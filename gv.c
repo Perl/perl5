@@ -2544,7 +2544,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 	   numifying instead of C's "+0". */
 	gv = Perl_gv_fetchmeth_pvn(aTHX_ stash, cooky, l, -1, 0);
         cv = 0;
-        if (gv && (cv = GvCV(gv))) {
+        if (gv && (cv = GvCV(gv)) && CvGV(cv)) {
 	    if(GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")){
 	      const char * const hvname = HvNAME_get(GvSTASH(CvGV(cv)));
 	      if (hvname && HEK_LEN(HvNAME_HEK(GvSTASH(CvGV(cv)))) == 8
