@@ -10,7 +10,7 @@ use strict;
 
 use vars qw(@ary %ary %hash);
 
-plan 73;
+plan 74;
 
 ok !defined($a);
 
@@ -127,6 +127,23 @@ for (z,z) {
     push @_, \$_;
 }
 is $_[0], $_[1], 'undef constants preserve identity';
+
+# [perl #122556]
+my $messages;
+package Thingie;
+DESTROY { $messages .= 'destroyed ' }
+package main;
+sub body {
+    sub {
+        my $t = bless [], 'Thingie';
+        undef $t;
+    }->(), $messages .= 'after ';
+
+    return;
+}
+body();
+is $messages, 'destroyed after ', 'undef $scalar frees refs immediately';
+
 
 # this will segfault if it fails
 

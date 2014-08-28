@@ -972,7 +972,8 @@ PP(pp_undef)
     if (!sv)
 	RETPUSHUNDEF;
 
-    SV_CHECK_THINKFIRST_COW_DROP(sv);
+    if (SvTHINKFIRST(sv))
+	sv_force_normal_flags(sv, SV_COW_DROP_PV|SV_IMMEDIATE_UNREF);
 
     switch (SvTYPE(sv)) {
     case SVt_NULL:
