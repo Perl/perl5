@@ -210,7 +210,7 @@ struct regnode_charclass {
 
 /* has runtime (locale) \d, \w, ..., [:posix:] classes */
 struct regnode_charclass_class {
-    U8	flags;				/* ANYOF_POSIXL bit must go here */
+    U8	flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
     U8  type;
     U16 next_off;
     U32 arg1;
@@ -228,7 +228,7 @@ struct regnode_charclass_class {
  * have a pointer field because there is no alignment issue, and because it is
  * set to NULL after construction, before any cloning of the pattern */
 struct regnode_ssc {
-    U8	flags;				/* ANYOF_POSIXL bit must go here */
+    U8	flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
     U8  type;
     U16 next_off;
     U32 arg1;
@@ -350,10 +350,10 @@ struct regnode_ssc {
 /* If the bitmap fully represents what this ANYOF node can match, the
  * ARG is set to this special value (since 0, 1, ... are legal, but will never
  * reach this high). */
-#define ANYOF_NONBITMAP_EMPTY	((U32) -1)
+#define ANYOF_ONLY_HAS_BITMAP	((U32) -1)
 
 /* Flags for node->flags of ANYOF.  These are in short supply, with none
- * currently available.  The ABOVE_LATIN1_ALL bit could be freed up
+ * currently available.  The ABOVE_BITMAP_ALL bit could be freed up
  * by resorting to creating a swash containing everything above 255.  This
  * introduces a performance penalty.  An option that wouldn't slow things down
  * would be to split one of the two LOC flags out into a separate
@@ -365,54 +365,55 @@ struct regnode_ssc {
  * only for /d, so there are no combinatorial issues.  The LOC flag to use is
  * probably the POSIXL one.
  * Several flags are not used in synthetic start class (SSC) nodes, so could be
- * shared should new flags be needed for SSCs, like ANYOF_EMPTY_STRING now. */
+ * shared should new flags be needed for SSCs, like SSC_MATCHES_EMPTY_STRING
+ * now. */
 
 /* regexec.c is expecting this to be in the low bit */
-#define ANYOF_INVERT		 0x01
+#define ANYOF_INVERT		                0x01
 
 /* For the SSC node only, which cannot be inverted, so is shared with that bit.
- * This means "Does this SSC match an empty string?"  This is used only during
- * regex compilation. */
-#define ANYOF_EMPTY_STRING       ANYOF_INVERT
+ * This is used only during regex compilation. */
+#define SSC_MATCHES_EMPTY_STRING                ANYOF_INVERT
 
-/* Are there things that will match only if the target string is encoded in
- * UTF-8?  (This is not set if ANYOF_AOVE_LATIN1_ALL is set) */
-#define ANYOF_UTF8               0x02
+/* Are there things outside the bitmap that will match only if the target
+ * string is encoded in UTF-8?  (This is not set if ANYOF_ABOVE_BITMAP_ALL is
+ * set) */
+#define ANYOF_HAS_UTF8_NONBITMAP_MATCHES        0x02
 
 /* The fold is calculated and stored in the bitmap where possible at compile
  * time.  However under locale, the actual folding varies depending on
  * what the locale is at the time of execution, so it has to be deferred until
  * then */
-#define ANYOF_LOC_FOLD           0x04
+#define ANYOF_LOC_FOLD                          0x04
 
 /* Set if this is a regnode_charclass_posixl vs a regnode_charclass.  This
  * is used for runtime \d, \w, [:posix:], ..., which are used only in locale
  * and the optimizer's synthetic start class.  Non-locale \d, etc are resolved
  * at compile-time */
-#define ANYOF_POSIXL	         0x08
+#define ANYOF_MATCHES_POSIXL                    0x08
 
 /* Should we raise a warning if matching against an above-Unicode code point?
  * */
-#define ANYOF_WARN_SUPER        0x10
+#define ANYOF_WARN_SUPER                        0x10
 
 /* Can match something outside the bitmap that isn't in utf8 */
-#define ANYOF_NONBITMAP_NON_UTF8 0x20
+#define ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES    0x20
 
-/* Matches every code point 0x100 and above*/
-#define ANYOF_ABOVE_LATIN1_ALL	 0x40
+/* Matches every code point NUM_ANYOF_CODE_POINTS and above*/
+#define ANYOF_MATCHES_ALL_ABOVE_BITMAP          0x40
 
 /* Match all Latin1 characters that aren't ASCII when the target string is not
  * in utf8. */
-#define ANYOF_NON_UTF8_NON_ASCII_ALL 0x80
+#define ANYOF_MATCHES_ALL_NON_UTF8_NON_ASCII    0x80
 
 #define ANYOF_FLAGS_ALL		(0xff)
 
-#define ANYOF_LOCALE_FLAGS (ANYOF_LOC_FOLD | ANYOF_POSIXL)
+#define ANYOF_LOCALE_FLAGS (ANYOF_LOC_FOLD | ANYOF_MATCHES_POSIXL)
 
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
  * start class nodes during construction of the SSC.  During finalization of
  * the SSC, other of the flags could be added to it */
-#define ANYOF_COMMON_FLAGS    (ANYOF_WARN_SUPER|ANYOF_UTF8)
+#define ANYOF_COMMON_FLAGS    (ANYOF_WARN_SUPER|ANYOF_HAS_UTF8_NONBITMAP_MATCHES)
 
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */
@@ -516,7 +517,7 @@ struct regnode_ssc {
 #define ANYOF_CLASS_SETALL(ret) ANYOF_POSIXL_SETALL(ret)
 
 #define ANYOF_POSIXL_TEST_ANY_SET(p)                               \
-        ((ANYOF_FLAGS(p) & ANYOF_POSIXL)                           \
+        ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL)                           \
 	 && (((regnode_charclass_posixl*)(p))->classflags))
 #define ANYOF_CLASS_TEST_ANY_SET(p) ANYOF_POSIXL_TEST_ANY_SET(p)
 
@@ -529,7 +530,7 @@ struct regnode_ssc {
                         == ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1)
 
 #define ANYOF_POSIXL_TEST_ALL_SET(p)                                   \
-        ((ANYOF_FLAGS(p) & ANYOF_POSIXL)                               \
+        ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL)                               \
          && ((regnode_charclass_posixl*) (p))->classflags              \
                         == ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1)
 

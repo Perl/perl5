@@ -7678,9 +7678,9 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     if (c < NUM_ANYOF_CODE_POINTS) {
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
-	else if (flags & ANYOF_NON_UTF8_NON_ASCII_ALL
-		&& ! utf8_target
-		&& ! isASCII(c))
+	else if ((flags & ANYOF_MATCHES_ALL_NON_UTF8_NON_ASCII)
+		  && ! utf8_target
+		  && ! isASCII(c))
 	{
 	    match = TRUE;
 	}
@@ -7743,14 +7743,16 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     /* If the bitmap didn't (or couldn't) match, and something outside the
      * bitmap could match, try that. */
     if (!match) {
-	if (c >= 256 && (flags & ANYOF_ABOVE_LATIN1_ALL)) {
-	    match = TRUE;	/* Everything above 255 matches */
+	if (c >= NUM_ANYOF_CODE_POINTS
+            && (flags & ANYOF_MATCHES_ALL_ABOVE_BITMAP))
+        {
+	    match = TRUE;	/* Everything above the bitmap matches */
 	}
-	else if ((flags & ANYOF_NONBITMAP_NON_UTF8)
-		  || (utf8_target && (flags & ANYOF_UTF8))
+	else if ((flags & ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES)
+		  || (utf8_target && (flags & ANYOF_HAS_UTF8_NONBITMAP_MATCHES))
                   || ((flags & ANYOF_LOC_FOLD)
                        && IN_UTF8_CTYPE_LOCALE
-                       && ARG(n) != ANYOF_NONBITMAP_EMPTY))
+                       && ARG(n) != ANYOF_ONLY_HAS_BITMAP))
         {
             SV* only_utf8_locale = NULL;
 	    SV * const sw = _get_regclass_nonbitmap_data(prog, n, TRUE, 0,
