@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 122;
+plan 124;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -322,6 +322,11 @@ like runperl(
   A::bar();
   is $stuff, 'A::bar', 'state sub assigned to *AUTOLOAD can autoload';
 }
+{
+  state sub quire{qr "quires"}
+  package o { use overload qr => \&quire }
+  ok "quires" =~ bless([], o::), 'state sub used as overload method';
+}
 
 # -------------------- my -------------------- #
 
@@ -623,6 +628,11 @@ like runperl(
   }
   A::bar();
   is $stuff, 'A::bar', 'my sub assigned to *AUTOLOAD can autoload';
+}
+{
+  my sub quire{qr "quires"}
+  package mo { use overload qr => \&quire }
+  ok "quires" =~ bless([], mo::), 'my sub used as overload method';
 }
 
 # -------------------- Interactions (and misc tests) -------------------- #
