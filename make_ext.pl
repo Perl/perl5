@@ -443,8 +443,8 @@ EOM
 	    # the Makefile.PL. Altering the atime and mtime backwards by 4
 	    # seconds seems to resolve the issue.
 	    eval {
-		my $ftime = time - 4;
-		utime $ftime, $ftime, 'Makefile.PL';
+        my $ftime = (stat('Makefile.PL'))[9] - 4;
+        utime $ftime, $ftime, 'Makefile.PL';
 	    };
         } elsif ($mname =~ /\A(?:Carp
                             |ExtUtils::CBuilder
