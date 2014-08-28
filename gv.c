@@ -1202,7 +1202,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
      * use that, but for lack of anything better we will use the sub's
      * original package to look up $AUTOLOAD.
      */
-    varstash = GvSTASH(CvGV(cv));
+    varstash = CvNAMED(cv) ? CvSTASH(cv) : GvSTASH(CvGV(cv));
     vargv = *(GV**)hv_fetch(varstash, S_autoload, S_autolen, TRUE);
     ENTER;
 

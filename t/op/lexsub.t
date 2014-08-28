@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 120;
+plan 122;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -313,6 +313,15 @@ like runperl(
      ),
      qr/syntax error/,
     'referencing a state sub after a syntax error does not crash';
+{
+  state $stuff;
+  package A {
+    state sub foo{ $stuff .= our $AUTOLOAD }
+    *A::AUTOLOAD = \&foo;
+  }
+  A::bar();
+  is $stuff, 'A::bar', 'state sub assigned to *AUTOLOAD can autoload';
+}
 
 # -------------------- my -------------------- #
 
@@ -606,6 +615,15 @@ like runperl(
      ),
      qr/syntax error/,
     'referencing a my sub after a syntax error does not crash';
+{
+  state $stuff;
+  package A {
+    my sub foo{ $stuff .= our $AUTOLOAD }
+    *A::AUTOLOAD = \&foo;
+  }
+  A::bar();
+  is $stuff, 'A::bar', 'my sub assigned to *AUTOLOAD can autoload';
+}
 
 # -------------------- Interactions (and misc tests) -------------------- #
 
