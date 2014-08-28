@@ -2228,6 +2228,38 @@ Perl_cv_clone_into(pTHX_ CV *proto, CV *target)
     return S_cv_clone(aTHX_ proto, target, NULL);
 }
 
+SV *
+Perl_cv_name(pTHX_ CV *cv, SV *sv)
+{
+    PERL_ARGS_ASSERT_CV_NAME;
+    if (!isGV_with_GP(cv) && SvTYPE(cv) != SVt_PVCV) {
+	if (sv) sv_setsv(sv,(SV *)cv);
+	return sv ? (sv) : (SV *)cv;
+    }
+    {
+	SV * const retsv = sv ? sv : sv_newmortal();
+    	if (SvTYPE(cv) == SVt_PVCV) {
+	    if (CvNAMED(cv)) {
+		if (CvLEXICAL(cv)) sv_sethek(retsv, CvNAME_HEK(cv));
+		else {
+		    sv_sethek(retsv, HvNAME_HEK(CvSTASH(cv)));
+		    sv_catpvs(retsv, "::");
+		    sv_catpvn_flags(retsv, HEK_KEY(CvNAME_HEK(cv)),
+				    HEK_LEN(CvNAME_HEK(cv)),
+				    HEK_UTF8(CvNAME_HEK(cv))
+					? SV_CATUTF8
+					: SV_CATBYTES);
+		}
+	    }
+	    else if (CvLEXICAL(cv))
+		sv_sethek(retsv, GvNAME_HEK(GvEGV(CvGV(cv))));
+	    else gv_efullname3(retsv, CvGV(cv), NULL);
+	}
+	else gv_efullname3(retsv,(GV *)cv,NULL);
+	return retsv;
+    }
+}
+
 /*
 =for apidoc m|void|pad_fixup_inner_anons|PADLIST *padlist|CV *old_cv|CV *new_cv
 
