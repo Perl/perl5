@@ -104,6 +104,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_AUTOLOAD	0x2000	/* SvPVX contains AUTOLOADed sub name  */
 #define CVf_HASEVAL	0x4000	/* contains string eval  */
 #define CVf_NAMED	0x8000  /* Has a name HEK */
+#define CVf_LEXICAL	0x10000 /* Omit package from name */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LVALUE)
@@ -184,6 +185,10 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvNAMED(cv)		(CvFLAGS(cv) & CVf_NAMED)
 #define CvNAMED_on(cv)		(CvFLAGS(cv) |= CVf_NAMED)
 #define CvNAMED_off(cv)		(CvFLAGS(cv) &= ~CVf_NAMED)
+
+#define CvLEXICAL(cv)		(CvFLAGS(cv) & CVf_LEXICAL)
+#define CvLEXICAL_on(cv)	(CvFLAGS(cv) |= CVf_LEXICAL)
+#define CvLEXICAL_off(cv)	(CvFLAGS(cv) &= ~CVf_LEXICAL)
 
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
