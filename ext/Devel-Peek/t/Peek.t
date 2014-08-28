@@ -1474,6 +1474,7 @@ for my $test (
 
 }
 
+my $runperl_args = { switches => ['-Ilib'] };
 sub test_DumpProg {
     my ($prog, $expected, $name, $test) = @_;
     $test ||= 'like';
@@ -1487,10 +1488,10 @@ sub test_DumpProg {
     utf8::encode($prog);
     
     if ( $test eq 'is' ) {
-        t::fresh_perl_is($prog . $u, $expected, undef, $name)
+        t::fresh_perl_is($prog . $u, $expected, $runperl_args, $name)
     }
     else {
-        t::fresh_perl_like($prog . $u, $expected, undef, $name)
+        t::fresh_perl_like($prog . $u, $expected, $runperl_args, $name)
     }
 
     $builder->current_test(t::curr_test() - 1);
@@ -1542,7 +1543,7 @@ dumpindent is 4 at - line 1.
     }
     {
 5       TYPE = entersub  ===> 1
-        TARG = TARGS_REPLACE
+        TARG = 1
         FLAGS = (VOID,KIDS,STACKED,SLABBED,LASTSIB)
         PRIVATE = (HASTARG)
         {
@@ -1568,7 +1569,6 @@ dumpindent is 4 at - line 1.
 }
 EODUMP
 
-$e =~ s/TARGS_REPLACE/$threads ? 3 : 1/e;
 $e =~ s/GV_OR_PADIX/$threads ? "PADIX = 2" : "GV = t::DumpProg"/e;
 
 test_DumpProg("package t;", $e, "DumpProg() has no 'Attempt to free X prematurely' warning", "is" );

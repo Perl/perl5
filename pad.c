@@ -230,6 +230,7 @@ Perl_pad_new(pTHX_ int flags)
 	if (! (flags & padnew_CLONE)) {
 	    SAVESPTR(PL_comppad_name);
 	    SAVEI32(PL_padix);
+	    SAVEI32(PL_constpadix);
 	    SAVEI32(PL_comppad_name_fill);
 	    SAVEI32(PL_min_intro_pending);
 	    SAVEI32(PL_max_intro_pending);
@@ -286,6 +287,7 @@ Perl_pad_new(pTHX_ int flags)
 	PL_comppad_name_fill = 0;
 	PL_min_intro_pending = 0;
 	PL_padix	     = 0;
+	PL_constpadix	     = 0;
 	PL_cv_has_eval	     = 0;
     }
 
@@ -731,30 +733,43 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
     else {
 	/* For a tmp, scan the pad from PL_padix upwards
 	 * for a slot which has no name and no active value.
+	 * For a constant, likewise, but use PL_constpadix.
 	 */
 	SV * const * const names = AvARRAY(PL_comppad_name);
         const SSize_t names_fill = AvFILLp(PL_comppad_name);
+	const bool konst = cBOOL(tmptype & SVf_READONLY);
+	retval = konst ? PL_constpadix : PL_padix;
 	for (;;) {
 	    /*
 	     * Entries that close over unavailable variables
 	     * in outer subs contain values not marked PADMY.
 	     * Thus we must skip, not just pad values that are
 	     * marked as current pad values, but also those with names.
+	     * If pad_reset is enabled, ‘current’ means different
+	     * things depending on whether we are allocating a con-
+	     * stant or a target.  For a target, things marked PADTMP
+	     * can be reused; not so for constants.
 	     */
-	    if (++PL_padix <= names_fill &&
-		   (sv = names[PL_padix]) && sv != &PL_sv_undef)
+	    if (++retval <= names_fill &&
+		   (sv = names[retval]) && sv != &PL_sv_undef)
 		continue;
-	    sv = *av_fetch(PL_comppad, PL_padix, TRUE);
-	    if (!(SvFLAGS(sv) & (SVs_PADTMP | SVs_PADMY)) &&
+	    sv = *av_fetch(PL_comppad, retval, TRUE);
+	    if (!(SvFLAGS(sv) &
+#ifdef USE_PAD_RESET
+		    (SVs_PADMY|(konst ? SVs_PADTMP : 0))
+#else
+		    (SVs_PADMY|SVs_PADTMP)
+#endif
+		 ) &&
 		!IS_PADGV(sv))
 		break;
 	}
-	if (tmptype & SVf_READONLY) {
-	    av_store(PL_comppad_name, PL_padix, &PL_sv_no);
+	if (konst) {
+	    av_store(PL_comppad_name, retval, &PL_sv_no);
 	    tmptype &= ~SVf_READONLY;
 	    tmptype |= SVs_PADTMP;
 	}
-	retval = PL_padix;
+	*(konst ? &PL_constpadix : &PL_padix) = retval;
     }
     SvFLAGS(sv) |= tmptype;
     PL_curpad = AvARRAY(PL_comppad);
@@ -955,13 +970,17 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
     if ((PADOFFSET)offset != NOT_IN_PAD) 
 	return offset;
 
+    /* Skip the ‘our’ hack for subroutines, as the warning does not apply.
+     */
+    if (*namepv == '&') return NOT_IN_PAD;
+
     /* look for an our that's being introduced; this allows
      *    our $foo = 0 unless defined $foo;
      * to not give a warning. (Yes, this is a hack) */
 
     nameav = PadlistARRAY(CvPADLIST(PL_compcv))[0];
     name_svp = AvARRAY(nameav);
-    for (offset = AvFILLp(nameav); offset > 0; offset--) {
+    for (offset = PadnamelistMAXNAMED(nameav); offset > 0; offset--) {
         const SV * const namesv = name_svp[offset];
 	if (namesv && PadnameLEN(namesv) == namelen
 	    && !SvFAKE(namesv)
@@ -1468,6 +1487,12 @@ Perl_pad_block_start(pTHX_ int full)
     PL_min_intro_pending = 0;
     SAVEI32(PL_comppad_name_fill);
     SAVEI32(PL_padix_floor);
+    /* PL_padix_floor is what PL_padix is reset to at the start of each
+       statement, by pad_reset().  We set it when entering a new scope
+       to keep things like this working:
+	    print "$foo$bar", do { this(); that() . "foo" };
+       We must not let "$foo$bar" and the later concatenation share the
+       same target.  */
     PL_padix_floor = PL_padix;
     PL_pad_reset_pending = FALSE;
 }
@@ -1611,7 +1636,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
 
     /* if pad tmps aren't shared between ops, then there's no need to
      * create a new tmp when an existing op is freed */
-#ifdef USE_BROKEN_PAD_RESET
+#ifdef USE_PAD_RESET
     PL_curpad[po] = newSV(0);
     SvPADTMP_on(PL_curpad[po]);
 #else
@@ -1624,8 +1649,11 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
 	}
 	PadnamelistARRAY(PL_comppad_name)[po] = &PL_sv_undef;
     }
-    if ((I32)po < PL_padix)
-	PL_padix = po - 1;
+    /* Use PL_constpadix here, not PL_padix.  The latter may have been
+       reset by pad_reset.  We don’t want pad_alloc to have to scan the
+       whole pad when allocating a constant. */
+    if ((I32)po < PL_constpadix)
+	PL_constpadix = po - 1;
 }
 
 /*
@@ -1636,16 +1664,15 @@ Mark all the current temporaries for reuse
 =cut
 */
 
-/* XXX pad_reset() is currently disabled because it results in serious bugs.
- * It causes pad temp TARGs to be shared between OPs. Since TARGs are pushed
- * on the stack by OPs that use them, there are several ways to get an alias
- * to  a shared TARG.  Such an alias will change randomly and unpredictably.
- * We avoid doing this until we can think of a Better Way.
- * GSAR 97-10-29 */
+/* pad_reset() causes pad temp TARGs (operator targets) to be shared
+ * between OPs from different statements.  During compilation, at the start
+ * of each statement pad_reset resets PL_padix back to its previous value.
+ * When allocating a target, pad_alloc begins its scan through the pad at
+ * PL_padix+1.  */
 static void
 S_pad_reset(pTHX)
 {
-#ifdef USE_BROKEN_PAD_RESET
+#ifdef USE_PAD_RESET
     if (AvARRAY(PL_comppad) != PL_curpad)
 	Perl_croak(aTHX_ "panic: pad_reset curpad, %p!=%p",
 		   AvARRAY(PL_comppad), PL_curpad);
@@ -1658,11 +1685,6 @@ S_pad_reset(pTHX)
     );
 
     if (!TAINTING_get) {	/* Can't mix tainted and non-tainted temporaries. */
-        I32 po;
-	for (po = AvMAX(PL_comppad); po > PL_padix_floor; po--) {
-	    if (PL_curpad[po] && !SvIMMORTAL(PL_curpad[po]))
-		SvPADTMP_off(PL_curpad[po]);
-	}
 	PL_padix = PL_padix_floor;
     }
 #endif
@@ -1809,7 +1831,9 @@ Free the SV at offset po in the current pad.
 void
 Perl_pad_free(pTHX_ PADOFFSET po)
 {
+#ifndef USE_PAD_RESET
     SV *sv;
+#endif
     ASSERT_CURPAD_LEGAL("pad_free");
     if (!PL_curpad)
 	return;
@@ -1824,13 +1848,14 @@ Perl_pad_free(pTHX_ PADOFFSET po)
 	    PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long)po)
     );
 
-
+#ifndef USE_PAD_RESET
     sv = PL_curpad[po];
     if (sv && sv != &PL_sv_undef && !SvPADMY(sv))
 	SvFLAGS(sv) &= ~SVs_PADTMP;
 
     if ((I32)po < PL_padix)
 	PL_padix = po - 1;
+#endif
 }
 
 /*

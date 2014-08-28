@@ -531,7 +531,9 @@ PERLVAR(I, subline,	I32)		/* line this subroutine began on */
 PERLVAR(I, min_intro_pending, I32)	/* start of vars to introduce */
 
 PERLVAR(I, max_intro_pending, I32)	/* end of vars to introduce */
-PERLVAR(I, padix,	I32)		/* max used index in current "register" pad */
+PERLVAR(I, padix,	I32)		/* lowest unused index - 1
+					   in current "register" pad */
+PERLVAR(I, constpadix,	I32)		/* lowest unused for constants */
 
 PERLVAR(I, padix_floor,	I32)		/* how low may inner block reset padix */
 
