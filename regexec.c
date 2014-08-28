@@ -7686,11 +7686,14 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	}
 	else if (flags & ANYOF_LOCALE_FLAGS) {
 	    if ((flags & ANYOF_LOC_FOLD)
+                && c < 256
 		&& ANYOF_BITMAP_TEST(n, PL_fold_locale[c]))
             {
                 match = TRUE;
             }
-            else if (ANYOF_POSIXL_TEST_ANY_SET(n)) {
+            else if (ANYOF_POSIXL_TEST_ANY_SET(n)
+                     && c < 256
+            ) {
 
                 /* The data structure is arranged so bits 0, 2, 4, ... are set
                  * if the class includes the Posix character class given by

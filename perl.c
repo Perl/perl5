@@ -1034,6 +1034,7 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_utf8_foldable);
     SvREFCNT_dec(PL_utf8_foldclosures);
     SvREFCNT_dec(PL_AboveLatin1);
+    SvREFCNT_dec(PL_InBitmap);
     SvREFCNT_dec(PL_UpperLatin1);
     SvREFCNT_dec(PL_Latin1);
     SvREFCNT_dec(PL_NonL1NonFinalFold);
@@ -1047,6 +1048,7 @@ perl_destruct(pTHXx)
     PL_utf8_idcont	= NULL;
     PL_utf8_foldclosures = NULL;
     PL_AboveLatin1       = NULL;
+    PL_InBitmap          = NULL;
     PL_HasMultiCharFold  = NULL;
     PL_Latin1            = NULL;
     PL_NonL1NonFinalFold = NULL;

@@ -1062,7 +1062,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     /* Similarly for these */
     if (ANYOF_FLAGS(node) & ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
-        invlist = _add_range_to_invlist(invlist, 256, UV_MAX);
+        _invlist_union_complement_2nd(invlist, PL_InBitmap, &invlist);
     }
 
     if (ANYOF_FLAGS(node) & ANYOF_INVERT) {
@@ -6276,6 +6276,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         PL_utf8_foldable = _new_invlist_C_array(_Perl_Any_Folds_invlist);
         PL_HasMultiCharFold =
                        _new_invlist_C_array(_Perl_Folds_To_Multi_Char_invlist);
+
+        /* This is calculated here, because the Perl program that generates the
+         * static global ones doesn't currently have access to
+         * NUM_ANYOF_CODE_POINTS */
+	PL_InBitmap = _new_invlist(2);
+	PL_InBitmap = _add_range_to_invlist(PL_InBitmap, 0,
+                                                    NUM_ANYOF_CODE_POINTS - 1);
     }
 #endif
 
@@ -12455,10 +12462,10 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 	    UV high;
 	    int i;
 
-            if (end == UV_MAX && start <= 256) {
+            if (end == UV_MAX && start <= NUM_ANYOF_CODE_POINTS) {
                 ANYOF_FLAGS(node) |= ANYOF_MATCHES_ALL_ABOVE_BITMAP;
             }
-            else if (end >= 256) {
+            else if (end >= NUM_ANYOF_CODE_POINTS) {
                 ANYOF_FLAGS(node) |= ANYOF_HAS_UTF8_NONBITMAP_MATCHES;
             }
 
@@ -12485,10 +12492,10 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
          * *invlist_ptr; similarly for code points above the bitmap if we have
          * a flag to match all of them anyways */
 	if (change_invlist) {
-	    _invlist_subtract(*invlist_ptr, PL_Latin1, invlist_ptr);
+	    _invlist_subtract(*invlist_ptr, PL_InBitmap, invlist_ptr);
 	}
         if (ANYOF_FLAGS(node) & ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
-	    _invlist_intersection(*invlist_ptr, PL_Latin1, invlist_ptr);
+	    _invlist_intersection(*invlist_ptr, PL_InBitmap, invlist_ptr);
 	}
 
 	/* If have completely emptied it, remove it completely */
@@ -16967,8 +16974,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
 
         /* Add everything remaining to the list, so when we invert it just
          * below, it will be excluded */
-        *invlist_ptr = _add_range_to_invlist(*invlist_ptr,
-                                             NUM_ANYOF_CODE_POINTS, UV_MAX);
+        _invlist_union_complement_2nd(*invlist_ptr, PL_InBitmap, invlist_ptr);
         _invlist_invert(*invlist_ptr);
     }
 
