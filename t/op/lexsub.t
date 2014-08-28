@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 124;
+plan 127;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -327,6 +327,13 @@ like runperl(
   package o { use overload qr => \&quire }
   ok "quires" =~ bless([], o::), 'state sub used as overload method';
 }
+{
+  state sub foo;
+  *cvgv = \&foo;
+  local *cvgv2 = *cvgv;
+  eval 'sub cvgv2 {42}'; # uses the stub already present
+  is foo, 42, 'defining state sub body via package sub declaration';
+}
 
 # -------------------- my -------------------- #
 
@@ -634,6 +641,22 @@ like runperl(
   package mo { use overload qr => \&quire }
   ok "quires" =~ bless([], mo::), 'my sub used as overload method';
 }
+{
+  my sub foo;
+  *mcvgv = \&foo;
+  local *mcvgv2 = *mcvgv;
+  eval 'sub mcvgv2 {42}'; # uses the stub already present
+  is foo, 42, 'defining my sub body via package sub declaration';
+}
+{
+  my sub foo;
+  *mcvgv3 = \&foo;
+  local *mcvgv4 = *mcvgv3;
+  eval 'sub mcvgv4 {42}'; # uses the stub already present
+  undef *mcvgv3; undef *mcvgv4; # leaves the pad with the only reference
+}
+# We would have crashed by now if it weren’t fixed.
+pass "pad taking ownership once more of packagified my-sub";
 
 # -------------------- Interactions (and misc tests) -------------------- #
 

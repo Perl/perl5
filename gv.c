@@ -232,7 +232,10 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
 	    sv_del_backref(MUTABLE_SV(oldgv), MUTABLE_SV(cv));
 	}
     }
-    else if ((hek = CvNAME_HEK(cv))) unshare_hek(hek);
+    else if ((hek = CvNAME_HEK(cv))) {
+	unshare_hek(hek);
+	CvNAMED_off(cv);
+    }
 
     SvANY(cv)->xcv_gv_u.xcv_gv = gv;
     assert(!CvCVGV_RC(cv));
