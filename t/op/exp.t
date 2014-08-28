@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 32;
+plan tests => 34;
 
 # compile time evaluation
 
@@ -40,6 +40,8 @@ $s = log(2);
 is(substr($s,0,5), '0.693', 'compile time log(2)');
 
 cmp_ok(exp(log(1)), '==', 1, 'compile time exp(log(1)) == 1');
+
+cmp_ok(round(atan2(1, 2)), '==', '0.463647609', "atan2(1, 2)");
 
 # run time evaluation
 
@@ -104,6 +106,8 @@ cmp_ok(round(cos(-1 * $pi_2)), '==', 0.0, 'cos(-pi/2) == 0');
 
 cmp_ok(round(cos($x1)), '==', '0.540302306', "cos(1)");
 
-# atan2() tests were removed due to differing results from calls to
-# atan2() on various OS's and architectures.  See perlport.pod for
-# more information.
+cmp_ok(round(atan2($x1, $x2)), '==', '0.463647609', "atan2($x1, $x2)");
+
+# atan2() tests testing with -0.0, 0.0, -1.0, 1.0 were removed due to
+# differing results from calls to atan2() on various OS's and
+# architectures.  See perlport.pod for more information.
