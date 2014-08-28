@@ -2244,11 +2244,7 @@ Perl_cv_name(pTHX_ CV *cv, SV *sv)
 		else {
 		    sv_sethek(retsv, HvNAME_HEK(CvSTASH(cv)));
 		    sv_catpvs(retsv, "::");
-		    sv_catpvn_flags(retsv, HEK_KEY(CvNAME_HEK(cv)),
-				    HEK_LEN(CvNAME_HEK(cv)),
-				    HEK_UTF8(CvNAME_HEK(cv))
-					? SV_CATUTF8
-					: SV_CATBYTES);
+		    sv_cathek(retsv, CvNAME_HEK(cv));
 		}
 	    }
 	    else if (CvLEXICAL(cv))
