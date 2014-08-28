@@ -8,7 +8,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 112;
+use Test::More tests => 113;
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno localeconv dup dup2 lseek access math_h);
@@ -419,6 +419,7 @@ SKIP: {
 
 # math_h
 cmp_ok(abs(M_PI - 3.14159265358979), '<', 1e9);
+cmp_ok(abs(asinh(1) - 0.881373587019543), '<', 1e9);
 
 # Check that output is not flushed by _exit. This test should be last
 # in the file, and is not counted in the total number of tests.

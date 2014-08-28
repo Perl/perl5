@@ -37,9 +37,12 @@ my %expect = (
 		  EXIT_FAILURE EXIT_SUCCESS FD_CLOEXEC FILENAME_MAX
 		  FLT_DIG FLT_EPSILON FLT_MANT_DIG FLT_MAX FLT_MAX_10_EXP
 		  FLT_MAX_EXP FLT_MIN FLT_MIN_10_EXP FLT_MIN_EXP FLT_RADIX
-		  FLT_ROUNDS F_DUPFD F_GETFD F_GETFL F_GETLK F_OK F_RDLCK
+		  FLT_ROUNDS
+                  FP_INFINITE FP_NAN FP_NORMAL FP_SUBNORMAL FP_ZERO
+		  F_DUPFD F_GETFD F_GETFL F_GETLK F_OK F_RDLCK
 		  F_SETFD F_SETFL F_SETLK F_SETLKW F_UNLCK F_WRLCK HUGE_VAL
-		  HUPCL ICANON ICRNL IEXTEN IGNBRK IGNCR IGNPAR INLCR INPCK
+		  HUPCL ICANON ICRNL IEXTEN IGNBRK IGNCR IGNPAR
+		  INF INFINITY INLCR INPCK
 		  INT_MAX INT_MIN ISIG ISTRIP IXOFF IXON LC_ALL LC_COLLATE
 		  LC_CTYPE LC_MESSAGES LC_MONETARY LC_NUMERIC LC_TIME LDBL_DIG
 		  LDBL_EPSILON LDBL_MANT_DIG LDBL_MAX LDBL_MAX_10_EXP
@@ -48,7 +51,7 @@ my %expect = (
 		  MAX_INPUT MB_CUR_MAX MB_LEN_MAX
                   M_1_PI M_2_PI M_2_SQRT_PI M_E M_LN2 M_LOG10E M_LOG2E
                   M_PI M_PI_2 M_PI_4 M_SQRT1_2 M_SQRT_2
-                  NAME_MAX NCCS NDEBUG NGROUPS_MAX NOFLSH NULL
+                  NAME_MAX NAN NCCS NDEBUG NGROUPS_MAX NOFLSH NULL
 		  OPEN_MAX OPOST O_ACCMODE O_APPEND
 		  O_CREAT O_EXCL O_NOCTTY O_NONBLOCK O_RDONLY O_RDWR O_TRUNC
 		  O_WRONLY PARENB PARMRK PARODD PATH_MAX PIPE_BUF RAND_MAX R_OK
@@ -80,37 +83,48 @@ my %expect = (
 		  _POSIX_VERSION _SC_ARG_MAX _SC_CHILD_MAX _SC_CLK_TCK
 		  _SC_JOB_CONTROL _SC_NGROUPS_MAX _SC_OPEN_MAX _SC_PAGESIZE
 		  _SC_SAVED_IDS _SC_STREAM_MAX _SC_TZNAME_MAX _SC_VERSION _exit
-		  abort access acos asctime asin assert atan atexit atof atoi
-		  atol bsearch calloc ceil cfgetispeed cfgetospeed cfsetispeed
-		  cfsetospeed clearerr clock cosh creat ctermid ctime cuserid
-		  difftime div dup dup2 errno execl execle execlp execv execve
-		  execvp fabs fclose fdopen feof ferror fflush fgetc fgetpos
-		  fgets floor fmod fopen fpathconf fprintf fputc fputs fread
-		  free freopen frexp fscanf fseek fsetpos fstat fsync ftell
-		  fwrite getchar getcwd getegid getenv geteuid getgid getgroups
-		  getpid gets getuid isalnum isalpha isatty iscntrl isdigit
-		  isgraph islower isprint ispunct isspace isupper isxdigit labs
-		  ldexp ldiv localeconv log10 longjmp lseek malloc mblen
-		  mbstowcs mbtowc memchr memcmp memcpy memmove memset mkfifo
-		  mktime modf offsetof pathconf pause perror pow putc putchar
-		  puts qsort raise realloc remove rewind scanf setbuf setgid
-		  setjmp setlocale setpgid setsid setuid setvbuf sigaction
-		  siglongjmp signal sigpending sigprocmask sigsetjmp sigsuspend
-		  sinh sscanf stderr stdin stdout strcat strchr strcmp strcoll
-		  strcpy strcspn strerror strftime strlen strncat strncmp
-		  strncpy strpbrk strrchr strspn strstr strtod strtok strtol
-		  strtold strtoul strxfrm sysconf tan tanh tcdrain tcflow
-		  tcflush tcgetattr tcgetpgrp tcsendbreak tcsetattr tcsetpgrp
-		  tmpfile tmpnam tolower toupper ttyname tzname tzset uname
-		  ungetc vfprintf vprintf vsprintf wcstombs wctomb)],
-    EXPORT_OK => [qw(abs alarm atan2 chdir chmod chown close closedir cos exit
-		     exp fcntl fileno fork getc getgrgid getgrnam getlogin
-		     getpgrp getppid getpwnam getpwuid gmtime kill lchown link
-		     localtime log mkdir nice open opendir pipe printf rand
-		     read readdir rename rewinddir rmdir sin sleep sprintf sqrt
-		     srand stat system time times umask unlink utime wait
-		     waitpid write)],
-);
+		  abort access acos acosh asctime asin asinh assert
+		  atan atanh atexit atof atoi atol bsearch calloc cbrt
+		  ceil cfgetispeed cfgetospeed cfsetispeed cfsetospeed
+		  clearerr clock copysign cosh creat ctermid ctime
+		  cuserid difftime div dup dup2 erf erfc errno execl
+		  execle execlp execv execve execvp exp2 expm1 fabs
+		  fclose fdim fdopen feof ferror fflush fgetc fgetpos
+		  fgets floor fma fmax fmin fmod fopen fpathconf
+		  fpclassify fprintf fputc fputs fread free freopen
+		  frexp fscanf fseek fsetpos fstat fsync ftell fwrite
+		  getchar getcwd getegid getenv geteuid getgid
+		  getgroups getpid gets getuid hypot ilogb isalnum
+		  isalpha isatty iscntrl isdigit isfinite isgraph
+		  isgreater isgreaterequal isinf isless islessequal
+		  islessgreater islower isnan isnormal isprint ispunct
+		  isspace isunordered isupper isxdigit j0 j1 jn labs
+		  ldexp ldiv lgamma localeconv log10 log1p log2 logb
+		  longjmp lrint lseek malloc mblen mbstowcs mbtowc
+		  memchr memcmp memcpy memmove memset mkfifo mktime
+		  modf nan nearbyint nextafter nexttoward offsetof
+		  pathconf pause perror pow putc putchar puts qsort
+		  raise realloc remainder remove remquo rewind rint
+		  round scalbn scanf setbuf setgid setjmp setlocale
+		  setpgid setsid setuid setvbuf sigaction siglongjmp
+		  signal signbit sigpending sigprocmask sigsetjmp
+		  sigsuspend sinh sscanf stderr stdin stdout strcat
+		  strchr strcmp strcoll strcpy strcspn strerror
+		  strftime strlen strncat strncmp strncpy strpbrk
+		  strrchr strspn strstr strtod strtok strtol strtold
+		  strtoul strxfrm sysconf tan tanh tcdrain tcflow
+		  tcflush tcgetattr tcgetpgrp tcsendbreak tcsetattr
+		  tcsetpgrp tgamma tmpfile tmpnam tolower toupper
+		  trunc ttyname tzname tzset uname ungetc vfprintf
+		  vprintf vsprintf wcstombs wctomb y0 y1 yn )],
+		  EXPORT_OK => [qw(abs alarm atan2 chdir chmod chown
+		  close closedir cos exit exp fcntl fileno fork getc
+		  getgrgid getgrnam getlogin getpgrp getppid getpwnam
+		  getpwuid gmtime kill lchown link localtime log mkdir
+		  nice open opendir pipe printf rand read readdir
+		  rename rewinddir rmdir sin sleep sprintf sqrt srand
+		  stat system time times umask unlink utime wait
+		  waitpid write)], );
 
 plan (tests => 2 * keys %expect);
 

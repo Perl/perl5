@@ -296,11 +296,18 @@ our %EXPORT_TAGS = (
 		    LC_MONETARY LC_NUMERIC LC_TIME NULL
 		    localeconv setlocale)],
 
-    math_h =>	[qw(HUGE_VAL
-                    M_E M_LOG2E M_LOG10E M_LN2 M_PI M_PI_2
-                    M_PI_4 M_1_PI M_2_PI M_2_SQRT_PI M_SQRT_2 M_SQRT1_2
-                    acos asin atan ceil cosh fabs floor fmod
-                    frexp ldexp log10 modf pow sinh tan tanh)],
+    math_h => [qw(HUGE_VAL INFINITY FP_INFINITE FP_NAN FP_NORMAL
+                  FP_SUBNORMAL FP_ZERO M_E M_LOG2E M_LOG10E M_LN2 M_PI
+                  M_PI_2 M_PI_4 M_1_PI M_2_PI M_2_SQRT_PI M_SQRT_2
+                  M_SQRT1_2 NAN acos acosh asin asinh atan atanh cbrt
+                  ceil copysign cosh erf erfc exp2 expm1 fabs fdim fma
+                  fmax fmin floor fmod fpclassify frexp hypot ilogb
+                  isgreater isgreaterequal isfinite isinf isless
+                  islessequal islessgreater isnan isnormal isunordered
+                  j0 j1 jn ldexp lgamma log10 log1p log2 logb lrint
+                  modf nan nearbyint nextafter nexttoward pow
+                  remainder remquo rint round scalbn signbit sinh tan
+                  tanh tgamma trunc y0 y1 yn)],
 
     pwd_h =>	[],
 

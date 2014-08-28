@@ -190,7 +190,19 @@ my $testpkgs = {
 			qw /WEXITSTATUS WIFEXITED WIFSIGNALED WIFSTOPPED
 			    WSTOPSIG WTERMSIG/,
 		       'int_macro_int', # Removed in POSIX 1.16
-                       'strtold', # platform varying
+
+                       'strtold', # platform varying (C99)
+
+                        # C99 math
+                        qw/acosh asinh atanh cbrt copysign cosh erf
+                        erfc exp2 expm1 fdim fma fmax fmin fpclassify
+                        hypot ilogb isfinite isgreater isgreaterequal
+                        isinf isless islessequal islessgreater isnan
+                        isnormal isunordered j0 j1 jn lgamma log1p
+                        log2 logb nan nearbyint nextafter nexttoward
+                        remainder remquo rint round scalbn signbit
+                        sinh tanh tgamma trunc y0 y1 yn/,
+
 		       ],
 	       perl => [qw/ import croak AUTOLOAD /,
 			$] >= 5.015

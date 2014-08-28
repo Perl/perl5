@@ -54,6 +54,191 @@
 #include <unistd.h>
 #endif
 
+/* C89 math.h:
+
+   acos asin atan atan2 ceil cos cosh exp fabs floor fmod frexp ldexp
+   log log10 modf pow sin sinh sqrt tan tanh
+
+ * Implemented in core:
+
+   atan2 cos exp log pow sin sqrt
+
+  * Berkeley/SVID extensions:
+
+    j0 j1 jn y0 y1 yn
+
+ * C99 math.h added:
+
+   acosh asinh atanh cbrt copysign cosh erf erfc exp2 expm1 fdim fma
+   fmax fmin fpclassify hypot ilogb isfinite isgreater isgreaterequal
+   isinf isless islessequal islessgreater isnan isnormal isunordered
+   lgamma log1p log2 logb nan nearbyint nextafter nexttoward remainder
+   remquo rint round scalbn signbit sinh tanh tgamma trunc
+
+*/
+
+#ifdef HAS_C99
+#  ifdef USE_LONG_DOUBLE
+#    define c99_acosh	acoshl
+#    define c99_asinh	asinhl
+#    define c99_atanh	atanhl
+#    define c99_cbrt	cbrtl
+#    define c99_copysign	copysignl
+#    define c99_cosh	coshl
+#    define c99_erf	erfl
+#    define c99_erfc	erfcl
+#    define c99_exp2	exp2l
+#    define c99_expm1	expm1l
+#    define c99_fdim	fdiml
+#    define c99_fma	fmal
+#    define c99_fmax	fmaxl
+#    define c99_fmin	fminl
+#    define c99_hypot	hypotl
+#    define c99_ilogb	ilogbl
+#    define c99_lgamma	gammal
+#    define c99_log1p	log1pl
+#    define c99_log2	log2l
+#    define c99_logb	logbl
+#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
+#      define c99_lrint	llrintl
+#    else
+#      define c99_lrint	lrintl
+#    endif
+#    define c99_nan	nanl
+#    define c99_nearbyint	nearbyintl
+#    define c99_nextafter	nextafterl
+#    define c99_nexttoward	nexttowardl
+#    define c99_remainder	remainderl
+#    define c99_remquo	remquol
+#    define c99_rint	rintl
+#    define c99_round	roundl
+#    define c99_scalbn	scalbnl
+#    define c99_signbit	signbitl
+#    define c99_sinh	sinhl
+#    define c99_tanh	tanhl
+#    define c99_tgamma	tgammal
+#    define c99_trunc	truncl
+#  else
+#    define c99_acosh	acosh
+#    define c99_asinh	asinh
+#    define c99_atanh	atanh
+#    define c99_cbrt	cbrt
+#    define c99_copysign	copysign
+#    define c99_cosh	cosh
+#    define c99_erf	erf
+#    define c99_erfc	erfc
+#    define c99_exp2	exp2
+#    define c99_expm1	expm1
+#    define c99_fdim	fdim
+#    define c99_fma	fma
+#    define c99_fmax	fmax
+#    define c99_fmin	fmin
+#    define c99_hypot	hypot
+#    define c99_ilogb	ilogb
+#    define c99_lgamma	lgamma
+#    define c99_log1p	log1p
+#    define c99_log2	log2
+#    define c99_logb	logb
+#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
+#      define c99_lrint	llrint
+#    else
+#      define c99_lrint	lrint
+#    endif
+#    define c99_nan	nan
+#    define c99_nearbyint	nearbyint
+#    define c99_nextafter	nextafter
+#    define c99_nexttoward	nexttoward
+#    define c99_remainder	remainder
+#    define c99_remquo	remquo
+#    define c99_rint	rint
+#    define c99_round	round
+#    define c99_scalbn	scalbn
+#    define c99_signbit	signbit
+#    define c99_sinh	sinh
+#    define c99_tanh	tanh
+#    define c99_tgamma	tgamma
+#    define c99_trunc	trunc
+#  endif
+#  define c99_fpclassify	fpclassify
+#  define c99_isgreater	isgreater
+#  define c99_isgreaterequal	isgreaterequal
+#  define c99_isless		isless
+#  define c99_islessequal	islessequal
+#  define c99_islessgreater	islessgreater
+#  define c99_isnormal		isnormal
+#  define c99_isunordered	isunordered
+#else
+#  define c99_acosh(x)	not_here("acosh")
+#  define c99_asinh(x)	not_here("asinh")
+#  define c99_atanh(x)	not_here("atanh")
+#  define c99_cbrt(x)	not_here("cbrt")
+#  define c99_copysign(x,y)	not_here("copysign")
+#  define c99_cosh(x)	not_here("cosh")
+#  define c99_erf(x)	not_here("erf")
+#  define c99_erfc(x)	not_here("erfc")
+#  define c99_exp2(x)	not_here("exp2")
+#  define c99_expm1(x)	not_here("expm1")
+#  define c99_fdim(x,y)	not_here("fdim")
+#  define c99_fma(x,y,z)	not_here("fma")
+#  define c99_fmax(x,y)	not_here("fmax")
+#  define c99_fmin(x,y)	not_here("fmin")
+#  define c99_hypot(x,y)	not_here("hypot")
+#  define c99_lgamma(x)	not_here("lgamma")
+#  define c99_log1p(x)	not_here("log1p")
+#  define c99_log2(x)	not_here("log2")
+#  define c99_logb(x)	not_here("logb")
+#  define c99_lrint(x)	not_here("lrint")
+#  define c99_nan(x)	not_here("nan")
+#  define c99_nearbyint(x)	not_here("nearbyint")
+#  define c99_nextafter(x,y)	not_here("nextafter")
+#  define c99_nexttoward(x,y)	not_here("nexttoward")
+#  define c99_remainder(x,y)	not_here("remainder")
+#  define c99_remquo(x,y)	not_here("remquo")
+#  define c99_rint(x)	not_here("rint")
+#  define c99_round(x)	not_here("round")
+#  define c99_scalbn(x,y)	not_here("scalbn")
+#  define c99_signbit(x)	not_here("signbit")
+#  define c99_sinh(x)	not_here("sinh")
+#  define c99_tanh(x)	not_here("tanh")
+#  define c99_tgamma(x)	not_here("tgamma")
+#  define c99_trunc(x)	not_here("trunc")
+
+#  define c99_fpclassify	not_here("fpclassify")
+#  define c99_ilogb		not_here("ilogb")
+#  define c99_isgreater	not_here("isgreater")
+#  define c99_isgreaterequal	not_here("isgreaterequal")
+#  define c99_isless		not_here("isless")
+#  define c99_islessequal	not_here("islessequal")
+#  define c99_islessgreater	not_here("islessgreater")
+#  define c99_isnormal		not_here("isnormal")
+#  define c99_isunordered	not_here("isunordered")
+#endif /* #ifdef HAS_C99 */
+
+#ifdef BSD /* XXX Configure */
+#  if defined(USE_LONG_DOUBLE) && defined(HAS_J0L) /* XXX Configure */
+#    define bessel_j0 j0l
+#    define bessel_j1 j1l
+#    define bessel_jn jnl
+#    define bessel_y0 y0l
+#    define bessel_y1 y1l
+#    define bessel_yn ynl
+#  else
+#    define bessel_j0 j0
+#    define bessel_j1 j1
+#    define bessel_jn jn
+#    define bessel_y0 y0
+#    define bessel_y1 y1
+#    define bessel_yn yn
+#  endif
+#else
+#  define bessel_j0 not_here("j0")
+#  define bessel_j1 not_here("j1")
+#  define bessel_jn not_here("jn")
+#  define bessel_y0 not_here("y0")
+#  define bessel_y1 not_here("y1")
+#  define bessel_yn not_here("yn")
+#endif
+
 /* XXX This comment is just to make I_TERMIO and I_SGTTY visible to
    metaconfig for future extension writers.  We don't use them in POSIX.
    (This is really sneaky :-)  --AD
@@ -1097,54 +1282,245 @@ NV
 acos(x)
 	NV		x
     ALIAS:
-	asin = 1
-	atan = 2
-	ceil = 3
-	cosh = 4
-	floor = 5
-	log10 = 6
-	sinh = 7
-	tan = 8
-	tanh = 9
+	acosh = 1
+	asin = 2
+	asinh = 3
+	atan = 4
+	atanh = 5
+	cbrt = 6
+	ceil = 7
+	cosh = 8
+	erf = 9
+	erfc = 10
+	exp2 = 11
+	expm1 = 12
+	floor = 13
+	j0 = 14
+	j1 = 15
+	lgamma = 16
+	log10 = 17
+	log1p = 18
+	log2 = 19
+	logb = 20
+	nearbyint = 21
+	rint = 22
+	round = 23
+	sinh = 24
+	tan = 25
+	tanh = 26
+	tgamma = 27
+	trunc = 28
+	y0 = 29
+	y1 = 30
     CODE:
 	switch (ix) {
 	case 0:
 	    RETVAL = acos(x);
 	    break;
 	case 1:
-	    RETVAL = asin(x);
+	    RETVAL = c99_acosh(x);
 	    break;
 	case 2:
-	    RETVAL = atan(x);
+	    RETVAL = asin(x);
 	    break;
 	case 3:
-	    RETVAL = ceil(x);
+	    RETVAL = c99_asinh(x);
 	    break;
 	case 4:
-	    RETVAL = cosh(x);
+	    RETVAL = atan(x);
 	    break;
 	case 5:
-	    RETVAL = floor(x);
+	    RETVAL = c99_atanh(x);
 	    break;
 	case 6:
-	    RETVAL = log10(x);
+	    RETVAL = c99_cbrt(x);
 	    break;
 	case 7:
-	    RETVAL = sinh(x);
+	    RETVAL = ceil(x);
 	    break;
 	case 8:
+	    RETVAL = c99_cosh(x);
+	    break;
+	case 9:
+	    RETVAL = c99_erf(x);
+	    break;
+	case 10:
+	    RETVAL = c99_erfc(x);
+	    break;
+	case 11:
+	    RETVAL = c99_exp2(x);
+	    break;
+	case 12:
+	    RETVAL = c99_expm1(x);
+	    break;
+	case 13:
+	    RETVAL = floor(x);
+	    break;
+	case 14:
+	    RETVAL = bessel_j0(x);
+	    break;
+	case 15:
+	    RETVAL = bessel_j1(x);
+	    break;
+	case 16:
+        /* XXX lgamma_r */
+	    RETVAL = c99_lgamma(x);
+	    break;
+	case 17:
+	    RETVAL = log10(x);
+	    break;
+	case 18:
+	    RETVAL = c99_log1p(x);
+	    break;
+	case 19:
+	    RETVAL = c99_log2(x);
+	    break;
+	case 20:
+	    RETVAL = c99_logb(x);
+	    break;
+	case 21:
+	    RETVAL = c99_nearbyint(x);
+	    break;
+	case 22:
+	    RETVAL = c99_rint(x);
+	    break;
+	case 23:
+	    RETVAL = c99_round(x);
+	    break;
+	case 24:
+	    RETVAL = c99_sinh(x);
+	    break;
+	case 25:
 	    RETVAL = tan(x);
 	    break;
-	default:
+	case 26:
 	    RETVAL = tanh(x);
+	    break;
+	case 27:
+        /* XXX tgamma_r */
+	    RETVAL = c99_tgamma(x);
+	    break;
+	case 28:
+	    RETVAL = c99_trunc(x);
+	    break;
+	case 29:
+	    RETVAL = bessel_y0(x);
+	    break;
+        case 30:
+	default:
+	    RETVAL = bessel_y1(x);
+	}
+    OUTPUT:
+	RETVAL
+
+IV
+fpclassify(x)
+	NV		x
+    ALIAS:
+	ilogb = 1
+	isfinite = 2
+	isinf = 3
+	isnan = 4
+	isnormal = 5
+        signbit = 6
+    CODE:
+	switch (ix) {
+	case 0:
+	    RETVAL = c99_fpclassify(x);
+	    break;
+	case 1:
+	    RETVAL = c99_ilogb(x);
+	    break;
+	case 2:
+	    RETVAL = Perl_isfinite(x);
+	    break;
+	case 3:
+	    RETVAL = Perl_isinf(x);
+	    break;
+	case 4:
+	    RETVAL = Perl_isnan(x);
+	    break;
+	case 5:
+	    RETVAL = c99_isnormal(x);
+	    break;
+	case 6:
+	default:
+	    RETVAL = c99_signbit(x);
+	    break;
 	}
     OUTPUT:
 	RETVAL
 
 NV
-fmod(x,y)
+copysign(x,y)
 	NV		x
 	NV		y
+    ALIAS:
+	fdim = 1
+	fmax = 2
+	fmin = 3
+	fmod = 4
+	hypot = 5
+	isgreater = 6
+	isgreaterequal = 7
+	isless = 8
+	islessequal = 9
+	islessgreater = 10
+	isunordered = 11
+	nextafter = 12
+	nexttoward = 13
+	remainder = 14
+    CODE:
+	switch (ix) {
+	case 0:
+	    RETVAL = c99_copysign(x, y);
+	    break;
+	case 1:
+	    RETVAL = c99_fdim(x, y);
+	    break;
+	case 2:
+	    RETVAL = c99_fmax(x, y);
+	    break;
+	case 3:
+	    RETVAL = c99_fmin(x, y);
+	    break;
+	case 4:
+	    RETVAL = fmod(x, y);
+	    break;
+	case 5:
+	    RETVAL = c99_hypot(x, y);
+	    break;
+	case 6:
+	    RETVAL = c99_isgreater(x, y);
+	    break;
+	case 7:
+	    RETVAL = c99_isgreaterequal(x, y);
+	    break;
+	case 8:
+	    RETVAL = c99_isless(x, y);
+	    break;
+	case 9:
+	    RETVAL = c99_islessequal(x, y);
+	    break;
+	case 10:
+	    RETVAL = c99_islessgreater(x, y);
+	    break;
+	case 11:
+	    RETVAL = c99_isunordered(x, y);
+	    break;
+	case 12:
+	    RETVAL = c99_nextafter(x, y);
+	    break;
+	case 13:
+	    RETVAL = c99_nexttoward(x, y);
+	    break;
+	case 14:
+	default:
+	    RETVAL = c99_remainder(x, y);
+	    break;
+	}
+	OUTPUT:
+	    RETVAL
 
 void
 frexp(x)
@@ -1168,6 +1544,61 @@ modf(x)
 	/* (We already know stack is long enough.) */
 	PUSHs(sv_2mortal(newSVnv(Perl_modf(x,&intvar))));
 	PUSHs(sv_2mortal(newSVnv(intvar)));
+
+void
+remquo(x,y)
+	NV		x
+	NV		y
+    PPCODE:
+        int intvar;
+        PUSHs(sv_2mortal(newSVnv(c99_remquo(x,y,&intvar))));
+        PUSHs(sv_2mortal(newSVnv(intvar)));
+
+NV
+scalbn(x,y)
+	NV		x
+	IV		y
+    CODE:
+	RETVAL = c99_scalbn(x, y);
+    OUTPUT:
+	RETVAL
+
+NV
+fma(x,y,z)
+	NV		x
+	NV		y
+	NV		z
+    CODE:
+	RETVAL = c99_fma(x, y, z);
+    OUTPUT:
+	RETVAL
+
+NV
+nan(s = 0)
+	char*	s;
+    CODE:
+	RETVAL = c99_nan(s);
+    OUTPUT:
+	RETVAL
+
+NV
+jn(x,y)
+	IV		x
+	NV		y
+    ALIAS:
+	yn = 1
+    CODE:
+        switch (ix) {
+	case 0:
+	    RETVAL = bessel_jn(x, y);
+            break;
+	case 1:
+	default:
+	    RETVAL = bessel_yn(x, y);
+            break;
+	}
+    OUTPUT:
+	RETVAL
 
 SysRet
 sigaction(sig, optaction, oldaction = 0)
