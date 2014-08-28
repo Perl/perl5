@@ -1474,6 +1474,7 @@ for my $test (
 
 }
 
+my $runperl_args = { switches => ['-Ilib'] };
 sub test_DumpProg {
     my ($prog, $expected, $name, $test) = @_;
     $test ||= 'like';
@@ -1487,10 +1488,10 @@ sub test_DumpProg {
     utf8::encode($prog);
     
     if ( $test eq 'is' ) {
-        t::fresh_perl_is($prog . $u, $expected, undef, $name)
+        t::fresh_perl_is($prog . $u, $expected, $runperl_args, $name)
     }
     else {
-        t::fresh_perl_like($prog . $u, $expected, undef, $name)
+        t::fresh_perl_like($prog . $u, $expected, $runperl_args, $name)
     }
 
     $builder->current_test(t::curr_test() - 1);
