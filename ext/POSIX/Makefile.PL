@@ -101,6 +101,10 @@ push @names, {name=>$_, type=>"NV"}
 	      FLT_MIN_10_EXP FLT_MIN_EXP FLT_RADIX LDBL_DIG LDBL_MANT_DIG
 	      LDBL_MAX_10_EXP LDBL_MAX_EXP LDBL_MIN_10_EXP LDBL_MIN_EXP));
 
+push @names, {name=>$_, type=>"NV"}
+  foreach (qw(M_E M_LOG2E M_LOG10E M_LN2 M_PI M_PI_2
+              M_PI_4 M_1_PI M_2_PI M_2_SQRT_PI M_SQRT_2 M_SQRT1_2));
+
 push @names, {name=>$_, type=>"IV", default=>["IV", "0"]}
   foreach (qw(_POSIX_ARG_MAX _POSIX_CHILD_MAX _POSIX_CHOWN_RESTRICTED
               _POSIX_LINK_MAX _POSIX_MAX_CANON _POSIX_MAX_INPUT _POSIX_NAME_MAX
