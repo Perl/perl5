@@ -1029,7 +1029,15 @@ Perl_leave_scope(pTHX_ I32 base)
                         break;
                     case SVt_PVCV:
                     {
-                        HEK * const hek = CvNAME_HEK((CV *)sv);
+                        HEK *hek =
+			    CvNAME_HEK((CV *)(
+			      CvNAMED(sv)
+				? sv
+				: mg_find(PadlistNAMESARRAY(
+						CvPADLIST(find_runcv(NULL))
+					  )[svp-PL_curpad],
+					  PERL_MAGIC_proto
+				  	 )->mg_obj));
                         assert(hek);
                         share_hek_hek(hek);
                         cv_undef((CV *)sv);
@@ -1059,9 +1067,15 @@ Perl_leave_scope(pTHX_ I32 base)
                         *svp = newSV_type(SVt_PVCV);
 
                         /* Share name */
-                        assert(CvNAMED(sv));
                         CvNAME_HEK_set(*svp,
-                            share_hek_hek(CvNAME_HEK((CV *)sv)));
+                            share_hek_hek(CvNAME_HEK((CV *)(
+			      CvNAMED(sv)
+				? sv
+				: mg_find(PadlistNAMESARRAY(
+						CvPADLIST(find_runcv(NULL))
+					  )[svp-PL_curpad],
+					  PERL_MAGIC_proto
+				  	 )->mg_obj))));
                         break;
                     }
                     default:	*svp = newSV(0);		break;

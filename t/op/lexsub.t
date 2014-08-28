@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 120;
+plan 129;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -313,6 +313,46 @@ like runperl(
      ),
      qr/syntax error/,
     'referencing a state sub after a syntax error does not crash';
+{
+  state $stuff;
+  package A {
+    state sub foo{ $stuff .= our $AUTOLOAD }
+    *A::AUTOLOAD = \&foo;
+  }
+  A::bar();
+  is $stuff, 'A::bar', 'state sub assigned to *AUTOLOAD can autoload';
+}
+{
+  state sub quire{qr "quires"}
+  package o { use overload qr => \&quire }
+  ok "quires" =~ bless([], o::), 'state sub used as overload method';
+}
+{
+  state sub foo;
+  *cvgv = \&foo;
+  local *cvgv2 = *cvgv;
+  eval 'sub cvgv2 {42}'; # uses the stub already present
+  is foo, 42, 'defining state sub body via package sub declaration';
+}
+{
+  local $ENV{PERL5DB} = 'sub DB::DB{}';
+  is(
+    runperl(
+     switches => [ '-d' ],
+     progs => [ split "\n",
+      'use feature qw - lexical_subs state -;
+       no warnings q-experimental::lexical_subs-;
+       sub DB::sub{ print qq|4\n|; goto $DB::sub }
+       state sub foo {print qq|2\n|}
+       foo();
+      '
+     ],
+     stderr => 1
+    ),
+    "4\n2\n",
+    'state subs and DB::sub under -d'
+  );
+}
 
 # -------------------- my -------------------- #
 
@@ -606,6 +646,56 @@ like runperl(
      ),
      qr/syntax error/,
     'referencing a my sub after a syntax error does not crash';
+{
+  state $stuff;
+  package A {
+    my sub foo{ $stuff .= our $AUTOLOAD }
+    *A::AUTOLOAD = \&foo;
+  }
+  A::bar();
+  is $stuff, 'A::bar', 'my sub assigned to *AUTOLOAD can autoload';
+}
+{
+  my sub quire{qr "quires"}
+  package mo { use overload qr => \&quire }
+  ok "quires" =~ bless([], mo::), 'my sub used as overload method';
+}
+{
+  my sub foo;
+  *mcvgv = \&foo;
+  local *mcvgv2 = *mcvgv;
+  eval 'sub mcvgv2 {42}'; # uses the stub already present
+  is foo, 42, 'defining my sub body via package sub declaration';
+}
+{
+  my sub foo;
+  *mcvgv3 = \&foo;
+  local *mcvgv4 = *mcvgv3;
+  eval 'sub mcvgv4 {42}'; # uses the stub already present
+  undef *mcvgv3; undef *mcvgv4; # leaves the pad with the only reference
+}
+# We would have crashed by now if it weren’t fixed.
+pass "pad taking ownership once more of packagified my-sub";
+
+{
+  local $ENV{PERL5DB} = 'sub DB::DB{}';
+  is(
+    runperl(
+     switches => [ '-d' ],
+     progs => [ split "\n",
+      'use feature qw - lexical_subs state -;
+       no warnings q-experimental::lexical_subs-;
+       sub DB::sub{ print qq|4\n|; goto $DB::sub }
+       my sub foo {print qq|2\n|}
+       foo();
+      '
+     ],
+     stderr => 1
+    ),
+    "4\n2\n",
+    'my subs and DB::sub under -d'
+  );
+}
 
 # -------------------- Interactions (and misc tests) -------------------- #
 
