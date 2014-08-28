@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 127;
+plan 129;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -334,6 +334,25 @@ like runperl(
   eval 'sub cvgv2 {42}'; # uses the stub already present
   is foo, 42, 'defining state sub body via package sub declaration';
 }
+{
+  local $ENV{PERL5DB} = 'sub DB::DB{}';
+  is(
+    runperl(
+     switches => [ '-d' ],
+     progs => [ split "\n",
+      'use feature qw - lexical_subs state -;
+       no warnings q-experimental::lexical_subs-;
+       sub DB::sub{ print qq|4\n|; goto $DB::sub }
+       state sub foo {print qq|2\n|}
+       foo();
+      '
+     ],
+     stderr => 1
+    ),
+    "4\n2\n",
+    'state subs and DB::sub under -d'
+  );
+}
 
 # -------------------- my -------------------- #
 
@@ -657,6 +676,26 @@ like runperl(
 }
 # We would have crashed by now if it weren’t fixed.
 pass "pad taking ownership once more of packagified my-sub";
+
+{
+  local $ENV{PERL5DB} = 'sub DB::DB{}';
+  is(
+    runperl(
+     switches => [ '-d' ],
+     progs => [ split "\n",
+      'use feature qw - lexical_subs state -;
+       no warnings q-experimental::lexical_subs-;
+       sub DB::sub{ print qq|4\n|; goto $DB::sub }
+       my sub foo {print qq|2\n|}
+       foo();
+      '
+     ],
+     stderr => 1
+    ),
+    "4\n2\n",
+    'my subs and DB::sub under -d'
+  );
+}
 
 # -------------------- Interactions (and misc tests) -------------------- #
 
