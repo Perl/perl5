@@ -390,8 +390,6 @@ struct regnode_ssc {
  * and the optimizer's synthetic start class.  Non-locale \d, etc are resolved
  * at compile-time */
 #define ANYOF_POSIXL	         0x08
-#define ANYOF_CLASS	         ANYOF_POSIXL
-#define ANYOF_LARGE              ANYOF_POSIXL
 
 /* Should we raise a warning if matching against an above-Unicode code point?
  * */
@@ -402,7 +400,6 @@ struct regnode_ssc {
 
 /* Matches every code point 0x100 and above*/
 #define ANYOF_ABOVE_LATIN1_ALL	 0x40
-#define ANYOF_UNICODE_ALL	 ANYOF_ABOVE_LATIN1_ALL
 
 /* Match all Latin1 characters that aren't ASCII when the target string is not
  * in utf8. */
@@ -552,13 +549,6 @@ struct regnode_ssc {
 	memset (ANYOF_BITMAP(p), 255, ANYOF_BITMAP_SIZE)
 #define ANYOF_BITMAP_CLEARALL(p)	\
 	Zero (ANYOF_BITMAP(p), ANYOF_BITMAP_SIZE)
-#if ANYOF_BITMAP_SIZE == 32
-/* Check that all 256 bits are all set. */
-#   define ANYOF_BITMAP_TESTALLSET(p)	/* Assumes sizeof(p) == 32 */     \
-	memEQ (ANYOF_BITMAP(p), "\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377", ANYOF_BITMAP_SIZE)
-#else
-#   error Need to fix this if raise bitmap size.  (As of this writing this macro is unused in the core)
-#endif
 
 #define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
 #define ANYOF_POSIXL_SKIP	((ANYOF_POSIXL_SIZE - 1)/sizeof(regnode))
