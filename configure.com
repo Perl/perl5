@@ -3375,10 +3375,12 @@ $ THEN
 $   d_isnan = "define"
 $   d_isnanl = "define"
 $   d_fp_classify = "define"
+$   d_j0 = "define"
 $ ELSE
 $   d_isnan = "undef"
 $   d_isnanl = "undef"
 $   d_fp_classify = "undef"
+$   d_j0 = "undef"
 $ ENDIF
 $!
 $! Now some that we build up
@@ -6075,6 +6077,8 @@ $ WC "d_isinf='undef'"
 $ WC "d_isinfl='undef'"
 $ WC "d_isnan='" + d_isnan + "'"
 $ WC "d_isnanl='" + d_isnanl + "'"
+$ WC "d_j0='" + d_j0 + "'"
+$ WC "d_j0l='undef'"
 $ WC "d_killpg='undef'"
 $ WC "d_lchown='" + d_lchown + "'"
 $ WC "d_ldbl_dig='define'"

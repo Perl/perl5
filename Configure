@@ -586,6 +586,8 @@ d_isinf=''
 d_isinfl=''
 d_isnan=''
 d_isnanl=''
+d_j0=''
+d_j0l=''
 d_killpg=''
 d_lchown=''
 d_ldbl_dig=''
@@ -15462,6 +15464,14 @@ eval $inlibc
 set isnanl d_isnanl
 eval $inlibc
 
+: see if j0 exists
+set j0 d_j0
+eval $inlibc
+
+: see if j0l exists
+set j0l d_j0l
+eval $inlibc
+
 : see if killpg exists
 set killpg d_killpg
 eval $inlibc
@@ -23417,6 +23427,8 @@ d_isinf='$d_isinf'
 d_isinfl='$d_isinfl'
 d_isnan='$d_isnan'
 d_isnanl='$d_isnanl'
+d_j0='$d_j0'
+d_j0l='$d_j0l'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
 d_ldbl_dig='$d_ldbl_dig'

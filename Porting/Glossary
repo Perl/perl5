@@ -1337,6 +1337,16 @@ d_isnanl (d_isnanl.U):
 	This variable conditionally defines the HAS_ISNANL symbol, which
 	indicates to the C program that the isnanl() routine is available.
 
+d_j0 (d_j0.U):
+
+	This variable conditionally defines the HAS_J0 symbol, which
+	indicates to the C program that the j0() routine is available.
+
+d_j0l (d_j0l.U):
+
+	This variable conditionally defines the HAS_J0L symbol, which
+	indicates to the C program that the j0l() routine is available.
+
 d_killpg (d_killpg.U):
 	This variable conditionally defines the HAS_KILLPG symbol, which
 	indicates to the C program that the killpg() routine is available
