@@ -78,7 +78,9 @@
 */
 
 #ifdef HAS_C99
-#  ifdef USE_LONG_DOUBLE
+#  if defined(USE_LONG_DOUBLE) && defined(HAS_ILOGBL)
+/* There's already a symbol for ilogbl, we will use its truthiness
+ * as a gating proxy for all the *l variants being defined. */
 #    define c99_acosh	acoshl
 #    define c99_asinh	asinhl
 #    define c99_atanh	atanhl
@@ -159,14 +161,31 @@
 #    define c99_tgamma	tgamma
 #    define c99_trunc	trunc
 #  endif
-#  define c99_fpclassify	fpclassify
-#  define c99_isgreater	isgreater
-#  define c99_isgreaterequal	isgreaterequal
-#  define c99_isless		isless
-#  define c99_islessequal	islessequal
-#  define c99_islessgreater	islessgreater
-#  define c99_isnormal		isnormal
-#  define c99_isunordered	isunordered
+
+/* Check both the Configure symbol and the macro-ness (like C99 promises). */ 
+#  if defined(HAS_FPCLASSIFY) && defined(fpclassify)
+#    define c99_fpclassify	fpclassify
+#  else
+#    define c99_fpclassify	not_here("fpclassify")
+#  endif
+/* Like isnormal(), the isfinite(), isinf(), and isnan() are also C99
+   and also (sizeof-arg-aware) macros, but they are already well taken
+   care of by Configure et al, and defined in perl.h as
+   Perl_isfinite(), Perl_isinf(), and Perl_isnan(). */
+#  ifdef isnormal
+#    define c99_isnormal		isnormal
+#  else
+#    define c99_isnormal	not_here("isnormal")
+#  endif
+#  ifdef isgreater
+#    define c99_isgreater	isgreater
+#    define c99_isgreaterequal	isgreaterequal
+#    define c99_isless		isless
+#    define c99_islessequal	islessequal
+#    define c99_islessgreater	islessgreater
+#    define c99_isunordered	isunordered
+#  endif
+
 #else
 #  define c99_acosh(x)	not_here("acosh")
 #  define c99_asinh(x)	not_here("asinh")
@@ -205,17 +224,18 @@
 
 #  define c99_fpclassify	not_here("fpclassify")
 #  define c99_ilogb		not_here("ilogb")
-#  define c99_isgreater	not_here("isgreater")
+#  define c99_isgreater		not_here("isgreater")
 #  define c99_isgreaterequal	not_here("isgreaterequal")
 #  define c99_isless		not_here("isless")
 #  define c99_islessequal	not_here("islessequal")
 #  define c99_islessgreater	not_here("islessgreater")
 #  define c99_isnormal		not_here("isnormal")
 #  define c99_isunordered	not_here("isunordered")
+
 #endif /* #ifdef HAS_C99 */
 
-#ifdef BSD /* XXX Configure */
-#  if defined(USE_LONG_DOUBLE) && defined(HAS_J0L) /* XXX Configure */
+#ifdef HAS_J0
+#  if defined(USE_LONG_DOUBLE) && defined(HAS_J0L)
 #    define bessel_j0 j0l
 #    define bessel_j1 j1l
 #    define bessel_jn jnl
