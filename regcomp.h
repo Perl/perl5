@@ -347,7 +347,7 @@ struct regnode_ssc {
 #define PASS1 SIZE_ONLY
 #define PASS2 (! SIZE_ONLY)
 
-/* If the bitmap doesn't fully represent what this ANYOF node can match, the
+/* If the bitmap fully represents what this ANYOF node can match, the
  * ARG is set to this special value (since 0, 1, ... are legal, but will never
  * reach this high). */
 #define ANYOF_NONBITMAP_EMPTY	((U32) -1)
