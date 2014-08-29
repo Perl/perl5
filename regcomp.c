@@ -16931,7 +16931,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
      * ASCII puncts are set, including an extra amount for the backslashed
      * ones.  */
     for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
-        if (BITMAP_TEST((U8 *) bitmap,i)) {
+        if (BITMAP_TEST(bitmap, i)) {
             *invlist_ptr = add_cp_to_invlist(*invlist_ptr, i);
             if (isPUNCT_A(i)) {
                 punct_count++;
