@@ -28,10 +28,8 @@
 #   include "config.h"
 #endif
 
-#ifndef HAS_C99
-# if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || defined(_STDC_C99)
 #  define HAS_C99 1
-# endif
 #endif
 
 /* See L<perlguts/"The Perl API"> for detailed notes on
