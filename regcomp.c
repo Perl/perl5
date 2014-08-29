@@ -16693,18 +16693,21 @@ Perl_save_re_context(pTHX)
                     ((c) == '-' || (c) == ']' || (c) == '\\' || (c) == '^')
 
 STATIC void
-S_put_byte(pTHX_ SV *sv, int c)
+S_put_code_point(pTHX_ SV *sv, UV c)
 {
-    PERL_ARGS_ASSERT_PUT_BYTE;
+    PERL_ARGS_ASSERT_PUT_CODE_POINT;
 
-    if (isPRINT(c)) {
-	const char string = c;
+    if (c > 255) {
+        Perl_sv_catpvf(aTHX_ sv, "\\x{%04"UVXf"}", c);
+    }
+    else if (isPRINT(c)) {
+	const char string = (char) c;
 	if (isBACKSLASHED_PUNCT(c))
 	    sv_catpvs(sv, "\\");
 	sv_catpvn(sv, &string, 1);
     }
     else {
-        switch (c) {
+        switch ((U8) c) {
             case '\a': Perl_sv_catpvf(aTHX_ sv, "\\a"); break;
             case '\b': Perl_sv_catpvf(aTHX_ sv, "\\b"); break;
             case ESC_NATIVE: Perl_sv_catpvf(aTHX_ sv, "\\e"); break;
@@ -16712,7 +16715,7 @@ S_put_byte(pTHX_ SV *sv, int c)
             case '\n': Perl_sv_catpvf(aTHX_ sv, "\\n"); break;
             case '\r': Perl_sv_catpvf(aTHX_ sv, "\\r"); break;
             case '\t': Perl_sv_catpvf(aTHX_ sv, "\\t"); break;
-            default: Perl_sv_catpvf(aTHX_ sv, "\\x{%02X}", c); break;
+            default: Perl_sv_catpvf(aTHX_ sv, "\\x{%02X}", (U8) c); break;
         }
     }
 }
@@ -16728,7 +16731,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
 {
     /* Appends to 'sv' a displayable version of the range of code points from
      * 'start' to 'end'.  It assumes that only ASCII printables are displayable
-     * as-is (though some of these will be escaped by put_byte()). */
+     * as-is (though some of these will be escaped by put_code_point()). */
 
     const unsigned int min_range_count = 3;
 
@@ -16737,11 +16740,14 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
     PERL_ARGS_ASSERT_PUT_RANGE;
 
     while (start <= end) {
+        UV this_end;
+        const char * format;
+
         if (end - start < min_range_count) {
 
             /* Individual chars in short ranges */
             for (; start <= end; start++) {
-                put_byte(sv, start);
+                put_code_point(sv, start);
             }
             break;
         }
@@ -16813,9 +16819,9 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
                     put_range(sv, start, temp_end, FALSE);
                 }
                 else {  /* Output as a range */
-                    put_byte(sv, start);
+                    put_code_point(sv, start);
                     sv_catpvs(sv, "-");
-                    put_byte(sv, temp_end);
+                    put_code_point(sv, temp_end);
                 }
                 start = temp_end + 1;
                 continue;
@@ -16826,7 +16832,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
                 while (start <= end && (isPUNCT_A(start)
                                         || isSPACE_A(start)))
                 {
-                    put_byte(sv, start);
+                    put_code_point(sv, start);
                     start++;
                 }
                 continue;
@@ -16838,7 +16844,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
          * the range to print mnemonically.  It isn't possible for many of
          * these to be in a row, so this won't overwhelm with output */
         while (isMNEMONIC_CNTRL(start) && start <= end) {
-            put_byte(sv, start);
+            put_code_point(sv, start);
             start++;
         }
         if (start < end && isMNEMONIC_CNTRL(end)) {
@@ -16856,18 +16862,21 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
             /* Then output the mnemonic trailing controls */
             start = temp_end + 1;
             while (start <= end) {
-                put_byte(sv, start);
+                put_code_point(sv, start);
                 start++;
             }
             break;
         }
 
         /* As a final resort, output the range or subrange as hex. */
-        Perl_sv_catpvf(aTHX_ sv, "\\x{%02" UVXf "}-\\x{%02" UVXf "}",
-                       start,
-                       (end < NUM_ANYOF_CODE_POINTS)
-                       ? end
-                       : NUM_ANYOF_CODE_POINTS - 1);
+
+        this_end = (end < NUM_ANYOF_CODE_POINTS)
+                    ? end
+                    : NUM_ANYOF_CODE_POINTS - 1;
+        format = (this_end < 256)
+                 ? "\\x{%02"UVXf"}-\\x{%02"UVXf"}"
+                 : "\\x{%04"UVXf"}-\\x{%04"UVXf"}";
+        Perl_sv_catpvf(aTHX_ sv, format, start, this_end);
         break;
     }
 }

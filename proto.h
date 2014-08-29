@@ -5382,16 +5382,16 @@ STATIC const regnode*	S_dumpuntil(pTHX_ const regexp *r, const regnode *start, c
 #define PERL_ARGS_ASSERT_DUMPUNTIL	\
 	assert(r); assert(start); assert(node); assert(sv)
 
-STATIC void	S_put_byte(pTHX_ SV* sv, int c)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_PUT_BYTE	\
-	assert(sv)
-
 STATIC bool	S_put_charclass_bitmap_innards(pTHX_ SV* sv, char* bitmap, SV** bitmap_invlist)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS	\
 	assert(sv); assert(bitmap)
+
+STATIC void	S_put_code_point(pTHX_ SV* sv, UV c)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PUT_CODE_POINT	\
+	assert(sv)
 
 STATIC void	S_put_range(pTHX_ SV* sv, UV start, const UV end, const bool allow_literals)
 			__attribute__nonnull__(pTHX_1);
