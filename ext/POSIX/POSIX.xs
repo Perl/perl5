@@ -79,8 +79,8 @@
 
 /* XXX The truthiness of acosh() is a gating proxy for all of the C99 math.
  * This is very likely wrong, especially in non-UNIX lands like Win32
- * and VMS.  For example, it looks like Win32 might not have the lgamma
- * and tgamma, despite having large swaths of the C99 math interface. */
+ * and VMS.  For Win32 we later do some redefines for these interfaces. */
+
 #if defined(HAS_C99) && defined(HAS_ACOSH)
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_ILOGBL)
 /* There's already a symbol for ilogbl, we will use its truthiness
@@ -166,6 +166,8 @@
 #    define c99_trunc	trunc
 #  endif
 
+/* XXX Add ldiv(), lldiv()?  It's C99, but from stdlib.h, not math.h  */
+
 /* Check both the Configure symbol and the macro-ness (like C99 promises). */ 
 #  if defined(HAS_FPCLASSIFY) && defined(fpclassify)
 #    define c99_fpclassify	fpclassify
@@ -238,7 +240,6 @@
 
 #endif /* #ifdef HAS_C99 */
 
-/* XXX Win32 might have these as _j0, ..., _yn. */
 #ifdef HAS_J0
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_J0L)
 #    define bessel_j0 j0l
@@ -263,6 +264,74 @@
 #  define bessel_y1 not_here("y1")
 #  define bessel_yn not_here("yn")
 #endif
+
+/* XXX Regarding C99 math.h, Win32 seems to be missing these:
+
+  exp2 fdim fma fmax fmin fpclassify ilogb lgamma log1p log2 lrint
+  remquo rint signbit tgamma trunc
+
+  Win32 does seem to have these:
+
+  acosh asinh atanh cbrt copysign cosh erf erfc expm1 hypot log10 nan
+  nearbyint nextafter nexttoward remainder round scalbn
+
+  And the Bessel functions are defined like _this.
+*/
+
+#ifdef WIN32
+#  undef c99_exp2
+#  undef c99_fdim
+#  undef c99_fma
+#  undef c99_fmax
+#  undef c99_fmin
+#  undef c99_ilogb
+#  undef c99_lgamma
+#  undef c99_log1p
+#  undef c99_log2
+#  undef c99_lrint
+#  undef c99_remquo
+#  undef c99_rint
+#  undef c99_signbit
+#  undef c99_tgamma
+#  undef c99_trunc
+
+#  define c99_exp2(x)	not_here("exp2")
+#  define c99_fdim(x)	not_here("fdim")
+#  define c99_fma(x)	not_here("fma")
+#  define c99_fmax(x)	not_here("fmax")
+#  define c99_fmin(x)	not_here("fmin")
+#  define c99_ilogb(x)	not_here("ilogb")
+#  define c99_lgamma(x)	not_here("lgamma")
+#  define c99_log1p(x)	not_here("log1p")
+#  define c99_log2(x)	not_here("log2")
+#  define c99_lrint(x)	not_here("lrint")
+#  define c99_remquo(x,y)	not_here("remquo")
+#  define c99_rint(x)	not_here("rint")
+#  define c99_signbit(x)	not_here("signbit")
+#  define c99_tgamma(x)	not_here("tgamma")
+#  define c99_trunc(x)	not_here("trunc")
+
+#  undef bessel_j0
+#  undef bessel_j1
+#  undef bessel_j2
+#  undef bessel_y0
+#  undef bessel_y1
+#  undef bessel_y2
+
+#  define bessel_j0 _j0
+#  define bessel_j1 _j1
+#  define bessel_jn _jn
+#  define bessel_y0 _y0
+#  define bessel_y1 _y1
+#  define bessel_yn _yn
+#endif
+
+/* XXX Some of the C99 math functions, if missing, could be rather
+ * trivially emulated: cbrt, exp2, log2, round, trunc...
+ *
+ * Keep in mind that the point of many of these functions is that
+ * they, if available, are supposed to give more precise/more
+ * numerically stable results. */
 
 /* XXX This comment is just to make I_TERMIO and I_SGTTY visible to
    metaconfig for future extension writers.  We don't use them in POSIX.

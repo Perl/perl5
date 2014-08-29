@@ -58,6 +58,9 @@ SKIP: {
     unless ($Config{d_acosh}) {
         skip "no acosh, suspecting no C99 math", 28;
     }
+    if ($^O =~ /Win32|VMS/) {
+        skip "running in $^O, C99 math support uneven", 28;
+    }
     cmp_ok(abs(M_PI - 3.14159265358979), '<', 1e9, "M_PI");
     cmp_ok(abs(asinh(1) - 0.881373587019543), '<', 1e9, "asinh");
     cmp_ok(abs(cbrt(8) - 2), '<', 1e9, "cbrt");
