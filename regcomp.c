@@ -16829,11 +16829,9 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
          * mnemonic names.  Split off any of those at the beginning and end of
          * the range to print mnemonically.  It isn't possible for many of
          * these to be in a row, so this won't overwhelm with output */
-        if (isMNEMONIC_CNTRL(start)) {
-            while (isMNEMONIC_CNTRL(start) && start <= end) {
-                put_byte(sv, start);
-                start++;
-            }
+        while (isMNEMONIC_CNTRL(start) && start <= end) {
+            put_byte(sv, start);
+            start++;
         }
         if (start < end && isMNEMONIC_CNTRL(end)) {
 
