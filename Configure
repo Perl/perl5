@@ -954,6 +954,7 @@ i_shadow=''
 i_socks=''
 i_stdbool=''
 i_stddef=''
+i_stdint=''
 i_stdlib=''
 i_string=''
 strings=''
@@ -5751,6 +5752,10 @@ do set $yyy; var=$2; eval "was=\$$2";
 	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu";
 	set $yyy; shift; shift; yyy=$@;
 done'
+
+: see if stdint is available
+set stdint.h i_stdint
+eval $inhdr
 
 : see if stdlib is available
 set stdlib.h i_stdlib
@@ -23810,6 +23815,7 @@ i_socks='$i_socks'
 i_stdarg='$i_stdarg'
 i_stdbool='$i_stdbool'
 i_stddef='$i_stddef'
+i_stdint='$i_stdint'
 i_stdlib='$i_stdlib'
 i_string='$i_string'
 i_sunmath='$i_sunmath'

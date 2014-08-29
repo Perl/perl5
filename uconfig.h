@@ -709,6 +709,12 @@
  */
 #define I_STDDEF	/**/
 
+/* I_STDINT:
+ *	This symbol, if defined, indicates that <stdint.h> exists and should
+ *	be included.
+ */
+/*#define I_STDINT		/ **/
+
 /* I_STDLIB:
  *	This symbol, if defined, indicates that <stdlib.h> exists and should
  *	be included.
@@ -4803,6 +4809,6 @@
 #endif
 
 /* Generated from:
- * d11e261bb139be0ee56e1999842277e01b6c71ad49dcb6334cea88f982648fb4 config_h.SH
- * 11ac8affd49fd0343b02249879adb0b00934fdfa8405591f28f73077e00105ab uconfig.sh
+ * 0f8a0a7c63b386e4ced948683f663789f15d702182a8443f833613f5d7cfecc7 config_h.SH
+ * a4410f6212dd1c64a11e20c38b71f6449fbafd923141b5e5dcd867e0dfd4dadb uconfig.sh
  * ex: set ro: */

@@ -744,6 +744,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_stddef I_STDDEF	/**/
 
+/* I_STDINT:
+ *	This symbol, if defined, indicates that <stdint.h> exists and should
+ *	be included.
+ */
+#$i_stdint I_STDINT		/**/
+
 /* I_STDLIB:
  *	This symbol, if defined, indicates that <stdlib.h> exists and should
  *	be included.

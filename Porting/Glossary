@@ -3257,6 +3257,11 @@ i_stddef (i_stddef.U):
 	indicates to the C program that <stddef.h> exists and should
 	be included.
 
+i_stdint (i_stdint.U):
+	This variable conditionally defines the I_STDINT symbol, which
+	indicates to the C program that <stdint.h> exists and should
+	be included.
+
 i_stdlib (i_stdlib.U):
 	This variable conditionally defines the I_STDLIB symbol, which
 	indicates to the C program that <stdlib.h> exists and should
