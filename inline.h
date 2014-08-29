@@ -25,6 +25,14 @@ S_av_top_index(pTHX_ AV *av)
 
 /* ------------------------------- cv.h ------------------------------- */
 
+PERL_STATIC_INLINE GV *
+S_CvGV(pTHX_ CV *sv)
+{
+    return CvNAMED(sv)
+	? Perl_cvgv_from_hek(aTHX_ sv)
+	: ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv_u.xcv_gv;
+}
+
 PERL_STATIC_INLINE I32 *
 S_CvDEPTHp(const CV * const sv)
 {

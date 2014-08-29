@@ -302,7 +302,8 @@ C<croak()>.  Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
 void
 Perl_croak_xs_usage(const CV *const cv, const char *const params)
 {
-    const GV *const gv = CvGV(cv);
+    /* Avoid CvGV as it requires aTHX.  */
+    const GV *const gv = CvNAMED(cv) ? NULL : cv->sv_any->xcv_gv_u.xcv_gv;
 
     PERL_ARGS_ASSERT_CROAK_XS_USAGE;
 

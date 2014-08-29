@@ -10172,7 +10172,7 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
     if (SvTYPE((SV*)cv) != SVt_PVCV)
 	return NULL;
     if (flags & RV2CVOPCV_RETURN_NAME_GV) {
-	if (!CvANON(cv) || !gv)
+	if ((!CvANON(cv) || !gv) && !CvLEXICAL(cv))
 	    gv = CvGV(cv);
 	return (CV*)gv;
     } else {

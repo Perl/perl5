@@ -404,10 +404,10 @@ SKIP:
         my $cv = B::svref_2object(\&bar);
         ok($cv, "make a B::CV from a lexical sub reference");
         isa_ok($cv, "B::CV");
-        my $gv = $cv->GV;
-        isa_ok($gv, "B::SPECIAL", "GV on a lexical sub");
         my $hek = $cv->NAME_HEK;
         is($hek, "bar", "check the NAME_HEK");
+        my $gv = $cv->GV;
+        isa_ok($gv, "B::GV", "GV on a lexical sub");
     }
     1;
 EOS

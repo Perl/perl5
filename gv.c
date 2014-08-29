@@ -216,7 +216,7 @@ Perl_newGP(pTHX_ GV *const gv)
 void
 Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
 {
-    GV * const oldgv = CvGV(cv);
+    GV * const oldgv = CvNAMED(cv) ? NULL : SvANY(cv)->xcv_gv_u.xcv_gv;
     HEK *hek;
     PERL_ARGS_ASSERT_CVGV_SET;
 
@@ -250,6 +250,29 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
 	CvCVGV_RC_on(cv);
 	SvREFCNT_inc_simple_void_NN(gv);
     }
+}
+
+/* Convert CvSTASH + CvNAME_HEK into a GV.  Conceptually, all subs have a
+   GV, but for efficiency that GV may not in fact exist.  This function,
+   called by CvGV, reifies it. */
+
+GV *
+Perl_cvgv_from_hek(pTHX_ CV *cv)
+{
+    GV *gv;
+    PERL_ARGS_ASSERT_CVGV_FROM_HEK;
+    assert(SvTYPE(cv) == SVt_PVCV);
+    if (!CvSTASH(cv)) return NULL;
+    ASSUME(CvNAME_HEK(cv));
+    gv = (GV *)newSV(0);
+    gv_init_pvn(gv, CvSTASH(cv), HEK_KEY(CvNAME_HEK(cv)),
+		HEK_LEN(CvNAME_HEK(cv)),
+		SVf_UTF8 * !!HEK_UTF8(CvNAME_HEK(cv)));
+    unshare_hek(CvNAME_HEK(cv));
+    CvNAMED_off(cv);
+    SvANY(cv)->xcv_gv_u.xcv_gv = gv;
+    CvCVGV_RC_on(cv);
+    return gv;
 }
 
 /* Assign CvSTASH(cv) = st, handling weak references. */
