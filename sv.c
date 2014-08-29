@@ -35,10 +35,6 @@
 # include <rms.h>
 #endif
 
-#ifdef HAS_C99
-# include <stdint.h>
-#endif
-
 #ifdef __Lynx__
 /* Missing proto on LynxOS */
   char *gconvert(double, int, int,  char *);
@@ -11313,7 +11309,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	case 'V':
 	case 'z':
 	case 't':
-#ifdef HAS_C99
+#ifdef I_STDINT
         case 'j':
 #endif
 	    intsize = *q++;
@@ -11462,7 +11458,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		case 't':	iv = va_arg(*args, ptrdiff_t); break;
 #endif
 		default:	iv = va_arg(*args, int); break;
-#ifdef HAS_C99
+#ifdef I_STDINT
 		case 'j':	iv = va_arg(*args, intmax_t); break;
 #endif
 		case 'q':
@@ -11565,7 +11561,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #ifdef HAS_PTRDIFF_T
 	        case 't':  uv = va_arg(*args, ptrdiff_t); break; /* will sign extend, but there is no uptrdiff_t, so oh well */
 #endif
-#ifdef HAS_C99
+#ifdef I_STDINT
 		case 'j':  uv = va_arg(*args, uintmax_t); break;
 #endif
 		default:   uv = va_arg(*args, unsigned); break;
@@ -12131,7 +12127,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #ifdef HAS_PTRDIFF_T
 		case 't':	*(va_arg(*args, ptrdiff_t*)) = i; break;
 #endif
-#ifdef HAS_C99
+#ifdef I_STDINT
 		case 'j':	*(va_arg(*args, intmax_t*)) = i; break;
 #endif
 		case 'q':

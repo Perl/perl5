@@ -29,7 +29,7 @@
 #endif
 
 #ifndef HAS_C99
-# if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L && !defined(__VMS)
+# if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 #  define HAS_C99 1
 # endif
 #endif
@@ -704,6 +704,10 @@
 #  ifdef I_VARARGS
 #    include <varargs.h>
 #  endif
+#endif
+
+#ifdef I_STDINT
+# include <stdint.h>
 #endif
 
 #include <ctype.h>
