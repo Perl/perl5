@@ -77,20 +77,21 @@
 
 */
 
-/* XXX The truthiness of acosh() is a gating proxy for all of the C99 math.
- * This is very likely wrong, especially in non-UNIX lands like Win32
- * and VMS.  For Win32 we later do some redefines for these interfaces. */
+/* XXX Add ldiv(), lldiv()?  It's C99, but from stdlib.h, not math.h  */
 
-#if defined(HAS_C99) && defined(HAS_ACOSH)
+/* XXX The truthiness of acosh() is the canary proxy for all of the C99 math.
+ * This is very likely wrong, especially in non-UNIX lands like Win32
+ * and VMS.  For Win32 we later do some undefines for these interfaces. */
+
+#ifdef HAS_ACOSH
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_ILOGBL)
 /* There's already a symbol for ilogbl, we will use its truthiness
- * as a gating proxy for all the *l variants being defined. */
+ * as the canary for all the *l variants being defined. */
 #    define c99_acosh	acoshl
 #    define c99_asinh	asinhl
 #    define c99_atanh	atanhl
 #    define c99_cbrt	cbrtl
 #    define c99_copysign	copysignl
-#    define c99_cosh	coshl
 #    define c99_erf	erfl
 #    define c99_erfc	erfcl
 #    define c99_exp2	exp2l
@@ -119,9 +120,9 @@
 #    define c99_rint	rintl
 #    define c99_round	roundl
 #    define c99_scalbn	scalbnl
-#    define c99_signbit	signbitl
-#    define c99_sinh	sinhl
-#    define c99_tanh	tanhl
+#    ifdef HAS_SIGNBIT /* possibly bad assumption */
+#      define c99_signbit	signbitl
+#    endif
 #    define c99_tgamma	tgammal
 #    define c99_trunc	truncl
 #  else
@@ -130,7 +131,6 @@
 #    define c99_atanh	atanh
 #    define c99_cbrt	cbrt
 #    define c99_copysign	copysign
-#    define c99_cosh	cosh
 #    define c99_erf	erf
 #    define c99_erfc	erfc
 #    define c99_exp2	exp2
@@ -159,31 +159,26 @@
 #    define c99_rint	rint
 #    define c99_round	round
 #    define c99_scalbn	scalbn
-#    define c99_signbit	signbit
-#    define c99_sinh	sinh
-#    define c99_tanh	tanh
+/* We already define Perl_signbit in perl.h. */
+#    ifdef HAS_SIGNBIT
+#      define c99_signbit	signbit
+#    endif
 #    define c99_tgamma	tgamma
 #    define c99_trunc	trunc
 #  endif
 
-/* XXX Add ldiv(), lldiv()?  It's C99, but from stdlib.h, not math.h  */
-
 /* Check both the Configure symbol and the macro-ness (like C99 promises). */ 
 #  if defined(HAS_FPCLASSIFY) && defined(fpclassify)
 #    define c99_fpclassify	fpclassify
-#  else
-#    define c99_fpclassify	not_here("fpclassify")
 #  endif
 /* Like isnormal(), the isfinite(), isinf(), and isnan() are also C99
    and also (sizeof-arg-aware) macros, but they are already well taken
    care of by Configure et al, and defined in perl.h as
    Perl_isfinite(), Perl_isinf(), and Perl_isnan(). */
 #  ifdef isnormal
-#    define c99_isnormal		isnormal
-#  else
-#    define c99_isnormal	not_here("isnormal")
+#    define c99_isnormal	isnormal
 #  endif
-#  ifdef isgreater
+#  ifdef isgreater /* canary for all the C99 is*<cmp>* macros. */
 #    define c99_isgreater	isgreater
 #    define c99_isgreaterequal	isgreaterequal
 #    define c99_isless		isless
@@ -191,78 +186,6 @@
 #    define c99_islessgreater	islessgreater
 #    define c99_isunordered	isunordered
 #  endif
-
-#else
-#  define c99_acosh(x)	not_here("acosh")
-#  define c99_asinh(x)	not_here("asinh")
-#  define c99_atanh(x)	not_here("atanh")
-#  define c99_cbrt(x)	not_here("cbrt")
-#  define c99_copysign(x,y)	not_here("copysign")
-#  define c99_cosh(x)	not_here("cosh")
-#  define c99_erf(x)	not_here("erf")
-#  define c99_erfc(x)	not_here("erfc")
-#  define c99_exp2(x)	not_here("exp2")
-#  define c99_expm1(x)	not_here("expm1")
-#  define c99_fdim(x,y)	not_here("fdim")
-#  define c99_fma(x,y,z)	not_here("fma")
-#  define c99_fmax(x,y)	not_here("fmax")
-#  define c99_fmin(x,y)	not_here("fmin")
-#  define c99_hypot(x,y)	not_here("hypot")
-#  define c99_lgamma(x)	not_here("lgamma")
-#  define c99_log1p(x)	not_here("log1p")
-#  define c99_log2(x)	not_here("log2")
-#  define c99_logb(x)	not_here("logb")
-#  define c99_lrint(x)	not_here("lrint")
-#  define c99_nan(x)	not_here("nan")
-#  define c99_nearbyint(x)	not_here("nearbyint")
-#  define c99_nextafter(x,y)	not_here("nextafter")
-#  define c99_nexttoward(x,y)	not_here("nexttoward")
-#  define c99_remainder(x,y)	not_here("remainder")
-#  define c99_remquo(x,y)	not_here("remquo")
-#  define c99_rint(x)	not_here("rint")
-#  define c99_round(x)	not_here("round")
-#  define c99_scalbn(x,y)	not_here("scalbn")
-#  define c99_signbit(x)	not_here("signbit")
-#  define c99_sinh(x)	not_here("sinh")
-#  define c99_tanh(x)	not_here("tanh")
-#  define c99_tgamma(x)	not_here("tgamma")
-#  define c99_trunc(x)	not_here("trunc")
-
-#  define c99_fpclassify	not_here("fpclassify")
-#  define c99_ilogb		not_here("ilogb")
-#  define c99_isgreater		not_here("isgreater")
-#  define c99_isgreaterequal	not_here("isgreaterequal")
-#  define c99_isless		not_here("isless")
-#  define c99_islessequal	not_here("islessequal")
-#  define c99_islessgreater	not_here("islessgreater")
-#  define c99_isnormal		not_here("isnormal")
-#  define c99_isunordered	not_here("isunordered")
-
-#endif /* #ifdef HAS_C99 */
-
-#ifdef HAS_J0
-#  if defined(USE_LONG_DOUBLE) && defined(HAS_J0L)
-#    define bessel_j0 j0l
-#    define bessel_j1 j1l
-#    define bessel_jn jnl
-#    define bessel_y0 y0l
-#    define bessel_y1 y1l
-#    define bessel_yn ynl
-#  else
-#    define bessel_j0 j0
-#    define bessel_j1 j1
-#    define bessel_jn jn
-#    define bessel_y0 y0
-#    define bessel_y1 y1
-#    define bessel_yn yn
-#  endif
-#else
-#  define bessel_j0 not_here("j0")
-#  define bessel_j1 not_here("j1")
-#  define bessel_jn not_here("jn")
-#  define bessel_y0 not_here("y0")
-#  define bessel_y1 not_here("y1")
-#  define bessel_yn not_here("yn")
 #endif
 
 /* XXX Regarding C99 math.h, Win32 seems to be missing these:
@@ -294,36 +217,34 @@
 #  undef c99_signbit
 #  undef c99_tgamma
 #  undef c99_trunc
+#endif
 
-#  define c99_exp2(x)	not_here("exp2")
-#  define c99_fdim(x)	not_here("fdim")
-#  define c99_fma(x)	not_here("fma")
-#  define c99_fmax(x)	not_here("fmax")
-#  define c99_fmin(x)	not_here("fmin")
-#  define c99_ilogb(x)	not_here("ilogb")
-#  define c99_lgamma(x)	not_here("lgamma")
-#  define c99_log1p(x)	not_here("log1p")
-#  define c99_log2(x)	not_here("log2")
-#  define c99_lrint(x)	not_here("lrint")
-#  define c99_remquo(x,y)	not_here("remquo")
-#  define c99_rint(x)	not_here("rint")
-#  define c99_signbit(x)	not_here("signbit")
-#  define c99_tgamma(x)	not_here("tgamma")
-#  define c99_trunc(x)	not_here("trunc")
-
-#  undef bessel_j0
-#  undef bessel_j1
-#  undef bessel_j2
-#  undef bessel_y0
-#  undef bessel_y1
-#  undef bessel_y2
-
-#  define bessel_j0 _j0
-#  define bessel_j1 _j1
-#  define bessel_jn _jn
-#  define bessel_y0 _y0
-#  define bessel_y1 _y1
-#  define bessel_yn _yn
+/* The Bessel functions. */
+#ifdef HAS_J0
+#  if defined(USE_LONG_DOUBLE) && defined(HAS_J0L)
+#    define bessel_j0 j0l
+#    define bessel_j1 j1l
+#    define bessel_jn jnl
+#    define bessel_y0 y0l
+#    define bessel_y1 y1l
+#    define bessel_yn ynl
+#  else
+#    ifdef WIN32
+#      define bessel_j0 _j0
+#      define bessel_j1 _j1
+#      define bessel_jn _jn
+#      define bessel_y0 _y0
+#      define bessel_y1 _y1
+#      define bessel_yn _yn
+#    else
+#      define bessel_j0 j0
+#      define bessel_j1 j1
+#      define bessel_jn jn
+#      define bessel_y0 y0
+#      define bessel_y1 y1
+#      define bessel_yn yn
+#    endif
+#  endif
 #endif
 
 /* XXX Some of the C99 math functions, if missing, could be rather
@@ -1409,100 +1330,184 @@ acos(x)
     CODE:
 	switch (ix) {
 	case 0:
-	    RETVAL = acos(x);
+	    RETVAL = acos(x); /* C89 math */
 	    break;
 	case 1:
+#ifdef c99_acosh
 	    RETVAL = c99_acosh(x);
+#else
+	    not_here("acosh");
+#endif
 	    break;
 	case 2:
-	    RETVAL = asin(x);
+	    RETVAL = asin(x); /* C89 math */
 	    break;
 	case 3:
+#ifdef c99_asinh
 	    RETVAL = c99_asinh(x);
+#else
+	    not_here("asinh");
+#endif
 	    break;
 	case 4:
-	    RETVAL = atan(x);
+	    RETVAL = atan(x); /* C89 math */
 	    break;
 	case 5:
+#ifdef c99_atanh
 	    RETVAL = c99_atanh(x);
+#else
+	    not_here("atanh");
+#endif
 	    break;
 	case 6:
+#ifdef c99_cbrt
 	    RETVAL = c99_cbrt(x);
+#else
+	    not_here("cbrt");
+#endif
 	    break;
 	case 7:
-	    RETVAL = ceil(x);
+	    RETVAL = ceil(x); /* C89 math */
 	    break;
 	case 8:
-	    RETVAL = c99_cosh(x);
+	    RETVAL = cosh(x); /* C89 math */
 	    break;
 	case 9:
+#ifdef c99_erf
 	    RETVAL = c99_erf(x);
+#else
+	    not_here("erf");
+#endif
 	    break;
 	case 10:
-	    RETVAL = c99_erfc(x);
+#ifdef c99_erfc
+	    RETVAL = erfc(x);
+#else
+	    not_here("erfc");
+#endif
 	    break;
 	case 11:
+#ifdef c99_exp2
 	    RETVAL = c99_exp2(x);
+#else
+	    not_here("exp2");
+#endif
 	    break;
 	case 12:
+#ifdef c99_expm1
 	    RETVAL = c99_expm1(x);
+#else
+	    not_here("expm1");
+#endif
 	    break;
 	case 13:
-	    RETVAL = floor(x);
+	    RETVAL = floor(x); /* C89 math */
 	    break;
 	case 14:
+#ifdef bessel_j0
 	    RETVAL = bessel_j0(x);
+#else
+	    not_here("bessel_j0");
+#endif
 	    break;
 	case 15:
+#ifdef bessel_j1
 	    RETVAL = bessel_j1(x);
+#else
+	    not_here("bessel_j1");
+#endif
 	    break;
 	case 16:
         /* XXX lgamma_r */
+#ifdef c99_lgamma
 	    RETVAL = c99_lgamma(x);
+#else
+	    not_here("lgamma");
+#endif
 	    break;
 	case 17:
-	    RETVAL = log10(x);
+	    RETVAL = log10(x); /* C89 math */
 	    break;
 	case 18:
+#ifdef c99_log1p
 	    RETVAL = c99_log1p(x);
+#else
+	    not_here("log1p");
+#endif
 	    break;
 	case 19:
+#ifdef c99_log2
 	    RETVAL = c99_log2(x);
+#else
+	    not_here("log2");
+#endif
 	    break;
 	case 20:
+#ifdef c99_logb
 	    RETVAL = c99_logb(x);
+#else
+	    not_here("logb");
+#endif
 	    break;
 	case 21:
+#ifdef c99_nearbyint
 	    RETVAL = c99_nearbyint(x);
+#else
+	    not_here("nearbyint");
+#endif
 	    break;
 	case 22:
+#ifdef c99_rint
 	    RETVAL = c99_rint(x);
+#else
+	    not_here("rint");
+#endif
 	    break;
 	case 23:
+#ifdef c99_round
 	    RETVAL = c99_round(x);
+#else
+	    not_here("round");
+#endif
 	    break;
 	case 24:
-	    RETVAL = c99_sinh(x);
+	    RETVAL = sinh(x); /* C89 math */
 	    break;
 	case 25:
-	    RETVAL = tan(x);
+	    RETVAL = tan(x); /* C89 math */
 	    break;
 	case 26:
-	    RETVAL = tanh(x);
+	    RETVAL = tanh(x); /* C89 math */
 	    break;
 	case 27:
         /* XXX tgamma_r */
+#ifdef c99_tgamma
 	    RETVAL = c99_tgamma(x);
+#else
+	    not_here("tgamma");
+#endif
 	    break;
 	case 28:
+#ifdef c99_trunc
 	    RETVAL = c99_trunc(x);
+#else
+	    not_here("trunc");
+#endif
 	    break;
 	case 29:
+#ifdef bessel_y0
 	    RETVAL = bessel_y0(x);
+#else
+	    not_here("bessel_y0");
+#endif
 	    break;
         case 30:
 	default:
+#ifdef bessel_y1
 	    RETVAL = bessel_y1(x);
+#else
+	    not_here("bessel_y1");
+#endif
 	}
     OUTPUT:
 	RETVAL
@@ -1520,10 +1525,18 @@ fpclassify(x)
     CODE:
 	switch (ix) {
 	case 0:
+#ifdef c99_fpclassify
 	    RETVAL = c99_fpclassify(x);
+#else
+	    not_here("fpclassify");
+#endif
 	    break;
 	case 1:
+#ifdef c99_ilogb
 	    RETVAL = c99_ilogb(x);
+#else
+	    not_here("ilogb");
+#endif
 	    break;
 	case 2:
 	    RETVAL = Perl_isfinite(x);
@@ -1535,11 +1548,17 @@ fpclassify(x)
 	    RETVAL = Perl_isnan(x);
 	    break;
 	case 5:
+#ifdef c99_isnormal
 	    RETVAL = c99_isnormal(x);
+#else
+	    not_here("isnormal");
+#endif
 	    break;
 	case 6:
 	default:
-	    RETVAL = c99_signbit(x);
+#ifdef Perl_signbit
+	    RETVAL = Perl_signbit(x);
+#endif
 	    break;
 	}
     OUTPUT:
@@ -1567,50 +1586,106 @@ copysign(x,y)
     CODE:
 	switch (ix) {
 	case 0:
+#ifdef c99_copysign
 	    RETVAL = c99_copysign(x, y);
+#else
+	    not_here("copysign");
+#endif
 	    break;
 	case 1:
+#ifdef c99_fdim
 	    RETVAL = c99_fdim(x, y);
+#else
+	    not_here("fdim");
+#endif
 	    break;
 	case 2:
+#ifdef c99_fmax
 	    RETVAL = c99_fmax(x, y);
+#else
+	    not_here("fmax");
+#endif
 	    break;
 	case 3:
+#ifdef c99_fmin
 	    RETVAL = c99_fmin(x, y);
+#else
+	    not_here("fmin");
+#endif
 	    break;
 	case 4:
-	    RETVAL = fmod(x, y);
+	    RETVAL = fmod(x, y); /* C89 math */
 	    break;
 	case 5:
+#ifdef c99_hypot
 	    RETVAL = c99_hypot(x, y);
+#else
+	    not_here("hypot");
+#endif
 	    break;
 	case 6:
+#ifdef c99_isgreater
 	    RETVAL = c99_isgreater(x, y);
+#else
+	    not_here("isgreater");
+#endif
 	    break;
 	case 7:
+#ifdef c99_isgreaterequal
 	    RETVAL = c99_isgreaterequal(x, y);
+#else
+	    not_here("isgreaterequal");
+#endif
 	    break;
 	case 8:
+#ifdef c99_isless
 	    RETVAL = c99_isless(x, y);
+#else
+	    not_here("isless");
+#endif
 	    break;
 	case 9:
+#ifdef c99_islessequal
 	    RETVAL = c99_islessequal(x, y);
+#else
+	    not_here("islessequal");
+#endif
 	    break;
 	case 10:
+#ifdef c99_islessgreater
 	    RETVAL = c99_islessgreater(x, y);
+#else
+	    not_here("islessgreater");
+#endif
 	    break;
 	case 11:
+#ifdef c99_isunordered
 	    RETVAL = c99_isunordered(x, y);
+#else
+	    not_here("isunordered");
+#endif
 	    break;
 	case 12:
+#ifdef c99_nextafter
 	    RETVAL = c99_nextafter(x, y);
+#else
+	    not_here("nextafter");
+#endif
 	    break;
 	case 13:
+#ifdef c99_nexttoward
 	    RETVAL = c99_nexttoward(x, y);
+#else
+	    not_here("nexttoward");
+#endif
 	    break;
 	case 14:
 	default:
+#ifdef c99_remainder
 	    RETVAL = c99_remainder(x, y);
+#else
+	    not_here("remainder");
+#endif
 	    break;
 	}
 	OUTPUT:
@@ -1622,7 +1697,7 @@ frexp(x)
     PPCODE:
 	int expvar;
 	/* (We already know stack is long enough.) */
-	PUSHs(sv_2mortal(newSVnv(frexp(x,&expvar))));
+	PUSHs(sv_2mortal(newSVnv(Perl_frexp(x,&expvar)))); /* C89 math */
 	PUSHs(sv_2mortal(newSViv(expvar)));
 
 NV
@@ -1636,7 +1711,7 @@ modf(x)
     PPCODE:
 	NV intvar;
 	/* (We already know stack is long enough.) */
-	PUSHs(sv_2mortal(newSVnv(Perl_modf(x,&intvar))));
+	PUSHs(sv_2mortal(newSVnv(Perl_modf(x,&intvar)))); /* C89 math */
 	PUSHs(sv_2mortal(newSVnv(intvar)));
 
 void
@@ -1644,16 +1719,24 @@ remquo(x,y)
 	NV		x
 	NV		y
     PPCODE:
+#ifdef c99_remquo
         int intvar;
         PUSHs(sv_2mortal(newSVnv(c99_remquo(x,y,&intvar))));
         PUSHs(sv_2mortal(newSVnv(intvar)));
+#else
+	not_here("remquo");
+#endif
 
 NV
 scalbn(x,y)
 	NV		x
 	IV		y
     CODE:
+#ifdef c99_scalbn
 	RETVAL = c99_scalbn(x, y);
+#else
+	not_here("scalbn");
+#endif
     OUTPUT:
 	RETVAL
 
@@ -1663,7 +1746,11 @@ fma(x,y,z)
 	NV		y
 	NV		z
     CODE:
+#ifdef c99_fma
 	RETVAL = c99_fma(x, y, z);
+#else
+	not_here("fma");
+#endif
     OUTPUT:
 	RETVAL
 
@@ -1671,7 +1758,11 @@ NV
 nan(s = 0)
 	char*	s;
     CODE:
+#ifdef c99_nan
 	RETVAL = c99_nan(s);
+#else
+	not_here("nan");
+#endif
     OUTPUT:
 	RETVAL
 
@@ -1684,11 +1775,19 @@ jn(x,y)
     CODE:
         switch (ix) {
 	case 0:
+#ifdef bessel_jn
 	    RETVAL = bessel_jn(x, y);
+#else
+	    not_here("jn");
+#endif
             break;
 	case 1:
 	default:
+#ifdef bessel_yn
 	    RETVAL = bessel_yn(x, y);
+#else
+	    not_here("yn");
+#endif
             break;
 	}
     OUTPUT:

@@ -72,7 +72,7 @@ SKIP: {
       }
       is(fpclassify(1), FP_NORMAL, "fpclassify 1");
       is(fpclassify(0), FP_ZERO, "fpclassify 0");
-      is(fpclassify(INFINITY), FP_INFINITE, "fpclassify Inf");
+      is(fpclassify(INFINITY), FP_INFINITE, "fpclassify INFINITY");
       is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
     }
   SKIP: {
@@ -99,8 +99,8 @@ SKIP: {
       unless ($Config{d_signbit}) {
           skip "no signbit", 2;
       }
-      is(signbit(2), 0, "signbit 2");
-      is(signbit(-2), 1, "signbit -2");
+      is(signbit(2), 0, "signbit 2"); # zero
+      ok(signbit(-2), "signbit -2"); # non-zero
     }
     is(round(2.25), 2, "round 2.25");
     is(round(-2.25), -2, "round -2.25");
