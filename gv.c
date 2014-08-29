@@ -235,6 +235,7 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
     else if ((hek = CvNAME_HEK(cv))) {
 	unshare_hek(hek);
 	CvNAMED_off(cv);
+	CvLEXICAL_off(cv);
     }
 
     SvANY(cv)->xcv_gv_u.xcv_gv = gv;

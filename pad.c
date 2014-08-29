@@ -469,9 +469,10 @@ Perl_cv_undef(pTHX_ CV *cv)
 	CvXSUB(cv) = NULL;
     }
     /* delete all flags except WEAKOUTSIDE and CVGV_RC, which indicate the
-     * ref status of CvOUTSIDE and CvGV, and ANON, which pp_entersub uses
+     * ref status of CvOUTSIDE and CvGV, and ANON and
+     * LEXICAL, which pp_entersub uses
      * to choose an error message */
-    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON);
+    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON|CVf_LEXICAL);
 }
 
 /*
@@ -2086,6 +2087,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 			assert(SvTYPE(ppad[ix]) == SVt_PVCV);
 			subclones = 1;
 			sv = newSV_type(SVt_PVCV);
+			CvLEXICAL_on(sv);
 		    }
 		    else if (PadnameLEN(namesv)>1 && !PadnameIsOUR(namesv))
 		    {
@@ -2104,6 +2106,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 					 * (SvUTF8(namesv) ? -1 : 1),
 				      hash)
 			);
+			CvLEXICAL_on(sv);
 		    }
 		    else sv = SvREFCNT_inc(ppad[ix]);
                 else if (sigil == '@')

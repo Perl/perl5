@@ -1042,6 +1042,7 @@ Perl_leave_scope(pTHX_ I32 base)
                         share_hek_hek(hek);
                         cv_undef((CV *)sv);
                         CvNAME_HEK_set(sv, hek);
+                        CvLEXICAL_on(sv);
                         break;
                     }
                     default:
@@ -1076,6 +1077,7 @@ Perl_leave_scope(pTHX_ I32 base)
 					  )[svp-PL_curpad],
 					  PERL_MAGIC_proto
 				  	 )->mg_obj))));
+                        CvLEXICAL_on(*svp);
                         break;
                     }
                     default:	*svp = newSV(0);		break;
