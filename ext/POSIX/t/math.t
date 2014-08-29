@@ -54,58 +54,63 @@ between(0.76, tanh(1), 0.77, 'tanh(1)');
 between(-0.77, tanh(-1), -0.76, 'tanh(-1)');
 cmp_ok(tanh(1), '==', -tanh(-1), 'tanh(1) == -tanh(-1)');
 
-cmp_ok(abs(M_PI - 3.14159265358979), '<', 1e9, "M_PI");
-cmp_ok(abs(asinh(1) - 0.881373587019543), '<', 1e9, "asinh");
-cmp_ok(abs(cbrt(8) - 2), '<', 1e9, "cbrt");
-is(copysign(3.14, -2), -3.14, "copysign");
-cmp_ok(abs(expm1(2) - 6.38905609893065), '<', 1e9, "expm1");
 SKIP: {
-    unless ($Config{d_fpclassify}) {
-        skip 4, "no fpclassify";
+    unless ($Config{d_acosh}) {
+        skip "no acosh, suspecting no C99 math", 28;
     }
-    is(fpclassify(1), FP_NORMAL, "fpclassify 1");
-    is(fpclassify(0), FP_ZERO, "fpclassify 0");
-    is(fpclassify(INFINITY), FP_INFINITE, "fpclassify Inf");
-    is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
-}
-SKIP: {
-    unless ($Config{d_isfinite}) {
-        skip 1, "no isfinite";
+    cmp_ok(abs(M_PI - 3.14159265358979), '<', 1e9, "M_PI");
+    cmp_ok(abs(asinh(1) - 0.881373587019543), '<', 1e9, "asinh");
+    cmp_ok(abs(cbrt(8) - 2), '<', 1e9, "cbrt");
+    is(copysign(3.14, -2), -3.14, "copysign");
+    cmp_ok(abs(expm1(2) - 6.38905609893065), '<', 1e9, "expm1");
+  SKIP: {
+      unless ($Config{d_fpclassify}) {
+          skip "no fpclassify", 4;
+      }
+      is(fpclassify(1), FP_NORMAL, "fpclassify 1");
+      is(fpclassify(0), FP_ZERO, "fpclassify 0");
+      is(fpclassify(INFINITY), FP_INFINITE, "fpclassify Inf");
+      is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
     }
-    ok(isfinite(1), "isfinite");
-}
-SKIP: {
-    unless ($Config{d_isinf}) {
-        skip 1, "no isinf";
+  SKIP: {
+      unless ($Config{d_isfinite}) {
+          skip "no isfinite", 1;
+      }
+      ok(isfinite(1), "isfinite");
     }
-    ok(isinf(INFINITY), "isinf");
-}
-SKIP: {
-    unless ($Config{d_isnan}) {
-        skip 1, "no isnan";
+  SKIP: {
+      unless ($Config{d_isinf}) {
+          skip "no isinf", 1;
+      }
+      ok(isinf(INFINITY), "isinf");
     }
-    ok(isnan(NAN), "isnan");
-}
-cmp_ok(abs(log1p(2) - 1.09861228866811), '<', 1e9, "log1p");
-cmp_ok(abs(log2(8) - 3), '<', 1e9, "log2");
-SKIP: {
-    unless ($Config{d_signbit}) {
-        skip 2, "no signbit";
+  SKIP: {
+      unless ($Config{d_isnan}) {
+          skip "no isnan", 1;
+      }
+      ok(isnan(NAN), "isnan");
     }
-    is(signbit(2), 0, "signbit 2");
-    is(signbit(-2), 1, "signbit -2");
+    cmp_ok(abs(log1p(2) - 1.09861228866811), '<', 1e9, "log1p");
+    cmp_ok(abs(log2(8) - 3), '<', 1e9, "log2");
+  SKIP: {
+      unless ($Config{d_signbit}) {
+          skip "no signbit", 2;
+      }
+      is(signbit(2), 0, "signbit 2");
+      is(signbit(-2), 1, "signbit -2");
+    }
+    is(round(2.25), 2, "round 2.25");
+    is(round(-2.25), -2, "round -2.25");
+    is(round(2.5), 3, "round 2.5");
+    is(round(-2.5), -3, "round -2.5");
+    is(round(2.75), 3, "round 2.75");
+    is(round(-2.75), -3, "round 2.75");
+    is(trunc(2.25), 2, "trunc 2.25");
+    is(trunc(-2.25), -2, "trunc -2.25");
+    is(trunc(2.5), 2, "trunc 2.5");
+    is(trunc(-2.5), -2, "trunc -2.5");
+    is(trunc(2.75), 2, "trunc 2.75");
+    is(trunc(-2.75), -2, "trunc -2.75");
 }
-is(round(2.25), 2, "round 2.25");
-is(round(-2.25), -2, "round -2.25");
-is(round(2.5), 3, "round 2.5");
-is(round(-2.5), -3, "round -2.5");
-is(round(2.75), 3, "round 2.75");
-is(round(-2.75), -3, "round 2.75");
-is(trunc(2.25), 2, "trunc 2.25");
-is(trunc(-2.25), -2, "trunc -2.25");
-is(trunc(2.5), 2, "trunc 2.5");
-is(trunc(-2.5), -2, "trunc -2.5");
-is(trunc(2.75), 2, "trunc 2.75");
-is(trunc(-2.75), -2, "trunc -2.75");
 
 done_testing();
