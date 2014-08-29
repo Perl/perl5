@@ -3432,6 +3432,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d__fwalk HAS__FWALK		/**/
 
+/* HAS_ACOSH:
+ *	This symbol, if defined, indicates that the acosh routine is
+ *	available.
+ */
+#$d_acosh HAS_ACOSH		/**/
+
 /* HAS_AINTL:
  *	This symbol, if defined, indicates that the aintl routine is
  *	available.  If copysignl is also present we can emulate modfl.

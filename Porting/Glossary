@@ -405,6 +405,10 @@ d_accessx (d_accessx.U):
 	This variable conditionally defines the HAS_ACCESSX symbol, which
 	indicates to the C program that the accessx() routine is available.
 
+d_acosh (d_acosh.U):
+	This variable conditionally defines the HAS_ACOSH symbol, which
+	indicates to the C program that the acosh() routine is available.
+
 d_aintl (d_aintl.U):
 	This variable conditionally defines the HAS_AINTL symbol, which
 	indicates to the C program that the aintl() routine is available.

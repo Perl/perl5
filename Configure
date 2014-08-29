@@ -372,6 +372,7 @@ cppstdin=''
 d__fwalk=''
 d_access=''
 d_accessx=''
+d_acosh=''
 d_aintl=''
 d_alarm=''
 asctime_r_proto=''
@@ -10339,6 +10340,10 @@ $rm -f access*
 
 : see if accessx exists
 set accessx d_accessx
+eval $inlibc
+
+: see if acosh exists
+set acosh d_acosh
 eval $inlibc
 
 : see if aintl exists
@@ -23232,6 +23237,7 @@ d_SCNfldbl='$d_SCNfldbl'
 d__fwalk='$d__fwalk'
 d_access='$d_access'
 d_accessx='$d_accessx'
+d_acosh='$d_acosh'
 d_aintl='$d_aintl'
 d_alarm='$d_alarm'
 d_archlib='$d_archlib'

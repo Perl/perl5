@@ -3376,11 +3376,13 @@ $   d_isnan = "define"
 $   d_isnanl = "define"
 $   d_fp_classify = "define"
 $   d_j0 = "define"
+$   d_acosh = "define"
 $ ELSE
 $   d_isnan = "undef"
 $   d_isnanl = "undef"
 $   d_fp_classify = "undef"
 $   d_j0 = "undef"
+$   d_acosh = "undef"
 $ ENDIF
 $!
 $! Now some that we build up
@@ -5889,6 +5891,7 @@ $ WC "d_SCNfldbl='" + d_SCNfldbl + "'"
 $ WC "d__fwalk='undef'"
 $ WC "d_access='" + d_access + "'"
 $ WC "d_accessx='undef'"
+$ WC "d_acosh='" + d_acosh + "'"
 $ WC "d_aintl='undef'"
 $ WC "d_alarm='define'"
 $ WC "d_archlib='define'"

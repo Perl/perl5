@@ -207,6 +207,20 @@
  */
 /*#define HAS_INET_ATON		/ **/
 
+/* HAS_J0:
+ *	This symbol, if defined, indicates to the C program that the
+ *	j0() function is available for Bessel functions of the first
+ *	kind of the order zero.
+ */
+/*#define HAS_J0		/ **/
+
+/* HAS_J0L:
+ *	This symbol, if defined, indicates to the C program that the
+ *	j0l() function is available for Bessel functions of the first
+ *	kind of the order zero, for long doubles.
+ */
+/*#define HAS_J0L		/ **/
+
 /* HAS_KILLPG:
  *	This symbol, if defined, indicates that the killpg routine is available
  *	to kill process groups.  If unavailable, you probably should use kill
@@ -3383,6 +3397,12 @@
  */
 /*#define HAS__FWALK		/ **/
 
+/* HAS_ACOSH:
+ *	This symbol, if defined, indicates that the acosh routine is
+ *	available.
+ */
+/*#define HAS_ACOSH		/ **/
+
 /* HAS_AINTL:
  *	This symbol, if defined, indicates that the aintl routine is
  *	available.  If copysignl is also present we can emulate modfl.
@@ -4809,6 +4829,6 @@
 #endif
 
 /* Generated from:
- * 0f8a0a7c63b386e4ced948683f663789f15d702182a8443f833613f5d7cfecc7 config_h.SH
- * a4410f6212dd1c64a11e20c38b71f6449fbafd923141b5e5dcd867e0dfd4dadb uconfig.sh
+ * 12401deb2bd159475d6a3533b0fe0fae288825fd27c04f4f0f6655e4959ec9b7 config_h.SH
+ * d4624634f898a9b01fb9baadf847f7614e0d036dd077852f40d37a9593af8e38 uconfig.sh
  * ex: set ro: */
