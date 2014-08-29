@@ -77,7 +77,11 @@
 
 */
 
-#ifdef HAS_C99
+/* XXX The truthiness of acosh() is a gating proxy for all of the C99 math.
+ * This is very likely wrong, especially in non-UNIX lands like Win32
+ * and VMS.  For example, it looks like Win32 might not have the lgamma
+ * and tgamma, despite having large swaths of the C99 math interface. */
+#if defined(HAS_C99) && defined(HAS_ACOSH)
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_ILOGBL)
 /* There's already a symbol for ilogbl, we will use its truthiness
  * as a gating proxy for all the *l variants being defined. */
@@ -234,6 +238,7 @@
 
 #endif /* #ifdef HAS_C99 */
 
+/* XXX Win32 might have these as _j0, ..., _yn. */
 #ifdef HAS_J0
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_J0L)
 #    define bessel_j0 j0l
