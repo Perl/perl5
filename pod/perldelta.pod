@@ -26,7 +26,7 @@ L<Digest::SHA> has been upgraded from 5.84_01 to 5.84_02.
 
 L<perl5db.pl> has been upgraded from version 1.39_10 to 1.39_11.
 
-This fixs a crash in tab completion, where available. [perl #120827]  Also,
+This fixes a crash in tab completion, where available. [perl #120827]  Also,
 filehandle information is properly reset after a pager is run. [perl #121456]
 
 =back
