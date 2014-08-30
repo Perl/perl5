@@ -34,8 +34,9 @@ my %expect = (
 		  ERANGE EREMOTE ERESTART EROFS ESHUTDOWN ESOCKTNOSUPPORT ESPIPE
 		  ESRCH ESTALE ETIME ETIMEDOUT ETOOMANYREFS ETXTBSY EUSERS
 		  EWOULDBLOCK EXDEV
-		  EXIT_FAILURE EXIT_SUCCESS FD_CLOEXEC FILENAME_MAX
-		  FLT_DIG FLT_EPSILON FLT_MANT_DIG FLT_MAX
+		  EXIT_FAILURE EXIT_SUCCESS FD_CLOEXEC
+		  FE_DOWNWARD FE_TONEAREST FE_TOWARDZERO FE_UPWARD
+		  FILENAME_MAX FLT_DIG FLT_EPSILON FLT_MANT_DIG FLT_MAX
 		  FLT_MAX_10_EXP FLT_MAX_EXP FLT_MIN FLT_MIN_10_EXP
 		  FLT_MIN_EXP FLT_RADIX FLT_ROUNDS FP_ILOGB0
 		  FP_ILOGBNAN FP_INFINITE FP_NAN FP_NORMAL
@@ -95,11 +96,11 @@ my %expect = (
 		  copysign cosh creat ctermid ctime cuserid difftime
 		  div dup dup2 erf erfc errno execl execle execlp
 		  execv execve execvp exp2 expm1 fabs fclose fdim
-		  fdopen feof ferror fflush fgetc fgetpos fgets floor
-		  fma fmax fmin fmod fopen fpathconf fpclassify
-		  fprintf fputc fputs fread free freopen frexp fscanf
-		  fseek fsetpos fstat fsync ftell fwrite getchar
-		  getcwd getegid getenv geteuid getgid getgroups
+		  fdopen fegetround feof ferror fesetround fflush
+		  fgetc fgetpos fgets floor fma fmax fmin fmod fopen
+		  fpathconf fpclassify fprintf fputc fputs fread free
+		  freopen frexp fscanf fseek fsetpos fstat fsync ftell
+		  fwrite getchar getcwd getegid getenv geteuid getgid getgroups
 		  getpid gets getuid hypot ilogb isalnum isalpha
 		  isatty iscntrl isdigit isfinite isgraph isgreater
 		  isgreaterequal isinf isless islessequal

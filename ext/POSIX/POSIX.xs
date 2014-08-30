@@ -34,6 +34,9 @@
 #ifdef I_FLOAT
 #include <float.h>
 #endif
+#ifdef I_FENV
+#include <fenv.h>
+#endif
 #ifdef I_LIMITS
 #include <limits.h>
 #endif
@@ -1853,6 +1856,31 @@ acos(x)
 	    not_here("bessel_y1");
 #endif
 	}
+    OUTPUT:
+	RETVAL
+
+IV
+fegetround()
+    CODE:
+#ifdef HAS_FEGETROUND
+	RETVAL = fegetround();
+#elif defined(FLT_ROUNDS)
+	RETVAL = FLT_ROUNDS;
+#else
+	not_here("fegetround");
+#endif
+    OUTPUT:
+	RETVAL
+
+IV
+fesetround(x)
+	IV	x
+    CODE:
+#ifdef HAS_FEGETROUND /* canary for fesetround */
+	RETVAL = fesetround(x);
+#else
+	not_here("fesetround");
+#endif
     OUTPUT:
 	RETVAL
 

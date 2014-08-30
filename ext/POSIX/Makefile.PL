@@ -111,6 +111,9 @@ push @names, {name=>$_, type=>"NV"}
               M_E M_LOG2E M_LOG10E M_LN2 M_PI M_PI_2
               M_PI_4 M_1_PI M_2_PI M_2_SQRT_PI M_SQRT_2 M_SQRT1_2));
 
+push @names, {name=>$_, type=>"IV"}
+  foreach (qw(FE_DOWNWARD FE_TONEAREST FE_TOWARDZERO FE_UPWARD));
+
 push @names, {name=>$_, type=>"IV", default=>["IV", "0"]}
   foreach (qw(_POSIX_ARG_MAX _POSIX_CHILD_MAX _POSIX_CHOWN_RESTRICTED
               _POSIX_LINK_MAX _POSIX_MAX_CANON _POSIX_MAX_INPUT _POSIX_NAME_MAX

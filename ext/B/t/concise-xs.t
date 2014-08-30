@@ -193,6 +193,8 @@ my $testpkgs = {
 
                        'strtold', # platform varying (C99)
 
+                        qw/fegetround fesetround/,
+
                         # C99 math
                         qw/acosh asinh atanh cbrt copysign cosh erf
                         erfc exp2 expm1 fdim fma fmax fmin fpclassify
