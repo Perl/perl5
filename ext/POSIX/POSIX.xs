@@ -75,13 +75,22 @@
    lgamma log1p log2 logb nan nearbyint nextafter nexttoward remainder
    remquo rint round scalbn signbit sinh tanh tgamma trunc
 
+  * Configure already (5.21.0) scans for:
+
+    fpclassify isfinite isinf isnan ilogb*l* signbit
+
 */
 
 /* XXX Add ldiv(), lldiv()?  It's C99, but from stdlib.h, not math.h  */
 
-/* XXX The truthiness of acosh() is the canary proxy for all of the C99 math.
- * This is very likely wrong, especially in non-UNIX lands like Win32
- * and VMS.  For Win32 we later do some undefines for these interfaces. */
+/* XXX The truthiness of acosh() is the canary proxy for all of the
+ * C99 math.  This is very likely wrong, especially in non-UNIX lands
+ * like Win32 and VMS, but also older UNIXes have issues.  For Win32
+ * we later do some undefines for these interfaces.
+ *
+ * But we are very trying very hard to avoid introducing separate Configure
+ * symbols for all the 40-ish new math symbols.  Especially since the set
+ * of missing functions doesn't seem to follow any patterns. */
 
 #ifdef HAS_ACOSH
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_ILOGBL)
@@ -188,6 +197,14 @@
 #  endif
 #endif
 
+/* HP-UX on PA-RISC is missing certain C99 math functions,
+ * but on IA64 (Integrity) these do exist. */
+#if defined(__hpux) && defined(__hppa)
+#  undef c99_fma
+#  undef c99_nexttoward
+#  undef c99_tgamma
+#endif
+
 /* XXX Regarding C99 math.h, Win32 seems to be missing these:
 
   exp2 fdim fma fmax fmin fpclassify ilogb lgamma log1p log2 lrint
@@ -200,7 +217,6 @@
 
   And the Bessel functions are defined like _this.
 */
-
 #ifdef WIN32
 #  undef c99_exp2
 #  undef c99_fdim
