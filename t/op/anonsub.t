@@ -91,3 +91,10 @@ undef &{$x=sub{}};
 $x->();
 EXPECT
 Undefined subroutine called at - line 4.
+########
+# NAME anon constant clobbering __ANON__
+sub __ANON__ { "42\n" }
+print __ANON__;
+sub(){3};
+EXPECT
+42

@@ -7767,7 +7767,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    CvISXSUB_on(cv);
 	}
 	else {
-	    GvCV_set(gv, NULL);
+	    if (name) GvCV_set(gv, NULL);
 	    cv = newCONSTSUB_flags(
 		NULL, name, namlen, name_is_utf8 ? SVf_UTF8 : 0,
 		const_sv
