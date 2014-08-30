@@ -2371,9 +2371,6 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	if ((type == OP_UNDEF || type == OP_REFGEN || type == OP_LOCK) &&
 	    !(o->op_flags & OPf_STACKED)) {
 	    o->op_type = OP_RV2CV;		/* entersub => rv2cv */
-	    /* Both ENTERSUB and RV2CV use this bit, but for different pur-
-	       poses, so we need it clear.  */
-	    o->op_private &= ~1;
 	    o->op_ppaddr = PL_ppaddr[OP_RV2CV];
 	    assert(cUNOPo->op_first->op_type == OP_NULL);
 	    op_null(((LISTOP*)cUNOPo->op_first)->op_first);/* disable pushmark */
@@ -2773,7 +2770,6 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 	    assert(cUNOPo->op_first->op_type == OP_NULL);
 	    op_null(((LISTOP*)cUNOPo->op_first)->op_first);	/* disable pushmark */
 	    o->op_flags |= OPf_SPECIAL;
-	    o->op_private &= ~1;
 	}
 	else if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV){
 	    o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
@@ -8826,8 +8822,6 @@ Perl_ck_rvconst(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_RVCONST;
 
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
-    if (o->op_type == OP_RV2CV)
-	o->op_private &= ~1;
 
     if (kid->op_type == OP_CONST) {
 	int iscv;
