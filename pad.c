@@ -2092,13 +2092,16 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 			/* my sub */
 			/* Just provide a stub, but name it.  It will be
 			   upgrade to the real thing on scope entry. */
+			U32 hash;
+			PERL_HASH(hash, SvPVX_const(namesv)+1,
+				  SvCUR(namesv) - 1);
 			sv = newSV_type(SVt_PVCV);
 			CvNAME_HEK_set(
 			    sv,
 			    share_hek(SvPVX_const(namesv)+1,
 				      SvCUR(namesv) - 1
 					 * (SvUTF8(namesv) ? -1 : 1),
-				      0)
+				      hash)
 			);
 		    }
 		    else sv = SvREFCNT_inc(ppad[ix]);

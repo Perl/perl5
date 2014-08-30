@@ -7353,10 +7353,12 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	if (CvNAMED(*spot))
 	    hek = CvNAME_HEK(*spot);
 	else {
+	    U32 hash;
+	    PERL_HASH(hash, PadnamePV(name)+1, PadnameLEN(name)-1);
 	    CvNAME_HEK_set(*spot, hek =
 		share_hek(
 		    PadnamePV(name)+1,
-		    PadnameLEN(name)-1 * (PadnameUTF8(name) ? -1 : 1), 0
+		    PadnameLEN(name)-1 * (PadnameUTF8(name) ? -1 : 1), hash
 		)
 	    );
 	}
@@ -7486,13 +7488,15 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
    setname:
     if (!CvNAME_HEK(cv)) {
-	CvNAME_HEK_set(cv,
-	 hek
-	  ? share_hek_hek(hek)
-	  : share_hek(PadnamePV(name)+1,
+	if (hek) share_hek_hek(hek);
+	else {
+	    U32 hash;
+	    PERL_HASH(hash, PadnamePV(name)+1, PadnameLEN(name)-1);
+	    hek = share_hek(PadnamePV(name)+1,
 		      PadnameLEN(name)-1 * (PadnameUTF8(name) ? -1 : 1),
-		      0)
-	);
+		      hash);
+	}
+	CvNAME_HEK_set(cv, hek);
     }
     if (const_sv) goto clone;
 
