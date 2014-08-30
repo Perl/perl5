@@ -61,11 +61,17 @@ SKIP: {
     if ($^O =~ /Win32|VMS/) {
         skip "running in $^O, C99 math support uneven", 28;
     }
-    cmp_ok(abs(M_PI - 3.14159265358979), '<', 1e9, "M_PI");
-    cmp_ok(abs(asinh(1) - 0.881373587019543), '<', 1e9, "asinh");
-    cmp_ok(abs(cbrt(8) - 2), '<', 1e9, "cbrt");
+    cmp_ok(abs(M_PI - 3.14159265358979), '<', 1e-9, "M_PI");
+    cmp_ok(abs(asinh(1) - 0.881373587019543), '<', 1e-9, "asinh");
+    cmp_ok(abs(cbrt(8) - 2), '<', 1e-9, "cbrt");
+    cmp_ok(abs(cbrt(-27) - -3), '<', 1e-9, "cbrt");
     is(copysign(3.14, -2), -3.14, "copysign");
-    cmp_ok(abs(expm1(2) - 6.38905609893065), '<', 1e9, "expm1");
+    cmp_ok(abs(expm1(2) - 6.38905609893065), '<', 1e-9, "expm1");
+    cmp_ok(abs(expm1(1e-6) - 1.00000050000017e-06), '<', 1e-9, "expm1");
+    is(fdim(12, 34), 0, "fdim 12 34");
+    is(fdim(34, 12), 22, "fdim 34 12");
+    is(fmax(12, 34), 34, "fmax 12 34");
+    is(fmin(12, 34), 12, "fmin 12 34");
   SKIP: {
       unless ($Config{d_fpclassify}) {
           skip "no fpclassify", 4;
@@ -75,6 +81,9 @@ SKIP: {
       is(fpclassify(INFINITY), FP_INFINITE, "fpclassify INFINITY");
       is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
     }
+    is(hypot(3, 4), 5, "hypot 3 4");
+    is(ilogb(255), 7, "ilogb 255");
+    is(ilogb(256), 8, "ilogb 256");
   SKIP: {
       unless ($Config{d_isfinite}) {
           skip "no isfinite", 1;
@@ -93,8 +102,9 @@ SKIP: {
       }
       ok(isnan(NAN), "isnan");
     }
-    cmp_ok(abs(log1p(2) - 1.09861228866811), '<', 1e9, "log1p");
-    cmp_ok(abs(log2(8) - 3), '<', 1e9, "log2");
+    cmp_ok(abs(log1p(2) - 1.09861228866811), '<', 1e-9, "log1p");
+    cmp_ok(abs(log1p(1e-6) - 9.99999500000333e-07), '<', 1e-9, "log1p");
+    cmp_ok(abs(log2(8) - 3), '<', 1e-9, "log2");
   SKIP: {
       unless ($Config{d_signbit}) {
           skip "no signbit", 2;

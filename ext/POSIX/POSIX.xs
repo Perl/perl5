@@ -54,6 +54,46 @@
 #include <unistd.h>
 #endif
 
+#ifndef M_E
+#  define M_E		2.71828182845904523536028747135266250
+#endif
+#ifndef M_LOG2E
+#  define M_LOG2E	1.44269504088896340735992468100189214
+#endif
+#ifndef M_LOG10E
+#  define M_LOG10E	0.434294481903251827651128918916605082
+#endif
+#ifndef M_LN2
+#  define M_LN2		0.693147180559945309417232121458176568
+#endif
+#ifndef M_LN10
+#  define M_LN10	2.30258509299404568401799145468436421
+#endif
+#ifndef M_PI
+#  define M_PI		3.14159265358979323846264338327950288
+#endif
+#ifndef M_PI_2
+#  define M_PI_2	1.57079632679489661923132169163975144
+#endif
+#ifndef M_PI_4
+#  define M_PI_4	0.785398163397448309615660845819875721
+#endif
+#ifndef M_1_PI
+#  define M_1_PI	0.318309886183790671537767526745028724
+#endif
+#ifndef M_2_PI
+#  define M_2_PI	0.636619772367581343075535053490057448
+#endif
+#ifndef M_2_SQRTPI
+#  define M_2_SQRTPI	1.12837916709551257389615890312154517
+#endif
+#ifndef M_SQRT2
+#  define M_SQRT2	1.41421356237309504880168872420969808
+#endif
+#ifndef M_SQRT1_2
+#  define M_SQRT1_2	0.707106781186547524400844362104849039
+#endif
+
 /* C89 math.h:
 
    acos asin atan atan2 ceil cos cosh exp fabs floor fmod frexp ldexp
@@ -72,7 +112,7 @@
    acosh asinh atanh cbrt copysign cosh erf erfc exp2 expm1 fdim fma
    fmax fmin fpclassify hypot ilogb isfinite isgreater isgreaterequal
    isinf isless islessequal islessgreater isnan isnormal isunordered
-   lgamma log1p log2 logb nan nearbyint nextafter nexttoward remainder
+   lgamma log1p log2 logb lrint nan nearbyint nextafter nexttoward remainder
    remquo rint round scalbn signbit sinh tanh tgamma trunc
 
   * Configure already (5.21.0) scans for:
@@ -83,7 +123,10 @@
 
 /* XXX Add ldiv(), lldiv()?  It's C99, but from stdlib.h, not math.h  */
 
-/* XXX The truthiness of acosh() is the canary proxy for all of the
+/* XXX Beware old gamma() -- one cannot know whether that is the
+   gamma or the log of gamma, that's why the new tgamma and lgamma. */
+
+/* XXX The truthiness of acosh() is the canary for all of the
  * C99 math.  This is very likely wrong, especially in non-UNIX lands
  * like Win32 and VMS, but also older UNIXes have issues.  For Win32
  * we later do some undefines for these interfaces.
@@ -217,6 +260,7 @@
 
   And the Bessel functions are defined like _this.
 */
+
 #ifdef WIN32
 #  undef c99_exp2
 #  undef c99_fdim
@@ -233,9 +277,18 @@
 #  undef c99_signbit
 #  undef c99_tgamma
 #  undef c99_trunc
+
+/* Some APIs exist under Win32 with "underbar" names. */
+#  undef c99_hypot
+#  undef c99_logb
+#  undef c99_nextafter
+#  define c99_hypot _hypot
+#  define c99_logb _logb
+#  define c99_nextafter _nextafter
+
 #endif
 
-/* The Bessel functions. */
+/* The Bessel functions: BSD, SVID, XPG4, and POSIX.  But not C99. */
 #ifdef HAS_J0
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_J0L)
 #    define bessel_j0 j0l
@@ -263,12 +316,188 @@
 #  endif
 #endif
 
-/* XXX Some of the C99 math functions, if missing, could be rather
- * trivially emulated: cbrt, exp2, log2, round, trunc...
+/* Emulations for missing math APIs.
  *
  * Keep in mind that the point of many of these functions is that
  * they, if available, are supposed to give more precise/more
- * numerically stable results. */
+ * numerically stable results.
+ *
+ * See e.g. http://www.johndcook.com/math_h.html
+ */
+
+/* XXX cosh sinh tanh */
+
+#ifndef c99_acosh
+static NV my_acosh(NV x)
+{
+  return Perl_log(x + Perl_sqrt(x * x - 1));
+}
+#  define c99_acosh my_acosh
+#endif
+
+#ifndef c99_asinh
+static NV my_asinh(NV x)
+{
+  return Perl_log(x + Perl_sqrt(x * x + 1));
+}
+#  define c99_asinh my_asinh
+#endif
+
+#ifndef c99_atanh
+static NV my_atanh(NV x)
+{
+  return (Perl_log(1 + x) - Perl_log(1 - x)) / 2;
+}
+#  define c99_atanh my_atanh
+#endif
+
+#ifndef c99_cbrt
+static NV my_cbrt(NV x)
+{
+  static const NV one_third = (NV)1.0/3;
+  return x >= 0.0 ? Perl_pow(x, one_third) : -Perl_pow(-x, one_third);
+}
+#  define c99_cbrt my_cbrt
+#endif
+
+#ifndef c99_copysign
+static NV my_copysign(NV x, NV y)
+{
+  return y >= 0 ? (x < 0 ? -x : x) : (x < 0 ? x : -x);
+}
+#  define c99_copysign my_copysign
+#endif
+
+#ifndef c99_exp2
+static NV my_exp2(NV x)
+{
+  return Perl_pow((NV)2.0, x);
+}
+#  define c99_exp2 my_exp2
+#endif
+
+#ifndef c99_expm1
+static NV my_expm1(NV x)
+{
+  if (PERL_ABS(x) < 1e-5)
+    /* Probably not enough for long doubles. */
+    return x * (1.0 + x * (0.5 + x / 6.0)); /* Taylor series */
+  else
+    return Perl_exp(x) - 1;
+}
+#  define c99_expm1 my_expm1
+#endif
+
+#ifndef c99_fdim
+static NV my_fdim(NV x, NV y)
+{
+  return x > y ? x - y : 0;
+}
+#  define c99_fdim my_fdim
+#endif
+
+#ifndef c99_fmax
+static NV my_fmax(NV x, NV y)
+{
+  if (Perl_isnan(x)) {
+    return Perl_isnan(y) ? NV_NAN : y;
+  } else if (Perl_isnan(y)) {
+    return x;
+  }
+  return x > y ? x : y;
+}
+#  define c99_fmax my_fmax
+#endif
+
+#ifndef c99_fmin
+static NV my_fmin(NV x, NV y)
+{
+  if (Perl_isnan(x)) {
+    return Perl_isnan(y) ? NV_NAN : y;
+  } else if (Perl_isnan(y)) {
+    return x;
+  }
+  return x < y ? x : y;
+}
+#  define c99_fmin my_fmin
+#endif
+
+#ifndef c99_hypot
+static NV my_hypot(NV x, NV y)
+{
+  if (x > 0.0) {
+    NV t = y / x;
+    return PERL_ABS(x) * Perl_sqrt(1 + t * t);
+  }
+  return NV_NAN;
+}
+#  define c99_hypot my_hypot
+#endif
+
+#ifndef c99_ilogb
+static IV my_ilogb(NV x)
+{
+  return (IV)(Perl_log(x) * M_LOG2E);
+}
+#  define c99_ilogb my_ilogb
+#endif
+
+#ifndef c99_log1p
+static NV my_log1p(NV x)
+{
+  if (PERL_ABS(x) > 1e-4)
+    return Perl_log(1.0 + x);
+  else
+    /* Probably not enough for long doubles. */
+    return x * (1.0 - x * (-x / 2.0 + x / 3.0)); /* Taylor series */
+}
+#  define c99_log1p my_log1p
+#endif
+
+#ifndef c99_log2
+static NV my_log2(NV x)
+{
+  return Perl_log(x) * M_LOG2E;
+}
+#  define c99_log2 my_log2
+#endif
+
+#ifndef c99_round
+static NV my_round(NV x)
+{
+  return (NV)((IV)(x >= 0.0 ? x + 0.5 : x - 0.5));
+}
+#  define c99_round my_round
+#endif
+
+#ifndef c99_scalbn
+#   if defined(Perl_ldexpl) && FLT_RADIX == 2
+static NV my_scalbn(NV x)
+{
+  return Perl_ldexp(x, y);
+}
+#    define c99_scalbn my_scalbn
+#  endif
+#endif
+
+#ifndef c99_trunc
+static NV my_trunc(NV x)
+{
+  return (NV)((IV)(x));
+}
+#  define c99_trunc my_trunc
+#endif
+
+#ifndef c99_tgamma
+#  ifdef c99_lgamma
+static NV my_tgamma(NV x)
+{
+  double l = c99_lgamma(x);
+  return signgam * Perl_exp(l); /* XXX evil global signgam, need lgamma_r */
+}
+#  define c99_tgamma my_tgamma
+#  endif
+#endif
 
 /* XXX This comment is just to make I_TERMIO and I_SGTTY visible to
    metaconfig for future extension writers.  We don't use them in POSIX.
