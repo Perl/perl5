@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 49 );
+plan( tests => 50 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -318,3 +318,12 @@ ok eval '
      sub foo{};
      1
   ', 'no crashing or errors when clobbering the current package';
+
+# Bareword lookup should not vivify stashes
+is runperl(
+    prog =>
+      'sub foo { print shift, qq-\n- } SUPER::foo bar if 0; foo SUPER',
+    stderr => 1,
+   ),
+   "SUPER\n",
+   'bareword lookup does not vivify stashes';

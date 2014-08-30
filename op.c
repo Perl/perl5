@@ -7147,6 +7147,7 @@ Perl_cv_const_sv_or_av(const CV * const cv)
 {
     if (!cv)
 	return NULL;
+    if (SvROK(cv)) return SvRV((SV *)cv);
     assert (SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);
     return CvCONST(cv) ? MUTABLE_SV(CvXSUBANY(cv).any_ptr) : NULL;
 }
@@ -8830,6 +8831,10 @@ Perl_ck_rvconst(pTHX_ OP *o)
 
     if (kid->op_type == OP_CONST) {
 	int iscv;
+	const int noexpand = o->op_type == OP_RV2CV
+			  && o->op_private & OPpMAY_RETURN_CONSTANT
+				? GV_NOEXPAND
+				: 0;
 	GV *gv;
 	SV * const kidsv = kid->op_sv;
 
@@ -8870,7 +8875,9 @@ Perl_ck_rvconst(pTHX_ OP *o)
 	iscv = (o->op_type == OP_RV2CV) * 2;
 	do {
 	    gv = gv_fetchsv(kidsv,
-		iscv | !(kid->op_private & OPpCONST_ENTERED),
+		noexpand
+		    ? noexpand
+		    : iscv | !(kid->op_private & OPpCONST_ENTERED),
 		iscv
 		    ? SVt_PVCV
 		    : o->op_type == OP_RV2SV
@@ -8880,7 +8887,8 @@ Perl_ck_rvconst(pTHX_ OP *o)
 			    : o->op_type == OP_RV2HV
 				? SVt_PVHV
 				: SVt_PVGV);
-	} while (!gv && !(kid->op_private & OPpCONST_ENTERED) && !iscv++);
+	} while (!noexpand && !gv && !(kid->op_private & OPpCONST_ENTERED)
+	      && !iscv++);
 	if (gv) {
 	    kid->op_type = OP_GV;
 	    SvREFCNT_dec(kid->op_sv);
@@ -8889,7 +8897,7 @@ Perl_ck_rvconst(pTHX_ OP *o)
 	    assert (sizeof(PADOP) <= sizeof(SVOP));
 	    kPADOP->op_padix = pad_alloc(OP_GV, SVf_READONLY);
 	    SvREFCNT_dec(PAD_SVl(kPADOP->op_padix));
-	    GvIN_PAD_on(gv);
+	    if (isGV(gv)) GvIN_PAD_on(gv);
 	    PAD_SETSV(kPADOP->op_padix, MUTABLE_SV(SvREFCNT_inc_simple_NN(gv)));
 #else
 	    kid->op_sv = SvREFCNT_inc_simple_NN(gv);
@@ -10077,7 +10085,7 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
     CV *cv;
     GV *gv;
     PERL_ARGS_ASSERT_RV2CV_OP_CV;
-    if (flags & ~(RV2CVOPCV_MARK_EARLY|RV2CVOPCV_RETURN_NAME_GV))
+    if (flags & ~RV2CVOPCV_FLAG_MASK)
 	Perl_croak(aTHX_ "panic: rv2cv_op_cv bad flags %x", (unsigned)flags);
     if (cvop->op_type != OP_RV2CV)
 	return NULL;
@@ -10089,6 +10097,11 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
     switch (rvop->op_type) {
 	case OP_GV: {
 	    gv = cGVOPx_gv(rvop);
+	    if (!isGV(gv)) {
+		if (flags & RV2CVOPCV_RETURN_STUB)
+		    return (CV *)gv;
+		else return NULL;
+	    }
 	    cv = GvCVu(gv);
 	    if (!cv) {
 		if (flags & RV2CVOPCV_MARK_EARLY)

@@ -214,13 +214,13 @@ is no conversion of op type.
 
   bit  entersub flag       phase   rv2cv flag             phase
   ---  -------------       -----   ----------             -----
-    1  OPpENTERSUB_INARGS  context OPpMAY_RETURN_CONSTANT context
+    1  OPpENTERSUB_INARGS  context
     2  HINT_STRICT_REFS    check   HINT_STRICT_REFS       check
     4  OPpENTERSUB_HASTARG check
     8                              OPpENTERSUB_AMPER      parser
    16  OPpENTERSUB_DB      check
    32  OPpDEREF_AV         context
-   64  OPpDEREF_HV         context
+   64  OPpDEREF_HV         context OPpMAY_RETURN_CONSTANT context
   128  OPpLVAL_INTRO       context OPpENTERSUB_NOPAREN    parser
 
 */
@@ -238,7 +238,7 @@ is no conversion of op type.
   /* OP_RV2CV only */
 #define OPpENTERSUB_AMPER	8	/* Used & form to call. */
 #define OPpENTERSUB_NOPAREN	128	/* bare sub call (without parens) */
-#define OPpMAY_RETURN_CONSTANT	1	/* If a constant sub, return the constant */
+#define OPpMAY_RETURN_CONSTANT	64	/* If a constant sub, return the constant */
 
   /* OP_GV only */
 #define OPpEARLY_CV		32	/* foo() called before sub foo was parsed */
@@ -878,6 +878,8 @@ preprocessing token; the type of I<arg> depends on I<which>.
 
 #define RV2CVOPCV_MARK_EARLY     0x00000001
 #define RV2CVOPCV_RETURN_NAME_GV 0x00000002
+#define RV2CVOPCV_RETURN_STUB    0x00000004
+#define RV2CVOPCV_FLAG_MASK      0x00000007 /* all of the above */
 
 #define op_lvalue(op,t) Perl_op_lvalue_flags(aTHX_ op,t,0)
 
