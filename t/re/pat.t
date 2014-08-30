@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 737;  # Update this when adding/deleting tests.
+plan tests => 738;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1604,6 +1604,12 @@ EOP
 
         # This one is for completeness
         ok('a<b>c' =~ qr<a\<b\>c>, "'\\<' is a literal in qr<...>)");
+    }
+
+    {   # Was getting optimized into EXACT (non-folding node)
+        my $x = qr/[x]/i;
+        utf8::upgrade($x);
+        like("X", qr/$x/, "UTF-8 of /[x]/i matches upper case");
     }
 
 } # End of sub run_tests
