@@ -225,7 +225,7 @@ system 'git', 'bisect', 'run', $^X, $runner, @ARGV and die;
 END {
     my $end_time = time;
 
-    printf "That took %d seconds\n", $end_time - $start_time
+    printf "That took %d seconds.\n", $end_time - $start_time
         if defined $start_time;
 }
 
