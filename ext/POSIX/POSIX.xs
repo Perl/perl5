@@ -368,8 +368,6 @@
  * See e.g. http://www.johndcook.com/math_h.html
  */
 
-/* XXX cosh sinh tanh */
-
 #ifndef c99_acosh
 static NV my_acosh(NV x)
 {
@@ -410,6 +408,11 @@ static NV my_copysign(NV x, NV y)
 }
 #  define c99_copysign my_copysign
 #endif
+
+/* XXX cosh */
+
+/* XXX erf -- non-trivial */
+/* XXX erfc -- non-trivial */
 
 #ifndef c99_exp2
 static NV my_exp2(NV x)
@@ -544,6 +547,8 @@ static IV my_ilogb(NV x)
 #  define c99_ilogb my_ilogb
 #endif
 
+/* XXX lgamma -- non-trivial */
+
 #ifndef c99_log1p
 static NV my_log1p(NV x)
 {
@@ -564,6 +569,70 @@ static NV my_log2(NV x)
 #  define c99_log2 my_log2
 #endif
 
+/* XXX nextafter */
+
+/* XXX nexttoward */
+
+static int my_fegetround()
+{
+#ifdef HAS_FEGETROUND
+  return fegetround();
+#elif defined(FLT_ROUNDS)
+  return FLT_ROUNDS;
+#else
+  return -1;
+#endif
+}
+
+static NV my_rint(NV x)
+{
+#ifdef FE_TONEAREST
+  switch (my_fegetround()) {
+  default:
+  case FE_TONEAREST:
+    return (NV)((IV)(x >= 0.0 ? x + 0.5 : x - 0.5)); /* like round() */
+  case FE_TOWARDZERO:
+    return (NV)((IV)(x)); /* like trunc() */
+  case FE_DOWNWARD:
+    return (NV)((IV)(x >= 0.0 ? x : x - 0.5));
+  case FE_UPWARD:
+    return (NV)((IV)(x >= 0.0 ? x + 0.5 : x));
+  }
+#else
+  return NV_NAN;
+#endif
+}
+
+/* XXX nearbyint() and rint() are not really identical -- but the difference
+ * is messy: nearbyint is defined NOT to raise FE_INEXACT floating point
+ * exceptions, while rint() is defined to MAYBE raise them.  At the moment
+ * Perl is blissfully unaware of such fine detail of floating point. */
+#ifndef c99_nearbyint
+#  ifdef FE_TONEAREST
+#    define c99_nearbyrint my_rint
+#  endif
+#endif
+
+#ifndef c99_lrint
+#  ifdef FE_TONEAREST
+static IV lrint(NV x)
+{
+  return (IV)my_rint(x);
+}
+#    define c99_lrint my_lrint
+#  endif
+#endif
+
+/* XXX remainder */
+
+/* XXX remquo */
+
+#ifndef c99_rint
+#  ifdef FE_TONEAREST
+#    define c99_rint my_rint
+#  endif
+#endif
+
 #ifndef c99_round
 static NV my_round(NV x)
 {
@@ -582,13 +651,7 @@ static NV my_scalbn(NV x)
 #  endif
 #endif
 
-#ifndef c99_trunc
-static NV my_trunc(NV x)
-{
-  return (NV)((IV)(x));
-}
-#  define c99_trunc my_trunc
-#endif
+/* XXX sinh */
 
 #ifndef c99_tgamma
 #  ifdef c99_lgamma
@@ -597,8 +660,19 @@ static NV my_tgamma(NV x)
   double l = c99_lgamma(x);
   return signgam * Perl_exp(l); /* XXX evil global signgam, need lgamma_r */
 }
-#  define c99_tgamma my_tgamma
+#    define c99_tgamma my_tgamma
+/* XXX tgamma without lgamma -- non-trivial */
 #  endif
+#endif
+
+/* XXX tanh */
+
+#ifndef c99_trunc
+static NV my_trunc(NV x)
+{
+  return (NV)((IV)(x));
+}
+#  define c99_trunc my_trunc
 #endif
 
 /* XXX This comment is just to make I_TERMIO and I_SGTTY visible to
@@ -1862,11 +1936,8 @@ acos(x)
 IV
 fegetround()
     CODE:
-#ifdef HAS_FEGETROUND
-	RETVAL = fegetround();
-#elif defined(FLT_ROUNDS)
-	RETVAL = FLT_ROUNDS;
-#else
+	RETVAL = my_fegetround();
+#ifndef HAS_FEGETROUND
 	not_here("fegetround");
 #endif
     OUTPUT:
@@ -1893,7 +1964,8 @@ fpclassify(x)
 	isinf = 3
 	isnan = 4
 	isnormal = 5
-        signbit = 6
+	lrint = 6
+        signbit = 7
     CODE:
 	switch (ix) {
 	case 0:
@@ -1927,6 +1999,13 @@ fpclassify(x)
 #endif
 	    break;
 	case 6:
+#ifdef c99_lrint
+	    RETVAL = c99_lrint(x);
+#else
+	    not_here("lrint");
+#endif
+	    break;
+	case 7:
 	default:
 #ifdef Perl_signbit
 	    RETVAL = Perl_signbit(x);

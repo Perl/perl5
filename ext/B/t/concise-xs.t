@@ -201,7 +201,7 @@ my $testpkgs = {
                         hypot ilogb isfinite isgreater isgreaterequal
                         isinf isless islessequal islessgreater isnan
                         isnormal isunordered j0 j1 jn lgamma log1p
-                        log2 logb nan nearbyint nextafter nexttoward
+                        log2 logb lrint nan nearbyint nextafter nexttoward
                         remainder remquo rint round scalbn signbit
                         sinh tanh tgamma trunc y0 y1 yn/,
 
