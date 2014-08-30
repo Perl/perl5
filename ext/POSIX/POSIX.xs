@@ -249,12 +249,43 @@
 #  endif
 #endif
 
+/* If on legacy platforms, and not using gcc, some C99 math interfaces
+ * might be missing, turn them off so that the emulations hopefully
+ * kick in.  This is admittedly nasty, and fragile, but the alternative
+ * is to have Configure scans for all the 40+ interfaces. */
+#ifndef __GNUC__
+
 /* HP-UX on PA-RISC is missing certain C99 math functions,
  * but on IA64 (Integrity) these do exist. */
-#if defined(__hpux) && defined(__hppa)
-#  undef c99_fma
-#  undef c99_nexttoward
-#  undef c99_tgamma
+#  if defined(__hpux) && defined(__hppa)
+#    undef c99_fma
+#    undef c99_nexttoward
+#    undef c99_tgamma
+#  endif
+
+#  if defined(__irix__)
+#    undef c99_ilogb
+#    undef c99_exp2
+#  endif
+
+#  if defined(__osf__) /* Tru64 */
+#    undef c99_fdim
+#    undef c99_fma
+#    undef c99_fmax
+#    undef c99_fmin
+#    undef c99_fpclassify
+#    undef c99_isfinite
+#    undef c99_isinf
+#    undef c99_isunordered
+#    undef c99_lrint
+#    undef c99_nearbyint
+#    undef c99_nexttoward
+#    undef c99_remquo
+#    undef c99_rint
+#    undef c99_round
+#    undef c99_scalbn
+#  endif
+
 #endif
 
 /* XXX Regarding C99 math.h, Win32 seems to be missing these:
