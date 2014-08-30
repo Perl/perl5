@@ -1558,6 +1558,7 @@ dumpindent is 4 at - line 1.
 8               TYPE = null  ===> (6)
                   (was rv2cv)
                 FLAGS = (SCALAR,KIDS,SLABBED,LASTSIB)
+                PRIVATE = (0x1)
                 {
 7                   TYPE = gv  ===> 5
                     FLAGS = (SCALAR,SLABBED,LASTSIB)
@@ -1570,6 +1571,7 @@ dumpindent is 4 at - line 1.
 EODUMP
 
 $e =~ s/GV_OR_PADIX/$threads ? "PADIX = 2" : "GV = t::DumpProg"/e;
+$e =~ s/.*PRIVATE = \(0x1\).*\n// if $] < 5.021004;
 
 test_DumpProg("package t;", $e, "DumpProg() has no 'Attempt to free X prematurely' warning", "is" );
 
