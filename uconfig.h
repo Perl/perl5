@@ -127,6 +127,12 @@
  */
 /*#define HAS_FCNTL		/ **/
 
+/* HAS_FEGETROUND:
+ *	This symbol, if defined, indicates that the fegetround routine is
+ *	available to get the floating point rounding mode.
+ */
+/*#define HAS_FEGETROUND	/ **/
+
 /* HAS_FGETPOS:
  *	This symbol, if defined, indicates that the fgetpos routine is
  *	available to get the file position indicator, similar to ftell().
@@ -672,6 +678,12 @@
  *	This manifest constant tells the C program to include <fcntl.h>.
  */
 /*#define I_FCNTL	/ **/
+
+/* I_FENV:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <fenv.h> to get the floating point environment definitions.
+ */
+/*#define I_FENV		/ **/
 
 /* I_FLOAT:
  *	This symbol, if defined, indicates to the C program that it should
@@ -4829,6 +4841,6 @@
 #endif
 
 /* Generated from:
- * 12401deb2bd159475d6a3533b0fe0fae288825fd27c04f4f0f6655e4959ec9b7 config_h.SH
- * d4624634f898a9b01fb9baadf847f7614e0d036dd077852f40d37a9593af8e38 uconfig.sh
+ * 0486f11f3248b90661c12addfea9b9c4166aa7ab6b424d1b7b901b7bf1a62c89 config_h.SH
+ * a376d0ca25730310baa72472d022838903cee6091bc06eb4a01fc6c22d6f9c4a uconfig.sh
  * ex: set ro: */

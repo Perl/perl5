@@ -808,6 +808,10 @@ d_fds_bits (d_fd_set.U):
 	a half-fast job and neglected to provide the macros to manipulate
 	an fd_set, HAS_FDS_BITS will let us know how to fix the gaffe.
 
+d_fegetround (d_fegetround.U):
+	This variable conditionally defines HAS_FEGETROUND if fegetround() is
+	available to get the floating point rounding mode.
+
 d_fgetpos (d_fgetpos.U):
 	This variable conditionally defines HAS_FGETPOS if fgetpos() is
 	available to get the file position indicator.

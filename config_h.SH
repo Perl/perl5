@@ -162,6 +162,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_fcntl HAS_FCNTL		/**/
 
+/* HAS_FEGETROUND:
+ *	This symbol, if defined, indicates that the fegetround routine is
+ *	available to get the floating point rounding mode.
+ */
+#$d_fegetround HAS_FEGETROUND	/**/
+
 /* HAS_FGETPOS:
  *	This symbol, if defined, indicates that the fgetpos routine is
  *	available to get the file position indicator, similar to ftell().
@@ -707,6 +713,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This manifest constant tells the C program to include <fcntl.h>.
  */
 #$i_fcntl I_FCNTL	/**/
+
+/* I_FENV:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <fenv.h> to get the floating point environment definitions.
+ */
+#$i_fenv I_FENV		/**/
 
 /* I_FLOAT:
  *	This symbol, if defined, indicates to the C program that it should

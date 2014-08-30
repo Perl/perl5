@@ -462,6 +462,7 @@ d_fcntl_can_lock=''
 d_fd_macros=''
 d_fd_set=''
 d_fds_bits=''
+d_fegetround=''
 d_fgetpos=''
 d_finite=''
 d_finitel=''
@@ -911,6 +912,7 @@ i_dirent=''
 i_dlfcn=''
 i_execinfo=''
 i_fcntl=''
+i_fenv=''
 i_float=''
 i_fp=''
 i_fp_class=''
@@ -6756,6 +6758,10 @@ EOCP
 	;;
 esac
 $rm_try
+
+: see if this is a fenv.h system
+set fenv.h i_fenv
+eval $inhdr
 
 : see if this is a float.h system
 set float.h i_float
@@ -13678,6 +13684,10 @@ EOM
 	fi
 fi
 $rm_try
+
+: see if fegetround exists
+set fegetround d_fegetround
+eval $inlibc
 
 : see if fgetpos exists
 set fgetpos d_fgetpos
@@ -23323,6 +23333,7 @@ d_fcntl_can_lock='$d_fcntl_can_lock'
 d_fd_macros='$d_fd_macros'
 d_fd_set='$d_fd_set'
 d_fds_bits='$d_fds_bits'
+d_fegetround='$d_fegetround'
 d_fgetpos='$d_fgetpos'
 d_finite='$d_finite'
 d_finitel='$d_finitel'
@@ -23798,6 +23809,7 @@ i_dirent='$i_dirent'
 i_dlfcn='$i_dlfcn'
 i_execinfo='$i_execinfo'
 i_fcntl='$i_fcntl'
+i_fenv='$i_fenv'
 i_float='$i_float'
 i_fp='$i_fp'
 i_fp_class='$i_fp_class'

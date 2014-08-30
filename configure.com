@@ -5974,6 +5974,7 @@ $ WC "d_fcntl_can_lock='" + d_fcntl_can_lock + "'"
 $ WC "d_fd_set='" + d_fd_set + "'"
 $ WC "d_fd_macros='define'"
 $ WC "d_fds_bits='define'"
+$ WC "d_fegetround='undef'"
 $ WC "d_fgetpos='define'"
 $ IF F$ELEMENT(0, "-", archname) .NES. "VMS_VAX" .AND. use_ieee_math
 $ THEN
@@ -6414,6 +6415,7 @@ $ WC "i_dirent='undef'"	! we roll our own
 $ WC "i_dlfcn='undef'"
 $ WC "i_execinfo='undef'"
 $ WC "i_fcntl='" + i_fcntl + "'"
+$ WC "i_fenv='undef'"
 $ WC "i_float='define'"
 $ WC "i_fp='undef'"
 $ WC "i_fp_class='undef'"
