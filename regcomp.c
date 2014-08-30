@@ -10976,10 +10976,16 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
                           EBCDIC, but it works there, as the extra invariants
                           fold to themselves) */
                     *character = toFOLD((U8) code_point);
-                    if (downgradable
-                        && *character == code_point
-                        && ! HAS_NONLATIN1_FOLD_CLOSURE(code_point))
-                    {
+
+                    /* We can downgrade to an EXACT node if this character
+                     * isn't a folding one.  Note that this assumes that
+                     * nothing above Latin1 folds to some other invariant than
+                     * one of these alphabetics; otherwise we would also have
+                     * to check:
+                     *  && (! HAS_NONLATIN1_FOLD_CLOSURE(code_point)
+                     *      || ASCII_FOLD_RESTRICTED))
+                     */
+                    if (downgradable && PL_fold[code_point] == code_point) {
                         OP(node) = EXACT;
                     }
                 }
