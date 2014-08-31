@@ -388,6 +388,12 @@ Constant dereferencing now works correctly for typeglob constants.
 Previously the glob was stringified and its name looked up.  Now the glob
 itself is used.  [perl #69456]
 
+=item *
+
+When parsing a funny character ($ @ % &) followed by braces, the parser no
+longer tries to guess whether it is a block or a hash constructor (causing
+a syntax error when it guesses the latter), since it can only be a block.
+
 =back
 
 =head1 Known Problems
