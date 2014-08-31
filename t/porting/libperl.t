@@ -418,8 +418,8 @@ ok(keys %{$symbols{undef}}, "has undefined symbols");
 
 # There are certain symbols we expect to see.
 
-# chmod, socket, getenv, sigaction, sqrt, time are system/library
-# calls that should each see at least one use. sqrt can be sqrtl
+# chmod, socket, getenv, sigaction, exp, time are system/library
+# calls that should each see at least one use. exp can be expl
 # if so configured.
 my %expected = (
     chmod  => undef, # There is no Configure symbol for chmod.
@@ -430,9 +430,9 @@ my %expected = (
     );
 
 if ($Config{uselongdouble} && $Config{d_longdbl}) {
-    $expected{sqrtl} = 'd_sqrtl';
+    $expected{expl} = undef; # There is no Configure symbol for expl.
 } else {
-    $expected{sqrt} = undef; # There is no Configure symbol for sqrt.
+    $expected{exp} = undef; # There is no Configure symbol for exp.
 }
 
 # DynaLoader will use dlopen, unless we are building static,
