@@ -498,7 +498,7 @@ see L<perlrun/PERL_PERTURB_KEYS>.  Note that this feature controls the
 When items collide into a given hash bucket the order they are stored in
 the chain is no longer predictable in Perl 5.18.  This
 has the intention to make it harder to observe a
-collisions.  This behavior can be overridden by using
+collision.  This behavior can be overridden by using
 the PERL_PERTURB_KEYS environment variable, see L<perlrun/PERL_PERTURB_KEYS>.
 
 =item New Default Hash Function
