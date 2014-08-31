@@ -2772,9 +2772,9 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
 }
 
 /* Helper for sv_2pv_flags and sv_vcatpvfn_flags.  If the NV is an
-* infinity or a not-a-number, writes the appropriate strings to the
-* buffer, including a zero byte.  On success returns the written length,
-* excluding the zero byte, on failure returns zero. */
+ * infinity or a not-a-number, writes the appropriate strings to the
+ * buffer, including a zero byte.  On success returns the written length,
+ * excluding the zero byte, on failure returns zero. */
 STATIC size_t
 S_infnan_copy(NV nv, char* buffer, size_t maxlen) {
     if (maxlen < 4)
@@ -2991,7 +2991,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    /* The +20 is pure guesswork.  Configure test needed. --jhi */
 	    s = SvGROW_mutable(sv, NV_DIG + 20);
 
-            len = S_infnan_copy(SvNVX(sv), s, SvLEN(sv));
+            len = S_infnan_copy(SvNVX(sv), s, 5);
             if (len > 0)
                 s += len;
             else {
@@ -12038,7 +12038,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
             }
             else
-                elen = S_infnan_copy(nv, PL_efloatbuf, PL_efloatsize);
+                elen = S_infnan_copy(nv, PL_efloatbuf, 5);
             if (elen == 0) {
                 char *ptr = ebuf + sizeof ebuf;
                 *--ptr = '\0';
