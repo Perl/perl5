@@ -418,6 +418,13 @@ messages) used to crash for lexical subs, but have been fixed.
 Bareword lookup now tries to avoid vivifying packages if it turns out the
 bareword is not going to be a subroutine name.
 
+=item *
+
+Compilation of anonymous constants (e.g., C<sub () { 3 }>) no longer
+deletes any subroutine named C<__ANON__> in the current package.  Not only
+was C<*__ANON__{CODE}> cleared, but there was a memory leak, too.  This bug
+goes back to perl 5.8.0. 
+
 =back
 
 =head1 Known Problems
