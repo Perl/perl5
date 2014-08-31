@@ -271,8 +271,8 @@ should only send patches to
 L<perl5-porters@perl.org|mailto:perl5-porters@perl.org> directly if the
 patch is not ready to be applied, but intended for discussion.
 
-See the next section for how to configure and use git to send these
-emails for you.
+Please do not use git-send-email(1) to send your patch. See L<Sending
+patch emails|/Sending patch emails> for more information.
 
 If you want to delete your temporary branch, you may do so with:
 
