@@ -247,7 +247,7 @@ the C<lib> pragma, e.g.:
   perl -Mlib=/foo program
 
 The benefit of using C<-Mlib=/foo> over C<-I/foo>, is that the former
-will automagically remove any duplicated directories, while the later
+will automagically remove any duplicated directories, while the latter
 will not.
 
 Note that if a tainted string is added to C<@INC>, the following
