@@ -152,7 +152,7 @@ pseudo-child created by it that is also a pseudo-parent will only exit
 after their pseudo-children have exited.
 
 Starting with Perl 5.14 a parent will not wait() automatically
-for any child that has been signalled with C<sig('TERM', ...)>
+for any child that has been signalled with C<kill('TERM', ...)>
 to avoid a deadlock in case the child is blocking on I/O and
 never receives the signal.
 
