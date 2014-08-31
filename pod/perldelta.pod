@@ -382,6 +382,12 @@ Compile-time checking of constant dereferencing (e.g.,
 C<< my_constant->() >>) has been removed, since it was not taking
 overloading into account.  [perl #69456] [perl #122607]
 
+=item *
+
+Constant dereferencing now works correctly for typeglob constants.
+Previously the glob was stringified and its name looked up.  Now the glob
+itself is used.  [perl #69456]
+
 =back
 
 =head1 Known Problems
