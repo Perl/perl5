@@ -255,12 +255,12 @@ itself you can fix it up by editing the files once more and then issue:
 
 Now you should create a patch file for all your local changes:
 
-  % git format-patch -M origin..
+  % git format-patch -M blead..
   0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
 
 Or for a lot of changes, e.g. from a topic branch:
 
-  % git format-patch --stdout -M origin.. > topic-branch-changes.patch
+  % git format-patch --stdout -M blead.. > topic-branch-changes.patch
 
 You should now send an email to
 L<perlbug@perl.org|mailto:perlbug@perl.org> with a description of your
