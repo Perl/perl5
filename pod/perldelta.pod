@@ -357,7 +357,9 @@ well.
 
 =item *
 
-XXX
+The parser no longer gets confused by C<\U=> within a double-quoted string.
+It used to roduce a syntax error, but now compile it correctly.
+[perl #80368]
 
 =back
 
