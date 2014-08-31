@@ -2027,7 +2027,7 @@ EXTERN_C long double modfl(long double, long double *);
 #        define Perl_fp_class_snan(x)	(Perl_fp_class(x)==FP_QNAN)
 #        define Perl_fp_class_qnan(x)	(Perl_fp_class(x)==FP_QNAN)
 #        define Perl_fp_class_pnorm(x)	(Perl_fp_class(x)==FP_PLUS_NORM)
-#        define Perl_fp_class_nnorm(x)	(Perl_fp_class(x)==FP_MINUIS_NORM)
+#        define Perl_fp_class_nnorm(x)	(Perl_fp_class(x)==FP_MINUS_NORM)
 #        define Perl_fp_class_pdenorm(x)	(Perl_fp_class(x)==FP_PLUS_DENORM)
 #        define Perl_fp_class_ndenorm(x)	(Perl_fp_class(x)==FP_MINUS_DENORM)
 #        define Perl_fp_class_pzero(x)	(Perl_fp_class(x)==FP_PLUS_ZERO)

@@ -407,7 +407,7 @@ static NV my_copysign(NV x, NV y)
 #  define c99_copysign my_copysign
 #endif
 
-/* XXX cosh */
+/* XXX cosh (though c89) */
 
 /* XXX erf -- non-trivial */
 /* XXX erfc -- non-trivial */
@@ -466,10 +466,20 @@ static NV my_fmin(NV x, NV y)
 #  define c99_fmin my_fmin
 #endif
 
-#ifndef HAS_FPCLASSIFY
+#if !(defined(HAS_FPCLASSIFY) && defined(FP_INFINITE))
 static NV my_fpclassify(NV x)
 {
-#if (defined(HAS_FPCLASS) || defined(HAS_FPCLASSL)) && defined(FP_CLASS_SNAN)
+#if defined(HAS_FPCLASSIFY) && defined(FP_PLUS_INF)
+  switch (Perl_fp_class(x)) {
+  case FP_PLUS_INF:    case FP_MINUS_INF:    return FP_INFINITE;
+  case FP_SNAN:        case FP_QNAN:         return FP_NAN;
+  case FP_PLUS_NORM:   case FP_MINUS_NORM:   return FP_NORMAL;
+  case FP_PLUS_DENORM: case FP_MINUS_DENORM: return FP_SUBNORMAL;
+  case FP_PLUS_ZERO:   case FP_MINUS_PZERO:  return FP_ZERO;
+  default: return -1;
+  }
+#  define c99_fpclassify my_fpclassify
+#elif (defined(HAS_FPCLASS) || defined(HAS_FPCLASSL)) && defined(FP_CLASS_SNAN)
   switch (Perl_fp_class(x)) {
   case FP_CLASS_NINF:    case FP_CLASS_PINF:    return FP_INFINITE;
   case FP_CLASS_SNAN:    case FP_CLASS_QNAN:    return FP_NAN;
@@ -521,6 +531,8 @@ static NV my_fpclassify(NV x)
   if (Perl_fp_class_zero(x))   return FP_ZERO;
   return -1;
 #  define c99_fpclassify my_fpclassify
+#else
+  return -1;
 #endif
 }
 #endif
@@ -653,7 +665,7 @@ static NV my_scalbn(NV x)
 #  endif
 #endif
 
-/* XXX sinh */
+/* XXX sinh (though c89) */
 
 #ifndef c99_tgamma
 #  ifdef c99_lgamma
@@ -667,7 +679,7 @@ static NV my_tgamma(NV x)
 #  endif
 #endif
 
-/* XXX tanh */
+/* XXX tanh (though c89) */
 
 #ifndef c99_trunc
 static NV my_trunc(NV x)
