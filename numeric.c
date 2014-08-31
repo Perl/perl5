@@ -1325,7 +1325,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 }
 
 /*
-=for apidoc grok_atou
+=for apidoc isinfnan
 
 Perl_isinfnan() is utility function that returns true if the NV
 argument is either an infinity or a NaN, false otherwise.  To test
