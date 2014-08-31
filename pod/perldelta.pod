@@ -397,6 +397,11 @@ When parsing a funny character ($ @ % &) followed by braces, the parser no
 longer tries to guess whether it is a block or a hash constructor (causing
 a syntax error when it guesses the latter), since it can only be a block.
 
+=item *
+
+C<undef $reference> now frees the referent immediately, instead of hanging
+on to it until the next statement.  [perl #122556]
+
 =back
 
 =head1 Known Problems
