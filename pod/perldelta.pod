@@ -402,6 +402,11 @@ a syntax error when it guesses the latter), since it can only be a block.
 C<undef $reference> now frees the referent immediately, instead of hanging
 on to it until the next statement.  [perl #122556]
 
+=item *
+
+Various cases where the name of a sub is used (autoload, overloading, error
+messages) used to crash for lexical subs, but have been fixed.
+
 =back
 
 =head1 Known Problems
