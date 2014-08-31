@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 34;
+plan tests => 30;
 
 # compile time evaluation
 
@@ -78,10 +78,12 @@ is(substr($s,0,5), '0.693', 'run time log(2)');
 
 cmp_ok(exp(log($x1)), '==', 1, 'run time exp(log(1)) == 1');
 
-# tests for transcendental functions
+# NOTE: do NOT test the trigonometric functions at [+-]Pi
+# and expect to get exact results like 0, 1, -1, because
+# you may not be able to feed them exactly [+-]Pi given
+# all the variations of different long doubles.
 
-my $pi = 3.1415926535897931160;
-my $pi_2 = 1.5707963267948965580;
+my $pi_2 = 1.5707963267949;
 
 sub round {
    my $result = shift;
@@ -90,19 +92,15 @@ sub round {
 
 # sin() tests
 cmp_ok(sin(0), '==', 0.0, 'sin(0) == 0');
-cmp_ok(round(sin($pi)), '==', 0.0, 'sin(pi) == 0');
-cmp_ok(round(sin(-1 * $pi)), '==', 0.0, 'sin(-pi) == 0');
-cmp_ok(round(sin($pi_2)), '==', 1.0, 'sin(pi/2) == 1');
-cmp_ok(round(sin(-1 * $pi_2)), '==', -1.0, 'sin(-pi/2) == -1');
+cmp_ok(abs(sin($pi_2) - 1), '<', 1e-9, 'sin(pi/2) == 1');
+cmp_ok(abs(sin(-1 * $pi_2) - -1), '<', 1e-9, 'sin(-pi/2) == -1');
 
 cmp_ok(round(sin($x1)), '==', '0.841470985', "sin(1)");
 
 # cos() tests
 cmp_ok(cos(0), '==', 1.0, 'cos(0) == 1');
-cmp_ok(round(cos($pi)), '==', -1.0, 'cos(pi) == -1');
-cmp_ok(round(cos(-1 * $pi)), '==', -1.0, 'cos(-pi) == -1');
-cmp_ok(round(cos($pi_2)), '==', 0.0, 'cos(pi/2) == 0');
-cmp_ok(round(cos(-1 * $pi_2)), '==', 0.0, 'cos(-pi/2) == 0');
+cmp_ok(abs(cos($pi_2)), '<', 1e-9, 'cos(pi/2) == 0');
+cmp_ok(abs(cos(-1 * $pi_2)), '<', 1e-9, 'cos(-pi/2) == 0');
 
 cmp_ok(round(cos($x1)), '==', '0.540302306', "cos(1)");
 
