@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 34 );
+plan( tests => 37 );
 
 sub empty_sub {}
 
@@ -229,3 +229,15 @@ fresh_perl_is(<<'EOS', "", { stderr => 1 },
 use strict; use warnings; eval q/use File::{Spec}/; eval q/use File::Spec/;
 EOS
 	       "check special blocks are cleared on error");
+
+use constant { constant1 => 1, constant2 => 2 };
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w++ };
+    eval 'sub constant1; sub constant2($)';
+    is eval '&constant1', '1',
+      'stub re-declaration of constant with no prototype';
+    is eval '&constant2', '2',
+      'stub re-declaration of constant with wrong prototype';
+    is $w, 2, 'two warnings from the above';
+}

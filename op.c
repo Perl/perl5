@@ -7712,12 +7712,14 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 				 o ? (const GV *)cSVOPo->op_sv : NULL, ps,
 				 ps_len, ps_utf8);
 	}
-	if (ps) {
+	if (!SvROK(gv)) {
+	  if (ps) {
 	    sv_setpvn(MUTABLE_SV(gv), ps, ps_len);
             if ( ps_utf8 ) SvUTF8_on(MUTABLE_SV(gv));
-        }
-	else
+          }
+	  else
 	    sv_setiv(MUTABLE_SV(gv), -1);
+	}
 
 	SvREFCNT_dec(PL_compcv);
 	cv = PL_compcv = NULL;
