@@ -1,5 +1,8 @@
 =encoding utf8
 
+=for todo
+8b57a5fa Allow package name in ‘use constant’ constants
+
 =head1 NAME
 
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
