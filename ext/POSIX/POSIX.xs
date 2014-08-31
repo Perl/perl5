@@ -579,6 +579,8 @@ static int my_fegetround()
   return fegetround();
 #elif defined(FLT_ROUNDS)
   return FLT_ROUNDS;
+  /* XXX emulate using fpgetround() (HAS_FPGETROUND):
+   * FP_RN to nearest, FP_RM down, FP_RP, up, FP_RZ truncate */
 #else
   return -1;
 #endif
@@ -599,6 +601,8 @@ static NV my_rint(NV x)
     return (NV)((IV)(x >= 0.0 ? x + 0.5 : x));
   }
 #else
+  /* XXX emulate using fpsetround() (HAS_FPGETROUND):
+   * FP_RN to nearest, FP_RM down, FP_RP, up, FP_RZ truncate */
   return NV_NAN;
 #endif
 }
