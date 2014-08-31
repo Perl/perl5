@@ -97,6 +97,22 @@
 #  define M_SQRT1_2	0.707106781186547524400844362104849039
 #endif
 
+#if !defined(INFINITY) && defined(NV_INF)
+#  define INFINITY NV_INF
+#endif
+
+#if !defined(NAN) && defined(NV_NAN)
+#  define NAN NV_NAN
+#endif
+
+#if !defined(Inf) && defined(NV_INF)
+#  define Inf NV_INF
+#endif
+
+#if !defined(NaN) && defined(NV_NAN)
+#  define NaN NV_NAN
+#endif
+
 /* We will have an emulation. */
 #if !defined(HAS_FPCLASSIFY) && !defined(FP_INFINITE)
 #  define FP_INFINITE	0
