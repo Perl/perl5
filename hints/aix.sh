@@ -544,4 +544,28 @@ if [ -f "/opt/freeware/include/gdbm/dbm.h" ] ||
     i_gdbm='undef'
     i_gdbmndbm='undef'
 fi
+
+# Some releases (and patch levels) of AIX have a broken powl().
+case "$uselongdouble" in
+define)
+  echo "Checking if your powl() is broken..." >&4
+  cat > powl$$.c <<EOF
+#include <math.h>
+#include <stdio.h>
+int main() {
+  printf("%Lg\n", powl(-3.0L, 2.0L));
+}
+EOF
+  $cc -qlongdouble -o powl$$ powl$$.c -lm
+  case `./powl$$` in
+  9) echo "Your powl() is working correctly." >&4 ;;
+  *)
+    ccflags="$ccflags -DHAS_AIX_POWL_NEG_BASE_BUG"
+    echo "Your powl() is broken." >&4
+    ;;
+  esac
+  rm -f powl$$.c powl$$
+  ;;
+esac
+
 # EOF
