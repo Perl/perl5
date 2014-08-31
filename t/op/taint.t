@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 800;
+plan tests => 801;
 
 $| = 1;
 
@@ -2382,6 +2382,14 @@ SKIP: {
 $::x = "foo";
 $_ = "$TAINT".reset "x";
 is eval { eval $::x.1 }, 1, 'reset does not taint undef';
+
+# [perl #122669]
+is runperl(
+   switches => [ '-T' ],
+   prog => 'use constant K=>$^X; 0 if K; BEGIN{} use strict; print 122669, qq-\n-',
+   stderr => 1,
+ ), "122669\n",
+    'tainted constant as logop condition should not prevent "use"';
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {
