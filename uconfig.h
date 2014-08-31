@@ -3635,6 +3635,12 @@
  */
 /*#define HAS_FPCLASSL		/ **/
 
+/* HAS_FPGETROUND:
+ *	This symbol, if defined, indicates that the fpgetround routine is
+ *	available to get the floating point rounding mode.
+ */
+/*#define HAS_FPGETROUND		/ **/
+
 /* HAS_FPOS64_T:
  *	This symbol will be defined if the C compiler supports fpos64_t.
  */
@@ -4841,6 +4847,6 @@
 #endif
 
 /* Generated from:
- * 0486f11f3248b90661c12addfea9b9c4166aa7ab6b424d1b7b901b7bf1a62c89 config_h.SH
- * a376d0ca25730310baa72472d022838903cee6091bc06eb4a01fc6c22d6f9c4a uconfig.sh
+ * 2f54acea42d3f924568021e83a8122d708d2beb715c56fd532dc312d69c2b3c3 config_h.SH
+ * c152ea695301aeff5abcae519813f0bc4f3a875ba6f38e4a841302baa7bb5c7b uconfig.sh
  * ex: set ro: */

@@ -872,6 +872,10 @@ d_fpclassl (d_fpclassl.U):
 	This variable conditionally defines the HAS_FPCLASSL symbol, which
 	indicates to the C program that the fpclassl() routine is available.
 
+d_fpgetround (d_fpgetround.U):
+	This variable conditionally defines HAS_FPGETROUND if fpgetround() is
+	available to get the floating point rounding mode.
+
 d_fpos64_t (d_fpos64_t.U):
 	This symbol will be defined if the C compiler supports fpos64_t.
 

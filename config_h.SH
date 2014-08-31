@@ -3670,6 +3670,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_fpclassl HAS_FPCLASSL		/**/
 
+/* HAS_FPGETROUND:
+ *	This symbol, if defined, indicates that the fpgetround routine is
+ *	available to get the floating point rounding mode.
+ */
+#$d_fpgetround HAS_FPGETROUND		/**/
+
 /* HAS_FPOS64_T:
  *	This symbol will be defined if the C compiler supports fpos64_t.
  */

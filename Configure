@@ -476,6 +476,7 @@ d_fp_classl=''
 d_fpclass=''
 d_fpclassify=''
 d_fpclassl=''
+d_fpgetround=''
 d_fpos64_t=''
 d_frexpl=''
 d_fs_data_s=''
@@ -13738,6 +13739,10 @@ eval $inlibc
 set fpclassl d_fpclassl
 eval $inlibc
 
+: see if fpgetround exists
+set fpgetround d_fpgetround
+eval $inlibc
+
 : check for fpos64_t
 echo " "
 echo "Checking to see if you have fpos64_t..." >&4
@@ -23348,6 +23353,7 @@ d_fpathconf='$d_fpathconf'
 d_fpclass='$d_fpclass'
 d_fpclassify='$d_fpclassify'
 d_fpclassl='$d_fpclassl'
+d_fpgetround='$d_fpgetround'
 d_fpos64_t='$d_fpos64_t'
 d_frexpl='$d_frexpl'
 d_fs_data_s='$d_fs_data_s'
