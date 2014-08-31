@@ -326,7 +326,7 @@ output.
 
 After you've generated your patch you should sent it
 to perlbug@perl.org (as discussed L<in the previous
-section|/"Patch workflow"> with a normal mail client as an
+section|/"Patch workflow">) with a normal mail client as an
 attachment, along with a description of the patch.
 
 You B<must not> use git-send-email(1) to send patches generated with
