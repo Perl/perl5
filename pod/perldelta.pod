@@ -1,8 +1,5 @@
 =encoding utf8
 
-=for todo
-8b57a5fa Allow package name in ‘use constant’ constants
-
 =head1 NAME
 
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
@@ -153,6 +150,9 @@ L<Pod::Perldoc> has been upgraded from version 3.23 to 3.24.
 =item *
 
 L<constant> has been upgraded from version 1.31 to 1.32.
+
+It now accepts fully-qualified constant names, allowing constants to be
+defined in packages other than the caller.
 
 =item *
 
