@@ -127,6 +127,34 @@ L<File::Find> has been upgraded from version 1.27 to 1.28.
 C<find()> and C<finddepth()> will now warn if passed inappropriate or
 misspelled options.
 
+=item *
+
+L<B::Concise> has been upgraded from version 0.992 to 0.993.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.047 to 0.048.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.021003 to 5.021004.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.42 to 1.43.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.23 to 3.24.
+
+=item *
+
+L<constant> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<threads> has been upgraded from version 1.95 to 1.96.
+
 =back
 
 =head2 Removed Modules and Pragmata
