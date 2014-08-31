@@ -1513,7 +1513,7 @@ SKIP: {
     }
 
     SKIP: {
-        skip "no Fcntl", 18 unless $has_fcntl;
+        skip "no Fcntl", 36 unless $has_fcntl;
 
 	my $foo = tempfile();
 	my $evil = $foo . $TAINT;
