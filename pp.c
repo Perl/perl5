@@ -2685,45 +2685,40 @@ PP(pp_atan2)
 PP(pp_sin)
 {
     dSP; dTARGET;
-    int amg_type = sin_amg;
+    int amg_type = fallback_amg;
     const char *neg_report = NULL;
-    NV (*func)(NV) = Perl_sin;
     const int op_type = PL_op->op_type;
 
     switch (op_type) {
-    case OP_COS:
-	amg_type = cos_amg;
-	func = Perl_cos;
-	break;
-    case OP_EXP:
-	amg_type = exp_amg;
-	func = Perl_exp;
-	break;
-    case OP_LOG:
-	amg_type = log_amg;
-	func = Perl_log;
-	neg_report = "log";
-	break;
-    case OP_SQRT:
-	amg_type = sqrt_amg;
-	func = Perl_sqrt;
-	neg_report = "sqrt";
-	break;
+    case OP_SIN:  amg_type = sin_amg; break;
+    case OP_COS:  amg_type = cos_amg; break;
+    case OP_EXP:  amg_type = exp_amg; break;
+    case OP_LOG:  amg_type = log_amg;  neg_report = "log";  break;
+    case OP_SQRT: amg_type = sqrt_amg; neg_report = "sqrt"; break;
     }
 
+    assert(amg_type != fallback_amg);
 
     tryAMAGICun_MG(amg_type, 0);
     {
       SV * const arg = POPs;
       const NV value = SvNV_nomg(arg);
-      if (neg_report) {
+      NV result;
+      if (neg_report) { /* log or sqrt */
 	  if (op_type == OP_LOG ? (value <= 0.0) : (value < 0.0)) {
 	      SET_NUMERIC_STANDARD();
 	      /* diag_listed_as: Can't take log of %g */
 	      DIE(aTHX_ "Can't take %s of %"NVgf, neg_report, value);
 	  }
       }
-      XPUSHn(func(value));
+      switch (op_type) {
+      case OP_SIN:  result = Perl_sin(value);  break;
+      case OP_COS:  result = Perl_cos(value);  break;
+      case OP_EXP:  result = Perl_exp(value);  break;
+      case OP_LOG:  result = Perl_log(value);  break;
+      case OP_SQRT: result = Perl_sqrt(value); break;
+      }
+      XPUSHn(result);
       RETURN;
     }
 }
