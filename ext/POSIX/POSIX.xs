@@ -329,6 +329,13 @@
 #  define c99_logb _logb
 #  define c99_nextafter _nextafter
 
+#  define bessel_j0 _j0
+#  define bessel_j1 _j1
+#  define bessel_jn _jn
+#  define bessel_y0 _y0
+#  define bessel_y1 _y1
+#  define bessel_yn _yn
+
 #endif
 
 /* The Bessel functions: BSD, SVID, XPG4, and POSIX.  But not C99. */
@@ -341,21 +348,12 @@
 #    define bessel_y1 y1l
 #    define bessel_yn ynl
 #  else
-#    ifdef WIN32
-#      define bessel_j0 _j0
-#      define bessel_j1 _j1
-#      define bessel_jn _jn
-#      define bessel_y0 _y0
-#      define bessel_y1 _y1
-#      define bessel_yn _yn
-#    else
-#      define bessel_j0 j0
-#      define bessel_j1 j1
-#      define bessel_jn jn
-#      define bessel_y0 y0
-#      define bessel_y1 y1
-#      define bessel_yn yn
-#    endif
+#    define bessel_j0 j0
+#    define bessel_j1 j1
+#    define bessel_jn jn
+#    define bessel_y0 y0
+#    define bessel_y1 y1
+#    define bessel_yn yn
 #  endif
 #endif
 
@@ -1832,14 +1830,14 @@ acos(x)
 #ifdef bessel_j0
 	    RETVAL = bessel_j0(x);
 #else
-	    not_here("bessel_j0");
+	    not_here("j0");
 #endif
 	    break;
 	case 15:
 #ifdef bessel_j1
 	    RETVAL = bessel_j1(x);
 #else
-	    not_here("bessel_j1");
+	    not_here("j1");
 #endif
 	    break;
 	case 16:
@@ -1923,7 +1921,7 @@ acos(x)
 #ifdef bessel_y0
 	    RETVAL = bessel_y0(x);
 #else
-	    not_here("bessel_y0");
+	    not_here("y0");
 #endif
 	    break;
         case 30:
@@ -1931,7 +1929,7 @@ acos(x)
 #ifdef bessel_y1
 	    RETVAL = bessel_y1(x);
 #else
-	    not_here("bessel_y1");
+	    not_here("y1");
 #endif
 	}
     OUTPUT:
