@@ -10,7 +10,7 @@ use Carp;
 use strict;
 use warnings;
 
-our $VERSION = '1.65';
+our $VERSION = '1.66';
 our @ISA = ('Exporter');
 our @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -195,7 +195,7 @@ sub manifind {
     # $File::Find::name is unavailable.
     # Also, it's okay to use / here, because MANIFEST files use Unix-style
     # paths.
-    find({wanted => $wanted},
+    find({wanted => $wanted, follow => 1},
 	 $Is_MacOS ? ":" : ".");
 
     return $found;
@@ -354,7 +354,7 @@ sub maniread {
 
         # filename may contain spaces if enclosed in ''
         # (in which case, \\ and \' are escapes)
-        if (($file, $comment) = /^'(\\[\\']|.+)+'\s*(.*)/) {
+        if (($file, $comment) = /^'((?:\\[\\']|.+)+)'\s*(.*)/) {
             $file =~ s/\\([\\'])/$1/g;
         }
         else {
