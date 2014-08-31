@@ -12,11 +12,14 @@ if ($Config{sig_name} =~ /\bRTMIN\b/ && $Config{sig_name} =~ /\bRTMAX\b/) {
 
 my @libs;
 if ($^O ne 'MSWin32' && $^O ne 'freemint') {
-    @libs = ('LIBS' => ["-lm -lposix -lcposix"]);
+    push @libs, qw(m posix cposix);
+}
+if ($^O eq 'solaris') {
+    push @libs, qw(sunmath);
 }
 WriteMakefile(
     NAME	=> 'POSIX',
-    @libs,
+    @libs ? ( 'LIBS' => [ join(" ", map { "-l$_" } @libs) ] ) : (),
     XSPROTOARG	=> '-noprototypes',	# XXX remove later?
     VERSION_FROM => 'lib/POSIX.pm',
     ABSTRACT_FROM => 'lib/POSIX.pod',
