@@ -34,7 +34,6 @@ d_setrgid='undef'
 d_setruid='undef'
 
 alignbytes=8
-
 case "$usemymalloc" in
     '')  usemymalloc='n' ;;
     esac
@@ -545,7 +544,37 @@ if [ -f "/opt/freeware/include/gdbm/dbm.h" ] ||
     i_gdbmndbm='undef'
 fi
 
+# Some releases (and patch levels) of AIX cannot have both
+# long doubles and infinity (infinity plus one equals ... NaNQ!)
+case "$uselongdouble" in
+define)
+  echo "Checking if your infinity is working with long doubles..." >&4
+  cat > inf$$.c <<EOF
+#include <math.h>
+#include <stdio.h>
+int main() {
+  long double inf = INFINITY;
+  long double one = 1.0L;
+  printf("%Lg\n", inf + one);
+}
+EOF
+  $cc -qlongdouble -o inf$$ inf$$.c -lm
+  case `./inf$$` in
+  INF) echo "Your infinity is working correctly with long doubles." >&4 ;;
+  *) # NaNQ
+    echo "Your infinity is broken, disabling long doubles." >&4
+    uselongdouble=undef
+    ccflags=`echo " $ccflags " | sed -e 's/ -qlongdouble / /'`
+    libswanted=`echo " $libswanted " | sed -e 's/ c128/ /'`
+    lddlflags=`echo " $lddlflags " | sed -e 's/ -lc128 / /'`
+    ;;
+  esac
+  rm -f inf$$.c inf$$
+  ;;
+esac
+
 # Some releases (and patch levels) of AIX have a broken powl().
+pp_cflags=''
 case "$uselongdouble" in
 define)
   echo "Checking if your powl() is broken..." >&4
@@ -560,8 +589,8 @@ EOF
   case `./powl$$` in
   9) echo "Your powl() is working correctly." >&4 ;;
   *)
-    ccflags="$ccflags -DHAS_AIX_POWL_NEG_BASE_BUG"
-    echo "Your powl() is broken." >&4
+    echo "Your powl() is broken, will use a workaround." >&4
+    pp_cflags='ccflags="$ccflags -DHAS_AIX_POWL_NEG_BASE_BUG"'
     ;;
   esac
   rm -f powl$$.c powl$$
