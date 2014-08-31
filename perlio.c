@@ -477,10 +477,7 @@ PerlIO_allocate(pTHX)
 	last = (PerlIOl **) (f);
 	for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
 	    if (!((++f)->next)) {
-		f->flags = 0; /* lockcnt */
-		f->tab = NULL;
-		f->head = f;
-		return (PerlIO *)f;
+		goto good_exit;
 	    }
 	}
     }
@@ -489,6 +486,8 @@ PerlIO_allocate(pTHX)
 	return NULL;
     }
     *last = (PerlIOl*) f++;
+
+    good_exit:
     f->flags = 0; /* lockcnt */
     f->tab = NULL;
     f->head = f;
@@ -1459,7 +1458,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
 	 * If it is a reference but not an object see if we have a handler
 	 * for it
 	 */
-	if (SvROK(arg) && !sv_isobject(arg)) {
+	if (SvROK(arg) && !SvOBJECT(SvRV(arg))) {
 	    PerlIO_funcs * const handler = PerlIO_layer_from_ref(aTHX_ SvRV(arg));
 	    if (handler) {
 		def = PerlIO_list_alloc(aTHX);
