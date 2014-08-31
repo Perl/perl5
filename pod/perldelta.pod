@@ -407,6 +407,11 @@ on to it until the next statement.  [perl #122556]
 Various cases where the name of a sub is used (autoload, overloading, error
 messages) used to crash for lexical subs, but have been fixed.
 
+=item *
+
+Bareword lookup now tries to avoid vivifying packages if it turns out the
+bareword is not going to be a subroutine name.
+
 =back
 
 =head1 Known Problems
