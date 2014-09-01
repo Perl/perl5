@@ -1,12 +1,10 @@
 package ExtUtils::CBuilder::Platform::android;
-
+$ExtUtils::CBuilder::Platform::android::VERSION = '0.280219';
 use strict;
-use Config;
 use File::Spec;
 use ExtUtils::CBuilder::Platform::Unix;
 
-use vars qw($VERSION @ISA);
-$VERSION = '0.280217';
+use vars qw(@ISA);
 @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
 
 # The Android linker will not recognize symbols from

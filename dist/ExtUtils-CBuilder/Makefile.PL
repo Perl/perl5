@@ -34,7 +34,7 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "Test::More" => "0.47"
   },
-  "VERSION" => "0.280216",
+  "VERSION_FROM" => "lib/ExtUtils/CBuilder.pm",
   "test" => {
     "TESTS" => "t/*.t"
   }

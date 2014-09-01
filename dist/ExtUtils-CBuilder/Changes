@@ -1,5 +1,24 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.280219 - 2014-09-01
+
+  Fixed:
+
+  - Fixed regression on Android (thanks to Brian Fraser)
+
+0.280218 - 2014-09-01
+
+  Fixed:
+
+  - Mispelled 'starup' key in BCC support was fixed. #79574
+  - Fixed the version in the PM file (thanks to Jim Keenan)
+
+0.280217 - 2014-08-22
+
+  Fixed:
+
+  - Quoted perl path for Windows support #98245 [Alberto Simões] 
+
 0.280216 - 2014-03-07
 
   Added:

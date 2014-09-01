@@ -132,6 +132,12 @@ misspelled options.
 
 L<B::Concise> has been upgraded from version 0.992 to 0.993.
 
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280216 to 0.280219.
+[perl #122675].
+
 =item *
 
 L<ExtUtils::Manifest> has been upgraded from version 1.65 to 1.66.

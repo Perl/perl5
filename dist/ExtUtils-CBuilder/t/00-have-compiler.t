@@ -4,6 +4,7 @@ use File::Spec;
 my $perl;
 BEGIN {
   $perl = File::Spec->rel2abs($^X);
+  $perl = qq{"$perl"}; # So it doesn't fail when there are spaces.
 }
 
 use strict;

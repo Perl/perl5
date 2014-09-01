@@ -1,10 +1,9 @@
 package ExtUtils::CBuilder::Platform::VMS;
-
+$ExtUtils::CBuilder::Platform::VMS::VERSION = '0.280219';
 use strict;
 use ExtUtils::CBuilder::Base;
 
-use vars qw($VERSION @ISA);
-$VERSION = '0.280217';
+use vars qw(@ISA);
 @ISA = qw(ExtUtils::CBuilder::Base);
 
 use File::Spec::Functions qw(catfile catdir);

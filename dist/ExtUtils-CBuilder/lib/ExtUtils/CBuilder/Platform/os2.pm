@@ -1,10 +1,9 @@
 package ExtUtils::CBuilder::Platform::os2;
-
+$ExtUtils::CBuilder::Platform::os2::VERSION = '0.280219';
 use strict;
 use ExtUtils::CBuilder::Platform::Unix;
 
-use vars qw($VERSION @ISA);
-$VERSION = '0.280217';
+use vars qw(@ISA);
 @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
 
 sub need_prelink { 1 }

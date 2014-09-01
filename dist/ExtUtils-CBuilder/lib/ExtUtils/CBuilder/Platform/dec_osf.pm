@@ -1,12 +1,11 @@
 package ExtUtils::CBuilder::Platform::dec_osf;
-
+$ExtUtils::CBuilder::Platform::dec_osf::VERSION = '0.280219';
 use strict;
 use ExtUtils::CBuilder::Platform::Unix;
 use File::Spec;
 
-use vars qw($VERSION @ISA);
+use vars qw(@ISA);
 @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
-$VERSION = '0.280217';
 
 sub link_executable {
   my $self = shift;

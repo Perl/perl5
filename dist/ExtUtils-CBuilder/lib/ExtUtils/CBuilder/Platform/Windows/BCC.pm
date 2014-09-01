@@ -1,8 +1,5 @@
 package ExtUtils::CBuilder::Platform::Windows::BCC;
-
-use vars qw($VERSION);
-$VERSION = '0.280217';
-
+$ExtUtils::CBuilder::Platform::Windows::BCC::VERSION = '0.280219';
 sub format_compiler_cmd {
   my ($self, %spec) = @_;
 
@@ -64,7 +61,7 @@ sub format_linker_cmd {
   }
 
   push( @{$spec{startup}}, 'c0d32.obj' )
-    unless ( $spec{starup} && @{$spec{startup}} );
+    unless ( $spec{startup} && @{$spec{startup}} );
 
   %spec = $self->write_linker_script(%spec)
     if $spec{use_scripts};
