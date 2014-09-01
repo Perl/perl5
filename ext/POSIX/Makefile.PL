@@ -111,10 +111,9 @@ push @names, {name=>$_, type=>"NV"}
 	      LDBL_MAX_10_EXP LDBL_MAX_EXP LDBL_MIN_10_EXP LDBL_MIN_EXP));
 
 push @names, {name=>$_, type=>"NV"}
-  foreach (qw(FP_ILOGB0 FP_ILOGBNAN FP_INFINITE 
-              FP_NAN FP_NORMAL FP_SUBNORMAL FP_ZERO
-              M_E M_LOG2E M_LOG10E M_LN2 M_PI M_PI_2
-              M_PI_4 M_1_PI M_2_PI M_2_SQRT_PI M_SQRT_2 M_SQRT1_2));
+  foreach (qw(FP_ILOGB0 FP_ILOGBNAN FP_INFINITE FP_NAN FP_NORMAL
+              FP_SUBNORMAL FP_ZERO M_1_PI M_2_PI M_2_SQRTPI M_E M_LN2
+              M_LOG10E M_LOG2E M_PI M_PI_2 M_PI_4 M_SQRT1_2 M_SQRT2));
 
 push @names, {name=>$_, type=>"IV"}
   foreach (qw(FE_DOWNWARD FE_TONEAREST FE_TOWARDZERO FE_UPWARD));

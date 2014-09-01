@@ -56,11 +56,13 @@ cmp_ok(tanh(1), '==', -tanh(-1), 'tanh(1) == -tanh(-1)');
 
 SKIP: {
     unless ($Config{d_acosh}) {
-        skip "no acosh, suspecting no C99 math", 28;
+        skip "no acosh, suspecting no C99 math", 30;
     }
     if ($^O =~ /Win32|VMS/) {
-        skip "running in $^O, C99 math support uneven", 28;
+        skip "running in $^O, C99 math support uneven", 30;
     }
+    cmp_ok(abs(M_SQRT2 - 1.4142135623731), '<', 1e-9, "M_SQRT2");
+    cmp_ok(abs(M_E - 2.71828182845905), '<', 1e-9, "M_E");
     cmp_ok(abs(M_PI - 3.14159265358979), '<', 1e-9, "M_PI");
     cmp_ok(abs(asinh(1) - 0.881373587019543), '<', 1e-9, "asinh");
     cmp_ok(abs(cbrt(8) - 2), '<', 1e-9, "cbrt");
