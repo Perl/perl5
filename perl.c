@@ -2070,10 +2070,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                it should be reported immediately as a build failure.  */
 	    (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
 						 Perl_newSVpvf(aTHX_
-				"BEGIN { do {local $!; -f q%c./%"SVf
-				"/buildcustomize.pl%c} and do q%c./%"SVf
-				"/buildcustomize.pl%c || die $@ }",
-							       0, SVfARG(*inc0), 0,
+		"BEGIN { my $f = q%c./%"SVf"/buildcustomize.pl%c; "
+			"do {local $!; -f $f }"
+			" and do $f || die $@ || qq '$f: $!' }",
 							       0, SVfARG(*inc0), 0));
 	}
 #  else
