@@ -4106,11 +4106,8 @@ END_EXTERN_C
 #if !defined(NV_INF) && defined(INF)
 #  define NV_INF (NV)INF
 #endif
-#if !defined(NV_INF) && defined(USE_LONG_DOUBLE) && defined(HUGE_VALL)
-#  define NV_INF (NV)HUGE_VALL
-#endif
-#if !defined(NV_INF) && defined(HUGE_VAL)
-#  define NV_INF (NV)HUGE_VAL
+#if !defined(NV_INF)
+#  define NV_INF (NV)PL_infinity
 #endif
 
 #if !defined(NV_NAN) && defined(USE_LONG_DOUBLE)
@@ -4136,14 +4133,14 @@ END_EXTERN_C
 #if !defined(NV_NAN) && defined(QNAN)
 #  define NV_NAN (NV)QNAN
 #endif
-#if !defined(NV_NAN) && defined(SNAN)
-#  define NV_NAN (NV)SNAN
-#endif
 #if !defined(NV_NAN) && defined(NAN)
 #  define NV_NAN (NV)NAN
 #endif
+#if !defined(NV_NAN) && defined(SNAN)
+#  define NV_NAN (NV)SNAN
+#endif
 #if !defined(NV_NAN) && defined(NV_INF)
-#  define NV_NAN (NV_INF-NV_INF)
+#  define NV_NAN PL_nan
 #endif
 
 #ifndef __cplusplus

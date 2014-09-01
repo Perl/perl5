@@ -237,3 +237,16 @@ PERLVAR(G, malloc_mutex, perl_mutex)	/* Mutex for malloc */
 
 PERLVARI(G, hash_seed_set, bool, FALSE)	/* perl.c */
 PERLVARA(G, hash_seed, PERL_HASH_SEED_BYTES, unsigned char) /* perl.c and hv.h */
+
+/* The infinity.  Used if no suitable definition is found in <math.h>.
+ * Note: many older places (like HP-UX 10.X) define HUGE_VAL
+ * as DBL_MAX (or LDBL_MAX for long doubles).  Therefore HUGE_VAL
+ * is not a suitable replacement for infinity.
+ *
+ * The division by zero might warn with some compilers. */
+PERLVARIC(G, infinity, NV, (NV)1.0/0.0)
+
+/* The not-a-number.  Used if no suitable definition is found in <math.h>
+ *
+ * The division by zero might warn with some compilers. */
+PERLVARIC(G, nan, NV, (NV)0.0/0.0)

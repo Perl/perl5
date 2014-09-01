@@ -121,6 +121,8 @@ END_EXTERN_C
 #define PL_hash_seed_set	(*Perl_Ghash_seed_set_ptr(NULL))
 #undef  PL_hints_mutex
 #define PL_hints_mutex		(*Perl_Ghints_mutex_ptr(NULL))
+#undef  PL_infinity
+#define PL_infinity		(*Perl_Ginfinity_ptr(NULL))
 #undef  PL_keyword_plugin
 #define PL_keyword_plugin	(*Perl_Gkeyword_plugin_ptr(NULL))
 #undef  PL_malloc_mutex
@@ -131,6 +133,8 @@ END_EXTERN_C
 #define PL_my_ctx_mutex		(*Perl_Gmy_ctx_mutex_ptr(NULL))
 #undef  PL_my_cxt_index
 #define PL_my_cxt_index		(*Perl_Gmy_cxt_index_ptr(NULL))
+#undef  PL_nan
+#define PL_nan			(*Perl_Gnan_ptr(NULL))
 #undef  PL_op_mutex
 #define PL_op_mutex		(*Perl_Gop_mutex_ptr(NULL))
 #undef  PL_op_seq
