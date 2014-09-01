@@ -1,7 +1,8 @@
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(../lib uni .);
-    require "case.pl";
+    require "uni/case.pl";
+    @INC = () unless is_miniperl();
+    unshift @INC, qw(../lib .);
 }
 
 is(uc("\x{3B1}\x{345}\x{301}"), "\x{391}\x{301}\x{399}", 'Verify moves YPOGEGRAMMENI');
