@@ -11711,14 +11711,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	    need = 0;
 	    /* frexp() (or frexpl) has some unspecified behaviour for
-             * nan/inf/-inf, so let's avoid calling that on those
-             * three values. nv * 0 will be NaN for NaN, +Inf and -Inf,
-             * and 0 for anything else. */
-	    if (isALPHA_FOLD_NE(c, 'e') && (nv * 0) == 0) {
+             * nan/inf/-inf, so let's avoid calling that on non-finites. */
+	    if (isALPHA_FOLD_NE(c, 'e') && Perl_isfinite(nv)) {
                 i = PERL_INT_MIN;
                 (void)Perl_frexp(nv, &i);
                 if (i == PERL_INT_MIN)
-                    Perl_die(aTHX_ "panic: frexp");
+                    Perl_die(aTHX_ "panic: frexp: %"NVgf, nv);
                 /* Do not set hexfp earlier since we want to printf
                  * Inf/NaN for Inf/NAN, not their hexfp. */
                 hexfp = isALPHA_FOLD_EQ(c, 'a');

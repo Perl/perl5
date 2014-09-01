@@ -4002,7 +4002,7 @@ data.
 (P) While attempting folding constants an exception other than an C<eval>
 failure was caught.
 
-=item panic: frexp
+=item panic: frexp: %f
 
 (P) The library function frexp() failed, making printf("%f") impossible.
 
