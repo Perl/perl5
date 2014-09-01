@@ -408,7 +408,8 @@ perform the upgrade if necessary.  See C<svtype>.
 /* note that SVf_AMAGIC is now only set on stashes, so this bit is free
  * for non-HV SVs */
 
-/* Ensure this value does not clash with the GV_ADD* flags in gv.h: */
+/* Ensure this value does not clash with the GV_ADD* flags in gv.h, or the
+   CV_CKPROTO_* flags in op.c, or the padadd_* flags in pad.h: */
 #define SVf_UTF8        0x20000000  /* SvPV is UTF-8 encoded
 				       This is also set on RVs whose overloaded
 				       stringification is UTF-8. This might
