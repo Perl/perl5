@@ -516,7 +516,7 @@ static NV my_fmin(NV x, NV y)
 #  define c99_fmin my_fmin
 #endif
 
-static NV my_fpclassify(NV x)
+static IV my_fpclassify(NV x)
 {
 #if defined(HAS_FPCLASSIFY) && defined(FP_PLUS_INF) /* E.g. HP-UX */
   switch (Perl_fp_class(x)) {
@@ -705,7 +705,7 @@ static NV my_round(NV x)
 
 #ifndef c99_scalbn
 #   if defined(Perl_ldexp) && FLT_RADIX == 2
-static NV my_scalbn(NV x)
+static NV my_scalbn(NV x, int y)
 {
   return Perl_ldexp(x, y);
 }
