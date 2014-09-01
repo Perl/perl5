@@ -4,8 +4,9 @@
 
 BEGIN {
     chdir 't';
-    @INC = qw(lib ../lib);
     require './test.pl';
+    @INC = () unless is_miniperl();
+    unshift @INC, qw(lib ../lib);
 }
 
 plan 48;
