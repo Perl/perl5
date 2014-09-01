@@ -14000,7 +14000,6 @@ parseit:
                                                      namedclass % 2 != 0,
                                                      posixes_ptr);
                 }
-                continue;   /* Go get next character */
 	    }
 	} /* end of namedclass \blah */
 
@@ -14009,12 +14008,14 @@ parseit:
                                 FALSE /* means don't recognize comments */ );
         }
 
-        /* Here, we have a single value.  If 'range' is set, it is the ending
-         * of a range--check its validity.  Later, we will handle each
-         * individual code point in the range.  If 'range' isn't set, this
-         * could be the beginning of a range, so check for that by looking
-         * ahead to see if the next real character to be processed is the range
-         * indicator--the minus sign */
+        /* If 'range' is set, 'value' is the ending of a range--check its
+         * validity.  (If value isn't a single code point in the case of a
+         * range, we should have figured that out above in the code that
+         * catches false ranges).  Later, we will handle each individual code
+         * point in the range.  If 'range' isn't set, this could be the
+         * beginning of a range, so check for that by looking ahead to see if
+         * the next real character to be processed is the range indicator--the
+         * minus sign */
 
 	if (range) {
 	    if (prevvalue > value) /* b-a */ {
@@ -14045,7 +14046,7 @@ parseit:
 
                     /* a bad range like \w-, [:word:]- ? */
                     if (namedclass > OOB_NAMEDCLASS) {
-                        if (strict || ckWARN(WARN_REGEXP)) {
+                        if (strict || (PASS2 && ckWARN(WARN_REGEXP))) {
                             const int w =
                                 RExC_parse >= rangebegin ?
                                 RExC_parse - rangebegin : 0;
@@ -14053,7 +14054,7 @@ parseit:
                                 vFAIL4("False [] range \"%*.*s\"",
                                     w, w, rangebegin);
                             }
-                            else {
+                            else if (PASS2) {
                                 vWARN4(RExC_parse,
                                     "False [] range \"%*.*s\"",
                                     w, w, rangebegin);
@@ -14070,8 +14071,12 @@ parseit:
 	    }
 	}
 
-        /* Here, <prevvalue> is the beginning of the range, if any; or <value>
-         * if not */
+        if (namedclass > OOB_NAMEDCLASS) {
+            continue;
+        }
+
+        /* Here, we have a single value, and <prevvalue> is the beginning of
+         * the range, if any; or <value> if not */
 
 	/* non-Latin1 code point implies unicode semantics.  Must be set in
 	 * pass1 so is there for the whole of pass 2 */
