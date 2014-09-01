@@ -773,3 +773,10 @@ case "`grep 'double strtold.const' /usr/include/stdlib.h`" in
 *) echo "Looks like your strtold() is non-standard..." >&4
    d_strtold=undef ;;
 esac
+
+# In pre-11 HP-UXes there really isn't isfinite(), despite what
+# Configure might think. (There is finite(), though.)
+case "`grep 'isfinite' /usr/include/math.h`" in
+*"isfinite"*) ;;
+*) d_isfinite=undef ;;
+esac
