@@ -271,15 +271,31 @@
 /* If on legacy platforms, and not using gcc, some C99 math interfaces
  * might be missing, turn them off so that the emulations hopefully
  * kick in.  This is admittedly nasty, and fragile, but the alternative
- * is to have Configure scans for all the 40+ interfaces. */
+ * is to have Configure scans for all the 40+ interfaces.
+ *
+ * In other words: if you have an incomplete (or broken) C99 math interface,
+ * #undef the c99_foo here, and let the emulations kick in. */
+
 #ifndef __GNUC__
 
 /* HP-UX on PA-RISC is missing certain C99 math functions,
  * but on IA64 (Integrity) these do exist. */
 #  if defined(__hpux) && defined(__hppa)
+#    undef c99_exp2
+#    undef c99_fdim
 #    undef c99_fma
+#    undef c99_fmax
+#    undef c99_fmin
+#    undef c99_fpclassify
+#    undef c99_lrint
+#    undef c99_nan
+#    undef c99_nearbyint
 #    undef c99_nexttoward
+#    undef c99_remquo
+#    undef c99_round
+#    undef c99_scalbn
 #    undef c99_tgamma
+#    undef c99_trunc
 #  endif
 
 #  if defined(__irix__)
@@ -494,16 +510,15 @@ static NV my_fmin(NV x, NV y)
 #  define c99_fmin my_fmin
 #endif
 
-#if !(defined(HAS_FPCLASSIFY) && defined(FP_INFINITE))
 static NV my_fpclassify(NV x)
 {
-#if defined(HAS_FPCLASSIFY) && defined(FP_PLUS_INF)
+#if defined(HAS_FPCLASSIFY) && defined(FP_PLUS_INF) /* E.g. HP-UX */
   switch (Perl_fp_class(x)) {
   case FP_PLUS_INF:    case FP_MINUS_INF:    return FP_INFINITE;
   case FP_SNAN:        case FP_QNAN:         return FP_NAN;
   case FP_PLUS_NORM:   case FP_MINUS_NORM:   return FP_NORMAL;
   case FP_PLUS_DENORM: case FP_MINUS_DENORM: return FP_SUBNORMAL;
-  case FP_PLUS_ZERO:   case FP_MINUS_PZERO:  return FP_ZERO;
+  case FP_PLUS_ZERO:   case FP_MINUS_ZERO:   return FP_ZERO;
   default: return -1;
   }
 #  define c99_fpclassify my_fpclassify
@@ -563,7 +578,6 @@ static NV my_fpclassify(NV x)
   return -1;
 #endif
 }
-#endif
 
 #ifndef c99_hypot
 static NV my_hypot(NV x, NV y)
