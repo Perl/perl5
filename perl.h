@@ -4102,6 +4102,12 @@ END_EXTERN_C
 #  endif
 #endif
 
+/* If you are thinking of using HUGE_VAL for infinity, or using
+ * <math.h> functions to generate NV_INF (e.g. exp(1e9), log(-1.0)),
+ * stop.  Neither will work portably: HUGE_VAL can be just DBL_MAX,
+ * and the math functions might be just generating DBL_MAX, or even
+ * zero.  */
+
 #if !defined(NV_INF) && defined(USE_LONG_DOUBLE) && defined(LDBL_INFINITY)
 #  define NV_INF LDBL_INFINITY
 #endif
@@ -4115,7 +4121,7 @@ END_EXTERN_C
 #  define NV_INF (NV)INF
 #endif
 #if !defined(NV_INF)
-#  define NV_INF (NV)PL_infinity
+#  define NV_INF ((NV)1.0/0.0) /* Some compilers will warn. */
 #endif
 
 #if !defined(NV_NAN) && defined(USE_LONG_DOUBLE)
@@ -4148,7 +4154,7 @@ END_EXTERN_C
 #  define NV_NAN (NV)SNAN
 #endif
 #if !defined(NV_NAN) && defined(NV_INF)
-#  define NV_NAN PL_nan
+#  define NV_NAN ((NV)0.0/0.0) /* Some compilers will warn. */
 #endif
 
 #ifndef __cplusplus
