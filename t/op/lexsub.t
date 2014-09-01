@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 129;
+plan 130;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -87,6 +87,14 @@ sub bar::c { 43 }
   package bar;
   my $y = if if if;
   is $y, 42, 'our subs from other packages override all keywords';
+}
+# Interaction with ‘use constant’
+{
+  our sub const; # symtab now has an undefined CV
+  BEGIN { delete $::{const} } # delete symtab entry; pad entry still exists
+  use constant const => 3; # symtab now has a scalar ref
+  # inlining this used to fail an assertion (parentheses necessary):
+  is(const, 3, 'our sub pointing to "use constant" constant');
 }
 
 # -------------------- state -------------------- #

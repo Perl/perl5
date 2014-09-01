@@ -6563,7 +6563,7 @@ Perl_yylex(pTHX)
 		    rv2cv_op =
 			newCVREF(OPpMAY_RETURN_CONSTANT<<8, const_op);
 		    cv = lex
-			? GvCV(gv)
+			? isGV(gv) ? GvCV(gv) : (CV *)gv
 			: rv2cv_op_cv(rv2cv_op, RV2CVOPCV_RETURN_STUB);
 		}
 
