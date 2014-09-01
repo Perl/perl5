@@ -307,6 +307,18 @@
 
 #endif
 
+/* XXX Regarding C99 math.h, VMS seems to be missing these:
+
+  nan nearbyint round scalbn
+ */
+
+#ifdef __VMS
+#    undef c99_nan
+#    undef c99_nearbyint
+#    undef c99_round
+#    undef c99_scalbn
+#endif
+
 /* XXX Regarding C99 math.h, Win32 seems to be missing these:
 
   exp2 fdim fma fmax fmin fpclassify ilogb lgamma log1p log2 lrint
