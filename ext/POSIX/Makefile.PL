@@ -112,7 +112,7 @@ push @names, {name=>$_, type=>"NV"}
 
 push @names, {name=>$_, type=>"NV"}
   foreach (qw(FP_ILOGB0 FP_ILOGBNAN FP_INFINITE FP_NAN FP_NORMAL
-              FP_SUBNORMAL FP_ZERO M_1_PI M_2_PI M_2_SQRTPI M_E M_LN2
+              FP_SUBNORMAL FP_ZERO M_1_PI M_2_PI M_2_SQRTPI M_E M_LN10 M_LN2
               M_LOG10E M_LOG2E M_PI M_PI_2 M_PI_4 M_SQRT1_2 M_SQRT2));
 
 push @names, {name=>$_, type=>"IV"}
