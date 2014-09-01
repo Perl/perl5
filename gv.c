@@ -260,17 +260,25 @@ GV *
 Perl_cvgv_from_hek(pTHX_ CV *cv)
 {
     GV *gv;
+    SV **svp;
     PERL_ARGS_ASSERT_CVGV_FROM_HEK;
     assert(SvTYPE(cv) == SVt_PVCV);
     if (!CvSTASH(cv)) return NULL;
     ASSUME(CvNAME_HEK(cv));
-    gv = (GV *)newSV(0);
-    gv_init_pvn(gv, CvSTASH(cv), HEK_KEY(CvNAME_HEK(cv)),
+    svp = hv_fetchhek(CvSTASH(cv), CvNAME_HEK(cv), 0);
+    gv = MUTABLE_GV(svp && *svp ? *svp : newSV(0));
+    if (!isGV(gv))
+	gv_init_pvn(gv, CvSTASH(cv), HEK_KEY(CvNAME_HEK(cv)),
 		HEK_LEN(CvNAME_HEK(cv)),
 		SVf_UTF8 * !!HEK_UTF8(CvNAME_HEK(cv)));
+    if (!CvNAMED(cv)) { /* gv_init took care of it */
+	assert (SvANY(cv)->xcv_gv_u.xcv_gv == gv);
+	return gv;
+    }
     unshare_hek(CvNAME_HEK(cv));
     CvNAMED_off(cv);
     SvANY(cv)->xcv_gv_u.xcv_gv = gv;
+    if (svp && *svp) SvREFCNT_inc_simple_void_NN(gv);
     CvCVGV_RC_on(cv);
     return gv;
 }
@@ -370,10 +378,9 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
     assert (!(proto && has_constant));
 
     if (has_constant) {
-	/* The constant has to be a simple scalar type.  */
+	/* The constant has to be a scalar, array or subroutine.  */
 	switch (SvTYPE(has_constant)) {
 	case SVt_PVHV:
-	case SVt_PVCV:
 	case SVt_PVFM:
 	case SVt_PVIO:
             Perl_croak(aTHX_ "Cannot convert a reference to %s to typeglob",
@@ -409,7 +416,21 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
     gv_name_set(gv, name, len, GV_ADD | ( flags & SVf_UTF8 ? SVf_UTF8 : 0 ));
     if (flags & GV_ADDMULTI || doproto)	/* doproto means it */
 	GvMULTI_on(gv);			/* _was_ mentioned */
-    if (doproto) {
+    if (has_constant && SvTYPE(has_constant) == SVt_PVCV) {
+	/* Not actually a constant.  Just a regular sub.  */
+	CV * const cv = (CV *)has_constant;
+	GvCV_set(gv,cv);
+	if (CvSTASH(cv) == stash && (
+	       CvNAME_HEK(cv) == GvNAME_HEK(gv)
+	    || (  HEK_LEN(CvNAME_HEK(cv)) == HEK_LEN(GvNAME_HEK(gv))
+	       && HEK_FLAGS(CvNAME_HEK(cv)) != HEK_FLAGS(GvNAME_HEK(gv))
+	       && HEK_UTF8(CvNAME_HEK(cv)) == HEK_UTF8(GvNAME_HEK(gv))
+	       && memEQ(HEK_KEY(CvNAME_HEK(cv)), GvNAME(gv), GvNAMELEN(gv))
+	       )
+	   ))
+	    CvGV_set(cv,gv);
+    }
+    else if (doproto) {
 	CV *cv;
 	if (has_constant) {
 	    /* newCONSTSUB takes ownership of the reference from us.  */

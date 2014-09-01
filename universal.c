@@ -303,11 +303,11 @@ void
 Perl_croak_xs_usage(const CV *const cv, const char *const params)
 {
     /* Avoid CvGV as it requires aTHX.  */
-    const GV *const gv = CvNAMED(cv) ? NULL : cv->sv_any->xcv_gv_u.xcv_gv;
+    const GV *gv = CvNAMED(cv) ? NULL : cv->sv_any->xcv_gv_u.xcv_gv;
 
     PERL_ARGS_ASSERT_CROAK_XS_USAGE;
 
-    if (gv) {
+    if (gv) got_gv: {
 	const HV *const stash = GvSTASH(gv);
 
 	if (HvNAME_get(stash))
@@ -321,6 +321,9 @@ Perl_croak_xs_usage(const CV *const cv, const char *const params)
 	    Perl_croak_nocontext("Usage: %"HEKf"(%s)",
                                 HEKfARG(GvNAME_HEK(gv)), params);
     } else {
+        dTHX;
+        if ((gv = CvGV(cv))) goto got_gv;
+
 	/* Pants. I don't think that it should be possible to get here. */
 	/* diag_listed_as: SKIPME */
 	Perl_croak_nocontext("Usage: CODE(0x%"UVxf")(%s)", PTR2UV(cv), params);

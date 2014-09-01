@@ -472,7 +472,9 @@ PP(pp_rv2cv)
     CV *cv = sv_2cv(TOPs, &stash_unused, &gv, flags);
     if (cv) NOOP;
     else if ((flags == (GV_ADD|GV_NOEXPAND)) && gv && SvROK(gv)) {
-	cv = MUTABLE_CV(gv);
+	cv = SvTYPE(SvRV(gv)) == SVt_PVCV
+	    ? MUTABLE_CV(SvRV(gv))
+	    : MUTABLE_CV(gv);
     }    
     else
 	cv = MUTABLE_CV(&PL_sv_undef);

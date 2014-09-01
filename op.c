@@ -2393,6 +2393,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    else {                      /* Compile-time error message: */
 		OP *kid = cUNOPo->op_first;
 		CV *cv;
+		GV *gv;
 
 		if (kid->op_type != OP_PUSHMARK) {
 		    if (kid->op_type != OP_NULL || kid->op_targ != OP_LIST)
@@ -2420,7 +2421,12 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 		    break;
 		}
 
-		cv = GvCV(kGVOP_gv);
+		gv = kGVOP_gv;
+		cv = isGV(gv)
+		    ? GvCV(gv)
+		    : SvROK(gv) && SvTYPE(SvRV(gv)) == SVt_PVCV
+			? MUTABLE_CV(SvRV(gv))
+			: NULL;
 		if (!cv)
 		    break;
 		if (CvLVALUE(cv))
@@ -7058,12 +7064,19 @@ Perl_newWHENOP(pTHX_ OP *cond, OP *block)
     return newGIVWHENOP(cond_op, block, OP_ENTERWHEN, OP_LEAVEWHEN, 0);
 }
 
+/* must not conflict with SVf_UTF8 */
+#define CV_CKPROTO_CURSTASH	0x1
+
 void
 Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
 		    const STRLEN len, const U32 flags)
 {
     SV *name = NULL, *msg;
-    const char * cvp = SvROK(cv) ? "" : CvPROTO(cv);
+    const char * cvp = SvROK(cv)
+			? SvTYPE(SvRV_const(cv)) == SVt_PVCV
+			   ? (cv = (const CV *)SvRV_const(cv), CvPROTO(cv))
+			   : ""
+			: CvPROTO(cv);
     STRLEN clen = CvPROTOLEN(cv), plen = len;
 
     PERL_ARGS_ASSERT_CV_CKPROTO_LEN_FLAGS;
@@ -7100,6 +7113,16 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
 	    gv_efullname3(name = sv_newmortal(), gv, NULL);
 	else if (SvPOK(gv) && *SvPVX((SV *)gv) == '&')
 	    name = newSVpvn_flags(SvPVX((SV *)gv)+1, SvCUR(gv)-1, SvUTF8(gv)|SVs_TEMP);
+	else if (flags & CV_CKPROTO_CURSTASH || SvROK(gv)) {
+	    name = sv_2mortal(newSVhek(HvNAME_HEK(PL_curstash)));
+	    sv_catpvs(name, "::");
+	    if (SvROK(gv)) {
+		assert (SvTYPE(SvRV_const(gv)) == SVt_PVCV);
+		assert (CvNAMED(SvRV_const(gv)));
+		sv_cathek(name, CvNAME_HEK(MUTABLE_CV(SvRV_const(gv))));
+	    }
+	    else sv_catsv(name, (SV *)gv);
+	}
 	else name = (SV *)gv;
     }
     sv_setpvs(msg, "Prototype mismatch:");
@@ -7652,7 +7675,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     /* If the subroutine has no body, no attributes, and no builtin attributes
        then it's just a sub declaration, and we may be able to get away with
        storing with a placeholder scalar in the symbol table, rather than a
-       full GV and CV.  If anything is present then it will take a full CV to
+       full CV.  If anything is present then it will take a full CV to
        store it.  */
     const I32 gv_fetch_flags
 	= ec ? GV_NOADD_NOINIT :
@@ -7666,13 +7689,27 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 #ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
 #endif
+    bool special = FALSE;
 
     if (o_is_gv) {
 	gv = (GV*)o;
 	o = NULL;
 	has_name = TRUE;
     } else if (name) {
-	gv = gv_fetchsv(cSVOPo->op_sv, gv_fetch_flags, SVt_PVCV);
+	/* Try to optimise and avoid creating a GV.  Instead, the CV’s name
+	   hek and CvSTASH pointer together can imply the GV.  If the name
+	   contains a package name, then GvSTASH(CvGV(cv)) may differ from
+	   CvSTASH, so forego the optimisation if we find any.
+	   Also, we may be called from load_module at run time, so
+	   PL_curstash (which sets CvSTASH) may not point to the stash the
+	   sub is stored in.  */
+	const I32 flags =
+	   ec ? GV_NOADD_NOINIT
+	      :   PL_curstash != CopSTASH(PL_curcop)
+	       || memchr(name, ':', namlen) || memchr(name, '\'', namlen)
+		    ? gv_fetch_flags
+		    : GV_ADDMULTI | GV_NOINIT;
+	gv = gv_fetchsv(cSVOPo->op_sv, flags, SVt_PVCV);
 	has_name = TRUE;
     } else if (PERLDB_NAMEANON && CopLINE(PL_curcop)) {
 	SV * const sv = sv_newmortal();
@@ -7689,7 +7726,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	has_name = FALSE;
     }
     if (!ec)
-        move_proto_attr(&proto, &attrs, gv);
+	move_proto_attr(&proto, &attrs,
+			isGV(gv) ? gv : (GV *)cSVOPo->op_sv);
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
@@ -7728,8 +7766,18 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	goto done;
     }
 
-    if (SvTYPE(gv) != SVt_PVGV) {	/* Maybe prototype now, and had at
-					   maximum a prototype before. */
+    if (!block && SvTYPE(gv) != SVt_PVGV) {
+      /* If we are not defining a new sub and the existing one is not a
+         full GV + CV... */
+      if (attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS)) {
+	/* We are applying attributes to an existing sub, so we need it
+	   upgraded if it is a constant.  */
+	if (SvROK(gv) && SvTYPE(SvRV(gv)) != SVt_PVCV)
+	    gv_init_pvn(gv, PL_curstash, name, namlen,
+			SVf_UTF8 * name_is_utf8);
+      }
+      else {			/* Maybe prototype now, and had at maximum
+				   a prototype or const/sub ref before.  */
 	if (SvTYPE(gv) > SVt_NULL) {
 	    cv_ckproto_len_flags((const CV *)gv,
 				 o ? (const GV *)cSVOPo->op_sv : NULL, ps,
@@ -7747,9 +7795,17 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	SvREFCNT_dec(PL_compcv);
 	cv = PL_compcv = NULL;
 	goto done;
+      }
     }
 
-    cv = (!name || GvCVGEN(gv)) ? NULL : GvCV(gv);
+    cv = (!name || (isGV(gv) && GvCVGEN(gv)))
+	? NULL
+	: isGV(gv)
+	    ? GvCV(gv)
+	    : SvROK(gv) && SvTYPE(SvRV(gv)) == SVt_PVCV
+		? (CV *)SvRV(gv)
+		: NULL;
+
 
     if (!block || !ps || *ps || attrs
 	|| (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS)
@@ -7757,6 +7813,38 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	const_sv = NULL;
     else
 	const_sv = op_const_sv(block, NULL);
+
+    if (SvPOK(gv) || (SvROK(gv) && SvTYPE(SvRV(gv)) != SVt_PVCV)) {
+	assert (block);
+	cv_ckproto_len_flags((const CV *)gv,
+			     o ? (const GV *)cSVOPo->op_sv : NULL, ps,
+			     ps_len, ps_utf8|CV_CKPROTO_CURSTASH);
+	if (SvROK(gv)) {
+	    /* All the other code for sub redefinition warnings expects the
+	       clobbered sub to be a CV.  Instead of making all those code
+	       paths more complex, just inline the RV version here.  */
+	    const line_t oldline = CopLINE(PL_curcop);
+	    assert(IN_PERL_COMPILETIME);
+	    if (PL_parser && PL_parser->copline != NOLINE)
+		/* This ensures that warnings are reported at the first
+		   line of a redefinition, not the last.  */
+		CopLINE_set(PL_curcop, PL_parser->copline);
+	    /* protect against fatal warnings leaking compcv */
+	    SAVEFREESV(PL_compcv);
+
+	    if (ckWARN(WARN_REDEFINE)
+	     || (  ckWARN_d(WARN_REDEFINE)
+		&& (  !const_sv || SvRV(gv) == const_sv
+		   || sv_cmp(SvRV(gv), const_sv)  )))
+		Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
+			  "Constant subroutine %"SVf" redefined",
+			  SVfARG(cSVOPo->op_sv));
+
+	    SvREFCNT_inc_simple_void_NN(PL_compcv);
+	    CopLINE_set(PL_curcop, oldline);
+	    SvREFCNT_dec(SvRV(gv));
+	}
+    }
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -7768,7 +7856,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         if (exists || SvPOK(cv))
             cv_ckproto_len_flags(cv, gv, ps, ps_len, ps_utf8);
 	/* already defined (or promised)? */
-	if (exists || GvASSUMECV(gv)) {
+	if (exists || (isGV(gv) && GvASSUMECV(gv))) {
 	    if (S_already_defined(aTHX_ cv, block, o, NULL, &const_sv))
 		cv = NULL;
 	    else {
@@ -7792,11 +7880,22 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    CvISXSUB_on(cv);
 	}
 	else {
-	    if (name) GvCV_set(gv, NULL);
-	    cv = newCONSTSUB_flags(
-		NULL, name, namlen, name_is_utf8 ? SVf_UTF8 : 0,
-		const_sv
-	    );
+	    if (isGV(gv)) {
+		if (name) GvCV_set(gv, NULL);
+		cv = newCONSTSUB_flags(
+		    NULL, name, namlen, name_is_utf8 ? SVf_UTF8 : 0,
+		    const_sv
+		);
+	    }
+	    else {
+		if (!SvROK(gv)) {
+		    SV_CHECK_THINKFIRST_COW_DROP((SV *)gv);
+		    prepare_SV_for_RV((SV *)gv);
+		    SvOK_off((SV *)gv);
+		    SvROK_on(gv);
+		}
+		SvRV_set(gv, const_sv);
+	    }
 	}
 	op_free(block);
 	SvREFCNT_dec(PL_compcv);
@@ -7814,12 +7913,23 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		CvFLAGS(cv) & (CVf_SLABBED|CVf_WEAKOUTSIDE);
 	    OP * const cvstart = CvSTART(cv);
 
-	    CvGV_set(cv,gv);
-	    assert(!CvCVGV_RC(cv));
-	    assert(CvGV(cv) == gv);
+	    if (isGV(gv)) {
+		CvGV_set(cv,gv);
+		assert(!CvCVGV_RC(cv));
+		assert(CvGV(cv) == gv);
+	    }
+	    else {
+		U32 hash;
+		PERL_HASH(hash, name, namlen);
+		CvNAME_HEK_set(cv,
+			       share_hek(name,
+					 name_is_utf8 ? -namlen : namlen,
+					 hash));
+	    }
 
 	    SvPOK_off(cv);
-	    CvFLAGS(cv) = CvFLAGS(PL_compcv) | existing_builtin_attrs;
+	    CvFLAGS(cv) = CvFLAGS(PL_compcv) | existing_builtin_attrs
+					     | CvNAMED(cv);
 	    CvOUTSIDE(cv) = CvOUTSIDE(PL_compcv);
 	    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(PL_compcv);
 	    CvPADLIST(cv) = CvPADLIST(PL_compcv);
@@ -7851,16 +7961,32 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     }
     else {
 	cv = PL_compcv;
-	if (name) {
+	if (name && isGV(gv)) {
 	    GvCV_set(gv, cv);
 	    GvCVGEN(gv) = 0;
 	    if (HvENAME_HEK(GvSTASH(gv)))
 		/* sub Foo::bar { (shift)+1 } */
 		gv_method_changed(gv);
 	}
+	else if (name) {
+	    if (!SvROK(gv)) {
+		SV_CHECK_THINKFIRST_COW_DROP((SV *)gv);
+		prepare_SV_for_RV((SV *)gv);
+		SvOK_off((SV *)gv);
+		SvROK_on(gv);
+	    }
+	    SvRV_set(gv, (SV *)cv);
+	}
     }
-    if (!CvGV(cv)) {
-	CvGV_set(cv, gv);
+    if (!CvHASGV(cv)) {
+	if (isGV(gv)) CvGV_set(cv, gv);
+	else {
+	    U32 hash;
+	    PERL_HASH(hash, name, namlen);
+	    CvNAME_HEK_set(cv, share_hek(name,
+					 name_is_utf8 ? -namlen : namlen,
+					 hash));
+	}
 	CvFILE_set_from_cop(cv, PL_curcop);
 	CvSTASH_set(cv, PL_curstash);
     }
@@ -7917,7 +8043,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
   attrs:
     if (attrs) {
 	/* Need to do a C<use attributes $stash_of_cv,\&cv,@attrs>. */
-	HV *stash = name && GvSTASH(CvGV(cv)) ? GvSTASH(CvGV(cv)) : PL_curstash;
+	HV *stash = name && !CvNAMED(cv) && GvSTASH(CvGV(cv))
+			? GvSTASH(CvGV(cv))
+			: PL_curstash;
 	if (!name) SAVEFREESV(cv);
 	apply_attrs(stash, MUTABLE_SV(cv), attrs);
 	if (!name) SvREFCNT_inc_simple_void_NN(cv);
@@ -7925,7 +8053,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (block && has_name) {
 	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
-	    SV * const tmpstr = sv_newmortal();
+	    SV * const tmpstr = cv_name(cv,NULL);
 	    GV * const db_postponed = gv_fetchpvs("DB::postponed",
 						  GV_ADDMULTI, SVt_PVHV);
 	    HV *hv;
@@ -7933,7 +8061,6 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 					  CopFILE(PL_curcop),
 					  (long)PL_subline,
 					  (long)CopLINE(PL_curcop));
-	    gv_efullname3(tmpstr, gv, NULL);
 	    (void)hv_store(GvHV(PL_DBsub), SvPVX_const(tmpstr),
 		    SvUTF8(tmpstr) ? -(I32)SvCUR(tmpstr) : (I32)SvCUR(tmpstr), sv, 0);
 	    hv = GvHVn(db_postponed);
@@ -7953,7 +8080,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             if (PL_parser && PL_parser->error_count)
                 clear_special_blocks(name, gv, cv);
             else
-                process_special_blocks(floor, name, gv, cv);
+                special = process_special_blocks(floor, name, gv, cv);
         }
     }
 
@@ -7963,7 +8090,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     LEAVE_SCOPE(floor);
 #ifdef PERL_DEBUG_READONLY_OPS
     /* Watch out for BEGIN blocks */
-    if (slab && gv && isGV(gv) && GvCV(gv)) Slab_to_ro(slab);
+    if (!special) Slab_to_ro(slab);
 #endif
     return cv;
 }
@@ -7984,12 +8111,16 @@ S_clear_special_blocks(pTHX_ const char *const fullname,
         || (*name == 'U' && strEQ(name, "UNITCHECK"))
         || (*name == 'C' && strEQ(name, "CHECK"))
         || (*name == 'I' && strEQ(name, "INIT"))) {
+        if (!isGV(gv)) {
+            (void)CvGV(cv);
+            assert(isGV(gv));
+        }
         GvCV_set(gv, NULL);
         SvREFCNT_dec_NN(MUTABLE_SV(cv));
     }
 }
 
-STATIC void
+STATIC bool
 S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 			 GV *const gv,
 			 CV *const cv)
@@ -8003,6 +8134,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 	if (strEQ(name, "BEGIN")) {
 	    const I32 oldscope = PL_scopestack_ix;
             dSP;
+            (void)CvGV(cv);
 	    if (floor) LEAVE_SCOPE(floor);
 	    ENTER;
             PUSHSTACKi(PERLSI_REQUIRE);
@@ -8017,23 +8149,24 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 
             POPSTACK;
 	    LEAVE;
+	    return TRUE;
 	}
 	else
-	    return;
+	    return FALSE;
     } else {
 	if (*name == 'E') {
 	    if strEQ(name, "END") {
 		DEBUG_x( dump_sub(gv) );
 		Perl_av_create_and_unshift_one(aTHX_ &PL_endav, MUTABLE_SV(cv));
 	    } else
-		return;
+		return FALSE;
 	} else if (*name == 'U') {
 	    if (strEQ(name, "UNITCHECK")) {
 		/* It's never too late to run a unitcheck block */
 		Perl_av_create_and_unshift_one(aTHX_ &PL_unitcheckav, MUTABLE_SV(cv));
 	    }
 	    else
-		return;
+		return FALSE;
 	} else if (*name == 'C') {
 	    if (strEQ(name, "CHECK")) {
 		if (PL_main_start)
@@ -8043,7 +8176,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 		Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, MUTABLE_SV(cv));
 	    }
 	    else
-		return;
+		return FALSE;
 	} else if (*name == 'I') {
 	    if (strEQ(name, "INIT")) {
 		if (PL_main_start)
@@ -8053,11 +8186,13 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 		Perl_av_create_and_push(aTHX_ &PL_initav, MUTABLE_SV(cv));
 	    }
 	    else
-		return;
+		return FALSE;
 	} else
-	    return;
+	    return FALSE;
 	DEBUG_x( dump_sub(gv) );
+	(void)CvGV(cv);
 	GvCV_set(gv,0);		/* cv has been hijacked */
+	return TRUE;
     }
 }
 
@@ -10143,6 +10278,11 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
 	case OP_GV: {
 	    gv = cGVOPx_gv(rvop);
 	    if (!isGV(gv)) {
+		if (SvROK(gv) && SvTYPE(SvRV(gv)) == SVt_PVCV) {
+		    cv = MUTABLE_CV(SvRV(gv));
+		    gv = NULL;
+		    break;
+		}
 		if (flags & RV2CVOPCV_RETURN_STUB)
 		    return (CV *)gv;
 		else return NULL;
@@ -11358,7 +11498,7 @@ Perl_rpeep(pTHX_ OP *o)
                 OP *rv2av, *q;
                 p = o->op_next;
                 if (   p->op_type == OP_GV
-                    && (gv = cGVOPx_gv(p))
+                    && (gv = cGVOPx_gv(p)) && isGV(gv)
                     && GvNAMELEN_get(gv) == 1
                     && *GvNAME_get(gv) == '_'
                     && GvSTASH(gv) == PL_defstash

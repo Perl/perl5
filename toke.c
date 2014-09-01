@@ -6552,7 +6552,11 @@ Perl_yylex(pTHX)
 		    rv2cv_op =
 			newCVREF(OPpMAY_RETURN_CONSTANT<<8, const_op);
 		    cv = lex
-			? isGV(gv) ? GvCV(gv) : (CV *)gv
+			? isGV(gv)
+			    ? GvCV(gv)
+			    : SvROK(gv) && SvTYPE(SvRV(gv)) == SVt_PVCV
+				? (CV *)SvRV(gv)
+				: (CV *)gv
 			: rv2cv_op_cv(rv2cv_op, RV2CVOPCV_RETURN_STUB);
 		}
 
