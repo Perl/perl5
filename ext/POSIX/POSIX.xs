@@ -698,7 +698,7 @@ static NV my_round(NV x)
 #endif
 
 #ifndef c99_scalbn
-#   if defined(Perl_ldexpl) && FLT_RADIX == 2
+#   if defined(Perl_ldexp) && FLT_RADIX == 2
 static NV my_scalbn(NV x)
 {
   return Perl_ldexp(x, y);
