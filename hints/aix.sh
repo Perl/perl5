@@ -562,8 +562,22 @@ EOF
   case `./inf$$` in
   INF) echo "Your infinity is working correctly with long doubles." >&4 ;;
   *) # NaNQ
-    echo "Your infinity is broken, disabling long doubles." >&4
-    uselongdouble=undef
+    echo " "
+    echo "Your infinity is broken, I suggest disabling long doubles." >&4
+    echo "The t/op/infnan.t will fail if broken long doubles are enabled. ">&4
+    rp="Disable long doubles?"
+    dflt="y"
+    . UU/myread
+    case "$ans" in
+    [Yy]*)
+      echo "Okay, disabling long doubles." >&4
+      uselongdouble=undef
+      ;;
+    *)
+      echo "Okay, keeping long doubles enabled." >&4
+      echo "But please note that t/op/infnan.t will fail a lot." >&4
+      ;;
+    esac
     ccflags=`echo " $ccflags " | sed -e 's/ -qlongdouble / /'`
     libswanted=`echo " $libswanted " | sed -e 's/ c128/ /'`
     lddlflags=`echo " $lddlflags " | sed -e 's/ -lc128 / /'`
