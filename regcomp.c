@@ -14047,9 +14047,9 @@ parseit:
                     /* a bad range like \w-, [:word:]- ? */
                     if (namedclass > OOB_NAMEDCLASS) {
                         if (strict || (PASS2 && ckWARN(WARN_REGEXP))) {
-                            const int w =
-                                RExC_parse >= rangebegin ?
-                                RExC_parse - rangebegin : 0;
+                            const int w = RExC_parse >= rangebegin
+                                          ?  RExC_parse - rangebegin
+                                          : 0;
                             if (strict) {
                                 vFAIL4("False [] range \"%*.*s\"",
                                     w, w, rangebegin);
