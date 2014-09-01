@@ -9,7 +9,8 @@ BEGIN {
     # Really want to know if chdir is working, as the build process will all go
     # wrong if it is not.
     if (is_miniperl() && !eval {require File::Spec::Functions; 1}) {
-	push @INC, qw(dist/Cwd/lib dist/Cwd ../dist/Cwd/lib ../dist/Cwd);
+	push @INC, qw(dist/PathTools/lib    dist/PathTools
+		   ../dist/PathTools/lib ../dist/PathTools);
     }
     plan(tests => 48);
 }
