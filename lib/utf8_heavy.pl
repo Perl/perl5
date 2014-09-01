@@ -175,7 +175,11 @@ sub _loose_name ($) {
                 }
                 if (miniperl) {
                     eval "require '$unicore_dir/Heavy.pl'";
-                    last GETFILE if $@;
+                    if ($@) {
+                        print STDERR __LINE__, ": '$@'\n" if DEBUG;
+                        pop @recursed if @recursed;
+                        return $type;
+                    }
                 }
                 else {
                     require "$unicore_dir/Heavy.pl";
