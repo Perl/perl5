@@ -1932,6 +1932,8 @@ EXTERN_C long double modfl(long double, long double *);
 #   ifndef Perl_isinf
 #       if defined(HAS_ISINFL) && !(defined(isinf) && HAS_C99)
 #           define Perl_isinf(x) isinfl(x)
+#       elif defined(LDBL_MAX)
+#           define Perl_isinf(x) ((x) > LDBL_MAX || (x) < -LDBL_MAX)
 #       endif
 #   endif
 #   if !defined(Perl_isfinite) && !(defined(isfinite) && HAS_C99)
@@ -1939,6 +1941,8 @@ EXTERN_C long double modfl(long double, long double *);
 #       define Perl_isfinite(x) isfinitel(x)
 #     elif defined(HAS_FINITEL)
 #       define Perl_isfinite(x) finitel(x)
+#     elif defined(LDBL_MAX)
+#       define Perl_isfinite(x) ((x) <= LDBL_MAX && (x) >= -LDBL_MAX)
 #     endif
 #   endif
 #else
@@ -1996,6 +2000,8 @@ EXTERN_C long double modfl(long double, long double *);
 #   ifndef Perl_isinf
 #       if defined(HAS_ISINF)
 #           define Perl_isinf(x) isinf(x)
+#       elif defined(DBL_MAX)
+#           define Perl_isinf(x) ((x) > DBL_MAX || (x) < -DBL_MAX)
 #       endif
 #   endif
 #   ifndef Perl_isfinite
@@ -2003,6 +2009,8 @@ EXTERN_C long double modfl(long double, long double *);
 #       define Perl_isfinite(x) isfinite(x)
 #     elif defined(HAS_FINITE)
 #       define Perl_isfinite(x) finite(x)
+#     elif defined(DBL_MAX)
+#       define Perl_isfinite(x) ((x) <= DBL_MAX && (x) >= -DBL_MAX)
 #     endif
 #   endif
 #endif
