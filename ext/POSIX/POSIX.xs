@@ -114,7 +114,7 @@
 #endif
 
 /* We will have an emulation. */
-#if !defined(HAS_FPCLASSIFY) && !defined(FP_INFINITE)
+#ifndef FP_INFINITE
 #  define FP_INFINITE	0
 #  define FP_NAN	1
 #  define FP_NORMAL	2
