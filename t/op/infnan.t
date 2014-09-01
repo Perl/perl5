@@ -101,8 +101,9 @@ SKIP: {
   is(1/$NInf, 0, "one per -Inf is zero");
 
  SKIP: {
-     if ("$^O $Config{osvers}" eq "hpux 10.20") {
-         skip "pow doesn't generate Inf", 1;
+     my $here = "$^O $Config{osvers}";
+     if ($here =~ /^hpux 10/) {
+         skip "$here: pow doesn't generate Inf", 1;
      }
      is(9**9**9, $PInf, "9**9**9 is Inf");
   }
@@ -160,8 +161,9 @@ SKIP: {
   is($NaN * 2, $NaN, "NaN times two is NaN");
 
  SKIP: {
-     if ("$^O $Config{osvers}" eq "hpux 10.20") {
-         skip "pow doesn't generate Inf, so sin(Inf) won't happen", 1;
+     my $here = "$^O $Config{osvers}";
+     if ($here =~ /^hpux 10/) {
+         skip "$here: pow doesn't generate Inf, so sin(Inf) won't happen", 1;
      }
      is(sin(9**9**9), $NaN, "sin(9**9**9) is NaN");
   }
