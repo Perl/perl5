@@ -6,9 +6,10 @@ use warnings;
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
-    require Config; import Config;
     require './test.pl';
+    @INC = () unless is_miniperl();
+    unshift @INC, '../lib';
+    require Config; import Config;
     require './loc_tools.pl';   # Contains find_utf8_ctype_locale()
 }
 
