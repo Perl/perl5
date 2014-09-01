@@ -1805,6 +1805,7 @@ acos(x)
 	y0 = 29
 	y1 = 30
     CODE:
+	RETVAL = NV_NAN;
 	switch (ix) {
 	case 0:
 	    RETVAL = acos(x); /* C89 math */
@@ -1992,8 +1993,10 @@ acos(x)
 IV
 fegetround()
     CODE:
+#ifdef HAS_FEGETROUND
 	RETVAL = my_fegetround();
-#ifndef HAS_FEGETROUND
+#else
+	RETVAL = -1;
 	not_here("fegetround");
 #endif
     OUTPUT:
@@ -2006,6 +2009,7 @@ fesetround(x)
 #ifdef HAS_FEGETROUND /* canary for fesetround */
 	RETVAL = fesetround(x);
 #else
+	RETVAL = -1;
 	not_here("fesetround");
 #endif
     OUTPUT:
@@ -2023,6 +2027,7 @@ fpclassify(x)
 	lrint = 6
         signbit = 7
     CODE:
+	RETVAL = -1;
 	switch (ix) {
 	case 0:
 #ifdef c99_fpclassify
@@ -2091,6 +2096,7 @@ copysign(x,y)
 	nexttoward = 13
 	remainder = 14
     CODE:
+	RETVAL = NV_NAN;
 	switch (ix) {
 	case 0:
 #ifdef c99_copysign
@@ -2242,6 +2248,7 @@ scalbn(x,y)
 #ifdef c99_scalbn
 	RETVAL = c99_scalbn(x, y);
 #else
+	RETVAL = NV_NAN;
 	not_here("scalbn");
 #endif
     OUTPUT:
@@ -2256,6 +2263,7 @@ fma(x,y,z)
 #ifdef c99_fma
 	RETVAL = c99_fma(x, y, z);
 #else
+	RETVAL = NV_NAN;
 	not_here("fma");
 #endif
     OUTPUT:
@@ -2268,6 +2276,7 @@ nan(s = 0)
 #ifdef c99_nan
 	RETVAL = c99_nan(s);
 #else
+	RETVAL = NV_NAN;
 	not_here("nan");
 #endif
     OUTPUT:
@@ -2280,6 +2289,7 @@ jn(x,y)
     ALIAS:
 	yn = 1
     CODE:
+	RETVAL = NV_NAN;
         switch (ix) {
 	case 0:
 #ifdef bessel_jn
