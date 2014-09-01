@@ -8,6 +8,8 @@ BEGIN {
 
 use strict;
 
+use Config;
+
 my $PInf = "Inf"  + 0;
 my $NInf = "-Inf" + 0;
 my $NaN  = "NaN"  + 0;
@@ -98,7 +100,12 @@ SKIP: {
   is(1/$PInf, 0, "one per +Inf is zero");
   is(1/$NInf, 0, "one per -Inf is zero");
 
-  is(9**9**9, $PInf, "9**9**9 is Inf");
+ SKIP: {
+     if ("$^O $Config{osvers}" eq "hpux 10.20") {
+         skip "pow doesn't generate Inf", 1;
+     }
+     is(9**9**9, $PInf, "9**9**9 is Inf");
+  }
 }
 
 {
@@ -152,7 +159,12 @@ SKIP: {
   is($NaN * 0, $NaN, "NaN times zero is NaN");
   is($NaN * 2, $NaN, "NaN times two is NaN");
 
-  is(sin(9**9**9), $NaN, "sin(9**9**9) is NaN");
+ SKIP: {
+     if ("$^O $Config{osvers}" eq "hpux 10.20") {
+         skip "pow doesn't generate Inf, so sin(Inf) won't happen", 1;
+     }
+     is(sin(9**9**9), $NaN, "sin(9**9**9) is NaN");
+  }
 }
 
 SKIP: {
