@@ -14004,17 +14004,17 @@ parseit:
 	    }
 	} /* end of namedclass \blah */
 
+        if (skip_white) {
+            RExC_parse = regpatws(pRExC_state, RExC_parse,
+                                FALSE /* means don't recognize comments */ );
+        }
+
         /* Here, we have a single value.  If 'range' is set, it is the ending
          * of a range--check its validity.  Later, we will handle each
          * individual code point in the range.  If 'range' isn't set, this
          * could be the beginning of a range, so check for that by looking
          * ahead to see if the next real character to be processed is the range
          * indicator--the minus sign */
-
-        if (skip_white) {
-            RExC_parse = regpatws(pRExC_state, RExC_parse,
-                                FALSE /* means don't recognize comments */ );
-        }
 
 	if (range) {
 	    if (prevvalue > value) /* b-a */ {
