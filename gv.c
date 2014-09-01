@@ -1316,8 +1316,16 @@ The most important of which are probably GV_ADD and SVf_UTF8.
 =cut
 */
 
+/*
+gv_stashpvn_internal
+
+Perform the internal bits of gv_stashsvpvn_cached. You could think of this
+as being one half of the logic. Not to be called except from gv_stashsvpvn_cached().
+
+*/
+
 PERL_STATIC_INLINE HV*
-S_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
+S_gv_stashpvn_internal(pTHX_ const char *name, U32 namelen, I32 flags)
 {
     char smallbuf[128];
     char *tmpbuf;
@@ -1325,7 +1333,7 @@ S_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
     GV *tmpgv;
     U32 tmplen = namelen + 2;
 
-    PERL_ARGS_ASSERT_GV_STASHPVN;
+    PERL_ARGS_ASSERT_GV_STASHPVN_INTERNAL;
 
     if (tmplen <= sizeof smallbuf)
 	tmpbuf = smallbuf;
@@ -1365,10 +1373,11 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
     if (he) return INT2PTR(HV*,SvIVX(HeVAL(he)));
     else if (flags & GV_CACHE_ONLY) return NULL;
 
-    stash = S_stashpvn(aTHX_ name, namelen, flags);
+    stash = gv_stashpvn_internal(name, namelen, flags);
+
     if (stash && namelen) {
         SV* const ref = newSViv(PTR2IV(stash));
-        hv_store(PL_stashcache, name,
+        (void)hv_store(PL_stashcache, name,
             (flags & SVf_UTF8) ? -(I32)namelen : (I32)namelen, ref, 0);
     }
     return stash;

@@ -548,6 +548,9 @@ px	|GV *	|gv_override	|NN const char * const name \
 XMpd	|void	|gv_try_downgrade|NN GV* gv
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
+#if defined(PERL_IN_GV_C)
+i	|HV*	|gv_stashpvn_internal|NN const char* name|U32 namelen|I32 flags
+#endif
 Apd	|HV*	|gv_stashsv	|NN SV* sv|I32 flags
 Apd	|void	|hv_clear	|NULLOK HV *hv
 : used in SAVEHINTS() and op.c
