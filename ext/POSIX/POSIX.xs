@@ -131,23 +131,29 @@
 
    atan2 cos exp log pow sin sqrt
 
+ * C99 math.h added:
+
+   acosh asinh atanh cbrt copysign erf erfc exp2 expm1 fdim fma fmax
+   fmin fpclassify hypot ilogb isfinite isgreater isgreaterequal isinf
+   isless islessequal islessgreater isnan isnormal isunordered lgamma
+   log1p log2 logb lrint nan nearbyint nextafter nexttoward remainder
+   remquo rint round scalbn signbit tgamma trunc
+
   * Berkeley/SVID extensions:
 
     j0 j1 jn y0 y1 yn
-
- * C99 math.h added:
-
-   acosh asinh atanh cbrt copysign cosh erf erfc exp2 expm1 fdim fma
-   fmax fmin fpclassify hypot ilogb isfinite isgreater isgreaterequal
-   isinf isless islessequal islessgreater isnan isnormal isunordered
-   lgamma log1p log2 logb lrint nan nearbyint nextafter nexttoward remainder
-   remquo rint round scalbn signbit sinh tanh tgamma trunc
 
   * Configure already (5.21.0) scans for:
 
     fpclassify isfinite isinf isnan ilogb*l* signbit
 
+  * For floating-point round mode (which matters for e.g. lrint and rint)
+
+    fegetround fesetround
+
 */
+
+/* XXX Constant FP_FAST_FMA (if true, FMA is faster) */
 
 /* XXX Add ldiv(), lldiv()?  It's C99, but from stdlib.h, not math.h  */
 

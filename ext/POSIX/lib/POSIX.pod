@@ -41,6 +41,32 @@ and other miscellaneous objects.  The remaining sections list various
 constants and macros in an organization which roughly follows IEEE Std
 1003.1b-1993.
 
+=head1 C99 "math" interfaces
+
+Mathematic functions and constants from the C99 standard are available
+on many platforms.  In the below functions list they are marked [C99].
+
+The mathematical constants include:
+
+  M_SQRT2    # the square root of two
+  M_E        # the Euler's (or Napier's) constant
+  M_PI       # the Pi
+
+and other related/similar ones
+
+  M_SQRT1_2  # sqrt(1/2)
+  M_LN10 M_LN2 M_LOG10E M_LOG2E
+  M_1_PI M_2_PI M_2_SQRTPI M_PI_2 M_PI_4  # 1/Pi, ..., Pi/4
+
+and the
+
+  INFINITY
+  NAN
+
+The last two are also available as just Inf and NaN.
+
+The Bessel functions (j0, j1, jn, y0, y1, yn) are also available.
+
 =head1 CAVEATS
 
 A few functions are not implemented because they are C specific.  If you
@@ -102,6 +128,12 @@ I<race condition>.
 This is identical to the C function C<acos()>, returning
 the arcus cosine of its numerical argument.  See also L<Math::Trig>.
 
+=item C<acosh>
+
+This is identical to the C function C<acos()>, returning the
+hyperbolic arcus cosine of its numerical argument [C99].  See also
+L<Math::Trig>.
+
 =item C<alarm>
 
 This is identical to Perl's builtin C<alarm()> function,
@@ -128,6 +160,12 @@ The C<$mon> is zero-based: January equals C<0>.  The C<$year> is
 This is identical to the C function C<asin()>, returning
 the arcus sine of its numerical argument.  See also L<Math::Trig>.
 
+=item C<asinh>
+
+This is identical to the C function C<asin()>, returning the
+hyperbolic arcus sine of its numerical argument [C99].  See also
+L<Math::Trig>.
+
 =item C<assert>
 
 Unimplemented, but you can use L<perlfunc/die> and the L<Carp> module
@@ -137,6 +175,12 @@ to achieve similar things.
 
 This is identical to the C function C<atan()>, returning the
 arcus tangent of its numerical argument.  See also L<Math::Trig>.
+
+=item C<atanh>
+
+This is identical to the C function C<atan()>, returning the
+hyperbolic arcus tangent of its numerical argument [C99].  See also
+L<Math::Trig>.
 
 =item C<atan2>
 
@@ -173,6 +217,10 @@ see L<Search::Dict>.
 =item C<calloc>
 
 C<calloc()> is C-specific.  Perl does memory management transparently.
+
+=item C<cbrt>
+
+The cube root [C99].
 
 =item C<ceil>
 
@@ -232,6 +280,12 @@ See also L<Math::Trig>.
 This is identical to the C function C<cosh()>, for returning
 the hyperbolic cosine of its numeric argument.  See also L<Math::Trig>.
 
+=item C<copysign>
+
+Returns the x but with the sign of y [C99].
+
+See also L</signbit>.
+
 =item C<creat>
 
 Create a new file.  This returns a file descriptor like the ones returned by
@@ -290,6 +344,14 @@ C<POSIX::open>.
 
 Returns C<undef> on failure.
 
+=item C<erf>
+
+The error function [C99].
+
+=item C<erfc>
+
+The complementary error function [C99].
+
 =item C<errno>
 
 Returns the value of errno.
@@ -332,6 +394,12 @@ program, see L<perlfunc/exit>.
 This is identical to Perl's builtin C<exp()> function for
 returning the exponent (I<e>-based) of the numerical argument,
 see L<perlfunc/exp>.
+
+=item C<expm1>
+
+Equivalent to C<exp(x) - 1>, but more precise for small argument values [C99].
+
+See also L</log1p>.
 
 =item C<fabs>
 
@@ -386,6 +454,35 @@ Use method C<IO::Handle::fileno()> instead, or see L<perlfunc/fileno>.
 This is identical to the C function C<floor()>, returning the largest
 integer value less than or equal to the numerical argument.
 
+=item C<fdim>
+
+"Positive difference", x - y if x > y, zero otherwise [C99].
+
+=item C<fegetround>
+
+Returns the current floating point rounding mode, one of
+
+  FE_TONEAREST FE_TOWARDZERO FE_UPWARD FE_UPWARD
+
+FE_TONEAREST is like L</round>, FE_TOWARDZERO is like L</trunc> [C99].
+
+=item C<fesetround>
+
+Sets the floating point rounding mode, see L</fegetround>.
+
+=item C<fma>
+
+"Fused multiply-add", x * y + z, possibly faster (and less lossy)
+than the explicit two operations [C99].
+
+=item C<fmax>
+
+Maximum of x and y, except when either is NaN, returns the other [C99].
+
+=item C<fmin>
+
+Minimum of x and y, except when either is NaN, returns the other [C99].
+
 =item C<fmod>
 
 This is identical to the C function C<fmod()>.
@@ -418,6 +515,14 @@ pathname on the filesystem which holds F</var/foo>.
 	$path_max = POSIX::fpathconf($fd, &POSIX::_PC_PATH_MAX);
 
 Returns C<undef> on failure.
+
+=item C<fpclassify>
+
+Returns one of
+
+  FP_NORMAL FP_ZERO FP_SUBNORMAL FP_INFINITE FP_NAN
+
+telling the class of the argument [C99].
 
 =item C<fprintf>
 
@@ -587,6 +692,17 @@ This is identical to Perl's builtin C<gmtime()> function for
 converting seconds since the epoch to a date in Greenwich Mean Time,
 see L<perlfunc/gmtime>.
 
+=item C<hypot>
+
+Equivalent to sqrt(x * x + y * y) except more stable on very large
+or very small arguments [C99].
+
+=item C<ilogb>
+
+Integer binary logarithm [C99], e.g. ilogb(30) is 4.
+
+Identical to L</logb>.
+
 =item C<isalnum>
 
 Deprecated function whose use raises a warning, and which is slated to
@@ -662,6 +778,13 @@ corresponding C function returns C<TRUE> for every byte in the string.
 You may want to use the C<L<E<sol>\dE<sol>|perlrecharclass/Digits>>
 construct instead.
 
+=item C<isfinite>
+
+Returns true if the argument is a finite number (that is, not an
+infinity, or the not-a-number) [C99].
+
+See also L</isinf>, L</isnan>, and L</fpclassify>.
+
 =item C<isgraph>
 
 Deprecated function whose use raises a warning, and which is slated to
@@ -677,6 +800,19 @@ modifier is in effect?>).
 
 The function returns C<TRUE> if the input string is empty, or if the
 corresponding C function returns C<TRUE> for every byte in the string.
+
+=item C<isgreater>
+
+(Also C<isgreaterequal>, C<isless>, C<islessequal>, C<islessgreater>,
+C<isunordered>)
+
+Floating point comparisons which handle the NaN [C99].
+
+=item C<isinf>
+
+Returns true if the argument is an infinity (positive or negative) [C99].
+
+See also L</isnan>, L</isfinite>, and L</fpclassify>.
 
 =item C<islower>
 
@@ -695,6 +831,25 @@ The function returns C<TRUE> if the input string is empty, or if the
 corresponding C function returns C<TRUE> for every byte in the string.
 
 Do B<not> use C</[a-z]/> unless you don't care about the current locale.
+
+=item C<isnan>
+
+Returns true if the argument is NaN (not-a-number) [C99].
+
+Note that you cannot test for "NaN-ness" with
+
+   $x == $x
+
+since the NaN is not equivalent to anything, B<including itself>.
+
+See also L</isinf>, and L</fpclassify>.
+
+=item C<isnormal>
+
+Returns true if the argument is normal (that is, not a subnormal/denormal,
+and not an infinity, or a not-a-number) [C99].
+
+See also L</isfinite>, and L</fpclassify>.
 
 =item C<isprint>
 
@@ -781,6 +936,12 @@ modifier is in effect?>).
 The function returns C<TRUE> if the input string is empty, or if the
 corresponding C function returns C<TRUE> for every byte in the string.
 
+=item C<j0>
+
+(Also C<j1>, C<jn>, C<y0>, C<y1>, C<yn>)
+
+The Bessel function of the first kind of the order zero.
+
 =item C<kill>
 
 This is identical to Perl's builtin C<kill()> function for sending
@@ -810,6 +971,29 @@ for multiplying floating point numbers with powers of two.
 
 (For computing dividends of long integers.)
 C<ldiv()> is C-specific, use C</> and C<int()> instead.
+
+=item C<lgamma>
+
+The logarithm of the Gamma function [C99].
+
+See also L</tgamma>.
+
+=item C<log1p>
+
+Equivalent to log(1 + x), but more stable results for small argument
+values [C99].
+
+=item C<log2>
+
+Logarithm base two [C99].
+
+See also L</expm1>.
+
+=item C<logb>
+
+Integer binary logarithm [C99].
+
+Identical to L</ilogb>.
 
 =item C<link>
 
@@ -894,6 +1078,14 @@ those obtained by calling C<POSIX::open>.
 	$off_t = POSIX::lseek( $fd, 0, &POSIX::SEEK_SET );
 
 Returns C<undef> on failure.
+
+=item C<lrint>
+
+Depending on the floating point rounding mode, rounds the argument
+either toward nearest, toward zero, downward (toward negative infinity),
+or upward (toward positive infinity) [C99].
+
+For the rounding mode, see L</fegetround> and L</fesetround>.
 
 =item C<malloc>
 
@@ -983,6 +1175,29 @@ Returns C<undef> on failure.
 Return the integral and fractional parts of a floating-point number.
 
 	($fractional, $integral) = POSIX::modf( 3.14 );
+
+=item C<nan>
+
+Returns not-a-number [C99].
+
+=item C<nearbyint>
+
+Returns the nearest integer to the argument, according to the current
+rounding mode (see L</fegetround>) [C99].
+
+=item C<nextafter>
+
+Returns the next representable floating point number after x in the
+direction of y [C99].
+
+Like L</nexttoward>, but potentially less accurate.
+
+=item C<nexttoward>
+
+Returns the next representable floating point number after x in the
+direction of y [C99].
+
+Like L</nextafter>, but potentially more accurate.
 
 =item C<nice>
 
@@ -1133,10 +1348,25 @@ for reading directory entries, see L<perlfunc/readdir>.
 
 C<realloc()> is C-specific.  Perl does memory management transparently.
 
+=item C<remainder>
+
+Given x and y, returns the value x - n*y, where n is the integer
+closest to x/y. [C99]
+
+See also L</remquo>.
+
 =item C<remove>
 
 This is identical to Perl's builtin C<unlink()> function
 for removing files, see L<perlfunc/unlink>.
+
+=item C<remquo>
+
+Like L</remainder> but also returns the low-order bits of the quotient (n)
+[C99]
+
+(This is quite esoteric interface, mainly used to implement numerical
+algorithms.)
 
 =item C<rename>
 
@@ -1152,10 +1382,26 @@ Seeks to the beginning of the file.
 This is identical to Perl's builtin C<rewinddir()> function for
 rewinding directory entry streams, see L<perlfunc/rewinddir>.
 
+=item C<rint>
+
+Identical to L</lrint>.
+
 =item C<rmdir>
 
 This is identical to Perl's builtin C<rmdir()> function
 for removing (empty) directories, see L<perlfunc/rmdir>.
+
+=item C<round>
+
+Returns the integer nearest to the argument [C99].
+
+See also L</ceil>, L</floor>, L</trunc>.
+
+=item C<scalbn>
+
+Returns x * 2**y [C99].
+
+See also L</frexp> and L</ldexp>.
 
 =item C<scanf>
 
@@ -1284,6 +1530,10 @@ C<sigaction> and possibly also C<siginfo> documentation.
 =item C<siglongjmp>
 
 C<siglongjmp()> is C-specific: use L<perlfunc/die> instead.
+
+=item C<signbit>
+
+Returns zero for positive arguments, non-zero for negative arguments [C99].
 
 =item C<sigpending>
 
@@ -1635,6 +1885,12 @@ terminal.
 
 Returns C<undef> on failure.
 
+=item C<tgamma>
+
+The Gamma function [C99].
+
+See also L</lgamma>.
+
 =item C<time>
 
 This is identical to Perl's builtin C<time()> function
@@ -1681,6 +1937,12 @@ This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using the C<uc()> function,
 see L<perlfunc/uc>, or the equivalent C<\U> operator inside doublequotish
 strings.
+
+=item C<trunc>
+
+Returns the integer toward zero from the argument [C99].
+
+See also L</ceil>, L</floor>, and L</round>.
 
 =item C<ttyname>
 
