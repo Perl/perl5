@@ -1313,6 +1313,9 @@ Flags may be one of:
 
 The most important of which are probably GV_ADD and SVf_UTF8.
 
+Note, use of C<gv_stashsv> instead of C<gv_stashpvn> where possible is strongly
+recommended for performance reasons.
+
 =cut
 */
 
@@ -1362,17 +1365,49 @@ S_gv_stashpvn_internal(pTHX_ const char *name, U32 namelen, I32 flags)
     return stash;
 }
 
-HV*
-Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
+/*
+gv_stashsvpvn_cached
+
+Returns a pointer to the stash for a specified package, possibly
+cached.  Implements both C<gv_stashpvn> and C<gc_stashsv>.
+
+Requires one of either namesv or namepv to be non-null.
+
+See C<gv_stashpvn> for details on "flags".
+
+Note the sv interface is strongly preferred for performance reasons.
+
+*/
+
+#define PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED \
+    assert(namesv || name)
+
+PERL_STATIC_INLINE HV*
+S_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 flags)
 {
     HV* stash;
-    const HE* const he = (const HE *)hv_common(
-        PL_stashcache, NULL, name, namelen,
+    HE* he;
+
+    PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED;
+
+    he = (HE *)hv_common(
+        PL_stashcache, namesv, name, namelen,
         (flags & SVf_UTF8) ? HVhek_UTF8 : 0, 0, NULL, 0
     );
+
     if (he) return INT2PTR(HV*,SvIVX(HeVAL(he)));
     else if (flags & GV_CACHE_ONLY) return NULL;
 
+    if (namesv) {
+        if (SvOK(namesv)) { /* prevent double uninit warning */
+            STRLEN len;
+            name = SvPV_const(namesv, len);
+            namelen = len;
+            flags |= SvUTF8(namesv);
+        } else {
+            name = ""; namelen = 0;
+        }
+    }
     stash = gv_stashpvn_internal(name, namelen, flags);
 
     if (stash && namelen) {
@@ -1380,7 +1415,15 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
         (void)hv_store(PL_stashcache, name,
             (flags & SVf_UTF8) ? -(I32)namelen : (I32)namelen, ref, 0);
     }
+
     return stash;
+}
+
+HV*
+Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
+{
+    PERL_ARGS_ASSERT_GV_STASHPVN;
+    return gv_stashsvpvn_cached(NULL, name, namelen, flags);
 }
 
 /*
@@ -1388,18 +1431,16 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
 
 Returns a pointer to the stash for a specified package.  See C<gv_stashpvn>.
 
+Note this interface is strongly preferred over C<gv_stashpvn> for performance reasons.
+
 =cut
 */
 
 HV*
 Perl_gv_stashsv(pTHX_ SV *sv, I32 flags)
 {
-    STRLEN len;
-    const char * const ptr = SvPV_const(sv,len);
-
     PERL_ARGS_ASSERT_GV_STASHSV;
-
-    return gv_stashpvn(ptr, len, flags | SvUTF8(sv));
+    return gv_stashsvpvn_cached(sv, NULL, 0, flags);
 }
 
 
