@@ -2041,6 +2041,10 @@ EXTERN_C long double modfl(long double, long double *);
  * are identical to the C99 fpclassify(). */
 #if !defined(Perl_fp_class) && defined(HAS_FP_CLASSIFY)
 #    include <math.h>
+#    ifdef __VMS
+     /* FP_INFINITE and others are here rather than in math.h as C99 stipulates */
+#        include <fp.h>
+#    endif
 #    if defined(FP_INFINITE) && defined(FP_NAN)
 #        define Perl_fp_class(x)	fp_classify(x)
 #        define Perl_fp_class_inf(x)	(Perl_fp_class(x)==FP_INFINITE)
