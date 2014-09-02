@@ -2,10 +2,11 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(. ../lib);
+    require './test.pl';
+    @INC = () unless is_miniperl();
+    unshift @INC, '../lib';
 }
 
-require "test.pl";
 plan( tests => 35 );
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
