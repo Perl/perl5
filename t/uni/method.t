@@ -6,7 +6,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(. ../lib);
+    @INC = qw(. ../lib ../cpan/parent/lib);
     require "test.pl";
 }
 
