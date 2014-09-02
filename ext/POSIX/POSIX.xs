@@ -464,8 +464,30 @@ static NV my_copysign(NV x, NV y)
 
 /* XXX cosh (though c89) */
 
-/* XXX erf -- non-trivial */
-/* XXX erfc -- non-trivial */
+#ifndef c99_erf
+static NV my_erf(NV x)
+{
+  /* http://www.johndcook.com/cpp_erf.html -- public domain */
+  NV a1 =  0.254829592;
+  NV a2 = -0.284496736;
+  NV a3 =  1.421413741;
+  NV a4 = -1.453152027;
+  NV a5 =  1.061405429;
+  NV p  =  0.3275911;
+
+  int sign = x < 0 ? -1 : 1; /* Save the sign. */
+  x = PERL_ABS(x);
+
+  /* Abramowitz and Stegun formula 7.1.26 */
+  NV t = 1.0 / (1.0 + p * x);
+  NV y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1) * t * exp(-x*x);
+
+  return sign * y;
+}
+#  define c99_erf my_erf
+#endif
+
+/* XXX erfc */
 
 #ifndef c99_exp2
 static NV my_exp2(NV x)
@@ -479,6 +501,8 @@ static NV my_exp2(NV x)
 static NV my_expm1(NV x)
 {
   if (PERL_ABS(x) < 1e-5)
+    /* http://www.johndcook.com/cpp_expm1.html -- public domain.
+     * Also including the cubic term. */
     /* Probably not enough for long doubles. */
     return x * (1.0 + x * (0.5 + x / 6.0)); /* Taylor series */
   else
@@ -619,6 +643,8 @@ static IV my_ilogb(NV x)
 #ifndef c99_log1p
 static NV my_log1p(NV x)
 {
+  /* http://www.johndcook.com/cpp_log_one_plus_x.html -- public domain.
+   * Including also quadratic term. */
   if (PERL_ABS(x) > 1e-4)
     return Perl_log(1.0 + x);
   else

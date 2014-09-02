@@ -126,6 +126,7 @@ SKIP: {
     is(trunc(-2.5), -2, "trunc -2.5");
     is(trunc(2.75), 2, "trunc 2.75");
     is(trunc(-2.75), -2, "trunc -2.75");
+    cmp_ok(abs(erf(1) - 0.842700792949715), '<', 1.2e-7, "erf 1");
 }
 
 done_testing();
