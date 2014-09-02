@@ -4,7 +4,9 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    require './test.pl';
+    @INC = () unless is_miniperl();
+    unshift @INC, '../lib';
 }
 use warnings ;
 
@@ -20,8 +22,6 @@ $SIG{__WARN__} = sub {
           warn $_[0];
      }
 };
-
-BEGIN { require './test.pl'; }
 
 plan(387);
 
