@@ -2703,7 +2703,7 @@ PP(pp_sin)
     {
       SV * const arg = POPs;
       const NV value = SvNV_nomg(arg);
-      NV result;
+      NV result = NV_NAN;
       if (neg_report) { /* log or sqrt */
 	  if (op_type == OP_LOG ? (value <= 0.0) : (value < 0.0)) {
 	      SET_NUMERIC_STANDARD();
@@ -2712,6 +2712,7 @@ PP(pp_sin)
 	  }
       }
       switch (op_type) {
+      default:
       case OP_SIN:  result = Perl_sin(value);  break;
       case OP_COS:  result = Perl_cos(value);  break;
       case OP_EXP:  result = Perl_exp(value);  break;
