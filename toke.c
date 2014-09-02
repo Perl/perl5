@@ -6704,7 +6704,7 @@ Perl_yylex(pTHX)
 		    }
 
 		    /* Resolve to GV now if this is a placeholder. */
-		    if ((gvop = cUNOPx(rv2cv_op)->op_first)
+		    if (!off && (gvop = cUNOPx(rv2cv_op)->op_first)
 		     && gvop->op_type == OP_GV) {
 			GV *gv2 = cGVOPx_gv(gvop);
 			if (gv2 && !isGV(gv2)) {
