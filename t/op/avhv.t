@@ -5,7 +5,9 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    require './test.pl';
+    @INC = () unless is_miniperl();
+    unshift @INC, '../lib';
 }
 
 require Tie::Array;
@@ -20,7 +22,6 @@ sub STORESIZE { $#{$_[0]} = $_[1]+1 }
 
 package main;
 
-require './test.pl';
 plan(tests => 40);
 
 # Helper function to check the typical error message.
