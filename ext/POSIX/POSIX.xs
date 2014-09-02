@@ -254,6 +254,21 @@
 #    define c99_trunc	trunc
 #  endif
 
+#  if !defined(isunordered) && defined(Perl_isnan)
+#    define isunordered(x, y) (Perl_isnan(x) || Perl-isnan(y))
+#  elsif defined(HAS_UNORDERED)
+#    define isunordered(x, y) unordered(x, y)
+#  endif
+
+#  if !defined(isgreater) && defined(isunordered)
+#    define isgreater(x, y)         (!isunordered((x), (y)) && (x) > (y))
+#    define isgreaterequal(x, y)    (!isunordered((x), (y)) && (x) >= (y))
+#    define isless(x, y)            (!isunordered((x), (y)) && (x) < (y))
+#    define islessequal(x, y)       (!isunordered((x), (y)) && (x) <= (y))
+#    define islessgreater(x, y)     (!isunordered((x), (y)) && \
+                                     ((x) > (y) || (y) > (x)))
+#  endif
+
 /* Check both the Configure symbol and the macro-ness (like C99 promises). */ 
 #  if defined(HAS_FPCLASSIFY) && defined(fpclassify)
 #    define c99_fpclassify	fpclassify
