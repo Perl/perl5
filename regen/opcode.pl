@@ -5,9 +5,12 @@
 #    opcode.h
 #    opnames.h
 #    pp_proto.h
+#    lib/B/Op_private.pm
 #
-# from information stored in regen/opcodes, plus the
-# values hardcoded into this script in @raw_alias.
+# from:
+#  * information stored in regen/opcodes;
+#  * information stored in regen/op_private (which is actually perl code);
+#  * the values hardcoded into this script in @raw_alias.
 #
 # Accepts the standard regen_lib -q and -v args.
 #
@@ -29,7 +32,14 @@ my $on = open_new('opnames.h', '>',
 		  { by => 'regen/opcode.pl', from => 'its data', style => '*',
 		    file => 'opnames.h', copyright => [1999 .. 2008] });
 
-# Read data.
+my $oprivpm = open_new('lib/B/Op_private.pm', '>',
+		  { by => 'regen/opcode.pl',
+                    from => 'data in regen/op_private',
+                    style => '#',
+		    file => 'lib/B/Op_private.pm',
+                    copyright => [2014 .. 2014] });
+
+# Read 'opcodes' data.
 
 my %seen;
 my (@ops, %desc, %check, %ckname, %flags, %args, %opnum);
@@ -142,6 +152,725 @@ foreach my $sock_func (qw(socket bind listen accept shutdown
 			  ssockopt getpeername)) {
     $alias{$sock_func} = ["Perl_pp_$sock_func", '#ifdef HAS_SOCKET'],
 }
+
+
+
+# =================================================================
+#
+# Functions for processing regen/op_private data.
+#
+# Put them in a separate package so that croak() does the right thing
+
+package OP_PRIVATE;
+
+use Carp;
+
+
+# the vars holding the global state built up by all the calls to addbits()
+
+
+# map OPpLVAL_INTRO => LVINTRO
+my %LABELS;
+
+
+# the numeric values of flags - what will get output as a #define
+my %DEFINES;
+
+# %BITFIELDS: the various bit field types. The key is the concatenation of
+# all the field values that make up a bit field hash; the values are bit
+# field hash refs.  This allows us to de-dup identical bit field defs
+# across different ops, and thus make the output tables more compact (esp
+# important for the C version)
+my %BITFIELDS;
+
+# %FLAGS: the main data structure. Indexed by op name, then bit index:
+# single bit flag:
+#   $FLAGS{rv2av}{2} = 'OPpSLICEWARNING';
+# bit field (bits 5 and 6):
+#   $FLAGS{rv2av}{5} = $FLAGS{rv2av}{6} = { .... };
+my %FLAGS;
+
+
+# do, with checking, $LABELS{$name} = $label
+
+sub add_label {
+    my ($name, $label) = @_;
+    if (exists $LABELS{$name} and $LABELS{$name} ne $label) {
+        croak "addbits(): label for flag '$name' redefined:\n"
+        .  "  was '$LABELS{$name}', now '$label'";
+    }
+    $LABELS{$name} = $label;
+}
+
+#
+# do, with checking, $DEFINES{$name} = $val
+
+sub add_define {
+    my ($name, $val) = @_;
+    if (exists $DEFINES{$name} && $DEFINES{$name} != $val) {
+        croak "addbits(): value for flag '$name' redefined:\n"
+        .  "  was $DEFINES{$name}, now $val";
+    }
+    $DEFINES{$name} = $val;
+}
+
+
+# intended to be called from regen/op_private; see that file for details
+
+sub ::addbits {
+    my @args = @_;
+
+    croak "too few arguments for addbits()" unless @args >= 3;
+    my $op = shift @args;
+    croak "invalid op name: '$op'" unless exists $opnum{$op};
+
+    while (@args) {
+        my $bits = shift @args;
+        if ($bits =~ /^[0-7]$/) {
+            # single bit
+            croak "addbits(): too few arguments for single bit flag"
+                unless @args >= 2;
+            my $flag_name   = shift @args;
+            my $flag_label  = shift @args;
+            add_label($flag_name, $flag_label);
+            croak "addbits(): bit $bits of $op already specified"
+                if defined $FLAGS{$op}{$bits};
+            $FLAGS{$op}{$bits} = $flag_name;
+            add_define($flag_name, (1 << $bits));
+        }
+        elsif ($bits =~ /^([0-7])\.\.([0-7])$/) {
+            # bit range
+            my ($bitmin, $bitmax) = ($1,$2);
+
+            croak "addbits(): min bit > max bit in bit range '$bits'"
+                unless $bitmin <= $bitmax;
+            croak "addbits(): bit field argument missing"
+                unless @args >= 1;
+
+            my $arg_hash = shift @args;
+            croak "addbits(): arg to $bits must be a hash ref"
+                unless defined $arg_hash and ref($arg_hash) =~ /HASH/;
+
+            my %valid_keys;
+            @valid_keys{qw(baseshift_def bitcount_def mask_def label enum)} = ();
+            for (keys %$arg_hash) {
+                croak "addbits(): unrecognised bifield key: '$_'"
+                    unless exists $valid_keys{$_};
+            }
+
+            my $bitmask = 0;
+            $bitmask += (1 << $_) for $bitmin..$bitmax;
+
+            my $enum_id ='';
+
+            if (defined $arg_hash->{enum}) {
+                my $enum = $arg_hash->{enum};
+                croak "addbits(): arg to enum must be an array ref"
+                    unless defined $enum and ref($enum) =~ /ARRAY/;
+                croak "addbits(): enum list must be in triplets"
+                    unless @$enum % 3 == 0;
+
+                my $max_id = (1 << ($bitmax - $bitmin + 1)) - 1;
+
+                my @e = @$enum;
+                while (@e) {
+                    my $enum_ix     = shift @e;
+                    my $enum_name   = shift @e;
+                    my $enum_label  = shift @e;
+                    croak "addbits(): enum index must be a number: '$enum_ix'"
+                        unless $enum_ix =~ /^\d+$/;
+                    croak "addbits(): enum index too big: '$enum_ix'"
+                        unless $enum_ix  <= $max_id;
+                    add_label($enum_name, $enum_label);
+                    add_define($enum_name, $enum_ix << $bitmin);
+                    $enum_id .= "($enum_ix:$enum_name:$enum_label)";
+                }
+            }
+
+            # id is a fingerprint of all the content of the bit field hash
+            my $id = join ':', map defined() ? $_ : "-undef-",
+                $bitmin, $bitmax,
+                $arg_hash->{label},
+                $arg_hash->{mask_def},
+                $arg_hash->{baseshift_def},
+                $arg_hash->{bitcount_def},
+                $enum_id;
+
+            unless (defined $BITFIELDS{$id}) {
+
+                if (defined $arg_hash->{mask_def}) {
+                    add_define($arg_hash->{mask_def}, $bitmask);
+                }
+
+                if (defined $arg_hash->{baseshift_def}) {
+                    add_define($arg_hash->{baseshift_def}, $bitmin);
+                }
+
+                if (defined $arg_hash->{bitcount_def}) {
+                    add_define($arg_hash->{bitcount_def}, $bitmax-$bitmin+1);
+                }
+
+                # create deep copy
+
+                my $copy = {};
+                for (qw(baseshift_def  bitcount_def mask_def label)) {
+                    $copy->{$_} = $arg_hash->{$_} if defined $arg_hash->{$_};
+                }
+                if (defined $arg_hash->{enum}) {
+                    $copy->{enum} = [ @{$arg_hash->{enum}} ];
+                }
+
+                # and add some extra fields
+
+                $copy->{bitmask} = $bitmask;
+                $copy->{bitmin} = $bitmin;
+                $copy->{bitmax} = $bitmax;
+
+                $BITFIELDS{$id} = $copy;
+            }
+
+            for my $bit ($bitmin..$bitmax) {
+                croak "addbits(): bit $bit of $op already specified"
+                    if defined $FLAGS{$op}{$bit};
+                $FLAGS{$op}{$bit} = $BITFIELDS{$id};
+            }
+        }
+        else {
+            croak "addbits(): invalid bit specifier '$bits'";
+        }
+    }
+}
+
+
+# intended to be called from regen/op_private; see that file for details
+
+sub ::ops_with_flag {
+    my $flag = shift;
+    return grep $flags{$_} =~ /\Q$flag/, sort keys %flags;
+}
+
+
+# intended to be called from regen/op_private; see that file for details
+
+sub ::ops_with_check {
+    my $c = shift;
+    return grep $check{$_} eq $c, sort keys %check;
+}
+
+
+# intended to be called from regen/op_private; see that file for details
+
+sub ::ops_with_arg {
+    my ($i, $arg_type) = @_;
+    my @ops;
+    for my $op (sort keys %args) {
+        my @args = split(' ',$args{$op});
+        push @ops, $op if defined $args[$i] and $args[$i] eq $arg_type;
+    }
+    @ops;
+}
+
+
+# output '#define OPpLVAL_INTRO 0x80' etc
+
+sub print_defines {
+    my $fh = shift;
+
+    for (sort { $DEFINES{$a} <=> $DEFINES{$b} || $a cmp $b } keys %DEFINES) {
+        printf $fh "#define %-23s 0x%02x\n", $_, $DEFINES{$_};
+    }
+}
+
+
+# Generate the content of B::Op_private
+
+sub print_B_Op_private {
+    my $fh = shift;
+
+    my $header = <<'EOF';
+@=head1 NAME
+@
+@B::Op_private -  OP op_private flag definitions
+@
+@=head1 SYNOPSIS
+@
+@    use B::Op_private;
+@
+@    # flag details for bit 7 of OP_AELEM's op_private:
+@    my $name  = $B::Op_private::bits{aelem}{7}; # OPpLVAL_INTRO
+@    my $value = $B::Op_private::defines{$name}; # 128
+@    my $label = $B::Op_private::labels{$name};  # LVINTRO
+@
+@    # the bit field at bits 5..6 of OP_AELEM's op_private:
+@    my $bf  = $B::Op_private::bits{aelem}{6};
+@    my $mask = $bf->{bitmask}; # etc
+@
+@=head1 DESCRIPTION
+@
+@This module provides three global hashes:
+@
+@    %B::Op_private::bits
+@    %B::Op_private::defines
+@    %B::Op_private::labels
+@
+@which contain information about the per-op meanings of the bits in the
+@op_private field.
+@
+@=head2 C<%bits>
+@
+@This is indexed by op name and then bit number (0..7). For single bit flags,
+@it returns the name of the define (if any) for that bit:
+@
+@   $B::Op_private::bits{aelem}{7} eq 'OPpLVAL_INTRO';
+@
+@For bit fields, it returns a hash ref containing details about the field.
+@The same reference will be returned for all bit positions that make
+@up the bit field; so for example these both return the same hash ref:
+@
+@    $bitfield = $B::Op_private::bits{aelem}{5};
+@    $bitfield = $B::Op_private::bits{aelem}{6};
+@
+@The general format of this hash ref is
+@
+@    {
+@        # The bit range and mask; these are always present.
+@        bitmin        => 5,
+@        bitmax        => 6,
+@        bitmask       => 0x60,
+@
+@        # (The remaining keys are optional)
+@
+@        # The names of any defines that were requested:
+@        mask_def      => 'OPpFOO_MASK',
+@        baseshift_def => 'OPpFOO_SHIFT',
+@        bitcount_def  => 'OPpFOO_BITS',
+@
+@        # If present, Concise etc will display the value with a 'FOO='
+@        # prefix. If it equals '-', then Concise will treat the bit field
+@        # as raw bits and not try to interpret it.
+@        label         => 'FOO',
+@
+@        # If present, specifies the names of some defines and the display
+@        # labels that are used to assign meaning to particular integer
+@        # values within the bit field; e.g. 3 is displayed as 'C'.
+@        enum          => [ qw(
+@                             1   OPpFOO_A  A
+@                             2   OPpFOO_B  B
+@                             3   OPpFOO_C  C
+@                         )],
+@
+@    };
+@
+@
+@=head2 C<%defines>
+@
+@This gives the value of every C<OPp> define, e.g.
+@
+@    $B::Op_private::defines{OPpLVAL_INTRO} == 128;
+@
+@=head2 C<%labels>
+@
+@This gives the short display label for each define, as used by C<B::Concise>
+@and C<perl -Dx>, e.g.
+@
+@    $B::Op_private::labels{OPpLVAL_INTRO} eq 'LVINTRO';
+@
+@If the label equals '-', then Concise will treat the bit as a raw bit and
+@not try to display it symbolically.
+@
+@=cut
+
+package B::Op_private;
+
+our %bits;
+
+EOF
+    # remove podcheck.t-defeating leading char
+    $header =~ s/^\@//gm;
+    print $fh $header;
+
+    # for each flag/bit combination, find the ops which use it
+    my %combos;
+    for my $op (sort keys %FLAGS) {
+        my $entry = $FLAGS{$op};
+        for my $bit (0..7) {
+            my $e = $entry->{$bit};
+            next unless defined $e;
+            next if ref $e; # bit field, not flag
+            push @{$combos{$e}{$bit}}, $op;
+        }
+    }
+
+    # dump flags used by multiple ops
+    for my $flag (sort keys %combos) {
+        for my $bit (sort keys %{$combos{$flag}}) {
+            my $ops = $combos{$flag}{$bit};
+            next unless @$ops > 1;
+            my @o = sort @$ops;
+            print $fh "\$bits{\$_}{$bit} = '$flag' for qw(@o);\n";
+        }
+    }
+
+    # dump bit field definitions
+
+    my %bitfield_ix;
+    {
+        my %bitfields;
+        # stringified-ref to ref mapping
+        $bitfields{$_} = $_ for values %BITFIELDS;
+        my $ix = -1;
+        my $s = "\nmy \@bf = (\n";
+        for my $bitfield_key (sort keys %BITFIELDS) {
+            my $bitfield = $BITFIELDS{$bitfield_key};
+            $ix++;
+            $bitfield_ix{$bitfield} = $ix;
+
+            $s .= "    {\n";
+            for (qw(label mask_def baseshift_def bitcount_def)) {
+                next unless defined $bitfield->{$_};
+                $s .= sprintf "        %-9s => '%s',\n",
+                            $_,  $bitfield->{$_};
+            }
+            for (qw(bitmin bitmax bitmask)) {
+                croak "panic" unless defined $bitfield->{$_};
+                $s .= sprintf "        %-9s => %d,\n",
+                            $_,  $bitfield->{$_};
+            }
+            if (defined $bitfield->{enum}) {
+                $s .= "        enum      => [\n";
+                my @enum = @{$bitfield->{enum}};
+                while (@enum) {
+                    my $i     = shift @enum;
+                    my $name  = shift @enum;
+                    my $label = shift @enum;
+                    $s .= sprintf "            %d, %-10s, %s,\n",
+                            $i, "'$name'", "'$label'";
+                }
+                $s .= "        ],\n";
+            }
+            $s .= "    },\n";
+
+        }
+        $s .= ");\n";
+        print $fh "$s\n";
+    }
+
+    # dump bitfields and remaining labels
+
+    for my $op (sort keys %FLAGS) {
+        my @indices;
+        my @vals;
+        my $entry = $FLAGS{$op};
+        my $bit;
+
+        for ($bit = 7; $bit >= 0; $bit--) {
+            next unless defined $entry->{$bit};
+            my $e = $entry->{$bit};
+            if (ref $e) {
+                my $ix = $bitfield_ix{$e};
+                for (reverse $e->{bitmin}..$e->{bitmax}) {
+                    push @indices,  $_;
+                    push @vals, "\$bf[$ix]";
+                }
+                $bit = $e->{bitmin};
+            }
+            else {
+                next if @{$combos{$e}{$bit}} > 1;  # already output
+                push @indices, $bit;
+                push @vals, "'$e'";
+            }
+        }
+        if (@indices) {
+            my $s = '';
+            $s = '@{' if @indices > 1;
+            $s .= "\$bits{$op}";
+            $s .= '}' if @indices > 1;
+            $s .= '{' . join(',', @indices) . '} = ';
+            $s .= '(' if @indices > 1;
+            $s .= join ', ', @vals;
+            $s .= ')' if @indices > 1;
+            print $fh "$s;\n";
+        }
+    }
+
+    # populate %defines and %labels
+
+    print  $fh "\n\nour %defines = (\n";
+    printf $fh "    %-23s  => %3d,\n", $_ , $DEFINES{$_} for sort keys %DEFINES;
+    print  $fh ");\n\nour %labels = (\n";
+    printf $fh "    %-23s  => '%s',\n", $_ , $LABELS{$_}  for sort keys %LABELS;
+    print  $fh ");\n";
+
+}
+
+
+
+# output the contents of the assorted PL_op_private_*[] tables
+
+sub print_PL_op_private_tables {
+    my $fh = shift;
+
+    my $PL_op_private_labels     = '';
+    my $PL_op_private_valid      = '';
+    my $PL_op_private_bitdef_ix  = '';
+    my $PL_op_private_bitdefs    = '';
+    my $PL_op_private_bitfields  = '';
+
+    my %label_ix;
+    my %bitfield_ix;
+
+    # generate $PL_op_private_labels
+
+    {
+        my %labs;
+        $labs{$_} = 1 for values %LABELS; # de-duplicate labels
+        # add in bit field labels
+        for (values %BITFIELDS) {
+            next unless defined $_->{label};
+            $labs{$_->{label}} = 1;
+        }
+
+        my $labels = '';
+        for my $lab (sort keys %labs) {
+            $label_ix{$lab} = length $labels;
+            $labels .= "$lab\0";
+            $PL_op_private_labels .=
+                  "    "
+                . join(',', map("'$_'", split //, $lab))
+                . ",'\\0',\n";
+        }
+    }
+
+
+    # generate PL_op_private_bitfields
+
+    {
+        my %bitfields;
+        # stringified-ref to ref mapping
+        $bitfields{$_} = $_ for values %BITFIELDS;
+
+        my $ix = 0;
+        for my $bitfield_key (sort keys %BITFIELDS) {
+            my $bf = $BITFIELDS{$bitfield_key};
+            $bitfield_ix{$bf} = $ix;
+
+            my @b;
+            push @b, $bf->{bitmin},
+                defined $bf->{label} ? $label_ix{$bf->{label}} : -1;
+            my $enum = $bf->{enum};
+            if (defined $enum) {
+                my @enum = @$enum;
+                while (@enum) {
+                    my $i     = shift @enum;
+                    my $name  = shift @enum;
+                    my $label = shift @enum;
+                    push @b, $i, $label_ix{$label};
+                }
+            }
+            push @b, -1; # terminate enum list
+
+            $PL_op_private_bitfields .= "    " .  join(', ', @b) .",\n";
+            $ix += @b;
+        }
+    }
+
+
+    # generate PL_op_private_bitdefs, PL_op_private_bitdef_ix
+
+    {
+        my $bitdef_count = 0;
+
+        my %not_seen = %FLAGS;
+
+        my $opnum = -1;
+        for my $op (sort { $opnum{$a} <=> $opnum{$b} } keys %opnum) {
+            $opnum++;
+            die "panic: opnum misorder: opnum=$opnum opnum{op}=$opnum{$op}"
+                unless $opnum == $opnum{$op};
+            delete $not_seen{$op};
+
+            my @bitdefs;
+            my $entry = $FLAGS{$op};
+            my $bit;
+            my $index;
+
+            for ($bit = 7; $bit >= 0; $bit--) {
+                my $e = $entry->{$bit};
+                next unless defined $e;
+
+                my $ix;
+                if (ref $e) {
+                    $ix = $bitfield_ix{$e};
+                    die "panic: \$bit =\= $e->{bitmax}"
+                        unless $bit == $e->{bitmax};
+
+                    push @bitdefs, ( ($ix << 5) | ($bit << 2) | 2 );
+                    $bit = $e->{bitmin};
+                }
+                else {
+                    $ix = $label_ix{$LABELS{$e}};
+                    die "panic: no label ix for '$e'" unless defined $ix;
+                    push @bitdefs, ( ($ix << 5) | ($bit << 2));
+                }
+                if ($ix > 2047) {
+                    die "Too many labels or bitfields (ix=$ix): "
+                    . "maybe the type of PL_op_private_bitdefs needs "
+                    . "expanding from U16 to U32???";
+                }
+            }
+            if (@bitdefs) {
+                $bitdefs[-1] |= 1; # stop bit
+                $index = $bitdef_count;
+                $bitdef_count += @bitdefs;
+                $PL_op_private_bitdefs .= sprintf "    /* %-13s */ %s,\n",
+                        $op,
+                        join(', ', map(sprintf("0x%04x", $_), @bitdefs));
+            }
+            else {
+                $index = -1;
+            }
+            $PL_op_private_bitdef_ix .= sprintf "    %4d, /* %s */\n", $index, $op;
+        }
+        if (%not_seen) {
+            die "panic: unprocessed ops: ". join(',', keys %not_seen);
+        }
+    }
+
+
+    # generate PL_op_private_valid
+
+    for my $op (@ops) {
+        my $last;
+        my @flags;
+        for my $bit (0..7) {
+            next unless exists $FLAGS{$op};
+            my $entry = $FLAGS{$op}{$bit};
+            next unless defined $entry;
+            if (ref $entry) {
+                # skip later entries for the same bit field
+                next if defined $last and $last == $entry;
+                $last = $entry;
+                push @flags,
+                    defined $entry->{mask_def}
+                        ? $entry->{mask_def}
+                        : $entry->{bitmask};
+            }
+            else {
+                push @flags, $entry;
+            }
+        }
+
+        # all bets are off
+        @flags = '0xff' if $op eq 'null' or $op eq 'custom';
+
+        $PL_op_private_valid .= sprintf "    /* %-10s */ (%s),\n", uc($op),
+                                    @flags ? join('|', @flags): '0';
+    }
+
+    print $fh <<EOF;
+START_EXTERN_C
+
+#ifndef PERL_GLOBAL_STRUCT_INIT
+
+#  ifndef DOINIT
+
+/* data about the flags in op_private */
+
+EXTCONST I16  PL_op_private_bitdef_ix[];
+EXTCONST U16  PL_op_private_bitdefs[];
+EXTCONST char PL_op_private_labels[];
+EXTCONST I16  PL_op_private_bitfields[];
+EXTCONST U8   PL_op_private_valid[];
+
+#  else
+
+
+/* PL_op_private_labels[]: the short descriptions of private flags.
+ * All labels are concatenated into a single char array
+ * (separated by \\0's) for compactness.
+ */
+
+EXTCONST char PL_op_private_labels[] = {
+$PL_op_private_labels
+};
+
+
+
+/* PL_op_private_bitfields[]: details about each bit field type.
+ * Each defintition consists of the following list of words:
+ *    bitmin
+ *    label (index into PL_op_private_labels[]; -1 if no label)
+ *    repeat for each enum entry (if any):
+ *       enum value
+ *       enum label (index into PL_op_private_labels[])
+ *    -1
+ */
+
+EXTCONST I16 PL_op_private_bitfields[] = {
+$PL_op_private_bitfields
+};
+
+
+/* PL_op_private_bitdef_ix[]: map an op number to a starting position
+ * in PL_op_private_bitdefs.  If -1, the op has no bits defined */
+
+EXTCONST I16  PL_op_private_bitdef_ix[] = {
+$PL_op_private_bitdef_ix
+};
+
+
+
+/* PL_op_private_bitdefs[]: given a starting position in this array (as
+ * supplied by PL_op_private_bitdef_ix[]), each word (until a stop bit is
+ * seen) defines the meaning of a particular op_private bit for a
+ * particular op. Each word consists of:
+ *  bit  0:     stop bit: this is the last bit def for the current op
+ *  bit  1:     bitfield: if set, this defines a bit field rather than a flag
+ *  bits 2..4:  unsigned number in the range 0..7 which is the bit number
+ *  bits 5..15: unsigned number in the range 0..2047 which is an index
+ *              into PL_op_private_labels[]    (for a flag), or
+ *              into PL_op_private_bitfields[] (for a bit field)
+ */
+
+EXTCONST U16  PL_op_private_bitdefs[] = {
+$PL_op_private_bitdefs
+};
+
+
+/* PL_op_private_valid: for each op, indexed by op_type, indicate which
+ * flags bits in op_private are legal */
+
+EXTCONST U8 PL_op_private_valid[] = {
+$PL_op_private_valid
+};
+
+#  endif /* !DOINIT */
+#endif /* !PERL_GLOBAL_STRUCT_INIT */
+
+END_EXTERN_C
+
+
+EOF
+
+}
+
+
+# =================================================================
+
+
+package main;
+
+# read regen/op_private data
+#
+# This file contains Perl code that builds up some data structures
+# which define what bits in op_private have what meanings for each op.
+# It populates %LABELS, %DEFINES, %FLAGS, %BITFIELDS.
+
+require 'regen/op_private';
+
+#use Data::Dumper;
+#print Dumper \%LABELS, \%DEFINES, \%FLAGS, \%BITFIELDS;
+
 
 # Emit defines.
 
@@ -469,7 +1198,14 @@ my $pp = open_new('pp_proto.h', '>',
     }
     print $pp "PERL_CALLCONV OP *$_(pTHX);\n" foreach sort keys %funcs;
 }
-foreach ($oc, $on, $pp) {
+
+print $oc "\n\n";
+OP_PRIVATE::print_defines($oc);
+OP_PRIVATE::print_PL_op_private_tables($oc);
+
+OP_PRIVATE::print_B_Op_private($oprivpm);
+
+foreach ($oc, $on, $pp, $oprivpm) {
     read_only_bottom_close_and_rename($_);
 }
 

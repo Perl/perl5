@@ -39,6 +39,11 @@ no_usym
 no_wrongref
 op_desc
 op_name
+op_private_bitdef_ix
+op_private_bitdefs
+op_private_bitfields
+op_private_labels
+op_private_valid
 opargs
 phase_names
 ppaddr

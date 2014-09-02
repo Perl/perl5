@@ -1351,6 +1351,7 @@ use File::Glob qw(:case);
                 lib/AnyDBM_File.{pm,t}
                 lib/Benchmark.{pm,t}
                 lib/B/Deparse{.pm,.t,-core.t}
+                lib/B/Op_private.pm
                 lib/CORE.pod
                 lib/Class/Struct.{pm,t}
                 lib/Config.t
