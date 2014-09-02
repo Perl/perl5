@@ -333,6 +333,7 @@ my @warning = (
     'm/[\w-x]/' => 'False [] range "\w-" {#} m/[\w-{#}x]/',
     'm/[a-\pM]/' => 'False [] range "a-\pM" {#} m/[a-\pM{#}]/',
     'm/[\pM-x]/' => 'False [] range "\pM-" {#} m/[\pM-{#}x]/',
+    'm/[\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]/' => 'Using just the first character returned by \N{} in character class {#} m/[\N{U+100{#}.300}]/',
     "m'\\y'"     => 'Unrecognized escape \y passed through {#} m/\y{#}/',
     '/x{3,1}/'   => 'Quantifier {n,m} with n > m can\'t match {#} m/x{3,1}{#}/',
     '/\08/' => '\'\08\' resolved to \'\o{0}8\' {#} m/\08{#}/',

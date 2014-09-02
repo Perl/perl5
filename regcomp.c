@@ -10901,7 +10901,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
                 RExC_parse = endbrace;
                 vFAIL("\\N{} in character class restricted to one character");
             }
-            else {
+            else if (PASS2) {
                 ckWARNreg(endchar, "Using just the first character returned by \\N{} in character class");
             }
         }
