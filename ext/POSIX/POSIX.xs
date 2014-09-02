@@ -139,17 +139,17 @@
    log1p log2 logb lrint nan nearbyint nextafter nexttoward remainder
    remquo rint round scalbn signbit tgamma trunc
 
-  * Berkeley/SVID extensions:
+ * Berkeley/SVID extensions:
 
-    j0 j1 jn y0 y1 yn
+   j0 j1 jn y0 y1 yn
 
-  * Configure already (5.21.0) scans for:
+ * Configure already (5.21.0) scans for:
 
-    fpclassify isfinite isinf isnan ilogb*l* signbit
+   fpclassify isfinite isinf isnan ilogb*l* signbit
 
-  * For floating-point round mode (which matters for e.g. lrint and rint)
+ * For floating-point round mode (which matters for e.g. lrint and rint)
 
-    fegetround fesetround
+   fegetround fesetround
 
 */
 
@@ -521,6 +521,8 @@ static NV my_fmin(NV x, NV y)
 #  define c99_fmin my_fmin
 #endif
 
+#ifndef c99_fpclassify
+
 static IV my_fpclassify(NV x)
 {
 #if defined(HAS_FPCLASSIFY) && defined(FP_PLUS_INF) /* E.g. HP-UX */
@@ -589,6 +591,8 @@ static IV my_fpclassify(NV x)
   return -1;
 #endif
 }
+
+#endif
 
 #ifndef c99_hypot
 static NV my_hypot(NV x, NV y)
