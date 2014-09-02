@@ -126,6 +126,13 @@ SKIP: {
     is(trunc(-2.5), -2, "trunc -2.5");
     is(trunc(2.75), 2, "trunc 2.75");
     is(trunc(-2.75), -2, "trunc -2.75");
+    ok(isless(1, 2), "isless 1 2");
+    ok(!isless(2, 1), "isless 2 1");
+    ok(!isless(1, 1), "isless 1 1");
+    ok(!isless(1, NaN), "isless 1 NaN");
+    ok(isgreater(2, 1), "isgreater 2 1");
+    ok(islessequal(1, 1), "islessequal 1 1");
+    ok(isunordered(1, NaN), "isunordered 1 NaN");
     cmp_ok(abs(erf(1) - 0.842700792949715), '<', 1.2e-7, "erf 1");
 }
 
