@@ -9,6 +9,10 @@ BEGIN {
     require './test.pl';
     @INC = () unless is_miniperl();
     unshift @INC, '../lib';
+    if (is_miniperl()) {
+        skip_all_if_miniperl("Unicode tables not built yet")
+            unless eval 'require "unicore/Heavy.pl"';
+    }
     require Config; import Config;
     require './loc_tools.pl';   # Contains find_utf8_ctype_locale()
 }
