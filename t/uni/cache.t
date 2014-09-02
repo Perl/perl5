@@ -2,10 +2,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    if (is_miniperl()) {
-        skip_all_if_miniperl("Unicode tables not built yet")
-            unless eval 'require "unicore/Heavy.pl"';
-    }
+    skip_all_without_unicode_tables();
 }
 
 plan tests => 1;

@@ -164,6 +164,13 @@ sub skip_all_without_config {
     }
 }
 
+sub skip_all_without_unicode_tables { # (but only under miniperl)
+    if (is_miniperl()) {
+        skip_all_if_miniperl("Unicode tables not built yet")
+            unless eval 'require "unicore/Heavy.pl"';
+    }
+}
+
 sub find_git_or_skip {
     my ($source_dir, $reason);
     if (-d '.git') {

@@ -7,10 +7,7 @@ BEGIN {
     require './test.pl';
     set_up_inc('../lib');
     require Config; import Config;
-    if (is_miniperl()) {
-        skip_all_if_miniperl("Unicode tables not built yet")
-            unless eval 'require "unicore/Heavy.pl"';
-    }
+    skip_all_without_unicode_tables();
     require './charset_tools.pl';
     require './loc_tools.pl';   # Contains find_utf8_ctype_locale()
 }
