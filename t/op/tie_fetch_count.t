@@ -6,8 +6,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    @INC = () unless is_miniperl();
-    unshift @INC, '../lib';
+    set_up_inc('../lib');
     plan (tests => 312);
 }
 

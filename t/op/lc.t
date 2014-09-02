@@ -5,8 +5,7 @@
 BEGIN {
     chdir 't';
     require './test.pl';
-    @INC = () unless is_miniperl();
-    unshift @INC, '../lib';
+    set_up_inc('../lib');
     require Config; import Config;
     if (is_miniperl()) {
         skip_all_if_miniperl("Unicode tables not built yet")

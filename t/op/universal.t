@@ -6,8 +6,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    @INC = () unless is_miniperl();
-    unshift @INC, qw '../lib ../dist/base/lib';
+    set_up_inc(qw '../lib ../dist/base/lib');
     $| = 1;
     require "./test.pl";
 }

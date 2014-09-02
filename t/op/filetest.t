@@ -6,8 +6,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    @INC = () unless is_miniperl();
-    unshift @INC, qw '../lib ../cpan/Perl-OSType/lib';
+    set_up_inc(qw '../lib ../cpan/Perl-OSType/lib');
 }
 
 plan(tests => 53 + 27*14);

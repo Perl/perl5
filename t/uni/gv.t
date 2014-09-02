@@ -7,8 +7,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    @INC = () unless is_miniperl();
-    unshift @INC, '../lib';
+    set_up_inc('../lib');
     if (is_miniperl()) {
         skip_all_if_miniperl("Unicode tables not built yet")
             unless eval 'require "unicore/Heavy.pl"';

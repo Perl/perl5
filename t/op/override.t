@@ -3,8 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    @INC = () unless is_miniperl();
-    unshift @INC, qw '../lib ../cpan/Text-ParseWords/lib';
+    set_up_inc(qw '../lib ../cpan/Text-ParseWords/lib');
     require Config; # load these before we mess with *CORE::GLOBAL::require
     require 'Config_heavy.pl'; # since runperl will need them
 }

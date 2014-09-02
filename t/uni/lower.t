@@ -1,8 +1,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require "uni/case.pl";
-    @INC = () unless is_miniperl();
-    unshift @INC, qw(../lib .);
+    set_up_inc(qw(../lib .));
 }
 
 casetest(0, # No extra tests run here,

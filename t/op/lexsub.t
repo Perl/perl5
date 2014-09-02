@@ -3,8 +3,7 @@
 BEGIN {
     chdir 't';
     require './test.pl';
-    @INC = () unless is_miniperl();
-    unshift @INC, '../lib';
+    set_up_inc('../lib');
     *bar::is = *is;
     *bar::like = *like;
 }
