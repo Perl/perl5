@@ -20651,20 +20651,29 @@ else
 	fi
 fi
 
-if $test X"$uselongdouble" = X"$define" -a X"$d_longdbl" = X"$define" -a X"$d_PRIgldbl" = X"$define"; then
+if $test X"$usequadmath" = X"$define"; then
+    nveformat='"Qe"'
+    nvfformat='"Qf"'
+    nvgformat='"Qg"'
+    nvEUformat='"QE"'
+    nvFUformat='"QF"'
+    nvGUformat='"QG"'
+else
+    if $test X"$uselongdouble" = X"$define" -a X"$d_longdbl" = X"$define" -a X"$d_PRIgldbl" = X"$define"; then
 	nveformat="$sPRIeldbl"
 	nvfformat="$sPRIfldbl"
 	nvgformat="$sPRIgldbl"
 	nvEUformat="$sPRIEUldbl"
 	nvFUformat="$sPRIFUldbl"
 	nvGUformat="$sPRIGUldbl"
-else
+    else
 	nveformat='"e"'
 	nvfformat='"f"'
 	nvgformat='"g"'
 	nvEUformat='"E"'
 	nvFUformat='"F"'
 	nvGUformat='"G"'
+    fi
 fi
 
 case "$ivdformat" in
