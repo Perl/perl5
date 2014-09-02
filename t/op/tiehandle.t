@@ -2,14 +2,15 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    require './test.pl';
+    @INC = () unless is_miniperl();
+    unshift @INC, qw '../lib ../dist/base/lib';
 }
 
 my @expect;
 my $data = "";
 my @data = ();
 
-require './test.pl';
 plan(tests => 67);
 
 sub compare {
