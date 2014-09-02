@@ -4,8 +4,9 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(. ../lib);
     require './test.pl';
+    @INC = () unless is_miniperl();
+    unshift @INC, '../lib';
 }
 
 use Config;
