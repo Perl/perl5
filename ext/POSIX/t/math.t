@@ -134,7 +134,7 @@ SKIP: {
     ok(isgreater(2, 1), "isgreater 2 1");
     ok(islessequal(1, 1), "islessequal 1 1");
     ok(isunordered(1, NaN), "isunordered 1 NaN");
-    cmp_ok(abs(erf(1) - 0.842700792949715), '<', 1.2e-7, "erf 1");
+    cmp_ok(abs(erf(1) - 0.842700792949715), '<', 1.5e-7, "erf 1");
 }
 
 done_testing();
