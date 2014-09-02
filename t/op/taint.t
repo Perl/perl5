@@ -2384,12 +2384,18 @@ $_ = "$TAINT".reset "x";
 is eval { eval $::x.1 }, 1, 'reset does not taint undef';
 
 # [perl #122669]
-is runperl(
-   switches => [ '-T' ],
-   prog => 'use constant K=>$^X; 0 if K; BEGIN{} use strict; print 122669, qq-\n-',
-   stderr => 1,
- ), "122669\n",
-    'tainted constant as logop condition should not prevent "use"';
+{
+    # See the comment above the first formline test.
+    local $ENV{PATH} = $ENV{PATH};
+    $ENV{PATH} = $old_env_path if $Is_MSWin32;
+    is runperl(
+       switches => [ '-T' ],
+       prog => 'use constant K=>$^X; 0 if K; BEGIN{} use strict; '
+              .'print 122669, qq-\n-',
+       stderr => 1,
+     ), "122669\n",
+        'tainted constant as logop condition should not prevent "use"';
+}
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {
