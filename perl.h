@@ -2052,6 +2052,9 @@ EXTERN_C long double modfl(long double, long double *);
 #    ifdef __VMS
      /* FP_INFINITE and others are here rather than in math.h as C99 stipulates */
 #        include <fp.h>
+     /* oh, and the isnormal macro has a typo in it! */
+#    undef isnormal
+#    define isnormal(x) Perl_fp_class_norm(x)
 #    endif
 #    if defined(FP_INFINITE) && defined(FP_NAN)
 #        define Perl_fp_class(x)	fp_classify(x)
