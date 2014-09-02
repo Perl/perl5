@@ -5,6 +5,7 @@
 
 BEGIN {
     require './test.pl';
+    skip_all_without_unicode_tables();
 }
 
 plan (tests => 52);
