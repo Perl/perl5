@@ -84,6 +84,7 @@ SKIP: {
       is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
     }
     is(hypot(3, 4), 5, "hypot 3 4");
+    is(hypot(-2, 1), sqrt(5), "hypot -1 2");
     is(ilogb(255), 7, "ilogb 255");
     is(ilogb(256), 8, "ilogb 256");
   SKIP: {
