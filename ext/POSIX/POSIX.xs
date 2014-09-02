@@ -332,7 +332,7 @@
 
 /* XXX Regarding C99 math.h, VMS seems to be missing these:
 
-  nan nearbyint round scalbn
+  nan nearbyint round scalbn llrint
  */
 
 #ifdef __VMS
@@ -340,6 +340,10 @@
 #    undef c99_nearbyint
 #    undef c99_round
 #    undef c99_scalbn
+/* Have lrint but not llrint. */
+#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
+#      undef c99_lrint
+#    endif
 #endif
 
 /* XXX Regarding C99 math.h, Win32 seems to be missing these:
