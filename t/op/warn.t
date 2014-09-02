@@ -3,8 +3,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';
+    @INC = () unless is_miniperl(); unshift @INC, '../lib';
 }
 
 plan 32;
