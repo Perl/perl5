@@ -27,6 +27,8 @@ tie %h, Tie::StdHash;
 untie %h;
 EXPECT
 ########
+# SKIP !defined &DynaLoader::boot_DynaLoader && !eval 'require base'
+# (skip under miniperl if base.pm is not in lib/ yet)
 
 # standard behaviour, without any extra references
 use Tie::Hash ;
