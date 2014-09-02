@@ -18,6 +18,10 @@ BEGIN {
     @INC = ('../lib','.','../ext/re');
     require Config; import Config;
     require './test.pl';
+    if (is_miniperl()) {
+        skip_all_if_miniperl("Unicode tables not built yet")
+            unless eval 'require "unicore/Heavy.pl"';
+    }
 }
 
 plan tests => 739;  # Update this when adding/deleting tests.
