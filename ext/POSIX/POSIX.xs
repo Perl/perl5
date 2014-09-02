@@ -621,11 +621,21 @@ static IV my_fpclassify(NV x)
 #ifndef c99_hypot
 static NV my_hypot(NV x, NV y)
 {
-  if (x > 0.0) {
-    NV t = y / x;
-    return PERL_ABS(x) * Perl_sqrt(1 + t * t);
+  /* http://en.wikipedia.org/wiki/Hypot */
+  NV t;
+  x = PERL_ABS(x); /* Take absolute values. */
+  if (y == 0)
+    return x;
+  if (Perl_isnan(y))
+    return NV_INF;
+  y = PERL_ABS(y);
+  if (x < y) { /* Swap so that y is less. */
+    t = x;
+    x = y;
+    y = t;
   }
-  return NV_NAN;
+  t = y / x;
+  return x * sqrt(1.0 + t * t);
 }
 #  define c99_hypot my_hypot
 #endif
