@@ -1,4 +1,7 @@
-require "test.pl";
+BEGIN {
+    require "test.pl";
+    set_up_inc(qw(../lib .));
+}
 use strict;
 use warnings;
 
