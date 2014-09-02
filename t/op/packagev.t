@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't';
-    @INC = '../lib';
+    @INC = qw '../lib ../cpan/version/lib';
     require './test.pl';
 }
 
