@@ -158,12 +158,13 @@
 /* XXX Add ldiv(), lldiv()?  It's C99, but from stdlib.h, not math.h  */
 
 /* XXX Beware old gamma() -- one cannot know whether that is the
-   gamma or the log of gamma, that's why the new tgamma and lgamma. */
+ * gamma or the log of gamma, that's why the new tgamma and lgamma.
+ * Though also remember tgamma_r and lgamma_r. */
 
 /* XXX The truthiness of acosh() is the canary for all of the
  * C99 math.  This is very likely wrong, especially in non-UNIX lands
- * like Win32 and VMS, but also older UNIXes have issues.  For Win32
- * we later do some undefines for these interfaces.
+ * like Win32 and VMS, but also older UNIXes have issues.  For Win32,
+ * and other non-fully-C99, we later do some undefines for these interfaces.
  *
  * But we are very trying very hard to avoid introducing separate Configure
  * symbols for all the 40-ish new math symbols.  Especially since the set
@@ -1902,7 +1903,9 @@ acos(x)
 #endif
 	    break;
 	case 16:
-        /* XXX lgamma_r */
+        /* XXX lgamma_r -- the lgamma accesses a global variable (signgam),
+         * which is evil.  Some platforms have lgamma_r, which has
+         * extra parameter instead of the global variable. */
 #ifdef c99_lgamma
 	    RETVAL = c99_lgamma(x);
 #else
@@ -1964,7 +1967,9 @@ acos(x)
 	    RETVAL = tanh(x); /* C89 math */
 	    break;
 	case 27:
-        /* XXX tgamma_r */
+        /* XXX tgamma_r -- the lgamma accesses a global variable (signgam),
+         * which is evil.  Some platforms have tgamma_r, which has
+         * extra parameter instead of the global variable. */
 #ifdef c99_tgamma
 	    RETVAL = c99_tgamma(x);
 #else
