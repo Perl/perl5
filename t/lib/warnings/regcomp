@@ -1,5 +1,6 @@
   regcomp.c	These tests have been moved to t/re/reg_mesg.t
-		except for those that explicitly test line numbers.
+		except for those that explicitly test line numbers
+                and those that don't have a <-- HERE in them.
 
 __END__
 use warnings 'regexp';
@@ -7,3 +8,25 @@ $r=qr/(??{ q"\\b+" })/;
 "a" =~ /a$r/; # warning should come from this line
 EXPECT
 \b+ matches null string many times in regex; marked by <-- HERE in m/\b+ <-- HERE / at - line 3.
+########
+# regcomp.c
+use warnings 'digit' ;
+my $a = qr/\o{1238456}\x{100}/;
+my $a = qr/[\o{6548321}]\x{100}/;
+no warnings 'digit' ;
+my $a = qr/\o{1238456}\x{100}/;
+my $a = qr/[\o{6548321}]\x{100}/;
+EXPECT
+Non-octal character '8'.  Resolved as "\o{123}" at - line 3.
+Non-octal character '8'.  Resolved as "\o{654}" at - line 4.
+########
+# regcomp.c.c
+use warnings;
+$a = qr/\c,/;
+$a = qr/[\c,]/;
+no warnings 'syntax';
+$a = qr/\c,/;
+$a = qr/[\c,]/;
+EXPECT
+"\c," is more clearly written simply as "l" at - line 3.
+"\c," is more clearly written simply as "l" at - line 4.

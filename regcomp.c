@@ -570,80 +570,85 @@ static const scan_data_t zero_scan_data =
             REPORT_LOCATION_ARGS(offset));         \
 } STMT_END
 
+/* These have asserts in them because of [perl #122671] Many warnings in
+ * regcomp.c can occur twice.  If they get output in pass1 and later in that
+ * pass, the pattern has to be converted to UTF-8 and the pass restarted, they
+ * would get output again.  So they should be output in pass2, and these
+ * asserts make sure new warnings follow that paradigm. */
 
 /* m is not necessarily a "literal string", in this macro */
 #define reg_warn_non_literal_string(loc, m) STMT_START {                \
     const IV offset = loc - RExC_precomp;                               \
-    Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s" REPORT_LOCATION,      \
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s" REPORT_LOCATION,      \
             m, REPORT_LOCATION_ARGS(offset));       \
 } STMT_END
 
 #define	ckWARNreg(loc,m) STMT_START {					\
     const IV offset = loc - RExC_precomp;				\
-    Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
+    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
 	    REPORT_LOCATION_ARGS(offset));		\
 } STMT_END
 
 #define	vWARN_dep(loc, m) STMT_START {				        \
     const IV offset = loc - RExC_precomp;				\
-    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), m REPORT_LOCATION,	\
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), m REPORT_LOCATION,	\
 	    REPORT_LOCATION_ARGS(offset));	        \
 } STMT_END
 
 #define	ckWARNdep(loc,m) STMT_START {				        \
     const IV offset = loc - RExC_precomp;				\
-    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),	                \
+    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),	                \
 	    m REPORT_LOCATION,						\
 	    REPORT_LOCATION_ARGS(offset));		\
 } STMT_END
 
 #define	ckWARNregdep(loc,m) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
-    Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),	\
+    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),	\
 	    m REPORT_LOCATION,						\
 	    REPORT_LOCATION_ARGS(offset));		\
 } STMT_END
 
 #define	ckWARN2reg_d(loc,m, a1) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
-    Perl_ck_warner_d(aTHX_ packWARN(WARN_REGEXP),			\
+    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN(WARN_REGEXP),			\
 	    m REPORT_LOCATION,						\
 	    a1, REPORT_LOCATION_ARGS(offset));	\
 } STMT_END
 
 #define	ckWARN2reg(loc, m, a1) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
-    Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
+    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
 	    a1, REPORT_LOCATION_ARGS(offset));	\
 } STMT_END
 
 #define	vWARN3(loc, m, a1, a2) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
-    Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
 	    a1, a2, REPORT_LOCATION_ARGS(offset));	\
 } STMT_END
 
 #define	ckWARN3reg(loc, m, a1, a2) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
-    Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
+    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
 	    a1, a2, REPORT_LOCATION_ARGS(offset));	\
 } STMT_END
 
 #define	vWARN4(loc, m, a1, a2, a3) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
-    Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
 	    a1, a2, a3, REPORT_LOCATION_ARGS(offset)); \
 } STMT_END
 
 #define	ckWARN4reg(loc, m, a1, a2, a3) STMT_START {			\
     const IV offset = loc - RExC_precomp;				\
-    Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
+    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
 	    a1, a2, a3, REPORT_LOCATION_ARGS(offset)); \
 } STMT_END
 
 #define	vWARN5(loc, m, a1, a2, a3, a4) STMT_START {			\
     const IV offset = loc - RExC_precomp;				\
-    Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
 	    a1, a2, a3, a4, REPORT_LOCATION_ARGS(offset)); \
 } STMT_END
 
@@ -9380,7 +9385,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 /*NOTREACHED*/
             case ONCE_PAT_MOD: /* 'o' */
             case GLOBAL_PAT_MOD: /* 'g' */
-                if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
+                if (PASS2 && ckWARN(WARN_REGEXP)) {
                     const I32 wflagbit = *RExC_parse == 'o'
                                          ? WASTED_O
                                          : WASTED_G;
@@ -9400,7 +9405,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 break;
 
             case CONTINUE_PAT_MOD: /* 'c' */
-                if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
+                if (PASS2 && ckWARN(WARN_REGEXP)) {
                     if (! (wastedflags & WASTED_C) ) {
                         wastedflags |= WASTED_GC;
 			/* diag_listed_as: Useless (?-%s) - don't use /%s modifier in regex; marked by <-- HERE in m/%s/ */
@@ -9415,7 +9420,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 break;
             case KEEPCOPY_PAT_MOD: /* 'p' */
                 if (flagsp == &negflags) {
-                    if (SIZE_ONLY)
+                    if (PASS2)
                         ckWARNreg(RExC_parse + 1,"Useless use of (?-p)");
                 } else {
                     *flagsp |= RXf_PMf_KEEPCOPY;
@@ -10547,7 +10552,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             if (max < min) {    /* If can't match, warn and optimize to fail
                                    unconditionally */
                 if (SIZE_ONLY) {
-                    ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
 
                     /* We can't back off the size because we have to reserve
                      * enough space for all the things we are about to throw
@@ -10556,6 +10560,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     RExC_size = PREVOPER(RExC_size) - regarglen[(U8)OPFAIL];
                 }
                 else {
+                    ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
                     RExC_emit = orig_emit;
                 }
                 ret = reg_node(pRExC_state, OPFAIL);
@@ -10565,7 +10570,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      && RExC_parse < RExC_end
                      && (*RExC_parse == '?' || *RExC_parse == '+'))
             {
-                if (SIZE_ONLY) {
+                if (PASS2) {
                     ckWARN2reg(RExC_parse + 1,
                                "Useless use of greediness modifier '%c'",
                                *RExC_parse);
@@ -10837,7 +10842,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
 	    *node_p = reg_node(pRExC_state,NOTHING);
 	}
         else if (in_char_class) {
-            if (SIZE_ONLY && in_char_class) {
+            if (PASS2 && in_char_class) {
                 if (strict) {
                     RExC_parse++;   /* Position after the "}" */
                     vFAIL("Zero length \\N{}");
@@ -11430,7 +11435,7 @@ tryagain:
 	    ret = reg_node(pRExC_state, CANY);
             RExC_seen |= REG_CANY_SEEN;
 	    *flagp |= HASWIDTH|SIMPLE;
-            if (SIZE_ONLY) {
+            if (PASS2) {
                 ckWARNdep(RExC_parse+1, "\\C is deprecated");
             }
 	    goto finish_meta_pat;
@@ -11930,7 +11935,7 @@ tryagain:
 			    bool valid = grok_bslash_o(&p,
 						       &result,
 						       &error_msg,
-						       TRUE, /* out warnings */
+						       PASS2, /* out warnings */
                                                        FALSE, /* not strict */
                                                        TRUE, /* Output warnings
                                                                 for non-
@@ -11959,7 +11964,7 @@ tryagain:
 			    bool valid = grok_bslash_x(&p,
 						       &result,
 						       &error_msg,
-						       TRUE, /* out warnings */
+						       PASS2, /* out warnings */
                                                        FALSE, /* not strict */
                                                        TRUE, /* Output warnings
                                                                 for non-
@@ -11982,7 +11987,7 @@ tryagain:
 			}
 		    case 'c':
 			p++;
-			ender = grok_bslash_c(*p++, SIZE_ONLY);
+			ender = grok_bslash_c(*p++, PASS2);
 			break;
                     case '8': case '9': /* must be a backreference */
                         --p;
@@ -12021,7 +12026,7 @@ tryagain:
 				REQUIRE_UTF8;
 			    }
 			    p += numlen;
-                            if (SIZE_ONLY   /* like \08, \178 */
+                            if (PASS2   /* like \08, \178 */
                                 && numlen < 3
                                 && p < RExC_end
                                 && isDIGIT(*p) && ckWARN(WARN_REGEXP))
@@ -12038,7 +12043,7 @@ tryagain:
 			if (! RExC_override_recoding) {
 			    SV* enc = PL_encoding;
 			    ender = reg_recode((const char)(U8)ender, &enc);
-			    if (!enc && SIZE_ONLY)
+			    if (!enc && PASS2)
 				ckWARNreg(p, "Invalid escape in the specified encoding");
 			    REQUIRE_UTF8;
 			}
@@ -12772,9 +12777,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
      * upon an unescaped ']' that isn't one ending a regclass.  To do both
      * these things, we need to realize that something preceded by a backslash
      * is escaped, so we have to keep track of backslashes */
-    if (SIZE_ONLY) {
-        UV depth = 0; /* how many nested (?[...]) constructs */
-
+    if (PASS2) {
         Perl_ck_warner_d(aTHX_
             packWARN(WARN_EXPERIMENTAL__REGEX_SETS),
             "The regex_sets feature is experimental" REPORT_LOCATION,
@@ -12782,6 +12785,9 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                 UTF8fARG(UTF,
                          RExC_end - RExC_start - (RExC_parse - RExC_precomp),
                          RExC_precomp + (RExC_parse - RExC_precomp)));
+    }
+    else {
+        UV depth = 0; /* how many nested (?[...]) constructs */
 
         while (RExC_parse < RExC_end) {
             SV* current = NULL;
@@ -13282,7 +13288,9 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
         default:
             /* Use deprecated warning to increase the chances of this being
              * output */
-            ckWARN2reg_d(RExC_parse, "Perl folding rules are not up-to-date for 0x%02X; please use the perlbug utility to report;", cp);
+            if (PASS2) {
+                ckWARN2reg_d(RExC_parse, "Perl folding rules are not up-to-date for 0x%02X; please use the perlbug utility to report;", cp);
+            }
             break;
     }
 }
@@ -13750,8 +13758,8 @@ parseit:
 		    bool valid = grok_bslash_o(&RExC_parse,
 					       &value,
 					       &error_msg,
-                                               SIZE_ONLY,   /* warnings in pass
-                                                               1 only */
+                                               PASS2,   /* warnings only in
+                                                           pass 2 */
                                                strict,
                                                silence_non_portable,
                                                UTF);
@@ -13770,7 +13778,7 @@ parseit:
 		    bool valid = grok_bslash_x(&RExC_parse,
 					       &value,
 					       &error_msg,
-					       TRUE, /* Output warnings */
+					       PASS2, /* Output warnings */
                                                strict,
                                                silence_non_portable,
                                                UTF);
@@ -13782,7 +13790,7 @@ parseit:
 		    goto recode_encoding;
 		break;
 	    case 'c':
-		value = grok_bslash_c(*RExC_parse++, SIZE_ONLY);
+		value = grok_bslash_c(*RExC_parse++, PASS2);
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7':
@@ -13822,7 +13830,7 @@ parseit:
                         if (strict) {
                             vFAIL("Invalid escape in the specified encoding");
                         }
-                        else if (SIZE_ONLY) {
+                        else if (PASS2) {
                             ckWARNreg(RExC_parse,
 				  "Invalid escape in the specified encoding");
                         }

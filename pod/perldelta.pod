@@ -437,6 +437,12 @@ Stub declarations like C<sub f;> and C<sub f ();> no longer wipe out
 constants of the same name declared by C<use constant>.  This bug was
 introduced in perl 5.10.0.
 
+=item *
+
+Under some conditions a warning raised in compilation of regular
+expression patterns could be displayed multiple times.  This is now
+fixed.
+
 =back
 
 =head1 Known Problems

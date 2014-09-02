@@ -320,21 +320,23 @@ push @death, @death_utf8;
 # In the following arrays of warnings, the value can be an array of things to
 # expect.  If the empty string, it means no warning should be raised.
 
-##
-## Key-value pairs of code/error of code that should have non-fatal regexp warnings.
-##
+
+# Key-value pairs of code/error of code that should have non-fatal regexp
+# warnings.  Most currently have \x{100} appended to them to force them to be
+# upgraded to UTF-8, and the first pass restarted.  Previously this would
+# cause some warnings to be output twice.  This tests that that behavior has
+# been fixed.
+
 my @warning = (
-    'm/\b*/' => '\b* matches null string many times {#} m/\b*{#}/',
-    'm/[:blank:]/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:blank:]{#}/',
-
-    "m'[\\y]'"     => 'Unrecognized escape \y in character class passed through {#} m/[\y{#}]/',
-
-    'm/[a-\d]/' => 'False [] range "a-\d" {#} m/[a-\d{#}]/',
-    'm/[\w-x]/' => 'False [] range "\w-" {#} m/[\w-{#}x]/',
-    'm/[a-\pM]/' => 'False [] range "a-\pM" {#} m/[a-\pM{#}]/',
-    'm/[\pM-x]/' => 'False [] range "\pM-" {#} m/[\pM-{#}x]/',
+    'm/\b*\x{100}/' => '\b* matches null string many times {#} m/\b*{#}\x{100}/',
+    'm/[:blank:]\x{100}/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:blank:]{#}\x{100}/',
+    "m'[\\y]\\x{100}'"     => 'Unrecognized escape \y in character class passed through {#} m/[\y{#}]\x{100}/',
+    'm/[a-\d]\x{100}/' => 'False [] range "a-\d" {#} m/[a-\d{#}]\x{100}/',
+    'm/[\w-x]\x{100}/' => 'False [] range "\w-" {#} m/[\w-{#}x]\x{100}/',
+    'm/[a-\pM]\x{100}/' => 'False [] range "a-\pM" {#} m/[a-\pM{#}]\x{100}/',
+    'm/[\pM-x]\x{100}/' => 'False [] range "\pM-" {#} m/[\pM-{#}x]\x{100}/',
     'm/[\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]/' => 'Using just the first character returned by \N{} in character class {#} m/[\N{U+100{#}.300}]/',
-    "m'\\y'"     => 'Unrecognized escape \y passed through {#} m/\y{#}/',
+    "m'\\y\\x{100}'"     => 'Unrecognized escape \y passed through {#} m/\y{#}\x{100}/',
     '/x{3,1}/'   => 'Quantifier {n,m} with n > m can\'t match {#} m/x{3,1}{#}/',
     '/\08/' => '\'\08\' resolved to \'\o{0}8\' {#} m/\08{#}/',
     '/\018/' => '\'\018\' resolved to \'\o{1}8\' {#} m/\018{#}/',
@@ -343,52 +345,59 @@ my @warning = (
     '/(?=a)*/' => '(?=a)* matches null string many times {#} m/(?=a)*{#}/',
     'my $x = \'\m\'; qr/a$x/' => 'Unrecognized escape \m passed through {#} m/a\m{#}/',
     '/\q/' => 'Unrecognized escape \q passed through {#} m/\q{#}/',
-    '/(?=a){1,3}/' => 'Quantifier unexpected on zero-length expression {#} m/(?=a){1,3}{#}/',
-    '/(a|b)(?=a){3}/' => 'Quantifier unexpected on zero-length expression {#} m/(a|b)(?=a){3}{#}/',
+
+    # Feel free to modify these 2 tests, should they start failing because the
+    # marker of where the problem is becomes wrong.  The current behavior is
+    # bad, always marking at the very end of the regex instead of where the
+    # problem is.  See [perl #122680] regcomp warning gives wrong position of
+    # problem.
+    '/(?=a){1,3}\x{100}/' => 'Quantifier unexpected on zero-length expression {#} m/(?=a){1,3}\x{100}{#}/',
+    '/(a|b)(?=a){3}\x{100}/' => 'Quantifier unexpected on zero-length expression {#} m/(a|b)(?=a){3}\x{100}{#}/',
+
     '/\_/' => "",
     '/[\_\0]/' => "",
     '/[\07]/' => "",
     '/[\006]/' => "",
     '/[\0005]/' => "",
-    '/[\8\9]/' => ['Unrecognized escape \8 in character class passed through {#} m/[\8{#}\9]/',
-                   'Unrecognized escape \9 in character class passed through {#} m/[\8\9{#}]/',
+    '/[\8\9]\x{100}/' => ['Unrecognized escape \8 in character class passed through {#} m/[\8{#}\9]\x{100}/',
+                   'Unrecognized escape \9 in character class passed through {#} m/[\8\9{#}]\x{100}/',
                   ],
-    '/[:alpha:]/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:alpha:]{#}/',
-    '/[:zog:]/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:zog:]{#}/',
-    '/[.zog.]/' => 'POSIX syntax [. .] belongs inside character classes {#} m/[.zog.]{#}/',
+    '/[:alpha:]\x{100}/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:alpha:]{#}\x{100}/',
+    '/[:zog:]\x{100}/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:zog:]{#}\x{100}/',
+    '/[.zog.]\x{100}/' => 'POSIX syntax [. .] belongs inside character classes {#} m/[.zog.]{#}\x{100}/',
     '/[a-b]/' => "",
-    '/[a-\d]/' => 'False [] range "a-\d" {#} m/[a-\d{#}]/',
-    '/[\d-b]/' => 'False [] range "\d-" {#} m/[\d-{#}b]/',
-    '/[\s-\d]/' => 'False [] range "\s-" {#} m/[\s-{#}\d]/',
-    '/[\d-\s]/' => 'False [] range "\d-" {#} m/[\d-{#}\s]/',
-    '/[a-[:digit:]]/' => 'False [] range "a-[:digit:]" {#} m/[a-[:digit:]{#}]/',
-    '/[[:digit:]-b]/' => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}b]/',
-    '/[[:alpha:]-[:digit:]]/' => 'False [] range "[:alpha:]-" {#} m/[[:alpha:]-{#}[:digit:]]/',
-    '/[[:digit:]-[:alpha:]]/' => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}[:alpha:]]/',
-    '/[a\zb]/' => 'Unrecognized escape \z in character class passed through {#} m/[a\z{#}b]/',
-    '/(?c)/' => 'Useless (?c) - use /gc modifier {#} m/(?c{#})/',
-    '/(?-c)/' => 'Useless (?-c) - don\'t use /gc modifier {#} m/(?-c{#})/',
-    '/(?g)/' => 'Useless (?g) - use /g modifier {#} m/(?g{#})/',
-    '/(?-g)/' => 'Useless (?-g) - don\'t use /g modifier {#} m/(?-g{#})/',
-    '/(?o)/' => 'Useless (?o) - use /o modifier {#} m/(?o{#})/',
-    '/(?-o)/' => 'Useless (?-o) - don\'t use /o modifier {#} m/(?-o{#})/',
-    '/(?g-o)/' => [ 'Useless (?g) - use /g modifier {#} m/(?g{#}-o)/',
-                    'Useless (?-o) - don\'t use /o modifier {#} m/(?g-o{#})/',
+    '/[a-\d]\x{100}/' => 'False [] range "a-\d" {#} m/[a-\d{#}]\x{100}/',
+    '/[\d-b]\x{100}/' => 'False [] range "\d-" {#} m/[\d-{#}b]\x{100}/',
+    '/[\s-\d]\x{100}/' => 'False [] range "\s-" {#} m/[\s-{#}\d]\x{100}/',
+    '/[\d-\s]\x{100}/' => 'False [] range "\d-" {#} m/[\d-{#}\s]\x{100}/',
+    '/[a-[:digit:]]\x{100}/' => 'False [] range "a-[:digit:]" {#} m/[a-[:digit:]{#}]\x{100}/',
+    '/[[:digit:]-b]\x{100}/' => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}b]\x{100}/',
+    '/[[:alpha:]-[:digit:]]\x{100}/' => 'False [] range "[:alpha:]-" {#} m/[[:alpha:]-{#}[:digit:]]\x{100}/',
+    '/[[:digit:]-[:alpha:]]\x{100}/' => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}[:alpha:]]\x{100}/',
+    '/[a\zb]\x{100}/' => 'Unrecognized escape \z in character class passed through {#} m/[a\z{#}b]\x{100}/',
+    '/(?c)\x{100}/' => 'Useless (?c) - use /gc modifier {#} m/(?c{#})\x{100}/',
+    '/(?-c)\x{100}/' => 'Useless (?-c) - don\'t use /gc modifier {#} m/(?-c{#})\x{100}/',
+    '/(?g)\x{100}/' => 'Useless (?g) - use /g modifier {#} m/(?g{#})\x{100}/',
+    '/(?-g)\x{100}/' => 'Useless (?-g) - don\'t use /g modifier {#} m/(?-g{#})\x{100}/',
+    '/(?o)\x{100}/' => 'Useless (?o) - use /o modifier {#} m/(?o{#})\x{100}/',
+    '/(?-o)\x{100}/' => 'Useless (?-o) - don\'t use /o modifier {#} m/(?-o{#})\x{100}/',
+    '/(?g-o)\x{100}/' => [ 'Useless (?g) - use /g modifier {#} m/(?g{#}-o)\x{100}/',
+                    'Useless (?-o) - don\'t use /o modifier {#} m/(?g-o{#})\x{100}/',
                   ],
-    '/(?g-c)/' => [ 'Useless (?g) - use /g modifier {#} m/(?g{#}-c)/',
-                    'Useless (?-c) - don\'t use /gc modifier {#} m/(?g-c{#})/',
+    '/(?g-c)\x{100}/' => [ 'Useless (?g) - use /g modifier {#} m/(?g{#}-c)\x{100}/',
+                    'Useless (?-c) - don\'t use /gc modifier {#} m/(?g-c{#})\x{100}/',
                   ],
       # (?c) means (?g) error won't be thrown
-     '/(?o-cg)/' => [ 'Useless (?o) - use /o modifier {#} m/(?o{#}-cg)/',
-                      'Useless (?-c) - don\'t use /gc modifier {#} m/(?o-c{#}g)/',
+     '/(?o-cg)\x{100}/' => [ 'Useless (?o) - use /o modifier {#} m/(?o{#}-cg)\x{100}/',
+                      'Useless (?-c) - don\'t use /gc modifier {#} m/(?o-c{#}g)\x{100}/',
                     ],
-    '/(?ogc)/' => [ 'Useless (?o) - use /o modifier {#} m/(?o{#}gc)/',
-                    'Useless (?g) - use /g modifier {#} m/(?og{#}c)/',
-                    'Useless (?c) - use /gc modifier {#} m/(?ogc{#})/',
+    '/(?ogc)\x{100}/' => [ 'Useless (?o) - use /o modifier {#} m/(?o{#}gc)\x{100}/',
+                    'Useless (?g) - use /g modifier {#} m/(?og{#}c)\x{100}/',
+                    'Useless (?c) - use /gc modifier {#} m/(?ogc{#})\x{100}/',
                   ],
-    '/a{1,1}?/' => 'Useless use of greediness modifier \'?\' {#} m/a{1,1}?{#}/',
-    '/b{3}  +/x' => 'Useless use of greediness modifier \'+\' {#} m/b{3}  +{#}/',
-);
+    '/a{1,1}?\x{100}/' => 'Useless use of greediness modifier \'?\' {#} m/a{1,1}?{#}\x{100}/',
+    '/b{3}  +\x{100}/x' => 'Useless use of greediness modifier \'+\' {#} m/b{3}  +{#}\x{100}/',
+); # See comments before this for why '\x{100}' is generally needed
 
 my @warnings_utf8 = mark_as_utf8(
     'm/ネ\b*ネ/' => '\b* matches null string many times {#} m/ネ\b*{#}ネ/',
