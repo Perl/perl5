@@ -9,7 +9,7 @@ BEGIN {
 # functions imported from t/test.pl or Test::More, as those programs/libraries
 # use operators which are what is being tested in this file.
 
-print "1..175\n";
+print "1..181\n";
 
 sub try ($$$) {
    print +($_[1] ? "ok" : "not ok"), " $_[0] - $_[2]\n";
@@ -468,3 +468,11 @@ try $T++,  0.1530000e-305 != 0.0,          '0.1530000e-305';
 try $T++,  0.1530001e-305 != 0.0,          '0.1530001e-305';
 try $T++,  1.17549435100e-38 != 0.0,       'min single';
 try $T++,  2.2250738585072014e-308 != 0.0, 'min double';
+
+# string-to-nv should equal float literals
+try $T++, "1.23"   + 0 ==  1.23,  '1.23';
+try $T++, " 1.23"  + 0 ==  1.23,  '1.23 with leading space';
+try $T++, "1.23 "  + 0 ==  1.23,  '1.23 with trailing space';
+try $T++, "+1.23"  + 0 ==  1.23,  '1.23 with unary plus';
+try $T++, "-1.23"  + 0 == -1.23,  '1.23 with unary minus';
+try $T++, "1.23e4" + 0 ==  12300, '1.23e4';
