@@ -469,7 +469,10 @@ ok(-d $tmpdir1, "rename on directories working");
 
 # Calling unlink on a directory without -U and privileges will always fail, but
 # it should set errno to EISDIR even though unlink(2) is never called.
-{
+SKIP: {
+    if (is_miniperl && !eval 'require Errno') {
+        skip "Errno not built yet", 3;
+    }
     require Errno;
 
     my $tmpdir = tempfile();
