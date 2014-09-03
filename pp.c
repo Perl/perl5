@@ -249,6 +249,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 			const char * const name = CopSTASHPV(PL_curcop);
 			gv = newGVgen_flags(name,
                                 HvNAMEUTF8(CopSTASH(PL_curcop)) ? SVf_UTF8 : 0 );
+			SvREFCNT_inc_simple_void_NN(gv);
 		    }
 		    prepare_SV_for_RV(sv);
 		    SvRV_set(sv, MUTABLE_SV(gv));

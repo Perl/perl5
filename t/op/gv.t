@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 269 );
+plan( tests => 270 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -1070,6 +1070,18 @@ package glob_constant_test {
   ::is eval { bar->() }, eval { &{+bar} },
     'glob_constant->() is not mangled at compile time';
   ::is "$@", "", 'no error from eval { &{+glob_constant} }';
+}
+
+{
+  my $free2;
+  local $SIG{__WARN__} = sub { ++$free2 if shift =~ /Attempt to free/ };
+  my $handleref;
+  my $proxy = \$handleref;
+  open $$proxy, "TEST";
+  delete $::{*$handleref{NAME}};  # delete *main::_GEN_xxx
+  undef $handleref;
+  is $free2, undef,
+    'no double free because of bad rv2gv/newGVgen refcounting';
 }
 
 # Look away, please.
