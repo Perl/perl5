@@ -1879,7 +1879,7 @@ acos(x)
 	    break;
 	case 10:
 #ifdef c99_erfc
-	    RETVAL = erfc(x);
+	    RETVAL = c99_erfc(x);
 #else
 	    not_here("erfc");
 #endif
