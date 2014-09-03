@@ -365,18 +365,20 @@
 
 /* XXX Regarding C99 math.h, Win32 seems to be missing these:
 
-  exp2 fdim fma fmax fmin fpclassify ilogb lgamma log1p log2 lrint
+  erf erfc exp2 fdim fma fmax fmin fpclassify ilogb lgamma log1p log2 lrint
   remquo rint signbit tgamma trunc
 
   Win32 does seem to have these:
 
-  acosh asinh atanh cbrt copysign cosh erf erfc expm1 hypot log10 nan
+  acosh asinh atanh cbrt copysign cosh expm1 hypot log10 nan
   nearbyint nextafter nexttoward remainder round scalbn
 
   And the Bessel functions are defined like _this.
 */
 
 #ifdef WIN32
+#  undef c99_erf
+#  undef c99_erfc
 #  undef c99_exp2
 #  undef c99_fdim
 #  undef c99_fma
