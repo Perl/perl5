@@ -61,15 +61,15 @@ for Phoenician.
 
 =over 4
 
-=item B<code2script ( CODE [,CODESET] )>
+=item B<code2script ( CODE [,CODESET] [,'retired'])>
 
-=item B<script2code ( NAME [,CODESET] )>
+=item B<script2code ( NAME [,CODESET] [,'retired'])>
 
 =item B<script_code2code ( CODE ,CODESET ,CODESET2 )>
 
-=item B<all_script_codes ( [CODESET] )>
+=item B<all_script_codes ( [CODESET] [,'retired'])>
 
-=item B<all_script_names ( [CODESET] )>
+=item B<all_script_names ( [CODESET] [,'retired'])>
 
 =item B<Locale::Codes::Script::rename_script  ( CODE ,NEW_NAME [,CODESET] )>
 

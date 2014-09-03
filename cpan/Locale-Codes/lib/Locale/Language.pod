@@ -63,15 +63,15 @@ ISO 639.
 
 =over 4
 
-=item B<code2language ( CODE [,CODESET] )>
+=item B<code2language ( CODE [,CODESET] [,'retired'])>
 
-=item B<language2code ( NAME [,CODESET] )>
+=item B<language2code ( NAME [,CODESET] [,'retired'])>
 
 =item B<language_code2code ( CODE ,CODESET ,CODESET2 )>
 
-=item B<all_language_codes ( [CODESET] )>
+=item B<all_language_codes ( [CODESET] [,'retired'])>
 
-=item B<all_language_names ( [CODESET] )>
+=item B<all_language_names ( [CODESET] [,'retired'])>
 
 =item B<Locale::Language::rename_language  ( CODE ,NEW_NAME [,CODESET] )>
 

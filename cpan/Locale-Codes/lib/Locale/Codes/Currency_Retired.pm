@@ -3,7 +3,7 @@ Locale::Codes::Currency_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Wed May 28 11:24:54 EDT 2014
+#    Generated on: Tue Aug 26 11:38:09 EDT 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.31';
+$VERSION='3.32';
 
 $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(ADP) => q(Andorran Peseta),
@@ -82,6 +82,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(bolivar fuerte) => [ q(VEF), q(Bolivar Fuerte) ],
    q(bond markets units european composite unit (eurco)) => [ q(XBA), q(Bond Markets Units European Composite Unit (EURCO)) ],
    q(candian dollar) => [ q(CAD), q(Candian Dollar) ],
+   q(cape verde escudo) => [ q(CVE), q(Cape Verde Escudo) ],
    q(cedi) => [ q(GHS), q(Cedi) ],
    q(convertible marks) => [ q(BAM), q(Convertible Marks) ],
    q(cyprus pound) => [ q(CYP), q(Cyprus Pound) ],
@@ -148,6 +149,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
 
 $Locale::Codes::Retired{'currency'}{'num'}{'name'} = {
    q(bolivar fuerte) => [ q(937), q(Bolivar Fuerte) ],
+   q(cape verde escudo) => [ q(132), q(Cape Verde Escudo) ],
    q(cedi) => [ q(936), q(Cedi) ],
    q(latvian lats) => [ q(428), q(Latvian Lats) ],
    q(leu) => [ q(946), q(Leu) ],

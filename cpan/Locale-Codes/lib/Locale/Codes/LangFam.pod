@@ -52,15 +52,15 @@ This is the default code set.
 
 =over 4
 
-=item B<code2langfam ( CODE [,CODESET] )>
+=item B<code2langfam ( CODE [,CODESET] [,'retired'])>
 
-=item B<langfam2code ( NAME [,CODESET] )>
+=item B<langfam2code ( NAME [,CODESET] [,'retired'])>
 
 =item B<langfam_code2code ( CODE ,CODESET ,CODESET2 )>
 
-=item B<all_langfam_codes ( [CODESET] )>
+=item B<all_langfam_codes ( [CODESET] [,'retired'])>
 
-=item B<all_langfam_names ( [CODESET] )>
+=item B<all_langfam_names ( [CODESET] [,'retired'])>
 
 =item B<Locale::Codes::LangFam::rename_langfam  ( CODE ,NEW_NAME [,CODESET] )>
 

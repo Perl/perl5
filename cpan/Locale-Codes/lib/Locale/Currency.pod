@@ -60,15 +60,15 @@ This is the set of three-digit numeric codes from ISO 4217.
 
 =over 4
 
-=item B<code2currency ( CODE [,CODESET] )>
+=item B<code2currency ( CODE [,CODESET] [,'retired'])>
 
-=item B<currency2code ( NAME [,CODESET] )>
+=item B<currency2code ( NAME [,CODESET] [,'retired'])>
 
 =item B<currency_code2code ( CODE ,CODESET ,CODESET2 )>
 
-=item B<all_currency_codes ( [CODESET] )>
+=item B<all_currency_codes ( [CODESET] [,'retired'])>
 
-=item B<all_currency_names ( [CODESET] )>
+=item B<all_currency_names ( [CODESET] [,'retired'])>
 
 =item B<Locale::Currency::rename_currency  ( CODE ,NEW_NAME [,CODESET] )>
 

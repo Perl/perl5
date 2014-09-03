@@ -52,15 +52,15 @@ This is the default code set.
 
 =over 4
 
-=item B<code2langext ( CODE [,CODESET] )>
+=item B<code2langext ( CODE [,CODESET] [,'retired'])>
 
-=item B<langext2code ( NAME [,CODESET] )>
+=item B<langext2code ( NAME [,CODESET] [,'retired'])>
 
 =item B<langext_code2code ( CODE ,CODESET ,CODESET2 )>
 
-=item B<all_langext_codes ( [CODESET] )>
+=item B<all_langext_codes ( [CODESET] [,'retired'])>
 
-=item B<all_langext_names ( [CODESET] )>
+=item B<all_langext_names ( [CODESET] [,'retired'])>
 
 =item B<Locale::Codes::LangExt::rename_langext  ( CODE ,NEW_NAME [,CODESET] )>
 

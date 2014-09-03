@@ -54,15 +54,15 @@ This is the default code set.
 
 =over 4
 
-=item B<code2langvar ( CODE [,CODESET] )>
+=item B<code2langvar ( CODE [,CODESET] [,'retired'])>
 
-=item B<langvar2code ( NAME [,CODESET] )>
+=item B<langvar2code ( NAME [,CODESET] [,'retired'])>
 
 =item B<langvar_code2code ( CODE ,CODESET ,CODESET2 )>
 
-=item B<all_langvar_codes ( [CODESET] )>
+=item B<all_langvar_codes ( [CODESET] [,'retired'])>
 
-=item B<all_langvar_names ( [CODESET] )>
+=item B<all_langvar_names ( [CODESET] [,'retired'])>
 
 =item B<Locale::Codes::LangVar::rename_langvar  ( CODE ,NEW_NAME [,CODESET] )>
 

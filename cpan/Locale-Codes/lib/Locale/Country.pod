@@ -80,15 +80,15 @@ Locale::Codes::Changes document for details.
 
 =over 4
 
-=item B<code2country ( CODE [,CODESET] )>
+=item B<code2country ( CODE [,CODESET] [,'retired'])>
 
-=item B<country2code ( NAME [,CODESET] )>
+=item B<country2code ( NAME [,CODESET] [,'retired'])>
 
 =item B<country_code2code ( CODE ,CODESET ,CODESET2 )>
 
-=item B<all_country_codes ( [CODESET] )>
+=item B<all_country_codes ( [CODESET] [,'retired'])>
 
-=item B<all_country_names ( [CODESET] )>
+=item B<all_country_names ( [CODESET] [,'retired'])>
 
 =item B<Locale::Country::rename_country  ( CODE ,NEW_NAME [,CODESET] )>
 

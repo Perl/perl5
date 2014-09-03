@@ -3,7 +3,7 @@ Locale::Codes::Currency_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Wed May 28 11:22:06 EDT 2014
+#    Generated on: Fri Aug 22 15:31:17 EDT 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.31';
+$VERSION='3.32';
 
 $Locale::Codes::Data{'currency'}{'id'} = '0178';
 
@@ -119,7 +119,7 @@ $Locale::Codes::Data{'currency'}{'id2names'} = {
       q(Canadian Dollar),
       ],
    q(0035) => [
-      q(Cape Verde Escudo),
+      q(Cabo Verde Escudo),
       ],
    q(0036) => [
       q(Cayman Islands Dollar),
@@ -654,12 +654,12 @@ $Locale::Codes::Data{'currency'}{'alias2id'} = {
       q(0031),
       q(0),
       ],
-   q(canadian dollar) => [
-      q(0034),
+   q(cabo verde escudo) => [
+      q(0035),
       q(0),
       ],
-   q(cape verde escudo) => [
-      q(0035),
+   q(canadian dollar) => [
+      q(0034),
       q(0),
       ],
    q(cayman islands dollar) => [
