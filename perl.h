@@ -1894,6 +1894,14 @@ typedef NVTYPE NV;
 #       define Perl_floor floorl
 #       define Perl_ceil ceill
 #       define Perl_fmod fmodl
+#       define Perl_acos acosl
+#       define Perl_asin asinl
+#       define Perl_atan atanl
+#       define Perl_cosh coshl
+#       define Perl_log10 log10l
+#       define Perl_sinh sinhl
+#       define Perl_tan tanl
+#       define Perl_tanh tanhl
 #   endif
 /* e.g. libsunmath doesn't have modfl and frexpl as of mid-March 2000 */
 #   ifdef HAS_MODFL
@@ -1992,6 +2000,14 @@ EXTERN_C long double modfl(long double, long double *);
 #   define Perl_modf(x,y) modf(x,y)
 #   define Perl_frexp(x,y) frexp(x,y)
 #   define Perl_ldexp(x,y) ldexp(x,y)
+#   define Perl_acos acos
+#   define Perl_asin asin
+#   define Perl_atan atan
+#   define Perl_cosh cosh
+#   define Perl_log10 log10
+#   define Perl_sinh sinh
+#   define Perl_tan tan
+#   define Perl_tanh tanh
 #   ifndef Perl_isnan
 #       ifdef HAS_ISNAN
 #           define Perl_isnan(x) isnan(x)

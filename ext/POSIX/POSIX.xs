@@ -1828,7 +1828,7 @@ acos(x)
 	RETVAL = NV_NAN;
 	switch (ix) {
 	case 0:
-	    RETVAL = acos(x); /* C89 math */
+	    RETVAL = Perl_acos(x); /* C89 math */
 	    break;
 	case 1:
 #ifdef c99_acosh
@@ -1838,7 +1838,7 @@ acos(x)
 #endif
 	    break;
 	case 2:
-	    RETVAL = asin(x); /* C89 math */
+	    RETVAL = Perl_asin(x); /* C89 math */
 	    break;
 	case 3:
 #ifdef c99_asinh
@@ -1848,7 +1848,7 @@ acos(x)
 #endif
 	    break;
 	case 4:
-	    RETVAL = atan(x); /* C89 math */
+	    RETVAL = Perl_atan(x); /* C89 math */
 	    break;
 	case 5:
 #ifdef c99_atanh
@@ -1865,10 +1865,10 @@ acos(x)
 #endif
 	    break;
 	case 7:
-	    RETVAL = ceil(x); /* C89 math */
+	    RETVAL = Perl_ceil(x); /* C89 math */
 	    break;
 	case 8:
-	    RETVAL = cosh(x); /* C89 math */
+	    RETVAL = Perl_cosh(x); /* C89 math */
 	    break;
 	case 9:
 #ifdef c99_erf
@@ -1899,7 +1899,7 @@ acos(x)
 #endif
 	    break;
 	case 13:
-	    RETVAL = floor(x); /* C89 math */
+	    RETVAL = Perl_floor(x); /* C89 math */
 	    break;
 	case 14:
 #ifdef bessel_j0
@@ -1971,13 +1971,13 @@ acos(x)
 #endif
 	    break;
 	case 24:
-	    RETVAL = sinh(x); /* C89 math */
+	    RETVAL = Perl_sinh(x); /* C89 math */
 	    break;
 	case 25:
-	    RETVAL = tan(x); /* C89 math */
+	    RETVAL = Perl_tan(x); /* C89 math */
 	    break;
 	case 26:
-	    RETVAL = tanh(x); /* C89 math */
+	    RETVAL = Perl_tanh(x); /* C89 math */
 	    break;
 	case 27:
         /* XXX tgamma_r -- the lgamma accesses a global variable (signgam),
@@ -2151,7 +2151,7 @@ copysign(x,y)
 #endif
 	    break;
 	case 4:
-	    RETVAL = fmod(x, y); /* C89 math */
+	    RETVAL = Perl_fmod(x, y); /* C89 math */
 	    break;
 	case 5:
 #ifdef c99_hypot
