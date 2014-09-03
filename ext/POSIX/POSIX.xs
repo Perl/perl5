@@ -491,13 +491,13 @@ static NV my_erf(NV x)
   NV a4 = -1.453152027;
   NV a5 =  1.061405429;
   NV p  =  0.3275911;
-
+  NV t, y;
   int sign = x < 0 ? -1 : 1; /* Save the sign. */
   x = PERL_ABS(x);
 
   /* Abramowitz and Stegun formula 7.1.26 */
-  NV t = 1.0 / (1.0 + p * x);
-  NV y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1) * t * exp(-x*x);
+  t = 1.0 / (1.0 + p * x);
+  y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1) * t * exp(-x*x);
 
   return sign * y;
 }
