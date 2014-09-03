@@ -227,7 +227,7 @@ struct regnode_charclass_class {
     U8  type;
     U16 next_off;
     U32 arg1;
-    char bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time */
+    char bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time ... */
     U32 classflags;	                        /* and run-time */
 };
 
@@ -245,7 +245,7 @@ struct regnode_ssc {
     U8  type;
     U16 next_off;
     U32 arg1;
-    char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time */
+    char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time ... */
     U32 classflags;	                /* and run-time */
 
     /* Auxiliary, only used during construction; NULL afterwards: list of code
