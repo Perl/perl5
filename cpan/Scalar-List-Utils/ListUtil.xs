@@ -82,6 +82,9 @@ static enum slu_accum accum_type(SV *sv) {
     return ACC_NV;
 }
 
+/* Magic for set_subname */
+static MGVTBL subname_vtbl;
+
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -237,6 +240,8 @@ CODE:
         retsv = TARG;
 
     switch(accum) {
+    case ACC_SV: /* nothing to do */
+        break;
     case ACC_IV:
         sv_setiv(retsv, retiv);
         break;
@@ -1064,7 +1069,7 @@ CODE:
     croak("vstrings are not implemented in this release of perl");
 #endif
 
-int
+SV *
 looks_like_number(sv)
     SV *sv
 PROTOTYPE: $
@@ -1076,45 +1081,16 @@ CODE:
     }
 #if PERL_BCDVERSION < 0x5008005
     if(SvPOK(sv) || SvPOKp(sv)) {
-        RETVAL = !!looks_like_number(sv);
+        RETVAL = looks_like_number(sv) ? &PL_sv_yes : &PL_sv_no;
     }
     else {
-        RETVAL = SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
+        RETVAL = (SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK)) ? &PL_sv_yes : &PL_sv_no;
     }
 #else
-    RETVAL = !!looks_like_number(sv);
+    RETVAL = looks_like_number(sv) ? &PL_sv_yes : &PL_sv_no;
 #endif
 OUTPUT:
     RETVAL
-
-void
-set_prototype(subref, proto)
-    SV *subref
-    SV *proto
-PROTOTYPE: &$
-CODE:
-{
-    SvGETMAGIC(subref);
-    if(SvROK(subref)) {
-        SV *sv = SvRV(subref);
-        if(SvTYPE(sv) != SVt_PVCV) {
-            /* not a subroutine reference */
-            croak("set_prototype: not a subroutine reference");
-        }
-        if(SvPOK(proto)) {
-            /* set the prototype */
-            sv_copypv(sv, proto);
-        }
-        else {
-            /* delete the prototype */
-            SvPOK_off(sv);
-        }
-    }
-    else {
-        croak("set_prototype: not a reference");
-    }
-    XSRETURN(1);
-}
 
 void
 openhandle(SV *sv)
@@ -1144,6 +1120,162 @@ CODE:
     }
     XSRETURN_UNDEF;
 }
+
+MODULE=List::Util       PACKAGE=Sub::Util
+
+void
+set_prototype(proto, code)
+    SV *proto
+    SV *code
+PREINIT:
+    SV *cv; /* not CV * */
+PPCODE:
+    SvGETMAGIC(code);
+    if(!SvROK(code))
+        croak("set_prototype: not a reference");
+
+    cv = SvRV(code);
+    if(SvTYPE(cv) != SVt_PVCV)
+        croak("set_prototype: not a subroutine reference");
+
+    if(SvPOK(proto)) {
+        /* set the prototype */
+        sv_copypv(cv, proto);
+    }
+    else {
+        /* delete the prototype */
+        SvPOK_off(cv);
+    }
+
+    PUSHs(code);
+    XSRETURN(1);
+
+void
+set_subname(name, sub)
+    char *name
+    SV *sub
+PREINIT:
+    CV *cv = NULL;
+    GV *gv;
+    HV *stash = CopSTASH(PL_curcop);
+    char *s, *end = NULL;
+    MAGIC *mg;
+PPCODE:
+    if (!SvROK(sub) && SvGMAGICAL(sub))
+        mg_get(sub);
+    if (SvROK(sub))
+        cv = (CV *) SvRV(sub);
+    else if (SvTYPE(sub) == SVt_PVGV)
+        cv = GvCVu(sub);
+    else if (!SvOK(sub))
+        croak(PL_no_usym, "a subroutine");
+    else if (PL_op->op_private & HINT_STRICT_REFS)
+        croak("Can't use string (\"%.32s\") as %s ref while \"strict refs\" in use",
+              SvPV_nolen(sub), "a subroutine");
+    else if ((gv = gv_fetchpv(SvPV_nolen(sub), FALSE, SVt_PVCV)))
+        cv = GvCVu(gv);
+    if (!cv)
+        croak("Undefined subroutine %s", SvPV_nolen(sub));
+    if (SvTYPE(cv) != SVt_PVCV && SvTYPE(cv) != SVt_PVFM)
+        croak("Not a subroutine reference");
+    for (s = name; *s++; ) {
+        if (*s == ':' && s[-1] == ':')
+            end = ++s;
+        else if (*s && s[-1] == '\'')
+            end = s;
+    }
+    s--;
+    if (end) {
+        char *namepv = savepvn(name, end - name);
+        stash = GvHV(gv_fetchpv(namepv, TRUE, SVt_PVHV));
+        Safefree(namepv);
+        name = end;
+    }
+
+    /* under debugger, provide information about sub location */
+    if (PL_DBsub && CvGV(cv)) {
+        HV *hv = GvHV(PL_DBsub);
+
+        char* new_pkg = HvNAME(stash);
+
+        char* old_name = GvNAME( CvGV(cv) );
+        char* old_pkg = HvNAME( GvSTASH(CvGV(cv)) );
+
+        int old_len = strlen(old_name) + strlen(old_pkg);
+        int new_len = strlen(name) + strlen(new_pkg);
+
+        char* full_name;
+        Newxz(full_name, (old_len > new_len ? old_len : new_len) + 3, char);
+
+        strcat(full_name, old_pkg);
+        strcat(full_name, "::");
+        strcat(full_name, old_name);
+
+        SV** old_data = hv_fetch(hv, full_name, strlen(full_name), 0);
+
+        if (old_data) {
+            strcpy(full_name, new_pkg);
+            strcat(full_name, "::");
+            strcat(full_name, name);
+
+            SvREFCNT_inc(*old_data);
+            if (!hv_store(hv, full_name, strlen(full_name), *old_data, 0))
+                SvREFCNT_dec(*old_data);
+        }
+        Safefree(full_name);
+    }
+
+    gv = (GV *) newSV(0);
+    gv_init(gv, stash, name, s - name, TRUE);
+
+    /*
+     * set_subname needs to create a GV to store the name. The CvGV field of a
+     * CV is not refcounted, so perl wouldn't know to SvREFCNT_dec() this GV if
+     * it destroys the containing CV. We use a MAGIC with an empty vtable
+     * simply for the side-effect of using MGf_REFCOUNTED to store the
+     * actually-counted reference to the GV.
+     */
+    mg = SvMAGIC(cv);
+    while (mg && mg->mg_virtual != &subname_vtbl)
+        mg = mg->mg_moremagic;
+    if (!mg) {
+        Newxz(mg, 1, MAGIC);
+        mg->mg_moremagic = SvMAGIC(cv);
+        mg->mg_type = PERL_MAGIC_ext;
+        mg->mg_virtual = &subname_vtbl;
+        SvMAGIC_set(cv, mg);
+    }
+    if (mg->mg_flags & MGf_REFCOUNTED)
+        SvREFCNT_dec(mg->mg_obj);
+    mg->mg_flags |= MGf_REFCOUNTED;
+    mg->mg_obj = (SV *) gv;
+    SvRMAGICAL_on(cv);
+    CvANON_off(cv);
+#ifndef CvGV_set
+    CvGV(cv) = gv;
+#else
+    CvGV_set(cv, gv);
+#endif
+    PUSHs(sub);
+
+void
+subname(code)
+    SV *code
+PREINIT:
+    CV *cv;
+    GV *gv;
+PPCODE:
+    if (!SvROK(code) && SvGMAGICAL(code))
+        mg_get(code);
+
+    if(!SvROK(code) || SvTYPE(cv = (CV *)SvRV(code)) != SVt_PVCV)
+        croak("Not a subroutine reference");
+
+    if(!(gv = CvGV(cv)))
+        XSRETURN(0);
+
+    mPUSHs(newSVpvf("%s::%s", HvNAME(GvSTASH(gv)), GvNAME(gv)));
+    XSRETURN(1);
 
 BOOT:
 {

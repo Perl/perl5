@@ -14,7 +14,7 @@ our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce sum sum0 shuffle
   pairmap pairgrep pairfirst pairs pairkeys pairvalues
 );
-our $VERSION    = "1.39";
+our $VERSION    = "1.40";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
@@ -110,7 +110,9 @@ C<undef> being returned
 The remaining list-reduction functions are all specialisations of this generic
 idea.
 
-=head2 $b = any { BLOCK } @list
+=head2 any
+
+    my $bool = any { BLOCK } @list;
 
 I<Since version 1.33.>
 
@@ -126,26 +128,34 @@ instead, as it can short-circuit after the first true result.
         # at least one string has more than 10 characters
     }
 
-=head2 $b = all { BLOCK } @list
+=head2 all
+
+    my $bool = all { BLOCK } @list;
 
 I<Since version 1.33.>
 
-Similar to C<any>, except that it requires all elements of the C<@list> to make
-the C<BLOCK> return true. If any element returns false, then it returns false.
-If the C<BLOCK> never returns false or the C<@list> was empty then it returns
-true.
+Similar to L</any>, except that it requires all elements of the C<@list> to
+make the C<BLOCK> return true. If any element returns false, then it returns
+false. If the C<BLOCK> never returns false or the C<@list> was empty then it
+returns true.
 
-=head2 $b = none { BLOCK } @list
+=head2 none
 
-=head2 $b = notall { BLOCK } @list
+=head2 notall
+
+    my $bool = none { BLOCK } @list;
+
+    my $bool = notall { BLOCK } @list;
 
 I<Since version 1.33.>
 
-Similar to C<any> and C<all>, but with the return sense inverted. C<none>
-returns true only if no value in the LIST causes the BLOCK to return true, and
-C<notall> returns true only if not all of the values do.
+Similar to L</any> and L</all>, but with the return sense inverted. C<none>
+returns true only if no value in the C<@list> causes the C<BLOCK> to return
+true, and C<notall> returns true only if not all of the values do.
 
-=head2 $val = first { BLOCK } @list
+=head2 first
+
+    my $val = first { BLOCK } @list;
 
 Similar to C<grep> in that it evaluates C<BLOCK> setting C<$_> to each element
 of C<@list> in turn. C<first> returns the first element where the result from
@@ -156,7 +166,9 @@ then C<undef> is returned.
     $foo = first { $_ > $value } @list    # first value in @list which
                                           # is greater than $value
 
-=head2 $num = max @list
+=head2 max
+
+    my $num = max @list;
 
 Returns the entry in the list with the highest numerical value. If the list is
 empty then C<undef> is returned.
@@ -165,9 +177,11 @@ empty then C<undef> is returned.
     $foo = max 3,9,12               # 12
     $foo = max @bar, @baz           # whatever
 
-=head2 $str = maxstr @list
+=head2 maxstr
 
-Similar to C<max>, but treats all the entries in the list as strings and
+    my $str = maxstr @list;
+
+Similar to L</max>, but treats all the entries in the list as strings and
 returns the highest string as defined by the C<gt> operator. If the list is
 empty then C<undef> is returned.
 
@@ -175,18 +189,22 @@ empty then C<undef> is returned.
     $foo = maxstr "hello","world"   # "world"
     $foo = maxstr @bar, @baz        # whatever
 
-=head2 $num = min @list
+=head2 min
 
-Similar to C<max> but returns the entry in the list with the lowest numerical
+    my $num = min @list;
+
+Similar to L</max> but returns the entry in the list with the lowest numerical
 value. If the list is empty then C<undef> is returned.
 
     $foo = min 1..10                # 1
     $foo = min 3,9,12               # 3
     $foo = min @bar, @baz           # whatever
 
-=head2 $str = minstr @list
+=head2 minstr
 
-Similar to C<min>, but treats all the entries in the list as strings and
+    my $str = minstr @list;
+
+Similar to L</min>, but treats all the entries in the list as strings and
 returns the lowest string as defined by the C<lt> operator. If the list is
 empty then C<undef> is returned.
 
@@ -194,7 +212,9 @@ empty then C<undef> is returned.
     $foo = minstr "hello","world"   # "hello"
     $foo = minstr @bar, @baz        # whatever
 
-=head2 $num = product @list
+=head2 product
+
+    my $num = product @list;
 
 I<Since version 1.35.>
 
@@ -204,7 +224,9 @@ empty then C<1> is returned.
     $foo = product 1..10            # 3628800
     $foo = product 3,9,12           # 324
 
-=head2 $num_or_undef = sum @list
+=head2 sum
+
+    my $num_or_undef = sum @list;
 
 Returns the numerical sum of all the elements in C<@list>. For backwards
 compatibility, if C<@list> is empty then C<undef> is returned.
@@ -213,12 +235,14 @@ compatibility, if C<@list> is empty then C<undef> is returned.
     $foo = sum 3,9,12               # 24
     $foo = sum @bar, @baz           # whatever
 
-=head2 $num = sum0 @list
+=head2 sum0
+
+    my $num = sum0 @list;
 
 I<Since version 1.26.>
 
-Similar to C<sum>, except this returns 0 when given an empty list, rather than
-C<undef>.
+Similar to L</sum>, except this returns 0 when given an empty list, rather
+than C<undef>.
 
 =cut
 
@@ -232,9 +256,11 @@ value - nor even do they require that the first of each pair be a plain string.
 
 =cut
 
-=head2 @kvlist = pairgrep { BLOCK } @kvlist
+=head2 pairgrep
 
-=head2 $count = pairgrep { BLOCK } @kvlist
+    my @kvlist = pairgrep { BLOCK } @kvlist;
+
+    my $count = pairgrep { BLOCK } @kvlist;
 
 I<Since version 1.29.>
 
@@ -254,13 +280,15 @@ As with C<grep> aliasing C<$_> to list elements, C<pairgrep> aliases C<$a> and
 C<$b> to elements of the given list. Any modifications of it by the code block
 will be visible to the caller.
 
-=head2 ( $key, $val ) = pairfirst { BLOCK } @kvlist
+=head2 pairfirst
 
-=head2 $found = pairfirst { BLOCK } @kvlist
+    my ( $key, $val ) = pairfirst { BLOCK } @kvlist;
+
+    my $found = pairfirst { BLOCK } @kvlist;
 
 I<Since version 1.30.>
 
-Similar to the C<first> function, but interprets the given list as an
+Similar to the L</first> function, but interprets the given list as an
 even-sized list of pairs. It invokes the C<BLOCK> multiple times, in scalar
 context, with C<$a> and C<$b> set to successive pairs of values from the
 C<@kvlist>.
@@ -276,9 +304,11 @@ As with C<grep> aliasing C<$_> to list elements, C<pairfirst> aliases C<$a> and
 C<$b> to elements of the given list. Any modifications of it by the code block
 will be visible to the caller.
 
-=head2 @list = pairmap { BLOCK } @kvlist
+=head2 pairmap
 
-=head2 $count = pairmap { BLOCK } @kvlist
+    my @list = pairmap { BLOCK } @kvlist;
+
+    my $count = pairmap { BLOCK } @kvlist;
 
 I<Since version 1.29.>
 
@@ -299,7 +329,9 @@ will be visible to the caller.
 
 See L</KNOWN BUGS> for a known-bug with C<pairmap>, and a workaround.
 
-=head2 @pairs = pairs @kvlist
+=head2 pairs
+
+    my @pairs = pairs @kvlist;
 
 I<Since version 1.29.>
 
@@ -325,7 +357,9 @@ the two methods C<key> and C<value>. The following code is equivalent:
        ...
     }
 
-=head2 @keys = pairkeys @kvlist
+=head2 pairkeys
+
+    my @keys = pairkeys @kvlist;
 
 I<Since version 1.29.>
 
@@ -335,7 +369,9 @@ It is a more efficient version of
 
     @keys = pairmap { $a } @kvlist
 
-=head2 @values = pairvalues @kvlist
+=head2 pairvalues
+
+    my @values = pairvalues @kvlist;
 
 I<Since version 1.29.>
 
@@ -351,7 +387,9 @@ It is a more efficient version of
 
 =cut
 
-=head2 @values = shuffle @values
+=head2 shuffle
+
+    my @values = shuffle @values;
 
 Returns the values of the input in a random order
 
@@ -365,7 +403,7 @@ Returns the values of the input in a random order
 
 L<https://rt.cpan.org/Ticket/Display.html?id=95409>
 
-If the block of code given to C<pairmap> contains lexical variables that are
+If the block of code given to L</pairmap> contains lexical variables that are
 captured by a returned closure, and the closure is executed after the block
 has been re-used for the next iteration, these lexicals will not see the
 correct values. For example:

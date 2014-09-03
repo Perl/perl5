@@ -222,6 +222,7 @@ ext/devel-peek/peek.pm	? Should you be using L<...> instead of	2
 ext/dynaloader/dynaloader.pm	Verbatim line length including indents exceeds 79 by	1
 ext/file-find/lib/file/find.pm	Verbatim line length including indents exceeds 79 by	1
 ext/file-glob/glob.pm	Verbatim line length including indents exceeds 79 by	15
+ext/hash-util-fieldhash/lib/hash/util/fieldhash.pm	Apparent broken link	1
 ext/hash-util/lib/hash/util.pm	Verbatim line length including indents exceeds 79 by	2
 ext/pod-html/testdir/perlpodspec-copy.pod	Verbatim line length including indents exceeds 79 by	8
 ext/pod-html/testdir/perlvar-copy.pod	? Should you be using L<...> instead of	3
