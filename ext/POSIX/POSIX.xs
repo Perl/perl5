@@ -2348,7 +2348,7 @@ fma(x,y,z)
 	RETVAL
 
 NV
-nan(s = 0)
+nan(s = "0")
 	char*	s;
     CODE:
 #ifdef c99_nan
