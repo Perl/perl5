@@ -6477,6 +6477,7 @@ Perl_yylex(pTHX)
 		    lastchar && PL_bufptr - 2 >= PL_linestart
 			 ? PL_bufptr[-2]
 			 : 0;
+		bool safebw;
 
 
 		/* Get the rest if it looks like a package qualifier */
@@ -6520,6 +6521,7 @@ Perl_yylex(pTHX)
 		    PL_tokenbuf[len] = '\0';
 		    gv = NULL;
 		    gvp = 0;
+		    safebw = TRUE;
 		}
 		else {
 		    if (!lex && !gv) {
@@ -6531,14 +6533,14 @@ Perl_yylex(pTHX)
 					       GV_NOADD_NOINIT | ( UTF ? SVf_UTF8 : 0 ),
 					       SVt_PVCV);
 		    }
-		    len = 0;
+		    safebw = FALSE;
 		}
 
 		/* if we saw a global override before, get the right name */
 
 		if (!sv)
 		  sv = S_newSV_maybe_utf8(aTHX_ PL_tokenbuf,
-		    len ? len : strlen(PL_tokenbuf));
+						len);
 		if (gvp) {
 		    SV * const tmp_sv = sv;
 		    sv = newSVpvs("CORE::GLOBAL::");
@@ -6553,7 +6555,7 @@ Perl_yylex(pTHX)
 		pl_yylval.opval->op_private = OPpCONST_BARE;
 
 		/* And if "Foo::", then that's what it certainly is. */
-		if (len)
+		if (safebw)
 		    goto safe_bareword;
 
 		if (!off)
