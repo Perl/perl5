@@ -105,6 +105,12 @@ sub is_miniperl {
     return !defined &DynaLoader::boot_DynaLoader;
 }
 
+sub set_up_inc {
+    # Don’t clobber @INC under miniperl
+    @INC = () unless is_miniperl;
+    unshift @INC, @_;
+}
+
 sub _comment {
     return map { /^#/ ? "$_\n" : "# $_\n" }
            map { split /\n/ } @_;
@@ -155,6 +161,13 @@ sub skip_all_without_config {
 	$key =~ s/^use//;
 	$key =~ s/^d_//;
 	skip_all("no $key");
+    }
+}
+
+sub skip_all_without_unicode_tables { # (but only under miniperl)
+    if (is_miniperl()) {
+        skip_all_if_miniperl("Unicode tables not built yet")
+            unless eval 'require "unicore/Heavy.pl"';
     }
 }
 

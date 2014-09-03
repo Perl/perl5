@@ -5,8 +5,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';
+    set_up_inc(qw '../lib ../cpan/Perl-OSType/lib');
 }
 
 plan(tests => 53 + 27*14);

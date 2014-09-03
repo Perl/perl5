@@ -18,6 +18,7 @@ BEGIN {
     @INC = ('../lib','.','../ext/re');
     require Config; import Config;
     require './test.pl';
+    skip_all_without_unicode_tables();
 }
 
 plan tests => 739;  # Update this when adding/deleting tests.

@@ -4,8 +4,8 @@
 
 BEGIN {
     chdir 't';
-    @INC = qw(lib ../lib);
     require './test.pl';
+    set_up_inc(qw(lib ../lib));
 }
 
 plan 48;

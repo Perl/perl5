@@ -14,6 +14,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = ('../lib','.','../ext/re');
     require './test.pl';
+    skip_all_without_unicode_tables();
 }
 
 use utf8;

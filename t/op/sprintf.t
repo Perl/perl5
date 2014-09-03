@@ -10,7 +10,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    @INC = qw '../lib ../cpan/version/lib';
 }
 use warnings;
 use version;

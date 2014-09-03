@@ -4,9 +4,11 @@
 
 BEGIN {
     chdir 't';
-    @INC = '../lib';
+    require './test.pl';
+    set_up_inc('../lib');
     require Config; import Config;
-    require './test.pl'; require './charset_tools.pl';
+    skip_all_without_unicode_tables();
+    require './charset_tools.pl';
     require './loc_tools.pl';   # Contains find_utf8_ctype_locale()
 }
 

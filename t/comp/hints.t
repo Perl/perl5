@@ -122,7 +122,12 @@ BEGIN {
     my $res;
     BEGIN { $^H{73174} = "foo" }
     BEGIN { $res = ($^H{73174} // "") }
-    "" =~ /\x{100}/i;	# forces loading of utf8.pm, which used to reset %^H
+    # /x{100}/i forces loading of utf8.pm, which used to reset %^H
+    eval '"" =~ /\x{100}/i; 1'
+	# Allow miniperl to fail this regexp compilation (effectively skip
+	# the test) in case tables have not been build, but require real
+	# perl to succeed.
+	or defined &DynaLoader::boot_DynaLoader and die;	
     BEGIN { $res .= '-' . ($^H{73174} // "")}
     $res .= '-' . ($^H{73174} // "");
     print $res eq "foo-foo-" ? "" : "not ",

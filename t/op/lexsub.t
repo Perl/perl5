@@ -2,8 +2,8 @@
 
 BEGIN {
     chdir 't';
-    @INC = '../lib';
     require './test.pl';
+    set_up_inc('../lib');
     *bar::is = *is;
     *bar::like = *like;
 }

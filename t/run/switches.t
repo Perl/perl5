@@ -15,7 +15,6 @@ BEGIN { require "./test.pl"; }
 plan(tests => 115);
 
 use Config;
-use Errno qw(EACCES EISDIR);
 BEGIN { eval 'use POSIX qw(setlocale LC_ALL)' }
 
 # due to a bug in VMS's piping which makes it impossible for runperl()
@@ -123,7 +122,11 @@ SKIP: {
 
     # Win32 won't let us open the directory, so we never get to die with
     # EISDIR, which happens after open.
-    my $error  = do { local $! = $^O eq 'MSWin32' ? EACCES : EISDIR; "$!" };
+    require Errno;
+    import Errno qw(EACCES EISDIR);
+    my $error  = do {
+        local $! = $^O eq 'MSWin32' ? &EACCES : &EISDIR; "$!"
+    };
     like(
         runperl( switches => [ '-c' ], args  => [ $tempdir ], stderr => 1),
         qr/Can't open perl script.*$tempdir.*\Q$error/s,

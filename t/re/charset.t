@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    @INC = qw '../lib ../dist/if';
     require './test.pl';
     require './loc_tools.pl';
 }

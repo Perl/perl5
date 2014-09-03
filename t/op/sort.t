@@ -2,8 +2,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(. ../lib);
-    require 'test.pl';
+    require './test.pl';
+    set_up_inc('../lib');
 }
 use warnings;
 plan( tests => 182 );

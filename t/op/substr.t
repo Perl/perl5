@@ -4,7 +4,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    require './test.pl';
+    set_up_inc('../lib');
 }
 use warnings ;
 
@@ -20,8 +21,6 @@ $SIG{__WARN__} = sub {
           warn $_[0];
      }
 };
-
-BEGIN { require './test.pl'; }
 
 plan(387);
 

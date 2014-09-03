@@ -4,6 +4,7 @@ BEGIN {
 	chdir 't' if -d 't';
 	@INC = qw '../lib ../ext/re';
 	require './test.pl';
+	skip_all_without_unicode_tables();
 	eval 'require Config'; # assume defaults if this fails
 }
 

@@ -1,7 +1,8 @@
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(../lib .);
-    require "test.pl";
+    require './test.pl';
+    set_up_inc('../lib');
+    skip_all_without_unicode_tables();
 }
 
 plan tests => 1;

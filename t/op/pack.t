@@ -2,8 +2,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';
+    set_up_inc(qw '../lib ../dist/Math-BigInt/lib');
 }
 
 # This is truth in an if statement, and could be a skip message

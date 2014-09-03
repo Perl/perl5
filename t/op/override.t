@@ -2,8 +2,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';
+    set_up_inc(qw '../lib ../cpan/Text-ParseWords/lib');
     require Config; # load these before we mess with *CORE::GLOBAL::require
     require 'Config_heavy.pl'; # since runperl will need them
 }

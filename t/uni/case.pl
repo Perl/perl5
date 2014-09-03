@@ -1,4 +1,8 @@
-require "test.pl";
+BEGIN {
+    require "test.pl";
+    set_up_inc(qw(../lib .));
+    skip_all_without_unicode_tables();
+}
 use strict;
 use warnings;
 
