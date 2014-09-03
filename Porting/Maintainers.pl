@@ -1207,7 +1207,7 @@ use File::Glob qw(:case);
     },
 
     'Time::Piece' => {
-        'DISTRIBUTION' => 'RJBS/Time-Piece-1.27.tar.gz',
+        'DISTRIBUTION' => 'RJBS/Time-Piece-1.29.tar.gz',
         'FILES'        => q[cpan/Time-Piece],
     },
 

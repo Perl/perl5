@@ -1,10 +1,11 @@
-use Test::More tests => 96;
+use Test::More tests => 95;
 
 my $is_win32 = ($^O =~ /Win32/);
 my $is_qnx = ($^O eq 'qnx');
 my $is_vos = ($^O eq 'vos');
-BEGIN { use_ok('Time::Piece'); }
-ok(1);
+
+use Time::Piece;
+use Time::Seconds;
 
 my $t = gmtime(951827696); # 2000-02-29T12:34:56
 
@@ -227,3 +228,5 @@ cmp_ok(
   951827696
 );
 
+my $s = Time::Seconds->new(-691050);
+is($s->pretty, 'minus 7 days, 23 hours, 57 minutes, 30 seconds');

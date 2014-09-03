@@ -2,7 +2,7 @@ package Time::Seconds;
 use strict;
 use vars qw/@EXPORT @EXPORT_OK/;
 
-our $VERSION = '1.27';
+our $VERSION = '1.29';
 
 use Exporter 5.57 'import';
 
@@ -160,7 +160,7 @@ sub pretty {
         if ($s >= ONE_HOUR) {
             if ($s >= ONE_DAY) {
                 my $days = sprintf("%d", $s->days); # does a "floor"
-                $str = $days . " days, ";
+                $str .= $days . " days, ";
                 $s -= ($days * ONE_DAY);
             }
             my $hours = sprintf("%d", $s->hours);
