@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.001003';
+our $VERSION = '1.001006';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 BEGIN {
@@ -89,7 +89,7 @@ Test::Builder - Backend for building test libraries
 
 =head1 DESCRIPTION
 
-Test::Simple and Test::More have proven to be popular testing modules,
+L<Test::Simple> and L<Test::More> have proven to be popular testing modules,
 but they're not always flexible enough.  Test::Builder provides a
 building block upon which to write your own test libraries I<which can
 work together>.
@@ -223,15 +223,18 @@ sub child {
 
 =item B<subtest>
 
-    $builder->subtest($name, \&subtests);
+    $builder->subtest($name, \&subtests, @args);
 
-See documentation of C<subtest> in Test::More.
+See documentation of C<subtest> in Test::More.  
+
+C<subtest> also, and optionally, accepts arguments which will be passed to the
+subtests reference.
 
 =cut
 
 sub subtest {
     my $self = shift;
-    my($name, $subtests) = @_;
+    my($name, $subtests, @args) = @_;
 
     if ('CODE' ne ref $subtests) {
         $self->croak("subtest()'s second argument must be a code ref");
@@ -255,7 +258,7 @@ sub subtest {
         my $run_the_subtests = sub {
             # Add subtest name for clarification of starting point
             $self->note("Subtest: $name");
-            $subtests->();
+            $subtests->(@args);
             $self->done_testing unless $self->_plan_handled;
             1;
         };
@@ -321,7 +324,7 @@ sub _plan_handled {
 When your child is done running tests, you must call C<finalize> to clean up
 and tell the parent your pass/fail status.
 
-Calling finalize on a child with open children will C<croak>.
+Calling C<finalize> on a child with open children will C<croak>.
 
 If the child falls out of scope before C<finalize> is called, a failure
 diagnostic will be issued and the child is considered to have failed.
@@ -1062,14 +1065,14 @@ DIAGNOSTIC
 
   $Test->isnt_eq($got, $dont_expect, $name);
 
-Like Test::More's C<isnt()>.  Checks if C<$got ne $dont_expect>.  This is
+Like L<Test::More>'s C<isnt()>.  Checks if C<$got ne $dont_expect>.  This is
 the string version.
 
 =item B<isnt_num>
 
   $Test->isnt_num($got, $dont_expect, $name);
 
-Like Test::More's C<isnt()>.  Checks if C<$got ne $dont_expect>.  This is
+Like L<Test::More>'s C<isnt()>.  Checks if C<$got ne $dont_expect>.  This is
 the numeric version.
 
 =cut
@@ -1111,14 +1114,14 @@ sub isnt_num {
   $Test->like($thing, qr/$regex/, $name);
   $Test->like($thing, '/$regex/', $name);
 
-Like Test::More's C<like()>.  Checks if $thing matches the given C<$regex>.
+Like L<Test::More>'s C<like()>.  Checks if $thing matches the given C<$regex>.
 
 =item B<unlike>
 
   $Test->unlike($thing, qr/$regex/, $name);
   $Test->unlike($thing, '/$regex/', $name);
 
-Like Test::More's C<unlike()>.  Checks if $thing B<does not match> the
+Like L<Test::More>'s C<unlike()>.  Checks if $thing B<does not match> the
 given C<$regex>.
 
 =cut
@@ -1141,7 +1144,7 @@ sub unlike {
 
   $Test->cmp_ok($thing, $type, $that, $name);
 
-Works just like Test::More's C<cmp_ok()>.
+Works just like L<Test::More>'s C<cmp_ok()>.
 
     $Test->cmp_ok($big_num, '!=', $other_big_num);
 
@@ -1246,7 +1249,7 @@ These are methods which are used in the course of writing a test but are not the
 
     $Test->BAIL_OUT($reason);
 
-Indicates to the Test::Harness that things are going so badly all
+Indicates to the L<Test::Harness> that things are going so badly all
 testing should terminate.  This includes running any additional test
 scripts.
 
@@ -2201,7 +2204,7 @@ pretty good at guessing the right package to look at.  It first looks for
 the caller based on C<$Level + 1>, since C<todo()> is usually called inside
 a test function.  As a last resort it will use C<exported_to()>.
 
-Sometimes there is some confusion about where todo() should be looking
+Sometimes there is some confusion about where C<todo()> should be looking
 for the C<$TODO> variable.  If you want to be sure, tell it explicitly
 what $pack to use.
 
@@ -2616,7 +2619,7 @@ Test::Builder.
 
 =head1 MEMORY
 
-An informative hash, accessible via C<<details()>>, is stored for each
+An informative hash, accessible via C<details()>, is stored for each
 test you perform.  So memory usage will scale linearly with each test
 run. Although this is not a problem for most test suites, it can
 become an issue if you do large (hundred thousands to million)
@@ -2624,19 +2627,19 @@ combinatorics tests in the same run.
 
 In such cases, you are advised to either split the test file into smaller
 ones, or use a reverse approach, doing "normal" (code) compares and
-triggering fail() should anything go unexpected.
+triggering C<fail()> should anything go unexpected.
 
 Future versions of Test::Builder will have a way to turn history off.
 
 
 =head1 EXAMPLES
 
-CPAN can provide the best examples.  Test::Simple, Test::More,
-Test::Exception and Test::Differences all use Test::Builder.
+CPAN can provide the best examples.  L<Test::Simple>, L<Test::More>,
+L<Test::Exception> and L<Test::Differences> all use Test::Builder.
 
 =head1 SEE ALSO
 
-Test::Simple, Test::More, Test::Harness
+L<Test::Simple>, L<Test::More>, L<Test::Harness>
 
 =head1 AUTHORS
 
