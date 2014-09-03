@@ -89,21 +89,29 @@ SKIP: {
     is(ilogb(256), 8, "ilogb 256");
   SKIP: {
       unless ($Config{d_isfinite}) {
-          skip "no isfinite", 1;
+          skip "no isfinite", 3;
       }
-      ok(isfinite(1), "isfinite");
+      ok(isfinite(1), "isfinite 1");
+      ok(!isfinite(Inf), "isfinite Inf");
+      ok(!isfinite(NaN), "isfinite NaN");
     }
   SKIP: {
       unless ($Config{d_isinf}) {
-          skip "no isinf", 1;
+          skip "no isinf", 4;
       }
-      ok(isinf(INFINITY), "isinf");
+      ok(isinf(INFINITY), "isinf INFINITY");
+      ok(isinf(Inf), "isinf Inf");
+      ok(!isinf(NaN), "isinf NaN");
+      ok(!isinf(42), "isinf 42");
     }
   SKIP: {
       unless ($Config{d_isnan}) {
-          skip "no isnan", 1;
+          skip "no isnan", 4;
       }
-      ok(isnan(NAN), "isnan");
+      ok(isnan(NAN), "isnan NAN");
+      ok(isnan(NaN), "isnan NaN");
+      ok(!isnan(Inf), "isnan Inf");
+      ok(!isnan(42), "isnan Inf");
     }
     cmp_ok(abs(log1p(2) - 1.09861228866811), '<', 1e-9, "log1p");
     cmp_ok(abs(log1p(1e-6) - 9.99999500000333e-07), '<', 1e-9, "log1p");
