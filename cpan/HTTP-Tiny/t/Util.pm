@@ -156,6 +156,8 @@ sub sort_headers {
             $self->{port}   = $monkey_port = $port;
             $self->{scheme} = $scheme;
             $self->{fh} = shift @req_fh;
+            $self->{pid} = $$;
+            $self->{tid} = HTTP::Tiny::Handle::_get_tid();
             return $self;
         };
         my $original_write_request = \&HTTP::Tiny::Handle::write_request;
