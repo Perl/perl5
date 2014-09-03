@@ -10988,8 +10988,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	*/
 #if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE
 	long double nv;
+#  define myNVgf PERL_PRIgldbl
 #else
 	NV nv;
+#  define myNVgf NVgf
 #endif
 	STRLEN have;
 	STRLEN need;
@@ -11724,7 +11726,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 i = PERL_INT_MIN;
                 (void)Perl_frexp(nv, &i);
                 if (i == PERL_INT_MIN)
-                    Perl_die(aTHX_ "panic: frexp: %"NVgf, nv);
+                    Perl_die(aTHX_ "panic: frexp: %"myNVgf, nv);
                 /* Do not set hexfp earlier since we want to printf
                  * Inf/NaN for Inf/NAN, not their hexfp. */
                 hexfp = isALPHA_FOLD_EQ(c, 'a');
