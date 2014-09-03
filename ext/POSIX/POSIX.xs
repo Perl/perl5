@@ -502,12 +502,10 @@ static NV my_erf(NV x)
 #  define c99_erf my_erf
 #endif
 
-/* While in theory erfc(x) is just 1-erf(x), thanks to numerical stability
- * things are not so easy. */
 #ifndef c99_erfc
 static NV my_erfc(NV x) {
-  /* Chiani, Dardari & Simon (2003), via Wikipedia */
-  return Perl_exp(-x*x) / 6.0 + Perl_exp(-4.0/3.0 * x*x) / 2.0;
+  /* This is not necessarily numerically stable, but better than nothing. */
+  return 1.0 - c99_erf(x);
 }
 #  define c99_erfc my_erfc
 #endif
