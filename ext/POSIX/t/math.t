@@ -64,7 +64,9 @@ SKIP: {
     cmp_ok(abs(M_SQRT2 - 1.4142135623731), '<', 1e-9, "M_SQRT2");
     cmp_ok(abs(M_E - 2.71828182845905), '<', 1e-9, "M_E");
     cmp_ok(abs(M_PI - 3.14159265358979), '<', 1e-9, "M_PI");
+    cmp_ok(abs(acosh(2) - 1.31695789692482), '<', 1e-9, "acosh");
     cmp_ok(abs(asinh(1) - 0.881373587019543), '<', 1e-9, "asinh");
+    cmp_ok(abs(atanh(0.5) - 0.549306144334055), '<', 1e-9, "atanh");
     cmp_ok(abs(cbrt(8) - 2), '<', 1e-9, "cbrt");
     cmp_ok(abs(cbrt(-27) - -3), '<', 1e-9, "cbrt");
     is(copysign(3.14, -2), -3.14, "copysign");
@@ -113,6 +115,7 @@ SKIP: {
       ok(!isnan(Inf), "isnan Inf");
       ok(!isnan(42), "isnan Inf");
     }
+    cmp_ok(nan(), '!=', nan(), 'nan');
     cmp_ok(abs(log1p(2) - 1.09861228866811), '<', 1e-9, "log1p");
     cmp_ok(abs(log1p(1e-6) - 9.99999500000333e-07), '<', 1e-9, "log1p");
     cmp_ok(abs(log2(8) - 3), '<', 1e-9, "log2");
