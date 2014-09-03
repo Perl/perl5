@@ -254,10 +254,12 @@
 #    define c99_trunc	trunc
 #  endif
 
-#  if !defined(isunordered) && defined(Perl_isnan)
-#    define isunordered(x, y) (Perl_isnan(x) || Perl-isnan(y))
-#  elsif defined(HAS_UNORDERED)
-#    define isunordered(x, y) unordered(x, y)
+#  ifndef isunordered
+#    ifdef Perl_isnan
+#      define isunordered(x, y) (Perl_isnan(x) || Perl_isnan(y))
+#    elif defined(HAS_UNORDERED)
+#      define isunordered(x, y) unordered(x, y)
+#    endif
 #  endif
 
 #  if !defined(isgreater) && defined(isunordered)
