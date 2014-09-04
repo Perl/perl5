@@ -2516,6 +2516,7 @@ typedef struct svop SVOP;
 typedef struct padop PADOP;
 typedef struct pvop PVOP;
 typedef struct loop LOOP;
+typedef struct methop METHOP;
 
 #ifdef PERL_CORE
 typedef struct opslab OPSLAB;

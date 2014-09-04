@@ -638,24 +638,24 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, scalar($1), $5),
-				    newUNOP(OP_METHOD, 0, $3)));
+				    newMETHOP(OP_METHOD, 0, $3)));
 			}
 	|	term ARROW method                     /* $foo->bar */
 			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST, scalar($1),
-				    newUNOP(OP_METHOD, 0, $3)));
+				    newMETHOP(OP_METHOD, 0, $3)));
 			}
 	|	METHOD indirob optlistexpr           /* new Class @args */
 			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, $2, $3),
-				    newUNOP(OP_METHOD, 0, $1)));
+				    newMETHOP(OP_METHOD, 0, $1)));
 			}
 	|	FUNCMETH indirob '(' optexpr ')'    /* method $object (@args) */
 			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, $2, $4),
-				    newUNOP(OP_METHOD, 0, $1)));
+				    newMETHOP(OP_METHOD, 0, $1)));
 			}
 	|	LSTOP optlistexpr                    /* print @args */
 			{ $$ = convert($1, 0, $2); }

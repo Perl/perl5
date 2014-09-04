@@ -850,6 +850,15 @@ Perl_op_clear(pTHX_ OP *o)
 	}
 	break;
     case OP_METHOD_NAMED:
+        SvREFCNT_dec(cMETHOPx(o)->meth_sv);
+        cMETHOPx(o)->meth_sv = NULL;
+#ifdef USE_ITHREADS
+        if (o->op_targ) {
+            pad_swipe(o->op_targ, 1);
+            o->op_targ = 0;
+        }
+#endif
+        break;
     case OP_CONST:
     case OP_HINTSEVAL:
 	SvREFCNT_dec(cSVOPo->op_sv);
@@ -2064,6 +2073,27 @@ Perl_finalize_optree(pTHX_ OP* o)
     LEAVE;
 }
 
+#ifdef USE_ITHREADS
+/* Relocate sv to the pad for thread safety.
+ * Despite being a "constant", the SV is written to,
+ * for reference counts, sv_upgrade() etc. */
+PERL_STATIC_INLINE void
+S_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp)
+{
+    PADOFFSET ix;
+    PERL_ARGS_ASSERT_OP_RELOCATE_SV;
+    if (!*svp) return;
+    ix = pad_alloc(OP_CONST, SVf_READONLY);
+    SvREFCNT_dec(PAD_SVl(ix));
+    PAD_SETSV(ix, *svp);
+    /* XXX I don't know how this isn't readonly already. */
+    if (!SvIsCOW(PAD_SVl(ix))) SvREADONLY_on(PAD_SVl(ix));
+    *svp = NULL;
+    *targp = ix;
+}
+#endif
+
+
 STATIC void
 S_finalize_op(pTHX_ OP* o)
 {
@@ -2116,21 +2146,16 @@ S_finalize_op(pTHX_ OP* o)
 	/* FALLTHROUGH */
 #ifdef USE_ITHREADS
     case OP_HINTSEVAL:
-    case OP_METHOD_NAMED:
-	/* Relocate sv to the pad for thread safety.
-	 * Despite being a "constant", the SV is written to,
-	 * for reference counts, sv_upgrade() etc. */
-	if (cSVOPo->op_sv) {
-	    const PADOFFSET ix = pad_alloc(OP_CONST, SVf_READONLY);
-	    SvREFCNT_dec(PAD_SVl(ix));
-	    PAD_SETSV(ix, cSVOPo->op_sv);
-	    /* XXX I don't know how this isn't readonly already. */
-	    if (!SvIsCOW(PAD_SVl(ix))) SvREADONLY_on(PAD_SVl(ix));
-	    cSVOPo->op_sv = NULL;
-	    o->op_targ = ix;
-	}
+        op_relocate_sv(&cSVOPo->op_sv, &o->op_targ);
 #endif
-	break;
+        break;
+
+#ifdef USE_ITHREADS
+    /* Relocate all the METHOP's SVs to the pad for thread safety. */
+    case OP_METHOD_NAMED:
+        op_relocate_sv(&cMETHOPx(o)->meth_sv, &o->op_targ);
+        break;
+#endif
 
     case OP_HELEM: {
 	UNOP *rop;
@@ -2942,7 +2967,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
 		   op_append_elem(OP_LIST,
 			       op_prepend_elem(OP_LIST, pack, list(arg)),
-			       newSVOP(OP_METHOD_NAMED, 0, meth)));
+			       newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
 
     /* Combine the ops. */
     *imopsp = op_append_elem(OP_LIST, *imopsp, imop);
@@ -4291,6 +4316,77 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 }
 
 /*
+=for apidoc Am|OP *|newMETHOP|I32 type|I32 flags|OP *first
+
+Constructs, checks, and returns an op of method type with a method name
+evaluated at runtime. I<type> is the opcode. I<flags> gives the eight
+bits of C<op_flags>, except that C<OPf_KIDS> will be set automatically,
+and, shifted up eight bits, the eight bits of C<op_private>, except that
+the bit with value 1 is automatically set. I<first> supplies an op which
+evaluates method name; it is consumed by this function and become part
+of the constructed op tree.
+Supported optypes: OP_METHOD.
+
+=cut
+*/
+
+static OP*
+S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth) {
+    dVAR;
+    METHOP *methop;
+   
+    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_UNOP || (PL_opargs[type] & OA_CLASS_MASK) == OA_SVOP);
+   
+    NewOp(1101, methop, 1, METHOP);
+    if (dynamic_meth) {
+        if (PL_opargs[type] & OA_MARK) dynamic_meth = force_list(dynamic_meth, 1);
+        methop->op_flags = (U8)(flags | OPf_KIDS);
+        methop->op_first = dynamic_meth;
+        methop->op_private = (U8)(1 | (flags >> 8));
+    }
+    else {
+        assert(const_meth);
+        methop->op_flags = (U8)(flags & ~OPf_KIDS);
+        methop->meth_sv = const_meth;
+        methop->op_private = (U8)(0 | (flags >> 8));
+        methop->op_next = (OP*)methop;
+    }
+
+    methop->op_type = (OPCODE)type;
+    methop->op_ppaddr = PL_ppaddr[type];
+    methop = (METHOP*) CHECKOP(type, methop);
+   
+    if (methop->op_next) return (OP*)methop;
+   
+    return fold_constants(op_integerize(op_std_init((OP *) methop)));
+}
+
+OP *
+Perl_newMETHOP (pTHX_ I32 type, I32 flags, OP* dynamic_meth) {
+    PERL_ARGS_ASSERT_NEWMETHOP;
+    return newMETHOP_internal(type, flags, dynamic_meth, NULL);
+}
+
+/*
+=for apidoc Am|OP *|newMETHOP_named|I32 type|I32 flags|SV *const_meth
+
+Constructs, checks, and returns an op of method type with a constant
+method name. I<type> is the opcode. I<flags> gives the eight bits of
+C<op_flags>, and, shifted up eight bits, the eight bits of
+C<op_private>. I<const_meth> supplies a constant method name;
+it must be a shared COW string.
+Supported optypes: OP_METHOD_NAMED.
+
+=cut
+*/
+
+OP *
+Perl_newMETHOP_named (pTHX_ I32 type, I32 flags, SV* const_meth) {
+    PERL_ARGS_ASSERT_NEWMETHOP_NAMED;
+    return newMETHOP_internal(type, flags, NULL, const_meth);
+}
+
+/*
 =for apidoc Am|OP *|newBINOP|I32 type|I32 flags|OP *first|OP *last
 
 Constructs, checks, and returns an op of any binary type.  I<type>
@@ -5345,7 +5441,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    veop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 			    op_append_elem(OP_LIST,
 					op_prepend_elem(OP_LIST, pack, list(version)),
-					newSVOP(OP_METHOD_NAMED, 0, meth)));
+					newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
 	}
     }
 
@@ -5372,7 +5468,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 		       op_append_elem(OP_LIST,
 				   op_prepend_elem(OP_LIST, pack, list(arg)),
-				   newSVOP(OP_METHOD_NAMED, 0, meth)));
+				   newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
     }
 
     /* Fake up the BEGIN {}, which does its thing immediately. */
@@ -9570,25 +9666,26 @@ Perl_ck_match(pTHX_ OP *o)
 OP *
 Perl_ck_method(pTHX_ OP *o)
 {
+    SV* sv;
+    const char* method;
     OP * const kid = cUNOPo->op_first;
 
     PERL_ARGS_ASSERT_CK_METHOD;
+    if (kid->op_type != OP_CONST) return o;
 
-    if (kid->op_type == OP_CONST) {
-	SV* sv = kSVOP->op_sv;
-	const char * const method = SvPVX_const(sv);
-	if (!(strchr(method, ':') || strchr(method, '\''))) {
-	    OP *cmop;
-	    if (!SvIsCOW_shared_hash(sv)) {
-		sv = newSVpvn_share(method, SvUTF8(sv) ? -(I32)SvCUR(sv) : (I32)SvCUR(sv), 0);
-	    }
-	    else {
-		kSVOP->op_sv = NULL;
-	    }
-	    cmop = newSVOP(OP_METHOD_NAMED, 0, sv);
-	    op_free(o);
-	    return cmop;
-	}
+    sv = kSVOP->op_sv;
+    method = SvPVX_const(sv);
+    if (!(strchr(method, ':') || strchr(method, '\''))) {
+        OP *cmop;
+        if (!SvIsCOW_shared_hash(sv)) {
+            sv = newSVpvn_share(method, SvUTF8(sv) ? -(I32)SvCUR(sv) : (I32)SvCUR(sv), 0);
+        }
+        else {
+            kSVOP->op_sv = NULL;
+        }
+        cmop = newMETHOP_named(OP_METHOD_NAMED, 0, sv);
+        op_free(o);
+        return cmop;
     }
     return o;
 }

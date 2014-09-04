@@ -369,6 +369,8 @@
 #define newLOGOP(a,b,c,d)	Perl_newLOGOP(aTHX_ a,b,c,d)
 #define newLOOPEX(a,b)		Perl_newLOOPEX(aTHX_ a,b)
 #define newLOOPOP(a,b,c,d)	Perl_newLOOPOP(aTHX_ a,b,c,d)
+#define newMETHOP(a,b,c)	Perl_newMETHOP(aTHX_ a,b,c)
+#define newMETHOP_named(a,b,c)	Perl_newMETHOP_named(aTHX_ a,b,c)
 #define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
 #define newNULLLIST()		Perl_newNULLLIST(aTHX)
 #define newOP(a,b)		Perl_newOP(aTHX_ a,b)
@@ -1510,6 +1512,7 @@
 #define my_kid(a,b,c)		S_my_kid(aTHX_ a,b,c)
 #define newDEFSVOP()		S_newDEFSVOP(aTHX)
 #define newGIVWHENOP(a,b,c,d,e)	S_newGIVWHENOP(aTHX_ a,b,c,d,e)
+#define newMETHOP_internal(a,b,c,d)	S_newMETHOP_internal(aTHX_ a,b,c,d)
 #define new_logop(a,b,c,d)	S_new_logop(aTHX_ a,b,c,d)
 #define no_bareword_allowed(a)	S_no_bareword_allowed(aTHX_ a)
 #define no_fh_allowed(a)	S_no_fh_allowed(aTHX_ a)
@@ -1530,6 +1533,9 @@
 #define too_few_arguments_sv(a,b,c)	S_too_few_arguments_sv(aTHX_ a,b,c)
 #define too_many_arguments_pv(a,b,c)	S_too_many_arguments_pv(aTHX_ a,b,c)
 #define too_many_arguments_sv(a,b,c)	S_too_many_arguments_sv(aTHX_ a,b,c)
+#    if defined(USE_ITHREADS)
+#define op_relocate_sv(a,b)	S_op_relocate_sv(aTHX_ a,b)
+#    endif
 #  endif
 #  if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
 #define report_redefined_cv(a,b,c)	Perl_report_redefined_cv(aTHX_ a,b,c)

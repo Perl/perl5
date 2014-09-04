@@ -385,6 +385,15 @@ struct listop {
     OP *	op_last;
 };
 
+/* METHOP is either extended UNOP (OP_METHOD) or extended SVOP (OP_METHOD_*) */
+struct methop {
+    BASEOP
+    union {
+        OP* op_first; /* when UNOP: optree for method name */
+        SV* meth_sv; /* when SVOP: method name */
+    };
+};
+
 struct pmop {
     BASEOP
     OP *	op_first;
@@ -543,6 +552,7 @@ struct loop {
 #define cPVOPx(o)	((PVOP*)o)
 #define cCOPx(o)	((COP*)o)
 #define cLOOPx(o)	((LOOP*)o)
+#define cMETHOPx(o)	((METHOP*)o)
 
 #define cUNOP		cUNOPx(PL_op)
 #define cBINOP		cBINOPx(PL_op)
@@ -595,6 +605,8 @@ struct loop {
 #  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv)
 #  define	cSVOPx_svp(v)	(&cSVOPx(v)->op_sv)
 #endif
+
+#  define	cMETHOPx_meth(v)	cSVOPx_sv(v)
 
 #define	cGVOP_gv		cGVOPx_gv(PL_op)
 #define	cGVOPo_gv		cGVOPx_gv(o)

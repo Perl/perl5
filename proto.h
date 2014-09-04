@@ -2873,6 +2873,20 @@ PERL_CALLCONV OP*	Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP* expr, OP* 
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV OP*	Perl_newMETHOP(pTHX_ I32 type, I32 flags, OP* dynamic_meth)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_NEWMETHOP	\
+	assert(dynamic_meth)
+
+PERL_CALLCONV OP*	Perl_newMETHOP_named(pTHX_ I32 type, I32 flags, SV* const_meth)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_NEWMETHOP_NAMED	\
+	assert(const_meth)
+
 PERL_CALLCONV CV *	Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_NEWMYSUB	\
@@ -6212,6 +6226,7 @@ STATIC OP*	S_newGIVWHENOP(pTHX_ OP* cond, OP *block, I32 enter_opcode, I32 leave
 #define PERL_ARGS_ASSERT_NEWGIVWHENOP	\
 	assert(block)
 
+PERL_STATIC_INLINE OP*	S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth);
 STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_3)
@@ -6309,6 +6324,14 @@ STATIC OP*	S_too_many_arguments_sv(pTHX_ OP *o, SV* namesv, U32 flags)
 #define PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS_SV	\
 	assert(o); assert(namesv)
 
+#  if defined(USE_ITHREADS)
+PERL_STATIC_INLINE void	S_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_OP_RELOCATE_SV	\
+	assert(svp); assert(targp)
+
+#  endif
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
 PERL_CALLCONV void	Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv, SV * const *new_const_svp)
