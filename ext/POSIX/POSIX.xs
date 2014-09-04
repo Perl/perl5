@@ -122,6 +122,14 @@
 #  define FP_ZERO	4
 #endif
 
+/* We will have an emulation. */
+#ifndef FE_TONEAREST
+#  define FE_TONEAREST	0
+#  define FE_TOWARDZERO	1
+#  define FE_DOWNWARD	2
+#  define FE_UPWARD	3
+#endif
+
 /* C89 math.h:
 
    acos asin atan atan2 ceil cos cosh exp fabs floor fmod frexp ldexp
@@ -651,30 +659,44 @@ static int my_fegetround()
   return fegetround();
 #elif defined(FLT_ROUNDS)
   return FLT_ROUNDS;
-  /* XXX emulate using fpgetround() (HAS_FPGETROUND):
-   * FP_RN to nearest, FP_RM down, FP_RP, up, FP_RZ truncate */
+#elif defined(HAS_FPGETROUND)
+  switch (fpgetround()) {
+  default:
+  case FP_RN: return FE_TONEAREST;
+  case FP_RZ: return FE_TOWARDZERO;
+  case FP_RM: return FE_DOWNWARD;
+  case FE_RP: return FE_UPWARD;
+  }
 #else
   return -1;
 #endif
 }
+
+/* Toward minus infinity. */
+#define my_round_down(x) ((NV)((IV)(x >= 0.0 ? x : x - 0.5)))
+
+/* Toward plus infinity. */
+#define my_round_up(x) ((NV)((IV)(x >= 0.0 ? x + 0.5 : x)))
 
 static NV my_rint(NV x)
 {
 #ifdef FE_TONEAREST
   switch (my_fegetround()) {
   default:
-  case FE_TONEAREST:
-    return (NV)((IV)(x >= 0.0 ? x + 0.5 : x - 0.5)); /* like round() */
-  case FE_TOWARDZERO:
-    return (NV)((IV)(x)); /* like trunc() */
-  case FE_DOWNWARD:
-    return (NV)((IV)(x >= 0.0 ? x : x - 0.5));
-  case FE_UPWARD:
-    return (NV)((IV)(x >= 0.0 ? x + 0.5 : x));
+  case FE_TONEAREST:  return c99_round(x);
+  case FE_TOWARDZERO: return c99_trunc(x);
+  case FE_DOWNWARD:   return my_round_down(x);
+  case FE_UPWARD:     return my_round_up(x);
+  }
+#elif defined(HAS_FPGETROUND)
+  switch (fpgetround()) {
+  default:
+  case FP_RN: return c99_round(x);
+  case FP_RZ: return c99_trunc(x);
+  case FP_RM: return my_round_down(x);
+  case FE_RP: return my_round_up(x);
   }
 #else
-  /* XXX emulate using fpsetround() (HAS_FPGETROUND):
-   * FP_RN to nearest, FP_RM down, FP_RP, up, FP_RZ truncate */
   return NV_NAN;
 #endif
 }
@@ -2032,6 +2054,14 @@ fesetround(x)
     CODE:
 #ifdef HAS_FEGETROUND /* canary for fesetround */
 	RETVAL = fesetround(x);
+#elif HAS_FPGETROUND /* canary for fpsetround */
+	switch (x) {
+        default:
+	case FE_TONEAREST:  RETVAL = fpsetround(FP_RN); break;
+	case FE_TOWARDZERO: RETVAL = fpsetround(FP_RZ); break;
+	case FE_DOWNWARD:   RETVAL = fpsetround(FP_RM); break;
+	case FE_UPWARD:     RETVAL = fpsetround(FP_RP); break;
+	}
 #else
 	RETVAL = -1;
 	not_here("fesetround");
