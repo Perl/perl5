@@ -5,8 +5,7 @@
 use strict;
 use Test::More;
 
-eval 'require Math::BigInt::Lite;';
-if ($@ eq '')
+if (eval { require Math::BigInt::Lite; 1 })
   {
   plan (tests => 1);
   # can use Lite, so let bignum try it
