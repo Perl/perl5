@@ -10722,25 +10722,47 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
    and needs to handle the rest. RExC_parse is expected to point at the first
    char following the N at the time of the call.  On successful return,
    RExC_parse has been updated to point to just after the sequence identified
-   by this routine, and <*flagp> has been updated.
+   by this routine, <*flagp> has been updated, and the non-NULL input pointers
+   have been set appropriately.
 
-   The \N may be inside (indicated by the boolean <in_char_class>) or outside a
-   character class.
+   The typical case for this is \N{some character name}.  This is usually
+   called while parsing the input, filling in or ready to fill in an EXACTish
+   node, and the code point for the character should be returned, so that it
+   can be added to the node, and parsing continued with the next input
+   character.  But it may be that instead of a single character the \N{}
+   expands to more than one, a named sequence.  In this case any following
+   quantifier applies to the whole sequence, and it is easier, given the code
+   structure that calls this, to handle it from a different area of the code.
+   For this reason, the input parameters can be set so that it returns valid
+   only on one or the other of these cases.
 
-   \N may begin either a named sequence, or if outside a character class, mean
-   to match a non-newline.  For non single-quoted regexes, the tokenizer has
-   attempted to decide which, and in the case of a named sequence, converted it
+   Another possibility is for the input to be an empty \N{}, which for
+   backwards compatibility we accept, but generate a NOTHING node which should
+   later get optimized out.  This is handled from the area of code which can
+   handle a named sequence, so if called with the parameters for the other, it
+   fails.
+
+   Still another possibility is for the \N to mean [^\n], and not a single
+   character or explicit sequence at all.  This is determined by context.
+   Again, this is handled from the area of code which can handle a named
+   sequence, so if called with the parameters for the other, it also fails.
+
+   And the final possibility is for the \N to be called from within a bracketed
+   character class.  In this case the [^\n] meaning makes no sense, and so is
+   an error, and the named sequence sense is currently either an error or a
+   warning depending on the strictness level passed in
+
+   For non-single-quoted regexes, the tokenizer has attempted to decide which
+   of the above applies, and in the case of a named sequence, has converted it
    into one of the forms: \N{} (if the sequence is null), or \N{U+c1.c2...},
    where c1... are the characters in the sequence.  For single-quoted regexes,
    the tokenizer passes the \N sequence through unchanged; this code will not
    attempt to determine this nor expand those, instead raising a syntax error.
    The net effect is that if the beginning of the passed-in pattern isn't '{U+'
    or there is no '}', it signals that this \N occurrence means to match a
-   non-newline.
+   non-newline. (This mostly was done because of [perl #56444].)
 
-   Only the \N{U+...} form should occur in a character class, for the same
-   reason that '.' inside a character class means to just match a period: it
-   just doesn't make sense.
+   The API is somewhat convoluted due to historical and the above reasons.
 
    The function raises an error (via vFAIL), and doesn't return for various
    syntax errors.  Otherwise it returns TRUE and sets <node_p> or <valuep> on
@@ -11079,7 +11101,7 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
                 if (LOC || ! FOLD) {    /* /l defers folding until runtime */
                     *character = (U8) code_point;
                 }
-                else { /* Here is /i and not /l (toFOLD() is defined on just
+                else { /* Here is /i and not /l. (toFOLD() is defined on just
                           ASCII, which isn't the same thing as INVARIANT on
                           EBCDIC, but it works there, as the extra invariants
                           fold to themselves) */
@@ -11110,7 +11132,10 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
                                                       ? FOLD_FLAGS_NOMIX_ASCII
                                                       : 0));
                 if (downgradable
-                    && folded == code_point
+                    && folded == code_point /* This quickly rules out many
+                                               cases, avoiding the
+                                               _invlist_contains_cp() overhead
+                                               for those.  */
                     && ! _invlist_contains_cp(PL_utf8_foldable, code_point))
                 {
                     OP(node) = EXACT;
