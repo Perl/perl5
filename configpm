@@ -628,6 +628,24 @@ foreach my $prefix (qw(libs libswanted)) {
     $heavy_txt .= "${prefix}_nolargefiles='$value'\n";
 }
 
+if (open(my $fh, "cflags")) {
+    my $ccwarnflags;
+    my $ccstdflags;
+    while (<$fh>) {
+        if (/^warn="(.+)"$/) {
+            $ccwarnflags = $1;
+        } elsif (/^stdflags="(.+)"$/) {
+            $ccstdflags = $1;
+        }
+    }
+    if (defined $ccwarnflags) {
+      $heavy_txt .= "ccwarnflags='$ccwarnflags'\n";
+    }
+    if (defined $ccstdflags) {
+      $heavy_txt .= "ccstdflags='$ccstdflags'\n";
+    }
+}
+
 $heavy_txt .= "EOVIRTUAL\n";
 
 $heavy_txt .= <<'ENDOFGIT';
