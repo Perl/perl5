@@ -949,7 +949,7 @@
 #define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)
 #define get_invlist_iter_addr	S_get_invlist_iter_addr
 #define get_invlist_previous_index_addr	S_get_invlist_previous_index_addr
-#define grok_bslash_N(a,b,c,d,e,f,g)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f,g)
+#define grok_bslash_N(a,b,c,d,e,f)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f)
 #define handle_regex_sets(a,b,c,d,e)	S_handle_regex_sets(aTHX_ a,b,c,d,e)
 #define invlist_array		S_invlist_array
 #define invlist_clone(a)	S_invlist_clone(aTHX_ a)

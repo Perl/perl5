@@ -10711,10 +10711,9 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     return(ret);
 }
 
-STATIC bool
+STATIC STRLEN
 S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
-                      UV *valuep, I32 *flagp, U32 depth, bool in_char_class,
-                      const bool strict   /* Apply stricter parsing rules? */
+                      UV *valuep, I32 *flagp, U32 depth, SV** substitute_parse
     )
 {
 
@@ -10749,8 +10748,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
 
    And the final possibility is for the \N to be called from within a bracketed
    character class.  In this case the [^\n] meaning makes no sense, and so is
-   an error, and the named sequence sense is currently either an error or a
-   warning depending on the strictness level passed in
+   an error.  Other anomalous situations are left to the calling code to handle.
 
    For non-single-quoted regexes, the tokenizer has attempted to decide which
    of the above applies, and in the case of a named sequence, has converted it
@@ -10765,25 +10763,33 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
    The API is somewhat convoluted due to historical and the above reasons.
 
    The function raises an error (via vFAIL), and doesn't return for various
-   syntax errors.  Otherwise it returns TRUE and sets <node_p> or <valuep> on
-   success; it returns FALSE otherwise. Returns FALSE, setting *flagp to
-   RESTART_UTF8 if the sizing scan needs to be restarted. Such a restart is
-   only possible if node_p is non-NULL.
-
+   syntax errors.  For other failures, it returns (STRLEN) -1.  For successes,
+   it returns a count of how many characters were accounted for by it.  (This
+   can be 0 for \N{}; 1 for it meaning [^\n]; and otherwise the number of code
+   points in the sequence.  It sets <node_p>, <valuep>, and/or
+   <substitute_parse> on success.
 
    If <valuep> is non-null, it means the caller can accept an input sequence
-   consisting of a just a single code point; <*valuep> is set to that value
-   if the input is such.
+   consisting of a just a single code point; <*valuep> is set to the value
+   of the only or first code point in the input.
 
-   If <node_p> is non-null it signifies that the caller can accept any other
-   legal sequence (i.e., one that isn't just a single code point).  <*node_p>
-   is set as follows:
-    1) \N means not-a-NL: points to a newly created REG_ANY node;
-    2) \N{}:              points to a new NOTHING node;
+   If <substitute_parse> is non-null, it means the caller can accept an input
+   sequence consisting of one or more code points; <*substitute_parse> is a
+   newly created mortal SV* in this case, containing \x{} escapes representing
+   those code points.
+
+   Both <valuep> and <substitute_parse> can be non-NULL.
+
+   If <node_p> is non-null, <substitute_parse> must be NULL.  This signifies
+   that the caller can accept any legal sequence other than a single code
+   point.  To wit, <*node_p> is set as follows:
+    1) \N means not-a-NL: points to a newly created REG_ANY node; return is 1
+    2) \N{}:              points to a new NOTHING node; return is 0
     3) otherwise:         points to a new EXACT node containing the resolved
-                          string.
-   Note that FALSE is returned for single code point sequences if <valuep> is
-   null.
+                          string; return is the number of code points in the
+                          string.  This will never be 1.
+   Note that failure is returned for single code point sequences if <valuep> is
+   null and <node_p> is not.
  */
 
     char * endbrace;    /* '}' following the name */
@@ -10792,6 +10798,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
                            stream */
     bool has_multiple_chars; /* true if the input stream contains a sequence of
                                 more than one character */
+    bool in_char_class = substitute_parse != NULL;
+    STRLEN count = 0;   /* Number of characters in this sequence */
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -10800,6 +10808,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
     GET_RE_DEBUG_FLAGS;
 
     assert(cBOOL(node_p) ^ cBOOL(valuep));  /* Exactly one should be set */
+    assert(! (node_p && substitute_parse)); /* At most 1 should be set */
 
     /* The [^\n] meaning of \N ignores spaces and comments under the /x
      * modifier.  The other meaning does not, so use a temporary until we find
@@ -10818,7 +10827,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
             if (in_char_class) {
                 vFAIL("\\N in a character class must be a named character: \\N{...}");
             }
-            return FALSE;
+            return (STRLEN) -1;
         }
         RExC_parse--;   /* Need to back off so nextchar() doesn't skip the
                            current char */
@@ -10827,7 +10836,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
 	*flagp |= HASWIDTH|SIMPLE;
 	RExC_naughty++;
         Set_Node_Length(*node_p, 1); /* MJD */
-	return TRUE;
+	return 1;
     }
 
     /* Here, we have decided it should be a named character or sequence */
@@ -10854,28 +10863,14 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
     }
 
     if (endbrace == RExC_parse) {   /* empty: \N{} */
-        bool ret = TRUE;
 	if (node_p) {
 	    *node_p = reg_node(pRExC_state,NOTHING);
 	}
-        else if (in_char_class) {
-            if (PASS2 && in_char_class) {
-                if (strict) {
-                    RExC_parse++;   /* Position after the "}" */
-                    vFAIL("Zero length \\N{}");
-                }
-                else {
-                    ckWARNreg(RExC_parse,
-                              "Ignoring zero length \\N{} in character class");
-                }
-            }
-            ret = FALSE;
-	}
-        else {
-            return FALSE;
+        else if (! in_char_class) {
+            return (STRLEN) -1;
         }
         nextchar(pRExC_state);
-        return ret;
+        return 0;
     }
 
     RExC_uni_semantics = 1; /* Unicode named chars imply Unicode semantics */
@@ -10887,23 +10882,26 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
      * point, and is terminated by the brace */
     has_multiple_chars = (endchar < endbrace);
 
-    if (valuep && (! has_multiple_chars || in_char_class)) {
-	/* We only pay attention to the first char of
-        multichar strings being returned in char classes. I kinda wonder
-	if this makes sense as it does change the behaviour
-	from earlier versions, OTOH that behaviour was broken
-	as well. XXX Solution is to recharacterize as
-	[rest-of-class]|multi1|multi2... */
-
+    /* We get the first code point if we want it, and either there is only one,
+     * or we can accept both cases of one and more than one */
+    if (valuep && (substitute_parse || ! has_multiple_chars)) {
 	STRLEN length_of_hex = (STRLEN)(endchar - RExC_parse);
 	I32 grok_hex_flags = PERL_SCAN_ALLOW_UNDERSCORES
 	    | PERL_SCAN_DISALLOW_PREFIX
-	    | (SIZE_ONLY ? PERL_SCAN_SILENT_ILLDIGIT : 0);
+
+                             /* No errors in the first pass (See [perl
+                              * #122671].)  We let the code below find the
+                              * errors when there are multiple chars. */
+                           | ((SIZE_ONLY || has_multiple_chars)
+                              ? PERL_SCAN_SILENT_ILLDIGIT
+                              : 0);
 
 	*valuep = grok_hex(RExC_parse, &length_of_hex, &grok_hex_flags, NULL);
 
 	/* The tokenizer should have guaranteed validity, but it's possible to
-	 * bypass it by using single quoting, so check */
+         * bypass it by using single quoting, so check.  Don't do the check
+         * here when there are multiple chars; we do it below anyway. */
+        if (! has_multiple_chars) {
 	if (length_of_hex == 0
 	    || length_of_hex != (STRLEN)(endchar - RExC_parse) )
 	{
@@ -10918,59 +10916,69 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
 	    vFAIL("Invalid hexadecimal number in \\N{U+...}");
 	}
 
-        if (in_char_class && has_multiple_chars) {
-            if (strict) {
-                RExC_parse = endbrace;
-                vFAIL("\\N{} in character class restricted to one character");
-            }
-            else if (PASS2) {
-                ckWARNreg(endchar, "Using just the first character returned by \\N{} in character class");
-            }
-        }
-
         RExC_parse = endbrace + 1;
+        return 1;
+        }
     }
-    else if (! node_p || ! has_multiple_chars) {
 
-        /* Here, the input is legal, but not according to the caller's
-         * options.  We fail without advancing the parse, so that the
-         * caller can try again */
+    /* Here, we should have already handled the case where a single character
+     * is expected and found.  So it is a failure if we aren't expecting
+     * multiple chars and got them; or didn't get them but wanted them.  We
+     * fail without advancing the parse, so that the caller can try again with
+     * different acceptance criteria */
+    if ((! node_p && ! substitute_parse) || ! has_multiple_chars) {
         RExC_parse = p;
-        return FALSE;
+        return (STRLEN) -1;
     }
-    else {
+
+    {
 
 	/* What is done here is to convert this to a sub-pattern of the form
-	 * (?:\x{char1}\x{char2}...)
-	 * and then call reg recursively.  That way, it retains its atomicness,
-	 * while not having to worry about special handling that some code
-	 * points may have.  toke.c has converted the original Unicode values
-	 * to native, so that we can just pass on the hex values unchanged.  We
-	 * do have to set a flag to keep recoding from happening in the
-	 * recursion */
+	 * \x{char1}\x{char2}...
+         * and then either return it in <*substitute_parse> if non-null; or
+         * call reg recursively to parse it (enclosing in "(?: ... )" ).  That
+         * way, it retains its atomicness, while not having to worry about
+         * special handling that some code points may have.  toke.c has
+         * converted the original Unicode values to native, so that we can just
+         * pass on the hex values unchanged.  We do have to set a flag to keep
+         * recoding from happening in the recursion */
 
-	SV * substitute_parse = newSVpvn_flags("?:", 2, SVf_UTF8|SVs_TEMP);
+	SV * dummy = NULL;
 	STRLEN len;
 	char *orig_end = RExC_end;
         I32 flags;
 
+        if (substitute_parse) {
+            *substitute_parse = newSVpvs("");
+        }
+        else {
+            substitute_parse = &dummy;
+            *substitute_parse = newSVpvs("?:");
+        }
+        *substitute_parse = sv_2mortal(*substitute_parse);
+
 	while (RExC_parse < endbrace) {
 
 	    /* Convert to notation the rest of the code understands */
-	    sv_catpv(substitute_parse, "\\x{");
-	    sv_catpvn(substitute_parse, RExC_parse, endchar - RExC_parse);
-	    sv_catpv(substitute_parse, "}");
+	    sv_catpv(*substitute_parse, "\\x{");
+	    sv_catpvn(*substitute_parse, RExC_parse, endchar - RExC_parse);
+	    sv_catpv(*substitute_parse, "}");
 
 	    /* Point to the beginning of the next character in the sequence. */
 	    RExC_parse = endchar + 1;
 	    endchar = RExC_parse + strcspn(RExC_parse, ".}");
-	}
-	sv_catpv(substitute_parse, ")");
 
-	RExC_parse = SvPV(substitute_parse, len);
+            count++;
+	}
+        if (! in_char_class) {
+            sv_catpv(*substitute_parse, ")");
+        }
+
+	RExC_parse = SvPV(*substitute_parse, len);
 
 	/* Don't allow empty number */
-	if (len < 8) {
+	if (len < (STRLEN) ((substitute_parse) ? 6 : 8)) {
+            RExC_parse = endbrace;
 	    vFAIL("Invalid hexadecimal number in \\N{U+...}");
 	}
 	RExC_end = RExC_parse + len;
@@ -10978,15 +10986,17 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
 	/* The values are Unicode, and therefore not subject to recoding */
 	RExC_override_recoding = 1;
 
+        if (node_p) {
 	if (!(*node_p = reg(pRExC_state, 1, &flags, depth+1))) {
             if (flags & RESTART_UTF8) {
                 *flagp = RESTART_UTF8;
-                return FALSE;
+                return (STRLEN) -1;
             }
             FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#"UVxf"",
                   (UV) flags);
         }
 	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
+        }
 
 	RExC_parse = endbrace;
 	RExC_end = orig_end;
@@ -10995,7 +11005,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
         nextchar(pRExC_state);
     }
 
-    return TRUE;
+    return count;
 }
 
 
@@ -11611,8 +11621,9 @@ tryagain:
              * special treatment for quantifiers is not needed for such single
              * character sequences */
             ++RExC_parse;
-            if (! grok_bslash_N(pRExC_state, &ret, NULL, flagp, depth, FALSE,
-                                FALSE /* not strict */ )) {
+            if ((STRLEN) -1 == grok_bslash_N(pRExC_state, &ret, NULL, flagp,
+                                             depth, FALSE))
+            {
                 if (*flagp & RESTART_UTF8)
                     return NULL;
                 RExC_parse--;
@@ -11913,10 +11924,12 @@ tryagain:
                          * point sequence.  Handle those in the switch() above
                          * */
                         RExC_parse = p + 1;
-                        if (! grok_bslash_N(pRExC_state, NULL, &ender,
-                                            flagp, depth, FALSE,
-                                            FALSE /* not strict */ ))
-                        {
+                        if ((STRLEN) -1 == grok_bslash_N(pRExC_state, NULL,
+                                                         &ender,
+                                                         flagp,
+                                                         depth,
+                                                         FALSE
+                        )) {
                             if (*flagp & RESTART_UTF8)
                                 FAIL("panic: grok_bslash_N set RESTART_UTF8");
                             RExC_parse = p = oldp;
@@ -13497,7 +13510,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     if (UCHARAT(RExC_parse) == ']')
 	goto charclassloop;
 
-parseit:
     while (1) {
         if  (RExC_parse >= stop_ptr) {
             break;
@@ -13577,19 +13589,51 @@ parseit:
 	    case 'H':	namedclass = ANYOF_NHORIZWS;	break;
             case 'N':  /* Handle \N{NAME} in class */
                 {
-                    /* We only pay attention to the first char of
-                    multichar strings being returned. I kinda wonder
-                    if this makes sense as it does change the behaviour
-                    from earlier versions, OTOH that behaviour was broken
-                    as well. */
-                    if (! grok_bslash_N(pRExC_state, NULL, &value, flagp, depth,
-                                      TRUE, /* => charclass */
-                                      strict))
-                    {
-                        if (*flagp & RESTART_UTF8)
-                            FAIL("panic: grok_bslash_N set RESTART_UTF8");
-                        goto parseit;
+                    SV *as_text;
+                    STRLEN cp_count = grok_bslash_N(pRExC_state, NULL, &value,
+                                                    flagp, depth, &as_text);
+                    if (*flagp & RESTART_UTF8)
+                        FAIL("panic: grok_bslash_N set RESTART_UTF8");
+                    if (cp_count != 1) {    /* The typical case drops through */
+                        assert(cp_count != (STRLEN) -1);
+                        if (cp_count == 0) {
+                            if (strict) {
+                                RExC_parse++;   /* Position after the "}" */
+                                vFAIL("Zero length \\N{}");
+                            }
+                            else if (PASS2) {
+                                ckWARNreg(RExC_parse,
+                                        "Ignoring zero length \\N{} in character class");
+                            }
+                        }
+                        else { /* cp_count > 1 */
+                            /* We only pay attention to the first char of
+                             * multichar strings being returned in char
+                             * classes. I kinda wonder if this makes sense as
+                             * it does change the behaviour from earlier
+                             * versions, OTOH that behaviour was broken as
+                             * well. XXX Solution is to recharacterize as
+                             * [rest-of-class]|multi1|multi2...  */
+                                    if (strict) {
+                                        RExC_parse--;
+                                        vFAIL("\\N{} in character class restricted to one character");
+                                    }
+                                    else if (PASS2) {
+                                        ckWARNreg(RExC_parse, "Using just the first character returned by \\N{} in character class");
+                                    }
+                                break; /* <value> contains the first code
+                                          point. Drop out of the switch to
+                                          process it */
+                        } /* End of cp_count != 1 */
+
+                        /* This element should not be processed further in this
+                         * class */
+                        element_count--;
+                        value = save_value;
+                        prevvalue = save_prevvalue;
+                        continue;   /* Back to top of loop to get next char */
                     }
+                    /* Here, is a single code point, and <value> contains it */
                 }
                 break;
 	    case 'p':
