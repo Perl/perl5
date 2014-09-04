@@ -88,6 +88,7 @@ static const char dow_year_start[SOLAR_CYCLE_LENGTH] = {
 #define CHEAT_YEARS 108
 
 #define IS_LEAP(n)	((!(((n) + 1900) % 400) || (!(((n) + 1900) % 4) && (((n) + 1900) % 100))) != 0)
+#undef WRAP /* some <termios.h> define this */
 #define WRAP(a,b,m)	((a) = ((a) <  0  ) ? ((b)--, (a) + (m)) : (a))
 
 #ifdef USE_SYSTEM_LOCALTIME
