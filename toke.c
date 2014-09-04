@@ -6583,11 +6583,7 @@ Perl_yylex(pTHX)
 
 		    if ((isIDFIRST_lazy_if(s,UTF) || *s == '$') &&
 			(tmp = intuit_method(s, lex ? NULL : sv, cv))) {
-			op_free(rv2cv_op);
-			if (tmp == METHOD && !PL_lex_allbrackets &&
-				PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
-			    PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
-			return REPORT(tmp);
+			goto method;
 		    }
 
 		    /* If not a declared subroutine, it's an indirect object. */
@@ -6665,6 +6661,7 @@ Perl_yylex(pTHX)
 		if (tmp == 1 && !orig_keyword
 			&& (isIDFIRST_lazy_if(s,UTF) || *s == '$')
 			&& (tmp = intuit_method(s, lex ? NULL : sv, cv))) {
+		  method:
 		    op_free(rv2cv_op);
 		    if (tmp == METHOD && !PL_lex_allbrackets &&
 			    PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
