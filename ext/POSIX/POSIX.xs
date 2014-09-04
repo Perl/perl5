@@ -676,29 +676,35 @@ static int my_fegetround()
 #endif
 }
 
+/* Toward closest integer. */
+#define MY_ROUND_NEAREST(x) ((NV)((IV)((x) >= 0.0 ? (x) + 0.5 : (x) - 0.5)))
+
+/* Toward zero. */
+#define MY_ROUND_TRUNC(x) ((NV)((IV)(x)))
+
 /* Toward minus infinity. */
-#define my_round_down(x) ((NV)((IV)(x >= 0.0 ? x : x - 0.5)))
+#define MY_ROUND_DOWN(x) ((NV)((IV)((x) >= 0.0 ? (x) : (x) - 0.5)))
 
 /* Toward plus infinity. */
-#define my_round_up(x) ((NV)((IV)(x >= 0.0 ? x + 0.5 : x)))
+#define MY_ROUND_UP(x) ((NV)((IV)((x) >= 0.0 ? (x) + 0.5 : (x))))
 
 static NV my_rint(NV x)
 {
 #ifdef FE_TONEAREST
   switch (my_fegetround()) {
   default:
-  case FE_TONEAREST:  return c99_round(x);
-  case FE_TOWARDZERO: return c99_trunc(x);
-  case FE_DOWNWARD:   return my_round_down(x);
-  case FE_UPWARD:     return my_round_up(x);
+  case FE_TONEAREST:  return MY_ROUND_NEAREST(x);
+  case FE_TOWARDZERO: return MY_ROUND_TRUNC(x);
+  case FE_DOWNWARD:   return MY_ROUND_DOWN(x);
+  case FE_UPWARD:     return MY_ROUND_UP(x);
   }
 #elif defined(HAS_FPGETROUND)
   switch (fpgetround()) {
   default:
-  case FP_RN: return c99_round(x);
-  case FP_RZ: return c99_trunc(x);
-  case FP_RM: return my_round_down(x);
-  case FE_RP: return my_round_up(x);
+  case FP_RN: return MY_ROUND_NEAREST(x);
+  case FP_RZ: return MY_ROUND_TRUNC(x);
+  case FP_RM: return MY_ROUND_DOWN(x);
+  case FE_RP: return MY_ROUND_UP(x);
   }
 #else
   return NV_NAN;
@@ -738,7 +744,7 @@ static IV my_lrint(NV x)
 #ifndef c99_round
 static NV my_round(NV x)
 {
-  return (NV)((IV)(x >= 0.0 ? x + 0.5 : x - 0.5));
+  return MY_ROUND_NEAREST(x);
 }
 #  define c99_round my_round
 #endif
@@ -772,7 +778,7 @@ static NV my_tgamma(NV x)
 #ifndef c99_trunc
 static NV my_trunc(NV x)
 {
-  return (NV)((IV)(x));
+  return MY_ROUND_TRUNC(x);
 }
 #  define c99_trunc my_trunc
 #endif
