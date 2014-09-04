@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 132;
+plan 133;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -108,6 +108,9 @@ sub F::h { 4242 }
   print "\n";
   is $called, undef, 'our sub symbol translation & meth names after print'
 }
+our sub j;
+is j
+  =>, 'j', 'name_of_our_sub <newline> =>  is parsed properly';
 
 # -------------------- state -------------------- #
 
