@@ -7597,7 +7597,7 @@ STATIC void	S_incline(pTHX_ const char *s)
 #define PERL_ARGS_ASSERT_INCLINE	\
 	assert(s)
 
-STATIC int	S_intuit_method(pTHX_ char *s, GV *gv, CV *cv)
+STATIC int	S_intuit_method(pTHX_ char *s, SV *ioname, CV *cv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INTUIT_METHOD	\
 	assert(s)

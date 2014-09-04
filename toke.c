@@ -3813,12 +3813,18 @@ S_intuit_more(pTHX_ char *s)
  */
 
 STATIC int
-S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
+S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
 {
     char *s = start + (*start == '$');
     char tmpbuf[sizeof PL_tokenbuf];
     STRLEN len;
     GV* indirgv;
+	/* Mustn't actually add anything to a symbol table.
+	   But also don't want to "initialise" any placeholder
+	   constants that might already be there into full
+	   blown PVGVs with attached PVCV.  */
+    GV * const gv =
+	ioname ? gv_fetchsv(ioname, GV_NOADD_NOINIT, SVt_PVCV) : NULL;
 
     PERL_ARGS_ASSERT_INTUIT_METHOD;
 
@@ -6499,8 +6505,7 @@ Perl_yylex(pTHX)
 			no_op("Bareword",s);
 		}
 
-		/* Look for a subroutine with this name in current package,
-		   unless this is a lexical sub, or name is "Foo::",
+		/* See if the name is "Foo::",
 		   in which case Foo is a bareword
 		   (and a package name). */
 
@@ -6519,15 +6524,6 @@ Perl_yylex(pTHX)
 		    safebw = TRUE;
 		}
 		else {
-		    if (!lex && !gv) {
-			/* Mustn't actually add anything to a symbol table.
-			   But also don't want to "initialise" any placeholder
-			   constants that might already be there into full
-			   blown PVGVs with attached PVCV.  */
-			gv = gv_fetchpvn_flags(PL_tokenbuf, len,
-					       GV_NOADD_NOINIT | ( UTF ? SVf_UTF8 : 0 ),
-					       SVt_PVCV);
-		    }
 		    safebw = FALSE;
 		}
 
@@ -6586,7 +6582,7 @@ Perl_yylex(pTHX)
 		    /* Two barewords in a row may indicate method call. */
 
 		    if ((isIDFIRST_lazy_if(s,UTF) || *s == '$') &&
-			(tmp = intuit_method(s, gv, cv))) {
+			(tmp = intuit_method(s, lex ? NULL : sv, cv))) {
 			op_free(rv2cv_op);
 			if (tmp == METHOD && !PL_lex_allbrackets &&
 				PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
@@ -6668,7 +6664,7 @@ Perl_yylex(pTHX)
 
 		if (tmp == 1 && !orig_keyword
 			&& (isIDFIRST_lazy_if(s,UTF) || *s == '$')
-			&& (tmp = intuit_method(s, gv, cv))) {
+			&& (tmp = intuit_method(s, lex ? NULL : sv, cv))) {
 		    op_free(rv2cv_op);
 		    if (tmp == METHOD && !PL_lex_allbrackets &&
 			    PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
