@@ -6564,6 +6564,10 @@ Perl_yylex(pTHX)
 			: rv2cv_op_cv(rv2cv_op, RV2CVOPCV_RETURN_STUB);
 		}
 
+		/* Use this var to track whether intuit_method has been
+		   called.  intuit_method returns 0 or > 255.  */
+		tmp = 1;
+
 		/* See if it's the indirect object for a list operator. */
 
 		if (PL_oldoldbufptr &&
@@ -6662,7 +6666,7 @@ Perl_yylex(pTHX)
 
 		/* If followed by a bareword, see if it looks like indir obj. */
 
-		if (!orig_keyword
+		if (tmp == 1 && !orig_keyword
 			&& (isIDFIRST_lazy_if(s,UTF) || *s == '$')
 			&& (tmp = intuit_method(s, gv, cv))) {
 		    op_free(rv2cv_op);
