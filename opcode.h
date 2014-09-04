@@ -1899,7 +1899,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000304,	/* andassign */
 	0x00000304,	/* orassign */
 	0x00000304,	/* dorassign */
-	0x00000140,	/* method */
+	0x00000e40,	/* method */
 	0x00002149,	/* entersub */
 	0x00000100,	/* leavesub */
 	0x00000100,	/* leavesublv */
@@ -1925,7 +1925,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000d44,	/* dump */
 	0x00000d44,	/* goto */
 	0x00009b44,	/* exit */
-	0x00000640,	/* method_named */
+	0x00000e40,	/* method_named */
 	0x00000340,	/* entergiven */
 	0x00000100,	/* leavegiven */
 	0x00000340,	/* enterwhen */
@@ -2532,184 +2532,184 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      352, /* dump */
      354, /* goto */
      356, /* exit */
-      -1, /* method_named */
-     357, /* entergiven */
-     358, /* leavegiven */
-     359, /* enterwhen */
-     360, /* leavewhen */
+     357, /* method_named */
+     358, /* entergiven */
+     359, /* leavegiven */
+     360, /* enterwhen */
+     361, /* leavewhen */
       -1, /* break */
       -1, /* continue */
-     361, /* open */
-     366, /* close */
-     367, /* pipe_op */
-     368, /* fileno */
-     369, /* umask */
-     370, /* binmode */
-     371, /* tie */
-     372, /* untie */
-     373, /* tied */
-     374, /* dbmopen */
-     375, /* dbmclose */
-     376, /* sselect */
-     377, /* select */
-     378, /* getc */
-     379, /* read */
-     380, /* enterwrite */
-     381, /* leavewrite */
+     362, /* open */
+     367, /* close */
+     368, /* pipe_op */
+     369, /* fileno */
+     370, /* umask */
+     371, /* binmode */
+     372, /* tie */
+     373, /* untie */
+     374, /* tied */
+     375, /* dbmopen */
+     376, /* dbmclose */
+     377, /* sselect */
+     378, /* select */
+     379, /* getc */
+     380, /* read */
+     381, /* enterwrite */
+     382, /* leavewrite */
       -1, /* prtf */
       -1, /* print */
       -1, /* say */
-     383, /* sysopen */
-     384, /* sysseek */
-     385, /* sysread */
-     386, /* syswrite */
-     387, /* eof */
-     388, /* tell */
-     389, /* seek */
-     390, /* truncate */
-     391, /* fcntl */
-     392, /* ioctl */
-     393, /* flock */
-     395, /* send */
-     396, /* recv */
-     397, /* socket */
-     398, /* sockpair */
-     399, /* bind */
-     400, /* connect */
-     401, /* listen */
-     402, /* accept */
-     403, /* shutdown */
-     404, /* gsockopt */
-     405, /* ssockopt */
-     406, /* getsockname */
-     407, /* getpeername */
-     408, /* lstat */
-     409, /* stat */
-     410, /* ftrread */
-     415, /* ftrwrite */
-     420, /* ftrexec */
-     425, /* fteread */
-     430, /* ftewrite */
-     435, /* fteexec */
-     440, /* ftis */
-     444, /* ftsize */
-     448, /* ftmtime */
-     452, /* ftatime */
-     456, /* ftctime */
-     460, /* ftrowned */
-     464, /* fteowned */
-     468, /* ftzero */
-     472, /* ftsock */
-     476, /* ftchr */
-     480, /* ftblk */
-     484, /* ftfile */
-     488, /* ftdir */
-     492, /* ftpipe */
-     496, /* ftsuid */
-     500, /* ftsgid */
-     504, /* ftsvtx */
-     508, /* ftlink */
-     512, /* fttty */
-     516, /* fttext */
-     520, /* ftbinary */
-     524, /* chdir */
-     526, /* chown */
-     528, /* chroot */
-     530, /* unlink */
-     532, /* chmod */
-     534, /* utime */
-     536, /* rename */
-     538, /* link */
-     540, /* symlink */
-     542, /* readlink */
-     543, /* mkdir */
-     545, /* rmdir */
-     547, /* open_dir */
-     548, /* readdir */
-     549, /* telldir */
-     550, /* seekdir */
-     551, /* rewinddir */
-     552, /* closedir */
+     384, /* sysopen */
+     385, /* sysseek */
+     386, /* sysread */
+     387, /* syswrite */
+     388, /* eof */
+     389, /* tell */
+     390, /* seek */
+     391, /* truncate */
+     392, /* fcntl */
+     393, /* ioctl */
+     394, /* flock */
+     396, /* send */
+     397, /* recv */
+     398, /* socket */
+     399, /* sockpair */
+     400, /* bind */
+     401, /* connect */
+     402, /* listen */
+     403, /* accept */
+     404, /* shutdown */
+     405, /* gsockopt */
+     406, /* ssockopt */
+     407, /* getsockname */
+     408, /* getpeername */
+     409, /* lstat */
+     410, /* stat */
+     411, /* ftrread */
+     416, /* ftrwrite */
+     421, /* ftrexec */
+     426, /* fteread */
+     431, /* ftewrite */
+     436, /* fteexec */
+     441, /* ftis */
+     445, /* ftsize */
+     449, /* ftmtime */
+     453, /* ftatime */
+     457, /* ftctime */
+     461, /* ftrowned */
+     465, /* fteowned */
+     469, /* ftzero */
+     473, /* ftsock */
+     477, /* ftchr */
+     481, /* ftblk */
+     485, /* ftfile */
+     489, /* ftdir */
+     493, /* ftpipe */
+     497, /* ftsuid */
+     501, /* ftsgid */
+     505, /* ftsvtx */
+     509, /* ftlink */
+     513, /* fttty */
+     517, /* fttext */
+     521, /* ftbinary */
+     525, /* chdir */
+     527, /* chown */
+     529, /* chroot */
+     531, /* unlink */
+     533, /* chmod */
+     535, /* utime */
+     537, /* rename */
+     539, /* link */
+     541, /* symlink */
+     543, /* readlink */
+     544, /* mkdir */
+     546, /* rmdir */
+     548, /* open_dir */
+     549, /* readdir */
+     550, /* telldir */
+     551, /* seekdir */
+     552, /* rewinddir */
+     553, /* closedir */
       -1, /* fork */
-     553, /* wait */
-     554, /* waitpid */
-     556, /* system */
-     558, /* exec */
-     560, /* kill */
-     562, /* getppid */
-     563, /* getpgrp */
-     565, /* setpgrp */
-     567, /* getpriority */
-     569, /* setpriority */
-     571, /* time */
+     554, /* wait */
+     555, /* waitpid */
+     557, /* system */
+     559, /* exec */
+     561, /* kill */
+     563, /* getppid */
+     564, /* getpgrp */
+     566, /* setpgrp */
+     568, /* getpriority */
+     570, /* setpriority */
+     572, /* time */
       -1, /* tms */
-     572, /* localtime */
-     573, /* gmtime */
-     574, /* alarm */
-     575, /* sleep */
-     577, /* shmget */
-     578, /* shmctl */
-     579, /* shmread */
-     580, /* shmwrite */
-     581, /* msgget */
-     582, /* msgctl */
-     583, /* msgsnd */
-     584, /* msgrcv */
-     585, /* semop */
-     586, /* semget */
-     587, /* semctl */
-     588, /* require */
-     589, /* dofile */
+     573, /* localtime */
+     574, /* gmtime */
+     575, /* alarm */
+     576, /* sleep */
+     578, /* shmget */
+     579, /* shmctl */
+     580, /* shmread */
+     581, /* shmwrite */
+     582, /* msgget */
+     583, /* msgctl */
+     584, /* msgsnd */
+     585, /* msgrcv */
+     586, /* semop */
+     587, /* semget */
+     588, /* semctl */
+     589, /* require */
+     590, /* dofile */
       -1, /* hintseval */
-     590, /* entereval */
-     596, /* leaveeval */
-     598, /* entertry */
+     591, /* entereval */
+     597, /* leaveeval */
+     599, /* entertry */
       -1, /* leavetry */
-     599, /* ghbyname */
-     600, /* ghbyaddr */
+     600, /* ghbyname */
+     601, /* ghbyaddr */
       -1, /* ghostent */
-     601, /* gnbyname */
-     602, /* gnbyaddr */
+     602, /* gnbyname */
+     603, /* gnbyaddr */
       -1, /* gnetent */
-     603, /* gpbyname */
-     604, /* gpbynumber */
+     604, /* gpbyname */
+     605, /* gpbynumber */
       -1, /* gprotoent */
-     605, /* gsbyname */
-     606, /* gsbyport */
+     606, /* gsbyname */
+     607, /* gsbyport */
       -1, /* gservent */
-     607, /* shostent */
-     608, /* snetent */
-     609, /* sprotoent */
-     610, /* sservent */
+     608, /* shostent */
+     609, /* snetent */
+     610, /* sprotoent */
+     611, /* sservent */
       -1, /* ehostent */
       -1, /* enetent */
       -1, /* eprotoent */
       -1, /* eservent */
-     611, /* gpwnam */
-     612, /* gpwuid */
+     612, /* gpwnam */
+     613, /* gpwuid */
       -1, /* gpwent */
       -1, /* spwent */
       -1, /* epwent */
-     613, /* ggrnam */
-     614, /* ggrgid */
+     614, /* ggrnam */
+     615, /* ggrgid */
       -1, /* ggrent */
       -1, /* sgrent */
       -1, /* egrent */
       -1, /* getlogin */
-     615, /* syscall */
-     616, /* lock */
-     617, /* once */
+     616, /* syscall */
+     617, /* lock */
+     618, /* once */
       -1, /* custom */
-     618, /* reach */
-     619, /* rkeys */
-     621, /* rvalues */
-     622, /* coreargs */
-     626, /* runcv */
-     627, /* fc */
+     619, /* reach */
+     620, /* rkeys */
+     622, /* rvalues */
+     623, /* coreargs */
+     627, /* runcv */
+     628, /* fc */
       -1, /* padcv */
       -1, /* introcv */
       -1, /* clonecv */
-     628, /* padrange */
+     629, /* padrange */
 
 };
 
@@ -2918,6 +2918,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* dump          */ 0x3bdc, 0x0003,
     /* goto          */ 0x3bdc, 0x0003,
     /* exit          */ 0x012f,
+    /* method_named  */ 0x0003,
     /* entergiven    */ 0x0003,
     /* leavegiven    */ 0x0003,
     /* enterwhen     */ 0x0003,
@@ -3276,7 +3277,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* DUMP       */ (OPpARG1_MASK|OPpPV_IS_UTF8),
     /* GOTO       */ (OPpARG1_MASK|OPpPV_IS_UTF8),
     /* EXIT       */ (OPpARG4_MASK),
-    /* METHOD_NAMED */ (0),
+    /* METHOD_NAMED */ (OPpARG1_MASK),
     /* ENTERGIVEN */ (OPpARG1_MASK),
     /* LEAVEGIVEN */ (OPpARG1_MASK),
     /* ENTERWHEN  */ (OPpARG1_MASK),

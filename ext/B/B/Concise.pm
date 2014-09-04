@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.993";
+our $VERSION   = "0.994";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -400,7 +400,8 @@ my $lastnext;	# remembers op-chain, used to insert gotos
 
 my %opclass = ('OP' => "0", 'UNOP' => "1", 'BINOP' => "2", 'LOGOP' => "|",
 	       'LISTOP' => "@", 'PMOP' => "/", 'SVOP' => "\$", 'GVOP' => "*",
-	       'PVOP' => '"', 'LOOP' => "{", 'COP' => ";", 'PADOP' => "#");
+	       'PVOP' => '"', 'LOOP' => "{", 'COP' => ";", 'PADOP' => "#",
+	       'METHOP' => '.');
 
 no warnings 'qw'; # "Possible attempt to put comments..."; use #7
 my @linenoise =
@@ -891,15 +892,25 @@ sub concise_op {
     elsif ($h{class} eq "SVOP" or $h{class} eq "PADOP") {
 	unless ($h{name} eq 'aelemfast' and $op->flags & OPf_SPECIAL) {
 	    my $idx = ($h{class} eq "SVOP") ? $op->targ : $op->padix;
-	    my $preferpv = $h{name} eq "method_named";
 	    if ($h{class} eq "PADOP" or !${$op->sv}) {
 		my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$idx];
-		$h{arg} = "[" . concise_sv($sv, \%h, $preferpv) . "]";
+		$h{arg} = "[" . concise_sv($sv, \%h, 0) . "]";
 		$h{targarglife} = $h{targarg} = "";
 	    } else {
-		$h{arg} = "(" . concise_sv($op->sv, \%h, $preferpv) . ")";
+		$h{arg} = "(" . concise_sv($op->sv, \%h, 0) . ")";
 	    }
 	}
+    }
+    elsif ($h{class} eq "METHOP") {
+        if ($h{name} eq "method_named") {
+            if (${$op->meth_sv}) {
+                $h{arg} = "(" . concise_sv($op->meth_sv, \%h, 1) . ")";
+            } else {
+                my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$op->targ];
+                $h{arg} = "[" . concise_sv($sv, \%h, 1) . "]";
+                $h{targarglife} = $h{targarg} = "";
+            }
+        }
     }
     $h{seq} = $h{hyphseq} = seq($op);
     $h{seq} = "" if $h{seq} eq "-";
@@ -1379,6 +1390,7 @@ B:: namespace that represents the ops in your Perl code.
     {      LOOP             An OP that holds pointers for a loop
     ;      COP              An OP that marks the start of a statement
     #      PADOP            An OP with a GV on the pad
+    .      METHOP           An OP with method call info
 
 =head2 OP flags abbreviations
 

@@ -1071,6 +1071,7 @@ my %opclass = (
     '%',  11,		# baseop_or_unop
     '-',  12,		# filestatop
     '}',  13,		# loopexop
+    '.',  14,		# methop
 );
 
 my %opflags = (

@@ -542,7 +542,7 @@ sub begin_is_use {
 	}
 	$constop = $constop->sibling;
 	return if $constop->name ne "method_named";
-	return if $self->const_sv($constop)->PV ne "VERSION";
+	return if $self->meth_sv($constop)->PV ne "VERSION";
     }
 
     $lineseq = $version_op->sibling;
@@ -570,7 +570,7 @@ sub begin_is_use {
     my $use = 'use';
     my $method_named = $svop;
     return if $method_named->name ne "method_named";
-    my $method_name = $self->const_sv($method_named)->PV;
+    my $method_name = $self->meth_sv($method_named)->PV;
 
     if ($method_name eq "unimport") {
 	$use = 'no';
@@ -3706,7 +3706,7 @@ sub _method {
     }
 
     if ($meth->name eq "method_named") {
-	$meth = $self->const_sv($meth)->PV;
+	$meth = $self->meth_sv($meth)->PV;
     } else {
 	$meth = $meth->first;
 	if ($meth->name eq "const") {
@@ -4309,6 +4309,15 @@ sub const_sv {
     my $self = shift;
     my $op = shift;
     my $sv = $op->sv;
+    # the constant could be in the pad (under useithreads)
+    $sv = $self->padval($op->targ) unless $$sv;
+    return $sv;
+}
+
+sub meth_sv {
+    my $self = shift;
+    my $op = shift;
+    my $sv = $op->meth_sv;
     # the constant could be in the pad (under useithreads)
     $sv = $self->padval($op->targ) unless $$sv;
     return $sv;

@@ -52,7 +52,7 @@ checkOptree ( name	=> 'BEGIN',
 # 5              <0> pushmark s ->6
 # 6              <$> const[PV "strict"] sM ->7
 # 7              <$> const[PV "refs"] sM ->8
-# 8              <$> method_named[PV "unimport"] ->9
+# 8              <.> method_named[PV "unimport"] ->9
 # BEGIN 2:
 # k  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq K ->k
@@ -66,7 +66,7 @@ checkOptree ( name	=> 'BEGIN',
 # f              <0> pushmark s ->g
 # g              <$> const[PV "strict"] sM ->h
 # h              <$> const[PV "refs"] sM ->i
-# i              <$> method_named[PV "unimport"] ->j
+# i              <.> method_named[PV "unimport"] ->j
 # BEGIN 3:
 # u  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->u
@@ -80,7 +80,7 @@ checkOptree ( name	=> 'BEGIN',
 # p              <0> pushmark s ->q
 # q              <$> const[PV "warnings"] sM ->r
 # r              <$> const[PV "qw"] sM ->s
-# s              <$> method_named[PV "unimport"] ->t
+# s              <.> method_named[PV "unimport"] ->t
 # BEGIN 4:
 # y  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->y
@@ -102,7 +102,7 @@ EOT_EOT
 # 5              <0> pushmark s ->6
 # 6              <$> const(PV "strict") sM ->7
 # 7              <$> const(PV "refs") sM ->8
-# 8              <$> method_named(PV "unimport") ->9
+# 8              <.> method_named(PV "unimport") ->9
 # BEGIN 2:
 # k  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq K ->k
@@ -116,7 +116,7 @@ EOT_EOT
 # f              <0> pushmark s ->g
 # g              <$> const(PV "strict") sM ->h
 # h              <$> const(PV "refs") sM ->i
-# i              <$> method_named(PV "unimport") ->j
+# i              <.> method_named(PV "unimport") ->j
 # BEGIN 3:
 # u  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->u
@@ -130,7 +130,7 @@ EOT_EOT
 # p              <0> pushmark s ->q
 # q              <$> const(PV "warnings") sM ->r
 # r              <$> const(PV "qw") sM ->s
-# s              <$> method_named(PV "unimport") ->t
+# s              <.> method_named(PV "unimport") ->t
 # BEGIN 4:
 # y  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->y
@@ -245,7 +245,7 @@ checkOptree ( name	=> 'all of BEGIN END INIT CHECK UNITCHECK -exec',
 # 5  <0> pushmark s
 # 6  <$> const[PV "strict"] sM
 # 7  <$> const[PV "refs"] sM
-# 8  <$> method_named[PV "unimport"] 
+# 8  <.> method_named[PV "unimport"] 
 # 9  <1> entersub[t1] KS*/TARG,STRICT
 # a  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 2:
@@ -256,7 +256,7 @@ checkOptree ( name	=> 'all of BEGIN END INIT CHECK UNITCHECK -exec',
 # f  <0> pushmark s
 # g  <$> const[PV "strict"] sM
 # h  <$> const[PV "refs"] sM
-# i  <$> method_named[PV "unimport"] 
+# i  <.> method_named[PV "unimport"] 
 # j  <1> entersub[t1] KS*/TARG,STRICT
 # k  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 3:
@@ -267,7 +267,7 @@ checkOptree ( name	=> 'all of BEGIN END INIT CHECK UNITCHECK -exec',
 # p  <0> pushmark s
 # q  <$> const[PV "warnings"] sM
 # r  <$> const[PV "qw"] sM
-# s  <$> method_named[PV "unimport"] 
+# s  <.> method_named[PV "unimport"] 
 # t  <1> entersub[t1] KS*/TARG,STRICT
 # u  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 4:
@@ -304,7 +304,7 @@ EOT_EOT
 # 5  <0> pushmark s
 # 6  <$> const(PV "strict") sM
 # 7  <$> const(PV "refs") sM
-# 8  <$> method_named(PV "unimport") 
+# 8  <.> method_named(PV "unimport") 
 # 9  <1> entersub[t1] KS*/TARG,STRICT
 # a  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 2:
@@ -315,7 +315,7 @@ EOT_EOT
 # f  <0> pushmark s
 # g  <$> const(PV "strict") sM
 # h  <$> const(PV "refs") sM
-# i  <$> method_named(PV "unimport") 
+# i  <.> method_named(PV "unimport") 
 # j  <1> entersub[t1] KS*/TARG,STRICT
 # k  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 3:
@@ -326,7 +326,7 @@ EOT_EOT
 # p  <0> pushmark s
 # q  <$> const(PV "warnings") sM
 # r  <$> const(PV "qw") sM
-# s  <$> method_named(PV "unimport") 
+# s  <.> method_named(PV "unimport") 
 # t  <1> entersub[t1] KS*/TARG,STRICT
 # u  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 4:
@@ -373,7 +373,7 @@ checkOptree ( name	=> 'regression test for patch 25352',
 # 5  <0> pushmark s
 # 6  <$> const[PV "strict"] sM
 # 7  <$> const[PV "refs"] sM
-# 8  <$> method_named[PV "unimport"] 
+# 8  <.> method_named[PV "unimport"] 
 # 9  <1> entersub[t1] KS*/TARG,STRICT
 # a  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 2:
@@ -384,7 +384,7 @@ checkOptree ( name	=> 'regression test for patch 25352',
 # f  <0> pushmark s
 # g  <$> const[PV "strict"] sM
 # h  <$> const[PV "refs"] sM
-# i  <$> method_named[PV "unimport"] 
+# i  <.> method_named[PV "unimport"] 
 # j  <1> entersub[t1] KS*/TARG,STRICT
 # k  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 3:
@@ -395,7 +395,7 @@ checkOptree ( name	=> 'regression test for patch 25352',
 # p  <0> pushmark s
 # q  <$> const[PV "warnings"] sM
 # r  <$> const[PV "qw"] sM
-# s  <$> method_named[PV "unimport"] 
+# s  <.> method_named[PV "unimport"] 
 # t  <1> entersub[t1] KS*/TARG,STRICT
 # u  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
@@ -407,7 +407,7 @@ EOT_EOT
 # 5  <0> pushmark s
 # 6  <$> const(PV "strict") sM
 # 7  <$> const(PV "refs") sM
-# 8  <$> method_named(PV "unimport") 
+# 8  <.> method_named(PV "unimport") 
 # 9  <1> entersub[t1] KS*/TARG,STRICT
 # a  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 2:
@@ -418,7 +418,7 @@ EOT_EOT
 # f  <0> pushmark s
 # g  <$> const(PV "strict") sM
 # h  <$> const(PV "refs") sM
-# i  <$> method_named(PV "unimport") 
+# i  <.> method_named(PV "unimport") 
 # j  <1> entersub[t1] KS*/TARG,STRICT
 # k  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 3:
@@ -429,7 +429,7 @@ EOT_EOT
 # p  <0> pushmark s
 # q  <$> const(PV "warnings") sM
 # r  <$> const(PV "qw") sM
-# s  <$> method_named(PV "unimport") 
+# s  <.> method_named(PV "unimport") 
 # t  <1> entersub[t1] KS*/TARG,STRICT
 # u  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT

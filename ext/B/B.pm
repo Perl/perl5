@@ -69,10 +69,11 @@ push @B::EXPORT_OK, (qw(minus_c ppname save_BEGINs
 @B::LOOP::ISA = 'B::LISTOP';
 @B::PMOP::ISA = 'B::LISTOP';
 @B::COP::ISA = 'B::OP';
+@B::METHOP::ISA = 'B::OP';
 
 @B::SPECIAL::ISA = 'B::OBJECT';
 
-@B::optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP);
+@B::optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP METHOP);
 # bytecode.pl contained the following comment:
 # Nullsv *must* come first in the following so that the condition
 # ($$sv == 0) can continue to be used to test (sv == Nullsv).
@@ -1065,7 +1066,7 @@ information is no longer stored directly in the hash.
 =head2 OP-RELATED CLASSES
 
 C<B::OP>, C<B::UNOP>, C<B::BINOP>, C<B::LOGOP>, C<B::LISTOP>, C<B::PMOP>,
-C<B::SVOP>, C<B::PADOP>, C<B::PVOP>, C<B::LOOP>, C<B::COP>.
+C<B::SVOP>, C<B::PADOP>, C<B::PVOP>, C<B::LOOP>, C<B::COP>, C<B::METHOP>.
 
 These classes correspond in the obvious way to the underlying C
 structures of similar names.  The inheritance hierarchy mimics the
@@ -1073,9 +1074,9 @@ underlying C "inheritance":
 
                                  B::OP
                                    |
-                   +---------------+--------+--------+-------+
-                   |               |        |        |       |
-                B::UNOP          B::SVOP B::PADOP  B::COP  B::PVOP
+                   +----------+---------+--------+-------+---------+
+                   |          |         |        |       |         |
+                B::UNOP    B::SVOP  B::PADOP  B::COP  B::PVOP  B::METHOP
                  ,'  `-.
                 /       `--.
            B::BINOP     B::LOGOP
@@ -1260,6 +1261,16 @@ Since perl 5.17.1
 =item hints
 
 =item hints_hash
+
+=back
+
+=head2 B::METHOP Methods (Since Perl 5.22)
+
+=over 4
+
+=item first
+
+=item meth_sv
 
 =back
 

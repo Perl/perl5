@@ -195,6 +195,17 @@ struct listop {
     OP *	op_last;
 };
 
+struct methop {
+    BASEOP
+    union {
+        /* op_u.op_first *must* be aligned the same as the op_first
+         * field of the other op types, and op_u.op_meth_sv *must*
+         * be aligned with op_sv */
+        OP* op_first;   /* optree for method name */
+        SV* op_meth_sv; /* static method name */
+    } op_u;
+};
+
 struct pmop {
     BASEOP
     OP *	op_first;
@@ -385,6 +396,7 @@ struct loop {
 #define cPVOPx(o)	((PVOP*)o)
 #define cCOPx(o)	((COP*)o)
 #define cLOOPx(o)	((LOOP*)o)
+#define cMETHOPx(o)	((METHOP*)o)
 
 #define cUNOP		cUNOPx(PL_op)
 #define cBINOP		cBINOPx(PL_op)
@@ -441,6 +453,8 @@ struct loop {
 #  define	cSVOPx_svp(v)	(&cSVOPx(v)->op_sv)
 #endif
 
+#  define	cMETHOPx_meth(v)	cSVOPx_sv(v)
+
 #define	cGVOP_gv		cGVOPx_gv(PL_op)
 #define	cGVOPo_gv		cGVOPx_gv(o)
 #define	kGVOP_gv		cGVOPx_gv(kid)
@@ -481,6 +495,7 @@ struct loop {
 #define OA_BASEOP_OR_UNOP (11 << OCSHIFT)
 #define OA_FILESTATOP (12 << OCSHIFT)
 #define OA_LOOPEXOP (13 << OCSHIFT)
+#define OA_METHOP (14 << OCSHIFT)
 
 /* Each remaining nybble of PL_opargs (i.e. bits 12..15, 16..19 etc)
  * encode the type for each arg */

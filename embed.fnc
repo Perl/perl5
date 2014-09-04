@@ -471,6 +471,11 @@ p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
 s	|OP*	|force_list	|NULLOK OP* arg|bool nullit
 i	|OP*	|op_integerize	|NN OP *o
 i	|OP*	|op_std_init	|NN OP *o
+#if defined(USE_ITHREADS)
+i	|void	|op_relocate_sv	|NN SV** svp|NN PADOFFSET* targp
+#endif
+i	|OP*	|newMETHOP_internal	|I32 type|I32 flags|NULLOK OP* dynamic_meth \
+					|NULLOK SV* const_meth
 : FIXME
 s	|OP*	|fold_constants	|NN OP *o
 #endif
@@ -1029,6 +1034,8 @@ Apda	|OP*	|newWHENOP	|NULLOK OP* cond|NN OP* block
 Apda	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
 				|NULLOK OP* expr|NULLOK OP* block|NULLOK OP* cont \
 				|I32 has_my
+Apda	|OP*	|newMETHOP	|I32 type|I32 flags|NN OP* dynamic_meth
+Apda	|OP*	|newMETHOP_named|I32 type|I32 flags|NN SV* const_meth
 Apd	|CV*	|rv2cv_op_cv	|NN OP *cvop|U32 flags
 Apd	|OP*	|ck_entersub_args_list|NN OP *entersubop
 Apd	|OP*	|ck_entersub_args_proto|NN OP *entersubop|NN GV *namegv|NN SV *protosv

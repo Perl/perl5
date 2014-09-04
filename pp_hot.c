@@ -2967,10 +2967,10 @@ PP(pp_method)
 PP(pp_method_named)
 {
     dSP;
-    SV* const sv = cSVOP_sv;
-    U32 hash = SvSHARED_HASH(sv);
+    SV* const meth = cMETHOPx_meth(PL_op);
+    U32 hash = SvSHARED_HASH(meth);
 
-    XPUSHs(method_common(sv, &hash));
+    XPUSHs(method_common(meth, &hash));
     RETURN;
 }
 

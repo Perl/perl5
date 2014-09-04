@@ -383,6 +383,7 @@ $bits{lstat}{0} = $bf[0];
 @{$bits{lt}}{1,0} = ($bf[1], $bf[1]);
 $bits{mapwhile}{0} = $bf[0];
 $bits{method}{0} = $bf[0];
+$bits{method_named}{0} = $bf[0];
 @{$bits{mkdir}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);
 @{$bits{modulo}}{1,0} = ($bf[1], $bf[1]);
 @{$bits{msgctl}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);

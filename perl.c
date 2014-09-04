@@ -2646,8 +2646,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 {
     dVAR; dSP;
     LOGOP myop;		/* fake syntax tree node */
-    UNOP method_unop;
-    SVOP method_svop;
+    METHOP method_op;
     I32 oldmark;
     VOL I32 retval = 0;
     I32 oldscope;
@@ -2691,23 +2690,19 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	myop.op_private |= OPpENTERSUB_DB;
 
     if (flags & (G_METHOD|G_METHOD_NAMED)) {
+        Zero(&method_op, 1, METHOP);
+        method_op.op_next = (OP*)&myop;
+        PL_op = (OP*)&method_op;
         if ( flags & G_METHOD_NAMED ) {
-            Zero(&method_svop, 1, SVOP);
-            method_svop.op_next = (OP*)&myop;
-            method_svop.op_ppaddr = PL_ppaddr[OP_METHOD_NAMED];
-            method_svop.op_type = OP_METHOD_NAMED;
-            method_svop.op_sv = sv;
-            PL_op = (OP*)&method_svop;
+            method_op.op_ppaddr = PL_ppaddr[OP_METHOD_NAMED];
+            method_op.op_type = OP_METHOD_NAMED;
+            method_op.op_u.op_meth_sv = sv;
         } else {
-            Zero(&method_unop, 1, UNOP);
-            method_unop.op_next = (OP*)&myop;
-            method_unop.op_ppaddr = PL_ppaddr[OP_METHOD];
-            method_unop.op_type = OP_METHOD;
-            PL_op = (OP*)&method_unop;
+            method_op.op_ppaddr = PL_ppaddr[OP_METHOD];
+            method_op.op_type = OP_METHOD;
         }
         myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
         myop.op_type = OP_ENTERSUB;
-
     }
 
     if (!(flags & G_EVAL)) {

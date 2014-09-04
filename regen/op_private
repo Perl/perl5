@@ -208,6 +208,7 @@ use strict;
                             ops_with_flag('|'), # LOGOP
                             ops_with_flag('-'), # FILESTATOP
                             ops_with_flag('}'), # LOOPEXOP
+                            ops_with_flag('.'), # METHOP
                     );
 
     $args2{$_} = 1 for (
