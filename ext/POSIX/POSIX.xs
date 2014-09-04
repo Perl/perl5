@@ -717,7 +717,7 @@ static NV my_rint(NV x)
 
 #ifndef c99_lrint
 #  ifdef FE_TONEAREST
-static IV lrint(NV x)
+static IV my_lrint(NV x)
 {
   return (IV)my_rint(x);
 }
