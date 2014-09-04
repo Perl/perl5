@@ -167,11 +167,6 @@ static const char* const lex_state_names[] = {
 
 #define CLINE (PL_copline = (CopLINE(PL_curcop) < PL_copline ? CopLINE(PL_curcop) : PL_copline))
 
-#  define SKIPSPACE0(s) skipspace(s)
-#  define SKIPSPACE1(s) skipspace(s)
-#  define SKIPSPACE2(s,tsv) skipspace(s)
-#  define PEEKSPACE(s) skipspace(s)
-
 /*
  * Convenience functions to return different tokens and prime the
  * lexer for the next token.  They all take an argument.
@@ -249,7 +244,7 @@ static const char* const lex_state_names[] = {
 	PL_last_lop_op = f; \
 	if (*s == '(') \
 	    return REPORT( (int)FUNC1 ); \
-	s = PEEKSPACE(s); \
+	s = skipspace(s); \
 	return REPORT( *s=='(' ? (int)FUNC1 : (int)UNIOP ); \
 	}
 #define UNI(f)    UNI3(f,XTERM,1)
@@ -1875,7 +1870,7 @@ S_lop(pTHX_ I32 f, int x, char *s)
     PL_expect = x;
     if (*s == '(')
 	return REPORT(FUNC);
-    s = PEEKSPACE(s);
+    s = skipspace(s);
     if (*s == '(')
 	return REPORT(FUNC);
     else {
@@ -2003,7 +1998,7 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
 
     PERL_ARGS_ASSERT_FORCE_WORD;
 
-    start = SKIPSPACE1(start);
+    start = skipspace(start);
     s = start;
     if (isIDFIRST_lazy_if(s,UTF) ||
 	(allow_pack && *s == ':') )
@@ -2017,7 +2012,7 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
 	    return start;
 	}
 	if (token == METHOD) {
-	    s = SKIPSPACE1(s);
+	    s = skipspace(s);
 	    if (*s == '(')
 		PL_expect = XTERM;
 	    else {
@@ -2121,7 +2116,7 @@ S_force_version(pTHX_ char *s, int guessing)
 
     PERL_ARGS_ASSERT_FORCE_VERSION;
 
-    s = SKIPSPACE1(s);
+    s = skipspace(s);
 
     d = s;
     if (*d == 'v')
@@ -2174,7 +2169,7 @@ S_force_strict_version(pTHX_ char *s)
 	version = newSVOP(OP_CONST, 0, ver);
     }
     else if ( (*s != ';' && *s != '{' && *s != '}' ) &&
-	    (s = SKIPSPACE1(s), (*s != ';' && *s != '{' && *s != '}' )))
+	    (s = skipspace(s), (*s != ';' && *s != '{' && *s != '}' )))
     {
 	PL_bufptr = s;
 	if (errstr)
@@ -3843,7 +3838,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 	if (cv || PL_last_lop_op == OP_PRINT || PL_last_lop_op == OP_SAY ||
 		isUPPER(*PL_tokenbuf))
 	    return 0;
-	s = PEEKSPACE(s);
+	s = skipspace(s);
 	PL_bufptr = start;
 	PL_expect = XREF;
 	return *s == '(' ? FUNCMETH : METHOD;
@@ -3866,7 +3861,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 	    return 0;
 	/* filehandle or package name makes it a method */
 	if (!cv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, UTF ? SVf_UTF8 : 0)) {
-	    s = PEEKSPACE(s);
+	    s = skipspace(s);
 	    if ((PL_bufend - s) >= 2 && *s == '=' && *(s+1) == '>')
 		return 0;	/* no assumptions -- "=>" quotes bareword */
       bare_package:
@@ -4142,11 +4137,11 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 	yyerror(Perl_form(aTHX_ "\"%s\" not allowed in expression",
 		    is_use ? "use" : "no"));
     PL_expect = XTERM;
-    s = SKIPSPACE1(s);
+    s = skipspace(s);
     if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
 	s = force_version(s, TRUE);
 	if (*s == ';' || *s == '}'
-		|| (s = SKIPSPACE1(s), (*s == ';' || *s == '}'))) {
+		|| (s = skipspace(s), (*s == ';' || *s == '}'))) {
 	    NEXTVAL_NEXTTOKE.opval = NULL;
 	    force_next(WORD);
 	}
@@ -5062,7 +5057,7 @@ Perl_yylex(pTHX)
 	    }
 	    else if (*s == '>') {
 		s++;
-		s = SKIPSPACE1(s);
+		s = skipspace(s);
 		if (FEATURE_POSTDEREF_IS_ENABLED && (
 		    ((*s == '$' || *s == '&') && s[1] == '*')
 		  ||(*s == '$' && s[1] == '#' && s[2] == '*')
@@ -5239,7 +5234,7 @@ Perl_yylex(pTHX)
 	case XATTRTERM:
 	    PL_expect = XTERMBLOCK;
 	 grabattrs:
-	    s = PEEKSPACE(s);
+	    s = skipspace(s);
 	    attrs = NULL;
 	    while (isIDFIRST_lazy_if(s,UTF)) {
 		I32 tmp;
@@ -5323,9 +5318,9 @@ Perl_yylex(pTHX)
 					    newSVOP(OP_CONST, 0,
 					      	    sv));
 		}
-		s = PEEKSPACE(d);
+		s = skipspace(d);
 		if (*s == ':' && s[1] != ':')
-		    s = PEEKSPACE(s+1);
+		    s = skipspace(s+1);
 		else if (s == d)
 		    break;	/* require real whitespace or :'s */
 		/* XXX losing whitespace on sequential attributes here */
@@ -5376,7 +5371,7 @@ Perl_yylex(pTHX)
 	    PL_oldbufptr = PL_oldoldbufptr;		/* allow print(STDOUT 123) */
 	else
 	    PL_expect = XTERM;
-	s = SKIPSPACE1(s);
+	s = skipspace(s);
 	PL_lex_allbrackets++;
 	TOKEN('(');
     case ';':
@@ -5391,7 +5386,7 @@ Perl_yylex(pTHX)
 	    TOKEN(0);
 	s++;
 	PL_lex_allbrackets--;
-	s = SKIPSPACE1(s);
+	s = skipspace(s);
 	if (*s == '{')
 	    PREBLOCK(')');
 	TERM(')');
@@ -5473,7 +5468,7 @@ Perl_yylex(pTHX)
 		else
 		    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
 		PL_lex_allbrackets++;
-		s = SKIPSPACE1(s);
+		s = skipspace(s);
 		if (*s == '}') {
 		    if (PL_expect == XREF && PL_lex_state == LEX_INTERPNORMAL) {
 			PL_expect = XTERM;
@@ -5911,7 +5906,7 @@ Perl_yylex(pTHX)
 	{
 	    const char tmp = *s;
 	    if (PL_lex_state == LEX_NORMAL || PL_lex_brackets)
-		s = SKIPSPACE1(s);
+		s = skipspace(s);
 
 	    if ((PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
 		&& intuit_more(s)) {
@@ -5923,7 +5918,7 @@ Perl_yylex(pTHX)
 			while (isSPACE(*t) || isWORDCHAR_lazy_if(t,UTF) || *t == '$')
 			    t++;
 			if (*t++ == ',') {
-			    PL_bufptr = PEEKSPACE(PL_bufptr); /* XXX can realloc */
+			    PL_bufptr = skipspace(PL_bufptr); /* XXX can realloc */
 			    while (t < PL_bufend && *t != ']')
 				t++;
 			    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
@@ -6023,7 +6018,7 @@ Perl_yylex(pTHX)
 	    PREREF('@');
 	}
 	if (PL_lex_state == LEX_NORMAL)
-	    s = SKIPSPACE1(s);
+	    s = skipspace(s);
 	if ((PL_expect != XREF || PL_oldoldbufptr == PL_last_lop) && intuit_more(s)) {
 	    if (*s == '{')
 		PL_tokenbuf[0] = '%';
@@ -6582,7 +6577,7 @@ Perl_yylex(pTHX)
 		    bool immediate_paren = *s == '(';
 
 		    /* (Now we can afford to cross potential line boundary.) */
-		    s = SKIPSPACE2(s,nextPL_nextwhite);
+		    s = skipspace(s);
 
 		    /* Two barewords in a row may indicate method call. */
 
@@ -7062,7 +7057,7 @@ Perl_yylex(pTHX)
 	    PREBLOCK(DEFAULT);
 
 	case KEY_do:
-	    s = SKIPSPACE1(s);
+	    s = skipspace(s);
 	    if (*s == '{')
 		PRETERMBLOCK(DO);
 	    if (*s != '\'') {
@@ -7071,7 +7066,7 @@ Perl_yylex(pTHX)
 			      1, &len);
 		if (len && (len != 4 || strNE(PL_tokenbuf+1, "CORE"))
 		 && !keyword(PL_tokenbuf + 1, len, 0)) {
-		    d = SKIPSPACE1(d);
+		    d = skipspace(d);
 		    if (*d == '(') {
 			force_ident_maybe_lex('&');
 			s = d;
@@ -7131,7 +7126,7 @@ Perl_yylex(pTHX)
 	    UNI(OP_EXIT);
 
 	case KEY_eval:
-	    s = SKIPSPACE1(s);
+	    s = skipspace(s);
 	    if (*s == '{') { /* block eval */
 		PL_expect = XTERMBLOCK;
 		UNIBRACK(OP_ENTERTRY);
@@ -7180,7 +7175,7 @@ Perl_yylex(pTHX)
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
 		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
-	    s = SKIPSPACE1(s);
+	    s = skipspace(s);
 	    if (PL_expect == XSTATE && isIDFIRST_lazy_if(s,UTF)) {
 		char *p = s;
 
@@ -7190,11 +7185,11 @@ Perl_yylex(pTHX)
 		else if ((PL_bufend - p) >= 4 &&
 		    strnEQ(p, "our", 3) && isSPACE(*(p + 3)))
 		    p += 3;
-		p = PEEKSPACE(p);
+		p = skipspace(p);
                 /* skip optional package name, as in "for my abc $x (..)" */
 		if (isIDFIRST_lazy_if(p,UTF)) {
 		    p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
-		    p = PEEKSPACE(p);
+		    p = skipspace(p);
 		}
 		if (*p != '$')
 		    Perl_croak(aTHX_ "Missing $ on loop variable");
@@ -7426,7 +7421,7 @@ Perl_yylex(pTHX)
 	case KEY_my:
 	case KEY_state:
 	    PL_in_my = (U16)tmp;
-	    s = SKIPSPACE1(s);
+	    s = skipspace(s);
 	    if (isIDFIRST_lazy_if(s,UTF)) {
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
 		if (len == 3 && strnEQ(PL_tokenbuf, "sub", 3))
@@ -7467,7 +7462,7 @@ Perl_yylex(pTHX)
 	    TOKEN(USE);
 
 	case KEY_not:
-	    if (*s == '(' || (s = SKIPSPACE1(s), *s == '('))
+	    if (*s == '(' || (s = skipspace(s), *s == '('))
 		FUN1(OP_NOT);
 	    else {
 		if (!PL_lex_allbrackets &&
@@ -7477,7 +7472,7 @@ Perl_yylex(pTHX)
 	    }
 
 	case KEY_open:
-	    s = SKIPSPACE1(s);
+	    s = skipspace(s);
 	    if (isIDFIRST_lazy_if(s,UTF)) {
           const char *t;
           d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE,
@@ -7537,7 +7532,7 @@ Perl_yylex(pTHX)
 
 	case KEY_package:
 	    s = force_word(s,WORD,FALSE,TRUE);
-	    s = SKIPSPACE1(s);
+	    s = skipspace(s);
 	    s = force_strict_version(s);
 	    PREBLOCK(PACKAGE);
 
@@ -7631,7 +7626,7 @@ Perl_yylex(pTHX)
 	    OLDLOP(OP_RETURN);
 
 	case KEY_require:
-	    s = SKIPSPACE1(s);
+	    s = skipspace(s);
 	    if (isDIGIT(*s)) {
 		s = force_version(s, FALSE);
 	    }
@@ -7801,7 +7796,7 @@ Perl_yylex(pTHX)
 
 	case KEY_sort:
 	    checkcomma(s,PL_tokenbuf,"subroutine name");
-	    s = SKIPSPACE1(s);
+	    s = skipspace(s);
 	    PL_expect = XTERM;
 	    s = force_word(s,WORD,TRUE,TRUE);
 	    LOP(OP_SORT,XREF);
@@ -8500,7 +8495,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
     PERL_ARGS_ASSERT_SCAN_IDENT;
 
     if (isSPACE(*s))
-	s = PEEKSPACE(s);
+	s = skipspace(s);
     if (isDIGIT(*s)) {
 	while (isDIGIT(*s)) {
 	    if (d >= e)
@@ -8538,7 +8533,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 	s++;
 	orig_copline = CopLINE(PL_curcop);
         if (s < PL_bufend && isSPACE(*s)) {
-            s = PEEKSPACE(s);
+            s = skipspace(s);
         }
     }
 
@@ -8598,7 +8593,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 	    *d = '\0';
             tmp_copline = CopLINE(PL_curcop);
             if (s < PL_bufend && isSPACE(*s)) {
-                s = PEEKSPACE(s);
+                s = skipspace(s);
             }
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
                 /* ${foo[0]} and ${foo{bar}} notation.  */
@@ -8637,7 +8632,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
         if ( !tmp_copline )
             tmp_copline = CopLINE(PL_curcop);
         if (s < PL_bufend && isSPACE(*s)) {
-            s = PEEKSPACE(s);
+            s = skipspace(s);
         }
 	    
         /* Expect to find a closing } after consuming any trailing whitespace.
@@ -9499,7 +9494,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 
     /* skip space before the delimiter */
     if (isSPACE(*s)) {
-	s = PEEKSPACE(s);
+	s = skipspace(s);
     }
 
     /* mark where we are, in case we need to report errors */
