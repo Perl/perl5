@@ -511,7 +511,7 @@ static NV my_erf(NV x)
 
   /* Abramowitz and Stegun formula 7.1.26 */
   t = 1.0 / (1.0 + p * x);
-  y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1) * t * exp(-x*x);
+  y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1) * t * Perl_exp(-x*x);
 
   return sign * y;
 }
@@ -616,7 +616,7 @@ static NV my_hypot(NV x, NV y)
     y = t;
   }
   t = y / x;
-  return x * sqrt(1.0 + t * t);
+  return x * Perl_sqrt(1.0 + t * t);
 }
 #  define c99_hypot my_hypot
 #endif
