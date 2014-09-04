@@ -10887,7 +10887,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
     if (valuep && (substitute_parse || ! has_multiple_chars)) {
 	STRLEN length_of_hex = (STRLEN)(endchar - RExC_parse);
 	I32 grok_hex_flags = PERL_SCAN_ALLOW_UNDERSCORES
-	    | PERL_SCAN_DISALLOW_PREFIX
+                           | PERL_SCAN_DISALLOW_PREFIX
 
                              /* No errors in the first pass (See [perl
                               * #122671].)  We let the code below find the
@@ -10902,22 +10902,22 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
          * bypass it by using single quoting, so check.  Don't do the check
          * here when there are multiple chars; we do it below anyway. */
         if (! has_multiple_chars) {
-	if (length_of_hex == 0
-	    || length_of_hex != (STRLEN)(endchar - RExC_parse) )
-	{
-	    RExC_parse += length_of_hex;	/* Includes all the valid */
-	    RExC_parse += (RExC_orig_utf8)	/* point to after 1st invalid */
-			    ? UTF8SKIP(RExC_parse)
-			    : 1;
-	    /* Guard against malformed utf8 */
-	    if (RExC_parse >= endchar) {
-                RExC_parse = endchar;
+            if (length_of_hex == 0
+                || length_of_hex != (STRLEN)(endchar - RExC_parse) )
+            {
+                RExC_parse += length_of_hex;	/* Includes all the valid */
+                RExC_parse += (RExC_orig_utf8)	/* point to after 1st invalid */
+                                ? UTF8SKIP(RExC_parse)
+                                : 1;
+                /* Guard against malformed utf8 */
+                if (RExC_parse >= endchar) {
+                    RExC_parse = endchar;
+                }
+                vFAIL("Invalid hexadecimal number in \\N{U+...}");
             }
-	    vFAIL("Invalid hexadecimal number in \\N{U+...}");
-	}
 
-        RExC_parse = endbrace + 1;
-        return 1;
+            RExC_parse = endbrace + 1;
+            return 1;
         }
     }
 
@@ -10987,15 +10987,15 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
 	RExC_override_recoding = 1;
 
         if (node_p) {
-	if (!(*node_p = reg(pRExC_state, 1, &flags, depth+1))) {
-            if (flags & RESTART_UTF8) {
-                *flagp = RESTART_UTF8;
-                return (STRLEN) -1;
+            if (!(*node_p = reg(pRExC_state, 1, &flags, depth+1))) {
+                if (flags & RESTART_UTF8) {
+                    *flagp = RESTART_UTF8;
+                    return (STRLEN) -1;
+                }
+                FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#"UVxf"",
+                    (UV) flags);
             }
-            FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#"UVxf"",
-                  (UV) flags);
-        }
-	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
+            *flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
         }
 
 	RExC_parse = endbrace;
