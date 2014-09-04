@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 130;
+plan 132;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -95,6 +95,18 @@ sub bar::c { 43 }
   use constant const => 3; # symtab now has a scalar ref
   # inlining this used to fail an assertion (parentheses necessary):
   is(const, 3, 'our sub pointing to "use constant" constant');
+}
+# our sub and method confusion
+sub F::h { 4242 }
+{
+  my $called;
+  our sub h { ++$called; 4343 };
+  is((h F),4242, 'our sub symbol translation does not affect meth names');
+  undef $called;
+  print "#";
+  print h F; # follows a different path through yylex to intuit_method
+  print "\n";
+  is $called, undef, 'our sub symbol translation & meth names after print'
 }
 
 # -------------------- state -------------------- #

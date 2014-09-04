@@ -6662,6 +6662,15 @@ Perl_yylex(pTHX)
 			&& (isIDFIRST_lazy_if(s,UTF) || *s == '$')
 			&& (tmp = intuit_method(s, lex ? NULL : sv, cv))) {
 		  method:
+		    if (lex && !off) {
+			assert(cSVOPx(pl_yylval.opval)->op_sv == sv);
+			SvREADONLY_off(sv);
+			sv_setpvn(sv, PL_tokenbuf, len);
+			if (UTF && !IN_BYTES
+			 && is_utf8_string((U8*)PL_tokenbuf, len))
+			    SvUTF8_on (sv);
+			else SvUTF8_off(sv);
+		    }
 		    op_free(rv2cv_op);
 		    if (tmp == METHOD && !PL_lex_allbrackets &&
 			    PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
