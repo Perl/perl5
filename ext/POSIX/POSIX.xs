@@ -2054,7 +2054,7 @@ fesetround(x)
     CODE:
 #ifdef HAS_FEGETROUND /* canary for fesetround */
 	RETVAL = fesetround(x);
-#elif HAS_FPGETROUND /* canary for fpsetround */
+#elif defined(HAS_FPGETROUND) /* canary for fpsetround */
 	switch (x) {
         default:
 	case FE_TONEAREST:  RETVAL = fpsetround(FP_RN); break;
