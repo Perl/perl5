@@ -2049,7 +2049,7 @@ EXTERN_C long double modfl(long double, long double *);
 #        define Perl_fp_class(x)	fpclassify(x)
 #        define Perl_fp_class_pinf(x)	(Perl_fp_class(x)==FP_PLUS_INF)
 #        define Perl_fp_class_ninf(x)	(Perl_fp_class(x)==FP_MINUS_INF)
-#        define Perl_fp_class_snan(x)	(Perl_fp_class(x)==FP_QNAN)
+#        define Perl_fp_class_snan(x)	(Perl_fp_class(x)==FP_SNAN)
 #        define Perl_fp_class_qnan(x)	(Perl_fp_class(x)==FP_QNAN)
 #        define Perl_fp_class_pnorm(x)	(Perl_fp_class(x)==FP_PLUS_NORM)
 #        define Perl_fp_class_nnorm(x)	(Perl_fp_class(x)==FP_MINUS_NORM)
@@ -2214,7 +2214,7 @@ EXTERN_C long double modfl(long double, long double *);
  * returns a set of bits. */
 #    define Perl_fp_class_snan(x) (_fpclass(x) & _FPCLASS_SNAN)
 #    define Perl_fp_class_qnan(x) (_fpclass(x) & _FPCLASS_QNAN)
-#    define Perl_fp_class_nan(x) (_fpclass(x) & (_FPCLASS_QNAN|_FPCLASS_QNAN))
+#    define Perl_fp_class_nan(x) (_fpclass(x) & (_FPCLASS_SNAN|_FPCLASS_QNAN))
 #    define Perl_fp_class_ninf(x) (_fpclass(x) & _FPCLASS_NINF))
 #    define Perl_fp_class_pinf(x) (_fpclass(x) & _FPCLASS_PINF))
 #    define Perl_fp_class_inf(x) (_fpclass(x) & (_FPCLASS_NINF|_FPCLASS_PINF))
