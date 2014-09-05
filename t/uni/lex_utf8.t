@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
     @INC = '../lib';
     require './test.pl';
-    skip_all_if_miniperl("no dynamic loading on miniperl, no re");
+    skip_all_without_unicode_tables();
     skip_all('EBCDIC') if $::IS_EBCDIC;
 }
 
