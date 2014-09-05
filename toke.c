@@ -6474,10 +6474,6 @@ Perl_yylex(pTHX)
 	  just_a_word: {
 		int pkgname = 0;
 		const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
-		const char penultchar =
-		    lastchar && PL_bufptr - 2 >= PL_linestart
-			 ? PL_bufptr[-2]
-			 : 0;
 		bool safebw;
 
 
@@ -6686,13 +6682,6 @@ Perl_yylex(pTHX)
 
 		if (cv) {
 		    OP *gvop;
-		    if (lastchar == '-' && penultchar != '-') {
-			const STRLEN l = len ? len : strlen(PL_tokenbuf);
- 			Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
-			    "Ambiguous use of -%"UTF8f" resolved as -&%"UTF8f"()",
-			     UTF8fARG(UTF, l, PL_tokenbuf),
-			     UTF8fARG(UTF, l, PL_tokenbuf));
-                    }
 		    /* Check for a constant sub */
 		    if ((sv = cv_const_sv_or_av(cv))) {
 		  its_constant:

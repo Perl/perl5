@@ -783,15 +783,14 @@ use warnings "ambiguous";
 print for keys %+; # should not warn
 EXPECT
 ########
-# toke.c
+# toke.c [This does not warn any more.]
 sub fred {};
 -fred ;
 sub hank : lvalue {$_}
 --hank; # This should *not* warn [perl #77240]
 EXPECT
-Ambiguous use of -fred resolved as -&fred() at - line 3.
 ########
-# toke.c
+# toke.c [This does not warn any more.]
 $^W = 0 ;
 sub fred {} ;
 -fred ;
@@ -803,19 +802,15 @@ sub fred {} ;
 }
 -fred ;
 EXPECT
-Ambiguous use of -fred resolved as -&fred() at - line 4.
-Ambiguous use of -fred resolved as -&fred() at - line 9.
-Ambiguous use of -fred resolved as -&fred() at - line 11.
 ########
-# toke.c
+# toke.c [This does not warn any more.]
 use utf8;
 use open qw( :utf8 :std );
 sub frèd {};
 -frèd ;
 EXPECT
-Ambiguous use of -frèd resolved as -&frèd() at - line 5.
 ########
-# toke.c
+# toke.c [This does not warn any more.]
 $^W = 0 ;
 use utf8;
 use open qw( :utf8 :std );
@@ -829,19 +824,15 @@ sub frèd {} ;
 }
 -frèd ;
 EXPECT
-Ambiguous use of -frèd resolved as -&frèd() at - line 6.
-Ambiguous use of -frèd resolved as -&frèd() at - line 11.
-Ambiguous use of -frèd resolved as -&frèd() at - line 13.
 ########
-# toke.c
+# toke.c [This does not warn any more.]
 use utf8;
 use open qw( :utf8 :std );
 sub ᒍᒘᒊ {};
 -ᒍᒘᒊ ;
 EXPECT
-Ambiguous use of -ᒍᒘᒊ resolved as -&ᒍᒘᒊ() at - line 5.
 ########
-# toke.c
+# toke.c [This does not warn any more.]
 $^W = 0 ;
 use utf8;
 use open qw( :utf8 :std );
@@ -855,9 +846,6 @@ sub ᒍᒘᒊ {} ;
 }
 -ᒍᒘᒊ ;
 EXPECT
-Ambiguous use of -ᒍᒘᒊ resolved as -&ᒍᒘᒊ() at - line 6.
-Ambiguous use of -ᒍᒘᒊ resolved as -&ᒍᒘᒊ() at - line 11.
-Ambiguous use of -ᒍᒘᒊ resolved as -&ᒍᒘᒊ() at - line 13.
 ########
 # toke.c
 open FOO || time;
