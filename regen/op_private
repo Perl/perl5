@@ -391,7 +391,7 @@ for (qw(rv2hv padhv)) {
 
 
 
-addbits($_, 1 => qw(OPpHINT_STRICT_REFS -)) for qw(rv2sv rv2av rv2hv rv2gv);
+addbits($_, 1 => qw(OPpHINT_STRICT_REFS STRICT)) for qw(rv2sv rv2av rv2hv rv2gv);
 
 
 
@@ -477,7 +477,7 @@ addbits('repeat', 6 => qw(OPpREPEAT_DOLIST DOLIST)); # List replication
 
 addbits('entersub',
     0      => qw(OPpENTERSUB_INARGS   INARGS), # Lval used as arg to a sub
-    1      => qw(OPpHINT_STRICT_REFS  -     ), # 'use strict' in scope
+    1      => qw(OPpHINT_STRICT_REFS  STRICT), # 'use strict' in scope
     2      => qw(OPpENTERSUB_HASTARG  TARG  ), # Called from OP tree
     3      => qw(OPpENTERSUB_AMPER    AMPER),  # Used & form to call
     4      => qw(OPpENTERSUB_DB       DBG   ), # Debug subroutine
@@ -486,7 +486,7 @@ addbits('entersub',
 );
 addbits('rv2cv',
     # If a constant sub, return the constant
-    1 => qw(OPpHINT_STRICT_REFS    -    ),  # 'use strict' in scope
+    1 => qw(OPpHINT_STRICT_REFS    STRICT),  # 'use strict' in scope
 
     3 => qw(OPpENTERSUB_AMPER      AMPER),  # Used & form to call
 
@@ -549,7 +549,7 @@ addbits('rv2gv',
 
 addbits('enteriter',
                     2 => qw(OPpITER_REVERSED REVERSED),# for (reverse ...)
-                    3 => qw(OPpITER_DEF      -),       # 'for $_' or 'for my $_'
+                    3 => qw(OPpITER_DEF      DEF),     # 'for $_' or 'for my $_'
 );
 addbits('iter',     2 => qw(OPpITER_REVERSED REVERSED));
 
@@ -643,7 +643,7 @@ addbits('entereval',
     2 => qw(OPpEVAL_UNICODE      UNI    ),
     3 => qw(OPpEVAL_BYTES        BYTES  ),
     4 => qw(OPpEVAL_COPHH        COPHH  ), # Construct %^H from COP hints
-    5 => qw(OPpEVAL_RE_REPARSING -      ), # eval_sv(..., G_RE_REPARSING)
+    5 => qw(OPpEVAL_RE_REPARSING REPARSE), # eval_sv(..., G_RE_REPARSING)
 );
 
 
