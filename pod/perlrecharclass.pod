@@ -457,29 +457,58 @@ Examples:
 
  -------
 
-* There is an exception to a bracketed character class matching a
-single character only.  When the class is to match caselessly under C</i>
-matching rules, and a character that is explicitly mentioned inside the
-class matches a
+* There are two exceptions to a bracketed character class matching a
+single character only.  Each requires special handling by Perl to make
+things work:
+
+=over
+
+=item *
+
+When the class is to match caselessly under C</i> matching rules, and a
+character that is explicitly mentioned inside the class matches a
 multiple-character sequence caselessly under Unicode rules, the class
-(when not L<inverted|/Negation>) will also match that sequence.  For
-example, Unicode says that the letter C<LATIN SMALL LETTER SHARP S>
-should match the sequence C<ss> under C</i> rules.  Thus,
+will also match that sequence.  For example, Unicode says that the
+letter C<LATIN SMALL LETTER SHARP S> should match the sequence C<ss>
+under C</i> rules.  Thus,
 
  'ss' =~ /\A\N{LATIN SMALL LETTER SHARP S}\z/i             # Matches
  'ss' =~ /\A[aeioust\N{LATIN SMALL LETTER SHARP S}]\z/i    # Matches
 
-For this to happen, the character must be explicitly specified, and not
-be part of a multi-character range (not even as one of its endpoints).
-(L</Character Ranges> will be explained shortly.)  Therefore,
+For this to happen, the class must not be inverted (see L</Negation>)
+and the character must be explicitly specified, and not be part of a
+multi-character range (not even as one of its endpoints).  (L</Character
+Ranges> will be explained shortly.) Therefore,
 
  'ss' =~ /\A[\0-\x{ff}]\z/i        # Doesn't match
  'ss' =~ /\A[\0-\N{LATIN SMALL LETTER SHARP S}]\z/i    # No match
- 'ss' =~ /\A[\xDF-\xDF]\z/i    # Matches on ASCII platforms, since \XDF
-                               # is LATIN SMALL LETTER SHARP S, and the
-                               # range is just a single element
+ 'ss' =~ /\A[\xDF-\xDF]\z/i    # Matches on ASCII platforms, since
+                               # \XDF is LATIN SMALL LETTER SHARP S,
+                               # and the range is just a single
+                               # element
 
 Note that it isn't a good idea to specify these types of ranges anyway.
+
+=item *
+
+Some names known to C<\N{...}> refer to a sequence of multiple characters,
+instead of the usual single character.  When one of these is included in
+the class, the entire sequence is matched.  For example,
+
+  "\N{TAMIL LETTER KA}\N{TAMIL VOWEL SIGN AU}"
+                              =~ / ^ [\N{TAMIL SYLLABLE KAU}]  $ /x;
+
+matches, because C<\N{TAMIL SYLLABLE KAU}> is a named sequence
+consisting of the two characters matched against.  Like the other
+instance where a bracketed class can match multi characters, and for
+similar reasons, the class must not be inverted, and the named sequence
+may not appear in a range, even one where it is both endpoints.  If
+these happen, it is a fatal error if the character class is within an
+extended L<C<(?[...])>|/Extended Bracketed Character Classes>
+class; and only the first code point is used (with
+a C<regexp>-type warning raised) otherwise.
+
+=back
 
 =head3 Special Characters Inside a Bracketed Character Class
 
@@ -597,9 +626,10 @@ the caret as one of the characters to match, either escape the caret or
 else don't list it first.
 
 In inverted bracketed character classes, Perl ignores the Unicode rules
-that normally say that certain characters should match a sequence of
-multiple characters under caseless C</i> matching.  Following those
-rules could lead to highly confusing situations:
+that normally say that named sequence, and certain characters should
+match a sequence of multiple characters use under caseless C</i>
+matching.  Following those rules could lead to highly confusing
+situations:
 
  "ss" =~ /^[^\xDF]+$/ui;   # Matches!
 
@@ -608,7 +638,7 @@ what C<\xDF> matches under C</i>.  C<"s"> isn't C<\xDF>, but Unicode
 says that C<"ss"> is what C<\xDF> matches under C</i>.  So which one
 "wins"? Do you fail the match because the string has C<ss> or accept it
 because it has an C<s> followed by another C<s>?  Perl has chosen the
-latter.
+latter.  (See note in L</Bracketed Character Classes> above.)
 
 Examples:
 

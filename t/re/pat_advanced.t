@@ -998,9 +998,8 @@ sub run_tests {
         #
         my $w;
         local $SIG {__WARN__} = sub {$w .= "@_"};
-        eval 'q(xxWxx) =~ /[\N{WARN}]/';
-        ok $w && $w =~ /Using just the first character returned by \\N\{} in character class/,
-                 "single character in [\\N{}] warning";
+        $result = eval 'q(WARN) =~ /[\N{WARN}]/';
+        ok !$@ && $result && ! $w,  '\N{} returning multi-char works';
 
         undef $w;
         eval q [ok "\0" !~ /[\N{EMPTY-STR}XY]/,

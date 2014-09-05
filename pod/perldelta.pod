@@ -443,6 +443,20 @@ Under some conditions a warning raised in compilation of regular
 expression patterns could be displayed multiple times.  This is now
 fixed.
 
+=item *
+
+C<qr/[\N{named sequence}]/> now works properly in many instances.  Some
+names known to C<\N{...}> refer to a sequence of multiple characters,
+instead of the usual single character.  Bracketed character classes
+generally only match single characters, but now special handling has
+been added so that they can match named sequences, but not if the class
+is inverted or the sequence is specified as the beginning or end of a
+range.  In these cases, the only behavior change from before is a slight
+rewording of the fatal error message given when this class is part of a
+C<?[...])> construct.  When the C<[...]> stands alone, the same
+non-fatal warning as before is raised, and only the first character in
+the sequence is used, again just as before.
+
 =back
 
 =head1 Known Problems

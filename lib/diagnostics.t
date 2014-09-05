@@ -106,7 +106,7 @@ seek STDERR, 0,0;
 $warning = '';
 warn "Using just the first character returned by \\N{} in character class in regex; marked by <-- HERE in m/%s/";
 like $warning,
-    qr/A charnames handler may return a sequence/s,
+    qr/Named Unicode character escapes/s,
     'multi-line entries in perldiag.pod match';
 
 # ; at end of entry in perldiag.pod

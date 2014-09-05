@@ -3362,15 +3362,23 @@ bracketed character class, for the same reason that C<.> in a character
 class loses its specialness: it matches almost everything, which is
 probably not what you want.
 
-=item \N{} in character class restricted to one character in regex; marked
+=item \N{} in inverted character class or as a range end-point is restricted to one character in regex; marked
 by S<<-- HERE> in m/%s/
 
 (F) Named Unicode character escapes C<(\N{...})> may return a
-multi-character sequence.  Such an escape may not be used in
-a character class, because character classes always match one
-character of input.  Check that the correct escape has been used,
-and the correct charname handler is in scope.  The S<<-- HERE> shows
-whereabouts in the regular expression the problem was discovered.
+multi-character sequence.  Even though a character class is supposed to
+match just one character of input, perl will match the whole thing
+correctly, except when the class is inverted (C<[^...]>, or the escape
+is the beginning or final end point of a range.  The mathematically
+logical behavior for what matches when inverting is very different than
+what people expect, so we have decided to forbid it.
+Similarly unclear is what should be generated when the C<\N{...}> is
+used as one of the end points of the range, such as in
+
+ [\x{41}-\N{ARABIC SEQUENCE YEH WITH HAMZA ABOVE WITH AE}]
+
+What is meant here is unclear, as the C<\N{...}> escape is a sequence of
+code points, so this is made an error.
 
 =item \N{NAME} must be resolved by the lexer in regex; marked by
 S<<-- HERE> in m/%s/
@@ -6507,9 +6515,14 @@ You need to add either braces or blanks to disambiguate.
 =item Using just the first character returned by \N{} in character class in 
 regex; marked by S<<-- HERE> in m/%s/
 
-(W regexp) A charnames handler may return a sequence of more than one
-character.  Currently all but the first one are discarded when used in
-a regular expression pattern bracketed character class.
+(W regexp) Named Unicode character escapes C<(\N{...})> may return a
+multi-character sequence.  Even though a character class is supposed to
+match just one character of input, perl will match the whole thing
+correctly, except when the class is inverted (C<[^...]>, or the escape
+is the beginning or final end point of a range.  For these, what should
+happen isn't clear at all.  In these circumstances, Perl discards all
+but the first character of the returned sequence, which is not likely
+what you want.
 
 =item Using !~ with %s doesn't make sense
 

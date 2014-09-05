@@ -2099,7 +2099,7 @@ Es	|void	 |set_ANYOF_arg	|NN RExC_state_t* const pRExC_state \
 				|NULLOK SV* const swash                    \
 				|const bool has_user_defined_property
 Es	|AV*	 |add_multi_match|NULLOK AV* multi_char_matches		    \
-				|NN SV* multi_fold			    \
+				|NN SV* multi_string			    \
 				|const STRLEN cp_count
 Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth|const bool stop_at_1 \

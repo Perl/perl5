@@ -13329,24 +13329,28 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
 }
 
 STATIC AV *
-S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_fold, const STRLEN cp_count)
+S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN cp_count)
 {
-    /* This adds the string scalar <multi_fold> to the array
-     * <multi_char_matches>.  <multi_fold> is known to have exactly
+    /* This adds the string scalar <multi_string> to the array
+     * <multi_char_matches>.  <multi_string> is known to have exactly
      * <cp_count> code points in it.  This is used when constructing a
      * bracketed character class and we find something that needs to match more
      * than a single character.
      *
-     * <multi_char_matches> is actually an array of arrays.  There will be one
-     * or two top-level elements: [2], and/or [3].  The [2] element is an
-     * array, each element thereof is a character which folds to TWO
-     * characters; [3] is for folds to THREE characters.  (Unicode guarantees a
-     * maximum of 3 characters in any fold.)  When we rewrite the character
-     * class below, we will do so such that the longest folds are written
-     * first, so that it prefers the longest matching strings first.  This is
-     * done even if it turns out that any quantifier is non-greedy, out of
-     * programmer laziness.  Tom Christiansen has agreed that this is ok.  This
-     * makes the test for the ligature 'ffi' come before the test for 'ff' */
+     * <multi_char_matches> is actually an array of arrays.  Each top-level
+     * element is an array that contains all the strings known so far that are
+     * the same length.  And that length (in number of code points) is the same
+     * as the index of the top-level array.  Hence, the [2] element is an
+     * array, each element thereof is a string containing TWO code points; while element
+     * [3] is for strings of THREE characters, and so on.  Since this is for
+     * multi-char strings there can never be a [0] nor [1] element.
+     *
+     * When we rewrite the character class below, we will do so such that the
+     * longest strings are written first, so that it prefers the longest
+     * matching strings first.  This is done even if it turns out that any
+     * quantifier is non-greedy, out of this programmer's (khw) laziness.  Tom
+     * Christiansen has agreed that this is ok.  This makes the test for the
+     * ligature 'ffi' come before the test for 'ff', for example */
 
     AV* this_array;
     AV** this_array_ptr;
@@ -13366,7 +13370,7 @@ S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_fold, const STRLEN cp_
         av_store(multi_char_matches, cp_count,
                  (SV*) this_array);
     }
-    av_push(this_array, multi_fold);
+    av_push(this_array, multi_string);
 
     return multi_char_matches;
 }
@@ -13650,23 +13654,26 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             }
                         }
                         else { /* cp_count > 1 */
-                            /* We only pay attention to the first char of
-                             * multichar strings being returned in char
-                             * classes. I kinda wonder if this makes sense as
-                             * it does change the behaviour from earlier
-                             * versions, OTOH that behaviour was broken as
-                             * well. XXX Solution is to recharacterize as
-                             * [rest-of-class]|multi1|multi2...  */
+                            if (! RExC_in_multi_char_class) {
+                                if (invert || range || *RExC_parse == '-') {
                                     if (strict) {
                                         RExC_parse--;
-                                        vFAIL("\\N{} in character class restricted to one character");
+                                        vFAIL("\\N{} in inverted character class or as a range end-point is restricted to one character");
                                     }
                                     else if (PASS2) {
                                         ckWARNreg(RExC_parse, "Using just the first character returned by \\N{} in character class");
                                     }
+                                }
+                                else {
+                                    multi_char_matches
+                                        = add_multi_match(multi_char_matches,
+                                                          as_text,
+                                                          cp_count);
+                                }
                                 break; /* <value> contains the first code
                                           point. Drop out of the switch to
                                           process it */
+                            }
                         } /* End of cp_count != 1 */
 
                         /* This element should not be processed further in this
