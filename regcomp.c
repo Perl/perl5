@@ -14370,6 +14370,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	RExC_parse = SvPV(substitute_parse, len);
 	RExC_end = RExC_parse + len;
         RExC_in_multi_char_class = 1;
+	RExC_override_recoding = 1;
         RExC_emit = (regnode *)orig_emit;
 
 	ret = reg(pRExC_state, 1, &reg_flags, depth+1);
@@ -14379,6 +14380,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	RExC_parse = save_parse;
 	RExC_end = save_end;
 	RExC_in_multi_char_class = 0;
+	RExC_override_recoding = 0;
         SvREFCNT_dec_NN(multi_char_matches);
         return ret;
     }
