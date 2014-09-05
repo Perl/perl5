@@ -4128,7 +4128,7 @@ S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
     if (gv && GvCV(gv)) {
 	SV * const sv = cv_const_sv(GvCV(gv));
 	if (sv)
-            pkgname = SvPV_const(sv, len);
+	    return gv_stashsv(sv, 0);
     }
 
     return gv_stashpvn(pkgname, len, UTF ? SVf_UTF8 : 0);

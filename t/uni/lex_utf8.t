@@ -14,7 +14,7 @@ BEGIN {
 
 use strict;
 
-plan (tests => 15);
+plan (tests => 16);
 use charnames ':full';
 
 use utf8;
@@ -60,6 +60,11 @@ $_ = "a";
 eval 'tr νaνbν';
 is $@, "", 'y/// compiles, where / is actually a wide character';
 is $_, "b", 'transliteration worked';
+
+use constant foofoo=>qq|\xc4\xb5|;
+{ no strict; ()=${"\xc4\xb5::foo"} } # vivify Äµ package
+eval 'my foofoo $dog'; # foofoo was resolving to ĵ, not Äµ
+is $@, '', 'my constant $var in utf8 scope where constant is not utf8';
 
 __END__
 
