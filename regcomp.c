@@ -13344,9 +13344,9 @@ S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN c
      * element is an array that contains all the strings known so far that are
      * the same length.  And that length (in number of code points) is the same
      * as the index of the top-level array.  Hence, the [2] element is an
-     * array, each element thereof is a string containing TWO code points; while element
-     * [3] is for strings of THREE characters, and so on.  Since this is for
-     * multi-char strings there can never be a [0] nor [1] element.
+     * array, each element thereof is a string containing TWO code points;
+     * while element [3] is for strings of THREE characters, and so on.  Since
+     * this is for multi-char strings there can never be a [0] nor [1] element.
      *
      * When we rewrite the character class below, we will do so such that the
      * longest strings are written first, so that it prefers the longest
