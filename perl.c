@@ -2072,10 +2072,10 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                it should be reported immediately as a build failure.  */
 	    (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
 						 Perl_newSVpvf(aTHX_
-		"BEGIN { my $f = q%c./%"SVf"/buildcustomize.pl%c; "
+		"BEGIN { my $f = q%c%s%"SVf"/buildcustomize.pl%c; "
 			"do {local $!; -f $f }"
 			" and do $f || die $@ || qq '$f: $!' }",
-							       0, SVfARG(*inc0), 0));
+                                0, (TAINTING_get ? "./" : ""), SVfARG(*inc0), 0));
 	}
 #  else
 	/* SITELIB_EXP is a function call on Win32.  */
