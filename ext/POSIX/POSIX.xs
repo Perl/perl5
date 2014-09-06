@@ -147,6 +147,9 @@
    log1p log2 logb lrint nan nearbyint nextafter nexttoward remainder
    remquo rint round scalbn signbit tgamma trunc
 
+   See:
+   http://pubs.opengroup.org/onlinepubs/009695399/basedefs/math.h.html
+
  * Berkeley/SVID extensions:
 
    j0 j1 jn y0 y1 yn
