@@ -13,7 +13,7 @@ plan (tests => 52);
 use utf8;
 use open qw( :utf8 :std );
 
-ok *tèst, "*main::tèst", "sanity check.";
+is *tèst, "*main::tèst", "sanity check.";
 ok $::{"tèst"}, "gets the right glob in the stash.";
 
 my $glob_by_sub = sub { *ｍａｉｎ::method }->();
