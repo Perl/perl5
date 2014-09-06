@@ -377,7 +377,7 @@ sub build_extension {
 		}
 
 		unless ($fromname) {
-		    die "For $mname tried @locations in in $ext_dir but can't find source";
+		    die "For $mname tried @locations in $ext_dir but can't find source";
 		}
 		($value = $fromname) =~ s/\.pm\z/.pod/;
 		$value = $fromname unless -e $value;
