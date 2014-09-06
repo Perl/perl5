@@ -687,7 +687,10 @@ struct loop {
 /* flags used by Perl_load_module() */
 #define PERL_LOADMOD_DENY		0x1	/* no Module */
 #define PERL_LOADMOD_NOIMPORT		0x2	/* use Module () */
-#define PERL_LOADMOD_IMPORT_OPS		0x4	/* use Module (...) */
+#define PERL_LOADMOD_IMPORT_OPS		0x4	/* import arguments
+						   are passed as a sin-
+						   gle op tree, not a
+						   list of SVs */
 
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
 #define ref(o, type) doref(o, type, TRUE)
