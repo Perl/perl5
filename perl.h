@@ -4141,6 +4141,29 @@ END_EXTERN_C
 #  define NV_INF (NV)INF
 #endif
 #if !defined(NV_INF)
+#  if INTSIZE == 4
+/* At this point we assume the IEEE 754 floating point (and of course,
+ * we also assume a floating point format that can encode an infinity).
+ * We will coerce an int32 (which will encode the infinity) into
+ * a 32-bit float, which will then be cast into NV.
+ *
+ * Note that we intentionally use a float and 32-bit int, instead of
+ * shifting a small integer into a full IV, and from that into a full
+ * NV, because:
+ *
+ * (1) an IV might not be wide enough to cover all the bits of an NV.
+ * (2) the exponent part (including the infinity and nan bits) of a NV
+ *     might be wider than just 16 bits.
+ *
+ * Below the NV_NAN logic has similar __PL_nan_u fallback, the only
+ * difference being the int32 constant being coerced. */
+#    define __PL_inf_float_int32 0x7F800000
+static const union { unsigned int __i; float __f; } __PL_inf_u =
+    { __PL_inf_float_int32 };
+#    define NV_INF ((NV)(__PL_inf_u.__f))
+#  endif
+#endif
+#if !defined(NV_INF)
 #  define NV_INF ((NV)1.0/0.0) /* Some compilers will warn. */
 #endif
 
@@ -4173,7 +4196,16 @@ END_EXTERN_C
 #if !defined(NV_NAN) && defined(SNAN)
 #  define NV_NAN (NV)SNAN
 #endif
-#if !defined(NV_NAN) && defined(NV_INF)
+#if !defined(NV_NAN)
+#  if INTSIZE == 4
+/* See the discussion near __PL_inf_u. */
+#    define __PL_nan_float_int32 0x7FC00000
+static const union { unsigned int __i; float __f; } __PL_nan_u =
+    { __PL_nan_float_int32 };
+#    define NV_NAN ((NV)(__PL_nan_u.__f))
+#  endif
+#endif
+#if !defined(NV_NAN)
 #  define NV_NAN ((NV)0.0/0.0) /* Some compilers will warn. */
 #endif
 
