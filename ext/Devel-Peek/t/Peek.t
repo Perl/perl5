@@ -698,7 +698,8 @@ do_test('constant subroutine',
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009
     PROTOTYPE = ""
-    COMP_STASH = 0x0
+    COMP_STASH = 0x0				# $] < 5.021004
+    COMP_STASH = $ADDR	"main"			# $] >=5.021004
     ROOT = 0x0					# $] < 5.009
     XSUB = $ADDR
     XSUBANY = $ADDR \\(CONST SV\\)
