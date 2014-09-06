@@ -555,11 +555,11 @@ splintfiles = $(c1)
 	@echo `$(CCCMD)` $(PLDLFLAGS) $*.c
 	@`$(CCCMD)` $(PLDLFLAGS) $*.c
 
-.c.i: 
+.c.i:	perl.h config.h
 	@echo `$(CCCMDSRC)` -E $*.c \> $*.i
 	@`$(CCCMDSRC)` -E $*.c > $*.i
 
-.c.s:
+.c.s:	perl.h config.h
 	@echo `$(CCCMDSRC)` -S $*.c
 	@`$(CCCMDSRC)` -S $*.c
 
