@@ -4128,8 +4128,13 @@ END_EXTERN_C
  * and the math functions might be just generating DBL_MAX, or even
  * zero.  */
 
-#if !defined(NV_INF) && defined(USE_LONG_DOUBLE) && defined(LDBL_INFINITY)
-#  define NV_INF LDBL_INFINITY
+#if !defined(NV_INF) && defined(USE_LONG_DOUBLE)
+#  if !defined(NV_INF) && defined(LDBL_INFINITY)
+#    define NV_INF LDBL_INFINITY
+#  endif
+#  if !defined(NV_INF) && defined(INFINITYL)
+#    define NV_INF INFINITYL
+#  endif
 #endif
 #if !defined(NV_INF) && defined(DBL_INFINITY)
 #  define NV_INF (NV)DBL_INFINITY
@@ -4171,6 +4176,9 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #   if !defined(NV_NAN) && defined(LDBL_NAN)
 #       define NV_NAN LDBL_NAN
 #   endif
+#   if !defined(NV_NAN) && defined(NANL)
+#       define NV_NAN NANL
+#   endif
 #   if !defined(NV_NAN) && defined(LDBL_QNAN)
 #       define NV_NAN LDBL_QNAN
 #   endif
@@ -4187,11 +4195,11 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #if !defined(NV_NAN) && defined(DBL_SNAN)
 #  define NV_NAN (NV)DBL_SNAN
 #endif
-#if !defined(NV_NAN) && defined(QNAN)
-#  define NV_NAN (NV)QNAN
-#endif
 #if !defined(NV_NAN) && defined(NAN)
 #  define NV_NAN (NV)NAN
+#endif
+#if !defined(NV_NAN) && defined(QNAN)
+#  define NV_NAN (NV)QNAN
 #endif
 #if !defined(NV_NAN) && defined(SNAN)
 #  define NV_NAN (NV)SNAN
