@@ -13,12 +13,16 @@ sub findsym {
 	return $symcache{$pkg,$ref} if $symcache{$pkg,$ref};
 	$type ||= ref($ref);
 	no strict 'refs';
-        foreach my $sym ( values %{$pkg."::"} ) {
+	my $symtab = \%{$pkg."::"};
+	for ( keys %$symtab ) { for my $sym ( $$symtab{$_} ) {
+	    if (ref $sym && $sym == $ref) {
+		return $symcache{$pkg,$ref} = \*{"$pkg:\:$_"};
+	    }
 	    use strict;
 	    next unless ref ( \$sym ) eq 'GLOB';
             return $symcache{$pkg,$ref} = \$sym
 		if *{$sym}{$type} && *{$sym}{$type} == $ref;
-	}
+	}}
 }
 
 my %validtype = (
