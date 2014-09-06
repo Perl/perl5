@@ -471,9 +471,9 @@ d_flock=''
 d_flockproto=''
 d_fork=''
 d_fp_class=''
-d_fp_classify=''
 d_fp_classl=''
 d_fpclass=''
+d_fp_classify=''
 d_fpclassify=''
 d_fpclassl=''
 d_fpgetround=''
@@ -2662,11 +2662,11 @@ EOM
 		# The most common problem is -D_REENTRANT for threads.
 		# This heuristic catches that case, but gets false positives
 		# if -Dusethreads was not actually specified.  Better to
-		# bail out here with a useful message than fail 
+		# bail out here with a useful message than fail
 		# mysteriously later. Should we perhaps just try to
 		# re-invoke Configure -Dcc=gcc config_args ?
 		if $test -f usethreads.cbu; then
-			$cat >&4 <<EOM 
+			$cat >&4 <<EOM
 
 *** However, any setting of the C compiler flags (e.g. for thread support)
 *** will be lost.  It may be necessary for you to restart Configure and
@@ -2688,7 +2688,7 @@ EOM
                         echo "Cannot find myread, sorry.  Aborting." >&2
                         exit 1
                     fi
-                fi  
+                fi
                 case "$ans" in
                 [yY]*) cc=gcc; ccname=gcc; ccflags=''; despair=no;
                 esac
@@ -2704,9 +2704,9 @@ cat <<EOS >checkcc
 $startsh
 EOS
 cat <<'EOSC' >>checkcc
-case "$cc" in        
+case "$cc" in
 '') ;;
-*)  $rm -f try try.*              
+*)  $rm -f try try.*
     $cat >try.c <<EOM
 int main(int argc, char *argv[]) {
   return 0;
@@ -2718,7 +2718,7 @@ EOM
         if $test X"$despair" = Xyes; then
            echo "Uh-oh, the C compiler '$cc' doesn't seem to be working." >&4
         fi
-        $cat >&4 <<EOM         
+        $cat >&4 <<EOM
 You need to find a working C compiler.
 Either (purchase and) install the C compiler supplied by your OS vendor,
 or for a free C compiler try http://gcc.gnu.org/
@@ -5759,10 +5759,6 @@ do set $yyy; var=$2; eval "was=\$$2";
 	set $yyy; shift; shift; yyy=$@;
 done'
 
-: see if stdint is available
-set stdint.h i_stdint
-eval $inhdr
-
 : see if stdlib is available
 set stdlib.h i_stdlib
 eval $inhdr
@@ -6759,10 +6755,6 @@ EOCP
 	;;
 esac
 $rm_try
-
-: see if this is a fenv.h system
-set fenv.h i_fenv
-eval $inhdr
 
 : see if this is a float.h system
 set float.h i_float
@@ -7913,12 +7905,12 @@ case "$prototype" in
 	cat <<EOM >&4
 
 $me:  FATAL ERROR:
-This version of $package can only be compiled by a compiler that 
-understands function prototypes.  Unfortunately, your C compiler 
+This version of $package can only be compiled by a compiler that
+understands function prototypes.  Unfortunately, your C compiler
 	$cc $ccflags
 doesn't seem to understand them.  Sorry about that.
 
-If GNU cc is available for your system, perhaps you could try that instead.  
+If GNU cc is available for your system, perhaps you could try that instead.
 
 Eventually, we hope to support building Perl with pre-ANSI compilers.
 If you would like to help in that effort, please contact <perlbug@perl.org>.
@@ -13715,6 +13707,35 @@ eval $hasproto
 set fp_class d_fp_class
 eval $inlibc
 
+: see if this is a math.h system
+set math.h i_math
+eval $inhdr
+
+: check for fpclassify
+echo "Checking to see if you have fpclassify..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return fpclassify(1.0) == FP_NORMAL ? 0 : 1; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have fpclassify."
+else
+	val="$undef"
+	echo "You do not have fpclassify."
+fi
+$rm_try
+set d_fpclassify
+eval $setvar
+
+: see if fp_classify exists
+set fp_classify d_fp_classify
+eval $inlibc
+
 : see if fp_classl exists
 set fp_classl d_fp_classl
 eval $inlibc
@@ -13729,10 +13750,6 @@ eval $inlibc
 
 : see if fpclass exists
 set fpclass d_fpclass
-eval $inlibc
-
-: see if fp_classify exists
-set fp_classify d_fp_classify
 eval $inlibc
 
 : see if fpclassl exists
@@ -15472,13 +15489,76 @@ set d_isblank
 eval $setvar
 $rm -f isblank*
 
+: check for isfinite
+echo "Checking to see if you have isfinite..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return isfinite(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isfinite."
+else
+	val="$undef"
+	echo "You do not have isfinite."
+fi
+$rm_try
+set d_isfinite
+eval $setvar
+
 : see if isfinitel exists
 set isfinitel d_isfinitel
 eval $inlibc
 
+: check for isinf
+echo "Checking to see if you have isinf..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return isinf(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isinf."
+else
+	val="$undef"
+	echo "You do not have isinf."
+fi
+$rm_try
+set d_isinf
+eval $setvar
+
 : see if isinfl exists
 set isinfl d_isinfl
 eval $inlibc
+
+: check for isnan
+echo "Checking to see if you have isnan..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return isnan(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isnan."
+else
+	val="$undef"
+	echo "You do not have isnan."
+fi
+$rm_try
+set d_isnan
+eval $setvar
 
 : see if isnanl exists
 set isnanl d_isnanl
@@ -15555,10 +15635,6 @@ $rm -f ldbl_dig.?
 set d_ldbl_dig
 eval $setvar
 
-: see if this is a math.h system
-set math.h i_math
-eval $inhdr
-
 : check to see if math.h defines _LIB_VERSION
 d_libm_lib_version="$undef"
 case $i_math in
@@ -15586,94 +15662,6 @@ EOCP
 	;;
 
     esac
-
-: check for fpclassify
-echo " "
-echo "Checking to see if you have fpclassify..." >&4
-$cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
-#include <math.h>
-#endif
-int main() { return fpclassify(1.0) == FP_NORMAL ? 0 : 1; }
-EOCP
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have fpclassify."
-else
-	val="$undef"
-	echo "You do not have fpclassify."
-fi
-$rm_try
-set d_fpclassify
-eval $setvar
-
-: check for isfinite
-echo " "
-echo "Checking to see if you have isfinite..." >&4
-$cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
-#include <math.h>
-#endif
-int main() { return isfinite(0.0); }
-EOCP
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have isfinite."
-else
-	val="$undef"
-	echo "You do not have isfinite."
-fi
-$rm_try
-set d_isfinite
-eval $setvar
-
-: check for isinf
-echo " "
-echo "Checking to see if you have isinf..." >&4
-$cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
-#include <math.h>
-#endif
-int main() { return isinf(0.0); }
-EOCP
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have isinf."
-else
-	val="$undef"
-	echo "You do not have isinf."
-fi
-$rm_try
-set d_isinf
-eval $setvar
-
-: check for isnan
-echo " "
-echo "Checking to see if you have isnan..." >&4
-$cat >try.c <<EOCP
-#$i_math I_MATH
-#ifdef I_MATH
-#include <math.h>
-#endif
-int main() { return isnan(0.0); }
-EOCP
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have isnan."
-else
-	val="$undef"
-	echo "You do not have isnan."
-fi
-$rm_try
-set d_isnan
-eval $setvar
 
 : see if link exists
 set link d_link
@@ -20661,7 +20649,7 @@ rp="What is the type used for the length parameter for string functions?"
 set size_t sizetype 'unsigned int' stdio.h sys/types.h
 eval $typedef_ask
 
-: check for type of arguments to gethostbyaddr. 
+: check for type of arguments to gethostbyaddr.
 if test "X$netdb_host_type" = X -o "X$netdb_hlen_type" = X; then
 	case "$d_gethbyaddr" in
 	$define)
@@ -20670,8 +20658,8 @@ if test "X$netdb_host_type" = X -o "X$netdb_hlen_type" = X; then
 Checking to see what type of arguments are accepted by gethostbyaddr().
 EOM
 		hdrs="$define sys/types.h
-			$d_socket sys/socket.h 
-			$i_niin netinet/in.h 
+			$d_socket sys/socket.h
+			$i_niin netinet/in.h
 			$i_netdb netdb.h
 			$i_unistd unistd.h"
 		: The first arg can 'char *' or 'void *'
@@ -20708,12 +20696,12 @@ EOM
 		netdb_hlen_type="$sizetype"
 		;;
 	esac
-	# Remove the "const" if needed. -- but then we'll have a 
+	# Remove the "const" if needed. -- but then we'll have a
 	# prototype clash!
 	# netdb_host_type=`echo "$netdb_host_type" | sed 's/^const //'`
 fi
 
-: check for type of argument to gethostbyname. 
+: check for type of argument to gethostbyname.
 if test "X$netdb_name_type" = X ; then
 	case "$d_gethbyname" in
 	$define)
@@ -20722,8 +20710,8 @@ if test "X$netdb_name_type" = X ; then
 Checking to see what type of argument is accepted by gethostbyname().
 EOM
 		hdrs="$define sys/types.h
-			$d_socket sys/socket.h 
-			$i_niin netinet/in.h 
+			$d_socket sys/socket.h
+			$i_niin netinet/in.h
 			$i_netdb netdb.h
 			$i_unistd unistd.h"
 		for xxx in "const char *" "char *"; do
@@ -20751,7 +20739,7 @@ EOM
 	esac
 fi
 
-: check for type of 1st argument to getnetbyaddr. 
+: check for type of 1st argument to getnetbyaddr.
 if test "X$netdb_net_type" = X ; then
 	case "$d_getnbyaddr" in
 	$define)
@@ -20760,8 +20748,8 @@ if test "X$netdb_net_type" = X ; then
 Checking to see what type of 1st argument is accepted by getnetbyaddr().
 EOM
 		hdrs="$define sys/types.h
-			$d_socket sys/socket.h 
-			$i_niin netinet/in.h 
+			$d_socket sys/socket.h
+			$i_niin netinet/in.h
 			$i_netdb netdb.h
 			$i_unistd unistd.h"
 		for xxx in in_addr_t "unsigned long" long "unsigned int" int; do
@@ -22125,6 +22113,10 @@ eval $inhdr
 set execinfo.h i_execinfo
 eval $inhdr
 
+: see if this is a fenv.h system
+set fenv.h i_fenv
+eval $inhdr
+
 : see if this is a fp.h system
 set fp.h i_fp
 eval $inhdr
@@ -22545,6 +22537,10 @@ eval $setvar
 
 : see if stddef is available
 set stddef.h i_stddef
+eval $inhdr
+
+: see if stdint is available
+set stdint.h i_stdint
 eval $inhdr
 
 : see if sys/access.h is available

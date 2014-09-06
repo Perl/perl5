@@ -846,13 +846,13 @@ d_fp_class (d_fp_class.U):
 	This variable conditionally defines the HAS_FP_CLASS symbol, which
 	indicates to the C program that the fp_class() routine is available.
 
-d_fp_class_l (d_fp_classl.U):
-	This variable conditionally defines the HAS_FP_CLASSL symbol, which
-	indicates to the C program that the fp_classl() routine is available.
-
-d_fp_classify (d_fp_classify.U):
+d_fp_classify (d_fpclassify.U):
 	This variable conditionally defines the HAS_FP_CLASSIFY symbol, which
 	indicates to the C program that the fp_classify() routine is available.
+
+d_fp_classl (d_fp_classl.U):
+	This variable conditionally defines the HAS_FP_CLASSL symbol, which
+	indicates to the C program that the fp_classl() routine is available.
 
 d_fpathconf (d_pathconf.U):
 	This variable conditionally defines the HAS_FPATHCONF symbol, which
@@ -873,8 +873,8 @@ d_fpclassl (d_fpclassl.U):
 	indicates to the C program that the fpclassl() routine is available.
 
 d_fpgetround (d_fpgetround.U):
-	This variable conditionally defines HAS_FPGETROUND if fpgetround() is
-	available to get the floating point rounding mode.
+	This variable conditionally defines HAS_FPGETROUND if fpgetround()
+	is available to get the floating point rounding mode.
 
 d_fpos64_t (d_fpos64_t.U):
 	This symbol will be defined if the C compiler supports fpos64_t.
@@ -1350,12 +1350,10 @@ d_isnanl (d_isnanl.U):
 	indicates to the C program that the isnanl() routine is available.
 
 d_j0 (d_j0.U):
-
 	This variable conditionally defines the HAS_J0 symbol, which
 	indicates to the C program that the j0() routine is available.
 
-d_j0l (d_j0l.U):
-
+d_j0l (d_j0.U):
 	This variable conditionally defines the HAS_J0L symbol, which
 	indicates to the C program that the j0l() routine is available.
 
@@ -3123,6 +3121,11 @@ i_execinfo (i_execinfo.U):
 i_fcntl (i_fcntl.U):
 	This variable controls the value of I_FCNTL (which tells
 	the C program to include <fcntl.h>).
+
+i_fenv (i_fenv.U):
+	This variable conditionally defines the I_FENV symbol, which
+	indicates to the C program that <fenv.h> exists and should
+	be included.
 
 i_float (i_float.U):
 	This variable conditionally defines the I_FLOAT symbol, and indicates

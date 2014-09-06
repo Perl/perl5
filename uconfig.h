@@ -127,12 +127,6 @@
  */
 /*#define HAS_FCNTL		/ **/
 
-/* HAS_FEGETROUND:
- *	This symbol, if defined, indicates that the fegetround routine is
- *	available to get the floating point rounding mode.
- */
-/*#define HAS_FEGETROUND	/ **/
-
 /* HAS_FGETPOS:
  *	This symbol, if defined, indicates that the fgetpos routine is
  *	available to get the file position indicator, similar to ftell().
@@ -212,20 +206,6 @@
  *	strings.
  */
 /*#define HAS_INET_ATON		/ **/
-
-/* HAS_J0:
- *	This symbol, if defined, indicates to the C program that the
- *	j0() function is available for Bessel functions of the first
- *	kind of the order zero.
- */
-/*#define HAS_J0		/ **/
-
-/* HAS_J0L:
- *	This symbol, if defined, indicates to the C program that the
- *	j0l() function is available for Bessel functions of the first
- *	kind of the order zero, for long doubles.
- */
-/*#define HAS_J0L		/ **/
 
 /* HAS_KILLPG:
  *	This symbol, if defined, indicates that the killpg routine is available
@@ -679,12 +659,6 @@
  */
 /*#define I_FCNTL	/ **/
 
-/* I_FENV:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <fenv.h> to get the floating point environment definitions.
- */
-/*#define I_FENV		/ **/
-
 /* I_FLOAT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <float.h> to get definition of symbols like DBL_MAX or
@@ -734,12 +708,6 @@
  *	be included.
  */
 #define I_STDDEF	/**/
-
-/* I_STDINT:
- *	This symbol, if defined, indicates that <stdint.h> exists and should
- *	be included.
- */
-/*#define I_STDINT		/ **/
 
 /* I_STDLIB:
  *	This symbol, if defined, indicates that <stdlib.h> exists and should
@@ -3411,7 +3379,7 @@
 
 /* HAS_ACOSH:
  *	This symbol, if defined, indicates that the acosh routine is
- *	available.
+ *	available to do the inverse hyperbolic cosine function.
  */
 /*#define HAS_ACOSH		/ **/
 
@@ -3525,6 +3493,13 @@
  */
 /*#define FCNTL_CAN_LOCK		/ **/
 
+/* HAS_FEGETROUND:
+ *	This symbol, if defined, indicates that the fegetround routine is
+ *	available to return the macro corresponding to the current rounding
+ *	mode.
+ */
+/*#define HAS_FEGETROUND	/ **/
+
 /* HAS_FINITE:
  *	This symbol, if defined, indicates that the finite routine is
  *	available to check whether a double is finite (non-infinity non-NaN).
@@ -3566,24 +3541,10 @@
 
 /* HAS_FP_CLASSL:
  *	This symbol, if defined, indicates that the fp_classl routine is
- *	available to classify doubles.  Available for example in Digital UNIX.
- *	See HAS_FP_CLASS.
- *
+ *	available to classify long doubles.  Available for example in
+ *	Digital UNIX.  See for possible values HAS_FP_CLASS.
  */
 /*#define HAS_FP_CLASSL		/ **/
-
-/* HAS_FP_CLASSIFY:
- *	This symbol, if defined, indicates that the fp_classify routine is
- *	available to classify doubles.
- *	The returned values are defined in <math.h> and are:
- *
- *	FP_NAN
- *	FP_INFINITE
- *	FP_NORMAL
- *	FP_SUBNORMAL
- *	FP_ZERO
- */
-/*#define HAS_FP_CLASSIFY		/ **/
 
 /* HAS_FPCLASS:
  *	This symbol, if defined, indicates that the fpclass routine is
@@ -3615,7 +3576,19 @@
  *           FP_NAN        NaN
  *
  */
-/*#define HAS_FPCLASSIFY		/ **/
+/* HAS_FP_CLASSIFY:
+ *	This symbol, if defined, indicates that the fp_classify routine is
+ *	available to classify doubles. The values are defined in <math.h>
+ *
+ *           FP_NORMAL     Normalized
+ *           FP_ZERO       Zero
+ *           FP_INFINITE   Infinity
+ *           FP_SUBNORMAL  Denormalized
+ *           FP_NAN        NaN
+ *
+ */
+/*#define	HAS_FPCLASSIFY		/ **/
+/*#define	HAS_FP_CLASSIFY		/ **/
 
 /* HAS_FPCLASSL:
  *	This symbol, if defined, indicates that the fpclassl routine is
@@ -3794,8 +3767,8 @@
 /*#define HAS_ISFINITE		/ **/
 
 /* HAS_ISFINITEL:
- *	This symbol, if defined, indicates that the isfinite routine is
- *	available to check whether a long double is finitel
+ *	This symbol, if defined, indicates that the isfinitel routine is
+ *	available to check whether a long double is finite.
  *	(non-infinity non-NaN).
  */
 /*#define HAS_ISFINITEL		/ **/
@@ -3806,8 +3779,8 @@
  */
 /*#define HAS_ISINF		/ **/
 
-/* HAS_ISINF:
- *	This symbol, if defined, indicates that the isinf routine is
+/* HAS_ISINFL:
+ *	This symbol, if defined, indicates that the isinfl routine is
  *	available to check whether a long double is an infinity.
  */
 /*#define HAS_ISINFL		/ **/
@@ -3823,6 +3796,19 @@
  *	available to check whether a long double is a NaN.
  */
 /*#define HAS_ISNANL		/ **/
+
+/* HAS_J0:
+ *	This symbol, if defined, indicates to the C program that the
+ *	j0() function is available for Bessel functions of the first
+ *	kind of the order zero, for doubles.
+ */
+/* HAS_J0L:
+ *	This symbol, if defined, indicates to the C program that the
+ *	j0l() function is available for Bessel functions of the first
+ *	kind of the order zero, for long doubles.
+ */
+/*#define	HAS_J0		/ **/
+/*#define	HAS_J0L		/ **/
 
 /* HAS_LDBL_DIG:
  *	This symbol, if defined, indicates that this system's <float.h>
@@ -4337,6 +4323,12 @@
 #define DB_VERSION_MINOR_CFG	0  	/**/
 #define DB_VERSION_PATCH_CFG	0  	/**/
 
+/* I_FENV:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <fenv.h> to get the floating point environment definitions.
+ */
+/*#define I_FENV		/ **/
+
 /* I_FP:
  *	This symbol, if defined, indicates that <fp.h> exists and
  *	should be included.
@@ -4420,6 +4412,12 @@
  *	can be included.
  */
 /*#define	I_STDBOOL		/ **/
+
+/* I_STDINT:
+ *	This symbol, if defined, indicates that <stdint.h> exists and
+ *	should be included.
+ */
+/*#define I_STDINT		/ **/
 
 /* I_SUNMATH:
  *	This symbol, if defined, indicates that <sunmath.h> exists and
@@ -4847,6 +4845,6 @@
 #endif
 
 /* Generated from:
- * 2f54acea42d3f924568021e83a8122d708d2beb715c56fd532dc312d69c2b3c3 config_h.SH
+ * 7e76a333a9371f1ff08dfca439fb5f6232dfaf68acc41ac20176cbce581fe5c7 config_h.SH
  * c152ea695301aeff5abcae519813f0bc4f3a875ba6f38e4a841302baa7bb5c7b uconfig.sh
  * ex: set ro: */
