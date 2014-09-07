@@ -275,6 +275,12 @@ The warning "Ambiguous use of -foo resolved as -&foo()" has been removed.
 There is actually no ambiguity here, and this impedes the use of negated
 constants; e.g., C<-Inf>.
 
+=item *
+
+The little-known C<my Class $var> syntax (see L<fields> and L<attributes>)
+could get confused in the scope of C<use utf8> if C<Class> were a constant
+whose value contained Latin-1 characters.
+
 =back
 
 =head1 Utility Changes
