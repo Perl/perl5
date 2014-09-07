@@ -379,6 +379,11 @@ disabled.  [perl #123029]
 Fixed a bug that could cause perl to execute an infite loop during
 compilation. [perl #122995]
 
+=item *
+
+Tainted constants evaluated at compile time no longer cause unrelated
+statements to become tainted.  [perl #122669]
+
 =back
 
 =head1 Known Problems
