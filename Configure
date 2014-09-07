@@ -835,6 +835,7 @@ d_times=''
 d_tmpnam_r=''
 tmpnam_r_proto=''
 d_truncate=''
+d_truncl=''
 d_ttyname_r=''
 ttyname_r_proto=''
 d_tzname=''
@@ -10349,6 +10350,10 @@ eval $inlibc
 set aintl d_aintl
 eval $inlibc
 
+: see if truncl exists
+set truncl d_truncl
+eval $inlibc
+
 : see if alarm exists
 set alarm d_alarm
 eval $inlibc
@@ -15984,10 +15989,14 @@ if $test "$uselongdouble" = "$define"; then
 	message="$message sqrtl"
     fi
     if $test "$d_modfl" != "$define"; then
-	if $test "$d_aintl:$d_copysignl" = "$define:$define"; then
-	    echo "You have both aintl and copysignl, so I can emulate modfl."
+	if $test "$d_truncl:$d_copysignl" = "$define:$define"; then
+	    echo "You have both truncl and copysignl, so I can emulate modfl."
 	else
-	    message="$message modfl"
+	    if $test "$d_aintl:$d_copysignl" = "$define:$define"; then
+		echo "You have both aintl and copysignl, so I can emulate modfl."
+	    else
+		message="$message modfl"
+	    fi
 	fi
     fi
     if $test "$d_frexpl" != "$define"; then
@@ -23672,6 +23681,7 @@ d_tm_tm_gmtoff='$d_tm_tm_gmtoff'
 d_tm_tm_zone='$d_tm_tm_zone'
 d_tmpnam_r='$d_tmpnam_r'
 d_truncate='$d_truncate'
+d_truncl='$d_truncl'
 d_ttyname_r='$d_ttyname_r'
 d_tzname='$d_tzname'
 d_u32align='$d_u32align'

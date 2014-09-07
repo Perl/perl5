@@ -2449,6 +2449,11 @@ d_truncate (d_truncate.U):
 	This variable conditionally defines HAS_TRUNCATE if truncate() is
 	available to truncate files.
 
+d_truncl (d_truncl.U):
+	This variable conditionally defines the HAS_TRUNCL symbol, which
+	indicates to the C program that the aintl() routine is available.
+	If copysignl is also present we can emulate modfl.
+
 d_ttyname_r (d_ttyname_r.U):
 	This variable conditionally defines the HAS_TTYNAME_R symbol,
 	which indicates to the C program that the ttyname_r()

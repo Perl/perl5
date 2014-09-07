@@ -3377,12 +3377,14 @@ $   d_isnanl = "define"
 $   d_fp_classify = "define"
 $   d_j0 = "define"
 $   d_acosh = "define"
+$   d_truncl = "define"
 $ ELSE
 $   d_isnan = "undef"
 $   d_isnanl = "undef"
 $   d_fp_classify = "undef"
 $   d_j0 = "undef"
 $   d_acosh = "undef"
+$   d_truncl = "undef"
 $ ENDIF
 $!
 $! Now some that we build up
@@ -6316,6 +6318,7 @@ $   WC "d_tm_tm_gmtoff='undef'"
 $   WC "d_tm_tm_zone='undef'"
 $ ENDIF
 $ WC "d_truncate='" + d_truncate + "'"
+$ WC "d_truncl='" + d_truncl + "'"
 $ WC "d_tzname='" + d_tzname + "'"
 $ WC "d_u32align='define'"
 $ WC "d_ualarm='" + d_ualarm + "'"

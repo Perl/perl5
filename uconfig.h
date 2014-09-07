@@ -577,6 +577,12 @@
  */
 /*#define HAS_TRUNCATE	/ **/
 
+/* HAS_TRUNCL:
+ *	This symbol, if defined, indicates that the truncl routine is
+ *	available.  If copysignl is also present we can emulate modfl.
+ */
+/*#define HAS_TRUNCL		/ **/
+
 /* HAS_TZNAME:
  *	This symbol, if defined, indicates that the tzname[] array is
  *	available to access timezone names.
@@ -4845,6 +4851,6 @@
 #endif
 
 /* Generated from:
- * 7e76a333a9371f1ff08dfca439fb5f6232dfaf68acc41ac20176cbce581fe5c7 config_h.SH
- * c152ea695301aeff5abcae519813f0bc4f3a875ba6f38e4a841302baa7bb5c7b uconfig.sh
+ * 1c1d16f8945b3f9bfe5468b7388d22d9eeb1d6474c8f01a6339b503de6167800 config_h.SH
+ * 6039ef141e931b6582a919f2049d2e4d68a5f977e2cf27b898966e83d5f3ed62 uconfig.sh
  * ex: set ro: */
