@@ -2054,7 +2054,7 @@ S_force_ident(pTHX_ const char *s, int kind)
 	       warnings if the symbol must be introduced in an eval.
 	       GSAR 96-10-12 */
 	    gv_fetchpvn_flags(s, len,
-			      (PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL)
+			      (PL_in_eval ? GV_ADDMULTI
 			      : GV_ADD) | ( UTF ? SVf_UTF8 : 0 ),
 			      kind == '$' ? SVt_PV :
 			      kind == '@' ? SVt_PVAV :
@@ -8162,10 +8162,7 @@ S_pending_ident(pTHX)
                 pl_yylval.opval->op_private = OPpCONST_ENTERED;
                 if (pit != '&')
                   gv_fetchsv(sym,
-                    (PL_in_eval
-                        ? (GV_ADDMULTI | GV_ADDINEVAL)
-                        : GV_ADDMULTI
-                    ),
+                    GV_ADDMULTI,
                     ((PL_tokenbuf[0] == '$') ? SVt_PV
                      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
                      : SVt_PVHV));
@@ -8209,7 +8206,7 @@ S_pending_ident(pTHX)
     pl_yylval.opval->op_private = OPpCONST_ENTERED;
     if (pit != '&')
 	gv_fetchpvn_flags(PL_tokenbuf+1, tokenbuf_len - 1,
-		     (PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : GV_ADD)
+		     (PL_in_eval ? GV_ADDMULTI : GV_ADD)
                      | ( UTF ? SVf_UTF8 : 0 ),
 		     ((PL_tokenbuf[0] == '$') ? SVt_PV
 		      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
@@ -9384,9 +9381,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 		++d;
 intro_sym:
 		gv = gv_fetchpv(d,
-				(PL_in_eval
-				 ? (GV_ADDMULTI | GV_ADDINEVAL)
-				 : GV_ADDMULTI) | ( UTF ? SVf_UTF8 : 0 ),
+				GV_ADDMULTI | ( UTF ? SVf_UTF8 : 0 ),
 				SVt_PV);
 		PL_lex_op = readline_overriden
 		    ? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,

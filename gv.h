@@ -221,7 +221,7 @@ Return the CV from the GV.
 #define GV_ADDMULTI	0x02	/* add, pretending it has been added
 				   already; used also by gv_init_* */
 #define GV_ADDWARN	0x04	/* add, but warn if symbol wasn't already there */
-#define GV_ADDINEVAL	0x08	/* add, as though we're doing so within an eval */
+		/*	0x08	   UNUSED */
 #define GV_NOINIT	0x10	/* add, but don't init symbol, if type != PVGV */
 /* This is used by toke.c to avoid turing placeholder constants in the symbol
    table into full PVGVs with attached constant subroutines.  */
