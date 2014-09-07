@@ -1912,11 +1912,9 @@ typedef NVTYPE NV;
 #       ifndef HAS_MODFL_PROTO
 EXTERN_C long double modfl(long double, long double *);
 #	endif
-#   else
-#       if defined(HAS_AINTL) && defined(HAS_COPYSIGNL)
+#   elif (defined(HAS_TRUNCL) || defined(HAS_AINTL)) && defined(HAS_COPYSIGNL)
         extern long double Perl_my_modfl(long double x, long double *ip);
 #           define Perl_modf(x,y) Perl_my_modfl(x,y)
-#       endif
 #   endif
 #   ifdef HAS_FREXPL
 #       define Perl_frexp(x,y) frexpl(x,y)

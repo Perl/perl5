@@ -1347,13 +1347,23 @@ Perl_isinfnan(NV nv)
     return FALSE;
 }
 
-#if ! defined(HAS_MODFL) && defined(HAS_AINTL) && defined(HAS_COPYSIGNL)
+#ifndef HAS_MODFL
+/* C99 has truncl, pre-C99 Solaris had aintl */
+#  if defined(HAS_TRUNCL) && defined(HAS_COPYSIGNL)
+long double
+Perl_my_modfl(long double x, long double *ip)
+{
+	*ip = truncl(x);
+	return (x == *ip ? copysignl(0.0L, x) : x - *ip);
+}
+#  elif defined(HAS_AINTL) && defined(HAS_COPYSIGNL)
 long double
 Perl_my_modfl(long double x, long double *ip)
 {
 	*ip = aintl(x);
 	return (x == *ip ? copysignl(0.0L, x) : x - *ip);
 }
+#  endif
 #endif
 
 #if ! defined(HAS_FREXPL) && defined(HAS_ILOGBL) && defined(HAS_SCALBNL)
