@@ -382,11 +382,7 @@ well.
 
 =over 4
 
-=item *
-
-The parser no longer gets confused by C<\U=> within a double-quoted string.
-It used to roduce a syntax error, but now compiles it correctly.
-[perl #80368]
+XXX
 
 =back
 
@@ -485,6 +481,12 @@ happen.
 When deciding that a bareword was a method name, the parser would get
 confused if an "our" sub with the same name existed, and look up the method
 in the package of the "our" sub, instead of the package of the invocant.
+
+=item *
+
+The parser no longer gets confused by C<\U=> within a double-quoted string.
+It used to roduce a syntax error, but now compiles it correctly.
+[perl #80368]
 
 =back
 
