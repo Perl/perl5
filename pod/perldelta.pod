@@ -263,6 +263,14 @@ XXX Describe change here
 
 =item *
 
+"Constant is not a FOO reference"
+
+Compile-time checking of constant dereferencing (e.g.,
+C<< my_constant->() >>) has been removed, since it was not taking
+overloading into account.  [perl #69456] [perl #122607]
+
+=item *
+
 The warning "Ambiguous use of -foo resolved as -&foo()" has been removed.
 There is actually no ambiguity here, and this impedes the use of negated
 constants; e.g., C<-Inf>.
@@ -398,12 +406,6 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 =item *
 
 XXX
-
-=item *
-
-Compile-time checking of constant dereferencing (e.g.,
-C<< my_constant->() >>) has been removed, since it was not taking
-overloading into account.  [perl #69456] [perl #122607]
 
 =item *
 
