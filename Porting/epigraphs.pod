@@ -17,6 +17,49 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.20.1-RC2 - Lorenzo da Ponte, Così fan tutte
+
+L<Announced on 2014-09-07 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg219446.html>
+
+  GUGLIELMO:
+  Oh God, I feel that this foot of mine
+  is reluctant to come before her.
+
+  FERRANDO:
+  My trembling lip
+  can utter no word.
+
+  DON ALFONSO:
+  The hero displays his manliness
+  in the most terrible moments.
+
+  FIORDILIGI, DORABELLA:
+  Now that we have heard the news,
+  you have the lesser duty:
+  Take heart, and plunge your swords
+  into both our hearts.
+
+  FERRANDO, GUGLIELMO:
+  My idol, blame fate
+  that I must abandon you.
+
+  DORABELLA: Ah no, you shall not leave...
+  FIORDILIGI: No, cruel one, you shall not go...
+  DORABELLA: First I want to tear out my heart.
+  FIORDILIGI: First I want to die at your feet.
+  FERRANDO (softly to Don Alfonso): What do you say to that?
+  GUGLIELMO (softly to Don Alfonso): You realise?
+  DON ALFONSO (softly): Steady, friend, finem lauda.
+
+  ALL:
+  Thus destiny defrauds
+  the hopes of mortals.
+  Ah, among so many misfortunes,
+  who can ever love life?
+
+    -- Lorenzo da Ponte, /Così fan tutte/,
+       trans. William Weaver
+
 =head2 v5.20.1-RC1 - Lorenzo da Ponte, Così fan tutte
 
 L<Announced on 2014-08-25 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/08/msg218975.html>
