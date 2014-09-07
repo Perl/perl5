@@ -572,15 +572,15 @@ EOF
     [Yy]*)
       echo "Okay, disabling long doubles." >&4
       uselongdouble=undef
+      ccflags=`echo " $ccflags " | sed -e 's/ -qlongdouble / /'`
+      libswanted=`echo " $libswanted " | sed -e 's/ c128/ /'`
+      lddlflags=`echo " $lddlflags " | sed -e 's/ -lc128 / /'`
       ;;
     *)
       echo "Okay, keeping long doubles enabled." >&4
       echo "But please note that t/op/infnan.t will fail a lot." >&4
       ;;
     esac
-    ccflags=`echo " $ccflags " | sed -e 's/ -qlongdouble / /'`
-    libswanted=`echo " $libswanted " | sed -e 's/ c128/ /'`
-    lddlflags=`echo " $lddlflags " | sed -e 's/ -lc128 / /'`
     ;;
   esac
   rm -f inf$$.c inf$$
