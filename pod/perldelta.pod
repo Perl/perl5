@@ -468,6 +468,12 @@ C<open $$fh, ...>, which vivifies a handle with a name like "main::_GEN_0",
 was not giving the handle the right reference count, so a double free could
 happen.
 
+=item *
+
+When deciding that a bareword was a method name, the parser would get
+confused if an "our" sub with the same name existed, and look up the method
+in the package of the "our" sub, instead of the package of the invocant.
+
 =back
 
 =head1 Known Problems
