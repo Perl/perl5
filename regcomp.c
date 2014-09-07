@@ -13328,6 +13328,49 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
     }
 }
 
+STATIC AV *
+S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_fold, const STRLEN cp_count)
+{
+    /* This adds the string scalar <multi_fold> to the array
+     * <multi_char_matches>.  <multi_fold> is known to have exactly
+     * <cp_count> code points in it.  This is used when constructing a
+     * bracketed character class and we find something that needs to match more
+     * than a single character.
+     *
+     * <multi_char_matches> is actually an array of arrays.  There will be one
+     * or two top-level elements: [2], and/or [3].  The [2] element is an
+     * array, each element thereof is a character which folds to TWO
+     * characters; [3] is for folds to THREE characters.  (Unicode guarantees a
+     * maximum of 3 characters in any fold.)  When we rewrite the character
+     * class below, we will do so such that the longest folds are written
+     * first, so that it prefers the longest matching strings first.  This is
+     * done even if it turns out that any quantifier is non-greedy, out of
+     * programmer laziness.  Tom Christiansen has agreed that this is ok.  This
+     * makes the test for the ligature 'ffi' come before the test for 'ff' */
+
+    AV* this_array;
+    AV** this_array_ptr;
+
+    PERL_ARGS_ASSERT_ADD_MULTI_MATCH;
+
+    if (! multi_char_matches) {
+        multi_char_matches = newAV();
+    }
+
+    if (av_exists(multi_char_matches, cp_count)) {
+        this_array_ptr = (AV**) av_fetch(multi_char_matches, cp_count, FALSE);
+        this_array = *this_array_ptr;
+    }
+    else {
+        this_array = newAV();
+        av_store(multi_char_matches, cp_count,
+                 (SV*) this_array);
+    }
+    av_push(this_array, multi_fold);
+
+    return multi_char_matches;
+}
+
 /* The names of properties whose definitions are not known at compile time are
  * stored in this SV, after a constant heading.  So if the length has been
  * changed since initialization, then there is a run-time definition. */
@@ -14196,44 +14239,17 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * again.  Otherwise add this character to the list of
                      * multi-char folds. */
                     if (! RExC_in_multi_char_class) {
-                        AV** this_array_ptr;
-                        AV* this_array;
                         STRLEN cp_count = utf8_length(foldbuf,
                                                       foldbuf + foldlen);
                         SV* multi_fold = sv_2mortal(newSVpvs(""));
 
                         Perl_sv_catpvf(aTHX_ multi_fold, "\\x{%"UVXf"}", value);
 
+                        multi_char_matches
+                                        = add_multi_match(multi_char_matches,
+                                                          multi_fold,
+                                                          cp_count);
 
-                        if (! multi_char_matches) {
-                            multi_char_matches = newAV();
-                        }
-
-                        /* <multi_char_matches> is actually an array of arrays.
-                         * There will be one or two top-level elements: [2],
-                         * and/or [3].  The [2] element is an array, each
-                         * element thereof is a character which folds to TWO
-                         * characters; [3] is for folds to THREE characters.
-                         * (Unicode guarantees a maximum of 3 characters in any
-                         * fold.)  When we rewrite the character class below,
-                         * we will do so such that the longest folds are
-                         * written first, so that it prefers the longest
-                         * matching strings first.  This is done even if it
-                         * turns out that any quantifier is non-greedy, out of
-                         * programmer laziness.  Tom Christiansen has agreed
-                         * that this is ok.  This makes the test for the
-                         * ligature 'ffi' come before the test for 'ff' */
-                        if (av_exists(multi_char_matches, cp_count)) {
-                            this_array_ptr = (AV**) av_fetch(multi_char_matches,
-                                                             cp_count, FALSE);
-                            this_array = *this_array_ptr;
-                        }
-                        else {
-                            this_array = newAV();
-                            av_store(multi_char_matches, cp_count,
-                                     (SV*) this_array);
-                        }
-                        av_push(this_array, multi_fold);
                     }
 
                     /* This element should not be processed further in this

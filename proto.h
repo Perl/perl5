@@ -6729,6 +6729,11 @@ STATIC U32	S_add_data(RExC_state_t* const pRExC_state, const char* const s, cons
 #define PERL_ARGS_ASSERT_ADD_DATA	\
 	assert(pRExC_state); assert(s)
 
+STATIC AV*	S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_fold, const STRLEN cp_count)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_ADD_MULTI_MATCH	\
+	assert(multi_fold)
+
 PERL_STATIC_INLINE void	S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32 *flagp, STRLEN len, UV code_point, bool downgradable)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
