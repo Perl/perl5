@@ -343,7 +343,7 @@ fixed.
 =head1 Acknowledgements
 
 Perl 5.20.1 represents approximately 3 months of development since Perl 5.20.0
-and contains approximately 11,000 lines of changes across 170 files from 35
+and contains approximately 12,000 lines of changes across 170 files from 36
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
@@ -358,8 +358,9 @@ Jousset, Andrew Fresh, Andy Dougherty, Brian Fraser, Chris 'BinGOs' Williams,
 Craig A. Berry, Daniel Dragan, David Golden, David Mitchell, H.Merijn Brand,
 James E Keenan, Jan Dubois, Jarkko Hietaniemi, John Peacock, kafka, Karen
 Etheridge, Karl Williamson, Lukas Mai, Matthew Horsfall, Michael Bunk, Peter
-Martini, Rafael Garcia-Suarez, Reini Urban, Ricardo Signes, Smylers, Steve Hay,
-Thomas Sibley, Todd Rinaldo, Tony Cook, Vladimir Marek, Yves Orton.
+Martini, Rafael Garcia-Suarez, Reini Urban, Ricardo Signes, Shirakata Kentaro,
+Smylers, Steve Hay, Thomas Sibley, Todd Rinaldo, Tony Cook, Vladimir Marek,
+Yves Orton.
 
 The list above is almost certainly incomplete as it is automatically generated
 from version control history.  In particular, it does not include the names of
