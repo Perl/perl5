@@ -1087,6 +1087,12 @@ or upward (toward positive infinity) [C99].
 
 For the rounding mode, see L</fegetround> and L</fesetround>.
 
+=item C<lround>
+
+Like L</round>, but as integer, as opposed to floating point [C99].
+
+See also L</ceil>, L</floor>, L</trunc>.
+
 =item C<malloc>
 
 C<malloc()> is C-specific.  Perl does memory management transparently.
@@ -1393,9 +1399,10 @@ for removing (empty) directories, see L<perlfunc/rmdir>.
 
 =item C<round>
 
-Returns the integer nearest to the argument [C99].
+Returns the integer (but still as floating point) nearest to the
+argument [C99].
 
-See also L</ceil>, L</floor>, L</trunc>.
+See also L</ceil>, L</floor>, L</lround>, L</trunc>.
 
 =item C<scalbn>
 

@@ -144,7 +144,7 @@
    acosh asinh atanh cbrt copysign erf erfc exp2 expm1 fdim fma fmax
    fmin fpclassify hypot ilogb isfinite isgreater isgreaterequal isinf
    isless islessequal islessgreater isnan isnormal isunordered lgamma
-   log1p log2 logb lrint nan nearbyint nextafter nexttoward remainder
+   log1p log2 logb lrint lround nan nearbyint nextafter nexttoward remainder
    remquo rint round scalbn signbit tgamma trunc
 
    See:
@@ -209,6 +209,11 @@
 #    else
 #      define c99_lrint	lrintl
 #    endif
+#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
+#      define c99_lround	llroundl
+#    else
+#      define c99_lround	lroundl
+#    endif
 #    define c99_nan	nanl
 #    define c99_nearbyint	nearbyintl
 #    define c99_nextafter	nextafterl
@@ -247,6 +252,11 @@
 #      define c99_lrint	llrint
 #    else
 #      define c99_lrint	lrint
+#    endif
+#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
+#      define c99_lround	llround
+#    else
+#      define c99_lround	lround
 #    endif
 #    define c99_nan	nan
 #    define c99_nearbyint	nearbyint
@@ -317,6 +327,7 @@
  * but on IA64 (Integrity) these do exist, and even on
  * recent enough HP-UX (cc) releases. */
 #  if defined(__hpux) && (defined(__hppa) || defined(_PA_RISC))
+/* lowest known release, could be lower */
 #    if defined(__HP_cc) && __HP_cc >= 111120
 #      undef c99_fma
 #      undef c99_nexttoward
@@ -329,6 +340,7 @@
 #      undef c99_fmin
 #      undef c99_fpclassify /* hpux 10.20 has fpclassify but different api */
 #      undef c99_lrint
+#      undef c99_lround
 #      undef c99_nan
 #      undef c99_nearbyint
 #      undef c99_nexttoward
@@ -355,6 +367,7 @@
 #    undef c99_isinf
 #    undef c99_isunordered
 #    undef c99_lrint
+#    undef c99_lround
 #    undef c99_nearbyint
 #    undef c99_nexttoward
 #    undef c99_remquo
@@ -367,10 +380,11 @@
 
 /* XXX Regarding C99 math.h, VMS seems to be missing these:
 
-  nan nearbyint round scalbn llrint
+  lround nan nearbyint round scalbn llrint
  */
 
 #ifdef __VMS
+#    undef c99_lround
 #    undef c99_nan
 #    undef c99_nearbyint
 #    undef c99_round
@@ -407,6 +421,7 @@
 #  undef c99_log1p
 #  undef c99_log2
 #  undef c99_lrint
+#  undef c99_lround
 #  undef c99_remquo
 #  undef c99_rint
 #  undef c99_signbit
@@ -739,6 +754,14 @@ static IV my_lrint(NV x)
 }
 #    define c99_lrint my_lrint
 #  endif
+#endif
+
+#ifndef c99_lround
+static IV my_lround(NV x)
+{
+  return (IV)return MY_ROUND_NEAREST(x);
+}
+#  define c99_lround my_lround
 #endif
 
 /* XXX remainder */
@@ -2099,7 +2122,8 @@ fpclassify(x)
 	isnan = 4
 	isnormal = 5
 	lrint = 6
-        signbit = 7
+	lround = 7
+        signbit = 8
     CODE:
 	RETVAL = -1;
 	switch (ix) {
@@ -2141,6 +2165,13 @@ fpclassify(x)
 #endif
 	    break;
 	case 7:
+#ifdef c99_lround
+	    RETVAL = c99_lround(x);
+#else
+	    not_here("lround");
+#endif
+	    break;
+	case 8:
 	default:
 #ifdef Perl_signbit
 	    RETVAL = Perl_signbit(x);
