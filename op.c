@@ -9656,12 +9656,14 @@ Perl_ck_require(pTHX_ OP *o)
 
     if (o->op_flags & OPf_KIDS) {	/* Shall we supply missing .pm? */
 	SVOP * const kid = (SVOP*)cUNOPo->op_first;
-
-	if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
-	    SV * const sv = kid->op_sv;
-	    U32 was_readonly = SvREADONLY(sv);
-	    char *s;
-	    STRLEN len;
+	HEK *hek;
+	U32 hash;
+	char *s;
+	STRLEN len;
+	if (kid->op_type == OP_CONST) {
+	  SV * const sv = kid->op_sv;
+	  U32 const was_readonly = SvREADONLY(sv);
+	  if (kid->op_private & OPpCONST_BARE) {
 	    const char *end;
 
 	    if (was_readonly) {
@@ -9681,7 +9683,32 @@ Perl_ck_require(pTHX_ OP *o)
 	    }
 	    SvEND_set(sv, end);
 	    sv_catpvs(sv, ".pm");
+	    PERL_HASH(hash, SvPVX(sv), SvCUR(sv));
+	    hek = share_hek(SvPVX(sv),
+			    (SSize_t)SvCUR(sv) * (SvUTF8(sv) ? -1 : 1),
+			    hash);
+	    sv_sethek(sv, hek);
+	    unshare_hek(hek);
 	    SvFLAGS(sv) |= was_readonly;
+	  }
+	  else if (SvPOK(sv) && !SvNIOK(sv) && !SvGMAGICAL(sv)) {
+	    s = SvPV(sv, len);
+	    if (SvREFCNT(sv) > 1) {
+		kid->op_sv = newSVpvn_share(
+		    s, SvUTF8(sv) ? -(SSize_t)len : (SSize_t)len, 0);
+		SvREFCNT_dec_NN(sv);
+	    }
+	    else {
+		if (was_readonly) SvREADONLY_off(sv);
+		PERL_HASH(hash, s, len);
+		hek = share_hek(s,
+				SvUTF8(sv) ? -(SSize_t)len : (SSize_t)len,
+				hash);
+		sv_sethek(sv, hek);
+		unshare_hek(hek);
+		SvFLAGS(sv) |= was_readonly;
+	    }
+	  }
 	}
     }
 
