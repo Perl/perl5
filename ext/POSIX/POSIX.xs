@@ -314,23 +314,30 @@
 #ifndef __GNUC__
 
 /* HP-UX on PA-RISC is missing certain C99 math functions,
- * but on IA64 (Integrity) these do exist. */
-#  if defined(__hpux) && defined(__hppa)
-#    undef c99_exp2
-#    undef c99_fdim
-#    undef c99_fma
-#    undef c99_fmax
-#    undef c99_fmin
-#    undef c99_fpclassify
-#    undef c99_lrint
-#    undef c99_nan
-#    undef c99_nearbyint
-#    undef c99_nexttoward
-#    undef c99_remquo
-#    undef c99_round
-#    undef c99_scalbn
-#    undef c99_tgamma
-#    undef c99_trunc
+ * but on IA64 (Integrity) these do exist, and even on
+ * recent enough HP-UX (cc) releases. */
+#  if defined(__hpux) && (defined(__hppa) || defined(_PA_RISC))
+#    if defined(__HP_cc) && __HP_cc >= 111120
+#      undef c99_fma
+#      undef c99_nexttoward
+#      undef c99_tgamma
+#    else
+#      undef c99_exp2
+#      undef c99_fdim
+#      undef c99_fma
+#      undef c99_fmax
+#      undef c99_fmin
+#      undef c99_fpclassify /* hpux 10.20 has fpclassify but different api */
+#      undef c99_lrint
+#      undef c99_nan
+#      undef c99_nearbyint
+#      undef c99_nexttoward
+#      undef c99_remquo
+#      undef c99_round
+#      undef c99_scalbn
+#      undef c99_tgamma
+#      undef c99_trunc
+#    endif
 #  endif
 
 #  if defined(__irix__)
