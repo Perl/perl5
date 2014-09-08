@@ -759,7 +759,7 @@ static IV my_lrint(NV x)
 #ifndef c99_lround
 static IV my_lround(NV x)
 {
-  return (IV)return MY_ROUND_NEAREST(x);
+  return (IV)MY_ROUND_NEAREST(x);
 }
 #  define c99_lround my_lround
 #endif
