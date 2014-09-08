@@ -242,7 +242,8 @@ EOC
     $found = 1;
     last;
 }
-die "Could not find a value which overflows the mantissa" unless $found;
+
+ok($found, "found a NV value which overflows the mantissa");
 
 # these will segfault if they fail
 
