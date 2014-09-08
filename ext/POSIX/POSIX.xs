@@ -2351,7 +2351,9 @@ nan(s = 0)
 	RETVAL = c99_nan(s ? s : "");
 #else
 	RETVAL = NV_NAN;
+#  ifndef NV_NAN
 	not_here("nan");
+#  endif
 #endif
     OUTPUT:
 	RETVAL
