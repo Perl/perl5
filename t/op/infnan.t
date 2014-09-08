@@ -10,6 +10,14 @@ use strict;
 
 use Config;
 
+BEGIN {
+    if ($^O eq 'aix' && $Config{uselongdouble}) {
+        # FWIW: NaN actually seems to be working decently,
+        # but Inf is completely broken (e.g. Inf + 0 -> NaN).
+        skip_all "$^O with long doubles does not have sane inf/nan";
+    }
+}
+
 my $PInf = "Inf"  + 0;
 my $NInf = "-Inf" + 0;
 my $NaN  = "NaN"  + 0;

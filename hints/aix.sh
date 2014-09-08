@@ -546,6 +546,43 @@ fi
 
 # Some releases (and patch levels) of AIX cannot have both
 # long doubles and infinity (infinity plus one equals ... NaNQ!)
+#
+# This deficiency, and others, is apparently a well-documented feature
+# of AIX 128-bit long doubles:
+#
+# http://www-01.ibm.com/support/knowledgecenter/ssw_aix_61/com.ibm.aix.genprogc/128bit_long_double_floating-point_datatype.htm
+#
+# The URL seems to be fragile, it has moved around over the years,
+# but searching AIX docs at ibm.com for "128-bit long double
+# floating-point data type" should surface the latest info.
+#
+# Some salient points:
+#
+# <quote>
+# * The 128-bit implementation differs from the IEEE standard for long double
+#   in the following ways:
+# * Supports only round-to-nearest mode. If the application changes
+#   the rounding mode, results are undefined.
+# * Does not fully support the IEEE special numbers NaN and INF.
+# * Does not support IEEE status flags for overflow, underflow,
+#   and other conditions. These flags have no meaning for the 128-bit
+#   long double inplementation.
+# * The 128-bit long double data type does not support the following math
+#   APIs: atanhl, cbrtl, copysignl, exp2l, expm1l, fdiml, fmal, fmaxl,
+#   fminl, hypotl, ilogbl, llrintl, llroundl, log1pl, log2l, logbl,
+#   lrintl, lroundl, nanl, nearbyintl, nextafterl, nexttoward,
+#   nexttowardf, nexttowardl, remainderl, remquol, rintl, roundl,
+#   scalblnl, scalbnl, tgammal, and truncl.
+# * The representation of 128-bit long double numbers means that the
+#   following macros required by standard C in the values.h file do not
+#   have clear meaning:
+#   * Number of bits in the mantissa (LDBL_MANT_DIG)
+#   * Epsilon (LBDL_EPSILON)
+#   * Maximum representable finite value (LDBL_MAX)
+# </quote>
+#
+# The missing math functions affect the POSIX extension math interfaces.
+
 case "$uselongdouble" in
 define)
   echo "Checking if your infinity is working with long doubles..." >&4
@@ -564,7 +601,6 @@ EOF
   *) # NaNQ
     echo " "
     echo "Your infinity is broken, I suggest disabling long doubles." >&4
-    echo "The t/op/infnan.t will fail if broken long doubles are enabled. ">&4
     rp="Disable long doubles?"
     dflt="y"
     . UU/myread
@@ -578,7 +614,6 @@ EOF
       ;;
     *)
       echo "Okay, keeping long doubles enabled." >&4
-      echo "But please note that t/op/infnan.t will fail a lot." >&4
       ;;
     esac
     ;;
