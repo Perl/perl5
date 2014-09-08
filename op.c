@@ -7353,6 +7353,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	if (CvNAMED(*spot))
 	    hek = CvNAME_HEK(*spot);
 	else {
+            dVAR;
 	    U32 hash;
 	    PERL_HASH(hash, PadnamePV(name)+1, PadnameLEN(name)-1);
 	    CvNAME_HEK_set(*spot, hek =
@@ -7490,6 +7491,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (!CvNAME_HEK(cv)) {
 	if (hek) share_hek_hek(hek);
 	else {
+            dVAR;
 	    U32 hash;
 	    PERL_HASH(hash, PadnamePV(name)+1, PadnameLEN(name)-1);
 	    hek = share_hek(PadnamePV(name)+1,
@@ -9668,6 +9670,7 @@ Perl_ck_require(pTHX_ OP *o)
 	  SV * const sv = kid->op_sv;
 	  U32 const was_readonly = SvREADONLY(sv);
 	  if (kid->op_private & OPpCONST_BARE) {
+            dVAR;
 	    const char *end;
 
 	    if (was_readonly) {
@@ -9703,6 +9706,7 @@ Perl_ck_require(pTHX_ OP *o)
 		SvREFCNT_dec_NN(sv);
 	    }
 	    else {
+                dVAR;
 		if (was_readonly) SvREADONLY_off(sv);
 		PERL_HASH(hash, s, len);
 		hek = share_hek(s,

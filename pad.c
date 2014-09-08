@@ -2092,6 +2092,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 			/* my sub */
 			/* Just provide a stub, but name it.  It will be
 			   upgrade to the real thing on scope entry. */
+                        dVAR;
 			U32 hash;
 			PERL_HASH(hash, SvPVX_const(namesv)+1,
 				  SvCUR(namesv) - 1);
