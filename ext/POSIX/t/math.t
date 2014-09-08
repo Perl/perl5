@@ -69,7 +69,7 @@ SKIP: {
     cmp_ok(abs(atanh(0.5) - 0.549306144334055), '<', 1e-9, "atanh");
     cmp_ok(abs(cbrt(8) - 2), '<', 1e-9, "cbrt");
     cmp_ok(abs(cbrt(-27) - -3), '<', 1e-9, "cbrt");
-    is(copysign(3.14, -2), -3.14, "copysign");
+    cmp_ok(abs(copysign(3.14, -2) - -3.14), '<', 1e-9, "copysign");
     cmp_ok(abs(expm1(2) - 6.38905609893065), '<', 1e-9, "expm1");
     cmp_ok(abs(expm1(1e-6) - 1.00000050000017e-06), '<', 1e-9, "expm1");
     is(fdim(12, 34), 0, "fdim 12 34");
@@ -86,7 +86,7 @@ SKIP: {
       is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
     }
     is(hypot(3, 4), 5, "hypot 3 4");
-    is(hypot(-2, 1), sqrt(5), "hypot -1 2");
+    cmp_ok(abs(hypot(-2, 1) - sqrt(5)), '<', 1e-9, "hypot -1 2");
     is(ilogb(255), 7, "ilogb 255");
     is(ilogb(256), 8, "ilogb 256");
   SKIP: {

@@ -17,6 +17,9 @@ if ($^O ne 'MSWin32' && $^O ne 'freemint') {
 if ($^O eq 'solaris') {
     push @libs, qw(sunmath);
 }
+if ($^O eq 'aix' && $Config{uselongdouble}) {
+    push @libs, qw(c128);
+}
 WriteMakefile(
     NAME	=> 'POSIX',
     @libs ? ( 'LIBS' => [ join(" ", map { "-l$_" } @libs) ] ) : (),

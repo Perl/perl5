@@ -182,9 +182,18 @@
  * of missing functions doesn't seem to follow any patterns. */
 
 #ifdef HAS_ACOSH
-#  if defined(USE_LONG_DOUBLE) && defined(HAS_ILOGBL)
+
+/* Certain AIX releases have the C99 math, but not in long double.
+ * The <math.h> has them, e.g. __expl128, but no library has them!
+ * AIX 5 releases before 5.3 unknown, AIX releases 7 unknown */
+#  if defined(_AIX53) || defined(_AIX61)
+#    define NO_C99_LONG_DOUBLE_MATH
+#  endif
+
 /* There's already a symbol for ilogbl, we will use its truthiness
  * as the canary for all the *l variants being defined. */
+#  if defined(USE_LONG_DOUBLE) && defined(HAS_ILOGBL) && \
+     !defined(NO_C99_LONG_DOUBLE_MATH)
 #    define c99_acosh	acoshl
 #    define c99_asinh	asinhl
 #    define c99_atanh	atanhl
@@ -322,6 +331,10 @@
  * #undef the c99_foo here, and let the emulations kick in. */
 
 #ifndef __GNUC__
+
+#  if defined(_AIX53) || defined(_AIX61) /* AIX 7 ? */
+#    undef c99_nexttoward
+#  endif
 
 /* HP-UX on PA-RISC is missing certain C99 math functions,
  * but on IA64 (Integrity) these do exist, and even on
