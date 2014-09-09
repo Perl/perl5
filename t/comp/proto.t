@@ -500,11 +500,11 @@ star(\*FOO, sub {
 	print "ok $i - star(\\*FOO)\n";
     }); $i++;
 star2 FOO, BAR, sub {
-    print "not " unless $_[0] eq 'FOO' and $_[1] eq 'BAR';
+    print "not " unless $_[0] eq 'FOO' and $_[1] eq 'quux';
     print "ok $i - star2 FOO, BAR\n";
 }; $i++;
 star2(Bar::BAZ, FOO, sub {
-	print "not " unless $_[0] eq 'Bar::BAZ' and $_[1] eq 'FOO';
+	print "not " unless $_[0] eq 'quuz' and $_[1] eq 'FOO';
 	print "ok $i - star2(Bar::BAZ, FOO)\n"
     }); $i++;
 star2 BAR(), FOO, sub {

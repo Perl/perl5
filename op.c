@@ -10292,32 +10292,6 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		    goto wrapref;	/* autoconvert GLOB -> GLOBref */
 		else if (o3->op_type == OP_CONST)
 		    o3->op_private &= ~OPpCONST_STRICT;
-		else if (o3->op_type == OP_ENTERSUB) {
-		    /* accidental subroutine, revert to bareword */
-		    OP *gvop = ((UNOP*)o3)->op_first;
-		    if (gvop && gvop->op_type == OP_NULL) {
-			gvop = ((UNOP*)gvop)->op_first;
-			if (gvop) {
-			    for (; OP_HAS_SIBLING(gvop); gvop = OP_SIBLING(gvop))
-				;
-			    if (gvop &&
-				    (gvop->op_private & OPpENTERSUB_NOPAREN) &&
-				    (gvop = ((UNOP*)gvop)->op_first) &&
-				    gvop->op_type == OP_GV)
-			    {
-                                OP * newop;
-				GV * const gv = cGVOPx_gv(gvop);
-				SV * const n = newSVpvs("");
-				gv_fullname4(n, gv, "", FALSE);
-                                /* replace the aop subtree with a const op */
-				newop = newSVOP(OP_CONST, 0, n);
-                                op_sibling_splice(parent, prev, 1, newop);
-				op_free(aop);
-                                aop = newop;
-			    }
-			}
-		    }
-		}
 		scalar(aop);
 		break;
 	    case '+':
