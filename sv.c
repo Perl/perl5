@@ -11020,15 +11020,19 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	unsigned base = 0;
 	IV iv = 0;
 	UV uv = 0;
-	/* we need a long double target in case HAS_LONG_DOUBLE but
-	   not USE_LONG_DOUBLE
+	/* We need a long double target in case HAS_LONG_DOUBLE,
+         * even without USE_LONG_DOUBLE, so that we can printf with
+         * long double formats, even without NV being long double.
+         * But we call the target 'fv' instead of 'nv', since most of
+         * the time it is not (most compilers these days recognize
+         * "long double", even if only as a synonym for "double").
 	*/
 #if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE
-	long double nv;
-#  define myNVgf PERL_PRIgldbl
+	long double fv;
+#  define myFVgf PERL_PRIgldbl
 #else
-	NV nv;
-#  define myNVgf NVgf
+	NV fv;
+#  define myFVgf NVgf
 #endif
 	STRLEN have;
 	STRLEN need;
@@ -11746,7 +11750,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 
 	    /* now we need (long double) if intsize == 'q', else (double) */
-	    nv = (args) ?
+	    fv = (args) ?
 #if LONG_DOUBLESIZE > DOUBLESIZE
 		intsize == 'q' ?
 		    va_arg(*args, long double) :
@@ -11759,11 +11763,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    need = 0;
 	    /* frexp() (or frexpl) has some unspecified behaviour for
              * nan/inf/-inf, so let's avoid calling that on non-finites. */
-	    if (isALPHA_FOLD_NE(c, 'e') && Perl_isfinite(nv)) {
+	    if (isALPHA_FOLD_NE(c, 'e') && Perl_isfinite(fv)) {
                 i = PERL_INT_MIN;
-                (void)Perl_frexp(nv, &i);
+                (void)Perl_frexp(fv, &i);
                 if (i == PERL_INT_MIN)
-                    Perl_die(aTHX_ "panic: frexp: %"myNVgf, nv);
+                    Perl_die(aTHX_ "panic: frexp: %"myFVgf, fv);
                 /* Do not set hexfp earlier since we want to printf
                  * Inf/NaN for Inf/NaN, not their hexfp. */
                 hexfp = isALPHA_FOLD_EQ(c, 'a');
@@ -11775,7 +11779,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * long doubles case, the "80-bit extended", two
                      * or six bytes of the NV are unused. */
                     need +=
-                        (nv < 0) ? 1 : 0 + /* possible unary minus */
+                        (fv < 0) ? 1 : 0 + /* possible unary minus */
                         2 + /* "0x" */
                         1 + /* the very unlikely carry */
                         1 + /* "1" */
@@ -11846,22 +11850,22 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #  endif
 
 	    if ((intsize == 'q') && (c == 'f') &&
-		((nv < MY_DBL_MAX_BUG) && (nv > -MY_DBL_MAX_BUG)) &&
+		((fv < MY_DBL_MAX_BUG) && (fv > -MY_DBL_MAX_BUG)) &&
 		(need < DBL_DIG)) {
 		/* it's going to be short enough that
 		 * long double precision is not needed */
 
-		if ((nv <= 0L) && (nv >= -0L))
+		if ((fv <= 0L) && (fv >= -0L))
 		    fix_ldbl_sprintf_bug = TRUE; /* 0 is 0 - easiest */
 		else {
 		    /* would use Perl_fp_class as a double-check but not
 		     * functional on IRIX - see perl.h comments */
 
-		    if ((nv >= MY_DBL_MIN) || (nv <= -MY_DBL_MIN)) {
+		    if ((fv >= MY_DBL_MIN) || (fv <= -MY_DBL_MIN)) {
 			/* It's within the range that a double can represent */
 #if defined(DBL_MAX) && !defined(DBL_MIN)
-			if ((nv >= ((long double)1/DBL_MAX)) ||
-			    (nv <= (-(long double)1/DBL_MAX)))
+			if ((fv >= ((long double)1/DBL_MAX)) ||
+			    (fv <= (-(long double)1/DBL_MAX)))
 #endif
 			fix_ldbl_sprintf_bug = TRUE;
 		    }
@@ -11870,8 +11874,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		    double temp;
 
 		    intsize = 0;
-		    temp = (double)nv;
-		    nv = (NV)temp;
+		    temp = (double)fv;
+		    fv = (NV)temp;
 		}
 	    }
 
@@ -11895,14 +11899,14 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		   aka precis is 0  */
 		if ( c == 'g' && precis) {
                     STORE_LC_NUMERIC_SET_TO_NEEDED();
-		    PERL_UNUSED_RESULT(Gconvert((NV)nv, (int)precis, 0, PL_efloatbuf));
+		    PERL_UNUSED_RESULT(Gconvert((NV)fv, (int)precis, 0, PL_efloatbuf));
 		    /* May return an empty string for digits==0 */
 		    if (*PL_efloatbuf) {
 			elen = strlen(PL_efloatbuf);
 			goto float_converted;
 		    }
 		} else if ( c == 'f' && !precis) {
-		    if ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
+		    if ((eptr = F0convert(fv, ebuf + sizeof ebuf, &elen)))
 			break;
 		}
 	    }
@@ -11930,8 +11934,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * should be output as 0x0.0000000000001p-1022 to
                  * match its internal structure. */
 
-                vend = S_hextract(aTHX_ nv, &exponent, vhex, NULL);
-                S_hextract(aTHX_ nv, &exponent, vhex, vend);
+                vend = S_hextract(aTHX_ fv, &exponent, vhex, NULL);
+                S_hextract(aTHX_ fv, &exponent, vhex, vend);
 
 #if NVSIZE > DOUBLESIZE && defined(LONG_DOUBLEKIND)
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
@@ -11942,7 +11946,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #  endif
 #endif
 
-                if (nv < 0)
+                if (fv < 0)
                     *p++ = '-';
                 else if (plus)
                     *p++ = plus;
@@ -12083,7 +12087,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
             }
             else
-                elen = S_infnan_2pv(nv, PL_efloatbuf, PL_efloatsize);
+                elen = S_infnan_2pv(fv, PL_efloatbuf, PL_efloatsize);
             if (elen == 0) {
                 char *ptr = ebuf + sizeof ebuf;
                 *--ptr = '\0';
@@ -12132,10 +12136,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 GCC_DIAG_IGNORE(-Wformat-nonliteral);
 #if defined(HAS_LONG_DOUBLE)
                 elen = ((intsize == 'q')
-                        ? my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, nv)
-                        : my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, (double)nv));
+                        ? my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv)
+                        : my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, (double)fv));
 #else
-                elen = my_sprintf(PL_efloatbuf, ptr, nv);
+                elen = my_sprintf(PL_efloatbuf, ptr, fv);
 #endif
                 GCC_DIAG_RESTORE;
 	    }
