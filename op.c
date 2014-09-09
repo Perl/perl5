@@ -7199,6 +7199,10 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	    return NULL;
 	if (type == OP_CONST && cSVOPo->op_sv)
 	    sv = cSVOPo->op_sv;
+	else if (type == OP_UNDEF && !o->op_private) {
+	    sv = newSV(0);
+	    SAVEFREESV(sv);
+	}
 	else if (cv && type == OP_CONST) {
 	    sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
 	    if (!sv)
