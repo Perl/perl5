@@ -1885,22 +1885,22 @@ typedef NVTYPE NV;
 #       endif
 #   endif
 #   ifdef HAS_SQRTL
-#       define Perl_cos cosl
-#       define Perl_sin sinl
-#       define Perl_sqrt sqrtl
-#       define Perl_exp expl
-#       define Perl_log logl
-#       define Perl_atan2 atan2l
-#       define Perl_pow powl
-#       define Perl_floor floorl
-#       define Perl_ceil ceill
-#       define Perl_fmod fmodl
 #       define Perl_acos acosl
 #       define Perl_asin asinl
 #       define Perl_atan atanl
+#       define Perl_atan2 atan2l
+#       define Perl_ceil ceill
+#       define Perl_cos cosl
 #       define Perl_cosh coshl
+#       define Perl_exp expl
+#       define Perl_floor floorl
+#       define Perl_fmod fmodl
+#       define Perl_log logl
 #       define Perl_log10 log10l
+#       define Perl_pow powl
+#       define Perl_sin sinl
 #       define Perl_sinh sinhl
+#       define Perl_sqrt sqrtl
 #       define Perl_tan tanl
 #       define Perl_tanh tanhl
 #   endif
@@ -1986,27 +1986,30 @@ EXTERN_C long double modfl(long double, long double *);
 #           define NV_MAX HUGE_VAL
 #       endif
 #   endif
-#   define Perl_cos cos
-#   define Perl_sin sin
-#   define Perl_sqrt sqrt
-#   define Perl_exp exp
-#   define Perl_log log
-#   define Perl_atan2 atan2
-#   define Perl_pow pow
-#   define Perl_floor floor
-#   define Perl_ceil ceil
-#   define Perl_fmod fmod
-#   define Perl_modf(x,y) modf(x,y)
-#   define Perl_frexp(x,y) frexp(x,y)
-#   define Perl_ldexp(x,y) ldexp(x,y)
+
 #   define Perl_acos acos
 #   define Perl_asin asin
 #   define Perl_atan atan
+#   define Perl_atan2 atan2
+#   define Perl_ceil ceil
+#   define Perl_cos cos
 #   define Perl_cosh cosh
+#   define Perl_exp exp
+#   define Perl_floor floor
+#   define Perl_fmod fmod
+#   define Perl_log log
 #   define Perl_log10 log10
+#   define Perl_pow pow
+#   define Perl_sin sin
 #   define Perl_sinh sinh
+#   define Perl_sqrt sqrt
 #   define Perl_tan tan
 #   define Perl_tanh tanh
+
+#   define Perl_modf(x,y) modf(x,y)
+#   define Perl_frexp(x,y) frexp(x,y)
+#   define Perl_ldexp(x,y) ldexp(x,y)
+
 #   ifndef Perl_isnan
 #       ifdef HAS_ISNAN
 #           define Perl_isnan(x) isnan(x)
