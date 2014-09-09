@@ -87,6 +87,8 @@ PerlIOWin32_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const ch
    DWORD  share  = 0;
    DWORD  create = -1;
    DWORD  attr   = FILE_ATTRIBUTE_NORMAL;
+   if (stricmp(path, "/dev/null")==0)
+    path = "NUL";
    if (*mode == '#')
     {
      /* sysopen - imode is UNIX-like O_RDONLY etc.
