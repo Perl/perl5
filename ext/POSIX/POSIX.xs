@@ -580,9 +580,9 @@ static NV my_expm1(NV x)
 {
   if (PERL_ABS(x) < 1e-5)
     /* http://www.johndcook.com/cpp_expm1.html -- public domain.
-     * Also including the cubic term. */
+     * Taylor series, the first four terms (the last term quartic). */
     /* Probably not enough for long doubles. */
-    return x * (1.0 + x * (0.5 + x / 6.0)); /* Taylor series */
+    return x * (1.0 + x * (1/2.0 + x * (1/6.0 + x/24.0)));
   else
     return Perl_exp(x) - 1;
 }
@@ -676,12 +676,12 @@ static IV my_ilogb(NV x)
 static NV my_log1p(NV x)
 {
   /* http://www.johndcook.com/cpp_log_one_plus_x.html -- public domain.
-   * Including also quadratic term. */
+   * Taylor series, the first four terms (the last term quartic). */
   if (PERL_ABS(x) > 1e-4)
     return Perl_log(1.0 + x);
   else
     /* Probably not enough for long doubles. */
-    return x * (1.0 - x * (-x / 2.0 + x / 3.0)); /* Taylor series */
+    return x * (1.0 + x * (-1/2.0 + x * (1/3.0 - x/4.0)));
 }
 #  define c99_log1p my_log1p
 #endif
