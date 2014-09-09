@@ -333,6 +333,19 @@ XXX
 
 =back
 
+=head3 Win32
+
+=over 4
+
+=item *
+
+In the experimental C<:win32> layer, a crash in C<open> was fixed. Also
+opening C</dev/null>, which works the Win32 Perl's normal C<:unix> layer, was
+implemented for C<:win32>.
+L<[perl #122224]|https://rt.perl.org/Ticket/Display.html?id=122224>
+
+=back
+
 =head1 Internal Changes
 
 XXX Changes which affect the interface available to C<XS> code go here.  Other
