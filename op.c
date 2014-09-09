@@ -3726,6 +3726,7 @@ S_fold_constants(pTHX_ OP *o)
     SV * const oldwarnhook = PL_warnhook;
     SV * const olddiehook  = PL_diehook;
     COP not_compiling;
+    U8 oldwarn = PL_dowarn;
     dJMPENV;
 
     PERL_ARGS_ASSERT_FOLD_CONSTANTS;
@@ -3820,6 +3821,10 @@ S_fold_constants(pTHX_ OP *o)
     PL_diehook  = NULL;
     JMPENV_PUSH(ret);
 
+    /* Effective $^W=1.  */
+    if ( ! (PL_dowarn & G_WARN_ALL_MASK))
+	PL_dowarn |= G_WARN_ON;
+
     switch (ret) {
     case 0:
 	CALLRUNOPS(aTHX);
@@ -3849,6 +3854,7 @@ S_fold_constants(pTHX_ OP *o)
 	Perl_croak(aTHX_ "panic: fold_constants JMPENV_PUSH returned %d", ret);
     }
     JMPENV_POP;
+    PL_dowarn   = oldwarn;
     PL_warnhook = oldwarnhook;
     PL_diehook  = olddiehook;
     PL_curcop = &PL_compiling;

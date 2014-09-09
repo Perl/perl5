@@ -80,6 +80,9 @@ while(<$kh>) {
       }
       if ($hpcode) {
          $tests ++;
+         # __FILE__ won’t fold with warnings on, and then we get
+         # ‘(eval 21)’ vs ‘(eval 22)’.
+         no warnings 'numeric';
          $core = $bd->coderef2text(eval $hpcode =~ s/my/CORE::/r or die);
          $my   = $bd->coderef2text(eval $hpcode or die);
          is $my, $core, "precedence of CORE::$word without parens";
