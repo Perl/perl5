@@ -1885,6 +1885,7 @@ typedef NVTYPE NV;
 #       endif
 #   endif
 #   ifdef HAS_SQRTL
+/* These math interfaces are the long double cousins of the C89 math. */
 #       define Perl_acos acosl
 #       define Perl_asin asinl
 #       define Perl_atan atanl
@@ -1893,6 +1894,7 @@ typedef NVTYPE NV;
 #       define Perl_cos cosl
 #       define Perl_cosh coshl
 #       define Perl_exp expl
+/* no Perl_fabs, but there's PERL_ABS */
 #       define Perl_floor floorl
 #       define Perl_fmod fmodl
 #       define Perl_log logl
@@ -1987,6 +1989,7 @@ EXTERN_C long double modfl(long double, long double *);
 #       endif
 #   endif
 
+/* These math interfaces are C89. */
 #   define Perl_acos acos
 #   define Perl_asin asin
 #   define Perl_atan atan
@@ -1995,6 +1998,7 @@ EXTERN_C long double modfl(long double, long double *);
 #   define Perl_cos cos
 #   define Perl_cosh cosh
 #   define Perl_exp exp
+/* no Perl_fabs, but there's PERL_ABS */
 #   define Perl_floor floor
 #   define Perl_fmod fmod
 #   define Perl_log log
