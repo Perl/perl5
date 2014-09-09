@@ -24,7 +24,7 @@ $ENV{LANGUAGE} = 'C'; # GNU locale extension
 
 sub errno_or_skip {
     SKIP: {
-	if (is_miniperl && !eval 'require Errno') {
+	if (is_miniperl && !eval { local $!; require Errno }) {
 	    skip "Errno not built yet", 1;
 	}
 	eval "ok($_[0])";
