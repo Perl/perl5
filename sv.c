@@ -10679,7 +10679,10 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
             HEXTRACT_COUNT(ix, 2);
     }
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
-    /* (does this format ever happen?) */
+    /* Does this format ever happen? (Wikipedia says the Motorola
+     * 6888x math coprocessors used format _like_ this but padded
+     * to 96 bits with 16 unused bits between the exponent and the
+     * mantissa.) */
     /* There explicitly is *no* implicit bit in this case. */
     for (ix = 0; ix < 8; ix++) {
         if (vend)
@@ -10687,68 +10690,95 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
-#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
-    /* Where is this used?
-     * 9a 99 99 99 99 99 59 bc 9a 99 99 99 99 99 b9 3f */
-    HEXTRACT_IMPLICIT_BIT();
-    if (vend)
-        HEXTRACT_OUTPUT_LO(14);
-    else
-        HEXTRACT_COUNT(14, 1);
-    for (ix = 13; ix >= 8; ix--) {
-        if (vend)
-            HEXTRACT_OUTPUT(ix);
-        else
-            HEXTRACT_COUNT(ix, 2);
-    }
-    /* XXX not extracting from the second double -- see the discussion
-     * below for the big endian double double. */
-#    if 0
-    if (vend)
-        HEXTRACT_OUTPUT_LO(6);
-    else
-        HEXTRACT_COUNT(6, 1);
-    for (ix = 5; ix >= 0; ix--) {
-        if (vend)
-            HEXTRACT_OUTPUT(ix);
-        else
-            HEXTRACT_COUNT(ix, 2);
-    }
-#    endif
-#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
-    /* Used in e.g. PPC/Power (AIX) and MIPS.
+#  elif \
+     LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN || \
+     LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
+    /* The little-endian double-double is used .. somewhere?
+     *
+     * The big endian double-double is used in e.g. PPC/Power (AIX)
+     * and MIPS (SGI).
      *
      * The mantissa bits are in two separate stretches, e.g. for -0.1L:
-     * 3f b9 99 99 99 99 99 9a bc 59 99 99 99 99 99 9a
-     */
-    HEXTRACT_IMPLICIT_BIT();
-    if (vend)
-        HEXTRACT_OUTPUT_LO(1);
-    else
-        HEXTRACT_COUNT(1, 1);
-    for (ix = 2; ix < 8; ix++) {
+     * 9a 99 99 99 99 99 59 bc 9a 99 99 99 99 99 b9 3f (LE)
+     * 3f b9 99 99 99 99 99 9a bc 59 99 99 99 99 99 9a (BE)
+     *
+     * With the double-double format the bytewise extraction we use
+     * for the other long double formats doesn't work, we must extract
+     * the values bit by bit. */
+
+    if (nv == (NV)0.0) {
         if (vend)
-            HEXTRACT_OUTPUT(ix);
+            *v++ = 0;
         else
-            HEXTRACT_COUNT(ix, 2);
+            v++;
+        *exponent = 0;
     }
-    /* XXX not extracting the second double mantissa bits- this is not
-     * right nor ideal (we effectively reduce the output format to
-     * that of a "single double", only 53 bits), but we do not know
-     * exactly how to do the extraction correctly so that it matches
-     * the semantics of, say, the IEEE quadruple float. */
-#    if 0
-    if (vend)
-        HEXTRACT_OUTPUT_LO(9);
-    else
-        HEXTRACT_COUNT(9, 1);
-    for (ix = 10; ix < 16; ix++) {
-        if (vend)
-            HEXTRACT_OUTPUT(ix);
-        else
-            HEXTRACT_COUNT(ix, 2);
+    else {
+        NV d = nv < 0 ? -nv : nv;
+        NV e = (NV)1.0;
+        U8 ha = 0x0; /* hexvalue accumulator */
+        U8 hd = 0x8; /* hexvalue digit */
+
+        *exponent = 1;
+
+        while (e > d) {
+            e *= (NV)0.5;
+            (*exponent)--;
+        }
+        /* Now d >= e */
+
+        while (d >= e + e) {
+            e += e;
+            (*exponent)++;
+        }
+        /* Now e <= d < 2*e */
+
+        /* First extract the leading hexdigit (the implicit bit). */
+        if (d >= e) {
+            d -= e;
+            if (vend)
+                *v++ = 1;
+            else
+                v++;
+        }
+        else {
+            if (vend)
+                *v++ = 0;
+            else
+                v++;
+        }
+        e *= (NV)0.5;
+
+        /* Then extract the remaining hexdigits. */
+        while (d > (NV)0.0) {
+            if (d >= e) {
+                ha |= hd;
+                d -= e;
+            }
+            if (hd == 1) {
+                /* Output or count in groups of four bits,
+                 * that is, when the hexdigit is down to one. */
+                if (vend)
+                    *v++ = ha;
+                else
+                    v++;
+                /* Reset the hexvalue. */
+                ha = 0x0;
+                hd = 0x8;
+            }
+            else 
+                hd >>= 1;
+            e *= (NV)0.5;
+        }
+
+        /* Flush possible pending hexvalue. */
+        if (ha) {
+            if (vend)
+                *v++ = ha;
+            else
+                v++;
+        }
     }
-#   endif
 #  else
     Perl_croak(aTHX_
                "Hexadecimal float: unsupported long double format");
@@ -10855,7 +10885,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     /* large enough for "%#.#f" --chip */
     /* what about long double NVs? --jhi */
     bool no_redundant_warning = FALSE; /* did we use any explicit format parameter index? */
-    bool hexfp = FALSE;
+    bool hexfp = FALSE; /* hexadecimal floating point? */
 
     DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED;
 
@@ -11728,7 +11758,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 if (i == PERL_INT_MIN)
                     Perl_die(aTHX_ "panic: frexp: %"myNVgf, nv);
                 /* Do not set hexfp earlier since we want to printf
-                 * Inf/NaN for Inf/NAN, not their hexfp. */
+                 * Inf/NaN for Inf/NaN, not their hexfp. */
                 hexfp = isALPHA_FOLD_EQ(c, 'a');
                 if (UNLIKELY(hexfp)) {
                     /* This seriously overshoots in most cases, but
