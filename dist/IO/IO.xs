@@ -61,6 +61,10 @@ typedef FILE * OutputStream;
 #  define dVAR dNOOP
 #endif
 
+#ifndef OP_SIBLING
+#  define OP_SIBLING(o) (o)->op_sibling
+#endif
+
 static int not_here(const char *s) __attribute__noreturn__;
 static int
 not_here(const char *s)
