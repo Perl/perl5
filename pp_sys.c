@@ -4570,16 +4570,14 @@ PP(pp_gmtime)
 	if (err == NULL)
 	    RETPUSHUNDEF;
        else {
-           mPUSHs(Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %.0f",
+           mPUSHs(Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %"IVdf,
                                 dayname[tmbuf.tm_wday],
                                 monname[tmbuf.tm_mon],
                                 tmbuf.tm_mday,
                                 tmbuf.tm_hour,
                                 tmbuf.tm_min,
                                 tmbuf.tm_sec,
-                                /* XXX newSVpvf()'s %lld type is broken,
-                                 * so cheat with a double */
-                                (double)tmbuf.tm_year + 1900));
+                                (IV)tmbuf.tm_year + 1900));
         }
     }
     else {			/* list context */
