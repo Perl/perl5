@@ -1108,8 +1108,10 @@ S_my_atof_infnan(const char* s, bool negative, const char* send, NV* value)
         }
 #endif
 #ifdef Perl_strtod
-        /* If still here, we didn't have either NV_INF or INV_NAN,
+        /* If still here, we didn't have either NV_INF or NV_NAN,
          * and can try falling back to native strtod/strtold.
+         *
+         * (Though, are our NV_INF or NV_NAN ever not defined?)
          *
          * The native interface might not recognize all the possible
          * inf/nan strings Perl recognizes.  What we can try
@@ -1340,6 +1342,8 @@ Perl_isinfnan() is utility function that returns true if the NV
 argument is either an infinity or a NaN, false otherwise.  To test
 in more detail, use Perl_isinf() and Perl_isnan().
 
+This is also the logical inverse of Perl_isfinite().
+
 =cut
 */
 bool
@@ -1357,29 +1361,32 @@ Perl_isinfnan(NV nv)
 }
 
 #ifndef HAS_MODFL
-/* C99 has truncl, pre-C99 Solaris had aintl */
+/* C99 has truncl, pre-C99 Solaris had aintl.  We can use either with
+ * copysignl to emulate modfl, which is in some platforms missing or
+ * broken. */
 #  if defined(HAS_TRUNCL) && defined(HAS_COPYSIGNL)
 long double
 Perl_my_modfl(long double x, long double *ip)
 {
-	*ip = truncl(x);
-	return (x == *ip ? copysignl(0.0L, x) : x - *ip);
+    *ip = truncl(x);
+    return (x == *ip ? copysignl(0.0L, x) : x - *ip);
 }
 #  elif defined(HAS_AINTL) && defined(HAS_COPYSIGNL)
 long double
 Perl_my_modfl(long double x, long double *ip)
 {
-	*ip = aintl(x);
-	return (x == *ip ? copysignl(0.0L, x) : x - *ip);
+    *ip = aintl(x);
+    return (x == *ip ? copysignl(0.0L, x) : x - *ip);
 }
 #  endif
 #endif
 
+/* Similarly, with ilobl and scalbnl we can emulate frexpl. */
 #if ! defined(HAS_FREXPL) && defined(HAS_ILOGBL) && defined(HAS_SCALBNL)
 long double
 Perl_my_frexpl(long double x, int *e) {
-	*e = x == 0.0L ? 0 : ilogbl(x) + 1;
-	return (scalbnl(x, -*e));
+    *e = x == 0.0L ? 0 : ilogbl(x) + 1;
+    return (scalbnl(x, -*e));
 }
 #endif
 
