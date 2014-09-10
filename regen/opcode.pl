@@ -34,7 +34,8 @@ my $on = open_new('opnames.h', '>',
 
 my $oprivpm = open_new('lib/B/Op_private.pm', '>',
 		  { by => 'regen/opcode.pl',
-                    from => 'data in regen/op_private',
+                    from => "data in\nregen/op_private "
+                           ."and pod embedded in regen/opcode.pl",
                     style => '#',
 		    file => 'lib/B/Op_private.pm',
                     copyright => [2014 .. 2014] });
