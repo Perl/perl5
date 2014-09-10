@@ -2994,7 +2994,7 @@ PP(pp_ftrread)
 {
     I32 result;
     /* Not const, because things tweak this below. Not bool, because there's
-       no guarantee that OPp_FT_ACCESS is <= CHAR_MAX  */
+       no guarantee that OPpFT_ACCESS is <= CHAR_MAX  */
 #if defined(HAS_ACCESS) || defined (PERL_EFF_ACCESS)
     I32 use_access = PL_op->op_private & OPpFT_ACCESS;
     /* Giving some sort of initial value silences compilers.  */

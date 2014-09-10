@@ -725,6 +725,11 @@ Perl_op_free(pTHX_ OP *o)
 	return;
 
     type = o->op_type;
+
+    /* an op should only ever acquire op_private flags that we know about.
+     * If this fails, you may need to fix something in regen/op_private */
+    assert(!(o->op_private & ~PL_op_private_valid[type]));
+
     if (o->op_private & OPpREFCOUNTED) {
 	switch (type) {
 	case OP_LEAVESUB:

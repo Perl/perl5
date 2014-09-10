@@ -240,7 +240,7 @@ checkOptree ( name	=> '-exec sub { foreach (1..10) {print "foo $_"} }',
 # 3  <$> const[IV 1] s
 # 4  <$> const[IV 10] s
 # 5  <#> gv[*_] s
-# 6  <{> enteriter(next->d last->g redo->7) lKS/8
+# 6  <{> enteriter(next->d last->g redo->7) lKS/DEF
 # e  <0> iter s
 # f  <|> and(other->7) K/1
 # 7      <;> nextstate(main 442 optree.t:158) v:>,<,%
@@ -259,7 +259,7 @@ EOT_EOT
 # 3  <$> const(IV 1) s
 # 4  <$> const(IV 10) s
 # 5  <$> gv(*_) s
-# 6  <{> enteriter(next->d last->g redo->7) lKS/8
+# 6  <{> enteriter(next->d last->g redo->7) lKS/DEF
 # e  <0> iter s
 # f  <|> and(other->7) K/1
 # 7      <;> nextstate(main 443 optree_samples.t:182) v:>,<,%
@@ -283,7 +283,7 @@ checkOptree ( name	=> '-basic sub { print "foo $_" foreach (1..10) }',
 # -     <@> lineseq KP ->g
 # 1        <;> nextstate(main 445 optree.t:167) v:>,<,% ->2
 # f        <2> leaveloop K/2 ->g
-# 6           <{> enteriter(next->c last->f redo->7) lKS/8 ->d
+# 6           <{> enteriter(next->c last->f redo->7) lKS/DEF ->d
 # -              <0> ex-pushmark s ->2
 # -              <1> ex-list lK ->5
 # 2                 <0> pushmark s ->3
@@ -308,7 +308,7 @@ EOT_EOT
 # -     <@> lineseq KP ->g
 # 1        <;> nextstate(main 446 optree_samples.t:192) v:>,<,% ->2
 # f        <2> leaveloop K/2 ->g
-# 6           <{> enteriter(next->c last->f redo->7) lKS/8 ->d
+# 6           <{> enteriter(next->c last->f redo->7) lKS/DEF ->d
 # -              <0> ex-pushmark s ->2
 # -              <1> ex-list lK ->5
 # 2                 <0> pushmark s ->3
@@ -341,7 +341,7 @@ checkOptree ( name	=> '-exec -e foreach (1..10) {print qq{foo $_}}',
 # 4  <$> const[IV 1] s
 # 5  <$> const[IV 10] s
 # 6  <#> gv[*_] s
-# 7  <{> enteriter(next->e last->h redo->8) lKS/8
+# 7  <{> enteriter(next->e last->h redo->8) lKS/DEF
 # f  <0> iter s
 # g  <|> and(other->8) vK/1
 # 8      <;> nextstate(main 1 -e:1) v:>,<,%
@@ -361,7 +361,7 @@ EOT_EOT
 # 4  <$> const(IV 1) s
 # 5  <$> const(IV 10) s
 # 6  <$> gv(*_) s
-# 7  <{> enteriter(next->e last->h redo->8) lKS/8
+# 7  <{> enteriter(next->e last->h redo->8) lKS/DEF
 # f  <0> iter s
 # g  <|> and(other->8) vK/1
 # 8      <;> nextstate(main 1 -e:1) v:>,<,%
@@ -386,7 +386,7 @@ checkOptree ( name	=> '-exec sub { print "foo $_" foreach (1..10) }',
 # 3  <$> const[IV 1] s
 # 4  <$> const[IV 10] s
 # 5  <#> gv[*_] s
-# 6  <{> enteriter(next->c last->f redo->7) lKS/8
+# 6  <{> enteriter(next->c last->f redo->7) lKS/DEF
 # d  <0> iter s
 # e  <|> and(other->7) K/1
 # 7      <0> pushmark s
@@ -404,7 +404,7 @@ EOT_EOT
 # 3  <$> const(IV 1) s
 # 4  <$> const(IV 10) s
 # 5  <$> gv(*_) s
-# 6  <{> enteriter(next->c last->f redo->7) lKS/8
+# 6  <{> enteriter(next->c last->f redo->7) lKS/DEF
 # d  <0> iter s
 # e  <|> and(other->7) K/1
 # 7      <0> pushmark s
@@ -530,7 +530,7 @@ checkOptree ( name	=> '%h=(); for $_(@a){$h{getkey($_)} = $_}',
 # a  <1> rv2av[t6] sKRM/1
 # b  <#> gv[*_] s
 # c  <1> rv2gv sKRM/1
-# d  <{> enteriter(next->o last->r redo->e) lKS/8
+# d  <{> enteriter(next->o last->r redo->e) lKS/DEF
 # p  <0> iter s
 # q  <|> and(other->e) K/1
 # e      <;> nextstate(main 505 (eval 24):1) v:{
@@ -561,7 +561,7 @@ EOT_EOT
 # a  <1> rv2av[t3] sKRM/1
 # b  <$> gv(*_) s
 # c  <1> rv2gv sKRM/1
-# d  <{> enteriter(next->o last->r redo->e) lKS/8
+# d  <{> enteriter(next->o last->r redo->e) lKS/DEF
 # p  <0> iter s
 # q  <|> and(other->e) K/1
 # e      <;> nextstate(main 505 (eval 24):1) v:{

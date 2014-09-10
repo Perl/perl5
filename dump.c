@@ -751,6 +751,10 @@ S_sequence_num(pTHX_ const OP *o)
     return PL_op_seq;
 }
 
+
+
+
+
 const struct flag_to_name op_flags_names[] = {
     {OPf_KIDS, ",KIDS"},
     {OPf_PARENS, ",PARENS"},
@@ -759,125 +763,6 @@ const struct flag_to_name op_flags_names[] = {
     {OPf_STACKED, ",STACKED"},
     {OPf_SPECIAL, ",SPECIAL"}
 };
-
-const struct flag_to_name op_trans_names[] = {
-    {OPpTRANS_FROM_UTF, ",FROM_UTF"},
-    {OPpTRANS_TO_UTF, ",TO_UTF"},
-    {OPpTRANS_IDENTICAL, ",IDENTICAL"},
-    {OPpTRANS_SQUASH, ",SQUASH"},
-    {OPpTRANS_COMPLEMENT, ",COMPLEMENT"},
-    {OPpTRANS_GROWS, ",GROWS"},
-    {OPpTRANS_DELETE, ",DELETE"}
-};
-
-const struct flag_to_name op_entersub_names[] = {
-    {OPpENTERSUB_DB, ",DB"},
-    {OPpENTERSUB_HASTARG, ",HASTARG"},
-    {OPpENTERSUB_AMPER, ",AMPER"},
-    {OPpENTERSUB_NOPAREN, ",NOPAREN"},
-    {OPpENTERSUB_INARGS, ",INARGS"}
-};
-
-const struct flag_to_name op_const_names[] = {
-    {OPpCONST_NOVER, ",NOVER"},
-    {OPpCONST_SHORTCIRCUIT, ",SHORTCIRCUIT"},
-    {OPpCONST_STRICT, ",STRICT"},
-    {OPpCONST_ENTERED, ",ENTERED"},
-    {OPpCONST_BARE, ",BARE"}
-};
-
-const struct flag_to_name op_sort_names[] = {
-    {OPpSORT_NUMERIC, ",NUMERIC"},
-    {OPpSORT_INTEGER, ",INTEGER"},
-    {OPpSORT_REVERSE, ",REVERSE"},
-    {OPpSORT_INPLACE, ",INPLACE"},
-    {OPpSORT_DESCEND, ",DESCEND"},
-    {OPpSORT_QSORT, ",QSORT"},
-    {OPpSORT_STABLE, ",STABLE"}
-};
-
-const struct flag_to_name op_open_names[] = {
-    {OPpOPEN_IN_RAW, ",IN_RAW"},
-    {OPpOPEN_IN_CRLF, ",IN_CRLF"},
-    {OPpOPEN_OUT_RAW, ",OUT_RAW"},
-    {OPpOPEN_OUT_CRLF, ",OUT_CRLF"}
-};
-
-const struct flag_to_name op_sassign_names[] = {
-    {OPpASSIGN_BACKWARDS, ",BACKWARDS"},
-    {OPpASSIGN_CV_TO_GV,  ",CV2GV"}
-};
-
-const struct flag_to_name op_leave_names[] = {
-    {OPpREFCOUNTED, ",REFCOUNTED"},
-    {OPpLVALUE,	    ",LVALUE"}
-};
-
-#define OP_PRIVATE_ONCE(op, flag, name) \
-    const struct flag_to_name CAT2(op, _names)[] = {	\
-	{(flag), (name)} \
-    }
-
-OP_PRIVATE_ONCE(op_leavesub, OPpREFCOUNTED, ",REFCOUNTED");
-OP_PRIVATE_ONCE(op_repeat, OPpREPEAT_DOLIST, ",DOLIST");
-OP_PRIVATE_ONCE(op_reverse, OPpREVERSE_INPLACE, ",INPLACE");
-OP_PRIVATE_ONCE(op_rv2cv, OPpLVAL_INTRO, ",INTRO");
-OP_PRIVATE_ONCE(op_flip, OPpFLIP_LINENUM, ",LINENUM");
-OP_PRIVATE_ONCE(op_gv, OPpEARLY_CV, ",EARLY_CV");
-OP_PRIVATE_ONCE(op_list, OPpLIST_GUESSED, ",GUESSED");
-OP_PRIVATE_ONCE(op_delete, OPpSLICE, ",SLICE");
-OP_PRIVATE_ONCE(op_exists, OPpEXISTS_SUB, ",EXISTS_SUB");
-OP_PRIVATE_ONCE(op_die, OPpHUSH_VMSISH, ",HUSH_VMSISH");
-OP_PRIVATE_ONCE(op_split, OPpSPLIT_IMPLIM, ",IMPLIM");
-OP_PRIVATE_ONCE(op_dbstate, OPpHUSH_VMSISH, ",HUSH_VMSISH");
-
-struct op_private_by_op {
-    U16 op_type;
-    U16 len;
-    const struct flag_to_name *start;
-};
-
-const struct op_private_by_op op_private_names[] = {
-    {OP_LEAVESUB, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
-    {OP_LEAVE, C_ARRAY_LENGTH(op_leave_names), op_leave_names },
-    {OP_LEAVESUBLV, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
-    {OP_LEAVEWRITE, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
-    {OP_DIE, C_ARRAY_LENGTH(op_die_names), op_die_names },
-    {OP_DELETE, C_ARRAY_LENGTH(op_delete_names), op_delete_names },
-    {OP_EXISTS, C_ARRAY_LENGTH(op_exists_names), op_exists_names },
-    {OP_FLIP, C_ARRAY_LENGTH(op_flip_names), op_flip_names },
-    {OP_FLOP, C_ARRAY_LENGTH(op_flip_names), op_flip_names },
-    {OP_GV, C_ARRAY_LENGTH(op_gv_names), op_gv_names },
-    {OP_LIST, C_ARRAY_LENGTH(op_list_names), op_list_names },
-    {OP_SASSIGN, C_ARRAY_LENGTH(op_sassign_names), op_sassign_names },
-    {OP_REPEAT, C_ARRAY_LENGTH(op_repeat_names), op_repeat_names },
-    {OP_RV2CV, C_ARRAY_LENGTH(op_rv2cv_names), op_rv2cv_names },
-    {OP_TRANS, C_ARRAY_LENGTH(op_trans_names), op_trans_names },
-    {OP_CONST, C_ARRAY_LENGTH(op_const_names), op_const_names },
-    {OP_SORT, C_ARRAY_LENGTH(op_sort_names), op_sort_names },
-    {OP_OPEN, C_ARRAY_LENGTH(op_open_names), op_open_names },
-    {OP_SPLIT, C_ARRAY_LENGTH(op_split_names), op_split_names },
-    {OP_DBSTATE, C_ARRAY_LENGTH(op_dbstate_names), op_dbstate_names },
-    {OP_NEXTSTATE, C_ARRAY_LENGTH(op_dbstate_names), op_dbstate_names },
-    {OP_BACKTICK, C_ARRAY_LENGTH(op_open_names), op_open_names }
-};
-
-static bool
-S_op_private_to_names(pTHX_ SV *tmpsv, U32 optype, U32 op_private) {
-    const struct op_private_by_op *start = op_private_names;
-    const struct op_private_by_op *const end = C_ARRAY_END(op_private_names);
-
-    /* This is a linear search, but no worse than the code that it replaced.
-       It's debugging code - size is more important than speed.  */
-    do {
-	if (optype == start->op_type) {
-	    S_append_flags(aTHX_ tmpsv, op_private, start->start,
-			   start->start + start->len);
-	    return TRUE;
-	}
-    } while (++start < end);
-    return FALSE;
-}
 
 
 void
@@ -966,94 +851,87 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     }
 
     if (o->op_private) {
-        U32 optype = o->op_type;
-        U32 oppriv = o->op_private;
-        SV * const tmpsv = newSVpvs("");
-	if (PL_opargs[optype] & OA_TARGLEX) {
-	    if (oppriv & OPpTARGET_MY)
-		sv_catpv(tmpsv, ",TARGET_MY");
-	}
-	else if (optype == OP_ENTERSUB ||
-                 optype == OP_RV2SV ||
-                 optype == OP_GVSV ||
-                 optype == OP_RV2AV ||
-                 optype == OP_RV2HV ||
-                 optype == OP_RV2GV ||
-                 optype == OP_AELEM ||
-                 optype == OP_HELEM )
-        {
-            if (optype == OP_ENTERSUB) {
-                append_flags(tmpsv, oppriv, op_entersub_names);
-            }
-            else {
-                switch (oppriv & OPpDEREF) {
-                case OPpDEREF_SV:
-                    sv_catpv(tmpsv, ",SV");
-                    break;
-                case OPpDEREF_AV:
-                    sv_catpv(tmpsv, ",AV");
-                    break;
-                case OPpDEREF_HV:
-                    sv_catpv(tmpsv, ",HV");
-                    break;
+        U16 oppriv = o->op_private;
+        I16 op_ix = PL_op_private_bitdef_ix[o->op_type];
+        SV * tmpsv = NULL;
+
+        if (op_ix != -1) {
+            U16 stop = 0;
+            tmpsv = newSVpvs("");
+            for (; !stop; op_ix++) {
+                U16 entry = PL_op_private_bitdefs[op_ix];
+                U16 bit = (entry >> 2) & 7;
+                U16 ix = entry >> 5;
+
+                stop = (entry & 1);
+
+                if (entry & 2) {
+                    /* bitfield */
+                    I16 const *p = &PL_op_private_bitfields[ix];
+                    U16 bitmin = (U16) *p++;
+                    I16 label = *p++;
+                    I16 enum_label;
+                    U16 mask = 0;
+                    U16 i;
+                    U16 val;
+
+                    for (i = bitmin; i<= bit; i++)
+                        mask |= (1<<i);
+                    bit = bitmin;
+                    val = (oppriv & mask);
+
+                    if (   label != -1
+                        && PL_op_private_labels[label] == '-'
+                        && PL_op_private_labels[label+1] == '\0'
+                    )
+                        /* display as raw number */
+                        continue;
+
+                    oppriv -= val;
+                    val >>= bit;
+                    enum_label = -1;
+                    while (*p != -1) {
+                        if (val == *p++) {
+                            enum_label = *p;
+                            break;
+                        }
+                        p++;
+                    }
+                    if (val == 0 && enum_label == -1)
+                        /* don't display anonymous zero values */
+                        continue;
+
+                    sv_catpv(tmpsv, ",");
+                    if (label != -1) {
+                        sv_catpv(tmpsv, &PL_op_private_labels[label]);
+                        sv_catpv(tmpsv, "=");
+                    }
+                    sv_catpv(tmpsv, &PL_op_private_labels[enum_label]);
+
                 }
-                if (oppriv & OPpMAYBE_LVSUB)
-                    sv_catpv(tmpsv, ",MAYBE_LVSUB");
+                else {
+                    /* bit flag */
+                    if (   oppriv & (1<<bit)
+                        && !(PL_op_private_labels[ix] == '-'
+                             && PL_op_private_labels[ix+1] == '\0'))
+                    {
+                        oppriv -= (1<<bit);
+                        sv_catpv(tmpsv, ",");
+                        sv_catpv(tmpsv, &PL_op_private_labels[ix]);
+                    }
+                }
             }
-            if (optype == OP_AELEM || optype == OP_HELEM) {
-                if (oppriv & OPpLVAL_DEFER)
-                    sv_catpv(tmpsv, ",LVAL_DEFER");
-            }
-            else if (optype == OP_RV2HV || optype == OP_PADHV) {
-                if (oppriv & OPpMAYBE_TRUEBOOL)
-                    sv_catpvs(tmpsv, ",OPpMAYBE_TRUEBOOL");
-                if (oppriv & OPpTRUEBOOL)
-                    sv_catpvs(tmpsv, ",OPpTRUEBOOL");
-            }
-            else {
-                if (oppriv & HINT_STRICT_REFS)
-                    sv_catpv(tmpsv, ",STRICT_REFS");
-                if (oppriv & OPpOUR_INTRO)
-                    sv_catpv(tmpsv, ",OUR_INTRO");
+            if (oppriv) {
+                sv_catpv(tmpsv, ",");
+                Perl_sv_catpvf(aTHX_ tmpsv, "0x%"UVxf, (UV)oppriv);
             }
         }
-	else if (S_op_private_to_names(aTHX_ tmpsv, optype, oppriv)) {
-	}
-	else if (OP_IS_FILETEST(o->op_type)) {
-            if (oppriv & OPpFT_ACCESS)
-                sv_catpv(tmpsv, ",FT_ACCESS");
-            if (oppriv & OPpFT_STACKED)
-                sv_catpv(tmpsv, ",FT_STACKED");
-            if (oppriv & OPpFT_STACKING)
-                sv_catpv(tmpsv, ",FT_STACKING");
-            if (oppriv & OPpFT_AFTER_t)
-                sv_catpv(tmpsv, ",AFTER_t");
-	}
-	else if (o->op_type == OP_AASSIGN) {
-	    if (oppriv & OPpASSIGN_COMMON)
-		sv_catpvs(tmpsv, ",COMMON");
-	    if (oppriv & OPpMAYBE_LVSUB)
-		sv_catpvs(tmpsv, ",MAYBE_LVSUB");
-	}
-	if (o->op_flags & OPf_MOD && oppriv & OPpLVAL_INTRO)
-	    sv_catpv(tmpsv, ",INTRO");
-	if (o->op_type == OP_PADRANGE)
-	    Perl_sv_catpvf(aTHX_ tmpsv, ",COUNT=%"UVuf,
-                           (UV)(oppriv & OPpPADRANGE_COUNTMASK));
-        if (  (o->op_type == OP_RV2HV || o->op_type == OP_RV2AV ||
-               o->op_type == OP_PADAV || o->op_type == OP_PADHV ||
-               o->op_type == OP_ASLICE || o->op_type == OP_HSLICE)
-           && oppriv & OPpSLICEWARNING  )
-            sv_catpvs(tmpsv, ",SLICEWARNING");
-	if (SvCUR(tmpsv)) {
+	if (tmpsv && SvCUR(tmpsv)) {
             Perl_dump_indent(aTHX_ level, file, "PRIVATE = (%s)\n", SvPVX_const(tmpsv) + 1);
 	} else
             Perl_dump_indent(aTHX_ level, file, "PRIVATE = (0x%"UVxf")\n",
                              (UV)oppriv);
     }
-
-
-
 
     switch (optype) {
     case OP_AELEMFAST:

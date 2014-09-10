@@ -283,7 +283,7 @@
 #define HINT_V_VMSISH		24
 #define HINT_M_VMSISH_STATUS	0x40000000 /* system, $? return VMS status */
 #define HINT_M_VMSISH_TIME	0x80000000 /* times are local, not UTC */
-#define NATIVE_HINTS		(PL_hints >> HINT_V_VMSISH)  /* used in op.c */
+#define NATIVE_HINTS		((PL_hints >> HINT_V_VMSISH) & OPpHINT_M_VMSISH_MASK)
 
 #ifdef PERL_IMPLICIT_CONTEXT
 #  define TEST_VMSISH(h)	(my_perl && PL_curcop && (PL_curcop->op_private & ((h) >> HINT_V_VMSISH)))

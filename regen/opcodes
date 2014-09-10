@@ -16,15 +16,15 @@
 # pvop/svop   - "            cop      - ;
 
 # Other options are:
-#   needs stack mark                    - m
-#   needs constant folding              - f
-#   produces a scalar                   - s
-#   produces an integer                 - i
-#   needs a target                      - t
-#   target can be in a pad              - T
-#   has a corresponding integer version - I
-#   has side effects                    - d
-#   uses $_ if no argument given        - u
+#   needs stack mark                    - m  (OA_MARK)
+#   needs constant folding              - f  (OA_FOLDCONST)
+#   produces a scalar                   - s  (OA_RETSCALAR)
+#   produces an integer                 - i  (unused)
+#   needs a target                      - t  (OA_TARGET)
+#   target can be in a pad              - T  (OA_TARGET|OA_TARGLEX)
+#   has a corresponding integer version - I  (OA_OTHERINT)
+#   has side effects                    - d  (OA_DANGEROUS)
+#   uses $_ if no argument given        - u  (OA_DEFGV)
 
 # Values for the operands are:
 # scalar      - S            list     - L            array     - A

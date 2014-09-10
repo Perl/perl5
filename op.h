@@ -150,213 +150,23 @@ Deprecated.  Use C<GIMME_V> instead.
 	      : G_SCALAR)						\
 	   : dowantarray())
 
-/* Lower bits of op_private often carry the number of arguments, as
- * set by newBINOP, newUNOP and ck_fun */
 
-/* NOTE: OP_NEXTSTATE and OP_DBSTATE (i.e. COPs) carry NATIVE_HINTS
- * in op_private */
+/* NOTE: OPp* flags are now auto-generated and defined in opcode.h,
+ *       from data in regen/op_private */
 
-/* Private for lvalues */
-#define OPpLVAL_INTRO	128	/* Lvalue must be localized or lvalue sub */
 
-/* Private for OPs with TARGLEX */
-  /* (lower bits may carry MAXARG) */
-#define OPpTARGET_MY		16	/* Target is PADMY. */
-
-/* Private for OP_LEAVE, OP_LEAVESUB, OP_LEAVESUBLV and OP_LEAVEWRITE */
-#define OPpREFCOUNTED		64	/* op_targ carries a refcount */
-
-/* Private for OP_LEAVE and OP_LEAVELOOP */
-#define OPpLVALUE		128	/* Do not copy return value */
-
-/* Private for OP_AASSIGN */
-#define OPpASSIGN_COMMON	64	/* Left & right have syms in common. */
-
-/* Private for OP_SASSIGN */
-#define OPpASSIGN_BACKWARDS	64	/* Left & right switched. */
-#define OPpASSIGN_CV_TO_GV	128	/* Possible optimisation for constants. */
-
-/* Private for OP_MATCH and OP_SUBST{,CONT} */
-#define OPpRUNTIME		64	/* Pattern coming in on the stack */
-
-/* Private for OP_TRANS */
-#define OPpTRANS_FROM_UTF	1
-#define OPpTRANS_TO_UTF		2
-#define OPpTRANS_IDENTICAL	4	/* right side is same as left */
-#define OPpTRANS_SQUASH		8
-    /* 16 is used for OPpTARGET_MY */
-#define OPpTRANS_COMPLEMENT	32
-#define OPpTRANS_GROWS		64
-#define OPpTRANS_DELETE		128
 #define OPpTRANS_ALL	(OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE)
 
-/* Private for OP_REPEAT */
-#define OPpREPEAT_DOLIST	64	/* List replication. */
 
-/* Private for OP_RV2GV, OP_RV2SV, OP_AELEM, OP_HELEM, OP_PADSV */
-#define OPpDEREF		(32|64)	/* autovivify: Want ref to something: */
-#define OPpDEREF_AV		32	/*   Want ref to AV. */
-#define OPpDEREF_HV		64	/*   Want ref to HV. */
-#define OPpDEREF_SV		(32|64)	/*   Want ref to SV. */
 
-/* OP_ENTERSUB and OP_RV2CV flags
-
-Flags are set on entersub and rv2cv in three phases:
-  parser  - the parser passes the flag to the op constructor
-  check   - the check routine called by the op constructor sets the flag
-  context - application of scalar/ref/lvalue context applies the flag
-
-In the third stage, an entersub op might turn into an rv2cv op (undef &foo,
-\&foo, lock &foo, exists &foo, defined &foo).  The two places where that
-happens (op_lvalue_flags and doref in op.c) need to make sure the flags do
-not conflict.  Flags applied in the context phase are only set when there
-is no conversion of op type.
-
-  bit  entersub flag       phase   rv2cv flag             phase
-  ---  -------------       -----   ----------             -----
-    1  OPpENTERSUB_INARGS  context
-    2  HINT_STRICT_REFS    check   HINT_STRICT_REFS       check
-    4  OPpENTERSUB_HASTARG check
-    8                              OPpENTERSUB_AMPER      parser
-   16  OPpENTERSUB_DB      check
-   32  OPpDEREF_AV         context
-   64  OPpDEREF_HV         context OPpMAY_RETURN_CONSTANT context
-  128  OPpLVAL_INTRO       context OPpENTERSUB_NOPAREN    parser
-
-*/
-
-  /* OP_ENTERSUB only */
-#define OPpENTERSUB_DB		16	/* Debug subroutine. */
-#define OPpENTERSUB_HASTARG	4	/* Called from OP tree. */
-#define OPpENTERSUB_INARGS	1	/* Lval used as arg to a sub. */
-/* used by OPpDEREF             (32|64) */
-/* used by HINT_STRICT_REFS     2          */
-  /* Mask for OP_ENTERSUB flags, the absence of which must be propagated
-     in dynamic context */
+/* Mask for OP_ENTERSUB flags, the absence of which must be propagated
+ in dynamic context */
 #define OPpENTERSUB_LVAL_MASK (OPpLVAL_INTRO|OPpENTERSUB_INARGS)
 
-  /* OP_RV2CV only */
-#define OPpENTERSUB_AMPER	8	/* Used & form to call. */
-#define OPpENTERSUB_NOPAREN	128	/* bare sub call (without parens) */
-#define OPpMAY_RETURN_CONSTANT	64	/* If a constant sub, return the constant */
+/* VMS-specific hints in COPs */
+#define OPpHINT_M_VMSISH_MASK (OPpHINT_M_VMSISH_STATUS|OPpHINT_M_VMSISH_TIME)
 
-  /* OP_GV only */
-#define OPpEARLY_CV		32	/* foo() called before sub foo was parsed */
-  /* OP_?ELEM only */
-#define OPpLVAL_DEFER		16	/* Defer creation of array/hash elem */
-  /* OP_RV2[AH]V OP_[AH]SLICE */
-#define OPpSLICEWARNING		4	/* warn about @hash{$scalar} */
-  /* OP_RV2[SAH]V, OP_GVSV, OP_ENTERITER only */
-#define OPpOUR_INTRO		16	/* Variable was in an our() */
-  /* OP_RV2[AGH]V, OP_PAD[AH]V, OP_[AH]ELEM, OP_[AH]SLICE OP_AV2ARYLEN,
-     OP_R?KEYS, OP_SUBSTR, OP_POS, OP_VEC */
-#define OPpMAYBE_LVSUB		8	/* We might be an lvalue to return */
-  /* OP_RV2HV and OP_PADHV */
-#define OPpTRUEBOOL		32	/* %hash in (%hash || $foo) in
-					   void context */
-#define OPpMAYBE_TRUEBOOL	64	/* %hash in (%hash || $foo) where
-					   cx is not known till run time */
 
-  /* OP_SUBSTR only */
-#define OPpSUBSTR_REPL_FIRST	16	/* 1st arg is replacement string */
-
-  /* OP_PADSV only */
-#define OPpPAD_STATE		16	/* is a "state" pad */
-  /* for OP_RV2?V, lower bits carry hints (currently only HINT_STRICT_REFS) */
-
-  /* OP_PADRANGE only */
-  /* bit 7 is OPpLVAL_INTRO */
-#define OPpPADRANGE_COUNTMASK	127	/* bits 6..0 hold target range, */
-#define OPpPADRANGE_COUNTSHIFT	7	/* 7 bits in total */
-
-  /* OP_RV2GV only */
-#define OPpDONT_INIT_GV		4	/* Call gv_fetchpv with GV_NOINIT */
-/* (Therefore will return whatever is currently in the symbol table, not
-   guaranteed to be a PVGV)  */
-#define OPpALLOW_FAKE		16	/* OK to return fake glob */
-
-/* Private for OP_ENTERITER and OP_ITER */
-#define OPpITER_REVERSED	4	/* for (reverse ...) */
-#define OPpITER_DEF		8	/* for $_ or for my $_ */
-
-/* Private for OP_CONST */
-#define	OPpCONST_NOVER		2	/* no 6; */
-#define	OPpCONST_SHORTCIRCUIT	4	/* eg the constant 5 in (5 || foo) */
-#define	OPpCONST_STRICT		8	/* bareword subject to strict 'subs' */
-#define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
-#define OPpCONST_BARE		64	/* Was a bare word (filehandle?). */
-
-/* Private for OP_FLIP/FLOP */
-#define OPpFLIP_LINENUM		64	/* Range arg potentially a line num. */
-
-/* Private for OP_LIST */
-#define OPpLIST_GUESSED		64	/* Guessed that pushmark was needed. */
-
-/* Private for OP_DELETE */
-#define OPpSLICE		64	/* Operating on a list of keys */
-/* Also OPpLVAL_INTRO (128) */
-
-/* Private for OP_EXISTS */
-#define OPpEXISTS_SUB		64	/* Checking for &sub, not {} or [].  */
-
-/* Private for OP_SORT */
-#define OPpSORT_NUMERIC		1	/* Optimized away { $a <=> $b } */
-#define OPpSORT_INTEGER		2	/* Ditto while under "use integer" */
-#define OPpSORT_REVERSE		4	/* Reversed sort */
-#define OPpSORT_INPLACE		8	/* sort in-place; eg @a = sort @a */
-#define OPpSORT_DESCEND		16	/* Descending sort */
-#define OPpSORT_QSORT		32	/* Use quicksort (not mergesort) */
-#define OPpSORT_STABLE		64	/* Use a stable algorithm */
-
-/* Private for OP_REVERSE */
-#define OPpREVERSE_INPLACE	8	/* reverse in-place (@a = reverse @a) */
-
-/* Private for OP_OPEN and OP_BACKTICK */
-#define OPpOPEN_IN_RAW		16	/* binmode(F,":raw") on input fh */
-#define OPpOPEN_IN_CRLF		32	/* binmode(F,":crlf") on input fh */
-#define OPpOPEN_OUT_RAW		64	/* binmode(F,":raw") on output fh */
-#define OPpOPEN_OUT_CRLF	128	/* binmode(F,":crlf") on output fh */
-
-/* Private for COPs */
-#define OPpHUSH_VMSISH		32	/* hush DCL exit msg vmsish mode*/
-/* Note: Used for NATIVE_HINTS (shifted from the values in PL_hints),
-	 currently defined by vms/vmsish.h:
-				64
-				128
- */
-
-/* Private for OP_FTXXX */
-#define OPpFT_ACCESS		2	/* use filetest 'access' */
-#define OPpFT_STACKED		4	/* stacked filetest, as "-f" in "-f -x $f" */
-#define OPpFT_STACKING		8	/* stacking filetest, as "-x" in "-f -x $f" */
-#define OPpFT_AFTER_t		16	/* previous op was -t */
-
-/* Private for OP_(MAP|GREP)(WHILE|START) */
-#define OPpGREP_LEX		2	/* iterate over lexical $_ */
-    
-/* Private for OP_ENTEREVAL */
-#define OPpEVAL_HAS_HH		2	/* Does it have a copy of %^H */
-#define OPpEVAL_UNICODE		4
-#define OPpEVAL_BYTES		8
-#define OPpEVAL_COPHH		16	/* Construct %^H from cop hints */
-#define OPpEVAL_RE_REPARSING	32	/* eval_sv(..., G_RE_REPARSING) */
-    
-/* Private for OP_CALLER, OP_WANTARRAY and OP_RUNCV */
-#define OPpOFFBYONE		128	/* Treat caller(1) as caller(2) */
-
-/* Private for OP_COREARGS */
-/* These must not conflict with OPpDONT_INIT_GV or OPpALLOW_FAKE.
-   See pp.c:S_rv2gv. */
-#define OPpCOREARGS_DEREF1	1	/* Arg 1 is a handle constructor */
-#define OPpCOREARGS_DEREF2	2	/* Arg 2 is a handle constructor */
-#define OPpCOREARGS_SCALARMOD	64	/* \$ rather than \[$@%*] */
-#define OPpCOREARGS_PUSHMARK	128	/* Call pp_pushmark */
-
-/* Private for OP_(LAST|REDO|NEXT|GOTO|DUMP) */
-#define OPpPV_IS_UTF8		128	/* label is in UTF8 */
-
-/* Private for OP_SPLIT */
-#define OPpSPLIT_IMPLIM		128	/* implicit limit */
 
 struct op {
     BASEOP
@@ -617,7 +427,7 @@ struct loop {
 #define OA_DANGEROUS 64
 #define OA_DEFGV 128
 
-/* The next 4 bits encode op class information */
+/* The next 4 bits (8..11) encode op class information */
 #define OCSHIFT 8
 
 #define OA_CLASS_MASK (15 << OCSHIFT)
@@ -637,9 +447,10 @@ struct loop {
 #define OA_FILESTATOP (12 << OCSHIFT)
 #define OA_LOOPEXOP (13 << OCSHIFT)
 
+/* Each remaining nybble of PL_opargs (i.e. bits 12..15, 16..19 etc)
+ * encode the type for each arg */
 #define OASHIFT 12
 
-/* Remaining nybbles of PL_opargs */
 #define OA_SCALAR 1
 #define OA_LIST 2
 #define OA_AVREF 3

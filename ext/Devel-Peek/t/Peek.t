@@ -1529,7 +1529,7 @@ dumpindent is 4 at - line 1.
 1   TYPE = leave  ===> NULL
     TARG = 1
     FLAGS = (VOID,KIDS,PARENS,SLABBED,LASTSIB)
-    PRIVATE = (REFCOUNTED)
+    PRIVATE = (REFC)
     REFCNT = 1
     {
 2       TYPE = enter  ===> 3
@@ -1545,7 +1545,7 @@ dumpindent is 4 at - line 1.
 5       TYPE = entersub  ===> 1
         TARG = 1
         FLAGS = (VOID,KIDS,STACKED,SLABBED,LASTSIB)
-        PRIVATE = (HASTARG)
+        PRIVATE = (TARG)
         {
 6           TYPE = null  ===> (5)
               (was list)
