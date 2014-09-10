@@ -4,6 +4,7 @@ BEGIN {
 }
 
 use XS::APItest;
+use Config;
 
 BEGIN {
     eval { require POSIX; POSIX->import("locale_h") };
@@ -30,6 +31,11 @@ skip_all("no non-dot radix locales available") unless $non_dot_locale;
 
 plan tests => 2;
 
-is(test_Gconvert(4.179, 2), "4.2", "Gconvert doesn't recognize underlying locale outside 'use locale'");
-use locale;
-is(test_Gconvert(4.179, 2), "4.2", "Gconvert doesn't recognize underlying locale inside 'use locale'");
+SKIP: {
+      if ($Config{usequadmath}) {
+            skip "no gconvert with usequadmath", 2;
+      }
+      is(test_Gconvert(4.179, 2), "4.2", "Gconvert doesn't recognize underlying locale outside 'use locale'");
+      use locale;
+      is(test_Gconvert(4.179, 2), "4.2", "Gconvert doesn't recognize underlying locale inside 'use locale'");
+}
