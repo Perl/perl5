@@ -11897,7 +11897,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		 && has_precis && intsize != 'q' ) {	/* Shortcuts */
 		/* See earlier comment about buggy Gconvert when digits,
 		   aka precis is 0  */
-		if ( c == 'g' && precis) {
+		if ( c == 'g' && precis ) {
                     STORE_LC_NUMERIC_SET_TO_NEEDED();
 		    PERL_UNUSED_RESULT(Gconvert((NV)fv, (int)precis, 0, PL_efloatbuf));
 		    /* May return an empty string for digits==0 */
@@ -11905,7 +11905,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			elen = strlen(PL_efloatbuf);
 			goto float_converted;
 		    }
-		} else if ( c == 'f' && !precis) {
+		} else if ( c == 'f' && !precis ) {
 		    if ((eptr = F0convert(fv, ebuf + sizeof ebuf, &elen)))
 			break;
 		}
