@@ -10573,10 +10573,46 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
     sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, svmax, maybe_tainted, SV_GMAGIC|SV_SMAGIC);
 }
 
+#if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN || \
+    LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
+    LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
+#  define LONGDOUBLE_LITTLE_ENDIAN
+#endif
+
+#if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN || \
+    LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN || \
+    LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
+#  define LONGDOUBLE_BIG_ENDIAN
+#endif
+
+#if LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
+    LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
+#  define LONGDOUBLE_X86_80_BIT
+#endif
+
+#if LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN || \
+    LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
+#  define LONGDOUBLE_DOUBLEDOUBLE
+#  define DOUBLEDOUBLE_MAXBITS 1028
+#endif
+
+#ifdef LONGDOUBLE_X86_80_BIT
+#  undef LONGDOUBLE_HAS_IMPLICIT_BIT
+#else
+#  define LONGDOUBLE_HAS_IMPLICIT_BIT
+#endif
+
+#ifdef LONGDOUBLE_DOUBLEDOUBLE
+/* vhex will contain the values (0..15) of the hex digits ("nybbles"
+ * of 4 bits); 1 for the implicit 1, and at most 1028 bits of mantissa,
+ * four bits per xdigit. */
+#  define VHEX_SIZE (1+DOUBLEDOUBLE_MAXBITS/4)
+#else
 /* vhex will contain the values (0..15) of the hex digits ("nybbles"
  * of 4 bits); 1 for the implicit 1, and at most 128 bits of mantissa,
  * four bits per xdigit. */
-#define VHEX_SIZE (1+128/4)
+#  define VHEX_SIZE (1+128/4)
+#endif
 
 /* If we do not have a known long double format, (including not using
  * long doubles, or long doubles being equal to doubles) then we will
@@ -10635,25 +10671,34 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
       else if (ix > ixmax) \
         ixmax = ix; \
     } STMT_END
-#define HEXTRACT_IMPLICIT_BIT() \
-    if (exponent) { \
-        if (vend) \
-            *v++ = 1; \
-        else \
-            v++; \
-    }
+#ifdef LONGDOUBLE_HAS_IMPLICIT_BIT
+#  define HEXTRACT_IMPLICIT_BIT(nv) \
+    if (nv != 0.0 && vend) \
+      *v++ = 1; \
+    else \
+      v++;
+#else
+#  undef HEXTRACT_IMPLICIT_BIT(nv)
+#endif
 
     /* First see if we are using long doubles. */
 #if NVSIZE > DOUBLESIZE && LONG_DOUBLEKIND != LONG_DOUBLE_IS_DOUBLE
     const U8* nvp = (const U8*)(&nv);
-#  define HEXTRACTSIZE NVSIZE
+#  ifdef LONGDOUBLE_DOUBLEDOUBLE
+#    define HEXTRACTSIZE (DOUBLEDOUBLE_MAXBITS/8)
+#  else
+#    define HEXTRACTSIZE NVSIZE
+#  endif
+    const U8* vmaxend = vhex + 2 * HEXTRACTSIZE + 1;
     (void)Perl_frexp(PERL_ABS(nv), exponent);
+    if (vend && (vend <= vhex || vend > vmaxend))
+        Perl_croak(aTHX_ "Hexadecimal float: internal error");
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
     /* Used in e.g. VMS and HP-UX IA-64, e.g. -0.1L:
      * 9a 99 99 99 99 99 99 99 99 99 99 99 99 99 fb 3f */
     /* The bytes 13..0 are the mantissa/fraction,
      * the 15,14 are the sign+exponent. */
-    HEXTRACT_IMPLICIT_BIT();
+    HEXTRACT_IMPLICIT_BIT(nv);
     for (ix = 13; ix >= 0; ix--) {
         if (vend)
             HEXTRACT_OUTPUT(ix);
@@ -10665,7 +10710,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
      * bf fb 99 99 99 99 99 99 99 99 99 99 99 99 99 9a */
     /* The bytes 2..15 are the mantissa/fraction,
      * the 0,1 are the sign+exponent. */
-    HEXTRACT_IMPLICIT_BIT();
+    HEXTRACT_IMPLICIT_BIT(nv);
     for (ix = 2; ix <= 15; ix++) {
         if (vend)
             HEXTRACT_OUTPUT(ix);
@@ -10697,9 +10742,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
-#  elif \
-     LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN || \
-     LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
+#  elif defined(LONGDOUBLE_DOUBLEDOUBLE)
     /* The little-endian double-double is used .. somewhere?
      *
      * The big endian double-double is used in e.g. PPC/Power (AIX)
@@ -10830,9 +10873,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
      * insert the radix.
      */
 #  if BYTEORDER == 0x12345678 || BYTEORDER == 0x1234 || \
-     LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN || \
-     LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
-     LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
+     defined(LONGDOUBLEKIND_LITTLE_ENDIAN)
     /* Little endian. */
     for (ix = limit_byte; ix >= 0; ix--) {
         if (vend)
@@ -10864,6 +10905,9 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
      * buffer, or if the ending output pointer didn't match the
      * previously computed value. */
     if (v <= vhex || v - vhex >= VHEX_SIZE ||
+        /* For double-double the ixmin and ixmax stay at zero,
+         * which is convenient since the HEXTRACTSIZE is tricky
+         * for double-double. */
         ixmin < 0 || ixmax >= HEXTRACTSIZE ||
         (vend && v != vend))
         Perl_croak(aTHX_ "Hexadecimal float: internal error");
@@ -11788,8 +11832,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         2 + /* "p+" */
                         BIT_DIGITS(NV_MAX_EXP) + /* exponent */
                         1;   /* \0 */
-#if LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN || \
-    LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
+#ifdef LONGDOUBLE_DOUBLEDOUBLE
                     /* However, for the "double double", we need more.
                      * Since each double has their own exponent, the
                      * doubles may float (haha) rather far from each
@@ -11801,7 +11844,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * for the future.) */
 
                     /* 2 hexdigits for each byte. */ 
-                    need += (1028/8 - DOUBLESIZE + 1) * 2;
+                    need += (DOUBLEDOUBLE_MAXBITS/8 - DOUBLESIZE + 1) * 2;
 #endif
 #ifdef USE_LOCALE_NUMERIC
                         STORE_LC_NUMERIC_SET_TO_NEEDED();
@@ -11937,12 +11980,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 vend = S_hextract(aTHX_ fv, &exponent, vhex, NULL);
                 S_hextract(aTHX_ fv, &exponent, vhex, vend);
 
-#if NVSIZE > DOUBLESIZE && defined(LONG_DOUBLEKIND)
-#  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
-      LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
-                exponent -= 4;
-#  else
+#if NVSIZE > DOUBLESIZE
+#  ifdef LONGDOUBLE_HAS_IMPLICIT_BIT
                 exponent--;
+#  else
+                exponent -= 4;
 #  endif
 #endif
 
