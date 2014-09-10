@@ -793,26 +793,14 @@ PP(pp_formline)
 
 	case FF_0DECIMAL: /* like FF_DECIMAL but for 0### */
 	    arg = *fpc++;
-#if defined(USE_LONG_DOUBLE)
 	    fmt = (const char *)
-		((arg & FORM_NUM_POINT) ?
-		 "%#0*.*" PERL_PRIfldbl : "%0*.*" PERL_PRIfldbl);
-#else
-	    fmt = (const char *)
-		((arg & FORM_NUM_POINT) ?
-		 "%#0*.*f"              : "%0*.*f");
-#endif
+		((arg & FORM_NUM_POINT) ? "%#0*.*" NVff : "%0*.*" NVff);
 	    goto ff_dec;
 
 	case FF_DECIMAL: /* do @##, ^##, where <arg>=(precision|flags) */
 	    arg = *fpc++;
-#if defined(USE_LONG_DOUBLE)
  	    fmt = (const char *)
-		((arg & FORM_NUM_POINT) ? "%#*.*" PERL_PRIfldbl : "%*.*" PERL_PRIfldbl);
-#else
-            fmt = (const char *)
-		((arg & FORM_NUM_POINT) ? "%#*.*f"              : "%*.*f");
-#endif
+		((arg & FORM_NUM_POINT) ? "%#*.*" NVff : "%*.*" NVff);
 	ff_dec:
 	    /* If the field is marked with ^ and the value is undefined,
 	       blank it out. */
