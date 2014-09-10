@@ -10678,7 +10678,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     else \
       v++;
 #else
-#  undef HEXTRACT_IMPLICIT_BIT(nv)
+#  undef HEXTRACT_IMPLICIT_BIT
 #endif
 
     /* First see if we are using long doubles. */
