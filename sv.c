@@ -12186,7 +12186,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	float_converted:
 	    eptr = PL_efloatbuf;
-            assert(elen > 0);
+            assert((IV)elen > 0); /* here zero elen is bad */
 
 #ifdef USE_LOCALE_NUMERIC
             /* If the decimal point character in the string is UTF-8, make the
@@ -12298,6 +12298,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 	}
 
+        assert((IV)elen >= 0); /* here zero elen is fine */
 	have = esignlen + zeros + elen;
 	if (have < zeros)
 	    croak_memory_wrap();
