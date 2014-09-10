@@ -1087,6 +1087,76 @@ Perl_my_atof(pTHX_ const char* s)
     return x;
 }
 
+static char*
+S_my_atof_infnan(const char* s, bool negative, const char* send, NV* value)
+{
+    const char *p0 = negative ? s - 1 : s;
+    const char *p = p0;
+    int infnan = grok_infnan(&p, send);
+    if (infnan && p != p0) {
+        /* If we can generate inf/nan directly, let's do so. */
+#ifdef NV_INF
+        if ((infnan & IS_NUMBER_INFINITY)) {
+            *value = (infnan & IS_NUMBER_NEG) ? -NV_INF: NV_INF;
+            return (char*)p;
+        }
+#endif
+#ifdef NV_NAN
+        if ((infnan & IS_NUMBER_NAN)) {
+            *value = NV_NAN;
+            return (char*)p;
+        }
+#endif
+#ifdef Perl_strtod
+        /* If still here, we didn't have either NV_INF or INV_NAN,
+         * and can try falling back to native strtod/strtold.
+         *
+         * The native interface might not recognize all the possible
+         * inf/nan strings Perl recognizes.  What we can try
+         * is to try faking the input.  We will try inf/-inf/nan
+         * as the most promising/portable input. */
+        {
+            const char* fake = NULL;
+            char* endp;
+            NV nv;
+            if ((infnan & IS_NUMBER_INFINITY)) {
+                fake = ((infnan & IS_NUMBER_NEG)) ? "-inf" : "inf";
+            }
+            else if ((infnan & IS_NUMBER_NAN)) {
+                fake = "nan";
+            }
+            assert(fake);
+            nv = Perl_strtod(fake, &endp);
+            if (fake != endp) {
+                if ((infnan & IS_NUMBER_INFINITY)) {
+#ifdef Perl_isinf
+                    if (Perl_isinf(nv))
+                        *value = nv;
+#else
+                    /* last resort, may generate SIGFPE */
+                    *value = Perl_exp((NV)1e9);
+                    if ((infnan & IS_NUMBER_NEG))
+                        *value = -*value;
+#endif
+                    return (char*)p; /* p, not endp */
+                }
+                else if ((infnan & IS_NUMBER_NAN)) {
+#ifdef Perl_isnan
+                    if (Perl_isnan(nv))
+                        *value = nv;
+#else
+                    /* last resort, may generate SIGFPE */
+                    *value = Perl_log((NV)-1.0);
+#endif
+                    return (char*)p; /* p, not endp */
+                }
+            }
+        }
+#endif /* #ifdef Perl_strtod */
+    }
+    return NULL;
+}
+
 char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)
 {
@@ -1151,70 +1221,9 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     }
 
     {
-        const char *p0 = negative ? s - 1 : s;
-        const char *p = p0;
-        int infnan = grok_infnan(&p, send);
-        if (infnan && p != p0) {
-            /* If we can generate inf/nan directly, let's do so. */
-#ifdef NV_INF
-            if ((infnan & IS_NUMBER_INFINITY)) {
-                *value = (infnan & IS_NUMBER_NEG) ? -NV_INF: NV_INF;
-                return (char*)p;
-            }
-#endif
-#ifdef NV_NAN
-            if ((infnan & IS_NUMBER_NAN)) {
-                *value = NV_NAN;
-                return (char*)p;
-            }
-#endif
-#ifdef Perl_strtod
-            /* If still here, we didn't have either NV_INF or INV_NAN,
-             * and can try falling back to native strtod/strtold.
-             *
-             * The native interface might not recognize all the possible
-             * inf/nan strings Perl recognizes.  What we can try
-             * is to try faking the input.  We will try inf/-inf/nan
-             * as the most promising/portable input. */
-            {
-                const char* fake = NULL;
-                char* endp;
-                NV nv;
-                if ((infnan & IS_NUMBER_INFINITY)) {
-                    fake = ((infnan & IS_NUMBER_NEG)) ? "-inf" : "inf";
-                }
-                else if ((infnan & IS_NUMBER_NAN)) {
-                    fake = "nan";
-                }
-                assert(fake);
-                nv = Perl_strtod(fake, &endp);
-                if (fake != endp) {
-                    if ((infnan & IS_NUMBER_INFINITY)) {
-#ifdef Perl_isinf
-                        if (Perl_isinf(nv))
-                            *value = nv;
-#else
-                        /* last resort, may generate SIGFPE */
-                        *value = Perl_exp((NV)1e9);
-                        if ((infnan & IS_NUMBER_NEG))
-                            *value = -*value;
-#endif
-                        return (char*)p; /* p, not endp */
-                    }
-                    else if ((infnan & IS_NUMBER_NAN)) {
-#ifdef Perl_isnan
-                        if (Perl_isnan(nv))
-                            *value = nv;
-#else
-                        /* last resort, may generate SIGFPE */
-                        *value = Perl_log((NV)-1.0);
-#endif
-                        return (char*)p; /* p, not endp */
-                    }
-                }
-            }
-#endif /* #ifdef Perl_strtod */
-        }
+        const char* endp;
+        if ((endp = S_my_atof_infnan(s, negative, send, value)))
+            return (char*)endp;
     }
 
     /* we accumulate digits into an integer; when this becomes too
