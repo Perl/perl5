@@ -677,8 +677,10 @@ static NV my_log1p(NV x)
 {
   /* http://www.johndcook.com/cpp_log_one_plus_x.html -- public domain.
    * Taylor series, the first four terms (the last term quartic). */
-  if (x <= -1.0)
+  if (x < -1.0)
     return NV_NAN;
+  if (x == -1.0)
+    return -NV_INF;
   if (PERL_ABS(x) > 1e-4)
     return Perl_log(1.0 + x);
   else
