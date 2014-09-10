@@ -612,12 +612,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_truncate HAS_TRUNCATE	/**/
 
-/* HAS_TRUNCL:
- *	This symbol, if defined, indicates that the truncl routine is
- *	available.  If copysignl is also present we can emulate modfl.
- */
-#$d_truncl HAS_TRUNCL		/**/
-
 /* HAS_TZNAME:
  *	This symbol, if defined, indicates that the tzname[] array is
  *	available to access timezone names.
@@ -4234,6 +4228,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to do the opposite of gmtime ()
  */
 #$d_timegm HAS_TIMEGM		/**/
+
+/* HAS_TRUNCL:
+ *	This symbol, if defined, indicates that the truncl routine is
+ *	available. If copysignl is also present we can emulate modfl.
+ */
+#$d_truncl HAS_TRUNCL		/**/
 
 /* U32_ALIGNMENT_REQUIRED:
  *	This symbol, if defined, indicates that you must access

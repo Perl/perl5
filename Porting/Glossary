@@ -2451,8 +2451,9 @@ d_truncate (d_truncate.U):
 
 d_truncl (d_truncl.U):
 	This variable conditionally defines the HAS_TRUNCL symbol, which
-	indicates to the C program that the aintl() routine is available.
-	If copysignl is also present we can emulate modfl.
+	indicates to the C program that the truncl() routine is available
+	to round long doubles towards zero. If copysignl is also present,
+	we can emulate modfl.
 
 d_ttyname_r (d_ttyname_r.U):
 	This variable conditionally defines the HAS_TTYNAME_R symbol,
