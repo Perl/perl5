@@ -10933,8 +10933,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
      * NV_DIG: mantissa takes than many decimal digits.
      * Plus 32: Playing safe. */
     char ebuf[IV_DIG * 4 + NV_DIG + 32];
-    /* large enough for "%#.#f" --chip */
-    /* what about long double NVs? --jhi */
     bool no_redundant_warning = FALSE; /* did we use any explicit format parameter index? */
     bool hexfp = FALSE; /* hexadecimal floating point? */
 
