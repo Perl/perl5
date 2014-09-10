@@ -1910,13 +1910,23 @@ foreach my $Locale (@Locale) {
 
     my $first_c_test = $locales_test_number;
 
-    report_result($Locale, ++$locales_test_number, $ok3);
-    $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a constant';
-    $problematical_tests{$locales_test_number} = 1;
+    $test_names{++$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a constant';
+    if ($Config{usequadmath}) {
+        print "# Skip: no locale radix with usequadmath ($test_names{$locales_test_number})\n";
+        report_result($Locale, $locales_test_number, 1);
+    } else {
+        report_result($Locale, $locales_test_number, $ok3);
+        $problematical_tests{$locales_test_number} = 1;
+    }
 
-    report_result($Locale, ++$locales_test_number, $ok4);
-    $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar';
-    $problematical_tests{$locales_test_number} = 1;
+    $test_names{++$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar';
+    if ($Config{usequadmath}) {
+        print "# Skip: no locale radix with usequadmath ($test_names{$locales_test_number})\n";
+        report_result($Locale, $locales_test_number, 1);
+    } else {
+        report_result($Locale, $locales_test_number, $ok4);
+        $problematical_tests{$locales_test_number} = 1;
+    }
 
     report_result($Locale, ++$locales_test_number, $ok5);
     $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar and an intervening sprintf';
@@ -1931,9 +1941,14 @@ foreach my $Locale (@Locale) {
     report_result($Locale, ++$locales_test_number, $ok7);
     $test_names{$locales_test_number} = 'Verify that "==" with a scalar still works in inner no locale';
 
-    report_result($Locale, ++$locales_test_number, $ok8);
-    $test_names{$locales_test_number} = 'Verify that "==" with a scalar and an intervening sprintf still works in inner no locale';
-    $problematical_tests{$locales_test_number} = 1;
+    $test_names{++$locales_test_number} = 'Verify that "==" with a scalar and an intervening sprintf still works in inner no locale';
+    if ($Config{usequadmath}) {
+        print "# Skip: no locale radix with usequadmath ($test_names{$locales_test_number})\n";
+        report_result($Locale, $locales_test_number, 1);
+    } else {
+        report_result($Locale, $locales_test_number, $ok8);
+        $problematical_tests{$locales_test_number} = 1;
+    }
 
     debug "$first_e_test..$locales_test_number: \$e = $e, no locale\n";
 
@@ -1946,9 +1961,14 @@ foreach my $Locale (@Locale) {
     $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar';
     $problematical_tests{$locales_test_number} = 1;
 
-    report_result($Locale, ++$locales_test_number, $ok11);
-    $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar and an intervening sprintf';
-    $problematical_tests{$locales_test_number} = 1;
+    $test_names{++$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar and an intervening sprintf';
+    if ($Config{usequadmath}) {
+        print "# Skip: no locale radix with usequadmath ($test_names{$locales_test_number})\n";
+        report_result($Locale, $locales_test_number, 1);
+    } else {
+        report_result($Locale, $locales_test_number, $ok11);
+        $problematical_tests{$locales_test_number} = 1;
+    }
 
     report_result($Locale, ++$locales_test_number, $ok12);
     $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix can participate in an addition and function call as numeric';
@@ -2186,9 +2206,14 @@ foreach my $Locale (@Locale) {
             }
         }
 
-	report_result($Locale, $locales_test_number, @f == 0);
-	if (@f) {
-	    print "# failed $locales_test_number locale '$Locale' numbers @f\n"
+        if ($Config{usequadmath}) {
+            print "# Skip: no locale radix with usequadmath ($Locale)\n";
+            report_result($Locale, $locales_test_number, 1);
+        } else {
+            report_result($Locale, $locales_test_number, @f == 0);
+            if (@f) {
+                print "# failed $locales_test_number locale '$Locale' numbers @f\n"
+            }
 	}
     }
 }
