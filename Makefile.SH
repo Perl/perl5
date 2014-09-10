@@ -1368,7 +1368,7 @@ done
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
 .PHONY: depend
-depend: makedepend $(DTRACE_H)
+depend: makedepend $(DTRACE_H) $(generated_headers)
 	sh ./makedepend MAKE="$(MAKE)" cflags
 
 .PHONY: test check test_prep test_prep_nodll test_prep_pre \
