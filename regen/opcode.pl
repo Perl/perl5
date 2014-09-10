@@ -446,13 +446,13 @@ sub print_B_Op_private {
 @        bitcount_def  => 'OPpFOO_BITS',
 @
 @        # If present, Concise etc will display the value with a 'FOO='
-@        # prefix. If it equals '-', then Concise will treat the bit field
-@        # as raw bits and not try to interpret it.
+@        # prefix. If it equals '-', then Concise will treat the bit
+@        # field as raw bits and not try to interpret it.
 @        label         => 'FOO',
 @
-@        # If present, specifies the names of some defines and the display
-@        # labels that are used to assign meaning to particular integer
-@        # values within the bit field; e.g. 3 is displayed as 'C'.
+@        # If present, specifies the names of some defines and the dis-
+@        # play labels that are used to assign meaning to particular inte-
+@        # ger values within the bit field; e.g. 3 is displayed as 'C'.
 @        enum          => [ qw(
 @                             1   OPpFOO_A  A
 @                             2   OPpFOO_B  B
