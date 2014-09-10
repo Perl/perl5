@@ -12146,6 +12146,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	float_converted:
 	    eptr = PL_efloatbuf;
+            assert(elen > 0);
 
 #ifdef USE_LOCALE_NUMERIC
             /* If the decimal point character in the string is UTF-8, make the
