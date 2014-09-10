@@ -8885,8 +8885,7 @@ Perl_ck_rvconst(pTHX_ OP *o)
 	 * whether the lexer already added THIS instance of this symbol.
 	 */
 	iscv = (o->op_type == OP_RV2CV) * 2;
-	do {
-	    gv = gv_fetchsv(kidsv,
+	gv = gv_fetchsv(kidsv,
 		noexpand
 		    ? noexpand
 		    : iscv | !(kid->op_private & OPpCONST_ENTERED),
@@ -8899,8 +8898,6 @@ Perl_ck_rvconst(pTHX_ OP *o)
 			    : o->op_type == OP_RV2HV
 				? SVt_PVHV
 				: SVt_PVGV);
-	} while (!noexpand && !gv && !(kid->op_private & OPpCONST_ENTERED)
-	      && !iscv++);
 	if (gv) {
 	    kid->op_type = OP_GV;
 	    SvREFCNT_dec(kid->op_sv);
