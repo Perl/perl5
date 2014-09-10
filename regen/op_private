@@ -470,7 +470,7 @@ addbits('repeat', 6 => qw(OPpREPEAT_DOLIST DOLIST)); # List replication
 #     3  OPpENTERSUB_AMPER   check   OPpENTERSUB_AMPER      parser
 #     4  OPpENTERSUB_DB      check
 #     5  OPpDEREF_AV         context
-#     6  OPpDEREF_HV         context OPpMAY_RETURN_CONSTANT context
+#     6  OPpDEREF_HV         context OPpMAY_RETURN_CONSTANT parser/context
 #     7  OPpLVAL_INTRO       context OPpENTERSUB_NOPAREN    parser
 
 # NB: OPpHINT_STRICT_REFS must equal HINT_STRICT_REFS
