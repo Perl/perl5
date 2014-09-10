@@ -252,7 +252,7 @@ sub nm_parse_darwin {
                 $symbols->{data}{const}{$symbol}{$symbols->{o}}++;
             } elsif (/^\(__TEXT,__text\) (?:non-)?external _(\w+)$/) {
                 $symbols->{text}{$1}{$symbols->{o}}++;
-            } elsif (/^\(__DATA,__(const|data|bss|common)\) (?:non-)?external _(\w+)(\.\w+)?$/) {
+            } elsif (/^\(__DATA,__\w*?(const|data|bss|common)\w*\) (?:non-)?external _(\w+)(\.\w+)?$/) {
                 my ($dtype, $symbol, $suffix) = ($1, $2, $3);
                 # Ignore function-local constants like
                 # _Perl_pp_gmtime.dayname
