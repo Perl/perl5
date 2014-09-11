@@ -9022,7 +9022,7 @@ Perl_ck_rvconst(pTHX_ OP *o)
 	 * or we get possible typo warnings.  OPpCONST_ENTERED says
 	 * whether the lexer already added THIS instance of this symbol.
 	 */
-	iscv = (o->op_type == OP_RV2CV) * 2;
+	iscv = o->op_type == OP_RV2CV ? GV_NOEXPAND|GV_ADDMULTI : 0;
 	gv = gv_fetchsv(kidsv,
 		o->op_type == OP_RV2CV
 			&& o->op_private & OPpMAY_RETURN_CONSTANT
@@ -9038,6 +9038,13 @@ Perl_ck_rvconst(pTHX_ OP *o)
 				? SVt_PVHV
 				: SVt_PVGV);
 	if (gv) {
+	    if (!isGV(gv)) {
+		assert(iscv);
+		assert(SvROK(gv));
+		if (!(o->op_private & OPpMAY_RETURN_CONSTANT)
+		  && SvTYPE(SvRV(gv)) != SVt_PVCV)
+		    gv_fetchsv(kidsv, GV_ADDMULTI, SVt_PVCV);
+	    }
 	    kid->op_type = OP_GV;
 	    SvREFCNT_dec(kid->op_sv);
 #ifdef USE_ITHREADS

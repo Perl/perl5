@@ -1794,9 +1794,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	    if (!PL_curpad[ix] || SvIMMORTAL(PL_curpad[ix])
 		 || IS_PADGV(PL_curpad[ix]) || IS_PADCONST(PL_curpad[ix]))
 		continue;
-	    if (!SvPADMY(PL_curpad[ix])) {
-		SvPADTMP_on(PL_curpad[ix]);
-	    } else if (!SvFAKE(namep[ix])) {
+	    if (SvPADMY(PL_curpad[ix]) && !SvFAKE(namep[ix])) {
 		/* This is a work around for how the current implementation of
 		   ?{ } blocks in regexps interacts with lexicals.
 
