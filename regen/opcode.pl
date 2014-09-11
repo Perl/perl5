@@ -451,9 +451,10 @@ sub print_B_Op_private {
 @        # field as raw bits and not try to interpret it.
 @        label         => 'FOO',
 @
-@        # If present, specifies the names of some defines and the dis-
-@        # play labels that are used to assign meaning to particular inte-
-@        # ger values within the bit field; e.g. 3 is displayed as 'C'.
+@        # If present, specifies the names of some defines and the
+@        # display labels that are used to assign meaning to particu-
+@        # lar integer values within the bit field; e.g. 3 is dis-
+@        # played as 'C'.
 @        enum          => [ qw(
 @                             1   OPpFOO_A  A
 @                             2   OPpFOO_B  B
