@@ -268,6 +268,8 @@ should print 123:
 
 typedef OP *(*Perl_call_checker)(pTHX_ OP *, GV *, SV *);
 
+#define CALL_CHECKER_REQUIRE_GV	MGf_REQUIRE_GV
+
 /*
  * Local variables:
  * c-indentation-style: bsd

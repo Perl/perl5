@@ -10764,7 +10764,7 @@ Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
 }
 
 /*
-=for apidoc Am|void|cv_set_call_checker|CV *cv|Perl_call_checker ckfun|SV *ckobj
+=for apidoc Am|void|cv_set_call_checker_flags|CV *cv|Perl_call_checker ckfun|SV *ckobj|U32 flags
 
 Sets the function that will be used to fix up a call to I<cv>.
 Specifically, the function is applied to an C<entersub> op tree for a
@@ -10781,14 +10781,24 @@ It is intended to be called in this manner:
     entersubop = ckfun(aTHX_ entersubop, namegv, ckobj);
 
 In this call, I<entersubop> is a pointer to the C<entersub> op,
-which may be replaced by the check function, and I<namegv> is a GV
-supplying the name that should be used by the check function to refer
+which may be replaced by the check function, and I<namegv> supplies
+the name that should be used by the check function to refer
 to the callee of the C<entersub> op if it needs to emit any diagnostics.
 It is permitted to apply the check function in non-standard situations,
 such as to a call to a different subroutine or to a method call.
 
+I<namegv> may not actually be a GV.  For efficiency, perl may pass a
+CV or other SV instead.  Whatever is passed can be used as the first
+argument to L</cv_name>.  You can force perl to pass a GV by including
+C<CALL_CHECKER_REQUIRE_GV> in the I<flags>.
+
 The current setting for a particular CV can be retrieved by
 L</cv_get_call_checker>.
+
+=for apidoc Am|void|cv_set_call_checker|CV *cv|Perl_call_checker ckfun|SV *ckobj
+
+The original form of L</cv_set_call_checker_flags>, which passes it the
+C<CALL_CHECKER_REQUIRE_GV> flag for backward-compatibility.
 
 =cut
 */
@@ -10797,6 +10807,14 @@ void
 Perl_cv_set_call_checker(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj)
 {
     PERL_ARGS_ASSERT_CV_SET_CALL_CHECKER;
+    cv_set_call_checker_flags(cv, ckfun, ckobj, CALL_CHECKER_REQUIRE_GV);
+}
+
+void
+Perl_cv_set_call_checker_flags(pTHX_ CV *cv, Perl_call_checker ckfun,
+				     SV *ckobj, U32 flags)
+{
+    PERL_ARGS_ASSERT_CV_SET_CALL_CHECKER_FLAGS;
     if (ckfun == Perl_ck_entersub_args_proto_or_list && ckobj == (SV*)cv) {
 	if (SvMAGICAL((SV*)cv))
 	    mg_free_type((SV*)cv, PERL_MAGIC_checkcall);
@@ -10815,7 +10833,8 @@ Perl_cv_set_call_checker(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj)
 	    SvREFCNT_inc_simple_void_NN(ckobj);
 	    callmg->mg_flags |= MGf_REFCOUNTED;
 	}
-	callmg->mg_flags |= MGf_COPY;
+	callmg->mg_flags = (callmg->mg_flags &~ MGf_REQUIRE_GV)
+			 | (flags & MGf_REQUIRE_GV) | MGf_COPY;
     }
 }
 
