@@ -2250,7 +2250,7 @@ Perl_cv_name(pTHX_ CV *cv, SV *sv)
 	return sv ? (sv) : (SV *)cv;
     }
     {
-	SV * const retsv = sv ? sv : sv_newmortal();
+	SV * const retsv = sv ? (sv) : sv_newmortal();
     	if (SvTYPE(cv) == SVt_PVCV) {
 	    if (CvNAMED(cv)) {
 		if (CvLEXICAL(cv)) sv_sethek(retsv, CvNAME_HEK(cv));
