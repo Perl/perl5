@@ -1843,6 +1843,23 @@ typedef NVTYPE NV;
 #   include <ieeefp.h>
 #endif
 
+/* We need Perl_isfinitel (ends with ell) (if available) even when
+ * not USE_LONG_DOUBLE because the printf code (sv_catpvfn_flags)
+ * needs that. */
+#if defined(HAS_LONG_DOUBLE) && !defined(Perl_isfinitel)
+/* If isfinite() is a macro and looks like we have C99,
+ * we assume it's the type-aware C99 isfinite(). */
+#    if defined(isfinite) && defined(HAS_C99)
+#        define Perl_isfinitel(x) isfinite(x)
+#    elif defined(HAS_ISFINITEL)
+#        define Perl_isfinitel(x) isfinitel(x)
+#    elif defined(HAS_FINITEL)
+#       define Perl_isfinitel(x) finitel(x)
+#    elif defined(LDBL_MAX)
+#       define Perl_isfinitel(x) ((x) <= LDBL_MAX && (x) >= -LDBL_MAX)
+#   endif
+#endif
+
 #ifdef USE_LONG_DOUBLE
 #   ifdef I_SUNMATH
 #       include <sunmath.h>
@@ -1934,25 +1951,19 @@ EXTERN_C long double modfl(long double, long double *);
 #       endif
 #   endif
 #   ifndef Perl_isnan
-#       if defined(HAS_ISNANL) && !(defined(isnan) && HAS_C99)
+#       if defined(HAS_ISNANL) && !(defined(isnan) && defined(HAS_C99))
 #           define Perl_isnan(x) isnanl(x)
 #       endif
 #   endif
 #   ifndef Perl_isinf
-#       if defined(HAS_ISINFL) && !(defined(isinf) && HAS_C99)
+#       if defined(HAS_ISINFL) && !(defined(isinf) && defined(HAS_C99))
 #           define Perl_isinf(x) isinfl(x)
 #       elif defined(LDBL_MAX)
 #           define Perl_isinf(x) ((x) > LDBL_MAX || (x) < -LDBL_MAX)
 #       endif
 #   endif
-#   if !defined(Perl_isfinite) && !(defined(isfinite) && HAS_C99)
-#     ifdef HAS_ISFINITEL
-#       define Perl_isfinite(x) isfinitel(x)
-#     elif defined(HAS_FINITEL)
-#       define Perl_isfinite(x) finitel(x)
-#     elif defined(LDBL_MAX)
-#       define Perl_isfinite(x) ((x) <= LDBL_MAX && (x) >= -LDBL_MAX)
-#     endif
+#   ifdef Perl_isfinitel
+#       define Perl_isfinite(x) Perl_isfinitel(x)
 #   endif
 #else
 #   define NV_DIG DBL_DIG
