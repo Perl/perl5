@@ -2231,8 +2231,8 @@ Perl_cv_clone_into(pTHX_ CV *proto, CV *target)
 
 Returns an SV containing the name of the CV, mainly for use in error
 reporting.  The CV may actually be a GV instead, in which case the returned
-SV holds the GV's name.  Anything other than a GV or CV will be treated as
-a string already holding the sub name.
+SV holds the GV's name.  Anything other than a GV or CV is treated as a
+string already holding the sub name, but this could change in the future.
 
 An SV may be passed as a second argument.  If so, the name will be assigned
 to it and it will be returned.  Otherwise the returned SV will be a new
