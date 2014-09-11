@@ -2241,7 +2241,7 @@ of Perl are likely to eliminate these arbitrary limitations.
 =item Ignoring zero length \N{} in character class in regex; marked by
 S<<-- HERE> in m/%s/
 
-(W regexp) Named Unicode character escapes C<(\N{...})> may return a
+(W regexp) Named Unicode character escapes (C<\N{...}>) may return a
 zero-length sequence.  When such an escape is used in a character class
 its behaviour is not well defined.  Check that the correct escape has
 been used, and the correct charname handler is in scope.
@@ -3365,20 +3365,20 @@ probably not what you want.
 =item \N{} in inverted character class or as a range end-point is restricted to one character in regex; marked
 by S<<-- HERE> in m/%s/
 
-(F) Named Unicode character escapes C<(\N{...})> may return a
-multi-character sequence.  Even though a character class is supposed to
-match just one character of input, perl will match the whole thing
-correctly, except when the class is inverted (C<[^...]>, or the escape
-is the beginning or final end point of a range.  The mathematically
-logical behavior for what matches when inverting is very different than
-what people expect, so we have decided to forbid it.
-Similarly unclear is what should be generated when the C<\N{...}> is
-used as one of the end points of the range, such as in
+(F) Named Unicode character escapes (C<\N{...}>) may return a
+multi-character sequence.  Even though a character class is
+supposed to match just one character of input, perl will match the
+whole thing correctly, except when the class is inverted (C<[^...]>),
+or the escape is the beginning or final end point of a range.  The
+mathematically logical behavior for what matches when inverting
+is very different from what people expect, so we have decided to
+forbid it.  Similarly unclear is what should be generated when the
+C<\N{...}> is used as one of the end points of the range, such as in
 
  [\x{41}-\N{ARABIC SEQUENCE YEH WITH HAMZA ABOVE WITH AE}]
 
-What is meant here is unclear, as the C<\N{...}> escape is a sequence of
-code points, so this is made an error.
+What is meant here is unclear, as the C<\N{...}> escape is a sequence
+of code points, so this is made an error.
 
 =item \N{NAME} must be resolved by the lexer in regex; marked by
 S<<-- HERE> in m/%s/
@@ -6515,14 +6515,14 @@ You need to add either braces or blanks to disambiguate.
 =item Using just the first character returned by \N{} in character class in 
 regex; marked by S<<-- HERE> in m/%s/
 
-(W regexp) Named Unicode character escapes C<(\N{...})> may return a
-multi-character sequence.  Even though a character class is supposed to
-match just one character of input, perl will match the whole thing
-correctly, except when the class is inverted (C<[^...]>, or the escape
-is the beginning or final end point of a range.  For these, what should
-happen isn't clear at all.  In these circumstances, Perl discards all
-but the first character of the returned sequence, which is not likely
-what you want.
+(W regexp) Named Unicode character escapes C<(\N{...})> may return
+a multi-character sequence.  Even though a character class is
+supposed to match just one character of input, perl will match
+the whole thing correctly, except when the class is inverted
+(C<[^...]>), or the escape is the beginning or final end point of
+a range.  For these, what should happen isn't clear at all.  In
+these circumstances, Perl discards all but the first character
+of the returned sequence, which is not likely what you want.
 
 =item Using !~ with %s doesn't make sense
 
@@ -6786,7 +6786,7 @@ Something Very Wrong.
 
 =item Zero length \N{} in regex; marked by S<<-- HERE> in m/%s/
 
-(F) Named Unicode character escapes C<(\N{...})> may return a zero-length
+(F) Named Unicode character escapes (C<\N{...}>) may return a zero-length
 sequence.  Such an escape was used in an extended character class, i.e.
 C<(?[...])>, which is not permitted.  Check that the correct escape has
 been used, and the correct charnames handler is in scope.  The S<<-- HERE>
