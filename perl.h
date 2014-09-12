@@ -1843,23 +1843,6 @@ typedef NVTYPE NV;
 #   include <ieeefp.h>
 #endif
 
-/* We need Perl_isfinitel (ends with ell) (if available) even when
- * not USE_LONG_DOUBLE because the printf code (sv_catpvfn_flags)
- * needs that. */
-#if defined(HAS_LONG_DOUBLE) && !defined(Perl_isfinitel)
-/* If isfinite() is a macro and looks like we have C99,
- * we assume it's the type-aware C99 isfinite(). */
-#    if defined(isfinite) && defined(HAS_C99)
-#        define Perl_isfinitel(x) isfinite(x)
-#    elif defined(HAS_ISFINITEL)
-#        define Perl_isfinitel(x) isfinitel(x)
-#    elif defined(HAS_FINITEL)
-#       define Perl_isfinitel(x) finitel(x)
-#    elif defined(LDBL_MAX)
-#       define Perl_isfinitel(x) ((x) <= LDBL_MAX && (x) >= -LDBL_MAX)
-#   endif
-#endif
-
 #ifdef USE_LONG_DOUBLE
 #   ifdef I_SUNMATH
 #       include <sunmath.h>
@@ -1962,9 +1945,7 @@ EXTERN_C long double modfl(long double, long double *);
 #           define Perl_isinf(x) ((x) > LDBL_MAX || (x) < -LDBL_MAX)
 #       endif
 #   endif
-#   ifdef Perl_isfinitel
-#       define Perl_isfinite(x) Perl_isfinitel(x)
-#   endif
+#   define Perl_isfinite(x) Perl_isfinitel(x)
 #else
 #   define NV_DIG DBL_DIG
 #   ifdef DBL_MANT_DIG
@@ -2315,6 +2296,27 @@ int isnan(double d);
 #   if defined(Perl_isfinite) && defined(Perl_isnan)
 #       define Perl_isinf(x) !(Perl_isfinite(x)||Perl_isnan(x))
 #   endif
+#endif
+
+/* We need Perl_isfinitel (ends with ell) (if available) even when
+ * not USE_LONG_DOUBLE because the printf code (sv_catpvfn_flags)
+ * needs that. */
+#if defined(HAS_LONG_DOUBLE) && !defined(Perl_isfinitel)
+/* If isfinite() is a macro and looks like we have C99,
+ * we assume it's the type-aware C99 isfinite(). */
+#    if defined(isfinite) && defined(HAS_C99)
+#        define Perl_isfinitel(x) isfinite(x)
+#    elif defined(HAS_ISFINITEL)
+#        define Perl_isfinitel(x) isfinitel(x)
+#    elif defined(HAS_FINITEL)
+#        define Perl_isfinitel(x) finitel(x)
+#    elif defined(HAS_INFL) && defined(HAS_NANL)
+#        define Perl_isfinitel(x) !(isinfl(x)||isnanl(x))
+#    elif defined(Perl_fp_class_inf) && defined(Perl_fp_class_nan)
+#        define Perl_isfinitel(x) !(Perl_fp_class_inf(x)||Perl_fp_class_nan(x))
+#    elif defined(LDBL_MAX)
+#        define Perl_isfinitel(x) ((x) <= LDBL_MAX && (x) >= -LDBL_MAX)
+#    endif
 #endif
 
 /* The default is to use Perl's own atof() implementation (in numeric.c).
