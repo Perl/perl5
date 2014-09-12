@@ -632,7 +632,7 @@ EXTCONST char * const PL_reg_name[] = {
 EXTCONST char * PL_reg_extflags_name[];
 #else
 EXTCONST char * const PL_reg_extflags_name[] = {
-	/* Bits in extflags defined: 11111110111111111111111111111111 */
+	/* Bits in extflags defined: 11111111111111110111111111111111 */
 	"MULTILINE",        /* 0x00000001 */
 	"SINGLELINE",       /* 0x00000002 */
 	"FOLD",             /* 0x00000004 */
@@ -642,22 +642,22 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 	"CHARSET1",         /* 0x00000040 : "CHARSET" - 0x000000e0 */
 	"CHARSET2",         /* 0x00000080 : "CHARSET" - 0x000000e0 */
 	"SPLIT",            /* 0x00000100 */
-	"IS_ANCHORED",      /* 0x00000200 */
+	"UNUSED0",          /* 0x00000200 */
 	"UNUSED1",          /* 0x00000400 */
 	"UNUSED2",          /* 0x00000800 */
 	"UNUSED3",          /* 0x00001000 */
 	"UNUSED4",          /* 0x00002000 */
 	"UNUSED5",          /* 0x00004000 */
-	"NO_INPLACE_SUBST", /* 0x00008000 */
-	"EVAL_SEEN",        /* 0x00010000 */
-	"UNUSED8",          /* 0x00020000 */
+	"UNUSED_BIT_15",    /* 0x00008000 */
+	"NO_INPLACE_SUBST", /* 0x00010000 */
+	"EVAL_SEEN",        /* 0x00020000 */
 	"UNBOUNDED_QUANTIFIER_SEEN",/* 0x00040000 */
 	"CHECK_ALL",        /* 0x00080000 */
 	"MATCH_UTF8",       /* 0x00100000 */
 	"USE_INTUIT_NOML",  /* 0x00200000 */
 	"USE_INTUIT_ML",    /* 0x00400000 */
 	"INTUIT_TAIL",      /* 0x00800000 */
-	"UNUSED_BIT_24",    /* 0x01000000 */
+	"IS_ANCHORED",      /* 0x01000000 */
 	"COPY_DONE",        /* 0x02000000 */
 	"TAINTED_SEEN",     /* 0x04000000 */
 	"TAINTED",          /* 0x08000000 */

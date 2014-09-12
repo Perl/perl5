@@ -355,8 +355,7 @@ and check for NULL.
 #   error "RXf_SPLIT does not match RXf_PMf_SPLIT"
 #endif
 
-/* Do we have some sort of anchor? */
-#define RXf_IS_ANCHORED         (1<<(RXf_BASE_SHIFT+0))
+#define RXf_UNUSED0             (1<<(RXf_BASE_SHIFT+0))
 #define RXf_UNUSED1             (1<<(RXf_BASE_SHIFT+1))
 #define RXf_UNUSED2             (1<<(RXf_BASE_SHIFT+2))
 #define RXf_UNUSED3             (1<<(RXf_BASE_SHIFT+3))
@@ -364,9 +363,8 @@ and check for NULL.
 #define RXf_UNUSED5             (1<<(RXf_BASE_SHIFT+5))
 
 /* What we have seen */
-#define RXf_NO_INPLACE_SUBST    (1<<(RXf_BASE_SHIFT+6))
-#define RXf_EVAL_SEEN   	(1<<(RXf_BASE_SHIFT+7))
-#define RXf_UNUSED8             (1<<(RXf_BASE_SHIFT+8))
+#define RXf_NO_INPLACE_SUBST    (1<<(RXf_BASE_SHIFT+7))
+#define RXf_EVAL_SEEN   	(1<<(RXf_BASE_SHIFT+8))
 
 /* Special */
 #define RXf_UNBOUNDED_QUANTIFIER_SEEN   (1<<(RXf_BASE_SHIFT+9))
@@ -380,6 +378,9 @@ and check for NULL.
 #define RXf_USE_INTUIT_ML	(1<<(RXf_BASE_SHIFT+13))
 #define RXf_INTUIT_TAIL 	(1<<(RXf_BASE_SHIFT+14))
 #define RXf_USE_INTUIT		(RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
+
+/* Do we have some sort of anchor? */
+#define RXf_IS_ANCHORED         (1<<(RXf_BASE_SHIFT+15))
 
 /* Copy and tainted info */
 #define RXf_COPY_DONE   	(1<<(RXf_BASE_SHIFT+16))
