@@ -429,7 +429,7 @@ my %expected = (
     time   => 'd_time',
     );
 
-if ($Config{uselongdouble} && $Config{d_longdbl}) {
+if ($Config{uselongdouble} && $Config{longdblsize} > $Config{doublesize}) {
     $expected{expl} = undef; # There is no Configure symbol for expl.
 } else {
     $expected{exp} = undef; # There is no Configure symbol for exp.
