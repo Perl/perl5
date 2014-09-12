@@ -11832,7 +11832,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         1 + /* "." */
                         2 * NVSIZE + /* 2 hexdigits for each byte */
                         2 + /* "p+" */
-                        BIT_DIGITS(NV_MAX_EXP) + /* exponent */
+                        6 + /* exponent: sign, plus up to 16383 (quad fp) */
                         1;   /* \0 */
 #ifdef LONGDOUBLE_DOUBLEDOUBLE
                     /* However, for the "double double", we need more.
@@ -11846,7 +11846,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * for the future.) */
 
                     /* 2 hexdigits for each byte. */ 
-                    need += (DOUBLEDOUBLE_MAXBITS/8 - DOUBLESIZE + 1) * 2;
+                    need += (DOUBLEDOUBLE_MAXBITS/8 + 1) * 2;
+                    /* the size for the exponent already added */
 #endif
 #ifdef USE_LOCALE_NUMERIC
                         STORE_LC_NUMERIC_SET_TO_NEEDED();
