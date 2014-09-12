@@ -350,44 +350,42 @@ and check for NULL.
 
 /* Leave some space, so future bit allocations can go either in the shared or
  * unshared area without affecting binary compatibility */
-#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT)
-
-/* Unused +0 - +6 */
+#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT + 5)
 
 /* What we have seen */
-#define RXf_NO_INPLACE_SUBST    (1<<(RXf_BASE_SHIFT+7))
-#define RXf_EVAL_SEEN   	(1<<(RXf_BASE_SHIFT+8))
+#define RXf_NO_INPLACE_SUBST    (1<<(RXf_BASE_SHIFT+2))
+#define RXf_EVAL_SEEN   	(1<<(RXf_BASE_SHIFT+3))
 
 /* Special */
-#define RXf_UNBOUNDED_QUANTIFIER_SEEN   (1<<(RXf_BASE_SHIFT+9))
-#define RXf_CHECK_ALL   	(1<<(RXf_BASE_SHIFT+10))
+#define RXf_UNBOUNDED_QUANTIFIER_SEEN   (1<<(RXf_BASE_SHIFT+4))
+#define RXf_CHECK_ALL   	(1<<(RXf_BASE_SHIFT+5))
 
 /* UTF8 related */
-#define RXf_MATCH_UTF8  	(1<<(RXf_BASE_SHIFT+11)) /* $1 etc are utf8 */
+#define RXf_MATCH_UTF8  	(1<<(RXf_BASE_SHIFT+6)) /* $1 etc are utf8 */
 
 /* Intuit related */
-#define RXf_USE_INTUIT_NOML	(1<<(RXf_BASE_SHIFT+12))
-#define RXf_USE_INTUIT_ML	(1<<(RXf_BASE_SHIFT+13))
-#define RXf_INTUIT_TAIL 	(1<<(RXf_BASE_SHIFT+14))
+#define RXf_USE_INTUIT_NOML	(1<<(RXf_BASE_SHIFT+7))
+#define RXf_USE_INTUIT_ML	(1<<(RXf_BASE_SHIFT+8))
+#define RXf_INTUIT_TAIL 	(1<<(RXf_BASE_SHIFT+9))
 #define RXf_USE_INTUIT		(RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
 
 /* Do we have some sort of anchor? */
-#define RXf_IS_ANCHORED         (1<<(RXf_BASE_SHIFT+15))
+#define RXf_IS_ANCHORED         (1<<(RXf_BASE_SHIFT+10))
 
 /* Copy and tainted info */
-#define RXf_COPY_DONE   	(1<<(RXf_BASE_SHIFT+16))
+#define RXf_COPY_DONE   	(1<<(RXf_BASE_SHIFT+11))
 
 /* post-execution: $1 et al are tainted */
-#define RXf_TAINTED_SEEN	(1<<(RXf_BASE_SHIFT+17))
+#define RXf_TAINTED_SEEN	(1<<(RXf_BASE_SHIFT+12))
 /* this pattern was tainted during compilation */
-#define RXf_TAINTED		(1<<(RXf_BASE_SHIFT+18))
+#define RXf_TAINTED		(1<<(RXf_BASE_SHIFT+13))
 
 /* Flags indicating special patterns */
-#define RXf_START_ONLY		(1<<(RXf_BASE_SHIFT+19)) /* Pattern is /^/ */
-#define RXf_SKIPWHITE                (1<<(RXf_BASE_SHIFT+20)) /* Pattern is for a split " " */
-#define RXf_WHITE		(1<<(RXf_BASE_SHIFT+21)) /* Pattern is /\s+/ */
-#define RXf_NULL		(1U<<(RXf_BASE_SHIFT+22)) /* Pattern is // */
-#if RXf_BASE_SHIFT+22 > 31
+#define RXf_START_ONLY		(1<<(RXf_BASE_SHIFT+14)) /* Pattern is /^/ */
+#define RXf_SKIPWHITE           (1<<(RXf_BASE_SHIFT+15)) /* Pattern is for a split " " */
+#define RXf_WHITE		(1<<(RXf_BASE_SHIFT+16)) /* Pattern is /\s+/ */
+#define RXf_NULL		(1U<<(RXf_BASE_SHIFT+17)) /* Pattern is // */
+#if RXf_BASE_SHIFT+17 > 31
 #   error Too many RXf_PMf bits used.  See regnodes.h for any spare in middle
 #endif
 
