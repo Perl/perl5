@@ -2368,9 +2368,9 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    ENTER;
 	    if ((errsv_save = GvSV(PL_errgv))) SAVEFREESV(errsv_save);
 	    GvSV(PL_errgv) = NULL;
+#ifndef NO_TAINT_SUPPORT
 	    /* It is assumed that callers of this routine are not passing in
 	     * any user derived data.  */
-#ifndef NO_TAINT_SUPPORT
 	    SAVEBOOL(TAINT_get);
 	    TAINT_NOT;
 #endif
