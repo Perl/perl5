@@ -882,7 +882,7 @@ XS(XS_PerlIO__Layer__find)
     else {
 	STRLEN len;
 	const char * const name = SvPV_const(ST(1), len);
-	const bool load = (items > 2) ? SvTRUE(ST(2)) : 0;
+	const bool load = (items > 2) ? SvTRUE_NN(ST(2)) : 0;
 	PerlIO_funcs * const layer = PerlIO_find_layer(aTHX_ name, len, load);
 	ST(0) =
 	    (layer) ? sv_2mortal(PerlIO_tab_sv(aTHX_ layer)) :
@@ -1003,8 +1003,7 @@ PerlIO_default_buffer(pTHX_ PerlIO_list_t *av)
 	tab = &PerlIO_stdio;
 #endif
     PerlIO_debug("Pushing %s\n", tab->name);
-    PerlIO_list_push(aTHX_ av, PerlIO_find_layer(aTHX_ tab->name, 0, 0),
-		     &PL_sv_undef);
+    PerlIO_list_push(aTHX_ av, tab, &PL_sv_undef);
 }
 
 SV *
@@ -1092,9 +1091,7 @@ PerlIO_default_layers(pTHX)
 	PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_utf8));
 	PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_remove));
 	PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_byte));
-	PerlIO_list_push(aTHX_ PL_def_layerlist,
-			 PerlIO_find_layer(aTHX_ osLayer->name, 0, 0),
-			 &PL_sv_undef);
+	PerlIO_list_push(aTHX_ PL_def_layerlist, osLayer, &PL_sv_undef);
 	if (s) {
 	    PerlIO_parse_layers(aTHX_ PL_def_layerlist, s);
 	}
