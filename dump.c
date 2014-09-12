@@ -1331,6 +1331,7 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_HASEVAL, "HASEVAL"},
     {CVf_SLABBED, "SLABBED,"},
     {CVf_NAMED, "NAMED,"},
+    {CVf_LEXICAL, "LEXICAL,"},
     {CVf_ISXSUB, "ISXSUB,"}
 };
 
