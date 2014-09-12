@@ -546,7 +546,7 @@ S_bad_type_pv(pTHX_ I32 n, const char *t, const char *name, U32 flags, const OP 
 STATIC void
 S_bad_type_gv(pTHX_ I32 n, const char *t, GV *gv, U32 flags, const OP *kid)
 {
-    SV * const namesv = gv_ename(gv);
+    SV * const namesv = cv_name((CV *)gv, NULL);
     PERL_ARGS_ASSERT_BAD_TYPE_GV;
  
     yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %"SVf" must be %s (not %s)",
@@ -10395,7 +10395,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 
 	if (proto >= proto_end)
 	{
-	    SV * const namesv = gv_ename(namegv);
+	    SV * const namesv = cv_name((CV *)namegv, NULL);
 	    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %"SVf,
 					SVfARG(namesv)), SvUTF8(namesv));
 	    return entersubop;
@@ -10549,10 +10549,9 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		continue;
 	    default:
 	    oops: {
-                SV* const tmpsv = sv_newmortal();
-                gv_efullname3(tmpsv, namegv, NULL);
 		Perl_croak(aTHX_ "Malformed prototype for %"SVf": %"SVf,
-			SVfARG(tmpsv), SVfARG(protosv));
+				  SVfARG(cv_name((CV *)namegv, NULL)),
+				  SVfARG(protosv));
             }
 	}
 
@@ -10567,7 +10566,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     if (!optional && proto_end > proto &&
 	(*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
     {
-	SV * const namesv = gv_ename(namegv);
+	SV * const namesv = cv_name((CV *)namegv, NULL);
 	yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %"SVf,
 				    SVfARG(namesv)), SvUTF8(namesv));
     }
@@ -10751,7 +10750,7 @@ S_cv_get_call_checker(CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p,
     } else {
 	*ckfun_p = Perl_ck_entersub_args_proto_or_list;
 	*ckobj_p = (SV*)cv;
-	if (flagsp) *flagsp = MGf_REQUIRE_GV;
+	if (flagsp) *flagsp = 0;
     }
 }
 
