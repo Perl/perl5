@@ -1533,7 +1533,6 @@ S_invoke_exception_hook(pTHX_ SV *ex, bool warn)
 	SV *exarg;
 
 	ENTER;
-	save_re_context();
 	if (warn) {
 	    SAVESPTR(*hook);
 	    *hook = NULL;
