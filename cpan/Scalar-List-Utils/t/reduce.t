@@ -5,7 +5,7 @@ use warnings;
 
 use List::Util qw(reduce min);
 use Test::More;
-plan tests => 29 + ($::PERL_ONLY ? 0 : 2);
+plan tests => 30 + ($::PERL_ONLY ? 0 : 2);
 
 my $v = reduce {};
 
@@ -160,3 +160,6 @@ ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
 eval { &reduce(+{},1,2,3) };
 ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
 
+my @names = ("a\x{100}c", "d\x{101}efgh", 'ijk');
+my $longest = reduce { length($a) > length($b) ? $a : $b } @names;
+is( length($longest),	6,	'missing SMG rt#121992');

@@ -16,7 +16,7 @@ our @EXPORT_OK = qw(
   subname set_subname
 );
 
-our $VERSION    = "1.40";
+our $VERSION    = "1.41";
 $VERSION   = eval $VERSION;
 
 =head1 NAME
@@ -25,7 +25,7 @@ Sub::Util - A selection of utility subroutines for subs and CODE references
 
 =head1 SYNOPSIS
 
-    use Sub::Util qw( set_prototype subname set_subname );
+    use Sub::Util qw( prototype set_prototype subname set_subname );
 
 =head1 DESCRIPTION
 
@@ -46,6 +46,8 @@ that its popularity warrants inclusion in a core module, which this is.
 =head2 prototype
 
     my $proto = prototype( $code )
+
+I<Since version 1.40.>
 
 Returns the prototype of the given C<$code> reference, if it has one, as a
 string. This is the same as the C<CORE::prototype> operator; it is included

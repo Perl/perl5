@@ -168,6 +168,10 @@ L<Pod::Perldoc> has been upgraded from version 3.23 to 3.24.
 
 =item *
 
+Scalar-List-Utils has been upgraded from version 1.40 to 1.41.
+
+=item *
+
 L<constant> has been upgraded from version 1.31 to 1.32.
 
 It now accepts fully-qualified constant names, allowing constants to be
