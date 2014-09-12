@@ -11811,7 +11811,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * nan/inf/-inf, so let's avoid calling that on non-finites. */
 	    if (isALPHA_FOLD_NE(c, 'e') && FV_ISFINITE(fv)) {
                 i = PERL_INT_MIN;
-                (void)Perl_frexp(fv, &i);
+                (void)FV_FREXP(fv, &i);
                 if (i == PERL_INT_MIN)
                     Perl_die(aTHX_ "panic: frexp: %"FV_GF, fv);
                 /* Do not set hexfp earlier since we want to printf
