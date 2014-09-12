@@ -6186,11 +6186,6 @@ STATIC void	S_forget_pmop(pTHX_ PMOP *const o)
 	assert(o)
 
 STATIC OP*	S_gen_constant_list(pTHX_ OP* o);
-STATIC SV*	S_gv_ename(pTHX_ GV *gv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GV_ENAME	\
-	assert(gv)
-
 STATIC void	S_inplace_aassign(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INPLACE_AASSIGN	\

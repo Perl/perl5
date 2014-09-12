@@ -496,17 +496,6 @@ Perl_op_refcnt_dec(pTHX_ OP *o)
 	o->op_ppaddr = PL_ppaddr[type];		\
     } STMT_END
 
-STATIC SV*
-S_gv_ename(pTHX_ GV *gv)
-{
-    SV* const tmpsv = sv_newmortal();
-
-    PERL_ARGS_ASSERT_GV_ENAME;
-
-    gv_efullname3(tmpsv, gv, NULL);
-    return tmpsv;
-}
-
 STATIC OP *
 S_no_fh_allowed(pTHX_ OP *o)
 {
