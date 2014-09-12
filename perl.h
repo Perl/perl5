@@ -2312,10 +2312,10 @@ int isnan(double d);
 #        define Perl_isfinitel(x) finitel(x)
 #    elif defined(HAS_INFL) && defined(HAS_NANL)
 #        define Perl_isfinitel(x) !(isinfl(x)||isnanl(x))
-#    elif defined(Perl_fp_class_inf) && defined(Perl_fp_class_nan)
-#        define Perl_isfinitel(x) !(Perl_fp_class_inf(x)||Perl_fp_class_nan(x))
 #    elif defined(LDBL_MAX)
 #        define Perl_isfinitel(x) ((x) <= LDBL_MAX && (x) >= -LDBL_MAX)
+#    else
+#        define Perl_isfinitel(x) ((x) * 0 == 0)
 #    endif
 #endif
 
