@@ -341,19 +341,16 @@ and check for NULL.
  *
  */
 
-/* Leave some space, so future bit allocations can go either in the shared or
- * unshared area without affecting binary compatibility */
-#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT)
-
 /*
   Set in Perl_pmruntime if op_flags & OPf_SPECIAL, i.e. split. Will
   be used by regex engines to check whether they should set
   RXf_SKIPWHITE
 */
-#define RXf_SPLIT                (1<<(RXf_BASE_SHIFT-1))
-#if RXf_SPLIT != RXf_PMf_SPLIT
-#   error "RXf_SPLIT does not match RXf_PMf_SPLIT"
-#endif
+#define RXf_SPLIT   RXf_PMf_SPLIT
+
+/* Leave some space, so future bit allocations can go either in the shared or
+ * unshared area without affecting binary compatibility */
+#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT)
 
 /* Unused +0 - +6 */
 
