@@ -534,16 +534,6 @@ S_too_many_arguments_pv(pTHX_ OP *o, const char *name, U32 flags)
     return o;
 }
 
-STATIC OP *
-S_too_many_arguments_sv(pTHX_ OP *o, SV *namesv, U32 flags)
-{
-    PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS_SV;
-
-    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %"SVf, SVfARG(namesv)),
-                SvUTF8(namesv) | flags);
-    return o;
-}
-
 STATIC void
 S_bad_type_pv(pTHX_ I32 n, const char *t, const char *name, U32 flags, const OP *kid)
 {
@@ -10404,7 +10394,12 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	OP* o3 = aop;
 
 	if (proto >= proto_end)
-	    return too_many_arguments_sv(entersubop, gv_ename(namegv), 0);
+	{
+	    SV * const namesv = gv_ename(namegv);
+	    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %"SVf,
+					SVfARG(namesv)), SvUTF8(namesv));
+	    return entersubop;
+	}
 
 	switch (*proto) {
 	    case ';':
