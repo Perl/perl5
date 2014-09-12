@@ -331,8 +331,8 @@ do_test('reference to named subroutine without prototype',
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = (3|4)
-    FLAGS = \\((?:HASEVAL)?\\)			# $] < 5.015 || !thr
-    FLAGS = \\(DYNFILE(?:,HASEVAL)?\\)		# $] >= 5.015 && thr
+    FLAGS = \\((?:HASEVAL(?:,NAMED)?)?\\)	# $] < 5.015 || !thr
+    FLAGS = \\(DYNFILE(?:,HASEVAL(?:,NAMED)?)?\\) # $] >= 5.015 && thr
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009
     COMP_STASH = $ADDR\\t"main"
@@ -340,13 +340,14 @@ do_test('reference to named subroutine without prototype',
     ROOT = $ADDR
     XSUB = 0x0					# $] < 5.009
     XSUBANY = 0					# $] < 5.009
-    GVGV::GV = $ADDR\\t"main" :: "do_test"
+    NAME = "do_test"				# $] >=5.021004
+    GVGV::GV = $ADDR\\t"main" :: "do_test"	# $] < 5.021004
     FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 1(?:
     MUTEXP = $ADDR
     OWNER = $ADDR)?
-    FLAGS = 0x(?:400)?0				# $] < 5.015 || !thr
-    FLAGS = 0x[145]000				# $] >= 5.015 && thr
+    FLAGS = 0x(?:[c4]00)?0			# $] < 5.015 || !thr
+    FLAGS = 0x[cd145]000			# $] >= 5.015 && thr
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
