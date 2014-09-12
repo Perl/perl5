@@ -518,15 +518,6 @@ S_no_fh_allowed(pTHX_ OP *o)
 }
 
 STATIC OP *
-S_too_few_arguments_sv(pTHX_ OP *o, SV *namesv, U32 flags)
-{
-    PERL_ARGS_ASSERT_TOO_FEW_ARGUMENTS_SV;
-    yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %"SVf, SVfARG(namesv)),
-                                    SvUTF8(namesv) | flags);
-    return o;
-}
-
-STATIC OP *
 S_too_few_arguments_pv(pTHX_ OP *o, const char* name, U32 flags)
 {
     PERL_ARGS_ASSERT_TOO_FEW_ARGUMENTS_PV;
@@ -10580,7 +10571,11 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     }
     if (!optional && proto_end > proto &&
 	(*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
-	return too_few_arguments_sv(entersubop, gv_ename(namegv), 0);
+    {
+	SV * const namesv = gv_ename(namegv);
+	yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %"SVf,
+				    SVfARG(namesv)), SvUTF8(namesv));
+    }
     return entersubop;
 }
 

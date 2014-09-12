@@ -1531,7 +1531,6 @@
 #define search_const(a)		S_search_const(aTHX_ a)
 #define simplify_sort(a)	S_simplify_sort(aTHX_ a)
 #define too_few_arguments_pv(a,b,c)	S_too_few_arguments_pv(aTHX_ a,b,c)
-#define too_few_arguments_sv(a,b,c)	S_too_few_arguments_sv(aTHX_ a,b,c)
 #define too_many_arguments_pv(a,b,c)	S_too_many_arguments_pv(aTHX_ a,b,c)
 #define too_many_arguments_sv(a,b,c)	S_too_many_arguments_sv(aTHX_ a,b,c)
 #  endif

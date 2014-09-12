@@ -1935,7 +1935,6 @@ s	|void	|bad_type_pv	|I32 n|NN const char *t|NN const char *name|U32 flags|NN co
 s	|void	|bad_type_gv	|I32 n|NN const char *t|NN GV *gv|U32 flags|NN const OP *kid
 s	|void	|no_bareword_allowed|NN OP *o
 sR	|OP*	|no_fh_allowed|NN OP *o
-sR	|OP*	|too_few_arguments_sv|NN OP *o|NN SV* namesv|U32 flags
 sR	|OP*	|too_few_arguments_pv|NN OP *o|NN const char* name|U32 flags
 s	|OP*	|too_many_arguments_pv|NN OP *o|NN const char* name|U32 flags
 sR	|OP*	|too_many_arguments_sv|NN OP *o|NN SV* namesv|U32 flags
