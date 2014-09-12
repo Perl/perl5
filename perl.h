@@ -28,7 +28,11 @@
 #   include "config.h"
 #endif
 
-#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || defined(_STDC_C99)
+/* Note that with gcc -std=c89 the __STDC_VERSION__ is *not* defined
+ * because the __STDC_VERSION__ became a thing only with C90.  Therefore,
+ * with gcc, HAS_C99 will never become true as long as we use -std=c89. */
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || \
+     defined(_STDC_C99)
 #  define HAS_C99 1
 #endif
 
