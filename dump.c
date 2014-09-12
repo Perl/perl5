@@ -1330,6 +1330,7 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_AUTOLOAD, "AUTOLOAD,"},
     {CVf_HASEVAL, "HASEVAL"},
     {CVf_SLABBED, "SLABBED,"},
+    {CVf_NAMED, "NAMED,"},
     {CVf_ISXSUB, "ISXSUB,"}
 };
 
