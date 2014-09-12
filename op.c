@@ -10315,8 +10315,9 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
     }
     if (SvTYPE((SV*)cv) != SVt_PVCV)
 	return NULL;
-    if (flags & RV2CVOPCV_RETURN_NAME_GV) {
-	if ((!CvANON(cv) || !gv) && !CvLEXICAL(cv))
+    if (flags & (RV2CVOPCV_RETURN_NAME_GV|RV2CVOPCV_MAYBE_NAME_GV)) {
+	if ((!CvANON(cv) || !gv) && !CvLEXICAL(cv)
+	 && ((flags & RV2CVOPCV_RETURN_NAME_GV) || !CvNAMED(cv)))
 	    gv = CvGV(cv);
 	return (CV*)gv;
     } else {
@@ -10747,20 +10748,29 @@ by L</cv_set_call_checker>.
 =cut
 */
 
-void
-Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
+static void
+S_cv_get_call_checker(CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p,
+		      U8 *flagsp)
 {
     MAGIC *callmg;
-    PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER;
-    PERL_UNUSED_CONTEXT;
     callmg = SvMAGICAL((SV*)cv) ? mg_find((SV*)cv, PERL_MAGIC_checkcall) : NULL;
     if (callmg) {
 	*ckfun_p = DPTR2FPTR(Perl_call_checker, callmg->mg_ptr);
 	*ckobj_p = callmg->mg_obj;
+	if (flagsp) *flagsp = callmg->mg_flags;
     } else {
 	*ckfun_p = Perl_ck_entersub_args_proto_or_list;
 	*ckobj_p = (SV*)cv;
+	if (flagsp) *flagsp = MGf_REQUIRE_GV;
     }
+}
+
+void
+Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
+{
+    PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER;
+    PERL_UNUSED_CONTEXT;
+    return S_cv_get_call_checker(cv, ckfun_p, ckobj_p, NULL);
 }
 
 /*
@@ -10853,7 +10863,7 @@ Perl_ck_subr(pTHX_ OP *o)
     aop = OP_SIBLING(aop);
     for (cvop = aop; OP_HAS_SIBLING(cvop); cvop = OP_SIBLING(cvop)) ;
     cv = rv2cv_op_cv(cvop, RV2CVOPCV_MARK_EARLY);
-    namegv = cv ? (GV*)rv2cv_op_cv(cvop, RV2CVOPCV_RETURN_NAME_GV) : NULL;
+    namegv = cv ? (GV*)rv2cv_op_cv(cvop, RV2CVOPCV_MAYBE_NAME_GV) : NULL;
 
     o->op_private &= ~1;
     o->op_private |= OPpENTERSUB_HASTARG;
@@ -10878,21 +10888,24 @@ Perl_ck_subr(pTHX_ OP *o)
     } else {
 	Perl_call_checker ckfun;
 	SV *ckobj;
-	cv_get_call_checker(cv, &ckfun, &ckobj);
-	if (!namegv) { /* expletive! */
-	    /* XXX The call checker API is public.  And it guarantees that
-		   a GV will be provided with the right name.  So we have
-		   to create a GV.  But it is still not correct, as its
-		   stringification will include the package.  What we
-		   really need is a new call checker API that accepts a
-		   GV or string (or GV or CV). */
-	    HEK * const hek = CvNAME_HEK(cv);
+	U8 flags;
+	S_cv_get_call_checker(cv, &ckfun, &ckobj, &flags);
+	if (!namegv) {
+	    /* The original call checker API guarantees that a GV will be
+	       be provided with the right name.  So, if the old API was
+	       used (or the REQUIRE_GV flag was passed), we have to reify
+	       the CV’s GV, unless this is an anonymous sub.  This is not
+	       ideal for lexical subs, as its stringification will include
+	       the package.  But it is the best we can do.  */
+	    if (flags & MGf_REQUIRE_GV) {
+		if (!CvANON(cv) && (!CvNAMED(cv) || CvNAME_HEK(cv)))
+		    namegv = CvGV(cv);
+	    }
+	    else namegv = MUTABLE_GV(cv);
 	    /* After a syntax error in a lexical sub, the cv that
 	       rv2cv_op_cv returns may be a nameless stub. */
-	    if (!hek) return ck_entersub_args_list(o);;
-	    namegv = (GV *)sv_newmortal();
-	    gv_init_pvn(namegv, PL_curstash, HEK_KEY(hek), HEK_LEN(hek),
-			SVf_UTF8 * !!HEK_UTF8(hek));
+	    if (!namegv) return ck_entersub_args_list(o);
+
 	}
 	return ckfun(aTHX_ o, namegv, ckobj);
     }
