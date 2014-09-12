@@ -1420,9 +1420,14 @@ sub gv_name {
     my $self = shift;
     my $gv = shift;
     my $raw = shift;
-Carp::confess() unless ref($gv) eq "B::GV";
-    my $stash = $gv->STASH->NAME;
-    my $name = $raw ? $gv->NAME : $gv->SAFENAME;
+#Carp::confess() unless ref($gv) eq "B::GV";
+    my $cv = $gv->FLAGS & SVf_ROK ? $gv->RV : 0;
+    my $stash = ($cv || $gv)->STASH->NAME;
+    my $name = $raw
+	? $cv ? $cv->NAME_HEK || $cv->GV->NAME : $gv->NAME
+	: $cv
+	    ? B::safename($cv->NAME_HEK || $cv->GV->NAME)
+	    : $gv->SAFENAME;
     if ($stash eq 'main' && $name =~ /^::/) {
 	$stash = '::';
     }
@@ -3848,8 +3853,10 @@ sub pp_entersub {
 	$kid = "{" . $self->deparse($kid, 0) . "}";
     } elsif ($kid->first->name eq "gv") {
 	my $gv = $self->gv_or_padgv($kid->first);
-	if (class($gv->CV) ne "SPECIAL") {
-	    $proto = $gv->CV->PV if $gv->CV->FLAGS & SVf_POK;
+	my $cv;
+	if (class($gv) eq 'GV' && class($cv = $gv->CV) ne "SPECIAL"
+	 || $gv->FLAGS & SVf_ROK && class($cv = $gv->RV) eq 'CV') {
+	    $proto = $cv->PV if $cv->FLAGS & SVf_POK;
 	}
 	$simple = 1; # only calls of named functions can be prototyped
 	$kid = $self->deparse($kid, 24);
