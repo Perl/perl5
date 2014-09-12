@@ -11071,10 +11071,14 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	*/
 #if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE
 	long double fv;
-#  define myFVgf PERL_PRIgldbl
+#  define FV_ISFINITE Perl_isfinitel
+#  define FV_FREXP frexpl
+#  define FV_GF PERL_PRIgldbl
 #else
 	NV fv;
-#  define myFVgf NVgf
+#  define FV_ISFINITE Perl_isfinite
+#  define FV_FREXP Perl_frexp
+#  define FV_GF NVgf
 #endif
 	STRLEN have;
 	STRLEN need;
@@ -11805,11 +11809,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    need = 0;
 	    /* frexp() (or frexpl) has some unspecified behaviour for
              * nan/inf/-inf, so let's avoid calling that on non-finites. */
-	    if (isALPHA_FOLD_NE(c, 'e') && Perl_isfinite(fv)) {
+	    if (isALPHA_FOLD_NE(c, 'e') && FV_ISFINITE(fv)) {
                 i = PERL_INT_MIN;
                 (void)Perl_frexp(fv, &i);
                 if (i == PERL_INT_MIN)
-                    Perl_die(aTHX_ "panic: frexp: %"myFVgf, fv);
+                    Perl_die(aTHX_ "panic: frexp: %"FV_GF, fv);
                 /* Do not set hexfp earlier since we want to printf
                  * Inf/NaN for Inf/NaN, not their hexfp. */
                 hexfp = isALPHA_FOLD_EQ(c, 'a');
@@ -11975,6 +11979,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * should be output as 0x0.0000000000001p-1022 to
                  * match its internal structure. */
 
+                /* Note: fv can be (and often is) long double.
+                 * Here it is implicitly cast to NV. */
                 vend = S_hextract(aTHX_ fv, &exponent, vhex, NULL);
                 S_hextract(aTHX_ fv, &exponent, vhex, vend);
 
