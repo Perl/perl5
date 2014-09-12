@@ -16786,32 +16786,14 @@ S_re_croak2(pTHX_ bool utf8, const char* pat1,const char* pat2,...)
     Perl_croak(aTHX_ "%"UTF8f, UTF8fARG(utf8, l1-1, buf));
 }
 
-/* XXX Here's a total kludge.  But we need to re-enter for swash routines. */
+/* Get this:  We have an empty void function here.  But it somehow got into
+   the API, so there you go.  */
 
 #ifndef PERL_IN_XSUB_RE
 void
 Perl_save_re_context(pTHX)
 {
-    /* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
-    if (PL_curpm) {
-	const REGEXP * const rx = PM_GETRE(PL_curpm);
-	if (rx) {
-	    U32 i;
-	    for (i = 1; i <= RX_NPARENS(rx); i++) {
-		char digits[TYPE_CHARS(long)];
-		const STRLEN len = my_snprintf(digits, sizeof(digits),
-                                               "%lu", (long)i);
-		GV *const *const gvp
-		    = (GV**)hv_fetch(PL_defstash, digits, len, 0);
-
-		if (gvp) {
-		    GV * const gv = *gvp;
-		    if (SvTYPE(gv) == SVt_PVGV && GvSV(gv))
-			save_scalar(gv);
-		}
-	    }
-	}
-    }
+    PERL_UNUSED_CONTEXT;
 }
 #endif
 
