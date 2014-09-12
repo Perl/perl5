@@ -298,13 +298,13 @@ use File::Glob qw(:case);
     },
 
     'CPAN::Meta::Requirements' => {
-        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-Requirements-2.126.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-Requirements-2.128.tar.gz',
         'FILES'        => q[cpan/CPAN-Meta-Requirements],
         'EXCLUDED'     => [
             qw(CONTRIBUTING.mkdn),
-            qw(t/00-compile.t),
             qw(t/00-report-prereqs.t),
             qw(t/00-report-prereqs.dd),
+            qw(t/version-cleanup.t),
             qr{^xt},
         ],
     },

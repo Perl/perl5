@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package CPAN::Meta::Requirements;
-our $VERSION = '2.126'; # VERSION
+our $VERSION = '2.128'; # VERSION
 # ABSTRACT: a set of version requirements for a CPAN dist
 
 #pod =head1 SYNOPSIS
@@ -33,7 +33,22 @@ our $VERSION = '2.126'; # VERSION
 
 use Carp ();
 use Scalar::Util ();
-use version 0.77 (); # the ->parse method
+
+# To help ExtUtils::MakeMaker bootstrap CPAN::Meta::Requirements on perls
+# before 5.10, we fall back to the EUMM bundled compatibility version module if
+# that's the only thing available.  This shouldn't ever happen in a normal CPAN
+# install of CPAN::Meta::Requirements, as version.pm will be picked up from
+# prereqs and be available at runtime.
+
+BEGIN {
+  eval "use version ()"; ## no critic
+  if ( my $err = $@ ) {
+    eval "use ExtUtils::MakeMaker::version" or die $err; ## no critic
+  }
+}
+
+# Perl 5.10.0 didn't have "is_qv" in version.pm
+*_is_qv = version->can('is_qv') ? sub { $_[0]->is_qv } : sub { exists $_[0]->{qv} };
 
 #pod =method new
 #pod
@@ -63,15 +78,41 @@ sub new {
   return bless \%self => $class;
 }
 
+# from version::vpp
+sub _find_magic_vstring {
+  my $value = shift;
+  my $tvalue = '';
+  require B;
+  my $sv = B::svref_2object(\$value);
+  my $magic = ref($sv) eq 'B::PVMG' ? $sv->MAGIC : undef;
+  while ( $magic ) {
+    if ( $magic->TYPE eq 'V' ) {
+      $tvalue = $magic->PTR;
+      $tvalue =~ s/^v?(.+)$/v$1/;
+      last;
+    }
+    else {
+      $magic = $magic->MOREMAGIC;
+    }
+  }
+  return $tvalue;
+}
+
 sub _version_object {
   my ($self, $version) = @_;
 
   my $vobj;
 
+  # hack around version::vpp not handling <3 character vstring literals
+  if ( $INC{'version/vpp.pm'} || $INC{'ExtUtils/MakeMaker/version/vpp.pm'} ) {
+    my $magic = _find_magic_vstring( $version );
+    $version = $magic if length $magic;
+  }
+
   eval {
     local $SIG{__WARN__} = sub { die "Invalid version: $_[0]" };
-    $vobj  = (! defined $version)                ? version->parse(0)
-           : (! Scalar::Util::blessed($version)) ? version->parse($version)
+    $vobj  = (! defined $version)                ? version->new(0)
+           : (! Scalar::Util::blessed($version)) ? version->new($version)
            :                                       $version;
   };
 
@@ -87,12 +128,12 @@ sub _version_object {
 
   # ensure no leading '.'
   if ( $vobj =~ m{\A\.} ) {
-    $vobj = version->parse("0$vobj");
+    $vobj = version->new("0$vobj");
   }
 
   # ensure normal v-string form
-  if ( $vobj->is_qv ) {
-    $vobj = version->parse($vobj->normal);
+  if ( _is_qv($vobj) ) {
+    $vobj = version->new($vobj->normal);
   }
 
   return $vobj;
@@ -694,7 +735,7 @@ CPAN::Meta::Requirements - a set of version requirements for a CPAN dist
 
 =head1 VERSION
 
-version 2.126
+version 2.128
 
 =head1 SYNOPSIS
 
@@ -969,6 +1010,8 @@ Ricardo Signes <rjbs@cpan.org>
 =back
 
 =head1 CONTRIBUTORS
+
+=for stopwords Karen Etheridge robario
 
 =over 4
 

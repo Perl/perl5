@@ -125,6 +125,9 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 L<B::Concise> has been upgraded from version 0.992 to 0.993.
 
+=item *
+
+L<CPAN::Meta::Requirements> has been upgraded from version 2.126 to 2.128.
 
 =item *
 
