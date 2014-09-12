@@ -300,6 +300,8 @@ foo
     can_ok $f, 'LINES';
 }
 
+is B::safename("\cLAST_FH"), "^LAST_FH", 'basic safename test';
+
 my $sub1 = sub {die};
 { no warnings 'once'; no strict; *Peel:: = *{"Pe\0e\x{142}::"} }
 my $sub2 = eval 'package Peel; sub {die}';
