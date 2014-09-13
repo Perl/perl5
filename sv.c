@@ -11794,16 +11794,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		goto unknown;
 	    }
 
-	    /* now we need (long double) if intsize == 'q', else (double) */
-	    fv = (args) ?
+            /* now we need (long double) if intsize == 'q', else (double) */
+            if (args) {
 #if LONG_DOUBLESIZE > DOUBLESIZE
-		intsize == 'q' ?
-		    va_arg(*args, long double) :
-		    va_arg(*args, double)
+                fv = intsize == 'q' ?
+                    va_arg(*args, long double) : va_arg(*args, double);
 #else
-		    va_arg(*args, double)
+                fv = va_arg(*args, double);
 #endif
-		: SvNV(argsv);
+            }
+            else
+                fv = SvNV(argsv);
 
 	    need = 0;
 	    /* frexp() (or frexpl) has some unspecified behaviour for
