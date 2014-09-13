@@ -1616,7 +1616,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    SV **newsp;
 #ifdef DEBUGGING
 	    COP *oldcop;
-#endif DEBUGGING
+#endif
 	    JMPENV *restartjmpenv;
 	    OP *restartop;
 
@@ -1635,7 +1635,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    namesv = cx->blk_eval.old_namesv;
 #ifdef DEBUGGING
 	    oldcop = cx->blk_oldcop;
-#endif DEBUGGING
+#endif
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop = cx->blk_eval.retop;
 
