@@ -17,6 +17,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
 	 OPpSORT_REVERSE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
+	 SVpad_TYPED
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
@@ -221,8 +222,9 @@ BEGIN {
 # curcvlex:
 # Cached hash of lexical variables for curcv: keys are
 # names prefixed with "m" or "o" (representing my/our), and
-# each value is an array of pairs, indicating the cop_seq of scopes
-# in which a var of that name is valid.
+# each value is an array with two elements indicating the cop_seq
+# of scopes in which a var of that name is valid and a third ele-
+# ment referencing the pad name.
 #
 # curcop:
 # COP for statement being deparsed
@@ -1191,6 +1193,19 @@ sub maybe_parens_func {
     }
 }
 
+sub find_our_type {
+    my ($self, $name) = @_;
+    $self->populate_curcvlex() if !defined $self->{'curcvlex'};
+    my $seq = $self->{'curcop'}->cop_seq;
+    for my $a (@{$self->{'curcvlex'}{"o$name"}}) {
+	my ($st, undef, $padname) = @$a;
+	if ($st == $seq && $padname->FLAGS & SVpad_TYPED) {
+	    return $padname->SvSTASH->NAME;
+	}
+    }
+    return '';
+}
+
 sub maybe_local {
     my $self = shift;
     my($op, $cx, $text) = @_;
@@ -1204,6 +1219,10 @@ sub maybe_local {
 		die "Unexpected our($text)\n";
 	    }
 	    $text =~ s/(\w+::)+//;
+
+	    if (my $type = $self->find_our_type($text)) {
+		$our_local .= ' ' . $type;
+	    }
 	}
 	return $text if $self->{'avoid_local'}{$$op};
         if (want_scalar($op)) {
@@ -1236,11 +1255,15 @@ sub padname_sv {
 
 sub maybe_my {
     my $self = shift;
-    my($op, $cx, $text, $forbid_parens) = @_;
+    my($op, $cx, $padname, $forbid_parens) = @_;
+    my $text = $padname->PVX;
     if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
 	my $my = $op->private & OPpPAD_STATE
 	    ? $self->keyword("state")
 	    : "my";
+	if ($padname->FLAGS & SVpad_TYPED) {
+	    $my .= ' ' . $padname->SvSTASH->NAME;
+	}
 	if ($forbid_parens || want_scalar($op)) {
 	    return "$my $text";
 	} else {
@@ -1517,7 +1540,7 @@ sub populate_curcvlex {
 
 	    push @{$self->{'curcvlex'}{
 			($ns[$i]->FLAGS & SVpad_OUR ? 'o' : 'm') . $name
-		  }}, [$seq_st, $seq_en];
+		  }}, [$seq_st, $seq_en, $ns[$i]];
 	}
     }
 }
@@ -2963,6 +2986,7 @@ sub pp_list {
     return '' if class($kid) eq 'NULL';
     my $lop;
     my $local = "either"; # could be local(...), my(...), state(...) or our(...)
+    my $type;
     for ($lop = $kid; !null($lop); $lop = $lop->sibling) {
 	# This assumes that no other private flags equal 128, and that
 	# OPs that store things other than flags in their op_private,
@@ -2980,6 +3004,7 @@ sub pp_list {
 	    $local = ""; # or not
 	    last;
 	}
+	my $newtype;
 	if ($lop->name =~ /^pad[ash]v$/) {
 	    if ($lop->private & OPpPAD_STATE) { # state()
 		($local = "", last) if $local =~ /^(?:local|our|my)$/;
@@ -2988,12 +3013,22 @@ sub pp_list {
 		($local = "", last) if $local =~ /^(?:local|our|state)$/;
 		$local = "my";
 	    }
-	} elsif ($lop->name =~ /^(gv|rv2)[ash]v$/
+	    my $padname = $self->padname_sv($lop->targ);
+	    if ($padname->FLAGS & SVpad_TYPED) {
+		$newtype = $padname->SvSTASH->NAME;
+	    }
+	} elsif ($lop->name =~ /^(?:gv|rv2)([ash])v$/
 			&& $lop->private & OPpOUR_INTRO
 		or $lop->name eq "null" && $lop->first->name eq "gvsv"
 			&& $lop->first->private & OPpOUR_INTRO) { # our()
 	    ($local = "", last) if $local =~ /^(?:my|local|state)$/;
 	    $local = "our";
+	    my $funny = !$1 || $1 eq 's' ? '$' : $1 eq 'a' ? '@' : '%';
+	    if (my $t = $self->find_our_type(
+		    $funny . $self->gv_or_padgv($lop->first)->NAME
+	       )) {
+		$newtype = $t;
+	    }
 	} elsif ($lop->name ne "undef"
 		# specifically avoid the "reverse sort" optimisation,
 		# where "reverse" is nullified
@@ -3003,8 +3038,14 @@ sub pp_list {
 	    ($local = "", last) if $local =~ /^(?:my|our|state)$/;
 	    $local = "local";
 	}
+	if (defined $type && defined $newtype && $newtype ne $type) {
+	    $local = '';
+	    last;
+	}
+	$type = $newtype;
     }
     $local = "" if $local eq "either"; # no point if it's all undefs
+    $local .= " $type " if $local && length $type;
     return $self->deparse($kid, $cx) if null $kid->sibling and not $local;
     for (; !null($kid); $kid = $kid->sibling) {
 	if ($local) {
@@ -3288,7 +3329,7 @@ sub padany {
 sub pp_padsv {
     my $self = shift;
     my($op, $cx, $forbid_parens) = @_;
-    return $self->maybe_my($op, $cx, $self->padname($op->targ),
+    return $self->maybe_my($op, $cx, $self->padname_sv($op->targ),
 			   $forbid_parens);
 }
 

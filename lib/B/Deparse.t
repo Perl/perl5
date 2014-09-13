@@ -347,6 +347,21 @@ $x{warn()};
 # our (LIST)
 our($foo, $bar, $baz);
 ####
+# CONTEXT { package Dog } use feature "state";
+# variables with declared classes
+my Dog $spot;
+our Dog $spotty;
+state Dog $spotted;
+my Dog @spot;
+our Dog @spotty;
+state Dog @spotted;
+my Dog %spot;
+our Dog %spotty;
+state Dog %spotted;
+my Dog ($foo, @bar, %baz);
+our Dog ($phoo, @barr, %bazz);
+state Dog ($fough, @barre, %bazze);
+####
 # <>
 my $foo;
 $_ .= <ARGV> . <$foo>;
