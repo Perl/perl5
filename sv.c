@@ -11066,17 +11066,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
          * the time it is not (most compilers these days recognize
          * "long double", even if only as a synonym for "double").
 	*/
-#if defined(HAS_LONG_DOUBLE) && \
-	LONG_DOUBLESIZE > DOUBLESIZE && \
-	defined(HAS_FREXPL)
+#if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE
 	long double fv;
-#  define FV_ISFINITE Perl_isfinitel
-#  define FV_FREXP frexpl
+#  define FV_ISFINITE(x) Perl_isfinitel(x)
 #  define FV_GF PERL_PRIgldbl
 #else
 	NV fv;
-#  define FV_ISFINITE Perl_isfinite
-#  define FV_FREXP Perl_frexp
+#  define FV_ISFINITE(x) Perl_isfinite((NV)(x))
 #  define FV_GF NVgf
 #endif
 	STRLEN have;
@@ -11820,7 +11816,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * nan/inf/-inf, so let's avoid calling that on non-finites. */
 	    if (isALPHA_FOLD_NE(c, 'e') && FV_ISFINITE(fv)) {
                 i = PERL_INT_MIN;
-                (void)FV_FREXP(fv, &i);
+                (void)Perl_frexp((NV)fv, &i);
                 if (i == PERL_INT_MIN)
                     Perl_die(aTHX_ "panic: frexp: %"FV_GF, fv);
                 /* Do not set hexfp earlier since we want to printf
