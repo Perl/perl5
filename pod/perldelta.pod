@@ -34,7 +34,7 @@ Floating point values are able to hold the special values infinity
 and propagate the value in computations, and on output normalize them
 to C<Inf> and C<NaN>.
 
-See also the L</POSIX> enhancements.
+See also the L<POSIX> enhancements.
 
 =head1 Security
 
