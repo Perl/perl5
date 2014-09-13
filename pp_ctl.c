@@ -1614,7 +1614,9 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    SV *namesv;
 	    PERL_CONTEXT *cx;
 	    SV **newsp;
+#ifdef DEBUGGING
 	    COP *oldcop;
+#endif DEBUGGING
 	    JMPENV *restartjmpenv;
 	    OP *restartop;
 
@@ -1631,7 +1633,9 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    }
 	    POPEVAL(cx);
 	    namesv = cx->blk_eval.old_namesv;
+#ifdef DEBUGGING
 	    oldcop = cx->blk_oldcop;
+#endif DEBUGGING
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop = cx->blk_eval.retop;
 
@@ -1641,13 +1645,8 @@ Perl_die_unwind(pTHX_ SV *msv)
 
 	    LEAVE;
 
-	    /* LEAVE could clobber PL_curcop (see save_re_context())
-	     * XXX it might be better to find a way to avoid messing with
-	     * PL_curcop in save_re_context() instead, but this is a more
-	     * minimal fix --GSAR */
-	    PL_curcop = oldcop;
-
 	    if (optype == OP_REQUIRE) {
+                assert (PL_curcop == oldcop);
                 (void)hv_store(GvHVn(PL_incgv),
                                SvPVX_const(namesv),
                                SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
