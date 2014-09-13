@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Infinity and NaN (not-a-number) handling improved
+
+Floating point values are able to hold the special values infinity
+(also -infinity), and NaN (not-a-number).  Now we more robustly recognize
+and propagate the value in computations, and on output normalize them
+to C<Inf> and C<NaN>.
+
+See also the L</POSIX> enhancements.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -167,6 +176,9 @@ L<Module::CoreList> has been upgraded from version 5.021003 to 5.021004.
 =item *
 
 L<POSIX> has been upgraded from version 1.42 to 1.43.
+
+The C99 math functions and constants (for example acosh, round,
+M_E, M_PI) have been added.
 
 =item *
 
