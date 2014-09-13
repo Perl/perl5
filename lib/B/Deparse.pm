@@ -2997,15 +2997,16 @@ sub pp_list {
 	# XXX This really needs to be rewritten to accept only those ops
 	#     known to take the OPpLVAL_INTRO flag.
 
+	my $lopname = $lop->name;
 	if (!($lop->private & (OPpLVAL_INTRO|OPpOUR_INTRO)
-		or $lop->name eq "undef")
-	    or $lop->name =~ /^(?:entersub|exit|open|split)\z/)
+		or $lopname eq "undef")
+	    or $lopname =~ /^(?:entersub|exit|open|split)\z/)
 	{
 	    $local = ""; # or not
 	    last;
 	}
 	my $newtype;
-	if ($lop->name =~ /^pad[ash]v$/) {
+	if ($lopname =~ /^pad[ash]v$/) {
 	    if ($lop->private & OPpPAD_STATE) { # state()
 		($local = "", last) if $local =~ /^(?:local|our|my)$/;
 		$local = "state";
@@ -3017,9 +3018,9 @@ sub pp_list {
 	    if ($padname->FLAGS & SVpad_TYPED) {
 		$newtype = $padname->SvSTASH->NAME;
 	    }
-	} elsif ($lop->name =~ /^(?:gv|rv2)([ash])v$/
+	} elsif ($lopname =~ /^(?:gv|rv2)([ash])v$/
 			&& $lop->private & OPpOUR_INTRO
-		or $lop->name eq "null" && $lop->first->name eq "gvsv"
+		or $lopname eq "null" && $lop->first->name eq "gvsv"
 			&& $lop->first->private & OPpOUR_INTRO) { # our()
 	    ($local = "", last) if $local =~ /^(?:my|local|state)$/;
 	    $local = "our";
@@ -3029,10 +3030,10 @@ sub pp_list {
 	       )) {
 		$newtype = $t;
 	    }
-	} elsif ($lop->name ne "undef"
+	} elsif ($lopname ne "undef"
 		# specifically avoid the "reverse sort" optimisation,
 		# where "reverse" is nullified
-		&& !($lop->name eq 'sort' && ($lop->flags & OPpSORT_REVERSE)))
+		&& !($lopname eq 'sort' && ($lop->flags & OPpSORT_REVERSE)))
 	{
 	    # local()
 	    ($local = "", last) if $local =~ /^(?:my|our|state)$/;
