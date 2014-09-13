@@ -11069,7 +11069,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
          * the time it is not (most compilers these days recognize
          * "long double", even if only as a synonym for "double").
 	*/
-#if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE
+#if defined(HAS_LONG_DOUBLE) && \
+	LONG_DOUBLESIZE > DOUBLESIZE && \
+	defined(HAS_FREXPL)
 	long double fv;
 #  define FV_ISFINITE Perl_isfinitel
 #  define FV_FREXP frexpl
