@@ -2314,7 +2314,7 @@ int isnan(double d);
 #if defined(HAS_LONG_DOUBLE) && !defined(Perl_isfinitel)
 /* If isfinite() is a macro and looks like we have C99,
  * we assume it's the type-aware C99 isfinite(). */
-#    if defined(isfinite) && defined(HAS_C99)
+#    if defined(HAS_ISFINITE) && defined(isfinite) && defined(HAS_C99)
 #        define Perl_isfinitel(x) isfinite(x)
 #    elif defined(HAS_ISFINITEL)
 #        define Perl_isfinitel(x) isfinitel(x)
