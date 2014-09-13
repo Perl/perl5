@@ -699,9 +699,11 @@ or very small arguments [C99].
 
 =item C<ilogb>
 
-Integer binary logarithm [C99], e.g. ilogb(30) is 4.
+Integer binary logarithm [C99]
 
-Identical to L</logb>.
+For example ilogb(20) is 4, as an integer.
+
+See also L</logb>.
 
 =item C<isalnum>
 
@@ -842,7 +844,7 @@ Note that you cannot test for "NaN-ness" with
 
 since the NaN is not equivalent to anything, B<including itself>.
 
-See also L</isinf>, and L</fpclassify>.
+See also L</nan>, L</isinf>, and L</fpclassify>.
 
 =item C<isnormal>
 
@@ -993,7 +995,9 @@ See also L</expm1>.
 
 Integer binary logarithm [C99].
 
-Identical to L</ilogb>.
+For example logb(20) is 4, as a floating point number.
+
+See also L</ilogb>.
 
 =item C<link>
 
@@ -1081,11 +1085,12 @@ Returns C<undef> on failure.
 
 =item C<lrint>
 
-Depending on the floating point rounding mode, rounds the argument
-either toward nearest, toward zero, downward (toward negative infinity),
-or upward (toward positive infinity) [C99].
+Depending on the current floating point rounding mode, rounds the
+argument either toward nearest (like L</round>), toward zero (like
+L</trunc>), downward (toward negative infinity), or upward (toward
+positive infinity) [C99].
 
-For the rounding mode, see L</fegetround> and L</fesetround>.
+For the rounding mode, see L</fegetround>.
 
 =item C<lround>
 
@@ -1100,23 +1105,24 @@ C<malloc()> is C-specific.  Perl does memory management transparently.
 =item C<mblen>
 
 This is identical to the C function C<mblen()>.
-Perl does not have any support for the wide and multibyte
-characters of the C standards, so this might be a rather
-useless function.
+
+Core Perl does not have any support for the wide and multibyte
+characters of the C standards, so this might be a rather useless
+function.
+
+However, Perl supports Unicode, see L<perluniintro>.
 
 =item C<mbstowcs>
 
 This is identical to the C function C<mbstowcs()>.
-Perl does not have any support for the wide and multibyte
-characters of the C standards, so this might be a rather
-useless function.
+
+See L</mblen>.
 
 =item C<mbtowc>
 
 This is identical to the C function C<mbtowc()>.
-Perl does not have any support for the wide and multibyte
-characters of the C standards, so this might be a rather
-useless function.
+
+See L</mblen>.
 
 =item C<memchr>
 
@@ -1182,9 +1188,13 @@ Return the integral and fractional parts of a floating-point number.
 
 	($fractional, $integral) = POSIX::modf( 3.14 );
 
+See also L</round>.
+
 =item C<nan>
 
 Returns not-a-number [C99].
+
+See also L</isnan>.
 
 =item C<nearbyint>
 
@@ -1402,7 +1412,7 @@ for removing (empty) directories, see L<perlfunc/rmdir>.
 Returns the integer (but still as floating point) nearest to the
 argument [C99].
 
-See also L</ceil>, L</floor>, L</lround>, L</trunc>.
+See also L</ceil>, L</floor>, L</lround>, L</modf>, and L</trunc>.
 
 =item C<scalbn>
 
@@ -2035,16 +2045,14 @@ builtin C<waitpid()> function, see L<perlfunc/waitpid>.
 =item C<wcstombs>
 
 This is identical to the C function C<wcstombs()>.
-Perl does not have any support for the wide and multibyte
-characters of the C standards, so this might be a rather
-useless function.
+
+See L</mblen>.
 
 =item C<wctomb>
 
 This is identical to the C function C<wctomb()>.
-Perl does not have any support for the wide and multibyte
-characters of the C standards, so this might be a rather
-useless function.
+
+See L</mblen>.
 
 =item C<write>
 
