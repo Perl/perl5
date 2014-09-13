@@ -176,6 +176,11 @@ section.
 
 XXX Description of the change here
 
+=item *
+
+L<perlsyn>: An ambiguity in the documentation of the Ellipsis statement has
+been corrected. [perl #122661]
+
 =back
 
 =head1 Diagnostics
