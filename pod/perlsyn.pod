@@ -788,14 +788,13 @@ syntax error if Perl doesn't guess that the C<{ ... }> is a block.  In that
 case, it doesn't think the C<...> is an ellipsis because it's expecting an
 expression instead of a statement:
 
-    @transformed = map { ... } @input;  # syntax error
+    @transformed = map { ... } @input;    # syntax error
 
-You can use a C<;> inside your block to denote that the C<{ ...  }> is a
-block and not a hash reference constructor.  Now the ellipsis works:
+Inside your block, you can use a C<;> before the ellipsis to denote that the
+C<{ ... }> is a block and not a hash reference constructor.  Now the ellipsis
+works:
 
-    @transformed = map {; ... } @input; # ; disambiguates
-
-    @transformed = map { ...; } @input; # ; disambiguates
+    @transformed = map {; ... } @input;   # ';' disambiguates
 
 Note: Some folks colloquially refer to this bit of punctuation as a
 "yada-yada" or "triple-dot", but its true name
