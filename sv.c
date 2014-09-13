@@ -11794,8 +11794,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		goto unknown;
 	    }
 
-            /* now we need (long double) if intsize == 'q', else (double) */
+            /* Now we need (long double) if intsize == 'q', else (double). */
             if (args) {
+                /* Note: do not pull NVs off the va_list with va_arg()
+                 * (pull doubles instead) because if you have a build
+                 * with long doubles, you would always be pulling long
+                 * doubles, which would badly break anyone using only
+                 * doubles (i.e. the majority of builds). In other
+                 * words, you cannot mix doubles and long doubles.
+                 * The only case where you can pull off long doubles
+                 * is when the format specifier explicitly asks so with
+                 * e.g. "%Lg". */
 #if LONG_DOUBLESIZE > DOUBLESIZE
                 fv = intsize == 'q' ?
                     va_arg(*args, long double) : va_arg(*args, double);
