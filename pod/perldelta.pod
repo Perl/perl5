@@ -141,6 +141,12 @@ L<ExtUtils::Manifest> has been upgraded from version 1.65 to 1.66.
 
 =item *
 
+L<ExtUtils::ParseXS>:  Documentation has been added to
+F<ExtUtils-ParseXS/lib/perlxs.pod> concerning handling of locales when writing
+XS code.
+
+=item *
+
 L<File::Find> has been upgraded from version 1.27 to 1.28.
 
 C<find()> and C<finddepth()> will now warn if passed inappropriate or
