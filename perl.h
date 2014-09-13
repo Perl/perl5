@@ -28,9 +28,12 @@
 #   include "config.h"
 #endif
 
-/* Note that with gcc -std=c89 the __STDC_VERSION__ is *not* defined
+/* NOTE 1: that with gcc -std=c89 the __STDC_VERSION__ is *not* defined
  * because the __STDC_VERSION__ became a thing only with C90.  Therefore,
- * with gcc, HAS_C99 will never become true as long as we use -std=c89. */
+ * with gcc, HAS_C99 will never become true as long as we use -std=c89.
+
+ * NOTE 2: headers lie.  Do not expect that if HAS_C99 gets to be true,
+ * all the C99 features are there and are correct. */
 #if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || \
      defined(_STDC_C99)
 #  define HAS_C99 1
