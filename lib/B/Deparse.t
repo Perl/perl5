@@ -344,6 +344,9 @@ print $main::x[1];
 my %x;
 $x{warn()};
 ####
+# our (LIST)
+our($foo, $bar, $baz);
+####
 # <>
 my $foo;
 $_ .= <ARGV> . <$foo>;

@@ -1195,8 +1195,7 @@ sub maybe_local {
     my $self = shift;
     my($op, $cx, $text) = @_;
     my $our_intro = ($op->name =~ /^(gv|rv2)[ash]v$/) ? OPpOUR_INTRO : 0;
-    if ($op->private & (OPpLVAL_INTRO|$our_intro)
-	and not $self->{'avoid_local'}{$$op}) {
+    if ($op->private & (OPpLVAL_INTRO|$our_intro)) {
 	my $our_local = ($op->private & OPpLVAL_INTRO) ? "local" : "our";
 	if( $our_local eq 'our' ) {
 	    if ( $text !~ /^\W(\w+::)*\w+\z/
@@ -1206,6 +1205,7 @@ sub maybe_local {
 	    }
 	    $text =~ s/(\w+::)+//;
 	}
+	return $text if $self->{'avoid_local'}{$$op};
         if (want_scalar($op)) {
 	    return "$our_local $text";
 	} else {
