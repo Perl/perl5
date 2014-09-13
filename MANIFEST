@@ -1338,6 +1338,7 @@ cpan/IO-Socket-IP/t/18fdopen.t				IO::Socket::IP tests
 cpan/IO-Socket-IP/t/19no-addrs.t			IO::Socket::IP tests
 cpan/IO-Socket-IP/t/20subclass.t			IO::Socket::IP tests
 cpan/IO-Socket-IP/t/21as-inet.t				IO::Socket::IP tests
+cpan/IO-Socket-IP/t/22timeout.t
 cpan/IO-Socket-IP/t/30nonblocking-connect.t		IO::Socket::IP tests
 cpan/IO-Socket-IP/t/31nonblocking-connect-internet.t	IO::Socket::IP tests
 cpan/IO-Socket-IP/t/99pod.t				IO::Socket::IP tests

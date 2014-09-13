@@ -7,7 +7,7 @@ package IO::Socket::IP;
 # $VERSION needs to be set before  use base 'IO::Socket'
 #  - https://rt.cpan.org/Ticket/Display.html?id=92107
 BEGIN {
-   $VERSION = '0.31';
+   $VERSION = '0.32';
 }
 
 use strict;
@@ -31,7 +31,7 @@ use Socket 1.97 qw(
 my $AF_INET6 = eval { Socket::AF_INET6() }; # may not be defined
 my $AI_ADDRCONFIG = eval { Socket::AI_ADDRCONFIG() } || 0;
 use POSIX qw( dup2 );
-use Errno qw( EINVAL EINPROGRESS EISCONN );
+use Errno qw( EINVAL EINPROGRESS EISCONN ETIMEDOUT EWOULDBLOCK );
 
 use constant HAVE_MSWIN32 => ( $^O eq "MSWin32" );
 
@@ -303,6 +303,22 @@ However, the behaviour it enables is always performed by C<IO::Socket::IP>.
 If defined but false, the socket will be set to non-blocking mode. Otherwise
 it will default to blocking mode. See the NON-BLOCKING section below for more
 detail.
+
+=item Timeout => NUM
+
+If defined, gives a maximum time in seconds to block per C<connect()> call
+when in blocking mode. If missing, no timeout is applied other than that
+provided by the underlying operating system. When in non-blocking mode this
+parameter is ignored.
+
+Note that if the hostname resolves to multiple address candidates, the same
+timeout will apply to each connection attempt individually, rather than to the
+operation as a whole. Further note that the timeout does not apply to the
+initial hostname resolve operation, if connecting by hostname.
+
+This behviour is copied inspired by C<IO::Socket::INET>; for more fine grained
+control over connection timeouts, consider performing a nonblocking connect
+directly.
 
 =back
 
@@ -611,12 +627,12 @@ sub setup
             return 0;
          }
 
-	 # If connect failed but we have no system error there must be an error
-	 # at the application layer, like a bad certificate with
-	 # IO::Socket::SSL.
-	 # In this case don't continue IP based multi-homing because the problem
-	 # cannot be solved at the IP layer.
-	 return 0 if ! $!;
+         # If connect failed but we have no system error there must be an error
+         # at the application layer, like a bad certificate with
+         # IO::Socket::SSL.
+         # In this case don't continue IP based multi-homing because the problem
+         # cannot be solved at the IP layer.
+         return 0 if ! $!;
 
          ${*$self}{io_socket_ip_errors}[0] = $!;
          next;
@@ -641,7 +657,47 @@ sub connect
    # useful APIs I'm just going to end-run around it and call CORE::connect()
    # directly
 
-   return CORE::connect( $self, $_[0] ) if @_;
+   if( @_ ) {
+      my ( $addr ) = @_;
+
+      # Annoyingly IO::Socket's connect() is where the timeout logic is
+      # implemented, so we'll have to reinvent it here
+      my $timeout = ${*$self}{'io_socket_timeout'};
+
+      return CORE::connect( $self, $addr ) unless defined $timeout;
+
+      my $was_blocking = $self->blocking( 0 );
+
+      my $err = defined CORE::connect( $self, $addr ) ? 0 : $!+0;
+
+      if( !$err ) {
+         # All happy
+         return 1;
+      }
+      elsif( not( $err == EINPROGRESS or $err == EWOULDBLOCK ) ) {
+         # Failed for some other reason
+         return undef;
+      }
+      elsif( !$was_blocking ) {
+         # We shouldn't block anyway
+         return undef;
+      }
+
+      my $vec = ''; vec( $vec, $self->fileno, 1 ) = 1;
+      if( !select( $vec, $vec, $vec, $timeout ) ) {
+         $! = ETIMEDOUT;
+         return undef;
+      }
+
+      # Hoist the error by connect()ing a second time
+      $err = defined CORE::connect( $self, $addr ) ? 0 : $!+0;
+      $err = 0 if $err == EISCONN; # Some OSes give EISCONN
+
+      $self->blocking( $was_blocking );
+
+      $! = $err, return undef if $err;
+      return 1;
+   }
 
    return 1 if !${*$self}{io_socket_ip_connect_in_progress};
 
@@ -1089,6 +1145,37 @@ useable address from the results of the C<getaddrinfo(3)> call. The
 constructor will ignore the value of this argument, except if it is defined
 but false. An exception is thrown in this case, because that would request it
 disable the C<getaddrinfo(3)> search behaviour in the first place.
+
+=item *
+
+C<IO::Socket::IP> implements both the C<Blocking> and C<Timeout> parameters,
+but it implements the interaction of both in a different way.
+
+In C<::INET>, supplying a timeout overrides the non-blocking behaviour,
+meaning that the C<connect()> operation will still block despite that the
+caller asked for a non-blocking socket. This is not explicitly specified in
+its documentation, nor does this author believe that is a useful behaviour -
+it appears to come from a quirk of implementation.
+
+In C<::IP> therefore, the C<Blocking> parameter takes precedence - if a
+non-blocking socket is requested, no operation will block. The C<Timeout>
+parameter here simply defines the maximum time that a blocking C<connect()>
+call will wait, if it blocks at all.
+
+In order to specifically obtain the "blocking connect then non-blocking send
+and receive" behaviour of specifying this combination of options to C<::INET>
+when using C<::IP>, perform first a blocking connect, then afterwards turn the
+socket into nonblocking mode.
+
+ my $sock = IO::Socket::IP->new(
+    PeerHost => $peer,
+    Timeout => 20,
+ ) or die "Cannot connect - $@";
+
+ $sock->blocking( 0 );
+
+This code will behave identically under both C<IO::Socket::INET> and
+C<IO::Socket::IP>.
 
 =back
 

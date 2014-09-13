@@ -27,6 +27,7 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
    my $testserver = IO::Socket::IP->new(
       ( $socktype eq "SOCK_STREAM" ? ( Listen => 1 ) : () ),
       LocalHost => "127.0.0.1",
+      Port      => 0,
       Type      => Socket->$socktype,
    );
 
