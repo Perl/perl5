@@ -139,10 +139,14 @@ SKIP: {
   }
 }
 
-{
+SKIP: {
+    my @FInf = qw(Info Infiniti Infinityz);
+    if ($Config{usequadmath}) {
+        skip "quadmath strtoflt128() accepts false infinities", scalar @FInf;
+    }
     # Silence "isn't numeric in addition", that's kind of the point.
     local $^W = 0;
-    for my $i (qw(Info Infiniti Infinityz)) {
+    for my $i (@FInf) {
         cmp_ok("$i" + 0, '==', 0, "false infinity $i");
     }
 }
