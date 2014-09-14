@@ -17,6 +17,40 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.20.1 - Lorenzo da Ponte, Così fan tutte
+
+L<Announced on 2014-09-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg219789.html>
+
+  DORABELLA (as if waking from a daze): Where are they?
+  DON ALFONSO: They've gone.
+  FIORDILIGI: Oh, the cruel bitterness of parting!
+
+  DON ALFONSO:
+  Take heart, my dearest children.
+  Look, in the distance, your lovers are waving to you.
+
+  FIORDILIGI: Bon voyage, my darling!
+  DORABELLA: Bon voyage!
+
+  FIORDILIGI:
+  O heavens! How swiftly the ship is sailing away!
+  It is disappearing already!
+  It is no longer in sight!
+  Oh, may heaven grant it a prosperous voyage!
+
+  DORABELLA: May good luck attend it to the battlefield!
+  DON ALFONSO: And may your sweethearts and my friends be safe!
+
+  FIORDILIGI, DORABELLA, DON ALFONSO:
+  May the wind be gentle,
+  may the sea be calm,
+  and may the elements
+  respond kindly
+  to our wishes.
+
+    -- Lorenzo da Ponte, /Così fan tutte/,
+       trans. Diana Reed
+
 =head2 v5.20.1-RC2 - Lorenzo da Ponte, Così fan tutte
 
 L<Announced on 2014-09-07 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg219446.html>
