@@ -40,6 +40,14 @@
   char *gconvert(double, int, int,  char *);
 #endif
 
+#ifdef USE_QUADMATH
+#  define SNPRINTF_G(nv, buffer, size, ndig) \
+    quadmath_snprintf(buffer, size, "%.*Qg", (int)ndig, (NV)(nv))
+#else
+#  define SNPRINTF_G(nv, buffer, size, ndig) \
+    PERL_UNUSED_RESULT(Gconvert((NV)(nv), (int)ndig, 0, buffer))
+#endif
+
 #ifdef PERL_NEW_COPY_ON_WRITE
 #   ifndef SV_COW_THRESHOLD
 #    define SV_COW_THRESHOLD                    0   /* COW iff len > K */
@@ -3045,12 +3053,13 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
                 /* some Xenix systems wipe out errno here */
 
 #ifndef USE_LOCALE_NUMERIC
-                PERL_UNUSED_RESULT(Gconvert(SvNVX(sv), NV_DIG, 0, s));
+                SNPRINTF_G(SvNVX(sv), s, SvLEN(sv), NV_DIG);
+
                 SvPOK_on(sv);
 #else
                 {
                     DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
-                    PERL_UNUSED_RESULT(Gconvert(SvNVX(sv), NV_DIG, 0, s));
+                    SNPRINTF_G(SvNVX(sv), s, SvLEN(sv), NV_DIG);
 
                     /* If the radix character is UTF-8, and actually is in the
                      * output, turn on the UTF-8 flag for the scalar */
@@ -11023,9 +11032,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     if (digits && digits < sizeof(ebuf) - NV_DIG - 10) {
                         /* 0, point, slack */
                         STORE_LC_NUMERIC_SET_TO_NEEDED();
-                        PERL_UNUSED_RESULT(Gconvert(nv, (int)digits, 0, ebuf));
+                        SNPRINTF_G(nv, ebuf, size, digits);
                         sv_catpv_nomg(sv, ebuf);
-                        if (*ebuf) /* May return an empty string for digits==0 */
+                        if (*ebuf)	/* May return an empty string for digits==0 */
                             return;
                     }
                 } else if (!digits) {
@@ -11088,7 +11097,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
          * the time it is not (most compilers these days recognize
          * "long double", even if only as a synonym for "double").
 	*/
-#if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE && defined(PERL_PRIgldbl)
+#if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE && \
+	defined(PERL_PRIgldbl) && !defined(USE_QUADMATH)
 	long double fv;
 #  define FV_ISFINITE(x) Perl_isfinitel(x)
 #  define FV_GF PERL_PRIgldbl
@@ -11394,6 +11404,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #if IVSIZE >= 8 || defined(HAS_LONG_DOUBLE)
 	case 'L':			/* Ld */
 	    /* FALLTHROUGH */
+#ifdef USE_QUADMATH
+        case 'Q':
+	    /* FALLTHROUGH */
+#endif
 #if IVSIZE >= 8
 	case 'q':			/* qd */
 #endif
@@ -11823,7 +11837,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * The only case where you can pull off long doubles
                  * is when the format specifier explicitly asks so with
                  * e.g. "%Lg". */
-#if LONG_DOUBLESIZE > DOUBLESIZE
+#ifdef USE_QUADMATH
+                fv = intsize == 'q' ?
+                    va_arg(*args, NV) : va_arg(*args, double);
+#elif LONG_DOUBLESIZE > DOUBLESIZE
                 fv = intsize == 'q' ?
                     va_arg(*args, long double) : va_arg(*args, double);
 #else
@@ -11973,7 +11990,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		   aka precis is 0  */
 		if ( c == 'g' && precis ) {
                     STORE_LC_NUMERIC_SET_TO_NEEDED();
-		    PERL_UNUSED_RESULT(Gconvert((NV)fv, (int)precis, 0, PL_efloatbuf));
+                    SNPRINTF_G(fv, PL_efloatbuf, PL_efloatsize, precis);
 		    /* May return an empty string for digits==0 */
 		    if (*PL_efloatbuf) {
 			elen = strlen(PL_efloatbuf);
@@ -12178,9 +12195,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		    /* Copy the one or more characters in a long double
 		     * format before the 'base' ([efgEFG]) character to
 		     * the format string. */
+#ifdef USE_QUADMATH
+                    *--ptr = 'Q';
+#else
 		    static char const ldblf[] = PERL_PRIfldbl;
 		    char const *p = ldblf + sizeof(ldblf) - 3;
 		    while (p >= ldblf) { *--ptr = *p--; }
+#endif
 		}
 #endif
 		if (has_precis) {
@@ -12211,7 +12232,19 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 /* hopefully the above makes ptr a very constrained format
                  * that is safe to use, even though it's not literal */
                 GCC_DIAG_IGNORE(-Wformat-nonliteral);
-#if defined(HAS_LONG_DOUBLE)
+#ifdef USE_QUADMATH
+                {
+                    const char* qfmt = quadmath_format_single(ptr);
+                    if (!qfmt)
+                        Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", ptr);
+                    elen = quadmath_snprintf(PL_efloatbuf, PL_efloatsize,
+                                             qfmt, fv);
+                    if ((IV)elen == -1)
+                        Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s|'", qfmt);
+                    if (qfmt != ptr)
+                        Safefree(qfmt);
+                }
+#elif defined(HAS_LONG_DOUBLE)
                 elen = ((intsize == 'q')
                         ? my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, fv)
                         : my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, (double)fv));

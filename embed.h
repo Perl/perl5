@@ -878,6 +878,10 @@
 #define PerlIO_unread(a,b,c)	Perl_PerlIO_unread(aTHX_ a,b,c)
 #define PerlIO_write(a,b,c)	Perl_PerlIO_write(aTHX_ a,b,c)
 #endif
+#if defined(USE_QUADMATH)
+#define quadmath_format_needed	Perl_quadmath_format_needed
+#define quadmath_format_single	Perl_quadmath_format_single
+#endif
 #if defined(WIN32)
 #define my_setlocale(a,b)	Perl_my_setlocale(aTHX_ a,b)
 #endif
@@ -1355,6 +1359,11 @@
 #define utf16_textfilter(a,b,c)	S_utf16_textfilter(aTHX_ a,b,c)
 #    endif
 #  endif
+#  if !defined(USE_QUADMATH)
+#    if defined(PERL_IN_NUMERIC_C)
+#define mulexp10		S_mulexp10
+#    endif
+#  endif
 #  if !defined(WIN32)
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
 #  endif
@@ -1485,9 +1494,6 @@
 #define mro_clean_isarev(a,b,c,d,e,f)	S_mro_clean_isarev(aTHX_ a,b,c,d,e,f)
 #define mro_gather_and_rename(a,b,c,d,e)	S_mro_gather_and_rename(aTHX_ a,b,c,d,e)
 #define mro_get_linear_isa_dfs(a,b)	S_mro_get_linear_isa_dfs(aTHX_ a,b)
-#  endif
-#  if defined(PERL_IN_NUMERIC_C)
-#define mulexp10		S_mulexp10
 #  endif
 #  if defined(PERL_IN_OP_C)
 #define aassign_common_vars(a)	S_aassign_common_vars(aTHX_ a)

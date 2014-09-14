@@ -965,6 +965,7 @@ Perl_grok_atou(const char *pv, const char** endptr)
     return val;
 }
 
+#ifndef USE_QUADMATH
 STATIC NV
 S_mulexp10(NV value, I32 exponent)
 {
@@ -1043,12 +1044,17 @@ S_mulexp10(NV value, I32 exponent)
     }
     return negative ? value / result : value * result;
 }
+#endif /* #ifndef USE_QUADMATH */
 
 NV
 Perl_my_atof(pTHX_ const char* s)
 {
     NV x = 0.0;
-#ifdef USE_LOCALE_NUMERIC
+#ifdef USE_QUADMATH
+    Perl_my_atof2(aTHX_ s, &x);
+    return x;
+#else
+#  ifdef USE_LOCALE_NUMERIC
     PERL_ARGS_ASSERT_MY_ATOF;
 
     {
@@ -1081,8 +1087,9 @@ Perl_my_atof(pTHX_ const char* s)
             Perl_atof2(s, x);
         RESTORE_LC_NUMERIC();
     }
-#else
+#  else
     Perl_atof2(s, x);
+#  endif
 #endif
     return x;
 }
@@ -1162,12 +1169,14 @@ S_my_atof_infnan(const char* s, bool negative, const char* send, NV* value)
 char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)
 {
-    NV result[3] = {0.0, 0.0, 0.0};
     const char* s = orig;
-#ifdef USE_PERL_ATOF
-    UV accumulator[2] = {0,0};	/* before/after dp */
-    bool negative = 0;
+    NV result[3] = {0.0, 0.0, 0.0};
+#if defined(USE_PERL_ATOF) || defined(USE_QUADMATH)
     const char* send = s + strlen(orig); /* one past the last */
+    bool negative = 0;
+#endif
+#if defined(USE_PERL_ATOF) && !defined(USE_QUADMATH)
+    UV accumulator[2] = {0,0};	/* before/after dp */
     bool seen_digit = 0;
     I32 exp_adjust[2] = {0,0};
     I32 exp_acc[2] = {-1, -1};
@@ -1177,8 +1186,38 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     I32 digit = 0;
     I32 old_digit = 0;
     I32 sig_digits = 0; /* noof significant digits seen so far */
+#endif
 
+#if defined(USE_PERL_ATOF) || defined(USE_QUADMATH)
     PERL_ARGS_ASSERT_MY_ATOF2;
+
+    /* leading whitespace */
+    while (isSPACE(*s))
+	++s;
+
+    /* sign */
+    switch (*s) {
+	case '-':
+	    negative = 1;
+	    /* FALLTHROUGH */
+	case '+':
+	    ++s;
+    }
+#endif
+
+#ifdef USE_QUADMATH
+    {
+        char* endp;
+        if ((endp = S_my_atof_infnan(s, negative, send, value)))
+            return endp;
+        result[2] = strtoflt128(s, &endp);
+        if (s != endp) {
+            *value = negative ? -result[2] : result[2];
+            return endp;
+        }
+        return NULL;
+    }
+#elif defined(USE_PERL_ATOF)
 
 /* There is no point in processing more significant digits
  * than the NV can hold. Note that NV_DIG is a lower-bound value,
@@ -1208,19 +1247,6 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 
 /* the max number we can accumulate in a UV, and still safely do 10*N+9 */
 #define MAX_ACCUMULATE ( (UV) ((UV_MAX - 9)/10))
-
-    /* leading whitespace */
-    while (isSPACE(*s))
-	++s;
-
-    /* sign */
-    switch (*s) {
-	case '-':
-	    negative = 1;
-	    /* FALLTHROUGH */
-	case '+':
-	    ++s;
-    }
 
     {
         const char* endp;

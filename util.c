@@ -4908,6 +4908,112 @@ Perl_my_sprintf(char *buffer, const char* pat, ...)
 #endif
 
 /*
+=for apidoc quadmath_format_single
+
+quadmath_snprintf() is very strict about its format string and will
+fail, returning -1, if the format is invalid.  It acccepts exactly
+one format spec.
+
+quadmath_format_single() checks that the intended single spec looks
+sane: begins with C<%>, has only one C<%>, ends with C<[efgaEFGA]>,
+and has C<Q> before it.  This is not a full "printf syntax check",
+just the basics.
+
+Returns the format if it is valid, NULL if not.
+
+quadmath_format_single() can and will actually patch in the missing
+C<Q>, if necessary.  In this case it will return the modified copy of
+the format, B<which the caller will need to free.>
+
+See also L</quadmath_format_needed>.
+
+=cut
+*/
+#ifdef USE_QUADMATH
+const char*
+Perl_quadmath_format_single(const char* format)
+{
+    STRLEN len;
+
+    PERL_ARGS_ASSERT_QUADMATH_FORMAT_SINGLE;
+
+    if (format[0] != '%' || strchr(format + 1, '%'))
+        return NULL;
+    len = strlen(format);
+    /* minimum length three: %Qg */
+    if (len < 3 || strchr("efgaEFGA", format[len - 1]) == NULL)
+        return NULL;
+    if (format[len - 2] != 'Q') {
+        char* fixed;
+        Newx(fixed, len + 1, char);
+        memcpy(fixed, format, len - 1);
+        fixed[len - 1] = 'Q';
+        fixed[len    ] = format[len - 1];
+        fixed[len + 1] = 0;
+        return (const char*)fixed;
+    }
+    return format;
+}
+#endif
+
+/*
+=for apidoc quadmath_format_needed
+
+quadmath_format_needed() returns true if the format string seems to
+contain at least one non-Q-prefixed %[efgaEFGA] format specifier,
+or returns false otherwise.
+
+The format specifier detection is not complete printf-syntax detection,
+but it should catch most common cases.
+
+If true is returned, those arguments B<should> in theory be processed
+with quadmath_snprintf(), but in case there is more than one such
+format specifier (see L</quadmath_format_single>), and if there is
+anything else beyond that one (even just a single byte), they
+B<cannot> be processed because quadmath_snprintf() is very strict,
+accepting only one format spec, and nothing else.
+In this case, the code should probably fail.
+
+=cut
+*/
+#ifdef USE_QUADMATH
+bool
+Perl_quadmath_format_needed(const char* format)
+{
+  const char *p = format;
+  const char *q;
+
+  PERL_ARGS_ASSERT_QUADMATH_FORMAT_NEEDED;
+
+  while ((q = strchr(p, '%'))) {
+    q++;
+    if (*q == '+') /* plus */
+      q++;
+    if (*q == '#') /* alt */
+      q++;
+    if (*q == '*') /* width */
+      q++;
+    else {
+      if (isDIGIT(*q)) {
+        while (isDIGIT(*q)) q++;
+      }
+    }
+    if (*q == '.' && (q[1] == '*' || isDIGIT(q[1]))) { /* prec */
+      q++;
+      if (*q == '*')
+        q++;
+      else
+        while (isDIGIT(*q)) q++;
+    }
+    if (strchr("efgaEFGA", *q)) /* Would have needed 'Q' in front. */
+      return TRUE;
+    p = q + 1;
+  }
+  return FALSE;
+}
+#endif
+
+/*
 =for apidoc my_snprintf
 
 The C library C<snprintf> functionality, if available and
@@ -4922,17 +5028,59 @@ getting C<vsnprintf>.
 int
 Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
 {
-    int retval;
+    int retval = -1;
     va_list ap;
     PERL_ARGS_ASSERT_MY_SNPRINTF;
 #ifndef HAS_VSNPRINTF
     PERL_UNUSED_VAR(len);
 #endif
     va_start(ap, format);
+#ifdef USE_QUADMATH
+    {
+        const char* qfmt = quadmath_format_single(format);
+        bool quadmath_valid = FALSE;
+        if (qfmt) {
+            /* If the format looked promising, use it as quadmath. */
+            retval = quadmath_snprintf(buffer, len, qfmt, va_arg(ap, NV));
+            if (retval == -1)
+                Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", qfmt);
+            quadmath_valid = TRUE;
+            if (qfmt != format)
+                Safefree(qfmt);
+            qfmt = NULL;
+        }
+        assert(qfmt == NULL);
+        /* quadmath_format_single() will return false for example for
+         * "foo = %g", or simply "%g".  We could handle the %g by
+         * using quadmath for the NV args.  More complex cases of
+         * course exist: "foo = %g, bar = %g", or "foo=%Qg" (otherwise
+         * quadmath-valid but has stuff in front).
+         *
+         * Handling the "Q-less" cases right would require walking
+         * through the va_list and rewriting the format, calling
+         * quadmath for the NVs, building a new va_list, and then
+         * letting vsnprintf/vsprintf to take care of the other
+         * arguments.  This may be doable.
+         *
+         * We do not attempt that now.  But for paranoia, we here try
+         * to detect some common (but not all) cases where the
+         * "Q-less" %[efgaEFGA] formats are present, and die if
+         * detected.  This doesn't fix the problem, but it stops the
+         * vsnprintf/vsprintf pulling doubles off the va_list when
+         * __float128 NVs should be pulled off instead.
+         *
+         * If quadmath_format_needed() returns false, we are reasonably
+         * certain that we can call vnsprintf() or vsprintf() safely. */
+        if (!quadmath_valid && quadmath_format_needed(format))
+          Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", format);
+
+    }
+#endif
+    if (retval == -1)
 #ifdef HAS_VSNPRINTF
-    retval = vsnprintf(buffer, len, format, ap);
+        retval = vsnprintf(buffer, len, format, ap);
 #else
-    retval = vsprintf(buffer, format, ap);
+        retval = vsprintf(buffer, format, ap);
 #endif
     va_end(ap);
     /* vsprintf() shows failure with < 0 */
@@ -4961,6 +5109,14 @@ C<sv_vcatpvf> instead, or getting C<vsnprintf>.
 int
 Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap)
 {
+#ifdef USE_QUADMATH
+    PERL_UNUSED_ARG(buffer);
+    PERL_UNUSED_ARG(len);
+    PERL_UNUSED_ARG(format);
+    PERL_UNUSED_ARG(ap);
+    Perl_croak_nocontext("panic: my_vsnprintf not available with quadmath");
+    return 0;
+#else
     int retval;
 #ifdef NEED_VA_COPY
     va_list apc;
@@ -4993,6 +5149,7 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
     )
 	Perl_croak_nocontext("panic: my_vsnprintf buffer overflow");
     return retval;
+#endif
 }
 
 void

@@ -5336,6 +5336,11 @@ PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...)
 	assert(buffer); assert(pat)
 
 #endif
+#if !defined(USE_QUADMATH)
+#  if defined(PERL_IN_NUMERIC_C)
+STATIC NV	S_mulexp10(NV value, I32 exponent);
+#  endif
+#endif
 #if !defined(WIN32)
 PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 			__attribute__nonnull__(pTHX_1);
@@ -6119,9 +6124,6 @@ STATIC AV*	S_mro_get_linear_isa_dfs(pTHX_ HV* stash, U32 level)
 #define PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA_DFS	\
 	assert(stash)
 
-#endif
-#if defined(PERL_IN_NUMERIC_C)
-STATIC NV	S_mulexp10(NV value, I32 exponent);
 #endif
 #if defined(PERL_IN_OP_C)
 PERL_STATIC_INLINE bool	S_aassign_common_vars(pTHX_ OP* o);
@@ -8066,6 +8068,18 @@ PERL_CALLCONV SSize_t	Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_PERLIO_WRITE	\
 	assert(vbuf)
+
+#endif
+#if defined(USE_QUADMATH)
+PERL_CALLCONV bool	Perl_quadmath_format_needed(const char* format)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_QUADMATH_FORMAT_NEEDED	\
+	assert(format)
+
+PERL_CALLCONV const char*	Perl_quadmath_format_single(const char* format)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_QUADMATH_FORMAT_SINGLE	\
+	assert(format)
 
 #endif
 #if defined(WIN32)

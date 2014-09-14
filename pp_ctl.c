@@ -825,11 +825,25 @@ PP(pp_formline)
                 int len;
                 DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
                 arg &= ~(FORM_NUM_POINT|FORM_NUM_BLANK);
+#ifdef USE_QUADMATH
+                {
+                    const char* qfmt = quadmath_format_single(fmt);
+                    int len;
+                    if (!qfmt)
+                        Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", fmt);
+                    len = quadmath_snprintf(t, max, qfmt, (int) fieldsize, (int) arg, value);
+                    if (len == -1)
+                        Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", qfmt);
+                    if (qfmt != fmt)
+                        Safefree(fmt);
+                }
+#else
                 /* we generate fmt ourselves so it is safe */
                 GCC_DIAG_IGNORE(-Wformat-nonliteral);
                 len = my_snprintf(t, max, fmt, (int) fieldsize, (int) arg, value);
-                PERL_MY_SNPRINTF_POST_GUARD(len, max);
                 GCC_DIAG_RESTORE;
+#endif
+                PERL_MY_SNPRINTF_POST_GUARD(len, max);
                 RESTORE_LC_NUMERIC();
 	    }
 	    t += fieldsize;

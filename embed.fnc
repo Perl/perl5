@@ -2433,7 +2433,9 @@ sn	|void	|mem_log_common	|enum mem_log_type mlt|const UV n|const UV typesize \
 #endif
 
 #if defined(PERL_IN_NUMERIC_C)
+#ifndef USE_QUADMATH
 sn	|NV|mulexp10	|NV value|I32 exponent
+#endif
 #endif
 
 #if defined(PERL_IN_UTF8_C)
@@ -2644,6 +2646,10 @@ Apnod	|int	|my_sprintf	|NN char *buffer|NN const char *pat|...
 
 Apnodf	|int	|my_snprintf	|NN char *buffer|const Size_t len|NN const char *format|...
 Apnod	|int	|my_vsnprintf	|NN char *buffer|const Size_t len|NN const char *format|va_list ap
+#ifdef USE_QUADMATH
+Apnd	|const char*	|quadmath_format_single|NN const char* format
+Apnd	|bool|quadmath_format_needed|NN const char* format
+#endif
 
 : Used in mg.c, sv.c
 px	|void	|my_clearenv
