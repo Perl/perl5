@@ -174,7 +174,11 @@ esac
 
 # Allow the user to override ld, but modify it as necessary below
 case "$ld" in
-    '') ld='cc';;
+    '') case "$cc" in
+        gcc*|g++*) ld="$cc" ;;
+        *) ld='cc';;
+        esac
+        ;;
 esac
 
 # Perl bundles do not expect two-level namespace, added in Darwin 1.4.
