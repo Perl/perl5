@@ -357,6 +357,12 @@ messages) used to crash for lexical subs, but have been fixed.
 An assertion failure when parsing C<sort> with debugging enabled has been
 fixed.  [perl #122771]
 
+=item *
+
+Loading UTF8 tables during a regular expression match could cause assertion
+failures under debugging builds if the previous match used the very same
+regular expression.  [perl #122747]
+
 =back
 
 =head1 Known Problems
