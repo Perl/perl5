@@ -115,7 +115,8 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Subroutines with an empty prototype and bodies containing just C<undef> are
+now eligible for inlining.  [perl #122728]
 
 =back
 
