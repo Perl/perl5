@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.201409015';
+$VERSION = '5.20140915';
 
 my $dumpinc = 0;
 sub import {
