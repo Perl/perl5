@@ -317,6 +317,21 @@ case "$gccversion" in
   ;;
 esac
 
+# The quadmath Q format specifier will cause -Wformat to whine.
+case "$gccversion" in
+'') ;;
+*) case "$usequadmath" in
+   define)
+     for f in -Wno-format
+     do
+       echo "cflags.SH: Adding $f because of usequadmath."
+       warn="$warn $f"
+     done
+    ;;
+  esac
+  ;;
+esac
+
 case "$cc" in
 *g++*)
   # Extra paranoia in case people have bad canned ccflags:
