@@ -1952,7 +1952,9 @@ EXTERN_C long double modfl(long double, long double *);
 #           define Perl_isinf(x) ((x) > LDBL_MAX || (x) < -LDBL_MAX)
 #       endif
 #   endif
-#   define Perl_isfinite(x) Perl_isfinitel(x)
+#   ifndef Perl_isfinite
+#       define Perl_isfinite(x) Perl_isfinitel(x)
+#   endif
 #else
 #   define NV_DIG DBL_DIG
 #   ifdef DBL_MANT_DIG
