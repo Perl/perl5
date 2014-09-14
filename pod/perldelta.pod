@@ -539,6 +539,12 @@ Previously, it was possible for some files to be considered UTF-8 that
 actually weren't valid UTF-8.  This is now fixed.  The operators now
 work on EBCDIC platforms as well.
 
+=item *
+
+Under some conditions warning messages raised during regular expression
+pattern compilation were being output more than once.  This has now been
+fixed.
+
 =back
 
 =head1 Known Problems
