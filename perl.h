@@ -1854,45 +1854,83 @@ typedef NVTYPE NV;
 #   ifdef I_SUNMATH
 #       include <sunmath.h>
 #   endif
-#   define NV_DIG LDBL_DIG
-#   ifdef LDBL_MANT_DIG
-#       define NV_MANT_DIG LDBL_MANT_DIG
+#   if defined(USE_QUADMATH) && defined(I_QUADMATH)
+#       include <quadmath.h>
 #   endif
-#   ifdef LDBL_MIN
-#       define NV_MIN LDBL_MIN
-#   endif
-#   ifdef LDBL_MAX
-#       define NV_MAX LDBL_MAX
-#   endif
-#   ifdef LDBL_MIN_EXP
-#       define NV_MIN_EXP LDBL_MIN_EXP
-#   endif
-#   ifdef LDBL_MAX_EXP
-#       define NV_MAX_EXP LDBL_MAX_EXP
-#   endif
-#   ifdef LDBL_MIN_10_EXP
-#       define NV_MIN_10_EXP LDBL_MIN_10_EXP
-#   endif
-#   ifdef LDBL_MAX_10_EXP
-#       define NV_MAX_10_EXP LDBL_MAX_10_EXP
-#   endif
-#   ifdef LDBL_EPSILON
-#       define NV_EPSILON LDBL_EPSILON
-#   endif
-#   ifdef LDBL_MAX
-#       define NV_MAX LDBL_MAX
+#   ifdef FLT128_DIG
+#       define NV_DIG FLT128_DIG
+#       define NV_MANT_DIG FLT128_MANT_DIG
+#       define NV_MIN FLT128_MIN
+#       define NV_MAX FLT128_MAX
+#       define NV_MIN_EXP FLT128_MIN_EXP
+#       define NV_MAX_EXP FLT128_MAX_EXP
+#       define NV_EPSILON FLT128_EPSILON
+#       define NV_MIN_10_EXP FLT128_MIN_10_EXP
+#       define NV_MAX_10_EXP FLT128_MAX_10_EXP
+#       define NV_INF HUGE_VALQ
+#       define NV_NAN nanq("0")
+#   elif defined(LDBL_DIG)
+#       define NV_DIG LDBL_DIG
+#       ifdef LDBL_MANT_DIG
+#           define NV_MANT_DIG LDBL_MANT_DIG
+#       endif
+#       ifdef LDBL_MIN
+#           define NV_MIN LDBL_MIN
+#       endif
+#       ifdef LDBL_MAX
+#           define NV_MAX LDBL_MAX
+#       endif
+#       ifdef LDBL_MIN_EXP
+#           define NV_MIN_EXP LDBL_MIN_EXP
+#       endif
+#       ifdef LDBL_MAX_EXP
+#           define NV_MAX_EXP LDBL_MAX_EXP
+#       endif
+#       ifdef LDBL_MIN_10_EXP
+#           define NV_MIN_10_EXP LDBL_MIN_10_EXP
+#       endif
+#       ifdef LDBL_MAX_10_EXP
+#           define NV_MAX_10_EXP LDBL_MAX_10_EXP
+#       endif
+#       ifdef LDBL_EPSILON
+#           define NV_EPSILON LDBL_EPSILON
+#       endif
+#       ifdef LDBL_MAX
+#           define NV_MAX LDBL_MAX
 /* Having LDBL_MAX doesn't necessarily mean that we have LDBL_MIN... -Allen */
-#   else
-#       ifdef HUGE_VALL
-#           define NV_MAX HUGE_VALL
 #       else
-#           ifdef HUGE_VAL
-#               define NV_MAX ((NV)HUGE_VAL)
+#           ifdef HUGE_VALL
+#               define NV_MAX HUGE_VALL
 #           endif
 #       endif
 #   endif
-#   ifdef HAS_SQRTL
-/* These math interfaces are the long double cousins of the C89 math. */
+#   if defined(USE_QUADMATH) && defined(I_QUADMATH)
+#       define Perl_acos acosq
+#       define Perl_asin asinq
+#       define Perl_atan atanq
+#       define Perl_atan2 atan2q
+#       define Perl_ceil ceilq
+#       define Perl_cos cosq
+#       define Perl_cosh coshq
+#       define Perl_exp expq
+/* no Perl_fabs, but there's PERL_ABS */
+#       define Perl_floor floorq
+#       define Perl_fmod fmodq
+#       define Perl_log logq
+#       define Perl_log10 log10q
+#       define Perl_pow powq
+#       define Perl_sin sinq
+#       define Perl_sinh sinhq
+#       define Perl_sqrt sqrtq
+#       define Perl_tan tanq
+#       define Perl_tanh tanhq
+#       define Perl_modf(x,y) modfq(x,y)
+#       define Perl_frexp(x,y) frexpq(x,y)
+#       define Perl_ldexp(x, y) ldexpq(x,y)
+#       define Perl_isinf(x) isinfq(x)
+#       define Perl_isnan(x) isnanq(x)
+#       define Perl_isfinite(x) !(isnanq(x) || isinfq(x))
+#   elif defined(HAS_SQRTL)
 #       define Perl_acos acosl
 #       define Perl_asin asinl
 #       define Perl_atan atanl
@@ -1914,30 +1952,36 @@ typedef NVTYPE NV;
 #       define Perl_tanh tanhl
 #   endif
 /* e.g. libsunmath doesn't have modfl and frexpl as of mid-March 2000 */
-#   ifdef HAS_MODFL
-#       define Perl_modf(x,y) modfl(x,y)
+#   ifndef Perl_modf
+#       ifdef HAS_MODFL
+#           define Perl_modf(x,y) modfl(x,y)
 /* eg glibc 2.2 series seems to provide modfl on ppc and arm, but has no
    prototype in <math.h> */
-#       ifndef HAS_MODFL_PROTO
+#           ifndef HAS_MODFL_PROTO
 EXTERN_C long double modfl(long double, long double *);
-#	endif
-#   elif (defined(HAS_TRUNCL) || defined(HAS_AINTL)) && defined(HAS_COPYSIGNL)
+#	    endif
+#       elif (defined(HAS_TRUNCL) || defined(HAS_AINTL)) && defined(HAS_COPYSIGNL)
         extern long double Perl_my_modfl(long double x, long double *ip);
 #           define Perl_modf(x,y) Perl_my_modfl(x,y)
-#   endif
-#   ifdef HAS_FREXPL
-#       define Perl_frexp(x,y) frexpl(x,y)
-#   else
-#       if defined(HAS_ILOGBL) && defined(HAS_SCALBNL)
-        extern long double Perl_my_frexpl(long double x, int *e);
-#           define Perl_frexp(x,y) Perl_my_frexpl(x,y)
 #       endif
 #   endif
-#   ifdef HAS_LDEXPL
-#       define Perl_ldexp(x, y) ldexpl(x,y)
-#   else
-#       if defined(HAS_SCALBNL) && FLT_RADIX == 2
-#           define Perl_ldexp(x,y) scalbnl(x,y)
+#   ifndef Perl_frexp
+#       ifdef HAS_FREXPL
+#           define Perl_frexp(x,y) frexpl(x,y)
+#       else
+#           if defined(HAS_ILOGBL) && defined(HAS_SCALBNL)
+extern long double Perl_my_frexpl(long double x, int *e);
+#               define Perl_frexp(x,y) Perl_my_frexpl(x,y)
+#           endif
+#       endif
+#   endif
+#   ifndef Perl_ldexp
+#       ifdef HAS_LDEXPL
+#           define Perl_ldexp(x, y) ldexpl(x,y)
+#       else
+#           if defined(HAS_SCALBNL) && FLT_RADIX == 2
+#               define Perl_ldexp(x,y) scalbnl(x,y)
+#           endif
 #       endif
 #   endif
 #   ifndef Perl_isnan
@@ -4993,6 +5037,9 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef USE_PERLIO
 			     " USE_PERLIO"
 #  endif
+#  ifdef USE_QUADMATH
+			     " USE_QUADMATH"
+#  endif
 #  ifdef USE_REENTRANT_API
 			     " USE_REENTRANT_API"
 #  endif
@@ -5765,7 +5812,9 @@ typedef struct am_table_short AMTS;
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+#ifdef USE_QUADMATH
+#  define Perl_strtod(s, e) strtoflt128(s, e)
+#elif defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
 #  if defined(HAS_STRTOLD)
 #    define Perl_strtod(s, e) strtold(s, e)
 #  elif defined(HAS_STRTOD)

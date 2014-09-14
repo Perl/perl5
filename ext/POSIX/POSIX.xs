@@ -57,44 +57,78 @@
 #include <unistd.h>
 #endif
 
-#ifndef M_E
-#  define M_E		2.71828182845904523536028747135266250
-#endif
-#ifndef M_LOG2E
-#  define M_LOG2E	1.44269504088896340735992468100189214
-#endif
-#ifndef M_LOG10E
-#  define M_LOG10E	0.434294481903251827651128918916605082
-#endif
-#ifndef M_LN2
-#  define M_LN2		0.693147180559945309417232121458176568
-#endif
-#ifndef M_LN10
-#  define M_LN10	2.30258509299404568401799145468436421
-#endif
-#ifndef M_PI
-#  define M_PI		3.14159265358979323846264338327950288
-#endif
-#ifndef M_PI_2
-#  define M_PI_2	1.57079632679489661923132169163975144
-#endif
-#ifndef M_PI_4
-#  define M_PI_4	0.785398163397448309615660845819875721
-#endif
-#ifndef M_1_PI
-#  define M_1_PI	0.318309886183790671537767526745028724
-#endif
-#ifndef M_2_PI
-#  define M_2_PI	0.636619772367581343075535053490057448
-#endif
-#ifndef M_2_SQRTPI
-#  define M_2_SQRTPI	1.12837916709551257389615890312154517
-#endif
-#ifndef M_SQRT2
-#  define M_SQRT2	1.41421356237309504880168872420969808
-#endif
-#ifndef M_SQRT1_2
-#  define M_SQRT1_2	0.707106781186547524400844362104849039
+#if defined(USE_QUADMATH) && defined(I_QUADMATH)
+
+#  undef M_E
+#  undef M_LOG2E
+#  undef M_LOG10E
+#  undef M_LN2
+#  undef M_LN10
+#  undef M_PI
+#  undef M_PI_2
+#  undef M_PI_4
+#  undef M_1_PI
+#  undef M_2_PI
+#  undef M_2_SQRTPI
+#  undef M_SQRT2
+#  undef M_SQRT1_2
+
+#  define M_E        M_Eq
+#  define M_LOG2E    M_LOG2Eq
+#  define M_LOG10E   M_LOG10Eq
+#  define M_LN2      M_LN2q
+#  define M_LN10     M_LN10q
+#  define M_PI       M_PIq
+#  define M_PI_2     M_PI_2q
+#  define M_PI_4     M_PI_4q
+#  define M_1_PI     M_1_PIq
+#  define M_2_PI     M_2_PIq
+#  define M_2_SQRTPI M_2_SQRTPIq
+#  define M_SQRT2    M_SQRT2q
+#  define M_SQRT1_2  M_SQRT1_2q
+
+#else
+
+#  ifndef M_E
+#    define M_E		2.71828182845904523536028747135266250
+#  endif
+#  ifndef M_LOG2E
+#    define M_LOG2E	1.44269504088896340735992468100189214
+#  endif
+#  ifndef M_LOG10E
+#    define M_LOG10E	0.434294481903251827651128918916605082
+#  endif
+#  ifndef M_LN2
+#    define M_LN2	0.693147180559945309417232121458176568
+#  endif
+#  ifndef M_LN10
+#    define M_LN10	2.30258509299404568401799145468436421
+#  endif
+#  ifndef M_PI
+#    define M_PI	3.14159265358979323846264338327950288
+#  endif
+#  ifndef M_PI_2
+#    define M_PI_2	1.57079632679489661923132169163975144
+#  endif
+#  ifndef M_PI_4
+#    define M_PI_4	0.785398163397448309615660845819875721
+#  endif
+#  ifndef M_1_PI
+#    define M_1_PI	0.318309886183790671537767526745028724
+#  endif
+#  ifndef M_2_PI
+#    define M_2_PI	0.636619772367581343075535053490057448
+#  endif
+#  ifndef M_2_SQRTPI
+#    define M_2_SQRTPI	1.12837916709551257389615890312154517
+#  endif
+#  ifndef M_SQRT2
+#    define M_SQRT2	1.41421356237309504880168872420969808
+#  endif
+#  ifndef M_SQRT1_2
+#    define M_SQRT1_2	0.707106781186547524400844362104849039
+#  endif
+
 #endif
 
 #if !defined(INFINITY) && defined(NV_INF)
@@ -193,10 +227,53 @@
 #    define NO_C99_LONG_DOUBLE_MATH
 #  endif
 
+#  if defined(USE_QUADMATH) && defined(I_QUADMATH)
+#    define c99_acosh	acoshq
+#    define c99_asinh	asinhq
+#    define c99_atanh	atanhq
+#    define c99_cbrt	cbrtq
+#    define c99_copysign	copysignq
+#    define c99_erf	erfq
+#    define c99_erfc	erfcq
+/* no exp2q */
+#    define c99_expm1	expm1q
+#    define c99_fdim	fdimq
+#    define c99_fma	fmaq
+#    define c99_fmax	fmaxq
+#    define c99_fmin	fminq
+#    define c99_hypot	hypotq
+#    define c99_ilogb	ilogbq
+#    define c99_lgamma	lgammaq
+#    define c99_log1p	log1pq
+#    define c99_log2	log2q
+/* no logbq */
+/* no llrintq */
+/* no llroundq */
+#    define c99_lrint	lrintq
+#    define c99_lround	lroundq
+#    define c99_nan	nanq
+#    define c99_nearbyint	nearbyintq
+#    define c99_nextafter	nextafterq
+/* no nexttowardq */
+#    define c99_remainder	remainderq
+#    define c99_remquo	remquoq
+#    define c99_rint	rintq
+#    define c99_round	roundq
+#    define c99_scalbn	scalbnq
+#    define c99_signbit	signbitq
+#    define c99_tgamma	tgammal
+#    define c99_trunc	truncq
+#    define bessel_j0 j0q
+#    define bessel_j1 j1q
+#    define bessel_jn jnq
+#    define bessel_y0 y0q
+#    define bessel_y1 y1q
+#    define bessel_yn ynq
+#  elif defined(USE_LONG_DOUBLE) && \
+     !defined(NO_C99_LONG_DOUBLE_MATH) && \
+      defined(HAS_ILOGBL)
 /* There's already a symbol for ilogbl, we will use its truthiness
  * as the canary for all the *l variants being defined. */
-#  if defined(USE_LONG_DOUBLE) && defined(HAS_ILOGBL) && \
-     !defined(NO_C99_LONG_DOUBLE_MATH)
 #    define c99_acosh	acoshl
 #    define c99_asinh	asinhl
 #    define c99_atanh	atanhl
@@ -479,7 +556,7 @@
 #endif
 
 /* The Bessel functions: BSD, SVID, XPG4, and POSIX.  But not C99. */
-#ifdef HAS_J0
+#if defined(HAS_J0) && !defined(bessel_j0)
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_J0L)
 #    define bessel_j0 j0l
 #    define bessel_j1 j1l
