@@ -530,6 +530,15 @@ The parser no longer gets confused by C<\U=> within a double-quoted string.
 It used to roduce a syntax error, but now compiles it correctly.
 [perl #80368]
 
+=item *
+
+It has always been the intention for the C<-B> and C<-T> file test
+operators to treat UTF-8 encoded files as text.
+(L<perlfunc|perlfunc/-X FILEHANDLE> has been updated to say this.)
+Previously, it was possible for some files to be considered UTF-8 that
+actually weren't valid UTF-8.  This is now fixed.  The operators now
+work on EBCDIC platforms as well.
+
 =back
 
 =head1 Known Problems
