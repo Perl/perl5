@@ -570,6 +570,12 @@ v5.20.1 as well as here) in which a UTF-8 encoded regular expression
 pattern that contains a single ASCII lowercase letter does not match its
 uppercase counterpart. [perl #122655]
 
+=item *
+
+Constant folding could incorrectly suppress warnings if lexical warnings
+(C<use warnings> or C<no warnings>) were not in effect and C<$^W> were
+false at compile time and true at run time.
+
 =back
 
 =head1 Known Problems
