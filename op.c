@@ -7504,7 +7504,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
    setname:
     if (!CvNAME_HEK(cv)) {
-	if (hek) share_hek_hek(hek);
+	if (hek) (void)share_hek_hek(hek);
 	else {
             dVAR;
 	    U32 hash;
