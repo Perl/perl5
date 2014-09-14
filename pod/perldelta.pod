@@ -54,6 +54,23 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Changes to the C<*> prototype
+
+The C<*> character in a subroutine's prototype used to allow barewords
+to take precedence over most, but not all subroutines.  It was never
+consistent and exhibited buggy behaviour.
+
+Now it has been changed, so subroutines always take precedence over
+barewords, which brings it into conformity with similarly prototyped
+built-in functions:
+
+    sub splat($) { ... }
+    sub foo { ... }
+    splat(foo); # now always splat(foo())
+    splat(bar); # still splat('bar') as before
+    close(foo); # close(foo())
+    close(bar); # close('bar')
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
