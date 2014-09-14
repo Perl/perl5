@@ -662,6 +662,11 @@ if ($define{'USE_PERLIO'}) {
 	# Remaining remnants that _may_ be functions are handled below.
 }
 
+unless ($define{'USE_QUADMATH'}) {
+  ++$skip{Perl_quadmath_format_needed};
+  ++$skip{Perl_quadmath_format_single};
+}
+
 ###############################################################################
 
 # At this point all skip lists should be completed, as we are about to test
