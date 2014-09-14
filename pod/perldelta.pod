@@ -448,7 +448,8 @@ well.
 
 =over 4
 
-XXX
+C<save_re_context> no longer does anything and has been moved to
+F<mathoms.c>.
 
 =back
 
