@@ -342,7 +342,7 @@ fixed.
 
 =head1 Acknowledgements
 
-Perl 5.20.1 represents approximately 3 months of development since Perl 5.20.0
+Perl 5.20.1 represents approximately 4 months of development since Perl 5.20.0
 and contains approximately 12,000 lines of changes across 170 files from 36
 authors.
 
