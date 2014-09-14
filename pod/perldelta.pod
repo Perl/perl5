@@ -545,6 +545,13 @@ Under some conditions warning messages raised during regular expression
 pattern compilation were being output more than once.  This has now been
 fixed.
 
+=item *
+
+A regression has been fixed that was introduced in v5.20.0 (fixed in
+v5.20.1 as well as here) in which a UTF-8 encoded regular expression
+pattern that contains a single ASCII lowercase letter does not match its
+uppercase counterpart. [perl #122655]
+
 =back
 
 =head1 Known Problems
