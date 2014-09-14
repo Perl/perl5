@@ -154,6 +154,13 @@ L<B::Concise> has been upgraded from version 0.992 to 0.993.
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.27 to 1.28.
+
+It now deparses C<our(I<LIST>)> and typed lexical (C<my Dog $spot>)
+correctly.
+
+=item *
+
 L<CPAN::Meta::Requirements> has been upgraded from version 2.126 to 2.128.
 
 =item *
