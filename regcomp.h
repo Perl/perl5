@@ -572,8 +572,8 @@ struct regnode_ssc {
 #define ANYOF_BITMAP_CLEARALL(p)	\
 	Zero (ANYOF_BITMAP(p), ANYOF_BITMAP_SIZE)
 
-#define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
-#define ANYOF_POSIXL_SKIP	((ANYOF_POSIXL_SIZE - 1)/sizeof(regnode))
+#define ANYOF_SKIP		EXTRA_SIZE(struct regnode_charclass)
+#define ANYOF_POSIXL_SKIP	EXTRA_SIZE(regnode_charclass_posixl)
 #define ANYOF_CLASS_SKIP	ANYOF_POSIXL_SKIP
 
 /*
