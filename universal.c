@@ -326,7 +326,7 @@ Perl_croak_xs_usage(const CV *const cv, const char *const params)
 
 	/* Pants. I don't think that it should be possible to get here. */
 	/* diag_listed_as: SKIPME */
-	Perl_croak_nocontext("Usage: CODE(0x%"UVxf")(%s)", PTR2UV(cv), params);
+	Perl_croak(aTHX_ "Usage: CODE(0x%"UVxf")(%s)", PTR2UV(cv), params);
     }
 }
 
