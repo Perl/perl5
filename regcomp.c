@@ -9945,7 +9945,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		} else {
 		    RExC_size++;
     		}
-                    RExC_seen |= REG_RECURSE_SEEN;
+                RExC_seen |= REG_RECURSE_SEEN;
                 Set_Node_Length(ret, 1 + regarglen[OP(ret)]); /* MJD */
 		Set_Node_Offset(ret, parse_start); /* MJD */
 
