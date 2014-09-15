@@ -1384,8 +1384,9 @@ array, the array's size shrinks to the position of the highest element that
 still tests true for exists(), or to 0 if none do.  In other words, an
 array won't have trailing nonexistent elements after a delete.
 
-B<WARNING:> Calling delete on array values is deprecated and likely to
-be removed in a future version of Perl.
+B<WARNING:> Calling C<delete> on array values is strongly discouraged.  The
+notion of deleting or checking the existence of Perl array elements is not
+conceptually coherent, and can lead to surprising behavior.
 
 Deleting from C<%ENV> modifies the environment.  Deleting from a hash tied to
 a DBM file deletes the entry from the DBM file.  Deleting from a C<tied> hash
@@ -2062,9 +2063,11 @@ corresponding value is undefined.
     print "True\n"      if $hash{$key};
 
 exists may also be called on array elements, but its behavior is much less
-obvious and is strongly tied to the use of L</delete> on arrays.  B<Be aware>
-that calling exists on array values is deprecated and likely to be removed in
-a future version of Perl.
+obvious and is strongly tied to the use of L</delete> on arrays.
+
+B<WARNING:> Calling C<exists> on array values is strongly discouraged.  The
+notion of deleting or checking the existence of Perl array elements is not
+conceptually coherent, and can lead to surprising behavior.
 
     print "Exists\n"    if exists $array[$index];
     print "Defined\n"   if defined $array[$index];
