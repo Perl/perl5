@@ -513,10 +513,6 @@ struct regnode_ssc {
 
 /* Utility macros for the bitmap and classes of ANYOF */
 
-#define ANYOF_SIZE		(sizeof(struct regnode_charclass))
-#define ANYOF_POSIXL_SIZE	(sizeof(regnode_charclass_posixl))
-#define ANYOF_CLASS_SIZE	ANYOF_POSIXL_SIZE
-
 #define ANYOF_FLAGS(p)		((p)->flags)
 
 #define ANYOF_BIT(c)		(1U << ((c) & 7))
@@ -574,7 +570,6 @@ struct regnode_ssc {
 
 #define ANYOF_SKIP		EXTRA_SIZE(struct regnode_charclass)
 #define ANYOF_POSIXL_SKIP	EXTRA_SIZE(regnode_charclass_posixl)
-#define ANYOF_CLASS_SKIP	ANYOF_POSIXL_SKIP
 
 /*
  * Utility definitions.
