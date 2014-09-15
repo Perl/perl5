@@ -204,6 +204,14 @@ do our best to smooth the transition path for users of experimental
 features, you should contact the perl5-porters mailinglist if you find
 an experimental feature useful and want to help shape its future.
 
+Experimental features must be experimental in two stable releases before being
+marked non-experimental.  Experimental features will only have their
+experimental status revoked when they no longer have any design-changing bugs
+open against them and when they have remained unchanged in behavior for the
+entire length of a development cycle.  In other words, a feature present in
+v5.20.0 may be marked no longer experimental in v5.22.0 if and only if its
+behavior is unchanged throughout all of v5.21.
+
 =item deprecated
 
 If something in the Perl core is marked as B<deprecated>, we may remove it
