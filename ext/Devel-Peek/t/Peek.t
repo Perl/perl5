@@ -493,6 +493,7 @@ do_test('typeglob',
   NAME = "a"
   NAMELEN = 1
   GvSTASH = $ADDR\\t"main"
+  FLAGS = $ADDR					# $] >=5.021004
   GP = $ADDR
     SV = $ADDR
     REFCNT = 1
@@ -505,7 +506,7 @@ do_test('typeglob',
     GPFLAGS = 0x0				# $] < 5.009
     LINE = \\d+
     FILE = ".*\\b(?i:peek\\.t)"
-    FLAGS = $ADDR
+    FLAGS = $ADDR				# $] < 5.021004
     EGV = $ADDR\\t"a"');
 
 if (ord('A') == 193) {
