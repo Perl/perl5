@@ -118,6 +118,16 @@ There may well be none in a stable release.
 Subroutines with an empty prototype and bodies containing just C<undef> are
 now eligible for inlining.  [perl #122728]
 
+=item *
+
+Subroutines in packages no longer need to carry typeglobs around with them.
+Declaring a subroutine will now put a simple sub reference in the stash if
+possible, saving memory.  The typeglobs still notionally exist, so
+accessing them will cause the subroutine reference to be upgraded to a
+typeglob.  This optimisation does not currently apply to XSUBs or exported
+subroutines, and method calls will undo it, since they cache things in
+typeglobs.  [perl #120441]
+
 =back
 
 =head1 Modules and Pragmata
@@ -146,7 +156,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<B> has been upgraded from version 1.50 to 1.51.
+
+It provides a new C<B::safename> function, based on the existing
+C<< B::GV->SAFENAME >>, that converts "\cOPEN" to "^OPEN".
 
 =item *
 
@@ -459,6 +472,30 @@ well.
 
 C<save_re_context> no longer does anything and has been moved to
 F<mathoms.c>.
+
+=item *
+
+C<cv_name> is a new API function that can be passed a CV or GV.  It returns
+an SV containing the name of the subroutine for use in diagnostics.
+[perl #116735] [perl #120441]
+
+=item *
+
+C<cv_set_call_checker_flags> is a new API function that works like
+C<cv_set_call_checker>, except that it allows the caller to specify whether
+the call checker requires a full GV for reporting the subroutine's name, or
+whether it could be passed a CV instead.  Whatever value is passed will be
+acceptable to C<cv_name>.  C<cv_set_call_checker> guarantees there will be
+a GV, but it may have to create one on the fly, which is inefficient.
+[perl #116735]
+
+=item *
+
+C<CvGV> (which is not part of the API) is now a more complex macro, which
+may call a function and reify a GV.  For those cases where is has been used
+as a boolean, C<CvHASGV> has been added, which will return true for CVs
+that notionally have GVs, but without reifying the GV.  C<CvGV> also
+returns a GV now for lexical subs.  [perl #120441]
 
 =back
 
