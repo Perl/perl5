@@ -1101,7 +1101,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	    GV* stubgv;
 	    GV* autogv;
 
-	    if (CvANON(cv) || !CvGV(cv))
+	    if (CvANON(cv) || CvLEXICAL(cv))
 		stubgv = gv;
 	    else {
 		stubgv = CvGV(cv);
