@@ -2086,6 +2086,10 @@ p	|OP *	|tied_method|NN SV *methname|NN SV **sp \
 #if defined(PERL_IN_REGCOMP_C)
 Es	|regnode*|reg		|NN RExC_state_t *pRExC_state \
 				|I32 paren|NN I32 *flagp|U32 depth
+Es	|regnode*|regnode_guts	|NN RExC_state_t *pRExC_state              \
+				|const U8 op				   \
+				|const STRLEN extra_len			   \
+				|NN const char* const name
 Es	|regnode*|reganode	|NN RExC_state_t *pRExC_state|U8 op \
 				|U32 arg
 Es	|regnode*|regatom	|NN RExC_state_t *pRExC_state \

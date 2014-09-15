@@ -15416,21 +15416,21 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
     }
 }
 
-/*
-- reg_node - emit a node
-*/
-STATIC regnode *			/* Location. */
-S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
+STATIC regnode *
+S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_size, const char* const name)
 {
-    regnode *ptr;
+    /* Allocate a regnode for 'op' and returns it, with 'extra_size' extra
+     * space.  In pass1, it aligns and increments RExC_size; in pass2,
+     * RExC_emit */
+
     regnode * const ret = RExC_emit;
     GET_RE_DEBUG_FLAGS_DECL;
 
-    PERL_ARGS_ASSERT_REG_NODE;
+    PERL_ARGS_ASSERT_REGNODE_GUTS;
 
     if (SIZE_ONLY) {
 	SIZE_ALIGN(RExC_size);
-	RExC_size += 1;
+	RExC_size += 1 + extra_size;
 	return(ret);
     }
     if (RExC_emit >= RExC_emit_bound)
@@ -15438,11 +15438,13 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 		   op, (void*)RExC_emit, (void*)RExC_emit_bound);
 
     NODE_ALIGN_FILL(ret);
-#ifdef RE_TRACK_PATTERN_OFFSETS
+#ifndef RE_TRACK_PATTERN_OFFSETS
+    PERL_UNUSED_ARG(name);
+#else
     if (RExC_offsets) {         /* MJD */
 	MJD_OFFSET_DEBUG(
               ("%s:%d: (op %s) %s %"UVuf" (len %"UVuf") (max %"UVuf").\n",
-              "reg_node", __LINE__,
+              name, __LINE__,
               PL_reg_name[op],
               (UV)(RExC_emit - RExC_emit_start) > RExC_offsets[0]
 		? "Overwriting end of array!\n" : "OK",
@@ -15452,9 +15454,24 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 	Set_Node_Offset(RExC_emit, RExC_parse + (op == END));
     }
 #endif
-    ptr = ret;
-    FILL_ADVANCE_NODE(ptr, op);
-    RExC_emit = ptr;
+    return(ret);
+}
+
+/*
+- reg_node - emit a node
+*/
+STATIC regnode *			/* Location. */
+S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
+{
+    regnode * const ret = regnode_guts(pRExC_state, op, 0, "reg_node");
+
+    PERL_ARGS_ASSERT_REG_NODE;
+
+    if (PASS2) {
+        regnode *ptr = ret;
+        FILL_ADVANCE_NODE(ptr, op);
+        RExC_emit = ptr;
+    }
     return(ret);
 }
 
@@ -15464,54 +15481,15 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 STATIC regnode *			/* Location. */
 S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 {
-    regnode *ptr;
-    regnode * const ret = RExC_emit;
-    GET_RE_DEBUG_FLAGS_DECL;
+    regnode * const ret = regnode_guts(pRExC_state, op, 1, "reganode");
 
     PERL_ARGS_ASSERT_REGANODE;
 
-    if (SIZE_ONLY) {
-	SIZE_ALIGN(RExC_size);
-	RExC_size += 2;
-	/*
-	   We can't do this:
-
-	   assert(2==regarglen[op]+1);
-
-	   Anything larger than this has to allocate the extra amount.
-	   If we changed this to be:
-
-	   RExC_size += (1 + regarglen[op]);
-
-	   then it wouldn't matter. Its not clear what side effect
-	   might come from that so its not done so far.
-	   -- dmq
-	*/
-	return(ret);
+    if (PASS2) {
+        regnode *ptr = ret;
+        FILL_ADVANCE_NODE_ARG(ptr, op, arg);
+        RExC_emit = ptr;
     }
-    if (RExC_emit >= RExC_emit_bound)
-        Perl_croak(aTHX_ "panic: reg_node overrun trying to emit %d, %p>=%p",
-		   op, (void*)RExC_emit, (void*)RExC_emit_bound);
-
-    NODE_ALIGN_FILL(ret);
-#ifdef RE_TRACK_PATTERN_OFFSETS
-    if (RExC_offsets) {         /* MJD */
-	MJD_OFFSET_DEBUG(
-              ("%s(%d): (op %s) %s %"UVuf" <- %"UVuf" (max %"UVuf").\n",
-              "reganode",
-	      __LINE__,
-	      PL_reg_name[op],
-              (UV)(RExC_emit - RExC_emit_start) > RExC_offsets[0] ?
-              "Overwriting end of array!\n" : "OK",
-              (UV)(RExC_emit - RExC_emit_start),
-              (UV)(RExC_parse - RExC_start),
-              (UV)RExC_offsets[0]));
-	Set_Cur_Node_Offset;
-    }
-#endif
-    ptr = ret;
-    FILL_ADVANCE_NODE_ARG(ptr, op, arg);
-    RExC_emit = ptr;
     return(ret);
 }
 
