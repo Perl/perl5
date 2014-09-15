@@ -455,6 +455,8 @@ well.
 
 =over 4
 
+=item *
+
 C<save_re_context> no longer does anything and has been moved to
 F<mathoms.c>.
 
