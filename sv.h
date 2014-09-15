@@ -408,7 +408,8 @@ perform the upgrade if necessary.  See C<svtype>.
 /* note that SVf_AMAGIC is now only set on stashes, so this bit is free
  * for non-HV SVs */
 
-/* Ensure this value does not clash with the GV_ADD* flags in gv.h: */
+/* Ensure this value does not clash with the GV_ADD* flags in gv.h, or the
+   CV_CKPROTO_* flags in op.c, or the padadd_* flags in pad.h: */
 #define SVf_UTF8        0x20000000  /* SvPV is UTF-8 encoded
 				       This is also set on RVs whose overloaded
 				       stringification is UTF-8. This might
@@ -1970,6 +1971,12 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 			     (littlelen), SV_GMAGIC)
 #define sv_mortalcopy(sv) \
 	Perl_sv_mortalcopy_flags(aTHX_ sv, SV_GMAGIC|SV_DO_COW_SVSETSV)
+#define sv_cathek(sv,hek)					    \
+	STMT_START {						     \
+	    HEK * const bmxk = hek;				      \
+	    sv_catpvn_flags(sv, HEK_KEY(bmxk), HEK_LEN(bmxk),	       \
+			    HEK_UTF8(bmxk) ? SV_CATUTF8 : SV_CATBYTES); \
+	} STMT_END
 
 /* Should be named SvCatPVN_utf8_upgrade? */
 #define sv_catpvn_nomg_utf8_upgrade(dsv, sstr, slen, nsv)	\

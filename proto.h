@@ -811,6 +811,11 @@ PERL_CALLCONV void	Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckf
 #define PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER	\
 	assert(cv); assert(ckfun_p); assert(ckobj_p)
 
+PERL_CALLCONV SV *	Perl_cv_name(pTHX_ CV *cv, SV *sv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CV_NAME	\
+	assert(cv)
+
 PERL_CALLCONV void	Perl_cv_set_call_checker(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
@@ -818,9 +823,21 @@ PERL_CALLCONV void	Perl_cv_set_call_checker(pTHX_ CV *cv, Perl_call_checker ckfu
 #define PERL_ARGS_ASSERT_CV_SET_CALL_CHECKER	\
 	assert(cv); assert(ckfun); assert(ckobj)
 
+PERL_CALLCONV void	Perl_cv_set_call_checker_flags(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj, U32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_CV_SET_CALL_CHECKER_FLAGS	\
+	assert(cv); assert(ckfun); assert(ckobj)
+
 PERL_CALLCONV void	Perl_cv_undef(pTHX_ CV* cv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CV_UNDEF	\
+	assert(cv)
+
+PERL_CALLCONV GV *	Perl_cvgv_from_hek(pTHX_ CV* cv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CVGV_FROM_HEK	\
 	assert(cv)
 
 PERL_CALLCONV void	Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
@@ -6169,11 +6186,6 @@ STATIC void	S_forget_pmop(pTHX_ PMOP *const o)
 	assert(o)
 
 STATIC OP*	S_gen_constant_list(pTHX_ OP* o);
-STATIC SV*	S_gv_ename(pTHX_ GV *gv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GV_ENAME	\
-	assert(gv)
-
 STATIC void	S_inplace_aassign(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INPLACE_AASSIGN	\
@@ -6255,7 +6267,7 @@ STATIC OP*	S_pmtrans(pTHX_ OP* o, OP* expr, OP* repl)
 #define PERL_ARGS_ASSERT_PMTRANS	\
 	assert(o); assert(expr); assert(repl)
 
-STATIC void	S_process_special_blocks(pTHX_ I32 floor, const char *const fullname, GV *const gv, CV *const cv)
+STATIC bool	S_process_special_blocks(pTHX_ I32 floor, const char *const fullname, GV *const gv, CV *const cv)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4);
@@ -6292,25 +6304,11 @@ STATIC OP*	S_too_few_arguments_pv(pTHX_ OP *o, const char* name, U32 flags)
 #define PERL_ARGS_ASSERT_TOO_FEW_ARGUMENTS_PV	\
 	assert(o); assert(name)
 
-STATIC OP*	S_too_few_arguments_sv(pTHX_ OP *o, SV* namesv, U32 flags)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_TOO_FEW_ARGUMENTS_SV	\
-	assert(o); assert(namesv)
-
 STATIC OP*	S_too_many_arguments_pv(pTHX_ OP *o, const char* name, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS_PV	\
 	assert(o); assert(name)
-
-STATIC OP*	S_too_many_arguments_sv(pTHX_ OP *o, SV* namesv, U32 flags)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS_SV	\
-	assert(o); assert(namesv)
 
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)

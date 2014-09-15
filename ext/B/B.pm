@@ -15,7 +15,7 @@ require Exporter;
 # walkoptree comes from B.xs
 
 BEGIN {
-    $B::VERSION = '1.50';
+    $B::VERSION = '1.51';
     @B::EXPORT_OK = ();
 
     # Our BOOT code needs $VERSION set, and will append to @EXPORT_OK.
@@ -35,7 +35,7 @@ push @B::EXPORT_OK, (qw(minus_c ppname save_BEGINs
 			parents comppadlist sv_undef compile_stats timing_info
 			begin_av init_av check_av end_av regex_padav dowarn
 			defstash curstash warnhook diehook inc_gv @optype
-			@specialsv_name unitcheck_av));
+			@specialsv_name unitcheck_av safename));
 
 @B::SV::ISA = 'B::OBJECT';
 @B::NULL::ISA = 'B::SV';
@@ -85,7 +85,11 @@ push @B::EXPORT_OK, (qw(minus_c ppname save_BEGINs
 }
 
 sub B::GV::SAFENAME {
-  my $name = (shift())->NAME;
+  safename(shift()->NAME);
+}
+
+sub safename {
+  my $name = shift;
 
   # The regex below corresponds to the isCONTROLVAR macro
   # from toke.c
@@ -536,6 +540,13 @@ be used as a string in C source code.
 
 Returns a double-quote-surrounded escaped version of STR which can
 be used as a string in Perl source code.
+
+=item safename(STR)
+
+This function returns the string with the first character modified if it
+is a control character.  It converts it to ^X format first, so that "\cG"
+becomes "^G".  This is used internally by L<B::GV::SAFENAME|/SAFENAME>, but
+you can call it directly.
 
 =item class(OBJ)
 

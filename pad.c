@@ -469,9 +469,10 @@ Perl_cv_undef(pTHX_ CV *cv)
 	CvXSUB(cv) = NULL;
     }
     /* delete all flags except WEAKOUTSIDE and CVGV_RC, which indicate the
-     * ref status of CvOUTSIDE and CvGV, and ANON, which pp_entersub uses
+     * ref status of CvOUTSIDE and CvGV, and ANON and
+     * LEXICAL, which pp_entersub uses
      * to choose an error message */
-    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON);
+    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON|CVf_LEXICAL);
 }
 
 /*
@@ -1793,9 +1794,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	    if (!PL_curpad[ix] || SvIMMORTAL(PL_curpad[ix])
 		 || IS_PADGV(PL_curpad[ix]) || IS_PADCONST(PL_curpad[ix]))
 		continue;
-	    if (!SvPADMY(PL_curpad[ix])) {
-		SvPADTMP_on(PL_curpad[ix]);
-	    } else if (!SvFAKE(namep[ix])) {
+	    if (SvPADMY(PL_curpad[ix]) && !SvFAKE(namep[ix])) {
 		/* This is a work around for how the current implementation of
 		   ?{ } blocks in regexps interacts with lexicals.
 
@@ -2086,6 +2085,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 			assert(SvTYPE(ppad[ix]) == SVt_PVCV);
 			subclones = 1;
 			sv = newSV_type(SVt_PVCV);
+			CvLEXICAL_on(sv);
 		    }
 		    else if (PadnameLEN(namesv)>1 && !PadnameIsOUR(namesv))
 		    {
@@ -2104,6 +2104,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 					 * (SvUTF8(namesv) ? -1 : 1),
 				      hash)
 			);
+			CvLEXICAL_on(sv);
 		    }
 		    else sv = SvREFCNT_inc(ppad[ix]);
                 else if (sigil == '@')
@@ -2223,6 +2224,49 @@ Perl_cv_clone_into(pTHX_ CV *proto, CV *target)
     PERL_ARGS_ASSERT_CV_CLONE_INTO;
     cv_undef(target);
     return S_cv_clone(aTHX_ proto, target, NULL);
+}
+
+/*
+=for apidoc cv_name
+
+Returns an SV containing the name of the CV, mainly for use in error
+reporting.  The CV may actually be a GV instead, in which case the returned
+SV holds the GV's name.  Anything other than a GV or CV is treated as a
+string already holding the sub name, but this could change in the future.
+
+An SV may be passed as a second argument.  If so, the name will be assigned
+to it and it will be returned.  Otherwise the returned SV will be a new
+mortal.
+
+=cut
+*/
+
+SV *
+Perl_cv_name(pTHX_ CV *cv, SV *sv)
+{
+    PERL_ARGS_ASSERT_CV_NAME;
+    if (!isGV_with_GP(cv) && SvTYPE(cv) != SVt_PVCV) {
+	if (sv) sv_setsv(sv,(SV *)cv);
+	return sv ? (sv) : (SV *)cv;
+    }
+    {
+	SV * const retsv = sv ? (sv) : sv_newmortal();
+    	if (SvTYPE(cv) == SVt_PVCV) {
+	    if (CvNAMED(cv)) {
+		if (CvLEXICAL(cv)) sv_sethek(retsv, CvNAME_HEK(cv));
+		else {
+		    sv_sethek(retsv, HvNAME_HEK(CvSTASH(cv)));
+		    sv_catpvs(retsv, "::");
+		    sv_cathek(retsv, CvNAME_HEK(cv));
+		}
+	    }
+	    else if (CvLEXICAL(cv))
+		sv_sethek(retsv, GvNAME_HEK(GvEGV(CvGV(cv))));
+	    else gv_efullname3(retsv, CvGV(cv), NULL);
+	}
+	else gv_efullname3(retsv,(GV *)cv,NULL);
+	return retsv;
+    }
 }
 
 /*

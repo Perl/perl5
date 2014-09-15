@@ -33,6 +33,7 @@ struct magic {
 
 #define MGf_TAINTEDDIR 1        /* PERL_MAGIC_envelem only */
 #define MGf_MINMATCH   1        /* PERL_MAGIC_regex_global only */
+#define MGf_REQUIRE_GV 1        /* PERL_MAGIC_checkcall only */
 #define MGf_REFCOUNTED 2
 #define MGf_GSKIP      4	/* skip further GETs until after next SET */
 #define MGf_COPY       8	/* has an svt_copy  MGVTBL entry */

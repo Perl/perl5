@@ -138,7 +138,7 @@ my $testpkgs = {
 	perl => [qw(
 		    walksymtable walkoptree_slow walkoptree_exec
 		    timing_info savesym peekop parents objsym debug
-		    compile_stats clearsym class
+		    compile_stats clearsym class safename
 		    )],
 	XS => [qw(
 		  warnhook walkoptree_debug walkoptree threadsv_names

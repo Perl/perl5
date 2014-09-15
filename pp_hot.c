@@ -2595,15 +2595,15 @@ PP(pp_entersub)
 	SV* sub_name;
 
 	/* anonymous or undef'd function leaves us no recourse */
-	if (CvANON(cv) || !(gv = CvGV(cv))) {
-	    if (CvNAMED(cv))
-		DIE(aTHX_ "Undefined subroutine &%"HEKf" called",
-			   HEKfARG(CvNAME_HEK(cv)));
+	if (CvLEXICAL(cv) && CvHASGV(cv))
+	    DIE(aTHX_ "Undefined subroutine &%"SVf" called",
+		       SVfARG(cv_name(cv, NULL)));
+	if (CvANON(cv) || !CvHASGV(cv)) {
 	    DIE(aTHX_ "Undefined subroutine called");
 	}
 
 	/* autoloaded stub? */
-	if (cv != GvCV(gv)) {
+	if (cv != GvCV(gv = CvGV(cv))) {
 	    cv = GvCV(gv);
 	}
 	/* should call AUTOLOAD now? */
@@ -2804,17 +2804,8 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
     if (CvANON(cv))
 	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on anonymous subroutine");
     else {
-        HEK *const hek = CvNAME_HEK(cv);
-        SV *tmpstr;
-        if (hek) {
-            tmpstr = sv_2mortal(newSVhek(hek));
-        }
-        else {
-            tmpstr = sv_newmortal();
-            gv_efullname3(tmpstr, CvGV(cv), NULL);
-        }
 	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on subroutine \"%"SVf"\"",
-		    SVfARG(tmpstr));
+		    SVfARG(cv_name(cv,NULL)));
     }
 }
 

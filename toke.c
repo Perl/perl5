@@ -6552,7 +6552,11 @@ Perl_yylex(pTHX)
 		    rv2cv_op =
 			newCVREF(OPpMAY_RETURN_CONSTANT<<8, const_op);
 		    cv = lex
-			? isGV(gv) ? GvCV(gv) : (CV *)gv
+			? isGV(gv)
+			    ? GvCV(gv)
+			    : SvROK(gv) && SvTYPE(SvRV(gv)) == SVt_PVCV
+				? (CV *)SvRV(gv)
+				: (CV *)gv
 			: rv2cv_op_cv(rv2cv_op, RV2CVOPCV_RETURN_STUB);
 		}
 
@@ -6681,7 +6685,6 @@ Perl_yylex(pTHX)
 		/* Not a method, so call it a subroutine (if defined) */
 
 		if (cv) {
-		    OP *gvop;
 		    /* Check for a constant sub */
 		    if ((sv = cv_const_sv_or_av(cv))) {
 		  its_constant:
@@ -6697,20 +6700,6 @@ Perl_yylex(pTHX)
 			    pl_yylval.opval->op_flags |= OPf_SPECIAL;
 			}
 			TOKEN(WORD);
-		    }
-
-		    /* Resolve to GV now if this is a placeholder. */
-		    if (!off && (gvop = cUNOPx(rv2cv_op)->op_first)
-		     && gvop->op_type == OP_GV) {
-			GV *gv2 = cGVOPx_gv(gvop);
-			if (gv2 && !isGV(gv2)) {
-			    gv = gv_fetchpv(PL_tokenbuf, 0, SVt_PVCV);
-			    assert (SvTYPE(gv) == SVt_PVGV);
-			    /* cv must have been some sort of placeholder,
-			       so now needs replacing with a real code
-			       reference.  */
-			    cv = GvCV(gv);
-			}
 		    }
 
 		    op_free(pl_yylval.opval);

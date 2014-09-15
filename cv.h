@@ -49,8 +49,9 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvROOT(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_root
 #define CvXSUB(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_xsub
 #define CvXSUBANY(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_start_u.xcv_xsubany
-#define CvGV(sv)	S_CvGV((const CV *)(sv))
+#define CvGV(sv)	S_CvGV(aTHX_ (CV *)(sv))
 #define CvGV_set(cv,gv)	Perl_cvgv_set(aTHX_ cv, gv)
+#define CvHASGV(cv)	cBOOL(SvANY(cv)->xcv_gv_u.xcv_gv)
 #define CvFILE(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_file
 #ifdef USE_ITHREADS
 #  define CvFILE_set_from_cop(sv, cop)	\
@@ -104,6 +105,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_AUTOLOAD	0x2000	/* SvPVX contains AUTOLOADed sub name  */
 #define CVf_HASEVAL	0x4000	/* contains string eval  */
 #define CVf_NAMED	0x8000  /* Has a name HEK */
+#define CVf_LEXICAL	0x10000 /* Omit package from name */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LVALUE)
@@ -185,16 +187,13 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvNAMED_on(cv)		(CvFLAGS(cv) |= CVf_NAMED)
 #define CvNAMED_off(cv)		(CvFLAGS(cv) &= ~CVf_NAMED)
 
+#define CvLEXICAL(cv)		(CvFLAGS(cv) & CVf_LEXICAL)
+#define CvLEXICAL_on(cv)	(CvFLAGS(cv) |= CVf_LEXICAL)
+#define CvLEXICAL_off(cv)	(CvFLAGS(cv) &= ~CVf_LEXICAL)
+
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
 
-PERL_STATIC_INLINE GV *
-S_CvGV(const CV *sv)
-{
-    return CvNAMED(sv)
-	? 0
-	: ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv_u.xcv_gv;
-}
 PERL_STATIC_INLINE HEK *
 CvNAME_HEK(CV *sv)
 {
@@ -268,6 +267,8 @@ should print 123:
 */
 
 typedef OP *(*Perl_call_checker)(pTHX_ OP *, GV *, SV *);
+
+#define CALL_CHECKER_REQUIRE_GV	MGf_REQUIRE_GV
 
 /*
  * Local variables:

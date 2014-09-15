@@ -300,6 +300,8 @@ foo
     can_ok $f, 'LINES';
 }
 
+is B::safename("\cLAST_FH"), "^LAST_FH", 'basic safename test';
+
 my $sub1 = sub {die};
 { no warnings 'once'; no strict; *Peel:: = *{"Pe\0e\x{142}::"} }
 my $sub2 = eval 'package Peel; sub {die}';
@@ -404,10 +406,10 @@ SKIP:
         my $cv = B::svref_2object(\&bar);
         ok($cv, "make a B::CV from a lexical sub reference");
         isa_ok($cv, "B::CV");
-        my $gv = $cv->GV;
-        isa_ok($gv, "B::SPECIAL", "GV on a lexical sub");
         my $hek = $cv->NAME_HEK;
         is($hek, "bar", "check the NAME_HEK");
+        my $gv = $cv->GV;
+        isa_ok($gv, "B::GV", "GV on a lexical sub");
     }
     1;
 EOS

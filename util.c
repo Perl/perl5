@@ -5372,10 +5372,7 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 	else {
 	    sv_sethek(dbsv, HvENAME_HEK(GvSTASH(gv)));
 	    sv_catpvs(dbsv, "::");
-	    sv_catpvn_flags(
-	      dbsv, GvNAME(gv), GvNAMELEN(gv),
-	      GvNAMEUTF8(gv) ? SV_CATUTF8 : SV_CATBYTES
-	    );
+	    sv_cathek(dbsv, GvNAME_HEK(gv));
 	}
     }
     else {

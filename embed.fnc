@@ -316,6 +316,7 @@ ApdRn	|SV*	|cv_const_sv	|NULLOK const CV *const cv
 pRn	|SV*	|cv_const_sv_or_av|NULLOK const CV *const cv
 : Used in pad.c
 pR	|SV*	|op_const_sv	|NULLOK const OP* o|NULLOK CV* cv
+Ap	|SV *	|cv_name	|NN CV *cv|NULLOK SV *sv
 Apd	|void	|cv_undef	|NN CV* cv
 p	|void	|cv_forget_slab	|NN CV *cv
 Ap	|void	|cx_dump	|NN PERL_CONTEXT* cx
@@ -534,6 +535,7 @@ Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool
 : Used in scope.c
 pMox	|GP *	|newGP		|NN GV *const gv
 pX	|void	|cvgv_set	|NN CV* cv|NULLOK GV* gv
+poX	|GV *	|cvgv_from_hek	|NN CV* cv
 pX	|void	|cvstash_set	|NN CV* cv|NULLOK HV* stash
 Amd	|void	|gv_init	|NN GV* gv|NULLOK HV* stash \
                                 |NN const char* name|STRLEN len|int multi
@@ -1034,6 +1036,9 @@ po	|OP*	|ck_entersub_args_core|NN OP *entersubop|NN GV *namegv \
 				      |NN SV *protosv
 Apd	|void	|cv_get_call_checker|NN CV *cv|NN Perl_call_checker *ckfun_p|NN SV **ckobj_p
 Apd	|void	|cv_set_call_checker|NN CV *cv|NN Perl_call_checker ckfun|NN SV *ckobj
+Apd	|void	|cv_set_call_checker_flags|NN CV *cv \
+					  |NN Perl_call_checker ckfun \
+					  |NN SV *ckobj|U32 flags
 Apd	|void	|wrap_op_checker|Optype opcode|NN Perl_check_t new_checker|NN Perl_check_t *old_checker_p
 Apa	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
 Ap	|char*	|scan_vstring	|NN const char *s|NN const char *const e \
@@ -1920,7 +1925,6 @@ sR	|OP*	|search_const	|NN OP *o
 sR	|OP*	|new_logop	|I32 type|I32 flags|NN OP **firstp|NN OP **otherp
 s	|void	|simplify_sort	|NN OP *o
 s	|void	|null_listop_in_list_context |NN OP* o
-s	|SV*	|gv_ename	|NN GV *gv
 sRn	|bool	|scalar_mod_type|NULLOK const OP *o|I32 type
 s	|OP *	|my_kid		|NULLOK OP *o|NULLOK OP *attrs|NN OP **imopsp
 s	|OP *	|dup_attrlist	|NN OP *o
@@ -1930,16 +1934,14 @@ s	|void	|bad_type_pv	|I32 n|NN const char *t|NN const char *name|U32 flags|NN co
 s	|void	|bad_type_gv	|I32 n|NN const char *t|NN GV *gv|U32 flags|NN const OP *kid
 s	|void	|no_bareword_allowed|NN OP *o
 sR	|OP*	|no_fh_allowed|NN OP *o
-sR	|OP*	|too_few_arguments_sv|NN OP *o|NN SV* namesv|U32 flags
 sR	|OP*	|too_few_arguments_pv|NN OP *o|NN const char* name|U32 flags
 s	|OP*	|too_many_arguments_pv|NN OP *o|NN const char* name|U32 flags
-sR	|OP*	|too_many_arguments_sv|NN OP *o|NN SV* namesv|U32 flags
 s	|bool	|looks_like_bool|NN const OP* o
 s	|OP*	|newGIVWHENOP	|NULLOK OP* cond|NN OP *block \
 				|I32 enter_opcode|I32 leave_opcode \
 				|PADOFFSET entertarg
 s	|OP*	|ref_array_or_hash|NULLOK OP* cond
-s	|void	|process_special_blocks	|I32 floor \
+s	|bool	|process_special_blocks	|I32 floor \
 					|NN const char *const fullname\
 					|NN GV *const gv|NN CV *const cv
 s	|void	|clear_special_blocks	|NN const char *const fullname\

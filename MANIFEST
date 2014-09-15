@@ -3794,6 +3794,7 @@ ext/XS-APItest/t/coplabel.t	test cop_*_label
 ext/XS-APItest/t/copstash.t	test alloccopstash
 ext/XS-APItest/t/copyhints.t	test hv_copy_hints_hv() API
 ext/XS-APItest/t/customop.t	XS::APItest: tests for custom ops
+ext/XS-APItest/t/cv_name.t	test cv_name
 ext/XS-APItest/t/eval-filter.t	Simple source filter/eval test
 ext/XS-APItest/t/exception.t	XS::APItest extension
 ext/XS-APItest/t/fetch_pad_names.t	Tests for UTF8 names in pad

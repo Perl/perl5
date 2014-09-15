@@ -100,7 +100,9 @@
 #define cv_clone(a)		Perl_cv_clone(aTHX_ a)
 #define cv_const_sv		Perl_cv_const_sv
 #define cv_get_call_checker(a,b,c)	Perl_cv_get_call_checker(aTHX_ a,b,c)
+#define cv_name(a,b)		Perl_cv_name(aTHX_ a,b)
 #define cv_set_call_checker(a,b,c)	Perl_cv_set_call_checker(aTHX_ a,b,c)
+#define cv_set_call_checker_flags(a,b,c,d)	Perl_cv_set_call_checker_flags(aTHX_ a,b,c,d)
 #define cv_undef(a)		Perl_cv_undef(aTHX_ a)
 #define cx_dump(a)		Perl_cx_dump(aTHX_ a)
 #define cxinc()			Perl_cxinc(aTHX)
@@ -1501,7 +1503,6 @@
 #define force_list(a,b)		S_force_list(aTHX_ a,b)
 #define forget_pmop(a)		S_forget_pmop(aTHX_ a)
 #define gen_constant_list(a)	S_gen_constant_list(aTHX_ a)
-#define gv_ename(a)		S_gv_ename(aTHX_ a)
 #define inplace_aassign(a)	S_inplace_aassign(aTHX_ a)
 #define is_handle_constructor	S_is_handle_constructor
 #define is_list_assignment(a)	S_is_list_assignment(aTHX_ a)
@@ -1529,9 +1530,7 @@
 #define search_const(a)		S_search_const(aTHX_ a)
 #define simplify_sort(a)	S_simplify_sort(aTHX_ a)
 #define too_few_arguments_pv(a,b,c)	S_too_few_arguments_pv(aTHX_ a,b,c)
-#define too_few_arguments_sv(a,b,c)	S_too_few_arguments_sv(aTHX_ a,b,c)
 #define too_many_arguments_pv(a,b,c)	S_too_many_arguments_pv(aTHX_ a,b,c)
-#define too_many_arguments_sv(a,b,c)	S_too_many_arguments_sv(aTHX_ a,b,c)
 #  endif
 #  if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
 #define report_redefined_cv(a,b,c)	Perl_report_redefined_cv(aTHX_ a,b,c)

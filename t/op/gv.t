@@ -490,6 +490,9 @@ is join("-", eval "&yarrow(1..10)"), '4-5-6', 'const list ignores & args';
 is prototype "yarrow", "", 'const list has "" prototype';
 is eval "yarrow", 3, 'const list in scalar cx returns length';
 
+$::{borage} = \&ok;
+eval 'borage("sub ref in stash")' or fail "sub ref in stash";
+
 {
     use vars qw($glook $smek $foof);
     # Check reference assignment isn't affected by the SV type (bug #38439)
@@ -512,7 +515,7 @@ is eval "yarrow", 3, 'const list in scalar cx returns length';
 format =
 .
 
-foreach my $value ({1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
+foreach my $value ({1=>2}, *STDOUT{IO}, *STDOUT{FORMAT}) {
     # *STDOUT{IO} returns a reference to a PVIO. As it's blessed, ref returns
     # IO::Handle, which isn't what we want.
     my $type = $value;
