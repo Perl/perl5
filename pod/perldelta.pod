@@ -634,6 +634,13 @@ regular expression.  [perl #122747]
 Thread cloning used to work incorrectly for lexical subs, possibly causing
 crashes or double frees on exit.
 
+=item *
+
+Since perl 5.14.0, deleting C<$SomePackage::{__ANON__}> and then undefining
+an anonymous subroutine could corrupt things internally, resulting in
+L<Devel::Peek> crashing or L<B.pm|B> giving nonsensical data.  This has
+been fixed.
+
 =back
 
 =head1 Known Problems
