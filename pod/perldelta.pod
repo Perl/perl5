@@ -590,6 +590,11 @@ Loading UTF8 tables during a regular expression match could cause assertion
 failures under debugging builds if the previous match used the very same
 regular expression.  [perl #122747]
 
+=item *
+
+Thread cloning used to work incorrectly for lexical subs, possibly causing
+crashes or double frees on exit.
+
 =back
 
 =head1 Known Problems
