@@ -2651,11 +2651,14 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 	   numifying instead of C's "+0". */
 	gv = Perl_gv_fetchmeth_pvn(aTHX_ stash, cooky, l, -1, 0);
         cv = 0;
-        if (gv && (cv = GvCV(gv)) && CvGV(cv)) {
-	    if(GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")){
-	      const char * const hvname = HvNAME_get(GvSTASH(CvGV(cv)));
-	      if (hvname && HEK_LEN(HvNAME_HEK(GvSTASH(CvGV(cv)))) == 8
-	       && strEQ(hvname, "overload")) {
+        if (gv && (cv = GvCV(gv)) && CvHASGV(cv)) {
+            const HEK * const gvhek =
+                CvNAMED(cv) ? CvNAME_HEK(cv) : GvNAME_HEK(CvGV(cv));
+            const HEK * const stashek =
+                HvNAME_HEK(CvNAMED(cv) ? CvSTASH(cv) : GvSTASH(CvGV(cv)));
+            if (HEK_LEN(gvhek) == 3 && strEQ(HEK_KEY(gvhek), "nil")
+             && stashek && HEK_LEN(stashek) == 8
+             && strEQ(HEK_KEY(stashek), "overload")) {
 		/* This is a hack to support autoloading..., while
 		   knowing *which* methods were declared as overloaded. */
 		/* GvSV contains the name of the method. */
@@ -2689,7 +2692,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 		    }
 		}
 		cv = GvCV(gv = ngv);
-	      }
 	    }
 	    DEBUG_o( Perl_deb(aTHX_ "Overloading \"%s\" in package \"%.256s\" via \"%.256s::%.256s\"\n",
 			 cp, HvNAME_get(stash), HvNAME_get(GvSTASH(CvGV(cv))),
