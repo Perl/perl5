@@ -1006,6 +1006,7 @@ PP(pp_undef)
 	    GV* const gv = CvGV((const CV *)sv);
 	    HEK * const hek = CvNAME_HEK((CV *)sv);
 	    if (hek) share_hek_hek(hek);
+	    if (gv) SvREFCNT_inc_void_NN(sv_2mortal((SV *)gv));
 	    cv_undef(MUTABLE_CV(sv));
 	    if (gv) CvGV_set(MUTABLE_CV(sv), gv);
 	    else if (hek) {

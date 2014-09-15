@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 133;
+plan 135;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -376,6 +376,10 @@ like runperl(
     'state subs and DB::sub under -d'
   );
 }
+# This used to fail an assertion, but only as a standalone script
+is runperl(switches => ['-lXMfeature=:all'],
+           prog     => 'state sub x {}; undef &x; print defined &x',
+           stderr   => 1), "\n", 'undefining state sub';
 
 # -------------------- my -------------------- #
 
@@ -719,6 +723,10 @@ pass "pad taking ownership once more of packagified my-sub";
     'my subs and DB::sub under -d'
   );
 }
+# This used to fail an assertion, but only as a standalone script
+is runperl(switches => ['-lXMfeature=:all'],
+           prog     => 'my sub x {}; undef &x; print defined &x',
+           stderr   => 1), "\n", 'undefining my sub';
 
 # -------------------- Interactions (and misc tests) -------------------- #
 
