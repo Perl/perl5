@@ -270,6 +270,10 @@ typedef OP *(*Perl_call_checker)(pTHX_ OP *, GV *, SV *);
 
 #define CALL_CHECKER_REQUIRE_GV	MGf_REQUIRE_GV
 
+#ifdef PERL_CORE
+# define CV_UNDEF_KEEP_NAME	1
+#endif
+
 /*
  * Local variables:
  * c-indentation-style: bsd

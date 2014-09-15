@@ -835,6 +835,11 @@ PERL_CALLCONV void	Perl_cv_undef(pTHX_ CV* cv)
 #define PERL_ARGS_ASSERT_CV_UNDEF	\
 	assert(cv)
 
+PERL_CALLCONV void	Perl_cv_undef_flags(pTHX_ CV* cv, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CV_UNDEF_FLAGS	\
+	assert(cv)
+
 PERL_CALLCONV GV *	Perl_cvgv_from_hek(pTHX_ CV* cv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CVGV_FROM_HEK	\

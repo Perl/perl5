@@ -1001,19 +1001,8 @@ PP(pp_undef)
                            ));
 	/* FALLTHROUGH */
     case SVt_PVFM:
-	{
 	    /* let user-undef'd sub keep its identity */
-	    GV* const gv = CvGV((const CV *)sv);
-	    HEK * const hek = CvNAME_HEK((CV *)sv);
-	    if (hek) share_hek_hek(hek);
-	    if (gv) SvREFCNT_inc_void_NN(sv_2mortal((SV *)gv));
-	    cv_undef(MUTABLE_CV(sv));
-	    if (gv) CvGV_set(MUTABLE_CV(sv), gv);
-	    else if (hek) {
-		SvANY((CV *)sv)->xcv_gv_u.xcv_hek = hek;
-		CvNAMED_on(sv);
-	    }
-	}
+	cv_undef_flags(MUTABLE_CV(sv), CV_UNDEF_KEEP_NAME);
 	break;
     case SVt_PVGV:
 	assert(isGV_with_GP(sv));

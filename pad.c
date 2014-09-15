@@ -319,10 +319,17 @@ children can still follow the full lexical scope chain.
 void
 Perl_cv_undef(pTHX_ CV *cv)
 {
+    PERL_ARGS_ASSERT_CV_UNDEF;
+    cv_undef_flags(cv, 0);
+}
+
+void
+Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
+{
     const PADLIST *padlist = CvPADLIST(cv);
     bool const slabbed = !!CvSLABBED(cv);
 
-    PERL_ARGS_ASSERT_CV_UNDEF;
+    PERL_ARGS_ASSERT_CV_UNDEF_FLAGS;
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
 	  "CV undef: cv=0x%"UVxf" comppad=0x%"UVxf"\n",
@@ -365,8 +372,13 @@ Perl_cv_undef(pTHX_ CV *cv)
 #endif
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     sv_unmagic((SV *)cv, PERL_MAGIC_checkcall);
-    if (CvNAMED(cv)) CvNAME_HEK_set(cv, NULL);
-    else	     CvGV_set(cv, NULL);
+    if (!(flags & CV_UNDEF_KEEP_NAME)) {
+	if (CvNAMED(cv)) {
+	    CvNAME_HEK_set(cv, NULL);
+	    CvNAMED_off(cv);
+	}
+	else CvGV_set(cv, NULL);
+    }
 
     /* This statement and the subsequence if block was pad_undef().  */
     pad_peg("pad_undef");
@@ -469,10 +481,10 @@ Perl_cv_undef(pTHX_ CV *cv)
 	CvXSUB(cv) = NULL;
     }
     /* delete all flags except WEAKOUTSIDE and CVGV_RC, which indicate the
-     * ref status of CvOUTSIDE and CvGV, and ANON and
-     * LEXICAL, which pp_entersub uses
-     * to choose an error message */
-    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON|CVf_LEXICAL);
+     * ref status of CvOUTSIDE and CvGV, and ANON, NAMED and
+     * LEXICAL, which are used to determine the sub's name.  */
+    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON|CVf_LEXICAL
+		   |CVf_NAMED);
 }
 
 /*

@@ -1128,6 +1128,7 @@
 #define cv_clone_into(a,b)	Perl_cv_clone_into(aTHX_ a,b)
 #define cv_const_sv_or_av	Perl_cv_const_sv_or_av
 #define cv_forget_slab(a)	Perl_cv_forget_slab(aTHX_ a)
+#define cv_undef_flags(a,b)	Perl_cv_undef_flags(aTHX_ a,b)
 #define cvgv_set(a,b)		Perl_cvgv_set(aTHX_ a,b)
 #define cvstash_set(a,b)	Perl_cvstash_set(aTHX_ a,b)
 #define deb_stack_all()		Perl_deb_stack_all(aTHX)
