@@ -13403,7 +13403,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		if (CvDYNFILE(dstr)) CvFILE(dstr) = SAVEPV(CvFILE(dstr));
 		if (CvNAMED(dstr))
 		    SvANY((CV *)dstr)->xcv_gv_u.xcv_hek =
-			share_hek_hek(CvNAME_HEK((CV *)sstr));
+			hek_dup(CvNAME_HEK((CV *)sstr), param);
 		/* don't dup if copying back - CvGV isn't refcounted, so the
 		 * duped GV may never be freed. A bit of a hack! DAPM */
 		else

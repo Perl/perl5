@@ -17,7 +17,7 @@ if (not $Config{'useithreads'}) {
     skip_all("clone_with_stack requires threads");
 }
 
-plan(4);
+plan(5);
 
 fresh_perl_is( <<'----', <<'====', undef, "minimal clone_with_stack" );
 use XS::APItest;
@@ -62,6 +62,19 @@ sub f {
 print 'X-', 'Y-', join(':', f()), "-Z\n";
 ----
 X-Y-0:1:2:3:4-Z
+====
+
+}
+
+{
+    fresh_perl_is( <<'----', <<'====', undef, "with a lexical sub" );
+use XS::APItest;
+use experimental lexical_subs=>;
+my sub f { print "42\n" }
+clone_with_stack();
+f();
+----
+42
 ====
 
 }
