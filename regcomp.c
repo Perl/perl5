@@ -15438,8 +15438,6 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 		   op, (void*)RExC_emit, (void*)RExC_emit_bound);
 
     NODE_ALIGN_FILL(ret);
-    ptr = ret;
-    FILL_ADVANCE_NODE(ptr, op);
 #ifdef RE_TRACK_PATTERN_OFFSETS
     if (RExC_offsets) {         /* MJD */
 	MJD_OFFSET_DEBUG(
@@ -15454,6 +15452,8 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 	Set_Node_Offset(RExC_emit, RExC_parse + (op == END));
     }
 #endif
+    ptr = ret;
+    FILL_ADVANCE_NODE(ptr, op);
     RExC_emit = ptr;
     return(ret);
 }
@@ -15494,8 +15494,6 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 		   op, (void*)RExC_emit, (void*)RExC_emit_bound);
 
     NODE_ALIGN_FILL(ret);
-    ptr = ret;
-    FILL_ADVANCE_NODE_ARG(ptr, op, arg);
 #ifdef RE_TRACK_PATTERN_OFFSETS
     if (RExC_offsets) {         /* MJD */
 	MJD_OFFSET_DEBUG(
@@ -15511,6 +15509,8 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 	Set_Cur_Node_Offset;
     }
 #endif
+    ptr = ret;
+    FILL_ADVANCE_NODE_ARG(ptr, op, arg);
     RExC_emit = ptr;
     return(ret);
 }
