@@ -15425,6 +15425,8 @@ S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_
 
     PERL_ARGS_ASSERT_REGNODE_GUTS;
 
+    assert(extra_size >= regarglen[op]);
+
     if (SIZE_ONLY) {
 	SIZE_ALIGN(RExC_size);
 	RExC_size += 1 + extra_size;
@@ -15460,9 +15462,11 @@ S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_
 STATIC regnode *			/* Location. */
 S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 {
-    regnode * const ret = regnode_guts(pRExC_state, op, 0, "reg_node");
+    regnode * const ret = regnode_guts(pRExC_state, op, regarglen[op], "reg_node");
 
     PERL_ARGS_ASSERT_REG_NODE;
+
+    assert(regarglen[op] == 0);
 
     if (PASS2) {
         regnode *ptr = ret;
@@ -15478,9 +15482,11 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 STATIC regnode *			/* Location. */
 S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 {
-    regnode * const ret = regnode_guts(pRExC_state, op, 1, "reganode");
+    regnode * const ret = regnode_guts(pRExC_state, op, regarglen[op], "reganode");
 
     PERL_ARGS_ASSERT_REGANODE;
+
+    assert(regarglen[op] == 1);
 
     if (PASS2) {
         regnode *ptr = ret;
