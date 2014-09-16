@@ -57,7 +57,7 @@ NBOUNDA     NBOUND,     no        ; Match "" at any word non-boundary using ASCI
 REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).
 SANY        REG_ANY,    no 0 S    ; Match any one character.
 CANY        REG_ANY,    no 0 S    ; Match any one byte.
-ANYOF       ANYOF,      sv 0 S    ; Match character in (or not in) this class, single char match only
+ANYOF       ANYOF,      sv 1 S    ; Match character in (or not in) this class, single char match only
 
 #* POSIX Character Classes:
 # Order of the below is important.  See ordering comment above.

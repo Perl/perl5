@@ -310,7 +310,7 @@ static const U8 regarglen[] = {
 	0,                                   	/* REG_ANY      */
 	0,                                   	/* SANY         */
 	0,                                   	/* CANY         */
-	0,                                   	/* ANYOF        */
+	EXTRA_SIZE(struct regnode_1),        	/* ANYOF        */
 	0,                                   	/* POSIXD       */
 	0,                                   	/* POSIXL       */
 	0,                                   	/* POSIXU       */
