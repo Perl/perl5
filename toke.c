@@ -1987,7 +1987,6 @@ S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
  *       a keyword (do this if the word is a label, e.g. goto FOO)
  *   int allow_pack : if true, : characters will also be allowed (require,
  *       use, etc. do this)
- *   int allow_initial_tick : used by the "sub" lexer only.
  */
 
 STATIC char *
