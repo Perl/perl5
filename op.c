@@ -7893,7 +7893,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		PERL_HASH(hash, name, namlen);
 		CvNAME_HEK_set(cv,
 			       share_hek(name,
-					 name_is_utf8 ? -namlen : namlen,
+					 name_is_utf8
+					    ? -(SSize_t)namlen
+					    :  (SSize_t)namlen,
 					 hash));
 	    }
 
@@ -7954,7 +7956,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    U32 hash;
 	    PERL_HASH(hash, name, namlen);
 	    CvNAME_HEK_set(cv, share_hek(name,
-					 name_is_utf8 ? -namlen : namlen,
+					 name_is_utf8
+					    ? -(SSize_t)namlen
+					    :  (SSize_t)namlen,
 					 hash));
 	}
 	CvFILE_set_from_cop(cv, PL_curcop);
@@ -10748,7 +10752,7 @@ Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
 {
     PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER;
     PERL_UNUSED_CONTEXT;
-    return S_cv_get_call_checker(cv, ckfun_p, ckobj_p, NULL);
+    S_cv_get_call_checker(cv, ckfun_p, ckobj_p, NULL);
 }
 
 /*
@@ -10822,7 +10826,7 @@ Perl_cv_set_call_checker_flags(pTHX_ CV *cv, Perl_call_checker ckfun,
 	    callmg->mg_flags |= MGf_REFCOUNTED;
 	}
 	callmg->mg_flags = (callmg->mg_flags &~ MGf_REQUIRE_GV)
-			 | (flags & MGf_REQUIRE_GV) | MGf_COPY;
+			 | (U8)(flags & MGf_REQUIRE_GV) | MGf_COPY;
     }
 }
 
