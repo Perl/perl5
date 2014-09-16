@@ -490,7 +490,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::Manifest' => {
-        'DISTRIBUTION' => 'BINGOS/ExtUtils-Manifest-1.66.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-Manifest-1.68.tar.gz',
         'FILES'        => q[cpan/ExtUtils-Manifest],
         'EXCLUDED'     => [qr(^xt/)],
     },

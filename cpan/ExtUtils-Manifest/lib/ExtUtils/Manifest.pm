@@ -10,7 +10,7 @@ use Carp;
 use strict;
 use warnings;
 
-our $VERSION = '1.66';
+our $VERSION = '1.68';
 our @ISA = ('Exporter');
 our @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -195,7 +195,7 @@ sub manifind {
     # $File::Find::name is unavailable.
     # Also, it's okay to use / here, because MANIFEST files use Unix-style
     # paths.
-    find({wanted => $wanted, follow => 1},
+    find({wanted => $wanted, follow_fast => 1},
 	 $Is_MacOS ? ":" : ".");
 
     return $found;
