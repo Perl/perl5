@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 139;
+plan 141;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -391,6 +391,12 @@ sub _cmp { $a cmp $b }
   is join(" ", sort _cmp split //, 'lexsub'), 'x u s l e b',
     'sort state_sub LIST'
 }
+{
+  state sub handel { "" }
+  print handel, "ok ", curr_test(),
+       " - no 'No comma allowed' after state sub\n";
+  curr_test(curr_test()+1);
+}
 
 # -------------------- my -------------------- #
 
@@ -747,6 +753,11 @@ is runperl(switches => ['-lXMfeature=:all'],
   my sub _cmp { $b cmp $a }
   is join(" ", sort _cmp split //, 'lexsub'), 'x u s l e b',
     'sort my_sub LIST'
+}
+{
+  my sub handel { "" }
+  print handel,"ok ",curr_test()," - no 'No comma allowed' after my sub\n";
+  curr_test(curr_test()+1);
 }
 
 # -------------------- Interactions (and misc tests) -------------------- #

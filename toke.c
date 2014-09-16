@@ -8243,12 +8243,20 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 	    s++;
 	if (*s == ',') {
 	    GV* gv;
+	    PADOFFSET off;
 	    if (keyword(w, s - w, 0))
 		return;
 
 	    gv = gv_fetchpvn_flags(w, s - w, ( UTF ? SVf_UTF8 : 0 ), SVt_PVCV);
 	    if (gv && GvCVu(gv))
 		return;
+	    if (s - w <= 254) {
+		char tmpbuf[256];
+		Copy(w, tmpbuf+1, s - w, char);
+		*tmpbuf = '&';
+		off = pad_findmy_pvn(tmpbuf, s-w+1, UTF ? SVf_UTF8 : 0);
+		if (off != NOT_IN_PAD) return;
+	    }
 	    Perl_croak(aTHX_ "No comma allowed after %s", what);
 	}
     }
