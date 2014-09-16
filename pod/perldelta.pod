@@ -652,6 +652,10 @@ been fixed.
 C<(caller $n)[3]> now reports names of lexical subs, instead of treating
 them as "(unknown)".
 
+=item *
+
+C<sort subname LIST> now supports lexical subs for the comparison routine.
+
 =back
 
 =head1 Known Problems
