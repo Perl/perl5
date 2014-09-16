@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 135;
+plan 137;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -380,6 +380,10 @@ like runperl(
 is runperl(switches => ['-lXMfeature=:all'],
            prog     => 'state sub x {}; undef &x; print defined &x',
            stderr   => 1), "\n", 'undefining state sub';
+{
+  state sub x { is +(caller 0)[3], 'x', 'state sub name in caller' }
+  x
+}
 
 # -------------------- my -------------------- #
 
@@ -727,6 +731,10 @@ pass "pad taking ownership once more of packagified my-sub";
 is runperl(switches => ['-lXMfeature=:all'],
            prog     => 'my sub x {}; undef &x; print defined &x',
            stderr   => 1), "\n", 'undefining my sub';
+{
+  my sub x { is +(caller 0)[3], 'x', 'my sub name in caller' }
+  x
+}
 
 # -------------------- Interactions (and misc tests) -------------------- #
 

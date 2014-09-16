@@ -1806,12 +1806,9 @@ PP(pp_caller)
     if (!has_arg)
 	RETURN;
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
-	GV * const cvgv = CvGV(dbcx->blk_sub.cv);
 	/* So is ccstack[dbcxix]. */
-	if (cvgv && isGV(cvgv)) {
-	    SV * const sv = newSV(0);
-	    gv_efullname3(sv, cvgv, NULL);
-	    mPUSHs(sv);
+	if (CvHASGV(dbcx->blk_sub.cv)) {
+	    PUSHs(cv_name(dbcx->blk_sub.cv, 0));
 	    PUSHs(boolSV(CxHASARGS(cx)));
 	}
 	else {
