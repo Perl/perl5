@@ -3125,7 +3125,9 @@ Perl_sighandler(int sig)
 
     if (!cv || !CvROOT(cv)) {
 	const HEK * const hek = gv
-			   ? GvENAME_HEK(gv)
+			? GvENAME_HEK(gv)
+			: cv && CvNAMED(cv)
+			   ? CvNAME_HEK(cv)
 			   : cv && CvGV(cv) ? GvENAME_HEK(CvGV(cv)) : NULL;
 	if (hek)
 	    Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL),
