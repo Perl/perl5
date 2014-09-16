@@ -45,7 +45,7 @@ my $has_inf;
 my $has_nan;
 
 SKIP: {
-  if ($PInf == 1 && $NInf == 1) {
+  if ($PInf == 0 && $NInf == 0) {
     skip $inf_tests, "no infinity found";
   }
 
@@ -126,7 +126,7 @@ SKIP: {
 }
 
 SKIP: {
-  if ($NaN == 1) {
+  if ($NaN == 0) {
     skip $nan_tests, "no nan found";
   }
 
