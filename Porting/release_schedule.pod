@@ -14,7 +14,8 @@ deemed necessary by the Pumpking.
 =head2 Perl 5.20
 
   2014-05-27  5.20.0 ✓        Ricardo Signes
-  2014-09-??  5.20.1          Steve Hay
+  2014-09-14  5.20.1 ✓        Steve Hay
+  2015-01-??  5.20.2          Steve Hay
 
 =head2 Perl 5.18
 
@@ -76,6 +77,7 @@ Jesse Luehrs <doy@cpan.org>
 Jesse Vincent <jesse@cpan.org>
 Leon Brocard <acme@astray.com>
 Matt Trout <mst@shadowcat.co.uk>
+Matthew Horsfall <wolfsage@gmail.com>
 Max Maischein <corion@cpan.org>
 Peter Martini <petercmartini@gmail.com>
 Philippe Bruhat <book@cpan.org>
