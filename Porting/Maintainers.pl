@@ -379,6 +379,9 @@ use File::Glob qw(:case);
                 examples/dups
                 ),
         ],
+        # Was hoping to be merged upstream in CPAN RT#96498,
+        # but that has been rejected...
+        'CUSTOMIZED'   => ['hints/hpux.pl'],
     },
 
     'Dumpvalue' => {

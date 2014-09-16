@@ -696,6 +696,7 @@ cpan/Digest-SHA/lib/Digest/SHA.pm	Digest::SHA extension
 cpan/Digest-SHA/Makefile.PL		Digest::SHA Makefile.PL
 cpan/Digest-SHA/shasum			shasum script
 cpan/Digest-SHA/SHA.xs			Digest::SHA extension
+cpan/Digest-SHA/src/sdf.c		Digest::SHA extension
 cpan/Digest-SHA/src/sha64bit.c		Digest::SHA extension
 cpan/Digest-SHA/src/sha64bit.h		Digest::SHA extension
 cpan/Digest-SHA/src/sha.c		Digest::SHA extension
