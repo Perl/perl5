@@ -4145,9 +4145,8 @@ END_EXTERN_C
 #  if !defined(NV_INF) && defined(HUGE_VAL)
 #    define NV_INF HUGE_VAL
 #  endif
-#  ifndef NV_NAN
-#    define NV_NAN (NV_INF-NV_INF)
-#  endif
+/* For WIN32 the best NV_NAN is the __PL_nan_u trick, see below.
+ * There is no supported way of getting the NAN across all the crts. */
 #endif
 
 /* If you are thinking of using HUGE_VAL for infinity, or using
@@ -4244,6 +4243,9 @@ static const union { unsigned int __i; float __f; } __PL_nan_u =
 #if !defined(NV_NAN)
 #  define NV_NAN ((NV)0.0/0.0) /* Some compilers will warn. */
 #endif
+/* Do NOT try doing NV_NAN based on NV_INF and trying (NV_INF-NV_INF).
+ * Though IEEE-754-logically correct, some compilers (like Visual C 2003)
+ * falsely misoptimize that to zero (x-x is zero, right?) */
 
 #ifndef __cplusplus
 #  if !defined(WIN32) && !defined(VMS)
