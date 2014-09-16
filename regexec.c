@@ -772,7 +772,7 @@ Perl_re_intuit_start(pTHX_
              * be too fiddly (e.g. REXEC_IGNOREPOS).
              */
             if (   strpos != strbeg
-                && (prog->intflags & (PREGf_ANCH_BOL|PREGf_ANCH_SBOL)))
+                && (prog->intflags & PREGf_ANCH_SBOL))
             {
 	        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                                 "  Not at start...\n"));
@@ -896,7 +896,7 @@ Perl_re_intuit_start(pTHX_
 
 
         /* If the regex is absolutely anchored to either the start of the
-         * string (BOL,SBOL) or to pos() (ANCH_GPOS), then
+         * string (SBOL) or to pos() (ANCH_GPOS), then
          * check_offset_max represents an upper bound on the string where
          * the substr could start. For the ANCH_GPOS case, we assume that
          * the caller of intuit will have already set strpos to
@@ -2715,7 +2715,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     }
 
     /* Simplest case:  anchored match need be tried only once. */
-    /*  [unless only anchor is BOL and multiline is set] */
+    /*  [unless only anchor is MBOL - implying multiline is set] */
     if (prog->intflags & (PREGf_ANCH & ~PREGf_ANCH_GPOS)) {
 	if (s == startpos && regtry(reginfo, &s))
 	    goto got_it;
@@ -4013,8 +4013,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         assert(nextchr < 256 && (nextchr >= 0 || nextchr == NEXTCHR_EOS));
 
 	switch (state_num) {
-	case BOL:  /*  /^../   */
-	case SBOL: /*  /^../s  */
+	case SBOL: /*  /^../ and /\A../  */
 	    if (locinput == reginfo->strbeg)
 		break;
 	    sayNO;
@@ -4052,9 +4051,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		sayNO;
 	    break;
 
-	case EOL: /* /..$/  */
-            /* FALLTHROUGH */
-	case SEOL: /* /..$/s  */
+	case SEOL: /* /..$/  */
 	    if (!NEXTCHR_IS_EOS && nextchr != '\n')
 		sayNO;
 	    if (reginfo->strend - locinput > 1)

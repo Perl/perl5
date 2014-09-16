@@ -1397,7 +1397,6 @@ const struct flag_to_name regexp_core_intflags_names[] = {
     {PREGf_CANY_SEEN,       "CANY_SEEN,"},
     {PREGf_GPOS_SEEN,       "GPOS_SEEN,"},
     {PREGf_GPOS_FLOAT,      "GPOS_FLOAT,"},
-    {PREGf_ANCH_BOL,        "ANCH_BOL,"},
     {PREGf_ANCH_MBOL,       "ANCH_MBOL,"},
     {PREGf_ANCH_SBOL,       "ANCH_SBOL,"},
     {PREGf_ANCH_GPOS,       "ANCH_GPOS,"},

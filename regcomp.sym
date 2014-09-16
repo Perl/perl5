@@ -24,15 +24,19 @@
 END         END,        no        ; End of program.
 SUCCEED     END,        no        ; Return from a subroutine, basically.
 
-#* Anchors:
+#* Line Start Anchors:
+SBOL        BOL,        no        ; Match "" at beginning of line: /^/, /\A/
+MBOL        BOL,        no        ; Same, assuming multiline: /^/m
 
-BOL         BOL,        no        ; Match "" at beginning of line.
-MBOL        BOL,        no        ; Same, assuming multiline.
-SBOL        BOL,        no        ; Same, assuming singleline.
-EOS         EOL,        no        ; Match "" at end of string.
-EOL         EOL,        no        ; Match "" at end of line.
-MEOL        EOL,        no        ; Same, assuming multiline.
-SEOL        EOL,        no        ; Same, assuming singleline.
+#* Line End Anchors:
+SEOL        EOL,        no        ; Match "" at end of line: /$/
+MEOL        EOL,        no        ; Same, assuming multiline: /$/m
+EOS         EOL,        no        ; Match "" at end of string: /\z/
+
+#* Match Start Anchors:
+GPOS        GPOS,       no        ; Matches where last m//g left off.
+
+#* Word Boundary Opcodes:
 # The regops that have varieties that vary depending on the character set regex
 # modifiers have to ordered thusly: /d, /l, /u, /a, /aa.  This is because code
 # in regcomp.c uses the enum value of the modifier as an offset from the /d
@@ -47,15 +51,14 @@ NBOUND      NBOUND,     no        ; Match "" at any word non-boundary using nati
 NBOUNDL     NBOUND,     no        ; Match "" at any locale word non-boundary
 NBOUNDU     NBOUND,     no        ; Match "" at any word non-boundary using Unicode rules
 NBOUNDA     NBOUND,     no        ; Match "" at any word non-boundary using ASCII rules
-GPOS        GPOS,       no        ; Matches where last m//g left off.
 
 #* [Special] alternatives:
-
 REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).
 SANY        REG_ANY,    no 0 S    ; Match any one character.
 CANY        REG_ANY,    no 0 S    ; Match any one byte.
 ANYOF       ANYOF,      sv 0 S    ; Match character in (or not in) this class, single char match only
 
+#* POSIX Character Classes:
 # Order of the below is important.  See ordering comment above.
 POSIXD      POSIXD,     none 0 S   ; Some [[:class:]] under /d; the FLAGS field gives which one
 POSIXL      POSIXD,     none 0 S   ; Some [[:class:]] under /l; the FLAGS field gives which one
@@ -147,16 +150,17 @@ NREFFL      REF,        no-sv 1 V ; Match already matched string, folded in loc.
 NREFFU      REF,        num   1 V ; Match already matched string, folded using unicode rules for non-utf8
 NREFFA      REF,        num   1 V ; Match already matched string, folded using unicode rules for non-utf8, no mixing ASCII, non-ASCII
 
+#*Support for long RE
+LONGJMP     LONGJMP,    off 1 . 1 ; Jump far away.
+BRANCHJ     BRANCHJ,    off 1 V 1 ; BRANCH with long offset.
+
+#*Special Case Regops
 IFMATCH     BRANCHJ,    off 1 . 2 ; Succeeds if the following matches.
 UNLESSM     BRANCHJ,    off 1 . 2 ; Fails if the following matches.
 SUSPEND     BRANCHJ,    off 1 V 1 ; "Independent" sub-RE.
 IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceded by switcher.
 GROUPP      GROUPP,     num 1     ; Whether the group matched.
 
-#*Support for long RE
-
-LONGJMP     LONGJMP,    off 1 . 1 ; Jump far away.
-BRANCHJ     BRANCHJ,    off 1 V 1 ; BRANCH with long offset.
 
 #*The heavy worker
 

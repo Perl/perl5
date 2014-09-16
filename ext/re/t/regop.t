@@ -263,7 +263,7 @@ Freeing REx: "[q]"
 #Compiling REx "^(\S{1,9}):\s*(\d+)$"
 #synthetic stclass "ANYOF[\x{00}-\x{06}\a\b\x{0E}-\x{1F}\x{21}-\x{FF}][{utf8}0100-167F 1681-1FFF 200B-2027 202A-202E 2030-205E 2060-2FFF 3001-INFINITY]".
 #Final program:
-#   1: BOL (2)
+#   1: SBOL (2)
 #   2: OPEN1 (4)
 #   4:   CURLY {1,9} (7)
 #   6:     NPOSIXD[\s] (0)
@@ -277,8 +277,8 @@ Freeing REx: "[q]"
 #  17: CLOSE2 (19)
 #  19: EOL (20)
 #  20: END (0)
-#floating ":" at 1..9 (checking floating) stclass ANYOF[\x{00}-\x{06}\a\b\x{0E}-\x{1F}\x{21}-\x{FF}][{utf8}0100-167F 1681-1FFF 200B-2027 202A-202E 2030-205E 2060-2FFF 3001-INFINITY] anchored(BOL) minlen 3
+#floating ":" at 1..9 (checking floating) stclass ANYOF[\x{00}-\x{06}\a\b\x{0E}-\x{1F}\x{21}-\x{FF}][{utf8}0100-167F 1681-1FFF 200B-2027 202A-202E 2030-205E 2060-2FFF 3001-INFINITY] anchored(SBOL) minlen 3
 #Freeing REx: "^(\S{1,9}):\s*(\d+)$"
-floating ":" at 1..9 (checking floating) stclass ANYOF[\x{00}-\x{06}\a\b\x{0E}-\x{1F}\x{21}-\x{FF}][{utf8}0100-167F 1681-1FFF 200B-2027 202A-202E 2030-205E 2060-2FFF 3001-INFINITY] anchored(BOL) minlen 3
+floating ":" at 1..9 (checking floating) stclass ANYOF[\x{00}-\x{06}\a\b\x{0E}-\x{1F}\x{21}-\x{FF}][{utf8}0100-167F 1681-1FFF 200B-2027 202A-202E 2030-205E 2060-2FFF 3001-INFINITY] anchored(SBOL) minlen 3
 %MATCHED%
 synthetic stclass

@@ -6871,9 +6871,7 @@ reStudy:
 	else if (PL_regkind[OP(first)] == BOL) {
             r->intflags |= (OP(first) == MBOL
                            ? PREGf_ANCH_MBOL
-			   : (OP(first) == SBOL
-                              ? PREGf_ANCH_SBOL
-                              : PREGf_ANCH_BOL));
+                           : PREGf_ANCH_SBOL);
 	    first = NEXTOPER(first);
 	    goto again;
 	}
@@ -11329,10 +11327,8 @@ tryagain:
 	nextchar(pRExC_state);
 	if (RExC_flags & RXf_PMf_MULTILINE)
 	    ret = reg_node(pRExC_state, MBOL);
-	else if (RExC_flags & RXf_PMf_SINGLELINE)
-	    ret = reg_node(pRExC_state, SBOL);
 	else
-	    ret = reg_node(pRExC_state, BOL);
+	    ret = reg_node(pRExC_state, SBOL);
         Set_Node_Length(ret, 1); /* MJD */
 	break;
     case '$':
@@ -11341,10 +11337,8 @@ tryagain:
 	    RExC_seen_zerolen++;
 	if (RExC_flags & RXf_PMf_MULTILINE)
 	    ret = reg_node(pRExC_state, MEOL);
-	else if (RExC_flags & RXf_PMf_SINGLELINE)
-	    ret = reg_node(pRExC_state, SEOL);
 	else
-	    ret = reg_node(pRExC_state, EOL);
+	    ret = reg_node(pRExC_state, SEOL);
         Set_Node_Length(ret, 1); /* MJD */
 	break;
     case '.':
@@ -15850,8 +15844,6 @@ Perl_regdump(pTHX_ const regexp *r)
     }
     if (r->intflags & PREGf_ANCH) {
 	PerlIO_printf(Perl_debug_log, "anchored");
-        if (r->intflags & PREGf_ANCH_BOL)
-	    PerlIO_printf(Perl_debug_log, "(BOL)");
         if (r->intflags & PREGf_ANCH_MBOL)
 	    PerlIO_printf(Perl_debug_log, "(MBOL)");
         if (r->intflags & PREGf_ANCH_SBOL)

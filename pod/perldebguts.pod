@@ -525,7 +525,7 @@ C<(??{ code })>.
 =item C<anchored(TYPE)>
 
 If the pattern may match only at a handful of places, with C<TYPE>
-being C<BOL>, C<MBOL>, or C<GPOS>.  See the table below.
+being C<SBOL>, C<MBOL>, or C<GPOS>.  See the table below.
 
 =back
 
@@ -559,15 +559,19 @@ will be lost.
  END             no         End of program.
  SUCCEED         no         Return from a subroutine, basically.
 
- # Anchors:
+ # Line Start Anchors:
+ SBOL            no         Match "" at beginning of line: /^/, /\A/
+ MBOL            no         Same, assuming multiline: /^/m
 
- BOL             no         Match "" at beginning of line.
- MBOL            no         Same, assuming multiline.
- SBOL            no         Same, assuming singleline.
- EOS             no         Match "" at end of string.
- EOL             no         Match "" at end of line.
- MEOL            no         Same, assuming multiline.
- SEOL            no         Same, assuming singleline.
+ # Line End Anchors:
+ SEOL            no         Match "" at end of line: /$/
+ MEOL            no         Same, assuming multiline: /$/m
+ EOS             no         Match "" at end of string: /\z/
+
+ # Match Start Anchors:
+ GPOS            no         Matches where last m//g left off.
+
+ # Word Boundary Opcodes:
  BOUND           no         Match "" at any word boundary using native
                             charset rules for non-utf8
  BOUNDL          no         Match "" at any locale word boundary
@@ -582,16 +586,15 @@ will be lost.
                             Unicode rules
  NBOUNDA         no         Match "" at any word non-boundary using
                             ASCII rules
- GPOS            no         Matches where last m//g left off.
 
  # [Special] alternatives:
-
  REG_ANY         no         Match any one character (except newline).
  SANY            no         Match any one character.
  CANY            no         Match any one byte.
  ANYOF           sv         Match character in (or not in) this class,
                             single char match only
 
+ # POSIX Character Classes:
  POSIXD          none       Some [[:class:]] under /d; the FLAGS field
                             gives which one
  POSIXL          none       Some [[:class:]] under /l; the FLAGS field
@@ -700,16 +703,16 @@ will be lost.
                             unicode rules for non-utf8, no mixing ASCII,
                             non-ASCII
 
+ # Support for long RE
+ LONGJMP         off 1 1    Jump far away.
+ BRANCHJ         off 1 1    BRANCH with long offset.
+
+ # Special Case Regops
  IFMATCH         off 1 2    Succeeds if the following matches.
  UNLESSM         off 1 2    Fails if the following matches.
  SUSPEND         off 1 1    "Independent" sub-RE.
  IFTHEN          off 1 1    Switch, should be preceded by switcher.
  GROUPP          num 1      Whether the group matched.
-
- # Support for long RE
-
- LONGJMP         off 1 1    Jump far away.
- BRANCHJ         off 1 1    BRANCH with long offset.
 
  # The heavy worker
 

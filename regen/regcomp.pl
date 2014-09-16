@@ -28,6 +28,7 @@ open DESC, 'regcomp.sym';
 my $ind = 0;
 my (@name,@rest,@type,@code,@args,@flags,@longj,@cmnt);
 my ($longest_name_length,$desc,$lastregop) = 0;
+my (%seen_op, %type_alias);
 while (<DESC>) {
     # Special pod comments
     if (/^#\* ?/) { $cmnt[$ind] .= "# $'"; }
@@ -43,8 +44,21 @@ while (<DESC>) {
     }
     unless ($lastregop) {
         ($name[$ind], $desc, $rest[$ind]) = /^(\S+)\s+([^\t]+?)\s*;\s*(.*)/;
+
+        if (defined $seen_op{$name[$ind]}) {
+            die "Duplicate regop $name[$ind] in regcomp.sym line $. previously defined on line $seen_op{$name[$ind]}\n";
+        } else {
+            $seen_op{$name[$ind]}= $.;
+        }
+
         ($type[$ind], $code[$ind], $args[$ind], $flags[$ind], $longj[$ind])
           = split /[,\s]\s*/, $desc;
+
+        if (!defined $seen_op{$type[$ind]} and !defined $type_alias{$type[$ind]}) {
+            warn "Regop type '$type[$ind]' from regcomp.sym line $. is not an existing regop, and will be aliased to $name[$ind]\n";
+            $type_alias{$type[$ind]}= $name[$ind];
+        }
+
         $longest_name_length = length $name[$ind]
           if length $name[$ind] > $longest_name_length;
         ++$ind;
@@ -148,10 +162,15 @@ EOP
     -$width, REGMATCH_STATE_MAX => $tot - 1
 ;
 
-
+my %rev_type_alias= reverse %type_alias;
 for ($ind=0; $ind < $lastregop ; ++$ind) {
   printf $out "#define\t%*s\t%d\t/* %#04x %s */\n",
     -$width, $name[$ind], $ind, $ind, $rest[$ind];
+  if (defined(my $alias= $rev_type_alias{$name[$ind]})) {
+      printf $out "#define\t%*s\t%d\t/* %#04x %s */\n",
+            -$width, $alias, $ind, $ind, "type alias";
+  }
+
 }
 print $out "\t/* ------------ States ------------- */\n";
 for ( ; $ind < $tot ; $ind++) {
