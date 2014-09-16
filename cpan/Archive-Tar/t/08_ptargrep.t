@@ -7,9 +7,9 @@ use FindBin '$Bin';
 use Archive::Tar;
 
 # filenames
-my $tartest = File::Spec->catfile("t", "tartest");
-my $foo = File::Spec->catfile("t", "tartest", "foo");
-my $tarfile = File::Spec->catfile("t", "tartest.tar");
+my $tartest = File::Spec->catfile("t", "ptargrep");
+my $foo = File::Spec->catfile("t", "ptargrep", "foo");
+my $tarfile = File::Spec->catfile("t", "ptargrep.tar");
 my $ptargrep = File::Spec->catfile($Bin, "..", "bin", "ptargrep");
 my $cmd = qq/$^X $ptargrep --list-only "file foo" $tarfile/;
 
@@ -26,7 +26,7 @@ $tar->write($tarfile);
 
 # see if ptargrep matches
 my $out = qx{$cmd};
-cmp_ok($out, '=~', qr{^t.*tartest.*foo$}m, "ptargrep shows matched file");
+cmp_ok($out, '=~', qr{^t.*ptargrep.*foo$}m, "ptargrep shows matched file");
 
 # cleanup
 END {

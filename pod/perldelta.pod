@@ -156,6 +156,12 @@ XXX
 
 =item *
 
+L<Archive::Tar> has been upgraded from version 2.00 to 2.02.
+
+Tests can now be run in parallel.
+
+=item *
+
 L<B> has been upgraded from version 1.50 to 1.51.
 
 It provides a new C<B::safename> function, based on the existing
