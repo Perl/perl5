@@ -630,9 +630,9 @@ don't want CPAN.pm to list it as most recent use an '_' after the
 regular version number followed by at least 2 digits, eg. 1.20_01. If
 you do this, the following idiom is recommended:
 
-  $VERSION = "1.12_01";
-  $XS_VERSION = $VERSION; # only needed if you have XS code
-  $VERSION = eval $VERSION;
+  our $VERSION = "1.12_01"; # so CPAN distribution will have right filename
+  our $XS_VERSION = $VERSION; # only needed if you have XS code
+  $VERSION = eval $VERSION; # so "use Module 0.002" won't warn on underscore
 
 With that trick MakeMaker will only read the first line and thus read
 the underscore, while the perl interpreter will evaluate the $VERSION
@@ -643,6 +643,13 @@ warning about $VERSION not being a number.
 Never release anything (even a one-word documentation patch) without
 incrementing the number.  Even a one-word documentation patch should
 result in a change in version at the sub-minor level.
+
+Once picked, it is important to stick to your version scheme, without
+reducing the number of digits. This is because "downstream" packagers,
+such as the FreeBSD ports system, interpret the version numbers in
+various ways. If you change the number of digits in your version scheme,
+you can confuse these systems so they get the versions of your module
+out of order, which is obviously bad.
 
 =head2 Pre-requisites
 
