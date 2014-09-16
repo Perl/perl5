@@ -9983,17 +9983,17 @@ Perl_ck_sort(pTHX_ OP *o)
 	    off = pad_findmy_pvn(tmpbuf, len+1, SvUTF8(kSVOP_sv));
 	    if (off != NOT_IN_PAD) {
 		if (PAD_COMPNAME_FLAGS_isOUR(off)) {
-		    SV * const new =
+		    SV * const fq =
 			newSVhek(HvNAME_HEK(PAD_COMPNAME_OURSTASH(off)));
-		    sv_catpvs(new, "::");
-		    sv_catsv(new, kSVOP_sv);
+		    sv_catpvs(fq, "::");
+		    sv_catsv(fq, kSVOP_sv);
 		    SvREFCNT_dec_NN(kSVOP_sv);
-		    kSVOP->op_sv = new;
+		    kSVOP->op_sv = fq;
 		}
 		else {
-		    OP * const new = newOP(OP_PADCV, 0);
-		    new->op_targ = off;
-		    cUNOPx(firstkid)->op_first = new;
+		    OP * const padop = newOP(OP_PADCV, 0);
+		    padop->op_targ = off;
+		    cUNOPx(firstkid)->op_first = padop;
 		    op_free(kid);
 		}
 	    }
