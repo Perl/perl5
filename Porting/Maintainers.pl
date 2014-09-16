@@ -482,6 +482,11 @@ use File::Glob qw(:case);
             'PATCHING',
             'README.packaging',
         ],
+        'CUSTOMIZED'   => [
+            # Already merged upstream in GitHub 0116aaf4e, just awaiting
+            # a new stable CPAN release
+            qw(	t/pm_to_blib.t ),
+        ],
     },
 
     'ExtUtils::Manifest' => {
