@@ -361,6 +361,13 @@ struct regnode_ssc {
     (ptr)->type = op;    (ptr)->next_off = 0;   (ptr)++; } STMT_END
 #define FILL_ADVANCE_NODE_ARG(ptr, op, arg) STMT_START { \
     ARG_SET(ptr, arg);  FILL_ADVANCE_NODE(ptr, op); (ptr) += 1; } STMT_END
+#define FILL_ADVANCE_NODE_2L_ARG(ptr, op, arg1, arg2)               \
+                STMT_START {                                        \
+                    ARG_SET(ptr, arg1);                             \
+                    ARG2L_SET(ptr, arg2);                           \
+                    FILL_ADVANCE_NODE(ptr, op);                     \
+                    (ptr) += 2;                                     \
+                } STMT_END
 
 #define REG_MAGIC 0234
 

@@ -2092,6 +2092,10 @@ Es	|regnode*|regnode_guts	|NN RExC_state_t *pRExC_state              \
 				|NN const char* const name
 Es	|regnode*|reganode	|NN RExC_state_t *pRExC_state|U8 op \
 				|U32 arg
+Es	|regnode*|reg2Lanode	|NN RExC_state_t *pRExC_state		   \
+				|const U8 op				   \
+				|const U32 arg1				   \
+				|const I32 arg2
 Es	|regnode*|regatom	|NN RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth
 Es	|regnode*|regbranch	|NN RExC_state_t *pRExC_state \

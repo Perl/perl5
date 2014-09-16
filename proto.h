@@ -6918,6 +6918,11 @@ STATIC regnode*	S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U3
 #define PERL_ARGS_ASSERT_REG	\
 	assert(pRExC_state); assert(flagp)
 
+STATIC regnode*	S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const I32 arg2)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_REG2LANODE	\
+	assert(pRExC_state)
+
 STATIC regnode*	S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REG_NODE	\

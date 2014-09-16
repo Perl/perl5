@@ -9931,20 +9931,17 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     num = RExC_npar + num - 1;
                 }
 
-                ret = reganode(pRExC_state, GOSUB, num);
+                ret = reg2Lanode(pRExC_state, GOSUB, num, RExC_recurse_count);
                 if (!SIZE_ONLY) {
 		    if (num > (I32)RExC_rx->nparens) {
 			RExC_parse++;
 			vFAIL("Reference to nonexistent group");
 	            }
-	            ARG2L_SET( ret, RExC_recurse_count++);
-                    RExC_emit++;
+	            RExC_recurse_count++;
 		    DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
 			"Recurse #%"UVuf" to %"IVdf"\n",
                               (UV)ARG(ret), (IV)ARG2L(ret)));
-		} else {
-		    RExC_size++;
-    		}
+                }
                 RExC_seen |= REG_RECURSE_SEEN;
                 Set_Node_Length(ret, 1 + regarglen[OP(ret)]); /* MJD */
 		Set_Node_Offset(ret, parse_start); /* MJD */
@@ -15488,6 +15485,25 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
     if (PASS2) {
         regnode *ptr = ret;
         FILL_ADVANCE_NODE_ARG(ptr, op, arg);
+        RExC_emit = ptr;
+    }
+    return(ret);
+}
+
+STATIC regnode *
+S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const I32 arg2)
+{
+    /* emit a node with U32 and I32 arguments */
+
+    regnode * const ret = regnode_guts(pRExC_state, op, regarglen[op], "rega2Lnode");
+
+    PERL_ARGS_ASSERT_REG2LANODE;
+
+    assert(regarglen[op] == 2);
+
+    if (PASS2) {
+        regnode *ptr = ret;
+        FILL_ADVANCE_NODE_2L_ARG(ptr, op, arg1, arg2);
         RExC_emit = ptr;
     }
     return(ret);
