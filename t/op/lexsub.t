@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 137;
+plan 139;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -384,6 +384,13 @@ is runperl(switches => ['-lXMfeature=:all'],
   state sub x { is +(caller 0)[3], 'x', 'state sub name in caller' }
   x
 }
+sub _cmp { $a cmp $b }
+{
+  local $::TODO = ' ';
+  state sub _cmp { $b cmp $a }
+  is join(" ", sort _cmp split //, 'lexsub'), 'x u s l e b',
+    'sort state_sub LIST'
+}
 
 # -------------------- my -------------------- #
 
@@ -734,6 +741,12 @@ is runperl(switches => ['-lXMfeature=:all'],
 {
   my sub x { is +(caller 0)[3], 'x', 'my sub name in caller' }
   x
+}
+{
+  local $::TODO = ' ';
+  my sub _cmp { $b cmp $a }
+  is join(" ", sort _cmp split //, 'lexsub'), 'x u s l e b',
+    'sort my_sub LIST'
 }
 
 # -------------------- Interactions (and misc tests) -------------------- #
