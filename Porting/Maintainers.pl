@@ -21,7 +21,7 @@ use File::Glob qw(:case);
     CHANGELOG ChangeLog Changelog CHANGES Changes CONTRIBUTING COPYING Copying
     cpanfile CREDITS dist.ini GOALS HISTORY INSTALL INSTALL.SKIP LICENSE
     Makefile.PL MANIFEST MANIFEST.SKIP META.json META.yml MYMETA.json
-    MYMETA.yml NEW NOTES perlcritic.rc ppport.h README README.PATCHING
+    MYMETA.yml NEW NEWS NOTES perlcritic.rc ppport.h README README.PATCHING
     SIGNATURE THANKS TODO Todo VERSION WHATSNEW
 );
 
