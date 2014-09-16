@@ -216,7 +216,7 @@ struct regnode_charclass {
     U8	flags;
     U8  type;
     U16 next_off;
-    U32 arg1;
+    U32 arg1;                           /* set by set_ANYOF_arg() */
     char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
 };
 
