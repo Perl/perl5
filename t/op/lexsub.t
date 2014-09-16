@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 142;
+plan 143;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -382,6 +382,24 @@ like runperl(
     ),
     "4\n2\n",
     'state subs and DB::sub under -d'
+  );
+  is(
+    runperl(
+     switches => [ '-d' ],
+     progs => [ split "\n",
+      'use feature qw - lexical_subs state -;
+       no warnings q-experimental::lexical_subs-;
+       sub DB::goto{ print qq|4\n|; $_ = $DB::sub }
+       state sub foo {print qq|2\n|}
+       $^P|=0x80;
+       sub { goto &foo }->();
+       print $_ == \&foo ? qq|ok\n| : qq|$_\n|;
+      '
+     ],
+     stderr => 1
+    ),
+    "4\n2\nok\n",
+    'state subs and DB::goto under -d'
   );
 }
 # This used to fail an assertion, but only as a standalone script

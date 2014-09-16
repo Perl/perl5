@@ -5349,10 +5349,10 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
     if (!PERLDB_SUB_NN) {
 	GV *gv = CvGV(cv);
 
-	if (gv && !svp) {
+	if (!svp && !CvLEXICAL(cv)) {
 	    gv_efullname3(dbsv, gv, NULL);
 	}
-	else if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED)) || !gv
+	else if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED)) || CvLEXICAL(cv)
 	     || strEQ(GvNAME(gv), "END")
 	     || ( /* Could be imported, and old sub redefined. */
 		 (GvCV(gv) != cv || !S_gv_has_usable_name(aTHX_ gv))
