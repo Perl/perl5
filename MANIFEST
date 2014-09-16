@@ -947,7 +947,6 @@ cpan/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for p
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Utils.pm		generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/XS.pm		generate XS code to import C header constants
 cpan/ExtUtils-Constant/t/Constant.t				See if ExtUtils::Constant works
-cpan/ExtUtils-Install/Changes				ExtUtils-Install change log
 cpan/ExtUtils-Install/lib/ExtUtils/Installed.pm		Information on installed extensions
 cpan/ExtUtils-Install/lib/ExtUtils/Install.pm		Handles 'make install' on extensions
 cpan/ExtUtils-Install/lib/ExtUtils/Packlist.pm		Manipulates .packlist files
