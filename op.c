@@ -9971,6 +9971,33 @@ Perl_ck_sort(pTHX_ OP *o)
 	    kid->op_next = kid;
 	    o->op_flags |= OPf_SPECIAL;
 	}
+	else if (kid->op_type == OP_CONST
+	      && kid->op_private & OPpCONST_BARE) {
+	    char tmpbuf[256];
+	    STRLEN len;
+	    PADOFFSET off;
+	    const char * const name = SvPV(kSVOP_sv, len);
+	    *tmpbuf = '&';
+	    assert (len < 256);
+	    Copy(name, tmpbuf+1, len, char);
+	    off = pad_findmy_pvn(tmpbuf, len+1, SvUTF8(kSVOP_sv));
+	    if (off != NOT_IN_PAD) {
+		if (PAD_COMPNAME_FLAGS_isOUR(off)) {
+		    SV * const new =
+			newSVhek(HvNAME_HEK(PAD_COMPNAME_OURSTASH(off)));
+		    sv_catpvs(new, "::");
+		    sv_catsv(new, kSVOP_sv);
+		    SvREFCNT_dec_NN(kSVOP_sv);
+		    kSVOP->op_sv = new;
+		}
+		else {
+		    OP * const new = newOP(OP_PADCV, 0);
+		    new->op_targ = off;
+		    cUNOPx(firstkid)->op_first = new;
+		    op_free(kid);
+		}
+	    }
+	}
 
 	firstkid = OP_SIBLING(firstkid);
     }
