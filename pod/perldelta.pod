@@ -647,6 +647,11 @@ an anonymous subroutine could corrupt things internally, resulting in
 L<Devel::Peek> crashing or L<B.pm|B> giving nonsensical data.  This has
 been fixed.
 
+=item *
+
+C<(caller $n)[3]> now reports names of lexical subs, instead of treating
+them as "(unknown)".
+
 =back
 
 =head1 Known Problems
