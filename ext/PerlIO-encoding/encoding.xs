@@ -385,7 +385,10 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	if (avail == 0)
 	    PerlIOBase(f)->flags |= PERLIO_F_EOF;
 	else
+	{
 	    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	    PerlIO_save_errno(f);
+	}
     }
     FREETMPS;
     LEAVE;

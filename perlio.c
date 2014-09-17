@@ -2062,6 +2062,7 @@ PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
         if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD)) {
 	    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
 	    SETERRNO(EBADF, SS_IVCHAN);
+	    PerlIO_save_errno(f);
 	    return 0;
 	}
 	while (count > 0) {
@@ -2734,6 +2735,7 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	    if (len < 0) {
 		if (errno != EAGAIN) {
 		    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+		    PerlIO_save_errno(f);
 		}
 	    }
 	    else if (len == 0 && count != 0) {
@@ -2766,6 +2768,7 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	    if (len < 0) {
 		if (errno != EAGAIN) {
 		    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+		    PerlIO_save_errno(f);
 		}
 	    }
 	    return len;
@@ -3899,6 +3902,7 @@ PerlIOBuf_flush(pTHX_ PerlIO *f)
 	    }
 	    else if (count < 0 || PerlIO_error(n)) {
 		PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+		PerlIO_save_errno(f);
 		code = -1;
 		break;
 	    }
@@ -4001,7 +4005,10 @@ PerlIOBuf_fill(pTHX_ PerlIO *f)
 	if (avail == 0)
 	    PerlIOBase(f)->flags |= PERLIO_F_EOF;
 	else
+	{
 	    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	    PerlIO_save_errno(f);
+	}
 	return -1;
     }
     b->end = b->buf + avail;

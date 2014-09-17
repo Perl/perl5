@@ -193,6 +193,27 @@ PERL_EXPORT_C void PerlIO_clone(pTHX_ PerlInterpreter *proto,
 #define PERLIO_DUP_CLONE	1
 #define PERLIO_DUP_FD		2
 
+#ifdef VMS
+# define PerlIO_save_errno(f)	PerlIOBase(f)->err = errno; \
+				PerlIOBase(f)->os_err = vaxc$errno
+#elif defined(OS2)
+# define PerlIO_save_errno(f)	PerlIOBase(f)->err = errno; \
+				PerlIOBase(f)->os_err = Perl_rc
+# define PerlIO_restore_errno(f) errno = PerlIOBase(f)->err; \
+				 Perl_rc = PerlIOBase(f)->os_err)
+#elif defined(WIN32)
+# define PerliO_save_errno(f)	PerlIOBase(f)->err = errno; \
+				PerlIOBase(f)->os_err = GetLastError()
+# define PerlIO_restore_errno(f) errno = PerlIOBase(f)->err; \
+				 SetLastError(PerlIOBase(f)->os_err)
+#else
+# define PerlIO_save_errno(f)	PerlIOBase(f)->err = errno
+#endif
+#ifndef PerlIO_restore_errno
+# define PerlIO_restore_errno(f) SETERRNO(PerlIOBase(f)->err, \
+					  PerlIOBase(f)->os_err)
+#endif
+
 /* --------------------- Now prototypes for functions --------------- */
 
 START_EXTERN_C
