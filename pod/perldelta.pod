@@ -162,6 +162,14 @@ Tests can now be run in parallel.
 
 =item *
 
+L<Attribute::Handlers> has been upgraded from version 0.96 to 0.97.
+
+=item *
+
+L<attributes> has been upgraded from version 0.22 to 0.23.
+
+=item *
+
 L<B> has been upgraded from version 1.50 to 1.51.
 
 It provides a new C<B::safename> function, based on the existing
@@ -175,8 +183,18 @@ L<B::Concise> has been upgraded from version 0.992 to 0.993.
 
 L<B::Deparse> has been upgraded from version 1.27 to 1.28.
 
-It now deparses C<our(I<LIST>)> and typed lexical (C<my Dog $spot>)
-correctly.
+It now deparses C<our(I<LIST>)> and typed lexical (C<my Dog $spot>) correctly.
+
+=item *
+
+L<bignum> has been upgraded from version 0.37 to 0.38.
+
+=item *
+
+L<constant> has been upgraded from version 1.31 to 1.32.
+
+It now accepts fully-qualified constant names, allowing constants to be defined
+in packages other than the caller.
 
 =item *
 
@@ -184,19 +202,21 @@ L<CPAN::Meta::Requirements> has been upgraded from version 2.126 to 2.128.
 
 =item *
 
-L<ExtUtils::CBuilder> has been upgraded from version 0.280216 to 0.280219.
+L<experimental> has been upgraded from version 0.008 to 0.010.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280217 to 0.280219.
 [perl #122675].
 
 =item *
 
-L<ExtUtils::Manifest> has been upgraded from version 1.65 to 1.66.
-[perl #122415].
+L<ExtUtils::Install> has been upgraded from version 1.68 to 2.04.
 
 =item *
 
-L<ExtUtils::ParseXS>:  Documentation has been added to
-F<ExtUtils-ParseXS/lib/perlxs.pod> concerning handling of locales when writing
-XS code.
+L<ExtUtils::Manifest> has been upgraded from version 1.65 to 1.68.
+[perl #122415].
 
 =item *
 
@@ -211,18 +231,31 @@ L<Getopt::Std> has been upgraded from version 1.10 to 1.11.
 
 =item *
 
-L<HTTP::Tiny> has been upgraded from version 0.047 to 0.048.
+L<HTTP::Tiny> has been upgraded from version 0.047 to 0.049.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.021003 to 5.021004.
+L<IO> has been upgraded from version 1.33 to 1.34.
 
 =item *
 
-L<POSIX> has been upgraded from version 1.42 to 1.43.
+L<IO::Socket::IP> has been upgraded from version 0.31 to 0.32.
 
-The C99 math functions and constants (for example acosh, round,
-M_E, M_PI) have been added.
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.31 to 3.32.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.021003 to 5.20140915.
+
+=item *
+
+L<overload> has been upgraded from version 1.22 to 1.23.
+
+=item *
+
+PathTools has been upgraded from version 3.49 to 3.50.
 
 =item *
 
@@ -230,18 +263,38 @@ L<Pod::Perldoc> has been upgraded from version 3.23 to 3.24.
 
 =item *
 
-Scalar-List-Utils has been upgraded from version 1.40 to 1.41.
+L<POSIX> has been upgraded from version 1.42 to 1.43.
+
+The C99 math functions and constants (for example acosh, round, M_E, M_PI) have
+been added.
 
 =item *
 
-L<constant> has been upgraded from version 1.31 to 1.32.
+Scalar-List-Utils has been upgraded from version 1.39 to 1.41.
 
-It now accepts fully-qualified constant names, allowing constants to be
-defined in packages other than the caller.
+=item *
+
+L<Term::ReadLine> has been upgraded from version 1.14 to 1.15.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.32 to 3.33.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.001003 to 1.001006.
 
 =item *
 
 L<threads> has been upgraded from version 1.95 to 1.96.
+
+=item *
+
+L<Time::Piece> has been upgraded from version 1.27 to 1.29.
+
+=item *
+
+L<version> has been upgraded from version 0.9908 to 0.9909.
 
 =back
 
@@ -274,18 +327,24 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlsyn>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+An ambiguity in the documentation of the Ellipsis statement has
+been corrected. [perl #122661]
+
+=back
+
+=head3 L<perlxs>
+
+=over 4
 
 =item *
 
-L<perlsyn>: An ambiguity in the documentation of the Ellipsis statement has
-been corrected. [perl #122661]
+Added a discussion of locale issues in XS code.
 
 =back
 
@@ -502,6 +561,14 @@ may call a function and reify a GV.  For those cases where is has been used
 as a boolean, C<CvHASGV> has been added, which will return true for CVs
 that notionally have GVs, but without reifying the GV.  C<CvGV> also
 returns a GV now for lexical subs.  [perl #120441]
+
+=item *
+
+Added L<perlapi/sync_locale>.
+Changing the program's locale should be avoided by XS code.  Nevertheless,
+certain non-Perl libraries called from XS, such as C<Gtk> do so.  When this
+happens, Perl needs to be told that the locale has changed.  Use this function
+to do so, before returning to Perl.
 
 =back
 
