@@ -55,8 +55,8 @@ while (<DESC>) {
           = split /[,\s]\s*/, $desc;
 
         if (!defined $seen_op{$type[$ind]} and !defined $type_alias{$type[$ind]}) {
-            warn "Regop type '$type[$ind]' from regcomp.sym line $. is not an existing regop, and will be aliased to $name[$ind]\n"
-                if -t STDERR;
+            #warn "Regop type '$type[$ind]' from regcomp.sym line $. is not an existing regop, and will be aliased to $name[$ind]\n"
+            #    if -t STDERR;
             $type_alias{$type[$ind]}= $name[$ind];
         }
 
