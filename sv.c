@@ -2228,6 +2228,13 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 #ifdef NV_PRESERVES_UV
             (void)SvIOKp_on(sv);
             (void)SvNOK_on(sv);
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+            if (Perl_isnan(SvNVX(sv))) {
+                SvUV_set(sv, 0);
+                SvIsUV_on(sv);
+                return FALSE;
+            }
+#endif
             if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
                 SvIV_set(sv, I_V(SvNVX(sv)));
                 if ((NV)(SvIVX(sv)) == SvNVX(sv)) {
@@ -2677,6 +2684,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
                     /* Both already have p flags, so do nothing */
                 } else {
 		    const NV nv = SvNVX(sv);
+                    /* XXX should this spot have NAN_COMPARE_BROKEN, too? */
                     if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
                         if (SvIVX(sv) == I_V(nv)) {
                             SvNOK_on(sv);
