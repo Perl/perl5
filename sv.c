@@ -2624,8 +2624,14 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	    == IS_NUMBER_IN_UV) {
 	    /* It's definitely an integer */
 	    SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -(NV)value : (NV)value);
-	} else
-	    SvNV_set(sv, Atof(SvPVX_const(sv)));
+	} else {
+            if ((numtype & IS_NUMBER_INFINITY)) {
+                SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -NV_INF : NV_INF);
+            } else if ((numtype & IS_NUMBER_NAN)) {
+                SvNV_set(sv, NV_NAN);
+            } else
+                SvNV_set(sv, Atof(SvPVX_const(sv)));
+        }
 	if (numtype)
 	    SvNOK_on(sv);
 	else
