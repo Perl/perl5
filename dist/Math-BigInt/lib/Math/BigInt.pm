@@ -4793,13 +4793,13 @@ change.
 Examples for rounding:
 
   use Math::BigFloat;
-  use Test;
+  use Test::More;
 
   $x = Math::BigFloat->new(123.4567);
   $y = Math::BigFloat->new(123.456789);
   Math::BigFloat->accuracy(4);		# no more A than 4
 
-  ok ($x->copy()->fround(),123.4);	# even rounding
+  is ($x->copy()->fround(),123.4);	# even rounding
   print $x->copy()->fround(),"\n";	# 123.4
   Math::BigFloat->round_mode('odd');	# round to odd
   print $x->copy()->fround(),"\n";	# 123.5
@@ -5030,8 +5030,8 @@ known to be troublesome:
 Both C<bstr()> and C<bsstr()> as well as automated stringify via overload now
 drop the leading '+'. The old code would return '+3', the new returns '3'.
 This is to be consistent with Perl and to make C<cmp> (especially with
-overloading) to work as you expect. It also solves problems with C<Test.pm>,
-because its C<ok()> uses 'eq' internally. 
+overloading) to work as you expect. It also solves problems with C<Test.pm>
+and L<Test::More>, which stringify arguments before comparing them.
 
 Mark Biggar said, when asked about to drop the '+' altogether, or make only
 C<cmp> work:
@@ -5043,14 +5043,13 @@ C<cmp> work:
 
 So, the following examples will now work all as expected:
 
-	use Test;
-        BEGIN { plan tests => 1 }
+	use Test::More tests => 1;
 	use Math::BigInt;
 
 	my $x = new Math::BigInt 3*3;
 	my $y = new Math::BigInt 3*3;
 
-	ok ($x,3*3);
+	is ($x,3*3, 'multiplication');
 	print "$x eq 9" if $x eq $y;
 	print "$x eq 9" if $x eq '9';
 	print "$x eq 9" if $x eq 3*3;
@@ -5067,15 +5066,14 @@ for comparison, but Perl will represent some numbers as 100 and others
 as 1e+308. If in doubt, convert both arguments to Math::BigInt before 
 comparing them as strings:
 
-	use Test;
-        BEGIN { plan tests => 3 }
+	use Test::More tests => 3;
 	use Math::BigInt;
 
 	$x = Math::BigInt->new('1e56'); $y = 1e56;
-	ok ($x,$y);			# will fail
-	ok ($x->bsstr(),$y);		# okay
+	is ($x,$y);			# will fail
+	is ($x->bsstr(),$y);		# okay
 	$y = Math::BigInt->new($y);
-	ok ($x,$y);			# okay
+	is ($x,$y);			# okay
 
 Alternatively, simply use C<< <=> >> for comparisons, this will get it
 always right. There is not yet a way to get a number automatically represented
