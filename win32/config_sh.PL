@@ -114,14 +114,12 @@ $opt{usemymalloc} = 'y' if $opt{d_mymalloc} eq 'define';
 $opt{libpth} = mungepath($opt{libpth}) if exists $opt{libpth};
 $opt{incpath} = mungepath($opt{incpath}) if exists $opt{incpath};
 
-my($int64, $int64f);
+my $int64;
 if ($opt{cc} =~ /\b(?:cl|icl)/) {
     $int64  = '__int64';
-    $int64f = 'I64';
 }
 elsif ($opt{cc} =~ /\bgcc\b/) {
     $int64  = 'long long';
-    $int64f = 'I64';
 }
 
 # set large files options
@@ -155,22 +153,22 @@ else {
 }
 if ($opt{use64bitint} eq 'define') {
     $opt{d_nv_preserves_uv} = 'undef';
-    $opt{ivdformat} = qq{"${int64f}d"};
+    $opt{ivdformat} = qq{"I64d"};
     $opt{ivsize} = 8;
     $opt{ivtype} = $int64;
     $opt{nv_preserves_uv_bits} = 53;
-    $opt{sPRIXU64} = qq{"${int64f}X"};
-    $opt{sPRId64} = qq{"${int64f}d"};
-    $opt{sPRIi64} = qq{"${int64f}i"};
-    $opt{sPRIo64} = qq{"${int64f}o"};
-    $opt{sPRIu64} = qq{"${int64f}u"};
-    $opt{sPRIx64} = qq{"${int64f}x"};
-    $opt{uvXUformat} = qq{"${int64f}X"};
-    $opt{uvoformat} = qq{"${int64f}o"};
+    $opt{sPRIXU64} = qq{"I64X"};
+    $opt{sPRId64} = qq{"I64d"};
+    $opt{sPRIi64} = qq{"I64i"};
+    $opt{sPRIo64} = qq{"I64o"};
+    $opt{sPRIu64} = qq{"I64u"};
+    $opt{sPRIx64} = qq{"I64x"};
+    $opt{uvXUformat} = qq{"I64X"};
+    $opt{uvoformat} = qq{"I64o"};
     $opt{uvsize} = 8;
     $opt{uvtype} = qq{unsigned $int64};
-    $opt{uvuformat} = qq{"${int64f}u"};
-    $opt{uvxformat} = qq{"${int64f}x"};
+    $opt{uvuformat} = qq{"I64u"};
+    $opt{uvxformat} = qq{"I64x"};
 }
 else {
     $opt{d_nv_preserves_uv} = 'define';
