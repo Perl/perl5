@@ -245,52 +245,84 @@ struct pmop {
 #define PM_SETRE(o,r)   ((o)->op_pmregexp = (r))
 #endif
 
-/* Leave some space, so future bit allocations can go either in the shared or
- * unshared area without affecting binary compatibility */
-#define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+6)
+/* Currently these PMf flags occupy a single 32-bit word.  Not all bits are
+ * currently used.  The lower bits are shared with their corresponding RXf flag
+ * bits, up to but not including _RXf_PMf_SHIFT_NEXT.  The unused bits
+ * immediately follow; finally the used Pmf-only (unshared) bits, so that the
+ * highest bit in the word is used.  This gathers all the unused bits as a pool
+ * in the middle, like so: 11111111111111110000001111111111
+ * where the '1's represent used bits, and the '0's unused.  This design allows
+ * us to allocate off one end of the pool if we need to add a shared bit, and
+ * off the other end if we need a non-shared bit, without disturbing the other
+ * bits.  This maximizes the likelihood of being able to change things without
+ * breaking binary compatibility.
+ *
+ * To add shared bits, do so in op_reg_common.h.  This should change
+ * _RXf_PMf_SHIFT_NEXT so that things won't compile.  Then come to regexp.h and
+ * op.h and adjust the constant adders in the definitions of PMf_BASE_SHIFT and
+ * Pmf_BASE_SHIFT down by the number of shared bits you added.  That's it.
+ * Things should be binary compatible.  But if either of these gets to having
+ * to subtract rather than add, leave at 0 and adjust all the entries below
+ * that are in terms of this according.  But if the first one of those is
+ * already PMf_BASE_SHIFT+0, there are no bits left, and a redesign is in
+ * order.
+ *
+ * To remove unshared bits, just delete its entry.  If you're where breaking
+ * binary compatibility is ok to do, you might want to adjust things to move
+ * the newly opened space so that it gets absorbed into the common pool.
+ *
+ * To add unshared bits, first use up any gaps in the middle.  Otherwise,
+ * allocate off the low end until you get to PMf_BASE_SHIFT+0.  If that isn't
+ * enough, move PMf_BASE_SHIFT down (if possible) and add the new bit at the
+ * other end instead; this preserves binary compatibility. */
+#define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+5)
 
 /* 'use re "taint"' in scope: taint $1 etc. if target tainted */
-#define PMf_RETAINT	(1<<(PMf_BASE_SHIFT+0))
+#define PMf_RETAINT	(1<<(PMf_BASE_SHIFT+5))
 
 /* match successfully only once per reset, with related flag RXf_USED in
  * re->extflags holding state.  This is used only for ?? matches, and only on
  * OP_MATCH and OP_QR */
-#define PMf_ONCE	(1<<(PMf_BASE_SHIFT+1))
+#define PMf_ONCE	(1<<(PMf_BASE_SHIFT+6))
 
 /* PMf_ONCE, i.e. ?pat?, has matched successfully.  Not used under threading. */
-#define PMf_USED        (1<<(PMf_BASE_SHIFT+3))
+#define PMf_USED        (1<<(PMf_BASE_SHIFT+7))
 
 /* subst replacement is constant */
-#define PMf_CONST	(1<<(PMf_BASE_SHIFT+4))
+#define PMf_CONST	(1<<(PMf_BASE_SHIFT+8))
 
 /* keep 1st runtime pattern forever */
-#define PMf_KEEP	(1<<(PMf_BASE_SHIFT+5))
+#define PMf_KEEP	(1<<(PMf_BASE_SHIFT+9))
 
-#define PMf_GLOBAL	(1<<(PMf_BASE_SHIFT+6))	/* pattern had a g modifier */
+#define PMf_GLOBAL	(1<<(PMf_BASE_SHIFT+10))	/* pattern had a g modifier */
 
 /* don't reset pos() if //g fails */
-#define PMf_CONTINUE	(1<<(PMf_BASE_SHIFT+7))
+#define PMf_CONTINUE	(1<<(PMf_BASE_SHIFT+11))
 
 /* evaluating replacement as expr */
-#define PMf_EVAL	(1<<(PMf_BASE_SHIFT+8))
+#define PMf_EVAL	(1<<(PMf_BASE_SHIFT+12))
 
 /* Return substituted string instead of modifying it. */
-#define PMf_NONDESTRUCT	(1<<(PMf_BASE_SHIFT+9))
+#define PMf_NONDESTRUCT	(1<<(PMf_BASE_SHIFT+13))
 
 /* the pattern has a CV attached (currently only under qr/...(?{}).../) */
-#define PMf_HAS_CV	(1<<(PMf_BASE_SHIFT+10))
+#define PMf_HAS_CV	(1<<(PMf_BASE_SHIFT+14))
 
 /* op_code_list is private; don't free it etc. It may well point to
  * code within another sub, with different pad etc */
-#define PMf_CODELIST_PRIVATE	(1<<(PMf_BASE_SHIFT+11))
+#define PMf_CODELIST_PRIVATE	(1<<(PMf_BASE_SHIFT+15))
 
 /* the PMOP is a QR (we should be able to detect that from the op type,
  * but the regex compilation API passes just the pm flags, not the op
  * itself */
-#define PMf_IS_QR	(1<<(PMf_BASE_SHIFT+12))
-#define PMf_USE_RE_EVAL	(1<<(PMf_BASE_SHIFT+13)) /* use re'eval' in scope */
+#define PMf_IS_QR	(1<<(PMf_BASE_SHIFT+16))
+#define PMf_USE_RE_EVAL	(1<<(PMf_BASE_SHIFT+17)) /* use re'eval' in scope */
 
-#if PMf_BASE_SHIFT+13 > 31
+/* See comments at the beginning of these defines about adding bits.  The
+ * highest bit position should be used, so that if PMf_BASE_SHIFT gets
+ * increased, the #error below will be triggered so that you will be reminded
+ * to adjust things at the other end to keep the bit positions unchanged */
+#if PMf_BASE_SHIFT+17 > 31
 #   error Too many PMf_ bits used.  See above and regnodes.h for any spare in middle
 #endif
 
