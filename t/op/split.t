@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 119;
+plan tests => 120;
 
 $FS = ':';
 
@@ -180,7 +180,10 @@ is($cnt, scalar(@ary));
 
 # /^/ treated as /^/m
 $_ = join ':', split /^/, "ab\ncd\nef\n";
-is($_, "ab\n:cd\n:ef\n");
+is($_, "ab\n:cd\n:ef\n","check that split /^/ is treated as split /^/m");
+
+$_ = join ':', split /\A/, "ab\ncd\nef\n";
+is($_, "ab\ncd\nef\n","check that split /\A/ is NOT treated as split /^/m");
 
 # see if @a = @b = split(...) optimization works
 @list1 = @list2 = split ('p',"a p b c p");

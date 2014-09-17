@@ -7188,7 +7188,12 @@ reStudy:
 
         if (PL_regkind[fop] == NOTHING && nop == END)
             r->extflags |= RXf_NULL;
-        else if (PL_regkind[fop] == BOL && nop == END)
+        else if ((fop == MBOL || (fop == SBOL && !first->flags)) && nop == END)
+            /* when fop is SBOL first->flags will be true only when it was
+             * produced by parsing /\A/, and not when parsing /^/. This is
+             * very important for the split code as there we want to
+             * treat /^/ as /^/m, but we do not want to treat /\A/ as /^/m.
+             * See rt #122761 for more details. -- Yves */
             r->extflags |= RXf_START_ONLY;
         else if (fop == PLUS
                  && PL_regkind[nop] == POSIXD && FLAGS(next) == _CC_SPACE
@@ -11427,6 +11432,11 @@ tryagain:
 	case 'A':
 	    RExC_seen_zerolen++;
 	    ret = reg_node(pRExC_state, SBOL);
+            /* SBOL is shared with /^/ so we set the flags so we can tell
+             * /\A/ from /^/ in split. We check ret because first pass we
+             * have no regop struct to set the flags on. */
+            if (PASS2)
+                ret->flags = 1;
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 'G':
@@ -16205,6 +16215,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", -(o->flags));
+    else if (OP(o) == SBOL)
+        Perl_sv_catpvf(aTHX_ sv, " /%s/", o->flags ? "\\A" : "^");
 #else
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);

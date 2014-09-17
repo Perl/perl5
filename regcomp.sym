@@ -25,6 +25,7 @@ END         END,        no        ; End of program.
 SUCCEED     END,        no        ; Return from a subroutine, basically.
 
 #* Line Start Anchors:
+#Note flags field for SBOL indicates if it is a /^/ or a /\A/
 SBOL        BOL,        no        ; Match "" at beginning of line: /^/, /\A/
 MBOL        BOL,        no        ; Same, assuming multiline: /^/m
 
