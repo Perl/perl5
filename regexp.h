@@ -348,8 +348,39 @@ and check for NULL.
 */
 #define RXf_SPLIT   RXf_PMf_SPLIT
 
-/* Leave some space, so future bit allocations can go either in the shared or
- * unshared area without affecting binary compatibility */
+/* Currently the regex flags occupy a single 32-bit word.  Not all bits are
+ * currently used.  The lower bits are shared with their corresponding PMf flag
+ * bits, up to but not including _RXf_PMf_SHIFT_NEXT.  The unused bits
+ * immediately follow; finally the used RXf-only (unshared) bits, so that the
+ * highest bit in the word is used.  This gathers all the unused bits as a pool
+ * in the middle, like so: 11111111111111110000001111111111
+ * where the '1's represent used bits, and the '0's unused.  This design allows
+ * us to allocate off one end of the pool if we need to add a shared bit, and
+ * off the other end if we need a non-shared bit, without disturbing the other
+ * bits.  This maximizes the likelihood of being able to change things without
+ * breaking binary compatibility.
+ *
+ * To add shared bits, do so in op_reg_common.h.  This should change
+ * _RXf_PMf_SHIFT_NEXT so that things won't compile.  Then come to regexp.h and
+ * op.h and adjust the constant adders in the definitions of RXf_BASE_SHIFT and
+ * Pmf_BASE_SHIFT down by the number of shared bits you added.  That's it.
+ * Things should be binary compatible.  But if either of these gets to having
+ * to subtract rather than add, leave at 0 and instead adjust all the entries
+ * that are in terms of it.  But if the first one of those is already
+ * RXf_BASE_SHIFT+0, there are no bits left, and a redesign is in order.
+ *
+ * To remove unshared bits, just delete its entry.  If you're where breaking
+ * binary compatibility is ok to do, you might want to adjust things to move
+ * the newly opened space so that it gets absorbed into the common pool.
+ *
+ * To add unshared bits, first use up any gaps in the middle.  Otherwise,
+ * allocate off the low end until you get to RXf_BASE_SHIFT+0.  If that isn't
+ * enough, move RXf_BASE_SHIFT down (if possible) and add the new bit at the
+ * other end instead; this preserves binary compatibility.
+ *
+ * For the regexp bits, PL_reg_extflags_name[] in regnodes.h has a comment
+ * giving which bits are used/unused */
+
 #define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT + 5)
 
 /* What we have seen */
@@ -385,8 +416,13 @@ and check for NULL.
 #define RXf_SKIPWHITE           (1<<(RXf_BASE_SHIFT+15)) /* Pattern is for a split " " */
 #define RXf_WHITE		(1<<(RXf_BASE_SHIFT+16)) /* Pattern is /\s+/ */
 #define RXf_NULL		(1U<<(RXf_BASE_SHIFT+17)) /* Pattern is // */
+
+/* See comments at the beginning of these defines about adding bits.  The
+ * highest bit position should be used, so that if RXf_BASE_SHIFT gets
+ * increased, the #error below will be triggered so that you will be reminded
+ * to adjust things at the other end to keep the bit positions unchanged */
 #if RXf_BASE_SHIFT+17 > 31
-#   error Too many RXf_PMf bits used.  See regnodes.h for any spare in middle
+#   error Too many RXf_PMf bits used.  See comments at beginning of these for what to do
 #endif
 
 /*
