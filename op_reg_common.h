@@ -96,7 +96,7 @@ get_regex_charset(const U32 flags)
 /* Mask of the above bits.  These need to be transferred from op_pmflags to
  * re->extflags during compilation */
 #define RXf_PMf_COMPILETIME    (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY|RXf_PMf_CHARSET)
-#define RXf_PMf_FLAGCOPYMASK   (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY|RXf_PMf_CHARSET|RXf_PMf_SPLIT)
+#define RXf_PMf_FLAGCOPYMASK   (RXf_PMf_COMPILETIME|RXf_PMf_SPLIT)
 
     /* Exclude win32 because it can't cope with I32_MAX definition */
 #ifndef WIN32
