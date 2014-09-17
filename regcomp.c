@@ -10005,17 +10005,22 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		if (is_logical) {
                     regnode *eval;
 		    ret = reg_node(pRExC_state, LOGICAL);
-                    eval = reganode(pRExC_state, EVAL, n);
+
+                    eval = reg2Lanode(pRExC_state, EVAL,
+                                       n,
+
+                                       /* for later propagation into (??{})
+                                        * return value */
+                                       RExC_flags & RXf_PMf_COMPILETIME
+                                      );
 		    if (!SIZE_ONLY) {
 			ret->flags = 2;
-                        /* for later propagation into (??{}) return value */
-                        eval->flags = (U8) (RExC_flags & RXf_PMf_COMPILETIME);
                     }
                     REGTAIL(pRExC_state, ret, eval);
                     /* deal with the length of this later - MJD */
 		    return ret;
 		}
-		ret = reganode(pRExC_state, EVAL, n);
+		ret = reg2Lanode(pRExC_state, EVAL, n, 0);
 		Set_Node_Length(ret, RExC_parse - parse_start + 1);
 		Set_Node_Offset(ret, parse_start);
 		return ret;
@@ -15501,7 +15506,7 @@ S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const
 {
     /* emit a node with U32 and I32 arguments */
 
-    regnode * const ret = regnode_guts(pRExC_state, op, regarglen[op], "rega2Lnode");
+    regnode * const ret = regnode_guts(pRExC_state, op, regarglen[op], "reg2Lanode");
 
     PERL_ARGS_ASSERT_REG2LANODE;
 

@@ -716,7 +716,8 @@ will be lost.
 
  # The heavy worker
 
- EVAL            evl 1      Execute some Perl code.
+ EVAL            evl/flags  Execute some Perl code.
+                 2L
 
  # Modifiers
 

@@ -98,8 +98,11 @@ get_regex_charset(const U32 flags)
 #define RXf_PMf_COMPILETIME    (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY|RXf_PMf_CHARSET)
 #define RXf_PMf_FLAGCOPYMASK   (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY|RXf_PMf_CHARSET|RXf_PMf_SPLIT)
 
-#if RXf_PMf_COMPILETIME > 255
-#  error RXf_PMf_COMPILETIME wont fit in U8 flags field of eval node
+    /* Exclude win32 because it can't cope with I32_MAX definition */
+#ifndef WIN32
+#   if RXf_PMf_COMPILETIME > I32_MAX
+#     error RXf_PMf_COMPILETIME wont fit in arg2 field of eval node
+#   endif
 #endif
 
 /* These copies need to be numerical or defsubs_h.PL won't know about them. */

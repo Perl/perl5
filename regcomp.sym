@@ -165,7 +165,7 @@ GROUPP      GROUPP,     num 1     ; Whether the group matched.
 
 #*The heavy worker
 
-EVAL        EVAL,       evl 1     ; Execute some Perl code.
+EVAL        EVAL,       evl/flags 2L ; Execute some Perl code.
 
 #*Modifiers
 

@@ -5448,7 +5448,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			re_sv = rex->engine->op_comp(aTHX_ &ret, 1, NULL,
 				    rex->engine, NULL, NULL,
                                     /* copy /msix etc to inner pattern */
-                                    scan->flags,
+                                    ARG2L(scan),
                                     pm_flags);
 
 			if (!(SvFLAGS(ret)

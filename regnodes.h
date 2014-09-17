@@ -357,7 +357,7 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* SUSPEND      */
 	EXTRA_SIZE(struct regnode_1),        	/* IFTHEN       */
 	EXTRA_SIZE(struct regnode_1),        	/* GROUPP       */
-	EXTRA_SIZE(struct regnode_1),        	/* EVAL         */
+	EXTRA_SIZE(struct regnode_2L),       	/* EVAL         */
 	0,                                   	/* MINMOD       */
 	0,                                   	/* LOGICAL      */
 	EXTRA_SIZE(struct regnode_1),        	/* RENUM        */
