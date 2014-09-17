@@ -116,7 +116,8 @@ There may well be none in a stable release.
 =item *
 
 Subroutines with an empty prototype and bodies containing just C<undef> are
-now eligible for inlining.  [perl #122728]
+now eligible for inlining.
+L<[perl #122728]|https://rt.perl.org/Ticket/Display.html?id=122728>
 
 =item *
 
@@ -126,7 +127,8 @@ possible, saving memory.  The typeglobs still notionally exist, so
 accessing them will cause the subroutine reference to be upgraded to a
 typeglob.  This optimisation does not currently apply to XSUBs or exported
 subroutines, and method calls will undo it, since they cache things in
-typeglobs.  [perl #120441]
+typeglobs.
+L<[perl #120441]|https://rt.perl.org/Ticket/Display.html?id=120441>
 
 =back
 
@@ -207,7 +209,7 @@ L<experimental> has been upgraded from version 0.008 to 0.010.
 =item *
 
 L<ExtUtils::CBuilder> has been upgraded from version 0.280217 to 0.280219.
-[perl #122675].
+L<[perl #122675]|https://rt.perl.org/Ticket/Display.html?id=122675>
 
 =item *
 
@@ -216,7 +218,7 @@ L<ExtUtils::Install> has been upgraded from version 1.68 to 2.04.
 =item *
 
 L<ExtUtils::Manifest> has been upgraded from version 1.65 to 1.68.
-[perl #122415].
+L<[perl #122415]|https://rt.perl.org/Ticket/Display.html?id=122415>
 
 =item *
 
@@ -334,7 +336,8 @@ section.
 =item *
 
 An ambiguity in the documentation of the Ellipsis statement has
-been corrected. [perl #122661]
+been corrected.
+L<[perl #122661]|https://rt.perl.org/Ticket/Display.html?id=122661>
 
 =back
 
@@ -404,7 +407,9 @@ XXX Describe change here
 
 Compile-time checking of constant dereferencing (e.g.,
 C<< my_constant->() >>) has been removed, since it was not taking
-overloading into account.  [perl #69456] [perl #122607]
+overloading into account.
+L<[perl #69456]|https://rt.perl.org/Ticket/Display.html?id=69456>
+L<[perl #122607]|https://rt.perl.org/Ticket/Display.html?id=122607>
 
 =item *
 
@@ -542,7 +547,8 @@ F<mathoms.c>.
 
 C<cv_name> is a new API function that can be passed a CV or GV.  It returns
 an SV containing the name of the subroutine for use in diagnostics.
-[perl #116735] [perl #120441]
+L<[perl #116735]|https://rt.perl.org/Ticket/Display.html?id=116735>
+L<[perl #120441]|https://rt.perl.org/Ticket/Display.html?id=120441>
 
 =item *
 
@@ -552,7 +558,7 @@ the call checker requires a full GV for reporting the subroutine's name, or
 whether it could be passed a CV instead.  Whatever value is passed will be
 acceptable to C<cv_name>.  C<cv_set_call_checker> guarantees there will be
 a GV, but it may have to create one on the fly, which is inefficient.
-[perl #116735]
+L<[perl #116735]|https://rt.perl.org/Ticket/Display.html?id=116735>
 
 =item *
 
@@ -560,7 +566,8 @@ C<CvGV> (which is not part of the API) is now a more complex macro, which
 may call a function and reify a GV.  For those cases where is has been used
 as a boolean, C<CvHASGV> has been added, which will return true for CVs
 that notionally have GVs, but without reifying the GV.  C<CvGV> also
-returns a GV now for lexical subs.  [perl #120441]
+returns a GV now for lexical subs.
+L<[perl #120441]|https://rt.perl.org/Ticket/Display.html?id=120441>
 
 =item *
 
@@ -589,7 +596,8 @@ XXX
 
 Constant dereferencing now works correctly for typeglob constants.
 Previously the glob was stringified and its name looked up.  Now the glob
-itself is used.  [perl #69456]
+itself is used.
+L<[perl #69456]|https://rt.perl.org/Ticket/Display.html?id=69456>
 
 =item *
 
@@ -600,7 +608,8 @@ a syntax error when it guesses the latter), since it can only be a block.
 =item *
 
 C<undef $reference> now frees the referent immediately, instead of hanging
-on to it until the next statement.  [perl #122556]
+on to it until the next statement.
+L<[perl #122556]|https://rt.perl.org/Ticket/Display.html?id=122556>
 
 =item *
 
@@ -648,7 +657,8 @@ the sequence is used, again just as before.
 =item *
 
 Tainted constants evaluated at compile time no longer cause unrelated
-statements to become tainted.  [perl #122669]
+statements to become tainted.
+L<[perl #122669]|https://rt.perl.org/Ticket/Display.html?id=122669>
 
 =item *
 
@@ -666,7 +676,7 @@ in the package of the "our" sub, instead of the package of the invocant.
 
 The parser no longer gets confused by C<\U=> within a double-quoted string.
 It used to roduce a syntax error, but now compiles it correctly.
-[perl #80368]
+L<[perl #80368]|https://rt.perl.org/Ticket/Display.html?id=80368>
 
 =item *
 
@@ -688,7 +698,8 @@ fixed.
 A regression has been fixed that was introduced in v5.20.0 (fixed in
 v5.20.1 as well as here) in which a UTF-8 encoded regular expression
 pattern that contains a single ASCII lowercase letter does not match its
-uppercase counterpart. [perl #122655]
+uppercase counterpart.
+L<[perl #122655]|https://rt.perl.org/Ticket/Display.html?id=122655>
 
 =item *
 
@@ -700,7 +711,8 @@ false at compile time and true at run time.
 
 Loading UTF8 tables during a regular expression match could cause assertion
 failures under debugging builds if the previous match used the very same
-regular expression.  [perl #122747]
+regular expression.
+L<[perl #122747]|https://rt.perl.org/Ticket/Display.html?id=122747>
 
 =item *
 
