@@ -309,7 +309,16 @@ struct regnode_ssc {
 
 #define NEXT_OFF(p) ((p)->next_off)
 #define NODE_ALIGN(node)
-#define NODE_ALIGN_FILL(node) ((node)->flags = 0xde) /* deadbeef */
+/* the following define was set to 0xde in 075abff3
+ * as part of some linting logic. I have set it to 0
+ * as otherwise in every place where we /might/ set flags
+ * we have to set it 0 explicitly, which duplicates
+ * assignments and IMO adds an unacceptable level of
+ * surprise to working in the regex engine. If this
+ * is changed from 0 then at the very least make sure
+ * that SBOL for /^/ sets the flags to 0 explicitly.
+ * -- Yves */
+#define NODE_ALIGN_FILL(node) ((node)->flags = 0)
 
 #define SIZE_ALIGN NODE_ALIGN
 
