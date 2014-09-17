@@ -8125,6 +8125,8 @@ PERL_CALLCONV SSize_t	Perl_PerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count
 #define PERL_ARGS_ASSERT_PERLIO_READ	\
 	assert(vbuf)
 
+PERL_CALLCONV void	Perl_PerlIO_restore_errno(pTHX_ PerlIO *f);
+PERL_CALLCONV void	Perl_PerlIO_save_errno(pTHX_ PerlIO *f);
 PERL_CALLCONV int	Perl_PerlIO_seek(pTHX_ PerlIO *f, Off_t offset, int whence);
 PERL_CALLCONV void	Perl_PerlIO_set_cnt(pTHX_ PerlIO *f, SSize_t cnt);
 PERL_CALLCONV void	Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR *ptr, SSize_t cnt);

@@ -67,6 +67,14 @@ struct _PerlIO {
     PerlIOl *next;		/* Lower layer */
     PerlIO_funcs *tab;		/* Functions for this layer */
     U32 flags;			/* Various flags for state */
+    int err;			/* Saved errno value */
+#ifdef VMS
+    unsigned os_err;		/* Saved vaxc$errno value */
+#elif defined (OS2)
+    unsigned long os_err;
+#elif defined (WIN32)
+    DWORD os_err;		/* Saved GetLastError() value */
+#endif
     PerlIOl *head;		/* our ultimate parent pointer */
 };
 

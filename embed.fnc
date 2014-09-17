@@ -2513,6 +2513,8 @@ Ap	|SSize_t|PerlIO_unread		|NULLOK PerlIO *f|NN const void *vbuf \
 					|Size_t count
 Ap	|Off_t	|PerlIO_tell		|NULLOK PerlIO *f
 Ap	|int	|PerlIO_seek		|NULLOK PerlIO *f|Off_t offset|int whence
+Xp	|void	|PerlIO_save_errno	|NULLOK PerlIO *f
+Xp	|void	|PerlIO_restore_errno	|NULLOK PerlIO *f
 
 Ap	|STDCHAR *|PerlIO_get_base	|NULLOK PerlIO *f
 Ap	|STDCHAR *|PerlIO_get_ptr	|NULLOK PerlIO *f

@@ -1775,6 +1775,10 @@
 #define magic_setcollxfrm(a,b)	Perl_magic_setcollxfrm(aTHX_ a,b)
 #define mem_collxfrm(a,b,c)	Perl_mem_collxfrm(aTHX_ a,b,c)
 #  endif
+#  if defined(USE_PERLIO)
+#define PerlIO_restore_errno(a)	Perl_PerlIO_restore_errno(aTHX_ a)
+#define PerlIO_save_errno(a)	Perl_PerlIO_save_errno(aTHX_ a)
+#  endif
 #  if defined(_MSC_VER)
 #define magic_regdatum_set(a,b)	Perl_magic_regdatum_set(aTHX_ a,b)
 #  endif
