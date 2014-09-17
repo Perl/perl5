@@ -761,14 +761,12 @@ CFGH_TMPL	= config_H.gc
 PERLIMPLIB	= ..\libperl521$(a)
 PERLSTATICLIB	= ..\libperl521s$(a)
 INT64		= long long
-INT64f		= ll
 
 .ELSE
 
 CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
 INT64		= __int64
-INT64f		= I64
 
 .ENDIF
 
@@ -1070,11 +1068,11 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #define UVSIZE ^8>>$@
 	@echo #undef NV_PRESERVES_UV>>$@
 	@echo #define NV_PRESERVES_UV_BITS 53>>$@
-	@echo #define IVdf "$(INT64f)d">>$@
-	@echo #define UVuf "$(INT64f)u">>$@
-	@echo #define UVof "$(INT64f)o">>$@
-	@echo #define UVxf "$(INT64f)x">>$@
-	@echo #define UVXf "$(INT64f)X">>$@
+	@echo #define IVdf "I64d">>$@
+	@echo #define UVuf "I64u">>$@
+	@echo #define UVof "I64o">>$@
+	@echo #define UVxf "I64x">>$@
+	@echo #define UVXf "I64X">>$@
 	@echo #define USE_64_BIT_INT>>$@
 .ELSE
 	@echo #define IVTYPE long>>$@
