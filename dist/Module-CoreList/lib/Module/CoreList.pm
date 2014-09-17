@@ -10132,13 +10132,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-    5.021004 => {
-        delta_from => 5.021003,
-        changed => {
-        },
-        removed => {
-        }
-    },
     5.020001 => {
         delta_from => 5.020000,
         changed => {
@@ -10181,6 +10174,13 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'version'               => '0.9909',
             'version::regex'        => '0.9909',
             'version::vpp'          => '0.9909',
+        },
+        removed => {
+        }
+    },
+    5.021004 => {
+        delta_from => 5.021003,
+        changed => {
         },
         removed => {
         }
@@ -10614,15 +10614,15 @@ for my $version (sort { $a <=> $b } keys %delta) {
         removed => {
         }
     },
-    5.021004 => {
-        delta_from => 5.021003,
+    5.020001 => {
+        delta_from => 5.020000,
         changed => {
         },
         removed => {
         }
     },
-    5.020001 => {
-        delta_from => 5.020000,
+    5.021004 => {
+        delta_from => 5.021003,
         changed => {
         },
         removed => {
