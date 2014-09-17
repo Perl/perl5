@@ -626,7 +626,7 @@ bareword is not going to be a subroutine name.
 Compilation of anonymous constants (e.g., C<sub () { 3 }>) no longer
 deletes any subroutine named C<__ANON__> in the current package.  Not only
 was C<*__ANON__{CODE}> cleared, but there was a memory leak, too.  This bug
-goes back to perl 5.8.0. 
+goes back to perl 5.8.0.
 
 =item *
 
@@ -675,7 +675,7 @@ in the package of the "our" sub, instead of the package of the invocant.
 =item *
 
 The parser no longer gets confused by C<\U=> within a double-quoted string.
-It used to roduce a syntax error, but now compiles it correctly.
+It used to produce a syntax error, but now compiles it correctly.
 L<[perl #80368]|https://rt.perl.org/Ticket/Display.html?id=80368>
 
 =item *
