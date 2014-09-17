@@ -1363,6 +1363,7 @@ const struct flag_to_name regexp_extflags_names[] = {
     {RXf_PMf_SINGLELINE,  "PMf_SINGLELINE,"},
     {RXf_PMf_FOLD,        "PMf_FOLD,"},
     {RXf_PMf_EXTENDED,    "PMf_EXTENDED,"},
+    {RXf_PMf_EXTENDED_MORE, "PMf_EXTENDED_MORE,"},
     {RXf_PMf_KEEPCOPY,    "PMf_KEEPCOPY,"},
     {RXf_IS_ANCHORED,     "IS_ANCHORED,"},
     {RXf_NO_INPLACE_SUBST, "NO_INPLACE_SUBST,"},

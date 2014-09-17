@@ -275,7 +275,7 @@ struct pmop {
  * allocate off the low end until you get to PMf_BASE_SHIFT+0.  If that isn't
  * enough, move PMf_BASE_SHIFT down (if possible) and add the new bit at the
  * other end instead; this preserves binary compatibility. */
-#define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+5)
+#define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+4)
 
 /* 'use re "taint"' in scope: taint $1 etc. if target tainted */
 #define PMf_RETAINT	(1<<(PMf_BASE_SHIFT+5))

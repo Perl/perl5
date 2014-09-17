@@ -321,7 +321,7 @@ and check for NULL.
 /* This string is expected by regcomp.c to be ordered so that the first
  * character is the flag in bit RXf_PMf_STD_PMMOD_SHIFT of extflags; the next
  * character is bit +1, etc. */
-#define STD_PAT_MODS        "msix"
+#define STD_PAT_MODS        "msixx"
 
 #define CHARSET_PAT_MODS    ASCII_RESTRICT_PAT_MODS DEPENDS_PAT_MODS LOCALE_PAT_MODS UNICODE_PAT_MODS
 
@@ -381,7 +381,7 @@ and check for NULL.
  * For the regexp bits, PL_reg_extflags_name[] in regnodes.h has a comment
  * giving which bits are used/unused */
 
-#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT + 5)
+#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT + 4)
 
 /* What we have seen */
 #define RXf_NO_INPLACE_SUBST    (1<<(RXf_BASE_SHIFT+2))

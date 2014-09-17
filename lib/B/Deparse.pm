@@ -20,8 +20,8 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 SVpad_TYPED
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
-	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = '1.28';
+	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED PMf_EXTENDED_MORE);
+$VERSION = '1.29';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -4756,11 +4756,12 @@ sub re_flags {
     $flags .= "o" if $pmflags & PMf_KEEP;
     $flags .= "s" if $pmflags & PMf_SINGLELINE;
     $flags .= "x" if $pmflags & PMf_EXTENDED;
+    $flags .= "x" if $pmflags & PMf_EXTENDED_MORE;
     $flags .= "p" if $pmflags & RXf_PMf_KEEPCOPY;
     if (my $charset = $pmflags & RXf_PMf_CHARSET) {
 	# Hardcoding this is fragile, but B does not yet export the
 	# constants we need.
-	$flags .= qw(d l u a aa)[$charset >> 5]
+	$flags .= qw(d l u a aa)[$charset >> 6]
     }
     # The /d flag is indicated by 0; only show it if necessary.
     elsif ($self->{hinthash} and

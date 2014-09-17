@@ -23,7 +23,7 @@ my %reflags = (
     s => 1 << ($PMMOD_SHIFT + 1),
     i => 1 << ($PMMOD_SHIFT + 2),
     x => 1 << ($PMMOD_SHIFT + 3),
-    p => 1 << ($PMMOD_SHIFT + 4),
+    p => 1 << ($PMMOD_SHIFT + 5),
 # special cases:
     d => 0,
     l => 1,

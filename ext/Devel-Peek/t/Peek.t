@@ -1189,7 +1189,7 @@ do_test('UTF-8 in a regular expression',
     CUR = 13
     STASH = $ADDR	"Regexp"
     COMPFLAGS = 0x0 \(\)
-    EXTFLAGS = 0x680040 \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
+    EXTFLAGS = 0x680080 \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
 (?:    ENGINE = $ADDR \(STANDARD\)
 )?    INTFLAGS = 0x0(?: \(\))?
     NPARENS = 0
@@ -1212,7 +1212,7 @@ do_test('UTF-8 in a regular expression',
       PV = $ADDR "\(\?\^u:\\\\\\\\x\{100\}\)" \[UTF8 "\(\?\^u:\\\\\\\\x\{100\}\)"\]
       CUR = 13
       COMPFLAGS = 0x0 \(\)
-      EXTFLAGS = 0x680040 \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
+      EXTFLAGS = 0x680080 \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
 (?:      ENGINE = $ADDR \(STANDARD\)
 )?      INTFLAGS = 0x0(?: \(\))?
       NPARENS = 0
