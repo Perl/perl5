@@ -2032,11 +2032,6 @@ EXTERN_C long double modfl(long double, long double *);
 #       define Perl_isfinite(x) isfinite(x)
 #     elif defined(HAS_FINITE)
 #       define Perl_isfinite(x) finite(x)
-#     else
-/* For the infinities the multiplication returns nan,
- * for the nan the multiplication also returns nan,
- * for everything else (that is, finite) zero should be returned. */
-#       define Perl_isfinite(x) ((x) * 0 == 0)
 #     endif
 #   endif
 #endif
@@ -2293,13 +2288,15 @@ int isnan(double d);
 
 #ifndef Perl_isfinite
 #   if defined(HAS_ISFINITE) && !defined(isfinite)
-#     define Perl_isfinite(x) isfinite((double)x)
+#     define Perl_isfinite(x) isfinite((double)(x))
 #   elif defined(HAS_FINITE)
-#       define Perl_isfinite(x) finite((double)x)
+#       define Perl_isfinite(x) finite((double)(x))
 #   elif defined(Perl_fp_class_finite)
 #     define Perl_isfinite(x) Perl_fp_class_finite(x)
 #   else
-/* NaN*0 is NaN, [+-]Inf*0 is NaN, zero for anything else. */
+/* For the infinities the multiplication returns nan,
+ * for the nan the multiplication also returns nan,
+ * for everything else (that is, finite) zero should be returned. */
 #     define Perl_isfinite(x) (((x) * 0) == 0)
 #   endif
 #endif
