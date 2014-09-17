@@ -107,10 +107,10 @@ get_regex_charset(const U32 flags)
 #endif
 
 /* These copies need to be numerical or defsubs_h.PL won't know about them. */
-#define PMf_MULTILINE    1<<0
-#define PMf_SINGLELINE   1<<1
-#define PMf_FOLD         1<<2
-#define PMf_EXTENDED     1<<3
+#define PMf_MULTILINE     1<<0
+#define PMf_SINGLELINE    1<<1
+#define PMf_FOLD          1<<2
+#define PMf_EXTENDED      1<<3
 #define PMf_EXTENDED_MORE 1<<4
 #define PMf_KEEPCOPY      1<<5
 #define PMf_CHARSET       7<<6
