@@ -120,6 +120,7 @@ sub pm_file_from_xs {
 			 # look for a .pm in lib/ based on that:
 			 my ($path) = shift =~ m!^(.*)/!;
 			 my ($last) = $path =~ m!([^/]+)\z!;
+			 $last = 'List-Util' if $last eq 'Scalar-List-Utils';
 			 $last =~ tr !-!/!;
 			 return "$path/lib/$last";
 		     }) {
