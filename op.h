@@ -390,18 +390,21 @@ struct loop {
 
 #ifdef USE_ITHREADS
 #  define	cGVOPx_gv(o)	((GV*)PAD_SVl(cPADOPx(o)->op_padix))
-#  define	IS_PADGV(v)	(v && SvTYPE(v) == SVt_PVGV && isGV_with_GP(v) \
-				 && GvIN_PAD(v))
-#  define	IS_PADCONST(v) \
+#  ifndef PERL_CORE
+#    define	IS_PADGV(v)	(v && isGV(v))
+#    define	IS_PADCONST(v) \
 	(v && (SvREADONLY(v) || (SvIsCOW(v) && !SvLEN(v))))
+#  endif
 #  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv \
 				 ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
 #  define	cSVOPx_svp(v)	(cSVOPx(v)->op_sv \
 				 ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
 #else
 #  define	cGVOPx_gv(o)	((GV*)cSVOPx(o)->op_sv)
-#  define	IS_PADGV(v)	FALSE
-#  define	IS_PADCONST(v)	FALSE
+#  ifndef PERL_CORE
+#    define	IS_PADGV(v)	FALSE
+#    define	IS_PADCONST(v)	FALSE
+#  endif
 #  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv)
 #  define	cSVOPx_svp(v)	(&cSVOPx(v)->op_sv)
 #endif
