@@ -4500,10 +4500,10 @@
  *	This symbol, if defined, contains the string used by stdio to
  *	format long doubles (format 'f') for input.
  */
-#define PERL_PRIfldbl	"f"	/**/
-#define PERL_PRIgldbl	"g"	/**/
-#define PERL_PRIeldbl	"e"	/**/
-#define PERL_SCNfldbl	"f"	/**/
+/*#define PERL_PRIfldbl	"f"	/ **/
+/*#define PERL_PRIgldbl	"g"	/ **/
+/*#define PERL_PRIeldbl	"e"	/ **/
+/*#define PERL_SCNfldbl	"f"	/ **/
 
 /* NEED_VA_COPY:
  *	This symbol, if defined, indicates that the system stores
