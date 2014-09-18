@@ -2516,8 +2516,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 			}
 		    }
 		}
-		else if (IS_PADGV(oldpad[ix])
-		      || (  names_fill >= ix && names[ix]
+		else if ((  names_fill >= ix && names[ix]
 			 && PadnamePV(names[ix])  )) {
 		    pad1a[ix] = sv_dup_inc(oldpad[ix], param);
 		}
