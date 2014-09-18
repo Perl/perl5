@@ -2515,6 +2515,16 @@ Perl_gp_free(pTHX_ GV *gv)
            (void)hv_deletehek(PL_stashcache, hvname_hek, G_DISCARD);
 	SvREFCNT_dec(hv);
       }
+      if (io && SvREFCNT(io) == 1 && IoIFP(io)
+	     && (IoTYPE(io) == IoTYPE_WRONLY ||
+		 IoTYPE(io) == IoTYPE_RDWR   ||
+		 IoTYPE(io) == IoTYPE_APPEND)
+	     && ckWARN_d(WARN_IO)
+	     && IoIFP(io) != PerlIO_stdin()
+	     && IoIFP(io) != PerlIO_stdout()
+	     && IoIFP(io) != PerlIO_stderr()
+	     && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+	io_close(io, gv, FALSE, TRUE);
       SvREFCNT_dec(io);
       SvREFCNT_dec(cv);
       SvREFCNT_dec(form);

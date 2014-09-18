@@ -1834,7 +1834,7 @@ PERL_CALLCONV U32	Perl_intro_my(pTHX);
 PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit)
+PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, GV *gv, bool not_implicit, bool warn_on_fail)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IO_CLOSE	\
 	assert(io)

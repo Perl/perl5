@@ -1185,7 +1185,7 @@
 #define init_constants()	Perl_init_constants(aTHX)
 #define init_debugger()		Perl_init_debugger(aTHX)
 #define invert(a)		Perl_invert(aTHX_ a)
-#define io_close(a,b)		Perl_io_close(aTHX_ a,b)
+#define io_close(a,b,c,d)	Perl_io_close(aTHX_ a,b,c,d)
 #define isinfnansv(a)		Perl_isinfnansv(aTHX_ a)
 #define jmaybe(a)		Perl_jmaybe(aTHX_ a)
 #define keyword(a,b,c)		Perl_keyword(aTHX_ a,b,c)
