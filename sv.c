@@ -10779,7 +10779,19 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
             HEXTRACT_COUNT(ix, 2);
     }
 #  elif defined(LONGDOUBLE_DOUBLEDOUBLE)
-    /* The little-endian double-double is used .. somewhere?
+    /* Double-double format: two doubles next to each other.
+     * The first double is the high-order one, exactly like
+     * it would be for a "lone" double.  The second double
+     * is shifted down using the exponent so that that there
+     * are no common bits.  The tricky part is that the value
+     * of the double-double is the SUM of the two doubles and
+     * the second one can be also NEGATIVE.
+     *
+     * Because of this tricky construction the bytewise extraction we
+     * use for the other long double formats doesn't work, we must
+     * extract the values bit by bit. */
+     *
+     * The little-endian double-double is used .. somewhere?
      *
      * The big endian double-double is used in e.g. PPC/Power (AIX)
      * and MIPS (SGI).
@@ -10787,10 +10799,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
      * The mantissa bits are in two separate stretches, e.g. for -0.1L:
      * 9a 99 99 99 99 99 59 bc 9a 99 99 99 99 99 b9 3f (LE)
      * 3f b9 99 99 99 99 99 9a bc 59 99 99 99 99 99 9a (BE)
-     *
-     * With the double-double format the bytewise extraction we use
-     * for the other long double formats doesn't work, we must extract
-     * the values bit by bit. */
+     */
 
     if (nv == (NV)0.0) {
         if (vend)
