@@ -2603,7 +2603,8 @@ safe location).
 For constructs with three-part delimiters (C<s///>, C<y///>, and
 C<tr///>), the search is repeated once more.
 If the first delimiter is not an opening punctuation, the three delimiters must
-be same such as C<s!!!> and C<tr)))>, in which case the second delimiter
+be the same, such as C<s!!!> and C<tr)))>,
+in which case the second delimiter
 terminates the left part and starts the right part at once.
 If the left part is delimited by bracketing punctuation (that is C<()>,
 C<[]>, C<{}>, or C<< <> >>), the right part needs another pair of
