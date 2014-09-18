@@ -773,8 +773,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 #else
 		    (SVs_PADMY|SVs_PADTMP)
 #endif
-		 ) &&
-		!IS_PADGV(sv))
+		 ))
 		break;
 	}
 	if (konst) {
