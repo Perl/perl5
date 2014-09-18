@@ -47,6 +47,7 @@ PP(pp_const)
 PP(pp_nextstate)
 {
     PL_curcop = (COP*)PL_op;
+    PL_sawalias = 0;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
@@ -62,6 +63,8 @@ PP(pp_gvsv)
 	PUSHs(save_scalar(cGVOP_gv));
     else
 	PUSHs(GvSVn(cGVOP_gv));
+    if (GvREFCNT(cGVOP_gv) > 1 || GvALIASED_SV(cGVOP_gv))
+	PL_sawalias = TRUE;
     RETURN;
 }
 
@@ -92,6 +95,9 @@ PP(pp_gv)
 {
     dSP;
     XPUSHs(MUTABLE_SV(cGVOP_gv));
+    if (isGV(cGVOP_gv)
+     && (GvREFCNT(cGVOP_gv) > 1 || GvALIASED_SV(cGVOP_gv)))
+	PL_sawalias = TRUE;
     RETURN;
 }
 
@@ -1005,7 +1011,7 @@ PP(pp_aassign)
      * Don't bother if LHS is just an empty hash or array.
      */
 
-    if (    (PL_op->op_private & OPpASSIGN_COMMON)
+    if (    (PL_op->op_private & OPpASSIGN_COMMON || PL_sawalias)
 	&&  (
 	       firstlelem != lastlelem
 	    || ! ((sv = *firstlelem))

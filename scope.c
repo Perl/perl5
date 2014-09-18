@@ -1226,6 +1226,22 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_READONLY_OFF:
 	    SvREADONLY_off(ARG0_SV);
 	    break;
+	case SAVEt_GP_ALIASED_SV: {
+	    /* The GP may have been abandoned, leaving the savestack with
+	       the only remaining reference to it.  */
+	    GP * const gp = (GP *)ARG0_PTR;
+	    if (gp->gp_refcnt == 1) {
+		GV * const gv = (GV *)sv_2mortal(newSV_type(SVt_PVGV));
+		GvGP_set(gv,gp);
+		gp_free(gv);
+	    }
+	    else {
+		gp->gp_refcnt--;
+		if (uv >> 8) gp->gp_flags |=  GPf_ALIASED_SV;
+		else	     gp->gp_flags &= ~GPf_ALIASED_SV;
+	    }
+	    break;
+	}
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency %u", type);
 	}

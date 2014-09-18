@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 270 );
+plan( tests => 271 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -1110,6 +1110,15 @@ $y = \&$x;                 # so when this tries to look up the right GV for
 undef $::{_119051again};   # CvGV, it still gets a fake one
 eval { $y->() };
 pass "No crash due to CvGV pointing to glob copy in the stash";
+
+# Aliasing should disable no-common-vars optimisation.
+{
+    *x = *y;
+    $x = 3;
+    ($x, my $z) = (1, $y);
+    is $z, 3, 'list assignment after aliasing [perl #89646]';
+}
+
 
 __END__
 Perl

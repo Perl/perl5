@@ -16,12 +16,12 @@
 #define SAVEt_CLEARPADRANGE	1
 #define SAVEt_CLEARSV		2
 #define SAVEt_REGCONTEXT	3
-/*** SPARE      	        4 ***/
 
-#define SAVEt_ARG0_MAX		4
+#define SAVEt_ARG0_MAX		3
 
 /* one arg */
 
+#define SAVEt_GP_ALIASED_SV	4
 #define SAVEt_BOOL		5
 #define SAVEt_COMPILE_WARNINGS	6
 #define SAVEt_COMPPAD		7
