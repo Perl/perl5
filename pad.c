@@ -2129,7 +2129,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 	    }
 	  }
 	}
-	else if (IS_PADGV(ppad[ix]) || (namesv && PadnamePV(namesv))) {
+	else if (namesv && PadnamePV(namesv)) {
 	    sv = SvREFCNT_inc_NN(ppad[ix]);
 	}
 	else {
