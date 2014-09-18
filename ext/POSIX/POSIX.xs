@@ -349,7 +349,7 @@
 
 /* not using gcc */
 
-#  if defined(_AIX53) || defined(_AIX61) /* AIX 7 ? */
+#  if defined(_AIX53) || defined(_AIX61) /* AIX 7 has nexttoward */
 #    undef c99_nexttoward
 #  endif
 
