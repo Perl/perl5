@@ -1778,8 +1778,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	     * pad are anonymous subs, constants and GVs.
 	     * The rest are created anew during cloning.
 	     */
-	    if (!PL_curpad[ix] || SvIMMORTAL(PL_curpad[ix])
-		 || IS_PADGV(PL_curpad[ix]))
+	    if (!PL_curpad[ix] || SvIMMORTAL(PL_curpad[ix]))
 		continue;
 	    namesv = namep[ix];
 	    if (!(PadnamePV(namesv) &&
