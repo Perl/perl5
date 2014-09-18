@@ -2380,7 +2380,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 		    SvPADMY_on(sv);
 		}
 	    }
-	    else if (IS_PADGV(oldpad[ix]) || PadnamePV(names[ix])) {
+	    else if (PadnamePV(names[ix])) {
 		av_store(newpad, ix, SvREFCNT_inc_NN(oldpad[ix]));
 	    }
 	    else {
