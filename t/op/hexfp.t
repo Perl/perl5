@@ -6,6 +6,7 @@ use Config;
 
 BEGIN {
     chdir 't' if -d 't';
+    unshift @INC, '../lib';
     require './test.pl';
 }
 
