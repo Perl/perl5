@@ -2512,6 +2512,7 @@ Perl_gp_free(pTHX_ GV *gv)
            (void)hv_deletehek(PL_stashcache, hvname_hek, G_DISCARD);
 	SvREFCNT_dec(hv);
       }
+      if (io && SvREFCNT(io) == 1) io_try_closing(io, gv);
       SvREFCNT_dec(io);
       SvREFCNT_dec(cv);
       SvREFCNT_dec(form);
