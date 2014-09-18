@@ -12,7 +12,7 @@ struct gp {
     SV *	gp_sv;		/* scalar value */
     struct io *	gp_io;		/* filehandle value */
     CV *	gp_cv;		/* subroutine value */
-    U32		gp_cvgen;	/* generational validity of cached gv_cv */
+    U32		gp_cvgen;	/* generational validity of cached gp_cv */
     U32		gp_refcnt;	/* how many globs point to this? */
     HV *	gp_hv;		/* hash value */
     AV *	gp_av;		/* array value */
