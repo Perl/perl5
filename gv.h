@@ -19,6 +19,7 @@ struct gp {
     CV *	gp_form;	/* format value */
     GV *	gp_egv;		/* effective gv, if *glob */
     line_t	gp_line;	/* line first declared at (for -w) */
+    U32		gp_flags;
     HEK *	gp_file_hek;	/* file first declared in (for -w) */
 };
 
@@ -138,6 +139,8 @@ Return the CV from the GV.
 #define GvCV_set(gv,cv)	(GvGP(gv)->gp_cv = (cv))
 #define GvCVGEN(gv)	(GvGP(gv)->gp_cvgen)
 #define GvCVu(gv)	(GvGP(gv)->gp_cvgen ? NULL : GvGP(gv)->gp_cv)
+
+#define GvGPFLAGS(gv)	(GvGP(gv)->gp_flags)
 
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
 #define GvFILE_HEK(gv)	(GvGP(gv)->gp_file_hek)
