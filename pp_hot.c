@@ -1917,7 +1917,6 @@ PP(pp_iter)
                 Perl_croak(aTHX_ "Use of freed value in iteration");
             }
             if (SvPADTMP(sv)) {
-                assert(!IS_PADGV(sv));
                 sv = newSVsv(sv);
             }
             else {
@@ -2435,7 +2434,6 @@ PP(pp_grepwhile)
 
 	src = PL_stack_base[*PL_markstack_ptr];
 	if (SvPADTMP(src)) {
-            assert(!IS_PADGV(src));
 	    src = PL_stack_base[*PL_markstack_ptr] = sv_mortalcopy(src);
 	    PL_tmps_floor++;
 	}
@@ -2697,7 +2695,6 @@ try_autoload:
 		if (*MARK)
 		{
 		    if (SvPADTMP(*MARK)) {
-                        assert(!IS_PADGV(*MARK));
 			*MARK = sv_mortalcopy(*MARK);
                     }
 		    SvTEMP_off(*MARK);
@@ -2766,7 +2763,6 @@ try_autoload:
 	    while (items--) {
 		mark++;
 		if (*mark && SvPADTMP(*mark)) {
-                    assert(!IS_PADGV(*mark));
 		    *mark = sv_mortalcopy(*mark);
                 }
 	    }

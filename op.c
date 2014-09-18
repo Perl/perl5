@@ -807,8 +807,6 @@ Perl_op_clear(pTHX_ OP *o)
 		SvREFCNT_inc_simple_void(gv);
 #ifdef USE_ITHREADS
 	    if (cPADOPo->op_padix > 0) {
-		/* No GvIN_PAD_off(cGVOPo_gv) here, because other references
-		 * may still exist on the pad */
 		pad_swipe(cPADOPo->op_padix, TRUE);
 		cPADOPo->op_padix = 0;
 	    }
@@ -875,8 +873,6 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_PUSHRE:
 #ifdef USE_ITHREADS
         if (cPMOPo->op_pmreplrootu.op_pmtargetoff) {
-	    /* No GvIN_PAD_off here, because other references may still
-	     * exist on the pad */
 	    pad_swipe(cPMOPo->op_pmreplrootu.op_pmtargetoff, TRUE);
 	}
 #else
@@ -5186,7 +5182,7 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
     padop->op_type = (OPCODE)type;
     padop->op_ppaddr = PL_ppaddr[type];
     padop->op_padix =
-	pad_alloc(type, IS_PADGV(sv) ? SVf_READONLY : SVs_PADTMP);
+	pad_alloc(type, isGV(sv) ? SVf_READONLY : SVs_PADTMP);
     SvREFCNT_dec(PAD_SVl(padop->op_padix));
     PAD_SETSV(padop->op_padix, sv);
     assert(sv);
@@ -5219,7 +5215,6 @@ Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
     PERL_ARGS_ASSERT_NEWGVOP;
 
 #ifdef USE_ITHREADS
-    GvIN_PAD_on(gv);
     return newPADOP(type, flags, SvREFCNT_inc_simple_NN(gv));
 #else
     return newSVOP(type, flags, SvREFCNT_inc_simple_NN(gv));
@@ -9026,7 +9021,6 @@ Perl_ck_rvconst(pTHX_ OP *o)
 	    assert (sizeof(PADOP) <= sizeof(SVOP));
 	    kPADOP->op_padix = pad_alloc(OP_GV, SVf_READONLY);
 	    SvREFCNT_dec(PAD_SVl(kPADOP->op_padix));
-	    if (isGV(gv)) GvIN_PAD_on(gv);
 	    PAD_SETSV(kPADOP->op_padix, MUTABLE_SV(SvREFCNT_inc_simple_NN(gv)));
 #else
 	    kid->op_sv = SvREFCNT_inc_simple_NN(gv);

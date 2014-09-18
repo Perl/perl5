@@ -773,8 +773,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 #else
 		    (SVs_PADMY|SVs_PADTMP)
 #endif
-		 ) &&
-		!IS_PADGV(sv))
+		 ))
 		break;
 	}
 	if (konst) {
@@ -1779,8 +1778,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	     * pad are anonymous subs, constants and GVs.
 	     * The rest are created anew during cloning.
 	     */
-	    if (!PL_curpad[ix] || SvIMMORTAL(PL_curpad[ix])
-		 || IS_PADGV(PL_curpad[ix]))
+	    if (!PL_curpad[ix] || SvIMMORTAL(PL_curpad[ix]))
 		continue;
 	    namesv = namep[ix];
 	    if (!(PadnamePV(namesv) &&
@@ -1803,8 +1801,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	PADOFFSET ix;
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	    if (!namep[ix]) namep[ix] = &PL_sv_undef;
-	    if (!PL_curpad[ix] || SvIMMORTAL(PL_curpad[ix])
-		 || IS_PADGV(PL_curpad[ix]) || IS_PADCONST(PL_curpad[ix]))
+	    if (!PL_curpad[ix] || SvIMMORTAL(PL_curpad[ix]))
 		continue;
 	    if (SvPADMY(PL_curpad[ix]) && !SvFAKE(namep[ix])) {
 		/* This is a work around for how the current implementation of
@@ -2132,7 +2129,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 	    }
 	  }
 	}
-	else if (IS_PADGV(ppad[ix]) || (namesv && PadnamePV(namesv))) {
+	else if (namesv && PadnamePV(namesv)) {
 	    sv = SvREFCNT_inc_NN(ppad[ix]);
 	}
 	else {
@@ -2383,7 +2380,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 		    SvPADMY_on(sv);
 		}
 	    }
-	    else if (IS_PADGV(oldpad[ix]) || PadnamePV(names[ix])) {
+	    else if (PadnamePV(names[ix])) {
 		av_store(newpad, ix, SvREFCNT_inc_NN(oldpad[ix]));
 	    }
 	    else {
@@ -2519,8 +2516,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 			}
 		    }
 		}
-		else if (IS_PADGV(oldpad[ix])
-		      || (  names_fill >= ix && names[ix]
+		else if ((  names_fill >= ix && names[ix]
 			 && PadnamePV(names[ix])  )) {
 		    pad1a[ix] = sv_dup_inc(oldpad[ix], param);
 		}
