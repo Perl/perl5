@@ -2386,7 +2386,7 @@ Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags)
 		}
 	    }
 
-            /* Quite wrong but no no good choices. */
+            /* Quite wrong but no good choices. */
             if ((numtype & IS_NUMBER_INFINITY)) {
                 return (numtype & IS_NUMBER_NEG) ? IV_MIN : IV_MAX;
             } else if ((numtype & IS_NUMBER_NAN)) {
@@ -2474,7 +2474,7 @@ Perl_sv_2uv_flags(pTHX_ SV *const sv, const I32 flags)
 		    return value;
 	    }
 
-            /* Quite wrong but no no good choices. */
+            /* Quite wrong but no good choices. */
             if ((numtype & IS_NUMBER_INFINITY)) {
                 return UV_MAX; /* So wrong. */
             } else if ((numtype & IS_NUMBER_NAN)) {
