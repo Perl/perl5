@@ -7653,8 +7653,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     bool name_is_utf8 = o && !o_is_gv && SvUTF8(cSVOPo->op_sv);
 #ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
-#endif
     bool special = FALSE;
+#endif
 
     if (o_is_gv) {
 	gv = (GV*)o;
@@ -8051,7 +8051,10 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             if (PL_parser && PL_parser->error_count)
                 clear_special_blocks(name, gv, cv);
             else
-                special = process_special_blocks(floor, name, gv, cv);
+#ifdef PERL_DEBUG_READONLY_OPS
+                special =
+#endif
+                    process_special_blocks(floor, name, gv, cv);
         }
     }
 
