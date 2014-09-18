@@ -9228,7 +9228,8 @@ S_scan_heredoc(pTHX_ char *s)
 	else if (PL_bufend - PL_linestart == 1 && PL_bufend[-1] == '\r')
 	    PL_bufend[-1] = '\n';
 #endif
-	if (*s == term && memEQ(s,PL_tokenbuf + 1,len)) {
+	if (*s == term && PL_bufend-s >= len
+	 && memEQ(s,PL_tokenbuf + 1,len)) {
 	    SvREFCNT_dec(PL_linestr);
 	    PL_linestr = linestr_save;
 	    PL_linestart = SvPVX(linestr_save);
