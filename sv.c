@@ -3157,9 +3157,7 @@ Perl_sv_copypv_flags(pTHX_ SV *const dsv, SV *const ssv, const I32 flags)
 
     PERL_ARGS_ASSERT_SV_COPYPV_FLAGS;
 
-    if ((flags & SV_GMAGIC) && SvGMAGICAL(ssv))
-	mg_get(ssv);
-    s = SvPV_nomg_const(ssv,len);
+    s = SvPV_flags_const(ssv,len,flags & SV_GMAGIC);
     sv_setpvn(dsv,s,len);
     if (SvUTF8(ssv))
 	SvUTF8_on(dsv);
