@@ -2808,21 +2808,15 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
  * maxlen too small) returns zero. */
 STATIC size_t
 S_infnan_2pv(NV nv, char* buffer, size_t maxlen) {
+    /* XXX this should be an assert */
     if (maxlen < 4) /* "Inf\0", "NaN\0" */
         return 0;
     else {
         char* s = buffer;
-        if (Perl_isinf(nv)) {
-            if (nv < 0) {
-                if (maxlen < 5) /* "-Inf\0"  */
-                    return 0;
-                *s++ = '-';
-            }
-            *s++ = 'I';
-            *s++ = 'n';
-            *s++ = 'f';
-        }
-        else if (Perl_isnan(nv)) {
+        /* isnan must be first due to NAN_COMPARE_BROKEN builds, since NAN might
+           use the broken for NAN >/< ops in the inf check, and then the inf
+           check returns true for NAN on NAN_COMPARE_BROKEN compilers */
+        if (Perl_isnan(nv)) {
             *s++ = 'N';
             *s++ = 'a';
             *s++ = 'N';
@@ -2832,6 +2826,17 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen) {
              * provide a format string so that the user can decide?
              * NOTE: would affect the maxlen and assert() logic.*/
         }
+        else if (Perl_isinf(nv)) {
+            if (nv < 0) {
+                if (maxlen < 5) /* "-Inf\0"  */
+                    return 0;
+                *s++ = '-';
+            }
+            *s++ = 'I';
+            *s++ = 'n';
+            *s++ = 'f';
+        }
+
         else
             return 0;
         assert((s == buffer + 3) || (s == buffer + 4));
@@ -3018,7 +3023,11 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
     else if (SvNOK(sv)) {
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
-	if (SvNVX(sv) == 0.0) {
+	if (SvNVX(sv) == 0.0
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+	    && !Perl_isnan(SvNVX(sv))
+#endif
+	) {
 	    s = SvGROW_mutable(sv, 2);
 	    *s++ = '0';
 	    *s = '\0';
