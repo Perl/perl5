@@ -2588,7 +2588,7 @@ corresponding closing punctuation (that is C<)>, C<]>, C<}>, or C<< > >>).
 If the starting delimiter is an unpaired character like C</> or a closing
 punctuation, the ending delimiter is same as the starting delimiter.
 Therefore a C</> terminates a C<qq//> construct, while a C<]> terminates
-C<qq[]> and C<qq]]> constructs.
+both C<qq[]> and C<qq]]> constructs.
 
 When searching for single-character delimiters, escaped delimiters
 and C<\\> are skipped.  For example, while searching for terminating C</>,
@@ -2604,13 +2604,13 @@ safe location).
 
 For constructs with three-part delimiters (C<s///>, C<y///>, and
 C<tr///>), the search is repeated once more.
-If the first delimiter is not an opening punctuation, three delimiters must
+If the first delimiter is not an opening punctuation, the three delimiters must
 be same such as C<s!!!> and C<tr)))>, in which case the second delimiter
 terminates the left part and starts the right part at once.
 If the left part is delimited by bracketing punctuation (that is C<()>,
 C<[]>, C<{}>, or C<< <> >>), the right part needs another pair of
 delimiters such as C<s(){}> and C<tr[]//>.  In these cases, whitespace
-and comments are allowed between both parts, though the comment must follow
+and comments are allowed between the two parts, though the comment must follow
 at least one whitespace character; otherwise a character expected as the 
 start of the comment may be regarded as the starting delimiter of the right part.
 
