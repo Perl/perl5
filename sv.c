@@ -10632,21 +10632,12 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 #  define DOUBLEDOUBLE_MAXBITS 1028
 #endif
 
-#ifdef LONGDOUBLE_X86_80_BIT
-#  undef LONGDOUBLE_HAS_IMPLICIT_BIT
-#else
-#  define LONGDOUBLE_HAS_IMPLICIT_BIT
-#endif
-
-#ifdef LONGDOUBLE_DOUBLEDOUBLE
 /* vhex will contain the values (0..15) of the hex digits ("nybbles"
- * of 4 bits); 1 for the implicit 1, and at most 1028 bits of mantissa,
- * four bits per xdigit. */
+ * of 4 bits); 1 for the implicit 1, and the mantissa bits, four bits
+ * per xdigit. */
+#ifdef LONGDOUBLE_DOUBLEDOUBLE
 #  define VHEX_SIZE (1+DOUBLEDOUBLE_MAXBITS/4)
 #else
-/* vhex will contain the values (0..15) of the hex digits ("nybbles"
- * of 4 bits); 1 for the implicit 1, and at most 128 bits of mantissa,
- * four bits per xdigit. */
 #  define VHEX_SIZE (1+128/4)
 #endif
 
@@ -10654,14 +10645,28 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
  * long doubles, or long doubles being equal to doubles) then we will
  * fall back to the ldexp/frexp route, with which we can retrieve at
  * most as many bits as our widest unsigned integer type is.  We try
- * to get a 64-bit unsigned integer even if we are not having 64-bit
- * UV. */
+ * to get a 64-bit unsigned integer even if we are not using a 64-bit UV.
+ *
+ * (If you want to test the case of UVSIZE == 4, NVSIZE == 8,
+ *  set the MANTISSATYPE to int and the MANTISSASIZE to 4.)
+ */
 #if defined(HAS_QUAD) && defined(Uquad_t)
 #  define MANTISSATYPE Uquad_t
 #  define MANTISSASIZE 8
 #else
-#  define MANTISSATYPE UV /* May lose precision if UVSIZE is not 8. */
+#  define MANTISSATYPE UV
 #  define MANTISSASIZE UVSIZE
+#endif
+
+/* We make here the wild assumption that the endianness of doubles
+ * is similar to the endianness of integers, and that there is no
+ * middle-endianness.  This may come back to haunt us (the rumor
+ * has it that ARM can be quite haunted). */
+#if BYTEORDER == 0x12345678 || BYTEORDER == 0x1234 || \
+     defined(DOUBLEKIND_LITTLE_ENDIAN)
+#  define HEXTRACT_LITTLE_ENDIAN
+#else
+#  define HEXTRACT_BIG_ENDIAN
 #endif
 
 /* S_hextract() is a helper for Perl_sv_vcatpvfn_flags, for extracting
@@ -10696,39 +10701,39 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
 #define HEXTRACT_OUTPUT_LO(ix) (*v++ = nvp[ix] & 0xF)
 #define HEXTRACT_OUTPUT(ix) \
     STMT_START { \
-        HEXTRACT_OUTPUT_HI(ix); \
-        HEXTRACT_OUTPUT_LO(ix); \
-    } STMT_END
+      HEXTRACT_OUTPUT_HI(ix); HEXTRACT_OUTPUT_LO(ix); \
+   } STMT_END
 #define HEXTRACT_COUNT(ix, c) \
     STMT_START { \
-      v += c; \
-      if (ix < ixmin) \
-        ixmin = ix; \
-      else if (ix > ixmax) \
-        ixmax = ix; \
-    } STMT_END
-#ifdef LONGDOUBLE_HAS_IMPLICIT_BIT
+      v += c; if (ix < ixmin) ixmin = ix; else if (ix > ixmax) ixmax = ix; \
+   } STMT_END
+#define HEXTRACT_BYTE(ix) \
+    STMT_START { \
+    if (vend) HEXTRACT_OUTPUT(ix); else HEXTRACT_COUNT(ix, 2); \
+   } STMT_END
+#define HEXTRACT_LO_NYBBLE(ix) \
+    STMT_START { \
+      if (vend) HEXTRACT_OUTPUT_LO(ix); else HEXTRACT_COUNT(ix, 1); \
+   } STMT_END
 #  define HEXTRACT_IMPLICIT_BIT(nv) \
-    if (nv != 0.0 && vend) \
-      *v++ = 1; \
-    else \
-      v++;
+    STMT_START { \
+        if (vend) *v++ = ((nv) == 0.0) ? 0 : 1; else v++; \
+   } STMT_END
+
+#ifdef LONGDOUBLE_DOUBLEDOUBLE
+#  define HEXTRACTSIZE (DOUBLEDOUBLE_MAXBITS/8)
 #else
-#  undef HEXTRACT_IMPLICIT_BIT
+#  define HEXTRACTSIZE NVSIZE
 #endif
 
-    /* First see if we are using long doubles. */
-#if NVSIZE > DOUBLESIZE && LONG_DOUBLEKIND != LONG_DOUBLE_IS_DOUBLE
     const U8* nvp = (const U8*)(&nv);
-#  ifdef LONGDOUBLE_DOUBLEDOUBLE
-#    define HEXTRACTSIZE (DOUBLEDOUBLE_MAXBITS/8)
-#  else
-#    define HEXTRACTSIZE NVSIZE
-#  endif
     const U8* vmaxend = vhex + 2 * HEXTRACTSIZE + 1;
     (void)Perl_frexp(PERL_ABS(nv), exponent);
     if (vend && (vend <= vhex || vend > vmaxend))
         Perl_croak(aTHX_ "Hexadecimal float: internal error");
+
+    /* First check if using long doubles. */
+#if NVSIZE > DOUBLESIZE
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
     /* Used in e.g. VMS and HP-UX IA-64, e.g. -0.1L:
      * 9a 99 99 99 99 99 99 99 99 99 99 99 99 99 fb 3f */
@@ -10736,10 +10741,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
      * the 15,14 are the sign+exponent. */
     HEXTRACT_IMPLICIT_BIT(nv);
     for (ix = 13; ix >= 0; ix--) {
-        if (vend)
-            HEXTRACT_OUTPUT(ix);
-        else
-            HEXTRACT_COUNT(ix, 2);
+        HEXTRACT_BYTE(ix);
     }
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
     /* Used in e.g. Solaris Sparc and HP-UX PA-RISC, e.g. -0.1L:
@@ -10748,10 +10750,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
      * the 0,1 are the sign+exponent. */
     HEXTRACT_IMPLICIT_BIT(nv);
     for (ix = 2; ix <= 15; ix++) {
-        if (vend)
-            HEXTRACT_OUTPUT(ix);
-        else
-            HEXTRACT_COUNT(ix, 2);
+        HEXTRACT_BYTE(ix);
     }
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
     /* x86 80-bit "extended precision", 64 bits of mantissa / fraction /
@@ -10759,24 +10758,20 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
      * be either 12 (ILP32, Solaris x86) or 16 (LP64, Linux and OS X),
      * meaning that 2 or 6 bytes are empty padding. */
     /* The bytes 7..0 are the mantissa/fraction */
-    /* There explicitly is *no* implicit bit in this case. */
+
+    /* Intentionally NO HEXTRACT_IMPLICIT_BIT here. */
     for (ix = 7; ix >= 0; ix--) {
-        if (vend)
-            HEXTRACT_OUTPUT(ix);
-        else
-            HEXTRACT_COUNT(ix, 2);
+        HEXTRACT_BYTE(ix);
     }
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
     /* Does this format ever happen? (Wikipedia says the Motorola
      * 6888x math coprocessors used format _like_ this but padded
      * to 96 bits with 16 unused bits between the exponent and the
      * mantissa.) */
-    /* There explicitly is *no* implicit bit in this case. */
+
+    /* Intentionally NO HEXTRACT_IMPLICIT_BIT here. */
     for (ix = 0; ix < 8; ix++) {
-        if (vend)
-            HEXTRACT_OUTPUT(ix);
-        else
-            HEXTRACT_COUNT(ix, 2);
+        HEXTRACT_BYTE(ix);
     }
 #  elif defined(LONGDOUBLE_DOUBLEDOUBLE)
     /* Double-double format: two doubles next to each other.
@@ -10789,7 +10784,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
      *
      * Because of this tricky construction the bytewise extraction we
      * use for the other long double formats doesn't work, we must
-     * extract the values bit by bit. */
+     * extract the values bit by bit.
      *
      * The little-endian double-double is used .. somewhere?
      *
@@ -10883,70 +10878,22 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
                "Hexadecimal float: unsupported long double format");
 #  endif
 #else
-    /* If not using long doubles (or if the long double format is
-     * known but not yet supported), try to retrieve the mantissa bits
-     * via frexp+ldexp. */
-
-    NV norm = Perl_frexp(PERL_ABS(nv), exponent);
-    /* Theoretically we have all the bytes [0, MANTISSASIZE-1] to
-     * inspect; but in practice we don't want the leading nybbles that
-     * are zero.  With the common IEEE 754 value for NV_MANT_DIG being
-     * 53, we want the limit byte to be (int)((53-1)/8) == 6.
-     *
-     * Note that this is _not_ inspecting the in-memory format of the
-     * nv (as opposed to the long double method), but instead the UV
-     * retrieved with the frexp+ldexp invocation. */
-#  if MANTISSASIZE * 8 > NV_MANT_DIG
-    MANTISSATYPE mantissa = (MANTISSATYPE)Perl_ldexp(norm, NV_MANT_DIG);
-    int limit_byte = (NV_MANT_DIG - 1) / 8;
-#  else
-    /* There will be low-order precision loss.  Try to salvage as many
-     * bits as possible.  Will truncate, not round. */
-    MANTISSATYPE mantissa =
-    Perl_ldexp(norm,
-               /* The highest possible shift by two that fits in the
-                * mantissa and is aligned (by four) the same was as
-                * NV_MANT_DIG. */
-               MANTISSASIZE * 8 - (4 - NV_MANT_DIG % 4));
-    int limit_byte = MANTISSASIZE - 1;
-#  endif
-    const U8* nvp = (const U8*)(&mantissa);
-#  define HEXTRACTSIZE MANTISSASIZE
-    /* We make here the wild assumption that the endianness of doubles
-     * is similar to the endianness of integers, and that there is no
-     * middle-endianness.  This may come back to haunt us (the rumor
-     * has it that ARM can be quite haunted).
+    /* Using normal doubles, not long doubles.
      *
      * We generate 4-bit xdigits (nybble/nibble) instead of 8-bit
-     * bytes, since we might need to handle printf precision, and also
-     * insert the radix.
-     */
-#  if BYTEORDER == 0x12345678 || BYTEORDER == 0x1234 || \
-     defined(LONGDOUBLEKIND_LITTLE_ENDIAN)
-    /* Little endian. */
-    for (ix = limit_byte; ix >= 0; ix--) {
-        if (vend)
-            HEXTRACT_OUTPUT(ix);
-        else
-            HEXTRACT_COUNT(ix, 2);
+     * bytes, since we might need to handle printf precision, and
+     * also need to insert the radix. */
+    HEXTRACT_IMPLICIT_BIT(nv);
+#  ifdef HEXTRACT_LITTLE_ENDIAN
+    HEXTRACT_LO_NYBBLE(6);
+    for (ix = 5; ix >= 0; ix--) {
+        HEXTRACT_BYTE(ix);
     }
 #  else
-    /* Big endian. */
-    for (ix = MANTISSASIZE - 1 - limit_byte; ix < MANTISSASIZE; ix++) {
-        if (vend)
-            HEXTRACT_OUTPUT(ix);
-        else
-            HEXTRACT_COUNT(ix, 2);
+    HEXTRACT_LO_NYBBLE(1);
+    for (ix = 2; ix < HEXTRACTSIZE; ix++) {
+        HEXTRACT_BYTE(ix);
     }
-#  endif
-    /* If there are not enough bits in MANTISSATYPE, we couldn't get
-     * all of them, issue a warning.
-     *
-     * Note that NV_PRESERVES_UV_BITS would not help here, it is the
-     * wrong way around. */
-#  if NV_MANT_DIG > MANTISSASIZE * 8
-    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                   "Hexadecimal float: precision loss");
 #  endif
 #endif
     /* Croak for various reasons: if the output pointer escaped the
@@ -12038,15 +11985,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * match its internal structure. */
 
                 /* Note: fv can be (and often is) long double.
-                 * Here it is implicitly cast to NV. */
-                vend = S_hextract(aTHX_ fv, &exponent, vhex, NULL);
-                S_hextract(aTHX_ fv, &exponent, vhex, vend);
+                 * Here it is explicitly cast to NV. */
+                vend = S_hextract(aTHX_ (NV)fv, &exponent, vhex, NULL);
+                S_hextract(aTHX_ (NV)fv, &exponent, vhex, vend);
 
 #if NVSIZE > DOUBLESIZE
-#  ifdef LONGDOUBLE_HAS_IMPLICIT_BIT
-                exponent--;
-#  else
+#  ifdef LONGDOUBLE_X86_80_BIT
                 exponent -= 4;
+#  else
+                exponent--;
 #  endif
 #endif
 
@@ -12083,7 +12030,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     }
 
 #if NVSIZE == DOUBLESIZE
-                    exponent--;
+                    if (fv != 0.0)
+                        exponent--;
 #endif
 
                     if (precis > 0) {
