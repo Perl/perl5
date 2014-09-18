@@ -387,7 +387,6 @@
 #    undef c99_nearbyint
 #    undef c99_nexttoward
 #    undef c99_remquo
-#    undef c99_rint
 #    undef c99_round
 #    undef c99_scalbn
 #  endif
