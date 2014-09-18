@@ -7884,6 +7884,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		assert(CvGV(cv) == gv);
 	    }
 	    else {
+		dVAR;
 		U32 hash;
 		PERL_HASH(hash, name, namlen);
 		CvNAME_HEK_set(cv,
@@ -7948,6 +7949,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     if (!CvHASGV(cv)) {
 	if (isGV(gv)) CvGV_set(cv, gv);
 	else {
+            dVAR;
 	    U32 hash;
 	    PERL_HASH(hash, name, namlen);
 	    CvNAME_HEK_set(cv, share_hek(name,
