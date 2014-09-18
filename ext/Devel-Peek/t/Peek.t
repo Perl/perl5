@@ -504,6 +504,7 @@ do_test('typeglob',
     CV = 0x0
     CVGEN = 0x0
     GPFLAGS = 0x0				# $] < 5.009
+    GPFLAGS = 0x0 \(\)				# $] >= 5.021004
     LINE = \\d+
     FILE = ".*\\b(?i:peek\\.t)"
     FLAGS = $ADDR				# $] < 5.021004
