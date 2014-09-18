@@ -1051,6 +1051,8 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
     return retval;
 }
 
+#include "perliol.h" /* PerlIO_restore_errno needs this */
+
 bool
 Perl_io_close(pTHX_ IO *io, bool not_implicit)
 {
@@ -1074,11 +1076,17 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 	else {
 	    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {		/* a socket */
 		const bool prev_err = PerlIO_error(IoOFP(io));
+		if (prev_err && PerlIOValid(IoOFP(io))) {
+		    PerlIO_restore_errno(IoOFP(io));
+		}
 		retval = (PerlIO_close(IoOFP(io)) != EOF && !prev_err);
 		PerlIO_close(IoIFP(io));	/* clear stdio, fd already closed */
 	    }
 	    else {
 		const bool prev_err = PerlIO_error(IoIFP(io));
+		if (prev_err && PerlIOValid(IoIFP(io))) {
+		    PerlIO_restore_errno(IoIFP(io));
+		}
 		retval = (PerlIO_close(IoIFP(io)) != EOF && !prev_err);
 	    }
 	}
