@@ -1034,7 +1034,7 @@ Perl_leave_scope(pTHX_ I32 base)
 				? CvNAME_HEK((CV *)sv)
 				: GvNAME_HEK(CvGV(sv));
                         assert(hek);
-                        share_hek_hek(hek);
+                        (void)share_hek_hek(hek);
                         cv_undef((CV *)sv);
                         CvNAME_HEK_set(sv, hek);
                         CvLEXICAL_on(sv);
