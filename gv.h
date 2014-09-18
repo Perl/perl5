@@ -156,7 +156,7 @@ Return the CV from the GV.
 #define GVf_INTRO	0x01
 #define GVf_MULTI	0x02
 #define GVf_ASSUMECV	0x04
-#define GVf_IN_PAD	0x08
+/*	UNUSED		0x08 */
 #define GVf_IMPORTED	0xF0
 #define GVf_IMPORTED_SV	  0x10
 #define GVf_IMPORTED_AV	  0x20
@@ -195,11 +195,10 @@ Return the CV from the GV.
 #define GvIMPORTED_CV_on(gv)	(GvFLAGS(gv) |= GVf_IMPORTED_CV)
 #define GvIMPORTED_CV_off(gv)	(GvFLAGS(gv) &= ~GVf_IMPORTED_CV)
 
-#define GvIN_PAD(gv)		(GvFLAGS(gv) & GVf_IN_PAD)
-#define GvIN_PAD_on(gv)		(GvFLAGS(gv) |= GVf_IN_PAD)
-#define GvIN_PAD_off(gv)	(GvFLAGS(gv) &= ~GVf_IN_PAD)
-
 #ifndef PERL_CORE
+#  define GvIN_PAD(gv)		0
+#  define GvIN_PAD_on(gv)	NOOP
+#  define GvIN_PAD_off(gv)	NOOP
 #  define Nullgv Null(GV*)
 #endif
 

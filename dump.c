@@ -1346,7 +1346,6 @@ const struct flag_to_name gp_flags_names[] = {
     {GVf_INTRO, "INTRO,"},
     {GVf_MULTI, "MULTI,"},
     {GVf_ASSUMECV, "ASSUMECV,"},
-    {GVf_IN_PAD, "IN_PAD,"}
 };
 
 const struct flag_to_name gp_flags_imported_names[] = {
