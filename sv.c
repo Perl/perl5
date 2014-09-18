@@ -10814,6 +10814,10 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         U8 ha = 0x0; /* hexvalue accumulator */
         U8 hd = 0x8; /* hexvalue digit */
 
+        /* Shift d and e (and update exponent) so that e <= d < 2*e,
+         * this is essentially manual frexp(). Multiplying by 0.5 and
+         * doubling should be lossless in binary floating point. */
+
         *exponent = 1;
 
         while (e > d) {
