@@ -67,6 +67,7 @@ plan(tests => 10);
 # make two handles that will always block
 
 sub fresh_io {
+	close $in if $in; close $out if $out;
 	undef $in; undef $out; # use fresh handles each time
 	pipe $in, $out;
 	$sigst = "";

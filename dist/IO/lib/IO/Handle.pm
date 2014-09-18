@@ -339,12 +339,16 @@ sub new_from_fd {
 }
 
 #
-# There is no need for DESTROY to do anything, because when the
+# Under perl 5.21.4 and higher, the perl core itself defines a
+# DESTROY method.
+#
+# Under other perl versions, there is no
+# need for DESTROY to do anything, because when the
 # last reference to an IO object is gone, Perl automatically
 # closes its associated files (if any).  However, to avoid any
 # attempts to autoload DESTROY, we here define it to do nothing.
 #
-sub DESTROY {}
+if (! defined &DESTROY) { eval 'sub DESTROY {}' }
 
 
 ################################################

@@ -36,7 +36,7 @@ __SWDTEST__
 		 args => ['3'],
 		);
     like($r,
-qr/^sub<Devel::switchd::import>;import<Devel::switchd>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;$/,
+qr/^sub<Devel::switchd::import>;import<Devel::switchd>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<IO::Handle::DESTROY>;sub<IO::Handle::DESTROY>;$/,
     'Got debugging output: 1');
     $r = runperl(
 		 switches => [ '-Ilib', '-f', '-d:switchd=a,42' ],
@@ -44,7 +44,7 @@ qr/^sub<Devel::switchd::import>;import<Devel::switchd>;DB<main,$::tempfile_regex
 		 args => ['4'],
 		);
     like($r,
-qr/^sub<Devel::switchd::import>;import<Devel::switchd a 42>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;$/,
+qr/^sub<Devel::switchd::import>;import<Devel::switchd a 42>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<IO::Handle::DESTROY>;sub<IO::Handle::DESTROY>;$/,
     'Got debugging output: 2');
     $r = runperl(
 		 switches => [ '-Ilib', '-f', '-d:-switchd=a,42' ],
@@ -52,7 +52,7 @@ qr/^sub<Devel::switchd::import>;import<Devel::switchd a 42>;DB<main,$::tempfile_
 		 args => ['4'],
 		);
     like($r,
-qr/^sub<Devel::switchd::unimport>;unimport<Devel::switchd a 42>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;$/,
+qr/^sub<Devel::switchd::unimport>;unimport<Devel::switchd a 42>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<IO::Handle::DESTROY>;sub<IO::Handle::DESTROY>;$/,
     'Got debugging output: 3');
 }
 
