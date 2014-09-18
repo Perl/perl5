@@ -1076,11 +1076,19 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 	else {
 	    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {		/* a socket */
 		const bool prev_err = PerlIO_error(IoOFP(io));
+#ifdef USE_PERLIO
+		if (prev_err)
+		    PerlIO_restore_errno(IoOFP(io));
+#endif
 		retval = (PerlIO_close(IoOFP(io)) != EOF && !prev_err);
 		PerlIO_close(IoIFP(io));	/* clear stdio, fd already closed */
 	    }
 	    else {
 		const bool prev_err = PerlIO_error(IoIFP(io));
+#ifdef USE_PERLIO
+		if (prev_err)
+		    PerlIO_restore_errno(IoIFP(io));
+#endif
 		retval = (PerlIO_close(IoIFP(io)) != EOF && !prev_err);
 	    }
 	}
