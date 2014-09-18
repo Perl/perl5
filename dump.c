@@ -2261,10 +2261,18 @@ Perl_debop(pTHX_ const OP *o)
 	break;
     case OP_GVSV:
     case OP_GV:
-	if (cGVOPo_gv) {
+	if (cGVOPo_gv && isGV(cGVOPo_gv)) {
 	    SV * const sv = newSV(0);
 	    gv_fullname3(sv, cGVOPo_gv, NULL);
 	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen_const(sv));
+	    SvREFCNT_dec_NN(sv);
+	}
+	else if (cGVOPo_gv) {
+	    SV * const sv = newSV(0);
+	    assert(SvROK(cGVOPo_gv));
+	    assert(SvTYPE(SvRV(cGVOPo_gv)) == SVt_PVCV);
+	    PerlIO_printf(Perl_debug_log, "(cv ref: %s)",
+		      SvPV_nolen_const(cv_name((CV *)SvRV(cGVOPo_gv),sv)));
 	    SvREFCNT_dec_NN(sv);
 	}
 	else
