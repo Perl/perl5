@@ -582,7 +582,7 @@ F<Configure> is run, and C<C> and C<XS> code isn't patched until after
 F<miniperl> is built. If C<--all-fixups> is specified, all the fixups are
 done before running C<Configure>. In rare cases adding this may cause a
 bisect to abort, because an inapplicable patch or other fixup is attempted
-for a revision which would usually have already I<skip>ed. If this happens,
+for a revision which would usually have already I<skip>ped. If this happens,
 please report it as a bug, giving the OS and problem revision.
 
 =item *
