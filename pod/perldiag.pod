@@ -1814,12 +1814,6 @@ effective uids or gids failed.
 aliased to another hash, so it doesn't reflect anymore the state of the
 program's environment.  This is potentially insecure.
 
-=item Error closing handle: %s
-
-=item Error closing handle %s: %s
-
-(S io) An error occurred when Perl implicitly closed a filehandle.
-
 =item Error converting file specification %s
 
 (F) An error peculiar to VMS.  Because Perl may have to deal with file
@@ -6698,6 +6692,13 @@ you called it with no args and C<$@> was empty.
 (S) The implicit close() done by an open() got an error indication on
 the close().  This usually indicates your file system ran out of disk
 space.
+
+=item Warning: unable to close filehandle properly: %s
+
+=item Warning: unable to close filehandle %s properly: %s
+
+(S io) An error occurred when Perl implicitly closed a filehandle.  This
+usually indicates your file system ran out of disk space.
 
 =item Warning: Use of "%s" without parentheses is ambiguous
 

@@ -1028,10 +1028,11 @@ XS(XS_IO_Handle_DESTROY)
         if (!success) {
             if (gv)
                 Perl_ck_warner_d(aTHX_ packWARN(WARN_IO),
-                                      "Error closing handle %"HEKf": %"SVf,
+                   "Warning: unable to close filehandle %"HEKf
+                   " properly: %"SVf,
                                        GvNAME_HEK(gv), get_sv("!",GV_ADD));
             else Perl_ck_warner_d(aTHX_ packWARN(WARN_IO),
-                                       "Error closing handle: %"SVf,
+                    "Warning: unable to close filehandle properly: %"SVf,
                                         get_sv("!",GV_ADD));
         }
     }
