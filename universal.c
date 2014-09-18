@@ -1016,26 +1016,7 @@ XS(XS_IO_Handle_DESTROY)
     }
     else if (SvTYPE(arg) == SVt_PVIO)
         io = (IO *)arg;
-
-    if (io && IoIFP(io) && (IoTYPE(io) == IoTYPE_WRONLY ||
-                            IoTYPE(io) == IoTYPE_RDWR   ||
-                            IoTYPE(io) == IoTYPE_APPEND)
-                        && IoIFP(io) != PerlIO_stdin()
-                        && IoIFP(io) != PerlIO_stdout()
-                        && IoIFP(io) != PerlIO_stderr()
-                        && !(IoFLAGS(io) & IOf_FAKE_DIRP)) {
-        const bool success = io_close(io, FALSE);
-        if (!success) {
-            if (gv)
-                Perl_ck_warner_d(aTHX_ packWARN(WARN_IO),
-                   "Warning: unable to close filehandle %"HEKf
-                   " properly: %"SVf,
-                                       GvNAME_HEK(gv), get_sv("!",GV_ADD));
-            else Perl_ck_warner_d(aTHX_ packWARN(WARN_IO),
-                    "Warning: unable to close filehandle properly: %"SVf,
-                                        get_sv("!",GV_ADD));
-        }
-    }
+    io_try_closing(io, gv);
     XSRETURN(0);
 }
 

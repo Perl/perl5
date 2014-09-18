@@ -1824,6 +1824,7 @@ PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit)
 #define PERL_ARGS_ASSERT_IO_CLOSE	\
 	assert(io)
 
+PERL_CALLCONV void	Perl_io_try_closing(pTHX_ IO *io, GV *gv);
 PERL_CALLCONV bool	Perl_isALNUM_lazy(pTHX_ const char* p)
 			__attribute__deprecated__
 			__attribute__warn_unused_result__

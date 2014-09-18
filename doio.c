@@ -1099,6 +1099,27 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
     return retval;
 }
 
+void
+Perl_io_try_closing(pTHX_ IO *io, GV *gv)
+{
+    if (io && IoIFP(io) && (IoTYPE(io) == IoTYPE_WRONLY ||
+			    IoTYPE(io) == IoTYPE_RDWR   ||
+			    IoTYPE(io) == IoTYPE_APPEND)
+			&& IoIFP(io) != PerlIO_stdin()
+			&& IoIFP(io) != PerlIO_stdout()
+			&& IoIFP(io) != PerlIO_stderr()
+			&& !(IoFLAGS(io) & IOf_FAKE_DIRP)
+			&& !io_close(io, FALSE)) {
+	if (gv)
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_IO),
+	      "Warning: unable to close filehandle %"HEKf" properly: %"SVf,
+	       GvNAME_HEK(gv), get_sv("!",GV_ADD));
+	else Perl_ck_warner_d(aTHX_ packWARN(WARN_IO),
+		"Warning: unable to close filehandle properly: %"SVf,
+		 get_sv("!",GV_ADD));
+    }
+}
+
 bool
 Perl_do_eof(pTHX_ GV *gv)
 {
