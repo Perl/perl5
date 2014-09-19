@@ -1159,20 +1159,15 @@ next(o)
 		    }
 		}
 		break;
-	    case 39: /* sv */
-	    case 40: /* gv */
-		/* It happens that the output typemaps for B::SV and B::GV
-		 * are identical. The "smarts" are in make_sv_object(),
-		 * which determines which class to use based on SvTYPE(),
-		 * rather than anything baked in at compile time.  */
-		if (cPADOPo->op_padix) {
-		    ret = PAD_SVl(cPADOPo->op_padix);
-		    if (ix == 40 && SvTYPE(ret) != SVt_PVGV)
-			ret = NULL;
-		} else {
-		    ret = NULL;
-		}
-		ret = make_sv_object(aTHX_ ret);
+	    case 39: /* B::PADOP::sv */
+	    case 40: /* B::PADOP::gv */
+		/* PADOPs should only be created on threaded builds.
+                 * They don't have an sv or gv field, just an op_padix
+                 * field. Leave it to the caller to retrieve padix
+                 * and look up th value in the pad. Don't do it here,
+                 * becuase PL_curpad is the pad of the caller, not the
+                 * pad of the sub the op is part of */
+		ret = make_sv_object(aTHX_ NULL);
 		break;
 	    case 41: /* pv */
 		/* OP_TRANS uses op_pv to point to a table of 256 or >=258

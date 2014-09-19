@@ -443,4 +443,42 @@ SKIP: {
 }
 
 
+# make sure ->sv, -gv methods do the right thing on threaded builds
+{
+
+    # for some reason B::walkoptree only likes a sub name, not a code ref
+    my ($gv, $sv);
+    sub gvsv_const {
+        # make the early pad slots something unlike a threaded const or
+        # gvsv
+        my ($dummy1, $dummy2, $dummy3, $dummy4) = qw(foo1 foo2 foo3 foo4);
+        my $self = shift;
+        if ($self->name eq 'gvsv') {
+            $gv = $self->gv;
+        }
+        elsif ($self->name eq 'const') {
+            $sv = $self->sv;
+        }
+    };
+
+    B::walkoptree(B::svref_2object(sub {our $x = 1})->ROOT, "::gvsv_const");
+    ok(defined $gv, "gvsv->gv seen");
+    ok(defined $sv, "const->sv seen");
+    if ($Config::Config{useithreads}) {
+        # should get NULLs
+        is(ref($gv), "B::SPECIAL", "gvsv->gv is special");
+        is(ref($sv), "B::SPECIAL", "const->sv is special");
+        is($$gv, 0, "gvsv->gv special is 0 (NULL)");
+        is($$sv, 0, "const->sv special is 0 (NULL)");
+    }
+    else {
+        is(ref($gv), "B::GV", "gvsv->gv is GV");
+        is(ref($sv), "B::IV", "const->sv is IV");
+        pass();
+        pass();
+    }
+
+}
+
+
 done_testing();
