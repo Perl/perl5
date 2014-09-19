@@ -39,6 +39,7 @@ foreach (@{(setup_embed())[0]}) {
   push @functions, 'Perl_' . $_->[2] if $_->[0] =~ /p/;
   push @functions, 'S_' . $_->[2] if $_->[0] =~ /s/;
 };
+push @functions, 'Perl_mess';
 
 my $regcomp_fail_re = '\b(?:(?:Simple_)?v)?FAIL[2-4]?(?:utf8f)?\b';
 my $regcomp_re =
@@ -597,6 +598,7 @@ Not array reference given to mod2fname
 Operator or semicolon missing before %c%s
 Out of memory during list extend
 panic queryaddr
+Parse error
 PerlApp::TextQuery: no arguments, please
 POSIX syntax [%c %c] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
