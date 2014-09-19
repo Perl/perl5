@@ -264,7 +264,7 @@ checkOptree
     ( name	=> 'cmdline self-strict compile err using prog',
       prog	=> 'use strict; sort @a',
       bcopts	=> [qw/ -basic -concise -exec /],
-      errs	=> 'Global symbol "@a" requires explicit package name at -e line 1.',
+      errs	=> 'Global symbol "@a" requires explicit package name (did you forget to declare "my @a"?) at -e line 1.',
       expect	=> 'nextstate',
       expect_nt	=> 'nextstate',
       noanchors => 1, # allow simple expectations to work
@@ -274,7 +274,9 @@ checkOptree
     ( name	=> 'cmdline self-strict compile err using code',
       code	=> 'use strict; sort @a',
       bcopts	=> [qw/ -basic -concise -exec /],
-      errs	=> qr/Global symbol "\@a" requires explicit package name at .*? line 1\./,
+      errs	=> qr/Global symbol "\@a" requires explicit package (?x:
+		     )name \(did you forget to declare "my \@a"\?\) at (?x:
+		     ).*? line 1\./,
       note	=> 'this test relys on a kludge which copies $@ to rendering when empty',
       expect	=> 'Global symbol',
       expect_nt	=> 'Global symbol',

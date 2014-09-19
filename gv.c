@@ -1733,7 +1733,12 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
         if (add && !PL_in_clean_all) {
             SV * const err = Perl_mess(aTHX_
                  "Global symbol \"%s%"UTF8f
-                 "\" requires explicit package name",
+                 "\" requires explicit package name (did you forget to "
+                 "declare \"my %s%"UTF8f"\"?)",
+                 (sv_type == SVt_PV ? "$"
+                  : sv_type == SVt_PVAV ? "@"
+                  : sv_type == SVt_PVHV ? "%"
+                  : ""), UTF8fARG(is_utf8, len, name),
                  (sv_type == SVt_PV ? "$"
                   : sv_type == SVt_PVAV ? "@"
                   : sv_type == SVt_PVHV ? "%"
