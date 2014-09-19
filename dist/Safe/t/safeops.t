@@ -446,7 +446,6 @@ egrent		endgrent
 getlogin	getlogin
 syscall		syscall
 lock		SKIP
-threadsv	SKIP
 setstate	SKIP
 method_named	$x->y()
 dor		$x // $y

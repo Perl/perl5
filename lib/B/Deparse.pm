@@ -3168,12 +3168,7 @@ sub loop_common {
 	    $ary = $self->deparse($ary, 1);
 	}
 	if (null $var) {
-	    if (($enter->flags & OPf_SPECIAL) && ($] < 5.009)) {
-		# thread special var, under 5005threads
-		$var = $self->pp_threadsv($enter, 1);
-	    } else { # regular my() variable
-		$var = $self->pp_padsv($enter, 1, 1);
-	    }
+            $var = $self->pp_padsv($enter, 1, 1);
 	} elsif ($var->name eq "rv2gv") {
 	    $var = $self->pp_rv2sv($var, 1);
 	    if ($enter->private & OPpOUR_INTRO) {
@@ -3341,13 +3336,6 @@ sub pp_padsv {
 
 sub pp_padav { pp_padsv(@_) }
 sub pp_padhv { pp_padsv(@_) }
-
-my @threadsv_names = B::threadsv_names;
-sub pp_threadsv {
-    my $self = shift;
-    my($op, $cx) = @_;
-    return $self->maybe_local($op, $cx, "\$" .  $threadsv_names[$op->targ]);
-}
 
 sub gv_or_padgv {
     my $self = shift;

@@ -556,8 +556,8 @@ C<"UNOP"> for example.
 
 =item threadsv_names
 
-In a perl compiled for threads, this returns a list of the special
-per-thread threadsv variables.
+This used to provide support for the old 5.005 threading module. It now
+does nothing.
 
 =back
 
