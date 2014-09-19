@@ -10571,6 +10571,11 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 
     PERL_ARGS_ASSERT_F0CONVERT;
 
+    if (Perl_isinfnan(nv)) {
+        STRLEN n = S_infnan_2pv(nv, endbuf - *len, *len);
+        *len = n;
+        return endbuf - n;
+    }
     if (neg)
 	nv = -nv;
     if (nv < UV_MAX) {
@@ -11010,26 +11015,28 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	   Munged by Nicholas Clark in v5.13.0-209-g95ea86d */
 	if (pp - pat == (int)patlen - 1 && svix < svmax) {
 	    const NV nv = SvNV(*svargs);
-	    if (*pp == 'g') {
-		/* Add check for digits != 0 because it seems that some
-		   gconverts are buggy in this case, and we don't yet have
-		   a Configure test for this.  */
-		if (digits && digits < sizeof(ebuf) - NV_DIG - 10) {
-		     /* 0, point, slack */
-                    STORE_LC_NUMERIC_SET_TO_NEEDED();
-		    PERL_UNUSED_RESULT(Gconvert(nv, (int)digits, 0, ebuf));
-		    sv_catpv_nomg(sv, ebuf);
-		    if (*ebuf)	/* May return an empty string for digits==0 */
-			return;
-		}
-	    } else if (!digits) {
-		STRLEN l;
+            if (LIKELY(!Perl_isinfnan(nv))) {
+                if (*pp == 'g') {
+                    /* Add check for digits != 0 because it seems that some
+                       gconverts are buggy in this case, and we don't yet have
+                       a Configure test for this.  */
+                    if (digits && digits < sizeof(ebuf) - NV_DIG - 10) {
+                        /* 0, point, slack */
+                        STORE_LC_NUMERIC_SET_TO_NEEDED();
+                        PERL_UNUSED_RESULT(Gconvert(nv, (int)digits, 0, ebuf));
+                        sv_catpv_nomg(sv, ebuf);
+                        if (*ebuf) /* May return an empty string for digits==0 */
+                            return;
+                    }
+                } else if (!digits) {
+                    STRLEN l;
 
-		if ((p = F0convert(nv, ebuf + sizeof ebuf, &l))) {
-		    sv_catpvn_nomg(sv, p, l);
-		    return;
-		}
-	    }
+                    if ((p = F0convert(nv, ebuf + sizeof ebuf, &l))) {
+                        sv_catpvn_nomg(sv, p, l);
+                        return;
+                    }
+                }
+            }
 	}
     }
 #endif /* !USE_LONG_DOUBLE */
@@ -11960,7 +11967,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 
 	    if ( !(width || left || plus || alt) && fill != '0'
-		 && has_precis && intsize != 'q' ) {	/* Shortcuts */
+		 && has_precis && intsize != 'q'	/* Shortcuts */
+                 && LIKELY(!Perl_isinfnan((NV)fv)) ) {
 		/* See earlier comment about buggy Gconvert when digits,
 		   aka precis is 0  */
 		if ( c == 'g' && precis ) {
@@ -12156,6 +12164,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             }
             else
                 elen = S_infnan_2pv(fv, PL_efloatbuf, PL_efloatsize);
+
             if (elen == 0) {
                 char *ptr = ebuf + sizeof ebuf;
                 *--ptr = '\0';
