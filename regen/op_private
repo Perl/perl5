@@ -312,6 +312,63 @@ addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
 # the pp function just updates the SV pointed to by op_targ, and doesn't
 # care whether that's a PADTMP or a lexical var.
 
+# Some comments about when its safe to use T/OPpTARGET_MY.
+#
+# Safe to set if the ppcode uses:
+#	tryAMAGICbin, tryAMAGICun, SETn, SETi, SETu, PUSHn, PUSHTARG, SETTARG,
+#	SETs(TARG), XPUSHn, XPUSHu,
+#
+# Unsafe to set if the ppcode uses dTARG or [X]RETPUSH[YES|NO|UNDEF]
+#
+# lt and friends do SETs (including ncmp, but not scmp)
+#
+# Additional mode of failure: the opcode can modify TARG before it "used"
+# all the arguments (or may call an external function which does the same).
+# If the target coincides with one of the arguments ==> kaboom.
+#
+# pp.c	pos substr each not OK (RETPUSHUNDEF)
+#	substr vec also not OK due to LV to target (are they???)
+#	ref not OK (RETPUSHNO)
+#	trans not OK (dTARG; TARG = sv_newmortal();)
+#	ucfirst etc not OK: TMP arg processed inplace
+#	quotemeta not OK (unsafe when TARG == arg)
+#	each repeat not OK too due to list context
+#	pack split - unknown whether they are safe
+#	sprintf: is calling do_sprintf(TARG,...) which can act on TARG
+#	  before other args are processed.
+#
+#	Suspicious wrt "additional mode of failure" (and only it):
+#	schop, chop, postinc/dec, bit_and etc, negate, complement.
+#
+#	Also suspicious: 4-arg substr, sprintf, uc/lc (POK_only), reverse, pack.
+#
+#	substr/vec: doing TAINT_off()???
+#
+# pp_hot.c
+#	readline - unknown whether it is safe
+#	match subst not OK (dTARG)
+#	grepwhile not OK (not always setting)
+#	join not OK (unsafe when TARG == arg)
+#
+#	Suspicious wrt "additional mode of failure": concat (dealt with
+#	in ck_sassign()), join (same).
+#
+# pp_ctl.c
+#	mapwhile flip caller not OK (not always setting)
+#
+# pp_sys.c
+#	backtick glob warn die not OK (not always setting)
+#	warn not OK (RETPUSHYES)
+#	open fileno getc sysread syswrite ioctl accept shutdown
+#	 ftsize(etc) readlink telldir fork alarm getlogin not OK (RETPUSHUNDEF)
+#	umask select not OK (XPUSHs(&PL_sv_undef);)
+#	fileno getc sysread syswrite tell not OK (meth("FILENO" "GETC"))
+#	sselect shm* sem* msg* syscall - unknown whether they are safe
+#	gmtime not OK (list context)
+#
+#	Suspicious wrt "additional mode of failure": warn, die, select.
+
+
 addbits($_, 4 => qw(OPpTARGET_MY TARGMY))
     for ops_with_flag('T'),
     # This flag is also used to indicate matches against implicit $_,
