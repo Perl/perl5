@@ -4158,7 +4158,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    regnode *end;
             U32 my_recursed_depth= recursed_depth;
 
-	    if (OP(scan) != SUSPEND) {
+            if (OP(scan) != SUSPEND) { /* GOSUB/GOSTART */
                 /* set the pointer */
 	        if (OP(scan) == GOSUB) {
 	            paren = ARG(scan);
@@ -4170,10 +4170,46 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     start = RExC_rxi->program + 1;
                     end   = RExC_opend;
                 }
-                if (!recursed_depth
+                /* this code is intended to handle expanding regex "subs" so
+                 * we can apply various optimizations. For instance with
+                 * /(?(DEFINE)(?<foo>foo)(?<bar>bar))(?&foo)(?&bar)/ we
+                 * want to recognize that the mandatory substr is going to be
+                 * "foobar".
+                 * However if we are not in SCF_DO_SUBSTR mode then there is
+                 * no point in doing this, and it can cause a serious slowdown.
+                 * See RT #122283.
+                 * Note the !is_inf and !is_inf_internal flags may be
+                 * superfluous for this decision, however I am including the
+                 * logic anyway as I am pretty sure it wont cause any harm.
+                 * Note also that this was a workaround for the core problem
+                 * which was that during compilation logic the excessive
+                 * recursion resulted in slowly consuming all the memory on
+                 * the box. Exactly what causes this is unclear. It does not
+                 * appear to be directly related to allocating the "visited"
+                 * bitmaps that is RExC_study_chunk_recursed.
+                 *
+                 * In reality study_chunk() does far far too much, and probably
+                 * this an other issues would go away if we split it into
+                 * multiple components.
+                 *
+                 * - Yves
+                 * */
+                if (flags & SCF_DO_SUBSTR) {
+                if (
+                    !recursed_depth
                     ||
                     !PAREN_TEST(RExC_study_chunk_recursed + ((recursed_depth-1) * RExC_study_chunk_recursed_bytes), paren)
                 ) {
+                    /* it is quite possible that there are more efficient ways
+                     * to do this. We maintain a bitmap per level of recursion
+                     * of which patterns we have entered so we can detect if a
+                     * pattern creates a possible infinite loop. When we
+                     * recurse down a level we copy the previous levels bitmap
+                     * down. When we are at recursion level 0 we zero the top
+                     * level bitmap. It would be nice to implement a different
+                     * more efficient way of doing this. In particular the top
+                     * level bitmap may be unnecessary.
+                     */
                     if (!recursed_depth) {
                         Zero(RExC_study_chunk_recursed, RExC_study_chunk_recursed_bytes, U8);
                     } else {
@@ -4199,6 +4235,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         ssc_anything(data->start_class);
                     flags &= ~SCF_DO_STCLASS;
 	        }
+                }
             } else {
 	        Newx(newframe,1,scan_frame);
 	        paren = stopparen;
