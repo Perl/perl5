@@ -761,6 +761,15 @@ This has been fixed.  It is doubtful that any crash could have occurred.
 This bug goes back to when here-docs were introduced in perl 3.000
 twenty-five years ago.
 
+=item *
+
+An optimization in C<split> to treat C<split/^/> like C<split/^/m> had the
+unfortunate side-effect of also treating C<split/\A/> like C<split/^/m>, which
+it should not.  This has been fixed.  (Note, however, that C<split/^x/> does
+not behave like C<split/^x/m>, which is also considered to be a bug and will be
+fixed in a future version.)
+L<[perl #122761]|https://rt.perl.org/Ticket/Display.html?id=122761>
+
 =back
 
 =head1 Known Problems
