@@ -393,7 +393,10 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Global symbol "%s" requires explicit package name|perldiag/Global symbol "%s" requires explicit package name (did you forget to declare "my %s"?)>
+
+This message has had '(did you forget to declare "my %s"?)' appended to it,
+to make it more helpful to new Perl programmers.  [perl #121638]
 
 =back
 
