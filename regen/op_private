@@ -18,8 +18,8 @@ C<%labels>, which hold roughly the same information as found in this file
 F<opcode.h> gains a series of C<OPp*> defines, and a few static data
 structures:
 
-C<PL_op_private_valid> defines, per-op, which op_private bits are legally,
-allowed to be set. This is a first good place to look to see if an op has
+C<PL_op_private_valid> defines, per-op, which op_private bits are legally
+allowed to be set. This is a good first place to look to see if an op has
 any spare private bits.
 
 C<PL_op_private_bitdef_ix>, C<PL_op_private_bitdefs>,
@@ -74,9 +74,9 @@ in the second half, specific per-op flags are added, e.g.
                3 => ...
            );
 
-(although the diving line between these two halves is somewhat subjective,
-and is based on whether "OPp" is followed by the op name or something
-generic).
+(although the dividing line between these two halves is somewhat
+subjective, and is based on whether "OPp" is followed by the op name or
+something generic).
 
 There are some utility functions for generating a list of ops from
 F<regen/opcodes> based on various criteria. These are:
@@ -85,7 +85,7 @@ F<regen/opcodes> based on various criteria. These are:
     ops_with_flag('X')
     ops_with_arg(N, 'XYZ')
 
-which return a list of op names where:
+which respectively return a list of op names where:
 
     field 3 of regen/opcodes specifies 'ck_foo' as the check function;
     field 4 of of regen/opcodes has flag or type 'X' set;
@@ -97,8 +97,8 @@ For example
 
 If a label is specified as '-', then the flag or bit field is not
 displayed symbolically by Concise/-Dx; instead the bits are treated as
-unrecognised and included in the final residual integer value after all
-recognised bits have been processed (this doesn't apply to individual
+unrecognised and are included in the final residual integer value after
+all recognised bits have been processed (this doesn't apply to individual
 enum labels).
 
 Here is a full example of a bit field hash:
