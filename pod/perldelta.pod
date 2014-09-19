@@ -276,8 +276,8 @@ L<Pod::Perldoc> has been upgraded from version 3.23 to 3.24.
 
 L<POSIX> has been upgraded from version 1.42 to 1.43.
 
-The C99 math functions and constants (for example acosh, round, M_E, M_PI) have
-been added.
+The C99 math functions and constants (for example acosh, isinf, isnan,
+round, trunc; M_E, M_SQRT2, M_PI) have been added.
 
 =item *
 
