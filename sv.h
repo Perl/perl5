@@ -1680,15 +1680,15 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #define SvPV_flags_const(sv, lp, flags) \
     (SvPOK_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX_const(sv)) : \
-     (const char*) sv_2pv_flags(sv, &lp, flags|SV_CONST_RETURN))
+     (const char*) sv_2pv_flags(sv, &lp, (flags|SV_CONST_RETURN)))
 #define SvPV_flags_const_nolen(sv, flags) \
     (SvPOK_nog(sv) \
      ? SvPVX_const(sv) : \
-     (const char*) sv_2pv_flags(sv, 0, flags|SV_CONST_RETURN))
+     (const char*) sv_2pv_flags(sv, 0, (flags|SV_CONST_RETURN)))
 #define SvPV_flags_mutable(sv, lp, flags) \
     (SvPOK_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX_mutable(sv)) : \
-     sv_2pv_flags(sv, &lp, flags|SV_MUTABLE_RETURN))
+     sv_2pv_flags(sv, &lp, (flags|SV_MUTABLE_RETURN)))
 
 #define SvPV_force(sv, lp) SvPV_force_flags(sv, lp, SV_GMAGIC)
 #define SvPV_force_nolen(sv) SvPV_force_flags_nolen(sv, SV_GMAGIC)
