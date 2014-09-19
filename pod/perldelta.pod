@@ -148,7 +148,8 @@ dual-life modules would have a F<Changes> file that could be cribbed.
 
 =item *
 
-XXX
+L<B::Op_private> provides detailed information about the flags used in
+the C<op_private> field of perl opcodes.
 
 =back
 
@@ -588,6 +589,17 @@ Changing the program's locale should be avoided by XS code.  Nevertheless,
 certain non-Perl libraries called from XS, such as C<Gtk> do so.  When this
 happens, Perl needs to be told that the locale has changed.  Use this function
 to do so, before returning to Perl.
+
+=item *
+
+The defines and labels for the flags in the C<op_private> field of OPs
+are now auto-generated from data in F<regen/op_private>. The noticeable
+affect of this is that some of the flag output of C<Concise> might differ
+slightly, and the flag output of C<perl -Dx> may differ considerably (they
+both use the same set of labels now). Also in debugging builds, there
+is a new assert in C<op_free()> that checks that the op doesn't have any
+unrecognised flags set in C<op_private>.
+
 
 =back
 
