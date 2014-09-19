@@ -7375,6 +7375,7 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 	    cache[3] = byte;
 	}
     } else {
+/* float casts necessary? XXX */
 #define THREEWAY_SQUARE(a,b,c,d) \
 	    ((float)((d) - (c))) * ((float)((d) - (c))) \
 	    + ((float)((c) - (b))) * ((float)((c) - (b))) \
@@ -7401,10 +7402,18 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 	}
 	else {
 	    const float keep_later = THREEWAY_SQUARE(0, byte, cache[1], blen);
+	    float b, c, keep_earlier;
 	    if (byte > cache[3]) {
 		/* New position is between the existing pair of pairs.  */
-		const float keep_earlier
-		    = THREEWAY_SQUARE(0, cache[3], byte, blen);
+		b = cache[3];
+		c = byte;
+	    } else {
+		/* New position is before the existing pair of pairs.  */
+		b = byte;
+		c = cache[3];
+	    }
+	    keep_earlier = THREEWAY_SQUARE(0, b, c, blen);
+	    if (byte > cache[3]) {
 		if (keep_later < keep_earlier) {
 		    cache[2] = utf8;
 		    cache[3] = byte;
@@ -7415,9 +7424,6 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 		}
 	    }
 	    else {
-		/* New position is before the existing pair of pairs.  */
-		const float keep_earlier
-		    = THREEWAY_SQUARE(0, byte, cache[3], blen);
 		if (! (keep_later < keep_earlier)) {
 		    cache[0] = cache[2];
 		    cache[1] = cache[3];
