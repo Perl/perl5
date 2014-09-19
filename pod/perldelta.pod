@@ -249,6 +249,10 @@ L<Locale::Codes> has been upgraded from version 3.31 to 3.32.
 
 =item *
 
+L<Math::BigInt> has been upgraded from version 1.9996 to 1.9997.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 5.021003 to 5.20140915.
 
 =item *
