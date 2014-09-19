@@ -741,6 +741,13 @@ Aliasing (e.g., via C<*x = *y>) could confuse list assignments that mention
 the two names for the same variable on either side, causing wrong values to
 be assigned.  [perl #15667]
 
+=item *
+
+Long here-doc terminators could cause a bad read on short lines of input.
+This has been fixed.  It is doubtful that any crash could have occurred.
+This bug goes back to when here-docs were introduced in perl 3.000
+twenty-five years ago.
+
 =back
 
 =head1 Known Problems
