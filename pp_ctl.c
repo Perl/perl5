@@ -2121,29 +2121,30 @@ PP(pp_enteriter)
 	    SvGETMAGIC(sv);
 	    SvGETMAGIC(right);
 	    if (RANGE_IS_NUMERIC(sv,right)) {
+		NV nv;
 		cx->cx_type &= ~CXTYPEMASK;
 		cx->cx_type |= CXt_LOOP_LAZYIV;
 		/* Make sure that no-one re-orders cop.h and breaks our
 		   assumptions */
 		assert(CxTYPE(cx) == CXt_LOOP_LAZYIV);
 #ifdef NV_PRESERVES_UV
-		if ((SvOK(sv) && ((SvNV_nomg(sv) < (NV)IV_MIN) ||
-				  (SvNV_nomg(sv) > (NV)IV_MAX)))
+		if ((SvOK(sv) && (((nv = SvNV_nomg(sv)) < (NV)IV_MIN) ||
+				  (nv > (NV)IV_MAX)))
 			||
-		    (SvOK(right) && ((SvNV_nomg(right) > (NV)IV_MAX) ||
-				     (SvNV_nomg(right) < (NV)IV_MIN))))
+		    (SvOK(right) && (((nv = SvNV_nomg(right)) > (NV)IV_MAX) ||
+				     (nv < (NV)IV_MIN))))
 #else
-		if ((SvOK(sv) && ((SvNV_nomg(sv) <= (NV)IV_MIN)
+		if ((SvOK(sv) && (((nv = SvNV_nomg(sv)) <= (NV)IV_MIN)
 				  ||
-		                  ((SvNV_nomg(sv) > 0) &&
-					((SvUV_nomg(sv) > (UV)IV_MAX) ||
-					 (SvNV_nomg(sv) > (NV)UV_MAX)))))
+				  ((nv > 0) &&
+					((nv > (NV)UV_MAX) ||
+					 (SvUV_nomg(sv) > (UV)IV_MAX)))))
 			||
-		    (SvOK(right) && ((SvNV_nomg(right) <= (NV)IV_MIN)
+		    (SvOK(right) && (((nv = SvNV_nomg(right)) <= (NV)IV_MIN)
 				     ||
-				     ((SvNV_nomg(right) > 0) &&
-					((SvUV_nomg(right) > (UV)IV_MAX) ||
-					 (SvNV_nomg(right) > (NV)UV_MAX))
+				     ((nv > 0) &&
+					((nv > (NV)UV_MAX) ||
+					 (SvUV_nomg(right) > (UV)IV_MAX))
 				     ))))
 #endif
 		    DIE(aTHX_ "Range iterator outside integer range");
