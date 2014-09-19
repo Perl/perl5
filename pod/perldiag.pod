@@ -2104,7 +2104,8 @@ is experimental, so its behavior may change or even be removed
 in any future release of perl.  See the explanation under
 L<perlsyn/Experimental Details on given and when>.
 
-=item Global symbol "%s" requires explicit package name
+=item Global symbol "%s" requires explicit package name (did you forget to
+declare "my %s"?)
 
 (F) You've said "use strict" or "use strict vars", which indicates 
 that all variables must either be lexically scoped (using "my" or "state"), 
