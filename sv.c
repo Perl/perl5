@@ -7395,13 +7395,9 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 	    if (keep_later < keep_earlier) {
                 cache[2] = cache[0];
                 cache[3] = cache[1];
-                cache[0] = utf8;
-                cache[1] = byte;
 	    }
-	    else {
-                cache[0] = utf8;
-                cache[1] = byte;
-	    }
+            cache[0] = utf8;
+            cache[1] = byte;
 	}
 	else {
 	    const float keep_later = THREEWAY_SQUARE(0, byte, cache[1], blen);
@@ -7422,16 +7418,12 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 		/* New position is before the existing pair of pairs.  */
 		const float keep_earlier
 		    = THREEWAY_SQUARE(0, byte, cache[3], blen);
-		if (keep_later < keep_earlier) {
-		    cache[2] = utf8;
-		    cache[3] = byte;
-		}
-		else {
+		if (! (keep_later < keep_earlier)) {
 		    cache[0] = cache[2];
 		    cache[1] = cache[3];
-		    cache[2] = utf8;
-		    cache[3] = byte;
 		}
+		cache[2] = utf8;
+		cache[3] = byte;
 	    }
 	}
     }
