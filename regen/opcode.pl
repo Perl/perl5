@@ -490,6 +490,8 @@ EOF
     # remove podcheck.t-defeating leading char
     $header =~ s/^\@//gm;
     print $fh $header;
+    my $v = (::perl_version())[3];
+    print $fh qq{\nour \$VERSION = "$v";\n\n};
 
     # for each flag/bit combination, find the ops which use it
     my %combos;
