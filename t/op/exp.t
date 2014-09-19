@@ -8,7 +8,9 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 30;
+use Config;
+
+plan tests => 31;
 
 # compile time evaluation
 
@@ -109,3 +111,11 @@ cmp_ok(round(atan2($x1, $x2)), '==', '0.463647609', "atan2($x1, $x2)");
 # atan2() tests testing with -0.0, 0.0, -1.0, 1.0 were removed due to
 # differing results from calls to atan2() on various OS's and
 # architectures.  See perlport.pod for more information.
+
+SKIP: {
+    unless ($Config{usequadmath}) {
+        skip "need usequadmath", 1;
+    }
+    # For quadmath we have a known precision.  
+    is(sqrt(2), '1.4142135623730950488016887242097', "quadmath sqrt");
+}
