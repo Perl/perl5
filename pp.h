@@ -379,7 +379,6 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 #define ARGTARG		PL_op->op_targ
 
-    /* See OPpTARGET_MY: */
 #define MAXARG		(PL_op->op_private & OPpARG4_MASK)
 
 #define SWITCHSTACK(f,t) \
