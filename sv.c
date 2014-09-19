@@ -7403,38 +7403,35 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
                 cache[1] = byte;
 	    }
 	}
-	else if (byte > cache[3]) {
-	    /* New position is between the existing pair of pairs.  */
-	    const float keep_earlier
-		= THREEWAY_SQUARE(0, cache[3], byte, blen);
-	    const float keep_later
-		= THREEWAY_SQUARE(0, byte, cache[1], blen);
-
-	    if (keep_later < keep_earlier) {
-                cache[2] = utf8;
-                cache[3] = byte;
-	    }
-	    else {
-                cache[0] = utf8;
-                cache[1] = byte;
-	    }
-	}
 	else {
- 	    /* New position is before the existing pair of pairs.  */
-	    const float keep_earlier
-		= THREEWAY_SQUARE(0, byte, cache[3], blen);
-	    const float keep_later
-		= THREEWAY_SQUARE(0, byte, cache[1], blen);
-
-	    if (keep_later < keep_earlier) {
-                cache[2] = utf8;
-                cache[3] = byte;
+	    const float keep_later = THREEWAY_SQUARE(0, byte, cache[1], blen);
+	    if (byte > cache[3]) {
+		/* New position is between the existing pair of pairs.  */
+		const float keep_earlier
+		    = THREEWAY_SQUARE(0, cache[3], byte, blen);
+		if (keep_later < keep_earlier) {
+		    cache[2] = utf8;
+		    cache[3] = byte;
+		}
+		else {
+		    cache[0] = utf8;
+		    cache[1] = byte;
+		}
 	    }
 	    else {
-                cache[0] = cache[2];
-                cache[1] = cache[3];
-                cache[2] = utf8;
-                cache[3] = byte;
+		/* New position is before the existing pair of pairs.  */
+		const float keep_earlier
+		    = THREEWAY_SQUARE(0, byte, cache[3], blen);
+		if (keep_later < keep_earlier) {
+		    cache[2] = utf8;
+		    cache[3] = byte;
+		}
+		else {
+		    cache[0] = cache[2];
+		    cache[1] = cache[3];
+		    cache[2] = utf8;
+		    cache[3] = byte;
+		}
 	    }
 	}
     }
