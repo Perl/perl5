@@ -1978,16 +1978,22 @@ PP(pp_dbstate)
 	return NORMAL;
 }
 
+/* S_leave_common: Common code that many functions in this file use on
+		   scope exit.  */
+
 /* SVs on the stack that have any of the flags passed in are left as is.
    Other SVs are protected via the mortals stack if lvalue is true, and
-   copied otherwise. */
+   copied otherwise.
+
+   Also, taintedness is cleared.
+*/
 
 STATIC SV **
-S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme,
+S_leave_common(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme,
 			      U32 flags, bool lvalue)
 {
     bool padtmp = 0;
-    PERL_ARGS_ASSERT_ADJUST_STACK_ON_LEAVE;
+    PERL_ARGS_ASSERT_LEAVE_COMMON;
 
     TAINT_NOT;
     if (flags & SVs_PADTMP) {
@@ -2059,7 +2065,7 @@ PP(pp_leave)
 
     gimme = OP_GIMME(PL_op, (cxstack_ix >= 0) ? gimme : G_SCALAR);
 
-    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP,
+    SP = leave_common(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP,
 			       PL_op->op_private & OPpLVALUE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
@@ -2221,7 +2227,7 @@ PP(pp_leaveloop)
     mark = newsp;
     newsp = PL_stack_base + cx->blk_loop.resetsp;
 
-    SP = adjust_stack_on_leave(newsp, SP, MARK, gimme, 0,
+    SP = leave_common(newsp, SP, MARK, gimme, 0,
 			       PL_op->op_private & OPpLVALUE);
     PUTBACK;
 
@@ -4279,7 +4285,7 @@ PP(pp_leaveeval)
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
 
-    SP = adjust_stack_on_leave((gimme == G_VOID) ? SP : newsp, SP, newsp,
+    SP = leave_common((gimme == G_VOID) ? SP : newsp, SP, newsp,
 				gimme, SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
@@ -4376,7 +4382,7 @@ PP(pp_leavetry)
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);
 
-    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme,
+    SP = leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
@@ -4422,7 +4428,7 @@ PP(pp_leavegiven)
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_GIVEN);
 
-    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme,
+    SP = leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
@@ -4995,7 +5001,7 @@ PP(pp_leavewhen)
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
 
-    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme,
+    SP = leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;   /* pop $1 et al */
 

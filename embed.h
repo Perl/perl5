@@ -1568,7 +1568,6 @@
 #define refto(a)		S_refto(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_PP_CTL_C)
-#define adjust_stack_on_leave(a,b,c,d,e,f)	S_adjust_stack_on_leave(aTHX_ a,b,c,d,e,f)
 #define check_type_and_open(a)	S_check_type_and_open(aTHX_ a)
 #define destroy_matcher(a)	S_destroy_matcher(aTHX_ a)
 #define do_smartmatch(a,b,c)	S_do_smartmatch(aTHX_ a,b,c)
@@ -1582,6 +1581,7 @@
 #define dopoptoloop(a)		S_dopoptoloop(aTHX_ a)
 #define dopoptosub_at(a,b)	S_dopoptosub_at(aTHX_ a,b)
 #define dopoptowhen(a)		S_dopoptowhen(aTHX_ a)
+#define leave_common(a,b,c,d,e,f)	S_leave_common(aTHX_ a,b,c,d,e,f)
 #define make_matcher(a)		S_make_matcher(aTHX_ a)
 #define matcher_matches_sv(a,b)	S_matcher_matches_sv(aTHX_ a,b)
 #define num_overflow		S_num_overflow

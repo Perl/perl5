@@ -6425,13 +6425,6 @@ PERL_CALLCONV GV*	Perl_softref2xv(pTHX_ SV *const sv, const char *const what, co
 
 #endif
 #if defined(PERL_IN_PP_CTL_C)
-STATIC SV **	S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme, U32 flags, bool lvalue)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_ADJUST_STACK_ON_LEAVE	\
-	assert(newsp); assert(sp); assert(mark)
-
 STATIC PerlIO *	S_check_type_and_open(pTHX_ SV *name)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -6485,6 +6478,13 @@ STATIC I32	S_dopoptosub_at(pTHX_ const PERL_CONTEXT* cxstk, I32 startingblock)
 
 STATIC I32	S_dopoptowhen(pTHX_ I32 startingblock)
 			__attribute__warn_unused_result__;
+
+STATIC SV **	S_leave_common(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme, U32 flags, bool lvalue)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_LEAVE_COMMON	\
+	assert(newsp); assert(sp); assert(mark)
 
 STATIC PMOP*	S_make_matcher(pTHX_ REGEXP* re)
 			__attribute__warn_unused_result__
