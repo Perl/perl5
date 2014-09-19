@@ -1730,6 +1730,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 	    no_bareword_allowed(o);
 	else {
 	    if (ckWARN(WARN_VOID)) {
+		NV nv;
 		/* don't warn on optimised away booleans, eg 
 		 * use constant Foo, 5; Foo || print; */
 		if (cSVOPo->op_private & OPpCONST_SHORTCIRCUIT)
@@ -1737,7 +1738,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 		/* the constants 0 and 1 are permitted as they are
 		   conventionally used as dummies in constructs like
 		        1 while some_condition_with_side_effects;  */
-		else if (SvNIOK(sv) && (SvNV(sv) == 0.0 || SvNV(sv) == 1.0))
+		else if (SvNIOK(sv) && ((nv = SvNV(sv)) == 0.0 || nv == 1.0))
 		    useless = NULL;
 		else if (SvPOK(sv)) {
                     SV * const dsv = newSVpvs("");
