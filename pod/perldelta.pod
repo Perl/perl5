@@ -404,7 +404,8 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 L<Global symbol "%s" requires explicit package name|perldiag/Global symbol "%s" requires explicit package name (did you forget to declare "my %s"?)>
 
 This message has had '(did you forget to declare "my %s"?)' appended to it,
-to make it more helpful to new Perl programmers.  [perl #121638]
+to make it more helpful to new Perl programmers.
+L<[perl #121638]|https://rt.perl.org/Ticket/Display.html?id=121638>
 
 =back
 
@@ -750,7 +751,8 @@ C<sort subname LIST> now supports lexical subs for the comparison routine.
 
 Aliasing (e.g., via C<*x = *y>) could confuse list assignments that mention
 the two names for the same variable on either side, causing wrong values to
-be assigned.  [perl #15667]
+be assigned.
+L<[perl #15667]|https://rt.perl.org/Ticket/Display.html?id=15667>
 
 =item *
 
