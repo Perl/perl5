@@ -308,7 +308,7 @@ C<$EXTENDED_OS_ERROR>) when used as strings use C<LC_MESSAGES>.
 
 The default behavior is restored with the S<C<no locale>> pragma, or
 upon reaching the end of the block enclosing C<use locale>.
-Note that C<use locale> and C<use locale ':not_characters'> may be
+Note that C<use locale> calls may be
 nested, and that what is in effect within an inner scope will revert to
 the outer scope's rules at the end of the inner scope.
 
