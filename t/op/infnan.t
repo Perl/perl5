@@ -34,12 +34,16 @@ my @NaN = ("NAN", "nan", "qnan", "SNAN", "NanQ", "NANS",
 
 my @num_fmt = qw(e f g a d u o b x p);
 
-my $inf_tests = 13 + @num_fmt + 8 + 3 * @PInf + 3 * @NInf + 5 + 3;
-my $nan_tests =  8 + @num_fmt + 4 + 2 * @NaN + 3;
+my $inf_tests = 13 + @num_fmt + 8 + 3 * @PInf + 3 * @NInf + 14 + 3;
+my $nan_tests =  8 + @num_fmt + 4 + 2 * @NaN + 14;
 
-my $infnan_tests = 4;
+my $infnan_tests = 13;
 
-plan tests => $inf_tests + $nan_tests + $infnan_tests;
+plan tests => $inf_tests + 1 + $nan_tests + 1 + $infnan_tests + 1;
+
+print "# inf_tests    = $inf_tests\n";
+print "# nan_tests    = $nan_tests\n";
+print "# infnan_tests = $infnan_tests\n";
 
 my $has_inf;
 my $has_nan;
@@ -108,6 +112,24 @@ SKIP: {
   is(1/$PInf, 0, "one per +Inf is zero");
   is(1/$NInf, 0, "one per -Inf is zero");
 
+  my ($PInfPP, $PInfMM) = ($PInf, $PInf);
+  my ($NInfPP, $NInfMM) = ($NInf, $NInf);;
+  $PInfPP++;
+  $PInfMM--;
+  $NInfPP++;
+  $NInfMM--;
+  is($PInfPP, $PInf, "+inf++ is +inf");
+  is($PInfMM, $PInf, "+inf-- is +inf");
+  is($NInfPP, $NInf, "-inf++ is -inf");
+  is($NInfMM, $NInf, "-inf-- is -inf");
+
+  ok($PInf, "+inf is true");
+  ok($NInf, "-inf is true");
+
+  is(sqrt($PInf), $PInf, "sqrt(+inf) is +inf");
+  is(exp($PInf), $PInf, "exp(+inf) is +inf");
+  is(exp($NInf), 0, "exp(-inf) is zero");
+
  SKIP: {
      my $here = "$^O $Config{osvers}";
      if ($here =~ /^hpux 10/) {
@@ -124,6 +146,8 @@ SKIP: {
         cmp_ok("$i" + 0, '==', 0, "false infinity $i");
     }
 }
+
+is(curr_test() - 1, $inf_tests, "expected number of inf tests");
 
 SKIP: {
   if ($NaN == 0) {
@@ -164,9 +188,28 @@ SKIP: {
     is("@{[$i+0]}", "NaN", "$i value stringifies as NaN");
   }
 
+  ok(!($NaN <  0), "NaN is not lt zero");
+  ok(!($NaN == 0), "NaN is not == zero");
+  ok(!($NaN >  0), "NaN is not gt zero");
+
+  ok(!($NaN < $NaN), "NaN is not lt NaN");
+  ok(!($NaN > $NaN), "NaN is not gt NaN");
+
   # is() okay with $NaN because it uses eq.
   is($NaN * 0, $NaN, "NaN times zero is NaN");
   is($NaN * 2, $NaN, "NaN times two is NaN");
+
+  my ($NaNPP, $NaNMM) = ($NaN, $NaN);
+  $NaNPP++;
+  $NaNMM--;
+  is($NaNPP, $NaN, "+inf++ is +inf");
+  is($NaNMM, $NaN, "+inf-- is +inf");
+
+  ok($NaN, "NaN is true");
+
+  is(sqrt($NaN), $NaN, "sqrt(nan) is nan");
+  is(exp($NaN), $NaN, "exp(nan) is nan");
+  is(sin($NaN), $NaN, "sin(nan) is nan");
 
  SKIP: {
      my $here = "$^O $Config{osvers}";
@@ -176,6 +219,9 @@ SKIP: {
      is(sin(9**9**9), $NaN, "sin(9**9**9) is NaN");
   }
 }
+
+is(curr_test() - 1, $inf_tests + 1 + $nan_tests,
+   "expected number of nan tests");
 
 SKIP: {
   unless ($has_inf && $has_nan) {
@@ -187,4 +233,19 @@ SKIP: {
   is($PInf * $NaN,  $NaN, "Inf times NaN is NaN");
   is($PInf + $NaN,  $NaN, "Inf plus NaN is NaN");
   is($PInf - $PInf, $NaN, "Inf minus inf is NaN");
+  is($PInf / $PInf, $NaN, "Inf div inf is NaN");
+  is($PInf % $PInf, $NaN, "Inf mod inf is NaN");
+
+  ok(!($NaN <  $PInf), "NaN is not lt +inf");
+  ok(!($NaN == $PInf), "NaN is not eq +inf");
+  ok(!($NaN >  $PInf), "NaN is not gt +inf");
+
+  ok(!($NaN >  $NInf), "NaN is not lt -inf");
+  ok(!($NaN == $NInf), "NaN is not eq -inf");
+  ok(!($NaN <  $NInf), "NaN is not gt -inf");
+
+  is(sin($PInf), $NaN, "sin(+inf) is nan");
 }
+
+is(curr_test() - 1, $inf_tests + 1 + $nan_tests + 1 + $infnan_tests,
+   "expected number of nan tests");
