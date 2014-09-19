@@ -594,7 +594,7 @@ to do so, before returning to Perl.
 
 The defines and labels for the flags in the C<op_private> field of OPs
 are now auto-generated from data in F<regen/op_private>. The noticeable
-affect of this is that some of the flag output of C<Concise> might differ
+effect of this is that some of the flag output of C<Concise> might differ
 slightly, and the flag output of C<perl -Dx> may differ considerably (they
 both use the same set of labels now). Also in debugging builds, there
 is a new assert in C<op_free()> that checks that the op doesn't have any
