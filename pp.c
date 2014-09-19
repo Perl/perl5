@@ -741,6 +741,9 @@ PP(pp_study)
     RETPUSHYES;
 }
 
+
+/* also used for: pp_transr() */
+
 PP(pp_trans)
 {
     dSP; dTARG;
@@ -934,6 +937,9 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
     }
 }
 
+
+/* also used for: pp_schomp() */
+
 PP(pp_schop)
 {
     dSP; dTARGET;
@@ -945,6 +951,9 @@ PP(pp_schop)
     SETTARG;
     RETURN;
 }
+
+
+/* also used for: pp_chomp() */
 
 PP(pp_chop)
 {
@@ -1059,6 +1068,9 @@ PP(pp_undef)
 
     RETPUSHUNDEF;
 }
+
+
+/* also used for: pp_i_postdec() pp_i_postinc() pp_postdec() */
 
 PP(pp_postinc)
 {
@@ -2097,6 +2109,9 @@ PP(pp_ncmp)
     RETURN;
 }
 
+
+/* also used for: pp_sge() pp_sgt() pp_slt() */
+
 PP(pp_sle)
 {
     dSP;
@@ -2206,6 +2221,9 @@ PP(pp_bit_and)
       RETURN;
     }
 }
+
+
+/* also used for: pp_bit_xor() */
 
 PP(pp_bit_or)
 {
@@ -2673,6 +2691,9 @@ PP(pp_atan2)
     }
 }
 
+
+/* also used for: pp_cos() pp_exp() pp_log() pp_sqrt() */
+
 PP(pp_sin)
 {
     dSP; dTARGET;
@@ -2879,6 +2900,9 @@ PP(pp_abs)
     }
     RETURN;
 }
+
+
+/* also used for: pp_hex() */
 
 PP(pp_oct)
 {
@@ -3186,6 +3210,9 @@ PP(pp_vec)
     RETURN;
 }
 
+
+/* also used for: pp_rindex() */
+
 PP(pp_index)
 {
     dSP; dTARGET;
@@ -3463,6 +3490,9 @@ PP(pp_crypt)
 
 /* Generally UTF-8 and UTF-EBCDIC are indistinguishable at this level.  So 
  * most comments below say UTF-8, when in fact they mean UTF-EBCDIC as well */
+
+
+/* also used for: pp_lcfirst() */
 
 PP(pp_ucfirst)
 {
@@ -4452,7 +4482,11 @@ PP(pp_kvaslice)
     RETURN;
 }
 
+
 /* Smart dereferencing for keys, values and each */
+
+/* also used for: pp_reach() pp_rvalues() */
+
 PP(pp_rkeys)
 {
     dSP;
@@ -4515,6 +4549,7 @@ PP(pp_aeach)
     RETURN;
 }
 
+/* also used for: pp_avalues()*/
 PP(pp_akeys)
 {
     dSP;
@@ -5287,6 +5322,7 @@ PP(pp_push)
     RETURN;
 }
 
+/* also used for: pp_pop()*/
 PP(pp_shift)
 {
     dSP;
@@ -5920,6 +5956,9 @@ PP(pp_lock)
     RETURN;
 }
 
+
+/* used for: pp_padany(), pp_mapstart(), pp_custom(); plus any system ops
+ * that aren't implemented on a particular platform */
 
 PP(unimplemented_op)
 {

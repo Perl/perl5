@@ -2743,7 +2743,10 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
     return 0;
 }
 
-PP(pp_goto) /* also pp_dump */
+
+/* also used for: pp_dump() */
+
+PP(pp_goto)
 {
     dVAR; dSP;
     OP *retop = NULL;
@@ -3653,6 +3656,9 @@ S_path_is_searchable(const char *name)
     else
 	return TRUE;
 }
+
+
+/* also used for: pp_dofile() */
 
 PP(pp_require)
 {

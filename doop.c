@@ -1215,6 +1215,9 @@ finish:
     SvTAINT(sv);
 }
 
+
+/* used for: pp_keys(), pp_values() */
+
 OP *
 Perl_do_kv(pTHX)
 {

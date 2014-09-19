@@ -68,6 +68,9 @@ PP(pp_gvsv)
     RETURN;
 }
 
+
+/* also used for: pp_lineseq() pp_regcmaybe() pp_scalar() pp_scope() */
+
 PP(pp_null)
 {
     return NORMAL;
@@ -100,6 +103,9 @@ PP(pp_gv)
 	PL_sawalias = TRUE;
     RETURN;
 }
+
+
+/* also used for: pp_andassign() */
 
 PP(pp_and)
 {
@@ -464,6 +470,9 @@ PP(pp_eq)
     RETURN;
 }
 
+
+/* also used for: pp_i_predec() pp_i_preinc() pp_predec() */
+
 PP(pp_preinc)
 {
     dSP;
@@ -484,6 +493,9 @@ PP(pp_preinc)
     return NORMAL;
 }
 
+
+/* also used for: pp_orassign() */
+
 PP(pp_or)
 {
     dSP;
@@ -496,6 +508,9 @@ PP(pp_or)
 	RETURNOP(cLOGOP->op_other);
     }
 }
+
+
+/* also used for: pp_dor() pp_dorassign() */
 
 PP(pp_defined)
 {
@@ -720,6 +735,9 @@ PP(pp_add)
     }
 }
 
+
+/* also used for: pp_aelemfast_lex() */
+
 PP(pp_aelemfast)
 {
     dSP;
@@ -769,6 +787,8 @@ PP(pp_pushre)
 }
 
 /* Oversized hot code. */
+
+/* also used for: pp_say() */
 
 PP(pp_print)
 {
@@ -863,6 +883,9 @@ PP(pp_print)
     XPUSHs(&PL_sv_undef);
     RETURN;
 }
+
+
+/* also used for: pp_rv2hv() */
 
 PP(pp_rv2av)
 {
