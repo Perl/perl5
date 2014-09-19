@@ -520,9 +520,9 @@ addbits('repeat', 6 => qw(OPpREPEAT_DOLIST DOLIST)); # List replication
 #   ---  -------------       -----   ----------             -----
 #     0  OPpENTERSUB_INARGS  context
 #     1  HINT_STRICT_REFS    check   HINT_STRICT_REFS       check
-#     2  OPpENTERSUB_HASTARG check
+#     2  OPpENTERSUB_HASTARG checki  OPpENTERSUB_HASTARG
 #     3  OPpENTERSUB_AMPER   check   OPpENTERSUB_AMPER      parser
-#     4  OPpENTERSUB_DB      check
+#     4  OPpENTERSUB_DB      check   OPpENTERSUB_DB
 #     5  OPpDEREF_AV         context
 #     6  OPpDEREF_HV         context OPpMAY_RETURN_CONSTANT parser/context
 #     7  OPpLVAL_INTRO       context OPpENTERSUB_NOPAREN    parser
@@ -538,24 +538,18 @@ addbits('entersub',
     # 5..6 => OPpDEREF,      already defined above
     # 7    => OPpLVAL_INTRO, already defined above
 );
-addbits('rv2cv',
-    # If a constant sub, return the constant
-    1 => qw(OPpHINT_STRICT_REFS    STRICT),  # 'use strict' in scope
 
-    3 => qw(OPpENTERSUB_AMPER      AMPER),  # Used & form to call
-
-    6 => qw(OPpMAY_RETURN_CONSTANT CONST),
-    7 => qw(OPpENTERSUB_NOPAREN    NO() ),  # bare sub call (without parens)
-);
-
-# XXX perhaps ought the clear these flags in Perl_doref when converting
-# and entersub into an rv2cv???? Failing that, update the comments above
-# and add them as part of the main addbits('rv2cv'.
+# note that some of these flags are just left-over from when an entersub
+# is converted into an rv2cv, and could probably be cleared/re-assigned
 
 addbits('rv2cv',
-              # If a constant sub, return the constant
-    2 => qw(OPpENTERSUB_HASTARG TARG),
-    4 => qw(OPpENTERSUB_DB       DBG   ), # Debug subroutine
+    1 => qw(OPpHINT_STRICT_REFS    STRICT), # 'use strict' in scope
+    2 => qw(OPpENTERSUB_HASTARG    TARG  ), # If const sub, return the const
+    3 => qw(OPpENTERSUB_AMPER      AMPER ), # Used & form to call
+    4 => qw(OPpENTERSUB_DB         DBG   ), # Debug subroutine
+
+    6 => qw(OPpMAY_RETURN_CONSTANT CONST ),
+    7 => qw(OPpENTERSUB_NOPAREN    NO()  ), # bare sub call (without parens)
 );
 
 
