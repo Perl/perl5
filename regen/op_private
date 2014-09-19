@@ -307,13 +307,10 @@ addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
 #
 # in constructs like my $x; ...; $x = $a + $b,
 # the sassign is optimised away and OPpTARGET_MY is set on the add op
-
-# XXX the old Concise.pm disagreed with regen/opcodes as to which ops have
-# this flag: in Concise, but not T:
-#       bit_and bit_or bit_xor chop complement join negate postdec postinc
-#       quotemeta schop sprintf
-# in T but not Concise:
-#       srand
+#
+# Note that OPpTARGET_MY is mainly used at compile-time. At run time,
+# the pp function just updates the SV pointed to by op_targ, and doesn't
+# care whether that's a PADTMP or a lexical var.
 
 addbits($_, 4 => qw(OPpTARGET_MY TARGMY))
     for ops_with_flag('T'),
