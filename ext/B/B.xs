@@ -676,7 +676,7 @@ struct OP_methods {
 #if PERL_VERSION >= 17
   { STR_WITH_LEN("code_list"),OPp,   STRUCT_OFFSET(struct pmop, op_code_list),},/*13*/
 #else
-  { STR_WITH_LEN("code_list"),op_offset_special, 0,
+  { STR_WITH_LEN("code_list"),op_offset_special, 0,                         }, /*13*/
 #endif
   { STR_WITH_LEN("sv"),      SVp,     STRUCT_OFFSET(struct svop, op_sv),    },/*14*/
   { STR_WITH_LEN("gv"),      SVp,     STRUCT_OFFSET(struct svop, op_sv),    },/*15*/
