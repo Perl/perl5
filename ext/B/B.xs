@@ -1028,11 +1028,11 @@ next(o)
 
 	if (op_methods[ix].type == op_offset_special)
 	    switch (ix) {
-	    case 1: /* op_sibling */
+	    case 1: /* B::OP::op_sibling */
 		ret = make_op_object(aTHX_ OP_SIBLING(o));
 		break;
 
-	    case 8: /* pmreplstart */
+	    case 8: /* B::PMOP::pmreplstart */
 		ret = make_op_object(aTHX_
 				cPMOPo->op_type == OP_SUBST
 				    ?  cPMOPo->op_pmstashstartu.op_pmreplstart
@@ -1040,22 +1040,22 @@ next(o)
 		      );
 		break;
 #ifdef USE_ITHREADS
-	    case 21: /* filegv */
+	    case 21: /* B::COP::filegv */
 		ret = make_sv_object(aTHX_ (SV *)CopFILEGV((COP*)o));
 		break;
 #endif
 #ifndef USE_ITHREADS
-	    case 22: /* file */
+	    case 22: /* B::COP::file */
 		ret = sv_2mortal(newSVpv(CopFILE((COP*)o), 0));
 		break;
 #endif
 #ifdef USE_ITHREADS
-	    case 23: /* stash */
+	    case 23: /* B::COP::stash */
 		ret = make_sv_object(aTHX_ (SV *)CopSTASH((COP*)o));
 		break;
 #endif
 #if PERL_VERSION >= 17 || !defined USE_ITHREADS
-	    case 24: /* stashpv */
+	    case 24: /* B::COP::stashpv */
 #  if PERL_VERSION >= 17
 		ret = sv_2mortal(CopSTASH((COP*)o)
 				&& SvTYPE(CopSTASH((COP*)o)) == SVt_PVHV
@@ -1066,15 +1066,15 @@ next(o)
 #  endif
 		break;
 #endif
-	    case 26: /* size */
+	    case 26: /* B::OP::size */
 		ret = sv_2mortal(newSVuv((UV)(opsizes[cc_opclass(aTHX_ o)])));
 		break;
-	    case 27: /* name */
-	    case 28: /* desc */
+	    case 27: /* B::OP::name */
+	    case 28: /* B::OP::desc */
 		ret = sv_2mortal(newSVpv(
 			    (char *)(ix == 28 ? OP_DESC(o) : OP_NAME(o)), 0));
 		break;
-	    case 29: /* ppaddr */
+	    case 29: /* B::OP::ppaddr */
 		{
 		    int i;
 		    ret = sv_2mortal(Perl_newSVpvf(aTHX_ "PL_ppaddr[OP_%s]",
@@ -1083,16 +1083,16 @@ next(o)
 			SvPVX(ret)[i] = toUPPER(SvPVX(ret)[i]);
 		}
 		break;
-	    case 30: /* type  */
-	    case 31: /* opt   */
-	    case 32: /* spare */
+	    case 30: /* B::OP::type  */
+	    case 31: /* B::OP::opt   */
+	    case 32: /* B::OP::spare */
 #if PERL_VERSION >= 17
-	    case 47: /* slabbed  */
-	    case 48: /* savefree */
-	    case 49: /* static   */
+	    case 47: /* B::OP::slabbed  */
+	    case 48: /* B::OP::savefree */
+	    case 49: /* B::OP::static   */
 #if PERL_VERSION >= 19
-	    case 50: /* folded   */
-	    case 51: /* lastsib  */
+	    case 50: /* B::OP::folded   */
+	    case 51: /* B::OP::lastsib  */
 #endif
 #endif
 	    /* These are all bitfields, so we can't take their addresses */
@@ -1106,7 +1106,7 @@ next(o)
 		                    : ix == 51 ? o->op_lastsib
 		                    :            o->op_spare)));
 		break;
-	    case 33: /* children */
+	    case 33: /* B::LISTOP::children */
 		{
 		    OP *kid;
 		    UV i = 0;
@@ -1115,7 +1115,7 @@ next(o)
 		    ret = sv_2mortal(newSVuv(i));
 		}
 		break;
-	    case 34: /* pmreplroot */
+	    case 34: /* B::PMOP::pmreplroot */
 		if (cPMOPo->op_type == OP_PUSHRE) {
 #ifdef USE_ITHREADS
 		    ret = sv_newmortal();
@@ -1134,16 +1134,16 @@ next(o)
 		}
 		break;
 #ifdef USE_ITHREADS
-	    case 35: /* pmstashpv */
+	    case 35: /* B::PMOP::pmstashpv */
 		ret = sv_2mortal(newSVpv(PmopSTASHPV(cPMOPo),0));
 		break;
 #else
-	    case 36: /* pmstash */
+	    case 36: /* B::PMOP::pmstash */
 		ret = make_sv_object(aTHX_ (SV *) PmopSTASH(cPMOPo));
 		break;
 #endif
-	    case 37: /* precomp */
-	    case 38: /* reflags */
+	    case 37: /* B::PMOP::precomp */
+	    case 38: /* B::PMOP::reflags */
 		{
 		    REGEXP *rx = PM_GETRE(cPMOPo);
 		    ret = sv_newmortal();
@@ -1169,7 +1169,7 @@ next(o)
                  * pad of the sub the op is part of */
 		ret = make_sv_object(aTHX_ NULL);
 		break;
-	    case 41: /* pv */
+	    case 41: /* B::PVOP::pv */
 		/* OP_TRANS uses op_pv to point to a table of 256 or >=258
 		 * shorts whereas other PVOPs point to a null terminated
 		 * string.  */
@@ -1188,24 +1188,24 @@ next(o)
 		else
 		    ret = newSVpvn_flags(cPVOPo->op_pv, strlen(cPVOPo->op_pv), SVs_TEMP);
 		break;
-	    case 42: /* label */
+	    case 42: /* B::COP::label */
 		ret = sv_2mortal(newSVpv(CopLABEL(cCOPo),0));
 		break;
-	    case 43: /* arybase */
+	    case 43: /* B::COP::arybase */
 		ret = sv_2mortal(newSVuv(0));
 		break;
-	    case 44: /* warnings */
+	    case 44: /* B::COP::warnings */
 		ret = make_warnings_object(aTHX_ cCOPo);
 		break;
-	    case 45: /* io */
+	    case 45: /* B::COP::io */
 		ret = make_cop_io_object(aTHX_ cCOPo);
 		break;
-	    case 46: /* hints_hash */
+	    case 46: /* B::COP::hints_hash */
 		ret = sv_newmortal();
 		sv_setiv(newSVrv(ret, "B::RHE"),
 			PTR2IV(CopHINTHASH_get(cCOPo)));
 		break;
-	    case 52: /* parent */
+	    case 52: /* B::OP::parent */
 		ret = make_op_object(aTHX_ op_parent(o));
 		break;
 	    default:
