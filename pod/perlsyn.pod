@@ -798,9 +798,7 @@ works:
 
 Note: Some folks colloquially refer to this bit of punctuation as a
 "yada-yada" or "triple-dot", but its true name
-is actually an ellipsis.  Perl does not yet
-accept the Unicode version, U+2026 HORIZONTAL ELLIPSIS, as an alias for
-C<...>, but someday it may.
+is actually an ellipsis.
 
 =head2 PODs: Embedded Documentation
 X<POD> X<documentation>
