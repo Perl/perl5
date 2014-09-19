@@ -489,6 +489,9 @@ use File::Glob qw(:case);
             # Already merged upstream in GitHub 0116aaf4e, just awaiting
             # a new stable CPAN release
             qw(	t/pm_to_blib.t ),
+            # Already merged upstream in GitHub 46586b12c, just awaiting
+            # a new stable CPAN release
+            qw( lib/ExtUtils/Liblist/Kid.pm ),
         ],
     },
 
