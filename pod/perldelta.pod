@@ -204,6 +204,10 @@ L<CPAN::Meta::Requirements> has been upgraded from version 2.126 to 2.128.
 
 =item *
 
+L<Data::Dumper> has been upgraded from version 2.152 to 2.154.
+
+=item *
+
 L<experimental> has been upgraded from version 0.008 to 0.010.
 
 =item *
