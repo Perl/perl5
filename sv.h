@@ -362,8 +362,6 @@ perform the upgrade if necessary.  See C<svtype>.
 				       GvIMPORTED_CV_on() if it needs to be
 				       expanded to a real GV */
 #define SVpad_NAMELIST	SVp_SCREAM  /* AV is a padnamelist */
-#define SVf_IsCOW	0x00010000  /* copy on write (shared hash key if
-				       SvLEN == 0) */
 #define SVs_PADTMP	0x00020000  /* in use as tmp; only if ! SVs_PADMY */
 #define SVs_PADSTALE	0x00020000  /* lexical has gone out of scope;
 					only valid for SVs_PADMY */
@@ -403,10 +401,10 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define PRIVSHIFT 4	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
+/* Note that SVf_AMAGIC is now only set on stashes.  */
 #define SVf_AMAGIC	0x10000000  /* has magical overloaded methods */
-
-/* note that SVf_AMAGIC is now only set on stashes, so this bit is free
- * for non-HV SVs */
+#define SVf_IsCOW	0x10000000  /* copy on write (shared hash key if
+				       SvLEN == 0) */
 
 /* Ensure this value does not clash with the GV_ADD* flags in gv.h, or the
    CV_CKPROTO_* flags in op.c, or the padadd_* flags in pad.h: */

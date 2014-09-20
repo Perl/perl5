@@ -1307,9 +1307,7 @@ const struct flag_to_name second_sv_flags_names[] = {
     {SVf_OOK, "OOK,"},
     {SVf_FAKE, "FAKE,"},
     {SVf_READONLY, "READONLY,"},
-    {SVf_IsCOW, "IsCOW,"},
     {SVf_BREAK, "BREAK,"},
-    {SVf_AMAGIC, "OVERLOAD,"},
     {SVp_IOK, "pIOK,"},
     {SVp_NOK, "pNOK,"},
     {SVp_POK, "pPOK,"}
@@ -1339,6 +1337,7 @@ const struct flag_to_name hv_flags_names[] = {
     {SVphv_SHAREKEYS, "SHAREKEYS,"},
     {SVphv_LAZYDEL, "LAZYDEL,"},
     {SVphv_HASKFLAGS, "HASKFLAGS,"},
+    {SVf_AMAGIC, "OVERLOAD,"},
     {SVphv_CLONEABLE, "CLONEABLE,"}
 };
 
@@ -1442,6 +1441,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     				sv_catpv(d, "ROK,");
 	if (SvWEAKREF(sv))	sv_catpv(d, "WEAKREF,");
     }
+    if (flags & SVf_IsCOW && type != SVt_PVHV) sv_catpvs(d, "IsCOW,");
     append_flags(d, flags, second_sv_flags_names);
     if (flags & SVp_SCREAM && type != SVt_PVHV && !isGV_with_GP(sv)
 			   && type != SVt_PVAV) {

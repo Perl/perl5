@@ -5155,7 +5155,7 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
 
     if (SvREADONLY(sv))
 	Perl_croak_no_modify();
-    else if (SvIsCOW(sv))
+    else if (SvIsCOW(sv) && LIKELY(SvTYPE(sv) != SVt_PVHV))
 	S_sv_uncow(aTHX_ sv, flags);
     if (SvROK(sv))
 	sv_unref_flags(sv, flags);
