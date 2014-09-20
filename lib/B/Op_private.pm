@@ -110,7 +110,7 @@ package B::Op_private;
 our %bits;
 
 
-our $VERSION = "5.021004";
+our $VERSION = "5.021005";
 
 $bits{$_}{3} = 'OPpENTERSUB_AMPER' for qw(entersub rv2cv);
 $bits{$_}{4} = 'OPpENTERSUB_DB' for qw(entersub rv2cv);
