@@ -996,7 +996,7 @@ Perl_leave_scope(pTHX_ I32 base)
                          * readonlyness so that it can go out of scope
                          * quietly
                          */
-                        if (SvREADONLY(sv) && !SvFAKE(sv))
+                        if (SvREADONLY(sv))
                             SvREADONLY_off(sv);
 
                         if (SvOOK(sv)) { /* OOK or HvAUX */

@@ -6,7 +6,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 15 );
+    plan( tests => 16 );
 }
 
 for my $arg ('', 'q[]', qw( 1 undef )) {
@@ -66,3 +66,6 @@ eval { ${\!0} = 7 };
 like $@, qr "^Modification of a read-only value",
     'protected values still croak on assignment after SvREADONLY(..., 0)';
 is ${\3} == 3, "1", 'attempt to modify failed';
+
+eval { { my $x = ${qr//}; Internals::SvREADONLY $x, 1; () } };
+is $@, "", 'read-only lexical regexps on scope exit [perl #115254]';
