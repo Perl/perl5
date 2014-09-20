@@ -17,6 +17,32 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.4 - Edgar Allan Poe, The Narrative of Arthur Gordon Pym of Nantucket
+
+L<Announced on 2014-09-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg220267.html>
+
+  To-day, being in latitude 83° 20', longitude 43° 5' W. (the sea being
+  of an extraordinarily dark colour), we again saw land from the
+  masthead, and, upon a closer scrutiny, found it to be one of a group
+  of very large islands.  The shore was precipitous, and the interior
+  seemed to be well wooded, a circumstance which occasioned us great
+  joy.  In about four hours from our first discovering the land we came
+  to anchor in ten fathoms, sandy bottom, a league from the coast, as a
+  high surf, with strong ripples here and there, rendered a nearer
+  approach of doubtful expediency.  The two largest boats were now
+  ordered out, and a party, well armed (among whome were Peters and
+  myself), proceeded to look for an opening in the reef which appeared
+  to encircle the island.  After searching about for some time, we
+  discovered an inlet, which we were entering, when we saw four large
+  canoes put off from the shore, filled with men who seemed to be well
+  armed.  We waited for them to come up, and, as they moved with great
+  rapidity, they were soon within hail.  Captain Guy now held up a white
+  handkerchief on the blade of an oar, when the strangers made a full
+  stop, and commenced a loud jabbering all at once, intermingled with
+  occasional shouts, in which we could distinguish the words Anamoo-moo!
+  and Lama-Lama!  They continued this for at least half an hour, during
+  which we had a good opportunity of observing their appearance.
+
 =head2 v5.20.1 - Lorenzo da Ponte, Così fan tutte
 
 L<Announced on 2014-09-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg219789.html>
