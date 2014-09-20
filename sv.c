@@ -11098,10 +11098,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	long double fv;
 #  define FV_ISFINITE(x) Perl_isfinitel(x)
 #  define FV_GF PERL_PRIgldbl
+#    if defined(__VMS) && defined(__ia64) && defined(__IEEE_FLOAT)
+       /* Work around breakage in OTS$CVT_FLOAT_T_X */
+#      define NV_TO_FV(nvsv) (Perl_isnan(SvNV(nvsv)) ? LDBL_SNAN : SvNV(nvsv));
+#    else
+#      define NV_TO_FV SvNV
+#    endif
 #else
 	NV fv;
 #  define FV_ISFINITE(x) Perl_isfinite((NV)(x))
 #  define FV_GF NVgf
+#  define NV_TO_FV SvNV
 #endif
 	STRLEN have;
 	STRLEN need;
@@ -11844,7 +11851,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
             }
             else
-                fv = SvNV(argsv);
+                fv = NV_TO_FV(argsv);
 
 	    need = 0;
 	    /* frexp() (or frexpl) has some unspecified behaviour for
