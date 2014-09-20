@@ -5138,6 +5138,7 @@ t/op/local.t			See if local works
 t/op/lock.t			Tests for lock args & retval (no threads)
 t/op/loopctl.t			See if next/last/redo work
 t/op/lop.t			See if logical operators work
+t/op/lvref.t			See if lvalue references work
 t/op/magic-27839.t		Test for #27839, skipped for minitest
 t/op/magic.t			See if magic variables work
 t/op/method.t			See if method calls work
