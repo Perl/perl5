@@ -452,10 +452,16 @@ constants; e.g., C<-Inf>.
 
 =head1 Configuration and Compilation
 
-For long doubles (to get more precision and range for floating point
-numbers) one can now use the GCC quadmath library which implements
-the quadruple precision floating point numbers in x86 and ia64 platforms.
-See INSTALL for details.
+=over 4
+
+=item *
+
+For long doubles (to get more precision and range for floating point numbers)
+one can now use the GCC quadmath library which implements the quadruple
+precision floating point numbers in x86 and ia64 platforms.  See F<INSTALL> for
+details.
+
+=back
 
 =head1 Testing
 
@@ -700,9 +706,36 @@ whose value contained Latin-1 characters.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.21.4 represents approximately 4 weeks of development since Perl 5.21.3
+and contains approximately 29,000 lines of changes across 520 files from 30
+authors.
 
-  perl Porting/acknowledgements.pl v5.21.3..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 15,000 lines of changes to 390 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.21.4:
+
+Alberto Simões, Alexandre (Midnite) Jousset, Andy Dougherty, Anthony Heading,
+Brian Fraser, Chris 'BinGOs' Williams, Craig A. Berry, Daniel Dragan, David
+Mitchell, Doug Bell, Father Chrysostomos, George Greer, H.Merijn Brand, James E
+Keenan, Jarkko Hietaniemi, Jerry D. Hedden, Karen Etheridge, Karl Williamson,
+Olivier Mengué, Peter Martini, Reini Urban, Ricardo Signes, Steffen Müller,
+Steve Hay, Sullivan Beck, syber, Tadeusz Sośnierz, Tony Cook, Yves Orton,
+Ævar Arnfjörð Bjarmason.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
