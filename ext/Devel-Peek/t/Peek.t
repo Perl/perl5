@@ -140,8 +140,8 @@ do_test('immediate constant (string)',
         "bar",
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(.*POK,READONLY,(?:IsCOW,)?pPOK\\)		# $] < 5.021004
-  FLAGS = \\(.*POK,(?:IsCOW,)?READONLY,PROTECT,pPOK\\)	# $] >=5.021004
+  FLAGS = \\(.*POK,READONLY,(?:IsCOW,)?pPOK\\)		# $] < 5.021005
+  FLAGS = \\(.*POK,(?:IsCOW,)?READONLY,PROTECT,pPOK\\)	# $] >=5.021005
   PV = $ADDR "bar"\\\0
   CUR = 3
   LEN = \\d+
@@ -159,8 +159,8 @@ do_test('immediate constant (integer)',
         456,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(.*IOK,READONLY,pIOK\\)		# $] < 5.021004
-  FLAGS = \\(.*IOK,READONLY,PROTECT,pIOK\\)	# $] >=5.021004
+  FLAGS = \\(.*IOK,READONLY,pIOK\\)		# $] < 5.021005
+  FLAGS = \\(.*IOK,READONLY,PROTECT,pIOK\\)	# $] >=5.021005
   IV = 456');
 
 do_test('assignment of immediate constant (integer)',
@@ -210,16 +210,16 @@ do_test('integer constant',
         0xabcd,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(.*IOK,READONLY,pIOK\\)		# $] < 5.021004
-  FLAGS = \\(.*IOK,READONLY,PROTECT,pIOK\\)	# $] >=5.021004
+  FLAGS = \\(.*IOK,READONLY,pIOK\\)		# $] < 5.021005
+  FLAGS = \\(.*IOK,READONLY,PROTECT,pIOK\\)	# $] >=5.021005
   IV = 43981');
 
 do_test('undef',
         undef,
 'SV = NULL\\(0x0\\) at $ADDR
   REFCNT = \d+
-  FLAGS = \\(READONLY\\)			# $] < 5.021004
-  FLAGS = \\(READONLY,PROTECT\\)		# $] >=5.021004
+  FLAGS = \\(READONLY\\)			# $] < 5.021005
+  FLAGS = \\(READONLY,PROTECT\\)		# $] >=5.021005
 ');
 
 do_test('reference to scalar',
@@ -683,8 +683,8 @@ do_test('blessed reference',
     RV = $ADDR
     SV = NULL\\(0x0\\) at $ADDR
       REFCNT = \d+
-      FLAGS = \\(READONLY\\)			# $] < 5.021004
-      FLAGS = \\(READONLY,PROTECT\\)		# $] >=5.021004
+      FLAGS = \\(READONLY\\)			# $] < 5.021005
+      FLAGS = \\(READONLY,PROTECT\\)		# $] >=5.021005
     PV = $ADDR ""
     CUR = 0
     LEN = 0
@@ -714,8 +714,8 @@ do_test('constant subroutine',
     XSUBANY = $ADDR \\(CONST SV\\)
     SV = PV\\($ADDR\\) at $ADDR
       REFCNT = 1
-      FLAGS = \\(.*POK,READONLY,(?:IsCOW,)?pPOK\\)	   # $] < 5.021004
-      FLAGS = \\(.*POK,(?:IsCOW,)?READONLY,PROTECT,pPOK\\) # $] >=5.021004
+      FLAGS = \\(.*POK,READONLY,(?:IsCOW,)?pPOK\\)	   # $] < 5.021005
+      FLAGS = \\(.*POK,(?:IsCOW,)?READONLY,PROTECT,pPOK\\) # $] >=5.021005
       PV = $ADDR "Perl rules"\\\0
       CUR = 10
       LEN = \\d+
@@ -881,8 +881,8 @@ do_test('ENAMEs on a stash with no NAME',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 3
     FLAGS = \\(OOK,SHAREKEYS\\)			# $] < 5.017
-    FLAGS = \\(OOK,OVERLOAD,SHAREKEYS\\)	# $] >=5.017 && $]<5.021004
-    FLAGS = \\(OOK,SHAREKEYS,OVERLOAD\\)	# $] >=5.021004
+    FLAGS = \\(OOK,OVERLOAD,SHAREKEYS\\)	# $] >=5.017 && $]<5.021005
+    FLAGS = \\(OOK,SHAREKEYS,OVERLOAD\\)	# $] >=5.021005
     IV = 1					# $] < 5.009
     NV = $FLOAT					# $] < 5.009
     AUX_FLAGS = 0                               # $] > 5.019008
