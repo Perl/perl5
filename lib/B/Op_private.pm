@@ -427,6 +427,7 @@ $bits{readlink}{0} = $bf[0];
 @{$bits{recv}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);
 $bits{redo}{0} = $bf[0];
 $bits{ref}{0} = $bf[0];
+@{$bits{refassign}}{1,0} = ($bf[1], $bf[1]);
 $bits{refgen}{0} = $bf[0];
 $bits{regcmaybe}{0} = $bf[0];
 $bits{regcomp}{0} = $bf[0];

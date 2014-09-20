@@ -527,6 +527,7 @@ EXTCONST char* const PL_op_name[] = {
 	"introcv",
 	"clonecv",
 	"padrange",
+	"refassign",
 	"freed",
 };
 #endif
@@ -914,6 +915,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"private subroutine",
 	"private subroutine",
 	"list of private variables",
+	"lvalue ref assignment",
 	"freed op",
 };
 #endif
@@ -1315,6 +1317,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_introcv,
 	Perl_pp_clonecv,
 	Perl_pp_padrange,
+	Perl_pp_refassign,
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1712,6 +1715,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* introcv */
 	Perl_ck_null,		/* clonecv */
 	Perl_ck_null,		/* padrange */
+	Perl_ck_null,		/* refassign */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2103,6 +2107,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000040,	/* introcv */
 	0x00000040,	/* clonecv */
 	0x00000040,	/* padrange */
+	0x00000240,	/* refassign */
 };
 #endif
 
@@ -2710,6 +2715,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       -1, /* introcv */
       -1, /* clonecv */
      630, /* padrange */
+     632, /* refassign */
 
 };
 
@@ -3068,6 +3074,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* runcv         */ 0x00bd,
     /* fc            */ 0x0003,
     /* padrange      */ 0x25bc, 0x019b,
+    /* refassign     */ 0x0067,
 
 };
 
@@ -3455,6 +3462,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* INTROCV    */ (0),
     /* CLONECV    */ (0),
     /* PADRANGE   */ (OPpPADRANGE_COUNTMASK|OPpLVAL_INTRO),
+    /* REFASSIGN  */ (OPpARG2_MASK),
 
 };
 

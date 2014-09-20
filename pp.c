@@ -6160,6 +6160,11 @@ PP(pp_runcv)
     RETURN;
 }
 
+PP(pp_refassign)
+{
+    DIE(aTHX_ "Unimplemented");
+}
+
 
 /*
  * Local variables:

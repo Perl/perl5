@@ -192,6 +192,7 @@ PERL_CALLCONV OP *Perl_pp_readline(pTHX);
 PERL_CALLCONV OP *Perl_pp_readlink(pTHX);
 PERL_CALLCONV OP *Perl_pp_redo(pTHX);
 PERL_CALLCONV OP *Perl_pp_ref(pTHX);
+PERL_CALLCONV OP *Perl_pp_refassign(pTHX);
 PERL_CALLCONV OP *Perl_pp_refgen(pTHX);
 PERL_CALLCONV OP *Perl_pp_regcomp(pTHX);
 PERL_CALLCONV OP *Perl_pp_regcreset(pTHX);
