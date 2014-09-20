@@ -3029,6 +3029,13 @@ typedef pthread_key_t	perl_key;
 
 #if defined(WIN32)
 #  include "win32.h"
+#  ifdef NAN_COMPARE_BROKEN /* VC6 */
+/* We need to redefine Perl_isinf() because we most likely defined it
+ * using the <DBL_MIN || >DBL_MAX way, which is broken if the NaN
+ * compare is broken. */
+#    undef Perl_isinf
+#    define Perl_isinf(x) Perl_fp_class_inf(x)
+#  endif
 #endif
 
 #ifdef NETWARE

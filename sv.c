@@ -2821,20 +2821,7 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen) {
         return 0;
     else {
         char* s = buffer;
-        /* isnan must be first due to NAN_COMPARE_BROKEN builds, since NAN might
-           use the broken for NAN >/< ops in the inf check, and then the inf
-           check returns true for NAN on NAN_COMPARE_BROKEN compilers */
-        if (Perl_isnan(nv)) {
-            *s++ = 'N';
-            *s++ = 'a';
-            *s++ = 'N';
-            /* XXX optionally output the payload mantissa bits as
-             * "(unsigned)" (to match the nan("...") C99 function,
-             * or maybe as "(0xhhh...)"  would make more sense...
-             * provide a format string so that the user can decide?
-             * NOTE: would affect the maxlen and assert() logic.*/
-        }
-        else if (Perl_isinf(nv)) {
+        if (Perl_isinf(nv)) {
             if (nv < 0) {
                 if (maxlen < 5) /* "-Inf\0"  */
                     return 0;
@@ -2843,6 +2830,15 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen) {
             *s++ = 'I';
             *s++ = 'n';
             *s++ = 'f';
+        } else if (Perl_isnan(nv)) {
+            *s++ = 'N';
+            *s++ = 'a';
+            *s++ = 'N';
+            /* XXX optionally output the payload mantissa bits as
+             * "(unsigned)" (to match the nan("...") C99 function,
+             * or maybe as "(0xhhh...)"  would make more sense...
+             * provide a format string so that the user can decide?
+             * NOTE: would affect the maxlen and assert() logic.*/
         }
 
         else

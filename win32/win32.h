@@ -255,7 +255,8 @@ typedef unsigned short	mode_t;
 #define vsnprintf	_vsnprintf
 
 #ifdef USING_MSVC6
-/* VC6 has broken NaN semantics: NaN == NaN returns true instead of false */
+/* VC6 has broken NaN semantics: NaN == NaN returns true instead of false,
+ * and for example NaN < IV_MIN. */
 #define NAN_COMPARE_BROKEN 1
 #endif
 
