@@ -50,7 +50,7 @@ my $has_nan;
 
 SKIP: {
   if ($PInf == 0 && $NInf == 0) {
-    skip $inf_tests, "no infinity found";
+    skip "no infinity found", $inf_tests;
   }
 
   $has_inf = 1;
@@ -155,7 +155,7 @@ is(curr_test() - 1, $inf_tests, "expected number of inf tests");
 
 SKIP: {
   if ($NaN == 0) {
-    skip $nan_tests, "no nan found";
+    skip "no nan found", $nan_tests;
   }
 
   $has_nan = 1;
@@ -229,7 +229,7 @@ is(curr_test() - 1, $inf_tests + 1 + $nan_tests,
 
 SKIP: {
   unless ($has_inf && $has_nan) {
-    skip $infnan_tests, "no both Inf and Nan";
+    skip "no both Inf and Nan", $infnan_tests;
   }
 
   # is() okay with $NaN because it uses eq.
