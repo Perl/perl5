@@ -8867,9 +8867,7 @@ Perl_ck_spair(pTHX_ OP *o)
 	newop = OP_SIBLING(kidkid);
 	if (newop) {
 	    const OPCODE type = newop->op_type;
-	    if (OP_HAS_SIBLING(newop) || !(PL_opargs[type] & OA_RETSCALAR) ||
-		    type == OP_PADAV || type == OP_PADHV ||
-		    type == OP_RV2AV || type == OP_RV2HV)
+	    if (OP_HAS_SIBLING(newop) || !(PL_opargs[type] & OA_RETSCALAR))
 		return o;
 	}
         /* excise first sibling */
