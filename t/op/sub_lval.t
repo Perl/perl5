@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>205;
+plan tests=>207;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -386,6 +386,19 @@ eval <<'EOE' or $_ = $@;
 EOE
 
 like($_, qr/Can\'t return a readonly value from lvalue subroutine/);
+
+eval <<'EOF';
+  sub lv2tmpr : lvalue { my $x = *foo; Internals::SvREADONLY $x, 1; $x }
+  lv2tmpr = (2,3);
+EOF
+
+like($@, qr/Can\'t return a readonly value from lvalue subroutine at/);
+
+eval <<'EOG';
+  (lv2tmpr) = (2,3);
+EOG
+
+like($@, qr/Can\'t return a readonly value from lvalue subroutine/);
 
 sub lva : lvalue {@a}
 

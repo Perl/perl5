@@ -2266,10 +2266,7 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 	    const char *what = NULL;
 	    if (MARK < SP) {
 		assert(MARK+1 == SP);
-		if ((SvPADTMP(TOPs) ||
-		     (SvFLAGS(TOPs) & (SVf_READONLY | SVf_FAKE))
-		       == SVf_READONLY
-		    ) &&
+		if ((SvPADTMP(TOPs) || SvREADONLY(TOPs)) &&
 		    !SvSMAGICAL(TOPs)) {
 		    what =
 			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
@@ -2337,11 +2334,9 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 		           : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
 	else while (++MARK <= SP) {
 	    if (*MARK != &PL_sv_undef
-		    && (SvPADTMP(*MARK)
-		       || (SvFLAGS(*MARK) & (SVf_READONLY|SVf_FAKE))
-		             == SVf_READONLY
-		       )
+		    && (SvPADTMP(*MARK) || SvREADONLY(*MARK))
 	    ) {
+		    const bool ro = cBOOL( SvREADONLY(*MARK) );
 		    SV *sv;
 		    /* Might be flattened array after $#array =  */
 		    PUTBACK;
@@ -2353,7 +2348,7 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 	       /* diag_listed_as: Can't return %s from lvalue subroutine */
 		    Perl_croak(aTHX_
 			"Can't return a %s from lvalue subroutine",
-			SvREADONLY(TOPs) ? "readonly value" : "temporary");
+			 ro ? "readonly value" : "temporary");
 	    }
 	    else
 		*++newsp =
