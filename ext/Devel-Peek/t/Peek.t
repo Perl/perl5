@@ -1118,7 +1118,8 @@ unless ($Config{useithreads}) {
     do_test('regular string constant', perl,
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)
+  FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)	# $] < 5.021005
+  FLAGS = \\(PADMY,POK,(?:IsCOW,)?READONLY,pPOK\\)	# $] >=5.021005
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
@@ -1134,7 +1135,7 @@ unless ($Config{useithreads}) {
     do_test('string constant now an FBM', perl,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(PADMY,SMG,POK,READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
+  FLAGS = \\(PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
@@ -1154,7 +1155,7 @@ unless ($Config{useithreads}) {
     do_test('string constant still an FBM', perl,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(PADMY,SMG,POK,READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
+  FLAGS = \\(PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
@@ -1172,7 +1173,8 @@ unless ($Config{useithreads}) {
     do_test('regular string constant', beer,
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 6
-  FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)
+  FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)	# $] < 5.021005
+  FLAGS = \\(PADMY,POK,(?:IsCOW,)?READONLY,pPOK\\)	# $] >=5.021005
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
@@ -1183,7 +1185,8 @@ unless ($Config{useithreads}) {
 
     do_test('string constant quite unaffected', beer, 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 6
-  FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)
+  FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)	# $] < 5.021005
+  FLAGS = \\(PADMY,POK,(?:IsCOW,)?READONLY,pPOK\\)	# $] >=5.021005
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
@@ -1192,7 +1195,7 @@ unless ($Config{useithreads}) {
 
     my $want = 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 6
-  FLAGS = \\(PADMY,SMG,POK,READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
+  FLAGS = \\(PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
