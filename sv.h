@@ -362,6 +362,7 @@ perform the upgrade if necessary.  See C<svtype>.
 				       GvIMPORTED_CV_on() if it needs to be
 				       expanded to a real GV */
 #define SVpad_NAMELIST	SVp_SCREAM  /* AV is a padnamelist */
+#define SVf_PROTECT	0x00010000  /* very read-only */
 #define SVs_PADTMP	0x00020000  /* in use as tmp; only if ! SVs_PADMY */
 #define SVs_PADSTALE	0x00020000  /* lexical has gone out of scope;
 					only valid for SVs_PADMY */

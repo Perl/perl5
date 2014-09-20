@@ -1307,6 +1307,7 @@ const struct flag_to_name second_sv_flags_names[] = {
     {SVf_OOK, "OOK,"},
     {SVf_FAKE, "FAKE,"},
     {SVf_READONLY, "READONLY,"},
+    {SVf_PROTECT, "PROTECT,"},
     {SVf_BREAK, "BREAK,"},
     {SVp_IOK, "pIOK,"},
     {SVp_NOK, "pNOK,"},
