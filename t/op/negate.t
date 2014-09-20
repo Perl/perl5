@@ -34,9 +34,7 @@ is(-" -10", 10, "Negation of a whitespace-lead numeric string");
 is(-" -10.0", 10, "Negation of a whitespace-lead decimal string");
 is(-" -10foo", 10,
     "Negation of a whitespace-lead sting starting with a numeric");
-{ local $::TODO = 'broken';
 is(-"-e1", "+e1", "Negation of e1");
-}
 
 $x = "dogs";
 ()=0+$x;
@@ -94,9 +92,7 @@ is -$t, -97656250000000000, 'magic str+int dualvar';
     is(-" -10.0", 10, "Negation of a whitespace-lead decimal string");
     is(-" -10foo", 10,
         "Negation of a whitespace-lead sting starting with a numeric");
-    { local $::TODO = 'broken';
     is(-"-e1", "+e1", "Negation of e1 (use integer)");
-    }
 
     $x = "dogs";
     ()=0+$x;
