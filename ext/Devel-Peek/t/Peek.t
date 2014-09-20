@@ -140,7 +140,7 @@ do_test('immediate constant (string)',
         "bar",
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(.*POK,READONLY,(?:IsCOW,)?pPOK\\)
+  FLAGS = \\(.*POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK\\)
   PV = $ADDR "bar"\\\0
   CUR = 3
   LEN = \\d+
@@ -708,7 +708,7 @@ do_test('constant subroutine',
     XSUBANY = $ADDR \\(CONST SV\\)
     SV = PV\\($ADDR\\) at $ADDR
       REFCNT = 1
-      FLAGS = \\(.*POK,READONLY,(?:IsCOW,)?pPOK\\)
+      FLAGS = \\(.*POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK\\)
       PV = $ADDR "Perl rules"\\\0
       CUR = 10
       LEN = \\d+
@@ -874,7 +874,8 @@ do_test('ENAMEs on a stash with no NAME',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 3
     FLAGS = \\(OOK,SHAREKEYS\\)			# $] < 5.017
-    FLAGS = \\(OOK,OVERLOAD,SHAREKEYS\\)	# $] >=5.017
+    FLAGS = \\(OOK,OVERLOAD,SHAREKEYS\\)	# $] >=5.017 && $]<5.021004
+    FLAGS = \\(OOK,SHAREKEYS,OVERLOAD\\)	# $] >=5.021004
     IV = 1					# $] < 5.009
     NV = $FLOAT					# $] < 5.009
     AUX_FLAGS = 0                               # $] > 5.019008
