@@ -573,6 +573,12 @@ PERL_CALLCONV OP *	Perl_ck_readline(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_READLINE	\
 	assert(o)
 
+PERL_CALLCONV OP *	Perl_ck_refassign(pTHX_ OP *o)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CK_REFASSIGN	\
+	assert(o)
+
 PERL_CALLCONV OP *	Perl_ck_repeat(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -6176,6 +6182,9 @@ STATIC void	S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp
 #define PERL_ARGS_ASSERT_APPLY_ATTRS_MY	\
 	assert(stash); assert(target); assert(imopsp)
 
+STATIC I32	S_assignment_type(pTHX_ const OP *o)
+			__attribute__warn_unused_result__;
+
 STATIC void	S_bad_type_gv(pTHX_ I32 n, const char *t, GV *gv, U32 flags, const OP *kid)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
@@ -6239,9 +6248,6 @@ STATIC bool	S_is_handle_constructor(const OP *o, I32 numargs)
 			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_IS_HANDLE_CONSTRUCTOR	\
 	assert(o)
-
-STATIC I32	S_is_list_assignment(pTHX_ const OP *o)
-			__attribute__warn_unused_result__;
 
 STATIC OP*	S_listkids(pTHX_ OP* o);
 STATIC bool	S_looks_like_bool(pTHX_ const OP* o)

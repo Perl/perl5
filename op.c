@@ -5661,8 +5661,11 @@ Perl_newSLICEOP(pTHX_ I32 flags, OP *subscript, OP *listval)
 	    list(force_list(listval,   1)) );
 }
 
+#define ASSIGN_LIST   1
+#define ASSIGN_REF    2
+
 STATIC I32
-S_is_list_assignment(pTHX_ const OP *o)
+S_assignment_type(pTHX_ const OP *o)
 {
     unsigned type;
     U8 flags;
@@ -5677,15 +5680,18 @@ S_is_list_assignment(pTHX_ const OP *o)
     type = o->op_type;
     if (type == OP_COND_EXPR) {
         OP * const sib = OP_SIBLING(cLOGOPo->op_first);
-        const I32 t = is_list_assignment(sib);
-        const I32 f = is_list_assignment(OP_SIBLING(sib));
+        const I32 t = assignment_type(sib);
+        const I32 f = assignment_type(OP_SIBLING(sib));
 
-	if (t && f)
-	    return TRUE;
-	if (t || f)
+	if (t == f)
+	    return t;
+	if ((t == ASSIGN_LIST) ^ (f == ASSIGN_LIST))
 	    yyerror("Assignment to both a list and a scalar");
 	return FALSE;
     }
+
+    if (type == OP_SREFGEN)
+	return ASSIGN_REF;
 
     if (type == OP_LIST &&
 	(flags & OPf_WANT) == OPf_WANT_SCALAR &&
@@ -5800,6 +5806,7 @@ OP *
 Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 {
     OP *o;
+    I32 assign_type;
 
     if (optype) {
 	if (optype == OP_ANDASSIGN || optype == OP_ORASSIGN || optype == OP_DORASSIGN) {
@@ -5813,7 +5820,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	}
     }
 
-    if (is_list_assignment(left)) {
+    if ((assign_type = assignment_type(left)) == ASSIGN_LIST) {
 	static const char no_list_state[] = "Initialization of state variables"
 	    " in list context currently forbidden";
 	OP *curop;
@@ -5972,6 +5979,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	}
 	return o;
     }
+    if (assign_type == ASSIGN_REF)
+	return newBINOP(OP_REFASSIGN, flags, scalar(right), left);
     if (!right)
 	right = newOP(OP_UNDEF, 0);
     if (right->op_type == OP_READLINE) {
@@ -9850,6 +9859,42 @@ Perl_ck_open(pTHX_ OP *o)
 	      last->op_private &= ~OPpCONST_STRICT;
     }
     return ck_fun(o);
+}
+
+OP *
+Perl_ck_refassign(pTHX_ OP *o)
+{
+    OP * const right = cLISTOPo->op_first;
+    OP * const left = OP_SIBLING(right);
+    OP * const varop = cUNOPx(cUNOPx(left)->op_first)->op_first;
+    PADOFFSET targ;
+
+    PERL_ARGS_ASSERT_CK_REFASSIGN;
+    assert (left);
+    assert (left->op_type == OP_SREFGEN);
+
+    switch (varop->op_type) {
+    case OP_PADSV:
+	if (varop->op_private & OPpLVAL_INTRO)
+	    goto bad; /* XXX temporary */
+	targ = varop->op_targ;
+	varop->op_targ = 0;
+	break;
+    default:
+      bad:
+	op_lvalue(left, OP_SASSIGN);
+	return o;
+    }
+    if (!FEATURE_LVREF_IS_ENABLED)
+	Perl_croak(aTHX_
+		  "Experimental lvalue references not enabled");
+    Perl_ck_warner_d(aTHX_
+		     packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
+		    "Lvalue references are experimental");
+    o->op_targ = targ;
+    op_sibling_splice(o, right, 1, NULL);
+    op_free(left);
+    return o;
 }
 
 OP *

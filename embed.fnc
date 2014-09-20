@@ -1925,7 +1925,7 @@ s	|void	|fixup_errno_string|NN SV* sv
 
 #if defined(PERL_IN_OP_C)
 sRn	|bool	|is_handle_constructor|NN const OP *o|I32 numargs
-sR	|I32	|is_list_assignment|NULLOK const OP *o
+sR	|I32	|assignment_type|NULLOK const OP *o
 s	|void	|forget_pmop	|NN PMOP *const o
 s	|void	|find_and_forget_pmops	|NN OP *o
 s	|void	|cop_free	|NN COP *cop

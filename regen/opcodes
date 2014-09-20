@@ -553,4 +553,4 @@ padcv		private subroutine	ck_null		d0
 introcv		private subroutine	ck_null		d0
 clonecv		private subroutine	ck_null		d0
 padrange	list of private variables	ck_null		d0
-refassign	lvalue ref assignment	ck_null		d2
+refassign	lvalue ref assignment	ck_refassign	d2

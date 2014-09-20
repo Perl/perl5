@@ -1715,7 +1715,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* introcv */
 	Perl_ck_null,		/* clonecv */
 	Perl_ck_null,		/* padrange */
-	Perl_ck_null,		/* refassign */
+	Perl_ck_refassign,	/* refassign */
 }
 #endif
 #ifdef PERL_CHECK_INITED

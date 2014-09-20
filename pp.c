@@ -6162,7 +6162,18 @@ PP(pp_runcv)
 
 PP(pp_refassign)
 {
-    DIE(aTHX_ "Unimplemented");
+    dSP;
+    dTOPss;
+    if (!SvROK(sv)) DIE(aTHX_ "Assigned value is not a reference");
+    if (SvTYPE(SvRV(sv)) > SVt_PVLV)
+	DIE(aTHX_ "Assigned value is not a scalar reference");
+    SvREFCNT_dec(PAD_SV(ARGTARG));
+    PAD_SETSV(ARGTARG, SvREFCNT_inc_NN(SvRV(sv)));
+    if (PL_op->op_flags & OPf_MOD)
+	SETs(sv_2mortal(newSVsv(sv)));
+    /* XXX else can weak references go stale before they are read, e.g.,
+       in leavesub?  */
+    RETURN;
 }
 
 

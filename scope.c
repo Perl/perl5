@@ -1007,8 +1007,6 @@ Perl_leave_scope(pTHX_ I32 base)
                     (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) ? "clear" : "abandon"
                 ));
 
-                assert(SvPADMY(sv));
-
                 /* Can clear pad variable in place? */
                 if (SvREFCNT(sv) == 1 && !SvOBJECT(sv)) {
 
