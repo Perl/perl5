@@ -29,6 +29,7 @@ my %feature = (
     postderef       => 'postderef',
     array_base      => 'arybase',
     current_sub     => '__SUB__',
+    lvalue_refs     => 'lvref',
     lexical_subs    => 'lexsubs',
     postderef_qq    => 'postderef_qq',
     unicode_eval    => 'unieval',
