@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.20140920';
+$VERSION = '5.20141020';
 
 my $dumpinc = 0;
 sub import {
@@ -255,6 +255,7 @@ sub changes_between {
     5.021003 => '2014-08-20',
     5.020001 => '2014-09-14',
     5.021004 => '2014-09-20',
+    5.021005 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -10352,6 +10353,18 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.021005 => {
+        delta_from => 5.021004,
+        changed => {
+            'B::Op_private'         => '5.021005',
+            'Config'                => '5.021005',
+            'Module::CoreList'      => '5.20141020',
+            'Module::CoreList::TieHashDelta'=> '5.20141020',
+            'Module::CoreList::Utils'=> '5.20141020',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -10790,6 +10803,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.021004 => {
         delta_from => 5.021003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.021005 => {
+        delta_from => 5.021004,
         changed => {
         },
         removed => {
