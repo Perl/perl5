@@ -84,8 +84,7 @@ void setegid(uid_t id);
 struct magic_state {
     SV* mgs_sv;
     I32 mgs_ss_ix;
-    U32 mgs_magical;
-    bool mgs_readonly;
+    U32 mgs_flags;
     bool mgs_bumped;
 };
 /* MGS is typedef'ed to struct magic_state in perl.h */
@@ -115,8 +114,7 @@ S_save_magic_flags(pTHX_ I32 mgs_ix, SV *sv, U32 flags)
 
     mgs = SSPTR(mgs_ix, MGS*);
     mgs->mgs_sv = sv;
-    mgs->mgs_magical = SvMAGICAL(sv);
-    mgs->mgs_readonly = SvREADONLY(sv) != 0;
+    mgs->mgs_flags = SvMAGICAL(sv) | SvREADONLY(sv);
     mgs->mgs_ss_ix = PL_savestack_ix;   /* points after the saved destructor */
     mgs->mgs_bumped = bumped;
 
@@ -201,13 +199,15 @@ Perl_mg_get(pTHX_ SV *sv)
 	    /* guard against magic having been deleted - eg FETCH calling
 	     * untie */
 	    if (!SvMAGIC(sv)) {
-		(SSPTR(mgs_ix, MGS *))->mgs_magical = 0; /* recalculate flags */
+		/* recalculate flags */
+		(SSPTR(mgs_ix, MGS *))->mgs_flags &= ~(SVs_GMG|SVs_SMG|SVs_RMG);
 		break;
 	    }
 
 	    /* recalculate flags if this entry was deleted. */
 	    if (mg->mg_flags & MGf_GSKIP)
-		(SSPTR(mgs_ix, MGS *))->mgs_magical = 0;
+		(SSPTR(mgs_ix, MGS *))->mgs_flags &=
+		     ~(SVs_GMG|SVs_SMG|SVs_RMG);
 	}
 	else if (vtbl == &PL_vtbl_utf8) {
 	    /* get-magic can reallocate the PV */
@@ -231,7 +231,8 @@ Perl_mg_get(pTHX_ SV *sv)
 	    have_new = 1;
 	    cur = mg;
 	    mg  = newmg;
-	    (SSPTR(mgs_ix, MGS *))->mgs_magical = 0; /* recalculate flags */
+	    /* recalculate flags */
+	    (SSPTR(mgs_ix, MGS *))->mgs_flags &= ~(SVs_GMG|SVs_SMG|SVs_RMG);
 	}
     }
 
@@ -267,7 +268,7 @@ Perl_mg_set(pTHX_ SV *sv)
 	nextmg = mg->mg_moremagic;	/* it may delete itself */
 	if (mg->mg_flags & MGf_GSKIP) {
 	    mg->mg_flags &= ~MGf_GSKIP;	/* setting requires another read */
-	    (SSPTR(mgs_ix, MGS*))->mgs_magical = 0;
+	    (SSPTR(mgs_ix, MGS*))->mgs_flags &= ~(SVs_GMG|SVs_SMG|SVs_RMG);
 	}
 	if (PL_localizing == 2
 	    && PERL_MAGIC_TYPE_IS_VALUE_MAGIC(mg->mg_type))
@@ -3254,10 +3255,8 @@ S_restore_magic(pTHX_ const void *p)
 	if (SvIsCOW(sv))
 	    sv_force_normal_flags(sv, 0);
 #endif
-	if (mgs->mgs_readonly)
-	    SvREADONLY_on(sv);
-	if (mgs->mgs_magical)
-	    SvFLAGS(sv) |= mgs->mgs_magical;
+	if (mgs->mgs_flags)
+	    SvFLAGS(sv) |= mgs->mgs_flags;
 	else
 	    mg_magical(sv);
     }

@@ -4499,7 +4499,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 				/* slated for free anyway (and not COW)? */
                     (sflags & (SVs_TEMP|SVf_IsCOW)) == SVs_TEMP
                                 /* or a swipable TARG */
-                 || ((sflags & (SVs_PADTMP|SVf_READONLY|SVf_IsCOW))
+                 || ((sflags &
+                           (SVs_PADTMP|SVf_READONLY|SVf_PROTECT|SVf_IsCOW))
                        == SVs_PADTMP
                                 /* whose buffer is worth stealing */
                      && CHECK_COWBUF_THRESHOLD(cur,len)
@@ -10071,7 +10072,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
     if (!SvROK(sv))
         Perl_croak(aTHX_ "Can't bless non-reference value");
     tmpRef = SvRV(sv);
-    if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY)) {
+    if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY|SVf_PROTECT)) {
 	if (SvREADONLY(tmpRef))
 	    Perl_croak_no_modify();
 	if (SvOBJECT(tmpRef)) {
@@ -14875,18 +14876,18 @@ void
 Perl_init_constants(pTHX)
 {
     SvREFCNT(&PL_sv_undef)	= SvREFCNT_IMMORTAL;
-    SvFLAGS(&PL_sv_undef)	= SVf_READONLY|SVt_NULL;
+    SvFLAGS(&PL_sv_undef)	= SVf_READONLY|SVf_PROTECT|SVt_NULL;
     SvANY(&PL_sv_undef)		= NULL;
 
     SvANY(&PL_sv_no)		= new_XPVNV();
     SvREFCNT(&PL_sv_no)		= SvREFCNT_IMMORTAL;
-    SvFLAGS(&PL_sv_no)		= SVt_PVNV|SVf_READONLY
+    SvFLAGS(&PL_sv_no)		= SVt_PVNV|SVf_READONLY|SVf_PROTECT
 				  |SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
 				  |SVp_POK|SVf_POK;
 
     SvANY(&PL_sv_yes)		= new_XPVNV();
     SvREFCNT(&PL_sv_yes)	= SvREFCNT_IMMORTAL;
-    SvFLAGS(&PL_sv_yes)		= SVt_PVNV|SVf_READONLY
+    SvFLAGS(&PL_sv_yes)		= SVt_PVNV|SVf_READONLY|SVf_PROTECT
 				  |SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
 				  |SVp_POK|SVf_POK;
 

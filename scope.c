@@ -986,7 +986,7 @@ Perl_leave_scope(pTHX_ I32 base)
                     /* these flags are the union of all the relevant flags
                      * in the individual conditions within */
                     if (UNLIKELY(SvFLAGS(sv) & (
-                            SVf_READONLY /* for SvREADONLY_off() */
+                            SVf_READONLY|SVf_PROTECT /*for SvREADONLY_off*/
                           | (SVs_GMG|SVs_SMG|SVs_RMG) /* SvMAGICAL() */
                           | SVf_OOK
                           | SVf_THINKFIRST)))

@@ -565,12 +565,12 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
 #ifdef PERL_OLD_COPY_ON_WRITE
 	    if (SvIsCOW(sv)) sv_force_normal(sv);
 #endif
-	    SvREADONLY_on(sv);
+	    SvFLAGS(sv) |= SVf_READONLY;
 	    XSRETURN_YES;
 	}
 	else {
 	    /* I hope you really know what you are doing. */
-	    SvREADONLY_off(sv);
+	    SvFLAGS(sv) &=~ SVf_READONLY;
 	    XSRETURN_NO;
 	}
     }

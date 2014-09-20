@@ -6,7 +6,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 13 );
+    plan( tests => 15 );
 }
 
 for my $arg ('', 'q[]', qw( 1 undef )) {
@@ -60,3 +60,9 @@ Internals::SvREADONLY($h{b},0);
 $h{b} =~ y/ia/ao/;
 is __PACKAGE__, 'main',
   'turning off a cow’s readonliness did not affect sharers of the same PV';
+
+&Internals::SvREADONLY(\!0, 0);
+eval { ${\!0} = 7 };
+like $@, qr "^Modification of a read-only value",
+    'protected values still croak on assignment after SvREADONLY(..., 0)';
+is ${\3} == 3, "1", 'attempt to modify failed';
