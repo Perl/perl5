@@ -225,7 +225,7 @@ L<Test>.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.021003 to 5.20140915.
+L<Module::CoreList> has been upgraded from version 5.021003 to 5.20140920.
 
 Updated to cover the latest releases of Perl.
 
