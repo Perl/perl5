@@ -2663,6 +2663,10 @@ typedef SV PADNAME;
 # define PERL_SAWAMPERSAND
 #endif
 
+#if defined(PERL_DEBUG_READONLY_OPS) && !defined(USE_ITHREADS)
+# error PERL_DEBUG_READONLY_OPS only works with ithreads
+#endif
+
 #include "handy.h"
 
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_RAWIO)
