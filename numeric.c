@@ -831,7 +831,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
         return 0;
   }
 
-  if (s < send) {
+  if (s > d && s < send) {
     /* we can have an optional exponent part */
     if (isALPHA_FOLD_EQ(*s, 'e')) {
       s++;
