@@ -102,6 +102,8 @@ my $tree = {
                                     [ 5.019, DEFAULT_ON ],
                                 'experimental::win32_perlio' =>
                                     [ 5.021, DEFAULT_ON ],
+                                'experimental::lvalue_refs' =>
+                                    [ 5.021, DEFAULT_ON ],
                         }],
 
        	'missing'	=> [ 5.021, DEFAULT_OFF],
