@@ -10036,6 +10036,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case '(':           /* (?(?{...})...) and (?(?=...)...) */
 	    {
 	        int is_define= 0;
+                const int DEFINE_len = sizeof("DEFINE") - 1;
 		if (RExC_parse[0] == '?') {        /* (?(?...)) */
 		    if (RExC_parse[1] == '=' || RExC_parse[1] == '!'
 			|| RExC_parse[1] == '<'
@@ -10078,15 +10079,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     ret = reganode(pRExC_state,NGROUPP,num);
                     goto insert_if_check_paren;
 		}
-		else if (RExC_parse[0] == 'D' &&
-		         RExC_parse[1] == 'E' &&
-		         RExC_parse[2] == 'F' &&
-		         RExC_parse[3] == 'I' &&
-		         RExC_parse[4] == 'N' &&
-		         RExC_parse[5] == 'E')
-		{
+		else if (strnEQ(RExC_parse, "DEFINE",
+                                       MIN(DEFINE_len, RExC_end - RExC_parse)))
+                {
 		    ret = reganode(pRExC_state,DEFINEP,0);
-		    RExC_parse +=6 ;
+		    RExC_parse += DEFINE_len;
 		    is_define = 1;
 		    goto insert_if_check_paren;
 		}
