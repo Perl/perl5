@@ -450,6 +450,13 @@ constants; e.g., C<-Inf>.
 
 =back
 
+=head1 Configuration and Compilation
+
+For long doubles (to get more precision and range for floating point
+numbers) one can now use the GCC quadmath library which implements
+the quadruple precision floating point numbers in x86 and ia64 platforms.
+See INSTALL for details.
+
 =head1 Testing
 
 =over 4
