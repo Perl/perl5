@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 15;
+plan 17;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -79,7 +79,13 @@ is \$b, \$c, 'lex scalar in (\$foo, \$bar)';
 
 # Errors
 
-# ...
+off;
+eval { my $x; \$x = 3 };
+like $@, qr/^Assigned value is not a reference at/, 'assigning non-ref';
+eval { my $x; \$x = [] };
+like $@, qr/^Assigned value is not a SCALAR reference at/,
+    'assigning non-scalar ref to scalar ref';
+on;
 
 # Miscellaneous
 
