@@ -4410,15 +4410,15 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
         last->op_sibling = (OP*)binop;
 #endif
 
-    binop = (BINOP*)CHECKOP(type, binop);
-    if (binop->op_next || binop->op_type != (OPCODE)type)
-	return (OP*)binop;
-
     binop->op_last = OP_SIBLING(binop->op_first);
 #ifdef PERL_OP_PARENT
     if (binop->op_last)
         binop->op_last->op_sibling = (OP*)binop;
 #endif
+
+    binop = (BINOP*)CHECKOP(type, binop);
+    if (binop->op_next || binop->op_type != (OPCODE)type)
+	return (OP*)binop;
 
     return fold_constants(op_integerize(op_std_init((OP *)binop)));
 }
@@ -9765,15 +9765,6 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    condop->op_targ = target;
 	    other->op_targ = target;
 
-	    /* Because we change the type of the op here, we will skip the
-	       assignment binop->op_last = OP_SIBLING(binop->op_first); at the
-	       end of Perl_newBINOP(). So need to do it here. */
-	    cBINOPo->op_last = OP_SIBLING(cBINOPo->op_first);
-            cBINOPo->op_first->op_lastsib = 0;
-            cBINOPo->op_last ->op_lastsib = 1;
-#ifdef PERL_OP_PARENT
-            cBINOPo->op_last->op_sibling = o;
-#endif
 	    return nullop;
 	}
     }
@@ -9872,6 +9863,7 @@ Perl_ck_repeat(pTHX_ OP *o)
         kids = op_sibling_splice(o, NULL, -1, NULL); /* detach all kids */
         kids = force_list(kids, 1); /* promote them to a list */
         op_sibling_splice(o, NULL, 0, kids); /* and add back */
+        if (cBINOPo->op_last == kids) cBINOPo->op_last = NULL;
     }
     else
 	scalar(o);
