@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 18;
+plan 19;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -99,4 +99,22 @@ on;
     is \$x, \$y, 'lexical alias affects outer closure';
   }->();
   is \$x, \$y, 'lexical alias affects outer sub where vars are declared';
+}
+
+{ # PADSTALE has a double meaning
+  use feature 'lexical_subs', 'signatures', 'state';
+  no warnings 'experimental';
+  my $c;
+  my sub s ($arg) {
+    state $x = ++$c;
+    if ($arg == 3) { return $c }
+    goto skip if $arg == 2;
+    my $y;
+   skip:
+    # $y is PADSTALE the 2nd time
+    \$x = \$y if $arg == 2;
+  }
+  s(1);
+  s(2);
+  is s(3), 1, 'padstale alias should not reset state'
 }
