@@ -6,7 +6,9 @@ BEGIN {
 
 plan 15;
 
-$::TODO = ' ';
+sub on { $::TODO = ' ' }
+sub off{ $::TODO = ''  }
+on;
 
 eval '\$x = \$y';
 like $@, qr/^Experimental lvalue references not enabled/,
@@ -29,9 +31,11 @@ no warnings 'experimental::lvalue_refs';
 
 eval '\$x = \$y';
 is \$x, \$y, '\$pkg_scalar = ...';
+off;
 my $m;
-eval '\$m = \$y';
+\$m = \$y;
 is \$m, \$y, '\$lexical = ...';
+on;
 eval '\my $n = \$y';
 is \$n, \$y, '\my $lexical = ...';
 @_ = \$_;
