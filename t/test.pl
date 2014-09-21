@@ -478,6 +478,17 @@ sub next_test {
 sub skip {
     my $why = shift;
     my $n    = @_ ? shift : 1;
+    my $bad_swap;
+    {
+      local $^W = 0;
+      $bad_swap = $why > 0 && $n == 0;
+    }
+    if ($bad_swap) {
+      die qq[$0: expected skip(why, count), got skip($why, "$n")\n];
+    }
+    if (@_) {
+      die qq[$0: expected skip(why, count), got skip($why, "$n", @_)\n];
+    }
     for (1..$n) {
         _print "ok $test # skip $why\n";
         $test = $test + 1;
