@@ -6171,9 +6171,12 @@ PP(pp_refassign)
 	DIE(aTHX_ "Assigned value is not a SCALAR reference");
     switch (left ? SvTYPE(left) : 0) {
     case 0:
-	SvREFCNT_dec(PAD_SV(ARGTARG));
+    {
+	SV * const old = PAD_SV(ARGTARG);
 	PAD_SETSV(ARGTARG, SvREFCNT_inc_NN(SvRV(sv)));
+	SvREFCNT_dec(old);
 	break;
+    }
     case SVt_PVGV:
 	gv_setref(left, sv);
 	SvSETMAGIC(left);

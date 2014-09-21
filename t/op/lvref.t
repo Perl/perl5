@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 19;
+plan 20;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -117,4 +117,14 @@ on;
   s(1);
   s(2);
   is s(3), 1, 'padstale alias should not reset state'
+}
+
+off;
+SKIP: {
+    skip_without_dynamic_extension('List/Util');
+    require Scalar::Util;
+    my $a;
+    Scalar::Util::weaken($r = \$a);
+    \$a = $r;
+    pass 'no crash when assigning \$lex = $weakref_to_lex'
 }
