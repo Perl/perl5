@@ -6166,7 +6166,8 @@ PP(pp_refassign)
     dTOPss;
     if (!SvROK(sv)) DIE(aTHX_ "Assigned value is not a reference");
     if (SvTYPE(SvRV(sv)) > SVt_PVLV)
-	DIE(aTHX_ "Assigned value is not a scalar reference");
+	/* diag_listed_as: Assigned value is not %s reference */
+	DIE(aTHX_ "Assigned value is not a SCALAR reference");
     SvREFCNT_dec(PAD_SV(ARGTARG));
     PAD_SETSV(ARGTARG, SvREFCNT_inc_NN(SvRV(sv)));
     if (PL_op->op_flags & OPf_MOD)
