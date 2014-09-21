@@ -1698,6 +1698,18 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		ld_bytes aldouble;
                 SHIFT_BYTES(utf8, s, strend, aldouble.bytes,
                             sizeof(aldouble.bytes), datumtype, needs_swap);
+                /* The most common long double format, the x86 80-bit
+                 * extended precision, has either 2 or 6 unused bytes,
+                 * which may contain garbage, which may contain
+                 * unintentional data.  While we do zero the bytes of
+                 * the long double data in pack(), here in unpack() we
+                 * don't, because it's really hard to envision that
+                 * reading the long double off aldouble would be
+                 * affected the unused bytes.
+                 *
+                 * Note that trying to unpack 'long doubles' of 'long
+                 * doubles' packed in another system is in the general
+                 * case doomed without having more detail. */
 		if (!checksum)
 		    mPUSHn(aldouble.ld);
 		else
