@@ -18,6 +18,7 @@ BEGIN {
     @INC = ('../lib','.','../ext/re');
     require Config; import Config;
     require './test.pl';
+    skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 }
 
