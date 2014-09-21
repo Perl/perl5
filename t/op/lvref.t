@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 26;
+plan 27;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -53,6 +53,8 @@ is \$b, \$c, 'lex scalar in (\$foo, \$bar)';
 is eval '\local $l = \3; $l', 3, '\local $scalar assignment';
 off;
 is $l, undef, 'localisation unwound';
+\$foo = \*bar;
+is *foo{SCALAR}, *bar{GLOB}, 'globref-to-scalarref assignment';
 on;
 
 # Array Elements
