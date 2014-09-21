@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 22;
+plan 26;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -78,6 +78,40 @@ on;
 # Mixed List Assignments
 
 # ...
+
+# Foreach
+
+eval '
+  for \my $a(\$for1, \$for2) {
+    push @for, \$a;
+  }
+';
+is "@for", \$for1 . ' ' . \$for2, 'foreach \my $a';
+
+@for = ();
+eval '
+  for \my @a([1,2], [3,4]) {
+    push @for, @a;
+  }
+';
+is "@for", "1 2 3 4", 'foreach \my @a [perl #22335]';
+
+@for = ();
+eval '
+  for \my %a({5,6}, {7,8}) {
+    push @for, %a;
+  }
+';
+is "@for", "5 6 7 8", 'foreach \my %a [perl #22335]';
+
+@for = ();
+eval '
+  for \my &a(sub {9}, sub {10}) {
+    push @for, &a;
+  }
+';
+is "@for", "9 10", 'foreach \my &a';
+
 
 # Errors
 
