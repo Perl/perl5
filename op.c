@@ -1034,25 +1034,25 @@ Perl_op_refcnt_unlock(pTHX)
 =for apidoc op_sibling_splice
 
 A general function for editing the structure of an existing chain of
-op_sibling nodes. By analogy with the perl-level splice() function, allows
+op_sibling nodes.  By analogy with the perl-level splice() function, allows
 you to delete zero or more sequential nodes, replacing them with zero or
 more different nodes.  Performs the necessary op_first/op_last
 housekeeping on the parent node and op_sibling manipulation on the
-children. The last deleted node will be marked as as the last node by
+children.  The last deleted node will be marked as as the last node by
 updating the op_sibling or op_lastsib field as appropriate.
 
 Note that op_next is not manipulated, and nodes are not freed; that is the
-responsibility of the caller. It also won't create a new list op for an
+responsibility of the caller.  It also won't create a new list op for an
 empty list etc; use higher-level functions like op_append_elem() for that.
 
 parent is the parent node of the sibling chain.
 
-start is the node preceding the first node to be spliced. Node(s)
-following it will be deleted, and ops will be inserted after it. If it is
+start is the node preceding the first node to be spliced.  Node(s)
+following it will be deleted, and ops will be inserted after it.  If it is
 NULL, the first node onwards is deleted, and nodes are inserted at the
 beginning.
 
-del_count is the number of nodes to delete. If zero, no nodes are deleted.
+del_count is the number of nodes to delete.  If zero, no nodes are deleted.
 If -1 or greater than or equal to the number of remaining kids, all
 remaining kids are deleted.
 
@@ -1156,7 +1156,7 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
 /*
 =for apidoc op_parent
 
-returns the parent OP of o, if it has a parent. Returns NULL otherwise.
+returns the parent OP of o, if it has a parent.  Returns NULL otherwise.
 (Currently perl must be built with C<-DPERL_OP_PARENT> for this feature to
 work.
 
