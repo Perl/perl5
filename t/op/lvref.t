@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 20;
+plan 22;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -50,6 +50,10 @@ is \$a, \$c, 'lex scalar in \(...)';
 eval '(\$_b, \my $b) = @{[\$b, \$c]}';
 is \$_b, \$::b, 'package scalar in (\$foo, \$bar)';
 is \$b, \$c, 'lex scalar in (\$foo, \$bar)';
+is eval '\local $l = \3; $l', 3, '\local $scalar assignment';
+off;
+is $l, undef, 'localisation unwound';
+on;
 
 # Array Elements
 
