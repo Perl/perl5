@@ -479,15 +479,6 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 
 #define opASSIGN (PL_op->op_flags & OPf_STACKED)
-#define SETsv(sv)	STMT_START {					\
-		if (opASSIGN || (SvFLAGS(TARG) & SVs_PADMY))		\
-		   { sv_setsv(TARG, (sv)); SETTARG; }			\
-		else SETs(sv); } STMT_END
-
-#define SETsvUN(sv)	STMT_START {					\
-		if (SvFLAGS(TARG) & SVs_PADMY)		\
-		   { sv_setsv(TARG, (sv)); SETTARG; }			\
-		else SETs(sv); } STMT_END
 
 /*
 =for apidoc mU||LVRET
