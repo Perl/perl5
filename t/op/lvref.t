@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 13;
+plan 15;
 
 $::TODO = ' ';
 
@@ -76,3 +76,16 @@ is \$b, \$c, 'lex scalar in (\$foo, \$bar)';
 # Errors
 
 # ...
+
+# Miscellaneous
+
+{
+  my($x,$y);
+  sub {
+    sub {
+      \$x = \$y;
+    }->();
+    is \$x, \$y, 'lexical alias affects outer closure';
+  }->();
+  is \$x, \$y, 'lexical alias affects outer sub where vars are declared';
+}
