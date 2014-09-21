@@ -9867,7 +9867,7 @@ Perl_ck_refassign(pTHX_ OP *o)
     OP * const right = cLISTOPo->op_first;
     OP * const left = OP_SIBLING(right);
     OP * const varop = cUNOPx(cUNOPx(left)->op_first)->op_first;
-    PADOFFSET targ;
+    bool stacked = 0;
 
     PERL_ARGS_ASSERT_CK_REFASSIGN;
     assert (left);
@@ -9877,8 +9877,16 @@ Perl_ck_refassign(pTHX_ OP *o)
     case OP_PADSV:
 	if (varop->op_private & OPpLVAL_INTRO)
 	    goto bad; /* XXX temporary */
-	targ = varop->op_targ;
+	o->op_targ = varop->op_targ;
 	varop->op_targ = 0;
+	break;
+    case OP_RV2SV:
+	if (cUNOPx(varop)->op_first->op_type != OP_GV) goto bad;
+	if (varop->op_private & OPpLVAL_INTRO)
+	    goto bad; /* XXX temporary */
+	op_null(varop);
+	op_null(left);
+	stacked = TRUE;
 	break;
     default:
       bad:
@@ -9891,9 +9899,12 @@ Perl_ck_refassign(pTHX_ OP *o)
     Perl_ck_warner_d(aTHX_
 		     packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
 		    "Lvalue references are experimental");
-    o->op_targ = targ;
-    op_sibling_splice(o, right, 1, NULL);
-    op_free(left);
+    if (stacked) o->op_flags |= OPf_STACKED;
+    else {
+	o->op_flags &=~ OPf_STACKED;
+	op_sibling_splice(o, right, 1, NULL);
+	op_free(left);
+    }
     return o;
 }
 

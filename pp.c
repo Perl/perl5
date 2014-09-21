@@ -6163,13 +6163,21 @@ PP(pp_runcv)
 PP(pp_refassign)
 {
     dSP;
+    SV * const left = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
     dTOPss;
     if (!SvROK(sv)) DIE(aTHX_ "Assigned value is not a reference");
     if (SvTYPE(SvRV(sv)) > SVt_PVLV)
 	/* diag_listed_as: Assigned value is not %s reference */
 	DIE(aTHX_ "Assigned value is not a SCALAR reference");
-    SvREFCNT_dec(PAD_SV(ARGTARG));
-    PAD_SETSV(ARGTARG, SvREFCNT_inc_NN(SvRV(sv)));
+    switch (left ? SvTYPE(left) : 0) {
+    case 0:
+	SvREFCNT_dec(PAD_SV(ARGTARG));
+	PAD_SETSV(ARGTARG, SvREFCNT_inc_NN(SvRV(sv)));
+	break;
+    case SVt_PVGV:
+	gv_setref(left, sv);
+	SvSETMAGIC(left);
+    }
     if (PL_op->op_flags & OPf_MOD)
 	SETs(sv_2mortal(newSVsv(sv)));
     /* XXX else can weak references go stale before they are read, e.g.,

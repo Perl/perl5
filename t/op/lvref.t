@@ -4,11 +4,10 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 17;
+plan 18;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
-on;
 
 eval '\$x = \$y';
 like $@, qr/^Experimental lvalue references not enabled/,
@@ -31,7 +30,6 @@ no warnings 'experimental::lvalue_refs';
 
 eval '\$x = \$y';
 is \$x, \$y, '\$pkg_scalar = ...';
-off;
 my $m;
 \$m = \$y;
 is \$m, \$y, '\$lexical = ...';
@@ -85,6 +83,9 @@ like $@, qr/^Assigned value is not a reference at/, 'assigning non-ref';
 eval { my $x; \$x = [] };
 like $@, qr/^Assigned value is not a SCALAR reference at/,
     'assigning non-scalar ref to scalar ref';
+eval { \$::x = [] };
+like $@, qr/^Assigned value is not a SCALAR reference at/,
+    'assigning non-scalar ref to package scalar ref';
 on;
 
 # Miscellaneous

@@ -3973,8 +3973,8 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
     return;
 }
 
-static void
-S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
+void
+Perl_gv_setref(pTHX_ SV *const dstr, SV *const sstr)
 {
     SV * const sref = SvRV(sstr);
     SV *dref;
@@ -3983,7 +3983,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
     U8 import_flag = 0;
     const U32 stype = SvTYPE(sref);
 
-    PERL_ARGS_ASSERT_GLOB_ASSIGN_REF;
+    PERL_ARGS_ASSERT_GV_SETREF;
 
     if (intro) {
 	GvINTRO_off(dstr);	/* one-shot flag */
@@ -4170,7 +4170,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    Perl_magic_clearisa(aTHX_ NULL, mg);
 	}
         else if (stype == SVt_PVIO) {
-            DEBUG_o(Perl_deb(aTHX_ "glob_assign_ref clearing PL_stashcache\n"));
+            DEBUG_o(Perl_deb(aTHX_ "gv_setref clearing PL_stashcache\n"));
             /* It's a cache. It will rebuild itself quite happily.
                It's a lot of effort to work out exactly which key (or keys)
                might be invalidated by the creation of the this file handle.
@@ -4429,7 +4429,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 
 	if (dtype >= SVt_PV) {
 	    if (isGV_with_GP(dstr)) {
-		glob_assign_ref(dstr, sstr);
+		gv_setref(dstr, sstr);
 		return;
 	    }
 	    if (SvPVX_const(dstr)) {

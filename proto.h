@@ -1571,6 +1571,12 @@ PERL_CALLCONV GV *	Perl_gv_override(pTHX_ const char * const name, const STRLEN 
 #define PERL_ARGS_ASSERT_GV_OVERRIDE	\
 	assert(name)
 
+PERL_CALLCONV void	Perl_gv_setref(pTHX_ SV *const dstr, SV *const sstr)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_GV_SETREF	\
+	assert(dstr); assert(sstr)
+
 PERL_CALLCONV HV*	Perl_gv_stashpv(pTHX_ const char* name, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GV_STASHPV	\
@@ -7486,12 +7492,6 @@ STATIC void	S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int d
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GLOB_ASSIGN_GLOB	\
-	assert(dstr); assert(sstr)
-
-STATIC void	S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_GLOB_ASSIGN_REF	\
 	assert(dstr); assert(sstr)
 
 STATIC SV *	S_more_sv(pTHX);
