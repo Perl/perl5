@@ -22,6 +22,9 @@ BEGIN {
         print "1..0 # Not all files are available during cross-compilation\n";
         exit 0;
     }
+    if ($^O eq 'dec_osf') {
+      skip_all("$^O cannot handle this test");
+    }
     require '../regen/regen_lib.pl';
 }
 
