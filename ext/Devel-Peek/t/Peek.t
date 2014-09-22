@@ -83,10 +83,7 @@ sub do_test {
 	    } split /^/, $pattern;
 	    
 	    $pattern =~ s/\$PADMY/
-		($] < 5.009) ? 'PADBUSY,PADMY' : 'PADMY';
-	    /mge;
-	    $pattern =~ s/\$PADTMP/
-		($] < 5.009) ? 'PADBUSY,PADTMP' : 'PADTMP';
+		'PADMY';
 	    /mge;
 	    $pattern =~ s/\$RV/
 		($] < 5.011) ? 'RV' : 'IV';
@@ -262,8 +259,6 @@ do_test('reference to array',
   SV = PVAV\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(\\)
-    IV = 0					# $] < 5.009
-    NV = 0					# $] < 5.009
     ARRAY = $ADDR
     FILL = 1
     MAX = 1
@@ -285,8 +280,6 @@ do_test('reference to hash',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = [12]
     FLAGS = \\(SHAREKEYS\\)
-    IV = 1					# $] < 5.009
-    NV = $FLOAT					# $] < 5.009
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -294,7 +287,7 @@ do_test('reference to hash',
     MAX = 7
     Elt "123" HASH = $ADDR' . $c_pattern,
 	'',
-	$] > 5.009 && $] < 5.015
+	$] < 5.015
 	 && 'The hash iterator used in dump.c sets the OOK flag');
 
 do_test('reference to anon sub with empty prototype',
@@ -307,21 +300,16 @@ do_test('reference to anon sub with empty prototype',
     REFCNT = 2
     FLAGS = \\($PADMY,POK,pPOK,ANON,WEAKOUTSIDE,CVGV_RC\\) # $] < 5.015 || !thr
     FLAGS = \\($PADMY,POK,pPOK,ANON,WEAKOUTSIDE,CVGV_RC,DYNFILE\\) # $] >= 5.015 && thr
-    IV = 0					# $] < 5.009
-    NV = 0					# $] < 5.009
     PROTOTYPE = ""
     COMP_STASH = $ADDR\\t"main"
     START = $ADDR ===> \\d+
     ROOT = $ADDR
-    XSUB = 0x0					# $] < 5.009
-    XSUBANY = 0					# $] < 5.009
     GVGV::GV = $ADDR\\t"main" :: "__ANON__[^"]*"
     FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 0(?:
     MUTEXP = $ADDR
     OWNER = $ADDR)?
-    FLAGS = 0x404				# $] < 5.009
-    FLAGS = 0x490		# $] >= 5.009 && ($] < 5.015 || !thr)
+    FLAGS = 0x490				# $] < 5.015 || !thr
     FLAGS = 0x1490				# $] >= 5.015 && thr
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
@@ -338,13 +326,9 @@ do_test('reference to named subroutine without prototype',
     REFCNT = (3|4)
     FLAGS = \\((?:HASEVAL(?:,NAMED)?)?\\)	# $] < 5.015 || !thr
     FLAGS = \\(DYNFILE(?:,HASEVAL(?:,NAMED)?)?\\) # $] >= 5.015 && thr
-    IV = 0					# $] < 5.009
-    NV = 0					# $] < 5.009
     COMP_STASH = $ADDR\\t"main"
     START = $ADDR ===> \\d+
     ROOT = $ADDR
-    XSUB = 0x0					# $] < 5.009
-    XSUBANY = 0					# $] < 5.009
     NAME = "do_test"				# $] >=5.021004
     GVGV::GV = $ADDR\\t"main" :: "do_test"	# $] < 5.021004
     FILE = ".*\\b(?i:peek\\.t)"
@@ -361,8 +345,7 @@ do_test('reference to named subroutine without prototype',
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$do_eval"
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$sub"
-      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG"			# $] < 5.009
-      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0	# $] >= 5.009
+      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump2"
     OUTSIDE = $ADDR \\(MAIN\\)');
@@ -455,8 +438,8 @@ do_test('reference to regexp',
       MG_VIRTUAL = $ADDR
       MG_TYPE = PERL_MAGIC_qr\(r\)
       MG_OBJ = $ADDR
-        PAT = "\(\?^:tic\)"			# $] >= 5.009
-        REFCNT = 2				# $] >= 5.009
+        PAT = "\(\?^:tic\)"
+        REFCNT = 2
     STASH = $ADDR\\t"Regexp"');
 }
 
@@ -469,32 +452,20 @@ do_test('reference to blessed hash',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = [12]
     FLAGS = \\(OBJECT,SHAREKEYS\\)
-    IV = 0					# $] < 5.009
-    NV = 0					# $] < 5.009
     STASH = $ADDR\\t"Tac"
     ARRAY = 0x0
     KEYS = 0
     FILL = 0
     MAX = 7', '',
-	$] > 5.009
-	? $] >= 5.015
+	$] >= 5.015
 	     ? 0
-	     : 'The hash iterator used in dump.c sets the OOK flag'
-	: "Something causes the HV's array to become allocated");
+	     : 'The hash iterator used in dump.c sets the OOK flag');
 
 do_test('typeglob',
 	*a,
 'SV = PVGV\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(MULTI(?:,IN_PAD)?\\)		# $] >= 5.009
-  FLAGS = \\(GMG,SMG,MULTI(?:,IN_PAD)?\\)	# $] < 5.009
-  IV = 0					# $] < 5.009
-  NV = 0					# $] < 5.009
-  PV = 0					# $] < 5.009
-  MAGIC = $ADDR					# $] < 5.009
-    MG_VIRTUAL = &PL_vtbl_glob			# $] < 5.009
-    MG_TYPE = PERL_MAGIC_glob\(\*\)		# $] < 5.009
-    MG_OBJ = $ADDR				# $] < 5.009
+  FLAGS = \\(MULTI(?:,IN_PAD)?\\)
   NAME = "a"
   NAMELEN = 1
   GvSTASH = $ADDR\\t"main"
@@ -508,7 +479,6 @@ do_test('typeglob',
     HV = 0x0
     CV = 0x0
     CVGEN = 0x0
-    GPFLAGS = 0x0				# $] < 5.009
     GPFLAGS = 0x0 \(\)				# $] >= 5.021004
     LINE = \\d+
     FILE = ".*\\b(?i:peek\\.t)"
@@ -520,8 +490,8 @@ do_test('string with Unicode',
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019003
-  FLAGS = \\((?:$PADTMP,)?POK,(?:IsCOW,)?pPOK,UTF8\\)	# $] >=5.019003
+  FLAGS = \\((?:PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019003
+  FLAGS = \\((?:PADTMP,)?POK,(?:IsCOW,)?pPOK,UTF8\\)	# $] >=5.019003
   PV = $ADDR "\\\214\\\101\\\0\\\235\\\101"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
@@ -532,8 +502,8 @@ do_test('string with Unicode',
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019003
-  FLAGS = \\((?:$PADTMP,)?POK,(?:IsCOW,)?pPOK,UTF8\\)	# $] >=5.019003
+  FLAGS = \\((?:PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019003
+  FLAGS = \\((?:PADTMP,)?POK,(?:IsCOW,)?pPOK,UTF8\\)	# $] >=5.019003
   PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
@@ -551,8 +521,6 @@ do_test('reference to hash containing Unicode',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = [12]
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
-    UV = 1					# $] < 5.009
-    NV = $FLOAT					# $] < 5.009
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -567,11 +535,9 @@ do_test('reference to hash containing Unicode',
       LEN = \\d+
       COW_REFCNT = 1				# $] < 5.019007
 ',      '',
-	$] > 5.009
-	? $] >= 5.015
+	$] >= 5.015
 	    ?  0
-	    : 'The hash iterator used in dump.c sets the OOK flag'
-	: 'sv_length has been called on the element, and cached the result in MAGIC');
+	    : 'The hash iterator used in dump.c sets the OOK flag');
 } else {
 do_test('reference to hash containing Unicode',
 	{chr(256)=>chr(512)},
@@ -582,8 +548,6 @@ do_test('reference to hash containing Unicode',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = [12]
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
-    UV = 1					# $] < 5.009
-    NV = 0					# $] < 5.009
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -598,11 +562,9 @@ do_test('reference to hash containing Unicode',
       LEN = \\d+
       COW_REFCNT = 1				# $] < 5.019007
 ',      '',
-	$] > 5.009
-	? $] >= 5.015
+	$] >= 5.015
 	    ?  0
-	    : 'The hash iterator used in dump.c sets the OOK flag'
-	: 'sv_length has been called on the element, and cached the result in MAGIC');
+	    : 'The hash iterator used in dump.c sets the OOK flag');
 }
 
 my $x="";
@@ -704,12 +666,9 @@ do_test('constant subroutine',
     REFCNT = (2)
     FLAGS = \\(POK,pPOK,CONST,ISXSUB\\)		# $] < 5.015
     FLAGS = \\(POK,pPOK,CONST,DYNFILE,ISXSUB\\)	# $] >= 5.015
-    IV = 0					# $] < 5.009
-    NV = 0					# $] < 5.009
     PROTOTYPE = ""
     COMP_STASH = 0x0				# $] < 5.021004
     COMP_STASH = $ADDR	"main"			# $] >=5.021004
-    ROOT = 0x0					# $] < 5.009
     XSUB = $ADDR
     XSUBANY = $ADDR \\(CONST SV\\)
     SV = PV\\($ADDR\\) at $ADDR
@@ -725,8 +684,7 @@ do_test('constant subroutine',
     DEPTH = 0(?:
     MUTEXP = $ADDR
     OWNER = $ADDR)?
-    FLAGS = 0x200				# $] < 5.009
-    FLAGS = 0xc00				# $] >= 5.009 && $] < 5.013
+    FLAGS = 0xc00				# $] < 5.013
     FLAGS = 0xc					# $] >= 5.013 && $] < 5.015
     FLAGS = 0x100c				# $] >= 5.015
     OUTSIDE_SEQ = 0
@@ -764,7 +722,6 @@ do_test('IO',
     TOP_GV = 0x0
     FMT_GV = 0x0
     BOTTOM_GV = 0x0
-    SUBPROCESS = 0				# $] < 5.009
     TYPE = \'>\'
     FLAGS = 0x4');
 
@@ -778,14 +735,10 @@ do_test('FORMAT',
     REFCNT = 2
     FLAGS = \\(\\)				# $] < 5.015 || !thr
     FLAGS = \\(DYNFILE\\)			# $] >= 5.015 && thr
-    IV = 0					# $] < 5.009
-    NV = 0					# $] < 5.009
 (?:    PV = 0
 )?    COMP_STASH = 0x0
     START = $ADDR ===> \\d+
     ROOT = $ADDR
-    XSUB = 0x0					# $] < 5.009
-    XSUBANY = 0					# $] < 5.009
     GVGV::GV = $ADDR\\t"main" :: "PIE"
     FILE = ".*\\b(?i:peek\\.t)"(?:
     DEPTH = 0)?(?:
@@ -808,18 +761,14 @@ do_test('blessing to a class with embedded NUL characters',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = [12]
     FLAGS = \\(OBJECT,SHAREKEYS\\)
-    IV = 0					# $] < 5.009
-    NV = 0					# $] < 5.009
     STASH = $ADDR\\t"\\\\0::foo::\\\\n::baz::\\\\t::\\\\0"
     ARRAY = $ADDR
     KEYS = 0
     FILL = 0
     MAX = 7', '',
-	$] > 5.009
-	? $] >= 5.015
+	$] >= 5.015
 	    ?  0
-	    : 'The hash iterator used in dump.c sets the OOK flag'
-	: "Something causes the HV's array to become allocated");
+	    : 'The hash iterator used in dump.c sets the OOK flag');
 
 do_test('ENAME on a stash',
         \%RWOM::,
@@ -830,8 +779,6 @@ do_test('ENAME on a stash',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(OOK,SHAREKEYS\\)
-    IV = 1					# $] < 5.009
-    NV = $FLOAT					# $] < 5.009
     AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR
     KEYS = 0
@@ -855,8 +802,6 @@ do_test('ENAMEs on a stash',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 3
     FLAGS = \\(OOK,SHAREKEYS\\)
-    IV = 1					# $] < 5.009
-    NV = $FLOAT					# $] < 5.009
     AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR
     KEYS = 0
@@ -883,8 +828,6 @@ do_test('ENAMEs on a stash with no NAME',
     FLAGS = \\(OOK,SHAREKEYS\\)			# $] < 5.017
     FLAGS = \\(OOK,OVERLOAD,SHAREKEYS\\)	# $] >=5.017 && $]<5.021005
     FLAGS = \\(OOK,SHAREKEYS,OVERLOAD\\)	# $] >=5.021005
-    IV = 1					# $] < 5.009
-    NV = $FLOAT					# $] < 5.009
     AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR
     KEYS = 0
@@ -908,8 +851,6 @@ do_test('small hash',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(PADMY,SHAREKEYS\\)
-    IV = 1					# $] < 5.009
-    NV = $FLOAT					# $] < 5.009
     ARRAY = $ADDR  \\(0:[67],.*\\)
     hash quality = [0-9.]+%
     KEYS = 2
@@ -936,8 +877,6 @@ do_test('small hash after keys',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
-    IV = 1					# $] < 5.009
-    NV = $FLOAT					# $] < 5.009
     AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR  \\(0:[67],.*\\)
     hash quality = [0-9.]+%
@@ -968,8 +907,6 @@ do_test('small hash after keys and scalar',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
-    IV = 1					# $] < 5.009
-    NV = $FLOAT					# $] < 5.009
     AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR  \\(0:[67],.*\\)
     hash quality = [0-9.]+%
@@ -1001,8 +938,6 @@ do_test('large hash',
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
-    IV = 1					# $] < 5.009
-    NV = $FLOAT					# $] < 5.009
     AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR  \\(0:\d+,.*\\)
     hash quality = \d+\\.\d+%
