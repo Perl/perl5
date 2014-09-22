@@ -818,6 +818,14 @@ static int my_fegetround()
   case 3: return FE_DOWNWARD;
   default: return -1;
   }
+#elif defined(__osf__) /* Tru64 */
+  switch (read_rnd()) {
+  case FP_RND_RN: return FE_TONEAREST;
+  case FP_RND_RZ: return FE_TOWARDZERO;
+  case FP_RND_RM: return FE_DOWNWARD;
+  case FP_RND_RP: return FE_UPWARD;
+  default: return -1;
+  }
 #else
   return -1;
 #endif
@@ -2233,6 +2241,14 @@ fesetround(x)
 	case FE_TOWARDZERO: RETVAL = fpsetround(FP_RZ); break;
 	case FE_DOWNWARD:   RETVAL = fpsetround(FP_RM); break;
 	case FE_UPWARD:     RETVAL = fpsetround(FP_RP); break;
+        default: RETVAL = -1; break;
+	}
+#elif defined(__osf__) /* Tru64 */
+	switch (x) {
+	case FE_TONEAREST:  RETVAL = write_rnd(FP_RND_RN); break;
+	case FE_TOWARDZERO: RETVAL = write_rnd(FP_RND_RZ); break;
+	case FE_DOWNWARD:   RETVAL = write_rnd(FP_RND_RM); break;
+	case FE_UPWARD:     RETVAL = write_rnd(FP_RND_RP); break;
         default: RETVAL = -1; break;
 	}
 #else
