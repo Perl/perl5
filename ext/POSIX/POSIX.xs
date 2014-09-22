@@ -480,6 +480,7 @@
 #    undef c99_isunordered
 #    undef c99_lrint
 #    undef c99_lround
+#    undef c99_nan /* in libm, but seems broken (no proto, either) */
 #    undef c99_nearbyint
 #    undef c99_nexttoward
 #    undef c99_remquo
@@ -2509,11 +2510,12 @@ nan(s = 0)
     CODE:
 #ifdef c99_nan
 	RETVAL = c99_nan(s ? s : "");
-#else
+#elif defined(NV_NAN)
+	/* XXX if s != NULL, warn about unused argument,
+         * or implement the nan payload setting. */
 	RETVAL = NV_NAN;
-#  ifndef NV_NAN
+#else
 	not_here("nan");
-#  endif
 #endif
     OUTPUT:
 	RETVAL
