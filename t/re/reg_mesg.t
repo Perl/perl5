@@ -439,6 +439,10 @@ my @deprecated = (
                  'Unescaped left brace in regex is deprecated, passed through {#} m/\q{{#}/'
                ],
     '/:{4,a}/' => 'Unescaped left brace in regex is deprecated, passed through {#} m/:{{#}4,a}/',
+    '/abc/xix' => 'Having more than one /x regexp modifier is deprecated',
+    '/(?xmsixp:abc)/' => 'Having more than one /x regexp modifier is deprecated',
+    '/(?xmsixp)abc/' => 'Having more than one /x regexp modifier is deprecated',
+    '/(?xxxx:abc)/' => 'Having more than one /x regexp modifier is deprecated',
 );
 
 while (my ($regex, $expect) = splice @death, 0, 2) {

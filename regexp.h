@@ -274,11 +274,18 @@ and check for NULL.
 
 #define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED)
 
-#define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl)                        \
-    case IGNORE_PAT_MOD:    *(pmfl) |= RXf_PMf_FOLD;       break;   \
-    case MULTILINE_PAT_MOD: *(pmfl) |= RXf_PMf_MULTILINE;  break;   \
-    case SINGLE_PAT_MOD:    *(pmfl) |= RXf_PMf_SINGLELINE; break;   \
-    case XTENDED_PAT_MOD:   *(pmfl) |= RXf_PMf_EXTENDED;   break
+#define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl, x_count)                       \
+    case IGNORE_PAT_MOD:    *(pmfl) |= RXf_PMf_FOLD;       break;           \
+    case MULTILINE_PAT_MOD: *(pmfl) |= RXf_PMf_MULTILINE;  break;           \
+    case SINGLE_PAT_MOD:    *(pmfl) |= RXf_PMf_SINGLELINE; break;           \
+    case XTENDED_PAT_MOD:   *(pmfl) |= RXf_PMf_EXTENDED; (x_count)++; break;
+
+#define STD_PMMOD_FLAGS_PARSE_X_WARN(x_count)                                   \
+    if (UNLIKELY((x_count) > 1)) {                                              \
+        Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),         \
+                    "Having more than one /%c regexp modifier is deprecated",   \
+                    XTENDED_PAT_MOD);                                           \
+    }
 
 /* Note, includes charset ones, assumes 0 is the default for them */
 #define STD_PMMOD_FLAGS_CLEAR(pmfl)                        \

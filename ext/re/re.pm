@@ -109,6 +109,7 @@ sub _load_unload {
 sub bits {
     my $on = shift;
     my $bits = 0;
+    my %seen;   # Has flag already been seen?
    ARG:
     foreach my $idx (0..$#_){
         my $s=$_[$idx];
@@ -187,7 +188,8 @@ sub bits {
 			  && $^H{reflags_charset} == $reflags{$_};
 		    }
 		} elsif (exists $reflags{$_}) {
-		    $on
+                    $seen{$_}++;
+                    $on
 		      ? $reflags |= $reflags{$_}
 		      : ($reflags &= ~$reflags{$_});
 		} else {
@@ -207,6 +209,18 @@ sub bits {
                        join(', ', map {qq('$_')} 'debug', 'debugcolor', sort keys %bitmask),
                        ")");
 	}
+    }
+    if (exists $seen{'x'} && $seen{'x'} > 1
+        && (warnings::enabled("deprecated")
+            || warnings::enabled("regexp")))
+    {
+        my $message = "Having more than one /x regexp modifier is deprecated";
+        if (warnings::enabled("deprecated")) {
+            warnings::warn("deprecated", $message);
+        }
+        else {
+            warnings::warn("regexp", $message);
+        }
     }
     $bits;
 }

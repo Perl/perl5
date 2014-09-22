@@ -2207,6 +2207,13 @@ created on an emergency basis to prevent a core dump.
 (F) The parser has given up trying to parse the program after 10 errors.
 Further error messages would likely be uninformative.
 
+=item Having more than one /%c regexp modifier is deprecated
+
+(D deprecated, regexp) You used the indicated regular expression pattern
+modifier at least twice in a string of modifiers.  It is deprecated to
+do this with this particular modifier, to allow future extensions to the
+Perl language.
+
 =item Hexadecimal float: exponent overflow
 
 (W overflow) The hexadecimal floating point has a larger exponent

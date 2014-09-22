@@ -9324,6 +9324,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
     regex_charset cs;
     bool has_use_defaults = FALSE;
     const char* const seqstart = RExC_parse - 1; /* Point to the '?' */
+    int x_mod_count = 0;
 
     PERL_ARGS_ASSERT_PARSE_LPAREN_QUESTION_FLAGS;
 
@@ -9351,7 +9352,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
         switch (*RExC_parse) {
 
             /* Code for the imsx flags */
-            CASE_STD_PMMOD_FLAGS_PARSE_SET(flagsp);
+            CASE_STD_PMMOD_FLAGS_PARSE_SET(flagsp, x_mod_count);
 
             case LOCALE_PAT_MOD:
                 if (has_charset_modifier) {
@@ -9488,6 +9489,9 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 if (RExC_flags & RXf_PMf_FOLD) {
                     RExC_contains_i = 1;
                 }
+                if (PASS2) {
+                    STD_PMMOD_FLAGS_PARSE_X_WARN(x_mod_count);
+                }
                 return;
                 /*NOTREACHED*/
             default:
@@ -9500,6 +9504,10 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
         }
 
         ++RExC_parse;
+    }
+
+    if (PASS2) {
+        STD_PMMOD_FLAGS_PARSE_X_WARN(x_mod_count);
     }
 }
 

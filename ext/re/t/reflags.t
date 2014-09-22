@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 62;
+use Test::More tests => 63;
 
 my @flags = qw( a d l u );
 
@@ -165,9 +165,13 @@ is qr//, '(?^:)', 'no re "/aai"';
   }
 
   $w = "";
-  eval "use re '/axaa'";
+  eval "use re '/amaa'";
   like $w, qr/The "a" flag may only appear a maximum of twice/,
-    "warning with eval \"use re \"/axaa\"";
+    "warning with eval \"use re \"/amaa\"";
 
+  $w = "";
+  eval "use re '/xamax'";
+  like $w, qr/Having more than one \/x regexp modifier is deprecated/,
+    "warning with eval \"use re \"/xamax\"";
 
 }

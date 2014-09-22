@@ -94,7 +94,20 @@ as an updated module in the L</Modules and Pragmata> section.
 
 =back
 
-[ List each other deprecation as a =head2 entry ]
+=head2 Use of multiple /x regexp modifiers
+
+It is now deprecated to say something like any of the following:
+
+    qr/foo/xx;
+    /(?xax:foo)/;
+    use re qw(/amxx);
+
+That is, now C<x> should only occur once in any string of contiguous
+regular expression pattern modifiers.  We do not believe there are any
+occurrences of this in all of CPAN.  This is in preparation for a future
+Perl release having C</xx> mean to allow white-space for readability in
+bracketed character classes (those enclosed in square brackets:
+C<[...]>).
 
 =head1 Performance Enhancements
 

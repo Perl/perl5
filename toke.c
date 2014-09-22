@@ -8668,7 +8668,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 }
 
 static bool
-S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charset) {
+S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charset, unsigned int * x_mod_count) {
 
     /* Adds, subtracts to/from 'pmfl' based on the next regex modifier flag
      * found in the parse starting at 's', based on the subset that are valid
@@ -8697,7 +8697,7 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
 
     switch (c) {
 
-        CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl);
+        CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl, *x_mod_count);
         case GLOBAL_PAT_MOD:      *pmfl |= PMf_GLOBAL; break;
         case CONTINUE_PAT_MOD:    *pmfl |= PMf_CONTINUE; break;
         case ONCE_PAT_MOD:        *pmfl |= PMf_KEEP; break;
@@ -8772,6 +8772,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     const char * const valid_flags =
 	(const char *)((type == OP_QR) ? QR_PAT_MODS : M_PAT_MODS);
     char charset = '\0';    /* character set modifier */
+    unsigned int x_mod_count = 0;
 
     PERL_ARGS_ASSERT_SCAN_PAT;
 
@@ -8821,13 +8822,17 @@ S_scan_pat(pTHX_ char *start, I32 type)
 	pm->op_pmflags |= PMf_IS_QR;
     }
 
-    while (*s && S_pmflag(aTHX_ valid_flags, &(pm->op_pmflags), &s, &charset)) {};
+    while (*s && S_pmflag(aTHX_ valid_flags, &(pm->op_pmflags),
+                                &s, &charset, &x_mod_count))
+    {};
     /* issue a warning if /c is specified,but /g is not */
     if ((pm->op_pmflags & PMf_CONTINUE) && !(pm->op_pmflags & PMf_GLOBAL))
     {
         Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), 
 		       "Use of /c modifier is meaningless without /g" );
     }
+
+    STD_PMMOD_FLAGS_PARSE_X_WARN(x_mod_count);
 
     PL_lex_op = (OP*)pm;
     pl_yylval.ival = OP_MATCH;
@@ -8843,6 +8848,7 @@ S_scan_subst(pTHX_ char *start)
     line_t first_line;
     I32 es = 0;
     char charset = '\0';    /* character set modifier */
+    unsigned int x_mod_count = 0;
     char *t;
 
     PERL_ARGS_ASSERT_SCAN_SUBST;
@@ -8876,11 +8882,14 @@ S_scan_subst(pTHX_ char *start)
 	    s++;
 	    es++;
 	}
-	else if (! S_pmflag(aTHX_ S_PAT_MODS, &(pm->op_pmflags), &s, &charset))
+	else if (! S_pmflag(aTHX_ S_PAT_MODS, &(pm->op_pmflags),
+                                  &s, &charset, &x_mod_count))
 	{
 	    break;
 	}
     }
+
+    STD_PMMOD_FLAGS_PARSE_X_WARN(x_mod_count);
 
     if ((pm->op_pmflags & PMf_CONTINUE)) {
         Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), "Use of /c modifier is meaningless in s///" );
