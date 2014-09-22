@@ -1860,7 +1860,11 @@ typedef NVTYPE NV;
 #ifdef USING_MSVC6
 /* VC6 has broken NaN semantics: NaN == NaN returns true instead of false,
  * and for example NaN < IV_MIN. */
-#define NAN_COMPARE_BROKEN 1
+#  define NAN_COMPARE_BROKEN
+#endif
+#if defined(__DECC) && defined(__osf__)
+/* Also Tru64 cc has broken NaN comparisons. */
+#  define NAN_COMPARE_BROKEN
 #endif
 
 #ifdef USE_LONG_DOUBLE
@@ -2005,7 +2009,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   ifndef Perl_isinf
 #       if defined(HAS_ISINFL) && !(defined(isinf) && defined(HAS_C99))
 #           define Perl_isinf(x) isinfl(x)
-#       elif defined(LDBL_MAX)
+#       elif defined(LDBL_MAX) && !defined(NAN_COMPARE_BROKEN)
 #           define Perl_isinf(x) ((x) > LDBL_MAX || (x) < -LDBL_MAX)
 #       endif
 #   endif
@@ -2080,7 +2084,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   ifndef Perl_isinf
 #       if defined(HAS_ISINF)
 #           define Perl_isinf(x) isinf(x)
-#       elif defined(DBL_MAX)
+#       elif defined(DBL_MAX) && !defined(NAN_COMPARE_BROKEN)
 #           define Perl_isinf(x) ((x) > DBL_MAX || (x) < -DBL_MAX)
 #       endif
 #   endif
