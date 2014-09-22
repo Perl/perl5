@@ -278,45 +278,45 @@ struct pmop {
 #define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+4)
 
 /* 'use re "taint"' in scope: taint $1 etc. if target tainted */
-#define PMf_RETAINT	(1<<(PMf_BASE_SHIFT+5))
+#define PMf_RETAINT	(1U<<(PMf_BASE_SHIFT+5))
 
 /* match successfully only once per reset, with related flag RXf_USED in
  * re->extflags holding state.  This is used only for ?? matches, and only on
  * OP_MATCH and OP_QR */
-#define PMf_ONCE	(1<<(PMf_BASE_SHIFT+6))
+#define PMf_ONCE	(1U<<(PMf_BASE_SHIFT+6))
 
 /* PMf_ONCE, i.e. ?pat?, has matched successfully.  Not used under threading. */
-#define PMf_USED        (1<<(PMf_BASE_SHIFT+7))
+#define PMf_USED        (1U<<(PMf_BASE_SHIFT+7))
 
 /* subst replacement is constant */
-#define PMf_CONST	(1<<(PMf_BASE_SHIFT+8))
+#define PMf_CONST	(1U<<(PMf_BASE_SHIFT+8))
 
 /* keep 1st runtime pattern forever */
-#define PMf_KEEP	(1<<(PMf_BASE_SHIFT+9))
+#define PMf_KEEP	(1U<<(PMf_BASE_SHIFT+9))
 
-#define PMf_GLOBAL	(1<<(PMf_BASE_SHIFT+10))	/* pattern had a g modifier */
+#define PMf_GLOBAL	(1U<<(PMf_BASE_SHIFT+10)) /* pattern had a g modifier */
 
 /* don't reset pos() if //g fails */
-#define PMf_CONTINUE	(1<<(PMf_BASE_SHIFT+11))
+#define PMf_CONTINUE	(1U<<(PMf_BASE_SHIFT+11))
 
 /* evaluating replacement as expr */
-#define PMf_EVAL	(1<<(PMf_BASE_SHIFT+12))
+#define PMf_EVAL	(1U<<(PMf_BASE_SHIFT+12))
 
 /* Return substituted string instead of modifying it. */
-#define PMf_NONDESTRUCT	(1<<(PMf_BASE_SHIFT+13))
+#define PMf_NONDESTRUCT	(1U<<(PMf_BASE_SHIFT+13))
 
 /* the pattern has a CV attached (currently only under qr/...(?{}).../) */
-#define PMf_HAS_CV	(1<<(PMf_BASE_SHIFT+14))
+#define PMf_HAS_CV	(1U<<(PMf_BASE_SHIFT+14))
 
 /* op_code_list is private; don't free it etc. It may well point to
  * code within another sub, with different pad etc */
-#define PMf_CODELIST_PRIVATE	(1<<(PMf_BASE_SHIFT+15))
+#define PMf_CODELIST_PRIVATE	(1U<<(PMf_BASE_SHIFT+15))
 
 /* the PMOP is a QR (we should be able to detect that from the op type,
  * but the regex compilation API passes just the pm flags, not the op
  * itself */
-#define PMf_IS_QR	(1<<(PMf_BASE_SHIFT+16))
-#define PMf_USE_RE_EVAL	(1<<(PMf_BASE_SHIFT+17)) /* use re'eval' in scope */
+#define PMf_IS_QR	(1U<<(PMf_BASE_SHIFT+16))
+#define PMf_USE_RE_EVAL	(1U<<(PMf_BASE_SHIFT+17)) /* use re'eval' in scope */
 
 /* See comments at the beginning of these defines about adding bits.  The
  * highest bit position should be used, so that if PMf_BASE_SHIFT gets

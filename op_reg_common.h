@@ -28,12 +28,12 @@
  * INT_PAT_MODS in regexp.h for the reason contiguity is needed */
 /* Make sure to update lib/re.pm when changing these! */
 /* Make sure you keep the pure PMf_ versions below in sync */
-#define RXf_PMf_MULTILINE      (1 << (RXf_PMf_STD_PMMOD_SHIFT+0))    /* /m */
-#define RXf_PMf_SINGLELINE     (1 << (RXf_PMf_STD_PMMOD_SHIFT+1))    /* /s */
-#define RXf_PMf_FOLD           (1 << (RXf_PMf_STD_PMMOD_SHIFT+2))    /* /i */
-#define RXf_PMf_EXTENDED       (1 << (RXf_PMf_STD_PMMOD_SHIFT+3))    /* /x */
-#define RXf_PMf_EXTENDED_MORE  (1 << (RXf_PMf_STD_PMMOD_SHIFT+4))    /* /xx */
-#define RXf_PMf_KEEPCOPY       (1 << (RXf_PMf_STD_PMMOD_SHIFT+5))    /* /p */
+#define RXf_PMf_MULTILINE      (1U << (RXf_PMf_STD_PMMOD_SHIFT+0))    /* /m */
+#define RXf_PMf_SINGLELINE     (1U << (RXf_PMf_STD_PMMOD_SHIFT+1))    /* /s */
+#define RXf_PMf_FOLD           (1U << (RXf_PMf_STD_PMMOD_SHIFT+2))    /* /i */
+#define RXf_PMf_EXTENDED       (1U << (RXf_PMf_STD_PMMOD_SHIFT+3))    /* /x */
+#define RXf_PMf_EXTENDED_MORE  (1U << (RXf_PMf_STD_PMMOD_SHIFT+4))    /* /xx */
+#define RXf_PMf_KEEPCOPY       (1U << (RXf_PMf_STD_PMMOD_SHIFT+5))    /* /p */
 
 /* The character set for the regex is stored in a field of more than one bit
  * using an enum, for reasons of compactness and to ensure that the options are
@@ -88,7 +88,7 @@ get_regex_charset(const U32 flags)
   be used by regex engines to check whether they should set
   RXf_SKIPWHITE
 */
-#define RXf_PMf_SPLIT (1<<(RXf_PMf_STD_PMMOD_SHIFT+9))
+#define RXf_PMf_SPLIT (1U<<(RXf_PMf_STD_PMMOD_SHIFT+9))
 
 /* Next available bit after the above.  Name begins with '_' so won't be
  * exported by B */
@@ -108,14 +108,14 @@ get_regex_charset(const U32 flags)
 
 /* These copies need to be numerical or ext/B/Makefile.PL won't think they are
  * constants */
-#define PMf_MULTILINE     1<<0
-#define PMf_SINGLELINE    1<<1
-#define PMf_FOLD          1<<2
-#define PMf_EXTENDED      1<<3
-#define PMf_EXTENDED_MORE 1<<4
-#define PMf_KEEPCOPY      1<<5
-#define PMf_CHARSET       7<<6
-#define PMf_SPLIT         1<<9
+#define PMf_MULTILINE     1U<<0
+#define PMf_SINGLELINE    1U<<1
+#define PMf_FOLD          1U<<2
+#define PMf_EXTENDED      1U<<3
+#define PMf_EXTENDED_MORE 1U<<4
+#define PMf_KEEPCOPY      1U<<5
+#define PMf_CHARSET       7U<<6
+#define PMf_SPLIT         1U<<9
 
 #if PMf_MULTILINE != RXf_PMf_MULTILINE || PMf_SINGLELINE != RXf_PMf_SINGLELINE || PMf_FOLD != RXf_PMf_FOLD || PMf_EXTENDED != RXf_PMf_EXTENDED || PMf_EXTENDED_MORE != RXf_PMf_EXTENDED_MORE || PMf_KEEPCOPY != RXf_PMf_KEEPCOPY || PMf_SPLIT != RXf_PMf_SPLIT || PMf_CHARSET != RXf_PMf_CHARSET
 #   error RXf_PMf defines are wrong
