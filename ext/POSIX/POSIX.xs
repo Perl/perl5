@@ -372,6 +372,11 @@
 #    endif
 #  endif
 
+/* XXX these isgreater/isnormal/isunordered macros definitions should
+ * be moved further in the file to be part of the emulations, so that
+ * platforms can e.g. #undef c99_isunordered and have it work like
+ * it does for the other interfaces. */
+
 #  if !defined(isgreater) && defined(isunordered)
 #    define isgreater(x, y)         (!isunordered((x), (y)) && (x) > (y))
 #    define isgreaterequal(x, y)    (!isunordered((x), (y)) && (x) >= (y))
