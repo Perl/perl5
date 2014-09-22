@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan( tests => 182 );
+plan( tests => 192 );
 
 # these shouldn't hang
 {
@@ -1016,3 +1016,22 @@ package deletions {
     @_=sort { delete $deletions::{a}; delete $deletions::{b}; 3 } 1..3;
 }
 pass "no crash when sort block deletes *a and *b";
+
+sub my_srt($$) { return $_[0] cmp $_[1] }
+{
+    # test sort in scalar context
+
+    is scalar(sort 2,3,1),3, "scalar(sort 2,3,1) returns number of items (3)";
+    is scalar(sort my_srt 2,3,1),3, "scalar(sort fnc 2,3,1) returns number of items (3)";
+    my @ary= (2,3,1);
+    is scalar(sort @ary),3, "scalar(sort \@ary) returns number of items (3)";
+    is scalar(sort { $a <=> $b } @ary), 3, "scalar(sort { BLOCK } \@ary) returns number of items (3)";
+    is scalar(sort { $b cmp $a } @ary), 3, "scalar(sort { BLOCK } \@ary) returns number of items (3)";
+    is scalar(sort my_srt @ary), 3, "scalar(sort fnc \@ary) returns number of items (3)";
+    @ary= ();
+    is scalar(sort @ary),0, "scalar(sort \@ary) returns number of items (0)";
+    is scalar(sort { $a <=> $b } @ary), 0, "scalar(sort { BLOCK } \@ary) returns number of items (0)";
+    is scalar(sort { $b cmp $a } @ary), 0, "scalar(sort { BLOCK } \@ary) returns number of items (0)";
+    is scalar(sort my_srt @ary), 0, "scalar(sort fnc \@ary) returns number of items (0)";
+}
+

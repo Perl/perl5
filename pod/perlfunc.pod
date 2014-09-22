@@ -6669,7 +6669,8 @@ X<sort> X<qsort> X<quicksort> X<mergesort>
 =for Pod::Functions sort a list of values
 
 In list context, this sorts the LIST and returns the sorted list value.
-In scalar context, the behaviour of C<sort()> is undefined.
+As of 5.18 in scalar context C<sort()> returns the number of elements
+passed in, prior to this it returned undef and raised a warning.
 
 If SUBNAME or BLOCK is omitted, C<sort>s in standard string comparison
 order.  If SUBNAME is specified, it gives the name of a subroutine

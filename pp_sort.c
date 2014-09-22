@@ -1490,18 +1490,25 @@ PP(pp_sort)
       = Perl_sortsv_flags;
     I32 all_SIVs = 1;
 
+    if ( gimme != G_ARRAY ) {
+        max = SP - MARK;
+        SP = MARK;
+        EXTEND(SP,1);
+        if ( gimme == G_SCALAR ) {
+            if ( (flags & (OPf_STACKED|OPf_SPECIAL)) == OPf_STACKED)
+                max--;
+            RETURNX( PUSHs( sv_2mortal( newSViv(max) ) ) );
+        } else {
+            RETPUSHUNDEF;
+        }
+    }
+
     if ((priv & OPpSORT_DESCEND) != 0)
 	sort_flags |= SORTf_DESC;
     if ((priv & OPpSORT_QSORT) != 0)
 	sort_flags |= SORTf_QSORT;
     if ((priv & OPpSORT_STABLE) != 0)
 	sort_flags |= SORTf_STABLE;
-
-    if (gimme != G_ARRAY) {
-	SP = MARK;
-	EXTEND(SP,1);
-	RETPUSHUNDEF;
-    }
 
     ENTER;
     SAVEVPTR(PL_sortcop);
