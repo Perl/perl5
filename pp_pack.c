@@ -1705,7 +1705,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                  * the long double data in pack(), here in unpack() we
                  * don't, because it's really hard to envision that
                  * reading the long double off aldouble would be
-                 * affected the unused bytes.
+                 * affected by the unused bytes.
                  *
                  * Note that trying to unpack 'long doubles' of 'long
                  * doubles' packed in another system is in the general
