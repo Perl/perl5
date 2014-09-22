@@ -2900,12 +2900,17 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    char   buf[1 + (int)((308 + 1) / 2)]; /* valid C */
 #endif
 		    char  *in = buf + sizeof(buf);
+                    static const char S_cannot_compress[] =
+                        "Cannot compress integer in pack";
+
+                    if (Perl_isinfnan(anv))
+                        Perl_croak(aTHX_ S_cannot_compress);
 
 		    anv = Perl_floor(anv);
 		    do {
 			const NV next = Perl_floor(anv / 128);
 			if (in <= buf)  /* this cannot happen ;-) */
-			    Perl_croak(aTHX_ "Cannot compress integer in pack");
+			    Perl_croak(aTHX_ S_cannot_compress);
 			*--in = (unsigned char)(anv - (next * 128)) | 0x80;
 			anv = next;
 		    } while (anv > 0);
