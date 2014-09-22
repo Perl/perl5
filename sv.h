@@ -369,7 +369,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpad_TYPED	0x00020000  /* pad name is a Typed Lexical */
 #define SVs_PADMY	0x00040000  /* in use a "my" variable */
 #define SVpad_OUR	0x00040000  /* pad name is "our" instead of "my" */
-#define SVs_TEMP	0x00080000  /* string is stealable? */
+#define SVs_TEMP	0x00080000  /* mortal (implies string is stealable) */
 #define SVs_OBJECT	0x00100000  /* is "blessed" */
 #define SVs_GMG		0x00200000  /* has magical get method */
 #define SVs_SMG		0x00400000  /* has magical set method */
@@ -382,7 +382,9 @@ perform the upgrade if necessary.  See C<svtype>.
 					  [CvEVAL(cv), CvSPECIAL(cv)]
 				       3: On a pad name SV, that slot in the
 					  frame AV is a REFCNT'ed reference
-					  to a lexical from "outside". */
+					  to a lexical from "outside".
+                                       4: HV: informally reserved by DAPM
+                                          for vtables */
 #define SVf_OOK		0x02000000  /* has valid offset value. For a PVHV this
 				       means that a hv_aux struct is present
 				       after the main array */
