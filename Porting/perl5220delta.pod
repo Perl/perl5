@@ -354,7 +354,20 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+XXX Check this list before the release of 5.22.0 for modules that have
+been fixed.
+
+The following modules are known to have test failures with this version of
+Perl.  Patches have been submitted, so there will hopefully be new releases
+soon:
+
+=over
+
+=item *
+
+L<Hook::LexWrap> version 0.24
+
+=back
 
 =back
 
