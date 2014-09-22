@@ -697,12 +697,9 @@ unless ($define{'USE_QUADMATH'}) {
 foreach (@syms) {
     my $syms = $ARGS{TARG_DIR} . $_;
     open my $global, '<', $syms or die "failed to open $syms: $!\n";
-    # Functions already have a Perl_ prefix
-    # Variables need a PL_ prefix
-    my $prefix = $syms =~ /var\.sym$/i ? 'PL_' : '';
     while (<$global>) {
 	next unless /^([A-Za-z].*)/;
-	my $symbol = "$prefix$1";
+	my $symbol = "$1";
 	++$export{$symbol} unless exists $skip{$symbol};
     }
 }
