@@ -5306,6 +5306,8 @@ t/re/reg_posixcc.t		See if posix character classes behave consistently
 t/re/re_tests			Regular expressions for regexp.t
 t/re/rt122747.t			Test rt122747 assert faile (requires DEBUGGING)
 t/re/rxcode.t			See if /(?{ code })/ works
+t/re/speed.t			See if optimisations are keeping things fast
+t/re/speed_thr.t		ditto under threads
 t/re/subst_amp.t		See if $&-related substitution works
 t/re/subst.t			See if substitution works
 t/re/substT.t			See if substitution works with -T

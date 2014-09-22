@@ -22,7 +22,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 739;  # Update this when adding/deleting tests.
+plan tests => 730;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1485,62 +1485,6 @@ EOP
 	   'undefining *^R within (??{}) does not result in a crash';
     }
 
-    {
-        # [perl #120446]
-        # this code should be virtually instantaneous. If it takes 10s of
-        # seconds, there a bug in intuit_start.
-        # (this test doesn't actually test for slowness - that involves
-        # too much danger of false positives on loaded machines - but by
-        # putting it here, hopefully someone might notice if it suddenly
-        # runs slowly)
-        my $s = ('a' x 1_000_000) . 'b';
-        my $i = 0;
-        for (1..10_000) {
-            pos($s) = $_;
-            $i++ if $s =~/\Gb/g;
-        }
-        is($i, 0, "RT 120446: mustn't run slowly");
-    }
-
-    {
-        # [perl #120692]
-        # these tests should be virtually instantaneous. If they take 10s of
-        # seconds, there's a bug in intuit_start.
-
-        my $s = 'ab' x 1_000_000;
-        utf8::upgrade($s);
-        1 while $s =~ m/\Ga+ba+b/g;
-        pass("RT#120692 \\G mustn't run slowly");
-
-        $s=~ /^a{1,2}x/ for  1..10_000;
-        pass("RT#120692 a{1,2} mustn't run slowly");
-
-        $s=~ /ab.{1,2}x/;
-        pass("RT#120692 ab.{1,2} mustn't run slowly");
-
-        $s = "-a-bc" x 250_000;
-        $s .= "1a1bc";
-        utf8::upgrade($s);
-        ok($s =~ /\da\d{0,30000}bc/, "\\d{30000}");
-
-        $s = "-ab\n" x 250_000;
-        $s .= "abx";
-        ok($s =~ /^ab.*x/m, "distant float with /m");
-
-        my $r = qr/^abcd/;
-        $s = "abcd-xyz\n" x 500_000;
-        $s =~ /$r\d{1,2}xyz/m for 1..200;
-        pass("BOL within //m  mustn't run slowly");
-
-        $s = "abcdefg" x 1_000_000;
-        $s =~ /(?-m:^)abcX?fg/m for 1..100;
-        pass("BOL within //m  mustn't skip absolute anchored check");
-
-        $s = "abcdefg" x 1_000_000;
-        $s =~ /^XX\d{1,10}cde/ for 1..100;
-        pass("abs anchored float string should fail quickly");
-
-    }
 
     # These are based on looking at the code in regcomp.c
     # We don't look for specific code, just the existence of an SSC
