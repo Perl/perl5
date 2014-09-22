@@ -8670,12 +8670,12 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 static bool
 S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charset) {
 
-    /* Adds, subtracts to/from 'pmfl' based on regex modifier flags found in
-     * the parse starting at 's', based on the subset that are valid in this
-     * context input to this routine in 'valid_flags'. Advances s.  Returns
-     * TRUE if the input should be treated as a valid flag, so the next char
-     * may be as well; otherwise FALSE. 'charset' should point to a NUL upon
-     * first call on the current regex.  This routine will set it to any
+    /* Adds, subtracts to/from 'pmfl' based on the next regex modifier flag
+     * found in the parse starting at 's', based on the subset that are valid
+     * in this context input to this routine in 'valid_flags'. Advances s.
+     * Returns TRUE if the input should be treated as a valid flag, so the next
+     * char may be as well; otherwise FALSE. 'charset' should point to a NUL
+     * upon first call on the current regex.  This routine will set it to any
      * charset modifier found.  The caller shouldn't change it.  This way,
      * another charset modifier encountered in the parse can be detected as an
      * error, as we have decided to allow only one */
