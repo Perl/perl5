@@ -94,6 +94,9 @@ my @death =
  '/(?(1x))/' => 'Switch condition not recognized {#} m/(?(1x{#}))/',
  '/(?(1x(?#)))/'=> 'Switch condition not recognized {#} m/(?(1x{#}(?#)))/',
 
+ '/(?(1)/'    => 'Switch (?(condition)... not terminated {#} m/(?(1){#}/',
+ '/(?(1)x/'    => 'Switch (?(condition)... not terminated {#} m/(?(1)x{#}/',
+ '/(?(1)x|y/'    => 'Switch (?(condition)... not terminated {#} m/(?(1)x|y{#}/',
  '/(?(1)x|y|z)/' => 'Switch (?(condition)... contains too many branches {#} m/(?(1)x|y|{#}z)/',
 
  '/(?(x)y|x)/' => 'Unknown switch condition (?(...)) {#} m/(?(x{#})y|x)/',

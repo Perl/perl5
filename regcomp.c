@@ -495,7 +495,8 @@ static const scan_data_t zero_scan_data =
  * Simple_vFAIL -- like FAIL, but marks the current location in the scan
  */
 #define	Simple_vFAIL(m) STMT_START {					\
-    const IV offset = RExC_parse - RExC_precomp;			\
+    const IV offset =                                                   \
+        (RExC_parse > RExC_end ? RExC_end : RExC_parse) - RExC_precomp; \
     Perl_croak(aTHX_ "%s" REPORT_LOCATION,				\
 	    m, REPORT_LOCATION_ARGS(offset));	\
 } STMT_END
@@ -10145,8 +10146,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    }
 		    else
 			lastbr = NULL;
-		    if (c != ')')
-			vFAIL("Switch (?(condition)... contains too many branches");
+                    if (c != ')') {
+                        if (RExC_parse>RExC_end)
+                            vFAIL("Switch (?(condition)... not terminated");
+                        else
+                            vFAIL("Switch (?(condition)... contains too many branches");
+                    }
 		    ender = reg_node(pRExC_state, TAIL);
                     REGTAIL(pRExC_state, br, ender);
 		    if (lastbr) {
