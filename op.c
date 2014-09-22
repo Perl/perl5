@@ -9875,8 +9875,7 @@ Perl_ck_refassign(pTHX_ OP *o)
 
     switch (varop->op_type) {
     case OP_PADSV:
-	if (varop->op_private & OPpLVAL_INTRO)
-	    goto bad; /* XXX temporary */
+	o->op_private = varop->op_private & OPpLVAL_INTRO;
 	o->op_targ = varop->op_targ;
 	varop->op_targ = 0;
 	break;

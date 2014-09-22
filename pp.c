@@ -6175,6 +6175,8 @@ PP(pp_refassign)
 	SV * const old = PAD_SV(ARGTARG);
 	PAD_SETSV(ARGTARG, SvREFCNT_inc_NN(SvRV(sv)));
 	SvREFCNT_dec(old);
+	if (PL_op->op_private & OPpLVAL_INTRO)
+	    SAVECLEARSV(PAD_SVl(ARGTARG));
 	break;
     }
     case SVt_PVGV:
