@@ -971,6 +971,7 @@
 #define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
 #define invlist_set_previous_index	S_invlist_set_previous_index
 #define invlist_trim		S_invlist_trim
+#define is_ssc_worth_it		S_is_ssc_worth_it
 #define join_exact(a,b,c,d,e,f,g)	S_join_exact(aTHX_ a,b,c,d,e,f,g)
 #define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)
 #define nextchar(a)		S_nextchar(aTHX_ a)

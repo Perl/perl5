@@ -155,7 +155,22 @@ foreach my $charset (get_supported_code_pages()) {
     printf $out_fh "#   define MAX_PRINT_A_FOR_USE_ONLY_BY_REGCOMP_DOT_C   0x%02X   /* The max code point that isPRINT_A */\n", $max_PRINT_A;
 
     print $out_fh "\n" . get_conditional_compile_line_end();
+
 }
+
+use Unicode::UCD 'prop_invlist';
+
+my $count = 0;
+my @other_invlist = prop_invlist("Other");
+for (my $i = 0; $i < @other_invlist; $i += 2) {
+    $count += ((defined $other_invlist[$i+1])
+              ? $other_invlist[$i+1]
+              : 0x110000)
+              - $other_invlist[$i];
+}
+printf $out_fh "\n/* The number of code points not matching \\pC */\n"
+             . "#define NON_OTHER_COUNT_FOR_USE_ONLY_BY_REGCOMP_DOT_C  %d\n",
+            0x110000 - $count;
 
 print $out_fh "\n#endif /* H_UNICODE_CONSTANTS */\n";
 

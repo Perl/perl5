@@ -1495,7 +1495,7 @@ EOP
                             qr/\d?c/d
                             qr/\w?c/l
                             qr/\s?c/a
-                            qr/[[:alpha:]]?c/u
+                            qr/[[:lower:]]?c/u
     )) {
       SKIP: {
         skip "no re-debug under miniperl" if is_miniperl;

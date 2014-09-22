@@ -2180,6 +2180,8 @@ Ei	|void	|ssc_add_range	|NN regnode_ssc *ssc \
 Ei	|void	|ssc_cp_and	|NN regnode_ssc *ssc \
 				|UV const cp
 Ein	|void	|ssc_clear_locale|NN regnode_ssc *ssc
+Ens	|bool	|is_ssc_worth_it|NN const RExC_state_t * pRExC_state \
+				|NN const regnode_ssc * ssc
 Es	|void	|ssc_finalize	|NN RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc
 Es	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state \
