@@ -3074,7 +3074,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                  * and replaced it with this one. Yves */
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log,
-			"String does not contain required substring, cannot match.\n"
+			"%sString does not contain required substring, cannot match.%s\n",
+                        PL_colors[4], PL_colors[5]
 	            ));
 		goto phooey;
 	    }
