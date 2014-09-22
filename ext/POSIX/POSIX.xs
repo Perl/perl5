@@ -477,7 +477,7 @@
 #    undef c99_fpclassify
 #    undef c99_isfinite
 #    undef c99_isinf
-#    undef c99_isunordered
+/* Tru64 is missing isunordered but we have emulation. */
 #    undef c99_lrint
 #    undef c99_lround
 #    undef c99_nan /* in libm, but seems broken (no proto, either) */
