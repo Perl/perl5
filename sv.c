@@ -3044,8 +3044,15 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
                 /* some Xenix systems wipe out errno here */
                 dSAVE_ERRNO;
 
-                /* The +20 is pure guesswork.  Configure test needed. --jhi */
-                size = NV_DIG + 20;
+                size =
+                    1 + /* sign */
+                    1 + /* "." */
+                    NV_DIG +
+                    1 + /* "e" */
+                    1 + /* sign */
+                    5 + /* exponent digits */
+                    1 + /* \0 */
+                    2; /* paranoia */
 
                 s = SvGROW_mutable(sv, size);
 #ifndef USE_LOCALE_NUMERIC
@@ -3054,17 +3061,27 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
                 SvPOK_on(sv);
 #else
                 {
+                    bool local_radix;
                     DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
+
+                    local_radix =
+                        PL_numeric_local &&
+                        PL_numeric_radix_sv &&
+                        SvUTF8(PL_numeric_radix_sv);
+                    if (local_radix && SvLEN(PL_numeric_radix_sv) > 1) {
+                        size += SvLEN(PL_numeric_radix_sv) - 1;
+                        s = SvGROW_mutable(sv, size);
+                    }
+
                     SNPRINTF_G(SvNVX(sv), s, SvLEN(sv), NV_DIG);
 
                     /* If the radix character is UTF-8, and actually is in the
                      * output, turn on the UTF-8 flag for the scalar */
-                    if (PL_numeric_local
-                        && PL_numeric_radix_sv && SvUTF8(PL_numeric_radix_sv)
-                        && instr(s, SvPVX_const(PL_numeric_radix_sv)))
-                        {
-                            SvUTF8_on(sv);
-                        }
+                    if (local_radix &&
+                        instr(s, SvPVX_const(PL_numeric_radix_sv))) {
+                        SvUTF8_on(sv);
+                    }
+
                     RESTORE_LC_NUMERIC();
                 }
 
