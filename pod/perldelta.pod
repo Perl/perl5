@@ -104,7 +104,8 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+C<length> is upto 20% faster for non-magical/non-tied containing a string and
+either non-utf8 or C<use bytes;> scalars.
 
 =back
 
