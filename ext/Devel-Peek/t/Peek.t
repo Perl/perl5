@@ -82,8 +82,8 @@ sub do_test {
 		    : $_ # Didn't match, so this line is in
 	    } split /^/, $pattern;
 	    
-	    $pattern =~ s/\$PADMY/
-		'PADMY';
+	    $pattern =~ s/\$PADMY,/
+		$] < 5.012005 ? 'PADMY,' : '';
 	    /mge;
 	    $pattern =~ s/\$RV/
 		($] < 5.011) ? 'RV' : 'IV';
@@ -850,7 +850,7 @@ do_test('small hash',
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(PADMY,SHAREKEYS\\)
+    FLAGS = \\($PADMY,SHAREKEYS\\)
     ARRAY = $ADDR  \\(0:[67],.*\\)
     hash quality = [0-9.]+%
     KEYS = 2
@@ -876,7 +876,7 @@ do_test('small hash after keys',
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
+    FLAGS = \\($PADMY,OOK,SHAREKEYS\\)
     AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR  \\(0:[67],.*\\)
     hash quality = [0-9.]+%
@@ -906,7 +906,7 @@ do_test('small hash after keys and scalar',
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
+    FLAGS = \\($PADMY,OOK,SHAREKEYS\\)
     AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR  \\(0:[67],.*\\)
     hash quality = [0-9.]+%
@@ -937,7 +937,7 @@ do_test('large hash',
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
+    FLAGS = \\($PADMY,OOK,SHAREKEYS\\)
     AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR  \\(0:\d+,.*\\)
     hash quality = \d+\\.\d+%
@@ -1054,7 +1054,7 @@ unless ($Config{useithreads}) {
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 5
   FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)	# $] < 5.021005
-  FLAGS = \\(PADMY,POK,(?:IsCOW,)?READONLY,pPOK\\)	# $] >=5.021005
+  FLAGS = \\(POK,(?:IsCOW,)?READONLY,pPOK\\)		# $] >=5.021005
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
@@ -1070,7 +1070,7 @@ unless ($Config{useithreads}) {
     do_test('string constant now an FBM', perl,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
+  FLAGS = \\($PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
@@ -1090,7 +1090,7 @@ unless ($Config{useithreads}) {
     do_test('string constant still an FBM', perl,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
+  FLAGS = \\($PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
@@ -1109,7 +1109,7 @@ unless ($Config{useithreads}) {
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 6
   FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)	# $] < 5.021005
-  FLAGS = \\(PADMY,POK,(?:IsCOW,)?READONLY,pPOK\\)	# $] >=5.021005
+  FLAGS = \\(POK,(?:IsCOW,)?READONLY,pPOK\\)		# $] >=5.021005
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
@@ -1121,7 +1121,7 @@ unless ($Config{useithreads}) {
     do_test('string constant quite unaffected', beer, 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 6
   FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)	# $] < 5.021005
-  FLAGS = \\(PADMY,POK,(?:IsCOW,)?READONLY,pPOK\\)	# $] >=5.021005
+  FLAGS = \\(POK,(?:IsCOW,)?READONLY,pPOK\\)		# $] >=5.021005
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
@@ -1130,7 +1130,7 @@ unless ($Config{useithreads}) {
 
     my $want = 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 6
-  FLAGS = \\(PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
+  FLAGS = \\($PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
@@ -1157,7 +1157,7 @@ unless ($Config{useithreads}) {
 
     do_test('second string also unaffected', $pie, 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADMY,POK,(?:IsCOW,)?pPOK\\)
+  FLAGS = \\($PADMY,POK,(?:IsCOW,)?pPOK\\)
   PV = $ADDR "good"\\\0
   CUR = 4
   LEN = \d+
