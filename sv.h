@@ -363,11 +363,10 @@ perform the upgrade if necessary.  See C<svtype>.
 				       expanded to a real GV */
 #define SVpad_NAMELIST	SVp_SCREAM  /* AV is a padnamelist */
 #define SVf_PROTECT	0x00010000  /* very read-only */
-#define SVs_PADTMP	0x00020000  /* in use as tmp; only if ! SVs_PADMY */
-#define SVs_PADSTALE	0x00020000  /* lexical has gone out of scope;
-					only valid for SVs_PADMY */
+#define SVs_PADTMP	0x00020000  /* in use as tmp */
 #define SVpad_TYPED	0x00020000  /* pad name is a Typed Lexical */
-#define SVs_PADMY	0x00040000  /* in use a "my" variable */
+#define SVs_PADSTALE	0x00040000  /* lexical has gone out of scope;
+					only used when !PADTMP */
 #define SVpad_OUR	0x00040000  /* pad name is "our" instead of "my" */
 #define SVs_TEMP	0x00080000  /* mortal (implies string is stealable) */
 #define SVs_OBJECT	0x00100000  /* is "blessed" */
@@ -1051,14 +1050,12 @@ sv_force_normal does nothing.
 
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 
-#define SvPADMY(sv)		(SvFLAGS(sv) & SVs_PADMY)
-#define SvPADMY_on(sv)		(SvFLAGS(sv) |= SVs_PADMY)
+#define SVs_PADMY		0
+#define SvPADMY(sv)		!(SvFLAGS(sv) & SVs_PADTMP)
+#define SvPADMY_on(sv)		SvPADTMP_off(sv)
 
-/* SVs_PADTMP and SVs_PADSTALE share the same bit, mediated by SVs_PADMY */
-
-#define SvPADTMP(sv)	((SvFLAGS(sv) & (SVs_PADMY|SVs_PADTMP)) == SVs_PADTMP)
-#define SvPADSTALE(sv)	((SvFLAGS(sv) & (SVs_PADMY|SVs_PADSTALE)) \
-				    == (SVs_PADMY|SVs_PADSTALE))
+#define SvPADTMP(sv)		(SvFLAGS(sv) & (SVs_PADTMP))
+#define SvPADSTALE(sv)		(SvFLAGS(sv) & (SVs_PADSTALE))
 
 #define SvPADTMP_on(sv)		S_SvPADTMP_on(MUTABLE_SV(sv))
 #define SvPADTMP_off(sv)	S_SvPADTMP_off(MUTABLE_SV(sv))

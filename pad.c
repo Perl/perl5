@@ -738,7 +738,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 		   AvARRAY(PL_comppad), PL_curpad);
     if (PL_pad_reset_pending)
 	pad_reset();
-    if (tmptype & SVs_PADMY) {
+    if (tmptype == SVs_PADMY) { /* Not & because this ‘flag’ is 0.  */
 	/* For a my, simply push a null SV onto the end of PL_comppad. */
 	sv = *av_fetch(PL_comppad, AvFILLp(PL_comppad) + 1, TRUE);
 	retval = AvFILLp(PL_comppad);

@@ -170,13 +170,13 @@ S_SvPADTMP_off(SV *sv)
 PERL_STATIC_INLINE U32
 S_SvPADSTALE_on(SV *sv)
 {
-    assert(SvFLAGS(sv) & SVs_PADMY);
+    assert(!(SvFLAGS(sv) & SVs_PADTMP));
     return SvFLAGS(sv) |= SVs_PADSTALE;
 }
 PERL_STATIC_INLINE U32
 S_SvPADSTALE_off(SV *sv)
 {
-    assert(SvFLAGS(sv) & SVs_PADMY);
+    assert(!(SvFLAGS(sv) & SVs_PADTMP));
     return SvFLAGS(sv) &= ~SVs_PADSTALE;
 }
 #if defined(PERL_CORE) || defined (PERL_EXT)
