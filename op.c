@@ -6363,10 +6363,12 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
     left->op_next = flip;
     right->op_next = flop;
 
-    range->op_targ = pad_alloc(OP_RANGE, SVs_PADMY);
+    range->op_targ = pad_add_name_pvn("$", 1, padadd_NO_DUP_CHECK, 0, 0);
     sv_upgrade(PAD_SV(range->op_targ), SVt_PVNV);
-    flip->op_targ = pad_alloc(OP_RANGE, SVs_PADMY);
+    flip->op_targ = pad_add_name_pvn("$", 1, padadd_NO_DUP_CHECK, 0, 0);;
     sv_upgrade(PAD_SV(flip->op_targ), SVt_PVNV);
+    SvFLAGS(PAD_SV(flip->op_targ)) &=~ SVs_PADMY;
+    SvPADTMP_on(PAD_SV(flip->op_targ));
 
     flip->op_private =  left->op_type == OP_CONST ? OPpFLIP_LINENUM : 0;
     flop->op_private = right->op_type == OP_CONST ? OPpFLIP_LINENUM : 0;

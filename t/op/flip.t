@@ -4,7 +4,7 @@ BEGIN {
     require "test.pl";
 }
 
-plan(11);
+plan(12);
 
 @a = (1,2,3,4,5,6,7,8,9,10,11,12);
 @b = ();
@@ -62,3 +62,6 @@ $warn = '';
 
 $. = 15;
 ok(scalar(15..0));
+
+push @_, \scalar(0..0) for 1,2;
+isnt $_[0], $_[1], '\scalar($a..$b) gives a different scalar each time';
