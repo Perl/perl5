@@ -1757,7 +1757,6 @@ GvGP(gv)
 #define GP_av_ix	(SVp << 16) | STRUCT_OFFSET(struct gp, gp_av)
 #define GP_form_ix	(SVp << 16) | STRUCT_OFFSET(struct gp, gp_form)
 #define GP_egv_ix	(SVp << 16) | STRUCT_OFFSET(struct gp, gp_egv)
-#define GP_line_ix	(line_tp << 16) | STRUCT_OFFSET(struct gp, gp_line)
 
 void
 SV(gv)
@@ -1772,7 +1771,6 @@ SV(gv)
 	AV = GP_av_ix
 	FORM = GP_form_ix
 	EGV = GP_egv_ix
-	LINE = GP_line_ix
     PREINIT:
 	GP *gp;
 	char *ptr;
@@ -1791,14 +1789,15 @@ SV(gv)
 	case U32p:
 	    ret = sv_2mortal(newSVuv(*((U32*)ptr)));
 	    break;
-	case line_tp:
-	    ret = sv_2mortal(newSVuv(*((line_t *)ptr)));
-	    break;
 	default:
 	    croak("Illegal alias 0x%08x for B::*SV", (unsigned)ix);
 	}
 	ST(0) = ret;
 	XSRETURN(1);
+
+U32
+GvLINE(gv)
+        B::GV   gv
 
 void
 FILEGV(gv)

@@ -18,8 +18,8 @@ struct gp {
     AV *	gp_av;		/* array value */
     CV *	gp_form;	/* format value */
     GV *	gp_egv;		/* effective gv, if *glob */
-    line_t	gp_line;	/* line first declared at (for -w) */
-    U32		gp_flags;
+    U32		gp_line:31;	/* line first declared at (for -w) */
+    U32		gp_flags:1;
     HEK *	gp_file_hek;	/* file first declared in (for -w) */
 };
 
