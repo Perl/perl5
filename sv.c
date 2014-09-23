@@ -2803,10 +2803,14 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
  * infinity or a not-a-number, writes the appropriate strings to the
  * buffer, including a zero byte.  On success returns the written length,
  * excluding the zero byte, on failure (not an infinity, not a nan, or the
- * maxlen too small) returns zero. */
+ * maxlen too small) returns zero.
+ *
+ * XXX for "Inf", "-Inf", and "NaN", we could have three read-only
+ * shared string constants we point to, instead of generating a new
+ * string for each instance. */
 STATIC size_t
 S_infnan_2pv(NV nv, char* buffer, size_t maxlen) {
-    /* XXX this should be an assert */
+    assert(maxlen >= 4);
     if (maxlen < 4) /* "Inf\0", "NaN\0" */
         return 0;
     else {
@@ -3027,18 +3031,23 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    *s++ = '0';
 	    *s = '\0';
 	} else {
-	    /* The +20 is pure guesswork.  Configure test needed. --jhi */
-            STRLEN size = NV_DIG + 20;
             STRLEN len;
-	    s = SvGROW_mutable(sv, size);
+            STRLEN size = 5; /* "-Inf\0" */
 
+            s = SvGROW_mutable(sv, size);
             len = S_infnan_2pv(SvNVX(sv), s, size);
-            if (len > 0)
+            if (len > 0) {
                 s += len;
+                SvPOK_on(sv);
+            }
             else {
-                dSAVE_ERRNO;
                 /* some Xenix systems wipe out errno here */
+                dSAVE_ERRNO;
 
+                /* The +20 is pure guesswork.  Configure test needed. --jhi */
+                size = NV_DIG + 20;
+
+                s = SvGROW_mutable(sv, size);
 #ifndef USE_LOCALE_NUMERIC
                 SNPRINTF_G(SvNVX(sv), s, SvLEN(sv), NV_DIG);
 
