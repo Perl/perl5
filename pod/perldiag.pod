@@ -546,6 +546,15 @@ the warning.  See L<perlsub>.
 (D deprecated) You called a function whose use is deprecated.  See
 the function's name in L<POSIX> for details.
 
+=item Cannot chr %f
+
+(F) You passed an invalid number (like an infinity or not-a-number) to C<chr>.
+
+=item Cannot compress %f
+
+(F) You tried converting an infinity or not-a-number to an
+unsigned character, which makes no sense.
+
 =item Cannot compress integer in pack
 
 (F) An argument to pack("w",...) was too large to compress.  The BER
@@ -574,6 +583,16 @@ be directly assigned to.
 
 (S io) You tried to apply an encoding that did not exist to a filehandle,
 either with open() or binmode().
+
+=item Cannot pack %f with '%c'
+
+(F) You tried converting an infinity or not-a-number to a character,
+which makes no sense.
+
+=item Cannot printf %f with '%c'
+
+(F) You tried printing an infinity or not-a-number as a character (%c),
+which makes no sense.  Maybe you meant '%s', or just stringifying it?
 
 =item Cannot set tied @DB::args
 
@@ -1334,18 +1353,6 @@ Perhaps you need to copy the value to a temporary, and repeat that.
 Note that ASCII characters that don't map to control characters are
 discouraged, and will generate the warning (when enabled)
 L</""\c%c" is more clearly written simply as "%s"">.
-
-=item Character in 'C' format overflow in pack
-
-(W pack) You tried converting an infinity or not-a-number to an
-unsigned character, which makes no sense.  Perl behaved as if you
-tried to pack 0xFF.
-
-=item Character in 'c' format overflow in pack
-
-(W pack) You tried converting an infinity or not-a-number to a
-signed character, which makes no sense.  Perl behaved as if you
-tried to pack 0xFF.
 
 =item Character in 'C' format wrapped in pack
 
@@ -2613,12 +2620,6 @@ a module that is a MRO plugin.  See L<mro> and L<perlmroapi>.
 (W utf8) You passed a negative number to C<chr>.  Negative numbers are
 not valid character numbers, so it returns the Unicode replacement
 character (U+FFFD).
-
-=item Invalid number (%f) in chr
-
-(W utf8) You passed an invalid number (like an infinity or
-not-a-number) to C<chr>.  Those are not valid character numbers,
-so it return the Unicode replacement character (U+FFFD).
 
 =item invalid option -D%c, use -D'' to see choices
 

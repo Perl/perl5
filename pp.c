@@ -3371,13 +3371,8 @@ PP(pp_chr)
     SV *top = POPs;
 
     SvGETMAGIC(top);
-    if (SvNOK(top) && Perl_isinfnan(SvNV(top))) {
-        if (ckWARN(WARN_UTF8)) {
-            Perl_warner(aTHX_ packWARN(WARN_UTF8),
-                        "Invalid number (%"NVgf") in chr", SvNV(top));
-        }
-        value = UNICODE_REPLACEMENT;
-    }
+    if (SvNOK(top) && Perl_isinfnan(SvNV(top)))
+        Perl_croak(aTHX_ "Cannot chr %"NVgf, SvNV(top));
     else {
         if (!IN_BYTES /* under bytes, chr(-1) eq chr(0xff), etc. */
             && ((SvIOKp(top) && !SvIsUV(top) && SvIV_nomg(top) < 0)

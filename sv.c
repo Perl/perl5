@@ -11484,7 +11484,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	}
 
         if (argsv && SvNOK(argsv)) {
-            /* XXX va_arg(*args) case? */
+            /* XXX va_arg(*args) case? need peek, use va_copy? */
             infnan = Perl_isinfnan(SvNV(argsv));
         }
 
@@ -11495,8 +11495,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	case 'c':
 	    if (vectorize)
 		goto unknown;
-	    uv = (args) ? va_arg(*args, int) :
-                infnan ? UNICODE_REPLACEMENT : SvIV(argsv);
+            if (infnan)
+                Perl_croak(aTHX_ "Cannot printf %"NVgf" with '%c'",
+                           /* no va_arg() case */
+                           SvNV(argsv), (int)c);
+	    uv = (args) ? va_arg(*args, int) : SvIV(argsv);
 	    if ((uv > 255 ||
 		 (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
 		&& !IN_BYTES) {

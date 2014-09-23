@@ -315,7 +315,7 @@ sub list_eq ($$) {
       if ($^O eq 'vos');
 
     eval { $x = pack 'w', $inf };
-    like ($@, qr/^Cannot compress integer/, "Cannot compress integer");
+    like ($@, qr/^Cannot compress Inf/, "Cannot compress infinity");
   }
 
  SKIP: {

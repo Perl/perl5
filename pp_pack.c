@@ -2114,6 +2114,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
         bool needs_swap;
 
 #define NEXTFROM (lengthcode ? lengthcode : items-- > 0 ? *beglist++ : &PL_sv_no)
+#define PEEKFROM (lengthcode ? lengthcode : items > 0 ? *beglist : &PL_sv_no)
 
         switch (howlen) {
 	  case e_star:
@@ -2163,10 +2164,23 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 
         needs_swap = NEEDS_SWAP(datumtype);
 
+        fromstr = PEEKFROM;
+        if (SvNOK(fromstr)) {
+            const NV nv = SvNV(fromstr);
+            const char c = TYPE_NO_MODIFIERS(datumtype);
+            if (Perl_isinfnan(nv) && !strchr("fdFD", c)) {
+                if (c == 'w')
+                    Perl_croak(aTHX_ "Cannot compress %"NVgf, nv);
+                else
+                    Perl_croak(aTHX_ "Cannot pack %"NVgf" with '%c'",
+                               nv, (int) c);
+            }
+        }
+
 	/* Code inside the switch must take care to properly update
 	   cat (CUR length and '\0' termination) if it updated *cur and
 	   doesn't simply leave using break */
-	switch(TYPE_NO_ENDIANNESS(datumtype)) {
+	switch (TYPE_NO_ENDIANNESS(datumtype)) {
 	default:
 	    Perl_croak(aTHX_ "Invalid type '%c' in pack",
 		       (int) TYPE_NO_MODIFIERS(datumtype));
@@ -2552,15 +2566,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    while (len-- > 0) {
 		IV aiv;
 		fromstr = NEXTFROM;
-                if (SvNOK(fromstr) && Perl_isinfnan(SvNV(fromstr))) {
-                    /* 255 is a pretty arbitrary choice, but with
-                     * inf/-inf/nan and 256 bytes there is not much room. */
-                    aiv = 255;
-		    Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
-				   "Character in 'c' format overflow in pack");
-                }
-                else
-                    aiv = SvIV(fromstr);
+                aiv = SvIV(fromstr);
 		if ((-128 > aiv || aiv > 127))
 		    Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
 				   "Character in 'c' format wrapped in pack");
@@ -2575,14 +2581,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    while (len-- > 0) {
 		IV aiv;
 		fromstr = NEXTFROM;
-                if (SvNOK(fromstr) && Perl_isinfnan(SvNV(fromstr))) {
-                    /* See the 'c' case. */
-                    aiv = 255;
-		    Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
-				   "Character in 'C' format overflow in pack");
-                }
-                else
-                    aiv = SvIV(fromstr);
+                aiv = SvIV(fromstr);
 		if ((0 > aiv || aiv > 0xff))
 		    Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
 				   "Character in 'C' format wrapped in pack");
@@ -2900,17 +2899,12 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    char   buf[1 + (int)((308 + 1) / 2)]; /* valid C */
 #endif
 		    char  *in = buf + sizeof(buf);
-                    static const char S_cannot_compress[] =
-                        "Cannot compress integer in pack";
-
-                    if (Perl_isinfnan(anv))
-                        Perl_croak(aTHX_ S_cannot_compress);
 
 		    anv = Perl_floor(anv);
 		    do {
 			const NV next = Perl_floor(anv / 128);
 			if (in <= buf)  /* this cannot happen ;-) */
-			    Perl_croak(aTHX_ S_cannot_compress);
+			    Perl_croak(aTHX_ "Cannot compress integer in pack");
 			*--in = (unsigned char)(anv - (next * 128)) | 0x80;
 			anv = next;
 		    } while (anv > 0);
