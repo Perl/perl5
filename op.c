@@ -6367,7 +6367,6 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
     sv_upgrade(PAD_SV(range->op_targ), SVt_PVNV);
     flip->op_targ = pad_add_name_pvn("$", 1, padadd_NO_DUP_CHECK, 0, 0);;
     sv_upgrade(PAD_SV(flip->op_targ), SVt_PVNV);
-    SvFLAGS(PAD_SV(flip->op_targ)) &=~ SVs_PADMY;
     SvPADTMP_on(PAD_SV(flip->op_targ));
 
     flip->op_private =  left->op_type == OP_CONST ? OPpFLIP_LINENUM : 0;
@@ -7415,7 +7414,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
     if (const_sv) {
 	SvREFCNT_inc_simple_void_NN(const_sv);
-	SvFLAGS(const_sv) = (SvFLAGS(const_sv) & ~SVs_PADMY) | SVs_PADTMP;
+	SvFLAGS(const_sv) |= SVs_PADTMP;
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
 	    cv_forget_slab(cv);
@@ -7607,7 +7606,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	else *spot = cv_clone(clonee);
 	SvREFCNT_dec_NN(clonee);
 	cv = *spot;
-	SvPADMY_on(cv);
     }
     if (CvDEPTH(outcv) && !reusable && PadnameIsSTATE(name)) {
 	PADOFFSET depth = CvDEPTH(outcv);
@@ -7837,7 +7835,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     }
     if (const_sv) {
 	SvREFCNT_inc_simple_void_NN(const_sv);
-	SvFLAGS(const_sv) = (SvFLAGS(const_sv) & ~SVs_PADMY) | SVs_PADTMP;
+	SvFLAGS(const_sv) |= SVs_PADTMP;
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
 	    cv_forget_slab(cv);

@@ -156,18 +156,6 @@ SvAMAGIC_off(SV *sv)
 }
 
 PERL_STATIC_INLINE U32
-S_SvPADTMP_on(SV *sv)
-{
-    assert(!(SvFLAGS(sv) & SVs_PADMY));
-    return SvFLAGS(sv) |= SVs_PADTMP;
-}
-PERL_STATIC_INLINE U32
-S_SvPADTMP_off(SV *sv)
-{
-    assert(!(SvFLAGS(sv) & SVs_PADMY));
-    return SvFLAGS(sv) &= ~SVs_PADTMP;
-}
-PERL_STATIC_INLINE U32
 S_SvPADSTALE_on(SV *sv)
 {
     assert(!(SvFLAGS(sv) & SVs_PADTMP));

@@ -1076,7 +1076,7 @@ Perl_leave_scope(pTHX_ I32 base)
                     SvREFCNT_dec_NN(sv); /* Cast current value to the winds. */
                     /* preserve pad nature, but also mark as not live
                      * for any closure capturing */
-                    SvFLAGS(*svp) |= (SVs_PADMY|SVs_PADSTALE);
+                    SvFLAGS(*svp) |= SVs_PADSTALE;
                 }
             }
 	    break;

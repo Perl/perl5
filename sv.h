@@ -1052,13 +1052,15 @@ sv_force_normal does nothing.
 
 #define SVs_PADMY		0
 #define SvPADMY(sv)		!(SvFLAGS(sv) & SVs_PADTMP)
-#define SvPADMY_on(sv)		SvPADTMP_off(sv)
+#ifndef PERL_CORE
+# define SvPADMY_on(sv)		SvPADTMP_off(sv)
+#endif
 
 #define SvPADTMP(sv)		(SvFLAGS(sv) & (SVs_PADTMP))
 #define SvPADSTALE(sv)		(SvFLAGS(sv) & (SVs_PADSTALE))
 
-#define SvPADTMP_on(sv)		S_SvPADTMP_on(MUTABLE_SV(sv))
-#define SvPADTMP_off(sv)	S_SvPADTMP_off(MUTABLE_SV(sv))
+#define SvPADTMP_on(sv)		(SvFLAGS(sv) |= SVs_PADTMP)
+#define SvPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVs_PADTMP)
 #define SvPADSTALE_on(sv)	S_SvPADSTALE_on(MUTABLE_SV(sv))
 #define SvPADSTALE_off(sv)	S_SvPADSTALE_off(MUTABLE_SV(sv))
 

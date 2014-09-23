@@ -769,9 +769,9 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 	    sv = *av_fetch(PL_comppad, retval, TRUE);
 	    if (!(SvFLAGS(sv) &
 #ifdef USE_PAD_RESET
-		    (SVs_PADMY|(konst ? SVs_PADTMP : 0))
+		    (konst ? SVs_PADTMP : 0))
 #else
-		    (SVs_PADMY|SVs_PADTMP)
+		    SVs_PADTMP
 #endif
 		 ))
 		break;
@@ -840,7 +840,6 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
 	assert (SvTYPE(func) == SVt_PVFM);
 	av_store(PL_comppad, ix, rv);
     }
-    SvPADMY_on((SV*)func);
 
     /* to avoid ref loops, we never have parent + child referencing each
      * other simultaneously */
@@ -2122,7 +2121,6 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 		    sv = MUTABLE_SV(newHV());
 		else
 		    sv = newSV(0);
-		SvPADMY_on(sv);
 		/* reset the 'assign only once' flag on each state var */
 		if (sigil != '&' && SvPAD_STATE(namesv))
 		    SvPADSTALE_on(sv);
@@ -2387,7 +2385,6 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 			if (SvPADTMP(oldpad[ix])) SvPADTMP_on(sv);
 		    }
 		    av_store(newpad, ix, sv);
-		    SvPADMY_on(sv);
 		}
 	    }
 	    else if (PadnamePV(names[ix])) {
@@ -2522,7 +2519,6 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 			    else
 				sv = newSV(0);
 			    pad1a[ix] = sv;
-			    SvPADMY_on(sv);
 			}
 		    }
 		}
@@ -2538,9 +2534,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 		    /* SvREFCNT(oldpad[ix]) != 1 for some code in threads.xs
 		       FIXTHAT before merging this branch.
 		       (And I know how to) */
-		    if (SvPADMY(oldpad[ix]))
-			SvPADMY_on(sv);
-		    else
+		    if (SvPADTMP(oldpad[ix]))
 			SvPADTMP_on(sv);
 		}
 	    }
