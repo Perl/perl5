@@ -2617,6 +2617,11 @@ PP(pp_ssockopt)
 	len = SvCUR(sv);
 	if (PerlSock_getsockopt(fd, lvl, optname, SvPVX(sv), &len) < 0)
 	    goto nuts2;
+#if defined(_AIX)
+        /* XXX Configure test: does getsockopt set the length properly? */
+        if (len == 256)
+            len = sizeof(int);
+#endif
 	SvCUR_set(sv, len);
 	*SvEND(sv) ='\0';
 	PUSHs(sv);
