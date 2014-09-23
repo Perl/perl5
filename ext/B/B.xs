@@ -1799,6 +1799,10 @@ U32
 GvLINE(gv)
         B::GV   gv
 
+U32
+GvGPFLAGS(gv)
+        B::GV   gv
+
 void
 FILEGV(gv)
 	B::GV	gv

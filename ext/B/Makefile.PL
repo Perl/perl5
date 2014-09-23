@@ -30,7 +30,7 @@ my @names = ({ name => 'HEf_SVKEY', macro => 1, type => "IV" },
 # match the pattern below.
 foreach my $tuple (['cop.h'],
                    ['cv.h', 'CVf'],
-                   ['gv.h', 'GVf'],
+                   ['gv.h', 'G[PV]f'],
                    ['op.h'],
                    ['opcode.h', 'OPp'],
                    ['op_reg_common.h','(?:(?:RXf_)?PMf_)'],
