@@ -674,3 +674,8 @@ EOCBU
 # Helmut Jarausch reports that Perl's malloc is rather unusable
 # with IRIX, and SGI confirms the problem.
 usemymalloc=${usemymalloc:-false}
+
+# Configure finds <fcntl.h> but then thinks it can use <sys/file.h>
+# instead; in IRIX this is not true because the prototype of fcntl()
+# requires explicit include of <fcntl.h>
+i_fcntl=define
