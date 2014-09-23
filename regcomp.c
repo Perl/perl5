@@ -102,6 +102,9 @@ EXTERN_C const struct regexp_engine my_reg_engine;
 #define	STATIC	static
 #endif
 
+#ifndef MIN
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 struct RExC_state_t {
     U32		flags;			/* RXf_* are we folding, multilining? */
@@ -16882,10 +16885,6 @@ S_put_code_point(pTHX_ SV *sv, UV c)
 }
 
 #define MAX_PRINT_A MAX_PRINT_A_FOR_USE_ONLY_BY_REGCOMP_DOT_C
-
-#ifndef MIN
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
 
 STATIC void
 S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
