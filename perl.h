@@ -1857,6 +1857,12 @@ typedef NVTYPE NV;
 #   include <ieeefp.h>
 #endif
 
+#ifdef USING_MSVC6
+/* VC6 has broken NaN semantics: NaN == NaN returns true instead of false,
+ * and for example NaN < IV_MIN. */
+#define NAN_COMPARE_BROKEN 1
+#endif
+
 #ifdef USE_LONG_DOUBLE
 #   ifdef I_SUNMATH
 #       include <sunmath.h>
@@ -3029,13 +3035,6 @@ typedef pthread_key_t	perl_key;
 
 #if defined(WIN32)
 #  include "win32.h"
-#  ifdef NAN_COMPARE_BROKEN /* VC6 */
-/* We need to redefine Perl_isinf() because we most likely defined it
- * using the <DBL_MIN || >DBL_MAX way, which is broken if the NaN
- * compare is broken. */
-#    undef Perl_isinf
-#    define Perl_isinf(x) Perl_fp_class_inf(x)
-#  endif
 #endif
 
 #ifdef NETWARE
