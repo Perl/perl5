@@ -42,7 +42,7 @@ run_tests() unless caller;
 sub run_tests {
 
 
-    watchdog(40 * (($::running_as_thread && $::running_as_thread) ? 2 : 1));
+    watchdog(($::running_as_thread && $::running_as_thread) ? 50 : 75);
 
     {
         # [perl #120446]
