@@ -10,7 +10,7 @@
  */
 
 /* These defines are used in both op.h and regexp.h  The definitions use the
- * shift form so that ext/B/defsubs_h.PL will pick them up.
+ * shift form so that ext/B/Makefile.PL will pick them up.
  *
  * Data structures used in the two headers have common fields, and in fact one
  * is copied onto the other.  This makes it easy to keep them in sync */
@@ -106,7 +106,8 @@ get_regex_charset(const U32 flags)
 #   endif
 #endif
 
-/* These copies need to be numerical or defsubs_h.PL won't know about them. */
+/* These copies need to be numerical or ext/B/Makefile.PL won't think they are
+ * constants */
 #define PMf_MULTILINE     1<<0
 #define PMf_SINGLELINE    1<<1
 #define PMf_FOLD          1<<2
