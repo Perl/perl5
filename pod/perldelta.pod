@@ -104,8 +104,8 @@ There may well be none in a stable release.
 
 =item *
 
-C<length> is upto 20% faster for non-magical/non-tied containing a string and
-either non-utf8 or C<use bytes;> scalars.
+C<length> is up to 20% faster for non-magical/non-tied scalars containing a
+string if it is a non-utf8 string or if C<use bytes;> is in scope.
 
 =back
 
