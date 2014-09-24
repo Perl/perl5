@@ -381,6 +381,7 @@ $bits{log}{0} = $bf[0];
 @{$bits{lslice}}{1,0} = ($bf[1], $bf[1]);
 $bits{lstat}{0} = $bf[0];
 @{$bits{lt}}{1,0} = ($bf[1], $bf[1]);
+$bits{lvref}{0} = $bf[0];
 $bits{mapwhile}{0} = $bf[0];
 $bits{method}{0} = $bf[0];
 $bits{method_named}{0} = $bf[0];

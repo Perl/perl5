@@ -6190,6 +6190,10 @@ PP(pp_refassign)
     RETURN;
 }
 
+PP(pp_lvref)
+{
+    DIE(aTHX_ "Unimplemented");
+}
 
 /*
  * Local variables:

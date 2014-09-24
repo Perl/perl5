@@ -402,7 +402,7 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     once
 
-    rv2gv refgen srefgen ref refassign
+    rv2gv refgen srefgen ref refassign lvref
 
     bless -- could be used to change ownership of objects
 	     (reblessing)
