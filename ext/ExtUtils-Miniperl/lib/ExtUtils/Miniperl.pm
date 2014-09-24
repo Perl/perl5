@@ -8,7 +8,7 @@ use vars qw($VERSION @ISA @EXPORT);
 
 @ISA = qw(Exporter);
 @EXPORT = qw(writemain);
-$VERSION = '1.02';
+$VERSION = '1.03';
 
 # blead will run this with miniperl, hence we can't use autodie or File::Temp
 my $temp;
@@ -135,6 +135,8 @@ main(int argc, char **argv, char **env)
                    Perl_atfork_unlock,
                    Perl_atfork_unlock);
 #endif
+
+    PERL_SYS_FPU_INIT;
 
     if (!PL_do_undump) {
 	my_perl = perl_alloc();

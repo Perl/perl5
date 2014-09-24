@@ -107,6 +107,8 @@ main(int argc, char **argv, char **env)
                    Perl_atfork_unlock);
 #endif
 
+    PERL_SYS_FPU_INIT;
+
     if (!PL_do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)

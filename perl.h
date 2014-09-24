@@ -2898,6 +2898,23 @@ typedef SV PADNAME;
 #  define PERL_FPU_POST_EXEC  }
 #endif
 
+/* In Tru64 the cc -ieee enables the IEEE math but disables traps.
+ * We need to reenable the "invalid" trap because otherwise generation
+ * of NaN values leaves the IEEE fp flags in bad state, leaving any further
+ * fp ops behaving strangely (Inf + 1 resulting in zero, for example). */
+#ifdef __osf__
+#  include <machine/fpu.h>
+#  define PERL_SYS_FPU_INIT \
+     STMT_START { \
+         ieee_set_fp_control(IEEE_TRAP_ENABLE_INV); \
+         signal(SIGFPE, SIG_IGN); \
+     } STMT_END
+#endif
+
+#ifndef PERL_SYS_FPU_INIT
+#  define PERL_SYS_FPU_INIT NOOP
+#endif
+
 #ifndef PERL_SYS_INIT3_BODY
 #  define PERL_SYS_INIT3_BODY(argvp,argcp,envp) PERL_SYS_INIT_BODY(argvp,argcp)
 #endif
