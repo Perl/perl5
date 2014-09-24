@@ -2063,6 +2063,30 @@ S_sv_2iuv_non_preserve(pTHX_ SV *const sv
 }
 #endif /* !NV_PRESERVES_UV*/
 
+/* If numtype is infnan, set the NV of the sv accordingly.
+ * If numtype is anything else, set the NV using Atof(PV). */
+static void
+S_sv_setnv(SV* sv, int numtype)
+{
+    bool pok = SvPOK(sv);
+    if ((numtype & IS_NUMBER_INFINITY)) {
+        SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -NV_INF : NV_INF);
+        SvNOK_only(sv);
+        if (pok)
+            SvPOK_on(sv);
+    }
+    else if ((numtype & IS_NUMBER_NAN)) {
+        SvNV_set(sv, NV_NAN);
+        SvNOK_only(sv);
+        if (pok)
+            SvPOK_on(sv);
+    }
+    else if (pok)
+        SvNV_set(sv, Atof(SvPVX_const(sv)));
+    else
+        return;
+}
+
 STATIC bool
 S_sv_2iuv_common(pTHX_ SV *const sv)
 {
@@ -2176,6 +2200,11 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	} else if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 
+        if ((numtype & (IS_NUMBER_INFINITY | IS_NUMBER_NAN))) {
+            S_sv_setnv(sv, numtype);
+            return FALSE;
+        }
+
 	/* If NVs preserve UVs then we only use the UV value if we know that
 	   we aren't going to call atof() below. If NVs don't preserve UVs
 	   then the value returned may have more precision than atof() will
@@ -2221,7 +2250,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	    != IS_NUMBER_IN_UV) {
 	    /* It wasn't an (integer that doesn't overflow the UV). */
-	    SvNV_set(sv, Atof(SvPVX_const(sv)));
+            S_sv_setnv(sv, numtype);
 
 	    if (! numtype && ckWARN(WARN_NUMERIC))
 		not_a_number(sv);
@@ -2623,12 +2652,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	    /* It's definitely an integer */
 	    SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -(NV)value : (NV)value);
 	} else {
-            if ((numtype & IS_NUMBER_INFINITY))
-                SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -NV_INF : NV_INF);
-            else if ((numtype & IS_NUMBER_NAN))
-                SvNV_set(sv, NV_NAN);
-            else
-                SvNV_set(sv, Atof(SvPVX_const(sv)));
+            S_sv_setnv(sv, numtype);
         }
 	if (numtype)
 	    SvNOK_on(sv);
