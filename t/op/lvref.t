@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 37;
+plan 40;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -153,7 +153,21 @@ like $@, qr/^Assigned value is not a SCALAR reference at/,
 eval { \$::x = [] };
 like $@, qr/^Assigned value is not a SCALAR reference at/,
     'assigning non-scalar ref to package scalar ref';
+
 on;
+eval '(\do{}) = 42';
+like $@, qr/^Can't modify reference to do block in list assignment at /,
+    "Can't modify reference to do block in list assignment";
+off;
+eval '(\pos) = 42';
+like $@,
+     qr/^Can't modify reference to match position in list assignment at /,
+    "Can't modify ref to some scalar-returning op in list assignment";
+on;
+eval '(\glob) = 42';
+like $@,
+     qr/^Can't modify reference to glob in list assignment at /,
+    "Can't modify reference to some list-returning op in list assignment";
 
 # Miscellaneous
 
