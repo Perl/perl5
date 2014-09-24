@@ -3592,7 +3592,11 @@ alias_av(AV *av, IV ix, SV *sv)
 SV *
 cv_name(SVREF ref, ...)
     CODE:
-	RETVAL = SvREFCNT_inc(cv_name((CV *)ref, items>1 ? ST(1) : NULL));
+	RETVAL = SvREFCNT_inc(cv_name((CV *)ref,
+				      items>1 && ST(1) != &PL_sv_undef
+					? ST(1)
+					: NULL,
+				      items>2 ? SvUV(ST(2)) : 0));
     OUTPUT:
 	RETVAL
 

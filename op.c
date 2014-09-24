@@ -535,7 +535,7 @@ S_bad_type_pv(pTHX_ I32 n, const char *t, const char *name, U32 flags, const OP 
 STATIC void
 S_bad_type_gv(pTHX_ I32 n, const char *t, GV *gv, U32 flags, const OP *kid)
 {
-    SV * const namesv = cv_name((CV *)gv, NULL);
+    SV * const namesv = cv_name((CV *)gv, NULL, 0);
     PERL_ARGS_ASSERT_BAD_TYPE_GV;
  
     yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %"SVf" must be %s (not %s)",
@@ -8027,7 +8027,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (block && has_name) {
 	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
-	    SV * const tmpstr = cv_name(cv,NULL);
+	    SV * const tmpstr = cv_name(cv,NULL,0);
 	    GV * const db_postponed = gv_fetchpvs("DB::postponed",
 						  GV_ADDMULTI, SVt_PVHV);
 	    HV *hv;
@@ -10417,7 +10417,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 
 	if (proto >= proto_end)
 	{
-	    SV * const namesv = cv_name((CV *)namegv, NULL);
+	    SV * const namesv = cv_name((CV *)namegv, NULL, 0);
 	    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %"SVf,
 					SVfARG(namesv)), SvUTF8(namesv));
 	    return entersubop;
@@ -10572,7 +10572,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    default:
 	    oops: {
 		Perl_croak(aTHX_ "Malformed prototype for %"SVf": %"SVf,
-				  SVfARG(cv_name((CV *)namegv, NULL)),
+				  SVfARG(cv_name((CV *)namegv, NULL, 0)),
 				  SVfARG(protosv));
             }
 	}
@@ -10588,7 +10588,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     if (!optional && proto_end > proto &&
 	(*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
     {
-	SV * const namesv = cv_name((CV *)namegv, NULL);
+	SV * const namesv = cv_name((CV *)namegv, NULL, 0);
 	yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %"SVf,
 				    SVfARG(namesv)), SvUTF8(namesv));
     }

@@ -1820,7 +1820,7 @@ PP(pp_caller)
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
 	/* So is ccstack[dbcxix]. */
 	if (CvHASGV(dbcx->blk_sub.cv)) {
-	    PUSHs(cv_name(dbcx->blk_sub.cv, 0));
+	    PUSHs(cv_name(dbcx->blk_sub.cv, 0, 0));
 	    PUSHs(boolSV(CxHASARGS(cx)));
 	}
 	else {

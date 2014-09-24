@@ -100,7 +100,7 @@
 #define cv_clone(a)		Perl_cv_clone(aTHX_ a)
 #define cv_const_sv		Perl_cv_const_sv
 #define cv_get_call_checker(a,b,c)	Perl_cv_get_call_checker(aTHX_ a,b,c)
-#define cv_name(a,b)		Perl_cv_name(aTHX_ a,b)
+#define cv_name(a,b,c)		Perl_cv_name(aTHX_ a,b,c)
 #define cv_set_call_checker(a,b,c)	Perl_cv_set_call_checker(aTHX_ a,b,c)
 #define cv_set_call_checker_flags(a,b,c,d)	Perl_cv_set_call_checker_flags(aTHX_ a,b,c,d)
 #define cv_undef(a)		Perl_cv_undef(aTHX_ a)

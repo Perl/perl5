@@ -2624,7 +2624,7 @@ PP(pp_entersub)
 	/* anonymous or undef'd function leaves us no recourse */
 	if (CvLEXICAL(cv) && CvHASGV(cv))
 	    DIE(aTHX_ "Undefined subroutine &%"SVf" called",
-		       SVfARG(cv_name(cv, NULL)));
+		       SVfARG(cv_name(cv, NULL, 0)));
 	if (CvANON(cv) || !CvHASGV(cv)) {
 	    DIE(aTHX_ "Undefined subroutine called");
 	}
@@ -2830,7 +2830,7 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
 	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on anonymous subroutine");
     else {
 	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on subroutine \"%"SVf"\"",
-		    SVfARG(cv_name(cv,NULL)));
+		    SVfARG(cv_name(cv,NULL,0)));
     }
 }
 

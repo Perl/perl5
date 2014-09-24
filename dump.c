@@ -2277,7 +2277,7 @@ Perl_debop(pTHX_ const OP *o)
 	    assert(SvROK(cGVOPo_gv));
 	    assert(SvTYPE(SvRV(cGVOPo_gv)) == SVt_PVCV);
 	    PerlIO_printf(Perl_debug_log, "(cv ref: %s)",
-		      SvPV_nolen_const(cv_name((CV *)SvRV(cGVOPo_gv),sv)));
+		    SvPV_nolen_const(cv_name((CV *)SvRV(cGVOPo_gv),sv,0)));
 	    SvREFCNT_dec_NN(sv);
 	}
 	else

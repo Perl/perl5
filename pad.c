@@ -2247,11 +2247,15 @@ An SV may be passed as a second argument.  If so, the name will be assigned
 to it and it will be returned.  Otherwise the returned SV will be a new
 mortal.
 
+If the I<flags> include CV_NAME_NOTQUAL, then the package name will not be
+included.  If the first argument is neither a CV nor a GV, this flag is
+ignored (subject to change).
+
 =cut
 */
 
 SV *
-Perl_cv_name(pTHX_ CV *cv, SV *sv)
+Perl_cv_name(pTHX_ CV *cv, SV *sv, U32 flags)
 {
     PERL_ARGS_ASSERT_CV_NAME;
     if (!isGV_with_GP(cv) && SvTYPE(cv) != SVt_PVCV) {
@@ -2262,17 +2266,19 @@ Perl_cv_name(pTHX_ CV *cv, SV *sv)
 	SV * const retsv = sv ? (sv) : sv_newmortal();
     	if (SvTYPE(cv) == SVt_PVCV) {
 	    if (CvNAMED(cv)) {
-		if (CvLEXICAL(cv)) sv_sethek(retsv, CvNAME_HEK(cv));
+		if (CvLEXICAL(cv) || flags & CV_NAME_NOTQUAL)
+		    sv_sethek(retsv, CvNAME_HEK(cv));
 		else {
 		    sv_sethek(retsv, HvNAME_HEK(CvSTASH(cv)));
 		    sv_catpvs(retsv, "::");
 		    sv_cathek(retsv, CvNAME_HEK(cv));
 		}
 	    }
-	    else if (CvLEXICAL(cv))
+	    else if (CvLEXICAL(cv) || flags & CV_NAME_NOTQUAL)
 		sv_sethek(retsv, GvNAME_HEK(GvEGV(CvGV(cv))));
 	    else gv_efullname3(retsv, CvGV(cv), NULL);
 	}
+	else if (flags & CV_NAME_NOTQUAL) sv_sethek(retsv, GvNAME_HEK(cv));
 	else gv_efullname3(retsv,(GV *)cv,NULL);
 	return retsv;
     }
