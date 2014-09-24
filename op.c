@@ -2626,6 +2626,34 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	 || !S_vivifies(OP_SIBLING(cLOGOPo->op_first)->op_type))
 	    op_lvalue(OP_SIBLING(cLOGOPo->op_first), type);
 	goto nomod;
+
+    case OP_SREFGEN:
+	if (type != OP_AASSIGN) goto nomod;
+	kid = cUNOPx(cUNOPo->op_first)->op_first;
+	switch (kid->op_type) {
+	case OP_RV2SV:
+	    if (kUNOP->op_first->op_type != OP_GV) goto badref;
+	    if (kid->op_private & OPpLVAL_INTRO)
+		goto badref; /* XXX temporary */
+	    op_null(kid);
+	    o->op_type = OP_LVREF;
+	    o->op_ppaddr = PL_ppaddr[OP_LVREF];
+	    o->op_flags |= OPf_STACKED;
+	    break;
+	default:
+	  badref:
+	    yyerror(Perl_form(aTHX_ "Can't modify reference to %s in list "
+				    "assignment",
+		     o->op_type == OP_NULL && o->op_flags & OPf_SPECIAL
+		      ? "do block"
+		      : OP_DESC(kid)));
+	    return o;
+	}
+	if (!FEATURE_LVREF_IS_ENABLED)
+	    Perl_croak(aTHX_ "Experimental lvalue references not enabled");
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
+			      "Lvalue references are experimental");
+	return o;
     }
 
     /* [20011101.069] File test operators interpret OPf_REF to mean that
@@ -5669,6 +5697,7 @@ S_assignment_type(pTHX_ const OP *o)
 {
     unsigned type;
     U8 flags;
+    U8 ret;
 
     if (!o)
 	return TRUE;
@@ -5691,12 +5720,17 @@ S_assignment_type(pTHX_ const OP *o)
     }
 
     if (type == OP_SREFGEN)
-	return ASSIGN_REF;
+    {
+	ret = ASSIGN_REF;
+	type = cUNOPx(cUNOPo->op_first)->op_first->op_type;
+	flags |= cUNOPx(cUNOPo->op_first)->op_first->op_flags;
+    }
+    else ret = 0;
 
     if (type == OP_LIST &&
 	(flags & OPf_WANT) == OPf_WANT_SCALAR &&
 	o->op_private & OPpLVAL_INTRO)
-	return FALSE;
+	return ret;
 
     if (type == OP_LIST || flags & OPf_PARENS ||
 	type == OP_RV2AV || type == OP_RV2HV ||
@@ -5708,9 +5742,9 @@ S_assignment_type(pTHX_ const OP *o)
 	return TRUE;
 
     if (type == OP_RV2SV)
-	return FALSE;
+	return ret;
 
-    return FALSE;
+    return ret;
 }
 
 /*

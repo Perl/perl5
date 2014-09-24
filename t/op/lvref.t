@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 34;
+plan 37;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -12,6 +12,9 @@ sub off{ $::TODO = ''  }
 eval '\$x = \$y';
 like $@, qr/^Experimental lvalue references not enabled/,
     'error when feature is disabled';
+eval '\($x) = \$y';
+like $@, qr/^Experimental lvalue references not enabled/,
+    'error when feature is disabled (aassign)';
 
 use feature 'lvalue_refs';
 
@@ -20,6 +23,11 @@ use feature 'lvalue_refs';
     local $SIG{__WARN__} = sub { $c++; $w = shift };
     eval '\$x = \$y';
     is $c, 1, 'one warning from lv ref assignment';
+    like $w, qr/^Lvalue references are experimental/,
+        'experimental warning';
+    undef $c;
+    eval '\($x) = \$y';
+    is $c, 1, 'one warning from lv ref list assignment';
     like $w, qr/^Lvalue references are experimental/,
         'experimental warning';
 }
@@ -35,16 +43,17 @@ my $m;
 is \$m, \$y, '\$lexical = ...';
 \my $n = \$y;
 is \$n, \$y, '\my $lexical = ...';
-on;
 @_ = \$_;
-eval '\($x) = @_';
+\($x) = @_;
 is \$x, \$_, '\($pkgvar) = ... gives list context';
 undef *x;
-eval '(\$x) = @_';
+(\$x) = @_;
 is \$x, \$_, '(\$pkgvar) = ... gives list context';
+on;
 my $o;
 eval '\($o) = @_';
 is \$o, \$_, '\($lexical) = ... gives list cx';
+my $q;
 eval '(\$q) = @_';
 is \$q, \$_, '(\$lexical) = ... gives list cx';
 eval '\(my $p) = @_';
@@ -88,9 +97,11 @@ on;
 
 # Mixed (List) Assignments
 
-eval '(\$tahi, $rua) = \(1,2)';
+off;
+(\$tahi, $rua) = \(1,2);
 is join(' ', $tahi, $$rua), '1 2',
   'mixed scalar ref and scalar list assignment';
+on;
 $_ = 3;
 eval '$_ == 3 ? \$tahi : $rua = \3';
 is $tahi, 3, 'cond assignment resolving to scalar ref';

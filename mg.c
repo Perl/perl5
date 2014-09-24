@@ -2465,7 +2465,14 @@ int
 Perl_magic_setlvref(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_SETLVREF;
-    Perl_croak(aTHX_ "Unimplemented");
+    if (!SvROK(sv)) Perl_croak(aTHX_ "Assigned value is not a reference");
+    if (SvTYPE(SvRV(sv)) > SVt_PVLV)
+	/* diag_listed_as: Assigned value is not %s reference */
+	Perl_croak(aTHX_ "Assigned value is not a SCALAR reference");
+    assert(isGV(mg->mg_obj));
+    gv_setref(mg->mg_obj, sv);
+    SvSETMAGIC(mg->mg_obj);
+    sv_unmagic(sv, PERL_MAGIC_lvref);
     return 0;
 }
 
