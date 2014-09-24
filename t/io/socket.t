@@ -102,7 +102,7 @@ SKIP: {
 	    my $buf;
 	    my $recv_peer = recv($child, $buf, 1000, 0);
 	    # [perl #118843]
-	    ok_child($recv_peer eq '' || $recv_peer eq $bind_name,
+	    ok_child($recv_peer eq '' || $recv_peer eq getpeername $child,
 	       "peer from recv() should be empty or the remote name");
 	    while(defined recv($child, my $tmp, 1000, 0)) {
 		last if length $tmp == 0;
