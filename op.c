@@ -2642,6 +2642,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    break;
 	default:
 	  badref:
+	    /* diag_listed_as: Can't modify %s in %s */
 	    yyerror(Perl_form(aTHX_ "Can't modify reference to %s in list "
 				    "assignment",
 		     o->op_type == OP_NULL && o->op_flags & OPf_SPECIAL
