@@ -365,6 +365,10 @@ soon:
 
 =item *
 
+L<Data::Util> version 0.63
+
+=item *
+
 L<Hook::LexWrap> version 0.24
 
 =back
