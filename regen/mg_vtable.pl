@@ -25,7 +25,7 @@ BEGIN {
 
 my %mg =
     (
-     sv => { char => '\0', vtable => 'sv', readonly_acceptable => 1,
+     sv => { char => "\0", vtable => 'sv', readonly_acceptable => 1,
 	     desc => 'Special scalar variable' },
      # overload, or type "A" magic, used to be here.  Hence overloaded is
      # often called AMAGIC internally, even though it does not use "A"
@@ -110,6 +110,8 @@ my %mg =
 		    desc => 'inlining/mutation of call to this CV'},
      debugvar => { char => '*', desc => '$DB::single, signal, trace vars',
 		   vtable => 'debugvar' },
+     lvref => { char => '\\', vtable => 'lvref',
+		  desc => "Lvalue reference in list assignment" },
 );
 
 # These have a subtly different "namespace" from the magic types.
@@ -147,6 +149,7 @@ my %sig =
      'hints' => {clear => 'clearhints'},
      'checkcall' => {copy => 'copycallchecker'},
      'debugvar' => { set => 'setdebugvar', get => 'getdebugvar' },
+     'lvref' => {set => 'setlvref'},
 );
 
 my ($vt, $raw, $names) = map {
@@ -183,39 +186,45 @@ EOH
 
     my %mg_order;
     while (my ($name, $data) = each %mg) {
-	my $byte = eval qq{"$data->{char}"};
-	$data->{byte} = $byte;
+	my $byte = $data->{char};
+	if ($byte =~ /[[:print:]]/) {
+	    $data->{r_char} = $byte; # readable char
+	    ($data->{c_char} = $byte) =~ s/([\\"])/\\$1/g; # for C strings
+	}
+	else {
+	    $data->{c_char} = $data->{r_char} = '\\'.ord $byte;
+	}
 	$mg_order{(uc $byte) . $byte} = $name;
     }
     my @rows;
     foreach (sort keys %mg_order) {
 	my $name = $mg_order{$_};
 	my $data = $mg{$name};
-	my $i = ord $data->{byte};
+	my $i = ord $data->{char};
 	unless ($data->{unknown_to_sv_magic}) {
 	    my $value = $data->{vtable}
 		? "want_vtbl_$data->{vtable}" : 'magic_vtable_max';
 	    $value .= ' | PERL_MAGIC_READONLY_ACCEPTABLE'
 		if $data->{readonly_acceptable};
 	    $value .= ' | PERL_MAGIC_VALUE_MAGIC' if $data->{value_magic};
-	    my $comment = "/* $name '$data->{char}' $data->{desc} */";
+	    my $comment = "/* $name '$data->{r_char}' $data->{desc} */";
 	    $comment =~ s/([\\"])/\\$1/g;
 	    $comment =~ tr/\n/ /;
-	    print $raw qq{    { '$data->{char}', "$value",\n      "$comment" },\n};
+	    print $raw qq{    { '$data->{c_char}', "$value",\n      "$comment" },\n};
 	}
 
 	my $comment = $data->{desc};
 	my $leader = ' ' x ($longest + 27);
 	$comment =~ s/\n/\n$leader/s;
 	printf $vt "#define PERL_MAGIC_%-${longest}s '%s' /* %s */\n",
-	    $name, $data->{char}, $comment;
+	    $name, $data->{c_char}, $comment;
 
-	my $char = $data->{char};
+	my $char = $data->{r_char};
 	$char =~ s/([\\"])/\\$1/g;
 	printf $names qq[\t{ PERL_MAGIC_%-${longest_p1}s "%s(%s)" },\n],
 	    "$name,", $name, $char;
 
-	push @rows, [(sprintf "%-2s PERL_MAGIC_%s", $data->{char}, $name),
+	push @rows, [(sprintf "%-2s PERL_MAGIC_%s", $data->{r_char},$name),
 		     $data->{vtable} ? "vtbl_$data->{vtable}" : '(none)',
 		     $data->{desc}];
     }

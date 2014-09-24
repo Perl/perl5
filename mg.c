@@ -2462,6 +2462,14 @@ Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
 }
 
 int
+Perl_magic_setlvref(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_SETLVREF;
+    Perl_croak(aTHX_ "Unimplemented");
+    return 0;
+}
+
+int
 Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 {
 #ifdef USE_ITHREADS

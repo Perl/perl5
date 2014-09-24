@@ -2514,6 +2514,12 @@ PERL_CALLCONV int	Perl_magic_setisa(pTHX_ SV* sv, MAGIC* mg)
 #define PERL_ARGS_ASSERT_MAGIC_SETISA	\
 	assert(sv); assert(mg)
 
+PERL_CALLCONV int	Perl_magic_setlvref(pTHX_ SV* sv, MAGIC* mg)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MAGIC_SETLVREF	\
+	assert(sv); assert(mg)
+
 PERL_CALLCONV int	Perl_magic_setmglob(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

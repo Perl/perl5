@@ -55,6 +55,7 @@
 #define PERL_MAGIC_substr         'x' /* substr() lvalue */
 #define PERL_MAGIC_defelem        'y' /* Shadow "foreach" iterator variable /
                                          smart parameter vivification */
+#define PERL_MAGIC_lvref          '\\' /* Lvalue reference in list assignment */
 #define PERL_MAGIC_checkcall      ']' /* inlining/mutation of call to this CV */
 #define PERL_MAGIC_ext            '~' /* Available for use by extensions */
 
@@ -73,6 +74,7 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_hintselem,
     want_vtbl_isa,
     want_vtbl_isaelem,
+    want_vtbl_lvref,
     want_vtbl_mglob,
     want_vtbl_nkeys,
     want_vtbl_ovrld,
@@ -108,6 +110,7 @@ EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] = {
     "hintselem",
     "isa",
     "isaelem",
+    "lvref",
     "mglob",
     "nkeys",
     "ovrld",
@@ -166,6 +169,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { 0, Perl_magic_sethint, 0, Perl_magic_clearhint, 0, 0, 0, 0 },
   { 0, Perl_magic_setisa, 0, Perl_magic_clearisa, 0, 0, 0, 0 },
   { 0, Perl_magic_setisa, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setlvref, 0, 0, 0, 0, 0, 0 },
   { 0, Perl_magic_setmglob, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_getnkeys, Perl_magic_setnkeys, 0, 0, 0, 0, 0, 0 },
   { 0, 0, 0, 0, Perl_magic_freeovrld, 0, 0, 0 },
@@ -210,6 +214,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 #define PL_vtbl_hintselem PL_magic_vtables[want_vtbl_hintselem]
 #define PL_vtbl_isa PL_magic_vtables[want_vtbl_isa]
 #define PL_vtbl_isaelem PL_magic_vtables[want_vtbl_isaelem]
+#define PL_vtbl_lvref PL_magic_vtables[want_vtbl_lvref]
 #define PL_vtbl_mglob PL_magic_vtables[want_vtbl_mglob]
 #define PL_vtbl_nkeys PL_magic_vtables[want_vtbl_nkeys]
 #define PL_vtbl_ovrld PL_magic_vtables[want_vtbl_ovrld]

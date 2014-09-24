@@ -1227,6 +1227,7 @@
 #define magic_setenv(a,b)	Perl_magic_setenv(aTHX_ a,b)
 #define magic_sethint(a,b)	Perl_magic_sethint(aTHX_ a,b)
 #define magic_setisa(a,b)	Perl_magic_setisa(aTHX_ a,b)
+#define magic_setlvref(a,b)	Perl_magic_setlvref(aTHX_ a,b)
 #define magic_setmglob(a,b)	Perl_magic_setmglob(aTHX_ a,b)
 #define magic_setnkeys(a,b)	Perl_magic_setnkeys(aTHX_ a,b)
 #define magic_setpack(a,b)	Perl_magic_setpack(aTHX_ a,b)

@@ -866,6 +866,7 @@ p	|int	|magic_setdefelem|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setenv	|NN SV* sv|NN MAGIC* mg
 dp	|int	|magic_sethint	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setisa	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setlvref	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setmglob	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setnkeys	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setpack	|NN SV* sv|NN MAGIC* mg
