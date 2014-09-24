@@ -84,9 +84,7 @@
  * but allows patterns to get big without disasters.
  *
  * [The "next" pointer is always aligned on an even
- * boundary, and reads the offset directly as a short.  Also, there is no
- * special test to reverse the sign of BACK pointers since the offset is
- * stored negative.]
+ * boundary, and reads the offset directly as a short.]
  */
 
 /* This is the stuff that used to live in regexp.h that was truly

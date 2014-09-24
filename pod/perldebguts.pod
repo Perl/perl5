@@ -623,13 +623,6 @@ will be lost.
  #
  BRANCH          node       Match this alternative, or the next...
 
- # Back pointer
-
- # BACK          Normal "next" pointers all implicitly point forward;
- #               BACK exists to make loop structures possible.
- # not used
- BACK            no         Match "", "next" ptr points backward.
-
  # Literals
 
  EXACT           str        Match this string (preceded by length).
@@ -659,7 +652,7 @@ will be lost.
  # Loops
 
  # STAR,PLUS    '?', and complex '*' and '+', are implemented as
- #               circular BRANCH structures using BACK.  Simple cases
+ #               circular BRANCH structures.  Simple cases
  #               (one character per match) are implemented with STAR
  #               and PLUS for speed and to minimize recursive plunges.
  #

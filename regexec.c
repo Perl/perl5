@@ -5189,9 +5189,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case TAIL: /* placeholder while compiling (A|B|C) */
 	    break;
 
-	case BACK: /* ??? doesn't appear to be used ??? */
-	    break;
-
 #undef  ST
 #define ST st->u.eval
 	{

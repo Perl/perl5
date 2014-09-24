@@ -86,13 +86,6 @@ CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 #*
 BRANCH      BRANCH,     node 0 V  ; Match this alternative, or the next...
 
-#*Back pointer
-
-#* BACK          Normal "next" pointers all implicitly point forward;
-#*               BACK exists to make loop structures possible.
-#* not used
-BACK        BACK,       no 0 V    ; Match "", "next" ptr points backward.
-
 #*Literals
 # NOTE: the relative ordering of these types is important do not change it
 
@@ -113,7 +106,7 @@ TAIL        NOTHING,    no        ; Match empty string. Can jump here from outsi
 #*Loops
 
 #* STAR,PLUS    '?', and complex '*' and '+', are implemented as
-#*               circular BRANCH structures using BACK.  Simple cases
+#*               circular BRANCH structures.  Simple cases
 #*               (one character per match) are implemented with STAR
 #*               and PLUS for speed and to minimize recursive plunges.
 #*
