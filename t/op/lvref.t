@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 27;
+plan 30;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -77,9 +77,16 @@ on;
 
 # ...
 
-# Mixed List Assignments
+# Mixed (List) Assignments
 
-# ...
+eval '(\$tahi, $rua) = \(1,2)';
+is join(' ', $tahi, $$rua), '1 2',
+  'mixed scalar ref and scalar list assignment';
+$_ = 3;
+eval '$_ == 3 ? \$tahi : $rua = \3';
+is $tahi, 3, 'cond assignment resolving to scalar ref';
+eval '$_ == 3 ? \$toru : $wha = \3';
+is $$wha, 3, 'cond assignment resolving to scalar';
 
 # Foreach
 
