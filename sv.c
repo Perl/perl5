@@ -2064,27 +2064,27 @@ S_sv_2iuv_non_preserve(pTHX_ SV *const sv
 #endif /* !NV_PRESERVES_UV*/
 
 /* If numtype is infnan, set the NV of the sv accordingly.
- * If numtype is anything else, set the NV using Atof(PV). */
+ * If numtype is anything else, try setting the NV using Atof(PV). */
 static void
-S_sv_setnv(SV* sv, int numtype)
+S_sv_setnv(pTHX_ SV* sv, int numtype)
 {
     bool pok = SvPOK(sv);
+    bool nok = FALSE;
     if ((numtype & IS_NUMBER_INFINITY)) {
         SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -NV_INF : NV_INF);
-        SvNOK_only(sv);
-        if (pok)
-            SvPOK_on(sv);
+        nok = TRUE;
     }
     else if ((numtype & IS_NUMBER_NAN)) {
+        nok = TRUE;
         SvNV_set(sv, NV_NAN);
-        SvNOK_only(sv);
-        if (pok)
-            SvPOK_on(sv);
     }
     else if (pok)
         SvNV_set(sv, Atof(SvPVX_const(sv)));
-    else
-        return;
+    if (nok) {
+        SvNOK_only(sv); /* No IV or UV please. */
+        if (pok)
+            SvPOK_on(sv); /* PV is okay, though. */
+    }
 }
 
 STATIC bool
@@ -2201,7 +2201,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	    sv_upgrade(sv, SVt_PVNV);
 
         if ((numtype & (IS_NUMBER_INFINITY | IS_NUMBER_NAN))) {
-            S_sv_setnv(sv, numtype);
+            S_sv_setnv(aTHX_ sv, numtype);
             return FALSE;
         }
 
@@ -2250,7 +2250,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	    != IS_NUMBER_IN_UV) {
 	    /* It wasn't an (integer that doesn't overflow the UV). */
-            S_sv_setnv(sv, numtype);
+            S_sv_setnv(aTHX_ sv, numtype);
 
 	    if (! numtype && ckWARN(WARN_NUMERIC))
 		not_a_number(sv);
@@ -2652,7 +2652,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	    /* It's definitely an integer */
 	    SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -(NV)value : (NV)value);
 	} else {
-            S_sv_setnv(sv, numtype);
+            S_sv_setnv(aTHX_ sv, numtype);
         }
 	if (numtype)
 	    SvNOK_on(sv);
