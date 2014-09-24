@@ -247,7 +247,7 @@ sub write_errno_pm {
 	    next if $name eq $expr;
 	    $expr =~ s/\(?\(\s*[a-z_]\w*\s*\)\(?([^\)]+)\)?\)?/$1/i; # ((type)0xcafebabe) at alia
 	    $expr =~ s/\b((?:0x)?[0-9a-f]+)[LU]+\b/$1/gi; # 2147483647L et alia
-	    next if $expr =~ m/^[a-z_]+$/i; # skip function names
+	    next if $expr =~ m/\b[a-z_]\w*\b/i; # skip expressions containing function names etc
 	    if($expr =~ m/^0[xX]/) {
 		$err{$name} = hex $expr;
 	    }
