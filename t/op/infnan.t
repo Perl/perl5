@@ -56,11 +56,20 @@ cmp_ok(-$NInf, '==', $PInf, "--negative == positive");
 is($PInf,  "Inf", "$PInf value stringifies as Inf");
 is($NInf, "-Inf", "$NInf value stringifies as -Inf");
 
+cmp_ok($PInf + 0, '==', $PInf, "+Inf + zero is +Inf");
+cmp_ok($NInf + 0, '==', $NInf, "-Inf + zero is -Inf");
+
+cmp_ok($PInf + 1, '==', $PInf, "+Inf + one is +Inf");
+cmp_ok($NInf + 1, '==', $NInf, "-Inf + one is -Inf");
+
+cmp_ok($PInf + $PInf, '==', $PInf, "+Inf + Inf is +Inf");
+cmp_ok($NInf + $NInf, '==', $NInf, "-Inf - Inf is -Inf");
+
 cmp_ok($PInf * 2, '==', $PInf, "twice Inf is Inf");
 cmp_ok($PInf / 2, '==', $PInf, "half of Inf is Inf");
 
-cmp_ok($PInf + 1, '==', $PInf, "Inf + one is Inf");
-cmp_ok($NInf + 1, '==', $NInf, "-Inf + one is -Inf");
+cmp_ok($PInf * $PInf, '==', $PInf, "-Inf * +Inf is +Inf");
+cmp_ok($NInf * $NInf, '==', $PInf, "-Inf * -Inf is +Inf");
 
 is(sprintf("%g", $PInf), "Inf", "$PInf sprintf %g is Inf");
 is(sprintf("%a", $PInf), "Inf", "$PInf sprintf %a is Inf");
@@ -132,9 +141,41 @@ is($NInfMM, $NInf, "-Inf-- is -Inf");
 ok($PInf, "+Inf is true");
 ok($NInf, "-Inf is true");
 
+is(abs($PInf), $PInf, "abs(+Inf) is +Inf");
+is(abs($NInf), $PInf, "abs(-Inf) is +Inf");
+
+# One could argue of NaN as the result.
+is(int($PInf), $PInf, "int(+Inf) is +Inf");
+is(int($NInf), $NInf, "int(-Inf) is -Inf");
+
 is(sqrt($PInf), $PInf, "sqrt(+Inf) is +Inf");
+# sqrt $NInf doesn't work because negative is caught
+
 is(exp($PInf), $PInf, "exp(+Inf) is +Inf");
 is(exp($NInf), 0, "exp(-Inf) is zero");
+
+SKIP: {
+    if ($PInf == 0) {
+        skip "if +Inf == 0 cannot log(+Inf)", 1;
+    }
+    is(log($PInf), $PInf, "log(+Inf) is +Inf");
+}
+# log $NInf doesn't work because negative is caught
+
+is(rand($PInf), $PInf, "rand(+Inf) is +Inf");
+is(rand($NInf), $NInf, "rand(-Inf) is -Inf");
+
+# XXX Bit operations?
+# +Inf & 1 == +Inf?
+# +Inf | 1 == +Inf?
+# +Inf ^ 1 == +Inf?
+# ~+Inf    == 0? or NaN?
+# -Inf ... ???
+# NaN & 1 == NaN?
+# NaN | 1 == NaN?
+# NaN ^ 1 == NaN?
+# ~NaN    == NaN???
+# Or just declare insanity and die?
 
 SKIP: {
     my $here = "$^O $Config{osvers}";
@@ -166,10 +207,15 @@ is("$NaN", "NaN", "$NaN value stringifies as NaN");
 is("+NaN" + 0, "NaN", "+NaN is NaN");
 is("-NaN" + 0, "NaN", "-NaN is NaN");
 
+is($NaN + 0, $NaN, "NaN + zero is NaN");
+
+is($NaN + 1, $NaN, "NaN + one is NaN");
+
 is($NaN * 2, $NaN, "twice NaN is NaN");
 is($NaN / 2, $NaN, "half of NaN is NaN");
 
-is($NaN + 1, $NaN, "NaN + one is NaN");
+is($NaN * $NaN, $NaN, "NaN * NaN is NaN");
+is($NaN / $NaN, $NaN, "NaN / NaN is NaN");
 
 for my $f (@printf_fmt) {
     is(sprintf("%$f", $NaN), "NaN", "$NaN sprintf %$f is NaN");
@@ -212,16 +258,27 @@ is($NaN * 2, $NaN, "NaN times two is NaN");
 my ($NaNPP, $NaNMM) = ($NaN, $NaN);
 $NaNPP++;
 $NaNMM--;
-is($NaNPP, $NaN, "+Inf++ is +Inf");
-is($NaNMM, $NaN, "+Inf-- is +Inf");
+is($NaNPP, $NaN, "+NaN++ is NaN");
+is($NaNMM, $NaN, "+NaN-- is NaN");
 
 # You might find this surprising (isn't NaN kind of like of undef?)
 # but this is how it is.
 ok($NaN, "NaN is true");
 
+is(abs($NaN), $NaN, "abs(NaN) is NaN");
+is(int($NaN), $NaN, "int(NaN) is NaN");
 is(sqrt($NaN), $NaN, "sqrt(NaN) is NaN");
 is(exp($NaN), $NaN, "exp(NaN) is NaN");
+
+SKIP: {
+    if ($NaN == 0) {
+        skip "if +NaN == 0 cannot log(+NaN)", 1;
+    }
+    is(log($NaN), $NaN, "log(NaN) is NaN");
+}
+
 is(sin($NaN), $NaN, "sin(NaN) is NaN");
+is(rand($NaN), $NaN, "rand(NaN) is NaN");
 
 SKIP: {
     my $here = "$^O $Config{osvers}";
@@ -245,9 +302,9 @@ ok(!($NaN <  $PInf), "NaN is not lt +Inf");
 ok(!($NaN == $PInf), "NaN is not eq +Inf");
 ok(!($NaN >  $PInf), "NaN is not gt +Inf");
 
-ok(!($NaN >  $NInf), "NaN is not lt -Inf");
+ok(!($NaN <  $NInf), "NaN is not lt -Inf");
 ok(!($NaN == $NInf), "NaN is not eq -Inf");
-ok(!($NaN <  $NInf), "NaN is not gt -Inf");
+ok(!($NaN >  $NInf), "NaN is not gt -Inf");
 
 is(sin($PInf), $NaN, "sin(+Inf) is NaN");
 
