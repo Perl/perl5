@@ -1802,7 +1802,8 @@ Perl_scalarvoid(pTHX_ OP *o)
 
 	refgen = (UNOP *)((BINOP *)o)->op_first;
 
-	if (!refgen || refgen->op_type != OP_REFGEN)
+	if (!refgen || (refgen->op_type != OP_REFGEN
+			&& refgen->op_type != OP_SREFGEN))
 	    break;
 
 	exlist = (LISTOP *)refgen->op_first;
@@ -1810,7 +1811,8 @@ Perl_scalarvoid(pTHX_ OP *o)
 	    || exlist->op_targ != OP_LIST)
 	    break;
 
-	if (exlist->op_first->op_type != OP_PUSHMARK)
+	if (exlist->op_first->op_type != OP_PUSHMARK
+	 && exlist->op_first != exlist->op_last)
 	    break;
 
 	rv2cv = (UNOP*)exlist->op_last;
@@ -8911,7 +8913,14 @@ Perl_ck_spair(pTHX_ OP *o)
 	newop = OP_SIBLING(kidkid);
 	if (newop) {
 	    const OPCODE type = newop->op_type;
-	    if (OP_HAS_SIBLING(newop) || !(PL_opargs[type] & OA_RETSCALAR))
+	    if (OP_HAS_SIBLING(newop))
+		return o;
+	    if (o->op_type == OP_REFGEN && !(newop->op_flags & OPf_PARENS)
+		&& (type == OP_RV2AV || type == OP_PADAV
+		 || type == OP_RV2HV || type == OP_PADHV
+		 || type == OP_RV2CV))
+	    	NOOP; /* OK (allow srefgen for \@a and \%h) */
+	    else if (!(PL_opargs[type] & OA_RETSCALAR))
 		return o;
 	}
         /* excise first sibling */
@@ -10627,7 +10636,8 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    case '&':
 		proto++;
 		arg++;
-		if (o3->op_type != OP_REFGEN && o3->op_type != OP_UNDEF)
+		if (o3->op_type != OP_REFGEN && o3->op_type != OP_SREFGEN
+		 && o3->op_type != OP_UNDEF)
 		    bad_type_gv(arg,
 			    arg == 1 ? "block or sub {}" : "sub {}",
 			    namegv, 0, o3);
