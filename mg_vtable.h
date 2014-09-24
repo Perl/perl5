@@ -14,13 +14,13 @@
 
 #define PERL_MAGIC_sv             '\0' /* Special scalar variable */
 #define PERL_MAGIC_arylen         '#' /* Array length ($#ary) */
-#define PERL_MAGIC_rhash          '%' /* extra data for restricted hashes */
+#define PERL_MAGIC_rhash          '%' /* Extra data for restricted hashes */
 #define PERL_MAGIC_proto          '&' /* my sub prototype CV */
 #define PERL_MAGIC_debugvar       '*' /* $DB::single, signal, trace vars */
 #define PERL_MAGIC_pos            '.' /* pos() lvalue */
-#define PERL_MAGIC_symtab         ':' /* extra data for symbol tables */
-#define PERL_MAGIC_backref        '<' /* for weak ref data */
-#define PERL_MAGIC_arylen_p       '@' /* to move arylen out of XPVAV */
+#define PERL_MAGIC_symtab         ':' /* Extra data for symbol tables */
+#define PERL_MAGIC_backref        '<' /* For weak ref data */
+#define PERL_MAGIC_arylen_p       '@' /* To move arylen out of XPVAV */
 #define PERL_MAGIC_bm             'B' /* Boyer-Moore (fast string search) */
 #define PERL_MAGIC_overload_table 'c' /* Holds overload table (AMT) on stash */
 #define PERL_MAGIC_regdata        'D' /* Regex match position data
@@ -43,7 +43,7 @@
 #define PERL_MAGIC_tied           'P' /* Tied array or hash */
 #define PERL_MAGIC_tiedelem       'p' /* Tied array or hash element */
 #define PERL_MAGIC_tiedscalar     'q' /* Tied scalar or handle */
-#define PERL_MAGIC_qr             'r' /* precompiled qr// regex */
+#define PERL_MAGIC_qr             'r' /* Precompiled qr// regex */
 #define PERL_MAGIC_sig            'S' /* %SIG hash */
 #define PERL_MAGIC_sigelem        's' /* %SIG hash element */
 #define PERL_MAGIC_taint          't' /* Taintedness */
@@ -56,7 +56,7 @@
 #define PERL_MAGIC_defelem        'y' /* Shadow "foreach" iterator variable /
                                          smart parameter vivification */
 #define PERL_MAGIC_lvref          '\\' /* Lvalue reference in list assignment */
-#define PERL_MAGIC_checkcall      ']' /* inlining/mutation of call to this CV */
+#define PERL_MAGIC_checkcall      ']' /* Inlining/mutation of call to this CV */
 #define PERL_MAGIC_ext            '~' /* Available for use by extensions */
 
 enum {		/* pass one of these to get_vtbl */
