@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 30;
+plan 34;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -39,11 +39,20 @@ on;
 @_ = \$_;
 eval '\($x) = @_';
 is \$x, \$_, '\($pkgvar) = ... gives list context';
+undef *x;
+eval '(\$x) = @_';
+is \$x, \$_, '(\$pkgvar) = ... gives list context';
 my $o;
 eval '\($o) = @_';
 is \$o, \$_, '\($lexical) = ... gives list cx';
+eval '(\$q) = @_';
+is \$q, \$_, '(\$lexical) = ... gives list cx';
 eval '\(my $p) = @_';
 is \$p, \$_, '\(my $lexical) = ... gives list cx';
+eval '(\my $r) = @_';
+is \$r, \$_, '(\my $lexical) = ... gives list cx';
+eval '\my($s) = @_';
+is \$s, \$_, '\my($lexical) = ... gives list cx';
 eval '\($_a, my $a) = @{[\$b, \$c]}';
 is \$_a, \$b, 'package scalar in \(...)';
 is \$a, \$c, 'lex scalar in \(...)';
