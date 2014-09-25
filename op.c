@@ -2632,20 +2632,23 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_SREFGEN:
 	if (type != OP_AASSIGN) goto nomod;
 	kid = cUNOPx(cUNOPo->op_first)->op_first;
-	switch (kid->op_type) {
-	case OP_RV2SV:
+	assert (!OP_HAS_SIBLING(kid));
+	goto kid_2lvref;
+    case OP_REFGEN:
+	if (type != OP_AASSIGN) goto nomod;
+	kid = OP_SIBLING(cUNOPx(cUNOPo->op_first)->op_first);
+	do {
+	 kid_2lvref:
+	  switch (kid->op_type) {
+	  case OP_RV2SV:
 	    if (kUNOP->op_first->op_type != OP_GV) goto badref;
 	    if (kid->op_private & OPpLVAL_INTRO)
 		goto badref; /* XXX temporary */
-	    o->op_flags |= OPf_STACKED;
+	    kid->op_flags |= OPf_STACKED;
+	  case OP_PADSV:
 	    break;
-	case OP_PADSV:
-	    o->op_private = kid->op_private & OPpLVAL_INTRO;
-	    o->op_targ = kid->op_targ;
-	    kid->op_targ = 0;
-	    break;
-	default:
-	  badref:
+	  default:
+	   badref:
 	    /* diag_listed_as: Can't modify %s in %s */
 	    yyerror(Perl_form(aTHX_ "Can't modify reference to %s in list "
 				    "assignment",
@@ -2653,14 +2656,18 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 		      ? "do block"
 		      : OP_DESC(kid)));
 	    return o;
-	}
+	  }
+	  kid->op_type = OP_LVREF;
+	  kid->op_ppaddr = PL_ppaddr[OP_LVREF];
+	  kid->op_private &= OPpLVAL_INTRO;
+	} while ((kid = OP_SIBLING(kid)));
 	if (!FEATURE_LVREF_IS_ENABLED)
 	    Perl_croak(aTHX_ "Experimental lvalue references not enabled");
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
 			      "Lvalue references are experimental");
-	op_null(kid);
-	o->op_type = OP_LVREF;
-	o->op_ppaddr = PL_ppaddr[OP_LVREF];
+	if (o->op_type == OP_REFGEN)
+	    op_null(cUNOPx(cUNOPo->op_first)->op_first); /* pushmark */
+	op_null(o);
 	return o;
     }
 
@@ -5743,7 +5750,7 @@ S_assignment_type(pTHX_ const OP *o)
     if (type == OP_LIST || flags & OPf_PARENS ||
 	type == OP_RV2AV || type == OP_RV2HV ||
 	type == OP_ASLICE || type == OP_HSLICE ||
-        type == OP_KVASLICE || type == OP_KVHSLICE)
+        type == OP_KVASLICE || type == OP_KVHSLICE || type == OP_REFGEN)
 	return TRUE;
 
     if (type == OP_PADAV || type == OP_PADHV)

@@ -319,8 +319,10 @@ is (scalar grep(ref($_), @baa), 3);
 is (scalar (@bzz), 3);
 
 # also, it can't be an lvalue
+# (That’s what *you* think!  --sprout)
 eval '\\($x, $y) = (1, 2);';
-like ($@, qr/Can\'t modify.*ref.*in.*assignment/);
+like ($@, qr/Can\'t modify.*ref.*in.*assignment(?x:
+           )|Experimental lvalue references not enabled/);
 
 # test for proper destruction of lexical objects
 $test = curr_test();

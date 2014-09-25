@@ -61,11 +61,9 @@ is \$p, \$_, '\(my $lexical) = ... gives list cx';
 is \$r, \$_, '(\my $lexical) = ... gives list cx';
 \my($s) = @_;
 is \$s, \$_, '\my($lexical) = ... gives list cx';
-on;
-eval '\($_a, my $a) = @{[\$b, \$c]}';
+\($_a, my $a) = @{[\$b, \$c]};
 is \$_a, \$b, 'package scalar in \(...)';
 is \$a, \$c, 'lex scalar in \(...)';
-off;
 (\$_b, \my $b) = @{[\$b, \$c]};
 is \$_b, \$::b, 'package scalar in (\$foo, \$bar)';
 is \$b, \$c, 'lex scalar in (\$foo, \$bar)';
@@ -170,12 +168,10 @@ eval '(\pos) = 42';
 like $@,
      qr/^Can't modify reference to match position in list assignment at /,
     "Can't modify ref to some scalar-returning op in list assignment";
-on;
 eval '(\glob) = 42';
 like $@,
      qr/^Can't modify reference to glob in list assignment at /,
     "Can't modify reference to some list-returning op in list assignment";
-off;
 eval '\pos = 42';
 like $@,
     qr/^Can't modify reference to match position in scalar assignment at /,
