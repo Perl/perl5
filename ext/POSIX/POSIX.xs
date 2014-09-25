@@ -805,11 +805,11 @@ static int my_fegetround()
   return FLT_ROUNDS;
 #elif defined(HAS_FPGETROUND)
   switch (fpgetround()) {
-  default:
   case FP_RN: return FE_TONEAREST;
   case FP_RZ: return FE_TOWARDZERO;
   case FP_RM: return FE_DOWNWARD;
   case FE_RP: return FE_UPWARD;
+  default: return -1;
   }
 #else
   return -1;
@@ -832,11 +832,11 @@ static NV my_rint(NV x)
 {
 #ifdef FE_TONEAREST
   switch (my_fegetround()) {
-  default:
   case FE_TONEAREST:  return MY_ROUND_NEAREST(x);
   case FE_TOWARDZERO: return MY_ROUND_TRUNC(x);
   case FE_DOWNWARD:   return MY_ROUND_DOWN(x);
   case FE_UPWARD:     return MY_ROUND_UP(x);
+  default: return NV_NAN;
   }
 #elif defined(HAS_FPGETROUND)
   switch (fpgetround()) {
@@ -845,6 +845,7 @@ static NV my_rint(NV x)
   case FP_RZ: return MY_ROUND_TRUNC(x);
   case FP_RM: return MY_ROUND_DOWN(x);
   case FE_RP: return MY_ROUND_UP(x);
+  default: return NV_NAN;
   }
 #else
   return NV_NAN;
@@ -2222,11 +2223,11 @@ fesetround(x)
 	RETVAL = fesetround(x);
 #elif defined(HAS_FPGETROUND) /* canary for fpsetround */
 	switch (x) {
-        default:
 	case FE_TONEAREST:  RETVAL = fpsetround(FP_RN); break;
 	case FE_TOWARDZERO: RETVAL = fpsetround(FP_RZ); break;
 	case FE_DOWNWARD:   RETVAL = fpsetround(FP_RM); break;
 	case FE_UPWARD:     RETVAL = fpsetround(FP_RP); break;
+        default: RETVAL = -1; break; 
 	}
 #else
 	RETVAL = -1;
