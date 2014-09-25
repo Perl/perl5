@@ -2842,7 +2842,7 @@ PP(pp_int)
       }
       else {
 	  const NV value = SvNV_nomg(sv);
-          if (SvNOK(sv) && Perl_isinfnan(SvNV(sv)))
+          if (SvNOK(sv) && UNLIKELY(Perl_isinfnan(SvNV(sv))))
               SETn(SvNV(sv));
 	  else if (value >= 0.0) {
 	      if (value < (NV)UV_MAX + 0.5) {
@@ -3394,7 +3394,7 @@ PP(pp_chr)
     SV *top = POPs;
 
     SvGETMAGIC(top);
-    if (SvNOK(top) && Perl_isinfnan(SvNV(top)))
+    if (SvNOK(top) && UNLIKELY(Perl_isinfnan(SvNV(top))))
         Perl_croak(aTHX_ "Cannot chr %"NVgf, SvNV(top));
     else {
         if (!IN_BYTES /* under bytes, chr(-1) eq chr(0xff), etc. */

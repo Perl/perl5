@@ -2102,7 +2102,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	 * IV or UV at same time to avoid this. */
 	/* IV-over-UV optimisation - choose to cache IV if possible */
 
-        if (Perl_isinfnan(SvNVX(sv)))
+        if (UNLIKELY(Perl_isinfnan(SvNVX(sv))))
             return FALSE;
 
 	if (SvTYPE(sv) == SVt_NV)
@@ -2373,7 +2373,7 @@ Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags)
     if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))
 	mg_get(sv);
 
-    if (SvNOK(sv) && Perl_isinfnan(SvNVX(sv)))
+    if (SvNOK(sv) && UNLIKELY(Perl_isinfnan(SvNVX(sv))))
         return 0; /* So wrong but what can we do. */
 
     if (SvROK(sv)) {
@@ -2468,7 +2468,7 @@ Perl_sv_2uv_flags(pTHX_ SV *const sv, const I32 flags)
     if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))
 	mg_get(sv);
 
-    if (SvNOK(sv) && Perl_isinfnan(SvNVX(sv)))
+    if (SvNOK(sv) && UNLIKELY(Perl_isinfnan(SvNVX(sv))))
         return 0; /* So wrong but what can we do. */
 
     if (SvROK(sv)) {
@@ -8652,7 +8652,7 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
     }
     if (flags & SVp_NOK) {
 	const NV was = SvNVX(sv);
-	if (!Perl_isinfnan(was) &&
+	if (LIKELY(!Perl_isinfnan(was)) &&
             NV_OVERFLOWS_INTEGERS_AT &&
 	    was >= NV_OVERFLOWS_INTEGERS_AT) {
 	    /* diag_listed_as: Lost precision when %s %f by 1 */
@@ -8831,7 +8831,7 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
     oops_its_num:
 	{
 	    const NV was = SvNVX(sv);
-	    if (!Perl_isinfnan(was) &&
+	    if (LIKELY(!Perl_isinfnan(was)) &&
                 NV_OVERFLOWS_INTEGERS_AT &&
 		was <= -NV_OVERFLOWS_INTEGERS_AT) {
 		/* diag_listed_as: Lost precision when %s %f by 1 */
@@ -10616,7 +10616,7 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 
     PERL_ARGS_ASSERT_F0CONVERT;
 
-    if (Perl_isinfnan(nv)) {
+    if (UNLIKELY(Perl_isinfnan(nv))) {
         STRLEN n = S_infnan_2pv(nv, endbuf - *len, *len);
         *len = n;
         return endbuf - n;
@@ -11517,7 +11517,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
         if (argsv && SvNOK(argsv)) {
             /* XXX va_arg(*args) case? need peek, use va_copy? */
-            infnan = Perl_isinfnan(SvNV(argsv));
+            infnan = UNLIKELY(Perl_isinfnan(SvNV(argsv)));
         }
 
 	switch (c = *q++) {
