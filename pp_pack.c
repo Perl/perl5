@@ -2170,7 +2170,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
             const char c = TYPE_NO_MODIFIERS(datumtype);
             if (Perl_isinfnan(nv) && !strchr("fdFD", c)) {
                 if (c == 'w')
-                    Perl_croak(aTHX_ "Cannot compress %"NVgf, nv);
+                    Perl_croak(aTHX_ "Cannot compress %"NVgf" in pack", nv);
                 else
                     Perl_croak(aTHX_ "Cannot pack %"NVgf" with '%c'",
                                nv, (int) c);

@@ -550,17 +550,16 @@ the function's name in L<POSIX> for details.
 
 (F) You passed an invalid number (like an infinity or not-a-number) to C<chr>.
 
-=item Cannot compress %f
+=item Cannot compress %f in pack
 
-(F) You tried converting an infinity or not-a-number to an
-unsigned character, which makes no sense.
+(F) You tried compressing an infinity or not-a-number as an unsigned
+integer with BER, which makes no sense.
 
 =item Cannot compress integer in pack
 
 (F) An argument to pack("w",...) was too large to compress.  The BER
-compressed integer format can only be used with positive integers, and you
-attempted to compress Infinity or a very large number (> 1e308).
-See L<perlfunc/pack>.
+compressed integer format can only be used with positive integers, and
+you attempted to a very large number (> 1e308).  See L<perlfunc/pack>.
 
 =item Cannot compress negative numbers in pack
 
@@ -586,7 +585,7 @@ either with open() or binmode().
 
 =item Cannot pack %f with '%c'
 
-(F) You tried converting an infinity or not-a-number to a character,
+(F) You tried converting an infinity or not-a-number to an integer,
 which makes no sense.
 
 =item Cannot printf %f with '%c'
