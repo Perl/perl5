@@ -801,14 +801,20 @@ static int my_fegetround()
 {
 #ifdef HAS_FEGETROUND
   return fegetround();
-#elif defined(FLT_ROUNDS)
-  return FLT_ROUNDS;
 #elif defined(HAS_FPGETROUND)
   switch (fpgetround()) {
   case FP_RN: return FE_TONEAREST;
   case FP_RZ: return FE_TOWARDZERO;
   case FP_RM: return FE_DOWNWARD;
   case FE_RP: return FE_UPWARD;
+  default: return -1;
+  }
+#elif defined(FLT_ROUNDS)
+  switch (FLT_ROUNDS) {
+  case 1: return FE_TONEAREST;
+  case 0: return FE_TOWARDZERO;
+  case 2: return FE_DOWNWARD;
+  case 3: return FE_UPWARD;
   default: return -1;
   }
 #else
