@@ -417,6 +417,10 @@ case "$ldflags" in
     *) ldflags="$ldflags -Wl,-woff,84" ;;
 esac
 
+# IRIX freeware kits sometimes have only o32 libraries for gdbm.
+# You can try Configure ... -Dlibswanted='m' -Dnoextensions='GDBM_File'
+# since the libm seems to be pretty much the only really needed library.
+
 # Irix 6.5.6 seems to have a broken header <sys/mode.h>
 # don't include that (it doesn't contain S_IFMT, S_IFREG, et al)
 
