@@ -557,9 +557,10 @@ integer with BER, which makes no sense.
 
 =item Cannot compress integer in pack
 
-(F) An argument to pack("w",...) was too large to compress.  The BER
-compressed integer format can only be used with positive integers, and
-you attempted to a very large number (> 1e308).  See L<perlfunc/pack>.
+(F) An argument to pack("w",...) was too large to compress.
+The BER compressed integer format can only be used with positive
+integers, and you attempted to compress a very large number (> 1e308).
+See L<perlfunc/pack>.
 
 =item Cannot compress negative numbers in pack
 
