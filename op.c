@@ -2642,8 +2642,6 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	  switch (kid->op_type) {
 	  case OP_RV2SV:
 	    if (kUNOP->op_first->op_type != OP_GV) goto badref;
-	    if (kid->op_private & OPpLVAL_INTRO)
-		goto badref; /* XXX temporary */
 	    kid->op_flags |= OPf_STACKED;
 	  case OP_PADSV:
 	    break;
@@ -9931,14 +9929,11 @@ Perl_ck_refassign(pTHX_ OP *o)
 
     switch (varop->op_type) {
     case OP_PADSV:
-	o->op_private = varop->op_private & OPpLVAL_INTRO;
 	o->op_targ = varop->op_targ;
 	varop->op_targ = 0;
 	break;
     case OP_RV2SV:
 	if (cUNOPx(varop)->op_first->op_type != OP_GV) goto bad;
-	if (varop->op_private & OPpLVAL_INTRO)
-	    goto bad; /* XXX temporary */
 	op_null(varop);
 	op_null(left);
 	stacked = TRUE;
@@ -9957,6 +9952,7 @@ Perl_ck_refassign(pTHX_ OP *o)
     Perl_ck_warner_d(aTHX_
 		     packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
 		    "Lvalue references are experimental");
+    o->op_private = varop->op_private & OPpLVAL_INTRO;
     if (stacked) o->op_flags |= OPf_STACKED;
     else {
 	o->op_flags &=~ OPf_STACKED;

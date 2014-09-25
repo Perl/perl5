@@ -6180,6 +6180,11 @@ PP(pp_refassign)
 	break;
     }
     case SVt_PVGV:
+	if (PL_op->op_private & OPpLVAL_INTRO) {
+	    save_pushptrptr((GV *)left, SvREFCNT_inc_simple(GvSV(left)),
+			    SAVEt_GVSV);
+	    GvSV(left) = 0;
+	}
 	gv_setref(left, sv);
 	SvSETMAGIC(left);
     }
@@ -6194,10 +6199,16 @@ PP(pp_lvref)
 {
     dSP;
     SV * const ret = sv_2mortal(newSV_type(SVt_PVMG));
-    sv_magic(ret, PL_op->op_flags & OPf_STACKED ? POPs : NULL,
+    SV * const arg = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
+    sv_magic(ret, arg,
 	     PERL_MAGIC_lvref, NULL, ARGTARG);
-    if (!(PL_op->op_flags & OPf_STACKED)
-	 && PL_op->op_private & OPpLVAL_INTRO)
+    if (PL_op->op_private & OPpLVAL_INTRO)
+      if (PL_op->op_flags & OPf_STACKED) {
+	save_pushptrptr((GV *)arg, SvREFCNT_inc_simple(GvSV(arg)),
+			SAVEt_GVSV);
+	GvSV(arg) = 0;
+      }
+      else
 	SAVECLEARSV(PAD_SVl(ARGTARG));
     XPUSHs(ret);
     RETURN;

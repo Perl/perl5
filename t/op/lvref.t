@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 42;
+plan 44;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -67,9 +67,9 @@ is \$a, \$c, 'lex scalar in \(...)';
 (\$_b, \my $b) = @{[\$b, \$c]};
 is \$_b, \$::b, 'package scalar in (\$foo, \$bar)';
 is \$b, \$c, 'lex scalar in (\$foo, \$bar)';
-on;
-is eval '\local $l = \3; $l', 3, '\local $scalar assignment';
-off;
+is do { \local $l = \3; $l }, 3, '\local $scalar assignment';
+is $l, undef, 'localisation unwound';
+is do { \(local $l) = \4; $l }, 4, '\(local $scalar) assignment';
 is $l, undef, 'localisation unwound';
 \$foo = \*bar;
 is *foo{SCALAR}, *bar{GLOB}, 'globref-to-scalarref assignment';
