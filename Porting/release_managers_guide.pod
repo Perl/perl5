@@ -171,14 +171,9 @@ For updating the L<http://dev.perl.org> web pages, either a Github account or
 sweet-talking somebody with a Github account into obedience is needed. This
 is only needed on the day of the release or shortly afterwards.
 
-=for checklist skip RC
-
 =head3 Quotation for release announcement epigraph
 
-I<SKIP this step for RC>
-
-For all except an RC release of perl, you will need a quotation
-to use as an epigraph to your release announcement.
+You will need a quotation to use as an epigraph to your release announcement.
 
 =head2 Building a release - advance actions
 
