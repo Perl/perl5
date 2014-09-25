@@ -2167,13 +2167,16 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
         fromstr = PEEKFROM;
         if (SvNOK(fromstr)) {
             const NV nv = SvNV(fromstr);
-            const char c = TYPE_NO_MODIFIERS(datumtype);
-            if (Perl_isinfnan(nv) && !strchr("fdFD", c)) {
-                if (c == 'w')
-                    Perl_croak(aTHX_ "Cannot compress %"NVgf" in pack", nv);
-                else
-                    Perl_croak(aTHX_ "Cannot pack %"NVgf" with '%c'",
-                               nv, (int) c);
+            if (UNLIKELY(Perl_isinfnan(nv))) {
+                const I32 c = TYPE_NO_MODIFIERS(datumtype);
+                if (!strchr("fdFD", (char)c)) { /* floats are okay */
+                    if (c == 'w')
+                        Perl_croak(aTHX_
+                                   "Cannot compress %"NVgf" in pack", nv);
+                    else
+                        Perl_croak(aTHX_ "Cannot pack %"NVgf" with '%c'",
+                                   nv, (int) c);
+                }
             }
         }
 
