@@ -1186,6 +1186,18 @@ L<"Bump the version number">.
 After bumping the version, follow the section L<"update INSTALL"> to
 ensure all version number references are correct.
 
+(Note: The version is NOT bumped immediately after a MAINT release in order
+to avoid confusion and wasted time arising from bug reports relating to
+"intermediate versions" such as 5.20.1-and-a-bit: If the report is caused
+by a bug that gets fixed in 5.20.2 and this intermediate version already
+calls itself 5.20.2 then much time can be wasted in figuring out why there
+is a failure from something that "should have been fixed". If the bump is
+late then there is a much smaller window of time for such confusing bug
+reports to arise. (The opposite problem -- trying to figure out why there
+*is* a bug in something calling itself 5.20.1 when in fact the bug was
+introduced later -- shouldn't arise for MAINT releases since they should,
+in theory, only contain bug fixes but never regressions.))
+
 =head3 clean build and test
 
 Run a clean build and test to make sure nothing obvious is broken.
