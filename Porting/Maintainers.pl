@@ -159,6 +159,8 @@ use File::Glob qw(:case);
         'CUSTOMIZED'   => [
             # Waiting to be merged upstream: see CPAN RT#87237
             qw(	t/utf8_open.t ),
+            # Waiting to be merged upstream: see CPAN RT#96609
+            qw(	t/truncate.t ),
         ],
     },
 

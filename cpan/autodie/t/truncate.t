@@ -62,6 +62,8 @@ eval {
 
 is($@, "", "Truncating a normal file should be fine");
 
+$tmpfh->close;
+
 # Time to test truncating via globs.
 
 # Firstly, truncating a closed filehandle should fail.
