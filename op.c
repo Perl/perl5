@@ -2637,10 +2637,12 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    if (kUNOP->op_first->op_type != OP_GV) goto badref;
 	    if (kid->op_private & OPpLVAL_INTRO)
 		goto badref; /* XXX temporary */
-	    op_null(kid);
-	    o->op_type = OP_LVREF;
-	    o->op_ppaddr = PL_ppaddr[OP_LVREF];
 	    o->op_flags |= OPf_STACKED;
+	    break;
+	case OP_PADSV:
+	    o->op_private = kid->op_private & OPpLVAL_INTRO;
+	    o->op_targ = kid->op_targ;
+	    kid->op_targ = 0;
 	    break;
 	default:
 	  badref:
@@ -2656,6 +2658,9 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    Perl_croak(aTHX_ "Experimental lvalue references not enabled");
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
 			      "Lvalue references are experimental");
+	op_null(kid);
+	o->op_type = OP_LVREF;
+	o->op_ppaddr = PL_ppaddr[OP_LVREF];
 	return o;
     }
 

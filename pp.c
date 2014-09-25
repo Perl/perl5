@@ -6194,9 +6194,13 @@ PP(pp_lvref)
 {
     dSP;
     SV * const ret = sv_2mortal(newSV_type(SVt_PVMG));
-    sv_magic(ret, TOPs, PERL_MAGIC_lvref, NULL, 0);
-    SETs(ret);
-    return NORMAL;
+    sv_magic(ret, PL_op->op_flags & OPf_STACKED ? POPs : NULL,
+	     PERL_MAGIC_lvref, NULL, ARGTARG);
+    if (!(PL_op->op_flags & OPf_STACKED)
+	 && PL_op->op_private & OPpLVAL_INTRO)
+	SAVECLEARSV(PAD_SVl(ARGTARG));
+    XPUSHs(ret);
+    RETURN;
 }
 
 /*
