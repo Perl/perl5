@@ -2075,13 +2075,16 @@ S_sv_setnv(pTHX_ SV* sv, int numtype)
         nok = TRUE;
     }
     else if ((numtype & IS_NUMBER_NAN)) {
-        nok = TRUE;
         SvNV_set(sv, NV_NAN);
+        nok = TRUE;
     }
-    else if (pok)
+    else if (pok) {
         SvNV_set(sv, Atof(SvPVX_const(sv)));
+        /* Purposefully no true nok here, since we don't want to blow
+         * away the possible IOK/UV of an existing sv. */
+    }
     if (nok) {
-        SvNOK_only(sv); /* No IV or UV please. */
+        SvNOK_only(sv); /* No IV or UV please, this is pure infnan. */
         if (pok)
             SvPOK_on(sv); /* PV is okay, though. */
     }
