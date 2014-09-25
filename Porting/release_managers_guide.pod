@@ -739,11 +739,7 @@ from blead:
     $ cp  ..../blead/pod/perlhist.pod pod/
     $ git commit -m 'sync perlhist from blead' pod/perlhist.pod
 
-=for checklist skip RC
-
 =head3 update perlhist.pod
-
-I<You MUST SKIP this step for a RC release>
 
 Add an entry to F<pod/perlhist.pod> with the release date, e.g.:
 
