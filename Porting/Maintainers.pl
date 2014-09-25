@@ -985,6 +985,10 @@ use File::Glob qw(:case);
     'Socket' => {
         'DISTRIBUTION' => 'PEVANS/Socket-2.015.tar.gz',
         'FILES'        => q[cpan/Socket],
+        'CUSTOMIZED'   => [
+            # Waiting to be merged upstream: see CPAN RT#98217
+            qw(	t/getnameinfo.t ),
+        ],
     },
 
     'Storable' => {

@@ -4,6 +4,7 @@ Digest::SHA cpan/Digest-SHA/hints/hpux.pl 8cf51e816894ee03826eac737bd6843300d6e6
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/Liblist/Kid.pm f738b4b8d6dfdb2bae5f3e43106370867aa88f01
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/pm_to_blib.t 2cd28c8279d7900e28962712763eaa4768117414
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
+Socket cpan/Socket/t/getnameinfo.t f25ae4125d64a81538d4d3b73a3a0b9ce3c0404d
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d
 Text::Balanced cpan/Text-Balanced/t/02_extbrk.t 6ba1b64a4604e822dc2260b8ffcea6b406339ee8
 Text::Balanced cpan/Text-Balanced/t/03_extcbk.t 3307c980af28963414cab799c427b359ef3b8657
