@@ -5715,8 +5715,8 @@ S_assignment_type(pTHX_ const OP *o)
         const I32 t = assignment_type(sib);
         const I32 f = assignment_type(OP_SIBLING(sib));
 
-	if (t == f)
-	    return t;
+	if (t == ASSIGN_LIST && f == ASSIGN_LIST)
+	    return ASSIGN_LIST;
 	if ((t == ASSIGN_LIST) ^ (f == ASSIGN_LIST))
 	    yyerror("Assignment to both a list and a scalar");
 	return FALSE;
