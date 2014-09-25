@@ -2068,7 +2068,7 @@ S_sv_2iuv_non_preserve(pTHX_ SV *const sv
 static void
 S_sv_setnv(pTHX_ SV* sv, int numtype)
 {
-    bool pok = SvPOK(sv);
+    bool pok = cBOOL(SvPOK(sv));
     bool nok = FALSE;
     if ((numtype & IS_NUMBER_INFINITY)) {
         SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -NV_INF : NV_INF);
