@@ -1308,11 +1308,6 @@ Thanks for releasing perl!
 
 =head2 Building a release - the day after
 
-=head3 link announcement in epigraphs.pod
-
-Add, to your quote to F<Porting/epigraphs.pod>, a link to the release
-announcement in the web-visible mailing list archive.  Commit it.
-
 =for checklist skip BLEAD-FINAL, MAINT, RC
 
 =head3 update Module::CoreList
