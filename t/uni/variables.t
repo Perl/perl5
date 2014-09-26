@@ -4,6 +4,7 @@
 # (including weird syntax errors)
 
 BEGIN {
+    chdir 't' if -d 't';
     require './test.pl';
     skip_all_without_unicode_tables();
 }

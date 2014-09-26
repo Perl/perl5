@@ -1,6 +1,7 @@
 #!./perl -w
 
 BEGIN {
+    chdir 't' if -d 't';
     require './test.pl';
     skip_all_without_dynamic_extension('Encode');
     skip_all("EBCDIC") if $::IS_EBCDIC;

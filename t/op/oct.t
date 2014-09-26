@@ -2,6 +2,7 @@
 
 # Tests 51 onwards are intentionally not all-warnings-clean
 
+chdir 't' if -d 't';
 require './test.pl';
 use strict;
 

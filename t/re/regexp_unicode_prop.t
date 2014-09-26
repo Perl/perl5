@@ -9,6 +9,7 @@ use warnings;
 use 5.010;
 
 BEGIN {
+    chdir 't' if -d 't';
     require './test.pl';
     skip_all_if_miniperl("no dynamic loading on miniperl, no File::Spec (used by charnames)");
 }

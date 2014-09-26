@@ -7,6 +7,7 @@
 use strict;
 use Config;
 
+chdir 't' if -d 't';
 require './test.pl';
 
 plan( tests => 16 );

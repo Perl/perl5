@@ -5,6 +5,7 @@ use warnings;
 
 BEGIN {
     unshift @INC, 'lib';
+    chdir 't' if -d 't';
     require './test.pl';
     plan(tests => 14);
 }
