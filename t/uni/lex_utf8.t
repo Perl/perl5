@@ -5,7 +5,7 @@
 BEGIN {
     $| = 1;
 
-    chdir 't';
+    chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;

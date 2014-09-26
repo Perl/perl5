@@ -1,7 +1,7 @@
 #!./perl
 
 BEGIN {
-    chdir 't';
+    chdir 't' if -d 't';
     @INC = qw(../lib);
     require './test.pl';
     plan (tests => 17);

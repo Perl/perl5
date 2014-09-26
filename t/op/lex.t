@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-BEGIN { chdir 't'; require './test.pl'; }
+BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
 plan(tests => 8);
 

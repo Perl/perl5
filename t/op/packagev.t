@@ -1,7 +1,7 @@
 #!./perl
 
 BEGIN {
-    chdir 't';
+    chdir 't' if -d 't';
     @INC = qw '../lib ../cpan/version/lib';
     require './test.pl';
 }

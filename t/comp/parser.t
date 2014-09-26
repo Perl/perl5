@@ -5,7 +5,7 @@
 
 BEGIN {
     @INC = qw(. ../lib);
-    chdir 't';
+    chdir 't' if -d 't';
 }
 
 print "1..170\n";

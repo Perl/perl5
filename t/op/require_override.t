@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 BEGIN {
-    chdir 't';
+    chdir 't' if -d 't';
     require './test.pl';
 }
 

@@ -3,7 +3,7 @@
 # This file is intentionally encoded in latin-1.
 
 BEGIN {
-    chdir 't';
+    chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
     require Config; import Config;
