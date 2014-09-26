@@ -2382,7 +2382,8 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 		    {
 			sv = newSV(0);
 			/* For flip-flop targets: */
-			if (SvPADTMP(oldpad[ix])) SvPADTMP_on(sv);
+			if (oldpad[ix] && SvPADTMP(oldpad[ix]))
+			    SvPADTMP_on(sv);
 		    }
 		    av_store(newpad, ix, sv);
 		}

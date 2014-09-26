@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan( tests => 37 );
+plan( tests => 38 );
 
 sub empty_sub {}
 
@@ -241,3 +241,20 @@ use constant { constant1 => 1, constant2 => 2 };
       'stub re-declaration of constant with wrong prototype';
     is $w, 2, 'two warnings from the above';
 }
+
+package _122845 {
+    our $depth = 0;
+    my $parent; # just to make the sub a closure
+
+    sub {
+	local $depth = $depth + 1;
+	our $ok++, return if $depth == 2;
+
+	()= $parent;  # just to make the sub a closure
+	our $whatever; # this causes the crash
+
+	CORE::__SUB__->();
+    }->();
+};
+is $_122845::ok, 1,
+  '[perl #122845] no crash in closure recursion with our-vars';
