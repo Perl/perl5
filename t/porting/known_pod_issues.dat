@@ -43,6 +43,7 @@ cpanp(1)
 CPANPLUS
 Crypt::Random
 curl(1)
+Data::Alias
 Data::Entropy
 Data::Float
 Data::Structure::Util
