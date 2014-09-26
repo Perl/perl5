@@ -846,7 +846,6 @@ static NV my_rint(NV x)
   }
 #elif defined(HAS_FPGETROUND)
   switch (fpgetround()) {
-  default:
   case FP_RN: return MY_ROUND_NEAREST(x);
   case FP_RZ: return MY_ROUND_TRUNC(x);
   case FP_RM: return MY_ROUND_DOWN(x);
