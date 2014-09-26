@@ -1452,9 +1452,9 @@ See L<charnames/CUSTOM ALIASES>.
 
 (D deprecated, regexp) The \C character class is deprecated, and will
 become a compile-time error in a future release of perl (tentatively
-v5.24). This construct allows you to match a single byte of what makes up
-a multi-byte single UTF8 character, and breaks encapsulation. It is
-currently also very buggy. If you really need to process the individual
+v5.24).  This construct allows you to match a single byte of what makes
+up a multi-byte single UTF8 character, and breaks encapsulation.  It is
+currently also very buggy.  If you really need to process the individual
 bytes, you probably want to convert your string to one where each
 underlying byte is stored as a character, with utf8::encode().
 
@@ -4700,7 +4700,7 @@ crude check that bails out after 100 levels of C<@ISA> depth.
 =item Redundant argument in %s
 
 (W redundant) You called a function with more arguments than other
-arguments you supplied indicated would be needed. Currently only
+arguments you supplied indicated would be needed.  Currently only
 emitted when a printf-type format required fewer arguments than were
 supplied, but might be used in the future for e.g. L<perlfunc/pack>.
 
@@ -5336,7 +5336,7 @@ was discovered.  See L<perlre>.
 S<<-- HERE> in m/%s/
 
 (F) You ommitted to close a (?(condition)...) block somewhere in the
-pattern. Add a closing parenthesis in the appropriate position. See
+pattern.  Add a closing parenthesis in the appropriate position.  See
 L<perlre>.
 
 =item Switch condition not recognized in regex; marked by S<<-- HERE> in
@@ -5752,7 +5752,7 @@ Check the #! line, or manually feed your script into Perl yourself.
 marked by <-- HERE in m/%s/
 
 (D deprecated, regexp) You used a literal C<"{"> character in a regular
-expression pattern. You should change to use C<"\{"> instead, because a
+expression pattern.  You should change to use C<"\{"> instead, because a
 future version of Perl (tentatively v5.26) will consider this to be a
 syntax error.  If the pattern delimiters are also braces, any matching
 right brace (C<"}">) should also be escaped to avoid confusing the parser,
