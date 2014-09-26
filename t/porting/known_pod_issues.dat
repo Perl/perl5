@@ -75,6 +75,7 @@ File::MMagic
 File::ShareDir
 flock(3)
 fsync(3c)
+Future
 gcc(1)
 Getopt::Std
 getpriority(2)
