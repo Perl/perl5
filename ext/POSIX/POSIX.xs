@@ -158,10 +158,10 @@
 
 /* We will have an emulation. */
 #ifndef FE_TONEAREST
-#  define FE_TONEAREST	0
-#  define FE_TOWARDZERO	1
-#  define FE_DOWNWARD	2
-#  define FE_UPWARD	3
+#  define FE_TOWARDZERO	0
+#  define FE_TONEAREST	1
+#  define FE_UPWARD	2
+#  define FE_DOWNWARD	3
 #endif
 
 /* C89 math.h:
@@ -811,10 +811,10 @@ static int my_fegetround()
   }
 #elif defined(FLT_ROUNDS)
   switch (FLT_ROUNDS) {
-  case 1: return FE_TONEAREST;
   case 0: return FE_TOWARDZERO;
-  case 2: return FE_DOWNWARD;
-  case 3: return FE_UPWARD;
+  case 1: return FE_TONEAREST;
+  case 2: return FE_UPWARD;
+  case 3: return FE_DOWNWARD;
   default: return -1;
   }
 #else
@@ -2233,7 +2233,7 @@ fesetround(x)
 	case FE_TOWARDZERO: RETVAL = fpsetround(FP_RZ); break;
 	case FE_DOWNWARD:   RETVAL = fpsetround(FP_RM); break;
 	case FE_UPWARD:     RETVAL = fpsetround(FP_RP); break;
-        default: RETVAL = -1; break; 
+        default: RETVAL = -1; break;
 	}
 #else
 	RETVAL = -1;
