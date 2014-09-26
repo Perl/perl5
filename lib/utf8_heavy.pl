@@ -574,8 +574,8 @@ sub _loose_name ($) {
                 $list = join '', $taint,
                         map  { $_->[1] }
                         sort { $a->[0] <=> $b->[0] }
-                        map  { /^([0-9a-fA-F]+)/; [ CORE::hex($1), $_ ] }
-                        grep { /^([0-9a-fA-F]+)/ and not $seen{$1}++ } @tmp; # XXX doesn't do ranges right
+                        map  { /^([0-9a-fA-F]+)/ && !$seen{$1}++ ? [ CORE::hex($1), $_ ] : () }
+                        @tmp; # XXX doesn't do ranges right
             }
             else {
                 # mktables has gone to some trouble to make non-user defined
