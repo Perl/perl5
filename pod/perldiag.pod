@@ -5332,13 +5332,6 @@ it in clustering parentheses:
 The S<<-- HERE> shows whereabouts in the regular expression the problem
 was discovered.  See L<perlre>.
 
-=item Switch (?(condition)... not terminated in regex; marked by
-S<<-- HERE> in m/%s/
-
-(F) You ommitted to close a (?(condition)...) block somewhere in the
-pattern.  Add a closing parenthesis in the appropriate position.  See
-L<perlre>.
-
 =item Switch condition not recognized in regex; marked by S<<-- HERE> in
 m/%s/
 
@@ -5357,6 +5350,13 @@ is not known.  The condition must be one of the following:
 
 The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.  See L<perlre>.
+
+=item Switch (?(condition)... not terminated in regex; marked by
+S<<-- HERE> in m/%s/
+
+(F) You ommitted to close a (?(condition)...) block somewhere in the
+pattern.  Add a closing parenthesis in the appropriate position.  See
+L<perlre>.
 
 =item switching effective %s is not implemented
 
