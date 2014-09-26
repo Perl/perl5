@@ -2649,6 +2649,11 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    kid->op_private |= OPpLVREF_ELEM;
 	    kid->op_flags   |= OPf_STACKED;
 	    break;
+	  case OP_ASLICE:
+	    kid->op_type = OP_LVREFSLICE;
+	    kid->op_ppaddr = PL_ppaddr[OP_LVREFSLICE];
+	    kid->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM;
+	    continue;
 	  default:
 	   badref:
 	    /* diag_listed_as: Can't modify %s in %s */

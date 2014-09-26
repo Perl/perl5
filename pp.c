@@ -6223,7 +6223,52 @@ PP(pp_lvref)
 
 PP(pp_lvrefslice)
 {
-    DIE(aTHX_ "Unimplemented");
+    dSP; dMARK; dORIGMARK;
+    AV * const av = (AV *)POPs;
+    const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
+    bool can_preserve = FALSE;
+
+    if (localizing) {
+	MAGIC *mg;
+	HV *stash;
+	SV **svp;
+
+	can_preserve = SvCANEXISTDELETE(av);
+
+	if (SvTYPE(av) == SVt_PVAV) {
+	    SSize_t max = -1;
+
+	    for (svp = MARK + 1; svp <= SP; svp++) {
+		const SSize_t elem = SvIV(*svp);
+		if (elem > max)
+		    max = elem;
+	    }
+	    if (max > AvMAX(av))
+		av_extend(av, max);
+	}
+    }
+
+    while (++MARK <= SP) {
+	SV * const elemsv = *MARK;
+	const SSize_t elem = SvIV(elemsv);
+	bool existent = TRUE;
+
+	if (localizing && can_preserve)
+	    existent = av_exists(av, elem);
+
+	if (localizing && existent) {
+	    SV ** const svp = av_fetch(av, elem, 1);
+	    if (!svp || !*svp)
+		DIE(aTHX_ PL_no_aelem, elem);
+	    save_aelem(av, elem, svp);
+	}
+	else
+	    SAVEADELETE(av, elem);
+
+	*MARK = sv_2mortal(newSV_type(SVt_PVMG));
+	sv_magic(*MARK,(SV *)av,PERL_MAGIC_lvref,(char *)elemsv,HEf_SVKEY);
+    }
+    RETURN;
 }
 
 /*

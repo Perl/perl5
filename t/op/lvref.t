@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 48;
+plan 52;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -76,16 +76,31 @@ is *foo{SCALAR}, *bar{GLOB}, 'globref-to-scalarref assignment';
 
 # Array Elements
 
-\$a[0] = \$_;
+sub expect_scalar_cx { wantarray ? 0 : \$_ }
+sub expect_list_cx { wantarray ? (\$_,\$_) : 0 }
+\$a[0] = expect_scalar_cx;
 is \$a[0], \$_, '\$array[0]';
-\($a[1]) = \$_;
+\($a[1]) = expect_list_cx;
 is \$a[1], \$_, '\($array[0])';
 {
   my @a;
-  \$a[0] = \$_;
+  \$a[0] = expect_scalar_cx;
   is \$a[0], \$_, '\$lexical_array[0]';
-  \($a[1]) = \$_;
+  \($a[1]) = expect_list_cx;
   is \$a[1], \$_, '\($lexical_array[0])';
+}
+{
+  my @a;
+  \@a[0,1] = expect_list_cx;
+  is \$a[0].\$a[1], \$_.\$_, '\@array[indices]';
+  \(@a[2,3]) = expect_list_cx;
+  is \$a[0].\$a[1], \$_.\$_, '\(@array[indices])';
+  my $tmp;
+  {
+    \local @a[0,1] = (\$tmp)x2;
+    is \$a[0].\$a[1], \$tmp.\$tmp, '\local @a[indices]';
+  }
+  is \$a[0].\$a[1], \$_.\$_, '\local @a[indices] unwound';
 }
 
 # Hash Elements
