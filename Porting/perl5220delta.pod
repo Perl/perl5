@@ -365,6 +365,10 @@ soon:
 
 =item *
 
+L<Data::Alias> version 1.18
+
+=item *
+
 L<Data::Util> version 0.63
 
 =item *
