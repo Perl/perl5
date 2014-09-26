@@ -6208,7 +6208,7 @@ PP(pp_lvref)
     SV * const arg = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
     sv_magic(ret, arg,
 	     PERL_MAGIC_lvref, (char *)elem, elem ? HEf_SVKEY : ARGTARG);
-    if (PL_op->op_private & OPpLVAL_INTRO)
+    if (PL_op->op_private & OPpLVAL_INTRO) {
       if (PL_op->op_flags & OPf_STACKED) {
 	save_pushptrptr((GV *)arg, SvREFCNT_inc_simple(GvSV(arg)),
 			SAVEt_GVSV);
@@ -6216,6 +6216,7 @@ PP(pp_lvref)
       }
       else
 	SAVECLEARSV(PAD_SVl(ARGTARG));
+    }
     XPUSHs(ret);
     RETURN;
 }
