@@ -529,6 +529,7 @@ EXTCONST char* const PL_op_name[] = {
 	"padrange",
 	"refassign",
 	"lvref",
+	"lvrefslice",
 	"freed",
 };
 #endif
@@ -916,6 +917,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"private subroutine",
 	"private subroutine",
 	"list of private variables",
+	"lvalue ref assignment",
 	"lvalue ref assignment",
 	"lvalue ref assignment",
 	"freed op",
@@ -1321,6 +1323,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_padrange,
 	Perl_pp_refassign,
 	Perl_pp_lvref,
+	Perl_pp_lvrefslice,
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1720,6 +1723,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* padrange */
 	Perl_ck_refassign,	/* refassign */
 	Perl_ck_null,		/* lvref */
+	Perl_ck_null,		/* lvrefslice */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2113,6 +2117,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000040,	/* padrange */
 	0x00000240,	/* refassign */
 	0x00000140,	/* lvref */
+	0x00000440,	/* lvrefslice */
 };
 #endif
 
@@ -2724,6 +2729,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      630, /* padrange */
      632, /* refassign */
      635, /* lvref */
+      -1, /* lvrefslice */
 
 };
 
@@ -3473,6 +3479,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* PADRANGE   */ (OPpPADRANGE_COUNTMASK|OPpLVAL_INTRO),
     /* REFASSIGN  */ (OPpARG2_MASK|OPpLVREF_ELEM|OPpLVAL_INTRO),
     /* LVREF      */ (OPpARG1_MASK|OPpLVREF_ELEM|OPpLVAL_INTRO),
+    /* LVREFSLICE */ (0),
 
 };
 
