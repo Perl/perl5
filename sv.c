@@ -11140,15 +11140,18 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #  define FV_GF PERL_PRIgldbl
 #    if defined(__VMS) && defined(__ia64) && defined(__IEEE_FLOAT)
        /* Work around breakage in OTS$CVT_FLOAT_T_X */
-#      define NV_TO_FV(nvsv) (Perl_isnan(SvNV(nvsv)) ? LDBL_SNAN : SvNV(nvsv));
+#      define NV_TO_FV(nv,fv) STMT_START {                   \
+                                           double _dv = nv;  \
+                                           fv = Perl_isnan(_dv) ? LDBL_QNAN : _dv; \
+                              } STMT_END
 #    else
-#      define NV_TO_FV SvNV
+#      define NV_TO_FV(nv,fv) (fv)=(nv)
 #    endif
 #else
 	NV fv;
 #  define FV_ISFINITE(x) Perl_isfinite((NV)(x))
 #  define FV_GF NVgf
-#  define NV_TO_FV SvNV
+#  define NV_TO_FV(nv,fv) (fv)=(nv)
 #endif
 	STRLEN have;
 	STRLEN need;
@@ -11892,14 +11895,16 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 fv = intsize == 'q' ?
                     va_arg(*args, NV) : va_arg(*args, double);
 #elif LONG_DOUBLESIZE > DOUBLESIZE
-                fv = intsize == 'q' ?
-                    va_arg(*args, long double) : va_arg(*args, double);
+                if (intsize == 'q')
+                    fv = va_arg(*args, long double);
+                else
+                    NV_TO_FV(va_arg(*args, double), fv);
 #else
                 fv = va_arg(*args, double);
 #endif
             }
             else
-                fv = NV_TO_FV(argsv);
+                NV_TO_FV(SvNV(argsv), fv);
 
 	    need = 0;
 	    /* frexp() (or frexpl) has some unspecified behaviour for
