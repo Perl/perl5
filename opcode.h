@@ -2729,7 +2729,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      630, /* padrange */
      632, /* refassign */
      635, /* lvref */
-      -1, /* lvrefslice */
+     638, /* lvrefslice */
 
 };
 
@@ -3090,6 +3090,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* padrange      */ 0x265c, 0x019b,
     /* refassign     */ 0x265c, 0x1328, 0x0067,
     /* lvref         */ 0x265c, 0x1328, 0x0003,
+    /* lvrefslice    */ 0x265d,
 
 };
 
@@ -3479,7 +3480,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* PADRANGE   */ (OPpPADRANGE_COUNTMASK|OPpLVAL_INTRO),
     /* REFASSIGN  */ (OPpARG2_MASK|OPpLVREF_ELEM|OPpLVAL_INTRO),
     /* LVREF      */ (OPpARG1_MASK|OPpLVREF_ELEM|OPpLVAL_INTRO),
-    /* LVREFSLICE */ (0),
+    /* LVREFSLICE */ (OPpLVAL_INTRO),
 
 };
 
