@@ -806,7 +806,7 @@ static int my_fegetround()
   case FP_RN: return FE_TONEAREST;
   case FP_RZ: return FE_TOWARDZERO;
   case FP_RM: return FE_DOWNWARD;
-  case FE_RP: return FE_UPWARD;
+  case FP_RP: return FE_UPWARD;
   default: return -1;
   }
 #elif defined(FLT_ROUNDS)
