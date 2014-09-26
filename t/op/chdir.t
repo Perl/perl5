@@ -9,7 +9,7 @@ BEGIN {
     # chdir() works!  Instead, we'll hedge our bets and put both
     # possibilities into @INC.
     unshift @INC, qw(t . lib ../lib);
-    require "test.pl";
+    require "./test.pl";
     plan(tests => 48);
 }
 

@@ -23,7 +23,7 @@ BEGIN {
 use strict;
 use Config;
 
-require "test.pl";
+require "./test.pl";
 plan(tests => 10);
 
 

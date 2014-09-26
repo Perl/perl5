@@ -8,7 +8,7 @@ BEGIN {
 BEGIN {
     use Config;
 
-    require "test.pl";
+    require "./test.pl";
 
     if( !$Config{d_crypt} ) {
         skip_all("crypt unimplemented");

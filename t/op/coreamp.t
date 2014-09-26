@@ -10,7 +10,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib ../dist/if);
-    require "test.pl";
+    require "./test.pl";
     $^P |= 0x100;
 }
 

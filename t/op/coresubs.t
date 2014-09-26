@@ -7,7 +7,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
-    require "test.pl";
+    require "./test.pl";
     skip_all_without_dynamic_extension('B');
     $^P |= 0x100;
 }

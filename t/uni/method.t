@@ -7,7 +7,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib ../cpan/parent/lib);
-    require "test.pl";
+    require "./test.pl";
 }
 
 use strict;

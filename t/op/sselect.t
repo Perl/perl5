@@ -7,7 +7,7 @@ BEGIN {
     $hires = eval 'use Time::HiResx "time"; 1';
 }
 
-require 'test.pl';
+require './test.pl';
 
 plan (15);
 

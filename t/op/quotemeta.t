@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = qw(../lib .);
     require Config; import Config;
-    require "test.pl";
+    require "./test.pl";
 }
 
 plan tests => 60;

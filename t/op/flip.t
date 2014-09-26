@@ -1,7 +1,7 @@
 #!./perl
 
 BEGIN {
-    require "test.pl";
+    require "./test.pl";
 }
 
 plan(12);

@@ -5,7 +5,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
-    require 'test.pl';
+    require './test.pl';
     skip_all_if_miniperl('no dynamic loading on miniperl, no Filter::Util::Call');
     skip_all_without_perlio();
 }
