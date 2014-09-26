@@ -6555,7 +6555,7 @@ Perl_yylex(pTHX)
 			    ? GvCV(gv)
 			    : SvROK(gv) && SvTYPE(SvRV(gv)) == SVt_PVCV
 				? (CV *)SvRV(gv)
-				: (CV *)gv
+				: ((CV *)gv)
 			: rv2cv_op_cv(rv2cv_op, RV2CVOPCV_RETURN_STUB);
 		}
 
