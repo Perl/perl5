@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 44;
+plan 48;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -73,11 +73,20 @@ is do { \(local $l) = \4; $l }, 4, '\(local $scalar) assignment';
 is $l, undef, 'localisation unwound';
 \$foo = \*bar;
 is *foo{SCALAR}, *bar{GLOB}, 'globref-to-scalarref assignment';
-on;
 
 # Array Elements
 
-# ...
+\$a[0] = \$_;
+is \$a[0], \$_, '\$array[0]';
+\($a[1]) = \$_;
+is \$a[1], \$_, '\($array[0])';
+{
+  my @a;
+  \$a[0] = \$_;
+  is \$a[0], \$_, '\$lexical_array[0]';
+  \($a[1]) = \$_;
+  is \$a[1], \$_, '\($lexical_array[0])';
+}
 
 # Hash Elements
 
@@ -97,7 +106,6 @@ on;
 
 # Mixed List Assignments
 
-off;
 (\$tahi, $rua) = \(1,2);
 is join(' ', $tahi, $$rua), '1 2',
   'mixed scalar ref and scalar list assignment';

@@ -715,6 +715,13 @@ addbits('coreargs',
 
 addbits('split', 7 => qw(OPpSPLIT_IMPLIM IMPLIM)); # implicit limit
 
+
+
+addbits($_,
+    2 => qw(OPpLVREF_ELEM ELEM   ),
+   #7 => qw(OPpLVAL_INTRO LVINTRO),
+) for 'refassign', 'lvref';
+
 1;
 
 # ex: set ts=8 sts=4 sw=4 et:

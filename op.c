@@ -2645,6 +2645,10 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    kid->op_flags |= OPf_STACKED;
 	  case OP_PADSV:
 	    break;
+	  case OP_AELEM:
+	    kid->op_private |= OPpLVREF_ELEM;
+	    kid->op_flags   |= OPf_STACKED;
+	    break;
 	  default:
 	   badref:
 	    /* diag_listed_as: Can't modify %s in %s */
@@ -2657,7 +2661,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	  }
 	  kid->op_type = OP_LVREF;
 	  kid->op_ppaddr = PL_ppaddr[OP_LVREF];
-	  kid->op_private &= OPpLVAL_INTRO;
+	  kid->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM;
 	} while ((kid = OP_SIBLING(kid)));
 	if (!FEATURE_LVREF_IS_ENABLED)
 	    Perl_croak(aTHX_ "Experimental lvalue references not enabled");
@@ -9934,6 +9938,10 @@ Perl_ck_refassign(pTHX_ OP *o)
 	break;
     case OP_RV2SV:
 	if (cUNOPx(varop)->op_first->op_type != OP_GV) goto bad;
+	goto null_and_stack;
+    case OP_AELEM:
+	o->op_private = OPpLVREF_ELEM;
+      null_and_stack:
 	op_null(varop);
 	op_null(left);
 	stacked = TRUE;
@@ -9952,7 +9960,7 @@ Perl_ck_refassign(pTHX_ OP *o)
     Perl_ck_warner_d(aTHX_
 		     packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
 		    "Lvalue references are experimental");
-    o->op_private = varop->op_private & OPpLVAL_INTRO;
+    o->op_private |= varop->op_private & OPpLVAL_INTRO;
     if (stacked) o->op_flags |= OPf_STACKED;
     else {
 	o->op_flags &=~ OPf_STACKED;

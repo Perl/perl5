@@ -6163,6 +6163,7 @@ PP(pp_runcv)
 PP(pp_refassign)
 {
     dSP;
+    SV * const key = PL_op->op_private & OPpLVREF_ELEM ? POPs : NULL;
     SV * const left = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
     dTOPss;
     if (!SvROK(sv)) DIE(aTHX_ "Assigned value is not a reference");
@@ -6187,6 +6188,10 @@ PP(pp_refassign)
 	}
 	gv_setref(left, sv);
 	SvSETMAGIC(left);
+	break;
+    case SVt_PVAV:
+	av_store((AV *)left, SvIV(key), SvREFCNT_inc_simple_NN(SvRV(sv)));
+	break;
     }
     if (PL_op->op_flags & OPf_MOD)
 	SETs(sv_2mortal(newSVsv(sv)));
@@ -6199,9 +6204,10 @@ PP(pp_lvref)
 {
     dSP;
     SV * const ret = sv_2mortal(newSV_type(SVt_PVMG));
+    SV * const elem = PL_op->op_private & OPpLVREF_ELEM ? POPs : NULL;
     SV * const arg = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
     sv_magic(ret, arg,
-	     PERL_MAGIC_lvref, NULL, ARGTARG);
+	     PERL_MAGIC_lvref, (char *)elem, elem ? HEf_SVKEY : ARGTARG);
     if (PL_op->op_private & OPpLVAL_INTRO)
       if (PL_op->op_flags & OPf_STACKED) {
 	save_pushptrptr((GV *)arg, SvREFCNT_inc_simple(GvSV(arg)),
