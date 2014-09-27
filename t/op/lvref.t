@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 52;
+plan 56;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -88,6 +88,17 @@ is \$a[1], \$_, '\($array[0])';
   is \$a[0], \$_, '\$lexical_array[0]';
   \($a[1]) = expect_list_cx;
   is \$a[1], \$_, '\($lexical_array[0])';
+  my $tmp;
+  {
+    \local $a[0] = \$tmp;
+    is \$a[0], \$tmp, '\local $a[0]';
+  }
+  is \$a[0], \$_, '\local $a[0] unwound';
+  {
+    \local ($a[1]) = \$tmp;
+    is \$a[1], \$tmp, '\local ($a[0])';
+  }
+  is \$a[1], \$_, '\local $a[0] unwound';
 }
 {
   my @a;

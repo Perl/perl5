@@ -6190,6 +6190,20 @@ PP(pp_refassign)
 	SvSETMAGIC(left);
 	break;
     case SVt_PVAV:
+	if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
+	    MAGIC *mg;
+	    HV *stash;
+	    IV const ix = SvIV(key);
+	    const bool existent =
+		SvCANEXISTDELETE(left) ? av_exists((AV *)left, ix) : TRUE;
+	    SV ** const svp = av_fetch((AV *)left, ix, 1);
+	    if (!svp || !*svp)
+		DIE(aTHX_ PL_no_aelem, ix);
+	    if (existent)
+		save_aelem((AV *)left, ix, svp);
+	    else
+		SAVEADELETE((AV *)left, ix);
+	}
 	av_store((AV *)left, SvIV(key), SvREFCNT_inc_simple_NN(SvRV(sv)));
 	break;
     }
@@ -6209,7 +6223,21 @@ PP(pp_lvref)
     sv_magic(ret, arg,
 	     PERL_MAGIC_lvref, (char *)elem, elem ? HEf_SVKEY : ARGTARG);
     if (PL_op->op_private & OPpLVAL_INTRO) {
-      if (PL_op->op_flags & OPf_STACKED) {
+      if (elem) {
+	MAGIC *mg;
+	HV *stash;
+	IV const ix = SvIV(elem);
+	const bool existent =
+	    SvCANEXISTDELETE(arg) ? av_exists((AV *)arg, ix) : TRUE;
+	SV ** const svp = av_fetch((AV *)arg, ix, 1);
+	if (!svp || !*svp)
+	    DIE(aTHX_ PL_no_aelem, ix);
+	if (existent)
+	    save_aelem((AV *)arg, ix, svp);
+	else
+	    SAVEADELETE((AV *)arg, ix);
+      }
+      else if (arg) {
 	save_pushptrptr((GV *)arg, SvREFCNT_inc_simple(GvSV(arg)),
 			SAVEt_GVSV);
 	GvSV(arg) = 0;
