@@ -2083,7 +2083,7 @@ S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed) {
 }
 
 static void
-S_sv_check_inf(pTHX_ SV *sv, I32 datumtype)
+S_sv_check_infnan(pTHX_ SV *sv, I32 datumtype)
 {
     SvGETMAGIC(sv);
     if (UNLIKELY(isinfnansv(sv))) {
@@ -2096,8 +2096,8 @@ S_sv_check_inf(pTHX_ SV *sv, I32 datumtype)
     }
 }
 
-#define SvIV_no_inf(sv,d) (S_sv_check_inf(aTHX_ sv,d), SvIV_nomg(sv))
-#define SvUV_no_inf(sv,d) (S_sv_check_inf(aTHX_ sv,d), SvUV_nomg(sv))
+#define SvIV_no_inf(sv,d) (S_sv_check_infnan(aTHX_ sv,d), SvIV_nomg(sv))
+#define SvUV_no_inf(sv,d) (S_sv_check_infnan(aTHX_ sv,d), SvUV_nomg(sv))
 
 STATIC
 SV **
@@ -2857,7 +2857,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
             while (len-- > 0) {
 		NV anv;
 		fromstr = NEXTFROM;
-		S_sv_check_inf(fromstr, datumtype);
+		S_sv_check_infnan(fromstr, datumtype);
 		anv = SvNV_nomg(fromstr);
 
 		if (anv < 0) {
