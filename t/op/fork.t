@@ -519,3 +519,13 @@ sub main {
 }
 EXPECT
 foo
+########
+# ${^GLOBAL_PHASE} at the end of a pseudo-fork
+if (my $pid = fork) {
+    waitpid $pid, 0;
+} else {
+    eval 'END { print "${^GLOBAL_PHASE}\n" }';
+    exit;
+}
+EXPECT
+END
