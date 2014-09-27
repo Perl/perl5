@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter IO::File);
 
 
-$VERSION = '2.064';
+$VERSION = '2.066';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.064 ;
+use IO::Compress::Base::Common 2.066 ;
 
 use IO::File ;
 use Symbol;
@@ -756,7 +756,8 @@ sub _rd2
 
         while (($status = $z->read($x->{buff})) > 0) {
             if ($fh) {
-                syswrite $fh, ${ $x->{buff} }
+                local $\;
+                print $fh ${ $x->{buff} }
                     or return $z->saveErrorString(undef, "Error writing to output file: $!", $!);
                 ${ $x->{buff} } = '' ;
             }
