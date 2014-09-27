@@ -1755,7 +1755,7 @@ scan(s, buf, out=NULL, eof=FALSE)
         croak("Wide character in Compress::Raw::Zlib::InflateScan::scan input parameter");
 #endif         
     /* initialise the input buffer */
-    s->stream.next_in = (Bytef*)SvPV_nomg_nolen(buf) ;
+    s->stream.next_in = (Bytef*)SvPV_force_nomg_nolen(buf) ;
     s->stream.avail_in = SvCUR(buf) ;
     start_len = s->stream.avail_in ;
     s->bytesInflated = 0 ; 
@@ -1841,8 +1841,8 @@ scan(s, buf, out=NULL, eof=FALSE)
             SvCUR_set(buf, in) ;
             if (in)
                 Move(s->stream.next_in, SvPVX(buf), in, char) ;	
-                *SvEND(buf) = '\0';
-                SvSETMAGIC(buf);
+            *SvEND(buf) = '\0';
+            SvSETMAGIC(buf);
         }
     }
 #endif
