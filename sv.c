@@ -11534,8 +11534,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             if (infnan)
                 Perl_croak(aTHX_ "Cannot printf %"NVgf" with '%c'",
                            /* no va_arg() case */
-                           SvNV(argsv), (int)c);
-	    uv = (args) ? va_arg(*args, int) : SvIV(argsv);
+                           SvNV_nomg(argsv), (int)c);
+	    uv = (args) ? va_arg(*args, int) : SvIV_nomg(argsv);
 	    if ((uv > 255 ||
 		 (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
 		&& !IN_BYTES) {
@@ -11653,7 +11653,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		}
 	    }
 	    else {
-		IV tiv = SvIV(argsv); /* work around GCC bug #13488 */
+		IV tiv = SvIV_nomg(argsv); /* work around GCC bug #13488 */
 		switch (intsize) {
 		case 'c':	iv = (char)tiv; break;
 		case 'h':	iv = (short)tiv; break;
@@ -11757,7 +11757,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		}
 	    }
 	    else {
-		UV tuv = SvUV(argsv); /* work around GCC bug #13488 */
+		UV tuv = SvUV_nomg(argsv); /* work around GCC bug #13488 */
 		switch (intsize) {
 		case 'c':	uv = (unsigned char)tuv; break;
 		case 'h':	uv = (unsigned short)tuv; break;
@@ -11905,7 +11905,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
             }
             else
-                NV_TO_FV(SvNV(argsv), fv);
+            {
+                if (!infnan) SvGETMAGIC(argsv);
+                NV_TO_FV(SvNV_nomg(argsv), fv);
+            }
 
 	    need = 0;
 	    /* frexp() (or frexpl) has some unspecified behaviour for

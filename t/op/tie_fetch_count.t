@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan (tests => 314);
+    plan (tests => 340);
 }
 
 use strict;
@@ -270,6 +270,18 @@ tie $var, "main", "\x{100}";
 pos$var = 0             ; check_count 'lvalue pos $utf8';
 $dummy=sprintf"%1s",$var; check_count 'sprintf "%1s", $utf8';
 $dummy=sprintf"%.1s",$var; check_count 'sprintf "%.1s", $utf8';
+
+tie $var, "main", 23;
+for (qw(B b c D d i O o p u U X x)) {
+    $dummy=sprintf"%$_",$var; check_count "sprintf '%$_'"
+}
+tie $var, "main", "Inf";
+for (qw(B b c D d i O o p u U X x)) {
+    $dummy = eval { sprintf "%$_", $var };
+                              check_count "sprintf '%$_', \$tied_inf"
+}
+
+tie $var, "main", "\x{100}";
 $dummy  = substr$var,0,1; check_count 'substr $utf8';
 my $l   =\substr$var,0,1;
 $dummy  = $$l           ; check_count 'reading lvalue substr($utf8)';
