@@ -1,4 +1,4 @@
-DB_File cpan/DB_File/DB_File.xs 140cd1d47c6830d1cb51b2207fd7c7d5ce8fb924
+DB_File cpan/DB_File/DB_File.xs f364b661bbb0df075b0c425b104577e7176fe82b
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
 Digest::SHA cpan/Digest-SHA/hints/hpux.pl 8cf51e816894ee03826eac737bd6843300d6e64c
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/Liblist/Kid.pm f738b4b8d6dfdb2bae5f3e43106370867aa88f01

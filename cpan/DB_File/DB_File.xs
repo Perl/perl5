@@ -164,7 +164,11 @@
 #  ifndef DB_VERSION_MAJOR
 
 #    undef  dNOOP
-#    define dNOOP extern int DB_File___notused
+#    ifdef __cplusplus
+#        define dNOOP (void)0
+#    else
+#        define dNOOP extern int DB_File___notused
+#    endif
 
     /* Ditto for dXSARGS. */
 #    undef  dXSARGS
