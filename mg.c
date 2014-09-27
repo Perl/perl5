@@ -2484,6 +2484,10 @@ Perl_magic_setlvref(pTHX_ SV *sv, MAGIC *mg)
     case SVt_PVAV:
 	av_store((AV *)mg->mg_obj, SvIV((SV *)mg->mg_ptr),
 		 SvREFCNT_inc_simple_NN(SvRV(sv)));
+	break;
+    case SVt_PVHV:
+	hv_store_ent((HV *)mg->mg_obj, (SV *)mg->mg_ptr,
+		     SvREFCNT_inc_simple_NN(SvRV(sv)), 0);
     }
     sv_unmagic(sv, PERL_MAGIC_lvref);
     return 0;

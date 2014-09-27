@@ -6174,6 +6174,21 @@ S_localise_aelem_lval(pTHX_ AV * const av, const SSize_t ix,
 	SAVEADELETE(av, ix);
 }
 
+static void
+S_localise_helem_lval(pTHX_ HV * const hv, SV * const keysv,
+			    const bool can_preserve)
+{
+    if (can_preserve ? hv_exists_ent(hv, keysv, 0) : TRUE) {
+	HE * const he = hv_fetch_ent(hv, keysv, 1, 0);
+	SV ** const svp = he ? &HeVAL(he) : NULL;
+	if (!svp || !*svp)
+	    Perl_croak(aTHX_ PL_no_helem_sv, SVfARG(keysv));
+	save_helem_flags(hv, keysv, svp, 0);
+    }
+    else
+	SAVEHDELETE(hv, keysv);
+}
+
 PP(pp_refassign)
 {
     dSP;
@@ -6185,6 +6200,8 @@ PP(pp_refassign)
 	/* diag_listed_as: Assigned value is not %s reference */
 	DIE(aTHX_ "Assigned value is not a SCALAR reference");
     switch (left ? SvTYPE(left) : 0) {
+	MAGIC *mg;
+	HV *stash;
     case 0:
     {
 	SV * const old = PAD_SV(ARGTARG);
@@ -6205,13 +6222,16 @@ PP(pp_refassign)
 	break;
     case SVt_PVAV:
 	if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
-	    MAGIC *mg;
-	    HV *stash;
 	    S_localise_aelem_lval(aTHX_ (AV *)left, SvIV(key),
 					SvCANEXISTDELETE(left));
 	}
 	av_store((AV *)left, SvIV(key), SvREFCNT_inc_simple_NN(SvRV(sv)));
 	break;
+    case SVt_PVHV:
+	if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO))
+	    S_localise_helem_lval(aTHX_ (HV *)left, key,
+					SvCANEXISTDELETE(left));
+	hv_store_ent((HV *)left, key, SvREFCNT_inc_simple_NN(SvRV(sv)), 0);
     }
     if (PL_op->op_flags & OPf_MOD)
 	SETs(sv_2mortal(newSVsv(sv)));
@@ -6232,8 +6252,11 @@ PP(pp_lvref)
       if (elem) {
 	MAGIC *mg;
 	HV *stash;
-	S_localise_aelem_lval(aTHX_ (AV *)arg, SvIV(elem),
-				    SvCANEXISTDELETE(arg));
+	const bool can_preserve = SvCANEXISTDELETE(arg);
+	if (SvTYPE(arg) == SVt_PVAV)
+	    S_localise_aelem_lval(aTHX_ (AV *)arg,SvIV(elem),can_preserve);
+	else
+	    S_localise_helem_lval(aTHX_ (HV *)arg, elem, can_preserve);
       }
       else if (arg) {
 	save_pushptrptr((GV *)arg, SvREFCNT_inc_simple(GvSV(arg)),
@@ -6276,7 +6299,10 @@ PP(pp_lvrefslice)
 
     while (++MARK <= SP) {
 	SV * const elemsv = *MARK;
-	S_localise_aelem_lval(aTHX_ av, SvIV(elemsv), can_preserve);
+	if (SvTYPE(av) == SVt_PVAV)
+	    S_localise_aelem_lval(aTHX_ av, SvIV(elemsv), can_preserve);
+	else
+	    S_localise_helem_lval(aTHX_ (HV *)av, elemsv, can_preserve);
 	*MARK = sv_2mortal(newSV_type(SVt_PVMG));
 	sv_magic(*MARK,(SV *)av,PERL_MAGIC_lvref,(char *)elemsv,HEf_SVKEY);
     }

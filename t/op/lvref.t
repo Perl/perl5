@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 56;
+plan 68;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -116,7 +116,41 @@ is \$a[1], \$_, '\($array[0])';
 
 # Hash Elements
 
-# ...
+\$h{a} = expect_scalar_cx;
+is \$h{a}, \$_, '\$hash{a}';
+\($h{b}) = expect_list_cx;
+is \$h{b}, \$_, '\($hash{a})';
+{
+  my @h;
+  \$h{a} = expect_scalar_cx;
+  is \$h{a}, \$_, '\$lexical_array{a}';
+  \($h{b}) = expect_list_cx;
+  is \$h{b}, \$_, '\($lexical_array{a})';
+  my $tmp;
+  {
+    \local $h{a} = \$tmp;
+    is \$h{a}, \$tmp, '\local $h{a}';
+  }
+  is \$h{a}, \$_, '\local $h{a} unwound';
+  {
+    \local ($h{b}) = \$tmp;
+    is \$h{b}, \$tmp, '\local ($h{a})';
+  }
+  is \$h{b}, \$_, '\local $h{a} unwound';
+}
+{
+  my @h;
+  \@h{"a","b"} = expect_list_cx;
+  is \$h{a}.\$h{b}, \$_.\$_, '\@hash{indices}';
+  \(@h{2,3}) = expect_list_cx;
+  is \$h{a}.\$h{b}, \$_.\$_, '\(@hash{indices})';
+  my $tmp;
+  {
+    \local @h{"a","b"} = (\$tmp)x2;
+    is \$h{a}.\$h{b}, \$tmp.\$tmp, '\local @h{indices}';
+  }
+  is \$h{a}.\$h{b}, \$_.\$_, '\local @h{indices} unwound';
+}
 
 # Arrays
 

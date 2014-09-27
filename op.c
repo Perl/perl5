@@ -2646,10 +2646,12 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	  case OP_PADSV:
 	    break;
 	  case OP_AELEM:
+	  case OP_HELEM:
 	    kid->op_private |= OPpLVREF_ELEM;
 	    kid->op_flags   |= OPf_STACKED;
 	    break;
 	  case OP_ASLICE:
+	  case OP_HSLICE:
 	    kid->op_type = OP_LVREFSLICE;
 	    kid->op_ppaddr = PL_ppaddr[OP_LVREFSLICE];
 	    kid->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM;
@@ -9945,6 +9947,7 @@ Perl_ck_refassign(pTHX_ OP *o)
 	if (cUNOPx(varop)->op_first->op_type != OP_GV) goto bad;
 	goto null_and_stack;
     case OP_AELEM:
+    case OP_HELEM:
 	o->op_private = OPpLVREF_ELEM;
       null_and_stack:
 	op_null(varop);
