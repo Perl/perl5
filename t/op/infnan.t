@@ -33,8 +33,9 @@ my @NaN = ("NAN", "nan", "qnan", "SNAN", "NanQ", "NANS",
            "nanonano"); # RIP, Robin Williams.
 
 my @printf_fmt = qw(e f g a d u o i b x p);
-my @packi_fmt = qw(a A Z b B h H c C s S l L i I n N v V j J w W p P u U);
+my @packi_fmt = qw(c C s S l L i I n N v V j J w W U);
 my @packf_fmt = qw(f d F);
+my @packs_fmt = qw(a4 A4 Z5 b20 B20 h10 H10 u);
 
 if ($Config{ivsize} == 8) {
     push @packi_fmt, qw(q Q);
@@ -80,23 +81,41 @@ for my $f (@printf_fmt) {
 
 ok(!defined eval { $a = sprintf("%c", $PInf)}, "sprintf %c +Inf undef");
 like($@, qr/Cannot printf/, "$PInf sprintf fails");
+ok(!defined eval { $a = sprintf("%c", "Inf")},
+  "stringy sprintf %c +Inf undef");
+like($@, qr/Cannot printf/, "stringy $PInf sprintf fails");
 
 ok(!defined eval { $a = chr($PInf) }, "chr(+Inf) undef");
 like($@, qr/Cannot chr/, "+Inf chr() fails");
+ok(!defined eval { $a = chr("Inf") }, "chr(stringy +Inf) undef");
+like($@, qr/Cannot chr/, "stringy +Inf chr() fails");
 
 ok(!defined eval { $a = sprintf("%c", $NInf)}, "sprintf %c -Inf undef");
 like($@, qr/Cannot printf/, "$NInf sprintf fails");
+ok(!defined eval { $a = sprintf("%c", "-Inf")},
+  "sprintf %c stringy -Inf undef");
+like($@, qr/Cannot printf/, "stringy $NInf sprintf fails");
 
 ok(!defined eval { $a = chr($NInf) }, "chr(-Inf) undef");
 like($@, qr/Cannot chr/, "-Inf chr() fails");
+ok(!defined eval { $a = chr("-Inf") }, "chr(stringy -Inf) undef");
+like($@, qr/Cannot chr/, "stringy -Inf chr() fails");
 
 for my $f (@packi_fmt) {
     ok(!defined eval { $a = pack($f, $PInf) }, "pack $f +Inf undef");
     like($@, $f eq 'w' ? qr/Cannot compress Inf/: qr/Cannot pack Inf/,
          "+Inf pack $f fails");
+    ok(!defined eval { $a = pack($f, "Inf") },
+      "pack $f stringy +Inf undef");
+    like($@, $f eq 'w' ? qr/Cannot compress Inf/: qr/Cannot pack Inf/,
+         "stringy +Inf pack $f fails");
     ok(!defined eval { $a = pack($f, $NInf) }, "pack $f -Inf undef");
     like($@, $f eq 'w' ? qr/Cannot compress -Inf/: qr/Cannot pack -Inf/,
          "-Inf pack $f fails");
+    ok(!defined eval { $a = pack($f, "-Inf") },
+      "pack $f stringy -Inf undef");
+    like($@, $f eq 'w' ? qr/Cannot compress -Inf/: qr/Cannot pack -Inf/,
+         "stringy -Inf pack $f fails");
 }
 
 for my $f (@packf_fmt) {
@@ -108,6 +127,19 @@ for my $f (@packf_fmt) {
     eval { $b = unpack($f, $a) };
     cmp_ok($b, '==', $NInf, "pack $f -Inf equals $NInf");
 }
+
+for my $f (@packs_fmt) {
+    ok(defined eval { $a = pack($f, $PInf) }, "pack $f +Inf defined");
+    is($a, pack($f, "Inf"), "pack $f +Inf same as 'Inf'");
+
+    ok(defined eval { $a = pack($f, $NInf) }, "pack $f -Inf defined");
+    is($a, pack($f, "-Inf"), "pack $f -Inf same as 'Inf'");
+}
+
+is eval { unpack "p", pack 'p', $PInf }, "Inf", "pack p +Inf";
+is eval { unpack "P3", pack 'P', $PInf }, "Inf", "pack P +Inf";
+is eval { unpack "p", pack 'p', $NInf }, "-Inf", "pack p -Inf";
+is eval { unpack "P4", pack 'P', $NInf }, "-Inf", "pack P -Inf";
 
 for my $i (@PInf) {
     cmp_ok($i + 0 , '==', $PInf, "$i is +Inf");
@@ -223,14 +255,23 @@ for my $f (@printf_fmt) {
 
 ok(!defined eval { $a = sprintf("%c", $NaN)}, "sprintf %c NaN undef");
 like($@, qr/Cannot printf/, "$NaN sprintf fails");
+ok(!defined eval { $a = sprintf("%c", "NaN")},
+  "sprintf %c stringy NaN undef");
+like($@, qr/Cannot printf/, "stringy $NaN sprintf fails");
 
 ok(!defined eval { $a = chr($NaN) }, "chr NaN undef");
 like($@, qr/Cannot chr/, "NaN chr() fails");
+ok(!defined eval { $a = chr("NaN") }, "chr stringy NaN undef");
+like($@, qr/Cannot chr/, "stringy NaN chr() fails");
 
 for my $f (@packi_fmt) {
     ok(!defined eval { $a = pack($f, $NaN) }, "pack $f NaN undef");
     like($@, $f eq 'w' ? qr/Cannot compress NaN/: qr/Cannot pack NaN/,
          "NaN pack $f fails");
+    ok(!defined eval { $a = pack($f, "NaN") },
+       "pack $f stringy NaN undef");
+    like($@, $f eq 'w' ? qr/Cannot compress NaN/: qr/Cannot pack NaN/,
+         "stringy NaN pack $f fails");
 }
 
 for my $f (@packf_fmt) {
@@ -238,6 +279,14 @@ for my $f (@packf_fmt) {
     eval { $b = unpack($f, $a) };
     cmp_ok($b, '!=', $b, "pack $f NaN not-equals $NaN");
 }
+
+for my $f (@packs_fmt) {
+    ok(defined eval { $a = pack($f, $NaN) }, "pack $f NaN defined");
+    is($a, pack($f, "NaN"), "pack $f NaN same as 'NaN'");
+}
+
+is eval { unpack "p", pack 'p', $NaN }, "NaN", "pack p +NaN";
+is eval { unpack "P3", pack 'P', $NaN }, "NaN", "pack P +NaN";
 
 for my $i (@NaN) {
     cmp_ok($i + 0, '!=', $i + 0, "$i is NaN numerically (by not being NaN)");

@@ -11518,9 +11518,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 	}
 
-        if (argsv && SvNOK(argsv)) {
+        if (argsv && strchr("BbcDdiOopuUXx",*q)) {
             /* XXX va_arg(*args) case? need peek, use va_copy? */
-            infnan = UNLIKELY(Perl_isinfnan(SvNV(argsv)));
+            SvGETMAGIC(argsv);
+            infnan = UNLIKELY(isinfnansv(argsv));
         }
 
 	switch (c = *q++) {

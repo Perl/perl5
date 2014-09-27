@@ -2681,6 +2681,7 @@ Apnod     |Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_
 #endif
 
 Apdn	|bool	|isinfnan	|NV nv
+p	|bool	|isinfnansv	|NN SV *sv
 
 #if !defined(HAS_SIGNBIT)
 AMdnoP	|int	|Perl_signbit	|NV f

@@ -1386,6 +1386,33 @@ Perl_isinfnan(NV nv)
     return FALSE;
 }
 
+/*
+=for apidoc
+
+Checks whether the argument would be either an infinity or NaN when used
+as a number, but is careful not to trigger non-numeric or uninitialized
+warnings.  it assumes the caller has done SvGETMAGIC(sv) already.
+
+=cut
+*/
+
+bool
+Perl_isinfnansv(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_ISINFNANSV;
+    if (!SvOK(sv))
+        return FALSE;
+    if (SvNOKp(sv))
+        return Perl_isinfnan(SvNVX(sv));
+    if (SvIOKp(sv))
+        return FALSE;
+    {
+        STRLEN len;
+        const char *s = SvPV_nomg_const(sv, len);
+        return cBOOL(grok_infnan(&s, s+len));
+    }
+}
+
 #ifndef HAS_MODFL
 /* C99 has truncl, pre-C99 Solaris had aintl.  We can use either with
  * copysignl to emulate modfl, which is in some platforms missing or
