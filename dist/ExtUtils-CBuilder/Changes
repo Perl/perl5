@@ -1,5 +1,11 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.280220 - 2014-09-27
+
+  Fixed:
+
+  - Added missing 'use Config' from 'android.pm' (thanks Debian community)
+
 0.280219 - 2014-09-01
 
   Fixed:

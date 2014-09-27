@@ -1,8 +1,9 @@
 package ExtUtils::CBuilder::Platform::android;
-$ExtUtils::CBuilder::Platform::android::VERSION = '0.280219';
+$ExtUtils::CBuilder::Platform::android::VERSION = '0.280220';
 use strict;
 use File::Spec;
 use ExtUtils::CBuilder::Platform::Unix;
+use Config;
 
 use vars qw(@ISA);
 @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
