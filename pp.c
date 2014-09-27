@@ -3394,7 +3394,7 @@ PP(pp_chr)
     SV *top = POPs;
 
     SvGETMAGIC(top);
-    if (UNLIKELY(Perl_isinfnansv(top)))
+    if (UNLIKELY(isinfnansv(top)))
         Perl_croak(aTHX_ "Cannot chr %"NVgf, SvNV(top));
     else {
         if (!IN_BYTES /* under bytes, chr(-1) eq chr(0xff), etc. */

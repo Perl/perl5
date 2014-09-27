@@ -2086,7 +2086,7 @@ static void
 S_sv_check_inf(pTHX_ SV *sv, I32 datumtype)
 {
     SvGETMAGIC(sv);
-    if (UNLIKELY(Perl_isinfnansv(sv))) {
+    if (UNLIKELY(isinfnansv(sv))) {
 	const I32 c = TYPE_NO_MODIFIERS(datumtype);
 	const NV nv = SvNV_nomg(sv);
 	if (c == 'w')
