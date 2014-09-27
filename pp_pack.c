@@ -2874,7 +2874,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		if (SvIOK(fromstr) || anv < UV_MAX_P1) {
 		    char   buf[(sizeof(UV)*CHAR_BIT)/7+1];
 		    char  *in = buf + sizeof(buf);
-		    UV     auv = SvUV(fromstr);
+		    UV     auv = SvUV_nomg(fromstr);
 
 		    do {
 			*--in = (char)((auv & 0x7f) | 0x80);
@@ -2925,7 +2925,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 
 		  w_string:
 		    /* Copy string and check for compliance */
-		    from = SvPV_const(fromstr, len);
+		    from = SvPV_nomg_const(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
 			Perl_croak(aTHX_ "Can only compress unsigned integers in pack");
 

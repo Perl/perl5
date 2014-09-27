@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan (tests => 312);
+    plan (tests => 314);
 }
 
 use strict;
@@ -260,6 +260,11 @@ for ([chdir=>''],[chmod=>'0,'],[chown=>'0,0,'],[utime=>'0,0,'],
 chop(my $u = "\xff\x{100}");
 tie $var, "main", $u;
 $dummy  = pack "u", $var; check_count 'pack "u", $utf8';
+$var = 0;
+$dummy  = pack "w", $var; check_count 'pack "w", $tied_int';
+$var = "111111111111111111111111111111111111111111111111111111111111111";
+$dummy  = eval { pack "w", $var };
+                          check_count 'pack "w", $tied_huge_int_as_str';
 
 tie $var, "main", "\x{100}";
 pos$var = 0             ; check_count 'lvalue pos $utf8';
