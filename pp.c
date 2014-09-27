@@ -6160,6 +6160,20 @@ PP(pp_runcv)
     RETURN;
 }
 
+static void
+S_localise_aelem_lval(pTHX_ AV * const av, const SSize_t ix,
+			    const bool can_preserve)
+{
+    if (can_preserve ? av_exists(av, ix) : TRUE) {
+	SV ** const svp = av_fetch(av, ix, 1);
+	if (!svp || !*svp)
+	    Perl_croak(aTHX_ PL_no_aelem, ix);
+	save_aelem(av, ix, svp);
+    }
+    else
+	SAVEADELETE(av, ix);
+}
+
 PP(pp_refassign)
 {
     dSP;
@@ -6193,16 +6207,8 @@ PP(pp_refassign)
 	if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
 	    MAGIC *mg;
 	    HV *stash;
-	    IV const ix = SvIV(key);
-	    const bool existent =
-		SvCANEXISTDELETE(left) ? av_exists((AV *)left, ix) : TRUE;
-	    SV ** const svp = av_fetch((AV *)left, ix, 1);
-	    if (!svp || !*svp)
-		DIE(aTHX_ PL_no_aelem, ix);
-	    if (existent)
-		save_aelem((AV *)left, ix, svp);
-	    else
-		SAVEADELETE((AV *)left, ix);
+	    S_localise_aelem_lval(aTHX_ (AV *)left, SvIV(key),
+					SvCANEXISTDELETE(left));
 	}
 	av_store((AV *)left, SvIV(key), SvREFCNT_inc_simple_NN(SvRV(sv)));
 	break;
@@ -6226,16 +6232,8 @@ PP(pp_lvref)
       if (elem) {
 	MAGIC *mg;
 	HV *stash;
-	IV const ix = SvIV(elem);
-	const bool existent =
-	    SvCANEXISTDELETE(arg) ? av_exists((AV *)arg, ix) : TRUE;
-	SV ** const svp = av_fetch((AV *)arg, ix, 1);
-	if (!svp || !*svp)
-	    DIE(aTHX_ PL_no_aelem, ix);
-	if (existent)
-	    save_aelem((AV *)arg, ix, svp);
-	else
-	    SAVEADELETE((AV *)arg, ix);
+	S_localise_aelem_lval(aTHX_ (AV *)arg, SvIV(elem),
+				    SvCANEXISTDELETE(arg));
       }
       else if (arg) {
 	save_pushptrptr((GV *)arg, SvREFCNT_inc_simple(GvSV(arg)),
@@ -6278,21 +6276,7 @@ PP(pp_lvrefslice)
 
     while (++MARK <= SP) {
 	SV * const elemsv = *MARK;
-	const SSize_t elem = SvIV(elemsv);
-	bool existent = TRUE;
-
-	if (localizing && can_preserve)
-	    existent = av_exists(av, elem);
-
-	if (localizing && existent) {
-	    SV ** const svp = av_fetch(av, elem, 1);
-	    if (!svp || !*svp)
-		DIE(aTHX_ PL_no_aelem, elem);
-	    save_aelem(av, elem, svp);
-	}
-	else
-	    SAVEADELETE(av, elem);
-
+	S_localise_aelem_lval(aTHX_ av, SvIV(elemsv), can_preserve);
 	*MARK = sv_2mortal(newSV_type(SVt_PVMG));
 	sv_magic(*MARK,(SV *)av,PERL_MAGIC_lvref,(char *)elemsv,HEf_SVKEY);
     }
