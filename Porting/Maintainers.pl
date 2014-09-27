@@ -648,6 +648,10 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qr{^examples/},
         ],
+        'CUSTOMIZED'   => [
+            # Almost always fails on Win32 since introduced: see CPAN RT#98976
+            't/22timeout.t',
+        ],
     },
 
     'IO::Zlib' => {
