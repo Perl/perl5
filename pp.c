@@ -6251,7 +6251,7 @@ PP(pp_lvref)
 
 PP(pp_lvrefslice)
 {
-    dSP; dMARK; dORIGMARK;
+    dSP; dMARK;
     AV * const av = (AV *)POPs;
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool can_preserve = FALSE;
