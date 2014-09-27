@@ -2857,7 +2857,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
             while (len-- > 0) {
 		NV anv;
 		fromstr = NEXTFROM;
-		S_sv_check_infnan(fromstr, datumtype);
+		S_sv_check_infnan(aTHX_ fromstr, datumtype);
 		anv = SvNV_nomg(fromstr);
 
 		if (anv < 0) {
