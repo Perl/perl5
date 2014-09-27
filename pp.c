@@ -6161,9 +6161,10 @@ PP(pp_runcv)
 }
 
 static void
-S_localise_aelem_lval(pTHX_ AV * const av, const SSize_t ix,
+S_localise_aelem_lval(pTHX_ AV * const av, SV * const keysv,
 			    const bool can_preserve)
 {
+    const SSize_t ix = SvIV(keysv);
     if (can_preserve ? av_exists(av, ix) : TRUE) {
 	SV ** const svp = av_fetch(av, ix, 1);
 	if (!svp || !*svp)
@@ -6222,7 +6223,7 @@ PP(pp_refassign)
 	break;
     case SVt_PVAV:
 	if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
-	    S_localise_aelem_lval(aTHX_ (AV *)left, SvIV(key),
+	    S_localise_aelem_lval(aTHX_ (AV *)left, key,
 					SvCANEXISTDELETE(left));
 	}
 	av_store((AV *)left, SvIV(key), SvREFCNT_inc_simple_NN(SvRV(sv)));
@@ -6254,7 +6255,7 @@ PP(pp_lvref)
 	HV *stash;
 	const bool can_preserve = SvCANEXISTDELETE(arg);
 	if (SvTYPE(arg) == SVt_PVAV)
-	    S_localise_aelem_lval(aTHX_ (AV *)arg,SvIV(elem),can_preserve);
+	    S_localise_aelem_lval(aTHX_ (AV *)arg, elem, can_preserve);
 	else
 	    S_localise_helem_lval(aTHX_ (HV *)arg, elem, can_preserve);
       }
@@ -6300,7 +6301,7 @@ PP(pp_lvrefslice)
     while (++MARK <= SP) {
 	SV * const elemsv = *MARK;
 	if (SvTYPE(av) == SVt_PVAV)
-	    S_localise_aelem_lval(aTHX_ av, SvIV(elemsv), can_preserve);
+	    S_localise_aelem_lval(aTHX_ av, elemsv, can_preserve);
 	else
 	    S_localise_helem_lval(aTHX_ (HV *)av, elemsv, can_preserve);
 	*MARK = sv_2mortal(newSV_type(SVt_PVMG));
