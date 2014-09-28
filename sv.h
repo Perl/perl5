@@ -191,11 +191,18 @@ typedef struct hek HEK;
     U32		sv_refcnt;	/* how many references to us */	\
     U32		sv_flags	/* what we are */
 
+#if NVSIZE <= IVSIZE
+#  define _NV_BODYLESS_UNION NV svu_nv;
+#else
+#  define _NV_BODYLESS_UNION
+#endif
+
 #define _SV_HEAD_UNION \
     union {				\
 	char*   svu_pv;		/* pointer to malloced string */	\
 	IV      svu_iv;			\
 	UV      svu_uv;			\
+	_NV_BODYLESS_UNION		\
 	SV*     svu_rv;		/* pointer to another SV */		\
 	struct regexp* svu_rx;		\
 	SV**    svu_array;		\

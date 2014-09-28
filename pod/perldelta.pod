@@ -107,6 +107,12 @@ There may well be none in a stable release.
 C<length> is up to 20% faster for non-magical/non-tied scalars containing a
 string if it is a non-utf8 string or if C<use bytes;> is in scope.
 
+=item *
+
+Non-magical/non-tied scalars that contain only a floating point value and are
+on most Perl builds with 64 bit integers now use 8-32 less bytes of memory
+depending on OS.
+
 =back
 
 =head1 Modules and Pragmata
@@ -384,6 +390,13 @@ XXX
 
 XXX Add anything here that we forgot to add, or were mistaken about, in
 the perldelta of a previous release.
+
+=item *
+
+SVs of type SVt_NV are now bodyless when a build configure and platform allow
+it, specifically C<sizeof(NV) <= sizeof(IV)>. The bodyless trick is the same one
+as for IVs since 5.9.2, but for NVs, unlike IVs, is not guarenteed on all
+platforms and build configurations.
 
 =back
 

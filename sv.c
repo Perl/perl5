@@ -838,8 +838,8 @@ because it "knows" that two adjacent 32 bit members will be 8-byte aligned.)
 
 This is the same trick as was used for NV and IV bodies.  Ironically it
 doesn't need to be used for NV bodies any more, because NV is now at
-the start of the structure.  IV bodies don't need it either, because
-they are no longer allocated.
+the start of the structure.  IV bodies, and also in some builds NV bodies,
+don't need it either, because they are no longer allocated.
 
 In turn, the new_body_* allocators call S_new_body(), which invokes
 new_body_inline macro, which takes a lock, and takes a body off the
@@ -883,12 +883,12 @@ available in hv.c.
 struct body_details {
     U8 body_size;	/* Size to allocate  */
     U8 copy;		/* Size of structure to copy (may be shorter)  */
-    U8 offset;
-    unsigned int type : 4;	    /* We have space for a sanity check.  */
-    unsigned int cant_upgrade : 1;  /* Cannot upgrade this type */
-    unsigned int zero_nv : 1;	    /* zero the NV when upgrading from this */
-    unsigned int arena : 1;	    /* Allocated from an arena */
-    size_t arena_size;		    /* Size of arena to allocate */
+    U8 offset;		/* Size of unalloced ghost fields to first alloced field*/
+    PERL_BITFIELD8 type : 4;        /* We have space for a sanity check. */
+    PERL_BITFIELD8 cant_upgrade : 1;/* Cannot upgrade this type */
+    PERL_BITFIELD8 zero_nv : 1;     /* zero the NV when upgrading from this */
+    PERL_BITFIELD8 arena : 1;       /* Allocated from an arena */
+    U32 arena_size;                 /* Size of arena to allocate */
 };
 
 #define HADNV FALSE
@@ -942,9 +942,15 @@ static const struct body_details bodies_by_type[] = {
       NOARENA /* IVS don't need an arena  */, 0
     },
 
+#if NVSIZE <= IVSIZE
+    { 0, sizeof(NV),
+      STRUCT_OFFSET(XPVNV, xnv_u),
+      SVt_NV, FALSE, HADNV, NOARENA, 0 },
+#else
     { sizeof(NV), sizeof(NV),
       STRUCT_OFFSET(XPVNV, xnv_u),
       SVt_NV, FALSE, HADNV, HASARENA, FIT_ARENA(0, sizeof(NV)) },
+#endif
 
     { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
@@ -1031,8 +1037,9 @@ static const struct body_details bodies_by_type[] = {
     } STMT_END
 
 #ifdef PURIFY
-
-#define new_XNV()	safemalloc(sizeof(XPVNV))
+#if !(NVSIZE <= IVSIZE)
+#  define new_XNV()	safemalloc(sizeof(XPVNV))
+#endif
 #define new_XPVNV()	safemalloc(sizeof(XPVNV))
 #define new_XPVMG()	safemalloc(sizeof(XPVMG))
 
@@ -1040,7 +1047,9 @@ static const struct body_details bodies_by_type[] = {
 
 #else /* !PURIFY */
 
-#define new_XNV()	new_body_allocated(SVt_NV)
+#if !(NVSIZE <= IVSIZE)
+#  define new_XNV()	new_body_allocated(SVt_NV)
+#endif
 #define new_XPVNV()	new_body_allocated(SVt_PVNV)
 #define new_XPVMG()	new_body_allocated(SVt_PVMG)
 
@@ -1326,7 +1335,11 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	return;
     case SVt_NV:
 	assert(old_type == SVt_NULL);
+#if NVSIZE <= IVSIZE
+	SvANY(sv) = (XPVNV*)((char*)&(sv->sv_u.svu_nv) - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv));
+#else
 	SvANY(sv) = new_XNV();
+#endif
 	SvNV_set(sv, 0);
 	return;
     case SVt_PVHV:
@@ -1469,7 +1482,9 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 		   (unsigned long)new_type);
     }
 
-    if (old_type > SVt_IV) {
+    /* if this is zero, this is a body-less SVt_NULL, SVt_IV/SVt_RV,
+       and sometimes SVt_NV */
+    if (old_type_details->body_size) {
 #ifdef PURIFY
 	safefree(old_body);
 #else
@@ -13231,7 +13246,11 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	}
 	break;
     case SVt_NV:
+#if NVSIZE <= IVSIZE
+	SvANY(dstr) = (XPVNV*)((char*)&(dstr->sv_u.svu_nv) - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv));
+#else
 	SvANY(dstr)	= new_XNV();
+#endif
 	SvNV_set(dstr, SvNVX(sstr));
 	break;
     default:
