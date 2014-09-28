@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 92;
+plan 102;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -185,11 +185,25 @@ package ArrayTest {
   is \$f[0].$f[1], \$_.\$_, '\(my @lexical)';
   eval '\my(@g) = expect_list_cx';
   is \$g[0].$g[1], \$_.\$_, '\my(@lexical)';
+  my $old = \@h;
+::off;
+  {
+    \local @h = \@ThatArray;
+    is \@h, \@ThatArray, '\local @a';
+  }
+::on;
+  is \@h, $old, '\local @a unwound';
+  $old = \@i;
+::off;
+  eval q{
+    (\local @i) = \@ThatArray;
+    is \@i, \@ThatArray, '(\local @a)';
+  } or do { SKIP: { ::skip 'unimplemented' } };
+  is \@i, $old, '(\local @a) unwound';
 }
 
 # Hashes
 
-off;
 package HashTest {
   BEGIN { *is = *main::is }
   sub expect_scalar_cx { wantarray ? 0 : \%ThatHash }
@@ -211,8 +225,22 @@ package HashTest {
 ::on;
   eval '(\my %d) = expect_list_cx';
   is \%d, \%ThatHash, '(\my %lexical)';
+  my $old = \%h;
+::off;
+  {
+    \local %h = \%ThatHash;
+    is \%h, \%ThatHash, '\local %a';
+  }
+::on;
+  is \%h, $old, '\local %a unwound';
+  $old = \%i;
+::off;
+  eval q{
+    (\local %i) = \%ThatHash;
+    is \%i, \%ThatHash, '(\local %a)';
+  } or do { SKIP: { ::skip 'unimplemented' } };
+  is \%i, $old, '(\local %a) unwound';
 }
-off;
 
 # Subroutines
 
@@ -311,6 +339,16 @@ like $@,
     qr/^Can't modify reference to match position in scalar assignment at /,
    "Can't modify ref to some scalar-returning op in scalar assignment";
 on;
+eval '\(local @b) = 42';
+like $@,
+    qr/^Can't modify reference to parenthesized localized array in list(?x:
+      ) assignment at /,
+   q"Can't modify \(local @array) in list assignment";
+eval '\local(@b) = 42';
+like $@,
+    qr/^Can't modify reference to parenthesized localized array in list(?x:
+      ) assignment at /,
+   q"Can't modify \local(@array) in list assignment";
 eval '\(%b) = 42';
 like $@,
     qr/^Can't modify reference to parenthesized hash in list assignment a/,
