@@ -5745,9 +5745,14 @@ S_assignment_type(pTHX_ const OP *o)
 
     if (type == OP_SREFGEN)
     {
+	OP * const kid = cUNOPx(cUNOPo->op_first)->op_first;
+	type = kid->op_type;
+	flags |= kid->op_flags;
+	if (!(flags & OPf_PARENS)
+	  && (kid->op_type == OP_RV2AV || kid->op_type == OP_PADAV ||
+	      kid->op_type == OP_RV2HV || kid->op_type == OP_PADHV ))
+	    return ASSIGN_REF;
 	ret = ASSIGN_REF;
-	type = cUNOPx(cUNOPo->op_first)->op_first->op_type;
-	flags |= cUNOPx(cUNOPo->op_first)->op_first->op_flags;
     }
     else ret = 0;
 
@@ -9939,11 +9944,23 @@ Perl_ck_refassign(pTHX_ OP *o)
     assert (left->op_type == OP_SREFGEN);
 
     switch (varop->op_type) {
+    case OP_PADAV:
+	o->op_private = OPpLVREF_AV;
+	goto settarg;
+    case OP_PADHV:
+	o->op_private = OPpLVREF_HV;
     case OP_PADSV:
+      settarg:
 	o->op_targ = varop->op_targ;
 	varop->op_targ = 0;
 	break;
+    case OP_RV2AV:
+	o->op_private = OPpLVREF_AV;
+	goto checkgv;
+    case OP_RV2HV:
+	o->op_private = OPpLVREF_HV;
     case OP_RV2SV:
+      checkgv:
 	if (cUNOPx(varop)->op_first->op_type != OP_GV) goto bad;
 	goto null_and_stack;
     case OP_AELEM:

@@ -6196,10 +6196,28 @@ PP(pp_refassign)
     SV * const key = PL_op->op_private & OPpLVREF_ELEM ? POPs : NULL;
     SV * const left = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
     dTOPss;
+    const char *bad = NULL;
     if (!SvROK(sv)) DIE(aTHX_ "Assigned value is not a reference");
-    if (SvTYPE(SvRV(sv)) > SVt_PVLV)
+    switch (PL_op->op_private & OPpLVREF_TYPE) {
+    case OPpLVREF_SV:
+	if (SvTYPE(SvRV(sv)) > SVt_PVLV)
+	    bad = " SCALAR";
+	break;
+    case OPpLVREF_AV:
+	if (SvTYPE(SvRV(sv)) != SVt_PVAV)
+	    bad = "n ARRAY";
+	break;
+    case OPpLVREF_HV:
+	if (SvTYPE(SvRV(sv)) != SVt_PVHV)
+	    bad = " HASH";
+	break;
+    case OPpLVREF_CV:
+	if (SvTYPE(SvRV(sv)) != SVt_PVCV)
+	    bad = " CODE";
+    }
+    if (bad)
 	/* diag_listed_as: Assigned value is not %s reference */
-	DIE(aTHX_ "Assigned value is not a SCALAR reference");
+	DIE(aTHX_ "Assigned value is not a%s reference", bad);
     switch (left ? SvTYPE(left) : 0) {
 	MAGIC *mg;
 	HV *stash;

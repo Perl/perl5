@@ -154,7 +154,6 @@ is \$h{b}, \$_, '\($hash{a})';
 
 # Arrays
 
-on;
 package ArrayTest {
   BEGIN { *is = *main::is }
   sub expect_scalar_cx { wantarray ? 0 : \@ThatArray }
@@ -163,15 +162,18 @@ package ArrayTest {
   eval '\@a = expect_scalar_cx';
   is \@a, \@ThatArray, '\@pkg';
   my @a;
-  eval '\@a = expect_scalar_cx';
+  \@a = expect_scalar_cx;
   is \@a, \@ThatArray, '\@lexical';
+::on;
   eval '(\@b) = expect_list_cx_a';
   is \@b, \@ThatArray, '(\@pkg)';
   my @b;
   eval '(\@b) = expect_list_cx_a';
   is \@b, \@ThatArray, '(\@lexical)';
-  eval '\my @c = expect_scalar_cx';
+::off;
+  \my @c = expect_scalar_cx;
   is \@c, \@ThatArray, '\my @lexical';
+::on;
   eval '(\my @d) = expect_list_cx_a';
   is \@d, \@ThatArray, '(\my @lexical)';
   eval '\(@e) = expect_list_cx';
@@ -187,22 +189,26 @@ package ArrayTest {
 
 # Hashes
 
+off;
 package HashTest {
   BEGIN { *is = *main::is }
   sub expect_scalar_cx { wantarray ? 0 : \%ThatHash }
   sub expect_list_cx   { wantarray ? (\%ThatHash)x2 : 0 }
-  eval '\%a = expect_scalar_cx';
+  \%a = expect_scalar_cx;
   is \%a, \%ThatHash, '\%pkg';
   my %a;
-  eval '\%a = expect_scalar_cx';
+  \%a = expect_scalar_cx;
   is \%a, \%ThatHash, '\%lexical';
+::on;
   eval '(\%b) = expect_list_cx';
   is \%b, \%ThatArray, '(\%pkg)';
   my %b;
   eval '(\%b) = expect_list_cx';
   is \%b, \%ThatHash, '(\%lexical)';
-  eval '\my %c = expect_scalar_cx';
+::off;
+  \my %c = expect_scalar_cx;
   is \%c, \%ThatHash, '\my %lexical';
+::on;
   eval '(\my %d) = expect_list_cx';
   is \%d, \%ThatHash, '(\my %lexical)';
 }
@@ -305,10 +311,12 @@ eval '\my(%b) = 42';
 like $@,
     qr/^Can't modify reference to parenthesized hash in list assignment a/,
    "Can't modify ref to parenthesized hash (\my(%b)) in list assignment";
+off;
 eval '\%{"42"} = 42';
 like $@,
     qr/^Can't modify reference to hash dereference in scalar assignment a/,
    "Can't modify reference to hash dereference in scalar assignment";
+on;
 
 
 # Miscellaneous
