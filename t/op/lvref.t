@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 68;
+plan 78;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -154,7 +154,37 @@ is \$h{b}, \$_, '\($hash{a})';
 
 # Arrays
 
-# ...
+on;
+package ArrayTest {
+  BEGIN { *is = *main::is }
+  sub expect_scalar_cx { wantarray ? 0 : \@ThatArray }
+  sub expect_list_cx   { wantarray ? (\$_,\$_) : 0 }
+  sub expect_list_cx_a { wantarray ? (\@ThatArray)x2 : 0 }
+  eval '\@a = expect_scalar_cx';
+  is \@a, \@ThatArray, '\@pkg';
+  my @a;
+  eval '\@a = expect_scalar_cx';
+  is \@a, \@ThatArray, '\@lexical';
+  eval '(\@b) = expect_list_cx_a';
+  is \@b, \@ThatArray, '(\@pkg)';
+  my @b;
+  eval '(\@b) = expect_list_cx_a';
+  is \@b, \@ThatArray, '(\@lexical)';
+  eval '\my @c = expect_scalar_cx';
+  is \@c, \@ThatArray, '\my @lexical';
+  eval '(\my @d) = expect_list_cx_a';
+  is \@d, \@ThatArray, '(\my @lexical)';
+  eval '\(@e) = expect_list_cx';
+  is \$e[0].$e[1], \$_.\$_, '\(@pkg)';
+  my @e;
+  eval '\(@e) = expect_list_cx';
+  is \$e[0].$e[1], \$_.\$_, '\(@lexical)';
+  eval '\(my @f) = expect_list_cx';
+  is \$f[0].$f[1], \$_.\$_, '\(my @lexical)';
+  eval '\my(@g) = expect_list_cx';
+  is \$g[0].$g[1], \$_.\$_, '\my(@lexical)';
+}
+off;
 
 # Hashes
 
