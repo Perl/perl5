@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.26";
+our $VERSION     = "0.27";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -57,6 +57,7 @@ my %flags = (
     TRIEC           => 0x000004,
     DUMP            => 0x000008,
     FLAGS           => 0x000010,
+    TEST            => 0x000020,
 
     EXECUTE         => 0x00FF00,
     INTUIT          => 0x000100,
@@ -396,6 +397,14 @@ Detailed info about trie compilation.
 
 Dump the final program out after it is compiled and optimised.
 
+=item FLAGS
+
+Dump the flags associated with the program
+
+=item TEST
+
+Print output intended for testing the internals of the compile process
+
 =back
 
 =item Execute related options
@@ -448,6 +457,10 @@ Enable debugging of the recursion stack in the engine. Enabling
 or disabling this option automatically does the same for debugging
 states as well. This output from this can be quite large.
 
+=item GPOS
+
+Enable debugging of the \G modifier.
+
 =item OPTIMISEM
 
 Enable enhanced optimisation debugging and start-point optimisations.
@@ -472,6 +485,7 @@ debug options.
 
 Almost definitely only useful to people hacking
 on the offsets part of the debug engine.
+
 
 =back
 

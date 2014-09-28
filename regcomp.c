@@ -171,9 +171,11 @@ struct RExC_state_t {
     const char  *lastparse;
     I32         lastnum;
     AV          *paren_name_list;       /* idx -> name */
+    U32         study_chunk_recursed_count;
 #define RExC_lastparse	(pRExC_state->lastparse)
 #define RExC_lastnum	(pRExC_state->lastnum)
 #define RExC_paren_name_list    (pRExC_state->paren_name_list)
+#define RExC_study_chunk_recursed_count    (pRExC_state->study_chunk_recursed_count)
 #endif
 };
 
@@ -3637,6 +3639,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 
   fake_study_recurse:
+    DEBUG_r(
+        RExC_study_chunk_recursed_count++;
+    );
     while ( scan && OP(scan) != END && scan < last ){
         UV min_subtract = 0;    /* How mmany chars to subtract from the minimum
                                    node length to get a real minimum (because
@@ -3646,8 +3651,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
         DEBUG_OPTIMISE_MORE_r(
         {
             PerlIO_printf(Perl_debug_log,
-                "%*sstudy_chunk stopparen=%ld depth=%lu recursed_depth=%lu ",
+                "%*sstudy_chunk stopparen=%ld recursed_count=%lu depth=%lu recursed_depth=%lu ",
                 ((int) depth*2), "", (long)stopparen,
+                (unsigned long)RExC_study_chunk_recursed_count,
                 (unsigned long)depth, (unsigned long)recursed_depth);
             if (recursed_depth) {
                 U32 i;
@@ -4179,9 +4185,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                  * However if we are not in SCF_DO_SUBSTR mode then there is
                  * no point in doing this, and it can cause a serious slowdown.
                  * See RT #122283.
-                 * Note the !is_inf and !is_inf_internal flags may be
-                 * superfluous for this decision, however I am including the
-                 * logic anyway as I am pretty sure it wont cause any harm.
                  * Note also that this was a workaround for the core problem
                  * which was that during compilation logic the excessive
                  * recursion resulted in slowly consuming all the memory on
@@ -6798,6 +6801,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 reStudy:
     r->minlen = minlen = sawlookahead = sawplus = sawopen = sawminmod = 0;
+    DEBUG_r(
+        RExC_study_chunk_recursed_count= 0;
+    );
     Zero(r->substrs, 1, struct reg_substr_data);
     if (RExC_study_chunk_recursed)
         Zero(RExC_study_chunk_recursed,
@@ -7267,7 +7273,10 @@ reStudy:
     }
     Newxz(r->offs, RExC_npar, regexp_paren_pair);
     /* assume we don't need to swap parens around before we match */
-
+    DEBUG_TEST_r({
+        PerlIO_printf(Perl_debug_log,"study_chunk_recursed_count: %lu\n",
+            RExC_study_chunk_recursed_count);
+    });
     DEBUG_DUMP_r({
         DEBUG_RExC_seen();
         PerlIO_printf(Perl_debug_log,"Final program:\n");
