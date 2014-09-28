@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 88;
+plan 92;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -280,6 +280,18 @@ like $@, qr/^Assigned value is not a SCALAR reference at/,
 eval { \$::x = [] };
 like $@, qr/^Assigned value is not a SCALAR reference at/,
     'assigning non-scalar ref to package scalar ref';
+eval { my @x; \@x = {} };
+like $@, qr/^Assigned value is not an ARRAY reference at/,
+    'assigning non-array ref to array ref';
+eval { \@::x = {} };
+like $@, qr/^Assigned value is not an ARRAY reference at/,
+    'assigning non-array ref to package array ref';
+eval { my %x; \%x = [] };
+like $@, qr/^Assigned value is not a HASH reference at/,
+    'assigning non-hash ref to hash ref';
+eval { \%::x = [] };
+like $@, qr/^Assigned value is not a HASH reference at/,
+    'assigning non-hash ref to package hash ref';
 
 on;
 eval '(\do{}) = 42';
