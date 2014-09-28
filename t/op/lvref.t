@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 78;
+plan 88;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -184,11 +184,29 @@ package ArrayTest {
   eval '\my(@g) = expect_list_cx';
   is \$g[0].$g[1], \$_.\$_, '\my(@lexical)';
 }
-off;
 
 # Hashes
 
-# ...
+package HashTest {
+  BEGIN { *is = *main::is }
+  sub expect_scalar_cx { wantarray ? 0 : \%ThatHash }
+  sub expect_list_cx   { wantarray ? (\%ThatHash)x2 : 0 }
+  eval '\%a = expect_scalar_cx';
+  is \%a, \%ThatHash, '\%pkg';
+  my %a;
+  eval '\%a = expect_scalar_cx';
+  is \%a, \%ThatHash, '\%lexical';
+  eval '(\%b) = expect_list_cx';
+  is \%b, \%ThatArray, '(\%pkg)';
+  my %b;
+  eval '(\%b) = expect_list_cx';
+  is \%b, \%ThatHash, '(\%lexical)';
+  eval '\my %c = expect_scalar_cx';
+  is \%c, \%ThatHash, '\my %lexical';
+  eval '(\my %d) = expect_list_cx';
+  is \%d, \%ThatHash, '(\my %lexical)';
+}
+off;
 
 # Subroutines
 
@@ -275,6 +293,23 @@ like $@,
     qr/^Can't modify reference to match position in scalar assignment at /,
    "Can't modify ref to some scalar-returning op in scalar assignment";
 on;
+eval '\(%b) = 42';
+like $@,
+    qr/^Can't modify reference to parenthesized hash in list assignment a/,
+   "Can't modify ref to parenthesized package hash in scalar assignment";
+eval '\(my %b) = 42';
+like $@,
+    qr/^Can't modify reference to parenthesized hash in list assignment a/,
+   "Can't modify ref to parenthesized hash (\(my %b)) in list assignment";
+eval '\my(%b) = 42';
+like $@,
+    qr/^Can't modify reference to parenthesized hash in list assignment a/,
+   "Can't modify ref to parenthesized hash (\my(%b)) in list assignment";
+eval '\%{"42"} = 42';
+like $@,
+    qr/^Can't modify reference to hash dereference in scalar assignment a/,
+   "Can't modify reference to hash dereference in scalar assignment";
+
 
 # Miscellaneous
 
