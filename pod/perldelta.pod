@@ -347,7 +347,10 @@ well.
 
 =item *
 
-XXX
+SVs of type SVt_NV are now bodyless when a build configure and platform allow
+it, specifically C<sizeof(NV) <= sizeof(IV)>. The bodyless trick is the same one
+as for IVs since 5.9.2, but for NVs, unlike IVs, is not guarenteed on all
+platforms and build configurations.
 
 =back
 
@@ -390,13 +393,6 @@ XXX
 
 XXX Add anything here that we forgot to add, or were mistaken about, in
 the perldelta of a previous release.
-
-=item *
-
-SVs of type SVt_NV are now bodyless when a build configure and platform allow
-it, specifically C<sizeof(NV) <= sizeof(IV)>. The bodyless trick is the same one
-as for IVs since 5.9.2, but for NVs, unlike IVs, is not guarenteed on all
-platforms and build configurations.
 
 =back
 
