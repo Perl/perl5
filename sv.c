@@ -919,9 +919,9 @@ struct body_details {
     ? count * body_size					\
     : FIT_ARENA0 (body_size)
 #define FIT_ARENA(count,body_size)			\
-    count 						\
+   (U32)(count 						\
     ? FIT_ARENAn (count, body_size)			\
-    : FIT_ARENA0 (body_size)
+    : FIT_ARENA0 (body_size))
 
 /* Calculate the length to copy. Specifically work out the length less any
    final padding the compiler needed to add.  See the comment in sv_upgrade
