@@ -719,6 +719,15 @@ addbits('split', 7 => qw(OPpSPLIT_IMPLIM IMPLIM)); # implicit limit
 
 addbits($_,
     2 => qw(OPpLVREF_ELEM ELEM   ),
+'3..4'=> {
+           mask_def => 'OPpLVREF_TYPE',
+           enum     => [ qw(
+                             0   OPpLVREF_SV   SV
+                             1   OPpLVREF_AV   AV
+                             2   OPpLVREF_HV   HV
+                             3   OPpLVREF_CV   CV
+                         )],
+         },
    #7 => qw(OPpLVAL_INTRO LVINTRO),
 ) for 'refassign', 'lvref';
 
