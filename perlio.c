@@ -2930,11 +2930,27 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
 {
     dTHX;
     PerlIO *f = NULL;
+#ifdef EBCDIC
+	 int rc;
+	 char filename[FILENAME_MAX];
+	 fldata_t fileinfo;
+#endif
     if (stdio) {
 	PerlIOStdio *s;
         int fd0 = fileno(stdio);
         if (fd0 < 0) {
+#ifdef EBCDIC
+			  rc = fldata(stdio,filename,&fileinfo);
+			  if(rc != 0){
+				  return NULL;
+			  }
+			  if(fileinfo.__dsorgHFS){
             return NULL;
+        }
+			  /*This MVS dataset , OK!*/
+#else
+            return NULL;
+#endif
         }
 	if (!mode || !*mode) {
 	    /* We need to probe to see how we can open the stream
@@ -2966,7 +2982,24 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
 	if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)), PERLIO_FUNCS_CAST(&PerlIO_stdio), mode, NULL))) {
 	    s = PerlIOSelf(f, PerlIOStdio);
 	    s->stdio = stdio;
+#ifdef EBCDIC
+		fd0 = fileno(stdio);
+		if(fd0 != -1){
+			PerlIOUnix_refcnt_inc(fd0);
+		}
+		else{
+			rc = fldata(stdio,filename,&fileinfo);
+			if(rc != 0){
+				PerlIOUnix_refcnt_inc(fd0);
+			}
+			if(fileinfo.__dsorgHFS){
+				PerlIOUnix_refcnt_inc(fd0);
+			}
+			  /*This MVS dataset , OK!*/
+		}
+#else
 	    PerlIOUnix_refcnt_inc(fileno(stdio));
+#endif
 	}
     }
     return f;
