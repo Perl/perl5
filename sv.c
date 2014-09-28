@@ -11592,7 +11592,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	case 'p':
             if (infnan) {
-                c = 'g';
                 goto floating_point;
             }
 	    if (alt || vectorize)
@@ -11611,7 +11610,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	case 'd':
 	case 'i':
             if (infnan) {
-                c = 'g';
                 goto floating_point;
             }
 	    if (vectorize) {
@@ -11716,7 +11714,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	uns_integer:
             if (infnan) {
-                c = 'g';
                 goto floating_point;
             }
 	    if (vectorize) {
