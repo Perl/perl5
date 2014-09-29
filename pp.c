@@ -6197,8 +6197,9 @@ PP(pp_refassign)
     SV * const left = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
     dTOPss;
     const char *bad = NULL;
+    const U8 type = PL_op->op_private & OPpLVREF_TYPE;
     if (!SvROK(sv)) DIE(aTHX_ "Assigned value is not a reference");
-    switch (PL_op->op_private & OPpLVREF_TYPE) {
+    switch (type) {
     case OPpLVREF_SV:
 	if (SvTYPE(SvRV(sv)) > SVt_PVLV)
 	    bad = " SCALAR";
@@ -6232,9 +6233,21 @@ PP(pp_refassign)
     }
     case SVt_PVGV:
 	if (PL_op->op_private & OPpLVAL_INTRO) {
-	    save_pushptrptr((GV *)left, SvREFCNT_inc_simple(GvSV(left)),
-			    SAVEt_GVSV);
-	    GvSV(left) = 0;
+	    if (type == OPpLVREF_SV) {
+		save_pushptrptr((GV *)left,
+				SvREFCNT_inc_simple(GvSV(left)),
+				SAVEt_GVSV);
+		GvSV(left) = 0;
+	    }
+	    else if (type == OPpLVREF_AV)
+		/* XXX Inefficient, as it creates a new AV, which we are
+		       about to clobber.  */
+		save_ary((GV *)left);
+	    else {
+		assert(type == OPpLVREF_HV);
+		/* XXX Likewise inefficient.  */
+		save_hash((GV *)left);
+	    }
 	}
 	gv_setref(left, sv);
 	SvSETMAGIC(left);

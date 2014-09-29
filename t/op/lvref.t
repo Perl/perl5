@@ -191,10 +191,8 @@ package ArrayTest {
     \local @h = \@ThatArray;
     is \@h, \@ThatArray, '\local @a';
   }
-::on;
   is \@h, $old, '\local @a unwound';
   $old = \@i;
-::off;
   eval q{
     (\local @i) = \@ThatArray;
     is \@i, \@ThatArray, '(\local @a)';
@@ -231,10 +229,8 @@ package HashTest {
     \local %h = \%ThatHash;
     is \%h, \%ThatHash, '\local %a';
   }
-::on;
   is \%h, $old, '\local %a unwound';
   $old = \%i;
-::off;
   eval q{
     (\local %i) = \%ThatHash;
     is \%i, \%ThatHash, '(\local %a)';
