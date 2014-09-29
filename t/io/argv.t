@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 32);
+plan(tests => 34);
 
 my ($devnull, $no_devnull);
 
@@ -183,6 +183,21 @@ $x = runperl(
     args	=> [ '-' ],
 );
 is($x, "Can't open -: No such file or directory at -e line 1.\n", '<<>> does not treat - as STDIN');
+
+{
+    # tests for an empty string in @ARGV
+    $x = runperl(
+        prog	=> 'push @ARGV,q//;print while <>',
+        stderr	=> 1,
+    );
+    is($x, "Can't open : No such file or directory at -e line 1.\n", '<<>> does not treat - as STDIN');
+
+    $x = runperl(
+        prog	=> 'push @ARGV,q//;print while <<>>',
+        stderr	=> 1,
+    );
+    is($x, "Can't open : No such file or directory at -e line 1.\n", '<<>> does not treat - as STDIN');
+}
 
 SKIP: {
     skip('no echo', 1) unless -x '/bin/echo';
