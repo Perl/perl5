@@ -50,7 +50,7 @@ typedef enum {
 } regex_charset;
 
 #define _RXf_PMf_CHARSET_SHIFT ((RXf_PMf_STD_PMMOD_SHIFT)+6)
-#define RXf_PMf_CHARSET (7 << (_RXf_PMf_CHARSET_SHIFT)) /* 3 bits */
+#define RXf_PMf_CHARSET (7U << (_RXf_PMf_CHARSET_SHIFT)) /* 3 bits */
 
 /* Manually decorate these functions here with gcc-style attributes just to
  * avoid making the regex_charset typedef global, which it would need to be for
@@ -110,14 +110,14 @@ get_regex_charset(const U32 flags)
 
 /* These copies need to be numerical or ext/B/Makefile.PL won't think they are
  * constants */
-#define PMf_MULTILINE     1U<<0
-#define PMf_SINGLELINE    1U<<1
-#define PMf_FOLD          1U<<2
-#define PMf_EXTENDED      1U<<3
-#define PMf_EXTENDED_MORE 1U<<4
-#define PMf_KEEPCOPY      1U<<5
-#define PMf_CHARSET       7U<<6
-#define PMf_SPLIT         1U<<9
+#define PMf_MULTILINE     (1U<<0)
+#define PMf_SINGLELINE    (1U<<1)
+#define PMf_FOLD          (1U<<2)
+#define PMf_EXTENDED      (1U<<3)
+#define PMf_EXTENDED_MORE (1U<<4)
+#define PMf_KEEPCOPY      (1U<<5)
+#define PMf_CHARSET       (7U<<6)
+#define PMf_SPLIT         (1U<<9)
 
 #if PMf_MULTILINE != RXf_PMf_MULTILINE || PMf_SINGLELINE != RXf_PMf_SINGLELINE || PMf_FOLD != RXf_PMf_FOLD || PMf_EXTENDED != RXf_PMf_EXTENDED || PMf_EXTENDED_MORE != RXf_PMf_EXTENDED_MORE || PMf_KEEPCOPY != RXf_PMf_KEEPCOPY || PMf_SPLIT != RXf_PMf_SPLIT || PMf_CHARSET != RXf_PMf_CHARSET
 #   error RXf_PMf defines are wrong
