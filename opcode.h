@@ -2158,7 +2158,6 @@ END_EXTERN_C
 #define OPpEVAL_BYTES           0x08
 #define OPpFT_STACKING          0x08
 #define OPpITER_DEF             0x08
-#define OPpLVREF_AV             0x08
 #define OPpMAYBE_LVSUB          0x08
 #define OPpREVERSE_INPLACE      0x08
 #define OPpSORT_INPLACE         0x08
@@ -2170,19 +2169,17 @@ END_EXTERN_C
 #define OPpEVAL_COPHH           0x10
 #define OPpFT_AFTER_t           0x10
 #define OPpLVAL_DEFER           0x10
-#define OPpLVREF_HV             0x10
 #define OPpOPEN_IN_RAW          0x10
 #define OPpOUR_INTRO            0x10
 #define OPpPAD_STATE            0x10
 #define OPpSORT_DESCEND         0x10
 #define OPpSUBSTR_REPL_FIRST    0x10
 #define OPpTARGET_MY            0x10
-#define OPpLVREF_CV             0x18
-#define OPpLVREF_TYPE           0x18
 #define OPpDEREF_AV             0x20
 #define OPpEARLY_CV             0x20
 #define OPpEVAL_RE_REPARSING    0x20
 #define OPpHUSH_VMSISH          0x20
+#define OPpLVREF_AV             0x20
 #define OPpOPEN_IN_CRLF         0x20
 #define OPpSORT_QSORT           0x20
 #define OPpTRANS_COMPLEMENT     0x20
@@ -2196,6 +2193,7 @@ END_EXTERN_C
 #define OPpFLIP_LINENUM         0x40
 #define OPpHINT_M_VMSISH_STATUS 0x40
 #define OPpLIST_GUESSED         0x40
+#define OPpLVREF_HV             0x40
 #define OPpMAYBE_TRUEBOOL       0x40
 #define OPpMAY_RETURN_CONSTANT  0x40
 #define OPpOPEN_OUT_RAW         0x40
@@ -2207,6 +2205,8 @@ END_EXTERN_C
 #define OPpTRANS_GROWS          0x40
 #define OPpDEREF                0x60
 #define OPpDEREF_SV             0x60
+#define OPpLVREF_CV             0x60
+#define OPpLVREF_TYPE           0x60
 #define OPpPADRANGE_COUNTMASK   0x7f
 #define OPpASSIGN_CV_TO_GV      0x80
 #define OPpCOREARGS_PUSHMARK    0x80
@@ -2348,8 +2348,8 @@ EXTCONST I16 PL_op_private_bitfields[] = {
     0, 8, -1,
     0, 8, -1,
     0, 8, -1,
-    3, -1, 0, 476, 1, 26, 2, 250, 3, 83, -1,
     5, -1, 1, 130, 2, 137, 3, 144, -1,
+    5, -1, 0, 476, 1, 26, 2, 250, 3, 83, -1,
 
 };
 
@@ -2765,12 +2765,12 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* gvsv          */ 0x277c, 0x2c91,
     /* gv            */ 0x12f5,
     /* gelem         */ 0x0067,
-    /* padsv         */ 0x277c, 0x03ba, 0x3971,
+    /* padsv         */ 0x277c, 0x025a, 0x3971,
     /* padav         */ 0x277c, 0x3970, 0x286c, 0x3669,
     /* padhv         */ 0x277c, 0x05d8, 0x0534, 0x3970, 0x286c, 0x3669,
     /* pushre        */ 0x3439,
-    /* rv2gv         */ 0x277c, 0x03ba, 0x1590, 0x286c, 0x2a68, 0x3a24, 0x0003,
-    /* rv2sv         */ 0x277c, 0x03ba, 0x2c90, 0x3a24, 0x0003,
+    /* rv2gv         */ 0x277c, 0x025a, 0x1590, 0x286c, 0x2a68, 0x3a24, 0x0003,
+    /* rv2sv         */ 0x277c, 0x025a, 0x2c90, 0x3a24, 0x0003,
     /* av2arylen     */ 0x286c, 0x0003,
     /* rv2cv         */ 0x29dc, 0x08f8, 0x0b90, 0x028c, 0x3be8, 0x3a24, 0x0003,
     /* prototype     */ 0x0003,
@@ -2883,7 +2883,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* rv2av         */ 0x277c, 0x2c90, 0x286c, 0x3668, 0x3a24, 0x0003,
     /* aelemfast     */ 0x01ff,
     /* aelemfast_lex */ 0x01ff,
-    /* aelem         */ 0x277c, 0x03ba, 0x2670, 0x286c, 0x0067,
+    /* aelem         */ 0x277c, 0x025a, 0x2670, 0x286c, 0x0067,
     /* aslice        */ 0x277c, 0x286c, 0x3669,
     /* kvaslice      */ 0x286d,
     /* aeach         */ 0x0003,
@@ -2895,7 +2895,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* delete        */ 0x277c, 0x35b8, 0x0003,
     /* exists        */ 0x3b18, 0x0003,
     /* rv2hv         */ 0x277c, 0x05d8, 0x0534, 0x2c90, 0x286c, 0x3668, 0x3a24, 0x0003,
-    /* helem         */ 0x277c, 0x03ba, 0x2670, 0x286c, 0x0067,
+    /* helem         */ 0x277c, 0x025a, 0x2670, 0x286c, 0x0067,
     /* hslice        */ 0x277c, 0x286c, 0x3669,
     /* kvhslice      */ 0x286d,
     /* unpack        */ 0x012f,
@@ -2929,7 +2929,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* orassign      */ 0x0003,
     /* dorassign     */ 0x0003,
     /* method        */ 0x0003,
-    /* entersub      */ 0x277c, 0x03ba, 0x0b90, 0x028c, 0x3be8, 0x3a24, 0x2141,
+    /* entersub      */ 0x277c, 0x025a, 0x0b90, 0x028c, 0x3be8, 0x3a24, 0x2141,
     /* leavesub      */ 0x2ff8, 0x0003,
     /* leavesublv    */ 0x2ff8, 0x0003,
     /* caller        */ 0x00bc, 0x012f,
@@ -3098,8 +3098,8 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* runcv         */ 0x00bd,
     /* fc            */ 0x0003,
     /* padrange      */ 0x277c, 0x019b,
-    /* refassign     */ 0x277c, 0x0252, 0x13e8, 0x0067,
-    /* lvref         */ 0x277c, 0x0252, 0x13e8, 0x0003,
+    /* refassign     */ 0x277c, 0x037a, 0x13e8, 0x0067,
+    /* lvref         */ 0x277c, 0x037a, 0x13e8, 0x0003,
     /* lvrefslice    */ 0x277d,
 
 };
