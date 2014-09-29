@@ -600,6 +600,11 @@ your set of characters to be matched and its position in the class is such
 that it could be considered part of a range, you must escape that hyphen
 with a backslash.
 
+The classes C<< [A-Z] >> and C<< [a-z] >> are special cased, in the sense
+they always match exactly the 26 upper/lower case letters, regardless
+of the platform (this only effects EBCDIC, which would otherwise include 
+some non-letters).
+
 Examples:
 
  [a-z]       #  Matches a character that is a lower case ASCII letter.
