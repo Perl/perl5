@@ -2853,7 +2853,7 @@ mean C</^/m>.
 
 =head2 I/O Operators
 X<operator, i/o> X<operator, io> X<io> X<while> X<filehandle>
-X<< <> >> X<@ARGV>
+X<< <> >> X<< <<>> >> X<@ARGV>
 
 There are several I/O operators you should know about.
 
@@ -2987,7 +2987,9 @@ can use the module C<ARGV::readonly> from CPAN, or use the double bracket:
 
 Using double angle brackets inside of a while causes the open to use the
 three argument form (with the second argument being C<< < >>), so all
-arguments in ARGV are treated as literal filenames.
+arguments in ARGV are treated as literal filenames (including "-").
+(Note that for convenience, if you use C<< <<>> >> and if @ARGV is
+empty, it will still read from the standard input.)
 
 You can modify @ARGV before the first <> as long as the array ends up
 containing the list of filenames you really want.  Line numbers (C<$.>)
