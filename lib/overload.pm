@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.23';
+our $VERSION = '1.24';
 
 %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -30,7 +30,7 @@ sub nil {}
 sub OVERLOAD {
   $package = shift;
   my %arg = @_;
-  my ($sub, $fb);
+  my $sub;
   *{$package . "::(("} = \&nil; # Make it findable via fetchmethod.
   for (keys %arg) {
     if ($_ eq 'fallback') {
