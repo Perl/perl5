@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.049'; # VERSION
+our $VERSION = '0.050'; # VERSION
 
 use Carp ();
 
@@ -483,6 +483,7 @@ sub _request {
         method    => $method,
         scheme    => $scheme,
         host      => $host,
+        port      => $port,
         host_port => ($port == $DefaultPort{$scheme} ? $host : "$host:$port"),
         uri       => $path_query,
         headers   => {},
@@ -619,9 +620,9 @@ sub _create_proxy_tunnel {
 
     my $connect_request = {
         method    => 'CONNECT',
-        uri       => $request->{host_port},
+        uri       => "$request->{host}:$request->{port}",
         headers   => {
-            host => $request->{host_port},
+            host => "$request->{host}:$request->{port}",
             'user-agent' => $agent,
         }
     };
@@ -1457,7 +1458,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.049
+version 0.050
 
 =head1 SYNOPSIS
 
@@ -2022,13 +2023,17 @@ David Golden <dagolden@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Alan Gardner James Raspass Jess Robinson Lukas Eklund Martin J. Evans Martin-Louis Bright Mike Doherty Petr Písař Serguei Trouchelle Syohei YOSHIDA Sören Kornetzki Alessandro Ghedini Tom Hukins Tony Cook Brad Gilbert Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry David Mitchell Edward Zborowski
+=for stopwords Alan Gardner Edward Zborowski James Raspass Jess Robinson Lukas Eklund Martin J. Evans Martin-Louis Bright Mike Doherty Petr Písař Serguei Trouchelle Syohei YOSHIDA Alessandro Ghedini Sören Kornetzki Tom Hukins Tony Cook Brad Gilbert Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry David Mitchell Dean Pearce
 
 =over 4
 
 =item *
 
 Alan Gardner <gardner@pythian.com>
+
+=item *
+
+Edward Zborowski <ed@rubensteintech.com>
 
 =item *
 
@@ -2068,11 +2073,11 @@ Syohei YOSHIDA <syohex@gmail.com>
 
 =item *
 
-Sören Kornetzki <soeren.kornetzki@delti.com>
+Alessandro Ghedini <al3xbio@gmail.com>
 
 =item *
 
-Alessandro Ghedini <al3xbio@gmail.com>
+Sören Kornetzki <soeren.kornetzki@delti.com>
 
 =item *
 
@@ -2112,7 +2117,7 @@ David Mitchell <davem@iabyn.com>
 
 =item *
 
-Edward Zborowski <ed@rubensteintech.com>
+Dean Pearce <pearce@pythian.com>
 
 =back
 
