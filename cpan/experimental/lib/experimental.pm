@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.010';
+$experimental::VERSION = '0.011';
 use strict;
 use warnings;
 use version ();
@@ -112,7 +112,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.010
+version 0.011
 
 =head1 SYNOPSIS
 
@@ -152,6 +152,26 @@ The supported features, documented further below, are:
 	signatures    - allow subroutine signatures (for named arguments)
 	smartmatch    - allow the use of ~~
 	switch        - allow the use of ~~, given, and when
+
+=head2 Ordering matters
+
+Using this pragma to 'enable an experimental feature' is another way of saying
+that this pragma will disable the warnings which would result from using that
+feature.  Therefore, the order in which pragmas are applied is important.  In
+particular, you probably want to enable experimental features I<after> you
+enable warnings:
+
+  use warnings;
+  use experimental 'smartmatch';
+
+You also need to take care with modules that enable warnings for you.  A common
+example being Moose.  In this example, warnings for the 'smartmatch' feature are
+first turned on by the warnings pragma, off by the experimental pragma and back
+on again by the Moose module (fix is to switch the last two lines):
+
+  use warnings;
+  use experimental 'smartmatch';
+  use Moose;
 
 =head2 Disclaimer
 
