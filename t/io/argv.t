@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 24);
+plan(tests => 28);
 
 my ($devnull, $no_devnull);
 
@@ -34,13 +34,13 @@ is($x, "1a line\n2a line\n", '<> from two files');
 	stdin	=> "foo\n",
 	args	=> [ 'Io_argv1.tmp', '-' ],
     );
-    is($x, "a line\nfoo\n", '   from a file and STDIN');
+    is($x, "a line\nfoo\n", '<> from a file and STDIN');
 
     $x = runperl(
 	prog	=> 'while (<>) { print $_; }',
 	stdin	=> "foo\n",
     );
-    is($x, "foo\n", '   from just STDIN');
+    is($x, "foo\n", '<> from just STDIN');
 }
 
 {
@@ -130,6 +130,41 @@ SKIP: {
     ok( defined(<$fh>) );
     is( <$fh>, undef );
     close $fh or die "Could not close: $!";
+}
+
+open(TRY, '>Io_argv1.tmp') || (die "Can't open temp file: $!");
+print TRY "one\ntwo\n";
+close TRY or die "Could not close: $!";
+
+$x = runperl(
+    prog	=> 'print while <<>>',
+    args	=> [ 'Io_argv1.tmp' ],
+);
+is($x, "one\ntwo\n", '<<>>');
+
+$x = runperl(
+    prog	=> 'while (<<>>) { print }',
+    stdin	=> "foo\n",
+);
+is($x, "foo\n", '<<>> from just STDIN (no argument)');
+
+$x = runperl(
+    prog	=> 'while (<<>>) { print $_; }',
+    stdin	=> "foo\n",
+    stderr	=> 1,
+    args	=> [ '-' ],
+);
+is($x, "Can't open -: No such file or directory at -e line 1.\n", '<<>> does not treat - as STDIN');
+
+SKIP: {
+    skip('no echo', 1) unless -x '/bin/echo';
+
+    $x = runperl(
+        prog	=> 'while (<<>>) { print $_; }',
+        stderr	=> 1,
+        args	=> [ '"echo foo |"' ],
+    );
+    is($x, "Can't open echo foo |: No such file or directory at -e line 1.\n", '<<>> does not treat ...| as fork');
 }
 
 # This used to dump core
