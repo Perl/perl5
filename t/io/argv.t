@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 28);
+plan(tests => 32);
 
 my ($devnull, $no_devnull);
 
@@ -20,6 +20,9 @@ if (is_miniperl()) {
 
 open(TRY, '>Io_argv1.tmp') || (die "Can't open temp file: $!");
 print TRY "a line\n";
+close TRY or die "Could not close: $!";
+open(TRY, '>Io_argv2.tmp') || (die "Can't open temp file: $!");
+print TRY "another line\n";
 close TRY or die "Could not close: $!";
 
 $x = runperl(
@@ -41,6 +44,25 @@ is($x, "1a line\n2a line\n", '<> from two files');
 	stdin	=> "foo\n",
     );
     is($x, "foo\n", '<> from just STDIN');
+
+    $x = runperl(
+	prog	=> 'while (<>) { print $ARGV.q/,/.$_ }',
+	args	=> [ 'Io_argv1.tmp', 'Io_argv2.tmp' ],
+    );
+    is($x, "Io_argv1.tmp,a line\nIo_argv2.tmp,another line\n", '$ARGV is the file name');
+
+    $x = runperl(
+	prog	=> 'print $ARGV while <>',
+	stdin	=> "foo\nbar\n",
+        args   	=> [ '-' ],
+    );
+    is($x, "--", '$ARGV is - for explicit STDIN');
+
+    $x = runperl(
+	prog	=> 'print $ARGV while <>',
+	stdin	=> "foo\nbar\n",
+    );
+    is($x, "--", '$ARGV is - for implicit STDIN');
 }
 
 {
@@ -69,7 +91,7 @@ close TRY or die "Could not close: $!";
 @ARGV = ('Io_argv1.tmp', 'Io_argv2.tmp');
 $^I = '_bak';   # not .bak which confuses VMS
 $/ = undef;
-my $i = 7;
+my $i = 10;
 while (<>) {
     s/^/ok $i\n/;
     ++$i;
@@ -94,7 +116,7 @@ open STDIN, 'Io_argv1.tmp' or die $!;
 @ARGV = ();
 ok( !eof(),     'STDIN has something' );
 
-is( <>, "ok 7\n" );
+is( <>, "ok 10\n" );
 
 SKIP: {
     skip_if_miniperl($no_devnull, 4);
@@ -137,16 +159,22 @@ print TRY "one\ntwo\n";
 close TRY or die "Could not close: $!";
 
 $x = runperl(
-    prog	=> 'print while <<>>',
+    prog	=> 'print $..$ARGV.$_ while <<>>',
     args	=> [ 'Io_argv1.tmp' ],
 );
-is($x, "one\ntwo\n", '<<>>');
+is($x, "1Io_argv1.tmpone\n2Io_argv1.tmptwo\n", '<<>>');
 
 $x = runperl(
     prog	=> 'while (<<>>) { print }',
     stdin	=> "foo\n",
 );
 is($x, "foo\n", '<<>> from just STDIN (no argument)');
+
+$x = runperl(
+    prog	=> 'print $ARGV.q/,/ for <<>>',
+    stdin	=> "foo\nbar\n",
+);
+is($x, "-,-,", '$ARGV is - for STDIN with <<>>');
 
 $x = runperl(
     prog	=> 'while (<<>>) { print $_; }',
