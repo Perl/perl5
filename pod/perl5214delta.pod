@@ -23,6 +23,14 @@ C<NaN>.
 
 See also the L<POSIX> enhancements.
 
+=head1 Security
+
+=head2 Perl is now compiled with -fstack-protector-strong if available
+
+Perl has been compiled with the anti-stack-smashing option
+C<-fstack-protector> since 5.10.1.  Now Perl uses the newer variant
+called C<-fstack-protector-strong>, if available.
+
 =head1 Incompatible Changes
 
 =head2 Changes to the C<*> prototype
