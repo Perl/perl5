@@ -9924,7 +9924,10 @@ Perl_ck_refassign(pTHX_ OP *o)
 	break;
     default:
       bad:
-	op_lvalue(left, OP_SASSIGN);
+	/* diag_listed_as: Can't modify %s in %s */
+	yyerror(Perl_form(aTHX_ "Can't modify reference to %s in scalar "
+				"assignment",
+				 OP_DESC(varop)));
 	return o;
     }
     if (!FEATURE_LVREF_IS_ENABLED)

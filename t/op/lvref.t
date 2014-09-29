@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 40;
+plan 41;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -168,6 +168,12 @@ eval '(\glob) = 42';
 like $@,
      qr/^Can't modify reference to glob in list assignment at /,
     "Can't modify reference to some list-returning op in list assignment";
+off;
+eval '\pos = 42';
+like $@,
+    qr/^Can't modify reference to match position in scalar assignment at /,
+   "Can't modify ref to some scalar-returning op in scalar assignment";
+on;
 
 # Miscellaneous
 
