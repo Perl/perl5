@@ -44,9 +44,12 @@ C<int_p_sign_posn>.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=head2 Perl is now compiled with -fstack-protector-strong if available
+
+Perl has been compiled with the anti-stack-smashing option
+C<-fstack-protector> since 5.10.1.  Now Perl uses the newer variant
+called C<-fstack-protector-strong>, if available.  (This was added
+already in 5.21.4.)
 
 [ List each security issue as a =head2 entry ]
 
