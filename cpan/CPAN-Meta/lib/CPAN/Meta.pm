@@ -2,8 +2,8 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta;
-our $VERSION = '2.142060'; # VERSION
-
+# VERSION
+$CPAN::Meta::VERSION = '2.142690';
 #pod =head1 SYNOPSIS
 #pod
 #pod     use v5.10;
@@ -641,7 +641,7 @@ CPAN::Meta - the distribution metadata for a CPAN dist
 
 =head1 VERSION
 
-version 2.142060
+version 2.142690
 
 =head1 SYNOPSIS
 
@@ -1020,6 +1020,8 @@ Ricardo Signes <rjbs@cpan.org>
 
 =head1 CONTRIBUTORS
 
+=for stopwords Ansgar Burchardt Avar Arnfjord Bjarmason Christopher J. Madsen Chuck Adams Cory G Watson Damyan Ivanov Eric Wilhelm Graham Knop Gregor Hermann Karen Etheridge Kenichi Ishigaki Ken Williams Lars Dieckow Leon Timmermans majensen Mark Fowler Matt S Trout Michael G. Schwern moznion Olaf Alders Olivier Mengue Randy Sims
+
 =over 4
 
 =item *
@@ -1052,6 +1054,10 @@ Eric Wilhelm <ewilhelm@cpan.org>
 
 =item *
 
+Graham Knop <haarg@haarg.org>
+
+=item *
+
 Gregor Hermann <gregoa@debian.org>
 
 =item *
@@ -1060,11 +1066,11 @@ Karen Etheridge <ether@cpan.org>
 
 =item *
 
-Ken Williams <kwilliams@cpan.org>
+Kenichi Ishigaki <ishigaki@cpan.org>
 
 =item *
 
-Kenichi Ishigaki <ishigaki@cpan.org>
+Ken Williams <kwilliams@cpan.org>
 
 =item *
 
@@ -1073,6 +1079,10 @@ Lars Dieckow <daxim@cpan.org>
 =item *
 
 Leon Timmermans <leont@cpan.org>
+
+=item *
+
+majensen <maj@fortinbras.us>
 
 =item *
 
@@ -1088,6 +1098,10 @@ Michael G. Schwern <mschwern@cpan.org>
 
 =item *
 
+moznion <moznion@gmail.com>
+
+=item *
+
 Olaf Alders <olaf@wundersolutions.com>
 
 =item *
@@ -1097,10 +1111,6 @@ Olivier Mengue <dolmen@cpan.org>
 =item *
 
 Randy Sims <randys@thepierianspring.org>
-
-=item *
-
-moznion <moznion@gmail.com>
 
 =back
 

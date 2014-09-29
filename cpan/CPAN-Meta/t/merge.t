@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use CPAN::Meta;
 use CPAN::Meta::Merge;
 
 my %base = (
@@ -114,5 +115,10 @@ like $@, qr/^Can't merge attribute abstract /, 'Exception looks right';
 my $failure2 = eval { $merger->merge(\%base, { provides => { Baz => { file => 'Baz.pm' } } }) };
 is($failure2, undef, 'Trying to merge different author gives an exception');
 like $@, qr/^Duplication of element provides\.Baz /, 'Exception looks right';
+
+# issue 67
+@base{qw/name version release_status/} = qw/Foo-Bar 0.01 testing/;
+my $base_obj = CPAN::Meta->create(\%base);
+ok my $first_result_obj = $merger->merge($base_obj, \%first), 'merging CPAN::Meta objects succeeds';
 
 done_testing();

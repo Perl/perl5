@@ -7,8 +7,8 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Spec;
-our $VERSION = '2.142060'; # VERSION
-
+# VERSION
+$CPAN::Meta::Spec::VERSION = '2.142690';
 1;
 
 # ABSTRACT: specification for CPAN distribution metadata
@@ -28,7 +28,7 @@ CPAN::Meta::Spec - specification for CPAN distribution metadata
 
 =head1 VERSION
 
-version 2.142060
+version 2.142690
 
 =head1 SYNOPSIS
 
@@ -526,7 +526,10 @@ Example:
 
 This Map describes any files, directories, packages, and namespaces that
 are private to the packaging or implementation of the distribution and
-should be ignored by indexing or search tools.
+should be ignored by indexing or search tools. Note that this is a list of
+exclusions, and the spec does not define what to I<include> - see
+L</Indexing distributions a la PAUSE> in the implementors notes for more
+information.
 
 Valid subkeys are as follows:
 
@@ -1137,6 +1140,24 @@ albeit only by accident.
 As such, consumers may use this data for informational analysis, but
 presenting it to the user as canonical or relying on it as such is
 invariably the height of folly.
+
+=head2 Indexing distributions a la PAUSE
+
+While no_index tells you what must be ignored when indexing, this spec holds
+no opinion on how you should get your initial candidate list of things to
+possibly index. For "normal" distributions you might consider simply indexing
+the contents of lib/, but there are many fascinating oddities on CPAN and
+many dists from the days when it was normal to put the main .pm file in the
+root of the distribution archive - so PAUSE currently indexes all .pm and .PL
+files that are not either (a) specifically excluded by no_index (b) in
+C<inc>, C<xt>, or C<t> directories, or common 'mistake' directories such as
+C<perl5>.
+
+Or: If you're trying to be PAUSE-like, make sure you skip C<inc>, C<xt> and
+C<t> as well as anything marked as no_index.
+
+Also remember: If the META file contains a provides field, you shouldn't be
+indexing anything in the first place - just use that.
 
 =head1 SEE ALSO
 

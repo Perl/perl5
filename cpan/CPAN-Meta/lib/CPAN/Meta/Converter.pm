@@ -2,8 +2,8 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-our $VERSION = '2.142060'; # VERSION
-
+# VERSION
+$CPAN::Meta::Converter::VERSION = '2.142690';
 #pod =head1 SYNOPSIS
 #pod
 #pod   my $struct = decode_json_file('META.json');
@@ -24,8 +24,23 @@ our $VERSION = '2.142060'; # VERSION
 
 use CPAN::Meta::Validator;
 use CPAN::Meta::Requirements;
-use version 0.88 ();
 use Parse::CPAN::Meta 1.4400 ();
+
+# To help ExtUtils::MakeMaker bootstrap CPAN::Meta::Requirements on perls
+# before 5.10, we fall back to the EUMM bundled compatibility version module if
+# that's the only thing available.  This shouldn't ever happen in a normal CPAN
+# install of CPAN::Meta::Requirements, as version.pm will be picked up from
+# prereqs and be available at runtime.
+
+BEGIN {
+  eval "use version ()"; ## no critic
+  if ( my $err = $@ ) {
+    eval "use ExtUtils::MakeMaker::version" or die $err; ## no critic
+  }
+}
+
+# Perl 5.10.0 didn't have "is_qv" in version.pm
+*_is_qv = version->can('is_qv') ? sub { $_[0]->is_qv } : sub { exists $_[0]->{qv} };
 
 sub _dclone {
   my $ref = shift;
@@ -363,7 +378,7 @@ sub _clean_version {
   # XXX check defined $v and not just $v because version objects leak memory
   # in boolean context -- dagolden, 2012-02-03
   if ( defined $v ) {
-    return $v->is_qv ? $v->normal : $element;
+    return _is_qv($v) ? $v->normal : $element;
   }
   else {
     return 0;
@@ -373,8 +388,8 @@ sub _clean_version {
 sub _bad_version_hook {
   my ($v) = @_;
   $v =~ s{[a-z]+$}{}; # strip trailing alphabetics
-  my $vobj = eval { version->parse($v) };
-  return defined($vobj) ? $vobj : version->parse(0); # or give up
+  my $vobj = eval { version->new($v) };
+  return defined($vobj) ? $vobj : version->new(0); # or give up
 }
 
 sub _version_map {
@@ -1479,7 +1494,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.142060
+version 2.142690
 
 =head1 SYNOPSIS
 

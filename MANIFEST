@@ -237,6 +237,11 @@ cpan/CPAN/lib/CPAN/URL.pm
 cpan/CPAN/lib/CPAN/Version.pm		Simple math with different flavors of version strings
 cpan/CPAN-Meta/lib/CPAN/Meta/Converter.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Feature.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_0.pod
+cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_1.pod
+cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_2.pod
+cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_3.pod
+cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_4.pod
 cpan/CPAN-Meta/lib/CPAN/Meta/History.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Merge.pm
 cpan/CPAN-Meta/lib/CPAN/Meta.pm

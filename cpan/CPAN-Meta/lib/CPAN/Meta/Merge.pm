@@ -1,10 +1,9 @@
-package CPAN::Meta::Merge;
-
 use strict;
 use warnings;
 
-our $VERSION = '2.142060'; # VERSION
-
+package CPAN::Meta::Merge;
+# VERSION
+$CPAN::Meta::Merge::VERSION = '2.142690';
 use Carp qw/croak/;
 use Scalar::Util qw/blessed/;
 use CPAN::Meta::Converter;
@@ -169,7 +168,7 @@ sub merge {
   my $current = {};
   for my $next (@items) {
     if ( blessed($next) && $next->isa('CPAN::Meta') ) {
-      $next = $next->as_string_hash;
+      $next = $next->as_struct;
     }
     elsif ( ref($next) eq 'HASH' ) {
       my $cmc = CPAN::Meta::Converter->new(
@@ -201,7 +200,7 @@ CPAN::Meta::Merge - Merging CPAN Meta fragments
 
 =head1 VERSION
 
-version 2.142060
+version 2.142690
 
 =head1 SYNOPSIS
 
