@@ -3107,7 +3107,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* refassign     */ 0x277c, 0x037a, 0x13e8, 0x0067,
     /* lvref         */ 0x277c, 0x037a, 0x13e8, 0x0003,
     /* lvrefslice    */ 0x277d,
-    /* lvavref       */ 0x0003,
+    /* lvavref       */ 0x277c, 0x3970, 0x0003,
 
 };
 
@@ -3498,7 +3498,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* REFASSIGN  */ (OPpARG2_MASK|OPpLVREF_ELEM|OPpLVREF_TYPE|OPpLVAL_INTRO),
     /* LVREF      */ (OPpARG1_MASK|OPpLVREF_ELEM|OPpLVREF_TYPE|OPpLVAL_INTRO),
     /* LVREFSLICE */ (OPpLVAL_INTRO),
-    /* LVAVREF    */ (OPpARG1_MASK),
+    /* LVAVREF    */ (OPpARG1_MASK|OPpPAD_STATE|OPpLVAL_INTRO),
 
 };
 

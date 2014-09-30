@@ -301,7 +301,7 @@ for (qw(nextstate dbstate)) {
 addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
     for qw(gvsv rv2sv rv2hv rv2gv rv2av aelem helem aslice
            hslice delete padsv padav padhv enteriter entersub padrange
-           pushmark cond_expr refassign lvref lvrefslice),
+           pushmark cond_expr refassign lvref lvrefslice lvavref),
            'list', # this gets set in my_attrs() for some reason
            ;
 
@@ -472,7 +472,8 @@ addbits($_, 7 => qw(OPpPV_IS_UTF8 UTF)) for qw(last redo next goto dump);
 
 
 
-addbits($_, 4 => qw(OPpPAD_STATE STATE))  for qw(padav padhv padsv pushmark);
+addbits($_, 4 => qw(OPpPAD_STATE STATE))  for qw(padav padhv padsv lvavref
+                                                 pushmark);
 
 
 
