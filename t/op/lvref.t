@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 102;
+plan 103;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -171,20 +171,18 @@ package ArrayTest {
   is \@b, \@ThatArray, '(\@lexical)';
   \my @c = expect_scalar_cx;
   is \@c, \@ThatArray, '\my @lexical';
-::on;
-  eval '(\my @d) = expect_list_cx_a';
+  (\my @d) = expect_list_cx_a;
   is \@d, \@ThatArray, '(\my @lexical)';
-  eval '\(@e) = expect_list_cx';
-  is \$e[0].$e[1], \$_.\$_, '\(@pkg)';
+  \(@e) = expect_list_cx;
+  is \$e[0].\$e[1], \$_.\$_, '\(@pkg)';
   my @e;
-  eval '\(@e) = expect_list_cx';
-  is \$e[0].$e[1], \$_.\$_, '\(@lexical)';
-  eval '\(my @f) = expect_list_cx';
-  is \$f[0].$f[1], \$_.\$_, '\(my @lexical)';
-  eval '\my(@g) = expect_list_cx';
-  is \$g[0].$g[1], \$_.\$_, '\my(@lexical)';
+  \(@e) = expect_list_cx;
+  is \$e[0].\$e[1], \$_.\$_, '\(@lexical)';
+  \(my @f) = expect_list_cx;
+  is \$f[0].\$f[1], \$_.\$_, '\(my @lexical)';
+  \my(@g) = expect_list_cx;
+  is \$g[0].\$g[1], \$_.\$_, '\my(@lexical)';
   my $old = \@h;
-::off;
   {
     \local @h = \@ThatArray;
     is \@h, \@ThatArray, '\local @a';
@@ -328,18 +326,20 @@ eval '\pos = 42';
 like $@,
     qr/^Can't modify reference to match position in scalar assignment at /,
    "Can't modify ref to some scalar-returning op in scalar assignment";
-on;
 eval '\(local @b) = 42';
 like $@,
-    qr/^Can't modify reference to parenthesized localized array in list(?x:
+    qr/^Can't modify reference to localized parenthesized array in list(?x:
       ) assignment at /,
    q"Can't modify \(local @array) in list assignment";
 eval '\local(@b) = 42';
 like $@,
-    qr/^Can't modify reference to parenthesized localized array in list(?x:
+    qr/^Can't modify reference to localized parenthesized array in list(?x:
       ) assignment at /,
    q"Can't modify \local(@array) in list assignment";
-off;
+eval '\local(@{foo()}) = 42';
+like $@,
+    qr/^Can't modify reference to array dereference in list assignment at/,
+   q"'Array deref' error takes prec. over 'local paren' error";
 eval '\(%b) = 42';
 like $@,
     qr/^Can't modify reference to parenthesized hash in list assignment a/,

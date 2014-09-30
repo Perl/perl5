@@ -2641,8 +2641,22 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	 kid_2lvref:
 	  switch (kid->op_type) {
 	  case OP_RV2AV:
+	    if (kUNOP->op_first->op_type != OP_GV) goto badref;
+	    kid->op_flags |= OPf_STACKED;
 	    if (kid->op_flags & OPf_PARENS) {
-		goto badref; /* XXX temporary */
+		if (kid->op_private & OPpLVAL_INTRO) {
+		     /* diag_listed_as: Can't modify %s in %s */
+		     yyerror(Perl_form(aTHX_ "Can't modify reference to "
+					     "localized parenthesized "
+					     "array in list assignment"));
+		    return o;
+		}
+	      slurpy:
+		kid->op_type = OP_LVAVREF;
+		kid->op_ppaddr = PL_ppaddr[OP_LVAVREF];
+		kid->op_private &= OPpLVAL_INTRO|OPpPAD_STATE;
+		kid->op_flags |= OPf_MOD|OPf_REF;
+		continue;
 	    }
 	    kid->op_private |= OPpLVREF_AV;
 	    goto checkgv;
@@ -2662,6 +2676,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	  case OP_PADSV:
 	    break;
 	  case OP_PADAV:
+	    if (kid->op_flags & OPf_PARENS) goto slurpy;
 	    kid->op_private |= OPpLVREF_AV;
 	    break;
 	  case OP_PADHV:

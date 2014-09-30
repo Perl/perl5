@@ -62,6 +62,7 @@ PP(pp_stub)
 
 /* Pushy stuff. */
 
+/* This is also called directly by pp_lvavref.  */
 PP(pp_padav)
 {
     dSP; dTARGET;
@@ -6349,7 +6350,17 @@ PP(pp_lvrefslice)
 
 PP(pp_lvavref)
 {
-    DIE(aTHX_ "Unimplemented");
+    if (PL_op->op_flags & OPf_STACKED)
+	Perl_pp_rv2av(aTHX);
+    else
+	Perl_pp_padav(aTHX);
+    {
+	dSP;
+	dTOPss;
+	SETs(0); /* special alias marker that aassign recognises */
+	XPUSHs(sv);
+	RETURN;
+    }
 }
 
 /*
