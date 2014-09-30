@@ -164,13 +164,11 @@ package ArrayTest {
   my @a;
   \@a = expect_scalar_cx;
   is \@a, \@ThatArray, '\@lexical';
-::on;
-  eval '(\@b) = expect_list_cx_a';
+  (\@b) = expect_list_cx_a;
   is \@b, \@ThatArray, '(\@pkg)';
   my @b;
-  eval '(\@b) = expect_list_cx_a';
+  (\@b) = expect_list_cx_a;
   is \@b, \@ThatArray, '(\@lexical)';
-::off;
   \my @c = expect_scalar_cx;
   is \@c, \@ThatArray, '\my @lexical';
 ::on;
@@ -211,20 +209,16 @@ package HashTest {
   my %a;
   \%a = expect_scalar_cx;
   is \%a, \%ThatHash, '\%lexical';
-::on;
-  eval '(\%b) = expect_list_cx';
-  is \%b, \%ThatArray, '(\%pkg)';
+  (\%b) = expect_list_cx;
+  is \%b, \%ThatHash, '(\%pkg)';
   my %b;
-  eval '(\%b) = expect_list_cx';
+  (\%b) = expect_list_cx;
   is \%b, \%ThatHash, '(\%lexical)';
-::off;
   \my %c = expect_scalar_cx;
   is \%c, \%ThatHash, '\my %lexical';
-::on;
-  eval '(\my %d) = expect_list_cx';
+  (\my %d) = expect_list_cx;
   is \%d, \%ThatHash, '(\my %lexical)';
   my $old = \%h;
-::off;
   {
     \local %h = \%ThatHash;
     is \%h, \%ThatHash, '\local %a';
@@ -345,6 +339,7 @@ like $@,
     qr/^Can't modify reference to parenthesized localized array in list(?x:
       ) assignment at /,
    q"Can't modify \local(@array) in list assignment";
+off;
 eval '\(%b) = 42';
 like $@,
     qr/^Can't modify reference to parenthesized hash in list assignment a/,
@@ -357,7 +352,6 @@ eval '\my(%b) = 42';
 like $@,
     qr/^Can't modify reference to parenthesized hash in list assignment a/,
    "Can't modify ref to parenthesized hash (\my(%b)) in list assignment";
-off;
 eval '\%{"42"} = 42';
 like $@,
     qr/^Can't modify reference to hash dereference in scalar assignment a/,

@@ -6190,6 +6190,25 @@ S_localise_helem_lval(pTHX_ HV * const hv, SV * const keysv,
 	SAVEHDELETE(hv, keysv);
 }
 
+static void
+S_localise_gv_slot(pTHX_ GV *gv, U8 type)
+{
+    if (type == OPpLVREF_SV) {
+	save_pushptrptr(gv, SvREFCNT_inc_simple(GvSV(gv)), SAVEt_GVSV);
+	GvSV(gv) = 0;
+    }
+    else if (type == OPpLVREF_AV)
+	/* XXX Inefficient, as it creates a new AV, which we are
+	       about to clobber.  */
+	save_ary(gv);
+    else {
+	assert(type == OPpLVREF_HV);
+	/* XXX Likewise inefficient.  */
+	save_hash(gv);
+    }
+}
+
+
 PP(pp_refassign)
 {
     dSP;
@@ -6233,21 +6252,7 @@ PP(pp_refassign)
     }
     case SVt_PVGV:
 	if (PL_op->op_private & OPpLVAL_INTRO) {
-	    if (type == OPpLVREF_SV) {
-		save_pushptrptr((GV *)left,
-				SvREFCNT_inc_simple(GvSV(left)),
-				SAVEt_GVSV);
-		GvSV(left) = 0;
-	    }
-	    else if (type == OPpLVREF_AV)
-		/* XXX Inefficient, as it creates a new AV, which we are
-		       about to clobber.  */
-		save_ary((GV *)left);
-	    else {
-		assert(type == OPpLVREF_HV);
-		/* XXX Likewise inefficient.  */
-		save_hash((GV *)left);
-	    }
+	    S_localise_gv_slot(aTHX_ (GV *)left, type);
 	}
 	gv_setref(left, sv);
 	SvSETMAGIC(left);
@@ -6278,8 +6283,10 @@ PP(pp_lvref)
     SV * const ret = sv_2mortal(newSV_type(SVt_PVMG));
     SV * const elem = PL_op->op_private & OPpLVREF_ELEM ? POPs : NULL;
     SV * const arg = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
-    sv_magic(ret, arg,
-	     PERL_MAGIC_lvref, (char *)elem, elem ? HEf_SVKEY : ARGTARG);
+    MAGIC * const mg = sv_magicext(ret, arg, PERL_MAGIC_lvref,
+				   &PL_vtbl_lvref, (char *)elem,
+				   elem ? HEf_SVKEY : ARGTARG);
+    mg->mg_private = PL_op->op_private;
     if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
       if (elem) {
 	MAGIC *mg;
@@ -6291,9 +6298,8 @@ PP(pp_lvref)
 	    S_localise_helem_lval(aTHX_ (HV *)arg, elem, can_preserve);
       }
       else if (arg) {
-	save_pushptrptr((GV *)arg, SvREFCNT_inc_simple(GvSV(arg)),
-			SAVEt_GVSV);
-	GvSV(arg) = 0;
+	S_localise_gv_slot(aTHX_ (GV *)arg, 
+				 PL_op->op_private & OPpLVREF_TYPE);
       }
       else
 	SAVECLEARSV(PAD_SVl(ARGTARG));

@@ -2640,10 +2640,33 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	do {
 	 kid_2lvref:
 	  switch (kid->op_type) {
+	  case OP_RV2AV:
+	    if (kid->op_flags & OPf_PARENS) {
+		goto badref; /* XXX temporary */
+	    }
+	    kid->op_private |= OPpLVREF_AV;
+	    goto checkgv;
+	  case OP_RV2HV:
+	    if (kid->op_flags & OPf_PARENS) {
+		/* diag_listed_as: Can't modify %s in %s */
+	      parenhash:
+		yyerror(Perl_form(aTHX_ "Can't modify reference to "
+				"parenthesized hash in list assignment"));
+		return o;
+	    }
+	    kid->op_private |= OPpLVREF_HV;
 	  case OP_RV2SV:
+	   checkgv:
 	    if (kUNOP->op_first->op_type != OP_GV) goto badref;
 	    kid->op_flags |= OPf_STACKED;
 	  case OP_PADSV:
+	    break;
+	  case OP_PADAV:
+	    kid->op_private |= OPpLVREF_AV;
+	    break;
+	  case OP_PADHV:
+	    if (kid->op_flags & OPf_PARENS) goto parenhash;
+	    kid->op_private |= OPpLVREF_HV;
 	    break;
 	  case OP_AELEM:
 	  case OP_HELEM:
@@ -2668,7 +2691,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	  }
 	  kid->op_type = OP_LVREF;
 	  kid->op_ppaddr = PL_ppaddr[OP_LVREF];
-	  kid->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM;
+	  kid->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM|OPpLVREF_TYPE;
 	} while ((kid = OP_SIBLING(kid)));
 	if (!FEATURE_LVREF_IS_ENABLED)
 	    Perl_croak(aTHX_ "Experimental lvalue references not enabled");

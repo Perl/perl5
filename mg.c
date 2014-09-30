@@ -2464,11 +2464,29 @@ Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setlvref(pTHX_ SV *sv, MAGIC *mg)
 {
+    const char *bad = NULL;
     PERL_ARGS_ASSERT_MAGIC_SETLVREF;
     if (!SvROK(sv)) Perl_croak(aTHX_ "Assigned value is not a reference");
-    if (SvTYPE(SvRV(sv)) > SVt_PVLV)
+    switch (mg->mg_private & OPpLVREF_TYPE) {
+    case OPpLVREF_SV:
+	if (SvTYPE(SvRV(sv)) > SVt_PVLV)
+	    bad = " SCALAR";
+	break;
+    case OPpLVREF_AV:
+	if (SvTYPE(SvRV(sv)) != SVt_PVAV)
+	    bad = "n ARRAY";
+	break;
+    case OPpLVREF_HV:
+	if (SvTYPE(SvRV(sv)) != SVt_PVHV)
+	    bad = " HASH";
+	break;
+    case OPpLVREF_CV:
+	if (SvTYPE(SvRV(sv)) != SVt_PVCV)
+	    bad = " CODE";
+    }
+    if (bad)
 	/* diag_listed_as: Assigned value is not %s reference */
-	Perl_croak(aTHX_ "Assigned value is not a SCALAR reference");
+	Perl_croak(aTHX_ "Assigned value is not a%s reference", bad);
     switch (mg->mg_obj ? SvTYPE(mg->mg_obj) : 0) {
     case 0:
     {
