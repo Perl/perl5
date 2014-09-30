@@ -2630,7 +2630,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	goto nomod;
 
     case OP_SREFGEN:
-	if (type != OP_AASSIGN) goto nomod;
+	if (type != OP_AASSIGN && type != OP_SASSIGN) goto nomod;
 	kid = cUNOPx(cUNOPo->op_first)->op_first;
 	assert (!OP_HAS_SIBLING(kid));
 	goto kid_2lvref;

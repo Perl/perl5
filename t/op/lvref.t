@@ -239,20 +239,20 @@ package HashTest {
 (\$tahi, $rua) = \(1,2);
 is join(' ', $tahi, $$rua), '1 2',
   'mixed scalar ref and scalar list assignment';
-on;
 
 # Conditional expressions
 
 $_ = 3;
 eval '$_ == 3 ? \$tahi : $rua = \3';
 is $tahi, 3, 'cond assignment resolving to scalar ref';
-eval '$_ == 3 ? \$toru : $wha = \3';
+eval '$_ == 0 ? \$toru : $wha = \3';
 is $$wha, 3, 'cond assignment resolving to scalar';
 eval '$_ == 3 ? \$rima : \$ono = \5';
-is $$rima, 5, 'cond assignment with refgens on both branches';
+is $rima, 5, 'cond assignment with refgens on both branches';
 
 # Foreach
 
+on;
 eval '
   for \my $a(\$for1, \$for2) {
     push @for, \$a;
