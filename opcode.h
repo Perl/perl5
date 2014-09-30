@@ -530,6 +530,7 @@ EXTCONST char* const PL_op_name[] = {
 	"refassign",
 	"lvref",
 	"lvrefslice",
+	"lvavref",
 	"freed",
 };
 #endif
@@ -920,6 +921,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"lvalue ref assignment",
 	"lvalue ref assignment",
 	"lvalue ref assignment",
+	"lvalue array reference",
 	"freed op",
 };
 #endif
@@ -1324,6 +1326,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_refassign,
 	Perl_pp_lvref,
 	Perl_pp_lvrefslice,
+	Perl_pp_lvavref,
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1724,6 +1727,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_refassign,	/* refassign */
 	Perl_ck_null,		/* lvref */
 	Perl_ck_null,		/* lvrefslice */
+	Perl_ck_null,		/* lvavref */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2118,6 +2122,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000240,	/* refassign */
 	0x00000b40,	/* lvref */
 	0x00000440,	/* lvrefslice */
+	0x00000b40,	/* lvavref */
 };
 #endif
 
@@ -2740,6 +2745,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      632, /* refassign */
      636, /* lvref */
      640, /* lvrefslice */
+     641, /* lvavref */
 
 };
 
@@ -3101,6 +3107,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* refassign     */ 0x277c, 0x037a, 0x13e8, 0x0067,
     /* lvref         */ 0x277c, 0x037a, 0x13e8, 0x0003,
     /* lvrefslice    */ 0x277d,
+    /* lvavref       */ 0x0003,
 
 };
 
@@ -3491,6 +3498,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* REFASSIGN  */ (OPpARG2_MASK|OPpLVREF_ELEM|OPpLVREF_TYPE|OPpLVAL_INTRO),
     /* LVREF      */ (OPpARG1_MASK|OPpLVREF_ELEM|OPpLVREF_TYPE|OPpLVAL_INTRO),
     /* LVREFSLICE */ (OPpLVAL_INTRO),
+    /* LVAVREF    */ (OPpARG1_MASK),
 
 };
 

@@ -6347,6 +6347,11 @@ PP(pp_lvrefslice)
     RETURN;
 }
 
+PP(pp_lvavref)
+{
+    DIE(aTHX_ "Unimplemented");
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

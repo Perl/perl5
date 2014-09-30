@@ -145,6 +145,7 @@ PERL_CALLCONV OP *Perl_pp_listen(pTHX);
 PERL_CALLCONV OP *Perl_pp_lock(pTHX);
 PERL_CALLCONV OP *Perl_pp_lslice(pTHX);
 PERL_CALLCONV OP *Perl_pp_lt(pTHX);
+PERL_CALLCONV OP *Perl_pp_lvavref(pTHX);
 PERL_CALLCONV OP *Perl_pp_lvref(pTHX);
 PERL_CALLCONV OP *Perl_pp_lvrefslice(pTHX);
 PERL_CALLCONV OP *Perl_pp_mapwhile(pTHX);
