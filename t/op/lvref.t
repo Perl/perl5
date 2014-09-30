@@ -243,11 +243,11 @@ is join(' ', $tahi, $$rua), '1 2',
 # Conditional expressions
 
 $_ = 3;
-eval '$_ == 3 ? \$tahi : $rua = \3';
+$_ == 3 ? \$tahi : $rua = \3;
 is $tahi, 3, 'cond assignment resolving to scalar ref';
-eval '$_ == 0 ? \$toru : $wha = \3';
+$_ == 0 ? \$toru : $wha = \3;
 is $$wha, 3, 'cond assignment resolving to scalar';
-eval '$_ == 3 ? \$rima : \$ono = \5';
+$_ == 3 ? \$rima : \$ono = \5;
 is $rima, 5, 'cond assignment with refgens on both branches';
 
 # Foreach
