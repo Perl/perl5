@@ -554,5 +554,5 @@ introcv		private subroutine	ck_null		d0
 clonecv		private subroutine	ck_null		d0
 padrange	list of private variables	ck_null		d0
 refassign	lvalue ref assignment	ck_refassign	d2
-lvref		lvalue ref assignment	ck_null		d1
+lvref		lvalue ref assignment	ck_null		d%
 lvrefslice	lvalue ref assignment	ck_null		d@

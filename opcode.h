@@ -2116,7 +2116,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000040,	/* clonecv */
 	0x00000040,	/* padrange */
 	0x00000240,	/* refassign */
-	0x00000140,	/* lvref */
+	0x00000b40,	/* lvref */
 	0x00000440,	/* lvrefslice */
 };
 #endif
