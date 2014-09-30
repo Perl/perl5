@@ -200,7 +200,7 @@ is($x, "Can't open -: No such file or directory at -e line 1.\n", '<<>> does not
 }
 
 SKIP: {
-    skip('no echo', 1) unless -x '/bin/echo';
+    skip('no echo', 2) unless -x '/bin/echo';
 
     $x = runperl(
         prog	=> 'while (<<>>) { print $_; }',
