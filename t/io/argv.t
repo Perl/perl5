@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 34);
+plan(tests => 35);
 
 my ($devnull, $no_devnull);
 
@@ -208,6 +208,13 @@ SKIP: {
         args	=> [ '"echo foo |"' ],
     );
     is($x, "Can't open echo foo |: No such file or directory at -e line 1.\n", '<<>> does not treat ...| as fork');
+
+    $x = runperl(
+        prog	=> 'while (<<>>) { }',
+        stderr	=> 1,
+        args	=> [ 'Io_argv1.tmp', '"echo foo |"' ],
+    );
+    is($x, "Can't open echo foo |: No such file or directory at -e line 1, <> line 2.\n", '<<>> does not treat ...| as fork after eof');
 }
 
 # This used to dump core
