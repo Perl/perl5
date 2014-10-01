@@ -4531,18 +4531,25 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	 * be allocated it is still not worth swiping PADTMPs for short
 	 * strings, as the savings here are small.
 	 * 
-	 * If the rhs is already flagged as a copy-on-write string and COW
-	 * is possible here, we use copy-on-write and make both SVs share
-	 * the string buffer.
-	 * 
-	 * If the rhs is not flagged as copy-on-write, then we see whether
-	 * it is worth upgrading it to such.  If the lhs already has a buf-
+	 * If swiping is not an option, then we see whether it is
+	 * worth using copy-on-write.  If the lhs already has a buf-
 	 * fer big enough and the string is short, we skip it and fall back
 	 * to method 3, since memcpy is faster for short strings than the
 	 * later bookkeeping overhead that copy-on-write entails.
+
+	 * If the rhs is not a copy-on-write string yet, then we also
+	 * consider whether the buffer is too large relative to the string
+	 * it holds.  Some operations such as readline allocate a large
+	 * buffer in the expectation of reusing it.  But turning such into
+	 * a COW buffer is counter-productive because it increases memory
+	 * usage by making readline allocate a new large buffer the sec-
+	 * ond time round.  So, if the buffer is too large, again, we use
+	 * method 3 (copy).
 	 * 
-	 * If there is no buffer on the left, or the buffer is too small,
-	 * then we use copy-on-write.
+	 * Finally, if there is no buffer on the left, or the buffer is too 
+	 * small, then we use copy-on-write and make both SVs share the
+	 * string buffer.
+	 *
 	 */
 
 	/* Whichever path we take through the next code, we want this true,
