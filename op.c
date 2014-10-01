@@ -2335,6 +2335,108 @@ S_vivifies(const OPCODE type)
     return 0;
 }
 
+static void
+S_lvref(pTHX_ OP *o)
+{
+    OP *kid;
+    switch (o->op_type) {
+    case OP_COND_EXPR:
+	for (kid = OP_SIBLING(cUNOPo->op_first); kid;
+	     kid = OP_SIBLING(kid))
+	    S_lvref(aTHX_ kid);
+	/* FALLTHROUGH */
+    case OP_PUSHMARK:
+	return;
+    case OP_RV2AV:
+	if (cUNOPo->op_first->op_type != OP_GV) goto badref;
+	o->op_flags |= OPf_STACKED;
+	if (o->op_flags & OPf_PARENS) {
+	    if (o->op_private & OPpLVAL_INTRO) {
+		 /* diag_listed_as: Can't modify %s in %s */
+		 yyerror(Perl_form(aTHX_ "Can't modify reference to "
+		      "localized parenthesized array in list assignment"));
+		return;
+	    }
+	  slurpy:
+	    o->op_type = OP_LVAVREF;
+	    o->op_ppaddr = PL_ppaddr[OP_LVAVREF];
+	    o->op_private &= OPpLVAL_INTRO|OPpPAD_STATE;
+	    o->op_flags |= OPf_MOD|OPf_REF;
+	    return;
+	}
+	o->op_private |= OPpLVREF_AV;
+	goto checkgv;
+    case OP_RV2HV:
+	if (o->op_flags & OPf_PARENS) {
+	  parenhash:
+	    /* diag_listed_as: Can't modify %s in %s */
+	    yyerror(Perl_form(aTHX_ "Can't modify reference to "
+				 "parenthesized hash in list assignment"));
+		return;
+	}
+	o->op_private |= OPpLVREF_HV;
+	/* FALLTHROUGH */
+    case OP_RV2SV:
+      checkgv:
+	if (cUNOPo->op_first->op_type != OP_GV) goto badref;
+	o->op_flags |= OPf_STACKED;
+	/* FALLTHROUGH */
+    case OP_PADSV:
+	break;
+    case OP_PADAV:
+	if (o->op_flags & OPf_PARENS) goto slurpy;
+	o->op_private |= OPpLVREF_AV;
+	break;
+    case OP_PADHV:
+	if (o->op_flags & OPf_PARENS) goto parenhash;
+	o->op_private |= OPpLVREF_HV;
+	break;
+    case OP_AELEM:
+    case OP_HELEM:
+	o->op_private |= OPpLVREF_ELEM;
+	o->op_flags   |= OPf_STACKED;
+	break;
+    case OP_ASLICE:
+    case OP_HSLICE:
+	o->op_type = OP_LVREFSLICE;
+	o->op_ppaddr = PL_ppaddr[OP_LVREFSLICE];
+	o->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM;
+	return;
+    case OP_NULL:
+	if (o->op_flags & OPf_SPECIAL)		/* do BLOCK */
+	    goto badref;
+	else if (!(o->op_flags & OPf_KIDS))
+	    return;
+	if (o->op_targ != OP_LIST) {
+	    S_lvref(aTHX_ cBINOPo->op_first);
+	    return;
+	}
+	/* FALLTHROUGH */
+    case OP_LIST:
+	for (kid = cLISTOPo->op_first; kid; kid = OP_SIBLING(kid)) {
+	    assert((kid->op_flags & OPf_WANT) != OPf_WANT_VOID);
+	    S_lvref(aTHX_ kid);
+	}
+	return;
+    case OP_STUB:
+	if (o->op_flags & OPf_PARENS)
+	    return;
+	/* FALLTHROUGH */
+    default:
+      badref:
+	/* diag_listed_as: Can't modify %s in %s */
+	yyerror(Perl_form(aTHX_ "Can't modify reference to %s in list "
+				"assignment",
+		     o->op_type == OP_NULL && o->op_flags & OPf_SPECIAL
+		      ? "do block"
+		      : OP_DESC(o)));
+	return;
+    }
+    o->op_type = OP_LVREF;
+    o->op_ppaddr = PL_ppaddr[OP_LVREF];
+    o->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM|OPpLVREF_TYPE;
+}
+
 OP *
 Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 {
@@ -2631,87 +2733,26 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
     case OP_SREFGEN:
 	if (type != OP_AASSIGN && type != OP_SASSIGN) goto nomod;
+	/* Don’t bother applying lvalue context to the ex-list.  */
 	kid = cUNOPx(cUNOPo->op_first)->op_first;
 	assert (!OP_HAS_SIBLING(kid));
 	goto kid_2lvref;
     case OP_REFGEN:
 	if (type != OP_AASSIGN) goto nomod;
-	kid = OP_SIBLING(cUNOPx(cUNOPo->op_first)->op_first);
-	do {
-	 kid_2lvref:
-	  switch (kid->op_type) {
-	  case OP_RV2AV:
-	    if (kUNOP->op_first->op_type != OP_GV) goto badref;
-	    kid->op_flags |= OPf_STACKED;
-	    if (kid->op_flags & OPf_PARENS) {
-		if (kid->op_private & OPpLVAL_INTRO) {
-		     /* diag_listed_as: Can't modify %s in %s */
-		     yyerror(Perl_form(aTHX_ "Can't modify reference to "
-					     "localized parenthesized "
-					     "array in list assignment"));
-		    return o;
-		}
-	      slurpy:
-		kid->op_type = OP_LVAVREF;
-		kid->op_ppaddr = PL_ppaddr[OP_LVAVREF];
-		kid->op_private &= OPpLVAL_INTRO|OPpPAD_STATE;
-		kid->op_flags |= OPf_MOD|OPf_REF;
-		continue;
-	    }
-	    kid->op_private |= OPpLVREF_AV;
-	    goto checkgv;
-	  case OP_RV2HV:
-	    if (kid->op_flags & OPf_PARENS) {
-		/* diag_listed_as: Can't modify %s in %s */
-	      parenhash:
-		yyerror(Perl_form(aTHX_ "Can't modify reference to "
-				"parenthesized hash in list assignment"));
-		return o;
-	    }
-	    kid->op_private |= OPpLVREF_HV;
-	  case OP_RV2SV:
-	   checkgv:
-	    if (kUNOP->op_first->op_type != OP_GV) goto badref;
-	    kid->op_flags |= OPf_STACKED;
-	  case OP_PADSV:
-	    break;
-	  case OP_PADAV:
-	    if (kid->op_flags & OPf_PARENS) goto slurpy;
-	    kid->op_private |= OPpLVREF_AV;
-	    break;
-	  case OP_PADHV:
-	    if (kid->op_flags & OPf_PARENS) goto parenhash;
-	    kid->op_private |= OPpLVREF_HV;
-	    break;
-	  case OP_AELEM:
-	  case OP_HELEM:
-	    kid->op_private |= OPpLVREF_ELEM;
-	    kid->op_flags   |= OPf_STACKED;
-	    break;
-	  case OP_ASLICE:
-	  case OP_HSLICE:
-	    kid->op_type = OP_LVREFSLICE;
-	    kid->op_ppaddr = PL_ppaddr[OP_LVREFSLICE];
-	    kid->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM;
-	    continue;
-	  default:
-	   badref:
-	    /* diag_listed_as: Can't modify %s in %s */
-	    yyerror(Perl_form(aTHX_ "Can't modify reference to %s in list "
-				    "assignment",
-		     o->op_type == OP_NULL && o->op_flags & OPf_SPECIAL
-		      ? "do block"
-		      : OP_DESC(kid)));
-	    return o;
-	  }
-	  kid->op_type = OP_LVREF;
-	  kid->op_ppaddr = PL_ppaddr[OP_LVREF];
-	  kid->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM|OPpLVREF_TYPE;
-	} while ((kid = OP_SIBLING(kid)));
-	if (!FEATURE_LVREF_IS_ENABLED)
-	    Perl_croak(aTHX_ "Experimental lvalue references not enabled");
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
+	kid = cUNOPo->op_first;
+      kid_2lvref:
+	{
+	    const U8 ec = PL_parser ? PL_parser->error_count : 0;
+	    S_lvref(aTHX_ kid);
+	    if (!PL_parser || PL_parser->error_count == ec) {
+		if (!FEATURE_LVREF_IS_ENABLED)
+		    Perl_croak(aTHX_
+			     "Experimental lvalue references not enabled");
+		Perl_ck_warner_d(aTHX_
+				 packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
 			      "Lvalue references are experimental");
+	    }
+	}
 	if (o->op_type == OP_REFGEN)
 	    op_null(cUNOPx(cUNOPo->op_first)->op_first); /* pushmark */
 	op_null(o);

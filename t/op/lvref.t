@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 103;
+plan 104;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -249,6 +249,8 @@ $_ == 0 ? \$toru : $wha = \3;
 is $$wha, 3, 'cond assignment resolving to scalar';
 $_ == 3 ? \$rima : \$ono = \5;
 is $rima, 5, 'cond assignment with refgens on both branches';
+\($_ == 3 ? $whitu : $waru) = \5;
+is $whitu, 5, '\( ?: ) assignment';
 
 # Foreach
 
