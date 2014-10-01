@@ -55,22 +55,6 @@ Server 2003 R2 or newer OS.  The leak does not appear on WinXP SP3.
 
 =back
 
-=head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Selected Bug Fixes
 
 =over 4
@@ -105,32 +89,31 @@ crashing.  This has been fixed. [perl #119949]
 
 =back
 
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
-
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.18.3 represents approximately 9 months of development since Perl 5.18.2
+and contains approximately 2,000 lines of changes across 53 files from 13
+authors.
 
-  perl Porting/acknowledgements.pl v5.18.2..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.18.3:
+
+Daniel Dragan, David Mitchell, Doug Bell, Father Chrysostomos, Hiroo Hayashi,
+James E Keenan, Karl Williamson, Mark Shelor, Ricardo Signes, Shlomi Fish,
+Smylers, Steve Hay, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
