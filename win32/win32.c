@@ -136,6 +136,8 @@ static int	do_spawn2_handles(pTHX_ const char *cmd, int exectype,
                         const int *handles);
 static int	do_spawnvp_handles(int mode, const char *cmdname,
                         const char * const *argv, const int *handles);
+static PerlIO * do_popen(const char *mode, const char *command, IV narg,
+			 SV **args);
 static long	find_pid(pTHX_ int pid);
 static void	remove_dead_process(long child);
 static int	terminate_process(DWORD pid, HANDLE process_handle, int sig);
@@ -146,7 +148,7 @@ static char*	wstr_to_str(const wchar_t* wstr);
 static long	filetime_to_clock(PFILETIME ft);
 static BOOL	filetime_from_time(PFILETIME ft, time_t t);
 static char*	create_command_line(char *cname, STRLEN clen,
-			const char * const *args);
+				    const char * const *args);
 static char*	qualified_path(const char *cmd);
 static void	ansify_path(void);
 static LRESULT	win32_process_message(HWND hwnd, UINT msg,
@@ -2931,22 +2933,13 @@ win32_pipe(int *pfd, unsigned int size, int mode)
 DllExport PerlIO*
 win32_popenlist(const char *mode, IV narg, SV **args)
 {
- Perl_croak_nocontext("List form of pipe open not implemented");
- return NULL;
+    get_shell();
+
+    return do_popen(mode, NULL, narg, args);
 }
 
-/*
- * a popen() clone that respects PERL5SHELL
- *
- * changed to return PerlIO* rather than FILE * by BKS, 11-11-2000
- */
-
-DllExport PerlIO*
-win32_popen(const char *command, const char *mode)
-{
-#ifdef USE_RTL_POPEN
-    return _popen(command, mode);
-#else
+STATIC PerlIO*
+do_popen(const char *mode, const char *command, IV narg, SV **args) {
     int p[2];
     int handles[3];
     int parent, child;
@@ -2955,6 +2948,7 @@ win32_popen(const char *command, const char *mode)
     int childpid;
     DWORD nhandle;
     int lock_held = 0;
+    const char **args_pvs = NULL;
 
     /* establish which ends read and write */
     if (strchr(mode,'w')) {
@@ -3008,8 +3002,32 @@ win32_popen(const char *command, const char *mode)
     {
 	dTHX;
 
-	if ((childpid = do_spawn2_handles(aTHX_ command, EXECF_SPAWN_NOWAIT, handles)) == -1)
-	    goto cleanup;
+	if (command) {
+	    if ((childpid = do_spawn2_handles(aTHX_ command, EXECF_SPAWN_NOWAIT, handles)) == -1)
+	        goto cleanup;
+
+	}
+	else {
+	    int i;
+
+	    Newx(args_pvs, narg + 1 + w32_perlshell_items, const char *);
+	    SAVEFREEPV(args_pvs);
+	    for (i = 0; i < narg; ++i)
+	        args_pvs[i] = SvPV_nolen(args[i]);
+	    args_pvs[i] = NULL;
+
+	    if ((childpid = do_spawnvp_handles(P_NOWAIT, args_pvs[0], args_pvs, handles)) == -1) {
+	        if (errno == ENOEXEC || errno == ENOENT) {
+	            /* possible shell-builtin, invoke with shell */
+		    Move(args_pvs, args_pvs+w32_perlshell_items, narg+1, const char *);
+		    Copy(w32_perlshell_vec, args_pvs, w32_perlshell_items, const char *);
+		    if ((childpid = do_spawnvp_handles(P_NOWAIT, args_pvs[0], args_pvs, handles)) == -1)
+		        goto cleanup;
+		}
+		else
+		  goto cleanup;
+	    }
+	}
 
 	win32_close(p[child]);
 
@@ -3028,7 +3046,21 @@ cleanup:
     win32_close(p[1]);
 
     return (NULL);
+}
 
+/*
+ * a popen() clone that respects PERL5SHELL
+ *
+ * changed to return PerlIO* rather than FILE * by BKS, 11-11-2000
+ */
+
+DllExport PerlIO*
+win32_popen(const char *command, const char *mode)
+{
+#ifdef USE_RTL_POPEN
+    return _popen(command, mode);
+#else
+    return do_popen(mode, command, 0, NULL);
 #endif /* USE_RTL_POPEN */
 }
 
