@@ -4009,8 +4009,8 @@ l1_char_class_tab.h		256 word bit table of character classes (for handy.h)
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
 lib/B/Deparse-core.t		See if B::Deparse knows when to use CORE::
-lib/B/Deparse-subclass.t	See if B::Deparse can be subclassed
 lib/B/Deparse.pm		Compiler Deparse backend
+lib/B/Deparse-subclass.t	See if B::Deparse can be subclassed
 lib/B/Deparse.t			See if B::Deparse works
 lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			See if Benchmark works
