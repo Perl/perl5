@@ -1255,8 +1255,7 @@ sub padname_sv {
 
 sub maybe_my {
     my $self = shift;
-    my($op, $cx, $padname, $forbid_parens) = @_;
-    my $text = $padname->PVX;
+    my($op, $cx, $text, $padname, $forbid_parens) = @_;
     if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
 	my $my = $op->private & OPpPAD_STATE
 	    ? $self->keyword("state")
@@ -3330,7 +3329,9 @@ sub padany {
 sub pp_padsv {
     my $self = shift;
     my($op, $cx, $forbid_parens) = @_;
-    return $self->maybe_my($op, $cx, $self->padname_sv($op->targ),
+    my $targ = $op->targ;
+    return $self->maybe_my($op, $cx, $self->padname($targ),
+			   $self->padname_sv($targ),
 			   $forbid_parens);
 }
 
