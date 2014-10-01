@@ -8,7 +8,7 @@ BEGIN {
     require 'Config_heavy.pl'; # since runperl will need them
 }
 
-plan tests => 35;
+plan tests => 37;
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -93,14 +93,20 @@ is( <FH>	, 12 );
 is( <$fh>	, 13 );
 my $pad_fh;
 is( <$pad_fh>	, 14 );
+{
+    my $buf = ''; $buf .= <FH>;
+    is( $buf, 15, 'rcatline' );
+}
 
 # Non-global readline() override
 BEGIN { *Rgs::readline = sub (;*) { --$r }; }
 {
     package Rgs;
-    ::is( <FH>	, 13 );
-    ::is( <$fh>	, 12 );
-    ::is( <$pad_fh>	, 11 );
+    ::is( <FH>	, 14 );
+    ::is( <$fh>	, 13 );
+    ::is( <$pad_fh>	, 12 );
+    my $buf = ''; $buf .= <FH>;
+    ::is( $buf, 11, 'rcatline' );
 }
 
 # Global readpipe() override
