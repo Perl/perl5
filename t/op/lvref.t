@@ -311,11 +311,9 @@ eval { \%::x = [] };
 like $@, qr/^Assigned value is not a HASH reference at/,
     'assigning non-hash ref to package hash ref';
 
-on;
 eval '(\do{}) = 42';
 like $@, qr/^Can't modify reference to do block in list assignment at /,
     "Can't modify reference to do block in list assignment";
-off;
 eval '(\pos) = 42';
 like $@,
      qr/^Can't modify reference to match position in list assignment at /,
