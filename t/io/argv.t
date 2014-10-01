@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 35);
+plan(tests => 36);
 
 my ($devnull, $no_devnull);
 
@@ -155,14 +155,20 @@ SKIP: {
 }
 
 open(TRY, '>Io_argv1.tmp') || (die "Can't open temp file: $!");
-print TRY "one\ntwo\n";
+print TRY "one\n\nthree\n";
 close TRY or die "Could not close: $!";
 
 $x = runperl(
     prog	=> 'print $..$ARGV.$_ while <<>>',
     args	=> [ 'Io_argv1.tmp' ],
 );
-is($x, "1Io_argv1.tmpone\n2Io_argv1.tmptwo\n", '<<>>');
+is($x, "1Io_argv1.tmpone\n2Io_argv1.tmp\n3Io_argv1.tmpthree\n", '<<>>');
+
+$x = runperl(
+    prog	=> '$w=q/b/;$w.=<<>>;print $w',
+    args	=> [ 'Io_argv1.tmp' ],
+);
+is($x, "bone\n", '<<>> and rcatline');
 
 $x = runperl(
     prog	=> 'while (<<>>) { print }',
@@ -214,7 +220,7 @@ SKIP: {
         stderr	=> 1,
         args	=> [ 'Io_argv1.tmp', '"echo foo |"' ],
     );
-    is($x, "Can't open echo foo |: No such file or directory at -e line 1, <> line 2.\n", '<<>> does not treat ...| as fork after eof');
+    is($x, "Can't open echo foo |: No such file or directory at -e line 1, <> line 3.\n", '<<>> does not treat ...| as fork after eof');
 }
 
 # This used to dump core
