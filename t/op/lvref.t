@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 111;
+plan 124;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -232,7 +232,37 @@ package HashTest {
 
 # Subroutines
 
-# ...
+package CodeTest {
+  BEGIN { *is = *main::is; }
+  use feature 'lexical_subs', 'state';
+  no warnings 'experimental::lexical_subs';
+  sub expect_scalar_cx { wantarray ? 0 : \&ThatSub }
+  sub expect_list_cx   { wantarray ? (\&ThatSub)x2 : 0 }
+  \&a = expect_scalar_cx;
+  is \&a, \&ThatSub, '\&pkg';
+  my sub a;
+  \&a = expect_scalar_cx;
+  is \&a, \&ThatSub, '\&mysub';
+  state sub as;
+  \&as = expect_scalar_cx;
+  is \&as, \&ThatSub, '\&statesub';
+  (\&b) = expect_list_cx;
+  is \&b, \&ThatSub, '(\&pkg)';
+  my sub b;
+  (\&b) = expect_list_cx;
+  is \&b, \&ThatSub, '(\&mysub)';
+  my sub bs;
+  (\&bs) = expect_list_cx;
+  is \&bs, \&ThatSub, '(\&statesub)';
+  \(&c) = expect_list_cx;
+  is \&c, \&ThatSub, '\(&pkg)';
+  my sub b;
+  \(&c) = expect_list_cx;
+  is \&c, \&ThatSub, '\(&mysub)';
+  my sub bs;
+  \(&cs) = expect_list_cx;
+  is \&cs, \&ThatSub, '\(&statesub)';
+}
 
 # Mixed List Assignments
 
@@ -310,6 +340,14 @@ like $@, qr/^Assigned value is not a HASH reference at/,
 eval { \%::x = [] };
 like $@, qr/^Assigned value is not a HASH reference at/,
     'assigning non-hash ref to package hash ref';
+eval { use feature 'lexical_subs';
+       no warnings 'experimental::lexical_subs';
+       my sub x; \&x = [] };
+like $@, qr/^Assigned value is not a CODE reference at/,
+    'assigning non-code ref to lexical code ref';
+eval { \&::x = [] };
+like $@, qr/^Assigned value is not a CODE reference at/,
+    'assigning non-code ref to package code ref';
 
 eval { my $x; (\$x) = 3 };
 like $@, qr/^Assigned value is not a reference at/,
@@ -332,6 +370,14 @@ like $@, qr/^Assigned value is not a HASH reference at/,
 eval { (\%::x) = [] };
 like $@, qr/^Assigned value is not a HASH reference at/,
     'list-assigning non-hash ref to package hash ref';
+eval { use feature 'lexical_subs';
+       no warnings 'experimental::lexical_subs';
+       my sub x; (\&x) = [] };
+like $@, qr/^Assigned value is not a CODE reference at/,
+    'list-assigning non-code ref to lexical code ref';
+eval { (\&::x) = [] };
+like $@, qr/^Assigned value is not a CODE reference at/,
+    'list-assigning non-code ref to package code ref';
 
 eval '(\do{}) = 42';
 like $@, qr/^Can't modify reference to do block in list assignment at /,

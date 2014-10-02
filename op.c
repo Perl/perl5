@@ -2366,6 +2366,21 @@ S_lvref(pTHX_ OP *o)
 	}
 	o->op_private |= OPpLVREF_AV;
 	goto checkgv;
+    case OP_RV2CV:
+	kid = cUNOPx(cUNOPx(cUNOPo->op_first)->op_first->op_sibling)
+		->op_first;
+	o->op_private = OPpLVREF_CV;
+	if (kid->op_type == OP_GV)
+	    o->op_flags |= OPf_STACKED;
+	else if (kid->op_type == OP_PADCV) {
+	    o->op_targ = kid->op_targ;
+	    kid->op_targ = 0;
+	    op_free(cUNOPo->op_first);
+	    cUNOPo->op_first = NULL;
+	    o->op_flags &=~ OPf_KIDS;
+	}
+	else goto badref;
+	break;
     case OP_RV2HV:
 	if (o->op_flags & OPf_PARENS) {
 	  parenhash:
@@ -10042,6 +10057,17 @@ Perl_ck_refassign(pTHX_ OP *o)
       checkgv:
 	if (cUNOPx(varop)->op_first->op_type != OP_GV) goto bad;
 	goto null_and_stack;
+    case OP_RV2CV: {
+	OP * const kid =
+	    cUNOPx(cUNOPx(cUNOPx(varop)->op_first)->op_first->op_sibling)
+		->op_first;
+	o->op_private = OPpLVREF_CV;
+	if (kid->op_type == OP_GV)	goto null_and_stack;
+	if (kid->op_type != OP_PADCV)	goto bad;
+	o->op_targ = kid->op_targ;
+	kid->op_targ = 0;
+	break;
+    }
     case OP_AELEM:
     case OP_HELEM:
 	o->op_private = OPpLVREF_ELEM;
