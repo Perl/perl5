@@ -4093,11 +4093,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	}
 	if (import_flag == GVf_IMPORTED_SV) {
 	    if (intro) {
-		dSS_ADD;
-		SS_ADD_PTR(gp_ref(GvGP(dstr)));
-		SS_ADD_UV(SAVEt_GP_ALIASED_SV
-			| cBOOL(GvALIASED_SV(dstr)) << 8);
-		SS_ADD_END(2);
+		save_aliased_sv((GV *)dstr);
 	    }
 	    /* Turn off the flag if sref is not referenced elsewhere,
 	       even by weak refs.  (SvRMAGICAL is a pessimistic check for

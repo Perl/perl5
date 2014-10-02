@@ -4,7 +4,7 @@ BEGIN {
     require "test.pl";
 }
 
-plan(106);
+plan(107);
 
 # A lot of tests to check that reversed for works.
 
@@ -578,4 +578,10 @@ SKIP: {
         eval { \$_[0] }
     }->($a[0]);
     is $@, "", 'vivify_defelem does not croak on &PL_sv_undef elements';
+}
+
+for $x ($y) {
+    $x = 3;
+    ($x, my $z) = (1, $y);
+    is $z, 3, 'list assignment after aliasing via foreach';
 }

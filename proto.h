@@ -3670,6 +3670,11 @@ PERL_CALLCONV void	Perl_save_aelem_flags(pTHX_ AV* av, SSize_t idx, SV **sptr, c
 #define PERL_ARGS_ASSERT_SAVE_AELEM_FLAGS	\
 	assert(av); assert(sptr)
 
+PERL_CALLCONV void	Perl_save_aliased_sv(pTHX_ GV* gv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SAVE_ALIASED_SV	\
+	assert(gv)
+
 PERL_CALLCONV I32	Perl_save_alloc(pTHX_ I32 size, I32 pad);
 PERL_CALLCONV void	Perl_save_aptr(pTHX_ AV** aptr)
 			__attribute__nonnull__(pTHX_1);
