@@ -362,6 +362,9 @@ my Dog ($foo, @bar, %baz);
 our Dog ($phoo, @barr, %bazz);
 state Dog ($fough, @barre, %bazze);
 ####
+# local our
+local our $rhubarb;
+####
 # <>
 my $foo;
 $_ .= <ARGV> . <$foo>;

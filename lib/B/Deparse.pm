@@ -1218,9 +1218,12 @@ sub maybe_local {
     # parens are there.
     my $need_parens = $self->{'in_refgen'} && $name =~ /[ah]v\z/
 		   && ($op->flags & (OPf_PARENS|OPf_REF)) == OPf_PARENS;
-    if ($op->private & (OPpLVAL_INTRO|$our_intro)) {
-	my $our_local = ($op->private & OPpLVAL_INTRO) ? "local" : "our";
-	if( $our_local eq 'our' ) {
+    if ((my $priv = $op->private) & (OPpLVAL_INTRO|$our_intro)) {
+	my @our_local;
+	push @our_local, "local" if $priv & OPpLVAL_INTRO;
+	push @our_local, "our"   if $priv & $our_intro;
+	my $our_local = join " ", @our_local;
+	if( $our_local[-1] eq 'our' ) {
 	    if ( $text !~ /^\W(\w+::)*\w+\z/
 	     and !utf8::decode($text) || $text !~ /^\W(\w+::)*\w+\z/
 	    ) {
