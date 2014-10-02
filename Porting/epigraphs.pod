@@ -571,6 +571,63 @@ L<Announced on 2013-05-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   …that I can't fix…
   …with my hands…
 
+=head2 v5.18.4 - Robert W. Chambers, "The King in Yellow"
+
+L<Announced on 2014-10-01 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/10/msg220770.html>
+
+  Along the shore the cloud waves break,
+  The twin suns sink beneath the lake,
+  The shadows lengthen
+    In Carcosa.
+
+  Strange is the night where black stars rise,
+  And strange moons circle through the skies
+  But stranger still is
+    Lost Carcosa.
+
+  Songs that the Hyades shall sing,
+  Where flap the tatters of the King,
+  Must die unheard in
+    Dim Carcosa.
+
+  Song of my soul, my voice is dead;
+  Die thou, unsung, as tears unshed
+  Shall dry and die in
+    Lost Carcosa.
+
+  -- Cassilda's Song in "The King in Yellow," Act i, Scene 2.
+     Robert W. Chambers
+
+=head2 v5.18.3 - (no epigraph)
+
+(no epigraph)
+
+=head2 v5.18.3-RC2 - Robert W. Chambers, "The King in Yellow"
+
+L<Announced on 2014-09-27|http://nntp.perl.org/group/perl.perl5.porters/220613>
+
+"Ah! I see it now!" I shrieked. "You have seized the throne and the
+empire. Woe! woe to you who are crowned with the crown of the King in
+Yellow!"
+
+    -- Robert W. Chambers, The King in Yellow, Act I, Scene 2.
+
+=head2 v5.18.3-RC1 - Robert W. Chambers, "The King in Yellow"
+
+L<Announced on 2014-09-17|http://nntp.perl.org/group/perl.perl5.porters/220072>
+
+  CAMILLA: You, sir, should unmask.
+
+  STRANGER: Indeed?
+
+  CASSILDA: Indeed it's time. We all have laid aside disguise but you.
+
+  STRANGER: I wear no mask.
+
+  CAMILLA: (Terrified, aside to Cassilda.) No mask? No mask!
+
+  -- Robert W. Chambers, The King in Yellow, Act I, Scene 2.
+
 =head2 v5.18.2 - Miss Manners
 
 L<Announced on 2014-01-06 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/01/msg211224.html>
