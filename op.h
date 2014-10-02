@@ -109,7 +109,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On control verbs, we saw no label */
 				/*  On flipflop, we saw ... instead of .. */
 				/*  On UNOPs, saw bare parens, e.g. eof(). */
-				/*  On OP_ENTERSUB || OP_NULL, saw a "do". */
+				/*  On OP_NULL, saw a "do". */
 				/*  On OP_EXISTS, treat av as av, not avhv.  */
 				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
                                 /*  On pushre, rx is used as part of split, e.g. split " " */
