@@ -2912,6 +2912,13 @@ tmpnam()
 	 *
 	 * Then again, maybe this should be removed at some point.
 	 * No point in enabling dangerous interfaces. */
+        if (ckWARN_d(WARN_DEPRECATED)) {
+	    HV *warned = get_hv("POSIX::_warned", GV_ADD | GV_ADDMULTI);
+            if (! hv_exists(warned, (const char *)&PL_op, sizeof(PL_op))) {
+                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "Calling POSIX::tmpnam() is deprecated");
+                hv_store(warned, (const char *)&PL_op, sizeof(PL_op), &PL_sv_yes, 0);
+            }
+        }
 	len = strlen(tmpnam(SvPV(RETVAL, i)));
 	SvCUR_set(RETVAL, len);
     OUTPUT:
