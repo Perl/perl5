@@ -108,6 +108,8 @@ my %mg =
      ext => { char => '~', desc => 'Available for use by extensions' },
      checkcall => { char => ']', value_magic => 1, vtable => 'checkcall',
 		    desc => 'inlining/mutation of call to this CV'},
+     debugvar => { char => '*', desc => '$DB::single, signal, trace vars',
+		   vtable => 'debugvar' },
 );
 
 # These have a subtly different "namespace" from the magic types.
@@ -144,6 +146,7 @@ my %sig =
      'hintselem' => {set => 'sethint', clear => 'clearhint'},
      'hints' => {clear => 'clearhints'},
      'checkcall' => {copy => 'copycallchecker'},
+     'debugvar' => { set => 'setdebugvar', get => 'getdebugvar' },
 );
 
 my ($vt, $raw, $names) = map {

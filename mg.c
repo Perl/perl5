@@ -3403,6 +3403,27 @@ Perl_magic_copycallchecker(pTHX_ SV *sv, MAGIC *mg, SV *nsv,
     return 1;
 }
 
+int
+Perl_magic_setdebugvar(pTHX_ SV *sv, MAGIC *mg) {
+    PERL_ARGS_ASSERT_MAGIC_SETDEBUGVAR;
+
+    assert(mg->mg_private >= DBVARMG_SINGLE && mg->mg_private < DBVARMG_COUNT);
+
+    PL_DBcontrol[mg->mg_private] = SvIV_nomg(sv);
+
+    return 1;
+}
+
+int
+Perl_magic_getdebugvar(pTHX_ SV *sv, MAGIC *mg) {
+    PERL_ARGS_ASSERT_MAGIC_GETDEBUGVAR;
+
+    assert(mg->mg_private >= DBVARMG_SINGLE && mg->mg_private < DBVARMG_COUNT);
+    sv_setiv(sv, PL_DBcontrol[mg->mg_private]);
+
+    return 0;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

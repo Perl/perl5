@@ -393,6 +393,8 @@ PERLVAR(I, DBtrace,	SV *)		/*  $DB::trace  */
 PERLVAR(I, DBsignal,	SV *)		/*  $DB::signal */
 PERLVAR(I, dbargs,	AV *)		/* args to call listed by caller function */
 
+PERLVARA(I, DBcontrol,    DBVARMG_COUNT, IV) /* IV versions of $DB::single, trace, signal */
+
 /* symbol tables */
 PERLVAR(I, debstash,	HV *)		/* symbol table for perldb package */
 PERLVAR(I, globalstash,	HV *)		/* global keyword overrides imported here */

@@ -286,8 +286,6 @@ is(
   '-d does not conflict with sort optimisations'
 );
 
-{
-local $TODO = "This crashes";
 is(
   runperl(
    switches => [ '-Ilib', '-d:switchd_empty' ],
@@ -302,4 +300,3 @@ is(
   "debugged\n",
   "\$DB::single set to overload"
 );
-}

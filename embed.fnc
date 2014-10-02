@@ -836,6 +836,7 @@ p	|int	|magic_freeovrld|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_get	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getarylen|NN SV* sv|NN const MAGIC* mg
 p	|int	|magic_getdefelem|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_getdebugvar|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getnkeys	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getpack	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getpos	|NN SV* sv|NN MAGIC* mg
@@ -859,6 +860,7 @@ p	|int	|magic_setarylen|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_cleararylen_p|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_freearylen_p|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setdbline|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setdebugvar|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setdefelem|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setenv	|NN SV* sv|NN MAGIC* mg
 dp	|int	|magic_sethint	|NN SV* sv|NN MAGIC* mg

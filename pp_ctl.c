@@ -1939,7 +1939,7 @@ PP(pp_dbstate)
     PERL_ASYNC_CHECK();
 
     if (PL_op->op_flags & OPf_SPECIAL /* breakpoint */
-	    || SvIV(PL_DBsingle) || SvIV(PL_DBsignal) || SvIV(PL_DBtrace))
+	    || PL_DBsingle_iv || PL_DBsignal_iv || PL_DBtrace_iv)
     {
 	dSP;
 	PERL_CONTEXT *cx;

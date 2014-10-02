@@ -2350,6 +2350,12 @@ PERL_CALLCONV int	Perl_magic_getarylen(pTHX_ SV* sv, const MAGIC* mg)
 #define PERL_ARGS_ASSERT_MAGIC_GETARYLEN	\
 	assert(sv); assert(mg)
 
+PERL_CALLCONV int	Perl_magic_getdebugvar(pTHX_ SV* sv, MAGIC* mg)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MAGIC_GETDEBUGVAR	\
+	assert(sv); assert(mg)
+
 PERL_CALLCONV int	Perl_magic_getdefelem(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -2464,6 +2470,12 @@ PERL_CALLCONV int	Perl_magic_setdbline(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_MAGIC_SETDBLINE	\
+	assert(sv); assert(mg)
+
+PERL_CALLCONV int	Perl_magic_setdebugvar(pTHX_ SV* sv, MAGIC* mg)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MAGIC_SETDEBUGVAR	\
 	assert(sv); assert(mg)
 
 PERL_CALLCONV int	Perl_magic_setdefelem(pTHX_ SV* sv, MAGIC* mg)

@@ -14577,6 +14577,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_DBsingle		= sv_dup(proto_perl->IDBsingle, param);
     PL_DBtrace		= sv_dup(proto_perl->IDBtrace, param);
     PL_DBsignal		= sv_dup(proto_perl->IDBsignal, param);
+    Copy(proto_perl->IDBcontrol, PL_DBcontrol, DBVARMG_COUNT, IV);
 
     /* symbol tables */
     PL_defstash		= hv_dup_inc(proto_perl->Idefstash, param);

@@ -5240,6 +5240,16 @@ typedef enum {
 	(SAWAMPERSAND_LEFT|SAWAMPERSAND_MIDDLE|SAWAMPERSAND_RIGHT)
 #endif
 
+/* Used for debugvar magic */
+#define DBVARMG_SINGLE  0
+#define DBVARMG_TRACE   1
+#define DBVARMG_SIGNAL  2
+#define DBVARMG_COUNT   3
+
+#define PL_DBsingle_iv  (PL_DBcontrol[DBVARMG_SINGLE])
+#define PL_DBtrace_iv   (PL_DBcontrol[DBVARMG_TRACE])
+#define PL_DBsignal_iv  (PL_DBcontrol[DBVARMG_SIGNAL])
+
 /* Various states of the input record separator SV (rs) */
 #define RsSNARF(sv)   (! SvOK(sv))
 #define RsSIMPLE(sv)  (SvOK(sv) && (! SvPOK(sv) || SvCUR(sv)))
