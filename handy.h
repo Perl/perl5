@@ -535,7 +535,9 @@ for.  If Perl can determine that the current locale is a UTF-8 locale, it uses
 the published Unicode rules; otherwise, it uses the C library function that
 gives the named classification.  For example, C<isDIGIT_LC()> when not in a
 UTF-8 locale returns the result of calling C<isdigit()>.  FALSE is always
-returned if the input won't fit into an octet.
+returned if the input won't fit into an octet.  On some platforms where the C
+library function is known to be defective, Perl changes its result to follow
+the POSIX standard's rules.
 
 Variant C<isFOO_LC_uvchr> is like C<isFOO_LC>, but is defined on any UV.  It
 returns the same as C<isFOO_LC> for input code points less than 256, and
@@ -704,8 +706,9 @@ word character includes more than the standard C language meaning of
 alphanumeric.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isWORDCHAR_A>, C<isWORDCHAR_L1>, C<isWORDCHAR_uni>, C<isWORDCHAR_utf8>,
-C<isWORDCHAR_LC>, C<isWORDCHAR_LC_uvchr>, and C<isWORDCHAR_LC_utf8>.
+C<isWORDCHAR_A>, C<isWORDCHAR_L1>, C<isWORDCHAR_uni>, and C<isWORDCHAR_utf8>.
+C<isWORDCHAR_LC>, C<isWORDCHAR_LC_uvchr>, and C<isWORDCHAR_LC_utf8> are also as
+described there, but additionally include the platform's native underscore.
 
 =for apidoc Am|bool|isXDIGIT|char ch
 Returns a boolean indicating whether the specified character is a hexadecimal
