@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 124;
+plan 125;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -424,6 +424,10 @@ eval '\%{"42"} = 42';
 like $@,
     qr/^Can't modify reference to hash dereference in scalar assignment a/,
    "Can't modify reference to hash dereference in scalar assignment";
+eval '$foo ? \%{"42"} : \%43 = 42';
+like $@,
+    qr/^Can't modify reference to hash dereference in scalar assignment a/,
+   "Can't modify ref to whatever in scalar assignment via cond expr";
 on;
 
 

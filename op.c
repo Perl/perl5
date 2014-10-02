@@ -2336,14 +2336,14 @@ S_vivifies(const OPCODE type)
 }
 
 static void
-S_lvref(pTHX_ OP *o)
+S_lvref(pTHX_ OP *o, I32 type)
 {
     OP *kid;
     switch (o->op_type) {
     case OP_COND_EXPR:
 	for (kid = OP_SIBLING(cUNOPo->op_first); kid;
 	     kid = OP_SIBLING(kid))
-	    S_lvref(aTHX_ kid);
+	    S_lvref(aTHX_ kid, type);
 	/* FALLTHROUGH */
     case OP_PUSHMARK:
 	return;
@@ -2423,14 +2423,14 @@ S_lvref(pTHX_ OP *o)
 	else if (!(o->op_flags & OPf_KIDS))
 	    return;
 	if (o->op_targ != OP_LIST) {
-	    S_lvref(aTHX_ cBINOPo->op_first);
+	    S_lvref(aTHX_ cBINOPo->op_first, type);
 	    return;
 	}
 	/* FALLTHROUGH */
     case OP_LIST:
 	for (kid = cLISTOPo->op_first; kid; kid = OP_SIBLING(kid)) {
 	    assert((kid->op_flags & OPf_WANT) != OPf_WANT_VOID);
-	    S_lvref(aTHX_ kid);
+	    S_lvref(aTHX_ kid, type);
 	}
 	return;
     case OP_STUB:
@@ -2440,11 +2440,11 @@ S_lvref(pTHX_ OP *o)
     default:
       badref:
 	/* diag_listed_as: Can't modify %s in %s */
-	yyerror(Perl_form(aTHX_ "Can't modify reference to %s in list "
-				"assignment",
+	yyerror(Perl_form(aTHX_ "Can't modify reference to %s in %s",
 		     o->op_type == OP_NULL && o->op_flags & OPf_SPECIAL
 		      ? "do block"
-		      : OP_DESC(o)));
+		      : OP_DESC(o),
+		     PL_op_desc[type]));
 	return;
     }
     o->op_type = OP_LVREF;
@@ -2758,7 +2758,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
       kid_2lvref:
 	{
 	    const U8 ec = PL_parser ? PL_parser->error_count : 0;
-	    S_lvref(aTHX_ kid);
+	    S_lvref(aTHX_ kid, type);
 	    if (!PL_parser || PL_parser->error_count == ec) {
 		if (!FEATURE_LVREF_IS_ENABLED)
 		    Perl_croak(aTHX_
