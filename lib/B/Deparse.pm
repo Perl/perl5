@@ -11,7 +11,7 @@ package B::Deparse;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
-	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD
+	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD OPf_PARENS
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
@@ -253,6 +253,9 @@ BEGIN {
 #
 # in_subst_repl
 # True when deparsing the replacement part of a substitution.
+#
+# in_refgen
+# True when deparsing the argument to \.
 #
 # parens: -p
 # linenums: -l
@@ -1209,7 +1212,12 @@ sub find_our_type {
 sub maybe_local {
     my $self = shift;
     my($op, $cx, $text) = @_;
-    my $our_intro = ($op->name =~ /^(gv|rv2)[ash]v$/) ? OPpOUR_INTRO : 0;
+    my $name = $op->name;
+    my $our_intro = ($name =~ /^(gv|rv2)[ash]v$/) ? OPpOUR_INTRO : 0;
+    # The @a in \(@a) isn't in ref context, but only when the
+    # parens are there.
+    my $need_parens = $self->{'in_refgen'} && $name =~ /[ah]v\z/
+		   && ($op->flags & (OPf_PARENS|OPf_REF)) == OPf_PARENS;
     if ($op->private & (OPpLVAL_INTRO|$our_intro)) {
 	my $our_local = ($op->private & OPpLVAL_INTRO) ? "local" : "our";
 	if( $our_local eq 'our' ) {
@@ -1224,14 +1232,17 @@ sub maybe_local {
 		$our_local .= ' ' . $type;
 	    }
 	}
-	return $text if $self->{'avoid_local'}{$$op};
-        if (want_scalar($op)) {
+	return $need_parens ? "($text)" : $text
+	    if $self->{'avoid_local'}{$$op};
+	if ($need_parens) {
+	    return "$our_local($text)";
+	} elsif (want_scalar($op)) {
 	    return "$our_local $text";
 	} else {
 	    return $self->maybe_parens_func("$our_local", $text, $cx, 16);
 	}
     } else {
-	return $text;
+	return $need_parens ? "($text)" : $text;
     }
 }
 
@@ -1256,6 +1267,11 @@ sub padname_sv {
 sub maybe_my {
     my $self = shift;
     my($op, $cx, $text, $padname, $forbid_parens) = @_;
+    # The @a in \(@a) isn't in ref context, but only when the
+    # parens are there.
+    my $need_parens = !$forbid_parens && $self->{'in_refgen'}
+		   && $op->name =~ /[ah]v\z/
+		   && ($op->flags & (OPf_PARENS|OPf_REF)) == OPf_PARENS;
     if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
 	my $my = $op->private & OPpPAD_STATE
 	    ? $self->keyword("state")
@@ -1263,13 +1279,15 @@ sub maybe_my {
 	if ($padname->FLAGS & SVpad_TYPED) {
 	    $my .= ' ' . $padname->SvSTASH->NAME;
 	}
-	if ($forbid_parens || want_scalar($op)) {
+	if ($need_parens) {
+	    return "$my($text)";
+	} elsif ($forbid_parens || want_scalar($op)) {
 	    return "$my $text";
 	} else {
 	    return $self->maybe_parens_func($my, $text, $cx, 16);
 	}
     } else {
-	return $text;
+	return $need_parens ? "($text)" : $text;
     }
 }
 
@@ -2255,13 +2273,7 @@ sub pp_refgen {
             return $self->e_anoncode({ code => $self->padval($kid->sibling->targ) });
 	} elsif ($kid->name eq "pushmark") {
             my $sib_name = $kid->sibling->name;
-            if ($sib_name =~ /^(pad|rv2)[ah]v$/
-                and not $kid->sibling->flags & OPf_REF)
-            {
-                # The @a in \(@a) isn't in ref context, but only when the
-                # parens are there.
-		return "\\(" . $self->pp_list($op->first) . ")";
-            } elsif ($sib_name eq 'entersub') {
+            if ($sib_name eq 'entersub') {
                 my $text = $self->deparse($kid->sibling, 1);
                 # Always show parens for \(&func()), but only with -p otherwise
                 $text = "($text)" if $self->{'parens'}
@@ -2270,6 +2282,7 @@ sub pp_refgen {
             }
         }
     }
+    local $self->{'in_refgen'} = 1;
     $self->pfixop($op, $cx, "\\", 20);
 }
 

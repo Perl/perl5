@@ -1463,3 +1463,12 @@ $x = $b[1] + $b[126] + $b[127] + $b[128] + $b[255] + $b[256];
 ####
 # 'm' must be preserved in m??
 m??;
+####
+# \(@array) and \(..., (@array), ...)
+my(@array, %hash, @a, @b, %c, %d);
+() = \(@array);
+() = \(%hash);
+() = \(@a, (@b), (%c), %d);
+() = \(@Foo::array);
+() = \(%Foo::hash);
+() = \(@Foo::a, (@Foo::b), (%Foo::c), %Foo::d);
