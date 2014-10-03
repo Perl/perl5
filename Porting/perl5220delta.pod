@@ -365,6 +365,10 @@ soon:
 
 =item *
 
+L<Dancer> version 1.3130
+
+=item *
+
 L<Data::Alias> version 1.18
 
 =item *
@@ -373,11 +377,23 @@ L<Data::Util> version 0.63
 
 =item *
 
+L<Function::Parameters> version 1.0402
+
+=item *
+
 L<Future> version 0.29
 
 =item *
 
 L<Hook::LexWrap> version 0.24
+
+=item *
+
+L<Padre> version 1.00
+
+=item *
+
+L<Parse::Keyword> 0.08
 
 =back
 
