@@ -3160,6 +3160,7 @@ sub loop_common {
     my $bare = 0;
     my $body;
     my $cond = undef;
+    my $name;
     if ($kid->name eq "lineseq") { # bare or infinite loop
 	if ($kid->last->name eq "unstack") { # infinite
 	    $head = "while (1) "; # Can't use for(;;) if there's a continue
@@ -3203,9 +3204,8 @@ sub loop_common {
 	$head = "foreach $var ($ary) ";
     } elsif ($kid->name eq "null") { # while/until
 	$kid = $kid->first;
-	my $name = {"and" => "while", "or" => "until"}->{$kid->name};
-	$cond = $self->deparse($kid->first, 1);
-	$head = "$name ($cond) ";
+	$name = {"and" => "while", "or" => "until"}->{$kid->name};
+	$cond = $kid->first;
 	$body = $kid->first->sibling;
     } elsif ($kid->name eq "stub") { # bare and empty
 	return "{;}"; # {} could be a hashref
@@ -3217,6 +3217,8 @@ sub loop_common {
     # block (or the last in a bare loop).
     my $cont_start = $enter->nextop;
     my $cont;
+    my $precond;
+    my $postcond;
     if ($$cont_start != $$op && ${$cont_start} != ${$body->last}) {
 	if ($bare) {
 	    $cont = $body->last;
@@ -3234,7 +3236,8 @@ sub loop_common {
 	}
 	$body = $self->lineseq(undef, 0, @states);
 	if (defined $cond and not is_scope $cont and $self->{'expand'} < 3) {
-	    $head = "for ($init; $cond; " . $self->deparse($cont, 1) .") ";
+	    $precond = "for ($init; ";
+	    $postcond = "; " . $self->deparse($cont, 1) .") ";
 	    $cont = "\cK";
 	} else {
 	    $cont = $cuddle . "continue {\n\t" .
@@ -3243,10 +3246,22 @@ sub loop_common {
     } else {
 	return "" if !defined $body;
 	if (length $init) {
-	    $head = "for ($init; $cond;) ";
+	    $precond = "for ($init; ";
+	    $postcond = ";) ";
 	}
 	$cont = "\cK";
 	$body = $self->deparse($body, 0);
+    }
+    if ($precond) { # for(;;)
+	$cond &&= $self->deparse($cond, $name eq 'until' ? 3 : 1);
+	if ($name eq 'until') {
+	    substr $cond, 0, 0, = $cond =~ /^\(/ ? "not" : "not ";
+	}
+	$head = "$precond$cond$postcond";
+    }
+    if ($name && !$head) {
+	ref $cond and $cond = $self->deparse($cond, 1);
+	$head = "$name ($cond) ";
     }
     $body =~ s/;?$/;\n/;
 

@@ -405,6 +405,15 @@ for (my $i = 0; $i < 2; ++$i) {
     my $z = 1;
 }
 ####
+# 3-argument for with inverted condition
+for (my $i; not $i;) {
+    die;
+}
+for (my $i; not $i; ++$i) {
+    die;
+}
+Something_to_put_the_loop_in_void_context();
+####
 # while/continue
 my $i;
 while ($i) { my $z = 1; } continue { $i = 99; }
