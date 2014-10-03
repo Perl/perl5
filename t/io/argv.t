@@ -188,7 +188,7 @@ $x = runperl(
     stderr	=> 1,
     args	=> [ '-' ],
 );
-is($x, "Can't open -: No such file or directory at -e line 1.\n", '<<>> does not treat - as STDIN');
+like($x, qr/^Can't open -: .* at -e line 1/, '<<>> does not treat - as STDIN');
 
 {
     # tests for an empty string in @ARGV
@@ -196,13 +196,13 @@ is($x, "Can't open -: No such file or directory at -e line 1.\n", '<<>> does not
         prog	=> 'push @ARGV,q//;print while <>',
         stderr	=> 1,
     );
-    is($x, "Can't open : No such file or directory at -e line 1.\n", '<<>> does not treat - as STDIN');
+    like($x, qr/^Can't open : .* at -e line 1/, '<<>> does not treat - as STDIN');
 
     $x = runperl(
         prog	=> 'push @ARGV,q//;print while <<>>',
         stderr	=> 1,
     );
-    is($x, "Can't open : No such file or directory at -e line 1.\n", '<<>> does not treat - as STDIN');
+    like($x, qr/^Can't open : .* at -e line 1/, '<<>> does not treat - as STDIN');
 }
 
 SKIP: {
@@ -213,14 +213,14 @@ SKIP: {
         stderr	=> 1,
         args	=> [ '"echo foo |"' ],
     );
-    is($x, "Can't open echo foo |: No such file or directory at -e line 1.\n", '<<>> does not treat ...| as fork');
+    like($x, qr/^Can't open echo foo \|: .* at -e line 1/, '<<>> does not treat ...| as fork');
 
     $x = runperl(
         prog	=> 'while (<<>>) { }',
         stderr	=> 1,
         args	=> [ 'Io_argv1.tmp', '"echo foo |"' ],
     );
-    is($x, "Can't open echo foo |: No such file or directory at -e line 1, <> line 3.\n", '<<>> does not treat ...| as fork after eof');
+    like($x, qr/^Can't open echo foo \|: .* at -e line 1, <> line 3/, '<<>> does not treat ...| as fork after eof');
 }
 
 # This used to dump core
