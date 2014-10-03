@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 125;
+plan 130;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -284,42 +284,61 @@ is $whitu, 5, '\( ?: ) assignment';
 
 # Foreach
 
-on;
-eval '
-  for \my $a(\$for1, \$for2) {
-    push @for, \$a;
-  }
-';
+for \my $topic (\$for1, \$for2) {
+    push @for, \$topic;
+}
 is "@for", \$for1 . ' ' . \$for2, 'foreach \my $a';
+is \$topic, \$::topic, 'for \my scoping';
 
 @for = ();
-eval '
-  for \my @a([1,2], [3,4]) {
+for \$::a(\$for1, \$for2) {
+    push @for, \$::a;
+}
+is "@for", \$for1 . ' ' . \$for2, 'foreach \$::a';
+
+@for = ();
+for \my @a([1,2], [3,4]) {
     push @for, @a;
-  }
-';
+}
 is "@for", "1 2 3 4", 'foreach \my @a [perl #22335]';
 
 @for = ();
-eval '
-  for \my %a({5,6}, {7,8}) {
+for \@::a([1,2], [3,4]) {
+    push @for, @::a;
+}
+is "@for", "1 2 3 4", 'foreach \@::a [perl #22335]';
+
+@for = ();
+for \my %a({5,6}, {7,8}) {
     push @for, %a;
-  }
-';
+}
 is "@for", "5 6 7 8", 'foreach \my %a [perl #22335]';
 
 @for = ();
-eval '
-  for \my &a(sub {9}, sub {10}) {
+for \%::a({5,6}, {7,8}) {
+    push @for, %::a;
+}
+is "@for", "5 6 7 8", 'foreach \%::a [perl #22335]';
+
+@for = ();
+{
+  use feature 'lexical_subs';
+  no warnings 'experimental::lexical_subs';
+  my sub a;
+  for \&a(sub {9}, sub {10}) {
     push @for, &a;
   }
-';
-is "@for", "9 10", 'foreach \my &a';
+}
+is "@for", "9 10", 'foreach \&padcv';
 
+@for = ();
+for \&::a(sub {9}, sub {10}) {
+  push @for, &::a;
+}
+is "@for", "9 10", 'foreach \&rv2cv';
 
 # Errors
 
-off;
 eval { my $x; \$x = 3 };
 like $@, qr/^Assigned value is not a reference at/, 'assigning non-ref';
 eval { my $x; \$x = [] };
