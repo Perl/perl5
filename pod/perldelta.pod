@@ -161,6 +161,13 @@ L<Module::CoreList> has been upgraded from version 5.20140920 to 5.20141020.
 
 Updated to cover the latest releases of Perl.
 
+=item *
+
+L<XSLoader> has been upgraded from version 0.17 to 0.18.
+
+Allow XSLoader to load modules from a different namespace.
+[perl #122455]
+
 =back
 
 =head2 Removed Modules and Pragmata
