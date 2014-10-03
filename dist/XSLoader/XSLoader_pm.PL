@@ -10,7 +10,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.17";
+$VERSION = "0.18";
 
 #use strict;
 
