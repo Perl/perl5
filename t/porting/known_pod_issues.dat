@@ -43,6 +43,7 @@ cpanp(1)
 CPANPLUS
 Crypt::Random
 curl(1)
+Dancer
 Data::Alias
 Data::Entropy
 Data::Float
@@ -75,6 +76,7 @@ File::MMagic
 File::ShareDir
 flock(3)
 fsync(3c)
+Function::Parameters
 Future
 gcc(1)
 Getopt::Std
@@ -129,7 +131,9 @@ open(2)
 OS2::Proc
 OS2::WinObject
 Package::Constants
+Padre
 PadWalker
+Parse::Keyword
 passwd(1)
 perl(1)
 Perl4::CoreLibs
