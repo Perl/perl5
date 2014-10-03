@@ -33,7 +33,7 @@ my %modules = (
     'Time::HiRes'=> q| ::can_ok( 'Time::HiRes' => 'usleep'  ) |,  # 5.7.3
 );
 
-plan tests => keys(%modules) * 3 + 8;
+plan tests => keys(%modules) * 3 + 9;
 
 # Try to load the module
 use_ok( 'XSLoader' );
@@ -95,4 +95,34 @@ SKIP: {
     eval 'package List::Util; XSLoader::load(__PACKAGE__, "version")';
     like $@, "/^Invalid version format/",
         'correct error msg for invalid versions';
+}
+
+SKIP: {
+  skip "Devel::Peek not available", 1
+    unless $extensions =~ /\bDevel::Peek\b/;
+
+  # XSLoader::load() assumes it's being called from a module, so
+  # pretend it is, first find when Devel/Peek.pm is
+  use File::Spec::Functions;
+  my $peek_file = catdir("Devel", "Peek.pm");
+  my $module_path;
+  for my $dir (@INC) {
+    if (-f catfile($dir, $peek_file)) {
+      $module_path = catfile($dir, "Not", "Devel", "Peek.pm");
+      last;
+    }
+  }
+
+  skip "Cannot find $peek_file", 2
+    unless $module_path;
+
+  # [perl #122455]
+  # die instead of falling back to DynaLoader
+  local *XSLoader::bootstrap_inherit = sub { die "Fallback to DynaLoader\n" };
+  ::ok( eval <<EOS, "test correct path searched for modules")
+package Not::Devel::Peek;
+#line 1 "$module_path"
+XSLoader::load("Devel::Peek");
+EOS
+    or ::diag $@;
 }
