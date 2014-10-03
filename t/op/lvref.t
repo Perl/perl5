@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 130;
+plan 135;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -73,6 +73,14 @@ is do { \(local $l) = \4; $l }, 4, '\(local $scalar) assignment';
 is $l, undef, 'localisation unwound';
 \$foo = \*bar;
 is *foo{SCALAR}, *bar{GLOB}, 'globref-to-scalarref assignment';
+for (1,2) {
+  \my $x = \3 if $_ == 1;
+  \my($y) = \3 if $_ == 1;
+  if ($_ == 2) {
+    is $x, undef, '\my $x = ... clears $x on scope exit';
+    is $y, undef, '\my($x) = ... clears $x on scope exit';
+  }
+}
 
 # Array Elements
 
@@ -195,6 +203,14 @@ package ArrayTest {
   } or do { SKIP: { ::skip 'unimplemented' } };
   is \@i, $old, '(\local @a) unwound';
 }
+for (1,2) {
+  \my @x = [1..3] if $_ == 1;
+  \my(@y) = \3 if $_ == 1;
+  if ($_ == 2) {
+    is @x, 0, '\my @x = ... clears @x on scope exit';
+    is @y, 0, '\my(@x) = ... clears @x on scope exit';
+  }
+}
 
 # Hashes
 
@@ -228,6 +244,12 @@ package HashTest {
     is \%i, \%ThatHash, '(\local %a)';
   } or do { SKIP: { ::skip 'unimplemented' } };
   is \%i, $old, '(\local %a) unwound';
+}
+for (1,2) {
+  \my %x = {1,2} if $_ == 1;
+  if ($_ == 2) {
+    is %x, 0, '\my %x = ... clears %x on scope exit';
+  }
 }
 
 # Subroutines
