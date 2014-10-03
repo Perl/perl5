@@ -1963,6 +1963,11 @@ PP(pp_iter)
             sv = AvARRAY(av)[ix];
         }
 
+        if (UNLIKELY(cx->cx_type & CXp_FOR_LVREF)) {
+            SvSetMagicSV(*itersvp, sv);
+            break;
+        }
+
         if (LIKELY(sv)) {
             if (UNLIKELY(SvIS_FREED(sv))) {
                 *itersvp = NULL;

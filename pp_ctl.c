@@ -2112,13 +2112,21 @@ PP(pp_enteriter)
 	itervar = &PAD_SVl(PL_op->op_targ);
 #endif
     }
-    else {					/* symbol table variable */
+    else if (LIKELY(isGV(TOPs))) {		/* symbol table variable */
 	GV * const gv = MUTABLE_GV(POPs);
 	SV** svp = &GvSV(gv);
 	save_pushptrptr(gv, SvREFCNT_inc(*svp), SAVEt_GVSV);
 	*svp = newSV(0);
 	itervar = (void *)gv;
 	save_aliased_sv(gv);
+    }
+    else {
+	SV * const sv = POPs;
+	assert(SvTYPE(sv) == SVt_PVMG);
+	assert(SvMAGIC(sv));
+	assert(SvMAGIC(sv)->mg_type == PERL_MAGIC_lvref);
+	itervar = (void *)sv;
+	cxtype |= CXp_FOR_LVREF;
     }
 
     if (PL_op->op_private & OPpITER_DEF)
@@ -2133,6 +2141,8 @@ PP(pp_enteriter)
 	if (SvTYPE(maybe_ary) != SVt_PVAV) {
 	    dPOPss;
 	    SV * const right = maybe_ary;
+	    if (UNLIKELY(cxtype & CXp_FOR_LVREF))
+		DIE(aTHX_ "Assigned value is not a reference");
 	    SvGETMAGIC(sv);
 	    SvGETMAGIC(right);
 	    if (RANGE_IS_NUMERIC(sv,right)) {

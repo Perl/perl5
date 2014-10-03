@@ -71,7 +71,8 @@
 %type <opval> sliceme kvslice gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr miexpr
 %type <opval> optlistexpr optexpr indirob listop method
-%type <opval> formname subname proto optsubbody cont my_scalar formblock
+%type <opval> formname subname proto optsubbody cont my_scalar my_var
+%type <opval> refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
 %type <opval> realsubbody subsignature termbinop termunop anonymous termdo
 %type <opval> formstmtseq formline formarg
@@ -376,6 +377,31 @@ barestmt:	PLUGSTMT
 			{
 			  $$ = block_end($4, newFOROP(0,
 				      op_lvalue($2, OP_ENTERLOOP), $5, $7, $8));
+			  parser->copline = (line_t)$1;
+			}
+	|	FOR REFGEN MY remember my_var
+			{ parser->in_my = 0; $<opval>$ = my($5); }
+		'(' mexpr ')' mblock cont
+			{
+			  $$ = block_end(
+				$4,
+				newFOROP(0,
+					 op_lvalue(
+					    newUNOP(OP_REFGEN, 0,
+						    op_lvalue($<opval>6,
+							      OP_REFGEN)),
+					    OP_ENTERLOOP),
+					 $8, $10, $11)
+			  );
+			  parser->copline = (line_t)$1;
+			}
+	|	FOR REFGEN refgen_topic '(' remember mexpr ')' mblock cont
+			{
+			  $$ = block_end($5, newFOROP(
+				0, op_lvalue(newUNOP(OP_REFGEN, 0,
+						     op_lvalue($3,
+							       OP_REFGEN)),
+					     OP_ENTERLOOP), $6, $8, $9));
 			  parser->copline = (line_t)$1;
 			}
 	|	FOR '(' remember mexpr ')' mblock cont
@@ -1016,6 +1042,15 @@ optexpr:	/* NULL */
    lexical */
 my_scalar:	scalar
 			{ parser->in_my = 0; $$ = my($1); }
+	;
+
+my_var	:	scalar
+	|	ary
+	|	hsh
+	;
+
+refgen_topic:	my_var
+	|	amper
 	;
 
 amper	:	'&' indirob

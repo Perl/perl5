@@ -2450,6 +2450,8 @@ S_lvref(pTHX_ OP *o, I32 type)
     o->op_type = OP_LVREF;
     o->op_ppaddr = PL_ppaddr[OP_LVREF];
     o->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM|OPpLVREF_TYPE;
+    if (type == OP_ENTERLOOP)
+	o->op_private |= OPpLVREF_ITER;
 }
 
 OP *
@@ -2747,7 +2749,9 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	goto nomod;
 
     case OP_SREFGEN:
-	if (type != OP_AASSIGN && type != OP_SASSIGN) goto nomod;
+	if (type != OP_AASSIGN && type != OP_SASSIGN
+	 && type != OP_ENTERLOOP)
+	    goto nomod;
 	/* Don’t bother applying lvalue context to the ex-list.  */
 	kid = cUNOPx(cUNOPo->op_first)->op_first;
 	assert (!OP_HAS_SIBLING(kid));
@@ -6932,6 +6936,8 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             op_free(sv);
 	    sv = NULL;
 	}
+	else if (sv->op_type == OP_NULL && sv->op_targ == OP_SREFGEN)
+	    NOOP;
 	else
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
 	if (padoff) {

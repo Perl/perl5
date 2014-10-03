@@ -761,7 +761,9 @@ struct block_loop {
 	((c)->blk_loop.itervar_u.oldcomppad				\
 	 ? (CxPADLOOP(c) 						\
 	    ? CxITERVAR_PADSV(c)					\
-	    : &GvSV((c)->blk_loop.itervar_u.gv))			\
+	    : isGV((c)->blk_loop.itervar_u.gv)				\
+		? &GvSV((c)->blk_loop.itervar_u.gv)			\
+		: (SV **)&(c)->blk_loop.itervar_u.gv)			\
 	 : (SV**)NULL)
 
 #define CxLABEL(c)	(0 + CopLABEL((c)->blk_oldcop))
@@ -980,6 +982,7 @@ struct context {
 
 /* private flags for CXt_LOOP */
 #define CXp_FOR_DEF	0x10	/* foreach using $_ */
+#define CXp_FOR_LVREF	0x20	/* foreach using \$var */
 #define CxPADLOOP(c)	((c)->blk_loop.my_op->op_targ)
 
 /* private flags for CXt_SUBST */

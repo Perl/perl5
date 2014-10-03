@@ -6288,6 +6288,8 @@ PP(pp_lvref)
 				   &PL_vtbl_lvref, (char *)elem,
 				   elem ? HEf_SVKEY : ARGTARG);
     mg->mg_private = PL_op->op_private;
+    if (PL_op->op_private & OPpLVREF_ITER)
+	mg->mg_flags |= MGf_PERSIST;
     if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
       if (elem) {
 	MAGIC *mg;
