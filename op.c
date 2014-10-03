@@ -2367,7 +2367,9 @@ S_lvref(pTHX_ OP *o, I32 type)
 	o->op_private |= OPpLVREF_AV;
 	goto checkgv;
     case OP_RV2CV:
-	kid = cUNOPx(cUNOPx(cUNOPo->op_first)->op_first->op_sibling)
+	kid = cUNOPo->op_first;
+	if (kid->op_type == OP_NULL)
+	    kid = cUNOPx(kUNOP->op_first->op_sibling)
 		->op_first;
 	o->op_private = OPpLVREF_CV;
 	if (kid->op_type == OP_GV)
