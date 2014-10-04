@@ -8619,9 +8619,11 @@ Similarly, if the specified Perl version is greater than or equal to
 5.12.0, strictures are enabled lexically as
 with C<use strict>.  Any explicit use of
 C<use strict> or C<no strict> overrides C<use VERSION>, even if it comes
-before it. Later use of C<use VERSION> will override all behavior of a previous
+before it.  Later use of C<use VERSION>
+will override all behavior of a previous
 C<use VERSION>, possibly removing the C<strict> and C<feature> added by
-C<use VERSION>. C<use VERSION> does not load the F<feature.pm> or F<strict.pm>
+C<use VERSION>.  C<use VERSION> does not
+load the F<feature.pm> or F<strict.pm>
 files.
 
 The C<BEGIN> forces the C<require> and C<import> to happen at compile time.  The
