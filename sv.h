@@ -176,6 +176,9 @@ typedef enum {
 #if defined(PERL_IN_HV_C) || defined(PERL_IN_XS_APITEST)
 #define HE_SVSLOT	SVt_NULL
 #endif
+#ifdef PERL_IN_SV_C
+#  define SVt_FIRST SVt_NULL	/* the type of SV that new_SV() in sv.c returns */
+#endif
 
 #define PERL_ARENA_ROOTS_SIZE	(SVt_LAST)
 

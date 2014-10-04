@@ -5573,8 +5573,7 @@ Perl_newSV(pTHX_ const STRLEN len)
 
     new_SV(sv);
     if (len) {
-	sv_upgrade(sv, SVt_PV);
-	SvGROW(sv, len + 1);
+	sv_grow(sv, len + 1);
     }
     return sv;
 }
@@ -9345,7 +9344,9 @@ Perl_newSV_type(pTHX_ const svtype type)
     SV *sv;
 
     new_SV(sv);
-    sv_upgrade(sv, type);
+    ASSUME(SvTYPE(sv) == SVt_FIRST);
+    if(type != SVt_FIRST)
+	sv_upgrade(sv, type);
     return sv;
 }
 
