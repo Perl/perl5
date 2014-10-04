@@ -3363,13 +3363,18 @@ S_scan_const(pTHX_ char *start)
                                  * through the string.  Each character takes up
                                  * 2 hex digits plus either a trailing dot or
                                  * the "}" */
+                                const char initial_text[] = "\\N{U+";
+                                const STRLEN initial_len = sizeof(initial_text)
+                                                           - 1;
                                 d = off + SvGROW(sv, off
                                                     + 3 * len
-                                                    + 6 /* For the "\N{U+", and
-                                                           trailing NUL */
+
+                                                    /* +1 for trailing NUL */
+                                                    + initial_len + 1
+
                                                     + (STRLEN)(send - e));
-                                Copy("\\N{U+", d, 5, char);
-                                d += 5;
+                                Copy(initial_text, d, initial_len, char);
+                                d += initial_len;
                                 while (str < str_end) {
                                     char hex_string[4];
                                     int len =
