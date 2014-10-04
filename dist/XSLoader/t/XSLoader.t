@@ -102,18 +102,17 @@ SKIP: {
     unless $extensions =~ /\bDevel::Peek\b/;
 
   # XSLoader::load() assumes it's being called from a module, so
-  # pretend it is, first find when Devel/Peek.pm is
-  use File::Spec::Functions;
-  my $peek_file = catdir("Devel", "Peek.pm");
+  # pretend it is, first find where Devel/Peek.pm is
+  my $peek_file = "Devel/Peek.pm";
   my $module_path;
   for my $dir (@INC) {
-    if (-f catfile($dir, $peek_file)) {
-      $module_path = catfile($dir, "Not", "Devel", "Peek.pm");
+    if (-f "$dir/$peek_file") {
+      $module_path = "$dir/Not/Devel/Peek.pm";
       last;
     }
   }
 
-  skip "Cannot find $peek_file", 2
+  skip "Cannot find $peek_file", 1
     unless $module_path;
 
   # [perl #122455]
