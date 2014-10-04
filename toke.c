@@ -3084,6 +3084,7 @@ S_scan_const(pTHX_ char *start)
 	     * symbol meaning, e.g. \x{2E} would be confused with a dot.  But
 	     * in spite of this, we do have to process \N here while the proper
 	     * charnames handler is in scope.  See bugs #56444 and #62056.
+             *
 	     * There is a complication because \N in a pattern may also stand
 	     * for 'match a non-nl', and not mean a charname, in which case its
 	     * processing should be deferred to the regex compiler.  To be a
@@ -3218,31 +3219,44 @@ S_scan_const(pTHX_ char *start)
 		continue;
 
  	    case 'N':
-		/* In a non-pattern \N must be a named character, like \N{LATIN
-		 * SMALL LETTER A} or \N{U+0041}.  For patterns, it also can
-		 * mean to match a non-newline.  For non-patterns, named
-		 * characters are converted to their string equivalents. In
-		 * patterns, named characters are not converted to their
-		 * ultimate forms for the same reasons that other escapes
-		 * aren't.  Instead, they are converted to the \N{U+...} form
-		 * to get the value from the charnames that is in effect right
-		 * now, while preserving the fact that it was a named character
-		 * so that the regex compiler knows this */
-
-		/* The structure of this section of code (besides checking for
+                /* In a non-pattern \N must be like \N{U+0041}, or it can be a
+                 * named character, like \N{LATIN SMALL LETTER A}, or a named
+                 * sequence, like \N{LATIN CAPITAL LETTER A WITH MACRON AND
+                 * GRAVE}.  For convenience all three forms are referred to as
+                 * "named characters" below.
+                 *
+                 * For patterns, \N also can mean to match a non-newline.  Code
+                 * before this 'switch' statement should already have handled
+                 * this situation, and hence this code only has to deal with
+                 * the named character cases.
+                 *
+                 * For non-patterns, the named characters are converted to
+                 * their string equivalents.  In patterns, named characters are
+                 * not converted to their ultimate forms for the same reasons
+                 * that other escapes aren't.  Instead, they are converted to
+                 * the \N{U+...} form to get the value from the charnames that
+                 * is in effect right now, while preserving the fact that it
+                 * was a named character, so that the regex compiler knows
+                 * this.
+                 *
+		 * The structure of this section of code (besides checking for
 		 * errors and upgrading to utf8) is:
-		 *  Further disambiguate between the two meanings of \N, and if
-		 *	not a charname, go process it elsewhere
-		 *  If of form \N{U+...}, pass it through if a pattern;
-		 *	otherwise convert to utf8
-		 *  Otherwise must be \N{NAME}: convert to \N{U+c1.c2...} if a
-		 *  pattern; otherwise convert to utf8 */
+                 *  If the named character is of the form \N{U+...}, pass it
+                 *      through if a pattern; otherwise convert the code point
+                 *      to utf8
+                 *  Otherwise must be some \N{NAME}: convert to \N{U+c1.c2...}
+                 *      if a pattern; otherwise convert to utf8
+                 *
+                 * If the regex compiler should ever need to differentiate
+                 * between the \N{U+...} and \N{name} forms, that could easily
+                 * be done here by stripping any leading zeros from the
+                 * \N{U+...} case, and adding them to the other one. */
 
-		/* Here, s points to the 'N'; the test below is guaranteed to
-		 * succeed if we are being called on a pattern as we already
-		 * know from a test above that the next character is a '{'.
-		 * On a non-pattern \N must mean 'named sequence, which
-		 * requires braces */
+                /* Here, 's' points to the 'N'; the test below is guaranteed to
+		 * succeed if we are being called on a pattern, as we already
+                 * know from a test above that the next character is a '{'.  A
+                 * non-pattern \N must mean 'named character', which requires
+                 * braces */
 		s++;
 		if (*s != '{') {
 		    yyerror("Missing braces on \\N{}"); 
@@ -3267,8 +3281,6 @@ S_scan_const(pTHX_ char *start)
 				| PERL_SCAN_DISALLOW_PREFIX;
 		    STRLEN len;
 
-		    /* For \N{U+...}, the '...' is a unicode value even on
-		     * EBCDIC machines */
 		    s += 2;	    /* Skip to next char after the 'U+' */
 		    len = e - s;
 		    uv = grok_hex(s, &len, &flags, NULL);
@@ -3279,27 +3291,26 @@ S_scan_const(pTHX_ char *start)
 		    }
 
 		    if (PL_lex_inpat) {
-
-			/* On non-EBCDIC platforms, pass through to the regex
-			 * compiler unchanged.  The reason we evaluated the
-			 * number above is to make sure there wasn't a syntax
-			 * error.  But on EBCDIC we convert to native so
-			 * downstream code can continue to assume it's native
-			 */
 			s -= 5;	    /* Include the '\N{U+' */
 #ifdef EBCDIC
-			d += my_snprintf(d, e - s + 1 + 1,  /* includes the }
+                        /* On EBCDIC platforms, in \N{U+...}, the '...' is a
+                         * Unicode value, so convert to native so downstream
+                         * code can continue to assume it's native */
+			d += my_snprintf(d, e - s + 1 + 1,  /* includes the '}'
 							       and the \0 */
-				    "\\N{U+%X}",
-				    (unsigned int) UNI_TO_NATIVE(uv));
+                                         "\\N{U+%X}",
+                                         (unsigned int) UNI_TO_NATIVE(uv));
 #else
-			Copy(s, d, e - s + 1, char);	/* 1 = include the } */
+                        /* On non-EBCDIC platforms, pass it through unchanged.
+                         * The reason we evaluated the number above is to make
+                         * sure there wasn't a syntax error. */
+			Copy(s, d, e - s + 1, char);	/* +1 is for the '}' */
 			d += e - s + 1;
 #endif
 		    }
 		    else {  /* Not a pattern: convert the hex to string */
 
-			 /* If destination is not in utf8, unconditionally
+                         /* If the destination is not in utf8, unconditionally
 			  * recode it to be so.  This is because \N{} implies
 			  * Unicode semantics, and scalars have to be in utf8
 			  * to guarantee those semantics */
@@ -3370,7 +3381,7 @@ S_scan_const(pTHX_ char *start)
                                     d += 3;
                                     str++;
                                 }
-                                d--;    /* We will overwrite below the final
+                                d--;    /* Below, we will overwrite the final
                                            dot with a right brace */
                             }
                             else {
