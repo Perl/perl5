@@ -7463,12 +7463,12 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 	    float b, c, keep_earlier;
 	    if (byte > cache[3]) {
 		/* New position is between the existing pair of pairs.  */
-		b = cache[3];
-		c = byte;
+		b = (float)cache[3];
+		c = (float)byte;
 	    } else {
 		/* New position is before the existing pair of pairs.  */
-		b = byte;
-		c = cache[3];
+		b = (float)byte;
+		c = (float)cache[3];
 	    }
 	    keep_earlier = THREEWAY_SQUARE(0, b, c, blen);
 	    if (byte > cache[3]) {
