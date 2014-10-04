@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 135;
+plan 140;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -16,7 +16,7 @@ eval '\($x) = \$y';
 like $@, qr/^Experimental lvalue references not enabled/,
     'error when feature is disabled (aassign)';
 
-use feature 'lvalue_refs';
+use feature 'lvalue_refs', 'state';
 
 {
     my($w,$c);
@@ -74,11 +74,15 @@ is $l, undef, 'localisation unwound';
 \$foo = \*bar;
 is *foo{SCALAR}, *bar{GLOB}, 'globref-to-scalarref assignment';
 for (1,2) {
-  \my $x = \3 if $_ == 1;
-  \my($y) = \3 if $_ == 1;
+  \my $x = \3,
+  \my($y) = \3,
+  \state $a = \3,
+  \state($b) = \3 if $_ == 1;
   if ($_ == 2) {
     is $x, undef, '\my $x = ... clears $x on scope exit';
     is $y, undef, '\my($x) = ... clears $x on scope exit';
+    is $a, 3, '\state $x = ... does not clear $x on scope exit';
+    is $b, 3, '\state($x) = ... does not clear $x on scope exit';
   }
 }
 
@@ -204,11 +208,15 @@ package ArrayTest {
   is \@i, $old, '(\local @a) unwound';
 }
 for (1,2) {
-  \my @x = [1..3] if $_ == 1;
-  \my(@y) = \3 if $_ == 1;
+  \my @x = [1..3],
+  \my(@y) = \3,
+  \state @a = [1..3],
+  \state(@b) = \3 if $_ == 1;
   if ($_ == 2) {
     is @x, 0, '\my @x = ... clears @x on scope exit';
     is @y, 0, '\my(@x) = ... clears @x on scope exit';
+    is "@a", "1 2 3", '\state @x = ... does not clear @x on scope exit';
+    is "@b", 3, '\state(@x) = ... does not clear @x on scope exit';
   }
 }
 
@@ -246,9 +254,11 @@ package HashTest {
   is \%i, $old, '(\local %a) unwound';
 }
 for (1,2) {
+  \state %y = {1,2},
   \my %x = {1,2} if $_ == 1;
   if ($_ == 2) {
     is %x, 0, '\my %x = ... clears %x on scope exit';
+    is "@{[%y]}", "1 2", '\state %x = ... does not clear %x on scope exit';
   }
 }
 
@@ -256,7 +266,7 @@ for (1,2) {
 
 package CodeTest {
   BEGIN { *is = *main::is; }
-  use feature 'lexical_subs', 'state';
+  use feature 'lexical_subs';
   no warnings 'experimental::lexical_subs';
   sub expect_scalar_cx { wantarray ? 0 : \&ThatSub }
   sub expect_list_cx   { wantarray ? (\&ThatSub)x2 : 0 }
@@ -486,7 +496,7 @@ on;
 }
 
 { # PADSTALE has a double meaning
-  use feature 'lexical_subs', 'signatures', 'state';
+  use feature 'lexical_subs', 'signatures';
   no warnings 'experimental';
   my $c;
   my sub s ($arg) {

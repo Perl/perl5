@@ -6247,7 +6247,8 @@ PP(pp_refassign)
 	SV * const old = PAD_SV(ARGTARG);
 	PAD_SETSV(ARGTARG, SvREFCNT_inc_NN(SvRV(sv)));
 	SvREFCNT_dec(old);
-	if (PL_op->op_private & OPpLVAL_INTRO)
+	if ((PL_op->op_private & (OPpLVAL_INTRO|OPpPAD_STATE))
+		== OPpLVAL_INTRO)
 	    SAVECLEARSV(PAD_SVl(ARGTARG));
 	break;
     }
@@ -6304,7 +6305,7 @@ PP(pp_lvref)
 	S_localise_gv_slot(aTHX_ (GV *)arg, 
 				 PL_op->op_private & OPpLVREF_TYPE);
       }
-      else
+      else if (!(PL_op->op_private & OPpPAD_STATE))
 	SAVECLEARSV(PAD_SVl(ARGTARG));
     }
     XPUSHs(ret);

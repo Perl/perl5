@@ -473,7 +473,7 @@ addbits($_, 7 => qw(OPpPV_IS_UTF8 UTF)) for qw(last redo next goto dump);
 
 
 addbits($_, 4 => qw(OPpPAD_STATE STATE))  for qw(padav padhv padsv lvavref
-                                                 pushmark);
+                                                 lvref refassign pushmark);
 
 
 

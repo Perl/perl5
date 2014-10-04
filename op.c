@@ -2451,7 +2451,8 @@ S_lvref(pTHX_ OP *o, I32 type)
     }
     o->op_type = OP_LVREF;
     o->op_ppaddr = PL_ppaddr[OP_LVREF];
-    o->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM|OPpLVREF_TYPE;
+    o->op_private &=
+	OPpLVAL_INTRO|OPpLVREF_ELEM|OPpLVREF_TYPE|OPpPAD_STATE;
     if (type == OP_ENTERLOOP)
 	o->op_private |= OPpLVREF_ITER;
 }
@@ -10098,7 +10099,7 @@ Perl_ck_refassign(pTHX_ OP *o)
     Perl_ck_warner_d(aTHX_
 		     packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
 		    "Lvalue references are experimental");
-    o->op_private |= varop->op_private & OPpLVAL_INTRO;
+    o->op_private |= varop->op_private & (OPpLVAL_INTRO|OPpPAD_STATE);
     if (stacked) o->op_flags |= OPf_STACKED;
     else {
 	o->op_flags &=~ OPf_STACKED;

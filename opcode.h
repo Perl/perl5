@@ -2745,9 +2745,9 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       -1, /* clonecv */
      630, /* padrange */
      632, /* refassign */
-     637, /* lvref */
-     642, /* lvrefslice */
-     643, /* lvavref */
+     638, /* lvref */
+     644, /* lvrefslice */
+     645, /* lvavref */
 
 };
 
@@ -3106,8 +3106,8 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* runcv         */ 0x00bd,
     /* fc            */ 0x0003,
     /* padrange      */ 0x281c, 0x019b,
-    /* refassign     */ 0x281c, 0x037a, 0x250c, 0x13e8, 0x0067,
-    /* lvref         */ 0x281c, 0x037a, 0x250c, 0x13e8, 0x0003,
+    /* refassign     */ 0x281c, 0x037a, 0x3a10, 0x250c, 0x13e8, 0x0067,
+    /* lvref         */ 0x281c, 0x037a, 0x3a10, 0x250c, 0x13e8, 0x0003,
     /* lvrefslice    */ 0x281d,
     /* lvavref       */ 0x281c, 0x3a10, 0x0003,
 
@@ -3497,8 +3497,8 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* INTROCV    */ (0),
     /* CLONECV    */ (0),
     /* PADRANGE   */ (OPpPADRANGE_COUNTMASK|OPpLVAL_INTRO),
-    /* REFASSIGN  */ (OPpARG2_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpLVREF_TYPE|OPpLVAL_INTRO),
-    /* LVREF      */ (OPpARG1_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpLVREF_TYPE|OPpLVAL_INTRO),
+    /* REFASSIGN  */ (OPpARG2_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpPAD_STATE|OPpLVREF_TYPE|OPpLVAL_INTRO),
+    /* LVREF      */ (OPpARG1_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpPAD_STATE|OPpLVREF_TYPE|OPpLVAL_INTRO),
     /* LVREFSLICE */ (OPpLVAL_INTRO),
     /* LVAVREF    */ (OPpARG1_MASK|OPpPAD_STATE|OPpLVAL_INTRO),
 
