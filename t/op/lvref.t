@@ -133,7 +133,7 @@ is \$h{a}, \$_, '\$hash{a}';
 \($h{b}) = expect_list_cx;
 is \$h{b}, \$_, '\($hash{a})';
 {
-  my @h;
+  my %h;
   \$h{a} = expect_scalar_cx;
   is \$h{a}, \$_, '\$lexical_array{a}';
   \($h{b}) = expect_list_cx;
@@ -151,7 +151,7 @@ is \$h{b}, \$_, '\($hash{a})';
   is \$h{b}, \$_, '\local $h{a} unwound';
 }
 {
-  my @h;
+  my %h;
   \@h{"a","b"} = expect_list_cx;
   is \$h{a}.\$h{b}, \$_.\$_, '\@hash{indices}';
   \(@h{2,3}) = expect_list_cx;
