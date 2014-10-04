@@ -36,7 +36,7 @@ no warnings 'experimental::lvalue_refs';
 
 # Scalars
 
-eval '\$x = \$y';
+\$x = \$y;
 is \$x, \$y, '\$pkg_scalar = ...';
 my $m;
 \$m = \$y;
@@ -171,7 +171,7 @@ package ArrayTest {
   sub expect_scalar_cx { wantarray ? 0 : \@ThatArray }
   sub expect_list_cx   { wantarray ? (\$_,\$_) : 0 }
   sub expect_list_cx_a { wantarray ? (\@ThatArray)x2 : 0 }
-  eval '\@a = expect_scalar_cx';
+  \@a = expect_scalar_cx;
   is \@a, \@ThatArray, '\@pkg';
   my @a;
   \@a = expect_scalar_cx;
@@ -201,10 +201,10 @@ package ArrayTest {
   }
   is \@h, $old, '\local @a unwound';
   $old = \@i;
-  eval q{
+  {
     (\local @i) = \@ThatArray;
     is \@i, \@ThatArray, '(\local @a)';
-  } or do { SKIP: { ::skip 'unimplemented' } };
+  }
   is \@i, $old, '(\local @a) unwound';
 }
 for (1,2) {
@@ -247,10 +247,10 @@ package HashTest {
   }
   is \%h, $old, '\local %a unwound';
   $old = \%i;
-  eval q{
+  {
     (\local %i) = \%ThatHash;
     is \%i, \%ThatHash, '(\local %a)';
-  } or do { SKIP: { ::skip 'unimplemented' } };
+  }
   is \%i, $old, '(\local %a) unwound';
 }
 for (1,2) {
