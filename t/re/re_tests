@@ -539,6 +539,7 @@ foo\w*\d{4}baz	foobar1234baz	y	$&	foobar1234baz
 a(?{})b	cabd	y	$&	ab
 a(?{f()+	-	c	-	Missing right curly or square bracket
 a(?{{1}+	-	c	-	Missing right curly or square bracket
+ (?{(^{})	-	c	-	syntax error
 a(?{}})b	-	c	-	
 a(?{"{"})b	ab	y	-	-
 a(?{"\{"})b	cabd	y	$&	ab

@@ -4922,7 +4922,15 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	for (o = cLISTOPx(expr)->op_first; o; o = OP_SIBLING(o)) {
 	    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
 		has_code = 1;
-		assert(!o->op_next && OP_HAS_SIBLING(o));
+		assert(!o->op_next);
+		if (UNLIKELY(!OP_HAS_SIBLING(o))) {
+		    assert(PL_parser && PL_parser->error_count);
+		    /* This can happen with qr/ (?{(^{})/.  Just fake up
+		       the op we were expecting to see, to avoid crashing
+		       elsewhere.  */
+		    op_sibling_splice(expr, o, 0,
+				      newSVOP(OP_CONST, 0, &PL_sv_no));
+		}
 		o->op_next = OP_SIBLING(o);
 	    }
 	    else if (o->op_type != OP_CONST && o->op_type != OP_PUSHMARK)
