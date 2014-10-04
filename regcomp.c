@@ -7343,7 +7343,7 @@ reStudy:
     /* assume we don't need to swap parens around before we match */
     DEBUG_TEST_r({
         PerlIO_printf(Perl_debug_log,"study_chunk_recursed_count: %lu\n",
-            RExC_study_chunk_recursed_count);
+            (unsigned long)RExC_study_chunk_recursed_count);
     });
     DEBUG_DUMP_r({
         DEBUG_RExC_seen();
