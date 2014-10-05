@@ -1506,3 +1506,10 @@ my(@array, %hash, @a, @b, %c, %d);
 () = \(@Foo::array);
 () = \(%Foo::hash);
 () = \(@Foo::a, (@Foo::b), (%Foo::c), %Foo::d);
+####
+# subs synonymous with keywords
+main::our();
+main::pop();
+state();
+use feature 'state';
+main::state();

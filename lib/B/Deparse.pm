@@ -1870,20 +1870,23 @@ my %strong_proto_keywords = map { $_ => 1 } qw(
     undef
 );
 
-sub keyword {
-    my $self = shift;
-    my $name = shift;
-    return $name if $name =~ /^CORE::/; # just in case
-    if (exists $feature_keywords{$name}) {
+sub feature_enabled {
+	my($self,$name) = @_;
 	my $hh;
 	my $hints = $self->{hints} & $feature::hint_mask;
 	if ($hints && $hints != $feature::hint_mask) {
 	    $hh = _features_from_bundle($hints);
 	}
 	elsif ($hints) { $hh = $self->{'hinthash'} }
-	return "CORE::$name"
-	 if !$hh
-	 || !$hh->{"feature_$feature_keywords{$name}"}
+	return $hh && $hh->{"feature_$feature_keywords{$name}"}
+}
+
+sub keyword {
+    my $self = shift;
+    my $name = shift;
+    return $name if $name =~ /^CORE::/; # just in case
+    if (exists $feature_keywords{$name}) {
+	return "CORE::$name" if not $self->feature_enabled($name);
     }
     if ($strong_proto_keywords{$name}
         || ($name !~ /^(?:chom?p|do|exec|glob|s(?:elect|ystem))\z/
@@ -3882,8 +3885,24 @@ sub pp_entersub {
 	if (!$amper) {
 	    if ($kid eq 'main::') {
 		$kid = '::';
-	    } elsif ($kid !~ /^(?:\w|::)(?:[\w\d]|::(?!\z))*\z/) {
+	    }
+	    else {
+	      if ($kid !~ /::/ && $kid ne 'x') {
+		# Fully qualify any sub name that is also a keyword.  While
+		# we could check the import flag, we cannot guarantee that
+		# the code deparsed so far would set that flag, so we qual-
+		# ify the names regardless of importation.
+		my $fq;
+		if (exists $feature_keywords{$kid}) {
+		    $fq++ if $self->feature_enabled($kid);
+		} elsif (eval { () = prototype "CORE::$kid"; 1 }) {
+		    $fq++
+		}
+		$fq and substr $kid, 0, 0, = $self->{'curstash'}.'::';
+	      }
+	      if ($kid !~ /^(?:\w|::)(?:[\w\d]|::(?!\z))*\z/) {
 		$kid = single_delim("q", "'", $kid) . '->';
+	      }
 	    }
 	}
     } elsif (is_scalar ($kid->first) && $kid->first->name ne 'rv2cv') {

@@ -132,6 +132,10 @@ sub do_infix_keyword {
     testit $keyword, "(\$a CORE::$keyword \$b)", $exp;
     testit $keyword, "(\$a $keyword \$b)", $exp;
     if (!$strong) {
+	# B::Deparse fully qualifies any sub whose name is a keyword,
+	# imported or not, since the importedness may not be reproduced by
+	# the deparsed code.  x is special.
+	$keyword =~ s/^(?!x\z)/test::/;
 	testit $keyword, "$keyword(\$a, \$b)", "$keyword(\$a, \$b);";
     }
 }
@@ -157,7 +161,9 @@ sub do_std_keyword {
 	    $args = ((!$core && !$strong) || $parens)
 			? "($args)"
 			:  @args ? " $args" : "";
-	    push @code, (($core && !($do_exp && $strong)) ? "CORE::" : "")
+	    push @code, (($core && !($do_exp && $strong))
+			   ? "CORE::"
+			   : $do_exp && !$core && !$strong ? "test::" : "")
 						       	. "$keyword$args;";
 	}
 	testit $keyword, @code; # code[0]: to run; code[1]: expected
@@ -210,7 +216,7 @@ testit delete   => 'delete $h{\'foo\'};',       'delete $h{\'foo\'};';
 # do is listed as strong, but only do { block } is strong;
 # do $file is weak,  so test it separately here
 testit do       => 'CORE::do $a;';
-testit do       => 'do $a;',                     'do($a);';
+testit do       => 'do $a;',                    'test::do($a);';
 testit do       => 'CORE::do { 1 }',
 		   "do {\n        1\n    };";
 testit do       => 'do { 1 };',
