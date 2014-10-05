@@ -1451,6 +1451,25 @@ no warnings 'experimental::lexical_subs';
 state sub f {}
 print f();
 ####
+# SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
+# TODO unimplemented in B::Deparse; RT #116553
+# lexical subroutine scoping
+# CONTEXT use feature 'lexical_subs'; no warnings 'experimental::lexical_subs';
+{
+  {
+    my sub a { die; }
+    {
+      foo();
+      my sub b;
+      b();
+      main::b();
+      my $b;
+      sub b { $b }
+    }
+  }
+  b();
+}
+####
 # Elements of %# should not be confused with $#{ array }
 () = ${#}{'foo'};
 ####
