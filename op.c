@@ -12006,7 +12006,9 @@ Perl_rpeep(pTHX_ OP *o)
                  * altering the basic op_first/op_sibling layout. */
                 kid = kLISTOP->op_first;
                 assert(
-                      (kid->op_type == OP_NULL && kid->op_targ == OP_NEXTSTATE)
+                      (kid->op_type == OP_NULL
+                      && (  kid->op_targ == OP_NEXTSTATE
+                         || kid->op_targ == OP_DBSTATE  ))
                     || kid->op_type == OP_STUB
                     || kid->op_type == OP_ENTER);
                 nullop->op_next = kLISTOP->op_next;
