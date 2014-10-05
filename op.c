@@ -2375,10 +2375,10 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    break;
 	}
 	else {				/* lvalue subroutine call */
-	    o->op_private |= OPpLVAL_INTRO
-	                   |(OPpENTERSUB_INARGS * (type == OP_LEAVESUBLV));
+	    o->op_private |= OPpLVAL_INTRO;
 	    PL_modcount = RETURN_UNLIMITED_NUMBER;
-	    if (type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN) {
+	    if (type == OP_GREPSTART || type == OP_ENTERSUB
+	     || type == OP_REFGEN    || type == OP_LEAVESUBLV) {
 		/* Potential lvalue context: */
 		o->op_private |= OPpENTERSUB_INARGS;
 		break;
