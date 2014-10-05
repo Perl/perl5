@@ -2617,11 +2617,6 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 		op_lvalue(kid, type);
 	break;
 
-    case OP_RETURN:
-	if (type != OP_LEAVESUBLV)
-	    goto nomod;
-	break; /* op_lvalue()ing was handled by ck_return() */
-
     case OP_COREARGS:
 	return o;
 
