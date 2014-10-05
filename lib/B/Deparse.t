@@ -412,6 +412,9 @@ for (my $i; not $i;) {
 for (my $i; not $i; ++$i) {
     die;
 }
+for (my $a; not +($1 || 2) ** 2;) {
+    die;
+}
 Something_to_put_the_loop_in_void_context();
 ####
 # while/continue

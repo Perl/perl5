@@ -3253,10 +3253,9 @@ sub loop_common {
 	$body = $self->deparse($body, 0);
     }
     if ($precond) { # for(;;)
-	$cond &&= $self->deparse($cond, $name eq 'until' ? 3 : 1);
-	if ($name eq 'until') {
-	    substr $cond, 0, 0, = $cond =~ /^\(/ ? "not" : "not ";
-	}
+	$cond &&= $name eq 'until'
+		    ? listop($self, undef, 1, "not", $cond->first)
+		    : $self->deparse($cond, 1);
 	$head = "$precond$cond$postcond";
     }
     if ($name && !$head) {
