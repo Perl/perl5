@@ -8114,6 +8114,7 @@ S_pending_ident(pTHX)
         }
         else {
             if (has_colon) {
+                /* "my" variable %s can't be in a package */
                 /* PL_no_myglob is constant */
                 GCC_DIAG_IGNORE(-Wformat-nonliteral);
                 yyerror_pv(Perl_form(aTHX_ PL_no_myglob,
