@@ -5542,9 +5542,6 @@ STATIC void	S_cv_dump(pTHX_ const CV *cv, const char *title)
 
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
-STATIC const char *	S_cntrl_to_mnemonic(const U8 c)
-			__attribute__pure__;
-
 STATIC void	S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV* widecharmap, AV *revcharmap, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
@@ -6911,6 +6908,9 @@ PERL_STATIC_INLINE void	S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_s
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_ALLOC_MAYBE_POPULATE_EXACT	\
 	assert(pRExC_state); assert(node); assert(flagp)
+
+STATIC const char *	S_cntrl_to_mnemonic(const U8 c)
+			__attribute__pure__;
 
 PERL_STATIC_INLINE U8	S_compute_EXACTish(RExC_state_t *pRExC_state)
 			__attribute__nonnull__(1);

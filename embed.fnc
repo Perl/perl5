@@ -2213,6 +2213,7 @@ Es	|I32	|make_trie	|NN RExC_state_t *pRExC_state \
 				|U32 word_count|U32 flags|U32 depth
 Es	|regnode *|construct_ahocorasick_from_trie|NN RExC_state_t *pRExC_state \
                                 |NN regnode *source|U32 depth
+EnPs	|const char *|cntrl_to_mnemonic|const U8 c
 #  ifdef DEBUGGING
 Es        |void        |regdump_intflags|NULLOK const char *lead| const U32 flags
 Es	|void	|regdump_extflags|NULLOK const char *lead| const U32 flags
@@ -2221,7 +2222,6 @@ Es	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
 				|NULLOK const regnode *last \
 				|NULLOK const regnode *plast \
 				|NN SV* sv|I32 indent|U32 depth
-EnPs	|const char *|cntrl_to_mnemonic|const U8 c
 Es	|void	|put_code_point	|NN SV* sv|UV c
 Es	|bool	|put_charclass_bitmap_innards|NN SV* sv	    \
 				|NN char* bitmap	    \

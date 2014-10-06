@@ -928,7 +928,6 @@
 #  endif
 #  if defined(DEBUGGING)
 #    if defined(PERL_IN_REGCOMP_C)
-#define cntrl_to_mnemonic	S_cntrl_to_mnemonic
 #define dump_trie(a,b,c,d)	S_dump_trie(aTHX_ a,b,c,d)
 #define dump_trie_interim_list(a,b,c,d,e)	S_dump_trie_interim_list(aTHX_ a,b,c,d,e)
 #define dump_trie_interim_table(a,b,c,d,e)	S_dump_trie_interim_table(aTHX_ a,b,c,d,e)
@@ -960,6 +959,7 @@
 #define add_data		S_add_data
 #define add_multi_match(a,b,c)	S_add_multi_match(aTHX_ a,b,c)
 #define alloc_maybe_populate_EXACT(a,b,c,d,e,f)	S_alloc_maybe_populate_EXACT(aTHX_ a,b,c,d,e,f)
+#define cntrl_to_mnemonic	S_cntrl_to_mnemonic
 #define compute_EXACTish	S_compute_EXACTish
 #define construct_ahocorasick_from_trie(a,b,c)	S_construct_ahocorasick_from_trie(aTHX_ a,b,c)
 #define could_it_be_a_POSIX_class	S_could_it_be_a_POSIX_class

@@ -122,6 +122,12 @@ typedef struct scan_frame {
     struct scan_frame *next_frame;      /* next frame */
 } scan_frame;
 
+/* Certain characters are output as a sequence with the first being a
+ * backslash. */
+#define isBACKSLASHED_PUNCT(c)                                              \
+                    ((c) == '-' || (c) == ']' || (c) == '\\' || (c) == '^')
+
+
 struct RExC_state_t {
     U32		flags;			/* RXf_* are we folding, multilining? */
     U32		pm_flags;		/* PMf_* stuff from the calling PMOP */
@@ -886,8 +892,6 @@ DEBUG_OPTIMISE_MORE_r(if(data){                                      \
     PerlIO_printf(Perl_debug_log,"\n");                              \
 });
 
-#ifdef DEBUGGING
-
 /* is c a control character for which we have a mnemonic? */
 #define isMNEMONIC_CNTRL(c) _IS_MNEMONIC_CNTRL_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 
@@ -910,8 +914,6 @@ S_cntrl_to_mnemonic(const U8 c)
 
     return NULL;
 }
-
-#endif
 
 /* Mark that we cannot extend a found fixed substring at this point.
    Update the longest found anchored substring and the longest found
@@ -17268,10 +17270,6 @@ S_re_croak2(pTHX_ bool utf8, const char* pat1,const char* pat2,...)
 }
 
 #ifdef DEBUGGING
-/* Certain characters are output as a sequence with the first being a
- * backslash. */
-#define isBACKSLASHED_PUNCT(c)                                              \
-                    ((c) == '-' || (c) == ']' || (c) == '\\' || (c) == '^')
 
 STATIC void
 S_put_code_point(pTHX_ SV *sv, UV c)
