@@ -22,7 +22,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 742;  # Update this when adding/deleting tests.
+plan tests => 754;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1487,13 +1487,28 @@ EOP
 
     SKIP: {   # Test literal range end point special handling
         unless ($::IS_EBCDIC) {
-            skip "Valid only for EBCDIC", 12;
+            skip "Valid only for EBCDIC", 24;
         }
 
         like("\x89", qr/[i-j]/, '"\x89" should match [i-j]');
         unlike("\x8A", qr/[i-j]/, '"\x8A" shouldnt match [i-j]');
         unlike("\x90", qr/[i-j]/, '"\x90" shouldnt match [i-j]');
         like("\x91", qr/[i-j]/, '"\x91" should match [i-j]');
+
+        like("\x89", qr/[i-\N{LATIN SMALL LETTER J}]/, '"\x89" should match [i-\N{LATIN SMALL LETTER J}]');
+        unlike("\x8A", qr/[i-\N{LATIN SMALL LETTER J}]/, '"\x8A" shouldnt match [i-\N{LATIN SMALL LETTER J}]');
+        unlike("\x90", qr/[i-\N{LATIN SMALL LETTER J}]/, '"\x90" shouldnt match [i-\N{LATIN SMALL LETTER J}]');
+        like("\x91", qr/[i-\N{LATIN SMALL LETTER J}]/, '"\x91" should match [i-\N{LATIN SMALL LETTER J}]');
+
+        like("\x89", qr/[i-\N{U+6A}]/, '"\x89" should match [i-\N{U+6A}]');
+        unlike("\x8A", qr/[i-\N{U+6A}]/, '"\x8A" shouldnt match [i-\N{U+6A}]');
+        unlike("\x90", qr/[i-\N{U+6A}]/, '"\x90" shouldnt match [i-\N{U+6A}]');
+        like("\x91", qr/[i-\N{U+6A}]/, '"\x91" should match [i-\N{U+6A}]');
+
+        like("\x89", qr/[\N{U+69}-\N{U+6A}]/, '"\x89" should match [\N{U+69}-\N{U+6A}]');
+        unlike("\x8A", qr/[\N{U+69}-\N{U+6A}]/, '"\x8A" shouldnt match [\N{U+69}-\N{U+6A}]');
+        unlike("\x90", qr/[\N{U+69}-\N{U+6A}]/, '"\x90" shouldnt match [\N{U+69}-\N{U+6A}]');
+        like("\x91", qr/[\N{U+69}-\N{U+6A}]/, '"\x91" should match [\N{U+69}-\N{U+6A}]');
 
         like("\x89", qr/[i-\x{91}]/, '"\x89" should match [i-\x{91}]');
         like("\x8A", qr/[i-\x{91}]/, '"\x8A" should match [i-\x{91}]');

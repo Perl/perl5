@@ -13813,6 +13813,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         continue;   /* Back to top of loop to get next char */
                     }
                     /* Here, is a single code point, and <value> contains it */
+#ifdef EBCDIC
+                    /* We consider named characters to be literal characters */
+                    literal_endpoint++;
+#endif
                 }
                 break;
 	    case 'p':
