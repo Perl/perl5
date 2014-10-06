@@ -14426,8 +14426,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 _invlist_intersection(this_range, PL_XPosix_ptrs[_CC_ASCII],
                                       &this_range);
 
-                /* Since this above only contains ascii, the intersection of it
-                 * with anything will still yield only ascii */
+                /* Since 'this_range' now only contains ascii, the intersection
+                 * of it with anything will still yield only ascii */
                 _invlist_intersection(this_range, PL_XPosix_ptrs[_CC_ALPHA],
                                       &this_range);
             }
