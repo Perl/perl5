@@ -205,7 +205,12 @@ section.
 
 =item *
 
-XXX Description of the change here
+Clarifications have been added to L<perlrecharclass/Character Ranges>
+to the effect that Perl guarantees that C<[A-Z]>, C<[a-z]>, C<[0-9]> and
+any subranges thereof in regular expression bracketed character classes
+are guaranteed to match exactly what a naive English speaker would
+expect them to match, even on platforms (such as EBCDIC) where special
+handling is required to accomplish this.
 
 =back
 
@@ -352,9 +357,15 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item EBCDIC
 
-XXX
+Special handling is required on EBCDIC platforms to get C<qr/[i-j]/> to
+match only C<"i"> and C<"j">, since there are 7 characters between the
+code points for C<"i"> and C<"j">.  This special handling had only been
+invoked when both ends of the range are literals.  Now it is also
+invoked if any of the C<\N{...}> forms for specifying a character by
+name or Unicode code point is used instead of a literal.  See
+L<perlrecharclass/Character Ranges>.
 
 =back
 

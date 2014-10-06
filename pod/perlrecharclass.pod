@@ -600,11 +600,6 @@ your set of characters to be matched and its position in the class is such
 that it could be considered part of a range, you must escape that hyphen
 with a backslash.
 
-The classes C<< [A-Z] >> and C<< [a-z] >> are special cased, in the sense
-they always match exactly the 26 upper/lower case letters, regardless
-of the platform (this only effects EBCDIC, which would otherwise include 
-some non-letters).
-
 Examples:
 
  [a-z]       #  Matches a character that is a lower case ASCII letter.
@@ -616,6 +611,36 @@ Examples:
  ['-?]       #  Matches any of the characters  '()*+,-./0123456789:;<=>?
              #  (But not on an EBCDIC platform).
 
+Perl guarantees that the ranges C<A-Z>, C<a-z>, C<0-9>, and any
+subranges of these match what an English-only speaker would expect them
+to match.  That is, C<[A-Z]> matches the 26 ASCII uppercase letters;
+C<[a-z]> matches the 26 lowercase letters; and C<[0-9]> matches the 10
+digits.  Subranges, like C<[h-k]>, match correspondingly, in this case
+just the four letters C<"h">, C<"i">, C<"j">, and C<"k">.  This is the
+natural behavior on ASCII platforms where the code points (ordinal
+values) for C<"h"> through C<"k"> are consecutive integers (0x68 through
+0x6B).  But special handling to achieve this may be needed on platforms
+with a non-ASCII native character set.  For example, on EBCDIC
+platforms, the code point for C<"h"> is 0x88, C<"i"> is 0x89, C<"j"> is
+0x91, and C<"k"> is 0x92.   Perl specially treats C<[h-k]> to exclude the
+seven code points in the gap: 0x8A through 0x90.  This special handling is
+only invoked when the range is a subrange of one of the ASCII uppercase,
+lowercase, and digit ranges, AND each end of the range is expressed
+either as a literal, like C<"A">, or as a named character (C<\N{...}>,
+including the C<\N{U+...> form).
+
+EBCDIC Examples:
+
+ [i-j]               #  Matches either "i" or "j"
+ [i-\N{LATIN SMALL LETTER J}]  # Same
+ [i-\N{U+6A}]        #  Same
+ [\N{U+69}-\N{U+6A}] #  Same
+ [\x{89}-\x{91}]     #  Matches 0x89 ("i"), 0x8A .. 0x90, 0x91 ("j")
+ [i-\x{91}]          #  Same
+ [\x{89}-j]          #  Same
+ [i-J]               #  Matches, 0x89 ("i") .. 0xC1 ("J"); special
+                     #  handling doesn't apply because range is mixed
+                     #  case
 
 =head3 Negation
 
