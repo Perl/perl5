@@ -10805,14 +10805,15 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         if (vend) *v++ = ((nv) == 0.0) ? 0 : 1; else v++; \
    } STMT_END
 
-#ifdef LONGDOUBLE_DOUBLEDOUBLE
-#  define HEXTRACTSIZE (DOUBLEDOUBLE_MAXBITS/8)
+    /* HEXTRACTSIZE is the maximum number of xdigits. */
+#if defined(USE_LONG_DOUBLE) && defined(LONGDOUBLE_DOUBLEDOUBLE)
+#  define HEXTRACTSIZE (DOUBLEDOUBLE_MAXBITS/4)
 #else
-#  define HEXTRACTSIZE NVSIZE
+#  define HEXTRACTSIZE 2 * NVSIZE
 #endif
 
     const U8* nvp = (const U8*)(&nv);
-    const U8* vmaxend = vhex + 2 * HEXTRACTSIZE + 1;
+    const U8* vmaxend = vhex + HEXTRACTSIZE;
     (void)Perl_frexp(PERL_ABS(nv), exponent);
     if (vend && (vend <= vhex || vend > vmaxend))
         Perl_croak(aTHX_ "Hexadecimal float: internal error");
@@ -10976,7 +10977,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     }
 #  else
     HEXTRACT_LO_NYBBLE(1);
-    for (ix = 2; ix < HEXTRACTSIZE; ix++) {
+    for (ix = 2; ix < NVSIZE; ix++) {
         HEXTRACT_BYTE(ix);
     }
 #  endif
@@ -10989,7 +10990,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         /* For double-double the ixmin and ixmax stay at zero,
          * which is convenient since the HEXTRACTSIZE is tricky
          * for double-double. */
-        ixmin < 0 || ixmax >= HEXTRACTSIZE ||
+        ixmin < 0 || ixmax >= NVSIZE ||
         (vend && v != vend))
         Perl_croak(aTHX_ "Hexadecimal float: internal error");
     return v;
