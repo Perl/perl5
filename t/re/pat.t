@@ -22,7 +22,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 730;  # Update this when adding/deleting tests.
+plan tests => 742;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1485,6 +1485,29 @@ EOP
 	   'undefining *^R within (??{}) does not result in a crash';
     }
 
+    SKIP: {   # Test literal range end point special handling
+        unless ($::IS_EBCDIC) {
+            skip "Valid only for EBCDIC", 12;
+        }
+
+        like("\x89", qr/[i-j]/, '"\x89" should match [i-j]');
+        unlike("\x8A", qr/[i-j]/, '"\x8A" shouldnt match [i-j]');
+        unlike("\x90", qr/[i-j]/, '"\x90" shouldnt match [i-j]');
+        like("\x91", qr/[i-j]/, '"\x91" should match [i-j]');
+
+        like("\x89", qr/[i-\x{91}]/, '"\x89" should match [i-\x{91}]');
+        like("\x8A", qr/[i-\x{91}]/, '"\x8A" should match [i-\x{91}]');
+        like("\x90", qr/[i-\x{91}]/, '"\x90" should match [i-\x{91}]');
+        like("\x91", qr/[i-\x{91}]/, '"\x91" should match [i-\x{91}]');
+
+        # Need to use eval, because tries to compile on ASCII platforms even
+        # though the tests are skipped, and fails because 0x89-j is an illegal
+        # range there.
+        like("\x89", eval "qr/[\x{89}-j]/", '"\x89" should match [\x{89}-j]');
+        like("\x8A", eval "qr/[\x{89}-j]/", '"\x8A" should match [\x{89}-j]');
+        like("\x90", eval "qr/[\x{89}-j]/", '"\x90" should match [\x{89}-j]');
+        like("\x91", eval "qr/[\x{89}-j]/", '"\x91" should match [\x{89}-j]');
+    }
 
     # These are based on looking at the code in regcomp.c
     # We don't look for specific code, just the existence of an SSC
