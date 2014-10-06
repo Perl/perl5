@@ -135,8 +135,8 @@ sub do_infix_keyword {
 	# B::Deparse fully qualifies any sub whose name is a keyword,
 	# imported or not, since the importedness may not be reproduced by
 	# the deparsed code.  x is special.
-	$keyword =~ s/^(?!x\z)/test::/;
-	testit $keyword, "$keyword(\$a, \$b)", "$keyword(\$a, \$b);";
+	my $pre = "test::" x ($keyword ne 'x');
+	testit $keyword, "$keyword(\$a, \$b)", "$pre$keyword(\$a, \$b);";
     }
 }
 
