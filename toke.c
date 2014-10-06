@@ -99,9 +99,9 @@ static const char* const ident_too_long = "Identifier too long";
 #define XFAKEBRACK 0x80
 
 #ifdef USE_UTF8_SCRIPTS
-#   define UTF (!IN_BYTES)
+#   define UTF cBOOL(!IN_BYTES)
 #else
-#   define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || ( !(PL_parser->lex_flags & LEX_IGNORE_UTF8_HINTS) && (PL_hints & HINT_UTF8)))
+#   define UTF cBOOL((PL_linestr && DO_UTF8(PL_linestr)) || ( !(PL_parser->lex_flags & LEX_IGNORE_UTF8_HINTS) && (PL_hints & HINT_UTF8)))
 #endif
 
 /* The maximum number of characters preceding the unrecognized one to display */

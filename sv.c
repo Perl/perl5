@@ -15344,7 +15344,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	if (match && subscript_type == FUV_SUBSCRIPT_WITHIN)
 	    break;
 
-	return varname(gv, hash ? '%' : '@', obase->op_targ,
+	return varname(gv, (char)(hash ? '%' : '@'), obase->op_targ,
 				    keysv, index, subscript_type);
       }
 
@@ -15500,8 +15500,8 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    if (match)
 		break;
 	    return varname(gv,
-		(o->op_type == OP_PADAV || o->op_type == OP_RV2AV)
-		? '@' : '%',
+		(char)((o->op_type == OP_PADAV || o->op_type == OP_RV2AV)
+		? '@' : '%'),
 		o->op_targ, NULL, 0, FUV_SUBSCRIPT_WITHIN);
 	}
 	NOT_REACHED; /* NOTREACHED */
