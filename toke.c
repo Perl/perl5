@@ -8118,7 +8118,9 @@ S_pending_ident(pTHX)
                 /* PL_no_myglob is constant */
                 GCC_DIAG_IGNORE(-Wformat-nonliteral);
                 yyerror_pv(Perl_form(aTHX_ PL_no_myglob,
-			    PL_in_my == KEY_my ? "my" : "state", PL_tokenbuf),
+                            PL_in_my == KEY_my ? "my" : "state",
+                            *PL_tokenbuf == '&' ? "subroutin" : "variabl",
+                            PL_tokenbuf),
                             UTF ? SVf_UTF8 : 0);
                 GCC_DIAG_RESTORE;
             }

@@ -3280,6 +3280,11 @@ See L<perlfunc/pack>.
 (F) Lexically scoped subroutines are not yet implemented.  Don't try
 that yet.
 
+=item "my" subroutine %s can't be in a package
+
+(F) Lexically scoped subroutines aren't in a package, so it doesn't make
+sense to try to declare one with a package qualifier on the front.
+
 =item "my %s" used in sort comparison
 
 (W syntax) The package variables $a and $b are used for sort comparisons.
@@ -5210,6 +5215,11 @@ die().  This is almost always an error, because exec() never returns
 unless there was a failure.  You probably wanted to use system()
 instead, which does return.  To suppress this warning, put the exec() in
 a block by itself.
+
+=item "state" subroutine %s can't be in a package
+
+(F) Lexically scoped subroutines aren't in a package, so it doesn't make
+sense to try to declare one with a package qualifier on the front.
 
 =item "state %s" used in sort comparison
 
