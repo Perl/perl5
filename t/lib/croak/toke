@@ -9,6 +9,21 @@ eval "s//<<foo/e"; die $@
 EXPECT
 Can't find string terminator "foo" anywhere before EOF at (eval 1) line 1.
 ########
+# NAME Unterminated qw//
+qw/
+EXPECT
+Can't find string terminator "/" anywhere before EOF at - line 1.
+########
+# NAME Unterminated q//
+qw/
+EXPECT
+Can't find string terminator "/" anywhere before EOF at - line 1.
+########
+# NAME Unterminated ''
+'
+EXPECT
+Can't find string terminator "'" anywhere before EOF at - line 1.
+########
 # NAME /\N{/
 /\N{/
 EXPECT
@@ -134,18 +149,3 @@ Execution of - aborted due to compilation errors.
 <<"foo
 EXPECT
 Unterminated delimiter for here document at - line 1.
-########
-# NAME Unterminated qw//
-qw/
-EXPECT
-Can't find string terminator "/" anywhere before EOF at - line 1.
-########
-# NAME Unterminated q//
-qw/
-EXPECT
-Can't find string terminator "/" anywhere before EOF at - line 1.
-########
-# NAME Unterminated ''
-'
-EXPECT
-Can't find string terminator "'" anywhere before EOF at - line 1.
