@@ -1,7 +1,14 @@
 #!./perl -w
 
-require './test.pl';
+BEGIN {
+    chdir 't' if -d 't';
+    unshift @INC, '../lib';
+    require './test.pl';
+}
+
 use strict;
+
+use Config;
 
 # Tests of post/pre - increment/decrement operators.
 
@@ -179,6 +186,12 @@ cmp_ok($a, '==', 2147483647, "postdecrement properly downgrades from double");
     cmp_ok($x, '==', 0, "(void) i_postdec");
 }
 
+SKIP: {
+    if ($Config{uselongdouble} &&
+        ($Config{longdblkind} == 6 || $Config{longdoublekind} == 5)) {
+        skip "the double-double format is weird", 1;
+    }
+
 # I'm sure that there's an IBM format with a 48 bit mantissa
 # IEEE doubles have a 53 bit mantissa
 # 80 bit long doubles have a 64 bit mantissa
@@ -244,6 +257,8 @@ EOC
 }
 
 ok($found, "found a NV value which overflows the mantissa");
+
+} # SKIP
 
 # these will segfault if they fail
 
