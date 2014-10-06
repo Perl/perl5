@@ -11960,13 +11960,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * Since each double has their own exponent, the
                      * doubles may float (haha) rather far from each
                      * other, and the number of required bits is much
-                     * larger, up to total of 1028 bits.  (NOTE: this
-                     * is not actually implemented properly yet,
-                     * we are using just the first double, see
-                     * S_hextract() for details.  But let's prepare
-                     * for the future.) */
-
-                    /* 2 hexdigits for each byte. */ 
+                     * larger, up to total of 1028 bits.
+                     *
+                     * Need 2 hexdigits for each byte. */
                     need += (DOUBLEDOUBLE_MAXBITS/8 + 1) * 2;
                     /* the size for the exponent already added */
 #endif
