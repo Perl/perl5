@@ -185,7 +185,7 @@ typedef struct regexp_engine {
 #endif
     REGEXP* (*op_comp) (pTHX_ SV ** const patternp, int pat_count,
 		    OP *expr, const struct regexp_engine* eng,
-		    REGEXP *VOL old_re,
+		    REGEXP *old_re,
 		    bool *is_bare_re, U32 orig_rx_flags, U32 pm_flags);
 } regexp_engine;
 
