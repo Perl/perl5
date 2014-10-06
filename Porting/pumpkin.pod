@@ -1265,12 +1265,6 @@ I've received sensible suggestions for --exec_prefix and other
 GNU configure --options.  It's not always obvious exactly what is
 intended, but this merits investigation.
 
-=item make clean
-
-Currently, B<make clean> isn't all that useful, though
-B<make realclean> and B<make distclean> are.  This needs a bit of
-thought and documentation before it gets cleaned up.
-
 =item Try gcc if cc fails
 
 Currently, we just give up.

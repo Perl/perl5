@@ -2363,9 +2363,8 @@ or
 	make realclean
 
 The only difference between the two is that make distclean also removes
-your old config.sh and Policy.sh files.  (A plain 'make clean' will not
-delete the makefiles used for rebuilding perl, and will also not delete
-a number of library and utility files extracted during the build process.)
+your old config.sh and Policy.sh files.  (A plain 'make clean' is now
+eqivalent to 'make realclean'.)
 
 If you are upgrading from a previous version of perl, or if you
 change systems or compilers or make other significant changes, or if

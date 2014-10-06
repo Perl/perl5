@@ -1216,7 +1216,7 @@ printconfig:
 	realclean _realcleaner clobber _clobber \
 	distclean veryclean _verycleaner
 
-clean:		_tidy _mopup 
+clean:		realclean
 
 realclean:	_realcleaner _mopup
 	@echo "Note that '$(MAKE) realclean' does not delete config.sh or Policy.sh"
@@ -1247,15 +1247,6 @@ _mopup:
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
 	-rm -f $(PERL_EXE) $(MINIPERL_EXE) $(LIBPERL) libperl.* microperl
 	-rm -f config.arch config.over $(DTRACE_H)
-
-# Do not 'make _tidy' directly.
-_tidy:
-	-cd pod; $(LDLIBPTH) $(MAKE) clean
-	-cd utils; $(LDLIBPTH) $(MAKE) clean
-	-rm -f lib/Config_git.pl git_version.h
-	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
-	$(MINIPERL) make_ext.pl --target=clean $$x MAKE="$(MAKE)" ; \
-	done
 
 _cleaner1:
 	-cd os2; rm -f Makefile
