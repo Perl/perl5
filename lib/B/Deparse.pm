@@ -3905,7 +3905,8 @@ sub pp_entersub {
 		my $fq;
 		if (exists $feature_keywords{$kid}) {
 		    $fq++ if $self->feature_enabled($kid);
-		} elsif (eval { () = prototype "CORE::$kid"; 1 }) {
+		} elsif (do { local $@; local $SIG{__DIE__};
+			      eval { () = prototype "CORE::$kid"; 1 } }) {
 		    $fq++
 		}
 		$fq and substr $kid, 0, 0, = $self->{'curstash'}.'::';

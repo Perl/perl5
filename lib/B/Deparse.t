@@ -13,7 +13,7 @@ use warnings;
 use strict;
 use Test::More;
 
-my $tests = 20; # not counting those in the __DATA__ section
+my $tests = 21; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -276,6 +276,14 @@ is($deparse->coderef2text(sub{ use utf8; /€/; }),
     /\x{20ac}/;
 }',
 "qr/euro/");
+
+# STDERR when deparsing sub calls
+# For a short while the output included 'While deparsing'
+$a = `$^X $path "-MO=Deparse" -e "foo()" 2>&1`;
+$a =~ s/-e syntax OK\n//g;
+is($a, <<'EOCODI', 'no extra output when deparsing foo()');
+foo();
+EOCODI
 
 
 done_testing($tests);
