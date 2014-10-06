@@ -157,7 +157,7 @@ With the default setting the size is limited to 128MB.
 The -1 removes this limit. If the "make test" fails please change
 your /etc/security/limits as stated above.
 
-=head Long doubles
+=head2 Long doubles
 
 IBM calls its implementation of long doubles 128-bit, but it is not
 the IEEE 128-bit ("quadruple precision") which would give 116 bit of
