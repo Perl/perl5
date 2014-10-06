@@ -490,6 +490,29 @@
 
 #endif
 
+/* XXX Regarding C99 math.h, Android seems to be missing these:
+
+  For API level < 13
+  nan log2 nexttoward
+  
+  For API level < 18
+  log2 nexttoward
+  
+  See https://android.googlesource.com/platform/development/+/b280e72a97736930063e947fe5fcda7a191e7b10/ndk/platforms/android-9/include/math.h
+ */
+
+#ifdef __ANDROID__
+#  include <android/api-level.h>
+#  if __ANDROID_API__ < 13
+#    undef c99_nan
+#  endif
+#  if __ANDROID_API__ < 17
+#    undef c99_log2
+#    undef c99_nexttoward
+#  endif
+#endif
+
+
 /* XXX Regarding C99 math.h, VMS seems to be missing these:
 
   lround nan nearbyint round scalbn llrint
