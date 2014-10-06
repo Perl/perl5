@@ -584,7 +584,7 @@ fi
 # The missing math functions affect the POSIX extension math interfaces.
 
 case "$uselongdouble" in
-define)
+'')
   echo "Checking if your infinity is working with long doubles..." >&4
   cat > inf$$.c <<EOF
 #include <math.h>
@@ -598,7 +598,7 @@ EOF
   $cc -qlongdouble -o inf$$ inf$$.c -lm
   case `./inf$$` in
   INF) echo "Your infinity is working correctly with long doubles." >&4 ;;
-  *) # NaNQ
+  *) # NaNQ (or anything else than INF)
     echo " "
     echo "Your infinity is broken, I suggest disabling long doubles." >&4
     rp="Disable long doubles?"
@@ -607,7 +607,7 @@ EOF
     case "$ans" in
     [Yy]*)
       echo "Okay, disabling long doubles." >&4
-      uselongdouble=undef
+      uselongdouble="$undef"
       ccflags=`echo " $ccflags " | sed -e 's/ -qlongdouble / /'`
       libswanted=`echo " $libswanted " | sed -e 's/ c128/ /'`
       lddlflags=`echo " $lddlflags " | sed -e 's/ -lc128 / /'`

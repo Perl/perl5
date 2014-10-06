@@ -157,6 +157,22 @@ With the default setting the size is limited to 128MB.
 The -1 removes this limit. If the "make test" fails please change
 your /etc/security/limits as stated above.
 
+=head Long doubles
+
+IBM calls its implementation of long doubles 128-bit, but it is not
+the IEEE 128-bit ("quadruple precision") which would give 116 bit of
+mantissa (nor it is implemented in hardware), instead it's a special
+software implementation called "double-double", which gives 106 bits
+of mantissa.
+
+There seem to be various problems in this long double implementation.
+If Configure detects this brokenness, it will disable the long double support.
+This can be overriden with explicit C<-Duselongdouble> (or C<-Dusemorebits>,
+which enables both long doubles and 64 bit integers).  If you decide to
+enable long doubles, for most of the broken things Perl has implemented
+workarounds, but the handling of the special values infinity and NaN
+remains badly broken: for example infinity plus zero results in NaN.
+
 =head2 Recommended Options AIX 5.1/5.2/5.3/6.1 and 7.1 (threaded/32-bit)
 
 With the following options you get a threaded Perl version which
