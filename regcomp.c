@@ -14433,6 +14433,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
             _invlist_union(cp_foldable_list, this_range, &cp_foldable_list);
             literal_endpoint = 0;
+            SvREFCNT_dec_NN(this_range);
 #endif
         }
 
