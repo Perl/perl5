@@ -1222,7 +1222,7 @@ sub maybe_local {
 	my @our_local;
 	push @our_local, "local" if $priv & OPpLVAL_INTRO;
 	push @our_local, "our"   if $priv & $our_intro;
-	my $our_local = join " ", @our_local;
+	my $our_local = join " ", map $self->keyword($_), @our_local;
 	if( $our_local[-1] eq 'our' ) {
 	    if ( $text !~ /^\W(\w+::)*\w+\z/
 	     and !utf8::decode($text) || $text !~ /^\W(\w+::)*\w+\z/
@@ -1276,9 +1276,8 @@ sub maybe_my {
 		   && $op->name =~ /[ah]v\z/
 		   && ($op->flags & (OPf_PARENS|OPf_REF)) == OPf_PARENS;
     if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
-	my $my = $op->private & OPpPAD_STATE
-	    ? $self->keyword("state")
-	    : "my";
+	my $my =
+	    $self->keyword($op->private & OPpPAD_STATE ? "state" : "my");
 	if ($padname->FLAGS & SVpad_TYPED) {
 	    $my .= ' ' . $padname->SvSTASH->NAME;
 	}
@@ -1377,7 +1376,10 @@ sub scopeop {
     }
     if ($cx > 0) { # inside an expression, (a do {} while for lineseq)
 	my $body = $self->lineseq($op, 0, @kids);
-	return is_lexical_subs(@kids) ? $body : "do {\n\t$body\n\b}";
+	return is_lexical_subs(@kids)
+		? $body
+		: ($self->lex_in_scope("&do") ? "CORE::do" : "do")
+		 . " {\n\t$body\n\b}";
     } else {
 	my $lineseq = $self->lineseq($op, $cx, @kids);
 	return (length ($lineseq) ? "$lineseq;" : "");
@@ -1888,6 +1890,9 @@ sub keyword {
     if (exists $feature_keywords{$name}) {
 	return "CORE::$name" if not $self->feature_enabled($name);
     }
+    if ($self->lex_in_scope("&$name")) {
+	return "CORE::$name";
+    }
     if ($strong_proto_keywords{$name}
         || ($name !~ /^(?:chom?p|do|exec|glob|s(?:elect|ystem))\z/
 	    && !defined eval{prototype "CORE::$name"})
@@ -2155,17 +2160,18 @@ sub pp_exists {
     my $self = shift;
     my($op, $cx) = @_;
     my $arg;
+    my $name = $self->keyword("exists");
     if ($op->private & OPpEXISTS_SUB) {
 	# Checking for the existence of a subroutine
-	return $self->maybe_parens_func("exists",
+	return $self->maybe_parens_func($name,
 				$self->pp_rv2cv($op->first, 16), $cx, 16);
     }
     if ($op->flags & OPf_SPECIAL) {
 	# Array element, not hash element
-	return $self->maybe_parens_func("exists",
+	return $self->maybe_parens_func($name,
 				$self->pp_aelem($op->first, 16), $cx, 16);
     }
-    return $self->maybe_parens_func("exists", $self->pp_helem($op->first, 16),
+    return $self->maybe_parens_func($name, $self->pp_helem($op->first, 16),
 				    $cx, 16);
 }
 
@@ -2173,24 +2179,25 @@ sub pp_delete {
     my $self = shift;
     my($op, $cx) = @_;
     my $arg;
+    my $name = $self->keyword("delete");
     if ($op->private & OPpSLICE) {
 	if ($op->flags & OPf_SPECIAL) {
 	    # Deleting from an array, not a hash
-	    return $self->maybe_parens_func("delete",
+	    return $self->maybe_parens_func($name,
 					$self->pp_aslice($op->first, 16),
 					$cx, 16);
 	}
-	return $self->maybe_parens_func("delete",
+	return $self->maybe_parens_func($name,
 					$self->pp_hslice($op->first, 16),
 					$cx, 16);
     } else {
 	if ($op->flags & OPf_SPECIAL) {
 	    # Deleting from an array, not a hash
-	    return $self->maybe_parens_func("delete",
+	    return $self->maybe_parens_func($name,
 					$self->pp_aelem($op->first, 16),
 					$cx, 16);
 	}
-	return $self->maybe_parens_func("delete",
+	return $self->maybe_parens_func($name,
 					$self->pp_helem($op->first, 16),
 					$cx, 16);
     }
@@ -2993,7 +3000,8 @@ sub mapop {
 	$expr = $self->deparse($kid, 6);
 	push @exprs, $expr if defined $expr;
     }
-    return $self->maybe_parens_func($name, $code . join(", ", @exprs), $cx, 5);
+    return $self->maybe_parens_func($self->keyword($name),
+				    $code . join(", ", @exprs), $cx, 5);
 }
 
 sub pp_mapwhile { mapop(@_, "map") }
@@ -3069,6 +3077,7 @@ sub pp_list {
 	$type = $newtype;
     }
     $local = "" if $local eq "either"; # no point if it's all undefs
+    $local &&= $self->keyword($local);
     $local .= " $type " if $local && length $type;
     return $self->deparse($kid, $cx) if null $kid->sibling and not $local;
     for (; !null($kid); $kid = $kid->sibling) {
@@ -3333,7 +3342,8 @@ sub pp_null {
 				   . $self->deparse($op->first->sibling, 20),
 				   $cx, 20);
     } elsif ($op->flags & OPf_SPECIAL && $cx < 1 && !$op->targ) {
-	return "do {\n\t". $self->deparse($op->first, $cx) ."\n\b};";
+	return ($self->lex_in_scope("&do") ? "CORE::do" : "do")
+	     . " {\n\t". $self->deparse($op->first, $cx) ."\n\b};";
     } elsif (!null($op->first->sibling) and
 	     $op->first->sibling->name eq "null" and
 	     class($op->first->sibling) eq "UNOP" and
