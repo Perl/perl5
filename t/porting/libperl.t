@@ -303,8 +303,12 @@ while (<$nm_fh>) {
 
 # use Data::Dumper; print Dumper(\%symbols);
 
-if (keys %symbols == 0) {
+# Something went awfully wrong.  Wrong nm?  Wrong options?
+unless (keys %symbols) {
     skip_all "no symbols\n";
+}
+unless (exists $symbols{text}) {
+    skip_all "no text symbols\n";
 }
 
 # These should always be true for everyone.
