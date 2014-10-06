@@ -167,6 +167,19 @@ you need to either recompile your Perl in Tru64 4.0D or upgrade your
 Tru64 4.0D to at least 4.0F: the sockatmark() system call was
 added in Tru64 4.0F, and the IO extension refers that symbol.
 
+=head1 read_cur_obj_info: bad file magic number
+
+You may be mixing the Tru64 cc/ar/ld with the GNU gcc/ar/ld.
+That may work, but sometimes it doesn't (your gcc or GNU utils
+may have been compiled for an incompatible OS release).
+
+Try 'which ld' and 'which ld' (or try 'ar --version' and 'ld --version',
+which work only for the GNU tools, and will announce themselves to be such),
+and adjust your PATH so that you are consistently using either
+the native tools or the GNU tools.  After fixing your PATH, you should
+do 'make distclean' and start all the way from running the Configure
+since you may have quite a confused situation.
+
 =head1 AUTHOR
 
 Jarkko Hietaniemi <jhi@iki.fi>
