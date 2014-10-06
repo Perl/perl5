@@ -14420,8 +14420,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * included.  literal_endpoint==2 means both ends of the range used
              * a literal character, not \x{foo} */
 	    if (literal_endpoint == 2
-                && ((prevvalue >= 'a' && value <= 'z')
-                    || (prevvalue >= 'A' && value <= 'Z')))
+                && ((isLOWER_A(prevvalue) && isLOWER_A(value))
+                    || (isUPPER_A(prevvalue) && isUPPER_A(value))))
             {
                 _invlist_intersection(this_range, PL_XPosix_ptrs[_CC_ASCII],
                                       &this_range);

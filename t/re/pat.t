@@ -22,7 +22,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 754;  # Update this when adding/deleting tests.
+plan tests => 755;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1614,6 +1614,11 @@ EOP
                    )|^Can't find Unicode property definition/,
                   undef,
                  '\p{} should not fail silently when uni tables evanesce');
+    }
+
+    {   # Special handling of literal-ended ranges in [...] was breaking this
+        use utf8;
+        like("ÿ", qr/[ÿ-ÿ]/, "\"ÿ\" should match [ÿ-ÿ]");
     }
 } # End of sub run_tests
 
