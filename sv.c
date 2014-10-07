@@ -10714,12 +10714,16 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 #if LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN || \
     LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
 #  define LONGDOUBLE_DOUBLEDOUBLE
-#  define DOUBLEDOUBLE_MAXBITS 1028
+/* The first double can be as large as 2**1023, or '1' x '0' x 1023.
+ * The second double can be as small as 2**-1074, or '0' x 1073 . '1'.
+ * The sum of them can be '1' . '0' x 2096 . '1', with implied radix point
+ * after the first 1023 zero bits. */
+#  define DOUBLEDOUBLE_MAXBITS 2098
 #endif
 
 /* vhex will contain the values (0..15) of the hex digits ("nybbles"
  * of 4 bits); 1 for the implicit 1, and the mantissa bits, four bits
- * per xdigit. */
+ * per xdigit.  For the double-double case, this can be rather many. */
 #ifdef LONGDOUBLE_DOUBLEDOUBLE
 #  define VHEX_SIZE (1+DOUBLEDOUBLE_MAXBITS/4)
 #else
@@ -11960,7 +11964,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * Since each double has their own exponent, the
                      * doubles may float (haha) rather far from each
                      * other, and the number of required bits is much
-                     * larger, up to total of 1028 bits.
+                     * larger, up to total of DOUBLEDOUBLE_MAXBITS bits.
+                     * See the definition of DOUBLEDOUBLE_MAXBITS.
                      *
                      * Need 2 hexdigits for each byte. */
                     need += (DOUBLEDOUBLE_MAXBITS/8 + 1) * 2;
