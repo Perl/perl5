@@ -462,7 +462,7 @@ sub next_todo {
     my $gv = $cv->GV;
     my $name = $self->gv_name($gv);
     if ($ent->[2]) {
-	return "format $name =\n"
+	return $self->keyword("format") . " $name =\n"
 	    . $self->deparse_format($ent->[1]). "\n";
     } else {
 	$self->{'subs_declared'}{$name} = 1;
@@ -470,6 +470,7 @@ sub next_todo {
 	    my $use_dec = $self->begin_is_use($cv);
 	    if (defined ($use_dec) and $self->{'expand'} < 5) {
 		return () if 0 == length($use_dec);
+		$use_dec =~ s/^(use|no)\b/$self->keyword($1)/e;
 		return $use_dec;
 	    }
 	}
@@ -483,13 +484,14 @@ sub next_todo {
 	if (class($cv->STASH) ne "SPECIAL") {
 	    my $stash = $cv->STASH->NAME;
 	    if ($stash ne $self->{'curstash'}) {
-		$p = "package $stash;\n";
+		$p = $self->keyword("package") . " $stash;\n";
 		$name = "$self->{'curstash'}::$name" unless $name =~ /::/;
 		$self->{'curstash'} = $stash;
 	    }
 	    $name =~ s/^\Q$stash\E::(?!\z|.*::)//;
 	}
-        return "${p}${l}sub $name " . $self->deparse_sub($cv);
+        return "${p}${l}" . $self->keyword("sub") . " $name "
+	      . $self->deparse_sub($cv);
     }
 }
 
@@ -820,9 +822,9 @@ sub compile {
 	my $laststash = defined $self->{'curcop'}
 	    ? $self->{'curcop'}->stash->NAME : $self->{'curstash'};
 	if (defined *{$laststash."::DATA"}{IO}) {
-	    print "package $laststash;\n"
+	    print $self->keyword("package") . " $laststash;\n"
 		unless $laststash eq $self->{'curstash'};
-	    print "__DATA__\n";
+	    print $self->keyword("__DATA__") . "\n";
 	    print readline(*{$laststash."::DATA"});
 	}
     }
@@ -1356,11 +1358,12 @@ sub scopeop {
 	    my $top = $kid->first;
 	    my $name = $top->name;
 	    if ($name eq "and") {
-		$name = "while";
+		$name = $self->keyword("while");
 	    } elsif ($name eq "or") {
-		$name = "until";
+		$name = $self->keyword("until");
 	    } else { # no conditional -> while 1 or until 0
-		return $self->deparse($top->first, 1) . " while 1";
+		return $self->deparse($top->first, 1) . " "
+		     . $self->keyword("while") . " 1";
 	    }
 	    my $cond = $top->first;
 	    my $body = $cond->sibling->first; # skip lineseq
@@ -1510,7 +1513,7 @@ sub stash_variable_name {
 	return $name, 0; # not quoted
     }
     else {
-	single_delim("q", "'", $name), 1;
+	single_delim("q", "'", $name, $self), 1;
     }
 }
 
@@ -1651,7 +1654,7 @@ sub pp_nextstate {
     push @text, $self->cop_subs($op);
     my $stash = $op->stashpv;
     if ($stash ne $self->{'curstash'}) {
-	push @text, "package $stash;\n";
+	push @text, $self->keyword("package") . " $stash;\n";
 	$self->{'curstash'} = $stash;
     }
 
@@ -1677,14 +1680,15 @@ sub pp_nextstate {
 
     if (defined ($warning_bits) and
        !defined($self->{warnings}) || $self->{'warnings'} ne $warning_bits) {
-	push @text, declare_warnings($self->{'warnings'}, $warning_bits);
+	push @text,
+	    $self->declare_warnings($self->{'warnings'}, $warning_bits);
 	$self->{'warnings'} = $warning_bits;
     }
 
     my $hints = $] < 5.008009 ? $op->private : $op->hints;
     my $old_hints = $self->{'hints'};
     if ($self->{'hints'} != $hints) {
-	push @text, declare_hints($self->{'hints'}, $hints);
+	push @text, $self->declare_hints($self->{'hints'}, $hints);
 	$self->{'hints'} = $hints;
     }
 
@@ -1711,14 +1715,15 @@ sub pp_nextstate {
 		my $bundle =
 		    $feature::hint_bundles[$to >> $feature::hint_shift];
 		$bundle =~ s/(\d[13579])\z/$1+1/e; # 5.11 => 5.12
-		push @text, "no feature;\n",
-			    "use feature ':$bundle';\n";
+		push @text,
+		    $self->keyword("no") . " feature;\n",
+		    $self->keyword("use") . " feature ':$bundle';\n";
 	    }
 	}
     }
 
     if ($] > 5.009) {
-	push @text, declare_hinthash(
+	push @text, $self->declare_hinthash(
 	    $self->{'hinthash'}, $newhh,
 	    $self->{indent_size}, $self->{hints},
 	);
@@ -1739,26 +1744,26 @@ sub pp_nextstate {
 }
 
 sub declare_warnings {
-    my ($from, $to) = @_;
+    my ($self, $from, $to) = @_;
     if (($to & WARN_MASK) eq (warnings::bits("all") & WARN_MASK)) {
-	return "use warnings;\n";
+	return $self->keyword("use") . " warnings;\n";
     }
     elsif (($to & WARN_MASK) eq ("\0"x length($to) & WARN_MASK)) {
-	return "no warnings;\n";
+	return $self->keyword("no") . " warnings;\n";
     }
     return "BEGIN {\${^WARNING_BITS} = ".perlstring($to)."}\n";
 }
 
 sub declare_hints {
-    my ($from, $to) = @_;
+    my ($self, $from, $to) = @_;
     my $use = $to   & ~$from;
     my $no  = $from & ~$to;
     my $decls = "";
     for my $pragma (hint_pragmas($use)) {
-	$decls .= "use $pragma;\n";
+	$decls .= $self->keyword("use") . " $pragma;\n";
     }
     for my $pragma (hint_pragmas($no)) {
-        $decls .= "no $pragma;\n";
+        $decls .= $self->keyword("no") . " $pragma;\n";
     }
     return $decls;
 }
@@ -1777,7 +1782,7 @@ my %ignored_hints = (
 my %rev_feature;
 
 sub declare_hinthash {
-    my ($from, $to, $indent, $hints) = @_;
+    my ($self, $from, $to, $indent, $hints) = @_;
     my $doing_features =
 	($hints & $feature::hint_mask) == $feature::hint_mask;
     my @decls;
@@ -1790,10 +1795,10 @@ sub declare_hinthash {
 	if (!exists $from->{$key} or $from->{$key} ne $to->{$key}) {
 	    push(@features, $key), next if $is_feature;
 	    push @decls,
-		qq(\$^H{) . single_delim("q", "'", $key) . qq(} = )
+		qq(\$^H{) . single_delim("q", "'", $key, $self) . qq(} = )
 	      . (
 		   defined $to->{$key}
-			? single_delim("q", "'", $to->{$key})
+			? single_delim("q", "'", $to->{$key}, $self)
 			: 'undef'
 		)
 	      . qq(;);
@@ -1813,11 +1818,11 @@ sub declare_hinthash {
 	if (!%rev_feature) { %rev_feature = reverse %feature::feature }
     }
     if (@features) {
-	push @ret, "use feature "
+	push @ret, $self->keyword("use") . " feature "
 		 . join(", ", map "'$rev_feature{$_}'", @features) . ";\n";
     }
     if (@unfeatures) {
-	push @ret, "no feature "
+	push @ret, $self->keyword("no") . " feature "
 		 . join(", ", map "'$rev_feature{$_}'", @unfeatures)
 		 . ";\n";
     }
@@ -1890,7 +1895,17 @@ sub keyword {
     if (exists $feature_keywords{$name}) {
 	return "CORE::$name" if not $self->feature_enabled($name);
     }
-    if ($self->lex_in_scope("&$name")) {
+    # This sub may be called for a program that has no nextstate ops.  In
+    # that case we may have a lexical sub named no/use/sub in scope but
+    # but $self->lex_in_scope will return false because it depends on the
+    # current nextstate op.  So we need this alternate method if there is
+    # no current cop.
+    if (!$self->{'curcop'}) {
+	$self->populate_curcvlex() if !defined $self->{'curcvlex'};
+	return "CORE::$name" if exists $self->{'curcvlex'}{"m&$name"}
+			     || exists $self->{'curcvlex'}{"o&$name"};
+    } elsif ($self->lex_in_scope("&$name")
+	  || $self->lex_in_scope("&$name", 1)) {
 	return "CORE::$name";
     }
     if ($strong_proto_keywords{$name}
@@ -2302,7 +2317,7 @@ sub pp_refgen {
 sub e_anoncode {
     my ($self, $info) = @_;
     my $text = $self->deparse_sub($info->{code});
-    return "sub " . $text;
+    return $self->keyword("sub") . " $text";
 }
 
 sub pp_srefgen { pp_refgen(@_) }
@@ -2649,6 +2664,7 @@ sub logop {
     my ($op, $cx, $lowop, $lowprec, $highop, $highprec, $blockname) = @_;
     my $left = $op->first;
     my $right = $op->first->sibling;
+    $blockname &&= $self->keyword($blockname);
     if ($cx < 1 and is_scope($right) and $blockname
 	and $self->{'expand'} < 7)
     { # if ($a) {$b}
@@ -3127,8 +3143,9 @@ sub pp_cond_expr {
 
     $cond = $self->deparse($cond, 1);
     $true = $self->deparse($true, 0);
-    my $head = "if ($cond) {\n\t$true\n\b}";
+    my $head = $self->keyword("if") . " ($cond) {\n\t$true\n\b}";
     my @elsifs;
+    my $elsif;
     while (!null($false) and is_ifelse_cont($false)) {
 	my $newop = $false->first;
 	my $newcond = $newop->first;
@@ -3142,10 +3159,11 @@ sub pp_cond_expr {
 	}
 	$newcond = $self->deparse($newcond, 1);
 	$newtrue = $self->deparse($newtrue, 0);
-	push @elsifs, "elsif ($newcond) {\n\t$newtrue\n\b}";
+	$elsif ||= $self->keyword("elsif");
+	push @elsifs, "$elsif ($newcond) {\n\t$newtrue\n\b}";
     }
     if (!null($false)) {
-	$false = $cuddle . "else {\n\t" .
+	$false = $cuddle . $self->keyword("else") . " {\n\t" .
 	  $self->deparse($false, 0) . "\n\b}\cK";
     } else {
 	$false = "\cK";
@@ -3211,7 +3229,8 @@ sub loop_common {
 	if (!is_state $body->first and $body->first->name !~ /^(?:stub|leave|scope)$/) {
 	    confess unless $var eq '$_';
 	    $body = $body->first;
-	    return $self->deparse($body, 2) . " foreach ($ary)";
+	    return $self->deparse($body, 2) . " "
+		 . $self->keyword("foreach") . " ($ary)";
 	}
 	$head = "foreach $var ($ary) ";
     } elsif ($kid->name eq "null") { # while/until
@@ -3274,6 +3293,7 @@ sub loop_common {
 	ref $cond and $cond = $self->deparse($cond, 1);
 	$head = "$name ($cond) ";
     }
+    $head =~ s/^(for(?:each)?|while|until)/$self->keyword($1)/e;
     $body =~ s/;?$/;\n/;
 
     return $head . "{\n\t" . $body . "\b}" . $cont;
@@ -3912,7 +3932,7 @@ sub pp_entersub {
 		$fq and substr $kid, 0, 0, = $self->{'curstash'}.'::';
 	      }
 	      if ($kid !~ /^(?:\w|::)(?:[\w\d]|::(?!\z))*\z/) {
-		$kid = single_delim("q", "'", $kid) . '->';
+		$kid = single_delim("q", "'", $kid, $self) . '->';
 	      }
 	    }
 	}
@@ -4172,21 +4192,22 @@ sub balanced_delim {
 }
 
 sub single_delim {
-    my($q, $default, $str) = @_;
+    my($q, $default, $str, $self) = @_;
     return "$default$str$default" if $default and index($str, $default) == -1;
+    my $coreq = $self->keyword($q); # maybe CORE::q
     if ($q ne 'qr') {
 	(my $succeed, $str) = balanced_delim($str);
-	return "$q$str" if $succeed;
+	return "$coreq$str" if $succeed;
     }
     for my $delim ('/', '"', '#') {
-	return "$q$delim" . $str . $delim if index($str, $delim) == -1;
+	return "$coreq$delim" . $str . $delim if index($str, $delim) == -1;
     }
     if ($default) {
 	$str =~ s/$default/\\$default/g;
 	return "$default$str$default";
     } else {
 	$str =~ s[/][\\/]g;
-	return "$q/$str/";
+	return "$coreq/$str/";
     }
 }
 
@@ -4313,7 +4334,7 @@ sub const {
 	    for (my $mg = $ref->MAGIC; $mg; $mg = $mg->MOREMAGIC) {
 		if ($mg->TYPE eq 'r') {
 		    my $re = re_uninterp(escape_str(re_unback($mg->precomp)));
-		    return single_delim("qr", "", $re);
+		    return single_delim("qr", "", $re, $self);
 		}
 	    }
 	}
@@ -4326,9 +4347,10 @@ sub const {
     } elsif ($sv->FLAGS & SVf_POK) {
 	my $str = $sv->PV;
 	if ($str =~ /[[:^print:]]/) {
-	    return single_delim("qq", '"', uninterp escape_str unback $str);
+	    return single_delim("qq", '"',
+				 uninterp(escape_str unback $str), $self);
 	} else {
-	    return single_delim("q", "'", unback $str);
+	    return single_delim("q", "'", unback($str), $self);
 	}
     } else {
 	return "undef";
@@ -4424,7 +4446,7 @@ sub pp_backtick {
     my $child = $op->first->sibling->isa('B::NULL')
 	? $op->first : $op->first->sibling;
     if ($self->pure_string($child)) {
-	return single_delim("qx", '`', $self->dq($child, 1));
+	return single_delim("qx", '`', $self->dq($child, 1), $self);
     }
     unop($self, @_, "readpipe");
 }
@@ -4435,7 +4457,8 @@ sub dquote {
     my $kid = $op->first->sibling; # skip ex-stringify, pushmark
     return $self->deparse($kid, $cx) if $self->{'unquote'};
     $self->maybe_targmy($kid, $cx,
-			sub {single_delim("qq", '"', $self->dq($_[1]))});
+			sub {single_delim("qq", '"', $self->dq($_[1]),
+					   $self)});
 }
 
 # OP_STRINGIFY is a listop, but it only ever has one arg
@@ -4690,7 +4713,7 @@ sub pp_trans {
     $flags .= "d" if $priv_flags & OPpTRANS_DELETE;
     $to = "" if $from eq $to and $flags eq "";
     $flags .= "s" if $priv_flags & OPpTRANS_SQUASH;
-    return "tr" . double_delim($from, $to) . $flags;
+    return $self->keyword("tr") . double_delim($from, $to) . $flags;
 }
 
 sub pp_transr { &pp_trans . 'r' }
@@ -4897,9 +4920,9 @@ sub matchop {
     $flags = $matchwords{$flags} if $matchwords{$flags};
     if ($pmflags & PMf_ONCE) { # only one kind of delimiter works here
 	$re =~ s/\?/\\?/g;
-	$re = "m?$re?";        # explicit 'm' is required
+	$re = $self->keyword("m") . "?$re?";     # explicit 'm' is required
     } elsif ($quote) {
-	$re = single_delim($name, $delim, $re);
+	$re = single_delim($name, $delim, $re, $self);
     }
     $re = $re . $flags if $quote;
     if ($binop) {
@@ -5028,12 +5051,13 @@ sub pp_subst {
     $flags .= $self->re_flags($op);
     $flags = join '', sort split //, $flags;
     $flags = $substwords{$flags} if $substwords{$flags};
+    my $core_s = $self->keyword("s"); # maybe CORE::s
     if ($binop) {
-	return $self->maybe_parens("$var =~ s"
+	return $self->maybe_parens("$var =~ $core_s"
 				   . double_delim($re, $repl) . $flags,
 				   $cx, 20);
     } else {
-	return "s". double_delim($re, $repl) . $flags;	
+	return "$core_s". double_delim($re, $repl) . $flags;	
     }
 }
 

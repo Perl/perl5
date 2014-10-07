@@ -13,7 +13,7 @@ use warnings;
 use strict;
 use Test::More;
 
-my $tests = 21; # not counting those in the __DATA__ section
+my $tests = 25; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -270,6 +270,11 @@ x(); z()
 .
 EOCODH
 
+# CORE::format
+$a = readpipe qq`$^X $path "-MO=Deparse" -e "use feature q|:all|;`
+             .qq` my sub format; CORE::format =" -e. 2>&1`;
+like($a, qr/CORE::format/, 'CORE::format when lex format sub is in scope');
+
 # literal big chars under 'use utf8'
 is($deparse->coderef2text(sub{ use utf8; /€/; }),
 '{
@@ -284,6 +289,25 @@ $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODI', 'no extra output when deparsing foo()');
 foo();
 EOCODI
+
+# CORE::no
+$a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
+             .qq`"use feature q|:all|; my sub no; CORE::no less" 2>&1`;
+like($a, qr/my sub no;\n\(\);\nCORE::no less;/,
+    'CORE::no after my sub no');
+
+# CORE::use
+$a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
+             .qq`"use feature q|:all|; my sub use; CORE::use less" 2>&1`;
+like($a, qr/my sub use;\n\(\);\nCORE::use less;/,
+    'CORE::use after my sub use');
+
+# CORE::__DATA__
+$a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
+             .qq`"use feature q|:all|; my sub __DATA__; `
+             .qq`CORE::__DATA__" 2>&1`;
+like($a, qr/my sub __DATA__;\n\(\);\nCORE::__DATA__/,
+    'CORE::__DATA__ after my sub __DATA__');
 
 
 done_testing($tests);
@@ -1105,6 +1129,58 @@ CORE::given ($x) {
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
+####
+# SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
+# lexical subroutines and keywords of the same name
+# CONTEXT use feature 'lexical_subs', 'switch'; no warnings 'experimental';
+my sub default;
+my sub else;
+my sub elsif;
+my sub for;
+my sub foreach;
+my sub given;
+my sub if;
+my sub m;
+my sub no;
+my sub package;
+my sub q;
+my sub qq;
+my sub qr;
+my sub qx;
+my sub require;
+my sub s;
+my sub sub;
+my sub tr;
+my sub unless;
+my sub until;
+my sub use;
+my sub when;
+my sub while;
+CORE::default { die; }
+CORE::if ($1) { die; }
+CORE::if ($1) { die; }
+CORE::elsif ($1) { die; }
+CORE::else { die; }
+CORE::for (die; $1; die) { die; }
+CORE::foreach $_ (1 .. 10) { die; }
+die CORE::foreach (1);
+CORE::given ($1) { die; }
+CORE::m[/];
+CORE::m?/?;
+CORE::package foo;
+CORE::no strict;
+() = (CORE::q['], CORE::qq["$_], CORE::qr//, CORE::qx[`]);
+CORE::require 1;
+CORE::s///;
+() = CORE::sub { die; } ;
+CORE::tr///;
+CORE::unless ($1) { die; }
+CORE::until ($1) { die; }
+die CORE::until $1;
+CORE::use strict;
+CORE::when ($1 ~~ $2) { die; }
+CORE::while ($1) { die; }
+die CORE::while $1;
 ####
 # Feature hints
 use feature 'current_sub', 'evalbytes';
