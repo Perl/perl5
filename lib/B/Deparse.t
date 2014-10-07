@@ -487,6 +487,12 @@ foreach our $i (1, 2) {
     my $z = 1;
 }
 ####
+# foreach with state
+# CONTEXT use feature "state";
+foreach state $i (1, 2) {
+    state $z = 1;
+}
+####
 # reverse sort
 my @x;
 print reverse sort(@x);

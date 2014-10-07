@@ -35,7 +35,8 @@ BEGIN {
 		OPpPAD_STATE PMf_SKIPWHITE RXf_SKIPWHITE
 		RXf_PMf_CHARSET RXf_PMf_KEEPCOPY
 		CVf_LOCKED OPpREVERSE_INPLACE OPpSUBSTR_REPL_FIRST
-		PMf_NONDESTRUCT OPpCONST_ARYBASE OPpEVAL_BYTES)) {
+		PMf_NONDESTRUCT OPpCONST_ARYBASE OPpEVAL_BYTES
+		SVpad_STATE)) {
 	eval { import B $_ };
 	no strict 'refs';
 	*{$_} = sub () {0} unless *{$_}{CODE};
@@ -1278,8 +1279,10 @@ sub maybe_my {
 		   && $op->name =~ /[ah]v\z/
 		   && ($op->flags & (OPf_PARENS|OPf_REF)) == OPf_PARENS;
     if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
+	# Check $padname->FLAGS for statehood, rather than $op->private,
+	# because enteriter ops do not carry the flag.
 	my $my =
-	    $self->keyword($op->private & OPpPAD_STATE ? "state" : "my");
+	    $self->keyword($padname->FLAGS & SVpad_STATE ? "state" : "my");
 	if ($padname->FLAGS & SVpad_TYPED) {
 	    $my .= ' ' . $padname->SvSTASH->NAME;
 	}
