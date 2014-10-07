@@ -1042,6 +1042,14 @@ EXTERN_C int usleep(unsigned int);
 #   endif
 #endif /* !HAS_BCMP */
 
+/* In Tru64 define _SOCKADDR_LEN to use 4.4BSD and IPv6 interfaces.
+ * Define it before any network headers like netinet/in.h or sys/socket.h.
+ * For OSF/1 3.2, however, defining _SOCKADDR_LEN would be
+ * a bad idea since it breaks send() and recv(). */
+#if defined(__osf__) && defined(__alpha) && !defined(_SOCKADDR_LEN) && !defined(DEC_OSF1_3_X)
+#   define _SOCKADDR_LEN
+#endif
+
 #ifdef I_NETINET_IN
 #   include <netinet/in.h>
 #endif
@@ -1105,14 +1113,6 @@ EXTERN_C int usleep(unsigned int);
 
 #if defined(WIN32) && defined(PERL_IMPLICIT_SYS)
 #  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
-#endif
-
-/* In Tru64 use the 4.4BSD struct msghdr, not the 4.3 one.
- * This is important for using IPv6.
- * For OSF/1 3.2, however, defining _SOCKADDR_LEN would be
- * a bad idea since it breaks send() and recv(). */
-#if defined(__osf__) && defined(__alpha) && !defined(_SOCKADDR_LEN) && !defined(DEC_OSF1_3_X)
-#   define _SOCKADDR_LEN
 #endif
 
 #if defined(HAS_SOCKET) && !defined(WIN32) /* WIN32 handles sockets via win32.h */
