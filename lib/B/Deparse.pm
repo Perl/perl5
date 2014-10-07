@@ -36,7 +36,8 @@ BEGIN {
 		RXf_PMf_CHARSET RXf_PMf_KEEPCOPY
 		CVf_LOCKED OPpREVERSE_INPLACE OPpSUBSTR_REPL_FIRST
 		PMf_NONDESTRUCT OPpCONST_ARYBASE OPpEVAL_BYTES
-		SVpad_STATE)) {
+		OPpLVREF_TYPE OPpLVREF_SV OPpLVREF_AV OPpLVREF_HV
+		OPpLVREF_CV OPpLVREF_ELEM SVpad_STATE)) {
 	eval { import B $_ };
 	no strict 'refs';
 	*{$_} = sub () {0} unless *{$_}{CODE};
@@ -322,7 +323,7 @@ BEGIN {
 
 
 
-BEGIN { for (qw[ const stringify rv2sv list glob pushmark null]) {
+BEGIN { for (qw[ const stringify rv2sv list glob pushmark null aelem]) {
     eval "sub OP_\U$_ () { " . opnumber($_) . "}"
 }}
 
@@ -1216,7 +1217,8 @@ sub maybe_local {
     my $self = shift;
     my($op, $cx, $text) = @_;
     my $name = $op->name;
-    my $our_intro = ($name =~ /^(?:(?:gv|rv2)[ash]v|split)$/)
+    my $our_intro = ($name =~ /^(?:(?:gv|rv2)[ash]v|split|refassign
+				  |lv(?:av)?ref)$/x)
 			? OPpOUR_INTRO
 			: 0;
     my $lval_intro = $name eq 'split' ? 0 : OPpLVAL_INTRO;
@@ -2500,7 +2502,7 @@ BEGIN {
 	      'multiply=' => 7, 'i_multiply=' => 7,
 	      'divide=' => 7, 'i_divide=' => 7,
 	      'modulo=' => 7, 'i_modulo=' => 7,
-	      'repeat=' => 7,
+	      'repeat=' => 7, 'refassign' => 7, 'refassign=' => 7,
 	      'add=' => 7, 'i_add=' => 7,
 	      'subtract=' => 7, 'i_subtract=' => 7,
 	      'concat=' => 7,
@@ -3054,7 +3056,8 @@ sub pp_list {
 	my $loppriv = $lop->private;
 	if (!($loppriv & (OPpLVAL_INTRO|OPpOUR_INTRO)
 		or $lopname eq "undef")
-	    or $lopname =~ /^(?:entersub|exit|open|split)\z/)
+	    or $lopname =~ /^(?:entersub|exit|open|split
+			       |lv(?:av)?ref(?:slice)?)\z/x)
 	{
 	    $local = ""; # or not
 	    last;
@@ -3233,6 +3236,8 @@ sub loop_common {
 	    }
 	} elsif ($var->name eq "gv") {
 	    $var = "\$" . $self->deparse($var, 1);
+	} else {
+	    $var = $self->deparse($var, 1);
 	}
 	$body = $kid->first->first->sibling; # skip OP_AND and OP_ITER
 	if (!is_state $body->first and $body->first->name !~ /^(?:stub|leave|scope)$/) {
@@ -5102,6 +5107,61 @@ sub pp_padcv {
     my $self = shift;
     my($op, $cx) = @_;
     return $self->padany($op);
+}
+
+my %lvref_funnies = (
+    OPpLVREF_SV, => '$',
+    OPpLVREF_AV, => '@',
+    OPpLVREF_HV, => '%',
+    OPpLVREF_CV, => '&',
+);
+
+sub pp_refassign {
+    my ($self, $op, $cx) = @_;
+    my $left;
+    if ($op->private & OPpLVREF_ELEM) {
+	$left = $op->first ->sibling   ->first  ->first;
+	           #  rhs  ex-srefgen  ex-list  ex-[ah]elem
+	$left = maybe_local(@_, elem($self, $left, undef,
+				     $left->targ == OP_AELEM
+					? qw([ ] padav)
+					: qw({ } padhv)));
+    } elsif ($op->flags & OPf_STACKED) {
+	$left = maybe_local(@_,
+			    $lvref_funnies{$op->private & OPpLVREF_TYPE}
+			  . $self->deparse($op->first->sibling));
+    } else {
+	$left = &pp_padsv;
+    }
+    my $right = $self->deparse_binop_right($op, $op->first, 7);
+    return $self->maybe_parens("\\$left = $right", $cx, 7);
+}
+
+sub pp_lvref {
+    my ($self, $op, $cx) = @_;
+    my $code;
+    if ($op->private & OPpLVREF_ELEM) {
+	$code = $op->first->name =~ /av\z/ ? &pp_aelem : &pp_helem;
+    } elsif ($op->flags & OPf_STACKED) {
+	$code = maybe_local(@_,
+			    $lvref_funnies{$op->private & OPpLVREF_TYPE}
+			  . $self->deparse($op->first));
+    } else {
+	$code = &pp_padsv;
+    }
+    "\\$code";
+}
+
+sub pp_lvrefslice {
+    my ($self, $op, $cx) = @_;
+    '\\' . ($op->last->name =~ /av\z/ ? &pp_aslice : &pp_hslice);
+}
+
+sub pp_lvavref {
+    my ($self, $op, $cx) = @_;
+    '\\(' . ($op->flags & OPf_STACKED
+		? maybe_local(@_, rv2x(@_, "\@"))
+		: &pp_padsv)  . ')'
 }
 
 1;
