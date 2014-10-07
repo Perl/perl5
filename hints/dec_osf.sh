@@ -539,6 +539,9 @@ gcc)   ;;
        ;;
 esac
 
+# Would need -D_SOCKADDR_LEN for the Configure test.
+d_sockaddr_sa_len='define'
+
 #
 # Unset temporary variables no more needed.
 #
