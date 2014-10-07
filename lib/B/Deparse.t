@@ -476,11 +476,6 @@ foreach my $i (1, 2) {
     my $z = 1;
 }
 ####
-# foreach
-foreach my $i (1, 2) {
-    my $z = 1;
-}
-####
 # foreach with our
 foreach our $i (1, 2) {
     my $z = 1;
