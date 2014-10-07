@@ -2717,7 +2717,11 @@ PP(pp_sin)
       const NV value = SvNV_nomg(arg);
       NV result = NV_NAN;
       if (neg_report) { /* log or sqrt */
-	  if (op_type == OP_LOG ? (value <= 0.0) : (value < 0.0)) {
+	  if (
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+	      ! Perl_isnan(value) &&
+#endif
+	      (op_type == OP_LOG ? (value <= 0.0) : (value < 0.0))) {
 	      SET_NUMERIC_STANDARD();
 	      /* diag_listed_as: Can't take log of %g */
 	      DIE(aTHX_ "Can't take %s of %"NVgf, neg_report, value);
@@ -2768,7 +2772,11 @@ PP(pp_rand)
 		value = SvNV(sv);
 	}
     /* 1 of 2 things can be carried through SvNV, SP or TARG, SP was carried */
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+	if (! Perl_isnan(value) && value == 0.0)
+#else
 	if (value == 0.0)
+#endif
 	    value = 1.0;
 	{
 	    dTARGET;
