@@ -913,7 +913,6 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * digits */
 #define isOCTAL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (0xF8 & (c)) == '0')
 
-/* ASCII range only */
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
 
 /* Character class numbers.  For internal core Perl use only.  The ones less
@@ -1102,7 +1101,7 @@ EXTCONST U32 PL_charclass[];
                                             _generic_isCC(c, _CC_IS_IN_SOME_FOLD)
 #   define _IS_MNEMONIC_CNTRL_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
                                             _generic_isCC(c, _CC_MNEMONIC_CNTRL)
-#else   /* else we don't have perl.h */
+#else   /* else we don't have perl.h H_PERL */
 
     /* If we don't have perl.h, we are compiling a utility program.  Below we
      * hard-code various macro definitions that wouldn't otherwise be available
@@ -1205,7 +1204,7 @@ EXTCONST U32 PL_charclass[];
          (FITS_IN_8_BITS(c) && S_bootstrap_ctype((U8) (c), (classnum), TRUE))
 #   define _generic_isCC_A(c, classnum)                                      \
          (FITS_IN_8_BITS(c) && S_bootstrap_ctype((U8) (c), (classnum), FALSE))
-#endif  /* End of no perl.h */
+#endif  /* End of no perl.h H_PERL */
 
 #define isALPHANUMERIC(c)  isALPHANUMERIC_A(c)
 #define isALPHA(c)   isALPHA_A(c)
