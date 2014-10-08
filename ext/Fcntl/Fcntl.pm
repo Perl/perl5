@@ -177,10 +177,15 @@ XSLoader::load();
 	LOCK_READ
 	LOCK_RW
 	LOCK_WRITE
+        O_ALT_IO
+        O_EVTONLY
 	O_IGNORE_CTTY
 	O_NOATIME
 	O_NOLINK
+        O_NOSIGPIPE
 	O_NOTRANS
+        O_SYMLINK
+        O_TTY_INIT
 ), map {@{$_}} values %EXPORT_TAGS);
 
 1;
