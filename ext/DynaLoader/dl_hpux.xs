@@ -23,6 +23,7 @@
 #endif
 
 #include "EXTERN.h"
+#define PERL_IN_DL_HPUX_XS
 #include "perl.h"
 #include "XSUB.h"
 

@@ -23,8 +23,10 @@
 typedef struct {
     SV*		x_dl_last_error;	/* pointer to allocated memory for
 					   last error message */
+#if defined(PERL_IN_DL_HPUX_XS) || defined(PERL_IN_DL_DLOPEN_XS)
     int		x_dl_nonlazy;		/* flag for immediate rather than lazy
 					   linking (spots unresolved symbol) */
+#endif
 #ifdef DL_LOADONCEONLY
     HV *	x_dl_loaded_files;	/* only needed on a few systems */
 #endif
@@ -39,7 +41,9 @@ typedef struct {
 START_MY_CXT
 
 #define dl_last_error	(SvPVX(MY_CXT.x_dl_last_error))
+#if defined(PERL_IN_DL_HPUX_XS) || defined(PERL_IN_DL_DLOPEN_XS)
 #define dl_nonlazy	(MY_CXT.x_dl_nonlazy)
+#endif
 #ifdef DL_LOADONCEONLY
 #define dl_loaded_files	(MY_CXT.x_dl_loaded_files)
 #endif
@@ -89,11 +93,12 @@ dl_unload_all_files(pTHX_ void *unused)
 static void
 dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
 {
+#if defined(PERL_IN_DL_HPUX_XS) || defined(PERL_IN_DL_DLOPEN_XS)
     char *perl_dl_nonlazy;
+#endif
     MY_CXT_INIT;
 
     MY_CXT.x_dl_last_error = newSVpvs("");
-    dl_nonlazy = 0;
 #ifdef DL_LOADONCEONLY
     dl_loaded_files = NULL;
 #endif
@@ -103,10 +108,15 @@ dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
 	dl_debug = sv ? SvIV(sv) : 0;
     }
 #endif
+
+#if defined(PERL_IN_DL_HPUX_XS) || defined(PERL_IN_DL_DLOPEN_XS)
     if ( (perl_dl_nonlazy = getenv("PERL_DL_NONLAZY")) != NULL )
 	dl_nonlazy = grok_atou(perl_dl_nonlazy, NULL);
+    else
+	dl_nonlazy = 0;
     if (dl_nonlazy)
 	DLDEBUG(1,PerlIO_printf(Perl_debug_log, "DynaLoader bind mode is 'non-lazy'\n"));
+#endif
 #ifdef DL_LOADONCEONLY
     if (!dl_loaded_files)
 	dl_loaded_files = newHV(); /* provide cache for dl_*.xs if needed */

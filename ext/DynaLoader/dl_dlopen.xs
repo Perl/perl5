@@ -119,6 +119,7 @@
 #define PERL_NO_GET_CONTEXT
 
 #include "EXTERN.h"
+#define PERL_IN_DL_DLOPEN_XS
 #include "perl.h"
 #include "XSUB.h"
 
