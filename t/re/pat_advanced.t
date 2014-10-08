@@ -4,23 +4,21 @@
 # the format supported by re/regexp.t.  If you want to add a test
 # that does fit that format, add it to re/re_tests, not here.
 
-use strict;
-use warnings;
-use 5.010;
-
-
-sub run_tests;
-
-$| = 1;
-
-
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    @INC = qw(../lib .);
     require './test.pl';
     require './charset_tools.pl';
     skip_all_if_miniperl("miniperl can't load Tie::Hash::NamedCapture, need for %+ and %-");
 }
+
+use strict;
+use warnings;
+use 5.010;
+
+sub run_tests;
+
+$| = 1;
 
 run_tests() unless caller;
 
@@ -985,6 +983,9 @@ sub run_tests {
     }
 
     {
+	BEGIN {
+	    unshift @INC, 'lib';
+	}
         use Cname;
 
         ok 'fooB'  =~ /\N{foo}[\N{B}\N{b}]/, "Passthrough charname";
