@@ -893,20 +893,16 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 #ifdef EBCDIC
 #   ifndef _ALL_SOURCE
-        /* This returns the wrong results on at least z/OS unless this is
-         * defined. */
+        /* The native libc isascii() et.al. functions return the wrong results
+         * on at least z/OS unless this is defined. */
 #       error   _ALL_SOURCE should probably be defined
 #   endif
-
-    /* We could be called without perl.h, in which case NATIVE_TO_ASCII() is
-     * likely not defined, and so we use the native function */
-#   define isASCII(c)    cBOOL(isascii(c))
 #else
+    /* There is a simple definition of ASCII for ASCII platforms.  But the
+     * EBCDIC one isn't so simple, so is defined using table look-up like the
+     * other macros below */
 #   define isASCII(c)    ((WIDEST_UTYPE)(c) < 128)
 #endif
-
-#define isASCII_A(c)  isASCII(c)
-#define isASCII_L1(c)  isASCII(c)
 
 /* The lower 3 bits in both the ASCII and EBCDIC representations of '0' are 0,
  * and the 8 possible permutations of those bits exactly comprise the 8 octal
@@ -1088,6 +1084,10 @@ EXTCONST U32 PL_charclass[];
 #   define isWORDCHAR_L1(c) _generic_isCC(c, _CC_WORDCHAR)
 #   define isIDFIRST_L1(c) _generic_isCC(c, _CC_IDFIRST)
 
+#   ifdef EBCDIC
+#       define isASCII(c) _generic_isCC(c, _CC_ASCII)
+#   endif
+
     /* Participates in a single-character fold with a character above 255 */
 #   define _HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) (c)] & _CC_mask(_CC_NONLATIN1_SIMPLE_FOLD)))
 
@@ -1105,36 +1105,83 @@ EXTCONST U32 PL_charclass[];
 
     /* If we don't have perl.h, we are compiling a utility program.  Below we
      * hard-code various macro definitions that wouldn't otherwise be available
-     * to it. */
-#   ifdef EBCDIC
-        /* Use the native functions.  They likely will return false for all
-         * non-ASCII values, but this makes sure */
-#       define isLOWER_A(c)    (isASCII(c) && islower(c))
-#       define isPRINT_A(c)    (isASCII(c) && isprint(c))
-#       define isUPPER_A(c)    (isASCII(c) && isupper(c))
-#   else   /* ASCII platform.  These are coded based on first principals */
+     * to it. Most are coded based on first principals.  First some ones common
+     * to both ASCII and EBCDIC */
+#   define isDIGIT_A(c)  ((c) <= '9' && (c) >= '0')
+#   define isBLANK_A(c)  ((c) == ' ' || (c) == '\t')
+#   define isSPACE_A(c)  (isBLANK_A(c)                                       \
+                          || (c) == '\n'                                     \
+                          || (c) == '\r'                                     \
+                          || (c) == '\v'                                     \
+                          || (c) == '\f')
+#   ifdef EBCDIC    /* There are gaps between 'i' and 'j'; 'r' and 's'.  Same
+                       for uppercase.  This is ordered to exclude most things
+                       early */
+#       define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z'                       \
+                               && ((c) <= 'i'                                \
+                                   || ((c) >= 'j' && (c) <= 'r')             \
+                                   || (c) >= 's'))
+#       define isUPPER_A(c)  ((c) >= 'A' && (c) <= 'Z'                       \
+                               && ((c) <= 'I'                                \
+                                   || ((c) >= 'J' && (c) <= 'R')             \
+                                   || (c) >= 'S'))
+#   else   /* ASCII platform. */
 #       define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z')
-#       define isPRINT_A(c)  (((c) >= 32 && (c) < 127))
 #       define isUPPER_A(c)  ((c) <= 'Z' && (c) >= 'A')
-#   endif   /* Below are common definitions for ASCII and non-ASCII */
+#   endif
+
+    /* Some more ASCII, non-ASCII common definitions */
 #   define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
 #   define isALPHANUMERIC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
-#   define isBLANK_A(c)      ((c) == ' ' || (c) == '\t')
-#   define isCNTRL_A(c)  (isASCII(c) && (! isPRINT_A(c)))
-#   define isDIGIT_A(c)  ((c) <= '9' && (c) >= '0')
-#   define isGRAPH_A(c)  (isPRINT_A(c) && (c) != ' ')
-#   define isIDFIRST_A(c)    (isALPHA_A(c) || (c) == '_')
-#   define isPUNCT_A(c)  (isGRAPH_A(c) && (! isALPHANUMERIC_A(c)))
-#   define isSPACE_A(c)  ((c) == ' '                                         \
-                       || (c) == '\t'                                        \
-                       || (c) == '\n'                                        \
-                       || (c) == '\r'                                        \
-                       || (c) == '\v'                                        \
-                       || (c) == '\f')
 #   define isWORDCHAR_A(c)   (isALPHANUMERIC_A(c) || (c) == '_')
-#   define isXDIGIT_A(c) (isDIGIT_A(c)                                       \
-                          || ((c) >= 'a' && (c) <= 'f')                      \
+#   define isIDFIRST_A(c)    (isALPHA_A(c) || (c) == '_')
+#   define isXDIGIT_A(c) (isDIGIT_A(c)                                      \
+                          || ((c) >= 'a' && (c) <= 'f')                     \
                           || ((c) <= 'F' && (c) >= 'A'))
+
+#   ifdef EBCDIC
+#       define isPUNCT_A(c)  ((c) == '-' || (c) == '!' || (c) == '"'        \
+                           || (c) == '#' || (c) == '$' || (c) == '%'        \
+                           || (c) == '&' || (c) == '\'' || (c) == '('       \
+                           || (c) == ')' || (c) == '*' || (c) == '+'        \
+                           || (c) == ',' || (c) == '.' || (c) == '/'        \
+                           || (c) == ':' || (c) == ';' || (c) == '<'        \
+                           || (c) == '=' || (c) == '>' || (c) == '?'        \
+                           || (c) == '@' || (c) == '[' || (c) == '\\'       \
+                           || (c) == ']' || (c) == '^' || (c) == '_'        \
+                           || (c) == '`' || (c) == '{' || (c) == '|'        \
+                           || (c) == '}' || (c) == '~')
+#       define isGRAPH_A(c)  (isALPHANUMERIC_A(c) || isPUNCT_A(c))
+#       define isPRINT_A(c)  (isGRAPH_A(c) || (c) == ' ')
+
+#       ifdef QUESTION_MARK_CTRL
+#           define _isQMC(c) ((c) == QUESTION_MARK_CTRL)
+#       else
+#           define _isQMC(c) 0
+#       endif
+
+        /* I (khw) can't think of a way to define all the ASCII controls
+         * without resorting to a libc (locale-sensitive) call.  But we know
+         * that all controls but the question-mark one are in the range 0-0x3f.
+         * This makes sure that all the controls that have names are included,
+         * and all controls that are also considered ASCII in the locale.  This
+         * may include more or fewer than what it actually should, but the
+         * wrong ones are less-important controls, so likely won't impact
+         * things (keep in mind that this is compiled only if perl.h isn't
+         * available).  The question mark control is included if available */
+#       define isCNTRL_A(c)  (((c) < 0x40 && isascii(c))                    \
+                            || (c) == '\0' || (c) == '\a' || (c) == '\b'    \
+                            || (c) == '\f' || (c) == '\n' || (c) == '\r'    \
+                            || (c) == '\t' || (c) == '\v' || _isQMC(c))
+
+#       define isASCII(c)    (isCNTRL_A(c) || isPRINT_A(c))
+#   else    /* ASCII platform; things are simpler, and  isASCII has already
+               been defined */
+#       define isGRAPH_A(c)  (((c) > ' ' && (c) < 127))
+#       define isPRINT_A(c)  (isGRAPH_A(c) || (c) == ' ')
+#       define isPUNCT_A(c)  (isGRAPH_A(c) && (! isALPHANUMERIC_A(c)))
+#       define isCNTRL_A(c)  (isASCII(c) && (! isPRINT_A(c)))
+#   endif
 
     /* The _L1 macros may be unnecessary for the utilities; I (khw) added them
      * during debugging, and it seems best to keep them.  We may be called
@@ -1214,6 +1261,8 @@ EXTCONST U32 PL_charclass[];
 
 #define isALPHANUMERIC(c)  isALPHANUMERIC_A(c)
 #define isALPHA(c)   isALPHA_A(c)
+#define isASCII_A(c)  isASCII(c)
+#define isASCII_L1(c)  isASCII(c)
 #define isBLANK(c)   isBLANK_A(c)
 #define isCNTRL(c)   isCNTRL_A(c)
 #define isDIGIT(c)   isDIGIT_A(c)
