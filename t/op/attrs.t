@@ -383,4 +383,10 @@ unlike runperl(
        qr/Unbalanced/,
       'attribute errors do not cause op trees to leak';
 
+package ProtoTest {
+    sub MODIFY_CODE_ATTRIBUTES { $Proto = prototype $_[1]; () }
+    sub foo ($) : gelastic {}
+}
+is $ProtoTest::Proto, '$', 'prototypes are visible in attr handlers';
+
 done_testing();
