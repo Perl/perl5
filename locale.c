@@ -1425,6 +1425,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
 #endif /* the code that is compiled when no nl_langinfo */
 
+#ifndef EBCDIC  /* On os390, even if the name ends with "UTF-8', it isn't a
+                   UTF-8 locale */
     /* As a last resort, look at the locale name to see if it matches
      * qr/UTF -?  * 8 /ix, or some other common locale names.  This "name", the
      * return of setlocale(), is actually defined to be opaque, so we can't
@@ -1464,6 +1466,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                               "Locale %s doesn't end with UTF-8 in name\n",
                                 save_input_locale));
     }
+#endif
 
 #ifdef WIN32
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx */

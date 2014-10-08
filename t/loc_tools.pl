@@ -209,6 +209,10 @@ sub find_locales ($) {  # Returns an array of all the locales we found on the
 
 sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
                          # is a UTF-8 locale
+
+    # On z/OS, even locales marked as UTF-8 aren't.
+    return 0 if ord "A" != 65;
+
     my $locale = shift;
 
     use locale;
