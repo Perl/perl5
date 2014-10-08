@@ -97,8 +97,12 @@ ok(close($in), 'read/die: close status');
 
 # This used to be 1_000_000, but on Linux/ppc64 (POWER7) this kept
 # consistently failing. At exactly 0x100000 it started passing
-# again. We're hoping this number is bigger than any pipe buffer.
-my $surely_this_arbitrary_number_is_fine = 0x100000;
+# again. Now we're asking the kernel what the pipe buffer is, and if
+# that fails, hoping this number is bigger than any pipe buffer.
+my $surely_this_arbitrary_number_is_fine = eval {
+    use Fcntl qw(F_GETPIPE_SZ);
+    fcntl($out, F_GETPIPE_SZ, 0) + 1;
+} || 0x100000;
 
 # close during print
 
