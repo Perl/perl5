@@ -1137,7 +1137,12 @@ EXTCONST U32 PL_charclass[];
                           || ((c) <= 'F' && (c) >= 'A'))
 
     /* The _L1 macros may be unnecessary for the utilities; I (khw) added them
-     * during debugging, and it seems best to keep them. */
+     * during debugging, and it seems best to keep them.  We may be called
+     * without NATIVE_TO_LATIN1 being defined.  On ASCII platforms, it doesn't
+     * do anything anyway, so make it not a problem */
+#   if ! defined(EBCDIC) && ! defined(NATIVE_TO_LATIN1)
+#       define NATIVE_TO_LATIN1(ch) (ch)
+#   endif
 #   define isPSXSPC_A(c)     isSPACE_A(c) /* XXX Assumes SPACE matches '\v' */
 #   define isALPHA_L1(c)     (isUPPER_L1(c) || isLOWER_L1(c))
 #   define isALPHANUMERIC_L1(c) (isALPHA_L1(c) || isDIGIT_A(c))
