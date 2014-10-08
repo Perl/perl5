@@ -20,8 +20,8 @@
 # file will probably pass as well.
 
 BEGIN {
-    chdir '..' unless -d 't';
-    unshift @INC, 'lib';
+    chdir 't' if -d '../t';
+    unshift @INC, '../lib';
 }
 
 use strict;

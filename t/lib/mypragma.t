@@ -4,9 +4,9 @@ use strict;
 use warnings;
 
 BEGIN {
-    unshift @INC, 'lib';
     chdir 't' if -d 't';
     require './test.pl';
+    @INC = '../lib';
     plan(tests => 14);
 }
 

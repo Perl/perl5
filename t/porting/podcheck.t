@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't';
-    unshift @INC, "../lib";
+    @INC = "../lib";
 }
 
 use strict;
