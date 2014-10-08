@@ -12473,7 +12473,7 @@ tryagain:
                      * the simple case just below.) */
 
                     UV folded;
-                    if (isASCII(ender)) {
+                    if (isASCII_uni(ender)) {
                         folded = toFOLD(ender);
                         *(s)++ = (U8) folded;
                     }
