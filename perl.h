@@ -1042,14 +1042,6 @@ EXTERN_C int usleep(unsigned int);
 #   endif
 #endif /* !HAS_BCMP */
 
-/* In Tru64 define _SOCKADDR_LEN to use 4.4BSD and IPv6 interfaces.
- * Define it before any network headers like netinet/in.h or sys/socket.h.
- * For OSF/1 3.2, however, defining _SOCKADDR_LEN would be
- * a bad idea since it breaks send() and recv(). */
-#if defined(__osf__) && defined(__alpha) && !defined(_SOCKADDR_LEN) && !defined(DEC_OSF1_3_X)
-#   define _SOCKADDR_LEN
-#endif
-
 #ifdef I_NETINET_IN
 #   include <netinet/in.h>
 #endif
