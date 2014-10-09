@@ -357,4 +357,18 @@ ok(!($NaN >  $NInf), "NaN is not gt -Inf");
 
 is(sin($PInf), $NaN, "sin(+Inf) is NaN");
 
+# === Overflows and Underflows ===
+
+# 1e9999 (and 1e-9999) are large (and small) enough for even
+# IEEE quadruple precision (magnitude 10**4932, and 10**-4932).
+
+cmp_ok(1e9999,     '==', $PInf, "overflow to +Inf (compile time)");
+cmp_ok('1e9999',   '==', $PInf, "overflow to +Inf (runtime)");
+cmp_ok(-1e9999,    '==', $NInf, "overflow to -Inf (compile time)");
+cmp_ok('-1e9999',  '==', $NInf, "overflow to -Inf (runtime)");
+cmp_ok(1e-9999,    '==', 0,     "underflow to 0 (compile time) from pos");
+cmp_ok('1e-9999',  '==', 0,     "underflow to 0 (runtime) from pos");
+cmp_ok(-1e-9999,   '==', 0,     "underflow to 0 (compile time) from neg");
+cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
+
 done_testing();
