@@ -9939,13 +9939,17 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    OP *const first = newOP(OP_NULL, 0);
 	    OP *const nullop = newCONDOP(0, first, o, other);
 	    OP *const condop = first->op_next;
-	    /* hijacking PADSTALE for uninitialized state variables */
-	    SvPADSTALE_on(PAD_SVl(target));
 
 	    condop->op_type = OP_ONCE;
 	    condop->op_ppaddr = PL_ppaddr[OP_ONCE];
-	    condop->op_targ = target;
 	    other->op_targ = target;
+
+	    /* Store the initializedness of state vars in a separate
+	       pad entry.  */
+	    condop->op_targ =
+	      pad_add_name_pvn("$",1,padadd_NO_DUP_CHECK|padadd_STATE,0,0);
+	    /* hijacking PADSTALE for uninitialized state variables */
+	    SvPADSTALE_on(PAD_SVl(condop->op_targ));
 
 	    return nullop;
 	}

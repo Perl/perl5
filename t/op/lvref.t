@@ -506,6 +506,7 @@ on;
   }->();
   is \$x, \$y, 'lexical alias affects outer sub where vars are declared';
 }
+off;
 
 { # PADSTALE has a double meaning
   use feature 'lexical_subs', 'signatures';
@@ -525,7 +526,6 @@ on;
   is s(3), 1, 'padstale alias should not reset state'
 }
 
-off;
 SKIP: {
     skip_without_dynamic_extension('List/Util');
     require Scalar::Util;
