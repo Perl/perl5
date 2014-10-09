@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 140;
+plan 148;
 
 sub on { $::TODO = ' ' }
 sub off{ $::TODO = ''  }
@@ -301,6 +301,16 @@ package CodeTest {
 (\$tahi, $rua) = \(1,2);
 is join(' ', $tahi, $$rua), '1 2',
   'mixed scalar ref and scalar list assignment';
+$_ = 1;
+\($bb, @cc, %dd, &ee, $_==1 ? $ff : @ff, $_==2 ? $gg : @gg, (@hh)) =
+    (\$BB, \@CC, \%DD, \&EE, \$FF, \@GG, \1, \2, \3);
+is \$bb, \$BB, '\$scalar in list assignment';
+is \@cc, \@CC, '\@array in list assignment';
+is \%dd, \%DD, '\%hash in list assignment';
+is \&ee, \&EE, '\&code in list assignment';
+is \$ff, \$FF, '$scalar in \ternary in list assignment';
+is \@gg, \@GG, '@gg in \ternary in list assignment';
+is "@hh", '1 2 3', '\(@array) in list assignment';
 
 # Conditional expressions
 
@@ -313,6 +323,8 @@ $_ == 3 ? \$rima : \$ono = \5;
 is $rima, 5, 'cond assignment with refgens on both branches';
 \($_ == 3 ? $whitu : $waru) = \5;
 is $whitu, 5, '\( ?: ) assignment';
+\($_ == 3 ? $_ < 4 ? $ii : $_ : $_) = \$_;
+is \$ii, \$_, 'nested \ternary assignment';
 
 # Foreach
 
