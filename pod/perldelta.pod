@@ -392,6 +392,14 @@ it, specifically C<sizeof(NV) <= sizeof(IV)>. The bodyless trick is the same one
 as for IVs since 5.9.2, but for NVs, unlike IVs, is not guarenteed on all
 platforms and build configurations.
 
+=item *
+
+The C<$DB::single>, C<$DB::signal> and C<$DB::trace> now have set and
+get magic that stores their values as IVs and those IVs are used when
+testing their values in C<pp_dbstate>.  This prevents perl from
+recursing infinity if an overloaded object is assigned to any of those
+variables. [perl #122445]
+
 =back
 
 =head1 Selected Bug Fixes
