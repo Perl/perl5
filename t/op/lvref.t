@@ -6,9 +6,6 @@ BEGIN {
 
 plan 148;
 
-sub on { $::TODO = ' ' }
-sub off{ $::TODO = ''  }
-
 eval '\$x = \$y';
 like $@, qr/^Experimental lvalue references not enabled/,
     'error when feature is disabled';
@@ -491,12 +488,11 @@ eval '$foo ? \%{"42"} : \%43 = 42';
 like $@,
     qr/^Can't modify reference to hash dereference in scalar assignment a/,
    "Can't modify ref to whatever in scalar assignment via cond expr";
-on;
-
 
 # Miscellaneous
 
 {
+  local $::TODO = ' ';
   my($x,$y);
   sub {
     sub {
@@ -506,7 +502,6 @@ on;
   }->();
   is \$x, \$y, 'lexical alias affects outer sub where vars are declared';
 }
-off;
 
 { # PADSTALE has a double meaning
   use feature 'lexical_subs', 'signatures';
