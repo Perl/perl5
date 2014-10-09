@@ -3048,7 +3048,8 @@ sub pp_list {
 	#     known to take the OPpLVAL_INTRO flag.
 
 	my $lopname = $lop->name;
-	if (!($lop->private & (OPpLVAL_INTRO|OPpOUR_INTRO)
+	my $loppriv = $lop->private;
+	if (!($loppriv & (OPpLVAL_INTRO|OPpOUR_INTRO)
 		or $lopname eq "undef")
 	    or $lopname =~ /^(?:entersub|exit|open|split)\z/)
 	{
@@ -3057,11 +3058,11 @@ sub pp_list {
 	}
 	my $newtype;
 	if ($lopname =~ /^pad[ash]v$/) {
-	    if ($lop->private & OPpPAD_STATE) { # state()
-		($local = "", last) if $local =~ /^(?:local|our|my)$/;
+	    if ($loppriv & OPpPAD_STATE) { # state()
+		($local = "", last) if $local !~ /^(?:either|state)$/;
 		$local = "state";
 	    } else { # my()
-		($local = "", last) if $local =~ /^(?:local|our|state)$/;
+		($local = "", last) if $local !~ /^(?:either|my)$/;
 		$local = "my";
 	    }
 	    my $padname = $self->padname_sv($lop->targ);
@@ -3069,11 +3070,13 @@ sub pp_list {
 		$newtype = $padname->SvSTASH->NAME;
 	    }
 	} elsif ($lopname =~ /^(?:gv|rv2)([ash])v$/
-			&& $lop->private & OPpOUR_INTRO
+			&& $loppriv & OPpOUR_INTRO
 		or $lopname eq "null" && $lop->first->name eq "gvsv"
 			&& $lop->first->private & OPpOUR_INTRO) { # our()
-	    ($local = "", last) if $local =~ /^(?:my|local|state)$/;
-	    $local = "our";
+	    my $newlocal = "local " x !!($loppriv & OPpLVAL_INTRO) . "our";
+	    ($local = "", last)
+		if $local ne 'either' && $local ne $newlocal;
+	    $local = $newlocal;
 	    my $funny = !$1 || $1 eq 's' ? '$' : $1 eq 'a' ? '@' : '%';
 	    if (my $t = $self->find_our_type(
 		    $funny . $self->gv_or_padgv($lop->first)->NAME
@@ -3086,7 +3089,7 @@ sub pp_list {
 		&& !($lopname eq 'sort' && ($lop->flags & OPpSORT_REVERSE)))
 	{
 	    # local()
-	    ($local = "", last) if $local =~ /^(?:my|our|state)$/;
+	    ($local = "", last) if $local !~ /^(?:either|local)$/;
 	    $local = "local";
 	}
 	if (defined $type && defined $newtype && $newtype ne $type) {
@@ -3096,7 +3099,7 @@ sub pp_list {
 	$type = $newtype;
     }
     $local = "" if $local eq "either"; # no point if it's all undefs
-    $local &&= $self->keyword($local);
+    $local &&= join ' ', map $self->keyword($_), split / /, $local;
     $local .= " $type " if $local && length $type;
     return $self->deparse($kid, $cx) if null $kid->sibling and not $local;
     for (; !null($kid); $kid = $kid->sibling) {

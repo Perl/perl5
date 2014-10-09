@@ -396,6 +396,7 @@ state Dog ($fough, @barre, %bazze);
 ####
 # local our
 local our $rhubarb;
+local our($rhu, $barb);
 ####
 # <>
 my $foo;
