@@ -132,7 +132,6 @@ dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
 static void
 SaveError(pTHX_ const char* pat, ...)
 {
-    dMY_CXT;
     va_list args;
     SV *msv;
     const char *message;
@@ -147,9 +146,12 @@ SaveError(pTHX_ const char* pat, ...)
     message = SvPV(msv,len);
     len++;		/* include terminating null char */
 
+    {
+	dMY_CXT;
     /* Copy message into dl_last_error (including terminating null char) */
-    sv_setpvn(MY_CXT.x_dl_last_error, message, len) ;
-    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "DynaLoader: stored error msg '%s'\n",dl_last_error));
+	sv_setpvn(MY_CXT.x_dl_last_error, message, len) ;
+	DLDEBUG(2,PerlIO_printf(Perl_debug_log, "DynaLoader: stored error msg '%s'\n",dl_last_error));
+    }
 }
 #endif
 
