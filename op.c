@@ -5879,8 +5879,23 @@ S_assignment_type(pTHX_ const OP *o)
 
 /*
   Helper function for newASSIGNOP to detection commonality between the
-  lhs and the rhs.  Marks all variables with PL_generation.  If it
+  lhs and the rhs.  (It is actually called very indirectly.  newASSIGNOP
+  flags the op and the peephole optimizer calls this helper function
+  if the flag is set.)  Marks all variables with PL_generation.  If it
   returns TRUE the assignment must be able to handle common variables.
+
+  PL_generation sorcery:
+  An assignment like ($a,$b) = ($c,$d) is easier than
+  ($a,$b) = ($c,$a), since there is no need for temporary vars.
+  To detect whether there are common vars, the global var
+  PL_generation is incremented for each assign op we compile.
+  Then, while compiling the assign op, we run through all the
+  variables on both sides of the assignment, setting a spare slot
+  in each of them to PL_generation.  If any of them already have
+  that value, we know we've got commonality.  We could use a
+  single bit marker, but then we'd have to make 2 passes, first
+  to clear the flag, then to test and set it.  To find somewhere
+  to store these values, evil chicanery is done with SvUVX().
 */
 PERL_STATIC_INLINE bool
 S_aassign_common_vars(pTHX_ OP* o)
@@ -5888,7 +5903,7 @@ S_aassign_common_vars(pTHX_ OP* o)
     OP *curop;
     for (curop = cUNOPo->op_first; curop; curop = OP_SIBLING(curop)) {
 	if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
-	    if (curop->op_type == OP_GV) {
+	    if (curop->op_type == OP_GV || curop->op_type == OP_GVSV) {
 		GV *gv = cGVOPx_gv(curop);
 		if (gv == PL_defgv
 		    || (int)GvASSIGN_GENERATION(gv) == PL_generation)
@@ -5931,6 +5946,9 @@ S_aassign_common_vars(pTHX_ OP* o)
 		    GvASSIGN_GENERATION_set(gv, PL_generation);
 		}
 	    }
+	    else if (curop->op_type == OP_PADRANGE)
+		/* Ignore padrange; checking its siblings is sufficient. */
+		continue;
 	    else
 		return TRUE;
 	}
@@ -6061,23 +6079,9 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    }
 	}
 
-	/* PL_generation sorcery:
-	 * an assignment like ($a,$b) = ($c,$d) is easier than
-	 * ($a,$b) = ($c,$a), since there is no need for temporary vars.
-	 * To detect whether there are common vars, the global var
-	 * PL_generation is incremented for each assign op we compile.
-	 * Then, while compiling the assign op, we run through all the
-	 * variables on both sides of the assignment, setting a spare slot
-	 * in each of them to PL_generation. If any of them already have
-	 * that value, we know we've got commonality.  We could use a
-	 * single bit marker, but then we'd have to make 2 passes, first
-	 * to clear the flag, then to test and set it.  To find somewhere
-	 * to store these values, evil chicanery is done with SvUVX().
-	 */
-
 	if (maybe_common_vars) {
-	    PL_generation++;
-	    if (aassign_common_vars(o))
+		/* The peephole optimizer will do the full check and pos-
+		   sibly turn this off.  */
 		o->op_private |= OPpASSIGN_COMMON;
 	}
 
@@ -12499,6 +12503,16 @@ Perl_rpeep(pTHX_ OP *o)
 			    (o->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
 		    }
 		}
+	    }
+	    break;
+
+	case OP_AASSIGN:
+	    if (o->op_private & OPpASSIGN_COMMON) {
+		 /* See the comment before S_aassign_common_vars concerning
+		    PL_generation sorcery.  */
+		PL_generation++;
+		if (!aassign_common_vars(o))
+		    o->op_private &=~ OPpASSIGN_COMMON;
 	    }
 	    break;
 
