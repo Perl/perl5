@@ -506,7 +506,10 @@ EOM
 	push @args, @$pass_through;
 	_quote_args(\@args) if $is_VMS;
 	print join(' ', $perl, @args), "\n" if $verbose;
-	my $code = system $perl, @args;
+	my $code = do {
+	   local $ENV{PERL_MM_USE_DEFAULT} = 1;
+	    system $perl, @args;
+	};
 	warn "$code from $ext_dir\'s Makefile.PL" if $code;
 
 	# Right. The reason for this little hack is that we're sitting inside
