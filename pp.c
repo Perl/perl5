@@ -5583,6 +5583,7 @@ PP(pp_split)
 	realarray = 1;
 	PUTBACK;
 	av_extend(ary,0);
+	(void)sv_2mortal(SvREFCNT_inc_simple_NN(sv));
 	av_clear(ary);
 	SPAGAIN;
 	if ((mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied))) {
