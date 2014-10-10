@@ -20,7 +20,7 @@ use Net::Cmd;
 use Net::Config;
 use Socket 1.3;
 
-our $VERSION = "3.01";
+our $VERSION = "3.02";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
@@ -193,8 +193,8 @@ sub auth {
         if $self->debug;
       $mechanisms =~ s/\b\Q$failed_mechanism\E\b//;
       last unless $mechanisms =~ /\S/;
+      $sasl->mechanism($mechanisms);
     }
-    $sasl->mechanism($mechanisms);
     
     # We should probably allow the user to pass the host, but I don't
     # currently know and SASL mechanisms that are used by smtp that need it

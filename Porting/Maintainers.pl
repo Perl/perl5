@@ -690,7 +690,7 @@ use File::Glob qw(:case);
     },
 
     'libnet' => {
-        'DISTRIBUTION' => 'SHAY/libnet-3.01.tar.gz',
+        'DISTRIBUTION' => 'SHAY/libnet-3.02.tar.gz',
         'FILES'        => q[cpan/libnet],
         'EXCLUDED'     => [
             qw( Configure
@@ -699,6 +699,7 @@ use File::Glob qw(:case);
                 t/pod_coverage.t
                 ),
             qr(^demos/),
+            qr(^t/external/),
         ],
     },
 

@@ -1437,9 +1437,6 @@ cpan/libnet/lib/Net/Time.pm
 cpan/libnet/Makefile.PL
 cpan/libnet/t/config.t		libnet
 cpan/libnet/t/datasend.t	libnet
-cpan/libnet/t/external/ftp-ssl.t
-cpan/libnet/t/external/pop3-ssl.t
-cpan/libnet/t/external/smtp-ssl.t
 cpan/libnet/t/ftp.t		libnet
 cpan/libnet/t/hostname.t	libnet
 cpan/libnet/t/libnet_t.pl	libnet
