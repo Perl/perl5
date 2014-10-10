@@ -132,15 +132,34 @@ Perl_savestack_grow_cnt(pTHX_ I32 need)
 
 #undef GROW
 
-void
-Perl_tmps_grow(pTHX_ SSize_t n)
+/*  The original function was called Perl_tmps_grow and was removed from public
+    API, Perl_tmps_grow_p is the replacement and it used in public macros but
+    isn't public itself.
+
+    Perl_tmps_grow_p takes a proposed ix. A proposed ix is PL_tmps_ix + extend_by,
+    where the result of (PL_tmps_ix + extend_by) is >= PL_tmps_max
+    Upon return, PL_tmps_stack[ix] will be a valid address. For machine code
+    optimization and register usage reasons, the proposed ix passed into
+    tmps_grow is returned to the caller which the caller can then use to write
+    an SV * to PL_tmps_stack[ix]. If the caller was using tmps_grow in
+    pre-extend mode (EXTEND_MORTAL macro), then it ignores the return value of
+    tmps_grow. Note, tmps_grow DOES NOT write ix to PL_tmps_ix, the caller
+    must assign ix or ret val of tmps_grow to PL_temps_ix themselves if that is
+    appropriate. The assignment to PL_temps_ix can happen before or after
+    tmps_grow call since tmps_grow doesn't look at PL_tmps_ix.
+ */
+
+SSize_t
+Perl_tmps_grow_p(pTHX_ SSize_t ix)
 {
+    SSize_t extend_to = ix;
 #ifndef STRESS_REALLOC
-    if (n < 128)
-	n = (PL_tmps_max < 512) ? 128 : 512;
+    if (ix - PL_tmps_max < 128)
+	extend_to += (PL_tmps_max < 512) ? 128 : 512;
 #endif
-    PL_tmps_max = PL_tmps_ix + n + 1;
+    PL_tmps_max = extend_to + 1;
     Renew(PL_tmps_stack, PL_tmps_max, SV*);
+    return ix;
 }
 
 

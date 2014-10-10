@@ -391,9 +391,10 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
     } STMT_END
 
 #define EXTEND_MORTAL(n) \
-    STMT_START {							\
-	if (UNLIKELY(PL_tmps_ix + (n) >= PL_tmps_max))			\
-	    tmps_grow(n);						\
+    STMT_START {						\
+	SSize_t eMiX = PL_tmps_ix + (n);			\
+	if (UNLIKELY(eMiX >= PL_tmps_max))			\
+	    (void)tmps_grow_p(eMiX);				\
     } STMT_END
 
 #define AMGf_noright	1

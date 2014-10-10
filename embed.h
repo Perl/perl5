@@ -688,7 +688,6 @@
 #define sync_locale()		Perl_sync_locale(aTHX)
 #define taint_env()		Perl_taint_env(aTHX)
 #define taint_proper(a,b)	Perl_taint_proper(aTHX_ a,b)
-#define tmps_grow(a)		Perl_tmps_grow(aTHX_ a)
 #define to_uni_lower(a,b,c)	Perl_to_uni_lower(aTHX_ a,b,c)
 #define to_uni_lower_lc(a)	Perl_to_uni_lower_lc(aTHX_ a)
 #define to_uni_title(a,b,c)	Perl_to_uni_title(aTHX_ a,b,c)
@@ -1307,6 +1306,7 @@
 #ifndef PERL_IMPLICIT_CONTEXT
 #define tied_method		Perl_tied_method
 #endif
+#define tmps_grow_p(a)		Perl_tmps_grow_p(aTHX_ a)
 #define unshare_hek(a)		Perl_unshare_hek(aTHX_ a)
 #define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)

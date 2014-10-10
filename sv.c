@@ -8906,8 +8906,10 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
  */
 #define PUSH_EXTEND_MORTAL__SV_C(AnSv) \
     STMT_START {      \
-	EXTEND_MORTAL(1); \
-	PL_tmps_stack[++PL_tmps_ix] = (AnSv); \
+	SSize_t ix = ++PL_tmps_ix;		\
+	if (UNLIKELY(ix >= PL_tmps_max))	\
+	    ix = tmps_grow_p(ix);			\
+	PL_tmps_stack[ix] = (AnSv); \
     } STMT_END
 
 /*
@@ -9029,7 +9031,7 @@ Perl_sv_2mortal(pTHX_ SV *const sv)
 {
     dVAR;
     if (!sv)
-	return NULL;
+	return sv;
     if (SvIMMORTAL(sv))
 	return sv;
     PUSH_EXTEND_MORTAL__SV_C(sv);

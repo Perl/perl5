@@ -406,6 +406,12 @@ testing their values in C<pp_dbstate>.  This prevents perl from
 recursing infinity if an overloaded object is assigned to any of those
 variables. [perl #122445]
 
+=item *
+
+C<Perl_tmps_grow> which is marked as public API but undocumented has been
+removed from public API. If you use C<EXTEND_MORTAL> macro in your XS code to
+preextend the mortal stack, you are unaffected by this change.
+
 =back
 
 =head1 Selected Bug Fixes

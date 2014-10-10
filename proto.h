@@ -4784,7 +4784,7 @@ PERL_CALLCONV OP *	Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv, c
 #define PERL_ARGS_ASSERT_TIED_METHOD	\
 	assert(methname); assert(sp); assert(sv); assert(mg)
 
-PERL_CALLCONV void	Perl_tmps_grow(pTHX_ SSize_t n);
+PERL_CALLCONV SSize_t	Perl_tmps_grow_p(pTHX_ SSize_t ix);
 /* PERL_CALLCONV UV	Perl_to_uni_fold(pTHX_ UV c, U8 *p, STRLEN *lenp)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3); */
