@@ -6009,7 +6009,10 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    lop->op_type == OP_PADHV ||
 		    lop->op_type == OP_PADANY) {
 		    if (!(lop->op_private & OPpLVAL_INTRO))
+		    {
 			maybe_common_vars = TRUE;
+			break;
+		    }
 
 		    if (lop->op_private & OPpPAD_STATE) {
 			if (left->op_private & OPpLVAL_INTRO) {
@@ -6031,6 +6034,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		} else {
 		    /* Other ops in the list. */
 		    maybe_common_vars = TRUE;
+		    break;
 		}
 		lop = OP_SIBLING(lop);
 	    }
