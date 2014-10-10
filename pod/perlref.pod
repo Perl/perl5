@@ -69,7 +69,7 @@ References can be created in several ways.
 X<\> X<backslash>
 
 By using the backslash operator on a variable, subroutine, or value.
-(This works much like the & (address-of) operator in C.)  
+(This works much like the & (address-of) operator in C.)
 This typically creates I<another> reference to a variable, because
 there's already a reference to the variable in the symbol table.  But
 the symbol table reference might go away, and you'll still have the
@@ -655,13 +655,13 @@ that generated HTML font changes for the various colors:
 
 The red() and green() functions would be similar.  To create these,
 we'll assign a closure to a typeglob of the name of the function we're
-trying to build.  
+trying to build.
 
     @colors = qw(red blue green yellow orange purple violet);
     for my $name (@colors) {
         no strict 'refs';	# allow symbol table manipulation
         *$name = *{uc $name} = sub { "<FONT COLOR='$name'>@_</FONT>" };
-    } 
+    }
 
 Now all those different functions appear to exist independently.  You can
 call red(), RED(), blue(), BLUE(), green(), etc.  This technique saves on
@@ -699,7 +699,7 @@ operator, as they are created on the fly. If you are accustomed to using
 nested subroutines in other programming languages with their own private
 variables, you'll have to work at it a bit in Perl.  The intuitive coding
 of this type of thing incurs mysterious warnings about "will not stay
-shared" due to the reasons explained above. 
+shared" due to the reasons explained above.
 For example, this won't work:
 
     sub outer {
