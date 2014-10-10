@@ -6079,7 +6079,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    PL_generation++;
 	    if (aassign_common_vars(o))
 		o->op_private |= OPpASSIGN_COMMON;
-	    LINKLIST(o);
 	}
 
 	if (right && right->op_type == OP_SPLIT) {
@@ -6112,7 +6111,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
                         /* detach rest of siblings from o subtree,
                          * and free subtree */
                         op_sibling_splice(cUNOPo->op_first, tmpop, -1, NULL);
-			right->op_next = tmpop->op_next;  /* fix starting loc */
 			right->op_private |=
 			    left->op_private & OPpOUR_INTRO;
 			op_free(o);			/* blow off assign */
