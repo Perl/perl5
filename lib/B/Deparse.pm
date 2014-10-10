@@ -1216,14 +1216,17 @@ sub maybe_local {
     my $self = shift;
     my($op, $cx, $text) = @_;
     my $name = $op->name;
-    my $our_intro = ($name =~ /^(gv|rv2)[ash]v$/) ? OPpOUR_INTRO : 0;
+    my $our_intro = ($name =~ /^(?:(?:gv|rv2)[ash]v|split)$/)
+			? OPpOUR_INTRO
+			: 0;
+    my $lval_intro = $name eq 'split' ? 0 : OPpLVAL_INTRO;
     # The @a in \(@a) isn't in ref context, but only when the
     # parens are there.
     my $need_parens = $self->{'in_refgen'} && $name =~ /[ah]v\z/
 		   && ($op->flags & (OPf_PARENS|OPf_REF)) == OPf_PARENS;
-    if ((my $priv = $op->private) & (OPpLVAL_INTRO|$our_intro)) {
+    if ((my $priv = $op->private) & ($lval_intro|$our_intro)) {
 	my @our_local;
-	push @our_local, "local" if $priv & OPpLVAL_INTRO;
+	push @our_local, "local" if $priv & $lval_intro;
 	push @our_local, "our"   if $priv & $our_intro;
 	my $our_local = join " ", map $self->keyword($_), @our_local;
 	if( $our_local[-1] eq 'our' ) {
@@ -4969,7 +4972,11 @@ sub pp_split {
     } elsif (!ref($replroot) and $replroot > 0) {
 	$gv = $self->padval($replroot);
     }
-    $ary = $self->stash_variable('@', $self->gv_name($gv), $cx) if $gv;
+    $ary = $self->maybe_local(@_,
+			      $self->stash_variable('@',
+						     $self->gv_name($gv),
+						     $cx))
+	if $gv;
 
     for (; !null($kid); $kid = $kid->sibling) {
 	push @exprs, $self->deparse($kid, 6);

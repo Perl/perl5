@@ -518,6 +518,9 @@ print $_ foreach (reverse 1, 2..5);
 our @ary;
 @ary = split(' ', 'foo', 0);
 ####
+# Split to our array
+our @array = split(//, 'foo', 0);
+####
 # bug #40055
 do { () }; 
 ####

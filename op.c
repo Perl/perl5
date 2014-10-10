@@ -5938,6 +5938,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
                          * and free subtree */
                         op_sibling_splice(cUNOPo->op_first, tmpop, -1, NULL);
 			right->op_next = tmpop->op_next;  /* fix starting loc */
+			right->op_private |=
+			    left->op_private & OPpOUR_INTRO;
 			op_free(o);			/* blow off assign */
 			right->op_flags &= ~OPf_WANT;
 				/* "I don't know and I don't care." */
