@@ -31,6 +31,7 @@ sub check_for
     {
 	open( my $file_source_fh, ">", $file_source ) or die "Cannot write $file_source - $!";
 	print $file_source_fh <<"EOF";
+#include <stddef.h>
 #include <sys/types.h>
 #ifdef WIN32
 # include <ws2tcpip.h>
@@ -46,7 +47,7 @@ int main(int argc, char *argv[])
   {
     (void)argc;
     (void)argv;
-    $main
+    { $main }
     return 0;
   }
 EOF
