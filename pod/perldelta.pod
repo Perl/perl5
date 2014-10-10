@@ -163,6 +163,12 @@ Avoid reading beyond the end of a buffer. [perl #122629]
 
 =item *
 
+L<DynaLoader> has been upgraded from version 1.26 to 1.27.
+
+Remove dl_nonlazy global if unused in Dynaloader. [perl #122926]
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 5.20140920 to 5.20141020.
 
 Updated to cover the latest releases of Perl.
