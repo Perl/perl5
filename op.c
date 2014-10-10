@@ -567,10 +567,6 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 	Perl_croak(aTHX_ "panic: allocmy illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
-    /* Until we're using the length for real, cross check that we're being
-       told the truth.  */
-    assert(strlen(name) == len);
-
     /* complain about "my $<special_var>" etc etc */
     if (len &&
 	!(is_our ||
@@ -578,7 +574,6 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 	  ((flags & SVf_UTF8) && isIDFIRST_utf8((U8 *)name+1)) ||
 	  (name[1] == '_' && (*name == '$' || len > 2))))
     {
-	/* name[2] is true if strlen(name) > 2  */
 	if (!(flags & SVf_UTF8 && UTF8_IS_START(name[1]))
 	 && (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1]))) {
 	    yyerror(Perl_form(aTHX_ "Can't use global %c^%c%.*s in \"%s\"",
