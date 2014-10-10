@@ -11,7 +11,7 @@ use Carp ();
 use B ();
 #use Devel::Peek;
 
-$JSON::PP::VERSION = '2.27203';
+$JSON::PP::VERSION = '2.27300';
 
 @JSON::PP::EXPORT = qw(encode_json decode_json from_json to_json);
 
@@ -655,6 +655,7 @@ BEGIN {
         }
         else {
             utf8::upgrade( $text );
+            utf8::encode( $text );
         }
 
         $len = length $text;
@@ -806,17 +807,12 @@ BEGIN {
                 else{
 
                     if ( ord $ch  > 127 ) {
-                        if ( $utf8 ) {
-                            unless( $ch = is_valid_utf8($ch) ) {
-                                $at -= 1;
-                                decode_error("malformed UTF-8 character in JSON string");
-                            }
-                            else {
-                                $at += $utf8_len - 1;
-                            }
+                        unless( $ch = is_valid_utf8($ch) ) {
+                            $at -= 1;
+                            decode_error("malformed UTF-8 character in JSON string");
                         }
                         else {
-                            utf8::encode( $ch );
+                            $at += $utf8_len - 1;
                         }
 
                         $is_utf8 = 1;
@@ -1630,7 +1626,7 @@ JSON::PP - JSON::XS compatible pure-Perl module.
 
 =head1 VERSION
 
-    2.27202
+    2.27300
 
 L<JSON::XS> 2.27 (~2.30) compatible.
 
@@ -2791,7 +2787,7 @@ Makamaka Hannyaharamitu, E<lt>makamaka[at]cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2007-2013 by Makamaka Hannyaharamitu
+Copyright 2007-2014 by Makamaka Hannyaharamitu
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 

@@ -1418,6 +1418,7 @@ cpan/JSON-PP/t/114_decode_prefix.t
 cpan/JSON-PP/t/115_tie_ixhash.t
 cpan/JSON-PP/t/116_incr_parse_fixed.t
 cpan/JSON-PP/t/_unicode_handling.pm
+cpan/JSON-PP/t/zero-mojibake.t
 cpan/libnet/Config.eg		libnet
 cpan/libnet/Hostname.pm.eg	libnet
 cpan/libnet/Makefile.PL
