@@ -1,14 +1,15 @@
-#!./perl -w
+#!perl
+
+use 5.008001;
+
+use strict;
+use warnings;
 
 BEGIN {
-    if ($ENV{PERL_CORE}) {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-    if (!eval "require Socket") {
+    if (!eval { require Socket; 1 }) {
         print "1..0 # no Socket\n"; exit 0;
     }
-    if (ord('A') == 193 && !eval "require Convert::EBCDIC") {
+    if (ord('A') == 193 && !eval { require Convert::EBCDIC; 1 }) {
         print "1..0 # EBCDIC but no Convert::EBCDIC\n"; exit 0;
     }
 }
@@ -18,7 +19,7 @@ BEGIN {
 
   use IO::File;
   use Net::Cmd;
-  @ISA = qw(Net::Cmd IO::File);
+  our @ISA = qw(Net::Cmd IO::File);
 
   sub timeout { 0 }
 

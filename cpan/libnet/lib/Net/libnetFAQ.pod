@@ -45,24 +45,24 @@ the internet community.
 
 =head2 Which version of perl do I need ?
 
-libnet has been know to work with versions of perl from 5.002 onwards. However
-if your release of perl is prior to perl5.004 then you will need to
-obtain and install the IO distribution from CPAN. If you have perl5.004
-or later then you will have the IO modules in your installation already,
-but CPAN may contain updates.
+This version of libnet requires Perl 5.8.1 or higher.
 
 =head2 What other modules do I need ?
 
-The only modules you will need installed are the modules from the IO
-distribution. If you have perl5.004 or later you will already have
-these modules.
+No non-core modules are required for normal use, except on os390,
+which requires Convert::EBCDIC.
+
+Authen::SASL is required for AUTH support.
+
+IO::Socket::SSL version 1.999 or higher is required for SSL support.
+
+IO::Socket::IP version 0.20 or IO::Socket::INET6 version 2.62 is
+required for IPv6 support.
 
 =head2 What machines support libnet ?
 
 libnet itself is an entirely perl-code distribution so it should work
-on any machine that perl runs on. However IO may not work
-with some machines and earlier releases of perl. But this
-should not be the case with perl version 5.004 or later.
+on any machine that perl runs on.
 
 =head2 Where can I get the latest libnet release
 

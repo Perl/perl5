@@ -1,21 +1,50 @@
 # Net::NNTP.pm
 #
-# Copyright (c) 1995-1997 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Versions up to 2.24_1 Copyright (c) 1995-1997 Graham Barr <gbarr@pobox.com>.
+# All rights reserved.
+# Changes in Version 2.25 onwards Copyright (C) 2013-2014 Steve Hay.  All rights
+# reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
 package Net::NNTP;
 
+use 5.008001;
+
 use strict;
-use vars qw(@ISA $VERSION $debug);
+use warnings;
+
+use Carp;
 use IO::Socket;
 use Net::Cmd;
-use Carp;
-use Time::Local;
 use Net::Config;
+use Time::Local;
 
-$VERSION = "2.26";
-@ISA     = qw(Net::Cmd IO::Socket::INET);
+our $VERSION = "3.01";
+
+# Code for detecting if we can use SSL
+my $ssl_class = eval {
+  require IO::Socket::SSL;
+  # first version with default CA on most platforms
+  IO::Socket::SSL->VERSION(1.999);
+} && 'IO::Socket::SSL';
+
+my $nossl_warn = !$ssl_class &&
+  'To use SSL please install IO::Socket::SSL with version>=1.999';
+
+# Code for detecting if we can use IPv6
+my $inet6_class = eval {
+  require IO::Socket::IP;
+  IO::Socket::IP->VERSION(0.20);
+} && 'IO::Socket::IP' || eval {
+  require IO::Socket::INET6;
+  IO::Socket::INET6->VERSION(2.62);
+} && 'IO::Socket::INET6';
+
+sub can_ssl   { $ssl_class };
+sub can_inet6 { $inet6_class };
+
+our @ISA = ('Net::Cmd', $ssl_class || $inet6_class || 'IO::Socket::INET');
 
 
 sub new {
@@ -40,20 +69,34 @@ sub new {
     unless @{$hosts};
 
   my %connect = ( Proto => 'tcp');
-  my $o;
-  foreach $o (qw(LocalAddr Timeout)) {
+
+  if ($ssl_class) {
+    $connect{SSL_verifycn_scheme} = 'nntp';
+    $connect{$_} = $arg{$_} for(grep { m{^SSL_} } keys %arg);
+    if ($arg{SSL}) {
+      # SSL from start
+      $arg{Port} ||= 563;
+    } else {
+      # upgrade later with STARTTLS
+      $connect{SSL_startHandshake} = 0;
+    }
+  } elsif ($arg{SSL}) {
+    die $nossl_warn;
+  }
+
+  foreach my $o (qw(LocalAddr Timeout)) {
     $connect{$o} = $arg{$o} if exists $arg{$o};
   }
   $connect{Timeout} = 120 unless defined $connect{Timeout};
   $connect{PeerPort} = $arg{Port} || 'nntp(119)';
-  my $h;
-  foreach $h (@{$hosts}) {
+  foreach my $h (@{$hosts}) {
     $connect{PeerAddr} = $h;
+    $connect{SSL_verifycn_name} = $arg{SSL_verifycn_name} || $h if $ssl_class;
     $obj = $type->SUPER::new(%connect)
       and last;
   }
 
-  return undef
+  return
     unless defined $obj;
 
   ${*$obj}{'net_nntp_host'} = $connect{PeerAddr};
@@ -63,7 +106,7 @@ sub new {
 
   unless ($obj->response() == CMD_OK) {
     $obj->close;
-    return undef;
+    return;
   }
 
   my $c = $obj->code;
@@ -116,6 +159,15 @@ sub postok {
   @_ == 1 or croak 'usage: $nntp->postok()';
   my $nntp = shift;
   ${*$nntp}{'net_nntp_post'} || 0;
+}
+
+
+sub starttls {
+  my $self = shift;
+  $ssl_class or die $nossl_warn;
+  $self->is_SSL and croak("NNTP connection is already in SSL mode");
+  $self->_STARTTLS or return;
+  $self->connect_SSL;
 }
 
 
@@ -403,6 +455,7 @@ sub distribution_patterns {
   my $arr;
   local $_;
 
+  ## no critic (ControlStructures::ProhibitMutatingListFunctions)
   $nntp->_LIST('DISTRIB.PATS')
     && ($arr = $nntp->read_until_dot)
     ? [grep { /^\d/ && (chomp, $_ = [split /:/]) } @$arr]
@@ -511,7 +564,7 @@ sub xpath {
   @_ == 2 or croak 'usage: $nntp->xpath( MESSAGE-ID )';
   my ($nntp, $mid) = @_;
 
-  return undef
+  return
     unless $nntp->_XPATH($mid);
 
   my $m;
@@ -590,12 +643,11 @@ sub _timestr {
 sub _grouplist {
   my $nntp = shift;
   my $arr  = $nntp->read_until_dot
-    or return undef;
+    or return;
 
   my $hash = {};
-  my $ln;
 
-  foreach $ln (@$arr) {
+  foreach my $ln (@$arr) {
     my @a = split(/[\s\n]+/, $ln);
     $hash->{$a[0]} = [@a[1, 2, 3]];
   }
@@ -607,12 +659,11 @@ sub _grouplist {
 sub _fieldlist {
   my $nntp = shift;
   my $arr  = $nntp->read_until_dot
-    or return undef;
+    or return;
 
   my $hash = {};
-  my $ln;
 
-  foreach $ln (@$arr) {
+  foreach my $ln (@$arr) {
     my @a = split(/[\t\n]/, $ln);
     my $m = shift @a;
     $hash->{$m} = [@a];
@@ -636,12 +687,11 @@ sub _articlelist {
 sub _description {
   my $nntp = shift;
   my $arr  = $nntp->read_until_dot
-    or return undef;
+    or return;
 
   my $hash = {};
-  my $ln;
 
-  foreach $ln (@$arr) {
+  foreach my $ln (@$arr) {
     chomp($ln);
 
     $hash->{$1} = $ln
@@ -674,6 +724,7 @@ sub _NEXT      { shift->command('NEXT')->response == CMD_OK }
 sub _POST      { shift->command('POST', @_)->response == CMD_MORE }
 sub _QUIT      { shift->command('QUIT', @_)->response == CMD_OK }
 sub _SLAVE     { shift->command('SLAVE', @_)->response == CMD_OK }
+sub _STARTTLS  { shift->command("STARTTLS")->response() == CMD_MORE }
 sub _STAT      { shift->command('STAT', @_)->response == CMD_OK }
 sub _MODE      { shift->command('MODE', @_)->response == CMD_OK }
 sub _XGTITLE   { shift->command('XGTITLE', @_)->response == CMD_OK }
@@ -712,10 +763,18 @@ Net::NNTP - NNTP Client class
     $nntp = Net::NNTP->new("some.host.name");
     $nntp->quit;
 
+    # start with SSL, e.g. nntps
+    $nntp = Net::NNTP->new("some.host.name", SSL => 1);
+
+    # start with plain and upgrade to SSL
+    $nntp = Net::NNTP->new("some.host.name");
+    $nntp->starttls;
+
+
 =head1 DESCRIPTION
 
 C<Net::NNTP> is a class implementing a simple NNTP client in Perl as described
-in RFC977.
+in RFC977 and RFC4642.
 
 The Net::NNTP class is a subclass of Net::Cmd and IO::Socket::INET.
 
@@ -739,6 +798,14 @@ B<Host> - NNTP host to connect to. It may be a single scalar, as defined for
 the C<PeerAddr> option in L<IO::Socket::INET>, or a reference to
 an array with hosts to try in turn. The L</host> method will return the value
 which was used to connect to the host.
+
+B<Port> - port to connect to.
+Default - 119 for plain NNTP and 563 for immediate SSL (nntps).
+
+B<SSL> - If the connection should be done from start with SSL, contrary to later
+upgrade with C<starttls>.
+You can use SSL arguments as documented in L<IO::Socket::SSL>, but it will
+usually use the right arguments already.
 
 B<Timeout> - Maximum time, in seconds, to wait for a response from the
 NNTP server, a value of zero will cause all IO operations to block.
@@ -771,6 +838,16 @@ be used to send commands to the remote NNTP server in addition to the methods
 documented here.
 
 =over 4
+
+=item host ()
+
+Returns the value used by the constructor, and passed to IO::Socket::INET,
+to connect to the host.
+
+=item starttls ()
+
+Upgrade existing plain connection to SSL.
+Any arguments necessary for SSL must be given in C<new> already.
 
 =item article ( [ MSGID|MSGNUM ], [FH] )
 
@@ -837,6 +914,11 @@ In an array context the return value is a list containing, the number
 of articles in the group, the number of the first article, the number
 of the last article and the group name.
 
+=item help ( )
+
+Request help text (a short summary of commands that are understood by this
+implementation) from the server. Returns the text or undef upon failure.
+
 =item ihave ( MSGID [, MESSAGE ])
 
 The C<ihave> command informs the server that the client has an article
@@ -870,11 +952,17 @@ that it will allow posting.
 
 =item authinfo ( USER, PASS )
 
-Authenticates to the server (using AUTHINFO USER / AUTHINFO PASS)
-using the supplied username and password.  Please note that the
-password is sent in clear text to the server.  This command should not
-be used with valuable passwords unless the connection to the server is
-somehow protected.
+Authenticates to the server (using the original AUTHINFO USER / AUTHINFO PASS
+form, defined in RFC2980) using the supplied username and password.  Please
+note that the password is sent in clear text to the server.  This command
+should not be used with valuable passwords unless the connection to the server
+is somehow protected.
+
+=item authinfo_simple ( USER, PASS )
+
+Authenticates to the server (using the proposed NNTP V2 AUTHINFO SIMPLE form,
+defined and deprecated in RFC2980) using the supplied username and password.
+As with L</authinfo> the password is sent in clear text.
 
 =item list ()
 
@@ -940,6 +1028,14 @@ news server.
 
 Quit the remote server and close the socket connection.
 
+=item can_inet6 ()
+
+Returns whether we can use IPv6.
+
+=item can_ssl ()
+
+Returns whether we can use SSL.
+
 =back
 
 =head2 Extension methods
@@ -959,6 +1055,13 @@ each value contains the description text for the group.
 
 Returns a reference to a hash where the keys are all the possible
 distribution names and the values are the distribution descriptions.
+
+=item distribution_patterns ()
+
+Returns a reference to an array where each element, itself an array
+reference, consists of the three fields of a line of the distrib.pats list
+maintained by some NNTP servers, namely: a weight, a wildmat and a value
+which the client may use to construct a Distribution header.
 
 =item subscriptions ()
 
@@ -1013,7 +1116,7 @@ message.
 The result is the same as C<xhdr> except the is will be restricted to
 headers where the text of the header matches C<PATTERN>
 
-=item xrover
+=item xrover ()
 
 The XROVER command returns reference information for the article(s)
 specified.
@@ -1026,7 +1129,7 @@ values are the References: lines from the articles
 Returns a reference to a list of all the active messages in C<GROUP>, or
 the current group if C<GROUP> is not specified.
 
-=item reader
+=item reader ()
 
 Tell the server that you are a reader and not another server.
 
@@ -1139,15 +1242,22 @@ with a and ends with d.
 
 =head1 SEE ALSO
 
-L<Net::Cmd>
+L<Net::Cmd>,
+L<IO::Socket::SSL>
 
 =head1 AUTHOR
 
-Graham Barr <gbarr@pobox.com>
+Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
+
+Steve Hay E<lt>F<shay@cpan.org>E<gt> is now maintaining libnet as of version
+1.22_02
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-1997 Graham Barr. All rights reserved.
+Versions up to 2.24_1 Copyright (c) 1995-1997 Graham Barr. All rights reserved.
+Changes in Version 2.25 onwards Copyright (C) 2013-2014 Steve Hay.  All rights
+reserved.
+
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 

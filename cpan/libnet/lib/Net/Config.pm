@@ -1,23 +1,31 @@
 # Net::Config.pm
 #
-# Copyright (c) 2000 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Versions up to 1.11 Copyright (c) 2000 Graham Barr <gbarr@pobox.com>.
+# All rights reserved.
+# Changes in Version 1.11_01 onwards Copyright (C) 2013-2014 Steve Hay.  All
+# rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
 package Net::Config;
 
-require Exporter;
-use vars qw(@ISA @EXPORT %NetConfig $VERSION $CONFIGURE $LIBNET_CFG);
-use Socket qw(inet_aton inet_ntoa);
-use strict;
+use 5.008001;
 
-@EXPORT  = qw(%NetConfig);
-@ISA     = qw(Net::LocalCfg Exporter);
-$VERSION = "1.14";
+use strict;
+use warnings;
+
+use Exporter;
+use Socket qw(inet_aton inet_ntoa);
+
+our @EXPORT  = qw(%NetConfig);
+our @ISA     = qw(Net::LocalCfg Exporter);
+our $VERSION = "3.01";
+
+our($CONFIGURE, $LIBNET_CFG);
 
 eval { local $SIG{__DIE__}; require Net::LocalCfg };
 
-%NetConfig = (
+our %NetConfig = (
   nntp_hosts      => [],
   snpp_hosts      => [],
   pop3_hosts      => [],
@@ -36,6 +44,8 @@ eval { local $SIG{__DIE__}; require Net::LocalCfg };
 #
 # Try to get as much configuration info as possible from InternetConfig
 #
+{
+## no critic (BuiltinFunctions::ProhibitStringyEval)
 $^O eq 'MacOS' and eval <<TRY_INTERNET_CONFIG;
 use Mac::InternetConfig;
 
@@ -56,6 +66,7 @@ my %nc = (
 \@NetConfig{keys %nc} = values %nc;
 }
 TRY_INTERNET_CONFIG
+}
 
 my $file = __FILE__;
 my $ref;
@@ -112,7 +123,6 @@ sub requires_firewall {
   return 0;
 }
 
-use vars qw(*is_external);
 *is_external = \&requires_firewall;
 
 1;
@@ -153,7 +163,7 @@ C<Net::LocalCfg> so you can override these methods if you want.
 
 =over 4
 
-=item requires_firewall HOST
+=item requires_firewall ( HOST )
 
 Attempts to determine if a given host is outside your firewall. Possible
 return values are.

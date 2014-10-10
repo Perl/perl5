@@ -1,25 +1,50 @@
 # Net::SMTP.pm
 #
-# Copyright (c) 1995-2004 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Versions up to 2.31_1 Copyright (c) 1995-2004 Graham Barr <gbarr@pobox.com>.
+# All rights reserved.
+# Changes in Version 2.31_2 onwards Copyright (C) 2013-2014 Steve Hay.  All
+# rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
 package Net::SMTP;
 
-require 5.001;
+use 5.008001;
 
 use strict;
-use vars qw($VERSION @ISA);
-use Socket 1.3;
+use warnings;
+
 use Carp;
 use IO::Socket;
 use Net::Cmd;
 use Net::Config;
+use Socket 1.3;
 
-$VERSION = "2.34";
+our $VERSION = "3.01";
 
-@ISA = qw(Net::Cmd IO::Socket::INET);
+# Code for detecting if we can use SSL
+my $ssl_class = eval {
+  require IO::Socket::SSL;
+  # first version with default CA on most platforms
+  IO::Socket::SSL->VERSION(1.999);
+} && 'IO::Socket::SSL';
 
+my $nossl_warn = !$ssl_class &&
+  'To use SSL please install IO::Socket::SSL with version>=1.999';
+
+# Code for detecting if we can use IPv6
+my $inet6_class = eval {
+  require IO::Socket::IP;
+  IO::Socket::IP->VERSION(0.20);
+} && 'IO::Socket::IP' || eval {
+  require IO::Socket::INET6;
+  IO::Socket::INET6->VERSION(2.62);
+} && 'IO::Socket::INET6';
+
+sub can_ssl   { $ssl_class };
+sub can_inet6 { $inet6_class };
+
+our @ISA = ('Net::Cmd', $inet6_class || 'IO::Socket::INET');
 
 sub new {
   my $self = shift;
@@ -33,26 +58,38 @@ sub new {
     %arg  = @_;
     $host = delete $arg{Host};
   }
+
+  if ($arg{SSL}) {
+    # SSL from start
+    die $nossl_warn if !$ssl_class;
+    $arg{Port} ||= 465;
+  }
+
   my $hosts = defined $host ? $host : $NetConfig{smtp_hosts};
   my $obj;
 
-  my $h;
-  foreach $h (@{ref($hosts) ? $hosts : [$hosts]}) {
+  $arg{Timeout} = 120 if ! defined $arg{Timeout};
+
+  foreach my $h (@{ref($hosts) ? $hosts : [$hosts]}) {
     $obj = $type->SUPER::new(
       PeerAddr => ($host = $h),
       PeerPort => $arg{Port} || 'smtp(25)',
       LocalAddr => $arg{LocalAddr},
       LocalPort => $arg{LocalPort},
       Proto     => 'tcp',
-      Timeout   => defined $arg{Timeout}
-      ? $arg{Timeout}
-      : 120
+      Timeout   => $arg{Timeout}
       )
       and last;
   }
 
-  return undef
+  return
     unless defined $obj;
+
+  ${*$obj}{'net_smtp_arg'} = \%arg;
+  if ($arg{SSL}) {
+    Net::SMTP::_SSL->start_SSL($obj,SSL_verifycn_name => $host,%arg)
+      or return;
+  }
 
   $obj->autoflush(1);
 
@@ -62,7 +99,7 @@ sub new {
     my $err = ref($obj) . ": " . $obj->code . " " . $obj->message;
     $obj->close();
     $@ = $err;
-    return undef;
+    return;
   }
 
   ${*$obj}{'net_smtp_exact_addr'} = $arg{ExactAddresses};
@@ -75,7 +112,7 @@ sub new {
     my $err = ref($obj) . ": " . $obj->code . " " . $obj->message;
     $obj->close();
     $@ = $err;
-    return undef;
+    return;
   }
 
   $obj;
@@ -128,7 +165,10 @@ sub auth {
 
   if (ref($username) and UNIVERSAL::isa($username, 'Authen::SASL')) {
     $sasl = $username;
-    $sasl->mechanism($mechanisms);
+    my $requested_mechanisms = $sasl->mechanism();
+    if (! defined($requested_mechanisms) || $requested_mechanisms eq '') {
+      $sasl->mechanism($mechanisms);
+    }
   }
   else {
     die "auth(username, password)" if not length $username;
@@ -138,14 +178,30 @@ sub auth {
         user     => $username,
         pass     => $password,
         authname => $username,
-      }
+      },
+      debug => $self->debug
     );
   }
 
-  # We should probably allow the user to pass the host, but I don't
-  # currently know and SASL mechanisms that are used by smtp that need it
-  my $client = $sasl->client_new('smtp', ${*$self}{'net_smtp_host'}, 0);
-  my $str    = $client->client_start;
+  my $client;
+  my $str;
+  do {
+    if ($client) {
+      # $client mechanism failed, so we need to exclude this mechanism from list
+      my $failed_mechanism = $client->mechanism;
+      $self->debug_text("Auth mechanism failed: $failed_mechanism")
+        if $self->debug;
+      $mechanisms =~ s/\b\Q$failed_mechanism\E\b//;
+      last unless $mechanisms =~ /\S/;
+    }
+    $sasl->mechanism($mechanisms);
+    
+    # We should probably allow the user to pass the host, but I don't
+    # currently know and SASL mechanisms that are used by smtp that need it
+
+    $client = $sasl->client_new('smtp', ${*$self}{'net_smtp_host'}, 0);
+    $str    = $client->client_start;
+  } while (!defined $str);
 
   # We don't support sasl mechanisms that encrypt the socket traffic.
   # todo that we would really need to change the ISA hierarchy
@@ -177,8 +233,7 @@ sub hello {
 
   if ($ok) {
     my $h = ${*$me}{'net_smtp_esmtp'} = {};
-    my $ln;
-    foreach $ln (@msg) {
+    foreach my $ln (@msg) {
       $h->{uc $1} = $2
         if $ln =~ /([-\w]+)\b[= \t]*([^\n]*)/;
     }
@@ -188,10 +243,24 @@ sub hello {
       if $ok = $me->_HELO($domain);
   }
 
-  return undef unless $ok;
+  return unless $ok;
+  ${*$me}{net_smtp_hello_domain} = $domain;
 
   $msg[0] =~ /\A\s*(\S+)/;
   return ($1 || " ");
+}
+
+sub starttls {
+  my $self = shift;
+  $ssl_class or die $nossl_warn;
+  $self->_STARTTLS or return;
+  Net::SMTP::_SSL->start_SSL($self,
+    %{ ${*$self}{'net_smtp_arg'} }, # (ssl) args given in new
+    @_   # more (ssl) args
+  ) or return;
+
+  # another hello after starttls to read new ESMTP capabilities
+  return $self->hello(${*$self}{net_smtp_hello_domain});
 }
 
 
@@ -399,8 +468,7 @@ sub recipient {
   }
 
   my @ok;
-  my $addr;
-  foreach $addr (@_) {
+  foreach my $addr (@_) {
     if ($smtp->_RCPT("TO:" . _addr($smtp, $addr) . $opts)) {
       push(@ok, $addr) if $skip_bad;
     }
@@ -531,6 +599,26 @@ sub _BDAT { shift->command("BDAT", @_) }
 sub _TURN { shift->unsupported(@_); }
 sub _ETRN { shift->command("ETRN", @_)->response() == CMD_OK }
 sub _AUTH { shift->command("AUTH", @_)->response() == CMD_OK }
+sub _STARTTLS { shift->command("STARTTLS")->response() == CMD_OK }
+
+
+{
+  package Net::SMTP::_SSL;
+  our @ISA = ( $ssl_class ? ($ssl_class):(), 'Net::SMTP' );
+  sub starttls { die "SMTP connection is already in SSL mode" }
+  sub start_SSL {
+    my ($class,$smtp,%arg) = @_;
+    delete @arg{ grep { !m{^SSL_} } keys %arg };
+    ( $arg{SSL_verifycn_name} ||= $smtp->host )
+	=~s{(?<!:):[\w()]+$}{}; # strip port
+    $arg{SSL_verifycn_scheme} ||= 'smtp';
+    my $ok = $class->SUPER::start_SSL($smtp,%arg);
+    $@ = $ssl_class->errstr if !$ok;
+    return $ok;
+  }
+}
+
+
 
 1;
 
@@ -621,9 +709,15 @@ B<Host> - SMTP host to connect to. It may be a single scalar (hostname[:port]),
 as defined for the C<PeerAddr> option in L<IO::Socket::INET>, or a reference to
 an array with hosts to try in turn. The L</host> method will return the value
 which was used to connect to the host.
+Format - C<PeerHost> from L<IO::Socket::INET> new method.
 
-B<Port> - port to connect to. Format - C<PeerHost> from L<IO::Socket::INET> new method.
-Default - 25.
+B<Port> - port to connect to.
+Default - 25 for plain SMTP and 465 for immediate SSL.
+
+B<SSL> - If the connection should be done from start with SSL, contrary to later
+upgrade with C<starttls>.
+You can use SSL arguments as documented in L<IO::Socket::SSL>, but it will
+usually use the right arguments already.
 
 B<LocalAddr> and B<LocalPort> - These parameters are passed directly
 to IO::Socket to allow binding the socket to a local port.
@@ -654,6 +748,14 @@ Example:
                            Timeout => 30,
                            Debug   => 1,
                           );
+
+    # the same with direct SSL
+    $smtp = Net::SMTP->new('mailhost',
+			   Hello => 'my.mail.domain',
+			   Timeout => 30,
+			   Debug   => 1,
+			   SSL     => 1,
+			  );
 
     # Connect to the default server from Net::config
     $smtp = Net::SMTP->new(
@@ -701,6 +803,12 @@ to connect to the host.
 =item etrn ( DOMAIN )
 
 Request a queue run for the DOMAIN given.
+
+=item starttls ( SSLARGS )
+
+Upgrade existing plain connection to SSL.
+You can use SSL arguments as documented in L<IO::Socket::SSL>, but it will
+usually use the right arguments already.
 
 =item auth ( USERNAME, PASSWORD )
 
@@ -828,6 +936,13 @@ If C<DATA> is not specified then the result will indicate that the server
 wishes the data to be sent. The data must then be sent using the C<datasend>
 and C<dataend> methods described in L<Net::Cmd>.
 
+=item bdat ( DATA )
+
+=item bdatlast ( DATA )
+
+Use the alternate DATA command "BDAT" of the data chunking service extension
+defined in RFC1830 for efficiently sending large MIME messages.
+
 =item expand ( ADDRESS )
 
 Request the server to expand the given address Returns an array
@@ -847,6 +962,14 @@ Request help text from the server. Returns the text or undef upon failure
 =item quit ()
 
 Send the QUIT command to the remote SMTP server and close the socket connection.
+
+=item can_inet6 ()
+
+Returns whether we can use IPv6.
+
+=item can_ssl ()
+
+Returns whether we can use SSL.
 
 =back
 
@@ -868,15 +991,22 @@ accept the address surrounded by angle brackets.
 
 =head1 SEE ALSO
 
-L<Net::Cmd>
+L<Net::Cmd>,
+L<IO::Socket::SSL>
 
 =head1 AUTHOR
 
-Graham Barr <gbarr@pobox.com>
+Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
+
+Steve Hay E<lt>F<shay@cpan.org>E<gt> is now maintaining libnet as of version
+1.22_02
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-2004 Graham Barr. All rights reserved.
+Versions up to 2.31_1 Copyright (c) 1995-2004 Graham Barr. All rights reserved.
+Changes in Version 2.31_2 onwards Copyright (C) 2013-2014 Steve Hay.  All rights
+reserved.
+
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 

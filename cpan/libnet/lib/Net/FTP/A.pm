@@ -3,15 +3,19 @@
 ##
 
 package Net::FTP::A;
+
+use 5.008001;
+
 use strict;
-use vars qw(@ISA $buf $VERSION);
+use warnings;
+
 use Carp;
+use Net::FTP::dataconn;
 
-require Net::FTP::dataconn;
+our @ISA     = qw(Net::FTP::dataconn);
+our $VERSION = "3.01";
 
-@ISA     = qw(Net::FTP::dataconn);
-$VERSION = "1.19";
-
+our $buf;
 
 sub read {
   my $data = shift;
@@ -42,7 +46,7 @@ sub read {
           : undef;
       }
       else {
-        return undef
+        return
           unless defined $n;
 
         ${*$data}{'net_ftp_eof'} = 1;
@@ -100,7 +104,7 @@ sub write {
 
     $off += $wrote;
     $wrote = syswrite($data, substr($tmp, $off), $len > $blksize ? $blksize : $len);
-    return undef
+    return
       unless defined($wrote);
     $len -= $wrote;
   }

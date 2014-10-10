@@ -1419,32 +1419,39 @@ cpan/JSON-PP/t/115_tie_ixhash.t
 cpan/JSON-PP/t/116_incr_parse_fixed.t
 cpan/JSON-PP/t/_unicode_handling.pm
 cpan/JSON-PP/t/zero-mojibake.t
-cpan/libnet/Config.eg		libnet
-cpan/libnet/Hostname.pm.eg	libnet
+cpan/libnet/lib/Net/Cmd.pm
+cpan/libnet/lib/Net/Config.pm
+cpan/libnet/lib/Net/Domain.pm
+cpan/libnet/lib/Net/FTP/A.pm
+cpan/libnet/lib/Net/FTP/dataconn.pm
+cpan/libnet/lib/Net/FTP/E.pm
+cpan/libnet/lib/Net/FTP/I.pm
+cpan/libnet/lib/Net/FTP/L.pm
+cpan/libnet/lib/Net/FTP.pm
+cpan/libnet/lib/Net/libnetFAQ.pod
+cpan/libnet/lib/Net/Netrc.pm
+cpan/libnet/lib/Net/NNTP.pm
+cpan/libnet/lib/Net/POP3.pm
+cpan/libnet/lib/Net/SMTP.pm
+cpan/libnet/lib/Net/Time.pm
 cpan/libnet/Makefile.PL
-cpan/libnet/Net/Cmd.pm		libnet
-cpan/libnet/Net/Config.pm	libnet
-cpan/libnet/Net/Domain.pm	libnet
-cpan/libnet/Net/FTP/A.pm	libnet
-cpan/libnet/Net/FTP/dataconn.pm	libnet
-cpan/libnet/Net/FTP/E.pm	libnet
-cpan/libnet/Net/FTP/I.pm	libnet
-cpan/libnet/Net/FTP/L.pm	libnet
-cpan/libnet/Net/FTP.pm		libnet
-cpan/libnet/Net/libnetFAQ.pod	libnet
-cpan/libnet/Net/Netrc.pm	libnet
-cpan/libnet/Net/NNTP.pm		libnet
-cpan/libnet/Net/POP3.pm		libnet
-cpan/libnet/Net/SMTP.pm		libnet
-cpan/libnet/Net/Time.pm		libnet
 cpan/libnet/t/config.t		libnet
 cpan/libnet/t/datasend.t	libnet
+cpan/libnet/t/external/ftp-ssl.t
+cpan/libnet/t/external/pop3-ssl.t
+cpan/libnet/t/external/smtp-ssl.t
 cpan/libnet/t/ftp.t		libnet
 cpan/libnet/t/hostname.t	libnet
 cpan/libnet/t/libnet_t.pl	libnet
 cpan/libnet/t/netrc.t		libnet
+cpan/libnet/t/nntp_ipv6.t
+cpan/libnet/t/nntp_ssl.t
 cpan/libnet/t/nntp.t		libnet
+cpan/libnet/t/pop3_ipv6.t
+cpan/libnet/t/pop3_ssl.t
 cpan/libnet/t/require.t		libnet
+cpan/libnet/t/smtp_ipv6.t
+cpan/libnet/t/smtp_ssl.t
 cpan/libnet/t/smtp.t		libnet
 cpan/libnet/t/time.t		libnet
 cpan/Locale-Codes/lib/Locale/Codes/API.pod	Locale::Codes documentation

@@ -1,16 +1,17 @@
-#!./perl -w
+#!perl
+
+use 5.008001;
+
+use strict;
+use warnings;
 
 BEGIN {
-    if ($ENV{PERL_CORE}) {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-    if (!eval "require Socket") {
+    if (!eval { require Socket; 1 }) {
         print "1..0 # no Socket\n"; exit 0;
     }
     undef *{Socket::inet_aton};
     undef *{Socket::inet_ntoa};
-    if (ord('A') == 193 && !eval "require Convert::EBCDIC") {
+    if (ord('A') == 193 && !eval { require Convert::EBCDIC; 1 }) {
         print "1..0 # EBCDIC but no Convert::EBCDIC\n"; exit 0;
     }
     $INC{'Socket.pm'} = 1;
@@ -20,7 +21,7 @@ package Socket;
 
 sub import {
         my $pkg = caller();
-        no strict 'refs';
+        no strict 'refs'; ## no critic (TestingAndDebugging::ProhibitNoStrict)
         *{ $pkg . '::inet_aton' } = \&inet_aton;
         *{ $pkg . '::inet_ntoa' } = \&inet_ntoa;
 }

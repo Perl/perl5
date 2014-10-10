@@ -1,3 +1,7 @@
+use 5.008001;
+
+use strict;
+use warnings;
 
 my $number = 0;
 sub ok {

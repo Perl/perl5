@@ -1,22 +1,26 @@
 # Net::Domain.pm
 #
-# Copyright (c) 1995-1998 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Versions up to 2.21 Copyright (c) 1995-1998 Graham Barr <gbarr@pobox.com>.
+# All rights reserved.
+# Changes in Version 2.22 onwards Copyright (C) 2013-2014 Steve Hay.  All rights
+# reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
 package Net::Domain;
 
-require Exporter;
+use 5.008001;
+
+use strict;
+use warnings;
 
 use Carp;
-use strict;
-use vars qw($VERSION @ISA @EXPORT_OK);
+use Exporter;
 use Net::Config;
 
-@ISA       = qw(Exporter);
-@EXPORT_OK = qw(hostname hostdomain hostfqdn domainname);
-
-$VERSION = "2.23";
+our @ISA       = qw(Exporter);
+our @EXPORT_OK = qw(hostname hostdomain hostfqdn domainname);
+our $VERSION = "3.01";
 
 my ($host, $domain, $fqdn) = (undef, undef, undef);
 
@@ -63,12 +67,12 @@ sub _hostname {
       my $tmp = "\0" x 256;    ## preload scalar
       eval {
         package main;
-        require "syscall.ph";
+        require "syscall.ph"; ## no critic (Modules::RequireBarewordIncludes)
         defined(&main::SYS_gethostname);
         }
         || eval {
         package main;
-        require "sys/syscall.ph";
+        require "sys/syscall.ph"; ## no critic (Modules::RequireBarewordIncludes)
         defined(&main::SYS_gethostname);
         }
         and $host =
@@ -124,15 +128,14 @@ sub _hostdomain {
   # calls to gethostbyname, and therefore DNS lookups. This helps
   # those on dialup systems.
 
-  local *RES;
   local ($_);
 
-  if (open(RES, "/etc/resolv.conf")) {
-    while (<RES>) {
+  if (open(my $res, '<', "/etc/resolv.conf")) {
+    while (<$res>) {
       $domain = $1
         if (/\A\s*(?:domain|search)\s+(\S+)/);
     }
-    close(RES);
+    close($res);
 
     return $domain
       if (defined $domain);
@@ -151,11 +154,11 @@ sub _hostdomain {
       my $tmp = "\0" x 256;    ## preload scalar
       eval {
         package main;
-        require "syscall.ph";
+        require "syscall.ph"; ## no critic (Modules::RequireBarewordIncludes)
         }
         || eval {
         package main;
-        require "sys/syscall.ph";
+        require "sys/syscall.ph"; ## no critic (Modules::RequireBarewordIncludes)
         }
         and $dom =
         (syscall(&main::SYS_getdomainname, $tmp, 256) == 0)
@@ -190,8 +193,7 @@ sub _hostdomain {
     next unless @info;
 
     # look at real name & aliases
-    my $site;
-    foreach $site ($info[0], split(/ /, $info[1])) {
+    foreach my $site ($info[0], split(/ /, $info[1])) {
       if (rindex($site, ".") > 0) {
 
         # Extract domain from FQDN
@@ -342,12 +344,18 @@ Returns the remainder of the FQDN after the I<hostname> has been removed.
 
 =head1 AUTHOR
 
-Graham Barr <gbarr@pobox.com>.
-Adapted from Sys::Hostname by David Sundstrom <sunds@asictest.sc.ti.com>
+Graham Barr E<lt>F<gbarr@pobox.com>E<gt>.
+Adapted from Sys::Hostname by David Sundstrom E<lt>F<sunds@asictest.sc.ti.com>E<gt>
+
+Steve Hay E<lt>F<shay@cpan.org>E<gt> is now maintaining libnet as of version
+1.22_02
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-1998 Graham Barr. All rights reserved.
+Versions up to 2.21 Copyright (c) 1995-1998 Graham Barr. All rights reserved.
+Changes in Version 2.22 onwards Copyright (C) 2013-2014 Steve Hay.  All rights
+reserved.
+
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 

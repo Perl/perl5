@@ -4,14 +4,18 @@
 
 package Net::FTP::I;
 
-use vars qw(@ISA $buf $VERSION);
+use 5.008001;
+
+use strict;
+use warnings;
+
 use Carp;
+use Net::FTP::dataconn;
 
-require Net::FTP::dataconn;
+our @ISA     = qw(Net::FTP::dataconn);
+our $VERSION = "3.01";
 
-@ISA     = qw(Net::FTP::dataconn);
-$VERSION = "1.12";
-
+our $buf;
 
 sub read {
   my $data = shift;
@@ -30,7 +34,7 @@ sub read {
     $blksize = $size if $size > $blksize;
 
     unless ($n = sysread($data, ${*$data}, $blksize, length ${*$data})) {
-      return undef unless defined $n;
+      return unless defined $n;
       ${*$data}{'net_ftp_eof'} = 1;
     }
   }
@@ -69,7 +73,7 @@ sub write {
       or croak "Timeout";
 
     my $n = syswrite($data, $buf, $sent > $blksize ? $blksize : $sent, $off);
-    return undef unless defined($n);
+    return unless defined($n);
     $sent -= $n;
     $off += $n;
   }

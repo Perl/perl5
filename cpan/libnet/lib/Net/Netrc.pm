@@ -1,23 +1,30 @@
 # Net::Netrc.pm
 #
-# Copyright (c) 1995-1998 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Versions up to 2.13 Copyright (c) 1995-1998 Graham Barr <gbarr@pobox.com>.
+# All rights reserved.
+# Changes in Version 2.13_01 onwards Copyright (C) 2013-2014 Steve Hay.  All
+# rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
 package Net::Netrc;
 
-use Carp;
-use strict;
-use FileHandle;
-use vars qw($VERSION $TESTING);
+use 5.008001;
 
-$VERSION = "2.14";
+use strict;
+use warnings;
+
+use Carp;
+use FileHandle;
+
+our $VERSION = "3.01";
+
+our $TESTING;
 
 my %netrc = ();
 
-
 sub _readrc {
-  my $host = shift;
+  my($class, $host) = @_;
   my ($home, $file);
 
   if ($^O eq "MacOS") {
@@ -56,7 +63,7 @@ sub _readrc {
     my @stat = stat($file);
 
     if (@stat) {
-      if ($stat[2] & 077) {
+      if ($stat[2] & 077) { ## no critic (ValuesAndExpressions::ProhibitLeadingZeros)
         carp "Bad permissions: $file";
         return;
       }
@@ -90,7 +97,7 @@ sub _readrc {
       while (@tok) {
         if ($tok[0] eq "default") {
           shift(@tok);
-          $mach = bless {};
+          $mach = bless {}, $class;
           $netrc{default} = [$mach];
 
           next TOKEN;
@@ -103,7 +110,7 @@ sub _readrc {
 
         if ($tok eq "machine") {
           my $host = shift @tok;
-          $mach = bless {machine => $host};
+          $mach = bless {machine => $host}, $class;
 
           $netrc{$host} = []
             unless exists($netrc{$host});
@@ -132,9 +139,9 @@ sub _readrc {
 
 
 sub lookup {
-  my ($pkg, $mach, $login) = @_;
+  my ($class, $mach, $login) = @_;
 
-  _readrc()
+  $class->_readrc()
     unless exists $netrc{default};
 
   $mach ||= 'default';
@@ -143,12 +150,11 @@ sub lookup {
 
   if (exists $netrc{$mach}) {
     if (defined $login) {
-      my $m;
-      foreach $m (@{$netrc{$mach}}) {
+      foreach my $m (@{$netrc{$mach}}) {
         return $m
           if (exists $m->{login} && $m->{login} eq $login);
       }
-      return undef;
+      return;
     }
     return $netrc{$mach}->[0];
   }
@@ -156,7 +162,7 @@ sub lookup {
   return $netrc{default}->[0]
     if defined $netrc{default};
 
-  return undef;
+  return;
 }
 
 
@@ -317,16 +323,22 @@ Return a list of login, password and account information for the netrc entry
 
 =head1 AUTHOR
 
-Graham Barr <gbarr@pobox.com>
+Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
+
+Steve Hay E<lt>F<shay@cpan.org>E<gt> is now maintaining libnet as of version
+1.22_02
 
 =head1 SEE ALSO
 
-L<Net::Netrc>
+L<Net::Netrc>,
 L<Net::Cmd>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-1998 Graham Barr. All rights reserved.
+Versions up to 2.13 Copyright (c) 1995-1998 Graham Barr. All rights reserved.
+Changes in Version 2.13_01 onwards Copyright (C) 2013-2014 Steve Hay.  All
+rights reserved.
+
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
