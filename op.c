@@ -6086,8 +6086,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    if (tmpop && (tmpop->op_type == OP_PUSHRE)) {
 		PMOP * const pm = (PMOP*)tmpop;
 		if (left->op_type == OP_RV2AV &&
-		    !(left->op_private & OPpLVAL_INTRO) &&
-		    !(o->op_private & OPpASSIGN_COMMON) )
+		    !(left->op_private & OPpLVAL_INTRO))
 		{
 		    tmpop = ((UNOP*)left)->op_first;
 		    if (tmpop->op_type == OP_GV
