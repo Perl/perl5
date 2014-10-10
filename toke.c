@@ -11401,7 +11401,6 @@ S_parse_opt_lexvar(pTHX)
     PL_bufptr = s;
     if (d == PL_tokenbuf+1)
 	return NULL;
-    *d = 0;
     var = newOP(sigil == '$' ? OP_PADSV : sigil == '@' ? OP_PADAV : OP_PADHV,
 		OPf_MOD | (OPpLVAL_INTRO<<8));
     var->op_targ = allocmy(PL_tokenbuf, d - PL_tokenbuf, UTF ? SVf_UTF8 : 0);
