@@ -694,7 +694,9 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/libnet],
         'EXCLUDED'     => [
             qw( Configure
-                install-nomake
+                t/critic.t
+                t/pod.t
+                t/pod_coverage.t
                 ),
             qr(^demos/),
         ],
