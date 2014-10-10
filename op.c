@@ -606,7 +606,9 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 		    PL_parser->in_my_stash,
 		    (is_our
 		        /* $_ is always in main::, even with our */
-			? (PL_curstash && !strEQ(name,"$_") ? PL_curstash : PL_defstash)
+			? (PL_curstash && !memEQs(name,len,"$_")
+			    ? PL_curstash
+			    : PL_defstash)
 			: NULL
 		    )
     );
