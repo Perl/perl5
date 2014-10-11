@@ -6973,6 +6973,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             sv->op_targ = 0;
             op_free(sv);
 	    sv = NULL;
+	    PAD_COMPNAME_GEN_set(padoff, PERL_INT_MAX);
 	}
 	else if (sv->op_type == OP_NULL && sv->op_targ == OP_SREFGEN)
 	    NOOP;
