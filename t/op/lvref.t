@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 148;
+plan 152;
 
 eval '\$x = \$y';
 like $@, qr/^Experimental lvalue references not enabled/,
@@ -528,4 +528,47 @@ SKIP: {
     Scalar::Util::weaken($r = \$a);
     \$a = $r;
     pass 'no crash when assigning \$lex = $weakref_to_lex'
+}
+
+{
+    \my $x = \my $y;
+    $x = 3;
+    ($x, my $z) = (1, $y);
+    is $z, 3, 'list assignment after aliasing lexical scalars';
+}
+{
+    (\my $x) = \my $y;
+    $x = 3;
+    ($x, my $z) = (1, $y);
+    is $z, 3,
+      'regular list assignment after aliasing via list assignment';
+}
+{
+    my $y;
+    goto do_aliasing;
+
+   do_test:
+    $y = 3;
+    my($x,$z) = (1, $y);
+    is $z, 3, 'list assignment "before" aliasing lexical scalars';
+    last;
+
+   do_aliasing:
+    \$x = \$y;
+    goto do_test;
+}
+{
+    my $y;
+    goto do_aliasing2;
+
+   do_test2:
+    $y = 3;
+    my($x,$z) = (1, $y);
+    is $z, 3,
+     'list assignment "before" aliasing lex scalars via list assignment';
+    last;
+
+   do_aliasing2:
+    \($x) = \$y;
+    goto do_test2;
 }

@@ -2397,16 +2397,18 @@ S_lvref(pTHX_ OP *o, I32 type)
       checkgv:
 	if (cUNOPo->op_first->op_type != OP_GV) goto badref;
 	o->op_flags |= OPf_STACKED;
-	/* FALLTHROUGH */
-    case OP_PADSV:
-	break;
-    case OP_PADAV:
-	if (o->op_flags & OPf_PARENS) goto slurpy;
-	o->op_private |= OPpLVREF_AV;
 	break;
     case OP_PADHV:
 	if (o->op_flags & OPf_PARENS) goto parenhash;
 	o->op_private |= OPpLVREF_HV;
+	/* FALLTHROUGH */
+    case OP_PADSV:
+	PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
+	break;
+    case OP_PADAV:
+	PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
+	if (o->op_flags & OPf_PARENS) goto slurpy;
+	o->op_private |= OPpLVREF_AV;
 	break;
     case OP_AELEM:
     case OP_HELEM:
@@ -5892,9 +5894,13 @@ S_assignment_type(pTHX_ const OP *o)
   Then, while compiling the assign op, we run through all the
   variables on both sides of the assignment, setting a spare slot
   in each of them to PL_generation.  If any of them already have
-  that value, we know we've got commonality.  We could use a
+  that value, we know we've got commonality.  Also, if the
+  generation number is already set to PERL_INT_MAX, then
+  the variable is involved in aliasing, so we also have
+  potential commonality in that case.  We could use a
   single bit marker, but then we'd have to make 2 passes, first
-  to clear the flag, then to test and set it.  To find somewhere
+  to clear the flag, then to test and set it.  And that
+  wouldn't help with aliasing, either.  To find somewhere
   to store these values, evil chicanery is done with SvUVX().
 */
 PERL_STATIC_INLINE bool
@@ -5916,7 +5922,8 @@ S_aassign_common_vars(pTHX_ OP* o)
 		curop->op_type == OP_PADANY)
 		{
 		    if (PAD_COMPNAME_GEN(curop->op_targ)
-			== (STRLEN)PL_generation)
+			== (STRLEN)PL_generation
+		     || PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
 			return TRUE;
 		    PAD_COMPNAME_GEN_set(curop->op_targ, PL_generation);
 
@@ -5955,6 +5962,29 @@ S_aassign_common_vars(pTHX_ OP* o)
 
 	if (curop->op_flags & OPf_KIDS) {
 	    if (aassign_common_vars(curop))
+		return TRUE;
+	}
+    }
+    return FALSE;
+}
+
+/* This variant only handles lexical aliases.  It is called when
+   newASSIGNOP decides that we don’t have any common vars, as lexical ali-
+   ases trump that decision.  */
+PERL_STATIC_INLINE bool
+S_aassign_common_vars_aliases_only(pTHX_ OP *o)
+{
+    OP *curop;
+    for (curop = cUNOPo->op_first; curop; curop = OP_SIBLING(curop)) {
+	if ((curop->op_type == OP_PADSV ||
+	     curop->op_type == OP_PADAV ||
+	     curop->op_type == OP_PADHV ||
+	     curop->op_type == OP_PADANY)
+	   && PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
+	    return TRUE;
+
+	if (curop->op_flags & OPf_KIDS) {
+	    if (S_aassign_common_vars_aliases_only(aTHX_ curop))
 		return TRUE;
 	}
     }
@@ -10065,6 +10095,7 @@ Perl_ck_refassign(pTHX_ OP *o)
       settarg:
 	o->op_targ = varop->op_targ;
 	varop->op_targ = 0;
+	PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
 	break;
     case OP_RV2AV:
 	o->op_private = OPpLVREF_AV;
@@ -12507,6 +12538,9 @@ Perl_rpeep(pTHX_ OP *o)
 	    break;
 
 	case OP_AASSIGN:
+	    /* We do the common-vars check here, rather than in newASSIGNOP
+	       (as formerly), so that all lexical vars that get aliased are
+	       marked as such before we do the check.  */
 	    if (o->op_private & OPpASSIGN_COMMON) {
 		 /* See the comment before S_aassign_common_vars concerning
 		    PL_generation sorcery.  */
@@ -12514,6 +12548,8 @@ Perl_rpeep(pTHX_ OP *o)
 		if (!aassign_common_vars(o))
 		    o->op_private &=~ OPpASSIGN_COMMON;
 	    }
+	    else if (S_aassign_common_vars_aliases_only(aTHX_ o))
+		o->op_private |= OPpASSIGN_COMMON;
 	    break;
 
 	case OP_CUSTOM: {
