@@ -15743,17 +15743,21 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
 {
     if (PL_op) {
 	SV* varname = NULL;
+	const char *desc;
 	if (uninit_sv && PL_curpad) {
 	    varname = find_uninit_var(PL_op, uninit_sv,0);
 	    if (varname)
 		sv_insert(varname, 0, 0, " ", 1);
 	}
+	desc = PL_op->op_type == OP_STRINGIFY && PL_op->op_folded
+		? "join or string"
+		: OP_DESC(PL_op);
         /* PL_warn_uninit_sv is constant */
         GCC_DIAG_IGNORE(-Wformat-nonliteral);
 	/* diag_listed_as: Use of uninitialized value%s */
 	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit_sv,
 		SVfARG(varname ? varname : &PL_sv_no),
-		" in ", OP_DESC(PL_op));
+		" in ", desc);
         GCC_DIAG_RESTORE;
     }
     else {

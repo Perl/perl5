@@ -5150,6 +5150,7 @@ t/op/negate.t			See if unary minus works
 t/op/not.t			See if not works
 t/op/numconvert.t		See if accessing fields does not change numeric values
 t/op/oct.t			See if oct and hex work
+t/op/opt.t			Test presence of some op optimisations
 t/op/ord.t			See if ord works
 t/op/or.t			See if || works in weird situations
 t/op/overload_integer.t		See if overload::constant for integer works after "use".

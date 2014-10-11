@@ -1888,7 +1888,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00091480,	/* unpack */
 	0x0002140f,	/* pack */
 	0x00111408,	/* split */
-	0x0002140d,	/* join */
+	0x0002140f,	/* join */
 	0x00002401,	/* list */
 	0x00224200,	/* lslice */
 	0x00002405,	/* anonlist */

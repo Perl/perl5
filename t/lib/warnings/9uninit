@@ -1126,7 +1126,6 @@ Use of uninitialized value $m1 in regexp compilation at - line 8.
 Use of uninitialized value $g1 in split at - line 8.
 Use of uninitialized value $m2 in split at - line 8.
 Use of uninitialized value $m1 in join or string at - line 10.
-Use of uninitialized value $m1 in join or string at - line 11.
 Use of uninitialized value $m2 in join or string at - line 11.
 Use of uninitialized value $m1 in join or string at - line 12.
 Use of uninitialized value $m2 in join or string at - line 12.

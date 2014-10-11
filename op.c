@@ -3872,6 +3872,7 @@ S_fold_constants(pTHX_ OP *o)
     OP * VOL curop;
     OP *newop;
     VOL I32 type = o->op_type;
+    bool folded;
     SV * VOL sv = NULL;
     int ret = 0;
     I32 oldscope;
@@ -4018,6 +4019,7 @@ S_fold_constants(pTHX_ OP *o)
     if (ret)
 	goto nope;
 
+    folded = o->op_folded;
     op_free(o);
     assert(sv);
     if (type == OP_STRINGIFY) SvPADTMP_off(sv);
@@ -4030,7 +4032,11 @@ S_fold_constants(pTHX_ OP *o)
     else
     {
 	newop = newSVOP(OP_CONST, 0, MUTABLE_SV(sv));
-	if (type != OP_STRINGIFY) newop->op_folded = 1;
+	/* OP_STRINGIFY and constant folding are used to implement qq.
+	   Here the constant folding is an implementation detail that we
+	   want to hide.  If the stringify op is itself already marked
+	   folded, however, then it is actually a folded join.  */
+	if (type != OP_STRINGIFY || folded) newop->op_folded = 1;
     }
     return newop;
 
@@ -10606,7 +10612,7 @@ Perl_ck_split(pTHX_ OP *o)
 OP *
 Perl_ck_join(pTHX_ OP *o)
 {
-    const OP * const kid = OP_SIBLING(cLISTOPo->op_first);
+    OP * const kid = OP_SIBLING(cLISTOPo->op_first);
 
     PERL_ARGS_ASSERT_CK_JOIN;
 
@@ -10622,6 +10628,23 @@ Perl_ck_join(pTHX_ OP *o)
 			SVfARG(msg), SVfARG(msg));
 	}
     }
+    if (kid->op_type == OP_CONST  /* an innocent, unsuspicious separator */
+     || (kid->op_type == OP_PADSV && !(kid->op_private & OPpLVAL_INTRO))
+     || (kid->op_type==OP_RV2SV && kUNOP->op_first->op_type == OP_GV
+	&& !(kid->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO))))
+    {
+	const OP * const bairn = OP_SIBLING(kid); /* the list */
+	if (bairn && !OP_HAS_SIBLING(bairn) /* single-item list */
+	 && PL_opargs[bairn->op_type] & OA_RETSCALAR)
+	{
+	    OP * const ret = convert(OP_STRINGIFY, 0,
+				     op_sibling_splice(o, kid, 1, NULL));
+	    op_free(o);
+	    ret->op_folded = 1;
+	    return ret;
+	}
+    }
+
     return ck_fun(o);
 }
 

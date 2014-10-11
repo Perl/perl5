@@ -387,7 +387,7 @@ $a{0} ;			# OP_HELEM
 @a{0} ;			# OP_HSLICE
 unpack "a", "a" ;	# OP_UNPACK
 pack $a,"" ;		# OP_PACK
-join "" ;		# OP_JOIN
+join "", @_ ;		# OP_JOIN
 (@a)[0,1] ;		# OP_LSLICE
 			# OP_ANONLIST
 			# OP_ANONHASH

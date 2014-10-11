@@ -36,7 +36,7 @@ BEGIN {
 
 use strict;
 use Test::More;
-plan tests => 4018;
+plan tests => 4006;
 
 use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
                                     # logic to add CORE::
@@ -522,7 +522,7 @@ hex              01    $
 index            23    p
 int              01    $
 ioctl            3     p
-join             123   p
+join             13    p
 keys             1     - # also tested specially
 kill             123   p
 # last handled specially
