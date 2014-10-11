@@ -367,7 +367,7 @@ wantarray ; 		# OP_WANTARRAY
 			# OP_PADANY
 			# OP_AV2ARYLEN
 ref ;			# OP_REF
-\@a ;			# OP_REFGEN
+\(@a) ;			# OP_REFGEN
 \$a ;			# OP_SREFGEN
 defined $a ;		# OP_DEFINED
 hex $a ;		# OP_HEX

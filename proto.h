@@ -573,6 +573,12 @@ PERL_CALLCONV OP *	Perl_ck_readline(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_READLINE	\
 	assert(o)
 
+PERL_CALLCONV OP *	Perl_ck_refassign(pTHX_ OP *o)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CK_REFASSIGN	\
+	assert(o)
+
 PERL_CALLCONV OP *	Perl_ck_repeat(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -1565,6 +1571,12 @@ PERL_CALLCONV GV *	Perl_gv_override(pTHX_ const char * const name, const STRLEN 
 #define PERL_ARGS_ASSERT_GV_OVERRIDE	\
 	assert(name)
 
+PERL_CALLCONV void	Perl_gv_setref(pTHX_ SV *const dstr, SV *const sstr)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_GV_SETREF	\
+	assert(dstr); assert(sstr)
+
 PERL_CALLCONV HV*	Perl_gv_stashpv(pTHX_ const char* name, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GV_STASHPV	\
@@ -2500,6 +2512,12 @@ PERL_CALLCONV int	Perl_magic_setisa(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_MAGIC_SETISA	\
+	assert(sv); assert(mg)
+
+PERL_CALLCONV int	Perl_magic_setlvref(pTHX_ SV* sv, MAGIC* mg)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MAGIC_SETLVREF	\
 	assert(sv); assert(mg)
 
 PERL_CALLCONV int	Perl_magic_setmglob(pTHX_ SV* sv, MAGIC* mg)
@@ -6176,6 +6194,9 @@ STATIC void	S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp
 #define PERL_ARGS_ASSERT_APPLY_ATTRS_MY	\
 	assert(stash); assert(target); assert(imopsp)
 
+STATIC I32	S_assignment_type(pTHX_ const OP *o)
+			__attribute__warn_unused_result__;
+
 STATIC void	S_bad_type_gv(pTHX_ I32 n, const char *t, GV *gv, U32 flags, const OP *kid)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
@@ -6239,9 +6260,6 @@ STATIC bool	S_is_handle_constructor(const OP *o, I32 numargs)
 			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_IS_HANDLE_CONSTRUCTOR	\
 	assert(o)
-
-STATIC I32	S_is_list_assignment(pTHX_ const OP *o)
-			__attribute__warn_unused_result__;
 
 STATIC OP*	S_listkids(pTHX_ OP* o);
 STATIC bool	S_looks_like_bool(pTHX_ const OP* o)
@@ -7480,12 +7498,6 @@ STATIC void	S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int d
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GLOB_ASSIGN_GLOB	\
-	assert(dstr); assert(sstr)
-
-STATIC void	S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_GLOB_ASSIGN_REF	\
 	assert(dstr); assert(sstr)
 
 STATIC SV *	S_more_sv(pTHX);

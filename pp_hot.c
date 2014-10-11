@@ -886,6 +886,7 @@ PP(pp_print)
 
 
 /* also used for: pp_rv2hv() */
+/* also called directly by pp_lvavref */
 
 PP(pp_rv2av)
 {
@@ -893,7 +894,8 @@ PP(pp_rv2av)
     const I32 gimme = GIMME_V;
     static const char an_array[] = "an ARRAY";
     static const char a_hash[] = "a HASH";
-    const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV;
+    const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV
+			  || PL_op->op_type == OP_LVAVREF;
     const svtype type = is_pp_rv2av ? SVt_PVAV : SVt_PVHV;
 
     SvGETMAGIC(sv);
@@ -1071,8 +1073,14 @@ PP(pp_aassign)
     hash = NULL;
 
     while (LIKELY(lelem <= lastlelem)) {
+	bool alias = FALSE;
 	TAINT_NOT;		/* Each item stands on its own, taintwise. */
 	sv = *lelem++;
+	if (UNLIKELY(!sv)) {
+	    alias = TRUE;
+	    sv = *lelem++;
+	    ASSUME(SvTYPE(sv) == SVt_PVAV);
+	}
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
 	    ary = MUTABLE_AV(sv);
@@ -1086,9 +1094,24 @@ PP(pp_aassign)
 		SV **didstore;
 		if (LIKELY(*relem))
 		    SvGETMAGIC(*relem); /* before newSV, in case it dies */
-		sv = newSV(0);
-		sv_setsv_nomg(sv, *relem);
-		*(relem++) = sv;
+		if (LIKELY(!alias)) {
+		    sv = newSV(0);
+		    sv_setsv_nomg(sv, *relem);
+		    *relem = sv;
+		}
+		else {
+		    if (!SvROK(*relem))
+			DIE(aTHX_ "Assigned value is not a reference");
+		    if (SvTYPE(SvRV(*relem)) > SVt_PVLV)
+		   /* diag_listed_as: Assigned value is not %s reference */
+			DIE(aTHX_
+			   "Assigned value is not a SCALAR reference");
+		    if (lval)
+			*relem = sv_mortalcopy(*relem);
+		    /* XXX else check for weak refs?  */
+		    sv = SvREFCNT_inc_simple_NN(SvRV(*relem));
+		}
+		relem++;
 		didstore = av_store(ary,i++,sv);
 		if (magic) {
 		    if (!didstore)
@@ -1938,6 +1961,11 @@ PP(pp_iter)
         }
         else {
             sv = AvARRAY(av)[ix];
+        }
+
+        if (UNLIKELY(cx->cx_type & CXp_FOR_LVREF)) {
+            SvSetMagicSV(*itersvp, sv);
+            break;
         }
 
         if (LIKELY(sv)) {

@@ -5,7 +5,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(107);
+plan(108);
 
 # A lot of tests to check that reversed for works.
 
@@ -585,4 +585,10 @@ for $x ($y) {
     $x = 3;
     ($x, my $z) = (1, $y);
     is $z, 3, 'list assignment after aliasing via foreach';
+}
+
+for my $x (my $y) {
+    $x = 3;
+    ($x, my $z) = (1, $y);
+    is $z, 3, 'list assignment after aliasing lexical var via foreach';
 }

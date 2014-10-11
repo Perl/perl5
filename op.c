@@ -1802,7 +1802,8 @@ Perl_scalarvoid(pTHX_ OP *o)
 
 	refgen = (UNOP *)((BINOP *)o)->op_first;
 
-	if (!refgen || refgen->op_type != OP_REFGEN)
+	if (!refgen || (refgen->op_type != OP_REFGEN
+			&& refgen->op_type != OP_SREFGEN))
 	    break;
 
 	exlist = (LISTOP *)refgen->op_first;
@@ -1810,7 +1811,8 @@ Perl_scalarvoid(pTHX_ OP *o)
 	    || exlist->op_targ != OP_LIST)
 	    break;
 
-	if (exlist->op_first->op_type != OP_PUSHMARK)
+	if (exlist->op_first->op_type != OP_PUSHMARK
+	 && exlist->op_first != exlist->op_last)
 	    break;
 
 	rv2cv = (UNOP*)exlist->op_last;
@@ -2333,6 +2335,130 @@ S_vivifies(const OPCODE type)
     return 0;
 }
 
+static void
+S_lvref(pTHX_ OP *o, I32 type)
+{
+    OP *kid;
+    switch (o->op_type) {
+    case OP_COND_EXPR:
+	for (kid = OP_SIBLING(cUNOPo->op_first); kid;
+	     kid = OP_SIBLING(kid))
+	    S_lvref(aTHX_ kid, type);
+	/* FALLTHROUGH */
+    case OP_PUSHMARK:
+	return;
+    case OP_RV2AV:
+	if (cUNOPo->op_first->op_type != OP_GV) goto badref;
+	o->op_flags |= OPf_STACKED;
+	if (o->op_flags & OPf_PARENS) {
+	    if (o->op_private & OPpLVAL_INTRO) {
+		 /* diag_listed_as: Can't modify %s in %s */
+		 yyerror(Perl_form(aTHX_ "Can't modify reference to "
+		      "localized parenthesized array in list assignment"));
+		return;
+	    }
+	  slurpy:
+	    o->op_type = OP_LVAVREF;
+	    o->op_ppaddr = PL_ppaddr[OP_LVAVREF];
+	    o->op_private &= OPpLVAL_INTRO|OPpPAD_STATE;
+	    o->op_flags |= OPf_MOD|OPf_REF;
+	    return;
+	}
+	o->op_private |= OPpLVREF_AV;
+	goto checkgv;
+    case OP_RV2CV:
+	kid = cUNOPo->op_first;
+	if (kid->op_type == OP_NULL)
+	    kid = cUNOPx(kUNOP->op_first->op_sibling)
+		->op_first;
+	o->op_private = OPpLVREF_CV;
+	if (kid->op_type == OP_GV)
+	    o->op_flags |= OPf_STACKED;
+	else if (kid->op_type == OP_PADCV) {
+	    o->op_targ = kid->op_targ;
+	    kid->op_targ = 0;
+	    op_free(cUNOPo->op_first);
+	    cUNOPo->op_first = NULL;
+	    o->op_flags &=~ OPf_KIDS;
+	}
+	else goto badref;
+	break;
+    case OP_RV2HV:
+	if (o->op_flags & OPf_PARENS) {
+	  parenhash:
+	    /* diag_listed_as: Can't modify %s in %s */
+	    yyerror(Perl_form(aTHX_ "Can't modify reference to "
+				 "parenthesized hash in list assignment"));
+		return;
+	}
+	o->op_private |= OPpLVREF_HV;
+	/* FALLTHROUGH */
+    case OP_RV2SV:
+      checkgv:
+	if (cUNOPo->op_first->op_type != OP_GV) goto badref;
+	o->op_flags |= OPf_STACKED;
+	break;
+    case OP_PADHV:
+	if (o->op_flags & OPf_PARENS) goto parenhash;
+	o->op_private |= OPpLVREF_HV;
+	/* FALLTHROUGH */
+    case OP_PADSV:
+	PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
+	break;
+    case OP_PADAV:
+	PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
+	if (o->op_flags & OPf_PARENS) goto slurpy;
+	o->op_private |= OPpLVREF_AV;
+	break;
+    case OP_AELEM:
+    case OP_HELEM:
+	o->op_private |= OPpLVREF_ELEM;
+	o->op_flags   |= OPf_STACKED;
+	break;
+    case OP_ASLICE:
+    case OP_HSLICE:
+	o->op_type = OP_LVREFSLICE;
+	o->op_ppaddr = PL_ppaddr[OP_LVREFSLICE];
+	o->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM;
+	return;
+    case OP_NULL:
+	if (o->op_flags & OPf_SPECIAL)		/* do BLOCK */
+	    goto badref;
+	else if (!(o->op_flags & OPf_KIDS))
+	    return;
+	if (o->op_targ != OP_LIST) {
+	    S_lvref(aTHX_ cBINOPo->op_first, type);
+	    return;
+	}
+	/* FALLTHROUGH */
+    case OP_LIST:
+	for (kid = cLISTOPo->op_first; kid; kid = OP_SIBLING(kid)) {
+	    assert((kid->op_flags & OPf_WANT) != OPf_WANT_VOID);
+	    S_lvref(aTHX_ kid, type);
+	}
+	return;
+    case OP_STUB:
+	if (o->op_flags & OPf_PARENS)
+	    return;
+	/* FALLTHROUGH */
+    default:
+      badref:
+	/* diag_listed_as: Can't modify %s in %s */
+	yyerror(Perl_form(aTHX_ "Can't modify reference to %s in %s",
+		     o->op_type == OP_NULL && o->op_flags & OPf_SPECIAL
+		      ? "do block"
+		      : OP_DESC(o),
+		     PL_op_desc[type]));
+	return;
+    }
+    o->op_type = OP_LVREF;
+    o->op_ppaddr = PL_ppaddr[OP_LVREF];
+    o->op_private &=
+	OPpLVAL_INTRO|OPpLVREF_ELEM|OPpLVREF_TYPE|OPpPAD_STATE;
+    if (type == OP_ENTERLOOP)
+	o->op_private |= OPpLVREF_ITER;
+}
+
 OP *
 Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 {
@@ -2626,6 +2752,35 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	 || !S_vivifies(OP_SIBLING(cLOGOPo->op_first)->op_type))
 	    op_lvalue(OP_SIBLING(cLOGOPo->op_first), type);
 	goto nomod;
+
+    case OP_SREFGEN:
+	if (type != OP_AASSIGN && type != OP_SASSIGN
+	 && type != OP_ENTERLOOP)
+	    goto nomod;
+	/* Don’t bother applying lvalue context to the ex-list.  */
+	kid = cUNOPx(cUNOPo->op_first)->op_first;
+	assert (!OP_HAS_SIBLING(kid));
+	goto kid_2lvref;
+    case OP_REFGEN:
+	if (type != OP_AASSIGN) goto nomod;
+	kid = cUNOPo->op_first;
+      kid_2lvref:
+	{
+	    const U8 ec = PL_parser ? PL_parser->error_count : 0;
+	    S_lvref(aTHX_ kid, type);
+	    if (!PL_parser || PL_parser->error_count == ec) {
+		if (!FEATURE_LVREF_IS_ENABLED)
+		    Perl_croak(aTHX_
+			     "Experimental lvalue references not enabled");
+		Perl_ck_warner_d(aTHX_
+				 packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
+			      "Lvalue references are experimental");
+	    }
+	}
+	if (o->op_type == OP_REFGEN)
+	    op_null(cUNOPx(cUNOPo->op_first)->op_first); /* pushmark */
+	op_null(o);
+	return o;
     }
 
     /* [20011101.069] File test operators interpret OPf_REF to mean that
@@ -4410,15 +4565,15 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
         last->op_sibling = (OP*)binop;
 #endif
 
-    binop = (BINOP*)CHECKOP(type, binop);
-    if (binop->op_next || binop->op_type != (OPCODE)type)
-	return (OP*)binop;
-
     binop->op_last = OP_SIBLING(binop->op_first);
 #ifdef PERL_OP_PARENT
     if (binop->op_last)
         binop->op_last->op_sibling = (OP*)binop;
 #endif
+
+    binop = (BINOP*)CHECKOP(type, binop);
+    if (binop->op_next || binop->op_type != (OPCODE)type)
+	return (OP*)binop;
 
     return fold_constants(op_integerize(op_std_init((OP *)binop)));
 }
@@ -5661,11 +5816,15 @@ Perl_newSLICEOP(pTHX_ I32 flags, OP *subscript, OP *listval)
 	    list(force_list(listval,   1)) );
 }
 
+#define ASSIGN_LIST   1
+#define ASSIGN_REF    2
+
 STATIC I32
-S_is_list_assignment(pTHX_ const OP *o)
+S_assignment_type(pTHX_ const OP *o)
 {
     unsigned type;
     U8 flags;
+    U8 ret;
 
     if (!o)
 	return TRUE;
@@ -5677,40 +5836,72 @@ S_is_list_assignment(pTHX_ const OP *o)
     type = o->op_type;
     if (type == OP_COND_EXPR) {
         OP * const sib = OP_SIBLING(cLOGOPo->op_first);
-        const I32 t = is_list_assignment(sib);
-        const I32 f = is_list_assignment(OP_SIBLING(sib));
+        const I32 t = assignment_type(sib);
+        const I32 f = assignment_type(OP_SIBLING(sib));
 
-	if (t && f)
-	    return TRUE;
-	if (t || f)
+	if (t == ASSIGN_LIST && f == ASSIGN_LIST)
+	    return ASSIGN_LIST;
+	if ((t == ASSIGN_LIST) ^ (f == ASSIGN_LIST))
 	    yyerror("Assignment to both a list and a scalar");
 	return FALSE;
     }
 
+    if (type == OP_SREFGEN)
+    {
+	OP * const kid = cUNOPx(cUNOPo->op_first)->op_first;
+	type = kid->op_type;
+	flags |= kid->op_flags;
+	if (!(flags & OPf_PARENS)
+	  && (kid->op_type == OP_RV2AV || kid->op_type == OP_PADAV ||
+	      kid->op_type == OP_RV2HV || kid->op_type == OP_PADHV ))
+	    return ASSIGN_REF;
+	ret = ASSIGN_REF;
+    }
+    else ret = 0;
+
     if (type == OP_LIST &&
 	(flags & OPf_WANT) == OPf_WANT_SCALAR &&
 	o->op_private & OPpLVAL_INTRO)
-	return FALSE;
+	return ret;
 
     if (type == OP_LIST || flags & OPf_PARENS ||
 	type == OP_RV2AV || type == OP_RV2HV ||
 	type == OP_ASLICE || type == OP_HSLICE ||
-        type == OP_KVASLICE || type == OP_KVHSLICE)
+        type == OP_KVASLICE || type == OP_KVHSLICE || type == OP_REFGEN)
 	return TRUE;
 
     if (type == OP_PADAV || type == OP_PADHV)
 	return TRUE;
 
     if (type == OP_RV2SV)
-	return FALSE;
+	return ret;
 
-    return FALSE;
+    return ret;
 }
 
 /*
   Helper function for newASSIGNOP to detection commonality between the
-  lhs and the rhs.  Marks all variables with PL_generation.  If it
+  lhs and the rhs.  (It is actually called very indirectly.  newASSIGNOP
+  flags the op and the peephole optimizer calls this helper function
+  if the flag is set.)  Marks all variables with PL_generation.  If it
   returns TRUE the assignment must be able to handle common variables.
+
+  PL_generation sorcery:
+  An assignment like ($a,$b) = ($c,$d) is easier than
+  ($a,$b) = ($c,$a), since there is no need for temporary vars.
+  To detect whether there are common vars, the global var
+  PL_generation is incremented for each assign op we compile.
+  Then, while compiling the assign op, we run through all the
+  variables on both sides of the assignment, setting a spare slot
+  in each of them to PL_generation.  If any of them already have
+  that value, we know we've got commonality.  Also, if the
+  generation number is already set to PERL_INT_MAX, then
+  the variable is involved in aliasing, so we also have
+  potential commonality in that case.  We could use a
+  single bit marker, but then we'd have to make 2 passes, first
+  to clear the flag, then to test and set it.  And that
+  wouldn't help with aliasing, either.  To find somewhere
+  to store these values, evil chicanery is done with SvUVX().
 */
 PERL_STATIC_INLINE bool
 S_aassign_common_vars(pTHX_ OP* o)
@@ -5718,7 +5909,7 @@ S_aassign_common_vars(pTHX_ OP* o)
     OP *curop;
     for (curop = cUNOPo->op_first; curop; curop = OP_SIBLING(curop)) {
 	if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
-	    if (curop->op_type == OP_GV) {
+	    if (curop->op_type == OP_GV || curop->op_type == OP_GVSV) {
 		GV *gv = cGVOPx_gv(curop);
 		if (gv == PL_defgv
 		    || (int)GvASSIGN_GENERATION(gv) == PL_generation)
@@ -5731,7 +5922,8 @@ S_aassign_common_vars(pTHX_ OP* o)
 		curop->op_type == OP_PADANY)
 		{
 		    if (PAD_COMPNAME_GEN(curop->op_targ)
-			== (STRLEN)PL_generation)
+			== (STRLEN)PL_generation
+		     || PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
 			return TRUE;
 		    PAD_COMPNAME_GEN_set(curop->op_targ, PL_generation);
 
@@ -5761,12 +5953,38 @@ S_aassign_common_vars(pTHX_ OP* o)
 		    GvASSIGN_GENERATION_set(gv, PL_generation);
 		}
 	    }
+	    else if (curop->op_type == OP_PADRANGE)
+		/* Ignore padrange; checking its siblings is sufficient. */
+		continue;
 	    else
 		return TRUE;
 	}
 
 	if (curop->op_flags & OPf_KIDS) {
 	    if (aassign_common_vars(curop))
+		return TRUE;
+	}
+    }
+    return FALSE;
+}
+
+/* This variant only handles lexical aliases.  It is called when
+   newASSIGNOP decides that we don’t have any common vars, as lexical ali-
+   ases trump that decision.  */
+PERL_STATIC_INLINE bool
+S_aassign_common_vars_aliases_only(pTHX_ OP *o)
+{
+    OP *curop;
+    for (curop = cUNOPo->op_first; curop; curop = OP_SIBLING(curop)) {
+	if ((curop->op_type == OP_PADSV ||
+	     curop->op_type == OP_PADAV ||
+	     curop->op_type == OP_PADHV ||
+	     curop->op_type == OP_PADANY)
+	   && PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
+	    return TRUE;
+
+	if (curop->op_flags & OPf_KIDS) {
+	    if (S_aassign_common_vars_aliases_only(aTHX_ curop))
 		return TRUE;
 	}
     }
@@ -5800,6 +6018,7 @@ OP *
 Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 {
     OP *o;
+    I32 assign_type;
 
     if (optype) {
 	if (optype == OP_ANDASSIGN || optype == OP_ORASSIGN || optype == OP_DORASSIGN) {
@@ -5813,7 +6032,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	}
     }
 
-    if (is_list_assignment(left)) {
+    if ((assign_type = assignment_type(left)) == ASSIGN_LIST) {
 	static const char no_list_state[] = "Initialization of state variables"
 	    " in list context currently forbidden";
 	OP *curop;
@@ -5838,7 +6057,10 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    lop->op_type == OP_PADHV ||
 		    lop->op_type == OP_PADANY) {
 		    if (!(lop->op_private & OPpLVAL_INTRO))
+		    {
 			maybe_common_vars = TRUE;
+			break;
+		    }
 
 		    if (lop->op_private & OPpPAD_STATE) {
 			if (left->op_private & OPpLVAL_INTRO) {
@@ -5860,6 +6082,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		} else {
 		    /* Other ops in the list. */
 		    maybe_common_vars = TRUE;
+		    break;
 		}
 		lop = OP_SIBLING(lop);
 	    }
@@ -5886,25 +6109,10 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    }
 	}
 
-	/* PL_generation sorcery:
-	 * an assignment like ($a,$b) = ($c,$d) is easier than
-	 * ($a,$b) = ($c,$a), since there is no need for temporary vars.
-	 * To detect whether there are common vars, the global var
-	 * PL_generation is incremented for each assign op we compile.
-	 * Then, while compiling the assign op, we run through all the
-	 * variables on both sides of the assignment, setting a spare slot
-	 * in each of them to PL_generation. If any of them already have
-	 * that value, we know we've got commonality.  We could use a
-	 * single bit marker, but then we'd have to make 2 passes, first
-	 * to clear the flag, then to test and set it.  To find somewhere
-	 * to store these values, evil chicanery is done with SvUVX().
-	 */
-
 	if (maybe_common_vars) {
-	    PL_generation++;
-	    if (aassign_common_vars(o))
+		/* The peephole optimizer will do the full check and pos-
+		   sibly turn this off.  */
 		o->op_private |= OPpASSIGN_COMMON;
-	    LINKLIST(o);
 	}
 
 	if (right && right->op_type == OP_SPLIT) {
@@ -5912,8 +6120,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    if (tmpop && (tmpop->op_type == OP_PUSHRE)) {
 		PMOP * const pm = (PMOP*)tmpop;
 		if (left->op_type == OP_RV2AV &&
-		    !(left->op_private & OPpLVAL_INTRO) &&
-		    !(o->op_private & OPpASSIGN_COMMON) )
+		    !(left->op_private & OPpLVAL_INTRO))
 		{
 		    tmpop = ((UNOP*)left)->op_first;
 		    if (tmpop->op_type == OP_GV
@@ -5937,7 +6144,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
                         /* detach rest of siblings from o subtree,
                          * and free subtree */
                         op_sibling_splice(cUNOPo->op_first, tmpop, -1, NULL);
-			right->op_next = tmpop->op_next;  /* fix starting loc */
 			right->op_private |=
 			    left->op_private & OPpOUR_INTRO;
 			op_free(o);			/* blow off assign */
@@ -5972,6 +6178,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	}
 	return o;
     }
+    if (assign_type == ASSIGN_REF)
+	return newBINOP(OP_REFASSIGN, flags, scalar(right), left);
     if (!right)
 	right = newOP(OP_UNDEF, 0);
     if (right->op_type == OP_READLINE) {
@@ -6765,7 +6973,10 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             sv->op_targ = 0;
             op_free(sv);
 	    sv = NULL;
+	    PAD_COMPNAME_GEN_set(padoff, PERL_INT_MAX);
 	}
+	else if (sv->op_type == OP_NULL && sv->op_targ == OP_SREFGEN)
+	    NOOP;
 	else
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
 	if (padoff) {
@@ -8867,9 +9078,14 @@ Perl_ck_spair(pTHX_ OP *o)
 	newop = OP_SIBLING(kidkid);
 	if (newop) {
 	    const OPCODE type = newop->op_type;
-	    if (OP_HAS_SIBLING(newop) || !(PL_opargs[type] & OA_RETSCALAR) ||
-		    type == OP_PADAV || type == OP_PADHV ||
-		    type == OP_RV2AV || type == OP_RV2HV)
+	    if (OP_HAS_SIBLING(newop))
+		return o;
+	    if (o->op_type == OP_REFGEN && !(newop->op_flags & OPf_PARENS)
+		&& (type == OP_RV2AV || type == OP_PADAV
+		 || type == OP_RV2HV || type == OP_PADHV
+		 || type == OP_RV2CV))
+	    	NOOP; /* OK (allow srefgen for \@a and \%h) */
+	    else if (!(PL_opargs[type] & OA_RETSCALAR))
 		return o;
 	}
         /* excise first sibling */
@@ -9759,23 +9975,18 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    OP *const first = newOP(OP_NULL, 0);
 	    OP *const nullop = newCONDOP(0, first, o, other);
 	    OP *const condop = first->op_next;
-	    /* hijacking PADSTALE for uninitialized state variables */
-	    SvPADSTALE_on(PAD_SVl(target));
 
 	    condop->op_type = OP_ONCE;
 	    condop->op_ppaddr = PL_ppaddr[OP_ONCE];
-	    condop->op_targ = target;
 	    other->op_targ = target;
 
-	    /* Because we change the type of the op here, we will skip the
-	       assignment binop->op_last = OP_SIBLING(binop->op_first); at the
-	       end of Perl_newBINOP(). So need to do it here. */
-	    cBINOPo->op_last = OP_SIBLING(cBINOPo->op_first);
-            cBINOPo->op_first->op_lastsib = 0;
-            cBINOPo->op_last ->op_lastsib = 1;
-#ifdef PERL_OP_PARENT
-            cBINOPo->op_last->op_sibling = o;
-#endif
+	    /* Store the initializedness of state vars in a separate
+	       pad entry.  */
+	    condop->op_targ =
+	      pad_add_name_pvn("$",1,padadd_NO_DUP_CHECK|padadd_STATE,0,0);
+	    /* hijacking PADSTALE for uninitialized state variables */
+	    SvPADSTALE_on(PAD_SVl(condop->op_targ));
+
 	    return nullop;
 	}
     }
@@ -9864,6 +10075,82 @@ Perl_ck_open(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_refassign(pTHX_ OP *o)
+{
+    OP * const right = cLISTOPo->op_first;
+    OP * const left = OP_SIBLING(right);
+    OP * const varop = cUNOPx(cUNOPx(left)->op_first)->op_first;
+    bool stacked = 0;
+
+    PERL_ARGS_ASSERT_CK_REFASSIGN;
+    assert (left);
+    assert (left->op_type == OP_SREFGEN);
+
+    switch (varop->op_type) {
+    case OP_PADAV:
+	o->op_private = OPpLVREF_AV;
+	goto settarg;
+    case OP_PADHV:
+	o->op_private = OPpLVREF_HV;
+    case OP_PADSV:
+      settarg:
+	o->op_targ = varop->op_targ;
+	varop->op_targ = 0;
+	PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
+	break;
+    case OP_RV2AV:
+	o->op_private = OPpLVREF_AV;
+	goto checkgv;
+    case OP_RV2HV:
+	o->op_private = OPpLVREF_HV;
+    case OP_RV2SV:
+      checkgv:
+	if (cUNOPx(varop)->op_first->op_type != OP_GV) goto bad;
+	goto null_and_stack;
+    case OP_RV2CV: {
+	OP * const kid =
+	    cUNOPx(cUNOPx(cUNOPx(varop)->op_first)->op_first->op_sibling)
+		->op_first;
+	o->op_private = OPpLVREF_CV;
+	if (kid->op_type == OP_GV)	goto null_and_stack;
+	if (kid->op_type != OP_PADCV)	goto bad;
+	o->op_targ = kid->op_targ;
+	kid->op_targ = 0;
+	break;
+    }
+    case OP_AELEM:
+    case OP_HELEM:
+	o->op_private = OPpLVREF_ELEM;
+      null_and_stack:
+	op_null(varop);
+	op_null(left);
+	stacked = TRUE;
+	break;
+    default:
+      bad:
+	/* diag_listed_as: Can't modify %s in %s */
+	yyerror(Perl_form(aTHX_ "Can't modify reference to %s in scalar "
+				"assignment",
+				 OP_DESC(varop)));
+	return o;
+    }
+    if (!FEATURE_LVREF_IS_ENABLED)
+	Perl_croak(aTHX_
+		  "Experimental lvalue references not enabled");
+    Perl_ck_warner_d(aTHX_
+		     packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
+		    "Lvalue references are experimental");
+    o->op_private |= varop->op_private & (OPpLVAL_INTRO|OPpPAD_STATE);
+    if (stacked) o->op_flags |= OPf_STACKED;
+    else {
+	o->op_flags &=~ OPf_STACKED;
+	op_sibling_splice(o, right, 1, NULL);
+	op_free(left);
+    }
+    return o;
+}
+
+OP *
 Perl_ck_repeat(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_REPEAT;
@@ -9874,6 +10161,7 @@ Perl_ck_repeat(pTHX_ OP *o)
         kids = op_sibling_splice(o, NULL, -1, NULL); /* detach all kids */
         kids = force_list(kids, 1); /* promote them to a list */
         op_sibling_splice(o, NULL, 0, kids); /* and add back */
+        if (cBINOPo->op_last == kids) cBINOPo->op_last = NULL;
     }
     else
 	scalar(o);
@@ -10544,7 +10832,8 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    case '&':
 		proto++;
 		arg++;
-		if (o3->op_type != OP_REFGEN && o3->op_type != OP_UNDEF)
+		if (o3->op_type != OP_REFGEN && o3->op_type != OP_SREFGEN
+		 && o3->op_type != OP_UNDEF)
 		    bad_type_gv(arg,
 			    arg == 1 ? "block or sub {}" : "sub {}",
 			    namegv, 0, o3);
@@ -12247,6 +12536,21 @@ Perl_rpeep(pTHX_ OP *o)
 		    }
 		}
 	    }
+	    break;
+
+	case OP_AASSIGN:
+	    /* We do the common-vars check here, rather than in newASSIGNOP
+	       (as formerly), so that all lexical vars that get aliased are
+	       marked as such before we do the check.  */
+	    if (o->op_private & OPpASSIGN_COMMON) {
+		 /* See the comment before S_aassign_common_vars concerning
+		    PL_generation sorcery.  */
+		PL_generation++;
+		if (!aassign_common_vars(o))
+		    o->op_private &=~ OPpASSIGN_COMMON;
+	    }
+	    else if (S_aassign_common_vars_aliases_only(aTHX_ o))
+		o->op_private |= OPpASSIGN_COMMON;
 	    break;
 
 	case OP_CUSTOM: {

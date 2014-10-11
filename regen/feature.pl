@@ -29,6 +29,7 @@ my %feature = (
     postderef       => 'postderef',
     array_base      => 'arybase',
     current_sub     => '__SUB__',
+    lvalue_refs     => 'lvref',
     lexical_subs    => 'lexsubs',
     postderef_qq    => 'postderef_qq',
     unicode_eval    => 'unieval',
@@ -363,7 +364,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.37';
+our $VERSION = '1.38';
 
 FEATURES
 
@@ -582,6 +583,29 @@ by syntax such as
 See L<perlsub/Signatures> for details.
 
 This feature is available from Perl 5.20 onwards.
+
+=head2 The 'lvalue_refs' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental::lvalue_refs";
+
+This enables aliasing via assignment to references:
+
+    \$a = \$b; # $a and $b now point to the same scalar
+    \@a = \@b; #                     to the same array
+    \%a = \%b;
+    \&a = \&b;
+    foreach \%hash (@array_of_hash_refs) {
+        ...
+    }
+
+See L<perlref/Assigning to References> for details.
+
+This feature is available from Perl 5.22 onwards.
 
 =head1 FEATURE BUNDLES
 

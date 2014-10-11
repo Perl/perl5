@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.28";
+$VERSION = "1.29";
 
 use Carp;
 use Exporter ();
@@ -402,7 +402,7 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     once
 
-    rv2gv refgen srefgen ref
+    rv2gv refgen srefgen ref refassign lvref lvrefslice lvavref
 
     bless -- could be used to change ownership of objects
 	     (reblessing)

@@ -158,6 +158,7 @@ my $testpkgs = {
 
 	constant => [qw/ ASSIGN CVf_LVALUE
 		     CVf_METHOD LIST_CONTEXT OP_CONST OP_LIST OP_RV2SV
+		     OP_AELEM
 		     OP_STRINGIFY OPf_KIDS OPf_MOD OPf_REF OPf_SPECIAL
 		     OPf_PARENS
 		     OPf_STACKED OPf_WANT OPf_WANT_LIST OPf_WANT_SCALAR
@@ -180,6 +181,9 @@ my $testpkgs = {
 		     OPpEVAL_BYTES OPpSUBSTR_REPL_FIRST) : (),
 		     $] >= 5.019 ? qw(OP_PUSHMARK OP_NULL) : (),
 		    'CVf_LOCKED', # This ends up as a constant, pre or post 5.10
+		     $] >= 5.021005 ? qw(OPpLVREF_TYPE OPpLVREF_SV
+					 OPpLVREF_AV OPpLVREF_HV
+					 OPpLVREF_CV OPpLVREF_ELEM) : (),
 		    ],
 		 },
 

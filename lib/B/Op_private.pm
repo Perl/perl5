@@ -128,7 +128,9 @@ $bits{$_}{5} = 'OPpHUSH_VMSISH' for qw(dbstate nextstate);
 $bits{$_}{2} = 'OPpITER_REVERSED' for qw(enteriter iter);
 $bits{$_}{7} = 'OPpLVALUE' for qw(leave leaveloop);
 $bits{$_}{4} = 'OPpLVAL_DEFER' for qw(aelem helem);
-$bits{$_}{7} = 'OPpLVAL_INTRO' for qw(aelem aslice cond_expr delete enteriter entersub gvsv helem hslice list padav padhv padrange padsv pushmark rv2av rv2gv rv2hv rv2sv);
+$bits{$_}{7} = 'OPpLVAL_INTRO' for qw(aelem aslice cond_expr delete enteriter entersub gvsv helem hslice list lvavref lvref lvrefslice padav padhv padrange padsv pushmark refassign rv2av rv2gv rv2hv rv2sv);
+$bits{$_}{2} = 'OPpLVREF_ELEM' for qw(lvref refassign);
+$bits{$_}{3} = 'OPpLVREF_ITER' for qw(lvref refassign);
 $bits{$_}{3} = 'OPpMAYBE_LVSUB' for qw(aassign aelem aslice av2arylen helem hslice keys kvaslice kvhslice padav padhv pos rkeys rv2av rv2gv rv2hv substr vec);
 $bits{$_}{6} = 'OPpMAYBE_TRUEBOOL' for qw(padhv rv2hv);
 $bits{$_}{7} = 'OPpOFFBYONE' for qw(caller runcv wantarray);
@@ -137,7 +139,7 @@ $bits{$_}{4} = 'OPpOPEN_IN_RAW' for qw(backtick open);
 $bits{$_}{7} = 'OPpOPEN_OUT_CRLF' for qw(backtick open);
 $bits{$_}{6} = 'OPpOPEN_OUT_RAW' for qw(backtick open);
 $bits{$_}{4} = 'OPpOUR_INTRO' for qw(enteriter gvsv rv2av rv2hv rv2sv split);
-$bits{$_}{4} = 'OPpPAD_STATE' for qw(padav padhv padsv pushmark);
+$bits{$_}{4} = 'OPpPAD_STATE' for qw(lvavref lvref padav padhv padsv pushmark refassign);
 $bits{$_}{7} = 'OPpPV_IS_UTF8' for qw(dump goto last next redo);
 $bits{$_}{6} = 'OPpREFCOUNTED' for qw(leave leaveeval leavesub leavesublv leavewrite);
 $bits{$_}{6} = 'OPpRUNTIME' for qw(match pushre qr subst substcont);
@@ -204,6 +206,18 @@ my @bf = (
             1, 'OPpDEREF_AV', 'DREFAV',
             2, 'OPpDEREF_HV', 'DREFHV',
             3, 'OPpDEREF_SV', 'DREFSV',
+        ],
+    },
+    {
+        mask_def  => 'OPpLVREF_TYPE',
+        bitmin    => 5,
+        bitmax    => 6,
+        bitmask   => 96,
+        enum      => [
+            0, 'OPpLVREF_SV', 'SV',
+            1, 'OPpLVREF_AV', 'AV',
+            2, 'OPpLVREF_HV', 'HV',
+            3, 'OPpLVREF_CV', 'CV',
         ],
     },
 );
@@ -381,6 +395,8 @@ $bits{log}{0} = $bf[0];
 @{$bits{lslice}}{1,0} = ($bf[1], $bf[1]);
 $bits{lstat}{0} = $bf[0];
 @{$bits{lt}}{1,0} = ($bf[1], $bf[1]);
+$bits{lvavref}{0} = $bf[0];
+@{$bits{lvref}}{6,5,0} = ($bf[7], $bf[7], $bf[0]);
 $bits{mapwhile}{0} = $bf[0];
 $bits{method}{0} = $bf[0];
 $bits{method_named}{0} = $bf[0];
@@ -427,6 +443,7 @@ $bits{readlink}{0} = $bf[0];
 @{$bits{recv}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);
 $bits{redo}{0} = $bf[0];
 $bits{ref}{0} = $bf[0];
+@{$bits{refassign}}{6,5,1,0} = ($bf[7], $bf[7], $bf[1], $bf[1]);
 $bits{refgen}{0} = $bf[0];
 $bits{regcmaybe}{0} = $bf[0];
 $bits{regcomp}{0} = $bf[0];
@@ -576,6 +593,13 @@ our %defines = (
     OPpLVALUE                => 128,
     OPpLVAL_DEFER            =>  16,
     OPpLVAL_INTRO            => 128,
+    OPpLVREF_AV              =>  32,
+    OPpLVREF_CV              =>  96,
+    OPpLVREF_ELEM            =>   4,
+    OPpLVREF_HV              =>  64,
+    OPpLVREF_ITER            =>   8,
+    OPpLVREF_SV              =>   0,
+    OPpLVREF_TYPE            =>  96,
     OPpMAYBE_LVSUB           =>   8,
     OPpMAYBE_TRUEBOOL        =>  64,
     OPpMAY_RETURN_CONSTANT   =>  64,
@@ -661,6 +685,12 @@ our %labels = (
     OPpLVALUE                => 'LV',
     OPpLVAL_DEFER            => 'LVDEFER',
     OPpLVAL_INTRO            => 'LVINTRO',
+    OPpLVREF_AV              => 'AV',
+    OPpLVREF_CV              => 'CV',
+    OPpLVREF_ELEM            => 'ELEM',
+    OPpLVREF_HV              => 'HV',
+    OPpLVREF_ITER            => 'ITER',
+    OPpLVREF_SV              => 'SV',
     OPpMAYBE_LVSUB           => 'LVSUB',
     OPpMAYBE_TRUEBOOL        => 'BOOL?',
     OPpMAY_RETURN_CONSTANT   => 'CONST',

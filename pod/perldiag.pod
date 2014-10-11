@@ -201,6 +201,23 @@ Auto-decrement> for details.
 
 (X) A general assertion failed.  The file in question must be examined.
 
+=item Assigned value is not a reference
+
+(F) You tried to assign something that was not a reference to an lvalue
+reference (e.g., C<\$x = $y>).  If you meant to make $x an alias to $y, use
+C<\$x = \$y>.
+
+=item Assigned value is not %s reference
+
+(F) You tried to assign a reference to an lvalue reference, but the two
+references were not of the same type.  You cannot alias a scalar to an
+array, or an array to a hash; the two types must match.
+
+    \$x = \@y;  # error
+    \@x = \%y;  # error
+     $y = [];
+    \$x = $y;   # error; did you mean \$y?
+
 =item Assigning non-zero to $[ is no longer possible
 
 (F) When the "array_base" feature is disabled (e.g., under C<use v5.16;>)
@@ -1944,6 +1961,14 @@ interpolated.  If you see this error message, then you probably
 have some other C<(?...)> construct inside your character class.  See
 L<perlrecharclass/Extended Bracketed Character Classes>.
 
+=item Experimental lvalue references not enabled
+
+(F) To use lvalue references, you must first enable them:
+
+    no warnings "experimental::lvalue_refs";
+    use feature "lvalue_refs";
+    \$x = \$y;
+
 =item Experimental subroutine signatures not enabled
 
 (F) To use subroutine signatures, you must first enable them:
@@ -2900,6 +2925,19 @@ add the lvalue attribute to the definition, or put the C<sub
 foo :lvalue;> declaration before the definition.
 
 See also L<attributes.pm|attributes>.
+
+=item Lvalue references are experimental
+
+(S experimental::lvalue_refs) This warning is emitted if you use
+a reference constructor on the left-hand side of an assignment to
+alias one variable to another.  Simply suppress the warning if you
+want to use the feature, but know that in doing so you are taking
+the risk of using an experimental feature which may change or be
+removed in a future Perl version:
+
+    no warnings "experimental::lvalue_refs";
+    use feature "lvalue_refs";
+    \$x = \$y;
 
 =item Magical list constants are not supported
 
