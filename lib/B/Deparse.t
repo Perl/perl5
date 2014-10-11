@@ -127,7 +127,7 @@ $a =~ s/.*possible typo.*\n//;	   # Remove warning line
 $a =~ s/.*-i used with no filenames.*\n//;	# Remove warning line
 $a =~ s{\\340\\242}{\\s} if (ord("\\") == 224); # EBCDIC, cp 1047 or 037
 $a =~ s{\\274\\242}{\\s} if (ord("\\") == 188); # $^O eq 'posix-bc'
-$b = <<'EOF';
+$b = quotemeta <<'EOF';
 BEGIN { $^I = ".bak"; }
 BEGIN { $^W = 1; }
 BEGIN { $/ = "\n"; $\ = "\n"; }
@@ -137,7 +137,8 @@ LINE: while (defined($_ = <ARGV>)) {
     '???';
 }
 EOF
-is($a, $b,
+$b =~ s/our\\\(\\\@F\\\)/our[( ]\@F\\)?/; # accept both our @F and our(@F)
+like($a, qr/$b/,
    'command line flags deparse as BEGIN blocks setting control variables');
 
 $a = `$^X $path "-MO=Deparse" -e "use constant PI => 4" 2>&1`;
