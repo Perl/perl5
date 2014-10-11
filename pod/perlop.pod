@@ -1131,7 +1131,11 @@ The following are recognized:
                  x=
 
 Although these are grouped by family, they all have the precedence
-of assignment.
+of assignment.  These combined assignment operators can only operate on
+scalars, whereas the ordinary assignment operator can assign to arrays,
+hashes, lists and even references.  (See L<"Context"|perldata/Context>
+and L<perldata/List value constructors>, and L<perlref/Assigning to
+References>.)
 
 Unlike in C, the scalar assignment operator produces a valid lvalue.
 Modifying an assignment is equivalent to doing the assignment and

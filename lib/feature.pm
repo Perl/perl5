@@ -269,6 +269,29 @@ See L<perlsub/Signatures> for details.
 
 This feature is available from Perl 5.20 onwards.
 
+=head2 The 'lvalue_refs' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental::lvalue_refs";
+
+This enables aliasing via assignment to references:
+
+    \$a = \$b; # $a and $b now point to the same scalar
+    \@a = \@b; #                     to the same array
+    \%a = \%b;
+    \&a = \&b;
+    foreach \%hash (@array_of_hash_refs) {
+        ...
+    }
+
+See L<perlref/Assigning to References> for details.
+
+This feature is available from Perl 5.22 onwards.
+
 =head1 FEATURE BUNDLES
 
 It's possible to load multiple features together, using
