@@ -9,9 +9,25 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 11;
+plan 12;
 
-use B 'svref_2object';
+use B qw 'svref_2object OPpASSIGN_COMMON';
+
+
+# aassign with no common vars
+{
+    my $last_expr =
+      svref_2object(sub { my($self) = @_ })->ROOT->first->last;
+    if ($last_expr->name ne 'aassign') {
+        die "Expected aassign but found ", $last_expr->name,
+            "; this test needs to be rewritten" 
+    }
+    is $last_expr->private & OPpASSIGN_COMMON, 0,
+      'no ASSIGN_COMMON for my($self) = @_';
+}    
+
+
+# join -> stringify/const
 
 for (['CONSTANT', sub {          join "foo", $_ }],
      ['$var'    , sub {          join  $_  , $_ }],
