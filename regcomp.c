@@ -3800,12 +3800,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		NEXT_OFF(scan) = off;
 	}
 
-
-
 	/* The principal pseudo-switch.  Cannot be a switch, since we
 	   look into several different things.  */
-	if (OP(scan) == BRANCH || OP(scan) == BRANCHJ
-		   || OP(scan) == IFTHEN) {
+        if (
+            OP(scan) == BRANCH  ||
+            OP(scan) == BRANCHJ ||
+            OP(scan) == IFTHEN
+        ) {
 	    next = regnext(scan);
 	    code = OP(scan);
             /* demq: the op(next)==code check is to see if we have
@@ -3858,6 +3859,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    minnext = study_chunk(pRExC_state, &scan, minlenp,
                                       &deltanext, next, &data_fake, stopparen,
                                       recursed_depth, NULL, f,depth+1);
+
 		    if (min1 > minnext)
 			min1 = minnext;
 		    if (deltanext == SSize_t_MAX) {
@@ -4422,8 +4424,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
-        else if (PL_regkind[OP(scan)] == EXACT) { /* But OP != EXACT!, so is
-                                                     EXACTFish */
+        else if (PL_regkind[OP(scan)] == EXACT) {
+            /* But OP != EXACT!, so is EXACTFish */
 	    SSize_t l = STR_LEN(scan);
 	    UV uc = *((U8*)STRING(scan));
             SV* EXACTF_invlist = _new_invlist(4); /* Start out big enough for 2
