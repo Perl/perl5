@@ -175,10 +175,16 @@ struct RExC_state_t {
     I32         lastnum;
     AV          *paren_name_list;       /* idx -> name */
     U32         study_chunk_recursed_count;
+    SV          *mysv1;
+    SV          *mysv2;
 #define RExC_lastparse	(pRExC_state->lastparse)
 #define RExC_lastnum	(pRExC_state->lastnum)
 #define RExC_paren_name_list    (pRExC_state->paren_name_list)
 #define RExC_study_chunk_recursed_count    (pRExC_state->study_chunk_recursed_count)
+#define RExC_mysv	(pRExC_state->mysv1)
+#define RExC_mysv1	(pRExC_state->mysv1)
+#define RExC_mysv2	(pRExC_state->mysv2)
+
 #endif
 };
 
@@ -3201,12 +3207,11 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
 
 #define DEBUG_PEEP(str,scan,depth) \
     DEBUG_OPTIMISE_r({if (scan){ \
-       SV * const mysv=sv_newmortal(); \
        regnode *Next = regnext(scan); \
-       regprop(RExC_rx, mysv, scan, NULL); \
+       regprop(RExC_rx, RExC_mysv, scan, NULL); \
        PerlIO_printf(Perl_debug_log, "%*s" str ">%3d: %s (%d)\n", \
-       (int)depth*2, "", REG_NODE_NUM(scan), SvPV_nolen_const(mysv),\
-       Next ? (REG_NODE_NUM(Next)) : 0 ); \
+           (int)depth*2, "", REG_NODE_NUM(scan), SvPV_nolen_const(RExC_mysv),\
+           Next ? (REG_NODE_NUM(Next)) : 0 ); \
    }});
 
 
@@ -3956,9 +3961,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         U8 trietype = 0;
                         U32 count=0;
 
-#ifdef DEBUGGING
-                        SV * const mysv = sv_newmortal();   /* for dumping */
-#endif
                         /* var tail is used because there may be a TAIL
                            regop in the way. Ie, the exacts will point to the
                            thing following the TAIL, but the last branch will
@@ -3974,11 +3976,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 
                         DEBUG_TRIE_COMPILE_r({
-                            regprop(RExC_rx, mysv, tail, NULL);
+                            regprop(RExC_rx, RExC_mysv, tail, NULL);
                             PerlIO_printf( Perl_debug_log, "%*s%s%s\n",
                               (int)depth * 2 + 2, "",
                               "Looking for TRIE'able sequences. Tail node is: ",
-                              SvPV_nolen_const( mysv )
+                              SvPV_nolen_const( RExC_mysv )
                             );
                         });
 
@@ -4055,18 +4057,18 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 #endif
 
                             DEBUG_TRIE_COMPILE_r({
-                                regprop(RExC_rx, mysv, cur, NULL);
+                                regprop(RExC_rx, RExC_mysv, cur, NULL);
                                 PerlIO_printf( Perl_debug_log, "%*s- %s (%d)",
-                                   (int)depth * 2 + 2,"", SvPV_nolen_const( mysv ), REG_NODE_NUM(cur) );
+                                   (int)depth * 2 + 2,"", SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur) );
 
-                                regprop(RExC_rx, mysv, noper, NULL);
+                                regprop(RExC_rx, RExC_mysv, noper, NULL);
                                 PerlIO_printf( Perl_debug_log, " -> %s",
-                                    SvPV_nolen_const(mysv));
+                                    SvPV_nolen_const(RExC_mysv));
 
                                 if ( noper_next ) {
-                                  regprop(RExC_rx, mysv, noper_next, NULL);
+                                  regprop(RExC_rx, RExC_mysv, noper_next, NULL);
                                   PerlIO_printf( Perl_debug_log,"\t=> %s\t",
-                                    SvPV_nolen_const(mysv));
+                                    SvPV_nolen_const(RExC_mysv));
                                 }
                                 PerlIO_printf( Perl_debug_log, "(First==%d,Last==%d,Cur==%d,tt==%s,nt==%s,nnt==%s)\n",
                                    REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
@@ -4163,11 +4165,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                             } /* end handle unmergable node */
                         } /* loop over branches */
                         DEBUG_TRIE_COMPILE_r({
-                            regprop(RExC_rx, mysv, cur, NULL);
+                            regprop(RExC_rx, RExC_mysv, cur, NULL);
                             PerlIO_printf( Perl_debug_log,
                               "%*s- %s (%d) <SCAN FINISHED>\n",
                               (int)depth * 2 + 2,
-                              "", SvPV_nolen_const( mysv ),REG_NODE_NUM(cur));
+                              "", SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
 
                         });
                         if ( last && trietype ) {
@@ -4203,10 +4205,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                      * something like this: (?:|) So we can
                                      * turn it into a plain NOTHING op. */
                                     DEBUG_TRIE_COMPILE_r({
-                                        regprop(RExC_rx, mysv, cur, NULL);
+                                        regprop(RExC_rx, RExC_mysv, cur, NULL);
                                         PerlIO_printf( Perl_debug_log,
                                           "%*s- %s (%d) <NOTHING BRANCH SEQUENCE>\n", (int)depth * 2 + 2,
-                                          "", SvPV_nolen_const( mysv ),REG_NODE_NUM(cur));
+                                          "", SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
 
                                     });
                                     OP(startbranch)= NOTHING;
@@ -5179,14 +5181,13 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
                 regnode *opt;
                 regnode *upto= regnext(scan);
                 DEBUG_PARSE_r({
-                    SV * const mysv_val=sv_newmortal();
                     DEBUG_STUDYDATA("OPFAIL",data,depth);
 
                     /*DEBUG_PARSE_MSG("opfail");*/
-                    regprop(RExC_rx, mysv_val, upto, NULL);
+                    regprop(RExC_rx, RExC_mysv, upto, NULL);
                     PerlIO_printf(Perl_debug_log,
                         "~ replace with OPFAIL pointed at %s (%"IVdf") offset %"IVdf"\n",
-                        SvPV_nolen_const(mysv_val),
+                        SvPV_nolen_const(RExC_mysv),
                         (IV)REG_NODE_NUM(upto),
                         (IV)(upto - scan)
                     );
@@ -6534,6 +6535,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_contains_i = 0;
     pRExC_state->runtime_code_qr = NULL;
 
+    DEBUG_r({
+        RExC_mysv1= sv_newmortal();
+        RExC_mysv2= sv_newmortal();
+    });
     DEBUG_COMPILE_r({
             SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, RExC_utf8, dsv, exp, plen, 60);
@@ -10401,15 +10406,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    break;
 	}
         DEBUG_PARSE_r(if (!SIZE_ONLY) {
-            SV * const mysv_val1=sv_newmortal();
-            SV * const mysv_val2=sv_newmortal();
             DEBUG_PARSE_MSG("lsbr");
-            regprop(RExC_rx, mysv_val1, lastbr, NULL);
-            regprop(RExC_rx, mysv_val2, ender, NULL);
+            regprop(RExC_rx, RExC_mysv1, lastbr, NULL);
+            regprop(RExC_rx, RExC_mysv2, ender, NULL);
             PerlIO_printf(Perl_debug_log, "~ tying lastbr %s (%"IVdf") to ender %s (%"IVdf") offset %"IVdf"\n",
-                          SvPV_nolen_const(mysv_val1),
+                          SvPV_nolen_const(RExC_mysv1),
                           (IV)REG_NODE_NUM(lastbr),
-                          SvPV_nolen_const(mysv_val2),
+                          SvPV_nolen_const(RExC_mysv2),
                           (IV)REG_NODE_NUM(ender),
                           (IV)(ender - lastbr)
             );
@@ -10442,15 +10445,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             if (is_nothing) {
                 br= PL_regkind[OP(ret)] != BRANCH ? regnext(ret) : ret;
                 DEBUG_PARSE_r(if (!SIZE_ONLY) {
-                    SV * const mysv_val1=sv_newmortal();
-                    SV * const mysv_val2=sv_newmortal();
                     DEBUG_PARSE_MSG("NADA");
-                    regprop(RExC_rx, mysv_val1, ret, NULL);
-                    regprop(RExC_rx, mysv_val2, ender, NULL);
+                    regprop(RExC_rx, RExC_mysv1, ret, NULL);
+                    regprop(RExC_rx, RExC_mysv2, ender, NULL);
                     PerlIO_printf(Perl_debug_log, "~ converting ret %s (%"IVdf") to ender %s (%"IVdf") offset %"IVdf"\n",
-                                  SvPV_nolen_const(mysv_val1),
+                                  SvPV_nolen_const(RExC_mysv1),
                                   (IV)REG_NODE_NUM(ret),
-                                  SvPV_nolen_const(mysv_val2),
+                                  SvPV_nolen_const(RExC_mysv2),
                                   (IV)REG_NODE_NUM(ender),
                                   (IV)(ender - ret)
                     );
@@ -15722,11 +15723,10 @@ S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p,
     for (;;) {
 	regnode * const temp = regnext(scan);
         DEBUG_PARSE_r({
-            SV * const mysv=sv_newmortal();
             DEBUG_PARSE_MSG((scan==p ? "tail" : ""));
-            regprop(RExC_rx, mysv, scan, NULL);
+            regprop(RExC_rx, RExC_mysv, scan, NULL);
             PerlIO_printf(Perl_debug_log, "~ %s (%d) %s %s\n",
-                SvPV_nolen_const(mysv), REG_NODE_NUM(scan),
+                SvPV_nolen_const(RExC_mysv), REG_NODE_NUM(scan),
                     (temp == NULL ? "->" : ""),
                     (temp == NULL ? PL_reg_name[OP(val)] : "")
             );
@@ -15811,11 +15811,10 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p,
             }
         }
         DEBUG_PARSE_r({
-            SV * const mysv=sv_newmortal();
             DEBUG_PARSE_MSG((scan==p ? "tsdy" : ""));
-            regprop(RExC_rx, mysv, scan, NULL);
+            regprop(RExC_rx, RExC_mysv, scan, NULL);
             PerlIO_printf(Perl_debug_log, "~ %s (%d) -> %s\n",
-                SvPV_nolen_const(mysv),
+                SvPV_nolen_const(RExC_mysv),
                 REG_NODE_NUM(scan),
                 PL_reg_name[exact]);
         });
@@ -15824,12 +15823,11 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p,
 	scan = temp;
     }
     DEBUG_PARSE_r({
-        SV * const mysv_val=sv_newmortal();
         DEBUG_PARSE_MSG("");
-        regprop(RExC_rx, mysv_val, val, NULL);
+        regprop(RExC_rx, RExC_mysv, val, NULL);
         PerlIO_printf(Perl_debug_log,
                       "~ attach to %s (%"IVdf") offset to %"IVdf"\n",
-		      SvPV_nolen_const(mysv_val),
+		      SvPV_nolen_const(RExC_mysv),
 		      (IV)REG_NODE_NUM(val),
 		      (IV)(val - scan)
         );
@@ -16075,7 +16073,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
     PERL_ARGS_ASSERT_REGPROP;
 
-    sv_setpvs(sv, "");
+    sv_setpvn(sv, "", 0);
 
     if (OP(o) > REGNODE_MAX)		/* regnode.type is unsigned */
 	/* It would be nice to FAIL() here, but this may be called from
