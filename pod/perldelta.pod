@@ -169,6 +169,12 @@ Remove dl_nonlazy global if unused in Dynaloader. [perl #122926]
 
 =item *
 
+L<Fcntl> has been upgraded from version 1.12 to 1.13.
+
+Add support for the Linux pipe buffer size fcntl() commands.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 5.20140920 to 5.20141020.
 
 Updated to cover the latest releases of Perl.
