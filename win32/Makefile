@@ -546,7 +546,10 @@ o = .obj
 # Rules
 #
 
-.SUFFIXES : .c $(o) .dll .lib .exe .rc .res
+#clear the list, we dont support .cxx .bas .cbl .for .pas .res .rc .f .f90
+# .asm .cpp are not currently used but they are included for completeness
+.SUFFIXES :
+.SUFFIXES : .c $(o) .cpp .asm .dll .lib .exe .rc .res
 
 .c$(o):
 	$(CC) -c -I$(<D) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<

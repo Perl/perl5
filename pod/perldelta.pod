@@ -224,9 +224,21 @@ Add support for the Linux pipe buffer size fcntl() commands.
 
 =item *
 
+L<File::Find> has been upgraded from version 1.28 to 1.29.
+
+Slightly faster module loading time.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 5.20140920 to 5.20141020.
 
 Updated to cover the latest releases of Perl.
+
+=item *
+
+The PathTools module collection has been upgraded from version 3.50 to 3.51.
+
+Slightly faster module loading time.
 
 =item *
 

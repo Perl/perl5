@@ -80,6 +80,7 @@ print $fh <<"EOT" or $error = "Can't print to $file: $!";
 ${\($^O eq 'MSWin32' ? '${^WIN32_SLOPPY_STAT} = 1;':'')}
 splice(\@INC, 0, 1, $inc);
 \$^O = '$osname';
+__END__
 EOT
 
 if ($error) {
