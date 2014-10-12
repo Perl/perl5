@@ -5561,7 +5561,7 @@ PP(pp_split)
 #else
     pm = (PMOP*)POPs;
 #endif
-    if (!pm || !s)
+    if (!pm)
 	DIE(aTHX_ "panic: pp_split, pm=%p, s=%p", pm, s);
     rx = PM_GETRE(pm);
 
