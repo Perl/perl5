@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 17;
+plan 18;
 
 use B qw 'svref_2object OPpASSIGN_COMMON';
 
@@ -65,3 +65,8 @@ for(['@pkgary'      , '@_'       ],
     my $split = svref_2object($sub)->ROOT->first->last;
     is $split->name, 'split', "$tn = split swallows up the assignment";
 }
+
+
+# stringify with join kid --> join
+is svref_2object(sub { "@_" })->ROOT->first->last->name, 'join',
+  'qq"@_" optimised from stringify(join(...)) to join(...)';

@@ -651,6 +651,12 @@ PERL_CALLCONV OP *	Perl_ck_split(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_SPLIT	\
 	assert(o)
 
+PERL_CALLCONV OP *	Perl_ck_stringify(pTHX_ OP *o)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CK_STRINGIFY	\
+	assert(o)
+
 PERL_CALLCONV OP *	Perl_ck_subr(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

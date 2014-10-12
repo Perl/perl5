@@ -10610,6 +10610,20 @@ Perl_ck_split(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_stringify(pTHX_ OP *o)
+{
+    OP * const kid = OP_SIBLING(cUNOPo->op_first);
+    PERL_ARGS_ASSERT_CK_STRINGIFY;
+    if (kid->op_type == OP_JOIN) {
+	assert(!OP_HAS_SIBLING(kid));
+	op_sibling_splice(o, cUNOPo->op_first, -1, NULL);
+	op_free(o);
+	return kid;
+    }
+    return ck_fun(o);
+}
+	
+OP *
 Perl_ck_join(pTHX_ OP *o)
 {
     OP * const kid = OP_SIBLING(cLISTOPo->op_first);

@@ -243,13 +243,13 @@ like($a, qr/-e syntax OK/,
 
 # [perl #93990]
 @] = ();
-is($deparse->coderef2text(sub{ print "@{]}" }),
+is($deparse->coderef2text(sub{ print "foo@{]}" }),
 q<{
-    print "@{]}";
+    print "foo@{]}";
 }>, 'curly around to interpolate "@{]}"');
-is($deparse->coderef2text(sub{ print "@{-}" }),
+is($deparse->coderef2text(sub{ print "foo@{-}" }),
 q<{
-    print "@-";
+    print "foo@-";
 }>, 'no need to curly around to interpolate "@-"');
 
 # Strict hints in %^H are mercilessly suppressed

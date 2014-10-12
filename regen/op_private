@@ -239,6 +239,7 @@ use strict;
                             ops_with_check('ck_lfun'),
                             ops_with_check('ck_open'),
                             ops_with_check('ck_select'),
+                            ops_with_check('ck_stringify'),
                             ops_with_check('ck_tell'),
                             ops_with_check('ck_trunc'),
                             ;
