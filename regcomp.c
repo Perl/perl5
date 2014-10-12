@@ -106,6 +106,22 @@ EXTERN_C const struct regexp_engine my_reg_engine;
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+/* this is a chain of data about sub patterns we are processing that
+   need to be handled separately/specially in study_chunk. Its so
+   we can simulate recursion without losing state.  */
+struct scan_frame;
+typedef struct scan_frame {
+    regnode *last_regnode;      /* last node to process in this frame */
+    regnode *next_regnode;      /* next node to process when last is reached */
+    U32 prev_recursed_depth;
+    I32 stopparen;              /* what stopparen do we use */
+    U32 is_top_frame;           /* what flags do we use? */
+
+    struct scan_frame *this_prev_frame; /* this previous frame */
+    struct scan_frame *prev_frame;      /* previous frame */
+    struct scan_frame *next_frame;      /* next frame */
+} scan_frame;
+
 struct RExC_state_t {
     U32		flags;			/* RXf_* are we folding, multilining? */
     U32		pm_flags;		/* PMf_* stuff from the calling PMOP */
@@ -165,6 +181,9 @@ struct RExC_state_t {
     int		num_code_blocks;	/* size of code_blocks[] */
     int		code_index;		/* next code_blocks[] slot */
     SSize_t     maxlen;                        /* mininum possible number of chars in string to match */
+    scan_frame *frame_head;
+    scan_frame *frame_last;
+    U32         frame_count;
 #ifdef ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -232,6 +251,9 @@ struct RExC_state_t {
 #define RExC_contains_i (pRExC_state->contains_i)
 #define RExC_override_recoding (pRExC_state->override_recoding)
 #define RExC_in_multi_char_class (pRExC_state->in_multi_char_class)
+#define RExC_frame_head (pRExC_state->frame_head)
+#define RExC_frame_last (pRExC_state->frame_last)
+#define RExC_frame_count (pRExC_state->frame_count)
 
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
@@ -3655,17 +3677,17 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
     Newx(and_withp,1, regnode_ssc); \
     SAVEFREEPV(and_withp)
 
-/* this is a chain of data about sub patterns we are processing that
-   need to be handled separately/specially in study_chunk. Its so
-   we can simulate recursion without losing state.  */
-struct scan_frame;
-typedef struct scan_frame {
-    regnode *last_regnode;  /* last node to process in this frame */
-    regnode *next_regnode;  /* next node to process when last is reached */
-    struct scan_frame *prev_frame; /*previous frame*/
-    U32 prev_recursed_depth;
-    I32 stopparen; /* what stopparen do we use */
-} scan_frame;
+
+static void
+S_unwind_scan_frames(pTHX_ const void *p)
+{
+    scan_frame *f= (scan_frame *)p;
+    do {
+        scan_frame *n= f->next_frame;
+        Safefree(f);
+        f= n;
+    } while (f);
+}
 
 
 STATIC SSize_t
@@ -4229,10 +4251,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		scan = NEXTOPER(scan);
 	    continue;
 	} else if (OP(scan) == SUSPEND || OP(scan) == GOSUB || OP(scan) == GOSTART) {
-	    scan_frame *newframe = NULL;
-	    I32 paren;
-	    regnode *start;
-	    regnode *end;
+            I32 paren = 0;
+            regnode *start = NULL;
+            regnode *end = NULL;
             U32 my_recursed_depth= recursed_depth;
 
             if (OP(scan) != SUSPEND) { /* GOSUB/GOSTART */
@@ -4243,7 +4264,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     start = RExC_open_parens[paren-1];
                     end   = RExC_close_parens[paren-1];
                 } else {
-                    paren = 0;
                     start = RExC_rxi->program + 1;
                     end   = RExC_opend;
                 }
@@ -4294,7 +4314,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	            DEBUG_STUDYDATA("set:", data,depth);
                     PAREN_SET(RExC_study_chunk_recursed + (recursed_depth * RExC_study_chunk_recursed_bytes), paren);
                     my_recursed_depth= recursed_depth + 1;
-                    Newxz(newframe,1,scan_frame);
                 } else {
 	            DEBUG_STUDYDATA("inf:", data,depth);
                     /* some form of infinite recursion, assume infinite length
@@ -4307,22 +4326,37 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
                         ssc_anything(data->start_class);
                     flags &= ~SCF_DO_STCLASS;
+
+                    start= NULL; /* reset start so we dont recurse later on. */
 	        }
             } else {
-	        Newxz(newframe,1,scan_frame);
 	        paren = stopparen;
-	        start = scan+2;
+                start = scan + 2;
 	        end = regnext(scan);
 	    }
-	    if (newframe) {
-                assert(start);
+            if (start) {
+                scan_frame *newframe;
                 assert(end);
-	        SAVEFREEPV(newframe);
-	        newframe->next_regnode = regnext(scan);
-	        newframe->last_regnode = last;
-	        newframe->stopparen = stopparen;
-	        newframe->prev_frame = frame;
+                if (!RExC_frame_last) {
+                    Newxz(newframe, 1, scan_frame);
+                    SAVEDESTRUCTOR_X(S_unwind_scan_frames, newframe);
+                    RExC_frame_head= newframe;
+                    RExC_frame_count++;
+                } else if (!RExC_frame_last->next_frame) {
+                    Newxz(newframe,1,scan_frame);
+                    RExC_frame_last->next_frame= newframe;
+                    newframe->prev_frame= RExC_frame_last;
+                    RExC_frame_count++;
+                } else {
+                    newframe= RExC_frame_last->next_frame;
+                }
+                RExC_frame_last= newframe;
+
+                newframe->next_regnode = regnext(scan);
+                newframe->last_regnode = last;
+                newframe->stopparen = stopparen;
                 newframe->prev_recursed_depth = recursed_depth;
+                newframe->this_prev_frame= frame;
 
                 DEBUG_STUDYDATA("frame-new:",data,depth);
                 DEBUG_PEEP("fnew", scan, depth);
@@ -5587,7 +5621,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
         recursed_depth = frame->prev_recursed_depth;
         depth = depth - 1;
 
-        frame = frame->prev_frame;
+        RExC_frame_last = frame->prev_frame;
+        frame = frame->this_prev_frame;
         goto fake_study_recurse;
     }
 
@@ -6534,6 +6569,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_contains_locale = 0;
     RExC_contains_i = 0;
     pRExC_state->runtime_code_qr = NULL;
+    RExC_frame_head= NULL;
+    RExC_frame_last= NULL;
+    RExC_frame_count= 0;
 
     DEBUG_r({
         RExC_mysv1= sv_newmortal();
