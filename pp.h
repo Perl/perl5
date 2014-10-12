@@ -394,7 +394,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
     STMT_START {						\
 	SSize_t eMiX = PL_tmps_ix + (n);			\
 	if (UNLIKELY(eMiX >= PL_tmps_max))			\
-	    (void)tmps_grow_p(eMiX);				\
+	    (void)Perl_tmps_grow_p(aTHX_ eMiX);			\
     } STMT_END
 
 #define AMGf_noright	1
