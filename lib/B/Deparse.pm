@@ -4972,12 +4972,15 @@ sub pp_split {
     # figures out for us which it is.
     my $replroot = $kid->pmreplroot;
     my $gv = 0;
+    my $stacked = $op->flags & OPf_STACKED;
     if (ref($replroot) eq "B::GV") {
 	$gv = $replroot;
     } elsif (!ref($replroot) and $replroot > 0) {
 	$gv = $self->padval($replroot);
     } elsif ($kid->targ) {
 	$ary = $self->padname($kid->targ)
+    } elsif ($stacked) {
+	$ary = $self->deparse($op->last, 7);
     }
     $ary = $self->maybe_local(@_,
 			      $self->stash_variable('@',
@@ -4985,7 +4988,9 @@ sub pp_split {
 						     $cx))
 	if $gv;
 
-    for (; !null($kid); $kid = $kid->sibling) {
+    # Skip the last kid when OPf_STACKED is set, since it is the array
+    # on the left.
+    for (; !null($stacked ? $kid->sibling : $kid); $kid = $kid->sibling) {
 	push @exprs, $self->deparse($kid, 6);
     }
 

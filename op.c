@@ -1696,6 +1696,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 	kid = cLISTOPo->op_first;
 	if (kid && kid->op_type == OP_PUSHRE
 		&& !kid->op_targ
+		&& !(o->op_flags & OPf_STACKED)
 #ifdef USE_ITHREADS
 		&& !((PMOP*)kid)->op_pmreplrootu.op_pmtargetoff)
 #else
@@ -6123,7 +6124,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		o->op_private |= OPpASSIGN_COMMON;
 	}
 
-	if (right && right->op_type == OP_SPLIT) {
+	if (right && right->op_type == OP_SPLIT
+	 && !(right->op_flags & OPf_STACKED)) {
 	    OP* tmpop = ((LISTOP*)right)->op_first;
 	    if (tmpop && (tmpop->op_type == OP_PUSHRE)) {
 		PMOP * const pm = (PMOP*)tmpop;
@@ -6157,6 +6159,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			    pm->op_targ = left->op_targ;
 			    left->op_targ = 0; /* filch it */
 			}
+		      detach_split:
 			tmpop = cUNOPo->op_first;	/* to list (nulled) */
 			tmpop = ((UNOP*)tmpop)->op_first; /* to pushmark */
                         /* detach rest of siblings from o subtree,
@@ -6166,6 +6169,24 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			right->op_flags &= ~OPf_WANT;
 				/* "I don't know and I don't care." */
 			return right;
+		    }
+		    else if (left->op_type == OP_RV2AV
+			  || left->op_type == OP_PADAV)
+		    {
+			/* Detach the array.  */
+#ifdef DEBUGGING
+			OP * const ary =
+#endif
+			op_sibling_splice(cBINOPo->op_last,
+					  cUNOPx(cBINOPo->op_last)
+						->op_first, 1, NULL);
+			assert(ary == left);
+			/* Attach it to the split.  */
+			op_sibling_splice(right, cLISTOPx(right)->op_last,
+					  0, left);
+			right->op_flags |= OPf_STACKED;
+			/* Detach split and expunge aassign as above.  */
+			goto detach_split;
 		    }
 		    else if (PL_modcount < RETURN_UNLIMITED_NUMBER &&
 			    ((LISTOP*)right)->op_last->op_type == OP_CONST)

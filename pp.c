@@ -5528,7 +5528,7 @@ PP(pp_reverse)
 PP(pp_split)
 {
     dSP; dTARG;
-    AV *ary;
+    AV *ary = PL_op->op_flags & OPf_STACKED ? (AV *)POPs : NULL;
     IV limit = POPi;			/* note, negative is forever */
     SV * const sv = POPs;
     STRLEN len;
@@ -5577,8 +5577,8 @@ PP(pp_split)
 	ary = GvAVn(pm->op_pmreplrootu.op_pmtargetgv);
     }
 #endif
-    else
-	ary = pm->op_targ ? (AV *)PAD_SVl(pm->op_targ) : NULL;
+    else if (pm->op_targ)
+	ary = (AV *)PAD_SVl(pm->op_targ);
     if (ary) {
 	realarray = 1;
 	PUTBACK;

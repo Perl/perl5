@@ -535,6 +535,9 @@ our @ary;
 # Split to our array
 our @array = split(//, 'foo', 0);
 ####
+# Split to my array
+my @array  = split(//, 'foo', 0);
+####
 # bug #40055
 do { () }; 
 ####
