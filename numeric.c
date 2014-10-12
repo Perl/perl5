@@ -1029,6 +1029,8 @@ S_mulexp10(NV value, I32 exponent)
             exponent--;
             value /= 10;
         }
+        if (value == 0.0)
+            return value;
 #endif
     }
     for (bit = 1; exponent; bit <<= 1) {
