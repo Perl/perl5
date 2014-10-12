@@ -431,7 +431,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Locking and unlocking values via L<Hash::Util> or C<Internals::SvREADONLY>
+no longer has any affect on values that are read-only to begin.  Unlocking
+such values could result in crashes, hangs or other erratic behaviour.
 
 =back
 
