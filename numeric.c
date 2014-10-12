@@ -1033,10 +1033,21 @@ S_mulexp10(NV value, I32 exponent)
             return value;
 #endif
     }
+#if defined(__osf__)
+    /* Even with cc -ieee + ieee_set_fp_control(IEEE_TRAP_ENABLE_INV)
+     * Tru64 fp behavior on inf/nan is somewhat broken. Another way
+     * to do this would be ieee_set_fp_control(IEEE_TRAP_ENABLE_OVF)
+     * but that breaks another set of infnan.t tests. */
+#  define FP_OVERFLOWS_TO_ZERO
+#endif
     for (bit = 1; exponent; bit <<= 1) {
 	if (exponent & bit) {
 	    exponent ^= bit;
 	    result *= power;
+#ifdef FP_OVERFLOWS_TO_ZERO
+            if (result == 0)
+                return value < 0 ? -NV_INF : NV_INF;
+#endif
 	    /* Floating point exceptions are supposed to be turned off,
 	     *  but if we're obviously done, don't risk another iteration.  
 	     */
