@@ -1914,8 +1914,13 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     if (PL_warnhook == PERL_WARNHOOK_FATAL || ckDEAD(err)) {
 	SV * const msv = vmess(pat, args);
 
-	invoke_exception_hook(msv, FALSE);
-	die_unwind(msv);
+	if (PL_parser && PL_parser->error_count) {
+	    qerror(msv);
+	}
+	else {
+	    invoke_exception_hook(msv, FALSE);
+	    die_unwind(msv);
+	}
     }
     else {
 	Perl_vwarn(aTHX_ pat, args);
