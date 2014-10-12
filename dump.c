@@ -642,8 +642,8 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
     else
 	ch = '/';
     if (PM_GETRE(pm))
-	Perl_dump_indent(aTHX_ level, file, "PMf_PRE %c%s%c%s\n",
-	     ch, RX_PRECOMP(PM_GETRE(pm)), ch,
+	Perl_dump_indent(aTHX_ level, file, "PMf_PRE %c%.*s%c%s\n",
+	     ch,(int)RX_PRELEN(PM_GETRE(pm)), RX_PRECOMP(PM_GETRE(pm)), ch,
 	     (pm->op_private & OPpRUNTIME) ? " (RUNTIME)" : "");
     else
 	Perl_dump_indent(aTHX_ level, file, "PMf_PRE (RUNTIME)\n");
