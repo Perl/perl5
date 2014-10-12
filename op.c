@@ -6119,16 +6119,16 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    OP* tmpop = ((LISTOP*)right)->op_first;
 	    if (tmpop && (tmpop->op_type == OP_PUSHRE)) {
 		PMOP * const pm = (PMOP*)tmpop;
-		if (left->op_type == OP_RV2AV &&
-		    !(left->op_private & OPpLVAL_INTRO))
-		{
-		    tmpop = ((UNOP*)left)->op_first;
-		    if (tmpop->op_type == OP_GV
+		if (
 #ifdef USE_ITHREADS
-			&& !pm->op_pmreplrootu.op_pmtargetoff
+		    !pm->op_pmreplrootu.op_pmtargetoff
 #else
-			&& !pm->op_pmreplrootu.op_pmtargetgv
+		    !pm->op_pmreplrootu.op_pmtargetgv
 #endif
+		) {
+		    if (left->op_type == OP_RV2AV &&
+			!(left->op_private & OPpLVAL_INTRO) &&
+			(tmpop = ((UNOP*)left)->op_first)->op_type == OP_GV
 			) {
 #ifdef USE_ITHREADS
 			pm->op_pmreplrootu.op_pmtargetoff
@@ -6151,10 +6151,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 				/* "I don't know and I don't care." */
 			return right;
 		    }
-		}
-		else {
-                   if (PL_modcount < RETURN_UNLIMITED_NUMBER &&
-		      ((LISTOP*)right)->op_last->op_type == OP_CONST)
+		    else if (PL_modcount < RETURN_UNLIMITED_NUMBER &&
+			    ((LISTOP*)right)->op_last->op_type == OP_CONST)
 		    {
 			SV ** const svp =
 			    &((SVOP*)((LISTOP*)right)->op_last)->op_sv;

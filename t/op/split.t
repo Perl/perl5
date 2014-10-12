@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 121;
+plan tests => 122;
 
 $FS = ':';
 
@@ -502,3 +502,6 @@ $aaa[1] .= "";
 @aaa = split //, $bbb[1];
 is "@aaa", "f o o b a r b a z",
    'split-to-array does not free its own argument';
+
+() = @a = split //, "abc";
+is "@a", "a b c", '() = split-to-array';
