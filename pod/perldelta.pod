@@ -435,6 +435,12 @@ Locking and unlocking values via L<Hash::Util> or C<Internals::SvREADONLY>
 no longer has any affect on values that are read-only to begin.  Unlocking
 such values could result in crashes, hangs or other erratic behaviour.
 
+=item *
+
+The internal C<looks_like_number> function (which L<Scalar::Util> provides
+access to) began erroneously to return true for "-e1" in 5.21.4, affecting
+also C<-'-e1'>.  This has been fixed.
+
 =back
 
 =head1 Known Problems
