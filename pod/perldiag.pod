@@ -4138,7 +4138,8 @@ and freeing temporaries and lexicals from.
 
 =item panic: pad_free po
 
-(P) An invalid scratch pad offset was detected internally.
+(P) An zero scratch pad offset was detected internally.  An attempt was
+made to free a target that had not been allocated to begin with.
 
 =item panic: pad_reset curpad, %p!=%p
 
@@ -4147,7 +4148,9 @@ and freeing temporaries and lexicals from.
 
 =item panic: pad_sv po
 
-(P) An invalid scratch pad offset was detected internally.
+(P) A zero scratch pad offset was detected internally.  Most likely
+an operator needed a target but that target had not been allocated
+for whatever reason.
 
 =item panic: pad_swipe curpad, %p!=%p
 
