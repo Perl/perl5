@@ -3655,11 +3655,11 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
    we can simulate recursion without losing state.  */
 struct scan_frame;
 typedef struct scan_frame {
-    regnode *last;  /* last node to process in this frame */
-    regnode *next;  /* next node to process when last is reached */
-    struct scan_frame *prev; /*previous frame*/
+    regnode *last_regnode;  /* last node to process in this frame */
+    regnode *next_regnode;  /* next node to process when last is reached */
+    struct scan_frame *prev_frame; /*previous frame*/
     U32 prev_recursed_depth;
-    I32 stop; /* what stopparen do we use */
+    I32 stopparen; /* what stopparen do we use */
 } scan_frame;
 
 
@@ -4266,7 +4266,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                  *
                  * - Yves
                  * */
-                if (flags & SCF_DO_SUBSTR) {
                 if (
                     !recursed_depth
                     ||
@@ -4293,7 +4292,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	            DEBUG_STUDYDATA("set:", data,depth);
                     PAREN_SET(RExC_study_chunk_recursed + (recursed_depth * RExC_study_chunk_recursed_bytes), paren);
                     my_recursed_depth= recursed_depth + 1;
-                    Newx(newframe,1,scan_frame);
+                    Newxz(newframe,1,scan_frame);
                 } else {
 	            DEBUG_STUDYDATA("inf:", data,depth);
                     /* some form of infinite recursion, assume infinite length
@@ -4307,9 +4306,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         ssc_anything(data->start_class);
                     flags &= ~SCF_DO_STCLASS;
 	        }
-                }
             } else {
-	        Newx(newframe,1,scan_frame);
+	        Newxz(newframe,1,scan_frame);
 	        paren = stopparen;
 	        start = scan+2;
 	        end = regnext(scan);
@@ -4318,10 +4316,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 assert(start);
                 assert(end);
 	        SAVEFREEPV(newframe);
-	        newframe->next = regnext(scan);
-	        newframe->last = last;
-	        newframe->stop = stopparen;
-	        newframe->prev = frame;
+	        newframe->next_regnode = regnext(scan);
+	        newframe->last_regnode = last;
+	        newframe->stopparen = stopparen;
+	        newframe->prev_frame = frame;
                 newframe->prev_recursed_depth = recursed_depth;
 
                 DEBUG_STUDYDATA("frame-new:",data,depth);
@@ -5582,13 +5580,13 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
         DEBUG_STUDYDATA("frame-end:",data,depth);
         DEBUG_PEEP("fend", scan, depth);
         /* restore previous context */
-        last = frame->last;
-        scan = frame->next;
-        stopparen = frame->stop;
+        last = frame->last_regnode;
+        scan = frame->next_regnode;
+        stopparen = frame->stopparen;
         recursed_depth = frame->prev_recursed_depth;
         depth = depth - 1;
 
-        frame = frame->prev;
+        frame = frame->prev_frame;
         goto fake_study_recurse;
     }
 
