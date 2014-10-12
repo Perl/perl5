@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 12;
+plan 17;
 
 use B qw 'svref_2object OPpASSIGN_COMMON';
 
@@ -49,4 +49,19 @@ for (['CONSTANT', sub {          join "foo", "bar"    }, 0, "bar"    ],
     my $tn = "join($sep, " . ($is_list?'list of constants':'const') . ")";
     is $last_expr->name, 'const', "$tn optimised to constant";
     is $sub->(), $expect, "$tn folded correctly";
+}
+
+
+# split to array
+
+for(['@pkgary'      , '@_'       ],
+    ['@lexary'      , 'my @a; @a'],
+    ['my(@array)'   , 'my(@a)'   ],
+    ['local(@array)', 'local(@_)'],
+    ['@{...}'       , '@{\@_}'   ],
+){
+    my($tn,$code) = @$_;
+    my $sub = eval "sub { $code = split }";
+    my $split = svref_2object($sub)->ROOT->first->last;
+    is $split->name, 'split', "$tn = split swallows up the assignment";
 }
