@@ -1695,6 +1695,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_SPLIT:
 	kid = cLISTOPo->op_first;
 	if (kid && kid->op_type == OP_PUSHRE
+		&& !kid->op_targ
 #ifdef USE_ITHREADS
 		&& !((PMOP*)kid)->op_pmreplrootu.op_pmtargetoff)
 #else
@@ -5921,6 +5922,7 @@ S_aassign_common_vars(pTHX_ OP* o)
 		curop->op_type == OP_PADHV ||
 		curop->op_type == OP_PADANY)
 		{
+		  padcheck:
 		    if (PAD_COMPNAME_GEN(curop->op_targ)
 			== (STRLEN)PL_generation
 		     || PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
@@ -5952,6 +5954,8 @@ S_aassign_common_vars(pTHX_ OP* o)
 			return TRUE;
 		    GvASSIGN_GENERATION_set(gv, PL_generation);
 		}
+		else if (curop->op_targ)
+		    goto padcheck;
 	    }
 	    else if (curop->op_type == OP_PADRANGE)
 		/* Ignore padrange; checking its siblings is sufficient. */
@@ -5981,6 +5985,10 @@ S_aassign_common_vars_aliases_only(pTHX_ OP *o)
 	     curop->op_type == OP_PADHV ||
 	     curop->op_type == OP_PADANY)
 	   && PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
+	    return TRUE;
+
+	if (curop->op_type == OP_PUSHRE && curop->op_targ
+	 && PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
 	    return TRUE;
 
 	if (curop->op_flags & OPf_KIDS) {
@@ -6125,27 +6133,35 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 #else
 		    !pm->op_pmreplrootu.op_pmtargetgv
 #endif
+		 && !pm->op_targ
 		) {
-		    if (left->op_type == OP_RV2AV &&
-			!(left->op_private & OPpLVAL_INTRO) &&
-			(tmpop = ((UNOP*)left)->op_first)->op_type == OP_GV
+		    if (!(left->op_private & OPpLVAL_INTRO) &&
+		        ( (left->op_type == OP_RV2AV &&
+			  (tmpop=((UNOP*)left)->op_first)->op_type==OP_GV)
+		        || left->op_type == OP_PADAV )
 			) {
+			if (tmpop != (OP *)pm) {
 #ifdef USE_ITHREADS
-			pm->op_pmreplrootu.op_pmtargetoff
+			  pm->op_pmreplrootu.op_pmtargetoff
 			    = cPADOPx(tmpop)->op_padix;
-			cPADOPx(tmpop)->op_padix = 0;	/* steal it */
+			  cPADOPx(tmpop)->op_padix = 0;	/* steal it */
 #else
-			pm->op_pmreplrootu.op_pmtargetgv
+			  pm->op_pmreplrootu.op_pmtargetgv
 			    = MUTABLE_GV(cSVOPx(tmpop)->op_sv);
-			cSVOPx(tmpop)->op_sv = NULL;	/* steal it */
+			  cSVOPx(tmpop)->op_sv = NULL;	/* steal it */
 #endif
+			  right->op_private |=
+			    left->op_private & OPpOUR_INTRO;
+			}
+			else {
+			    pm->op_targ = left->op_targ;
+			    left->op_targ = 0; /* filch it */
+			}
 			tmpop = cUNOPo->op_first;	/* to list (nulled) */
 			tmpop = ((UNOP*)tmpop)->op_first; /* to pushmark */
                         /* detach rest of siblings from o subtree,
                          * and free subtree */
                         op_sibling_splice(cUNOPo->op_first, tmpop, -1, NULL);
-			right->op_private |=
-			    left->op_private & OPpOUR_INTRO;
 			op_free(o);			/* blow off assign */
 			right->op_flags &= ~OPf_WANT;
 				/* "I don't know and I don't care." */

@@ -5578,7 +5578,7 @@ PP(pp_split)
     }
 #endif
     else
-	ary = NULL;
+	ary = pm->op_targ ? (AV *)PAD_SVl(pm->op_targ) : NULL;
     if (ary) {
 	realarray = 1;
 	PUTBACK;

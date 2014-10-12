@@ -4976,6 +4976,8 @@ sub pp_split {
 	$gv = $replroot;
     } elsif (!ref($replroot) and $replroot > 0) {
 	$gv = $self->padval($replroot);
+    } elsif ($kid->targ) {
+	$ary = $self->padname($kid->targ)
     }
     $ary = $self->maybe_local(@_,
 			      $self->stash_variable('@',
