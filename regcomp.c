@@ -3809,9 +3809,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
         ) {
 	    next = regnext(scan);
 	    code = OP(scan);
-            /* demq: the op(next)==code check is to see if we have
-             * "branch-branch" AFAICT */
 
+            /* The op(next)==code check below is to see if we
+             * have "BRANCH-BRANCH", "BRANCHJ-BRANCHJ", "IFTHEN-IFTHEN"
+             * IFTHEN is special as it might not appear in pairs.
+             * Not sure whether BRANCH-BRANCHJ is possible, regardless
+             * we dont handle it cleanly. */
 	    if (OP(next) == code || code == IFTHEN) {
                 /* NOTE - There is similar code to this block below for
                  * handling TRIE nodes on a re-study.  If you change stuff here
