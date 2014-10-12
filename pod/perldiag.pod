@@ -4138,7 +4138,7 @@ and freeing temporaries and lexicals from.
 
 =item panic: pad_free po
 
-(P) An zero scratch pad offset was detected internally.  An attempt was
+(P) A zero scratch pad offset was detected internally.  An attempt was
 made to free a target that had not been allocated to begin with.
 
 =item panic: pad_reset curpad, %p!=%p
