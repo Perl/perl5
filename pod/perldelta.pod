@@ -441,6 +441,12 @@ The internal C<looks_like_number> function (which L<Scalar::Util> provides
 access to) began erroneously to return true for "-e1" in 5.21.4, affecting
 also C<-'-e1'>.  This has been fixed.
 
+=item *
+
+The flip-flop operator (C<..> in scalar context) would return the same
+scalar each time, unles the containing subroutine was called recursively.
+Now it always returns a new scalar.  [perl #122829]
+
 =back
 
 =head1 Known Problems
