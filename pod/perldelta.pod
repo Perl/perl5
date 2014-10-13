@@ -528,6 +528,11 @@ fixed.  [perl #122771]
 C<*a = *b; @a = split //, $b[1]> could do a bad read and produce junk
 results.
 
+=item *
+
+In C<() = @array = split>, the C<() => at the beginning no longer confuses
+the optimiser, making it assume a limit of 1.
+
 =back
 
 =head1 Known Problems
