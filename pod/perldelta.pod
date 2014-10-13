@@ -294,7 +294,8 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+'"my" variable &foo::bar can't be in a package' has been reworded to say
+'subroutine' instead of 'variable'.
 
 =back
 
