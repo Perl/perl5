@@ -143,6 +143,12 @@ package arrays other than @_ and only if the argument to split was an
 explicit constant or scalar other than $_.  Now this optimisation happens
 almost all the time.
 
+=item *
+
+C<join> is now subject to constant folding.  Moreover, C<join> with a
+scalar or constant for the separator and a single-item list to join is
+simplified to a stringification.  The separator doesn't even get evaluated.
+
 =back
 
 =head1 Modules and Pragmata
