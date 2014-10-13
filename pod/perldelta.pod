@@ -27,6 +27,12 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New double-diamond operator
+
+C<<< <<>>> >>> is like C<< <> >> but uses three-argument C<open> to open
+each file in @ARGV.  So each element of @ARGV is an actual file name, and
+"|foo" won't be treated as a pipe open.
+
 =head2 Perl now supports POSIX 2008 locale currency additions.
 
 On platforms that are able to handle POSIX.1-2008, the
