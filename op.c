@@ -5930,6 +5930,7 @@ S_aassign_common_vars(pTHX_ OP* o)
 	    else if (curop->op_type == OP_PADSV ||
 		curop->op_type == OP_PADAV ||
 		curop->op_type == OP_PADHV ||
+		curop->op_type == OP_AELEMFAST_LEX ||
 		curop->op_type == OP_PADANY)
 		{
 		  padcheck:

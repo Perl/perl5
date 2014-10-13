@@ -9,21 +9,25 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 18;
+plan 19;
 
 use B qw 'svref_2object OPpASSIGN_COMMON';
 
 
 # aassign with no common vars
+for ('my ($self) = @_',
+     'my @x; @y = $x[0]', # aelemfast_lex
+    )
 {
+    my $sub = eval "sub { $_ }";
     my $last_expr =
-      svref_2object(sub { my($self) = @_ })->ROOT->first->last;
+      svref_2object($sub)->ROOT->first->last;
     if ($last_expr->name ne 'aassign') {
         die "Expected aassign but found ", $last_expr->name,
             "; this test needs to be rewritten" 
     }
     is $last_expr->private & OPpASSIGN_COMMON, 0,
-      'no ASSIGN_COMMON for my($self) = @_';
+      "no ASSIGN_COMMON for $_";
 }    
 
 
