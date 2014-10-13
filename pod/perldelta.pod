@@ -135,6 +135,14 @@ Non-magical/non-tied scalars that contain only a floating point value and are
 on most Perl builds with 64 bit integers now use 8-32 less bytes of memory
 depending on OS.
 
+=item *
+
+In C<@array = split>, the assigment can be optimised away with C<split>
+writing directly to the array.  This optimisation was happening only for
+package arrays other than @_ and only if the argument to split was an
+explicit constant or scalar other than $_.  Now this optimisation happens
+almost all the time.
+
 =back
 
 =head1 Modules and Pragmata
