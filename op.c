@@ -695,7 +695,9 @@ Perl_op_free(pTHX_ OP *o)
 
     /* an op should only ever acquire op_private flags that we know about.
      * If this fails, you may need to fix something in regen/op_private */
-    assert(!(o->op_private & ~PL_op_private_valid[type]));
+    if (o->op_ppaddr == PL_ppaddr[o->op_type]) {
+	assert(!(o->op_private & ~PL_op_private_valid[type]));
+    }
 
     if (o->op_private & OPpREFCOUNTED) {
 	switch (type) {
