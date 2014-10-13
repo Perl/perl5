@@ -184,6 +184,9 @@ This has been fixed.
 Core keywords that conflict with lexical subroutines are now deparsed with
 the C<CORE::> prefix.
 
+C<foreach state $x (...) {...}> now deparses correctly with C<state> and
+not C<my>.
+
 =item *
 
 L<DynaLoader> has been upgraded from version 1.26 to 1.27.
