@@ -1373,7 +1373,7 @@ STORESIZE(SV *obj,IV count)
         dTHXc;
         SV *sobj = SHAREDSV_FROM_OBJ(obj);
         SHARED_EDIT;
-        av_fill((AV*) sobj, count);
+        av_fill((AV*) sobj, count - 1);
         SHARED_RELEASE;
 
 
