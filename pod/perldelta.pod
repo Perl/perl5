@@ -169,6 +169,15 @@ Avoid reading beyond the end of a buffer. [perl #122629]
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.28 to 1.29.
+
+Parenthesised arrays in lists passed to C<\> are now correctly deparsed
+with parentheses (e.g., C<\(@a, (@b), @c)> now retains the parentheses
+around @b), this preserving the flattening behaviour of referenced
+parenthesised arrays.  Formerly, it only worked for one array: C<\(@a)>.
+
+=item *
+
 L<DynaLoader> has been upgraded from version 1.26 to 1.27.
 
 Remove dl_nonlazy global if unused in Dynaloader. [perl #122926]
