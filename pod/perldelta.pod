@@ -352,6 +352,11 @@ UTF8-encoding the value.  This has been fixed.  [perl #123135]
 Various cases where the name of a sub is used (autoload, overloading, error
 messages) used to crash for lexical subs, but have been fixed.
 
+=item *
+
+An assertion failure when parsing C<sort> with debugging enabled has been
+fixed.  [perl #122771]
+
 =back
 
 =head1 Known Problems
