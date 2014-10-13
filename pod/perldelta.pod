@@ -465,6 +465,10 @@ Some unterminated C<(?(...)...)> constructs in regular expressions would
 either crash or give erroneous error messages.  C</(?(1)/> is one such
 example.
 
+=item *
+
+C<pack "w", $tied> no longer calls FETCH twice.
+
 =back
 
 =head1 Known Problems
