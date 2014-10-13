@@ -3915,6 +3915,8 @@
 /* HAS_PRCTL:
  *	This symbol, if defined, indicates that the prctl routine is
  *	available to set process title.
+ *	Note that there are at least two prctl variants: Linux and Irix.
+ *	While they are somewhat similar, they are incompatible.
  */
 /* HAS_PRCTL_SET_NAME:
  *	This symbol, if defined, indicates that the prctl routine is
@@ -4871,6 +4873,6 @@
 #endif
 
 /* Generated from:
- * 74bb96b6e7b18b5b5f121da4f2849cd5521bb55ff62d63970fedb9a7ebd80f63 config_h.SH
+ * 60aff40735c73cdf11d3fbae8088eadf73c0b45413be5bd8480ec5ec481066da config_h.SH
  * 35023b2d9244ad2dc3abea4bb5174a7f66398b60266231cb9a2c3bfc8df867cf uconfig.sh
  * ex: set ro: */

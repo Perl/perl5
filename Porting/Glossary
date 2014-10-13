@@ -1701,6 +1701,8 @@ d_portable (d_portable.U):
 d_prctl (d_prctl.U):
 	This variable conditionally defines the HAS_PRCTL symbol, which
 	indicates to the C program that the prctl() routine is available.
+	Note that there are at least two prctl variants: Linux and Irix.
+	While they are somewhat similar, they are incompatible.
 
 d_prctl_set_name (d_prctl.U):
 	This variable conditionally defines the HAS_PRCTL_SET_NAME symbol,

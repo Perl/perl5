@@ -3950,6 +3950,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* HAS_PRCTL:
  *	This symbol, if defined, indicates that the prctl routine is
  *	available to set process title.
+ *	Note that there are at least two prctl variants: Linux and Irix.
+ *	While they are somewhat similar, they are incompatible.
  */
 /* HAS_PRCTL_SET_NAME:
  *	This symbol, if defined, indicates that the prctl routine is
