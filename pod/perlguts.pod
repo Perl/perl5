@@ -1773,7 +1773,9 @@ by looking on its flags: lexicals have C<SVs_PADMY> set, and
 I<target>s have C<SVs_PADTMP> set.  But this has never been fully true.
 C<SVs_PADMY> could be set on a variable that no longer resides in any pad.
 While I<target>s do have C<SVs_PADTMP> set, it can also be set on variables
-that have never resided in a pad, but nonetheless act like I<target>s.
+that have never resided in a pad, but nonetheless act like I<target>s.  As
+of perl 5.21.5, the C<SVs_PADMY> flag is no longer used and is defined as
+0.  C<SvPADMY()> now returns true for anything without C<SVs_PADTMP>.
 
 The correspondence between OPs and I<target>s is not 1-to-1.  Different
 OPs in the compile tree of the unit can use the same target, if this
