@@ -181,6 +181,9 @@ C<local our> is now deparsed correctly, with the C<our> included.
 C<for($foo; !$bar; $baz) {...}> was deparsed without the C<!> (or C<not>).
 This has been fixed.
 
+Core keywords that conflict with lexical subroutines are now deparsed with
+the C<CORE::> prefix.
+
 =item *
 
 L<DynaLoader> has been upgraded from version 1.26 to 1.27.
