@@ -424,6 +424,12 @@ C<cv_name>, which was introduced in 5.21.4, has been changed incompatibly.
 It now has a flags field that allows the caller to specify whether the name
 should be fully qualified.  See L<perlapi/cv_name>.
 
+=item *
+
+Internally Perl no longer uses the C<SVs_PADMY> flag.  C<SvPADMY()> now
+returns a true value for anything not marked PADTMP.  C<SVs_PADMY> is now
+defined as 0.
+
 =back
 
 =head1 Selected Bug Fixes
