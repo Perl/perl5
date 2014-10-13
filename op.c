@@ -4019,7 +4019,7 @@ S_fold_constants(pTHX_ OP *o)
     if (ret)
 	goto nope;
 
-    folded = o->op_folded;
+    folded = cBOOL(o->op_folded);
     op_free(o);
     assert(sv);
     if (type == OP_STRINGIFY) SvPADTMP_off(sv);
