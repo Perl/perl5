@@ -187,6 +187,9 @@ the C<CORE::> prefix.
 C<foreach state $x (...) {...}> now deparses correctly with C<state> and
 not C<my>.
 
+C<our @array = split(...)> now deparses correctly with C<our> in those
+cases where the assignment is optimised away.
+
 =item *
 
 L<DynaLoader> has been upgraded from version 1.26 to 1.27.
