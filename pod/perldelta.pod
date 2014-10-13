@@ -149,6 +149,12 @@ C<join> is now subject to constant folding.  Moreover, C<join> with a
 scalar or constant for the separator and a single-item list to join is
 simplified to a stringification.  The separator doesn't even get evaluated.
 
+=item *
+
+C<qq(@array)> is implemented using two ops: a stringify op and a join op.
+If the qq contains nothing but a single array, the stringification is
+optimised away.
+
 =back
 
 =head1 Modules and Pragmata
