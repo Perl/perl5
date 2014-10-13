@@ -269,7 +269,7 @@ sub _bits {
 	    $mask &= ~($DeadBits{$word}|$All) if $no_fatal ;
 	}
 	else
-          { Croaker("Unknown warnings category '$word'")}
+	  { Croaker("Unknown warnings category '$word'")}
     }
 
     return $mask ;
@@ -289,8 +289,8 @@ sub import
     my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $DEFAULT) ;
 
     if (vec($mask, $Offsets{'all'}, 1)) {
-        $mask |= $Bits{'all'} ;
-        $mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
+	$mask |= $Bits{'all'} ;
+	$mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
     }
 
     # append 'all' when implied (after a lone "FATAL" or "NONFATAL")
@@ -308,8 +308,8 @@ sub unimport
     my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $DEFAULT) ;
 
     if (vec($mask, $Offsets{'all'}, 1)) {
-        $mask |= $Bits{'all'} ;
-        $mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
+	$mask |= $Bits{'all'} ;
+	$mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
     }
 
     # append 'all' when implied (empty import list or after a lone "FATAL")
@@ -323,7 +323,7 @@ sub unimport
 	    $mask &= ~($catmask | $DeadBits{$word} | $All);
 	}
 	else
-          { Croaker("Unknown warnings category '$word'")}
+	  { Croaker("Unknown warnings category '$word'")}
     }
 
     ${^WARNING_BITS} = $mask ;
@@ -352,37 +352,37 @@ sub __chk
     my $message = pop if $has_message;
 
     if (@_) {
-        # check the category supplied.
-        $category = shift ;
-        if (my $type = ref $category) {
-            Croaker("not an object")
-                if exists $builtin_type{$type};
+	# check the category supplied.
+	$category = shift ;
+	if (my $type = ref $category) {
+	    Croaker("not an object")
+		if exists $builtin_type{$type};
 	    $category = $type;
-            $isobj = 1 ;
-        }
-        $offset = $Offsets{$category};
-        Croaker("Unknown warnings category '$category'")
+	    $isobj = 1 ;
+	}
+	$offset = $Offsets{$category};
+	Croaker("Unknown warnings category '$category'")
 	    unless defined $offset;
     }
     else {
-        $category = (caller(1))[0] ;
-        $offset = $Offsets{$category};
-        Croaker("package '$category' not registered for warnings")
+	$category = (caller(1))[0] ;
+	$offset = $Offsets{$category};
+	Croaker("package '$category' not registered for warnings")
 	    unless defined $offset ;
     }
 
     my $i;
 
     if ($isobj) {
-        my $pkg;
-        $i = 2;
-        while (do { { package DB; $pkg = (caller($i++))[0] } } ) {
-            last unless @DB::args && $DB::args[0] =~ /^$category=/ ;
-        }
+	my $pkg;
+	$i = 2;
+	while (do { { package DB; $pkg = (caller($i++))[0] } } ) {
+	    last unless @DB::args && $DB::args[0] =~ /^$category=/ ;
+	}
 	$i -= 2 ;
     }
     else {
-        $i = _error_loc(); # see where Carp will allocate the error
+	$i = _error_loc(); # see where Carp will allocate the error
     }
 
     # Default to 0 if caller returns nothing.  Default to $DEFAULT if it
@@ -545,7 +545,7 @@ warning, but the assignment to the scalar C<$b> will not.
 =head2 Default Warnings and Optional Warnings
 
 Before the introduction of lexical warnings, Perl had two classes of
-warnings: mandatory and optional. 
+warnings: mandatory and optional.
 
 As its name suggests, if your code tripped a mandatory warning, you
 would get a warning whether you wanted it or not.
@@ -677,7 +677,7 @@ will work unchanged.
 
 The B<-w> flag just sets the global C<$^W> variable as in 5.005.  This
 means that any legacy code that currently relies on manipulating C<$^W>
-to control warning behavior will still work as is. 
+to control warning behavior will still work as is.
 
 =item 3.
 
@@ -844,7 +844,7 @@ Just like the "strict" pragma any of these categories can be combined
     no warnings qw(io syntax untie);
 
 Also like the "strict" pragma, if there is more than one instance of the
-C<warnings> pragma in a given scope the cumulative effect is additive. 
+C<warnings> pragma in a given scope the cumulative effect is additive.
 
     use warnings qw(void); # only "void" warnings enabled
     ...
@@ -888,7 +888,7 @@ warning.
 When run it produces this output
 
     Useless use of time in void context at fatal line 3.
-    Useless use of length in void context at fatal line 7.  
+    Useless use of length in void context at fatal line 7.
 
 The scope where C<length> is used has escalated the C<void> warnings
 category into a fatal error, so the program terminates immediately when it
@@ -983,7 +983,7 @@ this snippet of code:
     package MyMod::Abc;
 
     sub open {
-        warnings::warnif("deprecated", 
+        warnings::warnif("deprecated",
                          "open is deprecated, use new instead");
         new(@_);
     }
@@ -1065,7 +1065,7 @@ Consider this example:
 
     1;
 
-The code below makes use of both modules, but it only enables warnings from 
+The code below makes use of both modules, but it only enables warnings from
 C<Derived>.
 
     use Original;
@@ -1077,7 +1077,7 @@ C<Derived>.
     $a->doit(1);
 
 When this code is run only the C<Derived> object, C<$b>, will generate
-a warning. 
+a warning.
 
     Odd numbers are unsafe at main.pl line 7
 
