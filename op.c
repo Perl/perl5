@@ -5994,6 +5994,7 @@ S_aassign_common_vars_aliases_only(pTHX_ OP *o)
 	if ((curop->op_type == OP_PADSV ||
 	     curop->op_type == OP_PADAV ||
 	     curop->op_type == OP_PADHV ||
+	     curop->op_type == OP_AELEMFAST_LEX ||
 	     curop->op_type == OP_PADANY)
 	   && PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
 	    return TRUE;

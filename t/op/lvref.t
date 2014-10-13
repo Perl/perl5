@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 152;
+plan 153;
 
 eval '\$x = \$y';
 like $@, qr/^Experimental lvalue references not enabled/,
@@ -571,4 +571,19 @@ SKIP: {
    do_aliasing2:
     \($x) = \$y;
     goto do_test2;
+}
+{
+    my @a;
+    goto do_aliasing3;
+
+   do_test3:
+    @a[0,1] = qw<a b>;
+    my($y,$x) = ($a[0],$a[1]);
+    is "@a", 'b a',
+       'aelemfast_lex-to-scalar list assignment "before" aliasing';
+    last;
+
+   do_aliasing3:
+    \(@a) = \($x,$y);
+    goto do_test3;
 }
