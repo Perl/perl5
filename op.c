@@ -5917,7 +5917,8 @@ S_aassign_common_vars(pTHX_ OP* o)
     OP *curop;
     for (curop = cUNOPo->op_first; curop; curop = OP_SIBLING(curop)) {
 	if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
-	    if (curop->op_type == OP_GV || curop->op_type == OP_GVSV) {
+	    if (curop->op_type == OP_GV || curop->op_type == OP_GVSV
+	     || curop->op_type == OP_AELEMFAST) {
 		GV *gv = cGVOPx_gv(curop);
 		if (gv == PL_defgv
 		    || (int)GvASSIGN_GENERATION(gv) == PL_generation)
