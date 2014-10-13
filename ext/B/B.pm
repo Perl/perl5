@@ -906,6 +906,10 @@ If you're working with globs at runtime, and need to disambiguate
 
 =item FLAGS
 
+=item GPFLAGS
+
+This last one is present only in perl 5.22.0 and higher.
+
 =back
 
 =head2 B::IO Methods
