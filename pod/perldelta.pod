@@ -176,6 +176,8 @@ with parentheses (e.g., C<\(@a, (@b), @c)> now retains the parentheses
 around @b), this preserving the flattening behaviour of referenced
 parenthesised arrays.  Formerly, it only worked for one array: C<\(@a)>.
 
+C<local our> is now deparsed correctly, with the C<our> included.
+
 =item *
 
 L<DynaLoader> has been upgraded from version 1.26 to 1.27.
