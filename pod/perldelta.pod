@@ -178,6 +178,9 @@ parenthesised arrays.  Formerly, it only worked for one array: C<\(@a)>.
 
 C<local our> is now deparsed correctly, with the C<our> included.
 
+C<for($foo; !$bar; $baz) {...}> was deparsed without the C<!> (or C<not>).
+This has been fixed.
+
 =item *
 
 L<DynaLoader> has been upgraded from version 1.26 to 1.27.
