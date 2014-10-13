@@ -500,6 +500,11 @@ Some patterns including code blocks with syntax errors, such as
 C</ (?{(^{})/>, would hang or fail assertions on debugging builds.  Now
 they produce errors.
 
+=item *
+
+An assertion failure when parsing C<sort> with debugging enabled has been
+fixed.  [perl #122771]
+
 =back
 
 =head1 Known Problems
