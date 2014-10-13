@@ -475,6 +475,11 @@ example.
 
 C<pack "w", $tied> no longer calls FETCH twice.
 
+=item *
+
+List assignments like C<($x, $z) = (1, $y)> now work correctly if $x and $y
+have been aliased by C<foreach>.
+
 =back
 
 =head1 Known Problems
