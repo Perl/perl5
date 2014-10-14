@@ -45,9 +45,9 @@ checkOptree ( name	=> 'BEGIN',
 # 1        <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$ ->2
 # 3        <1> require sK/1 ->4
 # 2           <$> const[PV "strict.pm"] s/BARE ->3
-# 4        <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$ ->5
+# -        <0> ex-nextstate v ->4
 # -        <@> lineseq K ->-
-# -           <0> null ->5
+# 4           <;> nextstate(B::Concise -275 Concise.pm:356) :*,&,{,x*,x&,x$,$ ->5
 # 9           <1> entersub[t1] KS*/TARG,STRICT ->a
 # 5              <0> pushmark s ->6
 # 6              <$> const[PV "strict"] sM ->7
@@ -59,9 +59,9 @@ checkOptree ( name	=> 'BEGIN',
 # b        <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$ ->c
 # d        <1> require sK/1 ->e
 # c           <$> const[PV "strict.pm"] s/BARE ->d
-# e        <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$ ->f
+# -        <0> ex-nextstate v ->e
 # -        <@> lineseq K ->-
-# -           <0> null ->f
+# e           <;> nextstate(B::Concise -265 Concise.pm:367) :*,&,x*,x&,x$,$ ->f
 # j           <1> entersub[t1] KS*/TARG,STRICT ->k
 # f              <0> pushmark s ->g
 # g              <$> const[PV "strict"] sM ->h
@@ -73,9 +73,9 @@ checkOptree ( name	=> 'BEGIN',
 # l        <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$ ->m
 # n        <1> require sK/1 ->o
 # m           <$> const[PV "warnings.pm"] s/BARE ->n
-# o        <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$ ->p
+# -        <0> ex-nextstate v ->o
 # -        <@> lineseq K ->-
-# -           <0> null ->p
+# o           <;> nextstate(B::Concise -254 Concise.pm:386) :*,&,{,x*,x&,x$,$ ->p
 # t           <1> entersub[t1] KS*/TARG,STRICT ->u
 # p              <0> pushmark s ->q
 # q              <$> const[PV "warnings"] sM ->r
@@ -95,9 +95,9 @@ EOT_EOT
 # 1        <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$ ->2
 # 3        <1> require sK/1 ->4
 # 2           <$> const(PV "strict.pm") s/BARE ->3
-# 4        <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$ ->5
+# -        <0> ex-nextstate v ->4
 # -        <@> lineseq K ->-
-# -           <0> null ->5
+# 4           <;> nextstate(B::Concise -275 Concise.pm:356) :*,&,{,x*,x&,x$,$ ->5
 # 9           <1> entersub[t1] KS*/TARG,STRICT ->a
 # 5              <0> pushmark s ->6
 # 6              <$> const(PV "strict") sM ->7
@@ -109,9 +109,9 @@ EOT_EOT
 # b        <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$ ->c
 # d        <1> require sK/1 ->e
 # c           <$> const(PV "strict.pm") s/BARE ->d
-# e        <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$ ->f
+# -        <0> ex-nextstate v ->e
 # -        <@> lineseq K ->-
-# -           <0> null ->f
+# e           <;> nextstate(B::Concise -265 Concise.pm:367) :*,&,x*,x&,x$,$ ->f
 # j           <1> entersub[t1] KS*/TARG,STRICT ->k
 # f              <0> pushmark s ->g
 # g              <$> const(PV "strict") sM ->h
@@ -123,9 +123,9 @@ EOT_EOT
 # l        <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$ ->m
 # n        <1> require sK/1 ->o
 # m           <$> const(PV "warnings.pm") s/BARE ->n
-# o        <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$ ->p
+# -        <0> ex-nextstate v ->o
 # -        <@> lineseq K ->-
-# -           <0> null ->p
+# o           <;> nextstate(B::Concise -254 Concise.pm:386) :*,&,{,x*,x&,x$,$ ->p
 # t           <1> entersub[t1] KS*/TARG,STRICT ->u
 # p              <0> pushmark s ->q
 # q              <$> const(PV "warnings") sM ->r
@@ -241,7 +241,7 @@ checkOptree ( name	=> 'all of BEGIN END INIT CHECK UNITCHECK -exec',
 # 1  <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$
 # 2  <$> const[PV "strict.pm"] s/BARE
 # 3  <1> require sK/1
-# 4  <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$
+# 4  <;> nextstate(B::Concise -275 Concise.pm:356) :*,&,{,x*,x&,x$,$
 # 5  <0> pushmark s
 # 6  <$> const[PV "strict"] sM
 # 7  <$> const[PV "refs"] sM
@@ -252,7 +252,7 @@ checkOptree ( name	=> 'all of BEGIN END INIT CHECK UNITCHECK -exec',
 # b  <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$
 # c  <$> const[PV "strict.pm"] s/BARE
 # d  <1> require sK/1
-# e  <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$
+# e  <;> nextstate(B::Concise -265 Concise.pm:367) :*,&,x*,x&,x$,$
 # f  <0> pushmark s
 # g  <$> const[PV "strict"] sM
 # h  <$> const[PV "refs"] sM
@@ -263,7 +263,7 @@ checkOptree ( name	=> 'all of BEGIN END INIT CHECK UNITCHECK -exec',
 # l  <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$
 # m  <$> const[PV "warnings.pm"] s/BARE
 # n  <1> require sK/1
-# o  <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$
+# o  <;> nextstate(B::Concise -254 Concise.pm:386) :*,&,{,x*,x&,x$,$
 # p  <0> pushmark s
 # q  <$> const[PV "warnings"] sM
 # r  <$> const[PV "qw"] sM
@@ -300,7 +300,7 @@ EOT_EOT
 # 1  <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$
 # 2  <$> const(PV "strict.pm") s/BARE
 # 3  <1> require sK/1
-# 4  <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$
+# 4  <;> nextstate(B::Concise -275 Concise.pm:356) :*,&,{,x*,x&,x$,$
 # 5  <0> pushmark s
 # 6  <$> const(PV "strict") sM
 # 7  <$> const(PV "refs") sM
@@ -311,7 +311,7 @@ EOT_EOT
 # b  <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$
 # c  <$> const(PV "strict.pm") s/BARE
 # d  <1> require sK/1
-# e  <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$
+# e  <;> nextstate(B::Concise -265 Concise.pm:367) :*,&,x*,x&,x$,$
 # f  <0> pushmark s
 # g  <$> const(PV "strict") sM
 # h  <$> const(PV "refs") sM
@@ -322,7 +322,7 @@ EOT_EOT
 # l  <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$
 # m  <$> const(PV "warnings.pm") s/BARE
 # n  <1> require sK/1
-# o  <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$
+# o  <;> nextstate(B::Concise -254 Concise.pm:386) :*,&,{,x*,x&,x$,$
 # p  <0> pushmark s
 # q  <$> const(PV "warnings") sM
 # r  <$> const(PV "qw") sM
@@ -369,7 +369,7 @@ checkOptree ( name	=> 'regression test for patch 25352',
 # 1  <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$
 # 2  <$> const[PV "strict.pm"] s/BARE
 # 3  <1> require sK/1
-# 4  <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$
+# 4  <;> nextstate(B::Concise -275 Concise.pm:356) :*,&,{,x*,x&,x$,$
 # 5  <0> pushmark s
 # 6  <$> const[PV "strict"] sM
 # 7  <$> const[PV "refs"] sM
@@ -380,7 +380,7 @@ checkOptree ( name	=> 'regression test for patch 25352',
 # b  <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$
 # c  <$> const[PV "strict.pm"] s/BARE
 # d  <1> require sK/1
-# e  <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$
+# e  <;> nextstate(B::Concise -265 Concise.pm:367) :*,&,x*,x&,x$,$
 # f  <0> pushmark s
 # g  <$> const[PV "strict"] sM
 # h  <$> const[PV "refs"] sM
@@ -391,7 +391,7 @@ checkOptree ( name	=> 'regression test for patch 25352',
 # l  <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$
 # m  <$> const[PV "warnings.pm"] s/BARE
 # n  <1> require sK/1
-# o  <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$
+# o  <;> nextstate(B::Concise -254 Concise.pm:386) :*,&,{,x*,x&,x$,$
 # p  <0> pushmark s
 # q  <$> const[PV "warnings"] sM
 # r  <$> const[PV "qw"] sM
@@ -403,7 +403,7 @@ EOT_EOT
 # 1  <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$
 # 2  <$> const(PV "strict.pm") s/BARE
 # 3  <1> require sK/1
-# 4  <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$
+# 4  <;> nextstate(B::Concise -275 Concise.pm:356) :*,&,{,x*,x&,x$,$
 # 5  <0> pushmark s
 # 6  <$> const(PV "strict") sM
 # 7  <$> const(PV "refs") sM
@@ -414,7 +414,7 @@ EOT_EOT
 # b  <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$
 # c  <$> const(PV "strict.pm") s/BARE
 # d  <1> require sK/1
-# e  <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$
+# e  <;> nextstate(B::Concise -265 Concise.pm:367) :*,&,x*,x&,x$,$
 # f  <0> pushmark s
 # g  <$> const(PV "strict") sM
 # h  <$> const(PV "refs") sM
@@ -425,7 +425,7 @@ EOT_EOT
 # l  <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$
 # m  <$> const(PV "warnings.pm") s/BARE
 # n  <1> require sK/1
-# o  <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$
+# o  <;> nextstate(B::Concise -254 Concise.pm:386) :*,&,{,x*,x&,x$,$
 # p  <0> pushmark s
 # q  <$> const(PV "warnings") sM
 # r  <$> const(PV "qw") sM

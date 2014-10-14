@@ -11881,44 +11881,9 @@ Perl_rpeep(pTHX_ OP *o)
 		    nextop = nextop->op_next;
 
 		if (nextop && (nextop->op_type == OP_NEXTSTATE)) {
-		    COP *firstcop = (COP *)o;
-		    COP *secondcop = (COP *)nextop;
-		    /* We want the COP pointed to by o (and anything else) to
-		       become the next COP down the line.  */
-		    cop_free(firstcop);
-
-		    firstcop->op_next = secondcop->op_next;
-
-		    /* Now steal all its pointers, and duplicate the other
-		       data.  */
-		    firstcop->cop_line = secondcop->cop_line;
-#ifdef USE_ITHREADS
-		    firstcop->cop_stashoff = secondcop->cop_stashoff;
-		    firstcop->cop_file = secondcop->cop_file;
-#else
-		    firstcop->cop_stash = secondcop->cop_stash;
-		    firstcop->cop_filegv = secondcop->cop_filegv;
-#endif
-		    firstcop->cop_hints = secondcop->cop_hints;
-		    firstcop->cop_seq = secondcop->cop_seq;
-		    firstcop->cop_warnings = secondcop->cop_warnings;
-		    firstcop->cop_hints_hash = secondcop->cop_hints_hash;
-
-#ifdef USE_ITHREADS
-		    secondcop->cop_stashoff = 0;
-		    secondcop->cop_file = NULL;
-#else
-		    secondcop->cop_stash = NULL;
-		    secondcop->cop_filegv = NULL;
-#endif
-		    secondcop->cop_warnings = NULL;
-		    secondcop->cop_hints_hash = NULL;
-
-		    /* If we use op_null(), and hence leave an ex-COP, some
-		       warnings are misreported. For example, the compile-time
-		       error in 'use strict; no strict refs;'  */
-		    secondcop->op_type = OP_NULL;
-		    secondcop->op_ppaddr = PL_ppaddr[OP_NULL];
+		    op_null(o);
+		    if (oldop)
+			oldop->op_next = nextop;
 		}
 	    }
 	    break;

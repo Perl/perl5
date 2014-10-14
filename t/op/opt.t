@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 19;
+plan 20;
 
 use B qw 'svref_2object OPpASSIGN_COMMON';
 
@@ -54,6 +54,12 @@ for (['CONSTANT', sub {          join "foo", "bar"    }, 0, "bar"    ],
     is $last_expr->name, 'const', "$tn optimised to constant";
     is $sub->(), $expect, "$tn folded correctly";
 }
+
+
+# nextstate multiple times becoming one nextstate
+
+is svref_2object(sub { 0;0;0;0;0;0;time })->START->next->name, 'time',
+  'multiple nextstates become one';
 
 
 # split to array

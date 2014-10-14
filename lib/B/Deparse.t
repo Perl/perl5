@@ -338,8 +338,8 @@ tr/\x{345}/\x{370}/;
 1;
 ####
 # Constants in a block
+# CONTEXT no warnings;
 {
-    no warnings;
     '???';
     2;
 }
