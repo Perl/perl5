@@ -2342,6 +2342,7 @@ S_vivifies(const OPCODE type)
 static void
 S_lvref(pTHX_ OP *o, I32 type)
 {
+    dVAR;
     OP *kid;
     switch (o->op_type) {
     case OP_COND_EXPR:
