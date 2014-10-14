@@ -242,6 +242,12 @@ Slightly faster module loading time.
 
 =item *
 
+L<POSIX> has been upgraded from version 1.44 to 1.45.
+
+POSIX::tmpnam() now produces a deprecation warning.  [perl #122005]
+
+=item *
+
 L<XSLoader> has been upgraded from version 0.17 to 0.18.
 
 Allow XSLoader to load modules from a different namespace.
