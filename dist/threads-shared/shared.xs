@@ -1371,9 +1371,29 @@ void
 STORESIZE(SV *obj,IV count)
     CODE:
         dTHXc;
-        SV *sobj = SHAREDSV_FROM_OBJ(obj);
+        SV *ssv = SHAREDSV_FROM_OBJ(obj);
+
         SHARED_EDIT;
-        av_fill((AV*) sobj, count - 1);
+        assert(SvTYPE(ssv) == SVt_PVAV);
+        if (!PL_dirty) {
+            SV **svp = AvARRAY((AV *)ssv);
+            I32 ix = AvFILLp((AV *)ssv);
+            for (;ix >= count; ix--) {
+                SV *sv = svp[ix];
+                if (!sv)
+                    continue;
+                if (   (SvOBJECT(sv) || (SvROK(sv) && (sv = SvRV(sv))))
+                    && SvREFCNT(sv) == 1 )
+                {
+                    SV *tmp = Perl_sv_newmortal(caller_perl);
+                    PERL_SET_CONTEXT((aTHX = caller_perl));
+                    sv_upgrade(tmp, SVt_RV);
+                    get_RV(tmp, sv);
+                    PERL_SET_CONTEXT((aTHX = PL_sharedsv_space));
+                }
+            }
+        }
+        av_fill((AV*) ssv, count - 1);
         SHARED_RELEASE;
 
 
