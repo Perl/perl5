@@ -546,7 +546,7 @@ o = .obj
 # Rules
 #
 
-#clear the list, we dont support .cxx .bas .cbl .for .pas .res .rc .f .f90
+#clear the list, we dont support .cxx .bas .cbl .for .pas .f .f90
 # .asm .cpp are not currently used but they are included for completeness
 .SUFFIXES :
 .SUFFIXES : .c $(o) .cpp .asm .dll .lib .exe .rc .res
