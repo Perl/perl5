@@ -29,7 +29,7 @@ here, but most should go in the L</Performance Enhancements> section.
 
 =head2 New double-diamond operator
 
-C<<< <<>>> >>> is like C<< <> >> but uses three-argument C<open> to open
+C<<< <<>> >>> is like C<< <> >> but uses three-argument C<open> to open
 each file in @ARGV.  So each element of @ARGV is an actual file name, and
 "|foo" won't be treated as a pipe open.
 
