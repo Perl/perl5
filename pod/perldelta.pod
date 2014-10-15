@@ -563,6 +563,11 @@ results.
 In C<() = @array = split>, the C<() => at the beginning no longer confuses
 the optimiser, making it assume a limit of 1.
 
+=item *
+
+Fatal warnings no longer prevent the output of syntax errors.
+[perl #122966]
+
 =back
 
 =head1 Known Problems
