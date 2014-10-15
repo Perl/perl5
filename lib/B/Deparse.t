@@ -1867,3 +1867,10 @@ foreach \%_ ({5, 6}, {7, 8}) {
 foreach \&a (sub { 9; } , sub { 10; } ) {
     die;
 }
+####
+# join $foo, pos
+my $foo;
+$_ = join $foo, pos
+>>>>
+my $foo;
+$_ = join('???', pos $_);

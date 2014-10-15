@@ -4476,7 +4476,23 @@ sub dquote {
 }
 
 # OP_STRINGIFY is a listop, but it only ever has one arg
-sub pp_stringify { maybe_targmy(@_, \&dquote) }
+sub pp_stringify {
+    my ($self, $op, $cx) = @_;
+    my $kid = $op->first->sibling;
+    while ($kid->name eq 'null' && !null($kid->first)) {
+	$kid = $kid->first;
+    }
+    if ($kid->name =~ /^(?:const|padsv|rv2sv|av2arylen|gvsv
+			  |aelemfast(?:_lex)?|[ah]elem|join|concat)\z/x) {
+	maybe_targmy(@_, \&dquote);
+    }
+    else {
+	# Actually an optimised join.
+	my $result = listop(@_,"join");
+	$result =~ s/join([( ])/join$1$self->{'ex_const'}, /;
+	$result;
+    }
+}
 
 # tr/// and s/// (and tr[][], tr[]//, tr###, etc)
 # note that tr(from)/to/ is OK, but not tr/from/(to)
