@@ -23,7 +23,7 @@
 #   needs a target                      - t  (OA_TARGET)
 #   target can be in a pad              - T  (OA_TARGET|OA_TARGLEX)
 #   has a corresponding integer version - I  (OA_OTHERINT)
-#   has side effects                    - d  (OA_DANGEROUS)
+#   make temp copy in list assignment   - d  (OA_DANGEROUS)
 #   uses $_ if no argument given        - u  (OA_DEFGV)
 
 # Values for the operands are:

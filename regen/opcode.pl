@@ -1082,7 +1082,7 @@ my %opflags = (
     'T' =>   8 | 16,	# ... which may be lexical
     'i' =>   0,		# always produces integer (unused since e7311069)
     'I' =>  32,		# has corresponding int op
-    'd' =>  64,		# danger, unknown side effects
+    'd' =>  64,		# danger, make temp copy in list assignment
     'u' => 128,		# defaults to $_
 );
 
