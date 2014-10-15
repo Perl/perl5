@@ -360,6 +360,26 @@ case "$ccversion" in
     ;;
 esac
 
+# There is a devious bug in the MIPSpro 7.4 compiler:
+# memcmp() is an inlined intrinsic, and "sometimes" it gets compiled wrong.
+#
+# In Perl the most obvious hit is regcomp.c:S_regpposixcc(),
+# causing bus errors when compiling the POSIX character classes like
+# /[[:digit:]], which means that miniperl cannot build perl.
+# (That is almost only the one victim: one single test in re/pat fails, also.)
+#
+# Therefore let's turn the inline intrinsics off and let the normal
+# libc versions be used instead. This may cause a performance hit
+# but a little slower is better than zero speed.
+#
+# MIPSpro C 7.4.1m is supposed to have fixed this bug.
+#
+case "$ccversion" in
+"MIPSpro Compilers: Version 7.4")
+  ccflags="$ccflags -U__INLINE_INTRINSICS"
+  ;;
+esac
+
 EOCCBU
 
 # End of cc.cbu callback unit. - Allen
