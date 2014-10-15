@@ -9,6 +9,8 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
+    skip_all_without_dynamic_extension('Fcntl');
 }
 
 use warnings;
