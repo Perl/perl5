@@ -95,17 +95,17 @@ checkOptree ( name	=> 'our $a',
 	      bcopts	=> '-basic',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-4  <@> leave[1 ref] vKP/REFC ->(end)
+3  <@> leave[1 ref] vKP/REFC ->(end)
 1     <0> enter ->2
 2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
--     <1> ex-rv2sv vK/17 ->4
-3        <#> gvsv[*a] s/OURINTR ->4
+-     <1> rv2sv vK/OURINTR,1 ->3
+-        <#> gv[*a] s ->-
 EOT_EOT
-# 4  <@> leave[1 ref] vKP/REFC ->(end)
+# 3  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter ->2
 # 2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
-# -     <1> ex-rv2sv vK/17 ->4
-# 3        <$> gvsv(*a) s/OURINTR ->4
+# -     <1> rv2sv vK/OURINTR,1 ->3
+# -        <$> gv(*a) s ->-
 EONT_EONT
 
 checkOptree ( name	=> 'local $c',

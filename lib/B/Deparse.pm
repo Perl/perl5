@@ -1203,10 +1203,10 @@ sub maybe_parens_func {
 sub find_our_type {
     my ($self, $name) = @_;
     $self->populate_curcvlex() if !defined $self->{'curcvlex'};
-    my $seq = $self->{'curcop'}->cop_seq;
+    my $seq = $self->{'curcop'} ? $self->{'curcop'}->cop_seq : 0;
     for my $a (@{$self->{'curcvlex'}{"o$name"}}) {
 	my ($st, undef, $padname) = @$a;
-	if ($st == $seq && $padname->FLAGS & SVpad_TYPED) {
+	if ($st >= $seq && $padname->FLAGS & SVpad_TYPED) {
 	    return $padname->SvSTASH->NAME;
 	}
     }

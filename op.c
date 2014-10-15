@@ -12211,10 +12211,31 @@ Perl_rpeep(pTHX_ OP *o)
 		    else
 			o->op_type = OP_AELEMFAST_LEX;
 		}
-		break;
+		if (o->op_type != OP_GV)
+		    break;
 	    }
 
-	    if (o->op_next->op_type == OP_RV2SV) {
+	    /* Remove $foo from the op_next chain in void context.  */
+	    if (oldop
+	     && (  o->op_next->op_type == OP_RV2SV
+		|| o->op_next->op_type == OP_RV2AV
+		|| o->op_next->op_type == OP_RV2HV  )
+	     && (o->op_next->op_flags & OPf_WANT) == OPf_WANT_VOID
+	     && !(o->op_next->op_private & OPpLVAL_INTRO))
+	    {
+		oldop->op_next = o->op_next->op_next;
+		/* Reprocess the previous op if it is a nextstate, to
+		   allow double-nextstate optimisation.  */
+		if (oldop->op_type == OP_NEXTSTATE && oldoldop
+		 && oldoldop->op_next == oldop) {
+		    oldop->op_opt = 0;
+		    o = oldop = oldoldop;
+		    oldoldop = NULL;
+		    continue;
+		}
+		o = oldop;
+	    }
+	    else if (o->op_next->op_type == OP_RV2SV) {
 		if (!(o->op_next->op_private & OPpDEREF)) {
 		    op_null(o->op_next);
 		    o->op_private |= o->op_next->op_private & (OPpLVAL_INTRO

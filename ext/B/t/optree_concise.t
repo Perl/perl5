@@ -291,26 +291,20 @@ checkOptree
       strip_open_hints => 1,
       expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <0> enter 
-# 2  <;> nextstate(main 1 -e:1) v:>,<,%,{
-# 3  <#> gv[*a] s
-# 4  <1> rv2av[t3] vK/OURINTR,1
-# 5  <;> nextstate(main 2 -e:1) v:>,<,%,{
-# 6  <0> pushmark s
-# 7  <#> gv[*a] s
-# 8  <1> rv2av[t5] lK/1
-# 9  <@> sort vK
-# a  <@> leave[1 ref] vKP/REFC
+# 2  <;> nextstate(main 2 -e:1) v:>,<,%,{
+# 3  <0> pushmark s
+# 4  <#> gv[*a] s
+# 5  <1> rv2av[t5] lK/1
+# 6  <@> sort vK
+# 7  <@> leave[1 ref] vKP/REFC
 EOT_EOT
 # 1  <0> enter 
-# 2  <;> nextstate(main 1 -e:1) v:>,<,%,{
-# 3  <$> gv(*a) s
-# 4  <1> rv2av[t2] vK/OURINTR,1
-# 5  <;> nextstate(main 2 -e:1) v:>,<,%,{
-# 6  <0> pushmark s
-# 7  <$> gv(*a) s
-# 8  <1> rv2av[t3] lK/1
-# 9  <@> sort vK
-# a  <@> leave[1 ref] vKP/REFC
+# 2  <;> nextstate(main 2 -e:1) v:>,<,%,{
+# 3  <0> pushmark s
+# 4  <$> gv(*a) s
+# 5  <1> rv2av[t3] lK/1
+# 6  <@> sort vK
+# 7  <@> leave[1 ref] vKP/REFC
 EONT_EONT
 
 

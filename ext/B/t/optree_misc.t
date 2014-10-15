@@ -27,38 +27,38 @@ checkOptree ( name	=> 'OP_AELEMFAST opclass',
 	      code	=> sub { my @x; our @y; $x[127] + $y[-128]},
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# a  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->a
+# 7  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->7
 # 1        <;> nextstate(main 634 optree_misc.t:25) v:>,<,% ->2
 # 2        <0> padav[@x:634,636] vM/LVINTRO ->3
-# 3        <;> nextstate(main 635 optree_misc.t:25) v:>,<,% ->4
-# 5        <1> rv2av[t4] vK/OURINTR,1 ->6
-# 4           <#> gv[*y] s ->5
-# 6        <;> nextstate(main 636 optree_misc.t:25) v:>,<,%,{ ->7
-# 9        <2> add[t6] sK/2 ->a
-# -           <1> ex-aelem sK/2 ->8
-# 7              <0> aelemfast_lex[@x:634,636] sR/127 ->8
+# -        <0> ex-nextstate v ->3
+# -        <1> rv2av[t4] vK/OURINTR,1 ->3
+# -           <#> gv[*y] s ->-
+# 3        <;> nextstate(main 636 optree_misc.t:25) v:>,<,%,{ ->4
+# 6        <2> add[t6] sK/2 ->7
+# -           <1> ex-aelem sK/2 ->5
+# 4              <0> aelemfast_lex[@x:634,636] sR/127 ->5
 # -              <0> ex-const s ->-
-# -           <1> ex-aelem sK/2 ->9
+# -           <1> ex-aelem sK/2 ->6
 # -              <1> ex-rv2av sKR/1 ->-
-# 8                 <#> aelemfast[*y] s/128 ->9
+# 5                 <#> aelemfast[*y] s/128 ->6
 # -              <0> ex-const s/FOLD ->-
 EOT_EOT
-# a  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->a
+# 7  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->7
 # 1        <;> nextstate(main 634 optree_misc.t:27) v:>,<,% ->2
 # 2        <0> padav[@x:634,636] vM/LVINTRO ->3
-# 3        <;> nextstate(main 635 optree_misc.t:27) v:>,<,% ->4
-# 5        <1> rv2av[t3] vK/OURINTR,1 ->6
-# 4           <$> gv(*y) s ->5
-# 6        <;> nextstate(main 636 optree_misc.t:27) v:>,<,%,{ ->7
-# 9        <2> add[t4] sK/2 ->a
-# -           <1> ex-aelem sK/2 ->8
-# 7              <0> aelemfast_lex[@x:634,636] sR/127 ->8
+# -        <0> ex-nextstate v ->3
+# -        <1> rv2av[t3] vK/OURINTR,1 ->3
+# -           <$> gv(*y) s ->-
+# 3        <;> nextstate(main 636 optree_misc.t:27) v:>,<,%,{ ->4
+# 6        <2> add[t4] sK/2 ->7
+# -           <1> ex-aelem sK/2 ->5
+# 4              <0> aelemfast_lex[@x:634,636] sR/127 ->5
 # -              <0> ex-const s ->-
-# -           <1> ex-aelem sK/2 ->9
+# -           <1> ex-aelem sK/2 ->6
 # -              <1> ex-rv2av sKR/1 ->-
-# 8                 <$> aelemfast(*y) s/128 ->9
+# 5                 <$> aelemfast(*y) s/128 ->6
 # -              <0> ex-const s/FOLD ->-
 EONT_EONT
 
