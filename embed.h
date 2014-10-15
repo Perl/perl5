@@ -912,7 +912,6 @@
 #define reg_numbered_buff_store(a,b,c)	Perl_reg_numbered_buff_store(aTHX_ a,b,c)
 #define reg_qr_package(a)	Perl_reg_qr_package(aTHX_ a)
 #define reg_temp_copy(a,b)	Perl_reg_temp_copy(aTHX_ a,b)
-#define regprop(a,b,c,d)	Perl_regprop(aTHX_ a,b,c,d)
 #define report_uninit(a)	Perl_report_uninit(aTHX_ a)
 #define sv_magicext_mglob(a)	Perl_sv_magicext_mglob(aTHX_ a)
 #define validate_proto(a,b,c)	Perl_validate_proto(aTHX_ a,b,c)
@@ -1016,6 +1015,7 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #define _load_PL_utf8_foldclosures()	Perl__load_PL_utf8_foldclosures(aTHX)
+#define regprop(a,b,c,d,e)	Perl_regprop(aTHX_ a,b,c,d,e)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 #define _get_swash_invlist(a)	Perl__get_swash_invlist(aTHX_ a)

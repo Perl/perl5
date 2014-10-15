@@ -3626,12 +3626,6 @@ PERL_CALLCONV void	Perl_reginitcolors(pTHX);
 PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode* o, const regmatch_info *reginfo)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_REGPROP	\
-	assert(sv); assert(o)
-
 PERL_CALLCONV void	Perl_repeatcpy(char* to, const char* from, I32 len, IV count)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
@@ -7198,6 +7192,12 @@ PERL_CALLCONV SV*	Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog, co
 	assert(node)
 
 PERL_CALLCONV void	Perl__load_PL_utf8_foldclosures(pTHX);
+PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode* o, const regmatch_info *reginfo, const RExC_state_t *pRExC_state)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_REGPROP	\
+	assert(sv); assert(o)
+
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV SV*	Perl__get_swash_invlist(pTHX_ SV* const swash)

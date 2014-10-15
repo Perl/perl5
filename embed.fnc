@@ -1219,7 +1219,6 @@ EXp	|I32|reg_numbered_buff_length|NN REGEXP * const rx|NN const SV * const sv|co
 EXp	|SV*|reg_qr_package|NN REGEXP * const rx
 
 : FIXME - why the E?
-Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o|NULLOK const regmatch_info *reginfo
 Anp	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|IV count
 AnpP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
@@ -2095,6 +2094,10 @@ p	|OP *	|tied_method|NN SV *methname|NN SV **sp \
 				|NN SV *const sv|NN const MAGIC *const mg \
 				|const U32 flags|U32 argc|...
 
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o|NULLOK const regmatch_info *reginfo \
+				|NULLOK const RExC_state_t *pRExC_state
+#endif
 #if defined(PERL_IN_REGCOMP_C)
 Es	|regnode*|reg		|NN RExC_state_t *pRExC_state \
 				|I32 paren|NN I32 *flagp|U32 depth
