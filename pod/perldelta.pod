@@ -139,8 +139,8 @@ depending on OS.
 
 In C<@array = split>, the assigment can be optimised away with C<split>
 writing directly to the array.  This optimisation was happening only for
-package arrays other than @_ and only if the argument to split was an
-explicit constant or scalar other than $_.  Now this optimisation happens
+package arrays other than @_ and only
+sometimes.  Now this optimisation happens
 almost all the time.
 
 =item *
