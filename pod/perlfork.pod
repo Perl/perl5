@@ -168,8 +168,8 @@ BEGIN block, but will not continue parsing the source stream after the
 BEGIN block.  For example, consider the following code:
 
     BEGIN {
-        fork and exit;		# fork child and exit the parent
-	print "inner\n";
+        fork and exit;          # fork child and exit the parent
+        print "inner\n";
     }
     print "outer\n";
 
@@ -224,58 +224,58 @@ write to a forked child:
 
     # simulate open(FOO, "|-")
     sub pipe_to_fork ($) {
-	my $parent = shift;
-	pipe my $child, $parent or die;
-	my $pid = fork();
-	die "fork() failed: $!" unless defined $pid;
-	if ($pid) {
-	    close $child;
-	}
-	else {
-	    close $parent;
-	    open(STDIN, "<&=" . fileno($child)) or die;
-	}
-	$pid;
+        my $parent = shift;
+        pipe my $child, $parent or die;
+        my $pid = fork();
+        die "fork() failed: $!" unless defined $pid;
+        if ($pid) {
+            close $child;
+        }
+        else {
+            close $parent;
+            open(STDIN, "<&=" . fileno($child)) or die;
+        }
+        $pid;
     }
 
     if (pipe_to_fork('FOO')) {
-	# parent
-	print FOO "pipe_to_fork\n";
-	close FOO;
+        # parent
+        print FOO "pipe_to_fork\n";
+        close FOO;
     }
     else {
-	# child
-	while (<STDIN>) { print; }
-	exit(0);
+        # child
+        while (<STDIN>) { print; }
+        exit(0);
     }
 
 And this one reads from the child:
 
     # simulate open(FOO, "-|")
     sub pipe_from_fork ($) {
-	my $parent = shift;
-	pipe $parent, my $child or die;
-	my $pid = fork();
-	die "fork() failed: $!" unless defined $pid;
-	if ($pid) {
-	    close $child;
-	}
-	else {
-	    close $parent;
-	    open(STDOUT, ">&=" . fileno($child)) or die;
-	}
-	$pid;
+        my $parent = shift;
+        pipe $parent, my $child or die;
+        my $pid = fork();
+        die "fork() failed: $!" unless defined $pid;
+        if ($pid) {
+            close $child;
+        }
+        else {
+            close $parent;
+            open(STDOUT, ">&=" . fileno($child)) or die;
+        }
+        $pid;
     }
 
     if (pipe_from_fork('BAR')) {
-	# parent
-	while (<BAR>) { print; }
-	close BAR;
+        # parent
+        while (<BAR>) { print; }
+        close BAR;
     }
     else {
-	# child
-	print "pipe_from_fork\n";
-	exit(0);
+        # child
+        print "pipe_from_fork\n";
+        exit(0);
     }
 
 Forking pipe open() constructs will be supported in future.
