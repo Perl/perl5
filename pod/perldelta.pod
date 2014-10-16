@@ -155,6 +155,12 @@ C<qq(@array)> is implemented using two ops: a stringify op and a join op.
 If the qq contains nothing but a single array, the stringification is
 optimised away.
 
+=item *
+
+C<our $var> and C<our($s,@a,%h)> in void context are no longer evaluated at
+run time.  Even a whole sequence of C<our $foo;> statements will simply be
+skipped over.
+
 =back
 
 =head1 Modules and Pragmata
