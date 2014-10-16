@@ -392,8 +392,9 @@ C<< UNOP/SVOP >> to being C<< METHOD >>.
 =item *
 
 Locking and unlocking values via L<Hash::Util> or C<Internals::SvREADONLY>
-no longer has any affect on values that are read-only to begin.  Unlocking
-such values could result in crashes, hangs or other erratic behaviour.
+no longer has any effect on values that are read-only to begin.
+Previously, unlocking such values could result in crashes, hangs or
+other erratic behaviour.
 
 =item *
 
