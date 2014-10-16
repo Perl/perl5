@@ -198,7 +198,7 @@ separately in the child.
 On some operating systems, notably Solaris and Unixware, calling C<exit()>
 from a child process will flush and close open filehandles in the parent,
 thereby corrupting the filehandles.  On these systems, calling C<_exit()>
-is suggested instead.  C<_exit()> is available in Perl through the 
+is suggested instead.  C<_exit()> is available in Perl through the
 C<POSIX> module.  Please consult your system's manpages for more information
 on this.
 
@@ -280,7 +280,7 @@ And this one reads from the child:
 
 Forking pipe open() constructs will be supported in future.
 
-=item Global state maintained by XSUBs 
+=item Global state maintained by XSUBs
 
 External subroutines (XSUBs) that maintain their own global state may
 not work correctly.  Such XSUBs will either need to maintain locks to
