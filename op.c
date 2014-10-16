@@ -11662,7 +11662,7 @@ S_null_listop_in_list_context(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_NULL_LISTOP_IN_LIST_CONTEXT;
 
-    /* This is an OP_LIST in list context. That means we
+    /* This is an OP_LIST in list (or void) context. That means we
      * can ditch the OP_LIST and the OP_PUSHMARK within. */
 
     kid = cLISTOPo->op_first;
@@ -11716,7 +11716,8 @@ Perl_rpeep(pTHX_ OP *o)
 
 
         /* The following will have the OP_LIST and OP_PUSHMARK
-         * patched out later IF the OP_LIST is in list context.
+         * patched out later IF the OP_LIST is in list context, or
+         * if it is in void context and padrange is not possible.
          * So in that case, we can set the this OP's op_next
          * to skip to after the OP_PUSHMARK:
          *   a THIS -> b
@@ -11734,17 +11735,28 @@ Perl_rpeep(pTHX_ OP *o)
         {
             OP *sibling;
             OP *other_pushmark;
+            OP *pushsib;
             if (OP_TYPE_IS(o->op_next, OP_PUSHMARK)
                 && (sibling = OP_SIBLING(o))
                 && sibling->op_type == OP_LIST
                 /* This KIDS check is likely superfluous since OP_LIST
                  * would otherwise be an OP_STUB. */
                 && sibling->op_flags & OPf_KIDS
-                && (sibling->op_flags & OPf_WANT) == OPf_WANT_LIST
                 && (other_pushmark = cLISTOPx(sibling)->op_first)
                 /* Pointer equality also effectively checks that it's a
                  * pushmark. */
-                && other_pushmark == o->op_next)
+                && other_pushmark == o->op_next
+                /* List context */
+                && (  (sibling->op_flags & OPf_WANT) == OPf_WANT_LIST
+                   /* ... or void context... */
+                   || (  (sibling->op_flags & OPf_WANT) == OPf_WANT_VOID
+                      /* ...and something padrange would reject */
+                      && (  !(pushsib = OP_SIBLING(other_pushmark))
+                         || (  pushsib->op_type != OP_PADSV
+                            && pushsib->op_type != OP_PADAV
+                            && pushsib->op_type != OP_PADHV)
+                         || pushsib->op_private & ~OPpLVAL_INTRO))
+                   ))
             {
                 o->op_next = other_pushmark->op_next;
                 null_listop_in_list_context(sibling);
