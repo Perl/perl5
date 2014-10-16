@@ -1470,9 +1470,9 @@ my($m7, undef, $m8) = (1, 2, 3);
 ($m7, undef, $m8) = (1, 2, 3);
 ####
 # 'our/local' works with padrange op
-no strict;
 our($z, @z);
 our $o1;
+no strict;
 local $o11;
 $o1 = 1;
 local $o1 = 1;

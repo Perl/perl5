@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 20;
+plan 21;
 
 use B qw 'svref_2object OPpASSIGN_COMMON';
 
@@ -60,6 +60,13 @@ for (['CONSTANT', sub {          join "foo", "bar"    }, 0, "bar"    ],
 
 is svref_2object(sub { 0;0;0;0;0;0;time })->START->next->name, 'time',
   'multiple nextstates become one';
+
+
+# rv2[ahs]v in void context
+
+is svref_2object(sub { our($foo,@fit,%far); our $bar; our($a,$b); time })
+    ->START->next->name, 'time',
+  'rv2[ahs]v in void context';
 
 
 # split to array

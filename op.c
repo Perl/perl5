@@ -11709,6 +11709,7 @@ Perl_rpeep(pTHX_ OP *o)
 	    break;
 	}
 
+      redo:
 	/* By default, this op has now been optimised. A couple of cases below
 	   clear this again.  */
 	o->op_opt = 1;
@@ -12238,12 +12239,12 @@ Perl_rpeep(pTHX_ OP *o)
 		oldop->op_next = o->op_next->op_next;
 		/* Reprocess the previous op if it is a nextstate, to
 		   allow double-nextstate optimisation.  */
-		if (oldop->op_type == OP_NEXTSTATE && oldoldop
-		 && oldoldop->op_next == oldop) {
+		if (oldop->op_type == OP_NEXTSTATE) {
 		    oldop->op_opt = 0;
-		    o = oldop = oldoldop;
+		    o = oldop;
+		    oldop = oldoldop;
 		    oldoldop = NULL;
-		    continue;
+		    goto redo;
 		}
 		o = oldop;
 	    }
