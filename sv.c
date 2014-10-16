@@ -5470,14 +5470,12 @@ Perl_sv_catsv_flags(pTHX_ SV *const dsv, SV *const ssv, const I32 flags)
     if (ssv) {
 	STRLEN slen;
 	const char *spv = SvPV_flags_const(ssv, slen, flags);
-	if (spv) {
-            if (flags & SV_GMAGIC)
+        if (flags & SV_GMAGIC)
                 SvGETMAGIC(dsv);
-	    sv_catpvn_flags(dsv, spv, slen,
+        sv_catpvn_flags(dsv, spv, slen,
 			    DO_UTF8(ssv) ? SV_CATUTF8 : SV_CATBYTES);
-            if (flags & SV_SMAGIC)
+        if (flags & SV_SMAGIC)
                 SvSETMAGIC(dsv);
-        }
     }
 }
 
