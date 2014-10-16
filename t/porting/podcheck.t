@@ -1619,6 +1619,7 @@ foreach my $filename (@files) {
                 $same = $prior_contents eq $contents;
             }
 
+            use File::Basename 'basename';
             if ($same) {
                 $checker->set_skip("The pod of $filename is a duplicate of "
                                     . "the pod for $prior_filename");
@@ -1633,6 +1634,11 @@ foreach my $filename (@files) {
                 $checker->set_skip("CPAN is upstream for $filename");
             } elsif ( $filename =~ /^utils/ or $prior_filename =~ /^utils/ ) {
                 $checker->set_skip("$filename copy is in utils/");
+            } elsif ($prior_filename =~ /^(?:cpan|ext|dist)/
+                     && $filename !~ /^(?:cpan|ext|dist)/
+                     && basename($prior_filename) eq basename($filename))
+            {
+                $checker->set_skip("$filename: Need to run make?");
             } else { # Here have two pods with identical names that differ
                 $prior_checker->poderror(
                         { -msg => $duplicate_name,
