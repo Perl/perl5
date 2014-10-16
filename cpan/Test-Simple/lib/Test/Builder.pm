@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.001006';
+our $VERSION = '1.001008';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 BEGIN {
@@ -355,7 +355,7 @@ sub finalize {
     $self->parent->{Child_Name} = undef;
     unless ($self->{Bailed_Out}) {
         if ( $self->{Skip_All} ) {
-            $self->parent->skip($self->{Skip_All});
+            $self->parent->skip($self->{Skip_All}, $self->name);
         }
         elsif ( not @{ $self->{Test_Results} } ) {
             $self->parent->ok( 0, sprintf q[No tests run for subtest "%s"], $self->name );
@@ -1292,8 +1292,9 @@ Skips the current test, reporting C<$why>.
 =cut
 
 sub skip {
-    my( $self, $why ) = @_;
+    my( $self, $why, $name ) = @_;
     $why ||= '';
+    $name = '' unless defined $name;
     $self->_unoverload_str( \$why );
 
     lock( $self->{Curr_Test} );
@@ -1303,7 +1304,7 @@ sub skip {
         {
             'ok'      => 1,
             actual_ok => 1,
-            name      => '',
+            name      => $name,
             type      => 'skip',
             reason    => $why,
         }
