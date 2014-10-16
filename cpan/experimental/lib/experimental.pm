@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.011';
+$experimental::VERSION = '0.012';
 use strict;
 use warnings;
 use version ();
@@ -25,6 +25,7 @@ my %min_version = (
 	fc              => '5.16.0',
 	lexical_topic   => '5.10.0',
 	lexical_subs    => '5.18.0',
+	lvalue_refs     => '5.21.5',
 	postderef       => '5.20.0',
 	postderef_qq    => '5.20.0',
 	regex_sets      => '5.18.0',
@@ -58,7 +59,13 @@ sub _enable {
 		croak "Can't enable unknown feature $pragma";
 	}
 	elsif ($min_version{$pragma} > $]) {
-		croak "Need perl $min_version{$pragma} or later for feature $pragma";
+		my $stable = $min_version{$pragma};
+		if ($stable->{version}[1] % 2) {
+			$stable = version->new(
+				"5.".($stable->{version}[1]+1).'.0'
+			);
+		}
+		croak "Need perl $stable or later for feature $pragma";
 	}
 }
 
@@ -112,7 +119,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.011
+version 0.012
 
 =head1 SYNOPSIS
 
@@ -146,6 +153,7 @@ The supported features, documented further below, are:
 	array_base    - allow the use of $[ to change the starting index of @array
 	autoderef     - allow push, each, keys, and other built-ins on references
 	lexical_topic - allow the use of lexical $_ via "my $_"
+	lvalue_refs   - allow aliasing via \$x = \$y
 	postderef     - allow the use of postfix dereferencing expressions, including
 	                in interpolating strings
 	regex_sets    - allow extended bracketed character classes in regexps
