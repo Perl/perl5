@@ -382,11 +382,11 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UTF8_TWO_BYTE_HI(c)                                                    \
        (__ASSERT_((sizeof(c) ==  1)                                            \
                   || !(((WIDEST_UTYPE)(c)) & ~MAX_PORTABLE_UTF8_TWO_BYTE))     \
-        ((U8) __BASE_TWO_BYTE_HI(c, NATIVE_TO_LATIN1)))
+        ((U8) __BASE_TWO_BYTE_HI(c, NATIVE_TO_UNI)))
 #define UTF8_TWO_BYTE_LO(c)                                                    \
        (__ASSERT_((sizeof(c) ==  1)                                            \
                   || !(((WIDEST_UTYPE)(c)) & ~MAX_PORTABLE_UTF8_TWO_BYTE))     \
-        ((U8) __BASE_TWO_BYTE_LO(c, NATIVE_TO_LATIN1)))
+        ((U8) __BASE_TWO_BYTE_LO(c, NATIVE_TO_UNI)))
 
 /* This is illegal in any well-formed UTF-8 in both EBCDIC and ASCII
  * as it is only in overlongs. */
