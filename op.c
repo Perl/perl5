@@ -6133,9 +6133,9 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	if (right && right->op_type == OP_SPLIT
 	 && !(right->op_flags & OPf_STACKED)) {
 	    OP* tmpop = ((LISTOP*)right)->op_first;
-	    if (tmpop && (tmpop->op_type == OP_PUSHRE)) {
-		PMOP * const pm = (PMOP*)tmpop;
-		if (
+	    PMOP * const pm = (PMOP*)tmpop;
+	    assert (tmpop && (tmpop->op_type == OP_PUSHRE));
+	    if (
 #ifdef USE_ITHREADS
 		    !pm->op_pmreplrootu.op_pmtargetoff
 #else
@@ -6214,7 +6214,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			  }
 			}
 		    }
-		}
 	    }
 	}
 	return o;
