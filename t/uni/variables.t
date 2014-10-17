@@ -86,7 +86,7 @@ for ( 0x80..0xff ) {
         eval "no strict; use utf8; \$$chr = 1";
         like $@,
             qr/\QUnrecognized character \x{\E\L$esc/,
-            sprintf("..but is illegal as a length-1 variable under use utf8", $_);
+            sprintf("..but is illegal as a length-1 variable under use utf8");
     }
     else {
         {
