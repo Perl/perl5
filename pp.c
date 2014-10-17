@@ -418,12 +418,12 @@ PP(pp_av2arylen)
     AV * const av = MUTABLE_AV(TOPs);
     const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
     if (lvalue) {
-	SV ** const sv = Perl_av_arylen_p(aTHX_ MUTABLE_AV(av));
-	if (!*sv) {
-	    *sv = newSV_type(SVt_PVMG);
-	    sv_magic(*sv, MUTABLE_SV(av), PERL_MAGIC_arylen, NULL, 0);
+	SV ** const svp = Perl_av_arylen_p(aTHX_ MUTABLE_AV(av));
+	if (!*svp) {
+	    *svp = newSV_type(SVt_PVMG);
+	    sv_magic(*svp, MUTABLE_SV(av), PERL_MAGIC_arylen, NULL, 0);
 	}
-	SETs(*sv);
+	SETs(*svp);
     } else {
 	SETs(sv_2mortal(newSViv(AvFILL(MUTABLE_AV(av)))));
     }
