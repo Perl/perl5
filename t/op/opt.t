@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 22;
+plan 23;
 
 use v5.10; # state
 use B qw 'svref_2object OPpASSIGN_COMMON';
@@ -55,6 +55,16 @@ for (['CONSTANT', sub {          join "foo", "bar"    }, 0, "bar"    ],
     is $last_expr->name, 'const', "$tn optimised to constant";
     is $sub->(), $expect, "$tn folded correctly";
 }
+
+
+# list+pushmark in list context elided out of the execution chain
+is svref_2object(sub { () = ($_, ($_, $_)) })
+    ->START # nextstate
+    ->next  # pushmark
+    ->next  # gvsv
+    ->next  # should be gvsv, not pushmark
+  ->name, 'gvsv',
+  "list+pushmark in list context where list's elder sibling is a null";
 
 
 # nextstate multiple times becoming one nextstate

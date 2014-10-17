@@ -6306,11 +6306,6 @@ STATIC OP*	S_no_fh_allowed(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_NO_FH_ALLOWED	\
 	assert(o)
 
-STATIC void	S_null_listop_in_list_context(pTHX_ OP* o)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_NULL_LISTOP_IN_LIST_CONTEXT	\
-	assert(o)
-
 PERL_STATIC_INLINE OP*	S_op_integerize(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_OP_INTEGERIZE	\

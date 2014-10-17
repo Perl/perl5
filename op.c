@@ -1878,12 +1878,27 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_LEAVETRY:
     case OP_LEAVELOOP:
     case OP_LINESEQ:
-    case OP_LIST:
     case OP_LEAVEGIVEN:
     case OP_LEAVEWHEN:
+      kids:
 	for (kid = cLISTOPo->op_first; kid; kid = OP_SIBLING(kid))
 	    scalarvoid(kid);
 	break;
+    case OP_LIST:
+	/* If the first kid after pushmark is something that the padrange
+	   optimisation would reject, then null the list and the pushmark.
+	 */
+	if ((kid = cLISTOPo->op_first)->op_type == OP_PUSHMARK
+	 && (  !(kid = OP_SIBLING(kid))
+	    || (  kid->op_type != OP_PADSV
+	       && kid->op_type != OP_PADAV
+	       && kid->op_type != OP_PADHV)
+	    || kid->op_private & ~OPpLVAL_INTRO)
+	) {
+	    op_null(cUNOPo->op_first); /* NULL the pushmark */
+	    op_null(o); /* NULL the list */
+	}
+	goto kids;
     case OP_ENTEREVAL:
 	scalarkids(o);
 	break;
@@ -1959,8 +1974,14 @@ Perl_list(pTHX_ OP *o)
 	    list(cBINOPo->op_first);
 	    return gen_constant_list(o);
 	}
+	listkids(o);
+	break;
     case OP_LIST:
 	listkids(o);
+	if (cLISTOPo->op_first->op_type == OP_PUSHMARK) {
+	    op_null(cUNOPo->op_first); /* NULL the pushmark */
+	    op_null(o); /* NULL the list */
+	}
 	break;
     case OP_LEAVE:
     case OP_LEAVETRY:
@@ -3093,7 +3114,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     meth = newSVpvs_share("import");
     imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
 		   op_append_elem(OP_LIST,
-			       op_prepend_elem(OP_LIST, pack, list(arg)),
+			       op_prepend_elem(OP_LIST, pack, arg),
 			       newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
 
     /* Combine the ops. */
@@ -5585,7 +5606,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    meth = newSVpvs_share("VERSION");
 	    veop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 			    op_append_elem(OP_LIST,
-					op_prepend_elem(OP_LIST, pack, list(version)),
+					op_prepend_elem(OP_LIST, pack, version),
 					newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
 	}
     }
@@ -5612,8 +5633,9 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    ? newSVpvs_share("import") : newSVpvs_share("unimport");
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 		       op_append_elem(OP_LIST,
-				   op_prepend_elem(OP_LIST, pack, list(arg)),
-				   newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
+				   op_prepend_elem(OP_LIST, pack, arg),
+				   newMETHOP_named(OP_METHOD_NAMED, 0, meth)
+		       ));
     }
 
     /* Fake up the BEGIN {}, which does its thing immediately. */
@@ -11655,18 +11677,6 @@ S_inplace_aassign(pTHX_ OP *o) {
 #define IS_OR_OP(o)    (o->op_type == OP_OR)
 
 
-STATIC void
-S_null_listop_in_list_context(pTHX_ OP *o)
-{
-    PERL_ARGS_ASSERT_NULL_LISTOP_IN_LIST_CONTEXT;
-
-    /* This is an OP_LIST in list (or void) context. That means we
-     * can ditch the OP_LIST and the OP_PUSHMARK within. */
-
-    op_null(cUNOPo->op_first); /* NULL the pushmark */
-    op_null(o); /* NULL the list */
-}
-
 /* A peephole optimizer.  We visit the ops in the order they're to execute.
  * See the comments at the top of this file for more details about when
  * peep() is called */
@@ -11707,54 +11717,6 @@ Perl_rpeep(pTHX_ OP *o)
 	o->op_opt = 1;
 	PL_op = o;
 
-
-        /* The following will have the OP_LIST and OP_PUSHMARK
-         * patched out later IF the OP_LIST is in list context, or
-         * if it is in void context and padrange is not possible.
-         * So in that case, we can set the this OP's op_next
-         * to skip to after the OP_PUSHMARK:
-         *   a THIS -> b
-         *   d list -> e
-         *   b   pushmark -> c
-         *   c   whatever -> d
-         *   e whatever
-         * will eventually become:
-         *   a THIS -> c
-         *   - ex-list -> -
-         *   -   ex-pushmark -> -
-         *   c   whatever -> e
-         *   e whatever
-         */
-        {
-            OP *sibling;
-            OP *other_pushmark;
-            OP *pushsib;
-            if (OP_TYPE_IS(o->op_next, OP_PUSHMARK)
-                && (sibling = OP_SIBLING(o))
-                && sibling->op_type == OP_LIST
-                /* This KIDS check is likely superfluous since OP_LIST
-                 * would otherwise be an OP_STUB. */
-                && sibling->op_flags & OPf_KIDS
-                && (other_pushmark = cLISTOPx(sibling)->op_first)
-                /* Pointer equality also effectively checks that it's a
-                 * pushmark. */
-                && other_pushmark == o->op_next
-                /* List context */
-                && (  (sibling->op_flags & OPf_WANT) == OPf_WANT_LIST
-                   /* ... or void context... */
-                   || (  (sibling->op_flags & OPf_WANT) == OPf_WANT_VOID
-                      /* ...and something padrange would reject */
-                      && (  !(pushsib = OP_SIBLING(other_pushmark))
-                         || (  pushsib->op_type != OP_PADSV
-                            && pushsib->op_type != OP_PADAV
-                            && pushsib->op_type != OP_PADHV)
-                         || pushsib->op_private & ~OPpLVAL_INTRO))
-                   ))
-            {
-                o->op_next = other_pushmark->op_next;
-                null_listop_in_list_context(sibling);
-            }
-        }
 
 	switch (o->op_type) {
 	case OP_DBSTATE:
