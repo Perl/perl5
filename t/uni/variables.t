@@ -65,49 +65,58 @@ for my $v (qw( ^V ; < > ( ) {^GLOBAL_PHASE} ^W _ 1 4 0 [ ] ! @ / \ = )) {
 
     local $@;
     eval "use utf8; \$$v;";
-    is $@, '', "No syntax error for \$$v under use utf8";
+    is $@, '', "No syntax error for \$$v under 'use utf8'";
   }
 }
 
 # Checking if the Latin-1 range behaves as expected, and that the behavior is the
 # same whenever under strict or not.
 for ( 0x80..0xff ) {
-    $_ = utf8::unicode_to_native($_);
+    my $ord = utf8::unicode_to_native($_);
+    my $chr = chr $ord;
+    my $name;
+    if ($chr =~ /[[:cntrl:]]/u) {
+        $name = sprintf "\\x%02x, a C1 control", $ord;
+    }
+    elsif ($chr =~ /\p{XIDStart}/) {
+        $name = sprintf "\\x%02x, a non-ASCII XIDS character", $ord;
+    }
+    else {
+        $name = sprintf "\\x%02x, a non-ASCII, non-XIDS character", $ord;
+    }
     no warnings 'closure';
-    my $chr = chr;
-    my $esc = sprintf("%X", ord $chr);
+    my $esc = sprintf("%X", $ord);
     utf8::downgrade($chr);
     if ($chr !~ /\p{XIDS}/u) {
         is evalbytes "no strict; \$$chr = 10",
             10,
-            sprintf("\\x%02x, part of the latin-1 range, is legal as a length-1 variable", $_);
-
+                "$name is legal as a length-1 variable";
         utf8::upgrade($chr);
         local $@;
         eval "no strict; use utf8; \$$chr = 1";
         like $@,
             qr/\QUnrecognized character \x{\E\L$esc/,
-            sprintf("..but is illegal as a length-1 variable under use utf8");
+            "  ... but is illegal as a length-1 variable under 'use utf8'";
     }
     else {
         {
             no utf8;
             local $@;
             evalbytes "no strict; \$$chr = 1";
-            is($@, '', sprintf("\\x%02x, =~ \\p{XIDS}, latin-1, no utf8, no strict, is a valid length-1 variable", $_));
+            is($@, '', "$name under 'no utf8', 'no strict', is a valid length-1 variable");
 
             local $@;
             evalbytes "use strict; \$$chr = 1";
             is($@,
                 '',
-                sprintf("\\x%02x under no utf8 does not have to be required under strict, even though it matches XIDS", $_)
+                "  ... and under 'no utf8' does not have to be required under strict, even though it matches XIDS"
             );
 
             local $@;
             evalbytes "\$a$chr = 1";
             like($@,
                 qr/Unrecognized character /,
-                sprintf("...but under no utf8, it's not allowed in two-or-more character variables")
+                "  ... but under 'no utf8', it's not allowed in length-2+ variables"
             );
         }
         {
@@ -116,13 +125,13 @@ for ( 0x80..0xff ) {
             utf8::upgrade($u);
             local $@;
             eval "no strict; \$$u = 1";
-            is($@, '', sprintf("\\x%02x, =~ \\p{XIDS}, UTF-8, use utf8, no strict, is a valid length-1 variable", $_));
+            is($@, '', "  ... and under 'use utf8', 'no strict', is a valid length-1 variable");
 
             local $@;
             eval "use strict; \$$u = 1";
             like($@,
                 qr/Global symbol "\$$u" requires explicit package name/,
-                sprintf("\\x%02x under utf8 has to be required under strict", $_)
+                "  ... and under utf8 has to be required under strict"
             );
         }
     }
@@ -132,7 +141,7 @@ for ( 0x80..0xff ) {
     use utf8;
     my $ret = eval "my \$c\x{327} = 100; \$c\x{327}"; # c + cedilla
     is($@, '', "ASCII character + combining character works as a variable name");
-    is($ret, 100, "...and returns the correct value");
+    is($ret, 100, "  ... and returns the correct value");
 }
 
 # From Tom Christiansen's 'highly illegal variable names are now accidentally legal' mail
@@ -247,7 +256,7 @@ EOP
     no warnings 'deprecated';
     my $ret = eval "\${\cT\n}";
     is($@, "", 'No errors from using ${\n\cT\n}');
-    is($ret, $^T, "...and we got the right value");
+    is($ret, $^T, "  ... and we got the right value");
 }
 
 {
@@ -267,9 +276,9 @@ EOP
     );
 
     eval "\$\cQ = 24";                 # Literal control character
-    is($@, "", "...and they can be assigned to without error");
-    is(${"\cQ"}, 24, "...and the assignment works");
-    is($^Q, 24, "...even if we access the variable through the caret name");
+    is($@, "", "  ... and they can be assigned to without error");
+    is(${"\cQ"}, 24, "  ... and the assignment works");
+    is($^Q, 24, "  ... even if we access the variable through the caret name");
     is(\${"\cQ"}, \$^Q, '\${\cQ} == \$^Q');
 }
 
