@@ -2339,7 +2339,7 @@ EXTCONST char PL_op_private_labels[] = {
 
 
 /* PL_op_private_bitfields[]: details about each bit field type.
- * Each defintition consists of the following list of words:
+ * Each definition consists of the following list of words:
  *    bitmin
  *    label (index into PL_op_private_labels[]; -1 if no label)
  *    repeat for each enum entry (if any):
