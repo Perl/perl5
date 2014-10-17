@@ -1355,6 +1355,12 @@ syntax error at - line 3, near "=~ ?"
 Execution of - aborted due to compilation errors.
 ########
 # toke.c
+BEGIN {
+    if (ord('A') == 193) {
+        print "SKIPPED\n# result varies depending on which ebcdic platform";
+        exit 0;
+    }
+}
 use warnings;
 $a = "\c,";
 $a = "\c`";
@@ -1362,8 +1368,8 @@ no warnings 'syntax';
 $a = "\c,";
 $a = "\c`";
 EXPECT
-"\c," is more clearly written simply as "l" at - line 3.
-"\c`" is more clearly written simply as "\ " at - line 4.
+"\c," is more clearly written simply as "l" at - line 9.
+"\c`" is more clearly written simply as "\ " at - line 10.
 ########
 # toke.c
 BEGIN {
