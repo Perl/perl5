@@ -1360,11 +1360,30 @@ EXPECT
 "\c`" is more clearly written simply as "\ " at - line 4.
 ########
 # toke.c
+BEGIN {
+    if (ord('A') == 193) {
+        print "SKIPPED\n# test is ASCII-specific";
+        exit 0;
+    }
+}
 use warnings;
 my $a = "\c{ack}";
 EXPECT
 OPTION fatal
-Use ";" instead of "\c{" at - line 3.
+Use ";" instead of "\c{" at - line 9.
+########
+# toke.c
+BEGIN {
+    if (ord('A') == 65) {
+        print "SKIPPED\n# test is EBCDIC-specific";
+        exit 0;
+    }
+}
+use warnings;
+my $a = "\c{ack}";
+EXPECT
+OPTION fatal
+Sequence "\c{" invalid at - line 9.
 ########
 # toke.c
 my $a = "\câ";

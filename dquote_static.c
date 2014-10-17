@@ -50,10 +50,14 @@ S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
                         "Character following \"\\c\" must be printable ASCII");
     }
     else if (source == '{') {
-        assert(isPRINT_A(toCTRL('{')));
-
-        /* diag_listed_as: Use "%s" instead of "%s" */
-        Perl_croak(aTHX_ "Use \"%c\" instead of \"\\c{\"", toCTRL('{'));
+        const char control = toCTRL('{');
+        if (isPRINT_A(control)) {
+            /* diag_listed_as: Use "%s" instead of "%s" */
+            Perl_croak(aTHX_ "Use \"%c\" instead of \"\\c{\"", control);
+        }
+        else {
+            Perl_croak(aTHX_ "Sequence \"\\c{\" invalid");
+        }
     }
 
     result = toCTRL(source);

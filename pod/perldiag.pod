@@ -5056,6 +5056,14 @@ missing the final closing quote or angle bracket after the name.  The
 S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.
 
+=item Sequence "\c{" invalid
+
+(F) These three characters may not appear in sequence in a
+double-quotish context.  This message is raised only on non-ASCII
+platforms (a different error message is output on ASCII ones).  If you
+were intending to specify a control character with this sequence, you'll
+have to use a different way to specify it.
+
 =item Sequence \%s... not terminated in regex; marked by S<<-- HERE> in
 m/%s/
 
