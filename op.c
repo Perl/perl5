@@ -678,9 +678,7 @@ optree.
 void
 Perl_op_free(pTHX_ OP *o)
 {
-#ifdef USE_ITHREADS
     dVAR;
-#endif
     OPCODE type;
 
     /* Though ops may be freed twice, freeing the op after its slab is a
