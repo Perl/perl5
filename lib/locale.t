@@ -2075,10 +2075,10 @@ foreach my $Locale (@Locale) {
                             "; lc=", disp_chars(($y)), "; ",
                             "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
-                            $x =~ /$y/i ? 1 : 0,
+                            $x =~ /\Q$y/i ? 1 : 0,
                             "; ",
                             disp_chars(($y)), "=~/", disp_chars(($x)), "/i=",
-                            $y =~ /$x/i ? 1 : 0,
+                            $y =~ /\Q$x/i ? 1 : 0,
                             "\n");
                 #
                 # If $x and $y contain regular expression characters
@@ -2108,7 +2108,7 @@ foreach my $Locale (@Locale) {
                     print "# Regex characters in '$x' or '$y', skipping test $locales_test_number for locale '$Locale'\n";
                     next;
                 }
-                push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+                push @f, $x unless $x =~ /\Q$y/i && $y =~ /\Q$x/i;
 
                 # fc is not a locale concept, so Perl uses lc for it.
                 push @f, $x unless lc $x eq fc $x;
@@ -2121,13 +2121,13 @@ foreach my $Locale (@Locale) {
                             "; lc=", disp_chars(($y)), "; ",
                             "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
-                            $x =~ /$y/i ? 1 : 0,
+                            $x =~ /\Q$y/i ? 1 : 0,
                             "; ",
                             disp_chars(($y)), "=~/", disp_chars(($x)), "/i=",
-                            $y =~ /$x/i ? 1 : 0,
+                            $y =~ /\Q$x/i ? 1 : 0,
                             "\n");
 
-                push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+                push @f, $x unless $x =~ /\Q$y/i && $y =~ /\Q$x/i;
 
                 # The places where Unicode's lc is different from fc are
                 # skipped here by virtue of the 'next unless uc...' line above
@@ -2143,16 +2143,16 @@ foreach my $Locale (@Locale) {
                             "; uc=", disp_chars(($y)), "; ",
                             "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
-                            $x =~ /$y/i ? 1 : 0,
+                            $x =~ /\Q$y/i ? 1 : 0,
                             "; ",
                             disp_chars(($y)), "=~/", disp_chars(($x)), "/i=",
-                            $y =~ /$x/i ? 1 : 0,
+                            $y =~ /\Q$x/i ? 1 : 0,
                             "\n");
                 if ($x =~ $re || $y =~ $re) { # See above.
                     print "# Regex characters in '$x' or '$y', skipping test $locales_test_number for locale '$Locale'\n";
                     next;
                 }
-                push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+                push @f, $x unless $x =~ /\Q$y/i && $y =~ /\Q$x/i;
 
                 push @f, $x unless lc $x eq fc $x;
             }
@@ -2164,12 +2164,12 @@ foreach my $Locale (@Locale) {
                             "; uc=", disp_chars(($y)), "; ",
                             "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
-                            $x =~ /$y/i ? 1 : 0,
+                            $x =~ /\Q$y/i ? 1 : 0,
                             "; ",
                             disp_chars(($y)), "=~/", disp_chars(($x)), "/i=",
-                            $y =~ /$x/i ? 1 : 0,
+                            $y =~ /\Q$x/i ? 1 : 0,
                             "\n");
-                push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+                push @f, $x unless $x =~ /\Q$y/i && $y =~ /\Q$x/i;
 
                 push @f, $x unless lc $x eq fc $x;
             }
