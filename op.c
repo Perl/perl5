@@ -12083,17 +12083,16 @@ Perl_rpeep(pTHX_ OP *o)
              * padrange.
              * In particular in void context, we can only optimise to
              * a padrange if see see the complete sequence
-             *     pushmark, pad*v, ...., list, nextstate
-             * which has the net effect of of leaving the stack empty
-             * (for now we leave the nextstate in the execution chain, for
-             * its other side-effects).
+             *     pushmark, pad*v, ...., list
+             * which has the net effect of of leaving the markstack as it
+             * was.  Not pushing on to the stack (whereas padsv does touch
+             * the stack) makes no difference in void context.
              */
             assert(followop);
             if (gimme == OPf_WANT_VOID) {
-                if (OP_TYPE_IS_OR_WAS(followop, OP_LIST)
+                if (followop->op_type == OP_LIST
                         && gimme == (followop->op_flags & OPf_WANT)
-                        && (   followop->op_next->op_type == OP_NEXTSTATE
-                            || followop->op_next->op_type == OP_DBSTATE))
+                   )
                 {
                     followop = followop->op_next; /* skip OP_LIST */
 
