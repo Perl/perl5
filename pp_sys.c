@@ -743,6 +743,22 @@ PP(pp_fileno)
 	return tied_method0(SV_CONST(FILENO), SP, MUTABLE_SV(io), mg);
     }
 
+    if (io && IoDIRP(io)) {
+#if defined(HAS_DIRFD) || defined(HAS_DIR_DD_FD)
+        PUSHi(my_dirfd(IoDIRP(io)));
+        RETURN;
+#elif defined(ENOTSUP)
+        errno = ENOTSUP;        /* Operation not supported */
+        RETPUSHUNDEF;
+#elif defined(EOPNOTSUPP)
+        errno = EOPNOTSUPP;     /* Operation not supported on socket */
+        RETPUSHUNDEF;
+#else
+        errno = EINVAL;         /* Invalid argument */
+        RETPUSHUNDEF;
+#endif
+    }
+
     if (!io || !(fp = IoIFP(io))) {
 	/* Can't do this because people seem to do things like
 	   defined(fileno($foo)) to check whether $foo is a valid fh.

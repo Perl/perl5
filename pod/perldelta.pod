@@ -27,6 +27,18 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<fileno> now works on directory handles
+
+When the relevant support is available in the operating system, the
+C<fileno> builtin now works on directory handles, yielding the
+underlying file descriptor in the same way as for filehandles. On
+operating systems without such support, C<fileno> on a directory handle
+continues to return the undefined value, as before, but also sets C<$!> to
+indicate that the operation is not supported.
+
+Currently, this uses either a C<dd_fd> member in the OS C<DIR>
+structure, or a dirfd(3) function as specified by POSIX.1-2008.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

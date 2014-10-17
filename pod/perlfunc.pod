@@ -2297,6 +2297,12 @@ same underlying descriptor:
             "not have a real file descriptor\n";
     }
 
+The behavior of C<fileno> on a directory handle depends on the operating
+system. On a system with dirfd(3) or similar, C<fileno> on a directory
+handle returns the underlying file descriptor associated with the
+handle; on systems with no such support, it returns the undefined value,
+and sets C<$!> (errno).
+
 =item flock FILEHANDLE,OPERATION
 X<flock> X<lock> X<locking>
 
