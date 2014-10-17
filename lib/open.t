@@ -184,6 +184,8 @@ EOE
 SKIP: {
     skip("no perlio", 1) unless (find PerlIO::Layer 'perlio');
     skip("no Encode", 1) unless $Config{extensions} =~ m{\bEncode\b};
+    skip("EBCDIC platform doesnt have 'use encoding' used by open ':locale'", 1)
+                                                                if $::IS_EBCDIC;
 
     eval q[use Encode::Alias;use open ":std", ":locale"];
     is($@, '', 'can use :std and :locale');
