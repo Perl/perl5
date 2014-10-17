@@ -12073,7 +12073,7 @@ Perl_rpeep(pTHX_ OP *o)
                 followop = p->op_next;
             }
 
-            if (count < 1)
+            if (count < 1 || (count == 1 && !defav))
                 break;
 
             /* pp_padrange in specifically compile-time void context
