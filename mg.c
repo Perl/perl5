@@ -3464,7 +3464,10 @@ int
 Perl_magic_setdebugvar(pTHX_ SV *sv, MAGIC *mg) {
     PERL_ARGS_ASSERT_MAGIC_SETDEBUGVAR;
 
-    assert(mg->mg_private >= DBVARMG_SINGLE && mg->mg_private < DBVARMG_COUNT);
+#if DBVARMG_SINGLE != 0
+    assert(mg->mg_private >= DBVARMG_SINGLE);
+#endif
+    assert(mg->mg_private < DBVARMG_COUNT);
 
     PL_DBcontrol[mg->mg_private] = SvIV_nomg(sv);
 
@@ -3475,7 +3478,10 @@ int
 Perl_magic_getdebugvar(pTHX_ SV *sv, MAGIC *mg) {
     PERL_ARGS_ASSERT_MAGIC_GETDEBUGVAR;
 
-    assert(mg->mg_private >= DBVARMG_SINGLE && mg->mg_private < DBVARMG_COUNT);
+#if DBVARMG_SINGLE != 0
+    assert(mg->mg_private >= DBVARMG_SINGLE);
+#endif
+    assert(mg->mg_private < DBVARMG_COUNT);
     sv_setiv(sv, PL_DBcontrol[mg->mg_private]);
 
     return 0;

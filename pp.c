@@ -6288,7 +6288,7 @@ PP(pp_lvref)
     SV * const arg = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
     MAGIC * const mg = sv_magicext(ret, arg, PERL_MAGIC_lvref,
 				   &PL_vtbl_lvref, (char *)elem,
-				   elem ? HEf_SVKEY : ARGTARG);
+				   elem ? HEf_SVKEY : (I32)ARGTARG);
     mg->mg_private = PL_op->op_private;
     if (PL_op->op_private & OPpLVREF_ITER)
 	mg->mg_flags |= MGf_PERSIST;
