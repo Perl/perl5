@@ -773,15 +773,18 @@ sub concise_op {
     $h{extarg} = $h{targ} = $op->targ;
     $h{extarg} = "" unless $h{extarg};
     $h{privval} = $op->private;
-    $h{private} = private_flags($h{name}, $op->private);
+    # for null ops, targ holds the old type
+    my $origname = $h{name} eq "null" && $h{targ}
+      ? substr(ppname($h{targ}), 3)
+      : $h{name};
+    $h{private} = private_flags($origname, $op->private);
     if ($op->folded) {
       $h{private} &&= "$h{private},";
       $h{private} .= "FOLD";
     }
 
-    if ($h{name} eq "null" and $h{targ}) {
-	# targ holds the old type
-	$h{exname} = "ex-" . substr(ppname($h{targ}), 3);
+    if ($h{name} ne $origname) { # a null op
+	$h{exname} = "ex-$origname";
 	$h{extarg} = "";
     } elsif ($h{private} =~ /\bREFC\b/) {
 	# targ holds a reference count

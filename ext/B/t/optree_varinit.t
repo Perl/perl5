@@ -117,13 +117,13 @@ checkOptree ( name	=> 'local $c',
 4  <@> leave[1 ref] vKP/REFC ->(end)
 1     <0> enter ->2
 2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
--     <1> ex-rv2sv vKM/129 ->4
+-     <1> ex-rv2sv vKM/LVINTRO,1 ->4
 3        <#> gvsv[*c] s/LVINTRO ->4
 EOT_EOT
 # 4  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter ->2
 # 2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
-# -     <1> ex-rv2sv vKM/129 ->4
+# -     <1> ex-rv2sv vKM/LVINTRO,1 ->4
 # 3        <$> gvsv(*c) s/LVINTRO ->4
 EONT_EONT
 
@@ -160,7 +160,7 @@ checkOptree ( name	=> 'sub {our $a=undef}',
 1        <;> nextstate(main 26 optree.t:109) v:>,<,%,{ ->2
 4        <2> sassign sKS/2 ->5
 2           <0> undef s ->3
--           <1> ex-rv2sv sKRM*/17 ->4
+-           <1> ex-rv2sv sKRM*/OURINTR,1 ->4
 3              <#> gvsv[*a] s/OURINTR ->4
 EOT_EOT
 # 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
@@ -168,7 +168,7 @@ EOT_EOT
 # 1        <;> nextstate(main 446 optree_varinit.t:137) v:>,<,%,{ ->2
 # 4        <2> sassign sKS/2 ->5
 # 2           <0> undef s ->3
-# -           <1> ex-rv2sv sKRM*/17 ->4
+# -           <1> ex-rv2sv sKRM*/OURINTR,1 ->4
 # 3              <$> gvsv(*a) s/OURINTR ->4
 EONT_EONT
 
@@ -183,7 +183,7 @@ checkOptree ( name	=> 'sub {local $a=undef}',
 1        <;> nextstate(main 28 optree.t:122) v:>,<,%,{ ->2
 4        <2> sassign sKS/2 ->5
 2           <0> undef s ->3
--           <1> ex-rv2sv sKRM*/129 ->4
+-           <1> ex-rv2sv sKRM*/LVINTRO,1 ->4
 3              <#> gvsv[*a] s/LVINTRO ->4
 EOT_EOT
 # 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
@@ -191,7 +191,7 @@ EOT_EOT
 # 1        <;> nextstate(main 58 optree.t:141) v:>,<,%,{ ->2
 # 4        <2> sassign sKS/2 ->5
 # 2           <0> undef s ->3
-# -           <1> ex-rv2sv sKRM*/129 ->4
+# -           <1> ex-rv2sv sKRM*/LVINTRO,1 ->4
 # 3              <$> gvsv(*a) s/LVINTRO ->4
 EONT_EONT
 
@@ -226,7 +226,7 @@ checkOptree ( name	=> 'our $a=undef',
 2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
 5     <2> sassign vKS/2 ->6
 3        <0> undef s ->4
--        <1> ex-rv2sv sKRM*/17 ->5
+-        <1> ex-rv2sv sKRM*/OURINTR,1 ->5
 4           <#> gvsv[*a] s/OURINTR ->5
 EOT_EOT
 # 6  <@> leave[1 ref] vKP/REFC ->(end)
@@ -234,7 +234,7 @@ EOT_EOT
 # 2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
 # 5     <2> sassign vKS/2 ->6
 # 3        <0> undef s ->4
-# -        <1> ex-rv2sv sKRM*/17 ->5
+# -        <1> ex-rv2sv sKRM*/OURINTR,1 ->5
 # 4           <$> gvsv(*a) s/OURINTR ->5
 EONT_EONT
 
@@ -250,7 +250,7 @@ checkOptree ( name	=> 'local $c=undef',
 2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
 5     <2> sassign vKS/2 ->6
 3        <0> undef s ->4
--        <1> ex-rv2sv sKRM*/129 ->5
+-        <1> ex-rv2sv sKRM*/LVINTRO,1 ->5
 4           <#> gvsv[*c] s/LVINTRO ->5
 EOT_EOT
 # 6  <@> leave[1 ref] vKP/REFC ->(end)
@@ -258,7 +258,7 @@ EOT_EOT
 # 2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
 # 5     <2> sassign vKS/2 ->6
 # 3        <0> undef s ->4
-# -        <1> ex-rv2sv sKRM*/129 ->5
+# -        <1> ex-rv2sv sKRM*/LVINTRO,1 ->5
 # 4           <$> gvsv(*c) s/LVINTRO ->5
 EONT_EONT
 
