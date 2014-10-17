@@ -799,7 +799,9 @@ or regex, as it will absorb the terminator.   But C<\c\I<X>> is a C<FILE
 SEPARATOR> concatenated with I<X> for all I<X>.
 The outlier C<\c?> on ASCII, which yields a non-C0 control C<DEL>,
 yields the outlier control C<APC> on EBCDIC, the one that isn't in the
-block of contiguous controls.
+block of contiguous controls.  Note that a subtlety of this is that
+C<\c?> on ASCII platforms is an ASCII character, while it isn't
+equivalent to any ASCII character in EBCDIC platforms.
 
  chr   ord   8859-1    0037    1047 && POSIX-BC
  -----------------------------------------------------------------------
