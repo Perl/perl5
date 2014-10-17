@@ -275,6 +275,7 @@ typedef U64TYPE U64;
 #define TYPE_DIGITS(T)  BIT_DIGITS(sizeof(T) * 8)
 #define TYPE_CHARS(T)   (TYPE_DIGITS(T) + 2) /* sign, NUL */
 
+/* Unused by core; should be deprecated */
 #define Ctl(ch) ((ch) & 037)
 
 /* This is a helper macro to avoid preprocessor issues, replaced by nothing
@@ -1613,7 +1614,7 @@ EXTCONST U32 PL_charclass[];
 #ifdef EBCDIC
     /* Because all controls are UTF-8 invariants in EBCDIC, we can use this
      * more efficient macro instead of the more general one */
-#   define isCNTRL_utf8(p)      isCNTRL_L1(p)
+#   define isCNTRL_utf8(p)      isCNTRL_L1(*(p))
 #else
 #   define isCNTRL_utf8(p)      _generic_utf8(_CC_CNTRL, p, 0)
 #endif
@@ -1719,17 +1720,19 @@ EXTCONST U32 PL_charclass[];
  * the outlier from the block that contains the other controls, just like
  * toCTRL('?') on ASCII yields DEL, the control that is the outlier from the C0
  * block.  If it weren't special cased, it would yield a non-control.
- * The conversion works both ways, so CTRL('D') is 4, and CTRL(4) is D, etc. */
+ * The conversion works both ways, so toCTRL('D') is 4, and toCTRL(4) is D,
+ * etc. */
 #ifndef EBCDIC
-#  define toCTRL(c)    (toUPPER(c) ^ 64)
+#  define toCTRL(c)    (__ASSERT_(FITS_IN_8_BITS(c)) toUPPER(c) ^ 64)
 #else
-#  define toCTRL(c)    ((isPRINT_A(c))                          \
-                       ? UNLIKELY((c) == '?')                   \
-                         ? QUESTION_MARK_CTRL                   \
-                         : (NATIVE_TO_LATIN1(toUPPER(c)) ^ 64)  \
-                       : UNLIKELY((c) == QUESTION_MARK_CTRL)    \
-                         ? ((c) == '?')                         \
-                         : (LATIN1_TO_NATIVE((c) ^ 64)))
+#  define toCTRL(c)   (__ASSERT_(FITS_IN_8_BITS(c))              \
+                      ((isPRINT_A(c))                            \
+                       ? (UNLIKELY((c) == '?')                   \
+                         ? QUESTION_MARK_CTRL                    \
+                         : (NATIVE_TO_LATIN1(toUPPER(c)) ^ 64))  \
+                       : (UNLIKELY((c) == QUESTION_MARK_CTRL)    \
+                         ? '?'                                   \
+                         : (LATIN1_TO_NATIVE((c) ^ 64)))))
 #endif
 
 /* Line numbers are unsigned, 32 bits. */
