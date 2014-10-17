@@ -8564,7 +8564,9 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
                                            || (((U8)(d)) <= 8 && (d) != 0) \
                                            || (((U8)(d)) == 13))))          \
                                    || (((U8)(d)) == toCTRL('?')))
-    if (s < PL_bufend
+    if ((s <= PL_bufend - (is_utf8)
+                          ? UTF8SKIP(s)
+                          : 1)
         && (isIDFIRST_lazy_if(s, is_utf8) || VALID_LEN_ONE_IDENT(*s, is_utf8)))
     {
         if ( isCNTRL_A((U8)*s) ) {
