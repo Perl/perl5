@@ -5970,6 +5970,9 @@ S_aassign_common_vars(pTHX_ OP* o)
 	    else
 		return TRUE;
 	}
+	else if (PL_opargs[curop->op_type] & OA_TARGLEX
+	      && curop->op_private & OPpTARGET_MY)
+	    goto padcheck;
 
 	if (curop->op_flags & OPf_KIDS) {
 	    if (aassign_common_vars(curop))
@@ -5991,7 +5994,9 @@ S_aassign_common_vars_aliases_only(pTHX_ OP *o)
 	     curop->op_type == OP_PADAV ||
 	     curop->op_type == OP_PADHV ||
 	     curop->op_type == OP_AELEMFAST_LEX ||
-	     curop->op_type == OP_PADANY)
+	     curop->op_type == OP_PADANY ||
+	     (  PL_opargs[curop->op_type] & OA_TARGLEX
+	     && curop->op_private & OPpTARGET_MY  ))
 	   && PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
 	    return TRUE;
 
