@@ -709,13 +709,22 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 
     if (delimlen) {
 	for (; items > 0; items--,mark++) {
+	    STRLEN len;
+	    const char *s;
 	    sv_catsv_nomg(sv,delim);
-	    sv_catsv(sv,*mark);
+	    s = SvPV_const(*mark,len);
+	    sv_catpvn_flags(sv,s,len,
+			    DO_UTF8(*mark) ? SV_CATUTF8 : SV_CATBYTES);
 	}
     }
     else {
 	for (; items > 0; items--,mark++)
-	    sv_catsv(sv,*mark);
+	{
+	    STRLEN len;
+	    const char *s = SvPV_const(*mark,len);
+	    sv_catpvn_flags(sv,s,len,
+			    DO_UTF8(*mark) ? SV_CATUTF8 : SV_CATBYTES);
+	}
     }
     SvSETMAGIC(sv);
 }
