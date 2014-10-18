@@ -522,6 +522,12 @@ Internally Perl no longer uses the C<SVs_PADMY> flag.  C<SvPADMY()> now
 returns a true value for anything not marked PADTMP.  C<SVs_PADMY> is now
 defined as 0.
 
+=item *
+
+The C<sv_catpvn_flags> function accepts C<SV_CATBYTES> and C<SV_CATUTF8>
+flags, which specify whether the appended string is bytes or utf8,
+respectively.
+
 =back
 
 =head1 Selected Bug Fixes
