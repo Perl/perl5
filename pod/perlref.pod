@@ -838,12 +838,16 @@ evaluated in scalar context:
     \local $some_hash{$key}
     condition ? \$this : \$that[0] # etc.
 
-Array slices and parentheses cause the right-hand side to be evaluated in
+Slicing operations and parentheses cause
+the right-hand side to be evaluated in
 list context:
 
     \@array[5..7]
     (\@array[5..7])
     \(@array[5..7])
+    \@hash{'foo','bar'}
+    (\@hash{'foo','bar'})
+    \(@hash{'foo','bar'})
     (\$scalar)
     \($scalar)
     \(my $scalar)
