@@ -33,6 +33,24 @@ C<<< <<>> >>> is like C<< <> >> but uses three-argument C<open> to open
 each file in @ARGV.  So each element of @ARGV is an actual file name, and
 "|foo" won't be treated as a pipe open.
 
+=head2 Aliasing via reference
+
+Variables and subroutines can now be aliased by assigning to a reference:
+
+    \$c = \$d;
+    \&x = \&y;
+
+Or by using a backslash before a C<foreach> iterator variable, which is
+perhaps the most useful idiom this feature provides:
+
+    foreach \%hash (@array_of_hash_refs) { ... }
+
+This feature is experimental and must be enabled via C<use feature
+'refaliasing'>.  It will warn unless the C<experimental::refaliasing>
+warnings category is disabled.
+
+See L<perlref/Assigning to References>.
+
 =head2 Perl now supports POSIX 2008 locale currency additions.
 
 On platforms that are able to handle POSIX.1-2008, the
