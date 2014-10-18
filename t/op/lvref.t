@@ -7,29 +7,29 @@ BEGIN {
 plan 153;
 
 eval '\$x = \$y';
-like $@, qr/^Experimental lvalue references not enabled/,
+like $@, qr/^Experimental aliasing via reference not enabled/,
     'error when feature is disabled';
 eval '\($x) = \$y';
-like $@, qr/^Experimental lvalue references not enabled/,
+like $@, qr/^Experimental aliasing via reference not enabled/,
     'error when feature is disabled (aassign)';
 
-use feature 'lvalue_refs', 'state';
+use feature 'refaliasing', 'state';
 
 {
     my($w,$c);
     local $SIG{__WARN__} = sub { $c++; $w = shift };
     eval '\$x = \$y';
     is $c, 1, 'one warning from lv ref assignment';
-    like $w, qr/^Lvalue references are experimental/,
+    like $w, qr/^Aliasing via reference is experimental/,
         'experimental warning';
     undef $c;
     eval '\($x) = \$y';
     is $c, 1, 'one warning from lv ref list assignment';
-    like $w, qr/^Lvalue references are experimental/,
+    like $w, qr/^Aliasing via reference is experimental/,
         'experimental warning';
 }
 
-no warnings 'experimental::lvalue_refs';
+no warnings 'experimental::refaliasing';
 
 # Scalars
 

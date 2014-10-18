@@ -504,7 +504,7 @@ a variable preceded by a backslash for VAR, in which case the items in the
 LIST must be references.  The backslashed variable will become an alias
 to each referenced item in the LIST, which must be of the correct type.
 The variable needn't be a scalar in this case, and the backslash may be
-followed by C<my>.  To use this form, you must enable the C<lvalue_refs>
+followed by C<my>.  To use this form, you must enable the C<refaliasing>
 feature via C<use feature>.  (See L<feature>.  See also L<perlref/Assigning
 to References>.)
 
@@ -527,8 +527,8 @@ Examples:
 	print "Item: $item\n";
     }
 
-    use feature "lvalue_refs";
-    no warnings "experimental::lvalue_refs";
+    use feature "refaliasing";
+    no warnings "experimental::refaliasing";
     foreach \my %hash (@array_of_hash_references) {
 	# do something which each %hash
     }

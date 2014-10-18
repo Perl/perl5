@@ -2772,12 +2772,12 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    const U8 ec = PL_parser ? PL_parser->error_count : 0;
 	    S_lvref(aTHX_ kid, type);
 	    if (!PL_parser || PL_parser->error_count == ec) {
-		if (!FEATURE_LVREF_IS_ENABLED)
+		if (!FEATURE_REFALIASING_IS_ENABLED)
 		    Perl_croak(aTHX_
-			     "Experimental lvalue references not enabled");
+		       "Experimental aliasing via reference not enabled");
 		Perl_ck_warner_d(aTHX_
-				 packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
-			      "Lvalue references are experimental");
+				 packWARN(WARN_EXPERIMENTAL__REFALIASING),
+				"Aliasing via reference is experimental");
 	    }
 	}
 	if (o->op_type == OP_REFGEN)
@@ -10174,12 +10174,12 @@ Perl_ck_refassign(pTHX_ OP *o)
 				 OP_DESC(varop)));
 	return o;
     }
-    if (!FEATURE_LVREF_IS_ENABLED)
+    if (!FEATURE_REFALIASING_IS_ENABLED)
 	Perl_croak(aTHX_
-		  "Experimental lvalue references not enabled");
+		  "Experimental aliasing via reference not enabled");
     Perl_ck_warner_d(aTHX_
-		     packWARN(WARN_EXPERIMENTAL__LVALUE_REFS),
-		    "Lvalue references are experimental");
+		     packWARN(WARN_EXPERIMENTAL__REFALIASING),
+		    "Aliasing via reference is experimental");
     o->op_private |= varop->op_private & (OPpLVAL_INTRO|OPpPAD_STATE);
     if (stacked) o->op_flags |= OPf_STACKED;
     else {

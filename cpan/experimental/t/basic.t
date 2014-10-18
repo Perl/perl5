@@ -52,7 +52,7 @@ END
 
 if ($] >= 5.021005) {
 	is (eval <<'END', 1, 'lvalue ref compiles') or diag $@;
-	use experimental 'lvalue_refs';
+	use experimental 'refaliasing';
 	\@a = \@b;
 	is(\@a, \@b, '@a and @b are the same after \@a=\@b');
 	1;

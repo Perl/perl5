@@ -322,7 +322,7 @@ is (scalar (@bzz), 3);
 # (That’s what *you* think!  --sprout)
 eval '\\($x, $y) = (1, 2);';
 like ($@, qr/Can\'t modify.*ref.*in.*assignment(?x:
-           )|Experimental lvalue references not enabled/);
+           )|Experimental aliasing via reference not enabled/);
 
 # test for proper destruction of lexical objects
 $test = curr_test();

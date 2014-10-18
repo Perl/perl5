@@ -50,6 +50,19 @@ letter.
 to check the return value of your socket() call?  See
 L<perlfunc/accept>.
 
+=item Aliasing via reference is experimental
+
+(S experimental::refaliasing) This warning is emitted if you use
+a reference constructor on the left-hand side of an assignment to
+alias one variable to another.  Simply suppress the warning if you
+want to use the feature, but know that in doing so you are taking
+the risk of using an experimental feature which may change or be
+removed in a future Perl version:
+
+    no warnings "experimental::refaliasing";
+    use feature "refaliasing";
+    \$x = \$y;
+
 =item Allocation too large: %x
 
 (X) You can't allocate more than 64K on an MS-DOS machine.
@@ -209,9 +222,9 @@ C<\$x = \$y>.
 
 =item Assigned value is not %s reference
 
-(F) You tried to assign a reference to an lvalue reference, but the two
-references were not of the same type.  You cannot alias a scalar to an
-array, or an array to a hash; the two types must match.
+(F) You tried to assign a reference to a reference constructor, but the
+two references were not of the same type.  You cannot alias a scalar to
+an array, or an array to a hash; the two types must match.
 
     \$x = \@y;  # error
     \@x = \%y;  # error
@@ -1961,12 +1974,12 @@ interpolated.  If you see this error message, then you probably
 have some other C<(?...)> construct inside your character class.  See
 L<perlrecharclass/Extended Bracketed Character Classes>.
 
-=item Experimental lvalue references not enabled
+=item Experimental aliasing via reference not enabled
 
-(F) To use lvalue references, you must first enable them:
+(F) To do aliasing via references, you must first enable the feature:
 
-    no warnings "experimental::lvalue_refs";
-    use feature "lvalue_refs";
+    no warnings "experimental::refaliasing";
+    use feature "refaliasing";
     \$x = \$y;
 
 =item Experimental subroutine signatures not enabled
@@ -2925,19 +2938,6 @@ add the lvalue attribute to the definition, or put the C<sub
 foo :lvalue;> declaration before the definition.
 
 See also L<attributes.pm|attributes>.
-
-=item Lvalue references are experimental
-
-(S experimental::lvalue_refs) This warning is emitted if you use
-a reference constructor on the left-hand side of an assignment to
-alias one variable to another.  Simply suppress the warning if you
-want to use the feature, but know that in doing so you are taking
-the risk of using an experimental feature which may change or be
-removed in a future Perl version:
-
-    no warnings "experimental::lvalue_refs";
-    use feature "lvalue_refs";
-    \$x = \$y;
 
 =item Magical list constants are not supported
 

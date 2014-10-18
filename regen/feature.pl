@@ -29,7 +29,7 @@ my %feature = (
     postderef       => 'postderef',
     array_base      => 'arybase',
     current_sub     => '__SUB__',
-    lvalue_refs     => 'lvref',
+    refaliasing     => 'refaliasing',
     lexical_subs    => 'lexsubs',
     postderef_qq    => 'postderef_qq',
     unicode_eval    => 'unieval',
@@ -590,14 +590,14 @@ See L<perlsub/Signatures> for details.
 
 This feature is available from Perl 5.20 onwards.
 
-=head2 The 'lvalue_refs' feature
+=head2 The 'refaliasing' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
 change in future versions of Perl.  For this reason, Perl will
 warn when you use the feature, unless you have explicitly disabled the
 warning:
 
-    no warnings "experimental::lvalue_refs";
+    no warnings "experimental::refaliasing";
 
 This enables aliasing via assignment to references:
 

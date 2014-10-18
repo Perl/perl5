@@ -814,9 +814,9 @@ side:
     \$a = \$b; # $a and $b now point to the same scalar
     \&foo = \&bar; # foo() now means bar()
 
-This syntax must be enabled with C<use feature 'lvalue_refs'>.  It is
+This syntax must be enabled with C<use feature 'refaliasing'>.  It is
 experimental, and will warn by default unless C<no warnings
-'experimental::lvalue_refs'> is in effect.
+'experimental::refaliasing'> is in effect.
 
 These forms may be assigned to, and cause the right-hand side to be
 evaluated in scalar context:

@@ -111,7 +111,7 @@ my %mg =
      debugvar => { char => '*', desc => '$DB::single, signal, trace vars',
 		   vtable => 'debugvar' },
      lvref => { char => '\\', vtable => 'lvref',
-		  desc => "Lvalue reference in list assignment" },
+		  desc => "Lvalue reference constructor" },
 );
 
 # These have a subtly different "namespace" from the magic types.

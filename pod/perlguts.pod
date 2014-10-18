@@ -1218,8 +1218,8 @@ will be lost.
  y  PERL_MAGIC_defelem        vtbl_defelem   Shadow "foreach" iterator
                                              variable / smart parameter
                                              vivification
- \  PERL_MAGIC_lvref          vtbl_lvref     Lvalue reference in list
-                                             assignment
+ \  PERL_MAGIC_lvref          vtbl_lvref     Lvalue reference
+                                             constructor
  ]  PERL_MAGIC_checkcall      vtbl_checkcall Inlining/mutation of call
                                              to this CV
  ~  PERL_MAGIC_ext            (none)         Available for use by

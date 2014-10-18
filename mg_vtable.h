@@ -55,7 +55,7 @@
 #define PERL_MAGIC_substr         'x' /* substr() lvalue */
 #define PERL_MAGIC_defelem        'y' /* Shadow "foreach" iterator variable /
                                          smart parameter vivification */
-#define PERL_MAGIC_lvref          '\\' /* Lvalue reference in list assignment */
+#define PERL_MAGIC_lvref          '\\' /* Lvalue reference constructor */
 #define PERL_MAGIC_checkcall      ']' /* Inlining/mutation of call to this CV */
 #define PERL_MAGIC_ext            '~' /* Available for use by extensions */
 

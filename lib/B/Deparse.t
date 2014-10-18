@@ -1621,7 +1621,7 @@ use feature 'state';
 main::state();
 ####
 # lvalue references
-# CONTEXT use feature "state", 'lvalue_refs', 'lexical_subs'; no warnings 'experimental';
+# CONTEXT use feature "state", 'refaliasing', 'lexical_subs'; no warnings 'experimental';
 our $x;
 \$x = \$x;
 my $m;

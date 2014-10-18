@@ -83,7 +83,7 @@
     { 'y', "want_vtbl_defelem | PERL_MAGIC_VALUE_MAGIC",
       "/* defelem 'y' Shadow \"foreach\" iterator variable / smart parameter vivification */" },
     { '\\', "want_vtbl_lvref",
-      "/* lvref '\\' Lvalue reference in list assignment */" },
+      "/* lvref '\\' Lvalue reference constructor */" },
     { ']', "want_vtbl_checkcall | PERL_MAGIC_VALUE_MAGIC",
       "/* checkcall ']' Inlining/mutation of call to this CV */" },
     { '~', "magic_vtable_max",

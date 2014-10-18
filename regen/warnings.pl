@@ -102,7 +102,7 @@ my $tree = {
                                     [ 5.019, DEFAULT_ON ],
                                 'experimental::win32_perlio' =>
                                     [ 5.021, DEFAULT_ON ],
-                                'experimental::lvalue_refs' =>
+                                'experimental::refaliasing' =>
                                     [ 5.021, DEFAULT_ON ],
                         }],
 

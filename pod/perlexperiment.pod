@@ -111,12 +111,12 @@ C<experimental::postderef>.
 The ticket for this feature is
 L<[perl #120162]|https://rt.perl.org:443/rt3/Ticket/Display.html?id=120162>.
 
-=item Lvalue references
+=item Aliasing via reference
 
 Introduced in Perl 5.22.0
 
 Using this feature triggers warnings in the category
-C<experimental::lvalue_refs>.
+C<experimental::refaliasing>.
 
 The ticket for this feature is
 L<[perl #122947]|https://rt.perl.org/rt3/Ticket/Display.html?id=122947>.
