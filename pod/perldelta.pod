@@ -548,7 +548,7 @@ also C<-'-e1'>.  This has been fixed.
 =item *
 
 The flip-flop operator (C<..> in scalar context) would return the same
-scalar each time, unles the containing subroutine was called recursively.
+scalar each time, unless the containing subroutine was called recursively.
 Now it always returns a new scalar.  [perl #122829]
 
 =item *
