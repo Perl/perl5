@@ -14,7 +14,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 66004);
+plan (tests => 66644);
 
 # ${single:colon} should not be valid syntax
 {
@@ -71,9 +71,11 @@ for my $v (qw( ^V ; < > ( ) {^GLOBAL_PHASE} ^W _ 1 4 0 [ ] ! @ / \ = )) {
 
 # Checking if the Latin-1 range behaves as expected, and that the behavior is the
 # same whenever under strict or not.
-for ( 0x80..0xff ) {
+for ( 0x0 .. 0xff ) {
     my $ord = utf8::unicode_to_native($_);
     my $chr = chr $ord;
+    my $syntax_error = 0;   # Do we expect this code point to generate a
+                            # syntax error?  Assume not, for now
     my $name;
 
     # A different number of tests are run depending on the branches in this
@@ -82,7 +84,24 @@ for ( 0x80..0xff ) {
     my $tests = 0;
     my $max_tests = 5;
 
-    if ($chr =~ /[[:cntrl:]]/u) {
+    if ($chr =~ /[[:graph:]]/a) {
+        $name = "'$chr'";
+        $syntax_error = 1 if $chr eq '{';
+    }
+    elsif ($chr =~ /[[:space:]]/a) {
+        $name = sprintf "\\x%02x, an ASCII space character", $ord;
+        $syntax_error = 1;
+    }
+    elsif ($chr =~ /[[:cntrl:]]/a) {
+        if ($chr eq "\N{NULL}") {
+            $name = sprintf "\\x%02x, NUL", $ord;
+            $syntax_error = 1;
+        }
+        else {
+            $name = sprintf "\\x%02x, an ASCII control", $ord;
+        }
+    }
+    elsif ($chr =~ /[[:cntrl:]]/u) {
         $name = sprintf "\\x%02x, a C1 control", $ord;
     }
     elsif ($chr =~ /\p{XIDStart}/) {
@@ -95,10 +114,46 @@ for ( 0x80..0xff ) {
     my $esc = sprintf("%X", $ord);
     utf8::downgrade($chr);
     if ($chr !~ /\p{XIDS}/u) {
+        no warnings 'deprecated';
+        if ($syntax_error) {
+            evalbytes "\$$chr";
+            like($@, qr/syntax error/, "$name as a length-1 variable generates a syntax error");
+            $tests++;
+        }
+        elsif ($ord < 32 || chr =~ /[[:punct:][:digit:]]/a) {
+
+            # Unlike other variables, we dare not try setting the length-1
+            # variables that are \cX (for all valid X) nor ASCII ones that are
+            # punctuation nor digits.  This is because many of these variables
+            # have meaning to the system, and setting them could have side
+            # effects or not work as expected (And using fresh_perl() doesn't
+            # always help.) For example, setting $^D (to use a visible
+            # representation of code point 0x04) turns on tracing, and setting
+            # $^E sets an error number, but what gets printed is instead a
+            # string associated with that number.  For all these we just
+            # verify that they don't generate a syntax error.
+            local $@;
+            evalbytes "\$$chr;";
+            is $@, '', "$name as a length-1 variable doesn't generate a syntax error";
+            $tests++;
+            utf8::upgrade($chr);
+            evalbytes "no strict; use utf8; \$$chr;",
+            is $@, '', "  ... and the same under 'use utf8'";
+            $tests++;
+        }
+        else {
         is evalbytes "no strict; \$$chr = 10",
             10,
                 "$name is legal as a length-1 variable";
         $tests++;
+            if ($chr =~ /[[:ascii:]]/) {
+                utf8::upgrade($chr);
+                is evalbytes "no strict; use utf8; \$$chr = 1",
+                    1,
+                    "  ... and is legal under 'use utf8'";
+                $tests++;
+            }
+            else {
         utf8::upgrade($chr);
         local $@;
         eval "no strict; use utf8; \$$chr = 1";
@@ -106,6 +161,8 @@ for ( 0x80..0xff ) {
             qr/\QUnrecognized character \x{\E\L$esc/,
             "  ... but is illegal as a length-1 variable under 'use utf8'";
         $tests++;
+        }
+    }
     }
     else {
         {
@@ -115,6 +172,7 @@ for ( 0x80..0xff ) {
             is($@, '', "$name under 'no utf8', 'no strict', is a valid length-1 variable");
             $tests++;
 
+            if ($chr !~ /[[:ascii:]]/) {
             local $@;
             evalbytes "use strict; \$$chr = 1";
             is($@,
@@ -130,6 +188,7 @@ for ( 0x80..0xff ) {
                 "  ... but under 'no utf8', it's not allowed in length-2+ variables"
             );
             $tests++;
+            }
         }
         {
             use utf8;
@@ -142,11 +201,18 @@ for ( 0x80..0xff ) {
 
             local $@;
             eval "use strict; \$$utf8 = 1";
+            if ($chr =~ /[ab]/) {   # These are special, for sort()
+                is($@, '', "  ... and under 'use utf8', 'use strict',"
+                    . " is a valid length-1 variable (\$a and \$b are special)");
+                $tests++;
+            }
+            else {
             like($@,
                 qr/Global symbol "\$$utf8" requires explicit package name/,
                 "  ... and under utf8 has to be required under strict"
             );
             $tests++;
+            }
         }
     }
 
