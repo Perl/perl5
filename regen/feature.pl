@@ -450,6 +450,12 @@ This feature is available starting with Perl 5.10.
 
 =head2 The 'switch' feature
 
+B<WARNING>: Because the L<smartmatch operator|perlop/"Smartmatch Operator"> is
+experimental, Perl will warn when you use this feature, unless you have
+explicitly disabled the warning:
+
+    no warnings "experimental::smartmatch";
+
 C<use feature 'switch'> tells the compiler to enable the Perl 6
 given/when construct.
 
