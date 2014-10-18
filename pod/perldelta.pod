@@ -223,6 +223,14 @@ Avoid reading beyond the end of a buffer. [perl #122629]
 
 =item *
 
+L<B::Concise> has been upgraded from version 0.993 to 0.994.
+
+Null ops that are part of the execution chain are now given sequence
+numbers.
+
+Private flags for nulled ops are now dumped with mnemonics as they would be
+for the non-nulled counterparts.
+
 L<B::Deparse> has been upgraded from version 1.28 to 1.29.
 
 Parenthesised arrays in lists passed to C<\> are now correctly deparsed
