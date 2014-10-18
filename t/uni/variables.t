@@ -121,16 +121,16 @@ for ( 0x80..0xff ) {
         }
         {
             use utf8;
-            my $u = $chr;
-            utf8::upgrade($u);
+            my $utf8 = $chr;
+            utf8::upgrade($utf8);
             local $@;
-            eval "no strict; \$$u = 1";
+            eval "no strict; \$$utf8 = 1";
             is($@, '', "  ... and under 'use utf8', 'no strict', is a valid length-1 variable");
 
             local $@;
-            eval "use strict; \$$u = 1";
+            eval "use strict; \$$utf8 = 1";
             like($@,
-                qr/Global symbol "\$$u" requires explicit package name/,
+                qr/Global symbol "\$$utf8" requires explicit package name/,
                 "  ... and under utf8 has to be required under strict"
             );
         }
