@@ -3600,6 +3600,15 @@ cv_name(SVREF ref, ...)
     OUTPUT:
 	RETVAL
 
+void
+sv_catpvn(SV *sv, SV *sv2)
+    CODE:
+    {
+	STRLEN len;
+	const char *s = SvPV(sv2,len);
+	sv_catpvn_flags(sv,s,len, SvUTF8(sv2) ? SV_CATUTF8 : SV_CATBYTES);
+    }
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
