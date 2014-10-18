@@ -558,6 +558,11 @@ CPAN.
 The C<< SvFAKE >> bit (unused on HVs) got informally reserved by
 David Mitchell for future work on vtables.
 
+=item *
+The C<sv_catpvn_flags> function accepts C<SV_CATBYTES> and C<SV_CATUTF8>
+flags, which specify whether the appended string is bytes or utf8,
+respectively.
+
 =back
 
 =head1 Selected Bug Fixes

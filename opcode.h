@@ -1758,7 +1758,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000144,	/* rv2sv */
 	0x00000104,	/* av2arylen */
 	0x00000140,	/* rv2cv */
-	0x00000600,	/* anoncode */
+	0x00000604,	/* anoncode */
 	0x00001b04,	/* prototype */
 	0x00002101,	/* refgen */
 	0x00001106,	/* srefgen */

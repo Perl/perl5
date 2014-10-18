@@ -5268,9 +5268,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	     *     ------              -------------------
 	     *                         pushmark (for regcomp)
 	     *                         pushmark (for entersub)
-	     *                         pushmark (for refgen)
 	     *                         anoncode
-	     *                         refgen
+	     *                         srefgen
 	     *                         entersub
 	     *     regcreset                  regcreset
 	     *     pushmark                   pushmark

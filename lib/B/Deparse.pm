@@ -2303,10 +2303,11 @@ sub pp_refgen {
     my($op, $cx) = @_;
     my $kid = $op->first;
     if ($kid->name eq "null") {
-	$kid = $kid->first;
-	if (!null($kid->sibling) and
-		 $kid->sibling->name eq "anoncode") {
-            return $self->e_anoncode({ code => $self->padval($kid->sibling->targ) });
+	my $anoncode = $kid = $kid->first;
+	if ($anoncode->name eq "anoncode"
+	 or !null($anoncode = $kid->sibling) and
+		 $anoncode->name eq "anoncode") {
+            return $self->e_anoncode({ code => $self->padval($anoncode->targ) });
 	} elsif ($kid->name eq "pushmark") {
             my $sib_name = $kid->sibling->name;
             if ($sib_name eq 'entersub') {

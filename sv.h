@@ -1871,12 +1871,8 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 /* if (after resolving magic etc), the SV is found to be overloaded,
  * don't call the overload magic, just return as-is */
 #define SV_SKIP_OVERLOAD	8192
-/* It is not yet clear whether we want this as an API, or what the
- * constants should be named. */
-#ifdef PERL_CORE
-# define SV_CATBYTES		16384
-# define SV_CATUTF8		32768
-#endif
+#define SV_CATBYTES		16384
+#define SV_CATUTF8		32768
 
 /* The core is safe for this COW optimisation. XS code on CPAN may not be.
    So only default to doing the COW setup if we're in the core.
