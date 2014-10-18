@@ -649,6 +649,12 @@ that shouldn't. [perl #122820]
 AIX now sets the length in C<< getsockopt >> correctly. [perl #120835],
 [rt #91183], [rt #85570].
 
+=item *
+
+During the pattern optimization phase, we no longer recurse into
+GOSUB/GOSTART when not SCF_DO_SUBSTR. This prevents the optimizer
+to run "forever" and exhaust all memory. [perl #122283]
+
 =back
 
 =head1 Known Problems
