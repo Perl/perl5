@@ -528,29 +528,15 @@ sub sequence {
     for (; $$op; $op = $op->next) {
 	last if exists $sequence_num{$$op};
 	my $name = $op->name;
-	if ($name =~ /^(null|scalar|lineseq|scope)$/) {
-	    next if $oldop and $ {$op->next};
-	} else {
-	    $sequence_num{$$op} = $seq_max++;
-	    if (class($op) eq "LOGOP") {
-		my $other = $op->other;
-		$other = $other->next while $other->name eq "null";
-		sequence($other);
-	    } elsif (class($op) eq "LOOP") {
-		my $redoop = $op->redoop;
-		$redoop = $redoop->next while $redoop->name eq "null";
-		sequence($redoop);
-		my $nextop = $op->nextop;
-		$nextop = $nextop->next while $nextop->name eq "null";
-		sequence($nextop);
-		my $lastop = $op->lastop;
-		$lastop = $lastop->next while $lastop->name eq "null";
-		sequence($lastop);
-	    } elsif ($name eq "subst" and $ {$op->pmreplstart}) {
-		my $replstart = $op->pmreplstart;
-		$replstart = $replstart->next while $replstart->name eq "null";
-		sequence($replstart);
-	    }
+	$sequence_num{$$op} = $seq_max++;
+	if (class($op) eq "LOGOP") {
+	    sequence($op->other);
+	} elsif (class($op) eq "LOOP") {
+	    sequence($op->redoop);
+	    sequence( $op->nextop);
+	    sequence($op->lastop);
+	} elsif ($name eq "subst" and $ {$op->pmreplstart}) {
+	    sequence($op->pmreplstart);
 	}
 	$oldop = $op;
     }
