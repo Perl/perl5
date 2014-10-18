@@ -696,7 +696,6 @@ cpan/Digest-MD5/t/md5-aaa.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/t/threads.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/t/utf8.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/typemap			Digest::MD5 extension
-cpan/Digest-SHA/hints/hpux.pl		Hint for HP-UX for named architecture
 cpan/Digest-SHA/lib/Digest/SHA.pm	Digest::SHA extension
 cpan/Digest-SHA/Makefile.PL		Digest::SHA Makefile.PL
 cpan/Digest-SHA/shasum			shasum script
