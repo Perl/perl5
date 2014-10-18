@@ -14,7 +14,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 65880);
+plan (tests => 65815);
 
 # ${single:colon} should not be valid syntax
 {
@@ -100,13 +100,6 @@ for ( 0x80..0xff ) {
             is($@,
                 '',
                 sprintf("\\x%02x under no utf8 does not have to be required under strict, even though it matches XIDS", $_)
-            );
-
-            local $@;
-            evalbytes "\$a$chr = 1";
-            like($@,
-                qr/Unrecognized character /,
-                sprintf("...but under no utf8, it's not allowed in two-or-more character variables")
             );
 
             local $@;
