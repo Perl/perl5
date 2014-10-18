@@ -1052,6 +1052,28 @@ a NULL.
 (F) Subroutines meant to be used in lvalue context should be declared as
 such.  See L<perlsub/"Lvalue subroutines">.
 
+=item Can't modify reference to %s in %s assignment
+
+(F) Only a limited number of constructs can be used as the argument to a
+reference constructor on the left-hand side of an assignment, and what
+you used was not one of them.  See L<perlref/Assigning to References>.
+
+=item Can't modify reference to localized parenthesized array in list
+assignment
+
+(F) Assigning to C<\local(@array)> or C<\(local @array)> is not supported, as
+it is not clear exactly what it should do.  If you meant to make @array
+refer to some other array, use C<\@array = \@other_array>.  If you want to
+make the elements of @array aliases of the scalars referenced on the
+right-hand side, use C<\(@array) = @scalar_refs>.
+
+=item Can't modify reference to parenthesized hash in list assignment
+
+(F) Assigning to C<\(%hash)> is not supported.  If you meant to make %hash
+refer to some other hash, use C<\%hash = \%other_hash>.  If you want to
+make the elements of %hash into aliases of the scalars referenced on the
+right-hand side, use a hash slice: C<\@hash{@keys} = @those_scalar_refs>.
+
 =item Can't msgrcv to read-only var
 
 (F) The target of a msgrcv must be modifiable to be used as a receive

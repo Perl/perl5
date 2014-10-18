@@ -2355,7 +2355,6 @@ S_lvref(pTHX_ OP *o, I32 type)
 	o->op_flags |= OPf_STACKED;
 	if (o->op_flags & OPf_PARENS) {
 	    if (o->op_private & OPpLVAL_INTRO) {
-		 /* diag_listed_as: Can't modify %s in %s */
 		 yyerror(Perl_form(aTHX_ "Can't modify reference to "
 		      "localized parenthesized array in list assignment"));
 		return;
@@ -2389,7 +2388,6 @@ S_lvref(pTHX_ OP *o, I32 type)
     case OP_RV2HV:
 	if (o->op_flags & OPf_PARENS) {
 	  parenhash:
-	    /* diag_listed_as: Can't modify %s in %s */
 	    yyerror(Perl_form(aTHX_ "Can't modify reference to "
 				 "parenthesized hash in list assignment"));
 		return;
@@ -2446,7 +2444,7 @@ S_lvref(pTHX_ OP *o, I32 type)
 	/* FALLTHROUGH */
     default:
       badref:
-	/* diag_listed_as: Can't modify %s in %s */
+	/* diag_listed_as: Can't modify reference to %s in %s assignment */
 	yyerror(Perl_form(aTHX_ "Can't modify reference to %s in %s",
 		     o->op_type == OP_NULL && o->op_flags & OPf_SPECIAL
 		      ? "do block"
@@ -10168,7 +10166,7 @@ Perl_ck_refassign(pTHX_ OP *o)
 	break;
     default:
       bad:
-	/* diag_listed_as: Can't modify %s in %s */
+	/* diag_listed_as: Can't modify reference to %s in %s assignment */
 	yyerror(Perl_form(aTHX_ "Can't modify reference to %s in scalar "
 				"assignment",
 				 OP_DESC(varop)));
