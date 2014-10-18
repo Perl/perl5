@@ -66,6 +66,16 @@ C<int_p_sep_by_space>,
 and
 C<int_p_sign_posn>.
 
+=head2 Packing infinity or not-a-number into a character is now fatal.
+
+Before, when trying to pack infinity or not-a-number into a
+(signed) character, Perl would warn, and assumed you tried to
+pack C<< 0xFF >>; if you gave it as an argument to C<< chr >>,
+C<< U+FFFD >> was returned. 
+
+But now, all such actions (C<< pack >>, C<< chr >>, and C<< print '%c' >>)
+result in a fatal error.
+
 =head1 Security
 
 =head2 Perl is now compiled with -fstack-protector-strong if available
@@ -343,7 +353,19 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<message|perldiag/"Cannot chr %f">
+
+=item *
+
+L<message|perldiag/"Cannot compress %f in pack">
+
+=item *
+
+L<message|perldiag/"Cannot pack %f with '%c'">
+
+=item *
+
+L<message|perldiag/"Cannot printf %f with '%c'">
 
 =back
 
@@ -420,7 +442,10 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+Some regular expression tests are written in such a way that they will
+run very slowly if certain optimizations break. These tests have been
+moved into new files, F<< t/re/speed.t >> and F<< t/re/speed_thr.t >>,
+and are run with a C<< watchdog() >>.
 
 =back
 
@@ -522,6 +547,17 @@ Internally Perl no longer uses the C<SVs_PADMY> flag.  C<SvPADMY()> now
 returns a true value for anything not marked PADTMP.  C<SVs_PADMY> is now
 defined as 0.
 
+=item *
+
+The macros SETsv and SETsvUN have been removed. They were no longer used
+in the core since commit 6f1401dc2a, and have not been found present on
+CPAN.
+
+=item *
+
+The C<< SvFAKE >> bit (unused on HVs) got informally reserved by
+David Mitchell for future work on vtables.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -591,6 +627,22 @@ the optimiser, making it assume a limit of 1.
 
 Fatal warnings no longer prevent the output of syntax errors.
 [perl #122966]
+
+=item *
+
+Fixed a NaN double to long double conversion error on VMS. For quiet NaNs
+(and only on Itanium, not Alpha) negative infinity instead of NaN was
+produced. 
+
+=item *
+
+Fixed the issue that caused C<< make distclean >> to leave files behind
+that shouldn't. [perl #122820]
+
+=item *
+
+AIX now sets the length in C<< getsockopt >> correctly. [perl #120835],
+[rt #91183], [rt #85570].
 
 =back
 
