@@ -63,6 +63,11 @@ C<< U+FFFD >> was returned.
 But now, all such actions (C<< pack >>, C<< chr >>, and C<< print '%c' >>)
 result in a fatal error.
 
+=head2 Inf, NaN, and large floating points
+
+Many small improvements, bugfixes and added test cases for dealing with
+math related to infinity, not-a-number, longdoubles and double-doubles.
+
 =head1 Security
 
 =head2 Perl is now compiled with -fstack-protector-strong if available
