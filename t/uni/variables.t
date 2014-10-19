@@ -99,9 +99,6 @@ for ( 0x0 .. 0xff ) {
         if ($chr eq "\N{NULL}") {
             $name = sprintf "\\x%02x, NUL", $ord;
             $syntax_error = 1;
-            # We don't deprecate this to avoid breaking the deprecated
-            # warnings test below, because it doesn't generate a warning,
-            # because it doesn't get far enough along in the parsing to do so.
         }
         else {
             $name = sprintf "\\x%02x, an ASCII control", $ord;

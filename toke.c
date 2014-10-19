@@ -8550,24 +8550,27 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 
 /* Is the byte 'd' a legal single character identifier name?  'u' is true
  * iff Unicode semantics are to be used.  The legal ones are any of:
- *  a) ASCII digits
- *  b) ASCII punctuation
+ *  a) all ASCII characters except:
+ *          1) space-type ones, like \t and SPACE;
+            2) NUL;
+ *          3) '{'
+ *     The final case currently doesn't get this far in the program, so we
+ *     don't test for it.  If that were to change, it would be ok to allow it.
  *  c) When not under Unicode rules, any upper Latin1 character
- *  d) \c?, \c\, \c^, \c_, and \cA..\cZ, minus the ones that have traditionally
- *     been matched by \s on ASCII platforms.  That is: \c?, plus 1-32, minus
- *     the \s ones. */
-#define VALID_LEN_ONE_IDENT(d, u) (isPUNCT_A((U8)(d))                       \
-                                   || isDIGIT_A((U8)(d))                    \
-                                   || (!(u) && !isASCII((U8)(d)))           \
-                                   || ((((U8)(d)) < 32)                     \
-                                       && (((((U8)(d)) >= 14)               \
-                                           || (((U8)(d)) <= 8 && (d) != 0) \
-                                           || (((U8)(d)) == 13))))          \
-                                   || (((U8)(d)) == toCTRL('?')))
+ *  d) Otherwise, when unicode rules are used, all XIDS characters.
+ *
+ *      Because all ASCII characters have the same representation whether
+ *      encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
+ *      '{' without knowing if is UTF-8 or not */
+#   define VALID_LEN_ONE_IDENT(s, is_utf8) (! isSPACE_A(*(s))                 \
+                                            && LIKELY(*(s) != '\0')           \
+                                            && (! is_utf8                     \
+                                                || isASCII_utf8((U8*) (s))    \
+                                                || isIDFIRST_utf8((U8*) (s))))
     if ((s <= PL_bufend - (is_utf8)
                           ? UTF8SKIP(s)
                           : 1)
-        && (isIDFIRST_lazy_if(s, is_utf8) || VALID_LEN_ONE_IDENT(*s, is_utf8)))
+        && VALID_LEN_ONE_IDENT(s, is_utf8))
     {
         if ( isCNTRL_A((U8)*s) ) {
             deprecate("literal control characters in variable names");
