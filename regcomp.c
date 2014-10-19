@@ -805,15 +805,44 @@ static const scan_data_t zero_scan_data =
             PerlIO_printf(Perl_debug_log,"\n");                             \
         });
 
+#define DEBUG_SHOW_STUDY_FLAG(flags,flag) \
+  if ((flags) & flag) PerlIO_printf(Perl_debug_log, "%s ", #flag)
+
+#define DEBUG_SHOW_STUDY_FLAGS(flags,open_str,close_str)                    \
+    if ( ( flags ) ) {                                                      \
+        PerlIO_printf(Perl_debug_log, "%s", open_str);                      \
+        DEBUG_SHOW_STUDY_FLAG(flags,SF_FL_BEFORE_SEOL);                     \
+        DEBUG_SHOW_STUDY_FLAG(flags,SF_FL_BEFORE_MEOL);                     \
+        DEBUG_SHOW_STUDY_FLAG(flags,SF_IS_INF);                             \
+        DEBUG_SHOW_STUDY_FLAG(flags,SF_HAS_PAR);                            \
+        DEBUG_SHOW_STUDY_FLAG(flags,SF_IN_PAR);                             \
+        DEBUG_SHOW_STUDY_FLAG(flags,SF_HAS_EVAL);                           \
+        DEBUG_SHOW_STUDY_FLAG(flags,SCF_DO_SUBSTR);                         \
+        DEBUG_SHOW_STUDY_FLAG(flags,SCF_DO_STCLASS_AND);                    \
+        DEBUG_SHOW_STUDY_FLAG(flags,SCF_DO_STCLASS_OR);                     \
+        DEBUG_SHOW_STUDY_FLAG(flags,SCF_DO_STCLASS);                        \
+        DEBUG_SHOW_STUDY_FLAG(flags,SCF_WHILEM_VISITED_POS);                \
+        DEBUG_SHOW_STUDY_FLAG(flags,SCF_TRIE_RESTUDY);                      \
+        DEBUG_SHOW_STUDY_FLAG(flags,SCF_SEEN_ACCEPT);                       \
+        DEBUG_SHOW_STUDY_FLAG(flags,SCF_TRIE_DOING_RESTUDY);                \
+        DEBUG_SHOW_STUDY_FLAG(flags,SCF_IN_DEFINE);                         \
+        PerlIO_printf(Perl_debug_log, "%s", close_str);                     \
+    }
+
+
 #define DEBUG_STUDYDATA(str,data,depth)                              \
 DEBUG_OPTIMISE_MORE_r(if(data){                                      \
     PerlIO_printf(Perl_debug_log,                                    \
         "%*s" str "Pos:%"IVdf"/%"IVdf                                \
-        " Flags: 0x%"UVXf" Whilem_c: %"IVdf" Lcp: %"IVdf" %s",       \
+        " Flags: 0x%"UVXf,                                           \
         (int)(depth)*2, "",                                          \
         (IV)((data)->pos_min),                                       \
         (IV)((data)->pos_delta),                                     \
-        (UV)((data)->flags),                                         \
+        (UV)((data)->flags)                                          \
+    );                                                               \
+    DEBUG_SHOW_STUDY_FLAGS((data)->flags," [ ","]");                 \
+    PerlIO_printf(Perl_debug_log,                                    \
+        " Whilem_c: %"IVdf" Lcp: %"IVdf" %s",                        \
         (IV)((data)->whilem_c),                                      \
         (IV)((data)->last_closep ? *((data)->last_closep) : -1),     \
         is_inf ? "INF " : ""                                         \
@@ -3231,9 +3260,11 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
     DEBUG_OPTIMISE_r({if (scan){ \
        regnode *Next = regnext(scan); \
        regprop(RExC_rx, RExC_mysv, scan, NULL, pRExC_state); \
-       PerlIO_printf(Perl_debug_log, "%*s" str ">%3d: %s (%d)\n", \
+       PerlIO_printf(Perl_debug_log, "%*s" str ">%3d: %s (%d)", \
            (int)depth*2, "", REG_NODE_NUM(scan), SvPV_nolen_const(RExC_mysv),\
            Next ? (REG_NODE_NUM(Next)) : 0 ); \
+       DEBUG_SHOW_STUDY_FLAGS(flags," [ ","]");\
+       PerlIO_printf(Perl_debug_log, "\n"); \
    }});
 
 /* The below joins as many adjacent EXACTish nodes as possible into a single
@@ -3736,36 +3767,47 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     DEBUG_r(
         RExC_study_chunk_recursed_count++;
     );
+    DEBUG_OPTIMISE_MORE_r(
+    {
+        PerlIO_printf(Perl_debug_log,
+            "%*sstudy_chunk stopparen=%ld recursed_count=%lu depth=%lu recursed_depth=%lu scan=%p last=%p",
+            ((int) depth*2), "", (long)stopparen,
+            (unsigned long)RExC_study_chunk_recursed_count,
+            (unsigned long)depth, (unsigned long)recursed_depth,
+            scan,
+            last);
+        if (recursed_depth) {
+            U32 i;
+            U32 j;
+            for ( j = 0 ; j < recursed_depth ; j++ ) {
+                for ( i = 0 ; i < (U32)RExC_npar ; i++ ) {
+                    if (
+                        PAREN_TEST(RExC_study_chunk_recursed +
+                                   ( j * RExC_study_chunk_recursed_bytes), i )
+                        && (
+                            !j ||
+                            !PAREN_TEST(RExC_study_chunk_recursed +
+                                   (( j - 1 ) * RExC_study_chunk_recursed_bytes), i)
+                        )
+                    ) {
+                        PerlIO_printf(Perl_debug_log," %d",i);
+                        break;
+                    }
+                }
+                if ( j + 1 < recursed_depth ) {
+                    PerlIO_printf(Perl_debug_log, ",");
+                }
+            }
+        }
+        PerlIO_printf(Perl_debug_log,"\n");
+    }
+    );
     while ( scan && OP(scan) != END && scan < last ){
         UV min_subtract = 0;    /* How mmany chars to subtract from the minimum
                                    node length to get a real minimum (because
                                    the folded version may be shorter) */
 	bool unfolded_multi_char = FALSE;
 	/* Peephole optimizer: */
-        DEBUG_OPTIMISE_MORE_r(
-        {
-            PerlIO_printf(Perl_debug_log,
-                "%*sstudy_chunk stopparen=%ld recursed_count=%lu depth=%lu recursed_depth=%lu ",
-                ((int) depth*2), "", (long)stopparen,
-                (unsigned long)RExC_study_chunk_recursed_count,
-                (unsigned long)depth, (unsigned long)recursed_depth);
-            if (recursed_depth) {
-                U32 i;
-                U32 j;
-                for ( j = 0 ; j < recursed_depth ; j++ ) {
-                    PerlIO_printf(Perl_debug_log,"[");
-                    for ( i = 0 ; i < (U32)RExC_npar ; i++ )
-                        PerlIO_printf(Perl_debug_log,"%d",
-                            PAREN_TEST(RExC_study_chunk_recursed +
-                                       (j * RExC_study_chunk_recursed_bytes), i)
-                            ? 1 : 0
-                        );
-                    PerlIO_printf(Perl_debug_log,"]");
-                }
-            }
-            PerlIO_printf(Perl_debug_log,"\n");
-        }
-        );
         DEBUG_STUDYDATA("Peep:", data, depth);
         DEBUG_PEEP("Peep", scan, depth);
 
@@ -3834,6 +3876,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    SSize_t deltanext, minnext, fake;
 		    I32 f = 0;
 		    regnode_ssc this_class;
+
+                    DEBUG_PEEP("Branch", scan, depth);
 
 		    num++;
 		    data_fake.flags = 0;
@@ -5616,14 +5660,16 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
     }
     */
     if (frame) {
+        depth = depth - 1;
+
         DEBUG_STUDYDATA("frame-end:",data,depth);
         DEBUG_PEEP("fend", scan, depth);
+
         /* restore previous context */
         last = frame->last_regnode;
         scan = frame->next_regnode;
         stopparen = frame->stopparen;
         recursed_depth = frame->prev_recursed_depth;
-        depth = depth - 1;
 
         RExC_frame_last = frame->prev_frame;
         frame = frame->this_prev_frame;
@@ -7927,22 +7973,20 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 }
 
 #define DEBUG_PARSE_MSG(funcname)     DEBUG_PARSE_r({           \
-    int rem=(int)(RExC_end - RExC_parse);                       \
-    int cut;                                                    \
     int num;                                                    \
-    int iscut=0;                                                \
-    if (rem>10) {                                               \
-        rem=10;                                                 \
-        iscut=1;                                                \
-    }                                                           \
-    cut=10-rem;                                                 \
-    if (RExC_lastparse!=RExC_parse)                             \
-        PerlIO_printf(Perl_debug_log," >%.*s%-*s",              \
-            rem, RExC_parse,                                    \
-            cut + 4,                                            \
-            iscut ? "..." : "<"                                 \
+    if (RExC_lastparse!=RExC_parse) {                           \
+        PerlIO_printf(Perl_debug_log, "%s",                     \
+            Perl_pv_pretty(aTHX_ RExC_mysv1, RExC_parse,        \
+                RExC_end - RExC_parse, 16,                      \
+                "", "",                                         \
+                PERL_PV_ESCAPE_UNI_DETECT |                     \
+                PERL_PV_PRETTY_ELLIPSES   |                     \
+                PERL_PV_PRETTY_LTGT       |                     \
+                PERL_PV_ESCAPE_RE         |                     \
+                PERL_PV_PRETTY_EXACTSIZE                        \
+            )                                                   \
         );                                                      \
-    else                                                        \
+    } else                                                      \
         PerlIO_printf(Perl_debug_log,"%16s","");                \
                                                                 \
     if (SIZE_ONLY)                                              \
