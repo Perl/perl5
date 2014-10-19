@@ -2,10 +2,9 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';
+    set_up_inc('../lib');
 }
-plan 912;
 
 eval "#line 8 foo\nsub t004 :method (\$a) { }";
 is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
@@ -1302,5 +1301,25 @@ is scalar(@{[ t117() ]}), 0;
 is scalar(t117()), undef;
 is scalar(@{[ t117(333, 444) ]}), 0;
 is scalar(t117(333, 444)), undef;
+
+use File::Spec::Functions;
+my $keywords_file = catfile(updir,'regen','keywords.pl');
+open my $kh, $keywords_file
+   or die "$0 cannot open $keywords_file: $!";
+while(<$kh>) {
+    if (m?__END__?..${\0} and /^[+-]/) {
+        chomp(my $word = $');
+        # $y should be an error after $x=foo.  The exact error we get may
+        # differ if this is __END__ or s or some other special keyword.
+        eval 'sub ($x = ' . $word . ', $y) {}';
+        local $::TODO = 'does not work yet'
+          if $word =~ /^(?:chmod|chown|die|exec|glob|kill|mkdir|print
+                          |printf|return|reverse|select|setpgrp|sort|split
+                          |system|unlink|utime|warn)\z/x;
+        isnt $@, "", "$word does not swallow trailing comma";
+    }
+}
+
+done_testing;
 
 1;
