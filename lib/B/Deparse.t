@@ -1093,8 +1093,8 @@ CORE::evalbytes '';
 # CONTEXT no warnings 'experimental::smartmatch';
 use feature (sprintf(":%vd", $^V));
 use 1;
+CORE::say $_;
 CORE::state $x;
-CORE::say $x;
 CORE::given ($x) {
     CORE::when (3) {
         continue;
@@ -1106,8 +1106,8 @@ CORE::given ($x) {
 CORE::evalbytes '';
 () = CORE::__SUB__;
 >>>>
+CORE::say $_;
 CORE::state $x;
-CORE::say $x;
 CORE::given ($x) {
     CORE::when (3) {
         continue;
@@ -1124,8 +1124,8 @@ CORE::evalbytes '';
 # feature features when feature has been disabled by use VERSION
 use feature (sprintf(":%vd", $^V));
 use 1;
+CORE::say $_;
 CORE::state $x;
-CORE::say $x;
 CORE::given ($x) {
     CORE::when (3) {
         continue;
@@ -1139,8 +1139,8 @@ CORE::evalbytes '';
 >>>>
 no feature;
 use feature ':default';
+CORE::say $_;
 CORE::state $x;
-CORE::say $x;
 CORE::given ($x) {
     CORE::when (3) {
         continue;
@@ -1492,8 +1492,7 @@ our($o7, undef, $o8) = (1, 2, 3);
 local($o7, undef, $o8) = (1, 2, 3);
 ####
 # 'state' works with padrange op
-no strict;
-use feature 'state';
+# CONTEXT no strict; use feature 'state';
 state($z, @z);
 state $s1;
 $s1 = 1;

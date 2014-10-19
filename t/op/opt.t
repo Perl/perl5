@@ -9,8 +9,9 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 21;
+plan 22;
 
+use v5.10; # state
 use B qw 'svref_2object OPpASSIGN_COMMON';
 
 
@@ -60,6 +61,13 @@ for (['CONSTANT', sub {          join "foo", "bar"    }, 0, "bar"    ],
 
 is svref_2object(sub { 0;0;0;0;0;0;time })->START->next->name, 'time',
   'multiple nextstates become one';
+
+
+# pad[ahs]v state declarations in void context 
+
+is svref_2object(sub{state($foo,@fit,%far);state $bar;state($a,$b); time})
+    ->START->next->name, 'time',
+  'pad[ahs]v state declarations in void context';
 
 
 # rv2[ahs]v in void context
