@@ -168,7 +168,7 @@ struct RExC_state_t {
 
     regnode	**recurse;		/* Recurse regops */
     I32		recurse_count;		/* Number of recurse regops */
-    U8          *study_chunk_recursed;  /* bitmap of which parens we have moved
+    U8          *study_chunk_recursed;  /* bitmap of which subs we have moved
                                            through */
     U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
     I32		in_lookbehind;
@@ -444,6 +444,10 @@ static const scan_data_t zero_scan_data =
 #define SCF_TRIE_RESTUDY        0x4000 /* Do restudy? */
 #define SCF_SEEN_ACCEPT         0x8000
 #define SCF_TRIE_DOING_RESTUDY 0x10000
+#define SCF_IN_DEFINE          0x20000
+
+
+
 
 #define UTF cBOOL(RExC_utf8)
 
@@ -3841,6 +3845,32 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 	/* The principal pseudo-switch.  Cannot be a switch, since we
 	   look into several different things.  */
+        if ( OP(scan) == DEFINEP ) {
+            SSize_t minlen = 0;
+            SSize_t deltanext = 0;
+            SSize_t fake_last_close = 0;
+            I32 f = SCF_IN_DEFINE;
+
+            StructCopy(&zero_scan_data, &data_fake, scan_data_t);
+            scan = regnext(scan);
+            assert( OP(scan) == IFTHEN );
+            DEBUG_PEEP("expect IFTHEN", scan, depth);
+
+            data_fake.last_closep= &fake_last_close;
+            minlen = *minlenp;
+            next = regnext(scan);
+            scan = NEXTOPER(NEXTOPER(scan));
+            DEBUG_PEEP("scan", scan, depth);
+            DEBUG_PEEP("next", next, depth);
+
+            /* we suppose the run is continuous, last=next...
+             * NOTE we dont use the return here! */
+            (void)study_chunk(pRExC_state, &scan, &minlen,
+                              &deltanext, next, &data_fake, stopparen,
+                              recursed_depth, NULL, f, depth+1);
+
+            scan = next;
+        } else
         if (
             OP(scan) == BRANCH  ||
             OP(scan) == BRANCHJ ||
@@ -4304,8 +4334,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             regnode *end = NULL;
             U32 my_recursed_depth= recursed_depth;
 
+
             if (OP(scan) != SUSPEND) { /* GOSUB/GOSTART */
-                /* set the pointer */
+                /* Do setup, note this code has side effects beyond
+                 * the rest of this block. Specifically setting
+                 * RExC_recurse[] must happen at least once during
+                 * study_chunk(). */
 	        if (OP(scan) == GOSUB) {
 	            paren = ARG(scan);
 	            RExC_recurse[ARG2L(scan)] = scan;
@@ -4315,27 +4349,33 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     start = RExC_rxi->program + 1;
                     end   = RExC_opend;
                 }
-                /* this code is intended to handle expanding regex "subs" so
-                 * we can apply various optimizations. For instance with
-                 * /(?(DEFINE)(?<foo>foo)(?<bar>bar))(?&foo)(?&bar)/ we
-                 * want to recognize that the mandatory substr is going to be
-                 * "foobar".
-                 * However if we are not in SCF_DO_SUBSTR mode then there is
-                 * no point in doing this, and it can cause a serious slowdown.
-                 * See RT #122283.
-                 * Note also that this was a workaround for the core problem
-                 * which was that during compilation logic the excessive
-                 * recursion resulted in slowly consuming all the memory on
-                 * the box. Exactly what causes this is unclear. It does not
-                 * appear to be directly related to allocating the "visited"
-                 * bitmaps that is RExC_study_chunk_recursed.
-                 *
-                 * In reality study_chunk() does far far too much, and probably
-                 * this an other issues would go away if we split it into
-                 * multiple components.
-                 *
-                 * - Yves
-                 * */
+                /* NOTE we MUST always execute the above code, even
+                 * if we do nothing with a GOSUB/GOSTART */
+                if (
+                    ( flags & SCF_IN_DEFINE )
+                    ||
+                    (
+                        (is_inf_internal || is_inf || data->flags & SF_IS_INF)
+                        &&
+                        ( (flags & (SCF_DO_STCLASS | SCF_DO_SUBSTR)) == 0 )
+                    )
+                ) {
+                    /* no need to do anything here if we are in a define. */
+                    /* or we are after some kind of infinite construct
+                     * so we can skip recursing into this item.
+                     * Since it is infinite we will not change the maxlen
+                     * or delta, and if we miss something that might raise
+                     * the minlen it will merely pessimise a little.
+                     *
+                     * Iow /(?(DEFINE)(?<foo>foo|food))a+(?&foo)/
+                     * might result in a minlen of 1 and not of 4,
+                     * but this doesn't make us mismatch, just try a bit
+                     * harder than we should.
+                     * */
+                    scan= regnext(scan);
+                    continue;
+                }
+
                 if (
                     !recursed_depth
                     ||
@@ -6964,9 +7004,11 @@ reStudy:
         RExC_study_chunk_recursed_count= 0;
     );
     Zero(r->substrs, 1, struct reg_substr_data);
-    if (RExC_study_chunk_recursed)
+    if (RExC_study_chunk_recursed) {
         Zero(RExC_study_chunk_recursed,
              RExC_study_chunk_recursed_bytes * RExC_npar, U8);
+    }
+
 
 #ifdef TRIE_STUDY_OPT
     if (!restudied) {
