@@ -105,14 +105,24 @@ for ( 0x0 .. 0xff ) {
             $deprecated = 1;
         }
     }
-    elsif ($chr =~ /[[:cntrl:]]/u) {
-        $name = sprintf "\\x%02x, a C1 control", $ord;
+    elsif ($chr =~ /\pC/) {
+        if ($chr eq "\N{SHY}") {
+            $name = sprintf "\\x%02x, SHY", $ord;
+        }
+        else {
+            $name = sprintf "\\x%02x, a C1 control", $ord;
+        }
+        $deprecated = 1;
     }
     elsif ($chr =~ /\p{XIDStart}/) {
         $name = sprintf "\\x%02x, a non-ASCII XIDS character", $ord;
     }
+    elsif ($chr =~ /\p{XPosixSpace}/) {
+        $name = sprintf "\\x%02x, a non-ASCII space character", $ord;
+        $deprecated = 1;
+    }
     else {
-        $name = sprintf "\\x%02x, a non-ASCII, non-XIDS character", $ord;
+        $name = sprintf "\\x%02x, a non-ASCII, non-XIDS graphic character", $ord;
     }
     no warnings 'closure';
     my $esc = sprintf("%X", $ord);

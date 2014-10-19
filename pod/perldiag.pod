@@ -6532,10 +6532,19 @@ old way has bad side effects.
 
 =item Use of literal control characters in variable names is deprecated
 
-(D deprecated) Using literal control characters in the source to refer
-to the ^FOO variables, like C<$^X> and C<${^GLOBAL_PHASE}> is now
-deprecated.  This only affects code like C<$\cT>, where \cT is a control in
-the source code: C<${"\cT"}> and C<$^T> remain valid.
+=item Use of literal non-graphic characters in variable names is deprecated
+
+(D deprecated) Using literal non-graphic (including control) characters
+in the source to refer to the ^FOO variables, like C<$^X> and
+C<${^GLOBAL_PHASE}> is now deprecated.  (We use C<^X> and C<^G> here for
+legibility.  They actually represent the non-printable control
+characters, code points 0x18 and 0x07, respectively; C<^A> would mean
+the control character whose code point is 0x01.) This only affects code
+like
+C<$\cT>, where C<\cT> is a control in the source code; C<${"\cT"}> and
+C<$^T> remain valid.  Things that are non-controls and also not graphic
+are NO-BREAK SPACE and SOFT HYPHEN, which were previously only allowed
+for historical reasons.
 
 =item Use of -l on filehandle%s
 

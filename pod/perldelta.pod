@@ -78,6 +78,17 @@ as an updated module in the L</Modules and Pragmata> section.
 
 [ List each other deprecation as a =head2 entry ]
 
+=head2 Use of non-graphic characters in single-character variable names
+
+The syntax for single-character variable names is more lenient than
+for longer variable names, allowing the one-character name to be a
+punctuation character or even invisible (a non-graphic).  Perl v5.20
+deprecated the ASCII-range controls as such a name.  Now, all
+non-graphic characters that formerly were allowed are deprecated.
+The practical effect of this occurs only when not under C<S<"use
+utf8">>, and affects just the C1 controls (code points 0x80 through
+0xFF), NO-BREAK SPACE, and SOFT HYPHEN.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here.
@@ -192,7 +203,7 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Use of literal non-graphic characters in variable names is deprecated|perldiag/"Use of literal non-graphic characters in variable names is deprecated">
 
 =back
 

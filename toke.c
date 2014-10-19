@@ -8572,8 +8572,22 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
                           : 1)
         && VALID_LEN_ONE_IDENT(s, is_utf8))
     {
-        if ( isCNTRL_A((U8)*s) ) {
-            deprecate("literal control characters in variable names");
+        /* Deprecate all non-graphic characters.  Include SHY as a non-graphic,
+         * because often it has no graphic representation.  (We can't get to
+         * here with SHY when 'is_utf8' is true, so no need to include a UTF-8
+         * test for it.) */
+        if ((is_utf8)
+            ? ! isGRAPH_utf8( (U8*) s)
+            : (! isGRAPH_L1( (U8) *s)
+               || UNLIKELY((U8) *(s) == LATIN1_TO_NATIVE(0xAD))))
+        {
+            /* Split messages for back compat */
+            if (isCNTRL_A( (U8) *s)) {
+                deprecate("literal control characters in variable names");
+            }
+            else {
+                deprecate("literal non-graphic characters in variable names");
+            }
         }
         
         if (is_utf8) {
