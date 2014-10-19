@@ -277,10 +277,6 @@ L<Cannot pack %f with '%c'|perldiag/"Cannot pack %f with '%c'">
 
 L<Cannot print %f with '%c'|perldiag/"Cannot printf %f with '%c'">
 
-=item *
-
-L<"my" subroutine %s can't be in package|perldiag/""my" subroutine %s can't be in a package">
-
 =back
 
 =head2 Changes to Existing Diagnostics
