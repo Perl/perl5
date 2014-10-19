@@ -10643,10 +10643,11 @@ Perl_ck_join(pTHX_ OP *o)
 			SVfARG(msg), SVfARG(msg));
 	}
     }
-    if (kid->op_type == OP_CONST  /* an innocent, unsuspicious separator */
-     || (kid->op_type == OP_PADSV && !(kid->op_private & OPpLVAL_INTRO))
-     || (kid->op_type==OP_RV2SV && kUNOP->op_first->op_type == OP_GV
-	&& !(kid->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO))))
+    if (kid
+     && (kid->op_type == OP_CONST /* an innocent, unsuspicious separator */
+	|| (kid->op_type == OP_PADSV && !(kid->op_private & OPpLVAL_INTRO))
+	|| (  kid->op_type==OP_RV2SV && kUNOP->op_first->op_type == OP_GV
+	   && !(kid->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)))))
     {
 	const OP * const bairn = OP_SIBLING(kid); /* the list */
 	if (bairn && !OP_HAS_SIBLING(bairn) /* single-item list */

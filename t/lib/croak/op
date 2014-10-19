@@ -1,4 +1,10 @@
 __END__
+# NAME join,
+join,
+EXPECT
+Not enough arguments for join or string at - line 1, near "join,"
+Execution of - aborted due to compilation errors.
+########
 # NAME my $<special>
 my $!;
 EXPECT
