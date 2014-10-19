@@ -295,6 +295,11 @@ L<XSLoader> has been upgraded from version 0.17 to 0.18.
 Allow XSLoader to load modules from a different namespace.
 [perl #122455]
 
+=item *
+
+L<perlfaq> has been upgraded from version 5.0150045 to version 5.0150046.
+[perl #123008]
+
 =back
 
 =head2 Removed Modules and Pragmata
