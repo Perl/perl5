@@ -3754,9 +3754,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
     PERL_ARGS_ASSERT_STUDY_CHUNK;
 
-#ifdef DEBUGGING
-    StructCopy(&zero_scan_data, &data_fake, scan_data_t);
-#endif
+
     if ( depth == 0 ) {
         while (first_non_open && OP(first_non_open) == OPEN)
             first_non_open=regnext(first_non_open);
@@ -3880,7 +3878,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     DEBUG_PEEP("Branch", scan, depth);
 
 		    num++;
-		    data_fake.flags = 0;
+                    StructCopy(&zero_scan_data, &data_fake, scan_data_t);
 		    if (data) {
 			data_fake.whilem_c = data->whilem_c;
 			data_fake.last_closep = data->last_closep;
@@ -5293,7 +5291,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
                 regnode_ssc intrnl;
                 int f = 0;
 
-                data_fake.flags = 0;
+                StructCopy(&zero_scan_data, &data_fake, scan_data_t);
                 if (data) {
                     data_fake.whilem_c = data->whilem_c;
                     data_fake.last_closep = data->last_closep;
@@ -5537,7 +5535,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
                     SSize_t deltanext=0, minnext=0, f = 0, fake;
                     regnode_ssc this_class;
 
-                    data_fake.flags = 0;
+                    StructCopy(&zero_scan_data, &data_fake, scan_data_t);
                     if (data) {
                         data_fake.whilem_c = data->whilem_c;
                         data_fake.last_closep = data->last_closep;
