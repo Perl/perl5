@@ -263,23 +263,23 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-L<message|perldiag/"Cannot chr %f">
+L<Cannot chr %f|perldiag/"Cannot chr %f">
 
 =item *
 
-L<message|perldiag/"Cannot compress %f in pack">
+L<Cannot compress %f in pack|perldiag/"Cannot compress %f in pack">
 
 =item *
 
-L<message|perldiag/"Cannot pack %f with '%c'">
+L<Cannot pack %f with '%c'|perldiag/"Cannot pack %f with '%c'">
 
 =item *
 
-L<message|perldiag/"Cannot printf %f with '%c'">
+L<Cannot print %f with '%c'|perldiag/"Cannot printf %f with '%c'">
 
 =item *
 
-L<message|perldiag/""my" subroutine %s can't be in a package">
+L<"my" subroutine %s can't be in package|perldiag/""my" subroutine %s can't be in a package">
 
 =back
 
