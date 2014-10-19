@@ -305,6 +305,11 @@ and are run with a C<< watchdog() >>.
 
 =head1 Platform Support
 
+=head2 Regained Platforms
+
+IRIX and Tru64 platforms are working again.
+(Some C<make test> failures remain.)
+
 =head2 Platform-Specific Notes
 
 =over 4
