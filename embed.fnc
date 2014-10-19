@@ -1749,7 +1749,7 @@ Apdbm	|void	|sv_usepvn_mg	|NN SV *sv|NULLOK char *ptr|STRLEN len
 ApR	|MGVTBL*|get_vtbl	|int vtbl_id
 Apd	|char*	|pv_display	|NN SV *dsv|NN const char *pv|STRLEN cur|STRLEN len \
 				|STRLEN pvlim
-Apd	|char*	|pv_escape	|NN SV *dsv|NN char const * const str\
+Apd	|char*	|pv_escape	|NULLOK SV *dsv|NN char const * const str\
                                 |const STRLEN count|const STRLEN max\
                                 |NULLOK STRLEN * const escaped\
                                 |const U32 flags				

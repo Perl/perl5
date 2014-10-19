@@ -96,7 +96,10 @@ S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
 
 Escapes at most the first "count" chars of pv and puts the results into
 dsv such that the size of the escaped string will not exceed "max" chars
-and will not contain any incomplete escape sequences.
+and will not contain any incomplete escape sequences. The number of bytes
+escaped will be returned in the STRLEN *escaped parameter if it is not null.
+When the dsv parameter is null no escaping actually occurs, but the number
+of bytes that would be escaped were it not null will be calculated.
 
 If flags contains PERL_PV_ESCAPE_QUOTE then any double quotes in the string
 will also be escaped.
@@ -151,7 +154,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
 
     PERL_ARGS_ASSERT_PV_ESCAPE;
 
-    if (!(flags & PERL_PV_ESCAPE_NOCLEAR)) {
+    if (dsv && !(flags & PERL_PV_ESCAPE_NOCLEAR)) {
 	    /* This won't alter the UTF-8 flag */
 	    sv_setpvs(dsv, "");
     }
@@ -221,7 +224,8 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
 	if ( max && (wrote + chsize > max) ) {
 	    break;
         } else if (chsize > 1) {
-            sv_catpvn(dsv, octbuf, chsize);
+            if (dsv)
+                sv_catpvn(dsv, octbuf, chsize);
             wrote += chsize;
 	} else {
 	    /* If PERL_PV_ESCAPE_NOBACKSLASH is set then non-ASCII bytes
@@ -230,7 +234,8 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
 	       Or add a new API call sv_catpvc(). Think about that name, and
 	       how to keep it clear that it's unlike the s of catpvs, which is
 	       really an array of octets, not a string.  */
-            Perl_sv_catpvf( aTHX_ dsv, "%c", c);
+            if (dsv)
+                Perl_sv_catpvf( aTHX_ dsv, "%c", c);
 	    wrote++;
 	}
         if ( flags & PERL_PV_ESCAPE_FIRSTCHAR ) 
@@ -238,7 +243,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
     }
     if (escaped != NULL)
         *escaped= pv - str;
-    return SvPVX(dsv);
+    return dsv ? SvPVX(dsv) : NULL;
 }
 /*
 =for apidoc pv_pretty
@@ -270,36 +275,51 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
   const STRLEN max, char const * const start_color, char const * const end_color, 
   const U32 flags ) 
 {
-    const U8 dq = (flags & PERL_PV_PRETTY_QUOTE) ? '"' : '%';
+    const U8 *quotes = (flags & PERL_PV_PRETTY_QUOTE) ? "\"\"" :
+                       (flags & PERL_PV_PRETTY_LTGT)  ? "<>" : NULL;
     STRLEN escaped;
+    STRLEN max_adjust= 0;
+    STRLEN orig_cur;
  
     PERL_ARGS_ASSERT_PV_PRETTY;
    
     if (!(flags & PERL_PV_PRETTY_NOCLEAR)) {
-	    /* This won't alter the UTF-8 flag */
-	    sv_setpvs(dsv, "");
+        /* This won't alter the UTF-8 flag */
+        sv_setpvs(dsv, "");
     }
+    orig_cur= SvCUR(dsv);
 
-    if ( dq == '"' )
-        sv_catpvs(dsv, "\"");
-    else if ( flags & PERL_PV_PRETTY_LTGT )
-        sv_catpvs(dsv, "<");
+    if ( quotes )
+        Perl_sv_catpvf(aTHX_ dsv, "%c", quotes[0]);
         
     if ( start_color != NULL ) 
         sv_catpv(dsv, start_color);
-    
-    pv_escape( dsv, str, count, max, &escaped, flags | PERL_PV_ESCAPE_NOCLEAR );    
-    
+
+    if ((flags & PERL_PV_PRETTY_EXACTSIZE)) {
+        if (quotes)
+            max_adjust += 2;
+        assert(max > max_adjust);
+        pv_escape( NULL, str, count, max - max_adjust, &escaped, flags );
+        if ( (flags & PERL_PV_PRETTY_ELLIPSES) && ( escaped < count ) )
+            max_adjust += 3;
+        assert(max > max_adjust);
+    }
+
+    pv_escape( dsv, str, count, max - max_adjust, &escaped, flags | PERL_PV_ESCAPE_NOCLEAR );
+
     if ( end_color != NULL ) 
         sv_catpv(dsv, end_color);
 
-    if ( dq == '"' ) 
-	sv_catpvs( dsv, "\"");
-    else if ( flags & PERL_PV_PRETTY_LTGT )
-        sv_catpvs(dsv, ">");         
+    if ( quotes )
+        Perl_sv_catpvf(aTHX_ dsv, "%c", quotes[1]);
     
     if ( (flags & PERL_PV_PRETTY_ELLIPSES) && ( escaped < count ) )
 	    sv_catpvs(dsv, "...");
+
+    if ((flags & PERL_PV_PRETTY_EXACTSIZE)) {
+        while( SvCUR(dsv) - orig_cur < max )
+            sv_catpvs(dsv," ");
+    }
  
     return SvPVX(dsv);
 }
