@@ -14,7 +14,8 @@ C<::> or C<'>.  In this case, the part before the last C<::> or
 C<'> is taken to be a I<package qualifier>; see L<perlmod>.
 
 Perl variable names may also be a sequence of digits or a single
-punctuation or control character.  These names are all reserved for
+punctuation or control character (with the literal control character
+form deprecated).  These names are all reserved for
 special uses by Perl; for example, the all-digits names are used
 to hold data captured by backreferences after a regular expression
 match.  Perl has a special syntax for the single-control-character
