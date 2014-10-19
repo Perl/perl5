@@ -669,11 +669,9 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
     I32 items = sp - mark;
     STRLEN len;
     STRLEN delimlen;
+    const char * const delims = SvPV_const(delim, delimlen);
 
     PERL_ARGS_ASSERT_DO_JOIN;
-
-    (void) SvPV_const(delim, delimlen); /* stringify and get the delimlen */
-    /* SvCUR assumes it's SvPOK() and woe betide you if it's not. */
 
     mark++;
     len = (items > 0 ? (delimlen * (items - 1) ) : 0);
@@ -708,10 +706,11 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
     }
 
     if (delimlen) {
+	const U32 delimflag = DO_UTF8(delim) ? SV_CATUTF8 : SV_CATBYTES;
 	for (; items > 0; items--,mark++) {
 	    STRLEN len;
 	    const char *s;
-	    sv_catsv_nomg(sv,delim);
+	    sv_catpvn_flags(sv,delims,delimlen,delimflag);
 	    s = SvPV_const(*mark,len);
 	    sv_catpvn_flags(sv,s,len,
 			    DO_UTF8(*mark) ? SV_CATUTF8 : SV_CATBYTES);

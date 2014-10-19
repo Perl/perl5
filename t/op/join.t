@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 26;
+plan tests => 28;
 
 @x = (1, 2, 3);
 is( join(':',@x), '1:2:3', 'join an array with character');
@@ -117,3 +117,10 @@ is( $f, 'baeak', 'join back to self, self is join character');
   is( $ju2, $u );
 }
 
+package o { use overload q|""| => sub { ${$_[0]}++ } }
+{
+  my $o = bless \(my $dummy = "a"), o::;
+  $_ = join $o, 1..10;
+  is $_, "1a2a3a4a5a6a7a8a9a10", 'join, $overloaded, LIST';
+  is $$o, "b", 'overloading was called once on overloaded separator';
+}
