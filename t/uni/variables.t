@@ -14,7 +14,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 66644);
+plan (tests => 66900);
 
 # ${single:colon} should not be valid syntax
 {
@@ -72,17 +72,20 @@ for my $v (qw( ^V ; < > ( ) {^GLOBAL_PHASE} ^W _ 1 4 0 [ ] ! @ / \ = )) {
 # Checking if the Latin-1 range behaves as expected, and that the behavior is the
 # same whenever under strict or not.
 for ( 0x0 .. 0xff ) {
+    my @warnings;
+    local $SIG {__WARN__} = sub {push @warnings, @_ };
     my $ord = utf8::unicode_to_native($_);
     my $chr = chr $ord;
     my $syntax_error = 0;   # Do we expect this code point to generate a
                             # syntax error?  Assume not, for now
+    my $deprecated = 0;
     my $name;
 
     # A different number of tests are run depending on the branches in this
     # loop iteration.  This allows us to add skips to make the reported total
     # the same for each iteration.
     my $tests = 0;
-    my $max_tests = 5;
+    my $max_tests = 6;
 
     if ($chr =~ /[[:graph:]]/a) {
         $name = "'$chr'";
@@ -96,9 +99,13 @@ for ( 0x0 .. 0xff ) {
         if ($chr eq "\N{NULL}") {
             $name = sprintf "\\x%02x, NUL", $ord;
             $syntax_error = 1;
+            # We don't deprecate this to avoid breaking the deprecated
+            # warnings test below, because it doesn't generate a warning,
+            # because it doesn't get far enough along in the parsing to do so.
         }
         else {
             $name = sprintf "\\x%02x, an ASCII control", $ord;
+            $deprecated = 1;
         }
     }
     elsif ($chr =~ /[[:cntrl:]]/u) {
@@ -114,7 +121,6 @@ for ( 0x0 .. 0xff ) {
     my $esc = sprintf("%X", $ord);
     utf8::downgrade($chr);
     if ($chr !~ /\p{XIDS}/u) {
-        no warnings 'deprecated';
         if ($syntax_error) {
             evalbytes "\$$chr";
             like($@, qr/syntax error/, "$name as a length-1 variable generates a syntax error");
@@ -214,6 +220,29 @@ for ( 0x0 .. 0xff ) {
                 $tests++;
             }
         }
+    }
+
+    if (! $deprecated) {
+        if ($chr =~ /[#*]/) {
+
+            # Length-1 variables with these two characters used to be used by
+            # Perl, but now their generates a warning that they're gone.
+            # Ignore such warnings.
+            for (my $i = @warnings - 1; $i >= 0; $i--) {
+                splice @warnings, $i, 1 if $warnings[$i] =~ /is no longer supported/;
+            }
+        }
+        ok(@warnings == 0, "  ... and doesn't generate any warnings");
+        $tests++;
+    }
+    elsif (! @warnings) {
+        fail("  ... and generates deprecation warnings (since is deprecated)");
+        $tests++;
+    }
+    else {
+        ok((scalar @warnings == grep { $_ =~ /deprecated/ } @warnings),
+           "  ... and generates deprecation warnings (only)");
+        $tests++;
     }
 
     SKIP: {
