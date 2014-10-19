@@ -63,10 +63,10 @@ C<< U+FFFD >> was returned.
 But now, all such actions (C<< pack >>, C<< chr >>, and C<< print '%c' >>)
 result in a fatal error.
 
-=head2 Inf, NaN, and large floating points
+=head2 Inf and NaN
 
-Many small improvements, bug fixes and added test cases for dealing with
-math related to infinity, not-a-number, long doubles and double-doubles.
+Many small improvements, bug fixes and added test cases for dealing 
+with math related to infinity and not-a-number.
 
 =head1 Security
 
