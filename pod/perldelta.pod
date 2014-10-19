@@ -163,13 +163,14 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perldata/Identifier parsing>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The syntax of single-character variable names has been brought
+up-to-date and more fully explained.
 
 =back
 

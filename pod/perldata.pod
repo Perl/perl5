@@ -188,31 +188,49 @@ fully-qualified.  They come in four forms:
 
 =over
 
-=item A sigil, followed solely by digits matching \p{POSIX_Digit}, like C<$0>,
-C<$1>, or C<$10000>.
+=item *
 
-=item A sigil, followed by either a caret and a single POSIX uppercase letter,
-like C<$^V> or C<$^W>, or a sigil followed by a literal control character
-matching the C<\p{POSIX_Cntrl}> property.
-Due to a historical oddity, if not
-running under C<use utf8>, the 128 extra controls in the C<[0x80-0xff]> range
-may also be used in length one variables.  The use of a literal control
-character is deprecated.  Support for this form will be removed in a future
-version of perl.
+A sigil, followed solely by digits matching C<\p{POSIX_Digit}>, like
+C<$0>, C<$1>, or C<$10000>.
 
-=item Similar to the above, a sigil, followed by bareword text in brackets,
-where the first character is either a caret followed by an uppercase letter,
-or a literal control, like C<${^GLOBAL_PHASE}> or C<${\7LOBAL_PHASE}>.  The use
-of a literal control character is deprecated.  Support for this form will be
-removed in a future version of perl.
+=item *
 
-=item A sigil followed by a single character matching the C<\p{POSIX_Punct}>
-property, like C<$!> or C<%+>.
+A sigil, followed by either a caret and a single POSIX uppercase letter,
+like C<$^V> or C<$^W>, or a sigil followed by a literal non-space,
+non-C<NUL> control character matching the C<\p{POSIX_Cntrl}> property.
+Due to a historical oddity, if not running under C<use utf8>, the 128
+characters in the C<[0x80-0xff]> range are considered to be controls,
+and may also be used in length-one variables.  However, the use of
+non-graphical characters is deprecated as of v5.22, and support for them
+will be removed in a future version of perl.  ASCII space characters and
+C<NUL> already aren't allowed, so this means that a single-character
+variable name with that name being any other C0 control C<[0x01-0x1F]>,
+or C<DEL> will generate a deprecated warning.  Already, under C<"use
+utf8">, non-ASCII characters must match C<Perl_XIDS>.  As of v5.22, when
+not under C<"use utf8"> C1 controls C<[0x80-0x9F]>, NO BREAK SPACE, and
+SOFT HYPHEN (C<SHY>)) generate a deprecated warning.
+
+=item *
+
+Similar to the above, a sigil, followed by bareword text in brackets,
+where the first character is either a caret followed by an uppercase
+letter, like C<${^GLOBAL_PHASE}> or a non-C<NUL>, non-space literal
+control like C<${\7LOBAL_PHASE}>.  Like the above, when not under
+C<"use utf8">, the characters in C<[0x80-0xFF]> are considered controls, but as
+of v5.22, the use of any that are non-graphical are deprecated, and as
+of v5.20 the use of any ASCII-range literal control is deprecated.
+Support for these will be removed in a future version of perl.
+
+=item *
+
+A sigil followed by a single character matching the C<\p{POSIX_Punct}>
+property, like C<$!> or C<%+>, except the character C<"{"> doesn't work.
 
 =back
 
 Note that as of Perl 5.20, literal control characters in variable names
-are deprecated.
+are deprecated; and as of Perl 5.22, any other non-graphic characters
+are also deprecated.
 
 =head2 Context
 X<context> X<scalar context> X<list context>
