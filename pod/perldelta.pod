@@ -65,8 +65,8 @@ result in a fatal error.
 
 =head2 Inf, NaN, and large floating points
 
-Many small improvements, bugfixes and added test cases for dealing with
-math related to infinity, not-a-number, longdoubles and double-doubles.
+Many small improvements, bug fixes and added test cases for dealing with
+math related to infinity, not-a-number, long doubles and double-doubles.
 
 =head1 Security
 
@@ -111,7 +111,7 @@ depending on OS.
 
 =item *
 
-In C<@array = split>, the assigment can be optimised away with C<split>
+In C<@array = split>, the assignment can be optimized away with C<split>
 writing directly to the array.  This optimisation was happening only for
 package arrays other than @_ and only
 sometimes.  Now this optimisation happens
@@ -127,7 +127,7 @@ simplified to a stringification.  The separator doesn't even get evaluated.
 
 C<qq(@array)> is implemented using two ops: a stringify op and a join op.
 If the qq contains nothing but a single array, the stringification is
-optimised away.
+optimized away.
 
 =item *
 
@@ -178,7 +178,7 @@ C<foreach state $x (...) {...}> now deparses correctly with C<state> and
 not C<my>.
 
 C<our @array = split(...)> now deparses correctly with C<our> in those
-cases where the assignment is optimised away.
+cases where the assignment is optimized away.
 
 =item *
 
@@ -329,7 +329,7 @@ L<perlrecharclass/Character Ranges>.
 
 SVs of type SVt_NV are now bodyless when a build configure and platform allow
 it, specifically C<sizeof(NV) <= sizeof(IV)>. The bodyless trick is the same one
-as for IVs since 5.9.2, but for NVs, unlike IVs, is not guarenteed on all
+as for IVs since 5.9.2, but for NVs, unlike IVs, is not guaranteed on all
 platforms and build configurations.
 
 =item *
@@ -443,7 +443,7 @@ results.
 =item *
 
 In C<() = @array = split>, the C<() => at the beginning no longer confuses
-the optimiser, making it assume a limit of 1.
+the optimizer, making it assume a limit of 1.
 
 =item *
 
@@ -484,7 +484,7 @@ Fixed an off-by-one error when setting the size of shared array.
 
 =item *
 
-Fixed a bug that could cause perl to execute an infite loop during
+Fixed a bug that could cause perl to execute an infinite loop during
 compilation. [perl #122995]
 
 =back
