@@ -3888,9 +3888,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 		    data_fake.pos_delta = delta;
 		    next = regnext(scan);
-		    scan = NEXTOPER(scan);
-		    if (code != BRANCH)
+
+                    scan = NEXTOPER(scan); /* everything */
+                    if (code != BRANCH)    /* everything but BRANCH */
 			scan = NEXTOPER(scan);
+
 		    if (flags & SCF_DO_STCLASS) {
 			ssc_init(pRExC_state, &this_class);
 			data_fake.start_class = &this_class;
