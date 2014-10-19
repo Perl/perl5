@@ -174,7 +174,7 @@ There's also I<$foo Magazin>, a German magazine dedicated to Perl, at
 German-speaking magazine for Perl beginners (see
 L<http://perl-zeitung.at.tf> ).
 
-Several unix/linux releated magazines frequently includes articles on Perl.
+Several unix/linux related magazines frequently includes articles on Perl.
 
 =head2 Which Perl blogs should I read?
 

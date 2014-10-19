@@ -730,7 +730,7 @@ L<Regexp::Common::balanced> and L<Regexp::Common::delimited>).
 More complex cases will require to write a parser, probably
 using a parsing module from CPAN, like
 L<Regexp::Grammars>, L<Parse::RecDescent>, L<Parse::Yapp>,
-L<Text::Balanced>, or L<Marpa::XS>.
+L<Text::Balanced>, or L<Marpa::R2>.
 
 =head2 How do I reverse a string?
 
