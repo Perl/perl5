@@ -187,7 +187,7 @@ optimised away.
 
 C<our $var> and C<our($s,@a,%h)> in void context are no longer evaluated at
 run time.  Even a whole sequence of C<our $foo;> statements will simply be
-skipped over.
+skipped over.  The same applies to C<state> variables.
 
 =back
 
