@@ -142,10 +142,10 @@ for ( 0x0 .. 0xff ) {
             $tests++;
         }
         else {
-        is evalbytes "no strict; \$$chr = 10",
-            10,
+            is evalbytes "no strict; \$$chr = 10",
+                10,
                 "$name is legal as a length-1 variable";
-        $tests++;
+            $tests++;
             if ($chr =~ /[[:ascii:]]/) {
                 utf8::upgrade($chr);
                 is evalbytes "no strict; use utf8; \$$chr = 1",
@@ -154,15 +154,15 @@ for ( 0x0 .. 0xff ) {
                 $tests++;
             }
             else {
-        utf8::upgrade($chr);
-        local $@;
-        eval "no strict; use utf8; \$$chr = 1";
-        like $@,
-            qr/\QUnrecognized character \x{\E\L$esc/,
-            "  ... but is illegal as a length-1 variable under 'use utf8'";
-        $tests++;
+                utf8::upgrade($chr);
+                local $@;
+                eval "no strict; use utf8; \$$chr = 1";
+                like $@,
+                    qr/\QUnrecognized character \x{\E\L$esc/,
+                    "  ... but is illegal as a length-1 variable under 'use utf8'";
+                $tests++;
+            }
         }
-    }
     }
     else {
         {
@@ -173,21 +173,21 @@ for ( 0x0 .. 0xff ) {
             $tests++;
 
             if ($chr !~ /[[:ascii:]]/) {
-            local $@;
-            evalbytes "use strict; \$$chr = 1";
-            is($@,
-                '',
-                "  ... and under 'no utf8' does not have to be required under strict, even though it matches XIDS"
-            );
-            $tests++;
+                local $@;
+                evalbytes "use strict; \$$chr = 1";
+                is($@,
+                    '',
+                    "  ... and under 'no utf8' does not have to be required under strict, even though it matches XIDS"
+                );
+                $tests++;
 
-            local $@;
-            evalbytes "\$a$chr = 1";
-            like($@,
-                qr/Unrecognized character /,
-                "  ... but under 'no utf8', it's not allowed in length-2+ variables"
-            );
-            $tests++;
+                local $@;
+                evalbytes "\$a$chr = 1";
+                like($@,
+                    qr/Unrecognized character /,
+                    "  ... but under 'no utf8', it's not allowed in length-2+ variables"
+                );
+                $tests++;
             }
         }
         {
@@ -207,11 +207,11 @@ for ( 0x0 .. 0xff ) {
                 $tests++;
             }
             else {
-            like($@,
-                qr/Global symbol "\$$utf8" requires explicit package name/,
-                "  ... and under utf8 has to be required under strict"
-            );
-            $tests++;
+                like($@,
+                    qr/Global symbol "\$$utf8" requires explicit package name/,
+                    "  ... and under utf8 has to be required under strict"
+                );
+                $tests++;
             }
         }
     }
