@@ -10060,7 +10060,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	            }
 	            RExC_recurse_count++;
 		    DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
-			"Recurse #%"UVuf" to %"IVdf"\n",
+                        "%*s%*s Recurse #%"UVuf" to %"IVdf"\n",
+                              22, "|    |", 1 + depth * 2, "",
                               (UV)ARG(ret), (IV)ARG2L(ret)));
                 }
                 RExC_seen |= REG_RECURSE_SEEN;
@@ -10332,7 +10333,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	            && !RExC_open_parens[parno-1])
 	        {
 		    DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
-			"Setting open paren #%"IVdf" to %d\n",
+                        "%*s%*s Setting open paren #%"IVdf" to %d\n",
+                        22, "|    |", 1+2 * depth, "",
 			(IV)parno, REG_NODE_NUM(ret)));
 	            RExC_open_parens[parno-1]= ret;
 	        }
@@ -10421,8 +10423,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    ender = reganode(pRExC_state, CLOSE, parno);
             if (!SIZE_ONLY && RExC_seen & REG_RECURSE_SEEN) {
 		DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
-			"Setting close paren #%"IVdf" to %d\n",
-			(IV)parno, REG_NODE_NUM(ender)));
+                        "%*s%*s Setting close paren #%"IVdf" to %d\n",
+                        22, "|    |", 1+2 * depth, "", (IV)parno, REG_NODE_NUM(ender)));
 	        RExC_close_parens[parno-1]= ender;
 	        if (RExC_nestroot == parno)
 	            RExC_nestroot = 0;
