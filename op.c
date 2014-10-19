@@ -11888,6 +11888,9 @@ Perl_rpeep(pTHX_ OP *o)
 		    op_null(o);
 		    if (oldop)
 			oldop->op_next = nextop;
+		    /* Skip (old)oldop assignment since the current oldop's
+		       op_next already points to the next op.  */
+		    continue;
 		}
 	    }
 	    break;
