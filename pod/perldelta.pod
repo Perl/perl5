@@ -380,6 +380,10 @@ L<message|perldiag/"Cannot pack %f with '%c'">
 
 L<message|perldiag/"Cannot printf %f with '%c'">
 
+=item *
+
+L<message|perldiag/""my" subroutine %s can't be in a package">
+
 =back
 
 =head3 New Warnings
@@ -577,6 +581,15 @@ The C<sv_catpvn_flags> function accepts C<SV_CATBYTES> and C<SV_CATUTF8>
 flags, which specify whether the appended string is bytes or utf8,
 respectively.
 
+=item *
+
+A new opcode class, C<< METHOP >> has been introduced, which holds
+class/method related info needed at runtime to improve performance
+of class/object method calls.
+
+C<< OP_METHOD >> and C<< OP_METHOD_NAMED >> are moved from being
+C<< UNOP/SVOP >> to being C<< METHOD >>.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -668,6 +681,21 @@ AIX now sets the length in C<< getsockopt >> correctly. [perl #120835],
 During the pattern optimization phase, we no longer recurse into
 GOSUB/GOSTART when not SCF_DO_SUBSTR. This prevents the optimizer
 to run "forever" and exhaust all memory. [perl #122283]
+
+=item *
+
+F<< t/op/crypt.t >> now performs SHA-256 algorithm if the default one
+is disabled. [perl #121591]
+
+=item *
+
+Fixed an off-by-one error when setting the size of shared array.
+[perl #122950]
+
+=item *
+
+Fixed a bug that could cause perl to execute an infite loop during
+compilation. [perl #122995]
 
 =back
 
