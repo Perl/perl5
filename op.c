@@ -11937,14 +11937,10 @@ Perl_rpeep(pTHX_ OP *o)
             /* look for a pushmark -> gv[_] -> rv2av */
 
             {
-                GV *gv;
                 OP *rv2av, *q;
                 p = o->op_next;
                 if (   p->op_type == OP_GV
-                    && (gv = cGVOPx_gv(p)) && isGV(gv)
-                    && GvNAMELEN_get(gv) == 1
-                    && *GvNAME_get(gv) == '_'
-                    && GvSTASH(gv) == PL_defstash
+                    && cGVOPx_gv(p) == PL_defgv
                     && (rv2av = p->op_next)
                     && rv2av->op_type == OP_RV2AV
                     && !(rv2av->op_flags & OPf_REF)
