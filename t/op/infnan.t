@@ -337,6 +337,15 @@ SKIP: {
     is(sin(9**9**9), $NaN, "sin(9**9**9) is NaN");
 }
 
+SKIP: {
+    my @FNaN = qw(NaX XNAN Ind Inx);
+    # Silence "isn't numeric in addition", that's kind of the point.
+    local $^W = 0;
+    for my $i (@FNaN) {
+        cmp_ok("$i" + 0, '==', 0, "false nan $i");
+    }
+}
+
 # === Tests combining Inf and NaN ===
 
 # is() okay with $NaN because it uses eq.

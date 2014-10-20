@@ -610,6 +610,7 @@ Perl_grok_infnan(const char** sp, const char* send)
 {
     const char* s = *sp;
     int flags = 0;
+    bool odh = FALSE; /* one dot hash: 1.#INF */
 
     PERL_ARGS_ASSERT_GROK_INFNAN;
 
@@ -631,6 +632,7 @@ Perl_grok_infnan(const char** sp, const char* send)
             s++; if (s == send) return 0;
         } else
             return 0;
+        odh = TRUE;
     }
 
     if (isALPHA_FOLD_EQ(*s, 'I')) {
@@ -652,7 +654,7 @@ Perl_grok_infnan(const char** sp, const char* send)
                 return 0;
             flags |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;
         }
-        else if (isALPHA_FOLD_EQ(*s, 'D')) {
+        else if (isALPHA_FOLD_EQ(*s, 'D') && odh) { /* 1.#IND */
             s++;
             flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
         } else
