@@ -14,7 +14,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 65815);
+plan (tests => 66004);
 
 # ${single:colon} should not be valid syntax
 {
@@ -75,6 +75,13 @@ for ( 0x80..0xff ) {
     my $ord = utf8::unicode_to_native($_);
     my $chr = chr $ord;
     my $name;
+
+    # A different number of tests are run depending on the branches in this
+    # loop iteration.  This allows us to add skips to make the reported total
+    # the same for each iteration.
+    my $tests = 0;
+    my $max_tests = 5;
+
     if ($chr =~ /[[:cntrl:]]/u) {
         $name = sprintf "\\x%02x, a C1 control", $ord;
     }
@@ -91,12 +98,14 @@ for ( 0x80..0xff ) {
         is evalbytes "no strict; \$$chr = 10",
             10,
                 "$name is legal as a length-1 variable";
+        $tests++;
         utf8::upgrade($chr);
         local $@;
         eval "no strict; use utf8; \$$chr = 1";
         like $@,
             qr/\QUnrecognized character \x{\E\L$esc/,
             "  ... but is illegal as a length-1 variable under 'use utf8'";
+        $tests++;
     }
     else {
         {
@@ -104,6 +113,7 @@ for ( 0x80..0xff ) {
             local $@;
             evalbytes "no strict; \$$chr = 1";
             is($@, '', "$name under 'no utf8', 'no strict', is a valid length-1 variable");
+            $tests++;
 
             local $@;
             evalbytes "use strict; \$$chr = 1";
@@ -111,6 +121,7 @@ for ( 0x80..0xff ) {
                 '',
                 "  ... and under 'no utf8' does not have to be required under strict, even though it matches XIDS"
             );
+            $tests++;
 
             local $@;
             evalbytes "\$a$chr = 1";
@@ -118,6 +129,7 @@ for ( 0x80..0xff ) {
                 qr/Unrecognized character /,
                 "  ... but under 'no utf8', it's not allowed in length-2+ variables"
             );
+            $tests++;
         }
         {
             use utf8;
@@ -126,6 +138,7 @@ for ( 0x80..0xff ) {
             local $@;
             eval "no strict; \$$utf8 = 1";
             is($@, '', "  ... and under 'use utf8', 'no strict', is a valid length-1 variable");
+            $tests++;
 
             local $@;
             eval "use strict; \$$utf8 = 1";
@@ -133,7 +146,13 @@ for ( 0x80..0xff ) {
                 qr/Global symbol "\$$utf8" requires explicit package name/,
                 "  ... and under utf8 has to be required under strict"
             );
+            $tests++;
         }
+    }
+
+    SKIP: {
+        die "Wrong max count for tests" if $tests > $max_tests;
+        skip("untaken tests", $max_tests - $tests) if $max_tests > $tests;
     }
 }
 
