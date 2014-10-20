@@ -409,6 +409,14 @@ After editing, regenerate uconfig.h (this must be run on a system with a
 
 This might not cause any new changes.
 
+You may also need to regen opcodes:
+
+ $ ./perl -Ilib regen/opcode.pl
+
+You may have to add stub entries in C<%Module::CoreList::version>, 
+C<%Module::CoreList::deprecated> and C<%Module::CoreList::Utils::delta>.
+If so, you must up their version numbers as well.
+
 Test your changes:
 
  $ git clean -xdf   # careful if you don't have local files to keep!
