@@ -99,13 +99,15 @@ TEST:
 foreach (@tests) {
     $test++;
     if (!/\S/ || /^\s*#/ || /^__END__$/) {
-        print "ok $test # (Blank line or comment)\n";
-        if (/#/) { print $_ };
+        chomp;
+        my ($not,$comment)= split /\s*#\s*/, $_, 2;
+        $comment ||= "(blank line)";
+        print "ok $test # $comment\n";
         next;
     }
     chomp;
     s/\\n/\n/g unless $regex_sets;
-    my ($pat, $subject, $result, $repl, $expect, $reason) = split(/\t/,$_,6);
+    my ($pat, $subject, $result, $repl, $expect, $reason, $comment) = split(/\t/,$_,7);
     if (!defined $subject) {
         die "Bad test definition on line $test: $_\n";
     }
@@ -130,6 +132,11 @@ foreach (@tests) {
     $reason = 'skipping $&' if $reason eq  '' && $skip_amp;
     $result =~ s/B//i unless $skip;
     my $todo= $result =~ s/T// ? " # TODO" : "";
+    my $testname= $test;
+    if ($comment) {
+        $comment=~s/^\s*(?:#\s*)?//;
+        $testname .= " - $comment" if $comment;
+    }
     if (! $skip && $regex_sets) {
 
         # If testing regex sets, change the [bracketed] classes into
@@ -169,7 +176,7 @@ foreach (@tests) {
                                 $reason = "Can't handle compilation errors with unmatched '{'";
                             }
                             else {
-                                print "not ok $test # Problem in $0; original = '$pat'; mod = '$modified'\n";
+                                print "not ok $testname # Problem in $0; original = '$pat'; mod = '$modified'\n";
                                 next TEST;
                             }
                         }
@@ -302,7 +309,7 @@ foreach (@tests) {
                     $reason = "Can't figure out where to put the (?[ and ]) since is a compilation error";
                 }
                 else {
-                    print "not ok $test # Problem in $0; original = '$pat'; mod = '$modified'\n";
+                    print "not ok $testname # Problem in $0; original = '$pat'; mod = '$modified'\n";
                     next TEST;
                 }
             }
@@ -365,22 +372,22 @@ EOFCODE
 	}
 	chomp( my $err = $@ );
 	if ( $skip ) {
-	    print "ok $test # skipped", length($reason) ? ".  $reason" : '', "\n";
+	    print "ok $testname # skipped", length($reason) ? ".  $reason" : '', "\n";
 	    next TEST;
 	}
 	elsif ($result eq 'c') {
-	    if ($err !~ m!^\Q$expect!) { print "not ok $test$todo (compile) $input => '$err'\n"; next TEST }
+	    if ($err !~ m!^\Q$expect!) { print "not ok $testname$todo (compile) $input => '$err'\n"; next TEST }
 	    last;  # no need to study a syntax error
 	}
 	elsif ( $todo_qr ) {
-	    print "not ok $test # TODO", length($reason) ? " - $reason" : '', "\n";
+	    print "not ok $testname # TODO", length($reason) ? " - $reason" : '', "\n";
 	    next TEST;
 	}
 	elsif ($@) {
-	    print "not ok $test$todo $input => error '$err'\n", _comment("$code\n$@\n"); next TEST;
+	    print "not ok $testname$todo $input => error '$err'\n", _comment("$code\n$@\n"); next TEST;
 	}
 	elsif ($result =~ /^n/) {
-	    if ($match) { print "not ok $test$todo ($study) $input => false positive\n"; next TEST }
+	    if ($match) { print "not ok $testname$todo ($study) $input => false positive\n"; next TEST }
 	}
 	else {
 	    if (!$match || $got ne $expect) {
@@ -391,18 +398,18 @@ EOFCODE
 		    # anger as it tries to load B. I'd prefer to keep the
 		    # regular calls below outside of an eval so that real
 		    # (unknown) failures get spotted, not ignored.
-		    print "not ok $test$todo ($study) $input => '$got', match=$match\n", _comment("$code\n");
+		    print "not ok $testname$todo ($study) $input => '$got', match=$match\n", _comment("$code\n");
 		}
 		else { # better diagnostics
 		    my $s = Data::Dumper->new([$subject],['subject'])->Useqq(1)->Dump;
 		    my $g = Data::Dumper->new([$got],['got'])->Useqq(1)->Dump;
-		    print "not ok $test$todo ($study) $input => '$got', match=$match\n", _comment("$s\n$g\n$code\n");
+		    print "not ok $testname$todo ($study) $input => '$got', match=$match\n", _comment("$s\n$g\n$code\n");
 		}
 		next TEST;
 	    }
 	}
     }
-    print "ok $test$todo\n";
+    print "ok $testname$todo\n";
 }
 
 1;
