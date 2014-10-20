@@ -4868,6 +4868,7 @@ t/io/print.t			See if print commands work
 t/io/pvbm.t			See if PVBMs break IO commands
 t/io/read.t			See if read works
 t/io/say.t			See if say works
+t/io/semctl.t			See if SysV semaphore semctl works
 t/io/sem.t			See if SysV semaphores work
 t/io/shm.t			See if SysV shared memory works
 t/io/socket.t			See if socket functions work

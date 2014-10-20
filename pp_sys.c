@@ -4753,7 +4753,7 @@ PP(pp_semctl)
     const int anum = do_ipcctl(PL_op->op_type, MARK, SP);
     SP = MARK;
     if (anum == -1)
-	RETSETUNDEF;
+	RETPUSHUNDEF;
     if (anum != 0) {
 	PUSHi(anum);
     }
