@@ -4,8 +4,11 @@ use Test::More tests => 76;
 
 use XS::APItest;
 
-XS::APItest::test_cv_getset_call_checker();
-ok 1;
+{
+    local $TODO = $^O eq "cygwin" ? "[perl #78502] function pointers don't match on cygwin" : "";
+    ok( eval { XS::APItest::test_cv_getset_call_checker(); 1 })
+      or diag $@;
+}
 
 my @z = ();
 my @a = qw(a);
