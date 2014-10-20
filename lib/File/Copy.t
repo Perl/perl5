@@ -364,12 +364,8 @@ SKIP: {
             is (__$perm2, __$permdef, "Permission bits set correctly");
             is (__$perm4, __$c_perm1, "Permission bits set correctly");
             is (__$perm5, __$c_perm1, "Permission bits set correctly");
-            TODO: {
-                local $TODO = 'Permission bits inconsistent under cygwin'
-                   if $^O eq 'cygwin';
-                is (__$perm3, __$c_perm3, "Permission bits not modified");
-                is (__$perm6, __$c_perm3, "Permission bits not modified");
-            }
+            is (__$perm3, __$c_perm3, "Permission bits not modified");
+            is (__$perm6, __$c_perm3, "Permission bits not modified");
         }
     }
     umask $old_mask or die $!;
