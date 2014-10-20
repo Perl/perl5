@@ -275,8 +275,8 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
   const STRLEN max, char const * const start_color, char const * const end_color, 
   const U32 flags ) 
 {
-    const U8 *quotes = (flags & PERL_PV_PRETTY_QUOTE) ? "\"\"" :
-                       (flags & PERL_PV_PRETTY_LTGT)  ? "<>" : NULL;
+    const U8 *quotes = (U8*)((flags & PERL_PV_PRETTY_QUOTE) ? "\"\"" :
+                             (flags & PERL_PV_PRETTY_LTGT)  ? "<>" : NULL);
     STRLEN escaped;
     STRLEN max_adjust= 0;
     STRLEN orig_cur;
