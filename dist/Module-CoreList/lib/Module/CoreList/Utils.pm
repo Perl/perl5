@@ -6,7 +6,7 @@ use vars qw[$VERSION %utilities];
 use Module::CoreList;
 use Module::CoreList::TieHashDelta;
 
-$VERSION = '5.20141020';
+$VERSION = '5.20141120';
 
 sub utilities {
     my $perl = shift;
@@ -980,6 +980,13 @@ my %delta = (
     },
     5.021005 => {
         delta_from => 5.021004,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.021006 => {
+        delta_from => 5.021005,
         changed => {
         },
         removed => {

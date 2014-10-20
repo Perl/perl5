@@ -419,7 +419,7 @@ here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.21.5..HEAD
+  perl Porting/acknowledgements.pl v5.21.6..HEAD
 
 =head1 Reporting Bugs
 
