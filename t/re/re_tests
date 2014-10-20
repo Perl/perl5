@@ -1138,6 +1138,8 @@ X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 /(ab)+((?1))(fox)/	ababfox	y	$1-$2-$3	ab-ab-fox
 /(ab){1,100}((?1))(fox)/	ababfox	y	$1-$2-$3	ab-ab-fox
 /(ab){0,100}((?1))(fox)/	ababfox	y	$1-$2-$3	ab-ab-fox
+foo(?0)?bar	phoofoofoobarbarbarr	y	$&	foofoobarbar
+foo(?R)?bar	phoofoofoobarbarbarr	y	$&	foofoobarbar
 # possessive captures
 a++a	aaaaa	n	-	-
 a*+a	aaaaa	n	-	-
