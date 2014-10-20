@@ -17,6 +17,66 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.5 - Friso Wiegersma (text), Jean Ferrat (music), Wim Sonneveld (performer), Het Dorp
+
+L<Announced on 2014-10-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2014/10/msg221399.html>
+
+  Het Dorp
+
+  Thuis heb ik nog een ansichtkaart
+  waarop een kerk, een kar met paard,
+  een slagerij J. van der Ven.
+  Een kroeg, een juffrouw op de fiets
+  het zegt u hoogstwaarschijnlijk niets,
+  maar 't is waar ik geboren ben.
+  Dit dorp, ik weet nog hoe het was,
+  de boerenkind'ren in de klas,
+  een kar die ratelt op de keien,
+  het raadhuis met een pomp ervoor,
+  een zandweg tussen koren door,
+  het vee, de boerderijen. 
+
+  En langs het tuinpad van m'n vader
+  zag ik de hoge bomen staan.
+  Ik was een kind en wist niet beter,
+  dan dat dat nooit voorbij zou gaan. 
+
+  Wat leefden ze eenvoudig toen
+  in simp'le huizen tussen groen
+  met boerenbloemen en een heg.
+  Maar blijkbaar leefden ze verkeerd,
+  het dorp is gemoderniseerd
+  en nu zijn ze op de goeie weg.
+  Want ziet, hoe rijk het leven is,
+  ze zien de televisiequiz
+  en wonen in betonnen dozen,
+  met flink veel glas, dan kun je zien
+  hoe of het bankstel staat bij Mien
+  en d'r dressoir met plastic rozen.
+
+  En langs het tuinpad van m'n vader
+  zag ik de hoge bomen staan.
+  Ik was een kind en wist niet beter,
+  dan dat dat nooit voorbij zou gaan. 
+
+  De dorpsjeugd klit wat bij elkaar
+  in minirok en beatle-haar
+  en joelt wat mee met beat-muziek.
+  Ik weet wel, het is hun goeie recht,
+  de nieuwe tijd, net wat u zegt,
+  maar het maakt me wat melancholiek.
+  Ik heb hun vaders nog gekend
+  ze kochten zoethout voor een cent
+  ik zag hun moeders touwtjespringen.
+  Dat dorp van toen, het is voorbij,
+  dit is al wat er bleef voor mij:
+  een ansicht en herinneringen.
+
+  Toen ik langs het tuinpad van m'n vader
+  de hoge bomen nog zag staan.
+  Ik was een kind, hoe kon ik weten
+  dat dat voorgoed voorbij zou gaan.
+
 =head2 v5.21.4 - Edgar Allan Poe, The Narrative of Arthur Gordon Pym of Nantucket
 
 L<Announced on 2014-09-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg220267.html>
