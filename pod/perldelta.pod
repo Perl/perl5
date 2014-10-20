@@ -151,6 +151,10 @@ Avoid reading beyond the end of a buffer. [perl #122629]
 
 =item *
 
+L<B> has been upgraded from version 1.51 to 1.52.
+
+=item *
+
 L<B::Concise> has been upgraded from version 0.993 to 0.994.
 
 Null ops that are part of the execution chain are now given sequence
@@ -182,15 +186,55 @@ cases where the assignment is optimized away.
 
 =item *
 
+L<B::Debug> has been upgraded from version 1.21 to 1.22.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.28 to 1.29.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.064 to 2.066.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.065 to 2.066.
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.142060 to 2.142690.
+
+=item *
+
 L<DynaLoader> has been upgraded from version 1.26 to 1.27.
 
 Remove dl_nonlazy global if unused in Dynaloader. [perl #122926]
 
 =item *
 
-L<Fcntl> has been upgraded from version 1.12 to 1.13.
+L<Errno> has been upgraded from version 1.20_04 to 1.21.
+
+=item *
+
+L<experimental> has been upgraded from version 0.010 to 0.012.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280219 to 0.280220.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.02 to 1.03.
+
+=item *
+
+L<Fcntl> has been upgraded from version 1.11 to 1.13.
 
 Add support for the Linux pipe buffer size fcntl() commands.
+
+=item *
+
+L<feature> has been upgraded from version 1.37 to 1.38.
 
 =item *
 
@@ -200,9 +244,37 @@ Slightly faster module loading time.
 
 =item *
 
+L<File::Spec> has been upgraded from version 3.50 to 3.51.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.049 to 0.050.
+
+=item *
+
+The IO-Compress set of modules has been upgraded from version 2.064 to 2.066.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 2.27203 to 2.27300.
+
+=item *
+
+The libnet collection of modules has been upgraded from version 1.27 to 3.02.
+
+Support for IPv6 and SSL to Net::FTP, Net::NNTP, Net::POP3 and Net::SMTP.
+
+Improvements in Net::SMTP authentication.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 5.20140920 to 5.20141020.
 
 Updated to cover the latest releases of Perl.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.28 to 1.29.
 
 =item *
 
@@ -212,9 +284,34 @@ Slightly faster module loading time.
 
 =item *
 
-L<POSIX> has been upgraded from version 1.44 to 1.45.
+L<perlfaq> has been upgraded from version 5.0150045 to version 5.0150046.
+[perl #123008]
+
+=item *
+
+L<POSIX> has been upgraded from version 1.43 to 1.45.
 
 POSIX::tmpnam() now produces a deprecation warning.  [perl #122005]
+
+=item *
+
+L<re> has been upgraded from version 0.26 to 0.27.
+
+=item *
+
+L<Socket> has been upgraded from version 2.015 to 2.016.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.001006 to 1.001008.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.46 to 1.47.
+
+=item *
+
+L<warnings> has been upgraded from version 1.26 to 1.28.
 
 =item *
 
@@ -222,11 +319,6 @@ L<XSLoader> has been upgraded from version 0.17 to 0.18.
 
 Allow XSLoader to load modules from a different namespace.
 [perl #122455]
-
-=item *
-
-L<perlfaq> has been upgraded from version 5.0150045 to version 5.0150046.
-[perl #123008]
 
 =back
 
