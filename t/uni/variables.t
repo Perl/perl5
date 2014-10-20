@@ -102,7 +102,8 @@ for ( 0x0 .. 0xff ) {
         }
         else {
             $name = sprintf "\\x%02x, an ASCII control", $ord;
-            $deprecated = 1;
+            $syntax_error = $::IS_EBCDIC;
+            $deprecated = ! $syntax_error;
         }
     }
     elsif ($chr =~ /\pC/) {
@@ -112,14 +113,16 @@ for ( 0x0 .. 0xff ) {
         else {
             $name = sprintf "\\x%02x, a C1 control", $ord;
         }
-        $deprecated = 1;
+        $syntax_error = $::IS_EBCDIC;
+        $deprecated = ! $syntax_error;
     }
     elsif ($chr =~ /\p{XIDStart}/) {
         $name = sprintf "\\x%02x, a non-ASCII XIDS character", $ord;
     }
     elsif ($chr =~ /\p{XPosixSpace}/) {
         $name = sprintf "\\x%02x, a non-ASCII space character", $ord;
-        $deprecated = 1;
+        $syntax_error = $::IS_EBCDIC;
+        $deprecated = ! $syntax_error;
     }
     else {
         $name = sprintf "\\x%02x, a non-ASCII, non-XIDS graphic character", $ord;
@@ -130,7 +133,8 @@ for ( 0x0 .. 0xff ) {
     if ($chr !~ /\p{XIDS}/u) {
         if ($syntax_error) {
             evalbytes "\$$chr";
-            like($@, qr/syntax error/, "$name as a length-1 variable generates a syntax error");
+            like($@, qr/ syntax\ error | Unrecognized\ character /x,
+                     "$name as a length-1 variable generates a syntax error");
             $tests++;
         }
         elsif ($ord < 32 || chr =~ /[[:punct:][:digit:]]/a) {
@@ -350,12 +354,16 @@ EOP
         no warnings 'deprecated';
 
         for my $var ( '$', "\7LOBAL_PHASE", "^GLOBAL_PHASE", "^V" ) {
+          SKIP: {
+            skip("Literal control characters in variable names forbidden on EBCDIC", 3)
+                             if ($::IS_EBCDIC && ord substr($var, 0, 1) < 32);
             eval "\${ $var}";
             is($@, '', "\${ $var} works" );
             eval "\${$var }";
             is($@, '', "\${$var } works" );
             eval "\${ $var }";
             is($@, '', "\${ $var } works" );
+          }
         }
     }
 }
@@ -368,19 +376,30 @@ EOP
     );
     
     
-    is(
-        "".eval "*{^JOIN}",
-        "*main::\nOIN",
-        "...but \$^J is still legal"
-    );
+    SKIP: {
+        skip('Is $^U on EBCDIC 1047, BC; nothing works on 0037', 1)
+                                                                if $::IS_EBCDIC;
+        is(
+            "".eval "*{^JOIN}",
+            "*main::\nOIN",
+            "  ... but \$^J is still legal"
+        );
+    }
     
+  SKIP: {
+    skip("Literal control characters in variable names forbidden on EBCDIC", 2)
+                                                                if $::IS_EBCDIC;
     no warnings 'deprecated';
     my $ret = eval "\${\cT\n}";
     is($@, "", 'No errors from using ${\n\cT\n}');
     is($ret, $^T, "  ... and we got the right value");
+  }
 }
 
-{
+SKIP: {
+    skip("Literal control characters in variable names forbidden on EBCDIC", 5)
+                                                                if $::IS_EBCDIC;
+
     # Originally from t/base/lex.t, moved here since we can't
     # turn deprecation warnings off in that file.
     no strict;

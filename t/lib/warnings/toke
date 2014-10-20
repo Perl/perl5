@@ -150,6 +150,12 @@ EXPECT
 Use of bare << to mean <<"" is deprecated at - line 2.
 ########
 # toke.c
+BEGIN {
+    if (ord('A') == 193) {
+        print "SKIPPED\n# Literal control characters in variable names forbidden on EBCDIC";
+        exit 0;
+    }
+}
 eval "\$\cT";
 eval "\${\7LOBAL_PHASE}";
 eval "\${\cT}";
@@ -1491,6 +1497,12 @@ I
 ########
 # toke.c
 #[perl #119123] disallow literal control character variables
+BEGIN {
+    if (ord('A') == 193) {
+        print "SKIPPED\n# Literal control characters in variable names forbidden on EBCDIC";
+        exit 0;
+    }
+}
 eval "\$\cQ = 25";
 eval "\${ \cX } = 24";
 *{

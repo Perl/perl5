@@ -8562,11 +8562,19 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
  *      Because all ASCII characters have the same representation whether
  *      encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
  *      '{' without knowing if is UTF-8 or not */
+#ifdef EBCDIC
+#   define VALID_LEN_ONE_IDENT(s, is_utf8)                                    \
+    (isGRAPH_A(*(s)) || ((is_utf8)                                            \
+                         ? isIDFIRST_utf8((U8*) (s))                          \
+                         : (isGRAPH_L1(*s)                                    \
+                            && LIKELY((U8) *(s) != LATIN1_TO_NATIVE(0xAD)))))
+#else
 #   define VALID_LEN_ONE_IDENT(s, is_utf8) (! isSPACE_A(*(s))                 \
                                             && LIKELY(*(s) != '\0')           \
                                             && (! is_utf8                     \
                                                 || isASCII_utf8((U8*) (s))    \
                                                 || isIDFIRST_utf8((U8*) (s))))
+#endif
     if ((s <= PL_bufend - (is_utf8)
                           ? UTF8SKIP(s)
                           : 1)
