@@ -36,7 +36,7 @@ This feature is experimental and must be enabled via C<use feature
 'refaliasing'>.  It will warn unless the C<experimental::refaliasing>
 warnings category is disabled.
 
-See L<perlref/Assigning to References>.
+See L<perlref/Assigning to References>
 
 =head2 Perl now supports POSIX 2008 locale currency additions.
 
@@ -53,7 +53,7 @@ C<int_p_sep_by_space>,
 and
 C<int_p_sign_posn>.
 
-=head2 Packing infinity or not-a-number into a character is now fatal.
+=head2 Packing infinity or not-a-number into a character is now fatal
 
 Before, when trying to pack infinity or not-a-number into a
 (signed) character, Perl would warn, and assumed you tried to
