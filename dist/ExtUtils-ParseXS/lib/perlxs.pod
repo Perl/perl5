@@ -1198,9 +1198,9 @@ contains the following statement will compile with only B<xsubpp> version
 
 This keyword can be used when an XSUB requires special cleanup procedures
 before it terminates.  When the CLEANUP:  keyword is used it must follow
-any CODE:, PPCODE:, or OUTPUT: blocks which are present in the XSUB.  The
-code specified for the cleanup block will be added as the last statements
-in the XSUB.
+any CODE:, or OUTPUT: blocks which are present in the XSUB.  The code
+specified for the cleanup block will be added as the last statements in
+the XSUB.
 
 =head2 The POSTCALL: Keyword
 
