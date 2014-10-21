@@ -5341,6 +5341,7 @@ t/op/write.t			See if write works (formats work)
 t/op/yadayada.t			See if ... works
 t/perf/opcount.t		See if optimised subs have the right op counts
 t/perf/optree.t			Test presence of some op optimisations
+t/perf/speed.t			See if optimisations are keeping things fast
 t/perl.supp			Perl valgrind suppressions
 t/porting/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
 t/porting/authors.t		Check that all authors have been acknowledged
