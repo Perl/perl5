@@ -464,7 +464,7 @@ unless (@ARGV) {
     push @ARGV, _tests_from_manifest($extensions, $known_extensions);
     unless ($::core) {
 	_find_tests('japh') if $::torture;
-	_find_tests('t/benchmark') if $::benchmark or $ENV{PERL_BENCHMARK};
+	_find_tests('benchmark') if $::benchmark or $ENV{PERL_BENCHMARK};
 	_find_tests('bigmem') if $ENV{PERL_TEST_MEMORY};
     }
 }
