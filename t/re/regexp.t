@@ -179,10 +179,10 @@ foreach (@tests) {
     if (! $skip && $regex_sets) {
 
         # If testing regex sets, change the [bracketed] classes into
-        # (?[bracketed]).
-
-        if ($pat !~ / \[ /x) {
-
+        # (?[bracketed]).  But note that '\[' and '\c[' don't introduce such a
+        # class.  (We don't bother looking for an odd number of backslashes,
+        # as this hasn't been needed so far.)
+        if ($pat !~ / (?<!\\c) (?<!\\) \[ /x) {
             $skip++;
             $reason = "Pattern doesn't contain [brackets]";
         }
