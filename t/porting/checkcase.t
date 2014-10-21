@@ -14,6 +14,10 @@ use File::Find;
 my %files;
 my $test_count = 0;
 
+# in a parallel 'make test', temporary files and directories can
+# randomly appear and disappear; don't complain about these
+no warnings 'File::Find';
+
 find({no_chdir => 1, wanted => sub {
 	   my $name = $File::Find::name;
 	   # Assumes that the path separator is exactly one character.
