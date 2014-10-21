@@ -358,9 +358,6 @@ sub _pessimise_walk {
 		    type => OP_PUSHMARK,
 		    name => 'pushmark',
 		    private => ($op->private & OPpLVAL_INTRO),
-		    next    => ($op->flags & OPf_SPECIAL)
-				    ? $op->sibling->first
-				    : $op->sibling,
 	    };
 	}
 

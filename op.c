@@ -11946,8 +11946,6 @@ Perl_rpeep(pTHX_ OP *o)
                     && !(rv2av->op_flags & OPf_REF)
                     && !(rv2av->op_private & (OPpLVAL_INTRO|OPpMAYBE_LVSUB))
                     && ((rv2av->op_flags & OPf_WANT) == OPf_WANT_LIST)
-                    && OP_SIBLING(o) == rv2av /* these two for Deparse */
-                    && cUNOPx(rv2av)->op_first == p
                 ) {
                     q = rv2av->op_next;
                     if (q->op_type == OP_NULL)
@@ -11959,11 +11957,6 @@ Perl_rpeep(pTHX_ OP *o)
                 }
             }
             if (!defav) {
-                /* To allow Deparse to pessimise this, it needs to be able
-                 * to restore the pushmark's original op_next, which it
-                 * will assume to be the same as OP_SIBLING. */
-                if (o->op_next != OP_SIBLING(o))
-                    break;
                 p = o;
             }
 
