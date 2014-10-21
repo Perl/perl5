@@ -1959,8 +1959,23 @@ Perl_list(pTHX_ OP *o)
 
     switch (o->op_type) {
     case OP_FLOP:
-    case OP_REPEAT:
 	list(cBINOPo->op_first);
+	break;
+    case OP_REPEAT:
+	if (o->op_private & OPpREPEAT_DOLIST
+	 && !(o->op_flags & OPf_STACKED))
+	{
+	    list(cBINOPo->op_first);
+	    kid = cBINOPo->op_last;
+	    if (kid->op_type == OP_CONST && SvIOK(kSVOP_sv)
+	     && SvIVX(kSVOP_sv) == 1)
+	    {
+		op_null(o); /* repeat */
+		op_null(cUNOPx(cBINOPo->op_first)->op_first);/* pushmark */
+		/* const (rhs): */
+		op_free(op_sibling_splice(o, cBINOPo->op_first, 1, NULL));
+	    }
+	}
 	break;
     case OP_OR:
     case OP_AND:
@@ -11958,6 +11973,49 @@ Perl_rpeep(pTHX_ OP *o)
 	    break;
 
         case OP_PUSHMARK:
+
+            /* Given
+                 5 repeat/DOLIST
+                 3   ex-list
+                 1     pushmark
+                 2     scalar or const
+                 4   const[0]
+               convert repeat into a stub with no kids.
+             */
+            if (o->op_next->op_type == OP_CONST
+             || (  o->op_next->op_type == OP_PADSV
+                && !(o->op_next->op_private & OPpLVAL_INTRO))
+             || (  o->op_next->op_type == OP_GV
+                && o->op_next->op_next->op_type == OP_RV2SV
+                && !(o->op_next->op_next->op_private
+                        & (OPpLVAL_INTRO|OPpOUR_INTRO))))
+            {
+                const OP *kid = o->op_next->op_next;
+                if (o->op_next->op_type == OP_GV)
+                   kid = kid->op_next;
+                /* kid is now the ex-list.  */
+                if (kid->op_type == OP_NULL
+                 && (kid = kid->op_next)->op_type == OP_CONST
+                    /* kid is now the repeat count.  */
+                 && kid->op_next->op_type == OP_REPEAT
+                 && kid->op_next->op_private & OPpREPEAT_DOLIST
+                 && (kid->op_next->op_flags & OPf_WANT) == OPf_WANT_LIST
+                 && SvIOK(kSVOP_sv) && SvIVX(kSVOP_sv) == 0)
+                {
+                    o = kid->op_next; /* repeat */
+                    assert(oldop);
+                    oldop->op_next = o;
+                    op_free(cBINOPo->op_first);
+                    op_free(cBINOPo->op_last );
+                    o->op_flags &=~ OPf_KIDS;
+                    /* stub is a baseop; repeat is a binop */
+                    assert(sizeof(OP) <= sizeof(BINOP));
+                    o->op_type = OP_STUB;
+                    o->op_ppaddr = PL_ppaddr[OP_STUB];
+                    o->op_private = 0;
+                    break;
+                }
+            }
 
             /* Convert a series of PAD ops for my vars plus support into a
              * single padrange op. Basically
