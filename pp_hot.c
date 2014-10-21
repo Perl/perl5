@@ -943,9 +943,7 @@ PP(pp_rv2av)
 
     if (is_pp_rv2av) {
 	AV *const av = MUTABLE_AV(sv);
-	/* The guts of pp_rv2av, with no intending change to preserve history
-	   (until such time as we get tools that can do blame annotation across
-	   whitespace changes.  */
+	/* The guts of pp_rv2av  */
 	if (gimme == G_ARRAY) {
             SP--;
             PUTBACK;
