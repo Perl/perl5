@@ -3305,6 +3305,7 @@ dist/PathTools/lib/File/Spec/Unix.pm		portable operations on Unix file names
 dist/PathTools/lib/File/Spec/VMS.pm		portable operations on VMS file names
 dist/PathTools/lib/File/Spec/Win32.pm		portable operations on Win32 and NetWare file names
 dist/PathTools/Makefile.PL			makefile writer for Cwd
+dist/PathTools/t/abs2rel.t		See if File::Spec->abs2rel works
 dist/PathTools/t/crossplatform.t		See if File::Spec works crossplatform
 dist/PathTools/t/cwd.t			See if Cwd works
 dist/PathTools/t/Functions.t			See if File::Spec::Functions works
