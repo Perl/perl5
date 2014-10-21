@@ -1,0 +1,45 @@
+#!perl
+
+# This file specifies a hash-of-hashes that define snippets of code that
+# can be run by various measurement and profiling tools.
+#
+# The basic idea is that any time you add an optimisation that is intended
+# to make a particular construct faster, then you should add that construct
+# to this file.
+#
+# Under the normal test suite, the test file benchmarks.t does a basic
+# compile and run of each of these snippets; not to test performance,
+# but just to ensure that the code doesn't have errors.
+#
+# Over time, it is intended that various measurement and profiling tools
+# will be written that can run selected (or all) snippets in various
+# environments. These will not be run as part of a normal test suite run.
+#
+# This file is designed to be read in by 'do' (and in such a way that
+# multiple versions of this file from different releases can be read in
+# by a single process).
+#
+# Each key of the top-level hash is a token that describes a particular
+# test. Code will be compiled in the package named after the token, so it
+# should match /^\w+$/a. It is intended that this can be used on the
+# command line of tools to select particular tests, .
+#
+# Each value is also a hash, with three fields:
+#
+#   desc is a description of the test
+#   setup is a string containing setup code
+#   code  is a string containing the code to run in a loop
+#
+# So typically a benchmark tool might do something like
+#
+#   eval "package $token; $setup; for (1..1000000) { $code }"
+
+
+{
+    arg_assignment => {
+        desc    => 'assignment to local vars from @_',
+        setup   => 'sub arg_assignment { my ($a, $b, $c) = @_ }',
+        code    => 'arg_assignment(1,2,3)',
+    },
+};
+
