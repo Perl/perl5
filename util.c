@@ -2426,8 +2426,10 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 	 PerlLIO_close(pp[0]);
     return PerlIO_fdopen(p[This], mode);
 #else
-#  ifdef OS2	/* Same, without fork()ing and all extra overhead... */
+#  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
     return my_syspopen4(aTHX_ NULL, mode, n, args);
+#  elif defined(WIN32)
+    return win32_popenlist(mode, n, args);
 #  else
     Perl_croak(aTHX_ "List form of piped open not implemented");
     return (PerlIO *) NULL;
