@@ -449,7 +449,7 @@ foreach my $forbidden (<DATA>) {
 # [perl #123029] regression in "state" under PERL_NO_COW
 sub rt_123029 {
     state $s;
-    $s = 'foo';
+    $s = 'foo'x500;
     my $c = $s;
     return defined $s;
 }
