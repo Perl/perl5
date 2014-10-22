@@ -27,6 +27,16 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 List form of pipe open implemented for Win32
+
+The list form of pipe:
+
+  open my $fh, "-|", "program", @arguments;
+
+is now implemented on Win32.  It has the same limitations as C<system
+LIST> on Win32, since the Win32 API doesn't accept program arguments
+as a list.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
