@@ -764,10 +764,23 @@ Useless use of a constant (undef) in void context at - line 8.
 Useless use of a constant ("\"\t\n") in void context at - line 9.
 ########
 # op.c
+BEGIN {
+    if (ord('A') == 193) {
+        print "SKIPPED\n# Result varies depending on EBCDIC code page";
+        exit 0;
+    }
+}
 use utf8;
 use open qw( :utf8 :std );
 use warnings 'void' ;
 "àḆc"; # OP_CONST
+EXPECT
+Useless use of a constant ("\340\x{1e06}c") in void context at - line 11.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'void' ;
 "Ẋ" . "ƴ"; # optimized to OP_CONST
 ＦＯＯ;     # Bareword optimized to OP_CONST
 use constant ů => undef;
@@ -778,10 +791,9 @@ no warnings 'void' ;
 "àḆc"; # OP_CONST
 "Ẋ" . "ƴ"; # optimized to OP_CONST
 EXPECT
-Useless use of a constant ("\340\x{1e06}c") in void context at - line 5.
-Useless use of a constant ("\x{1e8a}\x{1b4}") in void context at - line 6.
-Useless use of a constant ("\x{ff26}\x{ff2f}\x{ff2f}") in void context at - line 7.
-Useless use of a constant (undef) in void context at - line 9.
+Useless use of a constant ("\x{1e8a}\x{1b4}") in void context at - line 5.
+Useless use of a constant ("\x{ff26}\x{ff2f}\x{ff2f}") in void context at - line 6.
+Useless use of a constant (undef) in void context at - line 8.
 ########
 # op.c
 #
@@ -1148,6 +1160,12 @@ Prototype after '@' for main::foo : @\0 at (eval 1) line 1.
 Illegal character in prototype for main::foo : @\0 at (eval 1) line 1.
 ########
 # op.c
+BEGIN {
+    if (ord('A') == 193) {
+        print "SKIPPED\n# Different results on EBCDIC";
+        exit 0;
+    }
+}
 use utf8;
 use open qw( :utf8 :std );
 use warnings;
