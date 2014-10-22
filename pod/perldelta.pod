@@ -360,7 +360,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+fchmod() and futimes() now set C<$!> when they fail due to being
+passed a closed file handle.  [perl #122703]
 
 =back
 
