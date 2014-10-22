@@ -392,7 +392,7 @@
 0844; MANDAIC AH; D; No_Joining_Group
 0845; MANDAIC USHENNA; D; No_Joining_Group
 0846; MANDAIC AZ; R; No_Joining_Group
-0847; MANDAIC IT; D; No_Joining_Group
+0847; MANDAIC IT; R; No_Joining_Group
 0848; MANDAIC ATT; D; No_Joining_Group
 0849; MANDAIC AKSA; R; No_Joining_Group
 084A; MANDAIC AK; D; No_Joining_Group
@@ -400,7 +400,7 @@
 084C; MANDAIC AM; D; No_Joining_Group
 084D; MANDAIC AN; D; No_Joining_Group
 084E; MANDAIC AS; D; No_Joining_Group
-084F; MANDAIC IN; R; No_Joining_Group
+084F; MANDAIC IN; D; No_Joining_Group
 0850; MANDAIC AP; D; No_Joining_Group
 0851; MANDAIC ASZ; D; No_Joining_Group
 0852; MANDAIC AQ; D; No_Joining_Group
