@@ -363,6 +363,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 fchmod() and futimes() now set C<$!> when they fail due to being
 passed a closed file handle.  [perl #122703]
 
+=item *
+
+Perl now comes with a corrected Unicode 7.0 for the erratum issued on
+October 21, 2014 (see L<http://www.unicode.org/errata/#current_errata>),
+dealing with glyph shaping in Arabic.
+
 =back
 
 =head1 Known Problems
