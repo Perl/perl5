@@ -4413,7 +4413,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 				/* slated for free anyway (and not COW)? */
                     (sflags & (SVs_TEMP|SVf_IsCOW)) == SVs_TEMP
                                 /* or a swipable TARG */
-                 || ((sflags & (SVs_PADTMP|SVf_READONLY|SVf_IsCOW))
+                 || ((sflags & (SVs_PADTMP|SVs_PADMY|SVf_READONLY
+                               |SVf_IsCOW))
                        == SVs_PADTMP
                                 /* whose buffer is worth stealing */
                      && CHECK_COWBUF_THRESHOLD(cur,len)
