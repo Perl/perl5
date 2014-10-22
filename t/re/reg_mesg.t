@@ -356,13 +356,12 @@ my @warning = (
     'my $x = \'\m\'; qr/a$x/' => 'Unrecognized escape \m passed through {#} m/a\m{#}/',
     '/\q/' => 'Unrecognized escape \q passed through {#} m/\q{#}/',
 
-    # Feel free to modify these 2 tests, should they start failing because the
-    # marker of where the problem is becomes wrong.  The current behavior is
-    # bad, always marking at the very end of the regex instead of where the
-    # problem is.  See [perl #122680] regcomp warning gives wrong position of
+    # These two tests do not include the marker, because regcomp.c no
+    # longer knows where it goes by the time this warning is emitted.
+    # See [perl #122680] regcomp warning gives wrong position of
     # problem.
-    '/(?=a){1,3}\x{100}/' => 'Quantifier unexpected on zero-length expression {#} m/(?=a){1,3}\x{100}{#}/',
-    '/(a|b)(?=a){3}\x{100}/' => 'Quantifier unexpected on zero-length expression {#} m/(a|b)(?=a){3}\x{100}{#}/',
+    '/(?=a){1,3}\x{100}/' => 'Quantifier unexpected on zero-length expression in regex m/(?=a){1,3}\x{100}/',
+    '/(a|b)(?=a){3}\x{100}/' => 'Quantifier unexpected on zero-length expression in regex m/(a|b)(?=a){3}\x{100}/',
 
     '/\_/' => "",
     '/[\_\0]/' => "",

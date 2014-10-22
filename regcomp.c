@@ -4833,8 +4833,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		{
 		    /* Fatal warnings may leak the regexp without this: */
 		    SAVEFREESV(RExC_rx_sv);
-		    ckWARNreg(RExC_parse,
-			    "Quantifier unexpected on zero-length expression");
+		    Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
+			"Quantifier unexpected on zero-length expression "
+			"in regex m/%"UTF8f"/",
+			 UTF8fARG(UTF, RExC_end - RExC_precomp,
+				  RExC_precomp));
 		    (void)ReREFCNT_inc(RExC_rx_sv);
 		}
 

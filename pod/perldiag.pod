@@ -4714,17 +4714,13 @@ S<<-- HERE> in m/%s/
 (W regexp) Minima should be less than or equal to maxima.  If you really
 want your regexp to match something 0 times, just put {0}.
 
-=item Quantifier unexpected on zero-length expression in regex; marked by <-- 
-HERE in m/%s/
+=item Quantifier unexpected on zero-length expression in regex m/%s/
 
 (W regexp) You applied a regular expression quantifier in a place where
 it makes no sense, such as on a zero-width assertion.  Try putting the
 quantifier inside the assertion instead.  For example, the way to match
 "abc" provided that it is followed by three repetitions of "xyz" is
 C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
-
-The <-- HERE shows whereabouts in the regular expression the problem was
-discovered.
 
 =item Range iterator outside integer range
 
