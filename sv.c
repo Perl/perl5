@@ -46,25 +46,23 @@
   char *gconvert(double, int, int,  char *);
 #endif
 
-#ifdef PERL_NEW_COPY_ON_WRITE
-#   ifndef SV_COW_THRESHOLD
+#ifndef SV_COW_THRESHOLD
 #    define SV_COW_THRESHOLD                    0   /* COW iff len > K */
-#   endif
-#   ifndef SV_COWBUF_THRESHOLD
+#endif
+#ifndef SV_COWBUF_THRESHOLD
 #    define SV_COWBUF_THRESHOLD                 1250 /* COW iff len > K */
-#   endif
-#   ifndef SV_COW_MAX_WASTE_THRESHOLD
+#endif
+#ifndef SV_COW_MAX_WASTE_THRESHOLD
 #    define SV_COW_MAX_WASTE_THRESHOLD          80   /* COW iff (len - cur) < K */
-#   endif
-#   ifndef SV_COWBUF_WASTE_THRESHOLD
+#endif
+#ifndef SV_COWBUF_WASTE_THRESHOLD
 #    define SV_COWBUF_WASTE_THRESHOLD           80   /* COW iff (len - cur) < K */
-#   endif
-#   ifndef SV_COW_MAX_WASTE_FACTOR_THRESHOLD
+#endif
+#ifndef SV_COW_MAX_WASTE_FACTOR_THRESHOLD
 #    define SV_COW_MAX_WASTE_FACTOR_THRESHOLD   2    /* COW iff len < (cur * K) */
-#   endif
-#   ifndef SV_COWBUF_WASTE_FACTOR_THRESHOLD
+#endif
+#ifndef SV_COWBUF_WASTE_FACTOR_THRESHOLD
 #    define SV_COWBUF_WASTE_FACTOR_THRESHOLD    2    /* COW iff len < (cur * K) */
-#   endif
 #endif
 /* Work around compiler warnings about unsigned >= THRESHOLD when thres-
    hold is 0. */
