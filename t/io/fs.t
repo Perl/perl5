@@ -56,7 +56,7 @@ $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 my $skip_mode_checks =
     $^O eq 'cygwin' && $ENV{CYGWIN} !~ /ntsec/;
 
-plan tests => 55;
+plan tests => 61;
 
 my $tmpdir = tempfile();
 my $tmpdir1 = tempfile();
@@ -180,7 +180,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip "no fchmod", 5 unless ($Config{d_fchmod} || "") eq "define";
+    skip "no fchmod", 7 unless ($Config{d_fchmod} || "") eq "define";
     ok(open(my $fh, "<", "a"), "open a");
     is(chmod(0, $fh), 1, "fchmod");
     $mode = (stat "a")[2];
@@ -194,12 +194,26 @@ SKIP: {
         skip "no mode checks", 1 if $skip_mode_checks;
         is($mode & 0777, $newmode, "perm restored");
     }
+
+    # [perl #122703]
+    close $fh;
+    $! = 0;
+    ok(!chmod(0666, $fh), "chmod through closed handle fails");
+    isnt($!+0, 0, "and errno was set");
 }
 
 SKIP: {
-    skip "no fchown", 1 unless ($Config{d_fchown} || "") eq "define";
+    skip "no fchown", 3 unless ($Config{d_fchown} || "") eq "define";
     open(my $fh, "<", "a");
     is(chown(-1, -1, $fh), 1, "fchown");
+
+    # [perl #122703]
+    # chown() behaved correctly, but there was no test for the chown()
+    # on closed handle case
+    close $fh;
+    $! = 0;
+    ok(!chown(-1, -1, $fh), "chown on closed handle fails");
+    isnt($!+0, 0, "and errno was set");
 }
 
 SKIP: {
@@ -237,11 +251,16 @@ isnt($atime, 500000000, 'atime');
 isnt($mtime, 500000000 + $delta, 'mtime');
 
 SKIP: {
-    skip "no futimes", 4 unless ($Config{d_futimes} || "") eq "define";
+    skip "no futimes", 6 unless ($Config{d_futimes} || "") eq "define";
     open(my $fh, "<", 'b');
     $foo = (utime 500000000,500000000 + $delta, $fh);
     is($foo, 1, "futime");
     check_utime_result();
+    # [perl #122703]
+    close $fh;
+    ok(!utime(500000000,500000000 + $delta, $fh),
+       "utime fails on a closed file handle");
+    isnt($!+0, 0, "and errno was set");
 }
 
 

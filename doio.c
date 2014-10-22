@@ -1762,6 +1762,7 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 #endif
 		    }
 		    else {
+                        SETERRNO(EBADF,RMS_IFI);
 			tot--;
 		    }
 		}
@@ -1802,6 +1803,7 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 #endif
 		    }
 		    else {
+                        SETERRNO(EBADF,RMS_IFI);
 			tot--;
 		    }
 		}
