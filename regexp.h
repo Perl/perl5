@@ -388,7 +388,7 @@ and check for NULL.
  * For the regexp bits, PL_reg_extflags_name[] in regnodes.h has a comment
  * giving which bits are used/unused */
 
-#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT + 4)
+#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT + 3)
 
 /* What we have seen */
 #define RXf_NO_INPLACE_SUBST    (1U<<(RXf_BASE_SHIFT+2))

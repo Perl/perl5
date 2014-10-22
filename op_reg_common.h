@@ -33,7 +33,9 @@
 #define RXf_PMf_FOLD           (1U << (RXf_PMf_STD_PMMOD_SHIFT+2))    /* /i */
 #define RXf_PMf_EXTENDED       (1U << (RXf_PMf_STD_PMMOD_SHIFT+3))    /* /x */
 #define RXf_PMf_EXTENDED_MORE  (1U << (RXf_PMf_STD_PMMOD_SHIFT+4))    /* /xx */
-#define RXf_PMf_KEEPCOPY       (1U << (RXf_PMf_STD_PMMOD_SHIFT+5))    /* /p */
+#define RXf_PMf_NOCAPTURE      (1U << (RXf_PMf_STD_PMMOD_SHIFT+5))    /* /n */
+
+#define RXf_PMf_KEEPCOPY       (1U << (RXf_PMf_STD_PMMOD_SHIFT+6))    /* /p */
 
 /* The character set for the regex is stored in a field of more than one bit
  * using an enum, for reasons of compactness and to ensure that the options are
@@ -49,7 +51,7 @@ typedef enum {
     REGEX_ASCII_MORE_RESTRICTED_CHARSET
 } regex_charset;
 
-#define _RXf_PMf_CHARSET_SHIFT ((RXf_PMf_STD_PMMOD_SHIFT)+6)
+#define _RXf_PMf_CHARSET_SHIFT ((RXf_PMf_STD_PMMOD_SHIFT)+7)
 #define RXf_PMf_CHARSET (7U << (_RXf_PMf_CHARSET_SHIFT)) /* 3 bits */
 
 /* Manually decorate these functions here with gcc-style attributes just to
@@ -81,22 +83,22 @@ get_regex_charset(const U32 flags)
     return (regex_charset) ((flags & RXf_PMf_CHARSET) >> _RXf_PMf_CHARSET_SHIFT);
 }
 
-#define _RXf_PMf_SHIFT_COMPILETIME (RXf_PMf_STD_PMMOD_SHIFT+9)
+#define _RXf_PMf_SHIFT_COMPILETIME (RXf_PMf_STD_PMMOD_SHIFT+10)
 
 /*
   Set in Perl_pmruntime if op_flags & OPf_SPECIAL, i.e. split. Will
   be used by regex engines to check whether they should set
   RXf_SKIPWHITE
 */
-#define RXf_PMf_SPLIT (1U<<(RXf_PMf_STD_PMMOD_SHIFT+9))
+#define RXf_PMf_SPLIT (1U<<(RXf_PMf_STD_PMMOD_SHIFT+10))
 
 /* Next available bit after the above.  Name begins with '_' so won't be
  * exported by B */
-#define _RXf_PMf_SHIFT_NEXT (RXf_PMf_STD_PMMOD_SHIFT+10)
+#define _RXf_PMf_SHIFT_NEXT (RXf_PMf_STD_PMMOD_SHIFT+11)
 
 /* Mask of the above bits.  These need to be transferred from op_pmflags to
  * re->extflags during compilation */
-#define RXf_PMf_COMPILETIME    (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_KEEPCOPY|RXf_PMf_CHARSET)
+#define RXf_PMf_COMPILETIME    (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_KEEPCOPY|RXf_PMf_NOCAPTURE|RXf_PMf_CHARSET)
 #define RXf_PMf_FLAGCOPYMASK   (RXf_PMf_COMPILETIME|RXf_PMf_SPLIT)
 
 #if 0   /* Temporary to get Jenkins happy again */
@@ -115,11 +117,12 @@ get_regex_charset(const U32 flags)
 #define PMf_FOLD          (1U<<2)
 #define PMf_EXTENDED      (1U<<3)
 #define PMf_EXTENDED_MORE (1U<<4)
-#define PMf_KEEPCOPY      (1U<<5)
-#define PMf_CHARSET       (7U<<6)
-#define PMf_SPLIT         (1U<<9)
+#define PMf_NOCAPTURE     (1U<<5)
+#define PMf_KEEPCOPY      (1U<<6)
+#define PMf_CHARSET       (7U<<7)
+#define PMf_SPLIT         (1U<<10)
 
-#if PMf_MULTILINE != RXf_PMf_MULTILINE || PMf_SINGLELINE != RXf_PMf_SINGLELINE || PMf_FOLD != RXf_PMf_FOLD || PMf_EXTENDED != RXf_PMf_EXTENDED || PMf_EXTENDED_MORE != RXf_PMf_EXTENDED_MORE || PMf_KEEPCOPY != RXf_PMf_KEEPCOPY || PMf_SPLIT != RXf_PMf_SPLIT || PMf_CHARSET != RXf_PMf_CHARSET
+#if PMf_MULTILINE != RXf_PMf_MULTILINE || PMf_SINGLELINE != RXf_PMf_SINGLELINE || PMf_FOLD != RXf_PMf_FOLD || PMf_EXTENDED != RXf_PMf_EXTENDED || PMf_EXTENDED_MORE != RXf_PMf_EXTENDED_MORE || PMf_KEEPCOPY != RXf_PMf_KEEPCOPY || PMf_SPLIT != RXf_PMf_SPLIT || PMf_CHARSET != RXf_PMf_CHARSET || PMf_NOCAPTURE != RXf_PMf_NOCAPTURE
 #   error RXf_PMf defines are wrong
 #endif
 
