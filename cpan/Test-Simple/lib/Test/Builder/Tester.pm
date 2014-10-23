@@ -1,16 +1,22 @@
 package Test::Builder::Tester;
 
 use strict;
-our $VERSION = "1.24";
+our $VERSION = '1.301001_063';
+$VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
-use Test::Builder 0.98;
+use Test::Builder 1.301001;
 use Symbol;
-use Carp;
+use Test::Stream::Carp qw/croak/;
 
 =head1 NAME
 
-Test::Builder::Tester - test testsuites that have been built with
+Test::Builder::Tester - *DEPRECATED* test testsuites that have been built with
 Test::Builder
+
+=head1 DEPRECATED
+
+B<This module is deprecated.> Please see L<Test::Stream::Tester> for a
+better alternative that does not involve dealing with TAP/string output.
 
 =head1 SYNOPSIS
 
@@ -48,36 +54,54 @@ output.
 # set up testing
 ####
 
-my $t = Test::Builder->new;
+#my $t = Test::Builder->new;
 
 ###
 # make us an exporter
 ###
 
-use Exporter;
-our @ISA = qw(Exporter);
+use Test::Stream::Toolset;
+use Test::Stream::Exporter;
+default_exports qw/test_out test_err test_fail test_diag test_test line_num/;
+Test::Stream::Exporter->cleanup;
 
-our @EXPORT = qw(test_out test_err test_fail test_diag test_test line_num);
-
-sub import {
+sub before_import {
     my $class = shift;
-    my(@plan) = @_;
+    my ($importer, $list) = @_;
 
-    my $caller = caller;
+    my $meta    = init_tester($importer);
+    my $context = context(1);
+    my $other   = [];
+    my $idx     = 0;
 
-    $t->exported_to($caller);
-    $t->plan(@plan);
+    while ($idx <= $#{$list}) {
+        my $item = $list->[$idx++];
+        next unless $item;
 
-    my @imports = ();
-    foreach my $idx ( 0 .. $#plan ) {
-        if( $plan[$idx] eq 'import' ) {
-            @imports = @{ $plan[ $idx + 1 ] };
-            last;
+        if (defined $item and $item eq 'no_diag') {
+            Test::Stream->shared->set_no_diag(1);
+        }
+        elsif ($item eq 'tests') {
+            $context->plan($list->[$idx++]);
+        }
+        elsif ($item eq 'skip_all') {
+            $context->plan(0, 'SKIP', $list->[$idx++]);
+        }
+        elsif ($item eq 'no_plan') {
+            $context->plan(0, 'NO PLAN');
+        }
+        elsif ($item eq 'import') {
+            push @$other => @{$list->[$idx++]};
         }
     }
 
-    __PACKAGE__->export_to_level( 1, __PACKAGE__, @imports );
+    @$list = @$other;
+
+    return;
 }
+
+
+sub builder { Test::Builder->new }
 
 ###
 # set up file handles
@@ -100,6 +124,9 @@ my $testing = 0;
 my $testing_num;
 my $original_is_passing;
 
+my $original_stream;
+my $original_state;
+
 # remembering where the file handles were originally connected
 my $original_output_handle;
 my $original_failure_handle;
@@ -114,15 +141,18 @@ sub _start_testing {
     $original_harness_env = $ENV{HARNESS_ACTIVE} || 0;
     $ENV{HARNESS_ACTIVE} = 0;
 
+    $original_stream = builder->{stream} || Test::Stream->shared;
+    $original_state  = [@{$original_stream->state->[-1]}];
+
     # remember what the handles were set to
-    $original_output_handle  = $t->output();
-    $original_failure_handle = $t->failure_output();
-    $original_todo_handle    = $t->todo_output();
+    $original_output_handle  = builder()->output();
+    $original_failure_handle = builder()->failure_output();
+    $original_todo_handle    = builder()->todo_output();
 
     # switch out to our own handles
-    $t->output($output_handle);
-    $t->failure_output($error_handle);
-    $t->todo_output($output_handle);
+    builder()->output($output_handle);
+    builder()->failure_output($error_handle);
+    builder()->todo_output($output_handle);
 
     # clear the expected list
     $out->reset();
@@ -130,13 +160,13 @@ sub _start_testing {
 
     # remember that we're testing
     $testing     = 1;
-    $testing_num = $t->current_test;
-    $t->current_test(0);
-    $original_is_passing  = $t->is_passing;
-    $t->is_passing(1);
+    $testing_num = builder()->current_test;
+    builder()->current_test(0);
+    $original_is_passing  = builder()->is_passing;
+    builder()->is_passing(1);
 
     # look, we shouldn't do the ending stuff
-    $t->no_ending(1);
+    builder()->no_ending(1);
 }
 
 =head2 Functions
@@ -174,6 +204,7 @@ output filehandles)
 =cut
 
 sub test_out {
+    my $ctx = context;
     # do we need to do any setup?
     _start_testing() unless $testing;
 
@@ -181,6 +212,7 @@ sub test_out {
 }
 
 sub test_err {
+    my $ctx = context;
     # do we need to do any setup?
     _start_testing() unless $testing;
 
@@ -214,6 +246,7 @@ more simply as:
 =cut
 
 sub test_fail {
+    my $ctx = context;
     # do we need to do any setup?
     _start_testing() unless $testing;
 
@@ -256,12 +289,13 @@ without the newlines.
 =cut
 
 sub test_diag {
+    my $ctx = context;
     # do we need to do any setup?
     _start_testing() unless $testing;
 
     # expect the same thing, but prepended with "#     "
     local $_;
-    $err->expect( map { "# $_" } @_ );
+    $err->expect( map { m/\S/ ? "# $_" : "" } @_ );
 }
 
 =item test_test
@@ -304,6 +338,7 @@ will function normally and cause success/errors for L<Test::Harness>.
 =cut
 
 sub test_test {
+    my $ctx = context;
     # decode the arguments as described in the pod
     my $mess;
     my %args;
@@ -322,21 +357,23 @@ sub test_test {
       unless $testing;
 
     # okay, reconnect the test suite back to the saved handles
-    $t->output($original_output_handle);
-    $t->failure_output($original_failure_handle);
-    $t->todo_output($original_todo_handle);
+    builder()->output($original_output_handle);
+    builder()->failure_output($original_failure_handle);
+    builder()->todo_output($original_todo_handle);
 
     # restore the test no, etc, back to the original point
-    $t->current_test($testing_num);
+    builder()->current_test($testing_num);
     $testing = 0;
-    $t->is_passing($original_is_passing);
+    builder()->is_passing($original_is_passing);
 
     # re-enable the original setting of the harness
     $ENV{HARNESS_ACTIVE} = $original_harness_env;
 
+    $original_stream->state->[-1] = $original_state;
+
     # check the output we've stashed
-    unless( $t->ok( ( $args{skip_out} || $out->check ) &&
-                    ( $args{skip_err} || $err->check ), $mess ) 
+    unless( builder()->ok( ( $args{skip_out} || $out->check ) &&
+                    ( $args{skip_err} || $err->check ), $mess )
     )
     {
         # print out the diagnostic information about why this
@@ -344,10 +381,10 @@ sub test_test {
 
         local $_;
 
-        $t->diag( map { "$_\n" } $out->complaint )
+        builder()->diag( map { "$_\n" } $out->complaint )
           unless $args{skip_out} || $out->check;
 
-        $t->diag( map { "$_\n" } $err->complaint )
+        builder()->diag( map { "$_\n" } $err->complaint )
           unless $args{skip_err} || $err->check;
     }
 }
@@ -418,40 +455,6 @@ sub color {
 
 =back
 
-=head1 BUGS
-
-Calls C<< Test::Builder->no_ending >> turning off the ending tests.
-This is needed as otherwise it will trip out because we've run more
-tests than we strictly should have and it'll register any failures we
-had that we were testing for as real failures.
-
-The color function doesn't work unless L<Term::ANSIColor> is
-compatible with your terminal.
-
-Bugs (and requests for new features) can be reported to the author
-though the CPAN RT system:
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Builder-Tester>
-
-=head1 AUTHOR
-
-Copyright Mark Fowler E<lt>mark@twoshortplanks.comE<gt> 2002, 2004.
-
-Some code taken from L<Test::More> and L<Test::Catch>, written by
-Michael G Schwern E<lt>schwern@pobox.comE<gt>.  Hence, those parts
-Copyright Micheal G Schwern 2001.  Used and distributed with
-permission.
-
-This program is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
-
-=head1 MAINTAINERS
-
-=over 4
-
-=item Chad Granum E<lt>exodist@cpan.orgE<gt>
-
-=back
-
 =head1 NOTES
 
 Thanks to Richard Clamp E<lt>richardc@unixbeard.netE<gt> for letting
@@ -460,6 +463,106 @@ me use his testing system to try this module out on.
 =head1 SEE ALSO
 
 L<Test::Builder>, L<Test::Builder::Tester::Color>, L<Test::More>.
+
+=encoding utf8
+
+=head1 SOURCE
+
+The source code repository for Test::More can be found at
+F<http://github.com/Test-More/test-more/>.
+
+=head1 MAINTAINER
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=back
+
+=head1 AUTHORS
+
+The following people have all contributed to the Test-More dist (sorted using
+VIM's sort function).
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=item Fergal Daly E<lt>fergal@esatclear.ie>E<gt>
+
+=item Mark Fowler E<lt>mark@twoshortplanks.comE<gt>
+
+=item Michael G Schwern E<lt>schwern@pobox.comE<gt>
+
+=item 唐鳳
+
+=back
+
+=head1 COPYRIGHT
+
+There has been a lot of code migration between modules,
+here are all the original copyrights together:
+
+=over 4
+
+=item Test::Stream
+
+=item Test::Stream::Tester
+
+Copyright 2014 Chad Granum E<lt>exodist7@gmail.comE<gt>.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See F<http://www.perl.com/perl/misc/Artistic.html>
+
+=item Test::Simple
+
+=item Test::More
+
+=item Test::Builder
+
+Originally authored by Michael G Schwern E<lt>schwern@pobox.comE<gt> with much
+inspiration from Joshua Pritikin's Test module and lots of help from Barrie
+Slaymaker, Tony Bowden, blackstar.co.uk, chromatic, Fergal Daly and the perl-qa
+gang.
+
+Idea by Tony Bowden and Paul Johnson, code by Michael G Schwern
+E<lt>schwern@pobox.comE<gt>, wardrobe by Calvin Klein.
+
+Copyright 2001-2008 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See F<http://www.perl.com/perl/misc/Artistic.html>
+
+=item Test::use::ok
+
+To the extent possible under law, 唐鳳 has waived all copyright and related
+or neighboring rights to L<Test-use-ok>.
+
+This work is published from Taiwan.
+
+L<http://creativecommons.org/publicdomain/zero/1.0>
+
+=item Test::Tester
+
+This module is copyright 2005 Fergal Daly <fergal@esatclear.ie>, some parts
+are based on other people's work.
+
+Under the same license as Perl itself
+
+See http://www.perl.com/perl/misc/Artistic.html
+
+=item Test::Builder::Tester
+
+Copyright Mark Fowler E<lt>mark@twoshortplanks.comE<gt> 2002, 2004.
+
+This program is free software; you can redistribute it
+and/or modify it under the same terms as Perl itself.
+
+=back
 
 =cut
 
@@ -487,8 +590,10 @@ sub expect {
 sub _account_for_subtest {
     my( $self, $check ) = @_;
 
+    my $ctx = Test::Stream::Context::context();
+    my $depth = @{$ctx->stream->subtests};
     # Since we ship with Test::Builder, calling a private method is safe...ish.
-    return ref($check) ? $check : $t->_indent . $check;
+    return ref($check) ? $check : ($depth ? '    ' x $depth : '') . $check;
 }
 
 sub _translate_Failed_check {

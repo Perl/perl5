@@ -3,7 +3,7 @@
 use strict;
 use Config;
 use Test::More;
-my %modules;
+my (%modules, %no_unload);
 
 my $db_file;
 BEGIN {
@@ -17,17 +17,21 @@ BEGIN {
 }
 
 %modules = (
-   # ModuleName  => q| code to check that it was loaded |,
-    'List::Util' => q| ::is( ref List::Util->can('first'), 'CODE' ) |,  # 5.7.2
-    'Cwd'        => q| ::is( ref Cwd->can('fastcwd'),'CODE' ) |,         # 5.7 ?
-    'File::Glob' => q| ::is( ref File::Glob->can('doglob'),'CODE' ) |,   # 5.6
-    $db_file     => q| ::is( ref $db_file->can('TIEHASH'), 'CODE' ) |,  # 5.0
-    'Socket'     => q| ::is( ref Socket->can('inet_aton'),'CODE' ) |,    # 5.0
-    'Time::HiRes'=> q| ::is( ref Time::HiRes->can('usleep'),'CODE' ) |,  # 5.7.3
+   # ModuleName   => q| code to check that it was loaded |,
+    'List::Util'  => q| ::is( ref List::Util->can('first'), 'CODE' ) |,  # 5.7.2
+    'Cwd'         => q| ::is( ref Cwd->can('fastcwd'),'CODE' ) |,         # 5.7 ?
+    'File::Glob'  => q| ::is( ref File::Glob->can('doglob'),'CODE' ) |,   # 5.6
+    $db_file      => q| ::is( ref $db_file->can('TIEHASH'), 'CODE' ) |,  # 5.0
+    'Socket'      => q| ::is( ref Socket->can('inet_aton'),'CODE' ) |,    # 5.0
+    'Time::HiRes' => q| ::is( ref Time::HiRes->can('usleep'),'CODE' ) |,  # 5.7.3
+    'Encode'      => q| ::is( ref Encode->can('decode'),'CODE' ) |, # Test::Builder loads this.
 );
 
-plan tests => 26 + keys(%modules) * 3;
-
+# These modules must not be unloaded since they are needed by Test::Builder
+%no_unload = (
+    'Encode'     => 1,
+    'List::Util' => 1,
+);
 
 # Try to load the module
 use_ok( 'DynaLoader' );
@@ -150,6 +154,7 @@ for my $libref (reverse @DynaLoader::dl_librefs) {
             skip "unloading unsupported on $^O", 2
                 if ($old_darwin || $^O eq 'VMS');
             my $module = pop @loaded_modules;
+            next if $no_unload{$module};
             skip "File::Glob sets PL_opfreehook", 2 if $module eq 'File::Glob';
             my $r = eval { DynaLoader::dl_unload_file($libref) };
             is( $@, '', "calling dl_unload_file() for $module" );
@@ -186,3 +191,5 @@ SKIP: {
         "mod2fname + libname_unique correctly truncates long names"
     );
 }
+
+done_testing;
