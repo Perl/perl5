@@ -338,7 +338,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+AIX now sets the length in C<< getsockopt >> correctly. [perl #120835],
+[rt.cpan.org #91183], [rt.cpan.org #85570].
 
 =back
 
