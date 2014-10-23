@@ -5396,7 +5396,7 @@ sub re_flags {
     if (my $charset = $pmflags & RXf_PMf_CHARSET) {
 	# Hardcoding this is fragile, but B does not yet export the
 	# constants we need.
-	$flags .= qw(d l u a aa)[$charset >> 6]
+	$flags .= qw(d l u a aa)[$charset >> 7]
     }
     # The /d flag is indicated by 0; only show it if necessary.
     elsif ($self->{hinthash} and
