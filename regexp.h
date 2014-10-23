@@ -272,13 +272,14 @@ and check for NULL.
 
 #include "op_reg_common.h"
 
-#define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED)
+#define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_NOCAPTURE)
 
 #define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl, x_count)                       \
     case IGNORE_PAT_MOD:    *(pmfl) |= RXf_PMf_FOLD;       break;           \
     case MULTILINE_PAT_MOD: *(pmfl) |= RXf_PMf_MULTILINE;  break;           \
     case SINGLE_PAT_MOD:    *(pmfl) |= RXf_PMf_SINGLELINE; break;           \
-    case XTENDED_PAT_MOD:   *(pmfl) |= RXf_PMf_EXTENDED; (x_count)++; break;
+    case XTENDED_PAT_MOD:   *(pmfl) |= RXf_PMf_EXTENDED; (x_count)++; break;\
+    case NOCAPTURE_PAT_MOD: *(pmfl) |= RXf_PMf_NOCAPTURE; break;
 
 #define STD_PMMOD_FLAGS_PARSE_X_WARN(x_count)                                   \
     if (UNLIKELY((x_count) > 1)) {                                              \
@@ -289,7 +290,7 @@ and check for NULL.
 
 /* Note, includes charset ones, assumes 0 is the default for them */
 #define STD_PMMOD_FLAGS_CLEAR(pmfl)                        \
-    *(pmfl) &= ~(RXf_PMf_FOLD|RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_EXTENDED|RXf_PMf_CHARSET)
+    *(pmfl) &= ~(RXf_PMf_FOLD|RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_EXTENDED|RXf_PMf_CHARSET|RXf_PMf_NOCAPTURE)
 
 /* chars and strings used as regex pattern modifiers
  * Singular is a 'c'har, plural is a "string"
@@ -301,6 +302,7 @@ and check for NULL.
 #define DEFAULT_PAT_MOD      '^'    /* Short for all the default modifiers */
 #define EXEC_PAT_MOD         'e'
 #define KEEPCOPY_PAT_MOD     'p'
+#define NOCAPTURE_PAT_MOD    'n'
 #define ONCE_PAT_MOD         'o'
 #define GLOBAL_PAT_MOD       'g'
 #define CONTINUE_PAT_MOD     'c'
@@ -316,6 +318,7 @@ and check for NULL.
 
 #define ONCE_PAT_MODS        "o"
 #define KEEPCOPY_PAT_MODS    "p"
+#define NOCAPTURE_PAT_MODS   "n"
 #define EXEC_PAT_MODS        "e"
 #define LOOP_PAT_MODS        "gc"
 #define NONDESTRUCT_PAT_MODS "r"
@@ -328,7 +331,7 @@ and check for NULL.
 /* This string is expected by regcomp.c to be ordered so that the first
  * character is the flag in bit RXf_PMf_STD_PMMOD_SHIFT of extflags; the next
  * character is bit +1, etc. */
-#define STD_PAT_MODS        "msixx"
+#define STD_PAT_MODS        "msixxn"
 
 #define CHARSET_PAT_MODS    ASCII_RESTRICT_PAT_MODS DEPENDS_PAT_MODS LOCALE_PAT_MODS UNICODE_PAT_MODS
 
@@ -337,7 +340,7 @@ and check for NULL.
  * extflags; the next character is in bit +1, etc. */
 #define INT_PAT_MODS    STD_PAT_MODS    KEEPCOPY_PAT_MODS
 
-#define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS
+#define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS  NOCAPTURE_PAT_MODS
 #define QR_PAT_MODS     STD_PAT_MODS    EXT_PAT_MODS	   CHARSET_PAT_MODS
 #define M_PAT_MODS      QR_PAT_MODS     LOOP_PAT_MODS
 #define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS      NONDESTRUCT_PAT_MODS

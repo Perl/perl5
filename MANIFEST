@@ -5462,6 +5462,7 @@ t/re/reg_fold.t			See if case folding works properly
 t/re/reg_mesg.t			See if one can get regular expression errors
 t/re/reg_namedcapture.t		Make sure glob assignment doesn't break named capture
 t/re/reg_nc_tie.t		Test the tied methods of Tie::Hash::NamedCapture
+t/re/reg_nocapture.t		Test the /n flag for regexps
 t/re/reg_pmod.t			See if regexp /p modifier works as expected
 t/re/reg_posixcc.t		See if posix character classes behave consistently
 t/re/re_tests			Regular expressions for regexp.t

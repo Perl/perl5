@@ -9587,7 +9587,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
            and must be globally applied -- japhy */
         switch (*RExC_parse) {
 
-            /* Code for the imsx flags */
+            /* Code for the imsxn flags */
             CASE_STD_PMMOD_FLAGS_PARSE_SET(flagsp, x_mod_count);
 
             case LOCALE_PAT_MOD:
@@ -10443,7 +10443,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 goto parse_rest;
             } /* end switch */
 	}
-	else {                  /* (...) */
+	else if (!(RExC_flags & RXf_PMf_NOCAPTURE)) {   /* (...) */
 	  capturing_parens:
 	    parno = RExC_npar;
 	    RExC_npar++;
@@ -10465,6 +10465,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             Set_Node_Length(ret, 1); /* MJD */
             Set_Node_Offset(ret, RExC_parse); /* MJD */
 	    is_open = 1;
+	} else {
+	    ret = NULL;
 	}
     }
     else                        /* ! paren */
