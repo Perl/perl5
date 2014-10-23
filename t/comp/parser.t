@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..170\n";
+print "1..171\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -502,6 +502,12 @@ like $@, "^No such class a1b at ", 'TYPE of my of for statement';
 eval 'method {} {$_,undef}';
 like $@, qq/^Can't call method "method" on unblessed reference at /,
      'method BLOCK {...} does not try to disambiguate';
+
+eval '#line 1 maggapom
+      if ($a>3) { $a ++; }
+      else {printf(1/0);}';
+is $@, "Illegal division by zero at maggapom line 2.\n",
+   'else {foo} line number (no space after {) [perl #122695]';
 
 # Add new tests HERE (above this line)
 

@@ -5596,8 +5596,7 @@ Perl_yylex(pTHX)
 	    break;
 	}
 	pl_yylval.ival = CopLINE(PL_curcop);
-	if (isSPACE(*s) || *s == '#')
-	    PL_copline = NOLINE;   /* invalidate current command line number */
+	PL_copline = NOLINE;   /* invalidate current command line number */
 	TOKEN(formbrack ? '=' : '{');
     case '}':
 	if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
