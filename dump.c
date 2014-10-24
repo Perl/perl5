@@ -2223,11 +2223,40 @@ Perl_runops_debug(pTHX)
     return 0;
 }
 
+
+/* print the names of the n lexical vars starting at pad offset off */
+
+void
+S_deb_padvar(pTHX_ PADOFFSET off, int n, bool paren)
+{
+    PADNAME *sv;
+    CV * const cv = deb_curcv(cxstack_ix);
+    PADNAMELIST *comppad = NULL;
+    int i;
+
+    if (cv) {
+        PADLIST * const padlist = CvPADLIST(cv);
+        comppad = PadlistNAMES(padlist);
+    }
+    if (paren)
+        PerlIO_printf(Perl_debug_log, "(");
+    for (i = 0; i < n; i++) {
+        if (comppad && (sv = padnamelist_fetch(comppad, off + i)))
+            PerlIO_printf(Perl_debug_log, "%"PNf, PNfARG(sv));
+        else
+            PerlIO_printf(Perl_debug_log, "[%"UVuf"]",
+                    (UV)(off+i));
+        if (i < n - 1)
+            PerlIO_printf(Perl_debug_log, ",");
+    }
+    if (paren)
+        PerlIO_printf(Perl_debug_log, ")");
+}
+
+
 I32
 Perl_debop(pTHX_ const OP *o)
 {
-    int count;
-
     PERL_ARGS_ASSERT_DEBOP;
 
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
@@ -2269,35 +2298,11 @@ Perl_debop(pTHX_ const OP *o)
     case OP_PADSV:
     case OP_PADAV:
     case OP_PADHV:
-        count = 1;
-        goto dump_padop;
+        S_deb_padvar(aTHX_ o->op_targ, 1, 1);
+        break;
     case OP_PADRANGE:
-        count = o->op_private & OPpPADRANGE_COUNTMASK;
-    dump_padop:
-	/* print the lexical's name */
-        {
-            CV * const cv = deb_curcv(cxstack_ix);
-            PADNAME *sv;
-            PADNAMELIST * comppad = NULL;
-            int i;
-
-            if (cv) {
-                PADLIST * const padlist = CvPADLIST(cv);
-                comppad = PadlistNAMES(padlist);
-            }
-            PerlIO_printf(Perl_debug_log, "(");
-            for (i = 0; i < count; i++) {
-                if (comppad &&
-                        (sv = padnamelist_fetch(comppad, o->op_targ + i)))
-                    PerlIO_printf(Perl_debug_log, "%"PNf, PNfARG(sv));
-                else
-                    PerlIO_printf(Perl_debug_log, "[%"UVuf"]",
-                            (UV)o->op_targ+i);
-                if (i < count-1)
-                    PerlIO_printf(Perl_debug_log, ",");
-            }
-            PerlIO_printf(Perl_debug_log, ")");
-        }
+        S_deb_padvar(aTHX_ o->op_targ,
+                        o->op_private & OPpPADRANGE_COUNTMASK, 1);
         break;
 
     default:
