@@ -480,9 +480,9 @@ and the character must be explicitly specified, and not be part of a
 multi-character range (not even as one of its endpoints).  (L</Character
 Ranges> will be explained shortly.) Therefore,
 
- 'ss' =~ /\A[\0-\x{ff}]\z/i        # Doesn't match
- 'ss' =~ /\A[\0-\N{LATIN SMALL LETTER SHARP S}]\z/i    # No match
- 'ss' =~ /\A[\xDF-\xDF]\z/i    # Matches on ASCII platforms, since
+ 'ss' =~ /\A[\0-\x{ff}]\z/ui       # Doesn't match
+ 'ss' =~ /\A[\0-\N{LATIN SMALL LETTER SHARP S}]\z/ui   # No match
+ 'ss' =~ /\A[\xDF-\xDF]\z/ui   # Matches on ASCII platforms, since
                                # \XDF is LATIN SMALL LETTER SHARP S,
                                # and the range is just a single
                                # element
@@ -500,7 +500,7 @@ the class, the entire sequence is matched.  For example,
 
 matches, because C<\N{TAMIL SYLLABLE KAU}> is a named sequence
 consisting of the two characters matched against.  Like the other
-instance where a bracketed class can match multi characters, and for
+instance where a bracketed class can match multiple characters, and for
 similar reasons, the class must not be inverted, and the named sequence
 may not appear in a range, even one where it is both endpoints.  If
 these happen, it is a fatal error if the character class is within an
@@ -543,9 +543,7 @@ C<\t>,
 and
 C<\x>
 are also special and have the same meanings as they do outside a
-bracketed character class.  (However, inside a bracketed character
-class, if C<\N{I<NAME>}> expands to a sequence of characters, only the first
-one in the sequence is used, with a warning.)
+bracketed character class.
 
 Also, a backslash followed by two or three octal digits is considered an octal
 number.
