@@ -136,7 +136,7 @@ for ( 0x0 .. 0xff ) {
                      "$name as a length-1 variable generates a syntax error");
             $tests++;
         }
-        elsif ($ord < 32 || chr =~ /[[:punct:][:digit:]]/a) {
+        elsif ($ord < 32 || $chr =~ /[[:punct:][:digit:]]/a) {
 
             # Unlike other variables, we dare not try setting the length-1
             # variables that are \cX (for all valid X) nor ASCII ones that are
