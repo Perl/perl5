@@ -808,7 +808,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20141002.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20141020.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -884,7 +884,7 @@ use File::Glob qw(:case);
     },
 
     'perlfaq' => {
-        'DISTRIBUTION' => 'LLAP/perlfaq-5.0150045.tar.gz',
+        'DISTRIBUTION' => 'ETHER/perlfaq-5.0150046.tar.gz',
         'FILES'        => q[cpan/perlfaq],
         'EXCLUDED'     => [
             qw( t/release-pod-syntax.t
