@@ -23,7 +23,8 @@ BEGIN {
         exit 0;
     }
     if ($^O eq 'dec_osf') {
-      skip_all("$^O cannot handle this test");
+        print "1..0 # $^O cannot handle this test\n";
+        exit 0;
     }
     require '../regen/regen_lib.pl';
 }
