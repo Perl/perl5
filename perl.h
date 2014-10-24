@@ -1789,6 +1789,16 @@ typedef NVTYPE NV;
 #   include <ieeefp.h>
 #endif
 
+#ifdef USING_MSVC6
+/* VC6 has broken NaN semantics: NaN == NaN returns true instead of false,
+ * and for example NaN < IV_MIN. */
+#  define NAN_COMPARE_BROKEN
+#endif
+#if defined(__DECC) && defined(__osf__)
+/* Also Tru64 cc has broken NaN comparisons. */
+#  define NAN_COMPARE_BROKEN
+#endif
+
 #ifdef USE_LONG_DOUBLE
 #   ifdef I_SUNMATH
 #       include <sunmath.h>
