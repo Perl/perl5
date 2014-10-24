@@ -15,7 +15,7 @@ BEGIN {
 
 use File::Basename;
 
-our $VERSION = '6.98';
+our $VERSION = '7.00';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -240,8 +240,8 @@ sub find_perl {
         $rslt = `\@temp_mmvms.com`;
         unlink('temp_mmvms.com');
         if ($rslt =~ /VER_OK/) {
-            print "Using PERL=MCR $vmsfile\n" if $trace;
-            return "MCR $vmsfile";
+            print "Using PERL=$vmsfile\n" if $trace;
+            return $vmsfile;
         }
     }
     print "Unable to find a perl $ver (by these names: @$names, in these dirs: @$dirs)\n";
@@ -1893,6 +1893,7 @@ sub init_linker {
           $ENV{$shr} ? $ENV{$shr} : "Sys\$Share:$shr.$Config{'dlext'}";
     }
 
+    $self->{PERL_ARCHIVEDEP} ||= '';
     $self->{PERL_ARCHIVE_AFTER} ||= '';
 }
 
