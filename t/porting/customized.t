@@ -85,6 +85,7 @@ else {
 
 foreach my $module ( sort keys %Modules ) {
   next unless my $files = $Modules{ $module }{CUSTOMIZED};
+  next unless @{ $files };
   my @perl_files = my_get_module_files( $module );
   foreach my $file ( @perl_files ) {
     my $digest = Digest->new( $digest_type );
