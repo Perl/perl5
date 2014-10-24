@@ -12,7 +12,6 @@ use Test::More tests => 16;
 use File::Spec;
 
 my $TB = Test::More->builder;
-my $perl = which_perl;
 
 BEGIN { use_ok('ExtUtils::MM') }
 
@@ -24,7 +23,7 @@ isa_ok($mm, 'ExtUtils::MM_Any');
 sub try_oneliner {
     my($code, $switches, $expect, $name) = @_;
     my $cmd = $mm->oneliner($code, $switches);
-    $cmd =~ s{\$\(ABSPERLRUN\)}{$perl};
+    $cmd =~ s{\$\(ABSPERLRUN\)}{$^X};
 
     # VMS likes to put newlines at the end of commands if there isn't
     # one already.

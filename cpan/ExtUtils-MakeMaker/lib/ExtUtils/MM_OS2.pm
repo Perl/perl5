@@ -5,7 +5,7 @@ use strict;
 use ExtUtils::MakeMaker qw(neatvalue);
 use File::Spec;
 
-our $VERSION = '7.00';
+our $VERSION = '6.98';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -129,7 +129,6 @@ sub init_linker {
 
     $self->{PERL_ARCHIVE} = "\$(PERL_INC)/libperl\$(LIB_EXT)";
 
-    $self->{PERL_ARCHIVEDEP} ||= '';
     $self->{PERL_ARCHIVE_AFTER} = $OS2::is_aout
       ? ''
       : '$(PERL_INC)/libperl_override$(LIB_EXT)';

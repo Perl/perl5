@@ -34,7 +34,7 @@ my @cd_args = ($dir, "command1", "command2");
 qq{cd $dir
 	command1
 	command2
-	cd $expected_updir}, 'nmake';
+	cd $expected_updir};
     }
 
     {
@@ -42,14 +42,14 @@ qq{cd $dir
 
         ::is $mm->cd(@cd_args),
 qq{cd $dir && command1
-	cd $dir && command2}, 'dmake';
+	cd $dir && command2};
     }
 }
 
 {
     is +ExtUtils::MM_Unix->cd(@cd_args),
 qq{cd $dir && command1
-	cd $dir && command2}, 'Unix';
+	cd $dir && command2};
 }
 
 SKIP: {
@@ -61,5 +61,5 @@ q{startdir = F$Environment("Default")
 	Set Default [.some.dir]
 	command1
 	command2
-	Set Default 'startdir'}, 'VMS';
+	Set Default 'startdir'};
 }

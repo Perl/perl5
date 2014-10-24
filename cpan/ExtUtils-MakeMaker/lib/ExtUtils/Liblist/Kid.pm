@@ -11,7 +11,7 @@ use 5.006;
 
 use strict;
 use warnings;
-our $VERSION = '7.00';
+our $VERSION = '6.98_01';
 
 use ExtUtils::MakeMaker::Config;
 use Cwd 'cwd';
@@ -49,7 +49,7 @@ sub _unix_os2_ext {
     # this is a rewrite of Andy Dougherty's extliblist in perl
 
     my ( @searchpath );    # from "-L/path" entries in $potential_libs
-    my ( @libpath ) = split " ", $Config{'libpth'} || '';
+    my ( @libpath ) = split " ", $Config{'libpth'};
     my ( @ldloadlibs, @bsloadlibs, @extralibs, @ld_run_path, %ld_run_path_seen );
     my ( @libs,       %libs_seen );
     my ( $fullname,   @fullname );
@@ -57,7 +57,6 @@ sub _unix_os2_ext {
     my ( $found ) = 0;
 
     foreach my $thislib ( split ' ', $potential_libs ) {
-        my ( $custom_name ) = '';
 
         # Handle possible linker path arguments.
         if ( $thislib =~ s/^(-[LR]|-Wl,-R|-Wl,-rpath,)// ) {    # save path flag type
@@ -93,14 +92,7 @@ sub _unix_os2_ext {
         }
 
         # Handle possible library arguments.
-        if ( $thislib =~ s/^-l(:)?// ) {
-            # Handle -l:foo.so, which means that the library will
-            # actually be called foo.so, not libfoo.so.  This
-            # is used in Android by ExtUtils::Depends to allow one XS
-            # module to link to another.
-            $custom_name = $1 || '';
-        }
-        else {
+        unless ( $thislib =~ s/^-l// ) {
             warn "Unrecognized argument in LIBS ignored: '$thislib'\n";
             next;
         }
@@ -186,8 +178,6 @@ sub _unix_os2_ext {
                 #
                 # , the compilation tools expand the environment variables.)
             }
-            elsif ( $custom_name && -f ( $fullname = "$thispth/$thislib" ) ) {
-            }
             else {
                 warn "$thislib not found in $thispth\n" if $verbose;
                 next;
@@ -201,7 +191,7 @@ sub _unix_os2_ext {
 
             # what do we know about this library...
             my $is_dyna = ( $fullname !~ /\Q$Config_libext\E\z/ );
-            my $in_perl = ( $libs =~ /\B-l:?\Q${thislib}\E\b/s );
+            my $in_perl = ( $libs =~ /\B-l\Q${thislib}\E\b/s );
 
             # include the path to the lib once in the dynamic linker path
             # but only if it is a dynamic lib and not in Perl itself
@@ -221,7 +211,7 @@ sub _unix_os2_ext {
                     && ( $thislib eq 'm' || $thislib eq 'ndbm' ) )
               )
             {
-                push( @extralibs, "-l$custom_name$thislib" );
+                push( @extralibs, "-l$thislib" );
             }
 
             # We might be able to load this archive file dynamically
@@ -243,11 +233,11 @@ sub _unix_os2_ext {
 
                     # For SunOS4, do not add in this shared library if
                     # it is already linked in the main perl executable
-                    push( @ldloadlibs, "-l$custom_name$thislib" )
+                    push( @ldloadlibs, "-l$thislib" )
                       unless ( $in_perl and $^O eq 'sunos' );
                 }
                 else {
-                    push( @ldloadlibs, "-l$custom_name$thislib" );
+                    push( @ldloadlibs, "-l$thislib" );
                 }
             }
             last;    # found one here so don't bother looking further
@@ -342,8 +332,8 @@ sub _win32_ext {
     return ( '', '', '', '', ( $give_libs ? \@libs : () ) ) unless @extralibs;
 
     # make sure paths with spaces are properly quoted
-    @extralibs = map { qq["$_"] } @extralibs;
-    @libs      = map { qq["$_"] } @libs;
+    @extralibs = map { /\s/ ? qq["$_"] : $_ } @extralibs;
+    @libs      = map { /\s/ ? qq["$_"] : $_ } @libs;
 
     my $lib = join( ' ', @extralibs );
 

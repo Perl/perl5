@@ -97,7 +97,7 @@ MakeMaker::Test::Utils - Utility routines for testing MakeMaker
 
 =head1 DESCRIPTION
 
-A consolidation of little utility functions used throughout the
+A consolidation of little utility functions used through out the
 MakeMaker test suite.
 
 =head2 Functions
@@ -138,7 +138,6 @@ sub which_perl {
             last if -x $perlpath;
         }
     }
-    $perlpath = qq{"$perlpath"}; # "safe... in a command line" even with spaces
 
     return $perlpath;
 }
@@ -305,7 +304,10 @@ sub run {
 
     # Unix, modern Windows and OS/2 from 5.005_54 up can handle 2>&1
     # This makes our failure diagnostics nicer to read.
-    if (MM->can_redirect_error) {
+    if( MM->os_flavor_is('Unix')                                   or
+        (MM->os_flavor_is('Win32') and !MM->os_flavor_is('Win9x')) or
+        ($] > 5.00554 and MM->os_flavor_is('OS/2'))
+      ) {
         return `$cmd 2>&1`;
     }
     else {
