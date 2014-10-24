@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.29 2014/05/31 12:12:39 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.30 2014/10/19 07:01:15 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -19,8 +19,8 @@
    encode_method().  1 is recommended. 2 restores NI-S original */
 #define ENCODE_XS_USEFP   1
 
-#define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {dTHX;   \
-                         Perl_croak(aTHX_ "panic_unimplemented"); \
+#define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {		\
+			Perl_croak_nocontext("panic_unimplemented");	\
              return (y)0; /* fool picky compilers */ \
                          }
 /**/
@@ -686,6 +686,7 @@ CODE:
     /* require_pv(PERLIO_FILENAME); */
 
     eval_pv("require PerlIO::encoding", 0);
+    SPAGAIN;
 
     if (SvTRUE(get_sv("@", 0))) {
     ST(0) = &PL_sv_no;
@@ -703,6 +704,7 @@ CODE:
     encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
     SV *retval;
     eval_pv("require Encode::MIME::Name", 0);
+    SPAGAIN;
 
     if (SvTRUE(get_sv("@", 0))) {
 	ST(0) = &PL_sv_undef;

@@ -10,7 +10,7 @@ use warnings;
 use Getopt::Std;
 use Config;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.13 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.14 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -184,6 +184,7 @@ END
 
   if ($cname =~ /(\w+)\.xs$/)
    {
+    print C "#define PERL_NO_GET_CONTEXT\n";
     print C "#include <EXTERN.h>\n";
     print C "#include <perl.h>\n";
     print C "#include <XSUB.h>\n";

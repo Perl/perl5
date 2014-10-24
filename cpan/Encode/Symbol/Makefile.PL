@@ -64,6 +64,7 @@ sub post_initialize
     $self->{'clean'}{'FILES'} .= join(' ',@files);
     open(XS,">$name.xs") || die "Cannot open $name.xs:$!";
     print XS <<'END';
+#define PERL_NO_GET_CONTEXT
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
