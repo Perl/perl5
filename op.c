@@ -1893,6 +1893,11 @@ Perl_scalarvoid(pTHX_ OP *o)
 	    || (  kid->op_type != OP_PADSV
 	       && kid->op_type != OP_PADAV
 	       && kid->op_type != OP_PADHV)
+	    || kid->op_private & ~OPpLVAL_INTRO
+	    || !(kid = OP_SIBLING(kid))
+	    || (  kid->op_type != OP_PADSV
+	       && kid->op_type != OP_PADAV
+	       && kid->op_type != OP_PADHV)
 	    || kid->op_private & ~OPpLVAL_INTRO)
 	) {
 	    op_null(cUNOPo->op_first); /* NULL the pushmark */
