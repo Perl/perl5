@@ -797,7 +797,8 @@ void S_op_clear_gv(pTHX_ OP *o, SV**svp)
 #endif
 {
 
-    GV *gv = (o->op_type == OP_GV || o->op_type == OP_GVSV)
+    GV *gv = (o->op_type == OP_GV || o->op_type == OP_GVSV
+            || o->op_type == OP_MULTIDEREF)
 #ifdef USE_ITHREADS
                 && PL_curpad
                 ? ((GV*)PAD_SVl(*ixp)) : NULL;
@@ -975,6 +976,109 @@ clear_pmop:
 #endif
 
 	break;
+
+    case OP_MULTIDEREF:
+        {
+            UNOP_AUX_item *items = cUNOP_AUXo->op_aux;
+            UV actions = items->uv;
+            bool last = 0;
+            bool is_hash = FALSE;
+
+            while (!last) {
+                switch (actions & MDEREF_ACTION_MASK) {
+
+                case MDEREF_reload:
+                    actions = (++items)->uv;
+                    continue;
+
+                case MDEREF_HV_padhv_helem:
+                    is_hash = TRUE;
+                case MDEREF_AV_padav_aelem:
+                    pad_free((++items)->pad_offset);
+                    goto do_elem;
+
+                case MDEREF_HV_gvhv_helem:
+                    is_hash = TRUE;
+                case MDEREF_AV_gvav_aelem:
+#ifdef USE_ITHREADS
+                    S_op_clear_gv(aTHX_ o, &((++items)->pad_offset));
+#else
+                    S_op_clear_gv(aTHX_ o, &((++items)->sv));
+#endif
+                    goto do_elem;
+
+                case MDEREF_HV_gvsv_vivify_rv2hv_helem:
+                    is_hash = TRUE;
+                case MDEREF_AV_gvsv_vivify_rv2av_aelem:
+#ifdef USE_ITHREADS
+                    S_op_clear_gv(aTHX_ o, &((++items)->pad_offset));
+#else
+                    S_op_clear_gv(aTHX_ o, &((++items)->sv));
+#endif
+                    goto do_vivify_rv2xv_elem;
+
+                case MDEREF_HV_padsv_vivify_rv2hv_helem:
+                    is_hash = TRUE;
+                case MDEREF_AV_padsv_vivify_rv2av_aelem:
+                    pad_free((++items)->pad_offset);
+                    goto do_vivify_rv2xv_elem;
+
+                case MDEREF_HV_pop_rv2hv_helem:
+                case MDEREF_HV_vivify_rv2hv_helem:
+                    is_hash = TRUE;
+                do_vivify_rv2xv_elem:
+                case MDEREF_AV_pop_rv2av_aelem:
+                case MDEREF_AV_vivify_rv2av_aelem:
+                do_elem:
+                    switch (actions & MDEREF_INDEX_MASK) {
+                    case MDEREF_INDEX_none:
+                        last = 1;
+                        break;
+                    case MDEREF_INDEX_const:
+                        if (is_hash) {
+#ifdef USE_ITHREADS
+                            /* see RT #15654 */
+                            pad_swipe((++items)->pad_offset, 1);
+#else
+                            SvREFCNT_dec((++items)->sv);
+#endif
+                        }
+                        else
+                            items++;
+                        break;
+                    case MDEREF_INDEX_padsv:
+                        pad_free((++items)->pad_offset);
+                        break;
+                    case MDEREF_INDEX_gvsv:
+#ifdef USE_ITHREADS
+                        S_op_clear_gv(aTHX_ o, &((++items)->pad_offset));
+#else
+                        S_op_clear_gv(aTHX_ o, &((++items)->sv));
+#endif
+                        break;
+                    }
+
+                    if (actions & MDEREF_FLAG_last)
+                        last = 1;
+                    is_hash = FALSE;
+
+                    break;
+
+                default:
+                    assert(0);
+                    last = 1;
+                    break;
+
+                } /* switch */
+
+                actions >>= MDEREF_SHIFT;
+            } /* while */
+
+            /* start of malloc is at op_aux[-1], where the length is
+             * stored */
+            PerlMemShared_free(cUNOP_AUXo->op_aux - 1);
+        }
+        break;
     }
 
     if (o->op_targ > 0) {
@@ -2171,7 +2275,7 @@ S_modkids(pTHX_ OP *o, I32 type)
  */
 
 void
-S_check_hash_fields(pTHX_ UNOP *rop, SVOP *key_op)
+S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
 {
     PADNAME *lexname;
     GV **fields;
@@ -2379,7 +2483,7 @@ S_finalize_op(pTHX_ OP* o)
       check_keys:	
         if (o->op_private & OPpLVAL_INTRO || rop->op_type != OP_RV2HV)
             rop = NULL;
-        S_check_hash_fields(aTHX_ rop, key_op);
+        S_check_hash_fields_and_hekify(aTHX_ rop, key_op);
 	break;
     }
     case OP_ASLICE:
@@ -4705,7 +4809,7 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 }
 
 /*
-=for apidoc
+=for apidoc newUNOP_AUX
 
 Similar to C<newUNOP>, but creates an UNOP_AUX struct instead, with op_aux
 initialised to aux
@@ -12065,6 +12169,608 @@ S_inplace_aassign(pTHX_ OP *o) {
 
 
 
+/* S_maybe_multideref(): given an op_next chain of ops beginning at 'start'
+ * that potentially represent a series of one or more aggregate derefs
+ * (such as $a->[1]{$key}), examine the chain, and if appropriate, convert
+ * the whole chain to a single OP_MULTIDEREF op (maybe with a few
+ * additional ops left in too).
+ *
+ * The caller will have already verified that the first few ops in the
+ * chain following 'start' indicate a multideref candidate, and will have
+ * set 'orig_o' to the point further on in the chain where the first index
+ * expression (if any) begins.  'orig_action' specifies what type of
+ * beginning has already been determined by the ops between start..orig_o
+ * (e.g.  $lex_ary[], $pkg_ary->{}, expr->[], etc).
+ *
+ * 'hints' contains any hints flags that need adding (currently just
+ * OPpHINT_STRICT_REFS) as found in any rv2av/hv skipped by the caller.
+ */
+
+void
+S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
+{
+    dVAR;
+    int pass;
+    UNOP_AUX_item *arg_buf = NULL;
+    bool reset_start_targ  = FALSE; /* start->op_targ needs zeroing */
+    int index_skip         = -1;    /* don't output index arg on this action */
+
+    /* similar to regex compiling, do two passes; the first pass
+     * determines whether the op chain is convertible and calculates the
+     * buffer size; the second pass populates the buffer and makes any
+     * changes necessary to ops (such as moving consts to the pad on
+     * threaded builds)
+     */
+    for (pass = 0; pass < 2; pass++) {
+        OP *o                = orig_o;
+        UV action            = orig_action;
+        OP *first_elem_op    = NULL;  /* first seen aelem/helem */
+        OP *top_op           = NULL;  /* highest [ah]elem/exists/del/rv2[ah]v */
+        int action_count     = 0;     /* number of actions seen so far */
+        int action_ix        = 0;     /* action_count % (actions per IV) */
+        bool next_is_hash    = FALSE; /* is the next lookup to be a hash? */
+        bool is_last         = FALSE; /* no more derefs to follow */
+        bool maybe_aelemfast = FALSE; /* we can replace with aelemfast? */
+        UNOP_AUX_item *arg     = arg_buf;
+        UNOP_AUX_item *action_ptr = arg_buf;
+
+        if (pass)
+            action_ptr->uv = 0;
+        arg++;
+
+        switch (action) {
+        case MDEREF_HV_gvsv_vivify_rv2hv_helem:
+        case MDEREF_HV_gvhv_helem:
+            next_is_hash = TRUE;
+            /* FALLTHROUGH */
+        case MDEREF_AV_gvsv_vivify_rv2av_aelem:
+        case MDEREF_AV_gvav_aelem:
+            if (pass) {
+#ifdef USE_ITHREADS
+                arg->pad_offset = cPADOPx(start)->op_padix;
+                /* stop it being swiped when nulled */
+                cPADOPx(start)->op_padix = 0;
+#else
+                arg->sv = cSVOPx(start)->op_sv;
+                cSVOPx(start)->op_sv = NULL;
+#endif
+            }
+            arg++;
+            break;
+
+        case MDEREF_HV_padhv_helem:
+        case MDEREF_HV_padsv_vivify_rv2hv_helem:
+            next_is_hash = TRUE;
+            /* FALLTHROUGH */
+        case MDEREF_AV_padav_aelem:
+        case MDEREF_AV_padsv_vivify_rv2av_aelem:
+            if (pass) {
+                arg->pad_offset = start->op_targ;
+                /* we skip setting op_targ = 0 for now, since the intact
+                 * OP_PADXV is needed by S_check_hash_fields_and_hekify */
+                reset_start_targ = TRUE;
+            }
+            arg++;
+            break;
+
+        case MDEREF_HV_pop_rv2hv_helem:
+            next_is_hash = TRUE;
+            /* FALLTHROUGH */
+        case MDEREF_AV_pop_rv2av_aelem:
+            break;
+
+        default:
+            assert(0);
+            return;
+        }
+
+        while (!is_last) {
+            /* look for another (rv2av/hv; get index;
+             * aelem/helem/exists/delele) sequence */
+
+            IV iv;
+            OP *kid;
+            bool is_deref;
+            bool ok;
+            UV index_type = MDEREF_INDEX_none;
+
+            if (action_count) {
+                /* if this is not the first lookup, consume the rv2av/hv  */
+
+                /* for N levels of aggregate lookup, we normally expect
+                 * that the first N-1 [ah]elem ops will be flagged as
+                 * /DEREF (so they autovivifiy if necessary), and the last
+                 * lookup op not to be.
+                 * For other things (like @{$h{k1}{k2}}) extra scope or
+                 * leave ops can appear, so abandon the effort in that
+                 * case */
+                if (o->op_type != OP_RV2AV && o->op_type != OP_RV2HV)
+                    return;
+
+                /* rv2av or rv2hv sKR/1 */
+
+                assert(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
+                                            |OPf_REF|OPf_MOD|OPf_SPECIAL)));
+                if (o->op_flags != (OPf_WANT_SCALAR|OPf_KIDS|OPf_REF))
+                    return;
+
+                /* at this point, we wouldn't expect any of these
+                 * possible private flags:
+                 * OPpMAYBE_LVSUB, OPpOUR_INTRO, OPpLVAL_INTRO
+                 * OPpTRUEBOOL, OPpMAYBE_TRUEBOOL (rv2hv only)
+                 */
+                assert(!(o->op_private &
+                    ~(OPpHINT_STRICT_REFS|OPpARG1_MASK|OPpSLICEWARNING)));
+
+                hints = (o->op_private & OPpHINT_STRICT_REFS);
+
+                /* make sure the type of the previous /DEREF matches the
+                 * type of the next lookup */
+                assert(o->op_type == (next_is_hash ? OP_RV2HV : OP_RV2AV));
+                top_op = o;
+
+                action = next_is_hash
+                            ? MDEREF_HV_vivify_rv2hv_helem
+                            : MDEREF_AV_vivify_rv2av_aelem;
+                o = o->op_next;
+            }
+
+            /* if this is the second pass, and we're at the depth where
+             * previously we encountered a non-simple index expression,
+             * stop processing the index at this point */
+            if (action_count != index_skip) {
+
+                /* look for one or more simple ops that return an array
+                 * index or hash key */
+
+                switch (o->op_type) {
+                case OP_PADSV:
+                    /* it may be a lexical var index */
+                    assert(!(o->op_flags & ~(OPf_WANT|OPf_PARENS
+                                            |OPf_REF|OPf_MOD|OPf_SPECIAL)));
+                    assert(!(o->op_private &
+                            ~(OPpPAD_STATE|OPpDEREF|OPpLVAL_INTRO)));
+
+                    if (   o->op_flags == OPf_WANT_SCALAR
+                        && o->op_private == 0)
+                    {
+                        if (pass)
+                            arg->pad_offset = o->op_targ;
+                        arg++;
+                        index_type = MDEREF_INDEX_padsv;
+                        o = o->op_next;
+                    }
+                    break;
+
+                case OP_CONST:
+                    if (next_is_hash) {
+                        /* it's a constant hash index */
+                        if (!(SvFLAGS(cSVOPo_sv) & (SVf_IOK|SVf_NOK|SVf_POK)))
+                            /* "use constant foo => FOO; $h{+foo}" for
+                             * some weird FOO, can leave you with constants
+                             * that aren't simple strings. It's not worth
+                             * the extra hassle for those edge cases */
+                            break;
+
+                        if (pass) {
+                            UNOP *rop = NULL;
+                            OP * helem_op = o->op_next;
+
+                            assert(   helem_op->op_type == OP_HELEM
+                                   || helem_op->op_type == OP_NULL);
+                            if (helem_op->op_type == OP_HELEM) {
+                                rop = (UNOP*)(((BINOP*)helem_op)->op_first);
+                                if (   helem_op->op_private & OPpLVAL_INTRO
+                                    || rop->op_type != OP_RV2HV
+                                )
+                                    rop = NULL;
+                            }
+                            S_check_hash_fields_and_hekify(aTHX_ rop, cSVOPo);
+
+#ifdef USE_ITHREADS
+                            /* Relocate sv to the pad for thread safety */
+                            op_relocate_sv(&cSVOPo->op_sv, &o->op_targ);
+                            arg->pad_offset = o->op_targ;
+                            o->op_targ = 0;
+#else
+                            arg->sv = cSVOPx_sv(o);
+#endif
+                        }
+                    }
+                    else {
+                        /* it's a constant array index */
+                        SV *ix_sv = cSVOPo->op_sv;
+                        if (UNLIKELY(SvROK(ix_sv) && !SvGAMAGIC(ix_sv)
+                                                && ckWARN(WARN_MISC)))
+                        Perl_warner(aTHX_ packWARN(WARN_MISC),
+                                "Use of reference \"%"SVf"\" as array index",
+                                SVfARG(ix_sv));
+                        iv = SvIV(ix_sv);
+
+                        if (   action_count == 0
+                            && iv >= -128
+                            && iv <= 127
+                            && (   action == MDEREF_AV_padav_aelem
+                                || action == MDEREF_AV_gvav_aelem)
+                        )
+                            maybe_aelemfast = TRUE;
+
+                        if (pass) {
+                            arg->iv = iv;
+                            SvREFCNT_dec_NN(cSVOPo->op_sv);
+                        }
+                    }
+                    if (pass)
+                        /* we've taken ownership of the SV */
+                        cSVOPo->op_sv = NULL;
+                    arg++;
+                    index_type = MDEREF_INDEX_const;
+                    o = o->op_next;
+                    break;
+
+                case OP_GV:
+                    /* it may be a package var index */
+
+                    assert(!(o->op_flags & ~(OPf_WANT)));
+                    assert(!(o->op_private & ~(OPpEARLY_CV)));
+                    if (   o->op_flags != OPf_WANT_SCALAR
+                        || o->op_private != 0
+                    )
+                        break;
+
+                    kid = o->op_next;
+                    if (kid->op_type != OP_RV2SV)
+                        break;
+
+                    assert(!(kid->op_flags &
+                            ~(OPf_WANT|OPf_KIDS|OPf_MOD|OPf_REF|OPf_SPECIAL)));
+                    assert(!(kid->op_private &
+                                    ~(OPpARG1_MASK
+                                     |OPpHINT_STRICT_REFS|OPpOUR_INTRO
+                                     |OPpDEREF|OPpLVAL_INTRO)));
+                    if(   kid->op_flags != (OPf_WANT_SCALAR|OPf_KIDS)
+                       || (kid->op_private & ~(OPpARG1_MASK|HINT_STRICT_REFS))
+                    )
+                        break;
+
+                    if (pass) {
+#ifdef USE_ITHREADS
+                        arg->pad_offset = cPADOPx(o)->op_padix;
+                        /* stop it being swiped when nulled */
+                        cPADOPx(o)->op_padix = 0;
+#else
+                        arg->sv = cSVOPx(o)->op_sv;
+                        cSVOPo->op_sv = NULL;
+#endif
+                    }
+                    arg++;
+                    index_type = MDEREF_INDEX_gvsv;
+                    o = kid->op_next;
+                    break;
+
+                } /* switch */
+            } /* action_count != index_skip */
+
+            action |= index_type;
+
+
+            /* at this point we have either:
+             *   * detected what looks like a simple index expression,
+             *     and expect the next op to be an [ah]elem, or
+             *     an nulled  [ah]elem followed by a delete or exists;
+             *  * found a more complex expression, so something other
+             *    than the above follows.
+             */
+
+            /* possibly an optimised away [ah]elem (where op_next is
+             * exists or delete) */
+            if (o->op_type == OP_NULL)
+                o = o->op_next;
+
+            /* at this point we're looking for an OP_AELEM, OP_HELEM,
+             * OP_EXISTS or OP_DELETE */
+
+            /* if something like arybase (a.k.a $[ ) is in scope,
+             * abandon optimisation attempt */
+            if (o->op_type == OP_AELEM && PL_check[OP_AELEM] != Perl_ck_null)
+                return;
+
+            if (   o->op_type != OP_AELEM
+                || (o->op_private &
+		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF|OPpMAYBE_LVSUB))
+                )
+                maybe_aelemfast = FALSE;
+
+            /* look for aelem/helem/exists/delete. If it's not the last elem
+             * lookup, it *must* have OPpDEREF_AV/HV, but not many other
+             * flags; if it's the last, then it mustn't have
+             * OPpDEREF_AV/HV, but may have lots of other flags, like
+             * OPpLVAL_INTRO etc
+             */
+
+            if (   index_type == MDEREF_INDEX_none
+                || (   o->op_type != OP_AELEM  && o->op_type != OP_HELEM
+                    && o->op_type != OP_EXISTS && o->op_type != OP_DELETE)
+            )
+                ok = FALSE;
+            else {
+                /* we have aelem/helem/exists/delete with valid simple index */
+
+                is_deref =    (o->op_type == OP_AELEM || o->op_type == OP_HELEM)
+                           && (   (o->op_private & OPpDEREF) == OPpDEREF_AV
+                               || (o->op_private & OPpDEREF) == OPpDEREF_HV);
+
+                if (is_deref) {
+                    assert(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_MOD)));
+                    assert(!(o->op_private & ~(OPpARG2_MASK|OPpDEREF)));
+
+                    ok =    o->op_flags == (OPf_WANT_SCALAR|OPf_KIDS|OPf_MOD)
+                         && !(o->op_private & ~(OPpDEREF|OPpARG2_MASK));
+                }
+                else if (o->op_type == OP_EXISTS) {
+                    assert(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
+                                |OPf_REF|OPf_MOD|OPf_SPECIAL)));
+                    assert(!(o->op_private & ~(OPpARG1_MASK|OPpEXISTS_SUB)));
+                    ok =  !(o->op_private & ~OPpARG1_MASK);
+                }
+                else if (o->op_type == OP_DELETE) {
+                    assert(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
+                                |OPf_REF|OPf_MOD|OPf_SPECIAL)));
+                    assert(!(o->op_private &
+                                    ~(OPpARG1_MASK|OPpSLICE|OPpLVAL_INTRO)));
+                    /* don't handle slices or 'local delete'; the latter
+                     * is fairly rare, and has a complex runtime */
+                    ok =  !(o->op_private & ~OPpARG1_MASK);
+                    if (OP_TYPE_IS_OR_WAS(cUNOPo->op_first, OP_AELEM))
+                        /* skip handling run-tome error */
+                        ok = (ok && cBOOL(o->op_flags & OPf_SPECIAL));
+                }
+                else {
+                    assert(o->op_type == OP_AELEM || o->op_type == OP_HELEM);
+                    assert(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_MOD
+                                            |OPf_PARENS|OPf_REF|OPf_SPECIAL)));
+                    assert(!(o->op_private & ~(OPpARG2_MASK|OPpMAYBE_LVSUB
+                                    |OPpLVAL_DEFER|OPpDEREF|OPpLVAL_INTRO)));
+                    ok = (o->op_private & OPpDEREF) != OPpDEREF_SV;
+                }
+            }
+
+            if (ok) {
+                if (!first_elem_op)
+                    first_elem_op = o;
+                top_op = o;
+                if (is_deref) {
+                    next_is_hash = cBOOL((o->op_private & OPpDEREF) == OPpDEREF_HV);
+                    o = o->op_next;
+                }
+                else {
+                    is_last = TRUE;
+                    action |= MDEREF_FLAG_last;
+                }
+            }
+            else {
+                /* at this point we have something that started
+                 * promisingly enough (with rv2av or whatever), but failed
+                 * to find a simple index followed by an
+                 * aelem/helem/exists/delete. If this is the first action,
+                 * give up; but if we've already seen at least one
+                 * aelem/helem, then keep them and add a new action with
+                 * MDEREF_INDEX_none, which causes it to do the vivify
+                 * from the end of the previous lookup, and do the deref,
+                 * but stop at that point. So $a[0][expr] will do one
+                 * av_fetch, vivify and deref, then continue executing at
+                 * expr */
+                if (!action_count)
+                    return;
+                is_last = TRUE;
+                index_skip = action_count;
+                action |= MDEREF_FLAG_last;
+            }
+
+            if (pass)
+                action_ptr->uv |= (action << (action_ix * MDEREF_SHIFT));
+            action_ix++;
+            action_count++;
+            /* if there's no space for the next action, create a new slot
+             * for it *before* we start adding args for that action */
+            if ((action_ix + 1) * MDEREF_SHIFT > UVSIZE*8) {
+                action_ptr = arg;
+                if (pass)
+                    arg->uv = 0;
+                arg++;
+                action_ix = 0;
+            }
+        } /* while !is_last */
+
+        /* success! */
+
+        if (pass) {
+            OP *mderef;
+            OP *p;
+
+            mderef = newUNOP_AUX(OP_MULTIDEREF, 0, NULL, arg_buf);
+            if (index_skip == -1) {
+                mderef->op_flags = o->op_flags
+                        & (OPf_WANT|OPf_MOD|(next_is_hash ? OPf_SPECIAL : 0));
+                if (o->op_type == OP_EXISTS)
+                    mderef->op_private = OPpMULTIDEREF_EXISTS;
+                else if (o->op_type == OP_DELETE)
+                    mderef->op_private = OPpMULTIDEREF_DELETE;
+                else
+                    mderef->op_private = o->op_private
+                        & (OPpMAYBE_LVSUB|OPpLVAL_DEFER|OPpLVAL_INTRO);
+            }
+            /* accumulate strictness from every level (although I don't think
+             * they can actually vary) */
+            mderef->op_private |= hints;
+
+            /* integrate the new multideref op into the optree and the
+             * op_next chain.
+             *
+             * In general an op like aelem or helem has two child
+             * sub-trees: the aggregate expression (a_expr) and the
+             * index expression (i_expr):
+             *
+             *     aelem
+             *       |
+             *     a_expr - i_expr
+             *
+             * The a_expr returns an AV or HV, while the i-expr returns an
+             * index. In general a multideref replaces most or all of a
+             * multi-level tree, e.g.
+             *
+             *     exists
+             *       |
+             *     ex-aelem
+             *       |
+             *     rv2av  - i_expr1
+             *       |
+             *     helem
+             *       |
+             *     rv2hv  - i_expr2
+             *       |
+             *     aelem
+             *       |
+             *     a_expr - i_expr3
+             *
+             * With multideref, all the i_exprs will be simple vars or
+             * constants, except that i_expr1 may be arbitrary in the case
+             * of MDEREF_INDEX_none.
+             *
+             * The bottom-most a_expr will be either:
+             *   1) a simple var (so padXv or gv+rv2Xv);
+             *   2) a simple scalar var dereferenced (e.g. $r->[0]):
+             *      so a simple var with an extra rv2Xv;
+             *   3) or an arbitrary expression.
+             *
+             * 'start', the first op in the execution chain, will point to
+             *   1),2): the padXv or gv op;
+             *   3):    the rv2Xv which forms the last op in the a_expr
+             *          execution chain, and the top-most op in the a_expr
+             *          subtree.
+             *
+             * For all cases, the 'start' node is no longer required,
+             * but we can't free it since one or more external nodes
+             * may point to it. E.g. consider
+             *     $h{foo} = $a ? $b : $c
+             * Here, both the op_next and op_other branches of the
+             * cond_expr point to the gv[*h] of the hash expression, so
+             * we can't free the 'start' op.
+             *
+             * For expr->[...], we need to save the subtree containing the
+             * expression; for the other cases, we just need to save the
+             * start node.
+             * So in all cases, we null the start op and keep it around by
+             * making it the child of the multideref op; for the expr->
+             * case, the expr will be a subtree of the start node.
+             *
+             * So in the simple 1,2 case the  optree above changes to
+             *
+             *     ex-exists
+             *       |
+             *     multideref
+             *       |
+             *     ex-gv (or ex-padxv)
+             *
+             *  with the op_next chain being
+             *
+             *  -> ex-gv -> multideref -> op-following-ex-exists ->
+             *
+             *  In the 3 case, we have
+             *
+             *     ex-exists
+             *       |
+             *     multideref
+             *       |
+             *     ex-rv2xv
+             *       |
+             *    rest-of-a_expr
+             *      subtree
+             *
+             *  and
+             *
+             *  -> rest-of-a_expr subtree ->
+             *    ex-rv2xv -> multideref -> op-following-ex-exists ->
+             *
+             *
+             * Where the last i_expr is non-simple (i.e. MDEREF_INDEX_none,
+             * e.g. $a[0]{foo}[$x+1], the next rv2xv is nulled and the
+             * multideref attached as the child, e.g.
+             *
+             *     exists
+             *       |
+             *     ex-aelem
+             *       |
+             *     ex-rv2av  - i_expr1
+             *       |
+             *     multideref
+             *       |
+             *     ex-whatever
+             *
+             */
+
+            /* if we free this op, don't free the pad entry */
+            if (reset_start_targ)
+                start->op_targ = 0;
+
+
+            /* Cut the bit we need to save out of the tree and attach to
+             * the multideref op, then free the rest of the tree */
+
+            /* find parent of node to be detached (for use by splice) */
+            p = first_elem_op;
+            if (   orig_action == MDEREF_AV_pop_rv2av_aelem
+                || orig_action == MDEREF_HV_pop_rv2hv_helem)
+            {
+                /* there is an arbitrary expression preceding us, e.g.
+                 * expr->[..]? so we need to save the 'expr' subtree */
+                if (p->op_type == OP_EXISTS || p->op_type == OP_DELETE)
+                    p = cUNOPx(p)->op_first;
+                assert(   start->op_type == OP_RV2AV
+                       || start->op_type == OP_RV2HV);
+            }
+            else {
+                /* either a padXv or rv2Xv+gv, maybe with an ex-Xelem
+                 * above for exists/delete. */
+                while (   (p->op_flags & OPf_KIDS)
+                       && cUNOPx(p)->op_first != start
+                )
+                    p = cUNOPx(p)->op_first;
+            }
+            assert(cUNOPx(p)->op_first == start);
+
+            /* detach from main tree, and re-attach under the multideref */
+            op_sibling_splice(mderef, NULL, 0,
+                    op_sibling_splice(p, NULL, 1, NULL));
+            op_null(start);
+
+            start->op_next = mderef;
+
+            mderef->op_next = index_skip == -1 ? o->op_next : o;
+
+            /* excise and free the original tree, and replace with
+             * the multideref op */
+            op_free(op_sibling_splice(top_op, NULL, -1, mderef));
+            op_null(top_op);
+        }
+        else {
+            Size_t size = arg - arg_buf;
+
+            if (maybe_aelemfast && action_count == 1)
+                return;
+
+            arg_buf = (UNOP_AUX_item*)PerlMemShared_malloc(
+                                sizeof(UNOP_AUX_item) * (size + 1));
+            /* for dumping etc: store the length in a hidden first slot;
+             * we set the op_aux pointer to the second slot */
+            arg_buf->uv = size;
+            arg_buf++;
+        }
+    } /* for (pass = ...) */
+}
+
+
+
 /* mechanism for deferring recursion in rpeep() */
 
 #define MAX_DEFERRED 4
@@ -12124,6 +12830,183 @@ Perl_rpeep(pTHX_ OP *o)
 	   clear this again.  */
 	o->op_opt = 1;
 	PL_op = o;
+
+        /* look for a series of 1 or more aggregate derefs, e.g.
+         *   $a[1]{foo}[$i]{$k}
+         * and replace with a single OP_MULTIDEREF op.
+         * Each index must be either a const, or a simple variable,
+         *
+         * First, look for likely combinations of starting ops,
+         * corresponding to (global and lexical variants of)
+         *     $a[...]   $h{...}
+         *     $r->[...] $r->{...}
+         *     (preceding expression)->[...]
+         *     (preceding expression)->{...}
+         * and if so, call maybe_multideref() to do a full inspection
+         * of the op chain and if appropriate, replace with an
+         * OP_MULTIDEREF
+         */
+        {
+            UV action;
+            OP *o2 = o;
+            U8 hints = 0;
+
+            switch (o2->op_type) {
+            case OP_GV:
+                /* $pkg[..]   :   gv[*pkg]
+                 * $pkg->[...]:   gv[*pkg]; rv2sv sKM/DREFAV */
+
+                /* Fail if there are new op flag combinations that we're
+                 * not aware of, rather than:
+                 *  * silently failing to optimise, or
+                 *  * silently optimising the flag away.
+                 * If this assert starts failing, examine what new flag
+                 * has been added to the op, and decide whether the
+                 * optimisation should still occur with that flag, then
+                 * update the code accordingly. This applies to all the
+                 * other asserts in the block of code too.
+                 */
+                assert(!(o2->op_flags & ~(OPf_WANT|OPf_MOD)));
+                assert(!(o2->op_private & ~OPpEARLY_CV));
+
+                o2 = o2->op_next;
+
+                if (o2->op_type == OP_RV2AV) {
+                    action = MDEREF_AV_gvav_aelem;
+                    goto do_deref;
+                }
+
+                if (o2->op_type == OP_RV2HV) {
+                    action = MDEREF_HV_gvhv_helem;
+                    goto do_deref;
+                }
+
+                if (o2->op_type != OP_RV2SV)
+                    break;
+
+                /* at this point we've seen gv,rv2sv, so the only valid
+                 * construct left is $pkg->[] or $pkg->{} */
+
+                assert(!(o2->op_flags & OPf_STACKED));
+                if ((o2->op_flags & (OPf_WANT|OPf_REF|OPf_MOD|OPf_SPECIAL))
+                            != (OPf_WANT_SCALAR|OPf_MOD))
+                    break;
+
+                assert(!(o2->op_private & ~(OPpARG1_MASK|HINT_STRICT_REFS
+                                    |OPpOUR_INTRO|OPpDEREF|OPpLVAL_INTRO)));
+                if (o2->op_private & (OPpOUR_INTRO|OPpLVAL_INTRO))
+                    break;
+                if (   (o2->op_private & OPpDEREF) != OPpDEREF_AV
+                    && (o2->op_private & OPpDEREF) != OPpDEREF_HV)
+                    break;
+
+                o2 = o2->op_next;
+                if (o2->op_type == OP_RV2AV) {
+                    action = MDEREF_AV_gvsv_vivify_rv2av_aelem;
+                    goto do_deref;
+                }
+                if (o2->op_type == OP_RV2HV) {
+                    action = MDEREF_HV_gvsv_vivify_rv2hv_helem;
+                    goto do_deref;
+                }
+                break;
+
+            case OP_PADSV:
+                /* $lex->[...]: padsv[$lex] sM/DREFAV */
+
+                assert(!(o2->op_flags &
+                    ~(OPf_WANT|OPf_PARENS|OPf_REF|OPf_MOD|OPf_SPECIAL)));
+                if ((o2->op_flags &
+                        (OPf_WANT|OPf_REF|OPf_MOD|OPf_SPECIAL))
+                     != (OPf_WANT_SCALAR|OPf_MOD))
+                    break;
+
+                assert(!(o2->op_private &
+                                ~(OPpPAD_STATE|OPpDEREF|OPpLVAL_INTRO)));
+                /* skip if state or intro, or not a deref */
+                if (      o2->op_private != OPpDEREF_AV
+                       && o2->op_private != OPpDEREF_HV)
+                    break;
+
+                o2 = o2->op_next;
+                if (o2->op_type == OP_RV2AV) {
+                    action = MDEREF_AV_padsv_vivify_rv2av_aelem;
+                    goto do_deref;
+                }
+                if (o2->op_type == OP_RV2HV) {
+                    action = MDEREF_HV_padsv_vivify_rv2hv_helem;
+                    goto do_deref;
+                }
+                break;
+
+            case OP_PADAV:
+            case OP_PADHV:
+                /*    $lex[..]:  padav[@lex:1,2] sR *
+                 * or $lex{..}:  padhv[%lex:1,2] sR */
+                assert(!(o2->op_flags & ~(OPf_WANT|OPf_MOD|OPf_PARENS|
+                                            OPf_REF|OPf_SPECIAL)));
+                if ((o2->op_flags &
+                        (OPf_WANT|OPf_REF|OPf_MOD|OPf_SPECIAL))
+                     != (OPf_WANT_SCALAR|OPf_REF))
+                    break;
+                if (o2->op_flags != (OPf_WANT_SCALAR|OPf_REF))
+                    break;
+                /* OPf_PARENS isn't currently used in this case;
+                 * if that changes, let us know! */
+                assert(!(o2->op_flags & OPf_PARENS));
+
+                /* at this point, we wouldn't expect any of the remaining
+                 * possible private flags:
+                 * OPpPAD_STATE, OPpLVAL_INTRO, OPpTRUEBOOL,
+                 * OPpMAYBE_TRUEBOOL, OPpMAYBE_LVSUB
+                 *
+                 * OPpSLICEWARNING shouldn't affect runtime
+                 */
+                assert(!(o2->op_private & ~(OPpSLICEWARNING)));
+
+                action = o2->op_type == OP_PADAV
+                            ? MDEREF_AV_padav_aelem
+                            : MDEREF_HV_padhv_helem;
+                o2 = o2->op_next;
+                S_maybe_multideref(aTHX_ o, o2, action, 0);
+                break;
+
+
+            case OP_RV2AV:
+            case OP_RV2HV:
+                action = o2->op_type == OP_RV2AV
+                            ? MDEREF_AV_pop_rv2av_aelem
+                            : MDEREF_HV_pop_rv2hv_helem;
+                /* FALLTHROUGH */
+            do_deref:
+                /* (expr)->[...]:  rv2av sKR/1;
+                 * (expr)->{...}:  rv2hv sKR/1; */
+
+                assert(o2->op_type == OP_RV2AV || o2->op_type == OP_RV2HV);
+
+                assert(!(o2->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
+                                |OPf_REF|OPf_MOD|OPf_STACKED|OPf_SPECIAL)));
+                if (o2->op_flags != (OPf_WANT_SCALAR|OPf_KIDS|OPf_REF))
+                    break;
+
+                /* at this point, we wouldn't expect any of these
+                 * possible private flags:
+                 * OPpMAYBE_LVSUB, OPpOUR_INTRO, OPpLVAL_INTRO
+                 * OPpTRUEBOOL, OPpMAYBE_TRUEBOOL, (rv2hv only)
+                 */
+                assert(!(o2->op_private &
+                    ~(OPpHINT_STRICT_REFS|OPpARG1_MASK|OPpSLICEWARNING)));
+                hints |= (o2->op_private & OPpHINT_STRICT_REFS);
+
+                o2 = o2->op_next;
+
+                S_maybe_multideref(aTHX_ o, o2, action, hints);
+                break;
+
+            default:
+                break;
+            }
+        }
 
 
 	switch (o->op_type) {

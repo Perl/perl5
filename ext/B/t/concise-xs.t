@@ -159,6 +159,7 @@ my $testpkgs = {
 	constant => [qw/ ASSIGN CVf_LVALUE
 		     CVf_METHOD LIST_CONTEXT OP_CONST OP_LIST OP_RV2SV
 		     OP_AELEM OP_CUSTOM OP_NEXTSTATE OP_DBSTATE
+		     OP_HELEM OP_RV2AV OP_RV2HV
 		     OP_STRINGIFY OPf_KIDS OPf_MOD OPf_REF OPf_SPECIAL
 		     OPf_PARENS
 		     OPf_STACKED OPf_WANT OPf_WANT_LIST OPf_WANT_SCALAR
@@ -169,6 +170,8 @@ my $testpkgs = {
 		     OPpSORT_REVERSE OPpREVERSE_INPLACE OPpTARGET_MY
 		     OPpTRANS_COMPLEMENT OPpTRANS_DELETE OPpTRANS_SQUASH
 		     OPpREPEAT_DOLIST
+                     OPpMULTIDEREF_EXISTS
+                     OPpMULTIDEREF_DELETE
 		     PMf_CONTINUE PMf_EVAL PMf_EXTENDED PMf_EXTENDED_MORE
                      PMf_FOLD PMf_GLOBAL
 		     PMf_KEEP PMf_NONDESTRUCT
@@ -176,7 +179,32 @@ my $testpkgs = {
 		     POSTFIX SVf_FAKE SVf_IOK SVf_NOK SVf_POK SVf_ROK
 		     SVpad_STATE
 		     SVpad_OUR SVs_RMG SVs_SMG SWAP_CHILDREN OPpPAD_STATE
-		     OPpCONST_ARYBASE RXf_SKIPWHITE SVpad_TYPED/,
+		     OPpCONST_ARYBASE RXf_SKIPWHITE SVpad_TYPED
+
+                    MDEREF_reload
+                    MDEREF_AV_pop_rv2av_aelem
+                    MDEREF_AV_gvsv_vivify_rv2av_aelem
+                    MDEREF_AV_padsv_vivify_rv2av_aelem
+                    MDEREF_AV_vivify_rv2av_aelem
+                    MDEREF_AV_padav_aelem
+                    MDEREF_AV_gvav_aelem
+                    MDEREF_HV_pop_rv2hv_helem
+                    MDEREF_HV_gvsv_vivify_rv2hv_helem
+                    MDEREF_HV_padsv_vivify_rv2hv_helem
+                    MDEREF_HV_vivify_rv2hv_helem
+                    MDEREF_HV_padhv_helem
+                    MDEREF_HV_gvhv_helem
+                    MDEREF_ACTION_MASK
+                    MDEREF_INDEX_none
+                    MDEREF_INDEX_const
+                    MDEREF_INDEX_padsv
+                    MDEREF_INDEX_gvsv
+                    MDEREF_INDEX_MASK
+                    MDEREF_FLAG_last
+                    MDEREF_MASK
+                    MDEREF_SHIFT
+                     /,
+
 		     $] >= 5.015 ? qw(
 		     OP_GLOB PMf_SKIPWHITE RXf_PMf_CHARSET RXf_PMf_KEEPCOPY
 		     OPpEVAL_BYTES OPpSUBSTR_REPL_FIRST) : (),

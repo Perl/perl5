@@ -236,6 +236,10 @@ helem		hash element		ck_null		s2	H S
 hslice		hash slice		ck_null		m@	H L
 kvhslice	key/value hash slice	ck_null		m@	H L
 
+# mixed array and hash access
+
+multideref	array or hash lookup	ck_null		ds+	
+
 # Explosives and implosives.
 
 unpack		unpack			ck_fun		u@	S S?

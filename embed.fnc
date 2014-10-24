@@ -330,6 +330,7 @@ ApR	|I32	|cxinc
 Afp	|void	|deb		|NN const char* pat|...
 Ap	|void	|vdeb		|NN const char* pat|NULLOK va_list* args
 Ap	|void	|debprofdump
+EXp	|SV*	|unop_aux_stringify	|NN const OP* o|NN CV *cv
 Ap	|I32	|debop		|NN const OP* o
 Ap	|I32	|debstack
 Ap	|I32	|debstackptrs
@@ -2651,7 +2652,8 @@ s	|SV *	|find_hash_subscript|NULLOK const HV *const hv \
 s	|I32	|find_array_subscript|NULLOK const AV *const av \
 		|NN const SV *const val
 sMd	|SV*	|find_uninit_var|NULLOK const OP *const obase \
-		|NULLOK const SV *const uninit_sv|bool top
+		|NULLOK const SV *const uninit_sv|bool match \
+		|NN const char **desc_p
 #endif
 
 Ap	|GV*	|gv_fetchpvn_flags|NN const char* name|STRLEN len|I32 flags|const svtype sv_type

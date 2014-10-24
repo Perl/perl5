@@ -312,7 +312,7 @@ invert_opset function.
     av2arylen
 
     rv2hv helem hslice kvhslice each values keys exists delete
-    aeach akeys avalues reach rvalues rkeys
+    aeach akeys avalues reach rvalues rkeys multideref
 
     preinc i_preinc predec i_predec postinc i_postinc
     postdec i_postdec int hex oct abs pow multiply i_multiply

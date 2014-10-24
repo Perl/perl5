@@ -434,7 +434,6 @@ op/closure.t
 op/concat2.t
 op/coreamp.t
 op/crypt.t
-op/die.t
 op/do.t
 op/each.t
 op/eval.t
@@ -455,7 +454,6 @@ op/lexsub.t
 op/local.t
 op/magic.t
 op/method.t
-op/my.t
 op/mydef.t
 op/not.t
 op/ord.t

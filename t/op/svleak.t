@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 128;
+plan tests => 129;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -479,3 +479,17 @@ leak(2,0,sub{eval{require untohunothu}}, 'requiring nonexistent module');
 # [perl #120939]
 use constant const_av_xsub_leaked => 1 .. 3;
 leak(5, 0, sub { scalar &const_av_xsub_leaked }, "const_av_sub in scalar context");
+
+# check that OP_MULTIDEREF doesn't leak when compiled and then freed
+
+eleak(2, 0, <<'EOF', 'OP_MULTIDEREF');
+no strict;
+no warnings;
+my ($x, @a, %h, $r, $k, $i);
+$x = $a[0]{foo}{$k}{$i};
+$x = $h[0]{foo}{$k}{$i};
+$x = $r->[0]{foo}{$k}{$i};
+$x = $mdr::a[0]{foo}{$mdr::k}{$mdr::i};
+$x = $mdr::h[0]{foo}{$mdr::k}{$mdr::i};
+$x = $mdr::r->[0]{foo}{$mdr::k}{$mdr::i};
+EOF

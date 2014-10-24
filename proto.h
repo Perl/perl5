@@ -4946,6 +4946,12 @@ PERL_CALLCONV UV	Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, S
 
 PERL_CALLCONV bool	Perl_try_amagic_bin(pTHX_ int method, int flags);
 PERL_CALLCONV bool	Perl_try_amagic_un(pTHX_ int method, int flags);
+PERL_CALLCONV SV*	Perl_unop_aux_stringify(pTHX_ const OP* o, CV *cv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_UNOP_AUX_STRINGIFY	\
+	assert(o); assert(cv)
+
 PERL_CALLCONV I32	Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s, const char *strbeg, const char *strend, char **new_s, I32 ocnt, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
@@ -7543,7 +7549,11 @@ STATIC SV *	S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val)
 #define PERL_ARGS_ASSERT_FIND_HASH_SUBSCRIPT	\
 	assert(val)
 
-STATIC SV*	S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv, bool top);
+STATIC SV*	S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv, bool match, const char **desc_p)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_FIND_UNINIT_VAR	\
+	assert(desc_p)
+
 STATIC bool	S_glob_2number(pTHX_ GV* const gv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GLOB_2NUMBER	\

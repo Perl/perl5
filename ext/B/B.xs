@@ -8,6 +8,7 @@
  */
 
 #define PERL_NO_GET_CONTEXT
+#define PERL_EXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -1342,6 +1343,9 @@ string(o, cv)
 	SV *ret;
     PPCODE:
         switch (o->op_type) {
+        case OP_MULTIDEREF:
+            ret = unop_aux_stringify(o, cv);
+            break;
         default:
             ret = sv_2mortal(newSVpvn("", 0));
         }
@@ -1359,9 +1363,105 @@ aux_list(o, cv)
 	B::OP  o
 	B::CV  cv
     PPCODE:
+        PERL_UNUSED_VAR(cv); /* not needed on unthreaded builds */
         switch (o->op_type) {
         default:
             XSRETURN(0); /* by default, an empty list */
+
+        case OP_MULTIDEREF:
+#ifdef USE_ITHREADS
+#  define ITEM_SV(item) *av_fetch(comppad, (item)->pad_offset, FALSE);
+#else
+#  define ITEM_SV(item) UNOP_AUX_item_sv(item)
+#endif
+            {
+                UNOP_AUX_item *items = cUNOP_AUXo->op_aux;
+                UV actions = items->uv;
+                UV len = items[-1].uv;
+                SV *sv;
+                bool last = 0;
+                bool is_hash = FALSE;
+#ifdef USE_ITHREADS
+                PADLIST * const padlist = CvPADLIST(cv);
+                PAD *comppad = comppad = PadlistARRAY(padlist)[1];
+#endif
+
+                EXTEND(SP, len);
+                PUSHs(sv_2mortal(newSViv(actions)));
+
+                while (!last) {
+                    switch (actions & MDEREF_ACTION_MASK) {
+
+                    case MDEREF_reload:
+                        actions = (++items)->uv;
+                        PUSHs(sv_2mortal(newSVuv(actions)));
+                        continue;
+
+                    case MDEREF_HV_padhv_helem:
+                        is_hash = TRUE;
+                    case MDEREF_AV_padav_aelem:
+                        PUSHs(sv_2mortal(newSVuv((++items)->pad_offset)));
+                        goto do_elem;
+
+                    case MDEREF_HV_gvhv_helem:
+                        is_hash = TRUE;
+                    case MDEREF_AV_gvav_aelem:
+                        sv = ITEM_SV(++items);
+                        PUSHs(make_sv_object(aTHX_ sv));
+                        goto do_elem;
+
+                    case MDEREF_HV_gvsv_vivify_rv2hv_helem:
+                        is_hash = TRUE;
+                    case MDEREF_AV_gvsv_vivify_rv2av_aelem:
+                        sv = ITEM_SV(++items);
+                        PUSHs(make_sv_object(aTHX_ sv));
+                        goto do_vivify_rv2xv_elem;
+
+                    case MDEREF_HV_padsv_vivify_rv2hv_helem:
+                        is_hash = TRUE;
+                    case MDEREF_AV_padsv_vivify_rv2av_aelem:
+                        PUSHs(sv_2mortal(newSVuv((++items)->pad_offset)));
+                        goto do_vivify_rv2xv_elem;
+
+                    case MDEREF_HV_pop_rv2hv_helem:
+                    case MDEREF_HV_vivify_rv2hv_helem:
+                        is_hash = TRUE;
+                    do_vivify_rv2xv_elem:
+                    case MDEREF_AV_pop_rv2av_aelem:
+                    case MDEREF_AV_vivify_rv2av_aelem:
+                    do_elem:
+                        switch (actions & MDEREF_INDEX_MASK) {
+                        case MDEREF_INDEX_none:
+                            last = 1;
+                            break;
+                        case MDEREF_INDEX_const:
+                            if (is_hash) {
+                                sv = ITEM_SV(++items);
+                                PUSHs(make_sv_object(aTHX_ sv));
+                            }
+                            else
+                                PUSHs(sv_2mortal(newSViv((++items)->iv)));
+                            break;
+                        case MDEREF_INDEX_padsv:
+                            PUSHs(sv_2mortal(newSVuv((++items)->pad_offset)));
+                            break;
+                        case MDEREF_INDEX_gvsv:
+                            sv = ITEM_SV(++items);
+                            PUSHs(make_sv_object(aTHX_ sv));
+                            break;
+                        }
+                        if (actions & MDEREF_FLAG_last)
+                            last = 1;
+                        is_hash = FALSE;
+
+                        break;
+                    } /* switch */
+
+                    actions >>= MDEREF_SHIFT;
+                } /* while */
+                XSRETURN(len);
+
+            } /* OP_MULTIDEREF */
         } /* switch */
 
 

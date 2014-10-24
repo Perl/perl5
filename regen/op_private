@@ -299,7 +299,7 @@ for (qw(nextstate dbstate)) {
 addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
     for qw(gvsv rv2sv rv2hv rv2gv rv2av aelem helem aslice
            hslice delete padsv padav padhv enteriter entersub padrange
-           pushmark cond_expr refassign lvref lvrefslice lvavref),
+           pushmark cond_expr refassign lvref lvrefslice lvavref multideref),
            'list', # this gets set in my_attrs() for some reason
            ;
 
@@ -418,7 +418,7 @@ for (qw(rv2gv rv2sv padsv aelem helem entersub)) {
 
 
 # Defer creation of array/hash elem
-addbits($_, 6 => qw(OPpLVAL_DEFER LVDEFER)) for qw(aelem helem);
+addbits($_, 6 => qw(OPpLVAL_DEFER LVDEFER)) for qw(aelem helem multideref);
 
 
 
@@ -437,7 +437,7 @@ addbits($_, 6 => qw(OPpOUR_INTRO OURINTR)) # Variable was in an our()
 # We might be an lvalue to return
 addbits($_, 3 => qw(OPpMAYBE_LVSUB LVSUB))
     for qw(aassign rv2av rv2gv rv2hv padav padhv aelem helem aslice hslice
-           av2arylen keys rkeys kvaslice kvhslice substr pos vec);
+           av2arylen keys rkeys kvaslice kvhslice substr pos vec multideref);
 
 
 
@@ -450,7 +450,8 @@ for (qw(rv2hv padhv)) {
 
 
 
-addbits($_, 1 => qw(OPpHINT_STRICT_REFS STRICT)) for qw(rv2sv rv2av rv2hv rv2gv);
+addbits($_, 1 => qw(OPpHINT_STRICT_REFS STRICT))
+    for qw(rv2sv rv2av rv2hv rv2gv multideref);
 
 
 
@@ -733,6 +734,13 @@ addbits($_,
          },
    #7 => qw(OPpLVAL_INTRO LVINTRO),
 ) for 'refassign', 'lvref';
+
+
+
+addbits('multideref',
+    4 => qw(OPpMULTIDEREF_EXISTS EXISTS), # deref is actually exists
+    5 => qw(OPpMULTIDEREF_DELETE DELETE), # deref is actually delete
+);
 
 1;
 

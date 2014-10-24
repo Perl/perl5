@@ -2088,3 +2088,81 @@ $_ = join $foo, pos
 >>>>
 my $foo;
 $_ = join('???', pos $_);
+####
+# exists $a[0]
+our @a;
+exists $a[0];
+####
+# my @a; exists $a[0]
+my @a;
+exists $a[0];
+####
+# delete $a[0]
+our @a;
+delete $a[0];
+####
+# my @a; delete $a[0]
+my @a;
+delete $a[0];
+####
+# $_[0][$_[1]]
+$_[0][$_[1]];
+####
+# f($a[0]);
+my @a;
+f($a[0]);
+####
+#qr/\Q$h{'key'}\E/;
+my %h;
+qr/\Q$h{'key'}\E/;
+####
+# my $x = "$h{foo}";
+my %h;
+my $x = "$h{'foo'}";
+####
+# weird constant hash key
+my %h;
+my $x = $h{"\000\t\x{100}"};
+####
+# multideref and packages
+package foo;
+my(%bar) = ('a', 'b');
+our(@bar) = (1, 2);
+$bar{'k'} = $bar[200];
+$main::bar{'k'} = $main::bar[200];
+$foo::bar{'k'} = $foo::bar[200];
+package foo2;
+$bar{'k'} = $bar[200];
+$main::bar{'k'} = $main::bar[200];
+$foo::bar{'k'} = $foo::bar[200];
+>>>>
+package foo;
+my(%bar) = ('a', 'b');
+our(@bar) = (1, 2);
+$bar{'k'} = $bar[200];
+$main::bar{'k'} = $main::bar[200];
+$foo::bar{'k'} = $bar[200];
+package foo2;
+$bar{'k'} = $foo::bar[200];
+$main::bar{'k'} = $main::bar[200];
+$foo::bar{'k'} = $foo::bar[200];
+####
+# multideref and local
+my %h;
+local $h{'foo'}[0] = 1;
+####
+# multideref and exists
+my(%h, $i);
+my $e = exists $h{'foo'}[$i];
+####
+# multideref and delete
+my(%h, $i);
+my $e = delete $h{'foo'}[$i];
+####
+# multideref with leading expression
+my $r;
+my $x = ($r // [])->{'foo'}[0];
+####
+# multideref with complex middle index
+my(%h, $i, $j, $k);
+my $x = $h{'foo'}[$i + $j]{$k};

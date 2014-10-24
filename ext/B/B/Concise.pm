@@ -916,7 +916,7 @@ sub concise_op {
         }
     }
     elsif ($h{class} eq "UNOP_AUX") {
-        $h{arg} = "(" . $op->string . ")";
+        $h{arg} = "(" . $op->string($curcv) . ")";
     }
 
     $h{seq} = $h{hyphseq} = seq($op);

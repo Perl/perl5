@@ -195,9 +195,6 @@ PP(pp_clonecv)
 
 /* Translations. */
 
-static const char S_no_symref_sv[] =
-    "Can't use string (\"%" SVf32 "\"%s) as %s ref while \"strict refs\" in use";
-
 /* In some cases this function inspects PL_op.  If this function is called
    for new op types, more bool parameters may need to be added in place of
    the checks.
@@ -274,7 +271,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 	    else {
 		if (strict) {
                     Perl_die(aTHX_
-                             S_no_symref_sv,
+                             PL_no_symref_sv,
                              sv,
                              (SvPOKp(sv) && SvCUR(sv)>32 ? "..." : ""),
                              "a symbol"
@@ -329,7 +326,7 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
 
     if (PL_op->op_private & HINT_STRICT_REFS) {
 	if (SvOK(sv))
-	    Perl_die(aTHX_ S_no_symref_sv, sv,
+	    Perl_die(aTHX_ PL_no_symref_sv, sv,
 		     (SvPOKp(sv) && SvCUR(sv)>32 ? "..." : ""), what);
 	else
 	    Perl_die(aTHX_ PL_no_usym, what);

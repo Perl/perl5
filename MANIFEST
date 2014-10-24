@@ -5269,6 +5269,7 @@ t/op/magic-27839.t		Test for #27839, skipped for minitest
 t/op/magic.t			See if magic variables work
 t/op/method.t			See if method calls work
 t/op/mkdir.t			See if mkdir works
+t/op/multideref.t		See if "$a[0]{foo}[$i]{$k}" etc works
 t/op/mydef.t			See if "my $_" works
 t/op/my_stash.t			See if my Package works
 t/op/my.t			See if lexical scoping works

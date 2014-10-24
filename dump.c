@@ -952,6 +952,18 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	}
 #endif
 	break;
+
+    case OP_MULTIDEREF:
+    {
+        UNOP_AUX_item *items = cUNOP_AUXo->op_aux;
+        UV i, count = items[-1].uv;
+
+	Perl_dump_indent(aTHX_ level, file, "ARGS = \n");
+        for (i=0; i < count;  i++)
+            Perl_dump_indent(aTHX_ level+1, file, "%"UVuf" => 0x%"UVxf"\n",
+                                    i, items[i].uv);
+    }
+
     case OP_CONST:
     case OP_HINTSEVAL:
     case OP_METHOD_NAMED:
@@ -2254,6 +2266,181 @@ S_deb_padvar(pTHX_ PADOFFSET off, int n, bool paren)
 }
 
 
+/* append to the out SV, the name of the lexical at offset off in the CV
+ * cv */
+
+void
+S_append_padvar(pTHX_ PADOFFSET off, CV *cv, SV *out, int n,
+        bool paren, bool is_scalar)
+{
+    PADNAME *sv;
+    PADNAMELIST *namepad = NULL;
+    int i;
+
+    if (cv) {
+        PADLIST * const padlist = CvPADLIST(cv);
+        namepad = PadlistNAMES(padlist);
+    }
+
+    if (paren)
+        sv_catpvs_nomg(out, "(");
+    for (i = 0; i < n; i++) {
+        if (namepad && (sv = padnamelist_fetch(namepad, off + i)))
+        {
+            STRLEN cur = SvCUR(out);
+            Perl_sv_catpvf(aTHX_ out, "[%"PNf, PNfARG(sv));
+            if (is_scalar)
+                SvPVX(out)[cur] = '$';
+        }
+        else
+            Perl_sv_catpvf(aTHX_ out, "[%"UVuf"]", (UV)(off+i));
+        if (i < n - 1)
+            sv_catpvs_nomg(out, ",");
+    }
+    if (paren)
+        sv_catpvs_nomg(out, "(");
+}
+
+
+void
+S_print_gv_name(pTHX_ GV *gv, SV *out, char sigil)
+{
+    SV *sv;
+    if (!gv) {
+        sv_catpvs_nomg(out, "<NULLGV>");
+        return;
+    }
+    sv = newSV(0);
+    gv_fullname4(sv, gv, NULL, FALSE);
+    Perl_sv_catpvf(aTHX_ out, "%c%-p", sigil, sv);
+    SvREFCNT_dec_NN(sv);
+}
+
+#ifdef USE_ITHREADS
+#  define ITEM_SV(item) *av_fetch(comppad, (item)->pad_offset, FALSE);
+#else
+#  define ITEM_SV(item) UNOP_AUX_item_sv(item)
+#endif
+
+
+/* return a temporary SV containing a stringified representation of
+ * the op_aux field of a UNOP_AUX op, associated with CV cv
+ */
+
+SV*
+Perl_unop_aux_stringify(pTHX_ const OP *o, CV *cv)
+{
+    UNOP_AUX_item *items = cUNOP_AUXo->op_aux;
+    UV actions = items->uv;
+    SV *sv;
+    bool last = 0;
+    bool is_hash = FALSE;
+    int derefs = 0;
+    SV *out = sv_2mortal(newSVpv("",0));
+#ifdef USE_ITHREADS
+    PADLIST * const padlist = CvPADLIST(cv);
+    PAD *comppad = comppad = PadlistARRAY(padlist)[1];
+#endif
+
+    PERL_ARGS_ASSERT_UNOP_AUX_STRINGIFY;
+
+    while (!last) {
+        switch (actions & MDEREF_ACTION_MASK) {
+
+        case MDEREF_reload:
+            actions = (++items)->uv;
+            continue;
+
+        case MDEREF_HV_padhv_helem:
+            is_hash = TRUE;
+        case MDEREF_AV_padav_aelem:
+            derefs = 1;
+            S_append_padvar(aTHX_ (++items)->pad_offset, cv, out, 1, 0, 1);
+            goto do_elem;
+
+        case MDEREF_HV_gvhv_helem:
+            is_hash = TRUE;
+        case MDEREF_AV_gvav_aelem:
+            derefs = 1;
+            sv = ITEM_SV(++items);
+            S_print_gv_name(aTHX_ (GV*)sv, out, '$');
+            goto do_elem;
+
+        case MDEREF_HV_gvsv_vivify_rv2hv_helem:
+            is_hash = TRUE;
+        case MDEREF_AV_gvsv_vivify_rv2av_aelem:
+            sv = ITEM_SV(++items);
+            S_print_gv_name(aTHX_ (GV*)sv, out, '$');
+            goto do_vivify_rv2xv_elem;
+
+        case MDEREF_HV_padsv_vivify_rv2hv_helem:
+            is_hash = TRUE;
+        case MDEREF_AV_padsv_vivify_rv2av_aelem:
+            S_append_padvar(aTHX_ (++items)->pad_offset, cv, out, 1, 0, 1);
+            goto do_vivify_rv2xv_elem;
+
+        case MDEREF_HV_pop_rv2hv_helem:
+        case MDEREF_HV_vivify_rv2hv_helem:
+            is_hash = TRUE;
+        do_vivify_rv2xv_elem:
+        case MDEREF_AV_pop_rv2av_aelem:
+        case MDEREF_AV_vivify_rv2av_aelem:
+            if (!derefs++)
+                sv_catpvs_nomg(out, "->");
+        do_elem:
+            if ((actions & MDEREF_INDEX_MASK)== MDEREF_INDEX_none) {
+                sv_catpvs_nomg(out, "->");
+                last = 1;
+                break;
+            }
+
+            sv_catpvn_nomg(out, (is_hash ? "{" : "["), 1);
+            switch (actions & MDEREF_INDEX_MASK) {
+            case MDEREF_INDEX_const:
+                if (is_hash) {
+                    STRLEN cur;
+                    char *s;
+                    sv = ITEM_SV(++items);
+                    s = SvPV(sv, cur);
+                    pv_pretty(out, s, cur, 30,
+                                NULL, NULL,
+                                (PERL_PV_PRETTY_NOCLEAR
+                                |PERL_PV_PRETTY_QUOTE
+                                |PERL_PV_PRETTY_ELLIPSES));
+                }
+                else
+                    Perl_sv_catpvf(aTHX_ out, "%"IVdf, (++items)->iv);
+                break;
+            case MDEREF_INDEX_padsv:
+                S_append_padvar(aTHX_ (++items)->pad_offset, cv, out, 1, 0, 1);
+                break;
+            case MDEREF_INDEX_gvsv:
+                sv = ITEM_SV(++items);
+                S_print_gv_name(aTHX_ (GV*)sv, out, '$');
+                break;
+            }
+            sv_catpvn_nomg(out, (is_hash ? "}" : "]"), 1);
+
+            if (actions & MDEREF_FLAG_last)
+                last = 1;
+            is_hash = FALSE;
+
+            break;
+
+        default:
+            PerlIO_printf(Perl_debug_log, "UNKNOWN(%d)",
+                (int)(actions & MDEREF_ACTION_MASK));
+            last = 1;
+            break;
+
+        } /* switch */
+
+        actions >>= MDEREF_SHIFT;
+    } /* while */
+    return out;
+}
+
+
 I32
 Perl_debop(pTHX_ const OP *o)
 {
@@ -2300,9 +2487,15 @@ Perl_debop(pTHX_ const OP *o)
     case OP_PADHV:
         S_deb_padvar(aTHX_ o->op_targ, 1, 1);
         break;
+
     case OP_PADRANGE:
         S_deb_padvar(aTHX_ o->op_targ,
                         o->op_private & OPpPADRANGE_COUNTMASK, 1);
+        break;
+
+    case OP_MULTIDEREF:
+        PerlIO_printf(Perl_debug_log, "(%-p)",
+            unop_aux_stringify(o, deb_curcv(cxstack_ix)));
         break;
 
     default:

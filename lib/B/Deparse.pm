@@ -15,12 +15,36 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER OPpREPEAT_DOLIST
-	 OPpSORT_REVERSE
+	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
 	 SVpad_TYPED
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
-	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED PMf_EXTENDED_MORE);
+	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED PMf_EXTENDED_MORE
+        MDEREF_reload
+        MDEREF_AV_pop_rv2av_aelem
+        MDEREF_AV_gvsv_vivify_rv2av_aelem
+        MDEREF_AV_padsv_vivify_rv2av_aelem
+        MDEREF_AV_vivify_rv2av_aelem
+        MDEREF_AV_padav_aelem
+        MDEREF_AV_gvav_aelem
+        MDEREF_HV_pop_rv2hv_helem
+        MDEREF_HV_gvsv_vivify_rv2hv_helem
+        MDEREF_HV_padsv_vivify_rv2hv_helem
+        MDEREF_HV_vivify_rv2hv_helem
+        MDEREF_HV_padhv_helem
+        MDEREF_HV_gvhv_helem
+        MDEREF_ACTION_MASK
+        MDEREF_INDEX_none
+        MDEREF_INDEX_const
+        MDEREF_INDEX_padsv
+        MDEREF_INDEX_gvsv
+        MDEREF_INDEX_MASK
+        MDEREF_FLAG_last
+        MDEREF_MASK
+        MDEREF_SHIFT
+    );
+
 $VERSION = '1.31';
 use strict;
 use vars qw/$AUTOLOAD/;
@@ -334,7 +358,7 @@ BEGIN {
 
 
 BEGIN { for (qw[ const stringify rv2sv list glob pushmark null aelem
-		 custom nextstate dbstate ]) {
+		 nextstate dbstate rv2av rv2hv helem custom ]) {
     eval "sub OP_\U$_ () { " . opnumber($_) . "}"
 }}
 
@@ -3729,7 +3753,7 @@ sub pp_rv2av {
 
 sub is_subscriptable {
     my $op = shift;
-    if ($op->name =~ /^[ahg]elem/) {
+    if ($op->name =~ /^([ahg]elem|multideref$)/) {
 	return 1;
     } elsif ($op->name eq "entersub") {
 	my $kid = $op->first;
@@ -3833,6 +3857,145 @@ sub elem {
     }
 
 }
+
+# a simplified version of elem_or_slice_array_name()
+# for the use of pp_multideref
+
+sub multideref_var_name {
+    my $self = shift;
+    my ($gv, $is_hash) = @_;
+
+    my ($name, $quoted) =
+        $self->stash_variable_name( $is_hash  ? '%' : '@', $gv);
+    return $quoted ? "$name->"
+                   : $name eq '#'
+                        ? '${#}'       # avoid ${#}[1] => $#[1]
+                        : '$' . $name;
+}
+
+
+sub pp_multideref {
+    my $self = shift;
+    my($op, $cx) = @_;
+    my $text = "";
+
+    if ($op->private & OPpMULTIDEREF_EXISTS) {
+        $text = $self->keyword("exists"). " ";
+    }
+    elsif ($op->private & OPpMULTIDEREF_DELETE) {
+        $text = $self->keyword("delete"). " ";
+    }
+    elsif ($op->private & OPpLVAL_INTRO) {
+        $text = $self->keyword("local"). " ";
+    }
+
+    if ($op->first && ($op->first->flags & OPf_KIDS)) {
+        # arbitrary initial expression, e.g. f(1,2,3)->[...]
+        $text .=  $self->deparse($op->first, 24);
+    }
+
+    my @items = $op->aux_list($self->{curcv});
+    my $actions = shift @items;
+
+    my $is_hash;
+    my $derefs = 0;
+
+    while (1) {
+        if (($actions & MDEREF_ACTION_MASK) == MDEREF_reload) {
+            $actions = shift @items;
+            next;
+        }
+
+        $is_hash = (
+           ($actions & MDEREF_ACTION_MASK) == MDEREF_HV_pop_rv2hv_helem
+        || ($actions & MDEREF_ACTION_MASK) == MDEREF_HV_gvsv_vivify_rv2hv_helem
+        || ($actions & MDEREF_ACTION_MASK) == MDEREF_HV_padsv_vivify_rv2hv_helem
+        || ($actions & MDEREF_ACTION_MASK) == MDEREF_HV_vivify_rv2hv_helem
+        || ($actions & MDEREF_ACTION_MASK) == MDEREF_HV_padhv_helem
+        || ($actions & MDEREF_ACTION_MASK) == MDEREF_HV_gvhv_helem
+        );
+
+        if (   ($actions & MDEREF_ACTION_MASK) == MDEREF_AV_padav_aelem
+            || ($actions & MDEREF_ACTION_MASK) == MDEREF_HV_padhv_helem)
+        {
+            $derefs = 1;
+            $text .= '$' . substr($self->padname(shift @items), 1);
+        }
+        elsif (   ($actions & MDEREF_ACTION_MASK) == MDEREF_AV_gvav_aelem
+               || ($actions & MDEREF_ACTION_MASK) == MDEREF_HV_gvhv_helem)
+        {
+            $derefs = 1;
+            $text .= $self->multideref_var_name(shift @items, $is_hash);
+        }
+        else {
+            if (   ($actions & MDEREF_ACTION_MASK) ==
+                                        MDEREF_AV_padsv_vivify_rv2av_aelem
+                || ($actions & MDEREF_ACTION_MASK) ==
+                                        MDEREF_HV_padsv_vivify_rv2hv_helem)
+            {
+                $text .= $self->padname(shift @items);
+            }
+            elsif (   ($actions & MDEREF_ACTION_MASK) ==
+                                           MDEREF_AV_gvsv_vivify_rv2av_aelem
+                   || ($actions & MDEREF_ACTION_MASK) ==
+                                           MDEREF_HV_gvsv_vivify_rv2hv_helem)
+            {
+                $text .= $self->multideref_var_name(shift @items, $is_hash);
+            }
+            elsif (   ($actions & MDEREF_ACTION_MASK) ==
+                                           MDEREF_AV_pop_rv2av_aelem
+                   || ($actions & MDEREF_ACTION_MASK) ==
+                                           MDEREF_HV_pop_rv2hv_helem)
+            {
+                if (   ($op->flags & OPf_KIDS)
+                    && (   _op_is_or_was($op->first, OP_RV2AV)
+                        || _op_is_or_was($op->first, OP_RV2HV))
+                    && ($op->first->flags & OPf_KIDS)
+                    && (   _op_is_or_was($op->first->first, OP_AELEM)
+                        || _op_is_or_was($op->first->first, OP_HELEM))
+                    )
+                {
+                    $derefs++;
+                }
+            }
+
+            $text .= '->' if !$derefs++;
+        }
+
+
+        if (($actions & MDEREF_INDEX_MASK) == MDEREF_INDEX_none) {
+            last;
+        }
+
+        $text .= $is_hash ? '{' : '[';
+
+        if (($actions & MDEREF_INDEX_MASK) == MDEREF_INDEX_const) {
+            my $key = shift @items;
+            if ($is_hash) {
+                $text .= $self->const($key, $cx);
+            }
+            else {
+                $text .= $key;
+            }
+        }
+        elsif (($actions & MDEREF_INDEX_MASK) == MDEREF_INDEX_padsv) {
+            $text .= $self->padname(shift @items);
+        }
+        elsif (($actions & MDEREF_INDEX_MASK) == MDEREF_INDEX_gvsv) {
+            $text .= '$' .  ($self->stash_variable_name('$', shift @items))[0];
+        }
+
+        $text .= $is_hash ? '}' : ']';
+
+        if ($actions & MDEREF_FLAG_last) {
+            last;
+        }
+        $actions >>= MDEREF_SHIFT;
+    }
+
+    return $text;
+}
+
 
 sub pp_aelem { maybe_local(@_, elem(@_, "[", "]", "padav")) }
 sub pp_helem { maybe_local(@_, elem(@_, "{", "}", "padhv")) }
@@ -4727,7 +4890,7 @@ sub pp_stringify {
     while ($kid->name eq 'null' && !null($kid->first)) {
 	$kid = $kid->first;
     }
-    if ($kid->name =~ /^(?:const|padsv|rv2sv|av2arylen|gvsv
+    if ($kid->name =~ /^(?:const|padsv|rv2sv|av2arylen|gvsv|multideref
 			  |aelemfast(?:_lex)?|[ah]elem|join|concat)\z/x) {
 	maybe_targmy(@_, \&dquote);
     }
@@ -5075,20 +5238,23 @@ sub pure_string {
     elsif (is_scalar($op) || $type =~ /^[ah]elem$/) {
 	return 1;
     }
-    elsif ($type eq "null" and $op->can('first') and not null $op->first and
-	  ($op->first->name eq "null" and $op->first->can('first')
-	   and not null $op->first->first and
-	   $op->first->first->name eq "aelemfast"
-          or
-	   $op->first->name =~ /^aelemfast(?:_lex)?\z/
-	  )) {
-	return 1;
-    }
-    else {
-	return 0;
+    elsif ($type eq "null" and $op->can('first') and not null $op->first) {
+        my $first = $op->first;
+
+        return 1 if $first->name eq "multideref";
+        return 1 if $first->name eq "aelemfast_lex";
+
+        if (    $first->name eq "null"
+            and $first->can('first')
+	    and not null $first->first
+            and $first->first->name eq "aelemfast"
+	   )
+        {
+            return 1;
+        }
     }
 
-    return 1;
+    return 0;
 }
 
 sub code_list {

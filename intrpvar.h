@@ -70,6 +70,9 @@ PERLVARI(I, hash_rand_bits_enabled, U8, 1) /* used to randomize hash stuff 0 == 
 PERLVARI(I, hash_rand_bits, UV, 0)      /* used to randomize hash stuff */
 #endif
 PERLVAR(I, strtab,	HV *)		/* shared string table */
+/* prog counter for the currently executing OP_MULTIDEREF Used to signal
+ * to S_find_uninit_var() where we are */
+PERLVAR(I, multideref_pc, UNOP_AUX_item *)
 
 /* Fields used by magic variables such as $@, $/ and so on */
 PERLVAR(I, curpm,	PMOP *)		/* what to do \ interps in REs from */

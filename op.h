@@ -124,9 +124,10 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On OP_SMARTMATCH, an implicit smartmatch */
 				/*  On OP_ANONHASH and OP_ANONLIST, create a
 				    reference to the new anon hash or array */
-				/*  On OP_HELEM and OP_HSLICE, localization will be followed
-				    by assignment, so do not wipe the target if it is special
-				    (e.g. a glob or a magic SV) */
+				/*  On OP_HELEM, OP_MULTIDEREF and OP_HSLICE,
+                                    localization will be followed by assignment,
+                                    so do not wipe the target if it is special
+                                    (e.g. a glob or a magic SV) */
 				/*  On OP_MATCH, OP_SUBST & OP_TRANS, the
 				    operand of a logical or conditional
 				    that was optimised away, so it should
@@ -176,6 +177,14 @@ typedef union  {
     IV        iv;
     UV        uv;
 } UNOP_AUX_item;
+
+#ifdef USE_ITHREADS
+#  define UNOP_AUX_item_sv(item) PAD_SVl((item)->pad_offset);
+#else
+#  define UNOP_AUX_item_sv(item) ((item)->sv);
+#endif
+
+
 
 
 struct op {
@@ -987,6 +996,47 @@ Sets the sibling of o to sib
 #  define OP_CHECK_MUTEX_UNLOCK		NOOP
 #  define OP_CHECK_MUTEX_TERM		NOOP
 #endif
+
+
+/* Stuff for OP_MULTDEREF/pp_multideref. */
+
+/* actions */
+
+/* Load another word of actions/flag bits. Must be 0 */
+#define MDEREF_reload                       0
+
+#define MDEREF_AV_pop_rv2av_aelem           1
+#define MDEREF_AV_gvsv_vivify_rv2av_aelem   2
+#define MDEREF_AV_padsv_vivify_rv2av_aelem  3
+#define MDEREF_AV_vivify_rv2av_aelem        4
+#define MDEREF_AV_padav_aelem               5
+#define MDEREF_AV_gvav_aelem                6
+
+#define MDEREF_HV_pop_rv2hv_helem           8
+#define MDEREF_HV_gvsv_vivify_rv2hv_helem   9
+#define MDEREF_HV_padsv_vivify_rv2hv_helem 10
+#define MDEREF_HV_vivify_rv2hv_helem       11
+#define MDEREF_HV_padhv_helem              12
+#define MDEREF_HV_gvhv_helem               13
+
+#define MDEREF_ACTION_MASK                0xf
+
+/* key / index type */
+
+#define MDEREF_INDEX_none   0x00 /* run external ops to generate index */
+#define MDEREF_INDEX_const  0x10 /* index is const PV/UV */
+#define MDEREF_INDEX_padsv  0x20 /* index is lexical var */
+#define MDEREF_INDEX_gvsv   0x30 /* index is GV */
+
+#define MDEREF_INDEX_MASK   0x30
+
+/* bit flags */
+
+#define MDEREF_FLAG_last    0x40 /* the last [ah]elem; PL_op flags apply */
+
+#define MDEREF_MASK         0x7F
+#define MDEREF_SHIFT           7
+
 
 /*
  * Local variables:

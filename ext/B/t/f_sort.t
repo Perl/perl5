@@ -510,10 +510,8 @@ checkOptree(name   => q{Compound sort/map Expression },
 # 5  <0> pushmark s
 # 6  <#> gv[*old] s
 # 7  <1> rv2av[t19] lKM/1
-# 8  <@> mapstart lK*              < 5.017002
-# 8  <@> mapstart lK               >=5.017002
-# 9  <|> mapwhile(other->a)[t20] lK     < 5.019002
-# 9  <|> mapwhile(other->a)[t20] lKM    >=5.019002
+# 8  <@> mapstart lK
+# 9  <|> mapwhile(other->a)[t20] lKM
 # a      <0> enter l
 # b      <;> nextstate(main 608 (eval 34):2) v:{
 # c      <0> pushmark s
@@ -525,21 +523,15 @@ checkOptree(name   => q{Compound sort/map Expression },
 # i      <@> leave lKP
 #            goto 9
 # j  <@> sort lKMS*
-# k  <@> mapstart lK*              < 5.017002
-# k  <@> mapstart lK               >=5.017002
+# k  <@> mapstart lK
 # l  <|> mapwhile(other->m)[t26] lK
-# m      <#> gv[*_] s
-# n      <1> rv2sv sKM/DREFAV,1
-# o      <1> rv2av[t4] sKR/1
-# p      <$> const[IV 0] s
-# q      <2> aelem sK/2
-# -      <@> scope lK              < 5.017002
+# m      <+> multideref($_->[0]) sK
 #            goto l
-# r  <0> pushmark s
-# s  <#> gv[*new] s
-# t  <1> rv2av[t2] lKRM*/1
-# u  <2> aassign[t27] KS/COMMON
-# v  <1> leavesub[1 ref] K/REFC,1
+# n  <0> pushmark s
+# o  <#> gv[*new] s
+# p  <1> rv2av[t2] lKRM*/1
+# q  <2> aassign[t22] KS/COMMON
+# r  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 609 (eval 34):3) v:{
 # 2  <0> pushmark s
@@ -548,10 +540,8 @@ EOT_EOT
 # 5  <0> pushmark s
 # 6  <$> gv(*old) s
 # 7  <1> rv2av[t10] lKM/1
-# 8  <@> mapstart lK*              < 5.017002
-# 8  <@> mapstart lK               >=5.017002
-# 9  <|> mapwhile(other->a)[t11] lK     < 5.019002
-# 9  <|> mapwhile(other->a)[t11] lKM    >=5.019002
+# 8  <@> mapstart lK
+# 9  <|> mapwhile(other->a)[t11] lKM
 # a      <0> enter l
 # b      <;> nextstate(main 608 (eval 34):2) v:{
 # c      <0> pushmark s
@@ -563,21 +553,15 @@ EOT_EOT
 # i      <@> leave lKP
 #            goto 9
 # j  <@> sort lKMS*
-# k  <@> mapstart lK*              < 5.017002
-# k  <@> mapstart lK               >=5.017002
+# k  <@> mapstart lK
 # l  <|> mapwhile(other->m)[t12] lK
-# m      <$> gv(*_) s
-# n      <1> rv2sv sKM/DREFAV,1
-# o      <1> rv2av[t2] sKR/1
-# p      <$> const(IV 0) s
-# q      <2> aelem sK/2
-# -      <@> scope lK              < 5.017002
+# m      <+> multideref($_->[0]) sK
 #            goto l
-# r  <0> pushmark s
-# s  <$> gv(*new) s
-# t  <1> rv2av[t1] lKRM*/1
-# u  <2> aassign[t13] KS/COMMON
-# v  <1> leavesub[1 ref] K/REFC,1
+# n  <0> pushmark s
+# o  <$> gv(*new) s
+# p  <1> rv2av[t1] lKRM*/1
+# q  <2> aassign[t13] KS/COMMON
+# r  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
     
 

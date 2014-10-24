@@ -17,7 +17,10 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 28;
+use warnings;
+use strict;
+
+plan 2249;
 
 use B ();
 
@@ -56,8 +59,16 @@ use B ();
             note(sprintf "%3d %s", $counts{$_}, $_) for sort keys %counts;
         }
 
+        my @exp;
         for (sort keys %$expected_counts) {
-            is ($counts{$_}//0, $expected_counts->{$_}, "$desc: $_");
+            my ($c, $e) = ($counts{$_}//0, $expected_counts->{$_});
+            if ($c != $e) {
+                push @exp, "expected $e, got $c: $_";
+            }
+        }
+        ok(!@exp, $desc);
+        if (@exp) {
+            diag($_) for @exp;
         }
     }    
 }
@@ -65,7 +76,7 @@ use B ();
 # aelem => aelemfast: a basic test that this test file works
 
 test_opcount(0, "basic aelemfast",
-                sub { $a[0] = 1 }, 
+                sub { our @a; $a[0] = 1 },
                 {
                     aelem      => 0,
                     aelemfast  => 1,
@@ -96,6 +107,7 @@ test_opcount(0, "basic aelemfast",
                 }
             );
 
+    no warnings 'void';
     test_opcount(0, "bench.pl active loop",
                 sub { for my $x (1..$ARGV[0]) { $x; } },
                 {
@@ -115,3 +127,136 @@ test_opcount(0, "basic aelemfast",
                 }
             );
 }
+
+#
+# multideref
+#
+# try many permutations of aggregate lookup expressions
+
+{
+    package Foo;
+
+    my (@agg_lex, %agg_lex, $i_lex, $r_lex);
+    our (@agg_pkg, %agg_pkg, $i_pkg, $r_pkg);
+
+    my $f;
+    my @bodies = ('[0]', '[128]', '[$i_lex]', '[$i_pkg]',
+                   '{foo}', '{$i_lex}', '{$i_pkg}',
+                  );
+
+    for my $prefix ('$f->()->', '$agg_lex', '$agg_pkg', '$r_lex->', '$r_pkg->')
+    {
+        for my $mod ('', 'local', 'exists', 'delete') {
+            for my $body0 (@bodies) {
+                for my $body1 ('', @bodies) {
+                    for my $body2 ('', '[2*$i_lex]') {
+                        my $code = "$mod $prefix$body0$body1$body2";
+                        my $sub = "sub { $code }";
+                        my $coderef = eval $sub
+                            or die "eval '$sub': $@";
+
+                        my %c = (aelem         => 0,
+                                 aelemfast     => 0,
+                                 aelemfast_lex => 0,
+                                 exists        => 0,
+                                 delete        => 0,
+                                 helem         => 0,
+                                 multideref    => 0,
+                        );
+
+                        my $top = 'aelem';
+                        if ($code =~ /^\s*\$agg_...\[0\]$/) {
+                            # we should expect aelemfast rather than multideref
+                            $top = $code =~ /lex/ ? 'aelemfast_lex'
+                                                  : 'aelemfast';
+                            $c{$top} = 1;
+                        }
+                        else {
+                            $c{multideref} = 1;
+                        }
+
+                        if ($body2 ne '') {
+                            # trailing index; top aelem/exists/whatever
+                            # node is kept
+                            $top = $mod unless $mod eq '' or $mod eq 'local';
+                            $c{$top} = 1
+                        }
+
+                        ::test_opcount(0, $sub, $coderef, \%c);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+# multideref: ensure that the prefix expression and trailing index
+# expression are optimised (include aelemfast in those expressions)
+
+
+test_opcount(0, 'multideref expressions',
+                sub { ($_[0] // $_)->[0]{2*$_[0]} },
+                {
+                    aelemfast  => 2,
+                    helem      => 1,
+                    multideref => 1,
+                },
+            );
+
+# multideref with interesting constant indices
+
+
+test_opcount(0, 'multideref const index',
+                sub { $_->{1}{1.1} },
+                {
+                    helem      => 0,
+                    multideref => 1,
+                },
+            );
+
+use constant my_undef => undef;
+test_opcount(0, 'multideref undef const index',
+                sub { $_->{+my_undef} },
+                {
+                    helem      => 1,
+                    multideref => 0,
+                },
+            );
+
+# multideref when its the first op in a subchain
+
+test_opcount(0, 'multideref op_other etc',
+                sub { $_{foo} = $_ ? $_{bar} : $_{baz} },
+                {
+                    helem      => 0,
+                    multideref => 3,
+                },
+            );
+
+# multideref without hints
+
+{
+    no strict;
+    no warnings;
+
+    test_opcount(0, 'multideref no hints',
+                sub { $_{foo}[0] },
+                {
+                    aelem      => 0,
+                    helem      => 0,
+                    multideref => 1,
+                },
+            );
+}
+
+# exists shouldn't clash with aelemfast
+
+test_opcount(0, 'multideref exists',
+                sub { exists $_[0] },
+                {
+                    aelem      => 0,
+                    aelemfast  => 0,
+                    multideref => 1,
+                },
+            );

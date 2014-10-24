@@ -157,6 +157,7 @@ PERL_CALLCONV OP *Perl_pp_method_redir_super(pTHX);
 PERL_CALLCONV OP *Perl_pp_method_super(pTHX);
 PERL_CALLCONV OP *Perl_pp_mkdir(pTHX);
 PERL_CALLCONV OP *Perl_pp_modulo(pTHX);
+PERL_CALLCONV OP *Perl_pp_multideref(pTHX);
 PERL_CALLCONV OP *Perl_pp_multiply(pTHX);
 PERL_CALLCONV OP *Perl_pp_ncmp(pTHX);
 PERL_CALLCONV OP *Perl_pp_ne(pTHX);

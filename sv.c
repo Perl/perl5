@@ -15456,6 +15456,8 @@ warning, then following the direct child of the op may yield an
 OP_PADSV or OP_GV that gives the name of the undefined variable.  On the
 other hand, with OP_ADD there are two branches to follow, so we only print
 the variable name if we get an exact match.
+desc_p points to a string pointer holding the description of the op.
+This may be updated if needed.
 
 The name is returned as a mortal SV.
 
@@ -15467,12 +15469,14 @@ PL_comppad/PL_curpad points to the currently executing pad.
 
 STATIC SV *
 S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
-		  bool match)
+		  bool match, const char **desc_p)
 {
     dVAR;
     SV *sv;
     const GV *gv;
     const OP *o, *o2, *kid;
+
+    PERL_ARGS_ASSERT_FIND_UNINIT_VAR;
 
     if (!obase || (match && (!uninit_sv || uninit_sv == &PL_sv_undef ||
 			    uninit_sv == &PL_sv_placeholder)))
@@ -15513,7 +15517,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    }
 	    else if (obase == PL_op) /* @{expr}, %{expr} */
 		return find_uninit_var(cUNOPx(obase)->op_first,
-						    uninit_sv, match);
+                                                uninit_sv, match, desc_p);
 	    else /* @{expr}, %{expr} as a sub-expression */
 		return NULL;
 	}
@@ -15548,7 +15552,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    return varname(gv, '$', 0, NULL, 0, FUV_SUBSCRIPT_NONE);
 	}
 	/* ${expr} */
-	return find_uninit_var(cUNOPx(obase)->op_first, uninit_sv, 1);
+	return find_uninit_var(cUNOPx(obase)->op_first, uninit_sv, 1, desc_p);
 
     case OP_PADSV:
 	if (match && PAD_SVl(obase->op_targ) != uninit_sv)
@@ -15598,7 +15602,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	if (!o || o->op_type != OP_NULL ||
 		! (o->op_targ == OP_AELEM || o->op_targ == OP_HELEM))
 	    break;
-	return find_uninit_var(cBINOPo->op_last, uninit_sv, match);
+	return find_uninit_var(cBINOPo->op_last, uninit_sv, match, desc_p);
 
     case OP_AELEM:
     case OP_HELEM:
@@ -15607,7 +15611,8 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
 	if (PL_op == obase)
 	    /* $a[uninit_expr] or $h{uninit_expr} */
-	    return find_uninit_var(cBINOPx(obase)->op_last, uninit_sv, match);
+	    return find_uninit_var(cBINOPx(obase)->op_last,
+                                                uninit_sv, match, desc_p);
 
 	gv = NULL;
 	o = cBINOPx(obase)->op_first;
@@ -15696,9 +15701,205 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	NOT_REACHED; /* NOTREACHED */
     }
 
+    case OP_MULTIDEREF: {
+        /* If we were executing OP_MULTIDEREF when the undef warning
+         * triggered, then it must be one of the index values within
+         * that triggered it. If not, then the only possibility is that
+         * the value retrieved by the last aggregate lookup might be the
+         * culprit. For the former, we set PL_multideref_pc each time before
+         * using an index, so work though the item list until we reach
+         * that point. For the latter, just work through the entire item
+         * list; the last aggregate retrieved will be the candidate.
+         */
+
+        /* the named aggregate, if any */
+        PADOFFSET agg_targ = 0;
+        GV       *agg_gv   = NULL;
+        /* the last-seen index */
+        UV        index_type;
+        PADOFFSET index_targ;
+        GV       *index_gv;
+        IV        index_const_iv = 0; /* init for spurious compiler warn */
+        SV       *index_const_sv;
+        int       depth = 0;  /* how many array/hash lookups we've done */
+
+        UNOP_AUX_item *items = cUNOP_AUXx(obase)->op_aux;
+        UNOP_AUX_item *last = NULL;
+        UV actions = items->uv;
+        bool is_hv;
+
+        if (PL_op == obase) {
+            last = PL_multideref_pc;
+            assert(last >= items && last <= items + items[-1].uv);
+        }
+
+        assert(actions);
+
+        while (1) {
+            is_hv = FALSE;
+            switch (actions & MDEREF_ACTION_MASK) {
+
+            case MDEREF_reload:
+                actions = (++items)->uv;
+                continue;
+
+            case MDEREF_HV_padhv_helem:               /* $lex{...} */
+                is_hv = TRUE;
+                /* FALLTHROUGH */
+            case MDEREF_AV_padav_aelem:               /* $lex[...] */
+                agg_targ = (++items)->pad_offset;
+                agg_gv = NULL;
+                break;
+
+            case MDEREF_HV_gvhv_helem:                /* $pkg{...} */
+                is_hv = TRUE;
+                /* FALLTHROUGH */
+            case MDEREF_AV_gvav_aelem:                /* $pkg[...] */
+                agg_targ = 0;
+                agg_gv = (GV*)UNOP_AUX_item_sv(++items);
+                assert(isGV_with_GP(agg_gv));
+                break;
+
+            case MDEREF_HV_gvsv_vivify_rv2hv_helem:   /* $pkg->{...} */
+            case MDEREF_HV_padsv_vivify_rv2hv_helem:  /* $lex->{...} */
+                ++items;
+                /* FALLTHROUGH */
+            case MDEREF_HV_pop_rv2hv_helem:           /* expr->{...} */
+            case MDEREF_HV_vivify_rv2hv_helem:        /* vivify, ->{...} */
+                agg_targ = 0;
+                agg_gv   = NULL;
+                is_hv    = TRUE;
+                break;
+
+            case MDEREF_AV_gvsv_vivify_rv2av_aelem:   /* $pkg->[...] */
+            case MDEREF_AV_padsv_vivify_rv2av_aelem:  /* $lex->[...] */
+                ++items;
+                /* FALLTHROUGH */
+            case MDEREF_AV_pop_rv2av_aelem:           /* expr->[...] */
+            case MDEREF_AV_vivify_rv2av_aelem:        /* vivify, ->[...] */
+                agg_targ = 0;
+                agg_gv   = NULL;
+            } /* switch */
+
+            index_targ     = 0;
+            index_gv       = NULL;
+            index_const_sv = NULL;
+
+            index_type = (actions & MDEREF_INDEX_MASK);
+            switch (index_type) {
+            case MDEREF_INDEX_none:
+                break;
+            case MDEREF_INDEX_const:
+                if (is_hv)
+                    index_const_sv = UNOP_AUX_item_sv(++items)
+                else
+                    index_const_iv = (++items)->iv;
+                break;
+            case MDEREF_INDEX_padsv:
+                index_targ = (++items)->pad_offset;
+                break;
+            case MDEREF_INDEX_gvsv:
+                index_gv = (GV*)UNOP_AUX_item_sv(++items);
+                assert(isGV_with_GP(index_gv));
+                break;
+            }
+
+            if (index_type != MDEREF_INDEX_none)
+                depth++;
+
+            if (   index_type == MDEREF_INDEX_none
+                || (actions & MDEREF_FLAG_last)
+                || (last && items == last)
+            )
+                break;
+
+            actions >>= MDEREF_SHIFT;
+        } /* while */
+
+	if (PL_op == obase) {
+	    /* index was undef */
+
+            *desc_p = (    (actions & MDEREF_FLAG_last)
+                        && (obase->op_private
+                                & (OPpMULTIDEREF_EXISTS|OPpMULTIDEREF_DELETE)))
+                        ?
+                            (obase->op_private & OPpMULTIDEREF_EXISTS)
+                                ? "exists"
+                                : "delete"
+                        : is_hv ? "hash element" : "array element";
+            assert(index_type != MDEREF_INDEX_none);
+            if (index_gv)
+                return varname(index_gv, '$', 0, NULL, 0, FUV_SUBSCRIPT_NONE);
+            if (index_targ)
+                return varname(NULL, '$', index_targ,
+				    NULL, 0, FUV_SUBSCRIPT_NONE);
+            assert(is_hv); /* AV index is an IV and can't be undef */
+            /* can a const HV index ever be undef? */
+            return NULL;
+        }
+
+        /* the SV returned by pp_multideref() was undef, if anything was */
+
+        if (depth != 1)
+            break;
+
+        if (agg_targ)
+	    sv = PAD_SV(agg_targ);
+        else if (agg_gv)
+            sv = is_hv ? MUTABLE_SV(GvHV(agg_gv)) : MUTABLE_SV(GvAV(agg_gv));
+        else
+            break;
+
+	if (index_type == MDEREF_INDEX_const) {
+	    if (match) {
+		if (SvMAGICAL(sv))
+		    break;
+		if (is_hv) {
+		    HE* he = hv_fetch_ent(MUTABLE_HV(sv), index_const_sv, 0, 0);
+		    if (!he || HeVAL(he) != uninit_sv)
+			break;
+		}
+		else {
+		    SV * const * const svp =
+                            av_fetch(MUTABLE_AV(sv), index_const_iv, FALSE);
+		    if (!svp || *svp != uninit_sv)
+			break;
+		}
+	    }
+	    return is_hv
+		? varname(agg_gv, '%', agg_targ,
+                                index_const_sv, 0,    FUV_SUBSCRIPT_HASH)
+		: varname(agg_gv, '@', agg_targ,
+                                NULL, index_const_iv, FUV_SUBSCRIPT_ARRAY);
+	}
+	else  {
+	    /* index is an var */
+	    if (is_hv) {
+		SV * const keysv = find_hash_subscript((const HV*)sv, uninit_sv);
+		if (keysv)
+		    return varname(agg_gv, '%', agg_targ,
+						keysv, 0, FUV_SUBSCRIPT_HASH);
+	    }
+	    else {
+		const I32 index
+		    = find_array_subscript((const AV *)sv, uninit_sv);
+		if (index >= 0)
+		    return varname(agg_gv, '@', agg_targ,
+					NULL, index, FUV_SUBSCRIPT_ARRAY);
+	    }
+	    if (match)
+		break;
+	    return varname(agg_gv,
+		is_hv ? '%' : '@',
+		agg_targ, NULL, 0, FUV_SUBSCRIPT_WITHIN);
+	}
+	NOT_REACHED; /* NOTREACHED */
+    }
+
     case OP_AASSIGN:
 	/* only examine RHS */
-	return find_uninit_var(cBINOPx(obase)->op_first, uninit_sv, match);
+	return find_uninit_var(cBINOPx(obase)->op_first, uninit_sv,
+                                                                match, desc_p);
 
     case OP_OPEN:
 	o = cUNOPx(obase)->op_first;
@@ -15897,11 +16098,11 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    o2 = kid;
 	}
 	if (o2)
-	    return find_uninit_var(o2, uninit_sv, match);
+	    return find_uninit_var(o2, uninit_sv, match, desc_p);
 
 	/* scan all args */
 	while (o) {
-	    sv = find_uninit_var(o, uninit_sv, 1);
+	    sv = find_uninit_var(o, uninit_sv, 1, desc_p);
 	    if (sv)
 		return sv;
 	    o = OP_SIBLING(o);
@@ -15926,14 +16127,15 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
     if (PL_op) {
 	SV* varname = NULL;
 	const char *desc;
-	if (uninit_sv && PL_curpad) {
-	    varname = find_uninit_var(PL_op, uninit_sv,0);
-	    if (varname)
-		sv_insert(varname, 0, 0, " ", 1);
-	}
+
 	desc = PL_op->op_type == OP_STRINGIFY && PL_op->op_folded
 		? "join or string"
 		: OP_DESC(PL_op);
+	if (uninit_sv && PL_curpad) {
+	    varname = find_uninit_var(PL_op, uninit_sv, 0, &desc);
+	    if (varname)
+		sv_insert(varname, 0, 0, " ", 1);
+	}
         /* PL_warn_uninit_sv is constant */
         GCC_DIAG_IGNORE(-Wformat-nonliteral);
 	/* diag_listed_as: Use of uninitialized value%s */
