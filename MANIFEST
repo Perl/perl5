@@ -3835,6 +3835,7 @@ ext/XS-APItest/t/multicall.t	XS::APItest: test MULTICALL macros
 ext/XS-APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
 ext/XS-APItest/t/my_exit.t	XS::APItest: test my_exit
 ext/XS-APItest/t/newCONSTSUB.t	XS::APItest: test newCONSTSUB(_flags)
+ext/XS-APItest/t/newDEFSVOP.t	XS::APItest: test newDEFSVOP
 ext/XS-APItest/t/Null.pm	Helper for ./blockhooks.t
 ext/XS-APItest/t/op_contextualize.t	test op_contextualize() API
 ext/XS-APItest/t/op_list.t	test OP list construction API

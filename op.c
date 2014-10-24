@@ -3671,8 +3671,18 @@ Perl_blockhook_register(pTHX_ BHK *hk)
     Perl_av_create_and_push(aTHX_ &PL_blockhooks, newSViv(PTR2IV(hk)));
 }
 
-STATIC OP *
-S_newDEFSVOP(pTHX)
+/*
+=for apidoc Am|OP *|newDEFSVOP|
+
+Constructs and returns an op to access C<$_>, either as a lexical
+variable (if declared as C<my $_>) in the current scope, or the
+global C<$_>.
+
+=cut
+*/
+
+OP *
+Perl_newDEFSVOP(pTHX)
 {
     const PADOFFSET offset = pad_findmy_pvs("$_", 0);
     if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {

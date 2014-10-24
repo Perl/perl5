@@ -662,6 +662,7 @@ static SV *hintkey_swaplabel_sv, *hintkey_labelconst_sv;
 static SV *hintkey_arrayfullexpr_sv, *hintkey_arraylistexpr_sv;
 static SV *hintkey_arraytermexpr_sv, *hintkey_arrayarithexpr_sv;
 static SV *hintkey_arrayexprflags_sv;
+static SV *hintkey_DEFSV_sv;
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
 /* low-level parser helpers */
@@ -951,6 +952,12 @@ static OP *THX_parse_keyword_arrayexprflags(pTHX)
     return o ? newANONLIST(o) : newANONHASH(newOP(OP_STUB, 0));
 }
 
+#define parse_keyword_DEFSV() THX_parse_keyword_DEFSV(aTHX)
+static OP *THX_parse_keyword_DEFSV(pTHX)
+{
+    return newDEFSVOP();
+}
+
 /* plugin glue */
 
 #define keyword_active(hintkey_sv) THX_keyword_active(aTHX_ hintkey_sv)
@@ -1034,6 +1041,10 @@ static int my_keyword_plugin(pTHX_
     } else if(keyword_len == 14 && strnEQ(keyword_ptr, "arrayexprflags", 14) &&
 		    keyword_active(hintkey_arrayexprflags_sv)) {
 	*op_ptr = parse_keyword_arrayexprflags();
+	return KEYWORD_PLUGIN_EXPR;
+    } else if(keyword_len == 5 && strnEQ(keyword_ptr, "DEFSV", 5) &&
+		    keyword_active(hintkey_DEFSV_sv)) {
+	*op_ptr = parse_keyword_DEFSV();
 	return KEYWORD_PLUGIN_EXPR;
     } else {
 	return next_keyword_plugin(aTHX_ keyword_ptr, keyword_len, op_ptr);
@@ -3321,6 +3332,7 @@ BOOT:
     hintkey_arraytermexpr_sv = newSVpvs_share("XS::APItest/arraytermexpr");
     hintkey_arrayarithexpr_sv = newSVpvs_share("XS::APItest/arrayarithexpr");
     hintkey_arrayexprflags_sv = newSVpvs_share("XS::APItest/arrayexprflags");
+    hintkey_DEFSV_sv = newSVpvs_share("XS::APItest/DEFSV");
     next_keyword_plugin = PL_keyword_plugin;
     PL_keyword_plugin = my_keyword_plugin;
 }

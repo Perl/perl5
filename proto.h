@@ -2853,6 +2853,9 @@ PERL_CALLCONV OP*	Perl_newCVREF(pTHX_ I32 flags, OP* o)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV OP*	Perl_newDEFSVOP(pTHX)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV void	Perl_newFORM(pTHX_ I32 floor, OP* o, OP* block);
 PERL_CALLCONV OP*	Perl_newFOROP(pTHX_ I32 flags, OP* sv, OP* expr, OP* block, OP* cont)
 			__attribute__malloc__
@@ -6278,9 +6281,6 @@ STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_MY_KID	\
 	assert(imopsp)
-
-STATIC OP*	S_newDEFSVOP(pTHX)
-			__attribute__warn_unused_result__;
 
 STATIC OP*	S_newGIVWHENOP(pTHX_ OP* cond, OP *block, I32 enter_opcode, I32 leave_opcode, PADOFFSET entertarg)
 			__attribute__nonnull__(pTHX_2);

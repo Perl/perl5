@@ -1018,6 +1018,7 @@ Apda	|SV*	|newRV_noinc	|NN SV *const sv
 Apda	|SV*	|newSV		|const STRLEN len
 Apa	|OP*	|newSVREF	|NN OP* o
 Apda	|OP*	|newSVOP	|I32 type|I32 flags|NN SV* sv
+ApdR	|OP*	|newDEFSVOP
 pa	|SV*	|newSVavdefelem	|NN AV *av|SSize_t ix|bool extendible
 Apda	|SV*	|newSViv	|const IV i
 Apda	|SV*	|newSVuv	|const UV u
@@ -1932,7 +1933,6 @@ s	|void	|find_and_forget_pmops	|NN OP *o
 s	|void	|cop_free	|NN COP *cop
 s	|OP*	|modkids	|NULLOK OP *o|I32 type
 s	|OP*	|scalarboolean	|NN OP *o
-sR	|OP*	|newDEFSVOP
 sR	|OP*	|search_const	|NN OP *o
 sR	|OP*	|new_logop	|I32 type|I32 flags|NN OP **firstp|NN OP **otherp
 s	|void	|simplify_sort	|NN OP *o
