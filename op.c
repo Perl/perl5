@@ -3558,6 +3558,16 @@ Perl_op_unscope(pTHX_ OP *o)
     return o;
 }
 
+/*
+=for apidoc Am|int|block_start|int full
+
+Handles compile-time scope entry. Arranges for hints to be restored on block
+exit and also handles pad sequence numbers to make lexical variables scope
+right. Returns a savestack index for use with C<block_end>.
+
+=cut
+*/
+
 int
 Perl_block_start(pTHX_ int full)
 {
@@ -3573,6 +3583,16 @@ Perl_block_start(pTHX_ int full)
 
     return retval;
 }
+
+/*
+=for apidoc Am|OP *|block_end|I32 floor|OP *seq
+
+Handles compile-time scope exit. I<floor> is the savestack index returned by
+C<block_start>, and I<seq> is the body of the block.  Returns the block,
+possibly modified.
+
+=cut
+*/
 
 OP*
 Perl_block_end(pTHX_ I32 floor, OP *seq)

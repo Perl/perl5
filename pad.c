@@ -1509,11 +1509,11 @@ Perl_pad_block_start(pTHX_ int full)
 }
 
 /*
-=for apidoc m|U32|intro_my
+=for apidoc Am|U32|intro_my
 
-"Introduce" my variables to visible status.  This is called during parsing
-at the end of each statement to make lexical variables visible to
-subsequent statements.
+"Introduce" C<my> variables to visible status.  This is called during parsing
+at the end of each statement to make lexical variables visible to subsequent
+statements.
 
 =cut
 */

@@ -239,10 +239,10 @@ s	|MAGIC*	|get_aux_mg	|NN AV *av
 : Used in perly.y
 pR	|OP*	|bind_match	|I32 type|NN OP *left|NN OP *right
 : Used in perly.y
-pR	|OP*	|block_end	|I32 floor|NULLOK OP* seq
+ApdR	|OP*	|block_end	|I32 floor|NULLOK OP* seq
 ApR	|I32	|block_gimme
 : Used in perly.y
-pR	|int	|block_start	|int full
+ApdR	|int	|block_start	|int full
 Aodp	|void	|blockhook_register |NN BHK *hk
 : Used in perl.c
 p	|void	|boot_core_UNIVERSAL
@@ -2570,7 +2570,7 @@ Apd	|SV*	|pad_sv		|PADOFFSET po
 Apd	|void	|pad_setsv	|PADOFFSET po|NN SV* sv
 #endif
 pd	|void	|pad_block_start|int full
-pd	|U32	|intro_my
+Apd	|U32	|intro_my
 pd	|OP *	|pad_leavemy
 pd	|void	|pad_swipe	|PADOFFSET po|bool refadjust
 #if defined(PERL_IN_PAD_C)
