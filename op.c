@@ -2637,7 +2637,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 		assert(kid == cLISTOPx(cBINOPo->op_first)->op_last);
 	    }
 	    if (kid->op_type == OP_CONST && SvIOK(kSVOP_sv)) {
-		const iv = SvIV(kSVOP_sv);
+		const IV iv = SvIV(kSVOP_sv);
 		if (PL_modcount != RETURN_UNLIMITED_NUMBER)
 		    PL_modcount =
 			mods + (PL_modcount - mods) * (iv < 0 ? 0 : iv);
