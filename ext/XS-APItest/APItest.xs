@@ -959,7 +959,8 @@ static OP *THX_parse_keyword_DEFSV(pTHX)
     return newDEFSVOP();
 }
 
-static void sv_cat_c(pTHX_ SV *sv, U32 c) {
+#define sv_cat_c(a,b) THX_sv_cat_c(aTHX_ a, b)
+static void THX_sv_cat_c(pTHX_ SV *sv, U32 c) {
     char ds[UTF8_MAXBYTES + 1], *d;
     d = (char *)uvchr_to_utf8((U8 *)ds, c);
     if (d - ds > 1) {
