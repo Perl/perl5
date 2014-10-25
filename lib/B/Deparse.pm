@@ -14,7 +14,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD OPf_PARENS
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
-	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
+	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER OPpREPEAT_DOLIST
 	 OPpSORT_REVERSE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
 	 SVpad_TYPED
@@ -2636,6 +2636,7 @@ sub pp_repeat {
 	$prec = 7;
     }
     if (null($right)) { # list repeat; count is inside left-side ex-list
+			# in 5.21.5 and earlier
 	my $kid = $left->first->sibling; # skip pushmark
 	my @exprs;
 	for (; !null($kid->sibling); $kid = $kid->sibling) {
@@ -2644,7 +2645,11 @@ sub pp_repeat {
 	$right = $kid;
 	$left = "(" . join(", ", @exprs). ")";
     } else {
-	$left = $self->deparse_binop_left($op, $left, $prec);
+	my $dolist = $op->private & OPpREPEAT_DOLIST;
+	$left = $self->deparse_binop_left($op, $left, $dolist ? 1 : $prec);
+	if ($dolist) {
+	    $left = "($left)";
+	}
     }
     $right = $self->deparse_binop_right($op, $right, $prec);
     return $self->maybe_parens("$left x$eq $right", $cx, $prec);

@@ -2626,16 +2626,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    goto nomod;
 	else {
 	    const I32 mods = PL_modcount;
-	    if (cBINOPo->op_last) {
-		modkids(cBINOPo->op_first, OP_AASSIGN);
-		kid = cBINOPo->op_last;
-	    }
-	    else {
-		kid = OP_SIBLING(cUNOPx(cBINOPo->op_first)->op_first);
-		for (; OP_HAS_SIBLING(kid); kid = OP_SIBLING(kid))
-		    op_lvalue(kid, OP_AASSIGN);
-		assert(kid == cLISTOPx(cBINOPo->op_first)->op_last);
-	    }
+	    modkids(cBINOPo->op_first, OP_AASSIGN);
+	    kid = cBINOPo->op_last;
 	    if (kid->op_type == OP_CONST && SvIOK(kSVOP_sv)) {
 		const IV iv = SvIV(kSVOP_sv);
 		if (PL_modcount != RETURN_UNLIMITED_NUMBER)
@@ -10286,10 +10278,9 @@ Perl_ck_repeat(pTHX_ OP *o)
     if (cBINOPo->op_first->op_flags & OPf_PARENS) {
         OP* kids;
 	o->op_private |= OPpREPEAT_DOLIST;
-        kids = op_sibling_splice(o, NULL, -1, NULL); /* detach all kids */
-        kids = force_list(kids, 1); /* promote them to a list */
+        kids = op_sibling_splice(o, NULL, 1, NULL); /* detach first kid */
+        kids = force_list(kids, 1); /* promote it to a list */
         op_sibling_splice(o, NULL, 0, kids); /* and add back */
-        if (cBINOPo->op_last == kids) cBINOPo->op_last = NULL;
     }
     else
 	scalar(o);
