@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan(tests => 42);
+plan(tests => 45);
 
 # compile time
 
@@ -63,6 +63,13 @@ is(join('', (split(//,"123")) x 2), '123123',       'split and x');
 
 is(join('', @x x -12),      '',                     '@x x -12');
 is(join('', (@x) x -14),    '',                     '(@x) x -14');
+
+($a, (undef)x5, $b) = 1..10;
+is ("$a $b", "1 7", '(undef)xCONST on lhs of list assignment');
+(($a)x3,$b) = 1..10;
+is ("$a, $b", "3, 4", '($x)xCONST on lhs of list assignment');
+($a, (undef)x${\6}, $b) = "a".."z";
+is ("$a$b", "ah", '(undef)x$foo on lhs of list assignment');
 
 
 # This test is actually testing for Digital C compiler optimizer bug,

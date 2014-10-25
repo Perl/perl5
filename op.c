@@ -2599,7 +2599,6 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_MULTIPLY:
     case OP_DIVIDE:
     case OP_MODULO:
-    case OP_REPEAT:
     case OP_ADD:
     case OP_SUBTRACT:
     case OP_CONCAT:
@@ -2616,6 +2615,36 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	if (!(o->op_flags & OPf_STACKED))
 	    goto nomod;
 	PL_modcount++;
+	break;
+
+    case OP_REPEAT:
+	if (o->op_flags & OPf_STACKED) {
+	    PL_modcount++;
+	    break;
+	}
+	if (type != OP_AASSIGN || !(o->op_private & OPpREPEAT_DOLIST))
+	    goto nomod;
+	else {
+	    const I32 mods = PL_modcount;
+	    if (cBINOPo->op_last) {
+		modkids(cBINOPo->op_first, OP_AASSIGN);
+		kid = cBINOPo->op_last;
+	    }
+	    else {
+		kid = OP_SIBLING(cUNOPx(cBINOPo->op_first)->op_first);
+		for (; OP_HAS_SIBLING(kid); kid = OP_SIBLING(kid))
+		    op_lvalue(kid, OP_AASSIGN);
+		assert(kid == cLISTOPx(cBINOPo->op_first)->op_last);
+	    }
+	    if (kid->op_type == OP_CONST && SvIOK(kSVOP_sv)) {
+		const iv = SvIV(kSVOP_sv);
+		if (PL_modcount != RETURN_UNLIMITED_NUMBER)
+		    PL_modcount =
+			mods + (PL_modcount - mods) * (iv < 0 ? 0 : iv);
+	    }
+	    else
+		PL_modcount = RETURN_UNLIMITED_NUMBER;
+	}
 	break;
 
     case OP_COND_EXPR:
