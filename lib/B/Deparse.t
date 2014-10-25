@@ -13,7 +13,7 @@ use warnings;
 use strict;
 use Test::More;
 
-my $tests = 25; # not counting those in the __DATA__ section
+my $tests = 26; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -322,6 +322,10 @@ $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
              .qq`CORE::__DATA__" 2>&1`;
 like($a, qr/my sub __DATA__;\n\(\);\nCORE::__DATA__/,
     'CORE::__DATA__ after my sub __DATA__');
+
+# sub declarations
+$a = readpipe qq`$^X $path "-MO=Deparse" -e "sub foo{}" 2>&1`;
+like($a, qr/^sub foo\s*\{\s+\}/, 'sub declarations');
 
 
 done_testing($tests);

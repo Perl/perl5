@@ -638,6 +638,11 @@ sub stash_subs {
 		next unless $AF eq $0 || exists $self->{'files'}{$AF};
 	    }
 	    push @{$self->{'protos_todo'}}, [$pack . $key, undef];
+	} elsif ($class eq "IV") {
+	    # A reference.  Dump this if it is a reference to a CV.
+	    if (class(my $cv = $val->RV) eq "CV") {
+		$self->todo($cv, 0);
+	    }
 	} elsif ($class eq "GV") {
 	    if (class(my $cv = $val->CV) ne "SPECIAL") {
 		next if $self->{'subs_done'}{$$val}++;
