@@ -2542,9 +2542,17 @@ sub binop {
     if ($flags & SWAP_CHILDREN) {
 	($left, $right) = ($right, $left);
     }
+    my $leftop = $left;
     $left = $self->deparse_binop_left($op, $left, $prec);
     $left = "($left)" if $flags & LIST_CONTEXT
-		&& $left !~ /^(my|our|local|)[\@\(]/;
+		     and    $left !~ /^(my|our|local|)[\@\(]/
+			 || do {
+				# Parenthesize if the left argument is a
+				# lone repeat op.
+				my $left = $leftop->first->sibling;
+				$left->name eq 'repeat'
+				    && null($left->sibling);
+			    };
     $right = $self->deparse_binop_right($op, $right, $prec);
     return $self->maybe_parens("$left $opname$eq $right", $cx, $prec);
 }

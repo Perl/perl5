@@ -358,6 +358,9 @@ $test /= 2 if ++$test;
 # list x
 -((1, 2) x 2);
 ####
+# Assignment to list x
+((undef) x 3) = undef;
+####
 # lvalue sub
 {
     my $test = sub : lvalue {
