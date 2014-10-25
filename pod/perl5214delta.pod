@@ -42,7 +42,7 @@ exhibited buggy behaviour.
 Now it has been changed, so subroutines always take precedence over barewords,
 which brings it into conformity with similarly prototyped built-in functions:
 
-    sub splat($) { ... }
+    sub splat(*) { ... }
     sub foo { ... }
     splat(foo); # now always splat(foo())
     splat(bar); # still splat('bar') as before
