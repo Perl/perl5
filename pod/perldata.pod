@@ -718,6 +718,10 @@ function:
 
     ($dev, $ino, undef, undef, $uid, $gid) = stat($file);
 
+As of Perl 5.22, you can also use C<(undef)x2> instead of C<undef, undef>.
+(You can also do C<($x) x 2>, which is less useful, because it assigns to
+the same variable twice, clobbering the first value assigned.)
+
 List assignment in scalar context returns the number of elements
 produced by the expression on the right side of the assignment:
 
