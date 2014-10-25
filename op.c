@@ -3720,30 +3720,6 @@ Perl_blockhook_register(pTHX_ BHK *hk)
     Perl_av_create_and_push(aTHX_ &PL_blockhooks, newSViv(PTR2IV(hk)));
 }
 
-/*
-=for apidoc Am|OP *|newDEFSVOP|
-
-Constructs and returns an op to access C<$_>, either as a lexical
-variable (if declared as C<my $_>) in the current scope, or the
-global C<$_>.
-
-=cut
-*/
-
-OP *
-Perl_newDEFSVOP(pTHX)
-{
-    const PADOFFSET offset = pad_findmy_pvs("$_", 0);
-    if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {
-	return newSVREF(newGVOP(OP_GV, 0, PL_defgv));
-    }
-    else {
-	OP * const o = newOP(OP_PADSV, 0);
-	o->op_targ = offset;
-	return o;
-    }
-}
-
 void
 Perl_newPROG(pTHX_ OP *o)
 {
@@ -5492,6 +5468,30 @@ Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
     if (PL_opargs[type] & OA_TARGET)
 	svop->op_targ = pad_alloc(type, SVs_PADTMP);
     return CHECKOP(type, svop);
+}
+
+/*
+=for apidoc Am|OP *|newDEFSVOP|
+
+Constructs and returns an op to access C<$_>, either as a lexical
+variable (if declared as C<my $_>) in the current scope, or the
+global C<$_>.
+
+=cut
+*/
+
+OP *
+Perl_newDEFSVOP(pTHX)
+{
+    const PADOFFSET offset = pad_findmy_pvs("$_", 0);
+    if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {
+	return newSVREF(newGVOP(OP_GV, 0, PL_defgv));
+    }
+    else {
+	OP * const o = newOP(OP_PADSV, 0);
+	o->op_targ = offset;
+	return o;
+    }
 }
 
 #ifdef USE_ITHREADS
