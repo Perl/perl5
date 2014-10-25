@@ -325,7 +325,7 @@ like($a, qr/my sub __DATA__;\n\(\);\nCORE::__DATA__/,
 
 # sub declarations
 $a = readpipe qq`$^X $path "-MO=Deparse" -e "sub foo{}" 2>&1`;
-like($a, qr/^sub foo\s*\{\s+\}/, 'sub declarations');
+like($a, qr/sub foo\s*\{\s+\}/, 'sub declarations');
 
 
 done_testing($tests);
