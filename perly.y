@@ -388,8 +388,7 @@ barestmt:	PLUGSTMT
 				newFOROP(0,
 					 op_lvalue(
 					    newUNOP(OP_REFGEN, 0,
-						    op_lvalue($<opval>6,
-							      OP_REFGEN)),
+						    $<opval>6),
 					    OP_ENTERLOOP),
 					 $8, $10, $11)
 			  );
@@ -399,8 +398,7 @@ barestmt:	PLUGSTMT
 			{
 			  $$ = block_end($5, newFOROP(
 				0, op_lvalue(newUNOP(OP_REFGEN, 0,
-						     op_lvalue($3,
-							       OP_REFGEN)),
+						     $3),
 					     OP_ENTERLOOP), $6, $8, $9));
 			  parser->copline = (line_t)$1;
 			}
