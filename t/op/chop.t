@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl'; require './charset_tools.pl';
 }
 
-plan tests => 143;
+plan tests => 144;
 
 $_ = 'abc';
 $c = foo();
@@ -262,4 +262,14 @@ foreach my $start (@chars) {
         is($utf, "\x{ffffffffffffffff}", "chop even higher 'unicode' - remnant");
         is($result, "\x{fffffffffffffffe}", "chop even higher 'unicode' - result");
     }
+}
+
+{
+    my $expected = 99999;
+    my $input = "UserID\talpha $expected\n";
+    my $uid = '';
+    chomp(my @line = split (/ |\t/,$input));
+    $uid = $line[-1];
+    is($uid, $expected,
+        "RT #123057: chomp works as expected on split");
 }
