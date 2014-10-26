@@ -1,6 +1,7 @@
 #!./perl
 
-# Use B to test that optimisations are not inadvertently removed.
+# Use B to test that optimisations are not inadvertently removed,
+# by examining particular nodes in the optree.
 
 BEGIN {
     chdir 't';

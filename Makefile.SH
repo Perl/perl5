@@ -1513,7 +1513,9 @@ minitest: $(MINIPERL_EXE)
 	@echo "to build lib/Config.pm, or the Unicode data files."
 	@echo " "
 	- cd t && (rm -f $(PERL_EXE); $(LNS) ../$(MINIPERL_EXE) $(PERL_EXE)) \
-		&& $(RUN_PERL) TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t opbasic/*.t op/*.t uni/*.t </dev/tty
+		&& $(RUN_PERL) TEST base/*.t comp/*.t cmd/*.t run/*.t \
+		io/*.t re/*.t opbasic/*.t op/*.t uni/*.t perf/*.t \
+		</dev/tty
 
 # Test via harness
 

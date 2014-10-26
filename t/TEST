@@ -428,7 +428,7 @@ unless (@ARGV) {
     # then comp, to validate that require works
     # then run, to validate that -M works
     # then we know we can -MTestInit for everything else, making life simpler
-    foreach my $dir (qw(base comp run cmd io re opbasic op uni mro)) {
+    foreach my $dir (qw(base comp run cmd io re opbasic op uni mro perf)) {
 	_find_tests($dir);
     }
     unless ($::core) {
@@ -464,7 +464,7 @@ unless (@ARGV) {
     push @ARGV, _tests_from_manifest($extensions, $known_extensions);
     unless ($::core) {
 	_find_tests('japh') if $::torture;
-	_find_tests('t/benchmark') if $::benchmark or $ENV{PERL_BENCHMARK};
+	_find_tests('benchmark') if $::benchmark or $ENV{PERL_BENCHMARK};
 	_find_tests('bigmem') if $ENV{PERL_TEST_MEMORY};
     }
 }

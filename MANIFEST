@@ -5250,7 +5250,6 @@ t/op/negate.t			See if unary minus works
 t/op/not.t			See if not works
 t/op/numconvert.t		See if accessing fields does not change numeric values
 t/op/oct.t			See if oct and hex work
-t/op/opt.t			Test presence of some op optimisations
 t/op/ord.t			See if ord works
 t/op/or.t			See if || works in weird situations
 t/op/overload_integer.t		See if overload::constant for integer works after "use".
@@ -5340,6 +5339,11 @@ t/op/warn.t			See if warn works
 t/op/while.t			See if while loops work
 t/op/write.t			See if write works (formats work)
 t/op/yadayada.t			See if ... works
+t/perf/benchmarks		snippets of benchmarking/profiling code
+t/perf/benchmarks.t		test t/perf/benchmarks syntax
+t/perf/opcount.t		See if optimised subs have the right op counts
+t/perf/optree.t			Test presence of some op optimisations
+t/perf/speed.t			See if optimisations are keeping things fast
 t/perl.supp			Perl valgrind suppressions
 t/porting/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
 t/porting/authors.t		Check that all authors have been acknowledged
