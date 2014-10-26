@@ -1140,7 +1140,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 || wc != (wchar_t) 0x2010)
             {
                 is_utf8 = FALSE;
-                DEBUG_L(PerlIO_printf(Perl_debug_log, "\thyphen=U+%x\n", wc));
+                DEBUG_L(PerlIO_printf(Perl_debug_log, "\thyphen=U+%x\n", (unsigned int)wc));
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                         "\treturn from mbtowc=%d; errno=%d; ?UTF8 locale=0\n",
                         mbtowc(&wc, HYPHEN_UTF8, strlen(HYPHEN_UTF8)), errno));
