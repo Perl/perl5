@@ -454,7 +454,7 @@ formline:	THING formarg
 			       parser->copline = CopLINE(PL_curcop)-1;
 			  else parser->copline--;
 			  $$ = newSTATEOP(0, NULL,
-					  convert(OP_FORMLINE, 0, list));
+					  op_convert_list(OP_FORMLINE, 0, list));
 			}
 	;
 
@@ -651,40 +651,40 @@ listexpr:	listexpr ','
 
 /* List operators */
 listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
-			{ $$ = convert($1, OPf_STACKED,
+			{ $$ = op_convert_list($1, OPf_STACKED,
 				op_prepend_elem(OP_LIST, newGVREF($1,$2), $3) );
 			}
 	|	FUNC '(' indirob expr ')'      /* print ($fh @args */
-			{ $$ = convert($1, OPf_STACKED,
+			{ $$ = op_convert_list($1, OPf_STACKED,
 				op_prepend_elem(OP_LIST, newGVREF($1,$3), $4) );
 			}
 	|	term ARROW method '(' optexpr ')' /* $foo->bar(list) */
-			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, scalar($1), $5),
 				    newMETHOP(OP_METHOD, 0, $3)));
 			}
 	|	term ARROW method                     /* $foo->bar */
-			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST, scalar($1),
 				    newMETHOP(OP_METHOD, 0, $3)));
 			}
 	|	METHOD indirob optlistexpr           /* new Class @args */
-			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, $2, $3),
 				    newMETHOP(OP_METHOD, 0, $1)));
 			}
 	|	FUNCMETH indirob '(' optexpr ')'    /* method $object (@args) */
-			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, $2, $4),
 				    newMETHOP(OP_METHOD, 0, $1)));
 			}
 	|	LSTOP optlistexpr                    /* print @args */
-			{ $$ = convert($1, 0, $2); }
+			{ $$ = op_convert_list($1, 0, $2); }
 	|	FUNC '(' optexpr ')'                 /* print (@args) */
-			{ $$ = convert($1, 0, $3); }
+			{ $$ = op_convert_list($1, 0, $3); }
 	|	LSTOPSUB startanonsub block /* sub f(&@);   f { foo } ... */
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $<opval>$ = newANONATTRSUB($2, 0, (OP*)NULL, $3); }
@@ -803,7 +803,7 @@ termunop : '-' term %prec UMINUS                       /* -$x */
 			{ $$ = newUNOP(OP_POSTDEC, 0,
 					op_lvalue(scalar($1), OP_POSTDEC));}
 	|	term POSTJOIN    /* implicit join after interpolated ->@ */
-			{ $$ = convert(OP_JOIN, 0,
+			{ $$ = op_convert_list(OP_JOIN, 0,
 				       op_append_elem(
 					OP_LIST,
 					newSVREF(scalar(

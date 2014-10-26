@@ -3153,7 +3153,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 
     /* Fake up a method call to import */
     meth = newSVpvs_share("import");
-    imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
+    imop = op_convert_list(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
 		   op_append_elem(OP_LIST,
 			       op_prepend_elem(OP_LIST, pack, arg),
 			       newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
@@ -3891,7 +3891,7 @@ Perl_jmaybe(pTHX_ OP *o)
     if (o->op_type == OP_LIST) {
 	OP * const o2
 	    = newSVREF(newGVOP(OP_GV, 0, gv_fetchpvs(";", GV_ADD|GV_NOTQUAL, SVt_PV)));
-	o = convert(OP_JOIN, 0, op_prepend_elem(OP_LIST, o2, o));
+	o = op_convert_list(OP_JOIN, 0, op_prepend_elem(OP_LIST, o2, o));
     }
     return o;
 }
@@ -4159,41 +4159,6 @@ S_gen_constant_list(pTHX_ OP *o)
     return list(o);
 }
 
-/* convert o (and any siblings) into a list if not already, then
- * convert the parent OP_LIST to type 'type', and CHECKOP() and fold it
- */
-
-OP *
-Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
-{
-    dVAR;
-    if (type < 0) type = -type, flags |= OPf_SPECIAL;
-    if (!o || o->op_type != OP_LIST)
-        o = force_list(o, 0);
-    else
-	o->op_flags &= ~OPf_WANT;
-
-    if (!(PL_opargs[type] & OA_MARK))
-	op_null(cLISTOPo->op_first);
-    else {
-	OP * const kid2 = OP_SIBLING(cLISTOPo->op_first);
-	if (kid2 && kid2->op_type == OP_COREARGS) {
-	    op_null(cLISTOPo->op_first);
-	    kid2->op_private |= OPpCOREARGS_PUSHMARK;
-	}
-    }	
-
-    o->op_type = (OPCODE)type;
-    o->op_ppaddr = PL_ppaddr[type];
-    o->op_flags |= flags;
-
-    o = CHECKOP(type, o);
-    if (o->op_type != (unsigned)type)
-	return o;
-
-    return fold_constants(op_integerize(op_std_init(o)));
-}
-
 /*
 =head1 Optree Manipulation Functions
 */
@@ -4312,6 +4277,51 @@ Perl_op_prepend_elem(pTHX_ I32 type, OP *first, OP *last)
     }
 
     return newLISTOP(type, 0, first, last);
+}
+
+/*
+=for apidoc Am|OP *|op_convert_list|I32 type|I32 flags|OP *o
+
+Converts I<o> into a list op if it is not one already, and then converts it
+into the specified I<type>, calling its check function, allocating a target if
+it needs one, and folding constants.
+
+A list-type op is usually constructed one kid at a time via C<newLISTOP>,
+C<op_prepend_elem> and C<op_append_elem>. Then finally it is passed to
+C<op_convert> to make it the right type.
+
+=cut
+*/
+
+OP *
+Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
+{
+    dVAR;
+    if (type < 0) type = -type, flags |= OPf_SPECIAL;
+    if (!o || o->op_type != OP_LIST)
+        o = force_list(o, 0);
+    else
+	o->op_flags &= ~OPf_WANT;
+
+    if (!(PL_opargs[type] & OA_MARK))
+	op_null(cLISTOPo->op_first);
+    else {
+	OP * const kid2 = OP_SIBLING(cLISTOPo->op_first);
+	if (kid2 && kid2->op_type == OP_COREARGS) {
+	    op_null(cLISTOPo->op_first);
+	    kid2->op_private |= OPpCOREARGS_PUSHMARK;
+	}
+    }
+
+    o->op_type = (OPCODE)type;
+    o->op_ppaddr = PL_ppaddr[type];
+    o->op_flags |= flags;
+
+    o = CHECKOP(type, o);
+    if (o->op_type != (unsigned)type)
+	return o;
+
+    return fold_constants(op_integerize(op_std_init(o)));
 }
 
 /* Constructors */
@@ -5675,7 +5685,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
 	    /* Fake up a method call to VERSION */
 	    meth = newSVpvs_share("VERSION");
-	    veop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
+	    veop = op_convert_list(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 			    op_append_elem(OP_LIST,
 					op_prepend_elem(OP_LIST, pack, version),
 					newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
@@ -5702,7 +5712,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	/* Fake up a method call to import/unimport */
 	meth = aver
 	    ? newSVpvs_share("import") : newSVpvs_share("unimport");
-	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
+	imop = op_convert_list(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 		       op_append_elem(OP_LIST,
 				   op_prepend_elem(OP_LIST, pack, arg),
 				   newMETHOP_named(OP_METHOD_NAMED, 0, meth)
@@ -7171,7 +7181,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         expr = op_lvalue(force_list(expr, 1), OP_GREPSTART);
     }
 
-    loop = (LOOP*)list(convert(OP_ENTERITER, iterflags,
+    loop = (LOOP*)list(op_convert_list(OP_ENTERITER, iterflags,
 			       op_append_elem(OP_LIST, expr, scalar(sv))));
     assert(!loop->op_next);
     /* for my  $x () sets OPpLVAL_INTRO;
@@ -8890,13 +8900,13 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 OP *
 Perl_newANONLIST(pTHX_ OP *o)
 {
-    return convert(OP_ANONLIST, OPf_SPECIAL, o);
+    return op_convert_list(OP_ANONLIST, OPf_SPECIAL, o);
 }
 
 OP *
 Perl_newANONHASH(pTHX_ OP *o)
 {
-    return convert(OP_ANONHASH, OPf_SPECIAL, o);
+    return op_convert_list(OP_ANONHASH, OPf_SPECIAL, o);
 }
 
 OP *
@@ -10745,7 +10755,7 @@ Perl_ck_join(pTHX_ OP *o)
 	if (bairn && !OP_HAS_SIBLING(bairn) /* single-item list */
 	 && PL_opargs[bairn->op_type] & OA_RETSCALAR)
 	{
-	    OP * const ret = convert(OP_STRINGIFY, 0,
+	    OP * const ret = op_convert_list(OP_STRINGIFY, 0,
 				     op_sibling_splice(o, kid, 1, NULL));
 	    op_free(o);
 	    ret->op_folded = 1;
@@ -11275,7 +11285,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		? newPVOP(OP_RUNCV,0,NULL)
 		: newOP(opnum,0);
 	default:
-	    return convert(opnum,0,aop);
+	    return op_convert_list(opnum,0,aop);
 	}
     }
     assert(0);
@@ -13032,7 +13042,7 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	    }
 	    return o;
 	default:
-	    o = convert(opnum,OPf_SPECIAL*(opnum == OP_GLOB),argop);
+	    o = op_convert_list(opnum,OPf_SPECIAL*(opnum == OP_GLOB),argop);
 	    if (is_handle_constructor(o, 2))
 		argop->op_private |= OPpCOREARGS_DEREF2;
 	    if (opnum == OP_SUBSTR) {

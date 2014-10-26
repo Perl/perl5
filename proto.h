@@ -706,9 +706,6 @@ PERL_CALLCONV const COP*	Perl_closest_cop(pTHX_ const COP *cop, const OP *o, con
 #define PERL_ARGS_ASSERT_CLOSEST_COP	\
 	assert(cop)
 
-PERL_CALLCONV OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o)
-			__attribute__warn_unused_result__;
-
 PERL_CALLCONV const char *	Perl_cop_fetch_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_COP_FETCH_LABEL	\
@@ -3194,6 +3191,9 @@ PERL_CALLCONV OP*	Perl_op_contextualize(pTHX_ OP* o, I32 context)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_OP_CONTEXTUALIZE	\
 	assert(o)
+
+PERL_CALLCONV OP*	Perl_op_convert_list(pTHX_ I32 optype, I32 flags, OP* o)
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV void	Perl_op_dump(pTHX_ const OP *o)
 			__attribute__nonnull__(pTHX_1);

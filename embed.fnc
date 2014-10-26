@@ -263,7 +263,7 @@ ApR	|I32	|my_chsize	|int fd|Off_t length
 p	|const COP*|closest_cop	|NN const COP *cop|NULLOK const OP *o \
 				|NULLOK const OP *curop|bool opnext
 : Used in perly.y
-pR	|OP*	|convert	|I32 optype|I32 flags|NULLOK OP* o
+ApdR	|OP*	|op_convert_list	|I32 optype|I32 flags|NULLOK OP* o
 : Used in op.c and perl.c
 pM	|PERL_CONTEXT*	|create_eval_scope|U32 flags
 Aprd	|void	|croak_sv	|NN SV *baseex

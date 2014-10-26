@@ -664,6 +664,7 @@ static SV *hintkey_arraytermexpr_sv, *hintkey_arrayarithexpr_sv;
 static SV *hintkey_arrayexprflags_sv;
 static SV *hintkey_DEFSV_sv;
 static SV *hintkey_with_vars_sv;
+static SV *hintkey_join_with_space_sv;
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
 /* low-level parser helpers */
@@ -1043,6 +1044,16 @@ static OP *THX_parse_keyword_with_vars(pTHX)
     return block_end(save_ix, op_append_list(OP_LINESEQ, vardeclseq, body));
 }
 
+#define parse_join_with_space() THX_parse_join_with_space(aTHX)
+static OP *THX_parse_join_with_space(pTHX)
+{
+    OP *delim, *args;
+
+    args = parse_listexpr(0);
+    delim = newSVOP(OP_CONST, 0, newSVpvs(" "));
+    return op_convert_list(OP_JOIN, 0, op_prepend_elem(OP_LIST, delim, args));
+}
+
 /* plugin glue */
 
 #define keyword_active(hintkey_sv) THX_keyword_active(aTHX_ hintkey_sv)
@@ -1135,6 +1146,10 @@ static int my_keyword_plugin(pTHX_
 		    keyword_active(hintkey_with_vars_sv)) {
 	*op_ptr = parse_keyword_with_vars();
 	return KEYWORD_PLUGIN_STMT;
+    } else if(keyword_len == 15 && strnEQ(keyword_ptr, "join_with_space", 15) &&
+		    keyword_active(hintkey_join_with_space_sv)) {
+	*op_ptr = parse_join_with_space();
+	return KEYWORD_PLUGIN_EXPR;
     } else {
 	return next_keyword_plugin(aTHX_ keyword_ptr, keyword_len, op_ptr);
     }
@@ -3423,6 +3438,7 @@ BOOT:
     hintkey_arrayexprflags_sv = newSVpvs_share("XS::APItest/arrayexprflags");
     hintkey_DEFSV_sv = newSVpvs_share("XS::APItest/DEFSV");
     hintkey_with_vars_sv = newSVpvs_share("XS::APItest/with_vars");
+    hintkey_join_with_space_sv = newSVpvs_share("XS::APItest/join_with_space");
     next_keyword_plugin = PL_keyword_plugin;
     PL_keyword_plugin = my_keyword_plugin;
 }
