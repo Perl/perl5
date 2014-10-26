@@ -221,11 +221,11 @@ is(rand($NInf), $NInf, "rand(-Inf) is -Inf");
 # ~NaN    == NaN???
 # Or just declare insanity and die?
 
-SKIP: {
+TODO: {
+    local $::TODO;
     my $here = "$^O $Config{osvers}";
-    if ($here =~ /^hpux 10/) {
-        skip "$here: pow doesn't generate Inf", 1;
-    }
+    $::TODO = "$here: pow (9**9**9) doesn't give Inf"
+        if $here =~ /^(?:hpux 10|os390)/;
     is(9**9**9, $PInf, "9**9**9 is Inf");
 }
 
@@ -341,11 +341,11 @@ SKIP: {
 is(sin($NaN), $NaN, "sin(NaN) is NaN");
 is(rand($NaN), $NaN, "rand(NaN) is NaN");
 
-SKIP: {
+TODO: {
+    local $::TODO;
     my $here = "$^O $Config{osvers}";
-    if ($here =~ /^hpux 10/) {
-        skip "$here: pow doesn't generate Inf, so sin(Inf) won't happen", 1;
-    }
+    $::TODO = "$here: pow (9**9**9) doesn't give Inf"
+        if $here =~ /^(?:hpux 10|os390)/;
     is(sin(9**9**9), $NaN, "sin(9**9**9) is NaN");
 }
 
