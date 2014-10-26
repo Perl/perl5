@@ -320,9 +320,16 @@ is($_, -1, 'regexp--');
     is($_, 1, 'regexp++');
 }
 
-$_ = v97;
-$_++;
-isnt(ref\$_, 'VSTRING', '++ flattens vstrings');
+if ($::IS_EBCDIC) {
+    $_ = v129;
+    $_++;
+    isnt(ref\$_, 'VSTRING', '++ flattens vstrings');
+}
+else {
+    $_ = v97;
+    $_++;
+    isnt(ref\$_, 'VSTRING', '++ flattens vstrings');
+}
 
 sub TIESCALAR {bless\my $x}
 sub STORE { ++$store::called }
