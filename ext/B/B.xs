@@ -61,7 +61,8 @@ typedef enum {
     OPc_PVOP,	/* 9 */
     OPc_LOOP,	/* 10 */
     OPc_COP,	/* 11 */
-    OPc_METHOP	/* 12 */
+    OPc_METHOP,	/* 12 */
+    OPc_UNOP_AUX /* 13 */
 } opclass;
 
 static const char* const opclassnames[] = {
@@ -77,7 +78,8 @@ static const char* const opclassnames[] = {
     "B::PVOP",
     "B::LOOP",
     "B::COP",
-    "B::METHOP"
+    "B::METHOP",
+    "B::UNOP_AUX"
 };
 
 static const size_t opsizes[] = {
@@ -93,7 +95,8 @@ static const size_t opsizes[] = {
     sizeof(PVOP),
     sizeof(LOOP),
     sizeof(COP),
-    sizeof(METHOP)
+    sizeof(METHOP),
+    sizeof(UNOP_AUX),
 };
 
 #define MY_CXT_KEY "B::_guts" XS_VERSION
@@ -240,6 +243,8 @@ cc_opclass(pTHX_ const OP *o)
 	    return OPc_PVOP;
     case OA_METHOP:
 	return OPc_METHOP;
+    case OA_UNOP_AUX:
+	return OPc_UNOP_AUX;
     }
     warn("can't determine class of operator %s, assuming BASEOP\n",
 	 OP_NAME(o));
@@ -1315,6 +1320,50 @@ oplist(o)
 	B::OP		o
     PPCODE:
 	SP = oplist(aTHX_ o, SP);
+
+
+
+MODULE = B	PACKAGE = B::UNOP_AUX
+
+# UNOP_AUX class ops are like UNOPs except that they have an extra
+# op_aux pointer that points to an array of UNOP_AUX_item unions.
+# Element -1 of the array contains the length
+
+
+# return a string representation of op_aux where possible The op's CV is
+# needed as an extra arg to allow GVs and SVs moved into the pad to be
+# accessed okay.
+
+void
+string(o, cv)
+	B::OP  o
+	B::CV  cv
+    PREINIT:
+	SV *ret;
+    PPCODE:
+        switch (o->op_type) {
+        default:
+            ret = sv_2mortal(newSVpvn("", 0));
+        }
+	ST(0) = ret;
+	XSRETURN(1);
+
+
+# Return the contents of the op_aux array as a list of IV/GV/etc objects.
+# How to interpret each array element is op-dependent. The op's CV is
+# needed as an extra arg to allow GVs and SVs which have been moved into
+# the pad to be accessed okay.
+
+void
+aux_list(o, cv)
+	B::OP  o
+	B::CV  cv
+    PPCODE:
+        switch (o->op_type) {
+        default:
+            XSRETURN(0); /* by default, an empty list */
+        } /* switch */
+
 
 
 MODULE = B	PACKAGE = B::SV

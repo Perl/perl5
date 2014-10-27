@@ -169,6 +169,14 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpENTERSUB_LVAL_MASK (OPpLVAL_INTRO|OPpENTERSUB_INARGS)
 
 
+/* things that can be elements of op_aux */
+typedef union  {
+    PADOFFSET pad_offset;
+    SV        *sv;
+    IV        iv;
+    UV        uv;
+} UNOP_AUX_item;
+
 
 struct op {
     BASEOP
@@ -177,6 +185,12 @@ struct op {
 struct unop {
     BASEOP
     OP *	op_first;
+};
+
+struct unop_aux {
+    BASEOP
+    OP  	  *op_first;
+    UNOP_AUX_item *op_aux;
 };
 
 struct binop {
@@ -394,6 +408,7 @@ struct loop {
 };
 
 #define cUNOPx(o)	((UNOP*)o)
+#define cUNOP_AUXx(o)	((UNOP_AUX*)o)
 #define cBINOPx(o)	((BINOP*)o)
 #define cLISTOPx(o)	((LISTOP*)o)
 #define cLOGOPx(o)	((LOGOP*)o)
@@ -406,6 +421,7 @@ struct loop {
 #define cMETHOPx(o)	((METHOP*)o)
 
 #define cUNOP		cUNOPx(PL_op)
+#define cUNOP_AUX	cUNOP_AUXx(PL_op)
 #define cBINOP		cBINOPx(PL_op)
 #define cLISTOP		cLISTOPx(PL_op)
 #define cLOGOP		cLOGOPx(PL_op)
@@ -417,6 +433,7 @@ struct loop {
 #define cLOOP		cLOOPx(PL_op)
 
 #define cUNOPo		cUNOPx(o)
+#define cUNOP_AUXo	cUNOP_AUXx(o)
 #define cBINOPo		cBINOPx(o)
 #define cLISTOPo	cLISTOPx(o)
 #define cLOGOPo		cLOGOPx(o)
@@ -428,6 +445,7 @@ struct loop {
 #define cLOOPo		cLOOPx(o)
 
 #define kUNOP		cUNOPx(kid)
+#define kUNOP_AUX	cUNOP_AUXx(kid)
 #define kBINOP		cBINOPx(kid)
 #define kLISTOP		cLISTOPx(kid)
 #define kLOGOP		cLOGOPx(kid)
@@ -505,6 +523,7 @@ struct loop {
 #define OA_FILESTATOP (12 << OCSHIFT)
 #define OA_LOOPEXOP (13 << OCSHIFT)
 #define OA_METHOP (14 << OCSHIFT)
+#define OA_UNOP_AUX (15 << OCSHIFT)
 
 /* Each remaining nybble of PL_opargs (i.e. bits 12..15, 16..19 etc)
  * encode the type for each arg */

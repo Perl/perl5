@@ -60,6 +60,7 @@ push @B::EXPORT_OK, (qw(minus_c ppname save_BEGINs
 
 @B::OP::ISA = 'B::OBJECT';
 @B::UNOP::ISA = 'B::OP';
+@B::UNOP_AUX::ISA = 'B::UNOP';
 @B::BINOP::ISA = 'B::UNOP';
 @B::LOGOP::ISA = 'B::UNOP';
 @B::LISTOP::ISA = 'B::BINOP';
@@ -73,7 +74,8 @@ push @B::EXPORT_OK, (qw(minus_c ppname save_BEGINs
 
 @B::SPECIAL::ISA = 'B::OBJECT';
 
-@B::optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP METHOP);
+@B::optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP
+                METHOP UNOP_AUX);
 # bytecode.pl contained the following comment:
 # Nullsv *must* come first in the following so that the condition
 # ($$sv == 0) can continue to be used to test (sv == Nullsv).
@@ -1089,8 +1091,9 @@ information is no longer stored directly in the hash.
 
 =head2 OP-RELATED CLASSES
 
-C<B::OP>, C<B::UNOP>, C<B::BINOP>, C<B::LOGOP>, C<B::LISTOP>, C<B::PMOP>,
-C<B::SVOP>, C<B::PADOP>, C<B::PVOP>, C<B::LOOP>, C<B::COP>, C<B::METHOP>.
+C<B::OP>, C<B::UNOP>, C<B::UNOP_AUX>, C<B::BINOP>, C<B::LOGOP>,
+C<B::LISTOP>, C<B::PMOP>, C<B::SVOP>, C<B::PADOP>, C<B::PVOP>, C<B::LOOP>,
+C<B::COP>, C<B::METHOP>.
 
 These classes correspond in the obvious way to the underlying C
 structures of similar names.  The inheritance hierarchy mimics the
@@ -1101,15 +1104,17 @@ underlying C "inheritance":
                    +----------+---------+--------+-------+---------+
                    |          |         |        |       |         |
                 B::UNOP    B::SVOP  B::PADOP  B::COP  B::PVOP  B::METHOP
-                 ,'  `-.
-                /       `--.
-           B::BINOP     B::LOGOP
+                   |
+               +---+---+---------+
+               |       |         |
+           B::BINOP  B::LOGOP  B::UNOP_AUX
                |
                |
            B::LISTOP
-             ,' `.
-            /     \
-        B::LOOP B::PMOP
+               |
+           +---+---+
+           |       |
+        B::LOOP   B::PMOP
 
 Access methods correspond to the underlying C structure field names,
 with the leading "class indication" prefix (C<"op_">) removed.
@@ -1163,6 +1168,27 @@ This returns the op description from the global C PL_op_desc array
 =over 4
 
 =item first
+
+=back
+
+=head2 B::UNOP_AUX METHODS (since 5.22)
+
+=over 4
+
+=item aux_list(cv)
+
+This returns a list of the elements of the op's aux data structure,
+or a null list if there is no aux. What will be returned depends on the
+object's type, but will typically be a collection of C<B::IV>, C<B::GV>,
+etc. objects. C<cv> is the C<B::CV> object representing the sub that the
+op is contained within.
+
+=item string(cv)
+
+This returns a textual representation of the object (likely to b useful
+for deparsing and debugging), or an empty string if the op type doesn't
+support this. C<cv> is the C<B::CV> object representing the sub that the
+op is contained within.
 
 =back
 

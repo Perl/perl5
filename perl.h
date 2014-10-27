@@ -2594,6 +2594,7 @@ typedef MEM_SIZE STRLEN;
 typedef struct op OP;
 typedef struct cop COP;
 typedef struct unop UNOP;
+typedef struct unop_aux UNOP_AUX;
 typedef struct binop BINOP;
 typedef struct listop LISTOP;
 typedef struct logop LOGOP;

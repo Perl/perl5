@@ -2424,6 +2424,7 @@ S_finalize_op(pTHX_ OP* o)
         assert(  has_last /* has op_first and op_last, or ...
               ... has (or may have) op_first: */
               || family == OA_UNOP
+              || family == OA_UNOP_AUX
               || family == OA_LOGOP
               || family == OA_BASEOP_OR_UNOP
               || family == OA_FILESTATOP
@@ -4697,6 +4698,43 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 #endif
 
     unop = (UNOP*) CHECKOP(type, unop);
+    if (unop->op_next)
+	return (OP*)unop;
+
+    return fold_constants(op_integerize(op_std_init((OP *) unop)));
+}
+
+/*
+=for apidoc
+
+Similar to C<newUNOP>, but creates an UNOP_AUX struct instead, with op_aux
+initialised to aux
+
+=cut
+*/
+
+OP *
+Perl_newUNOP_AUX(pTHX_ I32 type, I32 flags, OP *first, UNOP_AUX_item *aux)
+{
+    dVAR;
+    UNOP_AUX *unop;
+
+    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_UNOP_AUX);
+
+    NewOp(1101, unop, 1, UNOP_AUX);
+    unop->op_type = (OPCODE)type;
+    unop->op_ppaddr = PL_ppaddr[type];
+    unop->op_first = first;
+    unop->op_flags = (U8)(flags | (first ? OPf_KIDS : 0));
+    unop->op_private = (U8)((first ? 1 : 0) | (flags >> 8));
+    unop->op_aux = aux;
+
+#ifdef PERL_OP_PARENT
+    if (first && !OP_HAS_SIBLING(first)) /* true unless weird syntax error */
+        first->op_sibling = (OP*)unop;
+#endif
+
+    unop = (UNOP_AUX*) CHECKOP(type, unop);
     if (unop->op_next)
 	return (OP*)unop;
 

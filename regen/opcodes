@@ -14,6 +14,7 @@
 # padop/svop  - $            padop    - # (unused)   loop       - {
 # baseop/unop - %            loopexop - }            filestatop - -
 # pvop/svop   - "            cop      - ;            methop     - .
+# unop_aux    - +
 
 # Other options are:
 #   needs stack mark                    - m  (OA_MARK)

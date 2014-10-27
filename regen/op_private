@@ -204,6 +204,7 @@ use strict;
                         qw(reverse), # ck_fun(), but most bits stolen
                         grep !$maxarg{$_} && !$args0{$_},
                             ops_with_flag('1'), # UNOP
+                            ops_with_flag('+'), # UNOP_AUX
                             ops_with_flag('%'), # BASEOP/UNOP
                             ops_with_flag('|'), # LOGOP
                             ops_with_flag('-'), # FILESTATOP

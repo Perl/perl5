@@ -401,7 +401,7 @@ my $lastnext;	# remembers op-chain, used to insert gotos
 my %opclass = ('OP' => "0", 'UNOP' => "1", 'BINOP' => "2", 'LOGOP' => "|",
 	       'LISTOP' => "@", 'PMOP' => "/", 'SVOP' => "\$", 'GVOP' => "*",
 	       'PVOP' => '"', 'LOOP' => "{", 'COP' => ";", 'PADOP' => "#",
-	       'METHOP' => '.');
+	       'METHOP' => '.', UNOP_AUX => '+');
 
 no warnings 'qw'; # "Possible attempt to put comments..."; use #7
 my @linenoise =
@@ -915,6 +915,10 @@ sub concise_op {
             }
         }
     }
+    elsif ($h{class} eq "UNOP_AUX") {
+        $h{arg} = "(" . $op->string . ")";
+    }
+
     $h{seq} = $h{hyphseq} = seq($op);
     $h{seq} = "" if $h{seq} eq "-";
     $h{opt} = $op->opt;
@@ -1383,6 +1387,7 @@ B:: namespace that represents the ops in your Perl code.
 
     0      OP (aka BASEOP)  An OP with no children
     1      UNOP             An OP with one child
+    +      UNOP_AUX         A UNOP with auxillary fields
     2      BINOP            An OP with two children
     |      LOGOP            A control branch OP
     @      LISTOP           An OP that could have lots of children
