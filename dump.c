@@ -96,7 +96,7 @@ S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
 
 Escapes at most the first "count" chars of pv and puts the results into
 dsv such that the size of the escaped string will not exceed "max" chars
-and will not contain any incomplete escape sequences. The number of bytes
+and will not contain any incomplete escape sequences.  The number of bytes
 escaped will be returned in the STRLEN *escaped parameter if it is not null.
 When the dsv parameter is null no escaping actually occurs, but the number
 of bytes that would be escaped were it not null will be calculated.

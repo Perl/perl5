@@ -3614,9 +3614,10 @@ Perl_op_unscope(pTHX_ OP *o)
 /*
 =for apidoc Am|int|block_start|int full
 
-Handles compile-time scope entry. Arranges for hints to be restored on block
+Handles compile-time scope entry.
+Arranges for hints to be restored on block
 exit and also handles pad sequence numbers to make lexical variables scope
-right. Returns a savestack index for use with C<block_end>.
+right.  Returns a savestack index for use with C<block_end>.
 
 =cut
 */
@@ -3640,7 +3641,8 @@ Perl_block_start(pTHX_ int full)
 /*
 =for apidoc Am|OP *|block_end|I32 floor|OP *seq
 
-Handles compile-time scope exit. I<floor> is the savestack index returned by
+Handles compile-time scope exit.  I<floor>
+is the savestack index returned by
 C<block_start>, and I<seq> is the body of the block.  Returns the block,
 possibly modified.
 
@@ -4304,7 +4306,7 @@ into the specified I<type>, calling its check function, allocating a target if
 it needs one, and folding constants.
 
 A list-type op is usually constructed one kid at a time via C<newLISTOP>,
-C<op_prepend_elem> and C<op_append_elem>. Then finally it is passed to
+C<op_prepend_elem> and C<op_append_elem>.  Then finally it is passed to
 C<op_convert> to make it the right type.
 
 =cut
@@ -4553,10 +4555,10 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 =for apidoc Am|OP *|newMETHOP|I32 type|I32 flags|OP *first
 
 Constructs, checks, and returns an op of method type with a method name
-evaluated at runtime. I<type> is the opcode. I<flags> gives the eight
+evaluated at runtime.  I<type> is the opcode.  I<flags> gives the eight
 bits of C<op_flags>, except that C<OPf_KIDS> will be set automatically,
 and, shifted up eight bits, the eight bits of C<op_private>, except that
-the bit with value 1 is automatically set. I<dynamic_meth> supplies an
+the bit with value 1 is automatically set.  I<dynamic_meth> supplies an
 op which evaluates method name; it is consumed by this function and
 become part of the constructed op tree.
 Supported optypes: OP_METHOD.
@@ -4605,9 +4607,9 @@ Perl_newMETHOP (pTHX_ I32 type, I32 flags, OP* dynamic_meth) {
 =for apidoc Am|OP *|newMETHOP_named|I32 type|I32 flags|SV *const_meth
 
 Constructs, checks, and returns an op of method type with a constant
-method name. I<type> is the opcode. I<flags> gives the eight bits of
+method name.  I<type> is the opcode.  I<flags> gives the eight bits of
 C<op_flags>, and, shifted up eight bits, the eight bits of
-C<op_private>. I<const_meth> supplies a constant method name;
+C<op_private>.  I<const_meth> supplies a constant method name;
 it must be a shared COW string.
 Supported optypes: OP_METHOD_NAMED.
 
