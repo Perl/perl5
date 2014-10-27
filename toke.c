@@ -11507,10 +11507,16 @@ Perl_parse_subsignature(pTHX)
 				scalar(newUNOP(OP_RV2AV, 0,
 				    newGVOP(OP_GV, 0, PL_defgv))),
 				newSVOP(OP_CONST, 0, newSViv(1))),
-			    newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
-				newSVOP(OP_CONST, 0,
-				    newSVpvs("Odd name/value argument "
-					"for subroutine"))));
+		            op_convert_list(OP_DIE, 0,
+		                op_convert_list(OP_SPRINTF, 0,
+		                    op_append_list(OP_LIST,
+		                        newSVOP(OP_CONST, 0,
+		                            newSVpvs("Odd name/value argument for subroutine at %s line %d.\n")),
+		                        newSLICEOP(0,
+		                            op_append_list(OP_LIST,
+		                                newSVOP(OP_CONST, 0, newSViv(1)),
+		                                newSVOP(OP_CONST, 0, newSViv(2))),
+		                            newOP(OP_CALLER, 0))))));
 		    if (pos != min_arity)
 			chkop = newLOGOP(OP_AND, 0,
 				    newBINOP(OP_GT, 0,
@@ -11573,9 +11579,16 @@ Perl_parse_subsignature(pTHX)
 			scalar(newUNOP(OP_RV2AV, 0,
 			    newGVOP(OP_GV, 0, PL_defgv))),
 			newSVOP(OP_CONST, 0, newSViv(min_arity))),
-		    newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
-			newSVOP(OP_CONST, 0,
-			    newSVpvs("Too few arguments for subroutine"))))),
+		    op_convert_list(OP_DIE, 0,
+		        op_convert_list(OP_SPRINTF, 0,
+		            op_append_list(OP_LIST,
+		                newSVOP(OP_CONST, 0,
+		                    newSVpvs("Too few arguments for subroutine at %s line %d.\n")),
+		                newSLICEOP(0,
+		                    op_append_list(OP_LIST,
+		                        newSVOP(OP_CONST, 0, newSViv(1)),
+		                        newSVOP(OP_CONST, 0, newSViv(2))),
+		                    newOP(OP_CALLER, 0))))))),
 	    initops);
     }
     if (max_arity != -1) {
@@ -11586,9 +11599,16 @@ Perl_parse_subsignature(pTHX)
 			scalar(newUNOP(OP_RV2AV, 0,
 			    newGVOP(OP_GV, 0, PL_defgv))),
 			newSVOP(OP_CONST, 0, newSViv(max_arity))),
-		    newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
-			newSVOP(OP_CONST, 0,
-			    newSVpvs("Too many arguments for subroutine"))))),
+		    op_convert_list(OP_DIE, 0,
+		        op_convert_list(OP_SPRINTF, 0,
+		            op_append_list(OP_LIST,
+		                newSVOP(OP_CONST, 0,
+		                    newSVpvs("Too many arguments for subroutine at %s line %d.\n")),
+		                newSLICEOP(0,
+		                    op_append_list(OP_LIST,
+		                        newSVOP(OP_CONST, 0, newSViv(1)),
+		                        newSVOP(OP_CONST, 0, newSViv(2))),
+		                    newOP(OP_CALLER, 0))))))),
 	    initops);
     }
     return initops;
