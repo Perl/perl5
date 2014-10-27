@@ -16503,6 +16503,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     PERL_UNUSED_ARG(o);
     PERL_UNUSED_ARG(prog);
     PERL_UNUSED_ARG(reginfo);
+    PERL_UNUSED_ARG(pRExC_state);
 #endif	/* DEBUGGING */
 }
 
