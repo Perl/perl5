@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More;
+use Test::More tests => 15;
 
 BEGIN {
     require warnings;
@@ -103,5 +103,3 @@ SKIP: {
 
     like $warning, qr/^skip\(\) was passed a non-numeric number of tests/;
 }
-
-done_testing;

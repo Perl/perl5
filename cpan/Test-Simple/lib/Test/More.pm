@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_063';
+our $VERSION = '1.301001_064';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream::Carp qw/croak carp/;
@@ -257,7 +257,7 @@ sub _skip {
     my $plan = $ctx->stream->plan;
 
     # If there is no plan we do not need to worry about counts
-    my $need_count = $plan ? !($plan->directive && $plan->directive eq 'NO PLAN') : 1;
+    my $need_count = $plan ? !($plan->directive && $plan->directive eq 'NO PLAN') : 0;
 
     $ctx->alert("$func() needs to know \$how_many tests are in the block")
         if $need_count && !defined $how_many;

@@ -7,7 +7,7 @@ Test::Stream::Architecture - Overview of how the Test-More dist works.
 This is the document that explains the architecture of Test::More and all the
 stuff driving it under the hood.
 
-=head1 KEY COMPONTENTS
+=head1 KEY COMPONENTS
 
 This is the list of primary components and their brief description, The most
 critical ones will have more details in later sections.
@@ -90,9 +90,9 @@ proper object. All events must use Test::Stream::Event as a base.
 
 This is the L<Moose> of Test::Stream. It is responsible for generating
 accessors and similar work. Unlike moose and others it uses an arrayref as the
-underlying object. This design descision was made to improve performance.
+underlying object. This design decision was made to improve performance.
 Performance was a real problem in some early alphas, the gains from the
-descision are huge.
+decision are huge.
 
 =item Test::Stream::Tester
 
@@ -118,7 +118,7 @@ number, and shove them through the correct output.
 
 The singleton model proved to be a major headache.
 
-Intercepting events typically meant replacing the singleton perminantly
+Intercepting events typically meant replacing the singleton permanently
 (Test::Tester) or for a limited scope. Another option people took
 (Test::Builder::Tester) was to simply replace the IO handles Test::Builder was
 tracking.
@@ -160,7 +160,7 @@ in the order they are added.
 
 There is not currently any way to remove a munger.
 
-B<Note:> each munger is called in a loop in the C<send()> method, so keep it is
+B<Note:> each munger is called in a loop in the C<send()> method, so keep it as
 fast and small as possible.
 
 =item Forward all events to listeners (including TAP output)
@@ -224,7 +224,7 @@ If there is a context already in play, that instance will be returned.
 Otherwise a new context will be returned. The context assumes that the stack
 level just above your call is where errors should be reported.
 
-You can optionally provide an integer as the only argument, in whcih case that
+You can optionally provide an integer as the only argument, in which case that
 number will be added to the C<caller()> call to find the correct frame for
 reporting. This will be completely ignored if there is already an active
 context.
@@ -245,7 +245,7 @@ In the example above c<my_ok()> generates a new context, then it calls C<ok()>,
 in this case both function will have the same context object, the one generated
 by my_ok. The result is that C<ok> will report errors to the correct place.
 
-=head3 IMPLEMENTEATION
+=head3 IMPLEMENTATION
 
 There is a variable C<$CURRENT> in C<Test::Stream::Context>, it is a lexical,
 so you can not touch it directly. When the C<context()> function is called, it
@@ -258,7 +258,7 @@ scope, or is otherwise removed, C<$CURRENT> will vanish on its own. This means
 that so long as you hold on to your context object, anything you call will find
 it.
 
-B<The caveat> here is that if you descide to hold on to your context beyond
+B<The caveat> here is that if you decide to hold on to your context beyond
 your scope, you could sabatoge any future test functions. If you need to hold
 on to a context you need to call C<< $context->snapshot >>, and store the
 cloned object it returns. In general you should not need to do this, event
@@ -266,9 +266,9 @@ objects all store the context, but do so using a snapshot.
 
 B<Note> I am open to changing this to remove the weak-reference magic and
 instead require someone to call C<< $context->release >> or similar when they
-are done with a context, but that seams more likely to result in rougue
+are done with a context, but that seems more likely to result in rougue
 contexts... This method would also require its own form of reference counting..
-This descision will need to be made before we go stable.
+This decision will need to be made before we go stable.
 
 =head2 GENERATING EVENTS
 
