@@ -2844,6 +2844,23 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    op_null(cUNOPx(cUNOPo->op_first)->op_first); /* pushmark */
 	op_null(o);
 	return o;
+
+    case OP_SPLIT:
+	kid = cLISTOPo->op_first;
+	if (kid && kid->op_type == OP_PUSHRE &&
+		(  kid->op_targ
+		|| o->op_flags & OPf_STACKED
+#ifdef USE_ITHREADS
+		|| ((PMOP*)kid)->op_pmreplrootu.op_pmtargetoff
+#else
+		|| ((PMOP*)kid)->op_pmreplrootu.op_pmtargetgv
+#endif
+	)) {
+	    /* This is actually @array = split.  */
+	    PL_modcount = RETURN_UNLIMITED_NUMBER;
+	    break;
+	}
+	goto nomod;
     }
 
     /* [20011101.069] File test operators interpret OPf_REF to mean that

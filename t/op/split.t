@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 122;
+plan tests => 123;
 
 $FS = ':';
 
@@ -505,3 +505,6 @@ is "@aaa", "f o o b a r b a z",
 
 () = @a = split //, "abc";
 is "@a", "a b c", '() = split-to-array';
+
+(@a = split //, "abc") = 1..10;
+is "@a", '1 2 3', 'assignment to split-to-array';

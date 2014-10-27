@@ -264,6 +264,7 @@ foreach my $start (@chars) {
     }
 }
 
+$/ = "\n";
 {
     my $expected = 99999;
     my $input = "UserID\talpha $expected\n";
