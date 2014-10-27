@@ -233,7 +233,7 @@ PREINIT:
 CODE:
 	if ((state = getSHA(self)) == NULL)
 		XSRETURN_UNDEF;
-	RETVAL = ix ? state->alg : state->digestlen << 3;
+	RETVAL = ix ? state->alg : (int) (state->digestlen << 3);
 OUTPUT:
 	RETVAL
 
@@ -307,7 +307,7 @@ CODE:
 	ptr = w32mem(ptr, state->lenhl);
 	ptr = w32mem(ptr, state->lenlh);
 	ptr = w32mem(ptr, state->lenll);
-	RETVAL = newSVpv((char *) buf, ptr - buf);
+	RETVAL = newSVpv((char *) buf, (STRLEN) (ptr - buf));
 OUTPUT:
 	RETVAL
 
@@ -324,7 +324,7 @@ PPCODE:
 	if ((state = getSHA(self)) == NULL)
 		XSRETURN_UNDEF;
 	data = (UCHR *) SvPV(packed_state, len);
-	if (len != (state->alg <= SHA256 ? 116 : 212))
+	if (len != (state->alg <= SHA256 ? 116U : 212U))
 		XSRETURN_UNDEF;
 	data = statecpy(state, data);
 	Copy(data, state->block, state->blocksize >> 3, UCHR);
@@ -351,7 +351,7 @@ PPCODE:
 	if (!f || (state = getSHA(self)) == NULL)
 		XSRETURN_UNDEF;
 	while ((n = PerlIO_read(f, in, sizeof(in))) > 0)
-		shawrite(in, n << 3, state);
+		shawrite(in, (ULNG) n << 3, state);
 	XSRETURN(1);
 
 void
@@ -359,7 +359,7 @@ _addfileuniv(self, f)
 	SV *		self
 	PerlIO *	f
 PREINIT:
-	char c;
+	UCHR c;
 	int n;
 	int cr = 0;
 	UCHR *src, *dst;
@@ -391,7 +391,7 @@ PPCODE:
 				}
 			}
 		}
-		shawrite(in, (dst - in) << 3, state);
+		shawrite(in, (ULNG) (dst - in) << 3, state);
 	}
 	if (cr) {
 		in[0] = '\012';

@@ -4,8 +4,8 @@
 	##
 	## Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
 	##
-	## Version: 5.92
-	## Sun Jun  1 00:15:44 MST 2014
+	## Version: 5.93
+	## Sun Oct 26 06:00:48 MST 2014
 
 	## shasum SYNOPSIS adapted from GNU Coreutils sha1sum. Add
 	## "-a" option for algorithm selection,
@@ -101,7 +101,7 @@ L<Digest::SHA::PurePerl>.
 
 END_OF_POD
 
-my $VERSION = "5.92";
+my $VERSION = "5.93";
 
 sub usage {
 	my($err, $msg) = @_;

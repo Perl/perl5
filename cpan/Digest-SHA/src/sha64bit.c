@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.92
- * Sun Jun  1 00:15:44 MST 2014
+ * Version: 5.93
+ * Sun Oct 26 06:00:48 MST 2014
  *
  */
 
@@ -96,7 +96,7 @@ static void sha512(SHA *s, unsigned char *block) /* SHA-384/512 transform */
 {
 	W64 a, b, c, d, e, f, g, h, T1, T2;
 	W64 W[80];
-	W64 *H = (W64 *) s->H;
+	W64 *H = s->H64;
 	int t;
 
 	SHA64_SCHED(W, block);

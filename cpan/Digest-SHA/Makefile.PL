@@ -70,7 +70,8 @@ if ($Config{archname} =~ /^i[3456]86/ && $Config{ccname} eq 'gcc') {
 	push(@extra, OPTIMIZE => '-O1 -fomit-frame-pointer');
 }
 
-push(@extra, CCFLAGS => '-W -Wall ' . $Config{ccflags}) if $opt_w;
+my $fussy = '-Wall -Wextra -Wconversion -Wcast-align -Wpointer-arith ';
+push(@extra, CCFLAGS => $fussy . $Config{ccflags}) if $opt_w;
 
 my %attr = (
 	'NAME'		=> 'Digest::SHA',

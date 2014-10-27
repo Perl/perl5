@@ -8,7 +8,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Fcntl;
 use integer;
 
-$VERSION = '5.92';
+$VERSION = '5.93';
 
 require Exporter;
 require DynaLoader;
@@ -777,6 +777,7 @@ L<http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf>
 The author is particularly grateful to
 
 	Gisle Aas
+	H. Merijn Brand
 	Sean Burke
 	Chris Carey
 	Alexandr Ciornii
@@ -786,6 +787,7 @@ The author is particularly grateful to
 	Jeffrey Friedl
 	Robert Gilmour
 	Brian Gladman
+	Jarkko Hietaniemi
 	Adam Kennedy
 	Mark Lawrence
 	Andy Lester

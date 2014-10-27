@@ -373,7 +373,7 @@ use File::Glob qw(:case);
     },
 
     'Digest::SHA' => {
-        'DISTRIBUTION' => 'MSHELOR/Digest-SHA-5.92.tar.gz',
+        'DISTRIBUTION' => 'MSHELOR/Digest-SHA-5.93.tar.gz',
         'FILES'        => q[cpan/Digest-SHA],
         'EXCLUDED'     => [
             qw( t/pod.t
@@ -381,9 +381,6 @@ use File::Glob qw(:case);
                 examples/dups
                 ),
         ],
-        # Was hoping to be merged upstream in CPAN RT#96498,
-        # but that has been rejected...
-        'CUSTOMIZED'   => ['hints/hpux.pl'],
     },
 
     'Dumpvalue' => {

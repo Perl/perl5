@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.92
- * Sun Jun  1 00:15:44 MST 2014
+ * Version: 5.93
+ * Sun Oct 26 06:00:48 MST 2014
  *
  */
 
@@ -65,10 +65,10 @@ static W32 K256[64] =			/* SHA-224/256 constants */
 	C32(0x90befffa), C32(0xa4506ceb), C32(0xbef9a3f7), C32(0xc67178f2)
 };
 
-static W32 H01[5] =			/* SHA-1 initial hash value */
+static W32 H01[8] =			/* SHA-1 initial hash value */
 {
-	C32(0x67452301), C32(0xefcdab89), C32(0x98badcfe),
-	C32(0x10325476), C32(0xc3d2e1f0)
+	C32(0x67452301), C32(0xefcdab89), C32(0x98badcfe), C32(0x10325476),
+	C32(0xc3d2e1f0), C32(0x00000000), C32(0x00000000), C32(0x00000000)
 };
 
 static W32 H0224[8] =			/* SHA-224 initial hash value */
@@ -88,7 +88,7 @@ static void sha1(SHA *s, UCHR *block)		/* SHA-1 transform */
 	W32 a, b, c, d, e;
 	W32 W[16];
 	W32 *wp = W;
-	W32 *H = (W32 *) s->H;
+	W32 *H = s->H32;
 
 	SHA32_SCHED(W, block);
 
@@ -156,7 +156,7 @@ static void sha256(SHA *s, UCHR *block)		/* SHA-224/256 transform */
 	W32 W[16];
 	W32 *kp = K256;
 	W32 *wp = W;
-	W32 *H = (W32 *) s->H;
+	W32 *H = s->H32;
 
 	SHA32_SCHED(W, block);
 
@@ -214,8 +214,8 @@ static void sha256(SHA *s, UCHR *block)		/* SHA-224/256 transform */
 
 #include "sha64bit.c"
 
-#define SETBIT(s, pos)	s[(pos) >> 3] |=  (0x01 << (7 - (pos) % 8))
-#define CLRBIT(s, pos)	s[(pos) >> 3] &= ~(0x01 << (7 - (pos) % 8))
+#define SETBIT(s, pos)	s[(pos) >> 3] |= (UCHR)  (0x01 << (7 - (pos) % 8))
+#define CLRBIT(s, pos)	s[(pos) >> 3] &= (UCHR) ~(0x01 << (7 - (pos) % 8))
 #define NBYTES(nbits)	(((nbits) + 7) >> 3)
 #define HEXLEN(nbytes)	((nbytes) << 1)
 #define B64LEN(nbytes)	(((nbytes) % 3 == 0) ? ((nbytes) / 3) * 4 \
@@ -247,8 +247,8 @@ static UCHR *digcpy(SHA *s)
 {
 	int i;
 	UCHR *d = s->digest;
-	W32 *p32 = (W32 *) s->H;
-	W64 *p64 = (W64 *) s->H;
+	W32 *p32 = s->H32;
+	W64 *p64 = s->H64;
 
 	if (s->alg <= SHA256)
 		for (i = 0; i < 8; i++, d += 4)
@@ -265,8 +265,8 @@ static UCHR *digcpy(SHA *s)
 static UCHR *statecpy(SHA *s, UCHR *buf)
 {
 	int i;
-	W32 *p32 = (W32 *) s->H;
-	W64 *p64 = (W64 *) s->H;
+	W32 *p32 = s->H32;
+	W64 *p64 = s->H64;
 
 	if (s->alg <= SHA256)
 		for (i = 0; i < 8; i++, buf += 4)
@@ -282,7 +282,10 @@ static UCHR *statecpy(SHA *s, UCHR *buf)
 	do {								\
 		Zero(s, 1, SHA);					\
 		s->alg = algo; s->sha = sha ## transform;		\
-		Copy(H0 ## algo, s->H, sizeof(H0 ## algo), char);	\
+		if (s->alg <= SHA256)					\
+			Copy(H0 ## algo, s->H32, 8, SHA32);		\
+		else							\
+			Copy(H0 ## algo, s->H64, 8, SHA64);		\
 		s->blocksize = SHA ## algo ## _BLOCK_BITS;		\
 		s->digestlen = SHA ## algo ## _DIGEST_BITS >> 3;	\
 	} while (0)
@@ -366,8 +369,8 @@ static ULNG shabits(UCHR *bitstr, ULNG bitcnt, SHA *s)
 	ULNG savecnt = bitcnt;
 
 	gap = 8 - s->blockcnt % 8;
-	s->block[s->blockcnt>>3] &= ~0 << gap;
-	s->block[s->blockcnt>>3] |= *bitstr >> (8 - gap);
+	s->block[s->blockcnt>>3] &= (UCHR) (~0 << gap);
+	s->block[s->blockcnt>>3] |= (UCHR) (*bitstr >> (8 - gap));
 	s->blockcnt += bitcnt < gap ? bitcnt : gap;
 	if (bitcnt < gap)
 		return(savecnt);
@@ -377,14 +380,16 @@ static ULNG shabits(UCHR *bitstr, ULNG bitcnt, SHA *s)
 		return(savecnt);
 	while (nbytes > bufsize) {
 		for (i = 0; i < bufsize; i++)
-			buf[i] = bitstr[i] << gap | bitstr[i+1] >> (8-gap);
+			buf[i] = (UCHR) (bitstr[i] << gap) |
+				 (UCHR) (bitstr[i+1] >> (8-gap));
 		nbits = bitcnt < bufbits ? bitcnt : bufbits;
 		shabytes(buf, nbits, s);
 		bitcnt -= nbits, bitstr += bufsize, nbytes -= bufsize;
 	}
 	for (i = 0; i < nbytes - 1; i++)
-		buf[i] = bitstr[i] << gap | bitstr[i+1] >> (8-gap);
-	buf[nbytes-1] = bitstr[nbytes-1] << gap;
+		buf[i] = (UCHR) (bitstr[i] << gap) |
+			 (UCHR) (bitstr[i+1] >> (8-gap));
+	buf[nbytes-1] = (UCHR) (bitstr[nbytes-1] << gap);
 	shabytes(buf, bitcnt, s);
 	return(savecnt);
 }
@@ -440,7 +445,7 @@ static char xmap[] =
 /* shahex: returns pointer to current digest (hexadecimal) */
 static char *shahex(SHA *s)
 {
-	int i;
+	UINT i;
 	char *h;
 	UCHR *d;
 
@@ -461,7 +466,7 @@ static char bmap[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* encbase64: encodes input (0 to 3 bytes) into Base 64 */
-static void encbase64(UCHR *in, int n, char *out)
+static void encbase64(UCHR *in, UINT n, char *out)
 {
 	UCHR byte[3] = {0, 0, 0};
 
@@ -479,7 +484,7 @@ static void encbase64(UCHR *in, int n, char *out)
 /* shabase64: returns pointer to current digest (Base 64) */
 static char *shabase64(SHA *s)
 {
-	int n;
+	UINT n;
 	UCHR *q;
 	char out[5];
 

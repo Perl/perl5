@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.92
- * Sun Jun  1 00:15:44 MST 2014
+ * Version: 5.93
+ * Sun Oct 26 06:00:48 MST 2014
  *
  */
 
@@ -131,22 +131,21 @@
 #define SHA_MAX_HEX_LEN		(SHA_MAX_DIGEST_BITS / 4)
 #define SHA_MAX_BASE64_LEN	(1 + (SHA_MAX_DIGEST_BITS / 6))
 
-#if defined(SHA64)
-	#define SHA_H_SIZE	sizeof(SHA64) * 8
-#else
-	#define SHA_H_SIZE	sizeof(SHA32) * 8
+#if !defined(SHA64)
+	#define SHA64	SHA32
 #endif
 
 typedef struct SHA {
 	int alg;
 	void (*sha)(struct SHA *, unsigned char *);
-	unsigned char H[SHA_H_SIZE];
+	SHA32 H32[8];
+	SHA64 H64[8];
 	unsigned char block[SHA_MAX_BLOCK_BITS/8];
 	unsigned int blockcnt;
 	unsigned int blocksize;
 	SHA32 lenhh, lenhl, lenlh, lenll;
 	unsigned char digest[SHA_MAX_DIGEST_BITS/8];
-	int digestlen;
+	unsigned int digestlen;
 	char hex[SHA_MAX_HEX_LEN+1];
 	char base64[SHA_MAX_BASE64_LEN+1];
 } SHA;
@@ -154,7 +153,7 @@ typedef struct SHA {
 typedef struct {
 	SHA isha;
 	SHA osha;
-	int digestlen;
+	unsigned int digestlen;
 	unsigned char key[SHA_MAX_BLOCK_BITS/8];
 } HMAC;
 
