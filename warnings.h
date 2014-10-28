@@ -106,12 +106,13 @@
 
 #define WARN_EXPERIMENTAL__REFALIASING 60
 #define WARN_EXPERIMENTAL__WIN32_PERLIO 61
-#define WARN_MISSING		 62
-#define WARN_REDUNDANT		 63
+#define WARN_LOCALE		 62
+#define WARN_MISSING		 63
+#define WARN_REDUNDANT		 64
 
-#define WARNsize		16
-#define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+#define WARNsize		17
+#define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
 
 #define isLEXWARN_on 	(PL_curcop->cop_warnings != pWARN_STD)
 #define isLEXWARN_off	(PL_curcop->cop_warnings == pWARN_STD)

@@ -108,6 +108,7 @@ my $tree = {
 
        	'missing'	=> [ 5.021, DEFAULT_OFF],
        	'redundant'	=> [ 5.021, DEFAULT_OFF],
+        'locale'	=> [ 5.021, DEFAULT_ON],
 
        	 #'default'	=> [ 5.008, DEFAULT_ON ],
   	}],
@@ -477,7 +478,7 @@ read_only_bottom_close_and_rename($pm);
 __END__
 package warnings;
 
-our $VERSION = '1.28';
+our $VERSION = '1.29';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
