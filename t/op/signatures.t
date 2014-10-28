@@ -38,125 +38,125 @@ sub t002 () { $a || "z" }
 is prototype(\&t002), undef;
 is eval("t002()"), 123;
 is eval("t002(456)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t002(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t003 ( ) { $a || "z" }
 is prototype(\&t003), undef;
 is eval("t003()"), 123;
 is eval("t003(456)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t003(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t006 ($a) { $a || "z" }
 is prototype(\&t006), undef;
 is eval("t006()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t006(0)"), "z";
 is eval("t006(456)"), 456;
 is eval("t006(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t006(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t007 ($a, $b) { $a.$b }
 is prototype(\&t007), undef;
 is eval("t007()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t007(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t007(456, 789)"), "456789";
 is eval("t007(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t007(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t008 ($a, $b, $c) { $a.$b.$c }
 is prototype(\&t008), undef;
 is eval("t008()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t008(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t008(456, 789)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t008(456, 789, 987)"), "456789987";
 is eval("t008(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t009 ($abc, $def) { $abc.$def }
 is prototype(\&t009), undef;
 is eval("t009()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t009(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t009(456, 789)"), "456789";
 is eval("t009(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t009(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t010 ($a, $) { $a || "z" }
 is prototype(\&t010), undef;
 is eval("t010()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t010(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t010(0, 789)"), "z";
 is eval("t010(456, 789)"), 456;
 is eval("t010(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t010(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t011 ($, $a) { $a || "z" }
 is prototype(\&t011), undef;
 is eval("t011()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t011(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t011(456, 0)"), "z";
 is eval("t011(456, 789)"), 789;
 is eval("t011(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t011(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t012 ($, $) { $a || "z" }
 is prototype(\&t012), undef;
 is eval("t012()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t012(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t012(0, 789)"), 123;
 is eval("t012(456, 789)"), 123;
 is eval("t012(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t012(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t013 ($) { $a || "z" }
 is prototype(\&t013), undef;
 is eval("t013()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t013(0)"), 123;
 is eval("t013(456)"), 123;
 is eval("t013(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t013(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t013(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t014 ($a = 222) { $a // "z" }
@@ -166,9 +166,9 @@ is eval("t014(0)"), 0;
 is eval("t014(undef)"), "z";
 is eval("t014(456)"), 456;
 is eval("t014(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t014(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t015 ($a = undef) { $a // "z" }
@@ -178,9 +178,9 @@ is eval("t015(0)"), 0;
 is eval("t015(undef)"), "z";
 is eval("t015(456)"), 456;
 is eval("t015(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t015(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t016 ($a = do { $z++; 222 }) { $a // "z" }
@@ -192,9 +192,9 @@ is eval("t016(0)"), 0;
 is eval("t016(undef)"), "z";
 is eval("t016(456)"), 456;
 is eval("t016(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t016(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $z, 1;
 is eval("t016()"), 222;
 is $z, 2;
@@ -210,9 +210,9 @@ is eval("t017(0)"), 0;
 is eval("t017(undef)"), "z";
 is eval("t017(456)"), 456;
 is eval("t017(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t017(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t019 ($p = 222, $a = 333) { "$p/$a" }
@@ -222,7 +222,7 @@ is eval("t019(0)"), "0/333";
 is eval("t019(456)"), "456/333";
 is eval("t019(456, 789)"), "456/789";
 is eval("t019(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t020 :prototype($) { $_[0]."z" }
@@ -233,7 +233,7 @@ is eval("t021(0)"), "0/333";
 is eval("t021(456)"), "456/333";
 is eval("t021(456, 789)"), "456/789";
 is eval("t021(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t022 ($p = do { $z += 10; 222 }, $a = do { $z++; 333 }) { "$p/$a" }
@@ -247,7 +247,7 @@ is eval("t022(456)"), "456/333";
 is $z, 13;
 is eval("t022(456, 789)"), "456/789";
 is eval("t022(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $z, 13;
 is $a, 123;
 
@@ -256,7 +256,7 @@ is prototype(\&t023), undef;
 is eval("t023()"), "azy";
 is eval("t023(sub { \"x\".\$_[0].\"x\" })"), "xaxy";
 is eval("t023(sub { \"x\".\$_[0].\"x\" }, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t036 ($a = $a."x") { $a."y" }
@@ -265,7 +265,7 @@ is eval("t036()"), "123xy";
 is eval("t036(0)"), "0y";
 is eval("t036(456)"), "456y";
 is eval("t036(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t120 ($a = $_) { $a // "z" }
@@ -280,7 +280,7 @@ $_ = "___";
 is eval("t120(456)"), 456;
 $_ = "___";
 is eval("t120(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t121 ($a = caller) { $a // "z" }
@@ -290,13 +290,13 @@ is eval("t121(undef)"), "z";
 is eval("t121(0)"), 0;
 is eval("t121(456)"), 456;
 is eval("t121(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("package T121::Z; ::t121()"), "T121::Z";
 is eval("package T121::Z; ::t121(undef)"), "z";
 is eval("package T121::Z; ::t121(0)"), 0;
 is eval("package T121::Z; ::t121(456)"), 456;
 is eval("package T121::Z; ::t121(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t129 ($a = return 222) { $a."x" }
@@ -305,7 +305,7 @@ is eval("t129()"), "222";
 is eval("t129(0)"), "0x";
 is eval("t129(456)"), "456x";
 is eval("t129(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 use feature "current_sub";
@@ -317,7 +317,7 @@ is eval("t122(1)"), "10";
 is eval("t122(5)"), "543210";
 is eval("t122(5, 789)"), "5789";
 is eval("t122(5, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t123 ($list = wantarray) { $list ? "list" : "scalar" }
@@ -329,7 +329,7 @@ is eval("(t123(0))[0]"), "scalar";
 is eval("scalar(t123(1))"), "list";
 is eval("(t123(1))[0]"), "list";
 is eval("t123(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t124 ($b = (local $a = $a + 1)) { "$a/$b" }
@@ -339,7 +339,7 @@ is $a, 123;
 is eval("t124(456)"), "123/456";
 is $a, 123;
 is eval("t124(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t125 ($c = (our $t125_counter)++) { $c }
@@ -352,7 +352,7 @@ is eval("t125(789)"), 789;
 is eval("t125()"), 3;
 is eval("t125()"), 4;
 is eval("t125(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 use feature "state";
@@ -368,7 +368,7 @@ is $z, 223;
 is eval("t126()"), 222;
 is $z, 223;
 is eval("t126(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $z, 223;
 is $a, 123;
 
@@ -387,7 +387,7 @@ is eval("t127(789)"), 789;
 is eval("t127()"), 225;
 is eval("t127()"), 226;
 is eval("t127(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $z, 223;
 is $a, 123;
 
@@ -398,7 +398,7 @@ is eval("t037(0)"), "0/0x";
 is eval("t037(456)"), "456/456x";
 is eval("t037(456, 789)"), "456/789";
 is eval("t037(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t128 ($a = 222, $b = ($a = 333)) { "$a/$b" }
@@ -408,7 +408,7 @@ is eval("t128(0)"), "333/333";
 is eval("t128(456)"), "333/333";
 is eval("t128(456, 789)"), "456/789";
 is eval("t128(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t130 { join(",", @_).";".scalar(@_) }
@@ -419,7 +419,7 @@ is eval("t131(0)"), "0;1";
 is eval("t131(456)"), "456;1";
 is eval("t131(456, 789)"), "456/789";
 is eval("t131(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 eval "#line 8 foo\nsub t024 (\$a =) { }";
@@ -431,11 +431,11 @@ is eval("t025()"), 123;
 is eval("t025(0)"), 123;
 is eval("t025(456)"), 123;
 is eval("t025(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t025(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t025(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t026 ($ = 222) { $a // "z" }
@@ -444,11 +444,11 @@ is eval("t026()"), 123;
 is eval("t026(0)"), 123;
 is eval("t026(456)"), 123;
 is eval("t026(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t026(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t026(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t032 ($ = do { $z++; 222 }) { $a // "z" }
@@ -459,11 +459,11 @@ is $z, 1;
 is eval("t032(0)"), 123;
 is eval("t032(456)"), 123;
 is eval("t032(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t032(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t032(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $z, 1;
 is $a, 123;
 
@@ -473,11 +473,11 @@ is eval("t027()"), 123;
 is eval("t027(0)"), 123;
 is eval("t027(456)"), 123;
 is eval("t027(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t027(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t027(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t119 ($ =, $a = 333) { $a // "z" }
@@ -487,81 +487,81 @@ is eval("t119(0)"), 333;
 is eval("t119(456)"), 333;
 is eval("t119(456, 789)"), 789;
 is eval("t119(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t119(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t028 ($a, $b = 333) { "$a/$b" }
 is prototype(\&t028), undef;
 is eval("t028()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t028(0)"), "0/333";
 is eval("t028(456)"), "456/333";
 is eval("t028(456, 789)"), "456/789";
 is eval("t028(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t045 ($a, $ = 333) { "$a/" }
 is prototype(\&t045), undef;
 is eval("t045()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t045(0)"), "0/";
 is eval("t045(456)"), "456/";
 is eval("t045(456, 789)"), "456/";
 is eval("t045(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t046 ($, $b = 333) { "$a/$b" }
 is prototype(\&t046), undef;
 is eval("t046()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t046(0)"), "123/333";
 is eval("t046(456)"), "123/333";
 is eval("t046(456, 789)"), "123/789";
 is eval("t046(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t047 ($, $ = 333) { "$a/" }
 is prototype(\&t047), undef;
 is eval("t047()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t047(0)"), "123/";
 is eval("t047(456)"), "123/";
 is eval("t047(456, 789)"), "123/";
 is eval("t047(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t029 ($a, $b, $c = 222, $d = 333) { "$a/$b/$c/$d" }
 is prototype(\&t029), undef;
 is eval("t029()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t029(0)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t029(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t029(456, 789)"), "456/789/222/333";
 is eval("t029(456, 789, 987)"), "456/789/987/333";
 is eval("t029(456, 789, 987, 654)"), "456/789/987/654";
 is eval("t029(456, 789, 987, 654, 321)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t029(456, 789, 987, 654, 321, 111)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t038 ($a, $b = $a."x") { "$a/$b" }
 is prototype(\&t038), undef;
 is eval("t038()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t038(0)"), "0/0x";
 is eval("t038(456)"), "456/456x";
 is eval("t038(456, 789)"), "456/789";
 is eval("t038(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 eval "#line 8 foo\nsub t030 (\$a = 222, \$b) { }";
@@ -610,15 +610,15 @@ sub t039 (%abc) { join("/", map { $_."=".$abc{$_} } sort keys %abc) }
 is prototype(\&t039), undef;
 is eval("t039()"), "";
 is eval("t039(0)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t039(456)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t039(456, 789)"), "456=789";
 is eval("t039(456, 789, 987)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t039(456, 789, 987, 654)"), "456=789/987=654";
 is eval("t039(456, 789, 987, 654, 321)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t039(456, 789, 987, 654, 321, 111)"), "321=111/456=789/987=654";
 is $a, 123;
 
@@ -632,15 +632,15 @@ sub t040 (%) { $a }
 is prototype(\&t040), undef;
 is eval("t040()"), 123;
 is eval("t040(0)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t040(456)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t040(456, 789)"), 123;
 is eval("t040(456, 789, 987)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t040(456, 789, 987, 654)"), 123;
 is eval("t040(456, 789, 987, 654, 321)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t040(456, 789, 987, 654, 321, 111)"), 123;
 is $a, 123;
 
@@ -653,7 +653,7 @@ like $@, qr/\AParse error at foo line 8\.\n/;
 sub t041 ($a, @b) { $a.";".join("/", @b) }
 is prototype(\&t041), undef;
 is eval("t041()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t041(0)"), "0;";
 is eval("t041(456)"), "456;";
 is eval("t041(456, 789)"), "456;789";
@@ -666,7 +666,7 @@ is $a, 123;
 sub t042 ($a, @) { $a.";" }
 is prototype(\&t042), undef;
 is eval("t042()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t042(0)"), "0;";
 is eval("t042(456)"), "456;";
 is eval("t042(456, 789)"), "456;";
@@ -679,7 +679,7 @@ is $a, 123;
 sub t043 ($, @b) { $a.";".join("/", @b) }
 is prototype(\&t043), undef;
 is eval("t043()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t043(0)"), "123;";
 is eval("t043(456)"), "123;";
 is eval("t043(456, 789)"), "123;789";
@@ -692,7 +692,7 @@ is $a, 123;
 sub t044 ($, @) { $a.";" }
 is prototype(\&t044), undef;
 is eval("t044()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t044(0)"), "123;";
 is eval("t044(456)"), "123;";
 is eval("t044(456, 789)"), "123;";
@@ -705,16 +705,16 @@ is $a, 123;
 sub t049 ($a, %b) { $a.";".join("/", map { $_."=".$b{$_} } sort keys %b) }
 is prototype(\&t049), undef;
 is eval("t049()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t049(222)"), "222;";
 is eval("t049(222, 456)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t049(222, 456, 789)"), "222;456=789";
 is eval("t049(222, 456, 789, 987)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t049(222, 456, 789, 987, 654)"), "222;456=789/987=654";
 is eval("t049(222, 456, 789, 987, 654, 321)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t049(222, 456, 789, 987, 654, 321, 111)"),
     "222;321=111/456=789/987=654";
 is $a, 123;
@@ -722,11 +722,11 @@ is $a, 123;
 sub t051 ($a, $b, $c, @d) { "$a;$b;$c;".join("/", @d).";".scalar(@d) }
 is prototype(\&t051), undef;
 is eval("t051()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t051(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t051(456, 789)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t051(456, 789, 987)"), "456;789;987;;0";
 is eval("t051(456, 789, 987, 654)"), "456;789;987;654;1";
 is eval("t051(456, 789, 987, 654, 321)"), "456;789;987;654/321;2";
@@ -736,18 +736,18 @@ is $a, 123;
 sub t052 ($a, $b, %c) { "$a;$b;".join("/", map { $_."=".$c{$_} } sort keys %c) }
 is prototype(\&t052), undef;
 is eval("t052()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t052(222)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t052(222, 333)"), "222;333;";
 is eval("t052(222, 333, 456)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t052(222, 333, 456, 789)"), "222;333;456=789";
 is eval("t052(222, 333, 456, 789, 987)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t052(222, 333, 456, 789, 987, 654)"), "222;333;456=789/987=654";
 is eval("t052(222, 333, 456, 789, 987, 654, 321)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t052(222, 333, 456, 789, 987, 654, 321, 111)"),
     "222;333;321=111/456=789/987=654";
 is $a, 123;
@@ -757,21 +757,21 @@ sub t053 ($a, $b, $c, %d) {
 }
 is prototype(\&t053), undef;
 is eval("t053()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t053(222)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t053(222, 333)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t053(222, 333, 444)"), "222;333;444;";
 is eval("t053(222, 333, 444, 456)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t053(222, 333, 444, 456, 789)"), "222;333;444;456=789";
 is eval("t053(222, 333, 444, 456, 789, 987)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t053(222, 333, 444, 456, 789, 987, 654)"),
     "222;333;444;456=789/987=654";
 is eval("t053(222, 333, 444, 456, 789, 987, 654, 321)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t053(222, 333, 444, 456, 789, 987, 654, 321, 111)"),
     "222;333;444;321=111/456=789/987=654";
 is $a, 123;
@@ -817,13 +817,13 @@ is prototype(\&t050), undef;
 is eval("t050()"), "211;";
 is eval("t050(222)"), "222;";
 is eval("t050(222, 456)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t050(222, 456, 789)"), "222;456=789";
 is eval("t050(222, 456, 789, 987)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t050(222, 456, 789, 987, 654)"), "222;456=789/987=654";
 is eval("t050(222, 456, 789, 987, 654, 321)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t050(222, 456, 789, 987, 654, 321, 111)"),
     "222;321=111/456=789/987=654";
 is $a, 123;
@@ -836,13 +836,13 @@ is eval("t056()"), "211;311;";
 is eval("t056(222)"), "222;311;";
 is eval("t056(222, 333)"), "222;333;";
 is eval("t056(222, 333, 456)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t056(222, 333, 456, 789)"), "222;333;456=789";
 is eval("t056(222, 333, 456, 789, 987)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t056(222, 333, 456, 789, 987, 654)"), "222;333;456=789/987=654";
 is eval("t056(222, 333, 456, 789, 987, 654, 321)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t056(222, 333, 456, 789, 987, 654, 321, 111)"),
     "222;333;321=111/456=789/987=654";
 is $a, 123;
@@ -856,14 +856,14 @@ is eval("t057(222)"), "222;311;411;";
 is eval("t057(222, 333)"), "222;333;411;";
 is eval("t057(222, 333, 444)"), "222;333;444;";
 is eval("t057(222, 333, 444, 456)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t057(222, 333, 444, 456, 789)"), "222;333;444;456=789";
 is eval("t057(222, 333, 444, 456, 789, 987)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t057(222, 333, 444, 456, 789, 987, 654)"),
     "222;333;444;456=789/987=654";
 is eval("t057(222, 333, 444, 456, 789, 987, 654, 321)"), undef;
-like $@, qr#\AOdd name/value argument for subroutine at#;
+like $@, qr#\AOdd name/value argument for subroutine at \(eval \d+\) line 1\.\n\z#;
 is eval("t057(222, 333, 444, 456, 789, 987, 654, 321, 111)"),
     "222;333;444;321=111/456=789/987=654";
 is $a, 123;
@@ -871,7 +871,7 @@ is $a, 123;
 sub t058 ($a, $b = 333, @c) { "$a;$b;".join("/", @c).";".scalar(@c) }
 is prototype(\&t058), undef;
 is eval("t058()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t058(456)"), "456;333;;0";
 is eval("t058(456, 789)"), "456;789;;0";
 is eval("t058(456, 789, 987)"), "456;789;987;1";
@@ -946,27 +946,27 @@ is $@, "Slurpy parameter not last at foo line 8\.\n";
 sub t080 ($a,,, $b) { $a.$b }
 is prototype(\&t080), undef;
 is eval("t080()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t080(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t080(456, 789)"), "456789";
 is eval("t080(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t080(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t081 ($a, $b,,) { $a.$b }
 is prototype(\&t081), undef;
 is eval("t081()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t081(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t081(456, 789)"), "456789";
 is eval("t081(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t081(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 eval "#line 8 foo\nsub t082 (, \$a) { }";
@@ -978,14 +978,14 @@ like $@, qr/\AParse error at foo line 8\.\n/;
 sub t084($a,$b){ $a.$b }
 is prototype(\&t084), undef;
 is eval("t084()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t084(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t084(456, 789)"), "456789";
 is eval("t084(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t084(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t085
@@ -1004,13 +1004,13 @@ sub t085
     { $a.$b }
 is prototype(\&t085), undef;
 is eval("t085()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t085(456)"), "456333";
 is eval("t085(456, 789)"), "456789";
 is eval("t085(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t085(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t086
@@ -1029,13 +1029,13 @@ sub t086
     { $a.$b }
 is prototype(\&t086), undef;
 is eval("t086()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t086(456)"), "456333";
 is eval("t086(456, 789)"), "456789";
 is eval("t086(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t086(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t087
@@ -1054,13 +1054,13 @@ sub t087
     { $a.$b }
 is prototype(\&t087), undef;
 is eval("t087()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t087(456)"), "456333";
 is eval("t087(456, 789)"), "456789";
 is eval("t087(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t087(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 eval "#line 8 foo\nsub t088 (\$ #foo\na) { }";
@@ -1104,17 +1104,17 @@ sub t100 ($_) { "$::_/$_" }
 is prototype(\&t100), undef;
 $_ = "___";
 is eval("t100()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 $_ = "___";
 is eval("t100(0)"), "___/0";
 $_ = "___";
 is eval("t100(456)"), "___/456";
 $_ = "___";
 is eval("t100(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 $_ = "___";
 is eval("t100(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 eval "#line 8 foo\nsub t101 (\@_) { }";
@@ -1126,25 +1126,25 @@ like $@, qr/\ACan't use global \%_ in "my" at foo line 8/;
 my $t103 = sub ($a) { $a || "z" };
 is prototype($t103), undef;
 is eval("\$t103->()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("\$t103->(0)"), "z";
 is eval("\$t103->(456)"), 456;
 is eval("\$t103->(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("\$t103->(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 my $t118 = sub :prototype($) ($a) { $a || "z" };
 is prototype($t118), "\$";
 is eval("\$t118->()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("\$t118->(0)"), "z";
 is eval("\$t118->(456)"), 456;
 is eval("\$t118->(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("\$t118->(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t033 ($a = sub ($a) { $a."z" }) { $a->("a")."y" }
@@ -1152,7 +1152,7 @@ is prototype(\&t033), undef;
 is eval("t033()"), "azy";
 is eval("t033(sub { \"x\".\$_[0].\"x\" })"), "xaxy";
 is eval("t033(sub { \"x\".\$_[0].\"x\" }, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t133 ($a = sub ($a = 222) { $a."z" }) { $a->()."/".$a->("a") }
@@ -1160,7 +1160,7 @@ is prototype(\&t133), undef;
 is eval("t133()"), "222z/az";
 is eval("t133(sub { \"x\".(\$_[0] // \"u\").\"x\" })"), "xux/xax";
 is eval("t133(sub { \"x\".(\$_[0] // \"u\").\"x\" }, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t134 ($a = sub ($a, $t = sub { $_[0]."p" }) { $t->($a)."z" }) {
@@ -1172,7 +1172,7 @@ is eval("t134(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" })"),
     "xax/xbqx";
 is eval("t134(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" }, 789)"),
     undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t135 ($a = sub ($a, $t = sub ($p) { $p."p" }) { $t->($a)."z" }) {
@@ -1184,7 +1184,7 @@ is eval("t135(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" })"),
     "xax/xbqx";
 is eval("t135(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" }, 789)"),
     undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t132 (
@@ -1198,19 +1198,19 @@ is eval("t132(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" })"),
     "xax/xbqx";
 is eval("t132(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" }, 789)"),
     undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t104 :method ($a) { $a || "z" }
 is prototype(\&t104), undef;
 is eval("t104()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t104(0)"), "z";
 is eval("t104(456)"), 456;
 is eval("t104(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t104(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t105 :prototype($) ($a) { $a || "z" }
@@ -1220,21 +1220,21 @@ like $@, qr/\ANot enough arguments for main::t105 /;
 is eval("t105(0)"), "z";
 is eval("t105(456)"), 456;
 is eval("t105(456, 789)"), undef;
-like $@, qr/\AToo many arguments for main::t105 at/;
+like $@, qr/\AToo many arguments for main::t105 at \(eval \d+\) line 1, near/;
 is eval("t105(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for main::t105 at/;
+like $@, qr/\AToo many arguments for main::t105 at \(eval \d+\) line 1, near/;
 is $a, 123;
 
 sub t106 :prototype(@) ($a) { $a || "z" }
 is prototype(\&t106), "\@";
 is eval("t106()"), undef;
-like $@, qr/\AToo few arguments for subroutine at/;
+like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t106(0)"), "z";
 is eval("t106(456)"), 456;
 is eval("t106(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is eval("t106(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at/;
+like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 eval "#line 8 foo\nsub t107 (\$a) :method { }";
