@@ -2379,12 +2379,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 		    else if (sigil == '%')
 			sv = MUTABLE_SV(newHV());
 		    else
-		    {
 			sv = newSV(0);
-			/* For flip-flop targets: */
-			if (oldpad[ix] && SvPADTMP(oldpad[ix]))
-			    SvPADTMP_on(sv);
-		    }
 		    av_store(newpad, ix, sv);
 		}
 	    }

@@ -5,7 +5,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(12);
+plan(13);
 
 @a = (1,2,3,4,5,6,7,8,9,10,11,12);
 @b = ();
@@ -66,3 +66,38 @@ ok(scalar(15..0));
 
 push @_, \scalar(0..0) for 1,2;
 isnt $_[0], $_[1], '\scalar($a..$b) gives a different scalar each time';
+
+# This evil little example from ticket #122829 abused the fact that each
+# recursion level maintained its own flip-flip state.  The following com-
+# ment describes how it *used* to work.
+
+# This routine maintains multiple flip-flop states, each with its own
+# numeric ID, starting from 1.  Pass the ID as the argument.
+sub f {
+    my $depth = shift() - 1;
+    return f($depth) if $depth;
+    return /3/../5/;
+}
+{
+    my $accumulator;
+    for(1..20) {
+        if (f(1)) {
+            my $outer = $_;
+            for(1..10){
+                $accumulator .= "$outer $_\n" if f(2);
+            }
+        }
+    }
+    is $accumulator, <<EOT, 'recursion shares state';
+3 1
+3 2
+3 3
+3 4
+3 5
+13 1
+13 2
+13 3
+13 4
+13 5
+EOT
+}
