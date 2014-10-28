@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 123;
+plan tests => 125;
 
 $FS = ':';
 
@@ -507,4 +507,11 @@ is "@aaa", "f o o b a r b a z",
 is "@a", "a b c", '() = split-to-array';
 
 (@a = split //, "abc") = 1..10;
-is "@a", '1 2 3', 'assignment to split-to-array';
+is "@a", '1 2 3', 'assignment to split-to-array (pmtarget/package array)';
+{
+  my @a;
+  (@a = split //, "abc") = 1..10;
+  is "@a", '1 2 3', 'assignment to split-to-array (targ/lexical)';
+}
+(@{\@a} = split //, "abc") = 1..10;
+is "@a", '1 2 3', 'assignment to split-to-array (stacked)';
