@@ -9104,7 +9104,7 @@ Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
     /* Add the range from 'start' to 'end' inclusive to the inversion list's
      * set.  A pointer to the inversion list is returned.  This may actually be
      * a new list, in which case the passed in one has been destroyed.  The
-     * passed in inversion list can be NULL, in which case a new one is created
+     * passed-in inversion list can be NULL, in which case a new one is created
      * with just the one range in it */
 
     SV* range_invlist;
@@ -14462,8 +14462,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             continue;
         }
 
-        /* Here, we have a single value, and <prevvalue> is the beginning of
-         * the range, if any; or <value> if not */
+        /* Here, we have a single value this time through the loop, and
+         * <prevvalue> is the beginning of the range, if any; or <value> if
+         * not. */
 
 	/* non-Latin1 code point implies unicode semantics.  Must be set in
 	 * pass1 so is there for the whole of pass 2 */
