@@ -2115,9 +2115,6 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	 * IV or UV at same time to avoid this. */
 	/* IV-over-UV optimisation - choose to cache IV if possible */
 
-        if (UNLIKELY(Perl_isinfnan(SvNVX(sv))))
-            return FALSE;
-
 	if (SvTYPE(sv) == SVt_NV)
 	    sv_upgrade(sv, SVt_PVNV);
 
@@ -2126,6 +2123,13 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	   certainly cast into the IV range at IV_MAX, whereas the correct
 	   answer is the UV IV_MAX +1. Hence < ensures that dodgy boundary
 	   cases go to UV */
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+	if (Perl_isnan(SvNVX(sv))) {
+	    SvUV_set(sv, 0);
+	    SvIsUV_on(sv);
+	    return FALSE;
+	}
+#endif
 	if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
 	    SvIV_set(sv, I_V(SvNVX(sv)));
 	    if (SvNVX(sv) == (NV) SvIVX(sv)
@@ -2277,6 +2281,13 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 #ifdef NV_PRESERVES_UV
             (void)SvIOKp_on(sv);
             (void)SvNOK_on(sv);
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+            if (Perl_isnan(SvNVX(sv))) {
+                SvUV_set(sv, 0);
+                SvIsUV_on(sv);
+                return FALSE;
+            }
+#endif
             if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
                 SvIV_set(sv, I_V(SvNVX(sv)));
                 if ((NV)(SvIVX(sv)) == SvNVX(sv)) {
@@ -2386,9 +2397,6 @@ Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags)
     if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))
 	mg_get(sv);
 
-    if (SvNOK(sv) && UNLIKELY(Perl_isinfnan(SvNVX(sv))))
-        return 0; /* So wrong but what can we do. */
-
     if (SvROK(sv)) {
 	if (SvAMAGIC(sv)) {
 	    SV * tmpstr;
@@ -2416,9 +2424,8 @@ Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags)
 	    UV value;
 	    const char * const ptr =
 		isREGEXP(sv) ? RX_WRAPPED((REGEXP*)sv) : SvPVX_const(sv);
-	    const int numtype = grok_number(ptr, SvCUR(sv), &value);
-
-            assert((numtype & (IS_NUMBER_INFINITY | IS_NUMBER_NAN)) == 0);
+	    const int numtype
+		= grok_number(ptr, SvCUR(sv), &value);
 
 	    if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 		== IS_NUMBER_IN_UV) {
@@ -2431,6 +2438,13 @@ Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags)
 			return (IV)value;
 		}
 	    }
+
+            /* Quite wrong but no good choices. */
+            if ((numtype & IS_NUMBER_INFINITY)) {
+                return (numtype & IS_NUMBER_NEG) ? IV_MIN : IV_MAX;
+            } else if ((numtype & IS_NUMBER_NAN)) {
+                return 0; /* So wrong. */
+            }
 
 	    if (!numtype) {
 		if (ckWARN(WARN_NUMERIC))
@@ -2481,9 +2495,6 @@ Perl_sv_2uv_flags(pTHX_ SV *const sv, const I32 flags)
     if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))
 	mg_get(sv);
 
-    if (SvNOK(sv) && UNLIKELY(Perl_isinfnan(SvNVX(sv))))
-        return 0; /* So wrong but what can we do. */
-
     if (SvROK(sv)) {
 	if (SvAMAGIC(sv)) {
 	    SV *tmpstr;
@@ -2506,9 +2517,8 @@ Perl_sv_2uv_flags(pTHX_ SV *const sv, const I32 flags)
 	    UV value;
 	    const char * const ptr =
 		isREGEXP(sv) ? RX_WRAPPED((REGEXP*)sv) : SvPVX_const(sv);
-	    const int numtype = grok_number(ptr, SvCUR(sv), &value);
-
-            assert((numtype & (IS_NUMBER_INFINITY | IS_NUMBER_NAN)) == 0);
+	    const int numtype
+		= grok_number(ptr, SvCUR(sv), &value);
 
 	    if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 		== IS_NUMBER_IN_UV) {
@@ -2516,6 +2526,13 @@ Perl_sv_2uv_flags(pTHX_ SV *const sv, const I32 flags)
 		if (!(numtype & IS_NUMBER_NEG))
 		    return value;
 	    }
+
+            /* Quite wrong but no good choices. */
+            if ((numtype & IS_NUMBER_INFINITY)) {
+                return UV_MAX; /* So wrong. */
+            } else if ((numtype & IS_NUMBER_NAN)) {
+                return 0; /* So wrong. */
+            }
 
 	    if (!numtype) {
 		if (ckWARN(WARN_NUMERIC))
@@ -2675,107 +2692,100 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	else
 	    SvNOKp_on(sv);
 #else
-        if ((numtype & IS_NUMBER_INFINITY)) {
-            SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -NV_INF : NV_INF);
-            SvNOK_on(sv);
-        } else if ((numtype & IS_NUMBER_NAN)) {
-            SvNV_set(sv, NV_NAN);
+	SvNV_set(sv, Atof(SvPVX_const(sv)));
+	/* Only set the public NV OK flag if this NV preserves the value in
+	   the PV at least as well as an IV/UV would.
+	   Not sure how to do this 100% reliably. */
+	/* if that shift count is out of range then Configure's test is
+	   wonky. We shouldn't be in here with NV_PRESERVES_UV_BITS ==
+	   UV_BITS */
+	if (((UV)1 << NV_PRESERVES_UV_BITS) >
+	    U_V(SvNVX(sv) > 0 ? SvNVX(sv) : -SvNVX(sv))) {
+	    SvNOK_on(sv); /* Definitely small enough to preserve all bits */
+	} else if (!(numtype & IS_NUMBER_IN_UV)) {
+            /* Can't use strtol etc to convert this string, so don't try.
+               sv_2iv and sv_2uv will use the NV to convert, not the PV.  */
             SvNOK_on(sv);
         } else {
-            SvNV_set(sv, Atof(SvPVX_const(sv)));
-            /* Only set the public NV OK flag if this NV preserves the value in
-               the PV at least as well as an IV/UV would.
-               Not sure how to do this 100% reliably. */
-            /* if that shift count is out of range then Configure's test is
-               wonky. We shouldn't be in here with NV_PRESERVES_UV_BITS ==
-               UV_BITS */
-            if (((UV)1 << NV_PRESERVES_UV_BITS) >
-                U_V(SvNVX(sv) > 0 ? SvNVX(sv) : -SvNVX(sv))) {
-                SvNOK_on(sv); /* Definitely small enough to preserve all bits */
-            } else if (!(numtype & IS_NUMBER_IN_UV)) {
-                /* Can't use strtol etc to convert this string, so don't try.
-                   sv_2iv and sv_2uv will use the NV to convert, not the PV.  */
-                SvNOK_on(sv);
+            /* value has been set.  It may not be precise.  */
+	    if ((numtype & IS_NUMBER_NEG) && (value > (UV)IV_MIN)) {
+		/* 2s complement assumption for (UV)IV_MIN  */
+                SvNOK_on(sv); /* Integer is too negative.  */
             } else {
-                /* value has been set.  It may not be precise.  */
-                if ((numtype & IS_NUMBER_NEG) && (value > (UV)IV_MIN)) {
-                    /* 2s complement assumption for (UV)IV_MIN  */
-                    SvNOK_on(sv); /* Integer is too negative.  */
+                SvNOKp_on(sv);
+                SvIOKp_on(sv);
+
+                if (numtype & IS_NUMBER_NEG) {
+                    SvIV_set(sv, -(IV)value);
+                } else if (value <= (UV)IV_MAX) {
+		    SvIV_set(sv, (IV)value);
+		} else {
+		    SvUV_set(sv, value);
+		    SvIsUV_on(sv);
+		}
+
+                if (numtype & IS_NUMBER_NOT_INT) {
+                    /* I believe that even if the original PV had decimals,
+                       they are lost beyond the limit of the FP precision.
+                       However, neither is canonical, so both only get p
+                       flags.  NWC, 2000/11/25 */
+                    /* Both already have p flags, so do nothing */
                 } else {
-                    SvNOKp_on(sv);
-                    SvIOKp_on(sv);
-
-                    if (numtype & IS_NUMBER_NEG) {
-                        SvIV_set(sv, -(IV)value);
-                    } else if (value <= (UV)IV_MAX) {
-                        SvIV_set(sv, (IV)value);
-                    } else {
-                        SvUV_set(sv, value);
-                        SvIsUV_on(sv);
-                    }
-
-                    if (numtype & IS_NUMBER_NOT_INT) {
-                        /* I believe that even if the original PV had decimals,
-                           they are lost beyond the limit of the FP precision.
-                           However, neither is canonical, so both only get p
-                           flags.  NWC, 2000/11/25 */
-                        /* Both already have p flags, so do nothing */
-                    } else {
-                        const NV nv = SvNVX(sv);
-                        if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
-                            if (SvIVX(sv) == I_V(nv)) {
-                                SvNOK_on(sv);
-                            } else {
-                                /* It had no "." so it must be integer.  */
-                            }
-                            SvIOK_on(sv);
+		    const NV nv = SvNVX(sv);
+                    /* XXX should this spot have NAN_COMPARE_BROKEN, too? */
+                    if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
+                        if (SvIVX(sv) == I_V(nv)) {
+                            SvNOK_on(sv);
                         } else {
-                            /* between IV_MAX and NV(UV_MAX).
-                               Could be slightly > UV_MAX */
+                            /* It had no "." so it must be integer.  */
+                        }
+			SvIOK_on(sv);
+                    } else {
+                        /* between IV_MAX and NV(UV_MAX).
+                           Could be slightly > UV_MAX */
 
-                            if (numtype & IS_NUMBER_NOT_INT) {
-                                /* UV and NV both imprecise.  */
-                            } else {
-                                const UV nv_as_uv = U_V(nv);
+                        if (numtype & IS_NUMBER_NOT_INT) {
+                            /* UV and NV both imprecise.  */
+                        } else {
+			    const UV nv_as_uv = U_V(nv);
 
-                                if (value == nv_as_uv && SvUVX(sv) != UV_MAX) {
-                                    SvNOK_on(sv);
-                                }
-                                SvIOK_on(sv);
+                            if (value == nv_as_uv && SvUVX(sv) != UV_MAX) {
+                                SvNOK_on(sv);
                             }
+			    SvIOK_on(sv);
                         }
                     }
                 }
             }
-            /* It might be more code efficient to go through the entire logic above
-               and conditionally set with SvNOKp_on() rather than SvNOK(), but it
-               gets complex and potentially buggy, so more programmer efficient
-	   to do it this way, by turning off the public flags:  */
-            if (!numtype)
-                SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK);
         }
+	/* It might be more code efficient to go through the entire logic above
+	   and conditionally set with SvNOKp_on() rather than SvNOK(), but it
+	   gets complex and potentially buggy, so more programmer efficient
+	   to do it this way, by turning off the public flags:  */
+	if (!numtype)
+	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK);
 #endif /* NV_PRESERVES_UV */
     }
     else  {
-        if (isGV_with_GP(sv)) {
-            glob_2number(MUTABLE_GV(sv));
-            return 0.0;
-        }
+	if (isGV_with_GP(sv)) {
+	    glob_2number(MUTABLE_GV(sv));
+	    return 0.0;
+	}
 
-        if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
-            report_uninit(sv);
-        assert (SvTYPE(sv) >= SVt_NV);
-        /* Typically the caller expects that sv_any is not NULL now.  */
-        /* XXX Ilya implies that this is a bug in callers that assume this
-           and ideally should be fixed.  */
-        return 0.0;
+	if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
+	    report_uninit(sv);
+	assert (SvTYPE(sv) >= SVt_NV);
+	/* Typically the caller expects that sv_any is not NULL now.  */
+	/* XXX Ilya implies that this is a bug in callers that assume this
+	   and ideally should be fixed.  */
+	return 0.0;
     }
     DEBUG_c({
-            STORE_NUMERIC_LOCAL_SET_STANDARD();
-            PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2nv(%" NVgf ")\n",
-                          PTR2UV(sv), SvNVX(sv));
-            RESTORE_NUMERIC_LOCAL();
-        });
+	STORE_NUMERIC_LOCAL_SET_STANDARD();
+	PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2nv(%" NVgf ")\n",
+		      PTR2UV(sv), SvNVX(sv));
+	RESTORE_NUMERIC_LOCAL();
+    });
     return SvNVX(sv);
 }
 
@@ -3063,7 +3073,6 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    sv_upgrade(sv, SVt_PVNV);
 	if (SvNVX(sv) == 0.0
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-            /* XXX Create SvNVXeq(sv, x)? Or just SvNVXzero(sv)? */
 	    && !Perl_isnan(SvNVX(sv))
 #endif
 	) {
