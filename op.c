@@ -675,85 +675,119 @@ optree.
 =cut
 */
 
+#define DEFERRED_STEP 100
+#define DEFER(o) \
+  STMT_START { \
+    if (UNLIKELY(defer_ix == (defer_stack_alloc-1))) {    \
+        defer_stack_alloc += DEFERRED_STEP; \
+        assert(defer_stack_alloc > 0); \
+        Renew(defer_stack, defer_stack_alloc, OP *); \
+    } \
+    defer_stack[++defer_ix] = o; \
+  } STMT_END
+
+#define POP_DEFERRED() (defer_ix >= 0 ? defer_stack[defer_ix--] : (OP *)NULL)
+
 void
 Perl_op_free(pTHX_ OP *o)
 {
     dVAR;
     OPCODE type;
+    SSize_t defer_ix = -1;
+    SSize_t defer_stack_alloc = 0;
+    OP **defer_stack = NULL;
 
-    /* Though ops may be freed twice, freeing the op after its slab is a
-       big no-no. */
-    assert(!o || !o->op_slabbed || OpSLAB(o)->opslab_refcnt != ~(size_t)0); 
-    /* During the forced freeing of ops after compilation failure, kidops
-       may be freed before their parents. */
-    if (!o || o->op_type == OP_FREED)
-	return;
+    do {
 
-    type = o->op_type;
+        /* Though ops may be freed twice, freeing the op after its slab is a
+           big no-no. */
+        assert(!o || !o->op_slabbed || OpSLAB(o)->opslab_refcnt != ~(size_t)0);
+        /* During the forced freeing of ops after compilation failure, kidops
+           may be freed before their parents. */
+        if (!o || o->op_type == OP_FREED)
+            continue;
 
-    /* an op should only ever acquire op_private flags that we know about.
-     * If this fails, you may need to fix something in regen/op_private */
-    if (o->op_ppaddr == PL_ppaddr[o->op_type]) {
-	assert(!(o->op_private & ~PL_op_private_valid[type]));
-    }
+        type = o->op_type;
 
-    if (o->op_private & OPpREFCOUNTED) {
-	switch (type) {
-	case OP_LEAVESUB:
-	case OP_LEAVESUBLV:
-	case OP_LEAVEEVAL:
-	case OP_LEAVE:
-	case OP_SCOPE:
-	case OP_LEAVEWRITE:
-	    {
-	    PADOFFSET refcnt;
-	    OP_REFCNT_LOCK;
-	    refcnt = OpREFCNT_dec(o);
-	    OP_REFCNT_UNLOCK;
-	    if (refcnt) {
-		/* Need to find and remove any pattern match ops from the list
-		   we maintain for reset().  */
-		find_and_forget_pmops(o);
-		return;
-	    }
-	    }
-	    break;
-	default:
-	    break;
-	}
-    }
+        /* an op should only ever acquire op_private flags that we know about.
+         * If this fails, you may need to fix something in regen/op_private */
+        if (o->op_ppaddr == PL_ppaddr[o->op_type]) {
+            assert(!(o->op_private & ~PL_op_private_valid[type]));
+        }
 
-    /* Call the op_free hook if it has been set. Do it now so that it's called
-     * at the right time for refcounted ops, but still before all of the kids
-     * are freed. */
-    CALL_OPFREEHOOK(o);
+        if (o->op_private & OPpREFCOUNTED) {
+            switch (type) {
+            case OP_LEAVESUB:
+            case OP_LEAVESUBLV:
+            case OP_LEAVEEVAL:
+            case OP_LEAVE:
+            case OP_SCOPE:
+            case OP_LEAVEWRITE:
+                {
+                PADOFFSET refcnt;
+                OP_REFCNT_LOCK;
+                refcnt = OpREFCNT_dec(o);
+                OP_REFCNT_UNLOCK;
+                if (refcnt) {
+                    /* Need to find and remove any pattern match ops from the list
+                       we maintain for reset().  */
+                    find_and_forget_pmops(o);
+                    continue;
+                }
+                }
+                break;
+            default:
+                break;
+            }
+        }
 
-    if (o->op_flags & OPf_KIDS) {
-        OP *kid, *nextkid;
-	for (kid = cUNOPo->op_first; kid; kid = nextkid) {
-	    nextkid = OP_SIBLING(kid); /* Get before next freeing kid */
-	    op_free(kid);
-	}
-    }
-    if (type == OP_NULL)
-	type = (OPCODE)o->op_targ;
+        /* Call the op_free hook if it has been set. Do it now so that it's called
+         * at the right time for refcounted ops, but still before all of the kids
+         * are freed. */
+        CALL_OPFREEHOOK(o);
 
-    if (o->op_slabbed)
-        Slab_to_rw(OpSLAB(o));
+        if (o->op_flags & OPf_KIDS) {
+            OP *kid, *nextkid;
+            for (kid = cUNOPo->op_first; kid; kid = nextkid) {
+                nextkid = OP_SIBLING(kid); /* Get before next freeing kid */
+                if (!kid || kid->op_type == OP_FREED)
+                    /* During the forced freeing of ops after
+                       compilation failure, kidops may be freed before
+                       their parents. */
+                    continue;
+                if (!(kid->op_flags & OPf_KIDS))
+                    /* If it has no kids, just free it now */
+                    op_free(kid);
+                else
+                    DEFER(kid);
+            }
+        }
+        if (type == OP_NULL)
+            type = (OPCODE)o->op_targ;
 
-    /* COP* is not cleared by op_clear() so that we may track line
-     * numbers etc even after null() */
-    if (type == OP_NEXTSTATE || type == OP_DBSTATE) {
-	cop_free((COP*)o);
-    }
+        if (o->op_slabbed)
+            Slab_to_rw(OpSLAB(o));
 
-    op_clear(o);
-    FreeOp(o);
+        /* COP* is not cleared by op_clear() so that we may track line
+         * numbers etc even after null() */
+        if (type == OP_NEXTSTATE || type == OP_DBSTATE) {
+            cop_free((COP*)o);
+        }
+
+        op_clear(o);
+        FreeOp(o);
 #ifdef DEBUG_LEAKING_SCALARS
-    if (PL_op == o)
-	PL_op = NULL;
+        if (PL_op == o)
+            PL_op = NULL;
 #endif
+    } while ( (o = POP_DEFERRED()) );
+
+    Safefree(defer_stack);
 }
+
+#undef DEFER
+#undef POP_DEFERRED
+#undef DEFERRED_STEP
 
 void
 Perl_op_clear(pTHX_ OP *o)
