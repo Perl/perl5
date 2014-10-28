@@ -5501,9 +5501,10 @@ Perl_yylex(pTHX)
 		    OPERATOR(HASHBRACK);
 		}
 		if (PL_expect == XREF && PL_oldoldbufptr != PL_last_lop) {
-		    /* ${...} or @{...} etc., but not print {...} */
-		    PL_expect = XTERM;
-		    break;
+		    /* ${...} or @{...} etc., but not print {...}
+		     * Skip the disambiguation and treat this as a block.
+		     */
+		    goto block_expectation;
 		}
 		/* This hack serves to disambiguate a pair of curlies
 		 * as being a block or an anon hash.  Normally, expectation
@@ -5587,7 +5588,28 @@ Perl_yylex(pTHX)
 				   || (*t == '=' && t[1] == '>')))
 		    OPERATOR(HASHBRACK);
 		if (PL_expect == XREF)
-		    PL_expect = XTERM;
+		{
+		  block_expectation:
+		    /* If there is an opening brace or 'sub:', treat it
+		       as a term to make ${{...}}{k} and &{sub:attr...}
+		       dwim.  Otherwise, treat it as a statement, so
+		       map {no strict; ...} works.
+		     */
+		    s = skipspace(s);
+		    if (*s == '{') {
+			PL_expect = XTERM;
+			break;
+		    }
+		    if (strnEQ(s, "sub", 3)) {
+			d = s + 3;
+			d = skipspace(d);
+			if (*d == ':') {
+			    PL_expect = XTERM;
+			    break;
+			}
+		    }
+		    PL_expect = XSTATE;
+		}
 		else {
 		    PL_lex_brackstack[PL_lex_brackets-1] = XSTATE;
 		    PL_expect = XSTATE;

@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..93\n";
+print "1..101\n";
 
 $x = 'x';
 
@@ -444,3 +444,33 @@ print "not " unless
     (eval '${Function_with_side_effects,\$_}' || $@)
       eq "sidekick function called";
 print "ok $test - \${...} where {...} looks like hash\n"; $test++;
+
+@_ = map{BEGIN {$_122782 = 'tst2'}; "rhu$_"} 'barb2';
+print "not " unless "@_" eq 'rhubarb2';
+print "ok $test - map{BEGIN...\n"; $test++;
+print "not " unless $_122782 eq 'tst2';
+print "ok $test - map{BEGIN...\n"; $test++;
+${
+=pod
+blah blah blah
+=cut
+\$_ } = 42;
+print "not "unless $_ == 42;
+print "ok $test - \${ <newline> =pod\n"; $test++;
+@_ = map{
+=pod
+blah blah blah
+=cut
+$_+1 } 1;
+print "not "unless "@_" eq 2;
+print "ok $test - map{ <newline> =pod\n"; $test++;
+eval { ${...}++ };
+print "not " unless $@ =~ /^Unimplemented at /;
+print "ok $test - \${...} (literal triple-dot)\n"; $test++;
+eval { () = map{...} @_ };
+print "not " unless $@ =~ /^Unimplemented at /;
+print "ok $test - map{...} (literal triple-dot)\n"; $test++;
+print "not " unless &{sub :lvalue { "a" }} eq "a";
+print "ok $test - &{sub :lvalue...}\n"; $test++;
+print "not " unless ref+(map{sub :lvalue { "a" }} 1)[0] eq "CODE";
+print "ok $test - map{sub :lvalue...}\n"; $test++;

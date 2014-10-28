@@ -16,22 +16,21 @@ no warnings qw(misc reserved);
 
 plan (tests => 66900);
 
-# ${single:colon} should not be valid syntax
+# ${single:colon} should not be treated as a simple variable, but as a
+# block with a label inside.
 {
     no strict;
 
     local $@;
-    eval "\${\x{30cd}single:\x{30cd}colon} = 1";
-    like($@,
-         qr/syntax error .* near "\x{30cd}single:/,
-         '${\x{30cd}single:\x{30cd}colon} should not be valid syntax'
-        );
+    eval "\${\x{30cd}single:\x{30cd}colon} = 'label, not var'";
+    is ${"\x{30cd}colon"}, 'label, not var',
+         '${\x{30cd}single:\x{30cd}colon} should be block-label';
 
     local $@;
     no utf8;
-    evalbytes '${single:colon} = 1';
-    like($@,
-         qr/syntax error .* near "single:/,
+    evalbytes '${single:colon} = "block/label, not var"';
+    is($::colon,
+         'block/label, not var',
          '...same with ${single:colon}'
         );
 }

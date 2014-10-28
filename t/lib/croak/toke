@@ -30,6 +30,11 @@ EXPECT
 Missing right brace on \N{} or unescaped left brace after \N at - line 1, within pattern
 Execution of - aborted due to compilation errors.
 ########
+# NAME map{for our *a...
+map{for our *a (1..10) {$_.=$x}}
+EXPECT
+Missing $ on loop variable at - line 1.
+########
 # NAME Missing name in "my sub"
 use feature 'lexical_subs'; my sub;
 EXPECT

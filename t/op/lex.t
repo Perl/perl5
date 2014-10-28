@@ -4,7 +4,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 8);
+plan(tests => 10);
 
 {
     no warnings 'deprecated';
@@ -88,3 +88,8 @@ is runperl(
  ."2.\n",
   'no buffer corruption with multiline *{...expr...}'
 ;
+
+$_ = "rhubarb";
+is ${no strict; \$_}, "rhubarb", '${no strict; ...}';
+is join("", map{no strict; "rhu$_" } "barb"), 'rhubarb',
+  'map{no strict;...}';
