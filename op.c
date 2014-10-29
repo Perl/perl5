@@ -10245,19 +10245,21 @@ Perl_ck_refassign(pTHX_ OP *o)
 {
     OP * const right = cLISTOPo->op_first;
     OP * const left = OP_SIBLING(right);
-    OP * const varop = cUNOPx(cUNOPx(left)->op_first)->op_first;
+    OP *varop = cUNOPx(cUNOPx(left)->op_first)->op_first;
     bool stacked = 0;
 
     PERL_ARGS_ASSERT_CK_REFASSIGN;
     assert (left);
     assert (left->op_type == OP_SREFGEN);
 
+    o->op_private = varop->op_private & (OPpLVAL_INTRO|OPpPAD_STATE);
+
     switch (varop->op_type) {
     case OP_PADAV:
-	o->op_private = OPpLVREF_AV;
+	o->op_private |= OPpLVREF_AV;
 	goto settarg;
     case OP_PADHV:
-	o->op_private = OPpLVREF_HV;
+	o->op_private |= OPpLVREF_HV;
     case OP_PADSV:
       settarg:
 	o->op_targ = varop->op_targ;
@@ -10265,20 +10267,27 @@ Perl_ck_refassign(pTHX_ OP *o)
 	PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
 	break;
     case OP_RV2AV:
-	o->op_private = OPpLVREF_AV;
+	o->op_private |= OPpLVREF_AV;
 	goto checkgv;
     case OP_RV2HV:
-	o->op_private = OPpLVREF_HV;
+	o->op_private |= OPpLVREF_HV;
     case OP_RV2SV:
       checkgv:
 	if (cUNOPx(varop)->op_first->op_type != OP_GV) goto bad;
-	goto null_and_stack;
+      detach_and_stack:
+	/* Point varop to its GV kid, detached.  */
+	varop = op_sibling_splice(varop, NULL, -1, NULL);
+	stacked = TRUE;
+	break;
     case OP_RV2CV: {
-	OP * const kid =
-	    cUNOPx(cUNOPx(cUNOPx(varop)->op_first)->op_first->op_sibling)
-		->op_first;
-	o->op_private = OPpLVREF_CV;
-	if (kid->op_type == OP_GV)	goto null_and_stack;
+	OP * const kidparent =
+	    cUNOPx(cUNOPx(varop)->op_first)->op_first->op_sibling;
+	OP * const kid = cUNOPx(kidparent)->op_first;
+	o->op_private |= OPpLVREF_CV;
+	if (kid->op_type == OP_GV) {
+	    varop = kidparent;
+	    goto detach_and_stack;
+	}
 	if (kid->op_type != OP_PADCV)	goto bad;
 	o->op_targ = kid->op_targ;
 	kid->op_targ = 0;
@@ -10286,11 +10295,11 @@ Perl_ck_refassign(pTHX_ OP *o)
     }
     case OP_AELEM:
     case OP_HELEM:
-	o->op_private = OPpLVREF_ELEM;
-      null_and_stack:
+	o->op_private |= OPpLVREF_ELEM;
 	op_null(varop);
-	op_null(left);
 	stacked = TRUE;
+	/* Detach varop.  */
+	op_sibling_splice(cUNOPx(left)->op_first, NULL, -1, NULL);
 	break;
     default:
       bad:
@@ -10306,13 +10315,15 @@ Perl_ck_refassign(pTHX_ OP *o)
     Perl_ck_warner_d(aTHX_
 		     packWARN(WARN_EXPERIMENTAL__REFALIASING),
 		    "Aliasing via reference is experimental");
-    o->op_private |= varop->op_private & (OPpLVAL_INTRO|OPpPAD_STATE);
-    if (stacked) o->op_flags |= OPf_STACKED;
+    if (stacked) {
+	o->op_flags |= OPf_STACKED;
+	op_sibling_splice(o, right, 1, varop);
+    }
     else {
 	o->op_flags &=~ OPf_STACKED;
 	op_sibling_splice(o, right, 1, NULL);
-	op_free(left);
     }
+    op_free(left);
     return o;
 }
 

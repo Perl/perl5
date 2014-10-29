@@ -5159,8 +5159,7 @@ sub pp_refassign {
     my ($self, $op, $cx) = @_;
     my $left;
     if ($op->private & OPpLVREF_ELEM) {
-	$left = $op->first ->sibling   ->first  ->first;
-	           #  rhs  ex-srefgen  ex-list  ex-[ah]elem
+	$left = $op->first->sibling;
 	$left = maybe_local(@_, elem($self, $left, undef,
 				     $left->targ == OP_AELEM
 					? qw([ ] padav)
