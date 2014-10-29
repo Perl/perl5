@@ -326,8 +326,10 @@ Perl_cv_undef(pTHX_ CV *cv)
 void
 Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 {
-    const PADLIST *padlist = CvPADLIST(cv);
-    bool const slabbed = !!CvSLABBED(cv);
+    CV cvbody;/*CV body will never be realloced inside this func,
+               so dont read it more than once, use fake CV so existing macros
+               will work, the indirection and CV head struct optimized away*/
+    SvANY(&cvbody) = SvANY(cv);
 
     PERL_ARGS_ASSERT_CV_UNDEF_FLAGS;
 
@@ -336,46 +338,59 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 	    PTR2UV(cv), PTR2UV(PL_comppad))
     );
 
-    if (CvFILE(cv) && CvDYNFILE(cv)) {
-	Safefree(CvFILE(cv));
+    if (CvFILE(&cvbody)) {
+	char * file = CvFILE(&cvbody);
+	CvFILE(&cvbody) = NULL;
+	if(CvDYNFILE(&cvbody))
+	    Safefree(file);
     }
-    CvFILE(cv) = NULL;
 
-    CvSLABBED_off(cv);
-    if (!CvISXSUB(cv) && CvROOT(cv)) {
-	if (SvTYPE(cv) == SVt_PVCV && CvDEPTH(cv))
-	    Perl_croak(aTHX_ "Can't undef active subroutine");
-	ENTER;
+    /* CvSLABBED_off(&cvbody); *//* turned off below */
+    /* release the sub's body */
+    if (!CvISXSUB(&cvbody)) {
+        if(CvROOT(&cvbody)) {
+            assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM); /*unsafe is safe */
+            if (CvDEPTHunsafe(&cvbody)) {
+                assert(SvTYPE(cv) == SVt_PVCV);
+                Perl_croak_nocontext("Can't undef active subroutine");
+            }
+            ENTER;
 
-	PAD_SAVE_SETNULLPAD();
+            PAD_SAVE_SETNULLPAD();
 
-	if (slabbed) OpslabREFCNT_dec_padok(OpSLAB(CvROOT(cv)));
-	op_free(CvROOT(cv));
-	CvROOT(cv) = NULL;
-	CvSTART(cv) = NULL;
-	LEAVE;
-    }
-    else if (slabbed && CvSTART(cv)) {
-	ENTER;
-	PAD_SAVE_SETNULLPAD();
+            if (CvSLABBED(&cvbody)) OpslabREFCNT_dec_padok(OpSLAB(CvROOT(&cvbody)));
+            op_free(CvROOT(&cvbody));
+            CvROOT(&cvbody) = NULL;
+            CvSTART(&cvbody) = NULL;
+            LEAVE;
+        }
+	else if (CvSLABBED(&cvbody)) {
+            if( CvSTART(&cvbody)) {
+                ENTER;
+                PAD_SAVE_SETNULLPAD();
 
-	/* discard any leaked ops */
-	if (PL_parser)
-	    parser_free_nexttoke_ops(PL_parser, (OPSLAB *)CvSTART(cv));
-	opslab_force_free((OPSLAB *)CvSTART(cv));
-	CvSTART(cv) = NULL;
+                /* discard any leaked ops */
+                if (PL_parser)
+                    parser_free_nexttoke_ops(PL_parser, (OPSLAB *)CvSTART(&cvbody));
+                opslab_force_free((OPSLAB *)CvSTART(&cvbody));
+                CvSTART(&cvbody) = NULL;
 
-	LEAVE;
-    }
+                LEAVE;
+            }
 #ifdef DEBUGGING
-    else if (slabbed) Perl_warn(aTHX_ "Slab leaked from cv %p", (void*)cv);
+            else Perl_warn(aTHX_ "Slab leaked from cv %p", (void*)cv);
 #endif
+        }
+    }
+    else { /* dont bother checking if CvXSUB(cv) is true, less branching */
+	CvXSUB(&cvbody) = NULL;
+    }
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     sv_unmagic((SV *)cv, PERL_MAGIC_checkcall);
     if (!(flags & CV_UNDEF_KEEP_NAME)) {
-	if (CvNAMED(cv)) {
-	    CvNAME_HEK_set(cv, NULL);
-	    CvNAMED_off(cv);
+	if (CvNAMED(&cvbody)) {
+	    CvNAME_HEK_set(&cvbody, NULL);
+	    CvNAMED_off(&cvbody);
 	}
 	else CvGV_set(cv, NULL);
     }
@@ -383,8 +398,9 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
     /* This statement and the subsequence if block was pad_undef().  */
     pad_peg("pad_undef");
 
-    if (padlist) {
+    if (!CvISXSUB(&cvbody)  && CvPADLIST(&cvbody)) {
 	I32 ix;
+	const PADLIST *padlist = CvPADLIST(&cvbody);
 
 	/* Free the padlist associated with a CV.
 	   If parts of it happen to be current, we null the relevant PL_*pad*
@@ -404,8 +420,8 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 	 * children, or integrate this loop with general cleanup */
 
 	if (PL_phase != PERL_PHASE_DESTRUCT) { /* don't bother during global destruction */
-	    CV * const outercv = CvOUTSIDE(cv);
-	    const U32 seq = CvOUTSIDE_SEQ(cv);
+	    CV * const outercv = CvOUTSIDE(&cvbody);
+	    const U32 seq = CvOUTSIDE_SEQ(&cvbody);
 	    PAD * const comppad_name = PadlistARRAY(padlist)[0];
 	    SV ** const namepad = AvARRAY(comppad_name);
 	    PAD * const comppad = PadlistARRAY(padlist)[1];
@@ -463,27 +479,29 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 	}
 	if (PadlistARRAY(padlist)) Safefree(PadlistARRAY(padlist));
 	Safefree(padlist);
-	CvPADLIST(cv) = NULL;
+	CvPADLIST(&cvbody) = NULL;
     }
+    else /* future union */
+	CvPADLIST(&cvbody) = NULL;
 
 
     /* remove CvOUTSIDE unless this is an undef rather than a free */
-    if (!SvREFCNT(cv) && CvOUTSIDE(cv)) {
-	if (!CvWEAKOUTSIDE(cv))
-	    SvREFCNT_dec(CvOUTSIDE(cv));
-	CvOUTSIDE(cv) = NULL;
+    if (!SvREFCNT(cv)) {
+	CV * outside = CvOUTSIDE(&cvbody);
+	if(outside) {
+	    CvOUTSIDE(&cvbody) = NULL;
+	    if (!CvWEAKOUTSIDE(&cvbody))
+		SvREFCNT_dec_NN(outside);
+	}
     }
-    if (CvCONST(cv)) {
-	SvREFCNT_dec(MUTABLE_SV(CvXSUBANY(cv).any_ptr));
-	CvCONST_off(cv);
-    }
-    if (CvISXSUB(cv) && CvXSUB(cv)) {
-	CvXSUB(cv) = NULL;
+    if (CvCONST(&cvbody)) {
+	SvREFCNT_dec(MUTABLE_SV(CvXSUBANY(&cvbody).any_ptr));
+	/* CvCONST_off(cv); *//* turned off below */
     }
     /* delete all flags except WEAKOUTSIDE and CVGV_RC, which indicate the
      * ref status of CvOUTSIDE and CvGV, and ANON, NAMED and
      * LEXICAL, which are used to determine the sub's name.  */
-    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON|CVf_LEXICAL
+    CvFLAGS(&cvbody) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON|CVf_LEXICAL
 		   |CVf_NAMED);
 }
 

@@ -62,10 +62,13 @@ See L<perlguts/Autoloading with XSUBs>.
 #endif
 #define CvFILEGV(sv)	(gv_fetchfile(CvFILE(sv)))
 #define CvDEPTH(sv)	(*S_CvDEPTHp((const CV *)sv))
-#define CvPADLIST(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist
-#define CvOUTSIDE(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside
-#define CvFLAGS(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_flags
+/* For use when you only have a XPVCV*, not a real CV*.
+   Must be assert protected as in S_CvDEPTHp before use. */
+#define CvDEPTHunsafe(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_depth
+#define CvPADLIST(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist
+#define CvOUTSIDE(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside
 #define CvOUTSIDE_SEQ(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside_seq
+#define CvFLAGS(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_flags
 
 /* These two are sometimes called on non-CVs */
 #define CvPROTO(sv)                               \
