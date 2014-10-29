@@ -346,9 +346,9 @@ if (defined &DynaLoader::boot_DynaLoader) {
 # Add generic tests before this point.   #
 ##########################################
 
-# UTF-encoded things - skipped on EBCDIC machines and on UTF-8 input
+# UTF-encoded things - skipped on UTF-8 input
 
-if ($Is_EBCDIC || $Is_UTF8) { exit; }
+if ($Is_UTF8) { exit; }
 
 my %templates = (
 		 'UTF-8'    => 'C0U',
