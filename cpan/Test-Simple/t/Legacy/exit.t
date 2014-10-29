@@ -61,7 +61,7 @@ END { 1 while unlink "exit_map_test" }
 
 for my $exit (0..255) {
     # This correctly emulates Test::Builder's behavior.
-    my $out = qx[$Perl exit_map_test $exit];
+    my $out = qx["$Perl" exit_map_test $exit];
     $TB->like( $out, qr/^exit $exit\n/, "exit map test for $exit" );
     $Exit_Map{$exit} = exitstatus($?);
 }
@@ -92,7 +92,7 @@ chdir 't';
 my $lib = File::Spec->catdir(qw(lib Test Simple sample_tests));
 while( my($test_name, $exit_code) = each %Tests ) {
     my $file = File::Spec->catfile($lib, $test_name);
-    my $wait_stat = system(qq{$Perl -"I../blib/lib" -"I../lib" -"I../t/lib" $file});
+    my $wait_stat = system(qq{"$Perl" -"I../blib/lib" -"I../lib" -"I../t/lib" $file});
     my $actual_exit = exitstatus($wait_stat);
 
     if( $exit_code eq 'not zero' ) {

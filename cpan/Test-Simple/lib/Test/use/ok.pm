@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.005;
 
-our $VERSION = '1.301001_064';
+our $VERSION = '1.301001_065';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 1;

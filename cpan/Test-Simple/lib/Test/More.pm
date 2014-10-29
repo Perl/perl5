@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_064';
+our $VERSION = '1.301001_065';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream::Carp qw/croak carp/;
@@ -103,6 +103,7 @@ sub ok ($;$) {
 }
 
 sub plan {
+    return unless @_;
     my ($directive, $arg) = @_;
     my $ctx = context();
 
