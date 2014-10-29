@@ -6,15 +6,15 @@ perlop - Perl operators and precedence
 =head1 DESCRIPTION
 
 In Perl, the operator determines what operation is performed,
-independent of the type of the operands.  For example C<$a + $b>
-is always a numeric addition, and if C<$a> or C<$b> do not contain
+independent of the type of the operands.  For example C<$x + $y>
+is always a numeric addition, and if C<$x> or C<$y> do not contain
 numbers, an attempt is made to convert them to numbers first.
 
 This is in contrast to many other dynamic languages, where the
 operation is determined by the type of the first argument.  It also
 means that Perl has two versions of some operators, one for numeric
-and one for string comparison.  For example C<$a == $b> compares
-two numbers for equality, and C<$a eq $b> compares two strings.
+and one for string comparison.  For example C<$x == $y> compares
+two numbers for equality, and C<$x eq $y> compares two strings.
 
 There are a few exceptions though: C<x> can be either string
 repetition or list repetition, depending on the type of the left
@@ -297,21 +297,21 @@ X</> X<slash>
 Binary "%" is the modulo operator, which computes the division
 remainder of its first argument with respect to its second argument.
 Given integer
-operands C<$a> and C<$b>: If C<$b> is positive, then C<$a % $b> is
-C<$a> minus the largest multiple of C<$b> less than or equal to
-C<$a>.  If C<$b> is negative, then C<$a % $b> is C<$a> minus the
-smallest multiple of C<$b> that is not less than C<$a> (that is, the
+operands C<$m> and C<$n>: If C<$n> is positive, then C<$m % $n> is
+C<$m> minus the largest multiple of C<$n> less than or equal to
+C<$m>.  If C<$n> is negative, then C<$m % $n> is C<$m> minus the
+smallest multiple of C<$n> that is not less than C<$m> (that is, the
 result will be less than or equal to zero).  If the operands
-C<$a> and C<$b> are floating point values and the absolute value of
-C<$b> (that is C<abs($b)>) is less than C<(UV_MAX + 1)>, only
-the integer portion of C<$a> and C<$b> will be used in the operation
+C<$m> and C<$n> are floating point values and the absolute value of
+C<$n> (that is C<abs($n)>) is less than C<(UV_MAX + 1)>, only
+the integer portion of C<$m> and C<$n> will be used in the operation
 (Note: here C<UV_MAX> means the maximum of the unsigned integer type).
-If the absolute value of the right operand (C<abs($b)>) is greater than
+If the absolute value of the right operand (C<abs($n)>) is greater than
 or equal to C<(UV_MAX + 1)>, "%" computes the floating-point remainder
-C<$r> in the equation C<($r = $a - $i*$b)> where C<$i> is a certain
+C<$r> in the equation C<($r = $m - $i*$n)> where C<$i> is a certain
 integer that makes C<$r> have the same sign as the right operand
-C<$b> (B<not> as the left operand C<$a> like C function C<fmod()>)
-and the absolute value less than that of C<$b>.
+C<$n> (B<not> as the left operand C<$m> like C function C<fmod()>)
+and the absolute value less than that of C<$n>.
 Note that when C<use integer> is in scope, "%" gives you direct access
 to the modulo operator as implemented by your C compiler.  This
 operator is not as well defined for negative operands, but it will
@@ -481,10 +481,10 @@ returns true, as does NaN != anything else.  If your platform doesn't
 support NaNs then NaN is just a string with numeric value 0.
 X<< <=> >> X<spaceship>
 
-    $ perl -le '$a = "NaN"; print "No NaN support here" if $a == $a'
-    $ perl -le '$a = "NaN"; print "NaN support here" if $a != $a'
+    $ perl -le '$x = "NaN"; print "No NaN support here" if $x == $x'
+    $ perl -le '$x = "NaN"; print "NaN support here" if $x != $x'
 
-(Note that the L<bigint>, L<bigrat>, and L<bignum> pragmas all 
+(Note that the L<bigint>, L<bigrat>, and L<bignum> pragmas all
 support "NaN".)
 
 Binary "eq" returns true if the left argument is stringwise equal to
@@ -866,7 +866,7 @@ this is the same result as C<< defined(EXPR1) ? EXPR1 : EXPR2 >> (except that
 the ternary-operator form can be used as a lvalue, while C<< EXPR1 // EXPR2 >>
 cannot).  This is very useful for
 providing default values for variables.  If you actually want to test if
-at least one of C<$a> and C<$b> is defined, use C<defined($a // $b)>.
+at least one of C<$x> and C<$y> is defined, use C<defined($x // $y)>.
 
 The C<||>, C<//> and C<&&> operators return the last value evaluated
 (unlike C's C<||> and C<&&>, which return 0 or 1).  Thus, a reasonably
@@ -1079,31 +1079,31 @@ is returned.  For example:
 Scalar or list context propagates downward into the 2nd
 or 3rd argument, whichever is selected.
 
-    $a = $ok ? $b : $c;  # get a scalar
-    @a = $ok ? @b : @c;  # get an array
-    $a = $ok ? @b : @c;  # oops, that's just a count!
+    $x = $ok ? $y : $z;  # get a scalar
+    @x = $ok ? @y : @z;  # get an array
+    $x = $ok ? @y : @z;  # oops, that's just a count!
 
 The operator may be assigned to if both the 2nd and 3rd arguments are
 legal lvalues (meaning that you can assign to them):
 
-    ($a_or_b ? $a : $b) = $c;
+    ($x_or_y ? $x : $y) = $z;
 
 Because this operator produces an assignable result, using assignments
 without parentheses will get you in trouble.  For example, this:
 
-    $a % 2 ? $a += 10 : $a += 2
+    $x % 2 ? $x += 10 : $x += 2
 
 Really means this:
 
-    (($a % 2) ? ($a += 10) : $a) += 2
+    (($x % 2) ? ($x += 10) : $x) += 2
 
 Rather than this:
 
-    ($a % 2) ? ($a += 10) : ($a += 2)
+    ($x % 2) ? ($x += 10) : ($x += 2)
 
 That should probably be written more simply as:
 
-    $a += ($a % 2) ? 10 : 2;
+    $x += ($x % 2) ? 10 : 2;
 
 =head2 Assignment Operators
 X<assignment> X<operator, assignment> X<=> X<**=> X<+=> X<*=> X<&=>
@@ -1114,11 +1114,11 @@ X<%=> X<^=> X<x=>
 
 Assignment operators work as in C.  That is,
 
-    $a += 2;
+    $x += 2;
 
 is equivalent to
 
-    $a = $a + 2;
+    $x = $x + 2;
 
 although without duplicating any side effects that dereferencing the lvalue
 might trigger, such as from tie().  Other assignment operators work similarly.
@@ -1146,12 +1146,12 @@ Although as of 5.14, that can be also be accomplished this way:
 
 Likewise,
 
-    ($a += 2) *= 3;
+    ($x += 2) *= 3;
 
 is equivalent to
 
-    $a += 2;
-    $a *= 3;
+    $x += 2;
+    $x *= 3;
 
 Similarly, a list assignment in list context produces the list of
 lvalues assigned to, and a list assignment in scalar context returns
@@ -1260,9 +1260,9 @@ only if the left expression is false.  Due to its precedence, you must
 be careful to avoid using it as replacement for the C<||> operator.
 It usually works out better for flow control than in assignments:
 
-    $a = $b or $c;		# bug: this is wrong
-    ($a = $b) or $c;		# really means this
-    $a = $b || $c;		# better written this way
+    $x = $y or $z;              # bug: this is wrong
+    ($x = $y) or $z;            # really means this
+    $x = $y || $z;              # better written this way
 
 However, when it's a list-context assignment and you're trying to use
 C<||> for control flow, you probably need "or" so that the assignment
@@ -1339,7 +1339,7 @@ is the same as
 
 Note, however, that this does not always work for quoting Perl code:
 
-    $s = q{ if($a eq "}") ... }; # WRONG
+    $s = q{ if($x eq "}") ... }; # WRONG
 
 is a syntax error.  The C<Text::Balanced> module (standard as of v5.8,
 and from CPAN before then) is able to do this properly.
@@ -1797,7 +1797,7 @@ empty pattern (which will always match).
 Note that it's possible to confuse Perl into thinking C<//> (the empty
 regex) is really C<//> (the defined-or operator).  Perl is usually pretty
 good about this, but some pathological cases might trigger this, such as
-C<$a///> (is that C<($a) / (//)> or C<$a // />?) and C<print $fh //>
+C<$x///> (is that C<($x) / (//)> or C<$x // />?) and C<print $fh //>
 (C<print $fh(//> or C<print($fh //>?).  In all of these examples, Perl
 will assume you meant defined-or.  If you meant the empty regex, just
 use parentheses or spaces to disambiguate, or even prefix the empty
@@ -2082,7 +2082,7 @@ Examples:
     s/^=(\w+)/pod($1)/ge;	# use function call
 
     $_ = 'abc123xyz';
-    $a = s/abc/def/r;           # $a is 'def123xyz' and
+    $x = s/abc/def/r;           # $x is 'def123xyz' and
                                 # $_ remains 'abc123xyz'.
 
     # expand variables in $_, but dynamics only, using
@@ -2711,13 +2711,13 @@ scalar.
 
 Note also that the interpolation code needs to make a decision on
 where the interpolated scalar ends.  For instance, whether
-C<< "a $b -> {c}" >> really means:
+C<< "a $x -> {c}" >> really means:
 
-  "a " . $b . " -> {c}";
+  "a " . $x . " -> {c}";
 
 or:
 
-  "a " . $b -> {c};
+  "a " . $x -> {c};
 
 Most of the time, the longest possible text that does not include
 spaces between components and which contains matching braces or
@@ -3245,14 +3245,14 @@ limited-precision representations.
 
 Or with rationals:
 
-	use 5.010;
-	use bigrat;
-	$a = 3/22;
-	$b = 4/6;
-	say "a/b is ", $a/$b;
-	say "a*b is ", $a*$b;
-    a/b is 9/44
-    a*b is 1/11
+        use 5.010;
+        use bigrat;
+        $x = 3/22;
+        $y = 4/6;
+        say "x/y is ", $x/$y;
+        say "x*y is ", $x*$y;
+        x/y is 9/44
+        x*y is 1/11
 
 Several modules let you calculate with (bound only by memory and CPU time)
 unlimited or fixed precision.  There
