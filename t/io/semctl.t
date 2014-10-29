@@ -14,6 +14,7 @@ skip_all('no SysV semaphores on this platform') if !$Config{d_sem};
 my @warnings;
 {
     local $SIG{__WARN__} = sub { push @warnings, $_[0] };
+    local $SIG{SYS} = sub { skip_all("SIGSYS caught") } if exists $SIG{SYS};
     my $test = (semctl(-1,0,0,0))[0];
     ok(!defined $test, "erroneous semctl list slice yields undef");
 }
