@@ -351,10 +351,11 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
     if (!CvISXSUB(&cvbody)) {
         if(CvROOT(&cvbody)) {
             assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM); /*unsafe is safe */
-            if (CvDEPTHunsafe(&cvbody)) {
+/*            if (CvDEPTHunsafe(&cvbody)) {
                 assert(SvTYPE(cv) == SVt_PVCV);
                 Perl_croak_nocontext("Can't undef active subroutine");
             }
+*/
             ENTER;
 
             PAD_SAVE_SETNULLPAD();
