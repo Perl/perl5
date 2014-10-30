@@ -7689,6 +7689,7 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 		    return NULL;
 		sv = newSVsv(sv);
 		SvREADONLY_on(sv);
+		SvPADTMP_on(sv);
 		return sv;
 	    }
 	    else {
