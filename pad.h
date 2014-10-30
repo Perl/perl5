@@ -33,6 +33,7 @@ struct padlist {
     PAD **	xpadl_alloc;	/* pointer to beginning of array of AVs */
     PADNAMELIST*xpadl_outid;	/* Padnamelist of outer pad; used as ID */
     U32		xpadl_refcnt;
+    I32		xpadl_depth;	/* CvDEPTH; number of recursive calls */
 };
 
 

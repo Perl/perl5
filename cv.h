@@ -64,7 +64,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvDEPTH(sv)	(*S_CvDEPTHp((const CV *)sv))
 /* For use when you only have a XPVCV*, not a real CV*.
    Must be assert protected as in S_CvDEPTHp before use. */
-#define CvDEPTHunsafe(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_depth
+#define CvDEPTHunsafe(sv) CvPADLIST(sv)->xpadl_depth
 #define CvPADLIST(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist
 #define CvOUTSIDE(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside
 #define CvOUTSIDE_SEQ(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside_seq

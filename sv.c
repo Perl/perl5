@@ -13533,10 +13533,6 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    HvARRAY(MUTABLE_HV(dstr)) = NULL;
 		break;
 	    case SVt_PVCV:
-		if (!(param->flags & CLONEf_COPY_STACKS)) {
-		    CvDEPTH(dstr) = 0;
-		}
-		/* FALLTHROUGH */
 	    case SVt_PVFM:
 		/* NOTE: not refcounted */
 		SvANY(MUTABLE_CV(dstr))->xcv_stash =

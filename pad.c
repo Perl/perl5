@@ -2479,6 +2479,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 
     if (cloneall) {
 	PADOFFSET depth;
+	dstpad->xpadl_depth = srcpad->xpadl_depth;
 	for (depth = 0; depth <= max; ++depth)
 	    PadlistARRAY(dstpad)[depth] =
 		av_dup_inc(PadlistARRAY(srcpad)[depth], param);
@@ -2494,6 +2495,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 	SV **pad1a;
 	AV *args;
 
+	dstpad->xpadl_depth = 0;
 	PadlistARRAY(dstpad)[0] =
 	    av_dup_inc(PadlistARRAY(srcpad)[0], param);
 	names = AvARRAY(PadlistARRAY(dstpad)[0]);

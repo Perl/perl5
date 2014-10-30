@@ -37,7 +37,8 @@ PERL_STATIC_INLINE I32 *
 S_CvDEPTHp(const CV * const sv)
 {
     assert(SvTYPE(sv) == SVt_PVCV || SvTYPE(sv) == SVt_PVFM);
-    return &((XPVCV*)SvANY(sv))->xcv_depth;
+    assert(CvPADLIST(sv));
+    return &CvPADLIST(sv)->xpadl_depth;
 }
 
 /*
