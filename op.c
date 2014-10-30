@@ -1190,8 +1190,13 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
         OP_SIBLING_set(start, insert);
         start->op_lastsib = insert ? 0 : 1;
     }
-    else
+    else {
         cLISTOPx(parent)->op_first = insert;
+        if (insert)
+            parent->op_flags |= OPf_KIDS;
+        else
+            parent->op_flags &= ~OPf_KIDS;
+    }
 
     if (!rest) {
         /* update op_last etc */
