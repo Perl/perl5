@@ -219,6 +219,7 @@ Perl_pad_new(pTHX_ int flags)
     /* ... create new pad ... */
 
     Newxz(padlist, 1, PADLIST);
+    PadlistREFCNT(padlist) = 1;
     pad		= newAV();
     Newxz(AvALLOC(pad), 4, SV *); /* Originally sized to
                                      match av_extend default */
@@ -373,7 +374,9 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
     /* This statement and the subsequence if block was pad_undef().  */
     pad_peg("pad_undef");
 
-    if (!CvISXSUB(&cvbody) && CvPADLIST(&cvbody)) {
+    if (!CvISXSUB(&cvbody) && CvPADLIST(&cvbody)
+        && !--PadlistREFCNT(CvPADLIST(&cvbody))
+    ){
         PADOFFSET ix;
         const PADLIST *padlist = CvPADLIST(&cvbody);
 
