@@ -472,5 +472,5 @@ print "not " unless $@ =~ /^Unimplemented at /;
 print "ok $test - map{...} (literal triple-dot)\n"; $test++;
 print "not " unless &{sub :lvalue { "a" }} eq "a";
 print "ok $test - &{sub :lvalue...}\n"; $test++;
-print "not " unless ref+(map{sub :lvalue { "a" }} 1)[0] eq "CODE";
+print "not " unless ref +(map{sub :lvalue { "a" }} 1)[0] eq "CODE";
 print "ok $test - map{sub :lvalue...}\n"; $test++;
