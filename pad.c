@@ -2205,7 +2205,12 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
     if (SvMAGIC(proto))
 	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
-    if (CvPADLIST(proto)) S_cv_clone_pad(aTHX_ proto, cv, outside, newcv);
+    if (CvPADLIST(proto) && CvCLONE(proto))
+	S_cv_clone_pad(aTHX_ proto, cv, outside, newcv);
+    else {
+	CvPADLIST(cv) = CvPADLIST(proto);
+	PadlistREFCNT(CvPADLIST(cv))++;
+    }
 
     DEBUG_Xv(
 	PerlIO_printf(Perl_debug_log, "\nPad CV clone\n");
