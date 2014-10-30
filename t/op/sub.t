@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan( tests => 38 );
+plan( tests => 39 );
 
 sub empty_sub {}
 
@@ -157,6 +157,7 @@ is eval {
         is eval "_79908", 7, 'sub(){$x} does not break closures';
     }
     isnt eval '\_79908', \$x, 'sub(){$x} returns a copy';
+    ok eval '\_79908 != \_79908', 'sub(){$x} returns a copy each time';
 
     # Test another thing that was broken by $x inlinement
     my $y;
