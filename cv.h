@@ -57,9 +57,8 @@ See L<perlguts/Autoloading with XSUBs>.
 #endif
 #define CvFILEGV(sv)	(gv_fetchfile(CvFILE(sv)))
 #define CvDEPTH(sv)	(*Perl_CvDEPTH((const CV *)sv))
-/* For use when you only have a XPVCV*, not a real CV*.
-   Must be assert protected as in Perl_CvDEPTH before use. */
-#define CvDEPTHunsafe(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_depth
+
+#define CvDEPTHunsafe(sv) CvPADLIST(sv)->xpadl_depth
 
 /* these CvPADLIST/CvRESERVED asserts can be reverted one day, once stabilized */
 #define CvPADLIST(sv)	  (*(assert_(!CvISXSUB((CV*)(sv))) \

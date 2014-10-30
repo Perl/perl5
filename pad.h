@@ -35,6 +35,7 @@ struct padlist {
     U32		xpadl_id;	/* Semi-unique ID, shared between clones */
     U32		xpadl_outid;	/* ID of outer pad */
     U32		xpadl_refcnt;
+    I32         xpadl_depth;    /* CvDEPTH; number of recursive calls */
 };
 
 struct padnamelist {

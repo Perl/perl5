@@ -14814,9 +14814,6 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                     HvARRAY(MUTABLE_HV(dsv)) = NULL;
                 break;
             case SVt_PVCV:
-                if (!(param->flags & CLONEf_COPY_STACKS)) {
-                    CvDEPTH(dsv) = 0;
-                }
                 /* FALLTHROUGH */
             case SVt_PVFM:
                 /* NOTE: not refcounted */
@@ -14870,7 +14867,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
     }
 
     return dsv;
- }
+}
 
 SV *
 Perl_sv_dup_inc(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
