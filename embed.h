@@ -1259,7 +1259,6 @@
 #define nextargv(a,b)		Perl_nextargv(aTHX_ a,b)
 #define oopsAV(a)		Perl_oopsAV(aTHX_ a)
 #define oopsHV(a)		Perl_oopsHV(aTHX_ a)
-#define op_const_sv(a,b)	Perl_op_const_sv(aTHX_ a,b)
 #define op_unscope(a)		Perl_op_unscope(aTHX_ a)
 #define package(a)		Perl_package(aTHX_ a)
 #define package_version(a)	Perl_package_version(aTHX_ a)
