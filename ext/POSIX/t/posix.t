@@ -344,7 +344,7 @@ eval { use strict; POSIX->import("S_ISBLK"); my $x = S_ISBLK };
 unlike( $@, qr/Can't use string .* as a symbol ref/, "Can import autoloaded constants" );
 
 SKIP: {
-    skip("localeconv() not present", 20) unless $Config{d_locconv};
+    skip("localeconv() not present", 26) unless $Config{d_locconv};
     my $conv = localeconv;
     is(ref $conv, 'HASH', 'localconv returns a hash reference');
 
