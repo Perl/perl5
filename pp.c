@@ -402,8 +402,8 @@ PP(pp_anoncode)
 {
     dSP;
     CV *cv = MUTABLE_CV(PAD_SV(PL_op->op_targ));
-    if (CvCLONE(cv))
-        cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
+    if (!CvISXSUB(cv))
+	cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
     EXTEND(SP,1);
 
     SV* sv = MUTABLE_SV(cv);
