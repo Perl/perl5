@@ -34,6 +34,7 @@ struct padlist {
     } xpadl_arr;
     U32		xpadl_id;	/* Semi-unique ID, shared between clones */
     U32		xpadl_outid;	/* ID of outer pad */
+    U32		xpadl_refcnt;
 };
 
 struct padnamelist {
@@ -324,7 +325,7 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadlistNAMES(pl)	*((PADNAMELIST **)PadlistARRAY(pl))
 #define PadlistNAMESARRAY(pl)	PadnamelistARRAY(PadlistNAMES(pl))
 #define PadlistNAMESMAX(pl)	PadnamelistMAX(PadlistNAMES(pl))
-#define PadlistREFCNT(pl)	1	/* reserved for future use */
+#define PadlistREFCNT(pl)	(pl)->xpadl_refcnt
 
 #define PadnamelistARRAY(pnl)		(pnl)->xpadnl_alloc
 #define PadnamelistMAX(pnl)		(pnl)->xpadnl_fill
