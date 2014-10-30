@@ -1872,22 +1872,7 @@ typedef NVTYPE NV;
 #   ifdef I_SUNMATH
 #       include <sunmath.h>
 #   endif
-#   if defined(USE_QUADMATH) && defined(I_QUADMATH)
-#       include <quadmath.h>
-#   endif
-#   ifdef FLT128_DIG
-#       define NV_DIG FLT128_DIG
-#       define NV_MANT_DIG FLT128_MANT_DIG
-#       define NV_MIN FLT128_MIN
-#       define NV_MAX FLT128_MAX
-#       define NV_MIN_EXP FLT128_MIN_EXP
-#       define NV_MAX_EXP FLT128_MAX_EXP
-#       define NV_EPSILON FLT128_EPSILON
-#       define NV_MIN_10_EXP FLT128_MIN_10_EXP
-#       define NV_MAX_10_EXP FLT128_MAX_10_EXP
-#       define NV_INF HUGE_VALQ
-#       define NV_NAN nanq("0")
-#   elif defined(LDBL_DIG)
+#   if defined(LDBL_DIG)
 #       define NV_DIG LDBL_DIG
 #       ifdef LDBL_MANT_DIG
 #           define NV_MANT_DIG LDBL_MANT_DIG
@@ -1922,33 +1907,7 @@ typedef NVTYPE NV;
 #           endif
 #       endif
 #   endif
-#   if defined(USE_QUADMATH) && defined(I_QUADMATH)
-#       define Perl_acos acosq
-#       define Perl_asin asinq
-#       define Perl_atan atanq
-#       define Perl_atan2 atan2q
-#       define Perl_ceil ceilq
-#       define Perl_cos cosq
-#       define Perl_cosh coshq
-#       define Perl_exp expq
-/* no Perl_fabs, but there's PERL_ABS */
-#       define Perl_floor floorq
-#       define Perl_fmod fmodq
-#       define Perl_log logq
-#       define Perl_log10 log10q
-#       define Perl_pow powq
-#       define Perl_sin sinq
-#       define Perl_sinh sinhq
-#       define Perl_sqrt sqrtq
-#       define Perl_tan tanq
-#       define Perl_tanh tanhq
-#       define Perl_modf(x,y) modfq(x,y)
-#       define Perl_frexp(x,y) frexpq(x,y)
-#       define Perl_ldexp(x, y) ldexpq(x,y)
-#       define Perl_isinf(x) isinfq(x)
-#       define Perl_isnan(x) isnanq(x)
-#       define Perl_isfinite(x) !(isnanq(x) || isinfq(x))
-#   elif defined(HAS_SQRTL)
+#   if defined(HAS_SQRTL)
 #       define Perl_acos acosl
 #       define Perl_asin asinl
 #       define Perl_atan atanl
@@ -2017,6 +1976,44 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   ifndef Perl_isfinite
 #       define Perl_isfinite(x) Perl_isfinitel(x)
 #   endif
+#elif defined(USE_QUADMATH) && defined(I_QUADMATH)
+#   include <quadmath.h>
+#   define NV_DIG FLT128_DIG
+#   define NV_MANT_DIG FLT128_MANT_DIG
+#   define NV_MIN FLT128_MIN
+#   define NV_MAX FLT128_MAX
+#   define NV_MIN_EXP FLT128_MIN_EXP
+#   define NV_MAX_EXP FLT128_MAX_EXP
+#   define NV_EPSILON FLT128_EPSILON
+#   define NV_MIN_10_EXP FLT128_MIN_10_EXP
+#   define NV_MAX_10_EXP FLT128_MAX_10_EXP
+#   define NV_INF HUGE_VALQ
+#   define NV_NAN nanq("0")
+#   define Perl_acos acosq
+#   define Perl_asin asinq
+#   define Perl_atan atanq
+#   define Perl_atan2 atan2q
+#   define Perl_ceil ceilq
+#   define Perl_cos cosq
+#   define Perl_cosh coshq
+#   define Perl_exp expq
+/* no Perl_fabs, but there's PERL_ABS */
+#   define Perl_floor floorq
+#   define Perl_fmod fmodq
+#   define Perl_log logq
+#   define Perl_log10 log10q
+#   define Perl_pow powq
+#   define Perl_sin sinq
+#   define Perl_sinh sinhq
+#   define Perl_sqrt sqrtq
+#   define Perl_tan tanq
+#   define Perl_tanh tanhq
+#   define Perl_modf(x,y) modfq(x,y)
+#   define Perl_frexp(x,y) frexpq(x,y)
+#   define Perl_ldexp(x, y) ldexpq(x,y)
+#   define Perl_isinf(x) isinfq(x)
+#   define Perl_isnan(x) isnanq(x)
+#   define Perl_isfinite(x) !(isnanq(x) || isinfq(x))
 #else
 #   define NV_DIG DBL_DIG
 #   ifdef DBL_MANT_DIG

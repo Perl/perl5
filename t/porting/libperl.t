@@ -441,11 +441,9 @@ my %expected = (
     );
 
 if ($Config{uselongdouble} && $Config{longdblsize} > $Config{doublesize}) {
-    if ($Config{usequadmath}) {
-        $expected{expq} = undef; # There is no Configure symbol for expq.
-    } else {
-        $expected{expl} = undef; # There is no Configure symbol for expl.
-    }
+    $expected{expl} = undef; # There is no Configure symbol for expl.
+} elsif ($Config{usequadmath}) {
+    $expected{expq} = undef; # There is no Configure symbol for expq.
 } else {
     $expected{exp} = undef; # There is no Configure symbol for exp.
 }

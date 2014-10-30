@@ -4451,8 +4451,6 @@ eval $setvar
 case "$usequadmath" in
 "$define"|true|[yY]*)
 	usequadmath="$define"
-        # if usequadmath enabled also enable uselongdouble
-	uselongdouble="$define"
 	;;
 *)	usequadmath="$undef" ;;
 esac
@@ -7063,6 +7061,18 @@ $define)
 	        esac
 		;;
 	esac
+	;;
+esac
+case "$usequadmath" in
+$define)
+	echo "quadmath selected." >&4
+	case "$archname" in
+        *-ld*) echo "...and architecture name already has -quadmath." >&4
+                ;;
+        *)      archname="$archname-quadmath"
+                echo "...setting architecture name to $archname." >&4
+		;;
+        esac
 	;;
 esac
 if $test -f archname.cbu; then

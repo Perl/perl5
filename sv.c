@@ -11081,7 +11081,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	return;
     }
 
-#ifndef USE_LONG_DOUBLE
+#if !defined(USE_LONG_DOUBLE) && !defined(USE_QUADMATH)
     /* special-case "%.<number>[gf]" */
     if ( !args && patlen <= 5 && pat[0] == '%' && pat[1] == '.'
 	 && (pat[patlen-1] == 'g' || pat[patlen-1] == 'f') ) {
@@ -11889,7 +11889,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    */
 	    switch (intsize) {
 	    case 'V':
-#if defined(USE_LONG_DOUBLE)
+#if defined(USE_LONG_DOUBLE) || defined(USE_QUADMATH)
 		intsize = 'q';
 #endif
 		break;
@@ -11897,7 +11897,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    case 'l':
 		/* FALLTHROUGH */
 	    default:
-#if defined(USE_LONG_DOUBLE)
+#if defined(USE_LONG_DOUBLE) || defined(USE_QUADMATH)
 		intsize = args ? 0 : 'q';
 #endif
 		break;
@@ -12277,8 +12277,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 char *ptr = ebuf + sizeof ebuf;
                 *--ptr = '\0';
                 *--ptr = c;
+#if defined(USE_QUADMATH)
+		if (intsize == 'q') {
+                    /* "g" -> "Qg" */
+                    *--ptr = 'Q';
+                }
                 /* FIXME: what to do if HAS_LONG_DOUBLE but not PERL_PRIfldbl? */
-#if defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
+#elif defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
 		/* Note that this is HAS_LONG_DOUBLE and PERL_PRIfldbl,
 		 * not USE_LONG_DOUBLE and NVff.  In other words,
 		 * this needs to work without USE_LONG_DOUBLE. */
@@ -12286,13 +12291,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		    /* Copy the one or more characters in a long double
 		     * format before the 'base' ([efgEFG]) character to
 		     * the format string. */
-#ifdef USE_QUADMATH
-                    *--ptr = 'Q';
-#else
 		    static char const ldblf[] = PERL_PRIfldbl;
 		    char const *p = ldblf + sizeof(ldblf) - 3;
 		    while (p >= ldblf) { *--ptr = *p--; }
-#endif
 		}
 #endif
 		if (has_precis) {
