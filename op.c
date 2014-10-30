@@ -7626,24 +7626,17 @@ Perl_cv_const_sv_or_av(const CV * const cv)
 }
 
 /* op_const_sv:  examine an optree to determine whether it's in-lineable.
- * Can be called in 3 ways:
+ * Can be called in 2 ways:
  *
  * !cv
  * 	look for a single OP_CONST with attached value: return the value
  *
- * cv && CvCLONE(cv) && !CvCONST(cv)
+ * cv
  *
  * 	examine the clone prototype, and if contains only a single
  * 	PADSV referencing
  * 	an outer lexical, return a non-zero value to indicate the CV is
  * 	a candidate for "constizing" at clone time
- *
- * cv && CvCONST(cv)
- *
- *	We have just cloned an anon prototype that was marked as a const
- *	candidate. Try to grab the current value, and in the case of
- *	PADSV, ignore it if it has multiple references. In this case we
- *	return a newly created *copy* of the value.
  */
 
 SV *
@@ -7681,21 +7674,8 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	    SAVEFREESV(sv);
 	}
 	else if (cv && type == OP_PADSV) {
-	    if (CvCONST(cv)) { /* newly cloned anon */
-		sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
-		/* the candidate should have 1 ref from this pad and 1 ref
-		 * from the parent */
-		if (!sv || SvREFCNT(sv) != 2)
-		    return NULL;
-		sv = newSVsv(sv);
-		SvREADONLY_on(sv);
-		SvPADTMP_on(sv);
-		return sv;
-	    }
-	    else {
 		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
 		    sv = &PL_sv_undef; /* an arbitrary non-null value */
-	    }
 	}
 	else {
 	    return NULL;

@@ -2217,20 +2217,31 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 	 * so try to grab the current const value, and if successful,
 	 * turn into a const sub:
 	 */
-	SV* const const_sv = op_const_sv(CvSTART(cv), cv);
-	if (const_sv) {
+	SV *const_sv;
+	OP *o = CvSTART(cv);
+	for (; o; o = o->op_next) {
+	    if (o->op_type == OP_PADSV)
+		break;
+	}
+	ASSUME(o->op_type == OP_PADSV);
+	const_sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
+	/* the candidate should have 1 ref from this pad and 1 ref
+	 * from the parent */
+	if (!const_sv || SvREFCNT(const_sv) != 2)
+	    CvCONST_off(cv);
+	else {
 	    const bool was_method = cBOOL(CvMETHOD(cv));
 	    SvREFCNT_dec_NN(cv);
-            /* For this calling case, op_const_sv returns a *copy*, which we
-               donate to newCONSTSUB. Yes, this is ugly, and should be killed.
+            /* We *copy* the lexical sub and donate it to
+               newCONSTSUB.  Yes, this is ugly, and should be killed.
                We need to fix how we decide whether this optimisation is
                possible to eliminate this.  */
+	    const_sv = newSVsv(const_sv);
+	    SvREADONLY_on(const_sv);
+	    SvPADTMP_on(const_sv);
 	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
 	    if (was_method)
 		CvMETHOD_on(cv);
-	}
-	else {
-	    CvCONST_off(cv);
 	}
     }
 
