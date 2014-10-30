@@ -7636,9 +7636,6 @@ S_op_const_sv(pTHX_ const OP *o)
 {
     SV *sv = NULL;
 
-    if (!o)
-	return NULL;
-
     if (o->op_type == OP_LINESEQ && cLISTOPo->op_first)
 	o = OP_SIBLING(cLISTOPo->op_first);
 
