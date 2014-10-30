@@ -2825,7 +2825,10 @@ $   idx = idx + 1
 $   goto replace_dash_with_slash
 $
 $ end_replace_dash_with_slash:
-$   
+$!
+$ IF extspec .EQS. "Scalar/List/Utils" THEN extspec = "List/Util"
+$ IF extspec .EQS. "PathTools" THEN extspec = "Cwd"
+$!
 $ xxx = xs_extensions
 $ gosub may_already_have_extension
 $ IF $STATUS .EQ. 1
