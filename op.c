@@ -7636,34 +7636,20 @@ S_op_const_sv(pTHX_ const OP *o)
 {
     SV *sv = NULL;
 
-    if (o->op_type == OP_LINESEQ && cLISTOPo->op_first)
-	o = OP_SIBLING(cLISTOPo->op_first);
+    if (o->op_type != OP_LINESEQ)
+	return NULL;
+    o = OP_SIBLING(cLISTOPo->op_first);
+    if (OP_HAS_SIBLING(o))
+	return NULL;
 
-    for (; o; o = o->op_next) {
+    {
 	const OPCODE type = o->op_type;
 
-	if (sv && o->op_next == o)
-	    return sv;
-	if (o->op_next != o) {
-	    if (type == OP_NEXTSTATE
-	     || (type == OP_NULL && !(o->op_flags & OPf_KIDS))
-	     || type == OP_PUSHMARK)
-		continue;
-	    if (type == OP_DBSTATE)
-		continue;
-	}
-	if (type == OP_LEAVESUB || type == OP_RETURN)
-	    break;
-	if (sv)
-	    return NULL;
 	if (type == OP_CONST && cSVOPo->op_sv)
 	    sv = cSVOPo->op_sv;
 	else if (type == OP_UNDEF && !o->op_private) {
 	    sv = newSV(0);
 	    SAVEFREESV(sv);
-	}
-	else {
-	    return NULL;
 	}
     }
     return sv;
