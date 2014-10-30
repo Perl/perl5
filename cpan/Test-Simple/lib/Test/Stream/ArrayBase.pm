@@ -52,11 +52,8 @@ sub apply_to {
         $ab_meta->baseclass();
     }
 
-    if ($args{accessors}) {
-        $ab_meta->add_accessor($_) for @{$args{accessors}};
-    }
-
-    1;
+    $ab_meta->add_accessors(@{$args{accessors}})
+        if $args{accessors};
 }
 
 sub new {

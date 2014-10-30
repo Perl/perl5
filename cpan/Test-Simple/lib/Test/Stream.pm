@@ -2,7 +2,7 @@ package Test::Stream;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_065';
+our $VERSION = '1.301001_068';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream::Threads;
@@ -10,14 +10,13 @@ use Test::Stream::IOSets;
 use Test::Stream::Util qw/try/;
 use Test::Stream::Carp qw/croak confess carp/;
 use Test::Stream::Meta qw/MODERN ENCODING init_tester/;
-use Encode();
 
 use Test::Stream::ArrayBase(
     accessors => [qw{
         no_ending no_diag no_header
         pid tid
         state
-        subtests subtest_todo
+        subtests subtest_todo subtest_exception
         subtest_tap_instant
         subtest_tap_delayed
         mungers
@@ -33,27 +32,29 @@ use Test::Stream::ArrayBase(
     }],
 );
 
-use constant STATE_COUNT   => 0;
-use constant STATE_FAILED  => 1;
-use constant STATE_PLAN    => 2;
-use constant STATE_PASSING => 3;
-use constant STATE_LEGACY  => 4;
-use constant STATE_ENDED   => 5;
+sub STATE_COUNT()   { 0 }
+sub STATE_FAILED()  { 1 }
+sub STATE_PLAN()    { 2 }
+sub STATE_PASSING() { 3 }
+sub STATE_LEGACY()  { 4 }
+sub STATE_ENDED()   { 5 }
 
-use constant OUT_STD  => 0;
-use constant OUT_ERR  => 1;
-use constant OUT_TODO => 2;
+sub OUT_STD()  { 0 }
+sub OUT_ERR()  { 1 }
+sub OUT_TODO() { 2 }
 
 use Test::Stream::Exporter;
 exports qw/
     OUT_STD OUT_ERR OUT_TODO
     STATE_COUNT STATE_FAILED STATE_PLAN STATE_PASSING STATE_LEGACY STATE_ENDED
 /;
-
 default_exports qw/ cull tap_encoding /;
+Test::Stream::Exporter->cleanup;
 
 sub tap_encoding {
     my ($encoding) = @_;
+
+    require Encode;
 
     croak "encoding '$encoding' is not valid, or not available"
         unless $encoding eq 'legacy' || Encode::find_encoding($encoding);
@@ -72,7 +73,6 @@ sub cull {
     $ctx->stream->fork_cull();
 }
 
-Test::Stream::Exporter->cleanup;
 sub before_import {
     my $class = shift;
     my ($importer, $list) = @_;
@@ -88,8 +88,6 @@ sub before_import {
     my $other  = [];
     my $idx    = 0;
     my $stream = $class->shared;
-
-    $stream->use_fork;
 
     while ($idx <= $#{$list}) {
         my $item = $list->[$idx++];
@@ -129,6 +127,9 @@ sub before_import {
 
             $stream->io_sets->init_encoding($encoding);
             $meta->[ENCODING] = $encoding;
+        }
+        elsif ($item eq 'enable_fork') {
+            $stream->use_fork;
         }
         else {
             push @$other => $item;
@@ -431,6 +432,7 @@ sub send {
             push @{$self->[STATE]} => [0, 0, undef, 1];
             push @{$self->[SUBTESTS]} => [];
             push @{$self->[SUBTEST_TODO]} => $e->context->in_todo;
+            push @{$self->[SUBTEST_EXCEPTION]} => undef;
 
             return $e;
         }
@@ -441,11 +443,12 @@ sub send {
             confess "Child pop left the stream without a state!" unless @{$self->[STATE]};
 
             $e = Test::Stream::Event::Subtest->new_from_pairs(
-                context => $e->context,
-                created => $e->created,
-                events  => $events,
-                state   => $state,
-                name    => $e->name,
+                context   => $e->context,
+                created   => $e->created,
+                events    => $events,
+                state     => $state,
+                name      => $e->name,
+                exception => pop @{$self->[SUBTEST_EXCEPTION]},
             );
         }
     }
@@ -581,12 +584,18 @@ sub _finalize_event {
         $cache->{state}->[STATE_PLAN] = $e;
         return unless $e->directive;
         return unless $e->directive eq 'SKIP';
+
+        $self->[SUBTEST_EXCEPTION]->[-1] = $e if $e->in_subtest;
+
         die $e if $e->in_subtest || !$self->[EXIT_ON_DISRUPTION];
         exit 0;
     }
     elsif (!$cache->{do_tap} && $e->isa('Test::Stream::Event::Bail')) {
         $self->[BAILED_OUT] = $e;
         $self->[NO_ENDING]  = 1;
+
+        $self->[SUBTEST_EXCEPTION]->[-1] = $e if $e->in_subtest;
+
         die $e if $e->in_subtest || !$self->[EXIT_ON_DISRUPTION];
         exit 255;
     }
@@ -680,10 +689,9 @@ Test::Stream - A modern infrastructure for testing.
 
 =head1 FEATURES
 
-When you load Test::Stream inside your test file you activate forking support,
-and prevent Test::More from turning on some expensive legacy support. You will
-also get warnings if your code, or any other code you load uses deprecated or
-discouraged practices.
+When you load Test::Stream inside your test file you prevent Test::More from
+turning on some expensive legacy support. You will also get warnings if your
+code, or any other code you load uses deprecated or discouraged practices.
 
 =head1 IMPORT ARGUMENTS
 
@@ -714,6 +722,12 @@ Show events within subtest AFTER the subtest event itself is complete.
 =item subtest_tap => 'both'
 
 Show events as they happen, then also display them after.
+
+=item 'enable_fork'
+
+Turns on support for code that forks. This is nto activated by default because
+it adds ~30ms to the Test::More compile-time, which can really add up in large
+test suites. Turn it on only when needed.
 
 =item 'utf8'
 

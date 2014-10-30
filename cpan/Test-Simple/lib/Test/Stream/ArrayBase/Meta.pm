@@ -60,35 +60,60 @@ sub subclass {
     }
 }
 
-sub add_accessor {
+my $IDX = -1;
+my (@CONST, @GET, @SET);
+_GROW(20);
+
+sub _GROW {
+    my ($max) = @_;
+    return if $max <= $IDX;
+    for (($IDX + 1) .. $max) {
+        # Var per sub for inlining/constant stuff.
+        my $c  = $_;
+        my $gi = $_;
+        my $si = $_;
+
+        $CONST[$_] = sub() { $c };
+        $GET[$_]   = sub   { $_[0]->[$gi] };
+        $SET[$_]   = sub { $_[0]->[$si] = $_[1] };
+    }
+    $IDX = $max;
+}
+
+*add_accessor = \&add_accessors;
+sub add_accessors {
     my $self = shift;
-    my ($name) = @_;
 
     confess "Cannot add accessor, metadata is locked due to a subclass being initialized ($self->{parent}).\n"
         if $self->{locked};
 
-    confess "field '$name' already defined!"
-        if exists $self->{fields}->{$name};
-
-    my $idx = $self->{index}++;
-    $self->{fields}->{$name} = $idx;
-
-    my $const = uc $name;
-    my $gname = lc $name;
-    my $sname = "set_$gname";
-
-    eval qq|
-        package $self->{package};
-        sub $gname { \$_[0]->[$idx] }
-        sub $sname { \$_[0]->[$idx] = \$_[1] }
-        sub $const() { $idx }
-        1
-    | || confess $@;
-
-    # Add the constant as an optional export
     my $ex_meta = Test::Stream::Exporter::Meta->get($self->{package});
-    $ex_meta->add($const);
+
+    for my $name (@_) {
+        confess "field '$name' already defined!"
+            if exists $self->{fields}->{$name};
+
+        my $idx = $self->{index}++;
+        $self->{fields}->{$name} = $idx;
+
+        _GROW($IDX + 10) if $idx > $IDX;
+
+        my $const = uc $name;
+        my $gname = lc $name;
+        my $sname = "set_$gname";
+
+        {
+            no strict 'refs';
+            *{"$self->{package}\::$const"} = $CONST[$idx];
+            *{"$self->{package}\::$gname"} = $GET[$idx];
+            *{"$self->{package}\::$sname"} = $SET[$idx];
+        }
+
+        $ex_meta->{exports}->{$const} = $CONST[$idx];
+        push @{$ex_meta->{polist}} => $const;
+    }
 }
+
 
 1;
 

@@ -7,14 +7,15 @@ BEGIN {
     }
 }
 
-use Test::More tests => 16;
-
 BEGIN {
     require warnings;
     if( eval "warnings->can('carp')" ) {
-        plan skip_all => 'Modern::Open is installed, which breaks this test';
+        require Test::More;
+        Test::More::plan( skip_all => 'Modern::Open is installed, which breaks this test' );
     }
 }
+
+use Test::More tests => 16;
 
 # If we skip with the same name, Test::Harness will report it back and
 # we won't get lots of false bug reports.

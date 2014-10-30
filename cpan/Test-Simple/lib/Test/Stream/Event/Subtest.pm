@@ -17,7 +17,7 @@ sub init {
     $self->[REAL_BOOL] = $self->[STATE]->[STATE_PASSING] && $self->[STATE]->[STATE_COUNT];
     $self->[EVENTS] ||= [];
 
-    if (my $le = $self->[EVENTS]->[-1]) {
+    if (my $le = $self->[EXCEPTION]) {
         my $is_skip = $le->isa('Test::Stream::Event::Plan');
         $is_skip &&= $le->directive;
         $is_skip &&= $le->directive eq 'SKIP';
@@ -28,8 +28,6 @@ sub init {
             $self->[CONTEXT]->set_skip($skip);
             $self->[REAL_BOOL] = 1;
         }
-
-        $self->[EXCEPTION] = $le if $is_skip || $le->isa('Test::Stream::Event::Bail');
     }
 
     push @{$self->[DIAG]} => '  No tests run for subtest.'

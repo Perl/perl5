@@ -5,7 +5,7 @@ use warnings;
 BEGIN {
     require Test::Stream::Threads;
     if ($INC{'Carp.pm'}) {
-        print "1..0 # Carp is already loaded before we even begin.\n";
+        print "1..0 # SKIP: Carp is already loaded before we even begin.\n";
         exit 0;
     }
 }

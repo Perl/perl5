@@ -40,6 +40,39 @@ sub add_default {
     $self->{default}->{$name} = 1;
 }
 
+sub add_bulk {
+    my $self = shift;
+    for my $name (@_) {
+        confess "$name is already exported"
+            if $self->exports->{$name};
+
+        my $ref = package_sym($self->{package}, CODE => $name)
+            || confess "No reference or package sub found for '$name' in '$self->{package}'";
+
+        $self->{exports}->{$name} = $ref;
+    }
+
+    push @{$self->{polist}} => @_;
+}
+
+sub add_default_bulk {
+    my $self = shift;
+
+    for my $name (@_) {
+        confess "$name is already exported"
+            if $self->exports->{$name};
+
+        my $ref = package_sym($self->{package}, CODE => $name)
+            || confess "No reference or package sub found for '$name' in '$self->{package}'";
+
+        $self->{exports}->{$name} = $ref;
+        $self->{default}->{$name} = 1;
+    }
+
+    push @{$self->{polist}} => @_;
+    push @{$self->{pdlist}} => @_;
+}
+
 my %EXPORT_META;
 
 sub new {

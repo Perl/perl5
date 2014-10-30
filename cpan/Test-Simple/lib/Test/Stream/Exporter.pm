@@ -47,13 +47,14 @@ sub export_to {
     my $class = shift;
     my ($dest, @imports) = @_;
 
-    my $meta = export_meta($class)
+    my $meta = Test::Stream::Exporter::Meta->get($class)
         || confess "$class is not an exporter!?";
 
     my (@include, %exclude);
     for my $import (@imports) {
-        if ($import =~ m/^!(.*)$/) {
-            $exclude{$1}++;
+        if (substr($import, 0, 1) eq '!') {
+            $import =~ s/^!//g;
+            $exclude{$import}++;
         }
         else {
             push @include => $import;
@@ -62,10 +63,11 @@ sub export_to {
 
     @include = $meta->default unless @include;
 
+    my $exports = $meta->exports;
     for my $name (@include) {
         next if $exclude{$name};
 
-        my $ref = $meta->exports->{$name}
+        my $ref = $exports->{$name}
             || croak "$class does not export $name";
 
         no strict 'refs';
@@ -95,7 +97,7 @@ sub exports {
     my $meta = export_meta($caller) ||
         confess "$caller is not an exporter!?";
 
-    $meta->add($_) for @_;
+    $meta->add_bulk(@_);
 }
 
 sub default_export {
@@ -114,7 +116,7 @@ sub default_exports {
     my $meta = export_meta($caller) ||
         confess "$caller is not an exporter!?";
 
-    $meta->add_default($_) for @_;
+    $meta->add_default_bulk(@_);
 }
 
 1;
