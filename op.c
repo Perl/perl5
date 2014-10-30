@@ -8480,7 +8480,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (CvCLONE(cv)) {
 	assert(!CvCONST(cv));
-	if (ps && !*ps && op_const_sv(block, cv))
+	if (ps && !*ps && !attrs && op_const_sv(block, cv))
 	    CvCONST_on(cv);
     }
 
