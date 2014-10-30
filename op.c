@@ -7634,7 +7634,7 @@ Perl_cv_const_sv_or_av(const CV * const cv)
  * cv && CvCLONE(cv) && !CvCONST(cv)
  *
  * 	examine the clone prototype, and if contains only a single
- * 	OP_CONST referencing a pad const, or a single PADSV referencing
+ * 	PADSV referencing
  * 	an outer lexical, return a non-zero value to indicate the CV is
  * 	a candidate for "constizing" at clone time
  *
@@ -7679,11 +7679,6 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	else if (type == OP_UNDEF && !o->op_private) {
 	    sv = newSV(0);
 	    SAVEFREESV(sv);
-	}
-	else if (cv && type == OP_CONST) {
-	    sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
-	    if (!sv)
-		return NULL;
 	}
 	else if (cv && type == OP_PADSV) {
 	    if (CvCONST(cv)) { /* newly cloned anon */
