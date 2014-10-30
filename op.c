@@ -7626,21 +7626,13 @@ Perl_cv_const_sv_or_av(const CV * const cv)
 }
 
 /* op_const_sv:  examine an optree to determine whether it's in-lineable.
- * Can be called in 2 ways:
  *
- * !cv
- * 	look for a single OP_CONST with attached value: return the value
- *
- * cv
- *
- * 	examine the clone prototype, and if contains only a single
- * 	PADSV referencing
- * 	an outer lexical, return a non-zero value to indicate the CV is
- * 	a candidate for "constizing" at clone time
+ * It looks for a single OP_CONST with attached value and returns it if
+ * there is one.
  */
 
 static SV *
-S_op_const_sv(pTHX_ const OP *o, CV *cv)
+S_op_const_sv(pTHX_ const OP *o)
 {
     SV *sv = NULL;
 
@@ -7673,15 +7665,65 @@ S_op_const_sv(pTHX_ const OP *o, CV *cv)
 	    sv = newSV(0);
 	    SAVEFREESV(sv);
 	}
-	else if (cv && type == OP_PADSV) {
-		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
-		    sv = &PL_sv_undef; /* an arbitrary non-null value */
-	}
 	else {
 	    return NULL;
 	}
     }
     return sv;
+}
+
+/* op_has_lone_padsv:  examine an op chain to determine whether it's an
+ * inlinable closure.
+ *
+ * It examines the clone prototype, and if it contains only a single PADSV
+ * referencing an outer lexical, returns TRUE to indicate that the CV is
+ * a candidate for ‘constizing’ at clone time.
+ */
+
+static bool
+S_op_has_lone_padsv(pTHX_ const OP *o, CV *cv)
+{
+    SV *sv = NULL;
+
+    assert(cv);
+    if (!o)
+	return FALSE;
+
+    if (o->op_type == OP_LINESEQ && cLISTOPo->op_first)
+	o = OP_SIBLING(cLISTOPo->op_first);
+
+    for (; o; o = o->op_next) {
+	const OPCODE type = o->op_type;
+
+	if (sv && o->op_next == o)
+	    return cBOOL(sv);
+	if (o->op_next != o) {
+	    if (type == OP_NEXTSTATE
+	     || (type == OP_NULL && !(o->op_flags & OPf_KIDS))
+	     || type == OP_PUSHMARK)
+		continue;
+	    if (type == OP_DBSTATE)
+		continue;
+	}
+	if (type == OP_LEAVESUB || type == OP_RETURN)
+	    break;
+	if (sv)
+	    return FALSE;
+	if (type == OP_CONST && cSVOPo->op_sv)
+	    sv = cSVOPo->op_sv;
+	else if (type == OP_UNDEF && !o->op_private) {
+	    sv = newSV(0);
+	    SAVEFREESV(sv);
+	}
+	else if (cv && type == OP_PADSV) {
+		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
+		    sv = &PL_sv_undef; /* an arbitrary non-null value */
+	}
+	else {
+	    return FALSE;
+	}
+    }
+    return cBOOL(sv);
 }
 
 static bool
@@ -7837,7 +7879,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	)
 	const_sv = NULL;
     else
-	const_sv = S_op_const_sv(aTHX_ block, NULL);
+	const_sv = S_op_const_sv(aTHX_ block);
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -8006,7 +8048,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (CvCLONE(cv)) {
 	assert(!CvCONST(cv));
-	if (ps && !*ps && S_op_const_sv(aTHX_ block, cv))
+	if (ps && !*ps && S_op_has_lone_padsv(aTHX_ block, cv))
 	    CvCONST_on(cv);
     }
 
@@ -8230,7 +8272,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	)
 	const_sv = NULL;
     else
-	const_sv = S_op_const_sv(aTHX_ block, NULL);
+	const_sv = S_op_const_sv(aTHX_ block);
 
     if (SvPOK(gv) || (SvROK(gv) && SvTYPE(SvRV(gv)) != SVt_PVCV)) {
 	assert (block);
@@ -8460,7 +8502,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (CvCLONE(cv)) {
 	assert(!CvCONST(cv));
-	if (ps && !*ps && !attrs && S_op_const_sv(aTHX_ block, cv))
+	if (ps && !*ps && !attrs && S_op_has_lone_padsv(aTHX_ block, cv))
 	    CvCONST_on(cv);
     }
 
