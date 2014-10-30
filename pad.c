@@ -2248,11 +2248,14 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 	 */
 	SV* const const_sv = op_const_sv(CvSTART(cv), cv);
 	if (const_sv) {
+	    const bool was_method = cBOOL(CvMETHOD(cv));
 	    SvREFCNT_dec_NN(cv);
             /* For this calling case, op_const_sv returns a *copy*, which we
                donate to newCONSTSUB. Yes, this is ugly, and should be killed.
                Need to fix how lib/constant.pm works to eliminate this.  */
 	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
+	    if (was_method)
+		CvMETHOD_on(cv);
 	}
 	else {
 	    CvCONST_off(cv);
