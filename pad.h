@@ -32,6 +32,7 @@ struct padlist {
     SSize_t	xpadl_max;	/* max index for which array has space */
     PAD **	xpadl_alloc;	/* pointer to beginning of array of AVs */
     PADNAMELIST*xpadl_outid;	/* Padnamelist of outer pad; used as ID */
+    U32		xpadl_refcnt;
 };
 
 
@@ -282,7 +283,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PadlistNAMES(pl)	(*PadlistARRAY(pl))
 #define PadlistNAMESARRAY(pl)	PadnamelistARRAY(PadlistNAMES(pl))
 #define PadlistNAMESMAX(pl)	PadnamelistMAX(PadlistNAMES(pl))
-#define PadlistREFCNT(pl)	1	/* reserved for future use */
+#define PadlistREFCNT(pl)	(pl)->xpadl_refcnt
 
 #define PadnamelistARRAY(pnl)	AvARRAY(pnl)
 #define PadnamelistMAX(pnl)	AvFILLp(pnl)
