@@ -65,7 +65,33 @@ See L<perlguts/Autoloading with XSUBs>.
 /* For use when you only have a XPVCV*, not a real CV*.
    Must be assert protected as in S_CvDEPTHp before use. */
 #define CvDEPTHunsafe(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_depth
-#define CvPADLIST(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist
+
+/* these CvPADLIST/CvRESERVED asserts can be reverted one day, once stabilized */
+#define CvPADLIST(sv)	  (*(assert_(!CvISXSUB((CV*)(sv))) \
+	&(((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_padlist)))
+/* CvPADLIST_set is not public API, it can be removed one day, once stabilized */
+#ifdef DEBUGGING
+#  define CvPADLIST_set(sv, padlist) Perl_set_padlist(aTHX_ (CV*)sv, padlist)
+#else
+#  define CvPADLIST_set(sv, padlist) (CvPADLIST(sv) = (padlist))
+#endif
+/* CvRESERVED is a placeholder and will be going away soon */
+#define CvRESERVED(sv)	  *(assert_(CvISXSUB((CV*)(sv))) \
+	&(((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_reserved))
+#ifdef DEBUGGING
+#  if PTRSIZE == 8
+#    define PoisonPADLIST(sv) \
+        (((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_padlist = (PADLIST *)UINT64_C(0xEFEFEFEFEFEFEFEF))
+#  elif PTRSIZE == 4
+#    define PoisonPADLIST(sv) \
+        (((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_padlist = (PADLIST *)0xEFEFEFEF)
+#  else
+#    error unknown pointer size
+#  endif
+#else
+#  define PoisonPADLIST(sv)
+#endif
+
 #define CvOUTSIDE(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside
 #define CvOUTSIDE_SEQ(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside_seq
 #define CvFLAGS(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_flags

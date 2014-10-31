@@ -2162,7 +2162,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     PL_main_cv = PL_compcv = MUTABLE_CV(newSV_type(SVt_PVCV));
     CvUNIQUE_on(PL_compcv);
 
-    CvPADLIST(PL_compcv) = pad_new(0);
+    CvPADLIST_set(PL_compcv, pad_new(0));
 
     PL_isarev = newHV();
 

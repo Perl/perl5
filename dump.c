@@ -2001,10 +2001,14 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  DEPTH = %"IVdf"\n", (IV)CvDEPTH(sv));
 	Perl_dump_indent(aTHX_ level, file, "  FLAGS = 0x%"UVxf"\n", (UV)CvFLAGS(sv));
 	Perl_dump_indent(aTHX_ level, file, "  OUTSIDE_SEQ = %"UVuf"\n", (UV)CvOUTSIDE_SEQ(sv));
-	Perl_dump_indent(aTHX_ level, file, "  PADLIST = 0x%"UVxf"\n", PTR2UV(CvPADLIST(sv)));
-	if (nest < maxnest) {
-	    do_dump_pad(level+1, file, CvPADLIST(sv), 0);
+	if (!CvISXSUB(sv)) {
+	    Perl_dump_indent(aTHX_ level, file, "  PADLIST = 0x%"UVxf"\n", PTR2UV(CvPADLIST(sv)));
+	    if (nest < maxnest) {
+		do_dump_pad(level+1, file, CvPADLIST(sv), 0);
+	    }
 	}
+	else
+	    Perl_dump_indent(aTHX_ level, file, "  RESERVED = 0x%p\n", CvRESERVED(sv));
 	{
 	    const CV * const outside = CvOUTSIDE(sv);
 	    Perl_dump_indent(aTHX_ level, file, "  OUTSIDE = 0x%"UVxf" (%s)\n",

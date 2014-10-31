@@ -1383,6 +1383,7 @@
 #  endif
 #  if defined(DEBUGGING)
 #define get_debug_opts(a,b)	Perl_get_debug_opts(aTHX_ a,b)
+#define set_padlist(a,b)	Perl_set_padlist(aTHX_ a,b)
 #    if defined(PERL_IN_PAD_C)
 #define cv_dump(a,b)		S_cv_dump(aTHX_ a,b)
 #    endif

@@ -2533,6 +2533,9 @@ s	|void	|deb_stack_n	|NN SV** stack_base|I32 stack_min \
 
 : pad API
 Apda	|PADLIST*|pad_new	|int flags
+#ifdef DEBUGGING
+pX	|void|set_padlist| NN CV * cv | NULLOK PADLIST * padlist
+#endif
 #if defined(PERL_IN_PAD_C)
 s	|PADOFFSET|pad_alloc_name|NN SV *namesv|U32 flags \
 				|NULLOK HV *typestash|NULLOK HV *ourstash
@@ -2589,7 +2592,7 @@ pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv
 pdX	|void	|pad_push	|NN PADLIST *padlist|int depth
 ApdR	|HV*	|pad_compname_type|const PADOFFSET po
 #if defined(USE_ITHREADS)
-pdR	|PADLIST *|padlist_dup	|NULLOK PADLIST *srcpad \
+pdR	|PADLIST *|padlist_dup	|NN PADLIST *srcpad \
 				|NN CLONE_PARAMS *param
 #endif
 p	|PAD **	|padlist_store	|NN PADLIST *padlist|I32 key \

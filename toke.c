@@ -10538,7 +10538,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     CvFLAGS(PL_compcv) |= flags;
 
     PL_subline = CopLINE(PL_curcop);
-    CvPADLIST(PL_compcv) = pad_new(padnew_SAVE|padnew_SAVESUB);
+    CvPADLIST_set(PL_compcv, pad_new(padnew_SAVE|padnew_SAVESUB));
     CvOUTSIDE(PL_compcv) = MUTABLE_CV(SvREFCNT_inc_simple(outsidecv));
     CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
     if (outsidecv && CvPADLIST(outsidecv))

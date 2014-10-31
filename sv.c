@@ -13568,7 +13568,14 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			? NULL
 			: gv_dup(CvGV(sstr), param);
 
-		CvPADLIST(dstr) = padlist_dup(CvPADLIST(sstr), param);
+		if (!CvISXSUB(sstr)) {
+                    if(CvPADLIST(sstr))
+                        CvPADLIST_set(dstr, padlist_dup(CvPADLIST(sstr), param));
+                    else
+                        CvPADLIST_set(dstr, NULL);
+                } else { /* future union here */
+                    CvRESERVED(dstr) = NULL;
+                }
 		CvOUTSIDE(dstr)	=
 		    CvWEAKOUTSIDE(sstr)
 		    ? cv_dup(    CvOUTSIDE(dstr), param)

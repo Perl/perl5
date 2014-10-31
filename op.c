@@ -7906,6 +7906,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	CvXSUB(cv) = const_sv_xsub;
 	CvCONST_on(cv);
 	CvISXSUB_on(cv);
+	PoisonPADLIST(cv);
 	op_free(block);
 	SvREFCNT_dec(compcv);
 	PL_compcv = NULL;
@@ -7940,9 +7941,9 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		CvFLAGS(compcv) | preserved_flags;
 	    CvOUTSIDE(cv) = CvOUTSIDE(compcv);
 	    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(compcv);
-	    CvPADLIST(cv) = CvPADLIST(compcv);
+	    CvPADLIST_set(cv, CvPADLIST(compcv));
 	    CvOUTSIDE(compcv) = temp_cv;
-	    CvPADLIST(compcv) = temp_padl;
+	    CvPADLIST_set(compcv, temp_padl);
 	    CvSTART(cv) = CvSTART(compcv);
 	    CvSTART(compcv) = cvstart;
 	    CvFLAGS(compcv) &= ~(CVf_SLABBED|CVf_WEAKOUTSIDE);
@@ -8320,6 +8321,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    CvXSUB(cv) = const_sv_xsub;
 	    CvCONST_on(cv);
 	    CvISXSUB_on(cv);
+	    PoisonPADLIST(cv);
 	}
 	else {
 	    if (isGV(gv)) {
@@ -8377,9 +8379,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 					     | CvNAMED(cv);
 	    CvOUTSIDE(cv) = CvOUTSIDE(PL_compcv);
 	    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(PL_compcv);
-	    CvPADLIST(cv) = CvPADLIST(PL_compcv);
+	    CvPADLIST_set(cv,CvPADLIST(PL_compcv));
 	    CvOUTSIDE(PL_compcv) = temp_cv;
-	    CvPADLIST(PL_compcv) = temp_av;
+	    CvPADLIST_set(PL_compcv, temp_av);
 	    CvSTART(cv) = CvSTART(PL_compcv);
 	    CvSTART(PL_compcv) = cvstart;
 	    CvFLAGS(PL_compcv) &= ~(CVf_SLABBED|CVf_WEAKOUTSIDE);
@@ -8805,6 +8807,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
         assert(!CvDYNFILE(cv)); /* cv_undef should have turned it off */
         CvISXSUB_on(cv);
         CvXSUB(cv) = subaddr;
+        PoisonPADLIST(cv);
     
         if (name)
             process_special_blocks(0, name, gv, cv);

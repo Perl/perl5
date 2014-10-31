@@ -253,6 +253,7 @@ unless ($define{'DEBUGGING'}) {
 		    Perl_debstackptrs
 		    Perl_pad_sv
 		    Perl_pad_setsv
+		    Perl_set_padlist
 		    Perl_hv_assert
 		    PL_watchaddr
 		    PL_watchok

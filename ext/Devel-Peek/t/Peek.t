@@ -688,7 +688,8 @@ do_test('constant subroutine',
     FLAGS = 0xc					# $] >= 5.013 && $] < 5.015
     FLAGS = 0x100c				# $] >= 5.015
     OUTSIDE_SEQ = 0
-    PADLIST = 0x0
+    PADLIST = 0x0				# $] < 5.021006
+    RESERVED = $ADDR				# $] >= 5.021006
     OUTSIDE = 0x0 \\(null\\)');	
 
 do_test('isUV should show on PVMG',

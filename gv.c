@@ -568,6 +568,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	GvCVGEN(gv) = 0;
 	CvISXSUB_on(cv);
 	CvXSUB(cv) = core_xsub;
+	PoisonPADLIST(cv);
     }
     CvGV_set(cv, gv); /* This stops new ATTRSUB from setting CvFILE
                          from PL_curcop. */

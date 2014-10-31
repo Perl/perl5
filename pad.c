@@ -38,9 +38,11 @@ not callable at will and are always thrown away after the eval"" is done
 executing).  Require'd files are simply evals without any outer lexical
 scope.
 
-XSUBs don't have CvPADLIST set - dXSTARG fetches values from PL_curpad,
+XSUBs do not have a CvPADLIST.  dXSTARG fetches values from PL_curpad,
 but that is really the callers pad (a slot of which is allocated by
-every entersub).
+every entersub). Do not get or set CvPADLIST if a CV is an XSUB (as
+determined by C<CvISXSUB()>), CvPADLIST slot is reused for a different
+internal purpose in XSUBs.
 
 The PADLIST has a C array where pads are stored.
 
@@ -193,6 +195,27 @@ sv_eq_pvn_flags(pTHX_ const SV *sv, const char* pv, const STRLEN pvlen, const U3
                     || memEQ(SvPVX_const(sv), pv, pvlen));
 }
 
+#ifdef DEBUGGING
+void
+Perl_set_padlist(pTHX_ CV * cv, PADLIST *padlist){
+    PERL_ARGS_ASSERT_SET_PADLIST;
+#  if PTRSIZE == 8
+    if((Size_t)padlist == UINT64_C(0xEFEFEFEFEFEFEFEF)){
+	assert(0);
+    }
+#  elif PTRSIZE == 4
+    if((Size_t)padlist == UINT64_C(0xEFEFEFEF)){
+	assert(0);
+    }
+#  else
+#    error unknown pointer size
+#  endif
+    if(CvISXSUB(cv)){
+	assert(0);
+    }
+    ((XPVCV*)MUTABLE_PTR(SvANY(cv)))->xcv_padlist_u.xcv_padlist = padlist;
+}
+#endif
 
 /*
 =for apidoc Am|PADLIST *|pad_new|int flags
@@ -398,7 +421,7 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
     /* This statement and the subsequence if block was pad_undef().  */
     pad_peg("pad_undef");
 
-    if (!CvISXSUB(&cvbody)  && CvPADLIST(&cvbody)) {
+    if (!CvISXSUB(&cvbody) && CvPADLIST(&cvbody)) {
 	I32 ix;
 	const PADLIST *padlist = CvPADLIST(&cvbody);
 
@@ -479,10 +502,11 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 	}
 	if (PadlistARRAY(padlist)) Safefree(PadlistARRAY(padlist));
 	Safefree(padlist);
-	CvPADLIST(&cvbody) = NULL;
+	CvPADLIST_set(&cvbody, NULL);
     }
-    else /* future union */
-	CvPADLIST(&cvbody) = NULL;
+    else if (CvISXSUB(&cvbody)) /* future union */
+	CvRESERVED(&cvbody) = NULL;
+    /* else is (!CvISXSUB(&cvbody) && !CvPADLIST(&cvbody)) {do nothing;} */
 
 
     /* remove CvOUTSIDE unless this is an undef rather than a free */
@@ -2065,7 +2089,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 
     SAVESPTR(PL_comppad_name);
     PL_comppad_name = protopad_name;
-    CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
+    CvPADLIST_set(cv, pad_new(padnew_CLONE|padnew_SAVE));
 
     av_fill(PL_comppad, fpad);
 
@@ -2459,9 +2483,6 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
     PADOFFSET max;
 
     PERL_ARGS_ASSERT_PADLIST_DUP;
-
-    if (!srcpad)
-	return NULL;
 
     cloneall = param->flags & CLONEf_COPY_STACKS
 	|| SvREFCNT(PadlistARRAY(srcpad)[1]) > 1;
