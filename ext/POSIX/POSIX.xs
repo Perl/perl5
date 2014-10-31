@@ -866,6 +866,7 @@ static int my_fegetround()
 /* Toward plus infinity. */
 #define MY_ROUND_UP(x) ((NV)((IV)((x) >= 0.0 ? (x) + 0.5 : (x))))
 
+#if (!defined(c99_nearbyint) || !defined(c99_lrint)) && defined(FE_TONEAREST)
 static NV my_rint(NV x)
 {
 #ifdef FE_TONEAREST
@@ -888,6 +889,7 @@ static NV my_rint(NV x)
   return NV_NAN;
 #endif
 }
+#endif
 
 /* XXX nearbyint() and rint() are not really identical -- but the difference
  * is messy: nearbyint is defined NOT to raise FE_INEXACT floating point
