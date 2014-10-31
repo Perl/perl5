@@ -301,7 +301,10 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PadnameOUTER(pn)	!!SvFAKE(pn)
 #define PadnameIsSTATE(pn)	!!SvPAD_STATE(pn)
 #define PadnameTYPE(pn)		(SvPAD_TYPED(pn) ? SvSTASH(pn) : NULL)
+#define PadnameLVALUE(pn) \
+    ((SvFLAGS(pn) & (SVpad_NAME|SVpad_LVALUE))==(SVpad_NAME|SVpad_LVALUE))
 
+#define PadnameLVALUE_on(pn)	(SvFLAGS(pn) |= SVpad_NAME|SVpad_LVALUE)
 
 #ifdef DEBUGGING
 #  define PAD_SV(po)	   pad_sv(po)

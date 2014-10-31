@@ -610,6 +610,8 @@ do_curse(pTHX_ SV * const sv) {
     if ((PL_stderrgv && GvGP(PL_stderrgv) && (SV*)GvIO(PL_stderrgv) == sv)
      || (PL_defoutgv && GvGP(PL_defoutgv) && (SV*)GvIO(PL_defoutgv) == sv))
 	return;
+    if (SvPAD_NAME(sv))
+	return;
     (void)curse(sv, 0);
 }
 
@@ -6456,10 +6458,12 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    goto free_head;
 	}
 
-	assert(!SvOBJECT(sv) || type >= SVt_PVMG); /* objs are always >= MG */
+	/* objs are always >= MG, but pad names use the SVs_OBJECT flag
+	   for another purpose  */
+	assert(!SvOBJECT(sv) || type >= SVt_PVMG || SvPAD_NAME(sv));
 
 	if (type >= SVt_PVMG) {
-	    if (SvOBJECT(sv)) {
+	    if (SvOBJECT(sv) && !SvPAD_NAME(sv)) {
 		if (!curse(sv, 1)) goto get_next_sv;
 		type = SvTYPE(sv); /* destructor may have changed it */
 	    }
@@ -13314,7 +13318,9 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 #endif
 
     /* don't clone objects whose class has asked us not to */
-    if (SvOBJECT(sstr) && ! (SvFLAGS(SvSTASH(sstr)) & SVphv_CLONEABLE)) {
+    if (SvOBJECT(sstr) && !SvPAD_NAME(sstr)
+     && ! (SvFLAGS(SvSTASH(sstr)) & SVphv_CLONEABLE))
+    {
 	SvFLAGS(dstr) = 0;
 	return dstr;
     }
@@ -13405,7 +13411,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    NOOP;
 		} else if (SvMAGIC(dstr))
 		    SvMAGIC_set(dstr, mg_dup(SvMAGIC(dstr), param));
-		if (SvOBJECT(dstr) && SvSTASH(dstr))
+		if (SvOBJECT(dstr) && !SvPAD_NAME(dstr) && SvSTASH(dstr))
 		    SvSTASH_set(dstr, hv_dup_inc(SvSTASH(dstr), param));
 		else SvSTASH_set(dstr, 0); /* don't copy DESTROY cache */
 	    }
