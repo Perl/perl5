@@ -40,6 +40,13 @@ my $acceptable_failure_percentage = ($^O =~ / ^ ( AIX ) $ /ix)
 # The list of test numbers of the problematic tests.
 my %problematical_tests;
 
+# If any %problematical_tests fails in one of these locales, it is
+# considered a TODO.
+my %known_bad_locales = (
+                          irix => qr/ ^ (?: cs | hu | sk ) $/x,
+                          darwin => qr/ ^ lt_LT.ISO8859 /ix,
+                          os390 => qr/ ^ italian /ix,
+                        );
 
 use Dumpvalue;
 
@@ -722,6 +729,7 @@ my %posixes;
 
 my %Problem;
 my %Okay;
+my %Known_bad_locale;   # Failed test for a locale known to be bad
 my %Testing;
 my @Added_alpha;   # Alphas that aren't in the C locale.
 my %test_names;
@@ -867,11 +875,14 @@ sub report_result {
     my ($Locale, $i, $pass_fail, $message) = @_;
     $message //= "";
     $message = "  ($message)" if $message;
-    unless ($pass_fail) {
+    if ($pass_fail) {
+	push @{$Okay{$i}}, $Locale;
+    }
+    else {
+	$Known_bad_locale{$i}{$Locale} = 1 if exists $known_bad_locales{$^O}
+                                         && $Locale =~ $known_bad_locales{$^O};
 	$Problem{$i}{$Locale} = 1;
 	debug "failed $i ($test_names{$i}) with locale '$Locale'$message\n";
-    } else {
-	push @{$Okay{$i}}, $Locale;
     }
 }
 
@@ -2222,11 +2233,15 @@ my $final_locales_test_number = $locales_test_number;
 
 # Recount the errors.
 
+TEST_NUM:
 foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
     if (%setlocale_failed) {
         print "not ";
     }
-    elsif ($Problem{$test_num} || !defined $Okay{$test_num} || !@{$Okay{$test_num}}) {
+    elsif ($Problem{$test_num}
+           || ! defined $Okay{$test_num}
+           || ! @{$Okay{$test_num}})
+    {
 	if (defined $not_necessarily_a_problem_test_number
             && $test_num == $not_necessarily_a_problem_test_number)
         {
@@ -2234,16 +2249,40 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
 	    print "# It usually indicates a problem in the environment,\n";
 	    print "# not in Perl itself.\n";
 	}
-        if ($Okay{$test_num} && grep { $_ == $test_num } keys %problematical_tests) {
+
+        # If there are any locales that pass this test, or are known-bad, it
+        # may be that there are enough passes that we TODO the failure.
+        if (($Okay{$test_num} || $Known_bad_locale{$test_num})
+            && grep { $_ == $test_num } keys %problematical_tests)
+        {
             no warnings 'experimental::autoderef';
+
+            # Don't count the known-bad failures when calculating the
+            # percentage that fail.
+            my $known_failures = (exists $Known_bad_locale{$test_num})
+                                  ? scalar(keys $Known_bad_locale{$test_num})
+                                  : 0;
+            my $adjusted_failures = scalar(keys $Problem{$test_num})
+                                    - $known_failures;
+
+            # Specially handle failures where only known-bad locales fail.
+            # This makes the diagnositics clearer.
+            if ($adjusted_failures <= 0) {
+                print "not ok $test_num $test_names{$test_num} # TODO fails only on ",
+                                                                "known bad locales: ",
+                      join " ", keys $Known_bad_locale{$test_num}, "\n";
+                next TEST_NUM;
+            }
+
             # Round to nearest .1%
-            my $percent_fail = (int(.5 + (1000 * scalar(keys $Problem{$test_num})
+            my $percent_fail = (int(.5 + (1000 * $adjusted_failures
                                           / scalar(@Locale))))
                                / 10;
             if ($percent_fail < $acceptable_failure_percentage) {
                 if (! $debug) {
                     $test_names{$test_num} .= 'TODO';
-                    print "# ", 100 - $percent_fail, "% of locales pass the following test, so it is likely that the failures\n";
+                    print "# ", 100 - $percent_fail, "% of locales not known to be problematic on this platform\n";
+                    print "# pass the following test, so it is likely that the failures\n";
                     print "# are errors in the locale definitions.  The test is marked TODO, as the\n";
                     print "# problem is not likely to be Perl's\n";
                 }
@@ -2418,6 +2457,12 @@ my $didwarn = 0;
 foreach ($first_locales_test_number..$final_locales_test_number) {
     if ($Problem{$_}) {
 	my @f = sort keys %{ $Problem{$_} };
+
+        # Don't list the failures caused by known-bad locales.
+        if (exists $known_bad_locales{$^O}) {
+            @f = grep { $_ !~ $known_bad_locales{$^O} } @f;
+            next unless @f;
+        }
 	my $f = join(" ", @f);
 	$f =~ s/(.{50,60}) /$1\n#\t/g;
 	print
@@ -2494,6 +2539,11 @@ if ($didwarn) {
     } else {
         print "# None of your locales were broken.\n";
     }
+}
+
+if (exists $known_bad_locales{$^O} && ! %Known_bad_locale) {
+    $test_num++;
+    print "ok $test_num $^O no longer has known bad locales # TODO\n";
 }
 
 print "1..$test_num\n";
