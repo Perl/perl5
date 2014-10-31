@@ -7655,8 +7655,8 @@ S_op_const_sv(pTHX_ const OP *o)
     return sv;
 }
 
-/* op_has_lone_padsv:  examine an op chain to determine whether it's an
- * inlinable closure.
+/* cv_has_lone_padsv:  Examine the CV’s op chain to determine whether it’s
+ * an inlinable closure.
  *
  * It examines the clone prototype, and if it contains only a single PADSV
  * referencing an outer lexical, returns TRUE to indicate that the CV is
@@ -7664,49 +7664,33 @@ S_op_const_sv(pTHX_ const OP *o)
  */
 
 static bool
-S_op_has_lone_padsv(pTHX_ const OP *o, CV *cv)
+S_cv_has_lone_padsv(pTHX_ CV *cv)
 {
-    SV *sv = NULL;
-
-    assert(cv);
-    if (!o)
-	return FALSE;
-
-    if (o->op_type == OP_LINESEQ && cLISTOPo->op_first)
-	o = OP_SIBLING(cLISTOPo->op_first);
+    bool seen_padsv = FALSE;
+    OP *o = CvSTART(cv);
 
     for (; o; o = o->op_next) {
 	const OPCODE type = o->op_type;
 
-	if (sv && o->op_next == o)
-	    return cBOOL(sv);
-	if (o->op_next != o) {
-	    if (type == OP_NEXTSTATE
-	     || (type == OP_NULL && !(o->op_flags & OPf_KIDS))
+	if (    type == OP_NEXTSTATE
+	     || type == OP_NULL
 	     || type == OP_PUSHMARK)
 		continue;
-	    if (type == OP_DBSTATE)
+	if (type == OP_DBSTATE)
 		continue;
-	}
-	if (type == OP_LEAVESUB || type == OP_RETURN)
+	if (type == OP_LEAVESUB)
 	    break;
-	if (sv)
+	if (seen_padsv)
 	    return FALSE;
-	if (type == OP_CONST && cSVOPo->op_sv)
-	    sv = cSVOPo->op_sv;
-	else if (type == OP_UNDEF && !o->op_private) {
-	    sv = newSV(0);
-	    SAVEFREESV(sv);
-	}
-	else if (cv && type == OP_PADSV) {
+	if (type == OP_PADSV) {
 		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
-		    sv = &PL_sv_undef; /* an arbitrary non-null value */
+		    seen_padsv = 1;
 	}
 	else {
 	    return FALSE;
 	}
     }
-    return cBOOL(sv);
+    return seen_padsv;
 }
 
 static bool
@@ -8031,7 +8015,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (CvCLONE(cv)) {
 	assert(!CvCONST(cv));
-	if (ps && !*ps && S_op_has_lone_padsv(aTHX_ block, cv))
+	if (ps && !*ps && S_cv_has_lone_padsv(aTHX_ cv))
 	    CvCONST_on(cv);
     }
 
@@ -8485,7 +8469,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (CvCLONE(cv)) {
 	assert(!CvCONST(cv));
-	if (ps && !*ps && !attrs && S_op_has_lone_padsv(aTHX_ block, cv))
+	if (ps && !*ps && !attrs && S_cv_has_lone_padsv(aTHX_ cv))
 	    CvCONST_on(cv);
     }
 
