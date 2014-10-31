@@ -128,7 +128,7 @@ sub _inner_check {
     return $self->_check_array($e1, $e2) if $type1 eq 'ARRAY';
     return $self->_check_hash($e1, $e2)  if $type1 eq 'HASH';
 
-    if ($type1 eq 'REF' || $type1 eq 'SCALAR' && !(is_regex($e1) && is_regex($e2))) {
+    if ($type1 eq 'REF' || $type1 eq 'SCALAR' && !(defined(is_regex($e1)) && defined(is_regex($e2)))) {
         push @$self => {type => 'REF', vals => [$e1, $e2], line => __LINE__};
         my $ok = $self->_deep_check($$e1, $$e2);
         pop @$self if $ok;

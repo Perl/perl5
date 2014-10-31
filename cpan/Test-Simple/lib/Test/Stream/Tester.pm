@@ -4,7 +4,7 @@ use warnings;
 
 use Test::Builder 1.301001;
 use Test::Stream;
-use Test::Stream::Util qw/try is_regex/;
+use Test::Stream::Util qw/try/;
 
 use B;
 

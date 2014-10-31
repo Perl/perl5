@@ -39,7 +39,7 @@ sub _reftype {
 
     return $type unless $type eq 'SCALAR';
 
-    $type = 'REGEXP' if $type eq 'REGEX' || is_regex($thing);
+    $type = 'REGEXP' if $type eq 'REGEX' || defined is_regex($thing);
 
     return $type;
 }

@@ -60,7 +60,7 @@ sub validate_check {
 
     return unless defined $val;
     return unless ref $val;
-    return if is_regex($val);
+    return if defined is_regex($val);
 
     if (blessed($val)) {
         return if $val->isa('Test::Stream::Tester::Checks');
@@ -76,7 +76,7 @@ sub validate_check {
         unless reftype($val) eq 'ARRAY';
 
     croak "Arrayrefs given as field checks may only contain regexes"
-        if grep { !is_regex($_) } @$val;
+        if grep { ! defined is_regex($_) } @$val;
 
     return;
 }

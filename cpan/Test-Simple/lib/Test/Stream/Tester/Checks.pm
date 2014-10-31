@@ -109,7 +109,7 @@ sub vtype {
         return 'event'  if $v->isa('Test::Stream::Tester::Events::Event');
     }
 
-    return 'regexp' if is_regex($v);
+    return 'regexp' if defined is_regex($v);
     return 'noref' unless ref $v;
     return 'array'  if reftype($v) eq 'ARRAY';
     return 'code'   if reftype($v) eq 'CODE';

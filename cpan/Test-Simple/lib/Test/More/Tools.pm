@@ -124,7 +124,7 @@ sub regex_check {
 
     my $regex = is_regex($got_regex);
     return (0, "    '$got_regex' doesn't look much like a regex to me.")
-        unless $regex;
+        unless defined $regex;
 
     my $ctx = context();
     my ($p, $file, $line) = $ctx->call;

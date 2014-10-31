@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_068';
+our $VERSION = '1.301001_070';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::More::Tools;
@@ -264,6 +264,9 @@ sub todo {
 
 sub in_todo {
     my $self = shift;
+
+    my $ctx = $self->ctx;
+    return 1 if $ctx->in_todo;
 
     return (defined $self->{Todo} || $self->find_TODO) ? 1 : 0;
 }
