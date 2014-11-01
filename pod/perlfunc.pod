@@ -3677,12 +3677,13 @@ C<{>.  Usually it gets it right, but if it
 doesn't it won't realize something is wrong until it gets to the C<}> and
 encounters the missing (or unexpected) comma.  The syntax error will be
 reported close to the C<}>, but you'll need to change something near the C<{>
-such as using a unary C<+> to give Perl some help:
+such as using a unary C<+> or semicolon to give Perl some help:
 
     %hash = map {  "\L$_" => 1  } @array # perl guesses EXPR. wrong
     %hash = map { +"\L$_" => 1  } @array # perl guesses BLOCK. right
-    %hash = map { ("\L$_" => 1) } @array # this also works
-    %hash = map {  lc($_) => 1  } @array # as does this.
+    %hash = map {; "\L$_" => 1  } @array # this also works
+    %hash = map { ("\L$_" => 1) } @array # as does this
+    %hash = map {  lc($_) => 1  } @array # and this.
     %hash = map +( lc($_) => 1 ), @array # this is EXPR and works!
 
     %hash = map  ( lc($_), 1 ),   @array # evaluates to (1, @array)
