@@ -2247,6 +2247,7 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 	 * turn into a const sub:
 	 */
 	SV* const const_sv = op_const_sv(CvSTART(cv), cv);
+	assert(newcv);
 	if (const_sv) {
 	    const bool was_method = cBOOL(CvMETHOD(cv));
 	    SvREFCNT_dec_NN(cv);
