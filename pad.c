@@ -2037,7 +2037,7 @@ the immediately surrounding code.
 
 static CV *S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside);
 
-static void
+static CV *
 S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 {
     I32 ix;
@@ -2194,6 +2194,8 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 
     if (newcv) SvREFCNT_inc_simple_void_NN(cv);
     LEAVE;
+
+    return cv;
 }
 
 static CV *
@@ -2231,7 +2233,8 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
     if (SvMAGIC(proto))
 	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
-    if (CvPADLIST(proto)) S_cv_clone_pad(aTHX_ proto, cv, outside, newcv);
+    if (CvPADLIST(proto))
+	cv = S_cv_clone_pad(aTHX_ proto, cv, outside, newcv);
 
     DEBUG_Xv(
 	PerlIO_printf(Perl_debug_log, "\nPad CV clone\n");
