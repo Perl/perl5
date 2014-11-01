@@ -2374,9 +2374,9 @@ of Perl are likely to eliminate these arbitrary limitations.
 S<<-- HERE> in m/%s/
 
 (W regexp) Named Unicode character escapes (C<\N{...}>) may return a
-zero-length sequence.  When such an escape is used in a character class
-its behaviour is not well defined.  Check that the correct escape has
-been used, and the correct charname handler is in scope.
+zero-length sequence.  When such an escape is used in a character
+class its behavior is not well defined.  Check that the correct
+escape has been used, and the correct charname handler is in scope.
 
 =item Illegal binary digit %s
 
@@ -3888,7 +3888,7 @@ with an offset pointing outside the buffer.  This is difficult to
 imagine.  The sole exceptions to this are that zero padding will
 take place when going past the end of the string when either
 C<sysread()>ing a file, or when seeking past the end of a scalar opened
-for I/O (in anticipation of future reads and to imitate the behaviour
+for I/O (in anticipation of future reads and to imitate the behavior
 with real files).
 
 =item %s() on unopened %s
@@ -6660,7 +6660,7 @@ of the returned sequence, which is not likely what you want.
 =item Using !~ with %s doesn't make sense
 
 (F) Using the C<!~> operator with C<s///r>, C<tr///r> or C<y///r> is
-currently reserved for future use, as the exact behaviour has not
+currently reserved for future use, as the exact behavior has not
 been decided.  (Simply returning the boolean opposite of the
 modified string is usually not particularly useful.)
 
