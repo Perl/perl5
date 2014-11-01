@@ -2195,6 +2195,30 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
     if (newcv) SvREFCNT_inc_simple_void_NN(cv);
     LEAVE;
 
+    if (CvCONST(cv)) {
+	/* Constant sub () { $x } closing over $x:
+	 * The prototype was marked as a candiate for const-ization,
+	 * so try to grab the current const value, and if successful,
+	 * turn into a const sub:
+	 */
+	SV* const const_sv = op_const_sv(CvSTART(cv), cv);
+	assert(newcv);
+	if (const_sv) {
+	    const bool was_method = cBOOL(CvMETHOD(cv));
+	    SvREFCNT_dec_NN(cv);
+	    /* For this calling case, op_const_sv returns a *copy*, which
+	       we donate to newCONSTSUB. Yes, this is ugly, and should be
+	       killed.  We need to fix how we decide whether this optimisa-
+	       tion is possible to eliminate this.  */
+	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
+	    if (was_method)
+		CvMETHOD_on(cv);
+	}
+	else {
+	    CvCONST_off(cv);
+	}
+    }
+
     return cv;
 }
 
@@ -2242,30 +2266,6 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 	cv_dump(proto,	 "Proto");
 	cv_dump(cv,	 "To");
     );
-
-    if (CvCONST(cv)) {
-	/* Constant sub () { $x } closing over $x:
-	 * The prototype was marked as a candiate for const-ization,
-	 * so try to grab the current const value, and if successful,
-	 * turn into a const sub:
-	 */
-	SV* const const_sv = op_const_sv(CvSTART(cv), cv);
-	assert(newcv);
-	if (const_sv) {
-	    const bool was_method = cBOOL(CvMETHOD(cv));
-	    SvREFCNT_dec_NN(cv);
-            /* For this calling case, op_const_sv returns a *copy*, which we
-               donate to newCONSTSUB. Yes, this is ugly, and should be killed.
-               We need to fix how we decide whether this optimisation is
-               possible to eliminate this.  */
-	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
-	    if (was_method)
-		CvMETHOD_on(cv);
-	}
-	else {
-	    CvCONST_off(cv);
-	}
-    }
 
     return cv;
 }
