@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
     @INC = '../lib';
 }
-plan 6;
+plan 7;
 
 # [perl #63540] Don’t treat sub { if(){.....}; "constant" } as a constant
 
@@ -26,6 +26,8 @@ BEGIN {
 
 # [perl #79908]
 {
+    my $w;
+    local $SIG{__WARN__} = sub {$w .= shift};
     my $x = 5;
     *_79908 = sub (){$x};
     $x = 7;
@@ -35,6 +37,9 @@ BEGIN {
     }
     isnt eval '\_79908', \$x, 'sub(){$x} returns a copy';
     ok eval '\_79908 != \_79908', 'sub(){$x} returns a copy each time';
+    like $w, qr/Constants from lexical variables potentially modified (?x:
+               )elsewhere are deprecated at /,
+        'deprecation warning for sub(){$x}';
 
     # Test another thing that was broken by $x inlinement
     my $y;

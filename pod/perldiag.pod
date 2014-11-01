@@ -1620,6 +1620,42 @@ The message indicates the type of reference that was expected.  This
 usually indicates a syntax error in dereferencing the constant value.
 See L<perlsub/"Constant Functions"> and L<constant>.
 
+=item Constants from lexical variables potentially modified elsewhere are
+deprecated
+
+(D deprecated) You wrote something like
+
+    my $var;
+    $sub = sub () { $var };
+
+but $var is referenced elsewhere and could be modified after the C<sub>
+expression is evaluated.  Either it is explicitly modified elsewhere
+(C<$var = 3>) or it is passed to a subroutine or to an operator like
+C<printf> or C<map>, which may or may not modify the variable.
+
+Traditionally, Perl has captured the value of the variable at that
+point and turned the subroutine into a constant eligible for inlining.
+In those cases where the variable can be modified elsewhere, this
+breaks the behavior of closures, in which the subroutine captures
+the variable itself, rather than its value, so future changes to the
+variable are reflected in the subroutine's return value.
+
+This usage is deprecated, because the behavior is likely to change
+in a future version of Perl.
+
+If you intended for the subroutine to be eligible for inlining, then
+make sure the variable is not referenced elsewhere, possibly by
+copying it:
+
+    my $var2 = $var;
+    $sub = sub () { $var2 };
+
+If you do want this subroutine to be a closure that reflects future
+changes to the variable that it closes over, add an explicit C<return>:
+
+    my $var;
+    $sub = sub () { return $var };
+
 =item Constant subroutine %s redefined
 
 (W redefine)(S) You redefined a subroutine which had previously

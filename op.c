@@ -7696,7 +7696,7 @@ Perl_cv_const_sv_or_av(const CV * const cv)
  */
 
 SV *
-Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
+Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv)
 {
     SV *sv = NULL;
 
@@ -7736,6 +7736,38 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	}
 	else if (cv && type == OP_PADSV) {
 	    if (CvCONST(cv)) { /* newly cloned anon */
+		if (outcv) {
+		    PADNAME * const pn =
+			PadlistNAMESARRAY(CvPADLIST(outcv))
+			    [PARENT_PAD_INDEX(PadlistNAMESARRAY(
+				CvPADLIST(cv))[o->op_targ])];
+		    if (PadnameLVALUE(pn)) {
+			/* We have a lexical that is potentially modifiable
+			   elsewhere, so making a constant will break clo-
+			   sure behaviour.  If this is a ‘simple lexical
+			   op tree’, i.e., sub(){$x}, emit a deprecation
+			   warning, but continue to exhibit the old behav-
+			   iour of making it a constant regardless.
+
+			   A simple lexical op tree looks like this:
+
+			     leavesub
+			       lineseq
+				 nextstate
+				 padsv
+			 */
+			if (ckWARN_d(WARN_DEPRECATED)
+			 && OP_SIBLING(
+			     cUNOPx(cUNOPx(CvROOT(cv))->op_first)->op_first
+			    ) == o
+			 && !OP_SIBLING(o))
+			    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+					     "Constants from lexical "
+					     "variables potentially "
+					     "modified elsewhere are "
+					     "deprecated");
+		    }
+		}
 		sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
 		/* the candidate should have 1 ref from this pad and 1 ref
 		 * from the parent */
@@ -7914,7 +7946,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(block, NULL);
+	const_sv = op_const_sv(block, NULL, NULL);
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -8309,7 +8341,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(block, NULL);
+	const_sv = op_const_sv(block, NULL, NULL);
 
     if (SvPOK(gv) || (SvROK(gv) && SvTYPE(SvRV(gv)) != SVt_PVCV)) {
 	assert (block);
@@ -8540,7 +8572,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (CvCLONE(cv)) {
 	assert(!CvCONST(cv));
-	if (ps && !*ps && !attrs && op_const_sv(block, cv))
+	if (ps && !*ps && !attrs && op_const_sv(block, cv, NULL))
 	    CvCONST_on(cv);
     }
 
