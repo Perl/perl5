@@ -5,6 +5,7 @@ package Test::Tester;
 # Turn this back on later
 #warn "Test::Tester is deprecated, see Test::Stream::Tester\n";
 
+use Test::Stream 1.301001 '-internal';
 use Test::Builder 1.301001;
 use Test::Stream::Toolset;
 use Test::More::Tools;
@@ -15,7 +16,7 @@ require Exporter;
 
 use vars qw( @ISA @EXPORT $VERSION );
 
-our $VERSION = '1.301001_070';
+our $VERSION = '1.301001_071';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 @EXPORT  = qw( run_tests check_tests check_test cmp_results show_space );

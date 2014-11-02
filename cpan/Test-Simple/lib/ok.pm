@@ -2,10 +2,11 @@ package ok;
 use strict;
 use warnings;
 
+use Test::Stream 1.301001 '-internal';
 use Test::More 1.301001 ();
 use Test::Stream::Carp qw/croak/;
 
-our $VERSION = '1.301001_070';
+our $VERSION = '1.301001_071';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 sub import {

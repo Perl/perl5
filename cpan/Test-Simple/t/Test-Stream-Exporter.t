@@ -84,4 +84,47 @@ is_deeply(
     "Exports are what we expect"
 );
 
+# Make sure export_to_level us supported
+
+BEGIN {
+    package A;
+
+    use Test::Stream::Exporter qw/import export_to_level exports/;
+    exports qw/foo/;
+
+    sub foo { 'foo' }
+
+    ###############
+    package B;
+
+    sub do_it {
+        my $class = shift;
+        my ($num) = @_;
+        $num ||= 1;
+        A->export_to_level($num, $class, 'foo');
+    }
+
+    ##############
+    package C;
+
+    sub do_it {
+        B->do_it(2);
+    }
+}
+
+{
+    package m1;
+
+    BEGIN { B->do_it }
+}
+
+{
+    package m2;
+
+    BEGIN{ C->do_it };
+}
+
+can_ok('m1', 'foo');
+can_ok('m2', 'foo');
+
 done_testing;

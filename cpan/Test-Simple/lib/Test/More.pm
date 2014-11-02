@@ -4,8 +4,12 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_070';
+our $VERSION = '1.301001_071';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
+
+use Test::Stream 1.301001 '-internal';
+use Test::Stream::Util qw/protect try spoof/;
+use Test::Stream::Toolset;
 
 use Test::Stream::Carp qw/croak carp/;
 use Scalar::Util qw/blessed/;
@@ -13,13 +17,12 @@ use Scalar::Util qw/blessed/;
 use Test::More::Tools;
 use Test::More::DeepCheck::Strict;
 
-use Test::Stream '-internal';
-use Test::Stream::Util qw/protect try spoof/;
-use Test::Stream::Toolset;
-
 use Test::Builder;
 
-use Test::Stream::Exporter;
+use Test::Stream::Exporter qw/
+    default_export default_exports import export_to export_to_level
+/;
+
 our $TODO;
 default_export '$TODO' => \$TODO;
 default_exports qw{

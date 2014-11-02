@@ -1,9 +1,10 @@
 package Test::Builder::Tester::Color;
 
 use strict;
-our $VERSION = '1.301001_070';
+our $VERSION = '1.301001_071';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
+use Test::Stream 1.301001 '-internal';
 require Test::Builder::Tester;
 
 

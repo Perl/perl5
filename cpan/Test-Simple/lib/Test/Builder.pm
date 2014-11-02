@@ -4,12 +4,11 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_070';
+our $VERSION = '1.301001_071';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
-use Test::More::Tools;
 
-use Test::Stream qw/ -internal STATE_LEGACY STATE_PLAN STATE_COUNT /;
+use Test::Stream 1.301001 qw/ -internal STATE_LEGACY STATE_PLAN STATE_COUNT /;
 use Test::Stream::Toolset;
 use Test::Stream::Context;
 use Test::Stream::Carp qw/confess/;
@@ -17,6 +16,8 @@ use Test::Stream::Meta qw/MODERN/;
 
 use Test::Stream::Util qw/try protect unoverload_str is_regex/;
 use Scalar::Util qw/blessed reftype/;
+
+use Test::More::Tools;
 
 BEGIN {
     my $meta = Test::Stream::Meta->is_tester('main');

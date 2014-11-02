@@ -26,7 +26,7 @@ sub import {
 }
 
 default_exports qw/export exports default_export default_exports/;
-exports         qw/export_to export_meta/;
+exports         qw/export_to export_meta export_to_level/;
 
 default_export import => sub {
     my $class = shift;
@@ -74,6 +74,16 @@ sub export_to {
         $name =~ s/^[\$\@\%\&]//;
         *{"$dest\::$name"} = $ref;
     }
+}
+
+sub export_to_level {
+    my $class = shift;
+    my ($level, undef, @want) = @_;
+
+    my $dest = caller($level);
+    my $export_to = $class->can('export_to') || \&export_to;
+
+    $class->$export_to($dest, @want);
 }
 
 sub cleanup {
