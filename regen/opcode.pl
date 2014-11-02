@@ -78,7 +78,7 @@ my %alias;
 # Format is "this function" => "does these op names"
 my @raw_alias = (
 		 Perl_do_kv => [qw( keys values )],
-		 Perl_unimplemented_op => [qw(padany mapstart custom)],
+		 Perl_unimplemented_op => [qw(padany custom)],
 		 # All the ops with a body of { return NORMAL; }
 		 Perl_pp_null => [qw(scalar regcmaybe lineseq scope)],
 
@@ -135,6 +135,7 @@ my @raw_alias = (
 					 spwent epwent sgrent egrent)],
 		 Perl_pp_shostent => [qw(snetent sprotoent sservent)],
 		 Perl_pp_aelemfast => ['aelemfast_lex'],
+		 Perl_pp_grepstart => ['mapstart'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

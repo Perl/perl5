@@ -9850,7 +9850,6 @@ Perl_ck_grep(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_CK_GREP;
 
-    o->op_ppaddr = PL_ppaddr[OP_GREPSTART];
     /* don't allocate gwop here, as we may leak it if PL_parser->error_count > 0 */
 
     if (o->op_flags & OPf_STACKED) {
