@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
     @INC = '../lib';
 }
-plan 26;
+plan 31;
 
 # @tests is an array of hash refs, each of which can have various keys:
 #
@@ -70,6 +70,22 @@ push @tests, {
   retval      => 5,
   same_retval => 0,
   inlinable   => 1,
+  deprecated  => 0,
+  method      => 0,
+};
+
+use feature 'state', 'lexical_subs';
+no warnings 'experimental::lexical_subs';
+
+push @tests, {
+  nickname    => 'sub () { my $x; state sub z { $x } $outer }',
+  generator   => sub {
+    my $outer = 43;
+    sub () { my $x; state sub z { $x } $outer }
+  },
+  retval      => 43,
+  same_retval => 0,
+  inlinable   => 0,
   deprecated  => 0,
   method      => 0,
 };

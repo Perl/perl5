@@ -7741,6 +7741,8 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv)
 			PadlistNAMESARRAY(CvPADLIST(outcv))
 			    [PARENT_PAD_INDEX(PadlistNAMESARRAY(
 				CvPADLIST(cv))[o->op_targ])];
+		    assert(PadnameOUTER(PadlistNAMESARRAY(CvPADLIST(cv))
+					    [o->op_targ]));
 		    if (PadnameLVALUE(pn)) {
 			/* We have a lexical that is potentially modifiable
 			   elsewhere, so making a constant will break clo-
@@ -7783,6 +7785,8 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv)
 	    else {
 		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
 		    sv = &PL_sv_undef; /* an arbitrary non-null value */
+		else
+		    return NULL;
 	    }
 	}
 	else {
