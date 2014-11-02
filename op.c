@@ -7719,7 +7719,7 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv)
 	    if (type == OP_DBSTATE)
 		continue;
 	}
-	if (type == OP_LEAVESUB || type == OP_RETURN)
+	if (type == OP_LEAVESUB)
 	    break;
 	if (sv)
 	    return NULL;
