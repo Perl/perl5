@@ -9459,7 +9459,7 @@ Perl_ck_rvconst(pTHX_ OP *o)
 		  && SvTYPE(SvRV(gv)) != SVt_PVCV)
 		    gv_fetchsv(kidsv, GV_ADDMULTI, SVt_PVCV);
 	    }
-	    kid->op_type = OP_GV;
+            CHANGE_TYPE(kid, OP_GV);
 	    SvREFCNT_dec(kid->op_sv);
 #ifdef USE_ITHREADS
 	    /* XXX hack: dependence on sizeof(PADOP) <= sizeof(SVOP) */
@@ -9471,7 +9471,6 @@ Perl_ck_rvconst(pTHX_ OP *o)
 	    kid->op_sv = SvREFCNT_inc_simple_NN(gv);
 #endif
 	    kid->op_private = 0;
-	    kid->op_ppaddr = PL_ppaddr[OP_GV];
 	    /* FAKE globs in the symbol table cause weird bugs (#77810) */
 	    SvFAKE_off(gv);
 	}
