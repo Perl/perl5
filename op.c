@@ -8578,7 +8578,15 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (CvCLONE(cv)) {
 	assert(!CvCONST(cv));
-	if (ps && !*ps && !attrs && op_const_sv(block, cv, NULL))
+	if (ps && !*ps && !attrs
+	    /* Check whether this sub is a potentially inlinable closure.
+	       First check for an explicit return at the end of the sub.
+	       Perl_rpeep will have removed it from the execution chain,
+	       yet we promise that it will prevent inlining.  */
+	 && block->op_type == OP_LINESEQ
+	 && cLISTOPx(block)->op_last->op_type != OP_RETURN
+	    /* Then search the op tree for a single lexical.  */
+	 && op_const_sv(block, cv, NULL))
 	    CvCONST_on(cv);
     }
 
