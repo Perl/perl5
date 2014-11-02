@@ -44,6 +44,7 @@ foreach my $tuple (['cop.h'],
             ( [()|\dx]+ [UuLl]{0,2}            # Parens, '|', digits, 'x',
                                                # followed by optional long,
                                                # unsigned qualifiers
+            | 0x[0-9a-fA-F]+                   # hex values
             | \(? \d+ [UuLl]{0,2} \s* << .*?   # digits left shifted by anything
                                                # followed by optional
                                                # long, unsigned qualifiers
