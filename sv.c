@@ -10736,7 +10736,12 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 /* The first double can be as large as 2**1023, or '1' x '0' x 1023.
  * The second double can be as small as 2**-1074, or '0' x 1073 . '1'.
  * The sum of them can be '1' . '0' x 2096 . '1', with implied radix point
- * after the first 1023 zero bits. */
+ * after the first 1023 zero bits.
+ *
+ * XXX The 2098 is quite large (262.25 bytes) and therefore some sort
+ * of dynamically growing buffer might be better, start at just 16 bytes
+ * (for example) and grow only when necessary.  Or maybe just by looking
+ * at the exponents of the two doubles? */
 #  define DOUBLEDOUBLE_MAXBITS 2098
 #endif
 
