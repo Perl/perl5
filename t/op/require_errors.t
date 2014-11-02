@@ -1,11 +1,12 @@
 #!perl
-use strict;
-use warnings;
 
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
 }
+
+use strict;
+use warnings;
 
 plan(tests => 17);
 

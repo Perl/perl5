@@ -4,15 +4,9 @@
 # the format supported by re/regexp.t.  If you want to add a test
 # that does fit that format, add it to re/re_tests, not here.
 
-use strict;
-use warnings;
-use 5.010;
-use Config;
-
 sub run_tests;
 
 $| = 1;
-
 
 BEGIN {
     chdir 't' if -d 't';
@@ -21,6 +15,10 @@ BEGIN {
     skip_all_if_miniperl("miniperl can't load Tie::Hash::NamedCapture, need for %+ and %-");
 }
 
+use strict;
+use warnings;
+use 5.010;
+use Config;
 
 plan tests => 2532;  # Update this when adding/deleting tests.
 

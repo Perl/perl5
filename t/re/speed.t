@@ -14,15 +14,6 @@
 # run, rather than actually timing out.
 #
 
-use strict;
-use warnings;
-use 5.010;
-
-sub run_tests;
-
-$| = 1;
-
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = ('../lib','.','../ext/re');
@@ -33,6 +24,14 @@ BEGIN {
 }
 
 plan tests => 9;  # Update this when adding/deleting tests.
+
+use strict;
+use warnings;
+use 5.010;
+
+sub run_tests;
+
+$| = 1;
 
 run_tests() unless caller;
 

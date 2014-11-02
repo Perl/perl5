@@ -1,13 +1,14 @@
 #!./perl
 
-use strict;
-use warnings;
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require q(./test.pl);
 }
+
+use strict;
+use warnings;
+
 plan(tests => 61);
 
 require mro;

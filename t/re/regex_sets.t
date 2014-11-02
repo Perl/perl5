@@ -5,17 +5,17 @@
 # list of the constructed set and then comparing it character by character
 # with the expected result.
 
-use strict;
-use warnings;
-
-$| = 1;
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = ('../lib','.','../ext/re');
     require './test.pl';
     skip_all_without_unicode_tables();
 }
+
+use strict;
+use warnings;
+
+$| = 1;
 
 use utf8;
 no warnings 'experimental::regex_sets';

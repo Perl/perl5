@@ -1,6 +1,3 @@
-use strict;
-use warnings;
-
 BEGIN {
   chdir 't' if -d 't';
   @INC = '../lib' if -d '../lib' && -d '../ext';
@@ -8,6 +5,9 @@ BEGIN {
   require "./test.pl";
   require Config; import Config;
 }
+
+use strict;
+use warnings;
 
 skip_all('no SysV semaphores on this platform') if !$Config{d_sem};
 
