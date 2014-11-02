@@ -10707,6 +10707,12 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
     sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, svmax, maybe_tainted, SV_GMAGIC|SV_SMAGIC);
 }
 
+#if DOUBLEKIND == DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN || \
+    DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN || \
+    DOUBLEKIND == DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+#  define DOUBLE_LITTLE_ENDIAN
+#endif
+
 #if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN || \
     LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
     LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
@@ -10760,12 +10766,12 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 #  define MANTISSASIZE UVSIZE
 #endif
 
-/* We make here the wild assumption that the endianness of doubles
- * is similar to the endianness of integers, and that there is no
- * middle-endianness.  This may come back to haunt us (the rumor
- * has it that ARM can be quite haunted). */
-#if BYTEORDER == 0x12345678 || BYTEORDER == 0x1234 || \
-     defined(DOUBLEKIND_LITTLE_ENDIAN)
+/* We make here the assumption that there is only IEEE 754 in
+ * different endiannesses, and no middle-endianness.  This may
+ * come back to haunt us (the rumor has it that ARM can be quite haunted).
+ *
+ * Also: the S_hextract() doesn't handle 32-bit or 128-bit doubles. */
+#if defined(DOUBLE_LITTLE_ENDIAN) || defined(LONGDOUBLE_LITTLE_ENDIAN)
 #  define HEXTRACT_LITTLE_ENDIAN
 #else
 #  define HEXTRACT_BIG_ENDIAN
