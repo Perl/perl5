@@ -14,7 +14,7 @@ plan 56;
 #
 #   nickname    - name of the sub to use in test names
 #   generator   - a sub returning a code ref to test
-#   finally     - sub to run after the other tests
+#   finally     - sub to run after the tests
 #
 # Each of the following gives expected test results.  If the key is
 # omitted, the test is skipped:
