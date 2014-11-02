@@ -6932,14 +6932,7 @@ $cat <<EOP >try.c
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
-#$usequadmath USE_QUADMATH
-#$i_quadmath I_QUADMATH
-#if defined(USE_QUADMATH) && defined(I_QUADMATH)
-#include <quadmath.h>
-static const __float128 d = -0.1Q;
-#else
 static const long double d = -0.1L;
-#endif
 #include <stdio.h>
 int main() {
   unsigned const char* b = (unsigned const char*)(&d);
