@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
     @INC = '../lib';
 }
-plan 16;
+plan 26;
 
 # @tests is an array of hash refs, each of which can have various keys:
 #
@@ -51,6 +51,26 @@ push @tests, {
   same_retval => 0,
   inlinable   => 1,
   deprecated  => 1,
+  method      => 0,
+};
+
+push @tests, {
+  nickname    => 'sub () { 0; $x } with $x modified elsewhere',
+  generator   => sub { my $x = 5; my $ret = sub(){0;$x}; $x = 8; $ret },
+  retval      => 8,
+  same_retval => 0,
+  inlinable   => 0,
+  deprecated  => 0,
+  method      => 0,
+};
+
+push @tests, {
+  nickname    => 'sub () { 0; $x } with $x unmodified elsewhere',
+  generator   => sub { my $x = 5; my $y = $x; sub(){0;$x} },
+  retval      => 5,
+  same_retval => 0,
+  inlinable   => 1,
+  deprecated  => 0,
   method      => 0,
 };
 

@@ -7756,16 +7756,18 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv)
 				 nextstate
 				 padsv
 			 */
-			if (ckWARN_d(WARN_DEPRECATED)
-			 && OP_SIBLING(
+			if (OP_SIBLING(
 			     cUNOPx(cUNOPx(CvROOT(cv))->op_first)->op_first
 			    ) == o
 			 && !OP_SIBLING(o))
-			    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+			    Perl_ck_warner_d(aTHX_
+					      packWARN(WARN_DEPRECATED),
 					     "Constants from lexical "
 					     "variables potentially "
 					     "modified elsewhere are "
 					     "deprecated");
+			else
+			    return NULL;
 		    }
 		}
 		sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
