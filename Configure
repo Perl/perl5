@@ -7005,6 +7005,9 @@ case "$longdblkind" in
 1) echo "You have IEEE 754 128-bit little endian long doubles." >&4 ;;
 2) echo "You have IEEE 754 128-bit big endian long doubles." >&4 ;;
 3) echo "You have x86 80-bit little endian long doubles." >& 4 ;;
+4) echo "You have x86 80-bit big endian long doubles." >& 4 ;;
+5) echo "You have 128-bit little-endian double-double long doubles." >& 4 ;;
+6) echo "You have 128-bit big-endian double-double long doubles." >& 4 ;;
 *) echo "Cannot figure out your long double." >&4 ;;
 esac
 $rm_try
