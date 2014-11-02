@@ -875,6 +875,7 @@ ld=''
 ld_can_script=''
 lddlflags=''
 usedl=''
+doublekind=''
 doublesize=''
 ebcdic=''
 fflushNULL=''
@@ -6787,6 +6788,78 @@ $rm_try
 : see if this is a float.h system
 set float.h i_float
 eval $inhdr
+
+$echo "Checking the kind of doubles you have..." >&4
+$cat <<EOP >try.c
+#$i_stdlib I_STDLIB
+#define DOUBLESIZE $doublesize
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+static const double d = -0.1;
+int main() {
+  unsigned const char* b = (unsigned const char*)(&d);
+#if DOUBLESIZE == 4
+  if (b[0] == 0xCD || b[3] == 0xBD) {
+    /* IEEE 754 32-bit little-endian */
+    printf("1\n");
+    exit(0);
+  }
+  if (b[0] == 0xBD || b[3] == 0xCD) {
+    /* IEEE 754 32-bit big-endian */
+    printf("2\n");
+    exit(0);
+  }
+#endif
+#if DOUBLESIZE == 8
+  if (b[0] == 0x9A || b[7] == 0xBD) {
+    /* IEEE 754 64-bit little-endian */
+    printf("3\n");
+    exit(0);
+  }
+  if (b[0] == 0x9A || b[7] == 0xCD) {
+    /* IEEE 754 64-bit big-endian */
+    printf("4\n");
+    exit(0);
+  }
+#endif
+#if DOUBLESIZE == 16
+  if (b[0] == 0x9A || b[15] == 0xBD) {
+    /* IEEE 754 128-bit little-endian */
+    printf("5\n");
+    exit(0);
+  }
+  if (b[0] == 0x9A || b[15] == 0xCD) {
+    /* IEEE 754 128-bit big-endian */
+    printf("6\n");
+    exit(0);
+  }
+#endif
+  /* Rumoredly some old ARM processors have 'mixed endian' doubles,
+   * two 32-bit little endians stored in big-endian order. */
+  /* Then there are old mainframe/miniframe formats like VAX, IBM, and CRAY.
+   * Whether those environments can still build Perl is debatable. */
+  printf("-1\n"); /* unknown */
+  exit(0);
+}
+EOP
+set try
+if eval $compile; then
+    doublekind=`$run ./try`
+else
+    doublekind=-1
+fi
+case "$doublekind" in
+1) echo "You have IEEE 754 32-bit little endian doubles." >&4 ;;
+2) echo "You have IEEE 754 32-bit big endian doubles." >&4 ;;
+3) echo "You have IEEE 754 64-bit little endian doubles." >&4 ;;
+4) echo "You have IEEE 754 64-bit big endian doubles." >&4 ;;
+5) echo "You have IEEE 754 128-bit little endian doubles." >&4 ;;
+6) echo "You have IEEE 754 128-bit big endian doubles." >&4 ;;
+*) echo "Cannot figure out your double.  You VAX, or something?" >&4 ;;
+esac
+$rm_try
 
 : check for long doubles
 echo " "
@@ -23946,6 +24019,7 @@ db_version_patch='$db_version_patch'
 direntrytype='$direntrytype'
 dlext='$dlext'
 dlsrc='$dlsrc'
+doublekind='$doublekind'
 doublesize='$doublesize'
 drand01='$drand01'
 drand48_r_proto='$drand48_r_proto'

@@ -516,6 +516,7 @@ db_version_patch='0'
 direntrytype='struct dirent'
 dlext='dll'
 dlsrc='dl_symbian.xs'
+doublekind='4'
 doublesize='8'
 drand01="((rand() & 0x7FFF) / (double) ((unsigned long)1 << 15))"
 drand48_r_proto='0'

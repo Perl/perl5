@@ -505,6 +505,7 @@ db_version_major='0'
 db_version_minor='0'
 db_version_patch='0'
 direntrytype='struct dirent'
+doublekind='3'
 doublesize='8'
 drand01="Perl_drand48()"
 drand48_r_proto='0'

@@ -2639,6 +2639,16 @@ dlsrc (dlsrc.U):
 	This variable contains the name of the dynamic loading file that
 	will be used with the package.
 
+doublekind (doublekind.U):
+	This variable, if defined, encodes the type of a double:
+	1 = IEEE 754 32-bit big little endian,
+	2 = IEEE 754 32-bit big big endian,
+	3 = IEEE 754 64-bit big little endian,
+	4 = IEEE 754 64-bit big big endian,
+	5 = IEEE 754 128-bit big little endian,
+	6 = IEEE 754 128-bit big big endian,
+	-1 = unknown format.
+
 doublesize (doublesize.U):
 	This variable contains the value of the DOUBLESIZE symbol, which
 	indicates to the C program how many bytes there are in a double.
