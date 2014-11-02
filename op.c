@@ -1226,7 +1226,7 @@ S_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
     LOGOP *logop;
     OP *kid = first;
     NewOp(1101, logop, 1, LOGOP);
-    logop->op_type = (OPCODE)type;
+    CHANGE_TYPE(logop, type);
     logop->op_first = first;
     logop->op_other = other;
     logop->op_flags = OPf_KIDS;
@@ -5366,7 +5366,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	}
 
         rcop = S_alloc_LOGOP(aTHX_ OP_REGCOMP, scalar(expr), o);
-	rcop->op_ppaddr = PL_ppaddr[OP_REGCOMP];
 	rcop->op_flags |=  ((PL_hints & HINT_RE_EVAL) ? OPf_SPECIAL : 0)
 			   | (reglist ? OPf_STACKED : 0);
 	rcop->op_targ = cv_targ;
@@ -5430,7 +5429,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	}
 	else {
             rcop = S_alloc_LOGOP(aTHX_ OP_SUBSTCONT, scalar(repl), o);
-	    rcop->op_ppaddr = PL_ppaddr[OP_SUBSTCONT];
 	    rcop->op_private = 1;
 
 	    /* establish postfix order */
@@ -6668,7 +6666,6 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	other->op_private |= OPpASSIGN_BACKWARDS;  /* other is an OP_SASSIGN */
 
     logop = S_alloc_LOGOP(aTHX_ type, first, LINKLIST(other));
-    logop->op_ppaddr = PL_ppaddr[type];
     logop->op_flags |= (U8)flags;
     logop->op_private = (U8)(1 | (flags >> 8));
 
@@ -6738,7 +6735,6 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	return live;
     }
     logop = S_alloc_LOGOP(aTHX_ OP_COND_EXPR, first, LINKLIST(trueop));
-    logop->op_ppaddr = PL_ppaddr[OP_COND_EXPR];
     logop->op_flags |= (U8)flags;
     logop->op_private = (U8)(1 | (flags >> 8));
     logop->op_next = LINKLIST(falseop);
@@ -6789,7 +6785,6 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
     PERL_ARGS_ASSERT_NEWRANGE;
 
     range = S_alloc_LOGOP(aTHX_ OP_RANGE, left, LINKLIST(right));
-    range->op_ppaddr = PL_ppaddr[OP_RANGE];
     range->op_flags = OPf_KIDS;
     leftstart = LINKLIST(left);
     range->op_private = (U8)(1 | (flags >> 8));
@@ -7309,7 +7304,6 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
     PERL_ARGS_ASSERT_NEWGIVWHENOP;
 
     enterop = S_alloc_LOGOP(aTHX_ enter_opcode, block, NULL);
-    enterop->op_ppaddr = PL_ppaddr[enter_opcode];
     enterop->op_targ = ((entertarg == NOT_IN_PAD) ? 0 : entertarg);
     enterop->op_private = 0;
 
@@ -9309,7 +9303,6 @@ Perl_ck_eval(pTHX_ OP *o)
 	    op_free(o);
 
             enter = S_alloc_LOGOP(aTHX_ OP_ENTERTRY, NULL, NULL);
-	    enter->op_ppaddr = PL_ppaddr[OP_ENTERTRY];
 
 	    /* establish postfix order */
 	    enter->op_next = (OP*)enter;
@@ -9872,7 +9865,6 @@ Perl_ck_grep(pTHX_ OP *o)
     kid = kUNOP->op_first;
 
     gwop = S_alloc_LOGOP(aTHX_ type, o, LINKLIST(kid));
-    gwop->op_ppaddr = PL_ppaddr[type];
     kid->op_next = (OP*)gwop;
     offset = pad_findmy_pvs("$_", 0);
     if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {
