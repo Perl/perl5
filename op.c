@@ -7726,7 +7726,7 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv)
 	    return sv;
 	if (o->op_next != o) {
 	    if (type == OP_NEXTSTATE
-	     || (type == OP_NULL && !(o->op_flags & OPf_KIDS))
+	     || type == OP_NULL
 	     || type == OP_PUSHMARK)
 		continue;
 	    if (type == OP_DBSTATE)
@@ -8600,7 +8600,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	 && block->op_type == OP_LINESEQ
 	 && cLISTOPx(block)->op_last->op_type != OP_RETURN
 	    /* Then search the op tree for a single lexical.  */
-	 && op_const_sv(block, cv, NULL))
+	 && op_const_sv(CvSTART(cv), cv, NULL))
 	    CvCONST_on(cv);
     }
 
