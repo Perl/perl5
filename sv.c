@@ -6493,7 +6493,10 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		IoIFP(sv) != PerlIO_stderr() &&
 		!(IoFLAGS(sv) & IOf_FAKE_DIRP))
 	    {
-		io_close(MUTABLE_IO(sv), FALSE);
+		io_close(MUTABLE_IO(sv), NULL, FALSE,
+			 (IoTYPE(sv) == IoTYPE_WRONLY ||
+			  IoTYPE(sv) == IoTYPE_RDWR   ||
+			  IoTYPE(sv) == IoTYPE_APPEND));
 	    }
 	    if (IoDIRP(sv) && !(IoFLAGS(sv) & IOf_FAKE_DIRP))
 		PerlDir_close(IoDIRP(sv));

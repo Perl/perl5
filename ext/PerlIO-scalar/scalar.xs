@@ -144,6 +144,7 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
     if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD)) {
 	PerlIOBase(f)->flags |= PERLIO_F_ERROR;
 	SETERRNO(EBADF, SS_IVCHAN);
+	Perl_PerlIO_save_errno(aTHX_ f);
 	return 0;
     }
     {

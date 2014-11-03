@@ -1043,7 +1043,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 	}
 	return FALSE;
     }
-    retval = io_close(io, not_implicit);
+    retval = io_close(io, NULL, not_implicit, FALSE);
     if (not_implicit) {
 	IoLINES(io) = 0;
 	IoPAGE(io) = 0;
@@ -1054,7 +1054,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 }
 
 bool
-Perl_io_close(pTHX_ IO *io, bool not_implicit)
+Perl_io_close(pTHX_ IO *io, GV *gv, bool not_implicit, bool warn_on_fail)
 {
     bool retval = FALSE;
 
@@ -1076,15 +1076,36 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 	else {
 	    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {		/* a socket */
 		const bool prev_err = PerlIO_error(IoOFP(io));
+#ifdef USE_PERLIO
+		if (prev_err)
+		    PerlIO_restore_errno(IoOFP(io));
+#endif
 		retval = (PerlIO_close(IoOFP(io)) != EOF && !prev_err);
 		PerlIO_close(IoIFP(io));	/* clear stdio, fd already closed */
 	    }
 	    else {
 		const bool prev_err = PerlIO_error(IoIFP(io));
+#ifdef USE_PERLIO
+		if (prev_err)
+		    PerlIO_restore_errno(IoIFP(io));
+#endif
 		retval = (PerlIO_close(IoIFP(io)) != EOF && !prev_err);
 	    }
 	}
 	IoOFP(io) = IoIFP(io) = NULL;
+
+	if (warn_on_fail && !retval) {
+	    if (gv)
+		Perl_ck_warner_d(aTHX_ packWARN(WARN_IO),
+				"Warning: unable to close filehandle %"
+				 HEKf" properly: %"SVf,
+				 GvNAME_HEK(gv), get_sv("!",GV_ADD));
+	    else
+		Perl_ck_warner_d(aTHX_ packWARN(WARN_IO),
+				"Warning: unable to close filehandle "
+				"properly: %"SVf,
+				 get_sv("!",GV_ADD));
+	}
     }
     else if (not_implicit) {
 	SETERRNO(EBADF,SS_IVCHAN);

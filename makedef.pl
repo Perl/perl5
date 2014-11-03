@@ -772,6 +772,8 @@ my @layer_syms = qw(
 		    Perl_PerlIO_get_cnt
 		    Perl_PerlIO_get_ptr
 		    Perl_PerlIO_read
+		    Perl_PerlIO_restore_errno
+		    Perl_PerlIO_save_errno
 		    Perl_PerlIO_seek
 		    Perl_PerlIO_set_cnt
 		    Perl_PerlIO_set_ptrcnt

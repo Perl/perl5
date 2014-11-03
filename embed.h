@@ -1185,7 +1185,7 @@
 #define init_constants()	Perl_init_constants(aTHX)
 #define init_debugger()		Perl_init_debugger(aTHX)
 #define invert(a)		Perl_invert(aTHX_ a)
-#define io_close(a,b)		Perl_io_close(aTHX_ a,b)
+#define io_close(a,b,c,d)	Perl_io_close(aTHX_ a,b,c,d)
 #define isinfnansv(a)		Perl_isinfnansv(aTHX_ a)
 #define jmaybe(a)		Perl_jmaybe(aTHX_ a)
 #define keyword(a,b,c)		Perl_keyword(aTHX_ a,b,c)
@@ -1774,6 +1774,10 @@
 #  if defined(USE_LOCALE_COLLATE)
 #define magic_setcollxfrm(a,b)	Perl_magic_setcollxfrm(aTHX_ a,b)
 #define mem_collxfrm(a,b,c)	Perl_mem_collxfrm(aTHX_ a,b,c)
+#  endif
+#  if defined(USE_PERLIO)
+#define PerlIO_restore_errno(a)	Perl_PerlIO_restore_errno(aTHX_ a)
+#define PerlIO_save_errno(a)	Perl_PerlIO_save_errno(aTHX_ a)
 #  endif
 #  if defined(_MSC_VER)
 #define magic_regdatum_set(a,b)	Perl_magic_regdatum_set(aTHX_ a,b)

@@ -373,7 +373,10 @@ like runperl(
      progs => [ split "\n",
       'use feature qw - lexical_subs state -;
        no warnings q-experimental::lexical_subs-;
-       sub DB::sub{ print qq|4\n|; goto $DB::sub }
+       sub DB::sub{
+         print qq|4\n| unless $DB::sub =~ DESTROY;
+         goto $DB::sub
+       }
        state sub foo {print qq|2\n|}
        foo();
       '
@@ -753,7 +756,10 @@ pass "pad taking ownership once more of packagified my-sub";
      progs => [ split "\n",
       'use feature qw - lexical_subs state -;
        no warnings q-experimental::lexical_subs-;
-       sub DB::sub{ print qq|4\n|; goto $DB::sub }
+       sub DB::sub{
+         print qq|4\n| unless $DB::sub =~ DESTROY;
+         goto $DB::sub
+       }
        my sub foo {print qq|2\n|}
        foo();
       '

@@ -1834,7 +1834,7 @@ PERL_CALLCONV U32	Perl_intro_my(pTHX);
 PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit)
+PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, GV *gv, bool not_implicit, bool warn_on_fail)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IO_CLOSE	\
 	assert(io)
@@ -8125,6 +8125,8 @@ PERL_CALLCONV SSize_t	Perl_PerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count
 #define PERL_ARGS_ASSERT_PERLIO_READ	\
 	assert(vbuf)
 
+PERL_CALLCONV void	Perl_PerlIO_restore_errno(pTHX_ PerlIO *f);
+PERL_CALLCONV void	Perl_PerlIO_save_errno(pTHX_ PerlIO *f);
 PERL_CALLCONV int	Perl_PerlIO_seek(pTHX_ PerlIO *f, Off_t offset, int whence);
 PERL_CALLCONV void	Perl_PerlIO_set_cnt(pTHX_ PerlIO *f, SSize_t cnt);
 PERL_CALLCONV void	Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR *ptr, SSize_t cnt);

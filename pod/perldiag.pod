@@ -6803,6 +6803,13 @@ you called it with no args and C<$@> was empty.
 the close().  This usually indicates your file system ran out of disk
 space.
 
+=item Warning: unable to close filehandle properly: %s
+
+=item Warning: unable to close filehandle %s properly: %s
+
+(S io) An error occurred when Perl implicitly closed a filehandle.  This
+usually indicates your file system ran out of disk space.
+
 =item Warning: Use of "%s" without parentheses is ambiguous
 
 (S ambiguous) You wrote a unary operator followed by something that

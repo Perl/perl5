@@ -651,7 +651,8 @@ Ap	|void	|init_tm	|NN struct tm *ptm
 : Used in perly.y
 AnpPR	|char*	|instr		|NN const char* big|NN const char* little
 : Used in sv.c
-p	|bool	|io_close	|NN IO* io|bool not_implicit
+p	|bool	|io_close	|NN IO* io|NULLOK GV *gv \
+				|bool not_implicit|bool warn_on_fail
 : Used in perly.y
 pR	|OP*	|invert		|NULLOK OP* cmd
 ApR	|I32	|is_lvalue_sub
@@ -2513,6 +2514,8 @@ Ap	|SSize_t|PerlIO_unread		|NULLOK PerlIO *f|NN const void *vbuf \
 					|Size_t count
 Ap	|Off_t	|PerlIO_tell		|NULLOK PerlIO *f
 Ap	|int	|PerlIO_seek		|NULLOK PerlIO *f|Off_t offset|int whence
+Xp	|void	|PerlIO_save_errno	|NULLOK PerlIO *f
+Xp	|void	|PerlIO_restore_errno	|NULLOK PerlIO *f
 
 Ap	|STDCHAR *|PerlIO_get_base	|NULLOK PerlIO *f
 Ap	|STDCHAR *|PerlIO_get_ptr	|NULLOK PerlIO *f
