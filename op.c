@@ -7960,7 +7960,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
 
     if (!block || !ps || *ps || attrs
-	|| (CvFLAGS(compcv) & CVf_BUILTIN_ATTRS)
+	|| CvLVALUE(compcv)
 	)
 	const_sv = NULL;
     else
@@ -8010,6 +8010,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	CvCONST_on(cv);
 	CvISXSUB_on(cv);
 	PoisonPADLIST(cv);
+	CvFLAGS(cv) |= CvMETHOD(compcv);
 	op_free(block);
 	SvREFCNT_dec(compcv);
 	PL_compcv = NULL;
@@ -8355,7 +8356,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
 
     if (!block || !ps || *ps || attrs
-	|| (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS)
+	|| CvLVALUE(PL_compcv)
 	)
 	const_sv = NULL;
     else
@@ -8426,14 +8427,17 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    CvCONST_on(cv);
 	    CvISXSUB_on(cv);
 	    PoisonPADLIST(cv);
+	    CvFLAGS(cv) |= CvMETHOD(PL_compcv);
 	}
 	else {
-	    if (isGV(gv)) {
-		if (name) GvCV_set(gv, NULL);
+	    if (isGV(gv) || CvMETHOD(PL_compcv)) {
+		if (name && isGV(gv))
+		    GvCV_set(gv, NULL);
 		cv = newCONSTSUB_flags(
 		    NULL, name, namlen, name_is_utf8 ? SVf_UTF8 : 0,
 		    const_sv
 		);
+		CvFLAGS(cv) |= CvMETHOD(PL_compcv);
 	    }
 	    else {
 		if (!SvROK(gv)) {
