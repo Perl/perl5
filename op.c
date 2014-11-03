@@ -7713,8 +7713,7 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv)
 {
     SV *sv = NULL;
 
-    if (!o)
-	return NULL;
+    PERL_ARGS_ASSERT_OP_CONST_SV;
 
     if (o->op_type == OP_LINESEQ && cLISTOPo->op_first)
 	o = OP_SIBLING(cLISTOPo->op_first);

@@ -316,7 +316,7 @@ ApdR	|SV*	|gv_const_sv	|NN GV* gv
 ApdRn	|SV*	|cv_const_sv	|NULLOK const CV *const cv
 pRn	|SV*	|cv_const_sv_or_av|NULLOK const CV *const cv
 : Used in pad.c
-pR	|SV*	|op_const_sv	|NULLOK const OP* o|NULLOK CV* cv \
+pR	|SV*	|op_const_sv	|NN const OP* o|NULLOK CV* cv \
 				|NULLOK CV *outside
 Apd	|SV *	|cv_name	|NN CV *cv|NULLOK SV *sv|U32 flags
 Apd	|void	|cv_undef	|NN CV* cv
