@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
     @INC = '../lib';
 }
-plan 101;
+plan 141;
 
 # @tests is an array of hash refs, each of which can have various keys:
 #
@@ -223,6 +223,80 @@ push @tests, {
 
 use feature 'state', 'lexical_subs';
 no warnings 'experimental::lexical_subs';
+
+# Constant constants
+push @tests, {
+  nickname    => 'sub with constant',
+  generator   => sub { sub () { 8 } },
+  retval      => 8,
+  same_retval => 0,
+  inlinable   => 1,
+  deprecated  => 0,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'sub with constant and return',
+  generator   => sub { sub () { return 8 } },
+  retval      => 8,
+  same_retval => 0,
+  inlinable   => 0,
+  deprecated  => 0,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'sub with optimised statement and constant',
+  generator   => sub { sub () { 0; 8 } },
+  retval      => 8,
+  same_retval => 0,
+  inlinable   => 1,
+  deprecated  => 0,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'sub with optimised statement, constant and return',
+  generator   => sub { sub () { 0; return 8 } },
+  retval      => 8,
+  same_retval => 0,
+  inlinable   => 0,
+  deprecated  => 0,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'my sub with constant',
+  generator   => sub { my sub x () { 8 } \&x },
+  retval      => 8,
+  same_retval => 0,
+  inlinable   => 1,
+  deprecated  => 0,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'my sub with constant and return',
+  generator   => sub { my sub x () { return 8 } \&x },
+  retval      => 8,
+  same_retval => 0,
+  inlinable   => 0,
+  deprecated  => 0,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'my sub with optimised statement and constant',
+  generator   => sub { my sub x () { 0; 8 } \&x },
+  retval      => 8,
+  same_retval => 0,
+  inlinable   => 1,
+  deprecated  => 0,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'my sub with optimised statement, constant and return',
+  generator   => sub { my sub x () { 0; return 8 } \&x },
+  retval      => 8,
+  same_retval => 0,
+  inlinable   => 0,
+  deprecated  => 0,
+  method      => 0,
+};
 
 push @tests, {
   nickname    => 'sub () { my $x; state sub z { $x } $outer }',

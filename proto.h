@@ -3196,11 +3196,12 @@ PERL_CALLCONV void	Perl_op_clear(pTHX_ OP* o)
 #define PERL_ARGS_ASSERT_OP_CLEAR	\
 	assert(o)
 
-PERL_CALLCONV SV*	Perl_op_const_sv(pTHX_ const OP* o, CV* cv, CV *outside)
+PERL_CALLCONV SV*	Perl_op_const_sv(pTHX_ const OP* o, CV* cv, CV *outside, bool allow_lex)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_OP_CONST_SV	\
-	assert(o)
+	assert(o); assert(cv)
 
 PERL_CALLCONV OP*	Perl_op_contextualize(pTHX_ OP* o, I32 context)
 			__attribute__nonnull__(pTHX_1);

@@ -2201,7 +2201,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 	 * so try to grab the current const value, and if successful,
 	 * turn into a const sub:
 	 */
-	SV* const const_sv = op_const_sv(CvSTART(cv), cv, outside);
+	SV* const const_sv = op_const_sv(CvSTART(cv), cv, outside, TRUE);
 	assert(newcv);
 	if (const_sv) {
 	    const bool was_method = cBOOL(CvMETHOD(cv));
