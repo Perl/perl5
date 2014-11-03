@@ -2793,7 +2793,20 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    Perl_croak(aTHX_ "Can't localize lexical variable %"SVf,
 		 PAD_COMPNAME_SV(o->op_targ));
 	if (!(o->op_private & OPpLVAL_INTRO))
-	    PadnameLVALUE_on(PAD_COMPNAME_SV(o->op_targ));
+	{
+	    PADNAME *pn = PAD_COMPNAME_SV(o->op_targ);
+	    CV *cv = PL_compcv;
+	    PadnameLVALUE_on(pn);
+	    while (PadnameOUTER(pn) && PARENT_PAD_INDEX(pn)) {
+		cv = CvOUTSIDE(cv);
+		assert(cv);
+		assert(CvPADLIST(cv));
+		pn =
+		   PadlistNAMESARRAY(CvPADLIST(cv))[PARENT_PAD_INDEX(pn)];
+		assert(PadnameLEN(pn));
+		PadnameLVALUE_on(pn);
+	    }
+	}
 	break;
 
     case OP_PUSHMARK:
@@ -7736,6 +7749,11 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv)
 	}
 	else if (cv && type == OP_PADSV) {
 	    if (CvCONST(cv)) { /* newly cloned anon */
+		sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
+		/* the candidate should have 1 ref from this pad and 1 ref
+		 * from the parent */
+		if (!sv || SvREFCNT(sv) != 2)
+		    return NULL;
 		if (outcv) {
 		    PADNAME * const pn =
 			PadlistNAMESARRAY(CvPADLIST(outcv))
@@ -7749,7 +7767,8 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv)
 			   sure behaviour.  If this is a ‘simple lexical
 			   op tree’, i.e., sub(){$x}, emit a deprecation
 			   warning, but continue to exhibit the old behav-
-			   iour of making it a constant regardless.
+			   iour of making it a constant based on the ref-
+			   count of the candidate variable.
 
 			   A simple lexical op tree looks like this:
 
@@ -7772,11 +7791,6 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv)
 			    return NULL;
 		    }
 		}
-		sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
-		/* the candidate should have 1 ref from this pad and 1 ref
-		 * from the parent */
-		if (!sv || SvREFCNT(sv) != 2)
-		    return NULL;
 		sv = newSVsv(sv);
 		SvREADONLY_on(sv);
 		SvPADTMP_on(sv);

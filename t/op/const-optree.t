@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
     @INC = '../lib';
 }
-plan 56;
+plan 91;
 
 # @tests is an array of hash refs, each of which can have various keys:
 #
@@ -126,6 +126,101 @@ push @tests, {
   method      => 0,
 };
 
+# Multiple closure tests
+push @tests, {
+  nickname    => 'simple lexical after another closure and no lvalue',
+  generator   => sub {
+    my $x = 5;
+    # This closure prevents inlining, though theoretically it shouldn’t
+    # have to.  If you change the behaviour, just change the test.  This
+    # fails the refcount check in op.c:op_const_sv, which is necessary for
+    # the sake of \(my $x = 1) (tested below).
+    my $sub1 = sub () { () = $x };
+    sub () { $x };
+  },
+  retval      => 5,
+  same_retval => 0,
+  inlinable   => 0,
+  deprecated  => 0,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'simple lexical before another closure and no lvalue',
+  generator   => sub {
+    my $x = 5;
+    my $ret = sub () { $x };
+    # This does not prevent inlining and never has.
+    my $sub1 = sub () { () = $x };
+    $ret;
+  },
+  retval      => 5,
+  same_retval => 0,
+  inlinable   => 1,
+  deprecated  => 0,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'simple lexical after an lvalue closure',
+  generator   => sub {
+    my $x = 5;
+    # This has always prevented inlining
+    my $sub1 = sub () { $x++ };
+    sub () { $x };
+  },
+  retval      => 5,
+  same_retval => 0,
+  inlinable   => 0,
+  deprecated  => 0,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'simple lexical before an lvalue closure',
+  generator   => sub {
+    my $x = 5;
+    my $ret = sub () { $x };  # <-- simple lexical op tree
+    # Traditionally this has not prevented inlining, though it should.  But
+    # since $ret has a simple lexical op tree, we preserve backward-compat-
+    # ibility, but deprecate it.
+    my $sub1 = sub () { $x++ };
+    $ret;
+  },
+  retval      => 5,
+  same_retval => 0,
+  inlinable   => 1,
+  deprecated  => 1,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'complex lexical op tree before an lvalue closure',
+  generator   => sub {
+    my $x = 5;
+    my $ret = sub () { 0; $x };  # <-- more than just a lexical
+    # This used not to prevent inlining, though it should, and now does.
+    my $sub1 = sub () { $x++ };
+    $ret;
+  },
+  retval      => 5,
+  same_retval => 0,
+  inlinable   => 0,
+  deprecated  => 0,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'complex lexical op tree before a nested lvalue closure',
+  generator   => sub {
+    my $x = 5;
+    my $ret = sub () { 0; $x };  # <-- more than just a lexical
+    # This used not to prevent inlining, though it should, and now does.
+    my $sub1 = sub () { sub () { $x++ } }; # nested
+    $ret;
+  },
+  retval      => 5,
+  same_retval => 0,
+  inlinable   => 0,
+  deprecated  => 0,
+  method      => 0,
+};
+
 use feature 'state', 'lexical_subs';
 no warnings 'experimental::lexical_subs';
 
@@ -136,6 +231,21 @@ push @tests, {
     sub () { my $x; state sub z { $x } $outer }
   },
   retval      => 43,
+  same_retval => 0,
+  inlinable   => 0,
+  deprecated  => 0,
+  method      => 0,
+};
+
+push @tests, {
+  nickname    => 'closure after \(my $x=1)',
+  generator   => sub {
+    $y = \(my $x = 1);
+    my $ret = sub () { $x };
+    $$y += 7;
+    $ret;
+  },
+  retval      => 8,
   same_retval => 0,
   inlinable   => 0,
   deprecated  => 0,
