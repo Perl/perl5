@@ -140,7 +140,9 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<IO::Socket> has been upgraded from version 1.37 to 1.38.
+
+Document the limitations of the isconnected() method.  [perl #123096]
 
 =back
 
