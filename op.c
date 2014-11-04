@@ -8509,7 +8509,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     LEAVE_SCOPE(floor);
 #ifdef PERL_DEBUG_READONLY_OPS
     /* Watch out for BEGIN blocks */
-    if (!special) Slab_to_ro(slab);
+    if (!special && slab)
+	Slab_to_ro(slab);
 #endif
     return cv;
 }
