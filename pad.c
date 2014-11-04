@@ -1233,31 +1233,8 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 		    fake_offset = offset; /* in case we don't find a real one */
 		    continue;
 		}
-		/* is seq within the range _LOW to _HIGH ?
-		 * This is complicated by the fact that PL_cop_seqmax
-		 * may have wrapped around at some point */
-		if (COP_SEQ_RANGE_LOW(namesv) == PERL_PADSEQ_INTRO)
-		    continue; /* not yet introduced */
-
-		if (COP_SEQ_RANGE_HIGH(namesv) == PERL_PADSEQ_INTRO) {
-		    /* in compiling scope */
-		    if (
-			(seq >  COP_SEQ_RANGE_LOW(namesv))
-			? (seq - COP_SEQ_RANGE_LOW(namesv) < (U32_MAX >> 1))
-			: (COP_SEQ_RANGE_LOW(namesv) - seq > (U32_MAX >> 1))
-		    )
-		       break;
-		}
-		else if (
-		    (COP_SEQ_RANGE_LOW(namesv) > COP_SEQ_RANGE_HIGH(namesv))
-		    ?
-			(  seq >  COP_SEQ_RANGE_LOW(namesv)
-			|| seq <= COP_SEQ_RANGE_HIGH(namesv))
-
-		    :    (  seq >  COP_SEQ_RANGE_LOW(namesv)
-			 && seq <= COP_SEQ_RANGE_HIGH(namesv))
-		)
-		break;
+		if (PadnameIN_SCOPE(namesv, seq))
+		    break;
 	    }
 	}
 

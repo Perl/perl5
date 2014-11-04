@@ -2422,6 +2422,22 @@ such as C<$$x = 5> which might have to vivify a reference in C<$x>.
 =cut
 */
 
+static void
+S_mark_padname_lvalue(pTHX_ PADNAME *pn)
+{
+    CV *cv = PL_compcv;
+    PadnameLVALUE_on(pn);
+    while (PadnameOUTER(pn) && PARENT_PAD_INDEX(pn)) {
+	cv = CvOUTSIDE(cv);
+	assert(cv);
+	assert(CvPADLIST(cv));
+	pn =
+	   PadlistNAMESARRAY(CvPADLIST(cv))[PARENT_PAD_INDEX(pn)];
+	assert(PadnameLEN(pn));
+	PadnameLVALUE_on(pn);
+    }
+}
+
 static bool
 S_vivifies(const OPCODE type)
 {
@@ -2793,20 +2809,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    Perl_croak(aTHX_ "Can't localize lexical variable %"SVf,
 		 PAD_COMPNAME_SV(o->op_targ));
 	if (!(o->op_private & OPpLVAL_INTRO))
-	{
-	    PADNAME *pn = PAD_COMPNAME_SV(o->op_targ);
-	    CV *cv = PL_compcv;
-	    PadnameLVALUE_on(pn);
-	    while (PadnameOUTER(pn) && PARENT_PAD_INDEX(pn)) {
-		cv = CvOUTSIDE(cv);
-		assert(cv);
-		assert(CvPADLIST(cv));
-		pn =
-		   PadlistNAMESARRAY(CvPADLIST(cv))[PARENT_PAD_INDEX(pn)];
-		assert(PadnameLEN(pn));
-		PadnameLVALUE_on(pn);
-	    }
-	}
+	    S_mark_padname_lvalue(aTHX_ PAD_COMPNAME_SV(o->op_targ));
 	break;
 
     case OP_PUSHMARK:
@@ -5179,6 +5182,21 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     return CHECKOP(type, pmop);
 }
 
+static void
+S_set_haseval(pTHX)
+{
+    PADOFFSET i = 1;
+    PL_cv_has_eval = 1;
+    /* Any pad names in scope are potentially lvalues.  */
+    for (; i < PadnamelistMAXNAMED(PL_comppad_name); i++) {
+	PADNAME *pn = PAD_COMPNAME_SV(i);
+	if (!pn || !PadnameLEN(pn))
+	    continue;
+	if (PadnameOUTER(pn) || PadnameIN_SCOPE(pn, PL_cop_seqmax))
+	    S_mark_padname_lvalue(aTHX_ pn);
+    }
+}
+
 /* Given some sort of match op o, and an expression expr containing a
  * pattern, either compile expr into a regex and attach it to o (if it's
  * constant), or convert expr into a runtime regcomp op sequence (if it's
@@ -5471,7 +5489,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	rcop->op_targ = cv_targ;
 
 	/* /$x/ may cause an eval, since $x might be qr/(?{..})/  */
-	if (PL_hints & HINT_RE_EVAL) PL_cv_has_eval = 1;
+	if (PL_hints & HINT_RE_EVAL)
+	    S_set_haseval(aTHX);
 
 	/* establish postfix order */
 	if (expr->op_type == OP_REGCRESET || expr->op_type == OP_REGCMAYBE) {
@@ -9430,7 +9449,7 @@ Perl_ck_eval(pTHX_ OP *o)
 	}
 	else {
 	    scalar((OP*)kid);
-	    PL_cv_has_eval = 1;
+	    S_set_haseval(aTHX);
 	}
     }
     else {

@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
     @INC = '../lib';
 }
-plan 141;
+plan 156;
 
 # @tests is an array of hash refs, each of which can have various keys:
 #
@@ -294,6 +294,54 @@ push @tests, {
   retval      => 8,
   same_retval => 0,
   inlinable   => 0,
+  deprecated  => 0,
+  method      => 0,
+};
+
+# String eval
+push @tests, {
+  nickname    => 'sub () { $x } with eval in scope',
+  generator   => sub {
+    my $outer = 43;
+    my $ret = sub () { $outer };
+    eval '$outer++';
+    $ret;
+  },
+  retval      => 43,
+  same_retval => 0,
+  inlinable   => 1,
+  deprecated  => 1,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'sub () { $x } with s///ee in scope',
+  generator   => sub {
+    my $outer = 43;
+    my $dummy = '$outer++';
+    my $ret = sub () { $outer };
+    $dummy =~ s//$dummy/ee;
+    $ret;
+  },
+  retval      => 43,
+  same_retval => 0,
+  inlinable   => 1,
+  deprecated  => 1,
+  method      => 0,
+};
+push @tests, {
+  nickname    => 'sub () { $x } with eval not in scope',
+  generator   => sub {
+    my $ret;
+    {
+      my $outer = 43;
+      $ret = sub () { $outer };
+    }
+    eval '';
+    $ret;
+  },
+  retval      => 43,
+  same_retval => 0,
+  inlinable   => 1,
   deprecated  => 0,
   method      => 0,
 };
