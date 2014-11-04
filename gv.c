@@ -1767,6 +1767,12 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
     return TRUE;
 }
 
+/* gv_magicalize only turns on the SVf_READONLY flag, not SVf_PROTECT.  So
+   redefine SvREADONLY_on for that purpose.  We don’t use it later on in
+   this file.  */
+#undef SvREADONLY_on
+#define SvREADONLY_on(sv) (SvFLAGS(sv) |= SVf_READONLY)
+
 /* gv_magicalize() is called by gv_fetchpvn_flags when creating
  * a new GV.
  * Note that it does not insert the GV into the stash prior to
@@ -2147,6 +2153,10 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 
     return addmg;
 }
+
+/* If we do ever start using this later on in the file, we need to make
+   sure we don’t accidentally use the wrong definition.  */
+#undef SvREADONLY_on
 
 /* This function is called when the stash already holds the GV of the magic
  * variable we're looking for, but we need to check that it has the correct

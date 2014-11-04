@@ -6,7 +6,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 16 );
+    plan( tests => 17 );
 }
 
 for my $arg ('', 'q[]', qw( 1 undef )) {
@@ -69,3 +69,7 @@ is ${\3} == 3, "1", 'attempt to modify failed';
 
 eval { { my $x = ${qr//}; Internals::SvREADONLY $x, 1; () } };
 is $@, "", 'read-only lexical regexps on scope exit [perl #115254]';
+
+Internals::SvREADONLY($],0);
+eval { $]=7 };
+is $], 7, 'SvREADONLY can make magic vars mutable'
