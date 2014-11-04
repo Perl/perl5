@@ -2201,20 +2201,67 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 	 * so try to grab the current const value, and if successful,
 	 * turn into a const sub:
 	 */
-	SV* const const_sv = op_const_sv(CvSTART(cv), cv, outside, TRUE);
+	SV* const_sv;
+	OP *o = CvSTART(cv);
 	assert(newcv);
-	if (const_sv) {
+	for (; o; o = o->op_next)
+	    if (o->op_type == OP_PADSV)
+		break;
+	ASSUME(o->op_type == OP_PADSV);
+	const_sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
+	/* the candidate should have 1 ref from this pad and 1 ref
+	 * from the parent */
+	if (const_sv && SvREFCNT(const_sv) == 2) {
 	    const bool was_method = cBOOL(CvMETHOD(cv));
+	    if (outside) {
+		PADNAME * const pn =
+		    PadlistNAMESARRAY(CvPADLIST(outside))
+			[PARENT_PAD_INDEX(PadlistNAMESARRAY(
+			    CvPADLIST(cv))[o->op_targ])];
+		assert(PadnameOUTER(PadlistNAMESARRAY(CvPADLIST(cv))
+					[o->op_targ]));
+		if (PadnameLVALUE(pn)) {
+		    /* We have a lexical that is potentially modifiable
+		       elsewhere, so making a constant will break clo-
+		       sure behaviour.  If this is a ‘simple lexical
+		       op tree’, i.e., sub(){$x}, emit a deprecation
+		       warning, but continue to exhibit the old behav-
+		       iour of making it a constant based on the ref-
+		       count of the candidate variable.
+
+		       A simple lexical op tree looks like this:
+
+		         leavesub
+			   lineseq
+			     nextstate
+			     padsv
+		     */
+		    if (OP_SIBLING(
+			 cUNOPx(cUNOPx(CvROOT(cv))->op_first)->op_first
+			) == o
+		     && !OP_SIBLING(o))
+			Perl_ck_warner_d(aTHX_
+					  packWARN(WARN_DEPRECATED),
+					 "Constants from lexical "
+					 "variables potentially "
+					 "modified elsewhere are "
+					 "deprecated");
+		    else
+			goto constoff;
+		}
+	    }
+	    /* We *copy* the lexical variable, and donate the copy to
+	       newCONSTSUB.  Yes, this is ugly, and should be killed.
+	       XXX Is it possible to eliminate this now?  */
+	    const_sv = newSVsv(const_sv);
+	    SvPADTMP_on(const_sv);
 	    SvREFCNT_dec_NN(cv);
-	    /* For this calling case, op_const_sv returns a *copy*, which
-	       we donate to newCONSTSUB. Yes, this is ugly, and should be
-	       killed.  We need to fix how we decide whether this optimisa-
-	       tion is possible to eliminate this.  */
 	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
 	    if (was_method)
 		CvMETHOD_on(cv);
 	}
 	else {
+	  constoff:
 	    CvCONST_off(cv);
 	}
     }

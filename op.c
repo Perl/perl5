@@ -7688,7 +7688,7 @@ Perl_cv_const_sv_or_av(const CV * const cv)
 }
 
 /* op_const_sv:  examine an optree to determine whether it's in-lineable.
- * Can be called in 3 ways:
+ * Can be called in 2 ways:
  *
  * !allow_lex
  * 	look for a single OP_CONST with attached value: return the value
@@ -7699,17 +7699,10 @@ Perl_cv_const_sv_or_av(const CV * const cv)
  * 	OP_CONST, return the value; or if it contains a single PADSV ref-
  * 	erencing an outer lexical, turn on CvCONST to indicate the CV is
  * 	a candidate for "constizing" at clone time, and return NULL.
- *
- * CvCONST(cv)
- *
- *	We have just cloned an anon prototype that was marked as a const
- *	candidate. Try to grab the current value, and in the case of
- *	PADSV, ignore it if it has multiple references. In this case we
- *	return a newly created *copy* of the value.
  */
 
 SV *
-Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv, bool allow_lex)
+Perl_op_const_sv(pTHX_ const OP *o, CV *cv, bool allow_lex)
 {
     SV *sv = NULL;
     bool padsv = FALSE;
@@ -7736,54 +7729,6 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv, bool allow_lex)
 	    SAVEFREESV(sv);
 	}
 	else if (allow_lex && type == OP_PADSV) {
-	    if (CvCONST(cv)) { /* newly cloned anon */
-		sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
-		/* the candidate should have 1 ref from this pad and 1 ref
-		 * from the parent */
-		if (!sv || SvREFCNT(sv) != 2)
-		    return NULL;
-		if (outcv) {
-		    PADNAME * const pn =
-			PadlistNAMESARRAY(CvPADLIST(outcv))
-			    [PARENT_PAD_INDEX(PadlistNAMESARRAY(
-				CvPADLIST(cv))[o->op_targ])];
-		    assert(PadnameOUTER(PadlistNAMESARRAY(CvPADLIST(cv))
-					    [o->op_targ]));
-		    if (PadnameLVALUE(pn)) {
-			/* We have a lexical that is potentially modifiable
-			   elsewhere, so making a constant will break clo-
-			   sure behaviour.  If this is a ‘simple lexical
-			   op tree’, i.e., sub(){$x}, emit a deprecation
-			   warning, but continue to exhibit the old behav-
-			   iour of making it a constant based on the ref-
-			   count of the candidate variable.
-
-			   A simple lexical op tree looks like this:
-
-			     leavesub
-			       lineseq
-				 nextstate
-				 padsv
-			 */
-			if (OP_SIBLING(
-			     cUNOPx(cUNOPx(CvROOT(cv))->op_first)->op_first
-			    ) == o
-			 && !OP_SIBLING(o))
-			    Perl_ck_warner_d(aTHX_
-					      packWARN(WARN_DEPRECATED),
-					     "Constants from lexical "
-					     "variables potentially "
-					     "modified elsewhere are "
-					     "deprecated");
-			else
-			    return NULL;
-		    }
-		}
-		sv = newSVsv(sv);
-		SvPADTMP_on(sv);
-		return sv;
-	    }
-	    else {
 		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
 		{
 		    sv = &PL_sv_undef; /* an arbitrary non-null value */
@@ -7791,7 +7736,6 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv, CV *outcv, bool allow_lex)
 		}
 		else
 		    return NULL;
-	    }
 	}
 	else {
 	    return NULL;
@@ -7978,7 +7922,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(start, compcv, NULL, FALSE);
+	const_sv = op_const_sv(start, compcv, FALSE);
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -8382,7 +8326,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(start, PL_compcv, NULL, CvCLONE(PL_compcv));
+	const_sv = op_const_sv(start, PL_compcv, CvCLONE(PL_compcv));
 
     if (SvPOK(gv) || (SvROK(gv) && SvTYPE(SvRV(gv)) != SVt_PVCV)) {
 	assert (block);

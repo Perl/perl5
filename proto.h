@@ -3196,7 +3196,7 @@ PERL_CALLCONV void	Perl_op_clear(pTHX_ OP* o)
 #define PERL_ARGS_ASSERT_OP_CLEAR	\
 	assert(o)
 
-PERL_CALLCONV SV*	Perl_op_const_sv(pTHX_ const OP* o, CV* cv, CV *outside, bool allow_lex)
+PERL_CALLCONV SV*	Perl_op_const_sv(pTHX_ const OP* o, CV* cv, bool allow_lex)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
