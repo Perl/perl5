@@ -90,7 +90,7 @@ sub do_test {
 	    /mge;
 	    $pattern =~ s/^\h+COW_REFCNT = .*\n//mg
 		if $Config{ccflags} =~
-			/-DPERL_(?:OLD_COPY_ON_WRITE|NO_COW)/
+			/-DPERL_(?:OLD_COPY_ON_WRITE|NO_COW)\b/
 			    || $] < 5.019003;
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
@@ -185,7 +185,7 @@ my $type = do_test('result of addition',
 do_test('floating point value',
        $d,
        $] < 5.019003
-        || $Config{ccflags} =~ /-DPERL_(?:NO_COW|OLD_COPY_ON_WRITE)/
+        || $Config{ccflags} =~ /-DPERL_(?:NO_COW|OLD_COPY_ON_WRITE)\b/
        ?
 'SV = PVNV\\($ADDR\\) at $ADDR
   REFCNT = 1
