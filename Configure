@@ -6801,36 +6801,36 @@ static const double d = -0.1;
 int main() {
   unsigned const char* b = (unsigned const char*)(&d);
 #if DOUBLESIZE == 4
-  if (b[0] == 0xCD || b[3] == 0xBD) {
+  if (b[0] == 0xCD && b[3] == 0xBD) {
     /* IEEE 754 32-bit little-endian */
     printf("1\n");
     exit(0);
   }
-  if (b[0] == 0xBD || b[3] == 0xCD) {
+  if (b[0] == 0xBD && b[3] == 0xCD) {
     /* IEEE 754 32-bit big-endian */
     printf("2\n");
     exit(0);
   }
 #endif
 #if DOUBLESIZE == 8
-  if (b[0] == 0x9A || b[7] == 0xBD) {
+  if (b[0] == 0x9A && b[7] == 0xBD) {
     /* IEEE 754 64-bit little-endian */
     printf("3\n");
     exit(0);
   }
-  if (b[0] == 0x9A || b[7] == 0xCD) {
+  if (b[0] == 0x9A && b[7] == 0xCD) {
     /* IEEE 754 64-bit big-endian */
     printf("4\n");
     exit(0);
   }
 #endif
 #if DOUBLESIZE == 16
-  if (b[0] == 0x9A || b[15] == 0xBD) {
+  if (b[0] == 0x9A && b[15] == 0xBD) {
     /* IEEE 754 128-bit little-endian */
     printf("5\n");
     exit(0);
   }
-  if (b[0] == 0x9A || b[15] == 0xCD) {
+  if (b[0] == 0x9A && b[15] == 0xCD) {
     /* IEEE 754 128-bit big-endian */
     printf("6\n");
     exit(0);
