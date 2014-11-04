@@ -2808,7 +2808,9 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	if (!type) /* local() */
 	    Perl_croak(aTHX_ "Can't localize lexical variable %"SVf,
 		 PAD_COMPNAME_SV(o->op_targ));
-	if (!(o->op_private & OPpLVAL_INTRO))
+	if (!(o->op_private & OPpLVAL_INTRO)
+	 || (  type != OP_SASSIGN && type != OP_AASSIGN
+	    && PadnameIsSTATE(PAD_COMPNAME_SV(o->op_targ))  ))
 	    S_mark_padname_lvalue(aTHX_ PAD_COMPNAME_SV(o->op_targ));
 	break;
 
