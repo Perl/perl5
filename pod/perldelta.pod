@@ -264,7 +264,7 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<Configure> with C<-Dmksymlinks> should now be faster. [perl #122002]
 
 =back
 
