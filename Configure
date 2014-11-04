@@ -6813,24 +6813,24 @@ int main() {
   }
 #endif
 #if DOUBLESIZE == 8
-  if (b[0] == 0x9A && b[7] == 0xBD) {
+  if (b[0] == 0x9A && b[7] == 0xBF) {
     /* IEEE 754 64-bit little-endian */
     printf("3\n");
     exit(0);
   }
-  if (b[0] == 0x9A && b[7] == 0xCD) {
+  if (b[0] == 0xBF && b[7] == 0x9A) {
     /* IEEE 754 64-bit big-endian */
     printf("4\n");
     exit(0);
   }
 #endif
 #if DOUBLESIZE == 16
-  if (b[0] == 0x9A && b[15] == 0xBD) {
+  if (b[0] == 0x9A && b[15] == 0xBF) {
     /* IEEE 754 128-bit little-endian */
     printf("5\n");
     exit(0);
   }
-  if (b[0] == 0x9A && b[15] == 0xCD) {
+  if (b[0] == 0xBF && b[15] == 0x9A) {
     /* IEEE 754 128-bit big-endian */
     printf("6\n");
     exit(0);
