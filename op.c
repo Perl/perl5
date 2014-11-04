@@ -1223,6 +1223,7 @@ S_op_sibling_newUNOP(pTHX_ OP *parent, OP *start, I32 type, I32 flags)
 LOGOP *
 S_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
 {
+    dVAR;
     LOGOP *logop;
     OP *kid = first;
     NewOp(1101, logop, 1, LOGOP);
