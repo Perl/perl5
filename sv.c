@@ -10774,11 +10774,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 #  define MANTISSASIZE UVSIZE
 #endif
 
-/* We make here the assumption that there is only IEEE 754 in
- * different endiannesses, and no middle-endianness.  This may
- * come back to haunt us (the rumor has it that ARM can be quite haunted).
- *
- * Also: the S_hextract() doesn't handle 32-bit or 128-bit doubles. */
 #if defined(DOUBLE_LITTLE_ENDIAN) || defined(LONGDOUBLE_LITTLE_ENDIAN)
 #  define HEXTRACT_LITTLE_ENDIAN
 #elif defined(DOUBLE_BIG_ENDIAN) || defined(LONGDOUBLE_BIG_ENDIAN)
