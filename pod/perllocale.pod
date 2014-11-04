@@ -191,7 +191,7 @@ follows:
 
 =item *
 
-The current locale is also used when going outside of Perl with
+The current locale is used when going outside of Perl with
 operations like L<system()|perlfunc/system LIST> or
 L<qxE<sol>E<sol>|perlop/qxE<sol>STRINGE<sol>>, if those operations are
 locale-sensitive.
@@ -406,6 +406,10 @@ C<POSIX::setlocale()> function:
         # restore the old locale
         setlocale(LC_CTYPE, $old_locale);
 
+This simultaneously affects all threads of the program, so it may be
+problematic to use locales in threaded applications except where there
+is a single locale applicable to all threads.
+
 The first argument of C<setlocale()> gives the B<category>, the second the
 B<locale>.  The category tells in what aspect of data processing you
 want to apply locale-specific rules.  Category names are discussed in
@@ -572,7 +576,7 @@ alphabetically in your system is called).
 
 You can test out changing these variables temporarily, and if the
 new settings seem to help, put those settings into your shell startup
-files.  Consult your local documentation for the exact details.  For in
+files.  Consult your local documentation for the exact details.  For
 Bourne-like shells (B<sh>, B<ksh>, B<bash>, B<zsh>):
 
 	LC_ALL=en_US.ISO8859-1
@@ -584,7 +588,7 @@ locale "En_US"--and in Cshish shells (B<csh>, B<tcsh>)
 
 	setenv LC_ALL en_US.ISO8859-1
 
-or if you have the "env" application you can do in any shell
+or if you have the "env" application you can do (in any shell)
 
 	env LC_ALL=en_US.ISO8859-1 perl ...
 
@@ -847,15 +851,16 @@ information on all these.)
 
 The C<LC_CTYPE> locale also provides the map used in transliterating
 characters between lower and uppercase.  This affects the case-mapping
-functions--C<fc()>, C<lc()>, C<lcfirst()>, C<uc()>, and C<ucfirst()>; case-mapping
+functions--C<fc()>, C<lc()>, C<lcfirst()>, C<uc()>, and C<ucfirst()>;
+case-mapping
 interpolation with C<\F>, C<\l>, C<\L>, C<\u>, or C<\U> in double-quoted
 strings and C<s///> substitutions; and case-independent regular expression
 pattern matching using the C<i> modifier.
 
 Finally, C<LC_CTYPE> affects the (deprecated) POSIX character-class test
 functions--C<POSIX::isalpha()>, C<POSIX::islower()>, and so on.  For
-example, if you move from the "C" locale to a 7-bit Scandinavian one,
-you may find--possibly to your surprise--that "|" moves from the
+example, if you move from the "C" locale to a 7-bit ISO 646 one,
+you may find--possibly to your surprise--that C<"|"> moves from the
 C<POSIX::ispunct()> class to C<POSIX::isalpha()>.
 Unfortunately, this creates big problems for regular expressions. "|" still
 means alternation even though it matches C<\w>.  Starting in v5.22, a
@@ -865,7 +870,7 @@ details are given several paragraphs further down.
 Starting in v5.20, Perl supports UTF-8 locales for C<LC_CTYPE>, but
 otherwise Perl only supports single-byte locales, such as the ISO 8859
 series.  This means that wide character locales, for example for Asian
-languages, are not supported.  (If the platform has the capability
+languages, are not well-supported.  (If the platform has the capability
 for Perl to detect such a locale, starting in Perl v5.22,
 L<Perl will warn, default enabled|warnings/Category Hierarchy>,
 using the C<locale> warning category, whenever such a locale is switched
@@ -882,7 +887,11 @@ For releases v5.16 and v5.18, C<S<use locale 'not_characters>> could be
 used as a workaround for this (see L</Unicode and UTF-8>).
 
 Note that there are quite a few things that are unaffected by the
-current locale.  All the escape sequences for particular characters,
+current locale.  Any literal character is the native character for the
+given platform.  Hence 'A' means the character at code point 65 on ASCII
+platforms, and 193 on EBCDIC.  That may or may not be an 'A' in the
+current locale, if that locale even has an 'A'.
+Similarly, all the escape sequences for particular characters,
 C<\n> for example, always mean the platform's native one.  This means,
 for example, that C<\N> in regular expressions (every character
 but new-line) works on the platform character set.
@@ -1531,7 +1540,7 @@ byte, and Unicode rules for those that can't is not uniformly applied.
 Pre-v5.12, it was somewhat haphazard; in v5.12 it was applied fairly
 consistently to regular expression matching except for bracketed
 character classes; in v5.14 it was extended to all regex matches; and in
-v5.16 to the casing operations such as C<"\L"> and C<uc()>.  For
+v5.16 to the casing operations such as C<\L> and C<uc()>.  For
 collation, in all releases, the system's C<strxfrm()> function is called,
 and whatever it does is what you get.
 
