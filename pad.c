@@ -2190,6 +2190,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 	 * from the parent */
 	if (const_sv && SvREFCNT(const_sv) == 2) {
 	    const bool was_method = cBOOL(CvMETHOD(cv));
+	    bool copied = FALSE;
 	    if (outside) {
 		PADNAME * const pn =
 		    PadlistNAMESARRAY(CvPADLIST(outside))
@@ -2217,20 +2218,31 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 			 cUNOPx(cUNOPx(CvROOT(cv))->op_first)->op_first
 			) == o
 		     && !OP_SIBLING(o))
+		    {
 			Perl_ck_warner_d(aTHX_
 					  packWARN(WARN_DEPRECATED),
 					 "Constants from lexical "
 					 "variables potentially "
 					 "modified elsewhere are "
 					 "deprecated");
+			/* We *copy* the lexical variable, and donate the
+			   copy to newCONSTSUB.  Yes, this is ugly, and
+			   should be killed.  We need to do this for the
+			   time being, however, because turning on SvPADTMP
+			   on a lexical will have observable effects
+			   elsewhere.  */
+			const_sv = newSVsv(const_sv);
+			copied = TRUE;
+		    }
 		    else
 			goto constoff;
 		}
 	    }
-	    /* We *copy* the lexical variable, and donate the copy to
-	       newCONSTSUB.  Yes, this is ugly, and should be killed.
-	       XXX Is it possible to eliminate this now?  */
-	    const_sv = newSVsv(const_sv);
+	    if (!copied)
+		SvREFCNT_inc_simple_void_NN(const_sv);
+	    /* If the lexical is not used elsewhere, it is safe to turn on
+	       SvPADTMP, since it is only when it is used in lvalue con-
+	       text that the difference is observable.  */
 	    SvPADTMP_on(const_sv);
 	    SvREFCNT_dec_NN(cv);
 	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
