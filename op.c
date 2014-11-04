@@ -7701,13 +7701,14 @@ Perl_cv_const_sv_or_av(const CV * const cv)
  * 	a candidate for "constizing" at clone time, and return NULL.
  */
 
-SV *
-Perl_op_const_sv(pTHX_ const OP *o, CV *cv, bool allow_lex)
+static SV *
+S_op_const_sv(pTHX_ const OP *o, CV *cv, bool allow_lex)
 {
     SV *sv = NULL;
     bool padsv = FALSE;
 
-    PERL_ARGS_ASSERT_OP_CONST_SV;
+    assert(o);
+    assert(cv);
 
     for (; o; o = o->op_next) {
 	const OPCODE type = o->op_type;
@@ -7922,7 +7923,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(start, compcv, FALSE);
+	const_sv = S_op_const_sv(aTHX_ start, compcv, FALSE);
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -8326,7 +8327,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(start, PL_compcv, CvCLONE(PL_compcv));
+	const_sv =
+	    S_op_const_sv(aTHX_ start, PL_compcv, CvCLONE(PL_compcv));
 
     if (SvPOK(gv) || (SvROK(gv) && SvTYPE(SvRV(gv)) != SVt_PVCV)) {
 	assert (block);
