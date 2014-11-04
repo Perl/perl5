@@ -2647,6 +2647,8 @@ doublekind (doublekind.U):
 	4 = IEEE 754 64-bit big big endian,
 	5 = IEEE 754 128-bit big little endian,
 	6 = IEEE 754 128-bit big big endian,
+	7 = IEEE 754 64-bit big mixed endian le-be,
+	8 = IEEE 754 64-bit big mixed endian be-le,
 	-1 = unknown format.
 
 doublesize (doublesize.U):
