@@ -10781,8 +10781,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
  * Also: the S_hextract() doesn't handle 32-bit or 128-bit doubles. */
 #if defined(DOUBLE_LITTLE_ENDIAN) || defined(LONGDOUBLE_LITTLE_ENDIAN)
 #  define HEXTRACT_LITTLE_ENDIAN
-#else
+#elif defined(DOUBLE_BIG_ENDIAN) || defined(LONGDOUBLE_BIG_ENDIAN)
 #  define HEXTRACT_BIG_ENDIAN
+#else
+#  define HEXTRACT_MIX_ENDIAN
 #endif
 
 /* S_hextract() is a helper for Perl_sv_vcatpvfn_flags, for extracting
@@ -11006,11 +11008,31 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     for (ix = 5; ix >= 0; ix--) {
         HEXTRACT_BYTE(ix);
     }
-#  else
+#  elif defined(HEXTRACT_BIG_ENDIAN)
     HEXTRACT_LO_NYBBLE(1);
     for (ix = 2; ix < NVSIZE; ix++) {
         HEXTRACT_BYTE(ix);
     }
+#  else
+#    if DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
+     /* 4 5 6 7 0 1 2 3 (MSB = 7, LSB = 0, 6+7 = exponent + sign)
+        HEXTRACT_BYTE(2);
+        HEXTRACT_BYTE(1);
+        HEXTRACT_BYTE(7);
+        HEXTRACT_BYTE(6);
+        HEXTRACT_BYTE(5);
+        HEXTRACT_BYTE(4);
+#    elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
+     /* 3 2 1 0 7 6 5 4 (MSB = 7, LSB = 0, 0+1 = sign+exponent) */
+        HEXTRACT_BYTE(4);
+        HEXTRACT_BYTE(5);
+        HEXTRACT_BYTE(6);
+        HEXTRACT_BYTE(7);
+        HEXTRACT_BYTE(0);
+        HEXTRACT_BYTE(1);
+#    else
+#      error "Unknown DOUBLEKIND"
+#    endif
 #  endif
 #endif
     /* Croak for various reasons: if the output pointer escaped the
