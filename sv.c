@@ -10999,35 +10999,38 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
      * also need to insert the radix. */
     HEXTRACT_IMPLICIT_BIT(nv);
 #  ifdef HEXTRACT_LITTLE_ENDIAN
+    /* 0 1 2 3 4 5 6 7 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
     HEXTRACT_LO_NYBBLE(6);
     for (ix = 5; ix >= 0; ix--) {
         HEXTRACT_BYTE(ix);
     }
 #  elif defined(HEXTRACT_BIG_ENDIAN)
+    /* 7 6 5 4 3 2 1 0 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
     HEXTRACT_LO_NYBBLE(1);
     for (ix = 2; ix < NVSIZE; ix++) {
         HEXTRACT_BYTE(ix);
     }
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
+    /* 4 5 6 7 0 1 2 3 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
+    HEXTRACT_LO_NYBBLE(2); /* 6 */
+    HEXTRACT_BYTE(1); /* 5 */
+    HEXTRACT_BYTE(0); /* 4 */
+    HEXTRACT_BYTE(7); /* 3 */
+    HEXTRACT_BYTE(6); /* 2 */
+    HEXTRACT_BYTE(5); /* 1 */
+    HEXTRACT_BYTE(4); /* 0 */
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
+    /* 3 2 1 0 7 6 5 4 (MSB = 7, LSB = 0, 7+6 = sign+exponent) */
+    HEXTRACT_LO_NYBBLE(5); /* 6 */
+    HEXTRACT_BYTE(6); /* 5 */
+    HEXTRACT_BYTE(7); /* 4 */
+    HEXTRACT_BYTE(0); /* 3 */
+    HEXTRACT_BYTE(1); /* 2 */
+    HEXTRACT_BYTE(2); /* 1 */
+    HEXTRACT_BYTE(3); /* 0 */
 #  else
-#    if DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
-     /* 4 5 6 7 0 1 2 3 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
-        HEXTRACT_BYTE(2);
-        HEXTRACT_BYTE(1);
-        HEXTRACT_BYTE(7);
-        HEXTRACT_BYTE(6);
-        HEXTRACT_BYTE(5);
-        HEXTRACT_BYTE(4);
-#    elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
-     /* 3 2 1 0 7 6 5 4 (MSB = 7, LSB = 0, 0+1 = sign+exponent) */
-        HEXTRACT_BYTE(4);
-        HEXTRACT_BYTE(5);
-        HEXTRACT_BYTE(6);
-        HEXTRACT_BYTE(7);
-        HEXTRACT_BYTE(0);
-        HEXTRACT_BYTE(1);
-#    else
-#      error "Unknown DOUBLEKIND"
-#    endif
+    /* XXX restore fallback to frexp+ldexp */
+    error "Unexpected DOUBLEKIND"
 #  endif
 #endif
     /* Croak for various reasons: if the output pointer escaped the
