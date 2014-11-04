@@ -185,10 +185,7 @@ if (IS_WIN32) {
 	    next;
 	}
 	push @extspec, $_;
-	if($_ eq 'DynaLoader' and $target !~ /clean$/) {
-	    # No, we don't know why nmake can't work out the dependency chain
-	    push @{$extra_passthrough{$_}}, 'DynaLoader.c';
-	} elsif(FindExt::is_static($_)) {
+	if($_ ne 'DynaLoader' && FindExt::is_static($_)) {
 	    push @{$extra_passthrough{$_}}, 'LINKTYPE=static';
 	}
     }
