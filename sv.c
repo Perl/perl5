@@ -11010,7 +11010,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     }
 #  else
 #    if DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
-     /* 4 5 6 7 0 1 2 3 (MSB = 7, LSB = 0, 6+7 = exponent + sign)
+     /* 4 5 6 7 0 1 2 3 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
         HEXTRACT_BYTE(2);
         HEXTRACT_BYTE(1);
         HEXTRACT_BYTE(7);
