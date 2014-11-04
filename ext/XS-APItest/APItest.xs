@@ -3779,6 +3779,11 @@ ALIAS:
 CODE:
     sv_unmagicext(SvRV(sv), PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo);
 
+void
+sv_magic(SV *sv, SV *thingy)
+CODE:
+    sv_magic(SvRV(sv), NULL, PERL_MAGIC_ext, (const char *)thingy, 0);
+
 UV
 test_get_vtbl()
     PREINIT:
