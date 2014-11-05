@@ -41,7 +41,7 @@ if ($Config{ivsize} == 8) {
     push @packi_fmt, qw(q Q);
 }
 
-if ($Config{uselongdouble}) {
+if ($Config{uselongdouble} && $Config{nvsize} > $Config{doublesize}) {
     push @packf_fmt, 'D';
 }
 
