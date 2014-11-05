@@ -1439,7 +1439,9 @@ sub walk_lineseq {
 		$i += $kids[$i]->sibling->name eq "unstack" ? 2 : 1);
 	    next;
 	}
-	$expr .= $self->deparse($kids[$i], (@kids != 1)/2);
+	my $expr2 = $self->deparse($kids[$i], (@kids != 1)/2);
+	$expr2 =~ s/^sub :/+sub :/; # statement label otherwise
+	$expr .= $expr2;
 	$expr =~ s/;\n?\z//;
 	$callback->($expr, $i);
     }

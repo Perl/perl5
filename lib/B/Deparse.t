@@ -377,6 +377,10 @@ $test /= 2 if ++$test;
     ;
 }
 ####
+# anonsub attrs at statement start
+my $x = do { +sub : lvalue { my $y; } };
+my $z = do { foo: +sub : method { my $a; } };
+####
 # block with continue
 {
     234;
