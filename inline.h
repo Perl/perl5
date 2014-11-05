@@ -269,7 +269,7 @@ S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char
 
     PERL_ARGS_ASSERT_IS_SAFE_SYSCALL;
 
-    if (pv && len > 1) {
+    if (len > 1) {
         char *null_at;
         if (UNLIKELY((null_at = (char *)memchr(pv, 0, len-1)) != NULL)) {
                 SETERRNO(ENOENT, LIB_INVARG);
