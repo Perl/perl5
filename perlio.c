@@ -5135,11 +5135,13 @@ int
 PerlIO_setpos(PerlIO *f, SV *pos)
 {
     if (SvOK(pos)) {
-	STRLEN len;
-	dTHX;
-	const Off_t * const posn = (Off_t *) SvPV(pos, len);
-	if (f && len == sizeof(Off_t))
-	    return PerlIO_seek(f, *posn, SEEK_SET);
+	if (f) {
+	    dTHX;
+	    STRLEN len;
+	    const Off_t * const posn = (Off_t *) SvPV(pos, len);
+	    if(len == sizeof(Off_t))
+		return PerlIO_seek(f, *posn, SEEK_SET);
+	}
     }
     SETERRNO(EINVAL, SS_IVCHAN);
     return -1;
@@ -5149,15 +5151,16 @@ PerlIO_setpos(PerlIO *f, SV *pos)
 int
 PerlIO_setpos(PerlIO *f, SV *pos)
 {
-    dTHX;
     if (SvOK(pos)) {
-	STRLEN len;
-	Fpos_t * const fpos = (Fpos_t *) SvPV(pos, len);
-	if (f && len == sizeof(Fpos_t)) {
+	if (f) {
+	    dTHX;
+	    STRLEN len;
+	    Fpos_t * const fpos = (Fpos_t *) SvPV(pos, len);
+	    if(len == sizeof(Fpos_t))
 #if defined(USE_64_BIT_STDIO) && defined(USE_FSETPOS64)
-	    return fsetpos64(f, fpos);
+		return fsetpos64(f, fpos);
 #else
-	    return fsetpos(f, fpos);
+		return fsetpos(f, fpos);
 #endif
 	}
     }
