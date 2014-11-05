@@ -863,18 +863,12 @@ example, if you move from the "C" locale to a 7-bit ISO 646 one,
 you may find--possibly to your surprise--that C<"|"> moves from the
 C<POSIX::ispunct()> class to C<POSIX::isalpha()>.
 Unfortunately, this creates big problems for regular expressions. "|" still
-means alternation even though it matches C<\w>.  Starting in v5.22, a
-warning will be raised when such a locale is switched into.  More
-details are given several paragraphs further down.
+means alternation even though it matches C<\w>.
 
 Starting in v5.20, Perl supports UTF-8 locales for C<LC_CTYPE>, but
 otherwise Perl only supports single-byte locales, such as the ISO 8859
 series.  This means that wide character locales, for example for Asian
-languages, are not well-supported.  (If the platform has the capability
-for Perl to detect such a locale, starting in Perl v5.22,
-L<Perl will warn, default enabled|warnings/Category Hierarchy>,
-using the C<locale> warning category, whenever such a locale is switched
-into.)  The UTF-8 locale support is actually a
+languages, are not supported.  The UTF-8 locale support is actually a
 superset of POSIX locales, because it is really full Unicode behavior
 as if no locale were in effect at all (except for tainting; see
 L</SECURITY>).  POSIX locales, even UTF-8 ones,
@@ -895,17 +889,6 @@ Similarly, all the escape sequences for particular characters,
 C<\n> for example, always mean the platform's native one.  This means,
 for example, that C<\N> in regular expressions (every character
 but new-line) works on the platform character set.
-
-Starting in v5.22, Perl will by default warn when switching into a
-locale that redefines any ASCII printable character (plus C<\t> and
-C<\n>) into a different class than expected.  This is unlikely to
-happen on modern locales, but can happen with the ISO 646 and other
-7-bit locales that are essentially obsolete.  Things may still work,
-depending on what features of Perl are used by the program.  For
-example, in the example from above where C<"|"> becomes a C<\w>, and
-there are no regular expressions where this matters, the program may
-still work properly.  The warning lists all the characters that
-it can determine could be adversely affected.
 
 B<Note:> A broken or malicious C<LC_CTYPE> locale definition may result
 in clearly ineligible characters being considered to be alphanumeric by
