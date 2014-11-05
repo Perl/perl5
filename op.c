@@ -2627,11 +2627,13 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    PL_modcount++;
 	    break;
 	}
-	if (type != OP_AASSIGN || !(o->op_private & OPpREPEAT_DOLIST))
+	if (!(o->op_private & OPpREPEAT_DOLIST))
 	    goto nomod;
 	else {
 	    const I32 mods = PL_modcount;
-	    modkids(cBINOPo->op_first, OP_AASSIGN);
+	    modkids(cBINOPo->op_first, type);
+	    if (type != OP_AASSIGN)
+		goto nomod;
 	    kid = cBINOPo->op_last;
 	    if (kid->op_type == OP_CONST && SvIOK(kSVOP_sv)) {
 		const IV iv = SvIV(kSVOP_sv);

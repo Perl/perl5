@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan(tests => 45);
+plan(tests => 46);
 
 # compile time
 
@@ -157,3 +157,9 @@ sub {
       '[perl #78194] \$_[0] == \$_[1] when @_ aliases elems repeated by x')
 }
  ->(("${\''}")x2);
+
+$#that_array = 7;
+for(($#that_array)x2) {
+    $_ *= 2;
+}
+is($#that_array, 28, 'list repetition propagates lvalue cx to its lhs');
