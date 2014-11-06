@@ -812,30 +812,6 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     if (o->op_targ) {
 	if (optype == OP_NULL) {
 	    Perl_dump_indent(aTHX_ level, file, "  (was %s)\n", PL_op_name[o->op_targ]);
-	    if (o->op_targ == OP_NEXTSTATE) {
-		if (CopLINE(cCOPo))
-		    Perl_dump_indent(aTHX_ level, file, "LINE = %"UVuf"\n",
-				     (UV)CopLINE(cCOPo));
-        if (CopSTASHPV(cCOPo)) {
-            SV* tmpsv = newSVpvs_flags("", SVs_TEMP);
-            HV *stash = CopSTASH(cCOPo);
-            const char * const hvname = HvNAME_get(stash);
-
-		    Perl_dump_indent(aTHX_ level, file, "PACKAGE = \"%s\"\n",
-                           generic_pv_escape( tmpsv, hvname, HvNAMELEN(stash), HvNAMEUTF8(stash)));
-       }
-     if (CopLABEL(cCOPo)) {
-          SV* tmpsv = newSVpvs_flags("", SVs_TEMP);
-          STRLEN label_len;
-          U32 label_flags;
-          const char *label = CopLABEL_len_flags(cCOPo,
-                                                 &label_len,
-                                                 &label_flags);
-		    Perl_dump_indent(aTHX_ level, file, "LABEL = \"%s\"\n",
-                           generic_pv_escape( tmpsv, label, label_len,(label_flags & SVf_UTF8)));
-      }
-
-	    }
 	}
 	else
 	    Perl_dump_indent(aTHX_ level, file, "TARG = %ld\n", (long)o->op_targ);
@@ -985,6 +961,10 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	Perl_dump_indent(aTHX_ level, file, "SV = %s\n", SvPEEK(cMETHOPx_meth(o)));
 #endif
 	break;
+    case OP_NULL:
+	if (o->op_targ != OP_NEXTSTATE && o->op_targ != OP_DBSTATE)
+	    break;
+	/* FALLTHROUGH */
     case OP_NEXTSTATE:
     case OP_DBSTATE:
 	if (CopLINE(cCOPo))
