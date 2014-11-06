@@ -11828,7 +11828,9 @@ Perl_rpeep(pTHX_ OP *o)
 		if (   OP_TYPE_IS(next, OP_PUSHMARK)
 		    && OP_TYPE_IS(sibling, OP_RETURN)
 		    && OP_TYPE_IS(sibling->op_next, OP_LINESEQ)
-		    && OP_TYPE_IS(sibling->op_next->op_next, OP_LEAVESUB)
+		    && ( OP_TYPE_IS(sibling->op_next->op_next, OP_LEAVESUB)
+		       ||OP_TYPE_IS(sibling->op_next->op_next,
+				    OP_LEAVESUBLV))
 		    && cUNOPx(sibling)->op_first == next
 		    && OP_HAS_SIBLING(next) && OP_SIBLING(next)->op_next
 		    && next->op_next
