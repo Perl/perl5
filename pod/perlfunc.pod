@@ -4848,6 +4848,8 @@ Some systems may have even weirder byte orders such as
    0x56 0x78 0x12 0x34
    0x34 0x12 0x78 0x56
 
+These are called mid-endian, middle-endian, mixed-endian, or just weird.
+
 You can determine your system endianness with this incantation:
 
    printf("%#02x ", $_) for unpack("W*", pack L=>0x12345678); 
@@ -4863,7 +4865,9 @@ or from the command line:
     $ perl -V:byteorder
 
 Byteorders C<"1234"> and C<"12345678"> are little-endian; C<"4321">
-and C<"87654321"> are big-endian.
+and C<"87654321"> are big-endian.  Systems with multiarchitecture binaries
+will have C<"ffff">, signifying that static information doesn't work,
+one must use runtime probing.
 
 For portably packed integers, either use the formats C<n>, C<N>, C<v>, 
 and C<V> or else use the C<< > >> and C<< < >> modifiers described
