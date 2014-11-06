@@ -1478,6 +1478,14 @@ Perl_scalar(pTHX_ OP *o)
     switch (o->op_type) {
     case OP_REPEAT:
 	scalar(cBINOPo->op_first);
+	if (o->op_private & OPpREPEAT_DOLIST) {
+	    kid = cLISTOPx(cUNOPo->op_first)->op_first;
+	    assert(kid->op_type == OP_PUSHMARK);
+	    if (OP_HAS_SIBLING(kid) && !OP_HAS_SIBLING(OP_SIBLING(kid))) {
+		op_null(cLISTOPx(cUNOPo->op_first)->op_first);
+		o->op_private &=~ OPpREPEAT_DOLIST;
+	    }
+	}
 	break;
     case OP_OR:
     case OP_AND:
