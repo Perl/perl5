@@ -32,6 +32,7 @@ INST_TOP	*= $(INST_DRV)\perl
 #
 # Uncomment if you want to build a 32-bit Perl using a 32-bit compiler
 # on a 64-bit version of Windows.
+#
 #WIN64		*= undef
 
 #
@@ -91,12 +92,14 @@ USE_IMP_SYS	*= define
 # then get a number of fails from make test i.e. bugs - complain to them not us ;-). 
 # You will also be unable to take full advantage of perl5.8's support for multiple 
 # encodings and may see lower IO performance. You have been warned.
+#
 USE_PERLIO	*= define
 
 #
 # Comment this out if you don't want to enable large file support for
 # some reason.  Should normally only be changed to maintain compatibility
 # with an older release of perl.
+#
 USE_LARGE_FILES	*= define
 
 #
@@ -104,7 +107,14 @@ USE_LARGE_FILES	*= define
 # (If you're building a 64-bit perl then you will have 64-bit integers whether
 # or not this is uncommented.)
 # Note: This option is not supported in 32-bit MSVC60 builds.
+#
 #USE_64_BIT_INT	*= define
+
+#
+# Uncomment this if you want to support the use of long doubles in GCC builds.
+# This option is not supported for MSVC builds.
+#
+#USE_LONG_DOUBLE *=define
 
 #
 # uncomment exactly one of the following
@@ -292,6 +302,7 @@ USE_IMP_SYS	*= undef
 USE_PERLIO	*= undef
 USE_LARGE_FILES	*= undef
 USE_64_BIT_INT	*= undef
+USE_LONG_DOUBLE	*= undef
 
 .IF "$(USE_IMP_SYS)" == "define"
 PERL_MALLOC	= undef
@@ -356,6 +367,12 @@ CCTYPE		= SDK2003SP1
 # does not support it.
 .IF "$(CCTYPE)" == "MSVC60"
 USE_64_BIT_INT	!= undef
+.ENDIF
+
+# Disable the long double option for MSVC builds since that compiler
+# does not support it.
+.IF "$(CCTYPE)" != "GCC"
+USE_LONG_DOUBLE	!= undef
 .ENDIF
 
 ARCHITECTURE = $(PROCESSOR_ARCHITECTURE)
@@ -427,6 +444,11 @@ LINK32		= $(ARCHPREFIX)g++
 LIB32		= $(ARCHPREFIX)ar rc
 IMPLIB		= $(ARCHPREFIX)dlltool
 RSC		= $(ARCHPREFIX)windres
+
+.IF "$(USE_LONG_DOUBLE)" == "define"
+BUILDOPT        += -D__USE_MINGW_ANSI_STDIO
+MINIBUILDOPT    += -D__USE_MINGW_ANSI_STDIO
+.ENDIF
 
 GCCWRAPV *= $(shell for /f "delims=. tokens=1,2,3" %i in ('$(CC) -dumpversion') do @if "%i"=="4" (if "%j" geq "3" echo define) else if "%i" geq "5" (echo define))
 
@@ -949,6 +971,7 @@ CFG_VARS	=					\
 		usemultiplicity=$(USE_MULTI)	~	\
 		useperlio=$(USE_PERLIO)		~	\
 		use64bitint=$(USE_64_BIT_INT)	~	\
+		uselongdouble=$(USE_LONG_DOUBLE)	~	\
 		uselargefiles=$(USE_LARGE_FILES)	~	\
 		usesitecustomize=$(USE_SITECUST)	~	\
 		LINK_FLAGS=$(LINK_FLAGS)	~	\
@@ -1024,6 +1047,7 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #undef HAS_ATOLL>>$@
 	@echo #undef HAS_STRTOLL>>$@
 	@echo #undef HAS_STRTOULL>>$@
+	@echo #undef Size_t_size>>$@
 	@echo #undef IVTYPE>>$@
 	@echo #undef UVTYPE>>$@
 	@echo #undef IVSIZE>>$@
@@ -1036,7 +1060,24 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #undef UVxf>>$@
 	@echo #undef UVXf>>$@
 	@echo #undef USE_64_BIT_INT>>$@
-	@echo #undef Size_t_size>>$@
+	@echo #undef Gconvert>>$@
+	@echo #undef HAS_FREXPL>>$@
+	@echo #undef HAS_ISNANL>>$@
+	@echo #undef HAS_MODFL>>$@
+	@echo #undef HAS_MODFL_PROTO>>$@
+	@echo #undef HAS_SQRTL>>$@
+	@echo #undef HAS_STRTOLD>>$@
+	@echo #undef PERL_PRIfldbl>>$@
+	@echo #undef PERL_PRIgldbl>>$@
+	@echo #undef PERL_PRIeldbl>>$@
+	@echo #undef PERL_SCNfldbl>>$@
+	@echo #undef NVTYPE>>$@
+	@echo #undef NVSIZE>>$@
+	@echo #undef NV_OVERFLOWS_INTEGERS_AT>>$@
+	@echo #undef NVef>>$@
+	@echo #undef NVff>>$@
+	@echo #undef NVgf>>$@
+	@echo #undef USE_LONG_DOUBLE>>$@
 .IF "$(USE_LARGE_FILES)"=="define"
 	@echo #define Off_t $(INT64)>>$@
 	@echo #define LSEEKSIZE ^8>>$@
@@ -1066,8 +1107,13 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #define UVTYPE unsigned $(INT64)>>$@
 	@echo #define IVSIZE ^8>>$@
 	@echo #define UVSIZE ^8>>$@
+.IF "$(USE_LONG_DOUBLE)"=="define"
+	@echo #define NV_PRESERVES_UV>>$@
+	@echo #define NV_PRESERVES_UV_BITS 64>>$@
+.ELSE
 	@echo #undef NV_PRESERVES_UV>>$@
 	@echo #define NV_PRESERVES_UV_BITS 53>>$@
+.ENDIF
 	@echo #define IVdf "I64d">>$@
 	@echo #define UVuf "I64u">>$@
 	@echo #define UVof "I64o">>$@
@@ -1087,6 +1133,45 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #define UVxf "lx">>$@
 	@echo #define UVXf "lX">>$@
 	@echo #undef USE_64_BIT_INT>>$@
+.ENDIF
+.IF "$(USE_LONG_DOUBLE)"=="define"
+	@echo #define Gconvert(x,n,t,b) sprintf((b),"%.*""Lg",(n),(x))>>$@
+	@echo #define HAS_FREXPL>>$@
+	@echo #define HAS_ISNANL>>$@
+	@echo #define HAS_MODFL>>$@
+	@echo #define HAS_MODFL_PROTO>>$@
+	@echo #define HAS_SQRTL>>$@
+	@echo #define HAS_STRTOLD>>$@
+	@echo #define PERL_PRIfldbl "Lf">>$@
+	@echo #define PERL_PRIgldbl "Lg">>$@
+	@echo #define PERL_PRIeldbl "Le">>$@
+	@echo #define PERL_SCNfldbl "Lf">>$@
+	@echo #define NVTYPE long double>>$@
+	@echo #define NVSIZE ^12>>$@
+	@echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0>>$@
+	@echo #define NVef "Le">>$@
+	@echo #define NVff "Lf">>$@
+	@echo #define NVgf "Lg">>$@
+	@echo #define USE_LONG_DOUBLE>>$@
+.ELSE
+	@echo #define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))>>$@
+	@echo #undef HAS_FREXPL>>$@
+	@echo #undef HAS_ISNANL>>$@
+	@echo #undef HAS_MODFL>>$@
+	@echo #undef HAS_MODFL_PROTO>>$@
+	@echo #undef HAS_SQRTL>>$@
+	@echo #undef HAS_STRTOLD>>$@
+	@echo #undef PERL_PRIfldbl>>$@
+	@echo #undef PERL_PRIgldbl>>$@
+	@echo #undef PERL_PRIeldbl>>$@
+	@echo #undef PERL_SCNfldbl>>$@
+	@echo #define NVTYPE double>>$@
+	@echo #define NVSIZE ^8>>$@
+	@echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0>>$@
+	@echo #define NVef "e">>$@
+	@echo #define NVff "f">>$@
+	@echo #define NVgf "g">>$@
+	@echo #undef USE_LONG_DOUBLE>>$@
 .ENDIF
 	@echo #endif>>$@
 

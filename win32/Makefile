@@ -26,6 +26,7 @@ INST_TOP	= $(INST_DRV)\perl
 #
 # Uncomment if you want to build a 32-bit Perl using a 32-bit compiler
 # on a 64-bit version of Windows.
+#
 #WIN64		= undef
 
 #
@@ -85,12 +86,14 @@ USE_IMP_SYS	= define
 # then get a number of fails from make test i.e. bugs - complain to them not us ;-). 
 # You will also be unable to take full advantage of perl5.8's support for multiple 
 # encodings and may see lower IO performance. You have been warned.
+#
 USE_PERLIO	= define
 
 #
 # Comment this out if you don't want to enable large file support for
 # some reason.  Should normally only be changed to maintain compatibility
 # with an older release of perl.
+#
 USE_LARGE_FILES	= define
 
 #
@@ -98,6 +101,7 @@ USE_LARGE_FILES	= define
 # (If you're building a 64-bit perl then you will have 64-bit integers whether
 # or not this is uncommented.)
 # Note: This option is not supported in 32-bit MSVC60 builds.
+#
 #USE_64_BIT_INT	= define
 
 #

@@ -151,12 +151,20 @@ else {
     $opt{ssizetype} = 'int';
     $opt{st_ino_size} = 4;
 }
+
+# set 64-bit-int options
 if ($opt{use64bitint} eq 'define') {
-    $opt{d_nv_preserves_uv} = 'undef';
+    if ($opt{uselongdouble} eq 'define') {
+        $opt{d_nv_preserves_uv} = 'define';
+        $opt{nv_preserves_uv_bits} = 64;
+    }
+    else {
+        $opt{d_nv_preserves_uv} = 'undef';
+        $opt{nv_preserves_uv_bits} = 53;
+    }
     $opt{ivdformat} = qq{"I64d"};
     $opt{ivsize} = 8;
     $opt{ivtype} = $int64;
-    $opt{nv_preserves_uv_bits} = 53;
     $opt{sPRIXU64} = qq{"I64X"};
     $opt{sPRId64} = qq{"I64d"};
     $opt{sPRIi64} = qq{"I64i"};
@@ -188,6 +196,58 @@ else {
     $opt{uvtype} = 'unsigned long';
     $opt{uvuformat} = '"lu"';
     $opt{uvxformat} = '"lx"';
+}
+
+# set long double options
+if ($opt{uselongdouble} eq 'define') {
+    $opt{d_Gconvert} = 'sprintf((b),"%.*""Lg",(n),(x))';
+    $opt{d_PRIEUldbl} = 'define';
+    $opt{d_PRIFUldbl} = 'define';
+    $opt{d_PRIGUldbl} = 'define';
+    $opt{d_frexpl} = 'define';
+    $opt{d_isnanl} = 'define';
+    $opt{d_modfl} = 'define';
+    $opt{d_modflproto} = 'define';
+    $opt{d_sqrtl} = 'define';
+    $opt{d_strtold} = 'define';
+    $opt{d_PRIeldbl} = 'define';
+    $opt{d_PRIfldbl} = 'define';
+    $opt{d_PRIgldbl} = 'define';
+    $opt{d_SCNfldbl} = 'define';
+    $opt{nvsize} = 12;
+    $opt{nvtype} = 'long double';
+    $opt{nv_overflows_integers_at} = '256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0';
+    $opt{nvEUformat} = '"LE"';
+    $opt{nvFUformat} = '"LF"';
+    $opt{nvGUformat} = '"LG"';
+    $opt{nveformat} = '"Le"';
+    $opt{nvfformat} = '"Lf"';
+    $opt{nvgformat} = '"Lg"';
+}
+else {
+    $opt{d_Gconvert} = 'sprintf((b),"%.*g",(n),(x))';
+    $opt{d_PRIEUldbl} = 'undef';
+    $opt{d_PRIFUldbl} = 'undef';
+    $opt{d_PRIGUldbl} = 'undef';
+    $opt{d_frexpl} = 'undef';
+    $opt{d_isnanl} = 'undef';
+    $opt{d_modfl} = 'undef';
+    $opt{d_modflproto} = 'undef';
+    $opt{d_sqrtl} = 'undef';
+    $opt{d_strtold} = 'undef';
+    $opt{d_PRIeldbl} = 'undef';
+    $opt{d_PRIfldbl} = 'undef';
+    $opt{d_PRIgldbl} = 'undef';
+    $opt{d_SCNfldbl} = 'undef';
+    $opt{nvsize} = 8;
+    $opt{nvtype} = 'double';
+    $opt{nv_overflows_integers_at} = '256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0';
+    $opt{nvEUformat} = '"E"';
+    $opt{nvFUformat} = '"F"';
+    $opt{nvGUformat} = '"G"';
+    $opt{nveformat} = '"e"';
+    $opt{nvfformat} = '"f"';
+    $opt{nvgformat} = '"g"';
 }
 
 # change the s{GM|LOCAL}TIME_{min|max} for VS2005 (aka VC 8) and
