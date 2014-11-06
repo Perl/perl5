@@ -703,6 +703,7 @@ Perl_re_intuit_start(pTHX_
 	goto fail;
     }
 
+    RX_MATCH_UTF8_set(rx,utf8_target);
     reginfo->is_utf8_target = cBOOL(utf8_target);
     reginfo->info_aux = NULL;
     reginfo->strbeg = strbeg;
@@ -2617,6 +2618,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     }
 
     RX_MATCH_TAINTED_off(rx);
+    RX_MATCH_UTF8_set(rx, utf8_target);
 
     reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
     reginfo->intuit = 0;
@@ -3136,8 +3138,6 @@ got_it:
 
     if (RXp_PAREN_NAMES(prog)) 
         (void)hv_iterinit(RXp_PAREN_NAMES(prog));
-
-    RX_MATCH_UTF8_set(rx, utf8_target);
 
     /* make sure $`, $&, $', and $digit will work later */
     if ( !(flags & REXEC_NOT_FIRST) )
