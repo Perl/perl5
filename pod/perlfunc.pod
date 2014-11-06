@@ -4875,6 +4875,19 @@ immediately below.  See also L<perlport>.
 
 =item *
 
+Also floating point numbers have endianness.  Usually (but not always)
+this agrees with the integer endianness.  Even though most platforms
+these days use the IEEE 754 binary format, there are differences,
+especially if the long doubles are involved.  You can see the
+C<Config> variables C<doublekind> and C<longdblkind> (also C<doublesize>,
+C<longdblsize>): the "kind" values are enums, unlike C<byteorder>.
+
+Portability-wise the best option is probably to keep to the IEEE 754
+64-bit doubles, and of agreed-upon endianness.  Another possibility
+is the C<"%a">) format of C<printf>.
+
+=item *
+
 Starting with Perl 5.10.0, integer and floating-point formats, along with
 the C<p> and C<P> formats and C<()> groups, may all be followed by the 
 C<< > >> or C<< < >> endianness modifiers to respectively enforce big-
