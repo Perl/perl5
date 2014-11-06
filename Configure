@@ -6792,6 +6792,7 @@ $rm_try
 set float.h i_float
 eval $inhdr
 
+echo " "
 $echo "Checking the kind of doubles you have..." >&4
 $cat <<EOP >try.c
 #$i_stdlib I_STDLIB
@@ -6936,6 +6937,7 @@ EOCP
 esac
 $rm_try
 
+echo " "
 $echo "Checking the kind of long doubles you have..." >&4
 case "$d_longdbl" in
 define)
@@ -6943,6 +6945,7 @@ $cat <<EOP >try.c
 #$i_float I_FLOAT
 #$i_stdlib I_STDLIB
 #define LONGDBLSIZE $longdblsize
+#define DOUBLESIZE $doublesize
 #ifdef I_FLOAT
 #include <float.h>
 #endif
@@ -6953,6 +6956,10 @@ static const long double d = -0.1L;
 #include <stdio.h>
 int main() {
   unsigned const char* b = (unsigned const char*)(&d);
+#if DOUBLESIZE == LONGDBLSIZE
+  printf("0\n"); /* unknown */
+  exit(0);
+#endif
 #if (LDBL_MANT_DIG == 113 || FLT128_MANT_DIG == 113) && LONGDBLSIZE == 16
   if (b[0] == 0x9A && b[1] == 0x99 && b[15] == 0xBF) {
     /* IEEE 754 128-bit little-endian */
