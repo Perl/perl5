@@ -5039,6 +5039,13 @@ If TEMPLATE requires more arguments than pack() is given, pack()
 assumes additional C<""> arguments.  If TEMPLATE requires fewer arguments
 than given, extra arguments are ignored.
 
+=item *
+
+Attempting to pack the special floating point values C<Inf> and C<NaN>
+(infinity, also in negative, and not-a-number) into packed integer values
+(like C<"L">) is a fatal error.  The reason for this is that there simply
+isn't any sensible mapping for these special values into integers.
+
 =back
 
 Examples:
