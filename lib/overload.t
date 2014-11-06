@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5198;
+plan tests => 5199;
 
 use Scalar::Util qw(tainted);
 
@@ -2747,6 +2747,12 @@ package refsgalore {
     is ioref->{44}, 45, "(ovrld const that is not a hash ref)->{key}";
     is ioref->(), 46, '(overloaded constant that is not a sub ref)->()';
 }
+
+package xstack { use overload 'x' => sub { shift . " x " . shift },
+                              '""'=> sub { "xstack" } }
+is join(",", 1..3, scalar((bless([], 'xstack')) x 3, 1), 4..6),
+  "1,2,3,1,4,5,6",
+  '(...)x... in void cx with x overloaded [perl #121827]';
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
     package ant;

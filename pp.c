@@ -1650,6 +1650,25 @@ PP(pp_repeat)
 	SvGETMAGIC(sv);
     }
     else {
+	if (UNLIKELY(PL_op->op_private & OPpREPEAT_DOLIST)) {
+	    /* The parser saw this as a list repeat, and there
+	       are probably several items on the stack. But we're
+	       in scalar/void context, and there's no pp_list to save us
+	       now. So drop the rest of the items -- robin@kitsite.com
+	     */
+	    dMARK;
+	    if (MARK + 1 < SP) {
+		MARK[1] = TOPm1s;
+		MARK[2] = TOPs;
+	    }
+	    else {
+		dTOPss;
+		ASSUME(MARK + 1 == SP);
+		XPUSHs(sv);
+		MARK[1] = &PL_sv_undef;
+	    }
+	    SP = MARK + 2;
+	}
 	tryAMAGICbin_MG(repeat_amg, AMGf_assign);
 	sv = POPs;
     }
@@ -1741,15 +1760,6 @@ PP(pp_repeat)
 	else
 	    (void)SvPOK_only(TARG);
 
-	if (PL_op->op_private & OPpREPEAT_DOLIST) {
-	    /* The parser saw this as a list repeat, and there
-	       are probably several items on the stack. But we're
-	       in scalar context, and there's no pp_list to save us
-	       now. So drop the rest of the items -- robin@kitsite.com
-	     */
-	    dMARK;
-	    SP = MARK;
-	}
 	PUSHTARG;
     }
     RETURN;

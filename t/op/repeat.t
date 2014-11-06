@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan(tests => 46);
+plan(tests => 47);
 
 # compile time
 
@@ -140,6 +140,16 @@ is($y, undef,   '  no extra values on stack');
 # Make sure the stack doesn't get truncated too much - the left
 # operand of the eq binop needs to remain!
 is(77, scalar ((1,7)x2),    'stack truncation');
+
+# ( )x in void context should not read preceding stack items
+package Tiecount {
+    sub TIESCALAR { bless[]} sub FETCH { our $Tiecount++; study; 3 }
+}
+sub nil {}
+tie my $t, "Tiecount";
+{ push my @temp, $t, scalar((nil) x 3, 1) }
+is($Tiecount::Tiecount, 1,
+   '(...)x... in void context in list (via scalar comma)');
 
 
 # perlbug 20011113.110 works in 5.6.1, broken in 5.7.2
