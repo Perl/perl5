@@ -8,6 +8,7 @@ use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
 	    %opts $packlist);
 use subs qw(unlink link chmod);
 require File::Path;
+require File::Copy;
 
 BEGIN {
     require Config;
