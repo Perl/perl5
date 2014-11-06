@@ -6957,7 +6957,7 @@ static const long double d = -0.1L;
 int main() {
   unsigned const char* b = (unsigned const char*)(&d);
 #if DOUBLESIZE == LONGDBLSIZE
-  printf("0\n"); /* unknown */
+  printf("0\n"); /* if it floats like double */
   exit(0);
 #endif
 #if (LDBL_MANT_DIG == 113 || FLT128_MANT_DIG == 113) && LONGDBLSIZE == 16
