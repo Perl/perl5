@@ -1039,8 +1039,7 @@ sub tree {
 # to update the corresponding magic number in the next line.
 # Remember, this needs to stay the last things in the module.
 
-# Why is this different for MacOS?  Does it matter?
-my $cop_seq_mnum = $^O eq 'MacOS' ? 12 : 11;
+my $cop_seq_mnum = 11;
 $cop_seq_base = svref_2object(eval 'sub{0;}')->START->cop_seq + $cop_seq_mnum;
 
 1;
