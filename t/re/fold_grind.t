@@ -20,6 +20,7 @@ my $DEBUG = 0;  # Outputs extra information for debugging this .t
 
 use strict;
 use warnings;
+no warnings 'locale';   # Plenty of these would otherwise get generated
 use Encode;
 use POSIX;
 

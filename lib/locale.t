@@ -2381,6 +2381,7 @@ setlocale(&POSIX::LC_ALL, "C");
                     my $should_be;
                     my $changed;
                     if (! $is_utf8_locale) {
+                        no warnings 'locale';
                         $should_be = ($j == $#list)
                             ? chr(ord($char) + $above_latin1_case_change_delta)
                             : (length $char == 0 || ord($char) > 127)

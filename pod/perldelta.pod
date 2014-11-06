@@ -218,6 +218,10 @@ XXX L<message|perldiag/"message">
 
 L<Use of literal non-graphic characters in variable names is deprecated|perldiag/"Use of literal non-graphic characters in variable names is deprecated">
 
+=item *
+
+L<Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".|perldiag/Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".>
+
 =back
 
 =head2 Changes to Existing Diagnostics

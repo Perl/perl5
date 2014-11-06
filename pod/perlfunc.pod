@@ -3372,8 +3372,10 @@ locale), the lower case of U+1E9E is
 itself, because 0xDF may not be LATIN SMALL LETTER SHARP S in the
 current locale, and Perl has no way of knowing if that character even
 exists in the locale, much less what code point it is.  Perl returns
-the input character unchanged, for all instances (and there aren't
-many) where the 255/256 boundary would otherwise be crossed.
+a result that is above 255 (almost always the input character unchanged,
+for all instances (and there aren't many) where the 255/256 boundary
+would otherwise be crossed; and starting in v5.22, it raises a
+L<locale|perldiag/Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".> warning.
 
 =item Otherwise, If EXPR has the UTF8 flag set:
 

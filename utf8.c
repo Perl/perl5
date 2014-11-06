@@ -1873,7 +1873,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 }
 
 STATIC UV
-S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* const ustrp, STRLEN *lenp)
+S_check_locale_boundary_crossing(pTHX_ const char * const func_name, const U8* const p, const UV result, U8* const ustrp, STRLEN *lenp)
 {
     /* This is called when changing the case of a utf8-encoded character above
      * the Latin1 range, and the operation is in a non-UTF-8 locale.  If the
@@ -1916,6 +1916,14 @@ bad_crossing:
 
     /* Failed, have to return the original */
     original = valid_utf8_to_uvchr(p, lenp);
+
+    /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
+    Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
+                           "Can't do %s(\"\\x{%"UVXf"}\") on non-UTF-8 locale; "
+                           "resolved to \"\\x{%"UVXf"}\".",
+                           func_name,
+                           original,
+                           original);
     Copy(p, ustrp, *lenp, char);
     return original;
 }
@@ -1964,7 +1972,7 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 	result = CALL_UPPER_CASE(p, ustrp, lenp);
 
 	if (flags) {
-	    result = check_locale_boundary_crossing(p, result, ustrp, lenp);
+	    result = check_locale_boundary_crossing("uc", p, result, ustrp, lenp);
 	}
 	return result;
     }
@@ -2029,7 +2037,7 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 	result = CALL_TITLE_CASE(p, ustrp, lenp);
 
 	if (flags) {
-	    result = check_locale_boundary_crossing(p, result, ustrp, lenp);
+	    result = check_locale_boundary_crossing("ucfirst", p, result, ustrp, lenp);
 	}
 	return result;
     }
@@ -2093,7 +2101,7 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 	result = CALL_LOWER_CASE(p, ustrp, lenp);
 
 	if (flags) {
-	    result = check_locale_boundary_crossing(p, result, ustrp, lenp);
+	    result = check_locale_boundary_crossing("lc", p, result, ustrp, lenp);
 	}
 
 	return result;
@@ -2177,15 +2185,23 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
                 && memEQ((char *) p, LATIN_CAPITAL_LETTER_SHARP_S_UTF8,
                           sizeof(LATIN_CAPITAL_LETTER_SHARP_S_UTF8) - 1))
             {
+                /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
+                Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
+                              "Can't do fc(\"\\x{1E9E}\") on non-UTF-8 locale; "
+                              "resolved to \"\\x{17F}\\x{17F}\".");
                 goto return_long_s;
             }
             else if (UTF8SKIP(p) == sizeof(LATIN_SMALL_LIGATURE_LONG_S_T) - 1
                 && memEQ((char *) p, LATIN_SMALL_LIGATURE_LONG_S_T_UTF8,
                           sizeof(LATIN_SMALL_LIGATURE_LONG_S_T_UTF8) - 1))
             {
+                /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
+                Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
+                              "Can't do fc(\"\\x{FB05}\") on non-UTF-8 locale; "
+                              "resolved to \"\\x{FB06}\".");
                 goto return_ligature_st;
             }
-	    return check_locale_boundary_crossing(p, result, ustrp, lenp);
+	    return check_locale_boundary_crossing("fc", p, result, ustrp, lenp);
 	}
 	else if (! (flags & FOLD_FLAGS_NOMIX_ASCII)) {
 	    return result;

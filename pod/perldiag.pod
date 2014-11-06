@@ -741,6 +741,33 @@ C<foreach> loop nor a C<given> block.  (Note that this error is
 issued on exit from the C<default> block, so you won't get the
 error if you use an explicit C<continue>.)
 
+=item Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".
+
+(W locale) You are 1) running under "C<use locale>"; 2) the current
+locale is not a UTF-8 one; 3) you tried to do the designated case-change
+operation on the specified Unicode character; and 4) the result of this
+operation would mix Unicode and locale rules, which likely conflict.
+Mixing of different rule types is forbidden, so the operation was not
+done; instead the result is the indicated value, which is the best
+available that uses entirely Unicode rules.  That turns out to almost
+always be the original character, unchanged.
+
+It is generally a bad idea to mix non-UTF-8 locales and Unicode, and
+this issue is one of the reasons why.  This warning is raised when
+Unicode rules would normally cause the result of this operation to
+contain a character that is in the range specified by the locale,
+0..255, and hence is subject to the locale's rules, not Unicode's.
+
+If you are using locale purely for its characteristics related to things
+like its numeric and time formatting (and not C<LC_CTYPE>), consider
+using a restricted form of the locale pragma (see L<perllocale/The "use
+locale" pragma>) like "S<C<use locale ':not_characters'>>".
+
+Note that failed case-changing operations done as a result of
+case-insensitive C</i> regular expression matching will show up in this
+warning as having the C<fc> operation (as that is what the regular
+expression engine calls behind the scenes.)
+
 =item Can't do inplace edit: %s is not a regular file
 
 (S inplace) You tried to use the B<-i> switch on a special file, such as

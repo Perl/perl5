@@ -581,3 +581,25 @@ print $fh "\x{10FFFF}", "\n";
 print $fh "\x{110000}", "\n";
 close $fh;
 EXPECT
+########
+# NAME Case change crosses 255/256 under non-UTF8 locale
+eval { require POSIX; POSIX->import("locale_h") };
+if ($@) {
+    print("SKIPPED\n# no POSIX\n"),exit;
+}
+use warnings 'locale';
+use feature 'fc';
+use locale;
+setlocale(&POSIX::LC_CTYPE, "C");
+my $a;
+$a = lc("\x{178}");
+$a = fc("\x{1E9E}");
+$a = fc("\x{FB05}");
+$a = uc("\x{FB00}");
+$a = ucfirst("\x{149}");
+EXPECT
+Can't do lc("\x{178}") on non-UTF-8 locale; resolved to "\x{178}". at - line 10.
+Can't do fc("\x{1E9E}") on non-UTF-8 locale; resolved to "\x{17F}\x{17F}". at - line 11.
+Can't do fc("\x{FB05}") on non-UTF-8 locale; resolved to "\x{FB06}". at - line 12.
+Can't do uc("\x{FB00}") on non-UTF-8 locale; resolved to "\x{FB00}". at - line 13.
+Can't do ucfirst("\x{149}") on non-UTF-8 locale; resolved to "\x{149}". at - line 14.
