@@ -3362,7 +3362,7 @@ Respects current LC_CTYPE locale for code points < 256; and uses Unicode
 rules for the remaining code points (this last can only happen if
 the UTF8 flag is also set).  See L<perllocale>.
 
-Starting in v5.20, Perl wil use full Unicode rules if the locale is
+Starting in v5.20, Perl uses full Unicode rules if the locale is
 UTF-8.  Otherwise, there is a deficiency in this scheme, which is that
 case changes that cross the 255/256
 boundary are not well-defined.  For example, the lower case of LATIN CAPITAL
