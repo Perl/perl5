@@ -12653,7 +12653,12 @@ Perl_rpeep(pTHX_ OP *o)
 	    break;
 
 	case OP_SASSIGN:
-	    if (OP_GIMME(o,0) == G_VOID) {
+	    if (OP_GIMME(o,0) == G_VOID
+	     || (  o->op_next->op_type == OP_LINESEQ
+		&& (  o->op_next->op_next->op_type == OP_LEAVESUB
+		   || (  o->op_next->op_next->op_type == OP_RETURN
+		      && !CvLVALUE(PL_compcv)))))
+	    {
 		OP *right = cBINOP->op_first;
 		if (right) {
                     /*   sassign

@@ -3186,7 +3186,9 @@ PP(pp_substr)
 	}
     }
     SPAGAIN;
-    if (rvalue) {
+    if (PL_op->op_private & OPpSUBSTR_REPL_FIRST)
+	SP++;
+    else if (rvalue) {
 	SvSETMAGIC(TARG);
 	PUSHs(TARG);
     }
