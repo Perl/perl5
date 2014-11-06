@@ -1892,6 +1892,7 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 '\Awibble\z'm	wibble	y	-	-
 /(alias|status)es$/i	Statuses	y	$1	Status		# [perl #121778]
 /( (?&solution) | % ) \Z (?(DEFINE) (?<solution>7\%\ solution) )/x	7% solution	y	$1	7% solution		# [perl #122890]
+(.)(?{$~=$^N})	\x{100}	y	$~	\x{100}		# [perl #123135]
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab
