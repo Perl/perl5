@@ -341,6 +341,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 AIX now sets the length in C<< getsockopt >> correctly. [perl #120835],
 [rt.cpan.org #91183], [rt.cpan.org #85570].
 
+=item *
+
+In Perl 5.20.0, C<$^N> accidentally had the internal UTF8 flag turned off
+if accessed from a code block within a regular expression, effectively
+UTF8-encoding the value.  This has been fixed.  [perl #123135]
+
 =back
 
 =head1 Known Problems
