@@ -172,10 +172,6 @@ if ($::do_nothing || $::do_nothing) { # set by harness b4 requiring us
     return 1;
 }
 
-if ($ENV{PERL_VALGRIND}) {
-    require TestValgrind;
-}
-
 chdir 't' if -f 't/TEST';
 if (-f 'TEST' && -f 'harness' && -d '../lib') {
     @INC = '../lib';
