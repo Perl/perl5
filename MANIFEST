@@ -5467,12 +5467,12 @@ t/run/switchx3.aux		Data for switchx.t
 t/run/switchx.aux		Data for switchx.t
 t/run/switchx.t			Test the -x switch
 t/TEST				The regression tester
-t/TestValgrind.pm		make test.valgrind support
 t/test.pl			Simple testing library
 t/test_pl/can_isa_ok.t		Tests for the simple testing library
 t/test_pl/_num_to_alpha.t	Tests for the simple testing library 
 t/test_pl/plan_skip_all.t	Tests for the simple testing library
 t/test_pl/tempfile.t		Tests for the simple testing library
+t/TestValgrind.pm		make test.valgrind support
 t/thread_it.pl			Run regression tests in a new thread
 t/uni/attrs.t			See if Unicode attributes work
 t/uni/bless.t			See if Unicode bless works
