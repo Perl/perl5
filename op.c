@@ -1747,10 +1747,11 @@ Perl_scalarvoid(pTHX_ OP *arg)
 		&& !kid->op_targ
 		&& !(o->op_flags & OPf_STACKED)
 #ifdef USE_ITHREADS
-		&& !((PMOP*)kid)->op_pmreplrootu.op_pmtargetoff)
+		&& !((PMOP*)kid)->op_pmreplrootu.op_pmtargetoff
 #else
-		&& !((PMOP*)kid)->op_pmreplrootu.op_pmtargetgv)
+		&& !((PMOP*)kid)->op_pmreplrootu.op_pmtargetgv
 #endif
+            )
 	    useless = OP_DESC(o);
 	break;
 
