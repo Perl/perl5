@@ -331,7 +331,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #endif
 
 #define XS_APIVERSION_BOOTCHECK						\
-    Perl_xs_apiversion_bootcheck(aTHX_ ST(0), STR_WITH_LEN("v" PERL_API_VERSION_STRING))
+    Perl_xs_apiversion_bootcheck(ST(0), STR_WITH_LEN("v" PERL_API_VERSION_STRING))
 
 #ifdef NO_XSLOCKS
 #  define dXCPT             dJMPENV; int rEtV = 0

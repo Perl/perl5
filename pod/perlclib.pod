@@ -119,6 +119,9 @@ There is no equivalent to C<fgets>; one should use C<sv_gets> instead:
                                               / strGT(s1,s2)
  strncmp(s1, s2, n)             strnNE(s1, s2, n) / strnEQ(s1, s2, n)
 
+ memcmp(p1, p2, n)              memNE(p1, p2, n)
+ !memcmp(p1, p2, n)             memEQ(p1, p2, n)
+
 Notice the different order of arguments to C<Copy> and C<Move> than used
 in C<memcpy> and C<memmove>.
 

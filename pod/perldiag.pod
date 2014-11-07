@@ -4349,6 +4349,11 @@ is equivalent to v5.100.
 recent than the currently running version.  How long has it been since
 you upgraded, anyway?  See L<perlfunc/require>.
 
+=item Perl API version %s of %s does not match %s
+
+(F) The XS module in question was complied against a different incompatible
+version of Perl than the one that has loaded the XS module.
+
 =item PERL_SH_DIR too long
 
 (F) An error peculiar to OS/2.  PERL_SH_DIR is the directory to find the

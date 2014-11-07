@@ -5153,9 +5153,9 @@ PERL_CALLCONV void	Perl_write_to_stderr(pTHX_ SV* msv)
 #define PERL_ARGS_ASSERT_WRITE_TO_STDERR	\
 	assert(msv)
 
-PERL_CALLCONV void	Perl_xs_apiversion_bootcheck(pTHX_ SV *module, const char *api_p, STRLEN api_len)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+PERL_CALLCONV void	Perl_xs_apiversion_bootcheck(SV *module, const char *api_p, STRLEN api_len)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_XS_APIVERSION_BOOTCHECK	\
 	assert(module); assert(api_p)
 

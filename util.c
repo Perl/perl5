@@ -5380,34 +5380,16 @@ Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
 }
 
 void
-Perl_xs_apiversion_bootcheck(pTHX_ SV *module, const char *api_p,
+Perl_xs_apiversion_bootcheck(SV *module, const char *api_p,
 			     STRLEN api_len)
 {
-    SV *xpt = NULL;
-    SV *compver = Perl_newSVpvn_flags(aTHX_ api_p, api_len, SVs_TEMP);
-    SV *runver;
-
     PERL_ARGS_ASSERT_XS_APIVERSION_BOOTCHECK;
 
-    /* This might croak  */
-    compver = upg_version(compver, 0);
-    /* This should never croak */
-    runver = new_version(PL_apiversion);
-    if (vcmp(compver, runver)) {
-	SV *compver_string = vstringify(compver);
-	SV *runver_string = vstringify(runver);
-	xpt = Perl_newSVpvf(aTHX_ "Perl API version %"SVf
-			    " of %"SVf" does not match %"SVf,
-			    SVfARG(compver_string), SVfARG(module),
-			    SVfARG(runver_string));
-	Perl_sv_2mortal(aTHX_ xpt);
-
-	SvREFCNT_dec(compver_string);
-	SvREFCNT_dec(runver_string);
+    if(api_len != sizeof("v" PERL_API_VERSION_STRING)-1
+	|| memNE(api_p, "v" PERL_API_VERSION_STRING, sizeof("v" PERL_API_VERSION_STRING)-1)) {
+	Perl_croak_nocontext("Perl API version %s of %"SVf" does not match %s",
+			    api_p, SVfARG(module), "v" PERL_API_VERSION_STRING);
     }
-    SvREFCNT_dec(runver);
-    if (xpt)
-	Perl_croak_sv(aTHX_ xpt);
 }
 
 /*
