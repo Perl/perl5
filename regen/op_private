@@ -332,7 +332,6 @@ addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
 # If the target coincides with one of the arguments ==> kaboom.
 #
 # pp.c	pos substr each not OK (RETPUSHUNDEF)
-#	substr vec also not OK due to LV to target (are they???)
 #	ref not OK (RETPUSHNO)
 #	trans not OK (dTARG; TARG = sv_newmortal();)
 #	ucfirst etc not OK: TMP arg processed inplace
