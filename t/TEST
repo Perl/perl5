@@ -814,13 +814,13 @@ SHRDLU_5
     print "$tot\n";
     if ($good_files) {
 	if (-d $show_elapsed_time) {
-	    # HARNESS_TIMER = <a-directory>.  Save a storable file of
-	    # timings data into the dir.  NB: the test cds to ./t/, so
-	    # relative path must account for that, or better, just
-	    # give an abs-path.
+	    # HARNESS_TIMER = <a-directory>.  Save timings etc to
+	    # storable file there.  NB: the test cds to ./t/, so
+	    # relative path must account for that, ie ../../perf
+	    # points to dir next to source tree.
 	    require Storable;
 	    my $fn = "$show_elapsed_time/$::tstamp.ttimes";
-	    Storable::store({ times => \%timings,
+	    Storable::store({ perf => \%timings,
 			      gather_conf_platform_info(),
 			      total => $tot,
 			    }, $fn);
@@ -859,7 +859,7 @@ sub gather_conf_platform_info {
 		     load => [ grep chomp, `uptime` ],
 	},
 	host => (grep chomp, `hostname -f`),
-	version => '0.031', # bump for conf, platform, or data collection changes
+	version => '0.03', # bump for conf, platform, or data collection changes
 	);
 }
 
