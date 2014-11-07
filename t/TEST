@@ -574,11 +574,11 @@ EOT
 	my $results = _run_test($test, $type);
 
 	my $failure = "";
-	my $next = 0;			# ++ after each ok M
-	my $seen_leader = 0;		# set after "1..N"
-	my $seen_ok = 0;		# set after "ok M"
-	my $trailing_leader = 0;	# set after "1..N" if $seen_ok
-	my $max;			# set to N after "1..N"
+	my $next = 0;
+	my $seen_leader = 0;
+	my $seen_ok = 0;
+	my $trailing_leader = 0;
+	my $max;
 	my %todo;
 	while (<$results>) {
 	    next if /^\s*$/; # skip blank lines
