@@ -64,6 +64,16 @@ sub debug_flags (;$) {
   $out
 }
 
+sub B::Deparse::pp_Devel_Peek_Dump {
+  my ($deparse,$op,$cx) = @_;
+  my @kids = $deparse->deparse($op->first, 6);
+  my $sib = $op->first->sibling;
+  if (ref $sib ne 'B::NULL') {
+    push @kids, $deparse->deparse($sib, 6);
+  }
+  return "Devel::Peek::Dump(" . join(", ", @kids) . ")";
+}
+
 1;
 __END__
 

@@ -440,7 +440,7 @@ BOOT:
     assert(cv);
     cv_set_call_checker(cv, S_ck_dump, (SV *)cv);
 
-    XopENTRY_set(&my_xop, xop_name, "Dump");
+    XopENTRY_set(&my_xop, xop_name, "Devel_Peek_Dump");
     XopENTRY_set(&my_xop, xop_desc, "Dump");
     XopENTRY_set(&my_xop, xop_class, OA_BINOP);
     Perl_custom_op_register(aTHX_ S_pp_dump, &my_xop);
