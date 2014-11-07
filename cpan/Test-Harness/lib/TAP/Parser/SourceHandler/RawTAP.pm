@@ -16,11 +16,11 @@ TAP::Parser::SourceHandler::RawTAP - Stream output from raw TAP in a scalar/arra
 
 =head1 VERSION
 
-Version 3.33
+Version 3.34
 
 =cut
 
-our $VERSION = '3.33';
+our $VERSION = '3.34';
 
 =head1 SYNOPSIS
 
