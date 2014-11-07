@@ -126,7 +126,7 @@ divide		division (/)		ck_null		IfsT2	S S
 i_divide	integer division (/)	ck_null		ifsT2	S S
 modulo		modulus (%)		ck_null		IifsT2	S S
 i_modulo	integer modulus (%)	ck_null		ifsT2	S S
-repeat		repeat (x)		ck_repeat	fmt2	L S
+repeat		repeat (x)		ck_repeat	fmT2	L S
 
 add		addition (+)		ck_null		IfsT2	S S
 i_add		integer addition (+)	ck_null		ifsT2	S S
