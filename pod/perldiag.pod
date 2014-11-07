@@ -4311,6 +4311,11 @@ the nesting limit is exceeded.
 command-line switch.  (This output goes to STDOUT unless you've
 redirected it with select().)
 
+=item Perl API version %s of %s does not match %s
+
+(F) The XS module in question was complied against a different incompatible
+version of Perl than the one that has loaded the XS module.
+
 =item Perl folding rules are not up-to-date for 0x%X; please use the perlbug
 utility to report; in regex; marked by S<<-- HERE> in m/%s/
 
@@ -4348,11 +4353,6 @@ is equivalent to v5.100.
 (F) The module in question uses features of a version of Perl more
 recent than the currently running version.  How long has it been since
 you upgraded, anyway?  See L<perlfunc/require>.
-
-=item Perl API version %s of %s does not match %s
-
-(F) The XS module in question was complied against a different incompatible
-version of Perl than the one that has loaded the XS module.
 
 =item PERL_SH_DIR too long
 
@@ -4989,6 +4989,14 @@ scalar that had previously been marked as free.
 (W closed) The socket you're sending to got itself closed sometime
 before now.  Check your control flow.
 
+=item Sequence "\c{" invalid
+
+(F) These three characters may not appear in sequence in a
+double-quotish context.  This message is raised only on non-ASCII
+platforms (a different error message is output on ASCII ones).  If you
+were intending to specify a control character with this sequence, you'll
+have to use a different way to specify it.
+
 =item Sequence (? incomplete in regex; marked by S<<-- HERE> in m/%s/
 
 (F) A regular expression ended with an incomplete extension (?.  The
@@ -5039,14 +5047,6 @@ in m/%s/
 missing the final closing quote or angle bracket after the name.  The
 S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.
-
-=item Sequence "\c{" invalid
-
-(F) These three characters may not appear in sequence in a
-double-quotish context.  This message is raised only on non-ASCII
-platforms (a different error message is output on ASCII ones).  If you
-were intending to specify a control character with this sequence, you'll
-have to use a different way to specify it.
 
 =item Sequence \%s... not terminated in regex; marked by S<<-- HERE> in
 m/%s/
