@@ -827,6 +827,7 @@ cpan/Encode/t/unibench.pl		benchmark script
 cpan/Encode/t/Unicode.t			test script
 cpan/Encode/t/utf8ref.t			test script
 cpan/Encode/t/utf8strict.t		test script
+cpan/Encode/t/utf8warnings.t
 cpan/Encode/TW/Makefile.PL		Encode extension
 cpan/Encode/TW/TW.pm			Encode extension
 cpan/Encode/ucm/8859-10.ucm		Unicode Character Map

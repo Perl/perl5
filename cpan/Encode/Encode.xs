@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.30 2014/10/19 07:01:15 dankogai Exp $
+ $Id: Encode.xs,v 2.31 2014/10/29 15:37:54 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -343,10 +343,14 @@ process_utf8(pTHX_ SV* dst, U8* s, U8* e, SV *check_sv,
         if (UTF8_IS_START(*s)) {
             U8 skip = UTF8SKIP(s);
             if ((s + skip) > e) {
-                /* Partial character */
-                /* XXX could check that rest of bytes are UTF8_IS_CONTINUATION(ch) */
-                if (stop_at_partial || (check & ENCODE_STOP_AT_PARTIAL))
+                if (stop_at_partial || (check & ENCODE_STOP_AT_PARTIAL)) {
+                    const U8 *p = s + 1;
+                    for (; p < e; p++) {
+                        if (!UTF8_IS_CONTINUATION(*p))
+                            goto malformed_byte;
+                    }
                     break;
+                }
 
                 goto malformed_byte;
             }

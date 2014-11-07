@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.63 2014/10/19 07:02:18 dankogai Exp $
+# $Id: Encode.pm,v 2.64 2014/10/29 15:37:54 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.63 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.64 $ =~ /(\d+)/g;
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -156,7 +156,20 @@ sub encode($$;$) {
         require Carp;
         Carp::croak("Unknown encoding '$name'");
     }
-    my $octets = $enc->encode( $string, $check );
+    # For Unicode, warnings need to be caught and re-issued at this level
+    # so that callers can disable utf8 warnings lexically.
+    my $octets;
+    if ( ref($enc) eq 'Encode::Unicode' ) {
+        my $warn = '';
+        {
+            local $SIG{__WARN__} = sub { $warn = shift };
+            $octets = $enc->encode( $string, $check );
+        }
+        warnings::warnif('utf8', $warn) if length $warn;
+    }
+    else {
+        $octets = $enc->encode( $string, $check );
+    }
     $_[1] = $string if $check and !ref $check and !( $check & LEAVE_SRC() );
     return $octets;
 }
@@ -172,7 +185,20 @@ sub decode($$;$) {
         require Carp;
         Carp::croak("Unknown encoding '$name'");
     }
-    my $string = $enc->decode( $octets, $check );
+    # For Unicode, warnings need to be caught and re-issued at this level
+    # so that callers can disable utf8 warnings lexically.
+    my $string;
+    if ( ref($enc) eq 'Encode::Unicode' ) {
+        my $warn = '';
+        {
+            local $SIG{__WARN__} = sub { $warn = shift };
+            $string = $enc->decode( $octets, $check );
+        }
+        warnings::warnif('utf8', $warn) if length $warn;
+    }
+    else {
+        $string = $enc->decode( $octets, $check );
+    }
     $_[1] = $octets if $check and !ref $check and !( $check & LEAVE_SRC() );
     return $string;
 }
