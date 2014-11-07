@@ -109,6 +109,23 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
 #define CALL_OPFREEHOOK(o) if (PL_opfreehook) PL_opfreehook(aTHX_ o)
 
+/* Used to avoid recursion through the op tree in scalarvoid() and
+   op_free()
+*/
+
+#define DEFERRED_OP_STEP 100
+#define DEFER_OP(o) \
+  STMT_START { \
+    if (UNLIKELY(defer_ix == (defer_stack_alloc-1))) {    \
+        defer_stack_alloc += DEFERRED_OP_STEP; \
+        assert(defer_stack_alloc > 0); \
+        Renew(defer_stack, defer_stack_alloc, OP *); \
+    } \
+    defer_stack[++defer_ix] = o; \
+  } STMT_END
+
+#define POP_DEFERRED_OP() (defer_ix >= 0 ? defer_stack[defer_ix--] : (OP *)NULL)
+
 /* remove any leading "empty" ops from the op_next chain whose first
  * node's address is stored in op_p. Store the updated address of the
  * first node in op_p.
@@ -675,19 +692,6 @@ optree.
 =cut
 */
 
-#define DEFERRED_STEP 100
-#define DEFER(o) \
-  STMT_START { \
-    if (UNLIKELY(defer_ix == (defer_stack_alloc-1))) {    \
-        defer_stack_alloc += DEFERRED_STEP; \
-        assert(defer_stack_alloc > 0); \
-        Renew(defer_stack, defer_stack_alloc, OP *); \
-    } \
-    defer_stack[++defer_ix] = o; \
-  } STMT_END
-
-#define POP_DEFERRED() (defer_ix >= 0 ? defer_stack[defer_ix--] : (OP *)NULL)
-
 void
 Perl_op_free(pTHX_ OP *o)
 {
@@ -759,7 +763,7 @@ Perl_op_free(pTHX_ OP *o)
                     /* If it has no kids, just free it now */
                     op_free(kid);
                 else
-                    DEFER(kid);
+                    DEFER_OP(kid);
             }
         }
         if (type == OP_NULL)
@@ -780,14 +784,10 @@ Perl_op_free(pTHX_ OP *o)
         if (PL_op == o)
             PL_op = NULL;
 #endif
-    } while ( (o = POP_DEFERRED()) );
+    } while ( (o = POP_DEFERRED_OP()) );
 
     Safefree(defer_stack);
 }
-
-#undef DEFER
-#undef POP_DEFERRED
-#undef DEFERRED_STEP
 
 void
 Perl_op_clear(pTHX_ OP *o)
@@ -1608,16 +1608,22 @@ Perl_scalar(pTHX_ OP *o)
 }
 
 OP *
-Perl_scalarvoid(pTHX_ OP *o)
+Perl_scalarvoid(pTHX_ OP *arg)
 {
     dVAR;
     OP *kid;
-    SV *useless_sv = NULL;
-    const char* useless = NULL;
     SV* sv;
     U8 want;
+    SSize_t defer_stack_alloc = 0;
+    SSize_t defer_ix = -1;
+    OP **defer_stack = NULL;
+    OP *o = arg;
 
     PERL_ARGS_ASSERT_SCALARVOID;
+
+    do {
+        SV *useless_sv = NULL;
+        const char* useless = NULL;
 
     if (o->op_type == OP_NEXTSTATE
 	|| o->op_type == OP_DBSTATE
@@ -1631,13 +1637,14 @@ Perl_scalarvoid(pTHX_ OP *o)
 	 || (PL_parser && PL_parser->error_count)
 	 || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE || o->op_type == OP_LEAVEWHEN)
     {
-	return o;
+	continue;
     }
 
     if ((o->op_private & OPpTARGET_MY)
 	&& (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
     {
-	return scalar(o);			/* As if inside SASSIGN */
+        scalar(o);			/* As if inside SASSIGN */
+        continue;
     }
 
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
@@ -1895,7 +1902,10 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_ENTERGIVEN:
     case OP_ENTERWHEN:
 	for (kid = OP_SIBLING(cUNOPo->op_first); kid; kid = OP_SIBLING(kid))
-	    scalarvoid(kid);
+            if (!(kid->op_flags & OPf_KIDS))
+                scalarvoid(kid);
+            else
+                DEFER_OP(kid);
 	break;
 
     case OP_NULL:
@@ -1918,7 +1928,10 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_LEAVEWHEN:
       kids:
 	for (kid = cLISTOPo->op_first; kid; kid = OP_SIBLING(kid))
-	    scalarvoid(kid);
+            if (!(kid->op_flags & OPf_KIDS))
+                scalarvoid(kid);
+            else
+                DEFER_OP(kid);
 	break;
     case OP_LIST:
 	/* If the first kid after pushmark is something that the padrange
@@ -1944,7 +1957,8 @@ Perl_scalarvoid(pTHX_ OP *o)
 	scalarkids(o);
 	break;
     case OP_SCALAR:
-	return scalar(o);
+        scalar(o);
+        break;
     }
 
     if (useless_sv) {
@@ -1958,7 +1972,11 @@ Perl_scalarvoid(pTHX_ OP *o)
                       "Useless use of %s in void context",
                       useless);
     }
-    return o;
+    } while ( (o = POP_DEFERRED_OP()) );
+
+    Safefree(defer_stack);
+
+    return arg;
 }
 
 static OP *
