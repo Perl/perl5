@@ -1475,7 +1475,7 @@ for my $test (
 }
 
 my $e = <<'EODUMP';
-dumpindent is 4 at - line 1.
+dumpindent is 4 at -e line 1.
 {
 1   TYPE = leave  ===> NULL
     TARG = 1
@@ -1523,7 +1523,11 @@ EODUMP
 
 $e =~ s/GV_OR_PADIX/$threads ? "PADIX = 2" : "GV = t::DumpProg"/e;
 $e =~ s/.*PRIVATE = \(0x1\).*\n// if $] < 5.021004;
-
-test_DumpProg("package t;", $e, "DumpProg() has no 'Attempt to free X prematurely' warning", "is" );
+my $out = t::runperl
+             switches => ['-Ilib'],
+             prog => 'package t; use Devel::Peek q-DumpProg-; DumpProg();',
+             stderr=>1;
+$out =~ s/ *SEQ = .*\n//;
+is $out, $e, "DumpProg() has no 'Attempt to free X prematurely' warning";
 
 done_testing();
