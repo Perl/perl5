@@ -122,12 +122,6 @@ $| = 1;
 @ARGV = grep($_,@ARGV) if $^O eq 'VMS';
 our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 
-{   # create timestamp for any reports written, so theyre corelatable
-    my @dt = localtime;
-    $dt[5] += 1900; $dt[4] += 1; # fix year, month
-    $::tstamp = sprintf("%d-%.2d%.2d-%.2d%.2d-%.2d-$$", @dt[5,4,3,2,1,0]);
-}
-
 # Cheesy version of Getopt::Std.  We can't replace it with that, because we
 # can't rely on require working.
 {
@@ -794,7 +788,9 @@ SHRDLU_5
 	    # relative path must account for that, ie ../../perf
 	    # points to dir next to source tree.
 	    require Storable;
-	    my $fn = "$show_elapsed_time/$::tstamp.ttimes";
+	    my @dt = localtime;
+	    $dt[5] += 1900; $dt[4] += 1; # fix year, month
+	    my $fn = "$show_elapsed_time/".join('-', @dt[5,4,3,2,1]).".ttimes";
 	    Storable::store({ perf => \%timings,
 			      gather_conf_platform_info(),
 			      total => $tot,
