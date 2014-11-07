@@ -389,6 +389,12 @@ dealing with glyph shaping in Arabic.
 op_free() no longer crashes due to a stack overflow when freeing a
 deeply recursive op tree. [perl #108276]
 
+=item *
+
+In Perl 5.20.0, C<$^N> accidentally had the internal UTF8 flag turned off
+if accessed from a code block within a regular expression, effectively
+UTF8-encoding the value.  This has been fixed.  [perl #123135]
+
 =back
 
 =head1 Known Problems
