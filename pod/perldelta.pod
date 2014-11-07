@@ -384,6 +384,11 @@ Perl now comes with a corrected Unicode 7.0 for the erratum issued on
 October 21, 2014 (see L<http://www.unicode.org/errata/#current_errata>),
 dealing with glyph shaping in Arabic.
 
+=item *
+
+op_free() no longer crashes due to a stack overflow when freeing a
+deeply recursive op tree. [perl #108276]
+
 =back
 
 =head1 Known Problems
