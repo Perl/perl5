@@ -568,7 +568,7 @@ EOT
     my $total_files = @tests;
     my $good_files = 0;
     my $tested_files = 0;
-    my $totmax = 0;		# += $plan after <$results> consumed. includes --repeats
+    my $totmax = 0;
     my %failed_tests;
     my $toolnm;		# valgrind, cachegrind, perf
 
@@ -604,10 +604,11 @@ EOT
 	my $results = _run_test($test, $type);
 
 	my $failure = "";
-	my $plan = undef;	# the N in "1..N"
-	my $next = 0;		# ++ after each "ok M", reset on "1..N"
-	my $nextreps = 0;	# ++ after each "ok M"
-	my $Reps = 0;		# ++ when "1..N" seen
+	my $next = 0;			# ++ after each ok M
+	my $seen_leader = 0;		# set after "1..N"
+	my $seen_ok = 0;		# set after "ok M"
+	my $trailing_leader = 0;	# set after "1..N" if $seen_ok
+	my $max;			# set to N after "1..N"
 	my %todo;
 	while (<$results>) {
 	    next if /^\s*$/; # skip blank lines
@@ -623,45 +624,47 @@ EOT
 		print $_;
 	    }
 	    unless (/^\#/) {
+		if ($trailing_leader) {
+		    # shouldn't be anything following a postfix 1..n
+		    $failure = 'FAILED--extra output after trailing 1..n';
+		    last;
+		}
 		if (/^1\.\.([0-9]+)( todo ([\d ]+))?/) {
-
-		    # a "1..N" plan, maybe todos also
-		    if (!$plan) {
-			$plan = $1;
-		    } else {
-			# allow another plan agreeing on N
-			if ($1 != $plan) {
-			    $failure = "latest plan disagrees: $1 != $plan\n";
-			    last;
-			}
-		    }
-		    unless ($next == 0 or $next == $plan) {
-			$failure = "plan seen in middle of tests: $next\n";
+		    if ($seen_leader) {
+			$failure = 'FAILED--seen duplicate leader';
 			last;
 		    }
-		    $Reps = $Reps + 1;
-		    $next = 0;		# reset for next "1..N" plan check
-
-		    $totmax = $totmax + $plan;
-		    $tested_files = $tested_files + 1;
-
-		    # if $Reps>1, this work is redone $Reps-1 times, trivial extra.
-		    # assume todos match, since plans do.
+		    $max = $1;
 		    %todo = map { $_ => 1 } split / /, $3 if $3;
-		    next;
-		}
-		else {
-		    if (/^(not )?ok(?:\s+(\d+))?[^\#]*(\s*\#.*)?/) {
-			$next = $next + 1;
-			$nextreps = $nextreps + 1;
-			my ($not, $num, $extra, $istodo) = ($1, $2, $3, 0);
-
-			$num = $next unless $num;	# tolerate un-numbered
-			if ($num != $next) {
-			    $failure ="FAILED--expected test $next, saw test $num";
+		    $totmax = $totmax + $max;
+		    $tested_files = $tested_files + 1;
+		    if ($seen_ok) {
+			# 1..n appears at end of file
+			$trailing_leader = 1;
+			if ($next != $max) {
+			    $failure = "FAILED--expected $max tests, saw $next";
 			    last;
 			}
-			else {
+		    }
+		    else {
+			$next = 0;
+		    }
+		    $seen_leader = 1;
+		}
+		else {
+		    if (/^(not )?ok(?: (\d+))?[^\#]*(\s*\#.*)?/) {
+			unless ($seen_leader) {
+			    unless ($seen_ok) {
+				$next = 0;
+			    }
+			}
+			$seen_ok = 1;
+			$next = $next + 1;
+			my($not, $num, $extra, $istodo) = ($1, $2, $3, 0);
+			$num = $next unless $num;
+
+			if ($num == $next) {
+
 			    # SKIP is essentially the same as TODO for t/TEST
 			    # this still conforms to TAP:
 			    # http://testanything.org/wiki/index.php/TAP_specification
@@ -672,6 +675,10 @@ EOT
 				$failure = "FAILED at test $num";
 				last;
 			    }
+			}
+			else {
+			    $failure ="FAILED--expected test $next, saw test $num";
+			    last;
 			}
 		    }
 		    elsif (/^Bail out!\s*(.*)/i) { # magic words
@@ -690,7 +697,7 @@ EOT
 	close $results;
 
 	if (not $failure) {
-	    $failure = "FAILED--no plan found next:$next" unless defined $plan;
+	    $failure = 'FAILED--no leader found' unless $seen_leader;
 	}
 
 	_check_valgrind(\$toolnm, \$grind_ct, \$test);
@@ -698,8 +705,8 @@ EOT
 	if ($type eq 'deparse' && !$ENV{KEEP_DEPARSE_FILES}) {
 	    unlink "./$test.dp";
 	}
-	if (not $failure and $nextreps != $Reps * $plan) {
-	    $failure="FAILED--expected $Reps * $plan tests, saw $nextreps";
+	if (not $failure and $next != $max) {
+	    $failure="FAILED--expected $max tests, saw $next";
 	}
 
 	if (not $failure and $? ) {	# don't mask a test failure
@@ -731,7 +738,7 @@ EOT
 	    $failed_tests{$test} = 1;
 	}
 	else {
-	    if ($plan) {
+	    if ($max) {
 		my ($elapsed, $etms) = ("", 0);
 		if ( $show_elapsed_time ) {
 		    $etms = (Time::HiRes::time() - $test_start_time) * 1000;
@@ -761,8 +768,6 @@ EOT
 	}
 	else {
 	    die "FAILED--no tests were run for some reason.\n";
-	    # forex: ./perl TEST run/dtrace.t
-	    # 1..0 # Skip no dtrace
 	}
     }
     else {
