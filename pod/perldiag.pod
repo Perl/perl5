@@ -4313,7 +4313,7 @@ redirected it with select().)
 
 =item Perl API version %s of %s does not match %s
 
-(F) The XS module in question was complied against a different incompatible
+(F) The XS module in question was compiled against a different incompatible
 version of Perl than the one that has loaded the XS module.
 
 =item Perl folding rules are not up-to-date for 0x%X; please use the perlbug
