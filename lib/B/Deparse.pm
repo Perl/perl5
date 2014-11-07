@@ -5631,7 +5631,8 @@ the main:: package, the code will include a package declaration.
 
 =item *
 
-The only pragmas to be completely supported are: C<use warnings>,
+In Perl 5.20 and earlier, the only pragmas to
+be completely supported are: C<use warnings>,
 C<use strict>, C<use bytes>, C<use integer>
 and C<use feature>.  (C<$[>, which
 behaves like a pragma, is also supported.)
@@ -5652,8 +5653,8 @@ exactly the right place.  So if you use a module which affects compilation
 (such as by over-riding keywords, overloading constants or whatever)
 then the output code might not work as intended.
 
-This is the most serious outstanding problem, and will require some help
-from the Perl core to fix.
+This is the most serious problem in Perl 5.20 and earlier.  Fixing this
+required internal changes in Perl 5.22.
 
 =item *
 
