@@ -5680,19 +5680,19 @@ typedef struct am_table_short AMTS;
 #define PERLDBf_SAVESRC_NOSUBS	0x800	/* Including evals that generate no subroutines */
 #define PERLDBf_SAVESRC_INVALID	0x1000	/* Save source that did not compile */
 
-#define PERLDB_SUB	(PL_perldb && (PL_perldb & PERLDBf_SUB))
-#define PERLDB_LINE	(PL_perldb && (PL_perldb & PERLDBf_LINE))
-#define PERLDB_NOOPT	(PL_perldb && (PL_perldb & PERLDBf_NOOPT))
-#define PERLDB_INTER	(PL_perldb && (PL_perldb & PERLDBf_INTER))
-#define PERLDB_SUBLINE	(PL_perldb && (PL_perldb & PERLDBf_SUBLINE))
-#define PERLDB_SINGLE	(PL_perldb && (PL_perldb & PERLDBf_SINGLE))
-#define PERLDB_SUB_NN	(PL_perldb && (PL_perldb & (PERLDBf_NONAME)))
-#define PERLDB_GOTO	(PL_perldb && (PL_perldb & PERLDBf_GOTO))
-#define PERLDB_NAMEEVAL	(PL_perldb && (PL_perldb & PERLDBf_NAMEEVAL))
-#define PERLDB_NAMEANON	(PL_perldb && (PL_perldb & PERLDBf_NAMEANON))
-#define PERLDB_SAVESRC 	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC))
-#define PERLDB_SAVESRC_NOSUBS	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_NOSUBS))
-#define PERLDB_SAVESRC_INVALID	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_INVALID))
+#define PERLDB_SUB		(PL_perldb & PERLDBf_SUB)
+#define PERLDB_LINE		(PL_perldb & PERLDBf_LINE)
+#define PERLDB_NOOPT		(PL_perldb & PERLDBf_NOOPT)
+#define PERLDB_INTER		(PL_perldb & PERLDBf_INTER)
+#define PERLDB_SUBLINE		(PL_perldb & PERLDBf_SUBLINE)
+#define PERLDB_SINGLE		(PL_perldb & PERLDBf_SINGLE)
+#define PERLDB_SUB_NN		(PL_perldb & PERLDBf_NONAME)
+#define PERLDB_GOTO		(PL_perldb & PERLDBf_GOTO)
+#define PERLDB_NAMEEVAL 	(PL_perldb & PERLDBf_NAMEEVAL)
+#define PERLDB_NAMEANON 	(PL_perldb & PERLDBf_NAMEANON)
+#define PERLDB_SAVESRC  	(PL_perldb & PERLDBf_SAVESRC)
+#define PERLDB_SAVESRC_NOSUBS	(PL_perldb & PERLDBf_SAVESRC_NOSUBS)
+#define PERLDB_SAVESRC_INVALID	(PL_perldb & PERLDBf_SAVESRC_INVALID)
 
 #ifdef USE_LOCALE
 /* These locale things are all subject to change */
