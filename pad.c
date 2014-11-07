@@ -1568,8 +1568,14 @@ Perl_intro_my(pTHX)
     U32 seq;
 
     ASSERT_CURPAD_ACTIVE("intro_my");
+    if (PL_compiling.cop_seq) {
+	seq = PL_compiling.cop_seq;
+	PL_compiling.cop_seq = 0;
+    }
+    else
+	seq = PL_cop_seqmax;
     if (! PL_min_intro_pending)
-	return PL_cop_seqmax;
+	return seq;
 
     svp = AvARRAY(PL_comppad_name);
     for (i = PL_min_intro_pending; i <= PL_max_intro_pending; i++) {
@@ -1588,7 +1594,6 @@ Perl_intro_my(pTHX)
 	    );
 	}
     }
-    seq = PL_cop_seqmax;
     PL_cop_seqmax++;
     if (PL_cop_seqmax == PERL_PADSEQ_INTRO) /* not a legal value */
 	PL_cop_seqmax++;

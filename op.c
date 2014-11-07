@@ -3677,11 +3677,16 @@ Perl_block_start(pTHX_ int full)
 {
     const int retval = PL_savestack_ix;
 
+    PL_compiling.cop_seq = PL_cop_seqmax++;
+    if (PL_cop_seqmax == PERL_PADSEQ_INTRO) /* not a legal value */
+	PL_cop_seqmax++;
     pad_block_start(full);
     SAVEHINTS();
     PL_hints &= ~HINT_BLOCK_SCOPE;
     SAVECOMPILEWARNINGS();
     PL_compiling.cop_warnings = DUP_WARNINGS(PL_compiling.cop_warnings);
+    SAVEI32(PL_compiling.cop_seq);
+    PL_compiling.cop_seq = 0;
 
     CALL_BLOCK_HOOKS(bhk_start, full);
 

@@ -13,7 +13,7 @@ use warnings;
 use strict;
 use Test::More;
 
-my $tests = 26; # not counting those in the __DATA__ section
+my $tests = 27; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -327,6 +327,44 @@ like($a, qr/my sub __DATA__;\n\(\);\nCORE::__DATA__/,
 $a = readpipe qq`$^X $path "-MO=Deparse" -e "sub foo{}" 2>&1`;
 like($a, qr/sub foo\s*\{\s+\}/, 'sub declarations');
 
+# BEGIN blocks
+SKIP : {
+    skip "BEGIN output is wrong on old perls", 1 if $] < 5.021006;
+    my $prog = '
+      BEGIN { pop }
+      {
+        BEGIN { pop }
+        {
+          no overloading;
+          {
+            BEGIN { pop }
+            die
+          }
+        }
+      }';
+    $prog =~ s/\n//g;
+    $a = readpipe qq`$^X $path "-MO=Deparse" -e "$prog" 2>&1`;
+    $a =~ s/-e syntax OK\n//g;
+    is($a, <<'EOCODJ', 'BEGIN blocks');
+sub BEGIN {
+    pop @ARGV;
+}
+{
+    sub BEGIN {
+        pop @ARGV;
+    }
+    {
+        no overloading;
+        {
+            sub BEGIN {
+                pop @ARGV;
+            }
+            die;
+        }
+    }
+}
+EOCODJ
+}
 
 done_testing($tests);
 

@@ -118,6 +118,7 @@ grammar	:	GRAMPROG
 		remember stmtseq
 			{
 			  newPROG(block_end($3,$4));
+			  PL_compiling.cop_seq = 0;
 			  $$ = 0;
 			}
 	|	GRAMEXPR
