@@ -318,7 +318,6 @@ PERLVAR(I, warnhook,	SV *)
 
 /* switches */
 PERLVAR(I, patchlevel,	SV *)
-PERLVAR(I, apiversion,	SV *)
 PERLVAR(I, localpatches, const char * const *)
 PERLVARI(I, splitstr,	const char *, " ")
 

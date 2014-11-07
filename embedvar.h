@@ -70,7 +70,6 @@
 #define PL_XPosix_ptrs		(vTHX->IXPosix_ptrs)
 #define PL_Xpv			(vTHX->IXpv)
 #define PL_an			(vTHX->Ian)
-#define PL_apiversion		(vTHX->Iapiversion)
 #define PL_argvgv		(vTHX->Iargvgv)
 #define PL_argvout_stack	(vTHX->Iargvout_stack)
 #define PL_argvoutgv		(vTHX->Iargvoutgv)

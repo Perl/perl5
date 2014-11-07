@@ -14608,7 +14608,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* switches */
     PL_patchlevel	= sv_dup_inc(proto_perl->Ipatchlevel, param);
-    PL_apiversion	= sv_dup_inc(proto_perl->Iapiversion, param);
     PL_inplace		= SAVEPV(proto_perl->Iinplace);
     PL_e_script		= sv_dup_inc(proto_perl->Ie_script, param);
 
