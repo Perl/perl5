@@ -5674,7 +5674,7 @@ produced is already ordinary Perl which shouldn't be filtered again.
 
 =item *
 
-Optimised away statements are rendered as
+Optimized-away statements are rendered as
 '???'.  This includes statements that
 have a compile-time side-effect, such as the obscure
 
