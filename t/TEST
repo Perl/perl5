@@ -531,7 +531,7 @@ EOT
     my $grind_ct = 0;		# count of non-empty valgrind reports
     my $total_files = @tests;
     my $good_files = 0;
-    my $tested_files = 0;
+    my $tested_files  = 0;
     my $totmax = 0;
     my %failed_tests;
     my $toolnm;		# valgrind, cachegrind, perf
@@ -567,7 +567,7 @@ EOT
 
 	my $results = _run_test($test, $type);
 
-	my $failure = "";
+	my $failure;
 	my $next = 0;
 	my $seen_leader = 0;
 	my $seen_ok = 0;
@@ -660,7 +660,7 @@ EOT
 	}
 	close $results;
 
-	if (not $failure) {
+	if (not defined $failure) {
 	    $failure = 'FAILED--no leader found' unless $seen_leader;
 	}
 
@@ -669,11 +669,13 @@ EOT
 	if ($type eq 'deparse' && !$ENV{KEEP_DEPARSE_FILES}) {
 	    unlink "./$test.dp";
 	}
-	if (not $failure and $next != $max) {
+	if (not defined $failure and $next != $max) {
 	    $failure="FAILED--expected $max tests, saw $next";
 	}
 
-	if (not $failure and $? ) {	# don't mask a test failure
+	if( !defined $failure  # don't mask a test failure
+	    and $? )
+	{
 	    $failure = "FAILED--non-zero wait status: $?";
 	}
 
@@ -690,7 +692,7 @@ EOT
 	    }
 	}
 
-	if ($failure) {
+	if (defined $failure) {
 	    print "${te}$failure\n";
 	    $::bad_files = $::bad_files + 1;
 	    if ($test =~ /^base/ && ! defined &DynaLoader::boot_DynaLoader) {
