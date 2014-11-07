@@ -1625,354 +1625,354 @@ Perl_scalarvoid(pTHX_ OP *arg)
         SV *useless_sv = NULL;
         const char* useless = NULL;
 
-    if (o->op_type == OP_NEXTSTATE
-	|| o->op_type == OP_DBSTATE
-	|| (o->op_type == OP_NULL && (o->op_targ == OP_NEXTSTATE
-				      || o->op_targ == OP_DBSTATE)))
-	PL_curcop = (COP*)o;		/* for warning below */
+        if (o->op_type == OP_NEXTSTATE
+            || o->op_type == OP_DBSTATE
+            || (o->op_type == OP_NULL && (o->op_targ == OP_NEXTSTATE
+                                          || o->op_targ == OP_DBSTATE)))
+            PL_curcop = (COP*)o;                /* for warning below */
 
-    /* assumes no premature commitment */
-    want = o->op_flags & OPf_WANT;
-    if ((want && want != OPf_WANT_SCALAR)
-	 || (PL_parser && PL_parser->error_count)
-	 || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE || o->op_type == OP_LEAVEWHEN)
-    {
-	continue;
-    }
+        /* assumes no premature commitment */
+        want = o->op_flags & OPf_WANT;
+        if ((want && want != OPf_WANT_SCALAR)
+            || (PL_parser && PL_parser->error_count)
+            || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE || o->op_type == OP_LEAVEWHEN)
+        {
+            continue;
+        }
 
-    if ((o->op_private & OPpTARGET_MY)
-	&& (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
-    {
-        scalar(o);			/* As if inside SASSIGN */
-        continue;
-    }
+        if ((o->op_private & OPpTARGET_MY)
+            && (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
+        {
+            scalar(o);                  /* As if inside SASSIGN */
+            continue;
+        }
 
-    o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
+        o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
 
-    switch (o->op_type) {
-    default:
-	if (!(PL_opargs[o->op_type] & OA_FOLDCONST))
-	    break;
-	/* FALLTHROUGH */
-    case OP_REPEAT:
-	if (o->op_flags & OPf_STACKED)
-	    break;
-	goto func_ops;
-    case OP_SUBSTR:
-	if (o->op_private == 4)
-	    break;
-	/* FALLTHROUGH */
-    case OP_GVSV:
-    case OP_WANTARRAY:
-    case OP_GV:
-    case OP_SMARTMATCH:
-    case OP_PADSV:
-    case OP_PADAV:
-    case OP_PADHV:
-    case OP_PADANY:
-    case OP_AV2ARYLEN:
-    case OP_REF:
-    case OP_REFGEN:
-    case OP_SREFGEN:
-    case OP_DEFINED:
-    case OP_HEX:
-    case OP_OCT:
-    case OP_LENGTH:
-    case OP_VEC:
-    case OP_INDEX:
-    case OP_RINDEX:
-    case OP_SPRINTF:
-    case OP_AELEM:
-    case OP_AELEMFAST:
-    case OP_AELEMFAST_LEX:
-    case OP_ASLICE:
-    case OP_KVASLICE:
-    case OP_HELEM:
-    case OP_HSLICE:
-    case OP_KVHSLICE:
-    case OP_UNPACK:
-    case OP_PACK:
-    case OP_JOIN:
-    case OP_LSLICE:
-    case OP_ANONLIST:
-    case OP_ANONHASH:
-    case OP_SORT:
-    case OP_REVERSE:
-    case OP_RANGE:
-    case OP_FLIP:
-    case OP_FLOP:
-    case OP_CALLER:
-    case OP_FILENO:
-    case OP_EOF:
-    case OP_TELL:
-    case OP_GETSOCKNAME:
-    case OP_GETPEERNAME:
-    case OP_READLINK:
-    case OP_TELLDIR:
-    case OP_GETPPID:
-    case OP_GETPGRP:
-    case OP_GETPRIORITY:
-    case OP_TIME:
-    case OP_TMS:
-    case OP_LOCALTIME:
-    case OP_GMTIME:
-    case OP_GHBYNAME:
-    case OP_GHBYADDR:
-    case OP_GHOSTENT:
-    case OP_GNBYNAME:
-    case OP_GNBYADDR:
-    case OP_GNETENT:
-    case OP_GPBYNAME:
-    case OP_GPBYNUMBER:
-    case OP_GPROTOENT:
-    case OP_GSBYNAME:
-    case OP_GSBYPORT:
-    case OP_GSERVENT:
-    case OP_GPWNAM:
-    case OP_GPWUID:
-    case OP_GGRNAM:
-    case OP_GGRGID:
-    case OP_GETLOGIN:
-    case OP_PROTOTYPE:
-    case OP_RUNCV:
-      func_ops:
-	if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)))
-	    /* Otherwise it's "Useless use of grep iterator" */
-	    useless = OP_DESC(o);
-	break;
+        switch (o->op_type) {
+        default:
+            if (!(PL_opargs[o->op_type] & OA_FOLDCONST))
+                break;
+            /* FALLTHROUGH */
+        case OP_REPEAT:
+            if (o->op_flags & OPf_STACKED)
+                break;
+            goto func_ops;
+        case OP_SUBSTR:
+            if (o->op_private == 4)
+                break;
+            /* FALLTHROUGH */
+        case OP_GVSV:
+        case OP_WANTARRAY:
+        case OP_GV:
+        case OP_SMARTMATCH:
+        case OP_PADSV:
+        case OP_PADAV:
+        case OP_PADHV:
+        case OP_PADANY:
+        case OP_AV2ARYLEN:
+        case OP_REF:
+        case OP_REFGEN:
+        case OP_SREFGEN:
+        case OP_DEFINED:
+        case OP_HEX:
+        case OP_OCT:
+        case OP_LENGTH:
+        case OP_VEC:
+        case OP_INDEX:
+        case OP_RINDEX:
+        case OP_SPRINTF:
+        case OP_AELEM:
+        case OP_AELEMFAST:
+        case OP_AELEMFAST_LEX:
+        case OP_ASLICE:
+        case OP_KVASLICE:
+        case OP_HELEM:
+        case OP_HSLICE:
+        case OP_KVHSLICE:
+        case OP_UNPACK:
+        case OP_PACK:
+        case OP_JOIN:
+        case OP_LSLICE:
+        case OP_ANONLIST:
+        case OP_ANONHASH:
+        case OP_SORT:
+        case OP_REVERSE:
+        case OP_RANGE:
+        case OP_FLIP:
+        case OP_FLOP:
+        case OP_CALLER:
+        case OP_FILENO:
+        case OP_EOF:
+        case OP_TELL:
+        case OP_GETSOCKNAME:
+        case OP_GETPEERNAME:
+        case OP_READLINK:
+        case OP_TELLDIR:
+        case OP_GETPPID:
+        case OP_GETPGRP:
+        case OP_GETPRIORITY:
+        case OP_TIME:
+        case OP_TMS:
+        case OP_LOCALTIME:
+        case OP_GMTIME:
+        case OP_GHBYNAME:
+        case OP_GHBYADDR:
+        case OP_GHOSTENT:
+        case OP_GNBYNAME:
+        case OP_GNBYADDR:
+        case OP_GNETENT:
+        case OP_GPBYNAME:
+        case OP_GPBYNUMBER:
+        case OP_GPROTOENT:
+        case OP_GSBYNAME:
+        case OP_GSBYPORT:
+        case OP_GSERVENT:
+        case OP_GPWNAM:
+        case OP_GPWUID:
+        case OP_GGRNAM:
+        case OP_GGRGID:
+        case OP_GETLOGIN:
+        case OP_PROTOTYPE:
+        case OP_RUNCV:
+        func_ops:
+            if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)))
+                /* Otherwise it's "Useless use of grep iterator" */
+                useless = OP_DESC(o);
+            break;
 
-    case OP_SPLIT:
-	kid = cLISTOPo->op_first;
-	if (kid && kid->op_type == OP_PUSHRE
-		&& !kid->op_targ
-		&& !(o->op_flags & OPf_STACKED)
+        case OP_SPLIT:
+            kid = cLISTOPo->op_first;
+            if (kid && kid->op_type == OP_PUSHRE
+                && !kid->op_targ
+                && !(o->op_flags & OPf_STACKED)
 #ifdef USE_ITHREADS
-		&& !((PMOP*)kid)->op_pmreplrootu.op_pmtargetoff
+                && !((PMOP*)kid)->op_pmreplrootu.op_pmtargetoff
 #else
-		&& !((PMOP*)kid)->op_pmreplrootu.op_pmtargetgv
+                && !((PMOP*)kid)->op_pmreplrootu.op_pmtargetgv
 #endif
-            )
-	    useless = OP_DESC(o);
-	break;
+                )
+                useless = OP_DESC(o);
+            break;
 
-    case OP_NOT:
-       kid = cUNOPo->op_first;
-       if (kid->op_type != OP_MATCH && kid->op_type != OP_SUBST &&
-           kid->op_type != OP_TRANS && kid->op_type != OP_TRANSR) {
-	        goto func_ops;
-       }
-       useless = "negative pattern binding (!~)";
-       break;
+        case OP_NOT:
+            kid = cUNOPo->op_first;
+            if (kid->op_type != OP_MATCH && kid->op_type != OP_SUBST &&
+                kid->op_type != OP_TRANS && kid->op_type != OP_TRANSR) {
+                goto func_ops;
+            }
+            useless = "negative pattern binding (!~)";
+            break;
 
-    case OP_SUBST:
-	if (cPMOPo->op_pmflags & PMf_NONDESTRUCT)
-	    useless = "non-destructive substitution (s///r)";
-	break;
+        case OP_SUBST:
+            if (cPMOPo->op_pmflags & PMf_NONDESTRUCT)
+                useless = "non-destructive substitution (s///r)";
+            break;
 
-    case OP_TRANSR:
-	useless = "non-destructive transliteration (tr///r)";
-	break;
+        case OP_TRANSR:
+            useless = "non-destructive transliteration (tr///r)";
+            break;
 
-    case OP_RV2GV:
-    case OP_RV2SV:
-    case OP_RV2AV:
-    case OP_RV2HV:
-	if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)) &&
-		(!OP_HAS_SIBLING(o) || OP_SIBLING(o)->op_type != OP_READLINE))
-	    useless = "a variable";
-	break;
+        case OP_RV2GV:
+        case OP_RV2SV:
+        case OP_RV2AV:
+        case OP_RV2HV:
+            if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)) &&
+                (!OP_HAS_SIBLING(o) || OP_SIBLING(o)->op_type != OP_READLINE))
+                useless = "a variable";
+            break;
 
-    case OP_CONST:
-	sv = cSVOPo_sv;
-	if (cSVOPo->op_private & OPpCONST_STRICT)
-	    no_bareword_allowed(o);
-	else {
-	    if (ckWARN(WARN_VOID)) {
-		NV nv;
-		/* don't warn on optimised away booleans, eg 
-		 * use constant Foo, 5; Foo || print; */
-		if (cSVOPo->op_private & OPpCONST_SHORTCIRCUIT)
-		    useless = NULL;
-		/* the constants 0 and 1 are permitted as they are
-		   conventionally used as dummies in constructs like
-		        1 while some_condition_with_side_effects;  */
-		else if (SvNIOK(sv) && ((nv = SvNV(sv)) == 0.0 || nv == 1.0))
-		    useless = NULL;
-		else if (SvPOK(sv)) {
-                    SV * const dsv = newSVpvs("");
-                    useless_sv
-                        = Perl_newSVpvf(aTHX_
-                                        "a constant (%s)",
-                                        pv_pretty(dsv, SvPVX_const(sv),
-                                                  SvCUR(sv), 32, NULL, NULL,
-                                                  PERL_PV_PRETTY_DUMP
-                                                  | PERL_PV_ESCAPE_NOCLEAR
-                                                  | PERL_PV_ESCAPE_UNI_DETECT));
-                    SvREFCNT_dec_NN(dsv);
-		}
-		else if (SvOK(sv)) {
-		    useless_sv = Perl_newSVpvf(aTHX_ "a constant (%"SVf")", SVfARG(sv));
-		}
-		else
-		    useless = "a constant (undef)";
-	    }
-	}
-	op_null(o);		/* don't execute or even remember it */
-	break;
+        case OP_CONST:
+            sv = cSVOPo_sv;
+            if (cSVOPo->op_private & OPpCONST_STRICT)
+                no_bareword_allowed(o);
+            else {
+                if (ckWARN(WARN_VOID)) {
+                    NV nv;
+                    /* don't warn on optimised away booleans, eg
+                     * use constant Foo, 5; Foo || print; */
+                    if (cSVOPo->op_private & OPpCONST_SHORTCIRCUIT)
+                        useless = NULL;
+                    /* the constants 0 and 1 are permitted as they are
+                       conventionally used as dummies in constructs like
+                       1 while some_condition_with_side_effects;  */
+                    else if (SvNIOK(sv) && ((nv = SvNV(sv)) == 0.0 || nv == 1.0))
+                        useless = NULL;
+                    else if (SvPOK(sv)) {
+                        SV * const dsv = newSVpvs("");
+                        useless_sv
+                            = Perl_newSVpvf(aTHX_
+                                            "a constant (%s)",
+                                            pv_pretty(dsv, SvPVX_const(sv),
+                                                      SvCUR(sv), 32, NULL, NULL,
+                                                      PERL_PV_PRETTY_DUMP
+                                                      | PERL_PV_ESCAPE_NOCLEAR
+                                                      | PERL_PV_ESCAPE_UNI_DETECT));
+                        SvREFCNT_dec_NN(dsv);
+                    }
+                    else if (SvOK(sv)) {
+                        useless_sv = Perl_newSVpvf(aTHX_ "a constant (%"SVf")", SVfARG(sv));
+                    }
+                    else
+                        useless = "a constant (undef)";
+                }
+            }
+            op_null(o);         /* don't execute or even remember it */
+            break;
 
-    case OP_POSTINC:
-        CHANGE_TYPE(o, OP_PREINC);	/* pre-increment is faster */
-	break;
+        case OP_POSTINC:
+            CHANGE_TYPE(o, OP_PREINC);  /* pre-increment is faster */
+            break;
 
-    case OP_POSTDEC:
-        CHANGE_TYPE(o, OP_PREDEC);	/* pre-decrement is faster */
-	break;
+        case OP_POSTDEC:
+            CHANGE_TYPE(o, OP_PREDEC);  /* pre-decrement is faster */
+            break;
 
-    case OP_I_POSTINC:
-        CHANGE_TYPE(o, OP_I_PREINC);	/* pre-increment is faster */
-	break;
+        case OP_I_POSTINC:
+            CHANGE_TYPE(o, OP_I_PREINC);        /* pre-increment is faster */
+            break;
 
-    case OP_I_POSTDEC:
-        CHANGE_TYPE(o, OP_I_PREDEC);	/* pre-decrement is faster */
-	break;
+        case OP_I_POSTDEC:
+            CHANGE_TYPE(o, OP_I_PREDEC);        /* pre-decrement is faster */
+            break;
 
-    case OP_SASSIGN: {
-	OP *rv2gv;
-	UNOP *refgen, *rv2cv;
-	LISTOP *exlist;
+        case OP_SASSIGN: {
+            OP *rv2gv;
+            UNOP *refgen, *rv2cv;
+            LISTOP *exlist;
 
-	if ((o->op_private & ~OPpASSIGN_BACKWARDS) != 2)
-	    break;
+            if ((o->op_private & ~OPpASSIGN_BACKWARDS) != 2)
+                break;
 
-	rv2gv = ((BINOP *)o)->op_last;
-	if (!rv2gv || rv2gv->op_type != OP_RV2GV)
-	    break;
+            rv2gv = ((BINOP *)o)->op_last;
+            if (!rv2gv || rv2gv->op_type != OP_RV2GV)
+                break;
 
-	refgen = (UNOP *)((BINOP *)o)->op_first;
+            refgen = (UNOP *)((BINOP *)o)->op_first;
 
-	if (!refgen || (refgen->op_type != OP_REFGEN
-			&& refgen->op_type != OP_SREFGEN))
-	    break;
+            if (!refgen || (refgen->op_type != OP_REFGEN
+                            && refgen->op_type != OP_SREFGEN))
+                break;
 
-	exlist = (LISTOP *)refgen->op_first;
-	if (!exlist || exlist->op_type != OP_NULL
-	    || exlist->op_targ != OP_LIST)
-	    break;
+            exlist = (LISTOP *)refgen->op_first;
+            if (!exlist || exlist->op_type != OP_NULL
+                || exlist->op_targ != OP_LIST)
+                break;
 
-	if (exlist->op_first->op_type != OP_PUSHMARK
-	 && exlist->op_first != exlist->op_last)
-	    break;
+            if (exlist->op_first->op_type != OP_PUSHMARK
+                && exlist->op_first != exlist->op_last)
+                break;
 
-	rv2cv = (UNOP*)exlist->op_last;
+            rv2cv = (UNOP*)exlist->op_last;
 
-	if (rv2cv->op_type != OP_RV2CV)
-	    break;
+            if (rv2cv->op_type != OP_RV2CV)
+                break;
 
-	assert ((rv2gv->op_private & OPpDONT_INIT_GV) == 0);
-	assert ((o->op_private & OPpASSIGN_CV_TO_GV) == 0);
-	assert ((rv2cv->op_private & OPpMAY_RETURN_CONSTANT) == 0);
+            assert ((rv2gv->op_private & OPpDONT_INIT_GV) == 0);
+            assert ((o->op_private & OPpASSIGN_CV_TO_GV) == 0);
+            assert ((rv2cv->op_private & OPpMAY_RETURN_CONSTANT) == 0);
 
-	o->op_private |= OPpASSIGN_CV_TO_GV;
-	rv2gv->op_private |= OPpDONT_INIT_GV;
-	rv2cv->op_private |= OPpMAY_RETURN_CONSTANT;
+            o->op_private |= OPpASSIGN_CV_TO_GV;
+            rv2gv->op_private |= OPpDONT_INIT_GV;
+            rv2cv->op_private |= OPpMAY_RETURN_CONSTANT;
 
-	break;
-    }
+            break;
+        }
 
-    case OP_AASSIGN: {
-	inplace_aassign(o);
-	break;
-    }
+        case OP_AASSIGN: {
+            inplace_aassign(o);
+            break;
+        }
 
-    case OP_OR:
-    case OP_AND:
-	kid = cLOGOPo->op_first;
-	if (kid->op_type == OP_NOT
-	    && (kid->op_flags & OPf_KIDS)) {
-	    if (o->op_type == OP_AND) {
-                CHANGE_TYPE(o, OP_OR);
-	    } else {
-                CHANGE_TYPE(o, OP_AND);
-	    }
-	    op_null(kid);
-	}
-        /* FALLTHROUGH */
+        case OP_OR:
+        case OP_AND:
+            kid = cLOGOPo->op_first;
+            if (kid->op_type == OP_NOT
+                && (kid->op_flags & OPf_KIDS)) {
+                if (o->op_type == OP_AND) {
+                    CHANGE_TYPE(o, OP_OR);
+                } else {
+                    CHANGE_TYPE(o, OP_AND);
+                }
+                op_null(kid);
+            }
+            /* FALLTHROUGH */
 
-    case OP_DOR:
-    case OP_COND_EXPR:
-    case OP_ENTERGIVEN:
-    case OP_ENTERWHEN:
-	for (kid = OP_SIBLING(cUNOPo->op_first); kid; kid = OP_SIBLING(kid))
-            if (!(kid->op_flags & OPf_KIDS))
-                scalarvoid(kid);
-            else
-                DEFER_OP(kid);
-	break;
-
-    case OP_NULL:
-	if (o->op_flags & OPf_STACKED)
-	    break;
-	/* FALLTHROUGH */
-    case OP_NEXTSTATE:
-    case OP_DBSTATE:
-    case OP_ENTERTRY:
-    case OP_ENTER:
-	if (!(o->op_flags & OPf_KIDS))
-	    break;
-	/* FALLTHROUGH */
-    case OP_SCOPE:
-    case OP_LEAVE:
-    case OP_LEAVETRY:
-    case OP_LEAVELOOP:
-    case OP_LINESEQ:
-    case OP_LEAVEGIVEN:
-    case OP_LEAVEWHEN:
-      kids:
-	for (kid = cLISTOPo->op_first; kid; kid = OP_SIBLING(kid))
-            if (!(kid->op_flags & OPf_KIDS))
-                scalarvoid(kid);
-            else
-                DEFER_OP(kid);
-	break;
-    case OP_LIST:
-	/* If the first kid after pushmark is something that the padrange
-	   optimisation would reject, then null the list and the pushmark.
-	 */
-	if ((kid = cLISTOPo->op_first)->op_type == OP_PUSHMARK
-	 && (  !(kid = OP_SIBLING(kid))
-	    || (  kid->op_type != OP_PADSV
-	       && kid->op_type != OP_PADAV
-	       && kid->op_type != OP_PADHV)
-	    || kid->op_private & ~OPpLVAL_INTRO
-	    || !(kid = OP_SIBLING(kid))
-	    || (  kid->op_type != OP_PADSV
-	       && kid->op_type != OP_PADAV
-	       && kid->op_type != OP_PADHV)
-	    || kid->op_private & ~OPpLVAL_INTRO)
-	) {
-	    op_null(cUNOPo->op_first); /* NULL the pushmark */
-	    op_null(o); /* NULL the list */
-	}
-	goto kids;
-    case OP_ENTEREVAL:
-	scalarkids(o);
-	break;
-    case OP_SCALAR:
-        scalar(o);
+        case OP_DOR:
+        case OP_COND_EXPR:
+        case OP_ENTERGIVEN:
+        case OP_ENTERWHEN:
+            for (kid = OP_SIBLING(cUNOPo->op_first); kid; kid = OP_SIBLING(kid))
+                if (!(kid->op_flags & OPf_KIDS))
+                    scalarvoid(kid);
+                else
+                    DEFER_OP(kid);
         break;
-    }
 
-    if (useless_sv) {
-        /* mortalise it, in case warnings are fatal.  */
-        Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
-                       "Useless use of %"SVf" in void context",
-                       SVfARG(sv_2mortal(useless_sv)));
-    }
-    else if (useless) {
-       Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
-                      "Useless use of %s in void context",
-                      useless);
-    }
+        case OP_NULL:
+            if (o->op_flags & OPf_STACKED)
+                break;
+            /* FALLTHROUGH */
+        case OP_NEXTSTATE:
+        case OP_DBSTATE:
+        case OP_ENTERTRY:
+        case OP_ENTER:
+            if (!(o->op_flags & OPf_KIDS))
+                break;
+            /* FALLTHROUGH */
+        case OP_SCOPE:
+        case OP_LEAVE:
+        case OP_LEAVETRY:
+        case OP_LEAVELOOP:
+        case OP_LINESEQ:
+        case OP_LEAVEGIVEN:
+        case OP_LEAVEWHEN:
+        kids:
+            for (kid = cLISTOPo->op_first; kid; kid = OP_SIBLING(kid))
+                if (!(kid->op_flags & OPf_KIDS))
+                    scalarvoid(kid);
+                else
+                    DEFER_OP(kid);
+            break;
+        case OP_LIST:
+            /* If the first kid after pushmark is something that the padrange
+               optimisation would reject, then null the list and the pushmark.
+            */
+            if ((kid = cLISTOPo->op_first)->op_type == OP_PUSHMARK
+                && (  !(kid = OP_SIBLING(kid))
+                      || (  kid->op_type != OP_PADSV
+                            && kid->op_type != OP_PADAV
+                            && kid->op_type != OP_PADHV)
+                      || kid->op_private & ~OPpLVAL_INTRO
+                      || !(kid = OP_SIBLING(kid))
+                      || (  kid->op_type != OP_PADSV
+                            && kid->op_type != OP_PADAV
+                            && kid->op_type != OP_PADHV)
+                      || kid->op_private & ~OPpLVAL_INTRO)
+            ) {
+                op_null(cUNOPo->op_first); /* NULL the pushmark */
+                op_null(o); /* NULL the list */
+            }
+            goto kids;
+        case OP_ENTEREVAL:
+            scalarkids(o);
+            break;
+        case OP_SCALAR:
+            scalar(o);
+            break;
+        }
+
+        if (useless_sv) {
+            /* mortalise it, in case warnings are fatal.  */
+            Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
+                           "Useless use of %"SVf" in void context",
+                           SVfARG(sv_2mortal(useless_sv)));
+        }
+        else if (useless) {
+            Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
+                           "Useless use of %s in void context",
+                           useless);
+        }
     } while ( (o = POP_DEFERRED_OP()) );
 
     Safefree(defer_stack);
