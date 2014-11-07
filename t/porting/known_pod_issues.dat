@@ -45,6 +45,7 @@ Crypt::Random
 curl(1)
 Dancer
 Data::Alias
+Data::Dump::Streamer
 Data::Entropy
 Data::Float
 Data::Structure::Util

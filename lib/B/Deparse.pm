@@ -5693,6 +5693,9 @@ appear in code2ref output text as package variables.  This is a tricky
 problem, as perl has no native facility for referring to a lexical variable
 defined within a different scope, although L<PadWalker> is a good start.
 
+See also L<Data::Dump::Streamer>, which combines B::Deparse and
+L<PadWalker> to serialize closures properly.
+
 =item *
 
 There are probably many more bugs on non-ASCII platforms (EBCDIC).
