@@ -10785,7 +10785,10 @@ Perl_ck_stringify(pTHX_ OP *o)
 {
     OP * const kid = OP_SIBLING(cUNOPo->op_first);
     PERL_ARGS_ASSERT_CK_STRINGIFY;
-    if (kid->op_type == OP_JOIN) {
+    if (kid->op_type == OP_JOIN || kid->op_type == OP_QUOTEMETA
+     || kid->op_type == OP_LC   || kid->op_type == OP_LCFIRST
+     || kid->op_type == OP_UC   || kid->op_type == OP_UCFIRST)
+    {
 	assert(!OP_HAS_SIBLING(kid));
 	op_sibling_splice(o, cUNOPo->op_first, -1, NULL);
 	op_free(o);
