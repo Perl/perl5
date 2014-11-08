@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 57;
+plan tests => 59;
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -269,3 +269,13 @@ for my $k (qw(each keys values)) {
     }
     ok(!$warned, "no warnings 'internal' silences each() after insert warnings");
 }
+
+use feature 'refaliasing';
+no warnings 'experimental::refaliasing';
+$a = 7;
+\$h2{f} = \$a;
+($a, $b) = (each %h2);
+is "$a $b", "f 7", 'each in list assignment';
+$a = 7;
+($a, $b) = (3, values %h2);
+is "$a $b", "3 7", 'values in list assignment';

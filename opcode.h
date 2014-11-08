@@ -1873,11 +1873,11 @@ EXTCONST U32 PL_opargs[] = {
 	0x00013204,	/* aelem */
 	0x00023401,	/* aslice */
 	0x00023401,	/* kvaslice */
-	0x00003b00,	/* aeach */
+	0x00003b40,	/* aeach */
 	0x00003b08,	/* akeys */
-	0x00003b08,	/* avalues */
-	0x00004b00,	/* each */
-	0x00004b08,	/* values */
+	0x00003b48,	/* avalues */
+	0x00004b40,	/* each */
+	0x00004b48,	/* values */
 	0x00004b08,	/* keys */
 	0x00001b00,	/* delete */
 	0x00001b04,	/* exists */
@@ -2109,9 +2109,9 @@ EXTCONST U32 PL_opargs[] = {
 	0x00007b04,	/* lock */
 	0x00000300,	/* once */
 	0x00000000,	/* custom */
-	0x00001b00,	/* reach */
+	0x00001b40,	/* reach */
 	0x00001b08,	/* rkeys */
-	0x00001b08,	/* rvalues */
+	0x00001b48,	/* rvalues */
 	0x00000600,	/* coreargs */
 	0x00000004,	/* runcv */
 	0x00009b8e,	/* fc */

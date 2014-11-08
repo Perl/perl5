@@ -219,14 +219,14 @@ aelem		array element		ck_null		s2	A S
 aslice		array slice		ck_null		m@	A L
 kvaslice	index/value array slice	ck_null		m@	A L
 
-aeach		each on array		ck_each		%	A
+aeach		each on array		ck_each		d%	A
 akeys		keys on array		ck_each		t%	A
-avalues		values on array		ck_each		t%	A
+avalues		values on array		ck_each		dt%	A
 
 # Hashes.
 
-each		each			ck_each		%	H
-values		values			ck_each		t%	H
+each		each			ck_each		d%	H
+values		values			ck_each		dt%	H
 keys		keys			ck_each		t%	H
 delete		delete			ck_delete	%	S
 exists		exists			ck_exists	is%	S
@@ -537,9 +537,9 @@ once		once			ck_null		|
 custom		unknown custom operator		ck_null		0
 
 # For smart dereference for each/keys/values
-reach		each on reference			ck_each		%	S
+reach		each on reference	ck_each		d%	S
 rkeys		keys on reference			ck_each		t%	S
-rvalues		values on reference			ck_each		t%	S
+rvalues		values on reference	ck_each		dt%	S
 
 # For CORE:: subs
 coreargs	CORE:: subroutine	ck_null		$	
