@@ -1773,8 +1773,8 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001304,	/* regcomp */
 	0x00000500,	/* match */
 	0x00000504,	/* qr */
-	0x00001544,	/* subst */
-	0x00000344,	/* substcont */
+	0x00001504,	/* subst */
+	0x00000304,	/* substcont */
 	0x00001804,	/* trans */
 	0x00001804,	/* transr */
 	0x00000004,	/* sassign */

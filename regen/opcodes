@@ -86,8 +86,8 @@ regcreset	regexp internal reset	ck_fun		s1	S
 regcomp		regexp compilation	ck_null		s|	S
 match		pattern match (m//)	ck_match	/
 qr		pattern quote (qr//)	ck_match	s/
-subst		substitution (s///)	ck_match	dis/	S
-substcont	substitution iterator	ck_null		dis|	
+subst		substitution (s///)	ck_match	is/	S
+substcont	substitution iterator	ck_null		is|	
 trans		transliteration (tr///)	ck_match	is"	S
 # y///r
 transr		transliteration (tr///)	ck_match	is"	S
