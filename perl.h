@@ -1761,11 +1761,9 @@ typedef UVTYPE UV;
 #define FPTR2DPTR(t,p) ((t)PTR2nat(p))	/* function pointer to data pointer */
 
 #ifdef USE_LONG_DOUBLE
-#  if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE == DOUBLESIZE
-#      define LONG_DOUBLE_EQUALS_DOUBLE
-#  endif
-#  if !(defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE))
-#     undef USE_LONG_DOUBLE /* Ouch! */
+#  if LONG_DOUBLESIZE == DOUBLESIZE
+#    define LONG_DOUBLE_EQUALS_DOUBLE
+#    undef USE_LONG_DOUBLE /* Ouch! */
 #  endif
 #endif
 
