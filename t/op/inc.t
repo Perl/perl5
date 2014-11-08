@@ -188,7 +188,7 @@ cmp_ok($a, '==', 2147483647, "postdecrement properly downgrades from double");
 
 SKIP: {
     if ($Config{uselongdouble} &&
-        ($Config{longdblkind} == 6 || $Config{longdoublekind} == 5)) {
+        ($Config{longdblkind} == 6 || $Config{longdblkind} == 5)) {
         skip "the double-double format is weird", 1;
     }
 
