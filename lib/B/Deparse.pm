@@ -3057,6 +3057,21 @@ sub pp_grepwhile { mapop(@_, "grep") }
 sub pp_mapstart { baseop(@_, "map") }
 sub pp_grepstart { baseop(@_, "grep") }
 
+my %uses_intro;
+BEGIN {
+    @uses_intro{
+	eval { require B::Op_private }
+	  ? grep +($B::Op_private::bits{$_}{log(OPpLVAL_INTRO) / log 2}
+			||'')
+		    eq 'OPpLVAL_INTRO',
+		 keys %B::Op_private::bits
+	  : qw(gvsv rv2sv rv2hv rv2gv rv2av aelem helem aslice
+	       hslice delete padsv padav padhv enteriter entersub padrange
+	       pushmark cond_expr refassign list)
+    } = ();
+    delete @uses_intro{qw( lvref lvrefslice lvavref )};
+}
+
 sub pp_list {
     my $self = shift;
     my($op, $cx) = @_;
@@ -3067,27 +3082,10 @@ sub pp_list {
     my $local = "either"; # could be local(...), my(...), state(...) or our(...)
     my $type;
     for ($lop = $kid; !null($lop); $lop = $lop->sibling) {
-	# This assumes that no other private flags equal 128, and that
-	# OPs that store things other than flags in their op_private,
-	# like OP_AELEMFAST, won't be immediate children of a list.
-	#
-	# OP_ENTERSUB and OP_SPLIT can break this logic, so check for them.
-	# I suspect that open and exit can too.
-	# XXX This really needs to be rewritten to accept only those ops
-	#     known to take the OPpLVAL_INTRO flag.
-
 	my $lopname = $lop->name;
 	my $loppriv = $lop->private;
-	if (!($loppriv & (OPpLVAL_INTRO|OPpOUR_INTRO)
-		or $lopname eq "undef")
-	    or $lopname =~ /^(?:entersub|exit|open|split
-			       |lv(?:av)?ref(?:slice)?)\z/x)
-	{
-	    $local = ""; # or not
-	    last;
-	}
 	my $newtype;
-	if ($lopname =~ /^pad[ash]v$/) {
+	if ($lopname =~ /^pad[ash]v$/ && $loppriv & OPpLVAL_INTRO) {
 	    if ($loppriv & OPpPAD_STATE) { # state()
 		($local = "", last) if $local !~ /^(?:either|state)$/;
 		$local = "state";
@@ -3113,10 +3111,15 @@ sub pp_list {
 	       )) {
 		$newtype = $t;
 	    }
-	} elsif ($lopname ne "undef"
-		# specifically avoid the "reverse sort" optimisation,
-		# where "reverse" is nullified
-		&& !($lopname eq 'sort' && ($lop->flags & OPpSORT_REVERSE)))
+	} elsif ($lopname ne 'undef'
+	   and    !($loppriv & OPpLVAL_INTRO)
+	       || !exists $uses_intro{$lopname eq 'null'
+					? substr B::ppname($lop->targ), 3
+					: $lopname})
+	{
+	    $local = ""; # or not
+	    last;
+	} elsif ($lopname ne "undef")
 	{
 	    # local()
 	    ($local = "", last) if $local !~ /^(?:either|local)$/;
