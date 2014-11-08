@@ -11249,7 +11249,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #  define FV_GF NVgf
 #  define NV_TO_FV(nv,fv) (fv)=(nv)
 #endif
-#ifndef FV_ISINITE
+#ifndef FV_ISFINITE
 #  define FV_ISFINITE(x) Perl_isfinite((NV)(x))
 #endif
 	STRLEN have;
