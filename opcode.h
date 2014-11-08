@@ -1963,7 +1963,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000e40c,	/* select */
 	0x0000eb0c,	/* getc */
 	0x0917640d,	/* read */
-	0x0000eb44,	/* enterwrite */
+	0x0000eb04,	/* enterwrite */
 	0x00000100,	/* leavewrite */
 	0x0002e405,	/* prtf */
 	0x0002e405,	/* print */

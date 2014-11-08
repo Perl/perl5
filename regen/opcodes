@@ -337,7 +337,7 @@ select		select			ck_select	st@	F?
 
 getc		getc			ck_eof		st%	F?
 read		read			ck_fun		imst@	F R S S?
-enterwrite	write			ck_fun		dis%	F?
+enterwrite	write			ck_fun		is%	F?
 leavewrite	write exit		ck_null		1	
 
 prtf		printf			ck_listiob	ims@	F? L
