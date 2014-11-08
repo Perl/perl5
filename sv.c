@@ -11231,7 +11231,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE && \
 	defined(PERL_PRIgldbl) && !defined(USE_QUADMATH)
 	long double fv;
-#  define FV_ISFINITE(x) Perl_isfinitel(x)
+#  ifdef Perl_isfinitel
+#    define FV_ISFINITE(x) Perl_isfinitel(x)
+#  endif
 #  define FV_GF PERL_PRIgldbl
 #    if defined(__VMS) && defined(__ia64) && defined(__IEEE_FLOAT)
        /* Work around breakage in OTS$CVT_FLOAT_T_X */
@@ -11244,9 +11246,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #    endif
 #else
 	NV fv;
-#  define FV_ISFINITE(x) Perl_isfinite((NV)(x))
 #  define FV_GF NVgf
 #  define NV_TO_FV(nv,fv) (fv)=(nv)
+#endif
+#ifndef FV_ISINITE
+#  define FV_ISFINITE(x) Perl_isfinite((NV)(x))
 #endif
 	STRLEN have;
 	STRLEN need;
