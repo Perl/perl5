@@ -3,9 +3,8 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(../lib lib);
+    require "./test.pl";
 }
-
-BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
@@ -286,6 +285,8 @@ is(
   '-d does not conflict with sort optimisations'
 );
 
+SKIP: {
+  skip_if_miniperl("under miniperl", 1);
 is(
   runperl(
    switches => [ '-Ilib', '-d:switchd_empty' ],
@@ -300,3 +301,4 @@ is(
   "debugged\n",
   "\$DB::single set to overload"
 );
+}
