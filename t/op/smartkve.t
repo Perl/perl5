@@ -7,7 +7,7 @@ BEGIN {
 }
 use strict;
 use warnings;
-no warnings 'deprecated', 'experimental::autoderef';
+no warnings 'experimental::autoderef';
 use vars qw($data $array $values $hash $errpat);
 
 plan 'no_plan';
