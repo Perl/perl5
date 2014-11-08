@@ -1791,10 +1791,10 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001144,	/* i_preinc */
 	0x00001164,	/* predec */
 	0x00001144,	/* i_predec */
-	0x0000117c,	/* postinc */
-	0x0000115c,	/* i_postinc */
-	0x0000117c,	/* postdec */
-	0x0000115c,	/* i_postdec */
+	0x0000113c,	/* postinc */
+	0x0000111c,	/* i_postinc */
+	0x0000113c,	/* postdec */
+	0x0000111c,	/* i_postdec */
 	0x0001121e,	/* pow */
 	0x0001123e,	/* multiply */
 	0x0001121e,	/* i_multiply */
