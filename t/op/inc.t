@@ -287,6 +287,29 @@ isnt(scalar eval { my $pvbm = PVBM; --$pvbm }, undef, "predecrement defined");
     }
 }
 
+# *Do* use pad TARG if it is actually a named variable, even when the thing
+# you’re copying is a ref.  The fix for #9466 broke this.
+{
+    package P9466_2;
+    my $x;
+    sub DESTROY { $x = 1 }
+    for (2..3) {
+	$x = 0;
+	my $a = bless {};
+	my $b;
+	use integer;
+	if ($_ == 2) {
+	    $b = $a--; # sassign optimised away
+	}
+	else {
+	    $b = $a++;
+	}
+	::is(ref $b, __PACKAGE__, 'i_post(in|de)c/TARGMY on ref');
+	undef $a; undef $b;
+	::is($x, 1, "9466 case $_");
+    }
+}
+
 $_ = ${qr //};
 $_--;
 is($_, -1, 'regexp--');
