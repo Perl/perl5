@@ -257,11 +257,11 @@ unshift		unshift			ck_fun		imsT@	A L
 sort		sort			ck_sort		m@	C? L
 reverse		reverse			ck_fun		mt@	L
 
-grepstart	grep			ck_grep		dm@	C L
-grepwhile	grep iterator		ck_null		dt|	
+grepstart	grep			ck_grep		m@	C L
+grepwhile	grep iterator		ck_null		t|	
 
-mapstart	map			ck_grep		dm@	C L
-mapwhile	map iterator		ck_null		dt|
+mapstart	map			ck_grep		m@	C L
+mapwhile	map iterator		ck_null		t|
 
 # Range stuff.
 
