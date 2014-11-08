@@ -328,7 +328,7 @@ binmode		binmode			ck_fun		s@	F S?
 
 tie		tie			ck_fun		idms@	R S L
 untie		untie			ck_fun		is%	R
-tied		tied			ck_fun		s%	R
+tied		tied			ck_fun		ds%	R
 dbmopen		dbmopen			ck_fun		is@	H S S
 dbmclose	dbmclose		ck_fun		is%	H
 

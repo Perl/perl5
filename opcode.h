@@ -1956,7 +1956,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00096404,	/* binmode */
 	0x00217445,	/* tie */
 	0x00007b04,	/* untie */
-	0x00007b04,	/* tied */
+	0x00007b44,	/* tied */
 	0x00114404,	/* dbmopen */
 	0x00004b04,	/* dbmclose */
 	0x01111408,	/* sselect */
