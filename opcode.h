@@ -1911,7 +1911,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000300,	/* or */
 	0x00011206,	/* xor */
 	0x00000300,	/* dor */
-	0x00000340,	/* cond_expr */
+	0x00000300,	/* cond_expr */
 	0x00000304,	/* andassign */
 	0x00000304,	/* orassign */
 	0x00000304,	/* dorassign */

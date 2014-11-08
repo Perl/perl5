@@ -275,7 +275,7 @@ and		logical and (&&)		ck_null		|
 or		logical or (||)			ck_null		|	
 xor		logical xor			ck_null		fs2	S S	
 dor		defined or (//)			ck_null		|
-cond_expr	conditional expression		ck_null		d|	
+cond_expr	conditional expression		ck_null		|	
 andassign	logical and assignment (&&=)	ck_null		s|	
 orassign	logical or assignment (||=)	ck_null		s|	
 dorassign	defined or assignment (//=)	ck_null		s|
