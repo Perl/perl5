@@ -1940,7 +1940,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000d04,	/* redo */
 	0x00000d44,	/* dump */
 	0x00000d04,	/* goto */
-	0x00009b44,	/* exit */
+	0x00009b04,	/* exit */
 	0x00000e40,	/* method_named */
 	0x00000340,	/* entergiven */
 	0x00000100,	/* leavegiven */

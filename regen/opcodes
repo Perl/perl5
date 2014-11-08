@@ -306,7 +306,7 @@ next		next			ck_null		s}
 redo		redo			ck_null		s}	
 dump		dump			ck_null		ds}	
 goto		goto			ck_null		s}	
-exit		exit			ck_fun		ds%	S?
+exit		exit			ck_fun		s%	S?
 method_named	method with known name	ck_null		d.
 
 entergiven	given()			ck_null		d|
