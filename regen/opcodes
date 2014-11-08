@@ -111,9 +111,9 @@ preinc		preincrement (++)		ck_lfun		dIs1	S
 i_preinc	integer preincrement (++)	ck_lfun		dis1	S
 predec		predecrement (--)		ck_lfun		dIs1	S
 i_predec	integer predecrement (--)	ck_lfun		dis1	S
-postinc		postincrement (++)		ck_lfun		dIst1	S
+postinc		postincrement (++)		ck_lfun		dIsT1	S
 i_postinc	integer postincrement (++)	ck_lfun		disT1	S
-postdec		postdecrement (--)		ck_lfun		dIst1	S
+postdec		postdecrement (--)		ck_lfun		dIsT1	S
 i_postdec	integer postdecrement (--)	ck_lfun		disT1	S
 
 # Ordinary operators.
