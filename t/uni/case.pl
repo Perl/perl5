@@ -7,11 +7,11 @@ use strict;
 use warnings;
 
 sub unidump {
-    join " ", map { sprintf "%04X", $_ } unpack "U*", $_[0];
+    join "", map { sprintf "\\x{%04X}", $_ } unpack "U*", $_[0];
 }
 
 sub casetest {
-    my ($already_run, $base, @funcs) = @_;
+    my ($already_run, $base, %funcs) = @_;
 
     my %spec;
 
@@ -20,14 +20,14 @@ sub casetest {
     # $already_run is the number of extra tests the caller has run before this
     # call.
     my $ballast = chr (0x2672) x 3;
-    @funcs = map {my $f = $_;
-		  ($f,
-		   sub {my $r = $f->($_[0] . $ballast); # Add it before
+    foreach my $name (keys %funcs) {
+        $funcs{"${name}_with_ballast"} =
+		   sub {my $r = $funcs{$name}->($_[0] . $ballast); # Add it before
 			$r =~ s/$ballast\z//so # Remove it afterwards
 			    or die "'$_[0]' to '$r' mangled";
 			$r; # Result with $ballast removed.
-		    },
-		   )} @funcs;
+		    };
+    }
 
     use Unicode::UCD 'prop_invmap';
 
@@ -81,41 +81,48 @@ sub casetest {
 
     my $test = $already_run + 1;
 
-    for my $i (sort keys %simple) {
-	my $w = $simple{$i};
-	my $c = pack "U0U", $i;
-	foreach my $func (@funcs) {
-	    my $d = $func->($c);
-	    my $e = unidump($d);
-	    is( $d, pack("U0U", $simple{$i}), "$i -> $e ($w)" );
+    for my $ord (sort keys %simple) {
+	my $char = pack "U0U", $ord;
+        my $disp_input = unidump($char);
+
+        my $expected = pack("U0U", $simple{$ord});
+        my $disp_expected = unidump($expected);
+
+	foreach my $name (sort keys %funcs) {
+	    my $got = $funcs{$name}->($char);
+	    is( $got, $expected,
+               "Verify $name(\"$disp_input\") eq \"$disp_expected\"");
 	}
     }
 
-    for my $i (sort keys %spec) {
-	my $w = unidump($spec{$i});
-	my $h = sprintf "%04X", $i;
-	my $c = chr($i); $c .= chr(0x100); chop $c;
-	foreach my $func (@funcs) {
-	    my $d = $func->($c);
-	    my $e = unidump($d);
-            is( $w, $e, "$h -> $e ($w)" );
+    for my $ord (sort keys %spec) {
+	my $char = chr($ord); $char .= chr(0x100); chop $char;
+        my $disp_input = unidump($char);
+
+	my $expected = unidump($spec{$ord});
+
+	foreach my $name (sort keys %funcs) {
+	    my $got = $funcs{$name}->($char);
+            is( unidump($got), $expected,
+               "Verify $name(\"$disp_input\") eq \"$expected\"");
 	}
     }
 
-    for my $i (sort { $a <=> $b } keys %none) {
-	my $c = pack "U0U", $i;
-	my $w = $i = sprintf "%04X", $i;
-	foreach my $func (@funcs) {
-	    my $d = $func->($c);
-	    my $e = unidump($d);
-            is( $d, $c, "$i -> $e ($w)" );
+    for my $ord (sort { $a <=> $b } keys %none) {
+	my $char = pack "U0U", $ord;
+        my $disp_input = unidump($char);
+
+	foreach my $name (sort keys %funcs) {
+	    my $got = $funcs{$name}->($char);
+            is( $got, $char,
+               "Verify $name(\"$disp_input\") eq \"$disp_input\"");
 	}
     }
 
     plan $already_run +
 	((scalar keys %simple) +
 	 (scalar keys %spec) +
-	 (scalar keys %none)) * @funcs;
+	 (scalar keys %none)) * scalar keys %funcs;
 }
 
 1;
