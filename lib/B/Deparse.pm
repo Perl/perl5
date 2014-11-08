@@ -2637,8 +2637,10 @@ sub real_concat {
     return $self->maybe_parens("$left .$eq $right", $cx, $prec);
 }
 
+sub pp_repeat { maybe_targmy(@_, \&repeat) }
+
 # 'x' is weird when the left arg is a list
-sub pp_repeat {
+sub repeat {
     my $self = shift;
     my($op, $cx) = @_;
     my $left = $op->first;
@@ -2830,7 +2832,7 @@ sub pp_substr {
     }
     maybe_local(@_, listop(@_, "substr"))
 }
-sub pp_vec { maybe_local(@_, listop(@_, "vec")) }
+sub pp_vec { maybe_targmy(@_, \&maybe_local, listop(@_, "vec")) }
 sub pp_index { maybe_targmy(@_, \&listop, "index") }
 sub pp_rindex { maybe_targmy(@_, \&listop, "rindex") }
 sub pp_sprintf { maybe_targmy(@_, \&listop, "sprintf") }
