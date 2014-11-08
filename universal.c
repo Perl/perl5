@@ -1049,9 +1049,11 @@ Perl_boot_core_UNIVERSAL(pTHX)
     {
 	CV * const cv =
 	    newCONSTSUB(get_hv("Regexp::", GV_ADD), "DESTROY", NULL);
-	Safefree(CvFILE(cv));
-	CvFILE(cv) = (char *)file;
+	char ** cvfile = &CvFILE(cv);
+	char * oldfile = *cvfile;
 	CvDYNFILE_off(cv);
+	*cvfile = (char *)file;
+	Safefree(oldfile);
     }
 }
 
