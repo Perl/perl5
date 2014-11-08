@@ -971,8 +971,12 @@ cpan/ExtUtils-MakeMaker/lib/ExtUtils/Liblist/Kid.pm		Does the real work of the a
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Liblist.pm			Locates libraries
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/Config.pm	MakeMaker wrapper for Config
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/FAQ.pod		MakeMaker FAQ
+cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/Locale.pm
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm		Write Makefiles for extensions
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/Tutorial.pod	Writing a module with MakeMaker
+cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/version.pm
+cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/version/regex.pm
+cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/version/vpp.pm
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Mkbootstrap.pm		Writes a bootstrap file (see MakeMaker)
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Mksymlists.pm		Writes a linker options file for extensions
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_AIX.pm			MakeMaker methods for AIX
@@ -1021,6 +1025,7 @@ cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/PL_FILES.pm	MakeMaker test ut
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/Problem.pm	MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/Recurs.pm	MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/SAS.pm	MakeMaker test utilities
+cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/Unicode.pm
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/XS.pm	MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Utils.pm		MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/TieIn.pm				Testing library for dummy input handles
@@ -1066,7 +1071,9 @@ cpan/ExtUtils-MakeMaker/t/test_boilerplate.t			MakeMaker test
 cpan/ExtUtils-MakeMaker/t/testdata/reallylongdirectoryname/arch1/Config.pm	test data for MakeMaker
 cpan/ExtUtils-MakeMaker/t/testdata/reallylongdirectoryname/arch2/Config.pm	test data for MakeMaker
 cpan/ExtUtils-MakeMaker/t/testlib.t				See if ExtUtils::testlib works
+cpan/ExtUtils-MakeMaker/t/unicode.t
 cpan/ExtUtils-MakeMaker/t/VERSION_FROM.t			See if MakeMaker's VERSION_FROM works
+cpan/ExtUtils-MakeMaker/t/vstrings.t
 cpan/ExtUtils-MakeMaker/t/WriteEmptyMakefile.t			See if WriteEmptyMakefile works
 cpan/ExtUtils-MakeMaker/t/writemakefile_args.t			See if WriteMakefile works
 cpan/ExtUtils-MakeMaker/t/xs.t					Part of MakeMaker's test suite

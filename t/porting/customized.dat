@@ -1,7 +1,5 @@
 DB_File cpan/DB_File/DB_File.xs f364b661bbb0df075b0c425b104577e7176fe82b
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
-ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/Liblist/Kid.pm f738b4b8d6dfdb2bae5f3e43106370867aa88f01
-ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/pm_to_blib.t 2cd28c8279d7900e28962712763eaa4768117414
 IO::Socket::IP cpan/IO-Socket-IP/t/22timeout.t 0a65d4ca44663f70eea3c7f1ccb5faed2940611f
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Socket cpan/Socket/t/getnameinfo.t f25ae4125d64a81538d4d3b73a3a0b9ce3c0404d

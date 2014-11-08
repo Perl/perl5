@@ -9,7 +9,7 @@ require ExtUtils::MM_Unix;
 require ExtUtils::MM_Win32;
 our @ISA = qw( ExtUtils::MM_Unix );
 
-our $VERSION = '6.98';
+our $VERSION = '7.02';
 
 
 =head1 NAME
@@ -94,6 +94,7 @@ sub init_linker {
           '$(PERL_INC)' .'/'. ("$Config{libperl}" or "libperl.a");
     }
 
+    $self->{PERL_ARCHIVEDEP} ||= '';
     $self->{PERL_ARCHIVE_AFTER} ||= '';
     $self->{EXPORT_LIST}  ||= '';
 }

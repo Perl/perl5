@@ -473,7 +473,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::MakeMaker' => {
-        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-6.98.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.02.tar.gz',
         'FILES'        => q[cpan/ExtUtils-MakeMaker],
         'EXCLUDED'     => [
             qr{^t/lib/Test/},
@@ -485,12 +485,6 @@ use File::Glob qw(:case);
             'README.packaging',
         ],
         'CUSTOMIZED'   => [
-            # Already merged upstream in GitHub 0116aaf4e, just awaiting
-            # a new stable CPAN release
-            qw(	t/pm_to_blib.t ),
-            # Already merged upstream in GitHub 46586b12c, just awaiting
-            # a new stable CPAN release
-            qw( lib/ExtUtils/Liblist/Kid.pm ),
         ],
     },
 

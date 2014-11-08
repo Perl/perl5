@@ -5,18 +5,18 @@
 use strict;
 use lib 't/lib';
 
-use Config;
-use Test::More
-    $ENV{PERL_CORE} && $Config{'usecrosscompile'}
-    ? (skip_all => "no toolchain installed when cross-compiling")
-    : 'no_plan';
 use File::Temp qw[tempdir];
 
 use ExtUtils::MakeMaker;
 
 use MakeMaker::Test::Utils;
 use MakeMaker::Test::Setup::BFD;
-
+use Config;
+use Test::More;
+use ExtUtils::MM;
+plan !MM->can_run(make()) && $ENV{PERL_CORE} && $Config{'usecrosscompile'}
+    ? (skip_all => "cross-compiling and make not available")
+    : 'no_plan';
 
 my $perl     = which_perl();
 my $makefile = makefile_name();
@@ -71,7 +71,10 @@ local $ENV{PERL_INSTALL_QUIET};
     run_ok(qq{$perl Makefile.PL});
 
     # XXX This is a fragile way to check that it reran.
-    like run_ok($make), qr/^Skip /ms;
+    TODO: {
+      local $TODO = 'This one is fragile on some systems for some reason that needs investigation';
+      like run_ok($make), qr/^Skip /ms;
+    }
 
     ok( -e "blib/lib/Big/Dummy.pm", "blib copied pm file" );
 }

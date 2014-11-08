@@ -15,9 +15,10 @@ use File::Temp;
 use Cwd 'abs_path';
 
 use Test::More;
-
-plan skip_all => "no toolchain installed when cross-compiling"
-    if $ENV{PERL_CORE} && $Config{'usecrosscompile'};
+use ExtUtils::MM;
+plan !MM->can_run(make()) && $ENV{PERL_CORE} && $Config{'usecrosscompile'}
+    ? (skip_all => "cross-compiling and make not available")
+    : ();
 
 #--------------------- Setup
 
