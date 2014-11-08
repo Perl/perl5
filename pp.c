@@ -1096,7 +1096,7 @@ PP(pp_postinc)
     /* special case for undef: see thread at 2003-03/msg00536.html in archive */
     if (inc && !SvOK(TARG))
 	sv_setiv(TARG, 0);
-    SETs(TARG);
+    SETTARG;
     return NORMAL;
 }
 

@@ -324,4 +324,16 @@ $_ = v97;
 $_++;
 isnt(ref\$_, 'VSTRING', '++ flattens vstrings');
 
+sub TIESCALAR {bless\my $x}
+sub STORE { ++$store::called }
+tie my $t, "";
+{
+    $t = $_++;
+    $t = $_--;
+    use integer;
+    $t = $_++;
+    $t = $_--;
+}
+is $store::called, 4, 'STORE called on "my" target';
+
 done_testing();
