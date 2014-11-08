@@ -336,7 +336,7 @@ addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
 #	trans not OK (dTARG; TARG = sv_newmortal();)
 #	ucfirst etc not OK: TMP arg processed inplace
 #	quotemeta not OK (unsafe when TARG == arg)
-#	pack split - unknown whether they are safe
+#	pack - unknown whether it is safe
 #	sprintf: is calling do_sprintf(TARG,...) which can act on TARG
 #	  before other args are processed.
 #

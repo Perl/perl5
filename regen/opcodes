@@ -239,7 +239,7 @@ kvhslice	key/value hash slice	ck_null		m@	H L
 
 unpack		unpack			ck_fun		u@	S S?
 pack		pack			ck_fun		fmst@	S L
-split		split			ck_split	t@	S S S
+split		split			ck_split	T@	S S S
 join		join or string		ck_join		fmst@	S L
 
 # List operators.

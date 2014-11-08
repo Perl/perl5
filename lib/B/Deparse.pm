@@ -5002,6 +5002,9 @@ sub pp_qr { matchop(@_, "qr", "") }
 sub pp_runcv { unop(@_, "__SUB__"); }
 
 sub pp_split {
+    maybe_targmy(@_, \&split);
+}
+sub split {
     my $self = shift;
     my($op, $cx) = @_;
     my($kid, @exprs, $ary, $expr);
