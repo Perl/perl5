@@ -1662,14 +1662,9 @@ Perl_scalarvoid(pTHX_ OP *arg)
             if (o->op_private == 4)
                 break;
             /* FALLTHROUGH */
-        case OP_GVSV:
         case OP_WANTARRAY:
         case OP_GV:
         case OP_SMARTMATCH:
-        case OP_PADSV:
-        case OP_PADAV:
-        case OP_PADHV:
-        case OP_PADANY:
         case OP_AV2ARYLEN:
         case OP_REF:
         case OP_REFGEN:
@@ -1682,13 +1677,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_INDEX:
         case OP_RINDEX:
         case OP_SPRINTF:
-        case OP_AELEM:
-        case OP_AELEMFAST:
-        case OP_AELEMFAST_LEX:
-        case OP_ASLICE:
         case OP_KVASLICE:
-        case OP_HELEM:
-        case OP_HSLICE:
         case OP_KVHSLICE:
         case OP_UNPACK:
         case OP_PACK:
@@ -1736,6 +1725,20 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_PROTOTYPE:
         case OP_RUNCV:
         func_ops:
+            useless = OP_DESC(o);
+            break;
+
+        case OP_GVSV:
+        case OP_PADSV:
+        case OP_PADAV:
+        case OP_PADHV:
+        case OP_PADANY:
+        case OP_AELEM:
+        case OP_AELEMFAST:
+        case OP_AELEMFAST_LEX:
+        case OP_ASLICE:
+        case OP_HELEM:
+        case OP_HSLICE:
             if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)))
                 /* Otherwise it's "Useless use of grep iterator" */
                 useless = OP_DESC(o);

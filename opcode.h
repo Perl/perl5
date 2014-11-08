@@ -2169,50 +2169,50 @@ END_EXTERN_C
 #define OPpSORT_INPLACE         0x08
 #define OPpTRANS_SQUASH         0x08
 #define OPpARG4_MASK            0x0f
-#define OPpALLOW_FAKE           0x10
 #define OPpCONST_ENTERED        0x10
-#define OPpENTERSUB_DB          0x10
+#define OPpDEREF_AV             0x10
 #define OPpEVAL_COPHH           0x10
 #define OPpFT_AFTER_t           0x10
-#define OPpLVAL_DEFER           0x10
+#define OPpLVREF_AV             0x10
+#define OPpMAYBE_TRUEBOOL       0x10
 #define OPpOPEN_IN_RAW          0x10
-#define OPpOUR_INTRO            0x10
-#define OPpPAD_STATE            0x10
 #define OPpSORT_DESCEND         0x10
 #define OPpSUBSTR_REPL_FIRST    0x10
 #define OPpTARGET_MY            0x10
-#define OPpDEREF_AV             0x20
+#define OPpDEREF_HV             0x20
 #define OPpEARLY_CV             0x20
 #define OPpEVAL_RE_REPARSING    0x20
 #define OPpHUSH_VMSISH          0x20
-#define OPpLVREF_AV             0x20
+#define OPpLVREF_HV             0x20
+#define OPpMAY_RETURN_CONSTANT  0x20
 #define OPpOPEN_IN_CRLF         0x20
 #define OPpSORT_QSORT           0x20
 #define OPpTRANS_COMPLEMENT     0x20
 #define OPpTRUEBOOL             0x20
+#define OPpDEREF                0x30
+#define OPpDEREF_SV             0x30
+#define OPpLVREF_CV             0x30
+#define OPpLVREF_TYPE           0x30
+#define OPpALLOW_FAKE           0x40
 #define OPpASSIGN_BACKWARDS     0x40
 #define OPpASSIGN_COMMON        0x40
 #define OPpCONST_BARE           0x40
 #define OPpCOREARGS_SCALARMOD   0x40
-#define OPpDEREF_HV             0x40
+#define OPpENTERSUB_DB          0x40
 #define OPpEXISTS_SUB           0x40
 #define OPpFLIP_LINENUM         0x40
 #define OPpHINT_M_VMSISH_STATUS 0x40
 #define OPpLIST_GUESSED         0x40
-#define OPpLVREF_HV             0x40
-#define OPpMAYBE_TRUEBOOL       0x40
-#define OPpMAY_RETURN_CONSTANT  0x40
+#define OPpLVAL_DEFER           0x40
 #define OPpOPEN_OUT_RAW         0x40
+#define OPpOUR_INTRO            0x40
+#define OPpPAD_STATE            0x40
 #define OPpREFCOUNTED           0x40
 #define OPpREPEAT_DOLIST        0x40
 #define OPpRUNTIME              0x40
 #define OPpSLICE                0x40
 #define OPpSORT_STABLE          0x40
 #define OPpTRANS_GROWS          0x40
-#define OPpDEREF                0x60
-#define OPpDEREF_SV             0x60
-#define OPpLVREF_CV             0x60
-#define OPpLVREF_TYPE           0x60
 #define OPpPADRANGE_COUNTMASK   0x7f
 #define OPpASSIGN_CV_TO_GV      0x80
 #define OPpCOREARGS_PUSHMARK    0x80
@@ -2355,8 +2355,8 @@ EXTCONST I16 PL_op_private_bitfields[] = {
     0, 8, -1,
     0, 8, -1,
     0, 8, -1,
-    5, -1, 1, 130, 2, 137, 3, 144, -1,
-    5, -1, 0, 481, 1, 26, 2, 250, 3, 83, -1,
+    4, -1, 1, 130, 2, 137, 3, 144, -1,
+    4, -1, 0, 481, 1, 26, 2, 250, 3, 83, -1,
 
 };
 
@@ -2767,20 +2767,20 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
     /* scalar        */ 0x0003,
-    /* pushmark      */ 0x281c, 0x3a11,
+    /* pushmark      */ 0x281c, 0x3a19,
     /* wantarray     */ 0x00bd,
     /* const         */ 0x03b8, 0x1490, 0x3acc, 0x3588, 0x2be5,
-    /* gvsv          */ 0x281c, 0x2d31,
+    /* gvsv          */ 0x281c, 0x2d39,
     /* gv            */ 0x12f5,
     /* gelem         */ 0x0067,
-    /* padsv         */ 0x281c, 0x025a, 0x3a11,
-    /* padav         */ 0x281c, 0x3a10, 0x290c, 0x3709,
-    /* padhv         */ 0x281c, 0x05d8, 0x0534, 0x3a10, 0x290c, 0x3709,
+    /* padsv         */ 0x281c, 0x3a18, 0x0257,
+    /* padav         */ 0x281c, 0x3a18, 0x290c, 0x3709,
+    /* padhv         */ 0x281c, 0x3a18, 0x0534, 0x05d0, 0x290c, 0x3709,
     /* pushre        */ 0x34d9,
-    /* rv2gv         */ 0x281c, 0x025a, 0x1590, 0x290c, 0x2b08, 0x3ac4, 0x0003,
-    /* rv2sv         */ 0x281c, 0x025a, 0x2d30, 0x3ac4, 0x0003,
+    /* rv2gv         */ 0x281c, 0x1598, 0x0256, 0x290c, 0x2b08, 0x3ac4, 0x0003,
+    /* rv2sv         */ 0x281c, 0x2d38, 0x0256, 0x3ac4, 0x0003,
     /* av2arylen     */ 0x290c, 0x0003,
-    /* rv2cv         */ 0x2a7c, 0x08f8, 0x0b90, 0x028c, 0x3c88, 0x3ac4, 0x0003,
+    /* rv2cv         */ 0x2a7c, 0x0b98, 0x08f4, 0x028c, 0x3c88, 0x3ac4, 0x0003,
     /* prototype     */ 0x0003,
     /* refgen        */ 0x0003,
     /* srefgen       */ 0x0003,
@@ -2888,10 +2888,10 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* uc            */ 0x0003,
     /* lc            */ 0x0003,
     /* quotemeta     */ 0x0003,
-    /* rv2av         */ 0x281c, 0x2d30, 0x290c, 0x3708, 0x3ac4, 0x0003,
+    /* rv2av         */ 0x281c, 0x2d38, 0x290c, 0x3708, 0x3ac4, 0x0003,
     /* aelemfast     */ 0x01ff,
     /* aelemfast_lex */ 0x01ff,
-    /* aelem         */ 0x281c, 0x025a, 0x2710, 0x290c, 0x0067,
+    /* aelem         */ 0x281c, 0x2718, 0x0256, 0x290c, 0x0067,
     /* aslice        */ 0x281c, 0x290c, 0x3709,
     /* kvaslice      */ 0x290d,
     /* aeach         */ 0x0003,
@@ -2902,13 +2902,13 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* keys          */ 0x290c, 0x0003,
     /* delete        */ 0x281c, 0x3658, 0x0003,
     /* exists        */ 0x3bb8, 0x0003,
-    /* rv2hv         */ 0x281c, 0x05d8, 0x0534, 0x2d30, 0x290c, 0x3708, 0x3ac4, 0x0003,
-    /* helem         */ 0x281c, 0x025a, 0x2710, 0x290c, 0x0067,
+    /* rv2hv         */ 0x281c, 0x2d38, 0x0534, 0x05d0, 0x290c, 0x3708, 0x3ac4, 0x0003,
+    /* helem         */ 0x281c, 0x2718, 0x0256, 0x290c, 0x0067,
     /* hslice        */ 0x281c, 0x290c, 0x3709,
     /* kvhslice      */ 0x290d,
     /* unpack        */ 0x012f,
     /* pack          */ 0x012f,
-    /* split         */ 0x207c, 0x2d31,
+    /* split         */ 0x207c, 0x2d39,
     /* join          */ 0x012f,
     /* list          */ 0x281c, 0x1cd9,
     /* lslice        */ 0x0067,
@@ -2937,7 +2937,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* orassign      */ 0x0003,
     /* dorassign     */ 0x0003,
     /* method        */ 0x0003,
-    /* entersub      */ 0x281c, 0x025a, 0x0b90, 0x028c, 0x3c88, 0x3ac4, 0x2141,
+    /* entersub      */ 0x281c, 0x0b98, 0x0256, 0x028c, 0x3c88, 0x3ac4, 0x2141,
     /* leavesub      */ 0x3098, 0x0003,
     /* leavesublv    */ 0x3098, 0x0003,
     /* caller        */ 0x00bc, 0x012f,
@@ -2947,7 +2947,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* nextstate     */ 0x40dc, 0x3f18, 0x1eb5,
     /* dbstate       */ 0x40dc, 0x3f18, 0x1eb5,
     /* leave         */ 0x26bc, 0x3099,
-    /* enteriter     */ 0x281c, 0x2d30, 0x0c0c, 0x33a9,
+    /* enteriter     */ 0x281c, 0x2d38, 0x0c0c, 0x33a9,
     /* iter          */ 0x33a9,
     /* leaveloop     */ 0x26bc, 0x0067,
     /* last          */ 0x3e9c, 0x0003,
@@ -3106,10 +3106,10 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     /* runcv         */ 0x00bd,
     /* fc            */ 0x0003,
     /* padrange      */ 0x281c, 0x019b,
-    /* refassign     */ 0x281c, 0x037a, 0x3a10, 0x250c, 0x13e8, 0x0067,
-    /* lvref         */ 0x281c, 0x037a, 0x3a10, 0x250c, 0x13e8, 0x0003,
+    /* refassign     */ 0x281c, 0x3a18, 0x0376, 0x250c, 0x13e8, 0x0067,
+    /* lvref         */ 0x281c, 0x3a18, 0x0376, 0x250c, 0x13e8, 0x0003,
     /* lvrefslice    */ 0x281d,
-    /* lvavref       */ 0x281c, 0x3a10, 0x0003,
+    /* lvavref       */ 0x281c, 0x3a18, 0x0003,
 
 };
 
@@ -3127,15 +3127,15 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* GVSV       */ (OPpOUR_INTRO|OPpLVAL_INTRO),
     /* GV         */ (OPpEARLY_CV),
     /* GELEM      */ (OPpARG2_MASK),
-    /* PADSV      */ (OPpPAD_STATE|OPpDEREF|OPpLVAL_INTRO),
+    /* PADSV      */ (OPpDEREF|OPpPAD_STATE|OPpLVAL_INTRO),
     /* PADAV      */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpPAD_STATE|OPpLVAL_INTRO),
-    /* PADHV      */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpPAD_STATE|OPpTRUEBOOL|OPpMAYBE_TRUEBOOL|OPpLVAL_INTRO),
+    /* PADHV      */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL|OPpPAD_STATE|OPpLVAL_INTRO),
     /* PADANY     */ (0),
     /* PUSHRE     */ (OPpRUNTIME),
-    /* RV2GV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpDONT_INIT_GV|OPpMAYBE_LVSUB|OPpALLOW_FAKE|OPpDEREF|OPpLVAL_INTRO),
-    /* RV2SV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpOUR_INTRO|OPpDEREF|OPpLVAL_INTRO),
+    /* RV2GV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpDONT_INIT_GV|OPpMAYBE_LVSUB|OPpDEREF|OPpALLOW_FAKE|OPpLVAL_INTRO),
+    /* RV2SV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpDEREF|OPpOUR_INTRO|OPpLVAL_INTRO),
     /* AV2ARYLEN  */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
-    /* RV2CV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpENTERSUB_HASTARG|OPpENTERSUB_AMPER|OPpENTERSUB_DB|OPpMAY_RETURN_CONSTANT|OPpENTERSUB_NOPAREN),
+    /* RV2CV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpENTERSUB_HASTARG|OPpENTERSUB_AMPER|OPpMAY_RETURN_CONSTANT|OPpENTERSUB_DB|OPpENTERSUB_NOPAREN),
     /* ANONCODE   */ (0),
     /* PROTOTYPE  */ (OPpARG1_MASK),
     /* REFGEN     */ (OPpARG1_MASK),
@@ -3248,7 +3248,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* RV2AV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpOUR_INTRO|OPpLVAL_INTRO),
     /* AELEMFAST  */ (255),
     /* AELEMFAST_LEX */ (255),
-    /* AELEM      */ (OPpARG2_MASK|OPpMAYBE_LVSUB|OPpLVAL_DEFER|OPpDEREF|OPpLVAL_INTRO),
+    /* AELEM      */ (OPpARG2_MASK|OPpMAYBE_LVSUB|OPpDEREF|OPpLVAL_DEFER|OPpLVAL_INTRO),
     /* ASLICE     */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpLVAL_INTRO),
     /* KVASLICE   */ (OPpMAYBE_LVSUB),
     /* AEACH      */ (OPpARG1_MASK),
@@ -3259,8 +3259,8 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* KEYS       */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
     /* DELETE     */ (OPpARG1_MASK|OPpSLICE|OPpLVAL_INTRO),
     /* EXISTS     */ (OPpARG1_MASK|OPpEXISTS_SUB),
-    /* RV2HV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpOUR_INTRO|OPpTRUEBOOL|OPpMAYBE_TRUEBOOL|OPpLVAL_INTRO),
-    /* HELEM      */ (OPpARG2_MASK|OPpMAYBE_LVSUB|OPpLVAL_DEFER|OPpDEREF|OPpLVAL_INTRO),
+    /* RV2HV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL|OPpOUR_INTRO|OPpLVAL_INTRO),
+    /* HELEM      */ (OPpARG2_MASK|OPpMAYBE_LVSUB|OPpDEREF|OPpLVAL_DEFER|OPpLVAL_INTRO),
     /* HSLICE     */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpLVAL_INTRO),
     /* KVHSLICE   */ (OPpMAYBE_LVSUB),
     /* UNPACK     */ (OPpARG4_MASK),
@@ -3294,7 +3294,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* ORASSIGN   */ (OPpARG1_MASK),
     /* DORASSIGN  */ (OPpARG1_MASK),
     /* METHOD     */ (OPpARG1_MASK),
-    /* ENTERSUB   */ (OPpENTERSUB_INARGS|OPpHINT_STRICT_REFS|OPpENTERSUB_HASTARG|OPpENTERSUB_AMPER|OPpENTERSUB_DB|OPpDEREF|OPpLVAL_INTRO),
+    /* ENTERSUB   */ (OPpENTERSUB_INARGS|OPpHINT_STRICT_REFS|OPpENTERSUB_HASTARG|OPpENTERSUB_AMPER|OPpDEREF|OPpENTERSUB_DB|OPpLVAL_INTRO),
     /* LEAVESUB   */ (OPpARG1_MASK|OPpREFCOUNTED),
     /* LEAVESUBLV */ (OPpARG1_MASK|OPpREFCOUNTED),
     /* CALLER     */ (OPpARG4_MASK|OPpOFFBYONE),
@@ -3497,8 +3497,8 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* INTROCV    */ (0),
     /* CLONECV    */ (0),
     /* PADRANGE   */ (OPpPADRANGE_COUNTMASK|OPpLVAL_INTRO),
-    /* REFASSIGN  */ (OPpARG2_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpPAD_STATE|OPpLVREF_TYPE|OPpLVAL_INTRO),
-    /* LVREF      */ (OPpARG1_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpPAD_STATE|OPpLVREF_TYPE|OPpLVAL_INTRO),
+    /* REFASSIGN  */ (OPpARG2_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpLVREF_TYPE|OPpPAD_STATE|OPpLVAL_INTRO),
+    /* LVREF      */ (OPpARG1_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpLVREF_TYPE|OPpPAD_STATE|OPpLVAL_INTRO),
     /* LVREFSLICE */ (OPpLVAL_INTRO),
     /* LVAVREF    */ (OPpARG1_MASK|OPpPAD_STATE|OPpLVAL_INTRO),
 
