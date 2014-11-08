@@ -1898,7 +1898,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000bb04,	/* pop */
 	0x0000bb04,	/* shift */
 	0x0002341d,	/* unshift */
-	0x0002d441,	/* sort */
+	0x0002d401,	/* sort */
 	0x00002409,	/* reverse */
 	0x00025441,	/* grepstart */
 	0x00000348,	/* grepwhile */
