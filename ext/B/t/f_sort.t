@@ -60,7 +60,7 @@ checkOptree(note   => q{},
 # 7  <0> pushmark s
 # 8  <#> gv[*articles] s
 # 9  <1> rv2av[t2] lKRM*/1
-# a  <2> aassign[t5] KS/COMMON
+# a  <2> aassign[t5] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 545 (eval 15):1) v
@@ -72,7 +72,7 @@ EOT_EOT
 # 7  <0> pushmark s
 # 8  <$> gv(*articles) s
 # 9  <1> rv2av[t1] lKRM*/1
-# a  <2> aassign[t3] KS/COMMON
+# a  <2> aassign[t3] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
     
@@ -97,7 +97,7 @@ checkOptree(note   => q{},
 # 7  <0> pushmark s
 # 8  <#> gv[*articles] s
 # 9  <1> rv2av[t2] lKRM*/1
-# a  <2> aassign[t3] KS/COMMON
+# a  <2> aassign[t3] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 546 (eval 15):1) v
@@ -109,7 +109,7 @@ EOT_EOT
 # 7  <0> pushmark s
 # 8  <$> gv(*articles) s
 # 9  <1> rv2av[t1] lKRM*/1
-# a  <2> aassign[t2] KS/COMMON
+# a  <2> aassign[t2] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
     
@@ -135,7 +135,7 @@ checkOptree(note   => q{},
 # 7  <0> pushmark s
 # 8  <#> gv[*articles] s
 # 9  <1> rv2av[t2] lKRM*/1
-# a  <2> aassign[t10] KS/COMMON
+# a  <2> aassign[t10] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 546 (eval 15):1) v
@@ -148,7 +148,7 @@ EOT_EOT
 # 7  <0> pushmark s
 # 8  <$> gv(*articles) s
 # 9  <1> rv2av[t1] lKRM*/1
-# a  <2> aassign[t6] KS/COMMON
+# a  <2> aassign[t6] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
     
@@ -173,7 +173,7 @@ checkOptree(note   => q{},
 # 7  <0> pushmark s
 # 8  <#> gv[*articles] s
 # 9  <1> rv2av[t2] lKRM*/1
-# a  <2> aassign[t3] KS/COMMON
+# a  <2> aassign[t3] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 546 (eval 15):1) v
@@ -185,7 +185,7 @@ EOT_EOT
 # 7  <0> pushmark s
 # 8  <$> gv(*articles) s
 # 9  <1> rv2av[t1] lKRM*/1
-# a  <2> aassign[t2] KS/COMMON
+# a  <2> aassign[t2] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
     
@@ -210,7 +210,7 @@ checkOptree(note   => q{},
 # 7  <0> pushmark s
 # 8  <#> gv[*articles] s
 # 9  <1> rv2av[t2] lKRM*/1
-# a  <2> aassign[t3] KS/COMMON
+# a  <2> aassign[t3] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 546 (eval 15):1) v
@@ -222,7 +222,7 @@ EOT_EOT
 # 7  <0> pushmark s
 # 8  <$> gv(*articles) s
 # 9  <1> rv2av[t1] lKRM*/1
-# a  <2> aassign[t2] KS/COMMON
+# a  <2> aassign[t2] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
     
@@ -247,7 +247,7 @@ checkOptree(note   => q{},
 # 7  <0> pushmark s
 # 8  <#> gv[*articles] s
 # 9  <1> rv2av[t2] lKRM*/1
-# a  <2> aassign[t3] KS/COMMON
+# a  <2> aassign[t3] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 546 (eval 15):1) v
@@ -259,7 +259,7 @@ EOT_EOT
 # 7  <0> pushmark s
 # 8  <$> gv(*articles) s
 # 9  <1> rv2av[t1] lKRM*/1
-# a  <2> aassign[t2] KS/COMMON
+# a  <2> aassign[t2] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
@@ -333,7 +333,7 @@ checkOptree(note   => q{},
 # 8  <0> pushmark s
 # 9  <#> gv[*sortedclass] s
 # a  <1> rv2av[t2] lKRM*/1
-# b  <2> aassign[t5] KS/COMMON
+# b  <2> aassign[t5] KS
 # c  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 546 (eval 15):1) v
@@ -347,7 +347,7 @@ EOT_EOT
 # 8  <0> pushmark s
 # 9  <$> gv(*sortedclass) s
 # a  <1> rv2av[t1] lKRM*/1
-# b  <2> aassign[t3] KS/COMMON
+# b  <2> aassign[t3] KS
 # c  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
     
@@ -608,7 +608,7 @@ checkOptree(name   => q{sort other::sub LIST },
 # 8  <0> pushmark s
 # 9  <#> gv[*new] s
 # a  <1> rv2av[t2] lKRM*/1
-# b  <2> aassign[t5] KS/COMMON
+# b  <2> aassign[t5] KS
 # c  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 614 (eval 36):2) v:{
@@ -622,7 +622,7 @@ EOT_EOT
 # 8  <0> pushmark s
 # 9  <$> gv(*new) s
 # a  <1> rv2av[t1] lKRM*/1
-# b  <2> aassign[t3] KS/COMMON
+# b  <2> aassign[t3] KS
 # c  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
     
@@ -650,7 +650,7 @@ checkOptree(note   => q{},
 # 8  <0> pushmark s
 # 9  <#> gv[*new] s
 # a  <1> rv2av[t2] lKRM*/1
-# b  <2> aassign[t5] KS/COMMON
+# b  <2> aassign[t5] KS
 # c  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 546 (eval 15):1) v
@@ -664,7 +664,7 @@ EOT_EOT
 # 8  <0> pushmark s
 # 9  <$> gv(*new) s
 # a  <1> rv2av[t1] lKRM*/1
-# b  <2> aassign[t3] KS/COMMON
+# b  <2> aassign[t3] KS
 # c  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
     
@@ -688,7 +688,7 @@ my ($expect, $expect_nt) = (<<'EOT_EOT', <<'EONT_EONT');
 # 7  <0> pushmark s
 # 8  <#> gv[*new] s
 # 9  <1> rv2av[t2] lKRM*/1
-# a  <2> aassign[t14] KS/COMMON
+# a  <2> aassign[t14] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 578 (eval 15):1) v:%,{
@@ -701,7 +701,7 @@ EOT_EOT
 # 7  <0> pushmark s
 # 8  <$> gv(*new) s
 # 9  <1> rv2av[t1] lKRM*/1
-# a  <2> aassign[t6] KS/COMMON
+# a  <2> aassign[t6] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
@@ -733,7 +733,7 @@ checkOptree(note   => q{},
 # 7  <0> pushmark s
 # 8  <#> gv[*new] s
 # 9  <1> rv2av[t2] lKRM*/1
-# a  <2> aassign[t14] KS/COMMON
+# a  <2> aassign[t14] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 578 (eval 15):1) v:%,{
@@ -746,7 +746,7 @@ EOT_EOT
 # 7  <0> pushmark s
 # 8  <$> gv(*new) s
 # 9  <1> rv2av[t1] lKRM*/1
-# a  <2> aassign[t6] KS/COMMON
+# a  <2> aassign[t6] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
     
@@ -772,7 +772,7 @@ checkOptree(note   => q{},
 # 7  <0> pushmark s
 # 8  <#> gv[*articles] s
 # 9  <1> rv2av[t2] lKRM*/1
-# a  <2> aassign[t8] KS/COMMON
+# a  <2> aassign[t8] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 546 (eval 15):1) v
@@ -785,7 +785,7 @@ EOT_EOT
 # 7  <0> pushmark s
 # 8  <$> gv(*articles) s
 # 9  <1> rv2av[t1] lKRM*/1
-# a  <2> aassign[t4] KS/COMMON
+# a  <2> aassign[t4] KS
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
     
