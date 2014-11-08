@@ -442,7 +442,7 @@ fork		fork			ck_null		ist0
 wait		wait			ck_null		isT0	
 waitpid		waitpid			ck_fun		isT@	S S
 system		system			ck_exec		imsT@	S? L
-exec		exec			ck_exec		dimsT@	S? L
+exec		exec			ck_exec		imsT@	S? L
 kill		kill			ck_fun		dimsT@	L
 getppid		getppid			ck_null		isT0	
 getpgrp		getpgrp			ck_fun		isT%	S?
