@@ -1921,7 +1921,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000100,	/* leavesublv */
 	0x00009b08,	/* caller */
 	0x0000240d,	/* warn */
-	0x0000244d,	/* die */
+	0x0000240d,	/* die */
 	0x00009b04,	/* reset */
 	0x00000400,	/* lineseq */
 	0x00000a04,	/* nextstate */
