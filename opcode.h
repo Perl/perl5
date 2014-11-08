@@ -2044,7 +2044,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0001141c,	/* waitpid */
 	0x0002941d,	/* system */
 	0x0002941d,	/* exec */
-	0x0000245d,	/* kill */
+	0x0000241d,	/* kill */
 	0x0000001c,	/* getppid */
 	0x00009b1c,	/* getpgrp */
 	0x0009941c,	/* setpgrp */
