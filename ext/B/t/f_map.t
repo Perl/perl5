@@ -239,14 +239,13 @@ checkOptree(note   => q{},
 # 7  <|> mapwhile(other->8)[t9] lK
 # 8      <#> gvsv[*_] s
 # 9      <1> lc[t4] sK/1
-# a      <@> stringify[t5] sK/1
-# b      <$> const[IV 1] s
+# a      <$> const[IV 1] s
 #            goto 7
-# c  <0> pushmark s
-# d  <#> gv[*hash] s
-# e  <1> rv2hv lKRM*/1
-# f  <2> aassign[t10] KS/COMMON
-# g  <1> leavesub[1 ref] K/REFC,1
+# b  <0> pushmark s
+# c  <#> gv[*hash] s
+# d  <1> rv2hv lKRM*/1
+# e  <2> aassign[t10] KS/COMMON
+# f  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 560 (eval 15):1) v
 # 2  <0> pushmark s
@@ -257,14 +256,13 @@ EOT_EOT
 # 7  <|> mapwhile(other->8)[t5] lK
 # 8      <$> gvsv(*_) s
 # 9      <1> lc[t2] sK/1
-# a      <@> stringify[t3] sK/1
-# b      <$> const(IV 1) s
+# a      <$> const(IV 1) s
 #            goto 7
-# c  <0> pushmark s
-# d  <$> gv(*hash) s
-# e  <1> rv2hv lKRM*/1
-# f  <2> aassign[t6] KS/COMMON
-# g  <1> leavesub[1 ref] K/REFC,1
+# b  <0> pushmark s
+# c  <$> gv(*hash) s
+# d  <1> rv2hv lKRM*/1
+# e  <2> aassign[t6] KS/COMMON
+# f  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
 
@@ -287,14 +285,13 @@ checkOptree(note   => q{},
 # 7  <|> mapwhile(other->8)[t9] lK
 # 8      <#> gvsv[*_] s
 # 9      <1> lc[t4] sK/1
-# a      <@> stringify[t5] sK/1
-# b      <$> const[IV 1] s
+# a      <$> const[IV 1] s
 #            goto 7
-# c  <0> pushmark s
-# d  <#> gv[*hash] s
-# e  <1> rv2hv lKRM*/1
-# f  <2> aassign[t10] KS/COMMON
-# g  <1> leavesub[1 ref] K/REFC,1
+# b  <0> pushmark s
+# c  <#> gv[*hash] s
+# d  <1> rv2hv lKRM*/1
+# e  <2> aassign[t10] KS/COMMON
+# f  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 560 (eval 15):1) v
 # 2  <0> pushmark s
@@ -305,14 +302,13 @@ EOT_EOT
 # 7  <|> mapwhile(other->8)[t5] lK
 # 8      <$> gvsv(*_) s
 # 9      <1> lc[t2] sK/1
-# a      <@> stringify[t3] sK/1
-# b      <$> const(IV 1) s
+# a      <$> const(IV 1) s
 #            goto 7
-# c  <0> pushmark s
-# d  <$> gv(*hash) s
-# e  <1> rv2hv lKRM*/1
-# f  <2> aassign[t6] KS/COMMON
-# g  <1> leavesub[1 ref] K/REFC,1
+# b  <0> pushmark s
+# c  <$> gv(*hash) s
+# d  <1> rv2hv lKRM*/1
+# e  <2> aassign[t6] KS/COMMON
+# f  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
 
