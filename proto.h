@@ -3164,6 +3164,13 @@ PERL_CALLCONV char*	Perl_ninstr(const char* big, const char* bigend, const char*
 #define PERL_ARGS_ASSERT_NINSTR	\
 	assert(big); assert(bigend); assert(little); assert(lend)
 
+PERL_CALLCONV_NO_RET void	Perl_noperl_die(const char* pat, ...)
+			__attribute__noreturn__
+			__attribute__format__(__printf__,1,2)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_NOPERL_DIE	\
+	assert(pat)
+
 PERL_CALLCONV int	Perl_nothreadhook(pTHX);
 PERL_CALLCONV OP*	Perl_oopsAV(pTHX_ OP* o)
 			__attribute__warn_unused_result__
@@ -5153,11 +5160,11 @@ PERL_CALLCONV void	Perl_write_to_stderr(pTHX_ SV* msv)
 #define PERL_ARGS_ASSERT_WRITE_TO_STDERR	\
 	assert(msv)
 
-PERL_CALLCONV void	Perl_xs_apiversion_bootcheck(SV *module, const char *api_p, STRLEN api_len)
-			__attribute__nonnull__(1)
+PERL_CALLCONV void	Perl_xs_boot_epilog(pTHX_ const U32 ax);
+PERL_CALLCONV I32	Perl_xs_handshake(const U32 key, void * v_my_perl, ...)
 			__attribute__nonnull__(2);
-#define PERL_ARGS_ASSERT_XS_APIVERSION_BOOTCHECK	\
-	assert(module); assert(api_p)
+#define PERL_ARGS_ASSERT_XS_HANDSHAKE	\
+	assert(v_my_perl)
 
 PERL_CALLCONV void	Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p, STRLEN xs_len)
 			__attribute__nonnull__(pTHX_3);

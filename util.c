@@ -5331,6 +5331,108 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
 #endif /* #ifndef PERL_GLOBAL_STRUCT_PRIVATE */
 #endif /* PERL_IMPLICIT_CONTEXT */
 
+
+/* The meaning of the varargs is determined U32 key arg. This is not a format
+   string. The U32 key is assembled with HS_KEY.
+
+   v_my_perl arg is "PerlInterpreter * my_perl" if PERL_IMPLICIT_CONTEXT and
+   otherwise "CV * cv" (boot xsub's CV *). v_my_perl will catch where a threaded
+   future perl526.dll calling IO.dll for example, and IO.dll was linked with
+   threaded perl524.dll, and both perl526.dll and perl524.dll are in %PATH and
+   the Win32 DLL loader sucessfully can load IO.dll into the process but
+   simultaniously it loaded a interp of a different version into the process,
+   and XS code will naturally pass SV*s created by perl524.dll for perl526.dll
+   to use through perl526.dll's my_perl->Istack_base.
+
+   v_my_perl (v=void) can not be the first arg since then key will be out of
+   place in a threaded vs non-threaded mixup and analyzing the key number's
+   bitfields won't reveal the problem since it will be a valid key
+   (unthreaded perl) on interp side, but croak reports the XS mod's key as
+   gibberish (it is really my_perl ptr) (threaded XS mod), or if threaded perl
+   and unthreaded XS module, threaded perl will look at uninit C stack or uninit
+   register to get var key (remember it assumes 1st arg is interp cxt).
+
+Perl_xs_handshake(U32 key, void * v_my_perl, [U32 items, U32 ax], [char * api_version], [char * xs_version]) */
+I32
+Perl_xs_handshake(const U32 key, void * v_my_perl, ...)
+{
+    va_list args;
+    U32 items, ax;
+#ifdef PERL_IMPLICIT_CONTEXT
+    dTHX;
+#endif
+    PERL_ARGS_ASSERT_XS_HANDSHAKE;
+    va_start(args, v_my_perl);
+
+    if((key & HSm_KEY_MATCH) != (HS_KEY(FALSE, "", "") & HSm_KEY_MATCH))
+	noperl_die("BOOT:: Invalid handshake key got %X needed %X"
+			", binaries are mismatched",    (key & HSm_KEY_MATCH)
+			, (HS_KEY(FALSE, "", "") & HSm_KEY_MATCH));
+/* try to catch where a 2nd threaded perl interp DLL is loaded into a process
+   by a XS DLL compiled against the wrong interl DLL b/c of bad @INC, and the
+   2nd threaded perl interp DLL never initialized its TLS/PERL_SYS_INIT3 so
+   dTHX call from 2nd interp DLL can't return the my_perl that pp_entersub
+   passed to the XS DLL */
+    {
+	void * got;
+	void * need;
+#ifdef PERL_IMPLICIT_CONTEXT
+	tTHX xs_interp = (tTHX)v_my_perl;
+	got = xs_interp;
+	need = my_perl;
+#else
+/* try to catch where an unthreaded perl interp DLL (for ex. perl522.dll) is
+   loaded into a process by a XS DLL built by an unthreaded perl522.dll perl,
+   but the DynaLoder/Perl that started the process and loaded the XS DLL is
+   unthreaded perl524.dll, since unthreadeds don't pass my_perl (a unique *)
+   through pp_entersub, use a unique value (which is a pointer to PL_stack_sp's
+   location in the unthreaded perl binary) stored in CV * to figure out if this
+   Perl_xs_handshake was called by the same pp_entersub */
+	CV* cv = (CV*)v_my_perl;
+	SV *** xs_spp = (SV***)CvHSCXT(cv);
+	got = xs_spp;
+	need = &PL_stack_sp;
+#endif
+	if(got != need)/* recycle branch and string from above */
+	    noperl_die("BOOT:: Invalid handshake key got %X needed %X"
+			    ", binaries are mismatched", got, need);
+    }
+
+    if(key & HSf_POPMARK) {
+	ax = POPMARK;
+	{   SV **mark = PL_stack_base + ax++;
+	    {   dSP;
+		items = (I32)(SP - MARK);
+	    }
+	}
+    } else {
+	items = va_arg(args, U32);
+	ax = va_arg(args, U32);
+    }
+    {
+	U32 apiverlen;
+	assert(HS_GETAPIVERLEN(key) <= UCHAR_MAX);
+	if(apiverlen = HS_GETAPIVERLEN(key)) {
+	    char * api_p = va_arg(args, char*);
+	    if(apiverlen != sizeof("v" PERL_API_VERSION_STRING)-1
+		|| memNE(api_p, "v" PERL_API_VERSION_STRING,
+			 sizeof("v" PERL_API_VERSION_STRING)-1))
+		Perl_croak_nocontext("Perl API version %s of %"SVf" does not match %s",
+				    api_p, SVfARG(PL_stack_base[ax + 0]),
+				    "v" PERL_API_VERSION_STRING);
+	}
+    }
+    {
+	U32 xsverlen;
+	assert(HS_GETXSVERLEN(key) <= UCHAR_MAX && HS_GETXSVERLEN(key) <= HS_APIVERLEN_MAX);
+	if(xsverlen = HS_GETXSVERLEN(key))
+	    Perl_xs_version_bootcheck(aTHX_
+		items, ax, va_arg(args, char*), xsverlen);
+    }
+    va_end(args);
+    return ax;
+}
+
 void
 Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
 			  STRLEN xs_len)
@@ -5376,19 +5478,6 @@ Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
 	    Perl_sv_2mortal(aTHX_ xpt);
 	    Perl_croak_sv(aTHX_ xpt);
 	}
-    }
-}
-
-void
-Perl_xs_apiversion_bootcheck(SV *module, const char *api_p,
-			     STRLEN api_len)
-{
-    PERL_ARGS_ASSERT_XS_APIVERSION_BOOTCHECK;
-
-    if(api_len != sizeof("v" PERL_API_VERSION_STRING)-1
-	|| memNE(api_p, "v" PERL_API_VERSION_STRING, sizeof("v" PERL_API_VERSION_STRING)-1)) {
-	Perl_croak_nocontext("Perl API version %s of %"SVf" does not match %s",
-			    api_p, SVfARG(module), "v" PERL_API_VERSION_STRING);
     }
 }
 

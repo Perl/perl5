@@ -504,8 +504,8 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 	Safefree(padlist);
 	CvPADLIST_set(&cvbody, NULL);
     }
-    else if (CvISXSUB(&cvbody)) /* future union */
-	CvRESERVED(&cvbody) = NULL;
+    else if (CvISXSUB(&cvbody))
+	CvHSCXT(&cvbody) = NULL;
     /* else is (!CvISXSUB(&cvbody) && !CvPADLIST(&cvbody)) {do nothing;} */
 
 

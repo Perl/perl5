@@ -5495,6 +5495,26 @@ END_EXTERN_C
 #undef PERLVARI
 #undef PERLVARIC
 
+#if !defined(MULTIPLICITY)
+/* Set up PERLVAR macros for populating structs */
+#  define PERLVAR(prefix,var,type) type prefix##var;
+/* 'var' is an array of length 'n' */
+#  define PERLVARA(prefix,var,n,type) type prefix##var[n];
+/* initialize 'var' to init' */
+#  define PERLVARI(prefix,var,type,init) type prefix##var;
+/* like PERLVARI, but make 'var' a const */
+#  define PERLVARIC(prefix,var,type,init) type prefix##var;
+
+/* this is never instantiated, is it just used for sizeof(struct PerlHandShakeInterpreter) */
+struct PerlHandShakeInterpreter {
+#  include "intrpvar.h"
+};
+#  undef PERLVAR
+#  undef PERLVARA
+#  undef PERLVARI
+#  undef PERLVARIC
+#endif
+
 START_EXTERN_C
 
 /* dummy variables that hold pointers to both runops functions, thus forcing

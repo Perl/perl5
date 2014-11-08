@@ -75,9 +75,8 @@ See L<perlguts/Autoloading with XSUBs>.
 #else
 #  define CvPADLIST_set(sv, padlist) (CvPADLIST(sv) = (padlist))
 #endif
-/* CvRESERVED is a placeholder and will be going away soon */
-#define CvRESERVED(sv)	  *(assert_(CvISXSUB((CV*)(sv))) \
-	&(((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_reserved))
+#define CvHSCXT(sv)	  *(assert_(CvISXSUB((CV*)(sv))) \
+	&(((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_hscxt))
 #ifdef DEBUGGING
 #  if PTRSIZE == 8
 #    define PoisonPADLIST(sv) \

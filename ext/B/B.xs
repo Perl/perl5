@@ -1947,10 +1947,10 @@ CvPADLIST(cv)
 #endif
 
 SV *
-CvRESERVED(cv)
+CvHSCXT(cv)
 	B::CV	cv
     CODE:
-	RETVAL = newSViv(CvISXSUB(cv) ? PTR2IV(CvRESERVED(cv)) : 0);
+	RETVAL = newSVuv(CvISXSUB(cv) ? PTR2UV(CvHSCXT(cv)) : 0);
     OUTPUT:
 	RETVAL
 

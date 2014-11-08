@@ -13631,13 +13631,14 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			: gv_dup(CvGV(sstr), param);
 
 		if (!CvISXSUB(sstr)) {
-                    if(CvPADLIST(sstr))
-                        CvPADLIST_set(dstr, padlist_dup(CvPADLIST(sstr), param));
-                    else
-                        CvPADLIST_set(dstr, NULL);
-                } else { /* future union here */
-                    CvRESERVED(dstr) = NULL;
-                }
+		    PADLIST * padlist = CvPADLIST(sstr);
+		    if(padlist)
+			padlist = padlist_dup(padlist, param);
+		    CvPADLIST_set(dstr, padlist);
+		} else
+/* unthreaded perl can't sv_dup so we dont support unthreaded's CvHSCXT */
+		    PoisonPADLIST(dstr);
+
 		CvOUTSIDE(dstr)	=
 		    CvWEAKOUTSIDE(sstr)
 		    ? cv_dup(    CvOUTSIDE(dstr), param)

@@ -1,5 +1,9 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.26 - not released yet
+  - Support added for XS handshake API introduced in 5.21.6.
+  - backported S_croak_xs_usage optimized on threaded builds
+
 3.24 - Wed Mar  5 18:20:00 CET 2014
   - Native Android build fixes
   - More lenient syntax for embedded TYPEMAP blocks in XS:

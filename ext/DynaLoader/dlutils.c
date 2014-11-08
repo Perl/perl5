@@ -20,6 +20,10 @@
 #endif
 #define MY_CXT_KEY "DynaLoader::_guts" XS_VERSION
 
+/* disable version checking since DynaLoader can't be DynaLoaded */
+#undef dXSBOOTARGSXSAPIVERCHK
+#define dXSBOOTARGSXSAPIVERCHK dXSARGS
+
 typedef struct {
     SV*		x_dl_last_error;	/* pointer to allocated memory for
 					   last error message */

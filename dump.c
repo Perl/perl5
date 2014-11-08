@@ -1990,7 +1990,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    }
 	}
 	else
-	    Perl_dump_indent(aTHX_ level, file, "  RESERVED = 0x%p\n", CvRESERVED(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  HSCXT = 0x%p\n", CvHSCXT(sv));
 	{
 	    const CV * const outside = CvOUTSIDE(sv);
 	    Perl_dump_indent(aTHX_ level, file, "  OUTSIDE = 0x%"UVxf" (%s)\n",

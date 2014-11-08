@@ -8852,7 +8852,11 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
         assert(!CvDYNFILE(cv)); /* cv_undef should have turned it off */
         CvISXSUB_on(cv);
         CvXSUB(cv) = subaddr;
+#ifndef PERL_IMPLICIT_CONTEXT
+        CvHSCXT(cv) = &PL_stack_sp;
+#else
         PoisonPADLIST(cv);
+#endif
     
         if (name)
             process_special_blocks(0, name, gv, cv);

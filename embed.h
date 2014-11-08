@@ -1257,6 +1257,7 @@
 #define newSVavdefelem(a,b,c)	Perl_newSVavdefelem(aTHX_ a,b,c)
 #define newXS_len_flags(a,b,c,d,e,f,g)	Perl_newXS_len_flags(aTHX_ a,b,c,d,e,f,g)
 #define nextargv(a,b)		Perl_nextargv(aTHX_ a,b)
+#define noperl_die		Perl_noperl_die
 #define oopsAV(a)		Perl_oopsAV(aTHX_ a)
 #define oopsHV(a)		Perl_oopsHV(aTHX_ a)
 #define op_const_sv(a,b)	Perl_op_const_sv(aTHX_ a,b)
@@ -1318,6 +1319,7 @@
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
 #define watch(a)		Perl_watch(aTHX_ a)
 #define write_to_stderr(a)	Perl_write_to_stderr(aTHX_ a)
+#define xs_boot_epilog(a)	Perl_xs_boot_epilog(aTHX_ a)
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
 #define yyerror_pv(a,b)		Perl_yyerror_pv(aTHX_ a,b)
 #define yyerror_pvn(a,b,c)	Perl_yyerror_pvn(aTHX_ a,b,c)

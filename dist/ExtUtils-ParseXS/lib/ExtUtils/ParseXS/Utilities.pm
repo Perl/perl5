@@ -453,10 +453,10 @@ EOF
 
 /* prototype to pass -Wmissing-prototypes */
 STATIC void
-S_croak_xs_usage(pTHX_ const CV *const cv, const char *const params);
+S_croak_xs_usage(const CV *const cv, const char *const params);
 
 STATIC void
-S_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
+S_croak_xs_usage(const CV *const cv, const char *const params)
 {
     const GV *const gv = CvGV(cv);
 
@@ -468,21 +468,17 @@ S_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
         const char *const hvname = stash ? HvNAME(stash) : NULL;
 
         if (hvname)
-            Perl_croak(aTHX_ "Usage: %s::%s(%s)", hvname, gvname, params);
+	    Perl_croak_nocontext("Usage: %s::%s(%s)", hvname, gvname, params);
         else
-            Perl_croak(aTHX_ "Usage: %s(%s)", gvname, params);
+	    Perl_croak_nocontext("Usage: %s(%s)", gvname, params);
     } else {
         /* Pants. I don't think that it should be possible to get here. */
-        Perl_croak(aTHX_ "Usage: CODE(0x%"UVxf")(%s)", PTR2UV(cv), params);
+	Perl_croak_nocontext("Usage: CODE(0x%"UVxf")(%s)", PTR2UV(cv), params);
     }
 }
 #undef  PERL_ARGS_ASSERT_CROAK_XS_USAGE
 
-#ifdef PERL_IMPLICIT_CONTEXT
-#define croak_xs_usage(a,b)    S_croak_xs_usage(aTHX_ a,b)
-#else
 #define croak_xs_usage        S_croak_xs_usage
-#endif
 
 #endif
 

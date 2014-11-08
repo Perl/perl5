@@ -5035,6 +5035,15 @@ read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
     return 1;
 }
 
+/* removes boilerplate code at the end of each boot_Module xsub */
+void
+Perl_xs_boot_epilog(pTHX_ const U32 ax)
+{
+  if (PL_unitcheckav)
+	call_list(PL_scopestack_ix, PL_unitcheckav);
+    XSRETURN_YES;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

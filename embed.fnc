@@ -275,6 +275,7 @@ Anprd	|void	|croak_xs_usage	|NN const CV *const cv \
 				|NN const char *const params
 npr	|void	|croak_no_mem
 nprX	|void	|croak_popstack
+fnprx	|void	|noperl_die|NN const char* pat|...
 #if defined(WIN32)
 norx	|void	|win32_croak_not_implemented|NN const char * fname
 #endif
@@ -2695,11 +2696,8 @@ Apo	|void*	|my_cxt_init	|NN int *index|size_t size
 : XS_VERSION_BOOTCHECK
 Xpo	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
 				|STRLEN xs_len
-: This function is an implementation detail. The public API for this is
-: XS_APIVERSION_BOOTCHECK
-Xpon	|void	|xs_apiversion_bootcheck|NN SV *module|NN const char *api_p \
-				|STRLEN api_len
-
+Xpon	|I32	|xs_handshake	|const U32 key|NN void * v_my_perl|...
+Xp	|void	|xs_boot_epilog	|const U32 ax
 #ifndef HAS_STRLCAT
 Apnod	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif

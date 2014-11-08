@@ -891,11 +891,13 @@ EOF
   print Q(<<"EOF");
 #XS_EXTERNAL(boot_$self->{Module_cname}); /* prototype to pass -Wmissing-prototypes */
 #XS_EXTERNAL(boot_$self->{Module_cname})
-EOF
-
-  print Q(<<"EOF");
 #[[
+##if PERL_VERSION_LE(5, 21, 5)
 #    dVAR; dXSARGS;
+##else
+#    dVAR; ${\($self->{WantVersionChk} ?
+     'dXSBOOTARGSXSAPIVERCHK;' : 'dXSBOOTARGSAPIVERCHK;')}
+##endif
 EOF
 
   #Under 5.8.x and lower, newXS is declared in proto.h as expecting a non-const
@@ -916,15 +918,26 @@ EOF
   print Q(<<"EOF");
 #    PERL_UNUSED_VAR(cv); /* -W */
 #    PERL_UNUSED_VAR(items); /* -W */
-##ifdef XS_APIVERSION_BOOTCHECK
-#    XS_APIVERSION_BOOTCHECK;
-##endif
 EOF
 
-  print Q(<<"EOF") if $self->{WantVersionChk};
+  if( $self->{WantVersionChk}){
+    print Q(<<"EOF") ;
+##if PERL_VERSION_LE(5, 21, 5)
 #    XS_VERSION_BOOTCHECK;
-#
+##  ifdef XS_APIVERSION_BOOTCHECK
+#    XS_APIVERSION_BOOTCHECK;
+##  endif
+##endif
+
 EOF
+  } else {
+    print Q(<<"EOF") ;
+##if PERL_VERSION_LE(5, 21, 5) && defined(XS_APIVERSION_BOOTCHECK)
+#  XS_APIVERSION_BOOTCHECK;
+##endif
+
+EOF
+  }
 
   print Q(<<"EOF") if defined $self->{XsubAliases} or defined $self->{interfaces};
 #    {
@@ -960,14 +973,15 @@ EOF
   }
 
   print Q(<<'EOF');
-##if (PERL_REVISION == 5 && PERL_VERSION >= 9)
-#  if (PL_unitcheckav)
-#       call_list(PL_scopestack_ix, PL_unitcheckav);
-##endif
-EOF
-
-  print Q(<<"EOF");
+##if PERL_VERSION_LE(5, 21, 5)
+##  if PERL_VERSION_GE(5, 9, 0)
+#    if (PL_unitcheckav)
+#        call_list(PL_scopestack_ix, PL_unitcheckav);
+##  endif
 #    XSRETURN_YES;
+##else
+#    Perl_xs_boot_epilog(aTHX_ ax);
+##endif
 #]]
 #
 EOF

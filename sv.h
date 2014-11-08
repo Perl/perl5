@@ -594,7 +594,7 @@ typedef U32 cv_flags_t;
     char *	xcv_file;							\
     union {									\
 	PADLIST *	xcv_padlist;						\
-	void *		xcv_reserved;						\
+	void *		xcv_hscxt;						\
     }		xcv_padlist_u;							\
     CV *	xcv_outside;							\
     U32		xcv_outside_seq; /* the COP sequence (at the point of our	\

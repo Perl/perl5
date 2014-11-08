@@ -5217,6 +5217,22 @@ vfprintf(FILE *fd, char *pat, char *args)
 
 #endif
 
+/* print a failure format string message to stderr and fail exit the process
+   using only libc without depending on any perl data structures being
+   initialized.
+*/
+
+void
+Perl_noperl_die(const char* pat, ...)
+{
+    va_list(arglist);
+    PERL_ARGS_ASSERT_NOPERL_DIE;
+    va_start(arglist, pat);
+    vfprintf(stderr, pat, arglist);
+    va_end(arglist);
+    exit(1);
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd
