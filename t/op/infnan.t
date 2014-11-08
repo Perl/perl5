@@ -69,7 +69,9 @@ cmp_ok($NInf + $NInf, '==', $NInf, "-Inf - Inf is -Inf");
 cmp_ok($PInf * 2, '==', $PInf, "twice Inf is Inf");
 cmp_ok($PInf / 2, '==', $PInf, "half of Inf is Inf");
 
-cmp_ok($PInf * $PInf, '==', $PInf, "-Inf * +Inf is +Inf");
+cmp_ok($PInf * $PInf, '==', $PInf, "+Inf * +Inf is +Inf");
+cmp_ok($PInf * $NInf, '==', $NInf, "+Inf * -Inf is -Inf");
+cmp_ok($NInf * $PInf, '==', $NInf, "-Inf * +Inf is -Inf");
 cmp_ok($NInf * $NInf, '==', $PInf, "-Inf * -Inf is +Inf");
 
 is(sprintf("%g", $PInf), "Inf", "$PInf sprintf %g is Inf");
