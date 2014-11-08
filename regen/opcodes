@@ -84,7 +84,7 @@ rcatline	append I/O operator	ck_null		t$
 regcmaybe	regexp internal guard	ck_fun		s1	S
 regcreset	regexp internal reset	ck_fun		s1	S
 regcomp		regexp compilation	ck_null		s|	S
-match		pattern match (m//)	ck_match	d/
+match		pattern match (m//)	ck_match	/
 qr		pattern quote (qr//)	ck_match	s/
 subst		substitution (s///)	ck_match	dis/	S
 substcont	substitution iterator	ck_null		dis|	
