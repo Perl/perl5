@@ -5221,8 +5221,8 @@ typedef enum {
 
 #define HINT_FEATURE_MASK	0x1c000000 /* 3 bits for feature bundles */
 
-				/* Note: Used for NATIVE_HINTS, currently
-				   defined by vms/vmsish.h:
+				/* Note: Used for HINT_M_VMSISH_*,
+				   currently defined by vms/vmsish.h:
 				0x40000000
 				0x80000000
 				 */

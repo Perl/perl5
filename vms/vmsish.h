@@ -280,15 +280,13 @@
 
 #define COMPLEX_STATUS	1	/* We track both "POSIX" and VMS values */
 
-#define HINT_V_VMSISH		24
 #define HINT_M_VMSISH_STATUS	0x40000000 /* system, $? return VMS status */
 #define HINT_M_VMSISH_TIME	0x80000000 /* times are local, not UTC */
-#define NATIVE_HINTS		((PL_hints >> HINT_V_VMSISH) & OPpHINT_M_VMSISH_MASK)
 
 #ifdef PERL_IMPLICIT_CONTEXT
-#  define TEST_VMSISH(h)	(my_perl && PL_curcop && (PL_curcop->op_private & ((h) >> HINT_V_VMSISH)))
+#  define TEST_VMSISH(h)	(my_perl && PL_curcop && (PL_curcop->cop_hints & (h)))
 #else
-#  define TEST_VMSISH(h)	(PL_curcop && (PL_curcop->op_private & ((h) >> HINT_V_VMSISH)))
+#  define TEST_VMSISH(h)	(PL_curcop && (PL_curcop->cop_hints & (h)))
 #endif
 #define VMSISH_STATUS	TEST_VMSISH(HINT_M_VMSISH_STATUS)
 #define VMSISH_TIME	TEST_VMSISH(HINT_M_VMSISH_TIME)

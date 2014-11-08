@@ -287,10 +287,6 @@ use strict;
 for (qw(nextstate dbstate)) {
     addbits($_,
         5 => qw(OPpHUSH_VMSISH          HUSH),
-        # should match HINT_M_VMSISH_STATUS, HINT_M_VMSISH_TIME
-        6 => qw(OPpHINT_M_VMSISH_STATUS VMSISH_STATUS),
-        7 => qw(OPpHINT_M_VMSISH_TIME   VMSISH_TIME),
-
     );
 }
 

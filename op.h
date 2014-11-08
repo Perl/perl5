@@ -163,9 +163,6 @@ Deprecated.  Use C<GIMME_V> instead.
  in dynamic context */
 #define OPpENTERSUB_LVAL_MASK (OPpLVAL_INTRO|OPpENTERSUB_INARGS)
 
-/* VMS-specific hints in COPs */
-#define OPpHINT_M_VMSISH_MASK (OPpHINT_M_VMSISH_STATUS|OPpHINT_M_VMSISH_TIME)
-
 
 
 struct op {
