@@ -102,16 +102,20 @@ ok(!defined eval { $a = chr("-Inf") }, "chr(stringy -Inf) undef");
 like($@, qr/Cannot chr/, "stringy -Inf chr() fails");
 
 for my $f (@packi_fmt) {
+    undef $a;
     ok(!defined eval { $a = pack($f, $PInf) }, "pack $f +Inf undef");
     like($@, $f eq 'w' ? qr/Cannot compress Inf/: qr/Cannot pack Inf/,
          "+Inf pack $f fails");
+    undef $a;
     ok(!defined eval { $a = pack($f, "Inf") },
       "pack $f stringy +Inf undef");
     like($@, $f eq 'w' ? qr/Cannot compress Inf/: qr/Cannot pack Inf/,
          "stringy +Inf pack $f fails");
+    undef $a;
     ok(!defined eval { $a = pack($f, $NInf) }, "pack $f -Inf undef");
     like($@, $f eq 'w' ? qr/Cannot compress -Inf/: qr/Cannot pack -Inf/,
          "-Inf pack $f fails");
+    undef $a;
     ok(!defined eval { $a = pack($f, "-Inf") },
       "pack $f stringy -Inf undef");
     like($@, $f eq 'w' ? qr/Cannot compress -Inf/: qr/Cannot pack -Inf/,
@@ -119,19 +123,25 @@ for my $f (@packi_fmt) {
 }
 
 for my $f (@packf_fmt) {
+    undef $a;
+    undef $b;
     ok(defined eval { $a = pack($f, $PInf) }, "pack $f +Inf defined");
     eval { $b = unpack($f, $a) };
     cmp_ok($b, '==', $PInf, "pack $f +Inf equals $PInf");
 
+    undef $a;
+    undef $b;
     ok(defined eval { $a = pack($f, $NInf) }, "pack $f -Inf defined");
     eval { $b = unpack($f, $a) };
     cmp_ok($b, '==', $NInf, "pack $f -Inf equals $NInf");
 }
 
 for my $f (@packs_fmt) {
+    undef $a;
     ok(defined eval { $a = pack($f, $PInf) }, "pack $f +Inf defined");
     is($a, pack($f, "Inf"), "pack $f +Inf same as 'Inf'");
 
+    undef $a;
     ok(defined eval { $a = pack($f, $NInf) }, "pack $f -Inf defined");
     is($a, pack($f, "-Inf"), "pack $f -Inf same as 'Inf'");
 }
