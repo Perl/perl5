@@ -717,7 +717,6 @@ addbits('split', 7 => qw(OPpSPLIT_IMPLIM IMPLIM)); # implicit limit
 
 
 
-# OPpLVREF_TYPE must not conflict with generic magic flags in mg.h.
 addbits($_,
     2 => qw(OPpLVREF_ELEM ELEM   ),
     3 => qw(OPpLVREF_ITER ITER   ),
