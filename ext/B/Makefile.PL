@@ -6,12 +6,6 @@ use warnings;
 
 my $core = grep { $_ eq 'PERL_CORE=1' } @ARGV;
 
-WriteMakefile(
-    NAME	    => "B",
-    VERSION_FROM    => "B.pm",
-    realclean	    => {FILES=> 'const-c.inc const-xs.inc'},
-);
-
 my $headerpath;
 if ($core) {
     $headerpath = File::Spec->catdir(File::Spec->updir, File::Spec->updir);
@@ -23,6 +17,7 @@ if ($core) {
 my @names = ({ name => 'HEf_SVKEY', macro => 1, type => "IV" },
              qw(SVTYPEMASK SVt_PVGV SVt_PVHV PAD_FAKELEX_ANON PAD_FAKELEX_MULTI));
 
+my @depend;
 
 # First element in each tuple is the file; second is a regex snippet
 # giving the prefix to limit the names of symbols to define that come
@@ -40,6 +35,7 @@ foreach my $tuple (['cop.h'],
     my $file = $tuple->[0];
     my $pfx = $tuple->[1] || '';
     my $path = File::Spec->catfile($headerpath, $file);
+    push @depend, $path;
     open my $fh, '<', $path or die "Cannot open $path: $!";
     while (<$fh>) {
 	push @names, $1 if (/ \#define \s+ ( $pfx \w+ ) \s+
@@ -54,6 +50,13 @@ foreach my $tuple (['cop.h'],
     }
     close $fh;
 }
+
+WriteMakefile(
+    NAME	    => "B",
+    VERSION_FROM    => "B.pm",
+    realclean	    => {FILES=> 'const-c.inc const-xs.inc'},
+    depend          => {'Makefile' => "@depend"},
+);
 
 # Currently only SVt_PVGV and SVt_PVHV aren't macros, but everything we name
 # should exist, so ensure that the C compile breaks if anything does not.
