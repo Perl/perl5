@@ -11,6 +11,15 @@ release schedules for the next, current and previous stable versions
 of Perl.  Dates with two or more question marks will only be releases if
 deemed necessary by the Pumpking.
 
+=head2 Perl 5.22
+
+Code freezes (which happen in the 5.21.X series)
+
+  2015-01-20  5.19.8          Contentious changes freeze
+  2015-02-20  5.19.9          User-visible changes freeze
+  2015-03-20  5.19.10         Full code freeze
+  2015-05-20  5.22.0          Stable release!
+
 =head2 Perl 5.20
 
   2014-05-27  5.20.0 ✓        Ricardo Signes
