@@ -444,7 +444,7 @@ sub abs2rel {
     my($path,$base) = @_;
     $base = $self->_cwd() unless defined $base and length $base;
 
-    for ($path, $base) { $_ = $self->canonpath($_) }
+    for ($path, $base) { $_ = $self->rel2abs($_) }
 
     # Are we even starting $path on the same (node::)device as $base?  Note that
     # logical paths or nodename differences may be on the "same device" 
@@ -459,8 +459,6 @@ sub abs2rel {
     my ($path_volume, $path_directories, $path_file) = $self->splitpath($path);
     my ($base_volume, $base_directories, $base_file) = $self->splitpath($base);
     return $path unless lc($path_volume) eq lc($base_volume);
-
-    for ($path, $base) { $_ = $self->rel2abs($_) }
 
     # Now, remove all leading components that are the same
     my @pathchunks = $self->splitdir( $path_directories );
