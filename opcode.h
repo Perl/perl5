@@ -1791,10 +1791,10 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001144,	/* i_preinc */
 	0x00001164,	/* predec */
 	0x00001144,	/* i_predec */
-	0x0000113c,	/* postinc */
-	0x0000111c,	/* i_postinc */
-	0x0000113c,	/* postdec */
-	0x0000111c,	/* i_postdec */
+	0x0000112c,	/* postinc */
+	0x0000110c,	/* i_postinc */
+	0x0000112c,	/* postdec */
+	0x0000110c,	/* i_postdec */
 	0x0001121e,	/* pow */
 	0x0001123e,	/* multiply */
 	0x0001121e,	/* i_multiply */
@@ -2412,10 +2412,10 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* i_preinc */
        0, /* predec */
        0, /* i_predec */
-      72, /* postinc */
-      72, /* i_postinc */
-      72, /* postdec */
-      72, /* i_postdec */
+       0, /* postinc */
+       0, /* i_postinc */
+       0, /* postdec */
+       0, /* i_postdec */
       74, /* pow */
       74, /* multiply */
       74, /* i_multiply */
@@ -2762,7 +2762,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, ref, readline, regcmaybe, regcreset, regcomp, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, akeys, avalues, each, values, pop, shift, range, and, or, dor, andassign, orassign, dorassign, method, method_named, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, reach, rvalues, fc */
+    0x0003, /* scalar, prototype, refgen, srefgen, ref, readline, regcmaybe, regcreset, regcomp, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, akeys, avalues, each, values, pop, shift, range, and, or, dor, andassign, orassign, dorassign, method, method_named, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, reach, rvalues, fc */
     0x281c, 0x3a19, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x03b8, 0x1490, 0x3acc, 0x3588, 0x2be5, /* const */
@@ -2784,7 +2784,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x0c9c, 0x1c18, 0x0834, 0x3d30, 0x384c, 0x1fa8, 0x01e4, 0x0141, /* trans, transr */
     0x0adc, 0x0458, 0x0067, /* sassign */
     0x0758, 0x290c, 0x0067, /* aassign */
-    0x3d30, 0x0003, /* chomp, schomp, postinc, i_postinc, postdec, i_postdec, i_negate, sin, cos, exp, log, sqrt, int, hex, oct, abs, length, ord, chr, chroot, rmdir */
+    0x3d30, 0x0003, /* chomp, schomp, i_negate, sin, cos, exp, log, sqrt, int, hex, oct, abs, length, ord, chr, chroot, rmdir */
     0x3d30, 0x0067, /* pow, multiply, i_multiply, divide, i_divide, modulo, i_modulo, add, i_add, subtract, i_subtract, concat, left_shift, right_shift */
     0x0f78, 0x3d30, 0x0067, /* repeat */
     0x3d30, 0x012f, /* stringify, atan2, rand, srand, index, rindex, crypt, push, unshift, flock, chdir, chown, unlink, chmod, utime, rename, link, symlink, mkdir, waitpid, system, exec, kill, getpgrp, setpgrp, getpriority, setpriority, sleep */
@@ -2885,10 +2885,10 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* I_PREINC   */ (OPpARG1_MASK),
     /* PREDEC     */ (OPpARG1_MASK),
     /* I_PREDEC   */ (OPpARG1_MASK),
-    /* POSTINC    */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* I_POSTINC  */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* POSTDEC    */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* I_POSTDEC  */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* POSTINC    */ (OPpARG1_MASK),
+    /* I_POSTINC  */ (OPpARG1_MASK),
+    /* POSTDEC    */ (OPpARG1_MASK),
+    /* I_POSTDEC  */ (OPpARG1_MASK),
     /* POW        */ (OPpARG2_MASK|OPpTARGET_MY),
     /* MULTIPLY   */ (OPpARG2_MASK|OPpTARGET_MY),
     /* I_MULTIPLY */ (OPpARG2_MASK|OPpTARGET_MY),

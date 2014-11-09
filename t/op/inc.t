@@ -336,4 +336,17 @@ tie my $t, "";
 }
 is $store::called, 4, 'STORE called on "my" target';
 
+{
+    # Temporarily broken between before 5.6.0 (b162f9ea/21f5b33c) and
+    # between 5.21.5 and 5.21.6 (9e319cc4fd)
+    my $x = 7;
+    $x = $x++;
+    is $x, 7, '$lex = $lex++';
+    $x = 7;
+    # broken in b162f9ea (5.6.0); fixed in 5.21.6
+    use integer;
+    $x = $x++;
+    is $x, 7, '$lex = $lex++ under use integer';
+}
+
 done_testing();
