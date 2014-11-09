@@ -1643,7 +1643,8 @@ Perl_scalarvoid(pTHX_ OP *arg)
         if ((o->op_private & OPpTARGET_MY)
             && (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
         {
-            scalar(o);                  /* As if inside SASSIGN */
+            /* newASSIGNOP has already applied scalar context, which we
+               leave, as if this op is inside SASSIGN.  */
             continue;
         }
 
