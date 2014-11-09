@@ -686,6 +686,8 @@ sub print_PL_op_private_tables {
         my $bitdef_count = 0;
 
         my %not_seen = %FLAGS;
+        my @seen_bitdefs;
+        my %seen_bitdefs;
 
         my $opnum = -1;
         for my $op (sort { $opnum{$a} <=> $opnum{$b} } keys %opnum) {
@@ -725,11 +727,17 @@ sub print_PL_op_private_tables {
             }
             if (@bitdefs) {
                 $bitdefs[-1] |= 1; # stop bit
-                $index = $bitdef_count;
-                $bitdef_count += @bitdefs;
-                $PL_op_private_bitdefs .= sprintf "    /* %-13s */ %s,\n",
-                        $op,
-                        join(', ', map(sprintf("0x%04x", $_), @bitdefs));
+                my $key = join(', ', map(sprintf("0x%04x", $_), @bitdefs));
+                if (!$seen_bitdefs{$key}) {
+                    $index = $bitdef_count;
+                    $bitdef_count += @bitdefs;
+                    push @seen_bitdefs,
+                         $seen_bitdefs{$key} = [$index, $key];
+                }
+                else {
+                    $index = $seen_bitdefs{$key}[0];
+                }
+                push @{$seen_bitdefs{$key}}, $op;
             }
             else {
                 $index = -1;
@@ -738,6 +746,10 @@ sub print_PL_op_private_tables {
         }
         if (%not_seen) {
             die "panic: unprocessed ops: ". join(',', keys %not_seen);
+        }
+        for (@seen_bitdefs) {
+            local $" = ", ";
+            $PL_op_private_bitdefs .= "    $$_[1], /* @$_[2..$#$_] */\n";
         }
     }
 
