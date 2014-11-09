@@ -31,7 +31,9 @@ Code freezes (which happen in the 5.21.X series)
   2013-05-18  5.18.0 ✓        Ricardo Signes
   2013-08-12  5.18.1 ✓        Ricardo Signes
   2014-01-06  5.18.2 ✓        Ricardo Signes
-  2014-??-??  5.18.3          ??
+  2014-10-01  5.18.3 ✓        Ricardo Signes
+  2014-10-01  5.18.4 ✓        Ricardo Signes
+  2015-??-??  5.18.5          ??
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
