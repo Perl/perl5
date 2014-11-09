@@ -4790,9 +4790,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	UV tfirst = 1;
 	UV tlast = 0;
 	IV tdiff;
+	STRLEN tcount = 0;
 	UV rfirst = 1;
 	UV rlast = 0;
 	IV rdiff;
+	STRLEN rcount = 0;
 	IV diff;
 	I32 none = 0;
 	U32 max = 0;
@@ -4919,6 +4921,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    /* now see which range will peter our first, if either. */
 	    tdiff = tlast - tfirst;
 	    rdiff = rlast - rfirst;
+	    tcount += tdiff + 1;
+	    rcount += rdiff + 1;
 
 	    if (tdiff <= rdiff)
 		diff = tdiff;
@@ -4980,15 +4984,17 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    (void)hv_store(MUTABLE_HV(SvRV(swash)), "FINAL", 5,
 			   newSVuv((UV)final), 0);
 
-	if (grows)
-	    o->op_private |= OPpTRANS_GROWS;
-
 	Safefree(tsave);
 	Safefree(rsave);
 
-	op_free(expr);
-	op_free(repl);
-	return o;
+	tlen = tcount;
+	rlen = rcount;
+	if (r < rend)
+	    rlen++;
+	else if (rlast == 0xffffffff)
+	    rlen = 0;
+
+	goto warnins;
     }
 
     tbl = (short*)PerlMemShared_calloc(
@@ -5064,6 +5070,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	}
     }
 
+  warnins:
     if(del && rlen == tlen) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Useless use of /d modifier in transliteration operator"); 
     } else if(rlen > tlen && !complement) {
