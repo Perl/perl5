@@ -88,7 +88,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #    error unknown pointer size
 #  endif
 #else
-#  define PoisonPADLIST(sv)
+#  define PoisonPADLIST(sv) NOOP
 #endif
 
 #define CvOUTSIDE(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside
