@@ -259,14 +259,14 @@ Public API:
 #  define SvARENA_CHAIN_SET(sv,val)	(sv)->sv_u.svu_rv = MUTABLE_SV((val))
 /* Whilst I'd love to do this, it seems that things like to check on
    unreferenced scalars
-#  define POSION_SV_HEAD(sv)	PoisonNew(sv, 1, struct STRUCT_SV)
+#  define POISON_SV_HEAD(sv)	PoisonNew(sv, 1, struct STRUCT_SV)
 */
-#  define POSION_SV_HEAD(sv)	PoisonNew(&SvANY(sv), 1, void *), \
+#  define POISON_SV_HEAD(sv)	PoisonNew(&SvANY(sv), 1, void *), \
 				PoisonNew(&SvREFCNT(sv), 1, U32)
 #else
 #  define SvARENA_CHAIN(sv)	SvANY(sv)
 #  define SvARENA_CHAIN_SET(sv,val)	SvANY(sv) = (void *)(val)
-#  define POSION_SV_HEAD(sv)
+#  define POISON_SV_HEAD(sv)
 #endif
 
 /* Mark an SV head as unused, and add to free list.
@@ -282,7 +282,7 @@ Public API:
 	MEM_LOG_DEL_SV(p, __FILE__, __LINE__, FUNCTION__);  \
 	DEBUG_SV_SERIAL(p);				\
 	FREE_SV_DEBUG_FILE(p);				\
-	POSION_SV_HEAD(p);				\
+	POISON_SV_HEAD(p);				\
 	SvFLAGS(p) = SVTYPEMASK;			\
 	if (!(old_flags & SVf_BREAK)) {		\
 	    SvARENA_CHAIN_SET(p, PL_sv_root);	\
