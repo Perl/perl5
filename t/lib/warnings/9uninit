@@ -818,6 +818,9 @@ $foo =~ s/./$m1/e;
 undef $g1;
 $m1 = '$g1';
 $foo =~ s//$m1/ee;
+undef $m1;
+$m1 =~ tr/x/y/;		undef $m1;
+$m1 =~ tr/x/y/r;
 EXPECT
 Use of my $_ is experimental at - line 16.
 Use of uninitialized value $_ in pattern match (m//) at - line 5.
@@ -882,6 +885,8 @@ Use of uninitialized value $m1 in regexp compilation at - line 43.
 Use of uninitialized value $g1 in substitution iterator at - line 43.
 Use of uninitialized value $m1 in substitution (s///) at - line 44.
 Use of uninitialized value in substitution iterator at - line 47.
+Use of uninitialized value $m1 in transliteration (tr///) at - line 49.
+Use of uninitialized value $m1 in transliteration (tr///) at - line 50.
 ########
 use warnings 'uninitialized';
 my ($m1);

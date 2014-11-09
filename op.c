@@ -3577,22 +3577,31 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	right->op_targ = 0;
 	right->op_private &= ~OPpTARGET_MY;
     }
-    if (!(right->op_flags & OPf_STACKED) && ismatchop) {
+    if (!(right->op_flags & OPf_STACKED) && !right->op_targ && ismatchop) {
 	OP *newleft;
 
-	right->op_flags |= OPf_STACKED;
-	if (rtype != OP_MATCH && rtype != OP_TRANSR &&
+        if (left->op_type == OP_PADSV
+         && !(left->op_private & OPpLVAL_INTRO))
+        {
+            right->op_targ = left->op_targ;
+            op_free(left);
+            o = right;
+        }
+        else {
+            right->op_flags |= OPf_STACKED;
+            if (rtype != OP_MATCH && rtype != OP_TRANSR &&
             ! (rtype == OP_TRANS &&
                right->op_private & OPpTRANS_IDENTICAL) &&
 	    ! (rtype == OP_SUBST &&
 	       (cPMOPx(right)->op_pmflags & PMf_NONDESTRUCT)))
-	    newleft = op_lvalue(left, rtype);
-	else
-	    newleft = left;
-	if (right->op_type == OP_TRANS || right->op_type == OP_TRANSR)
-	    o = newBINOP(OP_NULL, OPf_STACKED, scalar(newleft), right);
-	else
-	    o = op_prepend_elem(rtype, scalar(newleft), right);
+		newleft = op_lvalue(left, rtype);
+	    else
+		newleft = left;
+	    if (right->op_type == OP_TRANS || right->op_type == OP_TRANSR)
+		o = newBINOP(OP_NULL, OPf_STACKED, scalar(newleft), right);
+	    else
+		o = op_prepend_elem(rtype, scalar(newleft), right);
+	}
 	if (type == OP_NOT)
 	    return newUNOP(OP_NOT, 0, scalar(o));
 	return o;

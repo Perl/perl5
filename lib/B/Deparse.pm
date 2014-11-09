@@ -4753,7 +4753,7 @@ sub tr_decode_utf8 {
 
 sub pp_trans {
     my $self = shift;
-    my($op, $cx) = @_;
+    my($op, $cx, $morflags) = @_;
     my($from, $to);
     my $class = class($op);
     my $priv_flags = $op->private;
@@ -4770,10 +4770,16 @@ sub pp_trans {
     $flags .= "d" if $priv_flags & OPpTRANS_DELETE;
     $to = "" if $from eq $to and $flags eq "";
     $flags .= "s" if $priv_flags & OPpTRANS_SQUASH;
-    return $self->keyword("tr") . double_delim($from, $to) . $flags;
+    $flags .= $morflags if defined $morflags;
+    my $ret = $self->keyword("tr") . double_delim($from, $to) . $flags;
+    if (my $targ = $op->targ) {
+	return $self->maybe_parens($self->padname($targ) . " =~ $ret",
+				   $cx, 20);
+    }
+    return $ret;
 }
 
-sub pp_transr { &pp_trans . 'r' }
+sub pp_transr { push @_, 'r'; goto &pp_trans }
 
 sub re_dq_disambiguate {
     my ($first, $last) = @_;
@@ -4946,6 +4952,10 @@ sub matchop {
 	$var = $self->deparse($kid, 20);
 	$kid = $kid->sibling;
     }
+    elsif ($name eq 'match' and my $targ = $op->targ) {
+	$binop = 1;
+	$var = $self->padname($targ);
+    }
     my $quote = 1;
     my $pmflags = $op->pmflags;
     my $extended = ($pmflags & PMf_EXTENDED);
@@ -5084,6 +5094,10 @@ sub pp_subst {
 	$binop = 1;
 	$var = $self->deparse($kid, 20);
 	$kid = $kid->sibling;
+    }
+    elsif (my $targ = $op->targ) {
+	$binop = 1;
+	$var = $self->padname($targ);
     }
     my $flags = "";
     my $pmflags = $op->pmflags;
