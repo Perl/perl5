@@ -9,71 +9,40 @@ use File::Temp qw(tempdir);
 use File::Path qw(make_path);
 
 my $startdir = cwd();
+my @files = ( 'anyfile', './anyfile', '../first_sub_dir/anyfile', '../second_sub_dir/second_file' );
 
-test_rel2abs( {
-    startdir        => $startdir,
-    first_sub_dir   => 'etc',
-    sub_sub_dir     => 'init.d',
-    first_file      => 'passwd',
-    second_sub_dir  => 'dev',
-    second_file     => 'null',
-} );
-
-test_rel2abs( {
-    startdir        => $startdir,
-    first_sub_dir   => 'etc',
-    sub_sub_dir     => 'init.d',
-    first_file      => './passwd',
-    second_sub_dir  => 'dev',
-    second_file     => 'null',
-} );
-
-test_rel2abs( {
-    startdir        => $startdir,
-    first_sub_dir   => 'etc',
-    sub_sub_dir     => 'init.d',
-    first_file      => '../etc/passwd',
-    second_sub_dir  => 'dev',
-    second_file     => 'null',
-} );
-
-test_rel2abs( {
-    startdir        => $startdir,
-    first_sub_dir   => 'etc',
-    sub_sub_dir     => 'init.d',
-    first_file      => '../dev/null',
-    second_sub_dir  => 'dev',
-    second_file     => 'null',
-} );
+for my $file (@files) {
+    test_rel2abs($file);
+}
 
 sub test_rel2abs {
-    my $args = shift;
+    my $first_file = shift;
     my $tdir = tempdir( CLEANUP => 1 );
     chdir $tdir or die "Unable to change to $tdir: $!";
 
     my @subdirs = (
-        $args->{first_sub_dir},
-        File::Spec->catdir($args->{first_sub_dir},  $args->{sub_sub_dir}),
-        $args->{second_sub_dir}
+        'first_sub_dir',
+        File::Spec->catdir('first_sub_dir',  'sub_sub_dir'),
+        'second_sub_dir'
     );
     make_path(@subdirs, { mode => 0711 })
         or die "Unable to make_path: $!";
 
     open my $OUT2, '>',
-        File::Spec->catfile($args->{second_sub_dir}, $args->{second_file})
-        or die "Unable to open $args->{second_file} for writing: $!";
+        File::Spec->catfile('second_sub_dir', 'second_file')
+        or die "Unable to open 'second_file' for writing: $!";
     print $OUT2 "Attempting to resolve RT #121360\n";
-    close $OUT2 or die "Unable to close $args->{second_file} after writing: $!";
+    close $OUT2 or die "Unable to close 'second_file' after writing: $!";
 
-    chdir $args->{first_sub_dir}
-        or die "Unable to change to '$args->{first_sub_dir}': $!";
-    open my $OUT1, '>', $args->{first_file}
-        or die "Unable to open $args->{first_file} for writing: $!";
+    chdir 'first_sub_dir'
+        or die "Unable to change to 'first_sub_dir': $!";
+    open my $OUT1, '>', $first_file
+        or die "Unable to open $first_file for writing: $!";
     print $OUT1 "Attempting to resolve RT #121360\n";
-    close $OUT1 or die "Unable to close $args->{first_file} after writing: $!";
+    close $OUT1 or die "Unable to close $first_file after writing: $!";
 
-    my $rel_path = $args->{first_file};
-    my $rel_base = $args->{sub_sub_dir};
+    my $rel_path = $first_file;
+    my $rel_base = File::Spec->catdir(File::Spec->curdir(), 'sub_sub_dir');
     my $abs_path = File::Spec->rel2abs($rel_path);
     my $abs_base = File::Spec->rel2abs($rel_base);
     ok(-f $rel_path, "'$rel_path' is readable by effective uid/gid");
@@ -101,7 +70,7 @@ sub test_rel2abs {
     is($rr_link, $aa_link,
         "rel_path-rel_base '$rr_link' = abs_path-abs_base '$aa_link'");
 
-    chdir $args->{startdir} or die "Unable to change back to $args->{startdir}: $!";
+    chdir $startdir or die "Unable to change back to $startdir: $!";
 }
 
 done_testing();
