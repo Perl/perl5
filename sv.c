@@ -15540,7 +15540,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    /* index is constant */
 	    SV* kidsv;
 	    if (negate) {
-		kidsv = sv_2mortal(newSVpvs("-"));
+		kidsv = newSVpvs_flags("-", SVs_TEMP);
 		sv_catsv(kidsv, cSVOPx_sv(kid));
 	    }
 	    else
@@ -15633,11 +15633,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
     case OP_MATCH:
 	if ( !(obase->op_flags & OPf_STACKED)) {
 	    if (uninit_sv == DEFSV)
-	    {
-		sv = sv_newmortal();
-		sv_setpvs(sv, "$_");
-		return sv;
-	    }
+		return newSVpvs_flags("$_", SVs_TEMP);
 	    else if (obase->op_targ
 		  && uninit_sv == PAD_SVl(obase->op_targ))
 		return varname(NULL, '$', obase->op_targ, NULL, 0,
