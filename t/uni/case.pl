@@ -78,11 +78,6 @@ sub casetest {
     }
     print "# ", scalar keys %none, " noncase mappings\n";
 
-    my $tests = 
-        $already_run +
-	((scalar keys %simple) +
-	 (scalar keys %spec) +
-	 (scalar keys %none)) * @funcs;
 
     my $test = $already_run + 1;
 
@@ -117,7 +112,10 @@ sub casetest {
 	}
     }
 
-    done_testing();
+    plan $already_run +
+	((scalar keys %simple) +
+	 (scalar keys %spec) +
+	 (scalar keys %none)) * @funcs;
 }
 
 1;
