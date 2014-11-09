@@ -46,7 +46,7 @@ is($str, $hiragana, "s/// # hiragana -> katakana");
 {
   # [perl 16843]
   my $line = 'abcdefghijklmnopqrstuvwxyz$0123456789';
-  $line =~ tr/bcdeghijklmnprstvwxyz$02578/בצדעגהיײקלמנפּרסטװשכיזשױתײחא/;
+  $line =~ tr/bcdeghijklmnprstvwxyz$02578/בצדעגהיײקלמנפּרסטװשכיזשױתײח/;
   is($line, "aבצדעfגהיײקלמנoפqּרסuטװשכיזש1ױ34ת6ײח9", "[perl #16843]");
 }
 
