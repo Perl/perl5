@@ -444,6 +444,10 @@ sub abs2rel {
     my($path,$base) = @_;
     $base = $self->_cwd() unless defined $base and length $base;
 
+    # If there is no device or directory syntax on $base, make sure it
+    # is treated as a directory.
+    $base = VMS::Filespec::vmspath($base) unless $base =~ m{(?<!\^)[\[<:]};
+
     for ($path, $base) { $_ = $self->rel2abs($_) }
 
     # Are we even starting $path on the same (node::)device as $base?  Note that
