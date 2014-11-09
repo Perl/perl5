@@ -5365,9 +5365,10 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, ...)
     va_start(args, v_my_perl);
 
     if((key & HSm_KEY_MATCH) != (HS_KEY(FALSE, "", "") & HSm_KEY_MATCH))
-	noperl_die("BOOT:: Invalid handshake key got %X needed %X"
-			", binaries are mismatched",    (key & HSm_KEY_MATCH)
-			, (HS_KEY(FALSE, "", "") & HSm_KEY_MATCH));
+	noperl_die("BOOT:: Invalid handshake key got %"UVXf" needed %"UVXf
+			", binaries are mismatched",
+                        (UV)(key & HSm_KEY_MATCH),
+			(UV)(HS_KEY(FALSE, "", "") & HSm_KEY_MATCH));
 /* try to catch where a 2nd threaded perl interp DLL is loaded into a process
    by a XS DLL compiled against the wrong interl DLL b/c of bad @INC, and the
    2nd threaded perl interp DLL never initialized its TLS/PERL_SYS_INIT3 so
@@ -5394,8 +5395,9 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, ...)
 	need = &PL_stack_sp;
 #endif
 	if(got != need)/* recycle branch and string from above */
-	    noperl_die("BOOT:: Invalid handshake key got %X needed %X"
-			    ", binaries are mismatched", got, need);
+	    noperl_die("BOOT:: Invalid handshake key got %"UVXf
+                    " needed %"UVXf", binaries are mismatched",
+                    (UV)got, (UV)need);
     }
 
     if(key & HSf_POPMARK) {
@@ -5412,7 +5414,7 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, ...)
     {
 	U32 apiverlen;
 	assert(HS_GETAPIVERLEN(key) <= UCHAR_MAX);
-	if(apiverlen = HS_GETAPIVERLEN(key)) {
+	if((apiverlen = HS_GETAPIVERLEN(key))) {
 	    char * api_p = va_arg(args, char*);
 	    if(apiverlen != sizeof("v" PERL_API_VERSION_STRING)-1
 		|| memNE(api_p, "v" PERL_API_VERSION_STRING,
@@ -5425,7 +5427,7 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, ...)
     {
 	U32 xsverlen;
 	assert(HS_GETXSVERLEN(key) <= UCHAR_MAX && HS_GETXSVERLEN(key) <= HS_APIVERLEN_MAX);
-	if(xsverlen = HS_GETXSVERLEN(key))
+	if((xsverlen = HS_GETXSVERLEN(key)))
 	    Perl_xs_version_bootcheck(aTHX_
 		items, ax, va_arg(args, char*), xsverlen);
     }
