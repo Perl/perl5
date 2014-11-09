@@ -439,7 +439,7 @@ Attempt to convert an absolute file specification to a relative specification.
 sub abs2rel {
     my $self = shift;
     return vmspath(File::Spec::Unix::abs2rel( $self, @_ ))
-        if grep m{/}, @_;
+        if ((grep m{/}, @_) && !(grep m{(?<!\^)[\[<:]}, @_));
 
     my($path,$base) = @_;
     $base = $self->_cwd() unless defined $base and length $base;
