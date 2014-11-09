@@ -437,7 +437,7 @@ checkOptree ( name	=> '@foo = grep(!/^\#/, @bar)',
 # a  <0> pushmark s
 # b  <#> gv[*foo] s
 # c  <1> rv2av[t2] lKRM*/1
-# d  <2> aassign[t6] KS/COMMON
+# d  <2> aassign[t6] KS
 # e  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 496 (eval 20):1) v:{
@@ -453,7 +453,7 @@ EOT_EOT
 # a  <0> pushmark s
 # b  <$> gv(*foo) s
 # c  <1> rv2av[t1] lKRM*/1
-# d  <2> aassign[t4] KS/COMMON
+# d  <2> aassign[t4] KS
 # e  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 

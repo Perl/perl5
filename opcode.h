@@ -1873,11 +1873,11 @@ EXTCONST U32 PL_opargs[] = {
 	0x00013204,	/* aelem */
 	0x00023401,	/* aslice */
 	0x00023401,	/* kvaslice */
-	0x00003b00,	/* aeach */
+	0x00003b40,	/* aeach */
 	0x00003b08,	/* akeys */
-	0x00003b08,	/* avalues */
-	0x00004b00,	/* each */
-	0x00004b08,	/* values */
+	0x00003b48,	/* avalues */
+	0x00004b40,	/* each */
+	0x00004b48,	/* values */
 	0x00004b08,	/* keys */
 	0x00001b00,	/* delete */
 	0x00001b04,	/* exists */
@@ -1898,12 +1898,12 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000bb04,	/* pop */
 	0x0000bb04,	/* shift */
 	0x0002341d,	/* unshift */
-	0x0002d441,	/* sort */
+	0x0002d401,	/* sort */
 	0x00002409,	/* reverse */
-	0x00025441,	/* grepstart */
-	0x00000348,	/* grepwhile */
-	0x00025441,	/* mapstart */
-	0x00000348,	/* mapwhile */
+	0x00025401,	/* grepstart */
+	0x00000308,	/* grepwhile */
+	0x00025401,	/* mapstart */
+	0x00000308,	/* mapwhile */
 	0x00011300,	/* range */
 	0x00011100,	/* flip */
 	0x00000100,	/* flop */
@@ -1911,7 +1911,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000300,	/* or */
 	0x00011206,	/* xor */
 	0x00000300,	/* dor */
-	0x00000340,	/* cond_expr */
+	0x00000300,	/* cond_expr */
 	0x00000304,	/* andassign */
 	0x00000304,	/* orassign */
 	0x00000304,	/* dorassign */
@@ -1921,7 +1921,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000100,	/* leavesublv */
 	0x00009b08,	/* caller */
 	0x0000240d,	/* warn */
-	0x0000244d,	/* die */
+	0x0000240d,	/* die */
 	0x00009b04,	/* reset */
 	0x00000400,	/* lineseq */
 	0x00000a04,	/* nextstate */
@@ -1934,13 +1934,13 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000000,	/* iter */
 	0x00000940,	/* enterloop */
 	0x00000200,	/* leaveloop */
-	0x00002441,	/* return */
-	0x00000d44,	/* last */
-	0x00000d44,	/* next */
-	0x00000d44,	/* redo */
+	0x00002401,	/* return */
+	0x00000d04,	/* last */
+	0x00000d04,	/* next */
+	0x00000d04,	/* redo */
 	0x00000d44,	/* dump */
-	0x00000d44,	/* goto */
-	0x00009b44,	/* exit */
+	0x00000d04,	/* goto */
+	0x00009b04,	/* exit */
 	0x00000e40,	/* method_named */
 	0x00000340,	/* entergiven */
 	0x00000100,	/* leavegiven */
@@ -1956,14 +1956,14 @@ EXTCONST U32 PL_opargs[] = {
 	0x00096404,	/* binmode */
 	0x00217445,	/* tie */
 	0x00007b04,	/* untie */
-	0x00007b04,	/* tied */
+	0x00007b44,	/* tied */
 	0x00114404,	/* dbmopen */
 	0x00004b04,	/* dbmclose */
 	0x01111408,	/* sselect */
 	0x0000e40c,	/* select */
 	0x0000eb0c,	/* getc */
 	0x0917640d,	/* read */
-	0x0000eb44,	/* enterwrite */
+	0x0000eb04,	/* enterwrite */
 	0x00000100,	/* leavewrite */
 	0x0002e405,	/* prtf */
 	0x0002e405,	/* print */
@@ -2043,8 +2043,8 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000001c,	/* wait */
 	0x0001141c,	/* waitpid */
 	0x0002941d,	/* system */
-	0x0002945d,	/* exec */
-	0x0000245d,	/* kill */
+	0x0002941d,	/* exec */
+	0x0000241d,	/* kill */
 	0x0000001c,	/* getppid */
 	0x00009b1c,	/* getpgrp */
 	0x0009941c,	/* setpgrp */
@@ -2109,9 +2109,9 @@ EXTCONST U32 PL_opargs[] = {
 	0x00007b04,	/* lock */
 	0x00000300,	/* once */
 	0x00000000,	/* custom */
-	0x00001b00,	/* reach */
+	0x00001b40,	/* reach */
 	0x00001b08,	/* rkeys */
-	0x00001b08,	/* rvalues */
+	0x00001b48,	/* rvalues */
 	0x00000600,	/* coreargs */
 	0x00000004,	/* runcv */
 	0x00009b8e,	/* fc */

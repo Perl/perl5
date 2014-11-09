@@ -1451,3 +1451,18 @@ sub {
 print
 EXPECT
 crumpets
+########
+
+# tied() in list assignment
+
+sub TIESCALAR : lvalue {
+    ${+pop} = bless [], shift;
+}
+tie $t, "", \$a;
+$a = 7;
+($a, $b) = (3, tied $t);
+print "a is $a\n";
+print "b is $b\n";
+EXPECT
+a is 3
+b is 7
