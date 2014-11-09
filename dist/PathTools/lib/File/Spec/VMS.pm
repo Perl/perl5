@@ -204,7 +204,7 @@ sub catfile {
         # Only passed a single file?
         my $xfile = (defined($file) && length($file)) ? $file : '';
 
-        $rslt = $unix_rpt ? $file : vmsify($file);
+        $rslt = $unix_rpt ? $xfile : vmsify($xfile);
     }
     return $self->canonpath($rslt) unless $unix_rpt;
 
