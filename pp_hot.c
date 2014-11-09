@@ -1394,7 +1394,7 @@ PP(pp_match)
 
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
-    else if (PL_op->op_private & OPpTARGET_MY)
+    else if (ARGTARG)
 	GETTARGET;
     else {
 	TARG = DEFSV;
@@ -2098,7 +2098,7 @@ PP(pp_subst)
 
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
-    else if (PL_op->op_private & OPpTARGET_MY)
+    else if (ARGTARG)
 	GETTARGET;
     else {
 	TARG = DEFSV;

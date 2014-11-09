@@ -142,7 +142,7 @@ PP(pp_regcomp)
 	    const bool was_tainted = TAINT_get;
 	    if (pm->op_flags & OPf_STACKED)
 		lhs = args[-1];
-	    else if (pm->op_private & OPpTARGET_MY)
+	    else if (pm->op_targ)
 		lhs = PAD_SV(pm->op_targ);
 	    else lhs = DEFSV;
 	    SvGETMAGIC(lhs);
