@@ -10150,11 +10150,9 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    kid->op_targ = kkid->op_targ;
 	    kkid->op_targ = 0;
 	    /* Now we do not need PADSV and SASSIGN.
-             * first detach the PADSV, then detach kid from o */
-            op_sibling_splice(o, kid, 1, NULL);
-            op_sibling_splice(o, NULL, -1, NULL);
+	     * Detach kid and free the rest. */
+	    op_sibling_splice(o, NULL, 1, NULL);
 	    op_free(o);
-	    op_free(kkid);
 	    kid->op_private |= OPpTARGET_MY;	/* Used for context settings */
 	    return kid;
 	}
