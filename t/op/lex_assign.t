@@ -96,13 +96,11 @@ for (@INPUT) {
   $op = "$op==$op" unless $op =~ /==/;
   ($op, $expectop) = $op =~ /(.*)==(.*)/;
   
-  $skip = ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i)
-	  ? "skip" : "# '$_'\nnot";
+  $skip = ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i);
   $integer = ($comment =~ /^i_/) ? "use integer" : '' ;
-  if ($skip eq 'skip') {
+  if ($skip) {
     SKIP: {
         skip $comment, 1;
-        pass();
     }
     next;
   }
@@ -113,23 +111,12 @@ for (@INPUT) {
   $integer;
   \$a = $op;
   \$b = $expectop;
-  if (\$a ne \$b) {
-    SKIP: {
-        skip "\$comment: got '\$a', expected '\$b'", 1;
-        pass("")
-    }
-  }
-  pass();
+  is (\$a, \$b, \$comment);
 EOE
   if ($@) {
     $warning = $@;
     chomp $warning;
-    if ($@ =~ /is unimplemented/) {
-      SKIP: {
-        skip $warning, 1;
-        pass($comment);
-      }
-    } else {
+    if ($@ !~ /is unimplemented/) {
       fail($_ . ' ' . $warning);
     }
   }
