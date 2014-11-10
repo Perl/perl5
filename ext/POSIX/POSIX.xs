@@ -204,7 +204,7 @@
 
 /* XXX Beware old gamma() -- one cannot know whether that is the
  * gamma or the log of gamma, that's why the new tgamma and lgamma.
- * Though also remember tgamma_r and lgamma_r. */
+ * Though also remember lgamma_r. */
 
 /* Certain AIX releases have the C99 math, but not in long double.
  * The <math.h> has them, e.g. __expl128, but no library has them!
@@ -721,7 +721,154 @@ static IV my_ilogb(NV x)
 #  define c99_ilogb my_ilogb
 #endif
 
-/* XXX lgamma -- non-trivial */
+/* tgamma and lgamma emulations based on http://www.johndcook.com/cpp_gamma.html,
+ * code placed in public domain.
+ *
+ * Note that these implementations (neither the johndcook originals
+ * nor these) do NOT set the global signgam variable.  This is not
+ * necessarily a bad thing. */
+
+/* Note that tgamma() and lgamma() depend on each other. */
+#if !defined(c99_tgamma) || !defined(c99_lgamma)
+static NV my_tgamma(NV x);
+static NV my_lgamma(NV x);
+#endif
+
+#if !defined(c99_tgamma) || !defined(c99_lgamma)
+static NV my_tgamma(NV x)
+{
+  const NV gamma = 0.577215664901532860606512090; // Euler's gamma constant.
+  if (Perl_isnan(x) || x < 0.0)
+    return NV_NAN;
+  if (x == 0.0 || x == NV_INF)
+    return x == -0.0 ? -NV_INF : NV_INF;
+
+  /* The function domain is split into three intervals:
+   * (0, 0.001), [0.001, 12), and (12, infinity) */
+
+  /* First interval: (0, 0.001)
+   * For small values, 1/tgamma(x) has power series x + gamma x^2  ,
+   * so in this range, 1/tgamma(x) = x + gamma x^2 with error on the order of x^3.
+   * The relative error over this interval is less than 6e-7. */
+  if (x < 0.001)
+    return 1.0 / (x * (1.0 + gamma * x));
+
+  /* Second interval: [0.001, 12) */
+  if (x < 12.0) {
+    double y = x; /* Working copy. */
+    int n = 0;
+    /* Numerator coefficients for approximation over the interval (1,2) */
+    static const NV p[] = {
+      -1.71618513886549492533811E+0,
+      2.47656508055759199108314E+1,
+      -3.79804256470945635097577E+2,
+      6.29331155312818442661052E+2,
+      8.66966202790413211295064E+2,
+      -3.14512729688483675254357E+4,
+      -3.61444134186911729807069E+4,
+      6.64561438202405440627855E+4
+    };
+    /* Denominator coefficients for approximation over the interval (1, 2) */
+    static const NV q[] = {
+      -3.08402300119738975254353E+1,
+      3.15350626979604161529144E+2,
+      -1.01515636749021914166146E+3,
+      -3.10777167157231109440444E+3,
+      2.25381184209801510330112E+4,
+      4.75584627752788110767815E+3,
+      -1.34659959864969306392456E+5,
+      -1.15132259675553483497211E+5
+    };
+    NV num = 0.0;
+    NV den = 1.0;
+    NV z;
+    NV result;
+    int i;
+
+    if (x < 1.0)
+      y += 1.0;
+    else {
+      n = Perl_floor(y) - 1;
+      y -= n;
+    }
+    z = y - 1;
+    for (i = 0; i < 8; i++) {
+      num = (num + p[i]) * z;
+      den = den * z + q[i];
+    }
+    result = num / den + 1.0;
+
+    if (x < 1.0) {
+      /* Use the identity tgamma(z) = tgamma(z+1)/z
+       * The variable "result" now holds tgamma of the original y + 1
+       * Thus we use y - 1 to get back the original y. */
+      result /= (y - 1.0);
+    }
+    else {
+      /* Use the identity tgamma(z+n) = z*(z+1)* ... *(z+n-1)*tgamma(z) */
+      for (i = 0; i < n; i++)
+        result *= y++;
+    }
+
+    return result;
+  }
+
+  /* Third interval: [12, +Inf) */
+  if (x > 171.624) { /* XXX Too low for quad precision */
+    return NV_INF;
+  }
+
+  return Perl_exp(my_lgamma(x));
+}
+#  ifndef c99_tgamma
+#    define c99_tgamma my_tgamma
+#  endif
+#endif
+
+#if !defined(c99_lgamma) || !defined(c99_tgamma)
+static NV my_lgamma(NV x)
+{
+  if (Perl_isnan(x))
+    return NV_NAN;
+  if (x <= 0 || x == NV_INF)
+    return NV_INF;
+  if (x == 1.0 || x == 2.0)
+    return 0;
+  if (x < 12.0)
+    return Perl_log(PERL_ABS(my_tgamma(x)));
+  // Abramowitz and Stegun 6.1.41
+  // Asymptotic series should be good to at least 11 or 12 figures
+  // For error analysis, see Whittiker and Watson
+  // A Course in Modern Analysis (1927), page 252
+  {
+    static const NV c[8] = {
+      1.0/12.0,
+      -1.0/360.0,
+      1.0/1260.0,
+      -1.0/1680.0,
+      1.0/1188.0,
+      -691.0/360360.0,
+      1.0/156.0,
+      -3617.0/122400.0
+    };
+    NV z = 1.0 / (x * x);
+    NV sum = c[7];
+    static const NV half_log_of_two_pi =
+      0.91893853320467274178032973640562;
+    NV series;
+    int i;
+    for (i = 6; i >= 0; i--) {
+      sum *= z;
+      sum += c[i];
+    }
+    series = sum / x;
+    return (x - 0.5) * Perl_log(x) - x + half_log_of_two_pi + series;
+  }
+}
+#  ifndef c99_lgamma
+#    define c99_lgamma my_lgamma
+#  endif
+#endif
 
 #ifndef c99_log1p
 static NV my_log1p(NV x)
@@ -881,17 +1028,7 @@ static NV my_scalbn(NV x, int y)
 
 /* XXX sinh (though c89) */
 
-#ifndef c99_tgamma
-#  ifdef c99_lgamma
-static NV my_tgamma(NV x)
-{
-  double l = c99_lgamma(x);
-  return signgam * Perl_exp(l); /* XXX evil global signgam, need lgamma_r */
-}
-#    define c99_tgamma my_tgamma
-/* XXX tgamma without lgamma -- non-trivial */
-#  endif
-#endif
+/* tgamma -- see lgamma */
 
 /* XXX tanh (though c89) */
 
@@ -2076,9 +2213,9 @@ acos(x)
 #endif
 	    break;
 	case 16:
-        /* XXX lgamma_r -- the lgamma accesses a global variable (signgam),
+        /* XXX Note: the lgamma modifies a global variable (signgam),
          * which is evil.  Some platforms have lgamma_r, which has
-         * extra parameter instead of the global variable. */
+         * extra output parameter instead of the global variable. */
 #ifdef c99_lgamma
 	    RETVAL = c99_lgamma(x);
 #else
@@ -2140,9 +2277,6 @@ acos(x)
 	    RETVAL = Perl_tanh(x); /* C89 math */
 	    break;
 	case 27:
-        /* XXX tgamma_r -- the lgamma accesses a global variable (signgam),
-         * which is evil.  Some platforms have tgamma_r, which has
-         * extra parameter instead of the global variable. */
 #ifdef c99_tgamma
 	    RETVAL = c99_tgamma(x);
 #else

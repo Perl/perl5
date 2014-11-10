@@ -133,6 +133,8 @@ SKIP: {
     ok(isunordered(1, NaN), "isunordered 1 NaN");
     cmp_ok(abs(erf(1) - 0.842700792949715), '<', 1.5e-7, "erf 1");
     cmp_ok(abs(erfc(1) - 0.157299207050285), '<', 1.5e-7, "erfc 1");
+    cmp_ok(abs(tgamma(9) - 40320), '<', 1.5e-7, "tgamma 9");
+    cmp_ok(abs(lgamma(9) - 10.6046029027452), '<', 1.5e-7, "lgamma 9");
 }
 
 done_testing();
