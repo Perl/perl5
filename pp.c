@@ -890,7 +890,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 		    count += rs_charlen;
 		}
 	    }
-	    s = SvPV_force_nomg_nolen(sv);
+	    SvPV_force_nomg_nolen(sv);
 	    SvCUR_set(sv, len);
 	    *SvEND(sv) = '\0';
 	    SvNIOK_off(sv);
