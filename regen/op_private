@@ -318,8 +318,13 @@ addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
 # Safe to set if the ppcode uses:
 #	tryAMAGICbin, tryAMAGICun, SETn, SETi, SETu, PUSHn, PUSHTARG, SETTARG,
 #	SETs(TARG), XPUSHn, XPUSHu,
+# but make sure set-magic is invoked separately for SETs(TARG) (or change
+# it to SETTARG).
 #
 # Unsafe to set if the ppcode uses dTARG or [X]RETPUSH[YES|NO|UNDEF]
+#
+# Only the code paths that handle scalar rvalue context matter.  If dTARG
+# or RETPUSHNO occurs only in list or lvalue paths, T is safe.
 #
 # lt and friends do SETs (including ncmp, but not scmp)
 #
