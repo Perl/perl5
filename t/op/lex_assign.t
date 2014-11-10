@@ -53,32 +53,6 @@ my $xxx = 'b';
 $xxx = 'c' . ($xxx || 'e');
 is( $xxx, 'cb', 'variables can be read before being overwritten');
 
-{				# Check calling STORE
-  note('Tied variables, calling STORE');
-  my $sc = 0;
-  sub B::TIESCALAR {bless [11], 'B'}
-  sub B::FETCH { -(shift->[0]) }
-  sub B::STORE { $sc++; my $o = shift; $o->[0] = 17 + shift }
-
-  my $m;
-  tie $m, 'B';
-  $m = 100;
-
-  is( $sc, 1, 'STORE called when assigning scalar to tied variable' );
-
-  my $t = 11;
-  $m = $t + 89;
-  
-  is( $sc, 2, 'and again' );
-  is( $m,  -117, 'checking the tied variable result' );
-
-  $m += $t;
-
-  is( $sc, 3, 'called on self-increment' );
-  is( $m,  89, 'checking the tied variable result' );
-
-}
-
 # Chains of assignments
 
 my ($l1, $l2, $l3, $l4);
@@ -122,6 +96,42 @@ EOE
     if ($@ !~ /is unimplemented/) {
       fail($_ . ' ' . $warning);
     }
+  }
+}
+
+{				# Check calling STORE
+  note('Tied variables, calling STORE');
+  my $sc = 0;
+  sub B::TIESCALAR {bless [11], 'B'}
+  sub B::FETCH { -(shift->[0]) }
+  sub B::STORE { $sc++; my $o = shift; $o->[0] = 17 + shift }
+
+  my $m;
+  tie $m, 'B';
+  $m = 100;
+
+  is( $sc, 1, 'STORE called when assigning scalar to tied variable' );
+
+  my $t = 11;
+  $m = $t + 89;
+  
+  is( $sc, 2, 'and again' );
+  is( $m,  -117, 'checking the tied variable result' );
+
+  $m += $t;
+
+  is( $sc, 3, 'called on self-increment' );
+  is( $m,  89, 'checking the tied variable result' );
+
+  for (@INPUT) {
+    ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
+    $comment = $op unless defined $comment;
+    next if ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i);
+    $op =~ s/==.*//;
+    
+    $sc = 0;
+    eval "\$m = $op";
+    is $sc, 1, "STORE count for $comment";
   }
 }
 
@@ -241,6 +251,7 @@ rindex $posstr, 2		# rindex
 sprintf "%i%i", $n, $n		# sprintf
 ord $n				# ord
 chr $n				# chr
+chr ${\256}			# chr $wide
 crypt $n, $n			# crypt
 ucfirst ($cstr . "a")		# ucfirst padtmp
 ucfirst $cstr			# ucfirst

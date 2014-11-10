@@ -3225,6 +3225,8 @@ PP(pp_vec)
     }
 
     sv_setuv(ret, do_vecget(src, offset, size));
+    if (!lvalue)
+	SvSETMAGIC(ret);
     PUSHs(ret);
     RETURN;
 }
@@ -3422,7 +3424,7 @@ PP(pp_chr)
 	*tmps = '\0';
 	(void)SvPOK_only(TARG);
 	SvUTF8_on(TARG);
-	XPUSHs(TARG);
+	XPUSHTARG;
 	RETURN;
     }
 
@@ -3449,7 +3451,7 @@ PP(pp_chr)
 	}
     }
 
-    XPUSHs(TARG);
+    XPUSHTARG;
     RETURN;
 }
 
