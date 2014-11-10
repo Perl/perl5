@@ -1,5 +1,8 @@
 #!./perl
 
+# Test that $lexical = <some op> optimises the assignment away correctly
+# and causes no ill side-effects.
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -155,6 +158,8 @@ EOE
   }
 }
 
+# XXX This test does not really belong here, as it has nothing to do with
+#     OPpTARGET_MY optimisation.  But where should it go?
 eval {
     sub PVBM () { 'foo' }
     index 'foo', PVBM;
