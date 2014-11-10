@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl'; require './charset_tools.pl';
 }
 
-plan tests => 144;
+plan tests => 148;
 
 $_ = 'abc';
 $c = foo();
@@ -273,4 +273,24 @@ $/ = "\n";
     $uid = $line[-1];
     is($uid, $expected,
         "RT #123057: chomp works as expected on split");
+}
+
+{
+    my $a = local $/ = 7;
+    $a = chomp $a;
+    is $a, 1, 'lexical $a = chomp $a when $a eq $/ eq 7';
+    $a = $/ = 0;
+    $a = chomp $a;
+    is $a, 1, 'lexical $a = chomp $a when $a eq $/ eq 0';
+    my @a = "7";
+    for my $b($a[0]) {
+        $/ = 7;
+        $b = chomp @a;
+        is $b, 1,
+          'lexical $b = chomp @a when $b eq $/ eq 7 and \$a[0] == \$b';
+        $b = $/ = 0;
+        $b = chomp @a;
+        is $b, 1,
+          'lexical $b = chomp @a when $b eq $/ eq 0 and \$a[0] == \$b';
+    }
 }

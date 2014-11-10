@@ -2004,7 +2004,7 @@ s	|SV *	|incpush_if_exists|NN AV *const av|NN SV *dir|NN SV *const stem
 #endif
 
 #if defined(PERL_IN_PP_C)
-s	|void	|do_chomp	|NN SV *retval|NN SV *sv|bool chomping
+s	|size_t	|do_chomp	|NN SV *retval|NN SV *sv|bool chomping
 s	|OP*	|do_delete_local
 sR	|SV*	|refto		|NN SV* sv
 #endif

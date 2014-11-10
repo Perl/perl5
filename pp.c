@@ -774,16 +774,17 @@ PP(pp_trans)
 
 /* Lvalue operators. */
 
-static void
+static size_t
 S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 {
     STRLEN len;
     char *s;
+    size_t count = 0;
 
     PERL_ARGS_ASSERT_DO_CHOMP;
 
     if (chomping && (RsSNARF(PL_rs) || RsRECORD(PL_rs)))
-	return;
+	return 0;
     if (SvTYPE(sv) == SVt_PVAV) {
 	I32 i;
 	AV *const av = MUTABLE_AV(sv);
@@ -792,17 +793,17 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 	for (i = 0; i <= max; i++) {
 	    sv = MUTABLE_SV(av_fetch(av, i, FALSE));
 	    if (sv && ((sv = *(SV**)sv), sv != &PL_sv_undef))
-		do_chomp(retval, sv, chomping);
+		count += do_chomp(retval, sv, chomping);
 	}
-        return;
+        return count;
     }
     else if (SvTYPE(sv) == SVt_PVHV) {
 	HV* const hv = MUTABLE_HV(sv);
 	HE* entry;
         (void)hv_iterinit(hv);
         while ((entry = hv_iternext(hv)))
-            do_chomp(retval, hv_iterval(hv,entry), chomping);
-	return;
+            count += do_chomp(retval, hv_iterval(hv,entry), chomping);
+	return count;
     }
     else if (SvREADONLY(sv)) {
             Perl_croak_no_modify();
@@ -832,11 +833,11 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 	    if (RsPARA(PL_rs)) {
 		if (*s != '\n')
 		    goto nope;
-		++SvIVX(retval);
+		++count;
 		while (len && s[-1] == '\n') {
 		    --len;
 		    --s;
-		    ++SvIVX(retval);
+		    ++count;
 		}
 	    }
 	    else {
@@ -880,7 +881,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 		if (rslen == 1) {
 		    if (*s != *rsptr)
 			goto nope;
-		    ++SvIVX(retval);
+		    ++count;
 		}
 		else {
 		    if (len < rslen - 1)
@@ -889,7 +890,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 		    s -= rslen - 1;
 		    if (memNE(s, rsptr, rslen))
 			goto nope;
-		    SvIVX(retval) += rs_charlen;
+		    count += rs_charlen;
 		}
 	    }
 	    s = SvPV_force_nomg_nolen(sv);
@@ -936,6 +937,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 	    sv_setpvs(retval, "");
 	SvSETMAGIC(sv);
     }
+    return count;
 }
 
 
@@ -946,9 +948,9 @@ PP(pp_schop)
     dSP; dTARGET;
     const bool chomping = PL_op->op_type == OP_SCHOMP;
 
+    const size_t count = do_chomp(TARG, TOPs, chomping);
     if (chomping)
-	sv_setiv(TARG, 0);
-    do_chomp(TARG, TOPs, chomping);
+	sv_setiv(TARG, count);
     SETTARG;
     RETURN;
 }
@@ -960,11 +962,12 @@ PP(pp_chop)
 {
     dSP; dMARK; dTARGET; dORIGMARK;
     const bool chomping = PL_op->op_type == OP_CHOMP;
+    size_t count = 0;
 
-    if (chomping)
-	sv_setiv(TARG, 0);
     while (MARK < SP)
-	do_chomp(TARG, *++MARK, chomping);
+	count += do_chomp(TARG, *++MARK, chomping);
+    if (chomping)
+	sv_setiv(TARG, count);
     SP = ORIGMARK;
     XPUSHTARG;
     RETURN;

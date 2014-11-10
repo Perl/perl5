@@ -6471,7 +6471,7 @@ PERL_STATIC_NO_RET void	S_usage(pTHX)
 
 #endif
 #if defined(PERL_IN_PP_C)
-STATIC void	S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
+STATIC size_t	S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_DO_CHOMP	\
