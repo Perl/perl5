@@ -1836,7 +1836,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0001120e,	/* bit_xor */
 	0x0001120e,	/* bit_or */
 	0x0000112e,	/* negate */
-	0x0000111e,	/* i_negate */
+	0x0000110e,	/* i_negate */
 	0x00001106,	/* not */
 	0x0000110e,	/* complement */
 	0x00000204,	/* smartmatch */
@@ -2457,7 +2457,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       12, /* bit_xor */
       12, /* bit_or */
        0, /* negate */
-      72, /* i_negate */
+       0, /* i_negate */
        0, /* not */
        0, /* complement */
       12, /* smartmatch */
@@ -2762,7 +2762,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, ref, readline, regcmaybe, regcreset, regcomp, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, akeys, avalues, each, values, pop, shift, range, and, or, dor, andassign, orassign, dorassign, method, method_named, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, reach, rvalues, fc */
+    0x0003, /* scalar, prototype, refgen, srefgen, ref, readline, regcmaybe, regcreset, regcomp, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, akeys, avalues, each, values, pop, shift, range, and, or, dor, andassign, orassign, dorassign, method, method_named, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, reach, rvalues, fc */
     0x281c, 0x3a19, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x03b8, 0x1490, 0x3acc, 0x3588, 0x2be5, /* const */
@@ -2784,7 +2784,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x0c9c, 0x1c18, 0x0834, 0x3d30, 0x384c, 0x1fa8, 0x01e4, 0x0141, /* trans, transr */
     0x0adc, 0x0458, 0x0067, /* sassign */
     0x0758, 0x290c, 0x0067, /* aassign */
-    0x3d30, 0x0003, /* chomp, schomp, i_negate, sin, cos, exp, log, sqrt, int, hex, oct, abs, length, ord, chr, chroot, rmdir */
+    0x3d30, 0x0003, /* chomp, schomp, sin, cos, exp, log, sqrt, int, hex, oct, abs, length, ord, chr, chroot, rmdir */
     0x3d30, 0x0067, /* pow, multiply, i_multiply, divide, i_divide, modulo, i_modulo, add, i_add, subtract, i_subtract, concat, left_shift, right_shift */
     0x0f78, 0x3d30, 0x0067, /* repeat */
     0x3d30, 0x012f, /* stringify, atan2, rand, srand, index, rindex, crypt, push, unshift, flock, chdir, chown, unlink, chmod, utime, rename, link, symlink, mkdir, waitpid, system, exec, kill, getpgrp, setpgrp, getpriority, setpriority, sleep */
@@ -2930,7 +2930,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* BIT_XOR    */ (OPpARG2_MASK),
     /* BIT_OR     */ (OPpARG2_MASK),
     /* NEGATE     */ (OPpARG1_MASK),
-    /* I_NEGATE   */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* I_NEGATE   */ (OPpARG1_MASK),
     /* NOT        */ (OPpARG1_MASK),
     /* COMPLEMENT */ (OPpARG1_MASK),
     /* SMARTMATCH */ (OPpARG2_MASK),

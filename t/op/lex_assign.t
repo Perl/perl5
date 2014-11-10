@@ -220,6 +220,7 @@ $n ^ $n				# bit_xor
 $n | $n				# bit_or
 -$n				# negate
 -$n				# i_negate
+-$a=="-fake"			# i_negate with string
 ~$n				# complement
 atan2 $n,$n			# atan2
 sin $n				# sin

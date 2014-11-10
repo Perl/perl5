@@ -166,7 +166,7 @@ bit_xor		bitwise xor (^)		ck_bitop	fst2	S S
 bit_or		bitwise or (|)		ck_bitop	fst2	S S
 
 negate		negation (-)		ck_null		Ifst1	S
-i_negate	integer negation (-)	ck_null		ifsT1	S
+i_negate	integer negation (-)	ck_null		ifst1	S
 not		not			ck_null		ifs1	S
 complement	1's complement (~)	ck_bitop	fst1	S
 
