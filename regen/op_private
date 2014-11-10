@@ -354,8 +354,8 @@ addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
 #	grepwhile not OK (not always setting)
 #	join not OK (unsafe when TARG == arg)
 #
-#	Suspicious wrt "additional mode of failure": concat (dealt with
-#	in ck_sassign()), join (same).
+#	concat - pp_concat special-cases TARG==arg to avoid
+#		"additional mode of failure"
 #
 # pp_ctl.c
 #	mapwhile flip caller not OK (not always setting)
