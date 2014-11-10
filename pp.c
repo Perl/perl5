@@ -808,9 +808,6 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
     else if (SvREADONLY(sv)) {
             Perl_croak_no_modify();
     }
-    else if (SvIsCOW(sv)) {
-	sv_force_normal_flags(sv, 0);
-    }
 
     if (PL_encoding) {
 	if (!SvUTF8(sv)) {
@@ -905,7 +902,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 
 	Safefree(temp_buffer);
     } else {
-	if (len && !SvPOK(sv))
+	if (len && (!SvPOK(sv) || SvIsCOW(sv)))
 	    s = SvPV_force_nomg(sv, len);
 	if (DO_UTF8(sv)) {
 	    if (s && len) {
