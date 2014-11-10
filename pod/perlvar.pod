@@ -1873,8 +1873,8 @@ X<${^ENCODING}>
 
 The I<object reference> to the C<Encode> object that is used to convert
 the source code to Unicode.  Thanks to this variable your Perl script
-does not have to be written in UTF-8.  Default is I<undef>.  The direct
-manipulation of this variable is highly discouraged.
+does not have to be written in UTF-8.  Default is I<undef>.  Setting
+this variable to any other value is deprecated.
 
 This variable was added in Perl 5.8.2.
 

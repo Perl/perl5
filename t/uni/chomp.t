@@ -33,7 +33,9 @@ our %mbchars = (
 plan tests => 2 * (4 ** 3 + 4 + 1) * (keys %mbchars);
 
 for my $enc (sort keys %mbchars) {
+    no warnings 'deprecated';
     local ${^ENCODING} = find_encoding($enc);
+    use warnings 'deprecated';
     my @char = (sort(keys   %{ $mbchars{$enc} }),
 		sort(values %{ $mbchars{$enc} }));
 

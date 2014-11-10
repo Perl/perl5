@@ -744,7 +744,9 @@ sub run_tests {
 			# Poor man's "use encoding 'ascii'".
 			# This causes a different code path in S_const_str()
 			# to be used
+			no warnings 'deprecated';
 			local ${^ENCODING} = $enc;
+			use warnings 'deprecated';
 			use re 'eval';
 			ok($ss =~ /^$cc/, fmt("encode       $u->[2]", $ss, $cc));
 		    }

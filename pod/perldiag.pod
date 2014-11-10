@@ -5243,6 +5243,11 @@ a positive integer, where the integer was the address of the reference.
 As of Perl 5.20.0 this is a fatal error, to allow future versions of Perl
 to use non-integer refs for more interesting purposes.
 
+=item Setting ${^ENCODING} is deprecated
+
+(D deprecated) You assiged a non-C<undef> value to C<${^ENCODING}>.
+This is deprecated for the same reasons L<encoding> is deprecated.
+
 =item shift on reference is experimental
 
 (S experimental::autoderef) C<shift> with a scalar argument is experimental
