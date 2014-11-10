@@ -490,6 +490,21 @@
 
 #endif
 
+/* NetBSD 5.1 appears to be missing:
+
+  nexttoward nearbyint exp2 tgamma fma remquo
+
+ */
+
+#if defined(__NetBSD__)
+#  undef c99_nexttoward
+#  undef c99_nearbyint
+#  undef c99_exp2
+#  undef c99_tgamma
+#  undef c99_fma
+#  undef c99_remquo
+#  endif
+
 /* XXX Regarding C99 math.h, Android seems to be missing these:
 
   For API level < 13
