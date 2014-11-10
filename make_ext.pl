@@ -554,16 +554,13 @@ EOS
 			 );
     }
 
-    if (!$target or $target !~ /clean$/) {
-	# Give makefile an opportunity to rewrite itself.
-	# reassure users that life goes on...
-	my @args = ('config', @$pass_through);
-	system(@make, @args) and print "@make @args failed, continuing anyway...\n";
-    }
     my @targ = ($target, @$pass_through);
     print "Making $target in $ext_dir\n@make @targ\n" if $verbose;
     local $ENV{PERL_INSTALL_QUIET} = 1;
     my $code = system(@make, @targ);
+    if($code >> 8 != 0){ # probably cleaned itself, try again once more time
+        $code = system(@make, @targ);
+    }
     die "Unsuccessful make($ext_dir): code=$code" if $code != 0;
 
     chdir $return_dir || die "Cannot cd to $return_dir: $!";
