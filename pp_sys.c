@@ -4452,7 +4452,8 @@ PP(pp_setpgrp)
     if (MAXARG > 0) pid = TOPs ? TOPi : 0;
     else {
 	pid = 0;
-	XPUSHi(-1);
+	EXTEND(SP,1);
+	SP++;
     }
 
     TAINT_PROPER("setpgrp");

@@ -320,7 +320,7 @@ system "$runme -e 0"		# system skip(VMS)
 '???'				# kill
 getppid				# getppid
 getpgrp				# getpgrp
-'???'				# setpgrp
+setpgrp				# setpgrp
 getpriority $$, $$		# getpriority
 '???'				# setpriority
 time				# time
