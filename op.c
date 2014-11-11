@@ -10172,8 +10172,8 @@ Perl_ck_sassign(pTHX_ OP *o)
     }
     if (OP_HAS_SIBLING(kid)) {
 	OP *kkid = OP_SIBLING(kid);
-	/* For state variable assignment, kkid is a list op whose op_last
-	   is a padsv. */
+	/* For state variable assignment with attributes, kkid is a list op
+	   whose op_last is a padsv. */
 	if ((kkid->op_type == OP_PADSV ||
 	     (OP_TYPE_IS_OR_WAS(kkid, OP_LIST) &&
 	      (kkid = cLISTOPx(kkid)->op_last)->op_type == OP_PADSV
