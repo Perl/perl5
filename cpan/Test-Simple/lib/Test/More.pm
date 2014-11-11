@@ -1,97 +1,491 @@
 package Test::More;
 
-use 5.006;
+use 5.008001;
 use strict;
 use warnings;
 
-#---- perlcritic exemptions. ----#
-
-# We use a lot of subroutine prototypes
-## no critic (Subroutines::ProhibitSubroutinePrototypes)
-
-# Can't use Carp because it might cause C<use_ok()> to accidentally succeed
-# even though the module being used forgot to use Carp.  Yes, this
-# actually happened.
-sub _carp {
-    my( $file, $line ) = ( caller(1) )[ 1, 2 ];
-    return warn @_, " at $file line $line\n";
-}
-
-our $VERSION = '1.001009';
+our $VERSION = '1.301001_071';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
-use Test::Builder::Module 0.99;
-our @ISA    = qw(Test::Builder::Module);
-our @EXPORT = qw(ok use_ok require_ok
-  is isnt like unlike is_deeply
-  cmp_ok
-  skip todo todo_skip
-  pass fail
-  eq_array eq_hash eq_set
-  $TODO
-  plan
-  done_testing
-  can_ok isa_ok new_ok
-  diag note explain
-  subtest
-  BAIL_OUT
-);
+use Test::Stream 1.301001 '-internal';
+use Test::Stream::Util qw/protect try spoof/;
+use Test::Stream::Toolset;
+
+use Test::Stream::Carp qw/croak carp/;
+use Scalar::Util qw/blessed/;
+
+use Test::More::Tools;
+use Test::More::DeepCheck::Strict;
+
+use Test::Builder;
+
+use Test::Stream::Exporter qw/
+    default_export default_exports import export_to export_to_level
+/;
+
+our $TODO;
+default_export '$TODO' => \$TODO;
+default_exports qw{
+    context
+    plan done_testing
+
+    ok
+    is isnt
+    like unlike
+    cmp_ok
+    is_deeply
+    eq_array eq_hash eq_set
+    can_ok isa_ok new_ok
+    pass fail
+    require_ok use_ok
+    subtest
+
+    explain
+
+    diag note
+
+    skip todo_skip
+    BAIL_OUT
+};
+Test::Stream::Exporter->cleanup;
+
+{
+    no warnings 'once';
+    $Test::Builder::Level ||= 1;
+}
+
+sub builder { Test::Builder->new }
+
+sub before_import {
+    my $class = shift;
+    my ($importer, $list) = @_;
+
+    my $meta = init_tester($importer);
+
+    my $context = context(1);
+    my $other   = [];
+    my $idx     = 0;
+
+    while ($idx <= $#{$list}) {
+        my $item = $list->[$idx++];
+        next unless $item;
+
+        if (defined $item and $item eq 'no_diag') {
+            Test::Stream->shared->set_no_diag(1);
+        }
+        elsif ($item eq 'tests') {
+            $context->plan($list->[$idx++]);
+        }
+        elsif ($item eq 'skip_all') {
+            $context->plan(0, 'SKIP', $list->[$idx++]);
+        }
+        elsif ($item eq 'no_plan') {
+            $context->plan(0, 'NO PLAN');
+        }
+        elsif ($item eq 'import') {
+            push @$other => @{$list->[$idx++]};
+        }
+        else {
+            carp("Unknown option: $item");
+        }
+    }
+
+    @$list = @$other;
+
+    return;
+}
+
+sub ok ($;$) {
+    my $ctx = context();
+    $ctx->ok(@_);
+    return $_[0] ? 1 : 0;
+}
+
+sub plan {
+    return unless @_;
+    my ($directive, $arg) = @_;
+    my $ctx = context();
+
+    if ($directive eq 'tests') {
+        $ctx->plan($arg);
+    }
+    else {
+        $ctx->plan(0, $directive, $arg);
+    }
+}
+
+sub done_testing {
+    my ($num) = @_;
+    my $ctx = context();
+    $ctx->done_testing($num);
+}
+
+sub is($$;$) {
+    my ($got, $want, $name) = @_;
+    my $ctx = context();
+    my ($ok, @diag) = tmt->is_eq($got, $want);
+    $ctx->ok($ok, $name, \@diag);
+    return $ok;
+}
+
+sub isnt ($$;$) {
+    my ($got, $forbid, $name) = @_;
+    my $ctx = context();
+    my ($ok, @diag) = tmt->isnt_eq($got, $forbid);
+    $ctx->ok($ok, $name, \@diag);
+    return $ok;
+}
+
+{
+    no warnings 'once';
+    *isn't = \&isnt;
+    # ' to unconfuse syntax higlighters
+}
+
+sub like ($$;$) {
+    my ($got, $check, $name) = @_;
+    my $ctx = context();
+    my ($ok, @diag) = tmt->regex_check($got, $check, '=~');
+    $ctx->ok($ok, $name, \@diag);
+    return $ok;
+}
+
+sub unlike ($$;$) {
+    my ($got, $forbid, $name) = @_;
+    my $ctx = context();
+    my ($ok, @diag) = tmt->regex_check($got, $forbid, '!~');
+    $ctx->ok($ok, $name, \@diag);
+    return $ok;
+}
+
+sub cmp_ok($$$;$) {
+    my ($got, $type, $expect, $name) = @_;
+    my $ctx = context();
+    my ($ok, @diag) = tmt->cmp_check($got, $type, $expect);
+    $ctx->ok($ok, $name, \@diag);
+    return $ok;
+}
+
+sub can_ok($@) {
+    my ($thing, @methods) = @_;
+    my $ctx = context();
+
+    my $class = ref $thing || $thing || '';
+    my ($ok, @diag);
+
+    if (!@methods) {
+        ($ok, @diag) = (0, "    can_ok() called with no methods");
+    }
+    elsif (!$class) {
+        ($ok, @diag) = (0, "    can_ok() called with empty class or reference");
+    }
+    else {
+        ($ok, @diag) = tmt->can_check($thing, $class, @methods);
+    }
+
+    my $name = (@methods == 1 && defined $methods[0])
+        ? "$class\->can('$methods[0]')"
+        : "$class\->can(...)";
+
+    $ctx->ok($ok, $name, \@diag);
+    return $ok;
+}
+
+sub isa_ok ($$;$) {
+    my ($thing, $class, $thing_name) = @_;
+    my $ctx = context();
+    $thing_name = "'$thing_name'" if $thing_name;
+    my ($ok, @diag) = tmt->isa_check($thing, $class, \$thing_name);
+    my $name = "$thing_name isa '$class'";
+    $ctx->ok($ok, $name, \@diag);
+    return $ok;
+}
+
+sub new_ok {
+    croak "new_ok() must be given at least a class" unless @_;
+    my ($class, $args, $object_name) = @_;
+    my $ctx = context();
+    my ($obj, $name, $ok, @diag) = tmt->new_check($class, $args, $object_name);
+    $ctx->ok($ok, $name, \@diag);
+    return $obj;
+}
+
+sub pass (;$) {
+    my $ctx = context();
+    return $ctx->ok(1, @_);
+}
+
+sub fail (;$) {
+    my $ctx = context();
+    return $ctx->ok(0, @_);
+}
+
+sub subtest {
+    my $ctx = context();
+    return tmt->subtest(@_);
+}
+
+sub explain {
+    my $ctx = context();
+    tmt->explain(@_);
+}
+
+sub diag {
+    my $ctx = context();
+    $ctx->diag($_) for @_;
+}
+
+sub note {
+    my $ctx = context();
+    $ctx->note($_) for @_;
+}
+
+sub skip {
+    my( $why, $how_many ) = @_;
+    my $ctx = context();
+
+    _skip($why, $how_many, 'skip', 1);
+
+    no warnings 'exiting';
+    last SKIP;
+}
+
+sub _skip {
+    my( $why, $how_many, $func, $bool ) = @_;
+    my $ctx = context();
+
+    my $plan = $ctx->stream->plan;
+
+    # If there is no plan we do not need to worry about counts
+    my $need_count = $plan ? !($plan->directive && $plan->directive eq 'NO PLAN') : 0;
+
+    if ($need_count && !defined $how_many) {
+        $ctx->alert("$func() needs to know \$how_many tests are in the block");
+        $how_many = 1;
+    }
+
+    $ctx->alert("$func() was passed a non-numeric number of tests.  Did you get the arguments backwards?")
+        if defined $how_many and $how_many =~ /\D/;
+
+    return unless $how_many || !$bool;
+
+    $ctx->set_skip($why);
+    $how_many ||= 1;
+    for( 1 .. $how_many ) {
+        $ctx->ok($bool, '');
+    }
+}
+
+sub todo_skip {
+    my($why, $how_many) = @_;
+
+    my $ctx = context();
+    $ctx->set_in_todo(1);
+    $ctx->set_todo($why);
+    _skip($why, $how_many, 'todo_skip', 0);
+
+    no warnings 'exiting';
+    last TODO;
+}
+
+sub BAIL_OUT {
+    my ($reason) = @_;
+    my $ctx = context();
+    $ctx->bail($reason);
+}
+
+sub is_deeply {
+    my ($got, $want, $name) = @_;
+
+    my $ctx = context();
+
+    unless( @_ == 2 or @_ == 3 ) {
+        my $msg = <<'WARNING';
+is_deeply() takes two or three args, you gave %d.
+This usually means you passed an array or hash instead
+of a reference to it
+WARNING
+        chop $msg;    # clip off newline so carp() will put in line/file
+
+        $ctx->alert(sprintf $msg, scalar @_);
+
+        $ctx->ok(0, undef, ['incorrect number of args']);
+        return 0;
+    }
+
+    my ($ok, @diag) = Test::More::DeepCheck::Strict->check($got, $want);
+    $ctx->ok($ok, $name, \@diag);
+    return $ok;
+}
+
+sub eq_array {
+    my ($got, $want, $name) = @_;
+    my $ctx = context();
+    my ($ok, @diag) = Test::More::DeepCheck::Strict->check_array($got, $want);
+    return $ok;
+}
+
+sub eq_hash {
+    my ($got, $want, $name) = @_;
+    my $ctx = context();
+    my ($ok, @diag) = Test::More::DeepCheck::Strict->check_hash($got, $want);
+    return $ok;
+}
+
+sub eq_set {
+    my ($got, $want, $name) = @_;
+    my $ctx = context();
+    my ($ok, @diag) = Test::More::DeepCheck::Strict->check_set($got, $want);
+    return $ok;
+}
+
+sub require_ok($;$) {
+    my($module) = shift;
+    my $ctx = context();
+
+    # Try to determine if we've been given a module name or file.
+    # Module names must be barewords, files not.
+    $module = qq['$module'] unless _is_module_name($module);
+
+    my ($ret, $err);
+    {
+        local $SIG{__DIE__};
+        ($ret, $err) = spoof [caller] => "require $module";
+    }
+
+    my @diag;
+    unless ($ret) {
+        chomp $err;
+        push @diag => <<"        DIAG";
+    Tried to require '$module'.
+    Error:  $err
+        DIAG
+    }
+
+    $ctx->ok( $ret, "require $module;", \@diag );
+    return $ret ? 1 : 0;
+}
+
+sub _is_module_name {
+    my $module = shift;
+
+    # Module names start with a letter.
+    # End with an alphanumeric.
+    # The rest is an alphanumeric or ::
+    $module =~ s/\b::\b//g;
+
+    return $module =~ /^[a-zA-Z]\w*$/ ? 1 : 0;
+}
+
+sub use_ok($;@) {
+    my ($module, @imports) = @_;
+    @imports = () unless @imports;
+    my $ctx = context();
+
+    my($pack, $filename, $line) = caller;
+    $filename =~ y/\n\r/_/; # so it doesn't run off the "#line $line $f" line
+
+    my ($ret, $err, $newdie, @diag);
+    {
+        local $SIG{__DIE__};
+
+        if( @imports == 1 and $imports[0] =~ /^\d+(?:\.\d+)?$/ ) {
+            # probably a version check.  Perl needs to see the bare number
+            # for it to work with non-Exporter based modules.
+            ($ret, $err) = spoof [$pack, $filename, $line] => "use $module $imports[0]";
+        }
+        else {
+            ($ret, $err) = spoof [$pack, $filename, $line] => "use $module \@args", @imports;
+        }
+
+        $newdie = $SIG{__DIE__};
+    }
+
+    $SIG{__DIE__} = $newdie if defined $newdie;
+
+    unless ($ret) {
+        chomp $err;
+        push @diag => <<"        DIAG";
+    Tried to use '$module'.
+    Error:  $err
+        DIAG
+    }
+
+    $ctx->ok($ret, "use $module;", \@diag);
+
+    return $ret ? 1 : 0;
+}
+
+1;
+
+__END__
 
 =head1 NAME
 
-Test::More - yet another framework for writing test scripts
+Test::More - The defacto standard in unit testing tools.
 
 =head1 SYNOPSIS
 
-  use Test::More tests => 23;
-  # or
-  use Test::More skip_all => $reason;
-  # or
-  use Test::More;   # see done_testing()
+    # Enabled forking, and removes expensive legacy support;
+    use Test::Stream;
 
-  require_ok( 'Some::Module' );
+    # Load after Test::Stream to get the benefits of removed legacy
+    use Test::More;
 
-  # Various ways to say "ok"
-  ok($got eq $expected, $test_name);
+    use ok 'Some::Module';
 
-  is  ($got, $expected, $test_name);
-  isnt($got, $expected, $test_name);
+    can_ok($module, @methods);
+    isa_ok($object, $class);
 
-  # Rather than print STDERR "# here's what went wrong\n"
-  diag("here's what went wrong");
+    pass($test_name);
+    fail($test_name);
 
-  like  ($got, qr/expected/, $test_name);
-  unlike($got, qr/expected/, $test_name);
+    ok($got eq $expected, $test_name);
 
-  cmp_ok($got, '==', $expected, $test_name);
+    is  ($got, $expected, $test_name);
+    isnt($got, $expected, $test_name);
 
-  is_deeply($got_complex_structure, $expected_complex_structure, $test_name);
+    like  ($got, qr/expected/, $test_name);
+    unlike($got, qr/expected/, $test_name);
 
-  SKIP: {
-      skip $why, $how_many unless $have_some_feature;
+    cmp_ok($got, '==', $expected, $test_name);
 
-      ok( foo(),       $test_name );
-      is( foo(42), 23, $test_name );
-  };
+    is_deeply(
+        $got_complex_structure,
+        $expected_complex_structure,
+        $test_name
+    );
 
-  TODO: {
-      local $TODO = $why;
+    # Rather than print STDERR "# here's what went wrong\n"
+    diag("here's what went wrong");
 
-      ok( foo(),       $test_name );
-      is( foo(42), 23, $test_name );
-  };
+    SKIP: {
+        skip $why, $how_many unless $have_some_feature;
 
-  can_ok($module, @methods);
-  isa_ok($object, $class);
+        ok( foo(),       $test_name );
+        is( foo(42), 23, $test_name );
+    };
 
-  pass($test_name);
-  fail($test_name);
+    TODO: {
+        local $TODO = $why;
 
-  BAIL_OUT($why);
+        ok( foo(),       $test_name );
+        is( foo(42), 23, $test_name );
+    };
 
-  # UNIMPLEMENTED!!!
-  my @status = Test::More::status;
+    sub my_compare {
+        my ($got, $want, $name) = @_;
+        my $ctx = context();
+        my $ok = $got eq $want;
+        $ctx->ok($ok, $name);
+        ...
+        return $ok;
+    };
 
+    # If this fails it will report this line instead of the line in my_compare.
+    my_compare('a', 'b');
+
+    done_testing;
 
 =head1 DESCRIPTION
 
@@ -104,7 +498,6 @@ utilities.  Various ways to say "ok" with better diagnostics,
 facilities to skip tests, test future features and compare complicated
 data structures.  While you can do almost anything with a simple
 C<ok()> function, it doesn't provide good diagnostic output.
-
 
 =head2 I love it when a plan comes together
 
@@ -160,40 +553,6 @@ or for deciding between running the tests at all:
       plan tests => 42;
   }
 
-=cut
-
-sub plan {
-    my $tb = Test::More->builder;
-
-    return $tb->plan(@_);
-}
-
-# This implements "use Test::More 'no_diag'" but the behavior is
-# deprecated.
-sub import_extra {
-    my $class = shift;
-    my $list  = shift;
-
-    my @other = ();
-    my $idx   = 0;
-    while( $idx <= $#{$list} ) {
-        my $item = $list->[$idx];
-
-        if( defined $item and $item eq 'no_diag' ) {
-            $class->builder->no_diag(1);
-        }
-        else {
-            push @other, $item;
-        }
-
-        $idx++;
-    }
-
-    @$list = @other;
-
-    return;
-}
-
 =over 4
 
 =item B<done_testing>
@@ -213,12 +572,111 @@ This is safer than and replaces the "no_plan" plan.
 
 =back
 
-=cut
+=head2 Test::Stream
 
-sub done_testing {
-    my $tb = Test::More->builder;
-    $tb->done_testing(@_);
-}
+When you use Test::Stream, it enables support for forking in your tests. If it
+is loaded before Test::More then it will prevent the insertion of some legacy
+support shims, saving you memory and improving performance.
+
+    use Test::Stream;
+    use Test::More;
+
+=head2 TAP Encoding
+
+You can now control the encoding of your TAP output using Test::Stream.
+
+    use Test::Stream; # imports tap_encoding
+    use Test::More;
+
+    tap_encoding 'utf8';
+
+You can also just set 'utf8' it at import time
+
+    use Test::Stream 'utf8';
+
+or something other than utf8
+
+    use Test::Stream encoding => 'latin1';
+
+=over 4
+
+=item tap_encoding 'utf8';
+
+=item tap_encoding 'YOUR_ENCODING';
+
+=item tap_encoding 'xxx' => sub { ... };
+
+The C<tap_encoding($encoding)> function will ensure that any B<FUTURE> TAP
+output produced by I<This Package> will be output in the specified encoding.
+
+You may also provide a codeblock in which case the scope of the encoding change
+will only apply to that codeblock.
+
+B<Note>: This is effective only for the current package. Other packages can/may
+select other encodings for their TAP output. For packages where none is
+specified, the original STDOUT and STDERR settings are used, the results are
+unpredictable.
+
+B<Note>: The encoding of the TAP, it is necessary to set to match the
+locale of the encoding of the terminal.
+
+However, in tests code that are performed in a variety of environments,
+it can not be assumed in advance the encoding of the locale of the terminal,
+it is recommended how to set the encoding to your environment using the
+C<Encode::Locale> module.
+
+The following is an example of code.
+
+  use utf8;
+  use Test::Stream;
+  use Test::More;
+  use Encode::Locale;
+
+  tap_encoding('console_out');
+
+B<Note>: Filenames are a touchy subject:
+
+Different OS's and filesystems handle filenames differently. When you do not
+specify an encoding, the filename will be unmodified, you get whatever perl
+thinks it is. If you do specify an encoding, the filename will be assumed to be
+in that encoding, and an attempt will be made to unscramble it. If the
+unscrambling fails the original name will be used.
+
+This filename unscrambling is necessary for example on linux systems when you
+use utf8 encoding and a utf8 filename. Perl will read the bytes of the name,
+and treat them as bytes. if you then try to print the name to a utf8 handle it
+will treat each byte as a different character. Test::More attempts to fix this
+scrambling for you.
+
+=back
+
+=head2 Helpers
+
+Sometimes you want to write functions for things you do frequently that include
+calling ok() or other test functions. Doing this can make it hard to debug
+problems as failures will be reported in your sub, and not at the place where
+you called your sub. Now there is a solution to this, the
+L<Test::Stream::Context> object!.
+
+Test::More exports the C<context()> function which will return a context object
+for your use. The idea is that you generate a context object at the lowest
+level (the function you call from your test file). Deeper functions that need
+context will get the object you already generated, at least until the object
+falls out of scope or is undefined.
+
+    sub my_compare {
+        my ($got, $want, $name) = @_;
+        my $ctx = context();
+
+        # is() will find the context object above, instead of generating a new
+        # one. That way a failure will be reported to the correct line
+        is($got, $want);
+
+        # This time it will generate a new context object. That means a failure
+        # will report to this line.
+        $ctx = undef;
+        is($got, $want);
+    };
 
 =head2 Test names
 
@@ -284,15 +742,6 @@ Should an C<ok()> fail, it will produce some diagnostics:
     #   in foo.t at line 42.
 
 This is the same as L<Test::Simple>'s C<ok()> routine.
-
-=cut
-
-sub ok ($;$) {
-    my( $test, $name ) = @_;
-    my $tb = Test::More->builder;
-
-    return $tb->ok( $test, $name );
-}
 
 =item B<is>
 
@@ -368,23 +817,6 @@ different from some other value:
 For those grammatical pedants out there, there's an C<isn't()>
 function which is an alias of C<isnt()>.
 
-=cut
-
-sub is ($$;$) {
-    my $tb = Test::More->builder;
-
-    return $tb->is_eq(@_);
-}
-
-sub isnt ($$;$) {
-    my $tb = Test::More->builder;
-
-    return $tb->isnt_eq(@_);
-}
-
-*isn't = \&isnt;
-# ' to unconfuse syntax higlighters
-
 =item B<like>
 
   like( $got, qr/expected/, $test_name );
@@ -413,28 +845,12 @@ Regex options may be placed on the end (C<'/expected/i'>).
 Its advantages over C<ok()> are similar to that of C<is()> and C<isnt()>.  Better
 diagnostics on failure.
 
-=cut
-
-sub like ($$;$) {
-    my $tb = Test::More->builder;
-
-    return $tb->like(@_);
-}
-
 =item B<unlike>
 
   unlike( $got, qr/expected/, $test_name );
 
 Works exactly as C<like()>, only it checks if $got B<does not> match the
 given pattern.
-
-=cut
-
-sub unlike ($$;$) {
-    my $tb = Test::More->builder;
-
-    return $tb->unlike(@_);
-}
 
 =item B<cmp_ok>
 
@@ -468,19 +884,10 @@ C<is()>'s use of C<eq> will interfere:
 
     cmp_ok( $big_hairy_number, '==', $another_big_hairy_number );
 
-It's especially useful when comparing greater-than or smaller-than 
+It's especially useful when comparing greater-than or smaller-than
 relation between values:
 
     cmp_ok( $some_value, '<=', $upper_limit );
-
-
-=cut
-
-sub cmp_ok($$$;$) {
-    my $tb = Test::More->builder;
-
-    return $tb->cmp_ok(@_);
-}
 
 =item B<can_ok>
 
@@ -494,9 +901,9 @@ Checks to make sure the $module or $object can do these @methods
 
 is almost exactly like saying:
 
-    ok( Foo->can('this') && 
-        Foo->can('that') && 
-        Foo->can('whatever') 
+    ok( Foo->can('this') &&
+        Foo->can('that') &&
+        Foo->can('whatever')
       );
 
 only without all the typing and with a better interface.  Handy for
@@ -508,40 +915,6 @@ as one test.  If you desire otherwise, use:
     foreach my $meth (@methods) {
         can_ok('Foo', $meth);
     }
-
-=cut
-
-sub can_ok ($@) {
-    my( $proto, @methods ) = @_;
-    my $class = ref $proto || $proto;
-    my $tb = Test::More->builder;
-
-    unless($class) {
-        my $ok = $tb->ok( 0, "->can(...)" );
-        $tb->diag('    can_ok() called with empty class or reference');
-        return $ok;
-    }
-
-    unless(@methods) {
-        my $ok = $tb->ok( 0, "$class->can(...)" );
-        $tb->diag('    can_ok() called with no methods');
-        return $ok;
-    }
-
-    my @nok = ();
-    foreach my $method (@methods) {
-        $tb->_try( sub { $proto->can($method) } ) or push @nok, $method;
-    }
-
-    my $name = (@methods == 1) ? "$class->can('$methods[0]')" :
-                                 "$class->can(...)"           ;
-
-    my $ok = $tb->ok( !@nok, $name );
-
-    $tb->diag( map "    $class->can('$_') failed\n", @nok );
-
-    return $ok;
-}
 
 =item B<isa_ok>
 
@@ -575,88 +948,6 @@ The diagnostics of this test normally just refer to 'the object'.  If
 you'd like them to be more specific, you can supply an $object_name
 (for example 'Test customer').
 
-=cut
-
-sub isa_ok ($$;$) {
-    my( $thing, $class, $thing_name ) = @_;
-    my $tb = Test::More->builder;
-
-    my $whatami;
-    if( !defined $thing ) {
-        $whatami = 'undef';
-    }
-    elsif( ref $thing ) {
-        $whatami = 'reference';
-
-        local($@,$!);
-        require Scalar::Util;
-        if( Scalar::Util::blessed($thing) ) {
-            $whatami = 'object';
-        }
-    }
-    else {
-        $whatami = 'class';
-    }
-
-    # We can't use UNIVERSAL::isa because we want to honor isa() overrides
-    my( $rslt, $error ) = $tb->_try( sub { $thing->isa($class) } );
-
-    if($error) {
-        die <<WHOA unless $error =~ /^Can't (locate|call) method "isa"/;
-WHOA! I tried to call ->isa on your $whatami and got some weird error.
-Here's the error.
-$error
-WHOA
-    }
-
-    # Special case for isa_ok( [], "ARRAY" ) and like
-    if( $whatami eq 'reference' ) {
-        $rslt = UNIVERSAL::isa($thing, $class);
-    }
-
-    my($diag, $name);
-    if( defined $thing_name ) {
-        $name = "'$thing_name' isa '$class'";
-        $diag = defined $thing ? "'$thing_name' isn't a '$class'" : "'$thing_name' isn't defined";
-    }
-    elsif( $whatami eq 'object' ) {
-        my $my_class = ref $thing;
-        $thing_name = qq[An object of class '$my_class'];
-        $name = "$thing_name isa '$class'";
-        $diag = "The object of class '$my_class' isn't a '$class'";
-    }
-    elsif( $whatami eq 'reference' ) {
-        my $type = ref $thing;
-        $thing_name = qq[A reference of type '$type'];
-        $name = "$thing_name isa '$class'";
-        $diag = "The reference of type '$type' isn't a '$class'";
-    }
-    elsif( $whatami eq 'undef' ) {
-        $thing_name = 'undef';
-        $name = "$thing_name isa '$class'";
-        $diag = "$thing_name isn't defined";
-    }
-    elsif( $whatami eq 'class' ) {
-        $thing_name = qq[The class (or class-like) '$thing'];
-        $name = "$thing_name isa '$class'";
-        $diag = "$thing_name isn't a '$class'";
-    }
-    else {
-        die;
-    }
-
-    my $ok;
-    if($rslt) {
-        $ok = $tb->ok( 1, $name );
-    }
-    else {
-        $ok = $tb->ok( 0, $name );
-        $tb->diag("    $diag\n");
-    }
-
-    return $ok;
-}
-
 =item B<new_ok>
 
   my $obj = new_ok( $class );
@@ -676,31 +967,6 @@ If @args is not given, an empty list will be used.
 This function only works on C<new()> and it assumes C<new()> will return
 just a single object which isa C<$class>.
 
-=cut
-
-sub new_ok {
-    my $tb = Test::More->builder;
-    $tb->croak("new_ok() must be given at least a class") unless @_;
-
-    my( $class, $args, $object_name ) = @_;
-
-    $args ||= [];
-
-    my $obj;
-    my( $success, $error ) = $tb->_try( sub { $obj = $class->new(@$args); 1 } );
-    if($success) {
-        local $Test::Builder::Level = $Test::Builder::Level + 1;
-        isa_ok $obj, $class, $object_name;
-    }
-    else {
-        $class = 'undef' if !defined $class;
-        $tb->ok( 0, "$class->new() died" );
-        $tb->diag("    Error was:  $error");
-    }
-
-    return $obj;
-}
-
 =item B<subtest>
 
     subtest $name => \&code;
@@ -712,7 +978,7 @@ result of the whole subtest to determine if its ok or not ok.
 For example...
 
   use Test::More tests => 3;
- 
+
   pass("First test");
 
   subtest 'An example subtest' => sub {
@@ -762,15 +1028,6 @@ subtests are equivalent:
       done_testing();
   };
 
-=cut
-
-sub subtest {
-    my ($name, $subtests) = @_;
-
-    my $tb = Test::More->builder;
-    return $tb->subtest(@_);
-}
-
 =item B<pass>
 
 =item B<fail>
@@ -786,22 +1043,7 @@ C<ok(1)> and C<ok(0)>.
 
 Use these very, very, very sparingly.
 
-=cut
-
-sub pass (;$) {
-    my $tb = Test::More->builder;
-
-    return $tb->ok( 1, @_ );
-}
-
-sub fail (;$) {
-    my $tb = Test::More->builder;
-
-    return $tb->ok( 0, @_ );
-}
-
 =back
-
 
 =head2 Module tests
 
@@ -810,11 +1052,43 @@ successfully load.  For example, you'll often want a first test which
 simply loads all the modules in the distribution to make sure they
 work before going on to do more complicated testing.
 
-For such purposes we have C<use_ok> and C<require_ok>.
+For such purposes we have C<use ok 'module'>. C<use_ok> is still around, but is
+considered discouraged in favor of C<use ok 'module'>. C<require_ok> is also
+discouraged because it tries to guess if you gave it a file name or module
+name. C<require_ok>'s guessing mechanism is broken, but fixing it can break
+things.
 
 =over 4
 
+=item B<use ok 'module'>
+
+=item B<use ok 'module', @args>
+
+    use ok 'Some::Module';
+    use ok 'Another::Module', qw/import_a import_b/;
+
+This will load the specified module and pass through any extra arguments to
+that module. This will also produce a test result.
+
+B<Note - Do not do this:>
+
+    my $class = 'My::Module';
+    use ok $class;
+
+The value 'My::Module' is not assigned to the C<$class> variable until
+run-time, but the C<use ok $class> statement is run at compile time. The result
+of this is that we try to load 'undef' as a module. This will generate an
+exception: C<'use ok' called with an empty argument, did you try to use a package name from an uninitialized variable?>
+
+If you must do something like this, here is a more-correct way:
+
+    my $class;
+    BEGIN { $class = 'My::Module' }
+    use ok $class;
+
 =item B<require_ok>
+
+B<***DISCOURAGED***> - Broken guessing
 
    require_ok($module);
    require_ok($file);
@@ -839,52 +1113,9 @@ No exception will be thrown if the load fails.
         require_ok $module or BAIL_OUT "Can't load $module";
     }
 
-=cut
-
-sub require_ok ($) {
-    my($module) = shift;
-    my $tb = Test::More->builder;
-
-    my $pack = caller;
-
-    # Try to determine if we've been given a module name or file.
-    # Module names must be barewords, files not.
-    $module = qq['$module'] unless _is_module_name($module);
-
-    my $code = <<REQUIRE;
-package $pack;
-require $module;
-1;
-REQUIRE
-
-    my( $eval_result, $eval_error ) = _eval($code);
-    my $ok = $tb->ok( $eval_result, "require $module;" );
-
-    unless($ok) {
-        chomp $eval_error;
-        $tb->diag(<<DIAGNOSTIC);
-    Tried to require '$module'.
-    Error:  $eval_error
-DIAGNOSTIC
-
-    }
-
-    return $ok;
-}
-
-sub _is_module_name {
-    my $module = shift;
-
-    # Module names start with a letter.
-    # End with an alphanumeric.
-    # The rest is an alphanumeric or ::
-    $module =~ s/\b::\b//g;
-
-    return $module =~ /^[a-zA-Z]\w*$/ ? 1 : 0;
-}
-
-
 =item B<use_ok>
+
+B<***DISCOURAGED***> See C<use ok 'module'>
 
    BEGIN { use_ok($module); }
    BEGIN { use_ok($module, @imports); }
@@ -933,76 +1164,7 @@ import anything, use C<require_ok>.
 
   BEGIN { require_ok "Foo" }
 
-=cut
-
-sub use_ok ($;@) {
-    my( $module, @imports ) = @_;
-    @imports = () unless @imports;
-    my $tb = Test::More->builder;
-
-    my( $pack, $filename, $line ) = caller;
-    $filename =~ y/\n\r/_/; # so it doesn't run off the "#line $line $f" line
-
-    my $code;
-    if( @imports == 1 and $imports[0] =~ /^\d+(?:\.\d+)?$/ ) {
-        # probably a version check.  Perl needs to see the bare number
-        # for it to work with non-Exporter based modules.
-        $code = <<USE;
-package $pack;
-
-#line $line $filename
-use $module $imports[0];
-1;
-USE
-    }
-    else {
-        $code = <<USE;
-package $pack;
-
-#line $line $filename
-use $module \@{\$args[0]};
-1;
-USE
-    }
-
-    my( $eval_result, $eval_error ) = _eval( $code, \@imports );
-    my $ok = $tb->ok( $eval_result, "use $module;" );
-
-    unless($ok) {
-        chomp $eval_error;
-        $@ =~ s{^BEGIN failed--compilation aborted at .*$}
-                {BEGIN failed--compilation aborted at $filename line $line.}m;
-        $tb->diag(<<DIAGNOSTIC);
-    Tried to use '$module'.
-    Error:  $eval_error
-DIAGNOSTIC
-
-    }
-
-    return $ok;
-}
-
-sub _eval {
-    my( $code, @args ) = @_;
-
-    # Work around oddities surrounding resetting of $@ by immediately
-    # storing it.
-    my( $sigdie, $eval_result, $eval_error );
-    {
-        local( $@, $!, $SIG{__DIE__} );    # isolate eval
-        $eval_result = eval $code;              ## no critic (BuiltinFunctions::ProhibitStringyEval)
-        $eval_error  = $@;
-        $sigdie      = $SIG{__DIE__} || undef;
-    }
-    # make sure that $code got a chance to set $SIG{__DIE__}
-    $SIG{__DIE__} = $sigdie if defined $sigdie;
-
-    return( $eval_result, $eval_error );
-}
-
-
 =back
-
 
 =head2 Complex data structures
 
@@ -1034,112 +1196,6 @@ improve in the future.
 L<Test::Differences> and L<Test::Deep> provide more in-depth functionality
 along these lines.
 
-=cut
-
-our( @Data_Stack, %Refs_Seen );
-my $DNE = bless [], 'Does::Not::Exist';
-
-sub _dne {
-    return ref $_[0] eq ref $DNE;
-}
-
-## no critic (Subroutines::RequireArgUnpacking)
-sub is_deeply {
-    my $tb = Test::More->builder;
-
-    unless( @_ == 2 or @_ == 3 ) {
-        my $msg = <<'WARNING';
-is_deeply() takes two or three args, you gave %d.
-This usually means you passed an array or hash instead 
-of a reference to it
-WARNING
-        chop $msg;    # clip off newline so carp() will put in line/file
-
-        _carp sprintf $msg, scalar @_;
-
-        return $tb->ok(0);
-    }
-
-    my( $got, $expected, $name ) = @_;
-
-    $tb->_unoverload_str( \$expected, \$got );
-
-    my $ok;
-    if( !ref $got and !ref $expected ) {    # neither is a reference
-        $ok = $tb->is_eq( $got, $expected, $name );
-    }
-    elsif( !ref $got xor !ref $expected ) {    # one's a reference, one isn't
-        $ok = $tb->ok( 0, $name );
-        $tb->diag( _format_stack({ vals => [ $got, $expected ] }) );
-    }
-    else {                                     # both references
-        local @Data_Stack = ();
-        if( _deep_check( $got, $expected ) ) {
-            $ok = $tb->ok( 1, $name );
-        }
-        else {
-            $ok = $tb->ok( 0, $name );
-            $tb->diag( _format_stack(@Data_Stack) );
-        }
-    }
-
-    return $ok;
-}
-
-sub _format_stack {
-    my(@Stack) = @_;
-
-    my $var       = '$FOO';
-    my $did_arrow = 0;
-    foreach my $entry (@Stack) {
-        my $type = $entry->{type} || '';
-        my $idx = $entry->{'idx'};
-        if( $type eq 'HASH' ) {
-            $var .= "->" unless $did_arrow++;
-            $var .= "{$idx}";
-        }
-        elsif( $type eq 'ARRAY' ) {
-            $var .= "->" unless $did_arrow++;
-            $var .= "[$idx]";
-        }
-        elsif( $type eq 'REF' ) {
-            $var = "\${$var}";
-        }
-    }
-
-    my @vals = @{ $Stack[-1]{vals} }[ 0, 1 ];
-    my @vars = ();
-    ( $vars[0] = $var ) =~ s/\$FOO/     \$got/;
-    ( $vars[1] = $var ) =~ s/\$FOO/\$expected/;
-
-    my $out = "Structures begin differing at:\n";
-    foreach my $idx ( 0 .. $#vals ) {
-        my $val = $vals[$idx];
-        $vals[$idx]
-          = !defined $val ? 'undef'
-          : _dne($val)    ? "Does not exist"
-          : ref $val      ? "$val"
-          :                 "'$val'";
-    }
-
-    $out .= "$vars[0] = $vals[0]\n";
-    $out .= "$vars[1] = $vals[1]\n";
-
-    $out =~ s/^/    /msg;
-    return $out;
-}
-
-sub _type {
-    my $thing = shift;
-
-    return '' if !ref $thing;
-
-    for my $type (qw(Regexp ARRAY HASH REF SCALAR GLOB CODE)) {
-        return $type if UNIVERSAL::isa( $thing, $type );
-    }
-
-    return '';
-}
 
 =back
 
@@ -1194,16 +1250,6 @@ don't indicate a problem.
 
     note("Tempfile is $tempfile");
 
-=cut
-
-sub diag {
-    return Test::More->builder->diag(@_);
-}
-
-sub note {
-    return Test::More->builder->note(@_);
-}
-
 =item B<explain>
 
   my @dump = explain @diagnostic_message;
@@ -1220,12 +1266,6 @@ or
     note explain \%args;
     Some::Class->method(%args);
 
-=cut
-
-sub explain {
-    return Test::More->builder->explain(@_);
-}
-
 =back
 
 
@@ -1233,7 +1273,7 @@ sub explain {
 
 Sometimes running a test under certain conditions will cause the
 test script to die.  A certain function or method isn't implemented
-(such as C<fork()> on MacOS), some resource isn't available (like a 
+(such as C<fork()> on MacOS), some resource isn't available (like a
 net connection) or a module isn't available.  In these cases it's
 necessary to skip tests, or declare that they are supposed to fail
 but will work in the future (a todo test).
@@ -1285,34 +1325,6 @@ the label C<SKIP>, or Test::More can't work its magic.
 You don't skip tests which are failing because there's a bug in your
 program, or for which you don't yet have code written.  For that you
 use TODO.  Read on.
-
-=cut
-
-## no critic (Subroutines::RequireFinalReturn)
-sub skip {
-    my( $why, $how_many ) = @_;
-    my $tb = Test::More->builder;
-
-    unless( defined $how_many ) {
-        # $how_many can only be avoided when no_plan is in use.
-        _carp "skip() needs to know \$how_many tests are in the block"
-          unless $tb->has_plan eq 'no_plan';
-        $how_many = 1;
-    }
-
-    if( defined $how_many and $how_many =~ /\D/ ) {
-        _carp
-          "skip() was passed a non-numeric number of tests.  Did you get the arguments backwards?";
-        $how_many = 1;
-    }
-
-    for( 1 .. $how_many ) {
-        $tb->skip($why);
-    }
-
-    no warnings 'exiting';
-    last SKIP;
-}
 
 =item B<TODO: BLOCK>
 
@@ -1370,26 +1382,6 @@ The syntax and behavior is similar to a C<SKIP: BLOCK> except the
 tests will be marked as failing but todo.  L<Test::Harness> will
 interpret them as passing.
 
-=cut
-
-sub todo_skip {
-    my( $why, $how_many ) = @_;
-    my $tb = Test::More->builder;
-
-    unless( defined $how_many ) {
-        # $how_many can only be avoided when no_plan is in use.
-        _carp "todo_skip() needs to know \$how_many tests are in the block"
-          unless $tb->has_plan eq 'no_plan';
-        $how_many = 1;
-    }
-
-    for( 1 .. $how_many ) {
-        $tb->todo_skip($why);
-    }
-
-    no warnings 'exiting';
-    last TODO;
-}
 
 =item When do I use SKIP vs. TODO?
 
@@ -1425,17 +1417,7 @@ The test will exit with 255.
 
 For even better control look at L<Test::Most>.
 
-=cut
-
-sub BAIL_OUT {
-    my $reason = shift;
-    my $tb     = Test::More->builder;
-
-    $tb->BAIL_OUT($reason);
-}
-
 =back
-
 
 =head2 Discouraged comparison functions
 
@@ -1449,7 +1431,7 @@ These functions are usually used inside an C<ok()>.
 
     ok( eq_array(\@got, \@expected) );
 
-C<is_deeply()> can do that better and with diagnostics.  
+C<is_deeply()> can do that better and with diagnostics.
 
     is_deeply( \@got, \@expected );
 
@@ -1464,146 +1446,6 @@ They may be deprecated in future versions.
 Checks if two arrays are equivalent.  This is a deep check, so
 multi-level structures are handled correctly.
 
-=cut
-
-#'#
-sub eq_array {
-    local @Data_Stack = ();
-    _deep_check(@_);
-}
-
-sub _eq_array {
-    my( $a1, $a2 ) = @_;
-
-    if( grep _type($_) ne 'ARRAY', $a1, $a2 ) {
-        warn "eq_array passed a non-array ref";
-        return 0;
-    }
-
-    return 1 if $a1 eq $a2;
-
-    my $ok = 1;
-    my $max = $#$a1 > $#$a2 ? $#$a1 : $#$a2;
-    for( 0 .. $max ) {
-        my $e1 = $_ > $#$a1 ? $DNE : $a1->[$_];
-        my $e2 = $_ > $#$a2 ? $DNE : $a2->[$_];
-
-        next if _equal_nonrefs($e1, $e2);
-
-        push @Data_Stack, { type => 'ARRAY', idx => $_, vals => [ $e1, $e2 ] };
-        $ok = _deep_check( $e1, $e2 );
-        pop @Data_Stack if $ok;
-
-        last unless $ok;
-    }
-
-    return $ok;
-}
-
-sub _equal_nonrefs {
-    my( $e1, $e2 ) = @_;
-
-    return if ref $e1 or ref $e2;
-
-    if ( defined $e1 ) {
-        return 1 if defined $e2 and $e1 eq $e2;
-    }
-    else {
-        return 1 if !defined $e2;
-    }
-
-    return;
-}
-
-sub _deep_check {
-    my( $e1, $e2 ) = @_;
-    my $tb = Test::More->builder;
-
-    my $ok = 0;
-
-    # Effectively turn %Refs_Seen into a stack.  This avoids picking up
-    # the same referenced used twice (such as [\$a, \$a]) to be considered
-    # circular.
-    local %Refs_Seen = %Refs_Seen;
-
-    {
-        $tb->_unoverload_str( \$e1, \$e2 );
-
-        # Either they're both references or both not.
-        my $same_ref = !( !ref $e1 xor !ref $e2 );
-        my $not_ref = ( !ref $e1 and !ref $e2 );
-
-        if( defined $e1 xor defined $e2 ) {
-            $ok = 0;
-        }
-        elsif( !defined $e1 and !defined $e2 ) {
-            # Shortcut if they're both undefined.
-            $ok = 1;
-        }
-        elsif( _dne($e1) xor _dne($e2) ) {
-            $ok = 0;
-        }
-        elsif( $same_ref and( $e1 eq $e2 ) ) {
-            $ok = 1;
-        }
-        elsif($not_ref) {
-            push @Data_Stack, { type => '', vals => [ $e1, $e2 ] };
-            $ok = 0;
-        }
-        else {
-            if( $Refs_Seen{$e1} ) {
-                return $Refs_Seen{$e1} eq $e2;
-            }
-            else {
-                $Refs_Seen{$e1} = "$e2";
-            }
-
-            my $type = _type($e1);
-            $type = 'DIFFERENT' unless _type($e2) eq $type;
-
-            if( $type eq 'DIFFERENT' ) {
-                push @Data_Stack, { type => $type, vals => [ $e1, $e2 ] };
-                $ok = 0;
-            }
-            elsif( $type eq 'ARRAY' ) {
-                $ok = _eq_array( $e1, $e2 );
-            }
-            elsif( $type eq 'HASH' ) {
-                $ok = _eq_hash( $e1, $e2 );
-            }
-            elsif( $type eq 'REF' ) {
-                push @Data_Stack, { type => $type, vals => [ $e1, $e2 ] };
-                $ok = _deep_check( $$e1, $$e2 );
-                pop @Data_Stack if $ok;
-            }
-            elsif( $type eq 'SCALAR' ) {
-                push @Data_Stack, { type => 'REF', vals => [ $e1, $e2 ] };
-                $ok = _deep_check( $$e1, $$e2 );
-                pop @Data_Stack if $ok;
-            }
-            elsif($type) {
-                push @Data_Stack, { type => $type, vals => [ $e1, $e2 ] };
-                $ok = 0;
-            }
-            else {
-                _whoa( 1, "No type in _deep_check" );
-            }
-        }
-    }
-
-    return $ok;
-}
-
-sub _whoa {
-    my( $check, $desc ) = @_;
-    if($check) {
-        die <<"WHOA";
-WHOA!  $desc
-This should never happen!  Please contact the author immediately!
-WHOA
-    }
-}
-
 =item B<eq_hash>
 
   my $is_eq = eq_hash(\%got, \%expected);
@@ -1611,40 +1453,6 @@ WHOA
 Determines if the two hashes contain the same keys and values.  This
 is a deep check.
 
-=cut
-
-sub eq_hash {
-    local @Data_Stack = ();
-    return _deep_check(@_);
-}
-
-sub _eq_hash {
-    my( $a1, $a2 ) = @_;
-
-    if( grep _type($_) ne 'HASH', $a1, $a2 ) {
-        warn "eq_hash passed a non-hash ref";
-        return 0;
-    }
-
-    return 1 if $a1 eq $a2;
-
-    my $ok = 1;
-    my $bigger = keys %$a1 > keys %$a2 ? $a1 : $a2;
-    foreach my $k ( keys %$bigger ) {
-        my $e1 = exists $a1->{$k} ? $a1->{$k} : $DNE;
-        my $e2 = exists $a2->{$k} ? $a2->{$k} : $DNE;
-
-        next if _equal_nonrefs($e1, $e2);
-
-        push @Data_Stack, { type => 'HASH', idx => $k, vals => [ $e1, $e2 ] };
-        $ok = _deep_check( $e1, $e2 );
-        pop @Data_Stack if $ok;
-
-        last unless $ok;
-    }
-
-    return $ok;
-}
 
 =item B<eq_set>
 
@@ -1670,57 +1478,16 @@ level.  The following is an example of a comparison which might not work:
 
 L<Test::Deep> contains much better set comparison functions.
 
-=cut
-
-sub eq_set {
-    my( $a1, $a2 ) = @_;
-    return 0 unless @$a1 == @$a2;
-
-    no warnings 'uninitialized';
-
-    # It really doesn't matter how we sort them, as long as both arrays are
-    # sorted with the same algorithm.
-    #
-    # Ensure that references are not accidentally treated the same as a
-    # string containing the reference.
-    #
-    # Have to inline the sort routine due to a threading/sort bug.
-    # See [rt.cpan.org 6782]
-    #
-    # I don't know how references would be sorted so we just don't sort
-    # them.  This means eq_set doesn't really work with refs.
-    return eq_array(
-        [ grep( ref, @$a1 ), sort( grep( !ref, @$a1 ) ) ],
-        [ grep( ref, @$a2 ), sort( grep( !ref, @$a2 ) ) ],
-    );
-}
-
 =back
 
 
 =head2 Extending and Embedding Test::More
 
 Sometimes the Test::More interface isn't quite enough.  Fortunately,
-Test::More is built on top of L<Test::Builder> which provides a single,
+Test::More is built on top of L<Test::Stream> which provides a single,
 unified backend for any test library to use.  This means two test
-libraries which both use <Test::Builder> B<can> be used together in the
+libraries which both use <Test::Stream> B<can> be used together in the
 same program>.
-
-If you simply want to do a little tweaking of how the tests behave,
-you can access the underlying L<Test::Builder> object like so:
-
-=over 4
-
-=item B<builder>
-
-    my $test_builder = Test::More->builder;
-
-Returns the L<Test::Builder> object underlying Test::More for you to play
-with.
-
-
-=back
-
 
 =head1 EXIT CODES
 
@@ -1750,31 +1517,53 @@ Test::More works with Perls as old as 5.8.1.
 Thread support is not very reliable before 5.10.1, but that's
 because threads are not very reliable before 5.10.1.
 
-Although Test::More has been a core module in versions of Perl since 5.6.2, Test::More has evolved since then, and not all of the features you're used to will be present in the shipped version of Test::More. If you are writing a module, don't forget to indicate in your package metadata the minimum version of Test::More that you require. For instance, if you want to use C<done_testing()> but want your test script to run on Perl 5.10.0, you will need to explicitly require Test::More > 0.88.
+Although Test::More has been a core module in versions of Perl since 5.6.2,
+Test::More has evolved since then, and not all of the features you're used to
+will be present in the shipped version of Test::More. If you are writing a
+module, don't forget to indicate in your package metadata the minimum version
+of Test::More that you require. For instance, if you want to use
+C<done_testing()> but want your test script to run on Perl 5.10.0, you will
+need to explicitly require Test::More > 0.88.
 
 Key feature milestones include:
 
 =over 4
 
+=item event stream
+
+=item forking support
+
+=item tap encoding
+
+Test::Builder and Test::More version 1.301001 introduce these major
+modernizations.
+
 =item subtests
 
-Subtests were released in Test::More 0.94, which came with Perl 5.12.0. Subtests did not implicitly call C<done_testing()> until 0.96; the first Perl with that fix was Perl 5.14.0 with 0.98.
+Subtests were released in Test::More 0.94, which came with Perl 5.12.0.
+Subtests did not implicitly call C<done_testing()> until 0.96; the first Perl
+with that fix was Perl 5.14.0 with 0.98.
 
 =item C<done_testing()>
 
-This was released in Test::More 0.88 and first shipped with Perl in 5.10.1 as part of Test::More 0.92. 
+This was released in Test::More 0.88 and first shipped with Perl in 5.10.1 as
+part of Test::More 0.92.
 
 =item C<cmp_ok()>
 
-Although C<cmp_ok()> was introduced in 0.40, 0.86 fixed an important bug to make it safe for overloaded objects; the fixed first shipped with Perl in 5.10.1 as part of Test::More 0.92.
+Although C<cmp_ok()> was introduced in 0.40, 0.86 fixed an important bug to
+make it safe for overloaded objects; the fixed first shipped with Perl in
+5.10.1 as part of Test::More 0.92.
 
 =item C<new_ok()> C<note()> and C<explain()>
 
-These were was released in Test::More 0.82, and first shipped with Perl in 5.10.1 as part of Test::More 0.92. 
+These were was released in Test::More 0.82, and first shipped with Perl in
+5.10.1 as part of Test::More 0.92.
 
 =back
 
-There is a full version history in the Changes file, and the Test::More versions included as core can be found using L<Module::CoreList>:
+There is a full version history in the Changes file, and the Test::More
+versions included as core can be found using L<Module::CoreList>:
 
     $ corelist -a Test::More
 
@@ -1786,22 +1575,33 @@ There is a full version history in the Changes file, and the Test::More versions
 =item utf8 / "Wide character in print"
 
 If you use utf8 or other non-ASCII characters with Test::More you
-might get a "Wide character in print" warning.  Using
-C<< binmode STDOUT, ":utf8" >> will not fix it.
-L<Test::Builder> (which powers
-Test::More) duplicates STDOUT and STDERR.  So any changes to them,
-including changing their output disciplines, will not be seem by
-Test::More.
+might get a "Wide character in print" warning.
+Using C<< binmode STDOUT, ":utf8" >> will not fix it.
 
-One work around is to apply encodings to STDOUT and STDERR as early
-as possible and before Test::More (or any other Test module) loads.
+Use the C<tap_encoding> function to configure the TAP stream encoding.
 
+    use utf8;
+    use Test::Stream; # imports tap_encoding
+    use Test::More;
+    tap_encoding 'utf8';
+
+L<Test::Builder> (which powers Test::More) duplicates STDOUT and STDERR.
+So any changes to them, including changing their output disciplines,
+will not be seen by Test::More.
+
+B<Note>:deprecated ways to use utf8 or other non-ASCII characters.
+
+In the past it was necessary to alter the filehandle encoding prior to loading
+Test::More. This is no longer necessary thanks to C<tap_encoding()>.
+
+    # *** DEPRECATED WAY ***
     use open ':std', ':encoding(utf8)';
     use Test::More;
 
 A more direct work around is to change the filehandles used by
 L<Test::Builder>.
 
+    # *** EVEN MORE DEPRECATED WAY ***
     my $builder = Test::More->builder;
     binmode $builder->output,         ":encoding(utf8)";
     binmode $builder->failure_output, ":encoding(utf8)";
@@ -1824,6 +1624,11 @@ complex data structures.
 
 
 =item Threads
+
+B<NOTE:> The underlying mechanism to support threads has changed as of version
+1.301001. Instead of sharing several variables and locking them, threads now
+use the same mechanism as forking support. The new system writes events to temp
+files which are culled by the main process.
 
 Test::More will only be aware of threads if C<use threads> has been done
 I<before> Test::More is loaded.  This is ok:
@@ -1907,14 +1712,14 @@ L<Bundle::Test> installs a whole bunch of useful test modules.
 
 L<Test::Most> Most commonly needed test functions and features.
 
-=head1 AUTHORS
+=encoding utf8
 
-Michael G Schwern E<lt>schwern@pobox.comE<gt> with much inspiration
-from Joshua Pritikin's Test module and lots of help from Barrie
-Slaymaker, Tony Bowden, blackstar.co.uk, chromatic, Fergal Daly and
-the perl-qa gang.
+=head1 SOURCE
 
-=head1 MAINTAINERS
+The source code repository for Test::More can be found at
+F<http://github.com/Test-More/test-more/>.
+
+=head1 MAINTAINER
 
 =over 4
 
@@ -1922,19 +1727,56 @@ the perl-qa gang.
 
 =back
 
+=head1 AUTHORS
 
-=head1 BUGS
+The following people have all contributed to the Test-More dist (sorted using
+VIM's sort function).
 
-See F<http://rt.cpan.org> to report and view bugs.
+=over 4
 
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
 
-=head1 SOURCE
+=item Fergal Daly E<lt>fergal@esatclear.ie>E<gt>
 
-The source code repository for Test::More can be found at
-F<http://github.com/Test-More/test-more/>.
+=item Mark Fowler E<lt>mark@twoshortplanks.comE<gt>
 
+=item Michael G Schwern E<lt>schwern@pobox.comE<gt>
+
+=item 唐鳳
+
+=back
 
 =head1 COPYRIGHT
+
+There has been a lot of code migration between modules,
+here are all the original copyrights together:
+
+=over 4
+
+=item Test::Stream
+
+=item Test::Stream::Tester
+
+Copyright 2014 Chad Granum E<lt>exodist7@gmail.comE<gt>.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See F<http://www.perl.com/perl/misc/Artistic.html>
+
+=item Test::Simple
+
+=item Test::More
+
+=item Test::Builder
+
+Originally authored by Michael G Schwern E<lt>schwern@pobox.comE<gt> with much
+inspiration from Joshua Pritikin's Test module and lots of help from Barrie
+Slaymaker, Tony Bowden, blackstar.co.uk, chromatic, Fergal Daly and the perl-qa
+gang.
+
+Idea by Tony Bowden and Paul Johnson, code by Michael G Schwern
+E<lt>schwern@pobox.comE<gt>, wardrobe by Calvin Klein.
 
 Copyright 2001-2008 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
 
@@ -1943,6 +1785,29 @@ modify it under the same terms as Perl itself.
 
 See F<http://www.perl.com/perl/misc/Artistic.html>
 
-=cut
+=item Test::use::ok
 
-1;
+To the extent possible under law, 唐鳳 has waived all copyright and related
+or neighboring rights to L<Test-use-ok>.
+
+This work is published from Taiwan.
+
+L<http://creativecommons.org/publicdomain/zero/1.0>
+
+=item Test::Tester
+
+This module is copyright 2005 Fergal Daly <fergal@esatclear.ie>, some parts
+are based on other people's work.
+
+Under the same license as Perl itself
+
+See http://www.perl.com/perl/misc/Artistic.html
+
+=item Test::Builder::Tester
+
+Copyright Mark Fowler E<lt>mark@twoshortplanks.comE<gt> 2002, 2004.
+
+This program is free software; you can redistribute it
+and/or modify it under the same terms as Perl itself.
+
+=back

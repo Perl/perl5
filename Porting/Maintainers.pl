@@ -1065,7 +1065,7 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.001009.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.001008.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^t/xt},
@@ -1074,7 +1074,6 @@ use File::Glob qw(:case);
                 examples/indent.pl
                 examples/subtest.t
                 t/00compile.t
-                t/00test_harness_check.t
                 t/pod.t
                 t/pod-coverage.t
                 t/Builder/reset_outputs.t
