@@ -25,7 +25,7 @@ plan keys(%$benchmarks) * 3;
 # check the hash of hashes is minimally consistent in format
 
 for my $token (sort keys %$benchmarks) {
-    like($token, qr/^[a-zA-z]\w*$/a, "legal token: $token");
+    like($token, qr/^[a-zA-Z]\w*$/a, "legal token: $token");
     my $keys = join('-', sort keys %{$benchmarks->{$token}});
     is($keys, 'code-desc-setup', "legal keys:  $token");
 }
