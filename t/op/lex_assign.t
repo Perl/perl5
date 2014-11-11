@@ -93,7 +93,7 @@ EOE
   if ($@) {
     $warning = $@;
     chomp $warning;
-    if ($@ !~ /is unimplemented/) {
+    if ($@ !~ /(?:is un|not )implemented/) {
       fail($_ . ' ' . $warning);
     }
   }
@@ -152,7 +152,7 @@ EOE
   if ($@) {
     $warning = $@;
     chomp $warning;
-    if ($@ =~ /is unimplemented/) {
+    if ($@ =~ /(?:is un|not )implemented/) {
       SKIP: {
         skip $warning, 1;
         pass($comment);
