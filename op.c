@@ -10139,14 +10139,11 @@ Perl_ck_smartmatch(pTHX_ OP *o)
 }
 
 
-OP *
-Perl_ck_sassign(pTHX_ OP *o)
+static OP *
+S_maybe_targlex(pTHX_ OP *o)
 {
     dVAR;
     OP * const kid = cLISTOPo->op_first;
-
-    PERL_ARGS_ASSERT_CK_SASSIGN;
-
     /* has a disposable target? */
     if ((PL_opargs[kid->op_type] & OA_TARGLEX)
 	&& !(kid->op_flags & OPf_STACKED)
@@ -10169,6 +10166,22 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    kid->op_private |= OPpTARGET_MY;	/* Used for context settings */
 	    return kid;
 	}
+    }
+    return o;
+}
+
+OP *
+Perl_ck_sassign(pTHX_ OP *o)
+{
+    dVAR;
+    OP * const kid = cLISTOPo->op_first;
+
+    PERL_ARGS_ASSERT_CK_SASSIGN;
+
+    {
+	OP * const newop = S_maybe_targlex(aTHX_ o);
+	if (newop != o)
+	    return newop;
     }
     if (OP_HAS_SIBLING(kid)) {
 	OP *kkid = OP_SIBLING(kid);
