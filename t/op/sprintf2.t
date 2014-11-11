@@ -12,6 +12,8 @@ BEGIN {
 eval { my $q = pack "q", 0 };
 my $Q = $@ eq '';
 
+my $doubledouble;
+
 # %a and %A depend on the floating point config
 # This totally doesn't test non-IEEE-754 float formats.
 my @hexfloat;
@@ -189,6 +191,7 @@ if ($Config{nvsize} == 8 &&
     (pack("F", 0.1) =~ /^\x9A\x99{5}\x59\xBC/ ||  # LE
      pack("F", 0.1) =~ /\xBC\x59\x99{5}\x9A$/)    # BE
     ) {
+    $doubledouble = 1;
     @hexfloat = (
 	[ '%a', '0',       '0x0p+0' ],
 	[ '%a', '1',       '0x1p+0' ],
@@ -565,11 +568,19 @@ $o::count = 0;
 () = sprintf "%.1s", $o;
 is $o::count, '1', 'sprinf %.1s overload count';
 
+my $ppc64_linux = $Config{archname} =~ /^ppc64-linux/;
+
 for my $t (@hexfloat) {
     my ($format, $arg, $expected) = @$t;
     $arg = eval $arg;
     my $result = sprintf($format, $arg);
     my $ok = $result eq $expected;
+    if ($doubledouble && $ppc64_linux && $arg =~ /^2.71828/) {
+        # ppc64-linux has buggy exp(1).
+        local $::TODO = "$Config{archname} exp(1)";
+        ok($ok, "'$format' '$arg' -> '$result' cf '$expected'");
+        next;
+    }
     unless ($ok) {
         # It seems that there can be difference in the last bits:
         # [perl #122578]
