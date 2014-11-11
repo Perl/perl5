@@ -10155,7 +10155,8 @@ S_maybe_targlex(pTHX_ OP *o)
 
 	/* Can just relocate the target. */
 	if (kkid && kkid->op_type == OP_PADSV
-	    && !(kkid->op_private & OPpLVAL_INTRO))
+	    && (!(kkid->op_private & OPpLVAL_INTRO)
+	       || kkid->op_private & OPpPAD_STATE))
 	{
 	    kid->op_targ = kkid->op_targ;
 	    kkid->op_targ = 0;
@@ -10178,11 +10179,6 @@ Perl_ck_sassign(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_CK_SASSIGN;
 
-    {
-	OP * const newop = S_maybe_targlex(aTHX_ o);
-	if (newop != o)
-	    return newop;
-    }
     if (OP_HAS_SIBLING(kid)) {
 	OP *kkid = OP_SIBLING(kid);
 	/* For state variable assignment with attributes, kkid is a list op
@@ -10199,7 +10195,8 @@ Perl_ck_sassign(pTHX_ OP *o)
 				    kkid->op_flags
 				    | ((kkid->op_private & ~OPpLVAL_INTRO) << 8));
 	    OP *const first = newOP(OP_NULL, 0);
-	    OP *const nullop = newCONDOP(0, first, o, other);
+	    OP *const nullop =
+		newCONDOP(0, first, S_maybe_targlex(aTHX_ o), other);
 	    OP *const condop = first->op_next;
 
             CHANGE_TYPE(condop, OP_ONCE);
@@ -10215,7 +10212,7 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    return nullop;
 	}
     }
-    return o;
+    return S_maybe_targlex(aTHX_ o);
 }
 
 OP *

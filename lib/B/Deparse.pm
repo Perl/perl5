@@ -3215,7 +3215,9 @@ sub pp_once {
     my $cond = $op->first;
     my $true = $cond->sibling;
 
-    return $self->deparse($true, $cx);
+    my $ret = $self->deparse($true, $cx);
+    $ret =~ s/^(\(?)\$/$1 . $self->keyword("state") . ' $'/e;
+    $ret;
 }
 
 sub loop_common {
