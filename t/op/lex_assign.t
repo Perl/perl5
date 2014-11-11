@@ -130,6 +130,7 @@ EOE
     $op =~ s/==.*//;
     
     $sc = 0;
+    local $SIG{__WARN__} = \&wrn;
     eval "\$m = $op";
     is $sc, 1, "STORE count for $comment";
   }
