@@ -415,7 +415,8 @@ $a <=> $b;		# OP_NCMP
 "diatrewq";
 "igatrewq";
 use 5.015;
-__SUB__			# OP_RUNCV
+__SUB__	;		# OP_RUNCV
+[];			# OP_ANONLIST
 EXPECT
 Useless use of a constant ("111") in void context at - line 2.
 Useless use of repeat (x) in void context at - line 3.
@@ -462,6 +463,7 @@ Useless use of a constant ("dsatrewq") in void context at - line 57.
 Useless use of a constant ("diatrewq") in void context at - line 58.
 Useless use of a constant ("igatrewq") in void context at - line 59.
 Useless use of __SUB__ in void context at - line 61.
+Useless use of anonymous array ([]) in void context at - line 62.
 ########
 # op.c
 use warnings 'void' ; close STDIN ;
