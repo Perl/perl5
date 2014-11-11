@@ -10179,8 +10179,8 @@ Perl_ck_sassign(pTHX_ OP *o)
 	      (kkid = cLISTOPx(kkid)->op_last)->op_type == OP_PADSV
 	     )
 	    )
-		&& (kkid->op_private & OPpLVAL_INTRO)
-		&& SvPAD_STATE(PAD_COMPNAME_SV(kkid->op_targ))) {
+		&& (kkid->op_private & (OPpLVAL_INTRO|OPpPAD_STATE))
+		    == (OPpLVAL_INTRO|OPpPAD_STATE)) {
 	    const PADOFFSET target = kkid->op_targ;
 	    OP *const other = newOP(OP_PADSV,
 				    kkid->op_flags
