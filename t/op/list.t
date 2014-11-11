@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 66 );
+plan( tests => 67 );
 
 @foo = (1, 2, 3, 4);
 cmp_ok($foo[0], '==', 1, 'first elem');
@@ -203,3 +203,10 @@ sub foo { () = ($a, my $b, ($c, do { while(1) {} })) }
     ($a,$b) = ($b = $foo."", $a = $bar . "");
     is("$a,$b", "foo,bar", 'common vars check accounts for OPpTARGET_MY');
 }
+
+sub TIESCALAR {bless{}}
+sub FETCH {$_[0]{fetched}++}
+sub empty {}
+tie $t, "";
+() = (empty(), ($t)x10); # empty() since sub calls usually result in copies
+is(tied($t)->{fetched}, undef, 'assignment to empty list makes no copies');

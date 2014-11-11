@@ -12786,6 +12786,14 @@ Perl_rpeep(pTHX_ OP *o)
 	    /* We do the common-vars check here, rather than in newASSIGNOP
 	       (as formerly), so that all lexical vars that get aliased are
 	       marked as such before we do the check.  */
+	    /* There can’t be common vars if the lhs is a stub.  */
+	    if (OP_SIBLING(cLISTOPx(cBINOPo->op_last)->op_first)
+		    == cLISTOPx(cBINOPo->op_last)->op_last
+	     && cLISTOPx(cBINOPo->op_last)->op_last->op_type == OP_STUB)
+	    {
+		o->op_private &=~ OPpASSIGN_COMMON;
+		break;
+	    }
 	    if (o->op_private & OPpASSIGN_COMMON) {
 		 /* See the comment before S_aassign_common_vars concerning
 		    PL_generation sorcery.  */
