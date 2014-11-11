@@ -373,6 +373,8 @@ d__fwalk=''
 d_access=''
 d_accessx=''
 d_acosh=''
+d_asinh=''
+d_atanh=''
 d_aintl=''
 d_alarm=''
 asctime_r_proto=''
@@ -396,6 +398,7 @@ d_c99_variadic_macros=''
 d_casti32=''
 castflags=''
 d_castneg=''
+d_cbrt=''
 d_chown=''
 d_chroot=''
 d_chsize=''
@@ -405,6 +408,7 @@ d_closedir=''
 d_void_closedir=''
 d_cmsghdr_s=''
 d_const=''
+d_copysign=''
 d_copysignl=''
 d_cplusplus=''
 cryptlib=''
@@ -453,12 +457,17 @@ endpwent_r_proto=''
 d_endsent=''
 d_endservent_r=''
 endservent_r_proto=''
+d_erf=''
+d_erfc=''
+d_exp2=''
+d_expm1=''
 d_faststdio=''
 d_fchdir=''
 d_fchmod=''
 d_fchown=''
 d_fcntl=''
 d_fcntl_can_lock=''
+d_fdim=''
 d_fd_macros=''
 d_fd_set=''
 d_fds_bits=''
@@ -469,6 +478,10 @@ d_finitel=''
 d_flexfnam=''
 d_flock=''
 d_flockproto=''
+d_fdim=''
+d_fma=''
+d_fmax=''
+d_fmin=''
 d_fork=''
 d_fp_class=''
 d_fp_classl=''
@@ -576,6 +589,8 @@ d_gnulibc=''
 gnulibc_version=''
 d_hasmntopt=''
 d_htonl=''
+d_hypot=''
+d_ilogb=''
 d_ilogbl=''
 d_inetaton=''
 d_inetntop=''
@@ -589,13 +604,18 @@ d_isinf=''
 d_isinfl=''
 d_isnan=''
 d_isnanl=''
+d_isnormal=''
 d_j0=''
 d_j0l=''
 d_killpg=''
 d_lchown=''
 d_ldbl_dig=''
+d_lgamma=''
+d_lgamma_r=''
 d_libm_lib_version=''
 d_link=''
+d_llrint=''
+d_llround=''
 d_localtime_r=''
 d_localtime_r_needs_tzset=''
 localtime_r_proto=''
@@ -603,11 +623,16 @@ d_locconv=''
 d_lc_monetary_2008=''
 d_lockf=''
 d_ldexpl=''
+d_log1p=''
+d_log2=''
+d_logb=''
 d_longdbl=''
 longdblkind=''
 longdblsize=''
 d_longlong=''
 longlongsize=''
+d_lrint=''
+d_lround=''
 d_lseekproto=''
 d_lstat=''
 d_madvise=''
@@ -641,6 +666,10 @@ d_msgrcv=''
 d_msgsnd=''
 d_msync=''
 d_munmap=''
+d_nan=''
+d_nearbyint=''
+d_nextafter=''
+d_nexttoward=''
 d_nice=''
 d_nl_langinfo=''
 d_off64_t=''
@@ -677,12 +706,17 @@ readdir_r_proto=''
 d_readlink=''
 d_readv=''
 d_recvmsg=''
+d_remainder=''
+d_remquo=''
 d_rename=''
+d_rint=''
 d_rmdir=''
+d_round=''
 d_safebcpy=''
 d_safemcpy=''
 d_sanemcmp=''
 d_sbrkproto=''
+d_scalbn=''
 d_scalbnl=''
 d_select=''
 d_sem=''
@@ -835,6 +869,8 @@ clocktype=''
 d_times=''
 d_tmpnam_r=''
 tmpnam_r_proto=''
+d_tgamma=''
+d_trunc=''
 d_truncate=''
 d_truncl=''
 d_ttyname_r=''
@@ -10525,10 +10561,6 @@ $rm -f access*
 set accessx d_accessx
 eval $inlibc
 
-: see if acosh exists
-set acosh d_acosh
-eval $inlibc
-
 : see if aintl exists
 set aintl d_aintl
 eval $inlibc
@@ -13150,6 +13182,146 @@ esac
 set i_sysfile
 eval $setvar
 
+: see if acosh exists
+set acosh d_acosh
+eval $inlibc
+
+: see if asinh exists
+set asinh d_asinh
+eval $inlibc
+
+: see if atanh exists
+set atanh d_atanh
+eval $inlibc
+
+: see if cbrt exists
+set cbrt d_cbrt
+eval $inlibc
+
+: see if copysign exists
+set copysign d_copysign
+eval $inlibc
+
+: see if erf exists
+set erf d_erf
+eval $inlibc
+
+: see if erfc exists
+set erfc d_erfc
+eval $inlibc
+
+: see if exp2 exists
+set exp2 d_exp2
+eval $inlibc
+
+: see if expm1 exists
+set expm1 d_expm1
+eval $inlibc
+
+: see if fdim exists
+set fdim d_fdim
+eval $inlibc
+
+: see if fma exists
+set fma d_fma
+eval $inlibc
+
+: see if fmax exists
+set fmax d_fmax
+eval $inlibc
+
+: see if fmin exists
+set fmin d_fmin
+eval $inlibc
+
+: see if hypot exists
+set hypot d_hypot
+eval $inlibc
+
+: see if ilogb exists
+set ilogb d_ilogb
+eval $inlibc
+
+: see if lgamma exists
+set lgamma d_lgamma
+eval $inlibc
+
+: see if lgamma_r exists
+set lgamma_r d_lgamma_r
+eval $inlibc
+
+: see if llrint exists
+set llrint d_llrint
+eval $inlibc
+
+: see if llround exists
+set llround d_llround
+eval $inlibc
+
+: see if log1p exists
+set log1p d_log1p
+eval $inlibc
+
+: see if log2 exists
+set log2 d_log2
+eval $inlibc
+
+: see if logb exists
+set logb d_logb
+eval $inlibc
+
+: see if lrint exists
+set lrint d_lrint
+eval $inlibc
+
+: see if lround exists
+set lround d_lround
+eval $inlibc
+
+: see if nan exists
+set nan d_nan
+eval $inlibc
+
+: see if nearbyint exists
+set nearbyint d_nearbyint
+eval $inlibc
+
+: see if nextafter exists
+set nextafter d_nextafter
+eval $inlibc
+
+: see if nexttoward exists
+set nexttoward d_nexttoward
+eval $inlibc
+
+: see if remainder exists
+set remainder d_remainder
+eval $inlibc
+
+: see if remquo exists
+set remquo d_remquo
+eval $inlibc
+
+: see if rint exists
+set rint d_rint
+eval $inlibc
+
+: see if round exists
+set round d_round
+eval $inlibc
+
+: see if scalbn exists
+set scalbn d_scalbn
+eval $inlibc
+
+: see if tgamma exists
+set tgamma d_tgamma
+eval $inlibc
+
+: see if trunc exists
+set trunc d_trunc
+eval $inlibc
+
 : see if fcntl.h is there
 val=''
 set fcntl.h val
@@ -15723,6 +15895,27 @@ eval $setvar
 set isinfl d_isinfl
 eval $inlibc
 
+: check for isless
+echo "Checking to see if you have isless..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return isless(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isless."
+else
+	val="$undef"
+	echo "You do not have isless."
+fi
+$rm_try
+set d_isless
+eval $setvar
+
 : check for isnan
 echo "Checking to see if you have isnan..." >&4
 $cat >try.c <<EOCP
@@ -15747,6 +15940,27 @@ eval $setvar
 : see if isnanl exists
 set isnanl d_isnanl
 eval $inlibc
+
+: check for isnormal
+echo "Checking to see if you have isnormal..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return isnormal(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isnormal."
+else
+	val="$undef"
+	echo "You do not have isnormal."
+fi
+$rm_try
+set d_isnormal
+eval $setvar
 
 : see if j0 exists
 set j0 d_j0
@@ -23610,6 +23824,8 @@ d_alarm='$d_alarm'
 d_archlib='$d_archlib'
 d_asctime64='$d_asctime64'
 d_asctime_r='$d_asctime_r'
+d_asinh='$d_asinh'
+d_atanh='$d_atanh'
 d_atolf='$d_atolf'
 d_atoll='$d_atoll'
 d_attribute_deprecated='$d_attribute_deprecated'
@@ -23632,6 +23848,7 @@ d_bzero='$d_bzero'
 d_c99_variadic_macros='$d_c99_variadic_macros'
 d_casti32='$d_casti32'
 d_castneg='$d_castneg'
+d_cbrt='$d_cbrt'
 d_charvspr='$d_charvspr'
 d_chown='$d_chown'
 d_chroot='$d_chroot'
@@ -23641,6 +23858,7 @@ d_clearenv='$d_clearenv'
 d_closedir='$d_closedir'
 d_cmsghdr_s='$d_cmsghdr_s'
 d_const='$d_const'
+d_copysign='$d_copysign'
 d_copysignl='$d_copysignl'
 d_cplusplus='$d_cplusplus'
 d_crypt='$d_crypt'
@@ -23680,7 +23898,11 @@ d_endpwent_r='$d_endpwent_r'
 d_endsent='$d_endsent'
 d_endservent_r='$d_endservent_r'
 d_eofnblk='$d_eofnblk'
+d_erf='$d_erf'
+d_erfc='$d_erfc'
 d_eunice='$d_eunice'
+d_exp2='$d_exp2'
+d_expm1='$d_expm1'
 d_faststdio='$d_faststdio'
 d_fchdir='$d_fchdir'
 d_fchmod='$d_fchmod'
@@ -23689,6 +23911,7 @@ d_fcntl='$d_fcntl'
 d_fcntl_can_lock='$d_fcntl_can_lock'
 d_fd_macros='$d_fd_macros'
 d_fd_set='$d_fd_set'
+d_fdim='$d_fdim'
 d_fds_bits='$d_fds_bits'
 d_fegetround='$d_fegetround'
 d_fgetpos='$d_fgetpos'
@@ -23697,6 +23920,9 @@ d_finitel='$d_finitel'
 d_flexfnam='$d_flexfnam'
 d_flock='$d_flock'
 d_flockproto='$d_flockproto'
+d_fma='$d_fma'
+d_fmax='$d_fmax'
+d_fmin='$d_fmin'
 d_fork='$d_fork'
 d_fp_class='$d_fp_class'
 d_fp_classify='$d_fp_classify'
@@ -23783,6 +24009,8 @@ d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
 d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
+d_hypot='$d_hypot'
+d_ilogb='$d_ilogb'
 d_ilogbl='$d_ilogbl'
 d_inc_version_list='$d_inc_version_list'
 d_index='$d_index'
@@ -23802,23 +24030,34 @@ d_isinf='$d_isinf'
 d_isinfl='$d_isinfl'
 d_isnan='$d_isnan'
 d_isnanl='$d_isnanl'
+d_isnormal='$d_isnormal'
 d_j0='$d_j0'
 d_j0l='$d_j0l'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
+d_lc_monetary_2008='$d_lc_monetary_2008'
 d_ldbl_dig='$d_ldbl_dig'
 d_ldexpl='$d_ldexpl'
+d_lgamma='$d_lgamma'
+d_lgamma_r='$d_lgamma_r'
 d_libm_lib_version='$d_libm_lib_version'
 d_libname_unique='$d_libname_unique'
 d_link='$d_link'
+d_llrint='$d_llrint'
+d_llround='$d_llround'
 d_localtime64='$d_localtime64'
 d_localtime_r='$d_localtime_r'
 d_localtime_r_needs_tzset='$d_localtime_r_needs_tzset'
 d_locconv='$d_locconv'
-d_lc_monetary_2008='$d_lc_monetary_2008'
+d_lgamma='$d_lgamma'
 d_lockf='$d_lockf'
+d_log1p='$d_log1p'
+d_log2='$d_log2'
+d_logb='$d_logb'
 d_longdbl='$d_longdbl'
 d_longlong='$d_longlong'
+d_lrint='$d_lrint'
+d_lround='$d_lround'
 d_lseekproto='$d_lseekproto'
 d_lstat='$d_lstat'
 d_madvise='$d_madvise'
@@ -23858,8 +24097,12 @@ d_msgsnd='$d_msgsnd'
 d_msync='$d_msync'
 d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
+d_nan='$d_nan'
 d_ndbm='$d_ndbm'
 d_ndbm_h_uses_prototypes='$d_ndbm_h_uses_prototypes'
+d_nearbyint='$d_nearbyint'
+d_nextafter='$d_nextafter'
+d_nexttoward='$d_nexttoward'
 d_nice='$d_nice'
 d_nl_langinfo='$d_nl_langinfo'
 d_nv_preserves_uv='$d_nv_preserves_uv'
@@ -23902,13 +24145,18 @@ d_readdir_r='$d_readdir_r'
 d_readlink='$d_readlink'
 d_readv='$d_readv'
 d_recvmsg='$d_recvmsg'
+d_remainder='$d_remainder'
+d_remquo='$d_remquo'
 d_rename='$d_rename'
 d_rewinddir='$d_rewinddir'
+d_rint='$d_rint'
 d_rmdir='$d_rmdir'
+d_round='$d_round'
 d_safebcpy='$d_safebcpy'
 d_safemcpy='$d_safemcpy'
 d_sanemcmp='$d_sanemcmp'
 d_sbrkproto='$d_sbrkproto'
+d_scalbn='$d_scalbn'
 d_scalbnl='$d_scalbnl'
 d_sched_yield='$d_sched_yield'
 d_scm_rights='$d_scm_rights'
@@ -24022,6 +24270,7 @@ d_tcgetpgrp='$d_tcgetpgrp'
 d_tcsetpgrp='$d_tcsetpgrp'
 d_telldir='$d_telldir'
 d_telldirproto='$d_telldirproto'
+d_tgamma='$d_tgamma'
 d_time='$d_time'
 d_timegm='$d_timegm'
 d_times='$d_times'
@@ -24029,6 +24278,7 @@ d_tm_tm_gmtoff='$d_tm_tm_gmtoff'
 d_tm_tm_zone='$d_tm_tm_zone'
 d_tmpnam_r='$d_tmpnam_r'
 d_truncate='$d_truncate'
+d_trunc='$d_trunc'
 d_truncl='$d_truncl'
 d_ttyname_r='$d_ttyname_r'
 d_tzname='$d_tzname'

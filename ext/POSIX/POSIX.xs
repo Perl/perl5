@@ -188,9 +188,9 @@
 
    j0 j1 jn y0 y1 yn
 
- * Configure already (5.21.0) scans for:
+ * Configure already (5.21.5) scans for:
 
-   fpclassify isfinite isinf isnan ilogb*l* signbit
+   copysign*l* fpclassify isfinite isinf isnan isnan*l* ilogb*l* signbit scalbn*l*
 
  * For floating-point round mode (which matters for e.g. lrint and rint)
 
