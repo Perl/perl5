@@ -310,35 +310,3 @@ esac
 # of FreeBSD.
 d_printf_format_null='undef'
 
-$cat > UU/uselongdouble.cbu <<'EOCBU'
-# This script UU/uselongdouble.cbu will get 'called-back' by Configure
-# after it has prompted the user for whether to use long doubles.
-
-# Some FreeBSD releases apparently don't really have the C99 long double
-# versions of math functions.  If this seems to be the case, disable
-# uselongdouble.
-#
-# XXX This sanity check logic could be move to Configure.
-case "$uselongdouble" in
-define)
-  echo "Checking if your long double math functions work right..." >&4
-  cat > ldblm$$.c <<EOF
-#include <math.h>
-#include <stdio.h>
-int main() {
-  printf("%Lg\n", sqrtl(logl(expl(1.0L))+powl(2.0L, 3.0L))+cosl(sinl(1.0L)));
-}
-EOF
-  $cc -o ldblm$$ ldblm$$.c -lm
-  case `test -x ldblm$$ && ./ldblm$$` in
-  4) echo "Your long double math functions are working correctly." >&4 ;;
-  *)
-    echo "Your long double math functions are broken, disabling uselongdouble." >&4
-    uselongdouble=$undef
-    ;;
-  esac
-  rm -f ldblm$$.c ldblm$$
-  ;;
-esac
-
-EOCBU

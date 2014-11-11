@@ -7029,6 +7029,153 @@ case "$longdblkind" in
 esac
 $rm_try
 
+: Check print/scan long double stuff
+echo " "
+
+if $test X"$d_longdbl" = X"$define"; then
+
+echo "Checking how to print long doubles..." >&4
+
+if $test X"$sPRIfldbl" = X -a X"$doublesize" = X"$longdblsize"; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  double d = 123.456;
+  printf("%.3f\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`$run ./try`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"f"'; sPRIgldbl='"g"'; sPRIeldbl='"e"';
+			sPRIFUldbl='"F"'; sPRIGUldbl='"G"'; sPRIEUldbl='"E"';
+			echo "We will use %f."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3Lf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`$run ./try`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"Lf"'; sPRIgldbl='"Lg"'; sPRIeldbl='"Le"';
+			sPRIFUldbl='"LF"'; sPRIGUldbl='"LG"'; sPRIEUldbl='"LE"';
+			echo "We will use %Lf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3llf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`$run ./try`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"llf"'; sPRIgldbl='"llg"'; sPRIeldbl='"lle"';
+			sPRIFUldbl='"llF"'; sPRIGUldbl='"llG"'; sPRIEUldbl='"llE"';
+			echo "We will use %llf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3lf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`$run ./try`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"lf"'; sPRIgldbl='"lg"'; sPRIeldbl='"le"';
+			sPRIFUldbl='"lF"'; sPRIGUldbl='"lG"'; sPRIEUldbl='"lE"';
+			echo "We will use %lf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	echo "Cannot figure out how to print long doubles." >&4
+else
+	sSCNfldbl=$sPRIfldbl	# expect consistency
+fi
+
+$rm_try
+
+fi # d_longdbl
+
+case "$sPRIfldbl" in
+'')	d_PRIfldbl="$undef"; d_PRIgldbl="$undef"; d_PRIeldbl="$undef";
+	d_PRIFUldbl="$undef"; d_PRIGUldbl="$undef"; d_PRIEUldbl="$undef";
+	d_SCNfldbl="$undef";
+	;;
+*)	d_PRIfldbl="$define"; d_PRIgldbl="$define"; d_PRIeldbl="$define";
+	d_PRIFUldbl="$define"; d_PRIGUldbl="$define"; d_PRIEUldbl="$define";
+	d_SCNfldbl="$define";
+	;;
+esac
+
+: Before committing on uselongdouble, see whether that looks sane.
+if $test "$uselongdouble" = "$define"; then
+    message=""
+    echo " "
+    echo "Checking if your long double math functions work right..." >&4
+    $cat > try.c <<EOF
+#include <math.h>
+#include <stdio.h>
+int main() {
+  printf("%"$sPRIgldbl"\n", sqrtl(logl(expl(cosl(sinl(0.0L))))+powl(2.0L, 3.0L)));
+}
+EOF
+    case "$osname:$gccversion" in
+    aix:)	saveccflags="$ccflags"
+		ccflags="$ccflags -qlongdouble" ;; # to avoid core dump
+    esac
+    set try
+    if eval $compile_ok; then
+      yyy=`$run ./try`
+    fi
+    case "$yyy" in
+    3) echo "Your long double math functions are working correctly." >&4 ;;
+    *) echo "Your long double math functions are broken, not using long doubles." >&4
+       uselongdouble=$undef
+       ;;
+    esac
+    $rm_try
+    case "$osname:$gccversion" in
+    aix:)	ccflags="$saveccflags" ;; # restore
+    esac
+fi
 
 : determine the architecture name
 echo " "
@@ -10078,122 +10225,6 @@ esac
 : see if qgcvt exists
 set qgcvt d_qgcvt
 eval $inlibc
-
-: Check print/scan long double stuff
-echo " "
-
-if $test X"$d_longdbl" = X"$define"; then
-
-echo "Checking how to print long doubles..." >&4
-
-if $test X"$sPRIfldbl" = X -a X"$doublesize" = X"$longdblsize"; then
-	$cat >try.c <<'EOCP'
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-  double d = 123.456;
-  printf("%.3f\n", d);
-}
-EOCP
-	set try
-	if eval $compile; then
-		yyy=`$run ./try`
-		case "$yyy" in
-		123.456)
-			sPRIfldbl='"f"'; sPRIgldbl='"g"'; sPRIeldbl='"e"';
-                	sPRIFUldbl='"F"'; sPRIGUldbl='"G"'; sPRIEUldbl='"E"';
-			echo "We will use %f."
-			;;
-		esac
-	fi
-fi
-
-if $test X"$sPRIfldbl" = X; then
-	$cat >try.c <<'EOCP'
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-  long double d = 123.456;
-  printf("%.3Lf\n", d);
-}
-EOCP
-	set try
-	if eval $compile; then
-		yyy=`$run ./try`
-		case "$yyy" in
-		123.456)
-			sPRIfldbl='"Lf"'; sPRIgldbl='"Lg"'; sPRIeldbl='"Le"';
-                	sPRIFUldbl='"LF"'; sPRIGUldbl='"LG"'; sPRIEUldbl='"LE"';
-			echo "We will use %Lf."
-			;;
-		esac
-	fi
-fi
-
-if $test X"$sPRIfldbl" = X; then
-	$cat >try.c <<'EOCP'
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-  long double d = 123.456;
-  printf("%.3llf\n", d);
-}
-EOCP
-	set try
-	if eval $compile; then
-		yyy=`$run ./try`
-		case "$yyy" in
-		123.456)
-			sPRIfldbl='"llf"'; sPRIgldbl='"llg"'; sPRIeldbl='"lle"';
-                	sPRIFUldbl='"llF"'; sPRIGUldbl='"llG"'; sPRIEUldbl='"llE"';
-			echo "We will use %llf."
-			;;
-		esac
-	fi
-fi
-
-if $test X"$sPRIfldbl" = X; then
-	$cat >try.c <<'EOCP'
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-  long double d = 123.456;
-  printf("%.3lf\n", d);
-}
-EOCP
-	set try
-	if eval $compile; then
-		yyy=`$run ./try`
-		case "$yyy" in
-		123.456)
-			sPRIfldbl='"lf"'; sPRIgldbl='"lg"'; sPRIeldbl='"le"';
-                	sPRIFUldbl='"lF"'; sPRIGUldbl='"lG"'; sPRIEUldbl='"lE"';
-			echo "We will use %lf."
-			;;
-		esac
-	fi
-fi
-
-if $test X"$sPRIfldbl" = X; then
-	echo "Cannot figure out how to print long doubles." >&4
-else
-	sSCNfldbl=$sPRIfldbl	# expect consistency
-fi
-
-$rm_try
-
-fi # d_longdbl
-
-case "$sPRIfldbl" in
-'')	d_PRIfldbl="$undef"; d_PRIgldbl="$undef"; d_PRIeldbl="$undef";
-	d_PRIFUldbl="$undef"; d_PRIGUldbl="$undef"; d_PRIEUldbl="$undef";
-	d_SCNfldbl="$undef";
-	;;
-*)	d_PRIfldbl="$define"; d_PRIgldbl="$define"; d_PRIeldbl="$define";
-	d_PRIFUldbl="$define"; d_PRIGUldbl="$define"; d_PRIEUldbl="$define";
-	d_SCNfldbl="$define";
-	;;
-esac
 
 : Check how to convert floats to strings.
 
