@@ -690,7 +690,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"join or string",
 	"list",
 	"list slice",
-	"anonymous list ([])",
+	"anonymous array ([])",
 	"anonymous hash ({})",
 	"splice",
 	"push",

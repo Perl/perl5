@@ -80,7 +80,7 @@ $refref = \\$x;
 $x = "Good";
 is ($$$refref, 'Good');
 
-# Test nested anonymous lists.
+# Test nested anonymous arrays.
 
 $ref = [[],2,[3,4,5,]];
 is (scalar @$ref, 3);
