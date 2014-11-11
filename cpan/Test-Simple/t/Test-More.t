@@ -23,7 +23,7 @@ use ok 'Test::More';
     Dumper({foo => 'bar'});
 }
 
-can_ok('Foo', qw/ok is context plan/);
+can_ok('Foo', qw/ok is plan/);
 ok(!Foo->can('explain'), "explain was not imported");
 
 done_testing;

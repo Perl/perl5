@@ -12,6 +12,7 @@ BEGIN {
 
 use Test::More tests => 3;
 use Test::Builder;
+use Test::Stream::Context qw/context/;
 
 sub foo { my $ctx = context(); Test::Builder->new->croak("foo") }
 sub bar { my $ctx = context(); Test::Builder->new->carp("bar")  }

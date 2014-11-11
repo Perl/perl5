@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_071';
+our $VERSION = '1.301001_073';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 
@@ -853,6 +853,89 @@ sub AUTOLOAD {
 ####################
 # }}} TB1.5 stuff  #
 ####################
+
+##################################
+# {{{ Legacy support, do not use #
+##################################
+
+# These are here to support old versions of Test::More which may be bundled
+# with some dists. See https://github.com/Test-More/test-more/issues/479
+
+sub _try {
+    my( $self, $code, %opts ) = @_;
+
+    my $error;
+    my $return;
+    {
+        local $!;               # eval can mess up $!
+        local $@;               # don't set $@ in the test
+        local $SIG{__DIE__};    # don't trip an outside DIE handler.
+        $return = eval { $code->() };
+        $error = $@;
+    }
+
+    die $error if $error and $opts{die_on_fail};
+
+    return wantarray ? ( $return, $error ) : $return;
+}
+
+sub _unoverload {
+    my $self = shift;
+    my $type = shift;
+
+    $self->_try(sub { require overload; }, die_on_fail => 1);
+
+    foreach my $thing (@_) {
+        if( $self->_is_object($$thing) ) {
+            if( my $string_meth = overload::Method( $$thing, $type ) ) {
+                $$thing = $$thing->$string_meth();
+            }
+        }
+    }
+
+    return;
+}
+
+sub _is_object {
+    my( $self, $thing ) = @_;
+
+    return $self->_try( sub { ref $thing && $thing->isa('UNIVERSAL') } ) ? 1 : 0;
+}
+
+sub _unoverload_str {
+    my $self = shift;
+
+    return $self->_unoverload( q[""], @_ );
+}
+
+sub _unoverload_num {
+    my $self = shift;
+
+    $self->_unoverload( '0+', @_ );
+
+    for my $val (@_) {
+        next unless $self->_is_dualvar($$val);
+        $$val = $$val + 0;
+    }
+
+    return;
+}
+
+# This is a hack to detect a dualvar such as $!
+sub _is_dualvar {
+    my( $self, $val ) = @_;
+
+    # Objects are not dualvars.
+    return 0 if ref $val;
+
+    no warnings 'numeric';
+    my $numval = $val + 0;
+    return ($numval != 0 and $numval ne $val ? 1 : 0);
+}
+
+##################################
+# }}} Legacy support, do not use #
+##################################
 
 1;
 

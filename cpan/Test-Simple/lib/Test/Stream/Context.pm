@@ -6,7 +6,6 @@ use Scalar::Util qw/blessed weaken/;
 
 use Test::Stream::Carp qw/confess/;
 
-use Test::Stream '-internal';
 use Test::Stream::Threads;
 use Test::Stream::Event();
 use Test::Stream::Util qw/try translate_filename/;
@@ -70,6 +69,9 @@ sub context {
         no strict 'refs';
         no warnings 'once';
         if ($todo = $meta->[Test::Stream::Meta::TODO]) {
+            $in_todo = 1;
+        }
+        elsif ($todo = ${"$pkg\::TODO"}) {
             $in_todo = 1;
         }
         elsif ($todo = ${"$todo_pkg\::TODO"}) {

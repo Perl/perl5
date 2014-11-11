@@ -2,9 +2,10 @@ package Test::Stream;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_071';
+our $VERSION = '1.301001_073';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
+use Test::Stream::Context qw/context/;
 use Test::Stream::Threads;
 use Test::Stream::IOSets;
 use Test::Stream::Util qw/try/;
@@ -48,7 +49,7 @@ exports qw/
     OUT_STD OUT_ERR OUT_TODO
     STATE_COUNT STATE_FAILED STATE_PLAN STATE_PASSING STATE_LEGACY STATE_ENDED
 /;
-default_exports qw/ cull tap_encoding /;
+default_exports qw/ cull tap_encoding context /;
 Test::Stream::Exporter->cleanup;
 
 sub tap_encoding {
@@ -68,7 +69,6 @@ sub tap_encoding {
 }
 
 sub cull {
-    require Test::Stream::Context;
     my $ctx = Test::Stream::Context::context();
     $ctx->stream->fork_cull();
 }

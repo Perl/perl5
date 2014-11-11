@@ -21,7 +21,7 @@ sub add {
     confess "$name is already exported"
         if $self->exports->{$name};
 
-    $ref ||= package_sym($self->{package}, CODE => $name);
+    $ref ||= package_sym($self->{package}, $name);
 
     confess "No reference or package sub found for '$name' in '$self->{package}'"
         unless $ref && ref $ref;
@@ -46,7 +46,7 @@ sub add_bulk {
         confess "$name is already exported"
             if $self->exports->{$name};
 
-        my $ref = package_sym($self->{package}, CODE => $name)
+        my $ref = package_sym($self->{package}, $name)
             || confess "No reference or package sub found for '$name' in '$self->{package}'";
 
         $self->{exports}->{$name} = $ref;
@@ -59,10 +59,10 @@ sub add_default_bulk {
     my $self = shift;
 
     for my $name (@_) {
-        confess "$name is already exported"
+        confess "$name is already exported by $self->{package}"
             if $self->exports->{$name};
 
-        my $ref = package_sym($self->{package}, CODE => $name)
+        my $ref = package_sym($self->{package}, $name)
             || confess "No reference or package sub found for '$name' in '$self->{package}'";
 
         $self->{exports}->{$name} = $ref;
@@ -82,13 +82,32 @@ sub new {
     confess "Package is required!"
         unless $pkg;
 
-    $EXPORT_META{$pkg} ||= bless({
-        exports => {},
-        default => {},
-        pdlist  => do { no strict 'refs'; no warnings 'once'; \@{"$pkg\::EXPORT"} },
-        polist  => do { no strict 'refs'; no warnings 'once'; \@{"$pkg\::EXPORT_OK"} },
-        package => $pkg,
-    }, $class);
+    unless($EXPORT_META{$pkg}) {
+        # Grab anything set in @EXPORT or @EXPORT_OK
+        my (@pdlist, @polist);
+        {
+            no strict 'refs';
+            @pdlist = @{"$pkg\::EXPORT"};
+            @polist = @{"$pkg\::EXPORT_OK"};
+
+            @{"$pkg\::EXPORT"}    = ();
+            @{"$pkg\::EXPORT_OK"} = ();
+        }
+
+        my $meta = bless({
+            exports => {},
+            default => {},
+            pdlist  => do { no strict 'refs'; no warnings 'once'; \@{"$pkg\::EXPORT"} },
+            polist  => do { no strict 'refs'; no warnings 'once'; \@{"$pkg\::EXPORT_OK"} },
+            package => $pkg,
+        }, $class);
+
+        $meta->add_default_bulk(@pdlist);
+        my %seen = map {$_ => 1} @pdlist;
+        $meta->add_bulk(grep {!$seen{$_}++} @polist);
+
+        $EXPORT_META{$pkg} = $meta;
+    }
 
     return $EXPORT_META{$pkg};
 }

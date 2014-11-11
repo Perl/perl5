@@ -2306,6 +2306,8 @@ cpan/Test-Simple/lib/Test/Tutorial/WritingTools.pod			Test::Simple documentation
 cpan/Test-Simple/lib/Test/use/ok.pm			Test::Simple library
 cpan/Test-Simple/t/Behavior/388-threadedsubtest.load			Test::Simple Test
 cpan/Test-Simple/t/Behavior/388-threadedsubtest.t			Test::Simple test
+cpan/Test-Simple/t/Behavior/478-cmp_ok_hash.t			Test::Simple test
+cpan/Test-Simple/t/Behavior/490-inherit_exporter.t			Test::Simple test
 cpan/Test-Simple/t/Behavior/cmp_ok_xor.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/encoding_test.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/fork_new_end.t			Test::Simple Test

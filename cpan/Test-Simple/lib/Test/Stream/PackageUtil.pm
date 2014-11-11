@@ -7,6 +7,13 @@ sub confess { require Carp; goto &Carp::confess }
 my @SLOTS = qw/HASH SCALAR ARRAY IO FORMAT CODE/;
 my %SLOTS = map {($_ => 1)} @SLOTS;
 
+my %SIGMAP = (
+    '&' => 'CODE',
+    '%' => 'HASH',
+    '$' => 'SCALAR',
+    '*' => 'IO',
+);
+
 sub import {
     my $caller = caller;
     no strict 'refs';
@@ -16,8 +23,20 @@ sub import {
 }
 
 sub package_sym {
-    my ($pkg, $slot, $name) = @_;
+    my ($pkg, @parts) = @_;
     confess "you must specify a package" unless $pkg;
+
+    my ($slot, $name);
+
+    if (@parts > 1) {
+        ($slot, $name) = @parts;
+    }
+    elsif (@parts) {
+        my $sig;
+        ($sig, $name) = $parts[0] =~ m/^(\W)?(\w+)$/;
+        $slot = $SIGMAP{$sig || '&'};
+    }
+
     confess "you must specify a symbol type" unless $slot;
     confess "you must specify a symbol name" unless $name;
 

@@ -47,8 +47,7 @@ sub export_to {
     my $class = shift;
     my ($dest, @imports) = @_;
 
-    my $meta = Test::Stream::Exporter::Meta->get($class)
-        || confess "$class is not an exporter!?";
+    my $meta = Test::Stream::Exporter::Meta->new($class);
 
     my (@include, %exclude);
     for my $import (@imports) {
@@ -68,7 +67,7 @@ sub export_to {
         next if $exclude{$name};
 
         my $ref = $exports->{$name}
-            || croak "$class does not export $name";
+            || croak qq{"$name" is not exported by the $class module};
 
         no strict 'refs';
         $name =~ s/^[\$\@\%\&]//;
