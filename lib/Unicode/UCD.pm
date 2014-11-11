@@ -612,7 +612,7 @@ See also L</Blocks versus Scripts>.
 If supplied with an argument that can't be a code point, C<charblock()> tries to
 do the opposite and interpret the argument as an old-style block name.  On an
 ASCII platform, the return value is a I<range set> with one range: an
-anonymous list with a single element that consists of another anonymous list
+anonymous array with a single element that consists of another anonymous array
 whose first element is the first code point in the block, and whose second
 element is the final code point in the block.  On an EBCDIC
 platform, the first two Unicode blocks are not contiguous.  Their range sets
@@ -720,7 +720,7 @@ that it doesn't have scripts, this function returns C<"Unknown">.
 
 If supplied with an argument that can't be a code point, charscript() tries
 to do the opposite and interpret the argument as a script name. The
-return value is a I<range set>: an anonymous list of lists that contain
+return value is a I<range set>: an anonymous array of arrays that contain
 I<start-of-range>, I<end-of-range> code point pairs. You can test whether a
 code point is in a range set using the L</charinrange()> function.
 (To be precise, each I<range set> contains a third array element,

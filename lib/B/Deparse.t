@@ -1559,7 +1559,7 @@ state($s3, $s4);
 #@z = ($s7, undef, $s8);
 ($s7, undef, $s8) = (1, 2, 3);
 ####
-# anon lists with padrange
+# anon arrays with padrange
 my($a, $b);
 my $c = [$a, $b];
 my $d = {$a, $b};
