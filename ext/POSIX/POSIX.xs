@@ -265,9 +265,9 @@
 #    define bessel_y1 y1q
 #    define bessel_yn ynq
 #  elif defined(USE_LONG_DOUBLE) && \
-      defined(HAS_ILOGBL)
-/* There's already a symbol for ilogbl, we will use its truthiness
- * as the canary for all the *l variants being defined. */
+  (defined(HAS_FREXPL) || defined(HAS_ILOGBL)) && defined(HAS_SQRTL)
+/* Use some of the Configure scans for long double math functions
+ * as the canary for all the C99 *l variants being defined. */
 #    define c99_acosh	acoshl
 #    define c99_asinh	asinhl
 #    define c99_atanh	atanhl
