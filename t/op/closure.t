@@ -815,4 +815,14 @@ SKIP: {
         'closures in source filters do not interfere with pad names';
 }
 
+sub {
+    my $f;
+    sub test_ref_to_unavailable {
+	my $ref = \$f;
+        $$ref = 7;
+        is $f, 7, 'taking a ref to unavailable var should not copy it';
+    }
+};
+test_ref_to_unavailable();
+
 done_testing();
