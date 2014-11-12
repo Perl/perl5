@@ -265,7 +265,6 @@
 #    define bessel_y1 y1q
 #    define bessel_yn ynq
 #  elif defined(USE_LONG_DOUBLE) && \
-     !defined(NO_C99_LONG_DOUBLE_MATH) && \
       defined(HAS_ILOGBL)
 /* There's already a symbol for ilogbl, we will use its truthiness
  * as the canary for all the *l variants being defined. */
