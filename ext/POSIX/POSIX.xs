@@ -416,11 +416,6 @@
 
 /* using gcc */
 
-#  if defined(__hpux) && (defined(__hppa) || defined(_PA_RISC))
-#      undef c99_nexttoward
-#      undef c99_tgamma
-#  endif
-
 #else
 
 /* not using gcc */
