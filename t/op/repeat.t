@@ -137,8 +137,8 @@ my ($x, $y) = scalar ((1,2)x2);
 is($x, "22",    'list repeat in scalar context');
 is($y, undef,   '  no extra values on stack');
 
-# Make sure the stack doesn't get truncated too much - the left
-# operand of the eq binop needs to remain!
+# Make sure the stack doesn't get truncated too much - the first
+# argument to is() needs to remain!
 is(77, scalar ((1,7)x2),    'stack truncation');
 
 # ( )x in void context should not read preceding stack items
