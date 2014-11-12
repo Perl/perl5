@@ -2999,6 +2999,25 @@ not-a-number value).
 than it can reliably handle and C<localtime> probably returned the
 wrong date.
 
+=item Locale '%s' may not work well.%s
+
+(W locale) The named locale that Perl is now trying to use is not fully
+compatible with Perl.  The second C<%s> gives a reason.
+
+By far the most common reason is that the locale has characters in it
+that are represented by more than one byte.  The only such locales that
+Perl can handle are the UTF-8 locales.  Most likely the specified locale
+is a non-UTF-8 one for an East Asian language such as Chinese or
+Japanese.  If the locale is a superset of ASCII, the ASCII portion of it
+may work in Perl.  Read on for problems when it isn't a superset of
+ASCII.
+
+Some essentially obsolete locales that aren't supersets of ASCII, mainly
+those in ISO 646 or other 7-bit locales, such as ASMO 449, can also have
+problems, depending on what portions of the ASCII character set get
+changed by the locale and are also used by the program.
+The warning message lists the determinable conflicting characters.
+
 =item Lookbehind longer than %d not implemented in regex m/%s/
 
 (F) There is currently a limit on the length of string which lookbehind can

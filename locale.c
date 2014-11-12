@@ -280,6 +280,18 @@ Perl_new_ctype(pTHX_ const char *newctype)
         Copy(PL_fold_latin1, PL_fold_locale, 256, U8);
     }
     else {
+        /* Assume enough space for every character being bad.  4 spaces each
+         * for the 94 printable characters that are output like "'x' "; and 5
+         * spaces each for "'\\' ", "'\t' ", and "'\n' "; plus a terminating
+         * NUL */
+        char bad_chars_list[ (94 * 4) + (3 * 5) + 1 ];
+
+        bool check_for_problems = ckWARN_d(WARN_LOCALE); /* No warnings means
+                                                            no check */
+        bool multi_byte_locale = FALSE;     /* Assume is a single-byte locale
+                                               to start */
+        unsigned int bad_count = 0;         /* Count of bad characters */
+
         for (i = 0; i < 256; i++) {
             if (isUPPER_LC((U8) i))
                 PL_fold_locale[i] = (U8) toLOWER_LC((U8) i);
@@ -287,6 +299,76 @@ Perl_new_ctype(pTHX_ const char *newctype)
                 PL_fold_locale[i] = (U8) toUPPER_LC((U8) i);
             else
                 PL_fold_locale[i] = (U8) i;
+
+            /* If checking for locale problems, see if the native ASCII-range
+             * printables plus \n and \t are in their expected categories in
+             * the new locale.  If not, this could mean big trouble, upending
+             * Perl's and most programs' assumptions, like having a
+             * metacharacter with special meaning become a \w.  Fortunately,
+             * it's very rare to find locales that aren't supersets of ASCII
+             * nowadays.  It isn't a problem for most controls to be changed
+             * into something else; we check only \n and \t, though perhaps \r
+             * could be an issue as well. */
+            if (check_for_problems
+                && (isGRAPH_A(i) || isBLANK_A(i) || i == '\n'))
+            {
+                if ((isALPHANUMERIC_A(i) && ! isALPHANUMERIC_LC(i))
+                     || (isPUNCT_A(i) && ! isPUNCT_LC(i))
+                     || (isBLANK_A(i) && ! isBLANK_LC(i))
+                     || (i == '\n' && ! isCNTRL_LC(i)))
+                {
+                    if (bad_count) {    /* Separate multiple entries with a
+                                           blank */
+                        bad_chars_list[bad_count++] = ' ';
+                    }
+                    bad_chars_list[bad_count++] = '\'';
+                    if (isPRINT_A(i)) {
+                        bad_chars_list[bad_count++] = (char) i;
+                    }
+                    else {
+                        bad_chars_list[bad_count++] = '\\';
+                        if (i == '\n') {
+                            bad_chars_list[bad_count++] = 'n';
+                        }
+                        else {
+                            assert(i == '\t');
+                            bad_chars_list[bad_count++] = 't';
+                        }
+                    }
+                    bad_chars_list[bad_count++] = '\'';
+                    bad_chars_list[bad_count] = '\0';
+                }
+            }
+        }
+
+#ifdef MB_CUR_MAX
+        /* We only handle single-byte locales (outside of UTF-8 ones; so if
+         * this locale requires than one byte, there are going to be
+         * problems. */
+        if (check_for_problems && MB_CUR_MAX > 1) {
+            multi_byte_locale = TRUE;
+        }
+#endif
+
+        if (bad_count || multi_byte_locale) {
+            setlocale(LC_CTYPE, "C");
+            Perl_warner(aTHX_ packWARN(WARN_LOCALE),
+                             "Locale '%s' may not work well.%s%s%s\n",
+                             newctype,
+                             (multi_byte_locale)
+                              ? "  Some characters in it are not recognized by"
+                                " Perl."
+                              : "",
+                             (bad_count)
+                              ? "\nThe following characters (and maybe others)"
+                                " may not have the same meaning as the Perl"
+                                " program expects:\n"
+                              : "",
+                             (bad_count)
+                              ? bad_chars_list
+                              : ""
+                            );
+            setlocale(LC_CTYPE, newctype);
         }
     }
 

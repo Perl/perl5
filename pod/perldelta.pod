@@ -220,7 +220,20 @@ L<Use of literal non-graphic characters in variable names is deprecated|perldiag
 
 =item *
 
+A new C<locale> warning category has been created, with the following warning
+messages currently in it:
+
+=over 4
+
+=item *
+
+L<Locale '%s' may not work well.%s|perldiag/Locale '%s' may not work well.%s>
+
+=item *
+
 L<Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".|perldiag/Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".>
+
+=back
 
 =back
 
