@@ -406,19 +406,10 @@
  * kick in.  This is admittedly nasty, and fragile, but the alternative
  * is to have Configure scans for all the 40+ interfaces.
  *
- * For some platforms, also the gcc implementations are missing
- * certain interfaces.
- *
  * In other words: if you have an incomplete (or broken) C99 math interface,
  * #undef the c99_foo here, and let the emulations kick in. */
 
-#ifdef __GNUC__
-
-/* using gcc */
-
-#else
-
-/* not using gcc */
+#ifndef __GNUC__
 
 #  if defined(_AIX53) || defined(_AIX61) /* AIX 7 has nexttoward */
 #    undef c99_nexttoward
