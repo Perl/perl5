@@ -4035,6 +4035,7 @@ Gid_t getegid (void);
 #  define DEBUG_Pv_TEST DEBUG_Pv_TEST_
 
 #  define PERL_DEB(a)                  a
+#  define PERL_DEB2(a,b)               a
 #  define PERL_DEBUG(a) if (PL_debug)  a
 #  define DEBUG_p(a) if (DEBUG_p_TEST) a
 #  define DEBUG_s(a) if (DEBUG_s_TEST) a
@@ -4117,6 +4118,7 @@ Gid_t getegid (void);
 #  define DEBUG_Pv_TEST (0)
 
 #  define PERL_DEB(a)
+#  define PERL_DEB2(a,b)               b
 #  define PERL_DEBUG(a)
 #  define DEBUG_p(a)
 #  define DEBUG_s(a)
@@ -4159,11 +4161,11 @@ Gid_t getegid (void);
 /* Keep the old croak based assert for those who want it, and as a fallback if
    the platform is so heretically non-ANSI that it can't assert.  */
 
-#define Perl_assert(what)	PERL_DEB( 				\
+#define Perl_assert(what)	PERL_DEB2( 				\
 	((what) ? ((void) 0) :						\
 	    (Perl_croak_nocontext("Assertion %s failed: file \"" __FILE__ \
 			"\", line %d", STRINGIFY(what), __LINE__),	\
-	    (void) 0)))
+             (void) 0)), ((void)0))
 
 /* assert() gets defined if DEBUGGING (and I_ASSERT).
  * If no DEBUGGING, the <assert.h> has not been included. */
