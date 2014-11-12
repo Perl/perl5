@@ -809,7 +809,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
             Perl_croak_no_modify();
     }
 
-    if (PL_encoding) {
+    if (IN_ENCODING) {
 	if (!SvUTF8(sv)) {
 	    /* XXX, here sv is utf8-ized as a side-effect!
 	       If encoding.pm is used properly, almost string-generating
@@ -861,7 +861,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 			}
 			rsptr = temp_buffer;
 		    }
-		    else if (PL_encoding) {
+		    else if (IN_ENCODING) {
 			/* RS is 8 bit, encoding.pm is used.
 			 * Do not recode PL_rs as a side-effect. */
 			svrecode = newSVpvn(rsptr, rslen);
@@ -3262,7 +3262,7 @@ PP(pp_index)
     little_utf8 = DO_UTF8(little);
     if (big_utf8 ^ little_utf8) {
 	/* One needs to be upgraded.  */
-	if (little_utf8 && !PL_encoding) {
+	if (little_utf8 && !IN_ENCODING) {
 	    /* Well, maybe instead we might be able to downgrade the small
 	       string?  */
 	    char * const pv = (char*)bytes_from_utf8((U8 *)little_p, &llen,
@@ -3284,7 +3284,7 @@ PP(pp_index)
 	    temp = little_utf8
 		? newSVpvn(big_p, biglen) : newSVpvn(little_p, llen);
 
-	    if (PL_encoding) {
+	    if (IN_ENCODING) {
 		sv_recode_to_utf8(temp, PL_encoding);
 	    } else {
 		sv_utf8_upgrade(temp);
@@ -3370,7 +3370,7 @@ PP(pp_ord)
     STRLEN len;
     const U8 *s = (U8*)SvPV_const(argsv, len);
 
-    if (PL_encoding && SvPOK(argsv) && !DO_UTF8(argsv)) {
+    if (IN_ENCODING && SvPOK(argsv) && !DO_UTF8(argsv)) {
         SV * const tmpsv = sv_2mortal(newSVsv(argsv));
         s = (U8*)sv_recode_to_utf8(tmpsv, PL_encoding);
         len = UTF8SKIP(s);  /* Should be well-formed; so this is its length */
@@ -3435,7 +3435,7 @@ PP(pp_chr)
     *tmps = '\0';
     (void)SvPOK_only(TARG);
 
-    if (PL_encoding && !IN_BYTES) {
+    if (IN_ENCODING && !IN_BYTES) {
         sv_recode_to_utf8(TARG, PL_encoding);
 	tmps = SvPVX(TARG);
 	if (SvCUR(TARG) == 0

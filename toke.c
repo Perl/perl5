@@ -3588,7 +3588,7 @@ S_scan_const(pTHX_ char *start)
 		   " >= %"UVuf, (UV)SvCUR(sv), (UV)SvLEN(sv));
 
     SvPOK_on(sv);
-    if (PL_encoding && !has_utf8) {
+    if (IN_ENCODING && !has_utf8) {
 	sv_recode_to_utf8(sv, PL_encoding);
 	if (SvUTF8(sv))
 	    has_utf8 = TRUE;
@@ -6920,7 +6920,7 @@ Perl_yylex(pTHX)
 		if (!IN_BYTES) {
 		    if (UTF)
 			PerlIO_apply_layers(aTHX_ PL_rsfp, NULL, ":utf8");
-		    else if (PL_encoding) {
+		    else if (IN_ENCODING) {
 			SV *name;
 			dSP;
 			ENTER;
@@ -9334,7 +9334,7 @@ S_scan_heredoc(pTHX_ char *s)
     if (!IN_BYTES) {
 	if (UTF && is_utf8_string((U8*)SvPVX_const(tmpstr), SvCUR(tmpstr)))
 	    SvUTF8_on(tmpstr);
-	else if (PL_encoding)
+	else if (IN_ENCODING)
 	    sv_recode_to_utf8(tmpstr, PL_encoding);
     }
     PL_lex_stuff = tmpstr;
@@ -9625,7 +9625,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 	sv_catpvn(sv, s, termlen);
     s += termlen;
     for (;;) {
-	if (PL_encoding && !UTF && !re_reparse) {
+	if (IN_ENCODING && !UTF && !re_reparse) {
 	    bool cont = TRUE;
 
 	    while (cont) {
@@ -9843,13 +9843,13 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 
     /* at this point, we have successfully read the delimited string */
 
-    if (!PL_encoding || UTF || re_reparse) {
+    if (!IN_ENCODING || UTF || re_reparse) {
 
 	if (keep_delims)
 	    sv_catpvn(sv, s, termlen);
 	s += termlen;
     }
-    if (has_utf8 || (PL_encoding && !re_reparse))
+    if (has_utf8 || (IN_ENCODING && !re_reparse))
 	SvUTF8_on(sv);
 
     PL_multi_end = CopLINE(PL_curcop);
@@ -10519,7 +10519,7 @@ S_scan_formline(pTHX_ char *s)
 	if (!IN_BYTES) {
 	    if (UTF && is_utf8_string((U8*)SvPVX_const(stuff), SvCUR(stuff)))
 		SvUTF8_on(stuff);
-	    else if (PL_encoding)
+	    else if (IN_ENCODING)
 		sv_recode_to_utf8(stuff, PL_encoding);
 	}
 	NEXTVAL_NEXTTOKE.opval = (OP*)newSVOP(OP_CONST, 0, stuff);

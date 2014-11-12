@@ -1756,7 +1756,7 @@ PP(pp_sysread)
        bytes from a byte file handle into a UTF8 buffer, but it won't harm us
        unduly.
        (should be 2 * length + offset + 1, or possibly something longer if
-       PL_encoding is true) */
+       IN_ENCODING Is true) */
     buffer  = SvGROW(bufsv, (STRLEN)(length+offset+1));
     if (offset > 0 && offset > (SSize_t)orig_size) { /* Zero any newly allocated space */
     	Zero(buffer+orig_size, offset-orig_size, char);

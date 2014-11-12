@@ -767,6 +767,9 @@
 #   endif
 #endif /* !NO_LOCALE && HAS_SETLOCALE */
 
+/* Are we under the encoding pragma? */
+#define IN_ENCODING UNLIKELY(PL_encoding)
+
 #include <setjmp.h>
 
 #ifdef I_SYS_PARAM

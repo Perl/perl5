@@ -167,7 +167,7 @@ sv_eq_pvn_flags(pTHX_ const SV *sv, const char* pv, const STRLEN pvlen, const U3
         STRLEN cur1     = SvCUR(sv);
         const char *pv2 = pv;
         STRLEN cur2     = pvlen;
-	if (PL_encoding) {
+	if (IN_ENCODING) {
               SV* svrecode = NULL;
 	      if (SvUTF8(sv)) {
 		   svrecode = newSVpvn(pv2, cur2);

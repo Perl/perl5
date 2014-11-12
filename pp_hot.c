@@ -2186,7 +2186,7 @@ PP(pp_subst)
 	if (DO_UTF8(TARG) && !doutf8) {
 	     nsv = sv_newmortal();
 	     SvSetSV(nsv, dstr);
-	     if (PL_encoding)
+	     if (IN_ENCODING)
 		  sv_recode_to_utf8(nsv, PL_encoding);
 	     else
 		  sv_utf8_upgrade(nsv);
@@ -2367,7 +2367,7 @@ PP(pp_subst)
 	      first = FALSE;
 	    }
 	    else {
-		if (PL_encoding) {
+		if (IN_ENCODING) {
 		    if (!nsv) nsv = sv_newmortal();
 		    sv_copypv(nsv, repl);
 		    if (!DO_UTF8(nsv)) sv_recode_to_utf8(nsv, PL_encoding);

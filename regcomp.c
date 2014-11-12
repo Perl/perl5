@@ -12242,7 +12242,7 @@ tryagain:
 				vFAIL(error_msg);
 			    }
                             ender = result;
-			    if (PL_encoding && ender < 0x100) {
+			    if (IN_ENCODING && ender < 0x100) {
 				goto recode_encoding;
 			    }
 			    if (ender > 0xff) {
@@ -12272,7 +12272,7 @@ tryagain:
 			    }
                             ender = result;
 
-			    if (PL_encoding && ender < 0x100) {
+			    if (IN_ENCODING && ender < 0x100) {
 				goto recode_encoding;
 			    }
 			    if (ender > 0xff) {
@@ -12331,7 +12331,7 @@ tryagain:
                                          form_short_octal_warning(p, numlen));
                             }
 			}
-			if (PL_encoding && ender < 0x100)
+			if (IN_ENCODING && ender < 0x100)
 			    goto recode_encoding;
 			break;
 		    recode_encoding:
@@ -14147,7 +14147,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 			vFAIL(error_msg);
 		    }
 		}
-		if (PL_encoding && value < 0x100) {
+		if (IN_ENCODING && value < 0x100) {
 		    goto recode_encoding;
 		}
 		break;
@@ -14166,7 +14166,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 			vFAIL(error_msg);
 		    }
 		}
-		if (PL_encoding && value < 0x100)
+		if (IN_ENCODING && value < 0x100)
 		    goto recode_encoding;
 		break;
 	    case 'c':
@@ -14198,7 +14198,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             (void)ReREFCNT_inc(RExC_rx_sv);
                         }
                     }
-		    if (PL_encoding && value < 0x100)
+		    if (IN_ENCODING && value < 0x100)
 			goto recode_encoding;
 		    break;
 		}
