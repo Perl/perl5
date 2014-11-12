@@ -220,12 +220,7 @@
 /* Certain AIX releases have the C99 math, but not in long double.
  * The <math.h> has them, e.g. __expl128, but no library has them!
  *
- * See the comments in hints/aix.sh about long doubles.
- *
- * AIX 5 releases before 5.3 unknown, AIX releases 7 unknown */
-#  if defined(_AIX53) || defined(_AIX61)
-#    define NO_C99_LONG_DOUBLE_MATH
-#  endif
+ * Also see the comments in hints/aix.sh about long doubles. */
 
 #  if defined(USE_QUADMATH) && defined(I_QUADMATH)
 #    define c99_acosh	acoshq
