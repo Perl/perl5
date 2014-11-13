@@ -408,8 +408,12 @@
 
   Win32 does seem to have these:
 
-  acosh asinh atanh cbrt copysign cosh expm1 hypot log10 nan
+  acosh asinh atanh cbrt copysign expm1 hypot nan
   nearbyint nextafter nexttoward remainder round scalbn
+
+  Win32 also has these additional math functions:
+
+  log10
 
   And the Bessel functions are defined like _this.
 */
