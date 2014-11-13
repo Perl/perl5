@@ -432,23 +432,6 @@
 
 #endif
 
-/* XXX Regarding C99 math.h, VMS seems to be missing these:
-
-  lround nan nearbyint round scalbn llrint
- */
-
-#ifdef __VMS
-#    undef c99_lround
-#    undef c99_nan
-#    undef c99_nearbyint
-#    undef c99_round
-#    undef c99_scalbn
-/* Have lrint but not llrint. */
-#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
-#      undef c99_lrint
-#    endif
-#endif
-
 /* XXX Regarding C99 math.h, Win32 seems to be missing these:
 
   erf erfc exp2 fdim fma fmax fmin fpclassify ilogb lgamma log1p log2 lrint
