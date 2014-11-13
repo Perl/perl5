@@ -206,199 +206,187 @@
  * gamma or the log of gamma, that's why the new tgamma and lgamma.
  * Though also remember tgamma_r and lgamma_r. */
 
-/* XXX The truthiness of acosh() is the canary for all of the
- * C99 math.  This is very likely wrong, especially in non-UNIX lands
- * like Win32 and VMS, but also older UNIXes have issues.  For Win32,
- * and other non-fully-C99, we later do some undefines for these interfaces.
- *
- * But we are very trying very hard to avoid introducing separate Configure
- * symbols for all the 40-ish new math symbols.  Especially since the set
- * of missing functions doesn't seem to follow any patterns. */
-
-#ifdef HAS_ACOSH
-
 /* Certain AIX releases have the C99 math, but not in long double.
  * The <math.h> has them, e.g. __expl128, but no library has them!
  *
  * Also see the comments in hints/aix.sh about long doubles. */
 
-#  if defined(USE_QUADMATH) && defined(I_QUADMATH)
-#    define c99_acosh	acoshq
-#    define c99_asinh	asinhq
-#    define c99_atanh	atanhq
-#    define c99_cbrt	cbrtq
-#    define c99_copysign	copysignq
-#    define c99_erf	erfq
-#    define c99_erfc	erfcq
+#if defined(USE_QUADMATH) && defined(I_QUADMATH)
+#  define c99_acosh	acoshq
+#  define c99_asinh	asinhq
+#  define c99_atanh	atanhq
+#  define c99_cbrt	cbrtq
+#  define c99_copysign	copysignq
+#  define c99_erf	erfq
+#  define c99_erfc	erfcq
 /* no exp2q */
-#    define c99_expm1	expm1q
-#    define c99_fdim	fdimq
-#    define c99_fma	fmaq
-#    define c99_fmax	fmaxq
-#    define c99_fmin	fminq
-#    define c99_hypot	hypotq
-#    define c99_ilogb	ilogbq
-#    define c99_lgamma	lgammaq
-#    define c99_log1p	log1pq
-#    define c99_log2	log2q
+#  define c99_expm1	expm1q
+#  define c99_fdim	fdimq
+#  define c99_fma	fmaq
+#  define c99_fmax	fmaxq
+#  define c99_fmin	fminq
+#  define c99_hypot	hypotq
+#  define c99_ilogb	ilogbq
+#  define c99_lgamma	lgammaq
+#  define c99_log1p	log1pq
+#  define c99_log2	log2q
 /* no logbq */
 /* no llrintq */
 /* no llroundq */
-#    define c99_lrint	lrintq
-#    define c99_lround	lroundq
-#    define c99_nan	nanq
-#    define c99_nearbyint	nearbyintq
-#    define c99_nextafter	nextafterq
+#  define c99_lrint	lrintq
+#  define c99_lround	lroundq
+#  define c99_nan	nanq
+#  define c99_nearbyint	nearbyintq
+#  define c99_nextafter	nextafterq
 /* no nexttowardq */
-#    define c99_remainder	remainderq
-#    define c99_remquo	remquoq
-#    define c99_rint	rintq
-#    define c99_round	roundq
-#    define c99_scalbn	scalbnq
-#    define c99_signbit	signbitq
-#    define c99_tgamma	tgammaq
-#    define c99_trunc	truncq
-#    define bessel_j0 j0q
-#    define bessel_j1 j1q
-#    define bessel_jn jnq
-#    define bessel_y0 y0q
-#    define bessel_y1 y1q
-#    define bessel_yn ynq
-#  elif defined(USE_LONG_DOUBLE) && \
+#  define c99_remainder	remainderq
+#  define c99_remquo	remquoq
+#  define c99_rint	rintq
+#  define c99_round	roundq
+#  define c99_scalbn	scalbnq
+#  define c99_signbit	signbitq
+#  define c99_tgamma	tgammaq
+#  define c99_trunc	truncq
+#  define bessel_j0 j0q
+#  define bessel_j1 j1q
+#  define bessel_jn jnq
+#  define bessel_y0 y0q
+#  define bessel_y1 y1q
+#  define bessel_yn ynq
+#elif defined(USE_LONG_DOUBLE) && \
   (defined(HAS_FREXPL) || defined(HAS_ILOGBL)) && defined(HAS_SQRTL)
 /* Use some of the Configure scans for long double math functions
  * as the canary for all the C99 *l variants being defined. */
-#    define c99_acosh	acoshl
-#    define c99_asinh	asinhl
-#    define c99_atanh	atanhl
-#    define c99_cbrt	cbrtl
-#    define c99_copysign	copysignl
-#    define c99_erf	erfl
-#    define c99_erfc	erfcl
-#    define c99_exp2	exp2l
-#    define c99_expm1	expm1l
-#    define c99_fdim	fdiml
-#    define c99_fma	fmal
-#    define c99_fmax	fmaxl
-#    define c99_fmin	fminl
-#    define c99_hypot	hypotl
-#    define c99_ilogb	ilogbl
-#    define c99_lgamma	lgammal
-#    define c99_log1p	log1pl
-#    define c99_log2	log2l
-#    define c99_logb	logbl
-#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
-#      define c99_lrint	llrintl
-#    else
-#      define c99_lrint	lrintl
-#    endif
-#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
-#      define c99_lround	llroundl
-#    else
-#      define c99_lround	lroundl
-#    endif
-#    define c99_nan	nanl
-#    define c99_nearbyint	nearbyintl
-#    define c99_nextafter	nextafterl
-#    define c99_nexttoward	nexttowardl
-#    define c99_remainder	remainderl
-#    define c99_remquo	remquol
-#    define c99_rint	rintl
-#    define c99_round	roundl
-#    define c99_scalbn	scalbnl
-#    ifdef HAS_SIGNBIT /* possibly bad assumption */
-#      define c99_signbit	signbitl
-#    endif
-#    define c99_tgamma	tgammal
-#    define c99_trunc	truncl
+#  define c99_acosh	acoshl
+#  define c99_asinh	asinhl
+#  define c99_atanh	atanhl
+#  define c99_cbrt	cbrtl
+#  define c99_copysign	copysignl
+#  define c99_erf	erfl
+#  define c99_erfc	erfcl
+#  define c99_exp2	exp2l
+#  define c99_expm1	expm1l
+#  define c99_fdim	fdiml
+#  define c99_fma	fmal
+#  define c99_fmax	fmaxl
+#  define c99_fmin	fminl
+#  define c99_hypot	hypotl
+#  define c99_ilogb	ilogbl
+#  define c99_lgamma	lgammal
+#  define c99_log1p	log1pl
+#  define c99_log2	log2l
+#  define c99_logb	logbl
+#  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
+#   define c99_lrint	llrintl
 #  else
-#    define c99_acosh	acosh
-#    define c99_asinh	asinh
-#    define c99_atanh	atanh
-#    define c99_cbrt	cbrt
-#    define c99_copysign	copysign
-#    define c99_erf	erf
-#    define c99_erfc	erfc
-#    define c99_exp2	exp2
-#    define c99_expm1	expm1
-#    define c99_fdim	fdim
-#    define c99_fma	fma
-#    define c99_fmax	fmax
-#    define c99_fmin	fmin
-#    define c99_hypot	hypot
-#    define c99_ilogb	ilogb
-#    define c99_lgamma	lgamma
-#    define c99_log1p	log1p
-#    define c99_log2	log2
-#    define c99_logb	logb
-#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLRINT)
-#      define c99_lrint	llrint
-#    else
-#      define c99_lrint	lrint
-#    endif
-#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLROUND)
-#      define c99_lround	llround
-#    else
-#      define c99_lround	lround
-#    endif
-#    define c99_nan	nan
-#    define c99_nearbyint	nearbyint
-#    define c99_nextafter	nextafter
-#    define c99_nexttoward	nexttoward
-#    define c99_remainder	remainder
-#    define c99_remquo	remquo
-#    define c99_rint	rint
-#    define c99_round	round
-#    define c99_scalbn	scalbn
+#    define c99_lrint	lrintl
+#  endif
+#  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
+#    define c99_lround	llroundl
+#  else
+#    define c99_lround	lroundl
+#  endif
+#  define c99_nan	nanl
+#  define c99_nearbyint	nearbyintl
+#  define c99_nextafter	nextafterl
+#  define c99_nexttoward	nexttowardl
+#  define c99_remainder	remainderl
+#  define c99_remquo	remquol
+#  define c99_rint	rintl
+#  define c99_round	roundl
+#  define c99_scalbn	scalbnl
+#  ifdef HAS_SIGNBIT /* possibly bad assumption */
+#    define c99_signbit	signbitl
+#  endif
+#  define c99_tgamma	tgammal
+#  define c99_trunc	truncl
+#else
+#  define c99_acosh	acosh
+#  define c99_asinh	asinh
+#  define c99_atanh	atanh
+#  define c99_cbrt	cbrt
+#  define c99_copysign	copysign
+#  define c99_erf	erf
+#  define c99_erfc	erfc
+#  define c99_exp2	exp2
+#  define c99_expm1	expm1
+#  define c99_fdim	fdim
+#  define c99_fma	fma
+#  define c99_fmax	fmax
+#  define c99_fmin	fmin
+#  define c99_hypot	hypot
+#  define c99_ilogb	ilogb
+#  define c99_lgamma	lgamma
+#  define c99_log1p	log1p
+#  define c99_log2	log2
+#  define c99_logb	logb
+#  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLRINT)
+#    define c99_lrint	llrint
+#  else
+#    define c99_lrint	lrint
+#  endif
+#  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLROUND)
+#    define c99_lround	llround
+#  else
+#    define c99_lround	lround
+#  endif
+#  define c99_nan	nan
+#  define c99_nearbyint	nearbyint
+#  define c99_nextafter	nextafter
+#  define c99_nexttoward	nexttoward
+#  define c99_remainder	remainder
+#  define c99_remquo	remquo
+#  define c99_rint	rint
+#  define c99_round	round
+#  define c99_scalbn	scalbn
 /* We already define Perl_signbit in perl.h. */
-#    ifdef HAS_SIGNBIT
-#      define c99_signbit	signbit
-#    endif
-#    define c99_tgamma	tgamma
-#    define c99_trunc	trunc
+#  ifdef HAS_SIGNBIT
+#    define c99_signbit	signbit
 #  endif
+#  define c99_tgamma	tgamma
+#  define c99_trunc	trunc
+#endif
 
-#  ifndef isunordered
-#    ifdef Perl_isnan
-#      define isunordered(x, y) (Perl_isnan(x) || Perl_isnan(y))
-#    elif defined(HAS_UNORDERED)
-#      define isunordered(x, y) unordered(x, y)
-#    endif
+#ifndef isunordered
+#  ifdef Perl_isnan
+#    define isunordered(x, y) (Perl_isnan(x) || Perl_isnan(y))
+#  elif defined(HAS_UNORDERED)
+#    define isunordered(x, y) unordered(x, y)
 #  endif
+#endif
 
 /* XXX these isgreater/isnormal/isunordered macros definitions should
  * be moved further in the file to be part of the emulations, so that
  * platforms can e.g. #undef c99_isunordered and have it work like
  * it does for the other interfaces. */
 
-#  if !defined(isgreater) && defined(isunordered)
-#    define isgreater(x, y)         (!isunordered((x), (y)) && (x) > (y))
-#    define isgreaterequal(x, y)    (!isunordered((x), (y)) && (x) >= (y))
-#    define isless(x, y)            (!isunordered((x), (y)) && (x) < (y))
-#    define islessequal(x, y)       (!isunordered((x), (y)) && (x) <= (y))
-#    define islessgreater(x, y)     (!isunordered((x), (y)) && \
+#if !defined(isgreater) && defined(isunordered)
+#  define isgreater(x, y)         (!isunordered((x), (y)) && (x) > (y))
+#  define isgreaterequal(x, y)    (!isunordered((x), (y)) && (x) >= (y))
+#  define isless(x, y)            (!isunordered((x), (y)) && (x) < (y))
+#  define islessequal(x, y)       (!isunordered((x), (y)) && (x) <= (y))
+#  define islessgreater(x, y)     (!isunordered((x), (y)) && \
                                      ((x) > (y) || (y) > (x)))
-#  endif
+#endif
 
 /* Check both the Configure symbol and the macro-ness (like C99 promises). */ 
-#  if defined(HAS_FPCLASSIFY) && defined(fpclassify)
-#    define c99_fpclassify	fpclassify
-#  endif
+#if defined(HAS_FPCLASSIFY) && defined(fpclassify)
+#  define c99_fpclassify	fpclassify
+#endif
 /* Like isnormal(), the isfinite(), isinf(), and isnan() are also C99
    and also (sizeof-arg-aware) macros, but they are already well taken
    care of by Configure et al, and defined in perl.h as
    Perl_isfinite(), Perl_isinf(), and Perl_isnan(). */
-#  ifdef isnormal
-#    define c99_isnormal	isnormal
-#  endif
-#  ifdef isgreater /* canary for all the C99 is*<cmp>* macros. */
-#    define c99_isgreater	isgreater
-#    define c99_isgreaterequal	isgreaterequal
-#    define c99_isless		isless
-#    define c99_islessequal	islessequal
-#    define c99_islessgreater	islessgreater
-#    define c99_isunordered	isunordered
-#  endif
+#ifdef isnormal
+#  define c99_isnormal	isnormal
+#endif
+#ifdef isgreater /* canary for all the C99 is*<cmp>* macros. */
+#  define c99_isgreater	isgreater
+#  define c99_isgreaterequal	isgreaterequal
+#  define c99_isless		isless
+#  define c99_islessequal	islessequal
+#  define c99_islessgreater	islessgreater
+#  define c99_isunordered	isunordered
 #endif
 
 /* The Great Wall of Undef where according to the definedness of HAS_FOO symbols
