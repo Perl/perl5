@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = qw(../lib);
     require './test.pl';
-    plan (tests => 17);
+    plan (tests => 20);
 }
 
 is __SUB__, "__SUB__", '__SUB__ is a bareword outside of use feature';
@@ -75,3 +75,10 @@ sub squag {
     } 1;
 }
 squag();
+
+sub f () { __SUB__ }
+is f, \&f, 'sub named () { __SUB__ } returns self ref';
+my $f = sub () { __SUB__ };
+is &$f, $f, 'anonymous sub(){__SUB__} returns self ref';
+my $f2 = sub () { $f++ if 0; __SUB__ };
+is &$f2, $f2, 'sub(){__SUB__} anonymous closure returns self ref';
