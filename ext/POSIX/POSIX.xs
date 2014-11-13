@@ -528,10 +528,6 @@
 
 #endif
 
-#ifdef __CYGWIN__
-#  undef c99_nexttoward
-#endif
-
 /* The Bessel functions: BSD, SVID, XPG4, and POSIX.  But not C99. */
 #if defined(HAS_J0) && !defined(bessel_j0)
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_J0L)
