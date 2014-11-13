@@ -401,6 +401,114 @@
 #  endif
 #endif
 
+/* The Great Wall of Undef where according to the definedness of HAS_FOO symbols
+ * the corresponding c99_foo wrappers are undefined.  This list doesn't include
+ * the isfoo() interfaces because they are either type-aware macros, or dealt
+ * separately, already in perl.h */
+
+#ifndef HAS_ACOSH
+#  undef c99_acosh
+#endif
+#ifndef HAS_ASINH
+#  undef c99_asinh
+#endif
+#ifndef HAS_ATANH
+#  undef c99_atanh
+#endif
+#ifndef HAS_CBRT
+#  undef c99_cbrt
+#endif
+#ifndef HAS_COPYSIGN
+#  undef c99_copysign
+#endif
+#ifndef HAS_ERF
+#  undef c99_erf
+#endif
+#ifndef HAS_ERFC
+#  undef c99_erfc
+#endif
+#ifndef HAS_EXP2
+#  undef c99_exp2
+#endif
+#ifndef HAS_EXPM1
+#  undef c99_expm1
+#endif
+#ifndef HAS_FDIM
+#  undef c99_fdim
+#endif
+#ifndef HAS_FMA
+#  undef c99_fma
+#endif
+#ifndef HAS_FMAX
+#  undef c99_fmax
+#endif
+#ifndef HAS_FMIN
+#  undef c99_fmin
+#endif
+#ifndef HAS_FPCLASSIFY
+#  undef c99_fpclassify
+#endif
+#ifndef HAS_HYPOT
+#  undef c99_hypot
+#endif
+#ifndef HAS_ILOGB
+#  undef c99_ilogb
+#endif
+#ifndef HAS_LGAMMA
+#  undef c99_lgamma
+#endif
+#ifndef HAS_LOG1P
+#  undef c99_log1p
+#endif
+#ifndef HAS_LOG2
+#  undef c99_log2
+#endif
+#ifndef HAS_LOGB
+#  undef c99_logb
+#endif
+#ifndef HAS_LRINT
+#  undef c99_lrint
+#endif
+#ifndef HAS_LROUND
+#  undef c99_lround
+#endif
+#ifndef HAS_NAN
+#  undef c99_nan
+#endif
+#ifndef HAS_NEARBYINT
+#  undef c99_nearbyint
+#endif
+#ifndef HAS_NEXTAFTER
+#  undef c99_nextafter
+#endif
+#ifndef HAS_NEXTTOWARD
+#  undef c99_nexttoward
+#endif
+#ifndef HAS_REMAINDER
+#  undef c99_remainder
+#endif
+#ifndef HAS_REMQUO
+#  undef c99_remquo
+#endif
+#ifndef HAS_RINT
+#  undef c99_rint
+#endif
+#ifndef HAS_ROUND
+#  undef c99_round
+#endif
+#ifndef HAS_SCALBN
+#  undef c99_scalbn
+#endif
+#ifndef HAS_SIGNBIT
+#  undef c99_signbit
+#endif
+#ifndef HAS_TGAMMA
+#  undef c99_tgamma
+#endif
+#ifndef HAS_TRUNC
+#  undef c99_trunc
+#endif
+
 /* XXX Regarding C99 math.h, Win32 seems to be missing these:
 
   erf erfc exp2 fdim fma fmax fmin fpclassify ilogb lgamma log1p log2 lrint
