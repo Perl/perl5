@@ -491,6 +491,12 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #define newXSproto_portable(name, c_impl, file, proto) (PL_Sv=(SV*)newXS(name, c_impl, file), sv_setpv(PL_Sv, proto), (CV*)PL_Sv)
 #endif /* !defined(newXS_flags) */
 
+#if PERL_VERSION_LE(5, 21, 5)
+#  define newXS_deffile(a,b) Perl_newXS(aTHX_ a,b,file)
+#else
+#  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
+#endif
+
 EOF
   return 1;
 }

@@ -313,6 +313,7 @@ PERLVAR(I, envgv,	GV *)
 PERLVAR(I, incgv,	GV *)
 PERLVAR(I, hintgv,	GV *)
 PERLVAR(I, origfilename, char *)
+PERLVARI(I, xsubfilename, const char *, NULL)
 PERLVAR(I, diehook,	SV *)
 PERLVAR(I, warnhook,	SV *)
 

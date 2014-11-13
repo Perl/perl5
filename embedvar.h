@@ -350,6 +350,7 @@
 #define PL_warnhook		(vTHX->Iwarnhook)
 #define PL_watchaddr		(vTHX->Iwatchaddr)
 #define PL_watchok		(vTHX->Iwatchok)
+#define PL_xsubfilename		(vTHX->Ixsubfilename)
 
 #endif	/* MULTIPLICITY */
 

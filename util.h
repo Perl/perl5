@@ -173,16 +173,21 @@ typedef struct {
    selectable. These spare bits allow for additional features for the varargs
    stuff or ABI compat test flags in the future.
 */
-#define HSm_APIVERLEN 0x0000003F /* perl version string won't be more than 63 chars */
+#define HSm_APIVERLEN 0x0000001F /* perl version string won't be more than 31 chars */
 #define HS_APIVERLEN_MAX HSm_APIVERLEN
 #define HSm_XSVERLEN 0x0000FF00 /* if 0, not present, dont check, die if over 255*/
 #define HS_XSVERLEN_MAX 0xFF
+/* uses var file to set default filename for newXS_deffile to use for CvFILE */
+#define HSf_SETXSUBFN 0x00000020
 #define HSf_POPMARK 0x00000040 /* popmark mode or you must supply ax and items */
 #define HSf_IMP_CXT 0x00000080 /* ABI, threaded/PERL_IMPLICIT_CONTEXT, pTHX_ present */
 #define HSm_INTRPSIZE 0xFFFF0000 /* ABI, interp struct size */
-/* a mask where these bits must always match between a XS mod and interp */
-/* and maybe HSm_APIVERLEN one day if Perl_xs_apiversion_bootcheck is changed to a memcmp */
+/* A mask of bits in the key which must always match between a XS mod and interp.
+   Also if all ABI bits in a key are true, skip all ABI checks, it is very
+   the unlikely interp size will all 1 bits */
+/* Maybe HSm_APIVERLEN one day if Perl_xs_apiversion_bootcheck is changed to a memcmp */
 #define HSm_KEY_MATCH (HSm_INTRPSIZE|HSf_IMP_CXT)
+#define HSf_NOCHK HSm_KEY_MATCH  /* if all ABI bits are 1 in the key, dont chk */
 
 
 #define HS_GETINTERPSIZE(key) ((key) >> 16)
@@ -193,12 +198,14 @@ means arg not present, 1 is empty string/null byte */
 #define HS_GETAPIVERLEN(key) ((key) & HSm_APIVERLEN)
 
 /* internal to util.h macro to create a packed handshake key, all args must be constants */
-/* U32 return = (U16 interpsize, bool cxt, bool popmark, U6 (SIX!) apiverlen, U8 xsverlen) */
-#define HS_KEYp(interpsize, cxt, popmark, apiverlen, xsverlen) \
+/* U32 return = (U16 interpsize, bool cxt, bool setxsubfn, bool popmark,
+   U5 (FIVE!) apiverlen, U8 xsverlen) */
+#define HS_KEYp(interpsize, cxt, setxsubfn, popmark, apiverlen, xsverlen) \
     (((interpsize)  << 16) \
     | ((xsverlen) > HS_XSVERLEN_MAX \
         ? (Perl_croak_nocontext("panic: handshake overflow"), HS_XSVERLEN_MAX) \
         : (xsverlen) << 8) \
+    | (cBOOL(setxsubfn) ? HSf_SETXSUBFN : 0) \
     | (cBOOL(cxt) ? HSf_IMP_CXT : 0) \
     | (cBOOL(popmark) ? HSf_POPMARK : 0) \
     | ((apiverlen) > HS_APIVERLEN_MAX \
@@ -208,15 +215,16 @@ means arg not present, 1 is empty string/null byte */
 
 /* public macro for core usage to create a packed handshake key but this is
    not public API. This more friendly version already collected all ABI info */
-/* U32 return = (bool popmark, "litteral_string_api_ver", "litteral_string_xs_ver") */
+/* U32 return = (bool setxsubfn, bool popmark, "litteral_string_api_ver",
+   "litteral_string_xs_ver") */
 #ifdef PERL_IMPLICIT_CONTEXT
-#  define HS_KEY(popmark, apiver, xsver) \
-    HS_KEYp(sizeof(PerlInterpreter), TRUE, popmark, \
+#  define HS_KEY(setxsubfn, popmark, apiver, xsver) \
+    HS_KEYp(sizeof(PerlInterpreter), TRUE, setxsubfn, popmark, \
     sizeof("" apiver "")-1, sizeof("" xsver "")-1)
 #  define HS_CXT aTHX
 #else
-#  define HS_KEY(popmark, apiver, xsver) \
-    HS_KEYp(sizeof(struct PerlHandShakeInterpreter), FALSE, popmark, \
+#  define HS_KEY(setxsubfn, popmark, apiver, xsver) \
+    HS_KEYp(sizeof(struct PerlHandShakeInterpreter), FALSE, setxsubfn, popmark, \
     sizeof("" apiver "")-1, sizeof("" xsver "")-1)
 #  define HS_CXT cv
 #endif

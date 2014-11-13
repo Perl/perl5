@@ -5352,35 +5352,38 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
    and unthreaded XS module, threaded perl will look at uninit C stack or uninit
    register to get var key (remember it assumes 1st arg is interp cxt).
 
-Perl_xs_handshake(U32 key, void * v_my_perl, [U32 items, U32 ax], [char * api_version], [char * xs_version]) */
+Perl_xs_handshake(U32 key, void * v_my_perl, const char * file,
+[U32 items, U32 ax], [char * api_version], [char * xs_version]) */
 I32
-Perl_xs_handshake(const U32 key, void * v_my_perl, ...)
+Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
 {
     va_list args;
     U32 items, ax;
+    void * got;
+    void * need;
 #ifdef PERL_IMPLICIT_CONTEXT
     dTHX;
+    tTHX xs_interp;
+#else
+    CV* cv;
+    SV *** xs_spp;
 #endif
     PERL_ARGS_ASSERT_XS_HANDSHAKE;
-    va_start(args, v_my_perl);
+    va_start(args, file);
 
-    if((key & HSm_KEY_MATCH) != (HS_KEY(FALSE, "", "") & HSm_KEY_MATCH))
-	noperl_die("BOOT:: Invalid handshake key got %"UVXf" needed %"UVXf
-			", binaries are mismatched",
-                        (UV)(key & HSm_KEY_MATCH),
-			(UV)(HS_KEY(FALSE, "", "") & HSm_KEY_MATCH));
+    got = (void *)(key & HSm_KEY_MATCH);
+    need = (void *)(HS_KEY(FALSE, FALSE, "", "") & HSm_KEY_MATCH);
+    if(UNLIKELY(got != need))
+	goto bad_handshake;
 /* try to catch where a 2nd threaded perl interp DLL is loaded into a process
    by a XS DLL compiled against the wrong interl DLL b/c of bad @INC, and the
    2nd threaded perl interp DLL never initialized its TLS/PERL_SYS_INIT3 so
    dTHX call from 2nd interp DLL can't return the my_perl that pp_entersub
    passed to the XS DLL */
-    {
-	void * got;
-	void * need;
 #ifdef PERL_IMPLICIT_CONTEXT
-	tTHX xs_interp = (tTHX)v_my_perl;
-	got = xs_interp;
-	need = my_perl;
+    xs_interp = (tTHX)v_my_perl;
+    got = xs_interp;
+    need = my_perl;
 #else
 /* try to catch where an unthreaded perl interp DLL (for ex. perl522.dll) is
    loaded into a process by a XS DLL built by an unthreaded perl522.dll perl,
@@ -5389,15 +5392,24 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, ...)
    through pp_entersub, use a unique value (which is a pointer to PL_stack_sp's
    location in the unthreaded perl binary) stored in CV * to figure out if this
    Perl_xs_handshake was called by the same pp_entersub */
-	CV* cv = (CV*)v_my_perl;
-	SV *** xs_spp = (SV***)CvHSCXT(cv);
-	got = xs_spp;
-	need = &PL_stack_sp;
+    cv = (CV*)v_my_perl;
+    xs_spp = (SV***)CvHSCXT(cv);
+    got = xs_spp;
+    need = &PL_stack_sp;
 #endif
-	if(got != need)/* recycle branch and string from above */
-	    noperl_die("BOOT:: Invalid handshake key got %"UVXf
-                    " needed %"UVXf", binaries are mismatched",
-                    (UV)got, (UV)need);
+    if(UNLIKELY(got != need)) {
+	bad_handshake:/* recycle branch and string from above */
+	if(got != (void *)HSf_NOCHK)
+	    noperl_die("%s: Invalid handshake key got %p"
+		" needed %p, binaries are mismatched",
+		file, got, need);
+    }
+
+    if(key & HSf_SETXSUBFN) {     /* this might be called from a module bootstrap */
+	SAVEPPTR(PL_xsubfilename);/* which was require'd from a XSUB BEGIN */
+	PL_xsubfilename = file;   /* so the old name must be restored for
+				     additional XSUBs to register themselves */
+	(void)gv_fetchfile(file);
     }
 
     if(key & HSf_POPMARK) {

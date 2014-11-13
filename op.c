@@ -8790,6 +8790,24 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
     return cv;
 }
 
+/*
+=for apidoc U||newXS
+
+Used by C<xsubpp> to hook up XSUBs as Perl subs.  I<filename> needs to be
+static storage, as it is used directly as CvFILE(), without a copy being made.
+
+=cut
+*/
+
+CV *
+Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
+{
+    PERL_ARGS_ASSERT_NEWXS;
+    return newXS_len_flags(
+	name, name ? strlen(name) : 0, subaddr, filename, NULL, NULL, 0
+    );
+}
+
 CV *
 Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
 		 const char *const filename, const char *const proto,
@@ -8798,6 +8816,15 @@ Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
     PERL_ARGS_ASSERT_NEWXS_FLAGS;
     return newXS_len_flags(
        name, name ? strlen(name) : 0, subaddr, filename, proto, NULL, flags
+    );
+}
+
+CV *
+Perl_newXS_deffile(pTHX_ const char *name, XSUBADDR_t subaddr)
+{
+    PERL_ARGS_ASSERT_NEWXS_DEFFILE;
+    return newXS_len_flags(
+	name, name ? strlen(name) : 0, subaddr, NULL, NULL, NULL, 0
     );
 }
 
@@ -8811,17 +8838,16 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
     bool interleave = FALSE;
 
     PERL_ARGS_ASSERT_NEWXS_LEN_FLAGS;
-
+    if (!subaddr)
+	Perl_croak_nocontext("panic: no address for '%s' in '%s'",
+	    name, filename ? filename : PL_xsubfilename);
     {
         GV * const gv = gv_fetchpvn(
 			    name ? name : PL_curstash ? "__ANON__" : "__ANON__::__ANON__",
 			    name ? len : PL_curstash ? sizeof("__ANON__") - 1:
 				sizeof("__ANON__::__ANON__") - 1,
 			    GV_ADDMULTI | flags, SVt_PVCV);
-    
-        if (!subaddr)
-            Perl_croak(aTHX_ "panic: no address for '%s' in '%s'", name, filename);
-    
+
         if ((cv = (name ? GvCV(gv) : NULL))) {
             if (GvCVGEN(gv)) {
                 /* just a cached method */
@@ -8856,13 +8882,22 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
                     gv_method_changed(gv); /* newXS */
             }
         }
-        if (!name)
-            CvANON_on(cv);
+
         CvGV_set(cv, gv);
-        (void)gv_fetchfile(filename);
-        CvFILE(cv) = (char *)filename; /* NOTE: not copied, as it is expected to be
-                                    an external constant string */
-        assert(!CvDYNFILE(cv)); /* cv_undef should have turned it off */
+        if(filename) {
+            (void)gv_fetchfile(filename);
+            assert(!CvDYNFILE(cv)); /* cv_undef should have turned it off */
+            if (flags & XS_DYNAMIC_FILENAME) {
+                CvDYNFILE_on(cv);
+                CvFILE(cv) = savepv(filename);
+            } else {
+            /* NOTE: not copied, as it is expected to be an external constant string */
+                CvFILE(cv) = (char *)filename;
+            }
+        } else {
+            assert((flags & XS_DYNAMIC_FILENAME) == 0 && PL_xsubfilename);
+            CvFILE(cv) = (char*)PL_xsubfilename;
+        }
         CvISXSUB_on(cv);
         CvXSUB(cv) = subaddr;
 #ifndef PERL_IMPLICIT_CONTEXT
@@ -8870,15 +8905,14 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
 #else
         PoisonPADLIST(cv);
 #endif
-    
+
         if (name)
             process_special_blocks(0, name, gv, cv);
-    }
+        else
+            CvANON_on(cv);
+    } /* <- not a conditional branch */
 
-    if (flags & XS_DYNAMIC_FILENAME) {
-	CvFILE(cv) = savepv(filename);
-	CvDYNFILE_on(cv);
-    }
+
     sv_setpv(MUTABLE_SV(cv), proto);
     if (interleave) LEAVE;
     return cv;
@@ -8905,24 +8939,6 @@ Perl_newSTUB(pTHX_ GV *gv, bool fake)
     CvSTASH_set(cv, PL_curstash);
     GvMULTI_on(gv);
     return cv;
-}
-
-/*
-=for apidoc U||newXS
-
-Used by C<xsubpp> to hook up XSUBs as Perl subs.  I<filename> needs to be
-static storage, as it is used directly as CvFILE(), without a copy being made.
-
-=cut
-*/
-
-CV *
-Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
-{
-    PERL_ARGS_ASSERT_NEWXS;
-    return newXS_len_flags(
-	name, name ? strlen(name) : 0, subaddr, filename, NULL, NULL, 0
-    );
 }
 
 void

@@ -22,7 +22,7 @@
 
 /* disable version checking since DynaLoader can't be DynaLoaded */
 #undef dXSBOOTARGSXSAPIVERCHK
-#define dXSBOOTARGSXSAPIVERCHK dXSARGS
+#define dXSBOOTARGSXSAPIVERCHK dXSBOOTARGSNOVERCHK
 
 typedef struct {
     SV*		x_dl_last_error;	/* pointer to allocated memory for

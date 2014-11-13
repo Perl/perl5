@@ -3115,6 +3115,12 @@ PERL_CALLCONV CV*	Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const c
 #define PERL_ARGS_ASSERT_NEWXS	\
 	assert(subaddr); assert(filename)
 
+PERL_CALLCONV CV *	Perl_newXS_deffile(pTHX_ const char *name, XSUBADDR_t subaddr)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_NEWXS_DEFFILE	\
+	assert(name); assert(subaddr)
+
 PERL_CALLCONV CV *	Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr, const char *const filename, const char *const proto, U32 flags)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
@@ -3122,10 +3128,9 @@ PERL_CALLCONV CV *	Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr, 
 	assert(subaddr); assert(filename)
 
 PERL_CALLCONV CV *	Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len, XSUBADDR_t subaddr, const char *const filename, const char *const proto, SV **const_svp, U32 flags)
-			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_NEWXS_LEN_FLAGS	\
-	assert(subaddr); assert(filename)
+	assert(subaddr)
 
 PERL_CALLCONV void	Perl_new_collate(pTHX_ const char* newcoll);
 PERL_CALLCONV void	Perl_new_ctype(pTHX_ const char* newctype)
@@ -5161,10 +5166,11 @@ PERL_CALLCONV void	Perl_write_to_stderr(pTHX_ SV* msv)
 	assert(msv)
 
 PERL_CALLCONV void	Perl_xs_boot_epilog(pTHX_ const U32 ax);
-PERL_CALLCONV I32	Perl_xs_handshake(const U32 key, void * v_my_perl, ...)
-			__attribute__nonnull__(2);
+PERL_CALLCONV I32	Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
+			__attribute__nonnull__(2)
+			__attribute__nonnull__(3);
 #define PERL_ARGS_ASSERT_XS_HANDSHAKE	\
-	assert(v_my_perl)
+	assert(v_my_perl); assert(file)
 
 PERL_CALLCONV void	Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p, STRLEN xs_len)
 			__attribute__nonnull__(pTHX_3);

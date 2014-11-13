@@ -14608,6 +14608,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_incgv		= gv_dup_inc(proto_perl->Iincgv, param);
     PL_hintgv		= gv_dup_inc(proto_perl->Ihintgv, param);
     PL_origfilename	= SAVEPV(proto_perl->Iorigfilename);
+    PL_xsubfilename	= proto_perl->Ixsubfilename;
     PL_diehook		= sv_dup_inc(proto_perl->Idiehook, param);
     PL_warnhook		= sv_dup_inc(proto_perl->Iwarnhook, param);
 

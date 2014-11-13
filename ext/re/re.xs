@@ -11,7 +11,7 @@
 #undef dXSBOOTARGSXSAPIVERCHK
 /* skip API version checking due to different interp struct size but,
    this hack is until #123007 is resolved */
-#define dXSBOOTARGSXSAPIVERCHK dXSARGS
+#define dXSBOOTARGSXSAPIVERCHK dXSBOOTARGSNOVERCHK
 
 START_EXTERN_C
 

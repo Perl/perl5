@@ -797,12 +797,15 @@ EOF
 #
 EOF
 
-    $self->{newXS} = "newXS";
     $self->{proto} = "";
-
+    unless($self->{ProtoThisXSUB}) {
+      $self->{newXS} = "newXS_deffile";
+      $self->{file} = "";
+    }
+    else {
     # Build the prototype string for the xsub
-    if ($self->{ProtoThisXSUB}) {
       $self->{newXS} = "newXSproto_portable";
+      $self->{file} = ", file";
 
       if ($self->{ProtoThisXSUB} eq 2) {
         # User has specified empty prototype
@@ -831,14 +834,14 @@ EOF
       foreach my $xname (sort keys %{ $self->{XsubAliases} }) {
         my $value = $self->{XsubAliases}{$xname};
         push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
-#        cv = $self->{newXS}(\"$xname\", XS_$self->{Full_func_name}, file$self->{proto});
+#        cv = $self->{newXS}(\"$xname\", XS_$self->{Full_func_name}$self->{file}$self->{proto});
 #        XSANY.any_i32 = $value;
 EOF
       }
     }
     elsif (@{ $self->{Attributes} }) {
       push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
-#        cv = $self->{newXS}(\"$self->{pname}\", XS_$self->{Full_func_name}, file$self->{proto});
+#        cv = $self->{newXS}(\"$self->{pname}\", XS_$self->{Full_func_name}$self->{file}$self->{proto});
 #        apply_attrs_string("$self->{Package}", cv, "@{ $self->{Attributes} }", 0);
 EOF
     }
@@ -847,18 +850,18 @@ EOF
         my $value = $self->{Interfaces}{$yname};
         $yname = "$self->{Package}\::$yname" unless $yname =~ /::/;
         push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
-#        cv = $self->{newXS}(\"$yname\", XS_$self->{Full_func_name}, file$self->{proto});
+#        cv = $self->{newXS}(\"$yname\", XS_$self->{Full_func_name}$self->{file}$self->{proto});
 #        $self->{interface_macro_set}(cv,$value);
 EOF
       }
     }
-    elsif($self->{newXS} eq 'newXS'){ # work around P5NCI's empty newXS macro
+    elsif($self->{newXS} eq 'newXS_deffile'){ # work around P5NCI's empty newXS macro
       push(@{ $self->{InitFileCode} },
-       "        $self->{newXS}(\"$self->{pname}\", XS_$self->{Full_func_name}, file$self->{proto});\n");
+       "        $self->{newXS}(\"$self->{pname}\", XS_$self->{Full_func_name}$self->{file}$self->{proto});\n");
     }
     else {
       push(@{ $self->{InitFileCode} },
-       "        (void)$self->{newXS}(\"$self->{pname}\", XS_$self->{Full_func_name}, file$self->{proto});\n");
+       "        (void)$self->{newXS}(\"$self->{pname}\", XS_$self->{Full_func_name}$self->{file}$self->{proto});\n");
     }
   } # END 'PARAGRAPH' 'while' loop
 
@@ -876,7 +879,7 @@ EOF
     /* Making a sub named "$self->{Package}::()" allows the package */
     /* to be findable via fetchmethod(), and causes */
     /* overload::Overloaded("$self->{Package}") to return true. */
-    (void)$self->{newXS}("$self->{Package}::()", XS_$self->{Packid}_nil, file$self->{proto});
+    (void)$self->{newXS}("$self->{Package}::()", XS_$self->{Packid}_nil$self->{file}$self->{proto});
 MAKE_FETCHMETHOD_WORK
   }
 
@@ -1336,7 +1339,7 @@ sub OVERLOAD_handler {
       $self->{Overload} = 1 unless $self->{Overload};
       my $overload = "$self->{Package}\::(".$1;
       push(@{ $self->{InitFileCode} },
-       "        (void)$self->{newXS}(\"$overload\", XS_$self->{Full_func_name}, file$self->{proto});\n");
+       "        (void)$self->{newXS}(\"$overload\", XS_$self->{Full_func_name}$self->{file}$self->{proto});\n");
     }
   }
 }

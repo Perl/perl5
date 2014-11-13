@@ -549,11 +549,12 @@ copiable.
 (P) When starting a new thread or returning values from a thread, Perl
 encountered an invalid data type.
 
-=item BOOT:: Invalid handshake key got %X needed %X, binaries are mismatched
+=item %s: Invalid handshake key got %p needed %p, binaries are mismatched
 
 (P) A dynamic loading library C<.so> or C<.dll> was being loaded into the
 process that was built against a different build of perl than the said
-library was compiled against.
+library was compiled against. Reinstalling the XS module will likely fix this
+error.
 
 =item Buffer overflow in prime_env_iter: %s
 

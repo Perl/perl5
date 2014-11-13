@@ -989,9 +989,10 @@ Abm	|CV*	|newSUB		|I32 floor|NULLOK OP* o|NULLOK OP* proto \
 				|NULLOK OP* block
 p	|CV *	|newXS_len_flags|NULLOK const char *name|STRLEN len \
 				|NN XSUBADDR_t subaddr\
-				|NN const char *const filename \
+				|NULLOK const char *const filename \
 				|NULLOK const char *const proto \
 				|NULLOK SV **const_svp|U32 flags
+pX	|CV *	|newXS_deffile	|NN const char *name|NN XSUBADDR_t subaddr
 ApM	|CV *	|newXS_flags	|NULLOK const char *name|NN XSUBADDR_t subaddr\
 				|NN const char *const filename \
 				|NULLOK const char *const proto|U32 flags
@@ -2696,7 +2697,8 @@ Apo	|void*	|my_cxt_init	|NN int *index|size_t size
 : XS_VERSION_BOOTCHECK
 Xpo	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
 				|STRLEN xs_len
-Xpon	|I32	|xs_handshake	|const U32 key|NN void * v_my_perl|...
+Xpon	|I32	|xs_handshake	|const U32 key|NN void * v_my_perl\
+				|NN const char * file| ...
 Xp	|void	|xs_boot_epilog	|const U32 ax
 #ifndef HAS_STRLCAT
 Apnod	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
