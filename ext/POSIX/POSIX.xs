@@ -401,18 +401,6 @@
 #  endif
 #endif
 
-/* If on legacy platforms, and not using gcc, some C99 math interfaces
- * might be missing, turn them off so that the emulations hopefully
- * kick in.  This is admittedly nasty, and fragile, but the alternative
- * is to have Configure scans for all the 40+ interfaces.
- *
- * In other words: if you have an incomplete (or broken) C99 math interface,
- * #undef the c99_foo here, and let the emulations kick in. */
-
-#ifndef __GNUC__
-
-#endif
-
 /* XXX Regarding C99 math.h, Win32 seems to be missing these:
 
   erf erfc exp2 fdim fma fmax fmin fpclassify ilogb lgamma log1p log2 lrint
