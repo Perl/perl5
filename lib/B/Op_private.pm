@@ -31,11 +31,12 @@ B::Op_private -  OP op_private flag definitions
 
 =head1 DESCRIPTION
 
-This module provides three global hashes:
+This module provides four global hashes:
 
     %B::Op_private::bits
     %B::Op_private::defines
     %B::Op_private::labels
+    %B::Op_private::ops_using
 
 which contain information about the per-op meanings of the bits in the
 op_private field.
@@ -102,6 +103,13 @@ and C<perl -Dx>, e.g.
 
 If the label equals '-', then Concise will treat the bit as a raw bit and
 not try to display it symbolically.
+
+=head2 C<%ops_using>
+
+For each define, this gives a reference to an array of op names that use
+the flag.
+
+    @ops_using_lvintro = @{ $B::Op_private::ops_using{OPp_LVAL_INTRO} };
 
 =cut
 
@@ -721,5 +729,87 @@ our %labels = (
     OPpTRANS_TO_UTF          => '>UTF',
     OPpTRUEBOOL              => 'BOOL',
 );
+
+
+our %ops_using = (
+    OPpALLOW_FAKE            => [qw(rv2gv)],
+    OPpASSIGN_BACKWARDS      => [qw(sassign)],
+    OPpASSIGN_COMMON         => [qw(aassign)],
+    OPpCONST_BARE            => [qw(const)],
+    OPpCOREARGS_DEREF1       => [qw(coreargs)],
+    OPpEARLY_CV              => [qw(gv)],
+    OPpENTERSUB_AMPER        => [qw(entersub rv2cv)],
+    OPpENTERSUB_INARGS       => [qw(entersub)],
+    OPpENTERSUB_NOPAREN      => [qw(rv2cv)],
+    OPpEVAL_BYTES            => [qw(entereval)],
+    OPpEXISTS_SUB            => [qw(exists)],
+    OPpFLIP_LINENUM          => [qw(flip flop)],
+    OPpFT_ACCESS             => [qw(fteexec fteread ftewrite ftrexec ftrread ftrwrite)],
+    OPpFT_AFTER_t            => [qw(ftatime ftbinary ftblk ftchr ftctime ftdir fteexec fteowned fteread ftewrite ftfile ftis ftlink ftmtime ftpipe ftrexec ftrowned ftrread ftrwrite ftsgid ftsize ftsock ftsuid ftsvtx fttext fttty ftzero)],
+    OPpGREP_LEX              => [qw(grepstart grepwhile mapstart mapwhile)],
+    OPpHINT_STRICT_REFS      => [qw(entersub rv2av rv2cv rv2gv rv2hv rv2sv)],
+    OPpHUSH_VMSISH           => [qw(dbstate nextstate)],
+    OPpITER_DEF              => [qw(enteriter)],
+    OPpITER_REVERSED         => [qw(enteriter iter)],
+    OPpLIST_GUESSED          => [qw(list)],
+    OPpLVALUE                => [qw(leave leaveloop)],
+    OPpLVAL_DEFER            => [qw(aelem helem)],
+    OPpLVAL_INTRO            => [qw(aelem aslice cond_expr delete enteriter entersub gvsv helem hslice list lvavref lvref lvrefslice padav padhv padrange padsv pushmark refassign rv2av rv2gv rv2hv rv2sv)],
+    OPpLVREF_ELEM            => [qw(lvref refassign)],
+    OPpMAYBE_LVSUB           => [qw(aassign aelem aslice av2arylen helem hslice keys kvaslice kvhslice padav padhv pos rkeys rv2av rv2gv rv2hv substr vec)],
+    OPpMAYBE_TRUEBOOL        => [qw(padhv rv2hv)],
+    OPpOFFBYONE              => [qw(caller runcv wantarray)],
+    OPpOPEN_IN_CRLF          => [qw(backtick open)],
+    OPpOUR_INTRO             => [qw(enteriter gvsv rv2av rv2hv rv2sv split)],
+    OPpPAD_STATE             => [qw(lvavref lvref padav padhv padsv pushmark refassign)],
+    OPpPV_IS_UTF8            => [qw(dump goto last next redo)],
+    OPpREFCOUNTED            => [qw(leave leaveeval leavesub leavesublv leavewrite)],
+    OPpREPEAT_DOLIST         => [qw(repeat)],
+    OPpREVERSE_INPLACE       => [qw(reverse)],
+    OPpRUNTIME               => [qw(match pushre qr subst substcont)],
+    OPpSLICE                 => [qw(delete)],
+    OPpSLICEWARNING          => [qw(aslice hslice padav padhv rv2av rv2hv)],
+    OPpSORT_DESCEND          => [qw(sort)],
+    OPpSPLIT_IMPLIM          => [qw(split)],
+    OPpSUBSTR_REPL_FIRST     => [qw(substr)],
+    OPpTARGET_MY             => [qw(abs add atan2 chdir chmod chomp chown chr chroot concat cos crypt divide exec exp flock getpgrp getppid getpriority hex i_add i_divide i_modulo i_multiply i_subtract index int kill left_shift length link log match mkdir modulo multiply oct ord pow push rand rename repeat right_shift rindex rmdir schomp setpgrp setpriority sin sleep split sqrt srand stringify subst subtract symlink system time trans transr unlink unshift utime vec wait waitpid)],
+    OPpTRANS_COMPLEMENT      => [qw(trans transr)],
+);
+
+$ops_using{OPpASSIGN_CV_TO_GV} = $ops_using{OPpASSIGN_BACKWARDS};
+$ops_using{OPpCONST_ENTERED} = $ops_using{OPpCONST_BARE};
+$ops_using{OPpCONST_NOVER} = $ops_using{OPpCONST_BARE};
+$ops_using{OPpCONST_SHORTCIRCUIT} = $ops_using{OPpCONST_BARE};
+$ops_using{OPpCONST_STRICT} = $ops_using{OPpCONST_BARE};
+$ops_using{OPpCOREARGS_DEREF2} = $ops_using{OPpCOREARGS_DEREF1};
+$ops_using{OPpCOREARGS_PUSHMARK} = $ops_using{OPpCOREARGS_DEREF1};
+$ops_using{OPpCOREARGS_SCALARMOD} = $ops_using{OPpCOREARGS_DEREF1};
+$ops_using{OPpDONT_INIT_GV} = $ops_using{OPpALLOW_FAKE};
+$ops_using{OPpENTERSUB_DB} = $ops_using{OPpENTERSUB_AMPER};
+$ops_using{OPpENTERSUB_HASTARG} = $ops_using{OPpENTERSUB_AMPER};
+$ops_using{OPpEVAL_COPHH} = $ops_using{OPpEVAL_BYTES};
+$ops_using{OPpEVAL_HAS_HH} = $ops_using{OPpEVAL_BYTES};
+$ops_using{OPpEVAL_RE_REPARSING} = $ops_using{OPpEVAL_BYTES};
+$ops_using{OPpEVAL_UNICODE} = $ops_using{OPpEVAL_BYTES};
+$ops_using{OPpFT_STACKED} = $ops_using{OPpFT_AFTER_t};
+$ops_using{OPpFT_STACKING} = $ops_using{OPpFT_AFTER_t};
+$ops_using{OPpLVREF_ITER} = $ops_using{OPpLVREF_ELEM};
+$ops_using{OPpMAY_RETURN_CONSTANT} = $ops_using{OPpENTERSUB_NOPAREN};
+$ops_using{OPpOPEN_IN_RAW} = $ops_using{OPpOPEN_IN_CRLF};
+$ops_using{OPpOPEN_OUT_CRLF} = $ops_using{OPpOPEN_IN_CRLF};
+$ops_using{OPpOPEN_OUT_RAW} = $ops_using{OPpOPEN_IN_CRLF};
+$ops_using{OPpSORT_INPLACE} = $ops_using{OPpSORT_DESCEND};
+$ops_using{OPpSORT_INTEGER} = $ops_using{OPpSORT_DESCEND};
+$ops_using{OPpSORT_NUMERIC} = $ops_using{OPpSORT_DESCEND};
+$ops_using{OPpSORT_QSORT} = $ops_using{OPpSORT_DESCEND};
+$ops_using{OPpSORT_REVERSE} = $ops_using{OPpSORT_DESCEND};
+$ops_using{OPpSORT_STABLE} = $ops_using{OPpSORT_DESCEND};
+$ops_using{OPpTRANS_DELETE} = $ops_using{OPpTRANS_COMPLEMENT};
+$ops_using{OPpTRANS_FROM_UTF} = $ops_using{OPpTRANS_COMPLEMENT};
+$ops_using{OPpTRANS_GROWS} = $ops_using{OPpTRANS_COMPLEMENT};
+$ops_using{OPpTRANS_IDENTICAL} = $ops_using{OPpTRANS_COMPLEMENT};
+$ops_using{OPpTRANS_SQUASH} = $ops_using{OPpTRANS_COMPLEMENT};
+$ops_using{OPpTRANS_TO_UTF} = $ops_using{OPpTRANS_COMPLEMENT};
+$ops_using{OPpTRUEBOOL} = $ops_using{OPpMAYBE_TRUEBOOL};
 
 # ex: set ro:

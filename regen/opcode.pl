@@ -409,11 +409,12 @@ sub print_B_Op_private {
 @
 @=head1 DESCRIPTION
 @
-@This module provides three global hashes:
+@This module provides four global hashes:
 @
 @    %B::Op_private::bits
 @    %B::Op_private::defines
 @    %B::Op_private::labels
+@    %B::Op_private::ops_using
 @
 @which contain information about the per-op meanings of the bits in the
 @op_private field.
@@ -481,6 +482,13 @@ sub print_B_Op_private {
 @If the label equals '-', then Concise will treat the bit as a raw bit and
 @not try to display it symbolically.
 @
+@=head2 C<%ops_using>
+@
+@For each define, this gives a reference to an array of op names that use
+@the flag.
+@
+@    @ops_using_lvintro = @{ $B::Op_private::ops_using{OPp_LVAL_INTRO} };
+@
 @=cut
 
 package B::Op_private;
@@ -494,6 +502,8 @@ EOF
     my $v = (::perl_version())[3];
     print $fh qq{\nour \$VERSION = "$v";\n\n};
 
+    my %ops_using;
+
     # for each flag/bit combination, find the ops which use it
     my %combos;
     for my $op (sort keys %FLAGS) {
@@ -503,6 +513,7 @@ EOF
             next unless defined $e;
             next if ref $e; # bit field, not flag
             push @{$combos{$e}{$bit}}, $op;
+            push @{$ops_using{$e}}, $op;
         }
     }
 
@@ -605,6 +616,24 @@ EOF
     print  $fh ");\n\nour %labels = (\n";
     printf $fh "    %-23s  => '%s',\n", $_ , $LABELS{$_}  for sort keys %LABELS;
     print  $fh ");\n";
+
+    # %ops_using
+    print  $fh "\n\nour %ops_using = (\n";
+    # Save memory by using the same array wherever possible.
+    my %flag_by_op_list;
+    my $pending = '';
+    for my $flag (sort keys %ops_using) {
+        my $op_list = $ops_using{$flag} = "@{$ops_using{$flag}}";
+        if (!exists $flag_by_op_list{$op_list}) {
+            $flag_by_op_list{$op_list} = $flag;
+            printf $fh "    %-23s  => %s,\n", $flag , "[qw($op_list)]"
+        }
+        else {
+            $pending .= "\$ops_using{$flag} = "
+                      . "\$ops_using{$flag_by_op_list{$op_list}};\n";
+        }
+    }
+    print  $fh ");\n\n$pending";
 
 }
 
