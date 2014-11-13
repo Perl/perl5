@@ -77,9 +77,6 @@ SKIP: {
     is(fmax(12, 34), 34, "fmax 12 34");
     is(fmin(12, 34), 12, "fmin 12 34");
   SKIP: {
-      unless ($Config{d_fpclassify}) {
-          skip "no fpclassify", 4;
-      }
       is(fpclassify(1), FP_NORMAL, "fpclassify 1");
       is(fpclassify(0), FP_ZERO, "fpclassify 0");
       is(fpclassify(INFINITY), FP_INFINITE, "fpclassify INFINITY");
