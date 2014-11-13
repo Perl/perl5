@@ -8588,7 +8588,9 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
  *
  *      Because all ASCII characters have the same representation whether
  *      encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
- *      '{' without knowing if is UTF-8 or not */
+ *      '{' without knowing if is UTF-8 or not.
+ * EBCDIC already uses the rules that ASCII platforms will use after the
+ * deprecation cycle; see comment below about the deprecation. */
 #ifdef EBCDIC
 #   define VALID_LEN_ONE_IDENT(s, is_utf8)                                    \
     (isGRAPH_A(*(s)) || ((is_utf8)                                            \
