@@ -557,8 +557,20 @@ case "$ccflags" in
  ;;
 esac
 
-# nan is in libm, but seems broken (there is no proto, either)
+# These are in libm, but seem broken (there are no protos in headers,
+# or man pages, either)
+d_fdim='undef'
+d_fma='undef'
+d_fmax='undef'
+d_fmin='undef'
+d_llrint='undef'
+d_llround='undef'
+d_lrint='undef'
+d_lround='undef'
 d_nan='undef'
+d_nearbyint='undef'
+d_round='undef'
+d_scalbn='undef'
 
 #
 # Unset temporary variables no more needed.
