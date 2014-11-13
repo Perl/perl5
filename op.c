@@ -12741,7 +12741,9 @@ Perl_rpeep(pTHX_ OP *o)
 	    break;
 
 	case OP_RUNCV:
-	    if (!(o->op_private & OPpOFFBYONE) && !CvCLONE(PL_compcv)) {
+	    if (!(o->op_private & OPpOFFBYONE) && !CvCLONE(PL_compcv)
+	     && (!CvANON(PL_compcv) || (!PL_cv_has_eval && !PL_perldb)))
+	    {
 		SV *sv;
 		if (CvEVAL(PL_compcv)) sv = &PL_sv_undef;
 		else {
