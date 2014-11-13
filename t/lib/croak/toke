@@ -1,4 +1,24 @@
 __END__
+# NAME foo found where operator expected
+myfunc 1,2,3
+EXPECT
+Number found where operator expected at - line 1, near "myfunc 1"
+	(Do you need to predeclare myfunc?)
+syntax error at - line 1, near "myfunc 1"
+Execution of - aborted due to compilation errors.
+########
+# NAME foo found where operator expected (after strict error, w/fatal warnings)
+use warnings FATAL => 'all';
+use strict;
+$foo;
+myfunc 1,2,3
+EXPECT
+Global symbol "$foo" requires explicit package name (did you forget to declare "my $foo"?) at - line 3.
+Number found where operator expected at - line 4, near "myfunc 1"
+	(Do you need to predeclare myfunc?)
+syntax error at - line 4, near "myfunc 1"
+Execution of - aborted due to compilation errors.
+########
 # NAME Unterminated here-doc in string eval
 eval "<<foo"; die $@
 EXPECT

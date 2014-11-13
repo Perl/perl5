@@ -10557,7 +10557,6 @@ S_yywarn(pTHX_ const char *const s, U32 flags)
 
     PL_in_eval |= EVAL_WARNONLY;
     yyerror_pv(s, flags);
-    PL_in_eval &= ~EVAL_WARNONLY;
     return 0;
 }
 
@@ -10661,6 +10660,7 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
         PL_multi_end = 0;
     }
     if (PL_in_eval & EVAL_WARNONLY) {
+	PL_in_eval &= ~EVAL_WARNONLY;
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX), "%"SVf, SVfARG(msg));
     }
     else
