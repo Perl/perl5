@@ -346,6 +346,12 @@ opening C</dev/null>, which works the Win32 Perl's normal C<:unix> layer, was
 implemented for C<:win32>.
 L<[perl #122224]|https://rt.perl.org/Ticket/Display.html?id=122224>
 
+=item *
+
+A new makefile option, C<USE_LONG_DOUBLE>, has been added to the Windows
+dmake makefile for gcc builds only.  Set this to "define" if you want perl to
+use long doubles to give more accuracy and range for floating point numbers.
+
 =back
 
 =head1 Internal Changes
