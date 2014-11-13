@@ -549,13 +549,6 @@ copiable.
 (P) When starting a new thread or returning values from a thread, Perl
 encountered an invalid data type.
 
-=item %s: Invalid handshake key got %p needed %p, binaries are mismatched
-
-(P) A dynamic loading library C<.so> or C<.dll> was being loaded into the
-process that was built against a different build of perl than the said
-library was compiled against. Reinstalling the XS module will likely fix this
-error.
-
 =item Buffer overflow in prime_env_iter: %s
 
 (W internal) A warning peculiar to VMS.  While Perl was preparing to
@@ -2708,6 +2701,13 @@ The escape was replaced with REPLACEMENT CHARACTER (U+FFFD)
 instead, except within S<C<(?[   ])>>, where it is a fatal error.
 The S<<-- HERE> shows whereabouts in the regular expression the
 escape was discovered.
+
+=item %s: Invalid handshake key got %p needed %p, binaries are mismatched
+
+(P) A dynamic loading library C<.so> or C<.dll> was being loaded into the
+process that was built against a different build of perl than the
+said library was compiled against.  Reinstalling the XS module will
+likely fix this error.
 
 =item Invalid hexadecimal number in \N{U+...}
 
