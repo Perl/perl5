@@ -87,26 +87,18 @@ SKIP: {
     is(ilogb(255), 7, "ilogb 255");
     is(ilogb(256), 8, "ilogb 256");
   SKIP: {
-      unless ($Config{d_isfinite}) {
-          skip "no isfinite", 3;
-      }
+      skip "no isfinite", 3;
       ok(isfinite(1), "isfinite 1");
       ok(!isfinite(Inf), "isfinite Inf");
       ok(!isfinite(NaN), "isfinite NaN");
     }
   SKIP: {
-      unless ($Config{d_isinf}) {
-          skip "no isinf", 4;
-      }
       ok(isinf(INFINITY), "isinf INFINITY");
       ok(isinf(Inf), "isinf Inf");
       ok(!isinf(NaN), "isinf NaN");
       ok(!isinf(42), "isinf 42");
     }
   SKIP: {
-      unless ($Config{d_isnan}) {
-          skip "no isnan", 4;
-      }
       ok(isnan(NAN), "isnan NAN");
       ok(isnan(NaN), "isnan NaN");
       ok(!isnan(Inf), "isnan Inf");
