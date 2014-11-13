@@ -331,12 +331,12 @@
 #    define c99_log1p	log1p
 #    define c99_log2	log2
 #    define c99_logb	logb
-#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
+#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLRINT)
 #      define c99_lrint	llrint
 #    else
 #      define c99_lrint	lrint
 #    endif
-#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
+#    if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLROUND)
 #      define c99_lround	llround
 #    else
 #      define c99_lround	lround
