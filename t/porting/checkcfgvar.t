@@ -32,4 +32,4 @@ if ( $Config{usecrosscompile} ) {
   skip_all( "Not all files are available during cross-compilation" );
 }
 
-system "$^X Porting/checkcfgvar.pl --tap";
+system "$^X -Ilib Porting/checkcfgvar.pl --tap";
