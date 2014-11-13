@@ -557,6 +557,9 @@ case "$ccflags" in
  ;;
 esac
 
+# nan is in libm, but seems broken (there is no proto, either)
+d_nan='undef'
+
 #
 # Unset temporary variables no more needed.
 #

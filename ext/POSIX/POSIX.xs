@@ -411,25 +411,6 @@
 
 #ifndef __GNUC__
 
-#  if defined(__osf__) /* Tru64 */
-#    undef c99_fdim
-#    undef c99_fma
-#    undef c99_fmax
-#    undef c99_fmin
-#    undef c99_fpclassify
-#    undef c99_isfinite
-#    undef c99_isinf
-/* Tru64 is missing isunordered but we have emulation. */
-#    undef c99_lrint
-#    undef c99_lround
-#    undef c99_nan /* in libm, but seems broken (no proto, either) */
-#    undef c99_nearbyint
-#    undef c99_nexttoward
-#    undef c99_remquo
-#    undef c99_round
-#    undef c99_scalbn
-#  endif
-
 #endif
 
 /* XXX Regarding C99 math.h, Win32 seems to be missing these:
