@@ -3061,10 +3061,7 @@ my %uses_intro;
 BEGIN {
     @uses_intro{
 	eval { require B::Op_private }
-	  ? grep +($B::Op_private::bits{$_}{log(OPpLVAL_INTRO) / log 2}
-			||'')
-		    eq 'OPpLVAL_INTRO',
-		 keys %B::Op_private::bits
+	  ? @{$B::Op_private::ops_using{OPpLVAL_INTRO}}
 	  : qw(gvsv rv2sv rv2hv rv2gv rv2av aelem helem aslice
 	       hslice delete padsv padav padhv enteriter entersub padrange
 	       pushmark cond_expr refassign list)
