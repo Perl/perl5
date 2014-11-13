@@ -117,9 +117,6 @@ SKIP: {
     cmp_ok(abs(log1p(1e-6) - 9.99999500000333e-07), '<', 1e-9, "log1p");
     cmp_ok(abs(log2(8) - 3), '<', 1e-9, "log2");
   SKIP: {
-      unless ($Config{d_signbit}) {
-          skip "no signbit", 2;
-      }
       is(signbit(2), 0, "signbit 2"); # zero
       ok(signbit(-2), "signbit -2"); # non-zero
     }

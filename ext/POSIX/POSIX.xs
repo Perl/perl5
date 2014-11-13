@@ -2278,6 +2278,8 @@ fpclassify(x)
 	default:
 #ifdef Perl_signbit
 	    RETVAL = Perl_signbit(x);
+#else
+	    RETVAL = (x < 0) || (x == -0.0);
 #endif
 	    break;
 	}
