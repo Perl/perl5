@@ -509,42 +509,7 @@
 #  undef c99_trunc
 #endif
 
-/* XXX Regarding C99 math.h, Win32 seems to be missing these:
-
-  erf erfc exp2 fdim fma fmax fmin fpclassify ilogb lgamma log1p log2 lrint
-  remquo rint signbit tgamma trunc
-
-  Win32 does seem to have these:
-
-  acosh asinh atanh cbrt copysign expm1 hypot nan
-  nearbyint nextafter nexttoward remainder round scalbn
-
-  Win32 also has these additional math functions:
-
-  log10
-
-  And the Bessel functions are defined like _this.
-*/
-
 #ifdef WIN32
-#  undef c99_erf
-#  undef c99_erfc
-#  undef c99_exp2
-#  undef c99_fdim
-#  undef c99_fma
-#  undef c99_fmax
-#  undef c99_fmin
-#  undef c99_ilogb
-#  undef c99_lgamma
-#  undef c99_log1p
-#  undef c99_log2
-#  undef c99_lrint
-#  undef c99_lround
-#  undef c99_remquo
-#  undef c99_rint
-#  undef c99_signbit
-#  undef c99_tgamma
-#  undef c99_trunc
 
 /* Some APIs exist under Win32 with "underbar" names. */
 #  undef c99_hypot
