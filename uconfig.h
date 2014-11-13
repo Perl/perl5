@@ -321,6 +321,33 @@
  */
 /*#define HAS_MUNMAP		/ **/
 
+/* HAS_NAN:
+ *	This symbol, if defined, indicates that the nan routine is
+ *	available to generate NaN.
+ */
+/*#define HAS_NAN		/ **/
+
+/* HAS_NEARBYINT:
+ *	This symbol, if defined, indicates that the nextafter routine is
+ *	available to return the integral value closest to (according to
+	the current rounding mode) to x.
+ */
+/*#define HAS_NEARBYINT		/ **/
+
+/* HAS_NEXTAFTER:
+ *	This symbol, if defined, indicates that the nextafter routine is
+ *	available to return the next machine representable long double from
+ *	x in direction y.
+ */
+/*#define HAS_NEXTAFTER		/ **/
+
+/* HAS_NEXTTOWARD:
+ *	This symbol, if defined, indicates that the nexttoward routine is
+ *	available to return the next machine representable long double from
+ *	x in direction y.
+ */
+/*#define HAS_NEXTTOWARD		/ **/
+
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
  *	available.
@@ -390,6 +417,16 @@
  */
 /*#define HAS_READLINK		/ **/
 
+/* HAS_REMAINDER:
+ *	This symbol, if defined, indicates that the remainder routine is available.
+ */
+/*#define HAS_REMAINDER	/ **/
+
+/* HAS_REMQUO:
+ *	This symbol, if defined, indicates that the remquo routine is available.
+ */
+/*#define HAS_REMQUO	/ **/
+
 /* HAS_RENAME:
  *	This symbol, if defined, indicates that the rename routine is available
  *	to rename files.  Otherwise you should do the unlink(), link(), unlink()
@@ -397,12 +434,24 @@
  */
 #define HAS_RENAME	/**/
 
+/* HAS_RINT:
+ *	This symbol, if defined, indicates that the rint routine is available
+ *	to return the nearest integral value to x as double using the current
+ *	rounding mode.
+ */
+/*#define HAS_RINT	/ **/
+
 /* HAS_RMDIR:
  *	This symbol, if defined, indicates that the rmdir routine is
  *	available to remove directories. Otherwise you should fork off a
  *	new process to exec /bin/rmdir.
  */
 /*#define HAS_RMDIR		/ **/
+
+/* HAS_ROUND:
+ *	This symbol, if defined, indicates that the round routine is available.
+ */
+/*#define HAS_ROUND	/ **/
 
 /* HAS_SELECT:
  *	This symbol, if defined, indicates that the select routine is
@@ -576,6 +625,12 @@
  *	available to set foreground process group ID.
  */
 /*#define HAS_TCSETPGRP		/ **/
+
+/* HAS_TGAMMA:
+ *	This symbol, if defined, indicates that the lgamma routine is
+ *	available to do the gamma function.  See also HAS_LGAMMA.
+ */
+/*#define HAS_TGAMMA		/ **/
 
 /* HAS_TRUNCATE:
  *	This symbol, if defined, indicates that the truncate routine is
@@ -3418,6 +3473,78 @@
  */
 /*#define HAS_ACOSH		/ **/
 
+/* HAS_ASINH:
+ *	This symbol, if defined, indicates that the asinh routine is
+ *	available to do the inverse hyperbolic sine function.
+ */
+/*#define HAS_ASINH		/ **/
+
+/* HAS_ATANH:
+ *	This symbol, if defined, indicates that the atanh routine is
+ *	available to do the inverse hyperbolic tangent function.
+ */
+/*#define HAS_ATANH		/ **/
+
+/* HAS_CBRT:
+ *	This symbol, if defined, indicates that the cbrt routine is
+ *	available to do the cubic root function.
+ */
+/*#define HAS_CBRT		/ **/
+
+/* HAS_COPYSIGN:
+ *	This symbol, if defined, indicates that the copysign routine is
+ *	available to do the copysign function.
+ */
+/*#define HAS_COPYSIGN		/ **/
+
+/* HAS_ERF:
+ *	This symbol, if defined, indicates that the erf routine is
+ *	available to do the error function.
+ */
+/*#define HAS_ERF		/ **/
+
+/* HAS_ERFC:
+ *	This symbol, if defined, indicates that the erfc routine is
+ *	available to do the complementary error function.
+ */
+/*#define HAS_ERFC		/ **/
+
+/* HAS_EXP2:
+ *	This symbol, if defined, indicates that the exp2 routine is
+ *	available to do the 2**x function.
+ */
+/*#define HAS_EXP2		/ **/
+
+/* HAS_EXPM1:
+ *	This symbol, if defined, indicates that the expm1 routine is
+ *	available to do the exp(x) - 1 when x is near 1.
+ */
+/*#define HAS_EXPM1		/ **/
+
+/* HAS_FMA:
+ *	This symbol, if defined, indicates that the fma routine is
+ *	available to do the multiply-add function.
+ */
+/*#define HAS_FMA		/ **/
+
+/* HAS_FDIM:
+ *	This symbol, if defined, indicates that the fdim routine is
+ *	available to do the positive difference function.
+ */
+/*#define HAS_FDIM		/ **/
+
+/* HAS_FMAX:
+ *	This symbol, if defined, indicates that the fma routine is
+ *	available to do the maximum function.
+ */
+/*#define HAS_FMAX		/ **/
+
+/* HAS_FMIN:
+ *	This symbol, if defined, indicates that the fma routine is
+ *	available to do the minimum function.
+ */
+/*#define HAS_FMIN		/ **/
+
 /* HAS_AINTL:
  *	This symbol, if defined, indicates that the aintl routine is
  *	available.  If copysignl is also present we can emulate modfl.
@@ -3764,6 +3891,18 @@
  */
 /*#define HAS_HASMNTOPT		/ **/
 
+/* HAS_HYPOT:
+ *	This symbol, if defined, indicates that the hypot routine is
+ *	available to do the hypotenuse function.
+ */
+/*#define HAS_HYPOT		/ **/
+
+/* HAS_ILOGB:
+ *	This symbol, if defined, indicates that the ilogb routine is
+ *	available.
+ */
+/*#define HAS_ILOGB		/ **/
+
 /* HAS_ILOGBL:
  *	This symbol, if defined, indicates that the ilogbl routine is
  *	available.  If scalbnl is also present we can emulate frexpl.
@@ -3832,6 +3971,12 @@
  */
 /*#define HAS_ISNANL		/ **/
 
+/* HAS_ISNORMAL:
+ *	This symbol, if defined, indicates that the isnormal routine is
+ *	available to check whether a double is normal (non-zero normalized).
+ */
+/*#define HAS_ISNORMAL		/ **/
+
 /* HAS_J0:
  *	This symbol, if defined, indicates to the C program that the
  *	j0() function is available for Bessel functions of the first
@@ -3853,11 +3998,69 @@
  */
 /*#define HAS_LDBL_DIG 	/ * */
 
+/* HAS_LGAMMA:
+ *	This symbol, if defined, indicates that the lgamma routine is
+ *	available to do the log gamma function.  See also HAS_TGAMMA and
+ *	HAS_LGAMMA_R.
+ */
+/*#define HAS_LGAMMA		/ **/
+
+/* HAS_LGAMMA_R:
+ *	This symbol, if defined, indicates that the lgamma_r routine is
+ *	available to do the log gamma function without using the global
+ *	signgam variable.
+ */
+/*#define HAS_LGAMMA_R		/ **/
+
 /* LIBM_LIB_VERSION:
  *	This symbol, if defined, indicates that libm exports _LIB_VERSION
  *	and that math.h defines the enum to manipulate it.
  */
 /*#define LIBM_LIB_VERSION		/ **/
+
+/* HAS_LLRINT:
+ *	This symbol, if defined, indicates that the llrint routine is
+ *	available to return the closest long long value according to
+ *	the current rounding mode.
+ */
+/*#define HAS_LLRINT		/ **/
+
+/* HAS_LLROUND:
+ *	This symbol, if defined, indicates that the llround routine is
+ *	available to return the nearest long long value.
+ */
+/*#define HAS_LLROUND		/ **/
+
+/* HAS_LOG1P:
+ *	This symbol, if defined, indicates that the lgamma routine is
+ *	available to do the log1p function.
+ */
+/*#define HAS_LOG1P		/ **/
+
+/* HAS_LOG2:
+ *	This symbol, if defined, indicates that the lgamma routine is
+ *	available to do the log2 function.
+ */
+/*#define HAS_LOG2		/ **/
+
+/* HAS_LOGB:
+ *	This symbol, if defined, indicates that the lgamma routine is
+ *	available to do the logb function.
+ */
+/*#define HAS_LOGB		/ **/
+
+/* HAS_LRINT:
+ *	This symbol, if defined, indicates that the lrint routine is
+ *	available to return the closest integral value according to
+ *	the current rounding mode.
+ */
+/*#define HAS_LRINT		/ **/
+
+/* HAS_LROUND:
+ *	This symbol, if defined, indicates that the lround routine is
+ *	available to return the nearest integral value.
+ */
+/*#define HAS_LROUND		/ **/
 
 /* HAS_MADVISE:
  *	This symbol, if defined, indicates that the madvise system call is
@@ -3995,6 +4198,11 @@
  *		extern void* sbrk(size_t);
  */
 /*#define	HAS_SBRK_PROTO	/ **/
+
+/* HAS_SCALBN:
+ *	This symbol, if defined, indicates that the scalbn routine is available.
+ */
+/*#define HAS_SCALBN		/ **/
 
 /* HAS_SCALBNL:
  *	This symbol, if defined, indicates that the scalbnl routine is
@@ -4230,6 +4438,11 @@
  *	available to do the opposite of gmtime ()
  */
 /*#define HAS_TIMEGM		/ **/
+
+/* HAS_TRUNC:
+ *	This symbol, if defined, indicates that the trunc routine is available.
+ */
+/*#define HAS_TRUNC		/ **/
 
 /* HAS_TRUNCL:
  *	This symbol, if defined, indicates that the truncl routine is
@@ -4896,6 +5109,6 @@
 #endif
 
 /* Generated from:
- * 9483a1912f38fc41115354e0405334a5c08e7c3f0e83b506b908e9111df2b961 config_h.SH
- * 141d5cd6c8f9074f7d171b61583becedadab81b8ef0b12a8fbda7eb14da72ed6 uconfig.sh
+ * 7c85f69913f492fecfaef3ab68fba849dc01a6b917c88c66991f06fa1ef53797 config_h.SH
+ * 22822d456ad16d8f6b30a42bfa66aab6d7b264993ad6c95ecbf385c3a87c8826 uconfig.sh
  * ex: set ro: */
