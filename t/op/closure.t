@@ -671,20 +671,6 @@ $r = \$x
 	 "don't copy a stale lexical; create a fresh undef one instead");
 }
 
-# [perl #63540] Don’t treat sub { if(){.....}; "constant" } as a constant
-
-BEGIN {
-  my $x = 7;
-  *baz = sub() { if($x){ () = "tralala"; blonk() }; 0 }
-}
-{
-  my $blonk_was_called;
-  *blonk = sub { ++$blonk_was_called };
-  my $ret = baz();
-  is($ret, 0, 'RT #63540');
-  is($blonk_was_called, 1, 'RT #63540');
-}
-
 # test PL_cv_has_eval.  Any anon sub that could conceivably contain an
 # eval, should be marked as cloneable
 

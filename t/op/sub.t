@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan( tests => 38 );
+plan( tests => 35 );
 
 sub empty_sub {}
 
@@ -146,31 +146,6 @@ is eval {
     eval "Crunchy"; # test that freeing this op does not turn off PADTMP
     Munchy(Crunchy);
 } || $@, 2, 'freeing ops does not make sub(){42} immutable';
-
-# [perl #79908]
-{
-    my $x = 5;
-    *_79908 = sub (){$x};
-    $x = 7;
-    TODO: {
-        local $TODO = "Should be fixed with a deprecation cycle, see 'How about having a recommended way to add constant subs dynamically?' on p5p";
-        is eval "_79908", 7, 'sub(){$x} does not break closures';
-    }
-    isnt eval '\_79908', \$x, 'sub(){$x} returns a copy';
-
-    # Test another thing that was broken by $x inlinement
-    my $y;
-    no warnings 'once';
-    local *time = sub():method{$y};
-    my $w;
-    local $SIG{__WARN__} = sub { $w .= shift };
-    eval "()=time";
-    TODO: {
-        local $TODO = "Should be fixed with a deprecation cycle, see 'How about having a recommended way to add constant subs dynamically?' on p5p";
-        is $w, undef,
-          '*keyword = sub():method{$y} does not cause ambiguity warnings';
-    }
-}
 
 # &xsub when @_ has nonexistent elements
 {

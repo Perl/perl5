@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 143;
+plan 144;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -787,6 +787,11 @@ is runperl(switches => ['-lXMfeature=:all'],
   my sub handel { "" }
   print handel,"ok ",curr_test()," - no 'No comma allowed' after my sub\n";
   curr_test(curr_test()+1);
+}
+{
+  my $x = 43;
+  my sub y :prototype() {$x};
+  is y, 43, 'my sub that looks like constant closure';
 }
 
 # -------------------- Interactions (and misc tests) -------------------- #

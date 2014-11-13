@@ -90,6 +90,41 @@ S_MgBYTEPOS(pTHX_ MAGIC *mg, SV *sv, const char *s, STRLEN len)
 }
 #endif
 
+/* ------------------------------- pad.h ------------------------------ */
+
+#if defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
+PERL_STATIC_INLINE bool
+PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq)
+{
+    /* is seq within the range _LOW to _HIGH ?
+     * This is complicated by the fact that PL_cop_seqmax
+     * may have wrapped around at some point */
+    if (COP_SEQ_RANGE_LOW(pn) == PERL_PADSEQ_INTRO)
+	return FALSE; /* not yet introduced */
+
+    if (COP_SEQ_RANGE_HIGH(pn) == PERL_PADSEQ_INTRO) {
+    /* in compiling scope */
+	if (
+	    (seq >  COP_SEQ_RANGE_LOW(pn))
+	    ? (seq - COP_SEQ_RANGE_LOW(pn) < (U32_MAX >> 1))
+	    : (COP_SEQ_RANGE_LOW(pn) - seq > (U32_MAX >> 1))
+	)
+	    return TRUE;
+    }
+    else if (
+	(COP_SEQ_RANGE_LOW(pn) > COP_SEQ_RANGE_HIGH(pn))
+	?
+	    (  seq >  COP_SEQ_RANGE_LOW(pn)
+	    || seq <= COP_SEQ_RANGE_HIGH(pn))
+
+	:    (  seq >  COP_SEQ_RANGE_LOW(pn)
+	     && seq <= COP_SEQ_RANGE_HIGH(pn))
+    )
+	return TRUE;
+    return FALSE;
+}
+#endif
+
 /* ----------------------------- regexp.h ----------------------------- */
 
 PERL_STATIC_INLINE struct regexp *

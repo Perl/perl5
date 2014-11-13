@@ -1233,31 +1233,8 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 		    fake_offset = offset; /* in case we don't find a real one */
 		    continue;
 		}
-		/* is seq within the range _LOW to _HIGH ?
-		 * This is complicated by the fact that PL_cop_seqmax
-		 * may have wrapped around at some point */
-		if (COP_SEQ_RANGE_LOW(namesv) == PERL_PADSEQ_INTRO)
-		    continue; /* not yet introduced */
-
-		if (COP_SEQ_RANGE_HIGH(namesv) == PERL_PADSEQ_INTRO) {
-		    /* in compiling scope */
-		    if (
-			(seq >  COP_SEQ_RANGE_LOW(namesv))
-			? (seq - COP_SEQ_RANGE_LOW(namesv) < (U32_MAX >> 1))
-			: (COP_SEQ_RANGE_LOW(namesv) - seq > (U32_MAX >> 1))
-		    )
-		       break;
-		}
-		else if (
-		    (COP_SEQ_RANGE_LOW(namesv) > COP_SEQ_RANGE_HIGH(namesv))
-		    ?
-			(  seq >  COP_SEQ_RANGE_LOW(namesv)
-			|| seq <= COP_SEQ_RANGE_HIGH(namesv))
-
-		    :    (  seq >  COP_SEQ_RANGE_LOW(namesv)
-			 && seq <= COP_SEQ_RANGE_HIGH(namesv))
-		)
-		break;
+		if (PadnameIN_SCOPE(namesv, seq))
+		    break;
 	    }
 	}
 
@@ -2037,7 +2014,7 @@ the immediately surrounding code.
 
 static CV *S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside);
 
-static void
+static CV *
 S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 {
     I32 ix;
@@ -2194,6 +2171,91 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 
     if (newcv) SvREFCNT_inc_simple_void_NN(cv);
     LEAVE;
+
+    if (CvCONST(cv)) {
+	/* Constant sub () { $x } closing over $x:
+	 * The prototype was marked as a candiate for const-ization,
+	 * so try to grab the current const value, and if successful,
+	 * turn into a const sub:
+	 */
+	SV* const_sv;
+	OP *o = CvSTART(cv);
+	assert(newcv);
+	for (; o; o = o->op_next)
+	    if (o->op_type == OP_PADSV)
+		break;
+	ASSUME(o->op_type == OP_PADSV);
+	const_sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
+	/* the candidate should have 1 ref from this pad and 1 ref
+	 * from the parent */
+	if (const_sv && SvREFCNT(const_sv) == 2) {
+	    const bool was_method = cBOOL(CvMETHOD(cv));
+	    bool copied = FALSE;
+	    if (outside) {
+		PADNAME * const pn =
+		    PadlistNAMESARRAY(CvPADLIST(outside))
+			[PARENT_PAD_INDEX(PadlistNAMESARRAY(
+			    CvPADLIST(cv))[o->op_targ])];
+		assert(PadnameOUTER(PadlistNAMESARRAY(CvPADLIST(cv))
+					[o->op_targ]));
+		if (PadnameLVALUE(pn)) {
+		    /* We have a lexical that is potentially modifiable
+		       elsewhere, so making a constant will break clo-
+		       sure behaviour.  If this is a ‘simple lexical
+		       op tree’, i.e., sub(){$x}, emit a deprecation
+		       warning, but continue to exhibit the old behav-
+		       iour of making it a constant based on the ref-
+		       count of the candidate variable.
+
+		       A simple lexical op tree looks like this:
+
+		         leavesub
+			   lineseq
+			     nextstate
+			     padsv
+		     */
+		    if (OP_SIBLING(
+			 cUNOPx(cUNOPx(CvROOT(cv))->op_first)->op_first
+			) == o
+		     && !OP_SIBLING(o))
+		    {
+			Perl_ck_warner_d(aTHX_
+					  packWARN(WARN_DEPRECATED),
+					 "Constants from lexical "
+					 "variables potentially "
+					 "modified elsewhere are "
+					 "deprecated");
+			/* We *copy* the lexical variable, and donate the
+			   copy to newCONSTSUB.  Yes, this is ugly, and
+			   should be killed.  We need to do this for the
+			   time being, however, because turning on SvPADTMP
+			   on a lexical will have observable effects
+			   elsewhere.  */
+			const_sv = newSVsv(const_sv);
+			copied = TRUE;
+		    }
+		    else
+			goto constoff;
+		}
+	    }
+	    if (!copied)
+		SvREFCNT_inc_simple_void_NN(const_sv);
+	    /* If the lexical is not used elsewhere, it is safe to turn on
+	       SvPADTMP, since it is only when it is used in lvalue con-
+	       text that the difference is observable.  */
+	    SvPADTMP_on(const_sv);
+	    SvREFCNT_dec_NN(cv);
+	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
+	    if (was_method)
+		CvMETHOD_on(cv);
+	}
+	else {
+	  constoff:
+	    CvCONST_off(cv);
+	}
+    }
+
+    return cv;
 }
 
 static CV *
@@ -2231,7 +2293,8 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
     if (SvMAGIC(proto))
 	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
-    if (CvPADLIST(proto)) S_cv_clone_pad(aTHX_ proto, cv, outside, newcv);
+    if (CvPADLIST(proto))
+	cv = S_cv_clone_pad(aTHX_ proto, cv, outside, newcv);
 
     DEBUG_Xv(
 	PerlIO_printf(Perl_debug_log, "\nPad CV clone\n");
@@ -2239,25 +2302,6 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 	cv_dump(proto,	 "Proto");
 	cv_dump(cv,	 "To");
     );
-
-    if (CvCONST(cv)) {
-	/* Constant sub () { $x } closing over $x - see lib/constant.pm:
-	 * The prototype was marked as a candiate for const-ization,
-	 * so try to grab the current const value, and if successful,
-	 * turn into a const sub:
-	 */
-	SV* const const_sv = op_const_sv(CvSTART(cv), cv);
-	if (const_sv) {
-	    SvREFCNT_dec_NN(cv);
-            /* For this calling case, op_const_sv returns a *copy*, which we
-               donate to newCONSTSUB. Yes, this is ugly, and should be killed.
-               Need to fix how lib/constant.pm works to eliminate this.  */
-	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
-	}
-	else {
-	    CvCONST_off(cv);
-	}
-    }
 
     return cv;
 }

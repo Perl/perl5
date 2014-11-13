@@ -2422,6 +2422,22 @@ such as C<$$x = 5> which might have to vivify a reference in C<$x>.
 =cut
 */
 
+static void
+S_mark_padname_lvalue(pTHX_ PADNAME *pn)
+{
+    CV *cv = PL_compcv;
+    PadnameLVALUE_on(pn);
+    while (PadnameOUTER(pn) && PARENT_PAD_INDEX(pn)) {
+	cv = CvOUTSIDE(cv);
+	assert(cv);
+	assert(CvPADLIST(cv));
+	pn =
+	   PadlistNAMESARRAY(CvPADLIST(cv))[PARENT_PAD_INDEX(pn)];
+	assert(PadnameLEN(pn));
+	PadnameLVALUE_on(pn);
+    }
+}
+
 static bool
 S_vivifies(const OPCODE type)
 {
@@ -2792,6 +2808,10 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	if (!type) /* local() */
 	    Perl_croak(aTHX_ "Can't localize lexical variable %"SVf,
 		 PAD_COMPNAME_SV(o->op_targ));
+	if (!(o->op_private & OPpLVAL_INTRO)
+	 || (  type != OP_SASSIGN && type != OP_AASSIGN
+	    && PadnameIsSTATE(PAD_COMPNAME_SV(o->op_targ))  ))
+	    S_mark_padname_lvalue(aTHX_ PAD_COMPNAME_SV(o->op_targ));
 	break;
 
     case OP_PUSHMARK:
@@ -5164,6 +5184,21 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     return CHECKOP(type, pmop);
 }
 
+static void
+S_set_haseval(pTHX)
+{
+    PADOFFSET i = 1;
+    PL_cv_has_eval = 1;
+    /* Any pad names in scope are potentially lvalues.  */
+    for (; i < PadnamelistMAXNAMED(PL_comppad_name); i++) {
+	PADNAME *pn = PAD_COMPNAME_SV(i);
+	if (!pn || !PadnameLEN(pn))
+	    continue;
+	if (PadnameOUTER(pn) || PadnameIN_SCOPE(pn, PL_cop_seqmax))
+	    S_mark_padname_lvalue(aTHX_ pn);
+    }
+}
+
 /* Given some sort of match op o, and an expression expr containing a
  * pattern, either compile expr into a regex and attach it to o (if it's
  * constant), or convert expr into a runtime regcomp op sequence (if it's
@@ -5456,7 +5491,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	rcop->op_targ = cv_targ;
 
 	/* /$x/ may cause an eval, since $x might be qr/(?{..})/  */
-	if (PL_hints & HINT_RE_EVAL) PL_cv_has_eval = 1;
+	if (PL_hints & HINT_RE_EVAL)
+	    S_set_haseval(aTHX);
 
 	/* establish postfix order */
 	if (expr->op_type == OP_REGCRESET || expr->op_type == OP_REGCMAYBE) {
@@ -7673,51 +7709,38 @@ Perl_cv_const_sv_or_av(const CV * const cv)
 }
 
 /* op_const_sv:  examine an optree to determine whether it's in-lineable.
- * Can be called in 3 ways:
+ * Can be called in 2 ways:
  *
- * !cv
+ * !allow_lex
  * 	look for a single OP_CONST with attached value: return the value
  *
- * cv && CvCLONE(cv) && !CvCONST(cv)
+ * allow_lex && !CvCONST(cv);
  *
  * 	examine the clone prototype, and if contains only a single
- * 	OP_CONST referencing a pad const, or a single PADSV referencing
- * 	an outer lexical, return a non-zero value to indicate the CV is
- * 	a candidate for "constizing" at clone time
- *
- * cv && CvCONST(cv)
- *
- *	We have just cloned an anon prototype that was marked as a const
- *	candidate. Try to grab the current value, and in the case of
- *	PADSV, ignore it if it has multiple references. In this case we
- *	return a newly created *copy* of the value.
+ * 	OP_CONST, return the value; or if it contains a single PADSV ref-
+ * 	erencing an outer lexical, turn on CvCONST to indicate the CV is
+ * 	a candidate for "constizing" at clone time, and return NULL.
  */
 
-SV *
-Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
+static SV *
+S_op_const_sv(pTHX_ const OP *o, CV *cv, bool allow_lex)
 {
     SV *sv = NULL;
+    bool padsv = FALSE;
 
-    if (!o)
-	return NULL;
-
-    if (o->op_type == OP_LINESEQ && cLISTOPo->op_first)
-	o = OP_SIBLING(cLISTOPo->op_first);
+    assert(o);
+    assert(cv);
 
     for (; o; o = o->op_next) {
 	const OPCODE type = o->op_type;
 
-	if (sv && o->op_next == o)
-	    return sv;
-	if (o->op_next != o) {
-	    if (type == OP_NEXTSTATE
-	     || (type == OP_NULL && !(o->op_flags & OPf_KIDS))
+	if (type == OP_NEXTSTATE || type == OP_LINESEQ
+	     || type == OP_NULL
 	     || type == OP_PUSHMARK)
 		continue;
-	    if (type == OP_DBSTATE)
+	if (type == OP_DBSTATE)
 		continue;
-	}
-	if (type == OP_LEAVESUB || type == OP_RETURN)
+	if (type == OP_LEAVESUB)
 	    break;
 	if (sv)
 	    return NULL;
@@ -7727,30 +7750,22 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	    sv = newSV(0);
 	    SAVEFREESV(sv);
 	}
-	else if (cv && type == OP_CONST) {
-	    sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
-	    if (!sv)
-		return NULL;
-	}
-	else if (cv && type == OP_PADSV) {
-	    if (CvCONST(cv)) { /* newly cloned anon */
-		sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
-		/* the candidate should have 1 ref from this pad and 1 ref
-		 * from the parent */
-		if (!sv || SvREFCNT(sv) != 2)
-		    return NULL;
-		sv = newSVsv(sv);
-		SvREADONLY_on(sv);
-		return sv;
-	    }
-	    else {
+	else if (allow_lex && type == OP_PADSV) {
 		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
+		{
 		    sv = &PL_sv_undef; /* an arbitrary non-null value */
-	    }
+		    padsv = TRUE;
+		}
+		else
+		    return NULL;
 	}
 	else {
 	    return NULL;
 	}
+    }
+    if (padsv) {
+	CvCONST_on(cv);
+	return NULL;
     }
     return sv;
 }
@@ -7821,6 +7836,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CV *clonee = NULL;
     HEK *hek = NULL;
     bool reusable = FALSE;
+    OP *start;
 #ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
 #endif
@@ -7906,12 +7922,29 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	spot = (CV **)(svspot = &mg->mg_obj);
     }
 
+    if (block) {
+	/* This makes sub {}; work as expected.  */
+	if (block->op_type == OP_STUB) {
+	    const line_t l = PL_parser->copline;
+	    op_free(block);
+	    block = newSTATEOP(0, NULL, 0);
+	    PL_parser->copline = l;
+	}
+	block = CvLVALUE(compcv)
+	     || (cv && CvLVALUE(cv) && !CvROOT(cv) && !CvXSUB(cv))
+		   ? newUNOP(OP_LEAVESUBLV, 0,
+			     op_lvalue(scalarseq(block), OP_LEAVESUBLV))
+		   : newUNOP(OP_LEAVESUB, 0, scalarseq(block));
+	start = LINKLIST(block);
+	block->op_next = 0;
+    }
+
     if (!block || !ps || *ps || attrs
-	|| (CvFLAGS(compcv) & CVf_BUILTIN_ATTRS)
+	|| CvLVALUE(compcv)
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(block, NULL);
+	const_sv = S_op_const_sv(aTHX_ start, compcv, FALSE);
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -7957,6 +7990,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	CvCONST_on(cv);
 	CvISXSUB_on(cv);
 	PoisonPADLIST(cv);
+	CvFLAGS(cv) |= CvMETHOD(compcv);
 	op_free(block);
 	SvREFCNT_dec(compcv);
 	PL_compcv = NULL;
@@ -8053,16 +8087,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
        exit.  */
        
     PL_breakable_sub_gen++;
-    /* This makes sub {}; work as expected.  */
-    if (block->op_type == OP_STUB) {
-	    OP* const newblock = newSTATEOP(0, NULL, 0);
-	    op_free(block);
-	    block = newblock;
-    }
-    CvROOT(cv) = CvLVALUE(cv)
-		   ? newUNOP(OP_LEAVESUBLV, 0,
-			     op_lvalue(scalarseq(block), OP_LEAVESUBLV))
-		   : newUNOP(OP_LEAVESUB, 0, scalarseq(block));
+    CvROOT(cv) = block;
     CvROOT(cv)->op_private |= OPpREFCOUNTED;
     OpREFCNT_set(CvROOT(cv), 1);
     /* The cv no longer needs to hold a refcount on the slab, as CvROOT
@@ -8072,21 +8097,14 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 #ifdef PERL_DEBUG_READONLY_OPS
     slab = (OPSLAB *)CvSTART(cv);
 #endif
-    CvSTART(cv) = LINKLIST(CvROOT(cv));
-    CvROOT(cv)->op_next = 0;
-    CALL_PEEP(CvSTART(cv));
+    CvSTART(cv) = start;
+    CALL_PEEP(start);
     finalize_optree(CvROOT(cv));
     S_prune_chain_head(&CvSTART(cv));
 
     /* now that optimizer has done its work, adjust pad values */
 
     pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
-
-    if (CvCLONE(cv)) {
-	assert(!CvCONST(cv));
-	if (ps && !*ps && op_const_sv(block, cv))
-	    CvCONST_on(cv);
-    }
 
   attrs:
     if (attrs) {
@@ -8186,6 +8204,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	 o ? SvPV_const(o_is_gv ? (SV *)o : cSVOPo->op_sv, namlen) : NULL;
     bool has_name;
     bool name_is_utf8 = o && !o_is_gv && SvUTF8(cSVOPo->op_sv);
+    OP *start;
 #ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
     bool special = FALSE;
@@ -8306,13 +8325,31 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		? (CV *)SvRV(gv)
 		: NULL;
 
+    if (block) {
+	/* This makes sub {}; work as expected.  */
+	if (block->op_type == OP_STUB) {
+	    const line_t l = PL_parser->copline;
+	    op_free(block);
+	    block = newSTATEOP(0, NULL, 0);
+	    PL_parser->copline = l;
+	}
+	block = CvLVALUE(PL_compcv)
+	     || (cv && CvLVALUE(cv) && !CvROOT(cv) && !CvXSUB(cv)
+		    && (!isGV(gv) || !GvASSUMECV(gv)))
+		   ? newUNOP(OP_LEAVESUBLV, 0,
+			     op_lvalue(scalarseq(block), OP_LEAVESUBLV))
+		   : newUNOP(OP_LEAVESUB, 0, scalarseq(block));
+	start = LINKLIST(block);
+	block->op_next = 0;
+    }
 
     if (!block || !ps || *ps || attrs
-	|| (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS)
+	|| CvLVALUE(PL_compcv)
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(block, NULL);
+	const_sv =
+	    S_op_const_sv(aTHX_ start, PL_compcv, CvCLONE(PL_compcv));
 
     if (SvPOK(gv) || (SvROK(gv) && SvTYPE(SvRV(gv)) != SVt_PVCV)) {
 	assert (block);
@@ -8379,14 +8416,17 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    CvCONST_on(cv);
 	    CvISXSUB_on(cv);
 	    PoisonPADLIST(cv);
+	    CvFLAGS(cv) |= CvMETHOD(PL_compcv);
 	}
 	else {
-	    if (isGV(gv)) {
-		if (name) GvCV_set(gv, NULL);
+	    if (isGV(gv) || CvMETHOD(PL_compcv)) {
+		if (name && isGV(gv))
+		    GvCV_set(gv, NULL);
 		cv = newCONSTSUB_flags(
 		    NULL, name, namlen, name_is_utf8 ? SVf_UTF8 : 0,
 		    const_sv
 		);
+		CvFLAGS(cv) |= CvMETHOD(PL_compcv);
 	    }
 	    else {
 		if (!SvROK(gv)) {
@@ -8512,16 +8552,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
        exit.  */
        
     PL_breakable_sub_gen++;
-    /* This makes sub {}; work as expected.  */
-    if (block->op_type == OP_STUB) {
-	    OP* const newblock = newSTATEOP(0, NULL, 0);
-	    op_free(block);
-	    block = newblock;
-    }
-    CvROOT(cv) = CvLVALUE(cv)
-		   ? newUNOP(OP_LEAVESUBLV, 0,
-			     op_lvalue(scalarseq(block), OP_LEAVESUBLV))
-		   : newUNOP(OP_LEAVESUB, 0, scalarseq(block));
+    CvROOT(cv) = block;
     CvROOT(cv)->op_private |= OPpREFCOUNTED;
     OpREFCNT_set(CvROOT(cv), 1);
     /* The cv no longer needs to hold a refcount on the slab, as CvROOT
@@ -8531,21 +8562,14 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 #ifdef PERL_DEBUG_READONLY_OPS
     slab = (OPSLAB *)CvSTART(cv);
 #endif
-    CvSTART(cv) = LINKLIST(CvROOT(cv));
-    CvROOT(cv)->op_next = 0;
-    CALL_PEEP(CvSTART(cv));
+    CvSTART(cv) = start;
+    CALL_PEEP(start);
     finalize_optree(CvROOT(cv));
     S_prune_chain_head(&CvSTART(cv));
 
     /* now that optimizer has done its work, adjust pad values */
 
     pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
-
-    if (CvCLONE(cv)) {
-	assert(!CvCONST(cv));
-	if (ps && !*ps && op_const_sv(block, cv))
-	    CvCONST_on(cv);
-    }
 
   attrs:
     if (attrs) {
@@ -9427,7 +9451,7 @@ Perl_ck_eval(pTHX_ OP *o)
 	}
 	else {
 	    scalar((OP*)kid);
-	    PL_cv_has_eval = 1;
+	    S_set_haseval(aTHX);
 	}
     }
     else {

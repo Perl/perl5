@@ -1639,11 +1639,12 @@ The following functions would all be inlined:
     sub N () { int(OPT_BAZ) / 3 }
 
     sub FOO_SET () { 1 if FLAG_MASK & FLAG_FOO }
+    sub FOO_SET2 () { if (FLAG_MASK & FLAG_FOO) { 1 } }
 
-Be aware that these will not be inlined; as they contain inner scopes,
-the constant folding doesn't reduce them to a single constant:
-
-    sub foo_set () { if (FLAG_MASK & FLAG_FOO) { 1 } }
+(Be aware that the last example was not always inlined in Perl 5.20 and
+earlier, which did not behave consistently with subroutines containing
+inner scopes.)  You can countermand inlining by using an explicit
+C<return>:
 
     sub baz_val () {
 	if (OPT_BAZ) {
@@ -1653,6 +1654,7 @@ the constant folding doesn't reduce them to a single constant:
 	    return 42;
 	}
     }
+    sub bonk_val () { return 12345 }
 
 As alluded to earlier you can also declare inlined subs dynamically at
 BEGIN time if their body consists of a lexically-scoped scalar which
@@ -1682,6 +1684,24 @@ normal lexical variable, e.g. this will print C<79907>, not C<79908>:
     }
     print RT_79908(); # prints 79907
 
+As of Perl 5.22, this buggy behavior, while preserved for backward
+compatibility, is detected and emits a deprecation warning.  If you want
+the subroutine to be inlined (with no warning), make sure the variable is
+not used in a context where it could be modified aside from where it is
+declared.
+
+    # Fine, no warning
+    BEGIN {
+        my $x = 54321;
+        *INLINED = sub () { $x };
+    }
+    # Warns.  Future Perl versions will stop inlining it.
+    BEGIN {
+        my $x;
+        $x = 54321;
+        *ALSO_INLINED = sub () { $x };
+    }
+
 If you really want a subroutine with a C<()> prototype that returns a
 lexical variable you can easily force it to not be inlined by adding
 an explicit C<return>:
@@ -1694,7 +1714,7 @@ an explicit C<return>:
     print RT_79908(); # prints 79908
 
 The easiest way to tell if a subroutine was inlined is by using
-L<B::Deparse>, consider this example of two subroutines returning
+L<B::Deparse>.  Consider this example of two subroutines returning
 C<1>, one with a C<()> prototype causing it to be inlined, and one
 without (with deparse output truncated for clarity):
 
@@ -1727,7 +1747,8 @@ of the function will still be using the old value of the function.  If
 you need to be able to redefine the subroutine, you need to ensure
 that it isn't inlined, either by dropping the C<()> prototype (which
 changes calling semantics, so beware) or by thwarting the inlining
-mechanism in some other way, e.g. by adding an explicit C<return>:
+mechanism in some other way, e.g. by adding an explicit C<return>, as
+mentioned above:
 
     sub not_inlined () { return 23 }
 
