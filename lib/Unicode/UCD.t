@@ -1749,7 +1749,8 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
                     my $packed = pack "U*", @{$invmap_ref->[$i]};
                     if ($value ne $packed) {
                         fail("prop_invmap('$display_prop')");
-                        diag(sprintf "For %04X, expected the mapping to be '$packed', but got '$value'");
+                        diag(sprintf "For %04X, expected the mapping to be "
+                         . "'$packed', but got '$value'", $invlist_ref->[$i]);
                         next PROPERTY;
                     }
 
