@@ -3467,9 +3467,8 @@ PP(pp_crypt)
          /* If Unicode, try to downgrade.
 	  * If not possible, croak.
 	  * Yes, we made this up.  */
-	 SV* const tsv = sv_2mortal(newSVsv(left));
+	 SV* const tsv = newSVpvn_flags(tmps, len, SVf_UTF8|SVs_TEMP);
 
-	 SvUTF8_on(tsv);
 	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPV_const(tsv, len);
     }

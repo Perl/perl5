@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan (tests => 340);
+    plan (tests => 344);
 }
 
 use strict;
@@ -243,6 +243,13 @@ for ([chdir=>''],[chmod=>'0,'],[chown=>'0,0,'],[utime=>'0,0,'],
     eval "$op $args \$ref $postargs";
     check_count "$op $args\\\$tied_glob$postargs";
 }
+
+$dummy  =   crypt $var,0; check_count 'crypt $tied, ...';
+$dummy  =   crypt 0,$var; check_count 'crypt ..., $tied';
+$var = substr(chr 256,0,0);
+$dummy  =   crypt $var,0; check_count 'crypt $tied_utf8, ...';
+$var = substr(chr 256,0,0);
+$dummy  =   crypt 0,$var; check_count 'crypt ..., $tied_utf8';
 
 {
     no warnings;
