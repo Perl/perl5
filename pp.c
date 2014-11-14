@@ -3496,6 +3496,7 @@ PP(pp_crypt)
 #   else
     sv_setpv(TARG, PerlProc_crypt(tmps, SvPV_nolen_const(right)));
 #   endif
+    SvUTF8_off(TARG);
     SETTARG;
     RETURN;
 #else

@@ -14,7 +14,7 @@ BEGIN {
         skip_all("crypt unimplemented");
     }
     else {
-        plan(tests => 4);
+        plan(tests => 6);
     }
 }
 
@@ -55,3 +55,8 @@ eval {$b = crypt($a, $alg."cd")};
 is($@, '',                   "downgrade to eight bit characters");
 is($b, crypt("a\xFF", $alg."cd"), "downgrade results agree");
 
+my $x = chr 256; # has to be lexical, and predeclared
+# Assignment gets optimised away here:
+$x = crypt "foo", ${\"bar"}; # ${\ } to defeat constant folding
+is $x, crypt("foo", "bar"), 'crypt writing to utf8 target';
+ok !utf8::is_utf8($x), 'crypt turns off utf8 on its target';
