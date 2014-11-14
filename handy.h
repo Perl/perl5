@@ -1393,7 +1393,7 @@ EXTCONST U32 PL_charclass[];
 #if defined(HAS_ISBLANK)
 #   define isBLANK_LC(c) _generic_LC(c, _CC_BLANK, isblank)
 #else /* Unlike isASCII, varies if in a UTF-8 locale */
-#   define isBLANK_LC(c) (IN_UTF8_CTYPE_LOCALE) ? isBLANK_L1(c) : isBLANK(c)
+#   define isBLANK_LC(c) ((IN_UTF8_CTYPE_LOCALE) ? isBLANK_L1(c) : isBLANK(c))
 #endif
 
 #define _LC_CAST U8
