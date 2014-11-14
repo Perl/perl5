@@ -29,7 +29,7 @@ my $fh = (new FileHandle "./TEST", O_RDONLY
 ok(defined($fh), "create new handle O_RDONLY");
 
 my $buffer = <$fh>;
-is($buffer, "#!./perl -w\n", "Got expected first line via handle");
+is($buffer, "#!./perl\n", "Got expected first line via handle");
 
 ungetc $fh ord 'A';
 my $buf;

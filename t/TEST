@@ -1,4 +1,4 @@
-#!./perl -w
+#!./perl
 
 # This is written in a peculiar style, since we're trying to avoid
 # most of the constructs we'll be testing for.  (This comment is
@@ -108,7 +108,7 @@ my %skip = (
 	   );
 
 
-if ($::do_nothing || $::do_nothing) { # set by harness b4 requiring us
+if ($::do_nothing) {
     return 1;
 }
 
