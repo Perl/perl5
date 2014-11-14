@@ -737,6 +737,12 @@ unsigned.
 
 =item NVX
 
+=item COP_SEQ_RANGE_LOW
+
+=item COP_SEQ_RANGE_HIGH
+
+These last two are only valid for pad name SVs.
+
 =back
 
 =head2 B::RV Methods
