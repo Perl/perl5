@@ -2774,4 +2774,6 @@ Ei	|STRLEN	|sv_or_pv_pos_u2b|NN SV *sv|NN const char *pv|STRLEN pos \
 				 |NULLOK STRLEN *lenp
 #endif
 
+EMpPX	|SV*	|_get_encoding
+
 : ex: set ts=8 sts=4 sw=4 noet:

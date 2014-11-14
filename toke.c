@@ -3589,7 +3589,7 @@ S_scan_const(pTHX_ char *start)
 
     SvPOK_on(sv);
     if (IN_ENCODING && !has_utf8) {
-	sv_recode_to_utf8(sv, PL_encoding);
+	sv_recode_to_utf8(sv, _get_encoding());
 	if (SvUTF8(sv))
 	    has_utf8 = TRUE;
     }
@@ -6926,7 +6926,7 @@ Perl_yylex(pTHX)
 			ENTER;
 			SAVETMPS;
 			PUSHMARK(sp);
-			XPUSHs(PL_encoding);
+			XPUSHs(_get_encoding());
 			PUTBACK;
 			call_method("name", G_SCALAR);
 			SPAGAIN;
@@ -9335,7 +9335,7 @@ S_scan_heredoc(pTHX_ char *s)
 	if (UTF && is_utf8_string((U8*)SvPVX_const(tmpstr), SvCUR(tmpstr)))
 	    SvUTF8_on(tmpstr);
 	else if (IN_ENCODING)
-	    sv_recode_to_utf8(tmpstr, PL_encoding);
+	    sv_recode_to_utf8(tmpstr, _get_encoding());
     }
     PL_lex_stuff = tmpstr;
     pl_yylval.ival = op_type;
@@ -9630,7 +9630,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 
 	    while (cont) {
 		int offset = s - SvPVX_const(PL_linestr);
-		const bool found = sv_cat_decode(sv, PL_encoding, PL_linestr,
+		const bool found = sv_cat_decode(sv, _get_encoding(), PL_linestr,
 					   &offset, (char*)termstr, termlen);
 		const char *ns;
 		char *svlast;
@@ -10520,7 +10520,7 @@ S_scan_formline(pTHX_ char *s)
 	    if (UTF && is_utf8_string((U8*)SvPVX_const(stuff), SvCUR(stuff)))
 		SvUTF8_on(stuff);
 	    else if (IN_ENCODING)
-		sv_recode_to_utf8(stuff, PL_encoding);
+		sv_recode_to_utf8(stuff, _get_encoding());
 	}
 	NEXTVAL_NEXTTOKE.opval = (OP*)newSVOP(OP_CONST, 0, stuff);
 	force_next(THING);

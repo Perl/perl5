@@ -767,6 +767,14 @@ S_fixup_errno_string(pTHX_ SV* sv)
     }
 }
 
+SV*
+Perl__get_encoding(pTHX)
+{
+    /* Returns the $^ENCODING or 'use encoding' in effect; NULL if none */
+
+    return PL_encoding;
+}
+
 #ifdef VMS
 #include <descrip.h>
 #include <starlet.h>
@@ -817,7 +825,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\005':  /* ^E */
 	 if (nextchar != '\0') {
             if (strEQ(remaining, "NCODING"))
-                sv_setsv(sv, PL_encoding);
+                sv_setsv(sv, _get_encoding());
             break;
         }
 

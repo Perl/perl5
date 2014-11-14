@@ -171,12 +171,12 @@ sv_eq_pvn_flags(pTHX_ const SV *sv, const char* pv, const STRLEN pvlen, const U3
               SV* svrecode = NULL;
 	      if (SvUTF8(sv)) {
 		   svrecode = newSVpvn(pv2, cur2);
-		   sv_recode_to_utf8(svrecode, PL_encoding);
+		   sv_recode_to_utf8(svrecode, _get_encoding());
 		   pv2      = SvPV_const(svrecode, cur2);
 	      }
 	      else {
 		   svrecode = newSVpvn(pv1, cur1);
-		   sv_recode_to_utf8(svrecode, PL_encoding);
+		   sv_recode_to_utf8(svrecode, _get_encoding());
 		   pv1      = SvPV_const(svrecode, cur1);
 	      }
               SvREFCNT_dec_NN(svrecode);

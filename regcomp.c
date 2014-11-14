@@ -12336,7 +12336,7 @@ tryagain:
 			break;
 		    recode_encoding:
 			if (! RExC_override_recoding) {
-			    SV* enc = PL_encoding;
+			    SV* enc = _get_encoding();
 			    ender = reg_recode((const char)(U8)ender, &enc);
 			    if (!enc && PASS2)
 				ckWARNreg(p, "Invalid escape in the specified encoding");
@@ -14204,7 +14204,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 		}
 	    recode_encoding:
 		if (! RExC_override_recoding) {
-		    SV* enc = PL_encoding;
+		    SV* enc = _get_encoding();
 		    value = reg_recode((const char)(U8)value, &enc);
 		    if (!enc) {
                         if (strict) {

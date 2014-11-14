@@ -3454,7 +3454,7 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
     }
 
     if (IN_ENCODING && !(flags & SV_UTF8_NO_ENCODING)) {
-        sv_recode_to_utf8(sv, PL_encoding);
+        sv_recode_to_utf8(sv, _get_encoding());
 	if (extra) SvGROW(sv, SvCUR(sv) + extra);
 	return SvCUR(sv);
     }
@@ -7747,12 +7747,12 @@ Perl_sv_eq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 	 if (IN_ENCODING) {
 	      if (SvUTF8(sv1)) {
 		   svrecode = newSVpvn(pv2, cur2);
-		   sv_recode_to_utf8(svrecode, PL_encoding);
+		   sv_recode_to_utf8(svrecode, _get_encoding());
 		   pv2 = SvPV_const(svrecode, cur2);
 	      }
 	      else {
 		   svrecode = newSVpvn(pv1, cur1);
-		   sv_recode_to_utf8(svrecode, PL_encoding);
+		   sv_recode_to_utf8(svrecode, _get_encoding());
 		   pv1 = SvPV_const(svrecode, cur1);
 	      }
 	      /* Now both are in UTF-8. */
@@ -7837,7 +7837,7 @@ Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2,
 	if (SvUTF8(sv1)) {
 	    if (IN_ENCODING) {
 		 svrecode = newSVpvn(pv2, cur2);
-		 sv_recode_to_utf8(svrecode, PL_encoding);
+		 sv_recode_to_utf8(svrecode, _get_encoding());
 		 pv2 = SvPV_const(svrecode, cur2);
 	    }
 	    else {
@@ -7849,7 +7849,7 @@ Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2,
 	else {
 	    if (IN_ENCODING) {
 		 svrecode = newSVpvn(pv1, cur1);
-		 sv_recode_to_utf8(svrecode, PL_encoding);
+		 sv_recode_to_utf8(svrecode, _get_encoding());
 		 pv1 = SvPV_const(svrecode, cur1);
 	    }
 	    else {

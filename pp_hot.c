@@ -2187,7 +2187,7 @@ PP(pp_subst)
 	     nsv = sv_newmortal();
 	     SvSetSV(nsv, dstr);
 	     if (IN_ENCODING)
-		  sv_recode_to_utf8(nsv, PL_encoding);
+		  sv_recode_to_utf8(nsv, _get_encoding());
 	     else
 		  sv_utf8_upgrade(nsv);
 	     c = SvPV_const(nsv, clen);
@@ -2370,7 +2370,7 @@ PP(pp_subst)
 		if (IN_ENCODING) {
 		    if (!nsv) nsv = sv_newmortal();
 		    sv_copypv(nsv, repl);
-		    if (!DO_UTF8(nsv)) sv_recode_to_utf8(nsv, PL_encoding);
+		    if (!DO_UTF8(nsv)) sv_recode_to_utf8(nsv, _get_encoding());
 		    sv_catsv(dstr, nsv);
 		}
 		else sv_catsv(dstr, repl);

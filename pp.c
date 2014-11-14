@@ -816,7 +816,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 	       operations, including literal strings, chr(), input data, etc.
 	       should have been utf8-ized already, right?
 	    */
-	    sv_recode_to_utf8(sv, PL_encoding);
+	    sv_recode_to_utf8(sv, _get_encoding());
 	}
     }
 
@@ -865,7 +865,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 			/* RS is 8 bit, encoding.pm is used.
 			 * Do not recode PL_rs as a side-effect. */
 			svrecode = newSVpvn(rsptr, rslen);
-			sv_recode_to_utf8(svrecode, PL_encoding);
+			sv_recode_to_utf8(svrecode, _get_encoding());
 			rsptr = SvPV_const(svrecode, rslen);
 			rs_charlen = sv_len_utf8(svrecode);
 		    }
@@ -3285,7 +3285,7 @@ PP(pp_index)
 		? newSVpvn(big_p, biglen) : newSVpvn(little_p, llen);
 
 	    if (IN_ENCODING) {
-		sv_recode_to_utf8(temp, PL_encoding);
+		sv_recode_to_utf8(temp, _get_encoding());
 	    } else {
 		sv_utf8_upgrade(temp);
 	    }
@@ -3372,7 +3372,7 @@ PP(pp_ord)
 
     if (IN_ENCODING && SvPOK(argsv) && !DO_UTF8(argsv)) {
         SV * const tmpsv = sv_2mortal(newSVsv(argsv));
-        s = (U8*)sv_recode_to_utf8(tmpsv, PL_encoding);
+        s = (U8*)sv_recode_to_utf8(tmpsv, _get_encoding());
         len = UTF8SKIP(s);  /* Should be well-formed; so this is its length */
         argsv = tmpsv;
     }
@@ -3436,7 +3436,7 @@ PP(pp_chr)
     (void)SvPOK_only(TARG);
 
     if (IN_ENCODING && !IN_BYTES) {
-        sv_recode_to_utf8(TARG, PL_encoding);
+        sv_recode_to_utf8(TARG, _get_encoding());
 	tmps = SvPVX(TARG);
 	if (SvCUR(TARG) == 0
 	    || ! is_utf8_string((U8*)tmps, SvCUR(TARG))
