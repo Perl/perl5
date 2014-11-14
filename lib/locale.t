@@ -59,7 +59,7 @@ sub debug {
   return unless $debug;
   my($mess) = join "", '# ', @_;
   chop $mess;
-  print $dumper->stringify($mess,1), "\n";
+  print STDERR $dumper->stringify($mess,1), "\n";
 }
 
 sub debug_more {
@@ -68,7 +68,7 @@ sub debug_more {
 }
 
 sub debugf {
-    printf @_ if $debug;
+    printf STDERR @_ if $debug;
 }
 
 $a = 'abc %9';
