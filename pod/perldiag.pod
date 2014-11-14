@@ -741,6 +741,28 @@ C<foreach> loop nor a C<given> block.  (Note that this error is
 issued on exit from the C<default> block, so you won't get the
 error if you use an explicit C<continue>.)
 
+=item Can't do inplace edit: %s is not a regular file
+
+(S inplace) You tried to use the B<-i> switch on a special file, such as
+a file in /dev, a FIFO or an uneditable directory.  The file was ignored.
+
+=item Can't do inplace edit on %s: %s
+
+(S inplace) The creation of the new file failed for the indicated
+reason.
+
+=item Can't do inplace edit without backup
+
+(F) You're on a system such as MS-DOS that gets confused if you try
+reading from a deleted (but still opened) file.  You have to say
+C<-i.bak>, or some such.
+
+=item Can't do inplace edit: %s would not be unique
+
+(S inplace) Your filesystem does not support filenames longer than 14
+characters and Perl was unable to create a unique filename during
+inplace editing with the B<-i> switch.  The file was ignored.
+
 =item Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".
 
 (W locale) You are 1) running under "C<use locale>"; 2) the current
@@ -767,28 +789,6 @@ Note that failed case-changing operations done as a result of
 case-insensitive C</i> regular expression matching will show up in this
 warning as having the C<fc> operation (as that is what the regular
 expression engine calls behind the scenes.)
-
-=item Can't do inplace edit: %s is not a regular file
-
-(S inplace) You tried to use the B<-i> switch on a special file, such as
-a file in /dev, a FIFO or an uneditable directory.  The file was ignored.
-
-=item Can't do inplace edit on %s: %s
-
-(S inplace) The creation of the new file failed for the indicated
-reason.
-
-=item Can't do inplace edit without backup
-
-(F) You're on a system such as MS-DOS that gets confused if you try
-reading from a deleted (but still opened) file.  You have to say
-C<-i.bak>, or some such.
-
-=item Can't do inplace edit: %s would not be unique
-
-(S inplace) Your filesystem does not support filenames longer than 14
-characters and Perl was unable to create a unique filename during
-inplace editing with the B<-i> switch.  The file was ignored.
 
 =item Can't do waitpid with flags
 
@@ -2981,24 +2981,6 @@ L<perlfunc/listen>.
 form of C<open> does not support pipes, such as C<open($pipe, '|-', @args)>.
 Use the two-argument C<open($pipe, '|prog arg1 arg2...')> form instead.
 
-=item localtime(%f) failed
-
-(W overflow) You called C<localtime> with a number that it could not handle:
-too large, too small, or NaN.  The returned value is C<undef>.
-
-=item localtime(%f) too large
-
-(W overflow) You called C<localtime> with a number that was larger
-than it can reliably handle and C<localtime> probably returned the
-wrong date.  This warning is also triggered with NaN (the special
-not-a-number value).
-
-=item localtime(%f) too small
-
-(W overflow) You called C<localtime> with a number that was smaller
-than it can reliably handle and C<localtime> probably returned the
-wrong date.
-
 =item Locale '%s' may not work well.%s
 
 (W locale) The named locale that Perl is now trying to use is not fully
@@ -3017,6 +2999,24 @@ those in ISO 646 or other 7-bit locales, such as ASMO 449, can also have
 problems, depending on what portions of the ASCII character set get
 changed by the locale and are also used by the program.
 The warning message lists the determinable conflicting characters.
+
+=item localtime(%f) failed
+
+(W overflow) You called C<localtime> with a number that it could not handle:
+too large, too small, or NaN.  The returned value is C<undef>.
+
+=item localtime(%f) too large
+
+(W overflow) You called C<localtime> with a number that was larger
+than it can reliably handle and C<localtime> probably returned the
+wrong date.  This warning is also triggered with NaN (the special
+not-a-number value).
+
+=item localtime(%f) too small
+
+(W overflow) You called C<localtime> with a number that was smaller
+than it can reliably handle and C<localtime> probably returned the
+wrong date.
 
 =item Lookbehind longer than %d not implemented in regex m/%s/
 
