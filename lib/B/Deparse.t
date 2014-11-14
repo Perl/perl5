@@ -306,13 +306,13 @@ EOCODI
 # CORE::no
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub no; CORE::no less" 2>&1`;
-like($a, qr/my sub no;\n\(\);\nCORE::no less;/,
+like($a, qr/my sub no;\nCORE::no less;/,
     'CORE::no after my sub no');
 
 # CORE::use
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub use; CORE::use less" 2>&1`;
-like($a, qr/my sub use;\n\(\);\nCORE::use less;/,
+like($a, qr/my sub use;\nCORE::use less;/,
     'CORE::use after my sub use');
 
 # CORE::__DATA__
@@ -1631,19 +1631,37 @@ $a x= $b;
 my($a, $b, $c) = @_;
 ####
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
-# TODO unimplemented in B::Deparse; RT #116553
 # lexical subroutine
 use feature 'lexical_subs';
 no warnings "experimental::lexical_subs";
 my sub f {}
 print f();
+>>>>
+use feature 'lexical_subs';
+BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUUU\005"}
+my sub f {
+    BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUU\005"}
+    
+}
+BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUU\005"}
+print f();
 ####
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
-# TODO unimplemented in B::Deparse; RT #116553
 # lexical "state" subroutine
 use feature 'state', 'lexical_subs';
 no warnings 'experimental::lexical_subs';
 state sub f {}
+print f();
+>>>>
+use feature 'lexical_subs';
+BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUUU\005"}
+CORE::state sub f {
+    BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUU\005"}
+    use feature 'state';
+    
+}
+BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUU\005"}
+use feature 'state';
 print f();
 ####
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"

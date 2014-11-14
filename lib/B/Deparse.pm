@@ -236,7 +236,8 @@ BEGIN {
 #
 # subs_todo:
 # array of [cop_seq, CV, is_format?] for subs and formats we still
-# want to deparse
+# want to deparse.  Lexical subs have one more element, giving the pad
+# name thingy, and CV may be undef, indicating a stub declaration.
 #
 # protos_todo:
 # as above, but [name, prototype] for subs that never got a GV
@@ -459,6 +460,72 @@ sub next_todo {
     my $self = shift;
     my $ent = shift @{$self->{'subs_todo'}};
     my $cv = $ent->[1];
+    if ($ent->[3]) { # lexical sub
+	my @text;
+
+	# At this point, we may not yet have deparsed the hints that allow
+	# lexical subroutines to be recognized.  So adjust the current
+	# hints and deparse them.
+	# When lex subs cease being experimental, we should be able to
+	# remove this code.
+	{
+	    local $^H = $self->{'hints'};
+	    local %^H = %{ $self->{'hinthash'} || {} };
+	    local ${^WARNING_BITS} = $self->{'warnings'};
+	    feature->import("lexical_subs");
+	    warnings->unimport("experimental::lexical_subs");
+	    # Here we depend on the fact that individual features
+	    # will always set the feature bundle to ‘custom’
+	    # (== $feature::hint_mask).  If we had another specific bundle
+	    # enabled previously, normalise it.
+	    if (($self->{'hints'} & $feature::hint_mask)
+		    != $feature::hint_mask)
+	    {
+		if ($self->{'hinthash'}) {
+		    delete $self->{'hinthash'}{$_}
+			for grep /^feature_/, keys %{$self->{'hinthash'}};
+		}
+		else { $self->{'hinthash'} = {} }
+		$self->{'hinthash'}
+		    = _features_from_bundle(@$self{'hints','hinthash'});
+	    }
+	    push @text, $self->declare_hinthash($self->{'hinthash'}, \%^H,
+						$self->{indent_size}, $^H);
+	    push @text, $self->declare_warnings($self->{'warnings'},
+						${^WARNING_BITS})
+		unless ($self->{'warnings'} // 'u')
+		    eq (${^WARNING_BITS   } // 'u');
+	    $self->{'warnings'} = ${^WARNING_BITS};
+	    $self->{'hints'} = $^H;
+	    $self->{'hinthash'} = {%^H};
+	}
+
+	# Now emit the sub itself.
+	my $padname = $ent->[3];
+	my $flags = $padname->FLAGS;
+	push @text,
+	    !$cv || $ent->[0] <= $padname->COP_SEQ_RANGE_LOW
+		? $self->keyword($flags & SVpad_OUR
+				    ? "our"
+				    : $flags & SVpad_STATE
+					? "state"
+					: "my") . " "
+		: "";
+	# XXX We would do $self->keyword("sub"), but ‘my CORE::sub’
+	#     doesn’t work and ‘my sub’ ignores a &sub in scope.  I.e.,
+	#     we have a core bug here.
+	push @text, "sub " . substr $padname->PVX, 1;
+	if ($cv) {
+	    # my sub foo { }
+	    push @text,  " " . $self->deparse_sub($cv);
+	    $text[-1] =~ s/ ;$/;/;
+	}
+	else {
+	    # my sub foo;
+	    push @text, ";\n";
+	}
+	return join "", @text;
+    }
     my $gv = $cv->GV;
     my $name = $self->gv_name($gv);
     if ($ent->[2]) {
@@ -813,6 +880,7 @@ sub compile {
 	my $root = main_root;
 	local $B::overlay = {};
 	unless (null $root) {
+	    $self->pad_subs($self->{'curcv'});
 	    $self->pessimise($root, main_start);
 	    print $self->indent($self->deparse_root($root)), "\n";
 	}
@@ -1015,6 +1083,45 @@ sub indent {
     return join("\n", @lines);
 }
 
+sub pad_subs {
+    my ($self, $cv) = @_;
+    my $padlist = $cv->PADLIST;
+    my @names = $padlist->ARRAYelt(0)->ARRAY;
+    my @values = $padlist->ARRAYelt(1)->ARRAY;
+    my @todo;
+    for my $ix (0.. $#names) { for $_ ($names[$ix]) {
+	next if class($_) eq "SPECIAL";
+	my $name = $_->PVX;
+	if ($name =~ /^&./) {
+	    my $low = $_->COP_SEQ_RANGE_LOW;
+	    my $flags = $_->FLAGS;
+	    if ($flags & SVpad_OUR) {
+		push @todo, [$low, undef, 0, $_];
+		          # [seq, no cv, not format, padname]
+		next;
+	    }
+	    my $protocv = $flags & SVpad_STATE
+		? $values[$ix]
+		  # XXX temporary future-compatibility; B::PADNAME will
+		  #     have a PROTOCV method and no MAGIC method
+		: $_->can("MAGIC") ? $_->MAGIC->OBJ : $_->PROTOCV;
+	    my $outseq = $protocv->OUTSIDE_SEQ;
+	    if ($outseq <= $low) {
+		# defined before its name is visible, so it’s gotta be
+		# declared and defined at once: my sub foo { ... }
+		push @todo, [$low, $protocv, 0, $_];
+	    }
+	    else {
+		# declared and defined separately: my sub f; sub f { ... }
+		push @todo, [$low, undef, 0, $_],
+			    [$outseq, $protocv, 0, $_];
+	    }
+	}
+    }}
+    @{$self->{'subs_todo'}} =
+	sort {$a->[0] <=> $b->[0]} @{$self->{'subs_todo'}}, @todo
+}
+
 sub deparse_sub {
     my $self = shift;
     my $cv = shift;
@@ -1040,6 +1147,7 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     my $root = $cv->ROOT;
     local $B::overlay = {};
     if (not null $root) {
+	$self->pad_subs($cv);
 	$self->pessimise($root, $cv->START);
 	my $lineseq = $root->first;
 	if ($lineseq->name eq "lineseq") {
@@ -1664,8 +1772,14 @@ sub seq_subs {
     while (scalar(@{$self->{'subs_todo'}})
 	   and $seq > $self->{'subs_todo'}[0][0]) {
 	my $cv = $self->{'subs_todo'}[0][1];
-	my $outside = $cv && $cv->OUTSIDE;
-	if ($cv and ${$cv->OUTSIDE || \0} != ${$self->{'curcv'}}) {
+	# Skip the OUTSIDE check for lexical subs.  We may be deparsing a
+	# cloned anon sub with lexical subs declared in it, in which case
+	# the OUTSIDE pointer points to the anon protosub.
+	my $lexical = !!$self->{'subs_todo'}[0][3];
+	my $outside = !$lexical && $cv && $cv->OUTSIDE;
+	if (!$lexical and $cv
+	 and ${$cv->OUTSIDE || \0} != ${$self->{'curcv'}})
+	{
 	    push @pending, shift @{$self->{'subs_todo'}};
 	    next;
 	}
@@ -5183,20 +5297,16 @@ sub is_lexical_subs {
     return 1;
 }
 
+# Pretend these two ops do not exist.  The perl parser adds them to the
+# beginning of any block containing my-sub declarations, whereas we handle
+# the subs in pad_subs and next_todo.
+*pp_clonecv = *pp_introcv;
 sub pp_introcv {
     my $self = shift;
     my($op, $cx) = @_;
     # For now, deparsing doesn't worry about the distinction between introcv
     # and clonecv, so pretend this op doesn't exist:
     return '';
-}
-
-sub pp_clonecv {
-    my $self = shift;
-    my($op, $cx) = @_;
-    my $sv = $self->padname_sv($op->targ);
-    my $name = substr $sv->PVX, 1; # skip &/$/@/%, like $self->padany
-    return "my sub $name";
 }
 
 sub pp_padcv {

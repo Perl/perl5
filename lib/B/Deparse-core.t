@@ -102,7 +102,7 @@ sub testit {
 
 	my $got_text = $deparse->coderef2text($code_ref);
 
-	unless ($got_text =~ /^\{
+	unless ($got_text =~ /
     package (?:lexsub)?test;
     BEGIN \{\$\{\^WARNING_BITS} = "[^"]*"}
     use strict 'refs', 'subs';
