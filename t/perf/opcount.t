@@ -17,7 +17,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 3;
+plan 28;
 
 use B ();
 
@@ -72,3 +72,46 @@ test_opcount(0, "basic aelemfast",
                     'ex-aelem' => 1,
                 }
             );
+
+# Porting/bench.pl tries to create an empty and active loop, with the
+# ops executed being exactly the same apart from the additional ops
+# in the active loop. Check that this remains true.
+
+{
+    test_opcount(0, "bench.pl empty loop",
+                sub { for my $x (1..$ARGV[0]) { 1; } },
+                {
+                     aelemfast => 1,
+                     and       => 1,
+                     const     => 1,
+                     enteriter => 1,
+                     iter      => 1,
+                     leaveloop => 1,
+                     leavesub  => 1,
+                     lineseq   => 2,
+                     nextstate => 2,
+                     null      => 1,
+                     pushmark  => 1,
+                     unstack   => 1,
+                }
+            );
+
+    test_opcount(0, "bench.pl active loop",
+                sub { for my $x (1..$ARGV[0]) { $x; } },
+                {
+                     aelemfast => 1,
+                     and       => 1,
+                     const     => 1,
+                     enteriter => 1,
+                     iter      => 1,
+                     leaveloop => 1,
+                     leavesub  => 1,
+                     lineseq   => 2,
+                     nextstate => 2,
+                     null      => 1,
+                     padsv     => 1, # this is the additional active op
+                     pushmark  => 1,
+                     unstack   => 1,
+                }
+            );
+}

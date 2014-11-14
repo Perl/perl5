@@ -1,6 +1,6 @@
 #!perl
 
-# This file specifies a hash-of-hashes that define snippets of code that
+# This file specifies an array-of-hashes that define snippets of code that
 # can be run by various measurement and profiling tools.
 #
 # The basic idea is that any time you add an optimisation that is intended
@@ -15,16 +15,30 @@
 # will be written that can run selected (or all) snippets in various
 # environments. These will not be run as part of a normal test suite run.
 #
+# It is intended that the tests in this file will be lightweight; e.g.
+# a hash access, an empty function call, or a single regex match etc.
+#
 # This file is designed to be read in by 'do' (and in such a way that
 # multiple versions of this file from different releases can be read in
 # by a single process).
 #
-# Each key of the top-level hash is a token that describes a particular
-# test. Code will be compiled in the package named after the token, so it
-# should match /^\w+$/a. It is intended that this can be used on the
-# command line of tools to select particular tests, .
+# The top-level array has name/hash pairs (we use an array rather than a
+# hash so that duplicate keys can be spotted) Each name is a token that
+# describes a particular test. Code will be compiled in the package named
+# after the token, so it should match /^(\w|::)+$/a. It is intended that
+# this can be used on the command line of tools to select particular
+# tests.
+# In addition, the package names are arranged into an informal hierarchy
+# whose top members are (this is subject to change):
 #
-# Each value is also a hash, with three fields:
+#     call::     subroutine and method handling
+#     expr::     expressions: e.g. $x=1, $foo{bar}[0]
+#     loop::     structural code like for, while(), etc
+#     regex::    regular expressions
+#     string::   string handling
+#
+#
+# Each hash has three fields:
 #
 #   desc is a description of the test
 #   setup is a string containing setup code
@@ -33,13 +47,27 @@
 # So typically a benchmark tool might do something like
 #
 #   eval "package $token; $setup; for (1..1000000) { $code }"
+#
+# Currently the only tool that uses this file is Porting/bench.pl;
+# try C<perl Porting/bench.pl --help> for more info
 
 
-{
-    arg_assignment => {
-        desc    => 'assignment to local vars from @_',
-        setup   => 'sub arg_assignment { my ($a, $b, $c) = @_ }',
-        code    => 'arg_assignment(1,2,3)',
+[
+    'call::sub::3_args' => {
+        desc    => 'function call with 3 local lexical vars',
+        setup   => 'sub f { my ($a, $b, $c) = @_ }',
+        code    => 'f(1,2,3)',
     },
-};
+
+    'expr::assign::scalar_lex' => {
+        desc    => 'lexical $x = 1',
+        setup   => 'my $x',
+        code    => '$x = 1',
+    },
+    'expr::assign::2list_lex' => {
+        desc    => 'lexical ($x, $y) = (1, 2)',
+        setup   => 'my ($x, $y)',
+        code    => '($x, $y) = (1, 2)',
+    },
+];
 

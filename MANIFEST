@@ -4701,6 +4701,7 @@ pod/splitpod			Splits perlfunc into multiple pod pages
 Policy_sh.SH			Hold site-wide preferences between Configure runs.
 Porting/acknowledgements.pl	Generate perldelta acknowledgements text
 Porting/add-package.pl		Add/Update CPAN modules that are part of Core
+Porting/bench.pl		Run benchmarks against t/perf/benchmarks
 Porting/bisect-example.sh	Example script to use with git bisect run
 Porting/bisect.pl		A tool to make bisecting easy
 Porting/bisect-runner.pl	Tool to be called by git bisect run
@@ -5371,6 +5372,7 @@ t/perf/speed.t			See if optimisations are keeping things fast
 t/perl.supp			Perl valgrind suppressions
 t/porting/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
 t/porting/authors.t		Check that all authors have been acknowledged
+t/porting/bench.t		Check that Porting/bench.pl is okay
 t/porting/bincompat.t		Check that {non_,}bincompat_options are ordered
 t/porting/checkcase.t		Check whether we are case-insensitive-fs-friendly
 t/porting/checkcfgvar.t		Check that all config.sh-like files are good

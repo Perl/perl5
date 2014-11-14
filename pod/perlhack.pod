@@ -961,6 +961,27 @@ available memory can be run safely.
 See also the documentation for the Test and Test::Harness modules, for
 more environment variables that affect testing.
 
+=head2 Performance testing
+
+The file F<t/perf/benchmarks> contains snippets of perl code which are
+intended to be benchmarked across a range of perls by the
+F<Porting/bench.pl> tool. If you fix or enhance a performance issue, you
+may want to add a representative code sample to the file, then run
+F<bench.pl> against the previous and current perls to see what difference
+it has made, and whether anything else has slowed down as a consequence.
+
+The file F<t/perf/opcount.t> is designed to test whether a particular
+code snippet has been compiled into an optree containing specified
+numbers of particular op types. This is good for testing whether
+optimisations which alter ops, such as converting an C<aelem> op into an
+C<aelemfast> op, are really doing that.
+
+The files F<t/perf/speed.t> and F<t/re/speed.t> are designed to test
+things that run thousands of times slower if a particular optimisation
+is broken (for example, the utf8 length cache on long utf8 strings).
+Add a test that will take a fraction of a second normally, and minutes
+otherwise, causing the test file to time out on failure.
+
 =head1 MORE READING FOR GUTS HACKERS
 
 To hack on the Perl guts, you'll need to read the following things:

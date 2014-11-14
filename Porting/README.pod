@@ -16,6 +16,10 @@ text.
 Program to prepare dual-life distributions for insertion into the Perl 5
 F<lib/> and F<t/> directories.  Now thought to be largely superseded.
 
+=head2 F<bench.pl>
+
+Do performance analysis on the code snippets in F<t/perf/benchmarks>.
+
 =head2 F<bisect-example.sh>, F<bisect.pl> and F<bisect-runner.pl>
 
 Use C<git bisect> to pinpoint changes.
