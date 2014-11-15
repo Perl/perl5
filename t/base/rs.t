@@ -236,7 +236,8 @@ sub test_record {
   $test_count++;
 
   # Naughty straight number - should get the rest of the file
-  $/ = \0;
+  # no warnings 'deprecated'; # but not in t/base/*
+  { local $SIG{__WARN__} = sub {}; $/ = \0 }
   $bar = <FH>;
   if ($bar ne "90123456789012345678901234567890") {print "not ";}
   print "ok $test_count # \$/ = \\0\n";
