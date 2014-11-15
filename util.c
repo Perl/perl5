@@ -172,17 +172,14 @@ Perl_safesysmalloc(MEM_SIZE size)
 #endif
         ptr = (Malloc_t)((char*)ptr+PERL_MEMORY_DEBUG_HEADER_SIZE);
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
-	ret:
 	return ptr;
 }
     else {
 #ifndef ALWAYS_NEED_THX
 	dTHX;
 #endif
-	if (PL_nomemok){
-	    ptr = NULL;
-	    goto ret;
-	}
+	if (PL_nomemok)
+	    return NULL;
 	else {
 	    croak_no_mem();
 	}
@@ -210,14 +207,11 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 
     if (!size) {
 	safesysfree(where);
-	ptr = NULL;
-	goto ret;
+	return NULL;
     }
 
-    if (!where) {
-	ptr = safesysmalloc(size);
-	goto ret;
-    }
+    if (!where)
+	return safesysmalloc(size);
 #ifdef USE_MDH
     where = (Malloc_t)((char*)where-PERL_MEMORY_DEBUG_HEADER_SIZE);
     size += PERL_MEMORY_DEBUG_HEADER_SIZE;
@@ -299,17 +293,14 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 
 
     if (ptr != NULL) {
-	ret:
 	return ptr;
     }
     else {
 #ifndef ALWAYS_NEED_THX
 	dTHX;
 #endif
-	if (PL_nomemok){
-	    ptr = NULL;
-	    goto ret;
-	}
+	if (PL_nomemok)
+	    return NULL;
 	else {
 	    croak_no_mem();
 	}
