@@ -54,6 +54,12 @@ between(0.76, tanh(1), 0.77, 'tanh(1)');
 between(-0.77, tanh(-1), -0.76, 'tanh(-1)');
 cmp_ok(tanh(1), '==', -tanh(-1), 'tanh(1) == -tanh(-1)');
 
+sub near {
+    my ($got, $want, $msg, $eps) = @_;
+    $eps ||= 1e-6;
+    cmp_ok(abs($got - $want), '<', $eps, $msg);
+}
+
 SKIP: {
     my $C99_SKIP = 63;
 
@@ -63,17 +69,17 @@ SKIP: {
     if ($^O =~ /Win32|VMS/) {
         skip "running in $^O, C99 math support uneven", $C99_SKIP;
     }
-    cmp_ok(abs(M_SQRT2 - 1.4142135623731), '<', 1e-9, "M_SQRT2");
-    cmp_ok(abs(M_E - 2.71828182845905), '<', 1e-9, "M_E");
-    cmp_ok(abs(M_PI - 3.14159265358979), '<', 1e-9, "M_PI");
-    cmp_ok(abs(acosh(2) - 1.31695789692482), '<', 1e-9, "acosh");
-    cmp_ok(abs(asinh(1) - 0.881373587019543), '<', 1e-9, "asinh");
-    cmp_ok(abs(atanh(0.5) - 0.549306144334055), '<', 1e-9, "atanh");
-    cmp_ok(abs(cbrt(8) - 2), '<', 1e-9, "cbrt");
-    cmp_ok(abs(cbrt(-27) - -3), '<', 1e-9, "cbrt");
-    cmp_ok(abs(copysign(3.14, -2) - -3.14), '<', 1e-9, "copysign");
-    cmp_ok(abs(expm1(2) - 6.38905609893065), '<', 1e-9, "expm1");
-    cmp_ok(abs(expm1(1e-6) - 1.00000050000017e-06), '<', 1e-9, "expm1");
+    near(M_SQRT2, 1.4142135623731, "M_SQRT2", 1e-9);
+    near(M_E, 2.71828182845905, "M_E", 1e-9);
+    near(M_PI, 3.14159265358979, "M_PI", 1e-9);
+    near(acosh(2), 1.31695789692482, "acosh", 1e-9);
+    near(asinh(1), 0.881373587019543, "asinh", 1e-9);
+    near(atanh(0.5), 0.549306144334055, "atanh", 1e-9);
+    near(cbrt(8), 2, "cbrt", 1e-9);
+    near(cbrt(-27), -3, "cbrt", 1e-9);
+    near(copysign(3.14, -2), -3.14, "copysign", 1e-9);
+    near(expm1(2), 6.38905609893065, "expm1", 1e-9);
+    near(expm1(1e-6), 1.00000050000017e-06, "expm1", 1e-9);
     is(fdim(12, 34), 0, "fdim 12 34");
     is(fdim(34, 12), 22, "fdim 34 12");
     is(fmax(12, 34), 34, "fmax 12 34");
@@ -83,7 +89,7 @@ SKIP: {
     is(fpclassify(INFINITY), FP_INFINITE, "fpclassify INFINITY");
     is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
     is(hypot(3, 4), 5, "hypot 3 4");
-    cmp_ok(abs(hypot(-2, 1) - sqrt(5)), '<', 1e-9, "hypot -1 2");
+    near(hypot(-2, 1), sqrt(5), "hypot -1 2", 1e-9);
     is(ilogb(255), 7, "ilogb 255");
     is(ilogb(256), 8, "ilogb 256");
     ok(isfinite(1), "isfinite 1");
@@ -98,9 +104,9 @@ SKIP: {
     ok(!isnan(Inf), "isnan Inf");
     ok(!isnan(42), "isnan Inf");
     cmp_ok(nan(), '!=', nan(), 'nan');
-    cmp_ok(abs(log1p(2) - 1.09861228866811), '<', 1e-9, "log1p");
-    cmp_ok(abs(log1p(1e-6) - 9.99999500000333e-07), '<', 1e-9, "log1p");
-    cmp_ok(abs(log2(8) - 3), '<', 1e-9, "log2");
+    near(log1p(2), 1.09861228866811, "log1p", 1e-9);
+    near(log1p(1e-6), 9.99999500000333e-07, "log1p", 1e-9);
+    near(log2(8), 3, "log2", 1e-9);
     is(signbit(2), 0, "signbit 2"); # zero
     ok(signbit(-2), "signbit -2"); # non-zero
     is(round(2.25), 2, "round 2.25");
@@ -122,10 +128,10 @@ SKIP: {
     ok(isgreater(2, 1), "isgreater 2 1");
     ok(islessequal(1, 1), "islessequal 1 1");
     ok(isunordered(1, NaN), "isunordered 1 NaN");
-    cmp_ok(abs(erf(1) - 0.842700792949715), '<', 1.5e-7, "erf 1");
-    cmp_ok(abs(erfc(1) - 0.157299207050285), '<', 1.5e-7, "erfc 1");
-    cmp_ok(abs(tgamma(9) - 40320), '<', 1.5e-7, "tgamma 9");
-    cmp_ok(abs(lgamma(9) - 10.6046029027452), '<', 1.5e-7, "lgamma 9");
+    near(erf(1), 0.842700792949715, "erf 1", 1.5e-7);
+    near(erfc(1), 0.157299207050285, "erfc 1", 1.5e-7);
+    near(tgamma(9), 40320, "tgamma 9", 1.5e-7);
+    near(lgamma(9), 10.6046029027452, "lgamma 9", 1.5e-7);
 
     # If adding more tests here, update also the $C99_SKIP
     # at the beginning of this SKIP block.
