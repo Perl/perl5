@@ -39,6 +39,9 @@ struct padlist {
  * flagging that a lexical is being introduced, or has not yet left scope
  */
 #define PERL_PADSEQ_INTRO  U32_MAX
+#define COP_SEQMAX_INC \
+	(PL_cop_seqmax++, \
+	 (void)(PL_cop_seqmax == PERL_PADSEQ_INTRO && PL_cop_seqmax++))
 
 
 /* B.xs needs these for the benefit of B::Deparse */

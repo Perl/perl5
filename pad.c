@@ -1571,9 +1571,7 @@ Perl_intro_my(pTHX)
 	    );
 	}
     }
-    PL_cop_seqmax++;
-    if (PL_cop_seqmax == PERL_PADSEQ_INTRO) /* not a legal value */
-	PL_cop_seqmax++;
+    COP_SEQMAX_INC;
     PL_min_intro_pending = 0;
     PL_comppad_name_fill = PL_max_intro_pending; /* Needn't search higher */
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
@@ -1631,9 +1629,7 @@ Perl_pad_leavemy(pTHX)
 	    }
 	}
     }
-    PL_cop_seqmax++;
-    if (PL_cop_seqmax == PERL_PADSEQ_INTRO) /* not a legal value */
-	PL_cop_seqmax++;
+    COP_SEQMAX_INC;
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 	    "Pad leavemy: seq = %ld\n", (long)PL_cop_seqmax));
     return o;

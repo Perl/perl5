@@ -3706,9 +3706,8 @@ Perl_block_start(pTHX_ int full)
 {
     const int retval = PL_savestack_ix;
 
-    PL_compiling.cop_seq = PL_cop_seqmax++;
-    if (PL_cop_seqmax == PERL_PADSEQ_INTRO) /* not a legal value */
-	PL_cop_seqmax++;
+    PL_compiling.cop_seq = PL_cop_seqmax;
+    COP_SEQMAX_INC;
     pad_block_start(full);
     SAVEHINTS();
     PL_hints &= ~HINT_BLOCK_SCOPE;
@@ -5889,10 +5888,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_parser->copline = NOLINE;
-    PL_cop_seqmax++; /* Purely for B::*'s benefit */
-    if (PL_cop_seqmax == PERL_PADSEQ_INTRO) /* not a legal value */
-	PL_cop_seqmax++;
-
+    COP_SEQMAX_INC; /* Purely for B::*'s benefit */
 }
 
 /*
