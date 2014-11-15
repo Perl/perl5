@@ -6,10 +6,6 @@
   SIG%s handler \"%s\" not defined.
     $SIG{"INT"} = "ok3"; kill "INT",$$;
 
-  Mandatory Warnings TODO
-  ------------------
-  Can't break at that line	[magic_setdbline]
-
 __END__
 # mg.c
 use warnings 'signal' ;
