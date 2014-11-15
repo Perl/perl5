@@ -13,7 +13,7 @@ use warnings;
 use strict;
 use Test::More;
 
-my $tests = 27; # not counting those in the __DATA__ section
+my $tests = 28; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -365,6 +365,18 @@ sub BEGIN {
 }
 EOCODJ
 }
+
+# [perl #115066]
+$::TODO = ' ';
+my $prog = 'use constant FOO => do { 1 }; no overloading; die';
+$a = readpipe qq`$^X $path "-MO=-qq,Deparse" -e "$prog" 2>&1`;
+is($a, <<'EOCODK', '[perl #115066] use statements accidentally nested');
+use constant ('FOO', do {
+    1;
+});
+no overloading;
+die;
+EOCODK
 
 done_testing($tests);
 
