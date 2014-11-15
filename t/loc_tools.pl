@@ -8,6 +8,11 @@
 # anyway later during the scanning process (and besides, some clueless
 # vendor might have them capitalized erroneously anyway).
 
+# Some of the locales on the system may not play well with Perl.  Since, we
+# may be trying every possible locale, we don't want to be warned about the
+# weird ones.
+no warnings 'locale';
+
 sub _trylocale {    # Adds the locale given by the first parameter to the list
                     # given by the 3rd iff the platform supports the locale in
                     # each of the categories given by the 2nd parameter, which

@@ -710,6 +710,8 @@ debug "Scanning for locales...\n";
 
 require POSIX; import POSIX ':locale_h';
 
+no warnings 'locale';  # We test even weird locales;
+
 my @Locale = find_locales([ &POSIX::LC_CTYPE, &POSIX::LC_NUMERIC, &POSIX::LC_ALL ]);
 
 debug "Locales =\n";
