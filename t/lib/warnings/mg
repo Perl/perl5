@@ -33,6 +33,12 @@ $/ = \-1;
 EXPECT
 Setting $/ to a reference to a negative integer as a form of slurp is deprecated, treating as undef at - line 3.
 ########
+$/ = \-1;
+no warnings 'deprecated';
+$/ = \-1;
+EXPECT
+Setting $/ to a reference to a negative integer as a form of slurp is deprecated, treating as undef at - line 1.
+########
 # mg.c
 use warnings 'signal' ;
 if ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') {

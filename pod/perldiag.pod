@@ -5222,7 +5222,7 @@ L<perlfunc/setsockopt>.
 
 =item Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef
 
-(W deprecated) You assigned a reference to a scalar to C<$/> where the
+(D deprecated) You assigned a reference to a scalar to C<$/> where the
 referenced item is not a positive integer.  In older perls this B<appeared>
 to work the same as setting it to C<undef> but was in fact internally
 different, less efficient and with very bad luck could have resulted in
