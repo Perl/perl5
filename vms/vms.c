@@ -9350,46 +9350,6 @@ int rms_sts;
     _ckvmssts_noperl(lib$find_file_end(&context));
 }
 
-static int child_st[2];/* Event Flag set when child process completes	*/
-
-static unsigned short child_chan;/* I/O Channel for Pipe Mailbox		*/
-
-static unsigned long int exit_handler(void)
-{
-short iosb[4];
-
-    if (0 == child_st[0])
-	{
-#ifdef ARGPROC_DEBUG
-	PerlIO_printf(Perl_debug_log, "Waiting for Child Process to Finish . . .\n");
-#endif
-	fflush(stdout);	    /* Have to flush pipe for binary data to	*/
-			    /* terminate properly -- <tp@mccall.com>	*/
-	sys$qiow(0, child_chan, IO$_WRITEOF, iosb, 0, 0, 0, 0, 0, 0, 0, 0);
-	sys$dassgn(child_chan);
-	fclose(stdout);
-	sys$synch(0, child_st);
-	}
-    return(1);
-}
-
-static void sig_child(int chan)
-{
-#ifdef ARGPROC_DEBUG
-    PerlIO_printf(Perl_debug_log, "Child Completion AST\n");
-#endif
-    if (child_st[0] == 0)
-	child_st[0] = 1;
-}
-
-static struct exit_control_block exit_block =
-    {
-    0,
-    exit_handler,
-    1,
-    &exit_block.exit_status,
-    0
-    };
 
 static void 
 pipe_and_fork(pTHX_ char **cmargv)
