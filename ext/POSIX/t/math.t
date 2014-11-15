@@ -76,42 +76,31 @@ SKIP: {
     is(fdim(34, 12), 22, "fdim 34 12");
     is(fmax(12, 34), 34, "fmax 12 34");
     is(fmin(12, 34), 12, "fmin 12 34");
-  SKIP: {
-      is(fpclassify(1), FP_NORMAL, "fpclassify 1");
-      is(fpclassify(0), FP_ZERO, "fpclassify 0");
-      is(fpclassify(INFINITY), FP_INFINITE, "fpclassify INFINITY");
-      is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
-    }
+    is(fpclassify(1), FP_NORMAL, "fpclassify 1");
+    is(fpclassify(0), FP_ZERO, "fpclassify 0");
+    is(fpclassify(INFINITY), FP_INFINITE, "fpclassify INFINITY");
+    is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
     is(hypot(3, 4), 5, "hypot 3 4");
     cmp_ok(abs(hypot(-2, 1) - sqrt(5)), '<', 1e-9, "hypot -1 2");
     is(ilogb(255), 7, "ilogb 255");
     is(ilogb(256), 8, "ilogb 256");
-  SKIP: {
-      skip "no isfinite", 3;
-      ok(isfinite(1), "isfinite 1");
-      ok(!isfinite(Inf), "isfinite Inf");
-      ok(!isfinite(NaN), "isfinite NaN");
-    }
-  SKIP: {
-      ok(isinf(INFINITY), "isinf INFINITY");
-      ok(isinf(Inf), "isinf Inf");
-      ok(!isinf(NaN), "isinf NaN");
-      ok(!isinf(42), "isinf 42");
-    }
-  SKIP: {
-      ok(isnan(NAN), "isnan NAN");
-      ok(isnan(NaN), "isnan NaN");
-      ok(!isnan(Inf), "isnan Inf");
-      ok(!isnan(42), "isnan Inf");
-    }
+    ok(isfinite(1), "isfinite 1");
+    ok(!isfinite(Inf), "isfinite Inf");
+    ok(!isfinite(NaN), "isfinite NaN");
+    ok(isinf(INFINITY), "isinf INFINITY");
+    ok(isinf(Inf), "isinf Inf");
+    ok(!isinf(NaN), "isinf NaN");
+    ok(!isinf(42), "isinf 42");
+    ok(isnan(NAN), "isnan NAN");
+    ok(isnan(NaN), "isnan NaN");
+    ok(!isnan(Inf), "isnan Inf");
+    ok(!isnan(42), "isnan Inf");
     cmp_ok(nan(), '!=', nan(), 'nan');
     cmp_ok(abs(log1p(2) - 1.09861228866811), '<', 1e-9, "log1p");
     cmp_ok(abs(log1p(1e-6) - 9.99999500000333e-07), '<', 1e-9, "log1p");
     cmp_ok(abs(log2(8) - 3), '<', 1e-9, "log2");
-  SKIP: {
-      is(signbit(2), 0, "signbit 2"); # zero
-      ok(signbit(-2), "signbit -2"); # non-zero
-    }
+    is(signbit(2), 0, "signbit 2"); # zero
+    ok(signbit(-2), "signbit -2"); # non-zero
     is(round(2.25), 2, "round 2.25");
     is(round(-2.25), -2, "round -2.25");
     is(round(2.5), 3, "round 2.5");
