@@ -334,6 +334,8 @@ sub register_event {
     | || die $@;
 }
 
+sub meta { is_tester($_[0]->[FRAME]->[0]) }
+
 sub hide_todo {
     my $self = shift;
     no strict 'refs';

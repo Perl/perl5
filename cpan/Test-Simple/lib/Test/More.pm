@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_073';
+our $VERSION = '1.301001_074';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream 1.301001 '-internal';
@@ -442,8 +442,8 @@ Test::More - The defacto standard in unit testing tools.
 
 =head1 SYNOPSIS
 
-    # Enabled forking, and removes expensive legacy support
-    # Also provides context(), cull(), and tap_encoding()
+    # Using Test::Stream BEFORE using Test::More removes expensive legacy
+    # support. This Also provides context(), cull(), and tap_encoding()
     use Test::Stream;
 
     # Load after Test::Stream to get the benefits of removed legacy
@@ -591,12 +591,15 @@ This is safer than and replaces the "no_plan" plan.
 
 =head2 Test::Stream
 
-When you use Test::Stream, it enables support for forking in your tests. If it
-is loaded before Test::More then it will prevent the insertion of some legacy
-support shims, saving you memory and improving performance.
+If Test::Stream is loaded before Test::More then it will prevent the insertion
+of some legacy support shims, saving you memory and improving performance.
 
     use Test::Stream;
     use Test::More;
+
+You can also use it to make forking work:
+
+    use Test::Stream 'enable_fork';
 
 =head2 TAP Encoding
 
