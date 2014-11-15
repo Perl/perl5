@@ -1645,10 +1645,18 @@ sub seq_subs {
 #push @text, "# ($seq)\n";
 
     return "" if !defined $seq;
+    my @pending;
     while (scalar(@{$self->{'subs_todo'}})
 	   and $seq > $self->{'subs_todo'}[0][0]) {
+	my $cv = $self->{'subs_todo'}[0][1];
+	my $outside = $cv && $cv->OUTSIDE;
+	if ($cv and ${$cv->OUTSIDE || \0} != ${$self->{'curcv'}}) {
+	    push @pending, shift @{$self->{'subs_todo'}};
+	    next;
+	}
 	push @text, $self->next_todo;
     }
+    unshift @{$self->{'subs_todo'}}, @pending;
     return @text;
 }
 

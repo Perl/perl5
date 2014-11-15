@@ -367,12 +367,11 @@ EOCODJ
 }
 
 # [perl #115066]
-$::TODO = ' ';
 my $prog = 'use constant FOO => do { 1 }; no overloading; die';
 $a = readpipe qq`$^X $path "-MO=-qq,Deparse" -e "$prog" 2>&1`;
 is($a, <<'EOCODK', '[perl #115066] use statements accidentally nested');
 use constant ('FOO', do {
-    1;
+    1
 });
 no overloading;
 die;
