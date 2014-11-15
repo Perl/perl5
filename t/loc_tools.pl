@@ -58,6 +58,7 @@ sub _decode_encodings {
             push @enc, "$_.65001"; # Windows UTF-8
             push @enc, "$_.ACP"; # Windows ANSI code page
             push @enc, "$_.OCP"; # Windows OEM code page
+            push @enc, "$_.1252"; # Windows
 	}
     }
     if ($^O eq 'os390') {
