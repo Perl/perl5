@@ -12,7 +12,7 @@ use strict;
 plan(tests => 16);
 
 SKIP: {
-skip_without_dynamic_extension("Devel::Peek");
+skip_without_dynamic_extension("Devel::Peek", 2);
 
 my $out = runperl(stderr => 1,
 		  progs => [ split /\n/, <<'EOS' ]);

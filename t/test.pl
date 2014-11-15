@@ -479,12 +479,14 @@ sub skip {
     my $why = shift;
     my $n   = @_ ? shift : 1;
     my $bad_swap;
+    my $both_zero;
     {
       local $^W = 0;
       $bad_swap = $why > 0 && $n == 0;
+      $both_zero = $why == 0 && $n == 0;
     }
-    if ($bad_swap || @_) {
-      my $arg = "$why, '$n'";
+    if ($bad_swap || $both_zero || @_) {
+      my $arg = "'$why', '$n'";
       if (@_) {
         $arg .= join(", ", '', map { qq['$_'] } @_);
       }
@@ -503,10 +505,11 @@ sub skip_if_miniperl {
 }
 
 sub skip_without_dynamic_extension {
-    my ($extension) = @_;
-    skip("no dynamic loading on miniperl, no $extension") if is_miniperl();
-    return if &_have_dynamic_extension;
-    skip("$extension was not built");
+    my $extension = shift;
+    skip("no dynamic loading on miniperl, no extension $extension", @_)
+	if is_miniperl();
+    return if &_have_dynamic_extension($extension);
+    skip("extension $extension was not built", @_);
 }
 
 sub todo_skip {
