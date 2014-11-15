@@ -643,7 +643,7 @@ static NV my_expm1(NV x)
 #ifndef c99_fdim
 static NV my_fdim(NV x, NV y)
 {
-  return x > y ? x - y : 0;
+  return (Perl_isnan(x) || Perl_isnan(y)) ? NV_NAN : (x > y ? x - y : 0);
 }
 #  define c99_fdim my_fdim
 #endif
