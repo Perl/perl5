@@ -239,7 +239,7 @@ your subroutine's name.
       return($x * __SUB__->( $x - 1 ) );
     };
 
-The behaviour of C<__SUB__> within a regex code block (such as C</(?{...})/>)
+The behavior of C<__SUB__> within a regex code block (such as C</(?{...})/>)
 is subject to change.
 
 Subroutines whose names are in all upper case are reserved to the Perl
@@ -897,7 +897,7 @@ to safely reuse $_ in a subroutine.
 B<WARNING>: Localization of tied arrays and hashes does not currently
 work as described.
 This will be fixed in a future release of Perl; in the meantime, avoid
-code that relies on any particular behaviour of localising tied arrays
+code that relies on any particular behavior of localising tied arrays
 or hashes (localising individual elements is still okay).
 See L<perl58delta/"Localising Tied Arrays and Hashes Is Broken"> for more
 details.
