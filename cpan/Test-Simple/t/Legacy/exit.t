@@ -23,12 +23,6 @@ use File::Spec;
 my $Orig_Dir = cwd;
 
 my $Perl = File::Spec->rel2abs($^X);
-if( $^O eq 'VMS' ) {
-    # Quiet noisy 'SYS$ABORT'
-    $Perl .= q{ -"I../lib"} if $ENV{PERL_CORE};
-    $Perl .= q{ -"Mvmsish=hushed"};
-}
-
 
 eval { require POSIX; &POSIX::WEXITSTATUS(0) };
 if( $@ ) {

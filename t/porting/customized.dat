@@ -3,6 +3,7 @@ Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
 IO::Socket::IP cpan/IO-Socket-IP/t/22timeout.t 0a65d4ca44663f70eea3c7f1ccb5faed2940611f
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Socket cpan/Socket/t/getnameinfo.t f25ae4125d64a81538d4d3b73a3a0b9ce3c0404d
+Test::Simple cpan/Test-Simple/t/Legacy/exit.t 83edbf569d56d8cdbabea552dfe5602ea1c1822e
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d
 Text::Balanced cpan/Text-Balanced/t/02_extbrk.t 6ba1b64a4604e822dc2260b8ffcea6b406339ee8
 Text::Balanced cpan/Text-Balanced/t/03_extcbk.t 3307c980af28963414cab799c427b359ef3b8657
