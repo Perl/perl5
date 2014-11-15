@@ -55,11 +55,13 @@ between(-0.77, tanh(-1), -0.76, 'tanh(-1)');
 cmp_ok(tanh(1), '==', -tanh(-1), 'tanh(1) == -tanh(-1)');
 
 SKIP: {
+    my $C99_SKIP = 63;
+
     unless ($Config{d_acosh}) {
-        skip "no acosh, suspecting no C99 math", 30;
+        skip "no acosh, suspecting no C99 math", $C99_SKIP;
     }
     if ($^O =~ /Win32|VMS/) {
-        skip "running in $^O, C99 math support uneven", 30;
+        skip "running in $^O, C99 math support uneven", $C99_SKIP;
     }
     cmp_ok(abs(M_SQRT2 - 1.4142135623731), '<', 1e-9, "M_SQRT2");
     cmp_ok(abs(M_E - 2.71828182845905), '<', 1e-9, "M_E");
@@ -124,6 +126,9 @@ SKIP: {
     cmp_ok(abs(erfc(1) - 0.157299207050285), '<', 1.5e-7, "erfc 1");
     cmp_ok(abs(tgamma(9) - 40320), '<', 1.5e-7, "tgamma 9");
     cmp_ok(abs(lgamma(9) - 10.6046029027452), '<', 1.5e-7, "lgamma 9");
-}
+
+    # If adding more tests here, update also the $C99_SKIP
+    # at the beginning of this SKIP block.
+} # SKIP
 
 done_testing();
