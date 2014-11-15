@@ -29,6 +29,11 @@ eval "s//<<foo/e"; die $@
 EXPECT
 Can't find string terminator "foo" anywhere before EOF at (eval 1) line 1.
 ########
+# NAME Unterminated here-doc in string
+"${<<foo"; # Used to give ‘Attempt to free blah blah blah’
+EXPECT
+Can't find string terminator "foo" anywhere before EOF at - line 1.
+########
 # NAME Unterminated qw//
 qw/
 EXPECT

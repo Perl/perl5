@@ -9277,7 +9277,14 @@ S_scan_heredoc(pTHX_ char *s)
 		    origline + 1 + PL_parser->herelines);
 	if (!lex_next_chunk(LEX_NO_TERM)
 	 && (!SvCUR(tmpstr) || SvEND(tmpstr)[-1] != '\n')) {
-	    SvREFCNT_dec(linestr_save);
+	    /* Simply freeing linestr_save might seem simpler here, as it
+	       does not matter what PL_linestr points to, since we are
+	       about to croak; but in a quote-like op, linestr_save
+	       will have been prospectively freed already, via
+	       SAVEFREESV(PL_linestr) in sublex_push, so it’s easier to
+	       restore PL_linestr. */
+	    SvREFCNT_dec_NN(PL_linestr);
+	    PL_linestr = linestr_save;
 	    goto interminable;
 	}
 	CopLINE_set(PL_curcop, origline);
