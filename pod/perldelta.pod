@@ -569,6 +569,12 @@ STORE twice or not at all on tied variables.  The operators affected were
 C<$foo++>, C<$foo-->, and C<-$foo> under C<use integer>, C<chomp>, C<chr>
 and C<setpgrp>.
 
+=item *
+
+List assignments were sometimes buggy if the same scalar ended up on both
+sides of the assignment due to used of C<tied>, C<values> or C<each>.  The
+result would be the wrong value getting assigned.
+
 =back
 
 =head1 Known Problems
