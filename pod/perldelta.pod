@@ -183,6 +183,9 @@ occurring just before the end of the enclosing block may appear below it
 instead.  So this change may need to be reverted if it cannot be fixed
 before Perl 5.22.  [perl #77452]
 
+B::Deparse no longer puts erroneous C<local> here and there, such as for
+C<LIST = tr/a//d>.  [perl #119815]
+
 =item *
 
 L<DynaLoader> has been upgraded from version 1.27 to 1.28.
