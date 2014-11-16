@@ -559,6 +559,16 @@ C<(...) x ...> in scalar context used to corrupt the stack if one operand
 were an object with "x" overloading, causing erratic behaviour.
 [perl #121827]
 
+=item *
+
+Assignment to a lexical scalar is often optimised away (as mentioned under
+L</Performance Enhancements>.  Various bugs related to this optimisation
+have been fixed.  Certain operators on the right-hand side would sometimes
+fail to assign the value at all or assign the wrong value, or would call
+STORE twice or not at all on tied variables.  The operators affected were
+C<$foo++>, C<$foo-->, and C<-$foo> under C<use integer>, C<chomp>, C<chr>
+and C<setpgrp>.
+
 =back
 
 =head1 Known Problems
