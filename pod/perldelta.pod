@@ -37,6 +37,12 @@ is now implemented on Win32.  It has the same limitations as C<system
 LIST> on Win32, since the Win32 API doesn't accept program arguments
 as a list.
 
+=head2 Assignment to list repetition
+
+C<(...) x ...> can now be used within a list that is assigned to, as long
+as the left-hand side is a valid lvalue.  This allows C<(undef,undef,$foo)
+= that_function()> to be written as C<((undef)x2, $foo) = that_function()>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
