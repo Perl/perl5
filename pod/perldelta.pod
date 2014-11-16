@@ -116,7 +116,11 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+C<(...)x1>, C<("constant")x0> and C<($scalar)x0> are now optimised in list
+context.  If the right-hand argument is a constant 1, the repetition
+operator disappears.  If the right-hand argument is a constant 0, the whole
+expressions is optimised to the empty list, so long as the left-hand
+argument is a simple scalar or constant.  C<(foo())x0> is not optimised.
 
 =back
 
