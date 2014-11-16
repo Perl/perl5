@@ -1355,8 +1355,7 @@ it's loaded, etc.
 
 =item Can't use %s for loop variable
 
-(F) Only a simple scalar variable may be used as a loop variable on a
-foreach.
+(P) The parser got confused when trying to parse a C<foreach> loop.
 
 =item Can't use global %s in "%s"
 
