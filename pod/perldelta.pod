@@ -429,6 +429,11 @@ In Perl 5.20.0, C<$^N> accidentally had the internal UTF8 flag turned off
 if accessed from a code block within a regular expression, effectively
 UTF8-encoding the value.  This has been fixed.  [perl #123135]
 
+=item *
+
+A failed C<semctl> call no longer overwrites existing items on the stack,
+causing C<(semctl(-1,0,0,0))[0]> to give an "uninitialized" warning.
+
 =back
 
 =head1 Known Problems
