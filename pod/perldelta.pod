@@ -136,6 +136,14 @@ C<substr> assignment is now optimised into 4-argument C<substr> at the end
 of a subroutine (or as the argument to C<return>).  Previously, this
 optimisation only happened in void context.
 
+=item *
+
+Assignment to lexical variables is often optimised away.  For instance, in
+C<$lexical = chr $foo>, the C<chr> operator writes directly to the lexical
+variable instead of returning a value that gets copied.  This optimisation
+has been extended to C<split>, C<x> and C<vec> on the right-hand side.  It
+has also been made to work with state variable initialization.
+
 =back
 
 =head1 Modules and Pragmata
