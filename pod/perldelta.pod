@@ -438,6 +438,11 @@ UTF8-encoding the value.  This has been fixed.  [perl #123135]
 A failed C<semctl> call no longer overwrites existing items on the stack,
 causing C<(semctl(-1,0,0,0))[0]> to give an "uninitialized" warning.
 
+=item *
+
+C<else{foo()}> with no space before C<foo> is now better at assigning the
+right line number to that statement.  [perl #122695]
+
 =back
 
 =head1 Known Problems
