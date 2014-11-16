@@ -525,6 +525,12 @@ argument when used in contexts like C<foreach>.  That allows
 C<for(($#that_array)x2) { ... }> to work as expected if the loop modifies
 $_.
 
+=item *
+
+C<(...) x ...> in scalar context used to corrupt the stack if one operand
+were an object with "x" overloading, causing erratic behaviour.
+[perl #121827]
+
 =back
 
 =head1 Known Problems
