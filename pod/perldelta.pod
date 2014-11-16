@@ -130,6 +130,12 @@ operator disappears.  If the right-hand argument is a constant 0, the whole
 expressions is optimised to the empty list, so long as the left-hand
 argument is a simple scalar or constant.  C<(foo())x0> is not optimised.
 
+=item *
+
+C<substr> assignment is now optimised into 4-argument C<substr> at the end
+of a subroutine (or as the argument to C<return>).  Previously, this
+optimisation only happened in void context.
+
 =back
 
 =head1 Modules and Pragmata
