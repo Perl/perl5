@@ -144,6 +144,11 @@ variable instead of returning a value that gets copied.  This optimisation
 has been extended to C<split>, C<x> and C<vec> on the right-hand side.  It
 has also been made to work with state variable initialization.
 
+=item *
+
+In "\L...", "\Q...", etc., the extra "stringify" op is now optimised away,
+making these just as fast as C<lcfirst>, C<quotemeta>, etc.
+
 =back
 
 =head1 Modules and Pragmata
