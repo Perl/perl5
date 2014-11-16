@@ -427,6 +427,12 @@ to the API.
 The internal C<convert> function in F<op.c> has been renamed
 C<op_convert_list> and added to the API.
 
+=item *
+
+C<sv_magic> no longer forbids "ext" magic on read-only values.  After all,
+perl can't know whether the custom magic will modify the SV or not.
+[perl #123103]
+
 =back
 
 =head1 Selected Bug Fixes
