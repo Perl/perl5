@@ -257,6 +257,10 @@ L<Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".|perldiag/Can't do %s(
 
 =back
 
+=item *
+
+L<Warning: unable to close filehandle %s properly: %s|perldiag/"Warning: unable to close filehandle %s properly: %s">
+
 =back
 
 =head2 Changes to Existing Diagnostics
