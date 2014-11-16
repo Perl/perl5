@@ -199,6 +199,13 @@ C<LIST = tr/a//d>.  [perl #119815]
 
 =item *
 
+L<B::Op_private> has been upgraded from version 5.021005 to 5.021006.
+
+It now includes a hash named C<%ops_using>, list all op types that use a
+particular private flag.
+
+=item *
+
 L<DynaLoader> has been upgraded from version 1.27 to 1.28.
 
 =item *
