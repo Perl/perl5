@@ -149,6 +149,12 @@ has also been made to work with state variable initialization.
 In "\L...", "\Q...", etc., the extra "stringify" op is now optimised away,
 making these just as fast as C<lcfirst>, C<quotemeta>, etc.
 
+=item *
+
+Assignment to an empty list is now sometimes faster.  In particular, it
+never calls C<FETCH> on tied arguments on the right-hand side, whereas it
+used to sometimes.
+
 =back
 
 =head1 Modules and Pragmata
