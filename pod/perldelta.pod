@@ -463,6 +463,16 @@ causing C<(semctl(-1,0,0,0))[0]> to give an "uninitialized" warning.
 C<else{foo()}> with no space before C<foo> is now better at assigning the
 right line number to that statement.  [perl #122695]
 
+=item *
+
+Sometimes the assignment in C<@array = split> gets optimised and C<split>
+itself writes directly to the array.  This caused a bug, preventing this
+assignment from being used in lvalue context.  So
+C<(@a=split//,"foo")=bar()> was an error.  (This bug probably goes back to
+Perl 3, when the optimisation was added.)  This optimisation, and the bug,
+started to happen in more cases in 5.21.5.  It has now been fixed.
+[perl #123057]
+
 =back
 
 =head1 Known Problems
