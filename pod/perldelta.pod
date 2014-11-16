@@ -410,6 +410,11 @@ has been fatal since 5.17.0.
 C<newDEFSVOP>, C<block_start>, C<block_end> and C<intro_my> have been added
 to the API.
 
+=item *
+
+The internal C<convert> function in F<op.c> has been renamed
+C<op_convert_list> and added to the API.
+
 =back
 
 =head1 Selected Bug Fixes
