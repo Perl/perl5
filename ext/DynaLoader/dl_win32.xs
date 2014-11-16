@@ -47,10 +47,13 @@ OS_Error_String(pTHX)
     dMY_CXT;
     DWORD err = GetLastError();
     STRLEN len;
-    if (!dl_error_sv)
-	dl_error_sv = newSVpvs("");
-    PerlProc_GetOSError(dl_error_sv,err);
-    return SvPV(dl_error_sv,len);
+    SV ** l_dl_error_svp = &dl_error_sv;
+    SV * l_dl_error_sv;
+    if (!*l_dl_error_svp)
+	*l_dl_error_svp = newSVpvs("");
+    l_dl_error_sv = *l_dl_error_svp;
+    PerlProc_GetOSError(l_dl_error_sv,err);
+    return SvPV(l_dl_error_sv,len);
 }
 
 static void
@@ -114,11 +117,14 @@ BOOT:
 void
 dl_load_file(filename,flags=0)
     char *		filename
-    int			flags
+#flags is unused
+    SV *		flags = NO_INIT
     PREINIT:
     void *retv;
+    SV * retsv;
     CODE:
   {
+    PERL_UNUSED_VAR(flags);
     DLDEBUG(1,PerlIO_printf(Perl_debug_log,"dl_load_file(%s):\n", filename));
     if (dl_static_linked(filename) == 0) {
 	retv = PerlProc_DynaLoad(filename);
@@ -126,12 +132,15 @@ dl_load_file(filename,flags=0)
     else
 	retv = (void*) Win_GetModuleHandle(NULL);
     DLDEBUG(2,PerlIO_printf(Perl_debug_log," libref=%x\n", retv));
-    ST(0) = sv_newmortal() ;
-    if (retv == NULL)
+
+    if (retv == NULL) {
 	SaveError(aTHX_ "load_file:%s",
 		  OS_Error_String(aTHX)) ;
+	retsv = &PL_sv_undef;
+    }
     else
-	sv_setiv( ST(0), (IV)retv);
+	retsv = sv_2mortal(newSViv((IV)retv));
+    ST(0) = retsv;
   }
 
 int
@@ -186,11 +195,11 @@ dl_install_xsub(perl_name, symref, filename="$Package")
 					filename)));
 
 
-char *
+SV *
 dl_error()
     CODE:
     dMY_CXT;
-    RETVAL = dl_last_error;
+    RETVAL = newSVsv(MY_CXT.x_dl_last_error);
     OUTPUT:
     RETVAL
 

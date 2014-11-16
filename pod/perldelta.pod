@@ -144,6 +144,10 @@ L<IO::Socket> has been upgraded from version 1.37 to 1.38.
 
 Document the limitations of the isconnected() method.  [perl #123096]
 
+=item *
+
+L<DynaLoader> has been upgraded from version 1.27 to 1.28.
+
 =back
 
 =head2 Removed Modules and Pragmata

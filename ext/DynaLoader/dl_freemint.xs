@@ -191,12 +191,11 @@ dl_install_xsub(perl_name, symref, filename="$Package")
 					      XS_DYNAMIC_FILENAME)));
     XSRETURN(1);
 
-char *
+SV *
 dl_error()
-    PREINIT:
-    dMY_CXT;
     CODE:
-    RETVAL = dl_last_error ;
+    dMY_CXT;
+    RETVAL = newSVsv(MY_CXT.x_dl_last_error);
     OUTPUT:
     RETVAL
 

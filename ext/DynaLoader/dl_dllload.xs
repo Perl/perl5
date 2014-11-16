@@ -184,11 +184,11 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     XSRETURN(1);
 
 
-char *
+SV *
 dl_error()
     CODE:
     dMY_CXT;
-    RETVAL = dl_last_error ;
+    RETVAL = newSVsv(MY_CXT.x_dl_last_error);
     OUTPUT:
     RETVAL
 
