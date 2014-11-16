@@ -479,6 +479,13 @@ When argument lists that fail the checks installed by subroutine
 signatures, the resulting error messages now give the file and line number
 of the caller, not of the called subroutine.  [perl #121374]
 
+=item *
+
+Flip-flop operators (C<..> and C<...> in scalar context) used to maintain
+a separate state for each recursion level (the number of times the
+enclosing sub was called recursively), contrary to the documentation.  Now
+each closure has one internal state for each flip-flop.  [perl #122829]
+
 =back
 
 =head1 Known Problems
