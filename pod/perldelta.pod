@@ -486,6 +486,13 @@ a separate state for each recursion level (the number of times the
 enclosing sub was called recursively), contrary to the documentation.  Now
 each closure has one internal state for each flip-flop.  [perl #122829]
 
+=item *
+
+C<use>, C<no>, statement labels, special blocks (C<BEGIN>) and pod are now
+permitted as the first thing in a C<map> or C<grep> block, the block after
+C<print> or C<say> (or other functions) returning a handle, and within
+C<${...}>, C<@{...}>, etc.  [perl #122782]
+
 =back
 
 =head1 Known Problems
