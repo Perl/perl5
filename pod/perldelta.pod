@@ -43,6 +43,14 @@ C<(...) x ...> can now be used within a list that is assigned to, as long
 as the left-hand side is a valid lvalue.  This allows C<(undef,undef,$foo)
 = that_function()> to be written as C<((undef)x2, $foo) = that_function()>.
 
+=head2 C<close> now sets C<$!>
+
+When an I/O error occurs, the fact that there has been an error is recorded
+in the handle.  C<close> returns false for such a handle.  Previously, the
+value of C<$!> would be untouched by C<close>, so the common convention of
+writing C<close $fh or die $!> did not work reliably.  Now the handle
+records the value of C<$!>, too, and C<close> restores it.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
