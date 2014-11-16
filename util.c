@@ -917,23 +917,6 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
     }
 }
 
-char *
-Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
-{
-    PERL_ARGS_ASSERT_SCREAMINSTR;
-    PERL_UNUSED_ARG(bigstr);
-    PERL_UNUSED_ARG(littlestr);
-    PERL_UNUSED_ARG(start_shift);
-    PERL_UNUSED_ARG(end_shift);
-    PERL_UNUSED_ARG(old_posp);
-    PERL_UNUSED_ARG(last);
-
-    /* This function must only ever be called on a scalar with study magic,
-       but those do not happen any more. */
-    Perl_croak(aTHX_ "panic: screaminstr");
-    NORETURN_FUNCTION_END;
-}
-
 /*
 =for apidoc foldEQ
 
@@ -1565,6 +1548,13 @@ The function never actually returns.
 =cut
 */
 
+#ifdef _MSC_VER
+#  pragma warning( push )
+#  pragma warning( disable : 4646 ) /* warning C4646: function declared with
+    __declspec(noreturn) has non-void return type */
+#  pragma warning( disable : 4645 ) /* warning C4645: function declared with
+__declspec(noreturn) has a return statement */
+#endif
 OP *
 Perl_die_sv(pTHX_ SV *baseex)
 {
@@ -1573,6 +1563,9 @@ Perl_die_sv(pTHX_ SV *baseex)
     assert(0); /* NOTREACHED */
     NORETURN_FUNCTION_END;
 }
+#ifdef _MSC_VER
+#  pragma warning( pop )
+#endif
 
 /*
 =for apidoc Am|OP *|die|const char *pat|...
@@ -1585,6 +1578,13 @@ The function never actually returns.
 */
 
 #if defined(PERL_IMPLICIT_CONTEXT)
+#ifdef _MSC_VER
+#  pragma warning( push )
+#  pragma warning( disable : 4646 ) /* warning C4646: function declared with
+    __declspec(noreturn) has non-void return type */
+#  pragma warning( disable : 4645 ) /* warning C4645: function declared with
+__declspec(noreturn) has a return statement */
+#endif
 OP *
 Perl_die_nocontext(const char* pat, ...)
 {
@@ -1596,8 +1596,18 @@ Perl_die_nocontext(const char* pat, ...)
     va_end(args);
     NORETURN_FUNCTION_END;
 }
+#ifdef _MSC_VER
+#  pragma warning( pop )
+#endif
 #endif /* PERL_IMPLICIT_CONTEXT */
 
+#ifdef _MSC_VER
+#  pragma warning( push )
+#  pragma warning( disable : 4646 ) /* warning C4646: function declared with
+    __declspec(noreturn) has non-void return type */
+#  pragma warning( disable : 4645 ) /* warning C4645: function declared with
+__declspec(noreturn) has a return statement */
+#endif
 OP *
 Perl_die(pTHX_ const char* pat, ...)
 {
@@ -1608,6 +1618,9 @@ Perl_die(pTHX_ const char* pat, ...)
     va_end(args);
     NORETURN_FUNCTION_END;
 }
+#ifdef _MSC_VER
+#  pragma warning( pop )
+#endif
 
 /*
 =for apidoc Am|void|croak_sv|SV *baseex

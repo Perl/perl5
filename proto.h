@@ -904,6 +904,16 @@ PERL_CALLCONV char*	Perl_delimcpy(char* to, const char* toend, const char* from,
 	assert(to); assert(toend); assert(from); assert(fromend); assert(retlen)
 
 PERL_CALLCONV void	Perl_despatch_signals(pTHX);
+PERL_CALLCONV_NO_RET OP*	Perl_die(pTHX_ const char* pat, ...)
+			__attribute__noreturn__
+			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
+
+PERL_CALLCONV_NO_RET OP*	Perl_die_sv(pTHX_ SV *baseex)
+			__attribute__noreturn__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_DIE_SV	\
+	assert(baseex)
+
 PERL_CALLCONV_NO_RET void	Perl_die_unwind(pTHX_ SV* msv)
 			__attribute__noreturn__
 			__attribute__nonnull__(pTHX_1);
@@ -5232,16 +5242,6 @@ PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *index, size_t size)
 
 #endif
 #if !(defined(_MSC_VER))
-PERL_CALLCONV_NO_RET OP*	Perl_die(pTHX_ const char* pat, ...)
-			__attribute__noreturn__
-			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
-
-PERL_CALLCONV_NO_RET OP*	Perl_die_sv(pTHX_ SV *baseex)
-			__attribute__noreturn__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_DIE_SV	\
-	assert(baseex)
-
 PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__noreturn__
 			__attribute__nonnull__(pTHX_1)
@@ -5249,20 +5249,6 @@ PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
 #define PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET	\
 	assert(sv); assert(mg)
 
-PERL_CALLCONV_NO_RET char*	Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
-			__attribute__noreturn__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_5);
-#define PERL_ARGS_ASSERT_SCREAMINSTR	\
-	assert(bigstr); assert(littlestr); assert(old_posp)
-
-#  if defined(PERL_IMPLICIT_CONTEXT)
-PERL_CALLCONV_NO_RET OP*	Perl_die_nocontext(const char* pat, ...)
-			__attribute__noreturn__
-			__attribute__format__null_ok__(__printf__,1,2);
-
-#  endif
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 PERL_CALLCONV char*	Perl_my_bzero(char* loc, I32 len)
@@ -5765,6 +5751,10 @@ PERL_CALLCONV void	Perl_deb_nocontext(const char* pat, ...)
 #define PERL_ARGS_ASSERT_DEB_NOCONTEXT	\
 	assert(pat)
 
+PERL_CALLCONV_NO_RET OP*	Perl_die_nocontext(const char* pat, ...)
+			__attribute__noreturn__
+			__attribute__format__null_ok__(__printf__,1,2);
+
 PERL_CALLCONV char*	Perl_form_nocontext(const char* pat, ...)
 			__attribute__format__(__printf__,1,2)
 			__attribute__nonnull__(1);
@@ -5841,11 +5831,6 @@ PERL_CALLCONV void	Perl_warner_nocontext(U32 err, const char* pat, ...)
 #define PERL_ARGS_ASSERT_WARNER_NOCONTEXT	\
 	assert(pat)
 
-#  if defined(_MSC_VER)
-PERL_CALLCONV OP*	Perl_die_nocontext(const char* pat, ...)
-			__attribute__format__null_ok__(__printf__,1,2);
-
-#  endif
 #endif
 #if defined(PERL_IMPLICIT_SYS)
 PERL_CALLCONV PerlInterpreter*	perl_alloc_using(struct IPerlMem *ipM, struct IPerlMem *ipMS, struct IPerlMem *ipMP, struct IPerlEnv *ipE, struct IPerlStdIO *ipStd, struct IPerlLIO *ipLIO, struct IPerlDir *ipD, struct IPerlSock *ipS, struct IPerlProc *ipP)
@@ -8205,26 +8190,11 @@ PERL_CALLCONV int	Perl_do_spawn_nowait(pTHX_ char* cmd)
 
 #endif
 #if defined(_MSC_VER)
-PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
-			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
-
-PERL_CALLCONV OP*	Perl_die_sv(pTHX_ SV *baseex)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_DIE_SV	\
-	assert(baseex)
-
 PERL_CALLCONV int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET	\
 	assert(sv); assert(mg)
-
-PERL_CALLCONV char*	Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_5);
-#define PERL_ARGS_ASSERT_SCREAMINSTR	\
-	assert(bigstr); assert(littlestr); assert(old_posp)
 
 #endif
 #ifdef PERL_CORE

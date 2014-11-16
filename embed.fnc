@@ -281,12 +281,7 @@ norx	|void	|win32_croak_not_implemented|NN const char * fname
 #endif
 #if defined(PERL_IMPLICIT_CONTEXT)
 Afnrp	|void	|croak_nocontext|NULLOK const char* pat|...
-:removing noreturn to silence a warning
-#ifdef _MSC_VER
-Afnp   |OP*    |die_nocontext  |NULLOK const char* pat|...
-#else
 Afnrp  |OP*    |die_nocontext  |NULLOK const char* pat|...
-#endif
 Afnp	|void	|deb_nocontext	|NN const char* pat|...
 Afnp	|char*	|form_nocontext	|NN const char* pat|...
 Anp	|void	|load_module_nocontext|U32 flags|NN SV* name|NULLOK SV* ver|...
@@ -343,14 +338,8 @@ Anp	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
 				|NN const char* fromend|int delim|NN I32* retlen
 : Used in op.c, perl.c
 pM	|void	|delete_eval_scope
-:removing noreturn to silence a warning
-#ifdef _MSC_VER
-Apd    |OP*    |die_sv         |NN SV *baseex
-Afpd   |OP*    |die            |NULLOK const char* pat|...
-#else
 Aprd    |OP*    |die_sv         |NN SV *baseex
 Afrpd   |OP*    |die            |NULLOK const char* pat|...
-#endif
 : Used in util.c
 pr	|void	|die_unwind	|NN SV* msv
 Ap	|void	|dounwind	|I32 cxix
@@ -850,7 +839,8 @@ p	|int	|magic_nextpack	|NN SV *sv|NN MAGIC *mg|NN SV *key
 p	|U32	|magic_regdata_cnt|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_regdatum_get|NN SV* sv|NN MAGIC* mg
 :removing noreturn to silence a warning for this function resulted in no
-:change to the interpreter DLL image under VS 2003 -O1 -GL 32 bits
+:change to the interpreter DLL image under VS 2003 -O1 -GL 32 bits only because
+:this is used in a magic vtable, do not use this on conventionally called funcs
 #ifdef _MSC_VER
 p	|int	|magic_regdatum_set|NN SV* sv|NN MAGIC* mg
 #else
@@ -1322,14 +1312,6 @@ Apd	|NV	|scan_hex	|NN const char* start|STRLEN len|NN STRLEN* retlen
 Ap	|char*	|scan_num	|NN const char* s|NN YYSTYPE *lvalp
 Apd	|NV	|scan_oct	|NN const char* start|STRLEN len|NN STRLEN* retlen
 AMpd	|OP*	|op_scope	|NULLOK OP* o
-:removing noreturn to silence a warning
-#ifdef _MSC_VER
-Ap      |char*  |screaminstr    |NN SV *bigstr|NN SV *littlestr|I32 start_shift \
-                                |I32 end_shift|NN I32 *old_posp|I32 last
-#else
-Apr     |char*  |screaminstr    |NN SV *bigstr|NN SV *littlestr|I32 start_shift \
-                                |I32 end_shift|NN I32 *old_posp|I32 last
-#endif
 : Only used by perl.c/miniperl.c, but defined in caretx.c
 px	|void	|set_caret_X
 Apd	|void	|setdefout	|NN GV* gv

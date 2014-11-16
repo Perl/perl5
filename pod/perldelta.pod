@@ -383,7 +383,9 @@ well.
 
 =item *
 
-XXX
+C<screaminstr> has been removed. Although marked as public API, it is
+undocumented and has no usage in modern perl versions on CPAN Grep. Calling it
+has been fatal since 5.17.0.
 
 =back
 
