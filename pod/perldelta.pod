@@ -158,6 +158,13 @@ XXX
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.29 to 1.30.
+
+It now deparses C<+sub : attr { ... }> correctly at the start of a
+statement.  Without the initial C<+>, C<sub> would be a statement label.
+
+=item *
+
 L<DynaLoader> has been upgraded from version 1.27 to 1.28.
 
 =item *
