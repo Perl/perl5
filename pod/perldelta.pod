@@ -278,7 +278,7 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-L<Quantifier unexpected on zero-length expression in regex m/%s/|perldiag/"Quantifier unexpected on zero-length expression in regex m/%s/">.
+L<Quantifier unexpected on zero-length expression in regex mE<sol>%sE<sol>|perldiag/"Quantifier unexpected on zero-length expression in regex m/%s/">.
 
 This message has had the S<"<-- HERE"> marker removed, as it was always
 placed at the end of the regular expression, regardless of where the
