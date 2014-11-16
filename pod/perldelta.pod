@@ -461,6 +461,11 @@ Warning fatality is now ignored when rewinding the stack.  This
 prevents infinite recursion when the now fatal error also causes
 rewinding of the stack.  [perl #123398]
 
+=item *
+
+C<setpgrp($nonzero)> (with one argument) was accidentally changed in 5.16
+to mean C<setpgrp(0)>.  This has been fixed.
+
 =back
 
 =head1 Known Problems
