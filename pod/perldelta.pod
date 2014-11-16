@@ -397,7 +397,8 @@ has been fatal since 5.17.0.
 
 =item *
 
-C<newDEFSVOP> has been added to the API.
+C<newDEFSVOP>, C<block_start>, C<block_end> and C<intro_my> have been added
+to the API.
 
 =back
 
