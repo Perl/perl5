@@ -31,6 +31,9 @@
 \bBUILD.COM$
 \bbuild.com$
 
+# and Module::Build::Tiny generated files
+\b_build_params$
+
 # Avoid temp and backup files.
 ~$
 \.old$

@@ -5,12 +5,12 @@ use Config;
 use File::Basename;
 use File::Copy 'copy';
 use File::Find;
-use File::Spec;
+use File::Spec 0.8;
 use Carp;
 use strict;
 use warnings;
 
-our $VERSION = '1.68';
+our $VERSION = '1.69';
 our @ISA = ('Exporter');
 our @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -62,6 +62,10 @@ our $DEFAULT_MSKIP = File::Spec->catfile( dirname(__FILE__), "$MANIFEST.SKIP" );
 =head1 NAME
 
 ExtUtils::Manifest - utilities to write and check a MANIFEST file
+
+=head1 VERSION
+
+version 1.69
 
 =head1 SYNOPSIS
 
