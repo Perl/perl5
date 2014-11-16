@@ -6098,7 +6098,7 @@ S_assignment_type(pTHX_ const OP *o)
 }
 
 /*
-  Helper function for newASSIGNOP to detection commonality between the
+  Helper function for newASSIGNOP to detect commonality between the
   lhs and the rhs.  (It is actually called very indirectly.  newASSIGNOP
   flags the op and the peephole optimizer calls this helper function
   if the flag is set.)  Marks all variables with PL_generation.  If it
