@@ -633,6 +633,15 @@ This bug was actually fixed in 5.21.5, but it was not until after that
 release that this bug, and the fact that it had been fixed, were
 discovered.
 
+=item *
+
+If a named sub tries to access a scalar declared in an outer anonymous sub,
+the variable is not available, so the named sub gets its own undefined
+scalar.  In 5.10, attempts to take a reference to the variable
+(C<\$that_variable>) began returning a reference to a I<copy> of it
+instead.  This was accidentally fixed in 5.21.4, but the bug and its fix
+were not noticed till now.
+
 =back
 
 =head1 Obituary
