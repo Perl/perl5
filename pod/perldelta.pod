@@ -296,6 +296,16 @@ L<Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".|perldiag/Can't do %s(
 
 L<Warning: unable to close filehandle %s properly: %s|perldiag/"Warning: unable to close filehandle %s properly: %s">
 
+=item *
+
+The following two warnings for C<tr///> used to be skipped if the
+transliteration contained wide characters, but now they occur regardless of
+whether there are wide characters or not:
+
+L<Useless use of E<sol>d modifier in transliteration operator|perldiag/"Useless use of /d modifier in transliteration operator">
+
+L<Replacement list is longer than search list|perldiag/Replacement list is longer than search list>
+
 =back
 
 =head2 Changes to Existing Diagnostics
