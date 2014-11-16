@@ -585,6 +585,11 @@ List assignments were sometimes buggy if the same scalar ended up on both
 sides of the assignment due to used of C<tied>, C<values> or C<each>.  The
 result would be the wrong value getting assigned.
 
+=item *
+
+C<setpgrp($nonzero)> (with one argument) was accidentally changed in 5.16
+to mean C<setpgrp(0)>.  This has been fixed.
+
 =back
 
 =head1 Known Problems
