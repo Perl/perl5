@@ -461,8 +461,15 @@ XSUB CV*s from going through optree CV* expecting code.
 
 =item *
 
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
+Due to a mistake in the string-copying logic, copying the value of a state
+variable could instead steal the value and undefine the variable.  This
+bug, introduced in 5.20, would happen mostly for long strings (1250 chars
+or more), but could happen for any strings under builds with copy-on-write
+disabled.  [perl #123029]
+
+This bug was actually fixed in 5.21.5, but it was not until after that
+release that this bug, and the fact that it had been fixed, were
+discovered.
 
 =back
 
