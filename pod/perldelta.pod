@@ -699,6 +699,12 @@ would happen with C<$lexical = crypt ...>.
 
 C<crypt> no longer calls C<FETCH> twice on a tied first argument.
 
+=item *
+
+An unterminated here-doc on the last line of a quote-like operator
+(C<qq[${ <<END }]>, C</(?{ <<END })/>) no longer causes a double free.  It
+started doing so in 5.18.
+
 =back
 
 =head1 Known Problems
