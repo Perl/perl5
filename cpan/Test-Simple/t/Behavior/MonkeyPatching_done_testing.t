@@ -54,7 +54,7 @@ is($ran, 2, "We ran our override both times");
 mostly_like(
     \@warnings,
     [
-        qr{The new sub is 'main::__ANON__' defined in $file around line $line},
+        qr{The new sub is 'main::__ANON__' defined in \Q$file\E around line $line},
         undef,
     ],
     "Got the warning once"

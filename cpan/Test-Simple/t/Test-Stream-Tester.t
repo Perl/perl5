@@ -97,7 +97,7 @@ events_are(
         event ok => {
             bool => 0,
             diag => [
-                qr{Failed test 'Lets name this test!'.*at (\./)?$0 line}s,
+                qr{Failed test 'Lets name this test!'.*at (\./)?\Q$0\E line}s,
                 qr{  Event: 'ok' from \Q$0\E line $line1}s,
                 qr{  Check: 'ok' from \Q$0\E line $line2}s,
                 qr{  \$got->\{bool\} = '1'},

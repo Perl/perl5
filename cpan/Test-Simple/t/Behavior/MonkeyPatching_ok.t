@@ -37,7 +37,7 @@ my $orig = Test::Builder->can('ok');
     mostly_like(
         \@warnings,
         [
-            qr{The new sub is 'MyModernTester::__ANON__' defined in $file around line $line},
+            qr{The new sub is 'MyModernTester::__ANON__' defined in \Q$file\E around line $line},
             undef, #Only 1 warning
         ],
         "Found expected warning, just the one"
@@ -73,7 +73,7 @@ my $orig = Test::Builder->can('ok');
     mostly_like(
         \@warnings,
         [
-            qr{The new sub is 'MyModernTester2::__ANON__' defined in $file around line $line},
+            qr{The new sub is 'MyModernTester2::__ANON__' defined in \Q$file\E around line $line},
             undef, #Only 1 warning
         ],
         "new override, new warning"
