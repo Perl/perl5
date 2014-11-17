@@ -2239,6 +2239,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 	    /* If the lexical is not used elsewhere, it is safe to turn on
 	       SvPADTMP, since it is only when it is used in lvalue con-
 	       text that the difference is observable.  */
+	    SvREADONLY_on(const_sv);
 	    SvPADTMP_on(const_sv);
 	    SvREFCNT_dec_NN(cv);
 	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);

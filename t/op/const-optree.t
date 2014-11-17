@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
     @INC = '../lib';
 }
-plan 167;
+plan 168;
 
 # @tests is an array of hash refs, each of which can have various keys:
 #
@@ -483,3 +483,11 @@ sub  { my $x = "x"; my $sub = sub () { $x }; undef $sub; } ->();
 pass("No assertion failure when turning on PADSTALE on lexical shared by"
     ." erstwhile constant");
 
+{
+    my $sub = sub {
+        my $x = "x"x2000; sub () {$x};
+    }->();
+    $y = &$sub;
+    $z = &$sub;
+    is $z, $y, 'inlinable sub ret vals are not swipable';
+}
