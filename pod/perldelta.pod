@@ -113,6 +113,49 @@ The practical effect of this occurs only when not under C<S<"use
 utf8">>, and affects just the C1 controls (code points 0x80 through
 0xFF), NO-BREAK SPACE, and SOFT HYPHEN.
 
+=head2 Inlining of C<sub () { $var }> with observable side-effects
+
+In many cases Perl makes sub () { $var } into an inlinable constant
+subroutine, capturing the value of $var at the time the C<sub> expression
+is evaluated.  This can break the closure behaviour in those cases where
+$var is subsequently modified.  The subroutine won't return the new value.
+
+This usage is now deprecated in those cases where the variable could be
+modified elsewhere.  Perl detects those cases and emits a deprecation
+warning.  Such code will likely change in the future and stop producing a
+constant.
+
+If your variable is only modified in the place where it is declared, then
+Perl will continue to make the sub inlinable with no warnings.
+
+    sub make_constant {
+        my $var = shift;
+        return sub () { $var }; # fine
+    }
+
+    sub make_constant_deprecated {
+        my $var;
+        $var = shift;
+        return sub () { $bar }; # deprecated
+    }
+
+    sub make_constant_deprecated2 {
+        my $var = shift;
+        log_that_value($var); # could modify $var
+        return sub () { $bar }; # deprecated
+    }
+
+In the second example above, detecting that $var is assigned to only once
+is too hard to detect.  That it happens in a spot other than the C<my>
+declaration is enough for Perl to find it suspicious.
+
+This deprecation warning happens only for a simple variable for the body of
+the sub.  (A C<BEGIN> block or C<use> statement inside the sub is ignored,
+because it does not become part of the sub's body.)  For more complex
+cases, such as C<sub () { do_something() if 0; $var }> the behaviour has
+changed such that inlining does not happen if the variable is modifiable
+elsewhere.  Such cases should be rare.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here.
@@ -607,6 +650,34 @@ to mean C<setpgrp(0)>.  This has been fixed.
 
 C<__SUB__> could return the wrong value or even corrupt memory under the
 debugger (the B<-d> switch) and in subs containing C<eval $string>.
+
+=item *
+
+When C<sub () { $var }> becomes inlinable, it now returns a different
+scalar each time, just as a non-inlinable sub would, though Perl still
+optimises the copy away in cases where it would make no observable
+difference.
+
+=item *
+
+C<my sub f () { $var }> and C<sub () : attr { $var }> are no longer
+eligible for inlining.  The former would crash; the latter would just
+throw the attributes away.  An exception is made for the little-known
+":method" attribute, which does nothing much.
+
+=item *
+
+Inlining of subs with an empty prototype is now more consistent than
+before.  Previously, a sub with multiple statements, all but the last
+optimised away, would be inlinable only if it were an anonymous sub
+containing a string C<eval> or C<state> declaration or closing over an
+outer lexical variable (or any anonymous sub under the debugger).  Now any
+sub that gets folded to a single constant after statements have been
+optimised away is eligible for inlining.  This applies to things like C<sub
+() { jabber() if DEBUG; 42 }>.
+
+Some subroutines with an explicit C<return> were being made inlinable,
+contrary to the documentation,  Now C<return> always prevents inlining.
 
 =back
 
