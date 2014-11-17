@@ -132,7 +132,7 @@ EOE
     $sc = 0;
     local $SIG{__WARN__} = \&wrn;
     eval "\$m = $op";
-    like $sc, $@ ? qr/^[01]\z/ : qr/^1\z/, "STORE count for $comment";
+    is $sc, $@ ? 0 : 1, "STORE count for $comment";
   }
 }
 
