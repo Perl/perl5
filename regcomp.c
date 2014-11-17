@@ -3842,9 +3842,9 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *      using /iaa matching will be doing so almost entirely with ASCII
  *      strings, so this should rarely be encountered in practice */
 
-#define JOIN_EXACT(scan,min_subtract,unfolded_multi_char, flags) \
+#define JOIN_EXACT(scan, min_subtract, unfolded_multi_char, flags) \
     if (PL_regkind[OP(scan)] == EXACT) \
-        join_exact(pRExC_state,(scan),(min_subtract),unfolded_multi_char, (flags),NULL,depth+1)
+        join_exact(pRExC_state,(scan),(min_subtract),unfolded_multi_char, (flags),NULL,params->depth+1)
 
 STATIC U32
 S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
@@ -4151,7 +4151,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         n++;
     }
 #endif
-    DEBUG_OPTIMISE_r(if (merged){DEBUG_PEEP("finl", scan, depth, 0);});
+    DEBUG_OPTIMISE_r(if (merged) { DEBUG_PEEP("finl", scan, depth, 0); });
     return stopnow;
 }
 
@@ -4162,9 +4162,9 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
    to the position after last scanned or to NULL. */
 
 #define INIT_AND_WITHP \
-    assert(!and_withp); \
-    Newx(and_withp,1, regnode_ssc); \
-    SAVEFREEPV(and_withp)
+    assert(!params->and_withp); \
+    Newx(params->and_withp,1, regnode_ssc); \
+    SAVEFREEPV(params->and_withp)
 
 
 static void
@@ -4178,47 +4178,83 @@ S_unwind_scan_frames(pTHX_ const void *p)
     } while (f);
 }
 
+typedef struct rck_params {
+    regnode **scanp;    /* scanp: Start here (read-write). */
+    SSize_t *minlenp;
+    SSize_t *deltap;    /* deltap: Write maxlen-minlen here. */
+    regnode *last;      /* last: Stop before this one. */
+    scan_data_t *data;  /* data: string data about the pattern */
+    I32 stopparen;      /* stopparen: treat close N as END */
+    U32 recursed_depth; /* recursed: which subroutines have we recursed into */
+    regnode_ssc *and_withp; /* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
+    U32 flags;
+    U32 depth;
+
+    SSize_t     min; /* must be at least this number of characters to match */
+    I32         pars;
+    I32         code;
+    regnode*    scan;
+    regnode*    next;
+    SSize_t     delta;
+    int         is_inf;
+    int         is_inf_internal; /* The studied chunk is infinite */
+    I32         is_par;
+    scan_data_t data_fake;
+    SV*         re_trie_maxbuff;
+    regnode*    first_non_open;
+    SSize_t     stopmin;
+    scan_frame* frame;
+} rck_params_t;
+
 /* the return from this sub is the minimum length that could possibly match */
 STATIC SSize_t
-S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
-                        SSize_t *minlenp, SSize_t *deltap,
-			regnode *last,
-			scan_data_t *data,
-			I32 stopparen,
-                        U32 recursed_depth,
-			regnode_ssc *and_withp,
-			U32 flags, U32 depth)
-			/* scanp: Start here (read-write). */
-			/* deltap: Write maxlen-minlen here. */
-			/* last: Stop before this one. */
-			/* data: string data about the pattern */
-			/* stopparen: treat close N as END */
-			/* recursed: which subroutines have we recursed into */
-			/* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
+S_study_chunk(
+    pTHX_ RExC_state_t *pRExC_state,
+    regnode **scanp,    /* scanp: Start here (read-write). */
+    SSize_t *minlenp,
+    SSize_t *deltap,    /* deltap: Write maxlen-minlen here. */
+    regnode *last,      /* last: Stop before this one. */
+    scan_data_t *data,  /* data: string data about the pattern */
+    I32 stopparen,      /* stopparen: treat close N as END */
+    U32 recursed_depth, /* recursed: which subroutines have we recursed into */
+    regnode_ssc *and_withp, /* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
+    U32 flags,
+    U32 depth)
 {
-    /* There must be at least this number of characters to match */
-    SSize_t min = 0;
-    I32 pars = 0, code;
-    regnode *scan = *scanp, *next;
-    SSize_t delta = 0;
-    int is_inf = (flags & SCF_DO_SUBSTR) && (data->flags & SF_IS_INF);
-    int is_inf_internal = 0;		/* The studied chunk is infinite */
-    I32 is_par = OP(scan) == OPEN ? ARG(scan) : 0;
-    scan_data_t data_fake;
-    SV *re_trie_maxbuff = NULL;
-    regnode *first_non_open = scan;
-    SSize_t stopmin = SSize_t_MAX;
-    scan_frame *frame = NULL;
+    rck_params_t s_params;
+    rck_params_t *params = &s_params;
     GET_RE_DEBUG_FLAGS_DECL;
+    params->scanp = scanp;
+    params->minlenp = minlenp;
+    params->deltap = deltap;
+    params->last = last;
+    params->data = data;
+    params->stopparen = stopparen;
+    params->recursed_depth = recursed_depth;
+    params->and_withp = and_withp;
+    params->flags = flags;
+    params->depth = depth;
+
+    params->min = 0;
+    params->pars = 0;
+    params->scan = *params->scanp;
+    params->delta = 0;
+    params->is_inf = (params->flags & SCF_DO_SUBSTR) && (params->data->flags & SF_IS_INF);
+    params->is_inf_internal = 0;
+    params->is_par = OP(params->scan) == OPEN ? ARG(params->scan) : 0;
+    params->re_trie_maxbuff = NULL;
+    params->first_non_open = params->scan;
+    params->stopmin = SSize_t_MAX;
+    params->frame = NULL;
 
     PERL_ARGS_ASSERT_STUDY_CHUNK;
     RExC_study_started= 1;
 
-    Zero(&data_fake, 1, scan_data_t);
+    Zero(&params->data_fake, 1, scan_data_t);
 
-    if ( depth == 0 ) {
-        while (first_non_open && OP(first_non_open) == OPEN)
-            first_non_open=regnext(first_non_open);
+    if (params->depth == 0) {
+        while (params->first_non_open && OP(params->first_non_open) == OPEN)
+            params->first_non_open = regnext(params->first_non_open);
     }
 
 
@@ -4229,15 +4265,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     DEBUG_OPTIMISE_MORE_r(
     {
         Perl_re_indentf( aTHX_  "study_chunk stopparen=%ld recursed_count=%lu depth=%lu recursed_depth=%lu scan=%p last=%p",
-            depth, (long)stopparen,
+            params->depth, (long)params->stopparen,
             (unsigned long)RExC_study_chunk_recursed_count,
-            (unsigned long)depth, (unsigned long)recursed_depth,
-            scan,
-            last);
-        if (recursed_depth) {
+            (unsigned long)params->depth, (unsigned long)params->recursed_depth,
+            params->scan,
+            params->last);
+        if (params->recursed_depth) {
             U32 i;
             U32 j;
-            for ( j = 0 ; j < recursed_depth ; j++ ) {
+            for ( j = 0 ; j < params->recursed_depth ; j++ ) {
                 for ( i = 0 ; i < (U32)RExC_npar ; i++ ) {
                     if (
                         PAREN_TEST(RExC_study_chunk_recursed +
@@ -4252,7 +4288,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         break;
                     }
                 }
-                if ( j + 1 < recursed_depth ) {
+                if ( j + 1 < params->recursed_depth ) {
                     Perl_re_printf( aTHX_  ",");
                 }
             }
@@ -4260,14 +4296,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
         Perl_re_printf( aTHX_ "\n");
     }
     );
-    while ( scan && OP(scan) != END && scan < last ){
+    while (params->scan && OP(params->scan) != END && params->scan < params->last) {
         UV min_subtract = 0;    /* How mmany chars to subtract from the minimum
                                    node length to get a real minimum (because
                                    the folded version may be shorter) */
 	bool unfolded_multi_char = FALSE;
 	/* Peephole optimizer: */
-        DEBUG_STUDYDATA("Peep", data, depth, is_inf);
-        DEBUG_PEEP("Peep", scan, depth, flags);
+        DEBUG_STUDYDATA("Peep", params->data, params->depth, params->is_inf);
+        DEBUG_PEEP("Peep", params->scan, params->depth, params->flags);
 
 
         /* The reason we do this here is that we need to deal with things like
@@ -4275,18 +4311,18 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
          * parsing code, as each (?:..) is handled by a different invocation of
          * reg() -- Yves
          */
-        JOIN_EXACT(scan,&min_subtract, &unfolded_multi_char, 0);
+        JOIN_EXACT(params->scan, &min_subtract, &unfolded_multi_char, 0);
 
 	/* Follow the next-chain of the current node and optimize
 	   away all the NOTHINGs from it.  */
-	if (OP(scan) != CURLYX) {
-	    const int max = (reg_off_by_arg[OP(scan)]
+	if (OP(params->scan) != CURLYX) {
+	    const int max = (reg_off_by_arg[OP(params->scan)]
 		       ? I32_MAX
 		       /* I32 may be smaller than U16 on CRAYs! */
 		       : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
-	    int off = (reg_off_by_arg[OP(scan)] ? ARG(scan) : NEXT_OFF(scan));
+	    int off = (reg_off_by_arg[OP(params->scan)] ? ARG(params->scan) : NEXT_OFF(params->scan));
 	    int noff;
-	    regnode *n = scan;
+	    regnode *n = params->scan;
 
 	    /* Skip NOTHING and LONGJMP. */
 	    while ((n = regnext(n))
@@ -4294,169 +4330,169 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		       || ((OP(n) == LONGJMP) && (noff = ARG(n))))
 		   && off + noff < max)
 		off += noff;
-	    if (reg_off_by_arg[OP(scan)])
-		ARG(scan) = off;
+	    if (reg_off_by_arg[OP(params->scan)])
+		ARG(params->scan) = off;
 	    else
-		NEXT_OFF(scan) = off;
+		NEXT_OFF(params->scan) = off;
 	}
 
 	/* The principal pseudo-switch.  Cannot be a switch, since we
 	   look into several different things.  */
-        if ( OP(scan) == DEFINEP ) {
+        if ( OP(params->scan) == DEFINEP ) {
             SSize_t minlen = 0;
             SSize_t deltanext = 0;
             SSize_t fake_last_close = 0;
             I32 f = SCF_IN_DEFINE;
 
-            StructCopy(&zero_scan_data, &data_fake, scan_data_t);
-            scan = regnext(scan);
-            assert( OP(scan) == IFTHEN );
-            DEBUG_PEEP("expect IFTHEN", scan, depth, flags);
+            StructCopy(&zero_scan_data, &params->data_fake, scan_data_t);
+            params->scan = regnext(params->scan);
+            assert( OP(params->scan) == IFTHEN );
+            DEBUG_PEEP("expect IFTHEN", params->scan, params->depth, params->flags);
 
-            data_fake.last_closep= &fake_last_close;
-            minlen = *minlenp;
-            next = regnext(scan);
-            scan = NEXTOPER(NEXTOPER(scan));
-            DEBUG_PEEP("scan", scan, depth, flags);
-            DEBUG_PEEP("next", next, depth, flags);
+            params->data_fake.last_closep= &fake_last_close;
+            minlen = *params->minlenp;
+            params->next = regnext(params->scan);
+            params->scan = NEXTOPER(NEXTOPER(params->scan));
+            DEBUG_PEEP("scan", params->scan, params->depth, params->flags);
+            DEBUG_PEEP("next", params->next, params->depth, params->flags);
 
             /* we suppose the run is continuous, last=next...
              * NOTE we dont use the return here! */
             /* DEFINEP study_chunk() recursion */
-            (void)study_chunk(pRExC_state, &scan, &minlen,
-                              &deltanext, next, &data_fake, stopparen,
-                              recursed_depth, NULL, f, depth+1);
+            (void)study_chunk(pRExC_state, &params->scan, &minlen,
+                              &deltanext, params->next, &params->data_fake, params->stopparen,
+                              params->recursed_depth, NULL, f, params->depth+1);
 
-            scan = next;
+            params->scan = params->next;
         } else
         if (
-            OP(scan) == BRANCH  ||
-            OP(scan) == BRANCHJ ||
-            OP(scan) == IFTHEN
+            OP(params->scan) == BRANCH  ||
+            OP(params->scan) == BRANCHJ ||
+            OP(params->scan) == IFTHEN
         ) {
-	    next = regnext(scan);
-	    code = OP(scan);
+	    params->next = regnext(params->scan);
+	    params->code = OP(params->scan);
 
             /* The op(next)==code check below is to see if we
              * have "BRANCH-BRANCH", "BRANCHJ-BRANCHJ", "IFTHEN-IFTHEN"
              * IFTHEN is special as it might not appear in pairs.
              * Not sure whether BRANCH-BRANCHJ is possible, regardless
              * we dont handle it cleanly. */
-	    if (OP(next) == code || code == IFTHEN) {
+	    if (OP(params->next) == params->code || params->code == IFTHEN) {
                 /* NOTE - There is similar code to this block below for
                  * handling TRIE nodes on a re-study.  If you change stuff here
                  * check there too. */
 		SSize_t max1 = 0, min1 = SSize_t_MAX, num = 0;
 		regnode_ssc accum;
-		regnode * const startbranch=scan;
+		regnode * const startbranch=params->scan;
 
-                if (flags & SCF_DO_SUBSTR) {
+                if (params->flags & SCF_DO_SUBSTR) {
                     /* Cannot merge strings after this. */
-                    scan_commit(pRExC_state, data, minlenp, is_inf);
+                    scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
                 }
 
-                if (flags & SCF_DO_STCLASS)
+                if (params->flags & SCF_DO_STCLASS)
 		    ssc_init_zero(pRExC_state, &accum);
 
-		while (OP(scan) == code) {
+		while (OP(params->scan) == params->code) {
 		    SSize_t deltanext, minnext, fake;
 		    I32 f = 0;
 		    regnode_ssc this_class;
 
-                    DEBUG_PEEP("Branch", scan, depth, flags);
+                    DEBUG_PEEP("Branch", params->scan, params->depth, params->flags);
 
 		    num++;
-                    StructCopy(&zero_scan_data, &data_fake, scan_data_t);
-		    if (data) {
-			data_fake.whilem_c = data->whilem_c;
-			data_fake.last_closep = data->last_closep;
+                    StructCopy(&zero_scan_data, &params->data_fake, scan_data_t);
+		    if (params->data) {
+			params->data_fake.whilem_c = params->data->whilem_c;
+			params->data_fake.last_closep = params->data->last_closep;
 		    }
 		    else
-			data_fake.last_closep = &fake;
+			params->data_fake.last_closep = &fake;
 
-		    data_fake.pos_delta = delta;
-		    next = regnext(scan);
+		    params->data_fake.pos_delta = params->delta;
+		    params->next = regnext(params->scan);
 
-                    scan = NEXTOPER(scan); /* everything */
-                    if (code != BRANCH)    /* everything but BRANCH */
-			scan = NEXTOPER(scan);
+                    params->scan = NEXTOPER(params->scan); /* everything */
+                    if (params->code != BRANCH)    /* everything but BRANCH */
+			params->scan = NEXTOPER(params->scan);
 
-		    if (flags & SCF_DO_STCLASS) {
+		    if (params->flags & SCF_DO_STCLASS) {
 			ssc_init(pRExC_state, &this_class);
-			data_fake.start_class = &this_class;
+			params->data_fake.start_class = &this_class;
 			f = SCF_DO_STCLASS_AND;
 		    }
-		    if (flags & SCF_WHILEM_VISITED_POS)
+		    if (params->flags & SCF_WHILEM_VISITED_POS)
 			f |= SCF_WHILEM_VISITED_POS;
 
 		    /* we suppose the run is continuous, last=next...*/
                     /* recurse study_chunk() for each BRANCH in an alternation */
-		    minnext = study_chunk(pRExC_state, &scan, minlenp,
-                                      &deltanext, next, &data_fake, stopparen,
-                                      recursed_depth, NULL, f,depth+1);
+		    minnext = study_chunk(pRExC_state, &params->scan, params->minlenp,
+                                      &deltanext, params->next, &params->data_fake, params->stopparen,
+                                      params->recursed_depth, NULL, f,params->depth+1);
 
 		    if (min1 > minnext)
 			min1 = minnext;
 		    if (deltanext == SSize_t_MAX) {
-			is_inf = is_inf_internal = 1;
+			params->is_inf = params->is_inf_internal = 1;
 			max1 = SSize_t_MAX;
 		    } else if (max1 < minnext + deltanext)
 			max1 = minnext + deltanext;
-		    scan = next;
-		    if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
-			pars++;
-	            if (data_fake.flags & SCF_SEEN_ACCEPT) {
-	                if ( stopmin > minnext)
-	                    stopmin = min + min1;
-	                flags &= ~SCF_DO_SUBSTR;
-	                if (data)
-	                    data->flags |= SCF_SEEN_ACCEPT;
+		    params->scan = params->next;
+		    if (params->data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
+			params->pars++;
+	            if (params->data_fake.flags & SCF_SEEN_ACCEPT) {
+	                if ( params->stopmin > minnext)
+	                    params->stopmin = params->min + min1;
+	                params->flags &= ~SCF_DO_SUBSTR;
+	                if (params->data)
+	                    params->data->flags |= SCF_SEEN_ACCEPT;
 	            }
-		    if (data) {
-			if (data_fake.flags & SF_HAS_EVAL)
-			    data->flags |= SF_HAS_EVAL;
-			data->whilem_c = data_fake.whilem_c;
+		    if (params->data) {
+			if (params->data_fake.flags & SF_HAS_EVAL)
+			    params->data->flags |= SF_HAS_EVAL;
+			params->data->whilem_c = params->data_fake.whilem_c;
 		    }
-		    if (flags & SCF_DO_STCLASS)
+		    if (params->flags & SCF_DO_STCLASS)
 			ssc_or(pRExC_state, &accum, (regnode_charclass*)&this_class);
 		}
-		if (code == IFTHEN && num < 2) /* Empty ELSE branch */
+		if (params->code == IFTHEN && num < 2) /* Empty ELSE branch */
 		    min1 = 0;
-		if (flags & SCF_DO_SUBSTR) {
-		    data->pos_min += min1;
-		    if (data->pos_delta >= SSize_t_MAX - (max1 - min1))
-		        data->pos_delta = SSize_t_MAX;
+		if (params->flags & SCF_DO_SUBSTR) {
+		    params->data->pos_min += min1;
+		    if (params->data->pos_delta >= SSize_t_MAX - (max1 - min1))
+		        params->data->pos_delta = SSize_t_MAX;
 		    else
-		        data->pos_delta += max1 - min1;
-		    if (max1 != min1 || is_inf)
-			data->cur_is_floating = 1;
+		        params->data->pos_delta += max1 - min1;
+		    if (max1 != min1 || params->is_inf)
+			params->data->cur_is_floating = 1 /*float*/;
 		}
-		min += min1;
-		if (delta == SSize_t_MAX
-		 || SSize_t_MAX - delta - (max1 - min1) < 0)
-		    delta = SSize_t_MAX;
+		params->min += min1;
+		if (params->delta == SSize_t_MAX
+		 || SSize_t_MAX - params->delta - (max1 - min1) < 0)
+		    params->delta = SSize_t_MAX;
 		else
-		    delta += max1 - min1;
-		if (flags & SCF_DO_STCLASS_OR) {
-		    ssc_or(pRExC_state, data->start_class, (regnode_charclass*) &accum);
+		    params->delta += max1 - min1;
+		if (params->flags & SCF_DO_STCLASS_OR) {
+		    ssc_or(pRExC_state, params->data->start_class, (regnode_charclass*) &accum);
 		    if (min1) {
-			ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
-			flags &= ~SCF_DO_STCLASS;
+			ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
+			params->flags &= ~SCF_DO_STCLASS;
 		    }
 		}
-		else if (flags & SCF_DO_STCLASS_AND) {
+		else if (params->flags & SCF_DO_STCLASS_AND) {
 		    if (min1) {
-			ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &accum);
-			flags &= ~SCF_DO_STCLASS;
+			ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) &accum);
+			params->flags &= ~SCF_DO_STCLASS;
 		    }
 		    else {
 			/* Switch to OR mode: cache the old value of
 			 * data->start_class */
 			INIT_AND_WITHP;
-			StructCopy(data->start_class, and_withp, regnode_ssc);
-			flags &= ~SCF_DO_STCLASS_AND;
-			StructCopy(&accum, data->start_class, regnode_ssc);
-			flags |= SCF_DO_STCLASS_OR;
+			StructCopy(params->data->start_class, params->and_withp, regnode_ssc);
+			params->flags &= ~SCF_DO_STCLASS_AND;
+			StructCopy(&accum, params->data->start_class, regnode_ssc);
+			params->flags |= SCF_DO_STCLASS_OR;
 		    }
 		}
 
@@ -4507,16 +4543,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		*/
 
 		    int made=0;
-		    if (!re_trie_maxbuff) {
-			re_trie_maxbuff = get_sv(RE_TRIE_MAXBUF_NAME, 1);
-			if (!SvIOK(re_trie_maxbuff))
-			    sv_setiv(re_trie_maxbuff, RE_TRIE_MAXBUF_INIT);
+		    if (!params->re_trie_maxbuff) {
+			params->re_trie_maxbuff = get_sv(RE_TRIE_MAXBUF_NAME, 1);
+			if (!SvIOK(params->re_trie_maxbuff))
+			    sv_setiv(params->re_trie_maxbuff, RE_TRIE_MAXBUF_INIT);
 		    }
-                    if ( SvIV(re_trie_maxbuff)>=0  ) {
+                    if ( SvIV(params->re_trie_maxbuff)>=0  ) {
                         regnode *cur;
                         regnode *first = (regnode *)NULL;
                         regnode *last = (regnode *)NULL;
-                        regnode *tail = scan;
+                        regnode *tail = params->scan;
                         U8 trietype = 0;
                         U32 count=0;
 
@@ -4537,7 +4573,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         DEBUG_TRIE_COMPILE_r({
                             regprop(RExC_rx, RExC_mysv, tail, NULL, pRExC_state);
                             Perl_re_indentf( aTHX_  "%s %" UVuf ":%s\n",
-                              depth+1,
+                              params->depth + 1,
                               "Looking for TRIE'able sequences. Tail node is ",
                               (UV)(tail - RExC_emit_start),
                               SvPV_nolen_const( RExC_mysv )
@@ -4616,7 +4652,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                  : 0 )
 
                         /* dont use tail as the end marker for this traverse */
-                        for ( cur = startbranch ; cur != scan ; cur = regnext( cur ) ) {
+                        for ( cur = startbranch ; cur != params->scan ; cur = regnext( cur ) ) {
                             regnode * const noper = NEXTOPER( cur );
                             U8 noper_type = OP( noper );
                             U8 noper_trietype = TRIE_TYPE( noper_type );
@@ -4629,7 +4665,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                             DEBUG_TRIE_COMPILE_r({
                                 regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
                                 Perl_re_indentf( aTHX_  "- %d:%s (%d)",
-                                   depth+1,
+                                   params->depth + 1,
                                    REG_NODE_NUM(cur), SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur) );
 
                                 regprop(RExC_rx, RExC_mysv, noper, NULL, pRExC_state);
@@ -4710,7 +4746,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                     if ( trietype && trietype != NOTHING )
                                         make_trie( pRExC_state,
                                                 startbranch, first, cur, tail,
-                                                count, trietype, depth+1 );
+                                                count, trietype, params->depth+1 );
                                     last = NULL; /* note: we clear/update
                                                     first, trietype etc below,
                                                     so we dont do it here */
@@ -4738,7 +4774,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         DEBUG_TRIE_COMPILE_r({
                             regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
                             Perl_re_indentf( aTHX_  "- %s (%d) <SCAN FINISHED> ",
-                              depth+1, SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
+                              params->depth + 1, SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
                             Perl_re_printf( aTHX_  "(First==%d, Last==%d, Cur==%d, tt==%s)\n",
                                REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
                                PL_reg_name[trietype]
@@ -4751,16 +4787,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                  * a trie, so we have to construct it here
                                  * outside of the loop */
                                 made= make_trie( pRExC_state, startbranch,
-                                                 first, scan, tail, count,
-                                                 trietype, depth+1 );
+                                                 first, params->scan, tail, count,
+                                                 trietype, params->depth+1 );
 #ifdef TRIE_STUDY_OPT
                                 if ( ((made == MADE_EXACT_TRIE &&
                                      startbranch == first)
-                                     || ( first_non_open == first )) &&
-                                     depth==0 ) {
-                                    flags |= SCF_TRIE_RESTUDY;
+                                     || ( params->first_non_open == first )) &&
+                                     params->depth==0 ) {
+                                    params->flags |= SCF_TRIE_RESTUDY;
                                     if ( startbranch == first
-                                         && scan >= tail )
+                                         && params->scan >= tail )
                                     {
                                         RExC_seen &=~REG_TOP_LEVEL_BRANCHES_SEEN;
                                     }
@@ -4780,7 +4816,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                     DEBUG_TRIE_COMPILE_r({
                                         regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
                                         Perl_re_indentf( aTHX_  "- %s (%d) <NOTHING BRANCH SEQUENCE>\n",
-                                          depth+1,
+                                          params->depth + 1,
                                           SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
 
                                     });
@@ -4796,36 +4832,36 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 } /* do trie */
 
 	    }
-	    else if ( code == BRANCHJ ) {  /* single branch is optimized. */
-		scan = NEXTOPER(NEXTOPER(scan));
+	    else if ( params->code == BRANCHJ ) {  /* single branch is optimized. */
+		params->scan = NEXTOPER(NEXTOPER(params->scan));
 	    } else			/* single branch is optimized. */
-		scan = NEXTOPER(scan);
+		params->scan = NEXTOPER(params->scan);
 	    continue;
-        } else if (OP(scan) == SUSPEND || OP(scan) == GOSUB) {
+	} else if (OP(params->scan) == SUSPEND || OP(params->scan) == GOSUB) {
             I32 paren = 0;
             regnode *start = NULL;
             regnode *end = NULL;
-            U32 my_recursed_depth= recursed_depth;
+            U32 my_recursed_depth= params->recursed_depth;
 
-            if (OP(scan) != SUSPEND) { /* GOSUB */
+            if (OP(params->scan) != SUSPEND) { /* GOSUB */
                 /* Do setup, note this code has side effects beyond
                  * the rest of this block. Specifically setting
                  * RExC_recurse[] must happen at least once during
                  * study_chunk(). */
-                paren = ARG(scan);
-                RExC_recurse[ARG2L(scan)] = scan;
+                paren = ARG(params->scan);
+                RExC_recurse[ARG2L(params->scan)] = params->scan;
                 start = RExC_open_parens[paren];
                 end   = RExC_close_parens[paren];
 
                 /* NOTE we MUST always execute the above code, even
                  * if we do nothing with a GOSUB */
                 if (
-                    ( flags & SCF_IN_DEFINE )
+                    ( params->flags & SCF_IN_DEFINE )
                     ||
                     (
-                        (is_inf_internal || is_inf || (data && data->flags & SF_IS_INF))
+                        (params->is_inf_internal || params->is_inf || (params->data && params->data->flags & SF_IS_INF))
                         &&
-                        ( (flags & (SCF_DO_STCLASS | SCF_DO_SUBSTR)) == 0 )
+                        ( (params->flags & (SCF_DO_STCLASS | SCF_DO_SUBSTR)) == 0 )
                     )
                 ) {
                     /* no need to do anything here if we are in a define. */
@@ -4840,14 +4876,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                      * but this doesn't make us mismatch, just try a bit
                      * harder than we should.
                      * */
-                    scan= regnext(scan);
+                    params->scan= regnext(params->scan);
                     continue;
                 }
 
                 if (
-                    !recursed_depth
+                    !params->recursed_depth
                     ||
-                    !PAREN_TEST(RExC_study_chunk_recursed + ((recursed_depth-1) * RExC_study_chunk_recursed_bytes), paren)
+                    !PAREN_TEST(RExC_study_chunk_recursed + ((params->recursed_depth-1) * RExC_study_chunk_recursed_bytes), paren)
                 ) {
                     /* it is quite possible that there are more efficient ways
                      * to do this. We maintain a bitmap per level of recursion
@@ -4859,36 +4895,36 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                      * more efficient way of doing this. In particular the top
                      * level bitmap may be unnecessary.
                      */
-                    if (!recursed_depth) {
+                    if (!params->recursed_depth) {
                         Zero(RExC_study_chunk_recursed, RExC_study_chunk_recursed_bytes, U8);
                     } else {
-                        Copy(RExC_study_chunk_recursed + ((recursed_depth-1) * RExC_study_chunk_recursed_bytes),
-                             RExC_study_chunk_recursed + (recursed_depth * RExC_study_chunk_recursed_bytes),
+                        Copy(RExC_study_chunk_recursed + ((params->recursed_depth-1) * RExC_study_chunk_recursed_bytes),
+                             RExC_study_chunk_recursed + (params->recursed_depth * RExC_study_chunk_recursed_bytes),
                              RExC_study_chunk_recursed_bytes, U8);
                     }
                     /* we havent recursed into this paren yet, so recurse into it */
-                    DEBUG_STUDYDATA("gosub-set", data, depth, is_inf);
-                    PAREN_SET(RExC_study_chunk_recursed + (recursed_depth * RExC_study_chunk_recursed_bytes), paren);
-                    my_recursed_depth= recursed_depth + 1;
+                    DEBUG_STUDYDATA("gosub-set", params->data, params->depth, params->is_inf);
+                    PAREN_SET(RExC_study_chunk_recursed + (params->recursed_depth * RExC_study_chunk_recursed_bytes), paren);
+                    my_recursed_depth= params->recursed_depth + 1;
                 } else {
-                    DEBUG_STUDYDATA("gosub-inf", data, depth, is_inf);
+                    DEBUG_STUDYDATA("gosub-inf", params->data, params->depth, params->is_inf);
                     /* some form of infinite recursion, assume infinite length
                      * */
-                    if (flags & SCF_DO_SUBSTR) {
-                        scan_commit(pRExC_state, data, minlenp, is_inf);
-                        data->cur_is_floating = 1;
+                    if (params->flags & SCF_DO_SUBSTR) {
+                        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+                        params->data->cur_is_floating = 1 /*float*/;
                     }
-                    is_inf = is_inf_internal = 1;
-                    if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-                        ssc_anything(data->start_class);
-                    flags &= ~SCF_DO_STCLASS;
+                    params->is_inf = params->is_inf_internal = 1;
+                    if (params->flags & SCF_DO_STCLASS_OR) /* Allow everything */
+                        ssc_anything(params->data->start_class);
+                    params->flags &= ~SCF_DO_STCLASS;
 
                     start= NULL; /* reset start so we dont recurse later on. */
 	        }
             } else {
-	        paren = stopparen;
-                start = scan + 2;
-	        end = regnext(scan);
+	        paren = params->stopparen;
+                start = params->scan + 2;
+	        end = regnext(params->scan);
 	    }
             if (start) {
                 scan_frame *newframe;
@@ -4908,86 +4944,86 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 }
                 RExC_frame_last= newframe;
 
-                newframe->next_regnode = regnext(scan);
-                newframe->last_regnode = last;
-                newframe->stopparen = stopparen;
-                newframe->prev_recursed_depth = recursed_depth;
-                newframe->this_prev_frame= frame;
+                newframe->next_regnode = regnext(params->scan);
+                newframe->last_regnode = params->last;
+                newframe->stopparen = params->stopparen;
+                newframe->prev_recursed_depth = params->recursed_depth;
+                newframe->this_prev_frame= params->frame;
 
-                DEBUG_STUDYDATA("frame-new", data, depth, is_inf);
-                DEBUG_PEEP("fnew", scan, depth, flags);
+                DEBUG_STUDYDATA("frame-new", params->data, params->depth, params->is_inf);
+                DEBUG_PEEP("fnew", params->scan, params->depth, params->flags);
 
-	        frame = newframe;
-	        scan =  start;
-	        stopparen = paren;
-	        last = end;
-                depth = depth + 1;
-                recursed_depth= my_recursed_depth;
+	        params->frame = newframe;
+	        params->scan =  start;
+	        params->stopparen = paren;
+	        params->last = end;
+                params->depth = params->depth + 1;
+                params->recursed_depth= my_recursed_depth;
 
 	        continue;
 	    }
 	}
-	else if (OP(scan) == EXACT || OP(scan) == EXACTL) {
-	    SSize_t l = STR_LEN(scan);
+	else if (OP(params->scan) == EXACT || OP(params->scan) == EXACTL) {
+	    SSize_t l = STR_LEN(params->scan);
 	    UV uc;
             assert(l);
 	    if (UTF) {
-		const U8 * const s = (U8*)STRING(scan);
+		const U8 * const s = (U8*)STRING(params->scan);
 		uc = utf8_to_uvchr_buf(s, s + l, NULL);
 		l = utf8_length(s, s + l);
 	    } else {
-		uc = *((U8*)STRING(scan));
+		uc = *((U8*)STRING(params->scan));
 	    }
-	    min += l;
-	    if (flags & SCF_DO_SUBSTR) { /* Update longest substr. */
+	    params->min += l;
+	    if (params->flags & SCF_DO_SUBSTR) { /* Update longest substr. */
 		/* The code below prefers earlier match for fixed
 		   offset, later match for variable offset.  */
-		if (data->last_end == -1) { /* Update the start info. */
-		    data->last_start_min = data->pos_min;
- 		    data->last_start_max = is_inf
- 			? SSize_t_MAX : data->pos_min + data->pos_delta;
+		if (params->data->last_end == -1) { /* Update the start info. */
+		    params->data->last_start_min = params->data->pos_min;
+ 		    params->data->last_start_max = params->is_inf
+ 			? SSize_t_MAX : params->data->pos_min + params->data->pos_delta;
 		}
-		sv_catpvn(data->last_found, STRING(scan), STR_LEN(scan));
+		sv_catpvn(params->data->last_found, STRING(params->scan), STR_LEN(params->scan));
 		if (UTF)
-		    SvUTF8_on(data->last_found);
+		    SvUTF8_on(params->data->last_found);
 		{
-		    SV * const sv = data->last_found;
+		    SV * const sv = params->data->last_found;
 		    MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
 			mg_find(sv, PERL_MAGIC_utf8) : NULL;
 		    if (mg && mg->mg_len >= 0)
-			mg->mg_len += utf8_length((U8*)STRING(scan),
-                                              (U8*)STRING(scan)+STR_LEN(scan));
+			mg->mg_len += utf8_length((U8*)STRING(params->scan),
+                                              (U8*)STRING(params->scan)+STR_LEN(params->scan));
 		}
-		data->last_end = data->pos_min + l;
-		data->pos_min += l; /* As in the first entry. */
-		data->flags &= ~SF_BEFORE_EOL;
+		params->data->last_end = params->data->pos_min + l;
+		params->data->pos_min += l; /* As in the first entry. */
+		params->data->flags &= ~SF_BEFORE_EOL;
 	    }
 
             /* ANDing the code point leaves at most it, and not in locale, and
              * can't match null string */
-	    if (flags & SCF_DO_STCLASS_AND) {
-                ssc_cp_and(data->start_class, uc);
-                ANYOF_FLAGS(data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
-                ssc_clear_locale(data->start_class);
+	    if (params->flags & SCF_DO_STCLASS_AND) {
+                ssc_cp_and(params->data->start_class, uc);
+                ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+                ssc_clear_locale(params->data->start_class);
 	    }
-	    else if (flags & SCF_DO_STCLASS_OR) {
-                ssc_add_cp(data->start_class, uc);
-		ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
+	    else if (params->flags & SCF_DO_STCLASS_OR) {
+                ssc_add_cp(params->data->start_class, uc);
+		ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
 
                 /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
-                ANYOF_FLAGS(data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+                ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
 	    }
-	    flags &= ~SCF_DO_STCLASS;
+	    params->flags &= ~SCF_DO_STCLASS;
 	}
-        else if (PL_regkind[OP(scan)] == EXACT) {
+        else if (PL_regkind[OP(params->scan)] == EXACT) {
             /* But OP != EXACT!, so is EXACTFish */
-	    SSize_t l = STR_LEN(scan);
-            const U8 * s = (U8*)STRING(scan);
+	    SSize_t l = STR_LEN(params->scan);
+            const U8 * s = (U8*)STRING(params->scan);
 
 	    /* Search for fixed substrings supports EXACT only. */
-	    if (flags & SCF_DO_SUBSTR) {
-		assert(data);
-                scan_commit(pRExC_state, data, minlenp, is_inf);
+	    if (params->flags & SCF_DO_SUBSTR) {
+		assert(params->data);
+                scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
 	    }
 	    if (UTF) {
 		l = utf8_length(s, s + l);
@@ -4995,122 +5031,122 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    if (unfolded_multi_char) {
                 RExC_seen |= REG_UNFOLDED_MULTI_SEEN;
 	    }
-	    min += l - min_subtract;
-            assert (min >= 0);
-            delta += min_subtract;
-	    if (flags & SCF_DO_SUBSTR) {
-		data->pos_min += l - min_subtract;
-		if (data->pos_min < 0) {
-                    data->pos_min = 0;
+	    params->min += l - min_subtract;
+            assert (params->min >= 0);
+            params->delta += min_subtract;
+	    if (params->flags & SCF_DO_SUBSTR) {
+		params->data->pos_min += l - min_subtract;
+		if (params->data->pos_min < 0) {
+                    params->data->pos_min = 0;
                 }
-                data->pos_delta += min_subtract;
+                params->data->pos_delta += min_subtract;
 		if (min_subtract) {
-		    data->cur_is_floating = 1; /* float */
+		    params->data->cur_is_floating = 1; /* float */
 		}
 	    }
 
-            if (flags & SCF_DO_STCLASS) {
-                SV* EXACTF_invlist = _make_exactf_invlist(pRExC_state, scan);
+            if (params->flags & SCF_DO_STCLASS) {
+                SV* EXACTF_invlist = _make_exactf_invlist(pRExC_state, params->scan);
 
                 assert(EXACTF_invlist);
-                if (flags & SCF_DO_STCLASS_AND) {
-                    if (OP(scan) != EXACTFL)
-                        ssc_clear_locale(data->start_class);
-                    ANYOF_FLAGS(data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
-                    ANYOF_POSIXL_ZERO(data->start_class);
-                    ssc_intersection(data->start_class, EXACTF_invlist, FALSE);
+                if (params->flags & SCF_DO_STCLASS_AND) {
+                    if (OP(params->scan) != EXACTFL)
+                        ssc_clear_locale(params->data->start_class);
+                    ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+                    ANYOF_POSIXL_ZERO(params->data->start_class);
+                    ssc_intersection(params->data->start_class, EXACTF_invlist, FALSE);
                 }
                 else {  /* SCF_DO_STCLASS_OR */
-                    ssc_union(data->start_class, EXACTF_invlist, FALSE);
-                    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
+                    ssc_union(params->data->start_class, EXACTF_invlist, FALSE);
+                    ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
 
                     /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
-                    ANYOF_FLAGS(data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+                    ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
                 }
-                flags &= ~SCF_DO_STCLASS;
+                params->flags &= ~SCF_DO_STCLASS;
                 SvREFCNT_dec(EXACTF_invlist);
             }
 	}
-	else if (REGNODE_VARIES(OP(scan))) {
+	else if (REGNODE_VARIES(OP(params->scan))) {
 	    SSize_t mincount, maxcount, minnext, deltanext, pos_before = 0;
-	    I32 fl = 0, f = flags;
-	    regnode * const oscan = scan;
+	    I32 fl = 0, f = params->flags;
+	    regnode * const oscan = params->scan;
 	    regnode_ssc this_class;
 	    regnode_ssc *oclass = NULL;
 	    I32 next_is_eval = 0;
 
-	    switch (PL_regkind[OP(scan)]) {
+	    switch (PL_regkind[OP(params->scan)]) {
 	    case WHILEM:		/* End of (?:...)* . */
-		scan = NEXTOPER(scan);
+		params->scan = NEXTOPER(params->scan);
 		goto finish;
 	    case PLUS:
-		if (flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
-		    next = NEXTOPER(scan);
-		    if (OP(next) == EXACT
-                        || OP(next) == EXACTL
-                        || (flags & SCF_DO_STCLASS))
+		if (params->flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
+		    params->next = NEXTOPER(params->scan);
+		    if (OP(params->next) == EXACT
+                        || OP(params->next) == EXACTL
+                        || (params->flags & SCF_DO_STCLASS))
                     {
 			mincount = 1;
 			maxcount = REG_INFTY;
-			next = regnext(scan);
-			scan = NEXTOPER(scan);
+			params->next = regnext(params->scan);
+			params->scan = NEXTOPER(params->scan);
 			goto do_curly;
 		    }
 		}
-		if (flags & SCF_DO_SUBSTR)
-		    data->pos_min++;
-		min++;
+		if (params->flags & SCF_DO_SUBSTR)
+		    params->data->pos_min++;
+		params->min++;
 		/* FALLTHROUGH */
 	    case STAR:
-		if (flags & SCF_DO_STCLASS) {
+		if (params->flags & SCF_DO_STCLASS) {
 		    mincount = 0;
 		    maxcount = REG_INFTY;
-		    next = regnext(scan);
-		    scan = NEXTOPER(scan);
+		    params->next = regnext(params->scan);
+		    params->scan = NEXTOPER(params->scan);
 		    goto do_curly;
 		}
-		if (flags & SCF_DO_SUBSTR) {
-                    scan_commit(pRExC_state, data, minlenp, is_inf);
+		if (params->flags & SCF_DO_SUBSTR) {
+                    scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
                     /* Cannot extend fixed substrings */
-		    data->cur_is_floating = 1; /* float */
+		    params->data->cur_is_floating = 1; /* float */
 		}
-                is_inf = is_inf_internal = 1;
-                scan = regnext(scan);
+                params->is_inf = params->is_inf_internal = 1;
+                params->scan = regnext(params->scan);
 		goto optimize_curly_tail;
 	    case CURLY:
-	        if (stopparen>0 && (OP(scan)==CURLYN || OP(scan)==CURLYM)
-	            && (scan->flags == stopparen))
+	        if (params->stopparen>0 && (OP(params->scan)==CURLYN || OP(params->scan)==CURLYM)
+	            && (params->scan->flags == params->stopparen))
 		{
 		    mincount = 1;
 		    maxcount = 1;
 		} else {
-		    mincount = ARG1(scan);
-		    maxcount = ARG2(scan);
+		    mincount = ARG1(params->scan);
+		    maxcount = ARG2(params->scan);
 		}
-		next = regnext(scan);
-		if (OP(scan) == CURLYX) {
-		    I32 lp = (data ? *(data->last_closep) : 0);
-		    scan->flags = ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX);
+		params->next = regnext(params->scan);
+		if (OP(params->scan) == CURLYX) {
+		    I32 lp = (params->data ? *(params->data->last_closep) : 0);
+		    params->scan->flags = ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX);
 		}
-		scan = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
-		next_is_eval = (OP(scan) == EVAL);
+		params->scan = NEXTOPER(params->scan) + EXTRA_STEP_2ARGS;
+		next_is_eval = (OP(params->scan) == EVAL);
 	      do_curly:
-		if (flags & SCF_DO_SUBSTR) {
+		if (params->flags & SCF_DO_SUBSTR) {
                     if (mincount == 0)
-                        scan_commit(pRExC_state, data, minlenp, is_inf);
+                        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
                     /* Cannot extend fixed substrings */
-		    pos_before = data->pos_min;
+		    pos_before = params->data->pos_min;
 		}
-		if (data) {
-		    fl = data->flags;
-		    data->flags &= ~(SF_HAS_PAR|SF_IN_PAR|SF_HAS_EVAL);
-		    if (is_inf)
-			data->flags |= SF_IS_INF;
+		if (params->data) {
+		    fl = params->data->flags;
+		    params->data->flags &= ~(SF_HAS_PAR|SF_IN_PAR|SF_HAS_EVAL);
+		    if (params->is_inf)
+			params->data->flags |= SF_IS_INF;
 		}
-		if (flags & SCF_DO_STCLASS) {
+		if (params->flags & SCF_DO_STCLASS) {
 		    ssc_init(pRExC_state, &this_class);
-		    oclass = data->start_class;
-		    data->start_class = &this_class;
+		    oclass = params->data->start_class;
+		    params->data->start_class = &this_class;
 		    f |= SCF_DO_STCLASS_AND;
 		    f &= ~SCF_DO_STCLASS_OR;
 		}
@@ -5128,46 +5164,46 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 		/* This will finish on WHILEM, setting scan, or on NULL: */
                 /* recurse study_chunk() on loop bodies */
-		minnext = study_chunk(pRExC_state, &scan, minlenp, &deltanext,
-                                  last, data, stopparen, recursed_depth, NULL,
+		minnext = study_chunk(pRExC_state, &params->scan, params->minlenp, &deltanext,
+                                  params->last, params->data, params->stopparen, params->recursed_depth, NULL,
                                   (mincount == 0
                                    ? (f & ~SCF_DO_SUBSTR)
                                    : f)
-                                  ,depth+1);
+                                  ,params->depth+1);
 
-		if (flags & SCF_DO_STCLASS)
-		    data->start_class = oclass;
+		if (params->flags & SCF_DO_STCLASS)
+		    params->data->start_class = oclass;
 		if (mincount == 0 || minnext == 0) {
-		    if (flags & SCF_DO_STCLASS_OR) {
-			ssc_or(pRExC_state, data->start_class, (regnode_charclass *) &this_class);
+		    if (params->flags & SCF_DO_STCLASS_OR) {
+			ssc_or(pRExC_state, params->data->start_class, (regnode_charclass *) &this_class);
 		    }
-		    else if (flags & SCF_DO_STCLASS_AND) {
+		    else if (params->flags & SCF_DO_STCLASS_AND) {
 			/* Switch to OR mode: cache the old value of
 			 * data->start_class */
 			INIT_AND_WITHP;
-			StructCopy(data->start_class, and_withp, regnode_ssc);
-			flags &= ~SCF_DO_STCLASS_AND;
-			StructCopy(&this_class, data->start_class, regnode_ssc);
-			flags |= SCF_DO_STCLASS_OR;
-                        ANYOF_FLAGS(data->start_class)
+			StructCopy(params->data->start_class, params->and_withp, regnode_ssc);
+			params->flags &= ~SCF_DO_STCLASS_AND;
+			StructCopy(&this_class, params->data->start_class, regnode_ssc);
+			params->flags |= SCF_DO_STCLASS_OR;
+                        ANYOF_FLAGS(params->data->start_class)
                                                 |= SSC_MATCHES_EMPTY_STRING;
 		    }
 		} else {		/* Non-zero len */
-		    if (flags & SCF_DO_STCLASS_OR) {
-			ssc_or(pRExC_state, data->start_class, (regnode_charclass *) &this_class);
-			ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
+		    if (params->flags & SCF_DO_STCLASS_OR) {
+			ssc_or(pRExC_state, params->data->start_class, (regnode_charclass *) &this_class);
+			ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
 		    }
-		    else if (flags & SCF_DO_STCLASS_AND)
-			ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &this_class);
-		    flags &= ~SCF_DO_STCLASS;
+		    else if (params->flags & SCF_DO_STCLASS_AND)
+			ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) &this_class);
+		    params->flags &= ~SCF_DO_STCLASS;
 		}
-		if (!scan) 		/* It was not CURLYX, but CURLY. */
-		    scan = next;
-		if (((flags & (SCF_TRIE_DOING_RESTUDY|SCF_DO_SUBSTR))==SCF_DO_SUBSTR)
+		if (!params->scan) 		/* It was not CURLYX, but CURLY. */
+		    params->scan = params->next;
+		if (((params->flags & (SCF_TRIE_DOING_RESTUDY|SCF_DO_SUBSTR))==SCF_DO_SUBSTR)
 		    /* ? quantifier ok, except for (?{ ... }) */
 		    && (next_is_eval || !(mincount == 0 && maxcount == 1))
 		    && (minnext == 0) && (deltanext == 0)
-		    && data && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
+		    && params->data && !(params->data->flags & (SF_HAS_PAR|SF_IN_PAR))
                     && maxcount <= REG_INFTY/3) /* Complement check for big
                                                    count */
 		{
@@ -5181,20 +5217,20 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    (void)ReREFCNT_inc(RExC_rx_sv);
 		}
 
-		min += minnext * mincount;
-		is_inf_internal |= deltanext == SSize_t_MAX
+		params->min += minnext * mincount;
+		params->is_inf_internal |= deltanext == SSize_t_MAX
                          || (maxcount == REG_INFTY && minnext + deltanext > 0);
-		is_inf |= is_inf_internal;
-                if (is_inf) {
-		    delta = SSize_t_MAX;
+		params->is_inf |= params->is_inf_internal;
+                if (params->is_inf) {
+		    params->delta = SSize_t_MAX;
                 } else {
-		    delta += (minnext + deltanext) * maxcount
+		    params->delta += (minnext + deltanext) * maxcount
                              - minnext * mincount;
                 }
 		/* Try powerful optimization CURLYX => CURLYN. */
-		if (  OP(oscan) == CURLYX && data
-		      && data->flags & SF_IN_PAR
-		      && !(data->flags & SF_HAS_EVAL)
+		if (  OP(oscan) == CURLYX && params->data
+		      && params->data->flags & SF_IN_PAR
+		      && !(params->data->flags & SF_HAS_EVAL)
 		      && !deltanext && minnext == 1 ) {
 		    /* Try to optimize to CURLYN.  */
 		    regnode *nxt = NEXTOPER(oscan) + EXTRA_STEP_2ARGS;
@@ -5236,9 +5272,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	      nogo:
 
 		/* Try optimization CURLYX => CURLYM. */
-		if (  OP(oscan) == CURLYX && data
-		      && !(data->flags & SF_HAS_PAR)
-		      && !(data->flags & SF_HAS_EVAL)
+		if (  OP(oscan) == CURLYX && params->data
+		      && !(params->data->flags & SF_HAS_PAR)
+		      && !(params->data->flags & SF_HAS_EVAL)
 		      && !deltanext	/* atom is fixed width */
 		      && minnext != 0	/* CURLYM can't handle zero width */
 
@@ -5257,7 +5293,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			nxt = nxt2;
 		    OP(nxt2)  = SUCCEED; /* Whas WHILEM */
 		    /* Need to optimize away parenths. */
-		    if ((data->flags & SF_IN_PAR) && OP(nxt) == CLOSE) {
+		    if ((params->data->flags & SF_IN_PAR) && OP(nxt) == CLOSE) {
 			/* Set the parenth number.  */
 			regnode *nxt1 = NEXTOPER(oscan) + EXTRA_STEP_2ARGS; /* OPEN*/
 
@@ -5291,19 +5327,19 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 #endif
 			/* Optimize again: */
                         /* recurse study_chunk() on optimised CURLYX => CURLYM */
-			study_chunk(pRExC_state, &nxt1, minlenp, &deltanext, nxt,
-                                    NULL, stopparen, recursed_depth, NULL, 0,depth+1);
+			study_chunk(pRExC_state, &nxt1, params->minlenp, &deltanext, nxt,
+                                    NULL, params->stopparen, params->recursed_depth, NULL, 0,params->depth+1);
 		    }
 		    else
 			oscan->flags = 0;
 		}
 		else if ((OP(oscan) == CURLYX)
-			 && (flags & SCF_WHILEM_VISITED_POS)
+			 && (params->flags & SCF_WHILEM_VISITED_POS)
 			 /* See the comment on a similar expression above.
 			    However, this time it's not a subexpression
 			    we care about, but the expression itself. */
 			 && (maxcount == REG_INFTY)
-			 && data) {
+			 && params->data) {
 		    /* This stays as CURLYX, we can put the count/of pair. */
 		    /* Find WHILEM (as in regexec.c) */
 		    regnode *nxt = oscan + NEXT_OFF(oscan);
@@ -5313,26 +5349,26 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     nxt = PREVOPER(nxt);
                     if (nxt->flags & 0xf) {
                         /* we've already set whilem count on this node */
-                    } else if (++data->whilem_c < 16) {
-                        assert(data->whilem_c <= RExC_whilem_seen);
-                        nxt->flags = (U8)(data->whilem_c
+                    } else if (++params->data->whilem_c < 16) {
+                        assert(params->data->whilem_c <= RExC_whilem_seen);
+                        nxt->flags = (U8)(params->data->whilem_c
                             | (RExC_whilem_seen << 4)); /* On WHILEM */
                     }
 		}
-		if (data && fl & (SF_HAS_PAR|SF_IN_PAR))
-		    pars++;
-		if (flags & SCF_DO_SUBSTR) {
+		if (params->data && fl & (SF_HAS_PAR|SF_IN_PAR))
+		    params->pars++;
+		if (params->flags & SCF_DO_SUBSTR) {
 		    SV *last_str = NULL;
                     STRLEN last_chrs = 0;
 		    int counted = mincount != 0;
 
-                    if (data->last_end > 0 && mincount != 0) { /* Ends with a
+                    if (params->data->last_end > 0 && mincount != 0) { /* Ends with a
                                                                   string. */
-			SSize_t b = pos_before >= data->last_start_min
-			    ? pos_before : data->last_start_min;
+			SSize_t b = pos_before >= params->data->last_start_min
+			    ? pos_before : params->data->last_start_min;
 			STRLEN l;
-			const char * const s = SvPV_const(data->last_found, l);
-			SSize_t old = b - data->last_start_min;
+			const char * const s = SvPV_const(params->data->last_found, l);
+			SSize_t old = b - params->data->last_start_min;
 
 			if (UTF)
 			    old = utf8_hop((U8*)s, old) - (U8*)s;
@@ -5351,11 +5387,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                           mincount - 1);
 				SvCUR_set(last_str, SvCUR(last_str) * mincount);
 				/* Add additional parts. */
-				SvCUR_set(data->last_found,
-					  SvCUR(data->last_found) - l);
-				sv_catsv(data->last_found, last_str);
+				SvCUR_set(params->data->last_found,
+					  SvCUR(params->data->last_found) - l);
+				sv_catsv(params->data->last_found, last_str);
 				{
-				    SV * sv = data->last_found;
+				    SV * sv = params->data->last_found;
 				    MAGIC *mg =
 					SvUTF8(sv) && SvMAGICAL(sv) ?
 					mg_find(sv, PERL_MAGIC_utf8) : NULL;
@@ -5363,20 +5399,20 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 					mg->mg_len += last_chrs * (mincount-1);
 				}
                                 last_chrs *= mincount;
-				data->last_end += l * (mincount - 1);
+				params->data->last_end += l * (mincount - 1);
 			    }
 			} else {
 			    /* start offset must point into the last copy */
-			    data->last_start_min += minnext * (mincount - 1);
-			    data->last_start_max =
-                              is_inf
+			    params->data->last_start_min += minnext * (mincount - 1);
+			    params->data->last_start_max =
+                              params->is_inf
                                ? SSize_t_MAX
-			       : data->last_start_max +
-                                 (maxcount - 1) * (minnext + data->pos_delta);
+			       : params->data->last_start_max +
+                                 (maxcount - 1) * (minnext + params->data->pos_delta);
 			}
 		    }
 		    /* It is counted once already... */
-		    data->pos_min += minnext * (mincount - counted);
+		    params->data->pos_min += minnext * (mincount - counted);
 #if 0
 Perl_re_printf( aTHX_  "counted=%" UVuf " deltanext=%" UVuf
                               " SSize_t_MAX=%" UVuf " minnext=%" UVuf
@@ -5386,135 +5422,135 @@ Perl_re_printf( aTHX_  "counted=%" UVuf " deltanext=%" UVuf
 if (deltanext != SSize_t_MAX)
 Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
     (UV)(-counted * deltanext + (minnext + deltanext) * maxcount
-          - minnext * mincount), (UV)(SSize_t_MAX - data->pos_delta));
+          - minnext * mincount), (UV)(SSize_t_MAX - params->data->pos_delta));
 #endif
 		    if (deltanext == SSize_t_MAX
-                        || -counted * deltanext + (minnext + deltanext) * maxcount - minnext * mincount >= SSize_t_MAX - data->pos_delta)
-		        data->pos_delta = SSize_t_MAX;
+                        || -counted * deltanext + (minnext + deltanext) * maxcount - minnext * mincount >= SSize_t_MAX - params->data->pos_delta)
+		        params->data->pos_delta = SSize_t_MAX;
 		    else
-		        data->pos_delta += - counted * deltanext +
+		        params->data->pos_delta += - counted * deltanext +
 			(minnext + deltanext) * maxcount - minnext * mincount;
 		    if (mincount != maxcount) {
 			 /* Cannot extend fixed substrings found inside
 			    the group.  */
-                        scan_commit(pRExC_state, data, minlenp, is_inf);
+                        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
 			if (mincount && last_str) {
-			    SV * const sv = data->last_found;
+			    SV * const sv = params->data->last_found;
 			    MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
 				mg_find(sv, PERL_MAGIC_utf8) : NULL;
 
 			    if (mg)
 				mg->mg_len = -1;
 			    sv_setsv(sv, last_str);
-			    data->last_end = data->pos_min;
-			    data->last_start_min = data->pos_min - last_chrs;
-			    data->last_start_max = is_inf
+			    params->data->last_end = params->data->pos_min;
+			    params->data->last_start_min = params->data->pos_min - last_chrs;
+			    params->data->last_start_max = params->is_inf
 				? SSize_t_MAX
-				: data->pos_min + data->pos_delta - last_chrs;
+				: params->data->pos_min + params->data->pos_delta - last_chrs;
 			}
-			data->cur_is_floating = 1; /* float */
+			params->data->cur_is_floating = 1; /* float */
 		    }
 		    SvREFCNT_dec(last_str);
 		}
-		if (data && (fl & SF_HAS_EVAL))
-		    data->flags |= SF_HAS_EVAL;
+		if (params->data && (fl & SF_HAS_EVAL))
+		    params->data->flags |= SF_HAS_EVAL;
 	      optimize_curly_tail:
 		if (OP(oscan) != CURLYX) {
-		    while (PL_regkind[OP(next = regnext(oscan))] == NOTHING
-			   && NEXT_OFF(next))
-			NEXT_OFF(oscan) += NEXT_OFF(next);
+		    while (PL_regkind[OP(params->next = regnext(oscan))] == NOTHING
+			   && NEXT_OFF(params->next))
+			NEXT_OFF(oscan) += NEXT_OFF(params->next);
 		}
 		continue;
 
 	    default:
 #ifdef DEBUGGING
                 Perl_croak(aTHX_ "panic: unexpected varying REx opcode %d",
-                                                                    OP(scan));
+                                                                    OP(params->scan));
 #endif
             case REF:
             case CLUMP:
-		if (flags & SCF_DO_SUBSTR) {
+		if (params->flags & SCF_DO_SUBSTR) {
                     /* Cannot expect anything... */
-                    scan_commit(pRExC_state, data, minlenp, is_inf);
-		    data->cur_is_floating = 1; /* float */
+                    scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+		    params->data->cur_is_floating = 1; /* float */
 		}
-		is_inf = is_inf_internal = 1;
-		if (flags & SCF_DO_STCLASS_OR) {
-                    if (OP(scan) == CLUMP) {
+		params->is_inf = params->is_inf_internal = 1;
+		if (params->flags & SCF_DO_STCLASS_OR) {
+                    if (OP(params->scan) == CLUMP) {
                         /* Actually is any start char, but very few code points
                          * aren't start characters */
-                        ssc_match_all_cp(data->start_class);
+                        ssc_match_all_cp(params->data->start_class);
                     }
                     else {
-                        ssc_anything(data->start_class);
+                        ssc_anything(params->data->start_class);
                     }
                 }
-		flags &= ~SCF_DO_STCLASS;
+		params->flags &= ~SCF_DO_STCLASS;
 		break;
 	    }
 	}
-	else if (OP(scan) == LNBREAK) {
-	    if (flags & SCF_DO_STCLASS) {
-    	        if (flags & SCF_DO_STCLASS_AND) {
-                    ssc_intersection(data->start_class,
+	else if (OP(params->scan) == LNBREAK) {
+	    if (params->flags & SCF_DO_STCLASS) {
+    	        if (params->flags & SCF_DO_STCLASS_AND) {
+                    ssc_intersection(params->data->start_class,
                                     PL_XPosix_ptrs[_CC_VERTSPACE], FALSE);
-                    ssc_clear_locale(data->start_class);
-                    ANYOF_FLAGS(data->start_class)
+                    ssc_clear_locale(params->data->start_class);
+                    ANYOF_FLAGS(params->data->start_class)
                                                 &= ~SSC_MATCHES_EMPTY_STRING;
                 }
-                else if (flags & SCF_DO_STCLASS_OR) {
-                    ssc_union(data->start_class,
+                else if (params->flags & SCF_DO_STCLASS_OR) {
+                    ssc_union(params->data->start_class,
                               PL_XPosix_ptrs[_CC_VERTSPACE],
                               FALSE);
-		    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
+		    ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
 
                     /* See commit msg for
                      * 749e076fceedeb708a624933726e7989f2302f6a */
-                    ANYOF_FLAGS(data->start_class)
+                    ANYOF_FLAGS(params->data->start_class)
                                                 &= ~SSC_MATCHES_EMPTY_STRING;
                 }
-		flags &= ~SCF_DO_STCLASS;
+		params->flags &= ~SCF_DO_STCLASS;
             }
-	    min++;
-            if (delta != SSize_t_MAX)
-                delta++;    /* Because of the 2 char string cr-lf */
-            if (flags & SCF_DO_SUBSTR) {
+	    params->min++;
+            if (params->delta != SSize_t_MAX)
+                params->delta++;    /* Because of the 2 char string cr-lf */
+            if (params->flags & SCF_DO_SUBSTR) {
                 /* Cannot expect anything... */
-                scan_commit(pRExC_state, data, minlenp, is_inf);
-    	        data->pos_min += 1;
-                if (data->pos_delta != SSize_t_MAX) {
-                    data->pos_delta += 1;
+                scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+    	        params->data->pos_min += 1;
+                if (params->data->pos_delta != SSize_t_MAX) {
+                    params->data->pos_delta += 1;
                 }
-		data->cur_is_floating = 1; /* float */
+		params->data->cur_is_floating = 1; /* float */
     	    }
 	}
-	else if (REGNODE_SIMPLE(OP(scan))) {
+	else if (REGNODE_SIMPLE(OP(params->scan))) {
 
-	    if (flags & SCF_DO_SUBSTR) {
-                scan_commit(pRExC_state, data, minlenp, is_inf);
-		data->pos_min++;
+	    if (params->flags & SCF_DO_SUBSTR) {
+                scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+		params->data->pos_min++;
 	    }
-	    min++;
-	    if (flags & SCF_DO_STCLASS) {
+	    params->min++;
+	    if (params->flags & SCF_DO_STCLASS) {
                 bool invert = 0;
                 SV* my_invlist = NULL;
                 U8 namedclass;
 
                 /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
-                ANYOF_FLAGS(data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+                ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
 
 		/* Some of the logic below assumes that switching
 		   locale on will only add false positives. */
-		switch (OP(scan)) {
+		switch (OP(params->scan)) {
 
 		default:
 #ifdef DEBUGGING
                    Perl_croak(aTHX_ "panic: unexpected simple REx opcode %d",
-                                                                     OP(scan));
+                                                                     OP(params->scan));
 #endif
 		case SANY:
-		    if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-			ssc_match_all_cp(data->start_class);
+		    if (params->flags & SCF_DO_STCLASS_OR) /* Allow everything */
+			ssc_match_all_cp(params->data->start_class);
 		    break;
 
 		case REG_ANY:
@@ -5522,19 +5558,19 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                         SV* REG_ANY_invlist = _new_invlist(2);
                         REG_ANY_invlist = add_cp_to_invlist(REG_ANY_invlist,
                                                             '\n');
-                        if (flags & SCF_DO_STCLASS_OR) {
-                            ssc_union(data->start_class,
+                        if (params->flags & SCF_DO_STCLASS_OR) {
+                            ssc_union(params->data->start_class,
                                       REG_ANY_invlist,
                                       TRUE /* TRUE => invert, hence all but \n
                                             */
                                       );
                         }
-                        else if (flags & SCF_DO_STCLASS_AND) {
-                            ssc_intersection(data->start_class,
+                        else if (params->flags & SCF_DO_STCLASS_AND) {
+                            ssc_intersection(params->data->start_class,
                                              REG_ANY_invlist,
                                              TRUE  /* TRUE => invert */
                                              );
-                            ssc_clear_locale(data->start_class);
+                            ssc_clear_locale(params->data->start_class);
                         }
                         SvREFCNT_dec_NN(REG_ANY_invlist);
 		    }
@@ -5543,26 +5579,26 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 case ANYOFD:
                 case ANYOFL:
                 case ANYOF:
-		    if (flags & SCF_DO_STCLASS_AND)
-			ssc_and(pRExC_state, data->start_class,
-                                (regnode_charclass *) scan);
+		    if (params->flags & SCF_DO_STCLASS_AND)
+			ssc_and(pRExC_state, params->data->start_class,
+                                (regnode_charclass *) params->scan);
 		    else
-			ssc_or(pRExC_state, data->start_class,
-                                                          (regnode_charclass *) scan);
+			ssc_or(pRExC_state, params->data->start_class,
+                                                          (regnode_charclass *) params->scan);
 		    break;
 
                 case ANYOFM:
                   {
-                    SV* cp_list = get_ANYOFM_contents(scan);
+                    SV* cp_list = get_ANYOFM_contents(params->scan);
 
-                    if (flags & SCF_DO_STCLASS_OR) {
-                        ssc_union(data->start_class,
+                    if (params->flags & SCF_DO_STCLASS_OR) {
+                        ssc_union(params->data->start_class,
                                   cp_list,
                                   FALSE /* don't invert */
                                   );
                     }
-                    else if (flags & SCF_DO_STCLASS_AND) {
-                        ssc_intersection(data->start_class,
+                    else if (params->flags & SCF_DO_STCLASS_AND) {
+                        ssc_intersection(params->data->start_class,
                                          cp_list,
                                          FALSE /* don't invert */
                                          );
@@ -5577,37 +5613,37 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     /* FALLTHROUGH */
 
 		case POSIXL:
-                    namedclass = classnum_to_namedclass(FLAGS(scan)) + invert;
-                    if (flags & SCF_DO_STCLASS_AND) {
+                    namedclass = classnum_to_namedclass(FLAGS(params->scan)) + invert;
+                    if (params->flags & SCF_DO_STCLASS_AND) {
                         bool was_there = cBOOL(
-                                          ANYOF_POSIXL_TEST(data->start_class,
+                                          ANYOF_POSIXL_TEST(params->data->start_class,
                                                                  namedclass));
-                        ANYOF_POSIXL_ZERO(data->start_class);
+                        ANYOF_POSIXL_ZERO(params->data->start_class);
                         if (was_there) {    /* Do an AND */
-                            ANYOF_POSIXL_SET(data->start_class, namedclass);
+                            ANYOF_POSIXL_SET(params->data->start_class, namedclass);
                         }
                         /* No individual code points can now match */
-                        data->start_class->invlist
+                        params->data->start_class->invlist
                                                 = sv_2mortal(_new_invlist(0));
                     }
                     else {
                         int complement = namedclass + ((invert) ? -1 : 1);
 
-                        assert(flags & SCF_DO_STCLASS_OR);
+                        assert(params->flags & SCF_DO_STCLASS_OR);
 
                         /* If the complement of this class was already there,
                          * the result is that they match all code points,
                          * (\d + \D == everything).  Remove the classes from
                          * future consideration.  Locale is not relevant in
                          * this case */
-                        if (ANYOF_POSIXL_TEST(data->start_class, complement)) {
-                            ssc_match_all_cp(data->start_class);
-                            ANYOF_POSIXL_CLEAR(data->start_class, namedclass);
-                            ANYOF_POSIXL_CLEAR(data->start_class, complement);
+                        if (ANYOF_POSIXL_TEST(params->data->start_class, complement)) {
+                            ssc_match_all_cp(params->data->start_class);
+                            ANYOF_POSIXL_CLEAR(params->data->start_class, namedclass);
+                            ANYOF_POSIXL_CLEAR(params->data->start_class, complement);
                         }
                         else {  /* The usual case; just add this class to the
                                    existing set */
-                            ANYOF_POSIXL_SET(data->start_class, namedclass);
+                            ANYOF_POSIXL_SET(params->data->start_class, namedclass);
                         }
                     }
                     break;
@@ -5626,8 +5662,8 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     invert = 1;
                     /* FALLTHROUGH */
 		case POSIXA:
-                    assert(FLAGS(scan) != _CC_ASCII);
-                    my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(scan)]);
+                    assert(FLAGS(params->scan) != _CC_ASCII);
+                    my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(params->scan)]);
                     goto join_posix_and_ascii;
 
 		case NPOSIXD:
@@ -5636,49 +5672,49 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     /* FALLTHROUGH */
 		case POSIXD:
 		case POSIXU:
-                    my_invlist = invlist_clone(PL_XPosix_ptrs[FLAGS(scan)]);
+                    my_invlist = invlist_clone(PL_XPosix_ptrs[FLAGS(params->scan)]);
 
                     /* NPOSIXD matches all upper Latin1 code points unless the
                      * target string being matched is UTF-8, which is
                      * unknowable until match time.  Since we are going to
                      * invert, we want to get rid of all of them so that the
                      * inversion will match all */
-                    if (OP(scan) == NPOSIXD) {
+                    if (OP(params->scan) == NPOSIXD) {
                         _invlist_subtract(my_invlist, PL_UpperLatin1,
                                           &my_invlist);
                     }
 
                   join_posix_and_ascii:
 
-                    if (flags & SCF_DO_STCLASS_AND) {
-                        ssc_intersection(data->start_class, my_invlist, invert);
-                        ssc_clear_locale(data->start_class);
+                    if (params->flags & SCF_DO_STCLASS_AND) {
+                        ssc_intersection(params->data->start_class, my_invlist, invert);
+                        ssc_clear_locale(params->data->start_class);
                     }
                     else {
-                        assert(flags & SCF_DO_STCLASS_OR);
-                        ssc_union(data->start_class, my_invlist, invert);
+                        assert(params->flags & SCF_DO_STCLASS_OR);
+                        ssc_union(params->data->start_class, my_invlist, invert);
                     }
                     SvREFCNT_dec(my_invlist);
 		}
-		if (flags & SCF_DO_STCLASS_OR)
-		    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
-		flags &= ~SCF_DO_STCLASS;
+		if (params->flags & SCF_DO_STCLASS_OR)
+		    ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
+		params->flags &= ~SCF_DO_STCLASS;
 	    }
 	}
-	else if (PL_regkind[OP(scan)] == EOL && flags & SCF_DO_SUBSTR) {
-	    data->flags |= (OP(scan) == MEOL
+	else if (PL_regkind[OP(params->scan)] == EOL && params->flags & SCF_DO_SUBSTR) {
+	    params->data->flags |= (OP(params->scan) == MEOL
 			    ? SF_BEFORE_MEOL
 			    : SF_BEFORE_SEOL);
-            scan_commit(pRExC_state, data, minlenp, is_inf);
+            scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
 
 	}
-	else if (  PL_regkind[OP(scan)] == BRANCHJ
+	else if (  PL_regkind[OP(params->scan)] == BRANCHJ
 		 /* Lookbehind, or need to calculate parens/evals/stclass: */
-		   && (scan->flags || data || (flags & SCF_DO_STCLASS))
-		   && (OP(scan) == IFMATCH || OP(scan) == UNLESSM))
+		   && (params->scan->flags || params->data || (params->flags & SCF_DO_STCLASS))
+		   && (OP(params->scan) == IFMATCH || OP(params->scan) == UNLESSM))
         {
             if ( !PERL_ENABLE_POSITIVE_ASSERTION_STUDY
-                || OP(scan) == UNLESSM )
+                || OP(params->scan) == UNLESSM )
             {
                 /* Negative Lookahead/lookbehind
                    In this case we can't do fixed string optimisation.
@@ -5689,30 +5725,29 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 regnode_ssc intrnl;
                 int f = 0;
 
-                StructCopy(&zero_scan_data, &data_fake, scan_data_t);
-                if (data) {
-                    data_fake.whilem_c = data->whilem_c;
-                    data_fake.last_closep = data->last_closep;
+                StructCopy(&zero_scan_data, &params->data_fake, scan_data_t);
+                if (params->data) {
+                    params->data_fake.whilem_c = params->data->whilem_c;
+                    params->data_fake.last_closep = params->data->last_closep;
 		}
                 else
-                    data_fake.last_closep = &fake;
-		data_fake.pos_delta = delta;
-                if ( flags & SCF_DO_STCLASS && !scan->flags
-                     && OP(scan) == IFMATCH ) { /* Lookahead */
+                    params->data_fake.last_closep = &fake;
+		params->data_fake.pos_delta = params->delta;
+                if ( params->flags & SCF_DO_STCLASS && !params->scan->flags
+                     && OP(params->scan) == IFMATCH ) { /* Lookahead */
                     ssc_init(pRExC_state, &intrnl);
-                    data_fake.start_class = &intrnl;
+                    params->data_fake.start_class = &intrnl;
                     f |= SCF_DO_STCLASS_AND;
 		}
-                if (flags & SCF_WHILEM_VISITED_POS)
+                if (params->flags & SCF_WHILEM_VISITED_POS)
                     f |= SCF_WHILEM_VISITED_POS;
-                next = regnext(scan);
-                nscan = NEXTOPER(NEXTOPER(scan));
-
+                params->next = regnext(params->scan);
+                nscan = NEXTOPER(NEXTOPER(params->scan));
                 /* recurse study_chunk() for lookahead body */
-                minnext = study_chunk(pRExC_state, &nscan, minlenp, &deltanext,
-                                      last, &data_fake, stopparen,
-                                      recursed_depth, NULL, f, depth+1);
-                if (scan->flags) {
+                minnext = study_chunk(pRExC_state, &nscan, params->minlenp, &deltanext,
+                                      params->last, &params->data_fake, params->stopparen,
+                                      params->recursed_depth, NULL, f, params->depth+1);
+                if (params->scan->flags) {
                     if (deltanext) {
 			FAIL("Variable length lookbehind not implemented");
                     }
@@ -5720,30 +5755,30 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 			FAIL2("Lookbehind longer than %" UVuf " not implemented",
                               (UV)U8_MAX);
                     }
-                    scan->flags = (U8)minnext;
+                    params->scan->flags = (U8)minnext;
                 }
-                if (data) {
-                    if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
-                        pars++;
-                    if (data_fake.flags & SF_HAS_EVAL)
-                        data->flags |= SF_HAS_EVAL;
-                    data->whilem_c = data_fake.whilem_c;
+                if (params->data) {
+                    if (params->data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
+                        params->pars++;
+                    if (params->data_fake.flags & SF_HAS_EVAL)
+                        params->data->flags |= SF_HAS_EVAL;
+                    params->data->whilem_c = params->data_fake.whilem_c;
                 }
                 if (f & SCF_DO_STCLASS_AND) {
-		    if (flags & SCF_DO_STCLASS_OR) {
+		    if (params->flags & SCF_DO_STCLASS_OR) {
 			/* OR before, AND after: ideally we would recurse with
 			 * data_fake to get the AND applied by study of the
 			 * remainder of the pattern, and then derecurse;
 			 * *** HACK *** for now just treat as "no information".
 			 * See [perl #56690].
 			 */
-			ssc_init(pRExC_state, data->start_class);
+			ssc_init(pRExC_state, params->data->start_class);
 		    }  else {
                         /* AND before and after: combine and continue.  These
                          * assertions are zero-length, so can match an EMPTY
                          * string */
-			ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &intrnl);
-                        ANYOF_FLAGS(data->start_class)
+			ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) &intrnl);
+                        ANYOF_FLAGS(params->data->start_class)
                                                    |= SSC_MATCHES_EMPTY_STRING;
 		    }
                 }
@@ -5771,40 +5806,40 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 Newx( minnextp, 1, SSize_t );
                 SAVEFREEPV(minnextp);
 
-                if (data) {
-                    StructCopy(data, &data_fake, scan_data_t);
-                    if ((flags & SCF_DO_SUBSTR) && data->last_found) {
+                if (params->data) {
+                    StructCopy(params->data, &params->data_fake, scan_data_t);
+                    if ((params->flags & SCF_DO_SUBSTR) && params->data->last_found) {
                         f |= SCF_DO_SUBSTR;
-                        if (scan->flags)
-                            scan_commit(pRExC_state, &data_fake, minlenp, is_inf);
-                        data_fake.last_found=newSVsv(data->last_found);
+                        if (params->scan->flags)
+                            scan_commit(pRExC_state, &params->data_fake, params->minlenp, params->is_inf);
+                        params->data_fake.last_found=newSVsv(params->data->last_found);
                     }
                 }
                 else
-                    data_fake.last_closep = &fake;
-                data_fake.flags = 0;
-                data_fake.substrs[0].flags = 0;
-                data_fake.substrs[1].flags = 0;
-		data_fake.pos_delta = delta;
-                if (is_inf)
-	            data_fake.flags |= SF_IS_INF;
-                if ( flags & SCF_DO_STCLASS && !scan->flags
-                     && OP(scan) == IFMATCH ) { /* Lookahead */
+                    params->data_fake.last_closep = &fake;
+                params->data_fake.flags = 0;
+                params->data_fake.substrs[0].flags = 0;
+                params->data_fake.substrs[1].flags = 0;
+		params->data_fake.pos_delta = params->delta;
+                if (params->is_inf)
+	            params->data_fake.flags |= SF_IS_INF;
+                if ( params->flags & SCF_DO_STCLASS && !params->scan->flags
+                     && OP(params->scan) == IFMATCH ) { /* Lookahead */
                     ssc_init(pRExC_state, &intrnl);
-                    data_fake.start_class = &intrnl;
+                    params->data_fake.start_class = &intrnl;
                     f |= SCF_DO_STCLASS_AND;
                 }
-                if (flags & SCF_WHILEM_VISITED_POS)
+                if (params->flags & SCF_WHILEM_VISITED_POS)
                     f |= SCF_WHILEM_VISITED_POS;
-                next = regnext(scan);
-                nscan = NEXTOPER(NEXTOPER(scan));
+                params->next = regnext(params->scan);
+                nscan = NEXTOPER(NEXTOPER(params->scan));
 
                 /* positive lookahead study_chunk() recursion */
                 *minnextp = study_chunk(pRExC_state, &nscan, minnextp,
-                                        &deltanext, last, &data_fake,
-                                        stopparen, recursed_depth, NULL,
-                                        f,depth+1);
-                if (scan->flags) {
+                                        &deltanext, params->last, &params->data_fake,
+                                        params->stopparen, params->recursed_depth, NULL,
+                                        f,params->depth+1);
+                if (params->scan->flags) {
                     if (deltanext) {
 			FAIL("Variable length lookbehind not implemented");
                     }
@@ -5812,37 +5847,33 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 			FAIL2("Lookbehind longer than %" UVuf " not implemented",
                               (UV)U8_MAX);
                     }
-                    scan->flags = (U8)*minnextp;
+                    params->scan->flags = (U8)*minnextp;
                 }
 
-                *minnextp += min;
+                *minnextp += params->min;
 
                 if (f & SCF_DO_STCLASS_AND) {
-                    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &intrnl);
-                    ANYOF_FLAGS(data->start_class) |= SSC_MATCHES_EMPTY_STRING;
+                    ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) &intrnl);
+                    ANYOF_FLAGS(params->data->start_class) |= SSC_MATCHES_EMPTY_STRING;
                 }
-                if (data) {
-                    if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
-                        pars++;
-                    if (data_fake.flags & SF_HAS_EVAL)
-                        data->flags |= SF_HAS_EVAL;
-                    data->whilem_c = data_fake.whilem_c;
-                    if ((flags & SCF_DO_SUBSTR) && data_fake.last_found) {
+                if (params->data) {
+                    if (params->data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
+                        params->pars++;
+                    if (params->data_fake.flags & SF_HAS_EVAL)
+                        params->data->flags |= SF_HAS_EVAL;
+                    params->data->whilem_c = params->data_fake.whilem_c;
+                    if ((params->flags & SCF_DO_SUBSTR) && params->data_fake.last_found) {
                         int i;
                         if (RExC_rx->minlen<*minnextp)
                             RExC_rx->minlen=*minnextp;
-                        scan_commit(pRExC_state, &data_fake, minnextp, is_inf);
-                        SvREFCNT_dec_NN(data_fake.last_found);
-
+                        scan_commit(pRExC_state, &params->data_fake, minnextp, params->is_inf);
+                        SvREFCNT_dec_NN(params->data_fake.last_found);
                         for (i = 0; i < 2; i++) {
-                            if (data_fake.substrs[i].minlenp != minlenp) {
-                                data->substrs[i].min_offset =
-                                            data_fake.substrs[i].min_offset;
-                                data->substrs[i].max_offset =
-                                            data_fake.substrs[i].max_offset;
-                                data->substrs[i].minlenp =
-                                            data_fake.substrs[i].minlenp;
-                                data->substrs[i].lookbehind += scan->flags;
+                            if (params->data_fake.substrs[i].minlenp != params->minlenp) {
+                                params->data->substrs[i].min_offset = params->data_fake.substrs[i].min_offset;
+                                params->data->substrs[i].max_offset = params->data_fake.substrs[i].max_offset;
+                                params->data->substrs[i].minlenp = params->data_fake.substrs[i].minlenp;
+                                params->data->substrs[i].lookbehind += params->scan->flags;
                             }
                         }
                     }
@@ -5850,58 +5881,57 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 	    }
 #endif
 	}
-
-	else if (OP(scan) == OPEN) {
-	    if (stopparen != (I32)ARG(scan))
-	        pars++;
+	else if (OP(params->scan) == OPEN) {
+	    if (params->stopparen != (I32)ARG(params->scan))
+	        params->pars++;
 	}
-	else if (OP(scan) == CLOSE) {
-	    if (stopparen == (I32)ARG(scan)) {
+	else if (OP(params->scan) == CLOSE) {
+	    if (params->stopparen == (I32)ARG(params->scan)) {
 	        break;
 	    }
-	    if ((I32)ARG(scan) == is_par) {
-		next = regnext(scan);
+	    if ((I32)ARG(params->scan) == params->is_par) {
+		params->next = regnext(params->scan);
 
-		if ( next && (OP(next) != WHILEM) && next < last)
-		    is_par = 0;		/* Disable optimization */
+		if ( params->next && (OP(params->next) != WHILEM) && params->next < params->last)
+		    params->is_par = 0;		/* Disable optimization */
 	    }
-	    if (data)
-		*(data->last_closep) = ARG(scan);
+	    if (params->data)
+		*(params->data->last_closep) = ARG(params->scan);
 	}
-	else if (OP(scan) == EVAL) {
-		if (data)
-		    data->flags |= SF_HAS_EVAL;
+	else if (OP(params->scan) == EVAL) {
+		if (params->data)
+		    params->data->flags |= SF_HAS_EVAL;
 	}
-	else if ( PL_regkind[OP(scan)] == ENDLIKE ) {
-	    if (flags & SCF_DO_SUBSTR) {
-                scan_commit(pRExC_state, data, minlenp, is_inf);
-		flags &= ~SCF_DO_SUBSTR;
+	else if ( PL_regkind[OP(params->scan)] == ENDLIKE ) {
+	    if (params->flags & SCF_DO_SUBSTR) {
+                scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+		params->flags &= ~SCF_DO_SUBSTR;
 	    }
-	    if (data && OP(scan)==ACCEPT) {
-	        data->flags |= SCF_SEEN_ACCEPT;
-	        if (stopmin > min)
-	            stopmin = min;
+	    if (params->data && OP(params->scan)==ACCEPT) {
+	        params->data->flags |= SCF_SEEN_ACCEPT;
+	        if (params->stopmin > params->min)
+	            params->stopmin = params->min;
 	    }
 	}
-	else if (OP(scan) == LOGICAL && scan->flags == 2) /* Embedded follows */
+	else if (OP(params->scan) == LOGICAL && params->scan->flags == 2) /* Embedded follows */
 	{
-		if (flags & SCF_DO_SUBSTR) {
-                    scan_commit(pRExC_state, data, minlenp, is_inf);
-		    data->cur_is_floating = 1; /* float */
+		if (params->flags & SCF_DO_SUBSTR) {
+                    scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+		    params->data->cur_is_floating = 1; /* float */
 		}
-		is_inf = is_inf_internal = 1;
-		if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-		    ssc_anything(data->start_class);
-		flags &= ~SCF_DO_STCLASS;
+		params->is_inf = params->is_inf_internal = 1;
+		if (params->flags & SCF_DO_STCLASS_OR) /* Allow everything */
+		    ssc_anything(params->data->start_class);
+		params->flags &= ~SCF_DO_STCLASS;
 	}
-	else if (OP(scan) == GPOS) {
+	else if (OP(params->scan) == GPOS) {
             if (!(RExC_rx->intflags & PREGf_GPOS_FLOAT) &&
-	        !(delta || is_inf || (data && data->pos_delta)))
+	        !(params->delta || params->is_inf || (params->data && params->data->pos_delta)))
 	    {
-                if (!(RExC_rx->intflags & PREGf_ANCH) && (flags & SCF_DO_SUBSTR))
+                if (!(RExC_rx->intflags & PREGf_ANCH) && (params->flags & SCF_DO_SUBSTR))
                     RExC_rx->intflags |= PREGf_ANCH_GPOS;
-	        if (RExC_rx->gofs < (STRLEN)min)
-		    RExC_rx->gofs = min;
+	        if (RExC_rx->gofs < (STRLEN)params->min)
+		    RExC_rx->gofs = params->min;
             } else {
                 RExC_rx->intflags |= PREGf_GPOS_FLOAT;
                 RExC_rx->gofs = 0;
@@ -5909,21 +5939,21 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 	}
 #ifdef TRIE_STUDY_OPT
 #ifdef FULL_TRIE_STUDY
-        else if (PL_regkind[OP(scan)] == TRIE) {
+        else if (PL_regkind[OP(params->scan)] == TRIE) {
             /* NOTE - There is similar code to this block above for handling
                BRANCH nodes on the initial study.  If you change stuff here
                check there too. */
-            regnode *trie_node= scan;
-            regnode *tail= regnext(scan);
-            reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(scan) ];
+            regnode *trie_node= params->scan;
+            regnode *tail= regnext(params->scan);
+            reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(params->scan) ];
             SSize_t max1 = 0, min1 = SSize_t_MAX;
             regnode_ssc accum;
 
-            if (flags & SCF_DO_SUBSTR) { /* XXXX Add !SUSPEND? */
+            if (params->flags & SCF_DO_SUBSTR) { /* XXXX Add !SUSPEND? */
                 /* Cannot merge strings after this. */
-                scan_commit(pRExC_state, data, minlenp, is_inf);
+                scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
             }
-            if (flags & SCF_DO_STCLASS)
+            if (params->flags & SCF_DO_STCLASS)
                 ssc_init_zero(pRExC_state, &accum);
 
             if (!trie->jump) {
@@ -5938,33 +5968,33 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     SSize_t deltanext=0, minnext=0, f = 0, fake;
                     regnode_ssc this_class;
 
-                    StructCopy(&zero_scan_data, &data_fake, scan_data_t);
-                    if (data) {
-                        data_fake.whilem_c = data->whilem_c;
-                        data_fake.last_closep = data->last_closep;
+                    StructCopy(&zero_scan_data, &params->data_fake, scan_data_t);
+                    if (params->data) {
+                        params->data_fake.whilem_c = params->data->whilem_c;
+                        params->data_fake.last_closep = params->data->last_closep;
                     }
                     else
-                        data_fake.last_closep = &fake;
-		    data_fake.pos_delta = delta;
-                    if (flags & SCF_DO_STCLASS) {
+                        params->data_fake.last_closep = &fake;
+		    params->data_fake.pos_delta = params->delta;
+                    if (params->flags & SCF_DO_STCLASS) {
                         ssc_init(pRExC_state, &this_class);
-                        data_fake.start_class = &this_class;
+                        params->data_fake.start_class = &this_class;
                         f = SCF_DO_STCLASS_AND;
                     }
-                    if (flags & SCF_WHILEM_VISITED_POS)
+                    if (params->flags & SCF_WHILEM_VISITED_POS)
                         f |= SCF_WHILEM_VISITED_POS;
 
                     if (trie->jump[word]) {
                         if (!nextbranch)
                             nextbranch = trie_node + trie->jump[0];
-                        scan= trie_node + trie->jump[word];
+                        params->scan= trie_node + trie->jump[word];
                         /* We go from the jump point to the branch that follows
                            it. Note this means we need the vestigal unused
                            branches even though they arent otherwise used. */
                         /* optimise study_chunk() for TRIE */
-                        minnext = study_chunk(pRExC_state, &scan, minlenp,
-                            &deltanext, (regnode *)nextbranch, &data_fake,
-                            stopparen, recursed_depth, NULL, f,depth+1);
+                        minnext = study_chunk(pRExC_state, &params->scan, params->minlenp,
+                            &deltanext, (regnode *)nextbranch, &params->data_fake,
+                            params->stopparen, params->recursed_depth, NULL, f,params->depth+1);
                     }
                     if (nextbranch && PL_regkind[OP(nextbranch)]==BRANCH)
                         nextbranch= regnext((regnode*)nextbranch);
@@ -5972,145 +6002,144 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                     if (min1 > (SSize_t)(minnext + trie->minlen))
                         min1 = minnext + trie->minlen;
                     if (deltanext == SSize_t_MAX) {
-                        is_inf = is_inf_internal = 1;
+                        params->is_inf = params->is_inf_internal = 1;
                         max1 = SSize_t_MAX;
                     } else if (max1 < (SSize_t)(minnext + deltanext + trie->maxlen))
                         max1 = minnext + deltanext + trie->maxlen;
 
-                    if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
-                        pars++;
-                    if (data_fake.flags & SCF_SEEN_ACCEPT) {
-                        if ( stopmin > min + min1)
-	                    stopmin = min + min1;
-	                flags &= ~SCF_DO_SUBSTR;
-	                if (data)
-	                    data->flags |= SCF_SEEN_ACCEPT;
+                    if (params->data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
+                        params->pars++;
+                    if (params->data_fake.flags & SCF_SEEN_ACCEPT) {
+                        if ( params->stopmin > params->min + min1)
+	                    params->stopmin = params->min + min1;
+	                params->flags &= ~SCF_DO_SUBSTR;
+	                if (params->data)
+	                    params->data->flags |= SCF_SEEN_ACCEPT;
 	            }
-                    if (data) {
-                        if (data_fake.flags & SF_HAS_EVAL)
-                            data->flags |= SF_HAS_EVAL;
-                        data->whilem_c = data_fake.whilem_c;
+                    if (params->data) {
+                        if (params->data_fake.flags & SF_HAS_EVAL)
+                            params->data->flags |= SF_HAS_EVAL;
+                        params->data->whilem_c = params->data_fake.whilem_c;
                     }
-                    if (flags & SCF_DO_STCLASS)
+                    if (params->flags & SCF_DO_STCLASS)
                         ssc_or(pRExC_state, &accum, (regnode_charclass *) &this_class);
                 }
             }
-            if (flags & SCF_DO_SUBSTR) {
-                data->pos_min += min1;
-                data->pos_delta += max1 - min1;
-                if (max1 != min1 || is_inf)
-                    data->cur_is_floating = 1; /* float */
+            if (params->flags & SCF_DO_SUBSTR) {
+                params->data->pos_min += min1;
+                params->data->pos_delta += max1 - min1;
+                if (max1 != min1 || params->is_inf)
+                    params->data->cur_is_floating = 1; /* float */
             }
-            min += min1;
-            if (delta != SSize_t_MAX) {
-                if (SSize_t_MAX - (max1 - min1) >= delta)
-                    delta += max1 - min1;
+            params->min += min1;
+            if (params->delta != SSize_t_MAX) {
+                if (SSize_t_MAX - (max1 - min1) >= params->delta)
+                    params->delta += max1 - min1;
                 else
-                    delta = SSize_t_MAX;
+                    params->delta = SSize_t_MAX;
             }
-            if (flags & SCF_DO_STCLASS_OR) {
-                ssc_or(pRExC_state, data->start_class, (regnode_charclass *) &accum);
+            if (params->flags & SCF_DO_STCLASS_OR) {
+                ssc_or(pRExC_state, params->data->start_class, (regnode_charclass *) &accum);
                 if (min1) {
-                    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
-                    flags &= ~SCF_DO_STCLASS;
+                    ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
+                    params->flags &= ~SCF_DO_STCLASS;
                 }
             }
-            else if (flags & SCF_DO_STCLASS_AND) {
+            else if (params->flags & SCF_DO_STCLASS_AND) {
                 if (min1) {
-                    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &accum);
-                    flags &= ~SCF_DO_STCLASS;
+                    ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) &accum);
+                    params->flags &= ~SCF_DO_STCLASS;
                 }
                 else {
                     /* Switch to OR mode: cache the old value of
                      * data->start_class */
 		    INIT_AND_WITHP;
-                    StructCopy(data->start_class, and_withp, regnode_ssc);
-                    flags &= ~SCF_DO_STCLASS_AND;
-                    StructCopy(&accum, data->start_class, regnode_ssc);
-                    flags |= SCF_DO_STCLASS_OR;
+                    StructCopy(params->data->start_class, params->and_withp, regnode_ssc);
+                    params->flags &= ~SCF_DO_STCLASS_AND;
+                    StructCopy(&accum, params->data->start_class, regnode_ssc);
+                    params->flags |= SCF_DO_STCLASS_OR;
                 }
             }
-            scan= tail;
+            params->scan= tail;
             continue;
         }
 #else
-	else if (PL_regkind[OP(scan)] == TRIE) {
-	    reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(scan) ];
+	else if (PL_regkind[OP(params->scan)] == TRIE) {
+	    reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(params->scan) ];
 	    U8*bang=NULL;
 
-	    min += trie->minlen;
-	    delta += (trie->maxlen - trie->minlen);
-	    flags &= ~SCF_DO_STCLASS; /* xxx */
-            if (flags & SCF_DO_SUBSTR) {
+	    params->min += trie->minlen;
+	    params->delta += (trie->maxlen - trie->minlen);
+	    params->flags &= ~SCF_DO_STCLASS; /* xxx */
+            if (params->flags & SCF_DO_SUBSTR) {
                 /* Cannot expect anything... */
-                scan_commit(pRExC_state, data, minlenp, is_inf);
-    	        data->pos_min += trie->minlen;
-    	        data->pos_delta += (trie->maxlen - trie->minlen);
+                scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+    	        params->data->pos_min += trie->minlen;
+    	        params->data->pos_delta += (trie->maxlen - trie->minlen);
 		if (trie->maxlen != trie->minlen)
-		    data->cur_is_floating = 1; /* float */
+		    params->data->cur_is_floating = 1; /* float */
     	    }
     	    if (trie->jump) /* no more substrings -- for now /grr*/
-               flags &= ~SCF_DO_SUBSTR;
+               params->flags &= ~SCF_DO_SUBSTR;
 	}
 #endif /* old or new */
 #endif /* TRIE_STUDY_OPT */
 
 	/* Else: zero-length, ignore. */
-	scan = regnext(scan);
+	params->scan = regnext(params->scan);
     }
 
   finish:
-    if (frame) {
-        /* we need to unwind recursion. */
-        depth = depth - 1;
+    if (params->frame) {
+        params->depth = params->depth - 1;
 
-        DEBUG_STUDYDATA("frame-end", data, depth, is_inf);
-        DEBUG_PEEP("fend", scan, depth, flags);
+        DEBUG_STUDYDATA("frame-end", params->data, params->depth, params->is_inf);
+        DEBUG_PEEP("fend", params->scan, params->depth, params->flags);
 
         /* restore previous context */
-        last = frame->last_regnode;
-        scan = frame->next_regnode;
-        stopparen = frame->stopparen;
-        recursed_depth = frame->prev_recursed_depth;
+        params->last = params->frame->last_regnode;
+        params->scan = params->frame->next_regnode;
+        params->stopparen = params->frame->stopparen;
+        params->recursed_depth = params->frame->prev_recursed_depth;
 
-        RExC_frame_last = frame->prev_frame;
-        frame = frame->this_prev_frame;
+        RExC_frame_last = params->frame->prev_frame;
+        params->frame = params->frame->this_prev_frame;
         goto fake_study_recurse;
     }
 
-    assert(!frame);
-    DEBUG_STUDYDATA("pre-fin", data, depth, is_inf);
+    assert(!params->frame);
+    DEBUG_STUDYDATA("pre-fin", params->data, params->depth, params->is_inf);
 
-    *scanp = scan;
-    *deltap = is_inf_internal ? SSize_t_MAX : delta;
+    *params->scanp = params->scan;
+    *params->deltap = params->is_inf_internal ? SSize_t_MAX : params->delta;
 
-    if (flags & SCF_DO_SUBSTR && is_inf)
-	data->pos_delta = SSize_t_MAX - data->pos_min;
-    if (is_par > (I32)U8_MAX)
-	is_par = 0;
-    if (is_par && pars==1 && data) {
-	data->flags |= SF_IN_PAR;
-	data->flags &= ~SF_HAS_PAR;
+    if (params->flags & SCF_DO_SUBSTR && params->is_inf)
+	params->data->pos_delta = SSize_t_MAX - params->data->pos_min;
+    if (params->is_par > (I32)U8_MAX)
+	params->is_par = 0;
+    if (params->is_par && params->pars==1 && params->data) {
+	params->data->flags |= SF_IN_PAR;
+	params->data->flags &= ~SF_HAS_PAR;
     }
-    else if (pars && data) {
-	data->flags |= SF_HAS_PAR;
-	data->flags &= ~SF_IN_PAR;
+    else if (params->pars && params->data) {
+	params->data->flags |= SF_HAS_PAR;
+	params->data->flags &= ~SF_IN_PAR;
     }
-    if (flags & SCF_DO_STCLASS_OR)
-	ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
-    if (flags & SCF_TRIE_RESTUDY)
-        data->flags |= 	SCF_TRIE_RESTUDY;
+    if (params->flags & SCF_DO_STCLASS_OR)
+	ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
+    if (params->flags & SCF_TRIE_RESTUDY)
+        params->data->flags |= 	SCF_TRIE_RESTUDY;
 
-    DEBUG_STUDYDATA("post-fin", data, depth, is_inf);
+    DEBUG_STUDYDATA("post-fin", params->data, params->depth, params->is_inf);
 
     {
-        SSize_t final_minlen= min < stopmin ? min : stopmin;
+        SSize_t final_minlen= params->min < params->stopmin ? params->min : params->stopmin;
 
         if (!(RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)) {
-            if (final_minlen > SSize_t_MAX - delta)
+            if (final_minlen > SSize_t_MAX - params->delta)
                 RExC_maxlen = SSize_t_MAX;
-            else if (RExC_maxlen < final_minlen + delta)
-                RExC_maxlen = final_minlen + delta;
+            else if (RExC_maxlen < final_minlen + params->delta)
+                RExC_maxlen = final_minlen + params->delta;
         }
         return final_minlen;
     }

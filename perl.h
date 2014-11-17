@@ -3682,6 +3682,9 @@ typedef struct regnode_ssc regnode_ssc;
 typedef struct RExC_state_t RExC_state_t;
 struct _reg_trie_data;
 
+struct rck_params;
+typedef struct rck_params rck_params_t;
+
 #endif
 
 struct ptr_tbl_ent {
