@@ -66,4 +66,22 @@ sub dies_ok (&@) {
 
 }
 
+{
+  my $string_hash = {
+    Left   => 10,
+    Shared => v50.44.60,
+    Right  => 18,
+  };
+
+  my $warning;
+  local $SIG{__WARN__} = sub { $warning = join("\n",@_) };
+
+  my $req = CPAN::Meta::Requirements->from_string_hash($string_hash);
+
+  ok(
+    $req->accepts_module(Shared => 'v50.44.60'),
+    "vstring treated as if string",
+  );
+}
+
 done_testing;
