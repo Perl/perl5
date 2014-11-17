@@ -585,7 +585,7 @@ were an object with "x" overloading, causing erratic behaviour.
 =item *
 
 Assignment to a lexical scalar is often optimised away (as mentioned under
-L</Performance Enhancements>.  Various bugs related to this optimisation
+L</Performance Enhancements>).  Various bugs related to this optimisation
 have been fixed.  Certain operators on the right-hand side would sometimes
 fail to assign the value at all or assign the wrong value, or would call
 STORE twice or not at all on tied variables.  The operators affected were
