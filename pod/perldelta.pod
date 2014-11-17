@@ -378,6 +378,12 @@ This message has had the S<"<-- HERE"> marker removed, as it was always
 placed at the end of the regular expression, regardless of where the
 problem actually occurred.  [perl #122680]
 
+=item *
+
+L<Setting $E<sol> to a reference to %s as a form of slurp is deprecated, treating as undef|perldiag/"Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef">
+
+This warning is now a default warning, like other deprecation warnings.
+
 =back
 
 =head1 Utility Changes
