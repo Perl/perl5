@@ -4223,7 +4223,10 @@ S_study_chunk(
 {
     rck_params_t s_params;
     rck_params_t *params = &s_params;
+    SSize_t final_minlen;
+
     GET_RE_DEBUG_FLAGS_DECL;
+
     params->scanp = scanp;
     params->minlenp = minlenp;
     params->deltap = deltap;
@@ -4257,8 +4260,65 @@ S_study_chunk(
             params->first_non_open = regnext(params->first_non_open);
     }
 
+    while (1) {
+        study_chunk_one_frame(pRExC_state, params);
+        if (!params->frame)
+            break;
+        params->depth = params->depth - 1;
 
-  fake_study_recurse:
+        DEBUG_STUDYDATA("frame-end", params->data, params->depth, params->is_inf);
+        DEBUG_PEEP("fend", params->scan, params->depth, params->flags);
+
+        /* restore previous context */
+        params->last = params->frame->last_regnode;
+        params->scan = params->frame->next_regnode;
+        params->stopparen = params->frame->stopparen;
+        params->recursed_depth = params->frame->prev_recursed_depth;
+
+        RExC_frame_last = params->frame->prev_frame;
+        params->frame = params->frame->this_prev_frame;
+    }
+
+    DEBUG_STUDYDATA("pre-fin", params->data, params->depth, params->is_inf);
+
+    *params->scanp = params->scan;
+    *params->deltap = params->is_inf_internal ? SSize_t_MAX : params->delta;
+
+    if (params->flags & SCF_DO_SUBSTR && params->is_inf)
+	params->data->pos_delta = SSize_t_MAX - params->data->pos_min;
+    if (params->is_par > (I32)U8_MAX)
+	params->is_par = 0;
+    if (params->is_par && params->pars==1 && params->data) {
+	params->data->flags |= SF_IN_PAR;
+	params->data->flags &= ~SF_HAS_PAR;
+    }
+    else if (params->pars && params->data) {
+	params->data->flags |= SF_HAS_PAR;
+	params->data->flags &= ~SF_IN_PAR;
+    }
+    if (params->flags & SCF_DO_STCLASS_OR)
+	ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
+    if (params->flags & SCF_TRIE_RESTUDY)
+        params->data->flags |= 	SCF_TRIE_RESTUDY;
+
+    DEBUG_STUDYDATA("post-fin", params->data, params->depth, params->is_inf);
+
+    final_minlen = params->min < params->stopmin
+            ? params->min : params->stopmin;
+    if (!(RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)) {
+        if (final_minlen > SSize_t_MAX - params->delta)
+            RExC_maxlen = SSize_t_MAX;
+        else if (RExC_maxlen < final_minlen + params->delta)
+            RExC_maxlen = final_minlen + params->delta;
+    }
+    return final_minlen;
+}
+
+STATIC void S_study_chunk_one_frame(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    GET_RE_DEBUG_FLAGS_DECL;
+    PERL_ARGS_ASSERT_STUDY_CHUNK_ONE_FRAME;
+
     DEBUG_r(
         RExC_study_chunk_recursed_count++;
     );
@@ -5078,7 +5138,7 @@ S_study_chunk(
 	    switch (PL_regkind[OP(params->scan)]) {
 	    case WHILEM:		/* End of (?:...)* . */
 		params->scan = NEXTOPER(params->scan);
-		goto finish;
+		return;
 	    case PLUS:
 		if (params->flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
 		    params->next = NEXTOPER(params->scan);
@@ -6088,62 +6148,6 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 	/* Else: zero-length, ignore. */
 	params->scan = regnext(params->scan);
     }
-
-  finish:
-    if (params->frame) {
-        params->depth = params->depth - 1;
-
-        DEBUG_STUDYDATA("frame-end", params->data, params->depth, params->is_inf);
-        DEBUG_PEEP("fend", params->scan, params->depth, params->flags);
-
-        /* restore previous context */
-        params->last = params->frame->last_regnode;
-        params->scan = params->frame->next_regnode;
-        params->stopparen = params->frame->stopparen;
-        params->recursed_depth = params->frame->prev_recursed_depth;
-
-        RExC_frame_last = params->frame->prev_frame;
-        params->frame = params->frame->this_prev_frame;
-        goto fake_study_recurse;
-    }
-
-    assert(!params->frame);
-    DEBUG_STUDYDATA("pre-fin", params->data, params->depth, params->is_inf);
-
-    *params->scanp = params->scan;
-    *params->deltap = params->is_inf_internal ? SSize_t_MAX : params->delta;
-
-    if (params->flags & SCF_DO_SUBSTR && params->is_inf)
-	params->data->pos_delta = SSize_t_MAX - params->data->pos_min;
-    if (params->is_par > (I32)U8_MAX)
-	params->is_par = 0;
-    if (params->is_par && params->pars==1 && params->data) {
-	params->data->flags |= SF_IN_PAR;
-	params->data->flags &= ~SF_HAS_PAR;
-    }
-    else if (params->pars && params->data) {
-	params->data->flags |= SF_HAS_PAR;
-	params->data->flags &= ~SF_IN_PAR;
-    }
-    if (params->flags & SCF_DO_STCLASS_OR)
-	ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
-    if (params->flags & SCF_TRIE_RESTUDY)
-        params->data->flags |= 	SCF_TRIE_RESTUDY;
-
-    DEBUG_STUDYDATA("post-fin", params->data, params->depth, params->is_inf);
-
-    {
-        SSize_t final_minlen= params->min < params->stopmin ? params->min : params->stopmin;
-
-        if (!(RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)) {
-            if (final_minlen > SSize_t_MAX - params->delta)
-                RExC_maxlen = SSize_t_MAX;
-            else if (RExC_maxlen < final_minlen + params->delta)
-                RExC_maxlen = final_minlen + params->delta;
-        }
-        return final_minlen;
-    }
-    NOT_REACHED; /* NOTREACHED */
 }
 
 STATIC U32
