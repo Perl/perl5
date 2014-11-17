@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
     @INC = '../lib';
 }
-plan 166;
+plan 167;
 
 # @tests is an array of hash refs, each of which can have various keys:
 #
@@ -476,3 +476,10 @@ for \%_ (@tests) {
 
     &{$_{finally} or next}
 }
+
+# This used to fail an assertion in leave_scope.  For some reason, it did
+# not fail within the framework above.
+sub  { my $x = "x"; my $sub = sub () { $x }; undef $sub; } ->();
+pass("No assertion failure when turning on PADSTALE on lexical shared by"
+    ." erstwhile constant");
+

@@ -1076,6 +1076,7 @@ Perl_leave_scope(pTHX_ I32 base)
                         SvFLAGS(sv) &=~ (SVf_OK|SVf_IVisUV|SVf_UTF8);
                         break;
                     }
+                    SvPADTMP_off(sv);
                     SvPADSTALE_on(sv); /* mark as no longer live */
                 }
                 else {	/* Someone has a claim on this, so abandon it. */
