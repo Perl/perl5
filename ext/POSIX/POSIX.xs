@@ -648,6 +648,14 @@ static NV my_fdim(NV x, NV y)
 #  define c99_fdim my_fdim
 #endif
 
+#ifndef c99_fma
+static NV my_fma(NV x, NV y, NV z)
+{
+  return (x * y) + z;
+}
+#  define c99_fma my_fma
+#endif
+
 #ifndef c99_fmax
 static NV my_fmax(NV x, NV y)
 {
@@ -2606,9 +2614,6 @@ fma(x,y,z)
     CODE:
 #ifdef c99_fma
 	RETVAL = c99_fma(x, y, z);
-#else
-	RETVAL = NV_NAN;
-	not_here("fma");
 #endif
     OUTPUT:
 	RETVAL
