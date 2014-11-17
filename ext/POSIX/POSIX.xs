@@ -737,7 +737,7 @@ static NV my_lgamma(NV x);
 #if !defined(c99_tgamma) || !defined(c99_lgamma)
 static NV my_tgamma(NV x)
 {
-  const NV gamma = 0.577215664901532860606512090; // Euler's gamma constant.
+  const NV gamma = 0.577215664901532860606512090; /* Euler's gamma constant. */
   if (Perl_isnan(x) || x < 0.0)
     return NV_NAN;
   if (x == 0.0 || x == NV_INF)
@@ -747,7 +747,7 @@ static NV my_tgamma(NV x)
    * (0, 0.001), [0.001, 12), and (12, infinity) */
 
   /* First interval: (0, 0.001)
-   * For small values, 1/tgamma(x) has power series x + gamma x^2  ,
+   * For small values, 1/tgamma(x) has power series x + gamma x^2,
    * so in this range, 1/tgamma(x) = x + gamma x^2 with error on the order of x^3.
    * The relative error over this interval is less than 6e-7. */
   if (x < 0.001)
@@ -836,10 +836,10 @@ static NV my_lgamma(NV x)
     return 0;
   if (x < 12.0)
     return Perl_log(PERL_ABS(my_tgamma(x)));
-  // Abramowitz and Stegun 6.1.41
-  // Asymptotic series should be good to at least 11 or 12 figures
-  // For error analysis, see Whittiker and Watson
-  // A Course in Modern Analysis (1927), page 252
+  /* Abramowitz and Stegun 6.1.41
+   * Asymptotic series should be good to at least 11 or 12 figures
+   * For error analysis, see Whittiker and Watson
+   * A Course in Modern Analysis (1927), page 252 */
   {
     static const NV c[8] = {
       1.0/12.0,
