@@ -679,6 +679,13 @@ optimised away is eligible for inlining.  This applies to things like C<sub
 Some subroutines with an explicit C<return> were being made inlinable,
 contrary to the documentation,  Now C<return> always prevents inlining.
 
+=item *
+
+On some systems, such as VMS, C<crypt> can return a non-ASCII string.  If a
+scalar assigned to had contained a UTF8 string previously, then C<crypt>
+would not turn off the UTF8 flag, thus corrupting the return value.  This
+would happen with C<$lexical = crypt ...>. 
+
 =back
 
 =head1 Known Problems
