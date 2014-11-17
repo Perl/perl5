@@ -686,6 +686,10 @@ scalar assigned to had contained a UTF8 string previously, then C<crypt>
 would not turn off the UTF8 flag, thus corrupting the return value.  This
 would happen with C<$lexical = crypt ...>. 
 
+=item *
+
+C<crypt> no longer calls C<FETCH> twice on a tied first argument.
+
 =back
 
 =head1 Known Problems
