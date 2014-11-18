@@ -7,11 +7,11 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
+    require 'test.pl';
 }
 
 use warnings;
 use strict;
-use Test::More;
 
 my $tests = 28; # not counting those in the __DATA__ section
 
@@ -45,8 +45,7 @@ while (<DATA>) {
     die "Missing name in test $_" unless defined $desc;
 
     if ($meta{skip}) {
-	# Like this to avoid needing a label SKIP:
-	Test::More->builder->skip($meta{skip});
+	SKIP: { skip($meta{skip}) };
 	next;
     }
 
