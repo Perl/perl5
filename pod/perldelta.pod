@@ -705,6 +705,11 @@ An unterminated here-doc on the last line of a quote-like operator
 (C<qq[${ <<END }]>, C</(?{ <<END })/>) no longer causes a double free.  It
 started doing so in 5.18.
 
+=item *
+
+Fixed two assertion failures introduced into C<-DPERL_OP_PARENT>
+builds. [perl #108276]
+
 =back
 
 =head1 Known Problems
