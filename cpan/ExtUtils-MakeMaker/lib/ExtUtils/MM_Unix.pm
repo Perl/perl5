@@ -2718,8 +2718,13 @@ sub parse_abstract {
     close $fh;
 
     if ( $pod_encoding and !( $] < 5.008 or !$Config{useperlio} ) ) {
-        require Encode;
-        $result = Encode::decode($pod_encoding, $result);
+        # Have to wrap in an eval{} for when running under PERL_CORE
+        # Encode isn't available during build phase and parsing
+        # ABSTRACT isn't important there
+        eval {
+          require Encode;
+          $result = Encode::decode($pod_encoding, $result);
+        }
     }
 
     return $result;

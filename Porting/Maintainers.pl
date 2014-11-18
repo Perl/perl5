@@ -485,6 +485,8 @@ use File::Glob qw(:case);
             'README.packaging',
         ],
         'CUSTOMIZED'   => [
+            # Applied upstream
+            q(lib/ExtUtils/MM_Unix.pm),
         ],
     },
 
