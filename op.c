@@ -4657,6 +4657,11 @@ S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth
         methop->op_flags = (U8)(flags | OPf_KIDS);
         methop->op_u.op_first = dynamic_meth;
         methop->op_private = (U8)(1 | (flags >> 8));
+
+#ifdef PERL_OP_PARENT
+        if (!OP_HAS_SIBLING(dynamic_meth))
+            dynamic_meth->op_sibling = (OP*)methop;
+#endif
     }
     else {
         assert(const_meth);
@@ -10649,6 +10654,9 @@ Perl_ck_sort(pTHX_ OP *o)
 		    OP * const padop = newOP(OP_PADCV, 0);
 		    padop->op_targ = off;
 		    cUNOPx(firstkid)->op_first = padop;
+#ifdef PERL_OP_PARENT
+                    padop->op_sibling = firstkid;
+#endif
 		    op_free(kid);
 		}
 	    }
