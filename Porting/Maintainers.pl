@@ -18,9 +18,9 @@ use File::Glob qw(:case);
 @IGNORABLE = qw(
     .cvsignore .dualLivedDiffConfig .gitignore .perlcriticrc .perltidyrc
     ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
-    CHANGELOG ChangeLog Changelog CHANGES Changes CONTRIBUTING COPYING Copying
-    cpanfile CREDITS dist.ini GOALS HISTORY INSTALL INSTALL.SKIP LICENSE
-    Makefile.PL MANIFEST MANIFEST.SKIP META.json META.yml MYMETA.json
+    CHANGELOG ChangeLog Changelog CHANGES Changes CONTRIBUTING CONTRIBUTING.mkdn
+    COPYING Copying cpanfile CREDITS dist.ini GOALS HISTORY INSTALL INSTALL.skip
+    LICENSE Makefile.PL MANIFEST MANIFEST.SKIP META.json META.yml MYMETA.json
     MYMETA.yml NEW NEWS NOTES perlcritic.rc ppport.h README README.PATCHING
     SIGNATURE THANKS TODO Todo VERSION WHATSNEW
 );
@@ -587,7 +587,7 @@ use File::Glob qw(:case);
     },
 
     'HTTP::Tiny' => {
-        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.050.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.051.tar.gz',
         'FILES'        => q[cpan/HTTP-Tiny],
         'EXCLUDED'     => [
             't/00-report-prereqs.t',
