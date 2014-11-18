@@ -736,13 +736,18 @@ static IV my_ilogb(NV x)
  * nor these) do NOT set the global signgam variable.  This is not
  * necessarily a bad thing. */
 
-/* Note that tgamma() and lgamma() depend on each other. */
-#if !defined(c99_tgamma) || !defined(c99_lgamma)
+/* Note that tgamma() and lgamma() implementations depend on each other. */
+
+#ifndef c99_tgamma
 static NV my_tgamma(NV x);
+#  define c99_tgamma my_tgamma
+#endif
+#ifndef c99_lgamma
 static NV my_lgamma(NV x);
+#  define c99_lgamma my_lgamma
 #endif
 
-#if !defined(c99_tgamma) || !defined(c99_lgamma)
+#ifndef HAS_TGAMMA
 static NV my_tgamma(NV x)
 {
   const NV gamma = 0.577215664901532860606512090; /* Euler's gamma constant. */
@@ -826,14 +831,11 @@ static NV my_tgamma(NV x)
     return NV_INF;
   }
 
-  return Perl_exp(my_lgamma(x));
+  return Perl_exp(c99_lgamma(x));
 }
-#  ifndef c99_tgamma
-#    define c99_tgamma my_tgamma
-#  endif
 #endif
 
-#if !defined(c99_lgamma) || !defined(c99_tgamma)
+#ifndef HAS_LGAMMA
 static NV my_lgamma(NV x)
 {
   if (Perl_isnan(x))
@@ -843,7 +845,7 @@ static NV my_lgamma(NV x)
   if (x == 1.0 || x == 2.0)
     return 0;
   if (x < 12.0)
-    return Perl_log(PERL_ABS(my_tgamma(x)));
+    return Perl_log(PERL_ABS(c99_tgamma(x)));
   /* Abramowitz and Stegun 6.1.41
    * Asymptotic series should be good to at least 11 or 12 figures
    * For error analysis, see Whittiker and Watson
@@ -873,9 +875,6 @@ static NV my_lgamma(NV x)
     return (x - 0.5) * Perl_log(x) - x + half_log_of_two_pi + series;
   }
 }
-#  ifndef c99_lgamma
-#    define c99_lgamma my_lgamma
-#  endif
 #endif
 
 #ifndef c99_log1p
