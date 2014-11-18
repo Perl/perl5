@@ -272,7 +272,8 @@ sub cflags {
     }
 
     for my $x (@ccextraflags) {
-      $self->{CCFLAGS} .= $cflags{$x} if exists $cflags{$x};
+      next unless exists $cflags{$x};
+      $self->{CCFLAGS} .= $cflags{$x} =~ m!^\s! ? $cflags{$x} : ' ' . $cflags{$x};
     }
 
     my $pollute = '';
