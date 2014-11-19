@@ -351,10 +351,17 @@ Perl_new_ctype(pTHX_ const char *newctype)
 #endif
 
         if (bad_count || multi_byte_locale) {
+
+            /* We have to save 'newctype' because the setlocale() just below
+             * may destroy it.  The next setlocale() further down should
+             * restore it properly so that the intermediate change here is
+             * transparent to this function's caller */
+            const char * const badlocale = savepv(newctype);
+
             setlocale(LC_CTYPE, "C");
             Perl_warner(aTHX_ packWARN(WARN_LOCALE),
                              "Locale '%s' may not work well.%s%s%s\n",
-                             newctype,
+                             badlocale,
                              (multi_byte_locale)
                               ? "  Some characters in it are not recognized by"
                                 " Perl."
@@ -368,7 +375,7 @@ Perl_new_ctype(pTHX_ const char *newctype)
                               ? bad_chars_list
                               : ""
                             );
-            setlocale(LC_CTYPE, newctype);
+            setlocale(LC_CTYPE, badlocale);
         }
     }
 
