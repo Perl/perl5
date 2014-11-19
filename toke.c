@@ -3189,9 +3189,13 @@ S_scan_const(pTHX_ char *start)
 			SvPOK_on(sv);
 			*d = '\0';
 			/* See Note on sizing above.  */
-			sv_utf8_upgrade_flags_grow(sv,
-					SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-					UNISKIP(uv) + (STRLEN)(send - s) + 1);
+			sv_utf8_upgrade_flags_grow(
+                                         sv,
+                                         SV_GMAGIC|SV_FORCE_UTF8_UPGRADE
+                                                  /* Above-latin1 in string
+                                                   * implies no encoding */
+                                                  |SV_UTF8_NO_ENCODING,
+                                         UNISKIP(uv) + (STRLEN)(send - s) + 1);
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf8 = TRUE;
                     }
