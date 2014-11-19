@@ -1313,11 +1313,11 @@ sv_force_normal does nothing.
    Not guaranteed to stay returning void */
 /* Macro won't actually call sv_2iv if already IOK */
 #define SvIV_please(sv) \
-	STMT_START {if (!SvIOKp(sv) && (SvNOK(sv) || SvPOK(sv))) \
+	STMT_START {if (!SvIOKp(sv) && (SvFLAGS(sv) & (SVf_NOK|SVf_POK))) \
 		(void) SvIV(sv); } STMT_END
 #define SvIV_please_nomg(sv) \
-	(!SvIOKp(sv) && (SvNOK(sv) || SvPOK(sv)) \
-	    ? (SvIV_nomg(sv), SvIOK(sv))	  \
+	(!(SvFLAGS(sv) & (SVf_IOK|SVp_IOK)) && (SvFLAGS(sv) & (SVf_NOK|SVf_POK)) \
+	    ? (sv_2iv_flags(sv, 0), SvIOK(sv))	  \
 	    : SvIOK(sv))
 #define SvIV_set(sv, val) \
 	STMT_START { \
