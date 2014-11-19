@@ -8591,7 +8591,12 @@ static char *int_tovmsspec
 	  VMSEFS_DOT_WITH_ESCAPE(cp1, rslt, VMS_MAXRSS);
 	}
       }
-      else                  *(cp1++) =  *cp2;
+      else {
+        int out_cnt;
+        cp2 += copy_expand_unix_filename_escape(cp1, cp2, &out_cnt, utf8_flag);
+        cp2--; /* we're in a loop that will increment this */
+        cp1 += out_cnt;
+      }
       infront = 1;
     }
   }
