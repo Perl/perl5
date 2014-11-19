@@ -2664,14 +2664,14 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                     }
                 }
                 else { /* Use the regular global */
-	    SvREFCNT_dec(PL_encoding);
-	    if (SvOK(sv) || SvGMAGICAL(sv)) {
-		PL_encoding = newSVsv(sv);
-	    }
-	    else {
-		PL_encoding = NULL;
-	    }
-            }
+                    SvREFCNT_dec(PL_encoding);
+                    if (SvOK(sv) || SvGMAGICAL(sv)) {
+                        PL_encoding = newSVsv(sv);
+                    }
+                    else {
+                        PL_encoding = NULL;
+                    }
+                }
             }
         }
 	break;
