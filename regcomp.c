@@ -4357,6 +4357,49 @@ S_study_chunk(
     return final_minlen;
 }
 
+/* Follow the next-chain of the current node and optimize away
+   all the NOTHINGs from it.
+ */
+STATIC void S_rck_elide_nothing(pTHX_ regnode *node)
+{
+    const int max = reg_off_by_arg[OP(node)] ? I32_MAX
+            /* I32 may be smaller than U16 on CRAYs! */
+            : I32_MAX < U16_MAX ? I32_MAX : U16_MAX;
+    int off = reg_off_by_arg[OP(node)] ? ARG(node) : NEXT_OFF(node);
+    int noff;
+    regnode *n = node;
+
+    PERL_ARGS_ASSERT_RCK_ELIDE_NOTHING;
+
+   /* We don't do this for CURLYX - why not? Doing so causes very quick
+      coredumps in the "This stays as CURLYX, we can put the count/of pair."
+      section, but it isn't clear why that should be so. (hv)
+    */
+    if (OP(node) == CURLYX)
+        return;
+
+    /* Skip NOTHING and LONGJMP. */
+    while (1) {
+        n = regnext(n);
+        if (!n)
+            break;
+        if (PL_regkind[OP(n)] == NOTHING) {
+            noff = NEXT_OFF(n);
+        } else if (OP(n) == LONGJMP) {
+            noff = ARG(n);
+        } else {
+            break;
+        }
+        if (!noff || off + noff >= max)
+            break;
+        off += noff;
+    }
+    if (reg_off_by_arg[OP(node)])
+        ARG(node) = off;
+    else
+        NEXT_OFF(node) = off;
+}
+
 STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 {
     UV min_subtract = 0;    /* How mmany chars to subtract from the minimum
@@ -4382,26 +4425,7 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
 
     /* Follow the next-chain of the current node and optimize
        away all the NOTHINGs from it.  */
-    if (OP(params->scan) != CURLYX) {
-        const int max = (reg_off_by_arg[OP(params->scan)]
-                   ? I32_MAX
-                   /* I32 may be smaller than U16 on CRAYs! */
-                   : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
-        int off = (reg_off_by_arg[OP(params->scan)] ? ARG(params->scan) : NEXT_OFF(params->scan));
-        int noff;
-        regnode *n = params->scan;
-
-        /* Skip NOTHING and LONGJMP. */
-        while ((n = regnext(n))
-               && ((PL_regkind[OP(n)] == NOTHING && (noff = NEXT_OFF(n)))
-                   || ((OP(n) == LONGJMP) && (noff = ARG(n))))
-               && off + noff < max)
-            off += noff;
-        if (reg_off_by_arg[OP(params->scan)])
-            ARG(params->scan) = off;
-        else
-            NEXT_OFF(params->scan) = off;
-    }
+    rck_elide_nothing(params->scan);
 
     /* The principal pseudo-switch.  Cannot be a switch, since we
        look into several different things.  */

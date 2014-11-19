@@ -2464,6 +2464,7 @@ Es	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state \
 Es	|bool	|study_chunk_one_node|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
 EsR	|SV *	|get_ANYOFM_contents|NN const regnode * n
+Es	|void	|rck_elide_nothing|NN regnode *node
 EsRn	|U32	|add_data	|NN RExC_state_t* const pRExC_state \
 				|NN const char* const s|const U32 n
 rs	|void	|re_croak2	|bool utf8|NN const char* pat1|NN const char* pat2|...
