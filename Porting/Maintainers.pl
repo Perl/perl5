@@ -392,6 +392,7 @@ use File::Glob qw(:case);
     'Encode' => {
         'DISTRIBUTION' => 'DANKOGAI/Encode-2.64.tar.gz',
         'FILES'        => q[cpan/Encode],
+        'CUSTOMIZED'   => [ qw( encoding.pm ) ],
     },
 
     'encoding::warnings' => {

@@ -3691,7 +3691,6 @@ PP(pp_require)
     SV *filter_state = NULL;
     SV *filter_sub = NULL;
     SV *hook_sv = NULL;
-    SV *encoding;
     OP *op;
     int saved_errno;
     bool path_searchable;
@@ -4138,17 +4137,10 @@ PP(pp_require)
 
     PUTBACK;
 
-    /* Store and reset encoding. */
-    encoding = PL_encoding;
-    PL_encoding = NULL;
-
     if (doeval(gimme, NULL, PL_curcop->cop_seq, NULL))
 	op = DOCATCH(PL_eval_start);
     else
 	op = PL_op->op_next;
-
-    /* Restore encoding. */
-    PL_encoding = encoding;
 
     LOADED_FILE_PROBE(unixname);
 

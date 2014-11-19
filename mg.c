@@ -770,9 +770,40 @@ S_fixup_errno_string(pTHX_ SV* sv)
 SV*
 Perl__get_encoding(pTHX)
 {
-    /* Returns the $^ENCODING or 'use encoding' in effect; NULL if none */
+    /* For core Perl use only: Returns the $^ENCODING or 'use encoding' in
+     * effect; NULL if none.
+     *
+     * $^ENCODING maps to PL_encoding, and is the old way to do things, and is
+     * retained for backwards compatibility.  Now, there is a shadow variable
+     * ${^E_NCODING} set only by the encoding pragma, used to give this pragma
+     * lexical scope, unlike the global scope it (shudder) used to have.  This
+     * variable maps to PL_lex_encoding.  Again for backwards compatibility,
+     * PL_encoding has precedence over PL_lex_encoding.  The hints hash is used
+     * to determine if PL_lex_encoding is in scope, and hence valid.  The hints
+     * hash only accepts simple values, so we can't put an Encode object into
+     * it, so we put the object into the global, and put a simple boolean into
+     * the hints hash giving whether the global is valid or not */
 
-    return PL_encoding;
+    SV *is_encoding;
+
+    if (PL_encoding) {
+        return PL_encoding;
+    }
+
+    if (! PL_lex_encoding) {
+        return NULL;
+    }
+
+    is_encoding = cop_hints_fetch_pvs(PL_curcop, "encoding", 0);
+    if (   is_encoding
+        && is_encoding != &PL_sv_placeholder
+        && SvIOK(is_encoding)
+        && SvIV(is_encoding))  /* non-zero mean valid */
+    {
+        return PL_lex_encoding;
+    }
+
+    return NULL;
 }
 
 #ifdef VMS
@@ -824,6 +855,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\005':  /* ^E */
 	 if (nextchar != '\0') {
+            /* We shouldn't be trying to retrieve this shadow variable */
+            assert(strNE(remaining, "_NCODING"));
+
             if (strEQ(remaining, "NCODING"))
                 sv_setsv(sv, _get_encoding());
             break;
@@ -2609,7 +2643,27 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #  endif
 #endif
 	}
-	else if (strEQ(mg->mg_ptr+1, "NCODING")) {
+	else {
+            unsigned int offset = 1;
+            bool lex = FALSE;
+
+            /* It may be the shadow variable ${E_NCODING} which has lexical
+             * scope.  See comments at Perl__get_encoding in this file */
+            if (*(mg->mg_ptr + 1) == '_') {
+                lex = TRUE;
+                offset++;
+            }
+            if (strEQ(mg->mg_ptr + offset, "NCODING")) {
+                if (lex) {  /* Use the shadow global */
+                    SvREFCNT_dec(PL_lex_encoding);
+                    if (SvOK(sv) || SvGMAGICAL(sv)) {
+                        PL_lex_encoding = newSVsv(sv);
+                    }
+                    else {
+                        PL_lex_encoding = NULL;
+                    }
+                }
+                else { /* Use the regular global */
 	    SvREFCNT_dec(PL_encoding);
 	    if (SvOK(sv) || SvGMAGICAL(sv)) {
 		PL_encoding = newSVsv(sv);
@@ -2617,7 +2671,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    else {
 		PL_encoding = NULL;
 	    }
-	}
+            }
+            }
+        }
 	break;
     case '\006':	/* ^F */
 	PL_maxsysfd = SvIV(sv);

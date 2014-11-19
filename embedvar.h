@@ -179,6 +179,7 @@
 #define PL_lastgotoprobe	(vTHX->Ilastgotoprobe)
 #define PL_laststatval		(vTHX->Ilaststatval)
 #define PL_laststype		(vTHX->Ilaststype)
+#define PL_lex_encoding		(vTHX->Ilex_encoding)
 #define PL_localizing		(vTHX->Ilocalizing)
 #define PL_localpatches		(vTHX->Ilocalpatches)
 #define PL_lockhook		(vTHX->Ilockhook)
