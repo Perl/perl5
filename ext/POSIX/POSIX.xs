@@ -2626,6 +2626,7 @@ nan(s = 0)
 #ifdef c99_nan
 	RETVAL = c99_nan(s ? s : "");
 #elif defined(NV_NAN)
+	PERL_UNUSED_VAR(s);
 	/* XXX if s != NULL, warn about unused argument,
          * or implement the nan payload setting. */
 	RETVAL = NV_NAN;
