@@ -136,13 +136,13 @@ Perl will continue to make the sub inlinable with no warnings.
     sub make_constant_deprecated {
         my $var;
         $var = shift;
-        return sub () { $bar }; # deprecated
+        return sub () { $var }; # deprecated
     }
 
     sub make_constant_deprecated2 {
         my $var = shift;
         log_that_value($var); # could modify $var
-        return sub () { $bar }; # deprecated
+        return sub () { $var }; # deprecated
     }
 
 In the second example above, detecting that $var is assigned to only once
