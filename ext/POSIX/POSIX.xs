@@ -729,14 +729,16 @@ static IV my_ilogb(NV x)
 #  define c99_ilogb my_ilogb
 #endif
 
-/* tgamma and lgamma emulations based on http://www.johndcook.com/cpp_gamma.html,
+/* tgamma and lgamma emulations based on
+ * http://www.johndcook.com/cpp_gamma.html,
  * code placed in public domain.
  *
  * Note that these implementations (neither the johndcook originals
  * nor these) do NOT set the global signgam variable.  This is not
  * necessarily a bad thing. */
 
-/* Note that tgamma() and lgamma() implementations depend on each other. */
+/* Note that the tgamma() and lgamma() implementations
+ * here depend on each other. */
 
 #ifndef HAS_TGAMMA
 static NV my_tgamma(NV x);
