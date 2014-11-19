@@ -1871,10 +1871,34 @@ Mnemonic: value of B<-D> switch.
 =item ${^ENCODING}
 X<${^ENCODING}>
 
+DEPRECATED!!!
+
 The I<object reference> to the C<Encode> object that is used to convert
 the source code to Unicode.  Thanks to this variable your Perl script
-does not have to be written in UTF-8.  Default is I<undef>.  Setting
-this variable to any other value is deprecated.
+does not have to be written in UTF-8.  Default is C<undef>.
+
+Setting this variable to any other value than C<undef> is deprecated due
+to fundamental defects in its design and implementation.  It is planned
+to remove it from a future Perl version.  Its purpose was to allow your
+non-ASCII Perl scripts to not have to be written in UTF-8; this was
+useful before editors that worked on UTF-8 encoded text were common, but
+that was long ago.  It causes problems, such as affecting the operation
+of other modules that aren't expecting it, causing general mayhem.  Its
+use can lead to segfaults.
+
+If you need something like this functionality, you should use the
+L<encoding> pragma, which is also deprecated, but has fewer nasty side
+effects.
+
+If you are coming here because code of yours is being adversely affected
+by someone's use of this variable, you can usually work around it by
+doing this:
+
+ local ${^ENCODING};
+
+near the beginning of the functions that are getting broken.  This
+undefines the variable during the scope of execution of the including
+function.
 
 This variable was added in Perl 5.8.2.
 
