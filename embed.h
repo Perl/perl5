@@ -1164,7 +1164,7 @@
 #define ssc_or(a,b,c)		S_ssc_or(aTHX_ a,b,c)
 #define ssc_union(a,b,c)	S_ssc_union(aTHX_ a,b,c)
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
-#define study_chunk_one_frame(a,b)	S_study_chunk_one_frame(aTHX_ a,b)
+#define study_chunk_one_node(a,b)	S_study_chunk_one_node(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
 #define _invlist_dump(a,b,c,d)	Perl__invlist_dump(aTHX_ a,b,c,d)

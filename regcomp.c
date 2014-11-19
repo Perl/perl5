@@ -4206,6 +4206,42 @@ typedef struct rck_params {
     scan_frame* frame;
 } rck_params_t;
 
+#ifdef DEBUGGING
+#define DO_PAREN_TEST(depth, par) PAREN_TEST( \
+    RExC_study_chunk_recursed + (depth) * RExC_study_chunk_recursed_bytes, \
+    (par) \
+)
+void dump_study_chunk(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    Perl_re_indentf(aTHX_
+        "study_chunk stopparen=%ld recursed_count=%lu depth=%lu recursed_depth=%lu scan=%p last=%p",
+        params->depth, (long)params->stopparen,
+        (unsigned long)RExC_study_chunk_recursed_count,
+        (unsigned long)params->depth,
+        (unsigned long)params->recursed_depth,
+        params->scan,
+        params->last
+    );
+    if (params->recursed_depth) {
+        U32 i, j;
+        for (j = 0; j < params->recursed_depth; j++) {
+            for (i = 0; i < (U32)RExC_npar; i++) {
+                if (
+                    DO_PAREN_TEST(j, i) && (!j || !DO_PAREN_TEST(j - 1, i))
+                ) {
+                    Perl_re_printf(aTHX_ " %d", (int)i);
+                    break;
+                }
+            }
+            if (j + 1 < params->recursed_depth) {
+                Perl_re_printf(aTHX_ ",");
+            }
+        }
+    }
+    Perl_re_printf(aTHX_ "\n");
+}
+#endif
+
 /* the return from this sub is the minimum length that could possibly match */
 STATIC SSize_t
 S_study_chunk(
@@ -4260,8 +4296,19 @@ S_study_chunk(
             params->first_non_open = regnext(params->first_non_open);
     }
 
+    /* while there are frames to do */
     while (1) {
-        study_chunk_one_frame(pRExC_state, params);
+        DEBUG_r(RExC_study_chunk_recursed_count++;);
+        DEBUG_OPTIMISE_MORE_r({ dump_study_chunk(aTHX_ pRExC_state, params); });
+
+        while (params->scan
+            && OP(params->scan) != END
+            && params->scan < params->last
+        ) {
+            if (study_chunk_one_node(pRExC_state, params))
+                break;
+        }
+
         if (!params->frame)
             break;
         params->depth = params->depth - 1;
@@ -4314,53 +4361,15 @@ S_study_chunk(
     return final_minlen;
 }
 
-STATIC void S_study_chunk_one_frame(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 {
-    GET_RE_DEBUG_FLAGS_DECL;
-    PERL_ARGS_ASSERT_STUDY_CHUNK_ONE_FRAME;
-
-    DEBUG_r(
-        RExC_study_chunk_recursed_count++;
-    );
-    DEBUG_OPTIMISE_MORE_r(
-    {
-        Perl_re_indentf( aTHX_  "study_chunk stopparen=%ld recursed_count=%lu depth=%lu recursed_depth=%lu scan=%p last=%p",
-            params->depth, (long)params->stopparen,
-            (unsigned long)RExC_study_chunk_recursed_count,
-            (unsigned long)params->depth, (unsigned long)params->recursed_depth,
-            params->scan,
-            params->last);
-        if (params->recursed_depth) {
-            U32 i;
-            U32 j;
-            for ( j = 0 ; j < params->recursed_depth ; j++ ) {
-                for ( i = 0 ; i < (U32)RExC_npar ; i++ ) {
-                    if (
-                        PAREN_TEST(RExC_study_chunk_recursed +
-                                   ( j * RExC_study_chunk_recursed_bytes), i )
-                        && (
-                            !j ||
-                            !PAREN_TEST(RExC_study_chunk_recursed +
-                                   (( j - 1 ) * RExC_study_chunk_recursed_bytes), i)
-                        )
-                    ) {
-                        Perl_re_printf( aTHX_ " %d",(int)i);
-                        break;
-                    }
-                }
-                if ( j + 1 < params->recursed_depth ) {
-                    Perl_re_printf( aTHX_  ",");
-                }
-            }
-        }
-        Perl_re_printf( aTHX_ "\n");
-    }
-    );
-    while (params->scan && OP(params->scan) != END && params->scan < params->last) {
         UV min_subtract = 0;    /* How mmany chars to subtract from the minimum
                                    node length to get a real minimum (because
                                    the folded version may be shorter) */
 	bool unfolded_multi_char = FALSE;
+
+        PERL_ARGS_ASSERT_STUDY_CHUNK_ONE_NODE;
+
 	/* Peephole optimizer: */
         DEBUG_STUDYDATA("Peep", params->data, params->depth, params->is_inf);
         DEBUG_PEEP("Peep", params->scan, params->depth, params->flags);
@@ -4615,6 +4624,7 @@ STATIC void S_study_chunk_one_frame(pTHX_ RExC_state_t *pRExC_state, rck_params_
                         regnode *tail = params->scan;
                         U8 trietype = 0;
                         U32 count=0;
+                        GET_RE_DEBUG_FLAGS_DECL;
 
                         /* var tail is used because there may be a TAIL
                            regop in the way. Ie, the exacts will point to the
@@ -4896,7 +4906,7 @@ STATIC void S_study_chunk_one_frame(pTHX_ RExC_state_t *pRExC_state, rck_params_
 		params->scan = NEXTOPER(NEXTOPER(params->scan));
 	    } else			/* single branch is optimized. */
 		params->scan = NEXTOPER(params->scan);
-	    continue;
+	    return 0;
 	} else if (OP(params->scan) == SUSPEND || OP(params->scan) == GOSUB) {
             I32 paren = 0;
             regnode *start = NULL;
@@ -4937,7 +4947,7 @@ STATIC void S_study_chunk_one_frame(pTHX_ RExC_state_t *pRExC_state, rck_params_
                      * harder than we should.
                      * */
                     params->scan= regnext(params->scan);
-                    continue;
+                    return 0;
                 }
 
                 if (
@@ -5020,7 +5030,7 @@ STATIC void S_study_chunk_one_frame(pTHX_ RExC_state_t *pRExC_state, rck_params_
                 params->depth = params->depth + 1;
                 params->recursed_depth= my_recursed_depth;
 
-	        continue;
+	        return 0;
 	    }
 	}
 	else if (OP(params->scan) == EXACT || OP(params->scan) == EXACTL) {
@@ -5138,7 +5148,7 @@ STATIC void S_study_chunk_one_frame(pTHX_ RExC_state_t *pRExC_state, rck_params_
 	    switch (PL_regkind[OP(params->scan)]) {
 	    case WHILEM:		/* End of (?:...)* . */
 		params->scan = NEXTOPER(params->scan);
-		return;
+		return 1;
 	    case PLUS:
 		if (params->flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
 		    params->next = NEXTOPER(params->scan);
@@ -5520,7 +5530,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 			   && NEXT_OFF(params->next))
 			NEXT_OFF(oscan) += NEXT_OFF(params->next);
 		}
-		continue;
+		return 0;
 
 	    default:
 #ifdef DEBUGGING
@@ -5947,7 +5957,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 	}
 	else if (OP(params->scan) == CLOSE) {
 	    if (params->stopparen == (I32)ARG(params->scan)) {
-	        break;
+	        return 1;
 	    }
 	    if ((I32)ARG(params->scan) == params->is_par) {
 		params->next = regnext(params->scan);
@@ -6121,7 +6131,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
                 }
             }
             params->scan= tail;
-            continue;
+            return 0;
         }
 #else
 	else if (PL_regkind[OP(params->scan)] == TRIE) {
@@ -6147,7 +6157,7 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 
 	/* Else: zero-length, ignore. */
 	params->scan = regnext(params->scan);
-    }
+    return 0;
 }
 
 STATIC U32
