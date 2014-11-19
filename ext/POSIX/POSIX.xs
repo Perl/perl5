@@ -738,11 +738,11 @@ static IV my_ilogb(NV x)
 
 /* Note that tgamma() and lgamma() implementations depend on each other. */
 
-#ifndef c99_tgamma
+#ifndef HAS_TGAMMA
 static NV my_tgamma(NV x);
 #  define c99_tgamma my_tgamma
 #endif
-#ifndef c99_lgamma
+#ifndef HAS_LGAMMA
 static NV my_lgamma(NV x);
 #  define c99_lgamma my_lgamma
 #endif
