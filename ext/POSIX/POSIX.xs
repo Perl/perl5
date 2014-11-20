@@ -829,9 +829,15 @@ static NV my_tgamma(NV x)
   }
 
   /* Third interval: [12, +Inf) */
-  if (x > 171.624) { /* XXX Too low for quad precision */
+#if LDBL_MANT_DIG == 113 /* IEEE quad prec */
+  if (x > 1755.548) {
     return NV_INF;
   }
+#else
+  if (x > 171.624) {
+    return NV_INF;
+  }
+#endif
 
   return Perl_exp(c99_lgamma(x));
 }
