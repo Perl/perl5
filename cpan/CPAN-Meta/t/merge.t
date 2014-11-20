@@ -110,7 +110,7 @@ is_deeply($first_result, \%first_expected, 'First result is as expected');
 is_deeply($merger->merge(\%base, { abstract => 'This is a test' }), \%base, 'Can merge in identical abstract');
 my $failure = eval { $merger->merge(\%base, { abstract => 'And now for something else' }) };
 is($failure, undef, 'Trying to merge different author gives an exception');
-like $@, qr/^Can't merge attribute abstract /, 'Exception looks right';
+like $@, qr/^Can't merge attribute abstract/, 'Exception looks right';
 
 my $failure2 = eval { $merger->merge(\%base, { provides => { Baz => { file => 'Baz.pm' } } }) };
 is($failure2, undef, 'Trying to merge different author gives an exception');

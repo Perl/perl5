@@ -8,7 +8,7 @@ use strict;
 use warnings;
 package CPAN::Meta::Spec;
 # VERSION
-$CPAN::Meta::Spec::VERSION = '2.142690';
+$CPAN::Meta::Spec::VERSION = '2.143240';
 1;
 
 # ABSTRACT: specification for CPAN distribution metadata
@@ -28,7 +28,7 @@ CPAN::Meta::Spec - specification for CPAN distribution metadata
 
 =head1 VERSION
 
-version 2.142690
+version 2.143240
 
 =head1 SYNOPSIS
 

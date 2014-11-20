@@ -311,12 +311,12 @@ cpan/CPAN-Meta/t/load-bad.t
 cpan/CPAN-Meta/t/merge.t
 cpan/CPAN-Meta/t/meta-obj.t
 cpan/CPAN-Meta/t/no-index.t
+cpan/CPAN-Meta/t/optional_feature-merge.t
 cpan/CPAN-Meta/t/prereqs-finalize.t
 cpan/CPAN-Meta/t/prereqs-merge.t
 cpan/CPAN-Meta/t/prereqs.t
 cpan/CPAN-Meta/t/repository.t
 cpan/CPAN-Meta/t/save-load.t
-cpan/CPAN-Meta/t/strings.t
 cpan/CPAN-Meta/t/validator.t
 cpan/CPAN-Meta-YAML/lib/CPAN/Meta/YAML.pm		CPAN-Meta-YAML files
 cpan/CPAN-Meta-YAML/t/01_api.t

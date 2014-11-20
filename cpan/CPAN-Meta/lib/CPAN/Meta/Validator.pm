@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta::Validator;
 # VERSION
-$CPAN::Meta::Validator::VERSION = '2.142690';
+$CPAN::Meta::Validator::VERSION = '2.143240';
 #pod =head1 SYNOPSIS
 #pod
 #pod   my $struct = decode_json_file('META.json');
@@ -997,7 +997,7 @@ CPAN::Meta::Validator - validate CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.142690
+version 2.143240
 
 =head1 SYNOPSIS
 

@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta::Converter;
 # VERSION
-$CPAN::Meta::Converter::VERSION = '2.142690';
+$CPAN::Meta::Converter::VERSION = '2.143240';
 #pod =head1 SYNOPSIS
 #pod
 #pod   my $struct = decode_json_file('META.json');
@@ -1494,7 +1494,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.142690
+version 2.143240
 
 =head1 SYNOPSIS
 

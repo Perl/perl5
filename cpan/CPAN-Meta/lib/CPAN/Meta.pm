@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta;
 # VERSION
-$CPAN::Meta::VERSION = '2.142690';
+$CPAN::Meta::VERSION = '2.143240';
 #pod =head1 SYNOPSIS
 #pod
 #pod     use v5.10;
@@ -465,7 +465,8 @@ sub effective_prereqs {
 #pod
 #pod This method returns true if the given file should be indexed.  It decides this
 #pod by checking the C<file> and C<directory> keys in the C<no_index> property of
-#pod the distmeta structure.
+#pod the distmeta structure. Note that neither the version format nor
+#pod C<release_status> are considered.
 #pod
 #pod C<$filename> should be given in unix format.
 #pod
@@ -492,7 +493,8 @@ sub should_index_file {
 #pod
 #pod This method returns true if the given package should be indexed.  It decides
 #pod this by checking the C<package> and C<namespace> keys in the C<no_index>
-#pod property of the distmeta structure.
+#pod property of the distmeta structure. Note that neither the version format nor
+#pod C<release_status> are considered.
 #pod
 #pod =cut
 
@@ -641,7 +643,7 @@ CPAN::Meta - the distribution metadata for a CPAN dist
 
 =head1 VERSION
 
-version 2.142690
+version 2.143240
 
 =head1 SYNOPSIS
 
@@ -799,7 +801,8 @@ distribution's core prereqs before the CPAN::Meta::Prereqs object is returned.
 
 This method returns true if the given file should be indexed.  It decides this
 by checking the C<file> and C<directory> keys in the C<no_index> property of
-the distmeta structure.
+the distmeta structure. Note that neither the version format nor
+C<release_status> are considered.
 
 C<$filename> should be given in unix format.
 
@@ -809,7 +812,8 @@ C<$filename> should be given in unix format.
 
 This method returns true if the given package should be indexed.  It decides
 this by checking the C<package> and C<namespace> keys in the C<no_index>
-property of the distmeta structure.
+property of the distmeta structure. Note that neither the version format nor
+C<release_status> are considered.
 
 =head2 features
 

@@ -3,14 +3,14 @@ use warnings;
 
 package CPAN::Meta::Merge;
 # VERSION
-$CPAN::Meta::Merge::VERSION = '2.142690';
+$CPAN::Meta::Merge::VERSION = '2.143240';
 use Carp qw/croak/;
 use Scalar::Util qw/blessed/;
 use CPAN::Meta::Converter;
 
 sub _identical {
   my ($left, $right, $path) = @_;
-  croak "Can't merge attribute " . join '.', @{$path} unless $left eq $right;
+  croak sprintf "Can't merge attribute %s: '%s' does not equal '%s'", join('.', @{$path}), $left, $right unless $left eq $right;
   return $left;
 }
 
@@ -73,6 +73,36 @@ sub _improvize {
   croak sprintf "Can't merge '%s'", join '.', @{$path};
 }
 
+sub _optional_features {
+  my ($left, $right, $path) = @_;
+
+  for my $key (keys %{$right}) {
+    if (not exists $left->{$key}) {
+      $left->{$key} = $right->{$key};
+    }
+    else {
+      for my $subkey (keys %{ $right->{$key} }) {
+        next if $subkey eq 'prereqs';
+        if (not exists $left->{$key}{$subkey}) {
+          $left->{$key}{$subkey} = $right->{$key}{$subkey};
+        }
+        else {
+          Carp::croak "Cannot merge two optional_features named '$key' with different '$subkey' values"
+            if do { no warnings 'uninitialized'; $left->{$key}{$subkey} ne $right->{$key}{$subkey} };
+        }
+      }
+
+      require CPAN::Meta::Prereqs;
+      $left->{$key}{prereqs} =
+        CPAN::Meta::Prereqs->new($left->{$key}{prereqs})
+          ->with_merged_prereqs(CPAN::Meta::Prereqs->new($right->{$key}{prereqs}))
+          ->as_string_hash;
+    }
+  }
+  return $left;
+}
+
+
 my %default = (
   abstract       => \&_identical,
   author         => \&_set_addition,
@@ -95,7 +125,7 @@ my %default = (
   description       => \&_identical,
   keywords          => \&_set_addition,
   no_index          => { map { ($_ => \&_set_addition) } qw/file directory package namespace/ },
-  optional_features => \&_uniq_map,
+  optional_features => \&_optional_features,
   prereqs           => sub {
     require CPAN::Meta::Prereqs;
     my ($left, $right) = map { CPAN::Meta::Prereqs->new($_) } @_[0,1];
@@ -150,7 +180,7 @@ sub _coerce_mapping {
       my $mapping = _coerce_mapping($value, [ @{$map_path}, $key ]);
       $ret{$key} = sub {
         my ($left, $right, $path) = @_;
-        return _merge($left, $right, $mapping, [ @{$path}, $key ]);
+        return _merge($left, $right, $mapping, [ @{$path} ]);
       };
     }
     elsif ($coderef_for{$value}) {
@@ -200,7 +230,7 @@ CPAN::Meta::Merge - Merging CPAN Meta fragments
 
 =head1 VERSION
 
-version 2.142690
+version 2.143240
 
 =head1 SYNOPSIS
 
