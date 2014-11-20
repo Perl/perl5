@@ -2453,7 +2453,8 @@ PP(pp_i_divide)
     }
 }
 
-#if defined(__GLIBC__) && IVSIZE == 8 && !defined(PERL_DEBUG_READONLY_OPS)
+#if defined(__GLIBC__) && IVSIZE == 8 && !defined(PERL_DEBUG_READONLY_OPS) \
+    && ( __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8))
 STATIC
 PP(pp_i_modulo_0)
 #else
@@ -2476,7 +2477,8 @@ PP(pp_i_modulo)
      }
 }
 
-#if defined(__GLIBC__) && IVSIZE == 8 && !defined(PERL_DEBUG_READONLY_OPS)
+#if defined(__GLIBC__) && IVSIZE == 8 && !defined(PERL_DEBUG_READONLY_OPS) \
+    && ( __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8))
 STATIC
 PP(pp_i_modulo_1)
 
@@ -2512,7 +2514,7 @@ PP(pp_i_modulo)
 	       PL_ppaddr[OP_I_MODULO] =
 	           Perl_pp_i_modulo_0;
 	  /* .. but if we have glibc, we might have a buggy _moddi3
-	   * (at least glicb 2.2.5 is known to have this bug), in other
+	   * (at least glibc 2.2.5 is known to have this bug), in other
 	   * words our integer modulus with negative quad as the second
 	   * argument might be broken.  Test for this and re-patch the
 	   * opcode dispatch table if that is the case, remembering to
