@@ -195,7 +195,6 @@ sub :::: {
 sub :::::: {
     
 }
-;
 EOCODG
 
 # [perl #117311]
@@ -233,7 +232,6 @@ sub BEGIN {
     }
     ;
 }
-;
 EOCODF
 
 # [perl #91384]
@@ -382,17 +380,14 @@ is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ], prog => '
         sub BEGIN {
             pop @ARGV;
         }
-        ;
     }
     sub BEGIN {
         pop @ARGV;
     }
-    ;
 }
 sub BEGIN {
     pop @ARGV;
 }
-;
 EOCODL
 
 # [perl #115066]
