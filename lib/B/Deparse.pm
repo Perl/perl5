@@ -324,7 +324,7 @@ BEGIN {
 
 
 BEGIN { for (qw[ const stringify rv2sv list glob pushmark null aelem
-		 custom ]) {
+		 custom nextstate dbstate ]) {
     eval "sub OP_\U$_ () { " . opnumber($_) . "}"
 }}
 
@@ -1442,7 +1442,7 @@ sub walk_lineseq {
 	    next;
 	}
 	my $expr2 = $self->deparse($kids[$i], (@kids != 1)/2);
-	$expr2 =~ s/^sub :/+sub :/; # statement label otherwise
+	$expr2 =~ s/^sub :(?!:)/+sub :/; # statement label otherwise
 	$expr .= $expr2;
 	$expr =~ s/;\n?\z//;
 	$callback->($expr, $i);
@@ -3371,11 +3371,14 @@ sub _op_is_or_was {
 }
 
 sub pp_null {
-    my $self = shift;
-    my($op, $cx) = @_;
+    my($self, $op, $cx) = @_;
     if (class($op) eq "OP") {
 	# old value is lost
 	return $self->{'ex_const'} if $op->targ == OP_CONST;
+	if ($op->targ == OP_NEXTSTATE || $op->targ == OP_DBSTATE) {
+	    bless $op, "B::COP"; # XXX B bug
+	    return &pp_nextstate;
+	}
     } elsif ($op->first->name eq 'pushmark'
              or $op->first->name eq 'null'
                 && $op->first->targ == OP_PUSHMARK

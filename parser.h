@@ -111,6 +111,7 @@ typedef struct yy_parser {
     PERL_BITFIELD16	in_pod:1;      /* lexer is within a =pod section */
     PERL_BITFIELD16	filtered:1;    /* source filters in evalbytes */
     PERL_BITFIELD16	saw_infix_sigil:1; /* saw & or * or % operator */
+    PERL_BITFIELD16	parsed_sub:1;  /* last thing parsed was a sub */
 } yy_parser;
 
 /* flags for lexer API */

@@ -1547,7 +1547,10 @@ Perl_scalar(pTHX_ OP *o)
     do_kids:
 	while (kid) {
 	    OP *sib = OP_SIBLING(kid);
-	    if (sib && kid->op_type != OP_LEAVEWHEN)
+	    if (sib && kid->op_type != OP_LEAVEWHEN
+	     && (  OP_HAS_SIBLING(sib) || sib->op_type != OP_NULL
+		|| (  sib->op_targ != OP_NEXTSTATE
+		   && sib->op_targ != OP_DBSTATE  )))
 		scalarvoid(kid);
 	    else
 		scalar(kid);
@@ -3738,6 +3741,14 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     const int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
     OP* retval = scalarseq(seq);
     OP *o;
+
+    /* XXX Is the null PL_parser check necessary here? */
+    assert(PL_parser); /* Let’s find out under debugging builds.  */
+    if (PL_parser && PL_parser->parsed_sub) {
+	o = newSTATEOP(0, NULL, NULL);
+	op_null(o);
+	retval = op_append_elem(OP_LINESEQ, retval, o);
+    }
 
     CALL_BLOCK_HOOKS(bhk_pre_end, &retval);
 
@@ -6478,6 +6489,8 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     const U32 seq = intro_my();
     const U32 utf8 = flags & SVf_UTF8;
     COP *cop;
+
+    PL_parser->parsed_sub = 0;
 
     flags &= ~SVf_UTF8;
 

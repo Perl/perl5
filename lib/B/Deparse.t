@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 28; # not counting those in the __DATA__ section
+my $tests = 29; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -140,7 +140,7 @@ like($a, qr/$b/,
 
 $a = `$^X $path "-MO=Deparse" -e "use constant PI => 4" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
-is($a, "use constant ('PI', 4);\n",
+is($a, "();\nuse constant ('PI', 4);\n",
    "Proxy Constant Subroutines must not show up as (incorrect) prototypes");
 
 #Re: perlbug #35857, patch #24505
@@ -188,12 +188,14 @@ EOFCODE
 $a = `$^X $path "-MO=Deparse" -e "sub ::::{}sub ::::::{}" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODG', "sub :::: and sub ::::::");
+();
 sub :::: {
     
 }
 sub :::::: {
     
 }
+;
 EOCODG
 
 # [perl #117311]
@@ -224,12 +226,14 @@ $a =
   `$^X $path "-MO=Deparse" -e "BEGIN{*CORE::GLOBAL::require=sub{1}}" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODF', "CORE::GLOBAL::require override causing panick");
+();
 sub BEGIN {
     *CORE::GLOBAL::require = sub {
         1;
     }
     ;
 }
+;
 EOCODF
 
 # [perl #91384]
@@ -317,7 +321,7 @@ like($a, qr/my sub use;\n\(\);\nCORE::use less;/,
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub __DATA__; `
              .qq`CORE::__DATA__" 2>&1`;
-like($a, qr/my sub __DATA__;\n\(\);\nCORE::__DATA__/,
+like($a, qr/my sub __DATA__;\n.*\nCORE::__DATA__/s,
     'CORE::__DATA__ after my sub __DATA__');
 
 # sub declarations
@@ -362,6 +366,34 @@ sub BEGIN {
 }
 EOCODJ
 }
+is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ], prog => '
+      {
+        {
+          die;
+          BEGIN { pop }
+        }
+        BEGIN { pop }
+      }
+      BEGIN { pop }
+  '), <<'EOCODL', 'BEGIN blocks at the end of their enclosing blocks';
+{
+    {
+        die;
+        sub BEGIN {
+            pop @ARGV;
+        }
+        ;
+    }
+    sub BEGIN {
+        pop @ARGV;
+    }
+    ;
+}
+sub BEGIN {
+    pop @ARGV;
+}
+;
+EOCODL
 
 # [perl #115066]
 my $prog = 'use constant FOO => do { 1 }; no overloading; die';
