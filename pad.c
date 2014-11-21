@@ -168,21 +168,6 @@ padname_eq_pvn_flags(pTHX_ const PADNAME *pn, const char* pv, const STRLEN
         STRLEN cur1     = PadnameLEN(pn);
         const char *pv2 = pv;
         STRLEN cur2     = pvlen;
-	if (IN_ENCODING) {
-              SV *sv = (SV *)pn;
-              SV* svrecode = NULL;
-	      if (SvUTF8(sv)) {
-		   svrecode = newSVpvn(pv2, cur2);
-		   sv_recode_to_utf8(svrecode, _get_encoding());
-		   pv2      = SvPV_const(svrecode, cur2);
-	      }
-	      else {
-		   svrecode = newSVpvn(pv1, cur1);
-		   sv_recode_to_utf8(svrecode, _get_encoding());
-		   pv1      = SvPV_const(svrecode, cur1);
-	      }
-              SvREFCNT_dec_NN(svrecode);
-        }
         if (flags & SVf_UTF8)
             return (bytes_cmp_utf8(
                         (const U8*)pv1, cur1,
