@@ -76,10 +76,6 @@ case "$prefix" in
 case `$cc -v 2>&1`"" in
     *gcc*)  ccisgcc="$define"
 	    ccflags="$cc_cppflags"
-
-	    # Since the HP cc is strict C89, let's follow suit.
-	    ccflags="$ccflags -std=c89"
-
 	    if [ "X$gccversion" = "X" ]; then
 		# Done too late in Configure if hinted
 		gccversion=`$cc -dumpversion`
