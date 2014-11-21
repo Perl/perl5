@@ -167,12 +167,18 @@ case "$gccversion" in
 [12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
 Intel*) ;; # # Is that you, Intel C++?
 #
-# NOTE 1: the -std=c89 without -pedantic is a bit pointless.
+# NOTE 1: the -std=c89 without -pedantic is a bit pointless,
+# so we will not add it here.  You will have to use e.g.
+# Configure -Accflags=-std=c89
+#
 # Just -std=c89 means "if there is room for interpretation,
 # interpret the C89 way."  It does NOT mean "strict C89" on its own.
 # You need to add the -pedantic for that.  To do this with Configure,
 # do -Dgccansipedantic (note that the -ansi is included in any case,
 # the option is a bit oddly named, for historical reasons.)
+#
+# Furthermore, -std=c89 disables/hides/makes harder to use certain
+# non-C89 features like long long.
 #
 # NOTE 2: -pedantic necessitates adding a couple of flags:
 # * -PERL_GCC_PEDANTIC so that the perl code can adapt: there's nothing
@@ -184,7 +190,7 @@ Intel*) ;; # # Is that you, Intel C++?
 # NOTE 3: the relative order of these options matters:
 # -Wextra before -W, and -pedantic* before -Werror=d-a-s.
 #
-*)  for opt in -ansi -std=c89 $pedantic \
+*)  for opt in -ansi $pedantic \
 		-Werror=declaration-after-statement \
 		-Wextra -W \
 		-Wc++-compat -Wwrite-strings
