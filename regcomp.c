@@ -3842,10 +3842,6 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *      using /iaa matching will be doing so almost entirely with ASCII
  *      strings, so this should rarely be encountered in practice */
 
-#define JOIN_EXACT(scan, min_subtract, unfolded_multi_char, flags) \
-    if (PL_regkind[OP(scan)] == EXACT) \
-        join_exact(pRExC_state,(scan),(min_subtract),unfolded_multi_char, (flags),NULL,params->depth+1)
-
 STATIC U32
 S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                    UV *min_subtract, bool *unfolded_multi_char,
@@ -4380,7 +4376,9 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
      * parsing code, as each (?:..) is handled by a different invocation of
      * reg() -- Yves
      */
-    JOIN_EXACT(params->scan, &min_subtract, &unfolded_multi_char, 0);
+    if (PL_regkind[OP(params->scan)] == EXACT)
+        join_exact(pRExC_state, params->scan, &min_subtract,
+                &unfolded_multi_char, 0, NULL, params->depth + 1);
 
     /* Follow the next-chain of the current node and optimize
        away all the NOTHINGs from it.  */
