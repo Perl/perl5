@@ -409,7 +409,7 @@ ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose
 #define PAD_COMPNAME_FLAGS_isOUR(po) SvPAD_OUR(PAD_COMPNAME_SV(po))
 #define PAD_COMPNAME_PV(po)	PadnamePV(PAD_COMPNAME(po))
 
-#define PAD_COMPNAME_TYPE(po) pad_compname_type(po)
+#define PAD_COMPNAME_TYPE(po)	PadnameTYPE(PAD_COMPNAME(po))
 
 #define PAD_COMPNAME_OURSTASH(po) \
     (SvOURSTASH(PAD_COMPNAME_SV(po)))
