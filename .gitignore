@@ -134,14 +134,13 @@ xlib/
 
 # test byproducts
 ext/Test-Harness/t/ext/
+lib/Big/Dummy.pm
+lib/Big/Liar.pm
 t/rantests
 t/tmp*
 t/perl
 t/test_state
 *.output
-cpan/ExtUtils-MakeMaker/t/Big-Dummy/
-cpan/Module-Build/MB-*
-cpan/Module-Build/t/install_test*
 *.tmp
 t/*.ph
 t/lib/*.ph
