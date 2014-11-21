@@ -7255,11 +7255,10 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	else
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
 	if (padoff) {
-	    SV *const namesv = PAD_COMPNAME_SV(padoff);
-	    STRLEN len;
-	    const char *const name = SvPV_const(namesv, len);
+	    PADNAME * const pn = PAD_COMPNAME(padoff);
+	    const char * const name = PadnamePV(pn);
 
-	    if (len == 2 && name[0] == '$' && name[1] == '_')
+	    if (PadnameLEN(pn) == 2 && name[0] == '$' && name[1] == '_')
 		iterpflags |= OPpITER_DEF;
 	}
     }
@@ -7924,8 +7923,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	cv = *spot;
     else {
 	MAGIC *mg;
-	SvUPGRADE(name, SVt_PVMG);
-	mg = mg_find(name, PERL_MAGIC_proto);
+	SvUPGRADE((SV *)name, SVt_PVMG);
+	mg = mg_find((SV *)name, PERL_MAGIC_proto);
 	assert (SvTYPE(*spot) == SVt_PVCV);
 	if (CvNAMED(*spot))
 	    hek = CvNAME_HEK(*spot);
@@ -7947,8 +7946,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    cv = (CV *)mg->mg_obj;
 	}
 	else {
-	    sv_magic(name, &PL_sv_undef, PERL_MAGIC_proto, NULL, 0);
-	    mg = mg_find(name, PERL_MAGIC_proto);
+	    sv_magic((SV *)name, &PL_sv_undef, PERL_MAGIC_proto, NULL, 0);
+	    mg = mg_find((SV *)name, PERL_MAGIC_proto);
 	}
 	spot = (CV **)(svspot = &mg->mg_obj);
     }
@@ -9833,10 +9832,11 @@ Perl_ck_fun(pTHX_ OP *o)
 			     */
 			    priv = OPpDEREF;
 			    if (kid->op_type == OP_PADSV) {
-				SV *const namesv
+				PADNAME * const pn
 				    = PAD_COMPNAME_SV(kid->op_targ);
-				name = SvPV_const(namesv, len);
-                                name_utf8 = SvUTF8(namesv);
+				name = PadnamePV (pn);
+				len  = PadnameLEN(pn);
+				name_utf8 = PadnameUTF8(pn);
 			    }
 			    else if (kid->op_type == OP_RV2SV
 				     && kUNOP->op_first->op_type == OP_GV)
@@ -10779,14 +10779,17 @@ S_simplify_sort(pTHX_ OP *o)
 	kid = kBINOP->op_first;
 	do {
 	    if (kid->op_type == OP_PADSV) {
-		SV * const name = PAD_COMPNAME_SV(kid->op_targ);
-		if (SvCUR(name) == 2 && *SvPVX(name) == '$'
-		 && (SvPVX(name)[1] == 'a' || SvPVX(name)[1] == 'b'))
+		PADNAME * const name = PAD_COMPNAME(kid->op_targ);
+		if (PadnameLEN(name) == 2 && *PadnamePV(name) == '$'
+		 && (  PadnamePV(name)[1] == 'a'
+		    || PadnamePV(name)[1] == 'b'  ))
 		    /* diag_listed_as: "my %s" used in sort comparison */
 		    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				     "\"%s %s\" used in sort comparison",
-				      SvPAD_STATE(name) ? "state" : "my",
-				      SvPVX(name));
+				      PadnameIsSTATE(name)
+					? "state"
+					: "my",
+				      PadnamePV(name));
 	    }
 	} while ((kid = OP_SIBLING(kid)));
 	return;
@@ -11000,7 +11003,7 @@ Perl_find_lexical_cv(pTHX_ PADOFFSET off)
     }
     assert(!PadnameIsOUR(name));
     if (!PadnameIsSTATE(name) && SvMAGICAL(name)) {
-	MAGIC * mg = mg_find(name, PERL_MAGIC_proto);
+	MAGIC * mg = mg_find((SV *)name, PERL_MAGIC_proto);
 	assert(mg);
 	assert(mg->mg_obj);
 	return (CV *)mg->mg_obj;

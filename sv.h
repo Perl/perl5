@@ -2212,7 +2212,7 @@ C<newSVpadname> is preferable.
 =cut
 */
 
-#define newSVpadname(pn) newSVsv(pn)
+#define newSVpadname(pn) newSVsv((SV *)(pn))
 
 /*
 =for apidoc Am|void|SvOOK_offset|NN SV*sv|STRLEN len

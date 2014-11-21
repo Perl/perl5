@@ -287,7 +287,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PadlistNAMESMAX(pl)	PadnamelistMAX(PadlistNAMES(pl))
 #define PadlistREFCNT(pl)	1	/* reserved for future use */
 
-#define PadnamelistARRAY(pnl)	AvARRAY(pnl)
+#define PadnamelistARRAY(pnl)	((PADNAME **)AvARRAY(pnl))
 #define PadnamelistMAX(pnl)	AvFILLp(pnl)
 #define PadnamelistMAXNAMED(pnl) \
 	((XPVAV*) SvANY(pnl))->xmg_u.xmg_hash_index
@@ -295,8 +295,8 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PadARRAY(pad)		AvARRAY(pad)
 #define PadMAX(pad)		AvFILLp(pad)
 
-#define PadnamePV(pn)		(SvPOKp(pn) ? SvPVX(pn) : NULL)
-#define PadnameLEN(pn)		((pn) == &PL_sv_undef ? 0 : SvCUR(pn))
+#define PadnamePV(pn)		(SvPOKp(pn) ? SvPVX_const(pn) : NULL)
+#define PadnameLEN(pn)		((SV*)(pn) == &PL_sv_undef ? 0 : SvCUR(pn))
 #define PadnameUTF8(pn)		!!SvUTF8(pn)
 #define PadnameSV(pn)		pn
 #define PadnameIsOUR(pn)	!!SvPAD_OUR(pn)
@@ -404,10 +404,10 @@ ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose
 */
 
 #define PAD_COMPNAME(po)	PAD_COMPNAME_SV(po)
-#define PAD_COMPNAME_SV(po) (AvARRAY(PL_comppad_name)[(po)])
+#define PAD_COMPNAME_SV(po)	((PADNAME *)AvARRAY(PL_comppad_name)[(po)])
 #define PAD_COMPNAME_FLAGS(po) SvFLAGS(PAD_COMPNAME_SV(po))
 #define PAD_COMPNAME_FLAGS_isOUR(po) SvPAD_OUR(PAD_COMPNAME_SV(po))
-#define PAD_COMPNAME_PV(po) SvPV_nolen(PAD_COMPNAME_SV(po))
+#define PAD_COMPNAME_PV(po)	PadnamePV(PAD_COMPNAME(po))
 
 #define PAD_COMPNAME_TYPE(po) pad_compname_type(po)
 

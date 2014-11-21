@@ -2528,7 +2528,7 @@ Apda	|PADLIST*|pad_new	|int flags
 pnX	|void|set_padlist| NN CV * cv | NULLOK PADLIST * padlist
 #endif
 #if defined(PERL_IN_PAD_C)
-s	|PADOFFSET|pad_alloc_name|NN SV *namesv|U32 flags \
+s	|PADOFFSET|pad_alloc_name|NN PADNAME *name|U32 flags \
 				|NULLOK HV *typestash|NULLOK HV *ourstash
 #endif
 Apd	|PADOFFSET|pad_add_name_pvn|NN const char *namepv|STRLEN namelen\
@@ -2543,7 +2543,8 @@ Apd	|PADOFFSET|pad_add_name_sv|NN SV *name\
 AMpd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 Apd	|PADOFFSET|pad_add_anon	|NN CV* func|I32 optype
 #if defined(PERL_IN_PAD_C)
-sd	|void	|pad_check_dup	|NN SV *name|U32 flags|NULLOK const HV *ourstash
+sd	|void	|pad_check_dup	|NN PADNAME *name|U32 flags \
+				|NULLOK const HV *ourstash
 #endif
 Apd	|PADOFFSET|pad_findmy_pvn|NN const char* namepv|STRLEN namelen|U32 flags
 Apd	|PADOFFSET|pad_findmy_pv|NN const char* name|U32 flags
@@ -2555,8 +2556,8 @@ p	|SV*	|find_rundefsv2	|NN CV *cv|U32 seq
 #if defined(PERL_IN_PAD_C)
 sd	|PADOFFSET|pad_findlex	|NN const char *namepv|STRLEN namelen|U32 flags \
 				|NN const CV* cv|U32 seq|int warn \
-				|NULLOK SV** out_capture|NN SV** out_name_sv \
-				|NN int *out_flags
+				|NULLOK SV** out_capture \
+				|NN PADNAME** out_name|NN int *out_flags
 #endif
 #ifdef DEBUGGING
 Apd	|SV*	|pad_sv		|PADOFFSET po

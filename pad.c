@@ -161,13 +161,15 @@ and bytes checking.
 */
 
 static bool
-sv_eq_pvn_flags(pTHX_ const SV *sv, const char* pv, const STRLEN pvlen, const U32 flags) {
-    if ( (SvUTF8(sv) & SVf_UTF8 ) != (flags & SVf_UTF8) ) {
-        const char *pv1 = SvPVX_const(sv);
-        STRLEN cur1     = SvCUR(sv);
+padname_eq_pvn_flags(pTHX_ const PADNAME *pn, const char* pv, const STRLEN
+                           pvlen, const U32 flags) {
+    if ( !PadnameUTF8(pn) != !(flags & SVf_UTF8) ) {
+        const char *pv1 = PadnamePV(pn);
+        STRLEN cur1     = PadnameLEN(pn);
         const char *pv2 = pv;
         STRLEN cur2     = pvlen;
 	if (IN_ENCODING) {
+              SV *sv = (SV *)pn;
               SV* svrecode = NULL;
 	      if (SvUTF8(sv)) {
 		   svrecode = newSVpvn(pv2, cur2);
@@ -191,8 +193,8 @@ sv_eq_pvn_flags(pTHX_ const SV *sv, const char* pv, const STRLEN pvlen, const U3
 		        (const U8*)pv1, cur1) == 0);
     }
     else
-        return ((SvPVX_const(sv) == pv)
-                    || memEQ(SvPVX_const(sv), pv, pvlen));
+	return ((PadnamePV(pn) == pv)
+		    || memEQ(PadnamePV(pn), pv, pvlen));
 }
 
 #ifdef DEBUGGING
@@ -580,7 +582,8 @@ is done.  Returns the offset of the allocated pad slot.
 */
 
 static PADOFFSET
-S_pad_alloc_name(pTHX_ SV *namesv, U32 flags, HV *typestash, HV *ourstash)
+S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
+		       HV *ourstash)
 {
     const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
 
@@ -589,20 +592,20 @@ S_pad_alloc_name(pTHX_ SV *namesv, U32 flags, HV *typestash, HV *ourstash)
     ASSERT_CURPAD_ACTIVE("pad_alloc_name");
 
     if (typestash) {
-	assert(SvTYPE(namesv) == SVt_PVMG);
-	SvPAD_TYPED_on(namesv);
-	SvSTASH_set(namesv, MUTABLE_HV(SvREFCNT_inc_simple_NN(MUTABLE_SV(typestash))));
+	assert(SvTYPE(name) == SVt_PVMG);
+	SvPAD_TYPED_on(name);
+	SvSTASH_set(name, MUTABLE_HV(SvREFCNT_inc_simple_NN(MUTABLE_SV(typestash))));
     }
     if (ourstash) {
-	SvPAD_OUR_on(namesv);
-	SvOURSTASH_set(namesv, ourstash);
+	SvPAD_OUR_on(name);
+	SvOURSTASH_set(name, ourstash);
 	SvREFCNT_inc_simple_void_NN(ourstash);
     }
     else if (flags & padadd_STATE) {
-	SvPAD_STATE_on(namesv);
+	SvPAD_STATE_on(name);
     }
 
-    av_store(PL_comppad_name, offset, namesv);
+    av_store(PL_comppad_name, offset, (SV *)name);
     PadnamelistMAXNAMED(PL_comppad_name) = offset;
     return offset;
 }
@@ -633,7 +636,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 		U32 flags, HV *typestash, HV *ourstash)
 {
     PADOFFSET offset;
-    SV *namesv;
+    PADNAME *name;
     bool is_utf8;
 
     PERL_ARGS_ASSERT_PAD_ADD_NAME_PVN;
@@ -642,35 +645,36 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 	Perl_croak(aTHX_ "panic: pad_add_name_pvn illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
-    namesv = newSV_type((ourstash || typestash) ? SVt_PVMG : SVt_PVNV);
+    name = (PADNAME *)
+	newSV_type((ourstash || typestash) ? SVt_PVMG : SVt_PVNV);
     
     if ((is_utf8 = ((flags & padadd_UTF8_NAME) != 0))) {
         namepv = (const char*)bytes_from_utf8((U8*)namepv, &namelen, &is_utf8);
     }
 
-    sv_setpvn(namesv, namepv, namelen);
+    sv_setpvn((SV *)name, namepv, namelen);
 
     if (is_utf8) {
         flags |= padadd_UTF8_NAME;
-        SvUTF8_on(namesv);
+        SvUTF8_on(name);
     }
     else
         flags &= ~padadd_UTF8_NAME;
 
     if ((flags & padadd_NO_DUP_CHECK) == 0) {
 	ENTER;
-	SAVEFREESV(namesv); /* in case of fatal warnings */
+	SAVEFREESV(name); /* in case of fatal warnings */
 	/* check for duplicate declaration */
-	pad_check_dup(namesv, flags & padadd_OUR, ourstash);
-	SvREFCNT_inc_simple_void_NN(namesv);
+	pad_check_dup(name, flags & padadd_OUR, ourstash);
+	SvREFCNT_inc_simple_void_NN(name);
 	LEAVE;
     }
 
-    offset = pad_alloc_name(namesv, flags & ~padadd_UTF8_NAME, typestash, ourstash);
+    offset = pad_alloc_name(name, flags & ~padadd_UTF8_NAME, typestash, ourstash);
 
     /* not yet introduced */
-    COP_SEQ_RANGE_LOW_set(namesv, PERL_PADSEQ_INTRO);
-    COP_SEQ_RANGE_HIGH_set(namesv, 0);
+    COP_SEQ_RANGE_LOW_set(name, PERL_PADSEQ_INTRO);
+    COP_SEQ_RANGE_HIGH_set(name, 0);
 
     if (!PL_min_intro_pending)
 	PL_min_intro_pending = offset;
@@ -687,7 +691,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
     assert(SvPADMY(PL_curpad[offset]));
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 			   "Pad addname: %ld \"%s\" new lex=0x%"UVxf"\n",
-			   (long)offset, SvPVX(namesv),
+			   (long)offset, PadnamePV(name),
 			   PTR2UV(PL_curpad[offset])));
 
     return offset;
@@ -902,7 +906,7 @@ C<is_our> indicates that the name to check is an 'our' declaration.
 */
 
 STATIC void
-S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
+S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 {
     SV		**svp;
     PADOFFSET	top, off;
@@ -929,7 +933,7 @@ S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
 	    && !SvFAKE(sv)
 	    && (   COP_SEQ_RANGE_LOW(sv)  == PERL_PADSEQ_INTRO
 		|| COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
-	    && sv_eq(name, sv))
+	    && sv_eq((SV *)name, sv))
 	{
 	    if (is_our && (SvPAD_OUR(sv)))
 		break; /* "our" masking "our" */
@@ -955,7 +959,7 @@ S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
 		&& (   COP_SEQ_RANGE_LOW(sv)  == PERL_PADSEQ_INTRO
 		    || COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
 		&& SvOURSTASH(sv) == ourstash
-		&& sv_eq(name, sv))
+		&& sv_eq((SV *)name, sv))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
 		    "\"our\" variable %"SVf" redeclared", SVfARG(sv));
@@ -988,11 +992,11 @@ or C<NOT_IN_PAD> if no such lexical is in scope.
 PADOFFSET
 Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
 {
-    SV *out_sv;
+    PADNAME *out_pn;
     int out_flags;
     I32 offset;
     const AV *nameav;
-    SV **name_svp;
+    PADNAME **name_p;
 
     PERL_ARGS_ASSERT_PAD_FINDMY_PVN;
 
@@ -1013,7 +1017,7 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
     }
 
     offset = pad_findlex(namepv, namelen, flags,
-                PL_compcv, PL_cop_seqmax, 1, NULL, &out_sv, &out_flags);
+                PL_compcv, PL_cop_seqmax, 1, NULL, &out_pn, &out_flags);
     if ((PADOFFSET)offset != NOT_IN_PAD) 
 	return offset;
 
@@ -1026,15 +1030,15 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
      * to not give a warning. (Yes, this is a hack) */
 
     nameav = PadlistARRAY(CvPADLIST(PL_compcv))[0];
-    name_svp = AvARRAY(nameav);
+    name_p = PadnamelistARRAY(nameav);
     for (offset = PadnamelistMAXNAMED(nameav); offset > 0; offset--) {
-        const SV * const namesv = name_svp[offset];
-	if (namesv && PadnameLEN(namesv) == namelen
-	    && !SvFAKE(namesv)
-	    && (SvPAD_OUR(namesv))
-            && sv_eq_pvn_flags(aTHX_ namesv, namepv, namelen,
+        const PADNAME * const name = name_p[offset];
+        if (name && PadnameLEN(name) == namelen
+            && !PadnameOUTER(name)
+            && (PadnameIsOUR(name))
+            && padname_eq_pvn_flags(aTHX_ name, namepv, namelen,
                                 flags & padadd_UTF8_NAME ? SVf_UTF8 : 0 )
-	    && COP_SEQ_RANGE_LOW(namesv) == PERL_PADSEQ_INTRO
+            && COP_SEQ_RANGE_LOW(name) == PERL_PADSEQ_INTRO
 	)
 	    return offset;
     }
@@ -1093,10 +1097,10 @@ L</find_rundefsv> is likely to be more convenient.
 PADOFFSET
 Perl_find_rundefsvoffset(pTHX)
 {
-    SV *out_sv;
+    PADNAME *out_pn;
     int out_flags;
     return pad_findlex("$_", 2, 0, find_runcv(NULL), PL_curcop->cop_seq, 1,
-	    NULL, &out_sv, &out_flags);
+	    NULL, &out_pn, &out_flags);
 }
 
 /*
@@ -1112,14 +1116,14 @@ or will otherwise be the global one.
 SV *
 Perl_find_rundefsv(pTHX)
 {
-    SV *namesv;
+    PADNAME *name;
     int flags;
     PADOFFSET po;
 
     po = pad_findlex("$_", 2, 0, find_runcv(NULL), PL_curcop->cop_seq, 1,
-	    NULL, &namesv, &flags);
+	    NULL, &name, &flags);
 
-    if (po == NOT_IN_PAD || SvPAD_OUR(namesv))
+    if (po == NOT_IN_PAD || PadnameIsOUR(name))
 	return DEFSV;
 
     return PAD_SVl(po);
@@ -1128,23 +1132,23 @@ Perl_find_rundefsv(pTHX)
 SV *
 Perl_find_rundefsv2(pTHX_ CV *cv, U32 seq)
 {
-    SV *namesv;
+    PADNAME *name;
     int flags;
     PADOFFSET po;
 
     PERL_ARGS_ASSERT_FIND_RUNDEFSV2;
 
     po = pad_findlex("$_", 2, 0, cv, seq, 1,
-	    NULL, &namesv, &flags);
+	    NULL, &name, &flags);
 
-    if (po == NOT_IN_PAD || SvPAD_OUR(namesv))
+    if (po == NOT_IN_PAD || PadnameIsOUR(name))
 	return DEFSV;
 
     return AvARRAY(PadlistARRAY(CvPADLIST(cv))[CvDEPTH(cv)])[po];
 }
 
 /*
-=for apidoc m|PADOFFSET|pad_findlex|const char *namepv|STRLEN namelen|U32 flags|const CV* cv|U32 seq|int warn|SV** out_capture|SV** out_name_sv|int *out_flags
+=for apidoc m|PADOFFSET|pad_findlex|const char *namepv|STRLEN namelen|U32 flags|const CV* cv|U32 seq|int warn|SV** out_capture|PADNAME** out_name|int *out_flags
 
 Find a named lexical anywhere in a chain of nested pads.  Add fake entries
 in the inner pads if it's found in an outer one.
@@ -1154,7 +1158,7 @@ cv is the CV in which to start the search, and seq is the current cop_seq
 to match against.  If warn is true, print appropriate warnings.  The out_*
 vars return values, and so are pointers to where the returned values
 should be stored.  out_capture, if non-null, requests that the innermost
-instance of the lexical is captured; out_name_sv is set to the innermost
+instance of the lexical is captured; out_name is set to the innermost
 matched namesv or fake namesv; out_flags returns the flags normally
 associated with the IVX field of a fake namesv.
 
@@ -1188,7 +1192,7 @@ S_unavailable(pTHX_ SV *namesv)
 
 STATIC PADOFFSET
 S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq,
-	int warn, SV** out_capture, SV** out_name_sv, int *out_flags)
+	int warn, SV** out_capture, PADNAME** out_name, int *out_flags)
 {
     I32 offset, new_offset;
     SV *new_capture;
@@ -1215,19 +1219,19 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     if (padlist) { /* not an undef CV */
 	I32 fake_offset = 0;
         const AV * const nameav = PadlistARRAY(padlist)[0];
-	SV * const * const name_svp = AvARRAY(nameav);
+	PADNAME * const * const name_p = PadnamelistARRAY(nameav);
 
 	for (offset = PadnamelistMAXNAMED(nameav); offset > 0; offset--) {
-            const SV * const namesv = name_svp[offset];
-	    if (namesv && PadnameLEN(namesv) == namelen
-                    && sv_eq_pvn_flags(aTHX_ namesv, namepv, namelen,
+            const PADNAME * const name = name_p[offset];
+            if (name && PadnameLEN(name) == namelen
+                     && padname_eq_pvn_flags(aTHX_ name, namepv, namelen,
                                     flags & padadd_UTF8_NAME ? SVf_UTF8 : 0))
 	    {
-		if (SvFAKE(namesv)) {
+		if (PadnameOUTER(name)) {
 		    fake_offset = offset; /* in case we don't find a real one */
 		    continue;
 		}
-		if (PadnameIN_SCOPE(namesv, seq))
+		if (PadnameIN_SCOPE(name, seq))
 		    break;
 	    }
 	}
@@ -1235,7 +1239,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 	if (offset > 0 || fake_offset > 0 ) { /* a match! */
 	    if (offset > 0) { /* not fake */
 		fake_offset = 0;
-		*out_name_sv = name_svp[offset]; /* return the namesv */
+		*out_name = name_p[offset]; /* return the name */
 
 		/* set PAD_FAKELEX_MULTI if this lex can have multiple
 		 * instances. For now, we just test !CvUNIQUE(cv), but
@@ -1252,17 +1256,17 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		    "Pad findlex cv=0x%"UVxf" matched: offset=%ld (%lu,%lu)\n",
 		    PTR2UV(cv), (long)offset,
-		    (unsigned long)COP_SEQ_RANGE_LOW(*out_name_sv),
-		    (unsigned long)COP_SEQ_RANGE_HIGH(*out_name_sv)));
+		    (unsigned long)COP_SEQ_RANGE_LOW(*out_name),
+		    (unsigned long)COP_SEQ_RANGE_HIGH(*out_name)));
 	    }
 	    else { /* fake match */
 		offset = fake_offset;
-		*out_name_sv = name_svp[offset]; /* return the namesv */
-		*out_flags = PARENT_FAKELEX_FLAGS(*out_name_sv);
+		*out_name = name_p[offset]; /* return the name */
+		*out_flags = PARENT_FAKELEX_FLAGS(*out_name);
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		    "Pad findlex cv=0x%"UVxf" matched: offset=%ld flags=0x%lx index=%lu\n",
 		    PTR2UV(cv), (long)offset, (unsigned long)*out_flags,
-		    (unsigned long) PARENT_PAD_INDEX(*out_name_sv) 
+		    (unsigned long) PARENT_PAD_INDEX(*out_name) 
 		));
 	    }
 
@@ -1271,7 +1275,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 	    if (out_capture) {
 
 		/* our ? */
-		if (SvPAD_OUR(*out_name_sv)) {
+		if (PadnameIsOUR(*out_name)) {
 		    *out_capture = NULL;
 		    return offset;
 		}
@@ -1294,7 +1298,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 		else {
 		    int newwarn = warn;
 		    if (!CvCOMPILED(cv) && (*out_flags & PAD_FAKELEX_MULTI)
-			 && !SvPAD_STATE(name_svp[offset])
+			 && !PadnameIsSTATE(name_p[offset])
 			 && warn && ckWARN(WARN_CLOSURE)) {
 			newwarn = 0;
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
@@ -1307,16 +1311,16 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 		    if (fake_offset && CvANON(cv)
 			    && CvCLONE(cv) &&!CvCLONED(cv))
 		    {
-			SV *n;
+			PADNAME *n;
 			/* not yet caught - look further up */
 			DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 			    "Pad findlex cv=0x%"UVxf" chasing lex in outer pad\n",
 			    PTR2UV(cv)));
-			n = *out_name_sv;
+			n = *out_name;
 			(void) pad_findlex(namepv, namelen, flags, CvOUTSIDE(cv),
 			    CvOUTSIDE_SEQ(cv),
-			    newwarn, out_capture, out_name_sv, out_flags);
-			*out_name_sv = n;
+			    newwarn, out_capture, out_name, out_flags);
+			*out_name = n;
 			return offset;
 		    }
 
@@ -1328,7 +1332,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 
 		    if (SvPADSTALE(*out_capture)
 			&& (!CvDEPTH(cv) || !staleok)
-			&& !SvPAD_STATE(name_svp[offset]))
+			&& !PadnameIsSTATE(name_p[offset]))
 		    {
 			S_unavailable(aTHX_
                                        newSVpvn_flags(namepv, namelen,
@@ -1366,7 +1370,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     offset = pad_findlex(namepv, namelen,
 		flags | padadd_STALEOK*(new_capturep == &new_capture),
 		CvOUTSIDE(cv), CvOUTSIDE_SEQ(cv), 1,
-		new_capturep, out_name_sv, out_flags);
+		new_capturep, out_name, out_flags);
     if ((PADOFFSET)offset == NOT_IN_PAD)
 	return NOT_IN_PAD;
 
@@ -1382,7 +1386,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 	   type as the source, independent of the flags set, and on it being
 	   "good" and only copying flag bits and pointers that it understands.
 	*/
-	SV *new_namesv = newSVsv(*out_name_sv);
+	PADNAME *new_name = (PADNAME *)newSVsv((SV *)*out_name);
 	AV *  const ocomppad_name = PL_comppad_name;
 	PAD * const ocomppad = PL_comppad;
 	PL_comppad_name = PadlistARRAY(padlist)[0];
@@ -1390,40 +1394,40 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 	PL_curpad = AvARRAY(PL_comppad);
 
 	new_offset
-	    = pad_alloc_name(new_namesv,
-			      (SvPAD_STATE(*out_name_sv) ? padadd_STATE : 0),
-			      SvPAD_TYPED(*out_name_sv)
-			      ? SvSTASH(*out_name_sv) : NULL,
-			      SvOURSTASH(*out_name_sv)
+	    = pad_alloc_name(new_name,
+			      PadnameIsSTATE(*out_name) ? padadd_STATE : 0,
+			      PadnameTYPE(*out_name),
+			      PadnameOURSTASH(*out_name)
 			      );
 
-	SvFAKE_on(new_namesv);
+	SvFAKE_on(new_name);
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 			       "Pad addname: %ld \"%.*s\" FAKE\n",
 			       (long)new_offset,
-			       (int) SvCUR(new_namesv), SvPVX(new_namesv)));
-	PARENT_FAKELEX_FLAGS_set(new_namesv, *out_flags);
+			       (int) PadnameLEN(new_name),
+			       PadnamePV(new_name)));
+	PARENT_FAKELEX_FLAGS_set(new_name, *out_flags);
 
-	PARENT_PAD_INDEX_set(new_namesv, 0);
-	if (SvPAD_OUR(new_namesv)) {
+	PARENT_PAD_INDEX_set(new_name, 0);
+	if (PadnameIsOUR(new_name)) {
 	    NOOP;   /* do nothing */
 	}
 	else if (CvLATE(cv)) {
 	    /* delayed creation - just note the offset within parent pad */
-	    PARENT_PAD_INDEX_set(new_namesv, offset);
+	    PARENT_PAD_INDEX_set(new_name, offset);
 	    CvCLONE_on(cv);
 	}
 	else {
 	    /* immediate creation - capture outer value right now */
 	    av_store(PL_comppad, new_offset, SvREFCNT_inc(*new_capturep));
 	    /* But also note the offset, as newMYSUB needs it */
-	    PARENT_PAD_INDEX_set(new_namesv, offset);
+	    PARENT_PAD_INDEX_set(new_name, offset);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad findlex cv=0x%"UVxf" saved captured sv 0x%"UVxf" at offset %ld\n",
 		PTR2UV(cv), PTR2UV(*new_capturep), (long)new_offset));
 	}
-	*out_name_sv = new_namesv;
-	*out_flags = PARENT_FAKELEX_FLAGS(new_namesv);
+	*out_name = new_name;
+	*out_flags = PARENT_FAKELEX_FLAGS(new_name);
 
 	PL_comppad_name = ocomppad_name;
 	PL_comppad = ocomppad;
@@ -1672,7 +1676,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
 	if (PadnamelistARRAY(PL_comppad_name)[po]) {
 	    assert(!PadnameLEN(PadnamelistARRAY(PL_comppad_name)[po]));
 	}
-	PadnamelistARRAY(PL_comppad_name)[po] = &PL_sv_undef;
+	PadnamelistARRAY(PL_comppad_name)[po] = (PADNAME *)&PL_sv_undef;
     }
     /* Use PL_constpadix here, not PL_padix.  The latter may have been
        reset by pad_reset.  We don’t want pad_alloc to have to scan the
@@ -2496,11 +2500,7 @@ class to which it is typed is returned.  If not, C<NULL> is returned.
 HV *
 Perl_pad_compname_type(pTHX_ const PADOFFSET po)
 {
-    SV* const av = PAD_COMPNAME_SV(po);
-    if ( SvPAD_TYPED(av) ) {
-        return SvSTASH(av);
-    }
-    return NULL;
+    return PadnameTYPE(PAD_COMPNAME(po));
 }
 
 #if defined(USE_ITHREADS)
