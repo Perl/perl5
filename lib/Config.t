@@ -262,6 +262,7 @@ foreach my $lib (qw(applibexp archlibexp privlibexp sitearchexp sitelibexp
   my $dir = $Config{$lib};
   SKIP: {
     skip "lib $lib not in \@INC on Win32" if $^O eq 'MSWin32';
+    skip "lib $lib not in \@INC on os390" if $^O eq 'os390';
     skip "lib $lib not defined" unless defined $dir;
     skip "lib $lib not set" unless length $dir;
     # May be in @INC in either Unix or VMS format on VMS.
