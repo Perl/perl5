@@ -17,6 +17,31 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.6 - Jeff Noon, Vurt
+
+L<Announced on 2014-11-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2014/11/msg222448.html>
+
+  GAME CAT
+
+  EXCHANGE MECHANISMS. Sometimes we lose precious
+  things. Friends and colleagues, fellow travellers in the
+  Vurt, sometimes we lose them; even lovers we sometimes
+  lose. And get bad things in exchange: aliens, objects,
+  snakes, and sometimes even death. Things we don't want.
+  This is part of the deal, part of the game deal;
+  all things, in all worlds, must be kept in balance.
+  Kittlings often ask, who decides on the swappings? Now then,
+  some say it's all accidental; that some poor Vurt thing
+  finds himself too close to a door, at too critical a time,
+  just when something real is being lost. Whoosh! Swap time!
+  Others say that some kind of overseer is working the
+  MECHANISMS OF EXCHANGE, deciding the fate of innocents.
+  The Cat can only tease at this, because of the big secrets
+  involved, and because of the levels between you, the reader,
+  and me, the Game Cat. Hey, listen; I've struggled to get
+  where I am today; why should I give you the easy route?
+  Get working, kittlings! Reach up higher. Work the Vurt.
+
 =head2 v5.21.5 - Friso Wiegersma (text), Jean Ferrat (music), Wim Sonneveld (performer), Het Dorp
 
 L<Announced on 2014-10-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2014/10/msg221399.html>
@@ -34,12 +59,12 @@ L<Announced on 2014-10-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.p
   een kar die ratelt op de keien,
   het raadhuis met een pomp ervoor,
   een zandweg tussen koren door,
-  het vee, de boerderijen. 
+  het vee, de boerderijen.
 
   En langs het tuinpad van m'n vader
   zag ik de hoge bomen staan.
   Ik was een kind en wist niet beter,
-  dan dat dat nooit voorbij zou gaan. 
+  dan dat dat nooit voorbij zou gaan.
 
   Wat leefden ze eenvoudig toen
   in simp'le huizen tussen groen
@@ -57,7 +82,7 @@ L<Announced on 2014-10-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.p
   En langs het tuinpad van m'n vader
   zag ik de hoge bomen staan.
   Ik was een kind en wist niet beter,
-  dan dat dat nooit voorbij zou gaan. 
+  dan dat dat nooit voorbij zou gaan.
 
   De dorpsjeugd klit wat bij elkaar
   in minirok en beatle-haar
