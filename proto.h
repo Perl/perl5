@@ -5429,8 +5429,8 @@ PERL_CALLCONV void	Perl_pad_setsv(pTHX_ PADOFFSET po, SV* sv)
 	assert(sv)
 
 PERL_CALLCONV SV*	Perl_pad_sv(pTHX_ PADOFFSET po);
-PERL_CALLCONV void	Perl_set_padlist(pTHX_ CV * cv, PADLIST * padlist)
-			__attribute__nonnull__(pTHX_1);
+PERL_CALLCONV void	Perl_set_padlist(CV * cv, PADLIST * padlist)
+			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_SET_PADLIST	\
 	assert(cv)
 

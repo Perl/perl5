@@ -197,7 +197,7 @@ sv_eq_pvn_flags(pTHX_ const SV *sv, const char* pv, const STRLEN pvlen, const U3
 
 #ifdef DEBUGGING
 void
-Perl_set_padlist(pTHX_ CV * cv, PADLIST *padlist){
+Perl_set_padlist(CV * cv, PADLIST *padlist){
     PERL_ARGS_ASSERT_SET_PADLIST;
 #  if PTRSIZE == 8
     if((Size_t)padlist == UINT64_C(0xEFEFEFEFEFEFEFEF)){

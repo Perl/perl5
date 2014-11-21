@@ -71,7 +71,7 @@ See L<perlguts/Autoloading with XSUBs>.
 	&(((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_padlist)))
 /* CvPADLIST_set is not public API, it can be removed one day, once stabilized */
 #ifdef DEBUGGING
-#  define CvPADLIST_set(sv, padlist) Perl_set_padlist(aTHX_ (CV*)sv, padlist)
+#  define CvPADLIST_set(sv, padlist) Perl_set_padlist((CV*)sv, padlist)
 #else
 #  define CvPADLIST_set(sv, padlist) (CvPADLIST(sv) = (padlist))
 #endif

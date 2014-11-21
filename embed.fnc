@@ -2524,7 +2524,7 @@ s	|void	|deb_stack_n	|NN SV** stack_base|I32 stack_min \
 : pad API
 Apda	|PADLIST*|pad_new	|int flags
 #ifdef DEBUGGING
-pX	|void|set_padlist| NN CV * cv | NULLOK PADLIST * padlist
+pnX	|void|set_padlist| NN CV * cv | NULLOK PADLIST * padlist
 #endif
 #if defined(PERL_IN_PAD_C)
 s	|PADOFFSET|pad_alloc_name|NN SV *namesv|U32 flags \
