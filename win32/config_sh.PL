@@ -214,7 +214,14 @@ if ($opt{uselongdouble} eq 'define') {
     $opt{d_PRIfldbl} = 'define';
     $opt{d_PRIgldbl} = 'define';
     $opt{d_SCNfldbl} = 'define';
-    $opt{nvsize} = 12;
+    if ($opt{WIN64} eq 'define') {
+        $opt{longdblsize} = 16;
+        $opt{nvsize} = 16;
+    }
+    else {
+        $opt{longdblsize} = 12;
+        $opt{nvsize} = 12;
+    }
     $opt{nvtype} = 'long double';
     $opt{nv_overflows_integers_at} = '256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0';
     $opt{nvEUformat} = '"LE"';
@@ -239,6 +246,7 @@ else {
     $opt{d_PRIfldbl} = 'undef';
     $opt{d_PRIgldbl} = 'undef';
     $opt{d_SCNfldbl} = 'undef';
+    $opt{longdblsize} = 8;
     $opt{nvsize} = 8;
     $opt{nvtype} = 'double';
     $opt{nv_overflows_integers_at} = '256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0';

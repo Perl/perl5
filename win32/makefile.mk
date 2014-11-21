@@ -1073,6 +1073,7 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #undef PERL_SCNfldbl>>$@
 	@echo #undef NVTYPE>>$@
 	@echo #undef NVSIZE>>$@
+	@echo #undef LONG_DOUBLESIZE>>$@
 	@echo #undef NV_OVERFLOWS_INTEGERS_AT>>$@
 	@echo #undef NVef>>$@
 	@echo #undef NVff>>$@
@@ -1147,7 +1148,13 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #define PERL_PRIeldbl "Le">>$@
 	@echo #define PERL_SCNfldbl "Lf">>$@
 	@echo #define NVTYPE long double>>$@
+.IF "$(WIN64)"=="define"
+	@echo #define NVSIZE ^16>>$@
+	@echo #define LONG_DOUBLESIZE ^16>>$@
+.ELSE
 	@echo #define NVSIZE ^12>>$@
+	@echo #define LONG_DOUBLESIZE ^12>>$@
+.ENDIF
 	@echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0>>$@
 	@echo #define NVef "Le">>$@
 	@echo #define NVff "Lf">>$@
@@ -1167,6 +1174,7 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #undef PERL_SCNfldbl>>$@
 	@echo #define NVTYPE double>>$@
 	@echo #define NVSIZE ^8>>$@
+	@echo #define LONG_DOUBLESIZE ^8>>$@
 	@echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0>>$@
 	@echo #define NVef "e">>$@
 	@echo #define NVff "f">>$@
