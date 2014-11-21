@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 187);
+    plan (tests => 190);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -674,6 +674,12 @@ is ++${^MPE}, 1, '${^MPE} can be incremented';
 is ${^MPEN}, undef, '${^MPEN} starts undefined';
 # This one used to croak due to that missing break:
 is ++${^MPEN}, 1, '${^MPEN} can be incremented';
+
+eval { ${^E_NCODING} = 1 };
+like $@, qr/^Modification of a /, 'Setting ${^E_NCODING} croaks';
+$_ = ${^E_NCODING};
+pass('can read ${^E_NCODING} without blowing up');
+is $_, undef, '${^E_NCODING} is undef';
 
 # ^^^^^^^^^ New tests go here ^^^^^^^^^
 
