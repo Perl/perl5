@@ -2487,22 +2487,6 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
     }
 }
 
-/*
-=for apidoc Am|HV *|pad_compname_type|PADOFFSET po
-
-Looks up the type of the lexical variable at position I<po> in the
-currently-compiling pad.  If the variable is typed, the stash of the
-class to which it is typed is returned.  If not, C<NULL> is returned.
-
-=cut
-*/
-
-HV *
-Perl_pad_compname_type(pTHX_ const PADOFFSET po)
-{
-    return PadnameTYPE(PAD_COMPNAME(po));
-}
-
 #if defined(USE_ITHREADS)
 
 #  define av_dup_inc(s,t)	MUTABLE_AV(sv_dup_inc((const SV *)s,t))
