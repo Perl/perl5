@@ -3394,10 +3394,8 @@ sub pp_null {
     if (class($op) eq "OP") {
 	# old value is lost
 	return $self->{'ex_const'} if $op->targ == OP_CONST;
-	if ($op->targ == OP_NEXTSTATE || $op->targ == OP_DBSTATE) {
-	    bless $op, "B::COP"; # XXX B bug
+    } elsif (class ($op) eq "COP") {
 	    return &pp_nextstate;
-	}
     } elsif ($op->first->name eq 'pushmark'
              or $op->first->name eq 'null'
                 && $op->first->targ == OP_PUSHMARK

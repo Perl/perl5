@@ -45,7 +45,7 @@ checkOptree ( name	=> 'BEGIN',
 # 1        <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$ ->2
 # 3        <1> require sK/1 ->4
 # 2           <$> const[PV "strict.pm"] s/BARE ->3
-# -        <0> ex-nextstate v ->4
+# -        <;> ex-nextstate(B::Concise -837 Concise.pm:366) v:*,&,{,x*,x&,x$,$ ->4
 # -        <@> lineseq K ->-
 # 4           <;> nextstate(B::Concise -275 Concise.pm:356) :*,&,{,x*,x&,x$,$ ->5
 # 9           <1> entersub[t1] KS*/TARG,STRICT ->a
@@ -59,7 +59,7 @@ checkOptree ( name	=> 'BEGIN',
 # b        <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$ ->c
 # d        <1> require sK/1 ->e
 # c           <$> const[PV "strict.pm"] s/BARE ->d
-# -        <0> ex-nextstate v ->e
+# -        <;> ex-nextstate(B::Concise -812 Concise.pm:386) v:*,&,x*,x&,x$,$ ->e
 # -        <@> lineseq K ->-
 # e           <;> nextstate(B::Concise -265 Concise.pm:367) :*,&,x*,x&,x$,$ ->f
 # j           <1> entersub[t1] KS*/TARG,STRICT ->k
@@ -73,7 +73,7 @@ checkOptree ( name	=> 'BEGIN',
 # l        <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$ ->m
 # n        <1> require sK/1 ->o
 # m           <$> const[PV "warnings.pm"] s/BARE ->n
-# -        <0> ex-nextstate v ->o
+# -        <;> ex-nextstate(B::Concise -798 Concise.pm:406) v:*,&,{,x*,x&,x$,$ ->o
 # -        <@> lineseq K ->-
 # o           <;> nextstate(B::Concise -254 Concise.pm:386) :*,&,{,x*,x&,x$,$ ->p
 # t           <1> entersub[t1] KS*/TARG,STRICT ->u
@@ -95,7 +95,7 @@ EOT_EOT
 # 1        <;> nextstate(B::Concise -275 Concise.pm:356) v:*,&,{,x*,x&,x$,$ ->2
 # 3        <1> require sK/1 ->4
 # 2           <$> const(PV "strict.pm") s/BARE ->3
-# -        <0> ex-nextstate v ->4
+# -        <;> ex-nextstate(B::Concise -837 Concise.pm:366) v:*,&,{,x*,x&,x$,$ ->4
 # -        <@> lineseq K ->-
 # 4           <;> nextstate(B::Concise -275 Concise.pm:356) :*,&,{,x*,x&,x$,$ ->5
 # 9           <1> entersub[t1] KS*/TARG,STRICT ->a
@@ -109,7 +109,7 @@ EOT_EOT
 # b        <;> nextstate(B::Concise -265 Concise.pm:367) v:*,&,x*,x&,x$,$ ->c
 # d        <1> require sK/1 ->e
 # c           <$> const(PV "strict.pm") s/BARE ->d
-# -        <0> ex-nextstate v ->e
+# -        <;> ex-nextstate(B::Concise -812 Concise.pm:386) v:*,&,x*,x&,x$,$ ->e
 # -        <@> lineseq K ->-
 # e           <;> nextstate(B::Concise -265 Concise.pm:367) :*,&,x*,x&,x$,$ ->f
 # j           <1> entersub[t1] KS*/TARG,STRICT ->k
@@ -123,7 +123,7 @@ EOT_EOT
 # l        <;> nextstate(B::Concise -254 Concise.pm:386) v:*,&,{,x*,x&,x$,$ ->m
 # n        <1> require sK/1 ->o
 # m           <$> const(PV "warnings.pm") s/BARE ->n
-# -        <0> ex-nextstate v ->o
+# -        <;> ex-nextstate(B::Concise -798 Concise.pm:406) v:*,&,{,x*,x&,x$,$ ->o
 # -        <@> lineseq K ->-
 # o           <;> nextstate(B::Concise -254 Concise.pm:386) :*,&,{,x*,x&,x$,$ ->p
 # t           <1> entersub[t1] KS*/TARG,STRICT ->u

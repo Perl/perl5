@@ -298,6 +298,16 @@ B::svref_2object(sub{y/\x{100}//})->ROOT->first->first->sibling->sv;
 ok 1, 'B knows that UTF trans is a padop in 5.8.9, not an svop';
 
 {
+    my $o = B::svref_2object(sub{0;0})->ROOT->first->first;
+    # Make sure we are testing what we think we are testing.  If these two
+    # fail, tweak the test to find a nulled cop a different way.
+    is $o->name, "null", 'first op of sub{0;0} is a null';
+    is B::ppname($o->targ),'pp_nextstate','first op of sub{0;0} was a cop';
+    # Test its class
+    is B::class($o), "COP", 'nulled cops are of class COP';
+}
+
+{
     format FOO =
 foo
 .

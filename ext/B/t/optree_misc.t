@@ -31,7 +31,7 @@ checkOptree ( name	=> 'OP_AELEMFAST opclass',
 # -     <@> lineseq KP ->7
 # 1        <;> nextstate(main 634 optree_misc.t:25) v:>,<,% ->2
 # 2        <0> padav[@x:634,636] vM/LVINTRO ->3
-# -        <0> ex-nextstate v ->3
+# -        <;> ex-nextstate(main 1594 optree_misc.t:27) v ->3
 # -        <1> rv2av[t4] vK/OURINTR,1 ->3
 # -           <#> gv[*y] s ->-
 # 3        <;> nextstate(main 636 optree_misc.t:25) v:>,<,%,{ ->4
@@ -48,7 +48,7 @@ EOT_EOT
 # -     <@> lineseq KP ->7
 # 1        <;> nextstate(main 634 optree_misc.t:27) v:>,<,% ->2
 # 2        <0> padav[@x:634,636] vM/LVINTRO ->3
-# -        <0> ex-nextstate v ->3
+# -        <;> ex-nextstate(main 1594 optree_misc.t:27) v ->3
 # -        <1> rv2av[t3] vK/OURINTR,1 ->3
 # -           <$> gv(*y) s ->-
 # 3        <;> nextstate(main 636 optree_misc.t:27) v:>,<,%,{ ->4
@@ -159,7 +159,7 @@ checkOptree ( name      => 'formats',
 # 2           <0> pushmark s ->3
 # 3           <$> const[PV "@<<<\n"] s ->4
 # -           <@> lineseq lK ->5
-# -              <0> ex-nextstate v ->4
+# -              <;> ex-nextstate(main 3 tmp35894B:3) v ->4
 # -              <1> ex-rv2sv sK/1 ->-
 # 4                 <#> gvsv[*a] s ->5
 # 6        <;> nextstate(main 1 -:6) v:>,<,% ->7
@@ -167,7 +167,7 @@ checkOptree ( name      => 'formats',
 # 7           <0> pushmark s ->8
 # 8           <$> const[PV "@>>>\n"] s ->9
 # -           <@> lineseq lK ->b
-# -              <0> ex-nextstate v ->9
+# -              <;> ex-nextstate(main 3 tmp35894B:5) v ->9
 # a              <1> rv2av[t3] lK/1 ->b
 # 9                 <#> gv[*b] s ->a
 EOT_EOT
@@ -179,7 +179,7 @@ EOT_EOT
 # 2           <0> pushmark s ->3
 # 3           <$> const(PV "@<<<\n") s ->4
 # -           <@> lineseq lK ->5
-# -              <0> ex-nextstate v ->4
+# -              <;> ex-nextstate(main 3 tmp35894B:3) v ->4
 # -              <1> ex-rv2sv sK/1 ->-
 # 4                 <$> gvsv(*a) s ->5
 # 6        <;> nextstate(main 1 -:6) v:>,<,% ->7
@@ -187,7 +187,7 @@ EOT_EOT
 # 7           <0> pushmark s ->8
 # 8           <$> const(PV "@>>>\n") s ->9
 # -           <@> lineseq lK ->b
-# -              <0> ex-nextstate v ->9
+# -              <;> ex-nextstate(main 3 tmp35894B:5) v ->9
 # a              <1> rv2av[t3] lK/1 ->b
 # 9                 <$> gv(*b) s ->a
 EONT_EONT

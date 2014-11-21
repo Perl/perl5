@@ -116,8 +116,11 @@ cc_opclass(pTHX_ const OP *o)
     if (!o)
 	return OPc_NULL;
 
-    if (o->op_type == 0)
+    if (o->op_type == 0) {
+	if (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)
+	    return OPc_COP;
 	return (o->op_flags & OPf_KIDS) ? OPc_UNOP : OPc_BASEOP;
+    }
 
     if (o->op_type == OP_SASSIGN)
 	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPc_UNOP : OPc_BINOP);
