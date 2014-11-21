@@ -5219,6 +5219,11 @@ didn't think so.
 forget to check the return value of your socket() call?  See
 L<perlfunc/setsockopt>.
 
+=item Setting ${^ENCODING} is deprecated
+
+(D deprecated) You assiged a non-C<undef> value to C<${^ENCODING}>.
+This is deprecated; see C<L<perlvar/${^ENCODING}>> for details.
+
 =item Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef
 
 (D deprecated) You assigned a reference to a scalar to C<$/> where the
@@ -5242,11 +5247,6 @@ Perls this would have behaved similarly to setting it to a reference to
 a positive integer, where the integer was the address of the reference.
 As of Perl 5.20.0 this is a fatal error, to allow future versions of Perl
 to use non-integer refs for more interesting purposes.
-
-=item Setting ${^ENCODING} is deprecated
-
-(D deprecated) You assiged a non-C<undef> value to C<${^ENCODING}>.
-This is deprecated, see C<L<perlvar/${^ENCODING}>> for details.
 
 =item shift on reference is experimental
 
