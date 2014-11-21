@@ -856,9 +856,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\005':  /* ^E */
 	 if (nextchar != '\0') {
-            /* We shouldn't be trying to retrieve this shadow variable */
-            assert(strNE(remaining, "_NCODING"));
-
             if (strEQ(remaining, "NCODING"))
                 sv_setsv(sv, _get_encoding());
             break;
