@@ -914,13 +914,14 @@ EOF
 ##else
 #    const char* file = __FILE__;
 ##endif
+#
+#    PERL_UNUSED_VAR(file);
 EOF
 
   print Q("#\n");
 
   print Q(<<"EOF");
 #    PERL_UNUSED_VAR(cv); /* -W */
-#    PERL_UNUSED_VAR(file);
 #    PERL_UNUSED_VAR(items); /* -W */
 EOF
 
