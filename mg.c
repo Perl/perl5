@@ -784,6 +784,7 @@ Perl__get_encoding(pTHX)
      * it, so we put the object into the global, and put a simple boolean into
      * the hints hash giving whether the global is valid or not */
 
+    dVAR;
     SV *is_encoding;
 
     if (PL_encoding) {
