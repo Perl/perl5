@@ -4048,7 +4048,8 @@ PP(pp_require)
 	if (PL_op->op_type == OP_REQUIRE) {
 	    if(saved_errno == EMFILE || saved_errno == EACCES) {
 		/* diag_listed_as: Can't locate %s */
-		DIE(aTHX_ "Can't locate %s:   %s", name, Strerror(saved_errno));
+		DIE(aTHX_ "Can't locate %s:   %s: %s",
+		    name, tryname, Strerror(saved_errno));
 	    } else {
 	        if (namesv) {			/* did we lookup @INC? */
 		    AV * const ar = GvAVn(PL_incgv);
