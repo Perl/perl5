@@ -8,32 +8,35 @@
 # anyway later during the scanning process (and besides, some clueless
 # vendor might have them capitalized erroneously anyway).
 
-# Some of the locales on the system may not play well with Perl.  Since, we
-# may be trying every possible locale, we don't want to be warned about the
-# weird ones.
-no warnings 'locale';
-
-sub _trylocale {    # Adds the locale given by the first parameter to the list
-                    # given by the 3rd iff the platform supports the locale in
-                    # each of the categories given by the 2nd parameter, which
-                    # is either a single category or a reference to a list of
-                    # categories
+sub _trylocale ($$$$) { # Adds the locale given by the first parameter to the
+                        # list given by the 3rd iff the platform supports the
+                        # locale in each of the categories given by the 2nd
+                        # parameter, which is either a single category or a
+                        # reference to a list of categories
+                        # The 4th parameter is true if to reject locales that
+                        # aren't apparently fully compatible with Perl.
     my $locale = shift;
     my $categories = shift;
     my $list = shift;
+    my $only_plays_well = shift;
+
     return if ! $locale || grep { $locale eq $_ } @$list;
 
     $categories = [ $categories ] unless ref $categories;
 
+    my $badutf8 = 0;
+    my $plays_well = 1;
+
+    use warnings 'locale';
+
+    local $SIG{__WARN__} = sub {
+        $badutf8 = 1 if $_[0] =~ /Malformed UTF-8/;
+        $plays_well = 0 if $_[0] =~ /Locale .* may not work well/i
+    };
+
     foreach my $category (@$categories) {
         return unless setlocale($category, $locale);
-    }
-
-    my $badutf8;
-    {
-        local $SIG{__WARN__} = sub {
-            $badutf8 = $_[0] =~ /Malformed UTF-8/;
-        };
+        return if $only_plays_well && ! $plays_well;
     }
 
     if ($badutf8) {
@@ -70,14 +73,16 @@ sub _decode_encodings {
     return @enc;
 }
 
-sub find_locales ($) {  # Returns an array of all the locales we found on the
-                        # system.  The parameter is either a single locale
-                        # category or a reference to a list of categories to
-                        # find valid locales for it (or in the case of
-                        # multiple) for all of them.  Note that currently the
-                        # array includes even those locales that don't play
-                        # well with Perl
+sub find_locales ($;$) {  # Returns an array of all the locales we found on the
+                          # system.  If the optional 2nd parameter is
+                          # non-zero, the list is restricted to those locales
+                          # that play well with Perl.
+                          # The first parameter is either a single locale
+                          # category or a reference to a list of categories to
+                          # find valid locales for it (or in the case of
+                          # multiple) for all of them.
     my $categories = shift;
+    my $only_plays_well = shift // 0;
 
     use Config;;
     my $have_setlocale = $Config{d_setlocale};
@@ -103,16 +108,16 @@ sub find_locales ($) {  # Returns an array of all the locales we found on the
       return;
     }
 
-    _trylocale("C", $categories, \@Locale);
-    _trylocale("POSIX", $categories, \@Locale);
+    _trylocale("C", $categories, \@Locale, $only_plays_well);
+    _trylocale("POSIX", $categories, \@Locale, $only_plays_well);
     foreach (0..15) {
-        _trylocale("ISO8859-$_", $categories, \@Locale);
-        _trylocale("iso8859$_", $categories, \@Locale);
-        _trylocale("iso8859-$_", $categories, \@Locale);
-        _trylocale("iso_8859_$_", $categories, \@Locale);
-        _trylocale("isolatin$_", $categories, \@Locale);
-        _trylocale("isolatin-$_", $categories, \@Locale);
-        _trylocale("iso_latin_$_", $categories, \@Locale);
+        _trylocale("ISO8859-$_", $categories, \@Locale, $only_plays_well);
+        _trylocale("iso8859$_", $categories, \@Locale, $only_plays_well);
+        _trylocale("iso8859-$_", $categories, \@Locale, $only_plays_well);
+        _trylocale("iso_8859_$_", $categories, \@Locale, $only_plays_well);
+        _trylocale("isolatin$_", $categories, \@Locale, $only_plays_well);
+        _trylocale("isolatin-$_", $categories, \@Locale, $only_plays_well);
+        _trylocale("iso_latin_$_", $categories, \@Locale, $only_plays_well);
     }
 
     # Sanitize the environment so that we can run the external 'locale'
@@ -133,7 +138,7 @@ sub find_locales ($) {  # Returns an array of all the locales we found on the
             # locales will cause all IO hadles to default to (assume) utf8
             next unless utf8::valid($_);
             chomp;
-            _trylocale($_, $categories, \@Locale);
+            _trylocale($_, $categories, \@Locale, $only_plays_well);
         }
         close(LOCALES);
     } elsif ($^O eq 'VMS'
@@ -145,7 +150,7 @@ sub find_locales ($) {  # Returns an array of all the locales we found on the
         opendir(LOCALES, "SYS\$I18N_LOCALE:");
         while ($_ = readdir(LOCALES)) {
             chomp;
-            _trylocale($_, $categories, \@Locale);
+            _trylocale($_, $categories, \@Locale, $only_plays_well);
         }
         close(LOCALES);
     } elsif (($^O eq 'openbsd' || $^O eq 'bitrig' ) && -e '/usr/share/locale') {
@@ -156,7 +161,7 @@ sub find_locales ($) {  # Returns an array of all the locales we found on the
         opendir(LOCALES, '/usr/share/locale');
         while ($_ = readdir(LOCALES)) {
             chomp;
-            _trylocale($_, $categories, \@Locale);
+            _trylocale($_, $categories, \@Locale, $only_plays_well);
         }
         close(LOCALES);
     } else { # Final fallback.  Try our list of locales hard-coded here
@@ -180,27 +185,31 @@ sub find_locales ($) {  # Returns an array of all the locales we found on the
                 split /:/, $line;
             my @enc = _decode_encodings($encodings);
             foreach my $loc (split(/ /, $locale_name)) {
-                _trylocale($loc, $categories, \@Locale);
+                _trylocale($loc, $categories, \@Locale, $only_plays_well);
                 foreach my $enc (@enc) {
-                    _trylocale("$loc.$enc", $categories, \@Locale);
+                    _trylocale("$loc.$enc", $categories, \@Locale,
+                                                            $only_plays_well);
                 }
                 $loc = lc $loc;
                 foreach my $enc (@enc) {
-                    _trylocale("$loc.$enc", $categories, \@Locale);
+                    _trylocale("$loc.$enc", $categories, \@Locale,
+                                                            $only_plays_well);
                 }
             }
             foreach my $lang (split(/ /, $language_codes)) {
-                _trylocale($lang, $categories, \@Locale);
+                _trylocale($lang, $categories, \@Locale, $only_plays_well);
                 foreach my $country (split(/ /, $country_codes)) {
                     my $lc = "${lang}_${country}";
-                    _trylocale($lc, $categories, \@Locale);
+                    _trylocale($lc, $categories, \@Locale, $only_plays_well);
                     foreach my $enc (@enc) {
-                        _trylocale("$lc.$enc", $categories, \@Locale);
+                        _trylocale("$lc.$enc", $categories, \@Locale,
+                                                            $only_plays_well);
                     }
                     my $lC = "${lang}_\U${country}";
-                    _trylocale($lC, $categories, \@Locale);
+                    _trylocale($lC, $categories, \@Locale, $only_plays_well);
                     foreach my $enc (@enc) {
-                        _trylocale("$lC.$enc", $categories, \@Locale);
+                        _trylocale("$lC.$enc", $categories, \@Locale,
+                                                            $only_plays_well);
                     }
                 }
             }
@@ -221,6 +230,7 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
     my $locale = shift;
 
     use locale;
+    no warnings 'locale'; # We may be trying out a weird locale
 
     my $save_locale = setlocale(&POSIX::LC_CTYPE());
     if (! $save_locale) {
@@ -264,7 +274,9 @@ sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
     my $locales_ref = shift;
     return if !defined &POSIX::LC_CTYPE;
     if (! defined $locales_ref) {
-        my @locales = find_locales(&POSIX::LC_CTYPE());
+        my @locales = find_locales(&POSIX::LC_CTYPE(),
+                                   1 # Reject iffy locales.
+                                  );
         $locales_ref = \@locales;
     }
 
