@@ -862,6 +862,14 @@ Perl_op_clear(pTHX_ OP *o)
             o->op_targ = 0;
         }
 #endif
+    case OP_METHOD:
+	SvREFCNT_dec(cMETHOPx(o)->op_class_sv);
+#ifdef USE_ITHREADS
+	if (cMETHOPx(o)->op_class_targ) {
+	    pad_swipe(cMETHOPx(o)->op_class_targ, 1);
+	    cMETHOPx(o)->op_class_targ = 0;
+	}
+#endif
         break;
     case OP_CONST:
     case OP_HINTSEVAL:
@@ -2230,6 +2238,9 @@ S_finalize_op(pTHX_ OP* o)
     /* Relocate all the METHOP's SVs to the pad for thread safety. */
     case OP_METHOD_NAMED:
         op_relocate_sv(&cMETHOPx(o)->op_u.op_meth_sv, &o->op_targ);
+    case OP_METHOD:
+	if (cMETHOPx(o)->op_class_sv)
+	    op_relocate_sv(&cMETHOPx(o)->op_class_sv, &cMETHOPx(o)->op_class_targ);
         break;
 #endif
 
@@ -4682,6 +4693,8 @@ S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth
         methop->op_next = (OP*)methop;
     }
 
+    methop->op_class_sv = NULL;
+    methop->op_class_targ = 0;
     CHANGE_TYPE(methop, type);
     methop = (METHOP*) CHECKOP(type, methop);
 
@@ -11576,6 +11589,7 @@ Perl_ck_subr(pTHX_ OP *o)
     OP *aop, *cvop;
     CV *cv;
     GV *namegv;
+    SV *const_class = NULL;
 
     PERL_ARGS_ASSERT_CK_SUBR;
 
@@ -11592,17 +11606,33 @@ Perl_ck_subr(pTHX_ OP *o)
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
     if (PERLDB_SUB && PL_curstash != PL_debstash)
 	o->op_private |= OPpENTERSUB_DB;
-    if (cvop->op_type == OP_RV2CV) {
-	o->op_private |= (cvop->op_private & OPpENTERSUB_AMPER);
-	op_null(cvop);
-    } else if (cvop->op_type == OP_METHOD || cvop->op_type == OP_METHOD_NAMED) {
-	if (aop->op_type == OP_CONST)
-	    aop->op_private &= ~OPpCONST_STRICT;
-	else if (aop->op_type == OP_LIST) {
-	    OP * const sib = OP_SIBLING(((UNOP*)aop)->op_first);
-	    if (sib && sib->op_type == OP_CONST)
-		sib->op_private &= ~OPpCONST_STRICT;
-	}
+    switch (cvop->op_type) {
+	case OP_RV2CV:
+	    o->op_private |= (cvop->op_private & OPpENTERSUB_AMPER);
+	    op_null(cvop);
+	    break;
+	case OP_METHOD:
+	case OP_METHOD_NAMED:
+	    if (aop->op_type == OP_CONST) {
+		aop->op_private &= ~OPpCONST_STRICT;
+		const_class = cSVOPx(aop)->op_sv;
+	    }
+	    else if (aop->op_type == OP_LIST) {
+		OP * const sib = OP_SIBLING(((UNOP*)aop)->op_first);
+		if (sib && sib->op_type == OP_CONST) {
+		    sib->op_private &= ~OPpCONST_STRICT;
+		    const_class = cSVOPx(sib)->op_sv;
+		}
+	    }
+	    /* cache const class' name to speedup class method calls */
+	    if (const_class) {
+		STRLEN len;
+		const char* str = SvPV(const_class, len);
+		if (len) cMETHOPx(cvop)->op_class_sv = newSVpvn_share(
+		    str, SvUTF8(const_class) ? -len : len, 0
+		);
+	    }
+	    break;
     }
 
     if (!cv) {
