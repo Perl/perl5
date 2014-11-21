@@ -4400,6 +4400,40 @@ STATIC void S_rck_elide_nothing(pTHX_ regnode *node)
         NEXT_OFF(node) = off;
 }
 
+STATIC bool S_rck_definep(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    SSize_t minlen = 0;
+    SSize_t deltanext = 0;
+    SSize_t fake_last_close = 0;
+    I32 f = SCF_IN_DEFINE;
+
+    PERL_ARGS_ASSERT_RCK_DEFINEP;
+
+    StructCopy(&zero_scan_data, &params->data_fake, scan_data_t);
+    params->scan = regnext(params->scan);
+    assert(OP(params->scan) == IFTHEN);
+    DEBUG_PEEP("expect IFTHEN", params->scan, params->depth, params->flags);
+
+    params->data_fake.last_closep = &fake_last_close;
+    minlen = *params->minlenp;
+    params->next = regnext(params->scan);
+    params->scan = NEXTOPER(NEXTOPER(params->scan));
+    DEBUG_PEEP("scan", params->scan, params->depth, params->flags);
+    DEBUG_PEEP("next", params->next, params->depth, params->flags);
+
+    /* we suppose the run is continuous, last=next...
+     * NOTE we dont use the return here! */
+    /* DEFINEP study_chunk() recursion */
+    (void)study_chunk(
+        pRExC_state, &params->scan, &minlen, &deltanext, params->next,
+        &params->data_fake, params->stopparen, params->recursed_depth,
+        NULL, f, params->depth + 1
+    );
+
+    params->scan = regnext(params->next);
+    return 0;
+}
+
 STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 {
     UV min_subtract = 0;    /* How mmany chars to subtract from the minimum
@@ -4429,34 +4463,9 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
 
     /* The principal pseudo-switch.  Cannot be a switch, since we
        look into several different things.  */
-    if ( OP(params->scan) == DEFINEP ) {
-        SSize_t minlen = 0;
-        SSize_t deltanext = 0;
-        SSize_t fake_last_close = 0;
-        I32 f = SCF_IN_DEFINE;
-
-        StructCopy(&zero_scan_data, &params->data_fake, scan_data_t);
-        params->scan = regnext(params->scan);
-        assert( OP(params->scan) == IFTHEN );
-        DEBUG_PEEP("expect IFTHEN", params->scan, params->depth, params->flags);
-
-        params->data_fake.last_closep= &fake_last_close;
-        minlen = *params->minlenp;
-        params->next = regnext(params->scan);
-        params->scan = NEXTOPER(NEXTOPER(params->scan));
-        DEBUG_PEEP("scan", params->scan, params->depth, params->flags);
-        DEBUG_PEEP("next", params->next, params->depth, params->flags);
-
-        /* we suppose the run is continuous, last=next...
-         * NOTE we dont use the return here! */
-        /* DEFINEP study_chunk() recursion */
-        (void)study_chunk(pRExC_state, &params->scan, &minlen,
-                          &deltanext, params->next, &params->data_fake, params->stopparen,
-                          params->recursed_depth, NULL, f, params->depth+1);
-
-        params->scan = params->next;
-    } else
-    if (
+    if (OP(params->scan) == DEFINEP) {
+        return rck_definep(pRExC_state, params);
+    } else if (
         OP(params->scan) == BRANCH  ||
         OP(params->scan) == BRANCHJ ||
         OP(params->scan) == IFTHEN
