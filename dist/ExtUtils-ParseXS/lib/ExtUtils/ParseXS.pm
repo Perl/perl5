@@ -920,6 +920,7 @@ EOF
 
   print Q(<<"EOF");
 #    PERL_UNUSED_VAR(cv); /* -W */
+#    PERL_UNUSED_VAR(file);
 #    PERL_UNUSED_VAR(items); /* -W */
 EOF
 
