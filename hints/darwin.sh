@@ -201,6 +201,8 @@ case "$osvers" in
    lddlflags="${ldflags} -bundle -undefined suppress"
    ;;
 *) 
+   # MACOSX_DEPLOYMENT_TARGET selects the minimum OS level we want to support
+   # https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/cross_development/Configuring/configuring.html
    lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
    case "$ld" in
        *MACOSX_DEVELOPMENT_TARGET*) ;;
