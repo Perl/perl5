@@ -79,7 +79,7 @@ sub _copy_io_layers {
 }
 
 sub _autoflush {
-    my($fh) = shift;
+    my($fh) = pop;
     my $old_fh = select $fh;
     $| = 1;
     select $old_fh;

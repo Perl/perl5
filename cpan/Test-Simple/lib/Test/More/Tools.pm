@@ -334,6 +334,8 @@ sub subtest {
     $ctx->clear;
     my $todo = $ctx->hide_todo;
 
+    my $pid = $$;
+
     my ($succ, $err) = try {
         {
             no warnings 'once';
@@ -351,6 +353,19 @@ sub subtest {
             Test::Stream::ExitMagic->new->do_magic($stream, $ctx->snapshot);
         }
     };
+
+    if ($$ != $pid && !$ctx->stream->_use_fork) {
+        warn <<"        EOT";
+Subtest finished with a new PID ($$ vs $pid) while forking support was turned off!
+This is almost certainly not what you wanted. Did you fork and forget to exit?
+        EOT
+
+        # Did the forked process try to exit via die?
+        die $err unless $succ;
+    }
+
+    # If a subtest forked, then threw an exception, we need to propogate that right away.
+    die $err unless $succ || $$ == $pid || $err->isa('Test::Stream::Event');
 
     $ctx->set;
     $ctx->restore_todo($todo);

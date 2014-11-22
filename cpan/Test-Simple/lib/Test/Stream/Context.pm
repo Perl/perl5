@@ -164,10 +164,15 @@ sub _find_context {
     my $level = 2 + $add + $tb;
     my ($package, $file, $line, $subname) = caller($level);
 
-    return unless $package;
-
-    while ($package eq 'Test::Builder') {
-        ($package, $file, $line, $subname) = caller(++$level);
+    if ($package) {
+        while ($package eq 'Test::Builder') {
+            ($package, $file, $line, $subname) = caller(++$level);
+        }
+    }
+    else {
+        while (!$package) {
+            ($package, $file, $line, $subname) = caller(--$level);
+        }
     }
 
     return unless $package;

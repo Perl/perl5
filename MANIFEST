@@ -2371,6 +2371,7 @@ cpan/Test-Simple/t/Legacy/fail-more.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/fail_one.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/fail.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/filehandles.t			Test::Simple Test
+cpan/Test-Simple/t/Legacy/fork_die.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/fork_in_subtest.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/fork.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/harness_active.t			Test::Simple Test
