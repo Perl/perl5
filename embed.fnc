@@ -2467,6 +2467,8 @@ EsR	|SV *	|get_ANYOFM_contents|NN const regnode * n
 Es	|void	|rck_elide_nothing|NN regnode *node
 Es	|bool	|rck_definep	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
+Es	|bool	|rck_branch	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
 EsRn	|U32	|add_data	|NN RExC_state_t* const pRExC_state \
 				|NN const char* const s|const U32 n
 rs	|void	|re_croak2	|bool utf8|NN const char* pat1|NN const char* pat2|...

@@ -4434,6 +4434,479 @@ STATIC bool S_rck_definep(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
     return 0;
 }
 
+STATIC bool S_rck_branch(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{   
+    PERL_ARGS_ASSERT_RCK_BRANCH;
+
+    params->next = regnext(params->scan);
+    params->code = OP(params->scan);
+
+    /* The op(next)==code check below is to see if we
+     * have "BRANCH-BRANCH", "BRANCHJ-BRANCHJ", "IFTHEN-IFTHEN"
+     * IFTHEN is special as it might not appear in pairs.
+     * Not sure whether BRANCH-BRANCHJ is possible, regardless
+     * we dont handle it cleanly. */
+    if (OP(params->next) == params->code || params->code == IFTHEN) {
+        /* NOTE - There is similar code to this block below for
+         * handling TRIE nodes on a re-study.  If you change stuff here
+         * check there too. */
+        SSize_t max1 = 0, min1 = SSize_t_MAX, num = 0;
+        regnode_ssc accum;
+        regnode * const startbranch=params->scan;
+
+        if (params->flags & SCF_DO_SUBSTR) {
+            /* Cannot merge strings after this. */
+            scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+        }
+
+        if (params->flags & SCF_DO_STCLASS)
+            ssc_init_zero(pRExC_state, &accum);
+
+        while (OP(params->scan) == params->code) {
+            SSize_t deltanext, minnext, fake;
+            I32 f = 0;
+            regnode_ssc this_class;
+
+            DEBUG_PEEP("Branch", params->scan, params->depth, params->flags);
+
+            num++;
+            StructCopy(&zero_scan_data, &params->data_fake, scan_data_t);
+            if (params->data) {
+                params->data_fake.whilem_c = params->data->whilem_c;
+                params->data_fake.last_closep = params->data->last_closep;
+            }
+            else
+                params->data_fake.last_closep = &fake;
+
+            params->data_fake.pos_delta = params->delta;
+            params->next = regnext(params->scan);
+
+            params->scan = NEXTOPER(params->scan); /* everything */
+            if (params->code != BRANCH)    /* everything but BRANCH */
+                params->scan = NEXTOPER(params->scan);
+
+            if (params->flags & SCF_DO_STCLASS) {
+                ssc_init(pRExC_state, &this_class);
+                params->data_fake.start_class = &this_class;
+                f = SCF_DO_STCLASS_AND;
+            }
+            if (params->flags & SCF_WHILEM_VISITED_POS)
+                f |= SCF_WHILEM_VISITED_POS;
+
+            /* we suppose the run is continuous, last=next...*/
+            /* recurse study_chunk() for each BRANCH in an alternation */
+            minnext = study_chunk(pRExC_state, &params->scan, params->minlenp,
+                              &deltanext, params->next, &params->data_fake, params->stopparen,
+                              params->recursed_depth, NULL, f,params->depth+1);
+
+            if (min1 > minnext)
+                min1 = minnext;
+            if (deltanext == SSize_t_MAX) {
+                params->is_inf = params->is_inf_internal = 1;
+                max1 = SSize_t_MAX;
+            } else if (max1 < minnext + deltanext)
+                max1 = minnext + deltanext;
+            params->scan = params->next;
+            if (params->data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
+                params->pars++;
+            if (params->data_fake.flags & SCF_SEEN_ACCEPT) {
+                if ( params->stopmin > minnext)
+                    params->stopmin = params->min + min1;
+                params->flags &= ~SCF_DO_SUBSTR;
+                if (params->data)
+                    params->data->flags |= SCF_SEEN_ACCEPT;
+            }
+            if (params->data) {
+                if (params->data_fake.flags & SF_HAS_EVAL)
+                    params->data->flags |= SF_HAS_EVAL;
+                params->data->whilem_c = params->data_fake.whilem_c;
+            }
+            if (params->flags & SCF_DO_STCLASS)
+                ssc_or(pRExC_state, &accum, (regnode_charclass*)&this_class);
+        }
+        if (params->code == IFTHEN && num < 2) /* Empty ELSE branch */
+            min1 = 0;
+        if (params->flags & SCF_DO_SUBSTR) {
+            params->data->pos_min += min1;
+            if (params->data->pos_delta >= SSize_t_MAX - (max1 - min1))
+                params->data->pos_delta = SSize_t_MAX;
+            else
+                params->data->pos_delta += max1 - min1;
+            if (max1 != min1 || params->is_inf)
+                params->data->cur_is_floating = 1 /*float*/;
+        }
+        params->min += min1;
+        if (params->delta == SSize_t_MAX
+         || SSize_t_MAX - params->delta - (max1 - min1) < 0)
+            params->delta = SSize_t_MAX;
+        else
+            params->delta += max1 - min1;
+        if (params->flags & SCF_DO_STCLASS_OR) {
+            ssc_or(pRExC_state, params->data->start_class, (regnode_charclass*) &accum);
+            if (min1) {
+                ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
+                params->flags &= ~SCF_DO_STCLASS;
+            }
+        }
+        else if (params->flags & SCF_DO_STCLASS_AND) {
+            if (min1) {
+                ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) &accum);
+                params->flags &= ~SCF_DO_STCLASS;
+            }
+            else {
+                /* Switch to OR mode: cache the old value of
+                 * data->start_class */
+                INIT_AND_WITHP;
+                StructCopy(params->data->start_class, params->and_withp, regnode_ssc);
+                params->flags &= ~SCF_DO_STCLASS_AND;
+                StructCopy(&accum, params->data->start_class, regnode_ssc);
+                params->flags |= SCF_DO_STCLASS_OR;
+            }
+        }
+
+        if (PERL_ENABLE_TRIE_OPTIMISATION &&
+                OP( startbranch ) == BRANCH )
+        {
+        /* demq.
+
+           Assuming this was/is a branch we are dealing with: 'scan'
+           now points at the item that follows the branch sequence,
+           whatever it is. We now start at the beginning of the
+           sequence and look for subsequences of
+
+           BRANCH->EXACT=>x1
+           BRANCH->EXACT=>x2
+           tail
+
+           which would be constructed from a pattern like
+           /A|LIST|OF|WORDS/
+
+           If we can find such a subsequence we need to turn the first
+           element into a trie and then add the subsequent branch exact
+           strings to the trie.
+
+           We have two cases
+
+             1. patterns where the whole set of branches can be
+                converted.
+
+             2. patterns where only a subset can be converted.
+
+           In case 1 we can replace the whole set with a single regop
+           for the trie. In case 2 we need to keep the start and end
+           branches so
+
+             'BRANCH EXACT; BRANCH EXACT; BRANCH X'
+             becomes BRANCH TRIE; BRANCH X;
+
+          There is an additional case, that being where there is a
+          common prefix, which gets split out into an EXACT like node
+          preceding the TRIE node.
+
+          If x(1..n)==tail then we can do a simple trie, if not we make
+          a "jump" trie, such that when we match the appropriate word
+          we "jump" to the appropriate tail node. Essentially we turn
+          a nested if into a case structure of sorts.
+
+        */
+
+            int made=0;
+            if (!params->re_trie_maxbuff) {
+                params->re_trie_maxbuff = get_sv(RE_TRIE_MAXBUF_NAME, 1);
+                if (!SvIOK(params->re_trie_maxbuff))
+                    sv_setiv(params->re_trie_maxbuff, RE_TRIE_MAXBUF_INIT);
+            }
+            if ( SvIV(params->re_trie_maxbuff)>=0  ) {
+                regnode *cur;
+                regnode *first = (regnode *)NULL;
+                regnode *last = (regnode *)NULL;
+                regnode *tail = params->scan;
+                U8 trietype = 0;
+                U32 count=0;
+                GET_RE_DEBUG_FLAGS_DECL;
+
+                /* var tail is used because there may be a TAIL
+                   regop in the way. Ie, the exacts will point to the
+                   thing following the TAIL, but the last branch will
+                   point at the TAIL. So we advance tail. If we
+                   have nested (?:) we may have to move through several
+                   tails.
+                 */
+
+                while ( OP( tail ) == TAIL ) {
+                    /* this is the TAIL generated by (?:) */
+                    tail = regnext( tail );
+                }
+
+                DEBUG_TRIE_COMPILE_r({
+                    regprop(RExC_rx, RExC_mysv, tail, NULL, pRExC_state);
+                    Perl_re_indentf( aTHX_  "%s %" UVuf ":%s\n",
+                        params->depth + 1,
+                        "Looking for TRIE'able sequences. Tail node is ",
+                        (UV)(tail - RExC_emit_start),
+                        SvPV_nolen_const( RExC_mysv )
+                    );
+                });
+
+                /*
+
+                    Step through the branches
+                        cur represents each branch,
+                        noper is the first thing to be matched as part
+                              of that branch
+                        noper_next is the regnext() of that node.
+
+                    We normally handle a case like this
+                    /FOO[xyz]|BAR[pqr]/ via a "jump trie" but we also
+                    support building with NOJUMPTRIE, which restricts
+                    the trie logic to structures like /FOO|BAR/.
+
+                    If noper is a trieable nodetype then the branch is
+                    a possible optimization target. If we are building
+                    under NOJUMPTRIE then we require that noper_next is
+                    the same as scan (our current position in the regex
+                    program).
+
+                    Once we have two or more consecutive such branches
+                    we can create a trie of the EXACT's contents and
+                    stitch it in place into the program.
+
+                    If the sequence represents all of the branches in
+                    the alternation we replace the entire thing with a
+                    single TRIE node.
+
+                    Otherwise when it is a subsequence we need to
+                    stitch it in place and replace only the relevant
+                    branches. This means the first branch has to remain
+                    as it is used by the alternation logic, and its
+                    next pointer, and needs to be repointed at the item
+                    on the branch chain following the last branch we
+                    have optimized away.
+
+                    This could be either a BRANCH, in which case the
+                    subsequence is internal, or it could be the item
+                    following the branch sequence in which case the
+                    subsequence is at the end (which does not
+                    necessarily mean the first node is the start of the
+                    alternation).
+
+                    TRIE_TYPE(X) is a define which maps the optype to a
+                    trietype.
+
+                        optype          |  trietype
+                        ----------------+-----------
+                        NOTHING         | NOTHING
+                        EXACT           | EXACT
+                        EXACTFU         | EXACTFU
+                        EXACTFU_SS      | EXACTFU
+                        EXACTFAA        | EXACTFAA
+                        EXACTL          | EXACTL
+                        EXACTFLU8       | EXACTFLU8
+
+
+                */
+#define TRIE_TYPE(X) ( ( NOTHING == (X) )                                   \
+                   ? NOTHING                                            \
+                   : ( EXACT == (X) )                                   \
+                     ? EXACT                                            \
+                     : ( EXACTFU == (X) || EXACTFU_SS == (X) )          \
+                       ? EXACTFU                                        \
+                       : ( EXACTFAA == (X) )                             \
+                         ? EXACTFAA                                      \
+                         : ( EXACTL == (X) )                            \
+                           ? EXACTL                                     \
+                           : ( EXACTFLU8 == (X) )                        \
+                             ? EXACTFLU8                                 \
+                             : 0 )
+
+                /* dont use tail as the end marker for this traverse */
+                for ( cur = startbranch ; cur != params->scan ; cur = regnext( cur ) ) {
+                    regnode * const noper = NEXTOPER( cur );
+                    U8 noper_type = OP( noper );
+                    U8 noper_trietype = TRIE_TYPE( noper_type );
+#if defined(DEBUGGING) || defined(NOJUMPTRIE)
+                    regnode * const noper_next = regnext( noper );
+                    U8 noper_next_type = (noper_next && noper_next < tail) ? OP(noper_next) : 0;
+                    U8 noper_next_trietype = (noper_next && noper_next < tail) ? TRIE_TYPE( noper_next_type ) : 0;
+#endif
+
+                    DEBUG_TRIE_COMPILE_r({
+                        regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
+                        Perl_re_indentf( aTHX_  "- %d:%s (%d)",
+                           params->depth + 1,
+                           REG_NODE_NUM(cur), SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur) );
+
+                        regprop(RExC_rx, RExC_mysv, noper, NULL, pRExC_state);
+                        Perl_re_printf( aTHX_  " -> %d:%s",
+                            REG_NODE_NUM(noper), SvPV_nolen_const(RExC_mysv));
+
+                        if ( noper_next ) {
+                          regprop(RExC_rx, RExC_mysv, noper_next, NULL, pRExC_state);
+                          Perl_re_printf( aTHX_ "\t=> %d:%s\t",
+                            REG_NODE_NUM(noper_next), SvPV_nolen_const(RExC_mysv));
+                        }
+                        Perl_re_printf( aTHX_  "(First==%d,Last==%d,Cur==%d,tt==%s,ntt==%s,nntt==%s)\n",
+                           REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
+                           PL_reg_name[trietype], PL_reg_name[noper_trietype], PL_reg_name[noper_next_trietype]
+                        );
+                    });
+
+                    /* Is noper a trieable nodetype that can be merged
+                     * with the current trie (if there is one)? */
+                    if ( noper_trietype
+                          &&
+                          (
+                                ( noper_trietype == NOTHING )
+                                || ( trietype == NOTHING )
+                                || ( trietype == noper_trietype )
+                          )
+#ifdef NOJUMPTRIE
+                          && noper_next >= tail
+#endif
+                          && count < U16_MAX)
+                    {
+                        /* Handle mergable triable node Either we are
+                         * the first node in a new trieable sequence,
+                         * in which case we do some bookkeeping,
+                         * otherwise we update the end pointer. */
+                        if ( !first ) {
+                            first = cur;
+                            if ( noper_trietype == NOTHING ) {
+#if !defined(DEBUGGING) && !defined(NOJUMPTRIE)
+                                regnode * const noper_next = regnext( noper );
+                                U8 noper_next_type = (noper_next && noper_next < tail) ? OP(noper_next) : 0;
+                                U8 noper_next_trietype = noper_next_type ? TRIE_TYPE( noper_next_type ) :0;
+#endif
+
+                                if ( noper_next_trietype ) {
+                                    trietype = noper_next_trietype;
+                                } else if (noper_next_type)  {
+                                    /* a NOTHING regop is 1 regop wide.
+                                     * We need at least two for a trie
+                                     * so we can't merge this in */
+                                    first = NULL;
+                                }
+                            } else {
+                                trietype = noper_trietype;
+                            }
+                        } else {
+                            if ( trietype == NOTHING )
+                                trietype = noper_trietype;
+                            last = cur;
+                        }
+                        if (first)
+                            count++;
+                    } /* end handle mergable triable node */
+                    else {
+                        /* handle unmergable node -
+                         * noper may either be a triable node which can
+                         * not be tried together with the current trie,
+                         * or a non triable node */
+                        if ( last ) {
+                            /* If last is set and trietype is not
+                             * NOTHING then we have found at least two
+                             * triable branch sequences in a row of a
+                             * similar trietype so we can turn them
+                             * into a trie. If/when we allow NOTHING to
+                             * start a trie sequence this condition
+                             * will be required, and it isn't expensive
+                             * so we leave it in for now. */
+                            if ( trietype && trietype != NOTHING )
+                                make_trie( pRExC_state,
+                                        startbranch, first, cur, tail,
+                                        count, trietype, params->depth+1 );
+                            last = NULL; /* note: we clear/update
+                                            first, trietype etc below,
+                                            so we dont do it here */
+                        }
+                        if ( noper_trietype
+#ifdef NOJUMPTRIE
+                             && noper_next >= tail
+#endif
+                        ){
+                            /* noper is triable, so we can start a new
+                             * trie sequence */
+                            count = 1;
+                            first = cur;
+                            trietype = noper_trietype;
+                        } else if (first) {
+                            /* if we already saw a first but the
+                             * current node is not triable then we have
+                             * to reset the first information. */
+                            count = 0;
+                            first = NULL;
+                            trietype = 0;
+                        }
+                    } /* end handle unmergable node */
+                } /* loop over branches */
+                DEBUG_TRIE_COMPILE_r({
+                    regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
+                    Perl_re_indentf( aTHX_  "- %s (%d) <SCAN FINISHED> ",
+                      params->depth + 1, SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
+                    Perl_re_printf( aTHX_  "(First==%d, Last==%d, Cur==%d, tt==%s)\n",
+                       REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
+                       PL_reg_name[trietype]
+                    );
+
+                });
+                if ( last && trietype ) {
+                    if ( trietype != NOTHING ) {
+                        /* the last branch of the sequence was part of
+                         * a trie, so we have to construct it here
+                         * outside of the loop */
+                        made= make_trie( pRExC_state, startbranch,
+                                         first, params->scan, tail, count,
+                                         trietype, params->depth+1 );
+#ifdef TRIE_STUDY_OPT
+                        if ( ((made == MADE_EXACT_TRIE &&
+                             startbranch == first)
+                             || ( params->first_non_open == first )) &&
+                             params->depth==0 ) {
+                            params->flags |= SCF_TRIE_RESTUDY;
+                            if ( startbranch == first
+                                 && params->scan >= tail )
+                            {
+                                RExC_seen &=~REG_TOP_LEVEL_BRANCHES_SEEN;
+                            }
+                        }
+#endif
+                    } else {
+                        /* at this point we know whatever we have is a
+                         * NOTHING sequence/branch AND if 'startbranch'
+                         * is 'first' then we can turn the whole thing
+                         * into a NOTHING
+                         */
+                        if ( startbranch == first ) {
+                            regnode *opt;
+                            /* the entire thing is a NOTHING sequence,
+                             * something like this: (?:|) So we can
+                             * turn it into a plain NOTHING op. */
+                            DEBUG_TRIE_COMPILE_r({
+                                regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
+                                Perl_re_indentf( aTHX_  "- %s (%d) <NOTHING BRANCH SEQUENCE>\n",
+                                  params->depth + 1,
+                                  SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
+
+                            });
+                            OP(startbranch)= NOTHING;
+                            NEXT_OFF(startbranch)= tail - startbranch;
+                            for ( opt= startbranch + 1; opt < tail ; opt++ )
+                                OP(opt)= OPTIMIZED;
+                        }
+                    }
+                } /* end if ( last) */
+            } /* TRIE_MAXBUF is non zero */
+
+        } /* do trie */
+
+    }
+    else if ( params->code == BRANCHJ ) {  /* single branch is optimized. */
+        params->scan = NEXTOPER(NEXTOPER(params->scan));
+    } else			/* single branch is optimized. */
+        params->scan = NEXTOPER(params->scan);
+    return 0;
+}
+
 STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 {
     UV min_subtract = 0;    /* How mmany chars to subtract from the minimum
@@ -4470,474 +4943,7 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
         OP(params->scan) == BRANCHJ ||
         OP(params->scan) == IFTHEN
     ) {
-        params->next = regnext(params->scan);
-        params->code = OP(params->scan);
-
-        /* The op(next)==code check below is to see if we
-         * have "BRANCH-BRANCH", "BRANCHJ-BRANCHJ", "IFTHEN-IFTHEN"
-         * IFTHEN is special as it might not appear in pairs.
-         * Not sure whether BRANCH-BRANCHJ is possible, regardless
-         * we dont handle it cleanly. */
-        if (OP(params->next) == params->code || params->code == IFTHEN) {
-            /* NOTE - There is similar code to this block below for
-             * handling TRIE nodes on a re-study.  If you change stuff here
-             * check there too. */
-            SSize_t max1 = 0, min1 = SSize_t_MAX, num = 0;
-            regnode_ssc accum;
-            regnode * const startbranch=params->scan;
-
-            if (params->flags & SCF_DO_SUBSTR) {
-                /* Cannot merge strings after this. */
-                scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-            }
-
-            if (params->flags & SCF_DO_STCLASS)
-                ssc_init_zero(pRExC_state, &accum);
-
-            while (OP(params->scan) == params->code) {
-                SSize_t deltanext, minnext, fake;
-                I32 f = 0;
-                regnode_ssc this_class;
-
-                DEBUG_PEEP("Branch", params->scan, params->depth, params->flags);
-
-                num++;
-                StructCopy(&zero_scan_data, &params->data_fake, scan_data_t);
-                if (params->data) {
-                    params->data_fake.whilem_c = params->data->whilem_c;
-                    params->data_fake.last_closep = params->data->last_closep;
-                }
-                else
-                    params->data_fake.last_closep = &fake;
-
-                params->data_fake.pos_delta = params->delta;
-                params->next = regnext(params->scan);
-
-                params->scan = NEXTOPER(params->scan); /* everything */
-                if (params->code != BRANCH)    /* everything but BRANCH */
-                    params->scan = NEXTOPER(params->scan);
-
-                if (params->flags & SCF_DO_STCLASS) {
-                    ssc_init(pRExC_state, &this_class);
-                    params->data_fake.start_class = &this_class;
-                    f = SCF_DO_STCLASS_AND;
-                }
-                if (params->flags & SCF_WHILEM_VISITED_POS)
-                    f |= SCF_WHILEM_VISITED_POS;
-
-                /* we suppose the run is continuous, last=next...*/
-                /* recurse study_chunk() for each BRANCH in an alternation */
-                minnext = study_chunk(pRExC_state, &params->scan, params->minlenp,
-                                  &deltanext, params->next, &params->data_fake, params->stopparen,
-                                  params->recursed_depth, NULL, f,params->depth+1);
-
-                if (min1 > minnext)
-                    min1 = minnext;
-                if (deltanext == SSize_t_MAX) {
-                    params->is_inf = params->is_inf_internal = 1;
-                    max1 = SSize_t_MAX;
-                } else if (max1 < minnext + deltanext)
-                    max1 = minnext + deltanext;
-                params->scan = params->next;
-                if (params->data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
-                    params->pars++;
-                if (params->data_fake.flags & SCF_SEEN_ACCEPT) {
-                    if ( params->stopmin > minnext)
-                        params->stopmin = params->min + min1;
-                    params->flags &= ~SCF_DO_SUBSTR;
-                    if (params->data)
-                        params->data->flags |= SCF_SEEN_ACCEPT;
-                }
-                if (params->data) {
-                    if (params->data_fake.flags & SF_HAS_EVAL)
-                        params->data->flags |= SF_HAS_EVAL;
-                    params->data->whilem_c = params->data_fake.whilem_c;
-                }
-                if (params->flags & SCF_DO_STCLASS)
-                    ssc_or(pRExC_state, &accum, (regnode_charclass*)&this_class);
-            }
-            if (params->code == IFTHEN && num < 2) /* Empty ELSE branch */
-                min1 = 0;
-            if (params->flags & SCF_DO_SUBSTR) {
-                params->data->pos_min += min1;
-                if (params->data->pos_delta >= SSize_t_MAX - (max1 - min1))
-                    params->data->pos_delta = SSize_t_MAX;
-                else
-                    params->data->pos_delta += max1 - min1;
-                if (max1 != min1 || params->is_inf)
-                    params->data->cur_is_floating = 1 /*float*/;
-            }
-            params->min += min1;
-            if (params->delta == SSize_t_MAX
-             || SSize_t_MAX - params->delta - (max1 - min1) < 0)
-                params->delta = SSize_t_MAX;
-            else
-                params->delta += max1 - min1;
-            if (params->flags & SCF_DO_STCLASS_OR) {
-                ssc_or(pRExC_state, params->data->start_class, (regnode_charclass*) &accum);
-                if (min1) {
-                    ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
-                    params->flags &= ~SCF_DO_STCLASS;
-                }
-            }
-            else if (params->flags & SCF_DO_STCLASS_AND) {
-                if (min1) {
-                    ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) &accum);
-                    params->flags &= ~SCF_DO_STCLASS;
-                }
-                else {
-                    /* Switch to OR mode: cache the old value of
-                     * data->start_class */
-                    INIT_AND_WITHP;
-                    StructCopy(params->data->start_class, params->and_withp, regnode_ssc);
-                    params->flags &= ~SCF_DO_STCLASS_AND;
-                    StructCopy(&accum, params->data->start_class, regnode_ssc);
-                    params->flags |= SCF_DO_STCLASS_OR;
-                }
-            }
-
-            if (PERL_ENABLE_TRIE_OPTIMISATION &&
-                    OP( startbranch ) == BRANCH )
-            {
-            /* demq.
-
-               Assuming this was/is a branch we are dealing with: 'scan'
-               now points at the item that follows the branch sequence,
-               whatever it is. We now start at the beginning of the
-               sequence and look for subsequences of
-
-               BRANCH->EXACT=>x1
-               BRANCH->EXACT=>x2
-               tail
-
-               which would be constructed from a pattern like
-               /A|LIST|OF|WORDS/
-
-               If we can find such a subsequence we need to turn the first
-               element into a trie and then add the subsequent branch exact
-               strings to the trie.
-
-               We have two cases
-
-                 1. patterns where the whole set of branches can be
-                    converted.
-
-                 2. patterns where only a subset can be converted.
-
-               In case 1 we can replace the whole set with a single regop
-               for the trie. In case 2 we need to keep the start and end
-               branches so
-
-                 'BRANCH EXACT; BRANCH EXACT; BRANCH X'
-                 becomes BRANCH TRIE; BRANCH X;
-
-              There is an additional case, that being where there is a
-              common prefix, which gets split out into an EXACT like node
-              preceding the TRIE node.
-
-              If x(1..n)==tail then we can do a simple trie, if not we make
-              a "jump" trie, such that when we match the appropriate word
-              we "jump" to the appropriate tail node. Essentially we turn
-              a nested if into a case structure of sorts.
-
-            */
-
-                int made=0;
-                if (!params->re_trie_maxbuff) {
-                    params->re_trie_maxbuff = get_sv(RE_TRIE_MAXBUF_NAME, 1);
-                    if (!SvIOK(params->re_trie_maxbuff))
-                        sv_setiv(params->re_trie_maxbuff, RE_TRIE_MAXBUF_INIT);
-                }
-                if ( SvIV(params->re_trie_maxbuff)>=0  ) {
-                    regnode *cur;
-                    regnode *first = (regnode *)NULL;
-                    regnode *last = (regnode *)NULL;
-                    regnode *tail = params->scan;
-                    U8 trietype = 0;
-                    U32 count=0;
-                    GET_RE_DEBUG_FLAGS_DECL;
-
-                    /* var tail is used because there may be a TAIL
-                       regop in the way. Ie, the exacts will point to the
-                       thing following the TAIL, but the last branch will
-                       point at the TAIL. So we advance tail. If we
-                       have nested (?:) we may have to move through several
-                       tails.
-                     */
-
-                    while ( OP( tail ) == TAIL ) {
-                        /* this is the TAIL generated by (?:) */
-                        tail = regnext( tail );
-                    }
-
-
-                    DEBUG_TRIE_COMPILE_r({
-                        regprop(RExC_rx, RExC_mysv, tail, NULL, pRExC_state);
-                        Perl_re_indentf( aTHX_  "%s %" UVuf ":%s\n",
-                          params->depth + 1,
-                          "Looking for TRIE'able sequences. Tail node is ",
-                          (UV)(tail - RExC_emit_start),
-                          SvPV_nolen_const( RExC_mysv )
-                        );
-                    });
-
-                    /*
-
-                        Step through the branches
-                            cur represents each branch,
-                            noper is the first thing to be matched as part
-                                  of that branch
-                            noper_next is the regnext() of that node.
-
-                        We normally handle a case like this
-                        /FOO[xyz]|BAR[pqr]/ via a "jump trie" but we also
-                        support building with NOJUMPTRIE, which restricts
-                        the trie logic to structures like /FOO|BAR/.
-
-                        If noper is a trieable nodetype then the branch is
-                        a possible optimization target. If we are building
-                        under NOJUMPTRIE then we require that noper_next is
-                        the same as scan (our current position in the regex
-                        program).
-
-                        Once we have two or more consecutive such branches
-                        we can create a trie of the EXACT's contents and
-                        stitch it in place into the program.
-
-                        If the sequence represents all of the branches in
-                        the alternation we replace the entire thing with a
-                        single TRIE node.
-
-                        Otherwise when it is a subsequence we need to
-                        stitch it in place and replace only the relevant
-                        branches. This means the first branch has to remain
-                        as it is used by the alternation logic, and its
-                        next pointer, and needs to be repointed at the item
-                        on the branch chain following the last branch we
-                        have optimized away.
-
-                        This could be either a BRANCH, in which case the
-                        subsequence is internal, or it could be the item
-                        following the branch sequence in which case the
-                        subsequence is at the end (which does not
-                        necessarily mean the first node is the start of the
-                        alternation).
-
-                        TRIE_TYPE(X) is a define which maps the optype to a
-                        trietype.
-
-                            optype          |  trietype
-                            ----------------+-----------
-                            NOTHING         | NOTHING
-                            EXACT           | EXACT
-                            EXACTFU         | EXACTFU
-                            EXACTFU_SS      | EXACTFU
-                            EXACTFAA        | EXACTFAA
-                            EXACTL          | EXACTL
-                            EXACTFLU8       | EXACTFLU8
-
-
-                    */
-#define TRIE_TYPE(X) ( ( NOTHING == (X) )                                   \
-                   ? NOTHING                                            \
-                   : ( EXACT == (X) )                                   \
-                     ? EXACT                                            \
-                     : ( EXACTFU == (X) || EXACTFU_SS == (X) )          \
-                       ? EXACTFU                                        \
-                       : ( EXACTFAA == (X) )                             \
-                         ? EXACTFAA                                      \
-                         : ( EXACTL == (X) )                            \
-                           ? EXACTL                                     \
-                           : ( EXACTFLU8 == (X) )                        \
-                             ? EXACTFLU8                                 \
-                             : 0 )
-
-                    /* dont use tail as the end marker for this traverse */
-                    for ( cur = startbranch ; cur != params->scan ; cur = regnext( cur ) ) {
-                        regnode * const noper = NEXTOPER( cur );
-                        U8 noper_type = OP( noper );
-                        U8 noper_trietype = TRIE_TYPE( noper_type );
-#if defined(DEBUGGING) || defined(NOJUMPTRIE)
-                        regnode * const noper_next = regnext( noper );
-                        U8 noper_next_type = (noper_next && noper_next < tail) ? OP(noper_next) : 0;
-                        U8 noper_next_trietype = (noper_next && noper_next < tail) ? TRIE_TYPE( noper_next_type ) :0;
-#endif
-
-                        DEBUG_TRIE_COMPILE_r({
-                            regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
-                            Perl_re_indentf( aTHX_  "- %d:%s (%d)",
-                               params->depth + 1,
-                               REG_NODE_NUM(cur), SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur) );
-
-                            regprop(RExC_rx, RExC_mysv, noper, NULL, pRExC_state);
-                            Perl_re_printf( aTHX_  " -> %d:%s",
-                                REG_NODE_NUM(noper), SvPV_nolen_const(RExC_mysv));
-
-                            if ( noper_next ) {
-                              regprop(RExC_rx, RExC_mysv, noper_next, NULL, pRExC_state);
-                              Perl_re_printf( aTHX_ "\t=> %d:%s\t",
-                                REG_NODE_NUM(noper_next), SvPV_nolen_const(RExC_mysv));
-                            }
-                            Perl_re_printf( aTHX_  "(First==%d,Last==%d,Cur==%d,tt==%s,ntt==%s,nntt==%s)\n",
-                               REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
-                               PL_reg_name[trietype], PL_reg_name[noper_trietype], PL_reg_name[noper_next_trietype]
-                            );
-                        });
-
-                        /* Is noper a trieable nodetype that can be merged
-                         * with the current trie (if there is one)? */
-                        if ( noper_trietype
-                              &&
-                              (
-                                    ( noper_trietype == NOTHING )
-                                    || ( trietype == NOTHING )
-                                    || ( trietype == noper_trietype )
-                              )
-#ifdef NOJUMPTRIE
-                              && noper_next >= tail
-#endif
-                              && count < U16_MAX)
-                        {
-                            /* Handle mergable triable node Either we are
-                             * the first node in a new trieable sequence,
-                             * in which case we do some bookkeeping,
-                             * otherwise we update the end pointer. */
-                            if ( !first ) {
-                                first = cur;
-                                if ( noper_trietype == NOTHING ) {
-#if !defined(DEBUGGING) && !defined(NOJUMPTRIE)
-                                    regnode * const noper_next = regnext( noper );
-                                    U8 noper_next_type = (noper_next && noper_next < tail) ? OP(noper_next) : 0;
-                                    U8 noper_next_trietype = noper_next_type ? TRIE_TYPE( noper_next_type ) :0;
-#endif
-
-                                    if ( noper_next_trietype ) {
-                                        trietype = noper_next_trietype;
-                                    } else if (noper_next_type)  {
-                                        /* a NOTHING regop is 1 regop wide.
-                                         * We need at least two for a trie
-                                         * so we can't merge this in */
-                                        first = NULL;
-                                    }
-                                } else {
-                                    trietype = noper_trietype;
-                                }
-                            } else {
-                                if ( trietype == NOTHING )
-                                    trietype = noper_trietype;
-                                last = cur;
-                            }
-                            if (first)
-                                count++;
-                        } /* end handle mergable triable node */
-                        else {
-                            /* handle unmergable node -
-                             * noper may either be a triable node which can
-                             * not be tried together with the current trie,
-                             * or a non triable node */
-                            if ( last ) {
-                                /* If last is set and trietype is not
-                                 * NOTHING then we have found at least two
-                                 * triable branch sequences in a row of a
-                                 * similar trietype so we can turn them
-                                 * into a trie. If/when we allow NOTHING to
-                                 * start a trie sequence this condition
-                                 * will be required, and it isn't expensive
-                                 * so we leave it in for now. */
-                                if ( trietype && trietype != NOTHING )
-                                    make_trie( pRExC_state,
-                                            startbranch, first, cur, tail,
-                                            count, trietype, params->depth+1 );
-                                last = NULL; /* note: we clear/update
-                                                first, trietype etc below,
-                                                so we dont do it here */
-                            }
-                            if ( noper_trietype
-#ifdef NOJUMPTRIE
-                                 && noper_next >= tail
-#endif
-                            ){
-                                /* noper is triable, so we can start a new
-                                 * trie sequence */
-                                count = 1;
-                                first = cur;
-                                trietype = noper_trietype;
-                            } else if (first) {
-                                /* if we already saw a first but the
-                                 * current node is not triable then we have
-                                 * to reset the first information. */
-                                count = 0;
-                                first = NULL;
-                                trietype = 0;
-                            }
-                        } /* end handle unmergable node */
-                    } /* loop over branches */
-                    DEBUG_TRIE_COMPILE_r({
-                        regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
-                        Perl_re_indentf( aTHX_  "- %s (%d) <SCAN FINISHED> ",
-                          params->depth + 1, SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
-                        Perl_re_printf( aTHX_  "(First==%d, Last==%d, Cur==%d, tt==%s)\n",
-                           REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
-                           PL_reg_name[trietype]
-                        );
-
-                    });
-                    if ( last && trietype ) {
-                        if ( trietype != NOTHING ) {
-                            /* the last branch of the sequence was part of
-                             * a trie, so we have to construct it here
-                             * outside of the loop */
-                            made= make_trie( pRExC_state, startbranch,
-                                             first, params->scan, tail, count,
-                                             trietype, params->depth+1 );
-#ifdef TRIE_STUDY_OPT
-                            if ( ((made == MADE_EXACT_TRIE &&
-                                 startbranch == first)
-                                 || ( params->first_non_open == first )) &&
-                                 params->depth==0 ) {
-                                params->flags |= SCF_TRIE_RESTUDY;
-                                if ( startbranch == first
-                                     && params->scan >= tail )
-                                {
-                                    RExC_seen &=~REG_TOP_LEVEL_BRANCHES_SEEN;
-                                }
-                            }
-#endif
-                        } else {
-                            /* at this point we know whatever we have is a
-                             * NOTHING sequence/branch AND if 'startbranch'
-                             * is 'first' then we can turn the whole thing
-                             * into a NOTHING
-                             */
-                            if ( startbranch == first ) {
-                                regnode *opt;
-                                /* the entire thing is a NOTHING sequence,
-                                 * something like this: (?:|) So we can
-                                 * turn it into a plain NOTHING op. */
-                                DEBUG_TRIE_COMPILE_r({
-                                    regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
-                                    Perl_re_indentf( aTHX_  "- %s (%d) <NOTHING BRANCH SEQUENCE>\n",
-                                      params->depth + 1,
-                                      SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
-
-                                });
-                                OP(startbranch)= NOTHING;
-                                NEXT_OFF(startbranch)= tail - startbranch;
-                                for ( opt= startbranch + 1; opt < tail ; opt++ )
-                                    OP(opt)= OPTIMIZED;
-                            }
-                        }
-                    } /* end if ( last) */
-                } /* TRIE_MAXBUF is non zero */
-
-            } /* do trie */
-
-        }
-        else if ( params->code == BRANCHJ ) {  /* single branch is optimized. */
-            params->scan = NEXTOPER(NEXTOPER(params->scan));
-        } else			/* single branch is optimized. */
-            params->scan = NEXTOPER(params->scan);
-        return 0;
+        return rck_branch(pRExC_state, params);
     } else if (OP(params->scan) == SUSPEND || OP(params->scan) == GOSUB) {
         I32 paren = 0;
         regnode *start = NULL;

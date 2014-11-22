@@ -5291,6 +5291,9 @@ STATIC void	S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state);
 STATIC void	S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr);
 #define PERL_ARGS_ASSERT_POPULATE_ANYOF_FROM_INVLIST	\
 	assert(node); assert(invlist_ptr)
+STATIC bool	S_rck_branch(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_BRANCH	\
+	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_definep(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_DEFINEP	\
 	assert(pRExC_state); assert(params)
