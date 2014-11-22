@@ -134,8 +134,6 @@ xlib/
 
 # test byproducts
 ext/Test-Harness/t/ext/
-lib/Big/Dummy.pm
-lib/Big/Liar.pm
 t/rantests
 t/tmp*
 t/perl
