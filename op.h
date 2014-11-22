@@ -202,8 +202,11 @@ struct methop {
         OP* op_first;   /* optree for method name */
         SV* op_meth_sv; /* static method name */
     } op_u;
-    SV*       op_class_sv;   /* static class name */
+#ifdef USE_ITHREADS
     PADOFFSET op_class_targ; /* pad index for class name if threaded */
+#else
+    SV*       op_class_sv;   /* static class name */
+#endif
 };
 
 struct pmop {
@@ -444,7 +447,7 @@ struct loop {
 #  define	cSVOPx_svp(v)	(cSVOPx(v)->op_sv \
 				 ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
 #  define	cMETHOPx_class(v) (cMETHOPx(v)->op_class_targ ? \
-	PAD_SVl(cMETHOPx(v)->op_class_targ) : cMETHOPx(v)->op_class_sv)
+	PAD_SVl(cMETHOPx(v)->op_class_targ) : NULL)
 #else
 #  define	cGVOPx_gv(o)	((GV*)cSVOPx(o)->op_sv)
 #  ifndef PERL_CORE

@@ -863,12 +863,14 @@ Perl_op_clear(pTHX_ OP *o)
         }
 #endif
     case OP_METHOD:
-	SvREFCNT_dec(cMETHOPx(o)->op_class_sv);
 #ifdef USE_ITHREADS
 	if (cMETHOPx(o)->op_class_targ) {
 	    pad_swipe(cMETHOPx(o)->op_class_targ, 1);
 	    cMETHOPx(o)->op_class_targ = 0;
 	}
+#else
+	SvREFCNT_dec(cMETHOPx(o)->op_class_sv);
+	cMETHOPx(o)->op_class_sv = NULL;
 #endif
         break;
     case OP_CONST:
@@ -2238,9 +2240,6 @@ S_finalize_op(pTHX_ OP* o)
     /* Relocate all the METHOP's SVs to the pad for thread safety. */
     case OP_METHOD_NAMED:
         op_relocate_sv(&cMETHOPx(o)->op_u.op_meth_sv, &o->op_targ);
-    case OP_METHOD:
-	if (cMETHOPx(o)->op_class_sv)
-	    op_relocate_sv(&cMETHOPx(o)->op_class_sv, &cMETHOPx(o)->op_class_targ);
         break;
 #endif
 
@@ -4693,8 +4692,11 @@ S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth
         methop->op_next = (OP*)methop;
     }
 
-    methop->op_class_sv = NULL;
+#ifdef USE_ITHREADS
     methop->op_class_targ = 0;
+#else
+    methop->op_class_sv = NULL;
+#endif
     CHANGE_TYPE(methop, type);
     methop = (METHOP*) CHECKOP(type, methop);
 
@@ -11627,10 +11629,18 @@ Perl_ck_subr(pTHX_ OP *o)
 	    /* cache const class' name to speedup class method calls */
 	    if (const_class) {
 		STRLEN len;
+		SV* shared;
 		const char* str = SvPV(const_class, len);
-		if (len) cMETHOPx(cvop)->op_class_sv = newSVpvn_share(
-		    str, SvUTF8(const_class) ? -len : len, 0
-		);
+		if (len) {
+		    shared = newSVpvn_share(
+			str, SvUTF8(const_class) ? -len : len, 0
+		    );
+#ifdef USE_ITHREADS
+		    op_relocate_sv(&shared, &cMETHOPx(cvop)->op_class_targ);
+#else
+		    cMETHOPx(cvop)->op_class_sv = shared;
+#endif
+		}
 	    }
 	    break;
     }
