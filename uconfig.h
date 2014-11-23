@@ -46,6 +46,12 @@
  */
 /*#define HAS_BZERO	/ **/
 
+/* HAS_CBRT:
+ *	This symbol, if defined, indicates that the cbrt() (cube root)
+ *	function is available.
+ */
+/*#define HAS_CBRT	/ **/
+
 /* HAS_CHOWN:
  *	This symbol, if defined, indicates that the chown routine is
  *	available.
@@ -226,12 +232,6 @@
  */
 /*#define HAS_LOCALECONV	/ **/
 
-/* HAS_LC_MONETARY_2008:
- *	This symbol, if defined, indicates that the localeconv routine is
- *	available and has the additional members added in POSIX 1003.1-2008.
- */
-/*#define HAS_LC_MONETARY_2008	/ **/
-
 /* HAS_LOCKF:
  *	This symbol, if defined, indicates that the lockf routine is
  *	available to do file locking.
@@ -321,33 +321,6 @@
  */
 /*#define HAS_MUNMAP		/ **/
 
-/* HAS_NAN:
- *	This symbol, if defined, indicates that the nan routine is
- *	available to generate NaN.
- */
-/*#define HAS_NAN		/ **/
-
-/* HAS_NEARBYINT:
- *	This symbol, if defined, indicates that the nextafter routine is
- *	available to return the integral value closest to (according to
-	the current rounding mode) to x.
- */
-/*#define HAS_NEARBYINT		/ **/
-
-/* HAS_NEXTAFTER:
- *	This symbol, if defined, indicates that the nextafter routine is
- *	available to return the next machine representable long double from
- *	x in direction y.
- */
-/*#define HAS_NEXTAFTER		/ **/
-
-/* HAS_NEXTTOWARD:
- *	This symbol, if defined, indicates that the nexttoward routine is
- *	available to return the next machine representable long double from
- *	x in direction y.
- */
-/*#define HAS_NEXTTOWARD		/ **/
-
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
  *	available.
@@ -417,15 +390,12 @@
  */
 /*#define HAS_READLINK		/ **/
 
-/* HAS_REMAINDER:
- *	This symbol, if defined, indicates that the remainder routine is available.
+/* HAS_REGCOMP:
+ *	This symbol, if defined, indicates that the regcomp() routine is
+ *	available to do some regular patern matching (usually on POSIX.2
+ *	conforming systems).
  */
-/*#define HAS_REMAINDER	/ **/
-
-/* HAS_REMQUO:
- *	This symbol, if defined, indicates that the remquo routine is available.
- */
-/*#define HAS_REMQUO	/ **/
+#define HAS_REGCOMP		/* POSIX.2 */
 
 /* HAS_RENAME:
  *	This symbol, if defined, indicates that the rename routine is available
@@ -434,24 +404,12 @@
  */
 #define HAS_RENAME	/**/
 
-/* HAS_RINT:
- *	This symbol, if defined, indicates that the rint routine is available
- *	to return the nearest integral value to x as double using the current
- *	rounding mode.
- */
-/*#define HAS_RINT	/ **/
-
 /* HAS_RMDIR:
  *	This symbol, if defined, indicates that the rmdir routine is
  *	available to remove directories. Otherwise you should fork off a
  *	new process to exec /bin/rmdir.
  */
 /*#define HAS_RMDIR		/ **/
-
-/* HAS_ROUND:
- *	This symbol, if defined, indicates that the round routine is available.
- */
-/*#define HAS_ROUND	/ **/
 
 /* HAS_SELECT:
  *	This symbol, if defined, indicates that the select routine is
@@ -554,6 +512,12 @@
  */
 /*#define HAS_SETSID	/ **/
 
+/* HAS_STAT:
+ *	This symbol, if defined, indicates that the stat routine is
+ *	available to get file status.
+ */
+#define HAS_STAT	/**/
+
 /* HAS_STRCHR:
  *	This symbol is defined to indicate that the strchr()/strrchr()
  *	functions are available for string searching. If not, try the
@@ -625,12 +589,6 @@
  *	available to set foreground process group ID.
  */
 /*#define HAS_TCSETPGRP		/ **/
-
-/* HAS_TGAMMA:
- *	This symbol, if defined, indicates that the lgamma routine is
- *	available to do the gamma function.  See also HAS_LGAMMA.
- */
-/*#define HAS_TGAMMA		/ **/
 
 /* HAS_TRUNCATE:
  *	This symbol, if defined, indicates that the truncate routine is
@@ -2724,29 +2682,6 @@
  */
 #define DOUBLESIZE 8		/**/
 
-/* DOUBLEKIND:
- *	DOUBLEKIND will be one of
- *	DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN
- *	DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN
- *	DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN
- *	DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN
- *	DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
- *	DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
- *	DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
- *	DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
- *	DOUBLE_IS_UNKNOWN_FORMAT
- */
-#define DOUBLEKIND 3		/**/
-#define DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN	1
-#define DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN	2
-#define DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN	3
-#define DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN	4
-#define DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN	5
-#define DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN	6
-#define DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE	7
-#define DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE	8
-#define DOUBLE_IS_UNKNOWN_FORMAT		-1
-
 /* EBCDIC:
  *	This symbol, if defined, indicates that this system uses
  *	EBCDIC encoding.
@@ -2930,12 +2865,6 @@
 /*#define PWCOMMENT	/ **/
 /*#define PWGECOS	/ **/
 /*#define PWPASSWD	/ **/
-
-/* I_QUADMATH:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <quadmath.h>.
- */
-/*#define   I_QUADMATH                / **/
 
 /* I_SYS_ACCESS:
  *     This symbol, if defined, indicates to the C program that it should
@@ -3473,6 +3402,12 @@
  */
 /*#define HAS_ACOSH		/ **/
 
+/* HAS_AINTL:
+ *	This symbol, if defined, indicates that the aintl routine is
+ *	available.  If copysignl is also present we can emulate modfl.
+ */
+/*#define HAS_AINTL		/ **/
+
 /* HAS_ASINH:
  *	This symbol, if defined, indicates that the asinh routine is
  *	available to do the inverse hyperbolic sine function.
@@ -3484,72 +3419,6 @@
  *	available to do the inverse hyperbolic tangent function.
  */
 /*#define HAS_ATANH		/ **/
-
-/* HAS_CBRT:
- *	This symbol, if defined, indicates that the cbrt routine is
- *	available to do the cubic root function.
- */
-/*#define HAS_CBRT		/ **/
-
-/* HAS_COPYSIGN:
- *	This symbol, if defined, indicates that the copysign routine is
- *	available to do the copysign function.
- */
-/*#define HAS_COPYSIGN		/ **/
-
-/* HAS_ERF:
- *	This symbol, if defined, indicates that the erf routine is
- *	available to do the error function.
- */
-/*#define HAS_ERF		/ **/
-
-/* HAS_ERFC:
- *	This symbol, if defined, indicates that the erfc routine is
- *	available to do the complementary error function.
- */
-/*#define HAS_ERFC		/ **/
-
-/* HAS_EXP2:
- *	This symbol, if defined, indicates that the exp2 routine is
- *	available to do the 2**x function.
- */
-/*#define HAS_EXP2		/ **/
-
-/* HAS_EXPM1:
- *	This symbol, if defined, indicates that the expm1 routine is
- *	available to do the exp(x) - 1 when x is near 1.
- */
-/*#define HAS_EXPM1		/ **/
-
-/* HAS_FMA:
- *	This symbol, if defined, indicates that the fma routine is
- *	available to do the multiply-add function.
- */
-/*#define HAS_FMA		/ **/
-
-/* HAS_FDIM:
- *	This symbol, if defined, indicates that the fdim routine is
- *	available to do the positive difference function.
- */
-/*#define HAS_FDIM		/ **/
-
-/* HAS_FMAX:
- *	This symbol, if defined, indicates that the fma routine is
- *	available to do the maximum function.
- */
-/*#define HAS_FMAX		/ **/
-
-/* HAS_FMIN:
- *	This symbol, if defined, indicates that the fma routine is
- *	available to do the minimum function.
- */
-/*#define HAS_FMIN		/ **/
-
-/* HAS_AINTL:
- *	This symbol, if defined, indicates that the aintl routine is
- *	available.  If copysignl is also present we can emulate modfl.
- */
-/*#define HAS_AINTL		/ **/
 
 /* HAS_BUILTIN_CHOOSE_EXPR:
  *	Can we handle GCC builtin for compile-time ternary-like expressions
@@ -3596,6 +3465,12 @@
  */
 /*#define HAS_STRUCT_CMSGHDR	/ **/
 
+/* HAS_COPYSIGN:
+ *	This symbol, if defined, indicates that the copysign routine is
+ *	available to do the copysign function.
+ */
+/*#define HAS_COPYSIGN		/ **/
+
 /* HAS_COPYSIGNL:
  *	This symbol, if defined, indicates that the copysignl routine is
  *	available.  If aintl is also present we can emulate modfl.
@@ -3636,6 +3511,30 @@
  */
 /*#define 	DLSYM_NEEDS_UNDERSCORE 	/ **/
 
+/* HAS_ERF:
+ *	This symbol, if defined, indicates that the erf routine is
+ *	available to do the error function.
+ */
+/*#define HAS_ERF		/ **/
+
+/* HAS_ERFC:
+ *	This symbol, if defined, indicates that the erfc routine is
+ *	available to do the complementary error function.
+ */
+/*#define HAS_ERFC		/ **/
+
+/* HAS_EXP2:
+ *	This symbol, if defined, indicates that the exp2 routine is
+ *	available to do the 2**x function.
+ */
+/*#define HAS_EXP2		/ **/
+
+/* HAS_EXPM1:
+ *	This symbol, if defined, indicates that the expm1 routine is
+ *	available to do the exp(x) - 1 when x is near 1 function.
+ */
+/*#define HAS_EXPM1		/ **/
+
 /* HAS_FAST_STDIO:
  *	This symbol, if defined, indicates that the "fast stdio"
  *	is available to manipulate the stdio buffers directly.
@@ -3654,6 +3553,12 @@
  *	It may be undefined on VMS.
  */
 /*#define FCNTL_CAN_LOCK		/ **/
+
+/* HAS_FDIM:
+ *	This symbol, if defined, indicates that the fdim routine is
+ *	available to do the positive difference function.
+ */
+/*#define HAS_FDIM		/ **/
 
 /* HAS_FEGETROUND:
  *	This symbol, if defined, indicates that the fegetround routine is
@@ -3682,6 +3587,24 @@
  *		extern int flock(int, int);
  */
 /*#define	HAS_FLOCK_PROTO	/ **/
+
+/* HAS_FMA:
+ *	This symbol, if defined, indicates that the fma routine is
+ *	available to do the multiply-add function.
+ */
+/*#define HAS_FMA		/ **/
+
+/* HAS_FMAX:
+ *	This symbol, if defined, indicates that the fmax routine is
+ *	available to do the maximum function.
+ */
+/*#define HAS_FMAX		/ **/
+
+/* HAS_FMIN:
+ *	This symbol, if defined, indicates that the fmin routine is
+ *	available to do the minimum function.
+ */
+/*#define HAS_FMIN		/ **/
 
 /* HAS_FP_CLASS:
  *	This symbol, if defined, indicates that the fp_class routine is
@@ -3899,7 +3822,7 @@
 
 /* HAS_ILOGB:
  *	This symbol, if defined, indicates that the ilogb routine is
- *	available.
+ *	available to get integer exponent of a floating-point value.
  */
 /*#define HAS_ILOGB		/ **/
 
@@ -3959,6 +3882,12 @@
  */
 /*#define HAS_ISINFL		/ **/
 
+/* HAS_ISLESS:
+ *	This symbol, if defined, indicates that the isless routine is
+ *	available to do the isless function.
+ */
+/*#define HAS_ISLESS		/ **/
+
 /* HAS_ISNAN:
  *	This symbol, if defined, indicates that the isnan routine is
  *	available to check whether a double is a NaN.
@@ -3989,6 +3918,12 @@
  */
 /*#define	HAS_J0		/ **/
 /*#define	HAS_J0L		/ **/
+
+/* HAS_LC_MONETARY_2008:
+ *	This symbol, if defined, indicates that the localeconv routine is
+ *	available and has the additional members added in POSIX 1003.1-2008.
+ */
+/*#define HAS_LC_MONETARY_2008		/ **/
 
 /* HAS_LDBL_DIG:
  *	This symbol, if defined, indicates that this system's <float.h>
@@ -4032,19 +3967,19 @@
 /*#define HAS_LLROUND		/ **/
 
 /* HAS_LOG1P:
- *	This symbol, if defined, indicates that the lgamma routine is
- *	available to do the log1p function.
+ *	This symbol, if defined, indicates that the log1p routine is
+ *	available to do the logarithm of 1 plus argument function.
  */
 /*#define HAS_LOG1P		/ **/
 
 /* HAS_LOG2:
- *	This symbol, if defined, indicates that the lgamma routine is
+ *	This symbol, if defined, indicates that the log2 routine is
  *	available to do the log2 function.
  */
 /*#define HAS_LOG2		/ **/
 
 /* HAS_LOGB:
- *	This symbol, if defined, indicates that the lgamma routine is
+ *	This symbol, if defined, indicates that the logb routine is
  *	available to do the logb function.
  */
 /*#define HAS_LOGB		/ **/
@@ -4126,6 +4061,33 @@
  */
 /*#define HAS_STRUCT_MSGHDR	/ **/
 
+/* HAS_NAN:
+ *	This symbol, if defined, indicates that the nan routine is
+ *	available to generate NaN.
+ */
+/*#define HAS_NAN		/ **/
+
+/* HAS_NEARBYINT:
+ *	This symbol, if defined, indicates that the nearbyint routine is
+ *	available to return the integral value closest to (according to
+ *	the current rounding mode) to x.
+ */
+/*#define HAS_NEARBYINT		/ **/
+
+/* HAS_NEXTAFTER:
+ *	This symbol, if defined, indicates that the nextafter routine is
+ *	available to return the next machine representable double from
+ *	x in direction y.
+ */
+/*#define HAS_NEXTAFTER		/ **/
+
+/* HAS_NEXTTOWARD:
+ *	This symbol, if defined, indicates that the nexttoward routine is
+ *	available to return the next machine representable long double from
+ *	x in direction y.
+ */
+/*#define HAS_NEXTTOWARD		/ **/
+
 /* HAS_NL_LANGINFO:
  *	This symbol, if defined, indicates that the nl_langinfo routine is
  *	available to return local data.  You will also need <langinfo.h>
@@ -4190,6 +4152,31 @@
  */
 /*#define HAS_RECVMSG		/ **/
 
+/* HAS_REMAINDER:
+ *	This symbol, if defined, indicates that the remainder routine is
+ *	available to return the floating-point remainder.
+ */
+/*#define HAS_REMAINDER		/ **/
+
+/* HAS_REMQUO:
+ *	This symbol, if defined, indicates that the remquo routine is
+ *	available to return the remainder and part of quotient.
+ */
+/*#define HAS_REMQUO		/ **/
+
+/* HAS_RINT:
+ *	This symbol, if defined, indicates that the rint routine is
+ *	available to return the nearest integral value to x as double
+ *	using the current rounding mode.
+ */
+/*#define HAS_RINT		/ **/
+
+/* HAS_ROUND:
+ *	This symbol, if defined, indicates that the round routine is
+ *	available to round to nearest integer, away from zero.
+ */
+/*#define HAS_ROUND		/ **/
+
 /* HAS_SBRK_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the sbrk() function.  Otherwise, it is up
@@ -4200,7 +4187,9 @@
 /*#define	HAS_SBRK_PROTO	/ **/
 
 /* HAS_SCALBN:
- *	This symbol, if defined, indicates that the scalbn routine is available.
+ *	This symbol, if defined, indicates that the scalbn routine is
+ *	available to multiply floating-point number by integral power
+ *	of radix.
  */
 /*#define HAS_SCALBN		/ **/
 
@@ -4402,6 +4391,12 @@
  */
 /*#define	HAS_TELLDIR_PROTO	/ **/
 
+/* HAS_TGAMMA:
+ *	This symbol, if defined, indicates that the tgamma routine is
+ *	available to do the gamma function. See also HAS_LGAMMA.
+ */
+/*#define HAS_TGAMMA		/ **/
+
 /* HAS_CTIME64:
  *	This symbol, if defined, indicates that the ctime64 () routine is
  *	available to do the 64bit variant of ctime ()
@@ -4440,7 +4435,8 @@
 /*#define HAS_TIMEGM		/ **/
 
 /* HAS_TRUNC:
- *	This symbol, if defined, indicates that the trunc routine is available.
+ *	This symbol, if defined, indicates that the trunc routine is
+ *	available to round doubles towards zero.
  */
 /*#define HAS_TRUNC		/ **/
 
@@ -4651,6 +4647,12 @@
  */
 /*#define	I_PROT		/ **/
 
+/* I_QUADMATH:
+ *	This symbol, if defined, indicates that <quadmath.h> exists and
+ *	should be included.
+ */
+/*#define	I_QUADMATH		/ **/
+
 /* I_SHADOW:
  *	This symbol, if defined, indicates that <shadow.h> exists and
  *	should be included.
@@ -4744,6 +4746,28 @@
  *	This symbol, if defined, contains the string used by stdio to
  *	format long doubles (format 'f') for input.
  */
+/* DOUBLEKIND:
+ *	DOUBLEKIND will be one of
+ *	DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN
+ *	DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN
+ *	DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN
+ *	DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN
+ *	DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+ *	DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
+ *	DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
+ *	DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
+ *	DOUBLE_IS_UNKNOWN_FORMAT
+ */
+#define DOUBLEKIND 3		/**/
+#define DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN	1
+#define DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN	2
+#define DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN	3
+#define DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN	4
+#define DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN	5
+#define DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN	6
+#define DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE	7
+#define DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE	8
+#define DOUBLE_IS_UNKNOWN_FORMAT		-1
 /*#define PERL_PRIfldbl	"llf"	/ **/
 /*#define PERL_PRIgldbl	"llg"	/ **/
 /*#define PERL_PRIeldbl	"lle"	/ **/
@@ -5058,14 +5082,6 @@
 /*#define	USE_LONG_DOUBLE		/ **/
 #endif
 
-/* USE_QUADMATH:
- *	This symbol, if defined, indicates that the quadmath library should
- *	be used when available.
- */
-#ifndef USE_QUADMATH
-/*#define	USE_QUADMATH		/ **/
-#endif
-
 /* USE_MORE_BITS:
  *	This symbol, if defined, indicates that 64-bit interfaces and
  *	long doubles should be used when available.
@@ -5098,6 +5114,14 @@
 /*#define	USE_PERLIO		/ **/
 #endif
 
+/* USE_QUADMATH:
+ *	This symbol, if defined, indicates that the quadmath library should
+ *	be used when available.
+ */
+#ifndef USE_QUADMATH
+/*#define	USE_QUADMATH		/ **/
+#endif
+
 /* USE_SOCKS:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use socks.
@@ -5109,6 +5133,6 @@
 #endif
 
 /* Generated from:
- * 7c85f69913f492fecfaef3ab68fba849dc01a6b917c88c66991f06fa1ef53797 config_h.SH
- * 22822d456ad16d8f6b30a42bfa66aab6d7b264993ad6c95ecbf385c3a87c8826 uconfig.sh
+ * 45b69f7afc4f5a9118deafae60c017b206cc0acf790bf42c0c80cfe114a06e47 config_h.SH
+ * 37fcea608869353fa4ba82c931a6a9668f955825992315f17a1500b8bcba2bf8 uconfig.sh
  * ex: set ro: */

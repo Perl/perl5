@@ -549,7 +549,8 @@ d_castneg (d_castneg.U):
 
 d_cbrt (d_cbrt.U):
 	This variable conditionally defines the HAS_CBRT symbol, which
-	indicates to the C program that the cbrt() routine is available.
+	indicates to the C program that the cbrt() (cube root) function
+	is available.
 
 d_charvspr (d_vprintf.U):
 	This variable conditionally defines CHARVSPRINTF if this system
@@ -568,10 +569,6 @@ d_chsize (d_chsize.U):
 	This variable conditionally defines the CHSIZE symbol, which
 	indicates to the C program that the chsize() routine is available
 	to truncate files.  You might need a -lx to get this routine.
-
-d_copysign (d_copysign.U):
-	This variable conditionally defines the HAS_COPYSIGN symbol, which
-	indicates to the C program that the copysign() routine is available.
 
 d_class (d_class.U):
 	This variable conditionally defines the HAS_CLASS symbol, which
@@ -593,6 +590,10 @@ d_const (d_const.U):
 	This variable conditionally defines the HASCONST symbol, which
 	indicates to the C program that this C compiler knows about the
 	const type.
+
+d_copysign (d_copysign.U):
+	This variable conditionally defines the HAS_COPYSIGN symbol, which
+	indicates to the C program that the copysign() routine is available.
 
 d_copysignl (d_copysignl.U):
 	This variable conditionally defines the HAS_COPYSIGNL symbol, which
@@ -824,10 +825,6 @@ d_fcntl_can_lock (d_fcntl_can_lock.U):
 	This variable conditionally defines the FCNTL_CAN_LOCK symbol
 	and indicates whether file locking with fcntl() works.
 
-d_fdim (d_fdim.U):
-	This variable conditionally defines the HAS_FDIM symbol, which
-	indicates to the C program that the fdim() routine is available.
-
 d_fd_macros (d_fd_set.U):
 	This variable contains the eventual value of the HAS_FD_MACROS symbol,
 	which indicates if your C compiler knows about the macros which
@@ -836,6 +833,10 @@ d_fd_macros (d_fd_set.U):
 d_fd_set (d_fd_set.U):
 	This variable contains the eventual value of the HAS_FD_SET symbol,
 	which indicates if your C compiler knows about the fd_set typedef.
+
+d_fdim (d_fdim.U):
+	This variable conditionally defines the HAS_FDIM symbol, which
+	indicates to the C program that the fdim() routine is available.
 
 d_fds_bits (d_fd_set.U):
 	This variable contains the eventual value of the HAS_FDS_BITS symbol,
@@ -1407,6 +1408,10 @@ d_isnanl (d_isnanl.U):
 	This variable conditionally defines the HAS_ISNANL symbol, which
 	indicates to the C program that the isnanl() routine is available.
 
+d_isnormal (d_isnormal.U):
+	This variable conditionally defines the HAS_ISNORMAL symbol, which
+	indicates to the C program that the isnormal() routine is available.
+
 d_j0 (d_j0.U):
 	This variable conditionally defines the HAS_J0 symbol, which
 	indicates to the C program that the j0() routine is available.
@@ -1442,12 +1447,12 @@ d_ldexpl (d_longdbl.U):
 d_lgamma (d_lgamma.U):
 	This variable conditionally defines the HAS_LGAMMA symbol, which
 	indicates to the C program that the lgamma() routine is available
-        for the log gamma function.  See also d_tgamma and d_lgamma_r.
+	for the log gamma function.  See also d_tgamma and d_lgamma_r.
 
 d_lgamma_r (d_lgamma_r.U):
 	This variable conditionally defines the HAS_LGAMMA_R symbol, which
-	indicates to the C program that the lgamma() routine is available
-        for the log gamma function, without using the global signgam variable.
+	indicates to the C program that the lgamma_r() routine is available
+	for the log gamma function, without using the global signgam variable.
 
 d_libm_lib_version (d_libm_lib_version.U):
 	This variable conditionally defines the LIBM_LIB_VERSION symbol,
@@ -1473,7 +1478,7 @@ d_llrint (d_llrint.U):
 d_llround (d_llround.U):
 	This variable conditionally defines the HAS_LLROUND symbol, which
 	indicates to the C program that the llround() routine is available
-        to return the long long value nearest to x.
+	to return the long long value nearest to x.
 
 d_localtime64 (d_timefuncs64.U):
 	This variable conditionally defines the HAS_LOCALTIME64 symbol, which
@@ -1499,17 +1504,17 @@ d_lockf (d_lockf.U):
 d_log1p (d_log1p.U):
 	This variable conditionally defines the HAS_LOG1P symbol, which
 	indicates to the C program that the logp1() routine is available
-        to compute log(1 + x) for values of x close to zero.
+	to compute log(1 + x) for values of x close to zero.
 
 d_log2 (d_log2.U):
 	This variable conditionally defines the HAS_LOG2 symbol, which
 	indicates to the C program that the log2() routine is available
-        to compute log base two.
+	to compute log base two.
 
 d_logb (d_logb.U):
 	This variable conditionally defines the HAS_LOGB symbol, which
 	indicates to the C program that the logb() routine is available
-        to extract the exponent of x.
+	to extract the exponent of x.
 
 d_longdbl (d_longdbl.U):
 	This variable conditionally defines HAS_LONG_DOUBLE if
@@ -1528,7 +1533,7 @@ d_lrint (d_lrint.U):
 d_lround (d_lround.U):
 	This variable conditionally defines the HAS_LROUND symbol, which
 	indicates to the C program that the lround() routine is available
-        to return the integral value nearest to x.
+	to return the integral value nearest to x.
 
 d_lseekproto (d_lseekproto.U):
 	This variable conditionally defines the HAS_LSEEK_PROTO symbol,
@@ -1965,6 +1970,12 @@ d_random_r (d_random_r.U):
 	which indicates to the C program that the random_r()
 	routine is available.
 
+d_re_comp (d_regcmp.U):
+	This variable conditionally defines the HAS_RECOMP symbol, which
+	indicates to the C program that the re_comp() routine is available
+	for regular patern matching (usally on BSD). If so, it is likely that
+	re_exec() exists.
+
 d_readdir (d_readdir.U):
 	This variable conditionally defines HAS_READDIR if readdir() is
 	available to read directory entries.
@@ -1991,6 +2002,16 @@ d_readv (d_readv.U):
 d_recvmsg (d_recvmsg.U):
 	This variable conditionally defines the HAS_RECVMSG symbol, which
 	indicates to the C program that the recvmsg() routine is available.
+
+d_regcmp (d_regcmp.U):
+	This variable conditionally defines the HAS_REGCMP symbol, which
+	indicates to the C program that the regcmp() routine is available
+	for regular patern matching (usally on System V).
+
+d_regcomp (d_regcmp.U):
+	This variable conditionally defines the HAS_REGCOMP symbol, which
+	indicates to the C program that the regcomp() routine is available
+	for regular patern matching (usally on POSIX.2 conforming systems).
 
 d_remainder (d_remainder.U):
 	This variable conditionally defines the HAS_REMAINDER symbol, which
@@ -2378,6 +2399,10 @@ d_sresuproto (d_sresuproto.U):
 	a prototype for the setresuid() function.  Otherwise, it is
 	up to the program to supply one.
 
+d_stat (d_stat.U):
+	This variable conditionally defines HAS_STAT if stat() is
+	available to get file status.
+
 d_statblks (d_statblks.U):
 	This variable conditionally defines USE_STAT_BLOCKS
 	if this system has a stat structure declaring
@@ -2572,7 +2597,7 @@ d_telldirproto (d_telldirproto.U):
 d_tgamma (d_tgamma.U):
 	This variable conditionally defines the HAS_TGAMMA symbol, which
 	indicates to the C program that the tgamma() routine is available
-        for the gamma function.  See also d_lgamma.
+	for the gamma function.  See also d_lgamma.
 
 d_time (d_time.U):
 	This variable conditionally defines the HAS_TIME symbol, which indicates
@@ -2601,14 +2626,14 @@ d_tmpnam_r (d_tmpnam_r.U):
 	which indicates to the C program that the tmpnam_r()
 	routine is available.
 
+d_trunc (d_trunc.U):
+	This variable conditionally defines the HAS_TRUNC symbol, which
+	indicates to the C program that the trunc() routine is available
+	to round doubles towards zero.
+
 d_truncate (d_truncate.U):
 	This variable conditionally defines HAS_TRUNCATE if truncate() is
 	available to truncate files.
-
-d_trunc (d_trunc.U):
-	This variable conditionally defines the HAS_TRUNCL symbol, which
-	indicates to the C program that the trunc() routine is available
-	to round doubles towards zero.
 
 d_truncl (d_truncl.U):
 	This variable conditionally defines the HAS_TRUNCL symbol, which
@@ -2793,7 +2818,7 @@ dlsrc (dlsrc.U):
 	This variable contains the name of the dynamic loading file that
 	will be used with the package.
 
-doublekind (doublekind.U):
+doublekind (longdblfio.U):
 	This variable, if defined, encodes the type of a double:
 	1 = IEEE 754 32-bit big little endian,
 	2 = IEEE 754 32-bit big big endian,
@@ -2852,7 +2877,7 @@ emacs (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is the empty string and is not useful.
 
-ddgrent_r_proto (d_endgrent_r.U):
+endgrent_r_proto (d_endgrent_r.U):
 	This variable encodes the prototype of endgrent_r.
 	It is zero if d_endgrent_r is undef, and one of the
 	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endgrent_r

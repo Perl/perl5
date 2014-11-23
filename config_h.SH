@@ -81,6 +81,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_bzero HAS_BZERO	/**/
 
+/* HAS_CBRT:
+ *	This symbol, if defined, indicates that the cbrt() (cube root)
+ *	function is available.
+ */
+#$d_cbrt HAS_CBRT	/**/
+
 /* HAS_CHOWN:
  *	This symbol, if defined, indicates that the chown routine is
  *	available.
@@ -261,12 +267,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_locconv HAS_LOCALECONV	/**/
 
-/* HAS_LC_MONETARY_2008:
- *	This symbol, if defined, indicates that the localeconv routine is
- *	available and has the additional members added in POSIX 1003.1-2008.
- */
-#$d_lc_monetary_2008 HAS_LC_MONETARY_2008	/**/
-
 /* HAS_LOCKF:
  *	This symbol, if defined, indicates that the lockf routine is
  *	available to do file locking.
@@ -356,33 +356,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_munmap HAS_MUNMAP		/**/
 
-/* HAS_NAN:
- *	This symbol, if defined, indicates that the nan routine is
- *	available to generate NaN.
- */
-#$d_nan HAS_NAN		/**/
-
-/* HAS_NEARBYINT:
- *	This symbol, if defined, indicates that the nextafter routine is
- *	available to return the integral value closest to (according to
-	the current rounding mode) to x.
- */
-#$d_nearbyint HAS_NEARBYINT		/**/
-
-/* HAS_NEXTAFTER:
- *	This symbol, if defined, indicates that the nextafter routine is
- *	available to return the next machine representable long double from
- *	x in direction y.
- */
-#$d_nextafter HAS_NEXTAFTER		/**/
-
-/* HAS_NEXTTOWARD:
- *	This symbol, if defined, indicates that the nexttoward routine is
- *	available to return the next machine representable long double from
- *	x in direction y.
- */
-#$d_nexttoward HAS_NEXTTOWARD		/**/
-
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
  *	available.
@@ -452,15 +425,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_readlink HAS_READLINK		/**/
 
-/* HAS_REMAINDER:
- *	This symbol, if defined, indicates that the remainder routine is available.
+/* HAS_REGCOMP:
+ *	This symbol, if defined, indicates that the regcomp() routine is
+ *	available to do some regular patern matching (usually on POSIX.2
+ *	conforming systems).
  */
-#$d_remainder HAS_REMAINDER	/**/
-
-/* HAS_REMQUO:
- *	This symbol, if defined, indicates that the remquo routine is available.
- */
-#$d_remquo HAS_REMQUO	/**/
+#$d_regcomp HAS_REGCOMP		/* POSIX.2 */
 
 /* HAS_RENAME:
  *	This symbol, if defined, indicates that the rename routine is available
@@ -469,24 +439,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_rename HAS_RENAME	/**/
 
-/* HAS_RINT:
- *	This symbol, if defined, indicates that the rint routine is available
- *	to return the nearest integral value to x as double using the current
- *	rounding mode.
- */
-#$d_rint HAS_RINT	/**/
-
 /* HAS_RMDIR:
  *	This symbol, if defined, indicates that the rmdir routine is
  *	available to remove directories. Otherwise you should fork off a
  *	new process to exec /bin/rmdir.
  */
 #$d_rmdir HAS_RMDIR		/**/
-
-/* HAS_ROUND:
- *	This symbol, if defined, indicates that the round routine is available.
- */
-#$d_round HAS_ROUND	/**/
 
 /* HAS_SELECT:
  *	This symbol, if defined, indicates that the select routine is
@@ -589,6 +547,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_setsid HAS_SETSID	/**/
 
+/* HAS_STAT:
+ *	This symbol, if defined, indicates that the stat routine is
+ *	available to get file status.
+ */
+#$d_stat HAS_STAT	/**/
+
 /* HAS_STRCHR:
  *	This symbol is defined to indicate that the strchr()/strrchr()
  *	functions are available for string searching. If not, try the
@@ -660,12 +624,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to set foreground process group ID.
  */
 #$d_tcsetpgrp HAS_TCSETPGRP		/**/
-
-/* HAS_TGAMMA:
- *	This symbol, if defined, indicates that the lgamma routine is
- *	available to do the gamma function.  See also HAS_LGAMMA.
- */
-#$d_tgamma HAS_TGAMMA		/**/
 
 /* HAS_TRUNCATE:
  *	This symbol, if defined, indicates that the truncate routine is
@@ -2759,29 +2717,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define DOUBLESIZE $doublesize		/**/
 
-/* DOUBLEKIND:
- *	DOUBLEKIND will be one of
- *	DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN
- *	DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN
- *	DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN
- *	DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN
- *	DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
- *	DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
- *	DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
- *	DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
- *	DOUBLE_IS_UNKNOWN_FORMAT
- */
-#define DOUBLEKIND $doublekind		/**/
-#define DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN	1
-#define DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN	2
-#define DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN	3
-#define DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN	4
-#define DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN	5
-#define DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN	6
-#define DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE	7
-#define DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE	8
-#define DOUBLE_IS_UNKNOWN_FORMAT		-1
-
 /* EBCDIC:
  *	This symbol, if defined, indicates that this system uses
  *	EBCDIC encoding.
@@ -2965,12 +2900,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_pwcomment PWCOMMENT	/**/
 #$d_pwgecos PWGECOS	/**/
 #$d_pwpasswd PWPASSWD	/**/
-
-/* I_QUADMATH:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <quadmath.h>.
- */
-#$i_quadmath   I_QUADMATH                /**/
 
 /* I_SYS_ACCESS:
  *     This symbol, if defined, indicates to the C program that it should
@@ -3508,6 +3437,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_acosh HAS_ACOSH		/**/
 
+/* HAS_AINTL:
+ *	This symbol, if defined, indicates that the aintl routine is
+ *	available.  If copysignl is also present we can emulate modfl.
+ */
+#$d_aintl HAS_AINTL		/**/
+
 /* HAS_ASINH:
  *	This symbol, if defined, indicates that the asinh routine is
  *	available to do the inverse hyperbolic sine function.
@@ -3519,72 +3454,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to do the inverse hyperbolic tangent function.
  */
 #$d_atanh HAS_ATANH		/**/
-
-/* HAS_CBRT:
- *	This symbol, if defined, indicates that the cbrt routine is
- *	available to do the cubic root function.
- */
-#$d_cbrt HAS_CBRT		/**/
-
-/* HAS_COPYSIGN:
- *	This symbol, if defined, indicates that the copysign routine is
- *	available to do the copysign function.
- */
-#$d_copysign HAS_COPYSIGN		/**/
-
-/* HAS_ERF:
- *	This symbol, if defined, indicates that the erf routine is
- *	available to do the error function.
- */
-#$d_erf HAS_ERF		/**/
-
-/* HAS_ERFC:
- *	This symbol, if defined, indicates that the erfc routine is
- *	available to do the complementary error function.
- */
-#$d_erfc HAS_ERFC		/**/
-
-/* HAS_EXP2:
- *	This symbol, if defined, indicates that the exp2 routine is
- *	available to do the 2**x function.
- */
-#$d_exp2 HAS_EXP2		/**/
-
-/* HAS_EXPM1:
- *	This symbol, if defined, indicates that the expm1 routine is
- *	available to do the exp(x) - 1 when x is near 1.
- */
-#$d_expm1 HAS_EXPM1		/**/
-
-/* HAS_FMA:
- *	This symbol, if defined, indicates that the fma routine is
- *	available to do the multiply-add function.
- */
-#$d_fma HAS_FMA		/**/
-
-/* HAS_FDIM:
- *	This symbol, if defined, indicates that the fdim routine is
- *	available to do the positive difference function.
- */
-#$d_fdim HAS_FDIM		/**/
-
-/* HAS_FMAX:
- *	This symbol, if defined, indicates that the fma routine is
- *	available to do the maximum function.
- */
-#$d_fmax HAS_FMAX		/**/
-
-/* HAS_FMIN:
- *	This symbol, if defined, indicates that the fma routine is
- *	available to do the minimum function.
- */
-#$d_fmin HAS_FMIN		/**/
-
-/* HAS_AINTL:
- *	This symbol, if defined, indicates that the aintl routine is
- *	available.  If copysignl is also present we can emulate modfl.
- */
-#$d_aintl HAS_AINTL		/**/
 
 /* HAS_BUILTIN_CHOOSE_EXPR:
  *	Can we handle GCC builtin for compile-time ternary-like expressions
@@ -3631,6 +3500,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_cmsghdr_s HAS_STRUCT_CMSGHDR	/**/
 
+/* HAS_COPYSIGN:
+ *	This symbol, if defined, indicates that the copysign routine is
+ *	available to do the copysign function.
+ */
+#$d_copysign HAS_COPYSIGN		/**/
+
 /* HAS_COPYSIGNL:
  *	This symbol, if defined, indicates that the copysignl routine is
  *	available.  If aintl is also present we can emulate modfl.
@@ -3671,6 +3546,30 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/**/
 
+/* HAS_ERF:
+ *	This symbol, if defined, indicates that the erf routine is
+ *	available to do the error function.
+ */
+#$d_erf HAS_ERF		/**/
+
+/* HAS_ERFC:
+ *	This symbol, if defined, indicates that the erfc routine is
+ *	available to do the complementary error function.
+ */
+#$d_erfc HAS_ERFC		/**/
+
+/* HAS_EXP2:
+ *	This symbol, if defined, indicates that the exp2 routine is
+ *	available to do the 2**x function.
+ */
+#$d_exp2 HAS_EXP2		/**/
+
+/* HAS_EXPM1:
+ *	This symbol, if defined, indicates that the expm1 routine is
+ *	available to do the exp(x) - 1 when x is near 1 function.
+ */
+#$d_expm1 HAS_EXPM1		/**/
+
 /* HAS_FAST_STDIO:
  *	This symbol, if defined, indicates that the "fast stdio"
  *	is available to manipulate the stdio buffers directly.
@@ -3689,6 +3588,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	It may be undefined on VMS.
  */
 #$d_fcntl_can_lock FCNTL_CAN_LOCK		/**/
+
+/* HAS_FDIM:
+ *	This symbol, if defined, indicates that the fdim routine is
+ *	available to do the positive difference function.
+ */
+#$d_fdim HAS_FDIM		/**/
 
 /* HAS_FEGETROUND:
  *	This symbol, if defined, indicates that the fegetround routine is
@@ -3717,6 +3622,24 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *		extern int flock(int, int);
  */
 #$d_flockproto	HAS_FLOCK_PROTO	/**/
+
+/* HAS_FMA:
+ *	This symbol, if defined, indicates that the fma routine is
+ *	available to do the multiply-add function.
+ */
+#$d_fma HAS_FMA		/**/
+
+/* HAS_FMAX:
+ *	This symbol, if defined, indicates that the fmax routine is
+ *	available to do the maximum function.
+ */
+#$d_fmax HAS_FMAX		/**/
+
+/* HAS_FMIN:
+ *	This symbol, if defined, indicates that the fmin routine is
+ *	available to do the minimum function.
+ */
+#$d_fmin HAS_FMIN		/**/
 
 /* HAS_FP_CLASS:
  *	This symbol, if defined, indicates that the fp_class routine is
@@ -3934,7 +3857,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_ILOGB:
  *	This symbol, if defined, indicates that the ilogb routine is
- *	available.
+ *	available to get integer exponent of a floating-point value.
  */
 #$d_ilogb HAS_ILOGB		/**/
 
@@ -3994,6 +3917,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_isinfl HAS_ISINFL		/**/
 
+/* HAS_ISLESS:
+ *	This symbol, if defined, indicates that the isless routine is
+ *	available to do the isless function.
+ */
+#$d_isless HAS_ISLESS		/**/
+
 /* HAS_ISNAN:
  *	This symbol, if defined, indicates that the isnan routine is
  *	available to check whether a double is a NaN.
@@ -4024,6 +3953,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_j0	HAS_J0		/**/
 #$d_j0l	HAS_J0L		/**/
+
+/* HAS_LC_MONETARY_2008:
+ *	This symbol, if defined, indicates that the localeconv routine is
+ *	available and has the additional members added in POSIX 1003.1-2008.
+ */
+#$d_lc_monetary_2008 HAS_LC_MONETARY_2008		/**/
 
 /* HAS_LDBL_DIG:
  *	This symbol, if defined, indicates that this system's <float.h>
@@ -4067,19 +4002,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_llround HAS_LLROUND		/**/
 
 /* HAS_LOG1P:
- *	This symbol, if defined, indicates that the lgamma routine is
- *	available to do the log1p function.
+ *	This symbol, if defined, indicates that the log1p routine is
+ *	available to do the logarithm of 1 plus argument function.
  */
 #$d_log1p HAS_LOG1P		/**/
 
 /* HAS_LOG2:
- *	This symbol, if defined, indicates that the lgamma routine is
+ *	This symbol, if defined, indicates that the log2 routine is
  *	available to do the log2 function.
  */
 #$d_log2 HAS_LOG2		/**/
 
 /* HAS_LOGB:
- *	This symbol, if defined, indicates that the lgamma routine is
+ *	This symbol, if defined, indicates that the logb routine is
  *	available to do the logb function.
  */
 #$d_logb HAS_LOGB		/**/
@@ -4161,6 +4096,33 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_msghdr_s HAS_STRUCT_MSGHDR	/**/
 
+/* HAS_NAN:
+ *	This symbol, if defined, indicates that the nan routine is
+ *	available to generate NaN.
+ */
+#$d_nan HAS_NAN		/**/
+
+/* HAS_NEARBYINT:
+ *	This symbol, if defined, indicates that the nearbyint routine is
+ *	available to return the integral value closest to (according to
+ *	the current rounding mode) to x.
+ */
+#$d_nearbyint HAS_NEARBYINT		/**/
+
+/* HAS_NEXTAFTER:
+ *	This symbol, if defined, indicates that the nextafter routine is
+ *	available to return the next machine representable double from
+ *	x in direction y.
+ */
+#$d_nextafter HAS_NEXTAFTER		/**/
+
+/* HAS_NEXTTOWARD:
+ *	This symbol, if defined, indicates that the nexttoward routine is
+ *	available to return the next machine representable long double from
+ *	x in direction y.
+ */
+#$d_nexttoward HAS_NEXTTOWARD		/**/
+
 /* HAS_NL_LANGINFO:
  *	This symbol, if defined, indicates that the nl_langinfo routine is
  *	available to return local data.  You will also need <langinfo.h>
@@ -4225,6 +4187,31 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_recvmsg HAS_RECVMSG		/**/
 
+/* HAS_REMAINDER:
+ *	This symbol, if defined, indicates that the remainder routine is
+ *	available to return the floating-point remainder.
+ */
+#$d_remainder HAS_REMAINDER		/**/
+
+/* HAS_REMQUO:
+ *	This symbol, if defined, indicates that the remquo routine is
+ *	available to return the remainder and part of quotient.
+ */
+#$d_remquo HAS_REMQUO		/**/
+
+/* HAS_RINT:
+ *	This symbol, if defined, indicates that the rint routine is
+ *	available to return the nearest integral value to x as double
+ *	using the current rounding mode.
+ */
+#$d_rint HAS_RINT		/**/
+
+/* HAS_ROUND:
+ *	This symbol, if defined, indicates that the round routine is
+ *	available to round to nearest integer, away from zero.
+ */
+#$d_round HAS_ROUND		/**/
+
 /* HAS_SBRK_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the sbrk() function.  Otherwise, it is up
@@ -4235,7 +4222,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_sbrkproto	HAS_SBRK_PROTO	/**/
 
 /* HAS_SCALBN:
- *	This symbol, if defined, indicates that the scalbn routine is available.
+ *	This symbol, if defined, indicates that the scalbn routine is
+ *	available to multiply floating-point number by integral power
+ *	of radix.
  */
 #$d_scalbn HAS_SCALBN		/**/
 
@@ -4437,6 +4426,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_telldirproto	HAS_TELLDIR_PROTO	/**/
 
+/* HAS_TGAMMA:
+ *	This symbol, if defined, indicates that the tgamma routine is
+ *	available to do the gamma function. See also HAS_LGAMMA.
+ */
+#$d_tgamma HAS_TGAMMA		/**/
+
 /* HAS_CTIME64:
  *	This symbol, if defined, indicates that the ctime64 () routine is
  *	available to do the 64bit variant of ctime ()
@@ -4475,7 +4470,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_timegm HAS_TIMEGM		/**/
 
 /* HAS_TRUNC:
- *	This symbol, if defined, indicates that the trunc routine is available.
+ *	This symbol, if defined, indicates that the trunc routine is
+ *	available to round doubles towards zero.
  */
 #$d_trunc HAS_TRUNC		/**/
 
@@ -4686,6 +4682,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_prot	I_PROT		/**/
 
+/* I_QUADMATH:
+ *	This symbol, if defined, indicates that <quadmath.h> exists and
+ *	should be included.
+ */
+#$i_quadmath	I_QUADMATH		/**/
+
 /* I_SHADOW:
  *	This symbol, if defined, indicates that <shadow.h> exists and
  *	should be included.
@@ -4779,6 +4781,28 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, contains the string used by stdio to
  *	format long doubles (format 'f') for input.
  */
+/* DOUBLEKIND:
+ *	DOUBLEKIND will be one of
+ *	DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN
+ *	DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN
+ *	DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN
+ *	DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN
+ *	DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+ *	DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
+ *	DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
+ *	DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
+ *	DOUBLE_IS_UNKNOWN_FORMAT
+ */
+#define DOUBLEKIND $doublekind		/**/
+#define DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN	1
+#define DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN	2
+#define DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN	3
+#define DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN	4
+#define DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN	5
+#define DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN	6
+#define DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE	7
+#define DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE	8
+#define DOUBLE_IS_UNKNOWN_FORMAT		-1
 #$d_PRIfldbl PERL_PRIfldbl	$sPRIfldbl	/**/
 #$d_PRIgldbl PERL_PRIgldbl	$sPRIgldbl	/**/
 #$d_PRIeldbl PERL_PRIeldbl	$sPRIeldbl	/**/
@@ -5093,14 +5117,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$uselongdouble	USE_LONG_DOUBLE		/**/
 #endif
 
-/* USE_QUADMATH:
- *	This symbol, if defined, indicates that the quadmath library should
- *	be used when available.
- */
-#ifndef USE_QUADMATH
-#$usequadmath	USE_QUADMATH		/**/
-#endif
-
 /* USE_MORE_BITS:
  *	This symbol, if defined, indicates that 64-bit interfaces and
  *	long doubles should be used when available.
@@ -5131,6 +5147,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #ifndef USE_PERLIO
 #$useperlio	USE_PERLIO		/**/
+#endif
+
+/* USE_QUADMATH:
+ *	This symbol, if defined, indicates that the quadmath library should
+ *	be used when available.
+ */
+#ifndef USE_QUADMATH
+#$usequadmath	USE_QUADMATH		/**/
 #endif
 
 /* USE_SOCKS:
