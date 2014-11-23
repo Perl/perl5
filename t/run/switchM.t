@@ -24,7 +24,15 @@ like(runperl(switches => ['-Irun/flib/', '-Mbroken'], stderr => 1),
      "Ensure -Irun/flib/ produces correct filename in warnings");
 
 SKIP: {
-    if ( $Config{ccflags} =~ /(?:^|\s)-DPERL_DISABLE_PMC\b/ ) {
+    my $no_pmc;
+    foreach(Config::non_bincompat_options()) {
+	if($_ eq "PERL_DISABLE_PMC"){
+	    $no_pmc = 1;
+	    last;
+	}
+    }
+
+    if ( $no_pmc ) {
         skip('Tests fail without PMC support', 2);
     }
 

@@ -243,13 +243,18 @@ EOT
     require Config;
     die "Failed to load Config for some reason"
 	unless $Config::Config{version};
-    my $ccflags = $Config::Config{ccflags};
-    die "Failed to get ccflags for some reason" unless defined $ccflags;
 
     my $simple = ++$i;
     my $pmc_older = ++$i;
     my $pmc_dies = ++$i;
-    if ($ccflags =~ /(?:^|\s)-DPERL_DISABLE_PMC\b/) {
+    my $no_pmc;
+    foreach(Config::non_bincompat_options()) {
+	if($_ eq "PERL_DISABLE_PMC"){
+	    $no_pmc = 1;
+	    last;
+	}
+    }
+    if ($no_pmc) {
 	print "# .pmc files are ignored, so test that\n";
 	write_file_not_thing('krunch.pmc', '.pmc', $pmc_older);
 	write_file('urkkk.pm', qq(print "ok $simple - urkkk.pm branch A\n"));
