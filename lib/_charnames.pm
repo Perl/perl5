@@ -285,7 +285,7 @@ sub lookup_name ($$$) {
   # It looks first in the aliases, then in the large table of official Unicode
   # names.
 
-  my $utf8;       # The string result
+  my $result;       # The string result
   my $save_input;
 
   if ($runtime) {
@@ -321,7 +321,7 @@ sub lookup_name ($$$) {
   # User alias should be checked first or else can't override ours, and if we
   # were to add any, could conflict with theirs.
   if (exists $^H{charnames_ord_aliases}{$name}) {
-    $utf8 = $^H{charnames_ord_aliases}{$name};
+    $result = $^H{charnames_ord_aliases}{$name};
   }
   elsif (exists $^H{charnames_name_aliases}{$name}) {
     $name = $^H{charnames_name_aliases}{$name};
@@ -362,13 +362,13 @@ sub lookup_name ($$$) {
     # interested in convenience over speed, and the time for this second check
     # is miniscule compared to the rest of the routine.
     if (exists $system_aliases{$lookup_name}) {
-      $utf8 = $system_aliases{$lookup_name};
+      $result = $system_aliases{$lookup_name};
     }
     # There are currently no entries in this hash, so don't waste time looking
     # for them.  But the code is retained for the unlikely possibility that
     # some will be added in the future.
 #    elsif ($loose && exists $loose_system_aliases{$lookup_name}) {
-#      $utf8 = $loose_system_aliases{$lookup_name};
+#      $result = $loose_system_aliases{$lookup_name};
 #    }
 #    if (exists $deprecated_aliases{$lookup_name}) {
 #      require warnings;
@@ -376,7 +376,7 @@ sub lookup_name ($$$) {
 #                       "Unicode character name \"$name\" is deprecated, use \""
 #                       . viacode(ord $deprecated_aliases{$lookup_name})
 #                       . "\" instead");
-#      $utf8 = $deprecated_aliases{$lookup_name};
+#      $result = $deprecated_aliases{$lookup_name};
 #    }
     # There are currently no entries in this hash, so don't waste time looking
     # for them.  But the code is retained for the unlikely possibility that
@@ -387,21 +387,21 @@ sub lookup_name ($$$) {
 #                       "Unicode character name \"$name\" is deprecated, use \""
 #                       . viacode(ord $loose_deprecated_aliases{$lookup_name})
 #                       . "\" instead");
-#      $utf8 = $loose_deprecated_aliases{$lookup_name};
+#      $result = $loose_deprecated_aliases{$lookup_name};
 #    }
   }
 
   my @off;  # Offsets into table of pattern match begin and end
 
   # If haven't found it yet...
-  if (! defined $utf8) {
+  if (! defined $result) {
 
     # See if has looked this input up earlier.
     if (! $loose && $^H{charnames_full} && exists $full_names_cache{$name}) {
-      $utf8 = $full_names_cache{$name};
+      $result = $full_names_cache{$name};
     }
     elsif ($loose && exists $loose_names_cache{$name}) {
-      $utf8 = $loose_names_cache{$name};
+      $result = $loose_names_cache{$name};
     }
     else { # Here, must do a look-up
 
@@ -432,7 +432,7 @@ sub lookup_name ($$$) {
       if (($loose || $^H{charnames_full})
           && (defined (my $ord = charnames::name_to_code_point_special($lookup_name, $loose))))
       {
-        $utf8 = pack("U", $ord);
+        $result = pack("U", $ord);
       }
       else {
 
@@ -525,14 +525,14 @@ sub lookup_name ($$$) {
         # therefore yield the very last character in the table, which should
         # also be a \n, so the statement works anyway.)
         if (substr($txt, $off[0] - 7, 1) eq "\n") {
-          $utf8 = pack("U", CORE::hex substr($txt, $off[0] - 6, 5));
+          $result = pack("U", CORE::hex substr($txt, $off[0] - 6, 5));
 
           # Handle the single loose matching special case, in which two names
           # differ only by a single medial hyphen.  If the original had a
           # hyphen (or more) in the right place, then it is that one.
-          $utf8 = $HANGUL_JUNGSEONG_O_E_utf8
+          $result = $HANGUL_JUNGSEONG_O_E_utf8
                   if $loose
-                     && $utf8 eq $HANGUL_JUNGSEONG_OE_utf8
+                     && $result eq $HANGUL_JUNGSEONG_OE_utf8
                      && $name =~ m/O \s* - [-\s]* E/ix;
                      # Note that this wouldn't work if there were a 2nd
                      # OE in the name
@@ -544,7 +544,7 @@ sub lookup_name ($$$) {
           # The +1 skips past that newline, or, if the rindex() fails, to put
           # us to an offset of zero.
           my $charstart = rindex($txt, "\n", $off[0] - 7) + 1;
-          $utf8 = pack("U*", map { CORE::hex }
+          $result = pack("U*", map { CORE::hex }
               split " ", substr($txt, $charstart, $off[0] - $charstart - 1));
         }
       }
@@ -553,15 +553,15 @@ sub lookup_name ($$$) {
       # again, but only if it came from the one search that we cache.
       # (Haven't bothered with the pain of sorting out scoping issues for the
       # scripts searches.)
-      $cache_ref->{$name} = $utf8 if defined $cache_ref;
+      $cache_ref->{$name} = $result if defined $cache_ref;
     }
   }
 
 
-  # Here, have the utf8.  If the return is to be an ord, must be any single
-  # character.
+  # Here, have the result character.  If the return is to be an ord, must be
+  # any single character.
   if ($wants_ord) {
-    return ord($utf8) if length $utf8 == 1;
+    return ord($result) if length $result == 1;
   }
   else {
 
@@ -570,7 +570,7 @@ sub lookup_name ($$$) {
     my $in_bytes = ($runtime)
                    ? (caller $runtime)[8] & $bytes::hint_bits
                    : $^H & $bytes::hint_bits;
-    return $utf8 if (! $in_bytes || utf8::downgrade($utf8, 1)) # The 1 arg
+    return $result if (! $in_bytes || utf8::downgrade($result, 1)) # The 1 arg
                                                   # means don't die on failure
   }
 
@@ -594,10 +594,10 @@ sub lookup_name ($$$) {
 
   # Only other possible failure here is from use bytes.
   if ($runtime) {
-    carp not_legal_use_bytes_msg($name, $utf8);
+    carp not_legal_use_bytes_msg($name, $result);
     return;
   } else {
-    croak not_legal_use_bytes_msg($name, $utf8);
+    croak not_legal_use_bytes_msg($name, $result);
   }
 
 } # lookup_name
