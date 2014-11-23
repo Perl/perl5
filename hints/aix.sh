@@ -634,7 +634,10 @@ int main() {
   printf("%Lg\n", powl(-3.0L, 2.0L));
 }
 EOF
-  $cc -qlongdouble -o powl$$ powl$$.c -lm
+  case "$gccversion" in
+  '') $cc -qlongdouble -o powl$$ powl$$.c -lm ;;
+  *) $cc -o powl$$ powl$$.c -lm ;;
+  esac
   case `./powl$$` in
   9) echo "Your powl() is working correctly." >&4 ;;
   *)
