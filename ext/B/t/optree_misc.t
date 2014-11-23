@@ -174,7 +174,7 @@ EOT_EOT
 # main::STDOUT (FORMAT):
 # c  <1> leavewrite[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->c
-# 1        <;> nextstate(main 1 -:4) v:>,<,%:>,<,% ->2
+# 1        <;> nextstate(main 1 -:4) v:>,<,% ->2
 # 5        <@> formline vK/2 ->6
 # 2           <0> pushmark s ->3
 # 3           <$> const(PV "@<<<\n") s ->4
