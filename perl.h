@@ -2656,7 +2656,7 @@ typedef struct clone_params CLONE_PARAMS;
  * so hide the type.  */
 typedef struct padlist PADLIST;
 typedef AV PAD;
-typedef AV PADNAMELIST;
+typedef struct padnamelist PADNAMELIST;
 typedef SV PADNAME;
 
 /* enable PERL_NEW_COPY_ON_WRITE by default */

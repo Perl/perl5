@@ -1296,10 +1296,12 @@ Since perl 5.17.1
 
 =back
 
-=head2 OTHER CLASSES
+=head2 PAD-RELATED CLASSES
 
-Perl 5.18 introduces a new class, B::PADLIST, returned by B::CV's
+Perl 5.18 introduced a new class, B::PADLIST, returned by B::CV's
 C<PADLIST> method.
+
+Perl 5.22 introduced the B::PADNAMELIST and B::PADNAME classes.
 
 =head2 B::PADLIST Methods
 
@@ -1309,13 +1311,35 @@ C<PADLIST> method.
 
 =item ARRAY
 
-A list of pads.  The first one contains the names.  These are currently
-B::AV objects, but that is likely to change in future versions.
+A list of pads.  The first one contains the names.
+
+The first one is a B::PADNAMELIST under Perl 5.22, and a B::AV under
+earlier versions.  The rest are currently B::AV objects, but that could
+change in future versions.
 
 =item ARRAYelt
 
 Like C<ARRAY>, but takes an index as an argument to get only one element,
 rather than a list of all of them.
+
+=item NAMES
+
+This method, introduced in 5.22, returns the B::PADNAMELIST.  It is
+equivalent to C<ARRAYelt> with a 0 argument.
+
+=item REFCNT
+
+=back
+
+=head2 B::PADNAMELIST Methods
+
+=over 4
+
+=item MAX
+
+=item ARRAY
+
+=item ARRAYelt
 
 =item REFCNT
 

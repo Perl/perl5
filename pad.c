@@ -46,10 +46,10 @@ internal purpose in XSUBs.
 
 The PADLIST has a C array where pads are stored.
 
-The 0th entry of the PADLIST is a PADNAMELIST (which is actually just an
-AV, but that may change) which represents the "names" or rather
+The 0th entry of the PADLIST is a PADNAMELIST
+which represents the "names" or rather
 the "static type information" for lexicals.  The individual elements of a
-PADNAMELIST are PADNAMEs (just SVs; but, again, that may change).  Future
+PADNAMELIST are PADNAMEs.  Future
 refactorings might stop the PADNAMELIST from being stored in the PADLIST's
 array, so don't rely on it.  See L</PadlistNAMES>.
 
@@ -216,7 +216,8 @@ PADLIST *
 Perl_pad_new(pTHX_ int flags)
 {
     PADLIST *padlist;
-    PAD *padname, *pad;
+    PADNAMELIST *padname;
+    PAD *pad;
     PAD **ary;
 
     ASSERT_CURPAD_LEGAL("pad_new");
@@ -262,13 +263,12 @@ Perl_pad_new(pTHX_ int flags)
 	av_store(pad, 0, MUTABLE_SV(a0));
 	AvREIFY_only(a0);
 
-	padname = (PAD *)SvREFCNT_inc_simple_NN(PL_comppad_name);
+	PadnamelistREFCNT(padname = PL_comppad_name)++;
     }
     else {
 	av_store(pad, 0, NULL);
-	padname = newAV();
-	AvPAD_NAMELIST_on(padname);
-	av_store(padname, 0, &PL_sv_undef);
+	padname = newPADNAMELIST(0);
+	padnamelist_store(padname, 0, &PL_sv_undef);
     }
 
     /* Most subroutines never recurse, hence only need 2 entries in the padlist
@@ -278,7 +278,7 @@ Perl_pad_new(pTHX_ int flags)
     Newx(ary, 2, PAD *);
     PadlistMAX(padlist) = 1;
     PadlistARRAY(padlist) = ary;
-    ary[0] = padname;
+    ary[0] = (PAD *)padname;
     ary[1] = pad;
 
     /* ... then update state variables */
@@ -426,11 +426,11 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 	if (PL_phase != PERL_PHASE_DESTRUCT) { /* don't bother during global destruction */
 	    CV * const outercv = CvOUTSIDE(&cvbody);
 	    const U32 seq = CvOUTSIDE_SEQ(&cvbody);
-	    PAD * const comppad_name = PadlistARRAY(padlist)[0];
-	    SV ** const namepad = AvARRAY(comppad_name);
+	    PADNAMELIST * const comppad_name = PadlistNAMES(padlist);
+	    SV ** const namepad = PadnamelistARRAY(comppad_name);
 	    PAD * const comppad = PadlistARRAY(padlist)[1];
 	    SV ** const curpad = AvARRAY(comppad);
-	    for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
+	    for (ix = PadnamelistMAX(comppad_name); ix > 0; ix--) {
 		SV * const namesv = namepad[ix];
 		if (namesv && namesv != &PL_sv_undef
 		    && *SvPVX_const(namesv) == '&')
@@ -476,10 +476,10 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 	    }
 	}
 	{
-	    PAD * const sv = PadlistARRAY(padlist)[0];
-	    if (sv == PL_comppad_name && SvREFCNT(sv) == 1)
+	    PADNAMELIST * const names = PadlistNAMES(padlist);
+	    if (names == PL_comppad_name && PadnamelistREFCNT(names) == 1)
 		PL_comppad_name = NULL;
-	    SvREFCNT_dec(sv);
+	    PadnamelistREFCNT_dec(names);
 	}
 	if (PadlistARRAY(padlist)) Safefree(PadlistARRAY(padlist));
 	Safefree(padlist);
@@ -590,7 +590,7 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
 	SvPAD_STATE_on(name);
     }
 
-    av_store(PL_comppad_name, offset, (SV *)name);
+    padnamelist_store(PL_comppad_name, offset, (SV *)name);
     PadnamelistMAXNAMED(PL_comppad_name) = offset;
     return offset;
 }
@@ -773,8 +773,8 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 	 * for a slot which has no name and no active value.
 	 * For a constant, likewise, but use PL_constpadix.
 	 */
-	SV * const * const names = AvARRAY(PL_comppad_name);
-        const SSize_t names_fill = AvFILLp(PL_comppad_name);
+	PADNAME * const * const names = PadnamelistARRAY(PL_comppad_name);
+	const SSize_t names_fill = PadnamelistMAX(PL_comppad_name);
 	const bool konst = cBOOL(tmptype & SVf_READONLY);
 	retval = konst ? PL_constpadix : PL_padix;
 	for (;;) {
@@ -802,7 +802,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 		break;
 	}
 	if (konst) {
-	    av_store(PL_comppad_name, retval, &PL_sv_no);
+	    padnamelist_store(PL_comppad_name, retval, &PL_sv_no);
 	    tmptype &= ~SVf_READONLY;
 	    tmptype |= SVs_PADTMP;
 	}
@@ -855,7 +855,7 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
     COP_SEQ_RANGE_LOW_set(name, 0);
     COP_SEQ_RANGE_HIGH_set(name, 0);
     ix = pad_alloc(optype, SVs_PADMY);
-    av_store(PL_comppad_name, ix, name);
+    padnamelist_store(PL_comppad_name, ix, name);
     /* XXX DAPM use PL_curpad[] ? */
     if (SvTYPE(func) == SVt_PVCV || !CvOUTSIDE(func))
 	av_store(PL_comppad, ix, (SV*)func);
@@ -903,11 +903,11 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 
     assert((flags & ~padadd_OUR) == 0);
 
-    if (AvFILLp(PL_comppad_name) < 0 || !ckWARN(WARN_MISC))
+    if (PadnamelistMAX(PL_comppad_name) < 0 || !ckWARN(WARN_MISC))
 	return; /* nothing to check */
 
-    svp = AvARRAY(PL_comppad_name);
-    top = AvFILLp(PL_comppad_name);
+    svp = PadnamelistARRAY(PL_comppad_name);
+    top = PadnamelistMAX(PL_comppad_name);
     /* check the current scope */
     /* XXX DAPM - why the (I32) cast - shouldn't we ensure they're the same
      * type ? */
@@ -980,7 +980,7 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
     PADNAME *out_pn;
     int out_flags;
     I32 offset;
-    const AV *nameav;
+    const PADNAMELIST *namelist;
     PADNAME **name_p;
 
     PERL_ARGS_ASSERT_PAD_FINDMY_PVN;
@@ -1014,9 +1014,9 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
      *    our $foo = 0 unless defined $foo;
      * to not give a warning. (Yes, this is a hack) */
 
-    nameav = PadlistARRAY(CvPADLIST(PL_compcv))[0];
-    name_p = PadnamelistARRAY(nameav);
-    for (offset = PadnamelistMAXNAMED(nameav); offset > 0; offset--) {
+    namelist = PadlistNAMES(CvPADLIST(PL_compcv));
+    name_p = PadnamelistARRAY(namelist);
+    for (offset = PadnamelistMAXNAMED(namelist); offset > 0; offset--) {
         const PADNAME * const name = name_p[offset];
         if (name && PadnameLEN(name) == namelen
             && !PadnameOUTER(name)
@@ -1203,10 +1203,10 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 
     if (padlist) { /* not an undef CV */
 	I32 fake_offset = 0;
-        const AV * const nameav = PadlistARRAY(padlist)[0];
-	PADNAME * const * const name_p = PadnamelistARRAY(nameav);
+        const PADNAMELIST * const names = PadlistNAMES(padlist);
+	PADNAME * const * const name_p = PadnamelistARRAY(names);
 
-	for (offset = PadnamelistMAXNAMED(nameav); offset > 0; offset--) {
+	for (offset = PadnamelistMAXNAMED(names); offset > 0; offset--) {
             const PADNAME * const name = name_p[offset];
             if (name && PadnameLEN(name) == namelen
                      && padname_eq_pvn_flags(aTHX_ name, namepv, namelen,
@@ -1372,9 +1372,9 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 	   "good" and only copying flag bits and pointers that it understands.
 	*/
 	PADNAME *new_name = (PADNAME *)newSVsv((SV *)*out_name);
-	AV *  const ocomppad_name = PL_comppad_name;
+	PADNAMELIST * const ocomppad_name = PL_comppad_name;
 	PAD * const ocomppad = PL_comppad;
-	PL_comppad_name = PadlistARRAY(padlist)[0];
+	PL_comppad_name = PadlistNAMES(padlist);
 	PL_comppad = PadlistARRAY(padlist)[1];
 	PL_curpad = AvARRAY(PL_comppad);
 
@@ -1490,7 +1490,7 @@ Perl_pad_block_start(pTHX_ int full)
 {
     ASSERT_CURPAD_ACTIVE("pad_block_start");
     SAVEI32(PL_comppad_name_floor);
-    PL_comppad_name_floor = AvFILLp(PL_comppad_name);
+    PL_comppad_name_floor = PadnamelistMAX(PL_comppad_name);
     if (full)
 	PL_comppad_name_fill = PL_comppad_name_floor;
     if (PL_comppad_name_floor < 0)
@@ -1537,7 +1537,7 @@ Perl_intro_my(pTHX)
     if (! PL_min_intro_pending)
 	return seq;
 
-    svp = AvARRAY(PL_comppad_name);
+    svp = PadnamelistARRAY(PL_comppad_name);
     for (i = PL_min_intro_pending; i <= PL_max_intro_pending; i++) {
 	SV * const sv = svp[i];
 
@@ -1577,7 +1577,7 @@ Perl_pad_leavemy(pTHX)
 {
     I32 off;
     OP *o = NULL;
-    SV * const * const svp = AvARRAY(PL_comppad_name);
+    PADNAME * const * const svp = PadnamelistARRAY(PL_comppad_name);
 
     PL_pad_reset_pending = FALSE;
 
@@ -1592,7 +1592,8 @@ Perl_pad_leavemy(pTHX)
 	}
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
-    for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_fill; off--) {
+    for (off = PadnamelistMAX(PL_comppad_name);
+	 off > PL_comppad_name_fill; off--) {
 	SV * const sv = svp[off];
 	if (sv && PadnameLEN(sv) && !SvFAKE(sv)
 	    && COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
@@ -1764,11 +1765,11 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
     }
 
     /* extend namepad to match curpad */
-    if (AvFILLp(PL_comppad_name) < AvFILLp(PL_comppad))
-	av_store(PL_comppad_name, AvFILLp(PL_comppad), NULL);
+    if (PadnamelistMAX(PL_comppad_name) < AvFILLp(PL_comppad))
+	padnamelist_store(PL_comppad_name, AvFILLp(PL_comppad), NULL);
 
     if (type == padtidy_SUBCLONE) {
-	SV ** const namep = AvARRAY(PL_comppad_name);
+	PADNAME ** const namep = PadnamelistARRAY(PL_comppad_name);
 	PADOFFSET ix;
 
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
@@ -1799,7 +1800,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
     }
 
     if (type == padtidy_SUB || type == padtidy_FORMAT) {
-	SV ** const namep = AvARRAY(PL_comppad_name);
+	PADNAME ** const namep = PadnamelistARRAY(PL_comppad_name);
 	PADOFFSET ix;
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	    if (!namep[ix]) namep[ix] = &PL_sv_undef;
@@ -1879,7 +1880,7 @@ Dump the contents of a padlist
 void
 Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 {
-    const AV *pad_name;
+    const PADNAMELIST *pad_name;
     const AV *pad;
     SV **pname;
     SV **ppad;
@@ -1890,16 +1891,16 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
     if (!padlist) {
 	return;
     }
-    pad_name = *PadlistARRAY(padlist);
+    pad_name = PadlistNAMES(padlist);
     pad = PadlistARRAY(padlist)[1];
-    pname = AvARRAY(pad_name);
+    pname = PadnamelistARRAY(pad_name);
     ppad = AvARRAY(pad);
     Perl_dump_indent(aTHX_ level, file,
 	    "PADNAME = 0x%"UVxf"(0x%"UVxf") PAD = 0x%"UVxf"(0x%"UVxf")\n",
 	    PTR2UV(pad_name), PTR2UV(pname), PTR2UV(pad), PTR2UV(ppad)
     );
 
-    for (ix = 1; ix <= AvFILLp(pad_name); ix++) {
+    for (ix = 1; ix <= PadnamelistMAX(pad_name); ix++) {
         const SV *namesv = pname[ix];
 	if (namesv && !PadnameLEN(namesv)) {
 	    namesv = NULL;
@@ -1998,11 +1999,11 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 {
     I32 ix;
     PADLIST* const protopadlist = CvPADLIST(proto);
-    PAD *const protopad_name = *PadlistARRAY(protopadlist);
+    PADNAMELIST *const protopad_name = PadlistNAMES(protopadlist);
     const PAD *const protopad = PadlistARRAY(protopadlist)[1];
-    SV** const pname = AvARRAY(protopad_name);
+    SV** const pname = PadnamelistARRAY(protopad_name);
     SV** const ppad = AvARRAY(protopad);
-    const I32 fname = AvFILLp(protopad_name);
+    const I32 fname = PadnamelistMAX(protopad_name);
     const I32 fpad = AvFILLp(protopad);
     SV** outpad;
     long depth;
@@ -2367,15 +2368,15 @@ void
 Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 {
     I32 ix;
-    AV * const comppad_name = PadlistARRAY(padlist)[0];
+    PADNAMELIST * const comppad_name = PadlistNAMES(padlist);
     AV * const comppad = PadlistARRAY(padlist)[1];
-    SV ** const namepad = AvARRAY(comppad_name);
+    SV ** const namepad = PadnamelistARRAY(comppad_name);
     SV ** const curpad = AvARRAY(comppad);
 
     PERL_ARGS_ASSERT_PAD_FIXUP_INNER_ANONS;
     PERL_UNUSED_ARG(old_cv);
 
-    for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
+    for (ix = PadnamelistMAX(comppad_name); ix > 0; ix--) {
         const SV * const namesv = namepad[ix];
 	if (namesv && namesv != &PL_sv_undef && !SvPAD_STATE(namesv)
 	    && *SvPVX_const(namesv) == '&')
@@ -2429,8 +2430,8 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 	AV* const newpad = newAV();
 	SV** const oldpad = AvARRAY(svp[depth-1]);
 	I32 ix = AvFILLp((const AV *)svp[1]);
-        const I32 names_fill = AvFILLp((const AV *)svp[0]);
-	SV** const names = AvARRAY(svp[0]);
+	const I32 names_fill = PadnamelistMAX((PADNAMELIST *)svp[0]);
+	SV** const names = PadnamelistARRAY((PADNAMELIST *)svp[0]);
 	AV *av;
 
 	for ( ;ix > 0; ix--) {
@@ -2504,9 +2505,12 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
     PadlistMAX(dstpad) = max;
     Newx(PadlistARRAY(dstpad), max + 1, PAD *);
 
+    PadlistARRAY(dstpad)[0] = (PAD *)
+	    padnamelist_dup(PadlistNAMES(srcpad), param);
+    PadnamelistREFCNT(PadlistNAMES(dstpad))++;
     if (cloneall) {
 	PADOFFSET depth;
-	for (depth = 0; depth <= max; ++depth)
+	for (depth = 1; depth <= max; ++depth)
 	    PadlistARRAY(dstpad)[depth] =
 		av_dup_inc(PadlistARRAY(srcpad)[depth], param);
     } else {
@@ -2514,16 +2518,12 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 	   to build anything other than the first level of pads.  */
 	I32 ix = AvFILLp(PadlistARRAY(srcpad)[1]);
 	AV *pad1;
-	const I32 names_fill = AvFILLp(PadlistARRAY(srcpad)[0]);
+	const I32 names_fill = PadnamelistMAX(PadlistNAMES(srcpad));
 	const PAD *const srcpad1 = PadlistARRAY(srcpad)[1];
 	SV **oldpad = AvARRAY(srcpad1);
-	SV **names;
+	SV ** const names = PadnamelistARRAY(PadlistNAMES(dstpad));
 	SV **pad1a;
 	AV *args;
-
-	PadlistARRAY(dstpad)[0] =
-	    av_dup_inc(PadlistARRAY(srcpad)[0], param);
-	names = AvARRAY(PadlistARRAY(dstpad)[0]);
 
 	pad1 = newAV();
 
@@ -2618,6 +2618,129 @@ Perl_padlist_store(pTHX_ PADLIST *padlist, I32 key, PAD *val)
     ary[key] = val;
     return &ary[key];
 }
+
+/*
+=for apidoc newPADNAMELIST
+
+Creates a new pad name list.  C<max> is the highest index for which space
+is allocated.
+
+=cut
+*/
+
+PADNAMELIST *
+Perl_newPADNAMELIST(pTHX_ size_t max)
+{
+    PADNAMELIST *pnl;
+    Newx(pnl, 1, PADNAMELIST);
+    Newxz(PadnamelistARRAY(pnl), max+1, PADNAME *);
+    PadnamelistMAX(pnl) = -1;
+    PadnamelistREFCNT(pnl) = 1;
+    PadnamelistMAXNAMED(pnl) = 0;
+    pnl->xpadnl_max = max;
+    return pnl;
+}
+
+/*
+=for apidoc padnamelist_store
+
+Stores the pad name (which may be null) at the given index, freeing any
+existing pad name in that slot.
+
+=cut
+*/
+
+PADNAME **
+Perl_padnamelist_store(pTHX_ PADNAMELIST *pnl, SSize_t key, PADNAME *val)
+{
+    PADNAME **ary;
+
+    PERL_ARGS_ASSERT_PADNAMELIST_STORE;
+
+    assert(key >= 0);
+
+    if (key > pnl->xpadnl_max)
+	av_extend_guts(NULL,key,&pnl->xpadnl_max,
+		       (SV ***)&PadnamelistARRAY(pnl),
+		       (SV ***)&PadnamelistARRAY(pnl));
+    if (PadnamelistMAX(pnl) < key) {
+	Zero(PadnamelistARRAY(pnl)+PadnamelistMAX(pnl)+1,
+	     key-PadnamelistMAX(pnl), PADNAME *);
+	PadnamelistMAX(pnl) = key;
+    }
+    ary = PadnamelistARRAY(pnl);
+    SvREFCNT_dec(ary[key]);
+    ary[key] = val;
+    return &ary[key];
+}
+
+/*
+=for apidoc padnamelist_fetch
+
+Fetches the pad name from the given index.
+
+=cut
+*/
+
+PADNAME *
+Perl_padnamelist_fetch(pTHX_ PADNAMELIST *pnl, SSize_t key)
+{
+    PERL_ARGS_ASSERT_PADNAMELIST_FETCH;
+    ASSUME(key >= 0);
+
+    return key > PadnamelistMAX(pnl) ? NULL : PadnamelistARRAY(pnl)[key];
+}
+
+void
+Perl_padnamelist_free(pTHX_ PADNAMELIST *pnl)
+{
+    PERL_ARGS_ASSERT_PADNAMELIST_FREE;
+    if (!--PadnamelistREFCNT(pnl)) {
+	while(PadnamelistMAX(pnl) >= 0)
+	    SvREFCNT_dec(PadnamelistARRAY(pnl)[PadnamelistMAX(pnl)--]);
+	Safefree(PadnamelistARRAY(pnl));
+	Safefree(pnl);
+    }
+}
+
+#if defined(USE_ITHREADS)
+
+/*
+=for apidoc padnamelist_dup
+
+Duplicates a pad name list.
+
+=cut
+*/
+
+PADNAMELIST *
+Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
+{
+    PADNAMELIST *dstpad;
+    SSize_t max = PadnamelistMAX(srcpad);
+
+    PERL_ARGS_ASSERT_PADNAMELIST_DUP;
+
+    /* look for it in the table first */
+    dstpad = (PADNAMELIST *)ptr_table_fetch(PL_ptr_table, srcpad);
+    if (dstpad)
+	return dstpad;
+
+    dstpad = newPADNAMELIST(max);
+    PadnamelistREFCNT(dstpad) = 0; /* The caller will increment it.  */
+    PadnamelistMAXNAMED(dstpad) = PadnamelistMAXNAMED(srcpad);
+    PadnamelistMAX(dstpad) = max;
+
+    ptr_table_store(PL_ptr_table, srcpad, dstpad);
+    for (; max >= 0; max--)
+	PadnamelistARRAY(dstpad)[max] =
+	    sv_dup_inc(PadnamelistARRAY(srcpad)[max], param);
+
+    return dstpad;
+}
+
+#endif /* USE_ITHREADS */
+
 
 /*
  * Local variables:

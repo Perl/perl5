@@ -620,6 +620,8 @@ typedef struct refcounted_he	*B__RHE;
 #ifdef PadlistARRAY
 typedef PADLIST	*B__PADLIST;
 #endif
+typedef PADNAMELIST *B__PADNAMELIST;
+
 
 #ifdef MULTIPLICITY
 #  define ASSIGN_COMMON_ALIAS(prefix, var) \
@@ -2059,15 +2061,31 @@ MODULE = B	PACKAGE = B::PADLIST	PREFIX = Padlist
 SSize_t
 PadlistMAX(padlist)
 	B::PADLIST	padlist
+    ALIAS: B::PADNAMELIST::MAX = 0
+    CODE:
+        PERL_UNUSED_VAR(ix);
+	RETVAL = PadlistMAX(padlist);
+    OUTPUT:
+	RETVAL
+
+B::PADNAMELIST
+PadlistNAMES(padlist)
+	B::PADLIST	padlist
 
 void
 PadlistARRAY(padlist)
 	B::PADLIST	padlist
     PPCODE:
 	if (PadlistMAX(padlist) >= 0) {
+	    dXSTARG;
 	    PAD **padp = PadlistARRAY(padlist);
             SSize_t i;
-	    for (i = 0; i <= PadlistMAX(padlist); i++)
+	    sv_setiv(newSVrv(TARG, PadlistNAMES(padlist)
+				    ? "B::PADNAMELIST"
+				    : "B::NULL"),
+		     PTR2IV(PadlistNAMES(padlist)));
+	    XPUSHTARG;
+	    for (i = 1; i <= PadlistMAX(padlist); i++)
 		XPUSHs(make_sv_object(aTHX_ (SV *)padp[i]));
 	}
 
@@ -2076,12 +2094,17 @@ PadlistARRAYelt(padlist, idx)
 	B::PADLIST	padlist
 	SSize_t 	idx
     PPCODE:
-	if (PadlistMAX(padlist) >= 0
-	 && idx <= PadlistMAX(padlist))
+	if (idx < 0 || idx > PadlistMAX(padlist))
+	    XPUSHs(make_sv_object(aTHX_ NULL));
+	else if (!idx) {
+	    PL_stack_sp--;
+	    PUSHMARK(PL_stack_sp-1);
+	    XS_B__PADLIST_NAMES(aTHX_ cv);
+	    return;
+	}
+	else
 	    XPUSHs(make_sv_object(aTHX_
 				  (SV *)PadlistARRAY(padlist)[idx]));
-	else
-	    XPUSHs(make_sv_object(aTHX_ NULL));
 
 U32
 PadlistREFCNT(padlist)
@@ -2093,3 +2116,31 @@ PadlistREFCNT(padlist)
 	RETVAL
 
 #endif
+
+MODULE = B	PACKAGE = B::PADNAMELIST	PREFIX = Padnamelist
+
+void
+PadnamelistARRAY(pnl)
+	B::PADNAMELIST	pnl
+    PPCODE:
+	if (PadnamelistMAX(pnl) >= 0) {
+	    PADNAME **padp = PadnamelistARRAY(pnl);
+            SSize_t i = 0;
+	    for (; i <= PadnamelistMAX(pnl); i++)
+		XPUSHs(make_sv_object(aTHX_ padp[i]));
+	}
+
+void
+PadnamelistARRAYelt(pnl, idx)
+	B::PADNAMELIST	pnl
+	SSize_t 	idx
+    PPCODE:
+	if (idx < 0 || idx > PadnamelistMAX(pnl))
+	    XPUSHs(make_sv_object(aTHX_ NULL));
+	else
+	    XPUSHs(make_sv_object(aTHX_
+				  (SV *)PadnamelistARRAY(pnl)[idx]));
+
+U32
+PadnamelistREFCNT(pnl)
+	B::PADNAMELIST	pnl

@@ -390,8 +390,6 @@ S_mg_findext_flags(const SV *sv, int type, const MGVTBL *vtbl, U32 flags)
     if (sv) {
 	MAGIC *mg;
 
-	assert(!(SvTYPE(sv) == SVt_PVAV && AvPAD_NAMELIST(sv)));
-
 	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	    if (mg->mg_type == type && (!flags || mg->mg_virtual == vtbl)) {
 		return mg;

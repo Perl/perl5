@@ -27,11 +27,22 @@ typedef U64TYPE PADOFFSET;
 #endif
 #define NOT_IN_PAD ((PADOFFSET) -1)
 
+/* B.xs expects the first members of these two structs to line up
+   (xpadl_max with xpadnl_fill).
+ */
 
 struct padlist {
     SSize_t	xpadl_max;	/* max index for which array has space */
     PAD **	xpadl_alloc;	/* pointer to beginning of array of AVs */
     PADNAMELIST*xpadl_outid;	/* Padnamelist of outer pad; used as ID */
+};
+
+struct padnamelist {
+    SSize_t	xpadnl_fill;	/* max index in use */
+    PADNAME **	xpadnl_alloc;	/* pointer to beginning of array */
+    SSize_t	xpadnl_max;	/* max index for which array has space */
+    PADOFFSET	xpadnl_max_named; /* highest index with len > 0 */
+    U32		xpadnl_refcnt;
 };
 
 
@@ -203,6 +214,12 @@ The C array of pad names.
 =for apidoc Amx|SSize_t|PadnamelistMAX|PADNAMELIST pnl
 The index of the last pad name.
 
+=for apidoc Amx|SSize_t|PadnamelistREFCNT|PADNAMELIST pnl
+The reference count of the pad name list.
+
+=for apidoc Amx|void|PadnamelistREFCNT_dec|PADNAMELIST pnl
+Lowers the reference count of the pad name list.
+
 =for apidoc Amx|SV **|PadARRAY|PAD pad
 The C array of pad entries.
 
@@ -282,15 +299,16 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 
 #define PadlistARRAY(pl)	(pl)->xpadl_alloc
 #define PadlistMAX(pl)		(pl)->xpadl_max
-#define PadlistNAMES(pl)	(*PadlistARRAY(pl))
+#define PadlistNAMES(pl)	((PADNAMELIST *)*PadlistARRAY(pl))
 #define PadlistNAMESARRAY(pl)	PadnamelistARRAY(PadlistNAMES(pl))
 #define PadlistNAMESMAX(pl)	PadnamelistMAX(PadlistNAMES(pl))
 #define PadlistREFCNT(pl)	1	/* reserved for future use */
 
-#define PadnamelistARRAY(pnl)	((PADNAME **)AvARRAY(pnl))
-#define PadnamelistMAX(pnl)	AvFILLp(pnl)
-#define PadnamelistMAXNAMED(pnl) \
-	((XPVAV*) SvANY(pnl))->xmg_u.xmg_hash_index
+#define PadnamelistARRAY(pnl)		(pnl)->xpadnl_alloc
+#define PadnamelistMAX(pnl)		(pnl)->xpadnl_fill
+#define PadnamelistMAXNAMED(pnl)	(pnl)->xpadnl_max_named
+#define PadnamelistREFCNT(pnl)		(pnl)->xpadnl_refcnt
+#define PadnamelistREFCNT_dec(pnl)	Perl_padnamelist_free(aTHX_ pnl)
 
 #define PadARRAY(pad)		AvARRAY(pad)
 #define PadMAX(pad)		AvFILLp(pad)
@@ -404,7 +422,7 @@ ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose
 */
 
 #define PAD_COMPNAME(po)	PAD_COMPNAME_SV(po)
-#define PAD_COMPNAME_SV(po)	((PADNAME *)AvARRAY(PL_comppad_name)[(po)])
+#define PAD_COMPNAME_SV(po)	(PadnamelistARRAY(PL_comppad_name)[(po)])
 #define PAD_COMPNAME_FLAGS(po) SvFLAGS(PAD_COMPNAME_SV(po))
 #define PAD_COMPNAME_FLAGS_isOUR(po) SvPAD_OUR(PAD_COMPNAME_SV(po))
 #define PAD_COMPNAME_PV(po)	PadnamePV(PAD_COMPNAME(po))
@@ -414,9 +432,11 @@ ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose
 #define PAD_COMPNAME_OURSTASH(po) \
     (SvOURSTASH(PAD_COMPNAME_SV(po)))
 
-#define PAD_COMPNAME_GEN(po) ((STRLEN)SvUVX(AvARRAY(PL_comppad_name)[po]))
+#define PAD_COMPNAME_GEN(po) \
+    ((STRLEN)SvUVX(PadnamelistARRAY(PL_comppad_name)[po]))
 
-#define PAD_COMPNAME_GEN_set(po, gen) SvUV_set(AvARRAY(PL_comppad_name)[po], (UV)(gen))
+#define PAD_COMPNAME_GEN_set(po, gen) \
+    SvUV_set(PadnamelistARRAY(PL_comppad_name)[po], (UV)(gen))
 
 
 /*
@@ -437,7 +457,8 @@ Clone the state variables associated with running and compiling pads.
 #define PAD_CLONE_VARS(proto_perl, param)				\
     PL_comppad			= av_dup(proto_perl->Icomppad, param);	\
     PL_curpad = PL_comppad ?  AvARRAY(PL_comppad) : NULL;		\
-    PL_comppad_name		= av_dup(proto_perl->Icomppad_name, param); \
+    PL_comppad_name		=					\
+		  padnamelist_dup(proto_perl->Icomppad_name, param);	\
     PL_comppad_name_fill	= proto_perl->Icomppad_name_fill;	\
     PL_comppad_name_floor	= proto_perl->Icomppad_name_floor;	\
     PL_min_intro_pending	= proto_perl->Imin_intro_pending;	\

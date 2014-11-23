@@ -2295,7 +2295,7 @@ S_finalize_op(pTHX_ OP* o)
 
 	check_fields =
 	    rop
-	 && (lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE),
+	 && (lexname = padnamelist_fetch(PL_comppad_name, rop->op_targ),
 	     SvPAD_TYPED(lexname))
 	 && (fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE))
 	 && isGV(*fields) && GvHV(*fields);

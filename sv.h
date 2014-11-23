@@ -371,7 +371,6 @@ perform the upgrade if necessary.  See C<svtype>.
 				       subroutine in another package. Set the
 				       GvIMPORTED_CV_on() if it needs to be
 				       expanded to a real GV */
-#define SVpad_NAMELIST	SVp_SCREAM  /* AV is a padnamelist */
 #define SVf_PROTECT	0x00010000  /* very read-only */
 #define SVs_PADTMP	0x00020000  /* in use as tmp */
 #define SVpad_TYPED	0x00020000  /* pad name is a Typed Lexical */
@@ -506,7 +505,7 @@ union _xmgu {
     MAGIC*  xmg_magic;		/* linked list of magicalness */
     HV*	    xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
     STRLEN  xmg_hash_index;	/* used while freeing hash entries */
-};				/* also used by PadnamelistMAXNAMED */
+};
 
 struct xpv {
     _XPV_HEAD;
