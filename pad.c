@@ -2494,8 +2494,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 
     PERL_ARGS_ASSERT_PADLIST_DUP;
 
-    cloneall = param->flags & CLONEf_COPY_STACKS
-	|| SvREFCNT(PadlistARRAY(srcpad)[1]) > 1;
+    cloneall = param->flags & CLONEf_COPY_STACKS;
     assert (SvREFCNT(PadlistARRAY(srcpad)[1]) == 1);
 
     max = cloneall ? PadlistMAX(srcpad) : 1;
