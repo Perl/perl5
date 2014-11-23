@@ -164,12 +164,6 @@
 #define my_gmtime(a)			Perl_my_gmtime(aTHX_ a)
 #define my_localtime(a)			Perl_my_localtime(aTHX_ a)
 #define my_mkdir(a,b)			Perl_my_mkdir(aTHX_ a,b)
-#define my_sigemptyset(a)		Perl_my_sigemptyset(a)
-#define my_sigfillset(a)		Perl_my_sigfillset(a)
-#define my_sigaddset(a,b)		Perl_my_sigaddset(a,b)
-#define my_sigdelset(a,b,c)		Perl_my_sigdelset(a,b,c)
-#define my_sigismember(a,b)		Perl_my_sigismember(a,b)
-#define my_sigprocmask(a,b,c)		Perl_my_sigprocmask(a,b,c)
 #ifdef HAS_SYMLINK
 #  define my_symlink(a,b)		Perl_my_symlink(aTHX_ a,b)
 #endif
