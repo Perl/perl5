@@ -298,7 +298,7 @@ sub lookup_name ($$$) {
                               || (! defined $hints_ref->{charnames_full}
                                   && ! defined $hints_ref->{charnames_loose});
 
-    # At runtime, but currently not at compile time, $^H gets
+    # At runtime, but currently not at compile time, %^H gets
     # stringified, so un-stringify back to the original data structures.
     # These get thrown away by perl before the next invocation
     # Also fill in the hash with the non-stringified data.

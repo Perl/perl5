@@ -297,7 +297,7 @@ matched name) or to a
 numeric code point (ordinal).  The latter is useful for assigning names
 to code points in Unicode private use areas such as U+E800 through
 U+F8FF.
-A numeric code point must be a non-negative integer or a string beginning
+A numeric code point must be a non-negative integer, or a string beginning
 with C<"U+"> or C<"0x"> with the remainder considered to be a
 hexadecimal integer.  A literal numeric constant must be unsigned; it
 will be interpreted as hex if it has a leading zero or contains
