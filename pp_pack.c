@@ -1792,7 +1792,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    if (!checksum)
 		XPUSHs(sv);
 	    break;
-	}
+	} /* End of switch */
 
 	if (checksum) {
 	    if (strchr("fFdD", TYPE_NO_MODIFIERS(datumtype)) ||
