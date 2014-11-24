@@ -65,10 +65,10 @@ $Carp::Internal{ (__PACKAGE__) } = 1;
 
 my %system_aliases = (
 
-    'SINGLE-SHIFT 2'                => pack("U", utf8::unicode_to_native(0x8E)),
-    'SINGLE-SHIFT 3'                => pack("U", utf8::unicode_to_native(0x8F)),
-    'PRIVATE USE 1'                 => pack("U", utf8::unicode_to_native(0x91)),
-    'PRIVATE USE 2'                 => pack("U", utf8::unicode_to_native(0x92)),
+    'SINGLE-SHIFT 2'                => chr utf8::unicode_to_native(0x8E),
+    'SINGLE-SHIFT 3'                => chr utf8::unicode_to_native(0x8F),
+    'PRIVATE USE 1'                 => chr utf8::unicode_to_native(0x91),
+    'PRIVATE USE 2'                 => chr utf8::unicode_to_native(0x92),
 );
 
 # These are the aliases above that differ under :loose and :full matching
@@ -77,15 +77,15 @@ my %system_aliases = (
 #);
 
 #my %deprecated_aliases;
-#$deprecated_aliases{'BELL'} = pack("U", utf8::unicode_to_native(0x07)) if $^V lt v5.17.0;
+#$deprecated_aliases{'BELL'} = chr utf8::unicode_to_native(0x07) if $^V lt v5.17.0;
 
 #my %loose_deprecated_aliases = (
 #);
 
 # These are special cased in :loose matching, differing only in a medial
 # hyphen
-my $HANGUL_JUNGSEONG_O_E_utf8 = pack("U", 0x1180);
-my $HANGUL_JUNGSEONG_OE_utf8 = pack("U", 0x116C);
+my $HANGUL_JUNGSEONG_O_E_utf8 = chr 0x1180;
+my $HANGUL_JUNGSEONG_OE_utf8 = chr 0x116C;
 
 
 my $txt;  # The table of official character names
@@ -163,7 +163,7 @@ sub alias (@) # Set up a single alias
     }
     if ($value =~ $decimal_qr) {
         no warnings qw(non_unicode surrogate nonchar); # Allow any of these
-        $^H{charnames_ord_aliases}{$name} = pack("U", $value);
+        $^H{charnames_ord_aliases}{$name} = chr $value;
 
         # Use a canonical form.
         $^H{charnames_inverse_ords}{sprintf("%05X", $value)} = $name;
@@ -432,7 +432,7 @@ sub lookup_name ($$$) {
       if (($loose || $^H{charnames_full})
           && (defined (my $ord = charnames::name_to_code_point_special($lookup_name, $loose))))
       {
-        $result = pack("U", $ord);
+        $result = chr $ord;
       }
       else {
 
@@ -525,7 +525,7 @@ sub lookup_name ($$$) {
         # therefore yield the very last character in the table, which should
         # also be a \n, so the statement works anyway.)
         if (substr($txt, $off[0] - 7, 1) eq "\n") {
-          $result = pack("U", CORE::hex substr($txt, $off[0] - 6, 5));
+          $result = chr CORE::hex substr($txt, $off[0] - 6, 5);
 
           # Handle the single loose matching special case, in which two names
           # differ only by a single medial hyphen.  If the original had a
@@ -544,7 +544,7 @@ sub lookup_name ($$$) {
           # The +1 skips past that newline, or, if the rindex() fails, to put
           # us to an offset of zero.
           my $charstart = rindex($txt, "\n", $off[0] - 7) + 1;
-          $result = pack("U*", map { CORE::hex }
+          $result = pack("W*", map { CORE::hex }
               split " ", substr($txt, $charstart, $off[0] - $charstart - 1));
         }
       }
@@ -556,8 +556,6 @@ sub lookup_name ($$$) {
       $cache_ref->{$name} = $result if defined $cache_ref;
     }
   }
-  utf8::downgrade($result, 1);
-
 
   # Here, have the result character.  If the return is to be an ord, must be
   # any single character.
