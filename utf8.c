@@ -2191,7 +2191,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
                               "resolved to \"\\x{17F}\\x{17F}\".");
                 goto return_long_s;
             }
-            else if (UTF8SKIP(p) == sizeof(LATIN_SMALL_LIGATURE_LONG_S_T) - 1
+            else if (UTF8SKIP(p) == sizeof(LATIN_SMALL_LIGATURE_LONG_S_T_UTF8) - 1
                 && memEQ((char *) p, LATIN_SMALL_LIGATURE_LONG_S_T_UTF8,
                           sizeof(LATIN_SMALL_LIGATURE_LONG_S_T_UTF8) - 1))
             {
