@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 146;
+plan 147;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -806,6 +806,14 @@ is runperl(switches => ['-lXMfeature=:all'],
   eval { φου };
   like $@, qr/^Undefined subroutine &φου called at /,
     'my sub with utf8 name';
+}
+{
+  my $w;
+  local $SIG{__WARN__} = sub { $w = shift };
+  use warnings 'closure';
+  eval 'sub stayshared { my sub x; sub notstayshared { x } } 1' or die;
+  like $w, qr/^Subroutine "&x" will not stay shared at /,
+          'Subroutine will not stay shared';
 }
 
 # -------------------- Interactions (and misc tests) -------------------- #

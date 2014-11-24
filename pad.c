@@ -1233,8 +1233,11 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			 && !PadnameIsSTATE(name_p[offset])
 			 && warn && ckWARN(WARN_CLOSURE)) {
 			newwarn = 0;
+			/* diag_listed_as: Variable "%s" will not stay
+					   shared */
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
-			    "Variable \"%"UTF8f"\" will not stay shared",
+			    "%se \"%"UTF8f"\" will not stay shared",
+			     *namepv == '&' ? "Subroutin" : "Variabl",
 			     UTF8fARG(1, namelen, namepv));
 		    }
 

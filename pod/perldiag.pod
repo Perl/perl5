@@ -5438,6 +5438,25 @@ the previous instance.  This is almost always a typographical error.
 Note that the earlier subroutine will still exist until the end of
 the scope or until all closure references to it are destroyed.
 
+=item Subroutine "%s" will not stay shared
+
+(W closure) An inner (nested) I<named> subroutine is referencing a "my"
+subroutine defined in an outer named subroutine.
+
+When the inner subroutine is called, it will see the value of the outer
+subroutine's lexical subroutine as it was before and during the *first*
+call to the outer subroutine; in this case, after the first call to the
+outer subroutine is complete, the inner and outer subroutines will no
+longer share a common value for the lexical subroutine.  In other words,
+it will no longer be shared.  This will especially make a difference
+if the lexical subroutines accesses lexical variables declared in its
+surrounding scope.
+
+This problem can usually be solved by making the inner subroutine
+anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
+reference lexical subroutines in outer subroutines are created, they
+are automatically rebound to the current values of such lexical subs.
+
 =item Subroutine %s redefined
 
 (W redefine) You redefined a subroutine.  To suppress this warning, say
