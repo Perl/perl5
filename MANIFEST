@@ -2292,6 +2292,7 @@ cpan/Test-Simple/lib/Test/Stream/IOSets.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Meta.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/PackageUtil.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream.pm			Test::Simple module
+cpan/Test-Simple/lib/Test/Stream/Subtest.pm			Test::Simple modules
 cpan/Test-Simple/lib/Test/Stream/Tester/Checks/Event.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Tester/Checks.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Tester/Events/Event.pm			Test::Simple module
@@ -2321,7 +2322,8 @@ cpan/Test-Simple/t/Behavior/MonkeyPatching_ok.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/MonkeyPatching_plan.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/Munge.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/NotTB15.t			Test::Simple Test
-cpan/Test-Simple/t/Behavior/skip_all_in_subtest.load			Test::Simple Test
+cpan/Test-Simple/t/Behavior/skip_all_in_subtest1.load			Test::Simple::Test
+cpan/Test-Simple/t/Behavior/skip_all_in_subtest2.load			Test::Simple::Test
 cpan/Test-Simple/t/Behavior/skip_all_in_subtest.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/Tester2_subtest.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/threads_with_taint_mode.t			Test::Simple Test

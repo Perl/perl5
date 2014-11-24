@@ -1,0 +1,12 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use Carp qw/confess/;
+
+use Test::More;
+
+plan skip_all => "Cause I feel like it";
+
+confess "Should not see this!";

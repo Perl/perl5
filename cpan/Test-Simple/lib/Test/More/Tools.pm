@@ -322,64 +322,6 @@ sub _cmp_diag {
 DIAGNOSTIC
 }
 
-sub subtest {
-    my ($class, $name, $code, @args) = @_;
-
-    my $ctx = context();
-
-    $ctx->throw("subtest()'s second argument must be a code ref")
-        unless $code && 'CODE' eq reftype($code);
-
-    $ctx->child('push', $name);
-    $ctx->clear;
-    my $todo = $ctx->hide_todo;
-
-    my $pid = $$;
-
-    my ($succ, $err) = try {
-        {
-            no warnings 'once';
-            local $Test::Builder::Level = 1;
-            $code->(@args);
-        }
-
-        $ctx->set;
-        my $stream = $ctx->stream;
-        $ctx->done_testing unless $stream->plan || $stream->ended;
-
-        require Test::Stream::ExitMagic;
-        {
-            local $? = 0;
-            Test::Stream::ExitMagic->new->do_magic($stream, $ctx->snapshot);
-        }
-    };
-
-    if ($$ != $pid && !$ctx->stream->_use_fork) {
-        warn <<"        EOT";
-Subtest finished with a new PID ($$ vs $pid) while forking support was turned off!
-This is almost certainly not what you wanted. Did you fork and forget to exit?
-        EOT
-
-        # Did the forked process try to exit via die?
-        die $err unless $succ;
-    }
-
-    # If a subtest forked, then threw an exception, we need to propogate that right away.
-    die $err unless $succ || $$ == $pid || $err->isa('Test::Stream::Event');
-
-    $ctx->set;
-    $ctx->restore_todo($todo);
-    # This sends the subtest event
-    my $st = $ctx->child('pop', $name);
-
-    unless ($succ) {
-        die $err unless blessed($err) && $err->isa('Test::Stream::Event');
-        $ctx->bail($err->reason) if $err->isa('Test::Stream::Event::Bail');
-    }
-
-    return $st->bool;
-}
-
 1;
 
 __END__

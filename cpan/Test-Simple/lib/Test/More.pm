@@ -4,12 +4,13 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_078';
+our $VERSION = '1.301001_079';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream 1.301001 '-internal';
 use Test::Stream::Util qw/protect try spoof/;
 use Test::Stream::Toolset;
+use Test::Stream::Subtest qw/subtest/;
 
 use Test::Stream::Carp qw/croak carp/;
 use Scalar::Util qw/blessed/;
@@ -237,11 +238,6 @@ sub pass (;$) {
 sub fail (;$) {
     my $ctx = context();
     return $ctx->ok(0, @_);
-}
-
-sub subtest {
-    my $ctx = context();
-    return tmt->subtest(@_);
 }
 
 sub explain {
@@ -1047,6 +1043,39 @@ subtests are equivalent:
       ok 1, '... no matter how many tests are run';
       done_testing();
   };
+
+B<NOTE on using skip_all in a BEGIN inside a subtest.>
+
+Sometimes you want to run a file as a subtest:
+
+    subtest foo => sub { do 'foo.pl' };
+
+where foo.pl;
+
+    use Test::More skip_all => "won't work";
+
+This will work fine, but will issue a warning. The issue is that the normal
+flow control method will now work inside a BEGIN block. The C<use Test::More>
+statement is run in a BEGIN block. As a result an exception is thrown instead
+of the normal flow control. In most cases this works fine.
+
+A case like this however will have issues:
+
+    subtest foo => sub {
+        do 'foo.pl'; # Will issue a skip_all
+
+        # You would expect the subtest to stop, but the 'do' captures the
+        # exception, as a result the following statement does execute.
+
+        ok(0, "blah");
+    };
+
+You can work around this by cheking the return from C<do>, along with C<$@>, or you can alter foo.pl so that it does this:
+
+    use Test::More;
+    plan skip_all => 'broken';
+
+When the plan is issues outside of the BEGIN block it works just fine.
 
 =item B<pass>
 

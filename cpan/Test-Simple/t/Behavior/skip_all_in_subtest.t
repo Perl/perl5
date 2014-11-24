@@ -5,12 +5,16 @@ use warnings;
 
 use Test::More;
 
-subtest my_subtest => sub {
+subtest my_subtest1 => sub {
     my $file = __FILE__;
-    $file =~ s/\.t$/.load/;
+    $file =~ s/\.t$/1.load/;
     do $file;
-    note "Got: $@";
-    fail($@);
+};
+
+subtest my_subtest2 => sub {
+    my $file = __FILE__;
+    $file =~ s/\.t$/2.load/;
+    do $file;
 };
 
 done_testing;

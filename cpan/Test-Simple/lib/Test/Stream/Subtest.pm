@@ -1,46 +1,91 @@
-package ok;
+package Test::Stream::Subtest;
 use strict;
 use warnings;
 
-use Test::Stream 1.301001 '-internal';
-use Test::More 1.301001 ();
-use Test::Stream::Carp qw/croak/;
+use Test::Stream::Exporter;
+default_exports qw/subtest/;
+Test::Stream::Exporter->cleanup;
 
-our $VERSION = '1.301001_079';
-$VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
+use Test::Stream::Context qw/context/;
+use Scalar::Util qw/reftype blessed/;
+use Test::Stream::Util qw/try/;
 
-sub import {
-    shift;
+sub subtest {
+    my ($name, $code, @args) = @_;
 
-    if (@_) {
-        croak "'use ok' called with an empty argument, did you try to use a package name from an uninitialized variable?"
-            unless defined $_[0];
+    my $ctx = context();
 
-        goto &Test::More::pass if $_[0] eq 'ok';
-        goto &Test::More::use_ok;
+    $ctx->throw("subtest()'s second argument must be a code ref")
+        unless $code && 'CODE' eq reftype($code);
+
+    $ctx->child('push', $name);
+    $ctx->clear;
+    my $todo = $ctx->hide_todo;
+
+    my $pid = $$;
+
+    my ($succ, $err) = try {
+        my $early_return = 1;
+
+        TEST_STREAM_SUBTEST: {
+            no warnings 'once';
+            local $Test::Builder::Level = 1;
+            $code->(@args);
+            $early_return = 0;
+        }
+
+        die $ctx->stream->subtest_exception->[-1] if $early_return;
+
+        $ctx->set;
+        my $stream = $ctx->stream;
+        $ctx->done_testing unless $stream->plan || $stream->ended;
+
+        require Test::Stream::ExitMagic;
+        {
+            local $? = 0;
+            Test::Stream::ExitMagic->new->do_magic($stream, $ctx->snapshot);
+        }
+    };
+
+    if ($$ != $pid && !$ctx->stream->_use_fork) {
+        warn <<"        EOT";
+Subtest finished with a new PID ($$ vs $pid) while forking support was turned off!
+This is almost certainly not what you wanted. Did you fork and forget to exit?
+        EOT
+
+        # Did the forked process try to exit via die?
+        die $err unless $succ;
     }
+
+    # If a subtest forked, then threw an exception, we need to propogate that right away.
+    die $err unless $succ || $$ == $pid || $err->isa('Test::Stream::Event');
+
+    $ctx->set;
+    $ctx->restore_todo($todo);
+    # This sends the subtest event
+    my $st = $ctx->child('pop', $name);
+
+    unless ($succ) {
+        die $err unless blessed($err) && $err->isa('Test::Stream::Event');
+        $ctx->bail($err->reason) if $err->isa('Test::Stream::Event::Bail');
+    }
+
+    return $st->bool;
 }
 
 1;
 
 __END__
 
-=encoding utf8
+=head1 Name
 
-=head1 NAME
+Test::Stream::Subtest - Encapsulate subtest start, run, and finish.
 
-ok - Alternative to Test::More::use_ok
+=head1 Synopsys
 
-=head1 SYNOPSIS
+    use Test::Stream::Subtest;
 
-    use ok 'Some::Module';
-
-=head1 DESCRIPTION
-
-With this module, simply change all C<use_ok> in test scripts to C<use ok>,
-and they will be executed at C<BEGIN> time.
-
-Please see L<Test::use::ok> for the full description.
+    subtest $name => sub { ... };
 
 =encoding utf8
 

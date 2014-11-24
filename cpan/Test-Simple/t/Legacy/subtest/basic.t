@@ -15,7 +15,7 @@ use warnings;
 
 use Test::Builder::NoOutput;
 
-use Test::More tests => 18;
+use Test::More tests => 16;
 
 # Formatting may change if we're running under Test::Harness.
 $ENV{HARNESS_ACTIVE} = 0;
@@ -168,8 +168,6 @@ END
     {
         my $child = $tb->child('skippy says he loves you');
         eval { $child->plan( skip_all => 'cuz I said so' ) };
-        ok my $error = $@, 'A child which does a "skip_all" should throw an exception';
-        isa_ok $error, 'Test::Stream::Event', '... and the exception it throws';
     }
     subtest 'skip all', sub {
         plan skip_all => 'subtest with skip_all';
