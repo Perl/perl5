@@ -556,12 +556,26 @@ sub lookup_name ($$$) {
       $cache_ref->{$name} = $result if defined $cache_ref;
     }
   }
+  utf8::downgrade($result, 1);
 
 
   # Here, have the result character.  If the return is to be an ord, must be
   # any single character.
   if ($wants_ord) {
     return ord($result) if length $result == 1;
+  }
+  elsif (! utf8::is_utf8($result)) {
+
+    # Here isn't UTF-8.  That's OK if it is all ASCII, or we are being called
+    # at compile time where we know we can guarantee that Unicode rules are
+    # correctly imposed on the result, or under 'bytes' where we don't want
+    # those rules.  But otherwise we have to make it UTF8 to guarantee Unicode
+    # rules on the returned string.
+    return $result if ! $runtime
+                      || (caller $runtime)[8] & $bytes::hint_bits
+                      || $result !~ /[[:^ascii:]]/;
+    utf8::upgrade($result);
+    return $result;
   }
   else {
 
