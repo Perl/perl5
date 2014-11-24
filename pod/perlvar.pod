@@ -2063,7 +2063,9 @@ X<%^H>
 
 The C<%^H> hash provides the same scoping semantic as C<$^H>.  This makes
 it useful for implementation of lexically scoped pragmas.  See
-L<perlpragma>.
+L<perlpragma>.   All the entries are stringified when accessed at
+runtime, so only simple values can be accommodated.  This means no
+pointers to objects, for example.
 
 When putting items into C<%^H>, in order to avoid conflicting with other
 users of the hash there is a convention regarding which keys to use.
