@@ -479,7 +479,7 @@ class/method related info needed at runtime to improve performance
 of class/object method calls.
 
 C<< OP_METHOD >> and C<< OP_METHOD_NAMED >> are moved from being
-C<< UNOP/SVOP >> to being C<< METHOD >>.
+C<< UNOP/SVOP >> to being C<< METHOP >>.
 
 =back
 
