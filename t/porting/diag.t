@@ -244,6 +244,22 @@ sub check_file {
       $listed_as = $1;
       $listed_as_line = $.+1;
     }
+    elsif (m</\*\s*diag_listed_as: (.*?)\s*\z>) {
+      $listed_as = $1;
+      my $finished;
+      while (<$codefh>) {
+        if (m<\*/>) {
+          $listed_as .= $` =~ s/^\s*/ /r =~ s/\s+\z//r;
+          $listed_as_line = $.+1;
+          $finished = 1;
+          last;
+        }
+        else {
+          $listed_as .= s/^\s*/ /r =~ s/\s+\z//r;
+        }
+      }
+      if (!$finished) { $listed_as = undef }
+    }
     next if /^#/;
 
     my $multiline = 0;
