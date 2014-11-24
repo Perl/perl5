@@ -3,6 +3,8 @@ BEGIN {
     require "uni/case.pl";
 }
 
+use feature 'unicode_strings';
+
 casetest(0, # No extra tests run here,
 	"Lowercase_Mapping",
         lc                             => sub { lc $_[0] },

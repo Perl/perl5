@@ -5,9 +5,10 @@ BEGIN {
 }
 use strict;
 use warnings;
+use feature 'unicode_strings';
 
 sub unidump {
-    join "", map { sprintf "\\x{%04X}", $_ } unpack "U*", $_[0];
+    join "", map { sprintf "\\x{%04X}", $_ } unpack "W*", $_[0];
 }
 
 sub casetest {
@@ -52,7 +53,7 @@ sub casetest {
         else {  # The return is a list of the characters mapped-to.
                 # prop_invmap() guarantees a single element in the range in
                 # this case, so no adjustments are needed.
-            $spec{$invlist_ref->[$i]} = pack "U0U*" , @{$invmap_ref->[$i]};
+            $spec{$invlist_ref->[$i]} = pack "W*" , @{$invmap_ref->[$i]};
         }
     }
 
@@ -73,7 +74,7 @@ sub casetest {
     my %none;
     for my $i (map { ord } split //,
 	       "\e !\"#\$%&'()+,-./0123456789:;<=>?\@[\\]^_{|}~\b") {
-	next if pack("U0U", $i) =~ /\w/;
+	next if pack("W", $i) =~ /\w/;
 	$none{$i}++ unless $seen{$i};
     }
     print "# ", scalar keys %none, " noncase mappings\n";
@@ -82,10 +83,10 @@ sub casetest {
     my $test = $already_run + 1;
 
     for my $ord (sort keys %simple) {
-	my $char = pack "U0U", $ord;
+	my $char = pack "W", $ord;
         my $disp_input = unidump($char);
 
-        my $expected = pack("U0U", $simple{$ord});
+        my $expected = pack("W", $simple{$ord});
         my $disp_expected = unidump($expected);
 
 	foreach my $name (sort keys %funcs) {
@@ -96,7 +97,7 @@ sub casetest {
     }
 
     for my $ord (sort keys %spec) {
-	my $char = chr($ord); $char .= chr(0x100); chop $char;
+	my $char = pack "W", $ord;
         my $disp_input = unidump($char);
 
 	my $expected = unidump($spec{$ord});
@@ -109,7 +110,7 @@ sub casetest {
     }
 
     for my $ord (sort { $a <=> $b } keys %none) {
-	my $char = pack "U0U", $ord;
+	my $char = pack "W", $ord;
         my $disp_input = unidump($char);
 
 	foreach my $name (sort keys %funcs) {
