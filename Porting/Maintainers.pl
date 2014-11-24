@@ -488,6 +488,7 @@ use File::Glob qw(:case);
         'CUSTOMIZED'   => [
             # Applied upstream
             q(lib/ExtUtils/MM_Unix.pm),
+            q(lib/ExtUtils/MM_Any.pm),
         ],
     },
 

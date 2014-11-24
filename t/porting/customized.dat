@@ -1,6 +1,7 @@
 DB_File cpan/DB_File/DB_File.xs f364b661bbb0df075b0c425b104577e7176fe82b
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
 Encode cpan/Encode/encoding.pm 506ec84f1fbbff189c3f4f47b92aff5afc95b98e
+ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Any.pm 5ff15de1269f618d8e3b22626568ea97d596de77
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm 793813932194c12e62c6046f62ea6f1fb65de80b
 IO::Socket::IP cpan/IO-Socket-IP/t/22timeout.t 0a65d4ca44663f70eea3c7f1ccb5faed2940611f
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
