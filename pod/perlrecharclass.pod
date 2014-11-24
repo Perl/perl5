@@ -608,10 +608,22 @@ Examples:
              #  hyphen ('-'), or the letter 'm'.
  ['-?]       #  Matches any of the characters  '()*+,-./0123456789:;<=>?
              #  (But not on an EBCDIC platform).
+ [\N{APOSTROPHE}-\N{QUESTION MARK}]
+             #  Matches any of the characters  '()*+,-./0123456789:;<=>?
+             #  even on an EBCDIC platform.
+ [\N{U+27}-\N{U+3F}] # Same. (U+27 is "'", and U+3F is "?"
 
-Perl guarantees that the ranges C<A-Z>, C<a-z>, C<0-9>, and any
+As the final two examples above show, you can achieve portablity to
+non-ASCII platforms by using the C<\N{...}> form for the range
+endpoints.  These indicate that the specified range is to be interpreted
+using Unicode values, so C<[\N{U+27}-\N{U+3F}]> means to match
+C<\N{U+27}>, C<\N{U+28}>, C<\N{U+29}>, ..., C<\N{U+3D}>, C<\N{U+3E}>,
+and C<\N{U+3F}>, whatever the native code point versions for those are.
+
+Perl also guarantees that the ranges C<A-Z>, C<a-z>, C<0-9>, and any
 subranges of these match what an English-only speaker would expect them
-to match.  That is, C<[A-Z]> matches the 26 ASCII uppercase letters;
+to match on any platform.  That is, C<[A-Z]> matches the 26 ASCII
+uppercase letters;
 C<[a-z]> matches the 26 lowercase letters; and C<[0-9]> matches the 10
 digits.  Subranges, like C<[h-k]>, match correspondingly, in this case
 just the four letters C<"h">, C<"i">, C<"j">, and C<"k">.  This is the

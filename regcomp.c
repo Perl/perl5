@@ -13742,6 +13742,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     /* In a range, counts how many 0-2 of the ends of it came from literals,
      * not escapes.  Thus we can tell if 'A' was input vs \x{C1} */
     UV literal_endpoint = 0;
+
+    /* Is the range unicode? which means on a platform that isn't 1-1 native
+     * to Unicode (i.e. non-ASCII), each code point in it should be considered
+     * to be a Unicode value.  */
+    bool unicode_range = FALSE;
 #endif
     bool invert = FALSE;    /* Is this class to be complemented */
 
@@ -13947,8 +13952,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     }
                     /* Here, is a single code point, and <value> contains it */
 #ifdef EBCDIC
-                    /* We consider named characters to be literal characters */
+                    /* We consider named characters to be literal characters,
+                     * and they are Unicode */
                     literal_endpoint++;
+                    unicode_range = TRUE;
 #endif
                 }
                 break;
@@ -14406,8 +14413,23 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
          * minus sign */
 
 	if (range) {
+#ifdef EBCDIC
+            /* For unicode ranges, we have to test that the Unicode as opposed
+             * to the native values are not decreasing.  (Above 255, and there
+             * is no difference between native and Unicode) */
+	    if (unicode_range && prevvalue < 255 && value < 255) {
+                if (NATIVE_TO_LATIN1(prevvalue) > NATIVE_TO_LATIN1(value)) {
+                    goto backwards_range;
+                }
+            }
+            else
+#endif
 	    if (prevvalue > value) /* b-a */ {
-		const int w = RExC_parse - rangebegin;
+		int w;
+#ifdef EBCDIC
+              backwards_range:
+#endif
+                w = RExC_parse - rangebegin;
                 vFAIL2utf8f(
                     "Invalid [] range \"%"UTF8f"\"",
                     UTF8fARG(UTF, w, rangebegin));
@@ -14542,32 +14564,40 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             cp_foldable_list = _add_range_to_invlist(cp_foldable_list,
                                                      prevvalue, value);
 #else
-            SV* this_range = _new_invlist(1);
-            _append_range_to_invlist(this_range, prevvalue, value);
-
-            /* In EBCDIC, the ranges 'A-Z' and 'a-z' are each not contiguous.
-             * If this range was specified using something like 'i-j', we want
-             * to include only the 'i' and the 'j', and not anything in
-             * between, so exclude non-ASCII, non-alphabetics from it.
-             * However, if the range was specified with something like
-             * [\x89-\x91] or [\x89-j], all code points within it should be
-             * included.  literal_endpoint==2 means both ends of the range used
-             * a literal character, not \x{foo} */
-	    if (literal_endpoint == 2
-                && ((isLOWER_A(prevvalue) && isLOWER_A(value))
-                    || (isUPPER_A(prevvalue) && isUPPER_A(value))))
+            /* On non-ASCII platforms, for ranges that span all of 0..255, and
+             * ones that don't require special handling, we can just add the
+             * range like we do for ASCII platforms */
+            if ((UNLIKELY(prevvalue == 0) && value >= 255)
+                || ! (prevvalue < 256
+                      && (unicode_range
+                          || (literal_endpoint == 2
+                              && ((isLOWER_A(prevvalue) && isLOWER_A(value))
+                                  || (isUPPER_A(prevvalue)
+                                      && isUPPER_A(value)))))))
             {
-                _invlist_intersection(this_range, PL_XPosix_ptrs[_CC_ASCII],
-                                      &this_range);
-
-                /* Since 'this_range' now only contains ascii, the intersection
-                 * of it with anything will still yield only ascii */
-                _invlist_intersection(this_range, PL_XPosix_ptrs[_CC_ALPHA],
-                                      &this_range);
+                cp_foldable_list = _add_range_to_invlist(cp_foldable_list,
+                                                         prevvalue, value);
             }
-            _invlist_union(cp_foldable_list, this_range, &cp_foldable_list);
-            literal_endpoint = 0;
-            SvREFCNT_dec_NN(this_range);
+            else {
+                /* Here, requires special handling.  This can be because it is
+                 * a range whose code points are considered to be Unicode, and
+                 * so must be individually translated into native, or because
+                 * its a subrange of 'A-Z' or 'a-z' which each aren't
+                 * contiguous in EBCDIC, but we have defined them to include
+                 * only the "expected" upper or lower case ASCII alphabetics.
+                 * Subranges above 255 are the same in native and Unicode, so
+                 * can be added as a range */
+                U8 start = NATIVE_TO_LATIN1(prevvalue);
+                unsigned j;
+                U8 end = (value < 256) ? NATIVE_TO_LATIN1(value) : 255;
+                for (j = start; j <= end; j++) {
+                    cp_foldable_list = add_cp_to_invlist(cp_foldable_list, LATIN1_TO_NATIVE(j));
+                }
+                if (value > 255) {
+                    cp_foldable_list = _add_range_to_invlist(cp_foldable_list,
+                                                             256, value);
+                }
+            }
 #endif
         }
 
