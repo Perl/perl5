@@ -862,16 +862,6 @@ Perl_op_clear(pTHX_ OP *o)
             o->op_targ = 0;
         }
 #endif
-    case OP_METHOD:
-#ifdef USE_ITHREADS
-	if (cMETHOPx(o)->op_class_targ) {
-	    pad_swipe(cMETHOPx(o)->op_class_targ, 1);
-	    cMETHOPx(o)->op_class_targ = 0;
-	}
-#else
-	SvREFCNT_dec(cMETHOPx(o)->op_class_sv);
-	cMETHOPx(o)->op_class_sv = NULL;
-#endif
         break;
     case OP_CONST:
     case OP_HINTSEVAL:
@@ -4692,11 +4682,6 @@ S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth
         methop->op_next = (OP*)methop;
     }
 
-#ifdef USE_ITHREADS
-    methop->op_class_targ = 0;
-#else
-    methop->op_class_sv = NULL;
-#endif
     CHANGE_TYPE(methop, type);
     methop = (METHOP*) CHECKOP(type, methop);
 
@@ -11592,7 +11577,7 @@ Perl_ck_subr(pTHX_ OP *o)
     OP *aop, *cvop;
     CV *cv;
     GV *namegv;
-    SV *const_class = NULL;
+    SV **const_class = NULL;
 
     PERL_ARGS_ASSERT_CK_SUBR;
 
@@ -11618,29 +11603,26 @@ Perl_ck_subr(pTHX_ OP *o)
 	case OP_METHOD_NAMED:
 	    if (aop->op_type == OP_CONST) {
 		aop->op_private &= ~OPpCONST_STRICT;
-		const_class = cSVOPx(aop)->op_sv;
+		const_class = &cSVOPx(aop)->op_sv;
 	    }
 	    else if (aop->op_type == OP_LIST) {
 		OP * const sib = OP_SIBLING(((UNOP*)aop)->op_first);
 		if (sib && sib->op_type == OP_CONST) {
 		    sib->op_private &= ~OPpCONST_STRICT;
-		    const_class = cSVOPx(sib)->op_sv;
+		    const_class = &cSVOPx(sib)->op_sv;
 		}
 	    }
-	    /* cache const class' name to speedup class method calls */
-	    if (const_class) {
+	    /* make class name a shared cow string to speedup method calls */
+	    /* constant string might be replaced with object, f.e. bigint */
+	    if (const_class && !SvROK(*const_class)) {
 		STRLEN len;
-		SV* shared;
-		const char* str = SvPV(const_class, len);
+		const char* str = SvPV(*const_class, len);
 		if (len) {
-		    shared = newSVpvn_share(
-			str, SvUTF8(const_class) ? -len : len, 0
+		    SV* const shared = newSVpvn_share(
+			str, SvUTF8(*const_class) ? -len : len, 0
 		    );
-#ifdef USE_ITHREADS
-		    op_relocate_sv(&shared, &cMETHOPx(cvop)->op_class_targ);
-#else
-		    cMETHOPx(cvop)->op_class_sv = shared;
-#endif
+		    SvREFCNT_dec(*const_class);
+		    *const_class = shared;
 		}
 	    }
 	    break;

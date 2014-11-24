@@ -3006,27 +3006,27 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     SV* ob;
     GV* gv;
     HV* stash;
-    SV *packsv = NULL, *const_class, *sv;
+    SV *packsv = NULL;
 
-    PERL_ARGS_ASSERT_METHOD_COMMON;
-
-    if ((const_class = cMETHOPx_class(PL_op))) {
-	stash = gv_stashsv(const_class, GV_CACHE_ONLY);
-	if (stash) goto fetch;
-    }
-
-    sv = PL_stack_base + TOPMARK == PL_stack_sp
+    SV* const sv = PL_stack_base + TOPMARK == PL_stack_sp
 	? (Perl_croak(aTHX_ "Can't call method \"%"SVf"\" without a "
 			    "package or object reference", SVfARG(meth)),
 	   (SV *)NULL)
 	: *(PL_stack_base + TOPMARK + 1);
+
+    PERL_ARGS_ASSERT_METHOD_COMMON;
 
     if (UNLIKELY(!sv))
        undefined:
 	Perl_croak(aTHX_ "Can't call method \"%"SVf"\" on an undefined value",
 		   SVfARG(meth));
 
-    SvGETMAGIC(sv);
+    if (UNLIKELY(SvGMAGICAL(sv))) mg_get(sv);
+    else if (SvIsCOW_shared_hash(sv)) { /* MyClass->meth() */
+	stash = gv_stashsv(sv, GV_CACHE_ONLY);
+	if (stash) goto fetch;
+    }
+
     if (SvROK(sv))
 	ob = MUTABLE_SV(SvRV(sv));
     else if (!SvOK(sv)) goto undefined;
