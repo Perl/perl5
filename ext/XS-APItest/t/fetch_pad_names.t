@@ -307,8 +307,10 @@ sub general_tests {
     }
 
     is @$names_av, $tests->{pad_size}{total}{cmp}, $tests->{pad_size}{total}{msg};
-    is grep( Encode::is_utf8($_), @$names_av), $tests->{pad_size}{utf8}{cmp};
-    is grep( !Encode::is_utf8($_), @$names_av), $tests->{pad_size}{invariant}{cmp};
+    is grep( Encode::is_utf8($_), @$names_av),
+       $tests->{pad_size}{utf8}{cmp}, $tests->{pad_size}{utf8}{msg};
+    is grep( !Encode::is_utf8($_), @$names_av), $tests->{pad_size}{invariant}{cmp},
+       $tests->{pad_size}{invariant}{msg};
 
     for my $var (@{$tests->{vars}}) {
         no warnings 'experimental::smartmatch';
