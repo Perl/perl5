@@ -2128,7 +2128,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 			CvNAME_HEK_set(
 			    sv,
 			    share_hek(SvPVX_const(namesv)+1,
-				      SvCUR(namesv) - 1
+				      (SvCUR(namesv) - 1)
 					 * (SvUTF8(namesv) ? -1 : 1),
 				      hash)
 			);

@@ -7935,7 +7935,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    CvNAME_HEK_set(*spot, hek =
 		share_hek(
 		    PadnamePV(name)+1,
-		    PadnameLEN(name)-1 * (PadnameUTF8(name) ? -1 : 1), hash
+		    (PadnameLEN(name)-1) * (PadnameUTF8(name) ? -1 : 1),
+		    hash
 		)
 	    );
 	    CvLEXICAL_on(*spot);
@@ -8092,7 +8093,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    U32 hash;
 	    PERL_HASH(hash, PadnamePV(name)+1, PadnameLEN(name)-1);
 	    hek = share_hek(PadnamePV(name)+1,
-		      PadnameLEN(name)-1 * (PadnameUTF8(name) ? -1 : 1),
+		      (PadnameLEN(name)-1) * (PadnameUTF8(name) ? -1 : 1),
 		      hash);
 	}
 	CvNAME_HEK_set(cv, hek);

@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 144;
+plan 146;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -424,6 +424,13 @@ is runperl(switches => ['-lXMfeature=:all'],
        " - no 'No comma allowed' after state sub\n";
   curr_test(curr_test()+1);
 }
+{
+  use utf8;
+  state sub φου;
+  eval { φου };
+  like $@, qr/^Undefined subroutine &φου called at /,
+    'state sub with utf8 name';
+}
 
 # -------------------- my -------------------- #
 
@@ -792,6 +799,13 @@ is runperl(switches => ['-lXMfeature=:all'],
   my $x = 43;
   my sub y :prototype() {$x};
   is y, 43, 'my sub that looks like constant closure';
+}
+{
+  use utf8;
+  my sub φου;
+  eval { φου };
+  like $@, qr/^Undefined subroutine &φου called at /,
+    'my sub with utf8 name';
 }
 
 # -------------------- Interactions (and misc tests) -------------------- #
