@@ -2259,6 +2259,8 @@ cpan/Test-Simple/lib/Test/Builder/Module.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Builder.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Builder/Tester/Color.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Builder/Tester.pm			Test::Simple module
+cpan/Test-Simple/lib/Test/CanFork.pm			Test::Simple module
+cpan/Test-Simple/lib/Test/CanThread.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/FAQ.pod			Test::Simple module
 cpan/Test-Simple/lib/Test/More/DeepCheck.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/More/DeepCheck/Strict.pm			Test::Simple module
@@ -2285,6 +2287,7 @@ cpan/Test-Simple/lib/Test/Stream/ExitMagic/Context.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/ExitMagic.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Exporter/Meta.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Exporter.pm			Test::Simple module
+cpan/Test-Simple/lib/Test/Stream/ForceExit.pm			Test-Simple module
 cpan/Test-Simple/lib/Test/Stream/IOSets.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Meta.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/PackageUtil.pm			Test::Simple module
@@ -2486,6 +2489,7 @@ cpan/Test-Simple/t/Test-Stream-Event.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-ExitMagic-Context.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-Exporter-Meta.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-Exporter.t			Test::Simple Test
+cpan/Test-Simple/t/Test-Stream-ForceExit.t			Test-Simple test
 cpan/Test-Simple/t/Test-Stream-IOSets.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-Meta.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-PackageUtil.t			Test::Simple Test

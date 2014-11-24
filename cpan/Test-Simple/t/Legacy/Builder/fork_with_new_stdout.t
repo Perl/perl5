@@ -1,27 +1,15 @@
 #!perl -w
 use strict;
 use warnings;
+
+use Test::CanFork;
+
 use IO::Pipe;
 use Test::Builder;
-use Config;
 
 my $b = Test::Builder->new;
 $b->reset;
-
-my $Can_Fork = $Config{d_fork}
-    || (($^O eq 'MSWin32' || $^O eq 'NetWare')
-    and $Config{useithreads}
-    and $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/);
-
-if (!$Can_Fork) {
-    $b->plan('skip_all' => "This system cannot fork");
-}
-elsif ($^O eq 'MSWin32' && $] == 5.010000) {
-    $b->plan('skip_all' => "5.10 has fork/threading issues that break fork on win32");
-}
-else {
-    $b->plan('tests' => 2);
-}
+$b->plan('tests' => 2);
 
 my $pipe = IO::Pipe->new;
 if (my $pid = fork) {

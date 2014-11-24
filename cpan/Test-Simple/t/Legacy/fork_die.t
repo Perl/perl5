@@ -1,26 +1,15 @@
 use strict;
 use warnings;
 
-use Config;
-
 BEGIN {
-    my $Can_Fork = $Config{d_fork} ||
-                   (($^O eq 'MSWin32' || $^O eq 'NetWare') and
-                    $Config{useithreads} and
-                    $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/
-                   );
-
-    if( !$Can_Fork ) {
+    if ($^O eq 'MSWin32' || $^O eq 'NetWare') {
         require Test::More;
-        Test::More::plan(skip_all => "This system cannot fork");
-        exit 0;
-    }
-    elsif ($^O eq 'MSWin32' && $] == 5.010000) {
-        require Test::More;
-        Test::More::plan('skip_all' => "5.10 has fork/threading issues that break fork on win32");
+        Test::More::plan(skip_all => "This test is unreliable on $^O, also not likely to be helpful");
         exit 0;
     }
 }
+
+use Test::CanFork;
 
 # The failure case for this test is producing 2 results, 1 pass and 1 fail,
 # both with the same test number. If this test file does anything other than 1
