@@ -11153,8 +11153,11 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    case '&':
 		proto++;
 		arg++;
-		if (o3->op_type != OP_REFGEN && o3->op_type != OP_SREFGEN
-		 && o3->op_type != OP_UNDEF)
+		if (o3->op_type != OP_SREFGEN
+		 || (  cUNOPx(cUNOPx(o3)->op_first)->op_first->op_type
+			!= OP_ANONCODE
+		    && cUNOPx(cUNOPx(o3)->op_first)->op_first->op_type
+			!= OP_RV2CV))
 		    bad_type_gv(arg,
 			    arg == 1 ? "block or sub {}" : "sub {}",
 			    namegv, 0, o3);

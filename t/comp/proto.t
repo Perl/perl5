@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..201\n";
+print "1..206\n";
 
 my $i = 1;
 
@@ -289,6 +289,21 @@ a_sub \&tmp_sub_1;
 @array = ( \&tmp_sub_1 );
 eval 'a_sub @array';
 print "not " unless $@;
+printf "ok %d\n",$i++;
+eval 'a_sub \@array';
+print "not " unless $@ =~ /Type of arg/;
+printf "ok %d\n",$i++;
+eval 'a_sub \%hash';
+print "not " unless $@ =~ /Type of arg/;
+printf "ok %d\n",$i++;
+eval 'a_sub \$scalar';
+print "not " unless $@ =~ /Type of arg/;
+printf "ok %d\n",$i++;
+eval 'a_sub \($list, %of, @refs)';
+print "not " unless $@ =~ /Type of arg/;
+printf "ok %d\n",$i++;
+eval 'a_sub undef';
+print "not " unless $@ =~ /Type of arg/;
 printf "ok %d\n",$i++;
 
 ##
