@@ -4567,6 +4567,67 @@ STATIC bool S_rck_gosub(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
     return 0;
 }
 
+STATIC bool S_rck_exact(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    SSize_t l = STR_LEN(params->scan);
+    UV uc;
+
+    PERL_ARGS_ASSERT_RCK_EXACT;
+
+    assert(l);
+    if (UTF) {
+        const U8 * const s = (U8*)STRING(params->scan);
+        uc = utf8_to_uvchr_buf(s, s + l, NULL);
+        l = utf8_length(s, s + l);
+    } else {
+        uc = *((U8*)STRING(params->scan));
+    }
+    params->min += l;
+    if (params->flags & SCF_DO_SUBSTR) { /* Update longest substr. */
+        /* The code below prefers earlier match for fixed
+           offset, later match for variable offset.  */
+        if (params->data->last_end == -1) { /* Update the start info. */
+            params->data->last_start_min = params->data->pos_min;
+            params->data->last_start_max = params->is_inf
+                ? SSize_t_MAX : params->data->pos_min + params->data->pos_delta;
+        }
+        sv_catpvn(params->data->last_found, STRING(params->scan), STR_LEN(params->scan));
+        if (UTF)
+            SvUTF8_on(params->data->last_found);
+
+        {
+            SV * const sv = params->data->last_found;
+            MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
+                mg_find(sv, PERL_MAGIC_utf8) : NULL;
+            if (mg && mg->mg_len >= 0)
+                mg->mg_len += utf8_length((U8*)STRING(params->scan),
+                        (U8*)STRING(params->scan) + STR_LEN(params->scan));
+        }
+
+        params->data->last_end = params->data->pos_min + l;
+        params->data->pos_min += l; /* As in the first entry. */
+        params->data->flags &= ~SF_BEFORE_EOL;
+    }
+
+    /* ANDing the code point leaves at most it, and not in locale, and
+     * can't match null string */
+    if (params->flags & SCF_DO_STCLASS_AND) {
+        ssc_cp_and(params->data->start_class, uc);
+        ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+        ssc_clear_locale(params->data->start_class);
+    } else if (params->flags & SCF_DO_STCLASS_OR) {
+        ssc_add_cp(params->data->start_class, uc);
+        ssc_and(pRExC_state, params->data->start_class,
+                (regnode_charclass *)params->and_withp);
+
+        /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
+        ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+    }
+    params->flags &= ~SCF_DO_STCLASS;
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
 STATIC void S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params,
         regnode *start, regnode *end, I32 paren, U32 recursed_depth)
 {
@@ -5099,60 +5160,9 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
         return rck_suspend(pRExC_state, params);
     } else if (OP(params->scan) == GOSUB) {
         return rck_gosub(pRExC_state, params);
-    }
-    else if (OP(params->scan) == EXACT || OP(params->scan) == EXACTL) {
-        SSize_t l = STR_LEN(params->scan);
-        UV uc;
-        assert(l);
-        if (UTF) {
-            const U8 * const s = (U8*)STRING(params->scan);
-            uc = utf8_to_uvchr_buf(s, s + l, NULL);
-            l = utf8_length(s, s + l);
-        } else {
-            uc = *((U8*)STRING(params->scan));
-        }
-        params->min += l;
-        if (params->flags & SCF_DO_SUBSTR) { /* Update longest substr. */
-            /* The code below prefers earlier match for fixed
-               offset, later match for variable offset.  */
-            if (params->data->last_end == -1) { /* Update the start info. */
-                params->data->last_start_min = params->data->pos_min;
-                params->data->last_start_max = params->is_inf
-                    ? SSize_t_MAX : params->data->pos_min + params->data->pos_delta;
-            }
-            sv_catpvn(params->data->last_found, STRING(params->scan), STR_LEN(params->scan));
-            if (UTF)
-                SvUTF8_on(params->data->last_found);
-            {
-                SV * const sv = params->data->last_found;
-                MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
-                    mg_find(sv, PERL_MAGIC_utf8) : NULL;
-                if (mg && mg->mg_len >= 0)
-                    mg->mg_len += utf8_length((U8*)STRING(params->scan),
-                                          (U8*)STRING(params->scan)+STR_LEN(params->scan));
-            }
-            params->data->last_end = params->data->pos_min + l;
-            params->data->pos_min += l; /* As in the first entry. */
-            params->data->flags &= ~SF_BEFORE_EOL;
-        }
-
-        /* ANDing the code point leaves at most it, and not in locale, and
-         * can't match null string */
-        if (params->flags & SCF_DO_STCLASS_AND) {
-            ssc_cp_and(params->data->start_class, uc);
-            ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
-            ssc_clear_locale(params->data->start_class);
-        }
-        else if (params->flags & SCF_DO_STCLASS_OR) {
-            ssc_add_cp(params->data->start_class, uc);
-            ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
-
-            /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
-            ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
-        }
-        params->flags &= ~SCF_DO_STCLASS;
-    }
-    else if (PL_regkind[OP(params->scan)] == EXACT) {
+    } else if (OP(params->scan) == EXACT || OP(params->scan) == EXACTL) {
+        return rck_exact(pRExC_state, params);
+    } else if (PL_regkind[OP(params->scan)] == EXACT) {
         /* But OP != EXACT!, so is EXACTFish */
         SSize_t l = STR_LEN(params->scan);
         const U8 * s = (U8*)STRING(params->scan);
