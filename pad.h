@@ -143,7 +143,6 @@ typedef enum {
 #define padadd_NO_DUP_CHECK	0x04	   /* skip warning on dups. */
 #define padadd_STALEOK		0x08	   /* allow stale lexical in active
 					    * sub, but only one level up */
-#define padadd_UTF8_NAME	SVf_UTF8   /* name is UTF-8 encoded. */
 
 /* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively determine
  * whether PL_comppad and PL_curpad are consistent and whether they have
@@ -234,7 +233,7 @@ GV slot.
 The length of the name.
 
 =for apidoc Amx|bool|PadnameUTF8|PADNAME pn
-Whether PadnamePV is in UTF8.
+Whether PadnamePV is in UTF8.  Currently, this is always true.
 
 =for apidoc Amx|SV *|PadnameSV|PADNAME pn
 Returns the pad name as an SV.  This is currently just C<pn>.  It will
@@ -315,7 +314,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 
 #define PadnamePV(pn)		(SvPOKp(pn) ? SvPVX_const(pn) : NULL)
 #define PadnameLEN(pn)		((SV*)(pn) == &PL_sv_undef ? 0 : SvCUR(pn))
-#define PadnameUTF8(pn)		!!SvUTF8(pn)
+#define PadnameUTF8(pn)		(assert_(SvUTF8(pn)) 1)
 #define PadnameSV(pn)		pn
 #define PadnameIsOUR(pn)	!!SvPAD_OUR(pn)
 #define PadnameOURSTASH(pn)	SvOURSTASH(pn)

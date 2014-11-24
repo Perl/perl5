@@ -613,8 +613,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 
     off = pad_add_name_pvn(name, len,
 		       (is_our ? padadd_OUR :
-		        PL_parser->in_my == KEY_state ? padadd_STATE : 0)
-                            | ( flags & SVf_UTF8 ? SVf_UTF8 : 0 ),
+		        PL_parser->in_my == KEY_state ? padadd_STATE : 0),
 		    PL_parser->in_my_stash,
 		    (is_our
 		        /* $_ is always in main::, even with our */
