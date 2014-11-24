@@ -2473,8 +2473,16 @@ Es	|bool	|rck_branchj	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
 Es	|bool	|rck_ifthen	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
+Es	|bool	|rck_suspend	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
+Es	|bool	|rck_gosub	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
 Es	|void	|rck_make_trie	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
+Es	|void	|rck_enframe	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params \
+				|NN regnode *start|NN regnode *end \
+				|I32 paren|U32 recursed_depth
 EsRn	|U32	|add_data	|NN RExC_state_t* const pRExC_state \
 				|NN const char* const s|const U32 n
 rs	|void	|re_croak2	|bool utf8|NN const char* pat1|NN const char* pat2|...

@@ -5303,11 +5303,20 @@ STATIC bool	S_rck_definep(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 STATIC void	S_rck_elide_nothing(pTHX_ regnode *node);
 #define PERL_ARGS_ASSERT_RCK_ELIDE_NOTHING	\
 	assert(node)
+STATIC void	S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params, regnode *start, regnode *end, I32 paren, U32 recursed_depth);
+#define PERL_ARGS_ASSERT_RCK_ENFRAME	\
+	assert(pRExC_state); assert(params); assert(start); assert(end)
+STATIC bool	S_rck_gosub(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_GOSUB	\
+	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_ifthen(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_IFTHEN	\
 	assert(pRExC_state); assert(params)
 STATIC void	S_rck_make_trie(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_MAKE_TRIE	\
+	assert(pRExC_state); assert(params)
+STATIC bool	S_rck_suspend(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_SUSPEND	\
 	assert(pRExC_state); assert(params)
 PERL_STATIC_NO_RET void	S_re_croak2(pTHX_ bool utf8, const char* pat1, const char* pat2, ...)
 			__attribute__noreturn__;

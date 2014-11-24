@@ -4472,6 +4472,139 @@ STATIC bool S_rck_ifthen(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
     return 0;
 }
 
+STATIC bool S_rck_suspend(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_ARGS_ASSERT_RCK_SUSPEND;
+
+    rck_enframe(pRExC_state, params, params->scan + 2, regnext(params->scan),
+            params->stopparen, params->recursed_depth);
+    return 0;
+}
+
+STATIC bool S_rck_gosub(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    U32 my_recursed_depth = params->recursed_depth;
+    I32 paren;
+    regnode *start, *end;
+
+    PERL_ARGS_ASSERT_RCK_GOSUB;
+
+    /* Note we must set up RExC_recurse[] here, so we can later be fixed up
+     * to point to the correct node to recurse to. */
+    paren = ARG(params->scan);
+    RExC_recurse[ARG2L(params->scan)] = params->scan;
+    start = RExC_open_parens[paren];
+    end = RExC_close_parens[paren];
+
+    if (
+        (params->flags & SCF_IN_DEFINE)
+        || (
+            (params->is_inf_internal || params->is_inf || (params->data && params->data->flags & SF_IS_INF))
+            &&
+            ((params->flags & (SCF_DO_STCLASS | SCF_DO_SUBSTR)) == 0)
+        )
+    ) {
+        /* no need to do anything here if we are in a define. */
+        /* or we are after some kind of infinite construct
+         * so we can skip recursing into this item.
+         * Since it is infinite we will not change the maxlen
+         * or delta, and if we miss something that might raise
+         * the minlen it will merely pessimise a little.
+         *
+         * Iow /(?(DEFINE)(?<foo>foo|food))a+(?&foo)/
+         * might result in a minlen of 1 and not of 4,
+         * but this doesn't make us mismatch, just try a bit
+         * harder than we should.
+         * */
+        params->scan = regnext(params->scan);
+        return 0;
+    }
+
+    if (
+        !params->recursed_depth
+        || !PAREN_TEST(params->recursed_depth - 1, paren)
+    ) {
+        /* it is quite possible that there are more efficient ways
+         * to do this. We maintain a bitmap per level of recursion
+         * of which patterns we have entered so we can detect if a
+         * pattern creates a possible infinite loop. When we
+         * recurse down a level we copy the previous levels bitmap
+         * down. When we are at recursion level 0 we zero the top
+         * level bitmap. It would be nice to implement a different
+         * more efficient way of doing this. In particular the top
+         * level bitmap may be unnecessary.
+         */
+        if (!params->recursed_depth) {
+            Zero(RExC_study_chunk_recursed, RExC_study_chunk_recursed_bytes, U8);
+        } else {
+            Copy(PAREN_OFFSET(params->recursed_depth - 1),
+                 PAREN_OFFSET(params->recursed_depth),
+                 RExC_study_chunk_recursed_bytes, U8);
+        }
+        /* we havent recursed into this paren yet, so recurse into it */
+        DEBUG_STUDYDATA("gosub-set", params->data, params->depth, params->is_inf);
+        PAREN_SET(params->recursed_depth, paren);
+        my_recursed_depth = params->recursed_depth + 1;
+    } else {
+        DEBUG_STUDYDATA("gosub-inf", params->data, params->depth, params->is_inf);
+        /* some form of infinite recursion, assume infinite length */
+        if (params->flags & SCF_DO_SUBSTR) {
+            scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+            params->data->cur_is_floating = 1; /* float */
+        }
+        params->is_inf = params->is_inf_internal = 1;
+        if (params->flags & SCF_DO_STCLASS_OR) /* Allow everything */
+            ssc_anything(params->data->start_class);
+        params->flags &= ~SCF_DO_STCLASS;
+
+        start= NULL; /* reset start so we dont recurse later on. */
+    }
+
+    if (start)
+        rck_enframe(pRExC_state, params, start, end, paren, my_recursed_depth);
+    else
+        params->scan = regnext(params->scan);
+    return 0;
+}
+
+STATIC void S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params,
+        regnode *start, regnode *end, I32 paren, U32 recursed_depth)
+{
+    scan_frame *newframe;
+    PERL_ARGS_ASSERT_RCK_ENFRAME;
+
+    if (!RExC_frame_last) {
+        Newxz(newframe, 1, scan_frame);
+        SAVEDESTRUCTOR_X(S_unwind_scan_frames, newframe);
+        RExC_frame_head = newframe;
+        RExC_frame_count++;
+    } else if (!RExC_frame_last->next_frame) {
+        Newxz(newframe, 1, scan_frame);
+        RExC_frame_last->next_frame = newframe;
+        newframe->prev_frame = RExC_frame_last;
+        RExC_frame_count++;
+    } else {
+        newframe = RExC_frame_last->next_frame;
+    }
+    RExC_frame_last = newframe;
+
+    newframe->next_regnode = regnext(params->scan);
+    newframe->last_regnode = params->last;
+    newframe->stopparen = params->stopparen;
+    newframe->prev_recursed_depth = params->recursed_depth;
+    newframe->this_prev_frame = params->frame;
+
+    DEBUG_STUDYDATA("frame-new", params->data, params->depth, params->is_inf);
+    DEBUG_PEEP("fnew", params->scan, params->depth, params->flags);
+
+    params->frame = newframe;
+    params->scan =  start;
+    params->stopparen = paren;
+    params->last = end;
+    params->depth = params->depth + 1;
+    params->recursed_depth = recursed_depth;
+}
+
 STATIC void S_rck_make_trie(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 {
     SSize_t max1 = 0;
@@ -4962,130 +5095,10 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
         return rck_branchj(pRExC_state, params);
     } else if (OP(params->scan) == IFTHEN) {
         return rck_ifthen(pRExC_state, params);
-    } else if (OP(params->scan) == SUSPEND || OP(params->scan) == GOSUB) {
-        I32 paren = 0;
-        regnode *start = NULL;
-        regnode *end = NULL;
-        U32 my_recursed_depth= params->recursed_depth;
-
-        if (OP(params->scan) != SUSPEND) { /* GOSUB */
-            /* Do setup, note this code has side effects beyond
-             * the rest of this block. Specifically setting
-             * RExC_recurse[] must happen at least once during
-             * study_chunk(). */
-            paren = ARG(params->scan);
-            RExC_recurse[ARG2L(params->scan)] = params->scan;
-            start = RExC_open_parens[paren];
-            end   = RExC_close_parens[paren];
-
-            /* NOTE we MUST always execute the above code, even
-             * if we do nothing with a GOSUB */
-            if (
-                ( params->flags & SCF_IN_DEFINE )
-                ||
-                (
-                    (params->is_inf_internal || params->is_inf || (params->data && params->data->flags & SF_IS_INF))
-                    &&
-                    ( (params->flags & (SCF_DO_STCLASS | SCF_DO_SUBSTR)) == 0 )
-                )
-            ) {
-                /* no need to do anything here if we are in a define. */
-                /* or we are after some kind of infinite construct
-                 * so we can skip recursing into this item.
-                 * Since it is infinite we will not change the maxlen
-                 * or delta, and if we miss something that might raise
-                 * the minlen it will merely pessimise a little.
-                 *
-                 * Iow /(?(DEFINE)(?<foo>foo|food))a+(?&foo)/
-                 * might result in a minlen of 1 and not of 4,
-                 * but this doesn't make us mismatch, just try a bit
-                 * harder than we should.
-                 * */
-                params->scan= regnext(params->scan);
-                return 0;
-            }
-
-            if (
-                !params->recursed_depth
-                || !PAREN_TEST(params->recursed_depth - 1, paren)
-            ) {
-                /* it is quite possible that there are more efficient ways
-                 * to do this. We maintain a bitmap per level of recursion
-                 * of which patterns we have entered so we can detect if a
-                 * pattern creates a possible infinite loop. When we
-                 * recurse down a level we copy the previous levels bitmap
-                 * down. When we are at recursion level 0 we zero the top
-                 * level bitmap. It would be nice to implement a different
-                 * more efficient way of doing this. In particular the top
-                 * level bitmap may be unnecessary.
-                 */
-                if (!params->recursed_depth) {
-                    Zero(RExC_study_chunk_recursed, RExC_study_chunk_recursed_bytes, U8);
-                } else {
-                    Copy(PAREN_OFFSET(params->recursed_depth - 1),
-                         PAREN_OFFSET(params->recursed_depth),
-                         RExC_study_chunk_recursed_bytes, U8);
-                }
-                /* we havent recursed into this paren yet, so recurse into it */
-                DEBUG_STUDYDATA("gosub-set", params->data, params->depth, params->is_inf);
-                PAREN_SET(params->recursed_depth, paren);
-                my_recursed_depth= params->recursed_depth + 1;
-            } else {
-                DEBUG_STUDYDATA("gosub-inf", params->data, params->depth, params->is_inf);
-                /* some form of infinite recursion, assume infinite length
-                 * */
-                if (params->flags & SCF_DO_SUBSTR) {
-                    scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-                    params->data->cur_is_floating = 1 /*float*/;
-                }
-                params->is_inf = params->is_inf_internal = 1;
-                if (params->flags & SCF_DO_STCLASS_OR) /* Allow everything */
-                    ssc_anything(params->data->start_class);
-                params->flags &= ~SCF_DO_STCLASS;
-
-                start= NULL; /* reset start so we dont recurse later on. */
-            }
-        } else {
-            paren = params->stopparen;
-            start = params->scan + 2;
-            end = regnext(params->scan);
-        }
-        if (start) {
-            scan_frame *newframe;
-            assert(end);
-            if (!RExC_frame_last) {
-                Newxz(newframe, 1, scan_frame);
-                SAVEDESTRUCTOR_X(S_unwind_scan_frames, newframe);
-                RExC_frame_head= newframe;
-                RExC_frame_count++;
-            } else if (!RExC_frame_last->next_frame) {
-                Newxz(newframe,1,scan_frame);
-                RExC_frame_last->next_frame= newframe;
-                newframe->prev_frame= RExC_frame_last;
-                RExC_frame_count++;
-            } else {
-                newframe= RExC_frame_last->next_frame;
-            }
-            RExC_frame_last= newframe;
-
-            newframe->next_regnode = regnext(params->scan);
-            newframe->last_regnode = params->last;
-            newframe->stopparen = params->stopparen;
-            newframe->prev_recursed_depth = params->recursed_depth;
-            newframe->this_prev_frame= params->frame;
-
-            DEBUG_STUDYDATA("frame-new", params->data, params->depth, params->is_inf);
-            DEBUG_PEEP("fnew", params->scan, params->depth, params->flags);
-
-            params->frame = newframe;
-            params->scan =  start;
-            params->stopparen = paren;
-            params->last = end;
-            params->depth = params->depth + 1;
-            params->recursed_depth= my_recursed_depth;
-
-            return 0;
-        }
+    } else if (OP(params->scan) == SUSPEND) {
+        return rck_suspend(pRExC_state, params);
+    } else if (OP(params->scan) == GOSUB) {
+        return rck_gosub(pRExC_state, params);
     }
     else if (OP(params->scan) == EXACT || OP(params->scan) == EXACTL) {
         SSize_t l = STR_LEN(params->scan);
