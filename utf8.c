@@ -2179,11 +2179,16 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 
 	if (flags & FOLD_FLAGS_LOCALE) {
 
+#           define CAP_SHARP_S   LATIN_CAPITAL_LETTER_SHARP_S_UTF8
+#           define LONG_S_T      LATIN_SMALL_LIGATURE_LONG_S_T_UTF8
+
+            const unsigned int cap_sharp_s_len = sizeof(CAP_SHARP_S) - 1;
+            const unsigned int long_s_t_len    = sizeof(LONG_S_T) - 1;
+
             /* Special case these two characters, as what normally gets
              * returned under locale doesn't work */
-            if (UTF8SKIP(p) == sizeof(LATIN_CAPITAL_LETTER_SHARP_S_UTF8) - 1
-                && memEQ((char *) p, LATIN_CAPITAL_LETTER_SHARP_S_UTF8,
-                          sizeof(LATIN_CAPITAL_LETTER_SHARP_S_UTF8) - 1))
+            if (UTF8SKIP(p) == cap_sharp_s_len
+                && memEQ((char *) p, CAP_SHARP_S, cap_sharp_s_len))
             {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
                 Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
@@ -2191,9 +2196,8 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
                               "resolved to \"\\x{17F}\\x{17F}\".");
                 goto return_long_s;
             }
-            else if (UTF8SKIP(p) == sizeof(LATIN_SMALL_LIGATURE_LONG_S_T_UTF8) - 1
-                && memEQ((char *) p, LATIN_SMALL_LIGATURE_LONG_S_T_UTF8,
-                          sizeof(LATIN_SMALL_LIGATURE_LONG_S_T_UTF8) - 1))
+            else if (UTF8SKIP(p) == long_s_t_len
+                     && memEQ((char *) p, LONG_S_T, long_s_t_len))
             {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
                 Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
