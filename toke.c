@@ -3476,7 +3476,7 @@ S_scan_const(pTHX_ char *start)
 			    d = off + SvGROW(sv, off + len + (STRLEN)(send - s) + 1);
 			}
                         if (! SvUTF8(res)) {    /* Make sure \N{} return is UTF-8 */
-                            sv_utf8_upgrade(res);
+                            sv_utf8_upgrade_flags(res, SV_UTF8_NO_ENCODING);
                             str = SvPV_const(res, len);
                         }
 			Copy(str, d, len, char);
