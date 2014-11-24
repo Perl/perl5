@@ -455,7 +455,9 @@ my $utf8_locale = find_utf8_ctype_locale();
 {
     use feature qw( fc );
     use locale;
+    no warnings 'locale';   # Would otherwise warn
     is(fc("\x{1E9E}"), fc("\x{17F}\x{17F}"), 'fc("\x{1E9E}") eq fc("\x{17F}\x{17F}")');
+    use warnings 'locale';
     SKIP: {
         skip 'Can\'t find a UTF-8 locale', 1 unless defined $utf8_locale;
         setlocale(&LC_CTYPE, $utf8_locale);
