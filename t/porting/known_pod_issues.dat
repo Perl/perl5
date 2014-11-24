@@ -20,6 +20,7 @@ Array::Base
 Attribute::Constant
 B::Lint
 B::Lint::Debug
+B::Utils
 basename(1)
 Benchmark::Perl::Formance
 ByteLoader
@@ -104,6 +105,7 @@ Mail::Send
 Mail::SpamAssassin
 man(5)
 man(7)
+Mason
 Math::Big
 Math::BigInt::Constant
 Math::BigInt::GMP
