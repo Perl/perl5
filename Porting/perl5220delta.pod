@@ -389,10 +389,6 @@ L<Future> version 0.29
 
 =item *
 
-L<Hook::LexWrap> version 0.24
-
-=item *
-
 L<Mason> version 2.22
 
 =item *
