@@ -127,7 +127,12 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
+
+Only declare C<file> unused if we actually define it.
+
+Improve generated C<RETVAL> code generation to avoid repeated
+references to C<ST(0)>.  [perl #123278]
 
 =back
 
