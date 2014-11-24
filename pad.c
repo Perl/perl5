@@ -1234,9 +1234,8 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			 && warn && ckWARN(WARN_CLOSURE)) {
 			newwarn = 0;
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
-			    "Variable \"%"SVf"\" will not stay shared",
-                            SVfARG(newSVpvn_flags(namepv, namelen,
-                                                  SVs_TEMP|SVf_UTF8)));
+			    "Variable \"%"UTF8f"\" will not stay shared",
+			     UTF8fARG(1, namelen, namepv));
 		    }
 
 		    if (fake_offset && CvANON(cv)
