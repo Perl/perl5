@@ -11230,10 +11230,11 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 			    bad_type_gv(arg, "symbol", namegv, 0, o3);
 			break;
 		    case '&':
-			if (o3->op_type == OP_ENTERSUB)
+			if (o3->op_type == OP_ENTERSUB
+			 && !(o3->op_flags & OPf_STACKED))
 			    goto wrapref;
 			if (!contextclass)
-			    bad_type_gv(arg, "subroutine entry", namegv, 0,
+			    bad_type_gv(arg, "subroutine", namegv, 0,
 				    o3);
 			break;
 		    case '$':

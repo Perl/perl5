@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..211\n";
+print "1..214\n";
 
 my $i = 1;
 
@@ -325,6 +325,17 @@ a_subx &tmp_sub_2;
 eval 'a_subx @array';
 print "not " unless $@;
 printf "ok %d\n",$i++;
+my $bad =
+    qr/Type of arg 1 to .* must be subroutine \(not subroutine entry\)/;
+eval 'a_subx &tmp_sub_2()';
+print "not " unless $@ =~ $bad;
+printf "ok %d - \\& prohibits &foo()\n",$i++;
+eval 'a_subx tmp_sub_2()';
+print "not " unless $@ =~ $bad;
+printf "ok %d - \\& prohibits foo()\n",$i++;
+eval 'a_subx tmp_sub_2';
+print "not " unless $@ =~ $bad;
+printf "ok %d - \\& prohibits foo where foo is an existing sub\n",$i++;
 
 ##
 ##
