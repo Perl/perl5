@@ -51,10 +51,14 @@ within non-zero characters.
 /*
 =for apidoc is_ascii_string
 
-Returns true if the first C<len> bytes of the string C<s> are the same whether
-or not the string is encoded in UTF-8 (or UTF-EBCDIC on EBCDIC machines).  That
-is, if they are invariant.  On ASCII-ish machines, only ASCII characters
-fit this definition, hence the function's name.
+Returns true iff the first C<len> bytes of the string C<s> are the same
+regardless of the UTF-8 encoding of the string (or UTF-EBCDIC encoding on
+EBCDIC machines).  That is, if they are UTF-8 invariant.  On ASCII-ish
+machines, all the ASCII characters and only the ASCII characters fit this
+definition, hence the function's name.
+On EBCDIC machines, the ASCII-range characters are invariant, but
+so also are the C1 controls and C<\c?> (which isn't in the ASCII range on
+EBCDIC).
 
 If C<len> is 0, it will be calculated using C<strlen(s)>, (which means if you
 use this option, that C<s> can't have embedded C<NUL> characters and has to
