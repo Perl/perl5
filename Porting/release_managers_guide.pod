@@ -851,6 +851,11 @@ Over the lifetime of your distribution this will save a lot of
 people a small amount of download time and disk space, which adds
 up.
 
+In order to produce the C<xz> tarball, XZ Utils are required. The C<xz>
+utility is included with most modern UNIX-type operating systems and
+is available for Cygwin. A Windows port is available from
+L<http://tukaani.org/xz/>.
+
 Create a tarball. Use the C<-s> option to specify a suitable suffix for
 the tarball and directory name:
 
@@ -860,13 +865,13 @@ the tarball and directory name:
                         # git clean should not output anything!
  $ git status           # and there's nothing lying around
 
- $ perl Porting/makerel -b -s RC1            # for a release candidate
- $ perl Porting/makerel -b                   # for a final release
+ $ perl Porting/makerel -bx -s RC1            # for a release candidate
+ $ perl Porting/makerel -bx                   # for a final release
 
 This creates the  directory F<../perl-x.y.z-RC1> or similar, copies all
 the MANIFEST files into it, sets the correct permissions on them, then
 tars it up as F<../perl-x.y.z-RC1.tar.gz>. With C<-b>, it also creates a
-C<tar.bz2> file.
+C<tar.bz2> file. The C<-x> also produces a C<tar.xz> file.
 
 If you're getting your tarball suffixed with -uncommitted and you're sure
 your changes were all committed, you can override the suffix with:
@@ -886,7 +891,7 @@ Once you have a tarball it's time to test the tarball (not the repository).
 
 =head4 Copy the tarball to a web server
 
-Copy the tarballs (.gz and possibly .bz2) to a web server somewhere you
+Copy the tarballs (.gz and possibly .bz2 and .xz) to a web server somewhere you
 have access to.
 
 =head4 Download the tarball to another machine
