@@ -49,14 +49,13 @@ within non-zero characters.
 */
 
 /*
-=for apidoc is_ascii_string
+=for apidoc is_invariant_string
 
 Returns true iff the first C<len> bytes of the string C<s> are the same
 regardless of the UTF-8 encoding of the string (or UTF-EBCDIC encoding on
 EBCDIC machines).  That is, if they are UTF-8 invariant.  On ASCII-ish
 machines, all the ASCII characters and only the ASCII characters fit this
-definition, hence the function's name.
-On EBCDIC machines, the ASCII-range characters are invariant, but
+definition.  On EBCDIC machines, the ASCII-range characters are invariant, but
 so also are the C1 controls and C<\c?> (which isn't in the ASCII range on
 EBCDIC).
 
@@ -70,12 +69,12 @@ See also L</is_utf8_string>(), L</is_utf8_string_loclen>(), and L</is_utf8_strin
 */
 
 bool
-Perl_is_ascii_string(const U8 *s, STRLEN len)
+Perl_is_invariant_string(const U8 *s, STRLEN len)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
 
-    PERL_ARGS_ASSERT_IS_ASCII_STRING;
+    PERL_ARGS_ASSERT_IS_INVARIANT_STRING;
 
     for (; x < send; ++x) {
 	if (!UTF8_IS_INVARIANT(*x))
@@ -344,7 +343,7 @@ using C<strlen(s)> (which means if you use this option, that C<s> can't have
 embedded C<NUL> characters and has to have a terminating C<NUL> byte).  Note
 that all characters being ASCII constitute 'a valid UTF-8 string'.
 
-See also L</is_ascii_string>(), L</is_utf8_string_loclen>(), and L</is_utf8_string_loc>().
+See also L</is_invariant_string>(), L</is_utf8_string_loclen>(), and L</is_utf8_string_loc>().
 
 =cut
 */

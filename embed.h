@@ -245,7 +245,7 @@
 #define intro_my()		Perl_intro_my(aTHX)
 #define isALNUM_lazy(a)		Perl_isALNUM_lazy(aTHX_ a)
 #define isIDFIRST_lazy(a)	Perl_isIDFIRST_lazy(aTHX_ a)
-#define is_ascii_string		Perl_is_ascii_string
+#define is_invariant_string	Perl_is_invariant_string
 #define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
 #define is_safe_syscall(a,b,c,d)	S_is_safe_syscall(aTHX_ a,b,c,d)
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)

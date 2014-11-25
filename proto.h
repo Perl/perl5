@@ -1868,10 +1868,14 @@ PERL_CALLCONV bool	Perl_isIDFIRST_lazy(pTHX_ const char* p)
 #define PERL_ARGS_ASSERT_ISIDFIRST_LAZY	\
 	assert(p)
 
-PERL_CALLCONV bool	Perl_is_ascii_string(const U8 *s, STRLEN len)
+/* PERL_CALLCONV bool	Perl_is_ascii_string(pTHX_ const U8 *s, STRLEN len)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1); */
+
+PERL_CALLCONV bool	Perl_is_invariant_string(const U8 *s, STRLEN len)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_IS_ASCII_STRING	\
+#define PERL_ARGS_ASSERT_IS_INVARIANT_STRING	\
 	assert(s)
 
 PERL_CALLCONV I32	Perl_is_lvalue_sub(pTHX)

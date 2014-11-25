@@ -39,6 +39,20 @@
 #define _CORE_SWASH_INIT_RETURN_IF_UNDEF       0x2
 #define _CORE_SWASH_INIT_ACCEPT_INVLIST        0x4
 
+/*
+=head1 Unicode Support
+
+=for apidoc is_ascii_string
+
+This is a misleadingly-named synonym for L</is_invariant_string>.
+On ASCII-ish platforms, the name isn't misleading: the ASCII-range characters
+are exactly the UTF-8 invariants.  But EBCDIC machines have more invariants
+than just the ASCII characters, so C<is_invariant_string> is preferred.
+
+=cut
+*/
+#define is_ascii_string(s, len)     is_invariant_string(s, len)
+
 #define uvchr_to_utf8(a,b)          uvchr_to_utf8_flags(a,b,0)
 #define uvchr_to_utf8_flags(d,uv,flags)                                        \
                             uvoffuni_to_utf8_flags(d,NATIVE_TO_UNI(uv),flags)
@@ -625,7 +639,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #endif
 
 /*
-=head1 Unicode Support
 
 =for apidoc Am|STRLEN|isUTF8_CHAR|const U8 *s|const U8 *e
 
