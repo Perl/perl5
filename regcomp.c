@@ -4569,11 +4569,24 @@ STATIC bool S_rck_gosub(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 
 STATIC bool S_rck_exact(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 {
-    SSize_t l = STR_LEN(params->scan);
+    SSize_t l;
     UV uc;
 
     PERL_ARGS_ASSERT_RCK_EXACT;
 
+    {
+        /* min_subtract and unfolded_multi_char are only relevant for
+         * the EXACTFish types */
+        UV min_subtract = 0;
+        bool unfolded_multi_char = FALSE;
+
+        /* Deal with things like /(?:f)(?:o)(?:o)/ which can't be dealt with by
+         * the normal EXACT parsing code. */
+        join_exact(pRExC_state, params->scan, &min_subtract,
+                &unfolded_multi_char, 0, NULL, params->depth + 1);
+    }
+
+    l = STR_LEN(params->scan);
     assert(l);
     if (UTF) {
         const U8 * const s = (U8*)STRING(params->scan);
@@ -4624,6 +4637,72 @@ STATIC bool S_rck_exact(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
         ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
     }
     params->flags &= ~SCF_DO_STCLASS;
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
+STATIC bool S_rck_exactfish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    SSize_t l;
+    const U8 *s;
+    /* How many chars to subtract from the minimum node length to get
+     * a real minimum (because the folded version may be shorter) */
+    UV min_subtract = 0;
+    bool unfolded_multi_char = FALSE;
+
+    PERL_ARGS_ASSERT_RCK_EXACTFISH;
+
+    /* Deal with things like /(?:f)(?:o)(?:o)/ which can't be dealt with
+     * by the normal EXACTish parsing code */
+    join_exact(pRExC_state, params->scan, &min_subtract,
+            &unfolded_multi_char, 0, NULL, params->depth + 1);
+
+    l = STR_LEN(params->scan);
+    s = (U8*)STRING(params->scan);
+
+    /* Search for fixed substrings supports EXACT only. */
+    if (params->flags & SCF_DO_SUBSTR) {
+        assert(params->data);
+        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+    }
+    if (UTF) {
+        l = utf8_length(s, s + l);
+    }
+    if (unfolded_multi_char) {
+        RExC_seen |= REG_UNFOLDED_MULTI_SEEN;
+    }
+    params->min += l - min_subtract;
+    assert(params->min >= 0);
+    params->delta += min_subtract;
+    if (params->flags & SCF_DO_SUBSTR) {
+        params->data->pos_min += l - min_subtract;
+        if (params->data->pos_min < 0)
+            params->data->pos_min = 0;
+        params->data->pos_delta += min_subtract;
+        if (min_subtract)
+            params->data->cur_is_floating = 1; /* float */
+    }
+
+    if (params->flags & SCF_DO_STCLASS) {
+        SV* EXACTF_invlist = _make_exactf_invlist(pRExC_state, params->scan);
+
+        assert(EXACTF_invlist);
+        if (params->flags & SCF_DO_STCLASS_AND) {
+            if (OP(params->scan) != EXACTFL)
+                ssc_clear_locale(params->data->start_class);
+            ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+            ANYOF_POSIXL_ZERO(params->data->start_class);
+            ssc_intersection(params->data->start_class, EXACTF_invlist, FALSE);
+        } else {    /* SCF_DO_STCLASS_OR */
+            ssc_union(params->data->start_class, EXACTF_invlist, FALSE);
+            ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
+
+            /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
+            ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+        }
+        params->flags &= ~SCF_DO_STCLASS;
+        SvREFCNT_dec(EXACTF_invlist);
+    }
     params->scan = regnext(params->scan);
     return 0;
 }
@@ -5121,26 +5200,11 @@ STATIC void S_rck_make_trie(pTHX_ RExC_state_t *pRExC_state, rck_params_t *param
 
 STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 {
-    UV min_subtract = 0;    /* How mmany chars to subtract from the minimum
-                               node length to get a real minimum (because
-                               the folded version may be shorter) */
-    bool unfolded_multi_char = FALSE;
-
     PERL_ARGS_ASSERT_STUDY_CHUNK_ONE_NODE;
 
     /* Peephole optimizer: */
     DEBUG_STUDYDATA("Peep", params->data, params->depth, params->is_inf);
     DEBUG_PEEP("Peep", params->scan, params->depth, params->flags);
-
-
-    /* The reason we do this here is that we need to deal with things like
-     * /(?:f)(?:o)(?:o)/ which cant be dealt with by the normal EXACT
-     * parsing code, as each (?:..) is handled by a different invocation of
-     * reg() -- Yves
-     */
-    if (PL_regkind[OP(params->scan)] == EXACT)
-        join_exact(pRExC_state, params->scan, &min_subtract,
-                &unfolded_multi_char, 0, NULL, params->depth + 1);
 
     /* Follow the next-chain of the current node and optimize
        away all the NOTHINGs from it.  */
@@ -5163,58 +5227,10 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
     } else if (OP(params->scan) == EXACT || OP(params->scan) == EXACTL) {
         return rck_exact(pRExC_state, params);
     } else if (PL_regkind[OP(params->scan)] == EXACT) {
-        /* But OP != EXACT!, so is EXACTFish */
-        SSize_t l = STR_LEN(params->scan);
-        const U8 * s = (U8*)STRING(params->scan);
-
-        /* Search for fixed substrings supports EXACT only. */
-        if (params->flags & SCF_DO_SUBSTR) {
-            assert(params->data);
-            scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-        }
-        if (UTF) {
-            l = utf8_length(s, s + l);
-        }
-        if (unfolded_multi_char) {
-            RExC_seen |= REG_UNFOLDED_MULTI_SEEN;
-        }
-        params->min += l - min_subtract;
-        assert (params->min >= 0);
-        params->delta += min_subtract;
-        if (params->flags & SCF_DO_SUBSTR) {
-            params->data->pos_min += l - min_subtract;
-            if (params->data->pos_min < 0) {
-                params->data->pos_min = 0;
-            }
-            params->data->pos_delta += min_subtract;
-            if (min_subtract) {
-                params->data->cur_is_floating = 1; /* float */
-            }
-        }
-
-        if (params->flags & SCF_DO_STCLASS) {
-            SV* EXACTF_invlist = _make_exactf_invlist(pRExC_state, params->scan);
-
-            assert(EXACTF_invlist);
-            if (params->flags & SCF_DO_STCLASS_AND) {
-                if (OP(params->scan) != EXACTFL)
-                    ssc_clear_locale(params->data->start_class);
-                ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
-                ANYOF_POSIXL_ZERO(params->data->start_class);
-                ssc_intersection(params->data->start_class, EXACTF_invlist, FALSE);
-            }
-            else {  /* SCF_DO_STCLASS_OR */
-                ssc_union(params->data->start_class, EXACTF_invlist, FALSE);
-                ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
-
-                /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
-                ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
-            }
-            params->flags &= ~SCF_DO_STCLASS;
-            SvREFCNT_dec(EXACTF_invlist);
-        }
-    }
-    else if (REGNODE_VARIES(OP(params->scan))) {
+        /* But OP != EXACT!, so is EXACTFish - one of
+         * EXACTF, EXACTFL, EXACTFU, EXACTFAA, EXACTFU_SS EXACTFAA_NO_TRIE */
+        return rck_exactfish(pRExC_state, params);
+    } else if (REGNODE_VARIES(OP(params->scan))) {
         SSize_t mincount, maxcount, minnext, deltanext, pos_before = 0;
         I32 fl = 0, f = params->flags;
         regnode * const oscan = params->scan;

@@ -5309,6 +5309,9 @@ STATIC void	S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params,
 STATIC bool	S_rck_exact(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_EXACT	\
 	assert(pRExC_state); assert(params)
+STATIC bool	S_rck_exactfish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_EXACTFISH	\
+	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_gosub(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_GOSUB	\
 	assert(pRExC_state); assert(params)
