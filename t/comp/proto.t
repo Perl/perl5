@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..207\n";
+print "1..211\n";
 
 my $i = 1;
 
@@ -396,6 +396,11 @@ a_hash_ref %hash;
 print "not " unless $hash{'b'} == 2;
 printf "ok %d\n",$i++;
 
+%hash = ( a => 1);
+a_hash_ref +(%hash);
+print "not " unless $hash{'b'} == 2;
+printf "ok %d\n",$i++;
+
 ##
 ##
 ##
@@ -414,6 +419,16 @@ sub array_ref_plus (\@@) {
   array_ref_plus @array, @more; }
 print "not " unless @array == 4;
 print @array;
+
+@array = ('a');
+{ my @more = ('x');
+  array_ref_plus +(@array), @more; }
+print "not " unless @array == 4;
+print @array;
+
+##
+##
+##
 
 my $p;
 print "not " if defined prototype('CORE::print');

@@ -11255,14 +11255,20 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		    case '@':
 			if (o3->op_type == OP_RV2AV ||
 				o3->op_type == OP_PADAV)
+			{
+			    o3->op_flags &=~ OPf_PARENS;
 			    goto wrapref;
+			}
 			if (!contextclass)
 			    bad_type_gv(arg, "array", namegv, 0, o3);
 			break;
 		    case '%':
 			if (o3->op_type == OP_RV2HV ||
 				o3->op_type == OP_PADHV)
+			{
+			    o3->op_flags &=~ OPf_PARENS;
 			    goto wrapref;
+			}
 			if (!contextclass)
 			    bad_type_gv(arg, "hash", namegv, 0, o3);
 			break;
