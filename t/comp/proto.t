@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..206\n";
+print "1..207\n";
 
 my $i = 1;
 
@@ -285,6 +285,7 @@ sub tmp_sub_1 { printf "ok %d\n",$i++ }
 
 a_sub { printf "ok %d\n",$i++ };
 a_sub \&tmp_sub_1;
+a_sub \(&tmp_sub_1);
 
 @array = ( \&tmp_sub_1 );
 eval 'a_sub @array';

@@ -9358,10 +9358,11 @@ Perl_ck_spair(pTHX_ OP *o)
 	    const OPCODE type = newop->op_type;
 	    if (OP_HAS_SIBLING(newop))
 		return o;
-	    if (o->op_type == OP_REFGEN && !(newop->op_flags & OPf_PARENS)
-		&& (type == OP_RV2AV || type == OP_PADAV
-		 || type == OP_RV2HV || type == OP_PADHV
-		 || type == OP_RV2CV))
+	    if (o->op_type == OP_REFGEN
+	     && (  type == OP_RV2CV
+		|| (  !(newop->op_flags & OPf_PARENS)
+		   && (  type == OP_RV2AV || type == OP_PADAV
+		      || type == OP_RV2HV || type == OP_PADHV))))
 	    	NOOP; /* OK (allow srefgen for \@a and \%h) */
 	    else if (!(PL_opargs[type] & OA_RETSCALAR))
 		return o;
