@@ -182,9 +182,11 @@ Intel*) ;; # # Is that you, Intel C++?
 #   longer then the ANSI minimum of 509 bytes.
 #
 # NOTE 3: the relative order of these options matters:
-# -Wextra before -W, and -pedantic* before -Werror=d-a-s.
+# -Wextra before -W
+# -std=c89 before -ansi
+# -pedantic* before -Werror=d-a-s
 #
-*)  for opt in -ansi -std=c89 $pedantic \
+*)  for opt in -std=c89 -ansi $pedantic \
 		-Werror=declaration-after-statement \
 		-Wextra -W \
 		-Wc++-compat -Wwrite-strings
@@ -212,6 +214,17 @@ Intel*) ;; # # Is that you, Intel C++?
                -std*)
                  echo "cflags.SH: Adding $opt."
                  stdflags="$stdflags $opt"
+                 ;;
+               -ansi)
+                 # -std=c89 is the modern form of -ansi, so add
+                 # -ansi only if -std=c89 is not there already.
+                 case " $stdflags " in
+                 *-std=c89*) ;;
+                 *)
+                   echo "cflags.SH: Adding $opt."
+                   stdflags="$stdflags $opt"
+                   ;;
+                 esac
                  ;;
                *) case "$opt" in
                   -W)
