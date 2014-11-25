@@ -206,7 +206,7 @@ sub is_make_type {
     my($self, $type) = @_;
     (undef, undef, my $make_basename) = $self->splitpath($self->make);
     return 1 if $make_basename =~ /\b$type\b/i; # executable's filename
-    return 0 if $make_basename =~ /\bdmake\b/i; # Never fall through for dmake
+    return 0 if $make_basename =~ /\b(dmake|nmake)\b/i; # Never fall through for dmake/nmake
     # now have to run with "-v" and guess
     my $redirect = $self->can_redirect_error ? '2>&1' : '';
     my $make = $self->make || $self->{MAKE};
