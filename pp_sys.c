@@ -3486,12 +3486,12 @@ PP(pp_fttext)
 #endif
 
     assert(len);
-    if (! is_ascii_string((U8 *) s, len)) {
+    if (! is_invariant_string((U8 *) s, len)) {
         const U8 *ep;
 
-        /* Here contains a non-ASCII.  See if the entire string is UTF-8.  But
-         * the buffer may end in a partial character, so consider it UTF-8 if
-         * the first non-UTF8 char is an ending partial */
+        /* Here contains a variant under UTF-8 .  See if the entire string is
+         * UTF-8.  But the buffer may end in a partial character, so consider
+         * it UTF-8 if the first non-UTF8 char is an ending partial */
         if (is_utf8_string_loc((U8 *) s, len, &ep)
             || ep + UTF8SKIP(ep)  > (U8 *) (s + len))
         {
