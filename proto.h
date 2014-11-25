@@ -1869,6 +1869,7 @@ PERL_CALLCONV bool	Perl_isIDFIRST_lazy(pTHX_ const char* p)
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_ascii_string(const U8 *s, STRLEN len)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_IS_ASCII_STRING	\
 	assert(s)
