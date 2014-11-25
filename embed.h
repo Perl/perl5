@@ -1146,6 +1146,7 @@
 #define rck_exactfish(a,b)	S_rck_exactfish(aTHX_ a,b)
 #define rck_gosub(a,b)		S_rck_gosub(aTHX_ a,b)
 #define rck_ifthen(a,b)		S_rck_ifthen(aTHX_ a,b)
+#define rck_lnbreak(a,b)	S_rck_lnbreak(aTHX_ a,b)
 #define rck_make_trie(a,b)	S_rck_make_trie(aTHX_ a,b)
 #define rck_plus(a,b)		S_rck_plus(aTHX_ a,b)
 #define rck_refish(a,b)		S_rck_refish(aTHX_ a,b)

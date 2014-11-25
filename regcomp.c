@@ -4848,6 +4848,42 @@ STATIC bool S_rck_curlyish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params
     return 0;
 }
 
+STATIC bool S_rck_lnbreak(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_ARGS_ASSERT_RCK_LNBREAK;
+
+    if (params->flags & SCF_DO_STCLASS) {
+        if (params->flags & SCF_DO_STCLASS_AND) {
+            ssc_intersection(params->data->start_class,
+                    PL_XPosix_ptrs[_CC_VERTSPACE], FALSE);
+            ssc_clear_locale(params->data->start_class);
+            ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+        } else if (params->flags & SCF_DO_STCLASS_OR) {
+            ssc_union(params->data->start_class,
+                      PL_XPosix_ptrs[_CC_VERTSPACE], FALSE);
+            ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *)params->and_withp);
+
+            /* See commit msg for 749e076fceedeb708a624933726e7989f2302f6a */
+            ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+        }
+        params->flags &= ~SCF_DO_STCLASS;
+    }
+    params->min++;
+    if (params->delta != SSize_t_MAX)
+        params->delta++;    /* Because of the 2 char string cr-lf */
+    if (params->flags & SCF_DO_SUBSTR) {
+        /* Cannot expect anything... */
+        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+        params->data->pos_min += 1;
+        if (params->data->pos_delta != SSize_t_MAX) {
+            params->data->pos_delta += 1;
+        }
+        params->data->cur_is_floating = 1; /* float */
+    }
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
 STATIC void S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params,
         regnode *start, regnode *end, I32 paren, U32 recursed_depth)
 {
@@ -5711,41 +5747,8 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
         /* CURLY CURLYN CURLYM CURLYX */
         return rck_curlyish(pRExC_state, params);
     } else if (OP(params->scan) == LNBREAK) {
-        if (params->flags & SCF_DO_STCLASS) {
-            if (params->flags & SCF_DO_STCLASS_AND) {
-                ssc_intersection(params->data->start_class,
-                                PL_XPosix_ptrs[_CC_VERTSPACE], FALSE);
-                ssc_clear_locale(params->data->start_class);
-                ANYOF_FLAGS(params->data->start_class)
-                                            &= ~SSC_MATCHES_EMPTY_STRING;
-            }
-            else if (params->flags & SCF_DO_STCLASS_OR) {
-                ssc_union(params->data->start_class,
-                          PL_XPosix_ptrs[_CC_VERTSPACE],
-                          FALSE);
-                ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
-
-                /* See commit msg for
-                 * 749e076fceedeb708a624933726e7989f2302f6a */
-                ANYOF_FLAGS(params->data->start_class)
-                                            &= ~SSC_MATCHES_EMPTY_STRING;
-            }
-            params->flags &= ~SCF_DO_STCLASS;
-        }
-        params->min++;
-        if (params->delta != SSize_t_MAX)
-            params->delta++;    /* Because of the 2 char string cr-lf */
-        if (params->flags & SCF_DO_SUBSTR) {
-            /* Cannot expect anything... */
-            scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-            params->data->pos_min += 1;
-            if (params->data->pos_delta != SSize_t_MAX) {
-                params->data->pos_delta += 1;
-            }
-            params->data->cur_is_floating = 1; /* float */
-        }
-    }
-    else if (REGNODE_SIMPLE(OP(params->scan))) {
+        return rck_lnbreak(pRExC_state, params);
+    } else if (REGNODE_SIMPLE(OP(params->scan))) {
 
         if (params->flags & SCF_DO_SUBSTR) {
             scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);

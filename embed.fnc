@@ -2493,6 +2493,8 @@ Es	|bool	|rck_plus	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
 Es	|bool	|rck_curlyish	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
+Es	|bool	|rck_lnbreak	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
 Es	|void	|rck_make_trie	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
 Es	|void	|rck_enframe	|NN RExC_state_t *pRExC_state \
