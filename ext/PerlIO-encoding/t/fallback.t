@@ -9,7 +9,7 @@ BEGIN {
 	print "1..0 # Skip: EBCDIC\n";
 	exit 0;
     }
-    unless( eval { require Encode } ) { 
+    unless ( eval { require Encode } ) {
 	print "1..0 # Skip: No Encode\n";
 	exit 0;
     }
