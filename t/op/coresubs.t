@@ -12,8 +12,7 @@ BEGIN {
     $^P |= 0x100;
 }
 
-use B::Deparse;
-my $bd = new B::Deparse '-p';
+use B;
 
 my %unsupported = map +($_=>1), qw (
  __DATA__ __END__ AUTOLOAD BEGIN UNITCHECK CORE DESTROY END INIT CHECK and
@@ -83,8 +82,8 @@ while(<$kh>) {
          # __FILE__ won’t fold with warnings on, and then we get
          # ‘(eval 21)’ vs ‘(eval 22)’.
          no warnings 'numeric';
-         $core = $bd->coderef2text(eval $hpcode =~ s/my/CORE::/r or die);
-         $my   = $bd->coderef2text(eval $hpcode or die);
+         $core = op_list(eval $hpcode =~ s/my/CORE::/r or die);
+         $my   = op_list(eval $hpcode or die);
          is $my, $core, "precedence of CORE::$word without parens";
       }
 
@@ -118,6 +117,14 @@ while(<$kh>) {
   }
 }
 
+sub B::OP::pushname { push @op_names, shift->name }
+
+sub op_list {
+    local @op_names;
+    B::walkoptree(B::svref_2object($_[0])->ROOT, 'pushname');
+    return "@op_names";
+}
+
 sub inlinable_ok {
   my ($word, $args, $desc_suffix) = @_;
   $tests += 2;
@@ -130,8 +137,8 @@ sub inlinable_ok {
        "#line 1 This-line-makes-__FILE__-easier-to-test.
         sub { () = (CORE::$word$full_args) }";
     my $my_code = $core_code =~ s/CORE::$word/my$word/r;
-    my $core = $bd->coderef2text(eval $core_code or die);
-    my $my   = $bd->coderef2text(eval   $my_code or die);
+    my $core = op_list(eval $core_code or die);
+    my $my   = op_list(eval   $my_code or die);
     is $my, $core, "inlinability of CORE::$word $preposition parens $desc_suffix";
   }
 }
