@@ -1043,8 +1043,16 @@ SKIP: {
 # a way to make a better place for it:
 
 use constant {
-    perl => 'rules',
-    beer => 'foamy',
+
+    # The length of the rhs string must be such that if chr() is applied to it
+    # doesn't yield a character with a backslash mnemonic.  For example, if it
+    # were 'rules' instead of 'rule', it would have 5 characters, and on
+    # EBCDIC, chr(5) is \t.  The dumping code would translate all the 5's in
+    # MG_PTR into "\t", and this test code would be expecting \5's, so the
+    # tests would fail.  No platform that Perl works on translates chr(4) into
+    # a mnemonic.
+    perl => 'rule',
+    beer => 'foam',
 };
 
 unless ($Config{useithreads}) {
@@ -1056,8 +1064,8 @@ unless ($Config{useithreads}) {
   REFCNT = 5
   FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)	# $] < 5.021005
   FLAGS = \\(POK,(?:IsCOW,)?READONLY,pPOK\\)		# $] >=5.021005
-  PV = $ADDR "rules"\\\0
-  CUR = 5
+  PV = $ADDR "rule"\\\0
+  CUR = 4
   LEN = \d+
   COW_REFCNT = 0
 ');
@@ -1072,8 +1080,8 @@ unless ($Config{useithreads}) {
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
   FLAGS = \\($PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
-  PV = $ADDR "rules"\\\0
-  CUR = 5
+  PV = $ADDR "rule"\\\0
+  CUR = 4
   LEN = \d+
   COW_REFCNT = 0
   MAGIC = $ADDR
@@ -1092,8 +1100,8 @@ unless ($Config{useithreads}) {
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
   FLAGS = \\($PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
-  PV = $ADDR "rules"\\\0
-  CUR = 5
+  PV = $ADDR "rule"\\\0
+  CUR = 4
   LEN = \d+
   COW_REFCNT = 0
   MAGIC = $ADDR
@@ -1111,8 +1119,8 @@ unless ($Config{useithreads}) {
   REFCNT = 6
   FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)	# $] < 5.021005
   FLAGS = \\(POK,(?:IsCOW,)?READONLY,pPOK\\)		# $] >=5.021005
-  PV = $ADDR "foamy"\\\0
-  CUR = 5
+  PV = $ADDR "foam"\\\0
+  CUR = 4
   LEN = \d+
   COW_REFCNT = 0
 ');
@@ -1123,8 +1131,8 @@ unless ($Config{useithreads}) {
   REFCNT = 6
   FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)	# $] < 5.021005
   FLAGS = \\(POK,(?:IsCOW,)?READONLY,pPOK\\)		# $] >=5.021005
-  PV = $ADDR "foamy"\\\0
-  CUR = 5
+  PV = $ADDR "foam"\\\0
+  CUR = 4
   LEN = \d+
   COW_REFCNT = 0
 ');
@@ -1132,8 +1140,8 @@ unless ($Config{useithreads}) {
     my $want = 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 6
   FLAGS = \\($PADMY,SMG,POK,(?:IsCOW,)?READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
-  PV = $ADDR "foamy"\\\0
-  CUR = 5
+  PV = $ADDR "foam"\\\0
+  CUR = 4
   LEN = \d+
   COW_REFCNT = 0
   MAGIC = $ADDR
