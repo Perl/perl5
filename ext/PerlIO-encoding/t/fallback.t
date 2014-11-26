@@ -13,9 +13,10 @@ BEGIN {
 	print "1..0 # Skip: No Encode\n";
 	exit 0;
     }
-    use Test::More tests => 9;
     import Encode qw(:fallback_all);
 }
+
+use Test::More tests => 9;
 
 # $PerlIO::encoding = 0; # WARN_ON_ERR|PERLQQ;
 
