@@ -1,7 +1,10 @@
 #!./perl
 
 BEGIN {
-    skip_all("No perlio") unless (find PerlIO::Layer 'perlio');
+    unless (find PerlIO::Layer 'perlio') {
+	print "1..0 # No perlio\n";
+	exit 0;
+    }
     if (ord("A") == 193) {
 	print "1..0 # Skip: EBCDIC\n";
 	exit 0;
