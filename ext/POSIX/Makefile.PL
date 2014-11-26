@@ -144,35 +144,3 @@ WriteConstants(
     NAME => 'POSIX',
     NAMES => \@names,
 );
-
-package MY;
-
-use strict;
-use Config;
-
-sub cflags {
-    my $self = shift;
-
-    my $cflags = $self->SUPER::cflags(@_);
-
-    if ($^O eq 'freebsd') {
-        my $issue = "use <fenv.h> with -std=c89/-ansi";
-        print "$^O: checking if you can $issue\n";
-        # For example FreeBSD 10.0 uses "...static inline int" in <fenv.h>,
-        # which is incompatible with -std=c89 aka -ansi.
-        if (open(my $fh, ">fenv$$.c")) {
-            print { $fh } "#include <fenv.h>\nint main() { return 0; }\n";
-            close $fh;
-            system("$Config{cc} -std=c89 -o fenv$$ fenv$$.c 2>/dev/null");
-            if (-x "fenv$$") {
-                print "$^O: you can $issue\n";
-            } else {
-                print "$^O: you cannot $issue, removing those from flags\n";
-                $cflags =~ s/(?<=[ =])(?:-ansi|-std=c89)\b//g;
-            }
-            unlink("fenv$$.c", "fenv$$");
-        }
-   }
-
-   $cflags;
-}
