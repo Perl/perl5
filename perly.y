@@ -370,6 +370,7 @@ barestmt:	PLUGSTMT
 				      newOP(OP_UNSTACK, OPf_SPECIAL),
 				      forop));
 			  }
+			  PL_hints |= HINT_BLOCK_SCOPE;
 			  $$ = block_end($3, forop);
 			  parser->copline = (line_t)$1;
 			}
