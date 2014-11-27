@@ -6260,7 +6260,7 @@ PP(pp_refassign)
 	if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO))
 	    S_localise_helem_lval(aTHX_ (HV *)left, key,
 					SvCANEXISTDELETE(left));
-	hv_store_ent((HV *)left, key, SvREFCNT_inc_simple_NN(SvRV(sv)), 0);
+	(void)hv_store_ent((HV *)left, key, SvREFCNT_inc_simple_NN(SvRV(sv)), 0);
     }
     if (PL_op->op_flags & OPf_MOD)
 	SETs(sv_2mortal(newSVsv(sv)));
