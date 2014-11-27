@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.31 2014/10/29 15:37:54 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.32 2014/11/27 14:08:33 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -21,6 +21,8 @@
 
 #define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {		\
 			Perl_croak_nocontext("panic_unimplemented");	\
+                        PERL_UNUSED_VAR(sv); \
+                        PERL_UNUSED_VAR(encoding); \
              return (y)0; /* fool picky compilers */ \
                          }
 /**/
@@ -67,6 +69,10 @@ void
 call_failure(SV * routine, U8 * done, U8 * dest, U8 * orig)
 {
     /* Exists for breakpointing */
+    PERL_UNUSED_VAR(routine);
+    PERL_UNUSED_VAR(done);
+    PERL_UNUSED_VAR(dest);
+    PERL_UNUSED_VAR(orig);
 }
 
 
@@ -363,11 +369,11 @@ process_utf8(pTHX_ SV* dst, U8* s, U8* e, SV *check_sv,
         if (strict && uv > PERL_UNICODE_MAX)
         ulen = (STRLEN) -1;
 #endif
-            if (ulen == -1) {
+            if (ulen == (STRLEN) -1) {
                 if (strict) {
                     uv = utf8n_to_uvuni(s, e - s, &ulen,
                                         UTF8_CHECK_ONLY | UTF8_ALLOW_NONSTRICT);
-                    if (ulen == -1)
+                    if (ulen == (STRLEN) -1)
                         goto malformed_byte;
                     goto malformed;
                 }
@@ -507,7 +513,6 @@ PREINIT:
     U8 *s;
     U8 *e;
     SV *dst;
-    bool renewed = 0;
     int check;
 CODE:
 {
@@ -568,6 +573,7 @@ Method_renew(obj)
 SV *	obj
 CODE:
 {
+    PERL_UNUSED_VAR(obj);
     XSRETURN(1);
 }
 
@@ -576,6 +582,7 @@ Method_renewed(obj)
 SV *    obj
 CODE:
     RETVAL = 0;
+    PERL_UNUSED_VAR(obj);
 OUTPUT:
     RETVAL
 
@@ -677,6 +684,7 @@ SV *	obj
 CODE:
 {
     /* encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj))); */
+    PERL_UNUSED_VAR(obj);
     ST(0) = &PL_sv_no;
     XSRETURN(1);
 }
@@ -689,6 +697,7 @@ CODE:
     /* encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj))); */
     /* require_pv(PERLIO_FILENAME); */
 
+    PERL_UNUSED_VAR(obj);
     eval_pv("require PerlIO::encoding", 0);
     SPAGAIN;
 
