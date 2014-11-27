@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use Test::More;
-plan skip_all => "CPAN RT#98976" if $^O eq "MSWin32";
 
 use IO::Socket::IP;
 

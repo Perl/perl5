@@ -638,14 +638,10 @@ use File::Glob qw(:case);
     },
 
     'IO::Socket::IP' => {
-        'DISTRIBUTION' => 'PEVANS/IO-Socket-IP-0.32.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/IO-Socket-IP-0.33.tar.gz',
         'FILES'        => q[cpan/IO-Socket-IP],
         'EXCLUDED'     => [
             qr{^examples/},
-        ],
-        'CUSTOMIZED'   => [
-            # Almost always fails on Win32 since introduced: see CPAN RT#98976
-            't/22timeout.t',
         ],
     },
 

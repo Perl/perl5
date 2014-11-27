@@ -3,7 +3,6 @@ Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
 Encode cpan/Encode/encoding.pm 506ec84f1fbbff189c3f4f47b92aff5afc95b98e
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Any.pm 2590c841d9131bcc86549050aa4a270d5ffa2b6a
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm be61d41c5d0399d3e71d32345cddbfd20fc8d645
-IO::Socket::IP cpan/IO-Socket-IP/t/22timeout.t 0a65d4ca44663f70eea3c7f1ccb5faed2940611f
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Socket cpan/Socket/t/getnameinfo.t f25ae4125d64a81538d4d3b73a3a0b9ce3c0404d
 Test::Simple cpan/Test-Simple/t/Legacy/exit.t 83edbf569d56d8cdbabea552dfe5602ea1c1822e
