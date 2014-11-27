@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 
-# Two hashes one will all keys 8-bit possible (initially), other
+# Two hashes one with all 8-bit possible keys (initially), other
 # with a utf8 requiring key from the outset.
 
 my %hash8 = ( "\xff" => 0xff,
