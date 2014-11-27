@@ -94,7 +94,7 @@ dl_load_file(filename, flags=0)
     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s): ", filename));
     obj = shl_load(filename, bind_type, 0L);
 
-    DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%x\n", obj));
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%p\n", (void*)obj));
 end:
     ST(0) = sv_newmortal() ;
     if (obj == NULL)
@@ -136,11 +136,11 @@ dl_find_symbol(libhandle, symbolname)
     errno = 0;
 
     status = shl_findsym(&obj, symbolname, TYPE_PROCEDURE, &symaddr);
-    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "  symbolref(PROCEDURE) = %x\n", symaddr));
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "  symbolref(PROCEDURE) = %p\n", (void*)symaddr));
 
     if (status == -1 && errno == 0) {	/* try TYPE_DATA instead */
 	status = shl_findsym(&obj, symbolname, TYPE_DATA, &symaddr);
-	DLDEBUG(2,PerlIO_printf(Perl_debug_log, "  symbolref(DATA) = %x\n", symaddr));
+	DLDEBUG(2,PerlIO_printf(Perl_debug_log, "  symbolref(DATA) = %p\n", (void*)symaddr));
     }
 
     if (status == -1) {
@@ -164,8 +164,8 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     void *	symref 
     const char *	filename
     CODE:
-    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_install_xsub(name=%s, symref=%x)\n",
-	    perl_name, symref));
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_install_xsub(name=%s, symref=%p)\n",
+                            perl_name, (void*)symref));
     ST(0) = sv_2mortal(newRV((SV*)newXS_flags(perl_name,
 					      (void(*)(pTHX_ CV *))symref,
 					      filename, NULL,

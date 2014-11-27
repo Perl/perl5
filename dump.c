@@ -989,7 +989,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
                            generic_pv_escape( tmpsv, label, label_len,
                                       (label_flags & SVf_UTF8)));
    }
-        Perl_dump_indent(aTHX_ level, file, "SEQ = %d\n",
+        Perl_dump_indent(aTHX_ level, file, "SEQ = %u\n",
                                              cCOPo->cop_seq);
 	break;
     case OP_ENTERLOOP:
