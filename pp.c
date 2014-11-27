@@ -6229,9 +6229,10 @@ PP(pp_refassign)
     if (bad)
 	/* diag_listed_as: Assigned value is not %s reference */
 	DIE(aTHX_ "Assigned value is not a%s reference", bad);
+    {
+    MAGIC *mg;
+    HV *stash;
     switch (left ? SvTYPE(left) : 0) {
-	MAGIC *mg;
-	HV *stash;
     case 0:
     {
 	SV * const old = PAD_SV(ARGTARG);
@@ -6267,6 +6268,7 @@ PP(pp_refassign)
     /* XXX else can weak references go stale before they are read, e.g.,
        in leavesub?  */
     RETURN;
+    }
 }
 
 PP(pp_lvref)
