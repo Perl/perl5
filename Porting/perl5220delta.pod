@@ -385,10 +385,6 @@ L<Function::Parameters> version 1.0602
 
 =item *
 
-L<Future> version 0.29
-
-=item *
-
 L<Mason> version 2.22
 
 =item *
