@@ -3372,6 +3372,7 @@ cuserid(s = 0)
 #ifdef HAS_CUSERID
   RETVAL = cuserid(s);
 #else
+  PERL_UNUSED_VAR(s);
   RETVAL = 0;
   not_here("cuserid");
 #endif
