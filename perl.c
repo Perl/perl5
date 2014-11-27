@@ -3060,11 +3060,6 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       const char *const *p = usage_msgd;
       while (*p) PerlIO_puts(PerlIO_stdout(), *p++);
     }
-#  ifdef EBCDIC
-    if ((i & DEBUG_p_FLAG) && ckWARN_d(WARN_DEBUGGING))
-	Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
-		"-Dp not implemented on this platform\n");
-#  endif
     return i;
 }
 #endif
