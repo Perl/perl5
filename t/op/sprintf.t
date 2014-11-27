@@ -32,8 +32,18 @@ if ($^O eq 'VMS') {
 # No %Config.
 my $Is_Ultrix_VAX = $^O eq 'ultrix' && `uname -m` =~ /^VAX$/;
 
+our $IS_EBCDIC = $::IS_EBCDIC;  # Solely to avoid the 'used once' warning
+our $IS_ASCII = $::IS_ASCII;   # Solely to avoid the 'used once' warning
+
 while (<DATA>) {
-    s/^\s*>//; s/<\s*$//;
+    s/<\s*$//;
+
+    # An initial 'a' or 'e' marks the test as being only for ASCII or EBCDIC
+    # platforms respectively.
+    s/^\s* ( [ae] )? >//x;
+    next if defined $1 && $1 eq 'a' && $::IS_EBCDIC;
+    next if defined $1 && $1 eq 'e' && $::IS_ASCII;
+
     ($template, $data, $result, $comment) = split(/<\s*>/, $_, 4);
     if ($^O eq 'os390' || $^O eq 's390') { # non-IEEE (s390 is UTS)
         $data   =~ s/([eE])96$/${1}63/;      # smaller exponents
@@ -713,10 +723,17 @@ __END__
 >%*2147483647$v2d<	>''<	> MISSING<
 >%.3X<		>[11]<			>00B<		>perl #83194: hex, zero-padded to 3 places<
 >%.*X<		>[3, 11]<		>00B<		>perl #83194: dynamic precision<
->%vX<		>['012']<		>30.31.32<	>perl #83194: vector flag<
->%*vX<		>[':', '012']<		>30:31:32<	>perl #83194: vector flag + custom separator<
->%v.3X<		>['012']<		>030.031.032<	>perl #83194: vector flag + static precision<
->%v.*X<		>[3, '012']<		>030.031.032<	>perl #83194: vector flag + dynamic precision<
->%*v.3X<	>[':', '012']<		>030:031:032<	>perl #83194: vector flag + custom separator + static precision<
->%*v.*X<	>[':', 3, '012']<	>030:031:032<	>perl #83194: vector flag + custom separator + dynamic precision<
->%vd<	>"version"<	>118.101.114.115.105.111.110<	>perl #102586: vector flag + "version"<
+a>%vX<		>['012']<		>30.31.32<	>perl #83194: vector flag<
+e>%vX<		>['012']<		>F0.F1.F2<	>perl #83194: vector flag<
+a>%*vX<		>[':', '012']<		>30:31:32<	>perl #83194: vector flag + custom separator<
+e>%*vX<		>[':', '012']<		>F0:F1:F2<	>perl #83194: vector flag + custom separator<
+a>%v.3X<		>['012']<		>030.031.032<	>perl #83194: vector flag + static precision<
+e>%v.3X<		>['012']<		>0F0.0F1.0F2<	>perl #83194: vector flag + static precision<
+a>%v.*X<		>[3, '012']<		>030.031.032<	>perl #83194: vector flag + dynamic precision<
+e>%v.*X<		>[3, '012']<		>0F0.0F1.0F2<	>perl #83194: vector flag + dynamic precision<
+a>%*v.3X<	>[':', '012']<		>030:031:032<	>perl #83194: vector flag + custom separator + static precision<
+e>%*v.3X<	>[':', '012']<		>0F0:0F1:0F2<	>perl #83194: vector flag + custom separator + static precision<
+a>%*v.*X<	>[':', 3, '012']<	>030:031:032<	>perl #83194: vector flag + custom separator + dynamic precision<
+e>%*v.*X<	>[':', 3, '012']<	>0F0:0F1:0F2<	>perl #83194: vector flag + custom separator + dynamic precision<
+a>%vd<	>"version"<	>118.101.114.115.105.111.110<	>perl #102586: vector flag + "version"<
+e>%vd<   >"version"<    >165.133.153.162.137.150.149<   >perl #102586: vector flag + "version"<
