@@ -12,8 +12,6 @@
       "/* arylen '#' Array length ($#ary) */" },
     { '%', "magic_vtable_max | PERL_MAGIC_VALUE_MAGIC",
       "/* rhash '%' Extra data for restricted hashes */" },
-    { '&', "magic_vtable_max",
-      "/* proto '&' my sub prototype CV */" },
     { '*', "want_vtbl_debugvar",
       "/* debugvar '*' $DB::single, signal, trace vars */" },
     { '.', "want_vtbl_pos | PERL_MAGIC_VALUE_MAGIC",
