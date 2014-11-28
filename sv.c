@@ -9394,8 +9394,29 @@ Perl_newSVuv(pTHX_ const UV u)
 {
     SV *sv;
 
+    /* Inlining ONLY the small relevant subset of sv_setuv here
+     * for performance. Makes a significant difference. */
+
+    /* Using ivs is more efficient than using uvs - see sv_setuv */
+    if (u <= (UV)IV_MAX) {
+	return newSViv((IV)u);
+    }
+
     new_SV(sv);
-    sv_setuv(sv,u);
+
+    /* We're starting from SVt_FIRST, so provided that's
+     * actual 0, we don't have to unset any SV type flags
+     * to promote to SVt_IV. */
+    assert(SVt_FIRST == 0);
+
+    SET_SVANY_FOR_BODYLESS_IV(sv);
+    SvFLAGS(sv) |= SVt_IV;
+    (void)SvIOK_on(sv);
+    (void)SvIsUV_on(sv);
+
+    SvUV_set(sv, u);
+    SvTAINT(sv);
+
     return sv;
 }
 
