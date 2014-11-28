@@ -1343,6 +1343,9 @@ equivalent to C<ARRAYelt> with a 0 argument.
 
 =item ARRAYelt
 
+These two methods return the pad names, using B::SPECIAL objects for null
+pointers and B::PADNAME objects otherwise.
+
 =item REFCNT
 
 =back
