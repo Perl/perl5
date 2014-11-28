@@ -5315,6 +5315,9 @@ STATIC void	S_rck_elide_nothing(pTHX_ regnode *node);
 STATIC void	S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params, regnode *start, regnode *end, I32 paren, U32 recursed_depth);
 #define PERL_ARGS_ASSERT_RCK_ENFRAME	\
 	assert(pRExC_state); assert(params); assert(start); assert(end)
+STATIC bool	S_rck_eolish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_EOLISH	\
+	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_exact(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_EXACT	\
 	assert(pRExC_state); assert(params)

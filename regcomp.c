@@ -5057,6 +5057,19 @@ STATIC bool S_rck_simple(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
     return 0;
 }
 
+STATIC bool S_rck_eolish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_ARGS_ASSERT_RCK_EOLISH;
+
+    if (params->flags & SCF_DO_SUBSTR) {
+        params->data->flags
+                |= OP(params->scan) == MEOL ? SF_BEFORE_MEOL : SF_BEFORE_SEOL;
+        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+    }
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
 STATIC void S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params,
         regnode *start, regnode *end, I32 paren, U32 recursed_depth)
 {
@@ -5926,14 +5939,10 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
          * NASCII ASCII NPOSIXA POSIXA
          * NPOSIXD NPOSIXL NPOSIXU NPOSIXA */
         return rck_simple(pRExC_state, params);
-    } else if (PL_regkind[OP(params->scan)] == EOL && params->flags & SCF_DO_SUBSTR) {
-        params->data->flags |= (OP(params->scan) == MEOL
-                        ? SF_BEFORE_MEOL
-                        : SF_BEFORE_SEOL);
-        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-
-    }
-    else if (  PL_regkind[OP(params->scan)] == BRANCHJ
+    } else if (PL_regkind[OP(params->scan)] == EOL) {
+        /* SEOL MEOL EOS */
+        return rck_eolish(pRExC_state, params);
+    } else if (  PL_regkind[OP(params->scan)] == BRANCHJ
              /* Lookbehind, or need to calculate parens/evals/stclass: */
                && (params->scan->flags || params->data || (params->flags & SCF_DO_STCLASS))
                && (OP(params->scan) == IFMATCH || OP(params->scan) == UNLESSM))
