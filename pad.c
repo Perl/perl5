@@ -1530,24 +1530,24 @@ Perl_pad_leavemy(pTHX)
     ASSERT_CURPAD_ACTIVE("pad_leavemy");
     if (PL_min_intro_pending && PL_comppad_name_fill < PL_min_intro_pending) {
 	for (off = PL_max_intro_pending; off >= PL_min_intro_pending; off--) {
-	    const SV * const sv = svp[off];
-	    if (sv && PadnameLEN(sv) && !SvFAKE(sv))
+	    const PADNAME * const name = svp[off];
+	    if (name && PadnameLEN(name) && !PadnameOUTER(name))
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-				 "%"SVf" never introduced",
-				 SVfARG(sv));
+				      "%"PNf" never introduced",
+				       PNfARG(name));
 	}
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
     for (off = PadnamelistMAX(PL_comppad_name);
 	 off > PL_comppad_name_fill; off--) {
-	SV * const sv = svp[off];
-	if (sv && PadnameLEN(sv) && !SvFAKE(sv)
+	PADNAME * const sv = svp[off];
+	if (sv && PadnameLEN(sv) && !PadnameOUTER(sv)
 	    && COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
 	{
 	    COP_SEQ_RANGE_HIGH_set(sv, PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad leavemy: %ld \"%s\", (%lu,%lu)\n",
-		(long)off, SvPVX_const(sv),
+		(long)off, PadnamePV(sv),
 		(unsigned long)COP_SEQ_RANGE_LOW(sv),
 		(unsigned long)COP_SEQ_RANGE_HIGH(sv))
 	    );
