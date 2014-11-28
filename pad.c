@@ -748,8 +748,9 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 	     * stant or a target.  For a target, things marked PADTMP
 	     * can be reused; not so for constants.
 	     */
+	    PADNAME *pn;
 	    if (++retval <= names_fill &&
-		   (sv = names[retval]) && sv != &PL_sv_undef)
+		   (pn = names[retval]) && PadnamePV(pn))
 		continue;
 	    sv = *av_fetch(PL_comppad, retval, TRUE);
 	    if (!(SvFLAGS(sv) &
