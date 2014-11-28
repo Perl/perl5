@@ -4446,7 +4446,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	    SvOK_off(dstr);
 	}
     }
-    else if (dtype == SVt_PVAV || dtype == SVt_PVHV || dtype == SVt_PVFM) {
+    else if (UNLIKELY(dtype == SVt_PVAV || dtype == SVt_PVHV
+             || dtype == SVt_PVFM))
+    {
 	const char * const type = sv_reftype(dstr,0);
 	if (PL_op)
 	    /* diag_listed_as: Cannot copy to %s */
