@@ -213,6 +213,30 @@ case "$usemorebits" in
     $define|true|[yY]*) use64bitint="$define"; uselongdouble="$define" ;;
     esac
 
+# There is a weird pre-C99 long double (a struct of four uin32_t)
+# in HP-UX 10.20 but beyond strtold() there's no support for them
+# for example in <math.h>.
+case "$uselongdouble" in
+    $define|true|[yY]*)
+	if [ "$xxOsRevMajor" -lt 11 ]; then
+	    cat <<EOM >&4
+
+*** uselongdouble (or usemorebits) is not supported on HP-UX $xxOsRevMajor.
+*** You need at least HP-UX 11.0.
+*** Cannot continue, aborting.
+EOM
+	    exit 1
+	fi
+	;;
+    esac
+
+# Configure long double scan will detect the HP-UX 10.20 "long double"
+# (a struct of four uin32_t) and think it is IEEE quad.  Make it not so.
+if [ "$xxOsRevMajor" -lt 11 ]; then
+    d_longdbl="$undef"
+    longdblsize=8 # Make it double.
+fi
+
 case "$archname" in
     IA64*)
 	# While here, override so=sl auto-detection
