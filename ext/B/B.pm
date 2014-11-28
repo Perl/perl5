@@ -741,7 +741,9 @@ unsigned.
 
 =item COP_SEQ_RANGE_HIGH
 
-These last two are only valid for pad name SVs.
+These last two are only valid for pad name SVs.  They only existed in the
+B::NV class before Perl 5.22.  In 5.22 they were moved to the B::PADNAME
+class.
 
 =back
 
@@ -1342,6 +1344,56 @@ equivalent to C<ARRAYelt> with a 0 argument.
 =item ARRAYelt
 
 =item REFCNT
+
+=back
+
+=head2 B::PADNAME Methods
+
+=over 4
+
+=item PV
+
+=item PVX
+
+=item LEN
+
+=item REFCNT
+
+=item FLAGS
+
+For backward-compatibility, if the PADNAMEt_OUTER flag is set, the FLAGS
+method adds the SVf_FAKE flag, too.
+
+=item TYPE
+
+A B::HV object representing the stash for a typed lexical.
+
+=item SvSTASH
+
+A backward-compatibility alias for TYPE.
+
+=item OURSTASH
+
+A B::HV object representing the stash for 'our' variables.
+
+=item PROTOCV
+
+The prototype CV for a 'my' sub.
+
+=item COP_SEQ_RANGE_LOW
+
+=item COP_SEQ_RANGE_HIGH
+
+Sequence numbers representing the scope within which a lexical is visible.
+Meaningless if PADNAMEt_OUTER is set.
+
+=item PARENT_PAD_INDEX
+
+Only meaningful if PADNAMEt_OUTER is set.
+
+=item PARENT_FAKELEX_FLAGS
+
+Only meaningful if PADNAMEt_OUTER is set.
 
 =back
 
