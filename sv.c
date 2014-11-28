@@ -4307,7 +4307,13 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	if (SvIOK(sstr)) {
 	    switch (dtype) {
 	    case SVt_NULL:
-		sv_upgrade(dstr, SVt_IV);
+		/* For performance, we inline promoting to type SVt_IV. */
+		/* We're starting from SVt_NULL, so provided that's
+		 * actual 0, we don't have to unset any SV type flags
+		 * to promote to SVt_IV. */
+		assert(SVt_NULL == 0);
+		SET_SVANY_FOR_BODYLESS_IV(dstr);
+		SvFLAGS(dstr) |= SVt_IV;
 		break;
 	    case SVt_NV:
 	    case SVt_PV:
