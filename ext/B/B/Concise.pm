@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.995";
+our $VERSION   = "0.996";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -891,7 +891,7 @@ sub concise_op {
 	}
     }
     elsif ($h{class} eq "METHOP") {
-        if ($h{name} eq "method_named") {
+        if ($h{name} ne "method") {
             if (${$op->meth_sv}) {
                 $h{arg} = "(" . concise_sv($op->meth_sv, \%h, 1) . ")";
             } else {

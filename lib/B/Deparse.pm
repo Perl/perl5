@@ -563,7 +563,7 @@ sub begin_is_use {
     return unless $self->const_sv($svop)->PV eq $module;
 
     # Pull out the arguments
-    for ($svop=$svop->sibling; $svop->name ne "method_named";
+    for ($svop=$svop->sibling; index($svop->name, "method_") != 0;
 		$svop = $svop->sibling) {
 	$args .= ", " if length($args);
 	$args .= $self->deparse($svop, 6);
@@ -3822,6 +3822,8 @@ sub _method {
 
     if ($meth->name eq "method_named") {
 	$meth = $self->meth_sv($meth)->PV;
+    } elsif ($meth->name eq "method_super") {
+	$meth = "SUPER::".$self->meth_sv($meth)->PV;
     } else {
 	$meth = $meth->first;
 	if ($meth->name eq "const") {

@@ -2973,40 +2973,11 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
     return sv;
 }
 
-PP(pp_method)
-{
-    dSP;
-    SV* const sv = TOPs;
-
-    if (SvROK(sv)) {
-	SV* const rsv = SvRV(sv);
-	if (SvTYPE(rsv) == SVt_PVCV) {
-	    SETs(rsv);
-	    RETURN;
-	}
-    }
-
-    SETs(method_common(sv, NULL));
-    RETURN;
-}
-
-PP(pp_method_named)
-{
-    dSP;
-    SV* const meth = cMETHOPx_meth(PL_op);
-    U32 hash = SvSHARED_HASH(meth);
-
-    XPUSHs(method_common(meth, &hash));
-    RETURN;
-}
-
-STATIC SV *
-S_method_common(pTHX_ SV* meth, U32* hashp)
+PERL_STATIC_INLINE HV *
+S_opmethod_stash(pTHX_ SV* meth)
 {
     SV* ob;
-    GV* gv;
     HV* stash;
-    SV *packsv = NULL;
 
     SV* const sv = PL_stack_base + TOPMARK == PL_stack_sp
 	? (Perl_croak(aTHX_ "Can't call method \"%"SVf"\" without a "
@@ -3014,7 +2985,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	   (SV *)NULL)
 	: *(PL_stack_base + TOPMARK + 1);
 
-    PERL_ARGS_ASSERT_METHOD_COMMON;
+    PERL_ARGS_ASSERT_OPMETHOD_STASH;
 
     if (UNLIKELY(!sv))
        undefined:
@@ -3024,7 +2995,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     if (UNLIKELY(SvGMAGICAL(sv))) mg_get(sv);
     else if (SvIsCOW_shared_hash(sv)) { /* MyClass->meth() */
 	stash = gv_stashsv(sv, GV_CACHE_ONLY);
-	if (stash) goto fetch;
+	if (stash) return stash;
     }
 
     if (SvROK(sv))
@@ -3050,7 +3021,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
         const char * const packname = SvPV_nomg_const(sv, packlen);
         const U32 packname_utf8 = SvUTF8(sv);
         stash = gv_stashpvn(packname, packlen, packname_utf8 | GV_CACHE_ONLY);
-        if (stash) goto fetch;
+        if (stash) return stash;
 
 	if (!(iogv = gv_fetchpvn_flags(
 	        packname, packlen, packname_utf8, SVt_PVIO
@@ -3066,8 +3037,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    }
 	    /* assume it's a package name */
 	    stash = gv_stashpvn(packname, packlen, packname_utf8);
-	    if (!stash) packsv = sv;
-	    goto fetch;
+	    if (stash) return stash;
+	    else return MUTABLE_HV(sv);
 	}
 	/* it _is_ a filehandle name -- replace with a reference */
 	*(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV(MUTABLE_SV(iogv)));
@@ -3085,31 +3056,92 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
                                         : meth));
     }
 
-    stash = SvSTASH(ob);
+    return SvSTASH(ob);
+}
 
-  fetch:
-    /* NOTE: stash may be null, hope hv_fetch_ent and
-       gv_fetchmethod can cope (it seems they can) */
+PP(pp_method)
+{
+    dSP;
+    GV* gv;
+    HV* stash;
+    SV* const meth = TOPs;
 
-    /* shortcut for simple names */
-    if (hashp) {
-	const HE* const he = hv_fetch_ent(stash, meth, 0, *hashp);
-	if (he) {
-	    gv = MUTABLE_GV(HeVAL(he));
-	    assert(stash);
-	    if (isGV(gv) && GvCV(gv) &&
-		(!GvCVGEN(gv) || GvCVGEN(gv)
-                  == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))
-		return MUTABLE_SV(GvCV(gv));
-	}
+    if (SvROK(meth)) {
+        SV* const rmeth = SvRV(meth);
+        if (SvTYPE(rmeth) == SVt_PVCV) {
+            SETs(rmeth);
+            RETURN;
+        }
     }
 
-    assert(stash || packsv);
-    gv = gv_fetchmethod_sv_flags(stash ? stash : MUTABLE_HV(packsv),
-                                 meth, GV_AUTOLOAD | GV_CROAK);
+    stash = opmethod_stash(meth);
+
+    gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
     assert(gv);
 
-    return isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv);
+    SETs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    RETURN;
+}
+
+PP(pp_method_named)
+{
+    dSP;
+    GV* gv;
+    SV* const meth = cMETHOPx_meth(PL_op);
+    HV* const stash = opmethod_stash(meth);
+
+    if (LIKELY(SvTYPE(stash) == SVt_PVHV)) {
+        const HE* const he = hv_fetch_ent(stash, meth, 0, 0);
+        if (he) {
+            gv = MUTABLE_GV(HeVAL(he));
+            if (isGV(gv) && GvCV(gv) &&
+                (!GvCVGEN(gv) || GvCVGEN(gv)
+                  == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))
+            {
+                XPUSHs(MUTABLE_SV(GvCV(gv)));
+                RETURN;
+            }
+        }
+    }
+
+    gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
+    assert(gv);
+
+    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    RETURN;
+}
+
+PP(pp_method_super)
+{
+    dSP;
+    GV* gv;
+    HV* cache;
+    SV* const meth = cMETHOPx_meth(PL_op);
+    HV* const stash = CopSTASH(PL_curcop);
+    /* Actually, SUPER doesn't need real object's (or class') stash at all,
+     * as it uses CopSTASH. However, we must ensure that object(class) is
+     * correct (this check is done by S_opmethod_stash) */
+    opmethod_stash(meth);
+
+    if ((cache = HvMROMETA(stash)->super)) {
+        const HE* const he = hv_fetch_ent(cache, meth, 0, 0);
+        if (he) {
+            gv = MUTABLE_GV(HeVAL(he));
+            if (isGV(gv) && GvCV(gv) &&
+                (!GvCVGEN(gv) || GvCVGEN(gv)
+                  == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))
+            {
+                XPUSHs(MUTABLE_SV(GvCV(gv)));
+                RETURN;
+            }
+        }
+    }
+
+    gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK|GV_SUPER);
+    assert(gv);
+
+    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    RETURN;
 }
 
 /*

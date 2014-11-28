@@ -6605,10 +6605,9 @@ STATIC void	S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
 #define PERL_ARGS_ASSERT_DO_ODDBALL	\
 	assert(oddkey); assert(firstkey)
 
-STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp)
-			__attribute__warn_unused_result__
+PERL_STATIC_INLINE HV*	S_opmethod_stash(pTHX_ SV* meth)
 			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_METHOD_COMMON	\
+#define PERL_ARGS_ASSERT_OPMETHOD_STASH	\
 	assert(meth)
 
 #endif

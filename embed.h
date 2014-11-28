@@ -1604,7 +1604,7 @@
 #  endif
 #  if defined(PERL_IN_PP_HOT_C)
 #define do_oddball(a,b)		S_do_oddball(aTHX_ a,b)
-#define method_common(a,b)	S_method_common(aTHX_ a,b)
+#define opmethod_stash(a)	S_opmethod_stash(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_PP_PACK_C)
 #define bytes_to_uni		S_bytes_to_uni

@@ -308,6 +308,7 @@ dump		dump			ck_null		ds}
 goto		goto			ck_null		s}	
 exit		exit			ck_fun		s%	S?
 method_named	method with known name	ck_null		d.
+method_super	super with known name	ck_null		d.
 
 entergiven	given()			ck_null		d|
 leavegiven	leave given block	ck_null		1

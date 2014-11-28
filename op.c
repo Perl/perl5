@@ -854,6 +854,7 @@ Perl_op_clear(pTHX_ OP *o)
 	}
 	break;
     case OP_METHOD_NAMED:
+    case OP_METHOD_SUPER:
         SvREFCNT_dec(cMETHOPx(o)->op_u.op_meth_sv);
         cMETHOPx(o)->op_u.op_meth_sv = NULL;
 #ifdef USE_ITHREADS
@@ -2229,6 +2230,7 @@ S_finalize_op(pTHX_ OP* o)
 #ifdef USE_ITHREADS
     /* Relocate all the METHOP's SVs to the pad for thread safety. */
     case OP_METHOD_NAMED:
+    case OP_METHOD_SUPER:
         op_relocate_sv(&cMETHOPx(o)->op_u.op_meth_sv, &o->op_targ);
         break;
 #endif
@@ -10296,27 +10298,45 @@ Perl_ck_match(pTHX_ OP *o)
 OP *
 Perl_ck_method(pTHX_ OP *o)
 {
-    SV* sv;
+    SV *sv, *methsv;
     const char* method;
+    char* compatptr;
+    int utf8;
+    STRLEN len, nsplit = 0, i;
     OP * const kid = cUNOPo->op_first;
 
     PERL_ARGS_ASSERT_CK_METHOD;
     if (kid->op_type != OP_CONST) return o;
 
     sv = kSVOP->op_sv;
-    method = SvPVX_const(sv);
-    if (!(strchr(method, ':') || strchr(method, '\''))) {
-        OP *cmop;
-        if (!SvIsCOW_shared_hash(sv)) {
-            sv = newSVpvn_share(method, SvUTF8(sv) ? -(I32)SvCUR(sv) : (I32)SvCUR(sv), 0);
-        }
-        else {
-            kSVOP->op_sv = NULL;
-        }
-        cmop = newMETHOP_named(OP_METHOD_NAMED, 0, sv);
-        op_free(o);
-        return cmop;
+
+    /* replace ' with :: */
+    while ((compatptr = strchr(SvPVX_const(sv), '\''))) {
+        *compatptr = ':';
+        sv_insert(sv, compatptr - SvPVX_const(sv), 0, ":", 1);
     }
+
+    method = SvPVX_const(sv);
+    len = SvCUR(sv);
+    utf8 = SvUTF8(sv) ? -1 : 1;
+
+    for (i = len - 1; i > 0; --i) if (method[i] == ':') {
+        nsplit = i+1;
+        break;
+    }
+
+    methsv = newSVpvn_share(method+nsplit, utf8*(len - nsplit), 0);
+
+    if (!nsplit) { /* $proto->method() */
+        op_free(o);
+        return newMETHOP_named(OP_METHOD_NAMED, 0, methsv);
+    }
+
+    if (nsplit == 7 && memEQ(method, "SUPER::", nsplit)) { /* $proto->SUPER::method() */
+        op_free(o);
+        return newMETHOP_named(OP_METHOD_SUPER, 0, methsv);
+    }
+
     return o;
 }
 
@@ -11614,6 +11634,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	    break;
 	case OP_METHOD:
 	case OP_METHOD_NAMED:
+	case OP_METHOD_SUPER:
 	    if (aop->op_type == OP_CONST) {
 		aop->op_private &= ~OPpCONST_STRICT;
 		const_class = &cSVOPx(aop)->op_sv;

@@ -2047,7 +2047,7 @@ s	|OP*	|do_smartmatch	|NULLOK HV* seen_this \
 
 #if defined(PERL_IN_PP_HOT_C)
 s	|void	|do_oddball	|NN SV **oddkey|NN SV **firstkey
-sR	|SV*	|method_common	|NN SV* meth|NULLOK U32* hashp
+i	|HV*	|opmethod_stash	|NN SV* meth
 #endif
 
 #if defined(PERL_IN_PP_SORT_C)
