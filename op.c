@@ -7321,7 +7321,12 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	loop = tmp;
     }
     else if (!loop->op_slabbed)
+    {
 	loop = (LOOP*)PerlMemShared_realloc(loop, sizeof(LOOP));
+#ifdef PERL_OP_PARENT
+	loop->op_last->op_sibling = (OP *)loop;
+#endif
+    }
     loop->op_targ = padoff;
     wop = newWHILEOP(flags, 1, loop, newOP(OP_ITER, 0), block, cont, 0);
     return wop;

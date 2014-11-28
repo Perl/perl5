@@ -3635,14 +3635,25 @@ test_newFOROP_without_slab()
 CODE:
     {
 	const I32 floor = start_subparse(0,0);
+	OP *o;
 	/* The slab allocator does not like CvROOT being set. */
 	CvROOT(PL_compcv) = (OP *)1;
-	op_free(newFOROP(0, 0, newOP(OP_PUSHMARK, 0), 0, 0));
+	o = newFOROP(0, 0, newOP(OP_PUSHMARK, 0), 0, 0);
+#ifdef PERL_OP_PARENT
+	if (cLOOPx(cUNOPo->op_first)->op_last->op_sibling
+		!= cUNOPo->op_first)
+	{
+	    Perl_warn(aTHX_ "Op parent pointer is stale");
+	    RETVAL = FALSE;
+	}
+	else
+#endif
+	    /* If we do not crash before returning, the test passes. */
+	    RETVAL = TRUE;
+	op_free(o);
 	CvROOT(PL_compcv) = NULL;
 	SvREFCNT_dec(PL_compcv);
 	LEAVE_SCOPE(floor);
-	/* If we have not crashed yet, then the test passes. */
-	RETVAL = TRUE;
     }
 OUTPUT:
     RETVAL
