@@ -3514,7 +3514,7 @@ typedef pthread_key_t	perl_key;
 
 #ifndef DEBUGGING
 #  if __has_builtin(__builtin_unreachable) \
-     || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5 || __GNUC__ > 5) /* 4.5 -> */
+     || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5 || __GNUC__ > 4) /* 4.5 -> */
 #    define ASSUME(x) ((x) ? (void) 0 : __builtin_unreachable())
 #  elif defined(_MSC_VER)
 #    define ASSUME(x) __assume(x)
