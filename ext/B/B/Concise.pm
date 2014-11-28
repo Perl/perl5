@@ -789,7 +789,9 @@ sub concise_op {
 	for my $i (0..$count-1) {
 	    my ($targarg, $targarglife);
 	    my $padname = (($curcv->PADLIST->ARRAY)[0]->ARRAY)[$h{targ}+$i];
-	    if (defined $padname and class($padname) ne "SPECIAL") {
+	    if (defined $padname and class($padname) ne "SPECIAL" and
+		$padname->LEN)
+	    {
 		$targarg  = $padname->PVX;
 		if ($padname->FLAGS & SVf_FAKE) {
 		    # These changes relate to the jumbo closure fix.
