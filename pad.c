@@ -1719,8 +1719,8 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	PADOFFSET ix;
 
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
-	    SV *namesv;
-	    if (!namep[ix]) namep[ix] = &PL_sv_undef;
+	    PADNAME *namesv;
+	    if (!namep[ix]) namep[ix] = &PL_padname_undef;
 
 	    /*
 	     * The only things that a clonable function needs in its
@@ -1731,7 +1731,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 		continue;
 	    namesv = namep[ix];
 	    if (!(PadnamePV(namesv) &&
-		   (!PadnameLEN(namesv) || *SvPVX_const(namesv) == '&')))
+		   (!PadnameLEN(namesv) || *PadnamePV(namesv) == '&')))
 	    {
 		SvREFCNT_dec(PL_curpad[ix]);
 		PL_curpad[ix] = NULL;
