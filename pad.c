@@ -116,7 +116,8 @@ to be generated in evals, such as
 
     { my $x = 1; sub f { eval '$x'} } f();
 
-For state vars, SVs_PADSTALE is overloaded to mean 'not yet initialised'.
+For state vars, SVs_PADSTALE is overloaded to mean 'not yet initialised',
+but this internal state is stored in a separate pad entry.
 
 =for apidoc AmxU|PADNAMELIST *|PL_comppad_name
 
