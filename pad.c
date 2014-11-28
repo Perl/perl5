@@ -59,12 +59,13 @@ AV which is @_.  Other entries are storage for variables and op targets.
 
 Iterating over the PADNAMELIST iterates over all possible pad
 items.  Pad slots for targets (SVs_PADTMP)
-and GVs end up having &PL_sv_undef
-"names", while slots for constants have &PL_sv_no "names" (see
-pad_alloc()).  That &PL_sv_no is used is an implementation detail subject
-to change.  To test for it, use C<PadnamePV(name) && !PadnameLEN(name)>.
+and GVs end up having &PL_padname_undef "names", while slots for constants 
+have &PL_padname_const "names" (see pad_alloc()).  That &PL_padname_undef
+and &PL_padname_const are used is an implementation detail subject to
+change.  To test for them, use C<!PadnamePV(name)> and C<PadnamePV(name)
+&& !PadnameLEN(name)>, respectively.
 
-Only my/our variable (SvPADMY/PADNAME_isOUR) slots get valid names.
+Only my/our variable slots get valid names.
 The rest are op targets/GVs/constants which are statically allocated
 or resolved at compile time.  These don't have names by which they
 can be looked up from Perl code at run time through eval"" the way
@@ -72,10 +73,10 @@ my/our variables can be.  Since they can't be looked up by "name"
 but only by their index allocated at compile time (which is usually
 in PL_op->op_targ), wasting a name SV for them doesn't make sense.
 
-The SVs in the names AV have their PV being the name of the variable.
-xlow+1..xhigh inclusive in the NV union is a range of cop_seq numbers for
-which the name is valid (accessed through the macros COP_SEQ_RANGE_LOW and
-_HIGH).  During compilation, these fields may hold the special value
+The pad names in the PADNAMELIST have their PV holding the name of
+the variable.  The COP_SEQ_RANGE_LOW and _HIGH fields form a range
+(low+1..high inclusive) of cop_seq numbers for which the name is
+valid.  During compilation, these fields may hold the special value
 PERL_PADSEQ_INTRO to indicate various stages:
 
    COP_SEQ_RANGE_LOW        _HIGH
@@ -84,27 +85,24 @@ PERL_PADSEQ_INTRO to indicate various stages:
    valid-seq#   PERL_PADSEQ_INTRO   variable in scope:             { my ($x)
    valid-seq#          valid-seq#   compilation of scope complete: { my ($x) }
 
-For typed lexicals name SV is SVt_PVMG and SvSTASH
-points at the type.  For C<our> lexicals, the type is also SVt_PVMG, with the
-SvOURSTASH slot pointing at the stash of the associated global (so that
-duplicate C<our> declarations in the same package can be detected).  SvUVX is
-sometimes hijacked to store the generation number during compilation.
+For typed lexicals PadnameTYPE points at the type stash.  For C<our>
+lexicals, PadnameOURSTASH points at the stash of the associated global (so
+that duplicate C<our> declarations in the same package can be detected).
+PadnameGEN is sometimes used to store the generation number during
+compilation.
 
-If PADNAME_OUTER (SvFAKE) is set on the
-name SV, then that slot in the frame AV is
-a REFCNT'ed reference to a lexical from "outside".  In this case,
-the name SV does not use xlow and xhigh to store a cop_seq range, since it is
-in scope throughout.  Instead xhigh stores some flags containing info about
+If PadnameOUTER is set on the pad name, then that slot in the frame AV
+is a REFCNT'ed reference to a lexical from "outside".  Such entries
+are sometimes referred to as 'fake'.  In this case, the name does not
+use 'low' and 'high' to store a cop_seq range, since it is in scope
+throughout.  Instead 'high' stores some flags containing info about
 the real lexical (is it declared in an anon, and is it capable of being
-instantiated multiple times?), and for fake ANONs, xlow contains the index
+instantiated multiple times?), and for fake ANONs, 'low' contains the index
 within the parent's pad where the lexical's value is stored, to make
 cloning quicker.
 
 If the 'name' is '&' the corresponding entry in the PAD
 is a CV representing a possible closure.
-(PADNAME_OUTER and name of '&' is not a
-meaningful combination currently but could
-become so if C<my sub foo {}> is implemented.)
 
 Note that formats are treated as anon subs, and are cloned each time
 write is called (if necessary).
@@ -523,14 +521,14 @@ Perl_cv_forget_slab(pTHX_ CV *cv)
 }
 
 /*
-=for apidoc m|PADOFFSET|pad_alloc_name|SV *namesv|U32 flags|HV *typestash|HV *ourstash
+=for apidoc m|PADOFFSET|pad_alloc_name|PADNAME *name|U32 flags|HV *typestash|HV *ourstash
 
 Allocates a place in the currently-compiling
 pad (via L<perlapi/pad_alloc>) and
-then stores a name for that entry.  I<namesv> is adopted and becomes the
-name entry; it must already contain the name string and be sufficiently
-upgraded.  I<typestash> and I<ourstash> and the C<padadd_STATE> flag get
-added to I<namesv>.  None of the other
+then stores a name for that entry.  I<name> is adopted and
+becomes the name entry; it must already contain the name
+string.  I<typestash> and I<ourstash> and the C<padadd_STATE>
+flag get added to I<name>.  None of the other
 processing of L<perlapi/pad_add_name_pvn>
 is done.  Returns the offset of the allocated pad slot.
 
@@ -1086,13 +1084,13 @@ to match against.  If warn is true, print appropriate warnings.  The out_*
 vars return values, and so are pointers to where the returned values
 should be stored.  out_capture, if non-null, requests that the innermost
 instance of the lexical is captured; out_name is set to the innermost
-matched namesv or fake namesv; out_flags returns the flags normally
-associated with the IVX field of a fake namesv.
+matched pad name or fake pad name; out_flags returns the flags normally
+associated with the PARENT_FAKELEX_FLAGS field of a fake pad name.
 
 Note that pad_findlex() is recursive; it recurses up the chain of CVs,
 then comes back down, adding fake entries
 as it goes.  It has to be this way
-because fake namesvs in anon protoypes have to store in xlow the index into
+because fake names in anon protoypes have to store in xlow the index into
 the parent pad.
 
 =cut
