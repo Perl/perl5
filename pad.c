@@ -1221,8 +1221,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 		{
 		    if (warn)
 			S_unavailable(aTHX_
-                                       newSVpvn_flags(namepv, namelen,
-                                                      SVs_TEMP|SVf_UTF8));
+				      *out_name);
 
 		    *out_capture = NULL;
 		}
@@ -1269,8 +1268,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			&& !PadnameIsSTATE(name_p[offset]))
 		    {
 			S_unavailable(aTHX_
-                                       newSVpvn_flags(namepv, namelen,
-                                                      SVs_TEMP|SVf_UTF8));
+				      name_p[offset]);
 			*out_capture = NULL;
 		    }
 		}
