@@ -3307,6 +3307,8 @@ file-specification as an argument.  See L<perlfunc/require>.
 
 (F) Missing right brace in C<\x{...}>, C<\p{...}>, C<\P{...}>, or C<\N{...}>.
 
+=item Missing right brace on \\N{}
+
 =item Missing right brace on \N{} or unescaped left brace after \N
 
 (F) C<\N> has two meanings.
