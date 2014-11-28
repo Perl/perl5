@@ -147,14 +147,12 @@ Points directly to the body of the L</PL_comppad> array.
 #include "keywords.h"
 
 #define COP_SEQ_RANGE_LOW_set(sv,val)		\
-  STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xlow = (val); } STMT_END
+  STMT_START { (sv)->xpadn_low = (val); } STMT_END
 #define COP_SEQ_RANGE_HIGH_set(sv,val)		\
-  STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xhigh = (val); } STMT_END
+  STMT_START { (sv)->xpadn_high = (val); } STMT_END
 
-#define PARENT_PAD_INDEX_set(sv,val)		\
-  STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xlow = (val); } STMT_END
-#define PARENT_FAKELEX_FLAGS_set(sv,val)	\
-  STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xhigh = (val); } STMT_END
+#define PARENT_PAD_INDEX_set		COP_SEQ_RANGE_LOW_set
+#define PARENT_FAKELEX_FLAGS_set	COP_SEQ_RANGE_HIGH_set
 
 #ifdef DEBUGGING
 void
@@ -242,7 +240,7 @@ Perl_pad_new(pTHX_ int flags)
     else {
 	av_store(pad, 0, NULL);
 	padname = newPADNAMELIST(0);
-	padnamelist_store(padname, 0, &PL_sv_undef);
+	padnamelist_store(padname, 0, &PL_padname_undef);
     }
 
     /* Most subroutines never recurse, hence only need 2 entries in the padlist
@@ -550,9 +548,9 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
     ASSERT_CURPAD_ACTIVE("pad_alloc_name");
 
     if (typestash) {
-	assert(SvTYPE(name) == SVt_PVMG);
 	SvPAD_TYPED_on(name);
-	SvSTASH_set(name, MUTABLE_HV(SvREFCNT_inc_simple_NN(MUTABLE_SV(typestash))));
+	PadnameTYPE(name) =
+	    MUTABLE_HV(SvREFCNT_inc_simple_NN(MUTABLE_SV(typestash)));
     }
     if (ourstash) {
 	SvPAD_OUR_on(name);
@@ -563,7 +561,7 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
 	SvPAD_STATE_on(name);
     }
 
-    padnamelist_store(PL_comppad_name, offset, (SV *)name);
+    padnamelist_store(PL_comppad_name, offset, name);
     PadnamelistMAXNAMED(PL_comppad_name) = offset;
     return offset;
 }
@@ -602,18 +600,14 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 	Perl_croak(aTHX_ "panic: pad_add_name_pvn illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
-    name = (PADNAME *)
-	newSV_type((ourstash || typestash) ? SVt_PVMG : SVt_PVNV);
-    
-    sv_setpvn((SV *)name, namepv, namelen);
-    SvUTF8_on(name);
+    name = newPADNAMEpvn(namepv, namelen);
 
     if ((flags & padadd_NO_DUP_CHECK) == 0) {
 	ENTER;
-	SAVEFREESV(name); /* in case of fatal warnings */
+	SAVEFREEPADNAME(name); /* in case of fatal warnings */
 	/* check for duplicate declaration */
 	pad_check_dup(name, flags & padadd_OUR, ourstash);
-	SvREFCNT_inc_simple_void_NN(name);
+	PadnameREFCNT(name)++;
 	LEAVE;
     }
 
@@ -763,7 +757,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 		break;
 	}
 	if (konst) {
-	    padnamelist_store(PL_comppad_name, retval, &PL_sv_no);
+	    padnamelist_store(PL_comppad_name, retval, &PL_padname_const);
 	    tmptype &= ~SVf_READONLY;
 	    tmptype |= SVs_PADTMP;
 	}
@@ -805,16 +799,15 @@ PADOFFSET
 Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
 {
     PADOFFSET ix;
-    SV* const name = newSV_type(SVt_PVNV);
+    PADNAME * const name = newPADNAMEpvn("&", 1);
 
     PERL_ARGS_ASSERT_PAD_ADD_ANON;
 
     pad_peg("add_anon");
-    sv_setpvs(name, "&");
     /* These two aren't used; just make sure they're not equal to
-     * PERL_PADSEQ_INTRO */
-    COP_SEQ_RANGE_LOW_set(name, 0);
-    COP_SEQ_RANGE_HIGH_set(name, 0);
+     * PERL_PADSEQ_INTRO.  They should be 0 by default.  */
+    assert(COP_SEQ_RANGE_LOW (name) != PERL_PADSEQ_INTRO);
+    assert(COP_SEQ_RANGE_HIGH(name) != PERL_PADSEQ_INTRO);
     ix = pad_alloc(optype, SVs_PADMY);
     padnamelist_store(PL_comppad_name, ix, name);
     /* XXX DAPM use PL_curpad[] ? */
@@ -1317,7 +1310,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 	   type as the source, independent of the flags set, and on it being
 	   "good" and only copying flag bits and pointers that it understands.
 	*/
-	PADNAME *new_name = (PADNAME *)newSVsv((SV *)*out_name);
+	PADNAME *new_name = newPADNAMEouter(*out_name);
 	PADNAMELIST * const ocomppad_name = PL_comppad_name;
 	PAD * const ocomppad = PL_comppad;
 	PL_comppad_name = PadlistNAMES(padlist);
@@ -1331,7 +1324,6 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			      PadnameOURSTASH(*out_name)
 			      );
 
-	SvFAKE_on(new_name);
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 			       "Pad addname: %ld \"%.*s\" FAKE\n",
 			       (long)new_offset,
@@ -1608,7 +1600,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
 	if (PadnamelistARRAY(PL_comppad_name)[po]) {
 	    assert(!PadnameLEN(PadnamelistARRAY(PL_comppad_name)[po]));
 	}
-	PadnamelistARRAY(PL_comppad_name)[po] = (PADNAME *)&PL_sv_undef;
+	PadnamelistARRAY(PL_comppad_name)[po] = &PL_padname_undef;
     }
     /* Use PL_constpadix here, not PL_padix.  The latter may have been
        reset by pad_reset.  We don’t want pad_alloc to have to scan the
@@ -1749,10 +1741,10 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	PADNAME ** const namep = PadnamelistARRAY(PL_comppad_name);
 	PADOFFSET ix;
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
-	    if (!namep[ix]) namep[ix] = &PL_sv_undef;
+	    if (!namep[ix]) namep[ix] = &PL_padname_undef;
 	    if (!PL_curpad[ix] || SvIMMORTAL(PL_curpad[ix]))
 		continue;
-	    if (SvPADMY(PL_curpad[ix]) && !SvFAKE(namep[ix])) {
+	    if (SvPADMY(PL_curpad[ix]) && !PadnameOUTER(namep[ix])) {
 		/* This is a work around for how the current implementation of
 		   ?{ } blocks in regexps interacts with lexicals.
 
@@ -2315,23 +2307,25 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
     I32 ix;
     PADNAMELIST * const comppad_name = PadlistNAMES(padlist);
     AV * const comppad = PadlistARRAY(padlist)[1];
-    SV ** const namepad = PadnamelistARRAY(comppad_name);
+    PADNAME ** const namepad = PadnamelistARRAY(comppad_name);
     SV ** const curpad = AvARRAY(comppad);
 
     PERL_ARGS_ASSERT_PAD_FIXUP_INNER_ANONS;
     PERL_UNUSED_ARG(old_cv);
 
     for (ix = PadnamelistMAX(comppad_name); ix > 0; ix--) {
-        const SV * const namesv = namepad[ix];
-	if (namesv && namesv != &PL_sv_undef && !SvPAD_STATE(namesv)
-	    && *SvPVX_const(namesv) == '&')
+        const PADNAME * const name = namepad[ix];
+	if (name && name != &PL_padname_undef && !PadnameIsSTATE(name)
+	    && *PadnamePV(name) == '&')
 	{
 	  if (SvTYPE(curpad[ix]) == SVt_PVCV) {
-	    MAGIC * const mg =
-		SvMAGICAL(curpad[ix])
-		    ? mg_find(curpad[ix], PERL_MAGIC_proto)
-		    : NULL;
-	    CV * const innercv = MUTABLE_CV(mg ? mg->mg_obj : curpad[ix]);
+	    /* XXX 0afba48f added code here to check for a proto CV
+		   attached to the pad entry by magic.  But shortly there-
+		   after 81df9f6f95 moved the magic to the pad name.  The
+		   code here was never updated, so it wasn’t doing anything
+		   and got deleted when PADNAME became a distinct type.  Is
+		   there any bug as a result?  */
+	    CV * const innercv = MUTABLE_CV(curpad[ix]);
 	    if (CvOUTSIDE(innercv) == old_cv) {
 		if (!CvWEAKOUTSIDE(innercv)) {
 		    SvREFCNT_dec(old_cv);
@@ -2613,7 +2607,8 @@ Perl_padnamelist_store(pTHX_ PADNAMELIST *pnl, SSize_t key, PADNAME *val)
 	PadnamelistMAX(pnl) = key;
     }
     ary = PadnamelistARRAY(pnl);
-    SvREFCNT_dec(ary[key]);
+    if (ary[key])
+	PadnameREFCNT_dec(ary[key]);
     ary[key] = val;
     return &ary[key];
 }
@@ -2641,7 +2636,12 @@ Perl_padnamelist_free(pTHX_ PADNAMELIST *pnl)
     PERL_ARGS_ASSERT_PADNAMELIST_FREE;
     if (!--PadnamelistREFCNT(pnl)) {
 	while(PadnamelistMAX(pnl) >= 0)
-	    SvREFCNT_dec(PadnamelistARRAY(pnl)[PadnamelistMAX(pnl)--]);
+	{
+	    PADNAME * const pn =
+		PadnamelistARRAY(pnl)[PadnamelistMAX(pnl)--];
+	    if (pn)
+		PadnameREFCNT_dec(pn);
+	}
 	Safefree(PadnamelistARRAY(pnl));
 	Safefree(pnl);
     }
@@ -2677,14 +2677,136 @@ Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
 
     ptr_table_store(PL_ptr_table, srcpad, dstpad);
     for (; max >= 0; max--)
+      if (PadnamelistARRAY(srcpad)[max]) {
 	PadnamelistARRAY(dstpad)[max] =
-	    sv_dup_inc(PadnamelistARRAY(srcpad)[max], param);
+	    padname_dup(PadnamelistARRAY(srcpad)[max], param);
+	PadnameREFCNT(PadnamelistARRAY(dstpad)[max])++;
+      }
 
     return dstpad;
 }
 
 #endif /* USE_ITHREADS */
 
+/*
+=for apidoc newPADNAMEpvn
+
+Constructs and returns a new pad name.  I<s> must be a UTF8 string.  Do not
+use this for pad names that point to outer lexicals.  See
+L</newPADNAMEouter>.
+
+=cut
+*/
+
+PADNAME *
+Perl_newPADNAMEpvn(pTHX_ const char *s, STRLEN len)
+{
+    struct padname_with_str *alloc;
+    char *alloc2; /* for Newxz */
+    PADNAME *pn;
+    PERL_ARGS_ASSERT_NEWPADNAMEPVN;
+    Newxz(alloc2,
+	  STRUCT_OFFSET(struct padname_with_str, xpadn_str[0]) + len + 1,
+	  char);
+    alloc = (struct padname_with_str *)alloc2;
+    pn = (PADNAME *)alloc;
+    PadnameREFCNT(pn) = 1;
+    PadnamePV(pn) = alloc->xpadn_str;
+    Copy(s, PadnamePV(pn), len, char);
+    *(PadnamePV(pn) + len) = '\0';
+    PadnameLEN(pn) = len;
+    return pn;
+}
+
+/*
+=for apidoc newPADNAMEouter
+
+Constructs and returns a new pad name.  Only use this function for names
+that refer to outer lexicals.  (See also L</newPADNAMEpvn>.)  I<outer> is
+the outer pad name that this one mirrors.  The returned pad name has the
+PADNAMEt_OUTER flag already set.
+
+=cut
+*/
+
+PADNAME *
+Perl_newPADNAMEouter(pTHX_ PADNAME *outer)
+{
+    PADNAME *pn;
+    PERL_ARGS_ASSERT_NEWPADNAMEOUTER;
+    Newxz(pn, 1, PADNAME);
+    PadnameREFCNT(pn) = 1;
+    PadnamePV(pn) = PadnamePV(outer);
+    /* Not PadnameREFCNT(outer), because ‘outer’ may itself close over
+       another entry.  The original pad name owns the buffer.  */
+    PadnameREFCNT(PADNAME_FROM_PV(PadnamePV(outer)))++;
+    PadnameFLAGS(pn) = PADNAMEt_OUTER;
+    PadnameLEN(pn) = PadnameLEN(outer);
+    return pn;
+}
+
+void
+Perl_padname_free(pTHX_ PADNAME *pn)
+{
+    PERL_ARGS_ASSERT_PADNAME_FREE;
+    if (!--PadnameREFCNT(pn)) {
+	if (UNLIKELY(pn == &PL_padname_undef || pn == &PL_padname_const)) {
+	    PadnameREFCNT(pn) = SvREFCNT_IMMORTAL;
+	    return;
+	}
+	SvREFCNT_dec(PadnameTYPE(pn)); /* Takes care of protocv, too.  */
+	SvREFCNT_dec(PadnameOURSTASH(pn));
+	if (PadnameOUTER(pn))
+	    PadnameREFCNT_dec(PADNAME_FROM_PV(PadnamePV(pn)));
+	Safefree(pn);
+    }
+}
+
+#if defined(USE_ITHREADS)
+
+/*
+=for apidoc padname_dup
+
+Duplicates a pad name.
+
+=cut
+*/
+
+PADNAME *
+Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
+{
+    PADNAME *dst;
+
+    PERL_ARGS_ASSERT_PADNAME_DUP;
+
+    /* look for it in the table first */
+    dst = (PADNAME *)ptr_table_fetch(PL_ptr_table, src);
+    if (dst)
+	return dst;
+
+    if (!PadnamePV(src)) {
+	dst = &PL_padname_undef;
+	ptr_table_store(PL_ptr_table, src, dst);
+	return dst;
+    }
+
+    dst = PadnameOUTER(src)
+     ? newPADNAMEouter(padname_dup(PADNAME_FROM_PV(PadnamePV(src)), param))
+     : newPADNAMEpvn(PadnamePV(src), PadnameLEN(src));
+    ptr_table_store(PL_ptr_table, src, dst);
+    PadnameLEN(dst) = PadnameLEN(src);
+    PadnameFLAGS(dst) = PadnameFLAGS(src);
+    PadnameREFCNT(dst) = 0; /* The caller will increment it.  */
+    PadnameTYPE   (dst) = (HV *)sv_dup_inc((SV *)PadnameTYPE(src), param);
+    PadnameOURSTASH(dst) = (HV *)sv_dup_inc((SV *)PadnameOURSTASH(src),
+					    param);
+    dst->xpadn_low  = src->xpadn_low;
+    dst->xpadn_high = src->xpadn_high;
+    dst->xpadn_gen  = src->xpadn_gen;
+    return dst;
+}
+
+#endif /* USE_ITHREADS */
 
 /*
  * Local variables:

@@ -373,13 +373,10 @@ perform the upgrade if necessary.  See C<svtype>.
 				       expanded to a real GV */
 #define SVf_PROTECT	0x00010000  /* very read-only */
 #define SVs_PADTMP	0x00020000  /* in use as tmp */
-#define SVpad_TYPED	0x00020000  /* pad name is a Typed Lexical */
 #define SVs_PADSTALE	0x00040000  /* lexical has gone out of scope;
 					only used when !PADTMP */
-#define SVpad_OUR	0x00040000  /* pad name is "our" instead of "my" */
 #define SVs_TEMP	0x00080000  /* mortal (implies string is stealable) */
 #define SVs_OBJECT	0x00100000  /* is "blessed" */
-#define SVpad_LVALUE	0x00100000  /* pad name is used as lvalue */
 #define SVs_GMG		0x00200000  /* has magical get method */
 #define SVs_SMG		0x00400000  /* has magical set method */
 #define SVs_RMG		0x00800000  /* has random magical methods */
@@ -389,10 +386,7 @@ perform the upgrade if necessary.  See C<svtype>.
 				       2: For PVCV, whether CvUNIQUE(cv)
 					  refers to an eval or once only
 					  [CvEVAL(cv), CvSPECIAL(cv)]
-				       3: On a pad name SV, that slot in the
-					  frame AV is a REFCNT'ed reference
-					  to a lexical from "outside".
-                                       4: HV: informally reserved by DAPM
+                                       3: HV: informally reserved by DAPM
                                           for vtables */
 #define SVf_OOK		0x02000000  /* has valid offset value. For a PVHV this
 				       means that a hv_aux struct is present
@@ -436,22 +430,19 @@ perform the upgrade if necessary.  See C<svtype>.
 /* Some private flags. */
 
 
-/* PVNV, PVMG only, and only used in pads. Should be safe to test on any scalar
-   SV, as the core is careful to avoid setting both.
+/* The SVp_SCREAM|SVpbm_VALID (0x40008000) combination is up for grabs.
+   Formerly it was used for pad names, but now it is available.  The core
+   is careful to avoid setting both flags.
 
    SVf_POK, SVp_POK also set:
    0x00004400   Normal
    0x0000C400   method name for DOES (SvSCREAM)
    0x40004400   FBM compiled (SvVALID)
-   0x4000C400   pad name.
+   0x4000C400   *** Formerly used for pad names ***
 
    0x00008000   GV with GP
    0x00008800   RV with PCS imported
 */
-#define SVpad_NAME	(SVp_SCREAM|SVpbm_VALID)
-				    /* This SV is a name in the PAD, so
-				       SVpad_TYPED, SVpad_OUR and SVpad_STATE
-				       apply */
 /* PVAV */
 #define SVpav_REAL	0x40000000  /* free old entries */
 /* PVHV */
@@ -473,7 +464,6 @@ perform the upgrade if necessary.  See C<svtype>.
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
 /* pad name vars only */
-#define SVpad_STATE	0x80000000  /* pad name is a "state" var */
 
 #define _XPV_HEAD							\
     HV*		xmg_stash;	/* class package */			\
@@ -503,7 +493,6 @@ union _xivu {
 
 union _xmgu {
     MAGIC*  xmg_magic;		/* linked list of magicalness */
-    HV*	    xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
     STRLEN  xmg_hash_index;	/* used while freeing hash entries */
 };
 
@@ -1143,47 +1132,6 @@ sv_force_normal does nothing.
 #define SvTAIL_on(sv)		(SvFLAGS(sv) |= SVpbm_TAIL)
 #define SvTAIL_off(sv)		(SvFLAGS(sv) &= ~SVpbm_TAIL)
 
-#define SvPAD_NAME(sv) ((SvFLAGS(sv) & SVpad_NAME) == SVpad_NAME)
-
-#define SvPAD_TYPED(sv) \
-	((SvFLAGS(sv) & (SVpad_NAME|SVpad_TYPED)) == (SVpad_NAME|SVpad_TYPED))
-
-#define SvPAD_OUR(sv)	\
-	((SvFLAGS(sv) & (SVpad_NAME|SVpad_OUR)) == (SVpad_NAME|SVpad_OUR))
-
-#define SvPAD_STATE(sv)	\
-	((SvFLAGS(sv) & (SVpad_NAME|SVpad_STATE)) == (SVpad_NAME|SVpad_STATE))
-
-#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define SvPAD_TYPED_on(sv)	({					\
-	    SV *const _svpad = MUTABLE_SV(sv);				\
-	    assert(SvTYPE(_svpad) == SVt_PVMG);				\
-	    (SvFLAGS(_svpad) |= SVpad_NAME|SVpad_TYPED);		\
-	})
-#define SvPAD_OUR_on(sv)	({					\
-	    SV *const _svpad = MUTABLE_SV(sv);				\
-	    assert(SvTYPE(_svpad) == SVt_PVMG);				\
-	    (SvFLAGS(_svpad) |= SVpad_NAME|SVpad_OUR);			\
-	})
-#define SvPAD_STATE_on(sv)	({					\
-	    SV *const _svpad = MUTABLE_SV(sv);				\
-	    assert(SvTYPE(_svpad) == SVt_PVNV || SvTYPE(_svpad) == SVt_PVMG); \
-	    (SvFLAGS(_svpad) |= SVpad_NAME|SVpad_STATE);		\
-	})
-#else
-#  define SvPAD_TYPED_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_TYPED)
-#  define SvPAD_OUR_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_OUR)
-#  define SvPAD_STATE_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_STATE)
-#endif
-
-#define SvOURSTASH(sv)	\
-	(SvPAD_OUR(sv) ? ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash : NULL)
-#define SvOURSTASH_set(sv, st)					\
-        STMT_START {						\
-	    assert(SvTYPE(sv) == SVt_PVMG);			\
-	    ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash = st;	\
-	} STMT_END
-
 #define SvRVx(sv) SvRV(sv)
 
 #ifdef PERL_DEBUG_COW
@@ -1266,8 +1214,6 @@ sv_force_normal does nothing.
 #    define SvMAGIC(sv)							\
 	(*({ const SV *const _svmagic = (const SV *)(sv);		\
 	    assert(SvTYPE(_svmagic) >= SVt_PVMG);			\
-	    if(SvTYPE(_svmagic) == SVt_PVMG)				\
-		assert(!SvPAD_OUR(_svmagic));				\
 	    &(((XPVMG*) MUTABLE_PTR(SvANY(_svmagic)))->xmg_u.xmg_magic); \
 	  }))
 #    define SvSTASH(sv)							\
@@ -2204,14 +2150,12 @@ C<SvUTF8_on> on the new SV.  Implemented as a wrapper around C<newSVpvn_flags>.
 /*
 =for apidoc Amx|SV*|newSVpadname|PADNAME *pn
 
-Creates a new SV containing the pad name.  This is currently identical
-to C<newSVsv>, but pad names may cease being SVs at some point, so
-C<newSVpadname> is preferable.
+Creates a new SV containing the pad name.
 
 =cut
 */
 
-#define newSVpadname(pn) newSVsv((SV *)(pn))
+#define newSVpadname(pn) newSVpvn_utf8(PadnamePV(pn), PadnameLEN(pn), TRUE)
 
 /*
 =for apidoc Am|void|SvOOK_offset|NN SV*sv|STRLEN len

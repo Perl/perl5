@@ -7780,7 +7780,7 @@ S_op_const_sv(pTHX_ const OP *o, CV *cv, bool allow_lex)
 	    SAVEFREESV(sv);
 	}
 	else if (allow_lex && type == OP_PADSV) {
-		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
+		if (PAD_COMPNAME_FLAGS(o->op_targ) & PADNAMEt_OUTER)
 		{
 		    sv = &PL_sv_undef; /* an arbitrary non-null value */
 		    padsv = TRUE;
@@ -7922,9 +7922,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     else if (PadnameIsSTATE(name) || CvDEPTH(outcv))
 	cv = *spot;
     else {
-	MAGIC *mg;
-	SvUPGRADE((SV *)name, SVt_PVMG);
-	mg = mg_find((SV *)name, PERL_MAGIC_proto);
 	assert (SvTYPE(*spot) == SVt_PVCV);
 	if (CvNAMED(*spot))
 	    hek = CvNAME_HEK(*spot);
@@ -7941,15 +7938,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    );
 	    CvLEXICAL_on(*spot);
 	}
-	if (mg) {
-	    assert(mg->mg_obj);
-	    cv = (CV *)mg->mg_obj;
-	}
-	else {
-	    sv_magic((SV *)name, &PL_sv_undef, PERL_MAGIC_proto, NULL, 0);
-	    mg = mg_find((SV *)name, PERL_MAGIC_proto);
-	}
-	spot = (CV **)(svspot = &mg->mg_obj);
+	cv = PadnamePROTOCV(name);
+	svspot = (SV **)(spot = &PadnamePROTOCV(name));
     }
 
     if (block) {
@@ -11003,11 +10993,8 @@ Perl_find_lexical_cv(pTHX_ PADOFFSET off)
 		[off = PARENT_PAD_INDEX(name)];
     }
     assert(!PadnameIsOUR(name));
-    if (!PadnameIsSTATE(name) && SvMAGICAL(name)) {
-	MAGIC * mg = mg_find((SV *)name, PERL_MAGIC_proto);
-	assert(mg);
-	assert(mg->mg_obj);
-	return (CV *)mg->mg_obj;
+    if (!PadnameIsSTATE(name) && PadnamePROTOCV(name)) {
+	return PadnamePROTOCV(name);
     }
     return (CV *)AvARRAY(PadlistARRAY(CvPADLIST(compcv))[1])[off];
 }

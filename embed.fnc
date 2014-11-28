@@ -1000,6 +1000,8 @@ AmdbR	|HV*	|newHV
 ApaR	|HV*	|newHVhv	|NULLOK HV *hv
 Apabm	|IO*	|newIO
 Apda	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
+AMpda	|PADNAME *|newPADNAMEouter|NN PADNAME *outer
+AMpda	|PADNAME *|newPADNAMEpvn|NN const char *s|STRLEN len
 AMpda	|PADNAMELIST *|newPADNAMELIST|size_t max
 #ifdef USE_ITHREADS
 Apda	|OP*	|newPADOP	|I32 type|I32 flags|NN SV* sv
@@ -2588,7 +2590,9 @@ AMpdR	|PADNAME *|padnamelist_fetch|NN PADNAMELIST *pnl|SSize_t key
 Xop	|void	|padnamelist_free|NN PADNAMELIST *pnl
 AMpd	|PADNAME **|padnamelist_store|NN PADNAMELIST *pnl|SSize_t key \
 				     |NULLOK PADNAME *val
+Xop	|void	|padname_free	|NN PADNAME *pn
 #if defined(USE_ITHREADS)
+pdR	|PADNAME *|padname_dup	|NN PADNAME *src|NN CLONE_PARAMS *param
 pR	|PADNAMELIST *|padnamelist_dup|NN PADNAMELIST *srcpad \
 				      |NN CLONE_PARAMS *param
 pdR	|PADLIST *|padlist_dup	|NN PADLIST *srcpad \

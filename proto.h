@@ -2985,6 +2985,20 @@ PERL_CALLCONV PADNAMELIST *	Perl_newPADNAMELIST(pTHX_ size_t max)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV PADNAME *	Perl_newPADNAMEouter(pTHX_ PADNAME *outer)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_NEWPADNAMEOUTER	\
+	assert(outer)
+
+PERL_CALLCONV PADNAME *	Perl_newPADNAMEpvn(pTHX_ const char *s, STRLEN len)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_NEWPADNAMEPVN	\
+	assert(s)
+
 PERL_CALLCONV OP*	Perl_newPMOP(pTHX_ I32 type, I32 flags)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
@@ -3352,6 +3366,11 @@ PERL_CALLCONV PAD **	Perl_padlist_store(pTHX_ PADLIST *padlist, I32 key, PAD *va
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PADLIST_STORE	\
 	assert(padlist)
+
+PERL_CALLCONV void	Perl_padname_free(pTHX_ PADNAME *pn)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PADNAME_FREE	\
+	assert(pn)
 
 PERL_CALLCONV PADNAME *	Perl_padnamelist_fetch(pTHX_ PADNAMELIST *pnl, SSize_t key)
 			__attribute__warn_unused_result__
@@ -8037,6 +8056,13 @@ PERL_CALLCONV PADLIST *	Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *pa
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_PADLIST_DUP	\
 	assert(srcpad); assert(param)
+
+PERL_CALLCONV PADNAME *	Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_PADNAME_DUP	\
+	assert(src); assert(param)
 
 PERL_CALLCONV PADNAMELIST *	Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
 			__attribute__warn_unused_result__

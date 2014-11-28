@@ -1431,15 +1431,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		   (int)(PL_dumpindent*level), "", (IV)SvREFCNT(sv),
 		   (int)(PL_dumpindent*level), "");
 
-    if (!((flags & SVpad_NAME) == SVpad_NAME
-	  && (type == SVt_PVMG || type == SVt_PVNV))) {
-	if ((flags & SVs_PADSTALE))
+    if ((flags & SVs_PADSTALE))
 	    sv_catpv(d, "PADSTALE,");
-    }
-    if (!((flags & SVpad_NAME) == SVpad_NAME && type == SVt_PVMG)) {
-	if ((flags & SVs_PADTMP))
+    if ((flags & SVs_PADTMP))
 	    sv_catpv(d, "PADTMP,");
-    }
     append_flags(d, flags, first_sv_flags_names);
     if (flags & SVf_ROK)  {	
     				sv_catpv(d, "ROK,");
@@ -1489,11 +1484,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     case SVt_PVMG:
 	if (SvTAIL(sv))		sv_catpv(d, "TAIL,");
 	if (SvVALID(sv))	sv_catpv(d, "VALID,");
-	if (SvPAD_TYPED(sv))	sv_catpv(d, "TYPED,");
-	if (SvPAD_OUR(sv))	sv_catpv(d, "OUR,");
 	/* FALLTHROUGH */
-    case SVt_PVNV:
-	if (SvPAD_STATE(sv))	sv_catpv(d, "STATE,");
 	goto evaled_or_uv;
     case SVt_PVAV:
 	break;
@@ -1562,13 +1553,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	PerlIO_putc(file, '\n');
     }
 
-    if ((type == SVt_PVNV || type == SVt_PVMG)
-	&& (SvFLAGS(sv) & SVpad_NAME) == SVpad_NAME) {
-	Perl_dump_indent(aTHX_ level, file, "  COP_LOW = %"UVuf"\n",
-			 (UV) COP_SEQ_RANGE_LOW(sv));
-	Perl_dump_indent(aTHX_ level, file, "  COP_HIGH = %"UVuf"\n",
-			 (UV) COP_SEQ_RANGE_HIGH(sv));
-    } else if ((type >= SVt_PVNV && type != SVt_PVAV && type != SVt_PVHV
+    if ((type >= SVt_PVNV && type != SVt_PVAV && type != SVt_PVHV
 		&& type != SVt_PVCV && type != SVt_PVFM  && type != SVt_REGEXP
 		&& type != SVt_PVIO && !isGV_with_GP(sv) && !SvVALID(sv))
 	       || type == SVt_NV) {
@@ -1638,14 +1623,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     }
 
     if (type >= SVt_PVMG) {
-	if (type == SVt_PVMG && SvPAD_OUR(sv)) {
-	    HV * const ost = SvOURSTASH(sv);
-	    if (ost)
-		do_hv_dump(level, file, "  OURSTASH", ost);
-	} else {
-	    if (SvMAGIC(sv))
+	if (SvMAGIC(sv))
 		do_magic_dump(level, file, SvMAGIC(sv), nest+1, maxnest, dumpops, pvlim);
-	}
 	if (SvSTASH(sv))
 	    do_hv_dump(level, file, "  STASH", SvSTASH(sv));
 

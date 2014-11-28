@@ -170,25 +170,24 @@ PP(pp_introcv)
 PP(pp_clonecv)
 {
     dTARGET;
-    MAGIC * const mg =
-	mg_find(PadlistNAMESARRAY(CvPADLIST(find_runcv(NULL)))[ARGTARG],
-		PERL_MAGIC_proto);
+    CV * const protocv = PadnamePROTOCV(
+	PadlistNAMESARRAY(CvPADLIST(find_runcv(NULL)))[ARGTARG]
+    );
     assert(SvTYPE(TARG) == SVt_PVCV);
-    assert(mg);
-    assert(mg->mg_obj);
-    if (CvISXSUB(mg->mg_obj)) { /* constant */
+    assert(protocv);
+    if (CvISXSUB(protocv)) { /* constant */
 	/* XXX Should we clone it here? */
 	/* If this changes to use SAVECLEARSV, we can move the SAVECLEARSV
 	   to introcv and remove the SvPADSTALE_off. */
 	SAVEPADSVANDMORTALIZE(ARGTARG);
-	PAD_SVl(ARGTARG) = SvREFCNT_inc_simple_NN(mg->mg_obj);
+	PAD_SVl(ARGTARG) = SvREFCNT_inc_simple_NN(protocv);
     }
     else {
-	if (CvROOT(mg->mg_obj)) {
-	    assert(CvCLONE(mg->mg_obj));
-	    assert(!CvCLONED(mg->mg_obj));
+	if (CvROOT(protocv)) {
+	    assert(CvCLONE(protocv));
+	    assert(!CvCLONED(protocv));
 	}
-	cv_clone_into((CV *)mg->mg_obj,(CV *)TARG);
+	cv_clone_into(protocv,(CV *)TARG);
 	SAVECLEARSV(PAD_SVl(ARGTARG));
     }
     return NORMAL;
