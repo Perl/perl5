@@ -2465,7 +2465,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 	const I32 names_fill = PadnamelistMAX(PadlistNAMES(srcpad));
 	const PAD *const srcpad1 = PadlistARRAY(srcpad)[1];
 	SV **oldpad = AvARRAY(srcpad1);
-	SV ** const names = PadnamelistARRAY(PadlistNAMES(dstpad));
+	PADNAME ** const names = PadnamelistARRAY(PadlistNAMES(dstpad));
 	SV **pad1a;
 	AV *args;
 
@@ -2483,9 +2483,9 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 		    pad1a[ix] = NULL;
 		} else if (names_fill >= ix && names[ix] &&
 			   PadnameLEN(names[ix])) {
-		    const char sigil = SvPVX_const(names[ix])[0];
-		    if ((SvFLAGS(names[ix]) & SVf_FAKE)
-			|| (SvFLAGS(names[ix]) & SVpad_STATE)
+		    const char sigil = PadnamePV(names[ix])[0];
+		    if (PadnameOUTER(names[ix])
+			|| PadnameIsSTATE(names[ix])
 			|| sigil == '&')
 			{
 			    /* outer lexical or anon code */
