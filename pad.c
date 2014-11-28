@@ -1947,7 +1947,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
     PADLIST* const protopadlist = CvPADLIST(proto);
     PADNAMELIST *const protopad_name = PadlistNAMES(protopadlist);
     const PAD *const protopad = PadlistARRAY(protopadlist)[1];
-    SV** const pname = PadnamelistARRAY(protopad_name);
+    PADNAME** const pname = PadnamelistARRAY(protopad_name);
     SV** const ppad = AvARRAY(protopad);
     const I32 fname = PadnamelistMAX(protopad_name);
     const I32 fpad = AvFILLp(protopad);
@@ -2010,14 +2010,14 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 	CvPADLIST(cv)->xpadl_outid = PadlistNAMES(CvPADLIST(outside));
 
     for (ix = fpad; ix > 0; ix--) {
-	SV* const namesv = (ix <= fname) ? pname[ix] : NULL;
+	PADNAME* const namesv = (ix <= fname) ? pname[ix] : NULL;
 	SV *sv = NULL;
 	if (namesv && PadnameLEN(namesv)) { /* lexical */
 	  if (PadnameIsOUR(namesv)) { /* or maybe not so lexical */
 		NOOP;
 	  }
 	  else {
-	    if (SvFAKE(namesv)) {   /* lexical from outside? */
+	    if (PadnameOUTER(namesv)) {   /* lexical from outside? */
 		/* formats may have an inactive, or even undefined, parent;
 		   but state vars are always available. */
 		if (!outpad || !(sv = outpad[PARENT_PAD_INDEX(namesv)])
@@ -2030,7 +2030,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 		    SvREFCNT_inc_simple_void_NN(sv);
 	    }
 	    if (!sv) {
-                const char sigil = SvPVX_const(namesv)[0];
+                const char sigil = PadnamePV(namesv)[0];
                 if (sigil == '&')
 		    /* If there are state subs, we need to clone them, too.
 		       But they may need to close over variables we have
@@ -2052,14 +2052,13 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 			   upgrade to the real thing on scope entry. */
                         dVAR;
 			U32 hash;
-			PERL_HASH(hash, SvPVX_const(namesv)+1,
-				  SvCUR(namesv) - 1);
+			PERL_HASH(hash, PadnamePV(namesv)+1,
+				  PadnameLEN(namesv) - 1);
 			sv = newSV_type(SVt_PVCV);
 			CvNAME_HEK_set(
 			    sv,
-			    share_hek(SvPVX_const(namesv)+1,
-				      (SvCUR(namesv) - 1)
-					 * (SvUTF8(namesv) ? -1 : 1),
+			    share_hek(PadnamePV(namesv)+1,
+				      1 - PadnameLEN(namesv),
 				      hash)
 			);
 			CvLEXICAL_on(sv);
@@ -2089,9 +2088,9 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 
     if (subclones)
 	for (ix = fpad; ix > 0; ix--) {
-	    SV* const namesv = (ix <= fname) ? pname[ix] : NULL;
-	    if (namesv && namesv != &PL_sv_undef && !SvFAKE(namesv)
-	     && SvPVX_const(namesv)[0] == '&' && SvPAD_STATE(namesv))
+	    PADNAME * const name = (ix <= fname) ? pname[ix] : NULL;
+	    if (name && name != &PL_padname_undef && !PadnameOUTER(name)
+	     && PadnamePV(name)[0] == '&' && PadnameIsSTATE(name))
 		S_cv_clone(aTHX_ (CV *)ppad[ix], (CV *)PL_curpad[ix], cv);
 	}
 
