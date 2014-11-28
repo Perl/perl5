@@ -1113,15 +1113,15 @@ the parent pad.
 #define CvLATE(cv) (CvANON(cv) || CvCLONE(cv) || SvTYPE(cv) == SVt_PVFM)
 
 static void
-S_unavailable(pTHX_ SV *namesv)
+S_unavailable(pTHX_ PADNAME *name)
 {
     /* diag_listed_as: Variable "%s" is not available */
     Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-			"%se \"%"SVf"\" is not available",
-			 *SvPVX_const(namesv) == '&'
+			"%se \"%"PNf"\" is not available",
+			 *PadnamePV(name) == '&'
 					 ? "Subroutin"
 					 : "Variabl",
-			 SVfARG(namesv));
+			 PNfARG(name));
 }
 
 STATIC PADOFFSET
