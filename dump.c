@@ -2295,7 +2295,7 @@ Perl_debop(pTHX_ const OP *o)
 	/* print the lexical's name */
         {
             CV * const cv = deb_curcv(cxstack_ix);
-            SV *sv;
+            PADNAME *sv;
             PADNAMELIST * comppad = NULL;
             int i;
 
@@ -2307,7 +2307,7 @@ Perl_debop(pTHX_ const OP *o)
             for (i = 0; i < count; i++) {
                 if (comppad &&
                         (sv = padnamelist_fetch(comppad, o->op_targ + i)))
-                    PerlIO_printf(Perl_debug_log, "%s", SvPV_nolen_const(sv));
+                    PerlIO_printf(Perl_debug_log, "%"PNf, PNfARG(sv));
                 else
                     PerlIO_printf(Perl_debug_log, "[%"UVuf"]",
                             (UV)o->op_targ+i);
