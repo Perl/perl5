@@ -175,7 +175,8 @@ my %specialformats = (IVdf => 'd',
 		      UTF8f=> 's',
 		      SVf256=>'s',
 		      SVf32=> 's',
-		      SVf  => 's');
+		      SVf  => 's',
+		      PNf  => 's');
 my $format_modifiers = qr/ [#0\ +-]*              # optional flags
 			  (?: [1-9][0-9]* | \* )? # optional field width
 			  (?: \. \d* )?           # optional precision
