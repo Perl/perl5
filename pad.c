@@ -1469,7 +1469,7 @@ statements.
 U32
 Perl_intro_my(pTHX)
 {
-    SV **svp;
+    PADNAME **svp;
     I32 i;
     U32 seq;
 
@@ -1485,16 +1485,16 @@ Perl_intro_my(pTHX)
 
     svp = PadnamelistARRAY(PL_comppad_name);
     for (i = PL_min_intro_pending; i <= PL_max_intro_pending; i++) {
-	SV * const sv = svp[i];
+	PADNAME * const sv = svp[i];
 
-	if (sv && PadnameLEN(sv) && !SvFAKE(sv)
+	if (sv && PadnameLEN(sv) && !PadnameOUTER(sv)
 	    && COP_SEQ_RANGE_LOW(sv) == PERL_PADSEQ_INTRO)
 	{
 	    COP_SEQ_RANGE_HIGH_set(sv, PERL_PADSEQ_INTRO); /* Don't know scope end yet. */
 	    COP_SEQ_RANGE_LOW_set(sv, PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad intromy: %ld \"%s\", (%lu,%lu)\n",
-		(long)i, SvPVX_const(sv),
+		(long)i, PadnamePV(sv),
 		(unsigned long)COP_SEQ_RANGE_LOW(sv),
 		(unsigned long)COP_SEQ_RANGE_HIGH(sv))
 	    );
