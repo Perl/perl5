@@ -2376,14 +2376,14 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 	SV** const oldpad = AvARRAY(svp[depth-1]);
 	I32 ix = AvFILLp((const AV *)svp[1]);
 	const I32 names_fill = PadnamelistMAX((PADNAMELIST *)svp[0]);
-	SV** const names = PadnamelistARRAY((PADNAMELIST *)svp[0]);
+	PADNAME ** const names = PadnamelistARRAY((PADNAMELIST *)svp[0]);
 	AV *av;
 
 	for ( ;ix > 0; ix--) {
 	    if (names_fill >= ix && PadnameLEN(names[ix])) {
-		const char sigil = SvPVX_const(names[ix])[0];
-		if ((SvFLAGS(names[ix]) & SVf_FAKE)
-			|| (SvFLAGS(names[ix]) & SVpad_STATE)
+		const char sigil = PadnamePV(names[ix])[0];
+		if (PadnameOUTER(names[ix])
+			|| PadnameIsSTATE(names[ix])
 			|| sigil == '&')
 		{
 		    /* outer lexical or anon code */
