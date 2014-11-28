@@ -3542,6 +3542,8 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
 	sv_clear((SV*)gv);
 	SvREFCNT(gv) = 1;
 	SvFLAGS(gv) = SVt_IV|SVf_ROK|SVprv_PCS_IMPORTED * imported;
+
+        /* See also: 'SET_SVANY_FOR_BODYLESS_IV' in sv.c */
 	SvANY(gv) = (XPVGV*)((char*)&(gv->sv_u.svu_iv) -
 				STRUCT_OFFSET(XPVIV, xiv_iv));
 	SvRV_set(gv, value);

@@ -408,6 +408,34 @@ S_del_sv(pTHX_ SV *p)
 
 #endif /* DEBUGGING */
 
+/*
+ * Bodyless IVs and NVs!
+ *
+ * Since 5.9.2, we can avoid allocating a body for SVt_IV-type SVs.
+ * Since the larger IV-holding variants of SVs store their integer
+ * values in their respective bodies, the family of SvIV() accessor
+ * macros would  naively have to branch on the SV type to find the
+ * integer value either in the HEAD or BODY. In order to avoid this
+ * expensive branch, a clever soul has deployed a great hack:
+ * We set up the SvANY pointer such that instead of pointing to a
+ * real body, it points into the memory before the location of the
+ * head. We compute this pointer such that the location of
+ * the integer member of the hypothetical body struct happens to
+ * be the same as the location of the integer member of the bodyless
+ * SV head. This now means that the SvIV() family of accessors can
+ * always read from the (hypothetical or real) body via SvANY.
+ *
+ * Since the 5.21 dev series, we employ the same trick for NVs
+ * if the architecture can support it (NVSIZE <= IVSIZE).
+ */
+
+/* The following two macros compute the necessary offsets for the above
+ * trick and store them in SvANY for SvIV() (and friends) to use. */
+#define SET_SVANY_FOR_BODYLESS_IV(sv) \
+	SvANY(sv) = (XPVIV*)((char*)&(sv->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv))
+
+#define SET_SVANY_FOR_BODYLESS_NV(sv) \
+	SvANY(sv) = (XPVNV*)((char*)&(sv->sv_u.svu_nv) - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv))
 
 /*
 =head1 SV Manipulation Functions
@@ -1330,13 +1358,13 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
     switch (new_type) {
     case SVt_IV:
 	assert(old_type == SVt_NULL);
-	SvANY(sv) = (XPVIV*)((char*)&(sv->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
+	SET_SVANY_FOR_BODYLESS_IV(sv);
 	SvIV_set(sv, 0);
 	return;
     case SVt_NV:
 	assert(old_type == SVt_NULL);
 #if NVSIZE <= IVSIZE
-	SvANY(sv) = (XPVNV*)((char*)&(sv->sv_u.svu_nv) - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv));
+	SET_SVANY_FOR_BODYLESS_NV(sv);
 #else
 	SvANY(sv) = new_XNV();
 #endif
@@ -6335,8 +6363,7 @@ Perl_sv_replace(pTHX_ SV *const sv, SV *const nsv)
     StructCopy(nsv,sv,SV);
 #endif
     if(SvTYPE(sv) == SVt_IV) {
-	SvANY(sv)
-	    = (XPVIV*)((char*)&(sv->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
+	SET_SVANY_FOR_BODYLESS_IV(sv);
     }
 	
 
@@ -13330,7 +13357,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	SvANY(dstr)	= NULL;
 	break;
     case SVt_IV:
-	SvANY(dstr)	= (XPVIV*)((char*)&(dstr->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
+	SET_SVANY_FOR_BODYLESS_IV(dstr);
 	if(SvROK(sstr)) {
 	    Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	} else {
@@ -13339,7 +13366,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	break;
     case SVt_NV:
 #if NVSIZE <= IVSIZE
-	SvANY(dstr) = (XPVNV*)((char*)&(dstr->sv_u.svu_nv) - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv));
+	SET_SVANY_FOR_BODYLESS_NV(dstr);
 #else
 	SvANY(dstr)	= new_XNV();
 #endif
