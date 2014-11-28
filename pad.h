@@ -45,25 +45,45 @@ struct padnamelist {
     U32		xpadnl_refcnt;
 };
 
+/* PERL_PADNAME_MINIMAL uses less memory, but on some platforms
+   PERL_PADNAME_ALIGNED may be faster, so platform-specific hints can
+   define one or the other.  */
+#if defined(PERL_PADNAME_MINIMAL) && defined (PERL_PADNAME_ALIGNED)
+#  error PERL_PADNAME_MINIMAL and PERL_PADNAME_ALIGNED are exclusive
+#endif
+
+#if !defined(PERL_PADNAME_MINIMAL) && !defined(PERL_PADNAME_ALIGNED)
+#  define PERL_PADNAME_ALIGNED
+#endif
+
+#define _PADNAME_BASE \
+    char *	xpadn_pv;		\
+    HV *	xpadn_ourstash;		\
+    union {				\
+	HV *	xpadn_typestash;	\
+	CV *	xpadn_protocv;		\
+    } xpadn_type_u;			\
+    U32		xpadn_low;		\
+    U32		xpadn_high;		\
+    U32		xpadn_refcnt;		\
+    int		xpadn_gen;		\
+    U8		xpadn_len;		\
+    U8		xpadn_flags
+
 struct padname {
-    char *	xpadn_pv;
-    HV *	xpadn_ourstash;
-    union {
-	HV *	xpadn_typestash;
-	CV *	xpadn_protocv;
-    } xpadn_type_u;
-    U32		xpadn_low;
-    U32		xpadn_high;
-    U32		xpadn_refcnt;
-    int		xpadn_gen;
-    U8		xpadn_len;
-    U8		xpadn_flags;
+    _PADNAME_BASE;
 };
 
 struct padname_with_str {
+#ifdef PERL_PADNAME_MINIMAL
+    _PADNAME_BASE;
+#else
     struct padname	xpadn_padname;
+#endif
     char		xpadn_str[1];
 };
+
+#undef _PADNAME_BASE
 
 #define PADNAME_FROM_PV(s) \
     ((PADNAME *)((s) - STRUCT_OFFSET(struct padname_with_str, xpadn_str)))
