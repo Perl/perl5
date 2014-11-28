@@ -4884,6 +4884,179 @@ STATIC bool S_rck_lnbreak(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
     return 0;
 }
 
+STATIC bool S_rck_simple(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_ARGS_ASSERT_RCK_SIMPLE;
+
+    if (params->flags & SCF_DO_SUBSTR) {
+        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+        params->data->pos_min++;
+    }
+    params->min++;
+    if (params->flags & SCF_DO_STCLASS) {
+        bool invert = 0;
+        SV* my_invlist = NULL;
+        U8 namedclass;
+
+        /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
+        ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+
+        /* Some of the logic below assumes that switching
+           locale on will only add false positives. */
+        switch (OP(params->scan)) {
+
+        default:
+#ifdef DEBUGGING
+            Perl_croak(aTHX_ "panic: unexpected simple REx opcode %d",
+                    OP(params->scan));
+#endif
+        case SANY:
+            if (params->flags & SCF_DO_STCLASS_OR) /* Allow everything */
+                ssc_match_all_cp(params->data->start_class);
+            break;
+
+        case REG_ANY:
+            {
+                SV* REG_ANY_invlist = _new_invlist(2);
+                REG_ANY_invlist = add_cp_to_invlist(REG_ANY_invlist, '\n');
+                if (params->flags & SCF_DO_STCLASS_OR) {
+                    ssc_union(params->data->start_class,
+                        REG_ANY_invlist,
+                        TRUE /* TRUE => invert, hence all but \n */
+                    );
+                } else if (params->flags & SCF_DO_STCLASS_AND) {
+                    ssc_intersection(params->data->start_class,
+                        REG_ANY_invlist,
+                        TRUE  /* TRUE => invert */
+                    );
+                    ssc_clear_locale(params->data->start_class);
+                }
+                SvREFCNT_dec_NN(REG_ANY_invlist);
+            }
+            break;
+
+        case ANYOFD:
+        case ANYOFL:
+        case ANYOF:
+            if (params->flags & SCF_DO_STCLASS_AND)
+                ssc_and(pRExC_state, params->data->start_class,
+                        (regnode_charclass *)params->scan);
+            else
+                ssc_or(pRExC_state, params->data->start_class,
+                        (regnode_charclass *)params->scan);
+            break;
+
+        case ANYOFM:
+            {
+                SV* cp_list = get_ANYOFM_contents(params->scan);
+
+                if (params->flags & SCF_DO_STCLASS_OR) {
+                    ssc_union(params->data->start_class,
+                        cp_list,
+                        FALSE /* don't invert */
+                    );
+                }
+                else if (params->flags & SCF_DO_STCLASS_AND) {
+                    ssc_intersection(params->data->start_class,
+                        cp_list,
+                        FALSE /* don't invert */
+                    );
+                }
+
+                SvREFCNT_dec_NN(cp_list);
+            }
+            break;
+
+        case NPOSIXL:
+            invert = 1;
+            /* FALLTHROUGH */
+
+        case POSIXL:
+            namedclass = classnum_to_namedclass(FLAGS(params->scan)) + invert;
+            if (params->flags & SCF_DO_STCLASS_AND) {
+                bool was_there = cBOOL(ANYOF_POSIXL_TEST(
+                        params->data->start_class, namedclass));
+                ANYOF_POSIXL_ZERO(params->data->start_class);
+                if (was_there) {    /* Do an AND */
+                    ANYOF_POSIXL_SET(params->data->start_class, namedclass);
+                }
+                /* No individual code points can now match */
+                params->data->start_class->invlist
+                        = sv_2mortal(_new_invlist(0));
+            } else {
+                int complement = namedclass + ((invert) ? -1 : 1);
+
+                assert(params->flags & SCF_DO_STCLASS_OR);
+
+                /* If the complement of this class was already there,
+                 * the result is that they match all code points,
+                 * (\d + \D == everything).  Remove the classes from
+                 * future consideration.  Locale is not relevant in
+                 * this case */
+                if (ANYOF_POSIXL_TEST(params->data->start_class, complement)) {
+                    ssc_match_all_cp(params->data->start_class);
+                    ANYOF_POSIXL_CLEAR(params->data->start_class, namedclass);
+                    ANYOF_POSIXL_CLEAR(params->data->start_class, complement);
+                } else {  /* The usual case; just add this class to the
+                           * existing set */
+                    ANYOF_POSIXL_SET(params->data->start_class, namedclass);
+                }
+            }
+            break;
+
+        case NASCII:
+            invert = 1;
+            /* FALLTHROUGH */
+        case ASCII:
+            my_invlist = invlist_clone(PL_Posix_ptrs[_CC_ASCII]);
+
+            /* This can be handled as a Posix class */
+            goto join_posix_and_ascii;
+
+        case NPOSIXA:   /* For these, we always know the exact set of
+                           what's matched */
+            invert = 1;
+            /* FALLTHROUGH */
+        case POSIXA:
+            assert(FLAGS(params->scan) != _CC_ASCII);
+            my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(params->scan)]);
+            goto join_posix_and_ascii;
+
+        case NPOSIXD:
+        case NPOSIXU:
+            invert = 1;
+            /* FALLTHROUGH */
+        case POSIXD:
+        case POSIXU:
+            my_invlist = invlist_clone(PL_XPosix_ptrs[FLAGS(params->scan)]);
+
+            /* NPOSIXD matches all upper Latin1 code points unless the
+             * target string being matched is UTF-8, which is
+             * unknowable until match time.  Since we are going to
+             * invert, we want to get rid of all of them so that the
+             * inversion will match all */
+            if (OP(params->scan) == NPOSIXD)
+                _invlist_subtract(my_invlist, PL_UpperLatin1, &my_invlist);
+
+          join_posix_and_ascii:
+            if (params->flags & SCF_DO_STCLASS_AND) {
+                ssc_intersection(params->data->start_class, my_invlist, invert);
+                ssc_clear_locale(params->data->start_class);
+            } else {
+                assert(params->flags & SCF_DO_STCLASS_OR);
+                ssc_union(params->data->start_class, my_invlist, invert);
+            }
+            SvREFCNT_dec(my_invlist);
+        }
+        if (params->flags & SCF_DO_STCLASS_OR)
+            ssc_and(pRExC_state, params->data->start_class,
+                    (regnode_charclass *)params->and_withp);
+        params->flags &= ~SCF_DO_STCLASS;
+    }
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
 STATIC void S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params,
         regnode *start, regnode *end, I32 paren, U32 recursed_depth)
 {
@@ -5749,183 +5922,11 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
     } else if (OP(params->scan) == LNBREAK) {
         return rck_lnbreak(pRExC_state, params);
     } else if (REGNODE_SIMPLE(OP(params->scan))) {
-
-        if (params->flags & SCF_DO_SUBSTR) {
-            scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-            params->data->pos_min++;
-        }
-        params->min++;
-        if (params->flags & SCF_DO_STCLASS) {
-            bool invert = 0;
-            SV* my_invlist = NULL;
-            U8 namedclass;
-
-            /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
-            ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
-
-            /* Some of the logic below assumes that switching
-               locale on will only add false positives. */
-            switch (OP(params->scan)) {
-
-            default:
-#ifdef DEBUGGING
-               Perl_croak(aTHX_ "panic: unexpected simple REx opcode %d",
-                                                                 OP(params->scan));
-#endif
-            case SANY:
-                if (params->flags & SCF_DO_STCLASS_OR) /* Allow everything */
-                    ssc_match_all_cp(params->data->start_class);
-                break;
-
-            case REG_ANY:
-                {
-                    SV* REG_ANY_invlist = _new_invlist(2);
-                    REG_ANY_invlist = add_cp_to_invlist(REG_ANY_invlist,
-                                                        '\n');
-                    if (params->flags & SCF_DO_STCLASS_OR) {
-                        ssc_union(params->data->start_class,
-                                  REG_ANY_invlist,
-                                  TRUE /* TRUE => invert, hence all but \n
-                                        */
-                                  );
-                    }
-                    else if (params->flags & SCF_DO_STCLASS_AND) {
-                        ssc_intersection(params->data->start_class,
-                                         REG_ANY_invlist,
-                                         TRUE  /* TRUE => invert */
-                                         );
-                        ssc_clear_locale(params->data->start_class);
-                    }
-                    SvREFCNT_dec_NN(REG_ANY_invlist);
-                }
-                break;
-
-            case ANYOFD:
-            case ANYOFL:
-            case ANYOF:
-                if (params->flags & SCF_DO_STCLASS_AND)
-                    ssc_and(pRExC_state, params->data->start_class,
-                            (regnode_charclass *) params->scan);
-                else
-                    ssc_or(pRExC_state, params->data->start_class,
-                                                      (regnode_charclass *) params->scan);
-                break;
-
-            case ANYOFM:
-              {
-                SV* cp_list = get_ANYOFM_contents(params->scan);
-
-                if (params->flags & SCF_DO_STCLASS_OR) {
-                    ssc_union(params->data->start_class,
-                              cp_list,
-                              FALSE /* don't invert */
-                              );
-                }
-                else if (params->flags & SCF_DO_STCLASS_AND) {
-                    ssc_intersection(params->data->start_class,
-                                     cp_list,
-                                     FALSE /* don't invert */
-                                     );
-                }
-
-                SvREFCNT_dec_NN(cp_list);
-                break;
-              }
-
-            case NPOSIXL:
-                invert = 1;
-                /* FALLTHROUGH */
-
-            case POSIXL:
-                namedclass = classnum_to_namedclass(FLAGS(params->scan)) + invert;
-                if (params->flags & SCF_DO_STCLASS_AND) {
-                    bool was_there = cBOOL(
-                                      ANYOF_POSIXL_TEST(params->data->start_class,
-                                                             namedclass));
-                    ANYOF_POSIXL_ZERO(params->data->start_class);
-                    if (was_there) {    /* Do an AND */
-                        ANYOF_POSIXL_SET(params->data->start_class, namedclass);
-                    }
-                    /* No individual code points can now match */
-                    params->data->start_class->invlist
-                                            = sv_2mortal(_new_invlist(0));
-                }
-                else {
-                    int complement = namedclass + ((invert) ? -1 : 1);
-
-                    assert(params->flags & SCF_DO_STCLASS_OR);
-
-                    /* If the complement of this class was already there,
-                     * the result is that they match all code points,
-                     * (\d + \D == everything).  Remove the classes from
-                     * future consideration.  Locale is not relevant in
-                     * this case */
-                    if (ANYOF_POSIXL_TEST(params->data->start_class, complement)) {
-                        ssc_match_all_cp(params->data->start_class);
-                        ANYOF_POSIXL_CLEAR(params->data->start_class, namedclass);
-                        ANYOF_POSIXL_CLEAR(params->data->start_class, complement);
-                    }
-                    else {  /* The usual case; just add this class to the
-                               existing set */
-                        ANYOF_POSIXL_SET(params->data->start_class, namedclass);
-                    }
-                }
-                break;
-
-            case NASCII:
-                invert = 1;
-                /* FALLTHROUGH */
-            case ASCII:
-                my_invlist = invlist_clone(PL_Posix_ptrs[_CC_ASCII]);
-
-                /* This can be handled as a Posix class */
-                goto join_posix_and_ascii;
-
-            case NPOSIXA:   /* For these, we always know the exact set of
-                               what's matched */
-                invert = 1;
-                /* FALLTHROUGH */
-            case POSIXA:
-                assert(FLAGS(params->scan) != _CC_ASCII);
-                my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(params->scan)]);
-                goto join_posix_and_ascii;
-
-            case NPOSIXD:
-            case NPOSIXU:
-                invert = 1;
-                /* FALLTHROUGH */
-            case POSIXD:
-            case POSIXU:
-                my_invlist = invlist_clone(PL_XPosix_ptrs[FLAGS(params->scan)]);
-
-                /* NPOSIXD matches all upper Latin1 code points unless the
-                 * target string being matched is UTF-8, which is
-                 * unknowable until match time.  Since we are going to
-                 * invert, we want to get rid of all of them so that the
-                 * inversion will match all */
-                if (OP(params->scan) == NPOSIXD) {
-                    _invlist_subtract(my_invlist, PL_UpperLatin1,
-                                      &my_invlist);
-                }
-
-              join_posix_and_ascii:
-
-                if (params->flags & SCF_DO_STCLASS_AND) {
-                    ssc_intersection(params->data->start_class, my_invlist, invert);
-                    ssc_clear_locale(params->data->start_class);
-                }
-                else {
-                    assert(params->flags & SCF_DO_STCLASS_OR);
-                    ssc_union(params->data->start_class, my_invlist, invert);
-                }
-                SvREFCNT_dec(my_invlist);
-            }
-            if (params->flags & SCF_DO_STCLASS_OR)
-                ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
-            params->flags &= ~SCF_DO_STCLASS;
-        }
-    }
-    else if (PL_regkind[OP(params->scan)] == EOL && params->flags & SCF_DO_SUBSTR) {
+        /* REG_ANY SANY ANYOF ANYOFM POSIXD POSIXL POSIXU
+         * NASCII ASCII NPOSIXA POSIXA
+         * NPOSIXD NPOSIXL NPOSIXU NPOSIXA */
+        return rck_simple(pRExC_state, params);
+    } else if (PL_regkind[OP(params->scan)] == EOL && params->flags & SCF_DO_SUBSTR) {
         params->data->flags |= (OP(params->scan) == MEOL
                         ? SF_BEFORE_MEOL
                         : SF_BEFORE_SEOL);

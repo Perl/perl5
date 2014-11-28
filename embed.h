@@ -1150,6 +1150,7 @@
 #define rck_make_trie(a,b)	S_rck_make_trie(aTHX_ a,b)
 #define rck_plus(a,b)		S_rck_plus(aTHX_ a,b)
 #define rck_refish(a,b)		S_rck_refish(aTHX_ a,b)
+#define rck_simple(a,b)		S_rck_simple(aTHX_ a,b)
 #define rck_star(a,b)		S_rck_star(aTHX_ a,b)
 #define rck_suspend(a,b)	S_rck_suspend(aTHX_ a,b)
 #define rck_whilem(a,b)		S_rck_whilem(aTHX_ a,b)
