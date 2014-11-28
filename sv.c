@@ -9453,13 +9453,25 @@ SV is B<not> incremented.
 SV *
 Perl_newRV_noinc(pTHX_ SV *const tmpRef)
 {
-    SV *sv = newSV_type(SVt_IV);
+    SV *sv;
 
     PERL_ARGS_ASSERT_NEWRV_NOINC;
 
+    new_SV(sv);
+
+    /* We're starting from SVt_FIRST, so provided that's
+     * actual 0, we don't have to unset any SV type flags
+     * to promote to SVt_IV. */
+    assert(SVt_FIRST == 0);
+
+    SET_SVANY_FOR_BODYLESS_IV(sv);
+    SvFLAGS(sv) |= SVt_IV;
+    SvROK_on(sv);
+    SvIV_set(sv, 0);
+
     SvTEMP_off(tmpRef);
     SvRV_set(sv, tmpRef);
-    SvROK_on(sv);
+
     return sv;
 }
 
