@@ -401,13 +401,12 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 	    CV * const outercv = CvOUTSIDE(&cvbody);
 	    const U32 seq = CvOUTSIDE_SEQ(&cvbody);
 	    PADNAMELIST * const comppad_name = PadlistNAMES(padlist);
-	    SV ** const namepad = PadnamelistARRAY(comppad_name);
+	    PADNAME ** const namepad = PadnamelistARRAY(comppad_name);
 	    PAD * const comppad = PadlistARRAY(padlist)[1];
 	    SV ** const curpad = AvARRAY(comppad);
 	    for (ix = PadnamelistMAX(comppad_name); ix > 0; ix--) {
-		SV * const namesv = namepad[ix];
-		if (namesv && namesv != &PL_sv_undef
-		    && *SvPVX_const(namesv) == '&')
+		PADNAME * const name = namepad[ix];
+		if (name && PadnamePV(name) && *PadnamePV(name) == '&')
 		    {
 			CV * const innercv = MUTABLE_CV(curpad[ix]);
 			U32 inner_rc = SvREFCNT(innercv);
