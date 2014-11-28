@@ -2240,7 +2240,7 @@ S_finalize_op(pTHX_ OP* o)
 
     case OP_HELEM: {
 	UNOP *rop;
-	SV *lexname;
+	PADNAME *lexname;
 	GV **fields;
 	SVOP *key_op;
 	OP *kid;
@@ -2296,7 +2296,8 @@ S_finalize_op(pTHX_ OP* o)
 	    rop
 	 && (lexname = padnamelist_fetch(PL_comppad_name, rop->op_targ),
 	     SvPAD_TYPED(lexname))
-	 && (fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE))
+	 && (fields =
+		(GV**)hv_fetchs(PadnameTYPE(lexname), "FIELDS", FALSE))
 	 && isGV(*fields) && GvHV(*fields);
 	for (; key_op;
 	     key_op = (SVOP*)OP_SIBLING(key_op)) {
@@ -2319,9 +2320,9 @@ S_finalize_op(pTHX_ OP* o)
 	    if (check_fields
 	     && !hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0)) {
 		Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
-			   "in variable %"SVf" of type %"HEKf, 
-		      SVfARG(*svp), SVfARG(lexname),
-                      HEKfARG(HvNAME_HEK(SvSTASH(lexname))));
+			   "in variable %"PNf" of type %"HEKf, 
+		      SVfARG(*svp), PNfARG(lexname),
+                      HEKfARG(HvNAME_HEK(PadnameTYPE(lexname))));
 	    }
 	}
 	break;
