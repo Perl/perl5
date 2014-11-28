@@ -1449,7 +1449,7 @@ Perl_my_modfl(long double x, long double *ip)
 #  endif
 #endif
 
-/* Similarly, with ilobl and scalbnl we can emulate frexpl. */
+/* Similarly, with ilogbl and scalbnl we can emulate frexpl. */
 #if ! defined(HAS_FREXPL) && defined(HAS_ILOGBL) && defined(HAS_SCALBNL)
 long double
 Perl_my_frexpl(long double x, int *e) {
