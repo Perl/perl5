@@ -226,8 +226,8 @@ The C array of pad entries.
 The index of the last pad entry.
 
 =for apidoc Amx|char *|PadnamePV|PADNAME pn	
-The name stored in the pad name struct.  This returns NULL for a target or
-GV slot.
+The name stored in the pad name struct.  This returns NULL for a target
+slot.
 
 =for apidoc Amx|STRLEN|PadnameLEN|PADNAME pn	
 The length of the name.
