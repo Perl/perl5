@@ -854,7 +854,7 @@ C<is_our> indicates that the name to check is an 'our' declaration.
 STATIC void
 S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 {
-    SV		**svp;
+    PADNAME	**svp;
     PADOFFSET	top, off;
     const U32	is_our = flags & padadd_OUR;
 
@@ -873,22 +873,22 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
     /* XXX DAPM - why the (I32) cast - shouldn't we ensure they're the same
      * type ? */
     for (off = top; (I32)off > PL_comppad_name_floor; off--) {
-	SV * const sv = svp[off];
+	PADNAME * const sv = svp[off];
 	if (sv
-	    && PadnameLEN(sv)
-	    && !SvFAKE(sv)
+	    && PadnameLEN(sv) == PadnameLEN(name)
+	    && !PadnameOUTER(sv)
 	    && (   COP_SEQ_RANGE_LOW(sv)  == PERL_PADSEQ_INTRO
 		|| COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
-	    && sv_eq((SV *)name, sv))
+	    && memEQ(PadnamePV(sv), PadnamePV(name), PadnameLEN(name)))
 	{
 	    if (is_our && (SvPAD_OUR(sv)))
 		break; /* "our" masking "our" */
 	    /* diag_listed_as: "%s" variable %s masks earlier declaration in same %s */
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
-		"\"%s\" %s %"SVf" masks earlier declaration in same %s",
+		"\"%s\" %s %"PNf" masks earlier declaration in same %s",
 		(is_our ? "our" : PL_parser->in_my == KEY_my ? "my" : "state"),
-		*SvPVX(sv) == '&' ? "subroutine" : "variable",
-		SVfARG(sv),
+		*PadnamePV(sv) == '&' ? "subroutine" : "variable",
+		PNfARG(sv),
 		(COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO
 		    ? "scope" : "statement"));
 	    --off;
@@ -898,17 +898,17 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
     /* check the rest of the pad */
     if (is_our) {
 	while (off > 0) {
-	    SV * const sv = svp[off];
+	    PADNAME * const sv = svp[off];
 	    if (sv
-		&& PadnameLEN(sv)
-		&& !SvFAKE(sv)
+		&& PadnameLEN(sv) == PadnameLEN(name)
+		&& !PadnameOUTER(sv)
 		&& (   COP_SEQ_RANGE_LOW(sv)  == PERL_PADSEQ_INTRO
 		    || COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
 		&& SvOURSTASH(sv) == ourstash
-		&& sv_eq((SV *)name, sv))
+		&& memEQ(PadnamePV(sv), PadnamePV(name), PadnameLEN(name)))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
-		    "\"our\" variable %"SVf" redeclared", SVfARG(sv));
+		    "\"our\" variable %"PNf" redeclared", PNfARG(sv));
 		if ((I32)off <= PL_comppad_name_floor)
 		    Perl_warner(aTHX_ packWARN(WARN_MISC),
 			"\t(Did you mean \"local\" instead of \"our\"?)\n");
