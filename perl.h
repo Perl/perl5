@@ -3407,6 +3407,9 @@ typedef pthread_key_t	perl_key;
 #endif
 #define UTF8fARG(u,l,p) (int)cBOOL(u), (UV)(l), (void*)(p)
 
+#define PNf SVf
+#define PNfARG SVfARG
+
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB */
 #  undef UVf
