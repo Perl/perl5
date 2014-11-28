@@ -1828,7 +1828,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 {
     const PADNAMELIST *pad_name;
     const AV *pad;
-    SV **pname;
+    PADNAME **pname;
     SV **ppad;
     I32 ix;
 
@@ -1847,18 +1847,18 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
     );
 
     for (ix = 1; ix <= PadnamelistMAX(pad_name); ix++) {
-        const SV *namesv = pname[ix];
+        const PADNAME *namesv = pname[ix];
 	if (namesv && !PadnameLEN(namesv)) {
 	    namesv = NULL;
 	}
 	if (namesv) {
-	    if (SvFAKE(namesv))
+	    if (PadnameOUTER(namesv))
 		Perl_dump_indent(aTHX_ level+1, file,
 		    "%2d. 0x%"UVxf"<%lu> FAKE \"%s\" flags=0x%lx index=%lu\n",
 		    (int) ix,
 		    PTR2UV(ppad[ix]),
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
-		    SvPVX_const(namesv),
+		    PadnamePV(namesv),
 		    (unsigned long)PARENT_FAKELEX_FLAGS(namesv),
 		    (unsigned long)PARENT_PAD_INDEX(namesv)
 
@@ -1871,7 +1871,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
 		    (unsigned long)COP_SEQ_RANGE_LOW(namesv),
 		    (unsigned long)COP_SEQ_RANGE_HIGH(namesv),
-		    SvPVX_const(namesv)
+		    PadnamePV(namesv)
 		);
 	}
 	else if (full) {
