@@ -7893,7 +7893,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     spot = (CV **)svspot;
 
     if (!(PL_parser && PL_parser->error_count))
-        move_proto_attr(&proto, &attrs, (GV *)name);
+        move_proto_attr(&proto, &attrs, (GV *)PadnameSV(name));
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
@@ -7984,7 +7984,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
          * skipping the prototype check
          */
         if (exists || SvPOK(cv))
-            cv_ckproto_len_flags(cv, (GV *)name, ps, ps_len, ps_utf8);
+            cv_ckproto_len_flags(cv, (GV *)PadnameSV(name), ps, ps_len,
+                                 ps_utf8);
 	/* already defined? */
 	if (exists) {
 	    if (S_already_defined(aTHX_ cv,block,NULL,name,&const_sv))
