@@ -38,6 +38,7 @@ B::RHE		T_RHE_OBJ
 
 B::PADLIST	T_PL_OBJ
 B::PADNAMELIST	T_PNL_OBJ
+B::PADNAME	T_PN_OBJ
 
 INPUT
 T_OP_OBJ
@@ -96,6 +97,14 @@ T_PNL_OBJ
 	else
 	    croak(\"$var is not a reference\")
 
+T_PN_OBJ
+	if (SvROK($arg)) {
+	    IV tmp = SvIV((SV*)SvRV($arg));
+	    $var = INT2PTR($type,tmp);
+	}
+	else
+	    croak(\"$var is not a reference\")
+
 OUTPUT
 T_MG_OBJ
 	sv_setiv(newSVrv($arg, "B::MAGIC"), PTR2IV($var));
@@ -112,4 +121,8 @@ T_PL_OBJ
 
 T_PNL_OBJ
 	sv_setiv(newSVrv($arg, $var ? "B::PADNAMELIST" : "B::NULL"),
+		 PTR2IV($var));
+
+T_PN_OBJ
+	sv_setiv(newSVrv($arg, $var ? "B::PADNAME" : "B::SPECIAL"),
 		 PTR2IV($var));
