@@ -246,7 +246,8 @@ Whether this is an "our" variable.
 The stash in which this "our" variable was declared.
 
 =for apidoc m|bool|PadnameOUTER|PADNAME pn
-Whether this entry belongs to an outer pad.
+Whether this entry belongs to an outer pad.  Entries for which this is true
+are often referred to as 'fake'.
 
 =for apidoc m|bool|PadnameIsSTATE|PADNAME pn
 Whether this is a "state" variable.
