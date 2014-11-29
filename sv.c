@@ -11607,23 +11607,25 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    q++;
 	    break;
 #endif
-#if IVSIZE >= 8 || defined(HAS_LONG_DOUBLE)
+#if (IVSIZE >= 8 || defined(HAS_LONG_DOUBLE)) || \
+    (IVSIZE == 4 && !defined(HAS_LONG_DOUBLE))
 	case 'L':			/* Ld */
 	    /* FALLTHROUGH */
-#ifdef USE_QUADMATH
+#  ifdef USE_QUADMATH
         case 'Q':
 	    /* FALLTHROUGH */
-#endif
-#if IVSIZE >= 8
+#  endif
+#  if IVSIZE >= 8
 	case 'q':			/* qd */
-#endif
+#  endif
 	    intsize = 'q';
 	    q++;
 	    break;
 #endif
 	case 'l':
 	    ++q;
-#if IVSIZE >= 8 || defined(HAS_LONG_DOUBLE)
+#if (IVSIZE >= 8 || defined(HAS_LONG_DOUBLE)) || \
+    (IVSIZE == 4 && !defined(HAS_LONG_DOUBLE))
 	    if (*q == 'l') {	/* lld, llf */
 		intsize = 'q';
 		++q;
