@@ -11474,7 +11474,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    return op_convert_list(opnum,0,aop);
 	}
     }
-    assert(0);
+    NOT_REACHED;
     return entersubop;
 }
 

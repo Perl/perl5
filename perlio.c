@@ -2745,7 +2745,7 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	if (PL_sig_pending && S_perlio_async_run(aTHX_ f))
 	    return -1;
     }
-    /*NOTREACHED*/
+    NOT_REACHED; /*NOTREACHED*/
 }
 
 SSize_t
@@ -2774,7 +2774,7 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	if (PL_sig_pending && S_perlio_async_run(aTHX_ f))
 	    return -1;
     }
-    /*NOTREACHED*/
+    NOT_REACHED; /*NOTREACHED*/
 }
 
 Off_t

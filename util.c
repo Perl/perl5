@@ -184,7 +184,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 	    croak_no_mem();
 	}
     }
-    /*NOTREACHED*/
+    NOT_REACHED; /*NOTREACHED*/
 }
 
 /* paranoid version of system's realloc() */
@@ -305,7 +305,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	    croak_no_mem();
 	}
     }
-    /*NOTREACHED*/
+    NOT_REACHED; /*NOTREACHED*/
 }
 
 /* safe version of system's free() */
@@ -1560,7 +1560,7 @@ Perl_die_sv(pTHX_ SV *baseex)
 {
     PERL_ARGS_ASSERT_DIE_SV;
     croak_sv(baseex);
-    assert(0); /* NOTREACHED */
+    /* NOTREACHED */
     NORETURN_FUNCTION_END;
 }
 #ifdef _MSC_VER
@@ -1592,7 +1592,7 @@ Perl_die_nocontext(const char* pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    assert(0); /* NOTREACHED */
+    NOT_REACHED; /* NOTREACHED */
     va_end(args);
     NORETURN_FUNCTION_END;
 }
@@ -1614,7 +1614,7 @@ Perl_die(pTHX_ const char* pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    assert(0); /* NOTREACHED */
+    NOT_REACHED; /* NOTREACHED */
     va_end(args);
     NORETURN_FUNCTION_END;
 }
@@ -1717,7 +1717,7 @@ Perl_croak_nocontext(const char *pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    assert(0); /* NOTREACHED */
+    NOT_REACHED; /* NOTREACHED */
     va_end(args);
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
@@ -1728,7 +1728,7 @@ Perl_croak(pTHX_ const char *pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    assert(0); /* NOTREACHED */
+    NOT_REACHED; /* NOTREACHED */
     va_end(args);
 }
 
@@ -5665,7 +5665,7 @@ Perl_my_dirfd(DIR * dir) {
     return dir->dd_fd;
 #else
     Perl_croak_nocontext(PL_no_func, "dirfd");
-    assert(0); /* NOT REACHED */
+    NOT_REACHED; /* NOT REACHED */
     return 0;
 #endif 
 }

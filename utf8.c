@@ -140,7 +140,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	    {
 #ifdef EBCDIC
                 Perl_die(aTHX_ "Can't represent character for Ox%"UVXf" on this platform", uv);
-                assert(0);
+                NOT_REACHED;
 #endif
 		return NULL;
 	    }
@@ -1430,7 +1430,7 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
 		return 'S';
 	    default:
 		Perl_croak(aTHX_ "panic: to_upper_title_latin1 did not expect '%c' to map to '%c'", c, LATIN_SMALL_LETTER_Y_WITH_DIAERESIS);
-		assert(0); /* NOTREACHED */
+		NOT_REACHED; /* NOTREACHED */
 	}
     }
 

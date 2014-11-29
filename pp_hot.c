@@ -1553,7 +1553,7 @@ PP(pp_match)
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
-    /* NOTREACHED */
+    NOT_REACHED; /* NOTREACHED */
 
 nope:
     if (global && !(dynpm->op_pmflags & PMf_CONTINUE)) {

@@ -200,19 +200,13 @@ void
 Perl_set_padlist(CV * cv, PADLIST *padlist){
     PERL_ARGS_ASSERT_SET_PADLIST;
 #  if PTRSIZE == 8
-    if((Size_t)padlist == UINT64_C(0xEFEFEFEFEFEFEFEF)){
-	assert(0);
-    }
+    assert((Size_t)padlist != UINT64_C(0xEFEFEFEFEFEFEFEF));
 #  elif PTRSIZE == 4
-    if((Size_t)padlist == UINT64_C(0xEFEFEFEF)){
-	assert(0);
-    }
+    assert((Size_t)padlist != UINT64_C(0xEFEFEFEF));
 #  else
 #    error unknown pointer size
 #  endif
-    if(CvISXSUB(cv)){
-	assert(0);
-    }
+    assert(!CvISXSUB(cv));
     ((XPVCV*)MUTABLE_PTR(SvANY(cv)))->xcv_padlist_u.xcv_padlist = padlist;
 }
 #endif

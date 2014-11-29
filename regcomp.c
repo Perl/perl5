@@ -5754,7 +5754,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
         }
         return final_minlen;
     }
-    /* not-reached */
+    NOT_REACHED;
 }
 
 STATIC U32
@@ -8013,7 +8013,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
             Perl_croak(aTHX_ "panic: bad flag %lx in reg_scan_name",
 		       (unsigned long) flags);
         }
-        assert(0); /* NOT REACHED */
+        NOT_REACHED; /* NOT REACHED */
     }
     return NULL;
 }
@@ -9625,12 +9625,12 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 else {
                     vFAIL3("Regexp modifiers \"%c\" and \"%c\" are mutually exclusive", has_charset_modifier, *(RExC_parse - 1));
                 }
-                /*NOTREACHED*/
+                NOT_REACHED; /*NOTREACHED*/
             neg_modifier:
                 RExC_parse++;
                 vFAIL2("Regexp modifier \"%c\" may not appear after the \"-\"",
                                     *(RExC_parse - 1));
-                /*NOTREACHED*/
+                NOT_REACHED; /*NOTREACHED*/
             case ONCE_PAT_MOD: /* 'o' */
             case GLOBAL_PAT_MOD: /* 'g' */
                 if (PASS2 && ckWARN(WARN_REGEXP)) {
@@ -9703,7 +9703,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
 		/* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
                 vFAIL2utf8f("Sequence (%"UTF8f"...) not recognized",
                       UTF8fARG(UTF, RExC_parse-seqstart, seqstart));
-                /*NOTREACHED*/
+                NOT_REACHED; /*NOTREACHED*/
         }
 
         ++RExC_parse;
@@ -9951,7 +9951,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
 		vFAIL3("Sequence (%.*s...) not recognized",
                                 RExC_parse-seqstart, seqstart);
-		/*NOTREACHED*/
+		NOT_REACHED; /*NOTREACHED*/
             case '<':           /* (?<...) */
 		if (*RExC_parse == '!')
 		    paren = ',';
@@ -10084,7 +10084,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 if (RExC_parse == RExC_end || *RExC_parse != ')')
                     vFAIL("Sequence (?&... not terminated");
                 goto gen_recurse_regop;
-                assert(0); /* NOT REACHED */
+                /* NOT REACHED */
             case '+':
                 if (!(RExC_parse[0] >= '1' && RExC_parse[0] <= '9')) {
                     RExC_parse++;
@@ -10162,7 +10162,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 nextchar(pRExC_state);
                 return ret;
 
-            assert(0); /* NOT REACHED */
+            /* NOT REACHED */
 
 	    case '?':           /* (??...) */
 		is_logical = 1;
@@ -10172,7 +10172,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     vFAIL2utf8f(
                         "Sequence (%"UTF8f"...) not recognized",
                         UTF8fARG(UTF, RExC_parse-seqstart, seqstart));
-		    /*NOTREACHED*/
+		    NOT_REACHED; /*NOTREACHED*/
 		}
 		*flagp |= POSTPONED;
 		paren = *RExC_parse++;
@@ -10638,7 +10638,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	}
 	else
 	    FAIL("Junk on end of regexp");	/* "Can't happen". */
-	assert(0); /* NOTREACHED */
+	NOT_REACHED; /* NOTREACHED */
     }
 
     if (RExC_in_lookbehind) {
