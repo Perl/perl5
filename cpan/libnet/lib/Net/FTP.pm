@@ -24,7 +24,7 @@ use Net::Config;
 use Socket;
 use Time::Local;
 
-our $VERSION = '3.03';
+our $VERSION = '3.04';
 
 our $IOCLASS;
 BEGIN {
@@ -103,7 +103,8 @@ sub new {
     %tlsargs = (
       SSL_verifycn_scheme => 'ftp',
       SSL_verifycn_name => $hostname,
-      SSL_hostname => $hostname,
+      # use SNI if supported by IO::Socket::SSL
+      $pkg->can_client_sni ? (SSL_hostname => $hostname):(),
       # reuse SSL session of control connection in data connections
       SSL_session_cache => Net::FTP::_SSL_SingleSessionCache->new,
     );
@@ -1039,7 +1040,10 @@ sub _dataconn {
 	$ftp->is_SSL ? (
 	  SSL_reuse_ctx => $ftp,
 	  SSL_verifycn_name => ${*$ftp}{net_ftp_tlsargs}{SSL_verifycn_name},
-	  SSL_hostname => ${*$ftp}{net_ftp_tlsargs}{SSL_hostname},
+	  # This will cause the use of SNI if supported by IO::Socket::SSL.
+	  $ftp->can_client_sni ? (
+	    SSL_hostname  => ${*$ftp}{net_ftp_tlsargs}{SSL_hostname}
+	  ):(),
 	) :( %{${*$ftp}{net_ftp_tlsargs}} ),
       ):(),
     ) or return;

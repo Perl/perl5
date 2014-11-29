@@ -20,7 +20,7 @@ use Net::Cmd;
 use Net::Config;
 use Socket;
 
-our $VERSION = "3.03";
+our $VERSION = "3.04";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
@@ -616,7 +616,7 @@ sub _STARTTLS { shift->command("STARTTLS")->response() == CMD_OK }
     ( $arg{SSL_verifycn_name} ||= $smtp->host )
 	=~s{(?<!:):[\w()]+$}{}; # strip port
     $arg{SSL_hostname} = $arg{SSL_verifycn_name}
-	if ! defined $arg{SSL_hostname};
+	if ! defined $arg{SSL_hostname} && $class->can_client_sni;
     $arg{SSL_verifycn_scheme} ||= 'smtp';
     my $ok = $class->SUPER::start_SSL($smtp,%arg);
     $@ = $ssl_class->errstr if !$ok;
