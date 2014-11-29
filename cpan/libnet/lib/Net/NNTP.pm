@@ -20,31 +20,34 @@ use Net::Cmd;
 use Net::Config;
 use Time::Local;
 
-our $VERSION = "3.02";
+our $VERSION = "3.03";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
   require IO::Socket::SSL;
   # first version with default CA on most platforms
-  IO::Socket::SSL->VERSION(1.999);
+  no warnings 'numeric';
+  IO::Socket::SSL->VERSION(2.007);
 } && 'IO::Socket::SSL';
 
 my $nossl_warn = !$ssl_class &&
-  'To use SSL please install IO::Socket::SSL with version>=1.999';
+  'To use SSL please install IO::Socket::SSL with version>=2.007';
 
 # Code for detecting if we can use IPv6
 my $inet6_class = eval {
   require IO::Socket::IP;
+  no warnings 'numeric';
   IO::Socket::IP->VERSION(0.20);
 } && 'IO::Socket::IP' || eval {
   require IO::Socket::INET6;
+  no warnings 'numeric';
   IO::Socket::INET6->VERSION(2.62);
 } && 'IO::Socket::INET6';
 
 sub can_ssl   { $ssl_class };
 sub can_inet6 { $inet6_class };
 
-our @ISA = ('Net::Cmd', $ssl_class || $inet6_class || 'IO::Socket::INET');
+our @ISA = ('Net::Cmd', $inet6_class || 'IO::Socket::INET');
 
 
 sub new {
@@ -70,18 +73,11 @@ sub new {
 
   my %connect = ( Proto => 'tcp');
 
-  if ($ssl_class) {
-    $connect{SSL_verifycn_scheme} = 'nntp';
+  if ($arg{SSL}) {
+    # SSL from start
+    die $nossl_warn if ! $ssl_class;
+    $arg{Port} ||= 563;
     $connect{$_} = $arg{$_} for(grep { m{^SSL_} } keys %arg);
-    if ($arg{SSL}) {
-      # SSL from start
-      $arg{Port} ||= 563;
-    } else {
-      # upgrade later with STARTTLS
-      $connect{SSL_startHandshake} = 0;
-    }
-  } elsif ($arg{SSL}) {
-    die $nossl_warn;
   }
 
   foreach my $o (qw(LocalAddr Timeout)) {
@@ -91,15 +87,17 @@ sub new {
   $connect{PeerPort} = $arg{Port} || 'nntp(119)';
   foreach my $h (@{$hosts}) {
     $connect{PeerAddr} = $h;
-    $connect{SSL_verifycn_name} = $arg{SSL_verifycn_name} || $h if $ssl_class;
-    $obj = $type->SUPER::new(%connect)
-      and last;
+    $obj = $type->SUPER::new(%connect) or next;
+    ${*$obj}{'net_nntp_host'} = $h;
+    ${*$obj}{'net_nntp_arg'} = \%arg;
+    if ($arg{SSL}) {
+      Net::NNTP::_SSL->start_SSL($obj,%arg) or next;
+    }
+    last:
   }
 
   return
     unless defined $obj;
-
-  ${*$obj}{'net_nntp_host'} = $connect{PeerAddr};
 
   $obj->autoflush(1);
   $obj->debug(exists $arg{Debug} ? $arg{Debug} : undef);
@@ -165,9 +163,12 @@ sub postok {
 sub starttls {
   my $self = shift;
   $ssl_class or die $nossl_warn;
-  $self->is_SSL and croak("NNTP connection is already in SSL mode");
   $self->_STARTTLS or return;
-  $self->connect_SSL;
+  Net::NNTP::_SSL->start_SSL($self,
+    %{ ${*$self}{'net_nntp_arg'} }, # (ssl) args given in new
+    @_   # more (ssl) args
+  ) or return;
+  return 1;
 }
 
 
@@ -746,6 +747,28 @@ sub DESTROY {
   my $nntp = shift;
   defined(fileno($nntp)) && $nntp->quit;
 }
+
+{
+  package Net::NNTP::_SSL;
+  our @ISA = ( $ssl_class ? ($ssl_class):(), 'Net::NNTP' );
+  sub starttls { die "NNTP connection is already in SSL mode" }
+  sub start_SSL {
+    my ($class,$nntp,%arg) = @_;
+    delete @arg{ grep { !m{^SSL_} } keys %arg };
+    ( $arg{SSL_verifycn_name} ||= $nntp->host )
+	=~s{(?<!:):[\w()]+$}{}; # strip port
+    $arg{SSL_hostname} = $arg{SSL_verifycn_name}
+	if ! defined $arg{SSL_hostname};
+    my $ok = $class->SUPER::start_SSL($nntp,
+      SSL_verifycn_scheme => 'nntp',
+      %arg
+    );
+    $@ = $ssl_class->errstr if !$ok;
+    return $ok;
+  }
+}
+
+
 
 
 1;

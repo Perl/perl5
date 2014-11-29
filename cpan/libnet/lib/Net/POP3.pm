@@ -19,24 +19,27 @@ use IO::Socket;
 use Net::Cmd;
 use Net::Config;
 
-our $VERSION = "3.02";
+our $VERSION = "3.03";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
   require IO::Socket::SSL;
   # first version with default CA on most platforms
-  IO::Socket::SSL->VERSION(1.999);
+  no warnings 'numeric';
+  IO::Socket::SSL->VERSION(2.007);
 } && 'IO::Socket::SSL';
 
 my $nossl_warn = !$ssl_class &&
-  'To use SSL please install IO::Socket::SSL with version>=1.999';
+  'To use SSL please install IO::Socket::SSL with version>=2.007';
 
 # Code for detecting if we can use IPv6
 my $inet6_class = eval {
   require IO::Socket::IP;
+  no warnings 'numeric';
   IO::Socket::IP->VERSION(0.20);
 } && 'IO::Socket::IP' || eval {
   require IO::Socket::INET6;
+  no warnings 'numeric';
   IO::Socket::INET6->VERSION(2.62);
 } && 'IO::Socket::INET6';
 
@@ -84,13 +87,10 @@ sub new {
     unless defined $obj;
 
   ${*$obj}{'net_pop3_arg'} = \%arg;
-  if ($arg{SSL}) {
-    Net::POP3::_SSL->start_SSL($obj,
-      SSL_verifycn_name => $host,%arg
-    ) or return;
-  }
-
   ${*$obj}{'net_pop3_host'} = $host;
+  if ($arg{SSL}) {
+    Net::POP3::_SSL->start_SSL($obj,%arg) or return;
+  }
 
   $obj->autoflush(1);
   $obj->debug(exists $arg{Debug} ? $arg{Debug} : undef);
@@ -578,6 +578,8 @@ sub banner {
     delete @arg{ grep { !m{^SSL_} } keys %arg };
     ( $arg{SSL_verifycn_name} ||= $pop3->host )
 	=~s{(?<!:):[\w()]+$}{}; # strip port
+    $arg{SSL_hostname} = $arg{SSL_verifycn_name}
+	if ! defined $arg{SSL_hostname};
     $arg{SSL_verifycn_scheme} ||= 'pop3';
     my $ok = $class->SUPER::start_SSL($pop3,%arg);
     $@ = $ssl_class->errstr if !$ok;

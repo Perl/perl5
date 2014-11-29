@@ -18,26 +18,29 @@ use Carp;
 use IO::Socket;
 use Net::Cmd;
 use Net::Config;
-use Socket 1.3;
+use Socket;
 
-our $VERSION = "3.02";
+our $VERSION = "3.03";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
   require IO::Socket::SSL;
   # first version with default CA on most platforms
-  IO::Socket::SSL->VERSION(1.999);
+  no warnings 'numeric';
+  IO::Socket::SSL->VERSION(2.007);
 } && 'IO::Socket::SSL';
 
 my $nossl_warn = !$ssl_class &&
-  'To use SSL please install IO::Socket::SSL with version>=1.999';
+  'To use SSL please install IO::Socket::SSL with version>=2.007';
 
 # Code for detecting if we can use IPv6
 my $inet6_class = eval {
   require IO::Socket::IP;
+  no warnings 'numeric';
   IO::Socket::IP->VERSION(0.20);
 } && 'IO::Socket::IP' || eval {
   require IO::Socket::INET6;
+  no warnings 'numeric';
   IO::Socket::INET6->VERSION(2.62);
 } && 'IO::Socket::INET6';
 
@@ -86,8 +89,10 @@ sub new {
     unless defined $obj;
 
   ${*$obj}{'net_smtp_arg'} = \%arg;
+  ${*$obj}{'net_smtp_host'} = $host;
+
   if ($arg{SSL}) {
-    Net::SMTP::_SSL->start_SSL($obj,SSL_verifycn_name => $host,%arg)
+    Net::SMTP::_SSL->start_SSL($obj,%arg)
       or return;
   }
 
@@ -103,7 +108,6 @@ sub new {
   }
 
   ${*$obj}{'net_smtp_exact_addr'} = $arg{ExactAddresses};
-  ${*$obj}{'net_smtp_host'}       = $host;
 
   (${*$obj}{'net_smtp_banner'}) = $obj->message;
   (${*$obj}{'net_smtp_domain'}) = $obj->message =~ /\A\s*(\S+)/;
@@ -611,6 +615,8 @@ sub _STARTTLS { shift->command("STARTTLS")->response() == CMD_OK }
     delete @arg{ grep { !m{^SSL_} } keys %arg };
     ( $arg{SSL_verifycn_name} ||= $smtp->host )
 	=~s{(?<!:):[\w()]+$}{}; # strip port
+    $arg{SSL_hostname} = $arg{SSL_verifycn_name}
+	if ! defined $arg{SSL_hostname};
     $arg{SSL_verifycn_scheme} ||= 'smtp';
     my $ok = $class->SUPER::start_SSL($smtp,%arg);
     $@ = $ssl_class->errstr if !$ok;

@@ -14,9 +14,9 @@ available on the libnet web page at
 =head2 How to contribute to this document
 
 You may report corrections, additions, and suggestions on the
-CPAN request tracker at
+CPAN Request Tracker at
 
-    http://rt.cpan.org/Dist/Display.html?Name=libnet
+    http://rt.cpan.org/Public/Bug/Report.html?Queue=libnet
 
 =head1 Author and Copyright Information
 
@@ -54,7 +54,7 @@ which requires Convert::EBCDIC.
 
 Authen::SASL is required for AUTH support.
 
-IO::Socket::SSL version 1.999 or higher is required for SSL support.
+IO::Socket::SSL version 2.007 or higher is required for SSL support.
 
 IO::Socket::IP version 0.20 or IO::Socket::INET6 version 2.62 is
 required for IPv6 support.

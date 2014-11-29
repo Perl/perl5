@@ -21,10 +21,10 @@ use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 use IO::Socket;
 use Net::Cmd;
 use Net::Config;
-use Socket 1.3;
+use Socket;
 use Time::Local;
 
-our $VERSION = '3.02';
+our $VERSION = '3.03';
 
 our $IOCLASS;
 BEGIN {
@@ -32,18 +32,21 @@ BEGIN {
   my $ssl_class = eval {
     require IO::Socket::SSL;
     # first version with default CA on most platforms
-    IO::Socket::SSL->VERSION(1.999);
+    no warnings 'numeric';
+    IO::Socket::SSL->VERSION(2.007);
   } && 'IO::Socket::SSL';
 
   my $nossl_warn = !$ssl_class &&
-    'To use SSL please install IO::Socket::SSL with version>=1.999';
+    'To use SSL please install IO::Socket::SSL with version>=2.007';
 
   # Code for detecting if we can use IPv6
   my $inet6_class = eval {
     require IO::Socket::IP;
+    no warnings 'numeric';
     IO::Socket::IP->VERSION(0.20);
   } && 'IO::Socket::IP' || eval {
     require IO::Socket::INET6;
+    no warnings 'numeric';
     IO::Socket::INET6->VERSION(2.62);
   } && 'IO::Socket::INET6';
 
@@ -100,6 +103,7 @@ sub new {
     %tlsargs = (
       SSL_verifycn_scheme => 'ftp',
       SSL_verifycn_name => $hostname,
+      SSL_hostname => $hostname,
       # reuse SSL session of control connection in data connections
       SSL_session_cache => Net::FTP::_SSL_SingleSessionCache->new,
     );
@@ -107,7 +111,7 @@ sub new {
     $tlsargs{$_} = $arg{$_} for(grep { m{^SSL_} } keys %arg);
 
   } elsif ($arg{SSL}) {
-    croak("IO::Socket::SSL >= 1.999 needed for SSL support");
+    croak("IO::Socket::SSL >= 2.007 needed for SSL support");
   }
 
   my $ftp = $pkg->SUPER::new(
@@ -287,7 +291,7 @@ sub size {
 
 sub starttls {
   my $ftp = shift;
-  can_ssl() or croak("IO::Socket::SSL >= 1.999 needed for SSL support");
+  can_ssl() or croak("IO::Socket::SSL >= 2.007 needed for SSL support");
   $ftp->is_SSL and croak("called starttls within SSL session");
   $ftp->_AUTH('TLS') == CMD_OK or return;
 
@@ -897,6 +901,8 @@ sub _eprt {
       my $p = $listen->sockport;
       $port = join(',',split(m{\.},$listen->sockhost),$p >> 8,$p & 0xff);
     }
+  } elsif (ref($port) eq 'ARRAY') {
+    $port = join(',',split(m{\.},@$port[0]),@$port[1] >> 8,@$port[1] & 0xff);
   }
   my $ok = $cmd eq 'EPRT' ? $ftp->_EPRT($port) : $ftp->_PORT($port);
   ${*$ftp}{net_ftp_port} = $port if $ok;
@@ -1033,6 +1039,7 @@ sub _dataconn {
 	$ftp->is_SSL ? (
 	  SSL_reuse_ctx => $ftp,
 	  SSL_verifycn_name => ${*$ftp}{net_ftp_tlsargs}{SSL_verifycn_name},
+	  SSL_hostname => ${*$ftp}{net_ftp_tlsargs}{SSL_hostname},
 	) :( %{${*$ftp}{net_ftp_tlsargs}} ),
       ):(),
     ) or return;

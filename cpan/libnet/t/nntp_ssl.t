@@ -22,9 +22,6 @@ plan skip_all => "fork not supported on this platform"
      $Config::Config{useithreads} and
      $Config::Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/);
 
-plan skip_all => "incomplete or version of IO::Socket::SSL"
-  if ! eval { require IO::Socket::SSL::Utils };
-
 my $srv = IO::Socket::INET->new(
   LocalAddr => '127.0.0.1',
   Listen => 10
@@ -35,6 +32,7 @@ my $port = $srv->sockport;
 
 plan tests => 2;
 
+require IO::Socket::SSL::Utils;
 my ($ca,$key) = IO::Socket::SSL::Utils::CERT_create( CA => 1 );
 my ($fh,$cafile) = tempfile();
 print $fh IO::Socket::SSL::Utils::PEM_cert2string($ca);
