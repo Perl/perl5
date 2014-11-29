@@ -730,7 +730,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     parser->bufend = parser->bufptr + SvCUR(parser->linestr);
     parser->last_lop = parser->last_uni = NULL;
 
-    assert(FITS_IN_8_BITS(LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES
+    STATIC_ASSERT_STMT(FITS_IN_8_BITS(LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES
                                                         |LEX_DONT_CLOSE_RSFP));
     parser->lex_flags = (U8) (flags & (LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES
                                                         |LEX_DONT_CLOSE_RSFP));

@@ -2956,7 +2956,7 @@ PP(pp_length)
     /* simplest case shortcut */
     /* turn off SVf_UTF8 in tmp flags if HINT_BYTES on*/
     U32 svflags = (SvFLAGS(sv) ^ (in_bytes << 26)) & (SVf_POK|SVs_GMG|SVf_UTF8);
-    assert(HINT_BYTES == 0x00000008 && SVf_UTF8 == 0x20000000 && (SVf_UTF8 == HINT_BYTES << 26));
+    STATIC_ASSERT_STMT(HINT_BYTES == 0x00000008 && SVf_UTF8 == 0x20000000 && (SVf_UTF8 == HINT_BYTES << 26));
     SETs(TARG);
 
     if(LIKELY(svflags == SVf_POK))

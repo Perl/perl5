@@ -1320,8 +1320,8 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	break;
     case SVt_PV:
 	assert(new_type > SVt_PV);
-	assert(SVt_IV < SVt_PV);
-	assert(SVt_NV < SVt_PV);
+	STATIC_ASSERT_STMT(SVt_IV < SVt_PV);
+	STATIC_ASSERT_STMT(SVt_NV < SVt_PV);
 	break;
     case SVt_PVIV:
 	break;
@@ -4311,7 +4311,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 		/* We're starting from SVt_NULL, so provided that's
 		 * actual 0, we don't have to unset any SV type flags
 		 * to promote to SVt_IV. */
-		assert(SVt_NULL == 0);
+		STATIC_ASSERT_STMT(SVt_NULL == 0);
 		SET_SVANY_FOR_BODYLESS_IV(dstr);
 		SvFLAGS(dstr) |= SVt_IV;
 		break;
@@ -9366,7 +9366,7 @@ Perl_newSViv(pTHX_ const IV i)
     /* We're starting from SVt_FIRST, so provided that's
      * actual 0, we don't have to unset any SV type flags
      * to promote to SVt_IV. */
-    assert(SVt_FIRST == 0);
+    STATIC_ASSERT_STMT(SVt_FIRST == 0);
 
     SET_SVANY_FOR_BODYLESS_IV(sv);
     SvFLAGS(sv) |= SVt_IV;

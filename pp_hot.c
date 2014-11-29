@@ -386,7 +386,7 @@ PP(pp_padrange)
                       (base << (OPpPADRANGE_COUNTSHIFT + SAVE_TIGHT_SHIFT))
                     | (count << SAVE_TIGHT_SHIFT)
                     | SAVEt_CLEARPADRANGE);
-        assert(OPpPADRANGE_COUNTMASK + 1 == (1 <<OPpPADRANGE_COUNTSHIFT));
+        STATIC_ASSERT_STMT(OPpPADRANGE_COUNTMASK + 1 == (1 << OPpPADRANGE_COUNTSHIFT));
         assert((payload >> (OPpPADRANGE_COUNTSHIFT+SAVE_TIGHT_SHIFT)) == base);
         {
             dSS_ADD;

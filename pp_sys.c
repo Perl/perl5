@@ -534,9 +534,9 @@ Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
     PERL_ARGS_ASSERT_TIED_METHOD;
 
     /* Ensure that our flag bits do not overlap.  */
-    assert((TIED_METHOD_MORTALIZE_NOT_NEEDED & G_WANT) == 0);
-    assert((TIED_METHOD_ARGUMENTS_ON_STACK & G_WANT) == 0);
-    assert((TIED_METHOD_SAY & G_WANT) == 0);
+    STATIC_ASSERT_STMT((TIED_METHOD_MORTALIZE_NOT_NEEDED & G_WANT) == 0);
+    STATIC_ASSERT_STMT((TIED_METHOD_ARGUMENTS_ON_STACK & G_WANT) == 0);
+    STATIC_ASSERT_STMT((TIED_METHOD_SAY & G_WANT) == 0);
 
     PUTBACK; /* sp is at *foot* of args, so this pops args from old stack */
     PUSHSTACKi(PERLSI_MAGIC);

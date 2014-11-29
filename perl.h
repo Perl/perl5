@@ -3467,7 +3467,10 @@ typedef pthread_key_t	perl_key;
 #  define __attribute__warn_unused_result__
 #endif
 
-#if defined(DEBUGGING) && defined(I_ASSERT)
+#ifdef I_ASSERT
+#  if !defined(DEBUGGING) && !defined(NDEBUG)
+#    define NDEBUG 1
+#  endif
 #  include <assert.h>
 #endif
 
@@ -3498,6 +3501,27 @@ typedef pthread_key_t	perl_key;
 /* placeholder */
 #endif
 
+#if defined(static_assert) || (defined(__cplusplus) && __cplusplus >= 201103L)
+/* static_assert is a macro defined in <assert.h> in C11 or a compiler
+   builtin in C++11.
+*/
+#  define STATIC_ASSERT_GLOBAL(COND) static_assert(COND, #COND)
+#else
+/* We use a bit-field instead of an array because gcc accepts
+   'typedef char x[n]' where n is not a compile-time constant.
+   We want to enforce constantness.
+*/
+#  define STATIC_ASSERT_2(COND, SUFFIX) \
+    typedef struct { \
+        unsigned int _static_assertion_failed_##SUFFIX : (COND) ? 1 : -1; \
+    } _static_assertion_failed_##SUFFIX PERL_UNUSED_DECL
+#  define STATIC_ASSERT_1(COND, SUFFIX) STATIC_ASSERT_2(COND, SUFFIX)
+#  define STATIC_ASSERT_GLOBAL(COND)    STATIC_ASSERT_1(COND, __LINE__)
+#endif
+/* We need this wrapper even in C11 because 'case X: static_assert(...);' is an
+   error (static_assert is a declaration, and only statements can have labels).
+*/
+#define STATIC_ASSERT_STMT(COND)      do { STATIC_ASSERT_GLOBAL(COND); } while (0)
 
 #ifndef __has_builtin
 #  define __has_builtin(x) 0 /* not a clang style compiler */
