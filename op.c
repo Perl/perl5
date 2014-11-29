@@ -2099,9 +2099,13 @@ S_scalarseq(pTHX_ OP *o)
 	if (type == OP_LINESEQ || type == OP_SCOPE ||
 	    type == OP_LEAVE || type == OP_LEAVETRY)
 	{
-            OP *kid;
-	    for (kid = cLISTOPo->op_first; kid; kid = OP_SIBLING(kid)) {
-		if (OP_HAS_SIBLING(kid)) {
+     	    OP *kid, *sib;
+	    for (kid = cLISTOPo->op_first; kid; kid = sib) {
+		if ((sib = OP_SIBLING(kid))
+		 && (  OP_HAS_SIBLING(sib) || sib->op_type != OP_NULL
+		    || (  sib->op_targ != OP_NEXTSTATE
+		       && sib->op_targ != OP_DBSTATE  )))
+		{
 		    scalarvoid(kid);
 		}
 	    }
