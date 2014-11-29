@@ -10311,7 +10311,7 @@ Perl_ck_method(pTHX_ OP *o)
     sv = kSVOP->op_sv;
 
     /* replace ' with :: */
-    while ((compatptr = strchr(SvPVX_const(sv), '\''))) {
+    while ((compatptr = strchr(SvPVX(sv), '\''))) {
         *compatptr = ':';
         sv_insert(sv, compatptr - SvPVX_const(sv), 0, ":", 1);
     }
