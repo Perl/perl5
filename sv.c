@@ -10768,26 +10768,28 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 #  define DOUBLE_LITTLE_ENDIAN
 #endif
 
-#if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN || \
-    LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
-    LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
-#  define LONGDOUBLE_LITTLE_ENDIAN
-#endif
+#ifdef HAS_LONG_DOUBLEKIND
 
-#if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN || \
-    LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN || \
-    LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
-#  define LONGDOUBLE_BIG_ENDIAN
-#endif
+#  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN || \
+      LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
+      LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
+#    define LONGDOUBLE_LITTLE_ENDIAN
+#  endif
 
-#if LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
-    LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
-#  define LONGDOUBLE_X86_80_BIT
-#endif
+#  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN || \
+      LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN || \
+      LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
+#    define LONGDOUBLE_BIG_ENDIAN
+#  endif
 
-#if LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN || \
-    LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
-#  define LONGDOUBLE_DOUBLEDOUBLE
+#  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
+      LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
+#    define LONGDOUBLE_X86_80_BIT
+#  endif
+
+#  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN || \
+      LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
+#    define LONGDOUBLE_DOUBLEDOUBLE
 /* The first double can be as large as 2**1023, or '1' x '0' x 1023.
  * The second double can be as small as 2**-1074, or '0' x 1073 . '1'.
  * The sum of them can be '1' . '0' x 2096 . '1', with implied radix point
@@ -10797,8 +10799,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
  * of dynamically growing buffer might be better, start at just 16 bytes
  * (for example) and grow only when necessary.  Or maybe just by looking
  * at the exponents of the two doubles? */
-#  define DOUBLEDOUBLE_MAXBITS 2098
-#endif
+#    define DOUBLEDOUBLE_MAXBITS 2098
+#  endif
+
+#endif /* HAS_LONG_DOUBLE */
 
 /* vhex will contain the values (0..15) of the hex digits ("nybbles"
  * of 4 bits); 1 for the implicit 1, and the mantissa bits, four bits
