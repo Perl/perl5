@@ -14,6 +14,9 @@
 # In which case, we need to stop t/TEST actually running tests, as all
 # t/harness needs are its subroutines.
 
+# Measure the elapsed wallclock time.
+my $t0 = time();
+
 # If we're doing deparse tests, ignore failures for these
 my $deparse_failures;
 
@@ -778,6 +781,7 @@ SHRDLU_5
 	    }
 	}
     }
+    printf "Elapsed: %d sec\n", time() - $t0;
     my ($user,$sys,$cuser,$csys) = times;
     my $tot = sprintf("u=%.2f  s=%.2f  cu=%.2f  cs=%.2f  scripts=%d  tests=%d",
 		      $user,$sys,$cuser,$csys,$tested_files,$totmax);
