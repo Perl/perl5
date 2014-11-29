@@ -5263,6 +5263,55 @@ STATIC bool S_rck_lookaround(pTHX_ RExC_state_t *pRExC_state, rck_params_t *para
     return 0;
 }
 
+STATIC bool S_rck_open(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_UNUSED_VAR(pRExC_state);
+
+    PERL_ARGS_ASSERT_RCK_OPEN;
+
+    if (params->stopparen != (I32)ARG(params->scan))
+        params->pars++;
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
+STATIC bool S_rck_close(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_UNUSED_VAR(pRExC_state);
+
+    PERL_ARGS_ASSERT_RCK_CLOSE;
+
+    if (params->stopparen == (I32)ARG(params->scan))
+        return 1;
+
+    if ((I32)ARG(params->scan) == params->is_par) {
+        params->next = regnext(params->scan);
+
+        if (params->next
+            && (OP(params->next) != WHILEM)
+            && params->next < params->last
+        ) {
+            params->is_par = 0;		/* Disable optimization */
+        }
+    }
+    if (params->data)
+        *(params->data->last_closep) = ARG(params->scan);
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
+STATIC bool S_rck_eval(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_UNUSED_VAR(pRExC_state);
+
+    PERL_ARGS_ASSERT_RCK_EVAL;
+
+    if (params->data)
+        params->data->flags |= SF_HAS_EVAL;
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
 STATIC void S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params,
         regnode *start, regnode *end, I32 paren, U32 recursed_depth)
 {
@@ -6138,27 +6187,12 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
     } else if (OP(params->scan) == IFMATCH || OP(params->scan) == UNLESSM) {
         return rck_lookaround(pRExC_state, params);
     } else if (OP(params->scan) == OPEN) {
-        if (params->stopparen != (I32)ARG(params->scan))
-            params->pars++;
-    }
-    else if (OP(params->scan) == CLOSE) {
-        if (params->stopparen == (I32)ARG(params->scan)) {
-            return 1;
-        }
-        if ((I32)ARG(params->scan) == params->is_par) {
-            params->next = regnext(params->scan);
-
-            if ( params->next && (OP(params->next) != WHILEM) && params->next < params->last)
-                params->is_par = 0;		/* Disable optimization */
-        }
-        if (params->data)
-            *(params->data->last_closep) = ARG(params->scan);
-    }
-    else if (OP(params->scan) == EVAL) {
-            if (params->data)
-                params->data->flags |= SF_HAS_EVAL;
-    }
-    else if ( PL_regkind[OP(params->scan)] == ENDLIKE ) {
+        return rck_open(pRExC_state, params);
+    } else if (OP(params->scan) == CLOSE) {
+        return rck_close(pRExC_state, params);
+    } else if (OP(params->scan) == EVAL) {
+        return rck_eval(pRExC_state, params);
+    } else if ( PL_regkind[OP(params->scan)] == ENDLIKE ) {
         if (params->flags & SCF_DO_SUBSTR) {
             scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
             params->flags &= ~SCF_DO_SUBSTR;

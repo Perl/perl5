@@ -2501,6 +2501,12 @@ Es	|bool	|rck_eolish	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
 Es	|bool	|rck_lookaround	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
+Es	|bool	|rck_open	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
+Es	|bool	|rck_close	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
+Es	|bool	|rck_eval	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
 Es	|void	|rck_make_trie	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
 Es	|void	|rck_enframe	|NN RExC_state_t *pRExC_state \
