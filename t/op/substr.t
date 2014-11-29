@@ -22,7 +22,7 @@ $SIG{__WARN__} = sub {
      }
 };
 
-plan(387);
+plan(388);
 
 run_tests() unless caller;
 
@@ -681,6 +681,13 @@ is($x, "\x{100}\x{200}\xFFb");
 	$x .= "frompswiggle";
 	is $_, "gl";
     }
+}
+
+# Also part of perl #24346; scalar(substr...) should not affect lvalueness
+{
+    my $str = "abcdef";
+    sub { $_[0] = 'dea' }->( scalar substr $str, 3, 2 );
+    is $str, 'abcdeaf', 'scalar does not affect lvalueness of substr';
 }
 
 # [perl #24200] string corruption with lvalue sub

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (171);
+plan (172);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -545,5 +545,8 @@ pass "no assertion failure after assigning ref to arylen when ary is gone";
 ($ary[0],$ary[1]) = ($ary[1],$ary[0]);
 is "@ary", 'b a',
    'aelemfast with the same array on both sides of list assignment';
+
+for(scalar $#foo) { $_ = 3 }
+is $#foo, 3, 'assigning to arylen aliased in foreach(scalar $#arylen)';
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";

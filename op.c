@@ -2947,6 +2947,10 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    break;
 	}
 	goto nomod;
+
+    case OP_SCALAR:
+	op_lvalue(cUNOPo->op_first, OP_ENTERSUB);
+	goto nomod;
     }
 
     /* [20011101.069] File test operators interpret OPf_REF to mean that
