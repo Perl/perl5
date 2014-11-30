@@ -4270,7 +4270,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 
     PERL_ARGS_ASSERT_SV_SETSV_FLAGS;
 
-    if (sstr == dstr)
+    if (UNLIKELY( sstr == dstr ))
 	return;
 
     if (SvIS_FREED(dstr)) {
@@ -4278,7 +4278,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 		   " to a freed scalar %p", SVfARG(sstr), (void *)dstr);
     }
     SV_CHECK_THINKFIRST_COW_DROP(dstr);
-    if (!sstr)
+    if (UNLIKELY( !sstr ))
 	sstr = &PL_sv_undef;
     if (SvIS_FREED(sstr)) {
 	Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p to %p",
@@ -4292,7 +4292,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
     switch (stype) {
     case SVt_NULL:
       undef_sstr:
-	if (dtype != SVt_PVGV && dtype != SVt_PVLV) {
+	if (LIKELY( dtype != SVt_PVGV && dtype != SVt_PVLV )) {
 	    (void)SvOK_off(dstr);
 	    return;
 	}
@@ -4335,7 +4335,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	break;
 
     case SVt_NV:
-	if (SvNOK(sstr)) {
+	if (LIKELY( SvNOK(sstr) )) {
 	    switch (dtype) {
 	    case SVt_NULL:
 	    case SVt_IV:
@@ -4424,7 +4424,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
     dtype = SvTYPE(dstr);
     sflags = SvFLAGS(sstr);
 
-    if (dtype == SVt_PVCV) {
+    if (UNLIKELY( dtype == SVt_PVCV )) {
 	/* Assigning to a subroutine sets the prototype.  */
 	if (SvOK(sstr)) {
 	    STRLEN len;
@@ -10039,7 +10039,7 @@ Perl_newSVrv(pTHX_ SV *const rv, const char *const classname)
 
     SV_CHECK_THINKFIRST_COW_DROP(rv);
 
-    if (SvTYPE(rv) >= SVt_PVMG) {
+    if (UNLIKELY( SvTYPE(rv) >= SVt_PVMG )) {
 	const U32 refcnt = SvREFCNT(rv);
 	SvREFCNT(rv) = 0;
 	sv_clear(rv);

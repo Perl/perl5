@@ -349,7 +349,7 @@ perform the upgrade if necessary.  See C<svtype>.
 /* Sadly there are some parts of the core that have pointers to already-freed
    SV heads, and rely on being able to tell that they are now free. So mark
    them all by using a consistent macro.  */
-#define SvIS_FREED(sv)	((sv)->sv_flags == SVTYPEMASK)
+#define SvIS_FREED(sv)	UNLIKELY(((sv)->sv_flags == SVTYPEMASK))
 
 /* this is defined in this peculiar way to avoid compiler warnings.
  * See the <20121213131428.GD1842@iabyn.com> thread in p5p */
