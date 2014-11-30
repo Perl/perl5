@@ -36,6 +36,8 @@
 #     loop::     structural code like for, while(), etc
 #     regex::    regular expressions
 #     string::   string handling
+#     hash::     hashes
+#     array::    arrays
 #
 #
 # Each hash has three fields:
@@ -68,6 +70,73 @@
         desc    => 'lexical ($x, $y) = (1, 2)',
         setup   => 'my ($x, $y)',
         code    => '($x, $y) = (1, 2)',
+    },
+    'expr::loop::foreach_intrange' => {
+        desc    => 'lexical: ++$x foreach 1..100',
+        setup   => 'my $x = 0;',
+        code    => '++$x foreach 1..100;',
+    },
+    'expr::loop::foreach_array' => {
+        desc    => 'lexicals: $x += $_ foreach @a (100 elem)',
+        setup   => 'my $x = 0; my @a = ((1) x 100)',
+        code    => '$x += $_ foreach @a;',
+    },
+    'expr::loop::cstyle_for' => {
+        desc    => 'lexicals: C style for loop and additions',
+        setup   => 'my $y = 0;',
+        code    => 'for (my $x = 0; $x < 100; ++$x) {$y+=$x;}',
+    },
+
+    'hash::create::empty' => {
+        desc    => 'creating empty hash refs',
+        setup   => '',
+        code    => '+{}',
+    },
+    'hash::create::five_keys' => {
+        desc    => 'creating hash ref initialized with five short keys',
+        setup   => '',
+        code    => '+{a => undef, b => undef, c => undef, d => undef, e => undef}',
+    },
+    'hash::read::short_key' => {
+        desc    => 'read-accessing short key in small hash',
+        setup   => 'my %x = (map {$_ => undef} "a".."z");',
+        code    => '$x->{g}',
+    },
+    'hash::write::short_key' => {
+        desc    => 'write-accessing short key in small hash',
+        setup   => 'my %x = (map {$_ => undef} "a".."z");',
+        code    => '$x->{g} = undef',
+    },
+
+    'array::create::empty' => {
+        desc    => 'creating empty array refs',
+        setup   => '',
+        code    => '[]',
+    },
+    'array::create::hundred_ints' => {
+        desc    => 'creating array ref with 100 ints',
+        setup   => '',
+        code    => '[1..100]',
+    },
+    'array::modify::push_pop' => {
+        desc    => 'array: one push, one pop',
+        setup   => 'my @x = (1..10);',
+        code    => 'push @x, 1; pop @x;',
+    },
+    'array::modify::push_shift' => {
+        desc    => 'array: one push, one shift',
+        setup   => 'my @x = (1..10);',
+        code    => 'push @x, 1; shift @x;',
+    },
+    'array::modify::unshift_pop' => {
+        desc    => 'array: one unshift, one pop',
+        setup   => 'my @x = (1..10);',
+        code    => 'unshift @x, 1; pop @x;',
+    },
+    'array::modify::unshift_shift' => {
+        desc    => 'array: one unshift, one shift',
+        setup   => 'my @x = (1..10);',
+        code    => 'unshift @x, 1; shift @x;',
     },
 ];
 
