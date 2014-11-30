@@ -5045,6 +5045,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	     */
 
 	    SvREFCNT_inc_simple_void(PL_compcv);
+	    CvLVALUE_on(PL_compcv);
 	    /* these lines are just an unrolled newANONATTRSUB */
 	    expr = newSVOP(OP_ANONCODE, 0,
 		    MUTABLE_SV(newATTRSUB(floor, 0, NULL, NULL, expr)));
