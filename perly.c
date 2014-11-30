@@ -325,8 +325,8 @@ Perl_yyparse (pTHX_ int gramtype)
  * on a platform that doesn't use ASCII, this translation back would need to be
  * removed */
 #  ifdef EBCDIC
-	if (parser->yychar >= 0 && parser->yychar < 255) {
-	    parser->yychar = NATIVE_TO_LATIN1(parser->yychar);
+	if (parser->yychar >= 0) {
+	    parser->yychar = NATIVE_TO_UNI(parser->yychar);
 	}
 #  endif
     }
