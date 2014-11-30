@@ -472,7 +472,12 @@ sub walk_topdown {
 	}
     }
     if (class($op) eq "PMOP") {
-	my $maybe_root = $op->pmreplroot;
+	my $maybe_root = $op->code_list;
+	if ( ref($maybe_root) and $maybe_root->isa("B::OP")
+	 and not $op->flags & OPf_KIDS) {
+	    walk_topdown($maybe_root, $sub, $level + 1);
+	}
+	$maybe_root = $op->pmreplroot;
 	if (ref($maybe_root) and $maybe_root->isa("B::OP")) {
 	    # It really is the root of the replacement, not something
 	    # else stored here for lack of space elsewhere
