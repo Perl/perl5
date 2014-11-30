@@ -4302,7 +4302,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	    switch (dtype) {
 	    case SVt_NULL:
 		/* For performance, we inline promoting to type SVt_IV. */
-		/* We're starting from SVt_NULL, so provided that's
+		/* We're starting from SVt_NULL, so provided that define is
 		 * actual 0, we don't have to unset any SV type flags
 		 * to promote to SVt_IV. */
 		STATIC_ASSERT_STMT(SVt_NULL == 0);
