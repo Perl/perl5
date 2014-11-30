@@ -11,7 +11,8 @@ perls.
 
 =head1 SYNOPSIS
 
-    # Basic: run the tests in t/perf/benchmarks against two or more perls
+    # Basic: run the tests in t/perf/benchmarks against two or
+    # more perls
 
     bench.pl [options] perl1=[label1] perl2[=label2] ...
 
@@ -77,7 +78,8 @@ if more than one test or perl has been specified. It is intended to be
 called as part of a bisect run, to determine when something changed.
 For example,
 
-    bench.pl -j 8 --tests=foo --bisect=Ir,100,105 --perlargs=-Ilib ./miniperl
+    bench.pl -j 8 --tests=foo --bisect=Ir,100,105 --perlargs=-Ilib \
+        ./miniperl
 
 might be called from bisect to find when the number of instruction reads
 for test I<foo> falls outside the range 100..105.
@@ -152,7 +154,8 @@ high counts will dominate.
 Order the tests in the output based on the value of I<field> in the
 column I<perl>. The I<perl> value is as per C<--norm>. For example
 
-    bench.pl --sort=Dw:perl-5.20.0   perl-5.16.0 perl-5.18.0 perl-5.20.0
+    bench.pl --sort=Dw:perl-5.20.0 \
+        perl-5.16.0 perl-5.18.0 perl-5.20.0
 
 =item *
 
