@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 29; # not counting those in the __DATA__ section
+my $tests = 30; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -400,6 +400,11 @@ use constant ('FOO', do {
 no overloading;
 die;
 EOCODK
+
+like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+             prog => 'use feature lexical_subs=>; my sub f;sub main::f{}'),
+     qr/^sub main::f \{/m,
+    'sub decl when lex sub is in scope';
 
 done_testing($tests);
 
@@ -1665,7 +1670,6 @@ use feature 'state';
 print f();
 ####
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
-# TODO unimplemented in B::Deparse; RT #116553
 # lexical subroutine scoping
 # CONTEXT use feature 'lexical_subs'; no warnings 'experimental::lexical_subs';
 {
@@ -1676,8 +1680,10 @@ print f();
       my sub b;
       b();
       main::b();
-      my $b;
-      sub b { $b }
+      &main::b;
+      &main::b();
+      my $b = \&main::b;
+      sub b { $b; }
     }
   }
   b();

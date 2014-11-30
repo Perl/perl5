@@ -548,15 +548,22 @@ sub next_todo {
 	    $l = "\n\f#line $line \"$file\"\n";
 	}
 	my $p = '';
+	my $stash;
 	if (class($cv->STASH) ne "SPECIAL") {
-	    my $stash = $cv->STASH->NAME;
+	    $stash = $cv->STASH->NAME;
 	    if ($stash ne $self->{'curstash'}) {
 		$p = $self->keyword("package") . " $stash;\n";
 		$name = "$self->{'curstash'}::$name" unless $name =~ /::/;
 		$self->{'curstash'} = $stash;
 	    }
-	    $name =~ s/^\Q$stash\E::(?!\z|.*::)//;
 	}
+        if ( $name !~ /::/ and $self->lex_in_scope("&$name")
+                            || $self->lex_in_scope("&$name", 1) )
+        {
+            $name = "$self->{'curstash'}::$name";
+        } elsif (defined $stash) {
+            $name =~ s/^\Q$stash\E::(?!\z|.*::)//;
+        }
         return "${p}${l}" . $self->keyword("sub") . " $name "
 	      . $self->deparse_sub($cv);
     }
@@ -1618,7 +1625,7 @@ sub stash_variable {
 
     return "$prefix$name" if $name =~ /::/;
 
-    unless ($prefix eq '$' || $prefix eq '@' || #'
+    unless ($prefix eq '$' || $prefix eq '@' || $prefix eq '&' || #'
 	    $prefix eq '%' || $prefix eq '$#') {
 	return "$prefix$name";
     }
@@ -4096,7 +4103,13 @@ sub pp_entersub {
 	}
 	$simple = 1; # only calls of named functions can be prototyped
 	$kid = $self->deparse($kid, 24);
-	if (!$amper) {
+	my $fq;
+	# Fully qualify any sub name that conflicts with a lexical.
+	if ($self->lex_in_scope("&$kid")
+	 || $self->lex_in_scope("&$kid", 1))
+	{
+	    $fq++;
+	} elsif (!$amper) {
 	    if ($kid eq 'main::') {
 		$kid = '::';
 	    }
@@ -4106,20 +4119,19 @@ sub pp_entersub {
 		# we could check the import flag, we cannot guarantee that
 		# the code deparsed so far would set that flag, so we qual-
 		# ify the names regardless of importation.
-		my $fq;
 		if (exists $feature_keywords{$kid}) {
 		    $fq++ if $self->feature_enabled($kid);
 		} elsif (do { local $@; local $SIG{__DIE__};
 			      eval { () = prototype "CORE::$kid"; 1 } }) {
 		    $fq++
 		}
-		$fq and substr $kid, 0, 0, = $self->{'curstash'}.'::';
 	      }
 	      if ($kid !~ /^(?:\w|::)(?:[\w\d]|::(?!\z))*\z/) {
 		$kid = single_delim("q", "'", $kid, $self) . '->';
 	      }
 	    }
 	}
+	$fq and substr $kid, 0, 0, = $self->{'curstash'}.'::';
     } elsif (is_scalar ($kid->first) && $kid->first->name ne 'rv2cv') {
 	$amper = "&";
 	$kid = $self->deparse($kid, 24);
