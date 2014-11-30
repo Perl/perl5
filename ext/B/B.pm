@@ -867,6 +867,8 @@ in the MAGIC.
 
 =item precomp
 
+=item qr_anoncv
+
 =back
 
 =head2 B::GV Methods

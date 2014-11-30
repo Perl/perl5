@@ -338,6 +338,9 @@ SKIP: {
 	'different COP->stashoff for different stashes';
 }
 
+is B::svref_2object(qr/(?{time})/)->qr_anoncv->ROOT->first->name, 'qr',
+  'qr_anoncv';
+
 
 # Test $B::overlay
 {

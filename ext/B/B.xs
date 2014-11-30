@@ -1549,9 +1549,12 @@ REGEX(sv)
 	B::REGEXP	sv
     ALIAS:
 	precomp = 1
+	qr_anoncv = 2
     PPCODE:
-	if (ix) {
+	if (ix == 1) {
 	    PUSHs(newSVpvn_flags(RX_PRECOMP(sv), RX_PRELEN(sv), SVs_TEMP));
+	} else if (ix) {
+	    PUSHs(make_sv_object(aTHX_ (SV *)ReANY(sv)->qr_anoncv));
 	} else {
 	    dXSTARG;
 	    /* FIXME - can we code this method more efficiently?  */
