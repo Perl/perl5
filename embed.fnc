@@ -2507,6 +2507,16 @@ Es	|bool	|rck_close	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
 Es	|bool	|rck_eval	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
+Es	|bool	|rck_endlikish	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
+Es	|bool	|rck_logical	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
+Es	|bool	|rck_gpos	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
+Es	|bool	|rck_trie	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
+Es	|bool	|rck_default	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
 Es	|void	|rck_make_trie	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
 Es	|void	|rck_enframe	|NN RExC_state_t *pRExC_state \

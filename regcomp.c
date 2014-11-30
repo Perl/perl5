@@ -5312,6 +5312,236 @@ STATIC bool S_rck_eval(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
     return 0;
 }
 
+STATIC bool S_rck_endlikish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_ARGS_ASSERT_RCK_ENDLIKISH;
+
+    if (params->flags & SCF_DO_SUBSTR) {
+        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+        params->flags &= ~SCF_DO_SUBSTR;
+    }
+    if (params->data && OP(params->scan) == ACCEPT) {
+        params->data->flags |= SCF_SEEN_ACCEPT;
+        if (params->stopmin > params->min)
+            params->stopmin = params->min;
+    }
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
+STATIC bool S_rck_logical(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_ARGS_ASSERT_RCK_LOGICAL;
+
+    if (params->scan->flags == 2) {
+        /* Embedded follows */
+        if (params->flags & SCF_DO_SUBSTR) {
+            scan_commit(pRExC_state, params->data, params->minlenp,
+                    params->is_inf);
+            params->data->cur_is_floating = 1; /* float */
+        }
+        params->is_inf = params->is_inf_internal = 1;
+        if (params->flags & SCF_DO_STCLASS_OR) /* Allow everything */
+            ssc_anything(params->data->start_class);
+        params->flags &= ~SCF_DO_STCLASS;
+    }
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
+STATIC bool S_rck_gpos(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_ARGS_ASSERT_RCK_GPOS;
+
+    if (!(RExC_rx->intflags & PREGf_GPOS_FLOAT) &&
+        !(params->delta || params->is_inf || (params->data && params->data->pos_delta)))
+    {
+        if (!(RExC_rx->intflags & PREGf_ANCH) && (params->flags & SCF_DO_SUBSTR))
+            RExC_rx->intflags |= PREGf_ANCH_GPOS;
+        if (RExC_rx->gofs < (STRLEN)params->min)
+            RExC_rx->gofs = params->min;
+    } else {
+        RExC_rx->intflags |= PREGf_GPOS_FLOAT;
+        RExC_rx->gofs = 0;
+    }
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
+STATIC bool S_rck_trie(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+#ifdef TRIE_STUDY_OPT
+#ifdef FULL_TRIE_STUDY
+    /* NOTE - There is similar code to this block above for handling
+       BRANCH nodes on the initial study.  If you change stuff here
+       check there too. */
+    regnode *trie_node = params->scan;
+    regnode *tail = regnext(params->scan);
+    reg_trie_data *trie
+            = (reg_trie_data*)RExC_rxi->data->data[ARG(params->scan)];
+    SSize_t max1 = 0, min1 = SSize_t_MAX;
+    regnode_ssc accum;
+
+    PERL_ARGS_ASSERT_RCK_TRIE;
+
+    if (params->flags & SCF_DO_SUBSTR) { /* XXXX Add !SUSPEND? */
+        /* Cannot merge strings after this. */
+        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+    }
+    if (params->flags & SCF_DO_STCLASS)
+        ssc_init_zero(pRExC_state, &accum);
+
+    if (!trie->jump) {
+        min1 = trie->minlen;
+        max1 = trie->maxlen;
+    } else {
+        const regnode *nextbranch = NULL;
+        U32 word;
+
+        for (word = 1; word <= trie->wordcount; word++) {
+            SSize_t deltanext = 0, minnext = 0, f = 0, fake;
+            regnode_ssc this_class;
+
+            StructCopy(&zero_scan_data, &params->data_fake, scan_data_t);
+            if (params->data) {
+                params->data_fake.whilem_c = params->data->whilem_c;
+                params->data_fake.last_closep = params->data->last_closep;
+            } else {
+                params->data_fake.last_closep = &fake;
+            }
+            params->data_fake.pos_delta = params->delta;
+            if (params->flags & SCF_DO_STCLASS) {
+                ssc_init(pRExC_state, &this_class);
+                params->data_fake.start_class = &this_class;
+                f = SCF_DO_STCLASS_AND;
+            }
+            if (params->flags & SCF_WHILEM_VISITED_POS)
+                f |= SCF_WHILEM_VISITED_POS;
+
+            if (trie->jump[word]) {
+                if (!nextbranch)
+                    nextbranch = trie_node + trie->jump[0];
+                params->scan = trie_node + trie->jump[word];
+                /* We go from the jump point to the branch that follows
+                 * it. Note this means we need the vestigial unused
+                 * branches even though they aren't otherwise used. */
+                /* optimise study_chunk() for TRIE */
+                minnext = study_chunk(
+                    pRExC_state, &params->scan, params->minlenp, &deltanext,
+                    (regnode *)nextbranch, &params->data_fake,
+                    params->stopparen, params->recursed_depth, NULL, f,
+                    params->depth + 1
+                );
+            }
+            if (nextbranch && PL_regkind[OP(nextbranch)] == BRANCH)
+                nextbranch = regnext((regnode*)nextbranch);
+
+            if (min1 > (SSize_t)(minnext + trie->minlen))
+                min1 = minnext + trie->minlen;
+            if (deltanext == SSize_t_MAX) {
+                params->is_inf = params->is_inf_internal = 1;
+                max1 = SSize_t_MAX;
+            } else if (max1 < (SSize_t)(minnext + deltanext + trie->maxlen))
+                max1 = minnext + deltanext + trie->maxlen;
+
+            if (params->data_fake.flags & (SF_HAS_PAR | SF_IN_PAR))
+                params->pars++;
+            if (params->data_fake.flags & SCF_SEEN_ACCEPT) {
+                if (params->stopmin > params->min + min1)
+                    params->stopmin = params->min + min1;
+                params->flags &= ~SCF_DO_SUBSTR;
+                if (params->data)
+                    params->data->flags |= SCF_SEEN_ACCEPT;
+            }
+            if (params->data) {
+                if (params->data_fake.flags & SF_HAS_EVAL)
+                    params->data->flags |= SF_HAS_EVAL;
+                params->data->whilem_c = params->data_fake.whilem_c;
+            }
+            if (params->flags & SCF_DO_STCLASS)
+                ssc_or(pRExC_state, &accum, (regnode_charclass *)&this_class);
+        }
+    }
+    if (params->flags & SCF_DO_SUBSTR) {
+        params->data->pos_min += min1;
+        params->data->pos_delta += max1 - min1;
+        if (max1 != min1 || params->is_inf)
+            params->data->cur_is_floating = 1; /* float */
+    }
+    params->min += min1;
+    if (params->delta != SSize_t_MAX) {
+        if (SSize_t_MAX - (max1 - min1) >= params->delta)
+            params->delta += max1 - min1;
+        else
+            params->delta = SSize_t_MAX;
+    }
+    if (params->flags & SCF_DO_STCLASS_OR) {
+        ssc_or(pRExC_state, params->data->start_class,
+                (regnode_charclass *)&accum);
+        if (min1) {
+            ssc_and(pRExC_state, params->data->start_class,
+                    (regnode_charclass *)params->and_withp);
+            params->flags &= ~SCF_DO_STCLASS;
+        }
+    } else if (params->flags & SCF_DO_STCLASS_AND) {
+        if (min1) {
+            ssc_and(pRExC_state, params->data->start_class,
+                    (regnode_charclass *)&accum);
+            params->flags &= ~SCF_DO_STCLASS;
+        } else {
+            /* Switch to OR mode: cache the old value of
+             * data->start_class */
+            INIT_AND_WITHP;
+            StructCopy(params->data->start_class, params->and_withp,
+                    regnode_ssc);
+            params->flags &= ~SCF_DO_STCLASS_AND;
+            StructCopy(&accum, params->data->start_class, regnode_ssc);
+            params->flags |= SCF_DO_STCLASS_OR;
+        }
+    }
+    params->scan = tail;
+#else
+    reg_trie_data *trie
+            = (reg_trie_data*)RExC_rxi->data->data[ARG(params->scan)];
+    U8 *bang = NULL;
+
+    PERL_ARGS_ASSERT_RCK_TRIE;
+
+    params->min += trie->minlen;
+    params->delta += (trie->maxlen - trie->minlen);
+    params->flags &= ~SCF_DO_STCLASS; /* xxx */
+    if (params->flags & SCF_DO_SUBSTR) {
+        /* Cannot expect anything... */
+        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+        params->data->pos_min += trie->minlen;
+        params->data->pos_delta += (trie->maxlen - trie->minlen);
+        if (trie->maxlen != trie->minlen)
+            params->data->cur_is_floating = 1; /* float */
+    }
+    if (trie->jump) /* no more substrings -- for now /grr */
+        params->flags &= ~SCF_DO_SUBSTR;
+    params->scan = regnext(params->scan);
+#endif /* old or new */
+#else
+    PERL_ARGS_ASSERT_RCK_TRIE;
+
+    /* not TRIE_STUDY_OPT, same as rck_default */
+    params->scan = regnext(params->scan);
+#endif /* TRIE_STUDY_OPT */
+    return 0;
+}
+
+STATIC bool S_rck_default(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_UNUSED_VAR(pRExC_state);
+
+    PERL_ARGS_ASSERT_RCK_DEFAULT;
+
+    /* nothing to do, just move on to the next node */
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
 STATIC void S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params,
         regnode *start, regnode *end, I32 paren, U32 recursed_depth)
 {
@@ -6192,192 +6422,20 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
         return rck_close(pRExC_state, params);
     } else if (OP(params->scan) == EVAL) {
         return rck_eval(pRExC_state, params);
-    } else if ( PL_regkind[OP(params->scan)] == ENDLIKE ) {
-        if (params->flags & SCF_DO_SUBSTR) {
-            scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-            params->flags &= ~SCF_DO_SUBSTR;
-        }
-        if (params->data && OP(params->scan)==ACCEPT) {
-            params->data->flags |= SCF_SEEN_ACCEPT;
-            if (params->stopmin > params->min)
-                params->stopmin = params->min;
-        }
+    } else if (PL_regkind[OP(params->scan)] == ENDLIKE) {
+        /* ENDLIKE OPFAIL ACCEPT */
+        return rck_endlikish(pRExC_state, params);
+    } else if (OP(params->scan) == LOGICAL) {
+        return rck_logical(pRExC_state, params);
+    } else if (OP(params->scan) == GPOS) {
+        return rck_gpos(pRExC_state, params);
+    } else if (PL_regkind[OP(params->scan)] == TRIE) {
+        /* TRIE TRIEC AHOCORASICK AHOCORASICKC TRIE_next TRIE_next_fail */
+        return rck_trie(pRExC_state, params);
+    } else {
+        /* anything else */
+        return rck_default(pRExC_state, params);
     }
-    else if (OP(params->scan) == LOGICAL && params->scan->flags == 2) /* Embedded follows */
-    {
-            if (params->flags & SCF_DO_SUBSTR) {
-                scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-                params->data->cur_is_floating = 1; /* float */
-            }
-            params->is_inf = params->is_inf_internal = 1;
-            if (params->flags & SCF_DO_STCLASS_OR) /* Allow everything */
-                ssc_anything(params->data->start_class);
-            params->flags &= ~SCF_DO_STCLASS;
-    }
-    else if (OP(params->scan) == GPOS) {
-        if (!(RExC_rx->intflags & PREGf_GPOS_FLOAT) &&
-            !(params->delta || params->is_inf || (params->data && params->data->pos_delta)))
-        {
-            if (!(RExC_rx->intflags & PREGf_ANCH) && (params->flags & SCF_DO_SUBSTR))
-                RExC_rx->intflags |= PREGf_ANCH_GPOS;
-            if (RExC_rx->gofs < (STRLEN)params->min)
-                RExC_rx->gofs = params->min;
-        } else {
-            RExC_rx->intflags |= PREGf_GPOS_FLOAT;
-            RExC_rx->gofs = 0;
-        }
-    }
-#ifdef TRIE_STUDY_OPT
-#ifdef FULL_TRIE_STUDY
-    else if (PL_regkind[OP(params->scan)] == TRIE) {
-        /* NOTE - There is similar code to this block above for handling
-           BRANCH nodes on the initial study.  If you change stuff here
-           check there too. */
-        regnode *trie_node= params->scan;
-        regnode *tail= regnext(params->scan);
-        reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(params->scan) ];
-        SSize_t max1 = 0, min1 = SSize_t_MAX;
-        regnode_ssc accum;
-
-        if (params->flags & SCF_DO_SUBSTR) { /* XXXX Add !SUSPEND? */
-            /* Cannot merge strings after this. */
-            scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-        }
-        if (params->flags & SCF_DO_STCLASS)
-            ssc_init_zero(pRExC_state, &accum);
-
-        if (!trie->jump) {
-            min1= trie->minlen;
-            max1= trie->maxlen;
-        } else {
-            const regnode *nextbranch= NULL;
-            U32 word;
-
-            for ( word=1 ; word <= trie->wordcount ; word++)
-            {
-                SSize_t deltanext=0, minnext=0, f = 0, fake;
-                regnode_ssc this_class;
-
-                StructCopy(&zero_scan_data, &params->data_fake, scan_data_t);
-                if (params->data) {
-                    params->data_fake.whilem_c = params->data->whilem_c;
-                    params->data_fake.last_closep = params->data->last_closep;
-                }
-                else
-                    params->data_fake.last_closep = &fake;
-                params->data_fake.pos_delta = params->delta;
-                if (params->flags & SCF_DO_STCLASS) {
-                    ssc_init(pRExC_state, &this_class);
-                    params->data_fake.start_class = &this_class;
-                    f = SCF_DO_STCLASS_AND;
-                }
-                if (params->flags & SCF_WHILEM_VISITED_POS)
-                    f |= SCF_WHILEM_VISITED_POS;
-
-                if (trie->jump[word]) {
-                    if (!nextbranch)
-                        nextbranch = trie_node + trie->jump[0];
-                    params->scan= trie_node + trie->jump[word];
-                    /* We go from the jump point to the branch that follows
-                       it. Note this means we need the vestigal unused
-                       branches even though they arent otherwise used. */
-                    /* optimise study_chunk() for TRIE */
-                    minnext = study_chunk(pRExC_state, &params->scan, params->minlenp,
-                        &deltanext, (regnode *)nextbranch, &params->data_fake,
-                        params->stopparen, params->recursed_depth, NULL, f,params->depth+1);
-                }
-                if (nextbranch && PL_regkind[OP(nextbranch)]==BRANCH)
-                    nextbranch= regnext((regnode*)nextbranch);
-
-                if (min1 > (SSize_t)(minnext + trie->minlen))
-                    min1 = minnext + trie->minlen;
-                if (deltanext == SSize_t_MAX) {
-                    params->is_inf = params->is_inf_internal = 1;
-                    max1 = SSize_t_MAX;
-                } else if (max1 < (SSize_t)(minnext + deltanext + trie->maxlen))
-                    max1 = minnext + deltanext + trie->maxlen;
-
-                if (params->data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
-                    params->pars++;
-                if (params->data_fake.flags & SCF_SEEN_ACCEPT) {
-                    if ( params->stopmin > params->min + min1)
-                        params->stopmin = params->min + min1;
-                    params->flags &= ~SCF_DO_SUBSTR;
-                    if (params->data)
-                        params->data->flags |= SCF_SEEN_ACCEPT;
-                }
-                if (params->data) {
-                    if (params->data_fake.flags & SF_HAS_EVAL)
-                        params->data->flags |= SF_HAS_EVAL;
-                    params->data->whilem_c = params->data_fake.whilem_c;
-                }
-                if (params->flags & SCF_DO_STCLASS)
-                    ssc_or(pRExC_state, &accum, (regnode_charclass *) &this_class);
-            }
-        }
-        if (params->flags & SCF_DO_SUBSTR) {
-            params->data->pos_min += min1;
-            params->data->pos_delta += max1 - min1;
-            if (max1 != min1 || params->is_inf)
-                params->data->cur_is_floating = 1; /* float */
-        }
-        params->min += min1;
-        if (params->delta != SSize_t_MAX) {
-            if (SSize_t_MAX - (max1 - min1) >= params->delta)
-                params->delta += max1 - min1;
-            else
-                params->delta = SSize_t_MAX;
-        }
-        if (params->flags & SCF_DO_STCLASS_OR) {
-            ssc_or(pRExC_state, params->data->start_class, (regnode_charclass *) &accum);
-            if (min1) {
-                ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
-                params->flags &= ~SCF_DO_STCLASS;
-            }
-        }
-        else if (params->flags & SCF_DO_STCLASS_AND) {
-            if (min1) {
-                ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) &accum);
-                params->flags &= ~SCF_DO_STCLASS;
-            }
-            else {
-                /* Switch to OR mode: cache the old value of
-                 * data->start_class */
-                INIT_AND_WITHP;
-                StructCopy(params->data->start_class, params->and_withp, regnode_ssc);
-                params->flags &= ~SCF_DO_STCLASS_AND;
-                StructCopy(&accum, params->data->start_class, regnode_ssc);
-                params->flags |= SCF_DO_STCLASS_OR;
-            }
-        }
-        params->scan= tail;
-        return 0;
-    }
-#else
-    else if (PL_regkind[OP(params->scan)] == TRIE) {
-        reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(params->scan) ];
-        U8*bang=NULL;
-
-        params->min += trie->minlen;
-        params->delta += (trie->maxlen - trie->minlen);
-        params->flags &= ~SCF_DO_STCLASS; /* xxx */
-        if (params->flags & SCF_DO_SUBSTR) {
-            /* Cannot expect anything... */
-            scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-            params->data->pos_min += trie->minlen;
-            params->data->pos_delta += (trie->maxlen - trie->minlen);
-            if (trie->maxlen != trie->minlen)
-                params->data->cur_is_floating = 1; /* float */
-        }
-        if (trie->jump) /* no more substrings -- for now /grr*/
-           params->flags &= ~SCF_DO_SUBSTR;
-    }
-#endif /* old or new */
-#endif /* TRIE_STUDY_OPT */
-
-    /* Else: zero-length, ignore. */
-    params->scan = regnext(params->scan);
-    return 0;
 }
 
 STATIC U32

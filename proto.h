@@ -5306,6 +5306,9 @@ STATIC bool	S_rck_clump(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 STATIC bool	S_rck_curlyish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_CURLYISH	\
 	assert(pRExC_state); assert(params)
+STATIC bool	S_rck_default(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_DEFAULT	\
+	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_definep(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_DEFINEP	\
 	assert(pRExC_state); assert(params)
@@ -5315,6 +5318,9 @@ STATIC void	S_rck_do_curly(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params
 STATIC void	S_rck_elide_nothing(pTHX_ regnode *node);
 #define PERL_ARGS_ASSERT_RCK_ELIDE_NOTHING	\
 	assert(node)
+STATIC bool	S_rck_endlikish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_ENDLIKISH	\
+	assert(pRExC_state); assert(params)
 STATIC void	S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params, regnode *start, regnode *end, I32 paren, U32 recursed_depth);
 #define PERL_ARGS_ASSERT_RCK_ENFRAME	\
 	assert(pRExC_state); assert(params); assert(start); assert(end)
@@ -5333,11 +5339,17 @@ STATIC bool	S_rck_exactfish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *param
 STATIC bool	S_rck_gosub(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_GOSUB	\
 	assert(pRExC_state); assert(params)
+STATIC bool	S_rck_gpos(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_GPOS	\
+	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_ifthen(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_IFTHEN	\
 	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_lnbreak(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_LNBREAK	\
+	assert(pRExC_state); assert(params)
+STATIC bool	S_rck_logical(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_LOGICAL	\
 	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_lookaround(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_LOOKAROUND	\
@@ -5362,6 +5374,9 @@ STATIC bool	S_rck_star(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_suspend(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_SUSPEND	\
+	assert(pRExC_state); assert(params)
+STATIC bool	S_rck_trie(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_TRIE	\
 	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_whilem(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_WHILEM	\
