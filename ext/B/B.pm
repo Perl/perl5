@@ -859,6 +859,16 @@ in the MAGIC.
 
 =back
 
+=head2 B::REGEXP Methods
+
+=over 4
+
+=item REGEX
+
+=item precomp
+
+=back
+
 =head2 B::GV Methods
 
 =over 4
