@@ -3009,12 +3009,12 @@ PERL_CALLCONV SV*	Perl_newRV(pTHX_ SV *const sv)
 #define PERL_ARGS_ASSERT_NEWRV	\
 	assert(sv)
 
-PERL_CALLCONV SV*	Perl_newRV_noinc(pTHX_ SV *const sv)
+PERL_CALLCONV SV*	Perl_newRV_noinc(pTHX_ SV *const tmpRef)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_NEWRV_NOINC	\
-	assert(sv)
+	assert(tmpRef)
 
 PERL_CALLCONV OP*	Perl_newSLICEOP(pTHX_ I32 flags, OP* subscript, OP* listop)
 			__attribute__malloc__

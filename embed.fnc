@@ -1006,7 +1006,7 @@ Apda	|OP*	|newPADOP	|I32 type|I32 flags|NN SV* sv
 Apda	|OP*	|newPMOP	|I32 type|I32 flags
 Apda	|OP*	|newPVOP	|I32 type|I32 flags|NULLOK char* pv
 Apa	|SV*	|newRV		|NN SV *const sv
-Apda	|SV*	|newRV_noinc	|NN SV *const sv
+Apda	|SV*	|newRV_noinc	|NN SV *const tmpRef
 Apda	|SV*	|newSV		|const STRLEN len
 Apa	|OP*	|newSVREF	|NN OP* o
 Apda	|OP*	|newSVOP	|I32 type|I32 flags|NN SV* sv
