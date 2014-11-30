@@ -5878,20 +5878,9 @@ There are probably many more bugs on non-ASCII platforms (EBCDIC).
 
 =item *
 
-Lexical C<my> subroutines are not deparsed properly at the moment.  They are
-emitted as pure declarations, without their body; and the declaration may
-appear in the wrong place (before any lexicals the body closes over, or
-before the C<use feature> declaration that permits use of this feature).
-
-We expect to resolve this before the lexical-subroutine feature is no longer
-considered experimental.
-
-=item *
-
-Lexical C<state> subroutines are not deparsed at all at the moment.
-
-We expect to resolve this before the lexical-subroutine feature is no longer
-considered experimental.
+Prior to Perl 5.22, lexical C<my> subroutines were not deparsed properly.
+They were emitted as pure declarations, sometimes in the wrong place.
+Lexical C<state> subroutines were not deparsed at all.
 
 =back
 
