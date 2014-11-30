@@ -15,7 +15,6 @@
 #define PERL_MAGIC_sv             '\0' /* Special scalar variable */
 #define PERL_MAGIC_arylen         '#' /* Array length ($#ary) */
 #define PERL_MAGIC_rhash          '%' /* Extra data for restricted hashes */
-#define PERL_MAGIC_proto          '&' /* my sub prototype CV */
 #define PERL_MAGIC_debugvar       '*' /* $DB::single, signal, trace vars */
 #define PERL_MAGIC_pos            '.' /* pos() lvalue */
 #define PERL_MAGIC_symtab         ':' /* Extra data for symbol tables */

@@ -2652,12 +2652,12 @@ typedef struct ptr_tbl_ent PTR_TBL_ENT_t;
 typedef struct ptr_tbl PTR_TBL_t;
 typedef struct clone_params CLONE_PARAMS;
 
-/* a pad or name pad is currently just an AV; but that might change,
+/* a pad is currently just an AV; but that might change,
  * so hide the type.  */
 typedef struct padlist PADLIST;
 typedef AV PAD;
-typedef AV PADNAMELIST;
-typedef SV PADNAME;
+typedef struct padnamelist PADNAMELIST;
+typedef struct padname PADNAME;
 
 /* enable PERL_NEW_COPY_ON_WRITE by default */
 #if !defined(PERL_OLD_COPY_ON_WRITE) && !defined(PERL_NEW_COPY_ON_WRITE) && !defined(PERL_NO_COW)
@@ -3406,6 +3406,9 @@ typedef pthread_key_t	perl_key;
 #  define UTF8f "d%" UVuf "%4p"
 #endif
 #define UTF8fARG(u,l,p) (int)cBOOL(u), (UV)(l), (void*)(p)
+
+#define PNf UTF8f
+#define PNfARG(pn) (int)1, (UV)PadnameLEN(pn), (void *)PadnamePV(pn)
 
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB */

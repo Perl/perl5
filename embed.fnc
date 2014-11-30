@@ -1000,6 +1000,9 @@ AmdbR	|HV*	|newHV
 ApaR	|HV*	|newHVhv	|NULLOK HV *hv
 Apabm	|IO*	|newIO
 Apda	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
+AMpda	|PADNAME *|newPADNAMEouter|NN PADNAME *outer
+AMpda	|PADNAME *|newPADNAMEpvn|NN const char *s|STRLEN len
+AMpda	|PADNAMELIST *|newPADNAMELIST|size_t max
 #ifdef USE_ITHREADS
 Apda	|OP*	|newPADOP	|I32 type|I32 flags|NN SV* sv
 #endif
@@ -2528,7 +2531,7 @@ Apda	|PADLIST*|pad_new	|int flags
 pnX	|void|set_padlist| NN CV * cv | NULLOK PADLIST * padlist
 #endif
 #if defined(PERL_IN_PAD_C)
-s	|PADOFFSET|pad_alloc_name|NN SV *namesv|U32 flags \
+s	|PADOFFSET|pad_alloc_name|NN PADNAME *name|U32 flags \
 				|NULLOK HV *typestash|NULLOK HV *ourstash
 #endif
 Apd	|PADOFFSET|pad_add_name_pvn|NN const char *namepv|STRLEN namelen\
@@ -2543,7 +2546,8 @@ Apd	|PADOFFSET|pad_add_name_sv|NN SV *name\
 AMpd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 Apd	|PADOFFSET|pad_add_anon	|NN CV* func|I32 optype
 #if defined(PERL_IN_PAD_C)
-sd	|void	|pad_check_dup	|NN SV *name|U32 flags|NULLOK const HV *ourstash
+sd	|void	|pad_check_dup	|NN PADNAME *name|U32 flags \
+				|NULLOK const HV *ourstash
 #endif
 Apd	|PADOFFSET|pad_findmy_pvn|NN const char* namepv|STRLEN namelen|U32 flags
 Apd	|PADOFFSET|pad_findmy_pv|NN const char* name|U32 flags
@@ -2555,8 +2559,8 @@ p	|SV*	|find_rundefsv2	|NN CV *cv|U32 seq
 #if defined(PERL_IN_PAD_C)
 sd	|PADOFFSET|pad_findlex	|NN const char *namepv|STRLEN namelen|U32 flags \
 				|NN const CV* cv|U32 seq|int warn \
-				|NULLOK SV** out_capture|NN SV** out_name_sv \
-				|NN int *out_flags
+				|NULLOK SV** out_capture \
+				|NN PADNAME** out_name|NN int *out_flags
 #endif
 #ifdef DEBUGGING
 Apd	|SV*	|pad_sv		|PADOFFSET po
@@ -2581,8 +2585,16 @@ Apd	|CV*	|cv_clone	|NN CV* proto
 p	|CV*	|cv_clone_into	|NN CV* proto|NN CV *target
 pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv
 pdX	|void	|pad_push	|NN PADLIST *padlist|int depth
-ApdR	|HV*	|pad_compname_type|const PADOFFSET po
+ApbdR	|HV*	|pad_compname_type|const PADOFFSET po
+AMpdR	|PADNAME *|padnamelist_fetch|NN PADNAMELIST *pnl|SSize_t key
+Xop	|void	|padnamelist_free|NN PADNAMELIST *pnl
+AMpd	|PADNAME **|padnamelist_store|NN PADNAMELIST *pnl|SSize_t key \
+				     |NULLOK PADNAME *val
+Xop	|void	|padname_free	|NN PADNAME *pn
 #if defined(USE_ITHREADS)
+pdR	|PADNAME *|padname_dup	|NN PADNAME *src|NN CLONE_PARAMS *param
+pR	|PADNAMELIST *|padnamelist_dup|NN PADNAMELIST *srcpad \
+				      |NN CLONE_PARAMS *param
 pdR	|PADLIST *|padlist_dup	|NN PADLIST *srcpad \
 				|NN CLONE_PARAMS *param
 #endif

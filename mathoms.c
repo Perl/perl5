@@ -1773,6 +1773,22 @@ Perl_save_re_context(pTHX)
     PERL_UNUSED_CONTEXT;
 }
 
+/*
+=for apidoc Am|HV *|pad_compname_type|PADOFFSET po
+
+Looks up the type of the lexical variable at position I<po> in the
+currently-compiling pad.  If the variable is typed, the stash of the
+class to which it is typed is returned.  If not, C<NULL> is returned.
+
+=cut
+*/
+
+HV *
+Perl_pad_compname_type(pTHX_ const PADOFFSET po)
+{
+    return PAD_COMPNAME_TYPE(po);
+}
+
 
 END_EXTERN_C
 

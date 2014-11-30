@@ -638,8 +638,6 @@ do_curse(pTHX_ SV * const sv) {
     if ((PL_stderrgv && GvGP(PL_stderrgv) && (SV*)GvIO(PL_stderrgv) == sv)
      || (PL_defoutgv && GvGP(PL_defoutgv) && (SV*)GvIO(PL_defoutgv) == sv))
 	return;
-    if (SvPAD_NAME(sv))
-	return;
     (void)curse(sv, 0);
 }
 
@@ -1332,10 +1330,6 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	   there's no way that it can be safely upgraded, because perl.c
 	   expects to Safefree(SvANY(PL_mess_sv))  */
 	assert(sv != PL_mess_sv);
-	/* This flag bit is used to mean other things in other scalar types.
-	   Given that it only has meaning inside the pad, it shouldn't be set
-	   on anything that can get upgraded.  */
-	assert(!SvPAD_TYPED(sv));
 	break;
     default:
 	if (UNLIKELY(old_type_details->cant_upgrade))
@@ -5653,8 +5647,6 @@ Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how,
 
     PERL_ARGS_ASSERT_SV_MAGICEXT;
 
-    if (SvTYPE(sv)==SVt_PVAV) { assert (!AvPAD_NAMELIST(sv)); }
-
     SvUPGRADE(sv, SVt_PVMG);
     Newxz(mg, 1, MAGIC);
     mg->mg_moremagic = SvMAGIC(sv);
@@ -6495,10 +6487,10 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 
 	/* objs are always >= MG, but pad names use the SVs_OBJECT flag
 	   for another purpose  */
-	assert(!SvOBJECT(sv) || type >= SVt_PVMG || SvPAD_NAME(sv));
+	assert(!SvOBJECT(sv) || type >= SVt_PVMG);
 
 	if (type >= SVt_PVMG) {
-	    if (SvOBJECT(sv) && !SvPAD_NAME(sv)) {
+	    if (SvOBJECT(sv)) {
 		if (!curse(sv, 1)) goto get_next_sv;
 		type = SvTYPE(sv); /* destructor may have changed it */
 	    }
@@ -6509,19 +6501,12 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		if (SvMAGIC(sv))
 		    mg_free(sv);
 	    }
-	    else if (type == SVt_PVMG && SvPAD_OUR(sv)) {
-		SvREFCNT_dec(SvOURSTASH(sv));
-	    }
-	    else if (type == SVt_PVAV && AvPAD_NAMELIST(sv)) {
-		assert(!SvMAGICAL(sv));
-	    } else if (SvMAGIC(sv)) {
+	    else if (SvMAGIC(sv)) {
 		/* Free back-references before other types of magic. */
 		sv_unmagic(sv, PERL_MAGIC_backref);
 		mg_free(sv);
 	    }
 	    SvMAGICAL_off(sv);
-	    if (type == SVt_PVMG && SvPAD_TYPED(sv))
-		SvREFCNT_dec(SvSTASH(sv));
 	}
 	switch (type) {
 	    /* case SVt_INVLIST: */
@@ -13407,7 +13392,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 #endif
 
     /* don't clone objects whose class has asked us not to */
-    if (SvOBJECT(sstr) && !SvPAD_NAME(sstr)
+    if (SvOBJECT(sstr)
      && ! (SvFLAGS(SvSTASH(sstr)) & SVphv_CLONEABLE))
     {
 	SvFLAGS(dstr) = 0;
@@ -13494,13 +13479,9 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	       missing by always going for the destination.
 	       FIXME - instrument and check that assumption  */
 	    if (sv_type >= SVt_PVMG) {
-		if ((sv_type == SVt_PVMG) && SvPAD_OUR(dstr)) {
-		    SvOURSTASH_set(dstr, hv_dup_inc(SvOURSTASH(dstr), param));
-		} else if (sv_type == SVt_PVAV && AvPAD_NAMELIST(dstr)) {
-		    NOOP;
-		} else if (SvMAGIC(dstr))
+		if (SvMAGIC(dstr))
 		    SvMAGIC_set(dstr, mg_dup(SvMAGIC(dstr), param));
-		if (SvOBJECT(dstr) && !SvPAD_NAME(dstr) && SvSTASH(dstr))
+		if (SvOBJECT(dstr) && SvSTASH(dstr))
 		    SvSTASH_set(dstr, hv_dup_inc(SvSTASH(dstr), param));
 		else SvSTASH_set(dstr, 0); /* don't copy DESTROY cache */
 	    }
@@ -14014,6 +13995,11 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    sv = (const SV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
 	    break;
+	case SAVEt_FREEPADNAME:
+	    ptr = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = padname_dup((PADNAME *)ptr, param);
+	    PadnameREFCNT((PADNAME *)TOPPTR(nss,ix))++;
+	    break;
 	case SAVEt_SHARED_PVREF:		/* char* in shared space */
 	    c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = savesharedpv(c);
@@ -14383,6 +14369,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_sig_pending = 0;
     PL_parser = NULL;
     Zero(&PL_debug_pad, 1, struct perl_debug_pad);
+    Zero(&PL_padname_undef, 1, PADNAME);
+    Zero(&PL_padname_const, 1, PADNAME);
 #  ifdef DEBUG_LEAKING_SCALARS
     PL_sv_serial = (((UV)my_perl >> 2) & 0xfff) * 1000000;
 #  endif
@@ -14663,6 +14651,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_undef, &PL_sv_undef);
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_no, &PL_sv_no);
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_yes, &PL_sv_yes);
+    ptr_table_store(PL_ptr_table, &proto_perl->Ipadname_const,
+		    &PL_padname_const);
 
     /* create (a non-shared!) shared string table */
     PL_strtab		= newHV();
@@ -15173,6 +15163,8 @@ Perl_init_constants(pTHX)
     SvLEN_set(&PL_sv_yes, 0);
     SvIV_set(&PL_sv_yes, 1);
     SvNV_set(&PL_sv_yes, 1);
+
+    PadnamePV(&PL_padname_const) = (char *)PL_No;
 }
 
 /*
@@ -15410,16 +15402,15 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
     }
     else {
 	CV * const cv = gv ? ((CV *)gv) : find_runcv(NULL);
-	SV *sv;
-	AV *av;
+	PADNAME *sv;
 
 	assert(!cv || SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);
 
 	if (!cv || !CvPADLIST(cv))
 	    return NULL;
-	av = *PadlistARRAY(CvPADLIST(cv));
-	sv = *av_fetch(av, targ, FALSE);
-	sv_setsv_flags(name, sv, 0);
+	sv = padnamelist_fetch(PadlistNAMES(CvPADLIST(cv)), targ);
+	sv_setpvn(name, PadnamePV(sv), PadnameLEN(sv));
+	SvUTF8_on(name);
     }
 
     if (subscript_type == FUV_SUBSCRIPT_HASH) {

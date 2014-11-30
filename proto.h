@@ -2981,6 +2981,24 @@ PERL_CALLCONV OP*	Perl_newOP(pTHX_ I32 optype, I32 flags)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV PADNAMELIST *	Perl_newPADNAMELIST(pTHX_ size_t max)
+			__attribute__malloc__
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV PADNAME *	Perl_newPADNAMEouter(pTHX_ PADNAME *outer)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_NEWPADNAMEOUTER	\
+	assert(outer)
+
+PERL_CALLCONV PADNAME *	Perl_newPADNAMEpvn(pTHX_ const char *s, STRLEN len)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_NEWPADNAMEPVN	\
+	assert(s)
+
 PERL_CALLCONV OP*	Perl_newPMOP(pTHX_ I32 type, I32 flags)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
@@ -3348,6 +3366,27 @@ PERL_CALLCONV PAD **	Perl_padlist_store(pTHX_ PADLIST *padlist, I32 key, PAD *va
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PADLIST_STORE	\
 	assert(padlist)
+
+PERL_CALLCONV void	Perl_padname_free(pTHX_ PADNAME *pn)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PADNAME_FREE	\
+	assert(pn)
+
+PERL_CALLCONV PADNAME *	Perl_padnamelist_fetch(pTHX_ PADNAMELIST *pnl, SSize_t key)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PADNAMELIST_FETCH	\
+	assert(pnl)
+
+PERL_CALLCONV void	Perl_padnamelist_free(pTHX_ PADNAMELIST *pnl)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PADNAMELIST_FREE	\
+	assert(pnl)
+
+PERL_CALLCONV PADNAME **	Perl_padnamelist_store(pTHX_ PADNAMELIST *pnl, SSize_t key, PADNAME *val)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PADNAMELIST_STORE	\
+	assert(pnl)
 
 PERL_CALLCONV OP*	Perl_parse_arithexpr(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_barestmt(pTHX_ U32 flags);
@@ -6392,23 +6431,23 @@ PERL_CALLCONV void	Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_
 
 #endif
 #if defined(PERL_IN_PAD_C)
-STATIC PADOFFSET	S_pad_alloc_name(pTHX_ SV *namesv, U32 flags, HV *typestash, HV *ourstash)
+STATIC PADOFFSET	S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash, HV *ourstash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PAD_ALLOC_NAME	\
-	assert(namesv)
+	assert(name)
 
-STATIC void	S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
+STATIC void	S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PAD_CHECK_DUP	\
 	assert(name)
 
-STATIC PADOFFSET	S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq, int warn, SV** out_capture, SV** out_name_sv, int *out_flags)
+STATIC PADOFFSET	S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq, int warn, SV** out_capture, PADNAME** out_name, int *out_flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_4)
 			__attribute__nonnull__(pTHX_8)
 			__attribute__nonnull__(pTHX_9);
 #define PERL_ARGS_ASSERT_PAD_FINDLEX	\
-	assert(namepv); assert(cv); assert(out_name_sv); assert(out_flags)
+	assert(namepv); assert(cv); assert(out_name); assert(out_flags)
 
 STATIC void	S_pad_reset(pTHX);
 #endif
@@ -8016,6 +8055,20 @@ PERL_CALLCONV PADLIST *	Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *pa
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_PADLIST_DUP	\
+	assert(srcpad); assert(param)
+
+PERL_CALLCONV PADNAME *	Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_PADNAME_DUP	\
+	assert(src); assert(param)
+
+PERL_CALLCONV PADNAMELIST *	Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_PADNAMELIST_DUP	\
 	assert(srcpad); assert(param)
 
 PERL_CALLCONV yy_parser*	Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)

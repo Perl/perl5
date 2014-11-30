@@ -613,8 +613,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 
     off = pad_add_name_pvn(name, len,
 		       (is_our ? padadd_OUR :
-		        PL_parser->in_my == KEY_state ? padadd_STATE : 0)
-                            | ( flags & SVf_UTF8 ? SVf_UTF8 : 0 ),
+		        PL_parser->in_my == KEY_state ? padadd_STATE : 0),
 		    PL_parser->in_my_stash,
 		    (is_our
 		        /* $_ is always in main::, even with our */
@@ -2241,7 +2240,7 @@ S_finalize_op(pTHX_ OP* o)
 
     case OP_HELEM: {
 	UNOP *rop;
-	SV *lexname;
+	PADNAME *lexname;
 	GV **fields;
 	SVOP *key_op;
 	OP *kid;
@@ -2295,9 +2294,10 @@ S_finalize_op(pTHX_ OP* o)
 
 	check_fields =
 	    rop
-	 && (lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE),
+	 && (lexname = padnamelist_fetch(PL_comppad_name, rop->op_targ),
 	     SvPAD_TYPED(lexname))
-	 && (fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE))
+	 && (fields =
+		(GV**)hv_fetchs(PadnameTYPE(lexname), "FIELDS", FALSE))
 	 && isGV(*fields) && GvHV(*fields);
 	for (; key_op;
 	     key_op = (SVOP*)OP_SIBLING(key_op)) {
@@ -2320,9 +2320,9 @@ S_finalize_op(pTHX_ OP* o)
 	    if (check_fields
 	     && !hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0)) {
 		Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
-			   "in variable %"SVf" of type %"HEKf, 
-		      SVfARG(*svp), SVfARG(lexname),
-                      HEKfARG(HvNAME_HEK(SvSTASH(lexname))));
+			   "in variable %"PNf" of type %"HEKf, 
+		      SVfARG(*svp), PNfARG(lexname),
+                      HEKfARG(HvNAME_HEK(PadnameTYPE(lexname))));
 	    }
 	}
 	break;
@@ -2815,8 +2815,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_PADSV:
 	PL_modcount++;
 	if (!type) /* local() */
-	    Perl_croak(aTHX_ "Can't localize lexical variable %"SVf,
-		 PAD_COMPNAME_SV(o->op_targ));
+	    Perl_croak(aTHX_ "Can't localize lexical variable %"PNf,
+			      PNfARG(PAD_COMPNAME(o->op_targ)));
 	if (!(o->op_private & OPpLVAL_INTRO)
 	 || (  type != OP_SASSIGN && type != OP_AASSIGN
 	    && PadnameIsSTATE(PAD_COMPNAME_SV(o->op_targ))  ))
@@ -7255,11 +7255,10 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	else
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
 	if (padoff) {
-	    SV *const namesv = PAD_COMPNAME_SV(padoff);
-	    STRLEN len;
-	    const char *const name = SvPV_const(namesv, len);
+	    PADNAME * const pn = PAD_COMPNAME(padoff);
+	    const char * const name = PadnamePV(pn);
 
-	    if (len == 2 && name[0] == '$' && name[1] == '_')
+	    if (PadnameLEN(pn) == 2 && name[0] == '$' && name[1] == '_')
 		iterpflags |= OPpITER_DEF;
 	}
     }
@@ -7781,7 +7780,7 @@ S_op_const_sv(pTHX_ const OP *o, CV *cv, bool allow_lex)
 	    SAVEFREESV(sv);
 	}
 	else if (allow_lex && type == OP_PADSV) {
-		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
+		if (PAD_COMPNAME_FLAGS(o->op_targ) & PADNAMEt_OUTER)
 		{
 		    sv = &PL_sv_undef; /* an arbitrary non-null value */
 		    padsv = TRUE;
@@ -7894,7 +7893,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     spot = (CV **)svspot;
 
     if (!(PL_parser && PL_parser->error_count))
-        move_proto_attr(&proto, &attrs, (GV *)name);
+        move_proto_attr(&proto, &attrs, (GV *)PadnameSV(name));
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
@@ -7923,9 +7922,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     else if (PadnameIsSTATE(name) || CvDEPTH(outcv))
 	cv = *spot;
     else {
-	MAGIC *mg;
-	SvUPGRADE(name, SVt_PVMG);
-	mg = mg_find(name, PERL_MAGIC_proto);
 	assert (SvTYPE(*spot) == SVt_PVCV);
 	if (CvNAMED(*spot))
 	    hek = CvNAME_HEK(*spot);
@@ -7942,15 +7938,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    );
 	    CvLEXICAL_on(*spot);
 	}
-	if (mg) {
-	    assert(mg->mg_obj);
-	    cv = (CV *)mg->mg_obj;
-	}
-	else {
-	    sv_magic(name, &PL_sv_undef, PERL_MAGIC_proto, NULL, 0);
-	    mg = mg_find(name, PERL_MAGIC_proto);
-	}
-	spot = (CV **)(svspot = &mg->mg_obj);
+	cv = PadnamePROTOCV(name);
+	svspot = (SV **)(spot = &PadnamePROTOCV(name));
     }
 
     if (block) {
@@ -7985,7 +7974,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
          * skipping the prototype check
          */
         if (exists || SvPOK(cv))
-            cv_ckproto_len_flags(cv, (GV *)name, ps, ps_len, ps_utf8);
+            cv_ckproto_len_flags(cv, (GV *)PadnameSV(name), ps, ps_len,
+                                 ps_utf8);
 	/* already defined? */
 	if (exists) {
 	    if (S_already_defined(aTHX_ cv,block,NULL,name,&const_sv))
@@ -9833,10 +9823,11 @@ Perl_ck_fun(pTHX_ OP *o)
 			     */
 			    priv = OPpDEREF;
 			    if (kid->op_type == OP_PADSV) {
-				SV *const namesv
+				PADNAME * const pn
 				    = PAD_COMPNAME_SV(kid->op_targ);
-				name = SvPV_const(namesv, len);
-                                name_utf8 = SvUTF8(namesv);
+				name = PadnamePV (pn);
+				len  = PadnameLEN(pn);
+				name_utf8 = PadnameUTF8(pn);
 			    }
 			    else if (kid->op_type == OP_RV2SV
 				     && kUNOP->op_first->op_type == OP_GV)
@@ -10779,14 +10770,17 @@ S_simplify_sort(pTHX_ OP *o)
 	kid = kBINOP->op_first;
 	do {
 	    if (kid->op_type == OP_PADSV) {
-		SV * const name = PAD_COMPNAME_SV(kid->op_targ);
-		if (SvCUR(name) == 2 && *SvPVX(name) == '$'
-		 && (SvPVX(name)[1] == 'a' || SvPVX(name)[1] == 'b'))
+		PADNAME * const name = PAD_COMPNAME(kid->op_targ);
+		if (PadnameLEN(name) == 2 && *PadnamePV(name) == '$'
+		 && (  PadnamePV(name)[1] == 'a'
+		    || PadnamePV(name)[1] == 'b'  ))
 		    /* diag_listed_as: "my %s" used in sort comparison */
 		    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				     "\"%s %s\" used in sort comparison",
-				      SvPAD_STATE(name) ? "state" : "my",
-				      SvPVX(name));
+				      PadnameIsSTATE(name)
+					? "state"
+					: "my",
+				      PadnamePV(name));
 	    }
 	} while ((kid = OP_SIBLING(kid)));
 	return;
@@ -10999,11 +10993,8 @@ Perl_find_lexical_cv(pTHX_ PADOFFSET off)
 		[off = PARENT_PAD_INDEX(name)];
     }
     assert(!PadnameIsOUR(name));
-    if (!PadnameIsSTATE(name) && SvMAGICAL(name)) {
-	MAGIC * mg = mg_find(name, PERL_MAGIC_proto);
-	assert(mg);
-	assert(mg->mg_obj);
-	return (CV *)mg->mg_obj;
+    if (!PadnameIsSTATE(name) && PadnamePROTOCV(name)) {
+	return PadnamePROTOCV(name);
     }
     return (CV *)AvARRAY(PadlistARRAY(CvPADLIST(compcv))[1])[off];
 }

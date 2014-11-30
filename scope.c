@@ -972,6 +972,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_FREESV:
 	    SvREFCNT_dec(ARG0_SV);
 	    break;
+	case SAVEt_FREEPADNAME:
+	    PadnameREFCNT_dec((PADNAME *)ARG0_PTR);
+	    break;
 	case SAVEt_FREECOPHH:
 	    cophh_free((COPHH *)ARG0_PTR);
 	    break;

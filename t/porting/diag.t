@@ -175,7 +175,8 @@ my %specialformats = (IVdf => 'd',
 		      UTF8f=> 's',
 		      SVf256=>'s',
 		      SVf32=> 's',
-		      SVf  => 's');
+		      SVf  => 's',
+		      PNf  => 's');
 my $format_modifiers = qr/ [#0\ +-]*              # optional flags
 			  (?: [1-9][0-9]* | \* )? # optional field width
 			  (?: \. \d* )?           # optional precision
@@ -243,6 +244,22 @@ sub check_file {
     if (m</\*\s*diag_listed_as: (.*?)\s*\*/>) {
       $listed_as = $1;
       $listed_as_line = $.+1;
+    }
+    elsif (m</\*\s*diag_listed_as: (.*?)\s*\z>) {
+      $listed_as = $1;
+      my $finished;
+      while (<$codefh>) {
+        if (m<\*/>) {
+          $listed_as .= $` =~ s/^\s*/ /r =~ s/\s+\z//r;
+          $listed_as_line = $.+1;
+          $finished = 1;
+          last;
+        }
+        else {
+          $listed_as .= s/^\s*/ /r =~ s/\s+\z//r;
+        }
+      }
+      if (!$finished) { $listed_as = undef }
     }
     next if /^#/;
 

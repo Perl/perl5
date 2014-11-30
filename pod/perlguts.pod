@@ -1168,7 +1168,6 @@ will be lost.
  #  PERL_MAGIC_arylen         vtbl_arylen    Array length ($#ary)
  %  PERL_MAGIC_rhash          (none)         Extra data for restricted
                                              hashes
- &  PERL_MAGIC_proto          (none)         my sub prototype CV
  *  PERL_MAGIC_debugvar       vtbl_debugvar  $DB::single, signal, trace
                                              vars
  .  PERL_MAGIC_pos            vtbl_pos       pos() lvalue

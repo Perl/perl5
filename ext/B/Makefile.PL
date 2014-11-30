@@ -15,7 +15,8 @@ if ($core) {
 }
 
 my @names = ({ name => 'HEf_SVKEY', macro => 1, type => "IV" },
-             qw(SVTYPEMASK SVt_PVGV SVt_PVHV PAD_FAKELEX_ANON PAD_FAKELEX_MULTI));
+             qw(SVTYPEMASK SVt_PVGV SVt_PVHV PAD_FAKELEX_ANON
+                PAD_FAKELEX_MULTI SVpad_STATE SVpad_TYPED SVpad_OUR));
 
 my @depend;
 
@@ -29,6 +30,7 @@ foreach my $tuple (['cop.h'],
                    ['op.h'],
                    ['opcode.h', 'OPp'],
                    ['op_reg_common.h','(?:(?:RXf_)?PMf_)'],
+                   ['pad.h','PADNAMEt_'],
                    ['regexp.h','RXf_'],
                    ['sv.h', 'SV(?:[fps]|pad)_'],
                   ) {

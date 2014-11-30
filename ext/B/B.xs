@@ -620,6 +620,9 @@ typedef struct refcounted_he	*B__RHE;
 #ifdef PadlistARRAY
 typedef PADLIST	*B__PADLIST;
 #endif
+typedef PADNAMELIST *B__PADNAMELIST;
+typedef PADNAME	*B__PADNAME;
+
 
 #ifdef MULTIPLICITY
 #  define ASSIGN_COMMON_ALIAS(prefix, var) \
@@ -1338,15 +1341,6 @@ MODULE = B	PACKAGE = B::IV
 #define IV_uvx_ix	sv_UVp | STRUCT_OFFSET(struct xpvuv, xuv_uv)
 #define NV_nvx_ix	sv_NVp | STRUCT_OFFSET(struct xpvnv, xnv_u.xnv_nv)
 
-#define NV_cop_seq_range_low_ix \
-			sv_U32p | STRUCT_OFFSET(struct xpvnv, xnv_u.xpad_cop_seq.xlow)
-#define NV_cop_seq_range_high_ix \
-			sv_U32p | STRUCT_OFFSET(struct xpvnv, xnv_u.xpad_cop_seq.xhigh)
-#define NV_parent_pad_index_ix \
-			sv_U32p | STRUCT_OFFSET(struct xpvnv, xnv_u.xpad_cop_seq.xlow)
-#define NV_parent_fakelex_flags_ix \
-			sv_U32p | STRUCT_OFFSET(struct xpvnv, xnv_u.xpad_cop_seq.xhigh)
-
 #define PV_cur_ix	sv_STRLENp | STRUCT_OFFSET(struct xpv, xpv_cur)
 #define PV_len_ix	sv_STRLENp | STRUCT_OFFSET(struct xpv, xpv_len)
 
@@ -1412,10 +1406,6 @@ IVX(sv)
 	B::IV::IVX = IV_ivx_ix
 	B::IV::UVX = IV_uvx_ix
 	B::NV::NVX = NV_nvx_ix
-	B::NV::COP_SEQ_RANGE_LOW = NV_cop_seq_range_low_ix
-	B::NV::COP_SEQ_RANGE_HIGH = NV_cop_seq_range_high_ix
-	B::NV::PARENT_PAD_INDEX = NV_parent_pad_index_ix
-	B::NV::PARENT_FAKELEX_FLAGS = NV_parent_fakelex_flags_ix
 	B::PV::CUR = PV_cur_ix
 	B::PV::LEN = PV_len_ix
 	B::PVMG::SvSTASH = PVMG_stash_ix
@@ -2059,15 +2049,31 @@ MODULE = B	PACKAGE = B::PADLIST	PREFIX = Padlist
 SSize_t
 PadlistMAX(padlist)
 	B::PADLIST	padlist
+    ALIAS: B::PADNAMELIST::MAX = 0
+    CODE:
+        PERL_UNUSED_VAR(ix);
+	RETVAL = PadlistMAX(padlist);
+    OUTPUT:
+	RETVAL
+
+B::PADNAMELIST
+PadlistNAMES(padlist)
+	B::PADLIST	padlist
 
 void
 PadlistARRAY(padlist)
 	B::PADLIST	padlist
     PPCODE:
 	if (PadlistMAX(padlist) >= 0) {
+	    dXSTARG;
 	    PAD **padp = PadlistARRAY(padlist);
             SSize_t i;
-	    for (i = 0; i <= PadlistMAX(padlist); i++)
+	    sv_setiv(newSVrv(TARG, PadlistNAMES(padlist)
+				    ? "B::PADNAMELIST"
+				    : "B::NULL"),
+		     PTR2IV(PadlistNAMES(padlist)));
+	    XPUSHTARG;
+	    for (i = 1; i <= PadlistMAX(padlist); i++)
 		XPUSHs(make_sv_object(aTHX_ (SV *)padp[i]));
 	}
 
@@ -2076,12 +2082,17 @@ PadlistARRAYelt(padlist, idx)
 	B::PADLIST	padlist
 	SSize_t 	idx
     PPCODE:
-	if (PadlistMAX(padlist) >= 0
-	 && idx <= PadlistMAX(padlist))
+	if (idx < 0 || idx > PadlistMAX(padlist))
+	    XPUSHs(make_sv_object(aTHX_ NULL));
+	else if (!idx) {
+	    PL_stack_sp--;
+	    PUSHMARK(PL_stack_sp-1);
+	    XS_B__PADLIST_NAMES(aTHX_ cv);
+	    return;
+	}
+	else
 	    XPUSHs(make_sv_object(aTHX_
 				  (SV *)PadlistARRAY(padlist)[idx]));
-	else
-	    XPUSHs(make_sv_object(aTHX_ NULL));
 
 U32
 PadlistREFCNT(padlist)
@@ -2093,3 +2104,124 @@ PadlistREFCNT(padlist)
 	RETVAL
 
 #endif
+
+MODULE = B	PACKAGE = B::PADNAMELIST	PREFIX = Padnamelist
+
+void
+PadnamelistARRAY(pnl)
+	B::PADNAMELIST	pnl
+    PPCODE:
+	if (PadnamelistMAX(pnl) >= 0) {
+	    PADNAME **padp = PadnamelistARRAY(pnl);
+            SSize_t i = 0;
+	    for (; i <= PadnamelistMAX(pnl); i++)
+	    {
+		SV *rv = sv_newmortal();
+		sv_setiv(newSVrv(rv,padp[i] ? "B::PADNAME" : "B::SPECIAL"),
+			 PTR2IV(padp[i]));
+		XPUSHs(rv);
+	    }
+	}
+
+B::PADNAME
+PadnamelistARRAYelt(pnl, idx)
+	B::PADNAMELIST	pnl
+	SSize_t 	idx
+    CODE:
+	if (idx < 0 || idx > PadnamelistMAX(pnl))
+	    RETVAL = NULL;
+	else
+	    RETVAL = PadnamelistARRAY(pnl)[idx];
+    OUTPUT:
+	RETVAL
+
+U32
+PadnamelistREFCNT(pnl)
+	B::PADNAMELIST	pnl
+
+MODULE = B	PACKAGE = B::PADNAME	PREFIX = Padname
+
+#define PN_type_ix \
+	sv_SVp | STRUCT_OFFSET(struct padname,xpadn_type_u.xpadn_typestash)
+#define PN_ourstash_ix \
+	sv_SVp | STRUCT_OFFSET(struct padname,xpadn_ourstash)
+#define PN_len_ix \
+	sv_U8p | STRUCT_OFFSET(struct padname,xpadn_len)
+#define PN_refcnt_ix \
+	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_refcnt)
+#define PN_cop_seq_range_low_ix \
+	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_low)
+#define PN_cop_seq_range_high_ix \
+	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_high)
+#define PN_parent_pad_index_ix \
+	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_low)
+#define PN_parent_fakelex_flags_ix \
+	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_high)
+
+void
+PadnameTYPE(pn)
+	B::PADNAME	pn
+    ALIAS:
+	B::PADNAME::TYPE	= PN_type_ix
+	B::PADNAME::OURSTASH	= PN_ourstash_ix
+	B::PADNAME::LEN		= PN_len_ix
+	B::PADNAME::REFCNT	= PN_refcnt_ix
+	B::PADNAME::COP_SEQ_RANGE_LOW	 = PN_cop_seq_range_low_ix
+	B::PADNAME::COP_SEQ_RANGE_HIGH	 = PN_cop_seq_range_high_ix
+	B::PADNAME::PARENT_PAD_INDEX	 = PN_parent_pad_index_ix
+	B::PADNAME::PARENT_FAKELEX_FLAGS = PN_parent_fakelex_flags_ix
+    PREINIT:
+	char *ptr;
+	SV *ret;
+    PPCODE:
+	ptr = (ix & 0xFFFF) + (char *)pn;
+	switch ((U8)(ix >> 16)) {
+	case (U8)(sv_SVp >> 16):
+	    ret = make_sv_object(aTHX_ *((SV **)ptr));
+	    break;
+	case (U8)(sv_U32p >> 16):
+	    ret = sv_2mortal(newSVuv(*((U32 *)ptr)));
+	    break;
+	case (U8)(sv_U8p >> 16):
+	    ret = sv_2mortal(newSVuv(*((U8 *)ptr)));
+	    break;
+	default:
+	    NOT_REACHED;
+	}
+	ST(0) = ret;
+	XSRETURN(1);
+
+SV *
+PadnamePV(pn)
+	B::PADNAME	pn
+    PREINIT:
+	dXSTARG;
+    PPCODE:
+	PERL_UNUSED_ARG(RETVAL);
+	sv_setpvn(TARG, PadnamePV(pn), PadnameLEN(pn));
+	SvUTF8_on(TARG);
+	XPUSHTARG;
+
+BOOT:
+{
+    /* Uses less memory than an ALIAS.  */
+    GV *gv = gv_fetchpvs("B::PADNAME::TYPE", 1, SVt_PVGV);
+    sv_setsv((SV *)gv_fetchpvs("B::PADNAME::SvSTASH",1,SVt_PVGV),(SV *)gv);
+    sv_setsv((SV *)gv_fetchpvs("B::PADNAME::PROTOCV",1,SVt_PVGV),(SV *)gv);
+    sv_setsv((SV *)gv_fetchpvs("B::PADNAME::PVX",1,SVt_PVGV),
+	     (SV *)gv_fetchpvs("B::PADNAME::PV" ,1,SVt_PVGV));
+}
+
+U32
+PadnameFLAGS(pn)
+	B::PADNAME	pn
+    CODE:
+	RETVAL = PadnameFLAGS(pn);
+	/* backward-compatibility hack, which should be removed if the
+	   flags field becomes large enough to hold SVf_FAKE (and
+	   PADNAMEt_OUTER should be renumbered to match SVf_FAKE) */
+	assert(SVf_FAKE >= 1<<(sizeof(PadnameFLAGS(pn)) * 8));
+	if (PadnameOUTER(pn))
+	    RETVAL |= SVf_FAKE;
+    OUTPUT:
+	RETVAL
