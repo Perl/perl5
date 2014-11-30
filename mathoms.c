@@ -24,6 +24,8 @@
  * versions of Perl.  For binary or source compatibility reasons, though,
  * we cannot completely remove them from the core code.  
  *
+ * REMEMBER to update makedef.pl when adding a function to mathoms.c!!!
+ *
  * SMP - Oct. 24, 2005
  *
  * The compilation of this file can be suppressed; see INSTALL

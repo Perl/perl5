@@ -516,6 +516,7 @@ if ($define{'NO_MATHOMS'}) {
 		    Perl_newIO
 		    Perl_newSUB
 		    Perl_pack_cat
+		    Perl_pad_compname_type
 		    Perl_printf_nocontext
 		    Perl_ref
 		    Perl_save_freeop
