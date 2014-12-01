@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 41;
+plan tests => 42;
 
 $^R = undef;
 like( 'a',  qr/^a(?{1})(?:b(?{2}))?/, 'a =~ ab?' );
@@ -98,3 +98,7 @@ cmp_ok( scalar(@var), '==', 0, '..still nothing pushed (package)' );
 
 @a = 1..3;
 like eval { qr/@a(?{})/ }, qr/1 2 3\(\?\{\}\)/, 'qr/@a(?{})/';
+
+# Not a code block, but looks a bit like one.  (Failed an assertion from
+# 5.17.1 to 5.21.6.)
+ok "(?{" =~ qr/\Q(?{/, 'qr/\Q(?{/';
