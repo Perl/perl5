@@ -9392,7 +9392,7 @@ Perl_newSVuv(pTHX_ const UV u)
     /* We're starting from SVt_FIRST, so provided that's
      * actual 0, we don't have to unset any SV type flags
      * to promote to SVt_IV. */
-    assert(SVt_FIRST == 0);
+    STATIC_ASSERT_STMT(SVt_FIRST == 0);
 
     SET_SVANY_FOR_BODYLESS_IV(sv);
     SvFLAGS(sv) |= SVt_IV;
@@ -9447,7 +9447,7 @@ Perl_newRV_noinc(pTHX_ SV *const tmpRef)
     /* We're starting from SVt_FIRST, so provided that's
      * actual 0, we don't have to unset any SV type flags
      * to promote to SVt_IV. */
-    assert(SVt_FIRST == 0);
+    STATIC_ASSERT_STMT(SVt_FIRST == 0);
 
     SET_SVANY_FOR_BODYLESS_IV(sv);
     SvFLAGS(sv) |= SVt_IV;
