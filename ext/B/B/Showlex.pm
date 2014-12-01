@@ -155,10 +155,10 @@ Traditional form:
 
  $ perl -MO=Showlex -e 'my ($i,$j,$k)=(1,"foo")'
  Pad of lexical names for comppadlist has 4 entries
- 0: SPECIAL #1 &PL_sv_undef
- 1: PVNV (0x9db0fb0) $i
- 2: PVNV (0x9db0f38) $j
- 3: PVNV (0x9db0f50) $k
+ 0: (0x8caea4) undef
+ 1: (0x9db0fb0) $i
+ 2: (0x9db0f38) $j
+ 3: (0x9db0f50) $k
  Pad of lexical values for comppadlist has 5 entries
  0: SPECIAL #1 &PL_sv_undef
  1: NULL (0x9da4234)
@@ -171,10 +171,10 @@ New-style form:
 
  $ perl -MO=Showlex,-newlex -e 'my ($i,$j,$k)=(1,"foo")'
  main Pad has 4 entries
- 0: SPECIAL #1 &PL_sv_undef
- 1: PVNV (0xa0c4fb8) "$i" = NULL (0xa0b8234)
- 2: PVNV (0xa0c4f40) "$j" = NULL (0xa0c4f34)
- 3: PVNV (0xa0c4f58) "$k" = NULL (0xa0c4f4c)
+ 0: (0x8caea4) undef
+ 1: (0xa0c4fb8) "$i" = NULL (0xa0b8234)
+ 2: (0xa0c4f40) "$j" = NULL (0xa0c4f34)
+ 3: (0xa0c4f58) "$k" = NULL (0xa0c4f4c)
  -e syntax OK
 
 New form, no specials, outside O framework:
@@ -182,9 +182,9 @@ New form, no specials, outside O framework:
  $ perl -MB::Showlex -e \
     'my ($i,$j,$k)=(1,"foo"); B::Showlex::compile(-newlex,-nosp)->()'
  main Pad has 4 entries
- 1: PVNV (0x998ffb0) "$i" = IV (0x9983234) 1
- 2: PVNV (0x998ff68) "$j" = PV (0x998ff5c) "foo"
- 3: PVNV (0x998ff80) "$k" = NULL (0x998ff74)
+ 1: (0x998ffb0) "$i" = IV (0x9983234) 1
+ 2: (0x998ff68) "$j" = PV (0x998ff5c) "foo"
+ 3: (0x998ff80) "$k" = NULL (0x998ff74)
 
 Note that this example shows the values of the lexicals, whereas the other
 examples did not (as they're compile-time only).
