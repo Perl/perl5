@@ -1055,6 +1055,7 @@ EOF
     my $one_field = defined $OPTS{fields} &&  keys(%{$OPTS{fields}}) == 1;
 
     if ($one_field) {
+        print "Results for field " . (keys(%{$OPTS{fields}}))[0] . ".\n";
 
         # The first column will now contain test names rather than
         # field names; Calculate the max width.
@@ -1115,8 +1116,12 @@ EOF
                 next;
             }
 
-            printf "%*s", $field_label_width,
-                        $one_field ? $test_name : $field;
+            if ($one_field) {
+                printf "%-*s", $field_label_width, $test_name;
+            }
+            else {
+                printf "%*s", $field_label_width, $field;
+            }
 
             for my $i (0..$#widths) {
                 my $res2 = $res1->{$perl_names[$i]};
