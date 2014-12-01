@@ -1967,7 +1967,19 @@ foreach my $ord (78, 163, 256) {
   SKIP: {
       skip 'No crypt function, skipping crypt tests', 4 if(!$Config{d_crypt});
       # 59998
-      sub cr { my $x = crypt($_[0], $_[1]); $x }
+      sub cr {
+          # On platforms implementing FIPS mode, using a weak algorithm
+          # (including the default triple-DES algorithm) causes crypt(3) to
+          # return a null pointer, which Perl converts into undef. We assume
+          # for now that all such platforms support glibc-style selection of
+          # a different hashing algorithm.
+          my $alg = '';       # Use default algorithm
+          if ( !defined(crypt("ab", "cd")) ) {
+              $alg = '$5$';   # Use SHA-256
+          }
+          my $x = crypt($_[0], $alg . $_[1]);
+          $x
+      }
       sub co { my $x = ~$_[0]; $x }
       my ($a, $b);
       $a = cr('hello', 'foo' . $TAINT);
