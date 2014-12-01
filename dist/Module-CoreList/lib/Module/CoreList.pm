@@ -6,6 +6,16 @@ use Module::CoreList::TieHashDelta;
 use version;
 $VERSION = '5.20150320';
 
+sub _released_order {   # Sort helper, to make '?' sort after everything else
+    (substr($released{$a}, 0, 1) eq "?")
+    ? ((substr($released{$b}, 0, 1) eq "?")
+        ? 0
+        : 1)
+    : ((substr($released{$b}, 0, 1) eq "?")
+        ? -1
+        : $released{$a} cmp $released{$b} )
+}
+
 my $dumpinc = 0;
 sub import {
     my $self = shift;
@@ -38,7 +48,7 @@ sub first_release_raw {
 sub first_release_by_date {
     my @perls = &first_release_raw;
     return unless @perls;
-    return (sort { $released{$a} cmp $released{$b} } @perls)[0];
+    return (sort _released_order @perls)[0];
 }
 
 sub first_release {
@@ -96,7 +106,7 @@ sub removed_from {
 }
 
 sub removed_from_by_date {
-  my @perls = sort { $released{$a} cmp $released{$b} } &removed_raw;
+  my @perls = sort _released_order &removed_raw;
   return shift @perls;
 }
 

@@ -15,6 +15,16 @@ sub utilities {
     return sort keys %{ $utilities{$perl} };
 }
 
+sub _released_order {   # Sort helper, to make '?' sort after everything else
+    (substr($Module::CoreList::released{$a}, 0, 1) eq "?")
+    ? ((substr($Module::CoreList::released{$b}, 0, 1) eq "?")
+        ? 0
+        : 1)
+    : ((substr($Module::CoreList::released{$b}, 0, 1) eq "?")
+        ? -1
+        : $Module::CoreList::released{$a} cmp $Module::CoreList::released{$b} )
+}
+
 sub first_release_raw {
     my $util = shift;
     $util = shift if eval { $util->isa(__PACKAGE__) };
@@ -32,7 +42,7 @@ sub first_release_raw {
 sub first_release_by_date {
     my @perls = &first_release_raw;
     return unless @perls;
-    return (sort { $Module::CoreList::released{$a} cmp $Module::CoreList::released{$b} } @perls)[0];
+    return (sort _released_order @perls)[0];
 }
 
 sub first_release {
@@ -47,7 +57,7 @@ sub removed_from {
 }
 
 sub removed_from_by_date {
-  my @perls = sort { $Module::CoreList::released{$a} cmp $Module::CoreList::released{$b} } &removed_raw;
+  my @perls = sort _released_order &removed_raw;
   return shift @perls;
 }
 
