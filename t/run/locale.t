@@ -283,7 +283,7 @@ EOF
 
     # within this block, STDERR is closed. This is because fresh_perl_is()
     # forks a shell, and some shells (like bash) can complain noisily when
-    #LC_ALL or similar is set to an invalid value
+    # LC_ALL or similar is set to an invalid value
 
     {
         open my $saved_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
