@@ -212,6 +212,7 @@ unzip(1)
 Version::Requirements
 wait(2)
 waitpid(3)
+Want
 wget(1)
 Win32::Locale
 XML::LibXML
