@@ -14208,7 +14208,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPPTR(nss,ix) = parser_dup((const yy_parser*)ptr, param);
 	    break;
 	case SAVEt_GP_ALIASED_SV: {
-	    GP * gp_ptr = POPPTR(ss,ix);
+	    GP * gp_ptr = (GP *)POPPTR(ss,ix);
 	    GP * new_gp_ptr = gp_dup(gp_ptr, param);
 	    TOPPTR(nss,ix) = new_gp_ptr;
 	    new_gp_ptr->gp_refcnt++;
