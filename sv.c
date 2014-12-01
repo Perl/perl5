@@ -14207,11 +14207,13 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = parser_dup((const yy_parser*)ptr, param);
 	    break;
-        case SAVEt_GP_ALIASED_SV:
-	    ptr = POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = gp_dup((GP *)ptr, param);
-	    ((GP *)ptr)->gp_refcnt++;
+	case SAVEt_GP_ALIASED_SV: {
+	    GP * gp_ptr = POPPTR(ss,ix);
+	    GP * new_gp_ptr = gp_dup(gp_ptr, param);
+	    TOPPTR(nss,ix) = new_gp_ptr;
+	    new_gp_ptr->gp_refcnt++;
 	    break;
+	}
 	default:
 	    Perl_croak(aTHX_
 		       "panic: ss_dup inconsistency (%"IVdf")", (IV) type);
