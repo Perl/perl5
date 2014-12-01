@@ -3,7 +3,7 @@ Locale::Codes::LangExt_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Fri Aug 22 15:31:59 EDT 2014
+#    Generated on: Mon Nov 24 13:36:44 GMT 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.32';
+$VERSION='3.33';
 
 $Locale::Codes::Data{'langext'}{'id'} = '0229';
 
@@ -698,6 +698,7 @@ $Locale::Codes::Data{'langext'}{'id2names'} = {
       ],
    q(0223) => [
       q(Yue Chinese),
+      q(Cantonese),
       ],
    q(0224) => [
       q(Zimbabwe Sign Language),
@@ -828,6 +829,10 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
    q(bulgarian sign language) => [
       q(0041),
       q(0),
+      ],
+   q(cantonese) => [
+      q(0223),
+      q(1),
       ],
    q(catalan sign language) => [
       q(0054),

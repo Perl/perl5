@@ -3,7 +3,7 @@ Locale::Codes::Script_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Tue Aug 26 11:38:09 EDT 2014
+#    Generated on: Mon Nov 24 13:38:10 GMT 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.32';
+$VERSION='3.33';
 
 $Locale::Codes::Retired{'script'}{'alpha'}{'code'} = {
 };
@@ -61,6 +61,7 @@ $Locale::Codes::Retired{'script'}{'alpha'}{'name'} = {
 };
 
 $Locale::Codes::Retired{'script'}{'num'}{'name'} = {
+   q( multani) => [ q(323), q( Multani) ],
    q(mende) => [ q(438), q(Mende) ],
    q(old hungarian) => [ q(176), q(Old Hungarian) ],
    q(tiruta) => [ q(326), q(Tiruta) ],

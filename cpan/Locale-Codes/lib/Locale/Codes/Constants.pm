@@ -17,7 +17,7 @@ require Exporter;
 our($VERSION,@ISA,@EXPORT);
 our(%ALL_CODESETS);
 
-$VERSION='3.32';
+$VERSION='3.33';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(LOCALE_CODE_ALPHA_2
               LOCALE_CODE_ALPHA_3
