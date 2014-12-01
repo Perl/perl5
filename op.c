@@ -4930,8 +4930,17 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		 * were wrong (e.g. /[(?{}]/ ). Throw away the PL_compcv
 		 * that isn't required now. Note that we have to be pretty
 		 * confident that nothing used that CV's pad while the
-		 * regex was parsed */
-		assert(AvFILLp(PL_comppad) == 0); /* just @_ */
+		 * regex was parsed, except maybe op targets for \Q etc.
+		 * If there were any op targets, though, they should have
+		 * been stolen by constant folding.
+		 */
+#ifdef DEBUGGING
+		PADOFFSET i = 0;
+		assert(PadnamelistMAXNAMED(PL_comppad_name) == 0);
+		while (++i <= AvFILLp(PL_comppad)) {
+		    assert(!PL_curpad[i]);
+		}
+#endif
 		/* But we know that one op is using this CV's slab. */
 		cv_forget_slab(PL_compcv);
 		LEAVE_SCOPE(floor);
