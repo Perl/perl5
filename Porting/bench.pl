@@ -457,7 +457,6 @@ sub select_a_perl {
 
 
 # Validate the list of perl=label on the command line.
-# Also validate $OPTS{norm}, $OPTS{sort};
 # Return a list of [ exe, label ] pairs.
 
 sub process_perls {
@@ -469,15 +468,9 @@ sub process_perls {
         die "Error: unable to execute '$perl': $r" if $r ne "ok\n";
         push @results, [ $perl, $label ];
     }
-
-    $OPTS{norm} = select_a_perl($OPTS{norm}, \@results, "--norm");
-    if (defined $OPTS{'sort-perl'}) {
-        $OPTS{'sort-perl'} =
-                select_a_perl($OPTS{'sort-perl'}, \@results, "--sort");
-    }
-
     return @results;
 }
+
 
 
 # Return a string containing perl test code wrapped in a loop
@@ -600,7 +593,18 @@ sub do_grind {
             if defined $OPTS{bisect} and keys %$tests != 1;
 
         $perls = [ process_perls(@$perl_args) ];
+
+
         $results = grind_run($tests, $perls, $loop_counts);
+    }
+
+    # now that we have a list of perls, use it to process the
+    # 'perl' component of the --norm and --sort args
+
+    $OPTS{norm} = select_a_perl($OPTS{norm}, $perls, "--norm");
+    if (defined $OPTS{'sort-perl'}) {
+        $OPTS{'sort-perl'} =
+                select_a_perl($OPTS{'sort-perl'}, $perls, "--sort");
     }
 
     if (defined $OPTS{write}) {
