@@ -5396,7 +5396,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		 * been stolen by constant folding.
 		 */
 #ifdef DEBUGGING
-		PADOFFSET i = 0;
+		SSize_t i = 0;
 		assert(PadnamelistMAXNAMED(PL_comppad_name) == 0);
 		while (++i <= AvFILLp(PL_comppad)) {
 		    assert(!PL_curpad[i]);
