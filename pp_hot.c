@@ -3083,6 +3083,18 @@ PP(pp_method)
     RETURN;
 }
 
+#define METHOD_CHECK_CACHE(stash,cache,meth) 				\
+    const HE* const he = hv_fetch_ent(cache, meth, 0, 0);		\
+    if (he) {								\
+        gv = MUTABLE_GV(HeVAL(he));					\
+        if (isGV(gv) && GvCV(gv) && (!GvCVGEN(gv) || GvCVGEN(gv)	\
+             == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))	\
+        {								\
+            XPUSHs(MUTABLE_SV(GvCV(gv)));				\
+            RETURN;							\
+        }								\
+    }									\
+
 PP(pp_method_named)
 {
     dSP;
@@ -3091,17 +3103,7 @@ PP(pp_method_named)
     HV* const stash = opmethod_stash(meth);
 
     if (LIKELY(SvTYPE(stash) == SVt_PVHV)) {
-        const HE* const he = hv_fetch_ent(stash, meth, 0, 0);
-        if (he) {
-            gv = MUTABLE_GV(HeVAL(he));
-            if (isGV(gv) && GvCV(gv) &&
-                (!GvCVGEN(gv) || GvCVGEN(gv)
-                  == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))
-            {
-                XPUSHs(MUTABLE_SV(GvCV(gv)));
-                RETURN;
-            }
-        }
+        METHOD_CHECK_CACHE(stash, stash, meth);
     }
 
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
@@ -3124,17 +3126,46 @@ PP(pp_method_super)
     opmethod_stash(meth);
 
     if ((cache = HvMROMETA(stash)->super)) {
-        const HE* const he = hv_fetch_ent(cache, meth, 0, 0);
-        if (he) {
-            gv = MUTABLE_GV(HeVAL(he));
-            if (isGV(gv) && GvCV(gv) &&
-                (!GvCVGEN(gv) || GvCVGEN(gv)
-                  == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))
-            {
-                XPUSHs(MUTABLE_SV(GvCV(gv)));
-                RETURN;
-            }
-        }
+        METHOD_CHECK_CACHE(stash, cache, meth);
+    }
+
+    gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK|GV_SUPER);
+    assert(gv);
+
+    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    RETURN;
+}
+
+PP(pp_method_redir)
+{
+    dSP;
+    GV* gv;
+    SV* const meth = cMETHOPx_meth(PL_op);
+    HV* stash = gv_stashsv(cMETHOPx_rclass(PL_op), 0);
+    opmethod_stash(meth); /* not used but needed for error checks */
+
+    if (stash) { METHOD_CHECK_CACHE(stash, stash, meth); }
+    else stash = MUTABLE_HV(cMETHOPx_rclass(PL_op));
+
+    gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
+    assert(gv);
+
+    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    RETURN;
+}
+
+PP(pp_method_redir_super)
+{
+    dSP;
+    GV* gv;
+    HV* cache;
+    SV* const meth = cMETHOPx_meth(PL_op);
+    HV* stash = gv_stashsv(cMETHOPx_rclass(PL_op), 0);
+    opmethod_stash(meth); /* not used but needed for error checks */
+
+    if (UNLIKELY(!stash)) stash = MUTABLE_HV(cMETHOPx_rclass(PL_op));
+    else if ((cache = HvMROMETA(stash)->super)) {
+         METHOD_CHECK_CACHE(stash, cache, meth);
     }
 
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK|GV_SUPER);

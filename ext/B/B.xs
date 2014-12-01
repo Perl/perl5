@@ -751,6 +751,11 @@ struct OP_methods {
   { STR_WITH_LEN("first"),   op_offset_special, 0,                     },/*53*/
   { STR_WITH_LEN("meth_sv"), op_offset_special, 0,                     },/*54*/
   { STR_WITH_LEN("pmregexp"),op_offset_special, 0,                     },/*55*/
+#  ifdef USE_ITHREADS
+  { STR_WITH_LEN("rclass"),  op_offset_special, 0,                     },/*56*/
+#  else
+  { STR_WITH_LEN("rclass"),  op_offset_special, 0,                     },/*56*/
+#  endif
 #endif
 };
 
@@ -1032,6 +1037,7 @@ next(o)
 	B::METHOP::first     = 53
 	B::METHOP::meth_sv   = 54
 	B::PMOP::pmregexp    = 55
+	B::METHOP::rclass    = 56
     PREINIT:
 	SV *ret;
     PPCODE:
@@ -1249,6 +1255,21 @@ next(o)
 		break;
 	    case 55: /* B::PMOP::pmregexp */
 		ret = make_sv_object(aTHX_ (SV *)PM_GETRE(cPMOPo));
+		break;
+	    case 56: /* B::METHOP::rclass */
+#ifdef USE_ITHREADS
+		ret = sv_2mortal(newSVuv(
+		    (o->op_type == OP_METHOD_REDIR ||
+		     o->op_type == OP_METHOD_REDIR_SUPER) ?
+		      cMETHOPx(o)->op_rclass_targ : 0
+		));
+#else
+		ret = make_sv_object(aTHX_
+		    (o->op_type == OP_METHOD_REDIR ||
+		     o->op_type == OP_METHOD_REDIR_SUPER) ?
+		      cMETHOPx(o)->op_rclass_sv : NULL
+		);
+#endif
 		break;
 	    default:
 		croak("method %s not implemented", op_methods[ix].name);

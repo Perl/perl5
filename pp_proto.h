@@ -152,6 +152,8 @@ PERL_CALLCONV OP *Perl_pp_mapwhile(pTHX);
 PERL_CALLCONV OP *Perl_pp_match(pTHX);
 PERL_CALLCONV OP *Perl_pp_method(pTHX);
 PERL_CALLCONV OP *Perl_pp_method_named(pTHX);
+PERL_CALLCONV OP *Perl_pp_method_redir(pTHX);
+PERL_CALLCONV OP *Perl_pp_method_redir_super(pTHX);
 PERL_CALLCONV OP *Perl_pp_method_super(pTHX);
 PERL_CALLCONV OP *Perl_pp_mkdir(pTHX);
 PERL_CALLCONV OP *Perl_pp_modulo(pTHX);

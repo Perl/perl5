@@ -3946,6 +3946,11 @@ sub _method {
 	$meth = $self->meth_sv($meth)->PV;
     } elsif ($meth->name eq "method_super") {
 	$meth = "SUPER::".$self->meth_sv($meth)->PV;
+    } elsif ($meth->name eq "method_redir") {
+        $meth = $self->meth_rclass_sv($meth)->PV.'::'.$self->meth_sv($meth)->PV;
+    } elsif ($meth->name eq "method_redir_super") {
+        $meth = $self->meth_rclass_sv($meth)->PV.'::SUPER::'.
+                $self->meth_sv($meth)->PV;
     } else {
 	$meth = $meth->first;
 	if ($meth->name eq "const") {
@@ -4583,6 +4588,15 @@ sub meth_sv {
     my $sv = $op->meth_sv;
     # the constant could be in the pad (under useithreads)
     $sv = $self->padval($op->targ) unless $$sv;
+    return $sv;
+}
+
+sub meth_rclass_sv {
+    my $self = shift;
+    my $op = shift;
+    my $sv = $op->rclass;
+    # the constant could be in the pad (under useithreads)
+    $sv = $self->padval($sv) unless ref $sv;
     return $sv;
 }
 

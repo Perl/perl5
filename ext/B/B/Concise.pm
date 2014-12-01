@@ -898,12 +898,19 @@ sub concise_op {
 	}
     }
     elsif ($h{class} eq "METHOP") {
+        my $prefix = '';
+        if ($h{name} eq 'method_redir' or $h{name} eq 'method_redir_super') {
+            my $rclass_sv = $op->rclass;
+            $rclass_sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$rclass_sv]
+                unless ref $rclass_sv;
+            $prefix .= 'PACKAGE "'.$rclass_sv->PV.'", ';
+        }
         if ($h{name} ne "method") {
             if (${$op->meth_sv}) {
-                $h{arg} = "(" . concise_sv($op->meth_sv, \%h, 1) . ")";
+                $h{arg} = "($prefix" . concise_sv($op->meth_sv, \%h, 1) . ")";
             } else {
                 my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$op->targ];
-                $h{arg} = "[" . concise_sv($sv, \%h, 1) . "]";
+                $h{arg} = "[$prefix" . concise_sv($sv, \%h, 1) . "]";
                 $h{targarglife} = $h{targarg} = "";
             }
         }

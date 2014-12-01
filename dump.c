@@ -956,6 +956,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_HINTSEVAL:
     case OP_METHOD_NAMED:
     case OP_METHOD_SUPER:
+    case OP_METHOD_REDIR:
+    case OP_METHOD_REDIR_SUPER:
 #ifndef USE_ITHREADS
 	/* with ITHREADS, consts are stored in the pad, and the right pad
 	 * may not be active here, so skip */

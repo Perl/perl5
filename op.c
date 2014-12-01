@@ -852,6 +852,17 @@ Perl_op_clear(pTHX_ OP *o)
 	    }
 	}
 	break;
+    case OP_METHOD_REDIR:
+    case OP_METHOD_REDIR_SUPER:
+#ifdef USE_ITHREADS
+	if (cMETHOPx(o)->op_rclass_targ) {
+	    pad_swipe(cMETHOPx(o)->op_rclass_targ, 1);
+	    cMETHOPx(o)->op_rclass_targ = 0;
+	}
+#else
+	SvREFCNT_dec(cMETHOPx(o)->op_rclass_sv);
+	cMETHOPx(o)->op_rclass_sv = NULL;
+#endif
     case OP_METHOD_NAMED:
     case OP_METHOD_SUPER:
         SvREFCNT_dec(cMETHOPx(o)->op_u.op_meth_sv);
@@ -2234,6 +2245,8 @@ S_finalize_op(pTHX_ OP* o)
     /* Relocate all the METHOP's SVs to the pad for thread safety. */
     case OP_METHOD_NAMED:
     case OP_METHOD_SUPER:
+    case OP_METHOD_REDIR:
+    case OP_METHOD_REDIR_SUPER:
         op_relocate_sv(&cMETHOPx(o)->op_u.op_meth_sv, &o->op_targ);
         break;
 #endif
@@ -4691,6 +4704,12 @@ S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth
         methop->op_private = (U8)(0 | (flags >> 8));
         methop->op_next = (OP*)methop;
     }
+
+#ifdef USE_ITHREADS
+    methop->op_rclass_targ = 0;
+#else
+    methop->op_rclass_sv = NULL;
+#endif
 
     CHANGE_TYPE(methop, type);
     methop = (METHOP*) CHECKOP(type, methop);
@@ -10307,11 +10326,12 @@ Perl_ck_match(pTHX_ OP *o)
 OP *
 Perl_ck_method(pTHX_ OP *o)
 {
-    SV *sv, *methsv;
+    SV *sv, *methsv, *rclass;
     const char* method;
     char* compatptr;
     int utf8;
     STRLEN len, nsplit = 0, i;
+    OP* new_op;
     OP * const kid = cUNOPo->op_first;
 
     PERL_ARGS_ASSERT_CK_METHOD;
@@ -10346,7 +10366,21 @@ Perl_ck_method(pTHX_ OP *o)
         return newMETHOP_named(OP_METHOD_SUPER, 0, methsv);
     }
 
-    return o;
+    /* $proto->MyClass::method() and $proto->MyClass::SUPER::method() */
+    if (nsplit >= 9 && strnEQ(method+nsplit-9, "::SUPER::", 9)) {
+        rclass = newSVpvn_share(method, utf8*(nsplit-9), 0);
+        new_op = newMETHOP_named(OP_METHOD_REDIR_SUPER, 0, methsv);
+    } else {
+        rclass = newSVpvn_share(method, utf8*(nsplit-2), 0);
+        new_op = newMETHOP_named(OP_METHOD_REDIR, 0, methsv);
+    }
+#ifdef USE_ITHREADS
+    op_relocate_sv(&rclass, &cMETHOPx(new_op)->op_rclass_targ);
+#else
+    cMETHOPx(new_op)->op_rclass_sv = rclass;
+#endif
+    op_free(o);
+    return new_op;
 }
 
 OP *
@@ -11644,6 +11678,8 @@ Perl_ck_subr(pTHX_ OP *o)
 	case OP_METHOD:
 	case OP_METHOD_NAMED:
 	case OP_METHOD_SUPER:
+	case OP_METHOD_REDIR:
+	case OP_METHOD_REDIR_SUPER:
 	    if (aop->op_type == OP_CONST) {
 		aop->op_private &= ~OPpCONST_STRICT;
 		const_class = &cSVOPx(aop)->op_sv;
