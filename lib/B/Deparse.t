@@ -76,6 +76,7 @@ $deparse->ambient_pragmas (
 );
 EOC
 
+    local $::TODO = $meta{todo};
     if ($@) {
 	is($@, "", "compilation of $desc");
     }
@@ -86,7 +87,6 @@ EOC
 	$regex =~ s/\s+/\\s+/g;
 	$regex = '^\{\s*' . $regex . '\s*\}$';
 
-	local $::TODO = $meta{todo};
         like($deparsed, qr/$regex/, $desc);
     }
 }
@@ -1143,6 +1143,50 @@ print /a/u, s/b/c/u;
 ####
 # [perl #119807] s//\(3)/ge should not warn when deparsed (\3 warns)
 s/foo/\(3);/eg;
+####
+# [perl #115256]
+# TODO ODOT #
+"" =~ /a(?{ print q|
+|})/;
+>>>>
+"" =~ /a(?{ print "\n"; })/;
+####
+# [perl #123217]
+# TODO ODOT #
+$_ = qr/(??{<<END})/
+f.o
+b.r
+END
+>>>>
+$_ = qr/(??{ "f.o\nb.r\n"; })/;
+####
+# More regexp code block madness
+# TODO ODOT #
+my($b, @a);
+/(?{ die $b; })/;
+/a(?{ die $b; })a/;
+/$a(?{ die $b; })/;
+/@a(?{ die $b; })/;
+/(??{ die $b; })/;
+/a(??{ die $b; })a/;
+/$a(??{ die $b; })/;
+/@a(??{ die $b; })/;
+qr/(?{ die $b; })/;
+qr/a(?{ die $b; })a/;
+qr/$a(?{ die $b; })/;
+qr/@a(?{ die $b; })/;
+qr/(??{ die $b; })/;
+qr/a(??{ die $b; })a/;
+qr/$a(??{ die $b; })/;
+qr/@a(??{ die $b; })/;
+s/(?{ die $b; })//;
+s/a(?{ die $b; })a//;
+s/$a(?{ die $b; })//;
+s/@a(?{ die $b; })//;
+s/(??{ die $b; })//;
+s/a(??{ die $b; })a//;
+s/$a(??{ die $b; })//;
+s/@a(??{ die $b; })//;
 ####
 # y///r
 tr/a/b/r + $a =~ tr/p/q/r;

@@ -4,7 +4,7 @@
 # publicise an API for subclassing B::Deparse they can prevent us from
 # gratuitously breaking conventions that CPAN modules already use.
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 use B::Deparse;
 
@@ -13,6 +13,13 @@ package B::Deparse::NameMangler {
   sub padname { SUPER::padname{@_} . '_groovy' }
 }
 
-like 'B::Deparse::NameMangler'->new->coderef2text(sub { my($a, $b, $c) }),
+my $nm = 'B::Deparse::NameMangler'->new;
+
+like  $nm->coderef2text(sub { my($a, $b, $c) }),
       qr/\$a_groovy, \$b_groovy, \$c_groovy/,
      'overriding padname works for renaming lexicals';
+
+$TODO = TODO;
+like  $nm->coderef2text(sub { my $c; /(??{ $c })/; }),
+      qr/\Q(??{\E \$c_groovy/,
+     'overriding padname works for renaming lexicals in regexp blocks';
