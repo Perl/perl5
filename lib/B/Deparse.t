@@ -1098,6 +1098,10 @@ print /$s[1]/;
 # /$#a/
 print /$#main::a/;
 ####
+# $lexical =~ //
+my $x;
+$x =~ //;
+####
 # [perl #91318] /regexp/applaud
 print /a/a, s/b/c/a;
 print /a/aa, s/b/c/aa;

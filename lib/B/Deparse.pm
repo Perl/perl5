@@ -5122,7 +5122,8 @@ sub matchop {
 	$var = $self->deparse($kid, 20);
 	$kid = $kid->sibling;
     }
-    elsif ($name eq 'match' and my $targ = $op->targ) {
+           # not $name; $name will be 'm' for both match and split
+    elsif ($op->name eq 'match' and my $targ = $op->targ) {
 	$binop = 1;
 	$var = $self->padname($targ);
     }
