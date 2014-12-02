@@ -11,7 +11,7 @@ use 5.006;
 
 use strict;
 use warnings;
-our $VERSION = '7.02';
+our $VERSION = '7.04';
 
 use ExtUtils::MakeMaker::Config;
 use Cwd 'cwd';
@@ -511,7 +511,6 @@ sub _vms_ext {
         'Xm'     => 'DECW$XMLIBSHR',
         'Xmu'    => 'DECW$XMULIBSHR'
     );
-    if ( $Config{'vms_cc_type'} ne 'decc' ) { $libmap{'curses'} = 'VAXCCURSE'; }
 
     warn "Potential libraries are '$potential_libs'\n" if $verbose;
 
@@ -537,7 +536,7 @@ sub _vms_ext {
         }
         warn "Resolving directory $dir\n" if $verbose;
         if ( File::Spec->file_name_is_absolute( $dir ) ) {
-            $dir = $self->fixpath( $dir, 1 );
+            $dir = VMS::Filespec::vmspath( $dir );
         }
         else {
             $dir = $self->catdir( $cwd, $dir );
@@ -621,9 +620,7 @@ sub _vms_ext {
             }
             if ( $ctype ) {
 
-                # This has to precede any other CRTLs, so just make it first
-                if ( $cand eq 'VAXCCURSE' ) { unshift @{ $found{$ctype} }, $cand; }
-                else                        { push @{ $found{$ctype} }, $cand; }
+                push @{ $found{$ctype} }, $cand;
                 warn "\tFound as $cand (really $fullname), type $ctype\n"
                   if $verbose > 1;
                 push @flibs, $name unless $libs_seen{$fullname}++;
@@ -639,6 +636,7 @@ sub _vms_ext {
     my $lib = join( ' ', @fndlibs );
 
     $ldlib = $crtlstr ? "$lib $crtlstr" : $lib;
+    $ldlib =~ s/^\s+|\s+$//g;
     warn "Result:\n\tEXTRALIBS: $lib\n\tLDLOADLIBS: $ldlib\n" if $verbose;
     wantarray ? ( $lib, '', $ldlib, '', ( $give_libs ? \@flibs : () ) ) : $lib;
 }

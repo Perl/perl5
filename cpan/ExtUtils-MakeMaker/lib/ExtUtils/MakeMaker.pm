@@ -7,7 +7,7 @@ BEGIN {require 5.006;}
 
 require Exporter;
 use ExtUtils::MakeMaker::Config;
-use ExtUtils::MakeMaker::version; # ensure we always have or fake version.pm
+use ExtUtils::MakeMaker::version; # ensure we always have our fake version.pm
 use Carp;
 use File::Path;
 my $CAN_DECODE = eval { require ExtUtils::MakeMaker::Locale; }; # 2 birds, 1 stone
@@ -24,7 +24,7 @@ my %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.02';
+our $VERSION = '7.04';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -2169,7 +2169,8 @@ linkext below).
 
 =item MAGICXS
 
-When this is set to C<1>, C<OBJECT> will be automagically derived from C<XS>.
+When this is set to C<1>, C<OBJECT> will be automagically derived from
+C<O_FILES>.
 
 =item MAKE
 
