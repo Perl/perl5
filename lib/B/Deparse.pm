@@ -5135,7 +5135,7 @@ sub matchop {
 	if ($extended) {
 	    $re = re_uninterp_extended(escape_extended_re($unbacked));
 	} else {
-	    $re = re_uninterp(escape_str(re_unback($op->precomp)));
+	    $re = re_uninterp(escape_str($unbacked));
 	}
     } elsif ($kid->name ne 'regcomp') {
 	carp("found ".$kid->name." where regcomp expected");
