@@ -5043,6 +5043,43 @@ sub pure_string {
     return 1;
 }
 
+sub code_list {
+    my ($self,$op,$extended,$cv) = @_;
+
+    # localise stuff relating to the current sub
+    $cv and
+	local($self->{'curcv'}) = $cv,
+	local($self->{'curcvlex'}),
+	local(@$self{qw'curstash warnings hints hinthash curcop'})
+	    = @$self{qw'curstash warnings hints hinthash curcop'};
+
+    my $re;
+    for (; !null($op); $op = $op->sibling) {
+	my $name = $op->name;
+	if ($name eq 'const') {
+	    my $const = re_unback($self->const_sv($op)->PV);
+	    $re .= $extended
+		? re_uninterp_extended(escape_extended_re($const))
+		: re_uninterp         (escape_str        ($const));
+	}
+	else {
+	    my $scope = $op->first;
+	    # 0 context (last arg to scopeop) means statement context, so
+	    # the contents of the block will not be wrapped in do{...}.
+	    my $block = scopeop($scope->first->name eq "enter", $self,
+				$scope, 0);
+	    # next op is the source code of the block
+	    $op = $op->sibling;
+	    $re .= ($self->const_sv($op)->PV =~ m|^(\(\?\??\{)|)[0];
+	    my $multiline = $block =~ /\n/;
+	    $re .= $multiline ? "\n\t" : ' ';
+	    $re .= $block;
+	    $re .= $multiline ? "\n\b})" : " })";
+	}
+    }
+    $re;
+}
+
 sub regcomp {
     my $self = shift;
     my($op, $cx, $extended) = @_;
@@ -5132,12 +5169,26 @@ sub matchop {
     my $extended = ($pmflags & PMf_EXTENDED);
     my $rhs_bound_to_defsv;
     if (null $kid) {
+      # Check for code blocks
+      my $cv = $op->pmregexp->qr_anoncv;
+      if ($$cv) {
+	# For debugging:
+	#   ./perl -Ilib -MB -e 'use O "Concise", B::svref_2object(sub {qr/(?{die})/})->ROOT->first->first->sibling->pmregexp->qr_anoncv->object_2svref'
+	# find the first op in the regexp code list
+	my $patop = $cv->ROOT      # leavesub
+		       ->first     #   qr
+		       ->code_list #     list
+		       ->first     #       pushmark
+		       ->sibling;  #       ...
+	$re = $self->code_list($patop, $extended, $cv);
+      } else {
 	my $unbacked = re_unback($op->precomp);
 	if ($extended) {
 	    $re = re_uninterp_extended(escape_extended_re($unbacked));
 	} else {
 	    $re = re_uninterp(escape_str($unbacked));
 	}
+      }
     } elsif ($kid->name ne 'regcomp') {
 	carp("found ".$kid->name." where regcomp expected");
     } else {
