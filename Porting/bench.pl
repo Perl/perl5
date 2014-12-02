@@ -14,7 +14,7 @@ perls.
     # Basic: run the tests in t/perf/benchmarks against two or
     # more perls
 
-    bench.pl [options] perl1=[label1] perl2[=label2] ...
+    bench.pl [options] perl1[=label1] perl2[=label2] ...
 
     # Run bench.pl's own built-in sanity tests
 
