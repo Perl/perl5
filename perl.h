@@ -3510,10 +3510,11 @@ typedef pthread_key_t	perl_key;
 /* placeholder */
 #endif
 
-#if defined(static_assert) || (defined(__cplusplus) && __cplusplus >= 201103L)
+#if (defined(static_assert) || (defined(__cplusplus) && __cplusplus >= 201103L)) && (!defined(__IBMC__) || __IBMC__ >= 1210)
 /* static_assert is a macro defined in <assert.h> in C11 or a compiler
    builtin in C++11.
 */
+/* IBM XL C V11 does not support _Static_assert, no matter what <assert.h> says */
 #  define STATIC_ASSERT_GLOBAL(COND) static_assert(COND, #COND)
 #else
 /* We use a bit-field instead of an array because gcc accepts
