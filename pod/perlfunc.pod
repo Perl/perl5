@@ -4367,7 +4367,8 @@ existing variable: a package variable of the same name.
 
 This means that when C<use strict 'vars'> is in effect, C<our> lets you use
 a package variable without qualifying it with the package name, but only within
-the lexical scope of the C<our> declaration.
+the lexical scope of the C<our> declaration. This applies immediately--even
+within the same statement.
 
     package Foo;
     use strict;
@@ -4392,6 +4393,16 @@ package variables spring into existence when first used.
     our $foo = 23;   # just like $Foo::foo = 23
 
     print $Foo::foo; # prints 23
+
+Because the variable becomes legal immediately under C<use strict 'vars'>, so
+long as there is no variable with that name is already in scope, you can then
+reference the package variable again even within the same statement.
+
+    package Foo;
+    use strict;
+
+    my  $foo = $foo; # error, undeclared $foo on right-hand side
+    our $foo = $foo; # no errors
 
 If more than one variable is listed, the list must be placed
 in parentheses.
