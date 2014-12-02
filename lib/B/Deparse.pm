@@ -1099,7 +1099,7 @@ sub pad_subs {
     for my $ix (0.. $#names) { for $_ ($names[$ix]) {
 	next if class($_) eq "SPECIAL";
 	my $name = $_->PVX;
-	if ($name =~ /^&./) {
+	if (defined $name && $name =~ /^&./) {
 	    my $low = $_->COP_SEQ_RANGE_LOW;
 	    my $flags = $_->FLAGS;
 	    if ($flags & SVpad_OUR) {
@@ -1707,6 +1707,7 @@ sub populate_curcvlex {
 		next;
 	    }
             my $name = $ns[$i]->PVX;
+	    next unless defined $name;
 	    my ($seq_st, $seq_en) =
 		($ns[$i]->FLAGS & SVf_FAKE)
 		    ? (0, 999999)
