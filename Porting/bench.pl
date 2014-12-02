@@ -205,6 +205,7 @@ use strict;
 use Getopt::Long qw(:config no_auto_abbrev);
 use IPC::Open2 ();
 use IO::Select;
+use IO::File;
 use POSIX ":sys_wait_h";
 
 # The version of the file format used to save data. We refuse to process
