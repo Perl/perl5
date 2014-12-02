@@ -63,7 +63,7 @@ while (<DATA>) {
 	    new B::Deparse split /,/, $meta{options}
 	: $deparse;
 
-    my $coderef = eval "$meta{context};\n" . <<'EOC' . "sub {$input}";
+    my $coderef = eval "$meta{context};\n" . <<'EOC' . "sub {$input\n}";
 # Tell B::Deparse about our ambient pragmas
 my ($hint_bits, $warning_bits, $hinthash);
 BEGIN {
@@ -1152,7 +1152,6 @@ s/foo/\(3);/eg;
 "" =~ /a(?{ print "\n"; })/;
 ####
 # [perl #123217]
-# TODO ODOT #
 $_ = qr/(??{<<END})/
 f.o
 b.r
