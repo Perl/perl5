@@ -53,7 +53,7 @@ struct padnamelist {
 #endif
 
 #if !defined(PERL_PADNAME_MINIMAL) && !defined(PERL_PADNAME_ALIGNED)
-#  define PERL_PADNAME_ALIGNED
+#  define PERL_PADNAME_MINIMAL
 #endif
 
 #define _PADNAME_BASE \
