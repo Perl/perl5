@@ -108,6 +108,8 @@ my $obj = B::svref_2object($r);
 my $regexp =  ($] < 5.011) ? $obj->MAGIC : $obj;
 ok($regexp->precomp() eq 'foo', 'Get string from qr//');
 like($regexp->REGEX(), qr/\d+/, "REGEX() returns numeric value");
+is B::svref_2object(qr/(?{time})/)->qr_anoncv->ROOT->first->name, 'qr',
+  'qr_anoncv';
 my $iv = 1;
 my $iv_ref = B::svref_2object(\$iv);
 is(ref $iv_ref, "B::IV", "Test B:IV return from svref_2object");
@@ -337,9 +339,6 @@ SKIP: {
     isnt $cop->stashoff, $bobby->stashoff,
 	'different COP->stashoff for different stashes';
 }
-
-is B::svref_2object(qr/(?{time})/)->qr_anoncv->ROOT->first->name, 'qr',
-  'qr_anoncv';
 
 
 # Test $B::overlay
