@@ -1145,7 +1145,7 @@ print /a/u, s/b/c/u;
 s/foo/\(3);/eg;
 ####
 # y///r
-tr/a/b/r;
+tr/a/b/r + $a =~ tr/p/q/r;
 ####
 # y///d in list [perl #119815]
 () = tr/a//d;

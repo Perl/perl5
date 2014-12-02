@@ -3546,7 +3546,7 @@ sub pp_null {
 				   . $self->deparse($op->first->sibling, 7),
 				   $cx, 7);
     } elsif (!null($op->first->sibling) and
-	     $op->first->sibling->name eq "trans" and
+	     $op->first->sibling->name =~ /^transr?\z/ and
 	     $op->first->sibling->flags & OPf_STACKED) {
 	return $self->maybe_parens($self->deparse($op->first, 20) . " =~ "
 				   . $self->deparse($op->first->sibling, 20),
