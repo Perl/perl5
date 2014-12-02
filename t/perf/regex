@@ -1,0 +1,77 @@
+#!perl
+
+# Benchmarks for regex operations; see t/perf/benchmarks for more details.
+
+[
+	'regex::compile::empty' => {
+		desc	=> 'qr empty',
+		setup	=> 'my $a = q{}',
+		code 	=> 'qr{$a$__loop__}',
+	},
+	'regex::compile::exact' => {
+		desc	=> 'qr EXACT',
+		setup	=> 'my $a = q{exact string}',
+		code	=> 'qr{$a$__loop__}',
+	},
+	'regex::compile::exact_fold' => {
+		desc	=> 'qr EXACTFU',
+		setup	=> 'my $a = q{exact string}',
+		code	=> 'qr{$a$__loop__}i',
+	},
+	'regex::compile::trie' => {
+		desc	=> 'qr TRIEC-EXACT',
+		setup	=> 'my $a = q{foo|bar|baz|quux}',
+		code 	=> 'qr{$a$__loop__}'
+	},
+	'regex::compile::trie_fold' => {
+		desc	=> 'qr TRIE-EXACTFU',
+		setup	=> 'my $a = q{foo|bar|baz|quux}',
+		code 	=> 'qr{$a$__loop__}i'
+	},
+	'regex::compile::lookahead' => {
+		desc	=> 'qr IFMATCH',
+		setup	=> 'my $a = q{(?=exact string)}',
+		code	=> 'qr{$a$__loop__}',
+	},
+	'regex::compile::lookahead_neg' => {
+		desc	=> 'qr UNLESSM',
+		setup	=> 'my $a = q{(?!exact string)}',
+		code 	=> 'qr{$a$__loop__}',
+	},
+	'regex::compile::lookbehind' => {
+		desc	=> 'qr IFMATCH (lookbehind)',
+		setup	=> 'my $a = q{(?<=exact string)}',
+		code 	=> 'qr{$a$__loop__}',
+	},
+	'regex::compile::lookbehind_neg' => {
+		desc	=> 'qr UNLESSM (lookbehind)',
+		setup	=> 'my $a = q{(?<!exact string)}',
+		code	=> 'qr{$a$__loop__}',
+	},
+	'regex::compile::star' => {
+		desc	=> 'qr STAR',
+		setup	=> 'my $a = q{a*}',
+		code	=> 'qr{$a$__loop__}',
+	},
+	'regex::compile::plus' => {
+		desc	=> 'qr PLUS',
+		setup	=> 'my $a = q{a+}',
+		code	=> 'qr{$a$__loop__}',
+	},
+	'regex::compile::curly' => {
+		desc	=> 'qr CURLY',
+		setup	=> 'my $a = q{a?}',
+		code	=> 'qr{$a$__loop__}',
+	},
+	'regex::compile::curlyx' => {
+		desc	=> 'qr CURLYX',
+		setup	=> 'my $a = q{(?:a|[^a].)+}',
+		code	=> 'qr{$a$__loop__}',
+	},
+	'regex::compile::curlym' => {
+		desc	=> 'qr CURLYM',
+		setup	=> 'my $a = q{(?:a|[^b])+}',
+		code	=> 'qr{$a$__loop__}',
+	},
+];
+
