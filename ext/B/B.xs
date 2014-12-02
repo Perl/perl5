@@ -750,6 +750,7 @@ struct OP_methods {
 #if PERL_VERSION >= 21
   { STR_WITH_LEN("first"),   op_offset_special, 0,                     },/*53*/
   { STR_WITH_LEN("meth_sv"), op_offset_special, 0,                     },/*54*/
+  { STR_WITH_LEN("pmregexp"),op_offset_special, 0,                     },/*55*/
 #endif
 };
 
@@ -1030,6 +1031,7 @@ next(o)
 	B::OP::parent        = 52
 	B::METHOP::first     = 53
 	B::METHOP::meth_sv   = 54
+	B::PMOP::pmregexp    = 55
     PREINIT:
 	SV *ret;
     PPCODE:
@@ -1244,6 +1246,9 @@ next(o)
 		ret = make_sv_object(aTHX_
                             o->op_type == OP_METHOD
                                 ? NULL : cMETHOPx(o)->op_u.op_meth_sv);
+		break;
+	    case 55: /* B::PMOP::pmregexp */
+		ret = make_sv_object(aTHX_ (SV *)PM_GETRE(cPMOPo));
 		break;
 	    default:
 		croak("method %s not implemented", op_methods[ix].name);

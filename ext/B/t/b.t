@@ -340,6 +340,11 @@ SKIP: {
 	'different COP->stashoff for different stashes';
 }
 
+my $pmop = B::svref_2object(sub{ qr/fit/ })->ROOT->first->first->sibling;
+$regexp = $pmop->pmregexp;
+is B::class($regexp), 'REGEXP', 'B::PMOP::pmregexp returns a regexp';
+is $regexp->precomp, 'fit', 'pmregexp returns the right regexp';
+
 
 # Test $B::overlay
 {
