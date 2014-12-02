@@ -343,7 +343,6 @@ new_with_other_mg(package, ...)
     HV *self;
     HV *stash;
     SV *self_ref;
-    int i = 0;
     const char *data = "hello\0";
     MAGIC *mg;
   CODE:
@@ -354,7 +353,10 @@ new_with_other_mg(package, ...)
 
     sv_magic((SV*)self, NULL, PERL_MAGIC_ext, data, strlen(data));
     mg = mg_find((SV*)self, PERL_MAGIC_ext);
-    mg->mg_virtual = &other_mg_vtbl;
+    if (mg)
+      mg->mg_virtual = &other_mg_vtbl;
+    else
+      croak("No mg!");
 
     RETVAL = sv_bless(self_ref, stash);
   OUTPUT:
@@ -367,7 +369,6 @@ new_with_mg(package, ...)
     HV *self;
     HV *stash;
     SV *self_ref;
-    int i = 0;
     const char *data = "hello\0";
     MAGIC *mg;
   CODE:
@@ -378,7 +379,10 @@ new_with_mg(package, ...)
 
     sv_magic((SV*)self, NULL, PERL_MAGIC_ext, data, strlen(data));
     mg = mg_find((SV*)self, PERL_MAGIC_ext);
-    mg->mg_virtual = &null_mg_vtbl;
+    if (mg)
+      mg->mg_virtual = &null_mg_vtbl;
+    else
+      croak("No mg!");
 
     RETVAL = sv_bless(self_ref, stash);
   OUTPUT:
@@ -521,6 +525,9 @@ sv_magic_portable(sv)
 #if { VERSION >= 5.004 }
                 sv_magic_portable(sv, 0, '~', foo, 0);
                 mg = mg_find(sv, '~');
+                if (!mg)
+                  croak("No mg!");
+
                 RETVAL = mg->mg_ptr == foo;
 #else
                 sv_magic(sv, 0, '~', (char *) foo, strlen(foo));
