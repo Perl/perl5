@@ -134,6 +134,12 @@ Only declare C<file> unused if we actually define it.
 Improve generated C<RETVAL> code generation to avoid repeated
 references to C<ST(0)>.  [perl #123278]
 
+=item *
+
+The PathTools module collection has been upgraded from 3.52 to 3.53.
+
+Don't turn leading C<//> into C</> on Cygwin. [perl #122635]
+
 =back
 
 =head2 Removed Modules and Pragmata
