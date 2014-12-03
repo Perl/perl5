@@ -5054,7 +5054,7 @@ sub code_list {
 	    = @$self{qw'curstash warnings hints hinthash curcop'};
 
     my $re;
-    for (; !null($op); $op = $op->sibling) {
+    for ($op = $op->first->sibling; !null($op); $op = $op->sibling) {
 	if ($op->name eq 'null' and $op->flags & OPf_SPECIAL) {
 	    my $scope = $op->first;
 	    # 0 context (last arg to scopeop) means statement context, so
@@ -5183,7 +5183,7 @@ sub matchop {
     my $have_kid = !null $kid;
     # Check for code blocks first
     if (not null my $code_list = $op->code_list) {
-	$re = $self->code_list($code_list->first->sibling, $extended,
+	$re = $self->code_list($code_list, $extended,
 			       $op->name eq 'qr'
 				   ? $self->padval(
 				         $kid->first   # ex-list
@@ -5198,12 +5198,9 @@ sub matchop {
 				     )
 				   : undef);
     } elsif (${$bregexp = $op->pmregexp} && ${$cv = $bregexp->qr_anoncv}) {
-	# find the first op in the regexp code list
 	my $patop = $cv->ROOT      # leavesub
 		       ->first     #   qr
-		       ->code_list #     list
-		       ->first     #       pushmark
-		       ->sibling;  #       ...
+		       ->code_list;#     list
 	$re = $self->code_list($patop, $extended, $cv);
     } elsif (!$have_kid) {
 	my $unbacked = re_unback($op->precomp);
