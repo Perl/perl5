@@ -4974,7 +4974,6 @@ PP(pp_lslice)
     SV ** const lastlelem = PL_stack_base + POPMARK;
     SV ** const firstlelem = PL_stack_base + POPMARK + 1;
     SV ** const firstrelem = lastlelem + 1;
-    I32 is_something_there = FALSE;
     const U8 mod = PL_op->op_flags & OPf_MOD;
 
     const I32 max = lastrelem - lastlelem;
@@ -5004,7 +5003,6 @@ PP(pp_lslice)
 	if (ix < 0 || ix >= max)
 	    *lelem = &PL_sv_undef;
 	else {
-	    is_something_there = TRUE;
 	    if (!(*lelem = firstrelem[ix]))
 		*lelem = &PL_sv_undef;
 	    else if (mod && SvPADTMP(*lelem)) {
@@ -5012,10 +5010,7 @@ PP(pp_lslice)
             }
 	}
     }
-    if (is_something_there)
-	SP = lastlelem;
-    else
-	SP = firstlelem - 1;
+    SP = lastlelem;
     RETURN;
 }
 
