@@ -5170,8 +5170,10 @@ sub matchop {
     my $rhs_bound_to_defsv;
     if (null $kid) {
       # Check for code blocks
-      my $cv = $op->pmregexp->qr_anoncv;
-      if ($$cv) {
+      my $cv;
+      if (not null my $code_list = $op->code_list) {
+	$re = $self->code_list($code_list->first->sibling, $extended);
+      } elsif (${$cv = $op->pmregexp->qr_anoncv}) {
 	# For debugging:
 	#   ./perl -Ilib -MB -e 'use O "Concise", B::svref_2object(sub {qr/(?{die})/})->ROOT->first->first->sibling->pmregexp->qr_anoncv->object_2svref'
 	# find the first op in the regexp code list

@@ -1145,11 +1145,10 @@ print /a/u, s/b/c/u;
 s/foo/\(3);/eg;
 ####
 # [perl #115256]
-# TODO ODOT #
 "" =~ /a(?{ print q|
 |})/;
 >>>>
-"" =~ /a(?{ print "\n"; })/;
+'' =~ /a(?{ print "\n"; })/;
 ####
 # [perl #123217]
 $_ = qr/(??{<<END})/
