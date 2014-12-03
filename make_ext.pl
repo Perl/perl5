@@ -381,6 +381,17 @@ sub build_extension {
 		($value = $fromname) =~ s/\.pm\z/.pod/;
 		$value = $fromname unless -e $value;
 	    }
+
+            if ($mname eq 'Pod::Checker') {
+                # the abstract in the .pm file is unparseable by MM,
+                # so special-case it. We can't use the package's own
+                # Makefile.PL, as it doesn't handle the executable scripts
+                # right.
+                $key = 'ABSTRACT';
+                # this is copied from the CPAN Makefile.PL v 1.171
+                $value = 'Pod::Checker verifies POD documentation contents for compliance with the POD format specifications';
+            }
+
 	    open my $fh, '>', 'Makefile.PL'
 		or die "Can't open Makefile.PL for writing: $!";
 	    printf $fh <<'EOM', $0, $mname, $fromname, $key, $value;
