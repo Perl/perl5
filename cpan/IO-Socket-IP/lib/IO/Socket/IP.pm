@@ -7,7 +7,7 @@ package IO::Socket::IP;
 # $VERSION needs to be set before  use base 'IO::Socket'
 #  - https://rt.cpan.org/Ticket/Display.html?id=92107
 BEGIN {
-   $VERSION = '0.33';
+   $VERSION = '0.34';
 }
 
 use strict;
@@ -684,7 +684,7 @@ sub connect
       }
 
       my $vec = ''; vec( $vec, $self->fileno, 1 ) = 1;
-      if( !select( $vec, $vec, $vec, $timeout ) ) {
+      if( !select( undef, $vec, $vec, $timeout ) ) {
          $! = ETIMEDOUT;
          return undef;
       }
