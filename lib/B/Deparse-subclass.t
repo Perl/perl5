@@ -19,7 +19,6 @@ like  $nm->coderef2text(sub { my($a, $b, $c) }),
       qr/\$a_groovy, \$b_groovy, \$c_groovy/,
      'overriding padname works for renaming lexicals';
 
-$TODO = TODO;
 like  $nm->coderef2text(sub { my $c; /(??{ $c })/; }),
       qr/\Q(??{\E \$c_groovy/,
      'overriding padname works for renaming lexicals in regexp blocks';

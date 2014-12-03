@@ -5055,14 +5055,7 @@ sub code_list {
 
     my $re;
     for (; !null($op); $op = $op->sibling) {
-	my $name = $op->name;
-	if ($name eq 'const') {
-	    my $const = re_unback($self->const_sv($op)->PV);
-	    $re .= $extended
-		? re_uninterp_extended(escape_extended_re($const))
-		: re_uninterp         (escape_str        ($const));
-	}
-	else {
+	if ($op->name eq 'null' and $op->flags & OPf_SPECIAL) {
 	    my $scope = $op->first;
 	    # 0 context (last arg to scopeop) means statement context, so
 	    # the contents of the block will not be wrapped in do{...}.
@@ -5075,6 +5068,8 @@ sub code_list {
 	    $re .= $multiline ? "\n\t" : ' ';
 	    $re .= $block;
 	    $re .= $multiline ? "\n\b})" : " })";
+	} else {
+	    $re = re_dq_disambiguate($re, $self->re_dq($op, $extended));
 	}
     }
     $re;
@@ -5149,6 +5144,22 @@ map($matchwords{join "", sort split //, $_} = $_, 'cig', 'cog', 'cos', 'cogs',
     'cox', 'go', 'is', 'ism', 'iso', 'mig', 'mix', 'osmic', 'ox', 'sic',
     'sig', 'six', 'smog', 'so', 'soc', 'sog', 'xi');
 
+# When deparsing a regular expression with code blocks, we have to look in
+# various places to find the blocks.
+#
+# For qr/(?{...})/ without interpolation, the CV is under $qr->qr_anoncv
+# and the code list (list of blocks and constants, maybe vars) is under
+# $cv->ROOT->first->code_list:
+#   ./perl -Ilib -MB -e 'use O "Concise", B::svref_2object(sub {qr/(?{die})/})->ROOT->first->first->sibling->pmregexp->qr_anoncv->object_2svref'
+#
+# For qr/$a(?{...})/ with interpolation, the code list is more accessible,
+# under $pmop->code_list, but the $cv is something you have to dig for in
+# the regcomp op’s kids:
+#   ./perl -Ilib -mO=Concise -e 'qr/$a(?{die})/'
+#
+# For m// and split //, things are much simpler.  There is no CV.  The code
+# list is under $pmop->code_list.
+
 sub matchop {
     my $self = shift;
     my($op, $cx, $name, $delim) = @_;
@@ -5168,14 +5179,25 @@ sub matchop {
     my $pmflags = $op->pmflags;
     my $extended = ($pmflags & PMf_EXTENDED);
     my $rhs_bound_to_defsv;
-    if (null $kid) {
-      # Check for code blocks
-      my $cv;
-      if (not null my $code_list = $op->code_list) {
-	$re = $self->code_list($code_list->first->sibling, $extended);
-      } elsif (${$cv = $op->pmregexp->qr_anoncv}) {
-	# For debugging:
-	#   ./perl -Ilib -MB -e 'use O "Concise", B::svref_2object(sub {qr/(?{die})/})->ROOT->first->first->sibling->pmregexp->qr_anoncv->object_2svref'
+    my ($cv, $bregexp);
+    my $have_kid = !null $kid;
+    # Check for code blocks first
+    if (not null my $code_list = $op->code_list) {
+	$re = $self->code_list($code_list->first->sibling, $extended,
+			       $op->name eq 'qr'
+				   ? $self->padval(
+				         $kid->first   # ex-list
+					     ->first   #   pushmark
+					     ->sibling #   entersub
+					     ->first   #     ex-list
+					     ->first   #       pushmark
+					     ->sibling #       srefgen
+					     ->first   #         ex-list
+					     ->first   #           anoncode
+					     ->targ
+				     )
+				   : undef);
+    } elsif (${$bregexp = $op->pmregexp} && ${$cv = $bregexp->qr_anoncv}) {
 	# find the first op in the regexp code list
 	my $patop = $cv->ROOT      # leavesub
 		       ->first     #   qr
@@ -5183,18 +5205,19 @@ sub matchop {
 		       ->first     #       pushmark
 		       ->sibling;  #       ...
 	$re = $self->code_list($patop, $extended, $cv);
-      } else {
+    } elsif (!$have_kid) {
 	my $unbacked = re_unback($op->precomp);
 	if ($extended) {
 	    $re = re_uninterp_extended(escape_extended_re($unbacked));
 	} else {
 	    $re = re_uninterp(escape_str($unbacked));
 	}
-      }
     } elsif ($kid->name ne 'regcomp') {
 	carp("found ".$kid->name." where regcomp expected");
     } else {
 	($re, $quote) = $self->regcomp($kid, 21, $extended);
+    }
+    if ($have_kid and $kid->name eq 'regcomp') {
 	my $matchop = $kid->first;
 	if ($matchop->name eq 'regcrest') {
 	    $matchop = $matchop->first;
