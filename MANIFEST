@@ -1231,6 +1231,7 @@ cpan/IO-Compress/lib/IO/Uncompress/Gunzip.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Uncompress/Inflate.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Uncompress/RawInflate.pm	IO::Compress
 cpan/IO-Compress/lib/IO/Uncompress/Unzip.pm		IO::Compress
+cpan/IO-Compress/Makefile.PL				IO::Compress
 cpan/IO-Compress/private/MakeUtil.pm			IO::Compress
 cpan/IO-Compress/t/000prereq.t				IO::Compress
 cpan/IO-Compress/t/001bzip2.t				IO::Compress

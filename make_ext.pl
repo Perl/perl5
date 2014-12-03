@@ -368,7 +368,6 @@ sub build_extension {
 		my $leafname = "$leaf.pm";
 		my $pathname = join '/', @dirs, $leafname;
 		my @locations = ($leafname, $pathname, "lib/$pathname");
-		unshift @locations, 'lib/IO/Compress/Base.pm' if $mname eq 'IO::Compress';
 		foreach (@locations) {
 		    if (-f $_) {
 			$fromname = $_;
