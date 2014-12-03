@@ -4187,10 +4187,10 @@ typedef struct rck_params {
     scan_data_t *data;  /* data: string data about the pattern */
     I32 stopparen;      /* stopparen: treat close N as END */
     U32 recursed_depth; /* recursed: which subroutines have we recursed into */
-    regnode_ssc *and_withp; /* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
     U32 flags;
     U32 depth;
 
+    regnode_ssc *and_withp; /* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
     SSize_t     min; /* must be at least this number of characters to match */
     I32         pars;
     I32         code;
@@ -4239,36 +4239,13 @@ void dump_study_chunk(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 
 /* the return from this sub is the minimum length that could possibly match */
 STATIC SSize_t
-S_study_chunk(
-    pTHX_ RExC_state_t *pRExC_state,
-    regnode **scanp,    /* scanp: Start here (read-write). */
-    SSize_t *minlenp,
-    SSize_t *deltap,    /* deltap: Write maxlen-minlen here. */
-    regnode *last,      /* last: Stop before this one. */
-    scan_data_t *data,  /* data: string data about the pattern */
-    I32 stopparen,      /* stopparen: treat close N as END */
-    U32 recursed_depth, /* recursed: which subroutines have we recursed into */
-    regnode_ssc *and_withp, /* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
-    U32 flags,
-    U32 depth)
+S_study_chunk(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 {
-    rck_params_t s_params;
-    rck_params_t *params = &s_params;
     SSize_t final_minlen;
 
     GET_RE_DEBUG_FLAGS_DECL;
 
-    params->scanp = scanp;
-    params->minlenp = minlenp;
-    params->deltap = deltap;
-    params->last = last;
-    params->data = data;
-    params->stopparen = stopparen;
-    params->recursed_depth = recursed_depth;
-    params->and_withp = and_withp;
-    params->flags = flags;
-    params->depth = depth;
-
+    params->and_withp = NULL;
     params->min = 0;
     params->pars = 0;
     params->scan = *params->scanp;
@@ -4422,12 +4399,20 @@ STATIC bool S_rck_definep(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 
     /* we suppose the run is continuous, last=next...
      * NOTE we dont use the return here! */
-    /* DEFINEP study_chunk() recursion */
-    (void)study_chunk(
-        pRExC_state, &params->scan, &minlen, &deltanext, params->next,
-        &params->data_fake, params->stopparen, params->recursed_depth,
-        NULL, f, params->depth + 1
-    );
+    {
+        rck_params_t params2;
+        params2.scanp = &params->scan;
+        params2.minlenp = &minlen;
+        params2.deltap = &deltanext;
+        params2.last = params->next;
+        params2.data = &params->data_fake;
+        params2.stopparen = params->stopparen;
+        params2.recursed_depth = params->recursed_depth;
+        params2.flags = f;
+        params2.depth = params->depth + 1;
+        /* DEFINEP study_chunk() recursion */
+        (void)study_chunk(pRExC_state, &params2);
+    }
 
     params->scan = regnext(params->next);
     return 0;
@@ -5115,12 +5100,20 @@ STATIC bool S_rck_lookaround(pTHX_ RExC_state_t *pRExC_state, rck_params_t *para
         params->next = regnext(params->scan);
         nscan = NEXTOPER(NEXTOPER(params->scan));
 
-        /* recurse study_chunk() for lookahead body */
-        minnext = study_chunk(
-            pRExC_state, &nscan, params->minlenp, &deltanext, params->last,
-            &params->data_fake, params->stopparen, params->recursed_depth,
-            NULL, f, params->depth + 1
-        );
+        {
+            rck_params_t params2;
+            params2.scanp = &nscan;
+            params2.minlenp = params->minlenp;
+            params2.deltap = &deltanext;
+            params2.last = params->last;
+            params2.data = &params->data_fake;
+            params2.stopparen = params->stopparen;
+            params2.recursed_depth = params->recursed_depth;
+            params2.flags = f;
+            params2.depth = params->depth + 1;
+            /* recurse study_chunk() for lookahead body */
+            minnext = study_chunk(pRExC_state, &params2);
+        }
         if (params->scan->flags) {
             if (deltanext) {
                 FAIL("Variable length lookbehind not implemented");
@@ -5212,12 +5205,20 @@ STATIC bool S_rck_lookaround(pTHX_ RExC_state_t *pRExC_state, rck_params_t *para
         params->next = regnext(params->scan);
         nscan = NEXTOPER(NEXTOPER(params->scan));
 
-        /* positive lookahead study_chunk() recursion */
-        *minnextp = study_chunk(
-            pRExC_state, &nscan, minnextp, &deltanext, params->last,
-            &params->data_fake, params->stopparen, params->recursed_depth,
-            NULL, f, params->depth + 1
-        );
+        {
+            rck_params_t params2;
+            params2.scanp = &nscan;
+            params2.minnextp = minnextp;
+            params2.deltap = &deltanext;
+            params2.last = params->last;
+            params2.data = &params->data_fake;
+            params2.stopparen = params->stopparen;
+            params2.recursed_depth = params->recursed_depth;
+            params2.flags = f;
+            params2.depth = params->depth + 1;
+            /* positive lookahead study_chunk() recursion */
+            *minnextp = study_chunk(pRExC_state, &params2);
+        }
         if (params->scan->flags) {
             if (deltanext) {
                 FAIL("Variable length lookbehind not implemented");
@@ -5425,13 +5426,20 @@ STATIC bool S_rck_trie(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
                 /* We go from the jump point to the branch that follows
                  * it. Note this means we need the vestigial unused
                  * branches even though they aren't otherwise used. */
-                /* optimise study_chunk() for TRIE */
-                minnext = study_chunk(
-                    pRExC_state, &params->scan, params->minlenp, &deltanext,
-                    (regnode *)nextbranch, &params->data_fake,
-                    params->stopparen, params->recursed_depth, NULL, f,
-                    params->depth + 1
-                );
+                {
+                    rck_params_t params2;
+                    params2.scanp = &params->scan;
+                    params2.minlenp = params->minlenp;
+                    params2.deltap = &deltanext;
+                    params2.last = (regnode *)nextbranch;
+                    params2.data = &params->data_fake;
+                    params2.stopparen = params->stopparen;
+                    params2.recursed_depth = params->recursed_depth;
+                    params2.flags = f;
+                    params2.depth = params->depth + 1;
+                    /* optimise study_chunk() for TRIE */
+                    minnext = study_chunk(pRExC_state, &params2);
+                }
             }
             if (nextbranch && PL_regkind[OP(nextbranch)] == BRANCH)
                 nextbranch = regnext((regnode*)nextbranch);
@@ -5630,12 +5638,20 @@ STATIC void S_rck_make_trie(pTHX_ RExC_state_t *pRExC_state, rck_params_t *param
             f |= SCF_WHILEM_VISITED_POS;
 
         /* we suppose the run is continuous, last=next...*/
-        /* recurse study_chunk() for each BRANCH in an alternation */
-        minnext = study_chunk(
-            pRExC_state, &params->scan, params->minlenp, &deltanext,
-            params->next, &params->data_fake, params->stopparen,
-            params->recursed_depth, NULL, f, params->depth + 1
-        );
+        {
+            rck_params_t params2;
+            params2.scanp = &params->scan;
+            params2.minlenp = params->minlenp;
+            params2.deltap = &deltanext;
+            params2.last = params->next;
+            params2.data = &params->data_fake;
+            params2.stopparen = params->stopparen;
+            params2.recursed_depth = params->recursed_depth;
+            params2.flags = f;
+            params2.depth = params->depth + 1;
+            /* recurse study_chunk() for each BRANCH in an alternation */
+            minnext = study_chunk(pRExC_state, &params2);
+        }
 
         if (min1 > minnext)
             min1 = minnext;
@@ -6074,13 +6090,20 @@ STATIC void S_rck_do_curly(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params
         f &= ~SCF_WHILEM_VISITED_POS;
 
     /* This will finish on WHILEM, setting scan, or on NULL: */
-    /* recurse study_chunk() on loop bodies */
-    minnext = study_chunk(
-        pRExC_state, &params->scan, params->minlenp, &deltanext, params->last,
-        params->data, params->stopparen, params->recursed_depth, NULL,
-        (mincount == 0 ? (f & ~SCF_DO_SUBSTR) : f),
-        params->depth + 1
-    );
+    {
+        rck_params_t params2;
+        params2.scanp = &params->scan;
+        params2.minlenp = params->minlenp;
+        params2.deltap = &deltanext;
+        params2.last = params->last;
+        params2.data = params->data;
+        params2.stopparen = params->stopparen;
+        params2.recursed_depth = params->recursed_depth;
+        params2.flags = mincount == 0 ? (f & ~SCF_DO_SUBSTR) : f;
+        params2.depth = params->depth + 1;
+        /* recurse study_chunk() on loop bodies */
+        minnext = study_chunk(pRExC_state, &params2);
+    }
 
     if (params->flags & SCF_DO_STCLASS)
         params->data->start_class = oclass;
@@ -6232,9 +6255,20 @@ STATIC void S_rck_do_curly(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params
             }
 #endif
             /* Optimize again: */
-            /* recurse study_chunk() on optimised CURLYX => CURLYM */
-            study_chunk(pRExC_state, &nxt1, params->minlenp, &deltanext, nxt,
-                        NULL, params->stopparen, params->recursed_depth, NULL, 0, params->depth + 1);
+            {
+                rck_params_t params2;
+                params2.scanp = &nxt1;
+                params2.minlenp = params->minlenp;
+                params2.deltap = &deltanext;
+                params2.last = nxt;
+                params2.data = NULL;
+                params2.stopparen = params->stopparen;
+                params2.recursed_depth = params->recursed_depth;
+                params2.flags = 0;
+                params2.depth = params->depth + 1;
+                /* recurse study_chunk() on optimised CURLYX => CURLYM */
+                (void)study_chunk(pRExC_state, &params2);
+            }
         } else {
             node->flags = 0;
         }
@@ -7961,17 +7995,24 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	data.last_closep = &last_close;
 
         DEBUG_RExC_seen();
-        /*
-         * MAIN ENTRY FOR study_chunk() FOR m/PATTERN/
-         * (NO top level branches)
-         */
-	minlen = study_chunk(pRExC_state, &first, &minlen, &fake,
-                             scan + RExC_size, /* Up to end */
-            &data, -1, 0, NULL,
-            SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag
-                          | (restudied ? SCF_TRIE_DOING_RESTUDY : 0),
-            0);
-
+        {
+            rck_params_t params2;
+            params2.scanp = &first;
+            params2.minlenp = &minlen;
+            params2.deltap = &fake;
+            params2.last = scan + RExC_size; /* Up to end */
+            params2.data = &data;
+            params2.stopparen = -1;
+            params2.recursed_depth = 0;
+            params2.flags = SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS
+                    | stclass_flag | (restudied ? SCF_TRIE_DOING_RESTUDY : 0);
+            params2.depth = 0;
+            /*
+             * MAIN ENTRY FOR study_chunk() FOR m/PATTERN/
+             * (NO top level branches)
+             */
+            minlen = study_chunk(pRExC_state, &params2);
+        }
 
         CHECK_RESTUDY_GOTO_butfirst(LEAVE_with_name("study_chunk"));
 
@@ -8090,16 +8131,24 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	data.last_closep = &last_close;
 
         DEBUG_RExC_seen();
-        /*
-         * MAIN ENTRY FOR study_chunk() FOR m/P1|P2|.../
-         * (patterns WITH top level branches)
-         */
-	minlen = study_chunk(pRExC_state,
-            &scan, &minlen, &fake, scan + RExC_size, &data, -1, 0, NULL,
-            SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS|(restudied
-                                                      ? SCF_TRIE_DOING_RESTUDY
-                                                      : 0),
-            0);
+        {
+            rck_params_t params2;
+            params2.scanp = &scan;
+            params2.minlenp = &minlen;
+            params2.deltap = &fake;
+            params2.last = scan + RExC_size; /* Up to end */
+            params2.data = &data;
+            params2.stopparen = -1;
+            params2.recursed_depth = 0;
+            params2.flags = SCF_DO_STCLASS_AND | SCF_WHILEM_VISITED_POS
+                    | (restudied ? SCF_TRIE_DOING_RESTUDY : 0);
+            params2.depth = 0;
+            /*
+             * MAIN ENTRY FOR study_chunk() FOR m/P1|P2|.../
+             * (patterns WITH top level branches)
+             */
+            minlen = study_chunk(pRExC_state, &params2);
+        }
 
         CHECK_RESTUDY_GOTO_butfirst(NOOP);
 
