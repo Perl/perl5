@@ -514,7 +514,7 @@ then
        DBLIB="$DBDIR/libdb.so"
        if [ -f $DBLIB ]
        then
-         if ${nm:-nm} -u $DBLIB | grep pthread >/dev/null
+         if ${nm:-nm} -u $DBLIB 2>/dev/null | grep pthread >/dev/null
          then
            if ldd $DBLIB | grep pthread >/dev/null
            then

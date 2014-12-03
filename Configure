@@ -21448,7 +21448,6 @@ int check_min ()
 
 int main (int argc, char *argv[])
 {
-    fprintf (stderr, "Sizeof time_t = %ld\n", sizeof (time_t));
     check_max ();
     check_min ();
     return (0);
