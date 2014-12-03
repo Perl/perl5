@@ -17,7 +17,7 @@ if (not $Config{'useithreads'}) {
     skip_all("clone_with_stack requires threads");
 }
 
-plan(5);
+plan(6);
 
 fresh_perl_is( <<'----', <<'====', undef, "minimal clone_with_stack" );
 use XS::APItest;
@@ -75,6 +75,29 @@ clone_with_stack();
 f();
 ----
 42
+====
+
+}
+
+{
+    fresh_perl_is( <<'----', <<'====', undef, "with localised stuff" );
+use XS::APItest;
+$s = "outer";
+$a[0] = "anterior";
+$h{k} = "hale";
+{
+    local $s = "inner";
+    local $a[0] = 'posterior';
+    local $h{k} = "halt";
+    clone_with_stack();
+}
+print "scl: $s\n";
+print "ary: $a[0]\n";
+print "hsh: $h{k}\n";
+----
+scl: outer
+ary: anterior
+hsh: hale
 ====
 
 }
