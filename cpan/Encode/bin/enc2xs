@@ -10,7 +10,7 @@ use warnings;
 use Getopt::Std;
 use Config;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.15 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.16 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -1006,9 +1006,9 @@ sub make_configlocal_pm {
 	$mod =~ s/.*\bEncode\b/Encode/o;
 	$mod =~ s/\.pm\z//o;
 	$mod =~ s,/,::,og;
-	warn qq{ require $mod;\n};
 	eval qq{ require $mod; };
-	$@ and die "Can't require $mod: $@\n";
+        return if $@;
+        warn qq{ require $mod;\n};
 	for my $enc ( Encode->encodings() ) {
 	    no warnings;
 	    $in_core{$enc}                   and next;
@@ -1022,7 +1022,7 @@ sub make_configlocal_pm {
         $_ModLines .=
           qq(\$Encode::ExtModule{'$enc'} = "$LocalMod{$enc}";\n);
     }
-    warn $_ModLines;
+    warn $_ModLines if $_ModLines;
     $_LocalVer = _mkversion();
     $_E2X      = find_e2x();
     $_Inc      = $INC{"Encode.pm"};
