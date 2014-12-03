@@ -5364,7 +5364,9 @@ sub pp_subst {
 	}
     }
     my $extended = ($pmflags & PMf_EXTENDED);
-    if (null $kid) {
+    if (not null my $code_list = $op->code_list) {
+	$re = $self->code_list($code_list, $extended);
+    } elsif (null $kid) {
 	my $unbacked = re_unback($op->precomp);
 	if ($extended) {
 	    $re = re_uninterp_extended(escape_extended_re($unbacked));

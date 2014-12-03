@@ -1159,7 +1159,6 @@ END
 $_ = qr/(??{ "f.o\nb.r\n"; })/;
 ####
 # More regexp code block madness
-# TODO ODOT #
 my($b, @a);
 /(?{ die $b; })/;
 /a(?{ die $b; })a/;
