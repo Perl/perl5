@@ -13,7 +13,7 @@ use File::Temp qw( tempfile tempdir );
 
 use File::stat;
 
-my (undef, $file) = tempfile();
+my (undef, $file) = tempfile(UNLINK => 1);
 
 {
     my @stat = CORE::stat $file;
