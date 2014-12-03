@@ -381,6 +381,13 @@ compilation. [perl #122995]
 
 =item *
 
+On Win32, restoring in a child pseudo-process a variable that was
+C<local()>ed in a parent pseudo-process before the C<fork> happened caused
+memory corruption and a crash in the child pseudo-process (and therefore OS
+process).  [perl #40565]
+
+=item *
+
 Tainted constants evaluated at compile time no longer cause unrelated
 statements to become tainted.  [perl #122669]
 
