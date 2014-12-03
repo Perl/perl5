@@ -170,21 +170,20 @@ Perl_safesysmalloc(MEM_SIZE size)
 #ifdef MDH_HAS_SIZE
 	header->size = size;
 #endif
-        ptr = (Malloc_t)((char*)ptr+PERL_MEMORY_DEBUG_HEADER_SIZE);
+	ptr = (Malloc_t)((char*)ptr+PERL_MEMORY_DEBUG_HEADER_SIZE);
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
-	return ptr;
-}
+
+    }
     else {
 #ifndef ALWAYS_NEED_THX
 	dTHX;
 #endif
 	if (PL_nomemok)
-	    return NULL;
-	else {
+	    ptr =  NULL;
+	else
 	    croak_no_mem();
-	}
     }
-    NOT_REACHED; /*NOTREACHED*/
+    return ptr;
 }
 
 /* paranoid version of system's realloc() */
@@ -207,105 +206,102 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 
     if (!size) {
 	safesysfree(where);
-	return NULL;
+	ptr = NULL;
     }
-
-    if (!where)
-	return safesysmalloc(size);
+    else if (!where) {
+	ptr = safesysmalloc(size);
+    }
+    else {
 #ifdef USE_MDH
-    where = (Malloc_t)((char*)where-PERL_MEMORY_DEBUG_HEADER_SIZE);
-    size += PERL_MEMORY_DEBUG_HEADER_SIZE;
-    {
-	struct perl_memory_debug_header *const header
-	    = (struct perl_memory_debug_header *)where;
+	where = (Malloc_t)((char*)where-PERL_MEMORY_DEBUG_HEADER_SIZE);
+	size += PERL_MEMORY_DEBUG_HEADER_SIZE;
+	{
+	    struct perl_memory_debug_header *const header
+		= (struct perl_memory_debug_header *)where;
 
 # ifdef PERL_TRACK_MEMPOOL
-	if (header->interpreter != aTHX) {
-	    Perl_croak_nocontext("panic: realloc from wrong pool, %p!=%p",
-				 header->interpreter, aTHX);
-	}
-	assert(header->next->prev == header);
-	assert(header->prev->next == header);
+	    if (header->interpreter != aTHX) {
+		Perl_croak_nocontext("panic: realloc from wrong pool, %p!=%p",
+				     header->interpreter, aTHX);
+	    }
+	    assert(header->next->prev == header);
+	    assert(header->prev->next == header);
 #  ifdef PERL_POISON
-	if (header->size > size) {
-	    const MEM_SIZE freed_up = header->size - size;
-	    char *start_of_freed = ((char *)where) + size;
-	    PoisonFree(start_of_freed, freed_up, char);
-	}
+	    if (header->size > size) {
+		const MEM_SIZE freed_up = header->size - size;
+		char *start_of_freed = ((char *)where) + size;
+		PoisonFree(start_of_freed, freed_up, char);
+	    }
 #  endif
 # endif
 # ifdef MDH_HAS_SIZE
-	header->size = size;
+	    header->size = size;
 # endif
-    }
+	}
 #endif
 #ifdef DEBUGGING
-    if ((SSize_t)size < 0)
-	Perl_croak_nocontext("panic: realloc, size=%"UVuf, (UV)size);
+	if ((SSize_t)size < 0)
+	    Perl_croak_nocontext("panic: realloc, size=%"UVuf, (UV)size);
 #endif
 #ifdef PERL_DEBUG_READONLY_COW
-    if ((ptr = mmap(0, size, PROT_READ|PROT_WRITE,
-		    MAP_ANON|MAP_PRIVATE, -1, 0)) == MAP_FAILED) {
-	perror("mmap failed");
-	abort();
-    }
-    Copy(where,ptr,oldsize < size ? oldsize : size,char);
-    if (munmap(where, oldsize)) {
-	perror("munmap failed");
-	abort();
-    }
+	if ((ptr = mmap(0, size, PROT_READ|PROT_WRITE,
+			MAP_ANON|MAP_PRIVATE, -1, 0)) == MAP_FAILED) {
+	    perror("mmap failed");
+	    abort();
+	}
+	Copy(where,ptr,oldsize < size ? oldsize : size,char);
+	if (munmap(where, oldsize)) {
+	    perror("munmap failed");
+	    abort();
+	}
 #else
-    ptr = (Malloc_t)PerlMem_realloc(where,size);
+	ptr = (Malloc_t)PerlMem_realloc(where,size);
 #endif
-    PERL_ALLOC_CHECK(ptr);
+	PERL_ALLOC_CHECK(ptr);
 
     /* MUST do this fixup first, before doing ANYTHING else, as anything else
        might allocate memory/free/move memory, and until we do the fixup, it
        may well be chasing (and writing to) free memory.  */
-    if (ptr != NULL) {
+	if (ptr != NULL) {
 #ifdef PERL_TRACK_MEMPOOL
-	struct perl_memory_debug_header *const header
-	    = (struct perl_memory_debug_header *)ptr;
+	    struct perl_memory_debug_header *const header
+		= (struct perl_memory_debug_header *)ptr;
 
 #  ifdef PERL_POISON
-	if (header->size < size) {
-	    const MEM_SIZE fresh = size - header->size;
-	    char *start_of_fresh = ((char *)ptr) + size;
-	    PoisonNew(start_of_fresh, fresh, char);
-	}
+	    if (header->size < size) {
+		const MEM_SIZE fresh = size - header->size;
+		char *start_of_fresh = ((char *)ptr) + size;
+		PoisonNew(start_of_fresh, fresh, char);
+	    }
 #  endif
 
-	maybe_protect_rw(header->next);
-	header->next->prev = header;
-	maybe_protect_ro(header->next);
-	maybe_protect_rw(header->prev);
-	header->prev->next = header;
-	maybe_protect_ro(header->prev);
+	    maybe_protect_rw(header->next);
+	    header->next->prev = header;
+	    maybe_protect_ro(header->next);
+	    maybe_protect_rw(header->prev);
+	    header->prev->next = header;
+	    maybe_protect_ro(header->prev);
 #endif
-        ptr = (Malloc_t)((char*)ptr+PERL_MEMORY_DEBUG_HEADER_SIZE);
-    }
+	    ptr = (Malloc_t)((char*)ptr+PERL_MEMORY_DEBUG_HEADER_SIZE);
+	}
 
     /* In particular, must do that fixup above before logging anything via
      *printf(), as it can reallocate memory, which can cause SEGVs.  */
 
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
+	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
+	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
-
-    if (ptr != NULL) {
-	return ptr;
-    }
-    else {
+	if (ptr == NULL) {
 #ifndef ALWAYS_NEED_THX
-	dTHX;
+	    dTHX;
 #endif
-	if (PL_nomemok)
-	    return NULL;
-	else {
-	    croak_no_mem();
+	    if (PL_nomemok)
+		ptr = NULL;
+	    else
+		croak_no_mem();
 	}
     }
-    NOT_REACHED; /*NOTREACHED*/
+    return ptr;
 }
 
 /* safe version of system's free() */
