@@ -14447,6 +14447,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #  ifdef DEBUG_LEAKING_SCALARS
     PL_sv_serial = (((UV)my_perl >> 2) & 0xfff) * 1000000;
 #  endif
+#  ifdef PERL_TRACE_OPS
+    Zero(PL_op_exec_cnt, OP_max+2, UV);
+#  endif
 #else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
 #endif	/* DEBUGGING */
