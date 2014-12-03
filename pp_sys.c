@@ -2115,14 +2115,18 @@ PP(pp_eof)
     if (!MAXARG && (PL_op->op_flags & OPf_SPECIAL)) {	/* eof() */
 	if (io && !IoIFP(io)) {
 	    if ((IoFLAGS(io) & IOf_START) && av_tindex(GvAVn(gv)) < 0) {
+		SV ** svp;
 		IoLINES(io) = 0;
 		IoFLAGS(io) &= ~IOf_START;
 		do_open6(gv, "-", 1, NULL, NULL, 0);
-		if (GvSV(gv))
-		    sv_setpvs(GvSV(gv), "-");
+		svp = &GvSV(gv);
+		if (*svp) {
+		    SV * sv = *svp;
+		    sv_setpvs(sv, "-");
+		    SvSETMAGIC(sv);
+		}
 		else
-		    GvSV(gv) = newSVpvs("-");
-		SvSETMAGIC(GvSV(gv));
+		    *svp = newSVpvs("-");
 	    }
 	    else if (!nextargv(gv, FALSE))
 		RETPUSHYES;
