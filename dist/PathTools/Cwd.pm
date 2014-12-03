@@ -3,7 +3,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.51';
+$VERSION = '3.53';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//;
 
@@ -351,7 +351,13 @@ sub chdir_init {
 
 sub chdir {
     my $newdir = @_ ? shift : '';	# allow for no arg (chdir to HOME dir)
-    $newdir =~ s|///*|/|g unless $^O eq 'MSWin32';
+    if ($^O eq "cygwin") {
+      $newdir =~ s|\A///+|//|;
+      $newdir =~ s|(?<=[^/])//+|/|g;
+    }
+    elsif ($^O ne 'MSWin32') {
+      $newdir =~ s|///*|/|g;
+    }
     chdir_init() unless $chdir_init;
     my $newpwd;
     if ($^O eq 'MSWin32') {
