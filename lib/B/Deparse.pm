@@ -5216,7 +5216,7 @@ sub matchop {
     }
     if ($have_kid and $kid->name eq 'regcomp') {
 	my $matchop = $kid->first;
-	if ($matchop->name eq 'regcrest') {
+	if ($matchop->name eq 'regcreset') {
 	    $matchop = $matchop->first;
 	}
 	if ($matchop->name =~ /^(?:match|transr?|subst)\z/
