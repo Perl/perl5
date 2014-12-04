@@ -1051,17 +1051,9 @@ sub deparse {
 sub indent {
     my $self = shift;
     my $txt = shift;
-    # Handle semicolons after sub declarations.  There will be a \0 marker
-    # after each sequence of subs.  This:
-    #   sub {
-    #       ....
-    #   }
-    #   \0;
-    # needs to have the "\n\0;" removed, but the \n should be left if the
-    # semicolon is not followed by one.
-    $txt =~ s/(?<=\})(\n?)\0;(\n?)/$1 || $2 ? "\n" : ""/egg;
-    # Remove any remaining markers
-    $txt =~ y/\0//d;
+    # \cK also swallows a preceding line break when followed by a
+    # semicolon.
+    $txt =~ s/\n\cK;//g;
     my @lines = split(/\n/, $txt);
     my $leader = "";
     my $level = 0;
@@ -1546,11 +1538,9 @@ sub deparse_root {
     }
     $self->walk_lineseq($op, \@kids,
 			sub { return unless length $_[0];
-			      print $self->indent($_[0] =~ s/\0\z//
-						    ? $_[0]
-						    : $_[0].';');
+			      print $self->indent($_[0].';');
 			      print "\n"
-				unless $_[1] == $#kids or $_[0] =~ /\n\z/;
+				unless $_[1] == $#kids;
 			  });
 }
 
@@ -1815,7 +1805,7 @@ sub pp_nextstate {
     push @text, $self->cop_subs($op);
     if (@text) {
 	# Special marker to swallow up the semicolon
-	push @text, "\0";
+	push @text, "\cK";
     }
     my $stash = $op->stashpv;
     if ($stash ne $self->{'curstash'}) {
@@ -1916,7 +1906,7 @@ sub declare_warnings {
     elsif (($to & WARN_MASK) eq ("\0"x length($to) & WARN_MASK)) {
 	return $self->keyword("no") . " warnings;\n";
     }
-    return "BEGIN {\${^WARNING_BITS} = ".perlstring($to)."}\n\0";
+    return "BEGIN {\${^WARNING_BITS} = ".perlstring($to)."}\n\cK";
 }
 
 sub declare_hints {
@@ -1993,7 +1983,7 @@ sub declare_hinthash {
     }
     @decls and
 	push @ret,
-	     join("\n" . (" " x $indent), "BEGIN {", @decls) . "\n}\n\0";
+	     join("\n" . (" " x $indent), "BEGIN {", @decls) . "\n}\n\cK";
     return @ret;
 }
 
