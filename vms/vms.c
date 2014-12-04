@@ -7094,13 +7094,11 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
   PerlMem_free(tmp);
   for (; cp2 <= dirend; cp2++) {
     if ((*cp2 == '^')) {
-	/* EFS file escape, pass the next character as is */
-	/* Fix me: HEX encoding for Unicode not implemented */
-	*(cp1++) = *(++cp2);
-        /* An escaped dot stays as is -- don't convert to slash */
-        if (*cp2 == '.') cp2++;
+        /* EFS file escape -- unescape it. */
+        cp2 += copy_expand_vms_filename_escape(cp1, cp2, &outchars_added) - 1;
+        cp1 += outchars_added;
     }
-    if (*cp2 == ':') {
+    else if (*cp2 == ':') {
       *(cp1++) = '/';
       if (*(cp2+1) == '[' || *(cp2+1) == '<') cp2++;
     }
