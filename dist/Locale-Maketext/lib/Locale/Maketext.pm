@@ -27,7 +27,7 @@ BEGIN {
 }
 
 
-$VERSION = '1.25';
+$VERSION = '1.26';
 @ISA = ();
 
 $MATCH_SUPERS = 1;
