@@ -28,6 +28,7 @@ my $tests = 26; # I can't see a clean way to calculate this automatically.
 my %skip = ("regen_perly.pl"    => [qw(perly.act perly.h perly.tab)],
             "regen/keywords.pl" => [qw(keywords.c keywords.h)],
             "regen/uconfig_h.h" => [qw(uconfig.h)],
+            "regen/mk_invlists.pl" => [qw(charclass_invlists.h)],
            );
 
 my @files = map {@$_} sort values %skip;

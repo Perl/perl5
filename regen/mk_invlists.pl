@@ -297,4 +297,4 @@ for my $charset (get_supported_code_pages()) {
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
-read_only_bottom_close_and_rename($out_fh)
+read_only_bottom_close_and_rename($out_fh, [$0])

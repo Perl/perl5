@@ -50100,4 +50100,6 @@ static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC POSIX-BC */
 
 #endif	/* EBCDIC POSIX-BC */
 
-/* ex: set ro: */
+/* Generated from:
+ * d8772d2511bca9f2072104eb35b5a3943111af908dfe772214d64baf0fef3cbd regen/mk_invlists.pl
+ * ex: set ro: */
