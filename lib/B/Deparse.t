@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 31; # not counting those in the __DATA__ section
+my $tests = 32; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -282,6 +282,15 @@ format STDOUT =
 x(); z()
 .
 EOCODH
+
+is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-T' ],
+           prog => "format =\n\@\n\$;\n.\n"),
+   <<'EOCODM', '$; on format line';
+format STDOUT =
+@
+$;
+.
+EOCODM
 
 # CORE::format
 $a = readpipe qq`$^X $path "-MO=Deparse" -e "use feature q|:all|;`
@@ -1741,6 +1750,12 @@ print f();
 ####
 # Elements of %# should not be confused with $#{ array }
 () = ${#}{'foo'};
+####
+# $; [perl #12335]
+$_ = $;;
+do {
+    $;
+};
 ####
 # [perl #121050] Prototypes with whitespace
 sub _121050(\$ \$) { }

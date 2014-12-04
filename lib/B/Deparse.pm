@@ -322,6 +322,15 @@ BEGIN {
 # \f - flush left (no indent)
 # \cK - kill following semicolon, if any
 
+# Semicolon handling:
+#  - Individual statements are not deparsed with trailing semicolons.
+#    (If necessary, \cK is tacked on to the end.)
+#  - Whatever code joins statements together or emits them (lineseq,
+#    scopeop, deparse_root) is responsible for adding semicolons where
+#    necessary.
+#  - use statements are deparsed with trailing semicolons because they are
+#    immediately concatenated with the following statement.
+#  - indent() removes semicolons wherever it sees \cK.
 
 
 BEGIN { for (qw[ const stringify rv2sv list glob pushmark null aelem
@@ -1562,7 +1571,6 @@ sub walk_lineseq {
 	my $expr2 = $self->deparse($kids[$i], (@kids != 1)/2);
 	$expr2 =~ s/^sub :(?!:)/+sub :/; # statement label otherwise
 	$expr .= $expr2;
-	$expr =~ s/;\n?\z//;
 	$callback->($expr, $i);
     }
 }
@@ -2081,16 +2089,7 @@ sub baseop {
     return $self->keyword($name);
 }
 
-sub pp_stub {
-    my $self = shift;
-    my($op, $cx, $name) = @_;
-    if ($cx >= 1) {
-	return "()";
-    }
-    else {
-	return "();";
-    }
-}
+sub pp_stub { "()" }
 sub pp_wantarray { baseop(@_, "wantarray") }
 sub pp_fork { baseop(@_, "fork") }
 sub pp_wait { maybe_targmy(@_, \&baseop, "wait") }
