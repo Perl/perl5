@@ -1982,7 +1982,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 			         GvNAMEUTF8(CvGV(outside)))
 			 : "UNDEFINED"));
 	}
-	if (nest < maxnest && (CvCLONE(sv) || CvCLONED(sv)))
+	if (CvOUTSIDE(sv)
+	 && (nest < maxnest && (CvCLONE(sv) || CvCLONED(sv))))
 	    do_sv_dump(level+1, file, MUTABLE_SV(CvOUTSIDE(sv)), nest+1, maxnest, dumpops, pvlim);
 	break;
 
