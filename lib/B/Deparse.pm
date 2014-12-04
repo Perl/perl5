@@ -1894,7 +1894,7 @@ sub pp_nextstate {
     # This should go after of any branches that add statements, to
     # increase the chances that it refers to the same line it did in
     # the original program.
-    if ($self->{'linenums'}) {
+    if ($self->{'linenums'} && $cx != .5) { # $cx == .5 means in a format
 	push @text, "\f#line " . $op->line .
 	  ' "' . $op->file, qq'"\n';
     }

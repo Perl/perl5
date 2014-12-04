@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 32; # not counting those in the __DATA__ section
+my $tests = 33; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -289,6 +289,15 @@ is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-T' ],
 format STDOUT =
 @
 $;
+.
+EOCODM
+
+is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse,-l', $path ],
+           prog => "format =\n\@\n\$foo\n.\n"),
+   <<'EOCODM', 'formats with -l';
+format STDOUT =
+@
+$foo
 .
 EOCODM
 
