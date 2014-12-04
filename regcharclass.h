@@ -2907,4 +2907,6 @@
 
 #endif /* H_REGCHARCLASS */
 
-/* ex: set ro: */
+/* Generated from:
+ * d3ce45436d251560bef015ee209e8a0661a0e564216585e9e84f25ec8ac715ae regen/regcharclass.pl
+ * ex: set ro: */

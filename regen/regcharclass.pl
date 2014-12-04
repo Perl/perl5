@@ -1456,7 +1456,7 @@ EOF
     if($path eq '-') {
 	print $out_fh "/* ex: set ro: */\n";
     } else {
-	read_only_bottom_close_and_rename($out_fh)
+	read_only_bottom_close_and_rename($out_fh, [$0])
     }
 }
 

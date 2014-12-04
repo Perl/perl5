@@ -29,6 +29,7 @@ my %skip = ("regen_perly.pl"    => [qw(perly.act perly.h perly.tab)],
             "regen/keywords.pl" => [qw(keywords.c keywords.h)],
             "regen/uconfig_h.h" => [qw(uconfig.h)],
             "regen/mk_invlists.pl" => [qw(charclass_invlists.h)],
+            "regen/regcharclass.pl" => [qw(regcharclass.h)],
            );
 
 my @files = map {@$_} sort values %skip;
