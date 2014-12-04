@@ -1101,9 +1101,7 @@ sub pad_subs {
 	    }
 	    my $protocv = $flags & SVpad_STATE
 		? $values[$ix]
-		  # XXX temporary future-compatibility; B::PADNAME will
-		  #     have a PROTOCV method and no MAGIC method
-		: $_->can("MAGIC") ? $_->MAGIC->OBJ : $_->PROTOCV;
+		: $_->PROTOCV;
 	    my $outseq = $protocv->OUTSIDE_SEQ;
 	    if ($outseq <= $low) {
 		# defined before its name is visible, so it’s gotta be
