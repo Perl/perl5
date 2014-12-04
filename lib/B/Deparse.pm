@@ -5043,6 +5043,38 @@ sub pure_string {
     return 1;
 }
 
+sub code_list {
+    my ($self,$op,$extended,$cv) = @_;
+
+    # localise stuff relating to the current sub
+    $cv and
+	local($self->{'curcv'}) = $cv,
+	local($self->{'curcvlex'}),
+	local(@$self{qw'curstash warnings hints hinthash curcop'})
+	    = @$self{qw'curstash warnings hints hinthash curcop'};
+
+    my $re;
+    for ($op = $op->first->sibling; !null($op); $op = $op->sibling) {
+	if ($op->name eq 'null' and $op->flags & OPf_SPECIAL) {
+	    my $scope = $op->first;
+	    # 0 context (last arg to scopeop) means statement context, so
+	    # the contents of the block will not be wrapped in do{...}.
+	    my $block = scopeop($scope->first->name eq "enter", $self,
+				$scope, 0);
+	    # next op is the source code of the block
+	    $op = $op->sibling;
+	    $re .= ($self->const_sv($op)->PV =~ m|^(\(\?\??\{)|)[0];
+	    my $multiline = $block =~ /\n/;
+	    $re .= $multiline ? "\n\t" : ' ';
+	    $re .= $block;
+	    $re .= $multiline ? "\n\b})" : " })";
+	} else {
+	    $re = re_dq_disambiguate($re, $self->re_dq($op, $extended));
+	}
+    }
+    $re;
+}
+
 sub regcomp {
     my $self = shift;
     my($op, $cx, $extended) = @_;
@@ -5112,6 +5144,22 @@ map($matchwords{join "", sort split //, $_} = $_, 'cig', 'cog', 'cos', 'cogs',
     'cox', 'go', 'is', 'ism', 'iso', 'mig', 'mix', 'osmic', 'ox', 'sic',
     'sig', 'six', 'smog', 'so', 'soc', 'sog', 'xi');
 
+# When deparsing a regular expression with code blocks, we have to look in
+# various places to find the blocks.
+#
+# For qr/(?{...})/ without interpolation, the CV is under $qr->qr_anoncv
+# and the code list (list of blocks and constants, maybe vars) is under
+# $cv->ROOT->first->code_list:
+#   ./perl -Ilib -MB -e 'use O "Concise", B::svref_2object(sub {qr/(?{die})/})->ROOT->first->first->sibling->pmregexp->qr_anoncv->object_2svref'
+#
+# For qr/$a(?{...})/ with interpolation, the code list is more accessible,
+# under $pmop->code_list, but the $cv is something you have to dig for in
+# the regcomp op’s kids:
+#   ./perl -Ilib -mO=Concise -e 'qr/$a(?{die})/'
+#
+# For m// and split //, things are much simpler.  There is no CV.  The code
+# list is under $pmop->code_list.
+
 sub matchop {
     my $self = shift;
     my($op, $cx, $name, $delim) = @_;
@@ -5131,7 +5179,30 @@ sub matchop {
     my $pmflags = $op->pmflags;
     my $extended = ($pmflags & PMf_EXTENDED);
     my $rhs_bound_to_defsv;
-    if (null $kid) {
+    my ($cv, $bregexp);
+    my $have_kid = !null $kid;
+    # Check for code blocks first
+    if (not null my $code_list = $op->code_list) {
+	$re = $self->code_list($code_list, $extended,
+			       $op->name eq 'qr'
+				   ? $self->padval(
+				         $kid->first   # ex-list
+					     ->first   #   pushmark
+					     ->sibling #   entersub
+					     ->first   #     ex-list
+					     ->first   #       pushmark
+					     ->sibling #       srefgen
+					     ->first   #         ex-list
+					     ->first   #           anoncode
+					     ->targ
+				     )
+				   : undef);
+    } elsif (${$bregexp = $op->pmregexp} && ${$cv = $bregexp->qr_anoncv}) {
+	my $patop = $cv->ROOT      # leavesub
+		       ->first     #   qr
+		       ->code_list;#     list
+	$re = $self->code_list($patop, $extended, $cv);
+    } elsif (!$have_kid) {
 	my $unbacked = re_unback($op->precomp);
 	if ($extended) {
 	    $re = re_uninterp_extended(escape_extended_re($unbacked));
@@ -5142,6 +5213,8 @@ sub matchop {
 	carp("found ".$kid->name." where regcomp expected");
     } else {
 	($re, $quote) = $self->regcomp($kid, 21, $extended);
+    }
+    if ($have_kid and $kid->name eq 'regcomp') {
 	my $matchop = $kid->first;
 	if ($matchop->name eq 'regcrest') {
 	    $matchop = $matchop->first;
@@ -5291,7 +5364,9 @@ sub pp_subst {
 	}
     }
     my $extended = ($pmflags & PMf_EXTENDED);
-    if (null $kid) {
+    if (not null my $code_list = $op->code_list) {
+	$re = $self->code_list($code_list, $extended);
+    } elsif (null $kid) {
 	my $unbacked = re_unback($op->precomp);
 	if ($extended) {
 	    $re = re_uninterp_extended(escape_extended_re($unbacked));
