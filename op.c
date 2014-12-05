@@ -4075,7 +4075,7 @@ S_fold_constants(pTHX_ OP *o)
     OP * VOL curop;
     OP *newop;
     VOL I32 type = o->op_type;
-    bool folded;
+    bool is_stringify;
     SV * VOL sv = NULL;
     int ret = 0;
     I32 oldscope;
@@ -4222,10 +4222,14 @@ S_fold_constants(pTHX_ OP *o)
     if (ret)
 	goto nope;
 
-    folded = cBOOL(o->op_folded);
+    /* OP_STRINGIFY and constant folding are used to implement qq.
+       Here the constant folding is an implementation detail that we
+       want to hide.  If the stringify op is itself already marked
+       folded, however, then it is actually a folded join.  */
+    is_stringify = type == OP_STRINGIFY && !o->op_folded;
     op_free(o);
     assert(sv);
-    if (type == OP_STRINGIFY && !folded)
+    if (is_stringify)
 	SvPADTMP_off(sv);
     else if (!SvIMMORTAL(sv)) {
 	SvPADTMP_on(sv);
@@ -4236,11 +4240,7 @@ S_fold_constants(pTHX_ OP *o)
     else
     {
 	newop = newSVOP(OP_CONST, 0, MUTABLE_SV(sv));
-	/* OP_STRINGIFY and constant folding are used to implement qq.
-	   Here the constant folding is an implementation detail that we
-	   want to hide.  If the stringify op is itself already marked
-	   folded, however, then it is actually a folded join.  */
-	if (type != OP_STRINGIFY || folded) newop->op_folded = 1;
+	if (!is_stringify) newop->op_folded = 1;
     }
     return newop;
 
