@@ -250,3 +250,12 @@ d_attribute_noreturn='undef'
 d_attribute_pure='undef'
 d_attribute_unused='undef'
 d_attribute_warn_unused_result='undef'
+
+# nan() is in libm but doesn't work as expected: nan("") or nan("0")
+# returns zero, not a nan:
+# http://www-01.ibm.com/support/knowledgecenter/SSLTBW_1.12.0/com.ibm.zos.r12.bpxbd00/nan.htm%23nan?lang=en
+# contrast with e.g.
+# http://www.cplusplus.com/reference/cmath/nan-function/
+# (C++ but C99 math agrees)
+# XXX: Configure scan for proper behavior
+d_nan='undef'
