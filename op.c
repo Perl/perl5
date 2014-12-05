@@ -4235,13 +4235,8 @@ S_fold_constants(pTHX_ OP *o)
 	SvPADTMP_on(sv);
 	SvREADONLY_on(sv);
     }
-    if (type == OP_RV2GV)
-	newop = newGVOP(OP_GV, 0, MUTABLE_GV(sv));
-    else
-    {
-	newop = newSVOP(OP_CONST, 0, MUTABLE_SV(sv));
-	if (!is_stringify) newop->op_folded = 1;
-    }
+    newop = newSVOP(OP_CONST, 0, MUTABLE_SV(sv));
+    if (!is_stringify) newop->op_folded = 1;
     return newop;
 
  nope:
