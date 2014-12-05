@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 28;
+plan tests => 29;
 
 @x = (1, 2, 3);
 is( join(':',@x), '1:2:3', 'join an array with character');
@@ -124,3 +124,7 @@ package o { use overload q|""| => sub { ${$_[0]}++ } }
   is $_, "1a2a3a4a5a6a7a8a9a10", 'join, $overloaded, LIST';
   is $$o, "b", 'overloading was called once on overloaded separator';
 }
+
+for(1,2) { push @_, \join "x", 1 }
+isnt $_[1], $_[0],
+    'join(const, const) still returns a new scalar each time';

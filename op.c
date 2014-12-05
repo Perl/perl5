@@ -4225,7 +4225,8 @@ S_fold_constants(pTHX_ OP *o)
     folded = cBOOL(o->op_folded);
     op_free(o);
     assert(sv);
-    if (type == OP_STRINGIFY) SvPADTMP_off(sv);
+    if (type == OP_STRINGIFY && !folded)
+	SvPADTMP_off(sv);
     else if (!SvIMMORTAL(sv)) {
 	SvPADTMP_on(sv);
 	SvREADONLY_on(sv);
@@ -4450,6 +4451,8 @@ Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
 
     CHANGE_TYPE(o, type);
     o->op_flags |= flags;
+    if (flags & OPf_FOLDED)
+	o->op_folded = 1;
 
     o = CHECKOP(type, o);
     if (o->op_type != (unsigned)type)
@@ -10973,10 +10976,9 @@ Perl_ck_join(pTHX_ OP *o)
 	if (bairn && !OP_HAS_SIBLING(bairn) /* single-item list */
 	 && PL_opargs[bairn->op_type] & OA_RETSCALAR)
 	{
-	    OP * const ret = op_convert_list(OP_STRINGIFY, 0,
+	    OP * const ret = op_convert_list(OP_STRINGIFY, OPf_FOLDED,
 				     op_sibling_splice(o, kid, 1, NULL));
 	    op_free(o);
-	    ret->op_folded = 1;
 	    return ret;
 	}
     }
