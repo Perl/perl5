@@ -5188,22 +5188,27 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
         }
         SvIsCOW_off(sv);
 # ifdef PERL_NEW_COPY_ON_WRITE
-	if (len && CowREFCNT(sv) == 0)
-	    /* We own the buffer ourselves. */
-	    sv_buf_to_rw(sv);
+	if (len) {
+	    /* Must do this first, since the CowREFCNT uses SvPVX and
+	    we need to write to CowREFCNT, or de-RO the whole buffer if we are
+	    the only owner left of the buffer. */
+	    sv_buf_to_rw(sv); /* NOOP if RO-ing not supported */
+	    {
+		U8 cowrefcnt = CowREFCNT(sv);
+		if(cowrefcnt != 0) {
+		    cowrefcnt--;
+		    CowREFCNT(sv) = cowrefcnt;
+		    sv_buf_to_ro(sv);
+		    goto copy_over;
+		}
+	    }
+	    /* Else we are the only owner of the buffer. */
+        }
 	else
 # endif
 	{
-		
             /* This SV doesn't own the buffer, so need to Newx() a new one:  */
-# ifdef PERL_NEW_COPY_ON_WRITE
-	    /* Must do this first, since the macro uses SvPVX. */
-	    if (len) {
-		sv_buf_to_rw(sv);
-		CowREFCNT(sv)--;
-		sv_buf_to_ro(sv);
-	    }
-# endif
+            copy_over:
             SvPV_set(sv, NULL);
             SvCUR_set(sv, 0);
             SvLEN_set(sv, 0);
