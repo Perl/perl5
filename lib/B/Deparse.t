@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 33; # not counting those in the __DATA__ section
+my $tests = 34; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -343,6 +343,10 @@ like($a, qr/my sub __DATA__;\n.*\nCORE::__DATA__/s,
 # sub declarations
 $a = readpipe qq`$^X $path "-MO=Deparse" -e "sub foo{}" 2>&1`;
 like($a, qr/sub foo\s*\{\s+\}/, 'sub declarations');
+like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+           prog => 'sub f($); sub f($){}'),
+     qr/sub f\s*\(\$\)\s*\{\s*\}/,
+    'predeclared prototyped subs';
 
 # BEGIN blocks
 SKIP : {
