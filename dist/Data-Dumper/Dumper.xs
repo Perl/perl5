@@ -798,7 +798,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	else if (realtype == SVt_PVHV) {
 	    SV *totpad, *newapad;
 	    SV *sname;
-	    HE *entry;
+	    HE *entry = NULL;
 	    char *key;
 	    I32 klen;
 	    SV *hval;
