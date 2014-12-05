@@ -1580,7 +1580,7 @@ static XSPROTO(is_common)
                 Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
                             "Calling POSIX::%"HEKf"() is deprecated",
                             HEKfARG(GvNAME_HEK(CvGV(cv))));
-		hv_store(warned, (const char *)&PL_op, sizeof(PL_op), &PL_sv_yes, 0);
+		(void)hv_store(warned, (const char *)&PL_op, sizeof(PL_op), &PL_sv_yes, 0);
             }
         }
 
@@ -3024,7 +3024,7 @@ tmpnam()
 	    HV *warned = get_hv("POSIX::_warned", GV_ADD | GV_ADDMULTI);
             if (! hv_exists(warned, (const char *)&PL_op, sizeof(PL_op))) {
                 Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "Calling POSIX::tmpnam() is deprecated");
-                hv_store(warned, (const char *)&PL_op, sizeof(PL_op), &PL_sv_yes, 0);
+                (void)hv_store(warned, (const char *)&PL_op, sizeof(PL_op), &PL_sv_yes, 0);
             }
         }
 	len = strlen(tmpnam(SvPV(RETVAL, i)));
