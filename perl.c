@@ -1290,9 +1290,10 @@ perl_destruct(pTHXx)
     TAINTING_set(FALSE);
     TAINT_WARN_set(FALSE);
     PL_hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
-    PL_debug = 0;
 
     DEBUG_P(debprofdump());
+
+    PL_debug = 0;
 
 #ifdef USE_REENTRANT_API
     Perl_reentrant_free(aTHX);
