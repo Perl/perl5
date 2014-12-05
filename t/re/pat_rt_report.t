@@ -972,8 +972,11 @@ sub run_tests {
         is($x, 'ab cd', $message);
     }
 
-    {
+    SKIP: {
+        skip("Can run out of memory on os390", 1) if $^O eq 'os390';
         ok (("a" x (2 ** 15 - 10)) =~ /^()(a|bb)*$/, "Recursive stack cracker; Bug 24274");
+    }
+    {
         ok ((q(a)x 100) =~ /^(??{'(.)'x 100})/, 
             "Regexp /^(??{'(.)'x 100})/ crashes older perls; Bug 24274");
     }
