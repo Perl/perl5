@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 34; # not counting those in the __DATA__ section
+my $tests = 35; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -347,6 +347,12 @@ like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
            prog => 'sub f($); sub f($){}'),
      qr/sub f\s*\(\$\)\s*\{\s*\}/,
     'predeclared prototyped subs';
+like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+           prog => 'use Scalar::Util q-weaken-;
+                    sub f($);
+                    BEGIN { weaken($_=\$::{f}) }'),
+     qr/sub f\s*\(\$\)\s*;/,
+    'prototyped stub with weak reference to the stash entry';
 
 # BEGIN blocks
 SKIP : {
