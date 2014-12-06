@@ -1266,7 +1266,8 @@ assertx(int x)
     CODE:
         /* this only needs to compile and checks that assert() can be
            used this way syntactically */
-        (assert(x),1);
+	(void)(assert(x), 1);
+	(void)(x);
 
 MODULE = XS::APItest::utf8	PACKAGE = XS::APItest::utf8
 
