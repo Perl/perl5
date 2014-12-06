@@ -392,7 +392,6 @@ __DEPARSE_FAILURES__
 base/lex.t
 comp/final_line_num.t
 comp/fold.t
-comp/form_scope.t
 comp/hints.t
 comp/opsubs.t
 comp/parser.t
