@@ -35,6 +35,14 @@ Do we need this sequence of commits too? See https://rt.perl.org/Ticket/Display.
 <commit votes="" id="cd94980729f7f861da34f8bc040253ca8d4d6d20" ticket="122747" desc="perldelta for b4fa55d and 0ddd4a5"/>
 <commit votes="" id="6d67525df38ae6b009f80748fc8ed0544c91d809" ticket="122747" desc="perldelta: Insert missing =item"/>
 
+(Note: #123339 is a prerequisite for #40565)
+<commit votes="steveh" id="64c909d3055a7d5436012fab51eb1c046088140a" ticket="123339" desc="fix segv for psudofork duping of SAVEt_GP_ALIASED_SV"/>
+<commit votes="steveh, sprout" id="83a94553cbf9f2c11b3e9a63a44e7b9ce17ccb77" ticket="40565" desc="[perl #40565] Fix localisation in pseudo-fork"/>
+<commit votes="steveh" id="452466a503257b1012694b0d3a3cbf260e409d18" ticket="40565" desc="perldelta for the prev. commit"/>
+
+<commit votes="sprout" id="3bc8ec963e9657121e69386195faa61e46928dda" ticket="123344" desc="Fix qr/@array(?{block})/"/>
+<commit votes="sprout" id="d100ca43dce2c9a6bb636517e5595aa9e1e01e7e" ticket="123344" desc="Fix assertion failure with qr/\Q(?{})/"/>
+
 <head votes="arc, sprout, steveh" branch="sprout/maint-5.20-123029" ticket="123029" desc="5.20.x regression in state under PERL_NO_COW"/>
 This contains cherry-picks of
 	c4a33ecd3009146ea545628e3014a22c637b6bb1 [perl #123029]: add regression test
@@ -70,10 +78,6 @@ Crash Fixes
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
 <commit votes="steveh" id="9d8e4b9b32800eb499d83442ce8bbe6639773936" ticket="" desc="Fix crash with lex subs under -d"/>
 <commit votes="steveh" id="1699f5c257bc554753cc4ddf10c62ac8a5c338ff" ticket="" desc="perldelta for f20d0df0f"/>
-
-<commit votes="steveh" id="64c909d3055a7d5436012fab51eb1c046088140a" ticket="123339" desc="fix segv for psudofork duping of SAVEt_GP_ALIASED_SV"/>
-<commit votes="steveh, sprout" id="83a94553cbf9f2c11b3e9a63a44e7b9ce17ccb77" ticket="40565" desc="[perl #40565] Fix localisation in pseudo-fork"/>
-<commit votes="steveh" id="452466a503257b1012694b0d3a3cbf260e409d18" ticket="40565" desc="perldelta for the prev. commit"/>
 
 Security Fixes
 --------------
