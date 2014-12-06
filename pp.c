@@ -3343,7 +3343,7 @@ PP(pp_index)
 	retval = -1;
     else {
 	retval = little_p - big_p;
-	if (retval > 0 && big_utf8)
+	if (retval > 1 && big_utf8)
 	    retval = sv_pos_b2u_flags(big, retval, SV_CONST_RETURN);
     }
     SvREFCNT_dec(temp);

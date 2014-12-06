@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 121 );
+plan( tests => 122 );
 
 run_tests() unless caller;
 
@@ -253,3 +253,7 @@ is index('the main road', __PACKAGE__), 4,
     '[perl #119169] __PACKAGE__ as 2nd argument';
 
 } # end of sub run_tests
+
+utf8::upgrade my $substr = "\x{a3}a";
+
+is index($substr, 'a'), 1, 'index reply reflects characters not octets';
