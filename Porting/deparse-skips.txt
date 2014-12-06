@@ -392,7 +392,7 @@ __DEPARSE_FAILURES__
 base/lex.t                # checks regexp stringification
 comp/final_line_num.t     # tests syntax error after BEGIN block
 comp/fold.t               # mutability of folded constants
-comp/parser.t
+comp/parser.t             # crazy #line directives ==> shell syntax errors
 comp/require.t
 io/inplace.t
 io/utf8.t
