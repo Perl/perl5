@@ -119,13 +119,13 @@ Configure and hints/ Fixes
 --------------------------
 
 Would these break binary compatibility?
-<commit votes="" id="44b62df7ceb322e1e0484f45065025f0a709303c" ticket="" desc="Darwin: if cc is explicitly gcc/g++, use it also as ld."/>
-<commit votes="" id="990a70b8c9866c888194f4c2c6d152d7911b3c34" ticket="" desc="Darwin: set ld to 'cc' if $cc is 'cc' or empty, $cc otherwise."/>
-<commit votes="" id="54db7d57c29c9259228a6a4176caa32e391c6d0b" ticket="" desc="Upstream a patch from pkgsrc for NetBSD hints"/>
+<commit votes="tux" id="44b62df7ceb322e1e0484f45065025f0a709303c" ticket="" desc="Darwin: if cc is explicitly gcc/g++, use it also as ld."/>
+<commit votes="tux" id="990a70b8c9866c888194f4c2c6d152d7911b3c34" ticket="" desc="Darwin: set ld to 'cc' if $cc is 'cc' or empty, $cc otherwise."/>
+<commit votes="tux" id="54db7d57c29c9259228a6a4176caa32e391c6d0b" ticket="" desc="Upstream a patch from pkgsrc for NetBSD hints"/>
 <commit votes="" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
-<commit votes="" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
+<commit votes="tux" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
 
-<head votes="steveh" branch="smoke-me/jhi/maint-5.20-necromantic" ticket="" desc="IRIX and Tru64 fixes"/>
+<head votes="steveh,tux" branch="smoke-me/jhi/maint-5.20-necromantic" ticket="" desc="IRIX and Tru64 fixes"/>
 This contains cherry-picks of
 	0b6ebfadd8d2cfccc07203e94d583721305fd779 IRIX 6.5 (cc 7.4) needs -c99 to compile without whining.
 	1764d98bf44052060e2fe7cfa940d4ffc19f5961 Irix: MIPSpro 7.4 compiler has broken memcmp.
@@ -157,7 +157,7 @@ Platform-Specific Build/Test/Installation Fixes
 <commit votes="steveh" id="2d4a3ccef465111dae0e5e71cf008e97efeb057c" ticket="" desc="Errno parsing: Don't match hex numbers in parts of function names"/>
 <commit votes="steveh" id="cc192ed19bd1c52dd1711a900ce276043ce418ae" ticket="" desc="Errno parsing: Skip expressions containing function names etc"/>
 <commit votes="steveh" id="5884c88b2d4d412c81919fffcc0c487b49521793" ticket="" desc="Bump $Errno::VERSION for previous commits"/>
-<commit votes="steveh" id="b7ddc5bada637a1961bd44a02428c42f98955212" ticket="" desc="A little help for clang++ in toke.c"/>
+<commit votes="steveh,tux" id="b7ddc5bada637a1961bd44a02428c42f98955212" ticket="" desc="A little help for clang++ in toke.c"/>
 <commit votes="steveh" id="cd1dc8e2c73be346de250a16f103fb9a97814dd3" ticket="122861" desc="sv.c: Suppress compiler warning"/>
 <commit votes="steveh" id="1e02895ff34c407637067df12a1b06eb07a5a96a" ticket="" desc="t/io/eintr.t: Make this pass on my ppc64 box"/>
 <commit votes="steveh" id="c7925a5e8559739ce765137cf6164c5872c63a96" ticket="" desc="fix WinCE build"/>
