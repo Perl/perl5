@@ -392,7 +392,6 @@ __DEPARSE_FAILURES__
 base/lex.t                # checks regexp stringification
 comp/final_line_num.t     # tests syntax error after BEGIN block
 comp/fold.t               # mutability of folded constants
-comp/hints.t
 comp/opsubs.t
 comp/parser.t
 comp/proto.t
