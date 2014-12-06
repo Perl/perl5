@@ -19,5 +19,6 @@ autodie cpan/autodie/t/truncate.t 0fa688d8838b2b4d5b6508f244f4eb099a72e86f
 autodie cpan/autodie/t/utf8_open.t 5295851351c49f939008c5aca6a798742b1e503d
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
 podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d025d69
+threads dist/threads/threads.xs f492e1266d30f62faba625bee1d11652eb349955
 version cpan/version/lib/version.pm d0923b895d57f1d669ae36fcf85c87b16db341d1
 version vutil.c 668f17ca43e2527645674d29ba772b86330d5663
