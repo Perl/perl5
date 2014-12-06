@@ -10,7 +10,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.19";
+$VERSION = "0.20";
 
 #use strict;
 
@@ -109,9 +109,10 @@ print OUT <<'EOT';
 #       print STDERR "BS: $bs ($^O, $dlsrc)\n" if $dl_debug;
         eval { do $bs; };
         warn "$bs: $@\n" if $@;
+	goto \&XSLoader::bootstrap_inherit;
     }
 
-    goto \&XSLoader::bootstrap_inherit if not -f $file or -s $bs;
+    goto \&XSLoader::bootstrap_inherit if not -f $file;
 
     my $bootname = "boot_$module";
     $bootname =~ s/\W/_/g;

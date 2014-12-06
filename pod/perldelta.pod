@@ -144,6 +144,12 @@ Don't turn leading C<//> into C</> on Cygwin. [perl #122635]
 
 L<Locale::Maketext> has been upgraded from version 1.25 to 1.26.
 
+=item *
+
+L<XSLoader> has been upgraded from version 0.19 to 0.20
+
+Don't test twice for bootstrap file.
+
 =back
 
 =head2 Removed Modules and Pragmata
