@@ -8274,7 +8274,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	      :   PL_curstash != CopSTASH(PL_curcop)
 	       || memchr(name, ':', namlen) || memchr(name, '\'', namlen)
 		    ? gv_fetch_flags
-		    : GV_ADDMULTI | GV_NOINIT;
+		    : GV_ADDMULTI | GV_NOINIT | GV_NOTQUAL;
 	gv = gv_fetchsv(cSVOPo->op_sv, flags, SVt_PVCV);
 	has_name = TRUE;
     } else if (PERLDB_NAMEANON && CopLINE(PL_curcop)) {
