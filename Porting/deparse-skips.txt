@@ -389,9 +389,9 @@ __DEPARSE_FAILURES__
 ../lib/overload.t
 ../lib/overloading.t
 ../lib/utf8.t
-base/lex.t
-comp/final_line_num.t
-comp/fold.t
+base/lex.t                # checks regexp stringification
+comp/final_line_num.t     # tests syntax error after BEGIN block
+comp/fold.t               # mutability of folded constants
 comp/hints.t
 comp/opsubs.t
 comp/parser.t
