@@ -4164,12 +4164,12 @@ sub pp_entersub {
     }
 
     my $args;
+    my $listargs = 1;
     if ($declared and defined $proto and not $amper) {
 	($amper, $args) = $self->check_proto($proto, @exprs);
-	if ($amper eq "&") {
-	    $args = join(", ", map($self->deparse($_, 6), @exprs));
-	}
-    } else {
+	$listargs = $amper;
+    }
+    if ($listargs) {
 	$args = join(", ", map($self->deparse($_, 6), @exprs));
     }
     if ($prefix or $amper) {
