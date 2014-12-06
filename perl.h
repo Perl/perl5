@@ -309,7 +309,7 @@
 #endif
 
 #ifndef PERL_UNUSED_DECL
-#  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
+#  if defined(HASATTRIBUTE_UNUSED) && (!defined(__cplusplus) || (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)))
 #    define PERL_UNUSED_DECL __attribute__unused__
 #  else
 #    define PERL_UNUSED_DECL
