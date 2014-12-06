@@ -4442,7 +4442,8 @@ sub const {
     }
     if (class($sv) eq "SPECIAL") {
 	# sv_undef, sv_yes, sv_no
-	return ('undef', '1', $self->maybe_parens("!1", $cx, 21))[$$sv-1];
+	return $$sv == 3 ? $self->maybe_parens("!1", $cx, 21)
+			 : ('undef', '1')[$$sv-1];
     }
     if (class($sv) eq "NULL") {
        return 'undef';
