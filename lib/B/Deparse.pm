@@ -4546,7 +4546,7 @@ sub const {
 	return $self->maybe_parens("\\$const", $cx, 20);
     } elsif ($sv->FLAGS & SVf_POK) {
 	my $str = $sv->PV;
-	if ($str =~ /[[:^print:]]/) {
+	if ($str =~ /[[:^print:]]/a) {
 	    return single_delim("qq", '"',
 				 uninterp(escape_str unback $str), $self);
 	} else {
