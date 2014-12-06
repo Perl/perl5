@@ -3454,6 +3454,9 @@ lchown(uid, gid, path)
         * but consistent with CORE::chown() */
        RETVAL = lchown(path, uid, gid);
 #else
+       PERL_UNUSED_VAR(uid);
+       PERL_UNUSED_VAR(gid);
+       PERL_UNUSED_VAR(path);
        RETVAL = not_here("lchown");
 #endif
     OUTPUT:
