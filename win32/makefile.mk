@@ -625,6 +625,9 @@ LIBBASEFILES    += bufferoverflowU.lib
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
 EXTRACFLAGS	= -nologo -GF -W3
+.IF "$(__ICC)" == "define"
+EXTRACFLAGS	= $(EXTRACFLAGS) -Qstd=c99
+.ENDIF
 CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \

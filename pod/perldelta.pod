@@ -327,16 +327,13 @@ XXX
 
 =head2 Platform-Specific Notes
 
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
+=head3 Win32
 
-=over 4
+=over
 
-=item XXX-some-platform
+=item *
 
-XXX
+Intel C builds are now always built with C99 mode on.
 
 =back
 

@@ -333,7 +333,10 @@ IA-32 Visual Studio 20__ mode or Intel 64 Visual Studio 20__ mode as
 appropriate. Then run nmake as usually in that prompt box.
 
 Only Intel C++ Compiler v12.1 has been tested. Other versions probably will
-work.
+work. Using Intel C++ Compiler instead of Visual C has the benefit of C99
+compatibility which is needed by some CPAN XS modules, while maintaining
+compatibility with Visual C object code and Visual C debugging infrastructure
+unlike GCC.
 
 =back
 
