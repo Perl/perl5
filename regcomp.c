@@ -8170,6 +8170,8 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
     assert(SvLEN(invlist) == 0 || SvCUR(invlist) <= SvLEN(invlist));
 }
 
+#ifndef PERL_IN_XSUB_RE
+
 PERL_STATIC_INLINE IV*
 S_get_invlist_previous_index_addr(SV* invlist)
 {
@@ -8203,6 +8205,28 @@ S_invlist_set_previous_index(SV* const invlist, const IV index)
 
     *get_invlist_previous_index_addr(invlist) = index;
 }
+
+PERL_STATIC_INLINE void
+S_invlist_trim(SV* const invlist)
+{
+    PERL_ARGS_ASSERT_INVLIST_TRIM;
+
+    assert(SvTYPE(invlist) == SVt_INVLIST);
+
+    /* Change the length of the inversion list to how many entries it currently
+     * has */
+    SvPV_shrink_to_cur((SV *) invlist);
+}
+
+PERL_STATIC_INLINE bool
+S_invlist_is_iterating(SV* const invlist)
+{
+    PERL_ARGS_ASSERT_INVLIST_IS_ITERATING;
+
+    return *(get_invlist_iter_addr(invlist)) < (STRLEN) UV_MAX;
+}
+
+#endif /* ifndef PERL_IN_XSUB_RE */
 
 PERL_STATIC_INLINE UV
 S_invlist_max(SV* const invlist)
@@ -8321,18 +8345,6 @@ S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
     /* Add one to account for the zero element at the beginning which may not
      * be counted by the calling parameters */
     SvGROW((SV *)invlist, TO_INTERNAL_SIZE(new_max + 1));
-}
-
-PERL_STATIC_INLINE void
-S_invlist_trim(SV* const invlist)
-{
-    PERL_ARGS_ASSERT_INVLIST_TRIM;
-
-    assert(SvTYPE(invlist) == SVt_INVLIST);
-
-    /* Change the length of the inversion list to how many entries it currently
-     * has */
-    SvPV_shrink_to_cur((SV *) invlist);
 }
 
 STATIC void
@@ -9293,14 +9305,6 @@ S_invlist_iternext(SV* invlist, UV* start, UV* end)
     }
 
     return TRUE;
-}
-
-PERL_STATIC_INLINE bool
-S_invlist_is_iterating(SV* const invlist)
-{
-    PERL_ARGS_ASSERT_INVLIST_IS_ITERATING;
-
-    return *(get_invlist_iter_addr(invlist)) < (STRLEN) UV_MAX;
 }
 
 PERL_STATIC_INLINE UV
