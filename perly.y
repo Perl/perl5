@@ -263,6 +263,7 @@ barestmt:	PLUGSTMT
 			      SvREFCNT_inc_simple_void(fmtcv);
 			      pad_add_anon(fmtcv, OP_NULL);
 			  }
+			  parser->parsed_sub = 1;
 			}
 	|	SUB subname startsub
 			{

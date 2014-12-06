@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 35; # not counting those in the __DATA__ section
+my $tests = 36; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -298,6 +298,18 @@ format STDOUT =
 $foo
 .
 EOCODM
+
+is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+           prog => "{ my \$x; format =\n\@\n\$x\n.\n}"),
+   <<'EOCODN', 'formats nested inside blocks';
+{
+    my $x;
+    format STDOUT =
+@
+$x
+.
+}
+EOCODN
 
 # CORE::format
 $a = readpipe qq`$^X $path "-MO=Deparse" -e "use feature q|:all|;`

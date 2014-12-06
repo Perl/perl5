@@ -9068,6 +9068,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     if (PL_parser)
 	PL_parser->copline = NOLINE;
     LEAVE_SCOPE(floor);
+    PL_compiling.cop_seq = 0;
 }
 
 OP *
