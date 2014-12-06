@@ -2139,6 +2139,7 @@ acos(x)
 	y0 = 29
 	y1 = 30
     CODE:
+	PERL_UNUSED_VAR(x);
 	RETVAL = NV_NAN;
 	switch (ix) {
 	case 0:
@@ -2360,6 +2361,7 @@ fesetround(x)
         default: RETVAL = -1; break;
 	}
 #else
+	PERL_UNUSED_VAR(x);
 	RETVAL = -1;
 	not_here("fesetround");
 #endif
@@ -2379,6 +2381,7 @@ fpclassify(x)
 	lround = 7
         signbit = 8
     CODE:
+        PERL_UNUSED_VAR(x);
 	RETVAL = -1;
 	switch (ix) {
 	case 0:
@@ -2457,6 +2460,8 @@ copysign(x,y)
 	nexttoward = 13
 	remainder = 14
     CODE:
+        PERL_UNUSED_VAR(x);
+        PERL_UNUSED_VAR(y);
 	RETVAL = NV_NAN;
 	switch (ix) {
 	case 0:
@@ -2556,9 +2561,9 @@ copysign(x,y)
 	case 14:
 	default:
 #ifdef c99_remainder
-	    RETVAL = c99_remainder(x, y);
+          RETVAL = c99_remainder(x, y);
 #else
-	    not_here("remainder");
+          not_here("remainder");
 #endif
 	    break;
 	}
@@ -2598,6 +2603,8 @@ remquo(x,y)
         PUSHs(sv_2mortal(newSVnv(c99_remquo(x,y,&intvar))));
         PUSHs(sv_2mortal(newSVnv(intvar)));
 #else
+	PERL_UNUSED_VAR(x);
+	PERL_UNUSED_VAR(y);
 	not_here("remquo");
 #endif
 
@@ -2609,6 +2616,8 @@ scalbn(x,y)
 #ifdef c99_scalbn
 	RETVAL = c99_scalbn(x, y);
 #else
+	PERL_UNUSED_VAR(x);
+	PERL_UNUSED_VAR(y);
 	RETVAL = NV_NAN;
 	not_here("scalbn");
 #endif
@@ -2622,6 +2631,9 @@ fma(x,y,z)
 	NV		z
     CODE:
 #ifdef c99_fma
+	PERL_UNUSED_VAR(x);
+	PERL_UNUSED_VAR(y);
+	PERL_UNUSED_VAR(z);
 	RETVAL = c99_fma(x, y, z);
 #endif
     OUTPUT:
@@ -2651,21 +2663,23 @@ jn(x,y)
     ALIAS:
 	yn = 1
     CODE:
+	PERL_UNUSED_VAR(x);
+	PERL_UNUSED_VAR(y);
 	RETVAL = NV_NAN;
         switch (ix) {
 	case 0:
 #ifdef bessel_jn
-	    RETVAL = bessel_jn(x, y);
+          RETVAL = bessel_jn(x, y);
 #else
-	    not_here("jn");
+          not_here("jn");
 #endif
             break;
 	case 1:
 	default:
 #ifdef bessel_yn
-	    RETVAL = bessel_yn(x, y);
+          RETVAL = bessel_yn(x, y);
 #else
-	    not_here("yn");
+          not_here("yn");
 #endif
             break;
 	}
