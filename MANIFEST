@@ -4721,6 +4721,7 @@ Porting/checkpodencoding.pl	Check POD encoding
 Porting/checkURL.pl		Check whether we have working URLs
 Porting/checkVERSION.pl		Check whether we have $VERSIONs
 Porting/cherrymaint		Command line tool for updating cherrymaint
+Porting/cherry-pick-votes-maint-5.20.xml	Cherry-picking votes for maint-5.20
 Porting/cmpVERSION.pl		Compare whether two trees have changed modules
 Porting/config_H		Sample config.h
 Porting/config_h.pl		Reorder config_h.SH after metaconfig

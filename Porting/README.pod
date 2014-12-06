@@ -74,6 +74,10 @@ versions updated.
 Command line tool to update cherrymaint; a tool for selecting commits from 
 blead to cherry-pick into stable perl versions.
 
+=head2 F<cherry-pick-votes-maint-5.20.xml>
+
+Used to record proposals and votes for cherry-picks into maint-5.20.
+
 =head2 F<cmpVERSION.pl>
 
 Compare the current Perl source tree and a given tag for modules that have
