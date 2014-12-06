@@ -259,7 +259,12 @@ rmagical_a_dummy(pTHX_ IV idx, SV *sv) {
     return 0;
 }
 
-STATIC MGVTBL rmagical_b = { 0 };
+/* We could do "= { 0 };" but some versions of gcc do warn
+ * (with -Wextra) about missing initializer, this is probably gcc
+ * being a bit too paranoid.  But since this is file-static, we can
+ * just have it without initializer, since it should get
+ * zero-initialized. */
+STATIC MGVTBL rmagical_b;
 
 STATIC void
 blockhook_csc_start(pTHX_ int full)
