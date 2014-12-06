@@ -399,7 +399,7 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 	}
 	if (name)
 	    Perl_sv_catpv(aTHX_ report, name);
-	else if ((char)rv > ' ' && (char)rv <= '~')
+	else if (isGRAPH(rv))
 	{
 	    Perl_sv_catpvf(aTHX_ report, "'%c'", (char)rv);
 	    if ((char)rv == 'p')
