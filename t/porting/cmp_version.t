@@ -4,6 +4,11 @@
 #
 # Adapted from Porting/cmpVERSION.pl by Abigail
 # Changes folded back into that by Nicholas
+#
+# If some modules fail this, you need a version bump (_001, etc.)
+# AND you should probably also nudge the upstream maintainer for
+# example by filing a bug, with a patch attached and linking to
+# the core change.
 
 BEGIN {
     @INC = '..' if -f '../TestInit.pm';
