@@ -470,10 +470,10 @@ S_ithread_run(void * arg)
 {
     ithread *thread = (ithread *)arg;
     int jmp_rc = 0;
-    I32 oldscope;
+    volatile I32 oldscope;
     volatile int exit_app = 0;   /* Thread terminated using 'exit' */
     volatile int exit_code = 0;
-    int died = 0;       /* Thread terminated abnormally */
+    volatile int died = 0;       /* Thread terminated abnormally */
 
     dJMPENV;
 
