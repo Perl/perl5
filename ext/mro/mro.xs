@@ -477,8 +477,8 @@ mro__nextcan(...)
     const PERL_SI *top_si = PL_curstackinfo;
     HV* selfstash;
     SV *stashname;
-    const char *fq_subname;
-    const char *subname;
+    const char *fq_subname = NULL;
+    const char *subname = NULL;
     bool subname_utf8 = 0;
     STRLEN stashname_len;
     STRLEN subname_len;
