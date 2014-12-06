@@ -140,7 +140,7 @@ like($a, qr/$b/,
 
 $a = `$^X $path "-MO=Deparse" -e "use constant PI => 4" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
-is($a, "();\nuse constant ('PI', 4);\n",
+is($a, "use constant ('PI', 4);\n",
    "Proxy Constant Subroutines must not show up as (incorrect) prototypes");
 
 #Re: perlbug #35857, patch #24505
@@ -188,7 +188,6 @@ EOFCODE
 $a = `$^X $path "-MO=Deparse" -e "sub ::::{}sub ::::::{}" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODG', "sub :::: and sub ::::::");
-();
 sub :::: {
     
 }
@@ -225,7 +224,6 @@ $a =
   `$^X $path "-MO=Deparse" -e "BEGIN{*CORE::GLOBAL::require=sub{1}}" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODF', "CORE::GLOBAL::require override causing panick");
-();
 sub BEGIN {
     *CORE::GLOBAL::require = sub {
         1;

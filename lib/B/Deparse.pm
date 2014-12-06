@@ -890,8 +890,25 @@ sub compile {
 	local $B::overlay = {};
 	unless (null $root) {
 	    $self->pad_subs($self->{'curcv'});
-	    $self->pessimise($root, main_start);
-	    print $self->indent($self->deparse_root($root)), "\n";
+	    # Check for a stub-followed-by-ex-cop, resulting from a program
+	    # consisting solely of sub declarations.  For backward-compati-
+	    # bility (and sane output) we don’t want to emit the stub.
+	    #   leave
+	    #     enter
+	    #     stub
+	    #     ex-nextstate (or ex-dbstate)
+	    my $kid;
+	    if ( $root->name eq 'leave'
+	     and ($kid = $root->first)->name eq 'enter'
+	     and !null($kid = $kid->sibling) and $kid->name eq 'stub'
+	     and !null($kid = $kid->sibling) and $kid->name eq 'null'
+	     and class($kid) eq 'COP' and null $kid->sibling )
+	    {
+		# ignore
+	    } else {
+		$self->pessimise($root, main_start);
+		print $self->indent($self->deparse_root($root)), "\n";
+	    }
 	}
 	my @text;
 	while (scalar(@{$self->{'subs_todo'}})) {
