@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..101\n";
+print "1..102\n";
 
 $x = 'x';
 
@@ -387,6 +387,16 @@ print "ok $test - call a function in package v10::foo\n"; $test++;
 
 print "not " unless (1?v65:"bar") eq 'A';
 print "ok $test - colon detection after vstring does not break ? vstring :\n"; $test++;
+if (ord("\t") == 9) {
+    print v35;
+    print "not ";
+    print v10;
+    print "ok $test - print vstring prints the vstring\n";
+}
+else {
+    print "ok $test # skipped on EBCDIC\n";
+}
+$test++;
 
 # Test pyoq ops with comments before the first delim
 q # comment
