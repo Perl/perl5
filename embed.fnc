@@ -1510,12 +1510,14 @@ EiMRn	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
 EiMRn	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
+#ifndef PERL_EXT_RE_BUILD
 EiMRn	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
-EiMRn	|IV	|invlist_previous_index|NN SV* const invlist
-EiMn	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
-EiMn	|void	|invlist_trim	|NN SV* const invlist
-EiMR	|SV*	|invlist_clone	|NN SV* const invlist
 EiMRn	|bool	|invlist_is_iterating|NN SV* const invlist
+EiMn	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
+EiMRn	|IV	|invlist_previous_index|NN SV* const invlist
+EiMn	|void	|invlist_trim	|NN SV* const invlist
+#endif
+EiMR	|SV*	|invlist_clone	|NN SV* const invlist
 EiMRn	|STRLEN*|get_invlist_iter_addr	|NN SV* invlist
 EiMn	|void	|invlist_iterinit|NN SV* invlist
 EsMRn	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end

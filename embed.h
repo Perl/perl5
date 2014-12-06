@@ -913,6 +913,15 @@
 #define validate_proto(a,b,c)	Perl_validate_proto(aTHX_ a,b,c)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define yylex()			Perl_yylex(aTHX)
+#  if !defined(PERL_EXT_RE_BUILD)
+#    if defined(PERL_IN_REGCOMP_C)
+#define get_invlist_previous_index_addr	S_get_invlist_previous_index_addr
+#define invlist_is_iterating	S_invlist_is_iterating
+#define invlist_previous_index	S_invlist_previous_index
+#define invlist_set_previous_index	S_invlist_set_previous_index
+#define invlist_trim		S_invlist_trim
+#    endif
+#  endif
 #  if defined(DEBUGGING)
 #    if defined(PERL_IN_REGCOMP_C)
 #define cntrl_to_mnemonic	S_cntrl_to_mnemonic
@@ -951,22 +960,17 @@
 #define could_it_be_a_POSIX_class	S_could_it_be_a_POSIX_class
 #define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)
 #define get_invlist_iter_addr	S_get_invlist_iter_addr
-#define get_invlist_previous_index_addr	S_get_invlist_previous_index_addr
 #define grok_bslash_N(a,b,c,d,e,f)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f)
 #define handle_regex_sets(a,b,c,d,e)	S_handle_regex_sets(aTHX_ a,b,c,d,e)
 #define invlist_array		S_invlist_array
 #define invlist_clone(a)	S_invlist_clone(aTHX_ a)
 #define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
 #define invlist_highest		S_invlist_highest
-#define invlist_is_iterating	S_invlist_is_iterating
 #define invlist_iterfinish	S_invlist_iterfinish
 #define invlist_iterinit	S_invlist_iterinit
 #define invlist_iternext	S_invlist_iternext
 #define invlist_max		S_invlist_max
-#define invlist_previous_index	S_invlist_previous_index
 #define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
-#define invlist_set_previous_index	S_invlist_set_previous_index
-#define invlist_trim		S_invlist_trim
 #define is_ssc_worth_it		S_is_ssc_worth_it
 #define join_exact(a,b,c,d,e,f,g)	S_join_exact(aTHX_ a,b,c,d,e,f,g)
 #define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)

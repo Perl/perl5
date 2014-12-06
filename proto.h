@@ -5384,6 +5384,38 @@ STATIC PerlIO *	S_doopen_pm(pTHX_ SV *name)
 
 #  endif
 #endif
+#if !defined(PERL_EXT_RE_BUILD)
+#  if defined(PERL_IN_REGCOMP_C)
+PERL_STATIC_INLINE IV*	S_get_invlist_previous_index_addr(SV* invlist)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR	\
+	assert(invlist)
+
+PERL_STATIC_INLINE bool	S_invlist_is_iterating(SV* const invlist)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_INVLIST_IS_ITERATING	\
+	assert(invlist)
+
+PERL_STATIC_INLINE IV	S_invlist_previous_index(SV* const invlist)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_INVLIST_PREVIOUS_INDEX	\
+	assert(invlist)
+
+PERL_STATIC_INLINE void	S_invlist_set_previous_index(SV* const invlist, const IV index)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_INVLIST_SET_PREVIOUS_INDEX	\
+	assert(invlist)
+
+PERL_STATIC_INLINE void	S_invlist_trim(SV* const invlist)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_INVLIST_TRIM	\
+	assert(invlist)
+
+#  endif
+#endif
 #if !defined(PERL_IMPLICIT_SYS)
 PERL_CALLCONV I32	Perl_my_pclose(pTHX_ PerlIO* ptr);
 PERL_CALLCONV PerlIO*	Perl_my_popen(pTHX_ const char* cmd, const char* mode)
@@ -6877,12 +6909,6 @@ PERL_STATIC_INLINE STRLEN*	S_get_invlist_iter_addr(SV* invlist)
 #define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR	\
 	assert(invlist)
 
-PERL_STATIC_INLINE IV*	S_get_invlist_previous_index_addr(SV* invlist)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR	\
-	assert(invlist)
-
 STATIC STRLEN	S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** nodep, UV *valuep, I32 *flagp, U32 depth, SV** substitute_parse)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_4);
@@ -6919,12 +6945,6 @@ PERL_STATIC_INLINE UV	S_invlist_highest(SV* const invlist)
 #define PERL_ARGS_ASSERT_INVLIST_HIGHEST	\
 	assert(invlist)
 
-PERL_STATIC_INLINE bool	S_invlist_is_iterating(SV* const invlist)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_INVLIST_IS_ITERATING	\
-	assert(invlist)
-
 PERL_STATIC_INLINE void	S_invlist_iterfinish(SV* invlist)
 			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_INVLIST_ITERFINISH	\
@@ -6949,25 +6969,9 @@ PERL_STATIC_INLINE UV	S_invlist_max(SV* const invlist)
 #define PERL_ARGS_ASSERT_INVLIST_MAX	\
 	assert(invlist)
 
-PERL_STATIC_INLINE IV	S_invlist_previous_index(SV* const invlist)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_INVLIST_PREVIOUS_INDEX	\
-	assert(invlist)
-
 PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\
-	assert(invlist)
-
-PERL_STATIC_INLINE void	S_invlist_set_previous_index(SV* const invlist, const IV index)
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_INVLIST_SET_PREVIOUS_INDEX	\
-	assert(invlist)
-
-PERL_STATIC_INLINE void	S_invlist_trim(SV* const invlist)
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_INVLIST_TRIM	\
 	assert(invlist)
 
 STATIC bool	S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc)
