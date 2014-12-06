@@ -1796,6 +1796,15 @@ sub _121050empty( ) {}
 _121050 $a, $b;
 () = _121050empty + 1;
 ####
+# Ampersand calls and scalar context
+# OPTIONS -P
+package prototest;
+sub foo($$);
+foo(bar(),baz());
+>>>>
+package prototest;
+&foo(scalar bar(), scalar baz());
+####
 # ensure aelemfast works in the range -128..127 and that there's no
 # funky edge cases
 my $x;

@@ -4074,6 +4074,50 @@ sub check_proto {
     return ("", join ", ", @reals);
 }
 
+sub retscalar {
+    my $name = $_[0]->name;
+    # XXX There has to be a better way of doing this scalar-op check.
+    #     Currently PL_opargs is not exposed.
+    if ($name eq 'null') {
+        $name = substr B::ppname($_[0]->targ), 3
+    }
+    $name =~ /^(?:scalar|pushmark|wantarray|const|gvsv|gv|padsv|rv2gv
+                 |rv2sv|av2arylen|anoncode|prototype|srefgen|ref|bless
+                 |regcmaybe|regcreset|regcomp|qr|subst|substcont|trans
+                 |transr|sassign|chop|schop|chomp|schomp|defined|undef
+                 |study|pos|preinc|i_preinc|predec|i_predec|postinc
+                 |i_postinc|postdec|i_postdec|pow|multiply|i_multiply
+                 |divide|i_divide|modulo|i_modulo|add|i_add|subtract
+                 |i_subtract|concat|stringify|left_shift|right_shift|lt
+                 |i_lt|gt|i_gt|le|i_le|ge|i_ge|eq|i_eq|ne|i_ne|ncmp|i_ncmp
+                 |slt|sgt|sle|sge|seq|sne|scmp|bit_and|bit_xor|bit_or
+                 |negate|i_negate|not|complement|smartmatch|atan2|sin|cos
+                 |rand|srand|exp|log|sqrt|int|hex|oct|abs|length|substr
+                 |vec|index|rindex|sprintf|formline|ord|chr|crypt|ucfirst
+                 |lcfirst|uc|lc|quotemeta|aelemfast|aelem|exists|helem
+                 |pack|join|anonlist|anonhash|push|pop|shift|unshift|xor
+                 |andassign|orassign|dorassign|warn|die|reset|nextstate
+                 |dbstate|unstack|last|next|redo|dump|goto|exit|open|close
+                 |pipe_op|fileno|umask|binmode|tie|untie|tied|dbmopen
+                 |dbmclose|select|getc|read|enterwrite|prtf|print|say
+                 |sysopen|sysseek|sysread|syswrite|eof|tell|seek|truncate
+                 |fcntl|ioctl|flock|send|recv|socket|sockpair|bind|connect
+                 |listen|accept|shutdown|gsockopt|ssockopt|getsockname
+                 |getpeername|ftrread|ftrwrite|ftrexec|fteread|ftewrite
+                 |fteexec|ftis|ftsize|ftmtime|ftatime|ftctime|ftrowned
+                 |fteowned|ftzero|ftsock|ftchr|ftblk|ftfile|ftdir|ftpipe
+                 |ftsuid|ftsgid|ftsvtx|ftlink|fttty|fttext|ftbinary|chdir
+                 |chown|chroot|unlink|chmod|utime|rename|link|symlink
+                 |readlink|mkdir|rmdir|open_dir|telldir|seekdir|rewinddir
+                 |closedir|fork|wait|waitpid|system|exec|kill|getppid
+                 |getpgrp|setpgrp|getpriority|setpriority|time|alarm|sleep
+                 |shmget|shmctl|shmread|shmwrite|msgget|msgctl|msgsnd
+                 |msgrcv|semop|semget|semctl|hintseval|shostent|snetent
+                 |sprotoent|sservent|ehostent|enetent|eprotoent|eservent
+                 |spwent|epwent|sgrent|egrent|getlogin|syscall|lock|runcv
+                 |fc)\z/x
+}
+
 sub pp_entersub {
     my $self = shift;
     my($op, $cx) = @_;
@@ -4170,7 +4214,13 @@ sub pp_entersub {
 	$listargs = $amper;
     }
     if ($listargs) {
-	$args = join(", ", map($self->deparse($_, 6), @exprs));
+	$args = join(", ", map(
+		    ($_->flags & OPf_WANT) == OPf_WANT_SCALAR
+		 && !retscalar($_)
+			? $self->maybe_parens_unop('scalar', $_, 6)
+			: $self->deparse($_, 6),
+		    @exprs
+		));
     }
     if ($prefix or $amper) {
 	if ($kid eq '&') { $kid = "{$kid}" } # &{&} cannot be written as &&
