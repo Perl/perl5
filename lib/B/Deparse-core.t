@@ -75,6 +75,12 @@ sub testit {
 		#  the rest don't parenthesize the my var.
 		$repl = 'my($a)';
 	    }
+	    elsif ($expr =~ 'CORE::do') {
+		# do foo() is a syntax error, so B::Deparse emits
+		# do (foo()), but does not distinguish between foo and my,
+		# because it is too complicated.
+		$repl = '(my $a)';
+	    }
 	    s/\$a/$repl/ for $expr, $expected_expr;
 	}
 
