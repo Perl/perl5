@@ -1764,7 +1764,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000604,	/* const */
 	0x00000644,	/* gvsv */
 	0x00000644,	/* gv */
-	0x00011240,	/* gelem */
+	0x00011244,	/* gelem */
 	0x00000044,	/* padsv */
 	0x00000040,	/* padav */
 	0x00000040,	/* padhv */
@@ -2139,7 +2139,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000040,	/* introcv */
 	0x00000040,	/* clonecv */
 	0x00000040,	/* padrange */
-	0x00000240,	/* refassign */
+	0x00000244,	/* refassign */
 	0x00000b40,	/* lvref */
 	0x00000440,	/* lvrefslice */
 	0x00000b40,	/* lvavref */

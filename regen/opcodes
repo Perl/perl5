@@ -51,7 +51,7 @@ const		constant item		ck_svconst	s$
 
 gvsv		scalar variable		ck_null		ds$	
 gv		glob value		ck_null		ds$	
-gelem		glob elem		ck_null		d2	S S
+gelem		glob elem		ck_null		ds2	S S
 padsv		private variable	ck_null		ds0
 padav		private array		ck_null		d0
 padhv		private hash		ck_null		d0
@@ -561,7 +561,7 @@ padcv		private subroutine	ck_null		d0
 introcv		private subroutine	ck_null		d0
 clonecv		private subroutine	ck_null		d0
 padrange	list of private variables	ck_null		d0
-refassign	lvalue ref assignment	ck_refassign	d2
+refassign	lvalue ref assignment	ck_refassign	ds2
 lvref		lvalue ref assignment	ck_null		d%
 lvrefslice	lvalue ref assignment	ck_null		d@
 lvavref		lvalue array reference	ck_null		d%
