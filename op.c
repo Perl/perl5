@@ -10481,6 +10481,7 @@ Perl_ck_sassign(pTHX_ OP *o)
 
             CHANGE_TYPE(condop, OP_ONCE);
 	    other->op_targ = target;
+	    nullop->op_flags |= OPf_WANT_SCALAR;
 
 	    /* Store the initializedness of state vars in a separate
 	       pad entry.  */
