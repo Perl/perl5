@@ -24,11 +24,11 @@ checkOptree ( name	=> 'sub {my $a}',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 45 optree.t:23) v:>,<,%
-# 2  <0> padsv[$a:45,46] M/LVINTRO
+# 2  <0> padsv[$a:45,46] sM/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 45 optree.t:23) v:>,<,%
-# 2  <0> padsv[$a:45,46] M/LVINTRO
+# 2  <0> padsv[$a:45,46] sM/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
@@ -38,11 +38,11 @@ checkOptree ( name	=> '-exec sub {my $a}',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 49 optree.t:52) v:>,<,%
-# 2  <0> padsv[$a:49,50] M/LVINTRO
+# 2  <0> padsv[$a:49,50] sM/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 49 optree.t:45) v:>,<,%
-# 2  <0> padsv[$a:49,50] M/LVINTRO
+# 2  <0> padsv[$a:49,50] sM/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
@@ -390,14 +390,14 @@ checkOptree ( name	=> 'my ($a,$b)=()',
 # 1  <0> enter 
 # 2  <;> nextstate(main 1 -e:1) v:>,<,%,{
 # 3  <0> pushmark s
-# 4  <0> padrange[$a:1,2; $b:1,2] lRM/LVINTRO,2
+# 4  <0> padrange[$a:1,2; $b:1,2] sRM/LVINTRO,2
 # 5  <2> aassign[t3] vKS
 # 6  <@> leave[1 ref] vKP/REFC
 EOT_EOT
 # 1  <0> enter 
 # 2  <;> nextstate(main 1 -e:1) v:>,<,%,{
 # 3  <0> pushmark s
-# 4  <0> padrange[$a:1,2; $b:1,2] lRM/LVINTRO,2
+# 4  <0> padrange[$a:1,2; $b:1,2] sRM/LVINTRO,2
 # 5  <2> aassign[t3] vKS
 # 6  <@> leave[1 ref] vKP/REFC
 EONT_EONT
