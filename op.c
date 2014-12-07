@@ -4899,9 +4899,7 @@ S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth
 #endif
 
     CHANGE_TYPE(methop, type);
-    methop = (METHOP*) CHECKOP(type, methop);
-
-    return fold_constants(op_integerize(op_std_init((OP *) methop)));
+    return CHECKOP(type, methop);
 }
 
 OP *
