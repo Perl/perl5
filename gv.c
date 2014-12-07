@@ -716,10 +716,11 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
       Perl_croak(aTHX_ "Can't use anonymous symbol table for method lookup");
 
     assert(hvname);
-    assert(name);
+    assert(name || meth);
 
     DEBUG_o( Perl_deb(aTHX_ "Looking for %smethod %s in package %s\n",
-		      flags & GV_SUPER ? "SUPER " : "",name,hvname) );
+		      flags & GV_SUPER ? "SUPER " : "",
+		      name ? name : SvPV_nolen(meth), hvname) );
 
     topgen_cmp = HvMROMETA(stash)->cache_gen + PL_sub_generation;
 
@@ -742,7 +743,11 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
       have_gv:
         assert(topgv);
         if (SvTYPE(topgv) != SVt_PVGV)
+        {
+            if (!name)
+                name = SvPV_nomg(meth, len);
             gv_init_pvn(topgv, stash, name, len, GV_ADDMULTI|is_utf8);
+        }
         if ((cand_cv = GvCV(topgv))) {
             /* If genuine method or valid cache entry, use it */
             if (!GvCVGEN(topgv) || GvCVGEN(topgv) == topgen_cmp) {
@@ -821,7 +826,8 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
 
     /* Check UNIVERSAL without caching */
     if(level == 0 || level == -1) {
-        candidate = gv_fetchmeth_pvn(NULL, name, len, 1, flags &~GV_SUPER);
+        candidate = gv_fetchmeth_internal(NULL, meth, name, len, 1,
+                                          flags &~GV_SUPER);
         if(candidate) {
             cand_cv = GvCV(candidate);
             if (topgv && (GvREFCNT(topgv) == 1) && (CvROOT(cand_cv) || CvXSUB(cand_cv))) {
