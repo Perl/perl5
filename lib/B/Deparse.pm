@@ -2218,7 +2218,10 @@ sub unop {
 	}
 
 	if ($nollafr) {
-	    ($kid = $self->deparse($kid, 16)) =~ s/^\cS//;
+	    if (($kid = $self->deparse($kid, 16)) !~ s/^\cS//) {
+		# require foo() is a syntax error.
+		$kid =~ /^(?!\d)\w/ and $kid = "($kid)";
+	    }
 	    return $self->maybe_parens(
 			$self->keyword($name) . " $kid", $cx, 16
 		   );

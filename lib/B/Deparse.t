@@ -1504,6 +1504,10 @@ CORE::do({});
 () = (-w $_) + 3;
 () = (-x $_) + 3;
 ####
+# require(foo()) and do(foo())
+require (foo());
+do (foo());
+####
 # [perl #97476] not() *does* follow the llafr
 $_ = ($a xor not +($1 || 2) ** 2);
 ####
