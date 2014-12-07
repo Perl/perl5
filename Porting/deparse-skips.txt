@@ -510,7 +510,7 @@ re/regex_sets.t
 re/regexp_unicode_prop.t
 re/rxcode.t
 re/subst.t
-run/switchI.t
+run/switchI.t             # -I on #! line is not deparsed
 run/switchd-78586.t
 run/switches.t
 uni/attrs.t
