@@ -4566,7 +4566,7 @@ it needs one, and folding constants.
 
 A list-type op is usually constructed one kid at a time via C<newLISTOP>,
 C<op_prepend_elem> and C<op_append_elem>.  Then finally it is passed to
-C<op_convert> to make it the right type.
+C<op_convert_list> to make it the right type.
 
 =cut
 */
