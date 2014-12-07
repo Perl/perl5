@@ -2311,7 +2311,7 @@ sub pp_dofile {
 sub pp_entereval {
     unop(
       @_,
-      $_[1]->private & OPpEVAL_BYTES ? $_[0]->keyword('evalbytes') : "eval"
+      $_[1]->private & OPpEVAL_BYTES ? 'evalbytes' : "eval"
     )
 }
 
