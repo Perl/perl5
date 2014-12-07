@@ -4665,6 +4665,13 @@ C<OPf_KIDS> will be set automatically if required.  I<first> and I<last>
 supply up to two ops to be direct children of the list op; they are
 consumed by this function and become part of the constructed op tree.
 
+For most list operators, the check function expects all the kid ops to be
+present already, so calling C<newLISTOP(OP_JOIN, ...)> (e.g.,) is not
+appropriate.  What you want to do in that case is create an op of type
+OP_LIST, append more children to it, and then call L</op_convert_list>.
+See L</op_convert_list> for more information.
+
+
 =cut
 */
 
