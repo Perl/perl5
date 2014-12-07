@@ -510,7 +510,6 @@ re/regex_sets.t
 re/regexp_unicode_prop.t
 re/rxcode.t
 re/subst.t
-run/switchC.t
 run/switchI.t
 run/switchd-78586.t
 run/switches.t
