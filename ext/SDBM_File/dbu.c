@@ -224,19 +224,29 @@ static void
 prdatum(FILE *stream, datum d)
 {
 	int c;
-	char *p = d.dptr;
+	U8 *p = (U8 *) d.dptr;
 	int n = d.dsize;
 
 	while (n--) {
-		c = *p++ & 0377;
+		c = *p++;
+#ifndef EBCDIC /* Meta notation doesn't make sense on EBCDIC systems*/
 		if (c & 0200) {
-			fprintf(stream, "M-");
-			c &= 0177;
+                    fprintf(stream, "M-");
+                    c &= 0177;
 		}
-		if (c == 0177 || c < ' ') 
-			fprintf(stream, "^%c", (c == 0177) ? '?' : c + '@');
-		else
-			putc(c, stream);
+#endif
+                /* \c notation applies for \0 . \x1f, plus \c? */
+                if (c <= 0x1F || c == QUESTION_MARK_CTRL) {
+                    fprintf(stream, "^%c", toCTRL(c));
+                }
+#ifdef EBCDIC   /* Instead of meta, use \x{} for non-printables */
+                else if (! isPRINT_A(c)) {
+                    fprintf(stream, "\\x{%02x}", c);
+		}
+#endif
+		else { /* must be an ASCII printable */
+                    putc(c, stream);
+                }
 	}
 }
 
