@@ -5359,6 +5359,8 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     CHANGE_TYPE(pmop, type);
     pmop->op_flags = (U8)flags;
     pmop->op_private = (U8)(0 | (flags >> 8));
+    if (PL_opargs[type] & OA_RETSCALAR)
+	scalar((OP *)pmop);
 
     if (PL_hints & HINT_RE_TAINT)
 	pmop->op_pmflags |= PMf_RETAINT;
