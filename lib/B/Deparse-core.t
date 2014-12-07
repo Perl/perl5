@@ -68,14 +68,7 @@ sub testit {
 
 	if ($lex == 2) {
 	    my $repl = 'my $a';
-	    if ($expr =~ /CORE::(chomp|chop|lstat|stat)\b/
-	     or $expr =~ ($lexsub ? qr/::map\(\$a/ : qr/\bmap\(\$a/)) {
-		# for some reason only these do:
-		#  'foo my $a, $b,' => foo my($a), $b, ...
-		#  the rest don't parenthesize the my var.
-		$repl = 'my($a)';
-	    }
-	    elsif ($expr =~ 'CORE::do') {
+	    if ($expr =~ 'CORE::do') {
 		# do foo() is a syntax error, so B::Deparse emits
 		# do (foo()), but does not distinguish between foo and my,
 		# because it is too complicated.
