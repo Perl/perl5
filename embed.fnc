@@ -546,8 +546,10 @@ p	|void	|gv_setref	|NN SV *const dstr|NN SV *const sstr
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
 #if defined(PERL_IN_GV_C)
-i	|HV*	|gv_stashpvn_internal|NN const char* name|U32 namelen|I32 flags
-i	|HV*	|gv_stashsvpvn_cached|NULLOK SV *namesv|NULLOK const char* name|U32 namelen|I32 flags
+i	|HV*	|gv_stashpvn_internal	|NN const char* name|U32 namelen|I32 flags
+i	|HV*	|gv_stashsvpvn_cached	|NULLOK SV *namesv|NULLOK const char* name|U32 namelen|I32 flags
+i	|GV*	|gv_fetchmeth_internal	|NULLOK HV* stash|NULLOK SV* meth|NULLOK const char* name \
+					|STRLEN len|I32 level|U32 flags
 #endif
 Apd	|HV*	|gv_stashsv	|NN SV* sv|I32 flags
 Apd	|void	|hv_clear	|NULLOK HV *hv

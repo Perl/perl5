@@ -636,13 +636,8 @@ of an SV instead of a string/length pair.
 GV *
 Perl_gv_fetchmeth_sv(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
 {
-   char *namepv;
-   STRLEN namelen;
    PERL_ARGS_ASSERT_GV_FETCHMETH_SV;
-   namepv = SvPV(namesv, namelen);
-   if (SvUTF8(namesv))
-       flags |= SVf_UTF8;
-   return gv_fetchmeth_pvn(stash, namepv, namelen, level, flags);
+   return gv_fetchmeth_internal(stash, namesv, NULL, 0, level, flags);
 }
 
 /*
@@ -658,7 +653,7 @@ GV *
 Perl_gv_fetchmeth_pv(pTHX_ HV *stash, const char *name, I32 level, U32 flags)
 {
     PERL_ARGS_ASSERT_GV_FETCHMETH_PV;
-    return gv_fetchmeth_pvn(stash, name, strlen(name), level, flags);
+    return gv_fetchmeth_internal(stash, NULL, name, strlen(name), level, flags);
 }
 
 /*
@@ -689,10 +684,11 @@ obtained from the GV with the C<GvCV> macro.
 
 /* NOTE: No support for tied ISA */
 
-GV *
-Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, U32 flags)
+PERL_STATIC_INLINE GV*
+S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len, I32 level, U32 flags)
 {
     GV** gvp;
+    HE* he;
     AV* linear_av;
     SV** linear_svp;
     SV* linear_sv;
@@ -701,12 +697,10 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
     CV* cand_cv = NULL;
     GV* topgv = NULL;
     const char *hvname;
-    I32 create = (level >= 0) ? 1 : 0;
+    I32 create = (level >= 0) ? HV_FETCH_LVALUE : 0;
     I32 items;
     U32 topgen_cmp;
     U32 is_utf8 = flags & SVf_UTF8;
-
-    PERL_ARGS_ASSERT_GV_FETCHMETH_PVN;
 
     /* UNIVERSAL methods should be callable without a stash */
     if (!stash) {
@@ -737,8 +731,12 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
     else cachestash = stash;
 
     /* check locally for a real method or a cache entry */
-    gvp = (GV**)hv_fetch(cachestash, name, is_utf8 ? -(I32)len : (I32)len,
-			 create);
+    he = (HE*)hv_common(
+        cachestash, meth, name, len, (flags & SVf_UTF8) ? HVhek_UTF8 : 0, create, NULL, 0
+    );
+    if (he) gvp = (GV**)&HeVAL(he);
+    else gvp = NULL;
+
     if(gvp) {
         topgv = *gvp;
       have_gv:
@@ -843,6 +841,13 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
     }
 
     return 0;
+}
+
+GV *
+Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, U32 flags)
+{
+    PERL_ARGS_ASSERT_GV_FETCHMETH_PVN;
+    return gv_fetchmeth_internal(stash, NULL, name, len, level, flags);
 }
 
 /*

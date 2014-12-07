@@ -6050,6 +6050,7 @@ STATIC bool	S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
 #define PERL_ARGS_ASSERT_FIND_DEFAULT_STASH	\
 	assert(stash); assert(name)
 
+PERL_STATIC_INLINE GV*	S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len, I32 level, U32 flags);
 STATIC void	S_gv_init_svtype(pTHX_ GV *gv, const svtype sv_type)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GV_INIT_SVTYPE	\
