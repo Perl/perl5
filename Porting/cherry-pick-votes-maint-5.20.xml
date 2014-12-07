@@ -24,7 +24,8 @@ Tickets Listed in #122913: [META] perl 5.20.2
 <commit votes="steveh" id="409c6472cedc6771a158a61dbbf8154d0246dc5b" ticket="122747" desc="add test for rt122747"/>
 <commit votes="steveh" id="13dd5671ecb824f71dfe100fbf3b7d5ee9170636" ticket="122747" desc="perldelta for 2c1f00b/#122747"/>
 
-Do we need this sequence of commits too? See https://rt.perl.org/Ticket/Display.html?id=122747#txn-1308912
+Do we need this sequence of commits too? See https://rt.perl.org/Ticket/Display.html?id=122747#txn-1308912 --steveh
+No, we don’t. They remove code rendered unnecessary by the fix for #122747, but the fix does not depend on them. --sprout
 <commit votes="" id="b4fa55d3f12c6d98b13a8b3db4f8d921c8e56edc" ticket="122747" desc="Gut Perl_save_re_context"/>
 <commit votes="" id="d28a9254e445aee7212523d9a7ff62ae0a743fec" ticket="122747" desc="Don't call save_re_context"/>
 <commit votes="" id="1ca1baeff524e5f0398b23e9f8ba173cec7d497e" ticket="122747" desc="Remove obsolete comment from utf8.c"/>
@@ -75,7 +76,10 @@ Crash Fixes
 
 <commit votes="steveh" id="18691622911f2e18df42a5a98ea4c42386f4e558" ticket="" desc="Fix crash when lex subs are used for AUTOLOAD"/>
 <commit votes="steveh" id="56117e3ef4ef2c7986c400f86f321f22f261571a" ticket="" desc="Fix crash when lex subs are used for overload"/>
+
+I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
+
 <commit votes="steveh" id="9d8e4b9b32800eb499d83442ce8bbe6639773936" ticket="" desc="Fix crash with lex subs under -d"/>
 <commit votes="steveh" id="1699f5c257bc554753cc4ddf10c62ac8a5c338ff" ticket="" desc="perldelta for f20d0df0f"/>
 
