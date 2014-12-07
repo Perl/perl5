@@ -7033,7 +7033,9 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 
     CHECKOP(type,logop);
 
-    o = newUNOP(prepend_not ? OP_NOT : OP_NULL, 0, (OP*)logop);
+    o = newUNOP(prepend_not ? OP_NOT : OP_NULL,
+		PL_opargs[type] & OA_RETSCALAR ? OPf_WANT_SCALAR : 0,
+		(OP*)logop);
     other->op_next = o;
 
     return o;
