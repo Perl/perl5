@@ -489,7 +489,7 @@ semctl		semctl			ck_fun		imst@	S S S S
 
 # Eval.
 
-require		require			ck_require	du%	S?
+require		require			ck_require	dsu%	S?
 dofile		do "file"		ck_fun		d1	S
 hintseval	eval hints		ck_svconst	s$
 entereval	eval "string"		ck_eval		du%	S?

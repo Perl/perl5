@@ -2087,7 +2087,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0001140d,	/* semop */
 	0x0011140d,	/* semget */
 	0x0111140d,	/* semctl */
-	0x00009bc0,	/* require */
+	0x00009bc4,	/* require */
 	0x00001140,	/* dofile */
 	0x00000604,	/* hintseval */
 	0x00009bc0,	/* entereval */

@@ -10793,7 +10793,7 @@ Perl_ck_require(pTHX_ OP *o)
 	return newop;
     }
 
-    return scalar(ck_fun(o));
+    return ck_fun(o);
 }
 
 OP *
