@@ -803,7 +803,7 @@ static NV my_tgamma(NV x)
     if (x < 1.0)
       y += 1.0;
     else {
-      n = Perl_floor(y) - 1;
+      n = (int)Perl_floor(y) - 1;
       y -= n;
     }
     z = y - 1;
