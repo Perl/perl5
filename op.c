@@ -4846,8 +4846,6 @@ Perl_newUNOP_AUX(pTHX_ I32 type, I32 flags, OP *first, UNOP_AUX_item *aux)
 #endif
 
     unop = (UNOP_AUX*) CHECKOP(type, unop);
-    if (unop->op_next)
-	return (OP*)unop;
 
     return fold_constants(op_integerize(op_std_init((OP *) unop)));
 }
