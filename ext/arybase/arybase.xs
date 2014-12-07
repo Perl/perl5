@@ -236,6 +236,7 @@ static OP *ab_pp_basearg(pTHX) {
  SV **svp;
  UV count = 1;
  ab_op_info oi;
+ Zero(&oi, 1, ab_op_info);
  ab_map_fetch(PL_op, &oi);
  
  switch (PL_op->op_type) {
@@ -277,6 +278,7 @@ static OP *ab_pp_av2arylen(pTHX) {
  SV *sv;
  ab_op_info oi;
  OP *ret;
+ Zero(&oi, 1, ab_op_info);
  ab_map_fetch(PL_op, &oi);
  ret = (*oi.old_pp)(aTHX);
  if (PL_op->op_flags & OPf_MOD || LVRET) {
@@ -297,6 +299,7 @@ static OP *ab_pp_keys(pTHX) {
  OP *retval;
  const I32 offset = SP - PL_stack_base;
  SV **svp;
+ Zero(&oi, 1, ab_op_info);
  ab_map_fetch(PL_op, &oi);
  retval = (*oi.old_pp)(aTHX);
  if (GIMME_V == G_SCALAR) return retval;
@@ -311,6 +314,7 @@ static OP *ab_pp_each(pTHX) {
  ab_op_info oi;
  OP *retval;
  const I32 offset = SP - PL_stack_base;
+ Zero(&oi, 1, ab_op_info);
  ab_map_fetch(PL_op, &oi);
  retval = (*oi.old_pp)(aTHX);
  SPAGAIN;
@@ -325,6 +329,7 @@ static OP *ab_pp_index(pTHX) {
  dVAR; dSP;
  ab_op_info oi;
  OP *retval;
+ Zero(&oi, 1, ab_op_info);
  ab_map_fetch(PL_op, &oi);
  if (MAXARG == 3 && TOPs) replace_sv(TOPs,oi.base);
  retval = (*oi.old_pp)(aTHX);
