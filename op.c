@@ -9397,6 +9397,7 @@ Perl_newSVREF(pTHX_ OP *o)
 
     if (o->op_type == OP_PADANY) {
         CHANGE_TYPE(o, OP_PADSV);
+        scalar(o);
 	return o;
     }
     return newUNOP(OP_RV2SV, 0, scalar(o));
@@ -9584,7 +9585,7 @@ Perl_ck_spair(pTHX_ OP *o)
 		   && (  type == OP_RV2AV || type == OP_PADAV
 		      || type == OP_RV2HV || type == OP_PADHV))))
 	    	NOOP; /* OK (allow srefgen for \@a and \%h) */
-	    else if (!(PL_opargs[type] & OA_RETSCALAR))
+	    else if (OP_GIMME(newop,0) != G_SCALAR)
 		return o;
 	}
         /* excise first sibling */
@@ -11157,7 +11158,7 @@ Perl_ck_join(pTHX_ OP *o)
     {
 	const OP * const bairn = OP_SIBLING(kid); /* the list */
 	if (bairn && !OP_HAS_SIBLING(bairn) /* single-item list */
-	 && PL_opargs[bairn->op_type] & OA_RETSCALAR)
+	 && OP_GIMME(bairn,0) == G_SCALAR)
 	{
 	    OP * const ret = op_convert_list(OP_STRINGIFY, OPf_FOLDED,
 				     op_sibling_splice(o, kid, 1, NULL));
