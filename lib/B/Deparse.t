@@ -1507,6 +1507,11 @@ CORE::do({});
 # require(foo()) and do(foo())
 require (foo());
 do (foo());
+goto (foo());
+CORE::dump (foo());
+last (foo());
+next (foo());
+redo (foo());
 ####
 # [perl #97476] not() *does* follow the llafr
 $_ = ($a xor not +($1 || 2) ** 2);

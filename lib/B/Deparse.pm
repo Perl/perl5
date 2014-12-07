@@ -2558,6 +2558,8 @@ sub loopex {
 	# no-op
     } elsif (class($op) eq "UNOP") {
 	(my $kid = $self->deparse($op->first, 7)) =~ s/^\cS//;
+	# last foo() is a syntax error.
+	$kid =~ /^(?!\d)\w/ and $kid = "($kid)";
 	$name .= " $kid";
     }
     return $self->maybe_parens($name, $cx, 7);
