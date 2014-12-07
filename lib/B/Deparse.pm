@@ -3241,7 +3241,7 @@ BEGIN {
 	       hslice delete padsv padav padhv enteriter entersub padrange
 	       pushmark cond_expr refassign list)
     } = ();
-    delete @uses_intro{qw( lvref lvrefslice lvavref )};
+    delete @uses_intro{qw( lvref lvrefslice lvavref entersub )};
 }
 
 sub pp_list {

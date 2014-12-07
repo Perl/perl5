@@ -641,6 +641,11 @@ foreach state $i (1, 2) {
     state $z = 1;
 }
 ####
+# foreach with sub call
+foreach $_ (hcaerof()) {
+    ();
+}
+####
 # reverse sort
 my @x;
 print reverse sort(@x);
