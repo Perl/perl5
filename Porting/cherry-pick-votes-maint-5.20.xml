@@ -74,19 +74,19 @@ The same criteria apply to code in dual-life modules as to core code.)
 Crash Fixes
 -----------
 
-<commit votes="steveh" id="18691622911f2e18df42a5a98ea4c42386f4e558" ticket="" desc="Fix crash when lex subs are used for AUTOLOAD"/>
-<commit votes="steveh" id="56117e3ef4ef2c7986c400f86f321f22f261571a" ticket="" desc="Fix crash when lex subs are used for overload"/>
+<commit votes="sprout, steveh" id="18691622911f2e18df42a5a98ea4c42386f4e558" ticket="" desc="Fix crash when lex subs are used for AUTOLOAD"/>
+<commit votes="sprout, steveh" id="56117e3ef4ef2c7986c400f86f321f22f261571a" ticket="" desc="Fix crash when lex subs are used for overload"/>
 
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
 
-<commit votes="steveh" id="9d8e4b9b32800eb499d83442ce8bbe6639773936" ticket="" desc="Fix crash with lex subs under -d"/>
-<commit votes="steveh" id="1699f5c257bc554753cc4ddf10c62ac8a5c338ff" ticket="" desc="perldelta for f20d0df0f"/>
+<commit votes="sprout, steveh" id="9d8e4b9b32800eb499d83442ce8bbe6639773936" ticket="" desc="Fix crash with lex subs under -d"/>
+<commit votes="sprout, steveh" id="1699f5c257bc554753cc4ddf10c62ac8a5c338ff" ticket="" desc="perldelta for f20d0df0f"/>
 
 Security Fixes
 --------------
 
-<commit votes="steveh" id="dd369969a58d736f281ffebe36fc24ab45b29fa6" ticket="122701" desc="Correct usage of memEQs in attributes.xs [perl #122701]"/>
+<commit votes="sprout, steveh" id="dd369969a58d736f281ffebe36fc24ab45b29fa6" ticket="122701" desc="Correct usage of memEQs in attributes.xs [perl #122701]"/>
 NOT ff5314c5aa54b172122507017cac034acf1c4bf7" (fix attributes memcmp without len less than 6 (asan catch)), which Andy Dougherty says on #122629 should be reverted in blead.
 
 <commit votes="steveh" id="19be3be6968e2337bcdfe480693fff795ecd1304" ticket="" desc="don't recurse infinitely in Data::Dumper"/>
@@ -117,7 +117,8 @@ a51d618a82a7057c3aabb600a7a8691d27f44a34 caused #122890 so do we need this seque
 <commit votes="" id="f6f22b1fc01b8676e43ef64616ed7899a84bfec2" ticket="122890" desc="t/re/re_tests: Add test for perl #122890"/>
 <commit votes="" id="efcc8bfdc124f50d33aab3f1d7722b5f9e4de349" ticket="122890" desc="re_tests: More tests for #122890"/>
 
-<commit votes="steveh" id="b6e093f25daabf3a19790f257fae436db4adf515" ticket="122655" desc="PATCH: [perl #122655] 5.20 regression: 'X' !~ /[x]/i"/>
+<commit votes="sprout, steveh" id="b6e093f25daabf3a19790f257fae436db4adf515" ticket="122655" desc="PATCH: [perl #122655] 5.20 regression: 'X' !~ /[x]/i"/>
+Isn’t this already applied in db6d387787f5bd2763d328fabc35ffcfb8944973?
 
 Configure and hints/ Fixes
 --------------------------
@@ -212,7 +213,7 @@ Documentation Fixes
 <commit votes="steveh" id="282f36d45b3fd6109df025ed2228f0019b49c2e5" ticket="" desc="RMG - Remove out-of-date instruction about epigraph link"/>
 <commit votes="steveh" id="5e2d14fc932c50279eb04ac71b3d87d785d61420" ticket="" desc="RMG - RCs are now listed in perlhist"/>
 <commit votes="steveh" id="3617dbb697e46ddf316b2067f2ded656ad6a89f9" ticket="" desc="Consistent spaces after dots in perldiag"/>
-<commit votes="steveh" id="afdb3b14b41a9073ddecc2080ea6b46a16f31fc3" ticket="" desc="perlexperiment: add signatures to experimental features"/>
+<commit votes="sprout, steveh" id="afdb3b14b41a9073ddecc2080ea6b46a16f31fc3" ticket="" desc="perlexperiment: add signatures to experimental features"/>
 <commit votes="steveh" id="2a2f23e4f8a50bdcdd10563dc5d933684cb70954" ticket="122853" desc="Remarks specialness of [A-Z] and [a-z]."/>
 <commit votes="steveh" id="8bbce0b10dd8ea0fad79a905746218306cf4fe17" ticket="" desc="import latest epigraphs from maint-5.18"/>
 <commit votes="steveh" id="086feb3e31adb54d781926d7d8df06c266c39fae" ticket="" desc="perlhist: bring in 5.18.3 and 5.18.4 release dates"/>
