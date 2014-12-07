@@ -2722,7 +2722,8 @@ various get routines are as follows:
  $comment,  $gcos,     $dir,       $shell,   $expire ) = getpw*
  # 5        6          7           8         9
 
-(If the entry doesn't exist you get an empty list.)
+(If the entry doesn't exist, the return value is a single meaningless true
+value.)
 
 The exact meaning of the $gcos field varies but it usually contains
 the real name of the user (as opposed to the login name) and other
