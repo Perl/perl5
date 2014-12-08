@@ -636,8 +636,14 @@ of an SV instead of a string/length pair.
 GV *
 Perl_gv_fetchmeth_sv(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
 {
-   PERL_ARGS_ASSERT_GV_FETCHMETH_SV;
-   return gv_fetchmeth_internal(stash, namesv, NULL, 0, level, flags);
+    char *namepv;
+    STRLEN namelen;
+    PERL_ARGS_ASSERT_GV_FETCHMETH_SV;
+    if (LIKELY(SvPOK_nog(namesv))) /* common case */
+        return gv_fetchmeth_internal(stash, namesv, NULL, 0, level, flags);
+    namepv = SvPV(namesv, namelen);
+    if (SvUTF8(namesv)) flags |= SVf_UTF8;
+    return gv_fetchmeth_pvn(stash, namepv, namelen, level, flags);
 }
 
 /*
