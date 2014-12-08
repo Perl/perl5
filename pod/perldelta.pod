@@ -109,7 +109,9 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Win32 Perl uses 8 KB less of per-process memory than before for every perl
+process of this version. This data is now memory mapped from disk and shared
+between perl processes from the same perl binary.
 
 =back
 
