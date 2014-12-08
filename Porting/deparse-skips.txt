@@ -493,7 +493,7 @@ opbasic/concat.t
 porting/diag.t
 porting/globvar.t
 porting/podcheck.t
-re/overload.t
+re/overload.t             # [perl #123385]
 re/pat.t
 re/pat_advanced.t
 re/pat_re_eval.t
