@@ -4948,7 +4948,7 @@ Perl_yylex(pTHX)
 	Perl_croak(aTHX_
       "\t(Maybe you didn't strip carriage returns after a network transfer?)\n");
 #endif
-    case ' ': case '\t': case '\f': case 013:
+    case ' ': case '\t': case '\f': case '\v':
 	s++;
 	goto retry;
     case '#':
@@ -10512,7 +10512,7 @@ S_scan_formline(pTHX_ char *s)
 	if (needargs) {
 	    const char *s2 = s;
 	    while (*s2 == '\r' || *s2 == ' ' || *s2 == '\t' || *s2 == '\f'
-		|| *s2 == 013)
+		|| *s2 == '\v')
 		s2++;
 	    if (*s2 == '{') {
 		PL_expect = XTERMBLOCK;
