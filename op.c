@@ -10834,7 +10834,7 @@ Perl_ck_select(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_SELECT;
 
     if (o->op_flags & OPf_KIDS) {
-        kid = OpSIBLING(cLISTOPo->op_first)     /* get past pushmark */
+        kid = OpSIBLING(cLISTOPo->op_first);     /* get past pushmark */
         if (kid && OpHAS_SIBLING(kid)) {
             CHANGE_TYPE(o, OP_SSELECT);
 	    o = ck_fun(o);
