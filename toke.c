@@ -10634,7 +10634,7 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
     }
     else if (yychar > 255)
 	sv_catpvs(where_sv, "next token ???");
-    else if (yychar == -2) { /* YYEMPTY */
+    else if (yychar == YYEMPTY) {
 	if (PL_lex_state == LEX_NORMAL ||
 	   (PL_lex_state == LEX_KNOWNEXT && PL_lex_defer == LEX_NORMAL))
 	    sv_catpvs(where_sv, "at end of line");
