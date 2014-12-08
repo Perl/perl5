@@ -103,9 +103,6 @@ a51d618a82a7057c3aabb600a7a8691d27f44a34 caused #122890 so do we need this seque
 <commit votes="" id="f6f22b1fc01b8676e43ef64616ed7899a84bfec2" ticket="122890" desc="t/re/re_tests: Add test for perl #122890"/>
 <commit votes="" id="efcc8bfdc124f50d33aab3f1d7722b5f9e4de349" ticket="122890" desc="re_tests: More tests for #122890"/>
 
-<commit votes="sprout, steveh" id="b6e093f25daabf3a19790f257fae436db4adf515" ticket="122655" desc="PATCH: [perl #122655] 5.20 regression: 'X' !~ /[x]/i"/>
-Isn’t this already applied in db6d387787f5bd2763d328fabc35ffcfb8944973?
-
 Configure and hints/ Fixes
 --------------------------
 
