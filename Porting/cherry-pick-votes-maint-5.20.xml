@@ -24,18 +24,6 @@ Tickets Listed in #122913: [META] perl 5.20.2
 <commit votes="steveh" id="409c6472cedc6771a158a61dbbf8154d0246dc5b" ticket="122747" desc="add test for rt122747"/>
 <commit votes="steveh" id="13dd5671ecb824f71dfe100fbf3b7d5ee9170636" ticket="122747" desc="perldelta for 2c1f00b/#122747"/>
 
-Do we need this sequence of commits too? See https://rt.perl.org/Ticket/Display.html?id=122747#txn-1308912 --steveh
-No, we don’t. They remove code rendered unnecessary by the fix for #122747, but the fix does not depend on them. --sprout
-<commit votes="" id="b4fa55d3f12c6d98b13a8b3db4f8d921c8e56edc" ticket="122747" desc="Gut Perl_save_re_context"/>
-<commit votes="" id="d28a9254e445aee7212523d9a7ff62ae0a743fec" ticket="122747" desc="Don't call save_re_context"/>
-<commit votes="" id="1ca1baeff524e5f0398b23e9f8ba173cec7d497e" ticket="122747" desc="Remove obsolete comment from utf8.c"/>
-<commit votes="" id="1a419e6b1ae911c99a8ca065071290a8ba070856" ticket="122747" desc="utf8.c: Move an #ifndef for clarity"/>
-<commit votes="" id="e32ff4e1e2b9fb64a8d68add6913fc04e4b3152e" ticket="122747" desc="pp_ctl.c: Remove PL_curcop assignment"/>
-<commit votes="" id="0ddd4a5b1910c8bfa9b7e55eb0db60a115fe368c" ticket="122747" desc="Mathomise save_re_context"/>
-<commit votes="" id="2018906832b2c4787a4decced6a41a76c670d14c" ticket="122747" desc="pp_ctl.c: Remove junk from #endif"/>
-<commit votes="" id="cd94980729f7f861da34f8bc040253ca8d4d6d20" ticket="122747" desc="perldelta for b4fa55d and 0ddd4a5"/>
-<commit votes="" id="6d67525df38ae6b009f80748fc8ed0544c91d809" ticket="122747" desc="perldelta: Insert missing =item"/>
-
 <commit votes="steveh, sprout" id="83a94553cbf9f2c11b3e9a63a44e7b9ce17ccb77" ticket="40565" desc="[perl #40565] Fix localisation in pseudo-fork"/>
 <commit votes="steveh" id="452466a503257b1012694b0d3a3cbf260e409d18" ticket="40565" desc="perldelta for the prev. commit"/>
 
