@@ -9,6 +9,8 @@ BEGIN {
     require Config;
     skip_all('no fork')
 	unless ($Config::Config{d_fork} or $Config::Config{d_pseudofork});
+    skip_all('no fork')
+        if $^O eq 'MSWin32' && is_miniperl;
 }
 
 $|=1;
