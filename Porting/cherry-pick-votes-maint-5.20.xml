@@ -104,8 +104,8 @@ a51d618a82a7057c3aabb600a7a8691d27f44a34 caused #122890 so do we need this seque
 <commit votes="" id="efcc8bfdc124f50d33aab3f1d7722b5f9e4de349" ticket="122890" desc="re_tests: More tests for #122890"/>
 
 Fixes a regression from 5.8.8:
-<commit votes="steveh" id="64ff300be0f7714585466af5bb87b2e37db5082a" ticket="122669" desc="[perl #122669] Don't taint at compile time"/>
-<commit votes="steveh" id="eaff586aa6444fb20654ed863b7ff35e136737e8" ticket="122669" desc="Fix t/op/taint.t on Windows"/>
+<commit votes="sprout, steveh" id="64ff300be0f7714585466af5bb87b2e37db5082a" ticket="122669" desc="[perl #122669] Don't taint at compile time"/>
+<commit votes="sprout, steveh" id="eaff586aa6444fb20654ed863b7ff35e136737e8" ticket="122669" desc="Fix t/op/taint.t on Windows"/>
 
 Configure and hints/ Fixes
 --------------------------
