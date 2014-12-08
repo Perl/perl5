@@ -4448,33 +4448,8 @@ BEGIN {
 }
 
 # the same, but treat $|, $), $( and $ at the end of the string differently
+# and leave comments unmangled for the sake of /x and (?x).
 sub re_uninterp {
-    my($str) = @_;
-
-    $str =~ s/
-	  ( ^|\G                  # $1
-          | [^\\]
-          )
-
-          (                       # $2
-            (?:\\\\)*
-          )
-
-          (                       # $3
-            (\(\?\??\{$bal\}\))   # $4
-          | [\$\@]
-            (?!\||\)|\(|$)
-          | \\[uUlLQE]
-          )
-
-	/defined($4) && length($4) ? "$1$2$4" : "$1$2\\$3"/xeg;
-
-    return $str;
-}
-
-# This is for regular expressions with the /x modifier
-# We have to leave comments unmangled.
-sub re_uninterp_extended {
     my($str) = @_;
 
     $str =~ s/
@@ -4552,9 +4527,8 @@ sub escape_str { # ASCII, UTF8
     return $str;
 }
 
-# For regexes with the /x modifier.
-# Leave whitespace unmangled.
-sub escape_extended_re {
+# For regexes.  Leave whitespace unmangled in case of /x or (?x).
+sub escape_re {
     my($str) = @_;
     $str =~ s/(.)/ord($1) > 255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
     $str =~ s/([[:^print:]])/
@@ -4751,7 +4725,7 @@ sub const {
 	if ($ref->FLAGS & SVs_SMG) {
 	    for (my $mg = $ref->MAGIC; $mg; $mg = $mg->MOREMAGIC) {
 		if ($mg->TYPE eq 'r') {
-		    my $re = re_uninterp(escape_str(re_unback($mg->precomp)));
+		    my $re = re_uninterp(escape_re(re_unback($mg->precomp)));
 		    return single_delim("qr", "", $re, $self);
 		}
 	    }
@@ -5180,31 +5154,29 @@ sub re_dq_disambiguate {
 # Like dq(), but different
 sub re_dq {
     my $self = shift;
-    my ($op, $extended) = @_;
+    my ($op) = @_;
 
     my $type = $op->name;
     if ($type eq "const") {
 	return '$[' if $op->private & OPpCONST_ARYBASE;
 	my $unbacked = re_unback($self->const_sv($op)->as_string);
-	return re_uninterp_extended(escape_extended_re($unbacked))
-	    if $extended;
-	return re_uninterp(escape_str($unbacked));
+	return re_uninterp(escape_re($unbacked));
     } elsif ($type eq "concat") {
-	my $first = $self->re_dq($op->first, $extended);
-	my $last  = $self->re_dq($op->last,  $extended);
+	my $first = $self->re_dq($op->first);
+	my $last  = $self->re_dq($op->last);
 	return re_dq_disambiguate($first, $last);
     } elsif ($type eq "uc") {
-	return '\U' . $self->re_dq($op->first->sibling, $extended) . '\E';
+	return '\U' . $self->re_dq($op->first->sibling) . '\E';
     } elsif ($type eq "lc") {
-	return '\L' . $self->re_dq($op->first->sibling, $extended) . '\E';
+	return '\L' . $self->re_dq($op->first->sibling) . '\E';
     } elsif ($type eq "ucfirst") {
-	return '\u' . $self->re_dq($op->first->sibling, $extended);
+	return '\u' . $self->re_dq($op->first->sibling);
     } elsif ($type eq "lcfirst") {
-	return '\l' . $self->re_dq($op->first->sibling, $extended);
+	return '\l' . $self->re_dq($op->first->sibling);
     } elsif ($type eq "quotemeta") {
-	return '\Q' . $self->re_dq($op->first->sibling, $extended) . '\E';
+	return '\Q' . $self->re_dq($op->first->sibling) . '\E';
     } elsif ($type eq "fc") {
-	return '\F' . $self->re_dq($op->first->sibling, $extended) . '\E';
+	return '\F' . $self->re_dq($op->first->sibling) . '\E';
     } elsif ($type eq "join") {
 	return $self->deparse($op->last, 26); # was join($", @ary)
     } else {
@@ -5263,7 +5235,7 @@ sub pure_string {
 }
 
 sub code_list {
-    my ($self,$op,$extended,$cv) = @_;
+    my ($self,$op,$cv) = @_;
 
     # localise stuff relating to the current sub
     $cv and
@@ -5288,7 +5260,7 @@ sub code_list {
 	    $re .= $block;
 	    $re .= $multiline ? "\n\b})" : " })";
 	} else {
-	    $re = re_dq_disambiguate($re, $self->re_dq($op, $extended));
+	    $re = re_dq_disambiguate($re, $self->re_dq($op));
 	}
     }
     $re;
@@ -5296,7 +5268,7 @@ sub code_list {
 
 sub regcomp {
     my $self = shift;
-    my($op, $cx, $extended) = @_;
+    my($op, $cx) = @_;
     my $kid = $op->first;
     $kid = $kid->first if $kid->name eq "regcmaybe";
     $kid = $kid->first if $kid->name eq "regcreset";
@@ -5307,14 +5279,14 @@ sub regcomp {
 	$kid = $kid->first->sibling;
 	while (!null($kid)) {
 	    my $first = $str;
-	    my $last = $self->re_dq($kid, $extended);
+	    my $last = $self->re_dq($kid);
 	    $str = re_dq_disambiguate($first, $last);
 	    $kid = $kid->sibling;
 	}
 	return $str, 1;
     }
 
-    return ($self->re_dq($kid, $extended), 1) if $self->pure_string($kid);
+    return ($self->re_dq($kid), 1) if $self->pure_string($kid);
     return ($self->deparse($kid, $cx), 0);
 }
 
@@ -5396,13 +5368,12 @@ sub matchop {
     }
     my $quote = 1;
     my $pmflags = $op->pmflags;
-    my $extended = ($pmflags & PMf_EXTENDED);
     my $rhs_bound_to_defsv;
     my ($cv, $bregexp);
     my $have_kid = !null $kid;
     # Check for code blocks first
     if (not null my $code_list = $op->code_list) {
-	$re = $self->code_list($code_list, $extended,
+	$re = $self->code_list($code_list,
 			       $op->name eq 'qr'
 				   ? $self->padval(
 				         $kid->first   # ex-list
@@ -5420,18 +5391,13 @@ sub matchop {
 	my $patop = $cv->ROOT      # leavesub
 		       ->first     #   qr
 		       ->code_list;#     list
-	$re = $self->code_list($patop, $extended, $cv);
+	$re = $self->code_list($patop, $cv);
     } elsif (!$have_kid) {
-	my $unbacked = re_unback($op->precomp);
-	if ($extended) {
-	    $re = re_uninterp_extended(escape_extended_re($unbacked));
-	} else {
-	    $re = re_uninterp(escape_str($unbacked));
-	}
+	$re = re_uninterp(escape_re(re_unback($op->precomp)));
     } elsif ($kid->name ne 'regcomp') {
 	carp("found ".$kid->name." where regcomp expected");
     } else {
-	($re, $quote) = $self->regcomp($kid, 21, $extended);
+	($re, $quote) = $self->regcomp($kid, 21);
     }
     if ($have_kid and $kid->name eq 'regcomp') {
 	my $matchop = $kid->first;
@@ -5582,19 +5548,12 @@ sub pp_subst {
 	    $repl = $self->dq($repl);	
 	}
     }
-    my $extended = ($pmflags & PMf_EXTENDED);
     if (not null my $code_list = $op->code_list) {
-	$re = $self->code_list($code_list, $extended);
+	$re = $self->code_list($code_list);
     } elsif (null $kid) {
-	my $unbacked = re_unback($op->precomp);
-	if ($extended) {
-	    $re = re_uninterp_extended(escape_extended_re($unbacked));
-	}
-	else {
-	    $re = re_uninterp(escape_str($unbacked));
-	}
+	$re = re_uninterp(escape_re(re_unback($op->precomp)));
     } else {
-	($re) = $self->regcomp($kid, 1, $extended);
+	($re) = $self->regcomp($kid, 1);
     }
     $flags .= "r" if $pmflags & PMf_NONDESTRUCT;
     $flags .= "e" if $pmflags & PMf_EVAL;
