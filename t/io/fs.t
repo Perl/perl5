@@ -10,6 +10,12 @@ use Config;
 
 my $Is_VMSish = ($^O eq 'VMS');
 
+if ($^O eq 'MSWin32') {
+    # under minitest, buildcustomize sets this to 1, which means
+    # nlinks isn't populated properly, allow our tests to pass
+    ${^WIN32_SLOPPY_STAT} = 0;
+}
+
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
     $wd = `cd`;
 }
