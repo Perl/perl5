@@ -4554,74 +4554,79 @@ STATIC bool S_rck_gosub(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 
 STATIC bool S_rck_exact(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 {
-    SSize_t l;
-    UV uc;
+    SSize_t bytelen, charlen;
 
     PERL_ARGS_ASSERT_RCK_EXACT;
 
+    /* mandatory fixup: join things like /(?:f)(?:o)(?:o)/ that don't get
+     * seen by the EXACT parsing code */
     {
-        /* min_subtract and unfolded_multi_char are only relevant for
-         * the EXACTFish types */
-        UV min_subtract = 0;
-        bool unfolded_multi_char = FALSE;
-
-        /* Deal with things like /(?:f)(?:o)(?:o)/ which can't be dealt with by
-         * the normal EXACT parsing code. */
+        UV min_subtract; /* r/w params only relevant for EXACTFish types */
+        bool unfolded_multi_char;
         join_exact(pRExC_state, params->scan, &min_subtract,
                 &unfolded_multi_char, 0, NULL, params->depth + 1);
     }
 
-    l = STR_LEN(params->scan);
-    assert(l);
+    bytelen = STR_LEN(params->scan);
+    assert(bytelen);
     if (UTF) {
         const U8 * const s = (U8*)STRING(params->scan);
-        uc = utf8_to_uvchr_buf(s, s + l, NULL);
-        l = utf8_length(s, s + l);
+        charlen = utf8_length(s, s + bytelen);
     } else {
-        uc = *((U8*)STRING(params->scan));
+        charlen = bytelen;
     }
-    params->min += l;
-    if (params->flags & SCF_DO_SUBSTR) { /* Update longest substr. */
+
+    params->min += charlen;
+
+    /* Update longest substr */
+    if (params->flags & SCF_DO_SUBSTR) {
         /* The code below prefers earlier match for fixed
-           offset, later match for variable offset.  */
+         * offset, later match for variable offset.  */
         if (params->data->last_end == -1) { /* Update the start info. */
             params->data->last_start_min = params->data->pos_min;
             params->data->last_start_max = params->is_inf
                 ? SSize_t_MAX : params->data->pos_min + params->data->pos_delta;
         }
-        sv_catpvn(params->data->last_found, STRING(params->scan), STR_LEN(params->scan));
+        sv_catpvn(params->data->last_found, STRING(params->scan), bytelen);
         if (UTF)
             SvUTF8_on(params->data->last_found);
+        /* required to update utf8 length cache, for example */
+        SvSETMAGIC(params->data->last_found);
 
-        {
-            SV * const sv = params->data->last_found;
-            MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
-                mg_find(sv, PERL_MAGIC_utf8) : NULL;
-            if (mg && mg->mg_len >= 0)
-                mg->mg_len += utf8_length((U8*)STRING(params->scan),
-                        (U8*)STRING(params->scan) + STR_LEN(params->scan));
-        }
-
-        params->data->last_end = params->data->pos_min + l;
-        params->data->pos_min += l; /* As in the first entry. */
+        params->data->last_end = params->data->pos_min + charlen;
+        params->data->pos_min += charlen; /* As in the first entry. */
         params->data->flags &= ~SF_BEFORE_EOL;
     }
 
-    /* ANDing the code point leaves at most it, and not in locale, and
-     * can't match null string */
-    if (params->flags & SCF_DO_STCLASS_AND) {
-        ssc_cp_and(params->data->start_class, uc);
-        ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
-        ssc_clear_locale(params->data->start_class);
-    } else if (params->flags & SCF_DO_STCLASS_OR) {
-        ssc_add_cp(params->data->start_class, uc);
-        ssc_and(pRExC_state, params->data->start_class,
-                (regnode_charclass *)params->and_withp);
+    /* update start class */
+    if (params->flags & SCF_DO_STCLASS) {
+        const U8 * const s = (U8*)STRING(params->scan);
+        UV codepoint;
 
-        /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
-        ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+        if (UTF)
+            codepoint = utf8_to_uvchr_buf(s, s + bytelen, NULL);
+        else
+            codepoint = *s;
+
+        /* ANDing the code point leaves at most it, and not in locale, and
+         * can't match null string */
+        if (params->flags & SCF_DO_STCLASS_AND) {
+            ssc_cp_and(params->data->start_class, codepoint);
+            ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+            ssc_clear_locale(params->data->start_class);
+        } else if (params->flags & SCF_DO_STCLASS_OR) {
+            ssc_add_cp(params->data->start_class, codepoint);
+            ssc_and(pRExC_state, params->data->start_class,
+                    (regnode_charclass *)params->and_withp);
+
+            /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
+            ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
+        }
+
+        /* after this node, we're not at the start any more */
+        params->flags &= ~SCF_DO_STCLASS;
     }
-    params->flags &= ~SCF_DO_STCLASS;
+
     params->scan = regnext(params->scan);
     return 0;
 }
