@@ -36,8 +36,6 @@ No, we don’t. They remove code rendered unnecessary by the fix for #122747, bu
 <commit votes="" id="cd94980729f7f861da34f8bc040253ca8d4d6d20" ticket="122747" desc="perldelta for b4fa55d and 0ddd4a5"/>
 <commit votes="" id="6d67525df38ae6b009f80748fc8ed0544c91d809" ticket="122747" desc="perldelta: Insert missing =item"/>
 
-(Note: #123339 is a prerequisite for #40565)
-<commit votes="steveh" id="64c909d3055a7d5436012fab51eb1c046088140a" ticket="123339" desc="fix segv for psudofork duping of SAVEt_GP_ALIASED_SV"/>
 <commit votes="steveh, sprout" id="83a94553cbf9f2c11b3e9a63a44e7b9ce17ccb77" ticket="40565" desc="[perl #40565] Fix localisation in pseudo-fork"/>
 <commit votes="steveh" id="452466a503257b1012694b0d3a3cbf260e409d18" ticket="40565" desc="perldelta for the prev. commit"/>
 
