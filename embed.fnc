@@ -2698,10 +2698,7 @@ Apo	|int	|my_cxt_index	|NN const char *my_cxt_key
 Apo	|void*	|my_cxt_init	|NN int *index|size_t size
 #endif
 #endif
-
-: This function is an implementation detail. The public API for this is
-: XS_VERSION_BOOTCHECK
-Xpo	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
+so	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
 				|STRLEN xs_len
 Xpon	|I32	|xs_handshake	|const U32 key|NN void * v_my_perl\
 				|NN const char * file| ...

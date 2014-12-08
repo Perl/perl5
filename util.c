@@ -5451,15 +5451,15 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
 	U32 xsverlen;
 	assert(HS_GETXSVERLEN(key) <= UCHAR_MAX && HS_GETXSVERLEN(key) <= HS_APIVERLEN_MAX);
 	if((xsverlen = HS_GETXSVERLEN(key)))
-	    Perl_xs_version_bootcheck(aTHX_
+	    S_xs_version_bootcheck(aTHX_
 		items, ax, va_arg(args, char*), xsverlen);
     }
     va_end(args);
     return ax;
 }
 
-void
-Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
+STATIC void
+S_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
 			  STRLEN xs_len)
 {
     SV *sv;

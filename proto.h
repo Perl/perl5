@@ -5236,7 +5236,7 @@ PERL_CALLCONV I32	Perl_xs_handshake(const U32 key, void * v_my_perl, const char 
 #define PERL_ARGS_ASSERT_XS_HANDSHAKE	\
 	assert(v_my_perl); assert(file)
 
-PERL_CALLCONV void	Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p, STRLEN xs_len)
+STATIC void	S_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p, STRLEN xs_len)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_XS_VERSION_BOOTCHECK	\
 	assert(xs_p)
