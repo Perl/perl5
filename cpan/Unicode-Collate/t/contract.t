@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..108\n"; }
+BEGIN { $| = 1; print "1..118\n"; }
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -303,9 +303,27 @@ if (!$@) {
 ENTRIES
     );
 
-    ok($discontNFD->eq("A\x{327}\x{301}\0\x{334}", "A\x{334}\x{327}\x{301}"));
-    ok($discontNFD->eq("A\x{300}\0\x{327}",        "A\x{327}\x{300}"));
+    ok($discontNFD->eq("A\x{334}\x{327}\x{301}", "A\x{327}\x{301}\0\x{334}"));
+    ok($discontNFD->eq("A\x{327}\x{300}",        "A\x{300}\0\x{327}"));
+
+    $discontNFD->change(long_contraction => 0);
+    ok($discontNFD->lt("A\x{334}\x{327}\x{301}", "A\x{327}\x{301}\0\x{334}"));
+    ok($discontNFD->eq("A\x{334}\x{327}\x{301}", "A\0\x{327}\x{301}\x{334}"));
+    ok($discontNFD->eq("A\x{327}\x{300}",        "A\x{300}\0\x{327}"));
+
+    $discontNFD->change(level => 1);
+    ok($discontNFD->gt("A\x{327}\x{300}", "A\x{327}\0\x{300}"));
+
+    # discontiguous
+    ok($discontNFD->lt("A\x{334}\x{327}\x{301}", "A\x{327}\x{301}\0\x{334}"));
+    ok($discontNFD->lt("A\x{334}\x{327}\x{301}", "A\x{300}"));
+    ok($discontNFD->eq("A\x{334}\x{327}\x{301}", "A"));
+
+    # contiguous
+    ok($discontNFD->eq("A\x{327}\x{301}", "A\x{327}\x{301}\0\x{334}"));
+    ok($discontNFD->lt("A\x{327}\x{301}", "A\x{300}"));
+    ok($discontNFD->gt("A\x{327}\x{301}", "A"));
 } else {
-    ok(1) for 1..64;
+    ok(1) for 1..74;
 }
-# 108
+# 118

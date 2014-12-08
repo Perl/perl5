@@ -17,7 +17,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -89,9 +89,9 @@ my $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
 my $HighestVCE = pack(VCE_TEMPLATE, 0, 0xFFFE, 0x20, 0x5, 0xFFFF);
 my $minimalVCE = pack(VCE_TEMPLATE, 0,      1, 0x20, 0x5, 0xFFFE);
 
-sub UCA_Version { "28" }
+sub UCA_Version { "30" }
 
-sub Base_Unicode_Version { "6.3.0" }
+sub Base_Unicode_Version { "7.0.0" }
 
 ######
 
@@ -190,6 +190,7 @@ my %DerivCode = (
    24 => \&_derivCE_24,
    26 => \&_derivCE_24, # 26 == 24
    28 => \&_derivCE_24, # 28 == 24
+   30 => \&_derivCE_24, # 30 == 24
 );
 
 sub checkCollator {
@@ -1098,7 +1099,7 @@ If the revision (previously "tracking version") number of UCA is given,
 behavior of that revision is emulated on collating.
 If omitted, the return value of C<UCA_Version()> is used.
 
-The following revisions are supported.  The default is 28.
+The following revisions are supported.  The default is 30.
 
      UCA       Unicode Standard         DUCET (@version)
    -------------------------------------------------------
@@ -1113,6 +1114,7 @@ The following revisions are supported.  The default is 28.
      24             6.1.0               6.1.0 (6.1.0)
      26             6.2.0               6.2.0 (6.2.0)
      28             6.3.0               6.3.0 (6.3.0)
+     30             7.0.0               7.0.0 (7.0.0)
 
 * See below C<long_contraction> with C<UCA_Version> 22 and 24.
 
@@ -1356,7 +1358,7 @@ If AB is found but not ABC is not found, other long contraction where
 the first character is A and the second is not B may not be found.
 
 Under C<(normalization =E<gt> undef)>, detection step of discontiguous
-contractions are skipped.
+contractions will be skipped.
 
 B<Note:> The following contractions in DUCET are not considered
 in steps S2.1.1 to S2.1.3, where they are discontiguous.

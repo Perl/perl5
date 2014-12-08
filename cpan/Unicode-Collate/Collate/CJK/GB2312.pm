@@ -3,7 +3,7 @@ package Unicode::Collate::CJK::GB2312;
 use 5.006;
 use strict;
 
-our $VERSION = '0.65';
+our $VERSION = '1.08';
 
 my %u2p;
 my $wt = 0x8000;
