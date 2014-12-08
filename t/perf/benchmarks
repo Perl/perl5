@@ -236,7 +236,7 @@
     },
 
 
-    'expr::index::utf8_postion_1' => {
+    'expr::index::utf8_position_1' => {
         desc    => 'index of a utf8 string, matching at position 1',
         setup   => 'utf8::upgrade my $x = "abc"',
         code    => 'index $x, "b"',
