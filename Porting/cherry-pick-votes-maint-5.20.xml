@@ -44,7 +44,7 @@ We should also cherry-pick:
 Other Proposed Cherry-Picks
 ===========================
 
-Blead changes have been examined up to and including 09f8a1025e8fc99cd5cd3e8fb446079c5725e43c (Remove comp/opsubs.t from deparse-skips.txt)
+Blead changes have been examined up to and including ba2f93c53341e0002ccf08487a56622c6aa5a87d (deparse-skips.txt: Note bug number for re/overload.t)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -246,6 +246,7 @@ Part of this (but not the opcode part):
 <commit votes="steveh" id="5566fa1536b7e3ab06bf74ce785d42d16c663791" ticket="122986" desc="Convert \ts to spaces in perlref.pod."/>
 <commit votes="steveh" id="0e3be540c5c5d8ec7d6c682091855e8865b99b51" ticket="122987" desc="Remove trailing whitespace."/>
 <commit votes="steveh" id="e6ebbe921e63dbd445aa30e30a0b2b80574b88a0" ticket="122987" desc="perlfork.pod: convert \ts to spaces."/>
+<commit votes="steveh" id="15faabe4bd597caa63a35d745cc5e93792a347dc" ticket="123377" desc="Convert tabs to spaces and remove trailing space."/>
 
 To be included in an "Errata From Previous Releases":
 <commit votes="steveh" id="6ff8f256561a974b63b784ae8681c284ada44f7a" ticket="122655" desc="perldelta: Entry for [perl #122655]."/>
