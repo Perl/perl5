@@ -512,7 +512,6 @@ re/rxcode.t
 re/subst.t
 run/switchI.t             # -I on #! line is not deparsed
 run/switchd-78586.t       # -I on #! line is not deparsed
-run/switches.t
 uni/attrs.t
 uni/bless.t
 uni/chomp.t
