@@ -4633,39 +4633,40 @@ STATIC bool S_rck_exact(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 
 STATIC bool S_rck_exactfish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 {
-    SSize_t l;
+    SSize_t charlen;
     const U8 *s;
     /* How many chars to subtract from the minimum node length to get
      * a real minimum (because the folded version may be shorter) */
     UV min_subtract = 0;
-    bool unfolded_multi_char = FALSE;
 
     PERL_ARGS_ASSERT_RCK_EXACTFISH;
 
-    /* Deal with things like /(?:f)(?:o)(?:o)/ which can't be dealt with
-     * by the normal EXACTish parsing code */
-    join_exact(pRExC_state, params->scan, &min_subtract,
-            &unfolded_multi_char, 0, NULL, params->depth + 1);
+    /* mandatory fixups */
+    {
+        bool unfolded_multi_char = FALSE;
+        /* Deal with things like /(?:f)(?:o)(?:o)/ which can't be dealt with
+         * by the normal EXACTish parsing code */
+        join_exact(pRExC_state, params->scan, &min_subtract,
+                &unfolded_multi_char, 0, NULL, params->depth + 1);
+        if (unfolded_multi_char) {
+            RExC_seen |= REG_UNFOLDED_MULTI_SEEN;
+        }
+    }
 
-    l = STR_LEN(params->scan);
     s = (U8*)STRING(params->scan);
+    charlen = (UTF) ? utf8_length(s, s + STR_LEN(params->scan))
+            : STR_LEN(params->scan);
 
-    /* Search for fixed substrings supports EXACT only. */
-    if (params->flags & SCF_DO_SUBSTR) {
-        assert(params->data);
-        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-    }
-    if (UTF) {
-        l = utf8_length(s, s + l);
-    }
-    if (unfolded_multi_char) {
-        RExC_seen |= REG_UNFOLDED_MULTI_SEEN;
-    }
-    params->min += l - min_subtract;
+    params->min += charlen - min_subtract;
     assert(params->min >= 0);
     params->delta += min_subtract;
+
     if (params->flags & SCF_DO_SUBSTR) {
-        params->data->pos_min += l - min_subtract;
+        /* Search for fixed substrings supports EXACT only. */
+        assert(params->data);
+        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+
+        params->data->pos_min += charlen - min_subtract;
         if (params->data->pos_min < 0)
             params->data->pos_min = 0;
         params->data->pos_delta += min_subtract;
@@ -4685,7 +4686,8 @@ STATIC bool S_rck_exactfish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *param
             ssc_intersection(params->data->start_class, EXACTF_invlist, FALSE);
         } else {    /* SCF_DO_STCLASS_OR */
             ssc_union(params->data->start_class, EXACTF_invlist, FALSE);
-            ssc_and(pRExC_state, params->data->start_class, (regnode_charclass *) params->and_withp);
+            ssc_and(pRExC_state, params->data->start_class,
+                    (regnode_charclass *)params->and_withp);
 
             /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
             ANYOF_FLAGS(params->data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
@@ -4693,6 +4695,7 @@ STATIC bool S_rck_exactfish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *param
         params->flags &= ~SCF_DO_STCLASS;
         SvREFCNT_dec(EXACTF_invlist);
     }
+
     params->scan = regnext(params->scan);
     return 0;
 }
@@ -10727,6 +10730,10 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
             const unsigned int * remaining_folds_to_list;
             Size_t folds_to_count;
 
+            /* /aa doesn't allow folds between ASCII and non-ASCII */
+            bool must_match = (OP(node) == EXACTFAA
+                    || OP(node) == EXACTFAA_NO_TRIE);
+
             /* It matches itself */
             invlist = add_cp_to_invlist(invlist, fc);
 
@@ -10737,13 +10744,9 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
             for (k = 0; k < folds_to_count; k++) {
                 UV c = (k == 0) ? first_folds_to : remaining_folds_to_list[k-1];
 
-                /* /aa doesn't allow folds between ASCII and non- */
-                if (   (OP(node) == EXACTFAA || OP(node) == EXACTFAA_NO_TRIE)
-                    && isASCII(c) != isASCII(fc))
-                {
+                if (must_match && isASCII(c) != isASCII(fc)) {
                     continue;
                 }
-
                 invlist = add_cp_to_invlist(invlist, c);
             }
         }
