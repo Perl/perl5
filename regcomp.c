@@ -6007,7 +6007,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
             if (oplist) {
                 assert(oplist->op_type == OP_PADAV
                     || oplist->op_type == OP_RV2AV);
-                oplist = OP_SIBLING(oplist);
+                oplist = OpSIBLING(oplist);
             }
 
             if (SvRMAGICAL(av)) {
@@ -6054,10 +6054,10 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                 pRExC_state->code_blocks[n].src_regex = NULL;
                 n++;
                 code = 1;
-                oplist = OP_SIBLING(oplist); /* skip CONST */
+                oplist = OpSIBLING(oplist); /* skip CONST */
                 assert(oplist);
             }
-            oplist = OP_SIBLING(oplist);;
+            oplist = OpSIBLING(oplist);;
         }
 
 	/* apply magic and QR overloading to arg */
@@ -6561,7 +6561,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	OP *o;
 	int ncode = 0;
 
-	for (o = cLISTOPx(expr)->op_first; o; o = OP_SIBLING(o))
+	for (o = cLISTOPx(expr)->op_first; o; o = OpSIBLING(o))
 	    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL))
 		ncode++; /* count of DO blocks */
 	if (ncode) {
@@ -6582,7 +6582,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         if (expr->op_type == OP_CONST)
             n = 1;
         else
-            for (o = cLISTOPx(expr)->op_first; o; o = OP_SIBLING(o)) {
+            for (o = cLISTOPx(expr)->op_first; o; o = OpSIBLING(o)) {
                 if (o->op_type == OP_CONST)
                     n++;
             }
@@ -6598,7 +6598,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         if (expr->op_type == OP_CONST)
             new_patternp[n] = cSVOPx_sv(expr);
         else
-            for (o = cLISTOPx(expr)->op_first; o; o = OP_SIBLING(o)) {
+            for (o = cLISTOPx(expr)->op_first; o; o = OpSIBLING(o)) {
                 if (o->op_type == OP_CONST)
                     new_patternp[n++] = cSVOPo_sv;
             }
@@ -6618,7 +6618,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             assert(   expr->op_type == OP_PUSHMARK
                    || (expr->op_type == OP_NULL && expr->op_targ == OP_PUSHMARK)
                    || expr->op_type == OP_PADRANGE);
-            expr = OP_SIBLING(expr);
+            expr = OpSIBLING(expr);
     }
 
     pat = S_concat_pat(aTHX_ pRExC_state, NULL, new_patternp, pat_count,

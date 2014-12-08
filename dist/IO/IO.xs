@@ -61,8 +61,8 @@ typedef FILE * OutputStream;
 #  define dVAR dNOOP
 #endif
 
-#ifndef OP_SIBLING
-#  define OP_SIBLING(o) (o)->op_sibling
+#ifndef OpSIBLING
+#  define OpSIBLING(o) (o)->op_sibling
 #endif
 
 static int not_here(const char *s) __attribute__noreturn__;
@@ -195,7 +195,7 @@ static OP *
 io_ck_lineseq(pTHX_ OP *o)
 {
     OP *kid = cBINOPo->op_first;
-    for (; kid; kid = OP_SIBLING(kid))
+    for (; kid; kid = OpSIBLING(kid))
 	if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
 	    kid->op_ppaddr = io_pp_nextstate;
     return o;

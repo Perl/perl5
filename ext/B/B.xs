@@ -542,7 +542,7 @@ walkoptree(pTHX_ OP *o, const char *method, SV *ref)
     PUTBACK;
     perl_call_method(method, G_DISCARD);
     if (o && (o->op_flags & OPf_KIDS)) {
-	for (kid = ((UNOP*)o)->op_first; kid; kid = OP_SIBLING(kid)) {
+	for (kid = ((UNOP*)o)->op_first; kid; kid = OpSIBLING(kid)) {
 	    ref = walkoptree(aTHX_ kid, method, ref);
 	}
     }
@@ -568,7 +568,7 @@ oplist(pTHX_ OP *o, SV **SP)
             continue;
 	case OP_SORT:
 	    if (o->op_flags & OPf_STACKED && o->op_flags & OPf_SPECIAL) {
-		OP *kid = OP_SIBLING(cLISTOPo->op_first);   /* pass pushmark */
+		OP *kid = OpSIBLING(cLISTOPo->op_first);   /* pass pushmark */
 		kid = kUNOP->op_first;                      /* pass rv2gv */
 		kid = kUNOP->op_first;                      /* pass leave */
 		SP = oplist(aTHX_ kid->op_next, SP);
@@ -1061,7 +1061,7 @@ next(o)
 	if (op_methods[ix].type == op_offset_special)
 	    switch (ix) {
 	    case 1: /* B::OP::op_sibling */
-		ret = make_op_object(aTHX_ OP_SIBLING(o));
+		ret = make_op_object(aTHX_ OpSIBLING(o));
 		break;
 
 	    case 8: /* B::PMOP::pmreplstart */
@@ -1142,7 +1142,7 @@ next(o)
 		{
 		    OP *kid;
 		    UV i = 0;
-		    for (kid = ((LISTOP*)o)->op_first; kid; kid = OP_SIBLING(kid))
+		    for (kid = ((LISTOP*)o)->op_first; kid; kid = OpSIBLING(kid))
 			i++;
 		    ret = sv_2mortal(newSVuv(i));
 		}

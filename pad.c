@@ -2129,10 +2129,10 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 			     nextstate
 			     padsv
 		     */
-		    if (OP_SIBLING(
+		    if (OpSIBLING(
 			 cUNOPx(cUNOPx(CvROOT(cv))->op_first)->op_first
 			) == o
-		     && !OP_SIBLING(o))
+		     && !OpSIBLING(o))
 		    {
 			Perl_ck_warner_d(aTHX_
 					  packWARN(WARN_DEPRECATED),

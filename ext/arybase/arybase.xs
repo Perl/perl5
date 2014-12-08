@@ -177,7 +177,7 @@ STATIC OP *ab_ck_sassign(pTHX_ OP *o) {
  o = (*ab_old_ck_sassign)(aTHX_ o);
  if (o->op_type == OP_SASSIGN && FEATURE_ARYBASE_IS_ENABLED) {
   OP *right = cBINOPx(o)->op_first;
-  OP *left = OP_SIBLING(right);
+  OP *left = OpSIBLING(right);
   if (left) ab_process_assignment(left, right);
  }
  return o;
@@ -187,9 +187,9 @@ STATIC OP *ab_ck_aassign(pTHX_ OP *o) {
  o = (*ab_old_ck_aassign)(aTHX_ o);
  if (o->op_type == OP_AASSIGN && FEATURE_ARYBASE_IS_ENABLED) {
   OP *right = cBINOPx(o)->op_first;
-  OP *left = OP_SIBLING(right);
-  left = OP_SIBLING(cBINOPx(left)->op_first);
-  right = OP_SIBLING(cBINOPx(right)->op_first);
+  OP *left = OpSIBLING(right);
+  left = OpSIBLING(cBINOPx(left)->op_first);
+  right = OpSIBLING(cBINOPx(right)->op_first);
   ab_process_assignment(left, right);
  }
  return o;
@@ -384,7 +384,7 @@ static OP *ab_ck_base(pTHX_ OP *o)
    /* Break the aelemfast optimisation */
    if (o->op_type == OP_AELEM) {
     OP *const first = cBINOPo->op_first;
-    OP *second = OP_SIBLING(first);
+    OP *second = OpSIBLING(first);
     OP *newop;
     if (second->op_type == OP_CONST) {
      /* cut out second arg and replace it with a new unop which is

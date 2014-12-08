@@ -1810,7 +1810,7 @@ PP(pp_caller)
 	PUSHTARG;
     }
     mPUSHs(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
-    lcop = closest_cop(cx->blk_oldcop, OP_SIBLING(cx->blk_oldcop),
+    lcop = closest_cop(cx->blk_oldcop, OpSIBLING(cx->blk_oldcop),
 		       cx->blk_sub.retop, TRUE);
     if (!lcop)
 	lcop = cx->blk_oldcop;
@@ -2709,7 +2709,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
     if (o->op_flags & OPf_KIDS) {
 	OP *kid;
 	/* First try all the kids at this level, since that's likeliest. */
-	for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid)) {
+	for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid)) {
 	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
                 STRLEN kid_label_len;
                 U32 kid_label_flags;
@@ -2729,7 +2729,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
 		    return kid;
 	    }
 	}
-	for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid)) {
+	for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid)) {
 	    if (kid == PL_lastgotoprobe)
 		continue;
 	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
@@ -3017,13 +3017,13 @@ PP(pp_goto)
 	    case CXt_LOOP_PLAIN:
 	    case CXt_GIVEN:
 	    case CXt_WHEN:
-		gotoprobe = OP_SIBLING(cx->blk_oldcop);
+		gotoprobe = OpSIBLING(cx->blk_oldcop);
 		break;
 	    case CXt_SUBST:
 		continue;
 	    case CXt_BLOCK:
 		if (ix) {
-		    gotoprobe = OP_SIBLING(cx->blk_oldcop);
+		    gotoprobe = OpSIBLING(cx->blk_oldcop);
 		    in_block = TRUE;
 		} else
 		    gotoprobe = PL_main_root;
@@ -3051,9 +3051,9 @@ PP(pp_goto)
 				    enterops, enterops + GOTO_DEPTH);
 		if (retop)
 		    break;
-		if ( (sibl1 = OP_SIBLING(gotoprobe)) &&
+		if ( (sibl1 = OpSIBLING(gotoprobe)) &&
 		     sibl1->op_type == OP_UNSTACK &&
-		     (sibl2 = OP_SIBLING(sibl1)))
+		     (sibl2 = OpSIBLING(sibl1)))
                 {
 		    retop = dofindlabel(sibl2,
 					label, label_len, label_flags, enterops,

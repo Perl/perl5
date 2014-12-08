@@ -405,9 +405,9 @@ THX_ck_entersub_args_scalars(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     OP *aop = cUNOPx(entersubop)->op_first;
     PERL_UNUSED_ARG(namegv);
     PERL_UNUSED_ARG(ckobj);
-    if (!OP_HAS_SIBLING(aop))
+    if (!OpHAS_SIBLING(aop))
 	aop = cUNOPx(aop)->op_first;
-    for (aop = OP_SIBLING(aop); OP_HAS_SIBLING(aop); aop = OP_SIBLING(aop)) {
+    for (aop = OpSIBLING(aop); OpHAS_SIBLING(aop); aop = OpSIBLING(aop)) {
 	op_contextualize(aop, G_SCALAR);
     }
     return entersubop;
@@ -421,13 +421,13 @@ THX_ck_entersub_multi_sum(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     OP *pushop = cUNOPx(entersubop)->op_first;
     PERL_UNUSED_ARG(namegv);
     PERL_UNUSED_ARG(ckobj);
-    if (!OP_HAS_SIBLING(pushop)) {
+    if (!OpHAS_SIBLING(pushop)) {
         parent = pushop;
 	pushop = cUNOPx(pushop)->op_first;
     }
     while (1) {
-	OP *aop = OP_SIBLING(pushop);
-	if (!OP_HAS_SIBLING(aop))
+	OP *aop = OpSIBLING(pushop);
+	if (!OpHAS_SIBLING(aop))
 	    break;
         /* cut out first arg */
         op_sibling_splice(parent, pushop, 1, NULL);
@@ -457,7 +457,7 @@ test_op_list_describe_part(SV *res, OP *o)
     if (o->op_flags & OPf_KIDS) {
 	OP *k;
 	sv_catpvs(res, "[");
-	for (k = cUNOPx(o)->op_first; k; k = OP_SIBLING(k))
+	for (k = cUNOPx(o)->op_first; k; k = OpSIBLING(k))
 	    test_op_list_describe_part(res, k);
 	sv_catpvs(res, "]");
     } else {
@@ -564,12 +564,12 @@ THX_ck_entersub_establish_cleanup(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     ck_entersub_args_proto(entersubop, namegv, ckobj);
     parent = entersubop;
     pushop = cUNOPx(entersubop)->op_first;
-    if(!OP_HAS_SIBLING(pushop)) {
+    if(!OpHAS_SIBLING(pushop)) {
         parent = pushop;
         pushop = cUNOPx(pushop)->op_first;
     }
     /* extract out first arg, then delete the rest of the tree */
-    argop = OP_SIBLING(pushop);
+    argop = OpSIBLING(pushop);
     op_sibling_splice(parent, pushop, 1, NULL);
     op_free(entersubop);
 
@@ -586,11 +586,11 @@ THX_ck_entersub_postinc(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     ck_entersub_args_proto(entersubop, namegv, ckobj);
     parent = entersubop;
     pushop = cUNOPx(entersubop)->op_first;
-    if(!OP_HAS_SIBLING(pushop)) {
+    if(!OpHAS_SIBLING(pushop)) {
         parent = pushop;
         pushop = cUNOPx(pushop)->op_first;
     }
-    argop = OP_SIBLING(pushop);
+    argop = OpSIBLING(pushop);
     op_sibling_splice(parent, pushop, 1, NULL);
     op_free(entersubop);
     return newUNOP(OP_POSTINC, 0,
@@ -605,13 +605,13 @@ THX_ck_entersub_pad_scalar(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     SV *a0, *a1;
     ck_entersub_args_proto(entersubop, namegv, ckobj);
     pushop = cUNOPx(entersubop)->op_first;
-    if(!OP_HAS_SIBLING(pushop))
+    if(!OpHAS_SIBLING(pushop))
         pushop = cUNOPx(pushop)->op_first;
-    argop = OP_SIBLING(pushop);
-    if(argop->op_type != OP_CONST || OP_SIBLING(argop)->op_type != OP_CONST)
+    argop = OpSIBLING(pushop);
+    if(argop->op_type != OP_CONST || OpSIBLING(argop)->op_type != OP_CONST)
 	croak("bad argument expression type for pad_scalar()");
     a0 = cSVOPx_sv(argop);
-    a1 = cSVOPx_sv(OP_SIBLING(argop));
+    a1 = cSVOPx_sv(OpSIBLING(argop));
     switch(SvIV(a0)) {
 	case 1: {
 	    SV *namesv = sv_2mortal(newSVpvs("$"));
@@ -1219,8 +1219,8 @@ addissub_myck_add(pTHX_ OP *op)
     OP *aop, *bop;
     U8 flags;
     if (!(flag_svp && SvTRUE(*flag_svp) && (op->op_flags & OPf_KIDS) &&
-	    (aop = cBINOPx(op)->op_first) && (bop = OP_SIBLING(aop)) &&
-	    !OP_HAS_SIBLING(bop)))
+	    (aop = cBINOPx(op)->op_first) && (bop = OpSIBLING(aop)) &&
+	    !OpHAS_SIBLING(bop)))
 	return addissub_nxck_add(aTHX_ op);
     flags = op->op_flags;
     op_sibling_splice(op, NULL, 1, NULL); /* excise aop */

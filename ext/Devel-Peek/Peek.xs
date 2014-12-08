@@ -362,12 +362,12 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
 
     parent = entersubop;
     pm = cUNOPx(entersubop)->op_first;
-    if (!OP_HAS_SIBLING(pm)) {
+    if (!OpHAS_SIBLING(pm)) {
         parent = pm;
 	pm = cUNOPx(pm)->op_first;
     }
-    first = OP_SIBLING(pm);
-    second = OP_SIBLING(first);
+    first = OpSIBLING(pm);
+    second = OpSIBLING(first);
     if (!second) {
 	/* It doesn’t really matter what we return here, as this only
 	   occurs after yyerror.  */
@@ -376,7 +376,7 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
     /* we either have Dump($x):   [pushmark]->[first]->[ex-cvop]
      * or             Dump($x,1); [pushmark]->[first]->[second]->[ex-cvop]
      */
-    if (!OP_HAS_SIBLING(second))
+    if (!OpHAS_SIBLING(second))
         second = NULL;
 
     if (first->op_type == OP_RV2AV ||
