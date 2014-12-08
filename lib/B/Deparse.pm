@@ -3271,7 +3271,8 @@ sub pp_list {
 	    }
 	} elsif ($lopname =~ /^(?:gv|rv2)([ash])v$/
 			&& $loppriv & OPpOUR_INTRO
-		or $lopname eq "null" && $lop->first->name eq "gvsv"
+		or $lopname eq "null" && class($lop) eq 'UNOP'
+			&& $lop->first->name eq "gvsv"
 			&& $lop->first->private & OPpOUR_INTRO) { # our()
 	    my $newlocal = "local " x !!($loppriv & OPpLVAL_INTRO) . "our";
 	    ($local = "", last)

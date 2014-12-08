@@ -469,6 +469,14 @@ tr/\x{345}/\x{370}/;
     2;
 }
 ####
+# List of constants in void context
+# CONTEXT no warnings;
+(1,2,3);
+0;
+>>>>
+'???', '???', '???';
+0;
+####
 # Lexical and simple arithmetic
 my $test;
 ++$test and $test /= 2;
