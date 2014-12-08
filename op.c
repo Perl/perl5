@@ -4681,7 +4681,8 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     dVAR;
     LISTOP *listop;
 
-    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_LISTOP);
+    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_LISTOP
+	|| type == OP_CUSTOM);
 
     NewOp(1101, listop, 1, LISTOP);
 
@@ -4790,6 +4791,7 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP
 	|| type == OP_SASSIGN
 	|| type == OP_ENTERTRY
+	|| type == OP_CUSTOM
 	|| type == OP_NULL );
 
     if (!first)
@@ -4830,7 +4832,8 @@ Perl_newUNOP_AUX(pTHX_ I32 type, I32 flags, OP *first, UNOP_AUX_item *aux)
     dVAR;
     UNOP_AUX *unop;
 
-    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_UNOP_AUX);
+    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_UNOP_AUX
+        || type == OP_CUSTOM);
 
     NewOp(1101, unop, 1, UNOP_AUX);
     unop->op_type = (OPCODE)type;
@@ -4870,7 +4873,8 @@ S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth
     dVAR;
     METHOP *methop;
 
-    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_METHOP);
+    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_METHOP
+        || type == OP_CUSTOM);
 
     NewOp(1101, methop, 1, METHOP);
     if (dynamic_meth) {
@@ -4948,7 +4952,7 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     BINOP *binop;
 
     ASSUME((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP
-	|| type == OP_SASSIGN || type == OP_NULL );
+	|| type == OP_SASSIGN || type == OP_NULL || type == OP_CUSTOM);
 
     NewOp(1101, binop, 1, BINOP);
 
@@ -5353,7 +5357,8 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     dVAR;
     PMOP *pmop;
 
-    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_PMOP);
+    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_PMOP
+	|| type == OP_CUSTOM);
 
     NewOp(1101, pmop, 1, PMOP);
     CHANGE_TYPE(pmop, type);
@@ -5826,7 +5831,8 @@ Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_SVOP
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_PVOP_OR_SVOP
-	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_FILESTATOP);
+	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_FILESTATOP
+	|| type == OP_CUSTOM);
 
     NewOp(1101, svop, 1, SVOP);
     CHANGE_TYPE(svop, type);
@@ -5891,7 +5897,8 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_SVOP
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_PVOP_OR_SVOP
-	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_FILESTATOP);
+	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_FILESTATOP
+	|| type == OP_CUSTOM);
 
     NewOp(1101, padop, 1, PADOP);
     CHANGE_TYPE(padop, type);
@@ -5957,7 +5964,7 @@ Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
     flags &= ~SVf_UTF8;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_PVOP_OR_SVOP
-	|| type == OP_RUNCV
+	|| type == OP_RUNCV || type == OP_CUSTOM
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP);
 
     NewOp(1101, pvop, 1, PVOP);
@@ -6901,7 +6908,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     if (type == OP_XOR)		/* Not short circuit, but here by precedence. */
 	return newBINOP(type, flags, scalar(first), scalar(other));
 
-    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_LOGOP);
+    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_LOGOP
+	|| type == OP_CUSTOM);
 
     scalarboolean(first);
     /* optimize AND and OR ops that have NOTs as children */
@@ -7575,7 +7583,8 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 
     PERL_ARGS_ASSERT_NEWLOOPEX;
 
-    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP);
+    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP
+	|| type == OP_CUSTOM);
 
     if (type != OP_GOTO) {
 	/* "last()" means "last" */

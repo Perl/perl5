@@ -3751,6 +3751,50 @@ sv_catpvn(SV *sv, SV *sv2)
 	sv_catpvn_flags(sv,s,len, SvUTF8(sv2) ? SV_CATUTF8 : SV_CATBYTES);
     }
 
+bool
+test_newOP_CUSTOM()
+    CODE:
+    {
+	OP *o = newLISTOP(OP_CUSTOM, 0, NULL, NULL);
+	op_free(o);
+	o = newOP(OP_CUSTOM, 0);
+	op_free(o);
+	o = newUNOP(OP_CUSTOM, 0, NULL);
+	op_free(o);
+	o = newUNOP_AUX(OP_CUSTOM, 0, NULL, NULL);
+	op_free(o);
+	o = newMETHOP(OP_CUSTOM, 0, newOP(OP_NULL,0));
+	op_free(o);
+	o = newMETHOP_named(OP_CUSTOM, 0, newSV(0));
+	op_free(o);
+	o = newBINOP(OP_CUSTOM, 0, NULL, NULL);
+	op_free(o);
+	o = newPMOP(OP_CUSTOM, 0);
+	op_free(o);
+	o = newSVOP(OP_CUSTOM, 0, newSV(0));
+	op_free(o);
+#ifdef USE_ITHREADS
+	ENTER;
+	lex_start(NULL, NULL, 0);
+	{
+	    I32 ix = start_subparse(FALSE,0);
+	    o = newPADOP(OP_CUSTOM, 0, newSV(0));
+	    op_free(o);
+	    LEAVE_SCOPE(ix);
+	}
+	LEAVE;
+#endif
+	o = newPVOP(OP_CUSTOM, 0, NULL);
+	op_free(o);
+	o = newLOGOP(OP_CUSTOM, 0, newOP(OP_NULL,0), newOP(OP_NULL,0));
+	op_free(o);
+	o = newLOOPEX(OP_CUSTOM, newOP(OP_NULL,0));
+	op_free(o);
+	RETVAL = TRUE;
+    }
+    OUTPUT:
+	RETVAL
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
