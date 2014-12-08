@@ -103,6 +103,10 @@ a51d618a82a7057c3aabb600a7a8691d27f44a34 caused #122890 so do we need this seque
 <commit votes="" id="f6f22b1fc01b8676e43ef64616ed7899a84bfec2" ticket="122890" desc="t/re/re_tests: Add test for perl #122890"/>
 <commit votes="" id="efcc8bfdc124f50d33aab3f1d7722b5f9e4de349" ticket="122890" desc="re_tests: More tests for #122890"/>
 
+Fixes a regression from 5.8.8:
+<commit votes="steveh" id="64ff300be0f7714585466af5bb87b2e37db5082a" ticket="122669" desc="[perl #122669] Don’t taint at compile time"/>
+<commit votes="steveh" id="eaff586aa6444fb20654ed863b7ff35e136737e8" ticket="122669" desc="Fix t/op/taint.t on Windows"/>
+
 Configure and hints/ Fixes
 --------------------------
 
@@ -136,7 +140,6 @@ Platform-Specific Build/Test/Installation Fixes
 
 <commit votes="steveh" id="5b26a7b38f5eacab94ffc56c123c01ad6c3788dc" ticket="" desc="sv.c: Silence VMS compiler warning"/>
 <commit votes="steveh" id="e09e3cee34fbe40a471dc2fa31f2b8533598fb45" ticket="" desc="regcomp.c: Silence Win32 compiler warning"/>
-<commit votes="steveh" id="eaff586aa6444fb20654ed863b7ff35e136737e8" ticket="" desc="Fix t/op/taint.t on Windows"/>
 <commit votes="steveh" id="648eb45f2e489e7cbdab09c65bccaac4a78ae3ee" ticket="122609" desc="stat Makefile.PL to get values for utime."/>
 <commit votes="steveh" id="b6250659892d3195c5d3ecd04773e78dc0ccd564" ticket="" desc="Avoid gcc warning."/>
 <commit votes="steveh" id="9fa5aa9143471cda101c2ac9e87f7bf90ccd0b36" ticket="122820" desc="Fix distclean for pm_to_blib directly extensions."/>
