@@ -280,7 +280,8 @@ are not acceptable.
 
 =item *
 
-Patches that fix crashing bugs that do not otherwise change Perl's
+Patches that fix crashing bugs, assertion failures and
+memory corruption that do not otherwise change Perl's
 functionality or negatively impact performance are acceptable.
 
 =item *
