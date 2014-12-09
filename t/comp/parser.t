@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..171\n";
+print "1..172\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -508,6 +508,9 @@ eval '#line 1 maggapom
       else {printf(1/0);}';
 is $@, "Illegal division by zero at maggapom line 2.\n",
    'else {foo} line number (no space after {) [perl #122695]';
+
+# parentheses needed for this to fail an assertion in S_maybe_multideref
+is +(${[{a=>214}]}[0])->{a}, 214, '($array[...])->{...}';
 
 # Add new tests HERE (above this line)
 

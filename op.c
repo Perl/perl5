@@ -12517,7 +12517,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                                || (o->op_private & OPpDEREF) == OPpDEREF_HV);
 
                 if (is_deref) {
-                    assert(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_MOD)));
+                    assert(!(o->op_flags &
+                                 ~(OPf_WANT|OPf_KIDS|OPf_MOD|OPf_PARENS)));
                     assert(!(o->op_private & ~(OPpARG2_MASK|OPpDEREF)));
 
                     ok =    o->op_flags == (OPf_WANT_SCALAR|OPf_KIDS|OPf_MOD)
