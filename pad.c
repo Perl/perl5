@@ -801,6 +801,7 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
     PADNAME * const name = newPADNAMEpvn("&", 1);
 
     PERL_ARGS_ASSERT_PAD_ADD_ANON;
+    assert (SvTYPE(func) == SVt_PVCV);
 
     pad_peg("add_anon");
     /* These two aren't used; just make sure they're not equal to
@@ -810,18 +811,11 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
     ix = pad_alloc(optype, SVs_PADMY);
     padnamelist_store(PL_comppad_name, ix, name);
     /* XXX DAPM use PL_curpad[] ? */
-    if (SvTYPE(func) == SVt_PVCV || !CvOUTSIDE(func))
-	av_store(PL_comppad, ix, (SV*)func);
-    else {
-	SV *rv = newRV_noinc((SV *)func);
-	sv_rvweaken(rv);
-	assert (SvTYPE(func) == SVt_PVFM);
-	av_store(PL_comppad, ix, rv);
-    }
+    av_store(PL_comppad, ix, (SV*)func);
 
     /* to avoid ref loops, we never have parent + child referencing each
      * other simultaneously */
-    if (CvOUTSIDE(func) && SvTYPE(func) == SVt_PVCV) {
+    if (CvOUTSIDE(func)) {
 	assert(!CvWEAKOUTSIDE(func));
 	CvWEAKOUTSIDE_on(func);
 	SvREFCNT_dec_NN(CvOUTSIDE(func));

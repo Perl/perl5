@@ -260,8 +260,7 @@ barestmt:	PLUGSTMT
 			  newFORM($2, $3, $4);
 			  $$ = (OP*)NULL;
 			  if (CvOUTSIDE(fmtcv) && !CvEVAL(CvOUTSIDE(fmtcv))) {
-			      SvREFCNT_inc_simple_void(fmtcv);
-			      pad_add_anon(fmtcv, OP_NULL);
+			      pad_add_weakref(fmtcv);
 			  }
 			  parser->parsed_sub = 1;
 			}
