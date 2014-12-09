@@ -6,15 +6,15 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base 2.066 ;
-use IO::Compress::Base::Common  2.066 qw(:Status );
-use IO::Compress::Adapter::Deflate 2.066 ;
+use IO::Compress::Base 2.067 ;
+use IO::Compress::Base::Common  2.067 qw(:Status );
+use IO::Compress::Adapter::Deflate 2.067 ;
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.066';
+$VERSION = '2.067';
 $RawDeflateError = '';
 
 @ISA = qw(Exporter IO::Compress::Base);
@@ -116,8 +116,8 @@ sub getExtraParams
     return getZlibParams();
 }
 
-use IO::Compress::Base::Common  2.066 qw(:Parse);
-use Compress::Raw::Zlib  2.066 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+use IO::Compress::Base::Common  2.067 qw(:Parse);
+use Compress::Raw::Zlib  2.067 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 our %PARAMS = (
             #'method'   => [IO::Compress::Base::Common::Parse_unsigned,  Z_DEFLATED],
             'level'     => [IO::Compress::Base::Common::Parse_signed,    Z_DEFAULT_COMPRESSION],
@@ -147,7 +147,7 @@ sub getFileInfo
     
 }
 
-use IO::Seekable qw(SEEK_SET);
+use Fcntl qw(SEEK_SET);
 
 sub createMerge
 {
