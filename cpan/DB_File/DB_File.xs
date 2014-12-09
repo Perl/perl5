@@ -1546,9 +1546,11 @@ BOOT:
 #endif    
 #ifdef WANT_ERROR
     SV * sv_err = perl_get_sv(ERR_BUFF, GV_ADD|GV_ADDMULTI) ; 
-    PERL_UNUSED_VAR(sv_err); /* huh? we just retrieved it... */
 #endif
     MY_CXT_INIT;
+#ifdef WANT_ERROR
+    PERL_UNUSED_VAR(sv_err); /* huh? we just retrieved it... */
+#endif
     __getBerkeleyDBInfo() ;
  
     DBT_clear(empty) ; 
