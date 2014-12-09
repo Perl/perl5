@@ -328,9 +328,7 @@ use File::Glob qw(:case);
     },
 
     'DB_File' => {
-	# https://rt.cpan.org/Ticket/Display.html?id=96126
-	"CUSTOMIZED" => [ "DB_File.xs" ],
-        'DISTRIBUTION' => 'PMQS/DB_File-1.831.tar.gz',
+        'DISTRIBUTION' => 'PMQS/DB_File-1.832.tar.gz',
         'FILES'        => q[cpan/DB_File],
         'EXCLUDED'     => [
             qr{^patches/},

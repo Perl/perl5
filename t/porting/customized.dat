@@ -1,4 +1,3 @@
-DB_File cpan/DB_File/DB_File.xs f364b661bbb0df075b0c425b104577e7176fe82b
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
 Encode cpan/Encode/encoding.pm 506ec84f1fbbff189c3f4f47b92aff5afc95b98e
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691

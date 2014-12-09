@@ -153,6 +153,10 @@
 #    include <db.h>
 #endif
 
+#ifndef PERL_UNUSED_ARG
+#  define PERL_UNUSED_ARG(x) ((void)x)
+#endif
+
 /* Wall starts with 5.7.x */
 
 #if PERL_REVISION > 5 || (PERL_REVISION == 5 && PERL_VERSION >= 7)
@@ -599,6 +603,9 @@ const DBT * key2 ;
     int retval ;
     int count ;
     
+#ifdef AT_LEAST_DB_3_2
+    PERL_UNUSED_ARG(db);
+#endif
 
     if (CurrentDB->in_compare) {
         tidyUp(CurrentDB);
@@ -684,6 +691,10 @@ const DBT * key2 ;
     int retval ;
     int count ;
     
+#ifdef AT_LEAST_DB_3_2
+    PERL_UNUSED_ARG(db);
+#endif
+
     if (CurrentDB->in_prefix){
         tidyUp(CurrentDB);
         croak ("DB_File btree_prefix: recursion detected\n") ;
@@ -773,6 +784,10 @@ HASH_CB_SIZE_TYPE size ;
     int retval = 0;
     int count ;
 
+#ifdef AT_LEAST_DB_3_2
+    PERL_UNUSED_ARG(db);
+#endif
+
     if (CurrentDB->in_hash){
         tidyUp(CurrentDB);
         croak ("DB_File hash callback: recursion detected\n") ;
@@ -828,6 +843,9 @@ db_errcall_cb(const char * db_errpfx, char * buffer)
     dTHX;
 #endif    
     SV * sv = perl_get_sv(ERR_BUFF, FALSE) ;
+#ifdef AT_LEAST_DB_4_3
+    PERL_UNUSED_ARG(dbenv);
+#endif
     if (sv) {
         if (db_errpfx)
             sv_setpvf(sv, "%s: %s", db_errpfx, buffer) ;
@@ -1528,6 +1546,7 @@ BOOT:
 #endif    
 #ifdef WANT_ERROR
     SV * sv_err = perl_get_sv(ERR_BUFF, GV_ADD|GV_ADDMULTI) ; 
+    PERL_UNUSED_VAR(sv_err); /* huh? we just retrieved it... */
 #endif
     MY_CXT_INIT;
     __getBerkeleyDBInfo() ;
@@ -1606,6 +1625,7 @@ db_DELETE(db, key, flags=0)
 	PREINIT:
 	  dMY_CXT;
 	INIT:
+	  (void)flags;
 	  CurrentDB = db ;
 
 
@@ -1654,6 +1674,7 @@ db_STORE(db, key, value, flags=0)
 	PREINIT:
 	  dMY_CXT;
 	INIT:
+	  (void)flags;
 	  CurrentDB = db ;
 
 
