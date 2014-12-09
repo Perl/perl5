@@ -2698,8 +2698,10 @@ Apo	|int	|my_cxt_index	|NN const char *my_cxt_key
 Apo	|void*	|my_cxt_init	|NN int *index|size_t size
 #endif
 #endif
+#if defined(PERL_IN_UTIL_C)
 so	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
 				|STRLEN xs_len
+#endif
 Xpon	|I32	|xs_handshake	|const U32 key|NN void * v_my_perl\
 				|NN const char * file| ...
 Xp	|void	|xs_boot_epilog	|const U32 ax

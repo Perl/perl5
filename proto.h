@@ -5236,11 +5236,6 @@ PERL_CALLCONV I32	Perl_xs_handshake(const U32 key, void * v_my_perl, const char 
 #define PERL_ARGS_ASSERT_XS_HANDSHAKE	\
 	assert(v_my_perl); assert(file)
 
-STATIC void	S_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p, STRLEN xs_len)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_XS_VERSION_BOOTCHECK	\
-	assert(xs_p)
-
 PERL_CALLCONV int	Perl_yyerror(pTHX_ const char *const s)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_YYERROR	\
@@ -7957,6 +7952,11 @@ STATIC SV *	S_with_queued_errors(pTHX_ SV *ex)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_WITH_QUEUED_ERRORS	\
 	assert(ex)
+
+STATIC void	S_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p, STRLEN xs_len)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_XS_VERSION_BOOTCHECK	\
+	assert(xs_p)
 
 #  if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 STATIC void	S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *type_name, const SV *sv, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
