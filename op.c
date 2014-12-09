@@ -8449,8 +8449,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	 o ? SvPV_const(o_is_gv ? (SV *)o : cSVOPo->op_sv, namlen) : NULL;
     bool has_name;
     bool name_is_utf8 = o && !o_is_gv && SvUTF8(cSVOPo->op_sv);
-    bool special = FALSE;
-    bool maybe_begin = FALSE;
+    bool is_begin = FALSE;
     OP *start;
 #ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
@@ -8857,11 +8856,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             if (PL_parser && PL_parser->error_count)
                 clear_special_blocks(name, gv, cv);
             else
-            {
-                maybe_begin = *name == 'B';
-                special =
+                is_begin =
                     process_special_blocks(floor, name, gv, cv);
-            }
         }
     }
 
@@ -8869,14 +8865,14 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     if (PL_parser)
 	PL_parser->copline = NOLINE;
     LEAVE_SCOPE(floor);
+    if (!is_begin) {
 #ifdef PERL_DEBUG_READONLY_OPS
-    /* Watch out for BEGIN blocks */
-    if (!special && slab)
+      if (!is_begin && slab)
 	Slab_to_ro(slab);
 #endif
-    if (cv && name && (!special || !maybe_begin) && CvOUTSIDE(cv)
-     && !CvEVAL(CvOUTSIDE(cv)))
+      if (cv && name && CvOUTSIDE(cv) && !CvEVAL(CvOUTSIDE(cv)))
 	pad_add_weakref(cv);
+    }
     return cv;
 }
 
@@ -8977,7 +8973,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 	DEBUG_x( dump_sub(gv) );
 	(void)CvGV(cv);
 	GvCV_set(gv,0);		/* cv has been hijacked */
-	return TRUE;
+	return FALSE;
     }
 }
 
