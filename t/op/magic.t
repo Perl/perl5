@@ -684,8 +684,10 @@ is $_, undef, '${^E_NCODING} is undef';
 # ^^^^^^^^^ New tests go here ^^^^^^^^^
 
 SKIP: {
-    skip("%ENV manipulations fail or aren't safe on $^O", 19)
+    skip("%ENV manipulations fail or aren't safe on $^O", 20)
 	if $Is_Dos;
+    skip "Win32 needs XS for env/shell tests", 20
+        if $Is_MSWin32 && is_miniperl;
 
  SKIP: {
 	skip("clearing \%ENV is not safe when running under valgrind or on VMS")
