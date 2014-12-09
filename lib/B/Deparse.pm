@@ -259,9 +259,10 @@ BEGIN {
 # name of the current package for deparsed code
 #
 # subs_todo:
-# array of [cop_seq, CV, is_format?] for subs and formats we still
-# want to deparse.  Lexical subs have one more element, giving the pad
-# name thingy, and CV may be undef, indicating a stub declaration.
+# array of [cop_seq, CV, is_format?, name] for subs and formats we still
+# want to deparse.  The fourth element is a pad name thingy for lexical
+# subs or a string for special blocks.  For other subs, it is undef.  For
+# lexical subs, CV may be undef, indicating a stub declaration.
 #
 # protos_todo:
 # as above, but [name, prototype] for subs that never got a GV
@@ -473,7 +474,7 @@ sub null {
 
 sub todo {
     my $self = shift;
-    my($cv, $is_form) = @_;
+    my($cv, $is_form, $name) = @_;
     return unless ($cv->FILE eq $0 || exists $self->{files}{$cv->FILE});
     my $seq;
     if ($cv->OUTSIDE_SEQ) {
@@ -483,7 +484,7 @@ sub todo {
     } else {
 	$seq = 0;
     }
-    push @{$self->{'subs_todo'}}, [$seq, $cv, $is_form];
+    push @{$self->{'subs_todo'}}, [$seq, $cv, $is_form, $name];
     unless ($is_form || class($cv->STASH) eq 'SPECIAL') {
 	$self->{'subs_deparsed'}{$cv->STASH->NAME."::".$cv->GV->NAME} = 1;
     }
@@ -493,7 +494,7 @@ sub next_todo {
     my $self = shift;
     my $ent = shift @{$self->{'subs_todo'}};
     my $cv = $ent->[1];
-    if ($ent->[3]) { # lexical sub
+    if (ref $ent->[3]) { # lexical sub
 	my @text;
 
 	# At this point, we may not yet have deparsed the hints that allow
@@ -560,7 +561,7 @@ sub next_todo {
 	return join "", @text;
     }
     my $gv = $cv->GV;
-    my $name = $self->gv_name($gv);
+    my $name = $ent->[3] // $self->gv_name($gv);
     if ($ent->[2]) {
 	return $self->keyword("format") . " $name =\n"
 	    . $self->deparse_format($ent->[1]). "\n";
@@ -893,8 +894,13 @@ sub compile {
 	my @CHECKs  = B::check_av->isa("B::AV") ? B::check_av->ARRAY : ();
 	my @INITs   = B::init_av->isa("B::AV") ? B::init_av->ARRAY : ();
 	my @ENDs    = B::end_av->isa("B::AV") ? B::end_av->ARRAY : ();
-	for my $block (@BEGINs, @UNITCHECKs, @CHECKs, @INITs, @ENDs) {
-	    $self->todo($block, 0);
+	my @names = qw(BEGIN UNITCHECK CHECK INIT END);
+	my @blocks = \(@BEGINs, @UNITCHECKs, @CHECKs, @INITs, @ENDs);
+	while (@names) {
+	    my ($name, $blocks) = (shift @names, shift @blocks);
+	    for my $block (@$blocks) {
+		$self->todo($block, 0, $name);
+	    }
 	}
 	$self->stash_subs();
 	local($SIG{"__DIE__"}) =
@@ -1813,7 +1819,7 @@ sub seq_subs {
 	# Skip the OUTSIDE check for lexical subs.  We may be deparsing a
 	# cloned anon sub with lexical subs declared in it, in which case
 	# the OUTSIDE pointer points to the anon protosub.
-	my $lexical = !!$self->{'subs_todo'}[0][3];
+	my $lexical = ref $self->{'subs_todo'}[0][3];
 	my $outside = !$lexical && $cv && $cv->OUTSIDE;
 	if (!$lexical and $cv
 	 and ${$cv->OUTSIDE || \0} != ${$self->{'curcv'}})

@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 36; # not counting those in the __DATA__ section
+my $tests = 37; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -427,6 +427,11 @@ sub BEGIN {
     pop @ARGV;
 }
 EOCODL
+
+# BEGIN blocks should not be called __ANON__
+like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+             prog => 'sub BEGIN { } CHECK { delete $::{BEGIN} }'),
+     qr/sub BEGIN/, 'anonymised BEGIN';
 
 # [perl #115066]
 my $prog = 'use constant FOO => do { 1 }; no overloading; die';
