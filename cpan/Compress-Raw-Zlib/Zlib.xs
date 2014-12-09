@@ -499,12 +499,14 @@ DispStream(s, message)
 #ifdef AT_LEAST_ZLIB_1_2_5_2
 voidpf my_zcalloc (voidpf opaque, unsigned items, unsigned size)
 {
+    PERL_UNUSED_VAR(opaque);
     return safemalloc(items * size);
 }
 
 
 void my_zcfree (voidpf opaque, voidpf ptr)
 {
+    PERL_UNUSED_VAR(opaque);
     safefree(ptr);
     return; 
 }
