@@ -3326,6 +3326,11 @@ PERL_CALLCONV PADOFFSET	Perl_pad_add_name_sv(pTHX_ SV *name, U32 flags, HV *type
 #define PERL_ARGS_ASSERT_PAD_ADD_NAME_SV	\
 	assert(name)
 
+PERL_CALLCONV void	Perl_pad_add_weakref(pTHX_ CV* func)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PAD_ADD_WEAKREF	\
+	assert(func)
+
 PERL_CALLCONV PADOFFSET	Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype);
 PERL_CALLCONV void	Perl_pad_block_start(pTHX_ int full);
 PERL_CALLCONV HV*	Perl_pad_compname_type(pTHX_ const PADOFFSET po)

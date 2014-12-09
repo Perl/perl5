@@ -2552,6 +2552,7 @@ Apd	|PADOFFSET|pad_add_name_sv|NN SV *name\
 				|NULLOK HV *ourstash
 AMpd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 Apd	|PADOFFSET|pad_add_anon	|NN CV* func|I32 optype
+p	|void	|pad_add_weakref|NN CV* func
 #if defined(PERL_IN_PAD_C)
 sd	|void	|pad_check_dup	|NN PADNAME *name|U32 flags \
 				|NULLOK const HV *ourstash

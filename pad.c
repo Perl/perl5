@@ -829,6 +829,24 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
     return ix;
 }
 
+void
+Perl_pad_add_weakref(pTHX_ CV* func)
+{
+    const PADOFFSET ix = pad_alloc(OP_NULL, SVs_PADMY);
+    PADNAME * const name = newPADNAMEpvn("&", 1);
+    SV * const rv = newRV_inc((SV *)func);
+
+    PERL_ARGS_ASSERT_PAD_ADD_WEAKREF;
+
+    /* These two aren't used; just make sure they're not equal to
+     * PERL_PADSEQ_INTRO.  They should be 0 by default.  */
+    assert(COP_SEQ_RANGE_LOW (name) != PERL_PADSEQ_INTRO);
+    assert(COP_SEQ_RANGE_HIGH(name) != PERL_PADSEQ_INTRO);
+    padnamelist_store(PL_comppad_name, ix, name);
+    sv_rvweaken(rv);
+    av_store(PL_comppad, ix, rv);
+}
+
 /*
 =for apidoc pad_check_dup
 

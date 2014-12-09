@@ -8449,10 +8449,10 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	 o ? SvPV_const(o_is_gv ? (SV *)o : cSVOPo->op_sv, namlen) : NULL;
     bool has_name;
     bool name_is_utf8 = o && !o_is_gv && SvUTF8(cSVOPo->op_sv);
+    bool special = FALSE;
     OP *start;
 #ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
-    bool special = FALSE;
 #endif
 
     if (o_is_gv) {
@@ -8856,9 +8856,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             if (PL_parser && PL_parser->error_count)
                 clear_special_blocks(name, gv, cv);
             else
-#ifdef PERL_DEBUG_READONLY_OPS
                 special =
-#endif
                     process_special_blocks(floor, name, gv, cv);
         }
     }
@@ -8872,6 +8870,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     if (!special && slab)
 	Slab_to_ro(slab);
 #endif
+    if (cv && name && (!special || *name != 'B') && CvOUTSIDE(cv)
+     && !CvEVAL(CvOUTSIDE(cv)))
+	pad_add_weakref(cv);
     return cv;
 }
 

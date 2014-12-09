@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan( tests => 35 );
+plan( tests => 36 );
 
 sub empty_sub {}
 
@@ -233,3 +233,15 @@ package _122845 {
 };
 is $_122845::ok, 1,
   '[perl #122845] no crash in closure recursion with our-vars';
+
+() = *predeclared; # vivify the glob at compile time
+sub predeclared; # now we have a CV stub with no body (incorporeal? :-)
+sub predeclared {
+    CORE::state $x = 42;
+    sub inside_predeclared {
+	is eval '$x', 42, 'eval q/$var/ in named sub in predeclared sub';
+    }
+}
+predeclared(); # set $x to 42
+$main::x = $main::x = "You should not see this.";
+inside_predeclared(); # run test
