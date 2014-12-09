@@ -125,6 +125,8 @@
 #  include "ppport.h"
 #endif
 
+int DB_File___unused() { return 0; }
+
 /* Mention DB_VERSION_MAJOR_CFG, DB_VERSION_MINOR_CFG, and
    DB_VERSION_PATCH_CFG here so that Configure pulls them all in. */
 
@@ -171,7 +173,7 @@
 #    ifdef __cplusplus
 #        define dNOOP (void)0
 #    else
-#        define dNOOP extern int DB_File___notused
+#        define dNOOP extern int DB_File___notused()
 #    endif
 
     /* Ditto for dXSARGS. */
