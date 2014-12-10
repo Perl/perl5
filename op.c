@@ -13010,11 +13010,12 @@ Perl_rpeep(pTHX_ OP *o)
 
                 /* at this point, we wouldn't expect any of these
                  * possible private flags:
-                 * OPpMAYBE_LVSUB, OPpOUR_INTRO, OPpLVAL_INTRO
+                 * OPpMAYBE_LVSUB, OPpLVAL_INTRO
                  * OPpTRUEBOOL, OPpMAYBE_TRUEBOOL, (rv2hv only)
                  */
                 assert(!(o2->op_private &
-                    ~(OPpHINT_STRICT_REFS|OPpARG1_MASK|OPpSLICEWARNING)));
+                    ~(OPpHINT_STRICT_REFS|OPpARG1_MASK|OPpSLICEWARNING
+                     |OPpOUR_INTRO)));
                 hints |= (o2->op_private & OPpHINT_STRICT_REFS);
 
                 o2 = o2->op_next;
