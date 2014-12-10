@@ -345,7 +345,16 @@ Perl_new_ctype(pTHX_ const char *newctype)
         /* We only handle single-byte locales (outside of UTF-8 ones; so if
          * this locale requires than one byte, there are going to be
          * problems. */
-        if (check_for_problems && MB_CUR_MAX > 1) {
+        if (check_for_problems && MB_CUR_MAX > 1
+
+               /* Some platforms return MB_CUR_MAX > 1 for even the "C"
+                * locale.  Just assume that the implementation for them (plus
+                * for POSIX) is correct and the > 1 value is spurious.  (Since
+                * these are specially handled to never be considered UTF-8
+                * locales, as long as this is the only problem, everything
+                * should work fine */
+            && strNE(newctype, "C") && strNE(newctype, "POSIX"))
+        {
             multi_byte_locale = TRUE;
         }
 #endif
