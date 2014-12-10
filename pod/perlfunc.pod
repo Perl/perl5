@@ -2298,7 +2298,7 @@ same underlying descriptor:
     }
 
 The behavior of C<fileno> on a directory handle depends on the operating
-system. On a system with dirfd(3) or similar, C<fileno> on a directory
+system.  On a system with dirfd(3) or similar, C<fileno> on a directory
 handle returns the underlying file descriptor associated with the
 handle; on systems with no such support, it returns the undefined value,
 and sets C<$!> (errno).
@@ -4376,7 +4376,8 @@ existing variable: a package variable of the same name.
 
 This means that when C<use strict 'vars'> is in effect, C<our> lets you use
 a package variable without qualifying it with the package name, but only within
-the lexical scope of the C<our> declaration. This applies immediately--even
+the lexical scope of the C<our>
+declaration.  This applies immediately--even
 within the same statement.
 
     package Foo;
