@@ -8449,7 +8449,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	 o ? SvPV_const(o_is_gv ? (SV *)o : cSVOPo->op_sv, namlen) : NULL;
     bool has_name;
     bool name_is_utf8 = o && !o_is_gv && SvUTF8(cSVOPo->op_sv);
-    bool is_begin = FALSE;
+    bool evanescent = FALSE;
     OP *start = NULL;
 #ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
@@ -8856,7 +8856,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             if (PL_parser && PL_parser->error_count)
                 clear_special_blocks(name, gv, cv);
             else
-                is_begin =
+                evanescent =
                     process_special_blocks(floor, name, gv, cv);
         }
     }
@@ -8865,9 +8865,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     if (PL_parser)
 	PL_parser->copline = NOLINE;
     LEAVE_SCOPE(floor);
-    if (!is_begin) {
+    if (!evanescent) {
 #ifdef PERL_DEBUG_READONLY_OPS
-      if (!is_begin && slab)
+      if (slab)
 	Slab_to_ro(slab);
 #endif
       if (cv && name && CvOUTSIDE(cv) && !CvEVAL(CvOUTSIDE(cv)))
@@ -8901,6 +8901,7 @@ S_clear_special_blocks(pTHX_ const char *const fullname,
     }
 }
 
+/* Returns true if the sub has been freed.  */
 STATIC bool
 S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 			 GV *const gv,
@@ -8930,7 +8931,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 
             POPSTACK;
 	    LEAVE;
-	    return TRUE;
+	    return !PL_savebegin;
 	}
 	else
 	    return FALSE;

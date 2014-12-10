@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 37; # not counting those in the __DATA__ section
+my $tests = 38; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -443,6 +443,15 @@ use constant ('FOO', do {
 no overloading;
 die;
 EOCODK
+
+# BEGIN blocks inside predeclared subs
+like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+             prog => '
+                 sub run_tests;
+                 run_tests();
+                 sub run_tests { BEGIN { } die }'),
+     qr/sub run_tests \{\s*sub BEGIN/,
+    'BEGIN block inside predeclared sub';
 
 like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
              prog => 'use feature lexical_subs=>; my sub f;sub main::f{}'),
