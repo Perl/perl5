@@ -3155,6 +3155,8 @@ strtoul(str, base = 0)
 	unsigned long num;
 	char *unparsed;
     PPCODE:
+	PERL_UNUSED_VAR(str);
+	PERL_UNUSED_VAR(base);
 	num = strtoul(str, &unparsed, base);
 #if IVSIZE <= LONGSIZE
 	if (num > IV_MAX)
