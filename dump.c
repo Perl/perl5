@@ -2339,7 +2339,7 @@ Perl_unop_aux_stringify(pTHX_ const OP *o, CV *cv)
     SV *out = sv_2mortal(newSVpv("",0));
 #ifdef USE_ITHREADS
     PADLIST * const padlist = CvPADLIST(cv);
-    PAD *comppad = comppad = PadlistARRAY(padlist)[1];
+    PAD *comppad = PadlistARRAY(padlist)[1];
 #endif
 
     PERL_ARGS_ASSERT_UNOP_AUX_STRINGIFY;
