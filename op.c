@@ -12398,7 +12398,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                     else {
                         /* it's a constant array index */
                         SV *ix_sv = cSVOPo->op_sv;
-                        if (UNLIKELY(SvROK(ix_sv) && !SvGAMAGIC(ix_sv)
+                        if (pass && UNLIKELY(SvROK(ix_sv) && !SvGAMAGIC(ix_sv)
                                                 && ckWARN(WARN_MISC)))
                         Perl_warner(aTHX_ packWARN(WARN_MISC),
                                 "Use of reference \"%"SVf"\" as array index",
