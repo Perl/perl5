@@ -9,7 +9,7 @@
 
 package DB_File::HASHINFO ;
 
-require 5.00803;
+require 5.008003;
 
 use warnings;
 use strict;
@@ -163,7 +163,7 @@ our ($db_version, $use_XSLoader, $splice_end_array_no_length, $splice_end_array,
 use Carp;
 
 
-$VERSION = "1.833" ;
+$VERSION = "1.834" ;
 $VERSION = eval $VERSION; # needed for dev releases
 
 {

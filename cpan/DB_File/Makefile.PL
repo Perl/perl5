@@ -5,7 +5,7 @@ use ExtUtils::MakeMaker 5.16 ;
 use Config ;
 
 die "DB_File needs Perl 5.008_03 or better. This is $]\n" 
-    if $] < 5.00803; 
+    if $] < 5.008003; 
 
 my $VER_INFO ;
 my $LIB_DIR ;
