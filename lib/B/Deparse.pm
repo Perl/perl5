@@ -4530,7 +4530,7 @@ sub escape_str { # ASCII, UTF8
     $str =~ s/\f/\\f/g;
     $str =~ s/\r/\\r/g;
     $str =~ s/([\cA-\cZ])/$unctrl{$1}/ge;
-    $str =~ s/([[:^print:]])/sprintf("\\%03o", ord($1))/ge;
+    $str =~ s/([[:^print:]])/sprintf("\\%03o", ord($1))/age;
     return $str;
 }
 
@@ -4539,7 +4539,7 @@ sub escape_re {
     my($str) = @_;
     $str =~ s/(.)/ord($1) > 255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
     $str =~ s/([[:^print:]])/
-	($1 =~ y! \t\n!!) ? $1 : sprintf("\\%03o", ord($1))/ge;
+	($1 =~ y! \t\n!!) ? $1 : sprintf("\\%03o", ord($1))/age;
     $str =~ s/\n/\n\f/g;
     return $str;
 }

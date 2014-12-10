@@ -574,6 +574,11 @@ $_ .= <ARGV> . <$foo>;
 my $foo = "Ab\x{100}\200\x{200}\237Cd\000Ef\x{1000}\cA\x{2000}\cZ";
 my $bar = "\x{100}";
 ####
+# Latin-1 chars
+# TODO ? ord("A") != 65 && "EBCDIC"
+my $baz = "B\366\x{100}";
+my $bba = qr/B\366\x{100}/;
+####
 # s///e
 s/x/'y';/e;
 s/x/$a;/e;
