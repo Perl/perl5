@@ -17289,7 +17289,9 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
         format = (this_end < 256)
                  ? "\\x{%02"UVXf"}-\\x{%02"UVXf"}"
                  : "\\x{%04"UVXf"}-\\x{%04"UVXf"}";
+        GCC_DIAG_IGNORE(-Wformat-nonliteral);
         Perl_sv_catpvf(aTHX_ sv, format, start, this_end);
+        GCC_DIAG_RESTORE;
         break;
     }
 }
