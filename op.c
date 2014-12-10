@@ -8089,7 +8089,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CV *clonee = NULL;
     HEK *hek = NULL;
     bool reusable = FALSE;
-    OP *start;
+    OP *start = NULL;
 #ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
 #endif
@@ -8450,7 +8450,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     bool has_name;
     bool name_is_utf8 = o && !o_is_gv && SvUTF8(cSVOPo->op_sv);
     bool is_begin = FALSE;
-    OP *start;
+    OP *start = NULL;
 #ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
 #endif
