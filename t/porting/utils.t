@@ -86,7 +86,8 @@ foreach my $victim (@victims) {
             if $excuses{$victim};
 
         my $got = runperl(switches => ['-c'], progfile => $victim, stderr => 1, nolib => 1);
-        is($got, "$victim syntax OK\n", "$victim compiles");
+        is($got, "$victim syntax OK\n", "$victim compiles")
+            or diag("when executing perl with '-c $victim'");
     }
 }
 
