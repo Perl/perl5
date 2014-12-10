@@ -12523,7 +12523,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                                  ~(OPf_WANT|OPf_KIDS|OPf_MOD|OPf_PARENS)));
                     assert(!(o->op_private & ~(OPpARG2_MASK|OPpDEREF)));
 
-                    ok =    o->op_flags == (OPf_WANT_SCALAR|OPf_KIDS|OPf_MOD)
+                    ok =    (o->op_flags &~ OPf_PARENS)
+                               == (OPf_WANT_SCALAR|OPf_KIDS|OPf_MOD)
                          && !(o->op_private & ~(OPpDEREF|OPpARG2_MASK));
                 }
                 else if (o->op_type == OP_EXISTS) {
