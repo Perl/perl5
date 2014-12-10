@@ -389,6 +389,12 @@ The L<encoding> pragma's effect is now limited to lexical scope.  This
 pragma is deprecated, but in the meantime, it could adversely affect
 unrelated modules that are included in the same program.
 
+=item *
+
+Calling C<write> on a format with a C<^**> field could produce a panic
+in sv_chop() if there were insufficient arguments or if the variable
+used to fill the field was empty.  [perl #123245]
+
 =back
 
 =head1 Known Problems
