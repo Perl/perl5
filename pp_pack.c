@@ -216,16 +216,8 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 /* Explosives and implosives. */
 
-#if 'I' == 73 && 'J' == 74
-/* On an ASCII/ISO kind of system */
-#define ISUUCHAR(ch)    ((ch) >= ' ' && (ch) < 'a')
-#else
-/*
-  Some other sort of character set - use memchr() so we don't match
-  the null byte.
- */
-#define ISUUCHAR(ch)    (memchr(PL_uuemap, (ch), sizeof(PL_uuemap)-1) || (ch) == ' ')
-#endif
+#define ISUUCHAR(ch)    (NATIVE_TO_LATIN1(ch) >= NATIVE_TO_LATIN1(' ')  \
+                      && NATIVE_TO_LATIN1(ch) <  NATIVE_TO_LATIN1('a'))
 
 /* type modifiers */
 #define TYPE_IS_SHRIEKING	0x100
@@ -338,9 +330,10 @@ STATIC bool
 next_utf8_uu(pTHX_ const char **s, const char *end, I32 *out)
 {
     STRLEN retlen;
-    const UV val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen, UTF8_CHECK_ONLY);
-    if (val >= 0x100 || !ISUUCHAR(val) ||
-	retlen == (STRLEN) -1 || retlen == 0) {
+    const UV val = NATIVE_TO_UNI(utf8n_to_uvchr((U8 *) *s, end-*s, &retlen, UTF8_CHECK_ONLY));
+    if (val >= 0x100 || !ISUUCHAR(val)
+        || retlen == (STRLEN) -1 || retlen == 0)
+    {
 	*out = 0;
 	return FALSE;
     }
@@ -1759,7 +1752,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    }
 		}
 	    } else {
-		while (s < strend && *s > ' ' && ISUUCHAR(*s)) {
+		while (s < strend && *s != ' ' && ISUUCHAR(*s)) {
 		    I32 a, b, c, d;
 		    char hunk[3];
 
