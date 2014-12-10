@@ -1771,7 +1771,7 @@
 #define padname_dup(a,b)	Perl_padname_dup(aTHX_ a,b)
 #define padnamelist_dup(a,b)	Perl_padnamelist_dup(aTHX_ a,b)
 #  endif
-#  if defined(USE_LOCALE)     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
+#  if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
 #  endif
 #  if defined(USE_LOCALE_COLLATE)

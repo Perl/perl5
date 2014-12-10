@@ -8154,6 +8154,8 @@ PERL_CALLCONV SV*	Perl_sv_dup_inc(pTHX_ const SV *const sstr, CLONE_PARAMS *cons
 #endif
 #if defined(USE_LOCALE)     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
 PERL_CALLCONV bool	Perl__is_cur_LC_category_utf8(pTHX_ int category);
+#endif
+#if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
 STATIC char*	S_stdize_locale(pTHX_ char* locs)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_STDIZE_LOCALE	\

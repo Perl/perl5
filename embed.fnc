@@ -2429,9 +2429,12 @@ s	|bool	|isa_lookup	|NN HV *stash|NN const char * const name \
                                         |STRLEN len|U32 flags
 #endif
 
+#if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
+s	|char*	|stdize_locale	|NN char* locs
+#endif
+
 #if defined(USE_LOCALE) \
     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
-s	|char*	|stdize_locale	|NN char* locs
 ApM	|bool	|_is_cur_LC_category_utf8|int category
 #endif
 
