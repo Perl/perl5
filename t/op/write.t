@@ -1935,8 +1935,6 @@ format Potshriggley =
    is $x, undef, 'formats in subs do not leak';
 }
 
-{
-local $::TODO = "these crash";
 fresh_perl_is(<<'EOP', <<'EXPECT',
 use warnings 'syntax' ;
 format STDOUT =
@@ -1961,7 +1959,6 @@ Not enough format arguments at - line 4.
 dd|
 EXPECT
 	      { stderr => 1 }, '#123245 different panic in sv_chop');
-}
 
 #############################
 ## Section 4
