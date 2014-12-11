@@ -899,7 +899,7 @@ use File::Glob qw(:case);
     },
 
     'Pod::Escapes' => {
-        'DISTRIBUTION' => 'NEILB/Pod-Escapes-1.06.tar.gz',
+        'DISTRIBUTION' => 'NEILB/Pod-Escapes-1.07.tar.gz',
         'FILES'        => q[cpan/Pod-Escapes],
     },
 
