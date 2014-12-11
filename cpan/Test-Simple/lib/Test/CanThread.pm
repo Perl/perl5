@@ -4,37 +4,34 @@ use warnings;
 
 use Config;
 
-if ($] == 5.010000) {
-    require Test::More;
-    Test::More::plan(skip_all => "Threads are broken on 5.10.0");
-    exit 0;
-}
-
 my $works = 1;
 $works &&= $] >= 5.008001;
 $works &&= $Config{'useithreads'};
 $works &&= eval { require threads; 'threads'->import; 1 };
 
-unless ($works) {
-    require Test::More;
-    Test::More::plan(skip_all => "Skip no working threads");
-    exit 0;
-}
-
-if ($INC{'Devel/Cover.pm'}) {
-    require Test::More;
-    Test::More::plan(skip_all => "Devel::Cover does not work with threads yet");
-    exit 0;
-}
-
 sub import {
     my $class = shift;
+
+    if ($] == 5.010000) {
+        require Test::More;
+        Test::More::plan(skip_all => "Threads are broken on 5.10.0");
+    }
+
+    unless ($works) {
+        require Test::More;
+        Test::More::plan(skip_all => "Skip no working threads");
+    }
+
+    if ($INC{'Devel/Cover.pm'}) {
+        require Test::More;
+        Test::More::plan(skip_all => "Devel::Cover does not work with threads yet");
+    }
+
     while(my $var = shift(@_)) {
         next if $ENV{$var};
 
         require Test::More;
         Test::More::plan(skip_all => "This threaded test will only run when the '$var' environment variable is set.");
-        exit 0;
     }
 
     unshift @_ => 'threads';

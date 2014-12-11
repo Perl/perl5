@@ -9,26 +9,24 @@ my $Can_Fork = $Config{d_fork}
     and $Config{useithreads}
     and $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/);
 
-if (!$Can_Fork) {
-    require Test::More;
-    Test::More::plan(skip_all => "This system cannot fork");
-    exit 0;
-}
-
-if ($^O eq 'MSWin32' && $] == 5.010000) {
-    require Test::More;
-    Test::More::plan('skip_all' => "5.10 has fork/threading issues that break fork on win32");
-    exit 0;
-}
-
 sub import {
     my $class = shift;
+
+    if (!$Can_Fork) {
+        require Test::More;
+        Test::More::plan(skip_all => "This system cannot fork");
+    }
+
+    if ($^O eq 'MSWin32' && $] == 5.010000) {
+        require Test::More;
+        Test::More::plan('skip_all' => "5.10 has fork/threading issues that break fork on win32");
+    }
+
     for my $var (@_) {
         next if $ENV{$var};
 
         require Test::More;
         Test::More::plan(skip_all => "This forking test will only run when the '$var' environment variable is set.");
-        exit 0;
     }
 }
 

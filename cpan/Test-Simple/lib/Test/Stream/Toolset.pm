@@ -15,9 +15,50 @@ use Test::Stream::Event::Ok;
 use Test::Stream::Event::Plan;
 use Test::Stream::Event::Subtest;
 
-use Test::Stream::Exporter qw/import export_to default_exports/;
+use Test::Stream::Exporter qw/import export_to default_exports export/;
 default_exports qw/is_tester init_tester context/;
+
+export before_import => sub {
+    my $class = shift;
+    my ($importer, $list) = @_;
+
+    my $meta = init_tester($importer);
+
+    my $context = context(1);
+    my $other   = [];
+    my $idx     = 0;
+
+    while ($idx <= $#{$list}) {
+        my $item = $list->[$idx++];
+        next unless $item;
+
+        if (defined $item and $item eq 'no_diag') {
+            Test::Stream->shared->set_no_diag(1);
+        }
+        elsif ($item eq 'tests') {
+            $context->plan($list->[$idx++]);
+        }
+        elsif ($item eq 'skip_all') {
+            $context->plan(0, 'SKIP', $list->[$idx++]);
+        }
+        elsif ($item eq 'no_plan') {
+            $context->plan(0, 'NO PLAN');
+        }
+        elsif ($item eq 'import') {
+            push @$other => @{$list->[$idx++]};
+        }
+        else {
+            carp("Unknown option: $item");
+        }
+    }
+
+    @$list = @$other;
+
+    return;
+};
+
 Test::Stream::Exporter->cleanup();
+
 
 1;
 
@@ -77,6 +118,25 @@ of integrating with L<Test::Builder> and other testing tools much easier.
 
     1;
 
+=head2 TEST-MORE STYLE IMPORT
+
+If you want to be able to pass Test-More arguments such as 'tests', 'skip_all',
+and 'no_plan', then use the following:
+
+    package My::Tester;
+    use Test::Stream::Exporter;               # Gives us 'import()'
+    use Test::Stream::Toolset;                # default exports
+    use Test::Stream::Toolset 'before_import' # Test-More style argument support
+
+2 'use' statements were used above for clarity, you can get all the desired
+imports at once:
+
+    use Test::Stream::Toolset qw/context init_tester is_tester before_import/;
+
+Then in the test:
+
+    use My::Tester tests => 5;
+
 =head1 EXPORTS
 
 =over 4
@@ -105,6 +165,14 @@ will return the existing meta object.
 
 This method can be used to check if an object is a tester. If the object is a
 tester it will return the meta object for the tester.
+
+=item before_import
+
+This method is used by C<import()> to parse Test-More style import arguments.
+You should never need to run this yourself, it works just by being imported.
+
+B<NOTE:> This will only work if you use Test::Stream::Exporter for your
+'import' method.
 
 =back
 

@@ -2,7 +2,7 @@ package Test::Stream;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_079';
+our $VERSION = '1.301001_084';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream::Context qw/context/;
@@ -540,7 +540,7 @@ sub _process_event {
     my ($self, $e, $cache) = @_;
 
     if ($self->[MUNGERS]) {
-        $_->($self, $e) for @{$self->[MUNGERS]};
+        $_->($self, $e, $e->subevents) for @{$self->[MUNGERS]};
     }
 
     $self->_render_tap($cache) unless $cache->{no_out};

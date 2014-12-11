@@ -15,8 +15,9 @@ use Test::Stream::ArrayBase(
     accessors => [qw/frame stream encoding in_todo todo modern pid skip diag_todo provider monkeypatch_stash/],
 );
 
-use Test::Stream::Exporter qw/import export_to default_exports/;
+use Test::Stream::Exporter qw/import export_to default_exports exports/;
 default_exports qw/context/;
+exports qw/inspect_todo/;
 Test::Stream::Exporter->cleanup();
 
 {
@@ -24,6 +25,7 @@ Test::Stream::Exporter->cleanup();
     $Test::Builder::Level ||= 1;
 }
 
+my @TODO;
 my $CURRENT;
 
 sub init {
@@ -35,6 +37,10 @@ sub init {
 
 sub peek  { $CURRENT }
 sub clear { $CURRENT = undef }
+
+sub push_todo { push @TODO => pop @_ }
+sub pop_todo  { pop  @TODO           }
+sub peek_todo { @TODO ? $TODO[-1] : undef }
 
 sub set {
     $CURRENT = pop;
@@ -68,7 +74,11 @@ sub context {
         my $todo_pkg = $meta->[Test::Stream::Meta::PACKAGE];
         no strict 'refs';
         no warnings 'once';
-        if ($todo = $meta->[Test::Stream::Meta::TODO]) {
+        if (@TODO) {
+            $todo = $TODO[-1];
+            $in_todo = 1;
+        }
+        elsif ($todo = $meta->[Test::Stream::Meta::TODO]) {
             $in_todo = 1;
         }
         elsif ($todo = ${"$pkg\::TODO"}) {
@@ -341,23 +351,35 @@ sub register_event {
 
 sub meta { is_tester($_[0]->[FRAME]->[0]) }
 
+sub inspect_todo {
+    my ($pkg) = @_;
+    my $meta = $pkg ? is_tester($pkg) : undef;
+
+    no strict 'refs';
+    return {
+        TODO => [@TODO],
+        $Test::Builder::Test ? (TB   => $Test::Builder::Test->{Todo})      : (),
+        $meta                ? (META => $meta->[Test::Stream::Meta::TODO]) : (),
+        $pkg                 ? (PKG  => ${"$pkg\::TODO"})                  : (),
+    };
+}
+
 sub hide_todo {
     my $self = shift;
-    no strict 'refs';
-    no warnings 'once';
 
     my $pkg = $self->[FRAME]->[0];
     my $meta = is_tester($pkg);
 
-    my $found = {
-        TB   => $Test::Builder::Test ? $Test::Builder::Test->{Todo} : undef,
-        META => $meta->[Test::Stream::Meta::TODO],
-        PKG  => ${"$pkg\::TODO"},
-    };
+    my $found = inspect_todo($pkg);
 
+    @TODO = ();
     $Test::Builder::Test->{Todo} = undef;
     $meta->[Test::Stream::Meta::TODO] = undef;
-    ${"$pkg\::TODO"} = undef;
+    {
+        no strict 'refs';
+        no warnings 'once';
+        ${"$pkg\::TODO"} = undef;
+    }
 
     return $found;
 }
@@ -365,26 +387,25 @@ sub hide_todo {
 sub restore_todo {
     my $self = shift;
     my ($found) = @_;
-    no strict 'refs';
-    no warnings 'once';
 
     my $pkg = $self->[FRAME]->[0];
     my $meta = is_tester($pkg);
 
+    @TODO = @{$found->{TODO}};
     $Test::Builder::Test->{Todo} = $found->{TB};
     $meta->[Test::Stream::Meta::TODO] = $found->{META};
-    ${"$pkg\::TODO"} = $found->{PKG};
+    {
+        no strict 'refs';
+        no warnings 'once';
+        ${"$pkg\::TODO"} = $found->{PKG};
+    }
 
-    my $found2 = {
-        TB   => $Test::Builder::Test ? $Test::Builder::Test->{Todo} : undef,
-        META => $meta->[Test::Stream::Meta::TODO] || undef,
-        PKG  => ${"$pkg\::TODO"} || undef,
-    };
+    my $found2 = inspect_todo($pkg);
 
     for my $k (qw/TB META PKG/) {
         no warnings 'uninitialized';
         next if "$found->{$k}" eq "$found2->{$k}";
-        die "Mismatch! $k:\t$found->{$k}\n\t$found2->{$k}\n"
+        die "INTERNAL ERROR: Mismatch! $k:\t$found->{$k}\n\t$found2->{$k}\n"
     }
 
     return;
@@ -540,6 +561,24 @@ ref used by the package, so please do not alter it.
 
 These are used to temporarily hide the TODO value in ALL places where it might
 be found. The returned C<$stash> must be used to restore it later.
+
+=back
+
+=head2 CLASS METHODS
+
+B<Note:> These can effect all test packages, if that is not what you want do not use them!.
+
+=over 4
+
+=item $msg = Test::Stream::Context->push_todo($msg)
+
+=item $msg = Test::Stream::Context->pop_todo()
+
+=item $msg = Test::Stream::Context->peek_todo()
+
+These manage a global todo stack. Any new context created will check here first
+for a TODO. Changing this will not effect any existing context instances. This
+is a reliable way to set a global todo that effects any/all packages.
 
 =back
 

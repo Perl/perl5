@@ -2270,6 +2270,7 @@ cpan/Test-Simple/lib/Test/More.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/More/Tools.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/MostlyLike.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Simple.pm			Test::Simple module
+cpan/Test-Simple/lib/Test/Stream/API.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Architecture.pod			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/ArrayBase/Meta.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/ArrayBase.pm			Test::Simple module
@@ -2314,6 +2315,7 @@ cpan/Test-Simple/t/Behavior/388-threadedsubtest.t			Test::Simple test
 cpan/Test-Simple/t/Behavior/478-cmp_ok_hash.t			Test::Simple test
 cpan/Test-Simple/t/Behavior/490-inherit_exporter.t			Test::Simple test
 cpan/Test-Simple/t/Behavior/cmp_ok_xor.t			Test::Simple Test
+cpan/Test-Simple/t/Behavior/CustomOutput.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/encoding_test.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/fork_new_end.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/MonkeyPatching_diag.t			Test::Simple Test
@@ -2482,6 +2484,7 @@ cpan/Test-Simple/t/Test-More-DeepCheck.t			Test::Simple Test
 cpan/Test-Simple/t/Test-More.t			Test::Simple Test
 cpan/Test-Simple/t/Test-MostlyLike.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Simple.t			Test::Simple Test
+cpan/Test-Simple/t/Test-Stream-API.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-ArrayBase-Meta.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-ArrayBase.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-Carp.t			Test::Simple Test

@@ -74,6 +74,8 @@ sub summary {
     );
 }
 
+sub subevents { }
+
 1;
 
 __END__

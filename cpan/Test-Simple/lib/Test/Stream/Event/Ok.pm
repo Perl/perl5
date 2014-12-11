@@ -139,6 +139,8 @@ sub add_diag {
     }
 }
 
+sub subevents { @{$_[0]->[DIAG] || []} }
+
 sub to_legacy {
     my $self = shift;
 

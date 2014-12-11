@@ -4,12 +4,12 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_079';
+our $VERSION = '1.301001_084';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream 1.301001 '-internal';
 use Test::Stream::Util qw/protect try spoof/;
-use Test::Stream::Toolset;
+use Test::Stream::Toolset qw/is_tester init_tester context before_import/;
 use Test::Stream::Subtest qw/subtest/;
 
 use Test::Stream::Carp qw/croak carp/;
@@ -68,45 +68,6 @@ sub import {
 sub import_extra { 1 };
 
 sub builder { Test::Builder->new }
-
-sub before_import {
-    my $class = shift;
-    my ($importer, $list) = @_;
-
-    my $meta = init_tester($importer);
-
-    my $context = context(1);
-    my $other   = [];
-    my $idx     = 0;
-
-    while ($idx <= $#{$list}) {
-        my $item = $list->[$idx++];
-        next unless $item;
-
-        if (defined $item and $item eq 'no_diag') {
-            Test::Stream->shared->set_no_diag(1);
-        }
-        elsif ($item eq 'tests') {
-            $context->plan($list->[$idx++]);
-        }
-        elsif ($item eq 'skip_all') {
-            $context->plan(0, 'SKIP', $list->[$idx++]);
-        }
-        elsif ($item eq 'no_plan') {
-            $context->plan(0, 'NO PLAN');
-        }
-        elsif ($item eq 'import') {
-            push @$other => @{$list->[$idx++]};
-        }
-        else {
-            carp("Unknown option: $item");
-        }
-    }
-
-    @$list = @$other;
-
-    return;
-}
 
 sub ok ($;$) {
     my ($test, $name) = @_;

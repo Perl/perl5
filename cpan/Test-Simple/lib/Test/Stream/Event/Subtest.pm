@@ -11,6 +11,13 @@ use Test::Stream::Event(
     accessors => [qw/state events exception/],
 );
 
+sub subevents {
+    return (
+        @{$_[0]->[DIAG] || []},
+        map { $_, $_->subevents } @{$_[0]->[EVENTS] || []},
+    );
+}
+
 sub init {
     my $self = shift;
 
