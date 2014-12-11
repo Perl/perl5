@@ -6864,6 +6864,13 @@ PERL_STATIC_INLINE UV*	S__invlist_array_init(SV* const invlist, const bool will_
 #define PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT	\
 	assert(invlist)
 
+STATIC SV*	S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT__MAKE_EXACTF_INVLIST	\
+	assert(pRExC_state); assert(node)
+
 STATIC void	S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invlist)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);

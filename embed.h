@@ -952,6 +952,7 @@
 #  if defined(PERL_IN_REGCOMP_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_array_init	S__invlist_array_init
+#define _make_exactf_invlist(a,b)	S__make_exactf_invlist(aTHX_ a,b)
 #define add_above_Latin1_folds(a,b,c)	S_add_above_Latin1_folds(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data

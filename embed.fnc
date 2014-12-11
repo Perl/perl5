@@ -1528,6 +1528,8 @@ EiMn	|void	|invlist_iterinit|NN SV* invlist
 EsMRn	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
 EiMn	|void	|invlist_iterfinish|NN SV* invlist
 EiMRn	|UV	|invlist_highest|NN SV* const invlist
+EMRs	|SV*	|_make_exactf_invlist	|NN RExC_state_t *pRExC_state \
+					|NN regnode *node
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 EXmM	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
