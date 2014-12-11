@@ -300,7 +300,7 @@ sub format_arg {
 	    }
 	    my $o = ord($c);
 	    substr $arg, $i, 1, sprintf("\\x{%x}", $o)
-		if $o < 0x20 || $o > 0x7f;
+		if $o < 0x20 || $o > 0x7e;
 	}
     } else {
 	$arg =~ s/([\"\\\$\@])/\\$1/g;
@@ -318,7 +318,7 @@ sub Regexp::CARP_TRACE {
 	    my $o = ord(substr($arg, $i, 1));
 	    my $x = substr($arg, 0, 0);   # work around bug on Perl 5.8.{1,2}
 	    substr $arg, $i, 1, sprintf("\\x{%x}", $o)
-		if $o < 0x20 || $o > 0x7f;
+		if $o < 0x20 || $o > 0x7e;
 	}
     } else {
 	$arg =~ s/([^ -~])/sprintf("\\x{%x}",ord($1))/eg;
