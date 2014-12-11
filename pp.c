@@ -3390,6 +3390,8 @@ PP(pp_chr)
     SV *top = POPs;
 
     SvGETMAGIC(top);
+    if (UNLIKELY(SvAMAGIC(top)))
+	top = sv_2num(top);
     if (UNLIKELY(isinfnansv(top)))
         Perl_croak(aTHX_ "Cannot chr %"NVgf, SvNV(top));
     else {

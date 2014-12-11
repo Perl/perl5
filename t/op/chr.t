@@ -6,7 +6,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 42;
+plan tests => 45;
 
 # Note that t/op/ord.t already tests for chr() <-> ord() rountripping.
 
@@ -80,3 +80,11 @@ sub hexes {
     is(hexes(0x200000), "f8 88 80 80 80");
 }
 
+package o {
+    use overload
+        '""' => sub { ++$o::str; "42" },
+        '0+' => sub { ++$o::num; 42 };
+}
+is chr(bless [], "o"), chr(42), 'overloading called';
+is $o::str, undef, 'chr does not call string overloading';
+is $o::num, 1,     'chr does call num overloading';
