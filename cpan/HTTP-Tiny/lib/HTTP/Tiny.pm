@@ -4,7 +4,7 @@ use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
 
-our $VERSION = '0.051';
+our $VERSION = '0.052';
 
 use Carp ();
 
@@ -141,7 +141,9 @@ sub _set_proxies {
 
     # http proxy
     if (! exists $self->{http_proxy} ) {
-        $self->{http_proxy} = $ENV{http_proxy} || $self->{proxy};
+        # under CGI, bypass HTTP_PROXY as request sets it from Proxy header
+        local $ENV{HTTP_PROXY} if $ENV{REQUEST_METHOD};
+        $self->{http_proxy} = $ENV{http_proxy} || $ENV{HTTP_PROXY} || $self->{proxy};
     }
 
     if ( defined $self->{http_proxy} ) {
@@ -1456,7 +1458,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.051
+version 0.052
 
 =head1 SYNOPSIS
 
@@ -1842,7 +1844,7 @@ HTTP::Tiny supports the following proxy environment variables:
 
 =item *
 
-http_proxy
+http_proxy or HTTP_PROXY
 
 =item *
 
@@ -1853,6 +1855,11 @@ https_proxy or HTTPS_PROXY
 all_proxy or ALL_PROXY
 
 =back
+
+If the C<REQUEST_METHOD> environment variable is set, then this might be a CGI
+process and C<HTTP_PROXY> would be set from the C<Proxy:> header, which is a
+security risk.  If C<REQUEST_METHOD> is set, C<HTTP_PROXY> (the upper case
+variant only) is ignored.
 
 Tunnelling C<https> over an C<http> proxy using the CONNECT method is
 supported.  If your proxy uses C<https> itself, you can not tunnel C<https>

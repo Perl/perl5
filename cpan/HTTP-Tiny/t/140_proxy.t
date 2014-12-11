@@ -48,4 +48,25 @@ for my $proxy ("http://localhost:8080/", "http://localhost:8080"){
     ok(!defined $c->https_proxy, "https_proxy => undef disables ENV proxy");
 }
 
+# case variations
+for my $var ( qw/http_proxy https_proxy all_proxy/ ) {
+    my $proxy = "http://localhost:8080";
+    for my $s ( uc($var), lc($var) ) {
+        local $ENV{$s} = $proxy;
+        my $c = HTTP::Tiny->new();
+        my $m = ($s =~ /all/i) ? 'proxy' : lc($s);
+        is( $c->$m, $proxy, "set $m from $s" );
+    }
+}
+
+# ignore HTTP_PROXY with REQUEST_METHOD
+{
+    local $ENV{HTTP_PROXY} = "http://localhost:8080";
+    local $ENV{REQUEST_METHOD} = 'GET';
+    my $c = HTTP::Tiny->new();
+    ok(!defined $c->http_proxy,
+        "http_proxy not set from HTTP_PROXY if REQUEST_METHOD set");
+
+}
+
 done_testing();
