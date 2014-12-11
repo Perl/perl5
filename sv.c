@@ -2817,8 +2817,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 =for apidoc sv_2num
 
 Return an SV with the numeric value of the source SV, doing any necessary
-reference or overload conversion.  You must use the C<SvNUM(sv)> macro to
-access this function.
+reference or overload conversion.
 
 =cut
 */
