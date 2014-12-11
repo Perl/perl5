@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 14704;
+plan tests => 14707;
 
 use strict;
 use warnings qw(FATAL all);
@@ -2003,3 +2003,12 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
 #90160
 is(eval { () = unpack "C0 U*", ""; "ok" }, "ok",
   'medial U* on empty string');
+
+package o {
+    use overload
+        '""' => sub { ++$o::str; "42" },
+        '0+' => sub { ++$o::num; 42 };
+}
+is pack("c", bless [], "o"), chr(42), 'overloading called';
+is $o::str, undef, 'pack "c" does not call string overloading';
+is $o::num, 1,     'pack "c" does call num overloading';
