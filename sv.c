@@ -11703,6 +11703,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
         if (argsv && strchr("BbcDdiOopuUXx",*q)) {
             /* XXX va_arg(*args) case? need peek, use va_copy? */
             SvGETMAGIC(argsv);
+            if (UNLIKELY(SvAMAGIC(argsv)))
+                argsv = sv_2num(argsv);
             infnan = UNLIKELY(isinfnansv(argsv));
         }
 

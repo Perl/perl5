@@ -243,7 +243,7 @@ if ($Config{nvsize} == 8 &&
     print "# no hexfloat tests\n";
 }
 
-plan tests => 1406 + ($Q ? 0 : 12) + @hexfloat;
+plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat;
 
 use strict;
 use Config;
@@ -560,13 +560,21 @@ for my $width (1,2,3,4,5,6,7) {
 }
 
 # Overload count
-package o { use overload '""', sub { ++our $count; $_[0][0]; } }
-my $o = bless ["\x{100}"], o::;
+package o {
+    use overload
+        '""', sub { ++our $count; $_[0][0]; },
+        '0+', sub { ++our $numcount; $_[0][1]; }
+}
+my $o = bless ["\x{100}",42], o::;
 () = sprintf "%1s", $o;
 is $o::count, '1', 'sprinf %1s overload count';
 $o::count = 0;
 () = sprintf "%.1s", $o;
 is $o::count, '1', 'sprinf %.1s overload count';
+$o::count = 0;
+() = sprintf "%d", $o;
+is $o::count,    0, 'sprintf %d string overload count is 0';
+is $o::numcount, 1, 'sprintf %d number overload count is 1';
 
 my $ppc64_linux = $Config{archname} =~ /^ppc64-linux/;
 
