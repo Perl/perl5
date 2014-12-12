@@ -169,8 +169,7 @@ sub sort_headers {
         *HTTP::Tiny::Handle::close = sub { 1 }; # don't close our temps
 
         # don't try to proxy in mock-mode
-        delete $ENV{$_}
-            for map { $_, uc($_) } qw/http_proxy https_proxy all_proxy/;
+        delete $ENV{$_} for map { $_, uc($_) } qw/http_proxy https_proxy all_proxy/;
     }
 }
 

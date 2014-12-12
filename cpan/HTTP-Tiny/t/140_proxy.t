@@ -6,13 +6,18 @@ use warnings;
 use File::Basename;
 use Test::More 0.88;
 
+use t::Util qw[ monkey_patch ];
 use HTTP::Tiny;
+
+BEGIN {
+    monkey_patch();
+}
+
 
 # Require a true value
 for my $proxy (undef, "", 0){
     local $ENV{all_proxy} = undef;
     local $ENV{ALL_PROXY} = undef;
-    local $ENV{HTTP_PROXY} = $proxy;
     local $ENV{http_proxy} = $proxy;
     my $c = HTTP::Tiny->new();
     ok(!defined $c->http_proxy);
@@ -50,19 +55,18 @@ for my $proxy ("http://localhost:8080/", "http://localhost:8080"){
 }
 
 # case variations
-my @vars = map +(uc, lc), qw/http_proxy https_proxy all_proxy/;
-for my $var ( @vars ) {
+for my $var ( qw/http_proxy https_proxy all_proxy/ ) {
     my $proxy = "http://localhost:8080";
-    local @ENV{@vars};
-    local $ENV{$var} = $proxy;
-    my $c = HTTP::Tiny->new();
-    my $m = ($var =~ /all/i) ? 'proxy' : lc($var);
-    is( $c->$m, $proxy, "set $m from $var" );
+    for my $s ( uc($var), lc($var) ) {
+        local $ENV{$s} = $proxy;
+        my $c = HTTP::Tiny->new();
+        my $m = ($s =~ /all/i) ? 'proxy' : lc($s);
+        is( $c->$m, $proxy, "set $m from $s" );
+    }
 }
 
 # ignore HTTP_PROXY with REQUEST_METHOD
 {
-    local $ENV{http_proxy};
     local $ENV{HTTP_PROXY} = "http://localhost:8080";
     local $ENV{REQUEST_METHOD} = 'GET';
     my $c = HTTP::Tiny->new();
