@@ -1867,7 +1867,10 @@ sub generate_init {
 
   my $typem = $typemaps->get_typemap(ctype => $type);
   my $xstype = $typem->xstype;
-  $xstype =~ s/OBJ$/REF/ if $self->{func_name} =~ /DESTROY$/;
+  #this is an optimization from perl 5.0 alpha 6, class check is skipped
+  #T_REF_IV_REF is missing since it has no untyped analog at the moment
+  $xstype =~ s/OBJ$/REF/ || $xstype =~ s/^T_REF_IV_PTR$/T_PTRREF/
+    if $self->{func_name} =~ /DESTROY$/;
   if ($xstype eq 'T_PV' and exists $self->{lengthof}->{$var}) {
     print "\t$var" unless $printed_name;
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
