@@ -326,22 +326,6 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_
     return TRUE;
 }
 
-STATIC bool
-next_utf8_uu(pTHX_ const char **s, const char *end, I32 *out)
-{
-    STRLEN retlen;
-    const UV val = NATIVE_TO_UNI(utf8n_to_uvchr((U8 *) *s, end-*s, &retlen, UTF8_CHECK_ONLY));
-    if (val >= 0x100 || !ISUUCHAR(val)
-        || retlen == (STRLEN) -1 || retlen == 0)
-    {
-	*out = 0;
-	return FALSE;
-    }
-    *out = PL_uudmap[val] & 077;
-    *s += retlen;
-    return TRUE;
-}
-
 STATIC char *
 S_bytes_to_utf8(const U8 *start, STRLEN len, char *dest, const bool needs_swap) {
     PERL_ARGS_ASSERT_BYTES_TO_UNI;
@@ -1722,36 +1706,13 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		sv = sv_2mortal(newSV(l));
 		if (l) SvPOK_on(sv);
 	    }
-	    if (utf8) {
-		while (next_utf8_uu(aTHX_ &s, strend, &len)) {
-		    I32 a, b, c, d;
-		    char hunk[3];
 
-		    while (len > 0) {
-			next_utf8_uu(aTHX_ &s, strend, &a);
-			next_utf8_uu(aTHX_ &s, strend, &b);
-			next_utf8_uu(aTHX_ &s, strend, &c);
-			next_utf8_uu(aTHX_ &s, strend, &d);
-			hunk[0] = (char)((a << 2) | (b >> 4));
-			hunk[1] = (char)((b << 4) | (c >> 2));
-			hunk[2] = (char)((c << 6) | d);
-			if (!checksum)
-			    sv_catpvn(sv, hunk, (len > 3) ? 3 : len);
-			len -= 3;
-		    }
-		    if (s < strend) {
-			if (*s == '\n') {
-                            s++;
-                        }
-			else {
-			    /* possible checksum byte */
-			    const char *skip = s+UTF8SKIP(s);
-			    if (skip < strend && *skip == '\n')
-                                s = skip+1;
-			}
-		    }
-		}
-	    } else {
+            /* Note that all legal uuencoded strings are ASCII printables, so
+             * have the same representation under UTF-8 vs not.  This means we
+             * can ignore UTF8ness on legal input.  For illegal we stop at the
+             * first failure, and don't report where/what that is, so again we
+             * can ignore UTF8ness */
+
 		while (s < strend && *s != ' ' && ISUUCHAR(*s)) {
 		    I32 a, b, c, d;
 		    char hunk[3];
@@ -1787,7 +1748,6 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 			if (s + 1 < strend && s[1] == '\n')
 			    s += 2;
 		}
-	    }
 	    if (!checksum)
 		XPUSHs(sv);
 	    break;
