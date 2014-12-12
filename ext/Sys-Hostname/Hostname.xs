@@ -18,6 +18,7 @@
 #endif
 
 MODULE = Sys::Hostname		PACKAGE = Sys::Hostname
+PROTOTYPES: DISABLE
 
 void
 ghname()
