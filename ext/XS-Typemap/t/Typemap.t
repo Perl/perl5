@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 148;
+use Test::More tests => 152;
 
 use strict;
 use warnings;
@@ -405,6 +405,9 @@ SCOPE: {
   seek($fh2, 0, 0);
   is(readline($fh2), $str);
   ok(print $fh2 "foo\n");
+  ok(close $fh);
+  # this fails because the underlying shared handle is already closed
+  ok(!close $fh2);
 }
 
 # T_IN
@@ -431,6 +434,9 @@ SCOPE: {
   seek($fh2, 0, 0);
   is(readline($fh2), $str);
   ok(eval {print $fh2 "foo\n"; 1});
+  ok(close $fh);
+  # this fails because the underlying shared handle is already closed
+  ok(!close $fh2);
 }
 
 sub is_approx {
