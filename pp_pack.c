@@ -1713,41 +1713,41 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
              * first failure, and don't report where/what that is, so again we
              * can ignore UTF8ness */
 
-		while (s < strend && *s != ' ' && ISUUCHAR(*s)) {
-		    I32 a, b, c, d;
-		    char hunk[3];
+            while (s < strend && *s != ' ' && ISUUCHAR(*s)) {
+                I32 a, b, c, d;
+                char hunk[3];
 
-		    len = PL_uudmap[*(U8*)s++] & 077;
-		    while (len > 0) {
-			if (s < strend && ISUUCHAR(*s))
-			    a = PL_uudmap[*(U8*)s++] & 077;
-			else
-			    a = 0;
-			if (s < strend && ISUUCHAR(*s))
-			    b = PL_uudmap[*(U8*)s++] & 077;
-			else
-			    b = 0;
-			if (s < strend && ISUUCHAR(*s))
-			    c = PL_uudmap[*(U8*)s++] & 077;
-			else
-			    c = 0;
-			if (s < strend && ISUUCHAR(*s))
-			    d = PL_uudmap[*(U8*)s++] & 077;
-			else
-			    d = 0;
-			hunk[0] = (char)((a << 2) | (b >> 4));
-			hunk[1] = (char)((b << 4) | (c >> 2));
-			hunk[2] = (char)((c << 6) | d);
-			if (!checksum)
-			    sv_catpvn(sv, hunk, (len > 3) ? 3 : len);
-			len -= 3;
-		    }
-		    if (*s == '\n')
-			s++;
-		    else	/* possible checksum byte */
-			if (s + 1 < strend && s[1] == '\n')
-			    s += 2;
-		}
+                len = PL_uudmap[*(U8*)s++] & 077;
+                while (len > 0) {
+                    if (s < strend && ISUUCHAR(*s))
+                        a = PL_uudmap[*(U8*)s++] & 077;
+                    else
+                        a = 0;
+                    if (s < strend && ISUUCHAR(*s))
+                        b = PL_uudmap[*(U8*)s++] & 077;
+                    else
+                        b = 0;
+                    if (s < strend && ISUUCHAR(*s))
+                        c = PL_uudmap[*(U8*)s++] & 077;
+                    else
+                        c = 0;
+                    if (s < strend && ISUUCHAR(*s))
+                        d = PL_uudmap[*(U8*)s++] & 077;
+                    else
+                        d = 0;
+                    hunk[0] = (char)((a << 2) | (b >> 4));
+                    hunk[1] = (char)((b << 4) | (c >> 2));
+                    hunk[2] = (char)((c << 6) | d);
+                    if (!checksum)
+                        sv_catpvn(sv, hunk, (len > 3) ? 3 : len);
+                    len -= 3;
+                }
+                if (*s == '\n')
+                    s++;
+                else	/* possible checksum byte */
+                    if (s + 1 < strend && s[1] == '\n')
+                        s += 2;
+            }
 	    if (!checksum)
 		XPUSHs(sv);
 	    break;
