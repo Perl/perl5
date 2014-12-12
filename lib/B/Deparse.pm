@@ -567,12 +567,12 @@ sub next_todo {
 	    . $self->deparse_format($ent->[1]). "\n";
     } else {
 	$self->{'subs_declared'}{$name} = 1;
+	my $use_dec;
 	if ($name eq "BEGIN") {
-	    my $use_dec = $self->begin_is_use($cv);
+	    $use_dec = $self->begin_is_use($cv);
 	    if (defined ($use_dec) and $self->{'expand'} < 5) {
 		return () if 0 == length($use_dec);
 		$use_dec =~ s/^(use|no)\b/$self->keyword($1)/e;
-		return $use_dec;
 	    }
 	}
 	my $l = '';
@@ -590,6 +590,9 @@ sub next_todo {
 		$name = "$self->{'curstash'}::$name" unless $name =~ /::/;
 		$self->{'curstash'} = $stash;
 	    }
+	}
+	if ($use_dec) {
+	    return "$p$l$use_dec";
 	}
         if ( $name !~ /::/ and $self->lex_in_scope("&$name")
                             || $self->lex_in_scope("&$name", 1) )

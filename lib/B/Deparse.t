@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 38; # not counting those in the __DATA__ section
+my $tests = 39; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -452,6 +452,11 @@ like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
                  sub run_tests { BEGIN { } die }'),
      qr/sub run_tests \{\s*sub BEGIN/,
     'BEGIN block inside predeclared sub';
+
+like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+             prog => 'package foo; use overload qr=>sub{}'),
+     qr/package foo;\s*use overload/,
+    'package, then use';
 
 like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
              prog => 'use feature lexical_subs=>; my sub f;sub main::f{}'),
