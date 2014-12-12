@@ -496,7 +496,6 @@ porting/podcheck.t
 re/overload.t             # [perl #123385]
 re/pat.t                  # [perl #90590]
 re/pat_advanced.t
-re/pat_re_eval.t
 re/pat_rt_report.t
 re/reg_eval_scope.t
 re/reg_fold.t
