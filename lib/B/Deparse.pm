@@ -566,7 +566,6 @@ sub next_todo {
 	return $self->keyword("format") . " $name =\n"
 	    . $self->deparse_format($ent->[1]). "\n";
     } else {
-	$self->{'subs_declared'}{$name} = 1;
 	my $use_dec;
 	if ($name eq "BEGIN") {
 	    $use_dec = $self->begin_is_use($cv);
@@ -601,8 +600,10 @@ sub next_todo {
         } elsif (defined $stash) {
             $name =~ s/^\Q$stash\E::(?!\z|.*::)//;
         }
-        return "${p}${l}" . $self->keyword("sub") . " $name "
+	my $ret = "${p}${l}" . $self->keyword("sub") . " $name "
 	      . $self->deparse_sub($cv);
+	$self->{'subs_declared'}{$name} = 1;
+	return $ret;
     }
 }
 

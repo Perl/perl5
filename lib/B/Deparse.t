@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 39; # not counting those in the __DATA__ section
+my $tests = 40; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -462,6 +462,11 @@ like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
              prog => 'use feature lexical_subs=>; my sub f;sub main::f{}'),
      qr/^sub main::f \{/m,
     'sub decl when lex sub is in scope';
+
+like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+             prog => 'sub foo{foo()}'),
+     qr/^sub foo \{\s+foo\(\)/m,
+    'recursive sub';
 
 is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-T' ],
            prog => '$x =~ (1?/$a/:0)'),
