@@ -2310,10 +2310,6 @@ PadnamelistARRAYelt(pnl, idx)
     OUTPUT:
 	RETVAL
 
-U32
-PadnamelistREFCNT(pnl)
-	B::PADNAMELIST	pnl
-
 MODULE = B	PACKAGE = B::PADNAME	PREFIX = Padname
 
 #define PN_type_ix \
@@ -2328,6 +2324,8 @@ MODULE = B	PACKAGE = B::PADNAME	PREFIX = Padname
 	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_low)
 #define PN_cop_seq_range_high_ix \
 	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_high)
+#define PNL_refcnt_ix \
+	sv_U32p | STRUCT_OFFSET(struct padnamelist, xpadnl_refcnt)
 
 void
 PadnameTYPE(pn)
@@ -2339,6 +2337,7 @@ PadnameTYPE(pn)
 	B::PADNAME::REFCNT	= PN_refcnt_ix
 	B::PADNAME::COP_SEQ_RANGE_LOW	 = PN_cop_seq_range_low_ix
 	B::PADNAME::COP_SEQ_RANGE_HIGH	 = PN_cop_seq_range_high_ix
+	B::PADNAMELIST::REFCNT	= PNL_refcnt_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
