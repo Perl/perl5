@@ -414,7 +414,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 	        RETVAL = sv_mortalcopy(db_type) ;		\
 	    ST(0) = RETVAL ;					\
 	    if (db_type && (code == &PL_sv_undef)) {		\
-                SvREFCNT_dec(db_type) ;				\
+	        SvREFCNT_dec_NN(db_type) ;			\
 	        db_type = NULL ;				\
 	    }							\
 	    else if (code) {					\

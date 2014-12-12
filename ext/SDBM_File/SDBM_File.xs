@@ -65,7 +65,7 @@ sdbm_DESTROY(db)
 	    sdbm_close(db->dbp);
 	    do {
 		if (db->filter[i])
-		    SvREFCNT_dec(db->filter[i]);
+		    SvREFCNT_dec_NN(db->filter[i]);
 	    } while (i-- > 0);
 	    safefree(db) ;
 	}
