@@ -5440,6 +5440,15 @@ the previous instance.  This is almost always a typographical error.
 Note that the earlier subroutine will still exist until the end of
 the scope or until all closure references to it are destroyed.
 
+=item Subroutine %s redefined
+
+(W redefine) You redefined a subroutine.  To suppress this warning, say
+
+    {
+	no warnings 'redefine';
+	eval "sub name { ... }";
+    }
+
 =item Subroutine "%s" will not stay shared
 
 (W closure) An inner (nested) I<named> subroutine is referencing a "my"
@@ -5458,15 +5467,6 @@ This problem can usually be solved by making the inner subroutine
 anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
 reference lexical subroutines in outer subroutines are created, they
 are automatically rebound to the current values of such lexical subs.
-
-=item Subroutine %s redefined
-
-(W redefine) You redefined a subroutine.  To suppress this warning, say
-
-    {
-	no warnings 'redefine';
-	eval "sub name { ... }";
-    }
 
 =item Substitution loop
 
