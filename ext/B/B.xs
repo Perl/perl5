@@ -2328,10 +2328,6 @@ MODULE = B	PACKAGE = B::PADNAME	PREFIX = Padname
 	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_low)
 #define PN_cop_seq_range_high_ix \
 	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_high)
-#define PN_parent_pad_index_ix \
-	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_low)
-#define PN_parent_fakelex_flags_ix \
-	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_high)
 
 void
 PadnameTYPE(pn)
@@ -2343,8 +2339,6 @@ PadnameTYPE(pn)
 	B::PADNAME::REFCNT	= PN_refcnt_ix
 	B::PADNAME::COP_SEQ_RANGE_LOW	 = PN_cop_seq_range_low_ix
 	B::PADNAME::COP_SEQ_RANGE_HIGH	 = PN_cop_seq_range_high_ix
-	B::PADNAME::PARENT_PAD_INDEX	 = PN_parent_pad_index_ix
-	B::PADNAME::PARENT_FAKELEX_FLAGS = PN_parent_fakelex_flags_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -2385,6 +2379,13 @@ BOOT:
     sv_setsv((SV *)gv_fetchpvs("B::PADNAME::PROTOCV",1,SVt_PVGV),(SV *)gv);
     sv_setsv((SV *)gv_fetchpvs("B::PADNAME::PVX",1,SVt_PVGV),
 	     (SV *)gv_fetchpvs("B::PADNAME::PV" ,1,SVt_PVGV));
+    sv_setsv((SV *)gv_fetchpvs("B::PADNAME::PARENT_PAD_INDEX" ,1,SVt_PVGV),
+	     (SV *)gv_fetchpvs("B::PADNAME::COP_SEQ_RANGE_LOW",1,
+				SVt_PVGV));
+    sv_setsv((SV *)gv_fetchpvs("B::PADNAME::PARENT_FAKELEX_FLAGS",1,
+				SVt_PVGV),
+	     (SV *)gv_fetchpvs("B::PADNAME::COP_SEQ_RANGE_HIGH"  ,1,
+				SVt_PVGV));
 }
 
 U32
