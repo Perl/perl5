@@ -266,7 +266,7 @@ sub check_file {
     my $multiline = 0;
     # Loop to accumulate the message text all on one line.
     if (m/(?!^)\b(?:$source_msg_re(?:_nocontext)?|$regcomp_re)\s*\(/) {
-      while (not m/\);$/) {
+      while (not m/\);\s*$/) {
         my $nextline = <$codefh>;
         # Means we fell off the end of the file.  Not terribly surprising;
         # this code tries to merge a lot of things that aren't regular C
