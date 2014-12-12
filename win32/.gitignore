@@ -9,4 +9,5 @@ Extensions_static
 dlutils.c
 perllibst.h
 perlmain.c
+perlmainst.c
 !perlexe.ico
