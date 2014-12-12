@@ -14,7 +14,21 @@ exports qw{
 
 Test::Stream::Exporter->cleanup();
 
-sub protect(&) {
+sub _manual_protect(&) {
+    my $code = shift;
+
+    my ($ok, $error);
+    {
+        my ($msg, $no) = ($@, $!);
+        $ok = eval { $code->(); 1 } || 0;
+        $error = $@ || "Error was squashed!\n";
+        ($@, $!) = ($msg, $no);
+    }
+    die $error unless $ok;
+    return $ok;
+}
+
+sub _local_protect(&) {
     my $code = shift;
 
     my ($ok, $error);
@@ -27,7 +41,28 @@ sub protect(&) {
     return $ok;
 }
 
-sub try(&) {
+sub _manual_try(&) {
+    my $code = shift;
+    my $error;
+    my $ok;
+
+    {
+        my ($msg, $no) = ($@, $!);
+        my $die = delete $SIG{__DIE__};
+
+        $ok = eval { $code->(); 1 } || 0;
+        unless($ok) {
+            $error = $@ || "Error was squashed!\n";
+        }
+
+        ($@, $!) = ($msg, $no);
+        $SIG{__DIE__} = $die;
+    }
+
+    return wantarray ? ($ok, $error) : $ok;
+}
+
+sub _local_try(&) {
     my $code = shift;
     my $error;
     my $ok;
@@ -43,6 +78,18 @@ sub try(&) {
     return wantarray ? ($ok, $error) : $ok;
 }
 
+BEGIN {
+    if ($^O eq 'MSWin32' && $] < 5.020002) {
+        *protect = \&_manual_protect;
+        *try     = \&_manual_try;
+    }
+    else {
+        *protect = \&_local_protect;
+        *try     = \&_local_try;
+    }
+}
+
+
 sub spoof {
     my ($call, $code, @args) = @_;
 
@@ -55,8 +102,7 @@ sub spoof {
     my $error;
     my $ok;
 
-    {
-        local ($@, $!);
+    protect {
         $ok = eval <<"        EOT" || 0;
 package $call->[0];
 #line $call->[2] "$call->[1]"
@@ -66,7 +112,7 @@ $code;
         unless($ok) {
             $error = $@ || "Error was squashed!\n";
         }
-    }
+    };
 
     return wantarray ? ($ok, $error) : $ok;
 }

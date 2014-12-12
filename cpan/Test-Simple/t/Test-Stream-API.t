@@ -101,13 +101,6 @@ isa_ok($follow[0], 'Test::Stream::Context');
 my $events = intercept {
     Test::CanFork->import;
 
-    # On systems that fake forking, localized vars get unwound improperly
-    # post-fork. the 'intercept' function localizes $@ and $!, as such this
-    # test will fail on fake-fork systems up until 5.20.2
-    plan skip_all => "Skipping fork tests on $^O"
-        if ($^O eq 'MSWin32' || $^O eq 'NetWare')
-        && !eval { require v5.20.2 };
-
     enable_forking;
 
     my $pid = fork();

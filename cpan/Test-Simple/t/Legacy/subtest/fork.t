@@ -6,21 +6,14 @@ use Test::CanFork;
 
 use IO::Pipe;
 use Test::Builder;
-use Test::More tests => 1;
-
-# On systems that fake forking, localized vars get unwound improperly
-# post-fork. the 'subtest' function localizes $@ and $!, as such this
-# test will fail on fake-fork systems up until 5.20.2
-plan skip_all => "Skipping fork tests on $^O"
-    if ($^O eq 'MSWin32' || $^O eq 'NetWare')
-    && !eval { require v5.20.2 };
+use Test::More;
 
 subtest 'fork within subtest' => sub {
-    plan tests => 2;
-
     my $pipe = IO::Pipe->new;
-    my $pid = fork;
-    defined $pid or plan skip_all => "Fork not working";
+
+    my $pid = fork();
+    plan skip_all => "Fork not working"
+        unless defined $pid;
 
     if ($pid) {
         $pipe->reader;
@@ -45,3 +38,4 @@ subtest 'fork within subtest' => sub {
     }
 };
 
+done_testing;

@@ -1,14 +1,6 @@
 use strict;
 use warnings;
 
-BEGIN {
-    if ($^O eq 'MSWin32' || $^O eq 'NetWare') {
-        require Test::More;
-        Test::More::plan(skip_all => "This test is unreliable on $^O, also not likely to be helpful");
-        exit 0;
-    }
-}
-
 use Test::CanFork;
 
 # The failure case for this test is producing 2 results, 1 pass and 1 fail,
@@ -46,6 +38,7 @@ subtest do_it => sub {
     waitpid($pid, 0);
     ok($?, "Process exited with failure");
 
+    my $file = __FILE__;
     {
         local $SIG{ALRM} = sub { die "Read Timeout\n" };
         alarm 2;
@@ -56,7 +49,7 @@ subtest do_it => sub {
             [
                 "Subtest finished with a new PID ($pid vs $$) while forking support was turned off!",
                 'This is almost certainly not what you wanted. Did you fork and forget to exit?',
-                "This process did something wrong! at t/Legacy/fork_die.t line $line.",
+                "This process did something wrong! at $file line $line.",
             ],
             "Got warning and exception, nothing else"
        );
