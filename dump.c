@@ -2269,7 +2269,7 @@ S_deb_padvar(pTHX_ PADOFFSET off, int n, bool paren)
 /* append to the out SV, the name of the lexical at offset off in the CV
  * cv */
 
-void
+static void
 S_append_padvar(pTHX_ PADOFFSET off, CV *cv, SV *out, int n,
         bool paren, bool is_scalar)
 {
@@ -2302,7 +2302,7 @@ S_append_padvar(pTHX_ PADOFFSET off, CV *cv, SV *out, int n,
 }
 
 
-void
+static void
 S_append_gv_name(pTHX_ GV *gv, SV *out)
 {
     SV *sv;
