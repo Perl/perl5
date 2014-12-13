@@ -12887,7 +12887,7 @@ Perl_rpeep(pTHX_ OP *o)
                  * update the code accordingly. This applies to all the
                  * other asserts in the block of code too.
                  */
-                assert(!(o2->op_flags & ~(OPf_WANT|OPf_MOD)));
+                assert(!(o2->op_flags & ~(OPf_WANT|OPf_MOD|OPf_SPECIAL)));
                 assert(!(o2->op_private & ~OPpEARLY_CV));
 
                 o2 = o2->op_next;

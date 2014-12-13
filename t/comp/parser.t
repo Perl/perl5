@@ -512,6 +512,12 @@ is $@, "Illegal division by zero at maggapom line 2.\n",
 # parentheses needed for this to fail an assertion in S_maybe_multideref
 is +(${[{a=>214}]}[0])->{a}, 214, '($array[...])->{...}';
 
+# This used to fail an assertion because of the OPf_SPECIAL flag on an
+# OP_GV that started out as an OP_CONST.  No test output is necessary, as
+# successful parsing is sufficient.
+sub FILE1 () { 1 }
+sub dummy { tell FILE1 }
+
 # Add new tests HERE (above this line)
 
 # bug #74022: Loop on characters in \p{OtherIDContinue}
