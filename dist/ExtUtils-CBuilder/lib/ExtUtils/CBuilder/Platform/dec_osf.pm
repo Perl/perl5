@@ -1,5 +1,5 @@
 package ExtUtils::CBuilder::Platform::dec_osf;
-$ExtUtils::CBuilder::Platform::dec_osf::VERSION = '0.280220';
+$ExtUtils::CBuilder::Platform::dec_osf::VERSION = '0.280221';
 use strict;
 use ExtUtils::CBuilder::Platform::Unix;
 use File::Spec;
