@@ -2303,7 +2303,7 @@ S_append_padvar(pTHX_ PADOFFSET off, CV *cv, SV *out, int n,
 
 
 void
-S_print_gv_name(pTHX_ GV *gv, SV *out, char sigil)
+S_append_gv_name(pTHX_ GV *gv, SV *out)
 {
     SV *sv;
     if (!gv) {
@@ -2312,7 +2312,7 @@ S_print_gv_name(pTHX_ GV *gv, SV *out, char sigil)
     }
     sv = newSV(0);
     gv_fullname4(sv, gv, NULL, FALSE);
-    Perl_sv_catpvf(aTHX_ out, "%c%-p", sigil, sv);
+    Perl_sv_catpvf(aTHX_ out, "%c%-p", '$', sv);
     SvREFCNT_dec_NN(sv);
 }
 
@@ -2363,14 +2363,14 @@ Perl_unop_aux_stringify(pTHX_ const OP *o, CV *cv)
         case MDEREF_AV_gvav_aelem:
             derefs = 1;
             sv = ITEM_SV(++items);
-            S_print_gv_name(aTHX_ (GV*)sv, out, '$');
+            S_append_gv_name(aTHX_ (GV*)sv, out);
             goto do_elem;
 
         case MDEREF_HV_gvsv_vivify_rv2hv_helem:
             is_hash = TRUE;
         case MDEREF_AV_gvsv_vivify_rv2av_aelem:
             sv = ITEM_SV(++items);
-            S_print_gv_name(aTHX_ (GV*)sv, out, '$');
+            S_append_gv_name(aTHX_ (GV*)sv, out);
             goto do_vivify_rv2xv_elem;
 
         case MDEREF_HV_padsv_vivify_rv2hv_helem:
@@ -2416,7 +2416,7 @@ Perl_unop_aux_stringify(pTHX_ const OP *o, CV *cv)
                 break;
             case MDEREF_INDEX_gvsv:
                 sv = ITEM_SV(++items);
-                S_print_gv_name(aTHX_ (GV*)sv, out, '$');
+                S_append_gv_name(aTHX_ (GV*)sv, out);
                 break;
             }
             sv_catpvn_nomg(out, (is_hash ? "}" : "]"), 1);
