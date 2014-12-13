@@ -2834,8 +2834,8 @@ PP(pp_int)
       }
       else {
 	  const NV value = SvNV_nomg(sv);
-          if (SvNOK(sv) && UNLIKELY(Perl_isinfnan(SvNV(sv))))
-              SETn(SvNV(sv));
+	  if (UNLIKELY(Perl_isinfnan(value)))
+	      SETn(value);
 	  else if (value >= 0.0) {
 	      if (value < (NV)UV_MAX + 0.5) {
 		  SETu(U_V(value));

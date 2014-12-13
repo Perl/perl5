@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan (tests => 344);
+    plan (tests => 345);
 }
 
 use strict;
@@ -116,6 +116,8 @@ $dummy  =   abs $var    ; check_count 'abs';
 $dummy  =   log $var    ; check_count 'log';
 $dummy  =  sqrt $var    ; check_count 'sqrt';
 $dummy  =   int $var    ; check_count 'int';
+$var = "inf" for 1..5;
+$dummy  =   int $var    ; check_count 'int $tied_inf';
 $dummy  = atan2 $var, 1 ; check_count 'atan2';
 
 # Readline/glob
