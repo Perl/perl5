@@ -488,8 +488,6 @@ op/vec.t
 op/ver.t
 op/warn.t
 op/write.t
-opbasic/cmp.t
-opbasic/concat.t
 porting/diag.t
 porting/globvar.t
 porting/podcheck.t
