@@ -498,9 +498,6 @@ re/pat.t                  # [perl #90590]
 re/pat_advanced.t         # [perl #123417]
 re/pat_rt_report.t        # malformed utf8 constant; also /\c@/ -> /\c\@/
 re/reg_fold.t             # [perl #123385] %^H output
-re/reg_mesg.t
-re/reg_pmod.t
-re/reg_posixcc.t
 re/regex_sets.t
 re/regexp_unicode_prop.t
 re/rxcode.t
