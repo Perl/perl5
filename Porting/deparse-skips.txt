@@ -500,7 +500,7 @@ re/pat_rt_report.t        # malformed utf8 constant; also /\c@/ -> /\c\@/
 re/reg_fold.t             # [perl #123385] %^H output
 re/regex_sets.t
 re/regexp_unicode_prop.t
-re/rxcode.t
+re/rxcode.t               # checks regexp stringification
 re/subst.t
 run/switchI.t             # -I on #! line is not deparsed
 run/switchd-78586.t       # -I on #! line is not deparsed
