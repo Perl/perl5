@@ -11,6 +11,14 @@ EXPECT
 Can't use global $! in "my" at - line 1, near "my $!"
 Execution of - aborted due to compilation errors.
 ########
+# NAME my $<latin1>
+use open ":std", ":utf8";
+eval qq|my \$\xe9;|; # é in Latin-1
+print $@;
+exit 1;
+EXPECT
+Can't use global $é in "my" at (eval 1) line 1, near "my $é"
+########
 # NAME OP_HELEM fields
 package Foo;
 use fields qw(a b);

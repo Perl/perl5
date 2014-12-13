@@ -592,6 +592,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 	  (name[1] == '_' && (*name == '$' || len > 2))))
     {
 	if (!(flags & SVf_UTF8 && UTF8_IS_START(name[1]))
+	 && isASCII(name[1])
 	 && (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1]))) {
 	    yyerror(Perl_form(aTHX_ "Can't use global %c^%c%.*s in \"%s\"",
 			      name[0], toCTRL(name[1]), (int)(len - 2), name + 2,
