@@ -1568,6 +1568,9 @@ last (foo());
 next (foo());
 redo (foo());
 ####
+# require vstring
+require v5.16;
+####
 # [perl #97476] not() *does* follow the llafr
 $_ = ($a xor not +($1 || 2) ** 2);
 ####

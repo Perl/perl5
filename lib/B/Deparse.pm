@@ -2421,23 +2421,30 @@ sub pp_require {
     my $self = shift;
     my($op, $cx) = @_;
     my $opname = $op->flags & OPf_SPECIAL ? 'CORE::require' : 'require';
-    if (class($op) eq "UNOP" and $op->first->name eq "const"
-	and $op->first->private & OPpCONST_BARE)
-    {
-	my $name = $self->const_sv($op->first)->PV;
-	$name =~ s[/][::]g;
-	$name =~ s/\.pm//g;
-	return $self->maybe_parens("$opname $name", $cx, 16);
-    } else {	
-	$self->unop(
-	    $op, $cx,
-	    $op->first->name eq 'const'
-	     && $op->first->private & OPpCONST_NOVER
-		 ? "no"
-		 : $opname,
-	    1, # llafr does not apply
-	);
+    my $kid = $op->first;
+    if ($kid->name eq 'const') {
+	my $priv = $kid->private;
+	my $sv = $self->const_sv($kid);
+	my $arg;
+	if ($priv & OPpCONST_BARE) {
+	    $arg = $sv->PV;
+	    $arg =~ s[/][::]g;
+	    $arg =~ s/\.pm//g;
+	} elsif ($priv & OPpCONST_NOVER) {
+	    $opname = $self->keyword('no');
+	    $arg = $self->const($sv, 16);
+	} elsif ((my $tmp = $self->const($sv, 16)) =~ /^v/) {
+	    $arg = $tmp;
+	}
+	if ($arg) {
+	    return $self->maybe_parens("$opname $arg", $cx, 16);
+	}
     }
+    $self->unop(
+	    $op, $cx,
+	    $opname,
+	    1, # llafr does not apply
+    );
 }
 
 sub pp_scalar {
