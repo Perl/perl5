@@ -1670,7 +1670,7 @@ sub stash_variable {
 	return "$prefix$name";
     }
 
-    if ($name =~ /^[^\w+-]$/) {
+    if ($name =~ /^[^[:alpha:]+-]$/) {
       if (defined $cx && $cx == 26) {
 	if ($prefix eq '@') {
 	    return "$prefix\{$name}";
