@@ -5283,7 +5283,8 @@ sub regcomp {
     my $kid = $op->first;
     $kid = $kid->first if $kid->name eq "regcmaybe";
     $kid = $kid->first if $kid->name eq "regcreset";
-    if ($kid->name eq "null" and !null($kid->first)
+    my $kname = $kid->name;
+    if ($kname eq "null" and !null($kid->first)
 	and $kid->first->name eq 'pushmark')
     {
 	my $str = '';
@@ -5297,7 +5298,8 @@ sub regcomp {
 	return $str, 1;
     }
 
-    return ($self->re_dq($kid), 1) if $self->pure_string($kid);
+    return ($self->re_dq($kid), 1)
+	if $kname =~ /^(?:rv2|pad)av/ or $self->pure_string($kid);
     return ($self->deparse($kid, $cx), 0);
 }
 

@@ -1184,6 +1184,14 @@ print /$s[1]/;
 # /$#a/
 print /$#main::a/;
 ####
+# /@array/
+our @a;
+my @b;
+print /@a/;
+print /@b/;
+print qr/@a/;
+print qr/@b/;
+####
 # $lexical =~ //
 my $x;
 $x =~ //;
