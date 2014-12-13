@@ -571,6 +571,7 @@ d_nan='undef'
 d_nearbyint='undef'
 d_round='undef'
 d_scalbn='undef'
+d_tgamma='undef'
 
 #
 # Unset temporary variables no more needed.
