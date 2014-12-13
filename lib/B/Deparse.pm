@@ -5192,7 +5192,8 @@ sub re_dq {
 	return $self->deparse($op->last, 26); # was join($", @ary)
     } else {
 	my $ret = $self->deparse($op, 26);
-	$ret =~ s/^\$([(|)])\z/\${$1}/; # $( $| $) need braces
+	$ret =~ s/^\$([(|)])\z/\${$1}/ # $( $| $) need braces
+	or $ret =~ s/^\@([-+])\z/\@{$1}/; # @- @+ need braces
 	return $ret;
     }
 }
