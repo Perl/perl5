@@ -495,7 +495,7 @@ porting/globvar.t
 porting/podcheck.t
 re/overload.t             # [perl #123385]
 re/pat.t                  # [perl #90590]
-re/pat_advanced.t
+re/pat_advanced.t         # [perl #123417]
 re/pat_rt_report.t        # malformed utf8 constant; also /\c@/ -> /\c\@/
 re/reg_eval_scope.t
 re/reg_fold.t
