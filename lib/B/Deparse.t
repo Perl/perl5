@@ -2254,5 +2254,7 @@ my $x = ($r // [])->{'foo'}[0];
 my(%h, $i, $j, $k);
 my $x = $h{'foo'}[$i + $j]{$k};
 ####
-# chdir bareword
+# chdir
+chdir 'file';
 chdir FH;
+chdir;

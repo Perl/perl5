@@ -2298,7 +2298,7 @@ sub pp_getpeername { unop(@_, "getpeername") }
 
 sub pp_chdir {
     my ($self, $op, $cx) = @_;
-    if ($op->flags & OPf_SPECIAL) {
+    if (($op->flags & (OPf_SPECIAL|OPf_KIDS)) == (OPf_SPECIAL|OPf_KIDS)) {
 	my $kw = $self->keyword("chdir");
 	my $kid = $self->const_sv($op->first)->PV;
 	my $code = $kw
