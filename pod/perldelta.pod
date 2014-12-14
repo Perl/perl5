@@ -420,6 +420,12 @@ used to fill the field was empty.  [perl #123245]
 Non-ASCII lexical sub names (use in error messages) on longer have extra
 junk on the end.
 
+=item *
+
+The C<\@> subroutine prototype no longer flattens parenthesized arrays
+(taking a reference to each element), but takes a reference to the array
+itself.  [perl #47363]
+
 =back
 
 =head1 Known Problems
