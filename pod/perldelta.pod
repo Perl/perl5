@@ -208,6 +208,10 @@ When prototype sub calls are deparsed with C<&> (e.g., under the B<-P>
 option), C<scalar> is now added where appropriate, to force the scalar
 context implied by the prototype.
 
+C<require(foo())>, C<do(foo())>, C<goto(foo())> and similar constructs with
+loop controls are now deparsed correctly.  The outer parentheses are not
+optional.
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
