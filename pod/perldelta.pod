@@ -426,6 +426,11 @@ means they have to be compiled within the scope of C<S<"use locale">>),
 and there must be a string of at least 128 consecutive bytes to match.
 [perl #123539]
 
+=item *
+
+C<qr/@array(?{block})/> no longer dies with "Bizarre copy of ARRAY".
+[#123344]
+
 =back
 
 =head1 Known Problems
