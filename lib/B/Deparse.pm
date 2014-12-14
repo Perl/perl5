@@ -1915,7 +1915,7 @@ sub pp_nextstate {
 		    $feature::hint_bundles[$to >> $feature::hint_shift];
 		$bundle =~ s/(\d[13579])\z/$1+1/e; # 5.11 => 5.12
 		push @text,
-		    $self->keyword("no") . " feature;\n",
+		    $self->keyword("no") . " feature ':all';\n",
 		    $self->keyword("use") . " feature ':$bundle';\n";
 	    }
 	}

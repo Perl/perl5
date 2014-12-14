@@ -809,7 +809,7 @@ say 'foo';
 use 5.10.0;
 say 'foo';
 >>>>
-no feature;
+no feature ':all';
 use feature ':5.10';
 say 'foo';
 ####
@@ -827,7 +827,7 @@ say 'foo';
 use 5.10.0;
 say 'foo';
 >>>>
-no feature;
+no feature ':all';
 use feature ':5.10';
 say 'foo';
 ####
@@ -854,7 +854,7 @@ __SUB__;
 use 5.15.0;
 __SUB__;
 >>>>
-no feature;
+no feature ':all';
 use feature ':5.16';
 __SUB__;
 ####
@@ -872,7 +872,7 @@ __SUB__;
 use 5.15.0;
 __SUB__;
 >>>>
-no feature;
+no feature ':all';
 use feature ':5.16';
 __SUB__;
 ####
@@ -1259,7 +1259,7 @@ print /a/u, s/b/c/u;
     print /a/d, s/b/c/d;
 }
 {
-    no feature;
+    no feature ':all';
     use feature ':5.12';
     print /a/d, s/b/c/d;
 }
@@ -1401,7 +1401,7 @@ CORE::given ($x) {
 CORE::evalbytes '';
 () = CORE::__SUB__;
 >>>>
-no feature;
+no feature ':all';
 use feature ':default';
 CORE::say $_;
 CORE::state $x;
@@ -1480,10 +1480,10 @@ print;
 >>>>
 use feature 'current_sub', 'evalbytes';
 print $_;
-no feature;
+no feature ':all';
 use feature ':default';
 print $_;
-no feature;
+no feature ':all';
 use feature ':5.12';
 print $_;
 no feature 'unicode_strings';
