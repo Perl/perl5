@@ -226,6 +226,9 @@ C<@array>.
 C</@{-}/>, C</@{+}/> and C<$#{1}> are now deparsed with the braces, which
 are mandatory in these cases.
 
+In deparsing feature bundles, B::Deparse was emitting C<no feature;> first
+instead of C<no feature ':all';>.  This has been fixed.
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
