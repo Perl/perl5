@@ -450,6 +450,12 @@ true.  Previously, this was effectively the case already, but any support
 for two different internal representations of pad names has now been
 removed.
 
+=item *
+
+The C<OP_SIBLING> and C<OP_HAS_SIBLING> macros added in an earlier 5.21.x
+release have been renamed C<OpSIBLING> and C<OpHAS_SIBLING>, following the
+existing convention.
+
 =back
 
 =head1 Selected Bug Fixes
