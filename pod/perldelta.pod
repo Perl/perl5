@@ -57,12 +57,16 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
-=head2 C<&> prototype accepts only subs
+=head2 C<&> and C<\&> prototypes accepts only subs
 
 The C<&> prototype character now accepts only anonymous subs (C<sub {...}>)
 and things beginning with C<\&>.  Formerly it erroneously also allowed
 C<undef> and references to array, hashes, and lists.  [perl #4539]
 [perl #123062]
+
+The C<\&> prototype was allowing subroutine calls, whereas now it only
+allows subroutines.  C<&foo> is permitted.  C<&foo()> and C<foo()> are not.
+[perl #77860]
 
 =head2 C<use encoding> is now lexical
 
