@@ -28,11 +28,18 @@ sub do_magic {
 
     my $real_exit_code = $?;
 
+    $context ||= Test::Stream::ExitMagic::Context->new([caller()], $stream);
+
+    if (!$stream->ended && $stream->follow_ups && @{$stream->follow_ups}) {
+        $context->set;
+        $_->($context) for @{$stream->follow_ups};
+        $context->clear;
+    }
+
     my $plan  = $stream->plan;
     my $total = $stream->count;
     my $fails = $stream->failed;
 
-    $context ||= Test::Stream::ExitMagic::Context->new([caller()], $stream);
     $context->finish($total, $fails);
 
     # Ran tests but never declared a plan or hit done_testing

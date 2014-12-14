@@ -2,7 +2,7 @@ package Test::Stream;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_087';
+our $VERSION = '1.301001_088';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream::Context qw/context/;
@@ -389,7 +389,8 @@ sub done_testing {
         return;
     }
 
-    if ($self->[FOLLOW_UPS]) {
+    # Do not run followups in subtest!
+    if ($self->[FOLLOW_UPS] && !@{$self->[SUBTESTS]}) {
         $_->($ctx) for @{$self->[FOLLOW_UPS]};
     }
 
@@ -488,10 +489,6 @@ sub _update_state {
         }
     }
     elsif (!$self->[NO_HEADER] && $e->isa('Test::Stream::Event::Finish')) {
-        if ($self->[FOLLOW_UPS]) {
-            $_->($e->context) for @{$self->[FOLLOW_UPS]};
-        }
-
         $state->[STATE_ENDED] = $e->context->snapshot;
 
         my $plan = $state->[STATE_PLAN];
