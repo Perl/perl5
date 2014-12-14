@@ -430,6 +430,13 @@ The C<\@> subroutine prototype no longer flattens parenthesized arrays
 (taking a reference to each element), but takes a reference to the array
 itself.  [perl #47363]
 
+=item *
+
+A block containing nothing except a C-style C<for> loop could corrupt the
+stack, causing lists outside the block to lose elements or have elements
+overwritten.  This could happen with C<map { for(...){...} } ...> and with
+lists containing C<do { for(...){...} }>.  [perl #123286]
+
 =back
 
 =head1 Known Problems
