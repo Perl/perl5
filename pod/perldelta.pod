@@ -204,6 +204,10 @@ Non-ASCII characters are now consistently escaped in strings, instead of
 some of the time.  (There are still outstanding problems with regular
 expressions and identifiers that have not been fixed.)
 
+When prototype sub calls are deparsed with C<&> (e.g., under the B<-P>
+option), C<scalar> is now added where appropriate, to force the scalar
+context implied by the prototype.
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
