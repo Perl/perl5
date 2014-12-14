@@ -57,6 +57,13 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 C<&> prototype accepts only subs
+
+The C<&> prototype character now accepts only anonymous subs (C<sub {...}>)
+and things beginning with C<\&>.  Formerly it erroneously also allowed
+C<undef> and references to array, hashes, and lists.  [perl #4539]
+[perl #123062]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
