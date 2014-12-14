@@ -420,7 +420,7 @@ mro/recursion_c3_utf8.t
 mro/recursion_dfs.t
 mro/recursion_dfs_utf8.t
 op/attrhand.t             # Custom attrs ignored; also AH provides none
-op/attrs.t
+op/attrs.t                # [perl #70205]
 op/bop.t
 op/caller.t
 op/chdir.t
