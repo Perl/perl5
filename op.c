@@ -11676,7 +11676,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	     prev = cvop, cvop = OpSIBLING(cvop))
 	    ;
         if (!(cvop->op_private & OPpENTERSUB_NOPAREN)
-            /* Usually, OPf_SPECIAL on a UNOP means that its arg had no
+            /* Usually, OPf_SPECIAL on an op with no args means that it had
              * parens, but these have their own meaning for that flag: */
             && opnum != OP_VALUES && opnum != OP_KEYS && opnum != OP_EACH
             && opnum != OP_DELETE && opnum != OP_EXISTS)
