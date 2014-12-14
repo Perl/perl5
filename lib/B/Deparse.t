@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 40; # not counting those in the __DATA__ section
+my $tests = 41; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -330,6 +330,16 @@ $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODI', 'no extra output when deparsing foo()');
 foo();
 EOCODI
+
+# Sub calls compiled before importation
+like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+             prog => 'BEGIN {
+                       require Test::More;
+                       Test::More::->import;
+                       is(*foo, *foo)
+                     }'),
+     qr/&is\(/,
+    'sub calls compiled before importation of prototype subs';
 
 # CORE::no
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
