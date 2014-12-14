@@ -218,6 +218,8 @@ optional.
 Whitespace is no longer escaped in regular expressions, because it was
 getting erroneously escaped within C<(?x:...)> sections.
 
+C<sub foo { foo() }> is now deparsed with those mandatory parentheses.
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
