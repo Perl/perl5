@@ -1293,6 +1293,9 @@ convenience.
 
 =head2 B::COP Methods
 
+The C<B::COP> class is used for "nextstate" and "dbstate" ops.  As of Perl
+5.22, it is also used for "null" ops that started out as COPs.
+
 =over 4
 
 =item label
