@@ -212,6 +212,9 @@ C<require(foo())>, C<do(foo())>, C<goto(foo())> and similar constructs with
 loop controls are now deparsed correctly.  The outer parentheses are not
 optional.
 
+Whitespace is no longer escaped in regular expressions, because it was
+getting erroneously escaped within C<(?x:...)> sections.
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
