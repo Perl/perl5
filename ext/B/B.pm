@@ -1163,7 +1163,7 @@ This returns the op description from the global C PL_op_desc array
 
 =back
 
-=head2 B::UNOP METHOD
+=head2 B::UNOP Method
 
 =over 4
 
@@ -1171,7 +1171,7 @@ This returns the op description from the global C PL_op_desc array
 
 =back
 
-=head2 B::UNOP_AUX METHODS (since 5.22)
+=head2 B::UNOP_AUX Methods (since 5.22)
 
 =over 4
 
@@ -1192,7 +1192,7 @@ op is contained within.
 
 =back
 
-=head2 B::BINOP METHOD
+=head2 B::BINOP Method
 
 =over 4
 
@@ -1200,7 +1200,7 @@ op is contained within.
 
 =back
 
-=head2 B::LOGOP METHOD
+=head2 B::LOGOP Method
 
 =over 4
 
@@ -1208,7 +1208,7 @@ op is contained within.
 
 =back
 
-=head2 B::LISTOP METHOD
+=head2 B::LISTOP Method
 
 =over 4
 
@@ -1253,7 +1253,7 @@ convenience.
 
 =back
 
-=head2 B::SVOP METHOD
+=head2 B::SVOP Methods
 
 =over 4
 
@@ -1263,7 +1263,7 @@ convenience.
 
 =back
 
-=head2 B::PADOP METHOD
+=head2 B::PADOP Method
 
 =over 4
 
@@ -1271,7 +1271,7 @@ convenience.
 
 =back
 
-=head2 B::PVOP METHOD
+=head2 B::PVOP Method
 
 =over 4
 
