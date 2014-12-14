@@ -1,11 +1,13 @@
 <?xml version="1.0"?><?xml-stylesheet type="text/xml" href="#stylesheet"?><!DOCTYPE doc SYSTEM "doc.dtd"><doc><head><xsl:stylesheet version="1.0" id="stylesheet" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="xsl:stylesheet"/><xsl:template match="/">
-<html><head><title>Cherry-pick votes for maint-5.20</title></head><body>
+<html><head><title>Cherry-pick votes for maint-5.20</title><style>
+.accepted .ref a { color: #090 }
+</style></head><body>
 <h1>Cherry-pick votes for maint-5.20</h1>
 <table>
 <tr><td colspan="4"><h2>Commits</h2></td></tr>
-<xsl:for-each select="/doc/data/commit"><tr><td><xsl:value-of select="@votes"/></td><td><a href="http://perl5.git.perl.org/perl.git/commit/{@id}"><xsl:value-of select="@id"/></a></td><td><a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}"><xsl:value-of select="@ticket"/></a></td><td><xsl:value-of select="@desc"/></td></tr></xsl:for-each>
+<xsl:for-each select="/doc/data/commit"><tr><xsl:if test="substring-after(substring-after(@votes, ','), ',') != ''"><xsl:attribute name="class">accepted</xsl:attribute></xsl:if><td><xsl:value-of select="@votes"/></td><td class="ref"><a href="http://perl5.git.perl.org/perl.git/commit/{@id}"><xsl:value-of select="@id"/></a></td><td><a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}"><xsl:value-of select="@ticket"/></a></td><td><xsl:value-of select="@desc"/></td></tr></xsl:for-each>
 <tr><td colspan="4"><h2>Branches</h2></td></tr>
-<xsl:for-each select="/doc/data/head"><tr><td><xsl:value-of select="@votes"/></td><td><a href="http://perl5.git.perl.org/perl.git/shortlog/refs/heads/{@branch}"><xsl:value-of select="@branch"/></a></td><td><a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}"><xsl:value-of select="@ticket"/></a></td><td><xsl:value-of select="@desc"/></td></tr></xsl:for-each>
+<xsl:for-each select="/doc/data/head"><tr><xsl:if test="substring-after(substring-after(@votes, ','), ',') != ''"><xsl:attribute name="class">accepted</xsl:attribute></xsl:if><td><xsl:value-of select="@votes"/></td><td class="ref"><a href="http://perl5.git.perl.org/perl.git/shortlog/refs/heads/{@branch}"><xsl:value-of select="@branch"/></a></td><td><a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}"><xsl:value-of select="@ticket"/></a></td><td><xsl:value-of select="@desc"/></td></tr></xsl:for-each>
 </table>
 </body></html></xsl:template></xsl:stylesheet></head><data>
 
