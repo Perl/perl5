@@ -74,6 +74,12 @@ The L<encoding> pragma's effect is now limited to lexical scope.  This
 pragma is deprecated, but in the meantime, it could adversely affect
 unrelated modules that are included in the same program.
 
+=head2 List slices returning empty lists
+
+List slices return an empty list now only if the original list was empty
+(or if there are no indices).  Formerly, a list slice would return an empty
+list if all indices fell outside the original list.  [perl #114498]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
