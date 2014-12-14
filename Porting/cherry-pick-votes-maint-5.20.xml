@@ -290,7 +290,7 @@ I will also cherry-pick Module-CoreList changes as necessary in the unholy busin
                       <xsl:value-of select="@votes"/>
                     </td>
                     <td class="ref">
-                      <a href="http://perl5.git.perl.org/perl.git/commit/{@id}">
+                      <a href="http://perl5.git.perl.org/perl.git/commitdiff/{@id}">
                         <xsl:value-of select="@id"/>
                       </a>
                     </td>
