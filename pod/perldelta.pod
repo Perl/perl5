@@ -240,6 +240,9 @@ Only declare C<file> unused if we actually define it.
 Improve generated C<RETVAL> code generation to avoid repeated
 references to C<ST(0)>.  [perl #123278]
 
+C<\my @a> is now deparsed without parentheses.  (Parenthese would flatten
+the array.)
+
 =item *
 
 The PathTools module collection has been upgraded from 3.52 to 3.53.
