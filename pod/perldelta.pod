@@ -178,6 +178,9 @@ right place.  [perl #77452]
 
 Lexical subroutines are now fully deparsed.  [perl #116553]
 
+Deparsing of C<$lexical =~ //> was accidentally broken in 1.30 (perl
+5.21.6), omitting the C<$lexical =~>, but has now been fixed.
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
