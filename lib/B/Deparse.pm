@@ -1449,6 +1449,10 @@ sub maybe_my {
     my $need_parens = !$forbid_parens && $self->{'in_refgen'}
 		   && $op->name =~ /[ah]v\z/
 		   && ($op->flags & (OPf_PARENS|OPf_REF)) == OPf_PARENS;
+    # The @a in \my @a must not have parens.
+    if (!$need_parens && $self->{'in_refgen'}) {
+	$forbid_parens = 1;
+    }
     if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
 	# Check $padname->FLAGS for statehood, rather than $op->private,
 	# because enteriter ops do not carry the flag.

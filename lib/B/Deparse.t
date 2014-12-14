@@ -578,6 +578,7 @@ print $main::x;
 # lexical and package arrays
 my @x;
 print $main::x[1];
+print \my @a;
 ####
 # lexical and package hashes
 my %x;
