@@ -229,6 +229,8 @@ are mandatory in these cases.
 In deparsing feature bundles, B::Deparse was emitting C<no feature;> first
 instead of C<no feature ':all';>.  This has been fixed.
 
+C<chdir FH> is now deparsed without quotation marks.
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
