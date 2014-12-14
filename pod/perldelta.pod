@@ -401,6 +401,13 @@ well.
 The PADNAME and PADNAMELIST types are now separate types, and no longer
 simply aliases for SV and AV.  [perl #123223]
 
+=item *
+
+Pad names are now always UTF8.  The C<PadnameUTF8> macro always returns
+true.  Previously, this was effectively the case already, but any support
+for two different internal representations of pad names has now been
+removed.
+
 =back
 
 =head1 Selected Bug Fixes
