@@ -2350,6 +2350,14 @@ EOP
         is (pos $a, 0, "optimizer correctly thinks (?=...) is 0-length");
     }
 
+    {   # [perl #123417] multi-char \N{...} tripping roundly
+        use Cname;
+        my $qr = qr$(\N{foo})$;
+        "afoot" =~ eval "qr/$qr/";
+        is "$1" || $@, "foo", 'multichar \N{...} stringified and retoked';
+    }
+
+
     #
     # Keep the following tests last -- they may crash perl
     #

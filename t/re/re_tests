@@ -1456,8 +1456,8 @@ abc\N	abc\n	n
 /[\N{U+}]/	-	Sc	-	Unmatched
 /[\N{U+}]/	-	sc	-	Syntax error in (?[...])
 /abc\N{def/	-	c	-	Missing right brace
-/\N{U+4AG3}/	-	c	-	Illegal hexadecimal digit
-/[\N{U+4AG3}]/	-	c	-	Illegal hexadecimal digit
+/\N{U+4AG3}/	-	c	-	Invalid hexadecimal number
+/[\N{U+4AG3}]/	-	c	-	Unmatched
 
 # And verify that in single quotes which bypasses the lexer, the regex compiler
 # figures it out.
@@ -1471,9 +1471,10 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /abc\N {U+41}/x	-	c	-	Missing braces
 /abc\N {SPACE}/x	-	c	-	Missing braces
 
-# Verifies catches hex errors, and doesn't expose our . notation to the outside
-/\N{U+0xBEEF}/	-	c	-	Illegal hexadecimal digit
-/\N{U+BEEF.BEAD}/	-	c	-	Illegal hexadecimal digit
+# Verifies catches hex errors
+/\N{U+0xBEEF}/	-	c	-	Invalid hexadecimal number
+# Used to be an error, but not any more:
+/\N{U+BEEF.BEAD}/	-	c	-	
 
 # Verify works in single quotish context; regex compiler delivers slightly different msg
 # \N{U+BEEF.BEAD} succeeds here, because can't completely hide it from the outside.
