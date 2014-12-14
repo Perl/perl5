@@ -422,7 +422,6 @@ mro/recursion_dfs_utf8.t
 op/attrhand.t             # Custom attrs ignored; also AH provides none
 op/attrs.t                # [perl #70205]
 op/caller.t
-op/chdir.t
 op/chop.t
 op/chr.t
 op/closure.t
