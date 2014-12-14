@@ -508,6 +508,11 @@ C<for(scalar($#foo)) { ... }> can modify C<$#foo> through C<$_>.
 C<qr/@array(?{block})/> no longer dies with "Bizarre copy of ARRAY".
 [#123344]
 
+=item *
+
+C<eval '$variable'> in nested named subroutines would sometimes look up a
+global variable even with a lexical variable in scope.
+
 =back
 
 =head1 Known Problems
