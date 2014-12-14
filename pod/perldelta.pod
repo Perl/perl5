@@ -183,6 +183,11 @@ Deparsing of C<$lexical =~ //> was accidentally broken in 1.30 (perl
 
 C<Anything =~ y///r> with C</r> no longer omits the left-hand operand.
 
+The op trees that make up regexp code blocks are now deparsed for real.
+Formerly, the original string that made up the regular expression was used.
+That caused problems with C<qr/(?{<<heredoc})/> and multiline code blocks,
+which were deparsed incorrectly.  [perl #123217] [perl #115256]
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
