@@ -136,6 +136,13 @@ Win32 Perl uses 8 KB less of per-process memory than before for every perl
 process of this version. This data is now memory mapped from disk and shared
 between perl processes from the same perl binary.
 
+=item *
+
+If method and class names are known at compile time, hashes are precomputed
+to speed up run-time method lookup.  Also, compound method names like
+C<SUPER::new> are parsed at compile time, to save having to parse them at
+run time.
+
 =back
 
 =head1 Modules and Pragmata
