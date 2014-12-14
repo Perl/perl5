@@ -26,7 +26,7 @@ $tar->write($tarfile);
 
 # see if ptargrep matches
 my $out = qx{$cmd};
-cmp_ok($out, '=~', qr{^t.*ptargrep.*foo$}m, "ptargrep shows matched file");
+cmp_ok($out, 'eq', "$foo\n", "ptargrep shows matched file");
 
 # cleanup
 END {
