@@ -429,7 +429,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 On Win32, restoring in a child pseudo-process a variable that was
 C<local()>ed in a parent pseudo-process before the C<fork> happened caused
 memory corruption and a crash in the child pseudo-process (and therefore OS
-process). 
+process).  [perl #40565]
 
 =item *
 
