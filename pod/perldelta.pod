@@ -410,6 +410,11 @@ Calling C<write> on a format with a C<^**> field could produce a panic
 in sv_chop() if there were insufficient arguments or if the variable
 used to fill the field was empty.  [perl #123245]
 
+In perl 5.20.0, C<sort CORE::fake> where 'fake' is anything other than a
+keyword started chopping of the last 6 characters and treating the result
+as a sort sub name.  The previous behaviour of treating "CORE::fake" as a
+sort sub name has been restored.  [perl #123410]
+
 =back
 
 =head1 Known Problems
