@@ -282,7 +282,8 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+"Variable %s will not stay shared" has been changed to say "Subroutine"
+when it is actually a lexical sub that will not stay shared.
 
 =back
 
