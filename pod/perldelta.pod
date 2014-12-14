@@ -169,6 +169,8 @@ L<B::Deparse> has been upgraded from version 1.30 to 1.31.
 BEGIN blocks at the end of the enclosing scope are now deparsed in the
 right place.  [perl #77452]
 
+Lexical subroutines are now fully deparsed.  [perl #116553]
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
