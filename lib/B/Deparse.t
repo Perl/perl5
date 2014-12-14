@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 41; # not counting those in the __DATA__ section
+my $tests = 42; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -340,6 +340,25 @@ like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
                      }'),
      qr/&is\(/,
     'sub calls compiled before importation of prototype subs';
+
+# [perl #121050] Prototypes with whitespace
+is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+           prog => <<'EOCODO'),
+sub _121050(\$ \$) { }
+_121050($a,$b);
+sub _121050empty( ) {}
+() = _121050empty() + 1;
+EOCODO
+   <<'EOCODP', '[perl #121050] prototypes with whitespace';
+sub _121050 (\$ \$) {
+    
+}
+_121050 $a, $b;
+sub _121050empty ( ) {
+    
+}
+() = _121050empty + 1;
+EOCODP
 
 # CORE::no
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
@@ -1863,15 +1882,6 @@ $_ = $;;
 do {
     $;
 };
-####
-# [perl #121050] Prototypes with whitespace
-sub _121050(\$ \$) { }
-_121050($a,$b);
-sub _121050empty( ) {}
-() = _121050empty() + 1;
->>>>
-_121050 $a, $b;
-() = _121050empty + 1;
 ####
 # Ampersand calls and scalar context
 # OPTIONS -P
