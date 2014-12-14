@@ -516,6 +516,11 @@ C<qr/@array(?{block})/> no longer dies with "Bizarre copy of ARRAY".
 C<eval '$variable'> in nested named subroutines would sometimes look up a
 global variable even with a lexical variable in scope.
 
+In perl 5.20.0, C<sort CORE::fake> where 'fake' is anything other than a
+keyword started chopping of the last 6 characters and treating the result
+as a sort sub name.  The previous behaviour of treating "CORE::fake" as a
+sort sub name has been restored.  [perl #123410]
+
 =back
 
 =head1 Known Problems
