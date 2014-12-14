@@ -1719,16 +1719,16 @@ EXTCONST U32 PL_charclass[];
  * The conversion works both ways, so toCTRL('D') is 4, and toCTRL(4) is D,
  * etc. */
 #ifndef EBCDIC
-#  define toCTRL(c)    (__ASSERT_(FITS_IN_8_BITS(c)) toUPPER(c) ^ 64)
+#  define toCTRL(c)    (__ASSERT_(FITS_IN_8_BITS(c)) toUPPER(((U8)(c))) ^ 64)
 #else
-#  define toCTRL(c)   (__ASSERT_(FITS_IN_8_BITS(c))              \
-                      ((isPRINT_A(c))                            \
-                       ? (UNLIKELY((c) == '?')                   \
-                         ? QUESTION_MARK_CTRL                    \
-                         : (NATIVE_TO_LATIN1(toUPPER(c)) ^ 64))  \
-                       : (UNLIKELY((c) == QUESTION_MARK_CTRL)    \
-                         ? '?'                                   \
-                         : (LATIN1_TO_NATIVE((c) ^ 64)))))
+#  define toCTRL(c)   (__ASSERT_(FITS_IN_8_BITS(c))                     \
+                      ((isPRINT_A(c))                                   \
+                       ? (UNLIKELY((c) == '?')                          \
+                         ? QUESTION_MARK_CTRL                           \
+                         : (NATIVE_TO_LATIN1(toUPPER((U8) (c))) ^ 64))  \
+                       : (UNLIKELY((c) == QUESTION_MARK_CTRL)           \
+                         ? '?'                                          \
+                         : (LATIN1_TO_NATIVE(((U8) (c)) ^ 64)))))
 #endif
 
 /* Line numbers are unsigned, 32 bits. */
