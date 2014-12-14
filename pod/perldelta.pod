@@ -165,6 +165,8 @@ Nulled COPs are now of class C<B::COP>, rather than C<B::OP>.
 B::REGEXP objects now provide a C<qr_anoncv> method for accessing the
 implicit CV associated with C<qr//> things containing code blocks.
 
+Two new classes, B::PADNAME and B::PADNAMELIST, have been introduced.
+
 =item *
 
 L<B::Deparse> has been upgraded from version 1.30 to 1.31.
