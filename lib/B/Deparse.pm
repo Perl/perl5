@@ -276,9 +276,6 @@ BEGIN {
 # That means we can omit parentheses from the arguments. It also means we
 # need to put CORE:: on core functions of the same name.
 #
-# subs_deparsed
-# Keeps track of fully qualified names of all deparsed subs.
-#
 # in_subst_repl
 # True when deparsing the replacement part of a substitution.
 #
@@ -485,9 +482,6 @@ sub todo {
 	$seq = 0;
     }
     push @{$self->{'subs_todo'}}, [$seq, $cv, $is_form, $name];
-    unless ($is_form || class($cv->STASH) eq 'SPECIAL') {
-	$self->{'subs_deparsed'}{$cv->STASH->NAME."::".$cv->GV->NAME} = 1;
-    }
 }
 
 sub next_todo {
@@ -4376,21 +4370,10 @@ sub pp_entersub {
 
     # Doesn't matter how many prototypes there are, if
     # they haven't happened yet!
-    my $declared;
-    {
-	no strict 'refs';
-	no warnings 'uninitialized';
-	$declared = exists $self->{'subs_declared'}{$kid}
-	    || (
-		 defined &{ ${$self->{'curstash'}."::"}{$kid} }
-		 && !exists
-		     $self->{'subs_deparsed'}{$self->{'curstash'}."::".$kid}
-		 && defined prototype $self->{'curstash'}."::".$kid
-	       );
-	if (!$declared && defined($proto)) {
-	    # Avoid "too early to check prototype" warning
-	    ($amper, $proto) = ('&');
-	}
+    my $declared = exists $self->{'subs_declared'}{$kid};
+    if (!$declared && defined($proto)) {
+	# Avoid "too early to check prototype" warning
+	($amper, $proto) = ('&');
     }
 
     my $args;
