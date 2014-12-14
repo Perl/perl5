@@ -109,6 +109,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On control verbs, we saw no label */
 				/*  On flipflop, we saw ... instead of .. */
 				/*  On UNOPs, saw bare parens, e.g. eof(). */
+				/*  On OP_CHDIR, handle (or bare parens) */
 				/*  On OP_NULL, saw a "do". */
 				/*  On OP_EXISTS, treat av as av, not avhv.  */
 				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
