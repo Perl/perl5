@@ -529,6 +529,12 @@ keyword started chopping of the last 6 characters and treating the result
 as a sort sub name.  The previous behaviour of treating "CORE::fake" as a
 sort sub name has been restored.  [perl #123410]
 
+=item *
+
+Outside of C<use utf8>, a single-character Latin-1 lexical variable is
+disallowed.  The error message for it, "Can't use global $foo...", was
+giving garbage instead of the variable name.
+
 =back
 
 =head1 Known Problems
