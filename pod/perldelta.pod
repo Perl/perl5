@@ -64,6 +64,12 @@ and things beginning with C<\&>.  Formerly it erroneously also allowed
 C<undef> and references to array, hashes, and lists.  [perl #4539]
 [perl #123062]
 
+=head2 C<use encoding> is now lexical
+
+The L<encoding> pragma's effect is now limited to lexical scope.  This
+pragma is deprecated, but in the meantime, it could adversely affect
+unrelated modules that are included in the same program.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -402,12 +408,6 @@ On Win32, restoring in a child pseudo-process a variable that was
 C<local()>ed in a parent pseudo-process before the C<fork> happened caused
 memory corruption and a crash in the child pseudo-process (and therefore OS
 process). 
-
-=item *
-
-The L<encoding> pragma's effect is now limited to lexical scope.  This
-pragma is deprecated, but in the meantime, it could adversely affect
-unrelated modules that are included in the same program.
 
 =item *
 
