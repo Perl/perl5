@@ -3283,34 +3283,68 @@ S_scan_const(pTHX_ char *start)
 
 		if (*s == 'U' && s[1] == '+') { /* \N{U+...} */
 		    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
+				| PERL_SCAN_SILENT_ILLDIGIT
 				| PERL_SCAN_DISALLOW_PREFIX;
 		    STRLEN len;
 
 		    s += 2;	    /* Skip to next char after the 'U+' */
 		    len = e - s;
 		    uv = grok_hex(s, &len, &flags, NULL);
-		    if (len == 0 || len != (STRLEN)(e - s)) {
+		    if (len == 0
+		     || (  len != (STRLEN)(e - s) && s[len] != '.'
+			&& PL_lex_inpat))
+		    {
+		      bad_NU:
 			yyerror("Invalid hexadecimal number in \\N{U+...}");
 			s = e + 1;
 			continue;
 		    }
 
 		    if (PL_lex_inpat) {
-			s -= 5;	    /* Include the '\N{U+' */
 #ifdef EBCDIC
+			s -= 5;	    /* Include the '\N{U+' */
                         /* On EBCDIC platforms, in \N{U+...}, the '...' is a
                          * Unicode value, so convert to native so downstream
                          * code can continue to assume it's native */
+                        /* XXX This should be in the regexp parser,
+                               because doing it here makes /\N{U+41}/ and
+                               =~ '\N{U+41}' do different things.  */
 			d += my_snprintf(d, e - s + 1 + 1,  /* includes the '}'
 							       and the \0 */
-                                         "\\N{U+%X}",
+                                         "\\N{U+%X",
                                          (unsigned int) UNI_TO_NATIVE(uv));
+                        s += 5 + len;
+                        while (*s == '.') {
+                            s++;
+                            len = e - s;
+                            uv = grok_hex(s, &len, &flags, NULL);
+                            if (!len
+                             || (len != (STRLEN)(e - s) && s[len] != '.'))
+                                goto bad_NU;
+                            s--;
+                            d += my_snprintf(
+                                     d, e - s + 1 + 1, ".%X",
+                                     (unsigned int)UNI_TO_NATIVE(uv)
+                                 );
+                            s += len + 1;
+                        }
+                        *(d++) = '}';
 #else
                         /* On non-EBCDIC platforms, pass it through unchanged.
-                         * The reason we evaluated the number above is to make
+                         * The reason we evaluate the numbers is to make
                          * sure there wasn't a syntax error. */
-			Copy(s, d, e - s + 1, char);	/* +1 is for the '}' */
-			d += e - s + 1;
+                        const char * const orig_s = s - 5;
+                        while (*s == '.') {
+                            s++;
+                            len = e - s;
+                            uv = grok_hex(s, &len, &flags, NULL);
+                            if (!len
+                             || (len != (STRLEN)(e - s) && s[len] != '.'))
+                                goto bad_NU;
+                        }
+                        /* +1 is for the '}' */
+                        Copy(orig_s, d, e - orig_s + 1, char);
+                        d += e - orig_s + 1;
 #endif
 		    }
 		    else {  /* Not a pattern: convert the hex to string */
