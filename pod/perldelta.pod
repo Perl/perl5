@@ -220,6 +220,9 @@ getting erroneously escaped within C<(?x:...)> sections.
 
 C<sub foo { foo() }> is now deparsed with those mandatory parentheses.
 
+C</@array/> is now deparsed as a regular expression, and not just
+C<@array>.
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
