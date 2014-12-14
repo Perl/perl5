@@ -194,6 +194,9 @@ Formerly, the original string that made up the regular expression was used.
 That caused problems with C<qr/(?{<<heredoc})/> and multiline code blocks,
 which were deparsed incorrectly.  [perl #123217] [perl #115256]
 
+C<$;> at the end of a statement no longer loses its semicolon.
+[perl #123357]
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
