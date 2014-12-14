@@ -415,6 +415,11 @@ Calling C<write> on a format with a C<^**> field could produce a panic
 in sv_chop() if there were insufficient arguments or if the variable
 used to fill the field was empty.  [perl #123245]
 
+=item *
+
+Non-ASCII lexical sub names (use in error messages) on longer have extra
+junk on the end.
+
 =back
 
 =head1 Known Problems
