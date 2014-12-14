@@ -182,6 +182,9 @@ L<B::Deparse> has been upgraded from version 1.30 to 1.31.
 BEGIN blocks at the end of the enclosing scope are now deparsed in the
 right place.  [perl #77452]
 
+BEGIN blocks were sometimes deparsed as __ANON__, but are now always called
+BEGIN.
+
 Lexical subroutines are now fully deparsed.  [perl #116553]
 
 Deparsing of C<$lexical =~ //> was accidentally broken in 1.30 (perl
