@@ -12,17 +12,17 @@
 Tickets Listed in #122913: [META] perl 5.20.2
 =============================================
 
-<commit votes="sprout, steveh" id="4c627877a44535772b40aca390861295b62b1f6d" ticket="122771" desc="[perl #122771] Fix assertion failure with -d and sort"/>
-<commit votes="steveh" id="c1662923fd698c3467e36017e0b303046f173e13" ticket="122771" desc="perldelta for 4c62787/#122771"/>
+<commit votes="sprout, steveh, arc" id="4c627877a44535772b40aca390861295b62b1f6d" ticket="122771" desc="[perl #122771] Fix assertion failure with -d and sort"/>
+<commit votes="steveh, arc" id="c1662923fd698c3467e36017e0b303046f173e13" ticket="122771" desc="perldelta for 4c62787/#122771"/>
 
-<commit votes="sprout, steveh" id="0d42e778cfa0ef9c7315b82e62a6c9fe0cb1cec5" ticket="122995" desc="[perl #122995] Hang with while(1) in a sub-list"/>
+<commit votes="sprout, steveh, arc" id="0d42e778cfa0ef9c7315b82e62a6c9fe0cb1cec5" ticket="122995" desc="[perl #122995] Hang with while(1) in a sub-list"/>
 
 <commit votes="khw, sprout, steveh" id="512e01ab009bc6309309e05891effe8ae3c0e9da" ticket="123198" desc="PATCH: [perl #123198] Memory leak in regex in 5.20.1"/>
-<commit votes="steveh" id="43275f00a97a14a80f9493c38895a5c77f0fc88a" ticket="123198" desc="svleak.t: Add test for #123198"/>
+<commit votes="steveh, arc" id="43275f00a97a14a80f9493c38895a5c77f0fc88a" ticket="123198" desc="svleak.t: Add test for #123198"/>
 
-<commit votes="sprout, steveh" id="2c1f00b9036a7987c714a407662651ef7da99495" ticket="122747" desc="perl #122747: localize PL_curpm to null in _core_swash_init"/>
-<commit votes="steveh" id="409c6472cedc6771a158a61dbbf8154d0246dc5b" ticket="122747" desc="add test for rt122747"/>
-<commit votes="steveh" id="13dd5671ecb824f71dfe100fbf3b7d5ee9170636" ticket="122747" desc="perldelta for 2c1f00b/#122747"/>
+<commit votes="sprout, steveh, arc" id="2c1f00b9036a7987c714a407662651ef7da99495" ticket="122747" desc="perl #122747: localize PL_curpm to null in _core_swash_init"/>
+<commit votes="steveh, arc" id="409c6472cedc6771a158a61dbbf8154d0246dc5b" ticket="122747" desc="add test for rt122747"/>
+<commit votes="steveh, arc" id="13dd5671ecb824f71dfe100fbf3b7d5ee9170636" ticket="122747" desc="perldelta for 2c1f00b/#122747"/>
 
 <commit votes="steveh, sprout" id="83a94553cbf9f2c11b3e9a63a44e7b9ce17ccb77" ticket="40565" desc="[perl #40565] Fix localisation in pseudo-fork"/>
 <commit votes="steveh" id="452466a503257b1012694b0d3a3cbf260e409d18" ticket="40565" desc="perldelta for the prev. commit"/>
@@ -39,7 +39,7 @@ plus the maint-only change
 	d385684951d4e1197c32ad0f4371c5255766a34d [perl #123029] Don't steal PADSTALE buffers
 which stands in place of cherry-picking the blead fix, c0683843e9299db25f354e2c8c90faa7614950d1.
 We should also cherry-pick:
-<commit votes="steveh" id="857f4fb1c22a29afdfe39e929702476b8a82d7c5" ticket="123029" desc="perldelta for #123029"/>
+<commit votes="steveh, arc" id="857f4fb1c22a29afdfe39e929702476b8a82d7c5" ticket="123029" desc="perldelta for #123029"/>
 
 Other Proposed Cherry-Picks
 ===========================
@@ -60,52 +60,53 @@ The same criteria apply to code in dual-life modules as to core code.)
 Crash Fixes
 -----------
 
-<commit votes="sprout, steveh" id="18691622911f2e18df42a5a98ea4c42386f4e558" ticket="" desc="Fix crash when lex subs are used for AUTOLOAD"/>
-<commit votes="sprout, steveh" id="56117e3ef4ef2c7986c400f86f321f22f261571a" ticket="" desc="Fix crash when lex subs are used for overload"/>
+<commit votes="sprout, steveh, arc" id="18691622911f2e18df42a5a98ea4c42386f4e558" ticket="" desc="Fix crash when lex subs are used for AUTOLOAD"/>
+<commit votes="sprout, steveh, arc" id="56117e3ef4ef2c7986c400f86f321f22f261571a" ticket="" desc="Fix crash when lex subs are used for overload"/>
 
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
 
-<commit votes="sprout, steveh" id="9d8e4b9b32800eb499d83442ce8bbe6639773936" ticket="" desc="Fix crash with lex subs under -d"/>
-<commit votes="sprout, steveh" id="1699f5c257bc554753cc4ddf10c62ac8a5c338ff" ticket="" desc="perldelta for f20d0df0f"/>
+<commit votes="sprout, steveh, arc" id="9d8e4b9b32800eb499d83442ce8bbe6639773936" ticket="" desc="Fix crash with lex subs under -d"/>
+<commit votes="sprout, steveh, arc" id="1699f5c257bc554753cc4ddf10c62ac8a5c338ff" ticket="" desc="perldelta for f20d0df0f"/>
 
 Security Fixes
 --------------
 
-<commit votes="sprout, steveh" id="dd369969a58d736f281ffebe36fc24ab45b29fa6" ticket="122701" desc="Correct usage of memEQs in attributes.xs [perl #122701]"/>
+<commit votes="sprout, steveh, arc" id="dd369969a58d736f281ffebe36fc24ab45b29fa6" ticket="122701" desc="Correct usage of memEQs in attributes.xs [perl #122701]"/>
 NOT ff5314c5aa54b172122507017cac034acf1c4bf7" (fix attributes memcmp without len less than 6 (asan catch)), which Andy Dougherty says on #122629 should be reverted in blead.
 
-<commit votes="steveh" id="19be3be6968e2337bcdfe480693fff795ecd1304" ticket="" desc="don't recurse infinitely in Data::Dumper"/>
-<commit votes="steveh" id="fa10264e34d420edf76a46139faa3277c0b96a2b" ticket="" desc="Data::Dumper version bump for CPAN release"/>
+<commit votes="steveh, arc" id="19be3be6968e2337bcdfe480693fff795ecd1304" ticket="" desc="don't recurse infinitely in Data::Dumper"/>
+<commit votes="steveh, arc" id="fa10264e34d420edf76a46139faa3277c0b96a2b" ticket="" desc="Data::Dumper version bump for CPAN release"/>
 
 Other Regression Fixes
 ----------------------
 
-<commit votes="steveh" id="a51d618a82a7057c3aabb600a7a8691d27f44a34" ticket="122283" desc="rt 122283 - do not recurse into GOSUB/GOSTART when not SCF_DO_SUBSTR"/>
-<commit votes="steveh" id="d9a72fccda5cacaccd2671769c010f3cda59ef8a" ticket="122283" desc="Add tests for a51d618a fix of RT #122283"/>
-<commit votes="steveh" id="74f9f9edcc88e2102b767ccefb4c4100eab199bd" ticket="122283" desc="Another perldelta entry"/>
+<commit votes="steveh, arc" id="a51d618a82a7057c3aabb600a7a8691d27f44a34" ticket="122283" desc="rt 122283 - do not recurse into GOSUB/GOSTART when not SCF_DO_SUBSTR"/>
+<commit votes="steveh, arc" id="d9a72fccda5cacaccd2671769c010f3cda59ef8a" ticket="122283" desc="Add tests for a51d618a fix of RT #122283"/>
+<commit votes="steveh, arc" id="74f9f9edcc88e2102b767ccefb4c4100eab199bd" ticket="122283" desc="Another perldelta entry"/>
 
 a51d618a82a7057c3aabb600a7a8691d27f44a34 caused #122890 so do we need this sequence of commits too?
+This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even though the small, simple change in a51d618a82 fixed that case, it also caused the subsequent regression in #122890 – which is also maint-worthy. Sadly, the real fix is a little more invasive, especially since tracking it down clearly required additional internal debugging tools. I've gone with voting for the changes for #122283, plus the tests and bare-minimum fixes from #122890 (one of which partially reverts the code change for #122283), but I fear that getting the fixes to apply will require either manually reworking them, or pulling in some of the bigger changes (such as abd6de04db). Further, my votes on the commits for both bugs are conditional on the application of *at least* all the commits I've voted for (on the grounds that releasing 5.20.2 with a bug that was known in 5.20.0 and 5.20.1 is less bad than releasing it with a different known bug). That said, I'd be happy to look into manually applying the relevant commits, if need be; I believe I understand roughly what all the bits are doing, and how to select the ones that actually fix the bug. --arc
 <commit votes="" id="abd6de04dbc807cb1270d565e5019376c04c77fd" ticket="122890" desc="regcomp.c: struct scan_frame: rename members for clarity"/>
-<commit votes="" id="c9f0d54c3bad1139a1b0758ca0d999437ed93c95" ticket="122890" desc="regcomp.c: reuse temporary debugging temp sv's"/>
-<commit votes="" id="3f910e62fcf6ddef8eaffcfa6554e5ff7df08a08" ticket="122890" desc="regcomp.c: eliminate memory leak from GOSUB/GOSTART regops"/>
+<commit votes="arc" id="c9f0d54c3bad1139a1b0758ca0d999437ed93c95" ticket="122890" desc="regcomp.c: reuse temporary debugging temp sv's"/>
+<commit votes="arc" id="3f910e62fcf6ddef8eaffcfa6554e5ff7df08a08" ticket="122890" desc="regcomp.c: eliminate memory leak from GOSUB/GOSTART regops"/>
 <commit votes="" id="d615717366f1596d4a1b18ce2ca5a224dc076107" ticket="122890" desc="regcomp.c: study_chunk(): whitespace fixup for legibility"/>
 <commit votes="" id="e60d552100fc966cb2917d32cf2e708d20a6427f" ticket="122890" desc="regcomp.c: study_chunk(): improve branch-branch comment"/>
 <commit votes="" id="8b9781c905d8bc5e4fbf350df63e212283783324" ticket="122890" desc="regcomp.c: Improve re debug output by showing buffer names if they exist"/>
 <commit votes="" id="0a14d816d4f94b3847ccd7cea08086e2244d1e6e" ticket="122890" desc="regcomp.c: Fixup debug output so it matches other messages in context"/>
 <commit votes="" id="4420a417a2575a2656eb120d4b4048ac9dfbd46e" ticket="122890" desc="dump.c: Add PERL_PV_PRETTY_EXACTSIZE option"/>
 <commit votes="" id="fdfb4f2197409a1d793ee71f18be6e702a5461df" ticket="122890" desc="regcomp.c: Improve advanced re debug output"/>
-<commit votes="" id="64e04a51361b45dbbb94b038a93c7dc3cca0c7f9" ticket="122890" desc="regcomp.c: study_chunk(): Reset the entire data struct, not just a bit of it."/>
+<commit votes="arc" id="64e04a51361b45dbbb94b038a93c7dc3cca0c7f9" ticket="122890" desc="regcomp.c: study_chunk(): Reset the entire data struct, not just a bit of it."/>
 <commit votes="" id="32c35d38c96a76c6f8360ea6854ad3f3fb462725" ticket="122890" desc="regcomp.c: Add comment."/>
-<commit votes="" id="4286711ac0be1bf8f37eadee54b2e9ebbb08e0d8" ticket="122890" desc="regcomp.c: study_chunk(): Avoid unnecessary recursion."/>
+<commit votes="arc" id="4286711ac0be1bf8f37eadee54b2e9ebbb08e0d8" ticket="122890" desc="regcomp.c: study_chunk(): Avoid unnecessary recursion."/>
 <commit votes="" id="92b05f28a98d1b7301afb8746d17237f1a669174" ticket="122890" desc="Add test names to t/re/regexp.t and friends"/>
 <commit votes="" id="890fbec8b209c41a5902022a654cbd782f601bb7" ticket="122890" desc="t/re/re_tests: put comment in correct column"/>
-<commit votes="" id="f6f22b1fc01b8676e43ef64616ed7899a84bfec2" ticket="122890" desc="t/re/re_tests: Add test for perl #122890"/>
-<commit votes="" id="efcc8bfdc124f50d33aab3f1d7722b5f9e4de349" ticket="122890" desc="re_tests: More tests for #122890"/>
+<commit votes="arc" id="f6f22b1fc01b8676e43ef64616ed7899a84bfec2" ticket="122890" desc="t/re/re_tests: Add test for perl #122890"/>
+<commit votes="arc" id="efcc8bfdc124f50d33aab3f1d7722b5f9e4de349" ticket="122890" desc="re_tests: More tests for #122890"/>
 
 Fixes a regression from 5.8.8:
-<commit votes="sprout, steveh" id="64ff300be0f7714585466af5bb87b2e37db5082a" ticket="122669" desc="[perl #122669] Don't taint at compile time"/>
-<commit votes="sprout, steveh" id="eaff586aa6444fb20654ed863b7ff35e136737e8" ticket="122669" desc="Fix t/op/taint.t on Windows"/>
+<commit votes="sprout, steveh, arc" id="64ff300be0f7714585466af5bb87b2e37db5082a" ticket="122669" desc="[perl #122669] Don't taint at compile time"/>
+<commit votes="sprout, steveh, arc" id="eaff586aa6444fb20654ed863b7ff35e136737e8" ticket="122669" desc="Fix t/op/taint.t on Windows"/>
 
 Configure and hints/ Fixes
 --------------------------
