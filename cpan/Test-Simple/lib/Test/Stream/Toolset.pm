@@ -4,6 +4,7 @@ use warnings;
 
 use Test::Stream::Context qw/context/;
 use Test::Stream::Meta    qw/is_tester init_tester/;
+use Test::Stream::Carp    qw/carp/;
 
 # Preload these so the autoload is not necessary
 use Test::Stream::Event::Bail;
