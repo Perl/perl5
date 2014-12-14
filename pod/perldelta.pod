@@ -398,7 +398,8 @@ well.
 
 =item *
 
-XXX
+The PADNAME and PADNAMELIST types are now separate types, and no longer
+simply aliases for SV and AV.  [perl #123223]
 
 =back
 
