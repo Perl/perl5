@@ -223,6 +223,9 @@ C<sub foo { foo() }> is now deparsed with those mandatory parentheses.
 C</@array/> is now deparsed as a regular expression, and not just
 C<@array>.
 
+C</@{-}/>, C</@{+}/> and C<$#{1}> are now deparsed with the braces, which
+are mandatory in these cases.
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
