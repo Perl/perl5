@@ -1025,9 +1025,7 @@ $Data::Dumper::Useqq  I<or>  I<$OBJ>->Useqq(I<[NEWVAL]>)
 When set, enables the use of double quotes for representing string values.
 Whitespace other than space will be represented as C<[\n\t\r]>, "unsafe"
 characters will be backslashed, and unprintable characters will be output as
-quoted octal integers.  Since setting this variable imposes a performance
-penalty, the default is 0.  C<Dump()> will run slower if this flag is set,
-since the fast XSUB implementation doesn't support it yet.
+quoted octal integers.  The default is 0.
 
 =item *
 
@@ -1391,8 +1389,8 @@ to have, you can use the C<Seen> method to pre-seed the internal reference
 table and make the dumped output point to them, instead.  See L</EXAMPLES>
 above.
 
-The C<Useqq> and C<Deparse> flags makes Dump() run slower, since the
-XSUB implementation does not support them.
+The C<Deparse> flag makes Dump() run slower, since the XSUB
+implementation does not support it.
 
 SCALAR objects have the weirdest looking C<bless> workaround.
 
