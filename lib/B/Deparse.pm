@@ -2296,7 +2296,19 @@ sub pp_tell { unop(@_, "tell") }
 sub pp_getsockname { unop(@_, "getsockname") }
 sub pp_getpeername { unop(@_, "getpeername") }
 
-sub pp_chdir { maybe_targmy(@_, \&unop, "chdir") }
+sub pp_chdir {
+    my ($self, $op, $cx) = @_;
+    if ($op->flags & OPf_SPECIAL) {
+	my $kw = $self->keyword("chdir");
+	my $kid = $self->const_sv($op->first)->PV;
+	my $code = $kw
+		 . ($cx >= 16 || $self->{'parens'} ? "($kid)" : " $kid");
+	maybe_targmy(@_, sub { $_[3] }, $code);
+    } else {
+	maybe_targmy(@_, \&unop, "chdir")
+    }
+}
+
 sub pp_chroot { maybe_targmy(@_, \&unop, "chroot") }
 sub pp_readlink { unop(@_, "readlink") }
 sub pp_rmdir { maybe_targmy(@_, \&unop, "rmdir") }

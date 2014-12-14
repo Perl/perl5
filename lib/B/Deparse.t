@@ -2253,3 +2253,6 @@ my $x = ($r // [])->{'foo'}[0];
 # multideref with complex middle index
 my(%h, $i, $j, $k);
 my $x = $h{'foo'}[$i + $j]{$k};
+####
+# chdir bareword
+chdir FH;
