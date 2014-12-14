@@ -200,6 +200,10 @@ C<$;> at the end of a statement no longer loses its semicolon.
 Some cases of subroutine declarations stored in the stash in shorthand form
 were being omitted.
 
+Non-ASCII characters are now consistently escaped in strings, instead of
+some of the time.  (There are still outstanding problems with regular
+expressions and identifiers that have not been fixed.)
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
