@@ -437,6 +437,11 @@ stack, causing lists outside the block to lose elements or have elements
 overwritten.  This could happen with C<map { for(...){...} } ...> and with
 lists containing C<do { for(...){...} }>.  [perl #123286]
 
+=item *
+
+C<scalar()> now propagates lvalue context, so that
+C<for(scalar($#foo)) { ... }> can modify C<$#foo> through C<$_>.
+
 =back
 
 =head1 Known Problems
