@@ -447,6 +447,11 @@ lists containing C<do { for(...){...} }>.  [perl #123286]
 C<scalar()> now propagates lvalue context, so that
 C<for(scalar($#foo)) { ... }> can modify C<$#foo> through C<$_>.
 
+=item *
+
+C<qr/@array(?{block})/> no longer dies with "Bizarre copy of ARRAY".
+[#123344]
+
 =back
 
 =head1 Known Problems
