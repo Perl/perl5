@@ -873,6 +873,10 @@ in the MAGIC.
 
 =item qr_anoncv
 
+=item compflags
+
+The last two were added in Perl 5.22.
+
 =back
 
 =head2 B::GV Methods

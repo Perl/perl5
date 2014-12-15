@@ -108,6 +108,7 @@ my $obj = B::svref_2object($r);
 my $regexp =  ($] < 5.011) ? $obj->MAGIC : $obj;
 ok($regexp->precomp() eq 'foo', 'Get string from qr//');
 like($regexp->REGEX(), qr/\d+/, "REGEX() returns numeric value");
+like($regexp->compflags, qr/^\d+\z/, "compflags returns numeric value");
 is B::svref_2object(qr/(?{time})/)->qr_anoncv->ROOT->first->name, 'qr',
   'qr_anoncv';
 my $iv = 1;
