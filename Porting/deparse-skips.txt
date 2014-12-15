@@ -423,8 +423,6 @@ op/attrhand.t             # Custom attrs ignored; also AH provides none
 op/attrs.t                # [perl #70205]
 op/caller.t
 op/each.t                 # utf8ness of deparsed strings
-op/exec.t
-op/filetest.t
 op/goto.t
 op/hash-rt85026.t
 op/hashassign.t
