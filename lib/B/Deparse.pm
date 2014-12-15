@@ -5347,7 +5347,7 @@ sub re_flags {
 my %matchwords;
 map($matchwords{join "", sort split //, $_} = $_, 'cig', 'cog', 'cos', 'cogs',
     'cox', 'go', 'is', 'ism', 'iso', 'mig', 'mix', 'osmic', 'ox', 'sic',
-    'sig', 'six', 'smog', 'so', 'soc', 'sog', 'xi');
+    'sig', 'six', 'smog', 'so', 'soc', 'sog', 'xi', 'soup', 'soupmix');
 
 # When deparsing a regular expression with code blocks, we have to look in
 # various places to find the blocks.
