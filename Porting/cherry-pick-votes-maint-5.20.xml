@@ -1,18 +1,8 @@
-<?xml version="1.0"?><?xml-stylesheet type="text/xml" href="#stylesheet"?><!DOCTYPE doc SYSTEM "doc.dtd"><doc><head><xsl:stylesheet version="1.0" id="stylesheet" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="xsl:stylesheet"/><xsl:template match="/">
-<html><head><title>Cherry-pick votes for maint-5.20</title><style>
-.accepted .ref a { color: #090 }
-</style></head><body>
-<h1>Cherry-pick votes for maint-5.20</h1>
-<table>
-<tr><td colspan="4"><h2>Commits</h2></td></tr>
-<xsl:for-each select="/doc/data/commit"><tr><xsl:if test="substring-after(substring-after(@votes, ','), ',') != ''"><xsl:attribute name="class">accepted</xsl:attribute></xsl:if><td><xsl:value-of select="@votes"/></td><td class="ref"><a href="http://perl5.git.perl.org/perl.git/commit/{@id}"><xsl:value-of select="@id"/></a></td><td><a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}"><xsl:value-of select="@ticket"/></a></td><td><xsl:value-of select="@desc"/></td></tr></xsl:for-each>
-<tr><td colspan="4"><h2>Branches</h2></td></tr>
-<xsl:for-each select="/doc/data/head"><tr><xsl:if test="substring-after(substring-after(@votes, ','), ',') != ''"><xsl:attribute name="class">accepted</xsl:attribute></xsl:if><td><xsl:value-of select="@votes"/></td><td class="ref"><a href="http://perl5.git.perl.org/perl.git/shortlog/refs/heads/{@branch}"><xsl:value-of select="@branch"/></a></td><td><a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}"><xsl:value-of select="@ticket"/></a></td><td><xsl:value-of select="@desc"/></td></tr></xsl:for-each>
-</table>
-</body></html></xsl:template></xsl:stylesheet></head><data>
+<?xml version="1.0"?><?xml-stylesheet type="text/xml" href="#stylesheet"?><!DOCTYPE doc SYSTEM "doc.dtd"><doc>
 
-Tickets Listed in #122913: [META] perl 5.20.2
-=============================================
+<data>
+
+<div><h2>Tickets Listed in #122913: [META] perl 5.20.2</h2>
 
 <commit votes="sprout, steveh, arc" id="4c627877a44535772b40aca390861295b62b1f6d" ticket="122771" desc="[perl #122771] Fix assertion failure with -d and sort"/>
 <commit votes="steveh, arc" id="c1662923fd698c3467e36017e0b303046f173e13" ticket="122771" desc="perldelta for 4c62787/#122771"/>
@@ -43,8 +33,9 @@ which stands in place of cherry-picking the blead fix, c0683843e9299db25f354e2c8
 We should also cherry-pick:
 <commit votes="steveh, arc" id="857f4fb1c22a29afdfe39e929702476b8a82d7c5" ticket="123029" desc="perldelta for #123029"/>
 
-Other Proposed Cherry-Picks
-===========================
+</div>
+
+<div><h2>Other Proposed Cherry-Picks</h2>
 
 Blead changes have been examined up to and including ba2f93c53341e0002ccf08487a56622c6aa5a87d (deparse-skips.txt: Note bug number for re/overload.t)
 
@@ -59,8 +50,9 @@ Adding new warnings, errors or deprecations
 
 The same criteria apply to code in dual-life modules as to core code.)
 
-Crash Fixes
------------
+</div>
+
+<div><h3>Crash Fixes</h3>
 
 <commit votes="sprout, steveh, arc" id="18691622911f2e18df42a5a98ea4c42386f4e558" ticket="" desc="Fix crash when lex subs are used for AUTOLOAD"/>
 <commit votes="sprout, steveh, arc" id="56117e3ef4ef2c7986c400f86f321f22f261571a" ticket="" desc="Fix crash when lex subs are used for overload"/>
@@ -71,8 +63,9 @@ I feel a bit leery about this next one.  The code is a bit fragile, so I would f
 <commit votes="sprout, steveh, arc" id="9d8e4b9b32800eb499d83442ce8bbe6639773936" ticket="" desc="Fix crash with lex subs under -d"/>
 <commit votes="sprout, steveh, arc" id="1699f5c257bc554753cc4ddf10c62ac8a5c338ff" ticket="" desc="perldelta for f20d0df0f"/>
 
-Security Fixes
---------------
+</div>
+
+<div><h3>Security Fixes</h3>
 
 <commit votes="sprout, steveh, arc" id="dd369969a58d736f281ffebe36fc24ab45b29fa6" ticket="122701" desc="Correct usage of memEQs in attributes.xs [perl #122701]"/>
 NOT ff5314c5aa54b172122507017cac034acf1c4bf7" (fix attributes memcmp without len less than 6 (asan catch)), which Andy Dougherty says on #122629 should be reverted in blead.
@@ -80,8 +73,9 @@ NOT ff5314c5aa54b172122507017cac034acf1c4bf7" (fix attributes memcmp without len
 <commit votes="steveh, arc" id="19be3be6968e2337bcdfe480693fff795ecd1304" ticket="" desc="don't recurse infinitely in Data::Dumper"/>
 <commit votes="steveh, arc" id="fa10264e34d420edf76a46139faa3277c0b96a2b" ticket="" desc="Data::Dumper version bump for CPAN release"/>
 
-Other Regression Fixes
-----------------------
+</div>
+
+<div><h3>Other Regression Fixes</h3>
 
 <commit votes="steveh, arc" id="a51d618a82a7057c3aabb600a7a8691d27f44a34" ticket="122283" desc="rt 122283 - do not recurse into GOSUB/GOSTART when not SCF_DO_SUBSTR"/>
 <commit votes="steveh, arc" id="d9a72fccda5cacaccd2671769c010f3cda59ef8a" ticket="122283" desc="Add tests for a51d618a fix of RT #122283"/>
@@ -110,8 +104,9 @@ Fixes a regression from 5.8.8:
 <commit votes="sprout, steveh, arc" id="64ff300be0f7714585466af5bb87b2e37db5082a" ticket="122669" desc="[perl #122669] Don't taint at compile time"/>
 <commit votes="sprout, steveh, arc" id="eaff586aa6444fb20654ed863b7ff35e136737e8" ticket="122669" desc="Fix t/op/taint.t on Windows"/>
 
-Configure and hints/ Fixes
---------------------------
+</div>
+
+<div><h3>Configure and hints/ Fixes</h3>
 
 Would these break binary compatibility?
 <commit votes="tux" id="44b62df7ceb322e1e0484f45065025f0a709303c" ticket="" desc="Darwin: if cc is explicitly gcc/g++, use it also as ld."/>
@@ -138,8 +133,9 @@ and manual backports of:
 	c32c3de1f087531defe6795e7997f2f5d532ba7d Move the VC6 "broken-nan" define from win32.h to perl.h.
 	bcd8bfa93f638d0b45800be6431b3bd9b54e1af6 Tru64: NaN comparison quite broken.
 
-Platform-Specific Build/Test/Installation Fixes
------------------------------------------------
+</div>
+
+<div><h3>Platform-Specific Build/Test/Installation Fixes</h3>
 
 <commit votes="steveh" id="5b26a7b38f5eacab94ffc56c123c01ad6c3788dc" ticket="" desc="sv.c: Silence VMS compiler warning"/>
 <commit votes="steveh" id="e09e3cee34fbe40a471dc2fa31f2b8533598fb45" ticket="" desc="regcomp.c: Silence Win32 compiler warning"/>
@@ -158,8 +154,9 @@ Platform-Specific Build/Test/Installation Fixes
 <commit votes="steveh" id="dceaccf89041ac723759e83a3a31bedc8d82a38d" ticket="" desc="make -DNO_MATHOMS work on Win32"/>
 <commit votes="steveh" id="3415f8b9fb121a138ed954f9ced0b2c1f4660e48" ticket="120487" desc="[perl #120487] make sure we're using an unmodified @INC to load Win32"/>
 
-Documentation Fixes
--------------------
+</div>
+
+<div><h3>Documentation Fixes</h3>
 
 <commit votes="rjbs, sprout, steveh" id="f86d720ebb7ad53ce8b1c12cee66586eabffe0c8" ticket="" desc="document the postderef feature in feature.pm"/>
 <commit votes="steveh" id="422791e4eb03a12d17c98eb1787351280ae59789" ticket="" desc="Make eval_pv documentation more precise"/>
@@ -265,4 +262,78 @@ http://code.activestate.com/lists/perl5-porters/210398/
 
 I will also cherry-pick Module-CoreList changes as necessary in the unholy business of sorting that out for 5.20.2.
 
-</data></doc>
+</div>
+
+</data>
+
+<xsl:stylesheet version="1.0" id="stylesheet" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="xsl:stylesheet"/>
+  <xsl:template match="/">
+    <html>
+      <head>
+        <title>Cherry-pick votes for maint-5.20</title>
+        <style>.accepted .ref a { color: #090 }</style>
+      </head>
+      <body>
+        <h1>Cherry-pick votes for maint-5.20</h1>
+        <xsl:for-each select="/doc/data/div">
+          <h2><xsl:value-of select="h2"/></h2>
+          <h3><xsl:value-of select="h3"/></h3>
+          <table>
+            <xsl:for-each select="commit|head">
+              <xsl:choose>
+                <xsl:when test="local-name() = 'commit'">
+                  <tr>
+                    <xsl:if test="substring-after(substring-after(@votes, ','), ',') != ''">
+                      <xsl:attribute name="class">accepted</xsl:attribute>
+                    </xsl:if>
+                    <td>
+                      <xsl:value-of select="@votes"/>
+                    </td>
+                    <td class="ref">
+                      <a href="http://perl5.git.perl.org/perl.git/commit/{@id}">
+                        <xsl:value-of select="@id"/>
+                      </a>
+                    </td>
+                    <td>
+                      <a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}">
+                        <xsl:value-of select="@ticket"/>
+                      </a>
+                    </td>
+                    <td>
+                      <xsl:value-of select="@desc"/>
+                    </td>
+                  </tr>
+                </xsl:when>
+                <xsl:when test="local-name() = 'head'">x
+                  <tr>
+                    <xsl:if test="substring-after(substring-after(@votes, ','), ',') != ''">
+                      <xsl:attribute name="class">accepted</xsl:attribute>
+                    </xsl:if>
+                    <td>
+                      <xsl:value-of select="@votes"/>
+                    </td>
+                    <td class="ref">
+                      <a href="http://perl5.git.perl.org/perl.git/shortlog/refs/heads/{@branch}">
+                        <xsl:value-of select="@branch"/>
+                      </a>
+                    </td>
+                    <td>
+                      <a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}">
+                        <xsl:value-of select="@ticket"/>
+                      </a>
+                    </td>
+                    <td>
+                      <xsl:value-of select="@desc"/>
+                    </td>
+                  </tr>
+                </xsl:when>
+              </xsl:choose>
+            </xsl:for-each>
+          </table>
+        </xsl:for-each>
+      </body>
+    </html>
+  </xsl:template>
+</xsl:stylesheet>
+
+</doc>
