@@ -1230,6 +1230,12 @@ print /@b/;
 print qr/@a/;
 print qr/@b/;
 ####
+# =~ QR_CONSTANT
+use constant QR_CONSTANT => qr/a/soupmix;
+'' =~ QR_CONSTANT;
+>>>>
+'' =~ /a/impsux;
+####
 # $lexical =~ //
 my $x;
 $x =~ //;

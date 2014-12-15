@@ -5313,6 +5313,12 @@ sub re_flags {
     my ($self, $op) = @_;
     my $flags = '';
     my $pmflags = $op->pmflags;
+    if (!$pmflags) {
+	my $re = $op->pmregexp;
+	if ($$re) {
+	    $pmflags = $re->compflags;
+	}
+    }
     $flags .= "g" if $pmflags & PMf_GLOBAL;
     $flags .= "i" if $pmflags & PMf_FOLD;
     $flags .= "m" if $pmflags & PMf_MULTILINE;
