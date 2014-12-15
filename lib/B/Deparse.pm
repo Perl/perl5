@@ -3004,14 +3004,6 @@ sub listop {
 	return "$exprs[0] = $fullname"
 	         . ($parens ? "($exprs[0])" : " $exprs[0]");
     }
-    if ($name =~ /^(system|exec)$/
-	&& ($op->flags & OPf_STACKED)
-	&& @exprs > 1)
-    {
-	# handle the "system prog a1,a2,.." form
-	my $prog = shift @exprs;
-	$exprs[0] = "$prog $exprs[0]";
-    }
 
     if ($parens && $nollafr) {
 	return "($fullname " . join(", ", @exprs) . ")";
@@ -3088,8 +3080,8 @@ sub pp_mkdir { maybe_targmy(@_, \&listop, "mkdir") }
 sub pp_open_dir { listop(@_, "opendir") }
 sub pp_seekdir { listop(@_, "seekdir") }
 sub pp_waitpid { maybe_targmy(@_, \&listop, "waitpid") }
-sub pp_system { maybe_targmy(@_, \&listop, "system") }
-sub pp_exec { maybe_targmy(@_, \&listop, "exec") }
+sub pp_system { maybe_targmy(@_, \&indirop, "system") }
+sub pp_exec { maybe_targmy(@_, \&indirop, "exec") }
 sub pp_kill { maybe_targmy(@_, \&listop, "kill") }
 sub pp_setpgrp { maybe_targmy(@_, \&listop, "setpgrp") }
 sub pp_getpriority { maybe_targmy(@_, \&listop, "getpriority") }
@@ -3222,7 +3214,9 @@ sub indirop {
 	# comparison routine.  We have to say sort(...) in that case.
 	return "$name2($args)";
     } else {
-	return $self->maybe_parens_func($name2, $args, $cx, 5);
+	return length $args
+		? $self->maybe_parens_func($name2, $args, $cx, 5)
+		: $name2 . '()' x (7 < $cx);
     }
 
 }

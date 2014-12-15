@@ -795,6 +795,14 @@ our @bar;
 (foo { @bar } 1), foo();
 foo { @bar } 1 xor foo();
 ####
+# indirops with blocks
+# CONTEXT use 5.01;
+print {*STDOUT;} 'foo';
+printf {*STDOUT;} 'foo';
+say {*STDOUT;} 'foo';
+system {'foo';} '-foo';
+exec {'foo';} '-foo';
+####
 # SKIP ?$] < 5.010 && "say not implemented on this Perl version"
 # CONTEXT use feature ':5.10';
 # say
