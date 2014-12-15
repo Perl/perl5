@@ -4589,6 +4589,7 @@ pod/perl5163delta.pod		Perl changes in version 5.16.3
 pod/perl5180delta.pod		Perl changes in version 5.18.0
 pod/perl5181delta.pod		Perl changes in version 5.18.1
 pod/perl5182delta.pod		Perl changes in version 5.18.2
+pod/perl5184delta.pod		Perl changes in version 5.18.4
 pod/perl5200delta.pod		Perl changes in version 5.20.0
 pod/perl5201delta.pod		Perl changes in version 5.20.1
 pod/perl5210delta.pod		Perl changes in version 5.21.0
