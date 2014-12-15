@@ -422,7 +422,7 @@ mro/recursion_dfs_utf8.t
 op/attrhand.t             # Custom attrs ignored; also AH provides none
 op/attrs.t                # [perl #70205]
 op/caller.t
-op/each.t
+op/each.t                 # utf8ness of deparsed strings
 op/eval.t
 op/evalbytes.t
 op/exec.t
