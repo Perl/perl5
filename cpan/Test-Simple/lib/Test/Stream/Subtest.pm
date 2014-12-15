@@ -62,6 +62,8 @@ This is almost certainly not what you wanted. Did you fork and forget to exit?
 
     $ctx->set;
     $ctx->restore_todo($todo);
+    $ctx->stream->subtest_exception->[-1] = $err unless $succ;
+
     # This sends the subtest event
     my $st = $ctx->child('pop', $name);
 
