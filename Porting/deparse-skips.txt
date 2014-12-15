@@ -420,9 +420,10 @@ mro/recursion_c3_utf8.t
 mro/recursion_dfs.t
 mro/recursion_dfs_utf8.t
 op/attrhand.t             # Custom attrs ignored; also AH provides none
-op/attrs.t                # [perl #70205]
+op/attrs.t                # [perl #70205] my attrs
 op/caller.t
 op/each.t                 # utf8ness of deparsed strings
+op/getpid.t               # [perl #70205] my attrs
 op/goto.t
 op/hash-rt85026.t
 op/hashassign.t
