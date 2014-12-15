@@ -449,6 +449,10 @@ PP(pp_readline)
 	    PUTBACK;
 	    Perl_pp_rv2gv(aTHX);
 	    PL_last_in_gv = MUTABLE_GV(*PL_stack_sp--);
+	    if (PL_last_in_gv == (GV *)&PL_sv_undef)
+		PL_last_in_gv = NULL;
+	    else
+		assert(isGV_with_GP(PL_last_in_gv));
 	}
     }
     return do_readline();
