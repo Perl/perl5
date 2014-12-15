@@ -561,7 +561,8 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
     }
 
     padnamelist_store(PL_comppad_name, offset, name);
-    PadnamelistMAXNAMED(PL_comppad_name) = offset;
+    if (PadnameLEN(name) > 1)
+	PadnamelistMAXNAMED(PL_comppad_name) = offset;
     return offset;
 }
 
