@@ -2328,6 +2328,7 @@ cpan/Test-Simple/t/Behavior/NotTB15.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/skip_all_in_subtest1.load			Test::Simple::Test
 cpan/Test-Simple/t/Behavior/skip_all_in_subtest2.load			Test::Simple::Test
 cpan/Test-Simple/t/Behavior/skip_all_in_subtest.t			Test::Simple Test
+cpan/Test-Simple/t/Behavior/subtest_die.t	Test::Simple test
 cpan/Test-Simple/t/Behavior/Tester2_subtest.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/threads_with_taint_mode.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/todo.t			Test::Simple Test
