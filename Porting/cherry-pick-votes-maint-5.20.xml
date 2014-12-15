@@ -52,7 +52,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 </div>
 
-<div><h3>Crash Fixes</h3>
+<div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
 <commit votes="sprout, steveh, arc" id="18691622911f2e18df42a5a98ea4c42386f4e558" ticket="" desc="Fix crash when lex subs are used for AUTOLOAD"/>
 <commit votes="sprout, steveh, arc" id="56117e3ef4ef2c7986c400f86f321f22f261571a" ticket="" desc="Fix crash when lex subs are used for overload"/>
