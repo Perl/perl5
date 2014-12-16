@@ -190,6 +190,7 @@ String::Base
 String::Scanf
 Switch
 tar(1)
+Template::Declare
 Term::UI
 Term::UI::History
 Test::Harness::TAP

@@ -395,6 +395,10 @@ L<Padre> version 1.00
 
 L<Parse::Keyword> 0.08
 
+=item *
+
+L<Template::Declare> 0.46
+
 =back
 
 =back
