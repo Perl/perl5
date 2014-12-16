@@ -23,6 +23,9 @@
 #  define WIN32_NO_SOCKETS
 /* less I/O calls during each require */
 #  define PERL_DISABLE_PMC
+
+/* allow minitest to work */
+#  define USE_PERLIO
 #endif
 
 #ifdef WIN32_NO_SOCKETS
