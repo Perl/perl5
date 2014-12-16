@@ -417,7 +417,9 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 			}
 
 			/* in use, not just a prototype */
-			if (inner_rc && (CvOUTSIDE(innercv) == cv)) {
+			if (inner_rc && SvTYPE(innercv) == SVt_PVCV
+			 && (CvOUTSIDE(innercv) == cv))
+			{
 			    assert(CvWEAKOUTSIDE(innercv));
 			    /* don't relink to grandfather if he's being freed */
 			    if (outercv && SvREFCNT(outercv)) {
