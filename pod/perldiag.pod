@@ -5223,7 +5223,7 @@ L<perlfunc/setsockopt>.
 
 =item Setting ${^ENCODING} is deprecated
 
-(D deprecated) You assiged a non-C<undef> value to C<${^ENCODING}>.
+(D deprecated) You assigned a non-C<undef> value to C<${^ENCODING}>.
 This is deprecated; see C<L<perlvar/${^ENCODING}>> for details.
 
 =item Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef
