@@ -238,6 +238,9 @@ instead of C<no feature ':all';>.  This has been fixed.
 
 C<chdir FH> is now deparsed without quotation marks.
 
+C<\my @a> is now deparsed without parentheses.  (Parenthese would flatten
+the array.)
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
@@ -247,8 +250,8 @@ Only declare C<file> unused if we actually define it.
 Improve generated C<RETVAL> code generation to avoid repeated
 references to C<ST(0)>.  [perl #123278]
 
-C<\my @a> is now deparsed without parentheses.  (Parenthese would flatten
-the array.)
+Broaden and document the C</OBJ$/> to C</REF$/> typemap optimization
+for the C<DESTROY> method.  [perl #123418]
 
 =item *
 
