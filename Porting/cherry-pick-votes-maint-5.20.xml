@@ -253,6 +253,9 @@ Part of this (but not the opcode part):
 
 To be included in an "Errata From Previous Releases":
 <commit votes="steveh, arc" id="6ff8f256561a974b63b784ae8681c284ada44f7a" ticket="122655" desc="perldelta: Entry for [perl #122655]."/>
+</div>
+
+<div><h3>Other</h3>
 
 Not in any of the above categories, but would be nice anyway?:
 <commit votes="steveh" id="f276fdad8f6660f36944c895587a7748585e4969" ticket="" desc="Added -x option to makerel to produce .xz tarballs"/>
