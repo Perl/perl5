@@ -232,7 +232,7 @@ BEGIN {
 # lib/Tie/File/t/29_downcopy 5
 # lib/vars 22
 
-# Object fields (were globals):
+# Object fields:
 #
 # avoid_local:
 # (local($a), local($b)) and local($a, $b) have the same internal
