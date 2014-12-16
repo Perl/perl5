@@ -5197,32 +5197,6 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
 		   && (scan->flags || data || (flags & SCF_DO_STCLASS))
 		   && (OP(scan) == IFMATCH || OP(scan) == UNLESSM))
         {
-            if ( OP(scan) == UNLESSM &&
-                 scan->flags == 0 &&
-                 OP(NEXTOPER(NEXTOPER(scan))) == NOTHING &&
-                 OP(regnext(NEXTOPER(NEXTOPER(scan)))) == SUCCEED
-            ) {
-                regnode *opt;
-                regnode *upto= regnext(scan);
-                DEBUG_PARSE_r({
-                    DEBUG_STUDYDATA("OPFAIL",data,depth);
-
-                    /*DEBUG_PARSE_MSG("opfail");*/
-                    regprop(RExC_rx, RExC_mysv, upto, NULL, pRExC_state);
-                    PerlIO_printf(Perl_debug_log,
-                        "~ replace with OPFAIL pointed at %s (%"IVdf") offset %"IVdf"\n",
-                        SvPV_nolen_const(RExC_mysv),
-                        (IV)REG_NODE_NUM(upto),
-                        (IV)(upto - scan)
-                    );
-                });
-                OP(scan) = OPFAIL;
-                NEXT_OFF(scan) = upto - scan;
-                for (opt= scan + 1; opt < upto ; opt++)
-                    OP(opt) = OPTIMIZED;
-                scan= upto;
-                continue;
-            }
             if ( !PERL_ENABLE_POSITIVE_ASSERTION_STUDY
                 || OP(scan) == UNLESSM )
             {
@@ -10095,6 +10069,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 break;
 	    case '!':           /* (?!...) */
 		RExC_seen_zerolen++;
+		/* check if we're really just a "FAIL" assertion */
+		--RExC_parse;
+		nextchar(pRExC_state);
 	        if (*RExC_parse == ')') {
 	            ret=reg_node(pRExC_state, OPFAIL);
 	            nextchar(pRExC_state);
