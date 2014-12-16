@@ -2225,6 +2225,7 @@ sub unop {
 	my $builtinname = $name;
 	$builtinname =~ /^CORE::/ or $builtinname = "CORE::$name";
 	if (defined prototype($builtinname)
+	   && $builtinname ne 'CORE::readline'
 	   && prototype($builtinname) =~ /^;?\*/
 	   && $kid->name eq "rv2gv") {
 	    $kid = $kid->first;
@@ -2548,7 +2549,6 @@ sub pp_readline {
     my $self = shift;
     my($op, $cx) = @_;
     my $kid = $op->first;
-    $kid = $kid->first if $kid->name eq "rv2gv"; # <$fh>
     return "<" . $self->deparse($kid, 1) . ">" if is_scalar($kid);
     return $self->unop($op, $cx, "readline");
 }
