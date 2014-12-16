@@ -286,9 +286,7 @@ I will also cherry-pick Module-CoreList changes as necessary in the unholy busin
               <xsl:choose>
                 <xsl:when test="local-name() = 'commit'">
                   <tr>
-                    <xsl:if test="substring-after(substring-after(@votes, ','), ',') != ''">
-                      <xsl:attribute name="class">accepted</xsl:attribute>
-                    </xsl:if>
+                    <xsl:apply-templates select="@votes"/>
                     <td>
                       <xsl:value-of select="@votes"/>
                     </td>
@@ -309,9 +307,7 @@ I will also cherry-pick Module-CoreList changes as necessary in the unholy busin
                 </xsl:when>
                 <xsl:when test="local-name() = 'head'">
                   <tr>
-                    <xsl:if test="substring-after(substring-after(@votes, ','), ',') != ''">
-                      <xsl:attribute name="class">accepted</xsl:attribute>
-                    </xsl:if>
+                    <xsl:apply-templates select="@votes"/>
                     <td>
                       <xsl:value-of select="@votes"/>
                     </td>
@@ -336,6 +332,11 @@ I will also cherry-pick Module-CoreList changes as necessary in the unholy busin
         </xsl:for-each>
       </body>
     </html>
+  </xsl:template>
+  <xsl:template match="@votes">
+    <xsl:if test="substring-after(substring-after(., ','), ',') != ''">
+      <xsl:attribute name="class">accepted</xsl:attribute>
+    </xsl:if>
   </xsl:template>
 </xsl:stylesheet>
 
