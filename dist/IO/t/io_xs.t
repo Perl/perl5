@@ -9,10 +9,6 @@ BEGIN {
 	    exit 0;
         }
     }
-    if( $^O eq 'VMS' && $Config{'vms_cc_type'} ne 'decc' ) {
-        print "1..0 # Skip: not compatible with the VAXCRTL\n";
-        exit 0;
-    }
 }
 
 use Test::More tests => 5;
