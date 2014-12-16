@@ -274,7 +274,10 @@ I will also cherry-pick Module-CoreList changes as necessary in the unholy busin
     <html>
       <head>
         <title>Cherry-pick votes for maint-5.20</title>
-        <style>.accepted .ref a { color: #090 }</style>
+        <style>
+          .accepted .ref a { color: #090 }
+          .unvoted  .ref a { color: #c00 }
+        </style>
       </head>
       <body>
         <h1>Cherry-pick votes for maint-5.20</h1>
@@ -334,9 +337,14 @@ I will also cherry-pick Module-CoreList changes as necessary in the unholy busin
     </html>
   </xsl:template>
   <xsl:template match="@votes">
-    <xsl:if test="substring-after(substring-after(., ','), ',') != ''">
-      <xsl:attribute name="class">accepted</xsl:attribute>
-    </xsl:if>
+    <xsl:choose>
+      <xsl:when test=". = ''">
+        <xsl:attribute name="class">unvoted</xsl:attribute>
+      </xsl:when>
+      <xsl:when test="substring-after(substring-after(., ','), ',') != ''">
+        <xsl:attribute name="class">accepted</xsl:attribute>
+      </xsl:when>
+    </xsl:choose>
   </xsl:template>
 </xsl:stylesheet>
 
