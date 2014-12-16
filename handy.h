@@ -1351,7 +1351,7 @@ EXTCONST U32 PL_charclass[];
                                                 ? (c)                          \
                                                 : (IN_UTF8_CTYPE_LOCALE)       \
                                                   ? PL_latin1_lc[ (U8) (c) ]   \
-                                                : function((cast)(c)))
+                                                : (cast)function((cast)(c)))
 
 /* Note that the result can be larger than a byte in a UTF-8 locale.  It
  * returns a single value, so can't adequately return the upper case of LATIN
@@ -1362,7 +1362,7 @@ EXTCONST U32 PL_charclass[];
                     (! FITS_IN_8_BITS(c)                                       \
                     ? (c)                                                      \
                     : ((! IN_UTF8_CTYPE_LOCALE)                                \
-                      ? function((cast)(c))                                    \
+                      ? (cast)function((cast)(c))                                    \
                       : ((((U8)(c)) == MICRO_SIGN)                             \
                         ? GREEK_CAPITAL_LETTER_MU                              \
                         : ((((U8)(c)) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)  \
