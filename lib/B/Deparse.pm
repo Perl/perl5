@@ -234,6 +234,10 @@ BEGIN {
 
 # Object fields:
 #
+# in_coderef2text:
+# True when deparsing via $deparse->coderef2text; false when deparsing the
+# main program.
+#
 # avoid_local:
 # (local($a), local($b)) and local($a, $b) have the same internal
 # representation but the short form looks better. We notice we can
@@ -963,6 +967,7 @@ sub coderef2text {
     croak "Usage: ->coderef2text(CODEREF)" unless UNIVERSAL::isa($sub, "CODE");
 
     $self->init();
+    local $self->{in_coderef2text} = 1;
     return $self->indent($self->deparse_sub(svref_2object($sub)));
 }
 
@@ -4381,6 +4386,17 @@ sub pp_entersub {
     # Doesn't matter how many prototypes there are, if
     # they haven't happened yet!
     my $declared = exists $self->{'subs_declared'}{$kid};
+    if (not $declared and $self->{'in_coderef2text'}) {
+	no strict 'refs';
+	no warnings 'uninitialized';
+	$declared =
+	       (
+		 defined &{ ${$self->{'curstash'}."::"}{$kid} }
+		 && !exists
+		     $self->{'subs_deparsed'}{$self->{'curstash'}."::".$kid}
+		 && defined prototype $self->{'curstash'}."::".$kid
+	       );
+    }
     if (!$declared && defined($proto)) {
 	# Avoid "too early to check prototype" warning
 	($amper, $proto) = ('&');

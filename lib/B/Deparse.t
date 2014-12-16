@@ -1907,6 +1907,9 @@ foo(bar(),baz());
 package prototest;
 &foo(scalar bar(), scalar baz());
 ####
+# coderef2text and prototyped sub calls [perl #123435]
+is 'foo', 'oo';
+####
 # ensure aelemfast works in the range -128..127 and that there's no
 # funky edge cases
 my $x;
