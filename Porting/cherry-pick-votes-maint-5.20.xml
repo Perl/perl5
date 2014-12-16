@@ -109,13 +109,13 @@ Fixes a regression from 5.8.8:
 <div><h3>Configure and hints/ Fixes</h3>
 
 Would these break binary compatibility?
-<commit votes="tux" id="44b62df7ceb322e1e0484f45065025f0a709303c" ticket="" desc="Darwin: if cc is explicitly gcc/g++, use it also as ld."/>
-<commit votes="tux" id="990a70b8c9866c888194f4c2c6d152d7911b3c34" ticket="" desc="Darwin: set ld to 'cc' if $cc is 'cc' or empty, $cc otherwise."/>
-<commit votes="tux" id="54db7d57c29c9259228a6a4176caa32e391c6d0b" ticket="" desc="Upstream a patch from pkgsrc for NetBSD hints"/>
-<commit votes="" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
-<commit votes="tux" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
+<commit votes="tux, arc" id="44b62df7ceb322e1e0484f45065025f0a709303c" ticket="" desc="Darwin: if cc is explicitly gcc/g++, use it also as ld."/>
+<commit votes="tux, arc" id="990a70b8c9866c888194f4c2c6d152d7911b3c34" ticket="" desc="Darwin: set ld to 'cc' if $cc is 'cc' or empty, $cc otherwise."/>
+<commit votes="tux, arc" id="54db7d57c29c9259228a6a4176caa32e391c6d0b" ticket="" desc="Upstream a patch from pkgsrc for NetBSD hints"/>
+<commit votes="arc" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
+<commit votes="tux, arc" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
 
-<head votes="steveh,tux" branch="smoke-me/jhi/maint-5.20-necromantic" ticket="" desc="IRIX and Tru64 fixes"/>
+<head votes="steveh, tux, arc" branch="smoke-me/jhi/maint-5.20-necromantic" ticket="" desc="IRIX and Tru64 fixes"/>
 This contains cherry-picks of
 	0b6ebfadd8d2cfccc07203e94d583721305fd779 IRIX 6.5 (cc 7.4) needs -c99 to compile without whining.
 	1764d98bf44052060e2fe7cfa940d4ffc19f5961 Irix: MIPSpro 7.4 compiler has broken memcmp.
@@ -137,122 +137,122 @@ and manual backports of:
 
 <div><h3>Platform-Specific Build/Test/Installation Fixes</h3>
 
-<commit votes="steveh" id="5b26a7b38f5eacab94ffc56c123c01ad6c3788dc" ticket="" desc="sv.c: Silence VMS compiler warning"/>
-<commit votes="steveh" id="e09e3cee34fbe40a471dc2fa31f2b8533598fb45" ticket="" desc="regcomp.c: Silence Win32 compiler warning"/>
-<commit votes="steveh" id="648eb45f2e489e7cbdab09c65bccaac4a78ae3ee" ticket="122609" desc="stat Makefile.PL to get values for utime."/>
-<commit votes="steveh" id="b6250659892d3195c5d3ecd04773e78dc0ccd564" ticket="" desc="Avoid gcc warning."/>
-<commit votes="steveh" id="9fa5aa9143471cda101c2ac9e87f7bf90ccd0b36" ticket="122820" desc="Fix distclean for pm_to_blib directly extensions."/>
-<commit votes="steveh" id="a3baa5664f4da7f412812e0188d5ac3bab0b8694" ticket="" desc="Improve Errno parsing of Win32 output"/>
-<commit votes="steveh" id="1ef3f55063eff0bda07fa2251ec16a7807dfb602" ticket="" desc="Tweak Errno parsing some more"/>
-<commit votes="steveh" id="2d4a3ccef465111dae0e5e71cf008e97efeb057c" ticket="" desc="Errno parsing: Don't match hex numbers in parts of function names"/>
-<commit votes="steveh" id="cc192ed19bd1c52dd1711a900ce276043ce418ae" ticket="" desc="Errno parsing: Skip expressions containing function names etc"/>
-<commit votes="steveh" id="5884c88b2d4d412c81919fffcc0c487b49521793" ticket="" desc="Bump $Errno::VERSION for previous commits"/>
-<commit votes="steveh,tux" id="b7ddc5bada637a1961bd44a02428c42f98955212" ticket="" desc="A little help for clang++ in toke.c"/>
-<commit votes="steveh" id="cd1dc8e2c73be346de250a16f103fb9a97814dd3" ticket="122861" desc="sv.c: Suppress compiler warning"/>
-<commit votes="steveh" id="1e02895ff34c407637067df12a1b06eb07a5a96a" ticket="" desc="t/io/eintr.t: Make this pass on my ppc64 box"/>
-<commit votes="steveh" id="c7925a5e8559739ce765137cf6164c5872c63a96" ticket="" desc="fix WinCE build"/>
-<commit votes="steveh" id="dceaccf89041ac723759e83a3a31bedc8d82a38d" ticket="" desc="make -DNO_MATHOMS work on Win32"/>
-<commit votes="steveh" id="3415f8b9fb121a138ed954f9ced0b2c1f4660e48" ticket="120487" desc="[perl #120487] make sure we're using an unmodified @INC to load Win32"/>
+<commit votes="steveh, arc" id="5b26a7b38f5eacab94ffc56c123c01ad6c3788dc" ticket="" desc="sv.c: Silence VMS compiler warning"/>
+<commit votes="steveh, arc" id="e09e3cee34fbe40a471dc2fa31f2b8533598fb45" ticket="" desc="regcomp.c: Silence Win32 compiler warning"/>
+<commit votes="steveh, arc" id="648eb45f2e489e7cbdab09c65bccaac4a78ae3ee" ticket="122609" desc="stat Makefile.PL to get values for utime."/>
+<commit votes="steveh, arc" id="b6250659892d3195c5d3ecd04773e78dc0ccd564" ticket="" desc="Avoid gcc warning."/>
+<commit votes="steveh, arc" id="9fa5aa9143471cda101c2ac9e87f7bf90ccd0b36" ticket="122820" desc="Fix distclean for pm_to_blib directly extensions."/>
+<commit votes="steveh, arc" id="a3baa5664f4da7f412812e0188d5ac3bab0b8694" ticket="" desc="Improve Errno parsing of Win32 output"/>
+<commit votes="steveh, arc" id="1ef3f55063eff0bda07fa2251ec16a7807dfb602" ticket="" desc="Tweak Errno parsing some more"/>
+<commit votes="steveh, arc" id="2d4a3ccef465111dae0e5e71cf008e97efeb057c" ticket="" desc="Errno parsing: Don't match hex numbers in parts of function names"/>
+<commit votes="steveh, arc" id="cc192ed19bd1c52dd1711a900ce276043ce418ae" ticket="" desc="Errno parsing: Skip expressions containing function names etc"/>
+<commit votes="steveh, arc" id="5884c88b2d4d412c81919fffcc0c487b49521793" ticket="" desc="Bump $Errno::VERSION for previous commits"/>
+<commit votes="steveh, tux, arc" id="b7ddc5bada637a1961bd44a02428c42f98955212" ticket="" desc="A little help for clang++ in toke.c"/>
+<commit votes="steveh, arc" id="cd1dc8e2c73be346de250a16f103fb9a97814dd3" ticket="122861" desc="sv.c: Suppress compiler warning"/>
+<commit votes="steveh, arc" id="1e02895ff34c407637067df12a1b06eb07a5a96a" ticket="" desc="t/io/eintr.t: Make this pass on my ppc64 box"/>
+<commit votes="steveh, arc" id="c7925a5e8559739ce765137cf6164c5872c63a96" ticket="" desc="fix WinCE build"/>
+<commit votes="steveh, arc" id="dceaccf89041ac723759e83a3a31bedc8d82a38d" ticket="" desc="make -DNO_MATHOMS work on Win32"/>
+<commit votes="steveh, arc" id="3415f8b9fb121a138ed954f9ced0b2c1f4660e48" ticket="120487" desc="[perl #120487] make sure we're using an unmodified @INC to load Win32"/>
 
 </div>
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="rjbs, sprout, steveh" id="f86d720ebb7ad53ce8b1c12cee66586eabffe0c8" ticket="" desc="document the postderef feature in feature.pm"/>
-<commit votes="steveh" id="422791e4eb03a12d17c98eb1787351280ae59789" ticket="" desc="Make eval_pv documentation more precise"/>
-<commit votes="steveh" id="d4a03217c39773dcacf83845e1f96a61136eb870" ticket="" desc="perlfunc: Improve the pointer from elseif to elsif"/>
-<commit votes="steveh" id="eebea631754f8059d1a963e93b061efa2190e5e5" ticket="" desc="perldiag: Add clarification."/>
-<commit votes="steveh" id="7fa2fdc07ed9697d677cb165e07b12495e856d59" ticket="" desc="perlrecharclass: Use more common property synonym"/>
-<commit votes="steveh" id="7ed0dd9307df05e569c8c3d5fdcf705995129a5f" ticket="" desc="perldiag: reword and rewrap an entry"/>
-<commit votes="steveh" id="444d4f5cfb8c0054331f6949177c65c0b333e7d5" ticket="" desc="perlfunc: consistent spaces after dots"/>
-<commit votes="steveh" id="272ce8bbdf90cc9c24e7425001986a6b681c6015" ticket="" desc="Typo in pad.c apidocs"/>
-<commit votes="steveh" id="9fe0b8bee6be1d888d69587491d50258a908e8d0" ticket="" desc="todo: expand the list of OS access builtins to update"/>
-<commit votes="steveh" id="abc0aa9d9625544dc299d6ca0d07dc9bd61cd947" ticket="" desc="perldiag grammar"/>
-<commit votes="steveh" id="f6cce60a032fd351c1c7a6961fd3bcb043b3a784" ticket="122663" desc="add missing close paren in pod"/>
-<commit votes="steveh" id="91e649137a555abe48d1527549d88a833b6226a0" ticket="" desc="perlsec: Consistent spaces after dots"/>
-<commit votes="steveh" id="c6c886efdb6df3d06613743e0e6780de4a145e66" ticket="" desc="perlsec: Typo"/>
-<commit votes="steveh" id="6fd9f6130d0c4ad34a2ddcf44d887097de5b2847" ticket="" desc="perlsec: Another typo"/>
-<commit votes="steveh" id="9a0afbbcb76a8ee786dfbbeff1930f173fefdbad" ticket="" desc="Fix documented return type for PAD_SV"/>
-<commit votes="steveh" id="f3ba690558ce39a2cc7b8e8cf53bd510503c428e" ticket="" desc="perldiag: Rewrap for better splain output"/>
-<commit votes="steveh" id="12d22d1fe17e8471834a01cd417792ac5c022d62" ticket="122661" desc="Semicolon before ellipsis inside block disambiguates."/>
-<commit votes="steveh" id="c43e874320ac47cebbfc6fdd4c881214d39128ad" ticket="" desc="Add epigraph for 5.20.1"/>
-<commit votes="steveh" id="b77865f5def4737f78822fa2cd0da2dbc4fc647b" ticket="" desc="Consistent spaces after dots in perlsub"/>
-<commit votes="steveh" id="f1126a906c58d54cb68626bd2e4c1d577d77796a" ticket="" desc="document how to graduate from experimental status"/>
-<commit votes="steveh" id="2fbadc08f550cedfc8690b365310c2f6d81e960d" ticket="" desc="delete/exists on array elements is discouraged, not deprecated"/>
-<commit votes="steveh" id="fc6933476282438a4b45150119b9be73dfa05b82" ticket="" desc="perlop: Nits"/>
-<commit votes="steveh" id="d74605e51c7bb408573e37869390459a5232b4c7" ticket="" desc="perlop tweak"/>
-<commit votes="steveh" id="845392291027b157a962eea4a4c2a97f67b995ce" ticket="" desc="perlsyn: Remove reference to potential Unicode op"/>
-<commit votes="steveh" id="8af56b9d4cb926792c8f72b634303126a5b1d860" ticket="" desc="perldiag: Reunite 'perhaps you forgot to load'"/>
-<commit votes="steveh" id="3cd61afa1bd59515cd57091c4a4af93a52fec327" ticket="" desc="perllocale: Nit"/>
-<commit votes="steveh" id="5654cc4ecbbe52f346fca1d568892a85c0a10040" ticket="" desc="Update release announcement template"/>
-<commit votes="steveh" id="84c122ba1d2b7b856521ceffc2a095716a739335" ticket="" desc="Perl 5.21.4 today"/>
-<commit votes="steveh" id="28c2c58fe259cabc1510ac5b4c5ead3a7c0321d2" ticket="" desc="Add epigraph for 5.12.4"/>
-<commit votes="steveh" id="7e234f81b6d7325dd91edae7737f9bd69a91fc73" ticket="" desc="Consistent spaces after dots in perlapi"/>
-<commit votes="steveh" id="46f8a5eafc5328639a1c6ff58ff2407a39b09c04" ticket="" desc="Consistent spaces after dots in perlop"/>
-<commit votes="steveh" id="522c63f2ecc9e36821528bb96cb98f39509068fb" ticket="" desc="perlpolicy: clarify that bans related to RT as well as p5p"/>
-<commit votes="steveh" id="69520e41a46ec3b965c16d2280719fe904dc844a" ticket="" desc="perlmod and perlstyle improvements"/>
-<commit votes="steveh" id="8eff31e6ddbcd94a1ff3d6489062907d5b84d9d9" ticket="" desc="Add Ed J to AUTHORS"/>
-<commit votes="steveh" id="fbff26bcac0ac41e44778278aca063f82c1d70e0" ticket="" desc="Long verbatim lines in perlmodstyle"/>
-<commit votes="steveh" id="369236063a992c09b5fd6efb6f0910bd1d5effcd" ticket="" desc="Consistent spaces after dots in perlmodstyle"/>
-<commit votes="steveh" id="5f9f8ddf9ebc952fad1c1747b597e0d1162feac8" ticket="" desc="RMG - Note why it is that MAINT is version-bumped late rather than early"/>
-<commit votes="steveh" id="dffcb1c02065e74cff64fd076677292796ee9845" ticket="" desc="RMG - Even RCs these days generally get an epigraph"/>
-<commit votes="steveh" id="282f36d45b3fd6109df025ed2228f0019b49c2e5" ticket="" desc="RMG - Remove out-of-date instruction about epigraph link"/>
-<commit votes="steveh" id="5e2d14fc932c50279eb04ac71b3d87d785d61420" ticket="" desc="RMG - RCs are now listed in perlhist"/>
-<commit votes="steveh" id="3617dbb697e46ddf316b2067f2ded656ad6a89f9" ticket="" desc="Consistent spaces after dots in perldiag"/>
-<commit votes="sprout, steveh" id="afdb3b14b41a9073ddecc2080ea6b46a16f31fc3" ticket="" desc="perlexperiment: add signatures to experimental features"/>
-<commit votes="steveh" id="2a2f23e4f8a50bdcdd10563dc5d933684cb70954" ticket="122853" desc="Remarks specialness of [A-Z] and [a-z]."/>
-<commit votes="steveh" id="8bbce0b10dd8ea0fad79a905746218306cf4fe17" ticket="" desc="import latest epigraphs from maint-5.18"/>
-<commit votes="steveh" id="086feb3e31adb54d781926d7d8df06c266c39fae" ticket="" desc="perlhist: bring in 5.18.3 and 5.18.4 release dates"/>
-<commit votes="steveh" id="b39691c2f7d54897113063413c374b78418a1684" ticket="" desc="clarify use VERSION docs"/>
-<commit votes="steveh" id="2a2626d8512fc09c6ef077095e4e075978a5c2df" ticket="" desc="Consistent spaces after dots in perlfunc"/>
-<commit votes="steveh" id="8f5839a98a66edafefd2ffd3056e5e3fc64e1d27" ticket="" desc="improve and reword README.win32"/>
-<commit votes="steveh" id="1a83413c438a835495931877ff113ba7f7ef57cc" ticket="" desc="perlapi: Clarify two entries"/>
-<commit votes="steveh" id="d962e43687db045a52ba2406aafccd53e6af23ff" ticket="122942" desc="remove trailing whitespace."/>
-<commit votes="steveh" id="82f82fdb58cb3bf9651ec1ba6904780eb1105021" ticket="122938" desc="Remove trailing space from perlipc.pod."/>
-<commit votes="steveh" id="eee3e3021df1a54fbbae497b1d1c817aa9f2fc29" ticket="" desc="perlguts typo"/>
-<commit votes="steveh" id="8bc5de207a4b3d333e9c6535bd21b8f0b1381270" ticket="122938" desc="Modernized an example in perlipc.pod."/>
-<commit votes="steveh" id="586e992d6da290482e162f13db0dd3f4533b4cd6" ticket="122996" desc="Update Perl 5 Porter list archives."/>
-<commit votes="steveh" id="b44599e0887245dbbe59018b78901326db7e230c" ticket="" desc="perlvar: Note a deprecation"/>
-<commit votes="steveh" id="94691c1944f5865db239971507a705046fa2ce71" ticket="" desc="List files to modify."/>
-<commit votes="steveh" id="5bbd8f6148989e1b869c92ef5ec0dfee009597a4" ticket="" desc="Use F for files, not L"/>
-<commit votes="steveh" id="dbc8a3c9dcdb7b612305e7aad911da31d7d95bf5" ticket="" desc="Added 5.21.5 release to perlhist"/>
-<commit votes="steveh" id="b22c1b06a22800628b336f577cd4b6ed0eb4956e" ticket="" desc="Epigraph for 5.21.5"/>
+<commit votes="rjbs, sprout, steveh, arc" id="f86d720ebb7ad53ce8b1c12cee66586eabffe0c8" ticket="" desc="document the postderef feature in feature.pm"/>
+<commit votes="steveh, arc" id="422791e4eb03a12d17c98eb1787351280ae59789" ticket="" desc="Make eval_pv documentation more precise"/>
+<commit votes="steveh, arc" id="d4a03217c39773dcacf83845e1f96a61136eb870" ticket="" desc="perlfunc: Improve the pointer from elseif to elsif"/>
+<commit votes="steveh, arc" id="eebea631754f8059d1a963e93b061efa2190e5e5" ticket="" desc="perldiag: Add clarification."/>
+<commit votes="steveh, arc" id="7fa2fdc07ed9697d677cb165e07b12495e856d59" ticket="" desc="perlrecharclass: Use more common property synonym"/>
+<commit votes="steveh, arc" id="7ed0dd9307df05e569c8c3d5fdcf705995129a5f" ticket="" desc="perldiag: reword and rewrap an entry"/>
+<commit votes="steveh, arc" id="444d4f5cfb8c0054331f6949177c65c0b333e7d5" ticket="" desc="perlfunc: consistent spaces after dots"/>
+<commit votes="steveh, arc" id="272ce8bbdf90cc9c24e7425001986a6b681c6015" ticket="" desc="Typo in pad.c apidocs"/>
+<commit votes="steveh, arc" id="9fe0b8bee6be1d888d69587491d50258a908e8d0" ticket="" desc="todo: expand the list of OS access builtins to update"/>
+<commit votes="steveh, arc" id="abc0aa9d9625544dc299d6ca0d07dc9bd61cd947" ticket="" desc="perldiag grammar"/>
+<commit votes="steveh, arc" id="f6cce60a032fd351c1c7a6961fd3bcb043b3a784" ticket="122663" desc="add missing close paren in pod"/>
+<commit votes="steveh, arc" id="91e649137a555abe48d1527549d88a833b6226a0" ticket="" desc="perlsec: Consistent spaces after dots"/>
+<commit votes="steveh, arc" id="c6c886efdb6df3d06613743e0e6780de4a145e66" ticket="" desc="perlsec: Typo"/>
+<commit votes="steveh, arc" id="6fd9f6130d0c4ad34a2ddcf44d887097de5b2847" ticket="" desc="perlsec: Another typo"/>
+<commit votes="steveh, arc" id="9a0afbbcb76a8ee786dfbbeff1930f173fefdbad" ticket="" desc="Fix documented return type for PAD_SV"/>
+<commit votes="steveh, arc" id="f3ba690558ce39a2cc7b8e8cf53bd510503c428e" ticket="" desc="perldiag: Rewrap for better splain output"/>
+<commit votes="steveh, arc" id="12d22d1fe17e8471834a01cd417792ac5c022d62" ticket="122661" desc="Semicolon before ellipsis inside block disambiguates."/>
+<commit votes="steveh, arc" id="c43e874320ac47cebbfc6fdd4c881214d39128ad" ticket="" desc="Add epigraph for 5.20.1"/>
+<commit votes="steveh, arc" id="b77865f5def4737f78822fa2cd0da2dbc4fc647b" ticket="" desc="Consistent spaces after dots in perlsub"/>
+<commit votes="steveh, arc" id="f1126a906c58d54cb68626bd2e4c1d577d77796a" ticket="" desc="document how to graduate from experimental status"/>
+<commit votes="steveh, arc" id="2fbadc08f550cedfc8690b365310c2f6d81e960d" ticket="" desc="delete/exists on array elements is discouraged, not deprecated"/>
+<commit votes="steveh, arc" id="fc6933476282438a4b45150119b9be73dfa05b82" ticket="" desc="perlop: Nits"/>
+<commit votes="steveh, arc" id="d74605e51c7bb408573e37869390459a5232b4c7" ticket="" desc="perlop tweak"/>
+<commit votes="steveh, arc" id="845392291027b157a962eea4a4c2a97f67b995ce" ticket="" desc="perlsyn: Remove reference to potential Unicode op"/>
+<commit votes="steveh, arc" id="8af56b9d4cb926792c8f72b634303126a5b1d860" ticket="" desc="perldiag: Reunite 'perhaps you forgot to load'"/>
+<commit votes="steveh, arc" id="3cd61afa1bd59515cd57091c4a4af93a52fec327" ticket="" desc="perllocale: Nit"/>
+<commit votes="steveh, arc" id="5654cc4ecbbe52f346fca1d568892a85c0a10040" ticket="" desc="Update release announcement template"/>
+<commit votes="steveh, arc" id="84c122ba1d2b7b856521ceffc2a095716a739335" ticket="" desc="Perl 5.21.4 today"/>
+<commit votes="steveh, arc" id="28c2c58fe259cabc1510ac5b4c5ead3a7c0321d2" ticket="" desc="Add epigraph for 5.12.4"/>
+<commit votes="steveh, arc" id="7e234f81b6d7325dd91edae7737f9bd69a91fc73" ticket="" desc="Consistent spaces after dots in perlapi"/>
+<commit votes="steveh, arc" id="46f8a5eafc5328639a1c6ff58ff2407a39b09c04" ticket="" desc="Consistent spaces after dots in perlop"/>
+<commit votes="steveh, arc" id="522c63f2ecc9e36821528bb96cb98f39509068fb" ticket="" desc="perlpolicy: clarify that bans related to RT as well as p5p"/>
+<commit votes="steveh, arc" id="69520e41a46ec3b965c16d2280719fe904dc844a" ticket="" desc="perlmod and perlstyle improvements"/>
+<commit votes="steveh, arc" id="8eff31e6ddbcd94a1ff3d6489062907d5b84d9d9" ticket="" desc="Add Ed J to AUTHORS"/>
+<commit votes="steveh, arc" id="fbff26bcac0ac41e44778278aca063f82c1d70e0" ticket="" desc="Long verbatim lines in perlmodstyle"/>
+<commit votes="steveh, arc" id="369236063a992c09b5fd6efb6f0910bd1d5effcd" ticket="" desc="Consistent spaces after dots in perlmodstyle"/>
+<commit votes="steveh, arc" id="5f9f8ddf9ebc952fad1c1747b597e0d1162feac8" ticket="" desc="RMG - Note why it is that MAINT is version-bumped late rather than early"/>
+<commit votes="steveh, arc" id="dffcb1c02065e74cff64fd076677292796ee9845" ticket="" desc="RMG - Even RCs these days generally get an epigraph"/>
+<commit votes="steveh, arc" id="282f36d45b3fd6109df025ed2228f0019b49c2e5" ticket="" desc="RMG - Remove out-of-date instruction about epigraph link"/>
+<commit votes="steveh, arc" id="5e2d14fc932c50279eb04ac71b3d87d785d61420" ticket="" desc="RMG - RCs are now listed in perlhist"/>
+<commit votes="steveh, arc" id="3617dbb697e46ddf316b2067f2ded656ad6a89f9" ticket="" desc="Consistent spaces after dots in perldiag"/>
+<commit votes="sprout, steveh, arc" id="afdb3b14b41a9073ddecc2080ea6b46a16f31fc3" ticket="" desc="perlexperiment: add signatures to experimental features"/>
+<commit votes="steveh, arc" id="2a2f23e4f8a50bdcdd10563dc5d933684cb70954" ticket="122853" desc="Remarks specialness of [A-Z] and [a-z]."/>
+<commit votes="steveh, arc" id="8bbce0b10dd8ea0fad79a905746218306cf4fe17" ticket="" desc="import latest epigraphs from maint-5.18"/>
+<commit votes="steveh, arc" id="086feb3e31adb54d781926d7d8df06c266c39fae" ticket="" desc="perlhist: bring in 5.18.3 and 5.18.4 release dates"/>
+<commit votes="steveh, arc" id="b39691c2f7d54897113063413c374b78418a1684" ticket="" desc="clarify use VERSION docs"/>
+<commit votes="steveh, arc" id="2a2626d8512fc09c6ef077095e4e075978a5c2df" ticket="" desc="Consistent spaces after dots in perlfunc"/>
+<commit votes="steveh, arc" id="8f5839a98a66edafefd2ffd3056e5e3fc64e1d27" ticket="" desc="improve and reword README.win32"/>
+<commit votes="steveh, arc" id="1a83413c438a835495931877ff113ba7f7ef57cc" ticket="" desc="perlapi: Clarify two entries"/>
+<commit votes="steveh, arc" id="d962e43687db045a52ba2406aafccd53e6af23ff" ticket="122942" desc="remove trailing whitespace."/>
+<commit votes="steveh, arc" id="82f82fdb58cb3bf9651ec1ba6904780eb1105021" ticket="122938" desc="Remove trailing space from perlipc.pod."/>
+<commit votes="steveh, arc" id="eee3e3021df1a54fbbae497b1d1c817aa9f2fc29" ticket="" desc="perlguts typo"/>
+<commit votes="steveh, arc" id="8bc5de207a4b3d333e9c6535bd21b8f0b1381270" ticket="122938" desc="Modernized an example in perlipc.pod."/>
+<commit votes="steveh, arc" id="586e992d6da290482e162f13db0dd3f4533b4cd6" ticket="122996" desc="Update Perl 5 Porter list archives."/>
+<commit votes="steveh, arc" id="b44599e0887245dbbe59018b78901326db7e230c" ticket="" desc="perlvar: Note a deprecation"/>
+<commit votes="steveh, arc" id="94691c1944f5865db239971507a705046fa2ce71" ticket="" desc="List files to modify."/>
+<commit votes="steveh, arc" id="5bbd8f6148989e1b869c92ef5ec0dfee009597a4" ticket="" desc="Use F for files, not L"/>
+<commit votes="steveh, arc" id="dbc8a3c9dcdb7b612305e7aad911da31d7d95bf5" ticket="" desc="Added 5.21.5 release to perlhist"/>
+<commit votes="steveh, arc" id="b22c1b06a22800628b336f577cd4b6ed0eb4956e" ticket="" desc="Epigraph for 5.21.5"/>
 
 Part of this (but not the opcode part):
-<commit votes="steveh" id="82ce0493f7a0b47a207f493f68ab035a48f2284b" ticket="" desc="More actions to take when bumping the version number."/>
+<commit votes="steveh, arc" id="82ce0493f7a0b47a207f493f68ab035a48f2284b" ticket="" desc="More actions to take when bumping the version number."/>
 
-<commit votes="steveh" id="aae773bbd74e39596c3ed0ed403f36b245b6d687" ticket="" desc="perlebcdic: Add clarification"/>
-<commit votes="steveh" id="c981563317d1c97170a53c9a89a80456442ed201" ticket="" desc="make it clear not to use git-send-email at all"/>
-<commit votes="steveh" id="5df244132ec94f1e67bd70db61d4ea89bd824b00" ticket="" desc="git format-patch -M option takes branch"/>
-<commit votes="steveh" id="eb9e3b14fd77e43b36846b86f8780d23fda50258" ticket="" desc="recharclass: Corrections and nits"/>
-<commit votes="steveh" id="9a63e366d1167a528e8df0d80c9d85c0830d63e9" ticket="" desc="Consistent spaces after dots in perlapi.pod"/>
-<commit votes="steveh" id="920aefcab1aef66ce585b8cc2f371ae5bfc9ee63" ticket="123081" desc="Move the POD away from $a and $b."/>
-<commit votes="steveh" id="592708b4f2c747075fb01e3ad9276a2a9b338f27" ticket="123081" desc="Move away from $a and $b for examples."/>
-<commit votes="steveh" id="db69102781c2515ff4657c48b95696c5f5e3bb78" ticket="123081" desc="$a,$b deprecation in perlop.pod."/>
-<commit votes="steveh" id="24fe90a14d91f512527a158a02ea19d502723856" ticket="" desc="perlfunc: Mention map {;...} convention"/>
+<commit votes="steveh, arc" id="aae773bbd74e39596c3ed0ed403f36b245b6d687" ticket="" desc="perlebcdic: Add clarification"/>
+<commit votes="steveh, arc" id="c981563317d1c97170a53c9a89a80456442ed201" ticket="" desc="make it clear not to use git-send-email at all"/>
+<commit votes="steveh, arc" id="5df244132ec94f1e67bd70db61d4ea89bd824b00" ticket="" desc="git format-patch -M option takes branch"/>
+<commit votes="steveh, arc" id="eb9e3b14fd77e43b36846b86f8780d23fda50258" ticket="" desc="recharclass: Corrections and nits"/>
+<commit votes="steveh, arc" id="9a63e366d1167a528e8df0d80c9d85c0830d63e9" ticket="" desc="Consistent spaces after dots in perlapi.pod"/>
+<commit votes="steveh, arc" id="920aefcab1aef66ce585b8cc2f371ae5bfc9ee63" ticket="123081" desc="Move the POD away from $a and $b."/>
+<commit votes="steveh, arc" id="592708b4f2c747075fb01e3ad9276a2a9b338f27" ticket="123081" desc="Move away from $a and $b for examples."/>
+<commit votes="steveh, arc" id="db69102781c2515ff4657c48b95696c5f5e3bb78" ticket="123081" desc="$a,$b deprecation in perlop.pod."/>
+<commit votes="steveh, arc" id="24fe90a14d91f512527a158a02ea19d502723856" ticket="" desc="perlfunc: Mention map {;...} convention"/>
 
-<commit votes="steveh" id="7eb3f2cf1bb02dbe7d9bf2f9fe40d45164eeaf2a" ticket="" desc="Improve connected() doc"/>
-<commit votes="steveh" id="d7adc1ec0500a4328cb0a521f0465954fa2325cb" ticket="" desc="bump $IO::Socket::VERSION to 1.38"/>
-<commit votes="steveh" id="577437f753b1e6471709f6b5fa50908fa9754178" ticket="" desc="Glenn D. Golden is now a perl AUTHOR"/>
-<commit votes="steveh" id="bab69578a8b6966781f8808f12d668db87fc7778" ticket="" desc="perldelta for 7eb3f2cf1bb0"/>
+<commit votes="steveh, arc" id="7eb3f2cf1bb02dbe7d9bf2f9fe40d45164eeaf2a" ticket="" desc="Improve connected() doc"/>
+<commit votes="steveh, arc" id="d7adc1ec0500a4328cb0a521f0465954fa2325cb" ticket="" desc="bump $IO::Socket::VERSION to 1.38"/>
+<commit votes="steveh, arc" id="577437f753b1e6471709f6b5fa50908fa9754178" ticket="" desc="Glenn D. Golden is now a perl AUTHOR"/>
+<commit votes="steveh, arc" id="bab69578a8b6966781f8808f12d668db87fc7778" ticket="" desc="perldelta for 7eb3f2cf1bb0"/>
 
-<commit votes="steveh" id="90a44ae623db0999c98093c3bb234c1479755a2c" ticket="" desc="perliol.pod: Correct flags type in _PerlIO struct"/>
-<commit votes="steveh" id="663d437af9b7e1191e696b500650bce9e74fde08" ticket="" desc="perllocale: Nits and clarifications"/>
-<commit votes="steveh" id="2890cc8c9f56ed8f91a8a6134e7b2fb7beb23f38" ticket="" desc="Trailing whitespace removed in perlport.pod"/>
-<commit votes="steveh" id="86ceb7c6d74c3ecff8db4296861f8ededaa286a8" ticket="" desc="perlfunc: Fix typo"/>
-<commit votes="steveh" id="42c583b4b82b42bf02f26ea582ecfb3e94af8cc5" ticket="123230" desc="Add word missing from docs for 'wait' function."/>
-<commit votes="steveh" id="11741df4ee8d4b20d3e30f7f1b613a8d1b891059" ticket="" desc="Add epigraph for v5.21.6"/>
-<commit votes="steveh" id="7eb19200f4ef00b9a61884cbb755b9621b9c701d" ticket="" desc="Update perlhist for v5.21.6"/>
-<commit votes="steveh" id="1b0fd1e8346658cb037cc394f0c428007124b916" ticket="123271" desc="Storable: fixup pod wording"/>
+<commit votes="steveh, arc" id="90a44ae623db0999c98093c3bb234c1479755a2c" ticket="" desc="perliol.pod: Correct flags type in _PerlIO struct"/>
+<commit votes="steveh, arc" id="663d437af9b7e1191e696b500650bce9e74fde08" ticket="" desc="perllocale: Nits and clarifications"/>
+<commit votes="steveh, arc" id="2890cc8c9f56ed8f91a8a6134e7b2fb7beb23f38" ticket="" desc="Trailing whitespace removed in perlport.pod"/>
+<commit votes="steveh, arc" id="86ceb7c6d74c3ecff8db4296861f8ededaa286a8" ticket="" desc="perlfunc: Fix typo"/>
+<commit votes="steveh, arc" id="42c583b4b82b42bf02f26ea582ecfb3e94af8cc5" ticket="123230" desc="Add word missing from docs for 'wait' function."/>
+<commit votes="steveh, arc" id="11741df4ee8d4b20d3e30f7f1b613a8d1b891059" ticket="" desc="Add epigraph for v5.21.6"/>
+<commit votes="steveh, arc" id="7eb19200f4ef00b9a61884cbb755b9621b9c701d" ticket="" desc="Update perlhist for v5.21.6"/>
+<commit votes="steveh, arc" id="1b0fd1e8346658cb037cc394f0c428007124b916" ticket="123271" desc="Storable: fixup pod wording"/>
 <commit votes="steveh" id="2174049d55b865d9bed8adad15157d3061d5ae10" ticket="" desc="Update release manager documents for producing .xz tarballs"/>
-<commit votes="steveh" id="ecafefb82337acf1046f535da14a6fc0293f70b5" ticket="" desc="perlfunc: document immediate stricture effect of our"/>
-<commit votes="steveh" id="5566fa1536b7e3ab06bf74ce785d42d16c663791" ticket="122986" desc="Convert \ts to spaces in perlref.pod."/>
-<commit votes="steveh" id="0e3be540c5c5d8ec7d6c682091855e8865b99b51" ticket="122987" desc="Remove trailing whitespace."/>
-<commit votes="steveh" id="e6ebbe921e63dbd445aa30e30a0b2b80574b88a0" ticket="122987" desc="perlfork.pod: convert \ts to spaces."/>
-<commit votes="steveh" id="15faabe4bd597caa63a35d745cc5e93792a347dc" ticket="123377" desc="Convert tabs to spaces and remove trailing space."/>
+<commit votes="steveh, arc" id="ecafefb82337acf1046f535da14a6fc0293f70b5" ticket="" desc="perlfunc: document immediate stricture effect of our"/>
+<commit votes="steveh, arc" id="5566fa1536b7e3ab06bf74ce785d42d16c663791" ticket="122986" desc="Convert \ts to spaces in perlref.pod."/>
+<commit votes="steveh, arc" id="0e3be540c5c5d8ec7d6c682091855e8865b99b51" ticket="122987" desc="Remove trailing whitespace."/>
+<commit votes="steveh, arc" id="e6ebbe921e63dbd445aa30e30a0b2b80574b88a0" ticket="122987" desc="perlfork.pod: convert \ts to spaces."/>
+<commit votes="steveh, arc" id="15faabe4bd597caa63a35d745cc5e93792a347dc" ticket="123377" desc="Convert tabs to spaces and remove trailing space."/>
 
 To be included in an "Errata From Previous Releases":
-<commit votes="steveh" id="6ff8f256561a974b63b784ae8681c284ada44f7a" ticket="122655" desc="perldelta: Entry for [perl #122655]."/>
+<commit votes="steveh, arc" id="6ff8f256561a974b63b784ae8681c284ada44f7a" ticket="122655" desc="perldelta: Entry for [perl #122655]."/>
 
 Not in any of the above categories, but would be nice anyway?:
 <commit votes="steveh" id="f276fdad8f6660f36944c895587a7748585e4969" ticket="" desc="Added -x option to makerel to produce .xz tarballs"/>
