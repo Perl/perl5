@@ -392,8 +392,8 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
 
 #ifdef MYMALLOC
 #define EMBEDMYMALLOC	/**/
-/* #define USE_PERL_SBRK	/**/
-/* #define PERL_SBRK_VIA_MALLOC	/**/
+/* #define USE_PERL_SBRK	/ **/
+/* #define PERL_SBRK_VIA_MALLOC	/ **/
 #endif
 
 #ifdef PERL_TEXTMODE_SCRIPTS
