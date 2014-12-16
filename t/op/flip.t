@@ -5,7 +5,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(13);
+plan(14);
 
 @a = (1,2,3,4,5,6,7,8,9,10,11,12);
 @b = ();
@@ -101,3 +101,9 @@ sub f {
 13 5
 EOT
 }
+
+# Void context gives parenthesized lhs scalar context
+no warnings 'void';
+sub c { $context = qw[ void scalar list ][wantarray + defined wantarray] }
+(c())x34;
+is $context, 'scalar', '(...)x... in void context';
