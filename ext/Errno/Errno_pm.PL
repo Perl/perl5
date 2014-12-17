@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.21";
+our $VERSION = "1.22";
 
 my %err = ();
 
@@ -104,15 +104,9 @@ sub default_cpp {
 
 sub get_files {
     my %file = ();
-    # VMS keeps its include files in system libraries (well, except for Gcc)
+    # VMS keeps its include files in system libraries
     if ($^O eq 'VMS') {
-	if ($Config{vms_cc_type} eq 'decc') {
-	    $file{'Sys$Library:DECC$RTLDEF.TLB'} = 1;
-	} elsif ($Config{vms_cc_type} eq 'vaxc') {
-	    $file{'Sys$Library:vaxcdef.tlb'} = 1;
-	} elsif ($Config{vms_cc_type} eq 'gcc') {
-	    $file{'gnu_cc_include:[000000]errno.h'} = 1;
-	}
+	$file{'Sys$Library:DECC$RTLDEF.TLB'} = 1;
     } elsif ($^O eq 'os390') {
 	# OS/390 C compiler doesn't generate #file or #line directives
 	$file{'/usr/include/errno.h'} = 1;
