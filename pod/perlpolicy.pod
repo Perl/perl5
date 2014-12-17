@@ -182,7 +182,9 @@ bug as a feature, we need to treat it as such.
 
 New syntax and semantics which don't break existing language constructs
 and syntax have a much lower bar.  They merely need to prove themselves
-to be useful, elegant, well designed, and well tested.
+to be useful, elegant, well designed, and well tested.  In most cases,
+these additions will be marked as I<experimental> for some time.  See
+below for more on that.
 
 =head2 Terminology
 
