@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 42; # not counting those in the __DATA__ section
+my $tests = 43; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -392,6 +392,10 @@ like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
                     BEGIN { weaken($_=\$::{f}) }'),
      qr/sub f\s*\(\$\)\s*;/,
     'prototyped stub with weak reference to the stash entry';
+like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+           prog => 'sub f () { 42 }'),
+     qr/sub f\s*\(\)\s*\{\s*42;\s*\}/,
+    'constant perl sub declaration';
 
 # BEGIN blocks
 SKIP : {

@@ -17,7 +17,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER OPpREPEAT_DOLIST
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
-	 SVpad_TYPED
+	 SVs_PADTMP SVpad_TYPED
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED PMf_EXTENDED_MORE
@@ -727,13 +727,27 @@ sub stash_subs {
     while (my ($key, $val) = each %stash) {
 	my $flags = $val->FLAGS;
 	if ($flags & SVf_ROK) {
-	    # A reference.  Dump this if it is a reference to a CV.
-	    # But skip proxy constant subroutines, as some form of perl-
-	    # space visible code must have created them, be it a use
+	    # A reference.  Dump this if it is a reference to a CV.  If it
+	    # is a constant acting as a proxy for a full subroutine, then
+	    # we may or may not have to dump it.  If some form of perl-
+	    # space visible code must have created it, be it a use
 	    # statement, or some direct symbol-table manipulation code that
-	    # we will Deparse.
-	    if (class(my $cv = $val->RV) eq "CV") {
-		$self->todo($cv, 0);
+	    # we will deparse, then we don’t want to dump it.  If it is the
+	    # result of a declaration like sub f () { 42 } then we *do*
+	    # want to dump it.  The only way to distinguish these seems
+	    # to be the SVs_PADTMP flag on the constant, which is admit-
+	    # tedly a hack.
+	    my $class = class(my $referent = $val->RV);
+	    if ($class eq "CV") {
+		$self->todo($referent, 0);
+	    } elsif (
+		$class !~ /^(AV|HV|CV|FM|IO)\z/
+		# A more robust way to write that would be this, but B does
+		# not provide the SVt_ constants:
+		# ($referent->FLAGS & B::SVTYPEMASK) < B::SVt_PVAV
+		and $referent->FLAGS & SVs_PADTMP
+	    ) {
+		push @{$self->{'protos_todo'}}, [$pack . $key, $val];
 	    }
 	} elsif ($flags & (SVf_POK|SVf_IOK)) {
 	    # Just a prototype. As an ugly but fairly effective way
@@ -770,8 +784,12 @@ sub print_protos {
     my $ar;
     my @ret;
     foreach $ar (@{$self->{'protos_todo'}}) {
-	my $proto = (defined $ar->[1] ? " (". $ar->[1] . ")" : "");
-	push @ret, "sub " . $ar->[0] .  "$proto;\n";
+	my $body = defined $ar->[1]
+		? ref $ar->[1]
+		    ? " () {\n    " . $self->const($ar->[1]->RV,0) . ";\n}"
+		    : " (". $ar->[1] . ");"
+		: ";";
+	push @ret, "sub " . $ar->[0] .  "$body\n";
     }
     delete $self->{'protos_todo'};
     return @ret;
