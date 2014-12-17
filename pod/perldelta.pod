@@ -261,13 +261,23 @@ for the C<DESTROY> method.  [perl #123418]
 
 =item *
 
+L<Locale::Maketext> has been upgraded from version 1.25 to 1.26.
+
+=item *
+
 The PathTools module collection has been upgraded from 3.52 to 3.53.
 
 Don't turn leading C<//> into C</> on Cygwin. [perl #122635]
 
 =item *
 
-L<Locale::Maketext> has been upgraded from version 1.25 to 1.26.
+L<PerlIO::scalar> has been upgraded from version 0.20 to 0.21.
+
+Reading from a position well past the end of the scalar now correctly
+returns end of file.  [perl #123443]
+
+Seeking to a negative position still fails, but no longer leaves the
+file position set to a negation location.
 
 =item *
 
