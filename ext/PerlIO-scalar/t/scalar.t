@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 114;
+use Test::More tests => 118;
 
 my $fh;
 my $var = "aaa\n";
@@ -490,4 +490,13 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     is ref $x, "SCALAR", 'still a ref after opening for appending';
     print $refh "boo\n";
     is $x, $as_string."boo\n", 'string gets appended to ref';
+}
+
+{ # [perl #123443]
+    my $buf0 = "hello";
+    open my $fh, "<", \$buf0 or die $!;
+    ok(seek($fh, 2**32, SEEK_SET), "seek to a large position");
+    is(read($fh, my $tmp, 1), 0, "read from a large offset");
+    is($tmp, "", "should have read nothing");
+    ok(eof($fh), "fh should be eof");
 }

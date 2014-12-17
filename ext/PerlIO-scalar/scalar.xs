@@ -152,7 +152,7 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	SV *sv = s->var;
 	char *p;
 	STRLEN len;
-	I32 got;
+        STRLEN got;
 	p = SvPV(sv, len);
 	if (SvUTF8(sv)) {
 	    if (sv_utf8_downgrade(sv, TRUE)) {
@@ -165,9 +165,15 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	        return -1;
 	    }
 	}
-	got = len - (STRLEN)(s->posn);
-	if (got <= 0)
+        /* I assume that Off_t is at least as large as len (which 
+         * seems safe) and that the size of the buffer in our SV is
+         * always less than half the size of the address space
+         */
+        assert(sizeof(Off_t) >= sizeof(len));
+        assert((Off_t)len >= 0);
+        if ((Off_t)len <= s->posn)
 	    return 0;
+	got = len - (STRLEN)(s->posn);
 	if ((STRLEN)got > (STRLEN)count)
 	    got = (STRLEN)count;
 	Copy(p + (STRLEN)(s->posn), vbuf, got, STDCHAR);
