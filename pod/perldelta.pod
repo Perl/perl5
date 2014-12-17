@@ -495,7 +495,7 @@ existing convention.
 
 A new op class, C<UNOP_AUX>, has been added. This is a subclass of
 C<UNOP> with an C<op_aux> field added, which points to an array of unions
-of C<UV>, C<SV*> etc. It intended for where an op needs to store more data
+of C<UV>, C<SV*> etc. It is intended for where an op needs to store more data
 than a simple C<op_sv> or whatever. Currently the only op of this type is
 C<OP_MULTIDEREF> (see below).
 
@@ -507,7 +507,7 @@ variable. For example the expression C<$a[0]{$k}[$i]>, which previously
 involved ten C<rv2Xv>, C<Xelem>, C<gvsv> and C<const> ops is now performed
 by a single C<multideref> op. It can also handle C<local>, C<exists> and
 C<delete>. A non-simple index expression, such as C<[$i+1]> is still done
-using C<aelem/helem>, and single-level array lookup with small constant
+using C<aelem/helem>, and single-level array lookup with a small constant
 index is still done using C<aelemfast>.
 
 =back
