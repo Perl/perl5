@@ -103,28 +103,33 @@ IV
 PerlIOScalar_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
 {
     PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
+    Off_t new_posn;
 
     switch (whence) {
     case SEEK_SET:
-	s->posn = offset;
+	new_posn = offset;
 	break;
     case SEEK_CUR:
-	s->posn = offset + s->posn;
+	new_posn = offset + s->posn;
 	break;
     case SEEK_END:
       {
 	STRLEN oldcur;
 	(void)SvPV(s->var, oldcur);
-	s->posn = offset + oldcur;
+	new_posn = offset + oldcur;
 	break;
       }
+    default:
+        SETERRNO(EINVAL, SS_IVCHAN);
+        return -1;
     }
-    if (s->posn < 0) {
+    if (new_posn < 0) {
         if (ckWARN(WARN_LAYER))
 	    Perl_warner(aTHX_ packWARN(WARN_LAYER), "Offset outside string");
 	SETERRNO(EINVAL, SS_IVCHAN);
 	return -1;
     }
+    s->posn = new_posn;
     return 0;
 }
 

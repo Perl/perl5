@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 118;
+use Test::More tests => 120;
 
 my $fh;
 my $var = "aaa\n";
@@ -499,4 +499,11 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     is(read($fh, my $tmp, 1), 0, "read from a large offset");
     is($tmp, "", "should have read nothing");
     ok(eof($fh), "fh should be eof");
+}
+
+{
+    my $buf0 = "hello";
+    open my $fh, "<", \$buf0 or die $!;
+    ok(!seek($fh, -10, SEEK_CUR), "seek to negative position");
+    is(tell($fh), 0, "shouldn't change the position");
 }
