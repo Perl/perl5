@@ -2728,7 +2728,7 @@ instead, except within S<C<(?[   ])>>, where it is a fatal error.
 The S<<-- HERE> shows whereabouts in the regular expression the
 escape was discovered.
 
-=item %s: Invalid handshake key got %p needed %p, binaries are mismatched
+=item %s: loadable library and perl binaries are mismatched (got handshake key %p, needed %p)
 
 (P) A dynamic loading library C<.so> or C<.dll> was being loaded into the
 process that was built against a different build of perl than the

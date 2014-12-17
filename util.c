@@ -5425,8 +5425,8 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
     if(UNLIKELY(got != need)) {
 	bad_handshake:/* recycle branch and string from above */
 	if(got != (void *)HSf_NOCHK)
-	    noperl_die("%s: Invalid handshake key got %p"
-		" needed %p, binaries are mismatched",
+	    noperl_die("%s: loadable library and perl binaries are mismatched"
+                       " (got handshake key %p, needed %p)\n",
 		file, got, need);
     }
 
