@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 21;
+plan tests => 25;
 
 # Some /qr/ tests
 my $re = qr/(.*) b c d/;
@@ -46,4 +46,16 @@ is($3, undef, "(.*) didn't capture with /n");
 
 is($+{a}, 'a', "\$+{a} is correct");
 is($+{b}, 'b', "\$+{b} is correct");
+
+is(qr/(what)/n,     '(?^n:(what))',
+  'qr//n stringified is correct');
+
+is(qr/(?n:what)/,   '(?^:(?n:what))',
+  'qr/(?n:...)/ stringified is correct');
+
+is(qr/(?-n:what)/,  '(?^:(?-n:what))',
+  'qr/(?-n:...)/ stringified is correct');
+
+is(qr/(?-n:what)/n, '(?^n:(?-n:what))',
+  'qr/(?-n:...)/n stringified is correct');
 
