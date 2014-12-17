@@ -43,6 +43,8 @@ SKIP:
       and skip "fsync() documented to fail on non-writable handles on $^O", 1;
     $^O eq 'cygwin'
       and skip "fsync() on cygwin uses FlushFileBuffers which requires a writable handle", 1;
+    $^O eq 'VMS'
+      and skip "fsync() not allowed on a read-only handle on $^O", 1;
     open my $fh, "<", "t/io_xs.t"
        or skip "Cannot open t/io_xs.t read-only: $!", 1;
     ok($fh->sync, "sync to a read only handle")
