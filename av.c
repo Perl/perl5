@@ -748,10 +748,6 @@ The Perl equivalent for this is C<$#myarray>.
 
 (A slightly shorter form is C<av_tindex>.)
 
-=for apidoc av_tindex
-
-Same as L</av_top_index>.
-
 =for apidoc av_len
 
 Same as L</av_top_index>.  Note that, unlike what the name implies, it returns

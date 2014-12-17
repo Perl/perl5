@@ -159,6 +159,10 @@ DOC:
 		$ret = $docref->{retval};
 	    }
 
+	    if (exists $docs{$inline_where}{$curheader}{$name}) {
+                warn "$0: duplicate API entry for '$name' in $inline_where/$curheader\n";
+                next;
+            }
 	    $docs{$inline_where}{$curheader}{$name}
 		= [$flags, $docs, $ret, $file, @args];
 

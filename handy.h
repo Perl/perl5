@@ -833,10 +833,6 @@ The first code point of the lowercased version is returned
 
 The input character at C<p> is assumed to be well-formed.
 
-=for apidoc Am|U8|toLOWER_LC|U8 ch
-Converts the specified character to lowercase using the current locale's rules,
-if possible; otherwise returns the input character itself.
-
 =for apidoc Am|U8|toTITLE|U8 ch
 Converts the specified character to titlecase.  If the input is anything but an
 ASCII lowercase character, that input character itself is returned.  Variant
