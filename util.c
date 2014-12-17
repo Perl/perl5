@@ -5343,28 +5343,42 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
 #endif /* PERL_IMPLICIT_CONTEXT */
 
 
-/* The meaning of the varargs is determined U32 key arg. This is not a format
-   string. The U32 key is assembled with HS_KEY.
+/* Perl_xs_handshake():
+   implement the various XS_*_BOOTCHECK macros, which are added to .c
+   files by ExtUtils::ParseXS, to check that the perl the module was built
+   with is binary compatible with the running perl.
 
-   v_my_perl arg is "PerlInterpreter * my_perl" if PERL_IMPLICIT_CONTEXT and
-   otherwise "CV * cv" (boot xsub's CV *). v_my_perl will catch where a threaded
-   future perl526.dll calling IO.dll for example, and IO.dll was linked with
-   threaded perl524.dll, and both perl526.dll and perl524.dll are in %PATH and
-   the Win32 DLL loader sucessfully can load IO.dll into the process but
-   simultaniously it loaded a interp of a different version into the process,
-   and XS code will naturally pass SV*s created by perl524.dll for perl526.dll
-   to use through perl526.dll's my_perl->Istack_base.
+   usage:
+       Perl_xs_handshake(U32 key, void * v_my_perl, const char * file,
+            [U32 items, U32 ax], [char * api_version], [char * xs_version])
 
-   v_my_perl (v=void) can not be the first arg since then key will be out of
-   place in a threaded vs non-threaded mixup and analyzing the key number's
-   bitfields won't reveal the problem since it will be a valid key
-   (unthreaded perl) on interp side, but croak reports the XS mod's key as
-   gibberish (it is really my_perl ptr) (threaded XS mod), or if threaded perl
-   and unthreaded XS module, threaded perl will look at uninit C stack or uninit
-   register to get var key (remember it assumes 1st arg is interp cxt).
+   The meaning of the varargs is determined the U32 key arg (which is not
+   a format string). The fields of key are assembled by using HS_KEY().
 
-Perl_xs_handshake(U32 key, void * v_my_perl, const char * file,
-[U32 items, U32 ax], [char * api_version], [char * xs_version]) */
+   Under PERL_IMPLICIT_CONTEX, the v_my_perl arg is of type
+   "PerlInterpreter *" and represents the callers context; otherwise it is
+   of type "CV *", and is the boot xsub's CV.
+
+   v_my_perl will catch where a threaded future perl526.dll calling IO.dll
+   for example, and IO.dll was linked with threaded perl524.dll, and both
+   perl526.dll and perl524.dll are in %PATH and the Win32 DLL loader
+   successfully can load IO.dll into the process but simultaneously it
+   loaded an interpreter of a different version into the process, and XS
+   code will naturally pass SV*s created by perl524.dll for perl526.dll to
+   use through perl526.dll's my_perl->Istack_base.
+
+   v_my_perl cannot be the first arg, since then 'key' will be out of
+   place in a threaded vs non-threaded mixup; and analyzing the key
+   number's bitfields won't reveal the problem, since it will be a valid
+   key (unthreaded perl) on interp side, but croak will report the XS mod's
+   key as gibberish (it is really a my_perl ptr) (threaded XS mod); or if
+   it's a threaded perl and an unthreaded XS module, threaded perl will
+   look at an uninit C stack or an uninit register to get 'key'
+   (remember that it assumes that the 1st arg is the interp cxt).
+
+   'file' is the source filename of the caller.
+*/
+
 I32
 Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
 {
@@ -5457,6 +5471,7 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
     va_end(args);
     return ax;
 }
+
 
 STATIC void
 S_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
