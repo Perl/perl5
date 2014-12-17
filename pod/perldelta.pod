@@ -27,6 +27,12 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 faster array and hash lookups
+
+Array and hash lookups (especially nested ones) that use only constants
+or simple variables as keys, are now considerably faster. See
+L</Internal Changes> for more details.
+
 =head2 C<fileno> now works on directory handles
 
 When the relevant support is available in the operating system, the
@@ -484,6 +490,25 @@ removed.
 The C<OP_SIBLING> and C<OP_HAS_SIBLING> macros added in an earlier 5.21.x
 release have been renamed C<OpSIBLING> and C<OpHAS_SIBLING>, following the
 existing convention.
+
+=item *
+
+A new op class, C<UNOP_AUX>, has been added. This is a subclass of
+C<UNOP> with an C<op_aux> field added, which points to an array of unions
+of C<UV>, C<SV*> etc. It intended for where an op needs to store more data
+than a simple C<op_sv> or whatever. Currently the only op of this type is
+C<OP_MULTIDEREF> (see below).
+
+=item *
+
+A new op has been added, C<OP_MULTIDEREF>, which performs one or more
+nested array and hash lookups where the key is a constant or simple
+variable. For example the expression C<$a[0]{$k}[$i]>, which previously
+involved ten C<rv2Xv>, C<Xelem>, C<gvsv> and C<const> ops is now performed
+by a single C<multideref> op. It can also handle C<local>, C<exists> and
+C<delete>. A non-simple index expression, such as C<[$i+1]> is still done
+using C<aelem/helem>, and single-level array lookup with small constant
+index is still done using C<aelemfast>.
 
 =back
 
