@@ -3,11 +3,6 @@ use ExtUtils::MakeMaker;
 my $define = '-DSDBM -DDUFF';
 $define .= ' -DWIN32 -DPERL_STATIC_SYMS' if ($^O eq 'MSWin32');
 
-if ($^O eq 'VMS') {  # Old VAXC compiler can't handle Duff's device
-    require Config;
-    $define =~ s/\s+-DDUFF// if $Config::Config{'vms_cc_type'} eq 'vaxc';
-}
-
 WriteMakefile(
     NAME      => 'sdbm', # (doesn't matter what the name is here) oh yes it does
 #    LINKTYPE  => 'static',
