@@ -221,6 +221,15 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 XXX Describe change here
 
+The message
+L<Locale '%s' may not work well.%s|perldiag/"Locale '%s' may not work well.%s">
+is no longer raised unless the problemtatic locale is actually used in
+the Perl program.  Previously it was raised if it merely was the
+underlying locale.  All Perl programs have an underlying locale at all
+times, but something like a C<S<use locale>> is needed for that locale
+to actually have some effect.  This message will not be raised when
+the underlying locale is hidden.
+
 =back
 
 =head1 Utility Changes

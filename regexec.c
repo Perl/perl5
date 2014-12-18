@@ -1456,6 +1456,7 @@ STMT_START {                                                                    
     U8 flags = FOLD_FLAGS_FULL;                                                     \
     switch (trie_type) {                                                            \
     case trie_flu8:                                                                 \
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                         \
         goto do_trie_utf8_fold;                                                     \
     case trie_utf8_exactfa_fold:                                                    \
         flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
@@ -1493,6 +1494,8 @@ STMT_START {                                                                    
         }                                                                           \
         break;                                                                      \
     case trie_utf8l:                                                                \
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                         \
+        /* FALLTHROUGH */                                                           \
     case trie_utf8:                                                                 \
         uvc = utf8n_to_uvchr( (const U8*) uc, UTF8_MAXLEN, &len, uniflags );        \
         break;                                                                      \
@@ -1753,6 +1756,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     /* We know what class it must start with. */
     switch (OP(c)) {
     case ANYOFL:
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        /* FALLTHROUGH */
     case ANYOF:
         if (utf8_target) {
             REXEC_FBC_UTF8_CLASS_SCAN(
@@ -1794,6 +1799,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         goto do_exactf_non_utf8;
 
     case EXACTFL:
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         if (is_utf8_pat || utf8_target || IN_UTF8_CTYPE_LOCALE) {
             utf8_fold_flags = FOLDEQ_LOCALE;
             goto do_exactf_utf8;
@@ -1921,9 +1927,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     }
 
     case BOUNDL:
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         FBC_BOUND(isWORDCHAR_LC, isWORDCHAR_LC_uvchr, isWORDCHAR_LC_utf8);
         break;
     case NBOUNDL:
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         FBC_NBOUND(isWORDCHAR_LC, isWORDCHAR_LC_uvchr, isWORDCHAR_LC_utf8);
         break;
     case BOUND:
@@ -1958,6 +1966,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         /* FALLTHROUGH */
 
     case POSIXL:
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         REXEC_FBC_CSCAN(to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(c), (U8 *) s)),
                         to_complement ^ cBOOL(isFOO_lc(FLAGS(c), *s)));
         break;
@@ -4174,6 +4183,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		HV * widecharmap = MUTABLE_HV(rexi->data->data[ ARG( scan ) + 1 ]);
                 U32 state = trie->startstate;
 
+                if (scan->flags == EXACTL || scan->flags == EXACTFLU8) {
+                    _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+                }
                 if (   trie->bitmap
                     && (NEXTCHR_IS_EOS || !TRIE_BITMAP_TEST(trie, nextchr)))
                 {
@@ -4448,6 +4460,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 #undef  ST
 
 	case EXACTL:             /*  /abc/l       */
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            /* FALLTHROUGH */
 	case EXACT: {            /*  /abc/        */
 	    char *s = STRING(scan);
 	    ln = STR_LEN(scan);
@@ -4534,6 +4548,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    const char * s;
 	    U32 fold_utf8_flags;
 
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
             folder = foldEQ_locale;
             fold_array = PL_fold_locale;
 	    fold_utf8_flags = FOLDEQ_LOCALE;
@@ -4615,6 +4630,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	 * have to set the FLAGS fields of these */
 	case BOUNDL:  /*  /\b/l  */
 	case NBOUNDL: /*  /\B/l  */
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            /* FALLTHROUGH */
 	case BOUND:   /*  /\b/   */
 	case BOUNDU:  /*  /\b/u  */
 	case BOUNDA:  /*  /\b/a  */
@@ -4694,6 +4711,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    break;
 
 	case ANYOFL:  /*  /[abc]/l      */
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            /* FALLTHROUGH */
 	case ANYOF:  /*   /[abc]/       */
             if (NEXTCHR_IS_EOS)
                 sayNO;
@@ -4718,6 +4737,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* FALLTHROUGH */
 
         case POSIXL:    /* \w or [:punct:] etc. under /l */
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
             if (NEXTCHR_IS_EOS)
                 sayNO;
 
@@ -5094,6 +5114,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    const U8 *fold_array;
 	    UV utf8_fold_flags;
 
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
 	    type = REFFL;
@@ -5138,6 +5159,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    goto do_nref_ref_common;
 
 	case REFFL:  /*  /\1/il  */
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
 	    utf8_fold_flags = FOLDEQ_LOCALE;
@@ -7208,6 +7230,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         }
 	break;
     case EXACTL:
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        /* FALLTHROUGH */
     case EXACT:
         assert(STR_LEN(p) == reginfo->is_utf8_pat ? UTF8SKIP(STRING(p)) : 1);
 
@@ -7281,6 +7305,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	goto do_exactf;
 
     case EXACTFL:
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 	utf8_flags = FOLDEQ_LOCALE;
 	goto do_exactf;
 
@@ -7360,6 +7385,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	break;
     }
     case ANYOFL:
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        /* FALLTHROUGH */
     case ANYOF:
 	if (utf8_target) {
 	    while (hardcount < max
@@ -7382,6 +7409,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
     case POSIXL:
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 	if (! utf8_target) {
 	    while (scan < loceol && to_complement ^ cBOOL(isFOO_lc(FLAGS(p),
                                                                    *scan)))
@@ -7601,16 +7629,18 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	}
 	break;
 
+    case BOUNDL:
+    case NBOUNDL:
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        /* FALLTHROUGH */
     case BOUND:
     case BOUNDA:
-    case BOUNDL:
     case BOUNDU:
     case EOS:
     case GPOS:
     case KEEPS:
     case NBOUND:
     case NBOUNDA:
-    case NBOUNDL:
     case NBOUNDU:
     case OPFAIL:
     case SBOL:

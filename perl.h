@@ -5779,6 +5779,27 @@ typedef struct am_table_short AMTS;
 #   define IN_LC(category)  \
                     (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
 
+#   if defined (PERL_CORE) || defined (PERL_IN_XSUB_RE)
+
+        /* This internal macro should be called from places that operate under
+         * locale rules.  It there is a problem with the current locale that
+         * hasn't been raised yet, it will output a warning this time */
+#       define _CHECK_AND_WARN_PROBLEMATIC_LOCALE                           \
+	STMT_START {                                                        \
+            if (PL_warn_locale) {                                           \
+                /*GCC_DIAG_IGNORE(-Wformat-security);   Didn't work */      \
+                Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),                 \
+                                     SvPVX(PL_warn_locale),                 \
+                                     0 /* dummy to avoid comp warning */ ); \
+                /* GCC_DIAG_RESTORE; */                                     \
+                SvREFCNT_dec_NN(PL_warn_locale);                            \
+                PL_warn_locale = NULL;                                      \
+            }                                                               \
+        }  STMT_END
+
+
+#   endif   /* PERL_CORE or PERL_IN_XSUB_RE */
+
 #else   /* No locale usage */
 #   define IN_LOCALE_RUNTIME                0
 #   define IN_SOME_LOCALE_FORM_RUNTIME      0
@@ -5793,6 +5814,8 @@ typedef struct am_table_short AMTS;
 #   define IN_LC_COMPILETIME(category)      0
 #   define IN_LC_RUNTIME(category)          0
 #   define IN_LC(category)                  0
+
+#   define _CHECK_AND_WARN_PROBLEMATIC_LOCALE
 #endif
 
 #ifdef USE_LOCALE_NUMERIC

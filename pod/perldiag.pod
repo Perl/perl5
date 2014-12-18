@@ -2982,22 +2982,34 @@ likely fix this error.
 
 =item Locale '%s' may not work well.%s
 
-(W locale) The named locale that Perl is now trying to use is not fully
-compatible with Perl.  The second C<%s> gives a reason.
+(W locale) You are using the named locale, which is a non-UTF-8 one, and
+which Perl has determined is not fully compatible with Perl.  The second
+C<%s> gives a reason.
 
 By far the most common reason is that the locale has characters in it
 that are represented by more than one byte.  The only such locales that
 Perl can handle are the UTF-8 locales.  Most likely the specified locale
 is a non-UTF-8 one for an East Asian language such as Chinese or
 Japanese.  If the locale is a superset of ASCII, the ASCII portion of it
-may work in Perl.  Read on for problems when it isn't a superset of
-ASCII.
+may work in Perl.
 
 Some essentially obsolete locales that aren't supersets of ASCII, mainly
 those in ISO 646 or other 7-bit locales, such as ASMO 449, can also have
 problems, depending on what portions of the ASCII character set get
 changed by the locale and are also used by the program.
 The warning message lists the determinable conflicting characters.
+
+Note that not all incompatibilities are found.
+
+If this happens to you, there's not much you can do except switch to use a
+different locale or use L<Encode> to translate from the locale into
+UTF-8; if that's impracticable, you have been warned that some things
+may break.
+
+This message is output once each time a bad locale is switched into
+within the scope of C<S<use locale>>, or on the first possibly-affected
+operation if the C<S<use locale>> inherits a bad one.  It is not raised
+for any operations from the L<POSIX> module.
 
 =item localtime(%f) failed
 

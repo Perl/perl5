@@ -1600,9 +1600,14 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 
     PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
 
-    /* Treat a UTF-8 locale as not being in locale at all */
-    if (IN_UTF8_CTYPE_LOCALE) {
-        flags &= ~FOLD_FLAGS_LOCALE;
+    if (flags & FOLD_FLAGS_LOCALE) {
+        /* Treat a UTF-8 locale as not being in locale at all */
+        if (IN_UTF8_CTYPE_LOCALE) {
+            flags &= ~FOLD_FLAGS_LOCALE;
+        }
+        else {
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        }
     }
 
     if (c < 256) {
@@ -1949,8 +1954,14 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 
     PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS;
 
-    if (flags && IN_UTF8_CTYPE_LOCALE) {
-        flags = FALSE;
+    if (flags) {
+        /* Treat a UTF-8 locale as not being in locale at all */
+        if (IN_UTF8_CTYPE_LOCALE) {
+            flags = FALSE;
+        }
+        else {
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        }
     }
 
     if (UTF8_IS_INVARIANT(*p)) {
@@ -2014,8 +2025,14 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 
     PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS;
 
-    if (flags && IN_UTF8_CTYPE_LOCALE) {
-        flags = FALSE;
+    if (flags) {
+        /* Treat a UTF-8 locale as not being in locale at all */
+        if (IN_UTF8_CTYPE_LOCALE) {
+            flags = FALSE;
+        }
+        else {
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        }
     }
 
     if (UTF8_IS_INVARIANT(*p)) {
@@ -2078,8 +2095,14 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 
     PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS;
 
-    if (flags && IN_UTF8_CTYPE_LOCALE) {
-        flags = FALSE;
+    if (flags) {
+        /* Treat a UTF-8 locale as not being in locale at all */
+        if (IN_UTF8_CTYPE_LOCALE) {
+            flags = FALSE;
+        }
+        else {
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        }
     }
 
     if (UTF8_IS_INVARIANT(*p)) {
@@ -2153,8 +2176,14 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 
     assert(p != ustrp); /* Otherwise overwrites */
 
-    if (flags & FOLD_FLAGS_LOCALE && IN_UTF8_CTYPE_LOCALE) {
-        flags &= ~FOLD_FLAGS_LOCALE;
+    if (flags & FOLD_FLAGS_LOCALE) {
+        /* Treat a UTF-8 locale as not being in locale at all */
+        if (IN_UTF8_CTYPE_LOCALE) {
+            flags &= ~FOLD_FLAGS_LOCALE;
+        }
+        else {
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        }
     }
 
     if (UTF8_IS_INVARIANT(*p)) {

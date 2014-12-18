@@ -14588,6 +14588,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Unicode features (see perlrun/-C) */
     PL_unicode		= proto_perl->Iunicode;
 
+    /* Should we warn if uses locale? */
+    PL_warn_locale      = proto_perl->Iwarn_locale;
+
     /* Pre-5.8 signals control */
     PL_signals		= proto_perl->Isignals;
 

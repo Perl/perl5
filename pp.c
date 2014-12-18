@@ -3588,23 +3588,27 @@ PP(pp_ucfirst)
 	if (op_type == OP_LCFIRST) {
 
 	    /* lower case the first letter: no trickiness for any character */
-            *tmpbuf =
 #ifdef USE_LOCALE_CTYPE
-                      (IN_LC_RUNTIME(LC_CTYPE))
-                      ? toLOWER_LC(*s)
-                      :
+            if (IN_LC_RUNTIME(LC_CTYPE)) {
+                _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+                *tmpbuf = toLOWER_LC(*s);
+            }
+            else
 #endif
-                         (IN_UNI_8_BIT)
-                         ? toLOWER_LATIN1(*s)
-                         : toLOWER(*s);
+            {
+                *tmpbuf = (IN_UNI_8_BIT)
+                          ? toLOWER_LATIN1(*s)
+                          : toLOWER(*s);
+            }
 	}
-	/* is ucfirst() */
 #ifdef USE_LOCALE_CTYPE
+	/* is ucfirst() */
 	else if (IN_LC_RUNTIME(LC_CTYPE)) {
             if (IN_UTF8_CTYPE_LOCALE) {
                 goto do_uni_rules;
             }
 
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
             *tmpbuf = (U8) toUPPER_LC(*s); /* This would be a bug if any
                                               locales have upper and title case
                                               different */
@@ -3909,6 +3913,7 @@ PP(pp_uc)
                 if (IN_UTF8_CTYPE_LOCALE) {
                     goto do_uni_rules;
                 }
+                _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 		for (; s < send; d++, s++)
                     *d = (U8) toUPPER_LC(*s);
 	    }
@@ -4116,6 +4121,7 @@ PP(pp_lc)
 	     * whole thing in a tight loop, for speed, */
 #ifdef USE_LOCALE_CTYPE
             if (IN_LC_RUNTIME(LC_CTYPE)) {
+                _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 		for (; s < send; d++, s++)
 		    *d = toLOWER_LC(*s);
             }
@@ -4298,6 +4304,7 @@ PP(pp_fc)
             if (IN_UTF8_CTYPE_LOCALE) {
                 goto do_uni_folding;
             }
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
             for (; s < send; d++, s++)
                 *d = (U8) toFOLD_LC(*s);
         }

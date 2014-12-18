@@ -238,6 +238,7 @@ PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 
 PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
 PERLVAR(I, in_utf8_CTYPE_locale, bool)
+PERLVAR(I, warn_locale, SV *)
 
 PERLVARA(I, colors,6,	char *)		/* values from PERL_RE_COLORS env var */
 
