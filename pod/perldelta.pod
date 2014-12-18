@@ -279,6 +279,9 @@ returns end of file.  [perl #123443]
 Seeking to a negative position still fails, but no longer leaves the
 file position set to a negation location.
 
+C<eof()> on a C<PerlIO::scalar> handle now properly returns true when
+the file position is past the 2GB mark on 32-bit systems.
+
 =item *
 
 L<XSLoader> has been upgraded from version 0.19 to 0.20
