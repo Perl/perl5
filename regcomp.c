@@ -4151,11 +4151,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 
                         */
-#define TRIE_TYPE(X) ( ( NOTHING == (X) ) ? NOTHING :   \
-                       ( EXACT == (X) )   ? EXACT :        \
-                       ( EXACTFU == (X) || EXACTFU_SS == (X) ) ? EXACTFU :        \
-                       ( EXACTFA == (X) ) ? EXACTFA :        \
-                       0 )
+#define TRIE_TYPE(X) ( ( NOTHING == (X) )                                   \
+                       ? NOTHING                                            \
+                       : ( EXACT == (X) )                                   \
+                         ? EXACT                                            \
+                         : ( EXACTFU == (X) || EXACTFU_SS == (X) )          \
+                           ? EXACTFU                                        \
+                           : ( EXACTFA == (X) )                             \
+                             ? EXACTFA                                      \
+                             : 0 )
 
                         /* dont use tail as the end marker for this traverse */
                         for ( cur = startbranch ; cur != scan ; cur = regnext( cur ) ) {

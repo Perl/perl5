@@ -1433,13 +1433,17 @@ Perl_re_intuit_start(pTHX_
 
 
 #define DECL_TRIE_TYPE(scan) \
-    const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold, \
-                 trie_utf8_exactfa_fold, trie_latin_utf8_exactfa_fold } \
-                    trie_type = ((scan->flags == EXACT) \
-                              ? (utf8_target ? trie_utf8 : trie_plain) \
-                              : (scan->flags == EXACTFA) \
-                                ? (utf8_target ? trie_utf8_exactfa_fold : trie_latin_utf8_exactfa_fold) \
-                                : (utf8_target ? trie_utf8_fold : trie_latin_utf8_fold))
+    const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold,       \
+                 trie_utf8_exactfa_fold, trie_latin_utf8_exactfa_fold }             \
+                    trie_type = ((scan->flags == EXACT)                             \
+                                 ? (utf8_target ? trie_utf8 : trie_plain)           \
+                                 : (scan->flags == EXACTFA)                         \
+                                   ? (utf8_target                                   \
+                                      ? trie_utf8_exactfa_fold                      \
+                                      : trie_latin_utf8_exactfa_fold)               \
+                                   : (utf8_target                                   \
+                                      ? trie_utf8_fold                              \
+                                      : trie_latin_utf8_fold))
 
 #define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len, uvc, charid, foldlen, foldbuf, uniflags) \
 STMT_START {                                                                        \
