@@ -276,7 +276,7 @@ PerlIOScalar_get_cnt(pTHX_ PerlIO * f)
 	PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
 	STRLEN len;
 	(void)SvPV(s->var,len);
-	if (len > (STRLEN) s->posn)
+	if ((Off_t)len > s->posn)
 	    return len - (STRLEN)s->posn;
 	else
 	    return 0;
