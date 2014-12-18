@@ -178,7 +178,9 @@ been done in Perl, and avoid re-inventing the wheel unless you have a
 good reason.
 
 Good places to look for pre-existing modules include
-http://search.cpan.org/ and asking on modules@perl.org
+L<http://search.cpan.org/> and L<https://metacpan.org>
+and asking on C<module-authors@perl.org>
+(L<http://lists.perl.org/list/module-authors.html>).
 
 If an existing module B<almost> does what you want, consider writing a
 patch, writing a subclass, or otherwise extending the existing module
