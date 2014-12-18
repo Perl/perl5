@@ -247,6 +247,9 @@ C<chdir FH> is now deparsed without quotation marks.
 C<\my @a> is now deparsed without parentheses.  (Parenthese would flatten
 the array.)
 
+C<system> and C<exec> followed by a block are now deparsed correctly.
+Formerly there was an erroneous C<do> before the block.
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
