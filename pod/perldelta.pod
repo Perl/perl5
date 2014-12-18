@@ -605,6 +605,12 @@ C<readline> on a nonexistent handle was causing C<${^LAST_FH}> to produce a
 reference to an undefined scalar (or fail an assertion).  Now
 C<${^LAST_FH}> ends up undefined.
 
+=item *
+
+C<(...)x...> in void context now applies scalar context to the left-hand
+argument, instead of the context the current sub was called in.
+[perl #123020]
+
 =back
 
 =head1 Known Problems
