@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.08,
+   locale_version => 1.09,
    entry => <<'ENTRY', # for DUCET v7.0.0
 0B82      ; [.24CC.0020.0002][.FFF0.0000.0000] # TAMIL SIGN ANUSVARA
 0B83      ; [.24CC.0020.0002][.FFF1.0000.0000] # TAMIL SIGN VISARGA

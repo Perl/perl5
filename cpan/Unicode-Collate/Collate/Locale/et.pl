@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.08,
+   locale_version => 1.09,
    entry => <<'ENTRY', # for DUCET v7.0.0
 0161      ; [.1B54.0020.0002] # LATIN SMALL LETTER S WITH CARON
 0073 030C ; [.1B54.0020.0002] # LATIN SMALL LETTER S WITH CARON

@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.08,
+   locale_version => 1.09,
    entry => <<'ENTRY', # for DUCET v7.0.0
 0B01      ; [.2489.0020.0002][.FFF1.0000.0000] # ORIYA SIGN CANDRABINDU
 0B02      ; [.2489.0020.0002][.FFF2.0000.0000] # ORIYA SIGN ANUSVARA

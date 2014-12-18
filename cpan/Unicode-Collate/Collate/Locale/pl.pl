@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.08,
+   locale_version => 1.09,
    entry => <<'ENTRY', # for DUCET v7.0.0
 0105      ; [.190D.0020.0002] # LATIN SMALL LETTER A WITH OGONEK
 0061 0328 ; [.190D.0020.0002] # LATIN SMALL LETTER A WITH OGONEK

@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.08,
+   locale_version => 1.09,
    variable => 'shifted',
    alternate => 'shifted',
    entry => <<'ENTRY', # for DUCET v7.0.0

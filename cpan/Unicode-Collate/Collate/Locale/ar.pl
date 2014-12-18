@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.08,
+   locale_version => 1.09,
    entry => <<'ENTRY', # for DUCET v7.0.0
 0629      ; [.2025.0021.0002] # ARABIC LETTER TEH MARBUTA
 FE94      ; [.2025.0021.0019] # ARABIC LETTER TEH MARBUTA FINAL FORM

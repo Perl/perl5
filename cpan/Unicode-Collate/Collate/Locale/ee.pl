@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.08,
+   locale_version => 1.09,
 # d-tail, open-e, f-hook, gamma, eng, open-o, v-hook don't require tailoring
    entry => <<'ENTRY', # for DUCET v7.0.0
 0302      ; [.0000.0029.0002] # COMBINING CIRCUMFLEX ACCENT

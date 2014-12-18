@@ -2,9 +2,10 @@ package Unicode::Collate::CJK::Korean;
 
 use 5.006;
 use strict;
+use warnings;
 use Unicode::Collate;
 
-our $VERSION = '1.08';
+our $VERSION = '1.09';
 
 my %jamo2prim = (
     0x1100, 0x376F,   0x1101, 0x3770,   0x1102, 0x3771,   0x1103, 0x3772,

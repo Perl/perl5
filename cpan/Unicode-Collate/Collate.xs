@@ -10,37 +10,6 @@
 /* This file is prepared by mkheader */
 #include "ucatbl.h"
 
-/* Perl 5.6.1 ? */
-#ifdef utf8_to_uv
-#define utf8n_to_uvuni  utf8_to_uv
-#endif /* utf8_to_uv */
-
-/* UTF8_ALLOW_BOM is used before Perl 5.8.0 */
-#ifndef UTF8_ALLOW_BOM
-#define UTF8_ALLOW_BOM  (0)
-#endif /* UTF8_ALLOW_BOM */
-
-#ifndef UTF8_ALLOW_SURROGATE
-#define UTF8_ALLOW_SURROGATE  (0)
-#endif /* UTF8_ALLOW_SURROGATE */
-
-#ifndef UTF8_ALLOW_FE_FF
-#define UTF8_ALLOW_FE_FF  (0)
-#endif /* UTF8_ALLOW_FE_FF */
-
-#ifndef UTF8_ALLOW_FFFF
-#define UTF8_ALLOW_FFFF  (0)
-#endif /* UTF8_ALLOW_FFFF */
-
-#define AllowAnyUTF (UTF8_ALLOW_SURROGATE|UTF8_ALLOW_BOM|UTF8_ALLOW_FE_FF|UTF8_ALLOW_FFFF)
-
-/* perl 5.6.x workaround, before 5.8.0 */
-#ifdef utf8n_to_uvuni
-#define GET_UV_FOR_5_6	utf8n_to_uvuni(p, e - p, &retlen, AllowAnyUTF)
-#else
-#define GET_UV_FOR_5_6	retlen = 1 /* avoid an infinite loop */
-#endif /* utf8n_to_uvuni */
-
 /* At present, char > 0x10ffff are unaffected without complaint, right? */
 #define VALID_UTF_MAX    (0x10ffff)
 #define OVER_UTF_MAX(uv) (VALID_UTF_MAX < (uv))
@@ -680,31 +649,3 @@ visualizeSortKey (self, key)
     RETVAL = dst;
 OUTPUT:
     RETVAL
-
-
-
-void
-unpackUfor56 (src)
-    SV* src
-  PREINIT:
-    STRLEN srclen, retlen;
-    U8 *s, *p, *e;
-    UV uv;
-  PPCODE:
-    s = (U8*)SvPV(src,srclen);
-    if (!SvUTF8(src)) {
-	SV* tmpsv = sv_mortalcopy(src);
-	if (!SvPOK(tmpsv))
-	    (void)sv_pvn_force(tmpsv,&srclen);
-	sv_utf8_upgrade(tmpsv);
-	s = (U8*)SvPV(tmpsv,srclen);
-    }
-    e = s + srclen;
-
-    for (p = s; p < e; p += retlen) {
-	uv = GET_UV_FOR_5_6; /* perl 5.6.x workaround */
-	if (!retlen)
-	    croak("panic (Unicode::Collate): zero-length character");
-	XPUSHs(sv_2mortal(newSVuv(uv)));
-    }
-

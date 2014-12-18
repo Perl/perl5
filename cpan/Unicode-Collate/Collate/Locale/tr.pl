@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.08,
+   locale_version => 1.09,
    entry => <<'ENTRY', # for DUCET v7.0.0
 00E7      ; [.193F.0020.0002] # LATIN SMALL LETTER C WITH CEDILLA
 0063 0327 ; [.193F.0020.0002] # LATIN SMALL LETTER C WITH CEDILLA
