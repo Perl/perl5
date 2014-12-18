@@ -94,6 +94,9 @@ EXACTF      EXACT,      str       ; Match this non-UTF-8 string (not guaranteed 
 EXACTFL     EXACT,      str       ; Match this string (not guaranteed to be folded) using /il rules (w/len).
 EXACTFU     EXACT,      str	  ; Match this string (folded iff in UTF-8, length in folding doesn't change if not in UTF-8) using /iu rules (w/len).
 EXACTFA     EXACT,      str	  ; Match this string (not guaranteed to be folded) using /iaa rules (w/len).
+
+# End of important relative ordering.
+
 EXACTFU_SS  EXACT,      str	  ; Match this string (folded iff in UTF-8, length in folding may change even if not in UTF-8) using /iu rules (w/len).
 EXACTFA_NO_TRIE  EXACT, str	  ; Match this string (which is not trie-able; not guaranteed to be folded) using /iaa rules (w/len).
 

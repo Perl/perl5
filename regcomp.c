@@ -1044,13 +1044,13 @@ S_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
     ARG_SET(ssc, ANYOF_ONLY_HAS_BITMAP);
     ssc_anything(ssc);
 
-    /* If any portion of the regex is to operate under locale rules,
-     * initialization includes it.  The reason this isn't done for all regexes
-     * is that the optimizer was written under the assumption that locale was
-     * all-or-nothing.  Given the complexity and lack of documentation in the
-     * optimizer, and that there are inadequate test cases for locale, many
-     * parts of it may not work properly, it is safest to avoid locale unless
-     * necessary. */
+    /* If any portion of the regex is to operate under locale rules that aren't
+     * fully known at compile time, initialization includes it.  The reason
+     * this isn't done for all regexes is that the optimizer was written under
+     * the assumption that locale was all-or-nothing.  Given the complexity and
+     * lack of documentation in the optimizer, and that there are inadequate
+     * test cases for locale, many parts of it may not work properly, it is
+     * safest to avoid locale unless necessary. */
     if (RExC_contains_locale) {
 	ANYOF_POSIXL_SETALL(ssc);
     }
@@ -3201,7 +3201,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
         StructCopy(source,op,struct regnode_charclass);
         stclass = (regnode *)op;
     }
-    OP(stclass)+=2; /* covert the TRIE type to its AHO-CORASICK equivalent */
+    OP(stclass)+=2; /* convert the TRIE type to its AHO-CORASICK equivalent */
 
     ARG_SET( stclass, data_slot );
     aho = (reg_ac_data *) PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
@@ -12481,7 +12481,7 @@ tryagain:
                     /* Here, are folding and are not UTF-8 encoded; therefore
                      * the character must be in the range 0-255, and is not /l
                      * (Not /l because we already handled these under /l in
-                     * is_PROBLEMATIC_LOCALE_FOLD_cp */
+                     * is_PROBLEMATIC_LOCALE_FOLD_cp) */
                     if (IS_IN_SOME_FOLD_L1(ender)) {
                         maybe_exact = FALSE;
 

@@ -498,7 +498,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
      * '_char_class_number'.
      *
      * This just calls isFOO_lc on the code point for the character if it is in
-     * the range 0-255.  Outside that range, all characters avoid Unicode
+     * the range 0-255.  Outside that range, all characters use Unicode
      * rules, ignoring any locale.  So use the Unicode function if this class
      * requires a swash, and use the Unicode macro otherwise. */
 

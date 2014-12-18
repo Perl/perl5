@@ -1600,7 +1600,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 
     PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
 
-    /* Tread a UTF-8 locale as not being in locale at all */
+    /* Treat a UTF-8 locale as not being in locale at all */
     if (IN_UTF8_CTYPE_LOCALE) {
         flags &= ~FOLD_FLAGS_LOCALE;
     }
@@ -1615,7 +1615,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 	       : result;
     }
 
-    /* If no special needs, just use the macro */
+    /* Here, above 255.  If no special needs, just use the macro */
     if ( ! (flags & (FOLD_FLAGS_LOCALE|FOLD_FLAGS_NOMIX_ASCII))) {
 	uvchr_to_utf8(p, c);
 	return CALL_FOLD_CASE(p, p, lenp, flags & FOLD_FLAGS_FULL);
