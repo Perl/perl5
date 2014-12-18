@@ -252,6 +252,9 @@ the array.)
 C<system> and C<exec> followed by a block are now deparsed correctly.
 Formerly there was an erroneous C<do> before the block.
 
+C<use constant QR => qr/.../flags> followed by C<"" =~ QR> is no longer
+without the flags.
+
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.26 to 3.27.
