@@ -182,7 +182,9 @@ L<B> has been upgraded from version 1.53 to 1.54.
 Nulled COPs are now of class C<B::COP>, rather than C<B::OP>.
 
 B::REGEXP objects now provide a C<qr_anoncv> method for accessing the
-implicit CV associated with C<qr//> things containing code blocks.
+implicit CV associated with C<qr//> things containing code blocks, and a
+C<compflags> method that returns the pertinent flags originating from the
+C<qr//blahblah> op.
 
 B::PMOP now provides a C<pmregexp> method returning a B::REGEXP object.
 
