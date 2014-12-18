@@ -389,7 +389,15 @@ struct regnode_ssc {
  * probably better than that commit anyway.  But it could be reinstated if we
  * need a bit.  The LOC flags are only for /l nodes; the reverted commit was
  * only for /d, so there are no combinatorial issues.  The LOC flag to use is
- * probably the POSIXL one.
+ * probably the POSIXL one.  Now that there is an ANYOFL (locale) node, another
+ * option would be to make all of those include the POSIXL data structure,
+ * which would get rid of needing a separate POSIXL flag.  But it would
+ * increase the size of all such nodes, so it's probably not as atractive as
+ * having an ANYOF_POSIXL node type.  But if we did do it, note that not all 32
+ * bits of that extra space are used, one bit of that could be set aside for
+ * the LOC_FOLD flag, yielding yet another bit.  This would require extra code
+ * for masking, so again not the most attractive solution.
+ *
  * Several flags are not used in synthetic start class (SSC) nodes, so could be
  * shared should new flags be needed for SSCs, like SSC_MATCHES_EMPTY_STRING
  * now. */

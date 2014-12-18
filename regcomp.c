@@ -1879,7 +1879,7 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
 	       May be the same as tail.
   tail       : item following the branch sequence
   count      : words in the sequence
-  flags      : currently the OP() type we will be building one of /EXACT(|F|FA|FU|FU_SS)/
+  flags      : currently the OP() type we will be building one of /EXACT(|F|FA|FU|FU_SS|L|FLU8)/
   depth      : indent depth
 
 Inplace optimizes a sequence of 2 or more Branch-Exact nodes into a TRIE node.
@@ -2143,10 +2143,11 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 #endif
 
     switch (flags) {
-        case EXACT: break;
+        case EXACT: case EXACTL: break;
 	case EXACTFA:
         case EXACTFU_SS:
-	case EXACTFU: folder = PL_fold_latin1; break;
+	case EXACTFU:
+	case EXACTFLU8: folder = PL_fold_latin1; break;
 	case EXACTF:  folder = PL_fold; break;
         default: Perl_croak( aTHX_ "panic! In trie construction, unknown node type %u %s", (unsigned) flags, PL_reg_name[flags] );
     }
@@ -2157,7 +2158,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     trie->wordcount = word_count;
     RExC_rxi->data->data[ data_slot ] = (void*)trie;
     trie->charmap = (U16 *) PerlMemShared_calloc( 256, sizeof(U16) );
-    if (flags == EXACT)
+    if (flags == EXACT || flags == EXACTL)
 	trie->bitmap = (char *) PerlMemShared_calloc( ANYOF_BITMAP_SIZE, 1 );
     trie->wordinfo = (reg_trie_wordinfo *) PerlMemShared_calloc(
                        trie->wordcount+1, sizeof(reg_trie_wordinfo));
@@ -3500,7 +3501,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
      * this final joining, sequences could have been split over boundaries, and
      * hence missed).  The sequences only happen in folding, hence for any
      * non-EXACT EXACTish node */
-    if (OP(scan) != EXACT) {
+    if (OP(scan) != EXACT && OP(scan) != EXACTL) {
         U8* s0 = (U8*) STRING(scan);
         U8* s = s0;
         U8* s_end = s0 + STR_LEN(scan);
@@ -4148,6 +4149,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                 EXACTFU         | EXACTFU
                                 EXACTFU_SS      | EXACTFU
                                 EXACTFA         | EXACTFA
+                                EXACTL          | EXACTL
+                                EXACTFLU8       | EXACTFLU8
 
 
                         */
@@ -4159,7 +4162,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                            ? EXACTFU                                        \
                            : ( EXACTFA == (X) )                             \
                              ? EXACTFA                                      \
-                             : 0 )
+                             : ( EXACTL == (X) )                            \
+                               ? EXACTL                                     \
+                               : ( EXACTFLU8 == (X) )                        \
+                                 ? EXACTFLU8                                 \
+                                 : 0 )
 
                         /* dont use tail as the end marker for this traverse */
                         for ( cur = startbranch ; cur != scan ; cur = regnext( cur ) ) {
@@ -4475,7 +4482,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	        continue;
 	    }
 	}
-	else if (OP(scan) == EXACT) {
+	else if (OP(scan) == EXACT || OP(scan) == EXACTL) {
 	    SSize_t l = STR_LEN(scan);
 	    UV uc;
 	    if (UTF) {
@@ -4593,7 +4600,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    case PLUS:
 		if (flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
 		    next = NEXTOPER(scan);
-		    if (OP(next) == EXACT || (flags & SCF_DO_STCLASS)) {
+		    if (OP(next) == EXACT
+                        || OP(next) == EXACTL
+                        || (flags & SCF_DO_STCLASS))
+                    {
 			mincount = 1;
 			maxcount = REG_INFTY;
 			next = regnext(scan);
@@ -5074,6 +5084,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
 		    }
 		    break;
 
+                case ANYOFL:
                 case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
 			ssc_and(pRExC_state, data->start_class,
@@ -6986,7 +6997,7 @@ reStudy:
         DEBUG_PEEP("first:",first,0);
         /* Ignore EXACT as we deal with it later. */
 	if (PL_regkind[OP(first)] == EXACT) {
-	    if (OP(first) == EXACT)
+	    if (OP(first) == EXACT || OP(first) == EXACTL)
 		NOOP;	/* Empty, get anchored substr later. */
 	    else
 		ri->regstclass = first;
@@ -7336,7 +7347,7 @@ reStudy:
                  && OP(regnext(first)) == END)
             r->extflags |= RXf_WHITE;
         else if ( r->extflags & RXf_SPLIT
-                  && fop == EXACT
+                  && (fop == EXACT || fop == EXACTL)
                   && STR_LEN(first) == 1
                   && *(STRING(first)) == ' '
                   && OP(regnext(first)) == END )
@@ -11352,7 +11363,9 @@ S_compute_EXACTish(RExC_state_t *pRExC_state)
     PERL_ARGS_ASSERT_COMPUTE_EXACTISH;
 
     if (! FOLD) {
-        return EXACT;
+        return (LOC)
+                ? EXACTL
+                : EXACT;
     }
 
     op = get_regex_charset(RExC_flags);
@@ -11450,7 +11463,9 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
                                                for those.  */
                     && ! _invlist_contains_cp(PL_utf8_foldable, code_point))
                 {
-                    OP(node) = EXACT;
+                    OP(node) = (LOC)
+                               ? EXACTL
+                               : EXACT;
                 }
             }
             else if (code_point <= MAX_UTF8_TWO_BYTE) {
@@ -12751,10 +12766,14 @@ tryagain:
                      * differently depending on UTF8ness of the target string
                      * (for /u), or depending on locale for /l */
                     if (maybe_exact) {
-                        OP(ret) = EXACT;
+                        OP(ret) = (LOC)
+                                  ? EXACTL
+                                  : EXACT;
                     }
                     else if (maybe_exactfu) {
-                        OP(ret) = EXACTFU;
+                        OP(ret) = (LOC)
+                                  ? EXACTFLU8
+                                  : EXACTFU;
                     }
                 }
                 alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len, ender,
@@ -13808,7 +13827,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     DEBUG_PARSE("clas");
 
     /* Assume we are going to generate an ANYOF node. */
-    ret = reganode(pRExC_state, ANYOF, 0);
+    ret = reganode(pRExC_state,
+                   (LOC)
+                    ? ANYOFL
+                    : ANYOF,
+                   0);
 
     if (SIZE_ONLY) {
 	RExC_size += ANYOF_SKIP;
@@ -15287,7 +15310,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 value = start;
 
                 if (! FOLD) {
-                    op = EXACT;
+                    op = (LOC)
+                         ? EXACTL
+                         : EXACT;
                 }
                 else if (LOC) {
 
@@ -16000,10 +16025,12 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p,
         if ( exact ) {
             switch (OP(scan)) {
                 case EXACT:
+                case EXACTL:
                 case EXACTF:
                 case EXACTFA_NO_TRIE:
                 case EXACTFA:
                 case EXACTFU:
+                case EXACTFLU8:
                 case EXACTFU_SS:
                 case EXACTFL:
                         if( exact == PSEUDO )
@@ -16417,7 +16444,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         SV* bitmap_invlist;  /* Will hold what the bit map contains */
 
 
-	if (flags & ANYOF_LOCALE_FLAGS)
+	if (OP(o) == ANYOFL)
 	    sv_catpvs(sv, "{loc}");
 	if (flags & ANYOF_LOC_FOLD)
 	    sv_catpvs(sv, "{i}");

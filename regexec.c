@@ -231,15 +231,15 @@ static const char* const non_utf8_target_but_utf8_required
 
 #if 0 
 /* Currently these are only used when PL_regkind[OP(rn)] == EXACT so
-   we don't need this definition. */
+   we don't need this definition.  XXX These are now out-of-sync*/
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   || OP(rn)==REF   || OP(rn)==NREF   )
 #define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFA || OP(rn)==EXACTFA_NO_TRIE || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL || OP(rn)==REFFL || OP(rn)==NREFFL )
 
 #else
 /* ... so we use this as its faster. */
-#define IS_TEXT(rn)   ( OP(rn)==EXACT   )
-#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn) == EXACTFA || OP(rn) == EXACTFA_NO_TRIE)
+#define IS_TEXT(rn)   ( OP(rn)==EXACT || OP(rn)==EXACTL )
+#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFLU8 || OP(rn)==EXACTFU_SS || OP(rn) == EXACTFA || OP(rn) == EXACTFA_NO_TRIE)
 #define IS_TEXTF(rn)  ( OP(rn)==EXACTF  )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL )
 
@@ -1434,26 +1434,34 @@ Perl_re_intuit_start(pTHX_
 
 #define DECL_TRIE_TYPE(scan) \
     const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold,       \
-                 trie_utf8_exactfa_fold, trie_latin_utf8_exactfa_fold }             \
+                 trie_utf8_exactfa_fold, trie_latin_utf8_exactfa_fold,              \
+                 trie_utf8l, trie_flu8 }                                            \
                     trie_type = ((scan->flags == EXACT)                             \
                                  ? (utf8_target ? trie_utf8 : trie_plain)           \
-                                 : (scan->flags == EXACTFA)                         \
-                                   ? (utf8_target                                   \
-                                      ? trie_utf8_exactfa_fold                      \
-                                      : trie_latin_utf8_exactfa_fold)               \
-                                   : (utf8_target                                   \
-                                      ? trie_utf8_fold                              \
-                                      : trie_latin_utf8_fold))
+                                 : (scan->flags == EXACTL)                          \
+                                    ? (utf8_target ? trie_utf8l : trie_plain)       \
+                                    : (scan->flags == EXACTFA)                      \
+                                      ? (utf8_target                                \
+                                         ? trie_utf8_exactfa_fold                   \
+                                         : trie_latin_utf8_exactfa_fold)            \
+                                      : (scan->flags == EXACTFLU8                   \
+                                         ? trie_flu8                                \
+                                         : (utf8_target                             \
+                                           ? trie_utf8_fold                         \
+                                           :   trie_latin_utf8_fold)))
 
 #define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len, uvc, charid, foldlen, foldbuf, uniflags) \
 STMT_START {                                                                        \
     STRLEN skiplen;                                                                 \
     U8 flags = FOLD_FLAGS_FULL;                                                     \
     switch (trie_type) {                                                            \
+    case trie_flu8:                                                                 \
+        goto do_trie_utf8_fold;                                                     \
     case trie_utf8_exactfa_fold:                                                    \
         flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
         /* FALLTHROUGH */                                                          \
     case trie_utf8_fold:                                                            \
+      do_trie_utf8_fold:                                                            \
         if ( foldlen>0 ) {                                                          \
             uvc = utf8n_to_uvchr( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
             foldlen -= len;                                                         \
@@ -1484,6 +1492,7 @@ STMT_START {                                                                    
             uscan = foldbuf + skiplen;                                              \
         }                                                                           \
         break;                                                                      \
+    case trie_utf8l:                                                                \
     case trie_utf8:                                                                 \
         uvc = utf8n_to_uvchr( (const U8*) uc, UTF8_MAXLEN, &len, uniflags );        \
         break;                                                                      \
@@ -1743,6 +1752,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
     /* We know what class it must start with. */
     switch (OP(c)) {
+    case ANYOFL:
     case ANYOF:
         if (utf8_target) {
             REXEC_FBC_UTF8_CLASS_SCAN(
@@ -1797,6 +1807,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             utf8_fold_flags = FOLDEQ_S2_ALREADY_FOLDED;
         }
         goto do_exactf_utf8;
+
+    case EXACTFLU8:
+            if (! utf8_target) {    /* All code points in this node require
+                                       UTF-8 to express.  */
+                break;
+            }
+            utf8_fold_flags = FOLDEQ_S2_ALREADY_FOLDED;
+            goto do_exactf_utf8;
 
     case EXACTFU:
         if (is_utf8_pat || utf8_target) {
@@ -3652,7 +3670,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
     U8 *pat = (U8*)STRING(text_node);
     U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
 
-    if (OP(text_node) == EXACT) {
+    if (OP(text_node) == EXACT || OP(text_node) == EXACTL) {
 
         /* In an exact node, only one thing can be matched, that first
          * character.  If both the pat and the target are UTF-8, we can just
@@ -4429,6 +4447,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         }
 #undef  ST
 
+	case EXACTL:             /*  /abc/l       */
 	case EXACT: {            /*  /abc/        */
 	    char *s = STRING(scan);
 	    ln = STR_LEN(scan);
@@ -4518,6 +4537,15 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             folder = foldEQ_locale;
             fold_array = PL_fold_locale;
 	    fold_utf8_flags = FOLDEQ_LOCALE;
+	    goto do_exactf;
+
+        case EXACTFLU8:           /*  /abc/il; but all 'abc' are above 255, so
+                                      is effectively /u; hence to match, target
+                                      must be UTF-8. */
+            if (! utf8_target) {
+                sayNO;
+            }
+	    fold_utf8_flags = FOLDEQ_S1_ALREADY_FOLDED;
 	    goto do_exactf;
 
 	case EXACTFU_SS:         /*  /\x{df}/iu   */
@@ -4665,7 +4693,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    sayNO;
 	    break;
 
-	case ANYOF:  /*  /[abc]/       */
+	case ANYOFL:  /*  /[abc]/l      */
+	case ANYOF:  /*   /[abc]/       */
             if (NEXTCHR_IS_EOS)
                 sayNO;
 	    if (utf8_target) {
@@ -7178,6 +7207,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
             scan = loceol;
         }
 	break;
+    case EXACTL:
     case EXACT:
         assert(STR_LEN(p) == reginfo->is_utf8_pat ? UTF8SKIP(STRING(p)) : 1);
 
@@ -7259,6 +7289,13 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         utf8_flags = 0;
         goto do_exactf;
 
+    case EXACTFLU8:
+        if (! utf8_target) {
+            break;
+        }
+	utf8_flags = FOLDEQ_S2_ALREADY_FOLDED;
+        goto do_exactf;
+
     case EXACTFU_SS:
     case EXACTFU:
 	utf8_flags = reginfo->is_utf8_pat ? FOLDEQ_S2_ALREADY_FOLDED : 0;
@@ -7322,6 +7359,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	}
 	break;
     }
+    case ANYOFL:
     case ANYOF:
 	if (utf8_target) {
 	    while (hardcount < max
@@ -7631,7 +7669,7 @@ Perl_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit, 
 /*
  - reginclass - determine if a character falls into a character class
  
-  n is the ANYOF regnode
+  n is the ANYOF-type regnode
   p is the target string
   p_end points to one byte beyond the end of the target string
   utf8_target tells whether p is in UTF-8.

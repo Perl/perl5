@@ -593,6 +593,7 @@ will be lost.
  CANY            no         Match any one byte.
  ANYOF           sv 1       Match character in (or not in) this class,
                             single char match only
+ ANYOFL          sv 1       Like ANYOF, but /l is in effect
 
  # POSIX Character Classes:
  POSIXD          none       Some [[:class:]] under /d; the FLAGS field
@@ -626,6 +627,7 @@ will be lost.
  # Literals
 
  EXACT           str        Match this string (preceded by length).
+ EXACTL          str        Like EXACT, but /l is in effect.
  EXACTF          str        Match this non-UTF-8 string (not guaranteed
                             to be folded) using /id rules (w/len).
  EXACTFL         str        Match this string (not guaranteed to be
@@ -635,9 +637,13 @@ will be lost.
                             UTF-8) using /iu rules (w/len).
  EXACTFA         str        Match this string (not guaranteed to be
                             folded) using /iaa rules (w/len).
+
  EXACTFU_SS      str        Match this string (folded iff in UTF-8,
                             length in folding may change even if not in
                             UTF-8) using /iu rules (w/len).
+ EXACTFLU8       str        Rare cirucmstances: like EXACTFU, but is
+                            under /l, UTF-8, folded, and everything in
+                            it is above 255.
  EXACTFA_NO_TRIE str        Match this string (which is not trie-able;
                             not guaranteed to be folded) using /iaa
                             rules (w/len).
