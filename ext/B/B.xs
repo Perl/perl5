@@ -1383,7 +1383,7 @@ aux_list(o, cv)
                 bool is_hash = FALSE;
 #ifdef USE_ITHREADS
                 PADLIST * const padlist = CvPADLIST(cv);
-                PAD *comppad = comppad = PadlistARRAY(padlist)[1];
+                PAD *comppad = PadlistARRAY(padlist)[1];
 #endif
 
                 EXTEND(SP, len);
