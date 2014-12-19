@@ -10859,7 +10859,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 	do_curly:
 	    if ((flags&SIMPLE)) {
-		RExC_naughty += 2 + RExC_naughty / 2;
+                if (RExC_naughty < I32_MAX / 2)
+                    RExC_naughty += 2 + RExC_naughty / 2;
 		reginsert(pRExC_state, CURLY, ret, depth+1);
                 Set_Node_Offset(ret, parse_start+1); /* MJD */
                 Set_Node_Cur_Length(ret, parse_start);
@@ -10885,7 +10886,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 REGTAIL(pRExC_state, ret, reg_node(pRExC_state, NOTHING));
 		if (SIZE_ONLY)
 		    RExC_whilem_seen++, RExC_extralen += 3;
-		RExC_naughty += 4 + RExC_naughty;	/* compound interest */
+                if (RExC_naughty < I32_MAX / 4)
+                    RExC_naughty += 4 + RExC_naughty; /* compound interest */
 	    }
 	    ret->flags = 0;
 
