@@ -5514,7 +5514,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
                     data->longest = &(data->longest_float);
             }
             min += min1;
-            delta += max1 - min1;
+            if (delta != SSize_t_MAX)
+                delta += max1 - min1;
             if (flags & SCF_DO_STCLASS_OR) {
                 ssc_or(pRExC_state, data->start_class, (regnode_charclass *) &accum);
                 if (min1) {
