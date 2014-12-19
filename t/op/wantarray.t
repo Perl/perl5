@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-plan 28;
+plan 43;
 
 sub context {
   local $::Level = $::Level + 1;
@@ -76,5 +76,22 @@ sub cond_rhs_cx { $::f ? 0 : context(shift, "rhs of ?: at sub exit") }
 cond_rhs_cx('V');
 $_ = cond_rhs_cx('S');
 () = cond_rhs_cx('A');
+sub comma_context{ context(shift, "lhs of comma at sub exit"),
+                   context(shift, "rhs of comma at sub exit") }
+comma_context('V','V');
+$_ = comma_context('V','S');
+() = comma_context('A','A');
+sub x_context { (context(shift, "(lhs) of x at sub exit")) x $::t }
+x_context('S');
+$_ = x_context('S');
+() = x_context('A');
+sub comma_in_x {
+    (context(shift, "cx of foo in (foo,bar)xbaz at sub exit"),
+     context(shift, "cx of bar in (foo,bar)xbaz at sub exit"))
+      x $::t
+}
+comma_in_x('V','S');
+$_ = comma_in_x('V','S');
+() = comma_in_x('A','A');
 
 1;

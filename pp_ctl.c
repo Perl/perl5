@@ -1331,19 +1331,40 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 I32
 Perl_dowantarray(pTHX)
 {
-    const I32 gimme = block_gimme();
-    return (gimme == G_VOID) ? G_SCALAR : gimme;
+    const I32 cxix = dopoptosub(cxstack_ix);
+    if (cxix < 0)
+	return G_SCALAR;
+
+    switch (cxstack[cxix].blk_gimme) {
+    case G_VOID:
+    case G_SCALAR:
+	return G_SCALAR;
+    case G_ARRAY:
+	return G_ARRAY;
+    default:
+	Perl_croak(aTHX_ "panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
+    }
+    NOT_REACHED; /* NOTREACHED */
 }
 
 I32
 Perl_block_gimme(pTHX)
 {
     const I32 cxix = dopoptosub(cxstack_ix);
+    OP *o;
     if (cxix < 0)
 	return G_VOID;
 
     switch (cxstack[cxix].blk_gimme) {
     case G_VOID:
+	o = PL_op->op_next;
+	while (o->op_type == OP_LEAVE
+	    || o->op_type == OP_LEAVELOOP
+	    || o->op_type == OP_LEAVEGIVEN
+	    || o->op_type == OP_LEAVEWHEN)
+	    o = o->op_next;
+	if (o->op_type == OP_REPEAT)
+	    
 	return G_VOID;
     case G_SCALAR:
 	return G_SCALAR;
