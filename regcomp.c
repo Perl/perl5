@@ -4888,8 +4888,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			} else {
 			    /* start offset must point into the last copy */
 			    data->last_start_min += minnext * (mincount - 1);
-			    data->last_start_max += is_inf ? SSize_t_MAX
-				: (maxcount - 1) * (minnext + data->pos_delta);
+			    data->last_start_max =
+                              is_inf
+                               ? SSize_t_MAX
+			       : data->last_start_max +
+                                 (maxcount - 1) * (minnext + data->pos_delta);
 			}
 		    }
 		    /* It is counted once already... */
