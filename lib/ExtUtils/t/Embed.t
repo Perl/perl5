@@ -72,7 +72,15 @@ if ($^O eq 'VMS') {
        push @cmd, "-non_shared";
    }
 
-   push(@cmd,"-I$inc",ccflags(),'embed_test.c');
+   # XXX DAPM 12/2014: ExtUtils::Embed doesn't seem to provide API access
+   # to $Config{optimize} and so compiles the test code without
+   # optimisation on optimised perls. This causes the compiler to warn
+   # when -D_FORTIFY_SOURCE is in force without -O. For now, just strip
+   # the fortify on optimised builds to avoid the warning.
+   my $ccflags =  ccflags();
+   $ccflags =~ s/-D_FORTIFY_SOURCE=\d+// if $Config{optimize} =~ /-O/;
+
+   push(@cmd, "-I$inc", $ccflags, 'embed_test.c');
    if ($^O eq 'MSWin32') {
     $inc = File::Spec->catdir($inc,'win32');
     push(@cmd,"-I$inc");
