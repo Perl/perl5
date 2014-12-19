@@ -1,4 +1,5 @@
 Artistic		The "Artistic License"
+asan_ignore		Errors to skip under clang's Addresss Sanitizer
 AUTHORS			Contact info for contributors
 autodoc.pl		Creates pod/perlintern.pod and pod/perlapi.pod
 av.c			Array value code
