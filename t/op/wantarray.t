@@ -12,7 +12,7 @@ plan 13;
 
 sub context {
   local $::Level = $::Level + 1;
-  my ( $cona, $testnum ) = @_;
+  my ( $cona ) = @_;
   my $conb = (defined wantarray) ? ( wantarray ? 'A' : 'S' ) : 'V';
   is $cona, $conb;
 }
