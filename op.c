@@ -8597,7 +8597,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	const_sv = NULL;
     else
 	const_sv =
-	    S_op_const_sv(aTHX_ start, PL_compcv, CvCLONE(PL_compcv));
+	    S_op_const_sv(aTHX_ start, PL_compcv, cBOOL(CvCLONE(PL_compcv)));
 
     if (SvPOK(gv) || (SvROK(gv) && SvTYPE(SvRV(gv)) != SVt_PVCV)) {
 	assert (block);
@@ -11897,7 +11897,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	    /* make class name a shared cow string to speedup method calls */
 	    /* constant string might be replaced with object, f.e. bigint */
 	    if (const_class && !SvROK(*const_class)) {
-		STRLEN len;
+		SSize_t len;
 		const char* str = SvPV(*const_class, len);
 		if (len) {
 		    SV* const shared = newSVpvn_share(
