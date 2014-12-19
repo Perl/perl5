@@ -4758,7 +4758,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
             }
             else { /* Here, must be an above Latin-1 code point */
-                goto utf8_posix_not_eos;
+                goto utf8_posix_above_latin1;
             }
 
             /* Here, must be utf8 */
@@ -4817,7 +4817,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (NEXTCHR_IS_EOS) {
                 sayNO;
             }
-          utf8_posix_not_eos:
 
             /* Use _generic_isCC() for characters within Latin1.  (Note that
              * UTF8_IS_INVARIANT works even on non-UTF-8 strings, or else
@@ -4841,6 +4840,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 locinput += 2;
             }
             else {  /* Handle above Latin-1 code points */
+          utf8_posix_above_latin1:
                 classnum = (_char_class_number) FLAGS(scan);
                 if (classnum < _FIRST_NON_SWASH_CC) {
 
