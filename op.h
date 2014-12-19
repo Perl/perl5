@@ -77,6 +77,12 @@ The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_VOID>,
 C<G_SCALAR> or C<G_ARRAY> for void, scalar or list context,
 respectively.  See L<perlcall> for a usage example.
 
+=for apidoc Amn|bool|GIMME_ARRAY
+Returns true if the current context is list context (i.e., if C<GIMME_V>
+would have returned C<G_ARRAY>).  Use this if you do not need to
+distinguish between scalar and void context, as it may be faster than
+C<GIMME_V> in some cases.
+
 =for apidoc Amn|U32|GIMME
 A backward-compatible version of C<GIMME_V> which can only return
 C<G_SCALAR> or C<G_ARRAY>; in a void context, it returns C<G_SCALAR>.
@@ -86,6 +92,7 @@ Deprecated.  Use C<GIMME_V> instead.
 */
 
 #define GIMME_V		OP_GIMME(PL_op, block_gimme())
+#define GIMME_ARRAY	(OP_GIMME(PL_op, dowantarray()) == G_ARRAY)
 
 /* Public flags */
 
