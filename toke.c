@@ -2492,6 +2492,9 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
 
+    if (!SvCUR(res))
+        return res;
+
     if (UTF && ! is_utf8_string_loc((U8 *) backslash_ptr,
                                      e - backslash_ptr,
                                      &first_bad_char_loc))

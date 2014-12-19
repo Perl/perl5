@@ -2356,6 +2356,12 @@ EOP
         "afoot" =~ eval "qr/$qr/";
         is "$1" || $@, "foo", 'multichar \N{...} stringified and retoked';
     }
+    {   # empty \N{...} tripping roundly
+        BEGIN { $^H{charnames} = sub { "" } }
+        my $qr = qr$(a\N{foo}t)$;
+        "at" =~ eval "qr/$qr/";
+        is "$1" || $@, "at", 'empty \N{...} stringified and retoked';
+    }
 
 
     #
