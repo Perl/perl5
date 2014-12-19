@@ -155,13 +155,14 @@ We want to ensure that Perl continues to grow and flourish in the coming
 years and decades, but not at the expense of our user community.
 
 Existing syntax and semantics should only be marked for destruction in
-very limited circumstances.  If they can be easily replaced, are
-believed to be very rarely used, and stand in the way of actual
-improvement to the Perl language or perl interpreter, they may be
-considered for removal.  When in doubt, caution dictates that we will
-favor backward compatibility.  When a feature is deprecated, a
-statement of reasoning describing the decision process will be posted,
-and a link to it will be provided in the relevant perldelta documents.
+very limited circumstances.  If they believed to be very rarely used,
+stand in the way of actual improvement to the Perl language or perl
+interpreter, and if affected code can be easily updated to continue
+working, they may be considered for removal.  When in doubt, caution
+dictates that we will favor backward compatibility.  When a feature is
+deprecated, a statement of reasoning describing the decision process
+will be posted, and a link to it will be provided in the relevant
+perldelta documents.
 
 Using a lexical pragma to enable or disable legacy behavior should be
 considered when appropriate, and in the absence of any pragma legacy
