@@ -136,11 +136,15 @@ ndbm_NEXTKEY(db, key)
 int
 ndbm_error(db)
 	NDBM_File	db
+    CLEANUP:
+	PERL_UNUSED_VAR(db);
 
 #define ndbm_clearerr(db)			dbm_clearerr(db->dbp)
 void
 ndbm_clearerr(db)
 	NDBM_File	db
+    CLEANUP:
+	PERL_UNUSED_VAR(db);
 
 
 SV *
