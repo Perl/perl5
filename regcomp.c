@@ -928,8 +928,8 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 	else { /* *data->longest == data->longest_float */
 	    data->offset_float_min = l ? data->last_start_min : data->pos_min;
 	    data->offset_float_max = (l
-				      ? data->last_start_max
-				      : (data->pos_delta == SSize_t_MAX
+                          ? data->last_start_max
+                          : (data->pos_delta > SSize_t_MAX - data->pos_min
 					 ? SSize_t_MAX
 					 : data->pos_min + data->pos_delta));
 	    if (is_inf
