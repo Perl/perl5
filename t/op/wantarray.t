@@ -14,7 +14,7 @@ sub context {
   local $::Level = $::Level + 1;
   my ( $cona, $name ) = @_;
   my $conb = (defined wantarray) ? ( wantarray ? 'A' : 'S' ) : 'V';
-  is $cona, $conb, $name;
+  is $conb, $cona, $name;
 }
 
 context('V');
