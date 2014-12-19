@@ -11897,11 +11897,13 @@ Perl_ck_subr(pTHX_ OP *o)
 	    /* make class name a shared cow string to speedup method calls */
 	    /* constant string might be replaced with object, f.e. bigint */
 	    if (const_class && !SvROK(*const_class)) {
-		SSize_t len;
+		STRLEN len;
 		const char* str = SvPV(*const_class, len);
 		if (len) {
 		    SV* const shared = newSVpvn_share(
-			str, SvUTF8(*const_class) ? -len : len, 0
+			str, SvUTF8(*const_class)
+                                    ? -(SSize_t)len : (SSize_t)len,
+                        0
 		    );
 		    SvREFCNT_dec(*const_class);
 		    *const_class = shared;
