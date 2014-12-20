@@ -525,7 +525,7 @@ CODE:
 void
 opcodes()
 PPCODE:
-    if (GIMME == G_ARRAY) {
+    if (GIMME_V == G_ARRAY) {
 	croak("opcodes in list context not yet implemented"); /* XXX */
     }
     else {
