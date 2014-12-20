@@ -3710,7 +3710,7 @@ DllExport int
 win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
 #ifdef USE_RTL_SPAWNVP
-    return spawnvp(mode, cmdname, (char * const *)argv);
+    return _spawnvp(mode, cmdname, (char * const *)argv);
 #else
     return do_spawnvp_handles(mode, cmdname, argv, NULL);
 #endif
@@ -3885,9 +3885,9 @@ win32_execv(const char *cmdname, const char *const *argv)
     /* if this is a pseudo-forked child, we just want to spawn
      * the new program, and return */
     if (w32_pseudo_id)
-	return spawnv(P_WAIT, cmdname, argv);
+	return _spawnv(P_WAIT, cmdname, argv);
 #endif
-    return execv(cmdname, argv);
+    return _execv(cmdname, argv);
 }
 
 DllExport int
@@ -3907,7 +3907,7 @@ win32_execvp(const char *cmdname, const char *const *argv)
 	    return status;
     }
 #endif
-    return execvp(cmdname, argv);
+    return _execvp(cmdname, argv);
 }
 
 DllExport void
