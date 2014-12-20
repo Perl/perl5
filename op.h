@@ -150,12 +150,14 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPf_LIST	OPf_WANT_LIST
 #define OPf_KNOW	OPf_WANT
 
-#define GIMME \
+#ifndef PERL_CORE
+#  define GIMME \
 	  (PL_op->op_flags & OPf_WANT					\
 	   ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST		\
 	      ? G_ARRAY							\
 	      : G_SCALAR)						\
 	   : dowantarray())
+#endif
 
 
 /* NOTE: OPp* flags are now auto-generated and defined in opcode.h,

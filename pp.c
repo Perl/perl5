@@ -78,7 +78,7 @@ PP(pp_padav)
     } else if (PL_op->op_private & OPpMAYBE_LVSUB) {
        const I32 flags = is_lvalue_sub();
        if (flags && !(flags & OPpENTERSUB_INARGS)) {
-	if (GIMME == G_SCALAR)
+	if (GIMME_V == G_SCALAR)
 	    /* diag_listed_as: Can't return %s to lvalue scalar context */
 	    Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
 	PUSHs(TARG);
@@ -130,7 +130,7 @@ PP(pp_padhv)
     else if (PL_op->op_private & OPpMAYBE_LVSUB) {
       const I32 flags = is_lvalue_sub();
       if (flags && !(flags & OPpENTERSUB_INARGS)) {
-	if (GIMME == G_SCALAR)
+	if (GIMME_V == G_SCALAR)
 	    /* diag_listed_as: Can't return %s to lvalue scalar context */
 	    Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
 	RETURN;
@@ -533,7 +533,7 @@ PP(pp_srefgen)
 PP(pp_refgen)
 {
     dSP; dMARK;
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	if (++MARK <= SP)
 	    *MARK = *SP;
 	else
@@ -1640,7 +1640,7 @@ PP(pp_repeat)
     IV count;
     SV *sv;
 
-    if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
+    if (GIMME_V == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	/* TODO: think of some way of doing list-repeat overloading ??? */
 	sv = POPs;
 	SvGETMAGIC(sv);
@@ -1696,7 +1696,7 @@ PP(pp_repeat)
                                          "Negative repeat count does nothing");
     }
 
-    if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
+    if (GIMME_V == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
 	static const char* const oom_list_extend = "Out of memory during list extend";
 	const I32 items = SP - MARK;
@@ -4445,7 +4445,7 @@ PP(pp_aslice)
 	    *MARK = svp ? *svp : &PL_sv_undef;
 	}
     }
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	MARK = ORIGMARK;
 	*++MARK = SP > ORIGMARK ? *SP : &PL_sv_undef;
 	SP = MARK;
@@ -4490,7 +4490,7 @@ PP(pp_kvaslice)
         }
 	*++MARK = svp ? *svp : &PL_sv_undef;
     }
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	MARK = SP - items*2;
 	*++MARK = items > 0 ? *SP : &PL_sv_undef;
 	SP = MARK;
@@ -4891,7 +4891,7 @@ PP(pp_hslice)
         }
         *MARK = svp && *svp ? *svp : &PL_sv_undef;
     }
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	MARK = ORIGMARK;
 	*++MARK = SP > ORIGMARK ? *SP : &PL_sv_undef;
 	SP = MARK;
@@ -4940,7 +4940,7 @@ PP(pp_kvhslice)
         }
         *++MARK = svp && *svp ? *svp : &PL_sv_undef;
     }
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	MARK = SP - items*2;
 	*++MARK = items > 0 ? *SP : &PL_sv_undef;
 	SP = MARK;
@@ -4953,7 +4953,7 @@ PP(pp_kvhslice)
 PP(pp_list)
 {
     I32 markidx = POPMARK;
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	SV **mark = PL_stack_base + markidx;
 	dSP;
 	if (++MARK <= SP)
@@ -4978,7 +4978,7 @@ PP(pp_lslice)
     const I32 max = lastrelem - lastlelem;
     SV **lelem;
 
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	I32 ix = SvIV(*lastlelem);
 	if (ix < 0)
 	    ix += max;
@@ -5163,7 +5163,7 @@ PP(pp_splice)
 	}
 
 	MARK = ORIGMARK + 1;
-	if (GIMME == G_ARRAY) {			/* copy return vals to stack */
+	if (GIMME_V == G_ARRAY) {		/* copy return vals to stack */
 	    const bool real = cBOOL(AvREAL(ary));
 	    MEXTEND(MARK, length);
 	    if (real)
@@ -5259,7 +5259,7 @@ PP(pp_splice)
 	}
 
 	MARK = ORIGMARK + 1;
-	if (GIMME == G_ARRAY) {			/* copy return vals to stack */
+	if (GIMME_V == G_ARRAY) {		/* copy return vals to stack */
 	    if (length) {
 		const bool real = cBOOL(AvREAL(ary));
 		if (real)
@@ -5382,7 +5382,7 @@ PP(pp_reverse)
 {
     dSP; dMARK;
 
-    if (GIMME == G_ARRAY) {
+    if (GIMME_V == G_ARRAY) {
 	if (PL_op->op_private & OPpREVERSE_INPLACE) {
 	    AV *av;
 

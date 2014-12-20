@@ -1247,7 +1247,7 @@ PP(pp_sselect)
     }
 
     PUSHi(nfound);
-    if (GIMME == G_ARRAY && tbuf) {
+    if (GIMME_V == G_ARRAY && tbuf) {
 	value = (NV)(timebuf.tv_sec) +
 		(NV)(timebuf.tv_usec) / 1000000.0;
 	mPUSHn(value);
@@ -3963,7 +3963,7 @@ PP(pp_readdir)
     dSP;
 
     SV *sv;
-    const I32 gimme = GIMME;
+    const I32 gimme = GIMME_V;
     GV * const gv = MUTABLE_GV(POPs);
     const Direntry_t *dp;
     IO * const io = GvIOn(gv);
@@ -3997,7 +3997,7 @@ PP(pp_readdir)
 nope:
     if (!errno)
 	SETERRNO(EBADF,RMS_ISI);
-    if (GIMME == G_ARRAY)
+    if (GIMME_V == G_ARRAY)
 	RETURN;
     else
 	RETPUSHUNDEF;
@@ -4552,7 +4552,7 @@ PP(pp_tms)
     (void)PerlProc_times(&timesbuf);
 
     mPUSHn(((NV)timesbuf.tms_utime)/(NV)PL_clocktick);
-    if (GIMME == G_ARRAY) {
+    if (GIMME_V == G_ARRAY) {
 	mPUSHn(((NV)timesbuf.tms_stime)/(NV)PL_clocktick);
 	mPUSHn(((NV)timesbuf.tms_cutime)/(NV)PL_clocktick);
 	mPUSHn(((NV)timesbuf.tms_cstime)/(NV)PL_clocktick);
@@ -4563,7 +4563,7 @@ PP(pp_tms)
     dSP;
     mPUSHn(0.0);
     EXTEND(SP, 4);
-    if (GIMME == G_ARRAY) {
+    if (GIMME_V == G_ARRAY) {
 	 mPUSHn(0.0);
 	 mPUSHn(0.0);
 	 mPUSHn(0.0);
@@ -4641,7 +4641,7 @@ PP(pp_gmtime)
 		       "%s(%.0" NVff ") failed", opname, when);
     }
 
-    if (GIMME != G_ARRAY) {	/* scalar context */
+    if (GIMME_V != G_ARRAY) {	/* scalar context */
         EXTEND(SP, 1);
         EXTEND_MORTAL(1);
 	if (err == NULL)
@@ -4868,7 +4868,7 @@ PP(pp_ghostent)
 	}
 #endif
 
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	PUSHs(sv = sv_newmortal());
 	if (hent) {
 	    if (which == OP_GHBYNAME) {
@@ -4955,7 +4955,7 @@ PP(pp_gnetent)
 #endif
 
     EXTEND(SP, 4);
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	PUSHs(sv = sv_newmortal());
 	if (nent) {
 	    if (which == OP_GNBYNAME)
@@ -5019,7 +5019,7 @@ PP(pp_gprotoent)
 #endif
 
     EXTEND(SP, 3);
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	PUSHs(sv = sv_newmortal());
 	if (pent) {
 	    if (which == OP_GPBYNAME)
@@ -5085,7 +5085,7 @@ PP(pp_gservent)
 #endif
 
     EXTEND(SP, 4);
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	PUSHs(sv = sv_newmortal());
 	if (sent) {
 	    if (which == OP_GSBYNAME) {
@@ -5321,7 +5321,7 @@ PP(pp_gpwent)
     }
 
     EXTEND(SP, 10);
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	PUSHs(sv = sv_newmortal());
 	if (pwent) {
 	    if (which == OP_GPWNAM)
@@ -5463,7 +5463,7 @@ PP(pp_ggrent)
 #endif
 
     EXTEND(SP, 4);
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
 	SV * const sv = sv_newmortal();
 
 	PUSHs(sv);

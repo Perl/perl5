@@ -1109,7 +1109,7 @@ PP(pp_mapwhile)
 
 PP(pp_range)
 {
-    if (GIMME == G_ARRAY)
+    if (GIMME_V == G_ARRAY)
 	return NORMAL;
     if (SvTRUEx(PAD_SV(PL_op->op_targ)))
 	return cLOGOP->op_other;
@@ -1121,7 +1121,7 @@ PP(pp_flip)
 {
     dSP;
 
-    if (GIMME == G_ARRAY) {
+    if (GIMME_V == G_ARRAY) {
 	RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
     }
     else {
@@ -1175,7 +1175,7 @@ PP(pp_flop)
 {
     dSP;
 
-    if (GIMME == G_ARRAY) {
+    if (GIMME_V == G_ARRAY) {
 	dPOPPOPssrl;
 
 	SvGETMAGIC(left);
@@ -1776,7 +1776,7 @@ PP(pp_caller)
 
     cx = caller_cx(count + !!(PL_op->op_private & OPpOFFBYONE), &dbcx);
     if (!cx) {
-	if (GIMME != G_ARRAY) {
+	if (GIMME_V != G_ARRAY) {
 	    EXTEND(SP, 1);
 	    RETPUSHUNDEF;
 	}
@@ -1788,7 +1788,7 @@ PP(pp_caller)
     stash_hek = SvTYPE(CopSTASH(cx->blk_oldcop)) == SVt_PVHV
       ? HvNAME_HEK((HV*)CopSTASH(cx->blk_oldcop))
       : NULL;
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V != G_ARRAY) {
         EXTEND(SP, 1);
 	if (!stash_hek)
 	    PUSHs(&PL_sv_undef);
