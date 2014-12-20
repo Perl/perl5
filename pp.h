@@ -438,7 +438,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
         {                                       		\
 	    SPAGAIN;						\
             if (gimme == G_VOID) {                              \
-                (void)POPs; /* XXX ??? */                       \
+                NOOP;                                           \
             }                                                   \
             else if (gimme == G_ARRAY) {			\
                 SSize_t i;                                      \
