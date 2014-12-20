@@ -492,7 +492,10 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     is $x, $as_string."boo\n", 'string gets appended to ref';
 }
 
+SKIP:
 { # [perl #123443]
+    skip "Can't seek over 4GB with a small off_t", 4
+      if $Config::Config{lseeksize} < 8;
     my $buf0 = "hello";
     open my $fh, "<", \$buf0 or die $!;
     ok(seek($fh, 2**32, SEEK_SET), "seek to a large position");
