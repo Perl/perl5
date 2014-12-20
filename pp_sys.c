@@ -3997,7 +3997,7 @@ PP(pp_readdir)
 nope:
     if (!errno)
 	SETERRNO(EBADF,RMS_ISI);
-    if (GIMME_V == G_ARRAY)
+    if (gimme == G_ARRAY)
 	RETURN;
     else
 	RETPUSHUNDEF;
