@@ -12354,7 +12354,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                     assert(!(o->op_private &
                             ~(OPpPAD_STATE|OPpDEREF|OPpLVAL_INTRO)));
 
-                    if (   o->op_flags == OPf_WANT_SCALAR
+                    if (   OP_GIMME(o,0) == G_SCALAR
+                        && !(o->op_flags & (OPf_REF|OPf_MOD))
                         && o->op_private == 0)
                     {
                         if (pass)
