@@ -250,7 +250,7 @@ static OP *ab_pp_basearg(pTHX) {
  case OP_LSLICE:
   firstp = PL_stack_base + *(PL_markstack_ptr-1)+1;
   count = TOPMARK - *(PL_markstack_ptr-1);
-  if (GIMME != G_ARRAY) {
+  if (GIMME_V != G_ARRAY) {
    firstp += count-1;
    count = 1;
   }
