@@ -1389,11 +1389,13 @@ Perl_csighandler(int sig)
 #else
     dTHX;
 #endif
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 #if defined(__cplusplus) && defined(__GNUC__)
     /* g++ doesn't support PERL_UNUSED_DECL, so the sip and uap
      * parameters would be warned about. */
     PERL_UNUSED_ARG(sip);
     PERL_UNUSED_ARG(uap);
+#endif
 #endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
     (void) rsignal(sig, PL_csighandlerp);
