@@ -1762,7 +1762,7 @@ PP(pp_caller)
     dSP;
     const PERL_CONTEXT *cx;
     const PERL_CONTEXT *dbcx;
-    I32 gimme;
+    I32 gimme = GIMME_V;
     const HEK *stash_hek;
     I32 count = 0;
     bool has_arg = MAXARG && TOPs;
@@ -1776,7 +1776,7 @@ PP(pp_caller)
 
     cx = caller_cx(count + !!(PL_op->op_private & OPpOFFBYONE), &dbcx);
     if (!cx) {
-	if (GIMME_V != G_ARRAY) {
+	if (gimme != G_ARRAY) {
 	    EXTEND(SP, 1);
 	    RETPUSHUNDEF;
 	}
@@ -1788,7 +1788,7 @@ PP(pp_caller)
     stash_hek = SvTYPE(CopSTASH(cx->blk_oldcop)) == SVt_PVHV
       ? HvNAME_HEK((HV*)CopSTASH(cx->blk_oldcop))
       : NULL;
-    if (GIMME_V != G_ARRAY) {
+    if (gimme != G_ARRAY) {
         EXTEND(SP, 1);
 	if (!stash_hek)
 	    PUSHs(&PL_sv_undef);
