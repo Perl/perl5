@@ -148,7 +148,7 @@ dl_unload_file(libref)
     void *	libref
   CODE:
     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_unload_file(%lx):\n", PTR2ul(libref)));
-    RETVAL = FreeLibrary(libref);
+    RETVAL = FreeLibrary((HMODULE)libref);
     if (!RETVAL)
         SaveError(aTHX_ "unload_file:%s", OS_Error_String(aTHX)) ;
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, " retval = %d\n", RETVAL));
