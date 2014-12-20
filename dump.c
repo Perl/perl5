@@ -2336,7 +2336,7 @@ Perl_unop_aux_stringify(pTHX_ const OP *o, CV *cv)
     bool last = 0;
     bool is_hash = FALSE;
     int derefs = 0;
-    SV *out = sv_2mortal(newSVpv("",0));
+    SV *out = newSVpvn_flags("",0,SVs_TEMP);
 #ifdef USE_ITHREADS
     PADLIST * const padlist = CvPADLIST(cv);
     PAD *comppad = PadlistARRAY(padlist)[1];
