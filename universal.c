@@ -903,6 +903,7 @@ XS(XS_re_regexp_pattern)
 {
     dXSARGS;
     REGEXP *re;
+    U8 const gimme = GIMME_V;
 
     EXTEND(SP, 2);
     SP -= items;
@@ -925,7 +926,7 @@ XS(XS_re_regexp_pattern)
         /* Houston, we have a regex! */
         SV *pattern;
 
-        if ( GIMME_V == G_ARRAY ) {
+        if ( gimme == G_ARRAY ) {
 	    STRLEN left = 0;
 	    char reflags[sizeof(INT_PAT_MODS) + MAX_CHARSET_NAME_LENGTH];
             const char *fptr;
@@ -977,7 +978,7 @@ XS(XS_re_regexp_pattern)
         }
     } else {
         /* It ain't a regexp folks */
-        if ( GIMME_V == G_ARRAY ) {
+        if ( gimme == G_ARRAY ) {
             /* return the empty list */
             XSRETURN_UNDEF;
         } else {
