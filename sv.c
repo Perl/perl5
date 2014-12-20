@@ -2158,6 +2158,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	    SvIV_set(sv, I_V(SvNVX(sv)));
 	    if (SvNVX(sv) == (NV) SvIVX(sv)
 #ifndef NV_PRESERVES_UV
+                && SvIVX(sv) != IV_MIN /* avoid negating IV_MIN below */
 		&& (((UV)1 << NV_PRESERVES_UV_BITS) >
 		    (UV)(SvIVX(sv) > 0 ? SvIVX(sv) : -SvIVX(sv)))
 		/* Don't flag it as "accurately an integer" if the number
@@ -2273,7 +2274,8 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	    } else {
 		/* 2s complement assumption  */
 		if (value <= (UV)IV_MIN) {
-		    SvIV_set(sv, -(IV)value);
+		    SvIV_set(sv, value == (UV)IV_MIN
+                                    ? IV_MIN : -(IV)value);
 		} else {
 		    /* Too negative for an IV.  This is a double upgrade, but
 		       I'm assuming it will be rare.  */
@@ -2732,7 +2734,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
             SvNOK_on(sv);
         } else {
             /* value has been set.  It may not be precise.  */
-	    if ((numtype & IS_NUMBER_NEG) && (value > (UV)IV_MIN)) {
+	    if ((numtype & IS_NUMBER_NEG) && (value >= (UV)IV_MIN)) {
 		/* 2s complement assumption for (UV)IV_MIN  */
                 SvNOK_on(sv); /* Integer is too negative.  */
             } else {
@@ -2861,7 +2863,7 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
 	uv = iv;
 	sign = 0;
     } else {
-	uv = -iv;
+        uv = (iv == IV_MIN) ? (UV)iv : (UV)(-iv);
 	sign = 1;
     }
     do {
@@ -11898,7 +11900,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			esignbuf[esignlen++] = plus;
 		}
 		else {
-		    uv = -iv;
+		    uv = (iv == IV_MIN) ? (UV)iv : (UV)(-iv);
 		    esignbuf[esignlen++] = '-';
 		}
 	    }

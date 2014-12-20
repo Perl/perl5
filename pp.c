@@ -1298,7 +1298,8 @@ PP(pp_multiply)
 		    alow = aiv;
 		    auvok = TRUE; /* effectively it's a UV now */
 		} else {
-		    alow = -aiv; /* abs, auvok == false records sign */
+                    /* abs, auvok == false records sign */
+		    alow = (aiv == IV_MIN) ? (UV)aiv : (UV)(-aiv);
 		}
 	    }
 	    if (buvok) {
@@ -1309,7 +1310,8 @@ PP(pp_multiply)
 		    blow = biv;
 		    buvok = TRUE; /* effectively it's a UV now */
 		} else {
-		    blow = -biv; /* abs, buvok == false records sign */
+                    /* abs, buvok == false records sign */
+		    blow = (biv == IV_MIN) ? (UV)biv : (UV)(-biv);
 		}
 	    }
 
@@ -1372,7 +1374,8 @@ PP(pp_multiply)
 			    /* 2s complement assumption again  */
 			    /* -ve result, which could overflow an IV  */
 			    SP--;
-			    SETi( -(IV)product_low );
+			    SETi(product_low == (UV)IV_MIN
+                                    ? IV_MIN : -(IV)product_low);
 			    RETURN;
 			} /* else drop to NVs below. */
 		    }
@@ -1797,7 +1800,7 @@ PP(pp_subtract)
 			auv = aiv;
 			auvok = 1;	/* Now acting as a sign flag.  */
 		    } else { /* 2s complement assumption for IV_MIN */
-			auv = (UV)-aiv;
+			auv = (aiv == IV_MIN) ? (UV)aiv : (UV)-aiv;
 		    }
 		}
 		a_valid = 1;
@@ -1817,7 +1820,7 @@ PP(pp_subtract)
 		    buv = biv;
 		    buvok = 1;
 		} else
-		    buv = (UV)-biv;
+                    buv = (biv == IV_MIN) ? (UV)biv : (UV)-biv;
 	    }
 	    /* ?uvok if value is >= 0. basically, flagged as UV if it's +ve,
 	       else "IV" now, independent of how it came in.
@@ -1858,7 +1861,8 @@ PP(pp_subtract)
 		else {
 		    /* Negate result */
 		    if (result <= (UV)IV_MIN)
-			SETi( -(IV)result );
+                        SETi(result == (UV)IV_MIN
+                                ? IV_MIN : -(IV)result);
 		    else {
 			/* result valid, but out of range for IV.  */
 			SETn( -(NV)result );
