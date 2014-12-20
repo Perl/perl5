@@ -1933,7 +1933,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000304,	/* orassign */
 	0x00000304,	/* dorassign */
 	0x00000e40,	/* method */
-	0x00002149,	/* entersub */
+	0x00002141,	/* entersub */
 	0x00000100,	/* leavesub */
 	0x00000100,	/* leavesublv */
 	0x00009b08,	/* caller */

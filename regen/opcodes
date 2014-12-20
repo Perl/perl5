@@ -286,7 +286,7 @@ orassign	logical or assignment (||=)	ck_null		s|
 dorassign	defined or assignment (//=)	ck_null		s|
 
 method		method lookup		ck_method	d.
-entersub	subroutine entry	ck_subr		dmt1	L
+entersub	subroutine entry	ck_subr		dm1	L
 leavesub	subroutine exit		ck_null		1	
 leavesublv	lvalue subroutine return	ck_null		1	
 caller		caller			ck_fun		t%	S?

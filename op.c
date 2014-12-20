@@ -11850,6 +11850,13 @@ Perl_cv_set_call_checker_flags(pTHX_ CV *cv, Perl_call_checker ckfun,
     }
 }
 
+static void
+S_entersub_alloc_targ(pTHX_ OP * const o)
+{
+    o->op_targ = pad_alloc(OP_ENTERSUB, SVs_PADTMP);
+    o->op_private |= OPpENTERSUB_HASTARG;
+}
+
 OP *
 Perl_ck_subr(pTHX_ OP *o)
 {
@@ -11869,7 +11876,6 @@ Perl_ck_subr(pTHX_ OP *o)
     namegv = cv ? (GV*)rv2cv_op_cv(cvop, RV2CVOPCV_MAYBE_NAME_GV) : NULL;
 
     o->op_private &= ~1;
-    o->op_private |= OPpENTERSUB_HASTARG;
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
     if (PERLDB_SUB && PL_curstash != PL_debstash)
 	o->op_private |= OPpENTERSUB_DB;
@@ -11913,12 +11919,15 @@ Perl_ck_subr(pTHX_ OP *o)
     }
 
     if (!cv) {
+	S_entersub_alloc_targ(aTHX_ o);
 	return ck_entersub_args_list(o);
     } else {
 	Perl_call_checker ckfun;
 	SV *ckobj;
 	U8 flags;
 	S_cv_get_call_checker(cv, &ckfun, &ckobj, &flags);
+	if (CvISXSUB(cv) || !CvROOT(cv))
+	    S_entersub_alloc_targ(aTHX_ o);
 	if (!namegv) {
 	    /* The original call checker API guarantees that a GV will be
 	       be provided with the right name.  So, if the old API was
