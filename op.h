@@ -150,7 +150,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPf_LIST	OPf_WANT_LIST
 #define OPf_KNOW	OPf_WANT
 
-#ifndef PERL_CORE
+#if !defined(PERL_CORE) && !defined(PERL_EXT)
 #  define GIMME \
 	  (PL_op->op_flags & OPf_WANT					\
 	   ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST		\
