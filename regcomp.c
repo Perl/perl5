@@ -5647,8 +5647,11 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
     {
         SSize_t final_minlen= min < stopmin ? min : stopmin;
 
-        if (!(RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN) && (RExC_maxlen < final_minlen + delta)) {
-            RExC_maxlen = final_minlen + delta;
+        if (!(RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)) {
+            if (final_minlen > SSize_t_MAX - delta)
+                RExC_maxlen = SSize_t_MAX;
+            else if (RExC_maxlen < final_minlen + delta)
+                RExC_maxlen = final_minlen + delta;
         }
         return final_minlen;
     }
