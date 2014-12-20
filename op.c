@@ -12437,7 +12437,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
                     assert(!(o->op_flags & ~(OPf_WANT|OPf_SPECIAL)));
                     assert(!(o->op_private & ~(OPpEARLY_CV)));
-                    if (   o->op_flags != OPf_WANT_SCALAR
+                    if (  (o->op_flags &~ OPf_SPECIAL) != OPf_WANT_SCALAR
                         || o->op_private != 0
                     )
                         break;
