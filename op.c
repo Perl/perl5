@@ -12453,7 +12453,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                                     ~(OPpARG1_MASK
                                      |OPpHINT_STRICT_REFS|OPpOUR_INTRO
                                      |OPpDEREF|OPpLVAL_INTRO)));
-                    if(   kid->op_flags != (OPf_WANT_SCALAR|OPf_KIDS)
+                    if(   (kid->op_flags &~ OPf_PARENS)
+                            != (OPf_WANT_SCALAR|OPf_KIDS)
                        || (kid->op_private & ~(OPpARG1_MASK|HINT_STRICT_REFS))
                     )
                         break;
