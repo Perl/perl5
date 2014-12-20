@@ -12498,7 +12498,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
             /* if something like arybase (a.k.a $[ ) is in scope,
              * abandon optimisation attempt */
-            if (o->op_type == OP_AELEM && PL_check[OP_AELEM] != Perl_ck_null)
+            if (  (o->op_type == OP_AELEM || o->op_type == OP_HELEM)
+               && PL_check[o->op_type] != Perl_ck_null)
                 return;
 
             if (   o->op_type != OP_AELEM
