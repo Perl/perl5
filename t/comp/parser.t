@@ -518,6 +518,10 @@ is +(${[{a=>214}]}[0])->{a}, 214, '($array[...])->{...}';
 sub FILE1 () { 1 }
 sub dummy { tell FILE1 }
 
+# More potential multideref assertion failures
+# OPf_PARENS on OP_RV2SV in subscript
+$x[($_)];
+
 # Add new tests HERE (above this line)
 
 # bug #74022: Loop on characters in \p{OtherIDContinue}

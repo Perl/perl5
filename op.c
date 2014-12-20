@@ -12447,7 +12447,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                         break;
 
                     assert(!(kid->op_flags &
-                            ~(OPf_WANT|OPf_KIDS|OPf_MOD|OPf_REF|OPf_SPECIAL)));
+                            ~(OPf_WANT|OPf_KIDS|OPf_MOD|OPf_REF
+                             |OPf_SPECIAL|OPf_PARENS)));
                     assert(!(kid->op_private &
                                     ~(OPpARG1_MASK
                                      |OPpHINT_STRICT_REFS|OPpOUR_INTRO
