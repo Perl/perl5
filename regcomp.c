@@ -225,7 +225,6 @@ struct RExC_state_t {
 #define RExC_emit_dummy	(pRExC_state->emit_dummy)
 #define RExC_emit_start	(pRExC_state->emit_start)
 #define RExC_emit_bound	(pRExC_state->emit_bound)
-#define RExC_naughty	(pRExC_state->naughty)
 #define RExC_sawback	(pRExC_state->sawback)
 #define RExC_seen	(pRExC_state->seen)
 #define RExC_size	(pRExC_state->size)
@@ -255,6 +254,19 @@ struct RExC_state_t {
 #define RExC_frame_last (pRExC_state->frame_last)
 #define RExC_frame_count (pRExC_state->frame_count)
 
+/* Heuristic check on the complexity of the pattern: if TOO_NAUGHTY, we set
+ * a flag to disable back-off on the fixed/floating substrings - if it's
+ * a high complexity pattern we assume the benefit of avoiding a full match
+ * is worth the cost of checking for the substrings even if they rarely help.
+ */
+#define RExC_naughty	(pRExC_state->naughty)
+#define TOO_NAUGHTY (10)
+#define MARK_NAUGHTY(add) \
+    if (RExC_naughty < TOO_NAUGHTY) \
+        RExC_naughty += (add)
+#define MARK_NAUGHTY_EXP(exp, add) \
+    if (RExC_naughty < TOO_NAUGHTY) \
+        RExC_naughty += RExC_naughty / (exp) + (add)
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
@@ -6911,7 +6923,7 @@ reStudy:
     if (UTF)
 	SvUTF8_on(rx);	/* Unicode in it? */
     ri->regstclass = NULL;
-    if (RExC_naughty >= 10)	/* Probably an expensive pattern. */
+    if (RExC_naughty >= TOO_NAUGHTY)	/* Probably an expensive pattern. */
 	r->intflags |= PREGf_NAUGHTY;
     scan = ri->program + 1;		/* First BRANCH. */
 
@@ -10727,7 +10739,9 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 	if (chain == NULL) 	/* First piece. */
 	    *flagp |= flags&SPSTART;
 	else {
-	    RExC_naughty++;
+	    /* FIXME adding one for every branch after the first is probably
+	     * excessive now we have TRIE support. (hv) */
+	    MARK_NAUGHTY(1);
             REGTAIL(pRExC_state, chain, latest);
 	}
 	chain = latest;
@@ -10859,8 +10873,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 	do_curly:
 	    if ((flags&SIMPLE)) {
-                if (RExC_naughty < I32_MAX / 2)
-                    RExC_naughty += 2 + RExC_naughty / 2;
+                MARK_NAUGHTY_EXP(2, 2);
 		reginsert(pRExC_state, CURLY, ret, depth+1);
                 Set_Node_Offset(ret, parse_start+1); /* MJD */
                 Set_Node_Cur_Length(ret, parse_start);
@@ -10886,8 +10899,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 REGTAIL(pRExC_state, ret, reg_node(pRExC_state, NOTHING));
 		if (SIZE_ONLY)
 		    RExC_whilem_seen++, RExC_extralen += 3;
-                if (RExC_naughty < I32_MAX / 4)
-                    RExC_naughty += 4 + RExC_naughty; /* compound interest */
+                MARK_NAUGHTY_EXP(1, 4);     /* compound interest */
 	    }
 	    ret->flags = 0;
 
@@ -10937,7 +10949,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     if (op == '*' && (flags&SIMPLE)) {
 	reginsert(pRExC_state, STAR, ret, depth+1);
 	ret->flags = 0;
-	RExC_naughty += 4;
+	MARK_NAUGHTY(4);
         RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
     }
     else if (op == '*') {
@@ -10947,7 +10959,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     else if (op == '+' && (flags&SIMPLE)) {
 	reginsert(pRExC_state, PLUS, ret, depth+1);
 	ret->flags = 0;
-	RExC_naughty += 3;
+	MARK_NAUGHTY(3);
         RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
     }
     else if (op == '+') {
@@ -11118,7 +11130,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
 	nextchar(pRExC_state);
 	*node_p = reg_node(pRExC_state, REG_ANY);
 	*flagp |= HASWIDTH|SIMPLE;
-	RExC_naughty++;
+	MARK_NAUGHTY(1);
         Set_Node_Length(*node_p, 1); /* MJD */
 	return 1;
     }
@@ -11635,7 +11647,7 @@ tryagain:
 	else
 	    ret = reg_node(pRExC_state, REG_ANY);
 	*flagp |= HASWIDTH|SIMPLE;
-	RExC_naughty++;
+	MARK_NAUGHTY(1);
         Set_Node_Length(ret, 1); /* MJD */
 	break;
     case '[':
@@ -13814,7 +13826,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	RExC_parse++;
         invert = TRUE;
         allow_multi_folds = FALSE;
-        RExC_naughty++;
+        MARK_NAUGHTY(1);
         if (skip_white) {
             RExC_parse = regpatws(pRExC_state, RExC_parse,
                                   FALSE /* means don't recognize comments */ );
@@ -14804,7 +14816,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 if (! LOC && value == '\n') {
                     op = REG_ANY; /* Optimize [^\n] */
                     *flagp |= HASWIDTH|SIMPLE;
-                    RExC_naughty++;
+                    MARK_NAUGHTY(1);
                 }
             }
             else if (value < 256 || UTF) {
@@ -15311,7 +15323,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             if (end == UV_MAX) {
                 op = SANY;
                 *flagp |= HASWIDTH|SIMPLE;
-                RExC_naughty++;
+                MARK_NAUGHTY(1);
             }
             else if (end == '\n' - 1
                     && invlist_iternext(cp_list, &start, &end)
@@ -15319,7 +15331,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             {
                 op = REG_ANY;
                 *flagp |= HASWIDTH|SIMPLE;
-                RExC_naughty++;
+                MARK_NAUGHTY(1);
             }
         }
         invlist_iterfinish(cp_list);
