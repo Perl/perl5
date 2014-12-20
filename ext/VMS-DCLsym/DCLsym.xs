@@ -52,7 +52,7 @@ _getsym(name)
       _ckvmssts(lib$sfree1_dd(&valdsc));
     }
     else {
-      ST(0) = &PL_sv_undef;  /* error - we're returning undef, if anything */
+      /* error - we'll return an empty list */
       switch (retsts) {
         case LIB$_NOSUCHSYM:
           break;   /* nobody home */;
