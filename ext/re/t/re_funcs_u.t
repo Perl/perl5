@@ -33,6 +33,7 @@ use re qw(is_regexp regexp_pattern
     is(regexp_pattern($rx),'(?^upi:foo)', 'scalar regexp_pattern (bare REGEXP)');
 
     ok(!regexp_pattern(''),'!regexp_pattern("")');
+    is +()=regexp_pattern(''), 0, 'regexp_pattern("") in list cx';
 }
 
 if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){

@@ -980,7 +980,7 @@ XS(XS_re_regexp_pattern)
         /* It ain't a regexp folks */
         if ( gimme == G_ARRAY ) {
             /* return the empty list */
-            XSRETURN_UNDEF;
+            XSRETURN_EMPTY;
         } else {
             /* Because of the (?:..) wrapping involved in a
                stringified pattern it is impossible to get a
