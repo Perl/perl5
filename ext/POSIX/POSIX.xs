@@ -3092,7 +3092,7 @@ strtod(str)
         STORE_NUMERIC_STANDARD_FORCE_LOCAL();
 	num = strtod(str, &unparsed);
 	PUSHs(sv_2mortal(newSVnv(num)));
-	if (GIMME == G_ARRAY) {
+	if (GIMME_V == G_ARRAY) {
 	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
@@ -3113,7 +3113,7 @@ strtold(str)
         STORE_NUMERIC_STANDARD_FORCE_LOCAL();
 	num = strtold(str, &unparsed);
 	PUSHs(sv_2mortal(newSVnv(num)));
-	if (GIMME == G_ARRAY) {
+	if (GIMME_V == G_ARRAY) {
 	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
@@ -3139,7 +3139,7 @@ strtol(str, base = 0)
 	else
 #endif
 	    PUSHs(sv_2mortal(newSViv((IV)num)));
-	if (GIMME == G_ARRAY) {
+	if (GIMME_V == G_ARRAY) {
 	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
@@ -3164,7 +3164,7 @@ strtoul(str, base = 0)
 	else
 #endif
 	    PUSHs(sv_2mortal(newSViv((IV)num)));
-	if (GIMME == G_ARRAY) {
+	if (GIMME_V == G_ARRAY) {
 	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
