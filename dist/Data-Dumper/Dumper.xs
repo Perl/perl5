@@ -1292,7 +1292,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    I32 purity, deepcopy, quotekeys, maxdepth = 0;
 	    IV maxrecurse = 1000;
 	    char tmpbuf[1024];
-	    I32 gimme = GIMME;
+	    I32 gimme = GIMME_V;
             int use_sparse_seen_hash = 0;
 
 	    if (!SvROK(href)) {		/* call new to get an object first */
@@ -1504,7 +1504,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    }
 	    else
 		croak("Call to new() method failed to return HASH ref");
-	    if (gimme == G_SCALAR)
+	    if (gimme != G_ARRAY)
 		XPUSHs(sv_2mortal(retval));
 	}
 
