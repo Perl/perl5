@@ -521,6 +521,8 @@ sub dummy { tell FILE1 }
 # More potential multideref assertion failures
 # OPf_PARENS on OP_RV2SV in subscript
 $x[($_)];
+# OPf_SPECIAL on OP_GV in subscript
+$x[FILE1->[0]];
 
 # Add new tests HERE (above this line)
 
