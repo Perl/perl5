@@ -362,9 +362,15 @@ sub reval {
     my $evalsub = lexless_anon_sub($root, $strict, $expr);
     # propagate context
     my $sg = sub_generation();
-    my @subret = (wantarray)
+    my @subret;
+    if (defined wantarray) {
+        @subret = (wantarray)
                ?        Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub)
                : scalar Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
+    }
+    else {
+        Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
+    }
     _clean_stash($root.'::') if $sg != sub_generation();
     $obj->wrap_code_refs_within(@subret);
     return (wantarray) ? @subret : $subret[0];
