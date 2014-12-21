@@ -381,6 +381,10 @@ L<Data::Util> version 0.63
 
 =item *
 
+L<Lexical::Var> version 0.009
+
+=item *
+
 L<Mason> version 2.22
 
 =item *

@@ -93,6 +93,7 @@ IPC::Signal
 kill(3)
 langinfo(3)
 LaTeX::Encode
+Lexical::Var
 Lingua::KO::Hangul::Util
 List::Gather
 local::lib
