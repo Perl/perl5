@@ -130,14 +130,23 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 		if (key <= newmax) 
 		    goto resized;
 #endif 
-		newmax = key + *maxp / 5;
+                /* overflow-safe version of newmax = key + *maxp/5 */
+		newmax = *maxp / 5;
+                newmax = (key > SSize_t_MAX - newmax)
+                            ? SSize_t_MAX : key + newmax;
 	      resize:
 		{
 #ifdef PERL_MALLOC_WRAP /* Duplicated in pp_hot.c */
 		    static const char oom_array_extend[] =
 			"Out of memory during array extend";
 #endif
-		    MEM_WRAP_CHECK_1(newmax+1, SV*, oom_array_extend);
+                    /* it should really be newmax+1 here, but if newmax
+                     * happens to equal SSize_t_MAX, then newmax+1 is
+                     * undefined. This means technically we croak one
+                     * index lower than we should in theory; in practice
+                     * its unlikely the system has SSize_t_MAX/sizeof(SV*)
+                     * bytes to spare! */
+		    MEM_WRAP_CHECK_1(newmax, SV*, oom_array_extend);
 		}
 #ifdef STRESS_REALLOC
 		{
@@ -167,7 +176,8 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 		    static const char oom_array_extend[] =
 			"Out of memory during array extend";
 #endif
-		    MEM_WRAP_CHECK_1(newmax+1, SV*, oom_array_extend);
+                    /* see comment above about newmax+1*/
+		    MEM_WRAP_CHECK_1(newmax, SV*, oom_array_extend);
 		}
 		Newx(*allocp, newmax+1, SV*);
 		ary = *allocp + 1;
