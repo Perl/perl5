@@ -11349,6 +11349,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
         removed => {
         }
     },
+    5.021008 => {
+        delta_from => 5.021007,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 for my $version (sort { $a <=> $b } keys %deprecated) {
