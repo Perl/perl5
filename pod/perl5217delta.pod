@@ -522,11 +522,11 @@ of users and developers. The following people are known to have contributed the
 improvements that became Perl 5.21.7:
 
 Aaron Crane, Aristotle Pagaltzis, Chad Granum, Chris 'BinGOs' Williams, Craig
-A. Berry, Dagfinn Ilmari Manns├Ñker, Daniel Dragan, David Mitchell, Eric
+A. Berry, Dagfinn Ilmari Mannsåker, Daniel Dragan, David Mitchell, Eric
 Herman, Father Chrysostomos, H.Merijn Brand, Hugo van der Sanden, James
 Raspass, Jarkko Hietaniemi, Jim Cromie, Karen Etheridge, Karl Williamson, kmx,
-Lukas Mai, Matthew Horsfall, Max Maischein, Petr P├¡sa┼Ö, Ricardo Signes,
-Shlomi Fish, Steffen M├╝ller, Steve Hay, Sullivan Beck, syber, Todd Rinaldo,
+Lukas Mai, Matthew Horsfall, Max Maischein, Petr Písař, Ricardo Signes,
+Shlomi Fish, Steffen Müller, Steve Hay, Sullivan Beck, syber, Todd Rinaldo,
 Tony Cook.
 
 The list above is almost certainly incomplete as it is automatically generated
