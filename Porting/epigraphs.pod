@@ -17,6 +17,21 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.7 - Robert Heinlein, The Number of the Beast
+
+L<Announced on 2014-12-20 by Max Maischein|http://www.nntp.perl.org/group/perl.perl5.porters/2014/12/msg223774.html>
+
+     "Zebadiah, Hilda and I salvaged and put everything into the basket.
+      Hilda started to put it into our wardrobe-and it was heavy. So
+      we looked. Packed as tight as when we left Oz. Six bananas-and
+      everything else. Cross my heart. No, go look."
+     "Hmmm- Jake, can you write equations for a picnic basket that
+      refills itself? Will it go on doing so?"
+     "Zeb, equations can be written to describe anything. The description
+      would be simpler for a basket that replenishes itself indefinitely
+      than for one that does it once and stops-I would have to describe
+      the discontinuity."
+
 =head2 v5.21.6 - Jeff Noon, Vurt
 
 L<Announced on 2014-11-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2014/11/msg222448.html>
