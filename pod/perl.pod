@@ -121,6 +121,7 @@ aux a2p c2ph h2ph h2xs perlbug pl2pm pod2html pod2man s2p splain xsubpp
     perllocale		Perl locale support
     perluniintro	Perl Unicode introduction
     perlunicode 	Perl Unicode support
+    perlunicook 	Perl Unicode cookbook
     perlunifaq		Perl Unicode FAQ
     perluniprops	Index of Unicode properties in Perl
     perlunitut		Perl Unicode tutorial
