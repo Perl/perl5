@@ -814,8 +814,6 @@ Finally, see the published Unicode Standard (page numbers are from version
 §4.2  Case, pages 120–122;
 Case Mappings, page 166–172, especially Caseless Matching starting on page 170.
 
-=item
-
 =item UAX #44: Unicode Character Database
 
 =item UTS #18: Unicode Regular Expressions
