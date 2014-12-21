@@ -425,6 +425,7 @@ op/caller.t
 op/each.t                 # utf8ness of deparsed strings
 op/getpid.t               # [perl #70205] my attrs
 op/goto.t
+op/gv.t                   # glob copy constants
 op/hash-rt85026.t
 op/hashassign.t
 op/index.t
