@@ -17,3 +17,9 @@
 # nor =signed-integer-overflow worked.
 
 fun:Perl_pp_i_*
+
+# Perl's << is defined as using the underlying C's << operator, with the
+# same undefined behaviour for shifts greater than the word size.
+# (UVs normally, IVs with 'use integer')
+
+fun:Perl_pp_left_shift
