@@ -12292,7 +12292,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
             break;
 
         default:
-            assert(0);
+            NOT_REACHED;
             return;
         }
 
@@ -12321,7 +12321,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
                 /* rv2av or rv2hv sKR/1 */
 
-                assert(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
+                ASSUME(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
                                             |OPf_REF|OPf_MOD|OPf_SPECIAL)));
                 if (o->op_flags != (OPf_WANT_SCALAR|OPf_KIDS|OPf_REF))
                     return;
@@ -12331,14 +12331,14 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                  * OPpMAYBE_LVSUB, OPpOUR_INTRO, OPpLVAL_INTRO
                  * OPpTRUEBOOL, OPpMAYBE_TRUEBOOL (rv2hv only)
                  */
-                assert(!(o->op_private &
+                ASSUME(!(o->op_private &
                     ~(OPpHINT_STRICT_REFS|OPpARG1_MASK|OPpSLICEWARNING)));
 
                 hints = (o->op_private & OPpHINT_STRICT_REFS);
 
                 /* make sure the type of the previous /DEREF matches the
                  * type of the next lookup */
-                assert(o->op_type == (next_is_hash ? OP_RV2HV : OP_RV2AV));
+                ASSUME(o->op_type == (next_is_hash ? OP_RV2HV : OP_RV2AV));
                 top_op = o;
 
                 action = next_is_hash
@@ -12358,9 +12358,9 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                 switch (o->op_type) {
                 case OP_PADSV:
                     /* it may be a lexical var index */
-                    assert(!(o->op_flags & ~(OPf_WANT|OPf_PARENS
+                    ASSUME(!(o->op_flags & ~(OPf_WANT|OPf_PARENS
                                             |OPf_REF|OPf_MOD|OPf_SPECIAL)));
-                    assert(!(o->op_private &
+                    ASSUME(!(o->op_private &
                             ~(OPpPAD_STATE|OPpDEREF|OPpLVAL_INTRO)));
 
                     if (   OP_GIMME(o,0) == G_SCALAR
@@ -12389,7 +12389,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                             UNOP *rop = NULL;
                             OP * helem_op = o->op_next;
 
-                            assert(   helem_op->op_type == OP_HELEM
+                            ASSUME(   helem_op->op_type == OP_HELEM
                                    || helem_op->op_type == OP_NULL);
                             if (helem_op->op_type == OP_HELEM) {
                                 rop = (UNOP*)(((BINOP*)helem_op)->op_first);
@@ -12444,8 +12444,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                 case OP_GV:
                     /* it may be a package var index */
 
-                    assert(!(o->op_flags & ~(OPf_WANT|OPf_SPECIAL)));
-                    assert(!(o->op_private & ~(OPpEARLY_CV)));
+                    ASSUME(!(o->op_flags & ~(OPf_WANT|OPf_SPECIAL)));
+                    ASSUME(!(o->op_private & ~(OPpEARLY_CV)));
                     if (  (o->op_flags &~ OPf_SPECIAL) != OPf_WANT_SCALAR
                         || o->op_private != 0
                     )
@@ -12455,10 +12455,10 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                     if (kid->op_type != OP_RV2SV)
                         break;
 
-                    assert(!(kid->op_flags &
+                    ASSUME(!(kid->op_flags &
                             ~(OPf_WANT|OPf_KIDS|OPf_MOD|OPf_REF
                              |OPf_SPECIAL|OPf_PARENS)));
-                    assert(!(kid->op_private &
+                    ASSUME(!(kid->op_private &
                                     ~(OPpARG1_MASK
                                      |OPpHINT_STRICT_REFS|OPpOUR_INTRO
                                      |OPpDEREF|OPpLVAL_INTRO)));
@@ -12537,24 +12537,24 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                                || (o->op_private & OPpDEREF) == OPpDEREF_HV);
 
                 if (is_deref) {
-                    assert(!(o->op_flags &
+                    ASSUME(!(o->op_flags &
                                  ~(OPf_WANT|OPf_KIDS|OPf_MOD|OPf_PARENS)));
-                    assert(!(o->op_private & ~(OPpARG2_MASK|OPpDEREF)));
+                    ASSUME(!(o->op_private & ~(OPpARG2_MASK|OPpDEREF)));
 
                     ok =    (o->op_flags &~ OPf_PARENS)
                                == (OPf_WANT_SCALAR|OPf_KIDS|OPf_MOD)
                          && !(o->op_private & ~(OPpDEREF|OPpARG2_MASK));
                 }
                 else if (o->op_type == OP_EXISTS) {
-                    assert(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
+                    ASSUME(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
                                 |OPf_REF|OPf_MOD|OPf_SPECIAL)));
-                    assert(!(o->op_private & ~(OPpARG1_MASK|OPpEXISTS_SUB)));
+                    ASSUME(!(o->op_private & ~(OPpARG1_MASK|OPpEXISTS_SUB)));
                     ok =  !(o->op_private & ~OPpARG1_MASK);
                 }
                 else if (o->op_type == OP_DELETE) {
-                    assert(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
+                    ASSUME(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
                                 |OPf_REF|OPf_MOD|OPf_SPECIAL)));
-                    assert(!(o->op_private &
+                    ASSUME(!(o->op_private &
                                     ~(OPpARG1_MASK|OPpSLICE|OPpLVAL_INTRO)));
                     /* don't handle slices or 'local delete'; the latter
                      * is fairly rare, and has a complex runtime */
@@ -12564,10 +12564,10 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                         ok = (ok && cBOOL(o->op_flags & OPf_SPECIAL));
                 }
                 else {
-                    assert(o->op_type == OP_AELEM || o->op_type == OP_HELEM);
-                    assert(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_MOD
+                    ASSUME(o->op_type == OP_AELEM || o->op_type == OP_HELEM);
+                    ASSUME(!(o->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_MOD
                                             |OPf_PARENS|OPf_REF|OPf_SPECIAL)));
-                    assert(!(o->op_private & ~(OPpARG2_MASK|OPpMAYBE_LVSUB
+                    ASSUME(!(o->op_private & ~(OPpARG2_MASK|OPpMAYBE_LVSUB
                                     |OPpLVAL_DEFER|OPpDEREF|OPpLVAL_INTRO)));
                     ok = (o->op_private & OPpDEREF) != OPpDEREF_SV;
                 }
@@ -12764,7 +12764,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                  * expr->[..]? so we need to save the 'expr' subtree */
                 if (p->op_type == OP_EXISTS || p->op_type == OP_DELETE)
                     p = cUNOPx(p)->op_first;
-                assert(   start->op_type == OP_RV2AV
+                ASSUME(   start->op_type == OP_RV2AV
                        || start->op_type == OP_RV2HV);
             }
             else {
@@ -12775,7 +12775,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                 )
                     p = cUNOPx(p)->op_first;
             }
-            assert(cUNOPx(p)->op_first == start);
+            ASSUME(cUNOPx(p)->op_first == start);
 
             /* detach from main tree, and re-attach under the multideref */
             op_sibling_splice(mderef, NULL, 0,
@@ -12898,14 +12898,14 @@ Perl_rpeep(pTHX_ OP *o)
                  * not aware of, rather than:
                  *  * silently failing to optimise, or
                  *  * silently optimising the flag away.
-                 * If this assert starts failing, examine what new flag
+                 * If this ASSUME starts failing, examine what new flag
                  * has been added to the op, and decide whether the
                  * optimisation should still occur with that flag, then
                  * update the code accordingly. This applies to all the
-                 * other asserts in the block of code too.
+                 * other ASSUMEs in the block of code too.
                  */
-                assert(!(o2->op_flags & ~(OPf_WANT|OPf_MOD|OPf_SPECIAL)));
-                assert(!(o2->op_private & ~OPpEARLY_CV));
+                ASSUME(!(o2->op_flags & ~(OPf_WANT|OPf_MOD|OPf_SPECIAL)));
+                ASSUME(!(o2->op_private & ~OPpEARLY_CV));
 
                 o2 = o2->op_next;
 
@@ -12925,12 +12925,12 @@ Perl_rpeep(pTHX_ OP *o)
                 /* at this point we've seen gv,rv2sv, so the only valid
                  * construct left is $pkg->[] or $pkg->{} */
 
-                assert(!(o2->op_flags & OPf_STACKED));
+                ASSUME(!(o2->op_flags & OPf_STACKED));
                 if ((o2->op_flags & (OPf_WANT|OPf_REF|OPf_MOD|OPf_SPECIAL))
                             != (OPf_WANT_SCALAR|OPf_MOD))
                     break;
 
-                assert(!(o2->op_private & ~(OPpARG1_MASK|HINT_STRICT_REFS
+                ASSUME(!(o2->op_private & ~(OPpARG1_MASK|HINT_STRICT_REFS
                                     |OPpOUR_INTRO|OPpDEREF|OPpLVAL_INTRO)));
                 if (o2->op_private & (OPpOUR_INTRO|OPpLVAL_INTRO))
                     break;
@@ -12952,14 +12952,14 @@ Perl_rpeep(pTHX_ OP *o)
             case OP_PADSV:
                 /* $lex->[...]: padsv[$lex] sM/DREFAV */
 
-                assert(!(o2->op_flags &
+                ASSUME(!(o2->op_flags &
                     ~(OPf_WANT|OPf_PARENS|OPf_REF|OPf_MOD|OPf_SPECIAL)));
                 if ((o2->op_flags &
                         (OPf_WANT|OPf_REF|OPf_MOD|OPf_SPECIAL))
                      != (OPf_WANT_SCALAR|OPf_MOD))
                     break;
 
-                assert(!(o2->op_private &
+                ASSUME(!(o2->op_private &
                                 ~(OPpPAD_STATE|OPpDEREF|OPpLVAL_INTRO)));
                 /* skip if state or intro, or not a deref */
                 if (      o2->op_private != OPpDEREF_AV
@@ -12981,7 +12981,7 @@ Perl_rpeep(pTHX_ OP *o)
             case OP_PADHV:
                 /*    $lex[..]:  padav[@lex:1,2] sR *
                  * or $lex{..}:  padhv[%lex:1,2] sR */
-                assert(!(o2->op_flags & ~(OPf_WANT|OPf_MOD|OPf_PARENS|
+                ASSUME(!(o2->op_flags & ~(OPf_WANT|OPf_MOD|OPf_PARENS|
                                             OPf_REF|OPf_SPECIAL)));
                 if ((o2->op_flags &
                         (OPf_WANT|OPf_REF|OPf_MOD|OPf_SPECIAL))
@@ -12991,7 +12991,7 @@ Perl_rpeep(pTHX_ OP *o)
                     break;
                 /* OPf_PARENS isn't currently used in this case;
                  * if that changes, let us know! */
-                assert(!(o2->op_flags & OPf_PARENS));
+                ASSUME(!(o2->op_flags & OPf_PARENS));
 
                 /* at this point, we wouldn't expect any of the remaining
                  * possible private flags:
@@ -13000,7 +13000,7 @@ Perl_rpeep(pTHX_ OP *o)
                  *
                  * OPpSLICEWARNING shouldn't affect runtime
                  */
-                assert(!(o2->op_private & ~(OPpSLICEWARNING)));
+                ASSUME(!(o2->op_private & ~(OPpSLICEWARNING)));
 
                 action = o2->op_type == OP_PADAV
                             ? MDEREF_AV_padav_aelem
@@ -13020,9 +13020,9 @@ Perl_rpeep(pTHX_ OP *o)
                 /* (expr)->[...]:  rv2av sKR/1;
                  * (expr)->{...}:  rv2hv sKR/1; */
 
-                assert(o2->op_type == OP_RV2AV || o2->op_type == OP_RV2HV);
+                ASSUME(o2->op_type == OP_RV2AV || o2->op_type == OP_RV2HV);
 
-                assert(!(o2->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
+                ASSUME(!(o2->op_flags & ~(OPf_WANT|OPf_KIDS|OPf_PARENS
                                 |OPf_REF|OPf_MOD|OPf_STACKED|OPf_SPECIAL)));
                 if (o2->op_flags != (OPf_WANT_SCALAR|OPf_KIDS|OPf_REF))
                     break;
@@ -13032,7 +13032,7 @@ Perl_rpeep(pTHX_ OP *o)
                  * OPpMAYBE_LVSUB, OPpLVAL_INTRO
                  * OPpTRUEBOOL, OPpMAYBE_TRUEBOOL, (rv2hv only)
                  */
-                assert(!(o2->op_private &
+                ASSUME(!(o2->op_private &
                     ~(OPpHINT_STRICT_REFS|OPpARG1_MASK|OPpSLICEWARNING
                      |OPpOUR_INTRO)));
                 hints |= (o2->op_private & OPpHINT_STRICT_REFS);
