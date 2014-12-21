@@ -144,6 +144,7 @@ POD = perl.pod	\
 	perltoot.pod	\
 	perltrap.pod	\
 	perlunicode.pod	\
+	perlunicook.pod	\
 	perlunifaq.pod	\
 	perluniintro.pod	\
 	perluniprops.pod	\
@@ -284,6 +285,7 @@ MAN = perl.man	\
 	perltoot.man	\
 	perltrap.man	\
 	perlunicode.man	\
+	perlunicook.man	\
 	perlunifaq.man	\
 	perluniintro.man	\
 	perluniprops.man	\
@@ -423,6 +425,7 @@ HTML = perl.html	\
 	perltoot.html	\
 	perltrap.html	\
 	perlunicode.html	\
+	perlunicook.html	\
 	perlunifaq.html	\
 	perluniintro.html	\
 	perluniprops.html	\
@@ -564,6 +567,7 @@ TEX = perl.tex	\
 	perltoot.tex	\
 	perltrap.tex	\
 	perlunicode.tex	\
+	perlunicook.tex	\
 	perlunifaq.tex	\
 	perluniintro.tex	\
 	perluniprops.tex	\
