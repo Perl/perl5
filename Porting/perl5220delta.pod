@@ -365,6 +365,10 @@ soon:
 
 =item *
 
+L<B::Generate> version 1.49
+
+=item *
+
 L<B::Utils> version 0.25
 
 =item *
