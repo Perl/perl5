@@ -97,7 +97,6 @@ events_are( \@listen, $want, "Listen events" );
 events_are( \@munge, $want, "Munge events" );
 isa_ok($follow[0], 'Test::Stream::Context');
 
-
 my $events = intercept {
     Test::CanFork->import;
 

@@ -17,6 +17,8 @@ sub todo { $_[0]->[CONTEXT]->todo }
 sub init {
     my $self = shift;
 
+    $self->SUPER::init();
+
     # Do not store objects here, only true/false/undef
     if ($self->[REAL_BOOL]) {
         $self->[REAL_BOOL] = 1;

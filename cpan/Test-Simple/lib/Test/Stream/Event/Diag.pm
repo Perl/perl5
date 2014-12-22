@@ -12,6 +12,7 @@ use Scalar::Util qw/weaken/;
 use Test::Stream::Carp qw/confess/;
 
 sub init {
+    $_[0]->SUPER::init();
     $_[0]->[MESSAGE] = 'undef' unless defined $_[0]->[MESSAGE];
     weaken($_[0]->[LINKED]) if $_[0]->[LINKED];
 }

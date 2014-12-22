@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_090';
+our $VERSION = '1.301001_093';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 
@@ -156,9 +156,8 @@ sub child {
     }
 
     $name ||= "Child of " . $self->{Name};
-    $ctx->child('push', $name, 1);
-
     my $stream = $self->{stream} || Test::Stream->shared;
+    $ctx->subtest_start($name, parent_todo => $ctx->in_todo);
 
     my $child = bless {
         %$self,
@@ -190,7 +189,6 @@ sub finalize {
     my $passing = $ctx->stream->is_passing;
     my $count = $ctx->stream->count;
     my $name = $self->{Name};
-    $ctx = undef;
 
     my $stream = $self->{stream} || Test::Stream->shared;
 
@@ -200,8 +198,24 @@ sub finalize {
 
     $? = $self->{'?'};
 
-    $ctx = $parent->ctx;
-    $ctx->child('pop', $self->{Name});
+    my $st = $ctx->subtest_stop($name);
+
+    $parent->ctx->subtest(
+        # Stuff from ok (most of this gets initialized inside)
+        undef, # real_bool, gets set properly by initializer
+        $st->{name}, # name
+        undef, # diag
+        undef, # bool
+        undef, # level
+
+        # Subtest specific stuff
+        $st->{state},
+        $st->{events},
+        $st->{exception},
+        $st->{early_return},
+        $st->{delayed},
+        $st->{instant},
+    );
 }
 
 sub in_subtest {

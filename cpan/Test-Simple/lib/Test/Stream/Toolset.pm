@@ -8,7 +8,6 @@ use Test::Stream::Carp    qw/carp/;
 
 # Preload these so the autoload is not necessary
 use Test::Stream::Event::Bail;
-use Test::Stream::Event::Child;
 use Test::Stream::Event::Diag;
 use Test::Stream::Event::Finish;
 use Test::Stream::Event::Note;
@@ -226,8 +225,6 @@ In the event of a catostrophic failure that should terminate the test file, use
 this event to stop everything and print the reason.
 
 =item L<Test::Stream::Event::Finish>
-
-=item L<Test::Stream::Event::Child>
 
 =item L<Test::Stream::Event::Subtest>
 

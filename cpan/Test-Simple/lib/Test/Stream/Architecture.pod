@@ -1,15 +1,14 @@
 =head1 NAME
 
-Test::Stream::Architecture - Overview of how the Test-More dist works.
+Test::Stream::Architecture - overview of how the Test-More dist works.
 
 =head1 DESCRIPTION
 
-This is the document that explains the architecture of Test::More and all the
-stuff driving it under the hood.
+This document explains the Test::More architecture from top to bottom.
 
 =head1 KEY COMPONENTS
 
-This is the list of primary components and their brief description, The most
+This is the list of primary components and their brief description, the most
 critical ones will have more details in later sections.
 
 =over 4
@@ -18,44 +17,48 @@ critical ones will have more details in later sections.
 
 =item Test::Simple
 
-These are the primary public interfaces for anyone who wishes to write tests.
+These contain the public subroutines for anyone who wishes to write tests.
 
 =item Test::More::Tools
 
-All of the tools Test::More provides have been relocated and refactored into
-Test::More::Tools in such a way as to make them generic and reusable. This
-means you can use them without firing off events, you can then fire off your
-own events compiled from multiple tools. In many cases this is what tool
-builders actually want, but instead they settle for bumping C<$Level> and
-calling is/like/ok and producing extra events.
+All of the tools that L<Test::More> provided have been relocated into
+L<Test::More::Tools> and refactored to make them generic and reusable.
+
+This means you can use them without inadvertently firing off events. In many
+cases this is what tool builders actually want but instead they settle for
+bumping C<$Level> and calling is(), like(), or ok() and producing extra
+events.
 
 =item Test::Builder
 
-This B<used> to be the main under the hood module for anyone who wished to
-write a L<Test::More> compatible test library. It still works, and should be
-fully functional and backwards compatible. It is however discouraged as it is
-mostly a compatability wrapper.
+This was the B<old> under-the-hood module for anyone who wished to write
+a L<Test::More>-compatible test library. It still works and should be fully
+functional and backwards compatible. It is, however, discouraged as it is
+mostly a compatibility wrapper.
 
 =item Test::Stream
 
-This is the B<new> heart and soul of the Test::* architecture. However it is
-not the primary interface. This module is responsible for collecting all events
-from all threads and processes, then forwarding them to TAP and any added
-listeners.
+This is the B<new> heart and soul of the Test::* architecture. It is not the
+primary interface that a unit-test author will use. This module is responsible
+for collecting all events from all threads and processes and then forwarding
+them to TAP and any other added listeners.
 
 =item Test::Stream::IOSets
 
-This module is used to manage the IO handles to which all TAP is sent.
-Test::Builder cloned STDERR and STDOUT, then applied various magic to them.
-This module provides that legacy support while also adding support for utf8 and
-other encodings. By default all TAP goes to the 'legacy' outputs, which mimick
-what Test::Builder has always done. The 'legacy' outputs are also what get
-altered if someone uses the Test::Builder->output interface.
+This manages the IO handles to which all TAP is sent.
+
+In the old days, L<Test::Builder> cloned STDERR and STDOUT and applied various
+magic to them.
+
+This module provides that legacy support while also adding support for L<utf8>
+and other encodings. By default, all TAP goes to the 'legacy' outputs, which
+mimick what Test::Builder has always done. The 'legacy' outputs are also
+what get altered if someone uses the C<Test::Builder-E<gt>output> interface.
 
 =item Test::Stream::Toolset
 
 This is the primary interface a test module author should use. It ties together
-some key functions you should use. It proved 3 critical functions:
+some key functions you should use. It provides 3 critical functions:
 
     is_tester($package)
 
@@ -65,13 +68,13 @@ some key functions you should use. It proved 3 critical functions:
 
 =item Test::Stream::Context
 
-This is the primary interface as far as generating events goes. Every test
-function should grab a context, and use it to generate events.
+A context is used to generate events in test functions.
 
-Once a context object is created (the normal way) it is remembered, and
-anything that requests a context object will obtain the same instance. However
-once the instance is destroyed (end of your test function) it is forgotten, the
-next test function to run will then obtain a new context instance.
+Once a context object is created (the normal way) it is remembered and
+anything that requests a context object will obtain the same instance.
+
+After the context instance is destroyed (at end of your test function) it is
+forgotten. The next test function to run must obtain a new context instance.
 
 =item Test::Stream::Event
 
@@ -83,21 +86,19 @@ next test function to run will then obtain a new context instance.
 
 =item Test::Stream::Event::*
 
-All events generated by Test::More and other test tools now boil down to a
-proper object. All events must use Test::Stream::Event as a base.
+All events generated by L<Test::More> and other test tools now boil down to a
+proper object. All event subclasses must use L<Test::Stream::Event> as a base.
 
 =item Test::Stream::ArrayBase
 
-This is the L<Moose> of Test::Stream. It is responsible for generating
-accessors and similar work. Unlike moose and others it uses an arrayref as the
-underlying object. This design decision was made to improve performance.
-Performance was a real problem in some early alphas, the gains from the
-decision are huge.
+This is the L<Moose> of L<Test::Stream>. It is responsible for generating
+accessors and similar work. Unlike Moose, it uses an arrayref as the
+underlying object to improve performance. Performance was a real problem in
+some early alphas and the speed gains from this decision are huge.
 
 =item Test::Stream::Tester
 
-This is actually what spawned the ideas for the new Test::Stream work. This is
-a module that lets you validate your testing tools.
+This module can validate testing tools and their events.
 
 =back
 
@@ -111,27 +112,27 @@ a module that lets you validate your testing tools.
 
 =head2 HISTORY
 
-L<Test::Builder> is/was a singleton. The singleton model was chosen to solve
-the problem of synchronizing everything to a central location. Ultimately all
-results need to make their way to a central place that can assign them a
-number, and shove them through the correct output.
+L<Test::Builder> was (and still is) a singleton. The singleton model was
+chosen to solve the problem of synchronizing everything to a central location.
+Ultimately, all test results needed to make their way to a central place that
+could assign each test a number and create output in the correct order.
 
 The singleton model proved to be a major headache.
 
 Intercepting events typically meant replacing the singleton permanently
-(Test::Tester) or for a limited scope. Another option people took
-(Test::Builder::Tester) was to simply replace the IO handles Test::Builder was
-tracking.
+(L<Test::Tester>) or for a limited scope. Another option people took
+(L<Test::Builder::Tester>) was to simply replace the IO handles
+Test::Builder was tracking.
 
-Test::Builder did not provide any real mechanisms for altering events before
-processing them, or for intercepting them before they were turned into TAP. As
-a result many modules have monkeypatched Test::Builder, particularily the
-C<ok()> method.
+Test::Builder did not provide any real mechanisms for altering events
+before processing them, or for intercepting them before they were turned into
+TAP. As a result many modules have monkeypatched Test::Builder, particularily
+the C<ok()> method.
 
 =head2 CURRENT DESIGN
 
-Test::Stream unfortunately must still act as a singleton (mostly). But this
-time the design was to put as little as possible into the singleton.
+L<Test::Stream> unfortunately must still act as a singleton (mostly). This
+time, the design put as little logic as possible into the singleton.
 
 =head3 RESPONSIBILITIES OF TEST::STREAM
 
@@ -143,60 +144,60 @@ Test::Stream has 4 main jobs:
 
     $stream->send($event);
 
-The send() method will ensure that the event gets to the right place, no matter
-what thread or process you are in. (Forking support must be turned on, it is
-off by default).
+The send() method will ensure that the event gets to the right place, no
+matter which thread or process your code is in. (Forking support must be turned
+on. It is off by default).
 
-B<Note:> This method is key to performance. This method and everything it calls
+B<Note:> This method is key to performance. C<send()> and everything it calls
 must remain as lean and tight as possible.
 
-=item Provide a pre-output hook for altering events
+=item Provide a pre-output hook to alter events
 
     $stream->munge(sub { my ($stream, $event) = @_; ... })
 
-This lets you modify events before they are turned into output. You cannot
-remove the event, nor can you add events. Mungers are additive, and proceessed
+C<munge()> lets you modify events before they are turned into output. It cannot
+remove the event, nor can it add events. Mungers are additive and proceessed
 in the order they are added.
 
 There is not currently any way to remove a munger.
 
-B<Note:> each munger is called in a loop in the C<send()> method, so keep it as
-fast and small as possible.
+B<Note:> each munger is called in a loop in the C<send()> method, so keep them
+as fast and small as possible.
 
-=item Forward all events to listeners (including TAP output)
+=item Forward all events to all listeners (including TAP output)
 
     $stream->listen(sub { my ($stream, $event) = @_; .... })
 
-This lets you add a listener. All events that come to the stream object will be
-sent to all listeners.
+C<listen()> adds a listener. All events that come from the stream object will
+be sent to all listeners.
 
 There is not currently any way to remove a listener.
 
-B<Note:> each listener is called in a loop in the C<send()> method, so keep it is
-fast and small as possible.
+B<Note:> each listener is called in a loop in the C<send()> method, so keep
+them as fast and small as possible.
 
 =item Maintaining the legacy exit behavior from Test::Builder
 
-This is primarily setting $? to the number of tests that failed, up to 255, as
-well as providing other output such as missing a plan.
+This is sets C<$?> to the number of tests that failed (up to 255). It also
+provides some other output such as when a test file is missing a plan.
 
 =back
 
 =head3 SEMI-SINGLETON MODEL
 
-Test::Stream has a semi-singleton model. Instead of 1 singleton, it is a
+L<Test::Stream> has a semi-singleton model. Instead of 1 singleton, it has a
 singleton stack. Anything that wants to send an event to the B<current> acting
-stream should send it to the stream returned by C<< Test::Stream->shared >>.
+stream should send it to the stream returned by C<Test::Stream-E<gt>shared>.
 Nothing should ever cache this result as the B<current> stream may change.
 
-This mechanism is primarily used for intercepting, and hiding, all events for a
-limited scope. L<Test::Stream::Tester> uses this to push a stream onto the stack so
-that you can generate events that do not go to the listeners or TAP. Once the
-stack is popped the previous stream is restored allowing you to generate real
-events.
+This mechanism is primarily used for intercepting and hiding all events for a
+limited scope. L<Test::Stream::Tester> uses this to push a stream onto the
+stack so that events can be generated that do not go to the listeners or TAP.
+Once the stack is popped, the previous stream is restored, which allows real
+events to be generated.
 
 You can also create new Test::Stream objects at-will that are not present in
-the stack, this lets you create alternate streams for any purpose you want.
+the stack. This lets you create alternate streams for any purpose you want.
 
 =head1 THE CONTEXT OBJECT
 
@@ -206,12 +207,12 @@ the stack, this lets you create alternate streams for any purpose you want.
 
 =back
 
-This module is responsbile for 2 things, knowing where to report errors, and
+This module is responsible for 2 things: knowing where to report errors and
 making it easy to issue events.
 
 =head2 ERROR REPORTING
 
-To get the context you use the C<context()> function.
+Use the C<context()> function to get the current context.
 
     sub ok {
         my $context = context();
@@ -221,13 +222,17 @@ To get the context you use the C<context()> function.
     ok() # Errors are reported here.
 
 If there is a context already in play, that instance will be returned.
-Otherwise a new context will be returned. The context assumes that the stack
-level just above your call is where errors should be reported.
+Otherwise, a new context will be returned.
+
+The context assumes that the stack level just above your call is where errors
+should be reported.
 
 You can optionally provide an integer as the only argument, in which case that
 number will be added to the C<caller()> call to find the correct frame for
-reporting. This will be completely ignored if there is already an active
-context.
+reporting.
+
+B<Note:> The integer argument will be completely ignored if there is already
+an active context.
 
     sub ok {
         my $context = context();
@@ -241,16 +246,17 @@ context.
 
     my_ok();
 
-In the example above c<my_ok()> generates a new context, then it calls C<ok()>,
-in this case both function will have the same context object, the one generated
-by my_ok. The result is that C<ok> will report errors to the correct place.
+In the example above, c<my_ok()> generates a new context and then it calls
+C<ok()>. In this case, both functions will have the same context object (the
+one generated by C<my_ok()>). The result is that C<ok> will report errors to
+the correct place.
 
 =head3 IMPLEMENTATION
 
-There is a variable C<$CURRENT> in C<Test::Stream::Context>, it is a lexical,
-so you can not touch it directly. When the C<context()> function is called, it
-first checks if $CURRENT is set, if so it returns that. If there is no current
-context it generates a new one.
+There is a lexical variable C<$CURRENT> in C<Test::Stream::Context> that can
+not be directly touched. When the C<context()> function is called, it first
+checks if $CURRENT is set, and if so, returns that. If there is no current
+context, it generates a new one.
 
 When a new context is generated, it is assigned to C<$CURRENT>, but then the
 reference is weakened. This means that once the returned copy falls out of
@@ -260,29 +266,30 @@ it.
 
 B<The caveat> here is that if you decide to hold on to your context beyond
 your scope, you could sabatoge any future test functions. If you need to hold
-on to a context you need to call C<< $context->snapshot >>, and store the
-cloned object it returns. In general you should not need to do this, event
-objects all store the context, but do so using a snapshot.
+on to a context you need to call C<$context-E<gt>snapshot>, and store the
+cloned object it returns. In general you should not need to do this. Event
+objects all store the context but do so using a snapshot.
 
 B<Note> I am open to changing this to remove the weak-reference magic and
-instead require someone to call C<< $context->release >> or similar when they
-are done with a context, but that seems more likely to result in rougue
-contexts... This method would also require its own form of reference counting..
+instead require someone to call C<$context-E<gt>release> or similar when they
+are done with a context but that seems more likely to result in rogue
+contexts. This method would also require its own form of reference counting.
 This decision will need to be made before we go stable.
 
 =head2 GENERATING EVENTS
 
-All event objects should use L<Test::Stream::Event> which will set them up as a
-proper event object, as well as add a method to L<Test::Stream::Context> which
-is a shortcut for generating that event type. As such you can fire off an event
-directly from your context object using the lowercase name of the event class.
+All event subclasses should use L<Test::Stream::Event> to set them up as
+proper event objects. They should also add a method to
+L<Test::Stream::Context> to be used as a shortcut for generating that event
+type. That will let you can fire off an event directly from your context
+object using the lowercase name of the event class.
 
     my $ctx = context;
     $ctx->ok(1, "pass");
     $ctx->ok(0, "fail, ["This test failed, here is some diag ..."]);
     $ctx->note("I am a teapot");
 
-All events take a context, and 2 other arguments as the first 3 arguments of
+All events take a context and 2 other arguments as the first 3 arguments of
 their constructor, these shortcut methods handle those first 3 arguments for
 you, making life much easier.
 
@@ -292,7 +299,7 @@ The other arguments are:
 
 =item created
 
-Should be an arrayref with caller information for where the event was generated.
+an arrayref with caller information for where the event was generated.
 
 =item in_subtest
 
@@ -302,14 +309,14 @@ True if the event belongs in a subtest, false otherwise.
 
 =head1 EVENT OBJECTS
 
-Here are the primary/public events. There are other events, but they are used
+Here are the primary public events. There are other events, but they are used
 internally.
 
 =over 4
 
 =item L<Test::Stream::Event>
 
-This is just a base-class, you do not use it directly.
+This is just a base class. Do not use it directly.
 
 =item L<Test::Stream::Event::Diag>
 
@@ -319,7 +326,7 @@ This is just a base-class, you do not use it directly.
 
 =item L<Test::Stream::Event::Bail>
 
-These are faily simple and obvious event types.
+These are fairly simple and obvious event types.
 
 =item L<Test::Stream::Event::Ok>
 
@@ -327,21 +334,21 @@ These are faily simple and obvious event types.
 
 B<Note:> C<Subtest> is a subclass of C<Ok>.
 
-Ok can contain diag objects related to that specific ok. Subtest contains all
-the events that went into the final subtest result.
+C<Ok> can contain diag objects related to that specific ok. C<Subtest>
+contains all the events that went into the final subtest result.
 
 =back
 
-All events have a context in which they were created, which includes the file
-and line number where errors should be reported. They also have details on
-where/how they were generated. All other details are event specific.
+All events have the context in which they were created, which includes the
+file and line number where errors should be reported. They also have details
+on where and how they were generated. All other details are event-specific.
 
 The subclass event should never be generated on its own. In fact, just use the
-subtest helpers provided by Test::More, or Test::Stream::Context. Under the
-hood a Child event is started which adds a subtest to a stack in Test::Stream,
-all events then get intercepted by that subtest. When the subtest is done you
-issue another Child event to close it out. Once closed a Subtest event will be
-generated for you and sent to the stream.
+subtest helpers provided by L<Test::More>, or L<Test::Stream::Context>. Under
+the hood, a L<Child> event is started which adds a subtest to a stack in
+Test::Stream, and then all events get intercepted by that subtest. When the
+subtest is done, issue another Child event to close it out. Once closed, a
+Subtest event will be generated for you and sent to the stream.
 
 =encoding utf8
 

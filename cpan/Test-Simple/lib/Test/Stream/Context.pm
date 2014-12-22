@@ -28,6 +28,8 @@ Test::Stream::Exporter->cleanup();
 my @TODO;
 my $CURRENT;
 
+sub from_end_block { 0 };
+
 sub init {
     $_[0]->[FRAME]    ||= _find_context(1);                # +1 for call to init
     $_[0]->[STREAM]   ||= Test::Stream->shared;
@@ -260,6 +262,31 @@ sub snapshot {
 sub send {
     my $self = shift;
     $self->[STREAM]->send(@_);
+}
+
+sub subtest_start {
+    my $self = shift;
+    my ($name, %params) = @_;
+
+    $params{parent_todo} ||= $self->in_todo;
+
+    $self->clear;
+    my $todo = $self->hide_todo;
+
+    my $st = $self->stream->subtest_start($name, todo_stash => $todo, %params);
+    return $st;
+}
+
+sub subtest_stop {
+    my $self = shift;
+    my ($name) = @_;
+
+    my $st = $self->stream->subtest_stop($name);
+
+    $self->set;
+    $self->restore_todo($st->{todo_stash});
+
+    return $st;
 }
 
 # Uhg.. support legacy monkeypatching
@@ -533,7 +560,7 @@ Get the current context object, if there is one.
 
 =item $ctx->set
 
-=item $cclass->set($ctx)
+=item $class->set($ctx)
 
 Set the context object as the current one, replacing any that might already be
 current.
@@ -561,6 +588,20 @@ ref used by the package, so please do not alter it.
 
 These are used to temporarily hide the TODO value in ALL places where it might
 be found. The returned C<$stash> must be used to restore it later.
+
+=item $stash = $ctx->subtest_start($name, %params)
+
+=item $stash = $ctx->subtest_stop($name)
+
+Used to start and stop subtests in the test stream. The stash can be used to
+configure and manipulate the subtest information. C<subtest_start> will hide
+the current TODO settings, and unset the current context. C<subtest_stop> will
+restore the TODO and reset the context back to what it was.
+
+B<It is your job> to take the results in the stash and produce a
+L<Test::Stream::Event::Subtest> event from them.
+
+B<Using this directly is not recommended>.
 
 =back
 

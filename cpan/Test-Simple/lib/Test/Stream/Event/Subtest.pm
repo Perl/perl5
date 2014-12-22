@@ -8,29 +8,23 @@ use Test::Stream qw/-internal STATE_PASSING STATE_COUNT STATE_FAILED STATE_PLAN/
 
 use Test::Stream::Event(
     base      => 'Test::Stream::Event::Ok',
-    accessors => [qw/state events exception/],
+    accessors => [qw/state events exception early_return delayed instant/],
 );
-
-sub subevents {
-    return (
-        @{$_[0]->[DIAG] || []},
-        map { $_, $_->subevents } @{$_[0]->[EVENTS] || []},
-    );
-}
 
 sub init {
     my $self = shift;
+    $self->[EVENTS] ||= [];
 
-    if ($self->[EXCEPTION] && !(blessed($self->[EXCEPTION]) && $self->[EXCEPTION]->isa('Test::Stream::Event'))) {
+    $self->[REAL_BOOL] = $self->[STATE]->[STATE_PASSING] && $self->[STATE]->[STATE_COUNT];
+
+    if ($self->[EXCEPTION]) {
         push @{$self->[DIAG]} => "Exception in subtest '$self->[NAME]': $self->[EXCEPTION]";
         $self->[STATE]->[STATE_PASSING] = 0;
         $self->[BOOL] = 0;
+        $self->[REAL_BOOL] = 0;
     }
 
-    $self->[REAL_BOOL] = $self->[STATE]->[STATE_PASSING] && $self->[STATE]->[STATE_COUNT];
-    $self->[EVENTS] ||= [];
-
-    if (my $le = $self->[EXCEPTION]) {
+    if (my $le = $self->[EARLY_RETURN]) {
         my $is_skip = $le->isa('Test::Stream::Event::Plan');
         $is_skip &&= $le->directive;
         $is_skip &&= $le->directive eq 'SKIP';
@@ -41,17 +35,30 @@ sub init {
             $self->[CONTEXT]->set_skip($skip);
             $self->[REAL_BOOL] = 1;
         }
+        else { # BAILOUT
+            $self->[REAL_BOOL] = 0;
+        }
     }
 
-    push @{$self->[DIAG]} => '  No tests run for subtest.'
-        unless $self->[EXCEPTION] || $self->[STATE]->[STATE_COUNT];
+    push @{$self->[DIAG]} => "  No tests run for subtest."
+        unless $self->[EXCEPTION] || $self->[EARLY_RETURN] || $self->[STATE]->[STATE_COUNT];
 
+    # Have the 'OK' init run
     $self->SUPER::init();
+}
+
+sub subevents {
+    return (
+        @{$_[0]->[DIAG] || []},
+        map { $_, $_->subevents } @{$_[0]->[EVENTS] || []},
+    );
 }
 
 sub to_tap {
     my $self = shift;
-    my ($num, $delayed) = @_;
+    my ($num) = @_;
+
+    my $delayed = $self->[DELAYED];
 
     unless($delayed) {
         return if $self->[EXCEPTION]
@@ -64,7 +71,7 @@ sub to_tap {
     $self->[NAME] =~ s/$/ {/mg;
     my @out = (
         $self->SUPER::to_tap($num),
-        $self->_render_events(@_),
+        $self->_render_events($num),
         [OUT_STD, "}\n"],
     );
     $self->[NAME] =~ s/ \{$//mg;
@@ -73,7 +80,9 @@ sub to_tap {
 
 sub _render_events {
     my $self = shift;
-    my ($num, $delayed) = @_;
+    my ($num) = @_;
+
+    my $delayed = $self->[DELAYED];
 
     my $idx = 0;
     my @out;

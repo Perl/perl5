@@ -2276,6 +2276,7 @@ cpan/Test-Simple/lib/Test/Stream/API.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Architecture.pod			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/ArrayBase/Meta.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/ArrayBase.pm			Test::Simple module
+cpan/Test-Simple/lib/Test/Stream/Block.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Carp.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Context.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Event/Bail.pm			Test::Simple module
@@ -2490,6 +2491,7 @@ cpan/Test-Simple/t/Test-Simple.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-API.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-ArrayBase-Meta.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-ArrayBase.t			Test::Simple Test
+cpan/Test-Simple/t/Test-Stream-Block.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-Carp.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-Event-Diag.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Stream-Event-Finish.t			Test::Simple Test

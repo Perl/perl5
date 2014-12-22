@@ -16,7 +16,7 @@ require Exporter;
 
 use vars qw( @ISA @EXPORT $VERSION );
 
-our $VERSION = '1.301001_090';
+our $VERSION = '1.301001_093';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 @EXPORT  = qw( run_tests check_tests check_test cmp_results show_space );
@@ -573,7 +573,7 @@ variable also works (if both are set then the British spelling wins out).
 
 =head1 EXPORTED FUNCTIONS
 
-=head3 ($premature, @results) = run_tests(\&test_sub)
+=head2 ($premature, @results) = run_tests(\&test_sub)
 
 \&test_sub is a reference to a subroutine.
 
@@ -586,7 +586,7 @@ the first test.
 
 @results is an array of test result hashes.
 
-=head3 cmp_result(\%result, \%expect, $name)
+=head2 cmp_result(\%result, \%expect, $name)
 
 \%result is a ref to a test result hash.
 
@@ -596,7 +596,7 @@ cmp_result compares the result with the expected values. If any differences
 are found it outputs diagnostics. You may leave out any field from the
 expected result and cmp_result will not do the comparison of that field.
 
-=head3 cmp_results(\@results, \@expects, $name)
+=head2 cmp_results(\@results, \@expects, $name)
 
 \@results is a ref to an array of test results.
 
@@ -608,7 +608,7 @@ number of elements in \@results and \@expects is the same. Then it goes
 through each result checking it against the expected result as in
 cmp_result() above.
 
-=head3 ($premature, @results) = check_tests(\&test_sub, \@expects, $name)
+=head2 ($premature, @results) = check_tests(\&test_sub, \@expects, $name)
 
 \&test_sub is a reference to a subroutine.
 
@@ -620,7 +620,7 @@ checks if the tests died at any stage.
 It returns the same values as run_tests, so you can further examine the test
 results if you need to.
 
-=head3 ($premature, @results) = check_test(\&test_sub, \%expect, $name)
+=head2 ($premature, @results) = check_test(\&test_sub, \%expect, $name)
 
 \&test_sub is a reference to a subroutine.
 
@@ -634,7 +634,7 @@ make sure this is true.
 It returns the same values as run_tests, so you can further examine the test
 results if you need to.
 
-=head3 show_space()
+=head2 show_space()
 
 Turn on the escaping of characters as described in the SPACES AND TABS
 section.

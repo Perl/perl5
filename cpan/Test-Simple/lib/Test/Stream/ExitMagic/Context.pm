@@ -13,6 +13,8 @@ sub init {
 
 sub snapshot { $_[0] }
 
+sub from_end_block { 1 };
+
 1;
 
 __END__

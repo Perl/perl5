@@ -15,6 +15,8 @@ my %ALLOWED = (
 );
 
 sub init {
+    $_[0]->SUPER::init();
+
     if ($_[0]->[DIRECTIVE]) {
         $_[0]->[DIRECTIVE] = 'SKIP'    if $_[0]->[DIRECTIVE] eq 'skip_all';
         $_[0]->[DIRECTIVE] = 'NO PLAN' if $_[0]->[DIRECTIVE] eq 'no_plan';
@@ -29,8 +31,6 @@ sub init {
 
         confess "No number of tests specified"
             unless defined $_[0]->[MAX];
-
-
     }
 }
 

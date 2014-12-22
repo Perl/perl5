@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_090';
+our $VERSION = '1.301001_093';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream 1.301001 '-internal';
@@ -1694,8 +1694,6 @@ magic side-effects are kept to a minimum.  WYSIWYG.
 
 
 =head1 SEE ALSO
-
-=head2
 
 =head2 ALTERNATIVES
 

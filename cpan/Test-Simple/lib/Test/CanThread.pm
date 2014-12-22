@@ -34,8 +34,8 @@ sub import {
         Test::More::plan(skip_all => "This threaded test will only run when the '$var' environment variable is set.");
     }
 
-    unshift @_ => 'threads';
-    goto &threads::import;
+    my $caller = caller;
+    eval "package $caller; use threads; 1" || die $@;
 }
 
 1;

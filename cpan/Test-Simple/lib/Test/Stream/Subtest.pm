@@ -9,6 +9,9 @@ Test::Stream::Exporter->cleanup;
 use Test::Stream::Context qw/context/;
 use Scalar::Util qw/reftype blessed/;
 use Test::Stream::Util qw/try/;
+use Test::Stream::Carp qw/confess/;
+
+use Test::Stream::Block;
 
 sub subtest {
     my ($name, $code, @args) = @_;
@@ -18,23 +21,24 @@ sub subtest {
     $ctx->throw("subtest()'s second argument must be a code ref")
         unless $code && 'CODE' eq reftype($code);
 
-    $ctx->child('push', $name);
-    $ctx->clear;
-    my $todo = $ctx->hide_todo;
+    my $block = Test::Stream::Block->new(
+        $name, $code, undef, [caller(0)],
+    );
+
+    $ctx->note("Subtest: $name")
+        if $ctx->stream->subtest_tap_instant;
+
+    my $st = $ctx->subtest_start($name);
 
     my $pid = $$;
-
     my ($succ, $err) = try {
-        my $early_return = 1;
-
         TEST_STREAM_SUBTEST: {
             no warnings 'once';
             local $Test::Builder::Level = 1;
-            $code->(@args);
-            $early_return = 0;
+            $block->run(@args);
         }
 
-        die $ctx->stream->subtest_exception->[-1] if $early_return;
+        return if $st->{early_return};
 
         $ctx->set;
         my $stream = $ctx->stream;
@@ -47,32 +51,54 @@ sub subtest {
         }
     };
 
-    if ($$ != $pid && !$ctx->stream->_use_fork) {
-        warn <<"        EOT";
+    my $er = $st->{early_return};
+    if (!$succ) {
+        # Early return is not a *real* exception.
+        if ($er && $er == $err) {
+            $succ = 1;
+            $err = undef;
+        }
+        else {
+            $st->{exception} = $err;
+        }
+    }
+
+    if ($$ != $pid) {
+        warn <<"        EOT" unless $ctx->stream->_use_fork;
 Subtest finished with a new PID ($$ vs $pid) while forking support was turned off!
 This is almost certainly not what you wanted. Did you fork and forget to exit?
         EOT
 
         # Did the forked process try to exit via die?
+        # If a subtest forked, then threw an exception, we need to propogate that right away.
         die $err unless $succ;
     }
 
-    # If a subtest forked, then threw an exception, we need to propogate that right away.
-    die $err unless $succ || $$ == $pid || $err->isa('Test::Stream::Event');
+    my $st_check = $ctx->subtest_stop($name);
+    confess "Subtest mismatch!" unless $st == $st_check;
 
-    $ctx->set;
-    $ctx->restore_todo($todo);
-    $ctx->stream->subtest_exception->[-1] = $err unless $succ;
+    $ctx->bail($st->{early_return}->reason) if $er && $er->isa('Test::Stream::Event::Bail');
 
-    # This sends the subtest event
-    my $st = $ctx->child('pop', $name);
+    my $e = $ctx->subtest(
+        # Stuff from ok (most of this gets initialized inside)
+        undef, # real_bool, gets set properly by initializer
+        $st->{name}, # name
+        undef, # diag
+        undef, # bool
+        undef, # level
 
-    unless ($succ) {
-        die $err unless blessed($err) && $err->isa('Test::Stream::Event');
-        $ctx->bail($err->reason) if $err->isa('Test::Stream::Event::Bail');
-    }
+        # Subtest specific stuff
+        $st->{state},
+        $st->{events},
+        $st->{exception},
+        $st->{early_return},
+        $st->{delayed},
+        $st->{instant},
+    );
 
-    return $st->bool;
+    die $err unless $succ;
+
+    return $e->bool;
 }
 
 1;

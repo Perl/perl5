@@ -1,7 +1,7 @@
 package Test::Builder::Tester;
 
 use strict;
-our $VERSION = '1.301001_090';
+our $VERSION = '1.301001_093';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream 1.301001 '-internal';
@@ -370,7 +370,7 @@ sub test_test {
     # re-enable the original setting of the harness
     $ENV{HARNESS_ACTIVE} = $original_harness_env;
 
-    $original_stream->state->[-1] = $original_state;
+    @{$original_stream->state->[-1]} = @$original_state;
 
     # check the output we've stashed
     unless( builder()->ok( ( $args{skip_out} || $out->check ) &&

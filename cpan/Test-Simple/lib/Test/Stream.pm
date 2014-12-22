@@ -2,7 +2,7 @@ package Test::Stream;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_090';
+our $VERSION = '1.301001_093';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream::Context qw/context/;
@@ -17,7 +17,7 @@ use Test::Stream::ArrayBase(
         no_ending no_diag no_header
         pid tid
         state
-        subtests subtest_todo subtest_exception
+        subtests
         subtest_tap_instant
         subtest_tap_delayed
         mungers
@@ -422,47 +422,66 @@ sub done_testing {
     }
 }
 
+sub subtest_start {
+    my $self = shift;
+    my ($name, %params) = @_;
+
+    my $state = [0, 0, undef, 1];
+
+    $params{parent_todo} ||= Test::Stream::Context::context->in_todo;
+
+    if(@{$self->[SUBTESTS]}) {
+        $params{parent_todo} ||= $self->[SUBTESTS]->[-1]->{parent_todo};
+    }
+
+    push @{$self->[STATE]}    => $state;
+    push @{$self->[SUBTESTS]} => {
+        instant => $self->[SUBTEST_TAP_INSTANT],
+        delayed => $self->[SUBTEST_TAP_DELAYED],
+
+        %params,
+
+        state        => $state,
+        events       => [],
+        name         => $name,
+    };
+
+    return $self->[SUBTESTS]->[-1];
+}
+
+sub subtest_stop {
+    my $self = shift;
+    my ($name) = @_;
+
+    confess "No subtest to stop!"
+        unless @{$self->[SUBTESTS]};
+
+    confess "Subtest name mismatch!"
+        unless $self->[SUBTESTS]->[-1]->{name} eq $name;
+
+    my $st = pop @{$self->[SUBTESTS]};
+    pop @{$self->[STATE]};
+
+    return $st;
+}
+
+sub subtest { @{$_[0]->[SUBTESTS]} ? $_[0]->[SUBTESTS]->[-1] : () }
+
 sub send {
     my ($self, $e) = @_;
-
-    # Subtest state management
-    if ($e->isa('Test::Stream::Event::Child')) {
-        if ($e->action eq 'push') {
-            $e->context->note("Subtest: " . $e->name) if $self->[SUBTEST_TAP_INSTANT] && !$e->no_note;
-
-            push @{$self->[STATE]} => [0, 0, undef, 1];
-            push @{$self->[SUBTESTS]} => [];
-            push @{$self->[SUBTEST_TODO]} => $e->context->in_todo;
-            push @{$self->[SUBTEST_EXCEPTION]} => undef;
-
-            return $e;
-        }
-        else {
-            pop @{$self->[SUBTEST_TODO]};
-            my $events = pop @{$self->[SUBTESTS]} || confess "Unbalanced subtest stack (events)!";
-            my $state  = pop @{$self->[STATE]}    || confess "Unbalanced subtest stack (state)!";
-            confess "Child pop left the stream without a state!" unless @{$self->[STATE]};
-
-            $e = Test::Stream::Event::Subtest->new_from_pairs(
-                context   => $e->context,
-                created   => $e->created,
-                events    => $events,
-                state     => $state,
-                name      => $e->name,
-                exception => pop @{$self->[SUBTEST_EXCEPTION]},
-            );
-        }
-    }
 
     my $cache = $self->_update_state($self->[STATE]->[-1], $e);
 
     # Subtests get dibbs on events
-    if (@{$self->[SUBTESTS]}) {
-        $e->context->set_diag_todo(1) if $self->[SUBTEST_TODO]->[-1];
-        $e->set_in_subtest(scalar @{$self->[SUBTESTS]});
-        push @{$self->[SUBTESTS]->[-1]} => $e;
+    if (my $num = @{$self->[SUBTESTS]}) {
+        my $st = $self->[SUBTESTS]->[-1];
 
-        $self->_render_tap($cache) if $self->[SUBTEST_TAP_INSTANT] && !$cache->{no_out};
+        $e->set_in_subtest($num);
+        $e->context->set_diag_todo(1) if $st->{parent_todo};
+
+        push @{$st->{events}} => $e;
+
+        $self->_render_tap($cache) if $st->{instant} && !$cache->{no_out};
     }
     elsif($self->[_USE_FORK] && ($$ != $self->[PID] || get_tid() != $self->[TID])) {
         $self->fork_out($e);
@@ -556,8 +575,7 @@ sub _render_tap {
     return unless $cache->{do_tap} || $e->can('to_tap');
 
     my $num = $self->use_numbers ? $cache->{number} : undef;
-    confess "XXX" unless $e->can('to_tap');
-    my @sets = $e->to_tap($num, $self->[SUBTEST_TAP_DELAYED]);
+    my @sets = $e->to_tap($num);
 
     my $in_subtest = $e->in_subtest || 0;
     my $indent = '    ' x $in_subtest;
@@ -594,9 +612,11 @@ sub _finalize_event {
         return unless $e->directive;
         return unless $e->directive eq 'SKIP';
 
-        $self->[SUBTEST_EXCEPTION]->[-1] = $e if $e->in_subtest;
+        my $subtest = @{$self->[SUBTESTS]};
 
-        if ($e->in_subtest) {
+        $self->[SUBTESTS]->[-1]->{early_return} = $e if $subtest;
+
+        if ($subtest) {
             my $begin = _scan_for_begin('Test::Stream::Subtest::subtest');
 
             if ($begin) {
@@ -623,9 +643,11 @@ sub _finalize_event {
         $self->[BAILED_OUT] = $e;
         $self->[NO_ENDING]  = 1;
 
-        $self->[SUBTEST_EXCEPTION]->[-1] = $e if $e->in_subtest;
+        my $subtest = @{$self->[SUBTESTS]};
 
-        if ($e->in_subtest) {
+        $self->[SUBTESTS]->[-1]->{early_return} = $e if $subtest;
+
+        if ($subtest) {
             my $begin = _scan_for_begin('Test::Stream::Subtest::subtest');
 
             if ($begin) {
@@ -894,6 +916,15 @@ Turn legacy result storing on and off.
 =item $bool = $stream->use_numbers
 
 Turn test numbers on and off.
+
+=item $stash = $stream->subtest_start($name, %params)
+
+=item $stash = $stream->subtest_stop($name)
+
+These will push/pop new states and subtest stashes.
+
+B<Using these directly is not recommended.> Also see the wrapper methods in
+L<Test::Stream::Context>.
 
 =back
 
