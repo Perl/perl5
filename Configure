@@ -11599,7 +11599,7 @@ int main()
 EOCP
 set try
 if eval $compile_ok; then
-	$run ./try
+	$run ./try 2>/dev/null
 	yyy=$?
 else
 	echo "(I can't seem to compile the test program--assuming it can't)"
@@ -11699,7 +11699,7 @@ int main()
 EOCP
 set try
 if eval $compile_ok; then
-	$run ./try
+	$run ./try 2>/dev/null
 	castflags=$?
 else
 	echo "(I can't seem to compile the test program--assuming it can't)"
@@ -21453,7 +21453,7 @@ int main (int argc, char *argv[])
 EOCP
 	set try
 	if eval $compile; then
-	    eval `$run ./try`
+	    eval `$run ./try 2>/dev/null`
 	else
 	    echo "Cannot determine sGMTIME_max and sGMTIME_min." >&4
 	    fi
@@ -21534,7 +21534,7 @@ int main (int argc, char *argv[])
 EOCP
 	set try
 	if eval $compile; then
-	    eval `$run ./try`
+	    eval `$run ./try 2>/dev/null`
 	else
 	    echo "Cannot determine sLOCALTIME_max and sLOCALTIME_min." >&4
 	    fi
@@ -21666,7 +21666,7 @@ int main() {
 EOCP
 		set try
 		if eval $compile_ok; then
-			selectminbits=`$run ./try`
+			selectminbits=`$run ./try 2>/dev/null`
 			case "$selectminbits" in
 			'')	cat >&4 <<EOM
 Cannot figure out on how many bits at a time your select() operates.
