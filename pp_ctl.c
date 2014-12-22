@@ -1209,8 +1209,10 @@ PP(pp_flop)
 	    else
 		n = 0;
 	    while (n--) {
-		SV * const sv = sv_2mortal(newSViv(i++));
+		SV * const sv = sv_2mortal(newSViv(i));
 		PUSHs(sv);
+                if (n) /* avoid incrementing above IV_MAX */
+                    i++;
 	    }
 	}
 	else {
