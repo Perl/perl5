@@ -23,3 +23,8 @@ fun:Perl_pp_i_*
 # (UVs normally, IVs with 'use integer')
 
 fun:Perl_pp_left_shift
+
+# this function numifies the field width in eg printf "%10f".
+# It has its own overflow detection, so don't warn about it
+
+fun:S_expect_number
