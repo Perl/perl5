@@ -1337,6 +1337,10 @@ PP(pp_multiply)
 		    /* 2s complement assumption that (UV)-IV_MIN is correct.  */
 		    /* -ve result, which could overflow an IV  */
 		    SP--;
+                    /* can't negate IV_MIN, but there are aren't two
+                     * integers such that !ahigh && !bhigh, where the
+                     * product equals 0x800....000 */
+                    assert(product != (UV)IV_MIN);
 		    SETi( -(IV)product );
 		    RETURN;
 		} /* else drop to NVs below. */
@@ -1437,7 +1441,7 @@ PP(pp_divide)
                     right_non_neg = TRUE; /* effectively it's a UV now */
                 }
 		else {
-                    right = -biv;
+                    right = (biv == IV_MIN) ? (UV)biv : (UV)(-biv);
                 }
             }
             /* historically undef()/0 gives a "Use of uninitialized value"
@@ -1458,7 +1462,7 @@ PP(pp_divide)
                     left_non_neg = TRUE; /* effectively it's a UV now */
                 }
 		else {
-                    left = -aiv;
+                    left = (aiv == IV_MIN) ? (UV)aiv : (UV)(-aiv);
                 }
             }
 
@@ -1488,7 +1492,7 @@ PP(pp_divide)
                     }
                     /* 2s complement assumption */
                     if (result <= (UV)IV_MIN)
-                        SETi( -(IV)result );
+                        SETi(result == (UV)IV_MIN ? IV_MIN : -(IV)result);
                     else {
                         /* It's exact but too negative for IV. */
                         SETn( -(NV)result );
@@ -1538,7 +1542,7 @@ PP(pp_modulo)
                     right = biv;
                     right_neg = FALSE; /* effectively it's a UV now */
                 } else {
-                    right = -biv;
+                    right = (biv == IV_MIN) ? (UV)biv : (UV)(-biv);
                 }
             }
         }
@@ -1568,7 +1572,7 @@ PP(pp_modulo)
                         left = aiv;
                         left_neg = FALSE; /* effectively it's a UV now */
                     } else {
-                        left = -aiv;
+                        left = (aiv == IV_MIN) ? (UV)aiv : (UV)(-aiv);
                     }
                 }
         }

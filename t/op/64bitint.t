@@ -355,4 +355,13 @@ cmp_ok($q, '==', -9223372036854775806);
     unlike($q, qr/[e.]/, 'Should not be floating point');
 }
 
+# trigger various attempts to negate IV_MIN
+
+cmp_ok  0x8000000000000000 / -0x8000000000000000, '==', -1, '(IV_MAX+1) / IV_MIN';
+cmp_ok -0x8000000000000000 /  0x8000000000000000, '==', -1, 'IV_MIN / (IV_MAX+1)';
+cmp_ok  0x8000000000000000 / -1, '==', -0x8000000000000000, '(IV_MAX+1) / -1';
+cmp_ok                   0 % -0x8000000000000000, '==',  0, '0 % IV_MIN';
+cmp_ok -0x8000000000000000 % -0x8000000000000000, '==',  0, 'IV_MIN % IV_MIN';
+
+
 done_testing();

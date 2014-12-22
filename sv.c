@@ -2742,6 +2742,10 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
                 SvIOKp_on(sv);
 
                 if (numtype & IS_NUMBER_NEG) {
+                    /* -IV_MIN is undefined, but we should never reach
+                     * this point with both IS_NUMBER_NEG and value ==
+                     * (UV)IV_MIN */
+                    assert(value != (UV)IV_MIN);
                     SvIV_set(sv, -(IV)value);
                 } else if (value <= (UV)IV_MAX) {
 		    SvIV_set(sv, (IV)value);

@@ -9,7 +9,7 @@ BEGIN {
 # functions imported from t/test.pl or Test::More, as those programs/libraries
 # use operators which are what is being tested in this file.
 
-print "1..181\n";
+print "1..186\n";
 
 sub try ($$$) {
    print +($_[1] ? "ok" : "not ok"), " $_[0] - $_[2]\n";
@@ -476,3 +476,11 @@ try $T++, "1.23 "  + 0 ==  1.23,  '1.23 with trailing space';
 try $T++, "+1.23"  + 0 ==  1.23,  '1.23 with unary plus';
 try $T++, "-1.23"  + 0 == -1.23,  '1.23 with unary minus';
 try $T++, "1.23e4" + 0 ==  12300, '1.23e4';
+
+# trigger various attempts to negate IV_MIN
+
+tryeq $T++,  0x80000000 / -0x80000000, -1, '(IV_MAX+1) / IV_MIN';
+tryeq $T++, -0x80000000 /  0x80000000, -1, 'IV_MIN / (IV_MAX+1)';
+tryeq $T++,  0x80000000 / -1, -0x80000000, '(IV_MAX+1) / -1';
+tryeq $T++,           0 % -0x80000000,  0, '0 % IV_MIN';
+tryeq $T++, -0x80000000 % -0x80000000,  0, 'IV_MIN % IV_MIN';
