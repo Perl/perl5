@@ -11083,8 +11083,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
    <substitute_parse> on success.
 
    If <valuep> is non-null, it means the caller can accept an input sequence
-   consisting of a just a single code point; <*valuep> is set to the value
-   of the only or first code point in the input.
+   consisting of just a single code point; <*valuep> is set to the value of the
+   only or first code point in the input.
 
    If <substitute_parse> is non-null, it means the caller can accept an input
    sequence consisting of one or more code points; <*substitute_parse> is a
@@ -11164,12 +11164,11 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
 
     RExC_parse++;	/* Skip past the '{' */
 
-    if (! (endbrace = strchr(RExC_parse, '}')) /* no trailing brace */
+    if (! (endbrace = strchr(RExC_parse, '}'))  /* no trailing brace */
 	|| ! (endbrace == RExC_parse		/* nothing between the {} */
-              || (endbrace - RExC_parse >= 2	/* U+ (bad hex is checked below
-                                                 */
-                  && strnEQ(RExC_parse, "U+", 2)))) /* for a better error msg)
-                                                     */
+              || (endbrace - RExC_parse >= 2	/* U+ (bad hex is checked... */
+                  && strnEQ(RExC_parse, "U+", 2)))) /* ... below for a better
+                                                       error msg) */
     {
 	if (endbrace) RExC_parse = endbrace;	/* position msg's '<--HERE' */
 	vFAIL("\\N{NAME} must be resolved by the lexer");
@@ -11196,7 +11195,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
     has_multiple_chars = (endchar < endbrace);
 
     /* We get the first code point if we want it, and either there is only one,
-     * or we can accept both cases of one and more than one */
+     * or we can accept both cases of one and there is more than one */
     if (valuep && (substitute_parse || ! has_multiple_chars)) {
 	STRLEN length_of_hex = (STRLEN)(endchar - RExC_parse);
 	I32 grok_hex_flags = PERL_SCAN_ALLOW_UNDERSCORES
@@ -11245,7 +11244,6 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
     }
 
     {
-
 	/* What is done here is to convert this to a sub-pattern of the form
 	 * \x{char1}\x{char2}...
          * and then either return it in <*substitute_parse> if non-null; or
