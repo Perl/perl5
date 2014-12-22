@@ -733,7 +733,8 @@ Here's that program; tested on v5.14.
      "寿司"              => 9.99, # sushi, Japanese
      "おもち"            => 2.65, # omochi, rice cakes, Japanese
      "crème brûlée"      => 2.00, # crema catalana
-     "fideuà"            => 4.20, # more noodles, Valencian (Catalan=fideuada)
+     "fideuà"            => 4.20, # more noodles, Valencian
+                                  # (Catalan=fideuada)
      "pâté"              => 4.15, # gooseliver paste, French
      "お好み焼き"        => 8.00, # okonomiyaki, Japanese
  );
