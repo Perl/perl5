@@ -10,7 +10,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 23;
+plan 24;
 
 use v5.10; # state
 use B qw 'svref_2object OPpASSIGN_COMMON';
@@ -79,6 +79,17 @@ is svref_2object(sub { 0;0;0;0;0;0;time })->START->next->name, 'time',
 is svref_2object(sub{state($foo,@fit,%far);state $bar;state($a,$b); time})
     ->START->next->name, 'time',
   'pad[ahs]v state declarations in void context';
+
+
+# pushmark-padsv-padav-padhv in list context --> padrange
+
+{
+    my @ops;
+    my $sub = sub { \my( $f, @f, %f ) };
+    my $op = svref_2object($sub)->START;
+    push(@ops, $op->name), $op = $op->next while $$op;
+    is "@ops", "nextstate padrange refgen leavesub", 'multi-type padrange'
+}
 
 
 # rv2[ahs]v in void context

@@ -13304,7 +13304,7 @@ Perl_rpeep(pTHX_ OP *o)
             U8 count = 0;
             U8 intro = 0;
             PADOFFSET base = 0; /* init only to stop compiler whining */
-            U8 gimme       = 0; /* init only to stop compiler whining */
+            bool gvoid = 0;     /* init only to stop compiler whining */
             bool defav = 0;  /* seen (...) = @_ */
             bool reuse = 0;  /* reuse an existing padrange op */
 
@@ -13365,7 +13365,7 @@ Perl_rpeep(pTHX_ OP *o)
                 if (count == 0) {
                     intro = (p->op_private & OPpLVAL_INTRO);
                     base = p->op_targ;
-                    gimme = (p->op_flags & OPf_WANT);
+                    gvoid = OP_GIMME(p,0) == G_VOID;
                 }
                 else {
                     if ((p->op_private & OPpLVAL_INTRO) != intro)
@@ -13377,14 +13377,18 @@ Perl_rpeep(pTHX_ OP *o)
                     if (p->op_targ != base + count)
                         break;
                     assert(p->op_targ == base + count);
-                    /* all the padops should be in the same context */
-                    if (gimme != (p->op_flags & OPf_WANT))
+                    /* Either all the padops or none of the padops should
+                       be in void context.  Since we only do the optimisa-
+                       tion for av/hv when the aggregate itself is pushed
+                       on to the stack (one item), there is no need to dis-
+                       tinguish list from scalar context.  */
+                    if (gvoid != (OP_GIMME(p,0) == G_VOID))
                         break;
                 }
 
                 /* for AV, HV, only when we're not flattening */
                 if (   p->op_type != OP_PADSV
-                    && gimme != OPf_WANT_VOID
+                    && !gvoid
                     && !(p->op_flags & OPf_REF)
                 )
                     break;
@@ -13420,9 +13424,9 @@ Perl_rpeep(pTHX_ OP *o)
              * the stack) makes no difference in void context.
              */
             assert(followop);
-            if (gimme == OPf_WANT_VOID) {
+            if (gvoid) {
                 if (followop->op_type == OP_LIST
-                        && gimme == (followop->op_flags & OPf_WANT)
+                        && OP_GIMME(followop,0) == G_VOID
                    )
                 {
                     followop = followop->op_next; /* skip OP_LIST */
@@ -13505,7 +13509,8 @@ Perl_rpeep(pTHX_ OP *o)
                 /* bit 7: INTRO; bit 6..0: count */
                 o->op_private = (intro | count);
                 o->op_flags = ((o->op_flags & ~(OPf_WANT|OPf_SPECIAL))
-                                    | gimme | (defav ? OPf_SPECIAL : 0));
+                              | gvoid * OPf_WANT_VOID
+                              | (defav ? OPf_SPECIAL : 0));
             }
             break;
         }
