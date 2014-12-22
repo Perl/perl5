@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 43; # not counting those in the __DATA__ section
+my $tests = 44; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -505,6 +505,11 @@ is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-T' ],
            prog => '$x =~ (1?/$a/:0)'),
   '$x =~ ($_ =~ /$a/);'."\n",
   '$foo =~ <branch-folded match> under taint mode';
+
+unlike runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-w' ],
+               prog => 'BEGIN { undef &foo }'),
+       qr'Use of uninitialized value',
+      'no warnings for undefined sub';
 
 done_testing($tests);
 
