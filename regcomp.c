@@ -11174,6 +11174,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
 	vFAIL("\\N{NAME} must be resolved by the lexer");
     }
 
+    RExC_uni_semantics = 1; /* Unicode named chars imply Unicode semantics */
+
     if (endbrace == RExC_parse) {   /* empty: \N{} */
 	if (node_p) {
 	    *node_p = reg_node(pRExC_state,NOTHING);
@@ -11185,7 +11187,6 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
         return 0;
     }
 
-    RExC_uni_semantics = 1; /* Unicode named chars imply Unicode semantics */
     RExC_parse += 2;	/* Skip past the 'U+' */
 
     endchar = RExC_parse + strcspn(RExC_parse, ".}");
