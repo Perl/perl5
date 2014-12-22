@@ -2719,7 +2719,10 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    afloat = -FLT_MAX;
 		else afloat = (float)anv;
 # else
-		afloat = (float)anv;
+                /* a simple cast to float is undefined if outside
+                 * the range of values that can be represented */
+		afloat = (float)(anv >  FLT_MAX ?  NV_INF :
+                                 anv < -FLT_MAX ? -NV_INF : anv);
 # endif
                 PUSH_VAR(utf8, cur, afloat, needs_swap);
 	    }
