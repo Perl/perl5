@@ -5022,7 +5022,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
 		flags &= ~SCF_DO_STCLASS;
             }
 	    min++;
-	    delta++;    /* Because of the 2 char string cr-lf */
+            if (delta != SSize_t_MAX)
+                delta++;    /* Because of the 2 char string cr-lf */
             if (flags & SCF_DO_SUBSTR) {
                 /* Cannot expect anything... */
                 scan_commit(pRExC_state, data, minlenp, is_inf);
