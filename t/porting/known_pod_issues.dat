@@ -68,6 +68,7 @@ Devel::PPPort
 Devel::SawAmpersand
 dirname(1)
 Encode::Locale
+Eval::WithLexicals
 Exporter::Easy
 ExtUtils::Constant::ProxySubs
 fetch(1)
