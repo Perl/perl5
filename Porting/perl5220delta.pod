@@ -385,10 +385,6 @@ L<Data::Util> version 0.63
 
 =item *
 
-L<Eval::WithLexicals> version 1.003001
-
-=item *
-
 L<Lexical::Var> version 0.009
 
 =item *
