@@ -427,8 +427,8 @@ op/getpid.t               # [perl #70205] my attrs
 op/goto.t
 op/gv.t                   # glob copy constants
 op/index.t
-op/join.t
-op/length.t
+op/join.t                 # mutability of folded constants
+op/length.t               # utf8ness of deparsed strings
 op/lexsub.t
 op/local.t
 op/magic.t
