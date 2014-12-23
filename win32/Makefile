@@ -1319,7 +1319,8 @@ minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) utils $(UNIDATAFILES)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	attrib -r ..\t\*.*
 	cd ..\t && \
-	$(MINIPERL) -I..\lib harness base/*.t comp/*.t cmd/*.t io/*.t opbasic/*.t op/*.t pragma/*.t
+#note this perl.exe is miniperl
+	perl.exe -I..\lib harness base/*.t comp/*.t cmd/*.t io/*.t opbasic/*.t op/*.t pragma/*.t
 
 test-prep : all utils ../pod/perltoc.pod
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
@@ -1329,12 +1330,12 @@ test-prep : all utils ../pod/perltoc.pod
 
 test : test-prep
 	cd ..\t
-	$(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+	perl.exe -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 	cd ..\win32
 
 test_porting : test-prep
 	cd ..\t
-	$(PERLEXE) -I..\lib harness $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
+	perl.exe -I..\lib harness $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
 	cd ..\win32
 
 test-reonly : reonly utils
@@ -1342,7 +1343,7 @@ test-reonly : reonly utils
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	cd ..\t
-	$(PERLEXE) -I..\lib harness $(OPT) -re \bre\\/ $(EXTRA)
+	perl.exe -I..\lib harness $(OPT) -re \bre\\/ $(EXTRA)
 	cd ..\win32
 
 regen :
@@ -1353,7 +1354,7 @@ regen :
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1
 	cd ..\t
-	$(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+	perl.exe -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 	cd ..\win32
 
 _test : 
@@ -1361,7 +1362,7 @@ _test :
        $(XCOPY) $(PERLDLL) ..\t\$(NULL)
        $(XCOPY) $(GLOBEXE) ..\t\$(NULL)
        cd ..\t
-       $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+       perl.exe -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
        cd ..\win32
 
 _clean :
