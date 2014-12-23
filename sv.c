@@ -14574,6 +14574,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_subline		= proto_perl->Isubline;
 
+    PL_cv_has_eval	= proto_perl->Icv_has_eval;
+
 #ifdef FCRYPT
     PL_cryptseen	= proto_perl->Icryptseen;
 #endif
@@ -14832,6 +14834,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_endav		= av_dup_inc(proto_perl->Iendav, param);
     PL_checkav		= av_dup_inc(proto_perl->Icheckav, param);
     PL_initav		= av_dup_inc(proto_perl->Iinitav, param);
+    PL_savebegin	= proto_perl->Isavebegin;
 
     PL_isarev		= hv_dup_inc(proto_perl->Iisarev, param);
 
