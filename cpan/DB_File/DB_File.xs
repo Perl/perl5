@@ -314,7 +314,7 @@ typedef db_recno_t	recno_t;
 #if DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR < 5
 #    define flagSet(flags, bitmask)	((flags) & (bitmask))
 #else
-#    define flagSet(flags, bitmask)	(((flags) & DB_OPFLAGS_MASK) == (bitmask))
+#    define flagSet(flags, bitmask)	(((flags) & DB_OPFLAGS_MASK) == (u_int)(bitmask))
 #endif
 
 #else /* db version 1.x */
