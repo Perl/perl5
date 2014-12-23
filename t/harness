@@ -34,26 +34,6 @@ if ($ARGV[0] && $ARGV[0] eq '-torture') {
 # which live dual lives on CPAN.
 $ENV{PERL_CORE} = 1;
 
-#fudge DATA for now.
-my %datahandle = qw(
-		lib/bigint.t		1
-		lib/bigintpm.t		1
-		lib/bigfloat.t	 	1
-		lib/bigfloatpm.t	1
-		op/gv.t			1
-		lib/complex.t		1
-		lib/ph.t		1
-		lib/soundex.t		1
-		op/misc.t		1
-		op/runlevel.t		1
-		op/tie.t		1
-		op/lex_assign.t		1
-		);
-
-foreach (keys %datahandle) {
-     unlink "$_.t";
-}
-
 my (@tests, $re);
 
 # [.VMS]TEST.COM calls harness with empty arguments, so clean-up @ARGV
