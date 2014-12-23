@@ -13271,7 +13271,7 @@ Perl_rpeep(pTHX_ OP *o)
                     op_free(cBINOPo->op_last );
                     o->op_flags &=~ OPf_KIDS;
                     /* stub is a baseop; repeat is a binop */
-                    assert(sizeof(OP) <= sizeof(BINOP));
+                    STATIC_ASSERT_STMT(sizeof(OP) <= sizeof(BINOP));
                     CHANGE_TYPE(o, OP_STUB);
                     o->op_private = 0;
                     break;
