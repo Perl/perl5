@@ -305,9 +305,19 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Win32
 
-XXX
+=over 4
+
+=item *
+
+Previously, on Visual C++ for Win64 built Perls only, when compiling every Perl
+XS module (including CPAN ones) and Perl aware .c file with a 64 bit Visual C++,
+would uncondtionally have around a dozen warnings from hv_func.h.  These
+warnings have been silenced.  GCC all bitness and Visual C++ for Win32 were
+not affected.
+
+=back
 
 =back
 
