@@ -2330,6 +2330,11 @@ MODULE = B	PACKAGE = B::PADNAME	PREFIX = Padname
 	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_high)
 #define PNL_refcnt_ix \
 	sv_U32p | STRUCT_OFFSET(struct padnamelist, xpadnl_refcnt)
+#define PL_id_ix \
+	sv_U32p | STRUCT_OFFSET(struct padlist, xpadl_id)
+#define PL_outid_ix \
+	sv_U32p | STRUCT_OFFSET(struct padlist, xpadl_outid)
+
 
 void
 PadnameTYPE(pn)
@@ -2342,6 +2347,8 @@ PadnameTYPE(pn)
 	B::PADNAME::COP_SEQ_RANGE_LOW	 = PN_cop_seq_range_low_ix
 	B::PADNAME::COP_SEQ_RANGE_HIGH	 = PN_cop_seq_range_high_ix
 	B::PADNAMELIST::REFCNT	= PNL_refcnt_ix
+	B::PADLIST::id		= PL_id_ix
+	B::PADLIST::outid	= PL_outid_ix
     PREINIT:
 	char *ptr;
 	SV *ret;

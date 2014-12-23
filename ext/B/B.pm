@@ -1371,6 +1371,15 @@ equivalent to C<ARRAYelt> with a 0 argument.
 
 =item REFCNT
 
+=item id
+
+This method, introduced in 5.22, returns an ID shared by clones of the same
+padlist.
+
+=item outid
+
+This method, also added in 5.22, returns the ID of the outer padlist.
+
 =back
 
 =head2 B::PADNAMELIST Methods
