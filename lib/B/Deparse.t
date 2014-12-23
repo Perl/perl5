@@ -1892,7 +1892,7 @@ print f();
     {
       foo();
       my sub b;
-      b();
+      b ;
       main::b();
       &main::b;
       &main::b();
@@ -1901,6 +1901,14 @@ print f();
     }
   }
   b();
+}
+####
+# self-referential lexical subroutine
+# CONTEXT use feature 'lexical_subs', 'state'; no warnings 'experimental::lexical_subs';
+();
+state sub sb2;
+sub sb2 {
+    sb2 ;
 }
 ####
 # Elements of %# should not be confused with $#{ array }

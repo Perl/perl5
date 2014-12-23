@@ -21,6 +21,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED PMf_EXTENDED_MORE
+	 PADNAMEt_OUTER
         MDEREF_reload
         MDEREF_AV_pop_rv2av_aelem
         MDEREF_AV_gvsv_vivify_rv2av_aelem
@@ -1166,13 +1167,19 @@ sub pad_subs {
 	    my $low = $_->COP_SEQ_RANGE_LOW;
 	    my $flags = $_->FLAGS;
 	    if ($flags & SVpad_OUR) {
-		push @todo, [$low, undef, 0, $_];
+		push @todo, [$low, undef, 0, $_]
 		          # [seq, no cv, not format, padname]
+		    unless $flags & PADNAMEt_OUTER;
 		next;
 	    }
 	    my $protocv = $flags & SVpad_STATE
 		? $values[$ix]
 		: $_->PROTOCV;
+	    if ($flags & PADNAMEt_OUTER) {
+		next unless ${$protocv->OUTSIDE} == $$cv;
+		push @todo, [$protocv->OUTSIDE_SEQ, $protocv, 0, $_];
+		next;
+	    }
 	    my $outseq = $protocv->OUTSIDE_SEQ;
 	    if ($outseq <= $low) {
 		# defined before its name is visible, so it’s gotta be
@@ -4352,6 +4359,7 @@ sub pp_entersub {
     }
     my $simple = 0;
     my $proto = undef;
+    my $lexical;
     if (is_scope($kid)) {
 	$amper = "&";
 	$kid = "{" . $self->deparse($kid, 0) . "}";
@@ -4398,13 +4406,29 @@ sub pp_entersub {
 	$kid = $self->deparse($kid, 24);
     } else {
 	$prefix = "";
-	my $arrow = is_subscriptable($kid->first) || $kid->first->name eq "padcv" ? "" : "->";
+	my $grandkid = $kid->first;
+	my $arrow = ($lexical = $grandkid->name eq "padcv")
+		 || is_subscriptable($grandkid)
+		    ? ""
+		    : "->";
 	$kid = $self->deparse($kid, 24) . $arrow;
+	if ($lexical) {
+	    my $padlist = $self->{'curcv'}->PADLIST;
+	    my $padoff = $grandkid->targ;
+	    my $padname = $padlist->ARRAYelt(0)->ARRAYelt($padoff);
+	    my $protocv = $padname->FLAGS & SVpad_STATE
+		? $padlist->ARRAYelt(1)->ARRAYelt($padoff)
+		: $padname->PROTOCV;
+	    if ($protocv->FLAGS & SVf_POK) {
+		$proto = $protocv->PV
+	    }
+	    $simple = 1;
+	}
     }
 
     # Doesn't matter how many prototypes there are, if
     # they haven't happened yet!
-    my $declared = exists $self->{'subs_declared'}{$kid};
+    my $declared = $lexical || exists $self->{'subs_declared'}{$kid};
     if (not $declared and $self->{'in_coderef2text'}) {
 	no strict 'refs';
 	no warnings 'uninitialized';
