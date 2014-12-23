@@ -12364,12 +12364,14 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
 
                     if (precis > 0) {
-                        v = vhex + precis + 1;
-                        if (v < vend) {
+                        if ((SSize_t)(precis + 1) < vend - vhex) {
+                            bool round;
+
+                            v = vhex + precis + 1;
                             /* Round away from zero: if the tail
                              * beyond the precis xdigits is equal to
                              * or greater than 0x8000... */
-                            bool round = *v > 0x8;
+                            round = *v > 0x8;
                             if (!round && *v == 0x8) {
                                 for (v++; v < vend; v++) {
                                     if (*v) {
