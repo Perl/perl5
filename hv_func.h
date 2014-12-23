@@ -179,6 +179,7 @@
  * It is 64 bit only.
  */
 
+#if defined(PERL_HASH_FUNC_SIPHASH)
 #ifdef HAS_QUAD
 
 #define U8TO64_LE(p) \
@@ -257,6 +258,7 @@ S_perl_hash_siphash_2_4(const unsigned char * const seed, const unsigned char *i
   return (U32)(b & U32_MAX);
 }
 #endif /* defined(HAS_QUAD) */
+#endif /* defined(PERL_HASH_FUNC_SIPHASH) */
 
 /* FYI: This is the "Super-Fast" algorithm mentioned by Bob Jenkins in
  * (http://burtleburtle.net/bob/hash/doobs.html)
@@ -266,7 +268,7 @@ S_perl_hash_siphash_2_4(const unsigned char * const seed, const unsigned char *i
  * http://www.azillionmonkeys.com/qed/weblicense.html
  */
 
-
+#if defined(PERL_HASH_FUNC_SUPERFAST)
 PERL_STATIC_INLINE U32
 S_perl_hash_superfast(const unsigned char * const seed, const unsigned char *str, STRLEN len) {
     U32 hash = *((U32*)seed) + (U32)len;
@@ -305,7 +307,7 @@ S_perl_hash_superfast(const unsigned char * const seed, const unsigned char *str
     hash ^= hash << 25;
     return (hash + (hash >> 6));
 }
-
+#endif /* defined(PERL_HASH_FUNC_SUPERFAST) */
 
 /*-----------------------------------------------------------------------------
  * MurmurHash3 was written by Austin Appleby, and is placed in the public
@@ -332,7 +334,7 @@ S_perl_hash_superfast(const unsigned char * const seed, const unsigned char *str
  * on big endian machines, or a byte-by-byte read if the endianess is unknown.
  */
 
-
+#if defined(PERL_HASH_FUNC_MURMUR3)
 /*-----------------------------------------------------------------------------
  * Core murmurhash algorithm macros */
 
@@ -462,8 +464,9 @@ S_perl_hash_murmur3(const unsigned char * const seed, const unsigned char *ptr, 
     h1 ^= h1 >> 16;
     return h1;
 }
+#endif /* defined(PERL_HASH_FUNC_MURMUR3) */
 
-
+#if defined(PERL_HASH_FUNC_DJB2)
 PERL_STATIC_INLINE U32
 S_perl_hash_djb2(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
@@ -473,7 +476,9 @@ S_perl_hash_djb2(const unsigned char * const seed, const unsigned char *str, con
     }
     return hash;
 }
+#endif /* defined(PERL_HASH_FUNC_DJB2) */
 
+#if defined(PERL_HASH_FUNC_SDBM)
 PERL_STATIC_INLINE U32
 S_perl_hash_sdbm(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
@@ -483,6 +488,7 @@ S_perl_hash_sdbm(const unsigned char * const seed, const unsigned char *str, con
     }
     return hash;
 }
+#endif /* defined(PERL_HASH_FUNC_SDBM) */
 
 /* - ONE_AT_A_TIME_HARD is the 5.17+ recommend ONE_AT_A_TIME algorithm
  * - ONE_AT_A_TIME_OLD is the unmodified 5.16 and older algorithm
@@ -500,6 +506,7 @@ S_perl_hash_sdbm(const unsigned char * const seed, const unsigned char *str, con
  * (http://burtleburtle.net/bob/hash/doobs.html)
  * With seed/len tweak.
  * */
+#if defined(PERL_HASH_FUNC_ONE_AT_A_TIME)
 PERL_STATIC_INLINE U32
 S_perl_hash_one_at_a_time(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
@@ -513,8 +520,10 @@ S_perl_hash_one_at_a_time(const unsigned char * const seed, const unsigned char 
     hash ^= (hash >> 11);
     return (hash + (hash << 15));
 }
+#endif /* defined(PERL_HASH_FUNC_ONE_AT_A_TIME) */
 
 /* Derived from "One-at-a-Time" algorithm by Bob Jenkins */
+#if defined(PERL_HASH_FUNC_ONE_AT_A_TIME_HARD)
 PERL_STATIC_INLINE U32
 S_perl_hash_one_at_a_time_hard(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
@@ -549,7 +558,9 @@ S_perl_hash_one_at_a_time_hard(const unsigned char * const seed, const unsigned 
     hash ^= (hash >> 11);
     return (hash + (hash << 15));
 }
+#endif /* defined(PERL_HASH_FUNC_ONE_AT_A_TIME_HARD) */
 
+#if defined(PERL_HASH_FUNC_ONE_AT_A_TIME_OLD)
 PERL_STATIC_INLINE U32
 S_perl_hash_old_one_at_a_time(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
@@ -563,6 +574,7 @@ S_perl_hash_old_one_at_a_time(const unsigned char * const seed, const unsigned c
     hash ^= (hash >> 11);
     return (hash + (hash << 15));
 }
+#endif /* defined(PERL_HASH_FUNC_ONE_AT_A_TIME_OLD) */
 
 #ifdef PERL_HASH_FUNC_MURMUR_HASH_64A
 /* This code is from Austin Appleby and is in the public domain.
