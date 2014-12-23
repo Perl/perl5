@@ -505,4 +505,33 @@ SKIP: {
 }
 
 
+# Some pad tests
+{
+    my $sub = sub { my main $a; CORE::state @b; our %c };
+    my $padlist = B::svref_2object($sub)->PADLIST;
+    is $padlist->MAX, 1, 'padlist MAX';
+    my @array = $padlist->ARRAY;
+    is @array, 2, 'two items from padlist ARRAY';
+    is ${$padlist->ARRAYelt(0)}, ${$array[0]},
+      'ARRAYelt(0) is first item from ARRAY';
+    is ${$padlist->ARRAYelt(1)}, ${$array[1]},
+      'ARRAYelt(1) is second item from ARRAY';
+    is ${$padlist->NAMES}, ${$array[0]},
+      'NAMES is first item from ARRAY';
+    my @names = $array[0]->ARRAY;
+    cmp_ok @names, ">=", 4, 'at least 4 pad names';
+    is join(" ", map($_->PV//"undef",@names[0..3])), 'undef $a @b %c',
+       'pad name PVs';
+
+    my @closures;
+    for (1,2) { push @closures, sub { sub { @closures } } }
+    my $sub1 = B::svref_2object($closures[0]);
+    my $sub2 = B::svref_2object($closures[1]);
+    is $sub2->PADLIST->id, $sub1->PADLIST->id, 'padlist id';
+    $sub1 = B::svref_2object(my $lr = $closures[0]());
+    $sub2 = B::svref_2object(my $lr2= $closures[1]());
+    is $sub2->PADLIST->outid, $sub1->PADLIST->outid, 'padlist outid';
+}
+
+
 done_testing();
