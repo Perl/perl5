@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA @EXPORT) ;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw( filter_add filter_del filter_read filter_read_exact) ;
-$VERSION = "1.51" ;
+$VERSION = "1.53" ;
 
 sub filter_read_exact($)
 {
@@ -45,10 +45,10 @@ sub filter_add($)
     my($obj) = @_ ;
 
     # Did we get a code reference?
-    my $coderef = (ref $obj eq 'CODE') ;
+    my $coderef = (ref $obj eq 'CODE');
 
     # If the parameter isn't already a reference, make it one.
-    if (!$coderef and !ref $obj) {
+    if (!$coderef and (!ref($obj) or ref($obj) =~ /^ARRAY|HASH$/)) {
       $obj = bless (\$obj, (caller)[0]);
     }
 

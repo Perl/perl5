@@ -538,7 +538,7 @@ use File::Glob qw(:case);
     },
 
     'Filter::Util::Call' => {
-        'DISTRIBUTION' => 'RURBAN/Filter-1.51.tar.gz',
+        'DISTRIBUTION' => 'RURBAN/Filter-1.53.tar.gz',
         'FILES'        => q[cpan/Filter-Util-Call
                  pod/perlfilter.pod
                 ],
