@@ -1166,17 +1166,22 @@ sub pad_subs {
 	if (defined $name && $name =~ /^&./) {
 	    my $low = $_->COP_SEQ_RANGE_LOW;
 	    my $flags = $_->FLAGS;
+	    my $outer = $flags & PADNAMEt_OUTER;
 	    if ($flags & SVpad_OUR) {
 		push @todo, [$low, undef, 0, $_]
 		          # [seq, no cv, not format, padname]
-		    unless $flags & PADNAMEt_OUTER;
+		    unless $outer;
 		next;
 	    }
 	    my $protocv = $flags & SVpad_STATE
 		? $values[$ix]
 		: $_->PROTOCV;
+	    my $defined_in_this_sub = ${$protocv->OUTSIDE} == $$cv || do {
+		my $other = $protocv->PADLIST;
+		$$other && $other->outid == $padlist->id;
+	    };
 	    if ($flags & PADNAMEt_OUTER) {
-		next unless ${$protocv->OUTSIDE} == $$cv;
+		next unless $defined_in_this_sub;
 		push @todo, [$protocv->OUTSIDE_SEQ, $protocv, 0, $_];
 		next;
 	    }
@@ -1188,8 +1193,9 @@ sub pad_subs {
 	    }
 	    else {
 		# declared and defined separately: my sub f; sub f { ... }
-		push @todo, [$low, undef, 0, $_],
-			    [$outseq, $protocv, 0, $_];
+		push @todo, [$low, undef, 0, $_];
+		push @todo, [$outseq, $protocv, 0, $_]
+		    if $defined_in_this_sub;
 	    }
 	}
     }}

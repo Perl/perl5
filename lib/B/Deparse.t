@@ -1911,6 +1911,15 @@ sub sb2 {
     sb2 ;
 }
 ####
+# lexical subroutine with outer declaration and inner definition
+# CONTEXT use feature 'lexical_subs'; no warnings 'experimental::lexical_subs';
+();
+my sub f;
+my sub g {
+    ();
+    sub f { }
+}
+####
 # Elements of %# should not be confused with $#{ array }
 () = ${#}{'foo'};
 ####
