@@ -882,9 +882,9 @@ struct subst {
     U8		sbu_type;	/* what kind of context this is */
     U8		sbu_rflags;
     U16		sbu_rxtainted;	/* matches struct block */
-    I32		sbu_iters;
-    I32		sbu_maxiters;
     I32		sbu_oldsave;
+    SSize_t	sbu_iters;
+    SSize_t	sbu_maxiters;
     char *	sbu_orig;
     SV *	sbu_dstr;
     SV *	sbu_targ;

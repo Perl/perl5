@@ -2514,8 +2514,8 @@ PP(pp_subst)
     char *strend;
     const char *c;
     STRLEN clen;
-    I32 iters = 0;
-    I32 maxiters;
+    SSize_t iters = 0;
+    SSize_t maxiters;
     bool once;
     U8 rxtainted = 0; /* holds various SUBST_TAINT_* flag bits.
 			See "how taint works" above */
@@ -2739,7 +2739,7 @@ PP(pp_subst)
 		Move(s, d, i+1, char);		/* include the NUL */
 	    }
 	    SPAGAIN;
-	    mPUSHi((I32)iters);
+	    mPUSHi(iters);
 	}
     }
     else {
@@ -2851,7 +2851,7 @@ PP(pp_subst)
 	    SvPV_set(dstr, NULL);
 
 	    SPAGAIN;
-	    mPUSHi((I32)iters);
+	    mPUSHi(iters);
 	}
     }
 

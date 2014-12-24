@@ -210,7 +210,7 @@ PP(pp_substcont)
     rxres_restore(&cx->sb_rxres, rx);
 
     if (cx->sb_iters++) {
-	const I32 saviters = cx->sb_iters;
+	const SSize_t saviters = cx->sb_iters;
 	if (cx->sb_iters > cx->sb_maxiters)
 	    DIE(aTHX_ "Substitution loop");
 
