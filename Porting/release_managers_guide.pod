@@ -1116,6 +1116,14 @@ why you chose that particular quote for your epigraph.
 
 =for checklist skip RC
 
+=head3 Release schedule
+
+I<You MUST SKIP this step for RC>
+
+Tick the entry for your release in F<Porting/release_schedule.pod>.
+
+=for checklist skip RC
+
 =head3 Module::CoreList nagging
 
 I<You MUST SKIP this step for RC>
