@@ -15,8 +15,6 @@ $Config{ptrsize} >= 8
 plan(2);
 
 # [perl #103260] [perl #123071]
-# ${\2} to defeat constant folding, which in this case actually slows
-# things down
 my $x;
 $x .=" "x4096 for 1..2**30/4096;
 is eval { $x =~ s/ /_/g }, 2**30, "subst on long strings" ;
