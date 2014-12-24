@@ -16606,21 +16606,22 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
 
     DEBUG_COMPILE_r(
 	{
-	    const char * const s = SvPV_nolen_const(prog->check_substr
-		      ? prog->check_substr : prog->check_utf8);
+	    const char * const s = SvPV_nolen_const(RX_UTF8(r)
+		      ? prog->check_utf8 : prog->check_substr);
 
 	    if (!PL_colorset) reginitcolors();
 	    PerlIO_printf(Perl_debug_log,
 		      "%sUsing REx %ssubstr:%s \"%s%.60s%s%s\"\n",
 		      PL_colors[4],
-		      prog->check_substr ? "" : "utf8 ",
+		      RX_UTF8(r) ? "utf8 " : "",
 		      PL_colors[5],PL_colors[0],
 		      s,
 		      PL_colors[1],
 		      (strlen(s) > 60 ? "..." : ""));
 	} );
 
-    return prog->check_substr ? prog->check_substr : prog->check_utf8;
+    /* use UTF8 check substring if regexp pattern itself is in UTF8 */
+    return RX_UTF8(r) ? prog->check_utf8 : prog->check_substr;
 }
 
 /*

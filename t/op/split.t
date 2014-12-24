@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 125;
+plan tests => 131;
 
 $FS = ':';
 
@@ -371,6 +371,21 @@ is($cnt, scalar(@ary));
     eval { $b=split(/[, ]+/,$p) };
     is($b, scalar(@a));
     is ("$@-@a-", '-a b-', '#20912 - split() to array with /[]+/ and utf8');
+}
+
+{
+    # LATIN SMALL LETTER A WITH DIAERESIS, CYRILLIC SMALL LETTER I
+    for my $pattern ("\x{e4}", "\x{0437}") {
+        utf8::upgrade $pattern;
+        my @res;
+        for my $str ("a${pattern}b", "axb", "a${pattern}b") {
+            @split = split /$pattern/, $str;
+            push @res, scalar(@split);
+        }
+        is($res[0], 2);
+        is($res[1], 1);
+        is($res[2], 2, '#123469 - split with utf8 pattern after handling non-utf8 EXPR');
+    }
 }
 
 {
