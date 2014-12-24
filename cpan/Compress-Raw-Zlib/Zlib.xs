@@ -1502,6 +1502,8 @@ Perl_sv_dump(output); */
         s->stream.next_in = nextIn ;
         s->stream.avail_in  = availIn ;
     }
+#else
+    PERL_UNUSED_VAR(eof);
 #endif
     
     s->last_error = RETVAL ;
@@ -1746,6 +1748,8 @@ scan(s, buf, out=NULL, eof=FALSE)
     bool	eof_mode = FALSE;
     int    start_len = NO_INIT
   CODE:
+    PERL_UNUSED_VAR(out);
+    PERL_UNUSED_VAR(eof);
     /* If the input buffer is a reference, dereference it */
 #ifndef MAGIC_APPEND
         buf = buf;
