@@ -393,7 +393,6 @@ base/lex.t                # checks regexp stringification
 comp/final_line_num.t     # tests syntax error after BEGIN block
 comp/fold.t               # mutability of folded constants
 comp/parser.t             # crazy #line directives ==> shell syntax errors
-comp/require.t
 lib/deprecate.t
 lib/mypragma.t
 mro/basic.t
