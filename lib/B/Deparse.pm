@@ -4234,7 +4234,7 @@ sub check_proto {
     1 while $proto =~ s/(?<!\\)([@%])[^\]]+$/$1/;
     $proto =~ s/^\s*//;
     while ($proto) {
-	$proto =~ s/^(\\?[\$\@&%*_]|\\\[[\$\@&%*]+\]|;)\s*//;
+	$proto =~ s/^(\\?[\$\@&%*_]|\\\[[\$\@&%*]+\]|;|)\s*//;
 	my $chr = $1;
 	if ($chr eq "") {
 	    return "&" if @args;
@@ -4480,17 +4480,18 @@ sub pp_entersub {
 	$kid =~ s/^CORE::GLOBAL:://;
 
 	my $dproto = defined($proto) ? $proto : "undefined";
+	my $scalar_proto = $dproto =~ /^;*(?:[\$*_+]|\\.|\\\[[^]]\])\z/;
         if (!$declared) {
 	    return "$kid(" . $args . ")";
 	} elsif ($dproto =~ /^\s*\z/) {
 	    return $kid;
-	} elsif ($dproto eq "\$" and is_scalar($exprs[0])) {
+	} elsif ($scalar_proto and is_scalar($exprs[0])) {
 	    # is_scalar is an excessively conservative test here:
 	    # really, we should be comparing to the precedence of the
 	    # top operator of $exprs[0] (ala unop()), but that would
 	    # take some major code restructuring to do right.
 	    return $self->maybe_parens_func($kid, $args, $cx, 16);
-	} elsif ($dproto ne '$' and defined($proto) || $simple) { #'
+	} elsif (not $scalar_proto and defined($proto) || $simple) { #'
 	    return $self->maybe_parens_func($kid, $args, $cx, 5);
 	} else {
 	    return "$kid(" . $args . ")";

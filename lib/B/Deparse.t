@@ -1941,6 +1941,65 @@ package prototest;
 # coderef2text and prototyped sub calls [perl #123435]
 is 'foo', 'oo';
 ####
+# prototypes with unary precedence
+package prototest;
+sub dollar($) {}
+sub optdollar(;$) {}
+sub optoptdollar(;;$) {}
+sub splat(*) {}
+sub optsplat(;*) {}
+sub optoptsplat(;;*) {}
+sub bar(_) {}
+sub optbar(;_) {}
+sub optoptbar(;;_) {}
+sub plus(+) {}
+sub optplus(;+) {}
+sub optoptplus(;;+) {}
+sub wack(\$) {}
+sub optwack(;\$) {}
+sub optoptwack(;;\$) {}
+sub wackbrack(\[$]) {}
+sub optwackbrack(;\[$]) {}
+sub optoptwackbrack(;;\[$]) {}
+dollar($a < $b);
+optdollar($a < $b);
+optoptdollar($a < $b);
+splat($a < $b);     # Some of these deparse with ‘&’; if that changes, just
+optsplat($a < $b);  # change the tests.
+optoptsplat($a < $b);
+bar($a < $b);
+optbar($a < $b);
+optoptbar($a < $b);
+plus($a < $b);
+optplus($a < $b);
+optoptplus($a < $b);
+wack($a = $b);
+optwack($a = $b);
+optoptwack($a = $b);
+wackbrack($a = $b);
+optwackbrack($a = $b);
+optoptwackbrack($a = $b);
+>>>>
+package prototest;
+dollar($a < $b);
+optdollar($a < $b);
+optoptdollar($a < $b);
+&splat($a < $b);
+&optsplat($a < $b);
+&optoptsplat($a < $b);
+bar($a < $b);
+optbar($a < $b);
+optoptbar($a < $b);
+&plus($a < $b);
+&optplus($a < $b);
+&optoptplus($a < $b);
+&wack(\($a = $b));
+&optwack(\($a = $b));
+&optoptwack(\($a = $b));
+&wackbrack(\($a = $b));
+&optwackbrack(\($a = $b));
+&optoptwackbrack(\($a = $b));
+####
 # ensure aelemfast works in the range -128..127 and that there's no
 # funky edge cases
 my $x;
