@@ -256,6 +256,7 @@ cpan/CPAN-Meta-Requirements/t/basic.t
 cpan/CPAN-Meta-Requirements/t/finalize.t
 cpan/CPAN-Meta-Requirements/t/from-hash.t
 cpan/CPAN-Meta-Requirements/t/merge.t
+cpan/CPAN-Meta-Requirements/t/strings.t
 cpan/CPAN-Meta/t/converter-bad.t
 cpan/CPAN-Meta/t/converter-fail.t
 cpan/CPAN-Meta/t/converter-fragments.t

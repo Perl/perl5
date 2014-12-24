@@ -3,7 +3,7 @@ use warnings;
 package CPAN::Meta::Requirements;
 # ABSTRACT: a set of version requirements for a CPAN dist
 
-our $VERSION = '2.130';
+our $VERSION = '2.131';
 
 #pod =head1 SYNOPSIS
 #pod
@@ -33,7 +33,6 @@ our $VERSION = '2.130';
 #pod =cut
 
 use Carp ();
-use Scalar::Util ();
 
 # To help ExtUtils::MakeMaker bootstrap CPAN::Meta::Requirements on perls
 # before 5.10, we fall back to the EUMM bundled compatibility version module if
@@ -50,6 +49,9 @@ BEGIN {
 
 # Perl 5.10.0 didn't have "is_qv" in version.pm
 *_is_qv = version->can('is_qv') ? sub { $_[0]->is_qv } : sub { exists $_[0]->{qv} };
+
+# construct once, reuse many times
+my $V0 = version->new(0);
 
 #pod =method new
 #pod
@@ -100,6 +102,11 @@ sub _find_magic_vstring {
   return $tvalue;
 }
 
+# safe if given an unblessed reference
+sub _isa_version {
+  UNIVERSAL::isa( $_[0], 'UNIVERSAL' ) && $_[0]->isa('version')
+}
+
 sub _version_object {
   my ($self, $module, $version) = @_;
 
@@ -112,17 +119,23 @@ sub _version_object {
   }
 
   eval {
-    local $SIG{__WARN__} = sub { die "Invalid version: $_[0]" };
-    $vobj  = (! defined $version)                ? version->new(0)
-           : (! Scalar::Util::blessed($version)) ? version->new($version)
-           :                                       $version;
+    if (not defined $version or $version eq '0') {
+      $vobj = $V0;
+    }
+    elsif ( ref($version) eq 'version' || _isa_version($version) ) {
+      $vobj = $version;
+    }
+    else {
+      local $SIG{__WARN__} = sub { die "Invalid version: $_[0]" };
+      $vobj = version->new($version);
+    }
   };
 
   if ( my $err = $@ ) {
     my $hook = $self->{bad_version_hook};
     $vobj = eval { $hook->($version, $module) }
       if ref $hook eq 'CODE';
-    unless (Scalar::Util::blessed($vobj) && $vobj->isa("version")) {
+    unless (eval { $vobj->isa("version") }) {
       $err =~ s{ at .* line \d+.*$}{};
       die "Can't convert '$version': $err";
     }
@@ -194,7 +207,7 @@ sub _version_object {
 #pod =cut
 
 BEGIN {
-  for my $type (qw(minimum maximum exclusion exact_version)) {
+  for my $type (qw(maximum exclusion exact_version)) {
     my $method = "with_$type";
     my $to_add = $type eq 'exact_version' ? $type : "add_$type";
 
@@ -211,6 +224,25 @@ BEGIN {
     no strict 'refs';
     *$to_add = $code;
   }
+}
+
+sub add_minimum {
+  my ($self, $name, $version) = @_;
+
+  if (not defined $version or $version eq '0') {
+    return $self if $self->__entry_for($name);
+    Carp::confess("can't add new requirements to finalized requirements")
+      if $self->is_finalized;
+
+    $self->{requirements}{ $name } =
+      CPAN::Meta::Requirements::_Range::Range->with_minimum($V0);
+  }
+  else {
+    $version = $self->_version_object( $name, $version );
+
+    $self->__modify_entry_for($name, 'with_minimum', $version);
+  }
+  return $self;
 }
 
 #pod =method add_requirements
@@ -755,7 +787,7 @@ CPAN::Meta::Requirements - a set of version requirements for a CPAN dist
 
 =head1 VERSION
 
-version 2.130
+version 2.131
 
 =head1 SYNOPSIS
 
@@ -1037,7 +1069,7 @@ Ricardo Signes <rjbs@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Ed J Karen Etheridge robario
+=for stopwords Ed J Karen Etheridge Leon Timmermans robario
 
 =over 4
 
@@ -1048,6 +1080,10 @@ Ed J <mohawk2@users.noreply.github.com>
 =item *
 
 Karen Etheridge <ether@cpan.org>
+
+=item *
+
+Leon Timmermans <fawaka@gmail.com>
 
 =item *
 
