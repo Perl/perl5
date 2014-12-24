@@ -366,6 +366,7 @@ typedef struct {
 
 DllExport void		win32_get_child_IO(child_IO_table* ptr);
 DllExport HWND		win32_create_message_window(void);
+DllExport int		win32_async_check(pTHX);
 
 extern int		my_fclose(FILE *);
 extern char *		win32_get_privlib(const char *pl, STRLEN *const len);
@@ -469,8 +470,6 @@ struct interp_intern {
     unsigned 	poll_count;
     Sighandler_t sigtable[SIG_SIZE];
 };
-
-DllExport int win32_async_check(pTHX);
 
 #define WIN32_POLL_INTERVAL 32768
 #define PERL_ASYNC_CHECK() if (w32_do_async || PL_sig_pending) win32_async_check(aTHX)
