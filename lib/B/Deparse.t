@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 44; # not counting those in the __DATA__ section
+my $tests = 45; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -500,6 +500,11 @@ like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
              prog => 'sub foo{foo()}'),
      qr/^sub foo \{\s+foo\(\)/m,
     'recursive sub';
+
+is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+             prog => 'BEGIN { $::{f}=\!0 }'),
+   "sub BEGIN {\n    \$main::{'f'} = \\1;\n}\n",
+   '&PL_sv_yes constant (used to croak)';
 
 is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-T' ],
            prog => '$x =~ (1?/$a/:0)'),

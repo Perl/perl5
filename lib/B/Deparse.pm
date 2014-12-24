@@ -743,7 +743,7 @@ sub stash_subs {
 	    if ($class eq "CV") {
 		$self->todo($referent, 0);
 	    } elsif (
-		$class !~ /^(AV|HV|CV|FM|IO)\z/
+		$class !~ /^(AV|HV|CV|FM|IO|SPECIAL)\z/
 		# A more robust way to write that would be this, but B does
 		# not provide the SVt_ constants:
 		# ($referent->FLAGS & B::SVTYPEMASK) < B::SVt_PVAV
@@ -4795,16 +4795,17 @@ sub const {
 	return $str;
     } elsif ($sv->FLAGS & SVf_ROK && $sv->can("RV")) {
 	my $ref = $sv->RV;
-	if (class($ref) eq "AV") {
+	my $class = class($ref);
+	if ($class eq "AV") {
 	    return "[" . $self->list_const(2, $ref->ARRAY) . "]";
-	} elsif (class($ref) eq "HV") {
+	} elsif ($class eq "HV") {
 	    my %hash = $ref->ARRAY;
 	    my @elts;
 	    for my $k (sort keys %hash) {
 		push @elts, "$k => " . $self->const($hash{$k}, 6);
 	    }
 	    return "{" . join(", ", @elts) . "}";
-	} elsif (class($ref) eq "CV") {
+	} elsif ($class eq "CV") {
 	    BEGIN {
 		if ($] > 5.0150051) {
 		    require overloading;
@@ -4817,7 +4818,7 @@ sub const {
 	    }
 	    return "sub " . $self->deparse_sub($ref);
 	}
-	if ($ref->FLAGS & SVs_SMG) {
+	if ($class ne 'SPECIAL' and $ref->FLAGS & SVs_SMG) {
 	    for (my $mg = $ref->MAGIC; $mg; $mg = $mg->MOREMAGIC) {
 		if ($mg->TYPE eq 'r') {
 		    my $re = re_uninterp(escape_re(re_unback($mg->precomp)));
