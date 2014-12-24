@@ -29,10 +29,17 @@
 #  define dEXTCONST globaldef {"$GLOBAL_RO_VARS"} readonly
 #else
 #  if (defined(WIN32) && defined(__MINGW32__)) || defined(__SYMBIAN32__)
-#    define EXT		__declspec(dllexport)
-#    define dEXT
-#    define EXTCONST	__declspec(dllexport) const
-#    define dEXTCONST	const
+#    ifdef __cplusplus
+#      define EXT	__declspec(dllexport)
+#      define dEXT
+#      define EXTCONST	__declspec(dllexport) extern const
+#      define dEXTCONST	const
+#    else
+#      define EXT	__declspec(dllexport)
+#      define dEXT
+#      define EXTCONST	__declspec(dllexport) const
+#      define dEXTCONST	const
+#    endif
 #  else
 #    ifdef __cplusplus
 #      define EXT
