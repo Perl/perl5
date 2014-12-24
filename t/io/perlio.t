@@ -130,7 +130,7 @@ SKIP: {
     }
     else {
         ok(!defined $fd, "fileno(DIRHANDLE) is undef when no dirfd()");
-        isnt($errno, 0, "fileno(DIRHANDLE) sets errno when no dirfs()");
+        isnt($errno, 0, "fileno(DIRHANDLE) sets errno when no dirfd()");
     }
 }
 

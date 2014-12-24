@@ -1923,7 +1923,7 @@ my sub g {
 # Elements of %# should not be confused with $#{ array }
 () = ${#}{'foo'};
 ####
-# $; [perl #12335]
+# $; [perl #123357]
 $_ = $;;
 do {
     $;
