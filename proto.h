@@ -4379,6 +4379,12 @@ PERL_CALLCONV void	Perl_sv_free2(pTHX_ SV *const sv, const U32 refcnt)
 	assert(sv)
 
 PERL_CALLCONV void	Perl_sv_free_arenas(pTHX);
+PERL_CALLCONV SV*	Perl_sv_get_backrefs(pTHX_ SV *const sv)
+			__attribute__pure__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SV_GET_BACKREFS	\
+	assert(sv)
+
 PERL_CALLCONV char*	Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

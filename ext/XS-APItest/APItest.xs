@@ -5024,3 +5024,22 @@ test_Gconvert(SV * number, SV * num_digits)
         RETVAL = newSVpv(buffer, 0);
     OUTPUT:
         RETVAL
+
+MODULE = XS::APItest		PACKAGE = XS::APItest::Backrefs
+
+void
+weaken(SV *sv)
+    PROTOTYPE: $
+    CODE:
+        sv_rvweaken(sv);
+
+SV *
+has_backrefs(SV *sv)
+    CODE:
+        if (SvROK(sv) && sv_get_backrefs(SvRV(sv)))
+            RETVAL = &PL_sv_yes;
+        else
+            RETVAL = &PL_sv_no;
+    OUTPUT:
+        RETVAL
+

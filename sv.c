@@ -5929,6 +5929,49 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
     return sv;
 }
 
+/*
+=for apidoc sv_get_backrefs
+
+If the sv is the target of a weakrefence then return
+the backrefs structure associated with the sv, otherwise
+return NULL.
+
+When returning a non-null result the type of the return
+is relevant. If it is an AV then the contents of the AV
+are the weakrefs which point at this item. If it is any
+other type then the item itself is the weakref.
+
+See also Perl_sv_add_backref(), Perl_sv_del_backref(),
+Perl_sv_kill_backrefs()
+
+=cut
+*/
+
+SV *
+Perl_sv_get_backrefs(pTHX_ SV *const sv)
+{
+    SV **svp= NULL;
+    MAGIC *mg = NULL;
+
+    PERL_ARGS_ASSERT_SV_GET_BACKREFS;
+
+    /* find slot to store array or singleton backref */
+
+    if (SvTYPE(sv) == SVt_PVHV) {
+        if (SvOOK(sv))
+            svp = (SV**)Perl_hv_backreferences_p(aTHX_ sv);
+    } else {
+        if (SvMAGICAL(sv))
+            mg = mg_find(sv, PERL_MAGIC_backref);
+        if (mg)
+                svp = &(mg->mg_obj);
+    }
+    if (svp)
+        return *svp;
+    else
+        return NULL;
+}
+
 /* Give tsv backref magic if it hasn't already got it, then push a
  * back-reference to sv onto the array associated with the backref magic.
  *
