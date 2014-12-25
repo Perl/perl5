@@ -163,6 +163,9 @@ veryclean.sh
 U
 MANIFEST.new
 
+# this is used to auto-sort the MANIFEST
+MANIFEST.srt
+
 # ignore editor droppings
 *.swp
 *~
