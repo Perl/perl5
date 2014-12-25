@@ -2447,11 +2447,11 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 
 AV **
 Perl_hv_backreferences_p(pTHX_ HV *hv) {
-    struct xpvhv_aux * const iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
-
     PERL_ARGS_ASSERT_HV_BACKREFERENCES_P;
-
-    return &(iter->xhv_backreferences);
+    {
+        struct xpvhv_aux * const iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
+        return &(iter->xhv_backreferences);
+    }
 }
 
 void
