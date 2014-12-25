@@ -140,14 +140,14 @@
 #    ifdef PERL_GLOBAL_STRUCT_PRIVATE
        EXTERN_C struct perl_vars* Perl_GetVarsPrivate();
 #      define PERL_GET_VARS() Perl_GetVarsPrivate() /* see miniperlmain.c */
-#      ifndef PERLIO_FUNCS_CONST
-#        define PERLIO_FUNCS_CONST /* Can't have these lying around. */
-#      endif
 #    else
 #      define PERL_GET_VARS() PL_VarsPtr
 #    endif
 #  endif
 #endif
+
+/* this used to be off by default, now its on, see perlio.h */
+#define PERLIO_FUNCS_CONST
 
 #define pVAR    struct perl_vars* my_vars PERL_UNUSED_DECL
 

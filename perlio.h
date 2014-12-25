@@ -86,10 +86,8 @@ typedef PerlIOl *PerlIO;
 #define PerlIO PerlIO
 #define PERLIO_LAYERS 1
 
-/* Making the big PerlIO_funcs vtables const is good (enables placing
- * them in the const section which is good for speed, security, and
- * embeddability) but this cannot be done by default because of
- * backward compatibility. */
+/* PERLIO_FUNCS_CONST is now on by default for efficiency, PERLIO_FUNCS_CONST
+   can be removed 1 day once stable & then PerlIO vtables are permanently RO */
 #ifdef PERLIO_FUNCS_CONST
 #define PERLIO_FUNCS_DECL(funcs) const PerlIO_funcs funcs
 #define PERLIO_FUNCS_CAST(funcs) (PerlIO_funcs*)(funcs)
