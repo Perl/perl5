@@ -14497,7 +14497,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 vFAIL2utf8f(
                     "Invalid [] range \"%"UTF8f"\"",
                     UTF8fARG(UTF, w, rangebegin));
-		range = 0; /* not a valid range */
+                NOT_REACHED; /* NOT REACHED */
 	    }
 	}
 	else {
