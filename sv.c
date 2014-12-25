@@ -5959,7 +5959,7 @@ Perl_sv_get_backrefs(pTHX_ SV *const sv)
     if (SvTYPE(sv) == SVt_PVHV) {
         if (SvOOK(sv)) {
             struct xpvhv_aux * const iter = HvAUX((HV *)sv);
-            backrefs = iter->xhv_backreferences;
+            backrefs = (SV *)iter->xhv_backreferences;
         }
     } else if (SvMAGICAL(sv)) {
         MAGIC *mg = mg_find(sv, PERL_MAGIC_backref);
