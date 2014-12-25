@@ -4607,11 +4607,16 @@ PP(pp_gmtime)
     }
     else {
 	NV input = Perl_floor(POPn);
+	const bool isnan = Perl_isnan(input);
 	when = (Time64_T)input;
-	if (when != input) {
+	if (UNLIKELY(isnan || when != input)) {
 	    /* diag_listed_as: gmtime(%f) too large */
 	    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
 			   "%s(%.0" NVff ") too large", opname, input);
+	    if (isnan) {
+		err = NULL;
+		goto failed;
+	    }
 	}
     }
 
@@ -4637,6 +4642,7 @@ PP(pp_gmtime)
     if (err == NULL) {
 	/* diag_listed_as: gmtime(%f) failed */
 	/* XXX %lld broken for quads */
+      failed:
 	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
 		       "%s(%.0" NVff ") failed", opname, when);
     }

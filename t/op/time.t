@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 70;
+plan tests => 72;
 
 # These tests make sure, among other things, that we don't end up
 # burning tons of CPU for dates far in the future.
@@ -237,4 +237,10 @@ SKIP: { #rt #73040
     $date = localtime($small_time);
     like $warning, qr/^localtime\($small_time_f\) too small/;
     like $warning, qr/^localtime\($small_time_f\) failed/m;
+}
+
+{
+    local $^W;
+    is scalar gmtime("NaN"), undef, '[perl #123495] gmtime(NaN)';
+    is scalar localtime("NaN"), undef, 'localtime(NaN)';
 }
