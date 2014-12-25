@@ -1,11 +1,11 @@
 package XS::APItest;
 
-{ use 5.011001; }
+{ use 5.011001; } # 5.11 is a long long time ago... What gives with this?
 use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.69';
+our $VERSION = '0.70';
 
 require XSLoader;
 

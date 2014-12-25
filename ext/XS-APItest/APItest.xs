@@ -5028,7 +5028,7 @@ test_Gconvert(SV * number, SV * num_digits)
 MODULE = XS::APItest		PACKAGE = XS::APItest::Backrefs
 
 void
-weaken(SV *sv)
+apitest_weaken(SV *sv)
     PROTOTYPE: $
     CODE:
         sv_rvweaken(sv);

@@ -36,9 +36,9 @@ my $nrml_hash_ref= { this => is => a => 'hash' };
 # we could probably do other tests here, such as
 # verify the refcount of the referents, but maybe
 # another day.
-weaken(my $weak_scalar_ref= $scalar_ref);
-weaken(my $weak_array_ref= $array_ref);
-weaken(my $weak_hash_ref= $hash_ref);
+apitest_weaken(my $weak_scalar_ref= $scalar_ref);
+apitest_weaken(my $weak_array_ref= $array_ref);
+apitest_weaken(my $weak_hash_ref= $hash_ref);
 
 ok(has_backrefs($scalar_ref), "scalar with backrefs");
 ok(has_backrefs($array_ref), "array with backrefs");
