@@ -13911,6 +13911,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	if (!range) {
 	    rangebegin = RExC_parse;
 	    element_count++;
+#ifdef EBCDIC
+            literal_endpoint = 0;
+#endif
 	}
 	if (UTF) {
 	    value = utf8n_to_uvchr((U8*)RExC_parse,

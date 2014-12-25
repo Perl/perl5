@@ -256,6 +256,7 @@ a[bcd]+dcdcde	adcdcde	n	-	-
 ((a)(b)c)(d)	abcd	y	$-[4]	3
 ((a)(b)c)(d)	abcd	y	$+[4]	4
 [a-zA-Z_][a-zA-Z0-9_]*	alpha	y	$&	alpha
+[_A-Z]	}	n	-	-		# This could match on EBCDIC if A-Z not excluding things in middle
 ^a(bc+|b[eh])g|.h$	abh	y	$&-$1	bh-
 (bc+d$|ef*g.|h?i(j|k))	effgz	y	$&-$1-$2	effgz-effgz-
 (bc+d$|ef*g.|h?i(j|k))	ij	y	$&-$1-$2	ij-ij-j
