@@ -5950,26 +5950,23 @@ Perl_sv_kill_backrefs()
 SV *
 Perl_sv_get_backrefs(pTHX_ SV *const sv)
 {
-    SV **svp= NULL;
-    MAGIC *mg = NULL;
+    SV *backrefs= NULL;
 
     PERL_ARGS_ASSERT_SV_GET_BACKREFS;
 
     /* find slot to store array or singleton backref */
 
     if (SvTYPE(sv) == SVt_PVHV) {
-        if (SvOOK(sv))
-            svp = (SV**)Perl_hv_backreferences_p(aTHX_ sv);
-    } else {
-        if (SvMAGICAL(sv))
-            mg = mg_find(sv, PERL_MAGIC_backref);
+        if (SvOOK(sv)) {
+            struct xpvhv_aux * const iter = HvAUX((HV *)sv);
+            backrefs = iter->xhv_backreferences;
+        }
+    } else if (SvMAGICAL(sv)) {
+        MAGIC *mg = mg_find(sv, PERL_MAGIC_backref);
         if (mg)
-                svp = &(mg->mg_obj);
+            backrefs = mg->mg_obj;
     }
-    if (svp)
-        return *svp;
-    else
-        return NULL;
+    return backrefs;
 }
 
 /* Give tsv backref magic if it hasn't already got it, then push a
