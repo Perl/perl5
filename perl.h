@@ -5558,14 +5558,7 @@ EXTCONST runops_proc_t PL_runops_std
 EXTCONST runops_proc_t PL_runops_dbg
   INIT(Perl_runops_debug);
 
-/* PERL_GLOBAL_STRUCT_PRIVATE wants to keep global data like the
- * magic vtables const, but this is incompatible with SWIG which
- * does want to modify the vtables. */
-#ifdef PERL_GLOBAL_STRUCT_PRIVATE
-#  define EXT_MGVTBL EXTCONST MGVTBL
-#else
-#  define EXT_MGVTBL EXT MGVTBL
-#endif
+#define EXT_MGVTBL EXTCONST MGVTBL
 
 #define PERL_MAGIC_READONLY_ACCEPTABLE 0x40
 #define PERL_MAGIC_VALUE_MAGIC 0x80
