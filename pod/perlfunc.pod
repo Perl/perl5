@@ -7650,7 +7650,8 @@ list context is currently not possible this would serve no purpose.
 
 C<state> variables are enabled only when the C<use feature "state"> pragma 
 is in effect, unless the keyword is written as C<CORE::state>.
-See also L<feature>.
+See also L<feature>. Alternately, include a C<use v5.10> or later to the
+current scope.
 
 =item study SCALAR
 X<study>
