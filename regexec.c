@@ -1460,7 +1460,7 @@ STMT_START {                                                                    
         goto do_trie_utf8_fold;                                                     \
     case trie_utf8_exactfa_fold:                                                    \
         flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
-        /* FALLTHROUGH */                                                          \
+        /* FALLTHROUGH */                                                           \
     case trie_utf8_fold:                                                            \
       do_trie_utf8_fold:                                                            \
         if ( foldlen>0 ) {                                                          \
@@ -1478,7 +1478,7 @@ STMT_START {                                                                    
         break;                                                                      \
     case trie_latin_utf8_exactfa_fold:                                              \
         flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
-        /* FALLTHROUGH */                                                          \
+        /* FALLTHROUGH */                                                           \
     case trie_latin_utf8_fold:                                                      \
         if ( foldlen>0 ) {                                                          \
             uvc = utf8n_to_uvchr( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
