@@ -3940,7 +3940,9 @@ L<http://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
  *  FOLDEQ_LOCALE	    is set iff the rules from the current underlying
  *	                    locale are to be used.
  *  FOLDEQ_S1_ALREADY_FOLDED  s1 has already been folded before calling this
- *                            routine.  This allows that step to be skipped.
+ *                          routine.  This allows that step to be skipped.
+ *                          Currently, this requires s1 to be encoded as UTF-8
+ *                          (u1 must be true), which is asserted for.
  *  FOLDEQ_S2_ALREADY_FOLDED  Similarly.
  */
 I32
@@ -4031,6 +4033,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
         if (n1 == 0) {
 	    if (flags & FOLDEQ_S1_ALREADY_FOLDED) {
 		f1 = (U8 *) p1;
+                assert(u1);
 		n1 = UTF8SKIP(f1);
 	    }
 	    else {
@@ -4079,6 +4082,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
         if (n2 == 0) {    /* Same for s2 */
 	    if (flags & FOLDEQ_S2_ALREADY_FOLDED) {
 		f2 = (U8 *) p2;
+                assert(u2);
 		n2 = UTF8SKIP(f2);
 	    }
 	    else {
