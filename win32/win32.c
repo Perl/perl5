@@ -4188,7 +4188,7 @@ XS(w32_SetChildShowWindow)
     unsigned short showwindow = w32_showwindow;
 
     if (items > 1)
-	Perl_croak(aTHX_ "usage: Win32::SetChildShowWindow($showwindow)");
+	croak_xs_usage(cv, "[showwindow]");
 
     if (items == 0 || !SvOK(ST(0)))
         w32_use_showwindow = FALSE;
