@@ -4607,13 +4607,13 @@ PP(pp_gmtime)
     }
     else {
 	NV input = Perl_floor(POPn);
-	const bool isnan = Perl_isnan(input);
+	const bool pl_isnan = Perl_isnan(input);
 	when = (Time64_T)input;
-	if (UNLIKELY(isnan || when != input)) {
+	if (UNLIKELY(pl_isnan || when != input)) {
 	    /* diag_listed_as: gmtime(%f) too large */
 	    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
 			   "%s(%.0" NVff ") too large", opname, input);
-	    if (isnan) {
+	    if (pl_isnan) {
 		err = NULL;
 		goto failed;
 	    }
