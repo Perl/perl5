@@ -3832,6 +3832,7 @@ ext/POSIX/t/math.t		Basic math tests for POSIX
 ext/POSIX/t/posix.t		See if POSIX works
 ext/POSIX/t/sigaction.t		See if POSIX::sigaction works
 ext/POSIX/t/sigset.t		See if POSIX::SigSet works
+ext/POSIX/t/strerror_errno.t	See if POSIX:strerror doesn't trash $!
 ext/POSIX/t/sysconf.t		See if POSIX works
 ext/POSIX/t/taint.t		See if POSIX works with taint
 ext/POSIX/t/termios.t		See if POSIX works
