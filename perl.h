@@ -1269,19 +1269,22 @@ EXTERN_C char *crypt(const char *, const char *);
 
 #define ERRSV GvSVn(PL_errgv)
 
+/* contains inlined gv_add_by_type */
 #define CLEAR_ERRSV() STMT_START {					\
-    if (!GvSV(PL_errgv)) {						\
-	sv_setpvs(GvSV(gv_add_by_type(PL_errgv, SVt_PV)), "");		\
-    } else if (SvREADONLY(GvSV(PL_errgv))) {				\
-	SvREFCNT_dec(GvSV(PL_errgv));					\
-	GvSV(PL_errgv) = newSVpvs("");					\
+    SV ** const svp = &GvSV(PL_errgv);					\
+    if (!*svp) {							\
+	goto clresv_newemptypv;						\
+    } else if (SvREADONLY(*svp)) {					\
+	SvREFCNT_dec_NN(*svp);						\
+	clresv_newemptypv:						\
+	*svp = newSVpvs("");						\
     } else {								\
-	SV *const errsv = GvSV(PL_errgv);				\
+	SV *const errsv = *svp;						\
 	sv_setpvs(errsv, "");						\
+	SvPOK_only(errsv);						\
 	if (SvMAGICAL(errsv)) {						\
 	    mg_free(errsv);						\
 	}								\
-	SvPOK_only(errsv);						\
     }									\
     } STMT_END
 
