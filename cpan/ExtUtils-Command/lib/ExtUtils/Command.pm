@@ -2,17 +2,12 @@ package ExtUtils::Command;
 
 use 5.00503;
 use strict;
-use Carp;
-use File::Copy;
-use File::Compare;
-use File::Basename;
-use File::Path qw(rmtree);
 require Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 @ISA       = qw(Exporter);
 @EXPORT    = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f test_d chmod
                 dos2unix);
-$VERSION = '1.18';
+$VERSION = '1.19';
 
 my $Is_VMS   = $^O eq 'VMS';
 my $Is_VMS_mode = $Is_VMS;
@@ -131,7 +126,8 @@ Removes files and directories - recursively (even if readonly)
 sub rm_rf
 {
  expand_wildcards();
- rmtree([grep -e $_,@ARGV],0,0);
+ require File::Path;
+ File::Path::rmtree([grep -e $_,@ARGV],0,0);
 }
 
 =item rm_f
@@ -154,7 +150,8 @@ sub rm_f {
 
         next if _unlink($file);
 
-        carp "Cannot delete $file: $!";
+        require Carp;
+        Carp::carp("Cannot delete $file: $!");
     }
 }
 
@@ -204,11 +201,15 @@ sub mv {
     my @src = @ARGV;
     my $dst = pop @src;
 
-    croak("Too many arguments") if (@src > 1 && ! -d $dst);
+    if (@src > 1 && ! -d $dst) {
+        require Carp;
+        Carp::croak("Too many arguments");
+    }
 
+    require File::Copy;
     my $nok = 0;
     foreach my $src (@src) {
-        $nok ||= !move($src,$dst);
+        $nok ||= !File::Copy::move($src,$dst);
     }
     return !$nok;
 }
@@ -230,11 +231,15 @@ sub cp {
     my @src = @ARGV;
     my $dst = pop @src;
 
-    croak("Too many arguments") if (@src > 1 && ! -d $dst);
+    if (@src > 1 && ! -d $dst) {
+        require Carp;
+        Carp::croak("Too many arguments");
+    }
 
+    require File::Copy;
     my $nok = 0;
     foreach my $src (@src) {
-        $nok ||= !copy($src,$dst);
+        $nok ||= !File::Copy::copy($src,$dst);
 
         # Win32 does not update the mod time of a copied file, just the
         # created time which make does not look at.
@@ -257,6 +262,7 @@ sub chmod {
     expand_wildcards();
 
     if( $Is_VMS_mode && $Is_VMS_noefs) {
+        require File::Spec;
         foreach my $idx (0..$#ARGV) {
             my $path = $ARGV[$idx];
             next unless -d $path;
@@ -285,6 +291,7 @@ Creates directories, including any parent directories.
 sub mkpath
 {
  expand_wildcards();
+ require File::Path;
  File::Path::mkpath([@ARGV],0,0777);
 }
 
