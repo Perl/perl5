@@ -1607,17 +1607,13 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
         }
         else {
             _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            goto needs_full_generality;
         }
     }
 
     if (c < 256) {
-	UV result = _to_fold_latin1((U8) c, p, lenp,
+        return _to_fold_latin1((U8) c, p, lenp,
 			    flags & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII));
-	/* It is illegal for the fold to cross the 255/256 boundary under
-	 * locale; in this case return the original */
-	return (result > 256 && flags & FOLD_FLAGS_LOCALE)
-	       ? c
-	       : result;
     }
 
     /* Here, above 255.  If no special needs, just use the macro */
@@ -1628,6 +1624,8 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
     else {  /* Otherwise, _to_utf8_fold_flags has the intelligence to deal with
 	       the special flags. */
 	U8 utf8_c[UTF8_MAXBYTES + 1];
+
+      needs_full_generality:
 	uvchr_to_utf8(utf8_c, c);
 	return _to_utf8_fold_flags(utf8_c, p, lenp, flags);
     }
