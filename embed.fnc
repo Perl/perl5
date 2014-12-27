@@ -2462,7 +2462,6 @@ sn	|NV|mulexp10	|NV value|I32 exponent
 
 #if defined(PERL_IN_UTF8_C)
 sRM	|UV	|check_locale_boundary_crossing				    \
-		|NN const char * const func_name			    \
 		|NN const U8* const p					    \
 		|const UV result					    \
 		|NN U8* const ustrp					    \
