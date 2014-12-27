@@ -597,9 +597,18 @@ $a = fc("\x{1E9E}");
 $a = fc("\x{FB05}");
 $a = uc("\x{FB00}");
 $a = ucfirst("\x{149}");
+$a = lcfirst("\x{178}");
+no warnings 'locale';
+$a = lc("\x{178}");
+$a = fc("\x{1E9E}");
+$a = fc("\x{FB05}");
+$a = uc("\x{FB00}");
+$a = ucfirst("\x{149}");
+$a = lcfirst("\x{178}");
 EXPECT
 Can't do lc("\x{178}") on non-UTF-8 locale; resolved to "\x{178}". at - line 10.
 Can't do fc("\x{1E9E}") on non-UTF-8 locale; resolved to "\x{17F}\x{17F}". at - line 11.
 Can't do fc("\x{FB05}") on non-UTF-8 locale; resolved to "\x{FB06}". at - line 12.
 Can't do uc("\x{FB00}") on non-UTF-8 locale; resolved to "\x{FB00}". at - line 13.
 Can't do ucfirst("\x{149}") on non-UTF-8 locale; resolved to "\x{149}". at - line 14.
+Can't do lcfirst("\x{178}") on non-UTF-8 locale; resolved to "\x{178}". at - line 15.
