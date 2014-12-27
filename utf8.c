@@ -3957,6 +3957,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
     STRLEN n1 = 0, n2 = 0;              /* Number of bytes in current char */
     U8 foldbuf1[UTF8_MAXBYTES_CASE+1];
     U8 foldbuf2[UTF8_MAXBYTES_CASE+1];
+    U8 flags_for_folder = FOLD_FLAGS_FULL;
 
     PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS;
 
@@ -3973,8 +3974,13 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
      * and /iaa matches are most likely to involve code points 0-255, and this
      * function only under rare conditions gets called for 0-255. */
 
-    if (IN_UTF8_CTYPE_LOCALE) {
-        flags &= ~FOLDEQ_LOCALE;
+    if (flags & FOLDEQ_LOCALE) {
+        if (IN_UTF8_CTYPE_LOCALE) {
+            flags &= ~FOLDEQ_LOCALE;
+        }
+        else {
+            flags_for_folder |= FOLD_FLAGS_LOCALE;
+        }
     }
 
     if (pe1) {
@@ -4026,8 +4032,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
     while (p1 < e1 && p2 < e2) {
 
         /* If at the beginning of a new character in s1, get its fold to use
-	 * and the length of the fold.  (exception: locale rules just get the
-	 * character to a single byte) */
+	 * and the length of the fold. */
         if (n1 == 0) {
 	    if (flags & FOLDEQ_S1_ALREADY_FOLDED) {
 		f1 = (U8 *) p1;
@@ -4035,46 +4040,28 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 		n1 = UTF8SKIP(f1);
 	    }
 	    else {
-		/* If in locale matching, we use two sets of rules, depending
-		 * on if the code point is above or below 255.  Here, we test
-		 * for and handle locale rules */
-		if ((flags & FOLDEQ_LOCALE)
-		    && (! u1 || ! UTF8_IS_ABOVE_LATIN1(*p1)))
-		{
-		    /* There is no mixing of code points above and below 255. */
-		    if (u2 && UTF8_IS_ABOVE_LATIN1(*p2)) {
-			return 0;
-		    }
+                if (isASCII(*p1) && ! (flags & FOLDEQ_LOCALE)) {
 
-		    /* We handle locale rules by converting, if necessary, the
-		     * code point to a single byte. */
-		    if (! u1 || UTF8_IS_INVARIANT(*p1)) {
-			*foldbuf1 = *p1;
-		    }
-		    else {
-			*foldbuf1 = TWO_BYTE_UTF8_TO_NATIVE(*p1, *(p1 + 1));
-		    }
-		    n1 = 1;
-		}
-		else if (isASCII(*p1)) {    /* Note, that here won't be both
-					       ASCII and using locale rules */
-
-		    /* If trying to mix non- with ASCII, and not supposed to,
-		     * fail */
-		    if ((flags & FOLDEQ_UTF8_NOMIX_ASCII) && ! isASCII(*p2)) {
-			return 0;
-		    }
-		    n1 = 1;
-		    *foldbuf1 = toFOLD(*p1);
-		}
-		else if (u1) {
-		    to_utf8_fold(p1, foldbuf1, &n1);
-		}
-		else {  /* Not utf8, get utf8 fold */
-		    to_uni_fold(*p1, foldbuf1, &n1);
-		}
-		f1 = foldbuf1;
-	    }
+                    /* We have to forbid mixing ASCII with non-ASCII if the
+                     * flags so indicate.  And, we can short circuit having to
+                     * call the general functions for this common ASCII case,
+                     * all of whose non-locale folds are also ASCII, and hence
+                     * UTF-8 invariants, so the UTF8ness of the strings is not
+                     * relevant. */
+                    if ((flags & FOLDEQ_UTF8_NOMIX_ASCII) && ! isASCII(*p2)) {
+                        return 0;
+                    }
+                    n1 = 1;
+                    *foldbuf1 = toFOLD(*p1);
+                }
+                else if (u1) {
+                    _to_utf8_fold_flags(p1, foldbuf1, &n1, flags_for_folder);
+                }
+                else {  /* Not utf8, get utf8 fold */
+                    _to_uni_fold_flags(*p1, foldbuf1, &n1, flags_for_folder);
+                }
+                f1 = foldbuf1;
+            }
         }
 
         if (n2 == 0) {    /* Same for s2 */
@@ -4084,42 +4071,20 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 		n2 = UTF8SKIP(f2);
 	    }
 	    else {
-		if ((flags & FOLDEQ_LOCALE)
-		    && (! u2 || ! UTF8_IS_ABOVE_LATIN1(*p2)))
-		{
-		    /* Here, the next char in s2 is < 256.  We've already
-		     * worked on s1, and if it isn't also < 256, can't match */
-		    if (u1 && UTF8_IS_ABOVE_LATIN1(*p1)) {
-			return 0;
-		    }
-		    if (! u2 || UTF8_IS_INVARIANT(*p2)) {
-			*foldbuf2 = *p2;
-		    }
-		    else {
-			*foldbuf2 = TWO_BYTE_UTF8_TO_NATIVE(*p2, *(p2 + 1));
-		    }
-
-		    /* Use another function to handle locale rules.  We've made
-		     * sure that both characters to compare are single bytes */
-		    if (! foldEQ_locale((char *) f1, (char *) foldbuf2, 1)) {
-			return 0;
-		    }
-		    n1 = n2 = 0;
-		}
-		else if (isASCII(*p2)) {
-		    if ((flags & FOLDEQ_UTF8_NOMIX_ASCII) && ! isASCII(*p1)) {
-			return 0;
-		    }
-		    n2 = 1;
-		    *foldbuf2 = toFOLD(*p2);
-		}
-		else if (u2) {
-		    to_utf8_fold(p2, foldbuf2, &n2);
-		}
-		else {
-		    to_uni_fold(*p2, foldbuf2, &n2);
-		}
-		f2 = foldbuf2;
+                if (isASCII(*p2) && ! (flags & FOLDEQ_LOCALE)) {
+                    if ((flags & FOLDEQ_UTF8_NOMIX_ASCII) && ! isASCII(*p1)) {
+                        return 0;
+                    }
+                    n2 = 1;
+                    *foldbuf2 = toFOLD(*p2);
+                }
+                else if (u2) {
+                    _to_utf8_fold_flags(p2, foldbuf2, &n2, flags_for_folder);
+                }
+                else {
+                    _to_uni_fold_flags(*p2, foldbuf2, &n2, flags_for_folder);
+                }
+                f2 = foldbuf2;
 	    }
         }
 
