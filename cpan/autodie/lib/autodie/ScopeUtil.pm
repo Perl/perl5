@@ -12,7 +12,7 @@ use autodie::Scope::GuardStack;
 our @EXPORT_OK = qw(on_end_of_compile_scope);
 
 # ABSTRACT: Utilities for managing %^H scopes
-our $VERSION = '2.25'; # VERSION
+our $VERSION = '2.26'; # VERSION
 
 # docs says we should pick __PACKAGE__ /<whatever>
 my $H_STACK_KEY = __PACKAGE__ . '/stack';

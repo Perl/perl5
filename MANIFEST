@@ -82,6 +82,7 @@ cpan/autodie/t/hints_provider_does.t	autodie - Test hints/does roles
 cpan/autodie/t/hints_provider_easy_does_it.t	autodie - Test easy hints/does
 cpan/autodie/t/hints_provider_isa.t	autodie - Test hints/inheritance
 cpan/autodie/t/hints.t			autodie - Test hints interface
+cpan/autodie/t/import-into.t
 cpan/autodie/t/internal-backcompat.t	autodie - Back-compatibility tests
 cpan/autodie/t/internal.t		autodie - internal interface tests
 cpan/autodie/t/kill.t
@@ -98,6 +99,7 @@ cpan/autodie/t/lib/Hints_provider_isa.pm	autodie - Hints/inherit helper
 cpan/autodie/t/lib/Hints_test.pm	autodie - Hints test helper
 cpan/autodie/t/lib/lethal.pm		autodie - with a better name
 cpan/autodie/t/lib/my/autodie.pm	autodie - blog_hints.t helper
+cpan/autodie/t/lib/my/pragma.pm
 cpan/autodie/t/lib/OtherTypes.pm	autodie - Format clobberer helper.
 cpan/autodie/t/lib/pujHa/ghach/Dotlh.pm	autodie - With Klingon honour
 cpan/autodie/t/lib/pujHa/ghach.pm	autodie - Like a Klingon
@@ -105,6 +107,7 @@ cpan/autodie/t/lib/Some/Module.pm	autodie - blog_hints.t helper
 cpan/autodie/t/mkdir.t			autodie - filesystem tests
 cpan/autodie/t/no_carp.t
 cpan/autodie/t/open.t			autodie - Testing open
+cpan/autodie/t/read.t
 cpan/autodie/t/recv.t			autodie - send/recv tests
 cpan/autodie/t/repeat.t			autodie - repeat autodie leak tests
 cpan/autodie/t/rt-74246.t

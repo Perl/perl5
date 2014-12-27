@@ -2,7 +2,7 @@ package autodie::skip;
 use strict;
 use warnings;
 
-our $VERSION = '2.25'; # VERSION
+our $VERSION = '2.26'; # VERSION
 
 # This package exists purely so people can inherit from it,
 # which isn't at all how roles are supposed to work, but it's

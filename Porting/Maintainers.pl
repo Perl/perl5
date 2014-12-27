@@ -133,7 +133,7 @@ use File::Glob qw(:case);
     },
 
     'autodie' => {
-        'DISTRIBUTION' => 'PJF/autodie-2.25.tar.gz',
+        'DISTRIBUTION' => 'NTHYKIER/autodie-2.26.tar.gz',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{benchmarks},
@@ -155,12 +155,6 @@ use File::Glob qw(:case);
                 t/socket.t
                 t/system.t
                 )
-        ],
-        'CUSTOMIZED'   => [
-            # Waiting to be merged upstream: see CPAN RT#87237
-            qw(	t/utf8_open.t ),
-            # Waiting to be merged upstream: see CPAN RT#96609
-            qw(	t/truncate.t ),
         ],
     },
 

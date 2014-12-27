@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
 use strict;
 
+use Scalar::Util qw(blessed);
+
 use constant NO_SUCH_FILE => "this_file_or_dir_had_better_not_exist_XYZZY";
 
-use Test::More tests => 6;
+use Test::More tests => 9;
 
 # Lexical tests using the internal interface.
 
@@ -17,13 +19,28 @@ like($@, qr{:lexical must be used as first}, ":lexical must come first");
 	use Fatal qw(:lexical chdir);
 
 	eval { chdir(NO_SUCH_FILE); };
-	like ($@, qr/^Can't chdir/, "Lexical fatal chdir");
+	my $err = $@;
+	like ($err, qr/^Can't chdir/, "Lexical fatal chdir");
+      TODO: {
+          local $TODO = 'Fatal should not (but does) throw autodie::exceptions';
+          is(blessed($err), undef,
+             "Fatal does not throw autodie::exceptions");
+        }
 
-	no Fatal qw(:lexical chdir);
+	{
+		no Fatal qw(:lexical chdir);
+		eval { chdir(NO_SUCH_FILE); };
+		is ($@, "", "No lexical fatal chdir");
+        }
 
 	eval { chdir(NO_SUCH_FILE); };
-	is ($@, "", "No lexical fatal chdir");
-
+	$err = $@;
+	like ($err, qr/^Can't chdir/, "Lexical fatal chdir returns");
+      TODO: {
+          local $TODO = 'Fatal should not (but does) throw autodie::exceptions';
+          is(blessed($err), undef,
+             "Fatal does not throw autodie::exceptions");
+        }
 }
 
 eval { chdir(NO_SUCH_FILE); };
