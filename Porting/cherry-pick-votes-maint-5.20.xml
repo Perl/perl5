@@ -23,6 +23,10 @@ The fix which this test and perldelta relate to have already been picked:
 The fix which this perldelta relates to has already been picked:
 <commit votes="steveh, arc" id="857f4fb1c22a29afdfe39e929702476b8a82d7c5" ticket="123029" desc="perldelta for #123029"/>
 
+<commit votes="steveh" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
+
+<commit votes="steveh" id="" ticket="" desc="CPAN RT#101095 Module::Metadata does not extract correct version if use_our is enabled"/>
+
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
