@@ -4,15 +4,13 @@
 
 <div><h2>Tickets Listed in #122913: [META] perl 5.20.2</h2>
 
-<commit votes="sprout, steveh, arc" id="4c627877a44535772b40aca390861295b62b1f6d" ticket="122771" desc="[perl #122771] Fix assertion failure with -d and sort"/>
+The fix which this perldelta relates to has already been picked:
 <commit votes="steveh, arc" id="c1662923fd698c3467e36017e0b303046f173e13" ticket="122771" desc="perldelta for 4c62787/#122771"/>
 
-<commit votes="sprout, steveh, arc" id="0d42e778cfa0ef9c7315b82e62a6c9fe0cb1cec5" ticket="122995" desc="[perl #122995] Hang with while(1) in a sub-list"/>
-
-<commit votes="khw, sprout, steveh" id="512e01ab009bc6309309e05891effe8ae3c0e9da" ticket="123198" desc="PATCH: [perl #123198] Memory leak in regex in 5.20.1"/>
+The fix which this test relates to has already been partially picked. The rest of it (512e01a) will need picking with this:
 <commit votes="steveh, arc" id="43275f00a97a14a80f9493c38895a5c77f0fc88a" ticket="123198" desc="svleak.t: Add test for #123198"/>
 
-<commit votes="sprout, steveh, arc" id="2c1f00b9036a7987c714a407662651ef7da99495" ticket="122747" desc="perl #122747: localize PL_curpm to null in _core_swash_init"/>
+The fix which this test and perldelta relate to have already been picked:
 <commit votes="steveh, arc" id="409c6472cedc6771a158a61dbbf8154d0246dc5b" ticket="122747" desc="add test for rt122747"/>
 <commit votes="steveh, arc" id="13dd5671ecb824f71dfe100fbf3b7d5ee9170636" ticket="122747" desc="perldelta for 2c1f00b/#122747"/>
 
@@ -22,15 +20,7 @@
 <commit votes="sprout" id="3bc8ec963e9657121e69386195faa61e46928dda" ticket="123344" desc="Fix qr/@array(?{block})/"/>
 <commit votes="sprout" id="d100ca43dce2c9a6bb636517e5595aa9e1e01e7e" ticket="123344" desc="Fix assertion failure with qr/\Q(?{})/"/>
 
-<head votes="arc, sprout, steveh" branch="sprout/maint-5.20-123029" ticket="123029" desc="5.20.x regression in state under PERL_NO_COW"/>
-This contains cherry-picks of
-	c4a33ecd3009146ea545628e3014a22c637b6bb1 [perl #123029]: add regression test
-	029988317d165cb2c0c7f73581bb70d358c56458 state.t: Improve test for #123029
-	9f53080ae514a42899f88743c9a5113d4677e9f6 sv.c: Always #define COW threshold constants
-plus the maint-only change
-	d385684951d4e1197c32ad0f4371c5255766a34d [perl #123029] Don't steal PADSTALE buffers
-which stands in place of cherry-picking the blead fix, c0683843e9299db25f354e2c8c90faa7614950d1.
-We should also cherry-pick:
+The fix which this perldelta relates to has already been picked:
 <commit votes="steveh, arc" id="857f4fb1c22a29afdfe39e929702476b8a82d7c5" ticket="123029" desc="perldelta for #123029"/>
 
 </div>
@@ -54,21 +44,12 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="sprout, steveh, arc" id="18691622911f2e18df42a5a98ea4c42386f4e558" ticket="" desc="Fix crash when lex subs are used for AUTOLOAD"/>
-<commit votes="sprout, steveh, arc" id="56117e3ef4ef2c7986c400f86f321f22f261571a" ticket="" desc="Fix crash when lex subs are used for overload"/>
-
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
-
-<commit votes="sprout, steveh, arc" id="9d8e4b9b32800eb499d83442ce8bbe6639773936" ticket="" desc="Fix crash with lex subs under -d"/>
-<commit votes="sprout, steveh, arc" id="1699f5c257bc554753cc4ddf10c62ac8a5c338ff" ticket="" desc="perldelta for f20d0df0f"/>
 
 </div>
 
 <div><h3>Security Fixes</h3>
-
-<commit votes="sprout, steveh, arc" id="dd369969a58d736f281ffebe36fc24ab45b29fa6" ticket="122701" desc="Correct usage of memEQs in attributes.xs [perl #122701]"/>
-NOT ff5314c5aa54b172122507017cac034acf1c4bf7" (fix attributes memcmp without len less than 6 (asan catch)), which Andy Dougherty says on #122629 should be reverted in blead.
 
 <commit votes="steveh, arc" id="19be3be6968e2337bcdfe480693fff795ecd1304" ticket="" desc="don't recurse infinitely in Data::Dumper"/>
 <commit votes="steveh, arc" id="fa10264e34d420edf76a46139faa3277c0b96a2b" ticket="" desc="Data::Dumper version bump for CPAN release"/>
@@ -100,10 +81,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="arc" id="f6f22b1fc01b8676e43ef64616ed7899a84bfec2" ticket="122890" desc="t/re/re_tests: Add test for perl #122890"/>
 <commit votes="arc" id="efcc8bfdc124f50d33aab3f1d7722b5f9e4de349" ticket="122890" desc="re_tests: More tests for #122890"/>
 
-Fixes a regression from 5.8.8:
-<commit votes="sprout, steveh, arc" id="64ff300be0f7714585466af5bb87b2e37db5082a" ticket="122669" desc="[perl #122669] Don't taint at compile time"/>
-<commit votes="sprout, steveh, arc" id="eaff586aa6444fb20654ed863b7ff35e136737e8" ticket="122669" desc="Fix t/op/taint.t on Windows"/>
-
 </div>
 
 <div><h3>Configure and hints/ Fixes</h3>
@@ -114,24 +91,6 @@ Would these break binary compatibility?
 <commit votes="tux, arc" id="54db7d57c29c9259228a6a4176caa32e391c6d0b" ticket="" desc="Upstream a patch from pkgsrc for NetBSD hints"/>
 <commit votes="arc" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
 <commit votes="tux, arc" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
-
-<head votes="steveh, tux, arc" branch="smoke-me/jhi/maint-5.20-necromantic" ticket="" desc="IRIX and Tru64 fixes"/>
-This contains cherry-picks of
-	0b6ebfadd8d2cfccc07203e94d583721305fd779 IRIX 6.5 (cc 7.4) needs -c99 to compile without whining.
-	1764d98bf44052060e2fe7cfa940d4ffc19f5961 Irix: MIPSpro 7.4 compiler has broken memcmp.
-	5b96080c2232c4c22364c08f21c03d491dba7474 Irix: the explicit fcntl.h is needed
-	0befe6f120ed237c1658f27caa9950f1e21ef40b Tru64: _SOCKADDR_LEN is good.
-	ec015202b887bc1ede4b6538364b88eb80c4956d Tru64: does have sa_len.
-	f62f716d325db54bb85abeeb80fa2b4466ff860b Tru64: the socket API defines must come early.
-	fa2edc1a38517bf179bb9eefa2039264279c29db Tru64: Skip tests that for some reason grind Tru64 to a halt.
-	1d850a6a2204e3393ca4fda2edf9f4b515e06368 IRIX: fsync documented to fail on read-only filehandles.
-	0efa6de71269185adc8155368e49d31c82e1e21c IRIX: OS mixup in 1d850a6a.
-	4a3798ca1499c2c3d033682ee16e8f203e0a88cb Trailing comma in enum is not C89.
-	c7b2fb96dcace6e3cbac79dfe4c82984e1f7fd3d Tru64: the cluster filesystem is special.
-and manual backports of:
-	572618de69892b6cdf7f9eacce39941a7d3d7ce5 Document not to use test.pl here.
-	c32c3de1f087531defe6795e7997f2f5d532ba7d Move the VC6 "broken-nan" define from win32.h to perl.h.
-	bcd8bfa93f638d0b45800be6431b3bd9b54e1af6 Tru64: NaN comparison quite broken.
 
 </div>
 
@@ -158,7 +117,6 @@ and manual backports of:
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="rjbs, sprout, steveh, arc" id="f86d720ebb7ad53ce8b1c12cee66586eabffe0c8" ticket="" desc="document the postderef feature in feature.pm"/>
 <commit votes="steveh, arc" id="422791e4eb03a12d17c98eb1787351280ae59789" ticket="" desc="Make eval_pv documentation more precise"/>
 <commit votes="steveh, arc" id="d4a03217c39773dcacf83845e1f96a61136eb870" ticket="" desc="perlfunc: Improve the pointer from elseif to elsif"/>
 <commit votes="steveh, arc" id="eebea631754f8059d1a963e93b061efa2190e5e5" ticket="" desc="perldiag: Add clarification."/>
@@ -199,7 +157,6 @@ and manual backports of:
 <commit votes="steveh, arc" id="282f36d45b3fd6109df025ed2228f0019b49c2e5" ticket="" desc="RMG - Remove out-of-date instruction about epigraph link"/>
 <commit votes="steveh, arc" id="5e2d14fc932c50279eb04ac71b3d87d785d61420" ticket="" desc="RMG - RCs are now listed in perlhist"/>
 <commit votes="steveh, arc" id="3617dbb697e46ddf316b2067f2ded656ad6a89f9" ticket="" desc="Consistent spaces after dots in perldiag"/>
-<commit votes="sprout, steveh, arc" id="afdb3b14b41a9073ddecc2080ea6b46a16f31fc3" ticket="" desc="perlexperiment: add signatures to experimental features"/>
 <commit votes="steveh, arc" id="2a2f23e4f8a50bdcdd10563dc5d933684cb70954" ticket="122853" desc="Remarks specialness of [A-Z] and [a-z]."/>
 <commit votes="steveh, arc" id="8bbce0b10dd8ea0fad79a905746218306cf4fe17" ticket="" desc="import latest epigraphs from maint-5.18"/>
 <commit votes="steveh, arc" id="086feb3e31adb54d781926d7d8df06c266c39fae" ticket="" desc="perlhist: bring in 5.18.3 and 5.18.4 release dates"/>
