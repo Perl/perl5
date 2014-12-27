@@ -4806,7 +4806,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	    min++;
 	    if (flags & SCF_DO_STCLASS) {
                 bool invert = 0;
-                SV* my_invlist = sv_2mortal(_new_invlist(0));
+                SV* my_invlist = NULL;
                 U8 namedclass;
 
                 /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
@@ -4905,7 +4905,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     /* FALL THROUGH */
 		case POSIXA:
                     if (FLAGS(scan) == _CC_ASCII) {
-                        my_invlist = PL_XPosix_ptrs[_CC_ASCII];
+                        my_invlist = invlist_clone(PL_XPosix_ptrs[_CC_ASCII]);
                     }
                     else {
                         _invlist_intersection(PL_XPosix_ptrs[FLAGS(scan)],
@@ -4942,6 +4942,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                         assert(flags & SCF_DO_STCLASS_OR);
                         ssc_union(data->start_class, my_invlist, invert);
                     }
+                    SvREFCNT_dec(my_invlist);
 		}
 		if (flags & SCF_DO_STCLASS_OR)
 		    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
