@@ -106,7 +106,6 @@ Would these break binary compatibility?
 <commit votes="steveh, arc" id="2d4a3ccef465111dae0e5e71cf008e97efeb057c" ticket="" desc="Errno parsing: Don't match hex numbers in parts of function names"/>
 <commit votes="steveh, arc" id="cc192ed19bd1c52dd1711a900ce276043ce418ae" ticket="" desc="Errno parsing: Skip expressions containing function names etc"/>
 <commit votes="steveh, arc" id="5884c88b2d4d412c81919fffcc0c487b49521793" ticket="" desc="Bump $Errno::VERSION for previous commits"/>
-<commit votes="steveh, tux, arc" id="b7ddc5bada637a1961bd44a02428c42f98955212" ticket="" desc="A little help for clang++ in toke.c"/>
 <commit votes="steveh, arc" id="cd1dc8e2c73be346de250a16f103fb9a97814dd3" ticket="122861" desc="sv.c: Suppress compiler warning"/>
 <commit votes="steveh, arc" id="1e02895ff34c407637067df12a1b06eb07a5a96a" ticket="" desc="t/io/eintr.t: Make this pass on my ppc64 box"/>
 <commit votes="steveh, arc" id="c7925a5e8559739ce765137cf6164c5872c63a96" ticket="" desc="fix WinCE build"/>
