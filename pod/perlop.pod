@@ -18,7 +18,7 @@ two numbers for equality, and C<$x eq $y> compares two strings.
 
 There are a few exceptions though: C<x> can be either string
 repetition or list repetition, depending on the type of the left
-operand, and C<&>, C<|> and C<^> can be either string or numeric bit
+operand, and C<&>, C<|>, C<^> and C<~> can be either string or numeric bit
 operations.
 
 =head2 Operator Precedence and Associativity
