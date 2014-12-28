@@ -1169,6 +1169,11 @@ use File::Glob qw(:case);
     'threads' => {
         'DISTRIBUTION' => 'JDHEDDEN/threads-1.96.tar.gz',
         'FILES'        => q[dist/threads],
+        'CUSTOMIZED'   => [
+            # Waiting to be merged upstream: see CPAN RT#100755
+            qw( threads.xs
+                lib/threads.pm),
+        ],
         'EXCLUDED'     => [
             qr{^examples/},
             qw( t/pod.t
