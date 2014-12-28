@@ -469,7 +469,7 @@ PP(pp_rv2cv)
     else
 	cv = MUTABLE_CV(&PL_sv_undef);
     SETs(MUTABLE_SV(cv));
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_prototype)
