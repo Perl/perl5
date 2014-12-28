@@ -10,6 +10,10 @@ use strict qw(refs subs);
 
 plan(235);
 
+# Test this first before we extend the stack with other operations.
+# This caused an asan failure due to a bad write past the end of the stack.
+eval { die  1..127, $_=\() };
+
 # Test glob operations.
 
 $bar = "one";

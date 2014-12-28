@@ -530,7 +530,10 @@ PP(pp_refgen)
 	if (++MARK <= SP)
 	    *MARK = *SP;
 	else
+	{
+	    MEXTEND(SP, 1);
 	    *MARK = &PL_sv_undef;
+	}
 	*MARK = refto(*MARK);
 	SP = MARK;
 	RETURN;
