@@ -4649,7 +4649,6 @@ PP(pp_gmtime)
 
     if (GIMME_V != G_ARRAY) {	/* scalar context */
         EXTEND(SP, 1);
-        EXTEND_MORTAL(1);
 	if (err == NULL)
 	    RETPUSHUNDEF;
        else {
