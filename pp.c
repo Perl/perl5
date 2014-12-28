@@ -2744,10 +2744,12 @@ PP(pp_rand)
     {
 	dSP;
 	NV value;
-	EXTEND(SP, 1);
     
 	if (MAXARG < 1)
+	{
+	    EXTEND(SP, 1);
 	    value = 1.0;
+	}
 	else {
 	    SV * const sv = POPs;
 	    if(!sv)
