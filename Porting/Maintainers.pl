@@ -17,9 +17,9 @@ use File::Glob qw(:case);
 
 @IGNORABLE = qw(
     .cvsignore .dualLivedDiffConfig .gitignore .perlcriticrc .perltidyrc
-    ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
+    .travis.yml ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
     CHANGELOG ChangeLog Changelog CHANGES Changes CONTRIBUTING CONTRIBUTING.mkdn
-    COPYING Copying cpanfile CREDITS dist.ini GOALS HISTORY INSTALL INSTALL.skip
+    COPYING Copying cpanfile CREDITS dist.ini GOALS HISTORY INSTALL INSTALL.SKIP
     LICENSE Makefile.PL MANIFEST MANIFEST.SKIP META.json META.yml MYMETA.json
     MYMETA.yml NEW NEWS NOTES perlcritic.rc ppport.h README README.PATCHING
     SIGNATURE THANKS TODO Todo VERSION WHATSNEW
@@ -433,7 +433,7 @@ use File::Glob qw(:case);
     'ExtUtils::Command' => {
         'DISTRIBUTION' => 'BINGOS/ExtUtils-Command-1.19.tar.gz',
         'FILES'        => q[cpan/ExtUtils-Command],
-        'EXCLUDED'     => [qr{^t/release-}],
+        'EXCLUDED'     => [qr{^xt/}],
     },
 
     'ExtUtils::Constant' => {
@@ -484,7 +484,10 @@ use File::Glob qw(:case);
     'ExtUtils::Manifest' => {
         'DISTRIBUTION' => 'ETHER/ExtUtils-Manifest-1.69.tar.gz',
         'FILES'        => q[cpan/ExtUtils-Manifest],
-        'EXCLUDED'     => [qr(^xt/)],
+        'EXCLUDED'     => [
+            qr(^t/00-report-prereqs),
+            qr(^xt/)
+        ],
     },
 
     'ExtUtils::ParseXS' => {
@@ -822,7 +825,6 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'SMPETERS/Net-Ping-2.41.tar.gz',
         'FILES'        => q[dist/Net-Ping],
         'EXCLUDED'     => [
-            qr{^.travis.yml},
             qr{^README.md},
         ],
     },
@@ -868,10 +870,9 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'ETHER/perlfaq-5.0150046.tar.gz',
         'FILES'        => q[cpan/perlfaq],
         'EXCLUDED'     => [
-            qw( t/release-pod-syntax.t
-                t/release-eol.t
-                t/release-no-tabs.t
-                )
+            qw( inc/CreateQuestionList.pm
+                t/00-compile.t),
+            qr{^xt/},
         ],
     },
 
