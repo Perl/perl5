@@ -520,7 +520,7 @@ PP(pp_srefgen)
 {
     dSP;
     *SP = refto(*SP);
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_refgen)
