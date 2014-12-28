@@ -79,10 +79,11 @@ while (<SH>)
 close(H);
 close(SH);
 
-
-chmod(0666,"$opt{CORE_DIR}/$opt{CONFIG_H}");
-copy("$file.new","$opt{CORE_DIR}/$opt{CONFIG_H}") || die "Cannot copy:$!";
-chmod(0444,"$opt{CORE_DIR}/$opt{CONFIG_H}");
+if (compare("$file.new","$opt{CORE_DIR}/$opt{CONFIG_H}")) {
+    chmod(0666,"$opt{CORE_DIR}/$opt{CONFIG_H}");
+    copy("$file.new","$opt{CORE_DIR}/$opt{CONFIG_H}") || die "Cannot copy:$!";
+    chmod(0444,"$opt{CORE_DIR}/$opt{CONFIG_H}");
+}
 
 if (compare("$file.new",$file))
  {
