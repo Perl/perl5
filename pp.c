@@ -372,15 +372,8 @@ PP(pp_rv2sv)
 	}
 
 	sv = SvRV(sv);
-	switch (SvTYPE(sv)) {
-	case SVt_PVAV:
-	case SVt_PVHV:
-	case SVt_PVCV:
-	case SVt_PVFM:
-	case SVt_PVIO:
+	if (SvTYPE(sv) >= SVt_PVAV)
 	    DIE(aTHX_ "Not a SCALAR reference");
-	default: NOOP;
-	}
     }
     else {
 	gv = MUTABLE_GV(sv);
