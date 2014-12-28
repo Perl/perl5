@@ -299,9 +299,6 @@ PP(pp_concat)
     }
 
     if (!rcopied) {
-	if (left == right)
-	    /* $r.$r: do magic twice: tied might return different 2nd time */
-	    SvGETMAGIC(right);
 	rpv = SvPV_nomg_const(right, rlen);
 	rbyte = !DO_UTF8(right);
     }
