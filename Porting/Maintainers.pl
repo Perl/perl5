@@ -477,8 +477,6 @@ use File::Glob qw(:case);
             'PATCHING',
             'README.packaging',
         ],
-        'CUSTOMIZED'   => [
-        ],
     },
 
     'ExtUtils::Manifest' => {
