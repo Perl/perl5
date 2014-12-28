@@ -2542,13 +2542,6 @@ S_finalize_op(pTHX_ OP* o)
               || type == OP_CUSTOM
               || type == OP_NULL /* new_logop does this */
               );
-        /* XXX list form of 'x' is has a null op_last. This is wrong,
-         * but requires too much hacking (e.g. in Deparse) to fix for
-         * now */
-        if (type == OP_REPEAT && (o->op_private & OPpREPEAT_DOLIST)) {
-            assert(has_last);
-            has_last = 0;
-        }
 
         for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid)) {
 #  ifdef PERL_OP_PARENT
