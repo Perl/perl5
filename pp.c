@@ -421,15 +421,14 @@ PP(pp_av2arylen)
 
 PP(pp_pos)
 {
-    dSP; dPOPss;
+    dSP; dTOPss;
 
     if (PL_op->op_flags & OPf_MOD || LVRET) {
 	SV * const ret = sv_2mortal(newSV_type(SVt_PVLV));/* Not TARG RT#67838 */
 	sv_magic(ret, NULL, PERL_MAGIC_pos, NULL, 0);
 	LvTYPE(ret) = '.';
 	LvTARG(ret) = SvREFCNT_inc_simple(sv);
-	PUSHs(ret);    /* no SvSETMAGIC */
-	RETURN;
+	SETs(ret);    /* no SvSETMAGIC */
     }
     else {
 	    const MAGIC * const mg = mg_find_mglob(sv);
@@ -438,11 +437,12 @@ PP(pp_pos)
 		STRLEN i = mg->mg_len;
 		if (mg->mg_flags & MGf_BYTES && DO_UTF8(sv))
 		    i = sv_pos_b2u_flags(sv, i, SV_GMAGIC|SV_CONST_RETURN);
-		PUSHu(i);
-		RETURN;
+		SETu(i);
+		return NORMAL;
 	    }
-	    RETPUSHUNDEF;
+	    SETs(&PL_sv_undef);
     }
+    return NORMAL;
 }
 
 PP(pp_rv2cv)
