@@ -117,3 +117,29 @@ $_ = 'a' x (2**15+1);
 #
 EXPECT
 
+########
+# NAME Wide character in non-UTF-8 locale
+eval { require POSIX; POSIX->import("locale_h") };
+if ($@) {
+    print("SKIPPED\n# no POSIX\n"),exit;
+}
+use warnings 'locale';
+use locale;
+setlocale(&POSIX::LC_CTYPE, "C");
+"\x{100}" =~ /\x{100}|\x{101}/il;
+"\x{100}" =~ /\x{100}|\x{101}/l;
+"\x{100}" =~ /\w/l;
+"\x{100}" =~ /\x{100}+/l;
+"\x{100}" =~ /[\x{100}\x{102}]/l;
+no warnings 'locale';
+EXPECT
+Wide character (U+100) in pattern match (m//) at - line 8.
+Wide character (U+100) in pattern match (m//) at - line 8.
+Wide character (U+100) in pattern match (m//) at - line 9.
+Wide character (U+100) in pattern match (m//) at - line 9.
+Wide character (U+100) in pattern match (m//) at - line 9.
+Wide character (U+100) in pattern match (m//) at - line 10.
+Wide character (U+100) in pattern match (m//) at - line 10.
+Wide character (U+100) in pattern match (m//) at - line 11.
+Wide character (U+100) in pattern match (m//) at - line 12.
+Wide character (U+100) in pattern match (m//) at - line 12.

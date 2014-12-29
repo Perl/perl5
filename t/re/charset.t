@@ -9,6 +9,8 @@ BEGIN {
 
 use strict;
 use warnings;
+no warnings 'locale';   # Some /l tests use above-latin1 chars to make sure
+                        # they work, even though they warn.
 use Config;
 
 plan('no_plan');

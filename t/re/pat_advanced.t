@@ -866,6 +866,7 @@ sub run_tests {
         ok "\x{100}X" =~ /$re/, "S_cl_and ANYOF_UNICODE & ANYOF_INVERTED";
         my $loc_re = qq /(?l:^([^X]*)X)/;
         utf8::upgrade ($loc_re);
+        no warnings 'locale';
         ok "\x{100}X" =~ /$loc_re/, "locale, S_cl_and ANYOF_UNICODE & ANYOF_INVERTED";
     }
 

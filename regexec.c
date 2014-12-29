@@ -512,6 +512,8 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
                         TWO_BYTE_UTF8_TO_NATIVE(*character, *(character + 1)));
     }
 
+    _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(character, character + UTF8SKIP(character));
+
     if (classnum < _FIRST_NON_SWASH_CC) {
 
         /* Initialize the swash unless done already */
@@ -1457,6 +1459,9 @@ STMT_START {                                                                    
     switch (trie_type) {                                                            \
     case trie_flu8:                                                                 \
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                         \
+        if (utf8_target && UTF8_IS_ABOVE_LATIN1(*uc)) {                             \
+            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc + UTF8SKIP(uc));          \
+        }                                                                           \
         goto do_trie_utf8_fold;                                                     \
     case trie_utf8_exactfa_fold:                                                    \
         flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
@@ -1495,6 +1500,9 @@ STMT_START {                                                                    
         break;                                                                      \
     case trie_utf8l:                                                                \
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                         \
+        if (utf8_target && UTF8_IS_ABOVE_LATIN1(*uc)) {                             \
+            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc + UTF8SKIP(uc));          \
+        }                                                                           \
         /* FALLTHROUGH */                                                           \
     case trie_utf8:                                                                 \
         uvc = utf8n_to_uvchr( (const U8*) uc, UTF8_MAXLEN, &len, uniflags );        \
@@ -1819,7 +1827,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                        UTF-8 to express.  */
                 break;
             }
-            utf8_fold_flags = FOLDEQ_S2_ALREADY_FOLDED;
+            utf8_fold_flags =  FOLDEQ_LOCALE | FOLDEQ_S2_ALREADY_FOLDED
+                                             | FOLDEQ_S2_FOLDS_SANE;
             goto do_exactf_utf8;
 
     case EXACTFU:
@@ -4185,6 +4194,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                 if (scan->flags == EXACTL || scan->flags == EXACTFLU8) {
                     _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+                    if (utf8_target
+                        && UTF8_IS_ABOVE_LATIN1(nextchr)
+                        && scan->flags == EXACTL)
+                    {
+                        /* We only output for EXACTL, as we let the folder
+                         * output this message for EXACTFLU8 to avoid
+                         * duplication */
+                        _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(locinput,
+                                                               reginfo->strend);
+                    }
                 }
                 if (   trie->bitmap
                     && (NEXTCHR_IS_EOS || !TRIE_BITMAP_TEST(trie, nextchr)))
@@ -4461,6 +4480,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case EXACTL:             /*  /abc/l       */
             _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+
+            /* Complete checking would involve going through every character
+             * matched by the string to see if any is above latin1.  But the
+             * comparision otherwise might very well be a fast assembly
+             * language routine, and I (khw) don't think slowing things down
+             * just to check for this warning is worth it.  So this just checks
+             * the first character */
+            if (utf8_target && UTF8_IS_ABOVE_LATIN1(*locinput)) {
+                _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(locinput, reginfo->strend);
+            }
             /* FALLTHROUGH */
 	case EXACT: {            /*  /abc/        */
 	    char *s = STRING(scan);
@@ -4560,7 +4589,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (! utf8_target) {
                 sayNO;
             }
-	    fold_utf8_flags = FOLDEQ_S1_ALREADY_FOLDED;
+            fold_utf8_flags =  FOLDEQ_LOCALE | FOLDEQ_S1_ALREADY_FOLDED
+                                             | FOLDEQ_S1_FOLDS_SANE;
 	    goto do_exactf;
 
 	case EXACTFU_SS:         /*  /\x{df}/iu   */
@@ -4758,6 +4788,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
             }
             else { /* Here, must be an above Latin-1 code point */
+                _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(locinput, reginfo->strend);
                 goto utf8_posix_above_latin1;
             }
 
@@ -7231,6 +7262,9 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	break;
     case EXACTL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        if (utf8_target && UTF8_IS_ABOVE_LATIN1(*scan)) {
+            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(scan, loceol);
+        }
         /* FALLTHROUGH */
     case EXACT:
         assert(STR_LEN(p) == reginfo->is_utf8_pat ? UTF8SKIP(STRING(p)) : 1);
@@ -7318,7 +7352,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         if (! utf8_target) {
             break;
         }
-	utf8_flags = FOLDEQ_S2_ALREADY_FOLDED;
+        utf8_flags =  FOLDEQ_LOCALE | FOLDEQ_S2_ALREADY_FOLDED
+                                    | FOLDEQ_S2_FOLDS_SANE;
         goto do_exactf;
 
     case EXACTFU_SS:
@@ -7733,6 +7768,9 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 		 * UTF8_ALLOW_FFFF */
 	if (c_len == (STRLEN)-1)
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
+        if (c > 255 && OP(n) == ANYOFL && ! is_ANYOF_SYNTHETIC(n)) {
+            _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c);
+        }
     }
 
     /* If this character is potentially in the bitmap, check it */

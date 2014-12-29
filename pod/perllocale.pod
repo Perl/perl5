@@ -1519,6 +1519,11 @@ Still another problem is that this approach can lead to two code
 points meaning the same character.  Thus in a Greek locale, both U+03A7
 and U+00D7 are GREEK CAPITAL LETTER CHI.
 
+Because of all these problems, starting in v5.22, Perl will raise a
+warning if a multi-byte (hence Unicode) code point is used when a
+single-byte locale is in effect.  (Although it doesn't check for this if
+doing so would unreasonably slow execution down.)
+
 Vendor locales are notoriously buggy, and it is difficult for Perl to test
 its locale-handling code because this interacts with code that Perl has no
 control over; therefore the locale-handling code in Perl may be buggy as

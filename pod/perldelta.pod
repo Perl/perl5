@@ -209,6 +209,10 @@ XXX L<message|perldiag/"message">
 
 XXX L<message|perldiag/"message">
 
+=item *
+
+L<Wide character (U+%X) in %s|perldiag/"Wide character (U+%X) in %s">
+
 =back
 
 =head2 Changes to Existing Diagnostics

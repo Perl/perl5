@@ -6964,6 +6964,20 @@ warning is to add C<no warnings 'utf8';> but that is often closer to
 cheating.  In general, you are supposed to explicitly mark the
 filehandle with an encoding, see L<open> and L<perlfunc/binmode>.
 
+=item Wide character (U+%X) in %s
+
+(W locale) While in a single-byte locale (I<i.e.>, a non-UTF-8
+one), a multi-byte character was encountered.   Perl considers this
+character to be the specified Unicode code point.  Combining non-UTF8
+locales and Unicode is dangerous.  Almost certainly some characters
+will have two different representations.  For example, in the ISO 8859-7
+(Greek) locale, the code point 0xC3 represents a Capital Gamma.  But so
+also does 0x393.  This will make string comparisons unreliable.
+
+You likely need to figure out how this multi-byte character got mixed up
+with your single-byte locale (or perhaps you thought you had a UTF-8
+locale, but Perl disagrees).
+
 =item Within []-length '%c' not allowed
 
 (F) The count in the (un)pack template may be replaced by C<[TEMPLATE]>

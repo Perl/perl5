@@ -5798,6 +5798,27 @@ typedef struct am_table_short AMTS;
         }  STMT_END
 
 
+    /* These two internal macros are called when a warning should be raised,
+     * and will do so if enabled.  The first takes a single code point
+     * argument; the 2nd, is a pointer to the first byte of the UTF-8 encoded
+     * string, and an end position which it won't try to read past */
+#   define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(cp)                         \
+      Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),                           \
+             "Wide character (U+%"UVXf") in %s", (UV) cp, OP_DESC(PL_op));
+
+#  define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)                   \
+	STMT_START { /* Check if to warn before doing the conversion work */\
+            if (ckWARN(WARN_LOCALE)) {                                      \
+                UV cp = utf8_to_uvchr_buf((U8 *) s, (U8 *) send, NULL);     \
+                Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
+                    "Wide character (U+%"UVXf") in %s",                     \
+                    (cp == 0)                                               \
+                     ? UNICODE_REPLACEMENT                                  \
+                     : (UV) cp,                                             \
+                    OP_DESC(PL_op));                                        \
+            }                                                               \
+        }  STMT_END
+
 #   endif   /* PERL_CORE or PERL_IN_XSUB_RE */
 
 #else   /* No locale usage */
@@ -5816,6 +5837,8 @@ typedef struct am_table_short AMTS;
 #   define IN_LC(category)                  0
 
 #   define _CHECK_AND_WARN_PROBLEMATIC_LOCALE
+#   define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(a)
+#   define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(a,b)
 #endif
 
 #ifdef USE_LOCALE_NUMERIC
