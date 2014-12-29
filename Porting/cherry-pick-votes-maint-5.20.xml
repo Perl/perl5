@@ -16,9 +16,11 @@ The fix which this test and perldelta relate to have already been picked:
 
 <commit votes="steveh, sprout" id="83a94553cbf9f2c11b3e9a63a44e7b9ce17ccb77" ticket="40565" desc="[perl #40565] Fix localisation in pseudo-fork"/>
 <commit votes="steveh" id="452466a503257b1012694b0d3a3cbf260e409d18" ticket="40565" desc="perldelta for the prev. commit"/>
+<commit votes="steveh" id="64eb39580bdd68998bee47f67c15665c45d29bfc" ticket="40565" desc="perldelta: Add #40565 bug number"/>
 
 <commit votes="sprout" id="3bc8ec963e9657121e69386195faa61e46928dda" ticket="123344" desc="Fix qr/@array(?{block})/"/>
 <commit votes="sprout" id="d100ca43dce2c9a6bb636517e5595aa9e1e01e7e" ticket="123344" desc="Fix assertion failure with qr/\Q(?{})/"/>
+<commit votes="steveh" id="1318b6d7e272031984abced04ebef14bf73954f1" ticket="123344" desc="perldelta for 3bc8ec963 / #123344"/>
 
 The fix which this perldelta relates to has already been picked:
 <commit votes="steveh, arc" id="857f4fb1c22a29afdfe39e929702476b8a82d7c5" ticket="123029" desc="perldelta for #123029"/>
@@ -31,7 +33,7 @@ The fix which this perldelta relates to has already been picked:
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including ba2f93c53341e0002ccf08487a56622c6aa5a87d (deparse-skips.txt: Note bug number for re/overload.t)
+Blead changes have been examined up to and including d187b712a6af2c12904446f06de1eb336ab61a72 (Call FETCH once for values in {...})
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -50,6 +52,19 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
+
+<commit votes="steveh" id="fcaef4dc8ca94ff0fe27bf4a249a5583ca0e7af5" ticket="123245" desc="[perl #123245] tests for format crashes"/>
+<commit votes="steveh" id="fb9282c3ccd3b3c2e184a3158c46c930c23f30fb" ticket="123245" desc="[perl #123245] avoid a panic in sv_chop() in formats"/>
+<commit votes="steveh" id="279aef25246e63a7be992e42d2b92e22a892263e" ticket="123245" desc="perldelta for fcaef4dc8ca9, fb9282c3ccd3"/>
+
+<commit votes="steveh" id="63d073d27fe50d823f0e3c528ac62c9aa584704d" ticket="123443" desc="[perl #123443] avoid overflowing got into a negative number"/>
+<commit votes="steveh" id="1d050e5534ce798acb8f9cd9c56c9f557ec658e0" ticket="123443" desc="don't allow a negative file position on a PerlIO::scalar handle"/>
+<commit votes="steveh" id="b045b8b598844ddce261c725f3596c9336b42b79" ticket="123443" desc="perldelta for 63d073d27fe5, 1d050e5534ce"/>
+<commit votes="steveh" id="696efa16de2cd1abedf24104d680f3d0983587f4" ticket="123443" desc="fix PerlIO::scalar get_cnt when the file position is beyond 2GB"/>
+<commit votes="steveh" id="aa67537dafc18272058c189caa550b90c78f79f2" ticket="123443" desc="perldelta for 696efa16de2c"/>
+<commit votes="steveh" id="9745959a89f3a201c789b8e4ce494405f95b2a7a" ticket="123443" desc="PerlIO::scalar: skip the 4GB seek test if off_t is too small"/>
+
+<commit votes="steveh" id="d8bd3d828a02f8df716063d9980b8b9af539ca42" ticket="123495" desc="[perl #123495] Stop gmtime(nan) from crashing"/>
 
 </div>
 
@@ -85,16 +100,20 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="arc" id="f6f22b1fc01b8676e43ef64616ed7899a84bfec2" ticket="122890" desc="t/re/re_tests: Add test for perl #122890"/>
 <commit votes="arc" id="efcc8bfdc124f50d33aab3f1d7722b5f9e4de349" ticket="122890" desc="re_tests: More tests for #122890"/>
 
+<commit votes="steveh" id="487e470dbd7a885bb6a92a735b2783e1c6740066" ticket="123410" desc="[perl #123410] sort CORE::fake bizarre behaviour"/>
+<commit votes="steveh" id="070733dfda1bb0d07d337128db5d1e78f14e6562" ticket="123410" desc="perldelta for 487e470d / #123410"/>
+
 </div>
 
-<div><h3>Configure and hints/ Fixes</h3>
+<div><h3>Configure and hints Fixes (Consider whether these in particular would break binary compatibility)</h3>
 
-Would these break binary compatibility?
 <commit votes="tux, arc" id="44b62df7ceb322e1e0484f45065025f0a709303c" ticket="" desc="Darwin: if cc is explicitly gcc/g++, use it also as ld."/>
 <commit votes="tux, arc" id="990a70b8c9866c888194f4c2c6d152d7911b3c34" ticket="" desc="Darwin: set ld to 'cc' if $cc is 'cc' or empty, $cc otherwise."/>
 <commit votes="tux, arc" id="54db7d57c29c9259228a6a4176caa32e391c6d0b" ticket="" desc="Upstream a patch from pkgsrc for NetBSD hints"/>
 <commit votes="arc" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
 <commit votes="tux, arc" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
+<commit votes="" id="237050634b19905cdd9e8e25c2a43d0b24eb59f2" ticket="" desc="Add pthread to libswanted"/>
+<commit votes="steveh" id="cced55d2e366f8ccb0884e747f32c32c1b538989" ticket="" desc="Perl 5 on Haiku - libperl.so not found installing out of standard location"/>
 
 </div>
 
@@ -115,6 +134,8 @@ Would these break binary compatibility?
 <commit votes="steveh, arc" id="c7925a5e8559739ce765137cf6164c5872c63a96" ticket="" desc="fix WinCE build"/>
 <commit votes="steveh, arc" id="dceaccf89041ac723759e83a3a31bedc8d82a38d" ticket="" desc="make -DNO_MATHOMS work on Win32"/>
 <commit votes="steveh, arc" id="3415f8b9fb121a138ed954f9ced0b2c1f4660e48" ticket="120487" desc="[perl #120487] make sure we're using an unmodified @INC to load Win32"/>
+<commit votes="steveh" id="08088357011bedc22047b1d4a1ec3afaee813523" ticket="123438" desc="[perl #123438] Wrong comment style in win32/win32.h"/>
+<commit votes="steveh" id="dc5c2addf88baf2341663222a7ef79d1b8df8429" ticket="123436" desc="[perl #123436] installperl patch related to $Config{dlext}"/>
 
 </div>
 
@@ -210,9 +231,43 @@ Part of this (but not the opcode part):
 <commit votes="steveh, arc" id="0e3be540c5c5d8ec7d6c682091855e8865b99b51" ticket="122987" desc="Remove trailing whitespace."/>
 <commit votes="steveh, arc" id="e6ebbe921e63dbd445aa30e30a0b2b80574b88a0" ticket="122987" desc="perlfork.pod: convert \ts to spaces."/>
 <commit votes="steveh, arc" id="15faabe4bd597caa63a35d745cc5e93792a347dc" ticket="123377" desc="Convert tabs to spaces and remove trailing space."/>
+<commit votes="steveh" id="4c0ef2088519deeee7642c58f661b5d8a70ccf2f" ticket="" desc="perlpolicy: Be explicit wrt crashing bug policy"/>
+<commit votes="steveh" id="dacd91898fcfc21090ad48dd88483172a4bc8914" ticket="" desc="Consistent spaces after docs in perlfunc.pod"/>
+<commit votes="steveh" id="faad849dd7af72f2db0a94098b4c462d3e573f5f" ticket="" desc="perldiag: Add missing entry"/>
+<commit votes="steveh" id="96cfa1df465e71dba7e2099fc37db1b569d300b4" ticket="" desc="perluniintro: Vertically stack ternarys"/>
+<commit votes="steveh" id="e990b8498fc52e996e6150d10fcb7786b74ee9b2" ticket="" desc="Import perl5184delta"/>
+<commit votes="steveh" id="0c54b9fe11cbd0e7072f3fbd9329148d54a7f500" ticket="" desc="perl.pod: Line things up vertically"/>
+<commit votes="steveh" id="d114830901d62f712502caecc496b189619643d5" ticket="" desc="perl.pod: Use consistent perldelta order"/>
+<commit votes="steveh" id="4eea8a8bce5fd908572c50464cc4216df1f0bc57" ticket="" desc="include reference to metacpan.org; refer to the module-authors list instead of modules, and include a link to the subscription page"/>
+<commit votes="steveh" id="846dac6786c1ada87b95d0268c0a9772a4bd04fc" ticket="" desc="add new release to perlhist"/>
+<commit votes="steveh" id="d171d861d6628c21e57b207db12486ac035da531" ticket="" desc="Update epigraphs.pod"/>
+
+<commit votes="steveh" id="2561daa455347e2b981e853cf24c33f12c57c58b" ticket="" desc="Tom Christiansen's Perl Unicode Cookbook 1st draft"/>
+<commit votes="steveh" id="ddeccf1ffc8f43b11b4f333d8387265c4b449b3c" ticket="" desc="Fixes for a few trivial typos"/>
+<commit votes="steveh" id="d4d0a10ef54ca990c3e90457f90f03ea4bc9e10f" ticket="" desc="perlunicook: add perlunicook to MANIFEST"/>
+<commit votes="steveh" id="5dd47fd476d31d98fcd75101d115aca2ddcdbe49" ticket="" desc="perlunicook: add it to build files and TOC"/>
+<commit votes="steveh" id="32a9c674a9cef14c4bd3666bff64da2f2ff2b9a0" ticket="" desc="perlunicook: remove empty list item"/>
+<commit votes="steveh" id="efb8961587a30e930d4581a96246b02e20d2b1f4" ticket="" desc="perlunicook: add trusted-to-exist links for perlunicook"/>
+<commit votes="steveh" id="720a02e281a2a171c25d674b798fbfe46d2bbdaf" ticket="" desc="Fix long verbatim line in perlunicook"/>
+
+<commit votes="steveh" id="987ee32fd0939704c66e74c46ba0eea50742264e" ticket="" desc="Update release schedule"/>
+<commit votes="steveh" id="2d698e9fdf1acde369d23c80aaa35ca7ec046866" ticket="" desc="release schedule: put Abigail on for October"/>
+<commit votes="steveh" id="669097fff733d4ce9c6014ada9aff3664840b185" ticket="" desc="release schedule: add managers for 5.21.6, 5.21.8"/>
+<commit votes="steveh" id="ce98a8cbcc62ba1e5eceafb381453aff6ac4471f" ticket="" desc="release schedule: Max M. will do December 2014"/>
+<commit votes="steveh" id="4ed1f7f9ddcf3a92cab8beab7f52048cda246f44" ticket="" desc="Update 5.20 release schedule: Plan for 5.20.2 in January"/>
+<commit votes="steveh" id="ba27e2b14916d249d8db56bdf41409034871a54a" ticket="" desc="Tick that v5.21.4 got a release in the schedule"/>
+<commit votes="steveh" id="5695ab3c9022fbf13698540bb845a4d1ab200701" ticket="" desc="5.21.5 has been ticked off"/>
+<commit votes="steveh" id="63bd8e4b6a0da02940b663302e1e0775e36d2c07" ticket="" desc="release schedule: the v5.22 landing plan"/>
+<commit votes="steveh" id="34b5033e3abef07672d7dfa110b7f89bbf4308f8" ticket="" desc="release schedule: 5.18.4 shipped, 5.18.5 may happen"/>
+<commit votes="steveh" id="0afd0f200f29d255c3e9a8213092bf6907f3efc2" ticket="" desc="release_schedule.pod: Correct some versions"/>
+<commit votes="steveh" id="d920a62f19f2d30ca8fdefafb1e3173d525957db" ticket="" desc="Note that 5.21.6 and 5.21.7 are released"/>
+<commit votes="steveh" id="d274ee9d7b1765ee3032fac39cbc2e77b0d2f194" ticket="" desc="RMG: Note that Porting/release_schedule.pod should be updated"/>
+
+<commit votes="steveh" id="62fedd514941642472e01795828f42ddd04477eb" ticket="" desc="perlfunc: another alternative for enabling the "state" feature"/>
 
 To be included in an "Errata From Previous Releases":
 <commit votes="steveh, arc" id="6ff8f256561a974b63b784ae8681c284ada44f7a" ticket="122655" desc="perldelta: Entry for [perl #122655]."/>
+
 </div>
 
 <div><h3>Other</h3>
