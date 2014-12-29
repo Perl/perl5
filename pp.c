@@ -3763,7 +3763,7 @@ PP(pp_ucfirst)
     if (dest != source && SvTAINTED(source))
 	SvTAINT(dest);
     SvSETMAGIC(dest);
-    RETURN;
+    return NORMAL;
 }
 
 /* There's so much setup/teardown code common between uc and lc, I wonder if
@@ -4020,7 +4020,7 @@ PP(pp_uc)
     if (dest != source && SvTAINTED(source))
 	SvTAINT(dest);
     SvSETMAGIC(dest);
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_lc)
@@ -4146,7 +4146,7 @@ PP(pp_lc)
     if (dest != source && SvTAINTED(source))
 	SvTAINT(dest);
     SvSETMAGIC(dest);
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_quotemeta)
