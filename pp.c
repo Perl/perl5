@@ -2397,7 +2397,7 @@ PP(pp_complement)
 	      SvUTF8_off(TARG);
 	  }
 	  SETTARG;
-	  RETURN;
+	  return NORMAL;
 	}
 #ifdef LIBERAL
 	{
@@ -2414,7 +2414,7 @@ PP(pp_complement)
 	    *tmps = ~*tmps;
 	SETTARG;
       }
-      RETURN;
+      return NORMAL;
     }
 }
 
