@@ -3857,36 +3857,35 @@ ext/re/t/re_funcs_u.t		See if exportable 're' funcs in universal.c work
 ext/re/t/regop.pl		generate debug output for various patterns
 ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/re/t/re.t			see if re pragma works
+ext/SDBM_File/biblio	SDBM kit
+ext/SDBM_File/CHANGES	SDBM kit
+ext/SDBM_File/COMPARE	SDBM kit
+ext/SDBM_File/dba.c	SDBM kit
+ext/SDBM_File/dbd.c	SDBM kit
+ext/SDBM_File/dbe.1	SDBM kit
+ext/SDBM_File/dbe.c	SDBM kit
+ext/SDBM_File/dbu.c	SDBM kit
+ext/SDBM_File/grind	SDBM kit
+ext/SDBM_File/hash.c	SDBM kit
+ext/SDBM_File/linux.patches	SDBM kit
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
-ext/SDBM_File/sdbm/biblio	SDBM kit
-ext/SDBM_File/sdbm/CHANGES	SDBM kit
-ext/SDBM_File/sdbm/COMPARE	SDBM kit
-ext/SDBM_File/sdbm/dba.c	SDBM kit
-ext/SDBM_File/sdbm/dbd.c	SDBM kit
-ext/SDBM_File/sdbm/dbe.1	SDBM kit
-ext/SDBM_File/sdbm/dbe.c	SDBM kit
-ext/SDBM_File/sdbm/dbu.c	SDBM kit
+ext/SDBM_File/makefile.sdbm	SDBM kit
+ext/SDBM_File/pair.c	SDBM kit
+ext/SDBM_File/pair.h	SDBM kit
+ext/SDBM_File/README	SDBM kit
+ext/SDBM_File/readme.ms	SDBM kit
+ext/SDBM_File/README.too	SDBM kit
+ext/SDBM_File/sdbm.3	SDBM kit
+ext/SDBM_File/sdbm.c	SDBM kit
 ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
 ext/SDBM_File/SDBM_File.xs	SDBM extension external subroutines
-ext/SDBM_File/sdbm/grind	SDBM kit
-ext/SDBM_File/sdbm/hash.c	SDBM kit
-ext/SDBM_File/sdbm/linux.patches	SDBM kit
-ext/SDBM_File/sdbm/Makefile.PL	SDBM kit
-ext/SDBM_File/sdbm/makefile.sdbm	SDBM kit
-ext/SDBM_File/sdbm/pair.c	SDBM kit
-ext/SDBM_File/sdbm/pair.h	SDBM kit
-ext/SDBM_File/sdbm/README	SDBM kit
-ext/SDBM_File/sdbm/readme.ms	SDBM kit
-ext/SDBM_File/sdbm/README.too	SDBM kit
-ext/SDBM_File/sdbm/sdbm.3	SDBM kit
-ext/SDBM_File/sdbm/sdbm.c	SDBM kit
-ext/SDBM_File/sdbm/sdbm.h	SDBM kit
-ext/SDBM_File/sdbm/tune.h	SDBM kit
-ext/SDBM_File/sdbm/util.c	SDBM kit
+ext/SDBM_File/sdbm.h	SDBM kit
 ext/SDBM_File/t/constants.t	See if SDBM_File constants work
 ext/SDBM_File/t/prep.t		See if SDBM_File with extra argument works
 ext/SDBM_File/t/sdbm.t		See if SDBM_File works
+ext/SDBM_File/tune.h	SDBM kit
 ext/SDBM_File/typemap		SDBM extension interface types
+ext/SDBM_File/util.c	SDBM kit
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works

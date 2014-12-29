@@ -2,7 +2,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include "sdbm/sdbm.h"
+#include "sdbm.h"
 
 #define fetch_key 0
 #define store_key 1
