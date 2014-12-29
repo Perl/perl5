@@ -2263,7 +2263,7 @@ S_negate_string(pTHX)
 	*SvPV_force_nomg(TARG, len) = *s == '-' ? '+' : '-';
     }
     else return FALSE;
-    SETTARG; PUTBACK;
+    SETTARG;
     return TRUE;
 }
 
@@ -2283,21 +2283,21 @@ PP(pp_negate)
 		    /* 2s complement assumption. */
                     SETi(SvIVX(sv));	/* special case: -((UV)IV_MAX+1) ==
                                            IV_MIN */
-		    RETURN;
+                    return NORMAL;
 		}
 		else if (SvUVX(sv) <= IV_MAX) {
 		    SETi(-SvIVX(sv));
-		    RETURN;
+		    return NORMAL;
 		}
 	    }
 	    else if (SvIVX(sv) != IV_MIN) {
 		SETi(-SvIVX(sv));
-		RETURN;
+		return NORMAL;
 	    }
 #ifdef PERL_PRESERVE_IVUV
 	    else {
 		SETu((UV)IV_MIN);
-		RETURN;
+		return NORMAL;
 	    }
 #endif
 	}
@@ -2308,7 +2308,7 @@ PP(pp_negate)
 	else
 	    SETn(-SvNV_nomg(sv));
     }
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_not)
