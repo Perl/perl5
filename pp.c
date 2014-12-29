@@ -4224,7 +4224,7 @@ PP(pp_quotemeta)
     else
 	sv_setpvn(TARG, s, len);
     SETTARG;
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_fc)
