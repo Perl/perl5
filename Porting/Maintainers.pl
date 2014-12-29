@@ -384,6 +384,8 @@ use File::Glob qw(:case);
     'Encode' => {
         'DISTRIBUTION' => 'DANKOGAI/Encode-2.67.tar.gz',
         'FILES'        => q[cpan/Encode],
+        # Waiting to be merged upstream if it smokes ok: see CPAN RT#100347,
+        # in particular see khw's comments on that ticket on 21 Nov 2014.
         'CUSTOMIZED'   => [ qw( encoding.pm ) ],
     },
 
@@ -972,10 +974,6 @@ use File::Glob qw(:case);
     'Socket' => {
         'DISTRIBUTION' => 'PEVANS/Socket-2.016.tar.gz',
         'FILES'        => q[cpan/Socket],
-        'CUSTOMIZED'   => [
-            # Waiting to be merged upstream: see CPAN RT#98217
-            qw(	t/getnameinfo.t ),
-        ],
     },
 
     'Storable' => {
