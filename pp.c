@@ -2857,7 +2857,7 @@ PP(pp_int)
 	  }
       }
     }
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_abs)
