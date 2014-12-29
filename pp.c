@@ -2911,7 +2911,7 @@ PP(pp_oct)
     STRLEN len;
     NV result_nv;
     UV result_uv;
-    SV* const sv = POPs;
+    SV* const sv = TOPs;
 
     tmps = (SvPV_const(sv, len));
     if (DO_UTF8(sv)) {
@@ -2940,12 +2940,12 @@ PP(pp_oct)
         result_uv = grok_oct (tmps, &len, &flags, &result_nv);
 
     if (flags & PERL_SCAN_GREATER_THAN_UV_MAX) {
-        XPUSHn(result_nv);
+        SETn(result_nv);
     }
     else {
-        XPUSHu(result_uv);
+        SETu(result_uv);
     }
-    RETURN;
+    return NORMAL;
 }
 
 /* String stuff. */
