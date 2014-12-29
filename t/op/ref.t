@@ -798,7 +798,6 @@ for (3) {
     eval { $_ = 4 };
     like $@, qr/^Modification of a read-only/,
        'assignment to value aliased to literal number';
-    require Config;
     eval { ${\$_} = 4 };
     like $@, qr/^Modification of a read-only/,
        'refgen does not allow assignment to value aliased to literal number';
@@ -807,7 +806,6 @@ for ("4eounthouonth") {
     eval { $_ = 4 };
     like $@, qr/^Modification of a read-only/,
        'assignment to value aliased to literal string';
-    require Config;
     eval { ${\$_} = 4 };
     like $@, qr/^Modification of a read-only/,
        'refgen does not allow assignment to value aliased to literal string';
