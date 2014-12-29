@@ -3389,7 +3389,7 @@ PP(pp_chr)
     dSP; dTARGET;
     char *tmps;
     UV value;
-    SV *top = POPs;
+    SV *top = TOPs;
 
     SvGETMAGIC(top);
     if (UNLIKELY(SvAMAGIC(top)))
@@ -3426,8 +3426,8 @@ PP(pp_chr)
 	*tmps = '\0';
 	(void)SvPOK_only(TARG);
 	SvUTF8_on(TARG);
-	XPUSHTARG;
-	RETURN;
+	SETTARG;
+	return NORMAL;
     }
 
     SvGROW(TARG,2);
@@ -3453,8 +3453,8 @@ PP(pp_chr)
 	}
     }
 
-    XPUSHTARG;
-    RETURN;
+    SETTARG;
+    return NORMAL;
 }
 
 PP(pp_crypt)
