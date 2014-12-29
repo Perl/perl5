@@ -3366,7 +3366,7 @@ PP(pp_ord)
 {
     dSP; dTARGET;
 
-    SV *argsv = POPs;
+    SV *argsv = TOPs;
     STRLEN len;
     const U8 *s = (U8*)SvPV_const(argsv, len);
 
@@ -3377,11 +3377,11 @@ PP(pp_ord)
         argsv = tmpsv;
     }
 
-    XPUSHu(DO_UTF8(argsv)
+    SETu(DO_UTF8(argsv)
            ? utf8n_to_uvchr(s, len, 0, UTF8_ALLOW_ANYUV)
            : (UV)(*s));
 
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_chr)
