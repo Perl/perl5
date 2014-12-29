@@ -335,7 +335,7 @@ addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
 #
 # pp.c	pos substr each not OK (RETPUSHUNDEF)
 #	ref not OK (RETPUSHNO)
-#	trans not OK (dTARG; TARG = sv_newmortal();)
+#	trans not OK (target is used for lhs, not retval)
 #	ucfirst etc not OK: TMP arg processed inplace
 #	quotemeta not OK (unsafe when TARG == arg)
 #	pack - unknown whether it is safe
