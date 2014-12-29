@@ -2661,7 +2661,7 @@ PP(pp_i_negate)
 	SV * const sv = TOPs;
 	IV const i = SvIV_nomg(sv);
 	SETi(-i);
-	RETURN;
+	return NORMAL;
     }
 }
 
