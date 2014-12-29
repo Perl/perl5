@@ -197,7 +197,7 @@ ref $cstr			# ref nonref
 (@z = (1 .. 3))			# aassign
 (chop (@x=@chopar))		# chop
 chop $chopit			# schop
-(chop (@x=@chopar))		# chomp
+(chomp (@x=@chopar))		# chomp
 chomp $chopit			# schomp
 pos $posstr			# pos
 pos $chopit			# pos returns undef
