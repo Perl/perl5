@@ -2897,7 +2897,7 @@ PP(pp_abs)
 	  SETn(value);
       }
     }
-    RETURN;
+    return NORMAL;
 }
 
 
