@@ -27,6 +27,21 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 The warnings pragma now supports warnings outside of "all"
+
+Ever since perl v5.6.0 we've had no way of adding new warnings without
+retroactively adding them to all existing programs that used C<-w>,
+C<-W> or C<use warnings>.
+
+This caused us to not add new useful warnings out of fear that they
+might unduly burden users who just wanted to upgrade perl and didn't
+want to deal with a bunch of warnings from their existing code.
+
+We now support a way to have our cake and eat it too, and can add new
+warnings to the core going forward through other top-level warning
+categories. See L<the warnings documentation|warnings/Top-level
+warning categories & associated confusion> for details.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

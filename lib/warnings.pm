@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
@@ -93,15 +93,18 @@ our %Offsets = (
 
     # Warnings Categories added in Perl 5.021
 
-    'experimental::refaliasing'=> 120,
-    'experimental::win32_perlio'=> 122,
-    'locale'		=> 124,
-    'missing'		=> 126,
-    'redundant'		=> 128,
+    'everything'	=> 120,
+    'experimental::refaliasing'=> 122,
+    'experimental::win32_perlio'=> 124,
+    'locale'		=> 126,
+    'missing'		=> 128,
+    'redundant'		=> 130,
+    'extra'		=> 132,
+    'void_unusual'	=> 134,
   );
 
 our %Bits = (
-    'all'		=> "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x01", # [0..64]
+    'all'		=> "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x05", # [0..59,61..65]
     'ambiguous'		=> "\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [29]
     'bareword'		=> "\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [30]
     'closed'		=> "\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [6]
@@ -109,18 +112,20 @@ our %Bits = (
     'debugging'		=> "\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [22]
     'deprecated'	=> "\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [2]
     'digit'		=> "\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [31]
+    'everything'	=> "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55", # [0..67]
     'exec'		=> "\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [7]
     'exiting'		=> "\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [3]
-    'experimental'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x55\x15\x05\x00", # [51..58,60,61]
+    'experimental'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x55\x15\x14\x00", # [51..58,61,62]
     'experimental::autoderef'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00", # [56]
     'experimental::lexical_subs'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00", # [52]
     'experimental::lexical_topic'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00", # [53]
     'experimental::postderef'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00", # [57]
-    'experimental::refaliasing'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00", # [60]
+    'experimental::refaliasing'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00", # [61]
     'experimental::regex_sets'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00", # [54]
     'experimental::signatures'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00", # [58]
     'experimental::smartmatch'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00", # [55]
-    'experimental::win32_perlio'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00", # [61]
+    'experimental::win32_perlio'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00", # [62]
+    'extra'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x50", # [66,67]
     'glob'		=> "\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [4]
     'illegalproto'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00", # [47]
     'imprecision'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00", # [46]
@@ -128,10 +133,10 @@ our %Bits = (
     'internal'		=> "\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [24]
     'io'		=> "\x00\x54\x55\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00", # [5..11,59]
     'layer'		=> "\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [8]
-    'locale'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00", # [62]
+    'locale'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00", # [63]
     'malloc'		=> "\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [25]
     'misc'		=> "\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [12]
-    'missing'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00", # [63]
+    'missing'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01", # [64]
     'newline'		=> "\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [9]
     'non_unicode'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00", # [48]
     'nonchar'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00", # [49]
@@ -148,7 +153,7 @@ our %Bits = (
     'qw'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00", # [36]
     'recursion'		=> "\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [18]
     'redefine'		=> "\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [19]
-    'redundant'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01", # [64]
+    'redundant'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04", # [65]
     'regexp'		=> "\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [20]
     'reserved'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00", # [37]
     'semicolon'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00", # [38]
@@ -166,10 +171,11 @@ our %Bits = (
     'untie'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00", # [43]
     'utf8'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x15\x00\x00\x00\x00", # [44,48..50]
     'void'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00", # [45]
+    'void_unusual'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40", # [67]
   );
 
 our %DeadBits = (
-    'all'		=> "\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\x02", # [0..64]
+    'all'		=> "\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xa8\x0a", # [0..59,61..65]
     'ambiguous'		=> "\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [29]
     'bareword'		=> "\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [30]
     'closed'		=> "\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [6]
@@ -177,18 +183,20 @@ our %DeadBits = (
     'debugging'		=> "\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [22]
     'deprecated'	=> "\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [2]
     'digit'		=> "\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [31]
+    'everything'	=> "\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa", # [0..67]
     'exec'		=> "\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [7]
     'exiting'		=> "\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [3]
-    'experimental'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\xaa\x2a\x0a\x00", # [51..58,60,61]
+    'experimental'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\xaa\x2a\x28\x00", # [51..58,61,62]
     'experimental::autoderef'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00", # [56]
     'experimental::lexical_subs'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00", # [52]
     'experimental::lexical_topic'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00", # [53]
     'experimental::postderef'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00", # [57]
-    'experimental::refaliasing'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00", # [60]
+    'experimental::refaliasing'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00", # [61]
     'experimental::regex_sets'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00", # [54]
     'experimental::signatures'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00", # [58]
     'experimental::smartmatch'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00", # [55]
-    'experimental::win32_perlio'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00", # [61]
+    'experimental::win32_perlio'=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00", # [62]
+    'extra'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xa0", # [66,67]
     'glob'		=> "\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [4]
     'illegalproto'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00", # [47]
     'imprecision'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00", # [46]
@@ -196,10 +204,10 @@ our %DeadBits = (
     'internal'		=> "\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [24]
     'io'		=> "\x00\xa8\xaa\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00", # [5..11,59]
     'layer'		=> "\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [8]
-    'locale'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00", # [62]
+    'locale'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00", # [63]
     'malloc'		=> "\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [25]
     'misc'		=> "\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [12]
-    'missing'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00", # [63]
+    'missing'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02", # [64]
     'newline'		=> "\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [9]
     'non_unicode'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00", # [48]
     'nonchar'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00", # [49]
@@ -216,7 +224,7 @@ our %DeadBits = (
     'qw'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00", # [36]
     'recursion'		=> "\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [18]
     'redefine'		=> "\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [19]
-    'redundant'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02", # [64]
+    'redundant'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08", # [65]
     'regexp'		=> "\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [20]
     'reserved'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00", # [37]
     'semicolon'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00", # [38]
@@ -234,11 +242,12 @@ our %DeadBits = (
     'untie'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00", # [43]
     'utf8'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x2a\x00\x00\x00\x00", # [44,48..50]
     'void'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00", # [45]
+    'void_unusual'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80", # [67]
   );
 
 $NONE     = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-$DEFAULT  = "\x10\x01\x00\x00\x00\x50\x04\x00\x00\x00\x00\x00\x00\x55\x15\x15\x00", # [2,56,52,53,57,60,54,58,55,61,4,62,22,23,25]
-$LAST_BIT = 130 ;
+$DEFAULT  = "\x10\x01\x00\x00\x00\x50\x04\x00\x00\x00\x00\x00\x00\x55\x15\x54\x00", # [2,56,52,53,57,61,54,58,55,62,4,63,22,23,25]
+$LAST_BIT = 136 ;
 $BYTES    = 17 ;
 
 $All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
@@ -520,12 +529,17 @@ be applied to their module.
 By default, optional warnings are disabled, so any legacy code that
 doesn't attempt to control the warnings will work unchanged.
 
-All warnings are enabled in a block by either of these:
+When we talk about "all" warnings we don't actually mean "all the
+warnings we support". See L</Top-level warning categories & associated
+confusion> for details. The "all" category should really be called the
+"default" category, if not for backwards-compatibility concerns.
+
+"All" warnings are enabled in a block by either of these:
 
     use warnings;
     use warnings 'all';
 
-Similarly all warnings are disabled in a block by either of these:
+Similarly "all" warnings are disabled in a block by either of these:
 
     no warnings;
     no warnings 'all';
@@ -643,7 +657,7 @@ details of how this flag interacts with lexical warnings.
 =item B<-W>
 X<-W>
 
-If the B<-W> flag is used on the command line, it will enable all warnings
+If the B<-W> flag is used on the command line, it will enable "all" warnings
 throughout the program regardless of whether warnings were disabled
 locally using C<no warnings> or C<$^W =0>.
 This includes all files that get
@@ -653,9 +667,79 @@ Think of it as the Perl equivalent of the "lint" command.
 =item B<-X>
 X<-X>
 
-Does the exact opposite to the B<-W> flag, i.e. it disables all warnings.
+Does the exact opposite to the B<-W> flag, i.e. it disables "all" warnings.
 
 =back
+
+=head2 Top-level warning categories & associated confusion
+
+The lexical warning pragma was introduced in v5.6.0 of perl, and from
+the very beginning doing C<use warnings> would enable the "all"
+category of warnings, which were all the warnings we support.
+
+This led to arguments whenever someone suggested a new warning be
+added to perl, since that implicitly meant that existing programs that
+used the warnings pragma would be retroactively subjected to them when
+perl was upgraded.
+
+So similarly to how most C compilers support C<-Wall> to mean "not
+quite all warnings" along with extra options like C<-Wextra>, we
+support warnings outside of the "all" category. Think of the "all"
+category as "default", that's what we'd call it we were starting out
+today and didn't have a bunch of programs doing C<use warnings "all">
+in the wild already.
+
+The categories we support are:
+
+=over
+
+=item * all
+
+This is the "default" category for warnings that we've supported ever
+since v5.6.0. We have and might occasionally add new warnings here if
+they're deemed to be similar in nature to our existing warnings, but
+mostly these are things we're pretty sure are a logic error, but
+aren't irrecoverable, so they're not a runtime error.
+
+When you upgrade perl you might find that we've added some new
+warnings here, but they won't be anything wildly different from the
+current set of warnings, so the burden of going through your existing
+code and auditing the new parts that are warning should be fairly
+light.
+
+=item * everything
+
+This is what "all" would be if the world made any sense, but since we
+started out with "all" you need to enable "everything" to really
+enable "all the warnings".
+
+You almost definitely don't want to enable "everything", unless you're
+willing to potentially get a flood of new warnings with every perl
+upgrade, and those warnings may be entirely different in spirit to
+existing warnings shipped with previous releases.
+
+Maybe we'll start introducing really pedantic warnings that aren't
+useful for most cases, maybe we'll start warning about inconsistent
+indentation, who knows? If you really want ALL the warnings perl has
+to offer enable these, otherwise stick with some more sane category.
+
+=item * extra
+
+These are warnings that we might have put into "all"
+(a.k.a. "default") if we had a time machine and were starting out with
+perl today, but they'd probably cause too much of a disruption today
+so we're not doing that.
+
+As of writing this the sole warning in this category is a warning
+about useless use of grep in void context, but unlike for the "all"
+category we reserve the right to freely add things to this category in
+the future.
+
+=back
+
+In the future we might add any number of other top-level
+categories. The backwards-compatibility promises of those categories
+(if any) will be documented here.
 
 =head2 Backward Compatibility
 
@@ -713,135 +797,141 @@ to be enabled/disabled in isolation.
 
 The current hierarchy is:
 
-    all -+
-         |
-         +- closure
-         |
-         +- deprecated
-         |
-         +- exiting
-         |
-         +- experimental --+
-         |                 |
-         |                 +- experimental::autoderef
-         |                 |
-         |                 +- experimental::lexical_subs
-         |                 |
-         |                 +- experimental::lexical_topic
-         |                 |
-         |                 +- experimental::postderef
-         |                 |
-         |                 +- experimental::refaliasing
-         |                 |
-         |                 +- experimental::regex_sets
-         |                 |
-         |                 +- experimental::signatures
-         |                 |
-         |                 +- experimental::smartmatch
-         |                 |
-         |                 +- experimental::win32_perlio
-         |
-         +- glob
-         |
-         +- imprecision
-         |
-         +- io ------------+
-         |                 |
-         |                 +- closed
-         |                 |
-         |                 +- exec
-         |                 |
-         |                 +- layer
-         |                 |
-         |                 +- newline
-         |                 |
-         |                 +- pipe
-         |                 |
-         |                 +- syscalls
-         |                 |
-         |                 +- unopened
-         |
-         +- locale
-         |
-         +- misc
-         |
-         +- missing
-         |
-         +- numeric
-         |
-         +- once
-         |
-         +- overflow
-         |
-         +- pack
-         |
-         +- portable
-         |
-         +- recursion
-         |
-         +- redefine
-         |
-         +- redundant
-         |
-         +- regexp
-         |
-         +- severe --------+
-         |                 |
-         |                 +- debugging
-         |                 |
-         |                 +- inplace
-         |                 |
-         |                 +- internal
-         |                 |
-         |                 +- malloc
-         |
-         +- signal
-         |
-         +- substr
-         |
-         +- syntax --------+
-         |                 |
-         |                 +- ambiguous
-         |                 |
-         |                 +- bareword
-         |                 |
-         |                 +- digit
-         |                 |
-         |                 +- illegalproto
-         |                 |
-         |                 +- parenthesis
-         |                 |
-         |                 +- precedence
-         |                 |
-         |                 +- printf
-         |                 |
-         |                 +- prototype
-         |                 |
-         |                 +- qw
-         |                 |
-         |                 +- reserved
-         |                 |
-         |                 +- semicolon
-         |
-         +- taint
-         |
-         +- threads
-         |
-         +- uninitialized
-         |
-         +- unpack
-         |
-         +- untie
-         |
-         +- utf8 ----------+
-         |                 |
-         |                 +- non_unicode
-         |                 |
-         |                 +- nonchar
-         |                 |
-         |                 +- surrogate
-         |
-         +- void
+    everything -+
+                |
+                +- all ---+
+                |         |
+                |         +- closure
+                |         |
+                |         +- deprecated
+                |         |
+                |         +- exiting
+                |         |
+                |         +- experimental --+
+                |         |                 |
+                |         |                 +- experimental::autoderef
+                |         |                 |
+                |         |                 +- experimental::lexical_subs
+                |         |                 |
+                |         |                 +- experimental::lexical_topic
+                |         |                 |
+                |         |                 +- experimental::postderef
+                |         |                 |
+                |         |                 +- experimental::refaliasing
+                |         |                 |
+                |         |                 +- experimental::regex_sets
+                |         |                 |
+                |         |                 +- experimental::signatures
+                |         |                 |
+                |         |                 +- experimental::smartmatch
+                |         |                 |
+                |         |                 +- experimental::win32_perlio
+                |         |
+                |         +- glob
+                |         |
+                |         +- imprecision
+                |         |
+                |         +- io ------------+
+                |         |                 |
+                |         |                 +- closed
+                |         |                 |
+                |         |                 +- exec
+                |         |                 |
+                |         |                 +- layer
+                |         |                 |
+                |         |                 +- newline
+                |         |                 |
+                |         |                 +- pipe
+                |         |                 |
+                |         |                 +- syscalls
+                |         |                 |
+                |         |                 +- unopened
+                |         |
+                |         +- locale
+                |         |
+                |         +- misc
+                |         |
+                |         +- missing
+                |         |
+                |         +- numeric
+                |         |
+                |         +- once
+                |         |
+                |         +- overflow
+                |         |
+                |         +- pack
+                |         |
+                |         +- portable
+                |         |
+                |         +- recursion
+                |         |
+                |         +- redefine
+                |         |
+                |         +- redundant
+                |         |
+                |         +- regexp
+                |         |
+                |         +- severe --------+
+                |         |                 |
+                |         |                 +- debugging
+                |         |                 |
+                |         |                 +- inplace
+                |         |                 |
+                |         |                 +- internal
+                |         |                 |
+                |         |                 +- malloc
+                |         |
+                |         +- signal
+                |         |
+                |         +- substr
+                |         |
+                |         +- syntax --------+
+                |         |                 |
+                |         |                 +- ambiguous
+                |         |                 |
+                |         |                 +- bareword
+                |         |                 |
+                |         |                 +- digit
+                |         |                 |
+                |         |                 +- illegalproto
+                |         |                 |
+                |         |                 +- parenthesis
+                |         |                 |
+                |         |                 +- precedence
+                |         |                 |
+                |         |                 +- printf
+                |         |                 |
+                |         |                 +- prototype
+                |         |                 |
+                |         |                 +- qw
+                |         |                 |
+                |         |                 +- reserved
+                |         |                 |
+                |         |                 +- semicolon
+                |         |
+                |         +- taint
+                |         |
+                |         +- threads
+                |         |
+                |         +- uninitialized
+                |         |
+                |         +- unpack
+                |         |
+                |         +- untie
+                |         |
+                |         +- utf8 ----------+
+                |         |                 |
+                |         |                 +- non_unicode
+                |         |                 |
+                |         |                 +- nonchar
+                |         |                 |
+                |         |                 +- surrogate
+                |         |
+                |         +- void
+                |
+                +- extra -+
+                          |
+                          +- void_unusual
 
 Just like the "strict" pragma any of these categories can be combined
 

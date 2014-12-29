@@ -1857,12 +1857,12 @@ my sub f {}
 print f();
 >>>>
 use feature 'lexical_subs';
-BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUUU\005"}
+BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUT\005U\001"}
 my sub f {
-    BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUU\005"}
+    BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUT\005\001"}
     
 }
-BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUU\005"}
+BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUT\005\001"}
 print f();
 ####
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
@@ -1873,13 +1873,13 @@ state sub f {}
 print f();
 >>>>
 use feature 'lexical_subs';
-BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUUU\005"}
+BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUT\005U\001"}
 CORE::state sub f {
-    BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUU\005"}
+    BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUT\005\001"}
     use feature 'state';
     
 }
-BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUU\005"}
+BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUUUTUT\005\001"}
 use feature 'state';
 print f();
 ####
