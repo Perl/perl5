@@ -720,18 +720,20 @@ PP(pp_gelem)
 
 PP(pp_study)
 {
-    dSP; dPOPss;
+    dSP; dTOPss;
     STRLEN len;
 
     (void)SvPV(sv, len);
     if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv) || SvVALID(sv)) {
 	/* Historically, study was skipped in these cases. */
-	RETPUSHNO;
+	SETs(&PL_sv_no);
+	return NORMAL;
     }
 
     /* Make study a no-op. It's no longer useful and its existence
        complicates matters elsewhere. */
-    RETPUSHYES;
+    SETs(&PL_sv_yes);
+    return NORMAL;
 }
 
 
