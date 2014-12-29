@@ -10,6 +10,10 @@ BEGIN {
 
 plan tests => 134;
 
+# Test this first before we extend the stack with other operations.
+# This caused an asan failure due to a bad write past the end of the stack.
+eval { my $x; die  1..127, $x =~ y/// };
+
 my $Is_EBCDIC = (ord('i') == 0x89 & ord('J') == 0xd1);
 
 $_ = "abcdefghijklmnopqrstuvwxyz";

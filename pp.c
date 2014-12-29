@@ -746,11 +746,13 @@ PP(pp_trans)
 
     if (PL_op->op_flags & OPf_STACKED)
 	sv = POPs;
-    else if (ARGTARG)
-	sv = GETTARGET;
     else {
-	sv = DEFSV;
 	EXTEND(SP,1);
+	if (ARGTARG)
+	    sv = GETTARGET;
+	else {
+	    sv = DEFSV;
+	}
     }
     if(PL_op->op_type == OP_TRANSR) {
 	STRLEN len;
