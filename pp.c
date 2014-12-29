@@ -3102,7 +3102,6 @@ PP(pp_substr)
 	assert(!repl_sv);
 	repl_sv = POPs;
     }
-    PUTBACK;
     if (lvalue && !repl_sv) {
 	SV * ret;
 	ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
@@ -3118,7 +3117,6 @@ PP(pp_substr)
 		? (STRLEN)(UV)len_iv
 		: (LvFLAGS(ret) |= 2, (STRLEN)(UV)-len_iv);
 
-	SPAGAIN;
 	PUSHs(ret);    /* avoid SvSETMAGIC here */
 	RETURN;
     }
@@ -3188,7 +3186,6 @@ PP(pp_substr)
 	    SvREFCNT_dec(repl_sv_copy);
 	}
     }
-    SPAGAIN;
     if (PL_op->op_private & OPpSUBSTR_REPL_FIRST)
 	SP++;
     else if (rvalue) {
