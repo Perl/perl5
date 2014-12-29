@@ -5352,11 +5352,14 @@ error prone.
 =item prototype FUNCTION
 X<prototype>
 
+=item prototype
+
 =for Pod::Functions +5.002 get the prototype (if any) of a subroutine
 
 Returns the prototype of a function as a string (or C<undef> if the
 function has no prototype).  FUNCTION is a reference to, or the name of,
-the function whose prototype you want to retrieve.
+the function whose prototype you want to retrieve.  If FUNCTION is omitted,
+$_ is used.
 
 If FUNCTION is a string starting with C<CORE::>, the rest is taken as a
 name for a Perl builtin.  If the builtin's arguments
