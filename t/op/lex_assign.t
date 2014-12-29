@@ -195,10 +195,10 @@ ref $cstr			# ref nonref
 <OP>				# readline
 'faked'				# rcatline
 (@z = (1 .. 3))			# aassign
-chop $chopit			# chop
-(chop (@x=@chopar))		# schop
-chomp $chopit			# chomp
-(chop (@x=@chopar))		# schomp
+(chop (@x=@chopar))		# chop
+chop $chopit			# schop
+(chop (@x=@chopar))		# chomp
+chomp $chopit			# schomp
 pos $posstr			# pos
 pos $chopit			# pos returns undef
 $nn++==2			# postinc
