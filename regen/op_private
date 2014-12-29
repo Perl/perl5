@@ -327,7 +327,7 @@ addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
 # Only the code paths that handle scalar rvalue context matter.  If dTARG
 # or RETPUSHNO occurs only in list or lvalue paths, T is safe.
 #
-# lt and friends do SETs (including ncmp, but not scmp)
+# lt and friends do SETs (including ncmp, but not scmp or i_ncmp)
 #
 # Additional mode of failure: the opcode can modify TARG before it "used"
 # all the arguments (or may call an external function which does the same).

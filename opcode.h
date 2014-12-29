@@ -1840,14 +1840,14 @@ EXTCONST U32 PL_opargs[] = {
 	0x00011226,	/* ne */
 	0x00011206,	/* i_ne */
 	0x0001122e,	/* ncmp */
-	0x0001120e,	/* i_ncmp */
+	0x0001121e,	/* i_ncmp */
 	0x00011206,	/* slt */
 	0x00011206,	/* sgt */
 	0x00011206,	/* sle */
 	0x00011206,	/* sge */
 	0x00011206,	/* seq */
 	0x00011206,	/* sne */
-	0x0001120e,	/* scmp */
+	0x0001121e,	/* scmp */
 	0x0001120e,	/* bit_and */
 	0x0001120e,	/* bit_xor */
 	0x0001120e,	/* bit_or */
@@ -2469,14 +2469,14 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       12, /* ne */
       12, /* i_ne */
       12, /* ncmp */
-      12, /* i_ncmp */
+      74, /* i_ncmp */
       12, /* slt */
       12, /* sgt */
       12, /* sle */
       12, /* sge */
       12, /* seq */
       12, /* sne */
-      12, /* scmp */
+      74, /* scmp */
       12, /* bit_and */
       12, /* bit_xor */
       12, /* bit_or */
@@ -2796,7 +2796,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x03b8, 0x1570, 0x3c8c, 0x3748, 0x2da5, /* const */
     0x29dc, 0x2ef9, /* gvsv */
     0x13d5, /* gv */
-    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, eq, i_eq, ne, i_ne, ncmp, i_ncmp, slt, sgt, sle, sge, seq, sne, scmp, bit_and, bit_xor, bit_or, smartmatch, lslice, xor */
+    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, eq, i_eq, ne, i_ne, ncmp, slt, sgt, sle, sge, seq, sne, bit_and, bit_xor, bit_or, smartmatch, lslice, xor */
     0x29dc, 0x3bd8, 0x0257, /* padsv */
     0x29dc, 0x3bd8, 0x2acc, 0x38c9, /* padav */
     0x29dc, 0x3bd8, 0x0534, 0x05d0, 0x2acc, 0x38c9, /* padhv */
@@ -2813,7 +2813,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x0adc, 0x0458, 0x0067, /* sassign */
     0x0758, 0x2acc, 0x0067, /* aassign */
     0x3ef0, 0x0003, /* chomp, schomp, sin, cos, exp, log, sqrt, int, hex, oct, abs, length, ord, chr, chroot, rmdir */
-    0x3ef0, 0x0067, /* pow, multiply, i_multiply, divide, i_divide, modulo, i_modulo, add, i_add, subtract, i_subtract, concat, left_shift, right_shift */
+    0x3ef0, 0x0067, /* pow, multiply, i_multiply, divide, i_divide, modulo, i_modulo, add, i_add, subtract, i_subtract, concat, left_shift, right_shift, i_ncmp, scmp */
     0x1058, 0x3ef0, 0x0067, /* repeat */
     0x3ef0, 0x012f, /* stringify, atan2, rand, srand, index, rindex, crypt, push, unshift, flock, chdir, chown, unlink, chmod, utime, rename, link, symlink, mkdir, waitpid, system, exec, kill, getpgrp, setpgrp, getpriority, setpriority, sleep */
     0x33f0, 0x2acc, 0x00cb, /* substr */
@@ -2947,14 +2947,14 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* NE         */ (OPpARG2_MASK),
     /* I_NE       */ (OPpARG2_MASK),
     /* NCMP       */ (OPpARG2_MASK),
-    /* I_NCMP     */ (OPpARG2_MASK),
+    /* I_NCMP     */ (OPpARG2_MASK|OPpTARGET_MY),
     /* SLT        */ (OPpARG2_MASK),
     /* SGT        */ (OPpARG2_MASK),
     /* SLE        */ (OPpARG2_MASK),
     /* SGE        */ (OPpARG2_MASK),
     /* SEQ        */ (OPpARG2_MASK),
     /* SNE        */ (OPpARG2_MASK),
-    /* SCMP       */ (OPpARG2_MASK),
+    /* SCMP       */ (OPpARG2_MASK|OPpTARGET_MY),
     /* BIT_AND    */ (OPpARG2_MASK),
     /* BIT_XOR    */ (OPpARG2_MASK),
     /* BIT_OR     */ (OPpARG2_MASK),
