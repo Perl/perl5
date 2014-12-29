@@ -263,7 +263,7 @@ Part of this (but not the opcode part):
 <commit votes="steveh" id="d920a62f19f2d30ca8fdefafb1e3173d525957db" ticket="" desc="Note that 5.21.6 and 5.21.7 are released"/>
 <commit votes="steveh" id="d274ee9d7b1765ee3032fac39cbc2e77b0d2f194" ticket="" desc="RMG: Note that Porting/release_schedule.pod should be updated"/>
 
-<commit votes="steveh" id="62fedd514941642472e01795828f42ddd04477eb" ticket="" desc="perlfunc: another alternative for enabling the "state" feature"/>
+<commit votes="steveh" id="62fedd514941642472e01795828f42ddd04477eb" ticket="" desc="perlfunc: another alternative for enabling the 'state' feature"/>
 
 To be included in an "Errata From Previous Releases":
 <commit votes="steveh, arc" id="6ff8f256561a974b63b784ae8681c284ada44f7a" ticket="122655" desc="perldelta: Entry for [perl #122655]."/>
@@ -305,20 +305,20 @@ I will also cherry-pick Module-CoreList changes as necessary in the unholy busin
                 <xsl:when test="local-name() = 'commit'">
                   <tr>
                     <xsl:apply-templates select="@votes"/>
-                    <td>
+                    <td style="vertical-align: top; white-space: nowrap">
                       <xsl:value-of select="@votes"/>
                     </td>
-                    <td class="ref">
+                    <td class="ref" style="vertical-align: top">
                       <a href="http://perl5.git.perl.org/perl.git/commitdiff/{@id}">
                         <xsl:value-of select="@id"/>
                       </a>
                     </td>
-                    <td>
+                    <td style="vertical-align: top">
                       <a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}">
                         <xsl:value-of select="@ticket"/>
                       </a>
                     </td>
-                    <td>
+                    <td style="vertical-align: top">
                       <xsl:value-of select="@desc"/>
                     </td>
                   </tr>
@@ -326,20 +326,20 @@ I will also cherry-pick Module-CoreList changes as necessary in the unholy busin
                 <xsl:when test="local-name() = 'head'">
                   <tr>
                     <xsl:apply-templates select="@votes"/>
-                    <td>
+                    <td style="vertical-align: top; white-space: nowrap">
                       <xsl:value-of select="@votes"/>
                     </td>
-                    <td class="ref">
+                    <td class="ref" style="vertical-align: top">
                       <a href="http://perl5.git.perl.org/perl.git/shortlog/refs/heads/{@branch}">
                         <xsl:value-of select="@branch"/>
                       </a>
                     </td>
-                    <td>
+                    <td style="vertical-align: top">
                       <a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}">
                         <xsl:value-of select="@ticket"/>
                       </a>
                     </td>
-                    <td>
+                    <td style="vertical-align: top">
                       <xsl:value-of select="@desc"/>
                     </td>
                   </tr>
