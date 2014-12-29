@@ -180,7 +180,7 @@ pop (;+)
 pos (;\[$*])
 print undef
 printf undef
-prototype ($)
+prototype (_)
 push (+@)
 q undef
 qq undef

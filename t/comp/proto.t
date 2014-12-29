@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..214\n";
+print "1..215\n";
 
 my $i = 1;
 
@@ -885,3 +885,9 @@ print "ok ", $i++, "\n";
     print "not ok ", $i++, " # >@got<\n";
   }
 }
+
+# [perl #123514] prototype with no arguments
+$_ = sub ($$$$$$$) {};
+@_ = (1, 2, 3, prototype(), 4, 5, 6);
+print "not " unless "@_" eq '1 2 3 $$$$$$$ 4 5 6';
+print "ok ", $i++, " - [perl #123514] (got @_)\n";

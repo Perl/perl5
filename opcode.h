@@ -1376,7 +1376,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* av2arylen */
 	Perl_ck_rvconst,	/* rv2cv */
 	Perl_ck_anoncode,	/* anoncode */
-	Perl_ck_null,		/* prototype */
+	Perl_ck_prototype,	/* prototype */
 	Perl_ck_spair,		/* refgen */
 	Perl_ck_null,		/* srefgen */
 	Perl_ck_fun,		/* ref */
@@ -1775,7 +1775,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000104,	/* av2arylen */
 	0x00000140,	/* rv2cv */
 	0x00000604,	/* anoncode */
-	0x00001b04,	/* prototype */
+	0x00009b84,	/* prototype */
 	0x00002101,	/* refgen */
 	0x00001106,	/* srefgen */
 	0x00009b8c,	/* ref */

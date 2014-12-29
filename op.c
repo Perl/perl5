@@ -10618,6 +10618,17 @@ Perl_ck_open(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_prototype(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_PROTOTYPE;
+    if (!(o->op_flags & OPf_KIDS)) {
+	op_free(o);
+	return newUNOP(OP_PROTOTYPE, 0, newDEFSVOP());
+    }
+    return o;
+}
+
+OP *
 Perl_ck_refassign(pTHX_ OP *o)
 {
     OP * const right = cLISTOPo->op_first;
