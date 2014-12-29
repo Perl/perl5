@@ -4610,21 +4610,15 @@ PP(pp_each)
     HE *entry;
     const I32 gimme = GIMME_V;
 
-    PUTBACK;
-    /* might clobber stack_sp */
     entry = hv_iternext(hash);
-    SPAGAIN;
 
     EXTEND(SP, 2);
     if (entry) {
 	SV* const sv = hv_iterkeysv(entry);
-	PUSHs(sv);	/* won't clobber stack_sp */
+	PUSHs(sv);
 	if (gimme == G_ARRAY) {
 	    SV *val;
-	    PUTBACK;
-	    /* might clobber stack_sp */
 	    val = hv_iterval(hash, entry);
-	    SPAGAIN;
 	    PUSHs(val);
 	}
     }

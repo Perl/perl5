@@ -1269,27 +1269,22 @@ Perl_do_kv(pTHX)
 
     EXTEND(SP, HvUSEDKEYS(keys) * (dokeys + dovalues));
 
-    PUTBACK;	/* hv_iternext and hv_iterval might clobber stack_sp */
     while ((entry = hv_iternext(keys))) {
-	SPAGAIN;
 	if (dokeys) {
 	    SV* const sv = hv_iterkeysv(entry);
-	    XPUSHs(sv);	/* won't clobber stack_sp */
+	    XPUSHs(sv);
 	}
 	if (dovalues) {
 	    SV *tmpstr;
-	    PUTBACK;
 	    tmpstr = hv_iterval(keys,entry);
 	    DEBUG_H(Perl_sv_setpvf(aTHX_ tmpstr, "%lu%%%d=%lu",
 			    (unsigned long)HeHASH(entry),
 			    (int)HvMAX(keys)+1,
 			    (unsigned long)(HeHASH(entry) & HvMAX(keys))));
-	    SPAGAIN;
 	    XPUSHs(tmpstr);
 	}
-	PUTBACK;
     }
-    return NORMAL;
+    RETURN;
 }
 
 /*
