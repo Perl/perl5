@@ -2700,7 +2700,7 @@ PP(pp_sin)
 
     tryAMAGICun_MG(amg_type, 0);
     {
-      SV * const arg = POPs;
+      SV * const arg = TOPs;
       const NV value = SvNV_nomg(arg);
       NV result = NV_NAN;
       if (neg_report) { /* log or sqrt */
@@ -2722,8 +2722,8 @@ PP(pp_sin)
       case OP_LOG:  result = Perl_log(value);  break;
       case OP_SQRT: result = Perl_sqrt(value); break;
       }
-      XPUSHn(result);
-      RETURN;
+      SETn(result);
+      return NORMAL;
     }
 }
 
