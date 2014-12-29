@@ -3941,7 +3941,15 @@ L<http://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
  *                          routine.  This allows that step to be skipped.
  *                          Currently, this requires s1 to be encoded as UTF-8
  *                          (u1 must be true), which is asserted for.
+ *  FOLDEQ_S1_FOLDS_SANE    With either NOMIX_ASCII or LOCALE, no folds may
+ *                          cross certain boundaries.  Hence, the caller should
+ *                          let this function do the folding instead of
+ *                          pre-folding.  This code contains an assertion to
+ *                          that effect.  However, if the caller knows what
+ *                          it's doing, it can pass this flag to indicate that,
+ *                          and the assertion is skipped.
  *  FOLDEQ_S2_ALREADY_FOLDED  Similarly.
+ *  FOLDEQ_S2_FOLDS_SANE
  */
 I32
 Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2, U32 flags)
@@ -3962,7 +3970,10 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
     PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS;
 
     assert( ! ((flags & (FOLDEQ_UTF8_NOMIX_ASCII | FOLDEQ_LOCALE))
-           && (flags & (FOLDEQ_S1_ALREADY_FOLDED | FOLDEQ_S2_ALREADY_FOLDED))));
+               && (((flags & FOLDEQ_S1_ALREADY_FOLDED)
+                     && !(flags & FOLDEQ_S1_FOLDS_SANE))
+                   || ((flags & FOLDEQ_S2_ALREADY_FOLDED)
+                       && !(flags & FOLDEQ_S2_FOLDS_SANE)))));
     /* The algorithm is to trial the folds without regard to the flags on
      * the first line of the above assert(), and then see if the result
      * violates them.  This means that the inputs can't be pre-folded to a
