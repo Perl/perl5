@@ -646,7 +646,7 @@ PP(pp_gelem)
     SV *sv = POPs;
     STRLEN len;
     const char * const elem = SvPV_const(sv, len);
-    GV * const gv = MUTABLE_GV(POPs);
+    GV * const gv = MUTABLE_GV(TOPs);
     SV * tmpRef = NULL;
 
     sv = NULL;
@@ -712,7 +712,7 @@ PP(pp_gelem)
 	sv_2mortal(sv);
     else
 	sv = &PL_sv_undef;
-    XPUSHs(sv);
+    SETs(sv);
     RETURN;
 }
 
