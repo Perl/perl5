@@ -944,7 +944,7 @@ PP(pp_schop)
     if (chomping)
 	sv_setiv(TARG, count);
     SETTARG;
-    RETURN;
+    return NORMAL;
 }
 
 
