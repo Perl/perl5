@@ -975,9 +975,12 @@ PP(pp_undef)
 	RETPUSHUNDEF;
     }
 
-    sv = POPs;
+    sv = TOPs;
     if (!sv)
-	RETPUSHUNDEF;
+    {
+	SETs(&PL_sv_undef);
+	return NORMAL;
+    }
 
     if (SvTHINKFIRST(sv))
 	sv_force_normal_flags(sv, SV_COW_DROP_PV|SV_IMMEDIATE_UNREF);
@@ -1062,7 +1065,8 @@ PP(pp_undef)
 	SvSETMAGIC(sv);
     }
 
-    RETPUSHUNDEF;
+    SETs(&PL_sv_undef);
+    return NORMAL;
 }
 
 
