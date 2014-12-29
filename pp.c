@@ -741,7 +741,7 @@ PP(pp_study)
 
 PP(pp_trans)
 {
-    dSP; dTARG;
+    dSP; 
     SV *sv;
 
     if (PL_op->op_flags & OPf_STACKED)
@@ -749,7 +749,7 @@ PP(pp_trans)
     else {
 	EXTEND(SP,1);
 	if (ARGTARG)
-	    sv = GETTARGET;
+	    sv = PAD_SV(ARGTARG);
 	else {
 	    sv = DEFSV;
 	}
@@ -762,8 +762,7 @@ PP(pp_trans)
 	PUSHs(newsv);
     }
     else {
-	TARG = sv_newmortal();
-	PUSHi(do_trans(sv));
+	mPUSHi(do_trans(sv));
     }
     RETURN;
 }
