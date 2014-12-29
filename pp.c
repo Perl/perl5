@@ -5037,7 +5037,7 @@ PP(pp_anonhash)
 	    MARK++;
 	    SvGETMAGIC(*MARK);
 	    val = newSV(0);
-	    sv_setsv(val, *MARK);
+	    sv_setsv_nomg(val, *MARK);
 	}
 	else
 	{

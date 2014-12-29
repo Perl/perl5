@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan (tests => 345);
+    plan (tests => 347);
 }
 
 use strict;
@@ -216,6 +216,10 @@ $dummy  = &$var5        ; check_count '&{}';
     tie my $var7 => main => 973;
     defined $$var7          ; check_count 'symbolic defined ${}';
 }
+
+# Constructors
+$dummy  = {$var,$var}   ; check_count '{}', 2;
+$dummy  = [$var]        ; check_count '[]';
 
 tie my $var8 => 'main', 'main';
 sub bolgy {}
