@@ -65,6 +65,7 @@ I feel a bit leery about this next one.  The code is a bit fragile, so I would f
 <commit votes="steveh" id="9745959a89f3a201c789b8e4ce494405f95b2a7a" ticket="123443" desc="PerlIO::scalar: skip the 4GB seek test if off_t is too small"/>
 
 <commit votes="steveh" id="d8bd3d828a02f8df716063d9980b8b9af539ca42" ticket="123495" desc="[perl #123495] Stop gmtime(nan) from crashing"/>
+<commit votes="" id="2b9215fdb83c97496b82d0c73d4903097a8ed66b" ticket="123502" desc="Vital followup to gmtime(nan) fix"/>
 
 </div>
 
