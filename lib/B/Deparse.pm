@@ -4597,7 +4597,8 @@ sub escape_str { # ASCII, UTF8
     my($str) = @_;
     $str =~ s/(.)/ord($1) > 255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
     $str =~ s/\a/\\a/g;
-#    $str =~ s/\cH/\\b/g; # \b means something different in a regex
+#    $str =~ s/\cH/\\b/g; # \b means something different in a regex; and \cH
+                          # isn't a backspace in EBCDIC
     $str =~ s/\t/\\t/g;
     $str =~ s/\n/\\n/g;
     $str =~ s/\e/\\e/g;
