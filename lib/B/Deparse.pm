@@ -1720,6 +1720,41 @@ sub stash_variable {
     return $prefix . $self->maybe_qualify($prefix, $name);
 }
 
+my %unctrl = # portable to EBCDIC
+    (
+     "\c@" => '\c@',	# unused
+     "\cA" => '\cA',
+     "\cB" => '\cB',
+     "\cC" => '\cC',
+     "\cD" => '\cD',
+     "\cE" => '\cE',
+     "\cF" => '\cF',
+     "\cG" => '\cG',
+     "\cH" => '\cH',
+     "\cI" => '\cI',
+     "\cJ" => '\cJ',
+     "\cK" => '\cK',
+     "\cL" => '\cL',
+     "\cM" => '\cM',
+     "\cN" => '\cN',
+     "\cO" => '\cO',
+     "\cP" => '\cP',
+     "\cQ" => '\cQ',
+     "\cR" => '\cR',
+     "\cS" => '\cS',
+     "\cT" => '\cT',
+     "\cU" => '\cU',
+     "\cV" => '\cV',
+     "\cW" => '\cW',
+     "\cX" => '\cX',
+     "\cY" => '\cY',
+     "\cZ" => '\cZ',
+     "\c[" => '\c[',	# unused
+     "\c\\" => '\c\\',	# unused
+     "\c]" => '\c]',	# unused
+     "\c_" => '\c_',	# unused
+    );
+
 # Return just the name, without the prefix.  It may be returned as a quoted
 # string.  The second return value is a boolean indicating that.
 sub stash_variable_name {
@@ -4552,41 +4587,6 @@ sub re_uninterp {
     return $str;
 }
 }
-
-my %unctrl = # portable to EBCDIC
-    (
-     "\c@" => '\c@',	# unused
-     "\cA" => '\cA',
-     "\cB" => '\cB',
-     "\cC" => '\cC',
-     "\cD" => '\cD',
-     "\cE" => '\cE',
-     "\cF" => '\cF',
-     "\cG" => '\cG',
-     "\cH" => '\cH',
-     "\cI" => '\cI',
-     "\cJ" => '\cJ',
-     "\cK" => '\cK',
-     "\cL" => '\cL',
-     "\cM" => '\cM',
-     "\cN" => '\cN',
-     "\cO" => '\cO',
-     "\cP" => '\cP',
-     "\cQ" => '\cQ',
-     "\cR" => '\cR',
-     "\cS" => '\cS',
-     "\cT" => '\cT',
-     "\cU" => '\cU',
-     "\cV" => '\cV',
-     "\cW" => '\cW',
-     "\cX" => '\cX',
-     "\cY" => '\cY',
-     "\cZ" => '\cZ',
-     "\c[" => '\c[',	# unused
-     "\c\\" => '\c\\',	# unused
-     "\c]" => '\c]',	# unused
-     "\c_" => '\c_',	# unused
-    );
 
 # character escapes, but not delimiters that might need to be escaped
 sub escape_str { # ASCII, UTF8
