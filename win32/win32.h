@@ -243,8 +243,6 @@ typedef long		gid_t;
 typedef unsigned short	mode_t;
 #endif
 
-#pragma  warning(disable: 4102)	/* "unreferenced label" */
-
 #if _MSC_VER < 1800
 #define isnan		_isnan	/* Defined already in VC++ 12.0 */
 #endif

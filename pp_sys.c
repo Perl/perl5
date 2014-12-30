@@ -3633,11 +3633,13 @@ PP(pp_chdir)
 #endif
     RETURN;
 
+#ifdef HAS_FCHDIR
  nuts:
     report_evil_fh(gv);
     SETERRNO(EBADF,RMS_IFI);
     PUSHi(0);
     RETURN;
+#endif
 }
 
 

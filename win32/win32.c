@@ -3247,7 +3247,6 @@ win32_chsize(int fd, Off_t size)
 	    retval = -1;
 	}
     }
-finish:
     win32_lseek(fd, cur, SEEK_SET);
     return retval;
 #else
