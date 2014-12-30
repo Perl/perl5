@@ -1762,7 +1762,9 @@ sub stash_variable_name {
     my $name = $self->gv_name($gv, 1);
     $name = $self->maybe_qualify($prefix,$name);
     if ($name =~ /^(?:\S|(?!\d)[\ca-\cz]?(?:\w|::)*|\d+)\z/) {
-	$name =~ s/^([\ca-\cz])/'^'.($1|'@')/e;
+	if ($name =~ s/^([\ca-\cz])/$unctrl{$1}/e) {
+            $name =~ s/\\c/^/g;
+        }
 	$name =~ /^(\^..|{)/ and $name = "{$name}";
 	return $name, 0; # not quoted
     }
@@ -4995,7 +4997,11 @@ sub pchr { # ASCII
 	return '\\\\';
     } elsif ($n == ord "-") {
 	return "\\-";
-    } elsif ($n >= ord(' ') and $n <= ord('~')) {
+    } elsif (utf8::native_to_unicode($n) >= utf8::native_to_unicode(ord(' '))
+             and utf8::native_to_unicode($n) <= utf8::native_to_unicode(ord('~')))
+    {
+        # I'm presuming a regex is not ok here, otherwise we could have used
+        # /[[:print:]]/a to get here
 	return chr($n);
     } elsif ($n == ord "\a") {
 	return '\\a';
@@ -5012,7 +5018,7 @@ sub pchr { # ASCII
     } elsif ($n == ord "\r") {
 	return '\\r';
     } elsif ($n >= ord("\cA") and $n <= ord("\cZ")) {
-	return '\\c' . chr(ord("@") + $n);
+	return unctrl{chr $n};
     } else {
 #	return '\x' . sprintf("%02x", $n);
 	return '\\' . sprintf("%03o", $n);
