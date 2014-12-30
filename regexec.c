@@ -4591,6 +4591,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             fold_utf8_flags =  FOLDEQ_LOCALE | FOLDEQ_S1_ALREADY_FOLDED
                                              | FOLDEQ_S1_FOLDS_SANE;
+	    folder = foldEQ_latin1;
+	    fold_array = PL_fold_latin1;
 	    goto do_exactf;
 
 	case EXACTFU_SS:         /*  /\x{df}/iu   */
