@@ -6785,7 +6785,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                                    == REG_RUN_ON_COMMENT_SEEN);
 	U16 reganch = (U16)((r->extflags & RXf_PMf_STD_PMMOD)
 			    >> RXf_PMf_STD_PMMOD_SHIFT);
-	const char *fptr = STD_PAT_MODS;        /*"msix"*/
+	const char *fptr = STD_PAT_MODS;        /*"msixn"*/
 	char *p;
         /* Allocate for the worst case, which is all the std flags are turned
          * on.  If more precision is desired, we could do a population count of

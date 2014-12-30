@@ -958,6 +958,12 @@ required for some reason:
     @num = split /(a|b)+/, $x;    # @num = ('12','a','34','a','5')
     @num = split /(?:a|b)+/, $x;  # @num = ('12','34','5')
 
+In Perl 5.22 and later, all groups within a regexp can be set to
+non-capturing by using the new C</n> flag:
+
+    "hello" =~ /(hi|hello)/n; # $1 is not set!
+
+See L<perlre/"n"> for more information.
 
 =head2 Matching repetitions
 

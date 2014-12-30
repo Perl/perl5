@@ -966,7 +966,7 @@ XS(XS_re_regexp_pattern)
             XSRETURN(2);
         } else {
             /* Scalar, so use the string that Perl would return */
-            /* return the pattern in (?msix:..) format */
+            /* return the pattern in (?msixn:..) format */
 #if PERL_VERSION >= 11
             pattern = sv_2mortal(newSVsv(MUTABLE_SV(re)));
 #else

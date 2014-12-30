@@ -7000,7 +7000,8 @@ uses empty string matches as separators to produce the output
 list of its component characters.
 
 As a special case for C<split>, the empty pattern given in
-L<match operator|perlop/"m/PATTERN/msixpodualgc"> syntax (C<//>) specifically matches the empty string, which is contrary to its usual
+L<match operator|perlop/"m/PATTERN/msixpodualngc"> syntax (C<//>)
+specifically matches the empty string, which is contrary to its usual
 interpretation as the last successful match.
 
 If PATTERN is C</^/>, then it is treated as if it used the

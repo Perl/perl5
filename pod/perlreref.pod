@@ -21,7 +21,7 @@ false if the match succeeds, and true if it fails.
 
     $var !~ /foo/;
 
-C<m/pattern/msixpogcdual> searches a string for a pattern match,
+C<m/pattern/msixpogcdualn> searches a string for a pattern match,
 applying the given options.
 
     m  Multiline mode - ^ and $ match internal lines
@@ -39,13 +39,14 @@ applying the given options.
     u  match according to Unicode rules
     d  match according to native rules unless something indicates
        Unicode
+    n  Non-capture mode. Don't let () fill in $1, $2, etc...
 
 If 'pattern' is an empty string, the last I<successfully> matched
 regex is used. Delimiters other than '/' may be used for both this
 operator and the following ones. The leading C<m> can be omitted
 if the delimiter is '/'.
 
-C<qr/pattern/msixpodual> lets you store a regex in a variable,
+C<qr/pattern/msixpodualn> lets you store a regex in a variable,
 or pass one around. Modifiers as for C<m//>, and are stored
 within the regex.
 

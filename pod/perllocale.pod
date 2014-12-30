@@ -239,7 +239,7 @@ is.
 =item *
 
 Regular expression patterns can be compiled using
-L<qrE<sol>E<sol>|perlop/qrE<sol>STRINGE<sol>msixpodual> with actual
+L<qrE<sol>E<sol>|perlop/qrE<sol>STRINGE<sol>msixpodualn> with actual
 matching deferred to later.  Again, it is whether or not the compilation
 was done within the scope of C<use locale> that determines the match
 behavior, not if the matches are done within such a scope or not.

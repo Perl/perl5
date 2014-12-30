@@ -1629,14 +1629,14 @@ matching and related activities.
 
 =over 8
 
-=item qr/STRING/msixpodual
+=item qr/STRING/msixpodualn
 X<qr> X</i> X</m> X</o> X</s> X</x> X</p>
 
 This operator quotes (and possibly compiles) its I<STRING> as a regular
 expression.  I<STRING> is interpolated the same way as I<PATTERN>
 in C<m/PATTERN/>.  If "'" is used as the delimiter, no interpolation
 is done.  Returns a Perl value which may be used instead of the
-corresponding C</STRING/msixpodual> expression.  The returned value is a
+corresponding C</STRING/msixpodualn> expression.  The returned value is a
 normalized version of the original pattern.  It magically differs from
 a string containing the same characters: C<ref(qr/x/)> returns "Regexp";
 however, dereferencing it is not well defined (you currently get the 
@@ -1699,9 +1699,10 @@ Options (specified by the following modifiers) are:
     l   Use the locale.
     u   Use Unicode rules.
     d   Use Unicode or native charset, as in 5.12 and earlier.
+    n   Non-capture mode. Don't let () fill in $1, $2, etc...
 
 If a precompiled pattern is embedded in a larger pattern then the effect
-of "msixpluad" will be propagated appropriately.  The effect the "o"
+of "msixpluadn" will be propagated appropriately.  The effect the "o"
 modifier has is not propagated, being restricted to those patterns
 explicitly using it.
 
@@ -1715,12 +1716,12 @@ for a detailed look at the semantics of regular expressions.  In
 particular, all modifiers except the largely obsolete C</o> are further
 explained in L<perlre/Modifiers>.  C</o> is described in the next section.
 
-=item m/PATTERN/msixpodualgc
+=item m/PATTERN/msixpodualngc
 X<m> X<operator, match>
 X<regexp, options> X<regexp> X<regex, options> X<regex>
 X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c>
 
-=item /PATTERN/msixpodualgc
+=item /PATTERN/msixpodualngc
 
 Searches a string for a pattern match, and in scalar context returns
 true if it succeeds, false if it fails.  If no string is specified
@@ -1973,10 +1974,10 @@ Here is the output (split into several lines):
  lowercase line-noise lowercase lowercase line-noise lowercase
  lowercase line-noise MiXeD line-noise. That's all!
 
-=item m?PATTERN?msixpodualgc
+=item m?PATTERN?msixpodualngc
 X<?> X<operator, match-once>
 
-=item ?PATTERN?msixpodualgc
+=item ?PATTERN?msixpodualngc
 
 This is just like the C<m/PATTERN/> search, except that it matches
 only once between calls to the reset() operator.  This is a useful
@@ -2005,7 +2006,7 @@ but the resulting C<?PATTERN?> syntax is deprecated, will warn on
 usage and might be removed from a future stable release of Perl (without
 further notice!).
 
-=item s/PATTERN/REPLACEMENT/msixpodualgcer
+=item s/PATTERN/REPLACEMENT/msixpodualngcer
 X<substitute> X<substitution> X<replace> X<regexp, replace>
 X<regexp, substitute> X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c> X</e> X</r>
 

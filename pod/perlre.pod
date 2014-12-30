@@ -102,6 +102,26 @@ These modifiers, all new in 5.14, affect which character-set rules
 (Unicode, etc.) are used, as described below in
 L</Character set modifiers>.
 
+=item n
+X</n> X<regex, non-capture> X<regexp, non-capture>
+X<regular expression, non-capture>
+
+Prevent the grouping metacharacters C<()> from capturing. This modifier,
+new in 5.22, will stop C<$1>, C<$2>, etc... from being filled in.
+
+  "hello" =~ /(hi|hello)/;   # $1 is "hello"
+  "hello" =~ /(hi|hello)/n;  # $1 is undef
+
+This is equivalent to putting ?: at the beginning of every capturing group:
+
+  "hello" =~ /(?:hi|hello)/; # $1 is undef
+
+C</n> can be negated on a per-group basis. Alternatively, named captures
+may still be used.
+
+  "hello" =~ /(?-n:(hi|hello))/n;   # $1 is "hello"
+  "hello" =~ /(?<greet>hi|hello)/n; # $1 is "hello", $+{greet} is "hello"
+
 =item Other Modifiers
 
 There are a number of flags that can be found at the end of regular
@@ -117,7 +137,7 @@ L<perlretut/"Using regular expressions in Perl"> are:
 
 Substitution-specific modifiers described in
 
-L<perlop/"s/PATTERN/REPLACEMENT/msixpodualgcer"> are:
+L<perlop/"s/PATTERN/REPLACEMENT/msixpodualngcer"> are:
 
   e  - evaluate the right-hand side as an expression
   ee - evaluate the right side as a string then eval the result
