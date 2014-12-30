@@ -272,6 +272,13 @@ Perl_new_ctype(pTHX_ const char *newctype)
 
     PERL_ARGS_ASSERT_NEW_CTYPE;
 
+    /* We will replace any bad locale warning with 1) nothing if the new one is
+     * ok; or 2) a new warning for the bad new locale */
+    if (PL_warn_locale) {
+        SvREFCNT_dec_NN(PL_warn_locale);
+        PL_warn_locale = NULL;
+    }
+
     PL_in_utf8_CTYPE_locale = _is_cur_LC_category_utf8(LC_CTYPE);
 
     /* A UTF-8 locale gets standard rules.  But note that code still has to
@@ -291,8 +298,6 @@ Perl_new_ctype(pTHX_ const char *newctype)
         bool multi_byte_locale = FALSE;     /* Assume is a single-byte locale
                                                to start */
         unsigned int bad_count = 0;         /* Count of bad characters */
-
-        SvREFCNT_dec(PL_warn_locale);   /* We are about to overwrite this */
 
         for (i = 0; i < 256; i++) {
             if (isUPPER_LC((U8) i))
