@@ -2026,7 +2026,9 @@ sub declare_warnings {
     elsif (($to & WARN_MASK) eq ("\0"x length($to) & WARN_MASK)) {
 	return $self->keyword("no") . " warnings;\n";
     }
-    return "BEGIN {\${^WARNING_BITS} = ".perlstring($to)."}\n\cK";
+    return "BEGIN {\${^WARNING_BITS} = \""
+           . join("", map { sprintf("\\x%02x", ord $_) } split "", $to)
+           . "\"}\n\cK";
 }
 
 sub declare_hints {
