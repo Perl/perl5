@@ -797,141 +797,141 @@ to be enabled/disabled in isolation.
 
 The current hierarchy is:
 
-    everything -+
-                |
-                +- all ---+
-                |         |
-                |         +- closure
-                |         |
-                |         +- deprecated
-                |         |
-                |         +- exiting
-                |         |
-                |         +- experimental --+
-                |         |                 |
-                |         |                 +- experimental::autoderef
-                |         |                 |
-                |         |                 +- experimental::lexical_subs
-                |         |                 |
-                |         |                 +- experimental::lexical_topic
-                |         |                 |
-                |         |                 +- experimental::postderef
-                |         |                 |
-                |         |                 +- experimental::refaliasing
-                |         |                 |
-                |         |                 +- experimental::regex_sets
-                |         |                 |
-                |         |                 +- experimental::signatures
-                |         |                 |
-                |         |                 +- experimental::smartmatch
-                |         |                 |
-                |         |                 +- experimental::win32_perlio
-                |         |
-                |         +- glob
-                |         |
-                |         +- imprecision
-                |         |
-                |         +- io ------------+
-                |         |                 |
-                |         |                 +- closed
-                |         |                 |
-                |         |                 +- exec
-                |         |                 |
-                |         |                 +- layer
-                |         |                 |
-                |         |                 +- newline
-                |         |                 |
-                |         |                 +- pipe
-                |         |                 |
-                |         |                 +- syscalls
-                |         |                 |
-                |         |                 +- unopened
-                |         |
-                |         +- locale
-                |         |
-                |         +- misc
-                |         |
-                |         +- missing
-                |         |
-                |         +- numeric
-                |         |
-                |         +- once
-                |         |
-                |         +- overflow
-                |         |
-                |         +- pack
-                |         |
-                |         +- portable
-                |         |
-                |         +- recursion
-                |         |
-                |         +- redefine
-                |         |
-                |         +- redundant
-                |         |
-                |         +- regexp
-                |         |
-                |         +- severe --------+
-                |         |                 |
-                |         |                 +- debugging
-                |         |                 |
-                |         |                 +- inplace
-                |         |                 |
-                |         |                 +- internal
-                |         |                 |
-                |         |                 +- malloc
-                |         |
-                |         +- signal
-                |         |
-                |         +- substr
-                |         |
-                |         +- syntax --------+
-                |         |                 |
-                |         |                 +- ambiguous
-                |         |                 |
-                |         |                 +- bareword
-                |         |                 |
-                |         |                 +- digit
-                |         |                 |
-                |         |                 +- illegalproto
-                |         |                 |
-                |         |                 +- parenthesis
-                |         |                 |
-                |         |                 +- precedence
-                |         |                 |
-                |         |                 +- printf
-                |         |                 |
-                |         |                 +- prototype
-                |         |                 |
-                |         |                 +- qw
-                |         |                 |
-                |         |                 +- reserved
-                |         |                 |
-                |         |                 +- semicolon
-                |         |
-                |         +- taint
-                |         |
-                |         +- threads
-                |         |
-                |         +- uninitialized
-                |         |
-                |         +- unpack
-                |         |
-                |         +- untie
-                |         |
-                |         +- utf8 ----------+
-                |         |                 |
-                |         |                 +- non_unicode
-                |         |                 |
-                |         |                 +- nonchar
-                |         |                 |
-                |         |                 +- surrogate
-                |         |
-                |         +- void
-                |
-                +- extra -+
-                          |
-                          +- void_unusual
+ everything -+
+             |
+             +- all ---+
+             |         |
+             |         +- closure
+             |         |
+             |         +- deprecated
+             |         |
+             |         +- exiting
+             |         |
+             |         +- experimental --+
+             |         |                 |
+             |         |                 +- experimental::autoderef
+             |         |                 |
+             |         |                 +- experimental::lexical_subs
+             |         |                 |
+             |         |                 +- experimental::lexical_topic
+             |         |                 |
+             |         |                 +- experimental::postderef
+             |         |                 |
+             |         |                 +- experimental::refaliasing
+             |         |                 |
+             |         |                 +- experimental::regex_sets
+             |         |                 |
+             |         |                 +- experimental::signatures
+             |         |                 |
+             |         |                 +- experimental::smartmatch
+             |         |                 |
+             |         |                 +- experimental::win32_perlio
+             |         |
+             |         +- glob
+             |         |
+             |         +- imprecision
+             |         |
+             |         +- io ------------+
+             |         |                 |
+             |         |                 +- closed
+             |         |                 |
+             |         |                 +- exec
+             |         |                 |
+             |         |                 +- layer
+             |         |                 |
+             |         |                 +- newline
+             |         |                 |
+             |         |                 +- pipe
+             |         |                 |
+             |         |                 +- syscalls
+             |         |                 |
+             |         |                 +- unopened
+             |         |
+             |         +- locale
+             |         |
+             |         +- misc
+             |         |
+             |         +- missing
+             |         |
+             |         +- numeric
+             |         |
+             |         +- once
+             |         |
+             |         +- overflow
+             |         |
+             |         +- pack
+             |         |
+             |         +- portable
+             |         |
+             |         +- recursion
+             |         |
+             |         +- redefine
+             |         |
+             |         +- redundant
+             |         |
+             |         +- regexp
+             |         |
+             |         +- severe --------+
+             |         |                 |
+             |         |                 +- debugging
+             |         |                 |
+             |         |                 +- inplace
+             |         |                 |
+             |         |                 +- internal
+             |         |                 |
+             |         |                 +- malloc
+             |         |
+             |         +- signal
+             |         |
+             |         +- substr
+             |         |
+             |         +- syntax --------+
+             |         |                 |
+             |         |                 +- ambiguous
+             |         |                 |
+             |         |                 +- bareword
+             |         |                 |
+             |         |                 +- digit
+             |         |                 |
+             |         |                 +- illegalproto
+             |         |                 |
+             |         |                 +- parenthesis
+             |         |                 |
+             |         |                 +- precedence
+             |         |                 |
+             |         |                 +- printf
+             |         |                 |
+             |         |                 +- prototype
+             |         |                 |
+             |         |                 +- qw
+             |         |                 |
+             |         |                 +- reserved
+             |         |                 |
+             |         |                 +- semicolon
+             |         |
+             |         +- taint
+             |         |
+             |         +- threads
+             |         |
+             |         +- uninitialized
+             |         |
+             |         +- unpack
+             |         |
+             |         +- untie
+             |         |
+             |         +- utf8 ----------+
+             |         |                 |
+             |         |                 +- non_unicode
+             |         |                 |
+             |         |                 +- nonchar
+             |         |                 |
+             |         |                 +- surrogate
+             |         |
+             |         +- void
+             |
+             +- extra -+
+                       |
+                       +- void_unusual
 
 Just like the "strict" pragma any of these categories can be combined
 

@@ -295,7 +295,7 @@ sub mkOct
 
 if (@ARGV && $ARGV[0] eq "tree")
 {
-    print warningsTree($tree, "    ") ;
+    print warningsTree($tree, " ") ;
     exit ;
 }
 
@@ -475,7 +475,7 @@ print $pm '$LAST_BIT = ' . "$index ;\n" ;
 print $pm '$BYTES    = ' . "$warn_size ;\n" ;
 while (<DATA>) {
     if ($_ eq "=for warnings.pl tree-goes-here\n") {
-      print $pm warningsTree($tree, "    ");
+      print $pm warningsTree($tree, " ");
       next;
     }
     print $pm $_ ;
