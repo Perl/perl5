@@ -42,6 +42,17 @@ warnings to the core going forward through other top-level warning
 categories. See L<the warnings documentation|warnings/Top-level
 warning categories & associated confusion> for details.
 
+=head2 Non-Capturing Regular Expression Flag
+
+Regular expressions now support a C</n> flag that disables capturing
+and filling in C<$1>, C<$2>, etc... inside of groups:
+
+  "hello" =~ /(hi|hello)/n; # $1 is not set
+
+This is equivalent to putting C<?:> at the beginning of every capturing group.
+
+See L<perlre/"n"> for more information.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

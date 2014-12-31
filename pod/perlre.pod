@@ -112,7 +112,7 @@ new in 5.22, will stop C<$1>, C<$2>, etc... from being filled in.
   "hello" =~ /(hi|hello)/;   # $1 is "hello"
   "hello" =~ /(hi|hello)/n;  # $1 is undef
 
-This is equivalent to putting ?: at the beginning of every capturing group:
+This is equivalent to putting C<?:> at the beginning of every capturing group:
 
   "hello" =~ /(?:hi|hello)/; # $1 is undef
 
