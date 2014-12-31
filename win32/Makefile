@@ -1118,7 +1118,7 @@ Extensions_realclean:
 #-------------------------------------------------------------------------------
 
 doc: $(PERLEXE) ..\pod\perltoc.pod
-	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=$(HTMLDIR) \
+	$(PERLEXE) ..\installhtml --podroot=.. --htmldir=$(HTMLDIR) \
 	    --podpath=pod:lib:utils --htmlroot="file://$(INST_HTML::=|)" \
 	    --recurse
 
@@ -1319,8 +1319,8 @@ minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) utils $(UNIDATAFILES)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	attrib -r ..\t\*.*
 	cd ..\t && \
-#note this perl.exe is miniperl
-	perl.exe -I..\lib harness base/*.t comp/*.t cmd/*.t io/*.t opbasic/*.t op/*.t pragma/*.t
+# Note this perl.exe is miniperl
+	perl.exe harness base/*.t comp/*.t cmd/*.t io/*.t opbasic/*.t op/*.t pragma/*.t
 
 test-prep : all utils ../pod/perltoc.pod
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
@@ -1330,12 +1330,12 @@ test-prep : all utils ../pod/perltoc.pod
 
 test : test-prep
 	cd ..\t
-	perl.exe -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+	perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
 	cd ..\win32
 
 test_porting : test-prep
 	cd ..\t
-	perl.exe -I..\lib harness $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
+	perl.exe harness $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
 	cd ..\win32
 
 test-reonly : reonly utils
@@ -1343,7 +1343,7 @@ test-reonly : reonly utils
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	cd ..\t
-	perl.exe -I..\lib harness $(OPT) -re \bre\\/ $(EXTRA)
+	perl.exe harness $(OPT) -re \bre\\/ $(EXTRA)
 	cd ..\win32
 
 regen :
@@ -1354,7 +1354,7 @@ regen :
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1
 	cd ..\t
-	perl.exe -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+	perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
 	cd ..\win32
 
 _test : 
@@ -1362,7 +1362,7 @@ _test :
        $(XCOPY) $(PERLDLL) ..\t\$(NULL)
        $(XCOPY) $(GLOBEXE) ..\t\$(NULL)
        cd ..\t
-       perl.exe -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+       perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
        cd ..\win32
 
 _clean :
@@ -1403,13 +1403,13 @@ realclean : Extensions_realclean _clean
 # Please *don't* use this unless all tests pass.
 # If you want to report test failures, use "nmake nok" instead.
 ok: utils
-	$(PERLEXE) -I..\lib ..\utils\perlbug -ok -s "(UNINSTALLED)"
+	$(PERLEXE) ..\utils\perlbug -ok -s "(UNINSTALLED)"
 
 okfile: utils
-	$(PERLEXE) -I..\lib ..\utils\perlbug -ok -s "(UNINSTALLED)" -F perl.ok
+	$(PERLEXE) ..\utils\perlbug -ok -s "(UNINSTALLED)" -F perl.ok
 
 nok: utils
-	$(PERLEXE) -I..\lib ..\utils\perlbug -nok -s "(UNINSTALLED)"
+	$(PERLEXE) ..\utils\perlbug -nok -s "(UNINSTALLED)"
 
 nokfile: utils
-	$(PERLEXE) -I..\lib ..\utils\perlbug -nok -s "(UNINSTALLED)" -F perl.nok
+	$(PERLEXE) ..\utils\perlbug -nok -s "(UNINSTALLED)" -F perl.nok

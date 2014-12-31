@@ -1399,7 +1399,7 @@ Extensions_realclean :
 
 
 doc: $(PERLEXE) ..\pod\perltoc.pod
-	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=$(HTMLDIR) \
+	$(PERLEXE) ..\installhtml --podroot=.. --htmldir=$(HTMLDIR) \
 	    --podpath=pod:lib:utils --htmlroot="file://$(INST_HTML:s,:,|,)"\
 	    --recurse
 
@@ -1596,8 +1596,8 @@ minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES) utils
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	attrib -r ..\t\*.*
 	cd ..\t && \
-#note this perl.exe is miniperl
-	perl.exe -I..\lib harness base/*.t comp/*.t cmd/*.t io/*.t opbasic/*.t op/*.t pragma/*.t
+# Note this perl.exe is miniperl
+	perl.exe harness base/*.t comp/*.t cmd/*.t io/*.t opbasic/*.t op/*.t pragma/*.t
 
 test-prep : all utils ..\pod\perltoc.pod
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
@@ -1619,34 +1619,32 @@ test-prep : all utils ..\pod\perltoc.pod
 
 test : test-prep
 	set PERL_STATIC_EXT=$(STATIC_EXT) && \
-	    cd ..\t && perl.exe -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+	    cd ..\t && perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
 
 test_porting : test-prep
 	set PERL_STATIC_EXT=$(STATIC_EXT) && \
-	    cd ..\t && perl.exe -I..\lib harness $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
+	    cd ..\t && perl.exe harness $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
 
 test-reonly : reonly utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
-	cd ..\t && \
-	perl.exe -I..\lib harness $(OPT) -re \bpat\\/ $(EXTRA) && \
-	cd ..\win32
+	cd ..\t && perl.exe harness $(OPT) -re \bpat\\/ $(EXTRA)
 
 regen :
-	cd .. && regen.pl && cd win32
+	cd .. && regen.pl
 
 test-notty : test-prep
 	set PERL_STATIC_EXT=$(STATIC_EXT) && \
 	    set PERL_SKIP_TTY_TEST=1 && \
-	    cd ..\t && perl.exe -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+	    cd ..\t && perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
 
 _test :
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	set PERL_STATIC_EXT=$(STATIC_EXT) && \
-	    cd ..\t && perl.exe -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+	    cd ..\t && perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
 
 _clean :
 	-@erase miniperlmain$(o)
@@ -1688,13 +1686,13 @@ realclean : Extensions_realclean _clean
 # Please *don't* use this unless all tests pass.
 # If you want to report test failures, use "dmake nok" instead.
 ok: utils
-	$(PERLEXE) -I..\lib ..\utils\perlbug -ok -s "(UNINSTALLED)"
+	$(PERLEXE) ..\utils\perlbug -ok -s "(UNINSTALLED)"
 
 okfile: utils
-	$(PERLEXE) -I..\lib ..\utils\perlbug -ok -s "(UNINSTALLED)" -F perl.ok
+	$(PERLEXE) ..\utils\perlbug -ok -s "(UNINSTALLED)" -F perl.ok
 
 nok: utils
-	$(PERLEXE) -I..\lib ..\utils\perlbug -nok -s "(UNINSTALLED)"
+	$(PERLEXE) ..\utils\perlbug -nok -s "(UNINSTALLED)"
 
 nokfile: utils
-	$(PERLEXE) -I..\lib ..\utils\perlbug -nok -s "(UNINSTALLED)" -F perl.nok
+	$(PERLEXE) ..\utils\perlbug -nok -s "(UNINSTALLED)" -F perl.nok
