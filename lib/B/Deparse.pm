@@ -1160,6 +1160,7 @@ sub pad_subs {
     my @names = $padlist->ARRAYelt(0)->ARRAY;
     my @values = $padlist->ARRAYelt(1)->ARRAY;
     my @todo;
+  PADENTRY:
     for my $ix (0.. $#names) { for $_ ($names[$ix]) {
 	next if class($_) eq "SPECIAL";
 	my $name = $_->PVX;
@@ -1176,6 +1177,23 @@ sub pad_subs {
 	    my $protocv = $flags & SVpad_STATE
 		? $values[$ix]
 		: $_->PROTOCV;
+	    if (class ($protocv) ne 'CV') {
+		my $flags = $flags;
+		my $cv = $cv;
+		my $name = $_;
+		while ($flags & PADNAMEt_OUTER && class ($protocv) ne 'CV')
+		{
+		    $cv = $cv->OUTSIDE;
+		    next PADENTRY if class($cv) eq 'SPECIAL'; # XXX freed?
+		    my $padlist = $cv->PADLIST;
+		    my $ix = $name->PARENT_PAD_INDEX;
+		    $name = $padlist->NAMES->ARRAYelt($ix);
+		    $flags = $name->FLAGS;
+		    $protocv = $flags & SVpad_STATE
+			? $padlist->ARRAYelt(1)->ARRAYelt($ix)
+			: $name->PROTOCV;
+		}
+	    }
 	    my $defined_in_this_sub = ${$protocv->OUTSIDE} == $$cv || do {
 		my $other = $protocv->PADLIST;
 		$$other && $other->outid == $padlist->id;

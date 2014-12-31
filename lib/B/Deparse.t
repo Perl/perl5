@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 45; # not counting those in the __DATA__ section
+my $tests = 46; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -500,6 +500,12 @@ like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
              prog => 'sub foo{foo()}'),
      qr/^sub foo \{\s+foo\(\)/m,
     'recursive sub';
+
+like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+             prog => 'use feature lexical_subs=>state=>;
+                      state sub sb5; sub { sub sb5 { } }'),
+     qr/sub \{\s*\(\);\s*sub sb5 {/m,
+    'state sub in anon sub but declared outside';
 
 is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
              prog => 'BEGIN { $::{f}=\!0 }'),
@@ -1924,6 +1930,21 @@ my sub g {
     ();
     sub f { }
 }
+####
+# TODO only partially fixed
+# lexical state subroutine with outer declaration and inner definition
+# CONTEXT use feature 'lexical_subs', 'state'; no warnings 'experimental::lexical_subs';
+();
+state sub sb4;
+state sub a {
+    ();
+    sub sb4 { }
+}
+state sub sb5;
+sub {
+    ();
+    sub sb5 { }
+} ;
 ####
 # Elements of %# should not be confused with $#{ array }
 () = ${#}{'foo'};
