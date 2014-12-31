@@ -120,7 +120,8 @@ C</n> can be negated on a per-group basis. Alternatively, named captures
 may still be used.
 
   "hello" =~ /(?-n:(hi|hello))/n;   # $1 is "hello"
-  "hello" =~ /(?<greet>hi|hello)/n; # $1 is "hello", $+{greet} is "hello"
+  "hello" =~ /(?<greet>hi|hello)/n; # $1 is "hello", $+{greet} is
+                                    # "hello"
 
 =item Other Modifiers
 
