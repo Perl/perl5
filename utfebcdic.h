@@ -86,6 +86,20 @@
  *
  * tr16 also says that NEL and LF be swapped.  We don't do that.
  *
+ * Because of the way UTF-EBCDIC is constructed, the lowest 32 code points that
+ * aren't equivalent to ASCII characters nor C1 controls form the set of
+ * continuation bytes; the remaining 64 non-ASCII, non-control code points form
+ * the potential start bytes, in order.  (However, the first 5 of these lead to
+ * malformed overlongs, so there really are only 59 start bytes.) Hence the
+ * UTF-EBCDIC for the smallest variant code point, 0x160, will have likely 0x41
+ * as its continuation byte, provided 0x41 isn't an ASCII or C1 equivalent.
+ * And its start byte will be the code point that is 37 (32+5) non-ASCII,
+ * non-control code points past it.  (0 - 3F are controls, and 40 is SPACE,
+ * leaving 41 as the first potentially available one.)  In contrast, on ASCII
+ * platforms, the first 64 (not 32) non-ASCII code points are the continuation
+ * bytes.  And the first 2 (not 5) potential start bytes form overlong
+ * malformed sequences.
+ *
  * EBCDIC characters above 0xFF are the same as Unicode in Perl's
  * implementation of all 3 encodings, so for those Step 1 is trivial.
  *
