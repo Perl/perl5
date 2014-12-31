@@ -456,7 +456,7 @@ is_deeply( $files, \%expect, 'maniadd() vs MANIFEST without trailing newline');
 
 SKIP: {
     chmod( 0400, 'MANIFEST' );
-    skip "Can't make MANIFEST read-only", 2 if -w 'MANIFEST';
+    skip "Can't make MANIFEST read-only", 2 if -w 'MANIFEST' or $Config{osname} eq 'cygwin';
 
     eval {
         maniadd({ 'foo' => 'bar' });

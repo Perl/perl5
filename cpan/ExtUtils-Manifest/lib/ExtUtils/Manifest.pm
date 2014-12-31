@@ -10,7 +10,7 @@ use Carp;
 use strict;
 use warnings;
 
-our $VERSION = '1.69';
+our $VERSION = '1.70';
 our @ISA = ('Exporter');
 our @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -65,7 +65,7 @@ ExtUtils::Manifest - utilities to write and check a MANIFEST file
 
 =head1 VERSION
 
-version 1.69
+version 1.70
 
 =head1 SYNOPSIS
 
@@ -897,9 +897,14 @@ L<ExtUtils::MakeMaker> which has handy targets for most of the functionality.
 
 Andreas Koenig C<andreas.koenig@anima.de>
 
-Maintained by Michael G Schwern C<schwern@pobox.com> within the
-ExtUtils-MakeMaker package and, as a separate CPAN package, by
-Randy Kobes C<r.kobes@uwinnipeg.ca>.
+Currently maintained by the Perl Toolchain Gang.
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 1996- by Andreas Koenig.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
 
