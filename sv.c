@@ -2107,6 +2107,10 @@ S_sv_2iuv_non_preserve(pTHX_ SV *const sv
 
 /* If numtype is infnan, set the NV of the sv accordingly.
  * If numtype is anything else, try setting the NV using Atof(PV). */
+#ifdef USING_MSVC6
+#  pragma warning(push)
+#  pragma warning(disable:4756;disable:4056)
+#endif
 static void
 S_sv_setnv(pTHX_ SV* sv, int numtype)
 {
@@ -2131,6 +2135,9 @@ S_sv_setnv(pTHX_ SV* sv, int numtype)
             SvPOK_on(sv); /* PV is okay, though. */
     }
 }
+#ifdef USING_MSVC6
+#  pragma warning(pop)
+#endif
 
 STATIC bool
 S_sv_2iuv_common(pTHX_ SV *const sv)

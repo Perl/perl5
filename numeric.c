@@ -1259,6 +1259,11 @@ Perl_my_atof(pTHX_ const char* s)
     return x;
 }
 
+
+#ifdef USING_MSVC6
+#  pragma warning(push)
+#  pragma warning(disable:4756;disable:4056)
+#endif
 static char*
 S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value)
 {
@@ -1330,6 +1335,9 @@ S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value
     }
     return NULL;
 }
+#ifdef USING_MSVC6
+#  pragma warning(pop)
+#endif
 
 char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)

@@ -4257,14 +4257,6 @@ START_EXTERN_C
 END_EXTERN_C
 #endif
 
-#ifdef WIN32
-#  if !defined(NV_INF) && defined(HUGE_VAL)
-#    define NV_INF HUGE_VAL
-#  endif
-/* For WIN32 the best NV_NAN is the __PL_nan_u trick, see below.
- * There is no supported way of getting the NAN across all the crts. */
-#endif
-
 /* If you are thinking of using HUGE_VAL for infinity, or using
  * <math.h> functions to generate NV_INF (e.g. exp(1e9), log(-1.0)),
  * stop.  Neither will work portably: HUGE_VAL can be just DBL_MAX,

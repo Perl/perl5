@@ -260,6 +260,31 @@ typedef unsigned short	mode_t;
 #  pragma intrinsic(_rotl64,_rotr64)
 #endif
 
+#  pragma warning(push)
+#  pragma warning(disable:4756;disable:4056)
+PERL_STATIC_INLINE
+double S_Infinity() {
+    /* this is a real C literal which can get further constant folded
+       unlike using HUGE_VAL/_HUGE which are data symbol imports from the CRT
+       and therefore can not by folded by VC, an example of constant
+       folding INF is creating -INF */
+    return (DBL_MAX+DBL_MAX);
+}
+#  pragma warning(pop)
+#  define NV_INF S_Infinity()
+
+/* selectany allows duplicate and unused data symbols to be removed by
+   VC linker, if this were static, each translation unit will have its own,
+   usually unused __PL_nan_u, if this were plain extern it will cause link
+   to fail due to multiple definitions, since we dont know if we are being
+   compiled as static or DLL XS, selectany simply always works, the cost of
+   importing __PL_nan_u across DLL boundaries in size in the importing DLL
+   will be more than the 8 bytes it will take up being in each XS DLL if
+   that DLL actually uses __PL_nan_u */
+extern const __declspec(selectany) union { unsigned __int64 __q; double __d; }
+__PL_nan_u = { 0x7FF8000000000000UI64 };
+#  define NV_NAN ((NV)__PL_nan_u.__d)
+
 #endif /* _MSC_VER */
 
 #ifdef __MINGW32__		/* Minimal Gnu-Win32 */
