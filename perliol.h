@@ -109,7 +109,11 @@ struct _PerlIO {
 /* Data exports - EXTCONST rather than extern is needed for Cygwin */
 #undef EXTPERLIO 
 #ifdef PERLIO_FUNCS_CONST
-#define EXTPERLIO EXTCONST
+#ifdef __VMS
+#  define EXTPERLIO extern const
+#else
+#  define EXTPERLIO EXTCONST
+#endif
 #else
 #define EXTPERLIO EXT
 #endif
