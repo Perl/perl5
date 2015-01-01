@@ -1938,8 +1938,8 @@ s	|OP *	|my_kid		|NULLOK OP *o|NULLOK OP *attrs|NN OP **imopsp
 s	|OP *	|dup_attrlist	|NN OP *o
 s	|void	|apply_attrs	|NN HV *stash|NN SV *target|NULLOK OP *attrs
 s	|void	|apply_attrs_my	|NN HV *stash|NN OP *target|NULLOK OP *attrs|NN OP **imopsp
-s	|void	|bad_type_pv	|I32 n|NN const char *t|NN const char *name|U32 flags|NN const OP *kid
-s	|void	|bad_type_gv	|I32 n|NN const char *t|NN GV *gv|U32 flags|NN const OP *kid
+s	|void	|bad_type_pv	|I32 n|NN const char *t|NN const OP *o|NN const OP *kid
+s	|void	|bad_type_gv	|I32 n|NN GV *gv|NN const OP *kid|NN const char *t
 s	|void	|no_bareword_allowed|NN OP *o
 sR	|OP*	|no_fh_allowed|NN OP *o
 sR	|OP*	|too_few_arguments_pv|NN OP *o|NN const char* name|U32 flags

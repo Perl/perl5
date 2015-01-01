@@ -541,22 +541,24 @@ S_too_many_arguments_pv(pTHX_ OP *o, const char *name, U32 flags)
 }
 
 STATIC void
-S_bad_type_pv(pTHX_ I32 n, const char *t, const char *name, U32 flags, const OP *kid)
+S_bad_type_pv(pTHX_ I32 n, const char *t, const OP *o, const OP *kid)
 {
     PERL_ARGS_ASSERT_BAD_TYPE_PV;
 
     yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %s must be %s (not %s)",
-		 (int)n, name, t, OP_DESC(kid)), flags);
+		 (int)n, PL_op_desc[(o)->op_type], t, OP_DESC(kid)), 0);
 }
 
+/* remove flags var, its unused in all callers, move to to right end since gv
+  and kid are always the same */
 STATIC void
-S_bad_type_gv(pTHX_ I32 n, const char *t, GV *gv, U32 flags, const OP *kid)
+S_bad_type_gv(pTHX_ I32 n, GV *gv, const OP *kid, const char *t)
 {
     SV * const namesv = cv_name((CV *)gv, NULL, 0);
     PERL_ARGS_ASSERT_BAD_TYPE_GV;
  
     yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %"SVf" must be %s (not %s)",
-		 (int)n, SVfARG(namesv), t, OP_DESC(kid)), SvUTF8(namesv) | flags);
+		 (int)n, SVfARG(namesv), t, OP_DESC(kid)), SvUTF8(namesv));
 }
 
 STATIC void
@@ -9969,7 +9971,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		      && (  !SvROK(cSVOPx_sv(kid)) 
 		         || SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVAV  )
 		        )
-		    bad_type_pv(numargs, "array", PL_op_desc[type], 0, kid);
+		    bad_type_pv(numargs, "array", o, kid);
 		/* Defer checks to run-time if we have a scalar arg */
 		if (kid->op_type == OP_RV2AV || kid->op_type == OP_PADAV)
 		    op_lvalue(kid, type);
@@ -9984,7 +9986,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		break;
 	    case OA_HVREF:
 		if (kid->op_type != OP_RV2HV && kid->op_type != OP_PADHV)
-		    bad_type_pv(numargs, "hash", PL_op_desc[type], 0, kid);
+		    bad_type_pv(numargs, "hash", o, kid);
 		op_lvalue(kid, type);
 		break;
 	    case OA_CVREF:
@@ -10010,7 +10012,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    }
 		    else if (kid->op_type == OP_READLINE) {
 			/* neophyte patrol: open(<FH>), close(<FH>) etc. */
-			bad_type_pv(numargs, "HANDLE", OP_DESC(o), 0, kid);
+			bad_type_pv(numargs, "HANDLE", o, kid);
 		    }
 		    else {
 			I32 flags = OPf_SPECIAL;
@@ -11417,9 +11419,8 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 			!= OP_ANONCODE
 		    && cUNOPx(cUNOPx(o3)->op_first)->op_first->op_type
 			!= OP_RV2CV))
-		    bad_type_gv(arg,
-			    arg == 1 ? "block or sub {}" : "sub {}",
-			    namegv, 0, o3);
+		    bad_type_gv(arg, namegv, o3,
+			    arg == 1 ? "block or sub {}" : "sub {}");
 		break;
 	    case '*':
 		/* '*' allows any scalar type, including bareword */
@@ -11474,9 +11475,8 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 				     OP_READ, /* not entersub */
 				     OP_LVALUE_NO_CROAK
 				    )) goto wrapref;
-			    bad_type_gv(arg, Perl_form(aTHX_ "one of %.*s",
-					(int)(end - p), p),
-				    namegv, 0, o3);
+			    bad_type_gv(arg, namegv, o3,
+				    Perl_form(aTHX_ "one of %.*s",(int)(end - p), p));
 			} else
 			    goto oops;
 			break;
@@ -11484,15 +11484,14 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 			if (o3->op_type == OP_RV2GV)
 			    goto wrapref;
 			if (!contextclass)
-			    bad_type_gv(arg, "symbol", namegv, 0, o3);
+			    bad_type_gv(arg, namegv, o3, "symbol");
 			break;
 		    case '&':
 			if (o3->op_type == OP_ENTERSUB
 			 && !(o3->op_flags & OPf_STACKED))
 			    goto wrapref;
 			if (!contextclass)
-			    bad_type_gv(arg, "subroutine", namegv, 0,
-				    o3);
+			    bad_type_gv(arg, namegv, o3, "subroutine");
 			break;
 		    case '$':
 			if (o3->op_type == OP_RV2SV ||
@@ -11507,7 +11506,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 				    OP_READ,  /* not entersub */
 				    OP_LVALUE_NO_CROAK
 			       )) goto wrapref;
-			    bad_type_gv(arg, "scalar", namegv, 0, o3);
+			    bad_type_gv(arg, namegv, o3, "scalar");
 			}
 			break;
 		    case '@':
@@ -11518,7 +11517,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 			    goto wrapref;
 			}
 			if (!contextclass)
-			    bad_type_gv(arg, "array", namegv, 0, o3);
+			    bad_type_gv(arg, namegv, o3, "array");
 			break;
 		    case '%':
 			if (o3->op_type == OP_RV2HV ||
@@ -11528,7 +11527,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 			    goto wrapref;
 			}
 			if (!contextclass)
-			    bad_type_gv(arg, "hash", namegv, 0, o3);
+			    bad_type_gv(arg, namegv, o3, "hash");
 			break;
 		    wrapref:
                             aop = S_op_sibling_newUNOP(aTHX_ parent, prev,

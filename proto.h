@@ -6305,19 +6305,19 @@ STATIC void	S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp
 STATIC I32	S_assignment_type(pTHX_ const OP *o)
 			__attribute__warn_unused_result__;
 
-STATIC void	S_bad_type_gv(pTHX_ I32 n, const char *t, GV *gv, U32 flags, const OP *kid)
+STATIC void	S_bad_type_gv(pTHX_ I32 n, GV *gv, const OP *kid, const char *t)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_5);
+			__attribute__nonnull__(pTHX_4);
 #define PERL_ARGS_ASSERT_BAD_TYPE_GV	\
-	assert(t); assert(gv); assert(kid)
+	assert(gv); assert(kid); assert(t)
 
-STATIC void	S_bad_type_pv(pTHX_ I32 n, const char *t, const char *name, U32 flags, const OP *kid)
+STATIC void	S_bad_type_pv(pTHX_ I32 n, const char *t, const OP *o, const OP *kid)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_5);
+			__attribute__nonnull__(pTHX_4);
 #define PERL_ARGS_ASSERT_BAD_TYPE_PV	\
-	assert(t); assert(name); assert(kid)
+	assert(t); assert(o); assert(kid)
 
 STATIC void	S_clear_special_blocks(pTHX_ const char *const fullname, GV *const gv, CV *const cv)
 			__attribute__nonnull__(pTHX_1)
