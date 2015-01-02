@@ -61,10 +61,6 @@ my $isvax = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .LE. 1024 .AND. F\$G
 chomp $isvax;
 print "\$isvax: \\$isvax\\\n" if $debug;
 
-my $isi64 = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .GE. 4096)`;
-chomp $isi64;
-print "\$isi64: \\$isi64\\\n" if $debug;
-
 print "Input \$cc_cmd: \\$cc_cmd\\\n" if $debug;
 my $docc = ($cc_cmd !~ /^~~/);
 print "\$docc = $docc\n" if $debug;
@@ -162,7 +158,7 @@ if ($isvax) {
 }
 
 unless ($isgcc) {
-  if ($isi64) {
+  unless ($isvax) {
     print OPTBLD "PSECT_ATTR=\$GLOBAL_RO_VARS,NOEXE,RD,NOWRT,SHR\n";
     print OPTBLD "PSECT_ATTR=\$GLOBAL_RW_VARS,NOEXE,RD,WRT,NOSHR\n";
   }
