@@ -131,7 +131,7 @@ POSIX = POSIX
 #: __DEBUG__: builds images with full VMS debugger support
 .ifdef __DEBUG__
 DBGCCFLAGS = /List/Debug/NoOpt$(DBGSPECFLAGS)
-DBGLINKFLAGS = /Trace/Debug/Map/Full/Cross
+DBGLINKFLAGS = /Trace/Debug/Map=$(MMS$TARGET_NAME).MAP/Full/Cross
 DBG = DBG
 .else
 DBGCCFLAGS = /NoList
