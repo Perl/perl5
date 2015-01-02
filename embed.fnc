@@ -2493,6 +2493,10 @@ Es	|void	|rck_enframe	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params \
 				|NN regnode *start|NN regnode *end \
 				|I32 paren|U32 recursed_depth
+Es	|void	|rck_do_curly	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params \
+				|NN regnode *node|SSize_t mincount \
+				|SSize_t maxcount|I32 next_is_eval
 EsRn	|U32	|add_data	|NN RExC_state_t* const pRExC_state \
 				|NN const char* const s|const U32 n
 rs	|void	|re_croak2	|bool utf8|NN const char* pat1|NN const char* pat2|...

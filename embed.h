@@ -1138,6 +1138,7 @@
 #define rck_branchj(a,b)	S_rck_branchj(aTHX_ a,b)
 #define rck_clump(a,b)		S_rck_clump(aTHX_ a,b)
 #define rck_definep(a,b)	S_rck_definep(aTHX_ a,b)
+#define rck_do_curly(a,b,c,d,e,f)	S_rck_do_curly(aTHX_ a,b,c,d,e,f)
 #define rck_elide_nothing(a)	S_rck_elide_nothing(aTHX_ a)
 #define rck_enframe(a,b,c,d,e,f)	S_rck_enframe(aTHX_ a,b,c,d,e,f)
 #define rck_exact(a,b)		S_rck_exact(aTHX_ a,b)

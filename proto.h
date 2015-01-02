@@ -5303,6 +5303,9 @@ STATIC bool	S_rck_clump(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 STATIC bool	S_rck_definep(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_DEFINEP	\
 	assert(pRExC_state); assert(params)
+STATIC void	S_rck_do_curly(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params, regnode *node, SSize_t mincount, SSize_t maxcount, I32 next_is_eval);
+#define PERL_ARGS_ASSERT_RCK_DO_CURLY	\
+	assert(pRExC_state); assert(params); assert(node)
 STATIC void	S_rck_elide_nothing(pTHX_ regnode *node);
 #define PERL_ARGS_ASSERT_RCK_ELIDE_NOTHING	\
 	assert(node)
