@@ -4755,6 +4755,99 @@ STATIC bool S_rck_clump(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
     return 0;
 }
 
+STATIC bool S_rck_star(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    regnode * const node = params->scan;
+
+    PERL_ARGS_ASSERT_RCK_STAR;
+
+    if (params->flags & SCF_DO_STCLASS) {
+        params->next = regnext(params->scan);
+        params->scan = NEXTOPER(params->scan);
+        rck_do_curly(pRExC_state, params, node, 0, REG_INFTY, 0);
+    } else {
+        if (params->flags & SCF_DO_SUBSTR) {
+            scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+            /* Cannot extend fixed substrings */
+            params->data->cur_is_floating = 1; /* float */
+        }
+        params->is_inf = params->is_inf_internal = 1;
+        params->scan = regnext(params->scan);
+    }
+    rck_elide_nothing(node);
+    return 0;
+}
+
+STATIC bool S_rck_plus(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    regnode * const node = params->scan;
+
+    PERL_ARGS_ASSERT_RCK_PLUS;
+
+    if (params->flags & SCF_DO_STCLASS) {
+        SSize_t mincount;
+        if (params->flags & SCF_DO_SUBSTR) {
+            params->next = NEXTOPER(params->scan);
+            mincount = 1;
+        } else {
+            params->min++;
+            mincount = 0;
+        }
+        params->next = regnext(params->scan);
+        params->scan = NEXTOPER(params->scan);
+        rck_do_curly(pRExC_state, params, node, mincount, REG_INFTY, 0);
+    } else if (params->flags & SCF_DO_SUBSTR) {
+        params->next = NEXTOPER(params->scan);
+        if (OP(params->next) == EXACT || OP(params->next) == EXACTL) {
+            params->next = regnext(params->scan);
+            params->scan = NEXTOPER(params->scan);
+            rck_do_curly(pRExC_state, params, node, 1, REG_INFTY, 0);
+        } else {
+            params->data->pos_min++;
+            params->min++;
+            scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+            /* Cannot extend fixed substrings */
+            params->data->cur_is_floating = 1; /* float */
+            params->is_inf = params->is_inf_internal = 1;
+            params->scan = regnext(params->scan);
+        }
+    } else {
+        params->min++;
+        params->is_inf = params->is_inf_internal = 1;
+        params->scan = regnext(params->scan);
+    }
+    rck_elide_nothing(node);
+    return 0;
+}
+
+STATIC bool S_rck_curlyish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    regnode * const node = params->scan;
+    SSize_t mincount, maxcount;
+
+    PERL_ARGS_ASSERT_RCK_CURLYISH;
+
+    if (params->stopparen > 0
+        && (OP(params->scan) == CURLYN || OP(params->scan) == CURLYM)
+        && (params->scan->flags == params->stopparen)
+    ) {
+        mincount = 1;
+        maxcount = 1;
+    } else {
+        mincount = ARG1(params->scan);
+        maxcount = ARG2(params->scan);
+    }
+    params->next = regnext(params->scan);
+    if (OP(params->scan) == CURLYX) {
+        I32 lp = (params->data ? *(params->data->last_closep) : 0);
+        params->scan->flags = ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX);
+    }
+    params->scan = NEXTOPER(params->scan) + EXTRA_STEP_2ARGS;
+    rck_do_curly(pRExC_state, params, node, mincount, maxcount, (OP(params->scan) == EVAL));
+    rck_elide_nothing(node);
+    return 0;
+}
+
 STATIC void S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params,
         regnode *start, regnode *end, I32 paren, U32 recursed_depth)
 {
@@ -5610,77 +5703,14 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
         return rck_refish(pRExC_state, params);
     } else if (OP(params->scan) == CLUMP) {
         return rck_clump(pRExC_state, params);
-    } else if (REGNODE_VARIES(OP(params->scan))) {
-        SSize_t mincount, maxcount;
-        regnode * const oscan = params->scan;
-        I32 next_is_eval = 0;
-
-        switch (PL_regkind[OP(params->scan)]) {
-        case PLUS:
-            if (params->flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
-                params->next = NEXTOPER(params->scan);
-                if (OP(params->next) == EXACT
-                    || OP(params->next) == EXACTL
-                    || (params->flags & SCF_DO_STCLASS))
-                {
-                    mincount = 1;
-                    maxcount = REG_INFTY;
-                    params->next = regnext(params->scan);
-                    params->scan = NEXTOPER(params->scan);
-                    goto do_curly;
-                }
-            }
-            if (params->flags & SCF_DO_SUBSTR)
-                params->data->pos_min++;
-            params->min++;
-            /* FALLTHROUGH */
-        case STAR:
-            if (params->flags & SCF_DO_STCLASS) {
-                mincount = 0;
-                maxcount = REG_INFTY;
-                params->next = regnext(params->scan);
-                params->scan = NEXTOPER(params->scan);
-                goto do_curly;
-            }
-            if (params->flags & SCF_DO_SUBSTR) {
-                scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-                /* Cannot extend fixed substrings */
-                params->data->cur_is_floating = 1; /* float */
-            }
-            params->is_inf = params->is_inf_internal = 1;
-            params->scan = regnext(params->scan);
-            goto optimize_curly_tail;
-        case CURLY:
-            if (params->stopparen>0 && (OP(params->scan)==CURLYN || OP(params->scan)==CURLYM)
-                && (params->scan->flags == params->stopparen))
-            {
-                mincount = 1;
-                maxcount = 1;
-            } else {
-                mincount = ARG1(params->scan);
-                maxcount = ARG2(params->scan);
-            }
-            params->next = regnext(params->scan);
-            if (OP(params->scan) == CURLYX) {
-                I32 lp = (params->data ? *(params->data->last_closep) : 0);
-                params->scan->flags = ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX);
-            }
-            params->scan = NEXTOPER(params->scan) + EXTRA_STEP_2ARGS;
-            next_is_eval = (OP(params->scan) == EVAL);
-          do_curly:
-            rck_do_curly(pRExC_state, params, oscan, mincount, maxcount, next_is_eval);
-          optimize_curly_tail:
-            rck_elide_nothing(oscan);
-            return 0;
-
-        default:
-#ifdef DEBUGGING
-            Perl_croak(aTHX_ "panic: unexpected varying REx opcode %d",
-                                                                OP(params->scan));
-#endif
-        }
-    }
-    else if (OP(params->scan) == LNBREAK) {
+    } else if (OP(params->scan) == STAR) {
+        return rck_star(pRExC_state, params);
+    } else if (OP(params->scan) == PLUS) {
+        return rck_plus(pRExC_state, params);
+    } else if (PL_regkind[OP(params->scan)] == CURLY) {
+        /* CURLY CURLYN CURLYM CURLYX */
+        return rck_curlyish(pRExC_state, params);
+    } else if (OP(params->scan) == LNBREAK) {
         if (params->flags & SCF_DO_STCLASS) {
             if (params->flags & SCF_DO_STCLASS_AND) {
                 ssc_intersection(params->data->start_class,

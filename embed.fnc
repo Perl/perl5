@@ -2487,6 +2487,12 @@ Es	|bool	|rck_refish	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
 Es	|bool	|rck_clump	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
+Es	|bool	|rck_star	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
+Es	|bool	|rck_plus	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
+Es	|bool	|rck_curlyish	|NN RExC_state_t *pRExC_state \
+				|NN rck_params_t *params
 Es	|void	|rck_make_trie	|NN RExC_state_t *pRExC_state \
 				|NN rck_params_t *params
 Es	|void	|rck_enframe	|NN RExC_state_t *pRExC_state \

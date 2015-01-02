@@ -5300,6 +5300,9 @@ STATIC bool	S_rck_branchj(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 STATIC bool	S_rck_clump(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_CLUMP	\
 	assert(pRExC_state); assert(params)
+STATIC bool	S_rck_curlyish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_CURLYISH	\
+	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_definep(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_DEFINEP	\
 	assert(pRExC_state); assert(params)
@@ -5327,8 +5330,14 @@ STATIC bool	S_rck_ifthen(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 STATIC void	S_rck_make_trie(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_MAKE_TRIE	\
 	assert(pRExC_state); assert(params)
+STATIC bool	S_rck_plus(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_PLUS	\
+	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_refish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_REFISH	\
+	assert(pRExC_state); assert(params)
+STATIC bool	S_rck_star(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_STAR	\
 	assert(pRExC_state); assert(params)
 STATIC bool	S_rck_suspend(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_SUSPEND	\
