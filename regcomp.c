@@ -4707,6 +4707,16 @@ STATIC bool S_rck_exactfish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *param
     return 0;
 }
 
+STATIC bool S_rck_whilem(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_UNUSED_VAR(pRExC_state);
+
+    PERL_ARGS_ASSERT_RCK_WHILEM;
+
+    params->scan = NEXTOPER(params->scan);
+    return 1;
+}
+
 STATIC void S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params,
         regnode *start, regnode *end, I32 paren, U32 recursed_depth)
 {
@@ -5230,6 +5240,8 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
         /* But OP != EXACT!, so is EXACTFish - one of
          * EXACTF, EXACTFL, EXACTFU, EXACTFAA, EXACTFU_SS EXACTFAA_NO_TRIE */
         return rck_exactfish(pRExC_state, params);
+    } else if (OP(params->scan) == WHILEM) {
+        return rck_whilem(pRExC_state, params);
     } else if (REGNODE_VARIES(OP(params->scan))) {
         SSize_t mincount, maxcount, minnext, deltanext, pos_before = 0;
         I32 fl = 0, f = params->flags;
@@ -5239,9 +5251,6 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
         I32 next_is_eval = 0;
 
         switch (PL_regkind[OP(params->scan)]) {
-        case WHILEM:		/* End of (?:...)* . */
-            params->scan = NEXTOPER(params->scan);
-            return 1;
         case PLUS:
             if (params->flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
                 params->next = NEXTOPER(params->scan);

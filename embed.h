@@ -1145,6 +1145,7 @@
 #define rck_ifthen(a,b)		S_rck_ifthen(aTHX_ a,b)
 #define rck_make_trie(a,b)	S_rck_make_trie(aTHX_ a,b)
 #define rck_suspend(a,b)	S_rck_suspend(aTHX_ a,b)
+#define rck_whilem(a,b)		S_rck_whilem(aTHX_ a,b)
 #define reg(a,b,c,d)		S_reg(aTHX_ a,b,c,d)
 #define reg2Lanode(a,b,c,d)	S_reg2Lanode(aTHX_ a,b,c,d)
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)

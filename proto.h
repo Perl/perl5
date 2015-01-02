@@ -5324,6 +5324,9 @@ STATIC void	S_rck_make_trie(pTHX_ RExC_state_t *pRExC_state, rck_params_t *param
 STATIC bool	S_rck_suspend(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
 #define PERL_ARGS_ASSERT_RCK_SUSPEND	\
 	assert(pRExC_state); assert(params)
+STATIC bool	S_rck_whilem(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params);
+#define PERL_ARGS_ASSERT_RCK_WHILEM	\
+	assert(pRExC_state); assert(params)
 PERL_STATIC_NO_RET void	S_re_croak2(pTHX_ bool utf8, const char* pat1, const char* pat2, ...)
 			__attribute__noreturn__;
 #define PERL_ARGS_ASSERT_RE_CROAK2	\
