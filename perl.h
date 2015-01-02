@@ -6156,8 +6156,10 @@ typedef struct am_table_short AMTS;
 /* Clones the per-interpreter data. */
 #  define MY_CXT_CLONE \
 	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
-	Copy(PL_my_cxt_list[MY_CXT_INDEX], my_cxtp, 1, my_cxt_t);\
-	PL_my_cxt_list[MY_CXT_INDEX] = my_cxtp				\
+	void ** old_my_cxtp = PL_my_cxt_list[MY_CXT_INDEX];		\
+	PL_my_cxt_list[MY_CXT_INDEX] = my_cxtp;				\
+	Copy(old_my_cxtp, my_cxtp, 1, my_cxt_t);
+
 
 
 /* This macro must be used to access members of the my_cxt_t structure.
