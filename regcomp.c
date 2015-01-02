@@ -4717,6 +4717,44 @@ STATIC bool S_rck_whilem(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
     return 1;
 }
 
+STATIC bool S_rck_refish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_ARGS_ASSERT_RCK_REFISH;
+
+    /* REF REFF REFFL REFFU REFFA NREF NREFF NREFFL NREFFU NREFFA */
+    if (params->flags & SCF_DO_SUBSTR) {
+        /* Cannot expect anything... */
+        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+        params->data->cur_is_floating = 1; /* float */
+    }
+    params->is_inf = params->is_inf_internal = 1;
+    if (params->flags & SCF_DO_STCLASS_OR)
+        ssc_anything(params->data->start_class);
+    params->flags &= ~SCF_DO_STCLASS;
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
+STATIC bool S_rck_clump(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
+{
+    PERL_ARGS_ASSERT_RCK_CLUMP;
+
+    if (params->flags & SCF_DO_SUBSTR) {
+        /* Cannot expect anything... */
+        scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
+        params->data->cur_is_floating = 1; /* float */
+    }
+    params->is_inf = params->is_inf_internal = 1;
+    if (params->flags & SCF_DO_STCLASS_OR) {
+        /* Actually is any start char, but very few code points
+         * aren't start characters */
+        ssc_match_all_cp(params->data->start_class);
+    }
+    params->flags &= ~SCF_DO_STCLASS;
+    params->scan = regnext(params->scan);
+    return 0;
+}
+
 STATIC void S_rck_enframe(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params,
         regnode *start, regnode *end, I32 paren, U32 recursed_depth)
 {
@@ -5242,6 +5280,11 @@ STATIC bool S_study_chunk_one_node(pTHX_ RExC_state_t *pRExC_state, rck_params_t
         return rck_exactfish(pRExC_state, params);
     } else if (OP(params->scan) == WHILEM) {
         return rck_whilem(pRExC_state, params);
+    } else if (PL_regkind[OP(params->scan)] == REF) {
+        /* REF REFF REFFL REFFU REFFA NREF NREFF NREFFL NREFFU NREFFA */
+        return rck_refish(pRExC_state, params);
+    } else if (OP(params->scan) == CLUMP) {
+        return rck_clump(pRExC_state, params);
     } else if (REGNODE_VARIES(OP(params->scan))) {
         SSize_t mincount, maxcount, minnext, deltanext, pos_before = 0;
         I32 fl = 0, f = params->flags;
@@ -5639,26 +5682,6 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
             Perl_croak(aTHX_ "panic: unexpected varying REx opcode %d",
                                                                 OP(params->scan));
 #endif
-        case REF:
-        case CLUMP:
-            if (params->flags & SCF_DO_SUBSTR) {
-                /* Cannot expect anything... */
-                scan_commit(pRExC_state, params->data, params->minlenp, params->is_inf);
-                params->data->cur_is_floating = 1; /* float */
-            }
-            params->is_inf = params->is_inf_internal = 1;
-            if (params->flags & SCF_DO_STCLASS_OR) {
-                if (OP(params->scan) == CLUMP) {
-                    /* Actually is any start char, but very few code points
-                     * aren't start characters */
-                    ssc_match_all_cp(params->data->start_class);
-                }
-                else {
-                    ssc_anything(params->data->start_class);
-                }
-            }
-            params->flags &= ~SCF_DO_STCLASS;
-            break;
         }
     }
     else if (OP(params->scan) == LNBREAK) {
