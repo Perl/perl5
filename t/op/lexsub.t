@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 147;
+plan 148;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -431,6 +431,18 @@ is runperl(switches => ['-lXMfeature=:all'],
   like $@, qr/^Undefined subroutine &φου called at /,
     'state sub with utf8 name';
 }
+# This used to crash, but only as a standalone script
+is runperl(switches => ['-lXMfeature=:all'],
+           prog     => '$::x = global=>;
+                        sub x;
+                        sub x {
+                          state $x = 42;
+                          state sub x { print eval q|$x| }
+                          x()
+                        }
+                        x()',
+           stderr   => 1), "42\n",
+  'closure behaviour of state sub in predeclared package sub';
 
 # -------------------- my -------------------- #
 

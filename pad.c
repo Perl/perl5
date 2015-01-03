@@ -2327,18 +2327,30 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
     PERL_UNUSED_ARG(old_cv);
 
     for (ix = PadnamelistMAX(comppad_name); ix > 0; ix--) {
-        const PADNAME * const name = namepad[ix];
-	if (name && name != &PL_padname_undef && !PadnameIsSTATE(name)
+        const PADNAME *name = namepad[ix];
+	if (name && name != &PL_padname_undef && !PadnameIsOUR(name)
 	    && *PadnamePV(name) == '&')
 	{
-	  if (SvTYPE(curpad[ix]) == SVt_PVCV) {
+	  CV *innercv = MUTABLE_CV(curpad[ix]);
+	  if (UNLIKELY(PadnameOUTER(name))) {
+	    CV *cv = new_cv;
+	    PADNAME **names = namepad;
+	    PADOFFSET i = ix;
+	    while (PadnameOUTER(name)) {
+		cv = CvOUTSIDE(cv);
+		names = PadlistNAMESARRAY(CvPADLIST(cv));
+		i = PARENT_PAD_INDEX(name);
+		name = names[i];
+	    }
+	    innercv = (CV *)PadARRAY(PadlistARRAY(CvPADLIST(cv))[1])[i];
+	  }
+	  if (SvTYPE(innercv) == SVt_PVCV) {
 	    /* XXX 0afba48f added code here to check for a proto CV
 		   attached to the pad entry by magic.  But shortly there-
 		   after 81df9f6f95 moved the magic to the pad name.  The
 		   code here was never updated, so it wasn’t doing anything
 		   and got deleted when PADNAME became a distinct type.  Is
 		   there any bug as a result?  */
-	    CV * const innercv = MUTABLE_CV(curpad[ix]);
 	    if (CvOUTSIDE(innercv) == old_cv) {
 		if (!CvWEAKOUTSIDE(innercv)) {
 		    SvREFCNT_dec(old_cv);
