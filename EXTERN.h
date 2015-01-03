@@ -18,16 +18,7 @@
 #undef dEXT
 #undef EXTCONST
 #undef dEXTCONST
-#if defined(VMS) && !defined(__GNUC__)
-    /* Suppress portability warnings from DECC for VMS-specific extensions */
-#  ifdef __DECC
-#    pragma message disable (GLOBALEXT,NOSHAREEXT,READONLYEXT)
-#  endif
-#  define EXT globalref
-#  define dEXT globaldef {"$GLOBAL_RW_VARS"} noshare
-#  define EXTCONST globalref
-#  define dEXTCONST globaldef {"$GLOBAL_RO_VARS"} readonly
-#else
+
 #  if (defined(WIN32) || defined(__SYMBIAN32__)) && !defined(PERL_STATIC_SYMS)
     /* miniperl should not export anything */
 #    if defined(PERL_IS_MINIPERL) && !defined(UNDER_CE) && defined(_MSC_VER)
@@ -61,7 +52,6 @@
 #      define dEXTCONST const
 #    endif
 #  endif
-#endif
 
 #undef INIT
 #define INIT(x)
