@@ -1320,10 +1320,6 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 	return 0; /* this dummy (and invalid) value isnt used by the caller */
 
     {
-	/* This relies on sv_setsv_flags() upgrading the destination to the same
-	   type as the source, independent of the flags set, and on it being
-	   "good" and only copying flag bits and pointers that it understands.
-	*/
 	PADNAME *new_name = newPADNAMEouter(*out_name);
 	PADNAMELIST * const ocomppad_name = PL_comppad_name;
 	PAD * const ocomppad = PL_comppad;
