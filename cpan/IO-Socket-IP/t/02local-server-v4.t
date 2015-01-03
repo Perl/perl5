@@ -40,6 +40,9 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
    is( $testserver->sockhost, $INADDR_LOOPBACK_HOST, "\$testserver->sockhost for $socktype" );
    like( $testserver->sockport, qr/^\d+$/, "\$testserver->sockport for $socktype" );
 
+   ok( eval { $testserver->peerport; 1 }, "\$testserver->peerport does not die for $socktype" )
+      or do { chomp( my $e = $@ ); diag( "Exception was: $e" ) };
+
    my $socket = IO::Socket::INET->new(
       PeerHost => "127.0.0.1",
       PeerPort => $testserver->sockport,

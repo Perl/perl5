@@ -1,13 +1,13 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2010-2014 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2010-2015 -- leonerd@leonerd.org.uk
 
 package IO::Socket::IP;
 # $VERSION needs to be set before  use base 'IO::Socket'
 #  - https://rt.cpan.org/Ticket/Display.html?id=92107
 BEGIN {
-   $VERSION = '0.34';
+   $VERSION = '0.35';
 }
 
 use strict;
@@ -31,7 +31,7 @@ use Socket 1.97 qw(
 my $AF_INET6 = eval { Socket::AF_INET6() }; # may not be defined
 my $AI_ADDRCONFIG = eval { Socket::AI_ADDRCONFIG() } || 0;
 use POSIX qw( dup2 );
-use Errno qw( EINVAL EINPROGRESS EISCONN ETIMEDOUT EWOULDBLOCK );
+use Errno qw( EINVAL EINPROGRESS EISCONN ENOTCONN ETIMEDOUT EWOULDBLOCK );
 
 use constant HAVE_MSWIN32 => ( $^O eq "MSWin32" );
 
@@ -647,14 +647,14 @@ sub setup
    return undef;
 }
 
-sub connect
+sub connect :method
 {
    my $self = shift;
 
    # It seems that IO::Socket hides EINPROGRESS errors, making them look like
    # a success. This is annoying here.
    # Instead of putting up with its frankly-irritating intentional breakage of
-   # useful APIs I'm just going to end-run around it and call CORE::connect()
+   # useful APIs I'm just going to end-run around it and call core's connect()
    # directly
 
    if( @_ ) {
@@ -664,14 +664,15 @@ sub connect
       # implemented, so we'll have to reinvent it here
       my $timeout = ${*$self}{'io_socket_timeout'};
 
-      return CORE::connect( $self, $addr ) unless defined $timeout;
+      return connect( $self, $addr ) unless defined $timeout;
 
       my $was_blocking = $self->blocking( 0 );
 
-      my $err = defined CORE::connect( $self, $addr ) ? 0 : $!+0;
+      my $err = defined connect( $self, $addr ) ? 0 : $!+0;
 
       if( !$err ) {
          # All happy
+         $self->blocking( $was_blocking );
          return 1;
       }
       elsif( not( $err == EINPROGRESS or $err == EWOULDBLOCK ) ) {
@@ -714,7 +715,7 @@ sub connect
    # (still in progress). This even works on MSWin32.
    my $addr = ${*$self}{io_socket_ip_infos}[${*$self}{io_socket_ip_idx}]{peeraddr};
 
-   if( CORE::connect( $self, $addr ) or $! == EISCONN ) {
+   if( connect( $self, $addr ) or $! == EISCONN ) {
       delete ${*$self}{io_socket_ip_connect_in_progress};
       $! = 0;
       return 1;
@@ -744,6 +745,9 @@ sub _get_host_service
 {
    my $self = shift;
    my ( $addr, $flags, $xflags ) = @_;
+
+   defined $addr or
+      $! = ENOTCONN, return;
 
    $flags |= NI_DGRAM if $self->socktype == SOCK_DGRAM;
 
@@ -893,13 +897,13 @@ sub accept
 
 # This second unbelievably dodgy hack guarantees that $self->fileno doesn't
 # change, which is useful during nonblocking connect
-sub socket
+sub socket :method
 {
    my $self = shift;
    return $self->SUPER::socket(@_) if not defined $self->fileno;
 
    # I hate core prototypes sometimes...
-   CORE::socket( my $tmph, $_[0], $_[1], $_[2] ) or return undef;
+   socket( my $tmph, $_[0], $_[1], $_[2] ) or return undef;
 
    dup2( $tmph->fileno, $self->fileno ) or die "Unable to dup2 $tmph onto $self - $!";
 }

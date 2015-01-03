@@ -47,6 +47,9 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
    is( $testserver->sockhost, $IN6ADDR_LOOPBACK_HOST, "\$testserver->sockhost for $socktype" );
    like( $testserver->sockport, qr/^\d+$/,            "\$testserver->sockport for $socktype" );
 
+   ok( eval { $testserver->peerport; 1 }, "\$testserver->peerport does not die for $socktype" )
+      or do { chomp( my $e = $@ ); diag( "Exception was: $e" ) };
+
    my $socket = IO::Socket->new;
    $socket->socket( $AF_INET6, Socket->$socktype, 0 )
       or die "Cannot socket() - $!";

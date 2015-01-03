@@ -20,6 +20,7 @@ my $client = IO::Socket::IP->new(
 ) or die "Cannot connect on PF_INET - $!";
 
 ok( defined $client, 'client constructed with Timeout' );
+ok( $client->blocking, 'client is in blocking mode after connect' );
 
 my $accepted = $server->accept
    or die "Cannot accept - $!";
