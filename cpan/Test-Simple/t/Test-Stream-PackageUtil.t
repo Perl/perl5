@@ -29,10 +29,10 @@ package_purge_sym(__PACKAGE__, CODE => 'foo');
 is($foo, 'foo', '$foo is still defined');
 is_deeply(\@foo, [ 'f', 'o', 'o' ], '@foo is still defined');
 is_deeply(\%foo, { f => 'oo' }, '%foo is still defined');
-my $r = eval { foo() };
+my $r = eval { __PACKAGE__->foo() };
 my $e = $@;
 ok(!$r, "Failed to call foo()");
-like($e, qr/Undefined subroutine &main::foo called/, "foo() is not defined anymore");
+like($e, qr/Can't locate object method "foo" via package "main"/, "foo() is not defined anymore");
 ok(!__PACKAGE__->can('foo'), "can() no longer thinks we can do foo()");
 
 done_testing;

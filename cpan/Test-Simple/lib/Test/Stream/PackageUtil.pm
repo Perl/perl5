@@ -60,7 +60,8 @@ sub package_purge_sym {
 
         no strict 'refs';
         local *GLOBCLONE = *{"$pkg\::$name"};
-        undef *{"$pkg\::$name"};
+        my $stash = \%{"${pkg}\::"};
+        delete $stash->{$name};
         for my $slot (@SLOTS) {
             next if $slot eq $purge;
             *{"$pkg\::$name"} = *GLOBCLONE{$slot} if defined *GLOBCLONE{$slot};

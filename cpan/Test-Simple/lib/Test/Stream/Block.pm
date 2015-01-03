@@ -28,7 +28,16 @@ sub init {
     confess "coderef must be a code reference"
         unless ref($self->[CODEREF]) && reftype($self->[CODEREF]) eq 'CODE';
 
-    require B;
+    $self->deduce;
+
+    $self->[PARAMS] ||= {};
+}
+
+sub deduce {
+    my $self = shift;
+
+    eval { require B; 1 } || return;
+
     my $code    = $self->[CODEREF];
     my $cobj    = B::svref_2object($code);
     my $pkg     = $cobj->GV->STASH->NAME;
@@ -38,9 +47,8 @@ sub init {
 
     $SUB_MAPS{$file}->{$line} = $self->[NAME];
 
-    $self->[DEDUCED]  = [$pkg, $file, $line, $subname];
-    $self->[NAME]   ||= $subname;
-    $self->[PARAMS] ||= {};
+    $self->[DEDUCED] = [$pkg, $file, $line, $subname];
+    $self->[NAME] ||= $subname;
 }
 
 sub merge_params {

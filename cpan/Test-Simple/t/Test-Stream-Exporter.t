@@ -27,14 +27,6 @@ use Test::More;
     is($main::export::xxx, 'here', "still have an \$export::* var");
 
     ok(!__PACKAGE__->can($_), "removed $_\()") for qw/export default_export exports default_exports/;
-
-    my $ok = eval {
-        export no => sub { 'no' };
-        1;
-    };
-    my $error = $@;
-    ok(!$ok, "Cannot add exports after cleanup");
-    like($error, qr/Undefined subroutine &My::Exporter::export called/, "Sub was removed");
 }
 
 My::Exporter->import( '!x' );
