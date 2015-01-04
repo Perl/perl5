@@ -107,6 +107,8 @@ my $tree = {
                                     [ 5.021, DEFAULT_ON ],
                                 'experimental::const_attr' =>
                                     [ 5.021, DEFAULT_ON ],
+                                'experimental::bitwise' =>
+                                    [ 5.021, DEFAULT_ON ],
                         }],
 
         'missing'       => [ 5.021, DEFAULT_OFF],
