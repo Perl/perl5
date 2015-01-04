@@ -2366,3 +2366,20 @@ my $x = $h{'foo'}[$i + $j]{$k};
 chdir 'file';
 chdir FH;
 chdir;
+####
+# 5.22 bitops
+# CONTEXT use feature "bitwise"; no warnings "experimental::bitwise";
+$_ = $_ | $_;
+$_ = $_ & $_;
+$_ = $_ ^ $_;
+$_ = ~$_;
+$_ = $_ |. $_;
+$_ = $_ &. $_;
+$_ = $_ ^. $_;
+$_ = ~.$_;
+$_ |= $_;
+$_ &= $_;
+$_ ^= $_;
+$_ |.= $_;
+$_ &.= $_;
+$_ ^.= $_;
