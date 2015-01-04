@@ -25,6 +25,7 @@ my %feature = (
     say             => 'say',
     state           => 'state',
     switch          => 'switch',
+    bitwise         => 'bitwise',
     evalbytes       => 'evalbytes',
     postderef       => 'postderef',
     array_base      => 'arybase',

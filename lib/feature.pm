@@ -12,6 +12,7 @@ our %feature = (
     say             => 'feature_say',
     state           => 'feature_state',
     switch          => 'feature_switch',
+    bitwise         => 'feature_bitwise',
     evalbytes       => 'feature_evalbytes',
     postderef       => 'feature_postderef',
     array_base      => 'feature_arybase',
@@ -28,7 +29,7 @@ our %feature_bundle = (
     "5.10"    => [qw(array_base say state switch)],
     "5.11"    => [qw(array_base say state switch unicode_strings)],
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(array_base current_sub evalbytes fc lexical_subs postderef postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
+    "all"     => [qw(array_base bitwise current_sub evalbytes fc lexical_subs postderef postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
     "default" => [qw(array_base)],
 );
 
