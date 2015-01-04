@@ -812,11 +812,12 @@ use File::Glob qw(:case);
     },
 
     'Module::Metadata' => {
-        'DISTRIBUTION' => 'ETHER/Module-Metadata-1.000024.tar.gz',
+        'DISTRIBUTION' => 'ETHER/Module-Metadata-1.000025.tar.gz',
         'FILES'        => q[cpan/Module-Metadata],
         'EXCLUDED'     => [
             qw(README.md),
             qw(t/00-report-prereqs.t),
+            qw(t/00-report-prereqs.dd),
             qr{^xt},
         ],
     },

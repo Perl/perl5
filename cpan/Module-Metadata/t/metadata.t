@@ -221,6 +221,22 @@ package Simple;
   our ($VERSION)    = ($CVSVERSION =~ /(\d+\.\d+)/);
 }
 ---
+  'v2.2.102.2' => <<'---', # our + bare v-string
+package Simple;
+our $VERSION     = v2.2.102.2;
+---
+  '0.0.9_1' => <<'---', # our + dev release
+package Simple;
+our $VERSION = "0.0.9_1";
+---
+  '1.12' => <<'---', # our + crazy string and substitution code
+package Simple;
+our $VERSION     = '1.12.B55J2qn'; our $WTF = $VERSION; $WTF =~ s/^\d+\.\d+\.//; # attempts to rationalize $WTF go here.
+---
+  '1.12' => <<'---', # our in braces, as in Dist::Zilla::Plugin::PkgVersion with use_our = 1
+package Simple;
+{ our $VERSION = '1.12'; }
+---
 );
 
 # format: expected package name => code snippet
@@ -284,7 +300,7 @@ BEGIN {
   sub original_cwd { return $cwd }
 }
 
-# Setup a temp directory
+# Set up a temp directory
 sub tmpdir {
   my (@args) = @_;
   my $dir = $ENV{PERL_CORE} ? original_cwd : File::Spec->tmpdir;
