@@ -15,7 +15,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 174 + (10*13*2) + 5;
+plan tests => 194 + (10*13*2) + 5;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -471,6 +471,47 @@ SKIP: {
   # it's also bogus that (~~malformed) is \0\0\0\0.
   my $ref = "\x{10000}\0\0\0\0";
   is(~~$str, $ref, "use bytes with long replacement");
+}
+
+# New string- and number-specific bitwise ops
+{
+  use feature "bitwise";
+  no warnings "experimental::bitwise";
+  is "22" & "66", 2,    'numeric & with strings';
+  is "22" | "66", 86,   'numeric | with strings';
+  is "22" ^ "66", 84,   'numeric ^ with strings';
+  is ~"22" & 0xff, 233, 'numeric ~ with string';
+  is 22 &. 66, 22,     '&. with numbers';
+  is 22 |. 66, 66,     '|. with numbers';
+  is 22 ^. 66, "\4\4", '^. with numbers';
+  is ~.22, "\xcd\xcd", '~. with number';
+  $_ = "22";
+  is $_ &= "66", 2,  'numeric &= with strings';
+  $_ = "22";
+  is $_ |= "66", 86, 'numeric |= with strings';
+  $_ = "22";
+  is $_ ^= "66", 84, 'numeric ^= with strings';
+  $_ = 22;
+  is $_ &.= 66, 22,     '&.= with numbers';
+  $_ = 22;
+  is $_ |.= 66, 66,     '|.= with numbers';
+  $_ = 22;
+  is $_ ^.= 66, "\4\4", '^.= with numbers';
+
+ # signed vs. unsigned
+ ok ((~0 > 0 && do { use integer; ~0 } == -1));
+
+ my $bits = 0;
+ for (my $i = ~0; $i; $i >>= 1) { ++$bits; }
+ my $cusp = 1 << ($bits - 1);
+
+ ok (($cusp & -1) > 0 && do { use integer; $cusp & -1 } < 0);
+ ok (($cusp | 1) > 0 && do { use integer; $cusp | 1 } < 0);
+ ok (($cusp ^ 1) > 0 && do { use integer; $cusp ^ 1 } < 0);
+ ok ((1 << ($bits - 1)) == $cusp &&
+     do { use integer; 1 << ($bits - 1) } == -$cusp);
+ ok (($cusp >> 1) == ($cusp / 2) &&
+    do { use integer; abs($cusp >> 1) } == ($cusp / 2));
 }
 
 # ref tests
