@@ -31,7 +31,7 @@
 # scalar      - S            list     - L            array     - A
 # hash        - H            sub (CV) - C            file      - F
 # socket      - Fs           filetest - F-           filetest_access - F-+
-# num-compare - S<           dirhandle - DF
+# num-compare - S<           dirhandle - DF          infix bitwise   - S|
 
 # reference - R
 # "?" denotes an optional operand.
@@ -162,15 +162,15 @@ seq		string eq		ck_null		ifs2	S S
 sne		string ne		ck_null		ifs2	S S
 scmp		string comparison (cmp)	ck_null		ifsT2	S S
 
-bit_and		bitwise and (&)		ck_bitop	fst2	S S
-bit_xor		bitwise xor (^)		ck_bitop	fst2	S S
-bit_or		bitwise or (|)		ck_bitop	fst2	S S
-nbit_and	numeric bitiwse and (&)	ck_bitop	fsT2	S S
-nbit_xor	numeric bitwise xor (^)	ck_bitop	fsT2	S S
-nbit_or		numeric bitwise or (|)	ck_bitop	fsT2	S S
-sbit_and	string bitiwse and (&)	ck_bitop	fst2	S S
-sbit_xor	string bitwise xor (^)	ck_bitop	fst2	S S
-sbit_or		string bitwise or (|)	ck_bitop	fst2	S S
+bit_and		bitwise and (&)		ck_bitop	fst2	S S|
+bit_xor		bitwise xor (^)		ck_bitop	fst2	S S|
+bit_or		bitwise or (|)		ck_bitop	fst2	S S|
+nbit_and	numeric bitiwse and (&)	ck_bitop	fsT2	S S|
+nbit_xor	numeric bitwise xor (^)	ck_bitop	fsT2	S S|
+nbit_or		numeric bitwise or (|)	ck_bitop	fsT2	S S|
+sbit_and	string bitiwse and (&)	ck_bitop	fst2	S S|
+sbit_xor	string bitwise xor (^)	ck_bitop	fst2	S S|
+sbit_or		string bitwise or (|)	ck_bitop	fst2	S S|
 
 negate		negation (-)		ck_null		Ifst1	S
 i_negate	integer negation (-)	ck_null		ifst1	S
