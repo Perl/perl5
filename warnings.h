@@ -105,17 +105,18 @@
 /* Warnings Categories added in Perl 5.021 */
 
 #define WARN_EVERYTHING		 60
-#define WARN_EXPERIMENTAL__REFALIASING 61
-#define WARN_EXPERIMENTAL__WIN32_PERLIO 62
-#define WARN_LOCALE		 63
-#define WARN_MISSING		 64
-#define WARN_REDUNDANT		 65
-#define WARN_EXTRA		 66
-#define WARN_VOID_UNUSUAL	 67
+#define WARN_EXPERIMENTAL__RE_STRICT 61
+#define WARN_EXPERIMENTAL__REFALIASING 62
+#define WARN_EXPERIMENTAL__WIN32_PERLIO 63
+#define WARN_LOCALE		 64
+#define WARN_MISSING		 65
+#define WARN_REDUNDANT		 66
+#define WARN_EXTRA		 67
+#define WARN_VOID_UNUSUAL	 68
 
-#define WARNsize		17
-#define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+#define WARNsize		18
+#define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
 
 #define isLEXWARN_on 	(PL_curcop->cop_warnings != pWARN_STD)
 #define isLEXWARN_off	(PL_curcop->cop_warnings == pWARN_STD)
