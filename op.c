@@ -9481,6 +9481,13 @@ Perl_ck_bitop(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_BITOP;
 
     o->op_private = (U8)(PL_hints & HINT_INTEGER);
+
+    if (o->op_type == OP_NBIT_OR     || o->op_type == OP_SBIT_OR
+     || o->op_type == OP_NBIT_XOR    || o->op_type == OP_SBIT_XOR
+     || o->op_type == OP_NBIT_AND    || o->op_type == OP_SBIT_AND
+     || o->op_type == OP_NCOMPLEMENT || o->op_type == OP_SCOMPLEMENT)
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__BITWISE),
+			      "The bitwise feature is experimental");
     if (!(o->op_flags & OPf_STACKED) /* Not an assignment */
 	    && OP_IS_INFIX_BIT(o->op_type))
     {

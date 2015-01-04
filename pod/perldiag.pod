@@ -5750,6 +5750,18 @@ as a compiler directive.  You may say only one of
 This is to prevent the problem of one module changing the array base out
 from under another module inadvertently.  See L<perlvar/$[> and L<arybase>.
 
+=item The bitwise feature is experimental
+
+(S experimental::bitwise) This warning is emitted if you use bitwise
+operators (C<& | ^ ~ &. |. ^. ~.>) with the "bitwise" feature enabled.
+Simply suppress the warning if you want to use the feature, but know
+that in doing so you are taking the risk of using an experimental
+feature which may change or be removed in a future Perl version:
+
+    no warnings "experimental::bitwise";
+    use feature "bitwise";
+    $x |.= $y;
+
 =item The crypt() function is unimplemented due to excessive paranoia.
 
 (F) Configure couldn't find the crypt() function on your machine,

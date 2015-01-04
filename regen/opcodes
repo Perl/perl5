@@ -177,7 +177,9 @@ i_negate	integer negation (-)	ck_null		ifst1	S
 not		not			ck_null		ifs1	S
 complement	1's complement (~)	ck_bitop	fsT1	S
 ncomplement	numeric 1's complement (~)	ck_bitop	fsT1	S
-scomplement	string 1's complement (~)	ck_null	fsT1	S
+# scomplement uses ck_bitop only for the experimental warning.  Once the
+# warning is gone, this can change to ck_null.
+scomplement	string 1's complement (~)	ck_bitop	fsT1	S
 
 smartmatch	smart match		ck_smartmatch	s2
 
