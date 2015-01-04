@@ -9482,9 +9482,7 @@ Perl_ck_bitop(pTHX_ OP *o)
 
     o->op_private = (U8)(PL_hints & HINT_INTEGER);
     if (!(o->op_flags & OPf_STACKED) /* Not an assignment */
-	    && (o->op_type == OP_BIT_OR
-	     || o->op_type == OP_BIT_AND
-	     || o->op_type == OP_BIT_XOR))
+	    && OP_IS_INFIX_BIT(o->op_type))
     {
 	const OP * const left = cBINOPo->op_first;
 	const OP * const right = OpSIBLING(left);
@@ -9493,9 +9491,15 @@ Perl_ck_bitop(pTHX_ OP *o)
 	    (OP_IS_NUMCOMPARE(right->op_type) &&
 		(right->op_flags & OPf_PARENS) == 0))
 	    Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
-			   "Possible precedence problem on bitwise %c operator",
-			   o->op_type == OP_BIT_OR ? '|'
-			   : o->op_type == OP_BIT_AND ? '&' : '^'
+			  "Possible precedence problem on bitwise %s operator",
+			   o->op_type ==  OP_BIT_OR
+			 ||o->op_type == OP_NBIT_OR  ? "|"
+			:  o->op_type ==  OP_BIT_AND
+			 ||o->op_type == OP_NBIT_AND ? "&"
+			:  o->op_type ==  OP_BIT_XOR
+			 ||o->op_type == OP_NBIT_XOR ? "^"
+			:  o->op_type == OP_SBIT_OR  ? "|."
+			:  o->op_type == OP_SBIT_AND ? "&." : "^."
 			   );
     }
     return o;

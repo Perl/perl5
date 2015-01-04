@@ -829,7 +829,7 @@ termunop : '-' term %prec UMINUS                       /* -$x */
 	|	'!' term                               /* !$x */
 			{ $$ = newUNOP(OP_NOT, 0, scalar($2)); }
 	|	'~' term                               /* ~$x */
-			{ $$ = newUNOP(OP_COMPLEMENT, 0, scalar($2)); }
+			{ $$ = newUNOP($1, 0, scalar($2)); }
 	|	term POSTINC                           /* $x++ */
 			{ $$ = newUNOP(OP_POSTINC, 0,
 					op_lvalue(scalar($1), OP_POSTINC)); }

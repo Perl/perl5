@@ -4704,7 +4704,7 @@ Note this may be also triggered for constructs like:
 
     sub { 1 if die; }
 
-=item Possible precedence problem on bitwise %c operator
+=item Possible precedence problem on bitwise %s operator
 
 (W precedence) Your program uses a bitwise logical operator in conjunction
 with a numeric comparison operator, like this :
