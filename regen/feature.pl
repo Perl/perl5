@@ -365,7 +365,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.39';
+our $VERSION = '1.40';
 
 FEATURES
 
