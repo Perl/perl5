@@ -44,8 +44,12 @@ is($1, 'a', "named capture allows $1 with /n");
 is($2, 'b', "named capture allows $2 with /n");
 is($3, undef, "(.*) didn't capture with /n");
 
-is($+{a}, 'a', "\$+{a} is correct");
-is($+{b}, 'b', "\$+{b} is correct");
+SKIP: {
+    skip "no %+ under miniperl", 2 if is_miniperl();
+    no strict 'refs';
+    is(${"+"}{a}, 'a', "\$+{a} is correct");
+    is(${"+"}{b}, 'b', "\$+{b} is correct");
+}
 
 is(qr/(what)/n,     '(?^n:(what))',
   'qr//n stringified is correct');
