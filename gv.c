@@ -41,53 +41,56 @@ Perl stores its global variables.
 static const char S_autoload[] = "AUTOLOAD";
 static const STRLEN S_autolen = sizeof(S_autoload)-1;
 
-GV *
-Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
+SV *
+Perl_gv_add_by_type_p(pTHX_ GV *gv, gv_add_type type)
 {
     SV **where;
+    SV * sv;
+    PERL_ARGS_ASSERT_GV_ADD_BY_TYPE_P;
 
-    if (
-        !gv
-     || (
-            SvTYPE((const SV *)gv) != SVt_PVGV
+    if ( SvTYPE((const SV *)gv) != SVt_PVGV
          && SvTYPE((const SV *)gv) != SVt_PVLV
-        )
     ) {
 	const char *what;
-	if (type == SVt_PVIO) {
+	if (type == GPe_IO) {
 	    /*
 	     * if it walks like a dirhandle, then let's assume that
 	     * this is a dirhandle.
 	     */
 	    what = OP_IS_DIRHOP(PL_op->op_type) ?
 		"dirhandle" : "filehandle";
-	} else if (type == SVt_PVHV) {
+	} else if (type == GPe_HV) {
 	    what = "hash";
 	} else {
-	    what = type == SVt_PVAV ? "array" : "scalar";
+	    what = type == GPe_AV ? "array" : "scalar";
 	}
 	/* diag_listed_as: Bad symbol for filehandle */
 	Perl_croak(aTHX_ "Bad symbol for %s", what);
     }
 
-    if (type == SVt_PVHV) {
-	where = (SV **)&GvHV(gv);
-    } else if (type == SVt_PVAV) {
-	where = (SV **)&GvAV(gv);
-    } else if (type == SVt_PVIO) {
-	where = (SV **)&GvIOp(gv);
-    } else {
-	where = &GvSV(gv);
-    }
+    where = (SV **)((Size_t)GvGP(gv)+ (Size_t)type);
 
-    if (!*where)
-    {
-	*where = newSV_type(type);
-	    if (type == SVt_PVAV && GvNAMELEN(gv) == 3
-	     && strnEQ(GvNAME(gv), "ISA", 3))
-	    sv_magic(*where, (SV *)gv, PERL_MAGIC_isa, NULL, 0);
+    sv = *where;
+    if (!sv) {
+/* this is table of GP members to their SV types, SVt_LAST triggers a panic */
+	static const U8 addtype_to_svtype
+#if PTRSIZE == 8
+             /*gp_sv   , gp_io   , gp_cv   , cvgn/cnt, gp_hv   , gp_av */
+        [6] = {SVt_NULL, SVt_PVIO, SVt_LAST, SVt_LAST, SVt_PVHV, SVt_PVAV};
+#elif PTRSIZE == 4
+             /*gp_sv   , gp_io   , gp_cv   , gp_cvgen, gp_rfcnt, gp_hv   , gp_av */
+        [7] = {SVt_NULL, SVt_PVIO, SVt_LAST, SVt_LAST, SVt_LAST, SVt_PVHV, SVt_PVAV};
+#else
+#  error unknown pointer size
+#endif
+	svtype svtypevar = (svtype)addtype_to_svtype[PTRPTR2IDX(type)];
+
+	assert(PTRPTR2IDX(type) < sizeof(addtype_to_svtype));
+	sv = *where = newSV_type(svtypevar);
+	if (type == GPe_AV && memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
+	    sv_magic(sv, (SV *)gv, PERL_MAGIC_isa, NULL, 0);
     }
-    return gv;
+    return sv;
 }
 
 GV *
@@ -459,32 +462,60 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 STATIC void
 S_gv_init_svtype(pTHX_ GV *gv, const svtype sv_type)
 {
-    PERL_ARGS_ASSERT_GV_INIT_SVTYPE;
-
-    switch (sv_type) {
-    case SVt_PVIO:
-	(void)GvIOn(gv);
-	break;
-    case SVt_PVAV:
-	(void)GvAVn(gv);
-	break;
-    case SVt_PVHV:
-	(void)GvHVn(gv);
-	break;
+    Size_t addtype;
+#define SGVINIT_SKIP 0xFF
 #ifdef PERL_DONT_CREATE_GVSV
-    case SVt_NULL:
-    case SVt_PVCV:
-    case SVt_PVFM:
-    case SVt_PVGV:
-	break;
-    default:
-	if(GvSVn(gv)) {
-	    /* Work round what appears to be a bug in Sun C++ 5.8 2005/10/13
-	       If we just cast GvSVn(gv) to void, it ignores evaluating it for
-	       its side effect */
-	}
+#  define SGVINIT_SV GPe_SV
+#else
+#  define SGVINIT_SV SGVINIT_SKIP
 #endif
+    static const U8 svtype2add [] = {
+	/*SVt_NULL,	0 */
+        SGVINIT_SKIP,
+	/*SVt_IV,	1 */
+        SGVINIT_SV,
+	/*SVt_NV,	2 */
+        SGVINIT_SV,
+	/*SVt_PV,	3 */
+        SGVINIT_SV,
+	/*SVt_INVLIST,	4 implemented as a PV */
+        SGVINIT_SV,
+	/*SVt_PVIV,	5 */
+        SGVINIT_SV,
+	/*SVt_PVNV,	6 */
+        SGVINIT_SV,
+	/*SVt_PVMG,	7 */
+        SGVINIT_SV,
+	/*SVt_REGEXP,	8 */
+        SGVINIT_SV,
+	/*SVt_PVGV,	9 */
+        SGVINIT_SKIP,
+	/*SVt_PVLV,	10 */
+        SGVINIT_SV,
+	/*SVt_PVAV,	11 */
+        GPe_AV,
+	/*SVt_PVHV,	12 */
+        GPe_HV,
+	/*SVt_PVCV,	13 */
+        SGVINIT_SKIP,
+	/*SVt_PVFM,	14 */
+        SGVINIT_SKIP,
+	/*SVt_PVIO,	15 */
+        GPe_IO,
+	/*SVt_LAST	keep last in enum. used to size arrays */
+        /* invalid, this is slot 0x10, dont define it so this array is
+        a nice 16 bytes long */
+    };
+    PERL_ARGS_ASSERT_GV_INIT_SVTYPE;
+    addtype = svtype2add[sv_type];
+    if(addtype != SGVINIT_SKIP) {
+        SV ** where = (SV **)((Size_t)GvGP(gv)+ addtype);
+        if (!*where)
+            gv_add_by_type_p(gv, (gv_add_type)addtype);
     }
+    return;
+#undef SGVINIT_SV
+#undef SGVINIT_SKIP
 }
 
 static void core_xsub(pTHX_ CV* cv);
