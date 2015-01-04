@@ -1588,6 +1588,25 @@ $a = $b >= $c ^ $d;
 $a = $b <= $c | $d;
 $a = $b <=> $c & $d;
 $a &= $b == $c; $a |= $b == $c; $a ^= $b == $c; # shouldn't warn
+{
+ use experimental 'bitwise';
+ $a = $b & $c == $d;
+ $a = $b ^ $c != $d;
+ $a = $b | $c > $d;
+ $a = $b < $c & $d;
+ $a = $b >= $c ^ $d;
+ $a = $b <= $c | $d;
+ $a = $b <=> $c & $d;
+ $a &= $b == $c; $a |= $b == $c; $a ^= $b == $c; # shouldn't warn
+ $a = $b &. $c == $d;
+ $a = $b ^. $c != $d;
+ $a = $b |. $c > $d;
+ $a = $b < $c &. $d;
+ $a = $b >= $c ^. $d;
+ $a = $b <= $c |. $d;
+ $a = $b <=> $c &. $d;
+ $a &.= $b == $c; $a |.= $b == $c; $a ^.= $b == $c; # shouldn't warn
+}
 no warnings 'precedence';
 $a = $b & $c == $d;
 $a = $b ^ $c != $d;
@@ -1596,6 +1615,25 @@ $a = $b < $c & $d;
 $a = $b >= $c ^ $d;
 $a = $b <= $c | $d;
 $a = $b <=> $c & $d;
+{
+ use experimental 'bitwise';
+ $a = $b & $c == $d;
+ $a = $b ^ $c != $d;
+ $a = $b | $c > $d;
+ $a = $b < $c & $d;
+ $a = $b >= $c ^ $d;
+ $a = $b <= $c | $d;
+ $a = $b <=> $c & $d;
+ $a &= $b == $c; $a |= $b == $c; $a ^= $b == $c; # shouldn't warn
+ $a = $b &. $c == $d;
+ $a = $b ^. $c != $d;
+ $a = $b |. $c > $d;
+ $a = $b < $c &. $d;
+ $a = $b >= $c ^. $d;
+ $a = $b <= $c |. $d;
+ $a = $b <=> $c &. $d;
+ $a &.= $b == $c; $a |.= $b == $c; $a ^.= $b == $c; # shouldn't warn
+}
 EXPECT
 Possible precedence problem on bitwise & operator at - line 3.
 Possible precedence problem on bitwise ^ operator at - line 4.
@@ -1604,6 +1642,20 @@ Possible precedence problem on bitwise & operator at - line 6.
 Possible precedence problem on bitwise ^ operator at - line 7.
 Possible precedence problem on bitwise | operator at - line 8.
 Possible precedence problem on bitwise & operator at - line 9.
+Possible precedence problem on bitwise & operator at - line 13.
+Possible precedence problem on bitwise ^ operator at - line 14.
+Possible precedence problem on bitwise | operator at - line 15.
+Possible precedence problem on bitwise & operator at - line 16.
+Possible precedence problem on bitwise ^ operator at - line 17.
+Possible precedence problem on bitwise | operator at - line 18.
+Possible precedence problem on bitwise & operator at - line 19.
+Possible precedence problem on bitwise &. operator at - line 21.
+Possible precedence problem on bitwise ^. operator at - line 22.
+Possible precedence problem on bitwise |. operator at - line 23.
+Possible precedence problem on bitwise &. operator at - line 24.
+Possible precedence problem on bitwise ^. operator at - line 25.
+Possible precedence problem on bitwise |. operator at - line 26.
+Possible precedence problem on bitwise &. operator at - line 27.
 ########
 # op.c
 use integer;
