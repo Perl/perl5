@@ -2121,10 +2121,11 @@ Es	|void	 |set_ANYOF_arg	|NN RExC_state_t* const pRExC_state \
 Es	|AV*	 |add_multi_match|NULLOK AV* multi_char_matches		    \
 				|NN SV* multi_string			    \
 				|const STRLEN cp_count
-Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state \
+Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state                 \
 				|NN I32 *flagp|U32 depth|const bool stop_at_1 \
 				|bool allow_multi_fold                        \
-				|const bool silence_non_portable	      \
+				|const bool silence_non_portable              \
+				|const bool strict                            \
 				|NULLOK SV** ret_invlist
 Es	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist

@@ -11648,6 +11648,7 @@ tryagain:
                        FALSE, /* means parse the whole char class */
                        TRUE, /* allow multi-char folds */
                        FALSE, /* don't silence non-portable warnings. */
+                       FALSE, /* not strict */
                        NULL);
 	if (*RExC_parse != ']') {
 	    RExC_parse = oregcomp_parse;
@@ -11883,6 +11884,7 @@ tryagain:
                                FALSE, /* don't silence non-portable warnings.
                                          It would be a bug if these returned
                                          non-portables */
+                               FALSE, /* not strict */
                                NULL);
                 /* regclass() can only return RESTART_UTF8 if multi-char folds
                    are allowed.  */
@@ -13178,7 +13180,9 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                                                      posix class */
                                   FALSE, /* don't allow multi-char folds */
                                   TRUE, /* silence non-portable warnings. */
-                                  &current))
+                                  TRUE, /* strict */
+                                  &current
+                                 ))
                         FAIL2("panic: regclass returned NULL to handle_sets, flags=%#"UVxf"",
                               (UV) *flagp);
 
@@ -13345,7 +13349,9 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                               TRUE, /* means parse just the next thing */
                               FALSE, /* don't allow multi-char folds */
                               FALSE, /* don't silence non-portable warnings.  */
-                              &current))
+                              TRUE,  /* strict */
+                              &current
+                             ))
                     FAIL2("panic: regclass returned NULL to handle_sets, flags=%#"UVxf"",
                           (UV) *flagp);
                 /* regclass() will return with parsing just the \ sequence,
@@ -13368,7 +13374,9 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                                                 only if not a posix class */
                              FALSE, /* don't allow multi-char folds */
                              FALSE, /* don't silence non-portable warnings.  */
-                             &current))
+                             TRUE,   /* strict */
+                             &current
+                            ))
                     FAIL2("panic: regclass returned NULL to handle_sets, flags=%#"UVxf"",
                           (UV) *flagp);
                 /* function call leaves parse pointing to the ']', except if we
@@ -13569,7 +13577,9 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                     TRUE, /* silence non-portable warnings.  The above may very
                              well have generated non-portable code points, but
                              they're valid on this machine */
-                    NULL);
+                    FALSE, /* similarly, no need for strict */
+                    NULL
+                );
     if (!node)
         FAIL2("panic: regclass returned NULL to handle_sets, flags=%#"UVxf,
                     PTR2UV(flagp));
@@ -13705,7 +13715,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  const bool silence_non_portable,   /* Don't output warnings
                                                        about too large
                                                        characters */
-                 SV** ret_invlist)  /* Return an inversion list, not a node */
+                 const bool strict,
+                 SV** ret_invlist  /* Return an inversion list, not a node */
+          )
 {
     /* parse a bracketed class specification.  Most of these will produce an
      * ANYOF node; but something like [a] will produce an EXACT node; [aA], an
@@ -13762,7 +13774,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     char * stop_ptr = RExC_end;    /* where to stop parsing */
     const bool skip_white = cBOOL(ret_invlist); /* ignore unescaped white
                                                    space? */
-    const bool strict = cBOOL(ret_invlist); /* Apply strict parsing rules? */
 
     /* Unicode properties are stored in a swash; this holds the current one
      * being parsed.  If this swash is the only above-latin1 component of the
