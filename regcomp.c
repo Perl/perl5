@@ -6865,7 +6865,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_emit_bound = ri->program + RExC_size + 1;
     pRExC_state->code_index = 0;
 
-    REGC((U8)REG_MAGIC, (char*) RExC_emit++);
+    *((char*) RExC_emit++) = (char) REG_MAGIC;
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
 	ReREFCNT_dec(rx);
         Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for generation pass, flags=%#"UVxf"", (UV) flags);
