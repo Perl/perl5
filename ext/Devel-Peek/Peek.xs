@@ -406,7 +406,13 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
     return (OP *)newop;
 }
 
-static XOP my_xop;
+const static XOP my_xop = {
+    XOPf_xop_name|XOPf_xop_desc|XOPf_xop_class,		/* xop_flags */
+    "Devel_Peek_Dump",					/* xop_name */
+    "Dump",						/* xop_desc */
+    OA_BINOP,						/* xop_class */
+    NULL						/* xop_peep */
+};
 
 MODULE = Devel::Peek		PACKAGE = Devel::Peek
 
@@ -439,10 +445,6 @@ BOOT:
     CV * const cv = get_cvn_flags("Devel::Peek::Dump", 17, 0);
     assert(cv);
     cv_set_call_checker(cv, S_ck_dump, (SV *)cv);
-
-    XopENTRY_set(&my_xop, xop_name, "Devel_Peek_Dump");
-    XopENTRY_set(&my_xop, xop_desc, "Dump");
-    XopENTRY_set(&my_xop, xop_class, OA_BINOP);
     Perl_custom_op_register(aTHX_ S_pp_dump, &my_xop);
 }
 
