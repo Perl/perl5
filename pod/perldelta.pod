@@ -371,6 +371,11 @@ bug, introduced in 5.20, would happen mostly for long strings (1250 chars
 or more), but could happen for any strings under builds with copy-on-write
 disabled.  [perl #123029]
 
+=item *
+
+Fixed a bug that could cause perl to execute an infite loop during
+compilation. [perl #122995]
+
 =back
 
 =head1 Known Problems
