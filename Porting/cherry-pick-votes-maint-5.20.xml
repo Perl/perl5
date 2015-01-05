@@ -108,8 +108,8 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="arc" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
 <commit votes="tux, arc" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
 
-Will also require the fix to https://rt.perl.org/Public/Bug/Display.html?id=123543 if this is cherry-picked:
 <commit votes="tux" id="237050634b19905cdd9e8e25c2a43d0b24eb59f2" ticket="" desc="Add pthread to libswanted"/>
+<commit votes="tux" id="90207ba1bd77fb10e2c39594d954b43a9e8ee948" ticket="" desc="Put pthread in front of libswanted and add cl"/>
 
 </div>
 
