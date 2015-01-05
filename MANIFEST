@@ -2312,6 +2312,8 @@ cpan/Test-Simple/lib/Test/Stream/Threads.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Toolset.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Util.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Tester/Capture.pm			Test::Simple module
+cpan/Test-Simple/lib/Test/Tester/CaptureRunner.pm			Test::Simple module
+cpan/Test-Simple/lib/Test/Tester/Delegate.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Tester.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Tutorial.pod			Test::Simple documentation
 cpan/Test-Simple/lib/Test/Tutorial/WritingTests.pod			Test::Simple documentation
