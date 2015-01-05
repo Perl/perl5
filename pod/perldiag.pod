@@ -440,6 +440,11 @@ that wasn't a symbol table entry.
 (P) An internal request asked to add a hash entry to something that
 wasn't a symbol table entry.
 
+=item Bad symbol for scalar
+
+(P) An internal request asked to add a scalar entry to something that
+wasn't a symbol table entry.
+
 =item Bareword found in conditional
 
 (W bareword) The compiler found a bareword where it expected a
