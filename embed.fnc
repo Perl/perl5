@@ -2110,8 +2110,6 @@ Es	|regnode*|regatom	|NN RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth
 Es	|regnode*|regbranch	|NN RExC_state_t *pRExC_state \
 				|NN I32 *flagp|I32 first|U32 depth
-Ei	|STRLEN	|reguni		|NN const RExC_state_t *pRExC_state \
-				|UV uv|NN char *s
 Es	|void	 |set_ANYOF_arg	|NN RExC_state_t* const pRExC_state \
 				|NN regnode* const node                    \
 				|NULLOK SV* const cp_list                  \

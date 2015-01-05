@@ -996,7 +996,6 @@
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
 #define regpposixcc(a,b,c)	S_regpposixcc(aTHX_ a,b,c)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
-#define reguni(a,b,c)		S_reguni(aTHX_ a,b,c)
 #define scan_commit(a,b,c,d)	S_scan_commit(aTHX_ a,b,c,d)
 #define set_ANYOF_arg(a,b,c,d,e,f,g)	S_set_ANYOF_arg(aTHX_ a,b,c,d,e,f,g)
 #define ssc_add_range(a,b,c)	S_ssc_add_range(aTHX_ a,b,c)

@@ -702,12 +702,6 @@ static const scan_data_t zero_scan_data =
 	    a1, a2, a3, a4, REPORT_LOCATION_ARGS(offset)); \
 } STMT_END
 
-
-/* Allow for side effects in s */
-#define REGC(c,s) STMT_START {			\
-    if (!SIZE_ONLY) *(s) = (c); else (void)(s);	\
-} STMT_END
-
 /* Macros for recording node offsets.   20001227 mjd@plover.com
  * Nodes are numbered 1, 2, 3, 4.  Node #n's position is recorded in
  * element 2*n-1 of the array.  Element #2n holds the byte length node #n.
@@ -6648,10 +6642,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_recurse_count = 0;
     pRExC_state->code_index = 0;
 
-#if 0 /* REGC() is (currently) a NOP at the first pass.
-       * Clever compilers notice this and complain. --jhi */
-    REGC((U8)REG_MAGIC, (char*)RExC_emit);
-#endif
     DEBUG_PARSE_r(
 	PerlIO_printf(Perl_debug_log, "Starting first pass (sizing)\n");
         RExC_lastnum=0;
@@ -12534,8 +12524,7 @@ tryagain:
                      * unfolded, and we have to calculate how many EXACTish
                      * nodes it will take; and we may run out of room in a node
                      * in the middle of a potential multi-char fold, and have
-                     * to back off accordingly.  (Hence we can't use REGC for
-                     * the simple case just below.) */
+                     * to back off accordingly.  */
 
                     UV folded;
                     if (isASCII_uni(ender)) {
@@ -15834,17 +15823,6 @@ S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const
         RExC_emit = ptr;
     }
     return(ret);
-}
-
-/*
-- reguni - emit (if appropriate) a Unicode character
-*/
-PERL_STATIC_INLINE STRLEN
-S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv, char* s)
-{
-    PERL_ARGS_ASSERT_REGUNI;
-
-    return SIZE_ONLY ? UNISKIP(uv) : (uvchr_to_utf8((U8*)s, uv) - (U8*)s);
 }
 
 /*
