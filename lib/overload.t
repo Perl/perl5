@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5199;
+plan tests => 5200;
 
 use Scalar::Util qw(tainted);
 
@@ -2753,6 +2753,37 @@ package xstack { use overload 'x' => sub { shift . " x " . shift },
 is join(",", 1..3, scalar((bless([], 'xstack')) x 3, 1), 4..6),
   "1,2,3,1,4,5,6",
   '(...)x... in void cx with x overloaded [perl #121827]';
+
+package bitops {
+    our @o;
+    use overload do {
+	my %o;
+	for my $o (qw(& | ^ ~ &. |. ^. ~. &= |= ^= &.= |.= ^.=)) {
+	    $o{$o} = sub { push @o, $o; $_[0] }
+	}
+	%o, '=' => sub { bless [] };
+    }
+}
+{
+    use experimental 'bitwise';
+    my $o = bless [], bitops::;
+    $_ = $o & 0;
+    $_ = $o | 0;
+    $_ = $o ^ 0;
+    $_ = ~$o;
+    $_ = $o &. 0;
+    $_ = $o |. 0;
+    $_ = $o ^. 0;
+    $_ = ~.$o;
+    $o &= 0;
+    $o |= 0;
+    $o ^= 0;
+    $o &.= 0;
+    $o |.= 0;
+    $o ^.= 0;
+    is "@bitops::o", '& | ^ ~ &. |. ^. ~. &= |= ^= &.= |.= ^.=',
+       'experimental "bitwise" ops'
+}
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
     package ant;
