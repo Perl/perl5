@@ -147,6 +147,14 @@ XXX
 
 L<XXX> has been upgraded from version A.xx to B.yy.
 
+=item *
+
+L<B> has been upgraded from version 1.54 to 1.55.
+
+A bug where, after an ithread creation or psuedofork, special/immortal SVs in
+the child ithread/psuedoprocess did not have the correct class of
+C<B::SPECIAL>, has been fixed.
+
 =back
 
 =head2 Removed Modules and Pragmata

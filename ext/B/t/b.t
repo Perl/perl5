@@ -12,6 +12,7 @@ BEGIN {
 $|  = 1;
 use warnings;
 use strict;
+use threads;
 use Test::More;
 
 BEGIN { use_ok( 'B' ); }
@@ -217,6 +218,18 @@ is($gv_ref->GPFLAGS & B::GPf_ALIASED_SV, 0, 'GPFLAGS are unset');
 is(ref B::sv_yes(), "B::SPECIAL", "B::sv_yes()");
 is(ref B::sv_no(), "B::SPECIAL", "B::sv_no()");
 is(ref B::sv_undef(), "B::SPECIAL", "B::sv_undef()");
+SKIP: {
+    skip('no fork', 1)
+	unless ($Config::Config{d_fork} or $Config::Config{d_pseudofork});
+    my $pid;
+    if ($pid = fork) {
+        waitpid($pid,0);
+    }
+    else {
+        is(ref B::svref_2object(\(!!0)), "B::SPECIAL", "special SV table works after psuedofork");
+        exit;
+    }
+}
 
 # More utility functions
 is(B::ppname(0), "pp_null", "Testing ppname (this might break if opnames.h is changed)");
