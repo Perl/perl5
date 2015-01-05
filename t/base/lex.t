@@ -140,8 +140,6 @@ my $test = 31;
   # The second caret here should be interpreted as an xor
   if (($^Q^XX) != 3) { print "not " } 
   print "ok $test\n"; $test++;
-#  if (($N  ^  XX()) != 3) { print "not " } 
-#  print "ok $test\n"; $test++;
 
   # These next two tests are trying to make sure that
   # $^FOO is always global; it doesn't make sense to 'my' it.
