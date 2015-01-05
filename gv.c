@@ -3266,6 +3266,9 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     case band_amg:
     case bor_amg:
     case bxor_amg:
+    case sband_amg:
+    case sbor_amg:
+    case sbxor_amg:
       if (assign)
         force_scalar = 1;
       break;
