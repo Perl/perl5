@@ -4,15 +4,11 @@
 
 <div><h2>Tickets Listed in #122913: [META] perl 5.20.2</h2>
 
-The fix which this perldelta relates to has already been picked:
-<commit votes="steveh, arc" id="c1662923fd698c3467e36017e0b303046f173e13" ticket="122771" desc="perldelta for 4c62787/#122771"/>
-
 The fix which this test relates to has already been partially picked. The rest of it (512e01a) will need picking with this:
 <commit votes="steveh, arc" id="43275f00a97a14a80f9493c38895a5c77f0fc88a" ticket="123198" desc="svleak.t: Add test for #123198"/>
 
-The fix which this test and perldelta relate to have already been picked:
+The fix which this test relates to has already been picked:
 <commit votes="steveh, arc" id="409c6472cedc6771a158a61dbbf8154d0246dc5b" ticket="122747" desc="add test for rt122747"/>
-<commit votes="steveh, arc" id="13dd5671ecb824f71dfe100fbf3b7d5ee9170636" ticket="122747" desc="perldelta for 2c1f00b/#122747"/>
 
 <commit votes="steveh, sprout" id="83a94553cbf9f2c11b3e9a63a44e7b9ce17ccb77" ticket="40565" desc="[perl #40565] Fix localisation in pseudo-fork"/>
 <commit votes="steveh" id="452466a503257b1012694b0d3a3cbf260e409d18" ticket="40565" desc="perldelta for the prev. commit"/>
@@ -21,9 +17,6 @@ The fix which this test and perldelta relate to have already been picked:
 <commit votes="sprout" id="3bc8ec963e9657121e69386195faa61e46928dda" ticket="123344" desc="Fix qr/@array(?{block})/"/>
 <commit votes="sprout" id="d100ca43dce2c9a6bb636517e5595aa9e1e01e7e" ticket="123344" desc="Fix assertion failure with qr/\Q(?{})/"/>
 <commit votes="steveh" id="1318b6d7e272031984abced04ebef14bf73954f1" ticket="123344" desc="perldelta for 3bc8ec963 / #123344"/>
-
-The fix which this perldelta relates to has already been picked:
-<commit votes="steveh, arc" id="857f4fb1c22a29afdfe39e929702476b8a82d7c5" ticket="123029" desc="perldelta for #123029"/>
 
 <commit votes="steveh" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
 
