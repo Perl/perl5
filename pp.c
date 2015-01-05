@@ -5566,15 +5566,18 @@ PP(pp_split)
 #ifdef USE_ITHREADS
     if (pm->op_pmreplrootu.op_pmtargetoff) {
 	ary = GvAVn(MUTABLE_GV(PAD_SVl(pm->op_pmreplrootu.op_pmtargetoff)));
+	goto have_av;
     }
 #else
     if (pm->op_pmreplrootu.op_pmtargetgv) {
 	ary = GvAVn(pm->op_pmreplrootu.op_pmtargetgv);
+	goto have_av;
     }
 #endif
     else if (pm->op_targ)
 	ary = (AV *)PAD_SVl(pm->op_targ);
     if (ary) {
+	have_av:
 	realarray = 1;
 	PUTBACK;
 	av_extend(ary,0);
