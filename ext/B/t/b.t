@@ -15,6 +15,7 @@ use strict;
 BEGIN  {
     eval { require threads; threads->import; }
 }
+use Test::Stream 'enable_fork';
 use Test::More;
 
 BEGIN { use_ok( 'B' ); }
