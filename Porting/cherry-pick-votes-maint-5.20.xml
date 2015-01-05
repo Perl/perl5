@@ -118,8 +118,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 Will also require the fix to https://rt.perl.org/Public/Bug/Display.html?id=123543 if this is cherry-picked:
 <commit votes="tux" id="237050634b19905cdd9e8e25c2a43d0b24eb59f2" ticket="" desc="Add pthread to libswanted"/>
 
-<commit votes="steveh, arc, tux" id="cced55d2e366f8ccb0884e747f32c32c1b538989" ticket="" desc="Perl 5 on Haiku - libperl.so not found installing out of standard location"/>
-
 </div>
 
 <div><h3>Platform-Specific Build/Test/Installation Fixes</h3>
