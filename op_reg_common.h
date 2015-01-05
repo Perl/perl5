@@ -83,22 +83,25 @@ get_regex_charset(const U32 flags)
     return (regex_charset) ((flags & RXf_PMf_CHARSET) >> _RXf_PMf_CHARSET_SHIFT);
 }
 
-#define _RXf_PMf_SHIFT_COMPILETIME (RXf_PMf_STD_PMMOD_SHIFT+10)
+#define RXf_PMf_STRICT (1U<<(RXf_PMf_STD_PMMOD_SHIFT+10))
+
+#define _RXf_PMf_SHIFT_COMPILETIME (RXf_PMf_STD_PMMOD_SHIFT+11)
+
 
 /*
   Set in Perl_pmruntime if op_flags & OPf_SPECIAL, i.e. split. Will
   be used by regex engines to check whether they should set
   RXf_SKIPWHITE
 */
-#define RXf_PMf_SPLIT (1U<<(RXf_PMf_STD_PMMOD_SHIFT+10))
+#define RXf_PMf_SPLIT (1U<<(RXf_PMf_STD_PMMOD_SHIFT+11))
 
 /* Next available bit after the above.  Name begins with '_' so won't be
  * exported by B */
-#define _RXf_PMf_SHIFT_NEXT (RXf_PMf_STD_PMMOD_SHIFT+11)
+#define _RXf_PMf_SHIFT_NEXT (RXf_PMf_STD_PMMOD_SHIFT+12)
 
 /* Mask of the above bits.  These need to be transferred from op_pmflags to
  * re->extflags during compilation */
-#define RXf_PMf_COMPILETIME    (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_KEEPCOPY|RXf_PMf_NOCAPTURE|RXf_PMf_CHARSET)
+#define RXf_PMf_COMPILETIME    (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_KEEPCOPY|RXf_PMf_NOCAPTURE|RXf_PMf_CHARSET|RXf_PMf_STRICT)
 #define RXf_PMf_FLAGCOPYMASK   (RXf_PMf_COMPILETIME|RXf_PMf_SPLIT)
 
 #if 0   /* Temporary to get Jenkins happy again */
@@ -120,9 +123,10 @@ get_regex_charset(const U32 flags)
 #define PMf_NOCAPTURE     (1U<<5)
 #define PMf_KEEPCOPY      (1U<<6)
 #define PMf_CHARSET       (7U<<7)
-#define PMf_SPLIT         (1U<<10)
+#define PMf_STRICT        (1U<<10)
+#define PMf_SPLIT         (1U<<11)
 
-#if PMf_MULTILINE != RXf_PMf_MULTILINE || PMf_SINGLELINE != RXf_PMf_SINGLELINE || PMf_FOLD != RXf_PMf_FOLD || PMf_EXTENDED != RXf_PMf_EXTENDED || PMf_EXTENDED_MORE != RXf_PMf_EXTENDED_MORE || PMf_KEEPCOPY != RXf_PMf_KEEPCOPY || PMf_SPLIT != RXf_PMf_SPLIT || PMf_CHARSET != RXf_PMf_CHARSET || PMf_NOCAPTURE != RXf_PMf_NOCAPTURE
+#if PMf_MULTILINE != RXf_PMf_MULTILINE || PMf_SINGLELINE != RXf_PMf_SINGLELINE || PMf_FOLD != RXf_PMf_FOLD || PMf_EXTENDED != RXf_PMf_EXTENDED || PMf_EXTENDED_MORE != RXf_PMf_EXTENDED_MORE || PMf_KEEPCOPY != RXf_PMf_KEEPCOPY || PMf_SPLIT != RXf_PMf_SPLIT || PMf_CHARSET != RXf_PMf_CHARSET || PMf_NOCAPTURE != RXf_PMf_NOCAPTURE || PMf_STRICT != RXf_PMf_STRICT
 #   error RXf_PMf defines are wrong
 #endif
 
