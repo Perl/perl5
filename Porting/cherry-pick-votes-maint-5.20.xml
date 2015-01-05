@@ -114,8 +114,11 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="tux, arc" id="54db7d57c29c9259228a6a4176caa32e391c6d0b" ticket="" desc="Upstream a patch from pkgsrc for NetBSD hints"/>
 <commit votes="arc" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
 <commit votes="tux, arc" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
-<commit votes="" id="237050634b19905cdd9e8e25c2a43d0b24eb59f2" ticket="" desc="Add pthread to libswanted"/>
-<commit votes="steveh, arc" id="cced55d2e366f8ccb0884e747f32c32c1b538989" ticket="" desc="Perl 5 on Haiku - libperl.so not found installing out of standard location"/>
+
+Will also require the fix to https://rt.perl.org/Public/Bug/Display.html?id=123543 if this is cherry-picked:
+<commit votes="tux" id="237050634b19905cdd9e8e25c2a43d0b24eb59f2" ticket="" desc="Add pthread to libswanted"/>
+
+<commit votes="steveh, arc, tux" id="cced55d2e366f8ccb0884e747f32c32c1b538989" ticket="" desc="Perl 5 on Haiku - libperl.so not found installing out of standard location"/>
 
 </div>
 
