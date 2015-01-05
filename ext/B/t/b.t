@@ -12,7 +12,9 @@ BEGIN {
 $|  = 1;
 use warnings;
 use strict;
-use threads;
+BEGIN  {
+    eval { require threads; threads->import; }
+}
 use Test::More;
 
 BEGIN { use_ok( 'B' ); }
