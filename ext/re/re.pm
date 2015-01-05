@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.29";
+our $VERSION     = "0.30";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -25,6 +25,7 @@ my %reflags = (
     x => 1 << ($PMMOD_SHIFT + 3),
     n => 1 << ($PMMOD_SHIFT + 5),
     p => 1 << ($PMMOD_SHIFT + 6),
+    strict => 1 << ($PMMOD_SHIFT + 10),
 # special cases:
     d => 0,
     l => 1,
@@ -141,6 +142,31 @@ sub bits {
 	} elsif ($EXPORT_OK{$s}) {
 	    require Exporter;
 	    re->export_to_level(2, 're', $s);
+        } elsif ($s eq 'strict') {
+            if ($on) {
+                $^H{reflags} |= $reflags{$s};
+                warnings::warnif('experimental::re_strict',
+                                 "\"use re 'strict'\" is experimental");
+
+                # Turn on warnings if not already done.
+                if (! warnings::enabled('regexp')) {
+                    require warnings;
+                    warnings->import('regexp');
+                    $^H{re_strict} = 1;
+                }
+            }
+            else {
+                $^H{reflags} &= ~$reflags{$s};
+
+                # Turn off warnings if we turned them on.
+                warnings->unimport('regexp') if $^H{re_strict};
+            }
+	    if ($^H{reflags}) {
+                $^H |= $flags_hint;
+            }
+            else {
+                $^H &= ~$flags_hint;
+            }
 	} elsif ($s =~ s/^\///) {
 	    my $reflags = $^H{reflags} || 0;
 	    my $seen_charset;
@@ -263,6 +289,8 @@ re - Perl pragma to alter regular expression behaviour
                                    # switch)
     }
 
+    use re 'strict';               # Raise warnings for more conditions
+
     use re '/ix';
     "FOO" =~ / foo /; # /ix implied
     no re '/x';
@@ -323,6 +351,50 @@ interpolation.  Thus:
 
 I<is> allowed if $pat is a precompiled regular expression, even
 if $pat contains C<(?{ ... })> assertions or C<(??{ ... })> subexpressions.
+
+=head2 'strict' mode
+
+When C<use re 'strict'> is in effect, stricter checks are applied than
+otherwise when compiling regular expressions patterns.  These may cause more
+warnings to be raised than otherwise, and more things to be fatal instead of
+just warnings.  The purpose of this is to find and report at compile time some
+things, which may be legal, but have a reasonable possibility of not being the
+programmer's actual intent.  This automatically turns on the C<"regexp">
+warnings category (if not already on) within its scope.
+
+As an example of something that is caught under C<"strict'> but not otherwise
+is the pattern
+
+ qr/\xABC/
+
+The C<"\x"> construct without curly braces should be followed by exactly two
+hex digits; this one is followed by three.  This currently evaluates as
+equivalent to
+
+ qr/\x{AB}C/
+
+that is, the character whose code point value is C<0xAB>, followed by the
+letter C<C>.  But since C<C> is a a hex digit, there is a reasonable chance
+that the intent was
+
+ qr/\x{ABC}/
+
+that is the single character at C<0xABC>.  Under C<'strict'> it is an error to
+not follow C<\x> with exactly two hex digits.  When not under C<'strict'> a
+warning is generated if there is only one hex digit, and no warning is raised
+if there are more than two.
+
+It is expected that what exactly C<'strict'> does will evolve over time as we
+gain experience with it.  This means that programs that compile under it in
+today's Perl may not compile, or may have more or fewer warnings, in future
+Perls.  There is no backwards compatibility promises with regards to it.  For
+this reason, using it will raise a C<experimental::re_strict> class warning,
+unless that category is turned off.
+
+Note that if a pattern compiled within C<'strict'> is recompiled, say by
+interpolating into another pattern, outside of C<'strict'>, it is not checked
+again for strictness.  This is because if it works under strict it must work
+under non-strict.
 
 =head2 '/flags' mode
 

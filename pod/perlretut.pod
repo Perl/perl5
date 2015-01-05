@@ -49,6 +49,10 @@ is harder to pronounce.  The Perl pod documentation is evenly split on
 regexp vs regex; in Perl, there is more than one way to abbreviate it.
 We'll use regexp in this tutorial.
 
+New in v5.22, L<C<use re 'strict'>|re/'strict' mode> applies stricter
+rules than otherwise when compiling regular expression patterns.  It can
+find things that, while legal, may not be what you intended.
+
 =head1 Part 1: The basics
 
 =head2 Simple word matching

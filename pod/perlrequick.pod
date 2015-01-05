@@ -495,6 +495,14 @@ the matched substrings from the groupings as well:
 Since the first character of $x matched the regex, C<split> prepended
 an empty initial element to the list.
 
+=head2 C<use re 'strict'>
+
+New in v5.22, this applies stricter rules than otherwise when compiling
+regular expression patterns.  It can find things that, while legal, may
+not be what you intended.
+
+See L<'strict' in re|re/'strict' mode>.
+
 =head1 BUGS
 
 None.

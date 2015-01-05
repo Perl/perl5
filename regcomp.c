@@ -184,6 +184,7 @@ struct RExC_state_t {
     scan_frame *frame_head;
     scan_frame *frame_last;
     U32         frame_count;
+    U32         strict;
 #ifdef ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -253,6 +254,7 @@ struct RExC_state_t {
 #define RExC_frame_head (pRExC_state->frame_head)
 #define RExC_frame_last (pRExC_state->frame_last)
 #define RExC_frame_count (pRExC_state->frame_count)
+#define RExC_strict (pRExC_state->strict)
 
 /* Heuristic check on the complexity of the pattern: if TOO_NAUGHTY, we set
  * a flag to disable back-off on the fixed/floating substrings - if it's
@@ -6532,6 +6534,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_uni_semantics = 0;
     RExC_contains_locale = 0;
     RExC_contains_i = 0;
+    RExC_strict = cBOOL(pm_flags & RXf_PMf_STRICT);
     pRExC_state->runtime_code_qr = NULL;
     RExC_frame_head= NULL;
     RExC_frame_last= NULL;
@@ -11648,7 +11651,7 @@ tryagain:
                        FALSE, /* means parse the whole char class */
                        TRUE, /* allow multi-char folds */
                        FALSE, /* don't silence non-portable warnings. */
-                       FALSE, /* not strict */
+                       RExC_strict,
                        NULL);
 	if (*RExC_parse != ']') {
 	    RExC_parse = oregcomp_parse;
@@ -11884,7 +11887,7 @@ tryagain:
                                FALSE, /* don't silence non-portable warnings.
                                          It would be a bug if these returned
                                          non-portables */
-                               FALSE, /* not strict */
+                               RExC_strict,
                                NULL);
                 /* regclass() can only return RESTART_UTF8 if multi-char folds
                    are allowed.  */
@@ -12259,7 +12262,7 @@ tryagain:
 						       &result,
 						       &error_msg,
 						       PASS2, /* out warnings */
-                                                       FALSE, /* not strict */
+                                                       RExC_strict,
                                                        TRUE, /* Output warnings
                                                                 for non-
                                                                 portables */
@@ -12288,7 +12291,7 @@ tryagain:
 						       &result,
 						       &error_msg,
 						       PASS2, /* out warnings */
-                                                       FALSE, /* not strict */
+                                                       RExC_strict,
                                                        TRUE, /* Output warnings
                                                                 for non-
                                                                 portables */

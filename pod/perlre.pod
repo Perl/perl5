@@ -16,6 +16,9 @@ operations, plus various examples of the same, see discussions of
 C<m//>, C<s///>, C<qr//> and C<??> in L<perlop/"Regexp Quote-Like
 Operators">.
 
+New in v5.22, L<C<use re 'strict'>|re/'strict' mode> applies stricter
+rules than otherwise when compiling regular expression patterns.  It can
+find things that, while legal, may not be what you intended.
 
 =head2 Modifiers
 

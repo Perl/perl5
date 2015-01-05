@@ -57,6 +57,17 @@ See L<perlre/"n"> for more information.
 
 C<prototype()> with no arguments now infers C<$_>.  [perl #123514]
 
+=head2 C<use re 'strict'>
+
+This applies stricter syntax rules to regular expression patterns
+compiled within its scope, which hopefully will alert you to typos and
+other unintentional behavior that backwards-compatibility issues prevent
+us from doing in normal regular expression compilations.  Because the
+behavior of this is subject to change in future Perl releases as we gain
+experience, using this pragma will raise a category
+C<experimental:re_strict> warning.
+See L<'strict' in re|re/'strict' mode>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

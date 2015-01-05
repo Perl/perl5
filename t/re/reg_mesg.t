@@ -57,7 +57,9 @@ utf8::encode($utf8);
 
 sub mark_as_utf8 {
     my @ret;
-    while ( my ($pat, $msg) = splice(@_, 0, 2) ) {
+    for (my $i = 0; $i < @_; $i += 2) {
+        my $pat = $_[$i];
+        my $msg = $_[$i+1];
         my $l1_pat = $pat =~ s/$utf8/$l1/gr;
         my $l1_msg;
         $pat = "use utf8; $pat";
@@ -240,6 +242,90 @@ my @death =
  '/((?# This is a comment in the middle of a token)*FAIL)/' => 'In \'(*VERB...)\', the \'(\' and \'*\' must be adjacent {#} m/((?# This is a comment in the middle of a token)*{#}FAIL)/',
 );
 
+# These are messages that are warnings when not strict; death under 'use re
+# "strict".  See comment before @warnings as to why some have a \x{100} in
+# them.  This array has 3 elements per construct.  [0] is the regex to use;
+# [1] is the message under no strict, and [2] is under strict.
+my @death_only_under_strict = (
+    'm/\xABC/' => "",
+               => 'Use \x{...} for more than two hex characters {#} m/\xABC{#}/',
+    'm/[\xABC]/' => "",
+                 => 'Use \x{...} for more than two hex characters {#} m/[\xABC{#}]/',
+
+    # XXX This is a confusing error message.  The G isn't ignored; it just
+    # terminates the \x.  Also some messages below are missing the <-- HERE,
+    # aren't all category 'regexp'.  (Hence we have to turn off 'digit'
+    # messages as well below)
+    'm/\xAG/' => 'Illegal hexadecimal digit \'G\' ignored',
+              => 'Non-hex character {#} m/\xAG{#}/',
+    'm/[\xAG]/' => 'Illegal hexadecimal digit \'G\' ignored',
+                => 'Non-hex character {#} m/[\xAG{#}]/',
+    'm/\o{789}/' => 'Non-octal character \'8\'.  Resolved as "\o{7}"',
+                 => 'Non-octal character {#} m/\o{78{#}9}/',
+    'm/[\o{789}]/' => 'Non-octal character \'8\'.  Resolved as "\o{7}"',
+                   => 'Non-octal character {#} m/[\o{78{#}9}]/',
+    'm/\x{}/' => "",
+              => 'Number with no digits {#} m/\x{}{#}/',
+    'm/[\x{}]/' => "",
+                => 'Number with no digits {#} m/[\x{}{#}]/',
+    'm/\x{ABCDEFG}/' => 'Illegal hexadecimal digit \'G\' ignored',
+                     => 'Non-hex character {#} m/\x{ABCDEFG{#}}/',
+    'm/[\x{ABCDEFG}]/' => 'Illegal hexadecimal digit \'G\' ignored',
+                       => 'Non-hex character {#} m/[\x{ABCDEFG{#}}]/',
+    'm/[[:ascii]]/' => "",
+                    => 'Unmatched \':\' in POSIX class {#} m/[[:ascii{#}]]/',
+    'm/[\N{}]/' => 'Ignoring zero length \\N{} in character class {#} m/[\\N{}{#}]/',
+                => 'Zero length \\N{} {#} m/[\\N{}]{#}/',
+    "m'[\\y]\\x{100}'" => 'Unrecognized escape \y in character class passed through {#} m/[\y{#}]\x{100}/',
+                       => 'Unrecognized escape \y in character class {#} m/[\y{#}]\x{100}/',
+    'm/[a-\d]\x{100}/' => 'False [] range "a-\d" {#} m/[a-\d{#}]\x{100}/',
+                       => 'False [] range "a-\d" {#} m/[a-\d{#}]\x{100}/',
+    'm/[\w-x]\x{100}/' => 'False [] range "\w-" {#} m/[\w-{#}x]\x{100}/',
+                       => 'False [] range "\w-" {#} m/[\w-{#}x]\x{100}/',
+    'm/[a-\pM]\x{100}/' => 'False [] range "a-\pM" {#} m/[a-\pM{#}]\x{100}/',
+                        => 'False [] range "a-\pM" {#} m/[a-\pM{#}]\x{100}/',
+    'm/[\pM-x]\x{100}/' => 'False [] range "\pM-" {#} m/[\pM-{#}x]\x{100}/',
+                        => 'False [] range "\pM-" {#} m/[\pM-{#}x]\x{100}/',
+    'm/[^\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]/' => 'Using just the first character returned by \N{} in character class {#} m/[^\N{U+100.300}{#}]/',
+                                       => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/[^\N{U+100.300{#}}]/',
+    'm/[\x03-\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]/' => 'Using just the first character returned by \N{} in character class {#} m/[\x03-\N{U+100.300}{#}]/',
+                                            => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/[\x03-\N{U+100.300{#}}]/',
+    'm/[\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}-\x{10FFFF}]/' => 'Using just the first character returned by \N{} in character class {#} m/[\N{U+100.300}{#}-\x{10FFFF}]/',
+                                                  => '\N{} in inverted character class or as a range end-point is restricted to one character {#} m/[\N{U+100.300{#}}-\x{10FFFF}]/',
+    '/[\08]/'   => '\'\08\' resolved to \'\o{0}8\' {#} m/[\08{#}]/',
+                => 'Need exactly 3 octal digits {#} m/[\08{#}]/',
+    '/[\018]/'  => '\'\018\' resolved to \'\o{1}8\' {#} m/[\018{#}]/',
+                => 'Need exactly 3 octal digits {#} m/[\018{#}]/',
+    '/[\_\0]/'  => "",
+                => 'Need exactly 3 octal digits {#} m/[\_\0]{#}/',
+    '/[\07]/'   => "",
+                => 'Need exactly 3 octal digits {#} m/[\07]{#}/',
+    '/[\0005]/' => "",
+                => 'Need exactly 3 octal digits {#} m/[\0005]{#}/',
+    '/[\8\9]\x{100}/' => ['Unrecognized escape \8 in character class passed through {#} m/[\8{#}\9]\x{100}/',
+                          'Unrecognized escape \9 in character class passed through {#} m/[\8\9{#}]\x{100}/',
+                         ],
+                      => 'Unrecognized escape \8 in character class {#} m/[\8{#}\9]\x{100}/',
+    '/[a-\d]\x{100}/' => 'False [] range "a-\d" {#} m/[a-\d{#}]\x{100}/',
+                      => 'False [] range "a-\d" {#} m/[a-\d{#}]\x{100}/',
+    '/[\d-b]\x{100}/' => 'False [] range "\d-" {#} m/[\d-{#}b]\x{100}/',
+                      => 'False [] range "\d-" {#} m/[\d-{#}b]\x{100}/',
+    '/[\s-\d]\x{100}/' => 'False [] range "\s-" {#} m/[\s-{#}\d]\x{100}/',
+                       => 'False [] range "\s-" {#} m/[\s-{#}\d]\x{100}/',
+    '/[\d-\s]\x{100}/' => 'False [] range "\d-" {#} m/[\d-{#}\s]\x{100}/',
+                       => 'False [] range "\d-" {#} m/[\d-{#}\s]\x{100}/',
+    '/[a-[:digit:]]\x{100}/' => 'False [] range "a-[:digit:]" {#} m/[a-[:digit:]{#}]\x{100}/',
+                             => 'False [] range "a-[:digit:]" {#} m/[a-[:digit:]{#}]\x{100}/',
+    '/[[:digit:]-b]\x{100}/' => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}b]\x{100}/',
+                             => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}b]\x{100}/',
+    '/[[:alpha:]-[:digit:]]\x{100}/' => 'False [] range "[:alpha:]-" {#} m/[[:alpha:]-{#}[:digit:]]\x{100}/',
+                                     => 'False [] range "[:alpha:]-" {#} m/[[:alpha:]-{#}[:digit:]]\x{100}/',
+    '/[[:digit:]-[:alpha:]]\x{100}/' => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}[:alpha:]]\x{100}/',
+                                     => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}[:alpha:]]\x{100}/',
+    '/[a\zb]\x{100}/' => 'Unrecognized escape \z in character class passed through {#} m/[a\z{#}b]\x{100}/',
+                      => 'Unrecognized escape \z in character class {#} m/[a\z{#}b]\x{100}/',
+);
+
 # These need the character 'ネ' as a marker for mark_as_utf8()
 my @death_utf8 = mark_as_utf8(
  '/ネ[[=ネ=]]ネ/' => 'POSIX syntax [= =] is reserved for future extensions {#} m/ネ[[=ネ=]{#}]ネ/',
@@ -323,6 +409,22 @@ my @death_utf8 = mark_as_utf8(
 );
 push @death, @death_utf8;
 
+my @death_utf8_only_under_strict = (
+    "m'ネ[\\y]ネ'" => 'Unrecognized escape \y in character class passed through {#} m/ネ[\y{#}]ネ/',
+                   => 'Unrecognized escape \y in character class {#} m/ネ[\y{#}]ネ/',
+    'm/ネ[ネ-\d]ネ/' => 'False [] range "ネ-\d" {#} m/ネ[ネ-\d{#}]ネ/',
+                     => 'False [] range "ネ-\d" {#} m/ネ[ネ-\d{#}]ネ/',
+    'm/ネ[\w-ネ]ネ/' => 'False [] range "\w-" {#} m/ネ[\w-{#}ネ]ネ/',
+                     => 'False [] range "\w-" {#} m/ネ[\w-{#}ネ]ネ/',
+    'm/ネ[ネ-\pM]ネ/' => 'False [] range "ネ-\pM" {#} m/ネ[ネ-\pM{#}]ネ/',
+                      => 'False [] range "ネ-\pM" {#} m/ネ[ネ-\pM{#}]ネ/',
+    '/ネ[ネ-[:digit:]]ネ/' => 'False [] range "ネ-[:digit:]" {#} m/ネ[ネ-[:digit:]{#}]ネ/',
+                           => 'False [] range "ネ-[:digit:]" {#} m/ネ[ネ-[:digit:]{#}]ネ/',
+    '/ネ[\d-\s]ネ/' => 'False [] range "\d-" {#} m/ネ[\d-{#}\s]ネ/',
+                    => 'False [] range "\d-" {#} m/ネ[\d-{#}\s]ネ/',
+    '/ネ[a\zb]ネ/' => 'Unrecognized escape \z in character class passed through {#} m/ネ[a\z{#}b]ネ/',
+                   => 'Unrecognized escape \z in character class {#} m/ネ[a\z{#}b]ネ/',
+);
 # Tests involving a user-defined charnames translator are in pat_advanced.t
 
 # In the following arrays of warnings, the value can be an array of things to
@@ -338,20 +440,10 @@ push @death, @death_utf8;
 my @warning = (
     'm/\b*\x{100}/' => '\b* matches null string many times {#} m/\b*{#}\x{100}/',
     'm/[:blank:]\x{100}/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:blank:]{#}\x{100}/',
-    "m'[\\y]\\x{100}'"     => 'Unrecognized escape \y in character class passed through {#} m/[\y{#}]\x{100}/',
-    'm/[a-\d]\x{100}/' => 'False [] range "a-\d" {#} m/[a-\d{#}]\x{100}/',
-    'm/[\w-x]\x{100}/' => 'False [] range "\w-" {#} m/[\w-{#}x]\x{100}/',
-    'm/[a-\pM]\x{100}/' => 'False [] range "a-\pM" {#} m/[a-\pM{#}]\x{100}/',
-    'm/[\pM-x]\x{100}/' => 'False [] range "\pM-" {#} m/[\pM-{#}x]\x{100}/',
-    'm/[^\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]/' => 'Using just the first character returned by \N{} in character class {#} m/[^\N{U+100.300}{#}]/',
-    'm/[\x03-\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]/' => 'Using just the first character returned by \N{} in character class {#} m/[\x03-\N{U+100.300}{#}]/',
-    'm/[\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}-\x{10FFFF}]/' => 'Using just the first character returned by \N{} in character class {#} m/[\N{U+100.300}{#}-\x{10FFFF}]/',
     "m'\\y\\x{100}'"     => 'Unrecognized escape \y passed through {#} m/\y{#}\x{100}/',
     '/x{3,1}/'   => 'Quantifier {n,m} with n > m can\'t match {#} m/x{3,1}{#}/',
     '/\08/' => '\'\08\' resolved to \'\o{0}8\' {#} m/\08{#}/',
     '/\018/' => '\'\018\' resolved to \'\o{1}8\' {#} m/\018{#}/',
-    '/[\08]/' => '\'\08\' resolved to \'\o{0}8\' {#} m/[\08{#}]/',
-    '/[\018]/' => '\'\018\' resolved to \'\o{1}8\' {#} m/[\018{#}]/',
     '/(?=a)*/' => '(?=a)* matches null string many times {#} m/(?=a)*{#}/',
     'my $x = \'\m\'; qr/a$x/' => 'Unrecognized escape \m passed through {#} m/a\m{#}/',
     '/\q/' => 'Unrecognized escape \q passed through {#} m/\q{#}/',
@@ -364,26 +456,11 @@ my @warning = (
     '/(a|b)(?=a){3}\x{100}/' => 'Quantifier unexpected on zero-length expression in regex m/(a|b)(?=a){3}\x{100}/',
 
     '/\_/' => "",
-    '/[\_\0]/' => "",
-    '/[\07]/' => "",
     '/[\006]/' => "",
-    '/[\0005]/' => "",
-    '/[\8\9]\x{100}/' => ['Unrecognized escape \8 in character class passed through {#} m/[\8{#}\9]\x{100}/',
-                   'Unrecognized escape \9 in character class passed through {#} m/[\8\9{#}]\x{100}/',
-                  ],
     '/[:alpha:]\x{100}/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:alpha:]{#}\x{100}/',
     '/[:zog:]\x{100}/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:zog:]{#}\x{100}/',
     '/[.zog.]\x{100}/' => 'POSIX syntax [. .] belongs inside character classes {#} m/[.zog.]{#}\x{100}/',
     '/[a-b]/' => "",
-    '/[a-\d]\x{100}/' => 'False [] range "a-\d" {#} m/[a-\d{#}]\x{100}/',
-    '/[\d-b]\x{100}/' => 'False [] range "\d-" {#} m/[\d-{#}b]\x{100}/',
-    '/[\s-\d]\x{100}/' => 'False [] range "\s-" {#} m/[\s-{#}\d]\x{100}/',
-    '/[\d-\s]\x{100}/' => 'False [] range "\d-" {#} m/[\d-{#}\s]\x{100}/',
-    '/[a-[:digit:]]\x{100}/' => 'False [] range "a-[:digit:]" {#} m/[a-[:digit:]{#}]\x{100}/',
-    '/[[:digit:]-b]\x{100}/' => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}b]\x{100}/',
-    '/[[:alpha:]-[:digit:]]\x{100}/' => 'False [] range "[:alpha:]-" {#} m/[[:alpha:]-{#}[:digit:]]\x{100}/',
-    '/[[:digit:]-[:alpha:]]\x{100}/' => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}[:alpha:]]\x{100}/',
-    '/[a\zb]\x{100}/' => 'Unrecognized escape \z in character class passed through {#} m/[a\z{#}b]\x{100}/',
     '/(?c)\x{100}/' => 'Useless (?c) - use /gc modifier {#} m/(?c{#})\x{100}/',
     '/(?-c)\x{100}/' => 'Useless (?-c) - don\'t use /gc modifier {#} m/(?-c{#})\x{100}/',
     '/(?g)\x{100}/' => 'Useless (?g) - use /g modifier {#} m/(?g{#})\x{100}/',
@@ -413,13 +490,6 @@ my @warnings_utf8 = mark_as_utf8(
     'm/ネ\b*ネ/' => '\b* matches null string many times {#} m/ネ\b*{#}ネ/',
     '/(?=ネ)*/' => '(?=ネ)* matches null string many times {#} m/(?=ネ)*{#}/',
     'm/ネ[:foo:]ネ/' => 'POSIX syntax [: :] belongs inside character classes {#} m/ネ[:foo:]{#}ネ/',
-    "m'ネ[\\y]ネ'" => 'Unrecognized escape \y in character class passed through {#} m/ネ[\y{#}]ネ/',
-    'm/ネ[ネ-\d]ネ/' => 'False [] range "ネ-\d" {#} m/ネ[ネ-\d{#}]ネ/',
-    'm/ネ[\w-ネ]ネ/' => 'False [] range "\w-" {#} m/ネ[\w-{#}ネ]ネ/',
-    'm/ネ[ネ-\pM]ネ/' => 'False [] range "ネ-\pM" {#} m/ネ[ネ-\pM{#}]ネ/',
-    '/ネ[ネ-[:digit:]]ネ/' => 'False [] range "ネ-[:digit:]" {#} m/ネ[ネ-[:digit:]{#}]ネ/',
-    '/ネ[\d-\s]ネ/' => 'False [] range "\d-" {#} m/ネ[\d-{#}\s]ネ/',
-    '/ネ[a\zb]ネ/' => 'Unrecognized escape \z in character class passed through {#} m/ネ[a\z{#}b]ネ/',
     '/ネ(?c)ネ/' => 'Useless (?c) - use /gc modifier {#} m/ネ(?c{#})ネ/',
     '/utf8 ネ (?ogc) ネ/' => [
         'Useless (?o) - use /o modifier {#} m/utf8 ネ (?o{#}gc) ネ/',
@@ -450,36 +520,82 @@ my @deprecated = (
     '/(?xxxx:abc)/' => 'Having more than one /x regexp modifier is deprecated',
 );
 
-while (my ($regex, $expect) = splice @death, 0, 2) {
-    my $expect = fixup_expect($expect);
+for my $strict ("", "use re 'strict';") {
+
+    # First time just use @death; but under strict we add the things that fail
+    # there.  Doing it this way makes sure that 'strict' doesnt change the
+    # things that are already fatal when not under strict.
+    if ($strict) {
+        for (my $i = 0; $i < @death_only_under_strict; $i += 3) {
+            push @death, $death_only_under_strict[$i],    # The regex
+                         $death_only_under_strict[$i+2];  # The fatal msg
+        }
+        for (my $i = 0; $i < @death_utf8_only_under_strict; $i += 3) {
+
+            # Same with the utf8 versions
+            push @death, mark_as_utf8($death_utf8_only_under_strict[$i],
+                                      $death_utf8_only_under_strict[$i+2]);
+        }
+    }
+for (my $i = 0; $i < @death; $i += 2) {
+    my $regex = $death[$i];
+    my $expect = fixup_expect($death[$i+1]);
     no warnings 'experimental::regex_sets';
+    no warnings 'experimental::re_strict';
     # skip the utf8 test on EBCDIC since they do not die
     next if $::IS_EBCDIC && $regex =~ /utf8/;
 
     warning_is(sub {
+                   my $eval_string = "$strict $regex";
 		   $_ = "x";
-		   eval $regex;
-		   like($@, qr/\Q$expect/, $regex);
+		   eval $eval_string;
+		   like($@, qr/\Q$expect/, $eval_string);
 	       }, undef, "... and died without any other warnings");
 }
+}
 
+for my $strict ("no warnings 'experimental::re_strict'; use re 'strict';", "") {
+
+    # First time through we use strict to make sure that that doesn't change
+    # any of the warnings into fatal, and outputs them correctly.  The second
+    # time we don't use strict, and add the messages that are warnings when
+    # not under strict to the list of warnings.  This checks that non-strict
+    # works.
+    if (! $strict) {
+        for (my $i = 0; $i < @death_only_under_strict; $i += 3) {
+            push @warning, $death_only_under_strict[$i],    # The regex
+                           $death_only_under_strict[$i+1];  # The warning
+        }
+        for (my $i = 0; $i < @death_utf8_only_under_strict; $i += 3) {
+            push @warning, mark_as_utf8($death_utf8_only_under_strict[$i], $death_utf8_only_under_strict[$i+1]);
+        }
+    }
 foreach my $ref (\@warning, \@experimental_regex_sets, \@deprecated) {
-    my $warning_type = ($ref == \@warning)
-                       ? 'regexp'
-                       : ($ref == \@deprecated)
-                         ? 'regexp, deprecated'
-                         : 'experimental::regex_sets';
-    while (my ($regex, $expect) = splice @$ref, 0, 2) {
-        my @expect = fixup_expect($expect);
+    my $warning_type;
+    my $default_on;
+    if ($ref == \@warning) {
+        $warning_type = 'regexp, digit';
+        $default_on = $strict;
+    }
+    elsif ($ref == \@deprecated) {
+        $warning_type = 'regexp, deprecated';
+        $default_on = 1;
+    }
+    else {
+        $warning_type = 'experimental::regex_sets';
+        $default_on = 1;
+    }
+    for (my $i = 0; $i < @$ref; $i += 2) {
+        my $regex = $ref->[$i];
+        my @expect = fixup_expect($ref->[$i+1]);
         {
             $_ = "x";
-            no warnings;
-            eval $regex;
+            eval "$strict no warnings; $regex";
         }
-        if (is($@, "", "$regex did not die")) {
+        if (is($@, "", "$strict $regex did not die")) {
             my @got = capture_warnings(sub {
                                     $_ = "x";
-                                    eval $regex });
+                                    eval "$strict $regex" });
             my $count = @expect;
             if (! is(scalar @got, scalar @expect, "... and gave expected number ($count) of warnings")) {
                 if (@got < @expect) {
@@ -499,23 +615,26 @@ foreach my $ref (\@warning, \@experimental_regex_sets, \@deprecated) {
                 else {
                     ok (0 == capture_warnings(sub {
                                     $_ = "x";
-                                    eval "no warnings '$warning_type'; $regex;" }
+                                    eval "$strict no warnings '$warning_type'; $regex;" }
                                 ),
                     "... and turning off '$warning_type' warnings suppressed it");
+
                     # Test that whether the warning is on by default is
-                    # correct.  Experimental and deprecated warnings are;
-                    # others are not.  This test relies on the fact that we
+                    # correct.  This test relies on the fact that we
                     # are outside the scope of any ‘use warnings’.
                     local $^W;
-                    my $on = 'on' x ($warning_type ne 'regexp');
-                    ok !!$on ==
-                        capture_warnings(sub { $_ = "x"; eval $regex }),
-                      "... and the warning is " . ($on||'off')
-                       . " by default";
+                    my @warns = capture_warnings(sub { $_ = "x"; eval "$strict $regex" });
+                    if ($default_on) {
+                        ok @warns > 0, "... and the warning is on by default";
+                    }
+                    else {
+                        ok @warns == 0, "... and the warning is off by default";
+                    }
                 }
             }
         }
     }
+}
 }
 
 done_testing();

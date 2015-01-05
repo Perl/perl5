@@ -6733,6 +6733,14 @@ optimized into C<"that " . $foo>, and the warning will refer to the
 C<concatenation (.)> operator, even though there is no C<.> in
 your program.
 
+=item "use re 'strict'" is experimental
+
+(S experimental::re_strict) The things that are different when a regular
+expression pattern is compiled under C<'strict'> are subject to change
+in future Perl releases in incompatible ways.  This means that a pattern
+that compiles today may not in a future Perl release.  This warning is
+to alert you to that risk.
+
 =item Use \x{...} for more than two hex characters in regex; marked by
 S<<-- HERE> in m/%s/
 
