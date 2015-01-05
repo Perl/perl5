@@ -602,7 +602,7 @@ PerlIOEncode_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     }
 }
 
-PerlIO_funcs PerlIO_encode = {
+PERLIO_FUNCS_DECL(PerlIO_encode) = {
     sizeof(PerlIO_funcs),
     "encoding",
     sizeof(PerlIOEncode),
@@ -666,7 +666,7 @@ BOOT:
     sv_setsv(chk, POPs);
     PUTBACK;
 #ifdef PERLIO_LAYERS
-    PerlIO_define_layer(aTHX_ &PerlIO_encode);
+    PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_encode));
 #endif
     POPSTACK;
 }
