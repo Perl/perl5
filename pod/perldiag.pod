@@ -5509,8 +5509,8 @@ Missing the leading C<$> from variable C<$s> may cause this error.
 (W substr)(F) You tried to reference a substr() that pointed outside of
 a string.  That is, the absolute value of the offset was larger than the
 length of the string.  See L<perlfunc/substr>.  This warning is fatal if
-substr is used in an lvalue context (as the left hand side of an
-assignment or as a subroutine argument for example).
+substr is written to in an lvalue context (as the left hand side of an
+assignment for example).
 
 =item sv_upgrade from type %d down to type %d
 
