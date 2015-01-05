@@ -8542,14 +8542,11 @@ if "$useshrplib"; then
 	freebsd|mirbsd|netbsd|openbsd|interix|dragonfly|bitrig)
 		xxx="-Wl,-R$shrpdir"
 		;;
-	bsdos|linux|irix*|dec_osf|gnu*)
+	bsdos|linux|irix*|dec_osf|gnu*|haiku)
 		xxx="-Wl,-rpath,$shrpdir"
 		;;
 	next)
 		# next doesn't like the default...
-		;;
-	haiku)
-		# Haiku doesn't like the default, either.
 		;;
 	hpux*)
 		# hpux doesn't like the default, either.
