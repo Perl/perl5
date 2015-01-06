@@ -155,7 +155,7 @@ We want to ensure that Perl continues to grow and flourish in the coming
 years and decades, but not at the expense of our user community.
 
 Existing syntax and semantics should only be marked for destruction in
-very limited circumstances.  If they believed to be very rarely used,
+very limited circumstances.  If they are believed to be very rarely used,
 stand in the way of actual improvement to the Perl language or perl
 interpreter, and if affected code can be easily updated to continue
 working, they may be considered for removal.  When in doubt, caution
