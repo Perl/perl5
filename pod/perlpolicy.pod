@@ -155,23 +155,20 @@ We want to ensure that Perl continues to grow and flourish in the coming
 years and decades, but not at the expense of our user community.
 
 Existing syntax and semantics should only be marked for destruction in
-very limited circumstances.  If a given language feature's continued
-inclusion in the language will cause significant harm to the language
-or prevent us from making needed changes to the runtime, then it may
-be considered for deprecation.
+very limited circumstances.  If they believed to be very rarely used,
+stand in the way of actual improvement to the Perl language or perl
+interpreter, and if affected code can be easily updated to continue
+working, they may be considered for removal.  When in doubt, caution
+dictates that we will favor backward compatibility.  When a feature is
+deprecated, a statement of reasoning describing the decision process
+will be posted, and a link to it will be provided in the relevant
+perldelta documents.
 
-Any language change which breaks backward-compatibility should be able to
-be enabled or disabled lexically.  Unless code at a given scope declares
-that it wants the new behavior, that new behavior should be disabled.
-Which backward-incompatible changes are controlled implicitly by a
-'use v5.x.y' is a decision which should be made by the pumpking in
-consultation with the community.
-
-When a backward-incompatible change can't be toggled lexically, the decision
-to change the language must be considered very, very carefully.  If it's
-possible to move the old syntax or semantics out of the core language
-and into XS-land, that XS module should be enabled by default unless
-the user declares that they want a newer revision of Perl.
+Using a lexical pragma to enable or disable legacy behavior should be
+considered when appropriate, and in the absence of any pragma legacy
+behavior should be enabled.  Which backward-incompatible changes are
+controlled implicitly by a 'use v5.x.y' is a decision which should be
+made by the pumpking in consultation with the community.
 
 Historically, we've held ourselves to a far higher standard than
 backward-compatibility -- bugward-compatibility.  Any accident of
@@ -186,7 +183,9 @@ bug as a feature, we need to treat it as such.
 
 New syntax and semantics which don't break existing language constructs
 and syntax have a much lower bar.  They merely need to prove themselves
-to be useful, elegant, well designed, and well tested.
+to be useful, elegant, well designed, and well tested.  In most cases,
+these additions will be marked as I<experimental> for some time.  See
+below for more on that.
 
 =head2 Terminology
 
