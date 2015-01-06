@@ -276,32 +276,45 @@ is __SUB__test, \&__SUB__test, '&__SUB__';                  ++ $tests;
 
 test_proto 'abs', -5, 5;
 
-test_proto 'accept';
-$tests += 6; eval q{
-  is &CORE::accept(qw{foo bar}), undef, "&accept";
-  lis [&{"CORE::accept"}(qw{foo bar})], [undef], "&accept in list context";
+SKIP:
+{
+    if ($^O eq "MSWin32" && is_miniperl) {
+        $tests += 8;
+        skip "accept() not available in Win32 miniperl", 8
+    }
+    $tests += 6;
+    test_proto 'accept';
+    eval q{
+      is &CORE::accept(qw{foo bar}), undef, "&accept";
+      lis [&{"CORE::accept"}(qw{foo bar})], [undef], "&accept in list context";
 
-  &myaccept(my $foo, my $bar);
-  is ref $foo, 'GLOB', 'CORE::accept autovivifies its first argument';
-  is $bar, undef, 'CORE::accept does not autovivify its second argument';
-  use strict;
-  undef $foo;
-  eval { 'myaccept'->($foo, $bar) };
-  like $@, qr/^Can't use an undefined value as a symbol reference at/,
+      &myaccept(my $foo, my $bar);
+      is ref $foo, 'GLOB', 'CORE::accept autovivifies its first argument';
+      is $bar, undef, 'CORE::accept does not autovivify its second argument';
+      use strict;
+      undef $foo;
+      eval { 'myaccept'->($foo, $bar) };
+      like $@, qr/^Can't use an undefined value as a symbol reference at/,
       'CORE::accept will not accept undef 2nd arg under strict';
-  is ref $foo, 'GLOB', 'CORE::accept autovivs its first arg under strict';
-};
+      is ref $foo, 'GLOB', 'CORE::accept autovivs its first arg under strict';
+    };
+}
 
 test_proto 'alarm';
 test_proto 'atan2';
 
 test_proto 'bind';
 $tests += 3;
-is &CORE::bind('foo', 'bear'), undef, "&bind";
-lis [&CORE::bind('foo', 'bear')], [undef], "&bind in list context";
-eval { &mybind(my $foo, "bear") };
-like $@, qr/^Bad symbol for filehandle at/,
-     'CORE::bind dies with undef first arg';
+SKIP:
+{
+    skip "bind() not available in Win32 miniperl", 3
+      if $^O eq "MSWin32" && is_miniperl();
+    is &CORE::bind('foo', 'bear'), undef, "&bind";
+    lis [&CORE::bind('foo', 'bear')], [undef], "&bind in list context";
+    eval { &mybind(my $foo, "bear") };
+    like $@, qr/^Bad symbol for filehandle at/,
+         'CORE::bind dies with undef first arg';
+}
 
 test_proto 'binmode';
 $tests += 3;
@@ -397,8 +410,13 @@ lis [&CORE::closedir(foo)], [undef], '&CORE::closedir in list context';
 
 test_proto 'connect';
 $tests += 2;
-is &CORE::connect('foo','bar'), undef, '&connect';
-lis [&myconnect('foo','bar')], [undef], '&connect in list context';
+SKIP:
+{
+    skip "connect() not available in Win32 miniperl", 2
+      if $^O eq "MSWin32" && is_miniperl();
+    is &CORE::connect('foo','bar'), undef, '&connect';
+    lis [&myconnect('foo','bar')], [undef], '&connect in list context';
+}
 
 test_proto 'continue';
 $tests ++;
@@ -781,9 +799,12 @@ like $@, qr/^Not enough arguments for select system call at /,
 eval { &myselect(1,2,3,4,5) };
 like $@, qr/^Too many arguments for select system call at /,
       ,'&myselect($a,$total,$of,$five,$args)';
-&myselect((undef)x3,.25);
-# Just have to assume that worked. :-) If we get here, at least it didn’t
-# crash or anything.
+unless ($^O eq "MSWin32" && is_miniperl) {
+    &myselect((undef)x3,.25);
+    # Just have to assume that worked. :-) If we get here, at least it didn’t
+    # crash or anything.
+    # select() is unimplemented in Win32 miniperl
+}
 
 test_proto "sem$_" for qw "ctl get op";
 

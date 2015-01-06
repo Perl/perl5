@@ -9,6 +9,9 @@ BEGIN {
 
 require './test.pl';
 
+skip_all("Win32 miniperl has no socket select")
+  if $^O eq "MSWin32" && is_miniperl();
+
 plan (15);
 
 my $blank = "";

@@ -123,6 +123,9 @@ $| = 1;
 
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
 @ARGV = grep($_,@ARGV) if $^O eq 'VMS';
+
+@ARGV = map glob, @ARGV if $^O eq 'MSWin32';
+
 our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 
 # Cheesy version of Getopt::Std.  We can't replace it with that, because we
@@ -220,7 +223,7 @@ sub _scan_test {
 
     close $script;
 
-    my $perl = './perl';
+    my $perl = $^O eq 'MSWin32' ? '.\perl' : './perl';
     my $lib  = '../lib';
     my $run_dir;
     my $return_dir;

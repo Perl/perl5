@@ -19,6 +19,11 @@ if(eval {require File::Spec; 1}) {
     diag("\ncontinuing, assuming '.' for current directory. Some tests will be skipped.");
 }
 
+if ($^O eq 'MSWin32') {
+    # under minitest, buildcustomize sets this to 1, which means
+    # nlinks isn't populated properly, allow nlinks tests to pass
+    ${^WIN32_SLOPPY_STAT} = 0;
+}
 
 plan tests => 113;
 
