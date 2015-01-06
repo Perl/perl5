@@ -1220,7 +1220,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL
 # See the comment in Makefile.SH explaining this seemingly cranky ordering
 $(MINIPERL) : ..\lib\buildcustomize.pl
 
-..\lib\buildcustomize.pl : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS) ..\write_buildcustomize.pl
+..\lib\buildcustomize.pl : .\config.h $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS) ..\write_buildcustomize.pl
 .IF "$(CCTYPE)" == "GCC"
 	$(LINK32) -v -mconsole -o $(MINIPERL) $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(MINI_OBJ) $(LIBFILES) $(LKPOST))
