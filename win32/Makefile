@@ -991,7 +991,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL
 # See the comment in Makefile.SH explaining this seemingly cranky ordering
 $(MINIPERL) : ..\lib\buildcustomize.pl 
 
-..\lib\buildcustomize.pl : .\config.h $(MINIDIR) $(MINI_OBJ) ..\write_buildcustomize.pl
+..\lib\buildcustomize.pl : $(MINIDIR) $(MINI_OBJ) ..\write_buildcustomize.pl
 	$(LINK32) -subsystem:console -out:$(MINIPERL) @<<
 	$(LINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ)
 <<
