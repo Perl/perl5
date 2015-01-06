@@ -12444,7 +12444,17 @@ tryagain:
                         && is_PROBLEMATIC_LOCALE_FOLD_cp(ender)))
                 {
                     if (UTF) {
-                        const STRLEN unilen = reguni(pRExC_state, ender, s);
+
+                        /* Normally, we don't need the representation of the
+                         * character in the sizing pass--just its size, but if
+                         * folding, we have to actually put the character out
+                         * even in the sizing pass, because the size could
+                         * change as we juggle things at the end of this loop
+                         * to avoid splitting a too-full node in the middle of
+                         * a potential multi-char fold [perl #123539] */
+                        const STRLEN unilen = (SIZE_ONLY && ! FOLD)
+                                               ? UNISKIP(ender)
+                                               : (uvchr_to_utf8((U8*)s, ender) - (U8*)s);
                         if (unilen > 0) {
                            s   += unilen;
                            len += unilen;
@@ -12456,6 +12466,10 @@ tryagain:
                          * be the correct final value, so subtract one to
                          * cancel out the increment that follows */
                         len--;
+                    }
+                    else if (FOLD) {
+                        /* See comment above for [perl #123539] */
+                        *(s++) = (char) ender;
                     }
                     else {
                         REGC((char)ender, s++);

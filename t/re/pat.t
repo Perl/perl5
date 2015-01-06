@@ -22,7 +22,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 755;  # Update this when adding/deleting tests.
+plan tests => 757;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1620,6 +1620,12 @@ EOP
         use utf8;
         like("ÿ", qr/[ÿ-ÿ]/, "\"ÿ\" should match [ÿ-ÿ]");
     }
+
+    {	# [perl #123539]
+        like("TffffffffffffTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT5TTTTTTTTTTTTTTTTTTTTTTTTT3TTgTTTTTTTTTTTTTTTTTTTTT2TTTTTTTTTTTTTTTTTTTTTTTHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHiHHHHHHHfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff&ffff", qr/TffffffffffffTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT5TTTTTTTTTTTTTTTTTTTTTTTTT3TTgTTTTTTTTTTTTTTTTTTTTT2TTTTTTTTTTTTTTTTTTTTTTTHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHiHHHHHHHfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff&ffff/il, "");
+        like("TffffffffffffT\x{100}TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT5TTTTTTTTTTTTTTTTTTTTTTTTT3TTgTTTTTTTTTTTTTTTTTTTTT2TTTTTTTTTTTTTTTTTTTTTTTHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHiHHHHHHHfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff&ffff", qr/TffffffffffffT\x{100}TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT5TTTTTTTTTTTTTTTTTTTTTTTTT3TTgTTTTTTTTTTTTTTTTTTTTT2TTTTTTTTTTTTTTTTTTTTTTTHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHiHHHHHHHfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff&ffff/il, "");
+    }
+
 } # End of sub run_tests
 
 1;
