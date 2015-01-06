@@ -565,6 +565,7 @@ BQW10602\100nifty.com                   sadahiro\100cpan.org
 bulk88\100hotmail.com                   bulk88
 
 chad.granum\100dreamhost.com            exodist7\100gmail.com
+choroba\100cpan.org                     choroba\100weed.(none)
 chromatic\100wgz.org                    chromatic\100rmci.net
 ckuskie\100cadence.com                  colink\100perldreamer.com
 claes\100surfar.nu                      claes\100versed.se
