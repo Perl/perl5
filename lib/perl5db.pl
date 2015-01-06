@@ -6737,24 +6737,24 @@ sub _db_system {
 
     # We save, change, then restore STDIN and STDOUT to avoid fork() since
     # some non-Unix systems can do system() but have problems with fork().
-    open( SAVEIN,  "<&STDIN" )  || db_warn("Can't save STDIN");
-    open( SAVEOUT, ">&STDOUT" ) || db_warn("Can't save STDOUT");
-    open( STDIN,   "<&IN" )     || db_warn("Can't redirect STDIN");
-    open( STDOUT,  ">&OUT" )    || db_warn("Can't redirect STDOUT");
+    open( SAVEIN,  "<&STDIN" )  || _db_warn("Can't save STDIN");
+    open( SAVEOUT, ">&STDOUT" ) || _db_warn("Can't save STDOUT");
+    open( STDIN,   "<&IN" )     || _db_warn("Can't redirect STDIN");
+    open( STDOUT,  ">&OUT" )    || _db_warn("Can't redirect STDOUT");
 
     # XXX: using csh or tcsh destroys sigint retvals!
     system(@_);
-    open( STDIN,  "<&SAVEIN" )  || db_warn("Can't restore STDIN");
-    open( STDOUT, ">&SAVEOUT" ) || db_warn("Can't restore STDOUT");
+    open( STDIN,  "<&SAVEIN" )  || _db_warn("Can't restore STDIN");
+    open( STDOUT, ">&SAVEOUT" ) || _db_warn("Can't restore STDOUT");
     close(SAVEIN);
     close(SAVEOUT);
 
     # most of the $? crud was coping with broken cshisms
     if ( $? >> 8 ) {
-        db_warn( "(Command exited ", ( $? >> 8 ), ")\n" );
+        _db_warn( "(Command exited ", ( $? >> 8 ), ")\n" );
     }
     elsif ($?) {
-        db_warn(
+        _db_warn(
             "(Command died of SIG#",
             ( $? & 127 ),
             ( ( $? & 128 ) ? " -- core dumped" : "" ),
