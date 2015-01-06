@@ -2588,7 +2588,7 @@ is allocated.
 */
 
 PADNAMELIST *
-Perl_newPADNAMELIST(pTHX_ size_t max)
+Perl_newPADNAMELIST(size_t max)
 {
     PADNAMELIST *pnl;
     Newx(pnl, 1, PADNAMELIST);
@@ -2643,7 +2643,7 @@ Fetches the pad name from the given index.
 */
 
 PADNAME *
-Perl_padnamelist_fetch(pTHX_ PADNAMELIST *pnl, SSize_t key)
+Perl_padnamelist_fetch(PADNAMELIST *pnl, SSize_t key)
 {
     PERL_ARGS_ASSERT_PADNAMELIST_FETCH;
     ASSUME(key >= 0);
@@ -2720,7 +2720,7 @@ L</newPADNAMEouter>.
 */
 
 PADNAME *
-Perl_newPADNAMEpvn(pTHX_ const char *s, STRLEN len)
+Perl_newPADNAMEpvn(const char *s, STRLEN len)
 {
     struct padname_with_str *alloc;
     char *alloc2; /* for Newxz */
@@ -2751,7 +2751,7 @@ PADNAMEt_OUTER flag already set.
 */
 
 PADNAME *
-Perl_newPADNAMEouter(pTHX_ PADNAME *outer)
+Perl_newPADNAMEouter(PADNAME *outer)
 {
     PADNAME *pn;
     PERL_ARGS_ASSERT_NEWPADNAMEOUTER;

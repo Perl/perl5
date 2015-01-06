@@ -383,9 +383,9 @@
 #define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
 #define newNULLLIST()		Perl_newNULLLIST(aTHX)
 #define newOP(a,b)		Perl_newOP(aTHX_ a,b)
-#define newPADNAMELIST(a)	Perl_newPADNAMELIST(aTHX_ a)
-#define newPADNAMEouter(a)	Perl_newPADNAMEouter(aTHX_ a)
-#define newPADNAMEpvn(a,b)	Perl_newPADNAMEpvn(aTHX_ a,b)
+#define newPADNAMELIST		Perl_newPADNAMELIST
+#define newPADNAMEouter		Perl_newPADNAMEouter
+#define newPADNAMEpvn		Perl_newPADNAMEpvn
 #define newPMOP(a,b)		Perl_newPMOP(aTHX_ a,b)
 #define newPROG(a)		Perl_newPROG(aTHX_ a)
 #define newPVOP(a,b,c)		Perl_newPVOP(aTHX_ a,b,c)
@@ -452,7 +452,7 @@
 #define pad_findmy_sv(a,b)	Perl_pad_findmy_sv(aTHX_ a,b)
 #define pad_new(a)		Perl_pad_new(aTHX_ a)
 #define pad_tidy(a)		Perl_pad_tidy(aTHX_ a)
-#define padnamelist_fetch(a,b)	Perl_padnamelist_fetch(aTHX_ a,b)
+#define padnamelist_fetch	Perl_padnamelist_fetch
 #define padnamelist_store(a,b,c)	Perl_padnamelist_store(aTHX_ a,b,c)
 #define parse_arithexpr(a)	Perl_parse_arithexpr(aTHX_ a)
 #define parse_barestmt(a)	Perl_parse_barestmt(aTHX_ a)

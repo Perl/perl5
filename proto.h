@@ -2991,21 +2991,21 @@ PERL_CALLCONV OP*	Perl_newOP(pTHX_ I32 optype, I32 flags)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV PADNAMELIST *	Perl_newPADNAMELIST(pTHX_ size_t max)
+PERL_CALLCONV PADNAMELIST *	Perl_newPADNAMELIST(size_t max)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV PADNAME *	Perl_newPADNAMEouter(pTHX_ PADNAME *outer)
+PERL_CALLCONV PADNAME *	Perl_newPADNAMEouter(PADNAME *outer)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_NEWPADNAMEOUTER	\
 	assert(outer)
 
-PERL_CALLCONV PADNAME *	Perl_newPADNAMEpvn(pTHX_ const char *s, STRLEN len)
+PERL_CALLCONV PADNAME *	Perl_newPADNAMEpvn(const char *s, STRLEN len)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_NEWPADNAMEPVN	\
 	assert(s)
 
@@ -3391,9 +3391,9 @@ PERL_CALLCONV void	Perl_padname_free(pTHX_ PADNAME *pn)
 #define PERL_ARGS_ASSERT_PADNAME_FREE	\
 	assert(pn)
 
-PERL_CALLCONV PADNAME *	Perl_padnamelist_fetch(pTHX_ PADNAMELIST *pnl, SSize_t key)
+PERL_CALLCONV PADNAME *	Perl_padnamelist_fetch(PADNAMELIST *pnl, SSize_t key)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_PADNAMELIST_FETCH	\
 	assert(pnl)
 
