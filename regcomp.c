@@ -12439,53 +12439,64 @@ tryagain:
                     goto loopdone;
                 }
 
-                if (! FOLD   /* The simple case, just append the literal */
-                    || (LOC  /* Also don't fold for tricky chars under /l */
-                        && is_PROBLEMATIC_LOCALE_FOLD_cp(ender)))
-                {
-                    if (UTF) {
+                if (! FOLD) {  /* The simple case, just append the literal */
 
-                        /* Normally, we don't need the representation of the
-                         * character in the sizing pass--just its size, but if
-                         * folding, we have to actually put the character out
-                         * even in the sizing pass, because the size could
-                         * change as we juggle things at the end of this loop
-                         * to avoid splitting a too-full node in the middle of
-                         * a potential multi-char fold [perl #123539] */
-                        const STRLEN unilen = (SIZE_ONLY && ! FOLD)
-                                               ? UNISKIP(ender)
-                                               : (uvchr_to_utf8((U8*)s, ender) - (U8*)s);
-                        if (unilen > 0) {
-                           s   += unilen;
-                           len += unilen;
+                    /* In the sizing pass, we need only the size of the
+                     * character we are appending, hence we can delay getting
+                     * its representation until PASS2. */
+                    if (SIZE_ONLY) {
+                        if (UTF) {
+                            const STRLEN unilen = UNISKIP(ender);
+                            s += unilen;
+
+                            /* We have to subtract 1 just below (and again in
+                             * the corresponding PASS2 code) because the loop
+                             * increments <len> each time, as all but this path
+                             * (and one other) through it add a single byte to
+                             * the EXACTish node.  But these paths would change
+                             * len to be the correct final value, so cancel out
+                             * the increment that follows */
+                            len += unilen - 1;
                         }
-
-                        /* The loop increments <len> each time, as all but this
-                         * path (and one other) through it add a single byte to
-                         * the EXACTish node.  But this one has changed len to
-                         * be the correct final value, so subtract one to
-                         * cancel out the increment that follows */
-                        len--;
-                    }
-                    else if (FOLD) {
-                        /* See comment above for [perl #123539] */
-                        *(s++) = (char) ender;
-                    }
-                    else {
-                        REGC((char)ender, s++);
-                    }
-
-                    /* Can get here if folding only if is one of the /l
-                     * characters whose fold depends on the locale.  The
-                     * occurrence of any of these indicate that we can't
-                     * simplify things */
-                    if (FOLD) {
-                        maybe_exact = FALSE;
-                        maybe_exactfu = FALSE;
+                        else {
+                            s++;
+                        }
+                    } else { /* PASS2 */
+                      not_fold_common:
+                        if (UTF) {
+                            U8 * new_s = uvchr_to_utf8((U8*)s, ender);
+                            len += (char *) new_s - s - 1;
+                            s = (char *) new_s;
+                        }
+                        else {
+                            *(s++) = (char) ender;
+                        }
                     }
                 }
-                else             /* FOLD */
-                     if (! ( UTF
+                else if (LOC && is_PROBLEMATIC_LOCALE_FOLD_cp(ender)) {
+
+                    /* Here are folding under /l, and the code point is
+                     * problematic.  First, we know we can't simplify things */
+                    maybe_exact = FALSE;
+                    maybe_exactfu = FALSE;
+
+                    /* A problematic code point in this context means that its
+                     * fold isn't known until runtime, so we can't fold it now.
+                     * (The non-problematic code points are the above-Latin1
+                     * ones that fold to also all above-Latin1.  Their folds
+                     * don't vary no matter what the locale is.) But here we
+                     * have characters whose fold depends on the locale.
+                     * Unlike the non-folding case above, we have to keep track
+                     * of these in the sizing pass, so that we can make sure we
+                     * don't split too-long nodes in the middle of a potential
+                     * multi-char fold.  And unlike the regular fold case
+                     * handled in the else clauses below, we don't actually
+                     * fold and don't have special cases to consider.  What we
+                     * do for both passes is the PASS2 code for non-folding */
+                    goto not_fold_common;
+                }
+                else /* A regular FOLD code point */
+                    if (! ( UTF
                         /* See comments for join_exact() as to why we fold this
                          * non-UTF at compile time */
                         || (node_type == EXACTFU
