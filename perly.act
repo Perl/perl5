@@ -1078,7 +1078,7 @@ case 2:
 
   case 168:
 #line 860 "perly.y"
-    { (yyval.opval) = newUNOP(OP_REFGEN, 0, op_lvalue((ps[(2) - (2)].val.opval),OP_REFGEN)); ;}
+    { (yyval.opval) = newUNOP(OP_REFGEN, 0, (ps[(2) - (2)].val.opval)); ;}
     break;
 
   case 169:
@@ -1502,6 +1502,6 @@ case 2:
     
 
 /* Generated from:
- * 0c499ecc5892868c1d5acd74ecc34b917f3c7fc5aa57d93b01ecd12f4a0f7a8b perly.y
+ * 742ccd162893f72458d7102c054eda970bae7a1de1a02b75fb23afc88e332e7f perly.y
  * d1d4df7b8e30ac9dede664af9179e6e5e7ddc7f2ad9c4eff9e2e5b32c9e16a6e regen_perly.pl
  * ex: set ro: */

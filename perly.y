@@ -857,7 +857,7 @@ term	:	termbinop
 	|	term '?' term ':' term
 			{ $$ = newCONDOP(0, $1, $3, $5); }
 	|	REFGEN term                          /* \$x, \@y, \%z */
-			{ $$ = newUNOP(OP_REFGEN, 0, op_lvalue($2,OP_REFGEN)); }
+			{ $$ = newUNOP(OP_REFGEN, 0, $2); }
 	|	myattrterm	%prec UNIOP
 			{ $$ = $1; }
 	|	LOCAL term	%prec UNIOP
