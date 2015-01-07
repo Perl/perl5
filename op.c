@@ -7149,7 +7149,6 @@ and become part of the constructed op tree.
 OP *
 Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
 {
-    dVAR;
     LOGOP *range;
     OP *flip;
     OP *flop;
