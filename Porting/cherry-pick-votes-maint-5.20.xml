@@ -22,6 +22,8 @@ The fix which this test relates to has already been picked:
 
 <commit votes="steveh" id="" ticket="" desc="CPAN RT#101095 Module::Metadata does not extract correct version if use_our is enabled"/>
 
+<commit votes="steveh" id="405dffcb17b9cc9d0e5d7b41835b998ca7f1d873" ticket="123539" desc="PATCH: [perl #123539] regcomp.c node overrun/segfault"/>
+
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
