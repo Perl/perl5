@@ -5461,7 +5461,6 @@ S_set_haseval(pTHX)
 OP *
 Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 {
-    dVAR;
     PMOP *pm;
     LOGOP *rcop;
     I32 repl_has_vars = 0;
