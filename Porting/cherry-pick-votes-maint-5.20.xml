@@ -4,9 +4,6 @@
 
 <div><h2>Tickets Listed in #122913: [META] perl 5.20.2</h2>
 
-The fix which this test relates to has already been partially picked. The rest of it (512e01a) will need picking with this:
-<commit votes="steveh, arc" id="43275f00a97a14a80f9493c38895a5c77f0fc88a" ticket="123198" desc="svleak.t: Add test for #123198"/>
-
 The fix which this test relates to has already been picked:
 <commit votes="steveh, arc" id="409c6472cedc6771a158a61dbbf8154d0246dc5b" ticket="122747" desc="add test for rt122747"/>
 
