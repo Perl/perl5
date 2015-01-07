@@ -124,7 +124,7 @@ $| = 1;
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
 @ARGV = grep($_,@ARGV) if $^O eq 'VMS';
 
-@ARGV = map glob, @ARGV if $^O eq 'MSWin32';
+@ARGV = eval 'map glob, @ARGV' if $^O eq 'MSWin32';
 
 our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 
