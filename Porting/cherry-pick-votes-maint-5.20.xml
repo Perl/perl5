@@ -4,9 +4,6 @@
 
 <div><h2>Tickets Listed in #122913: [META] perl 5.20.2</h2>
 
-The fix which this test relates to has already been picked:
-<commit votes="steveh, arc" id="409c6472cedc6771a158a61dbbf8154d0246dc5b" ticket="122747" desc="add test for rt122747"/>
-
 <commit votes="steveh, sprout" id="83a94553cbf9f2c11b3e9a63a44e7b9ce17ccb77" ticket="40565" desc="[perl #40565] Fix localisation in pseudo-fork"/>
 <commit votes="steveh" id="452466a503257b1012694b0d3a3cbf260e409d18" ticket="40565" desc="perldelta for the prev. commit"/>
 <commit votes="steveh" id="64eb39580bdd68998bee47f67c15665c45d29bfc" ticket="40565" desc="perldelta: Add #40565 bug number"/>
