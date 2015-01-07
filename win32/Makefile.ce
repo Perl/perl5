@@ -37,14 +37,6 @@ CCLIBDIR	= $(CCHOME)\lib
 CECOPY     = cecopy
 
 #
-# Comment out next assign to disable perl's I/O subsystem and use compiler's
-# stdio for IO - depending on your compiler vendor and run time library you may
-# then get a number of fails from make test i.e. bugs - complain to them not us ;-).
-# You will also be unable to take full advantage of perl5.8's support for multiple
-# encodings and may see lower IO performance. You have been warned.
-USE_PERLIO	= define
-
-#
 # set this if you wish to use perl's malloc
 # This will make perl run few times faster
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
@@ -458,10 +450,6 @@ USE_ITHREADS	= undef
 USE_IMP_SYS	= undef
 !ENDIF
 
-!IF "$(USE_PERLIO)" == ""
-USE_PERLIO	= undef
-!ENDIF
-
 !IF "$(USE_PERLCRT)" == ""
 USE_PERLCRT	= undef
 !ENDIF
@@ -480,10 +468,6 @@ BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
 
 !IF "$(USE_IMP_SYS)" != "undef"
 BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_SYS
-!ENDIF
-
-!IF "$(USE_PERLIO)" == "define"
-BUILDOPT	= $(BUILDOPT) -DUSE_PERLIO
 !ENDIF
 
 !IF "$(CROSS_NAME)" == ""
@@ -766,7 +750,6 @@ CFG_VARS = \
  "usethreads=$(USE_ITHREADS)" \
  "useithreads=$(USE_ITHREADS)" \
  "usemultiplicity=$(USE_MULTI)" \
- "useperlio=$(USE_PERLIO)" \
  "use64bitint=undef" \
  "uselargefiles=undef" \
  "LINK_FLAGS=$(LDLIBPATH) $(LINK_FLAGS) $(SUBSYS)" \

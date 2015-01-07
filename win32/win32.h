@@ -25,7 +25,6 @@
 #  define PERL_DISABLE_PMC
 
 /* allow minitest to work */
-#  define USE_PERLIO
 #  define PERL_TEXTMODE_SCRIPTS
 #endif
 

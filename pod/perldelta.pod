@@ -364,6 +364,12 @@ would uncondtionally have around a dozen warnings from hv_func.h.  These
 warnings have been silenced.  GCC all bitness and Visual C++ for Win32 were
 not affected.
 
+=item *
+
+Support for building without PerlIO has been removed from the Windows
+makefiles.  Non-PerlIO builds were all but deprecated in Perl 5.18.0 and are
+already not supported by F<Configure> on POSIX systems.
+
 =back
 
 =back

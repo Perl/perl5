@@ -81,15 +81,6 @@ USE_ITHREADS	= define
 USE_IMP_SYS	= define
 
 #
-# Comment out next assign to disable perl's I/O subsystem and use compiler's 
-# stdio for IO - depending on your compiler vendor and run time library you may 
-# then get a number of fails from make test i.e. bugs - complain to them not us ;-). 
-# You will also be unable to take full advantage of perl5.8's support for multiple 
-# encodings and may see lower IO performance. You have been warned.
-#
-USE_PERLIO	= define
-
-#
 # Comment this out if you don't want to enable large file support for
 # some reason.  Should normally only be changed to maintain compatibility
 # with an older release of perl.
@@ -278,10 +269,6 @@ USE_ITHREADS	= undef
 USE_IMP_SYS	= undef
 !ENDIF
 
-!IF "$(USE_PERLIO)" == ""
-USE_PERLIO	= undef
-!ENDIF
-
 !IF "$(USE_LARGE_FILES)" == ""
 USE_LARGE_FILES	= undef
 !ENDIF
@@ -368,15 +355,7 @@ ARCHITECTURE	= ia64
 !IF "$(USE_MULTI)" == "define"
 ARCHNAME	= MSWin32-$(ARCHITECTURE)-multi
 !ELSE
-!IF "$(USE_PERLIO)" == "define"
 ARCHNAME	= MSWin32-$(ARCHITECTURE)-perlio
-!ELSE
-ARCHNAME	= MSWin32-$(ARCHITECTURE)
-!ENDIF
-!ENDIF
-
-!IF "$(USE_PERLIO)" == "define"
-BUILDOPT	= $(BUILDOPT) -DUSE_PERLIO
 !ENDIF
 
 !IF "$(USE_ITHREADS)" == "define"
@@ -717,16 +696,10 @@ EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\perlio.c
 
 WIN32_SRC	=		\
 		.\win32.c	\
+		.\win32io.c	\
 		.\win32sck.c	\
 		.\win32thread.c	\
 		.\fcrypt.c
-
-# We need this for miniperl build unless we override canned 
-# config.h #define building mini\*
-#!IF "$(USE_PERLIO)" == "define"
-WIN32_SRC	= $(WIN32_SRC) .\win32io.c
-#!ENDIF
-
 
 CORE_NOCFG_H	=		\
 		..\av.h		\
@@ -830,7 +803,6 @@ CFG_VARS	=					\
 		"usethreads=$(USE_ITHREADS)"		\
 		"useithreads=$(USE_ITHREADS)"		\
 		"usemultiplicity=$(USE_MULTI)"		\
-		"useperlio=$(USE_PERLIO)"		\
 		"use64bitint=$(USE_64_BIT_INT)"		\
 		"uselargefiles=$(USE_LARGE_FILES)"	\
 		"usesitecustomize=$(USE_SITECUST)"	\
@@ -970,7 +942,7 @@ config.w32 : $(CFGSH_TMPL)
 
 # This target is for when changes to the main config.sh happen.
 # Edit config.vc, then make perl in a minimal configuration (i.e. with MULTI,
-# ITHREADS, IMP_SYS, LARGE_FILES and PERLIO off), then make this target
+# ITHREADS, IMP_SYS and LARGE_FILES off), then make this target
 # to regenerate config_H.vc.
 regen_config_h:
 	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
