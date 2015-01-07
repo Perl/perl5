@@ -10442,7 +10442,6 @@ Perl_ck_smartmatch(pTHX_ OP *o)
 static OP *
 S_maybe_targlex(pTHX_ OP *o)
 {
-    dVAR;
     OP * const kid = cLISTOPo->op_first;
     /* has a disposable target? */
     if ((PL_opargs[kid->op_type] & OA_TARGLEX)
