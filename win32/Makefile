@@ -1290,7 +1290,6 @@ minitest : .\config.h $(MINIPERL) ..\git_version.h $(GLOBEXE) $(CONFIGPM) $(UNID
 	if exist ..\t\perl.exe del /f ..\t\perl.exe
 	rename ..\t\miniperl.exe perl.exe
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
-	attrib -r ..\t\*.*
 # Note this perl.exe is miniperl
 	cd ..\t && perl.exe TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t opbasic/*.t op/*.t uni/*.t perf/*.t pragma/*.t
 
