@@ -1565,7 +1565,7 @@ $(UNIDATAFILES) ..\pod\perluniprops.pod .UPDATEALL : $(MINIPERL) $(CONFIGPM) ..\
 	cd ..\lib\unicore && \
 	..\$(MINIPERL) -I.. -I..\..\dist\Cwd\lib -I..\..\dist\Cwd mktables -P ..\..\pod -maketest -makelist -p
 
-minitest : .\config.h $(MINIPERL) ..\git_version.h $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES)
+minitest : .\config.h $(MINIPERL) ..\git_version.h $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES) test-prep-gcc
 	$(XCOPY) $(MINIPERL) ..\t\$(NULL)
 	if exist ..\t\perl.exe del /f ..\t\perl.exe
 	rename ..\t\miniperl.exe perl.exe
@@ -1574,17 +1574,19 @@ minitest : .\config.h $(MINIPERL) ..\git_version.h $(GLOBEXE) $(CONFIGPM) $(UNID
 # Note this perl.exe is miniperl
 	cd ..\t && perl.exe TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t opbasic/*.t op/*.t uni/*.t perf/*.t pragma/*.t
 
-test-prep : all utils ..\pod\perltoc.pod
+test-prep : all utils ..\pod\perltoc.pod test-prep-gcc
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
-.IF "$(CCTYPE)" == "GCC"
+
 # If building with gcc versions 4.x.x or greater, then
 # the GCC helper DLL will also need copied to the test directory.
 # The name of the dll can change, depending upon which vendor has supplied
 # your compiler, and upon the values of "x".
 # libstdc++-6.dll is copied if it exists as it, too, may then be needed.
 # Without this copying, the op/taint.t test script will fail.
+test-prep-gcc :
+.IF "$(CCTYPE)" == "GCC"
 	if exist $(CCDLLDIR)\libgcc_s_seh-1.dll $(XCOPY) $(CCDLLDIR)\libgcc_s_seh-1.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libgcc_s_sjlj-1.dll $(XCOPY) $(CCDLLDIR)\libgcc_s_sjlj-1.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libgcc_s_dw2-1.dll $(XCOPY) $(CCDLLDIR)\libgcc_s_dw2-1.dll ..\t\$(NULL)
