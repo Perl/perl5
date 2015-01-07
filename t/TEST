@@ -124,6 +124,8 @@ $| = 1;
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
 @ARGV = grep($_,@ARGV) if $^O eq 'VMS';
 
+# String eval to avoid loading File::Glob on non-miniperl.
+# (Windows only uses this script for miniperl.)
 @ARGV = eval 'map glob, @ARGV' if $^O eq 'MSWin32';
 
 our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
