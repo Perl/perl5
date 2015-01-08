@@ -4,10 +4,6 @@
 
 <div><h2>Tickets Listed in #122913: [META] perl 5.20.2</h2>
 
-<commit votes="steveh, sprout" id="83a94553cbf9f2c11b3e9a63a44e7b9ce17ccb77" ticket="40565" desc="[perl #40565] Fix localisation in pseudo-fork"/>
-<commit votes="steveh" id="452466a503257b1012694b0d3a3cbf260e409d18" ticket="40565" desc="perldelta for the prev. commit"/>
-<commit votes="steveh" id="64eb39580bdd68998bee47f67c15665c45d29bfc" ticket="40565" desc="perldelta: Add #40565 bug number"/>
-
 <commit votes="sprout" id="3bc8ec963e9657121e69386195faa61e46928dda" ticket="123344" desc="Fix qr/@array(?{block})/"/>
 <commit votes="sprout" id="d100ca43dce2c9a6bb636517e5595aa9e1e01e7e" ticket="123344" desc="Fix assertion failure with qr/\Q(?{})/"/>
 <commit votes="steveh" id="1318b6d7e272031984abced04ebef14bf73954f1" ticket="123344" desc="perldelta for 3bc8ec963 / #123344"/>
