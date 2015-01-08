@@ -5789,30 +5789,30 @@ Perl_yylex(pTHX)
 	    s--;
 	    if (PL_expect == XSTATE && isALPHA(tmp) &&
 		(s == PL_linestart+1 || s[-2] == '\n') )
-		{
-		    if ((PL_in_eval && !PL_rsfp && !PL_parser->filtered)
-			|| PL_lex_state != LEX_NORMAL) {
-			d = PL_bufend;
-			while (s < d) {
-			    if (*s++ == '\n') {
-				incline(s);
-				if (strnEQ(s,"=cut",4)) {
-				    s = strchr(s,'\n');
-				    if (s)
-					s++;
-				    else
-					s = d;
-				    incline(s);
-				    goto retry;
-				}
-			    }
-			}
-			goto retry;
-		    }
-		    s = PL_bufend;
-		    PL_parser->in_pod = 1;
-		    goto retry;
-		}
+            {
+                if ((PL_in_eval && !PL_rsfp && !PL_parser->filtered)
+                    || PL_lex_state != LEX_NORMAL) {
+                    d = PL_bufend;
+                    while (s < d) {
+                        if (*s++ == '\n') {
+                            incline(s);
+                            if (strnEQ(s,"=cut",4)) {
+                                s = strchr(s,'\n');
+                                if (s)
+                                    s++;
+                                else
+                                    s = d;
+                                incline(s);
+                                goto retry;
+                            }
+                        }
+                    }
+                    goto retry;
+                }
+                s = PL_bufend;
+                PL_parser->in_pod = 1;
+                goto retry;
+            }
 	}
 	if (PL_expect == XBLOCK) {
 	    const char *t = s;
