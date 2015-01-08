@@ -4821,8 +4821,8 @@ STATIC bool S_rck_curlyish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params
     PERL_ARGS_ASSERT_RCK_CURLYISH;
 
     if (params->stopparen > 0
-        && (OP(params->scan) == CURLYN || OP(params->scan) == CURLYM)
-        && (params->scan->flags == params->stopparen)
+        && (OP(node) == CURLYN || OP(node) == CURLYM)
+        && (node->flags == params->stopparen)
     ) {
         mincount = 1;
         maxcount = 1;
@@ -4830,12 +4830,12 @@ STATIC bool S_rck_curlyish(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params
         mincount = ARG1(params->scan);
         maxcount = ARG2(params->scan);
     }
-    params->next = regnext(params->scan);
-    if (OP(params->scan) == CURLYX) {
+    params->next = regnext(node);
+    if (OP(node) == CURLYX) {
         I32 lp = (params->data ? *(params->data->last_closep) : 0);
-        params->scan->flags = ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX);
+        node->flags = ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX);
     }
-    params->scan = NEXTOPER(params->scan) + EXTRA_STEP_2ARGS;
+    params->scan = NEXTOPER(node) + EXTRA_STEP_2ARGS;
     rck_do_curly(pRExC_state, params, node, mincount, maxcount, (OP(params->scan) == EVAL));
     rck_elide_nothing(node);
     return 0;
