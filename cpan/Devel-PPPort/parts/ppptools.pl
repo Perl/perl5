@@ -319,6 +319,11 @@ sub parse_embed
               cond  => ppcond(\@pps),
             };
           }
+          elsif ($name =~ /^[^\W\d]\w*-E<gt>[^\W\d]\w*$/) {
+            # silenty ignore entries of the form
+            #    PL_parser-E<gt>linestr
+            # which documents a struct entry rather than a function
+          }
           else {
             warn "mysterious name [$name] in $file, line $.\n";
           }

@@ -306,6 +306,8 @@ XS(XS_Devel__PPPort_dXSTARG)
   dXSARGS;
   dXSTARG;
   IV iv;
+
+  PERL_UNUSED_VAR(cv);
   SP -= items;
   iv = SvIV(ST(0)) + 1;
   PUSHi(iv);
@@ -319,6 +321,8 @@ XS(XS_Devel__PPPort_dAXMARK)
   dAXMARK;
   dITEMS;
   IV iv;
+
+  PERL_UNUSED_VAR(cv);
   SP -= items;
   iv = SvIV(ST(0)) - 1;
   mPUSHi(iv);
