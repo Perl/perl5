@@ -433,7 +433,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::Command' => {
-        'DISTRIBUTION' => 'BINGOS/ExtUtils-Command-1.19.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-Command-1.20.tar.gz',
         'FILES'        => q[cpan/ExtUtils-Command],
         'EXCLUDED'     => [qr{^xt/}],
     },
