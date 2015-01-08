@@ -124,6 +124,16 @@ L<attributes> has been upgraded from version 0.22 to 0.23.
 The usage of C<memEQs> in the XS has been corrected.
 L<[perl #122701]|https://rt.perl.org/Ticket/Display.html?id=122701>
 
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.20 to 0.21.
+
+Reading from a position well past the end of the scalar now correctly
+returns end of file.  [perl #123443]
+
+Seeking to a negative position still fails, but no longer leaves the
+file position set to a negation location.
+
 =back
 
 =head2 Removed Modules and Pragmata
