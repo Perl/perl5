@@ -38,16 +38,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
 
-<commit votes="steveh, arc" id="fcaef4dc8ca94ff0fe27bf4a249a5583ca0e7af5" ticket="123245" desc="[perl #123245] tests for format crashes"/>
-<commit votes="steveh, arc" id="fb9282c3ccd3b3c2e184a3158c46c930c23f30fb" ticket="123245" desc="[perl #123245] avoid a panic in sv_chop() in formats"/>
-<commit votes="steveh, arc" id="279aef25246e63a7be992e42d2b92e22a892263e" ticket="123245" desc="perldelta for fcaef4dc8ca9, fb9282c3ccd3"/>
 
-<commit votes="steveh, arc" id="63d073d27fe50d823f0e3c528ac62c9aa584704d" ticket="123443" desc="[perl #123443] avoid overflowing got into a negative number"/>
-<commit votes="steveh, arc" id="1d050e5534ce798acb8f9cd9c56c9f557ec658e0" ticket="123443" desc="don't allow a negative file position on a PerlIO::scalar handle"/>
-<commit votes="steveh, arc" id="b045b8b598844ddce261c725f3596c9336b42b79" ticket="123443" desc="perldelta for 63d073d27fe5, 1d050e5534ce"/>
-<commit votes="steveh, arc" id="696efa16de2cd1abedf24104d680f3d0983587f4" ticket="123443" desc="fix PerlIO::scalar get_cnt when the file position is beyond 2GB"/>
-<commit votes="steveh, arc" id="aa67537dafc18272058c189caa550b90c78f79f2" ticket="123443" desc="perldelta for 696efa16de2c"/>
-<commit votes="steveh, arc" id="9745959a89f3a201c789b8e4ce494405f95b2a7a" ticket="123443" desc="PerlIO::scalar: skip the 4GB seek test if off_t is too small"/>
 
 My vote for d8bd3d8 is conditional on 2b9215f, since the latter fixes a build issue with the former. --arc
 <commit votes="steveh, arc" id="d8bd3d828a02f8df716063d9980b8b9af539ca42" ticket="123495" desc="[perl #123495] Stop gmtime(nan) from crashing"/>
@@ -56,9 +47,6 @@ My vote for d8bd3d8 is conditional on 2b9215f, since the latter fixes a build is
 </div>
 
 <div><h3>Security Fixes</h3>
-
-<commit votes="steveh, arc" id="19be3be6968e2337bcdfe480693fff795ecd1304" ticket="" desc="don't recurse infinitely in Data::Dumper"/>
-<commit votes="steveh, arc" id="fa10264e34d420edf76a46139faa3277c0b96a2b" ticket="" desc="Data::Dumper version bump for CPAN release"/>
 
 </div>
 
@@ -109,21 +97,16 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 
 <commit votes="steveh, arc" id="5b26a7b38f5eacab94ffc56c123c01ad6c3788dc" ticket="" desc="sv.c: Silence VMS compiler warning"/>
 <commit votes="steveh, arc" id="e09e3cee34fbe40a471dc2fa31f2b8533598fb45" ticket="" desc="regcomp.c: Silence Win32 compiler warning"/>
-<commit votes="steveh, arc" id="648eb45f2e489e7cbdab09c65bccaac4a78ae3ee" ticket="122609" desc="stat Makefile.PL to get values for utime."/>
-<commit votes="steveh, arc" id="b6250659892d3195c5d3ecd04773e78dc0ccd564" ticket="" desc="Avoid gcc warning."/>
-<commit votes="steveh, arc" id="9fa5aa9143471cda101c2ac9e87f7bf90ccd0b36" ticket="122820" desc="Fix distclean for pm_to_blib directly extensions."/>
 <commit votes="steveh, arc" id="a3baa5664f4da7f412812e0188d5ac3bab0b8694" ticket="" desc="Improve Errno parsing of Win32 output"/>
 <commit votes="steveh, arc" id="1ef3f55063eff0bda07fa2251ec16a7807dfb602" ticket="" desc="Tweak Errno parsing some more"/>
 <commit votes="steveh, arc" id="2d4a3ccef465111dae0e5e71cf008e97efeb057c" ticket="" desc="Errno parsing: Don't match hex numbers in parts of function names"/>
 <commit votes="steveh, arc" id="cc192ed19bd1c52dd1711a900ce276043ce418ae" ticket="" desc="Errno parsing: Skip expressions containing function names etc"/>
 <commit votes="steveh, arc" id="5884c88b2d4d412c81919fffcc0c487b49521793" ticket="" desc="Bump $Errno::VERSION for previous commits"/>
-<commit votes="steveh, arc" id="cd1dc8e2c73be346de250a16f103fb9a97814dd3" ticket="122861" desc="sv.c: Suppress compiler warning"/>
 <commit votes="steveh, arc" id="1e02895ff34c407637067df12a1b06eb07a5a96a" ticket="" desc="t/io/eintr.t: Make this pass on my ppc64 box"/>
 <commit votes="steveh, arc" id="c7925a5e8559739ce765137cf6164c5872c63a96" ticket="" desc="fix WinCE build"/>
 <commit votes="steveh, arc" id="dceaccf89041ac723759e83a3a31bedc8d82a38d" ticket="" desc="make -DNO_MATHOMS work on Win32"/>
 <commit votes="steveh, arc" id="3415f8b9fb121a138ed954f9ced0b2c1f4660e48" ticket="120487" desc="[perl #120487] make sure we're using an unmodified @INC to load Win32"/>
 <commit votes="steveh, arc" id="08088357011bedc22047b1d4a1ec3afaee813523" ticket="123438" desc="[perl #123438] Wrong comment style in win32/win32.h"/>
-<commit votes="steveh, arc" id="dc5c2addf88baf2341663222a7ef79d1b8df8429" ticket="123436" desc="[perl #123436] installperl patch related to $Config{dlext}"/>
 
 </div>
 
