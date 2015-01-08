@@ -126,7 +126,7 @@ L<[perl #122701]|https://rt.perl.org/Ticket/Display.html?id=122701>
 
 =item *
 
-L<PerlIO::scalar> has been upgraded from version 0.20 to 0.21.
+L<PerlIO::scalar> has been upgraded from version 0.18 to 0.18_01.
 
 Reading from a position well past the end of the scalar now correctly
 returns end of file.  [perl #123443]
