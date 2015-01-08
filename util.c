@@ -5835,6 +5835,9 @@ static void bfd_update(bfd_context* ctx, Dl_info* dl_info)
     /* BFD open and scan only if the filename changed. */
     if (ctx->fname_prev == NULL ||
         strNE(dl_info->dli_fname, ctx->fname_prev)) {
+        if (ctx->abfd) {
+            bfd_close(ctx->abfd);
+        }
         ctx->abfd = bfd_openr(dl_info->dli_fname, 0);
         if (ctx->abfd) {
             if (bfd_check_format(ctx->abfd, bfd_object)) {
@@ -6331,6 +6334,9 @@ Perl_get_c_backtrace(pTHX_ int depth, int skip)
     }
 #ifdef USE_BFD
     Safefree(symbol_names);
+    if (bfd_ctx.abfd) {
+        bfd_close(bfd_ctx.abfd);
+    }
 #endif
     Safefree(source_lines);
     Safefree(source_name_sizes);
