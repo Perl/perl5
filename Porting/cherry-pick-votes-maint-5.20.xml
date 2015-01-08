@@ -18,7 +18,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including d187b712a6af2c12904446f06de1eb336ab61a72 (Call FETCH once for values in {...})
+Blead changes have been examined up to and including e7368224f1884f08b01b3cedcf693510ca964712 (Upgrade Devel::PPPort from 3.25 to 3.26 (to silence build warnings))
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -236,6 +236,14 @@ dacd91898fcfc21090ad48dd88483172a4bc8914 won't apply cleanly, but should be easy
 <commit votes="steveh, arc" id="d274ee9d7b1765ee3032fac39cbc2e77b0d2f194" ticket="" desc="RMG: Note that Porting/release_schedule.pod should be updated"/>
 
 <commit votes="steveh, arc" id="62fedd514941642472e01795828f42ddd04477eb" ticket="" desc="perlfunc: another alternative for enabling the 'state' feature"/>
+<commit votes="steveh" id="dbf3c4d788344c8d20eb2549c638ced519d3f0e8" ticket="" desc="perllocale: Nits"/>
+<commit votes="steveh" id="a0879bf8a3066bd055931dcc51f2c4f80ec01ffb" ticket="" desc="perlpod: Latin1 pods need an =encoding"/>
+<commit votes="steveh" id="e6d55c9947dea892b32541479147753415a72c46" ticket="" desc="perldiag: Document 'Bad symbol for scalar'"/>
+<commit votes="steveh" id="5ae454f0f6fe0fcfbf51c1f9f4bfc593da8df756" ticket="" desc="proposed changes for perlpolicy updates"/>
+<commit votes="steveh" id="b50cfd0a486367dd5f82cdf3ec88ee9d3aa67aa4" ticket="" desc="forward reference from 'new features' to 'experimental'"/>
+<commit votes="steveh" id="9650f35b1f161b417324376040f61ae47b518529" ticket="" desc="perlpolicy: the point is caution, not low stakes"/>
+<commit votes="steveh" id="667f5e7f722e725f12e664e2dd66190f90db42d7" ticket="" desc="perlpolicy: clarify what 'feature can be replaced' means"/>
+<commit votes="steveh" id="1adbeba0a4bd082e42cd1499f87faef5175d36a2" ticket="" desc="perlpolicy: add a missing verb"/>
 
 To be included in an "Errata From Previous Releases":
 <commit votes="steveh, arc" id="6ff8f256561a974b63b784ae8681c284ada44f7a" ticket="122655" desc="perldelta: Entry for [perl #122655]."/>
