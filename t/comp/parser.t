@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..172\n";
+print "1..173\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -523,6 +523,9 @@ sub dummy { tell FILE1 }
 $x[($_)];
 # OPf_SPECIAL on OP_GV in subscript
 $x[FILE1->[0]];
+
+# Used to crash [perl #123452]
+eval 's /${<>{}) //';
 
 # Add new tests HERE (above this line)
 

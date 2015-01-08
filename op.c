@@ -5473,7 +5473,10 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 
     /* for s/// and tr///, last element in list is the replacement; pop it */
 
-    if (is_trans || o->op_type == OP_SUBST) {
+    /* If we have a syntax error causing tokens to be popped and the parser
+       to see PMFUNC '(' expr ')' with no commas in it; e.g., s/${<>{})//,
+       then expr will not be of type OP_LIST, there being no repl.  */
+    if ((is_trans || o->op_type == OP_SUBST) && expr->op_type == OP_LIST) {
 	OP* kid;
 	repl = cLISTOPx(expr)->op_last;
 	kid = cLISTOPx(expr)->op_first;
