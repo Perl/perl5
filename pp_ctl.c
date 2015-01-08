@@ -3578,6 +3578,7 @@ S_check_type_and_open(pTHX_ SV *name)
 {
     Stat_t st;
     STRLEN len;
+    PerlIO * retio;
     const char *p = SvPV_const(name, len);
     int st_rc;
 
@@ -3592,6 +3593,11 @@ S_check_type_and_open(pTHX_ SV *name)
     if (!IS_SAFE_PATHNAME(p, len, "require"))
         return NULL;
 
+    /* on Win32 stat is expensive (it does an open() and close() twice and
+       a couple other IO calls), the open will fail with a dir on its own with
+       errno EACCES, so only do a stat to separate a dir from a real EACCES
+       caused by user perms */
+#ifndef WIN32
     /* we use the value of errno later to see how stat() or open() failed.
      * We don't want it set if the stat succeeded but we still failed,
      * such as if the name exists, but is a directory */
@@ -3602,12 +3608,29 @@ S_check_type_and_open(pTHX_ SV *name)
     if (st_rc < 0 || S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode)) {
 	return NULL;
     }
+#endif
 
 #if !defined(PERLIO_IS_STDIO)
-    return PerlIO_openn(aTHX_ ":", PERL_SCRIPT_MODE, -1, 0, 0, NULL, 1, &name);
+    retio = PerlIO_openn(aTHX_ ":", PERL_SCRIPT_MODE, -1, 0, 0, NULL, 1, &name);
 #else
-    return PerlIO_open(p, PERL_SCRIPT_MODE);
+    retio = PerlIO_open(p, PERL_SCRIPT_MODE);
 #endif
+#ifdef WIN32
+    /* EACCES stops the INC search early in pp_require to implement
+       feature RT #113422 */
+    if(!retio && errno == EACCES) { /* exists but probably a directory */
+	int eno;
+	st_rc = PerlLIO_stat(p, &st);
+	if (st_rc >= 0) {
+	    if(S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode))
+		eno = 0;
+	    else
+		eno = EACCES;
+	    errno = eno;
+	}
+    }
+#endif
+    return retio;
 }
 
 #ifndef PERL_DISABLE_PMC

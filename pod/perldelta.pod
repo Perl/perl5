@@ -376,6 +376,11 @@ Support for building without PerlIO has been removed from the Windows
 makefiles.  Non-PerlIO builds were all but deprecated in Perl 5.18.0 and are
 already not supported by F<Configure> on POSIX systems.
 
+=item *
+
+Between 2 and 6 ms and 7 I/O calls have been saved per attempt to open a perl
+module for each path in C<@INC>.
+
 =back
 
 =back
