@@ -1054,7 +1054,7 @@ the stashes, which are rarely used directly, thus should not slow down
 Perl.)
 
 If a package uses overload, it carries a special flag.  This flag is also
-set when new function are defined or @ISA is modified.  There will be a
+set when new functions are defined or @ISA is modified.  There will be a
 slight speed penalty on the very first operation thereafter that supports
 overloading, while the overload tables are updated.  If there is no
 overloading present, the flag is turned off.  Thus the only speed penalty
