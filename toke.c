@@ -2458,7 +2458,7 @@ S_sublex_done(pTHX)
 		 + PL_parser->herelines;
 	    PL_parser->herelines = 0;
 	}
-	return ',';
+	return '/';
     }
     else {
 	const line_t l = CopLINE(PL_curcop);

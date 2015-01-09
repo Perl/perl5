@@ -3806,7 +3806,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
     }
     else
 	return bind_match(type, left,
-		pmruntime(newPMOP(OP_MATCH, 0), right, 0, 0));
+		pmruntime(newPMOP(OP_MATCH, 0), right, NULL, 0, 0));
 }
 
 OP *
@@ -5450,8 +5450,7 @@ S_set_haseval(pTHX)
  * isreg indicates that the pattern is part of a regex construct, eg
  * $x =~ /pattern/ or split /pattern/, as opposed to $x =~ $pattern or
  * split "pattern", which aren't. In the former case, expr will be a list
- * if the pattern contains more than one term (eg /a$b/) or if it contains
- * a replacement, ie s/// or tr///.
+ * if the pattern contains more than one term (eg /a$b/).
  *
  * When the pattern has been compiled within a new anon CV (for
  * qr/(?{...})/ ), then floor indicates the savestack level just before
@@ -5459,48 +5458,19 @@ S_set_haseval(pTHX)
  */
 
 OP *
-Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
+Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, bool isreg, I32 floor)
 {
     PMOP *pm;
     LOGOP *rcop;
     I32 repl_has_vars = 0;
-    OP* repl = NULL;
     bool is_trans = (o->op_type == OP_TRANS || o->op_type == OP_TRANSR);
     bool is_compiletime;
     bool has_code;
 
     PERL_ARGS_ASSERT_PMRUNTIME;
 
-    /* for s/// and tr///, last element in list is the replacement; pop it */
-
-    /* If we have a syntax error causing tokens to be popped and the parser
-       to see PMFUNC '(' expr ')' with no commas in it; e.g., s/${<>{})//,
-       then expr will not be of type OP_LIST, there being no repl.  */
-    if ((is_trans || o->op_type == OP_SUBST) && expr->op_type == OP_LIST) {
-	OP* kid;
-	repl = cLISTOPx(expr)->op_last;
-	kid = cLISTOPx(expr)->op_first;
-        while (OpSIBLING(kid) != repl)
-            kid = OpSIBLING(kid);
-        op_sibling_splice(expr, kid, 1, NULL);
-    }
-
-    /* for TRANS, convert LIST/PUSH/CONST into CONST, and pass to pmtrans() */
-
     if (is_trans) {
-        OP *first, *last;
-
-        assert(expr->op_type == OP_LIST);
-        first = cLISTOPx(expr)->op_first;
-        last  = cLISTOPx(expr)->op_last;
-        assert(first->op_type == OP_PUSHMARK);
-        assert(OpSIBLING(first) == last);
-
-        /* cut 'last' from sibling chain, then free everything else */
-        op_sibling_splice(expr, first, 1, NULL);
-        op_free(expr);
-
-        return pmtrans(o, last, repl);
+        return pmtrans(o, expr, repl);
     }
 
     /* find whether we have any runtime or code elements;
@@ -11114,7 +11084,7 @@ Perl_ck_split(pTHX_ OP *o)
         /* remove kid, and replace with new optree */
         op_sibling_splice(o, NULL, 1, NULL);
         /* OPf_SPECIAL is used to trigger split " " behavior */
-        kid = pmruntime( newPMOP(OP_MATCH, OPf_SPECIAL), kid, 0, 0);
+        kid = pmruntime( newPMOP(OP_MATCH, OPf_SPECIAL), kid, NULL, 0, 0);
         op_sibling_splice(o, NULL, 0, kid);
     }
     CHANGE_TYPE(kid, OP_PUSHRE);

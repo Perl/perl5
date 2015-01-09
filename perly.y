@@ -70,7 +70,7 @@
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> sliceme kvslice gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr miexpr
-%type <opval> optlistexpr optexpr indirob listop method
+%type <opval> optlistexpr optexpr optrepl indirob listop method
 %type <opval> formname subname proto optsubbody cont my_scalar my_var
 %type <opval> refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
@@ -996,8 +996,8 @@ term	:	termbinop
 			    } else
 				$<ival>$ = 0;
 			}
-		    '(' listexpr ')'
-			{ $$ = pmruntime($1, $4, 1, $<ival>2); }
+		    '(' listexpr optrepl ')'
+			{ $$ = pmruntime($1, $4, $5, 1, $<ival>2); }
 	|	WORD
 	|	listop
 	|	YADAYADA
@@ -1040,6 +1040,12 @@ optexpr:	/* NULL */
 			{ $$ = (OP*)NULL; }
 	|	expr
 			{ $$ = $1; }
+	;
+
+optrepl:	/* NULL */
+			{ $$ = (OP*)NULL; }
+	|	'/' expr
+			{ $$ = $2; }
 	;
 
 /* A little bit of trickery to make "for my $foo (@bar)" actually be
