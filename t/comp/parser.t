@@ -524,7 +524,7 @@ $x[($_)];
 # OPf_SPECIAL on OP_GV in subscript
 $x[FILE1->[0]];
 
-# Used to crash [perl #123452]
+# Used to crash [perl #123542]
 eval 's /${<>{}) //';
 
 # Add new tests HERE (above this line)
