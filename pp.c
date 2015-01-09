@@ -2227,7 +2227,7 @@ PP(pp_bit_and)
 PP(pp_nbit_and)
 {
     dSP;
-    tryAMAGICbin_MG(band_amg, AMGf_assign);
+    tryAMAGICbin_MG(band_amg, AMGf_assign|AMGf_numarg);
     {
 	dATARGET; dPOPTOPssrl;
 	if (PL_op->op_private & HINT_INTEGER) {
@@ -2297,7 +2297,7 @@ PP(pp_nbit_or)
     const int op_type = PL_op->op_type;
 
     tryAMAGICbin_MG((op_type == OP_NBIT_OR ? bor_amg : bxor_amg),
-		    AMGf_assign);
+		    AMGf_assign|AMGf_numarg);
     {
 	dATARGET; dPOPTOPssrl;
 	if (PL_op->op_private & HINT_INTEGER) {
@@ -2515,7 +2515,7 @@ PP(pp_complement)
 PP(pp_ncomplement)
 {
     dSP;
-    tryAMAGICun_MG(compl_amg, AMGf_numeric);
+    tryAMAGICun_MG(compl_amg, AMGf_numeric|AMGf_numarg);
     {
 	dTARGET; dTOPss;
 	if (PL_op->op_private & HINT_INTEGER) {

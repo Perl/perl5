@@ -2842,7 +2842,9 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
     SvGETMAGIC(arg);
 
     if (SvAMAGIC(arg) && (tmpsv = amagic_call(arg, &PL_sv_undef, method,
-					      AMGf_noright | AMGf_unary))) {
+					      AMGf_noright | AMGf_unary
+					    | (flags & AMGf_numarg))))
+    {
 	if (flags & AMGf_set) {
 	    SETs(tmpsv);
 	}
@@ -2887,7 +2889,8 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
 
     if (SvAMAGIC(left) || SvAMAGIC(right)) {
 	SV * const tmpsv = amagic_call(left, right, method,
-		    ((flags & AMGf_assign) && opASSIGN ? AMGf_assign: 0));
+		    ((flags & AMGf_assign) && opASSIGN ? AMGf_assign: 0)
+		  | (flags & AMGf_numarg));
 	if (tmpsv) {
 	    if (flags & AMGf_set) {
 		(void)POPs;
@@ -3395,6 +3398,10 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       PUSHs(newSVpvn_flags(AMG_id2name(method + assignshift),
 			   AMG_id2namelen(method + assignshift), SVs_TEMP));
     }
+    else if (flags & AMGf_numarg)
+      PUSHs(&PL_sv_undef);
+    if (flags & AMGf_numarg)
+      PUSHs(&PL_sv_yes);
     PUSHs(MUTABLE_SV(cv));
     PUTBACK;
     oldmark = TOPMARK;
