@@ -252,7 +252,9 @@ illustrates the calling conventions:
     # * may recurse once - see table below
 
 Three arguments are passed to all subroutines specified in the
-C<use overload> directive (with one exception - see L</nomethod>).
+C<use overload> directive (with exceptions - see below, particularly
+L</nomethod>).
+
 The first of these is the operand providing the overloaded
 operator implementation -
 in this case, the object whose C<minus()> method is being called.
@@ -309,6 +311,12 @@ An appropriate implementation of C<--> might look like
     use overload '--' => "decr",
         # ...
     sub decr { --${$_[0]}; }
+
+If the experimental "bitwise" feature is enabled (see L<feature>), a fifth
+TRUE argument is passed to subroutines handling C<&>, C<|>, C<^> and C<~>.
+This indicates that the caller is expecting numeric behaviour.  The fourth
+argument will be C<undef>, as that position (C<$_[3]>) is reserved for use
+by L</nomethod>.
 
 =head3 Mathemagic, Mutators, and Copy Constructors
 
@@ -686,7 +694,8 @@ The specified function will be passed four parameters.
 The first three arguments coincide with those that would have been
 passed to the corresponding method if it had been defined.
 The fourth argument is the C<use overload> key for that missing
-method.
+method.  If the experimental "bitwise" feature is enabled (see L<feature>),
+a fifth TRUE argument is passed to subroutines handling C<&>, C<|>, C<^> and C<~> to indicate that the caller is expecting numeric behaviour.
 
 For example, if C<$a> is an object blessed into a package declaring
 
