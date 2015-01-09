@@ -205,7 +205,11 @@ Part of this (but not the opcode part):
 <commit votes="steveh, arc" id="4c0ef2088519deeee7642c58f661b5d8a70ccf2f" ticket="" desc="perlpolicy: Be explicit wrt crashing bug policy"/>
 dacd91898fcfc21090ad48dd88483172a4bc8914 won't apply cleanly, but should be easy to fix. --arc
 <commit votes="steveh, arc" id="dacd91898fcfc21090ad48dd88483172a4bc8914" ticket="" desc="Consistent spaces after docs in perlfunc.pod"/>
-<commit votes="steveh, arc" id="faad849dd7af72f2db0a94098b4c462d3e573f5f" ticket="" desc="perldiag: Add missing entry"/>
+
+faad849dd has a typo in it that was fixed by 605eee606.  We could cherry-pick just the pod/ part of 605eee606 if the t/ part is controversial, but I think that is splitting hairs.
+<commit votes="steveh, sprout, arc" id="faad849dd7af72f2db0a94098b4c462d3e573f5f" ticket="" desc="perldiag: Add missing entry"/>
+<commit votes="sprout" id="605eee6061b9fb79ab7be45ac13eaf417fd8db4f" ticket="" desc="diag.t: Ignore trailing whitespace"/>
+
 <commit votes="steveh, arc" id="96cfa1df465e71dba7e2099fc37db1b569d300b4" ticket="" desc="perluniintro: Vertically stack ternarys"/>
 <commit votes="steveh, arc" id="e990b8498fc52e996e6150d10fcb7786b74ee9b2" ticket="" desc="Import perl5184delta"/>
 <commit votes="steveh, arc" id="0c54b9fe11cbd0e7072f3fbd9329148d54a7f500" ticket="" desc="perl.pod: Line things up vertically"/>
