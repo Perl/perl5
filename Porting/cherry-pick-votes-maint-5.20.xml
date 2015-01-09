@@ -12,7 +12,7 @@
 
 <commit votes="steveh" id="" ticket="" desc="CPAN RT#101095 Module::Metadata does not extract correct version if use_our is enabled"/>
 
-<commit votes="steveh,tonyc" id="405dffcb17b9cc9d0e5d7b41835b998ca7f1d873" ticket="123539" desc="PATCH: [perl #123539] regcomp.c node overrun/segfault"/>
+<commit votes="sprout,steveh,tonyc" id="405dffcb17b9cc9d0e5d7b41835b998ca7f1d873" ticket="123539" desc="PATCH: [perl #123539] regcomp.c node overrun/segfault"/>
 
 </div>
 
@@ -41,8 +41,8 @@ I feel a bit leery about this next one.  The code is a bit fragile, so I would f
 
 
 My vote for d8bd3d8 is conditional on 2b9215f, since the latter fixes a build issue with the former. --arc
-<commit votes="steveh, arc" id="d8bd3d828a02f8df716063d9980b8b9af539ca42" ticket="123495" desc="[perl #123495] Stop gmtime(nan) from crashing"/>
-<commit votes="arc" id="2b9215fdb83c97496b82d0c73d4903097a8ed66b" ticket="123502" desc="Vital followup to gmtime(nan) fix"/>
+<commit votes="steveh, sprout, arc" id="d8bd3d828a02f8df716063d9980b8b9af539ca42" ticket="123495" desc="[perl #123495] Stop gmtime(nan) from crashing"/>
+<commit votes="arc, sprout" id="2b9215fdb83c97496b82d0c73d4903097a8ed66b" ticket="123502" desc="Vital followup to gmtime(nan) fix"/>
 
 </div>
 
@@ -75,8 +75,8 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="arc" id="f6f22b1fc01b8676e43ef64616ed7899a84bfec2" ticket="122890" desc="t/re/re_tests: Add test for perl #122890"/>
 <commit votes="arc" id="efcc8bfdc124f50d33aab3f1d7722b5f9e4de349" ticket="122890" desc="re_tests: More tests for #122890"/>
 
-<commit votes="steveh, arc" id="487e470dbd7a885bb6a92a735b2783e1c6740066" ticket="123410" desc="[perl #123410] sort CORE::fake bizarre behaviour"/>
-<commit votes="steveh, arc" id="070733dfda1bb0d07d337128db5d1e78f14e6562" ticket="123410" desc="perldelta for 487e470d / #123410"/>
+<commit votes="steveh, sprout, arc" id="487e470dbd7a885bb6a92a735b2783e1c6740066" ticket="123410" desc="[perl #123410] sort CORE::fake bizarre behaviour"/>
+<commit votes="steveh, sprout, arc" id="070733dfda1bb0d07d337128db5d1e78f14e6562" ticket="123410" desc="perldelta for 487e470d / #123410"/>
 
 </div>
 
@@ -238,7 +238,7 @@ dacd91898fcfc21090ad48dd88483172a4bc8914 won't apply cleanly, but should be easy
 <commit votes="steveh, arc" id="62fedd514941642472e01795828f42ddd04477eb" ticket="" desc="perlfunc: another alternative for enabling the 'state' feature"/>
 <commit votes="steveh" id="dbf3c4d788344c8d20eb2549c638ced519d3f0e8" ticket="" desc="perllocale: Nits"/>
 <commit votes="steveh" id="a0879bf8a3066bd055931dcc51f2c4f80ec01ffb" ticket="" desc="perlpod: Latin1 pods need an =encoding"/>
-<commit votes="steveh" id="e6d55c9947dea892b32541479147753415a72c46" ticket="" desc="perldiag: Document 'Bad symbol for scalar'"/>
+<commit votes="sprout, steveh" id="e6d55c9947dea892b32541479147753415a72c46" ticket="" desc="perldiag: Document 'Bad symbol for scalar'"/>
 <commit votes="steveh" id="5ae454f0f6fe0fcfbf51c1f9f4bfc593da8df756" ticket="" desc="proposed changes for perlpolicy updates"/>
 <commit votes="steveh" id="b50cfd0a486367dd5f82cdf3ec88ee9d3aa67aa4" ticket="" desc="forward reference from 'new features' to 'experimental'"/>
 <commit votes="steveh" id="9650f35b1f161b417324376040f61ae47b518529" ticket="" desc="perlpolicy: the point is caution, not low stakes"/>
