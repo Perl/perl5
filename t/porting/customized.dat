@@ -1,5 +1,6 @@
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
 Encode cpan/Encode/encoding.pm 506ec84f1fbbff189c3f4f47b92aff5afc95b98e
+ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/pm_to_blib.t 0637e6ef934adaf80249d2b57c35649279d8fce2
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Test::Simple cpan/Test-Simple/t/Legacy/exit.t 83edbf569d56d8cdbabea552dfe5602ea1c1822e
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d

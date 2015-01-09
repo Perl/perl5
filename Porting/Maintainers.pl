@@ -479,6 +479,8 @@ use File::Glob qw(:case);
             'PATCHING',
             'README.packaging',
         ],
+        # Applied upstream remove customisation when updating EUMM
+        'CUSTOMIZED'   => [ qw[ t/pm_to_blib.t ] ],
     },
 
     'ExtUtils::Manifest' => {

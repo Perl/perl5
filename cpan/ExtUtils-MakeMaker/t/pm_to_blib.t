@@ -68,13 +68,12 @@ local $ENV{PERL_INSTALL_QUIET};
 
 # Rerun the Makefile.PL, pm_to_blib should rerun
 {
+    sleep 2;
     run_ok(qq{$perl Makefile.PL});
 
     # XXX This is a fragile way to check that it reran.
-    TODO: {
-      local $TODO = 'This one is fragile on some systems for some reason that needs investigation';
-      like run_ok($make), qr/^Skip /ms;
-    }
+    local $TODO = 'This one is fragile on some systems for some reason that needs investigation';
+    like run_ok($make), qr/^Skip /ms;
 
     ok( -e "blib/lib/Big/Dummy.pm", "blib copied pm file" );
 }
