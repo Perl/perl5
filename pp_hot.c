@@ -76,7 +76,8 @@ PP(pp_null)
     return NORMAL;
 }
 
-/* This is sometimes called directly by pp_coreargs and pp_grepstart. */
+/* This is sometimes called directly by pp_coreargs, pp_grepstart and
+   amagic_call. */
 PP(pp_pushmark)
 {
     PUSHMARK(PL_stack_sp);
