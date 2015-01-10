@@ -4,13 +4,15 @@
 
 <div><h2>Tickets Listed in #122913: [META] perl 5.20.2</h2>
 
-<commit votes="sprout, steveh" id="3bc8ec963e9657121e69386195faa61e46928dda" ticket="123344" desc="Fix qr/@array(?{block})/"/>
-<commit votes="sprout, steveh" id="d100ca43dce2c9a6bb636517e5595aa9e1e01e7e" ticket="123344" desc="Fix assertion failure with qr/\Q(?{})/"/>
-<commit votes="steveh" id="1318b6d7e272031984abced04ebef14bf73954f1" ticket="123344" desc="perldelta for 3bc8ec963 / #123344"/>
+<commit votes="sprout, steveh khw" id="3bc8ec963e9657121e69386195faa61e46928dda" ticket="123344" desc="Fix qr/@array(?{block})/"/>
+<commit votes="sprout, steveh khw" id="d100ca43dce2c9a6bb636517e5595aa9e1e01e7e" ticket="123344" desc="Fix assertion failure with qr/\Q(?{})/"/>
+<commit votes="steveh khw" id="1318b6d7e272031984abced04ebef14bf73954f1" ticket="123344" desc="perldelta for 3bc8ec963 / #123344"/>
 
-<commit votes="steveh" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
+<commit votes="steveh khw" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
 
 <commit votes="steveh" id="" ticket="" desc="CPAN RT#101095 Module::Metadata does not extract correct version if use_our is enabled"/>
+
+<commit votes="khw" id="405dffcb17b9cc9d0e5d7b41835b998ca7f1d873" ticket="123539" desc="Segmentation Fault in Perl 5.21.8 while fuzzing Perl binary"/>
 
 </div>
 
