@@ -433,7 +433,7 @@ other crashes has been fixed.  This occurred only in patterns compiled
 with C<"/i">, while taking into account the current POSIX locale (this usually
 means they have to be compiled within the scope of C<S<"use locale">>),
 and there must be a string of at least 128 consecutive bytes to match.
-[perl #123530]
+[perl #123539]
 
 =back
 
