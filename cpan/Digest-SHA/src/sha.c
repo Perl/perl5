@@ -3,10 +3,10 @@
  *
  * Ref: NIST FIPS PUB 180-4 Secure Hash Standard
  *
- * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
+ * Copyright (C) 2003-2015 Mark Shelor, All Rights Reserved
  *
- * Version: 5.93
- * Sun Oct 26 06:00:48 MST 2014
+ * Version: 5.94
+ * Sat Jan 10 00:45:28 MST 2015
  *
  */
 
@@ -45,7 +45,7 @@
 #define K3	C32(0x8f1bbcdc)
 #define K4	C32(0xca62c1d6)
 
-static W32 K256[64] =			/* SHA-224/256 constants */
+static const W32 K256[64] =		/* SHA-224/256 constants */
 {
 	C32(0x428a2f98), C32(0x71374491), C32(0xb5c0fbcf), C32(0xe9b5dba5),
 	C32(0x3956c25b), C32(0x59f111f1), C32(0x923f82a4), C32(0xab1c5ed5),
@@ -65,19 +65,19 @@ static W32 K256[64] =			/* SHA-224/256 constants */
 	C32(0x90befffa), C32(0xa4506ceb), C32(0xbef9a3f7), C32(0xc67178f2)
 };
 
-static W32 H01[8] =			/* SHA-1 initial hash value */
+static const W32 H01[8] =		/* SHA-1 initial hash value */
 {
 	C32(0x67452301), C32(0xefcdab89), C32(0x98badcfe), C32(0x10325476),
 	C32(0xc3d2e1f0), C32(0x00000000), C32(0x00000000), C32(0x00000000)
 };
 
-static W32 H0224[8] =			/* SHA-224 initial hash value */
+static const W32 H0224[8] =		/* SHA-224 initial hash value */
 {
 	C32(0xc1059ed8), C32(0x367cd507), C32(0x3070dd17), C32(0xf70e5939),
 	C32(0xffc00b31), C32(0x68581511), C32(0x64f98fa7), C32(0xbefa4fa4)
 };
 
-static W32 H0256[8] =			/* SHA-256 initial hash value */
+static const W32 H0256[8] =		/* SHA-256 initial hash value */
 {
 	C32(0x6a09e667), C32(0xbb67ae85), C32(0x3c6ef372), C32(0xa54ff53a),
 	C32(0x510e527f), C32(0x9b05688c), C32(0x1f83d9ab), C32(0x5be0cd19)
@@ -154,7 +154,7 @@ static void sha256(SHA *s, UCHR *block)		/* SHA-224/256 transform */
 {
 	W32 a, b, c, d, e, f, g, h, T1;
 	W32 W[16];
-	W32 *kp = K256;
+	const W32 *kp = K256;
 	W32 *wp = W;
 	W32 *H = s->H32;
 
@@ -214,6 +214,7 @@ static void sha256(SHA *s, UCHR *block)		/* SHA-224/256 transform */
 
 #include "sha64bit.c"
 
+#define BITSET(s, pos)	s[(pos) >> 3] &  (UCHR)  (0x01 << (7 - (pos) % 8))
 #define SETBIT(s, pos)	s[(pos) >> 3] |= (UCHR)  (0x01 << (7 - (pos) % 8))
 #define CLRBIT(s, pos)	s[(pos) >> 3] &= (UCHR) ~(0x01 << (7 - (pos) % 8))
 #define NBYTES(nbits)	(((nbits) + 7) >> 3)
@@ -359,45 +360,23 @@ static ULNG shabytes(UCHR *bitstr, ULNG bitcnt, SHA *s)
 /* shabits: updates state for bit-aligned data in s->block */
 static ULNG shabits(UCHR *bitstr, ULNG bitcnt, SHA *s)
 {
-	UINT i;
-	UINT gap;
-	ULNG nbits;
-	UCHR buf[1<<9];
-	UINT bufsize = sizeof(buf);
-	ULNG bufbits = (ULNG) bufsize << 3;
-	UINT nbytes = NBYTES(bitcnt);
-	ULNG savecnt = bitcnt;
+	ULNG i;
 
-	gap = 8 - s->blockcnt % 8;
-	s->block[s->blockcnt>>3] &= (UCHR) (~0 << gap);
-	s->block[s->blockcnt>>3] |= (UCHR) (*bitstr >> (8 - gap));
-	s->blockcnt += bitcnt < gap ? bitcnt : gap;
-	if (bitcnt < gap)
-		return(savecnt);
-	if (s->blockcnt == s->blocksize)
-		s->sha(s, s->block), s->blockcnt = 0;
-	if ((bitcnt -= gap) == 0)
-		return(savecnt);
-	while (nbytes > bufsize) {
-		for (i = 0; i < bufsize; i++)
-			buf[i] = (UCHR) (bitstr[i] << gap) |
-				 (UCHR) (bitstr[i+1] >> (8-gap));
-		nbits = bitcnt < bufbits ? bitcnt : bufbits;
-		shabytes(buf, nbits, s);
-		bitcnt -= nbits, bitstr += bufsize, nbytes -= bufsize;
+	for (i = 0UL; i < bitcnt; i++) {
+		if (BITSET(bitstr, i))
+			SETBIT(s->block, s->blockcnt), s->blockcnt++;
+		else
+			CLRBIT(s->block, s->blockcnt), s->blockcnt++;
+		if (s->blockcnt == s->blocksize)
+			s->sha(s, s->block), s->blockcnt = 0;
 	}
-	for (i = 0; i < nbytes - 1; i++)
-		buf[i] = (UCHR) (bitstr[i] << gap) |
-			 (UCHR) (bitstr[i+1] >> (8-gap));
-	buf[nbytes-1] = (UCHR) (bitstr[nbytes-1] << gap);
-	shabytes(buf, bitcnt, s);
-	return(savecnt);
+	return(bitcnt);
 }
 
 /* shawrite: triggers a state update using data in bitstr/bitcnt */
 static ULNG shawrite(UCHR *bitstr, ULNG bitcnt, SHA *s)
 {
-	if (bitcnt < 1)
+	if (!bitcnt)
 		return(0);
 	if (SHA_LO32(s->lenll += bitcnt) < bitcnt)
 		if (SHA_LO32(++s->lenlh) == 0)
@@ -439,7 +418,7 @@ static void shafinish(SHA *s)
 #define shadigest(state)	digcpy(state)
 
 /* xmap: translation map for hexadecimal encoding */
-static char xmap[] =
+static const char xmap[] =
 	"0123456789abcdef";
 
 /* shahex: returns pointer to current digest (hexadecimal) */
@@ -462,7 +441,7 @@ static char *shahex(SHA *s)
 }
 
 /* bmap: translation map for Base 64 encoding */
-static char bmap[] =
+static const char bmap[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* encbase64: encodes input (0 to 3 bytes) into Base 64 */

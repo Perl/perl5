@@ -1,3 +1,4 @@
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -10,6 +11,11 @@
 	#endif
 #else
 	#define SvPVbyte SvPV
+#endif
+
+#ifndef dTHX
+	#define pTHX_
+	#define aTHX_
 #endif
 
 #ifndef PerlIO
@@ -28,7 +34,7 @@
 
 #include "src/sha.c"
 
-static int ix2alg[] =
+static const int ix2alg[] =
 	{1,1,1,224,224,224,256,256,256,384,384,384,512,512,512,
 	512224,512224,512224,512256,512256,512256};
 
@@ -39,7 +45,7 @@ static int ix2alg[] =
 #define MAX_WRITE_SIZE 16384
 #define IO_BUFFER_SIZE 4096
 
-static SHA *getSHA(SV *self)
+static SHA *getSHA(pTHX_ SV *self)
 {
 	if (!sv_isobject(self) || !sv_derived_from(self, "Digest::SHA"))
 		return(NULL);
@@ -90,7 +96,7 @@ PREINIT:
 	SHA *state;
 	SHA *clone;
 CODE:
-	if ((state = getSHA(self)) == NULL)
+	if ((state = getSHA(aTHX_ self)) == NULL)
 		XSRETURN_UNDEF;
 	Newx(clone, 1, SHA);
 	RETVAL = newSV(0);
@@ -231,7 +237,7 @@ ALIAS:
 PREINIT:
 	SHA *state;
 CODE:
-	if ((state = getSHA(self)) == NULL)
+	if ((state = getSHA(aTHX_ self)) == NULL)
 		XSRETURN_UNDEF;
 	RETVAL = ix ? state->alg : (int) (state->digestlen << 3);
 OUTPUT:
@@ -246,7 +252,7 @@ PREINIT:
 	STRLEN len;
 	SHA *state;
 PPCODE:
-	if ((state = getSHA(self)) == NULL)
+	if ((state = getSHA(aTHX_ self)) == NULL)
 		XSRETURN_UNDEF;
 	for (i = 1; i < items; i++) {
 		data = (UCHR *) (SvPVbyte(ST(i), len));
@@ -271,7 +277,7 @@ PREINIT:
 	SHA *state;
 	char *result;
 CODE:
-	if ((state = getSHA(self)) == NULL)
+	if ((state = getSHA(aTHX_ self)) == NULL)
 		XSRETURN_UNDEF;
 	shafinish(state);
 	len = 0;
@@ -296,7 +302,7 @@ PREINIT:
 	UCHR buf[256];
 	UCHR *ptr = buf;
 CODE:
-	if ((state = getSHA(self)) == NULL)
+	if ((state = getSHA(aTHX_ self)) == NULL)
 		XSRETURN_UNDEF;
 	Copy(digcpy(state), ptr, state->alg <= SHA256 ? 32 : 64, UCHR);
 	ptr += state->alg <= SHA256 ? 32 : 64;
@@ -321,7 +327,7 @@ PREINIT:
 	SHA *state;
 	UCHR *data;
 PPCODE:
-	if ((state = getSHA(self)) == NULL)
+	if ((state = getSHA(aTHX_ self)) == NULL)
 		XSRETURN_UNDEF;
 	data = (UCHR *) SvPV(packed_state, len);
 	if (len != (state->alg <= SHA256 ? 116U : 212U))
@@ -348,7 +354,7 @@ PREINIT:
 	int n;
 	UCHR in[IO_BUFFER_SIZE];
 PPCODE:
-	if (!f || (state = getSHA(self)) == NULL)
+	if (!f || (state = getSHA(aTHX_ self)) == NULL)
 		XSRETURN_UNDEF;
 	while ((n = PerlIO_read(f, in, sizeof(in))) > 0)
 		shawrite(in, (ULNG) n << 3, state);
@@ -366,7 +372,7 @@ PREINIT:
 	UCHR in[IO_BUFFER_SIZE+1];
 	SHA *state;
 PPCODE:
-	if (!f || (state = getSHA(self)) == NULL)
+	if (!f || (state = getSHA(aTHX_ self)) == NULL)
 		XSRETURN_UNDEF;
 	while ((n = PerlIO_read(f, in+1, IO_BUFFER_SIZE)) > 0) {
 		for (dst = in, src = in + 1; n; n--) {

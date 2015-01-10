@@ -3,10 +3,10 @@
  *
  * Ref: NIST FIPS PUB 180-4 Secure Hash Standard
  *
- * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
+ * Copyright (C) 2003-2015 Mark Shelor, All Rights Reserved
  *
- * Version: 5.93
- * Sun Oct 26 06:00:48 MST 2014
+ * Version: 5.94
+ * Sat Jan 10 00:45:28 MST 2015
  *
  */
 

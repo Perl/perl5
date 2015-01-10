@@ -8,7 +8,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Fcntl;
 use integer;
 
-$VERSION = '5.93';
+$VERSION = '5.94';
 
 require Exporter;
 require DynaLoader;
@@ -588,6 +588,15 @@ So, the following two statements do the same thing:
 	$sha->add_bits("111100001010");
 	$sha->add_bits("\xF0\xA0", 12);
 
+Note that SHA-1 and SHA-2 use I<most-significant-bit ordering>
+for their internal state.  This means that
+
+	$sha3->add_bits("110");
+
+is equivalent to
+
+	$sha3->add_bits("1")->add_bits("1")->add_bits("0");
+
 =item B<addfile(*FILE)>
 
 Reads from I<FILE> until EOF, and appends that data to the current
@@ -804,7 +813,7 @@ darkness and moored it in so perfect a calm and in so brilliant a light"
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2003-2014 Mark Shelor
+Copyright (C) 2003-2015 Mark Shelor
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
