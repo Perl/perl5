@@ -10313,8 +10313,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     ret = reganode(pRExC_state,NGROUPP,num);
                     goto insert_if_check_paren;
 		}
-		else if (strnEQ(RExC_parse, "DEFINE",
-                                       MIN(DEFINE_len, RExC_end - RExC_parse)))
+		else if (RExC_end - RExC_parse >= DEFINE_len
+                        && strnEQ(RExC_parse, "DEFINE", DEFINE_len))
                 {
 		    ret = reganode(pRExC_state,DEFINEP,0);
 		    RExC_parse += DEFINE_len;
