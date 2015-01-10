@@ -417,6 +417,15 @@ keyword started chopping of the last 6 characters and treating the result
 as a sort sub name.  The previous behaviour of treating "CORE::fake" as a
 sort sub name has been restored.  [perl #123410]
 
+=item *
+
+A bug in regular expression patterns that could lead to segfaults and
+other crashes has been fixed.  This occurred only in patterns compiled
+with C<"/i">, while taking into account the current POSIX locale (this usually
+means they have to be compiled within the scope of C<S<"use locale">>),
+and there must be a string of at least 128 consecutive bytes to match.
+[perl #123530]
+
 =back
 
 =head1 Known Problems
