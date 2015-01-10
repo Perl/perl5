@@ -4192,7 +4192,7 @@ typedef struct rck_params {
 
     regnode_ssc *and_withp; /* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
     SSize_t     min; /* must be at least this number of characters to match */
-    I32         pars;
+    I32         parens;
     I32         code;
     regnode*    scan;
     regnode*    next;
@@ -4247,7 +4247,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 
     params->and_withp = NULL;
     params->min = 0;
-    params->pars = 0;
+    params->parens = 0;
     params->scan = *params->scanp;
     params->delta = 0;
     params->is_inf = (params->flags & SCF_DO_SUBSTR) && (params->data->flags & SF_IS_INF);
@@ -4307,11 +4307,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
 	params->data->pos_delta = SSize_t_MAX - params->data->pos_min;
     if (params->is_par > (I32)U8_MAX)
 	params->is_par = 0;
-    if (params->is_par && params->pars==1 && params->data) {
+    if (params->is_par && params->parens == 1 && params->data) {
 	params->data->flags |= SF_IN_PAR;
 	params->data->flags &= ~SF_HAS_PAR;
     }
-    else if (params->pars && params->data) {
+    else if (params->parens && params->data) {
 	params->data->flags |= SF_HAS_PAR;
 	params->data->flags &= ~SF_IN_PAR;
     }
@@ -5133,7 +5133,7 @@ STATIC bool S_rck_lookaround(pTHX_ RExC_state_t *pRExC_state, rck_params_t *para
         }
         if (params->data) {
             if (params->data_fake.flags & (SF_HAS_PAR | SF_IN_PAR))
-                params->pars++;
+                params->parens++;
             if (params->data_fake.flags & SF_HAS_EVAL)
                 params->data->flags |= SF_HAS_EVAL;
             params->data->whilem_c = params->data_fake.whilem_c;
@@ -5246,7 +5246,7 @@ STATIC bool S_rck_lookaround(pTHX_ RExC_state_t *pRExC_state, rck_params_t *para
         }
         if (params->data) {
             if (params->data_fake.flags & (SF_HAS_PAR | SF_IN_PAR))
-                params->pars++;
+                params->parens++;
             if (params->data_fake.flags & SF_HAS_EVAL)
                 params->data->flags |= SF_HAS_EVAL;
             params->data->whilem_c = params->data_fake.whilem_c;
@@ -5279,7 +5279,7 @@ STATIC bool S_rck_open(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
     PERL_ARGS_ASSERT_RCK_OPEN;
 
     if (params->stopparen != (I32)ARG(params->scan))
-        params->pars++;
+        params->parens++;
     params->scan = regnext(params->scan);
     return 0;
 }
@@ -5461,7 +5461,7 @@ STATIC bool S_rck_trie(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params)
                 max1 = minnext + deltanext + trie->maxlen;
 
             if (params->data_fake.flags & (SF_HAS_PAR | SF_IN_PAR))
-                params->pars++;
+                params->parens++;
             if (params->data_fake.flags & SCF_SEEN_ACCEPT) {
                 if (params->stopmin > params->min + min1)
                     params->stopmin = params->min + min1;
@@ -5670,7 +5670,7 @@ STATIC void S_rck_make_trie(pTHX_ RExC_state_t *pRExC_state, rck_params_t *param
             max1 = minnext + deltanext;
         params->scan = params->next;
         if (params->data_fake.flags & (SF_HAS_PAR | SF_IN_PAR))
-            params->pars++;
+            params->parens++;
         if (params->data_fake.flags & SCF_SEEN_ACCEPT) {
             if (params->stopmin > minnext)
                 params->stopmin = params->min + min1;
@@ -6303,7 +6303,7 @@ STATIC void S_rck_do_curly(pTHX_ RExC_state_t *pRExC_state, rck_params_t *params
         }
     }
     if (params->data && fl & (SF_HAS_PAR | SF_IN_PAR))
-        params->pars++;
+        params->parens++;
     if (params->flags & SCF_DO_SUBSTR) {
         SV *last_str = NULL;
         STRLEN last_chrs = 0;
