@@ -72,7 +72,6 @@ local $ENV{PERL_INSTALL_QUIET};
     run_ok(qq{$perl Makefile.PL});
 
     # XXX This is a fragile way to check that it reran.
-    local $TODO = 'This one is fragile on some systems for some reason that needs investigation';
     like run_ok($make), qr/^Skip /ms;
 
     ok( -e "blib/lib/Big/Dummy.pm", "blib copied pm file" );
