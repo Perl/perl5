@@ -12,8 +12,6 @@
 
 <commit votes="steveh" id="" ticket="" desc="CPAN RT#101095 Module::Metadata does not extract correct version if use_our is enabled"/>
 
-<commit votes="sprout,steveh,tonyc" id="405dffcb17b9cc9d0e5d7b41835b998ca7f1d873" ticket="123539" desc="PATCH: [perl #123539] regcomp.c node overrun/segfault"/>
-
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
@@ -37,8 +35,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
-
-
 
 My vote for d8bd3d8 is conditional on 2b9215f, since the latter fixes a build issue with the former. --arc
 <commit votes="steveh, sprout, arc" id="d8bd3d828a02f8df716063d9980b8b9af539ca42" ticket="123495" desc="[perl #123495] Stop gmtime(nan) from crashing"/>
@@ -78,9 +74,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="" id="890fbec8b209c41a5902022a654cbd782f601bb7" ticket="122890" desc="t/re/re_tests: put comment in correct column"/>
 <commit votes="arc" id="f6f22b1fc01b8676e43ef64616ed7899a84bfec2" ticket="122890" desc="t/re/re_tests: Add test for perl #122890"/>
 <commit votes="arc" id="efcc8bfdc124f50d33aab3f1d7722b5f9e4de349" ticket="122890" desc="re_tests: More tests for #122890"/>
-
-<commit votes="steveh, sprout, arc" id="487e470dbd7a885bb6a92a735b2783e1c6740066" ticket="123410" desc="[perl #123410] sort CORE::fake bizarre behaviour"/>
-<commit votes="steveh, sprout, arc" id="070733dfda1bb0d07d337128db5d1e78f14e6562" ticket="123410" desc="perldelta for 487e470d / #123410"/>
 
 </div>
 
@@ -210,8 +203,7 @@ Part of this (but not the opcode part):
 dacd91898fcfc21090ad48dd88483172a4bc8914 won't apply cleanly, but should be easy to fix. --arc
 <commit votes="steveh, arc" id="dacd91898fcfc21090ad48dd88483172a4bc8914" ticket="" desc="Consistent spaces after docs in perlfunc.pod"/>
 
-faad849dd has a typo in it that was fixed by 605eee606.  We could cherry-pick just the pod/ part of 605eee606 if the t/ part is controversial, but I think that is splitting hairs.
-<commit votes="steveh, sprout, arc" id="faad849dd7af72f2db0a94098b4c462d3e573f5f" ticket="" desc="perldiag: Add missing entry"/>
+The pod/ part of this is already applied to maint-5.20 since it fixes faad849dd7, which has already been cherry-picked:
 <commit votes="sprout" id="605eee6061b9fb79ab7be45ac13eaf417fd8db4f" ticket="" desc="diag.t: Ignore trailing whitespace"/>
 
 <commit votes="steveh, arc" id="96cfa1df465e71dba7e2099fc37db1b569d300b4" ticket="" desc="perluniintro: Vertically stack ternarys"/>
