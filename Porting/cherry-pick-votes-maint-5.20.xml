@@ -12,8 +12,6 @@
 
 <commit votes="steveh" id="" ticket="" desc="CPAN RT#101095 Module::Metadata does not extract correct version if use_our is enabled"/>
 
-<commit votes="khw" id="405dffcb17b9cc9d0e5d7b41835b998ca7f1d873" ticket="123539" desc="Segmentation Fault in Perl 5.21.8 while fuzzing Perl binary"/>
-
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
@@ -204,10 +202,6 @@ Part of this (but not the opcode part):
 <commit votes="steveh, arc" id="4c0ef2088519deeee7642c58f661b5d8a70ccf2f" ticket="" desc="perlpolicy: Be explicit wrt crashing bug policy"/>
 dacd91898fcfc21090ad48dd88483172a4bc8914 won't apply cleanly, but should be easy to fix. --arc
 <commit votes="steveh, arc" id="dacd91898fcfc21090ad48dd88483172a4bc8914" ticket="" desc="Consistent spaces after docs in perlfunc.pod"/>
-
-The pod/ part of this is already applied to maint-5.20 since it fixes faad849dd7, which has already been cherry-picked:
-<commit votes="sprout" id="605eee6061b9fb79ab7be45ac13eaf417fd8db4f" ticket="" desc="diag.t: Ignore trailing whitespace"/>
-
 <commit votes="steveh, arc" id="96cfa1df465e71dba7e2099fc37db1b569d300b4" ticket="" desc="perluniintro: Vertically stack ternarys"/>
 <commit votes="steveh, arc" id="e990b8498fc52e996e6150d10fcb7786b74ee9b2" ticket="" desc="Import perl5184delta"/>
 <commit votes="steveh, arc" id="0c54b9fe11cbd0e7072f3fbd9329148d54a7f500" ticket="" desc="perl.pod: Line things up vertically"/>
