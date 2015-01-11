@@ -898,8 +898,14 @@ seekdir() attempted on invalid dirhandle $ｆｏｏ at - line 21.
 rewinddir() attempted on invalid dirhandle $ｆｏｏ at - line 22.
 closedir() attempted on invalid dirhandle $ｆｏｏ at - line 23.
 ########
-
 # pp_sys.c [pp_gmtime]
+BEGIN {
+    print <<EOM;
+SKIPPED
+# NaN values not produced consistently in 5.20.x
+EOM
+    exit;
+}
 gmtime("NaN");
 localtime("NaN");
 use warnings "overflow";
