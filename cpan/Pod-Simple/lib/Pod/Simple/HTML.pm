@@ -1,4 +1,3 @@
-
 require 5;
 package Pod::Simple::HTML;
 use strict;
@@ -10,8 +9,7 @@ use vars qw(
   $Doctype_decl  $Content_decl
 );
 @ISA = ('Pod::Simple::PullParser');
-$VERSION = '3.28';
-
+$VERSION = '3.29';
 BEGIN {
   if(defined &DEBUG) { } # no-op
   elsif( defined &Pod::Simple::DEBUG ) { *DEBUG = \&Pod::Simple::DEBUG }
@@ -75,6 +73,7 @@ __PACKAGE__->_accessorize(
  'html_header_before_title',
  'html_header_after_title',
  'html_footer',
+ 'top_anchor',
 
  'index', # whether to add an index at the top of each page
     # (actually it's a table-of-contents, but we'll call it an index,
@@ -209,6 +208,7 @@ sub new {
     "<!-- start doc -->\n",
   );
   $new->html_footer( qq[\n<!-- end doc -->\n\n</body></html>\n] );
+  $new->top_anchor( "<a name='___top' class='dummyTopAnchor' ></a>\n" );
 
   $new->{'Tagmap'} = {%Tagmap};
 
@@ -312,7 +312,7 @@ sub do_beginning {
 sub _add_top_anchor {
   my($self, $text_r) = @_;
   unless($$text_r and $$text_r =~ m/name=['"]___top['"]/) { # a hack
-    $$text_r .= "<a name='___top' class='dummyTopAnchor' ></a>\n";
+    $$text_r .= $self->top_anchor || '';
   }
   return;
 }
@@ -524,7 +524,9 @@ sub _do_middle_main_loop {
           next;
         }
         DEBUG and print "    raw text ", $next->text, "\n";
-        print $fh "\n" . $next->text . "\n";
+        # The parser sometimes preserves newlines and sometimes doesn't!
+        (my $text = $next->text) =~ s/\n\z//;
+        print $fh $text, "\n";
         next;
        
       } else {
@@ -969,7 +971,7 @@ Set the content-type in the HTML head: (defaults to ISO-8859-1)
 
   $Pod::Simple::HTML::Content_decl =  q{<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >};
 
-Set the value that will be ebedded in the opening tags of F, C tags and verbatim text.
+Set the value that will be embedded in the opening tags of F, C tags and verbatim text.
 F maps to <em>, C maps to <code>, Verbatim text maps to <pre> (Computerese defaults to "")
 
   $Pod::Simple::HTML::Computerese =  ' class="some_class_name';
@@ -989,6 +991,13 @@ and including the opening <title> tag. The following call will set it to be a si
 file:
 
   $p->html_header_before_title('<html><head><title>');
+
+=head2 top_anchor
+
+By default Pod::Simple::HTML adds a dummy anchor at the top of the HTML.
+You can change it by calling
+
+  $p->top_anchor('<a name="zz" >');
 
 =head2 html_h_level
 

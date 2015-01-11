@@ -1,7 +1,6 @@
-
 require 5;
 package Pod::Simple::PullParser;
-$VERSION = '3.28';
+$VERSION = '3.29';
 use Pod::Simple ();
 BEGIN {@ISA = ('Pod::Simple')}
 
@@ -688,7 +687,7 @@ If the title can't be found, then get_short_title returns empty-string
 This works like get_title except that it returns the contents of the
 "=head1 AUTHOR\n\nParagraph...\n" section, assuming that that section
 isn't terribly long. To recognize a "=head1 Author\n\nParagraph\n"
-section, pass the C<nocase> otpion:
+section, pass the C<nocase> option:
 
   $parser->get_author(nocase => 1);
 
@@ -699,7 +698,7 @@ section, pass the C<nocase> otpion:
 This works like get_title except that it returns the contents of the
 "=head1 DESCRIPTION\n\nParagraph...\n" section, assuming that that section
 isn't terribly long. To recognize a "=head1 Description\n\nParagraph\n"
-section, pass the C<nocase> otpion:
+section, pass the C<nocase> option:
 
   $parser->get_description(nocase => 1);
 
@@ -708,7 +707,7 @@ section, pass the C<nocase> otpion:
 This works like get_title except that it returns the contents of
 the "=head1 VERSION\n\n[BIG BLOCK]\n" block.  Note that this does NOT
 return the module's C<$VERSION>!! To recognize a
-"=head1 Version\n\n[BIG BLOCK]\n" section, pass the C<nocase> otpion:
+"=head1 Version\n\n[BIG BLOCK]\n" section, pass the C<nocase> option:
 
   $parser->get_version(nocase => 1);
 

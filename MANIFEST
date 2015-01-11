@@ -1893,6 +1893,10 @@ cpan/Pod-Simple/t/corpus/8859_7.pod			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/8859_7.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/cp1256.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/cp1256.xml			Pod::Simple test file
+cpan/Pod-Simple/t/corpus/enc_char_directive.txt			Pod::Simple test file
+cpan/Pod-Simple/t/corpus/enc_char_directive.xml			Pod::Simple test file
+cpan/Pod-Simple/t/corpus/enc_char_wrong_directive.txt			Pod::Simple test file
+cpan/Pod-Simple/t/corpus/enc_char_wrong_directive.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/encwarn01.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/encwarn01.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/encwarn02.txt			Pod::Simple test file

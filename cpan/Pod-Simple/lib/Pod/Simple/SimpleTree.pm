@@ -1,12 +1,11 @@
 
-
 require 5;
 package Pod::Simple::SimpleTree;
 use strict;
 use Carp ();
 use Pod::Simple ();
 use vars qw( $ATTR_PAD @ISA $VERSION $SORT_ATTRS);
-$VERSION = '3.28';
+$VERSION = '3.29';
 BEGIN {
   @ISA = ('Pod::Simple');
   *DEBUG = \&Pod::Simple::DEBUG unless defined &DEBUG;
@@ -121,7 +120,7 @@ the form: C<[ I<elementname>, \%attributes, I<...subnodes...> ]>.
 See the example tree dump in the Synopsis, above.
 
 Every text node in the tree is represented by a simple (non-ref)
-string scalar.  So you can test C<ref($node)> to see whather you have
+string scalar.  So you can test C<ref($node)> to see whether you have
 an element node or just a text node.
 
 The top node in the tree is C<[ 'Document', \%attributes,

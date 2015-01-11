@@ -1,7 +1,7 @@
 
 require 5;
 package Pod::Simple::DumpAsText;
-$VERSION = '3.28';
+$VERSION = '3.29';
 use Pod::Simple ();
 BEGIN {@ISA = ('Pod::Simple')}
 
@@ -54,7 +54,7 @@ sub _handle_text {
          [^\n]{55}         # Snare some characters from a line
          [^\n\ ]{0,50}     #  and finish any current word
         )
-        \x20{1,10}(?!\n)   # capture some spaces not at line-end
+        \ {1,10}(?!\n)     # capture some spaces not at line-end
        /$1"\n$indent . "/gx     # => line-break here
     ;
     

@@ -919,7 +919,7 @@ use File::Glob qw(:case);
     },
 
     'Pod::Simple' => {
-        'DISTRIBUTION' => 'DWHEELER/Pod-Simple-3.28.tar.gz',
+        'DISTRIBUTION' => 'DWHEELER/Pod-Simple-3.29.tar.gz',
         'FILES'        => q[cpan/Pod-Simple],
     },
 

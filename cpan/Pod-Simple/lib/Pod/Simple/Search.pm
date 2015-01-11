@@ -1,10 +1,9 @@
-
 require 5.005;
 package Pod::Simple::Search;
 use strict;
 
 use vars qw($VERSION $MAX_VERSION_WITHIN $SLEEPY);
-$VERSION = '3.28';   ## Current version of this package
+$VERSION = '3.29';   ## Current version of this package
 
 BEGIN { *DEBUG = sub () {0} unless defined &DEBUG; }   # set DEBUG level
 use Carp ();
@@ -768,7 +767,6 @@ are produced.  (Setting verbose to 1 turns on some messages, and setting
 it to 2 turns on even more messages, i.e., makes the following search(es)
 even more verbose than 1 would make them.)
 
-
 =item $search->limit_glob( I<some-glob-string> );
 
 This option means that you want to limit the results just to items whose
@@ -806,6 +804,10 @@ seeing only files with Perl-like extensions, omitting subdirectories
 that are numeric but do I<not> match the current Perl interpreter's
 version ID, suppressing F<site_perl> as a module hierarchy name, etc.
 
+=item $search->recurse( I<true-or-false> );
+
+Unless you set this attribute to a false value, Pod::Search will
+recurse into subdirectories of the search directories.
 
 =item $search->shadows( I<true-or-false> );
 
@@ -834,7 +836,7 @@ C<limit_glob> attribute is used instead.
 
 Setting this attribute to a string value means that the searches should
 begin in the specified subdirectory name (like "Pod" or "File::Find",
-also expressable as "File/Find"). For example, the search option
+also expressible as "File/Find"). For example, the search option
 C<< $search->limit_glob("File::Find::R*") >>
 is the same as the combination of the search options
 C<< $search->limit_re("^File::Find::R") -> dir_prefix("File::Find") >>.
@@ -942,8 +944,7 @@ version than the system's general path dirs in general.)
 The options to this argument is a list of either directories that are
 searched recursively, or files.  (Usually you wouldn't specify files,
 but just dirs.)  Or you can just specify an empty-list, as in
-$name2path; with the
-C<inc> option on, as it is by default, teh
+$name2path; with the C<inc> option on, as it is by default.
 
 The POD names of files are the plain basenames with any Perl-like
 extension (.pm, .pl, .pod) stripped, and path separators replaced by

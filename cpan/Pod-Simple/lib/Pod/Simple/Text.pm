@@ -6,7 +6,7 @@ use Carp ();
 use Pod::Simple::Methody ();
 use Pod::Simple ();
 use vars qw( @ISA $VERSION $FREAKYMODE);
-$VERSION = '3.28';
+$VERSION = '3.29';
 @ISA = ('Pod::Simple::Methody');
 BEGIN { *DEBUG = defined(&Pod::Simple::DEBUG)
           ? \&Pod::Simple::DEBUG
@@ -14,7 +14,8 @@ BEGIN { *DEBUG = defined(&Pod::Simple::DEBUG)
       }
 
 use Text::Wrap 98.112902 ();
-$Text::Wrap::wrap = 'overflow';
+$Text::Wrap::huge = 'overflow';
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 sub new {

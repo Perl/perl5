@@ -5,7 +5,7 @@ use strict;
 use vars qw( $VERSION $HTML_RENDER_CLASS $HTML_EXTENSION
  $CSS $JAVASCRIPT $SLEEPY $SEARCH_CLASS @ISA
 );
-$VERSION = '3.28';
+$VERSION = '3.29';
 @ISA = ();  # Yup, we're NOT a subclass of Pod::Simple::HTML!
 
 # TODO: nocontents stylesheets. Strike some of the color variations?
@@ -1308,18 +1308,6 @@ TODO
     $batchconv->batch_mode_page_object_init($page, $module, $infile, $outfile, $depth)
   subclass Pod::Simple::Search and set $batchconv->search_class to
     that classname
-
-
-
-=head1 ASK ME!
-
-If you want to do some kind of big pod-to-HTML version with some
-particular kind of option that you don't see how to achieve using this
-module, email me (C<sburke@cpan.org>) and I'll probably have a good idea
-how to do it. For reasons of concision and energetic laziness, some
-methods and options in this module (and the dozen modules it depends on)
-are undocumented; but one of those undocumented bits might be just what
-you're looking for.
 
 
 =head1 SEE ALSO
