@@ -4,10 +4,6 @@
 
 <div><h2>Tickets Listed in #122913: [META] perl 5.20.2</h2>
 
-<commit votes="sprout, steveh khw" id="3bc8ec963e9657121e69386195faa61e46928dda" ticket="123344" desc="Fix qr/@array(?{block})/"/>
-<commit votes="sprout, steveh khw" id="d100ca43dce2c9a6bb636517e5595aa9e1e01e7e" ticket="123344" desc="Fix assertion failure with qr/\Q(?{})/"/>
-<commit votes="steveh khw" id="1318b6d7e272031984abced04ebef14bf73954f1" ticket="123344" desc="perldelta for 3bc8ec963 / #123344"/>
-
 <commit votes="steveh khw" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
 
 <commit votes="steveh" id="" ticket="" desc="CPAN RT#101095 Module::Metadata does not extract correct version if use_our is enabled"/>
@@ -35,10 +31,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
-
-My vote for d8bd3d8 is conditional on 2b9215f, since the latter fixes a build issue with the former. --arc
-<commit votes="steveh, sprout, arc" id="d8bd3d828a02f8df716063d9980b8b9af539ca42" ticket="123495" desc="[perl #123495] Stop gmtime(nan) from crashing"/>
-<commit votes="arc, sprout, steveh" id="2b9215fdb83c97496b82d0c73d4903097a8ed66b" ticket="123502" desc="Vital followup to gmtime(nan) fix"/>
 
 <commit votes="sprout, steveh" id="08b999a9d7e845b758c38568f45f6b2b8d552ed9" ticket="123542" desc="[perl #123452] Fix crash with s/${&lt;&gt;{})//"/>
 <commit votes="sprout, steveh" id="ca949e9c3c10048fd3c2829b96293e6139846dcc" ticket="123542" desc="parser.t: Correct skip count"/>
