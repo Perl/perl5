@@ -332,7 +332,7 @@ I will also cherry-pick Module-CoreList changes as necessary in the unholy busin
       <xsl:when test=". = ''">
         <xsl:attribute name="class">unvoted</xsl:attribute>
       </xsl:when>
-      <xsl:when test="substring-after(substring-after(., ','), ',') != ''">
+      <xsl:when test="substring-after(substring-after(normalize-space(translate(., ',', ' ')), ' '), ' ') != ''">
         <xsl:attribute name="class">accepted</xsl:attribute>
       </xsl:when>
     </xsl:choose>
