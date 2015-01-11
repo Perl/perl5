@@ -1480,10 +1480,7 @@ print "aq" =~ m[^a\[a-z\]$], "H\n";
 print "aq" =~ m(^a\(q\)$), "I\n";
 EXPECT
 Illegal hexadecimal digit '\' ignored at - line 5.
-Illegal hexadecimal digit '\' ignored at - line 5.
 Illegal hexadecimal digit '\' ignored at - line 7.
-Illegal hexadecimal digit '\' ignored at - line 7.
-Illegal hexadecimal digit '\' ignored at - line 9.
 Illegal hexadecimal digit '\' ignored at - line 9.
 A
 B

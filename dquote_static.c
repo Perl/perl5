@@ -223,7 +223,7 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
     assert(**s == 'x');
     (*s)++;
 
-    if (strict) {
+    if (strict || ! output_warning) {
         flags |= PERL_SCAN_SILENT_ILLDIGIT;
     }
 
