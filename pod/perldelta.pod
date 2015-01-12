@@ -495,6 +495,13 @@ When trying to emit warnings, perl's default debugger (F<perl5db.pl>) was
 sometimes giving 'Undefined subroutine &DB::db_warn called' instead.  This
 bug, which started to occur in Perl 5.18, has been fixed.  [perl #123553]
 
+=item *
+
+Certain syntax errors in substitutions, such as C<< s/${<>{})// >>, would
+crash, and had done so since Perl 5.10.  (In some cases the crash did not
+start happening till 5.16.)  The crash has, of course, been fixed.
+[perl #123542]
+
 =back
 
 =head1 Known Problems
