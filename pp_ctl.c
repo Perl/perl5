@@ -2095,6 +2095,8 @@ S_outside_integer(pTHX_ SV *sv)
 {
   if (SvOK(sv)) {
     const NV nv = SvNV_nomg(sv);
+    if (Perl_isinfnan(nv))
+      return TRUE;
 #ifdef NV_PRESERVES_UV
     if (nv < (NV)IV_MIN || nv > (NV)IV_MAX)
       return TRUE;
