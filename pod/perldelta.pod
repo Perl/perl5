@@ -163,6 +163,13 @@ C<B::SPECIAL>, has been fixed.
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.31 to 1.32.
+
+Deparsing C<BEGIN { undef &foo }> with the B<-w> switch enabled started to
+emit 'uninitialized' warnings in Perl 5.14.  This has been fixed.
+
+=item *
+
 L<Safe> has been upgraded from version 2.38 to 2.39.
 
 C<reval> was not propagating void context properly.
