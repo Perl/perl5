@@ -161,6 +161,8 @@ A bug where, after an ithread creation or psuedofork, special/immortal SVs in
 the child ithread/psuedoprocess did not have the correct class of
 C<B::SPECIAL>, has been fixed.
 
+The C<id> and C<outid> PADLIST methods have been added.
+
 =item *
 
 L<B::Deparse> has been upgraded from version 1.31 to 1.32.
