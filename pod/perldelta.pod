@@ -484,6 +484,11 @@ C<prototype()> with no arguments used to read the previous item on the
 stack, so C<print "foo", prototype()> would print foo's prototype.  It has
 been fixed to infer $_ instead.  [perl #123514]
 
+=item *
+
+Some cases of lexical state subs inside predeclared subs could crash but no
+longer do.
+
 =back
 
 =head1 Known Problems
