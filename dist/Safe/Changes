@@ -1,6 +1,6 @@
 2.39 xxxxx
     - reval was not propagating void context properly.
-      The fix is partly in Opcode, so it requires 5.21.7 or higher.
+      The fix is partly in Opcode, so it requires 5.21.8 or higher.
 
 2.38 Mon Aug 04 2014
     - critical bugfix: outside packages could be replaced (fix in Opcode)
