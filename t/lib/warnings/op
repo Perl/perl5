@@ -1942,3 +1942,20 @@ no warnings 'numeric';
 EXPECT
 Negative repeat count does nothing at - line 3.
 Negative repeat count does nothing at - line 4.
+########
+my $a = "inf" + 0;
+my $b = -$a;
+my $c = "nan" + 0;
+use warnings 'numeric';
+my $x = "x" x $a;
+my $y = "y" x $b;
+my $z = "z" x $c;
+no warnings 'numeric';
+my $x = "x" x $a;
+my $y = "y" x $b;
+my $z = "z" x $c;
+no warnings 'numeric';
+EXPECT
+Non-finite repeat count does nothing at - line 5.
+Non-finite repeat count does nothing at - line 6.
+Non-finite repeat count does nothing at - line 7.

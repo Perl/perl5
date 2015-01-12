@@ -3704,6 +3704,12 @@ in the remaining packages of the MRO of this class.  If you don't want
 it throwing an exception, use C<maybe::next::method>
 or C<next::can>.  See L<mro>.
 
+=item Non-finite repeat count does nothing
+
+(W numeric) You tried to execute the
+L<C<x>|perlop/Multiplicative Operators> repetition operator C<Inf>
+(or C<-Inf>) or C<NaN>, which doesn't make sense.
+
 =item Non-hex character in regex; marked by S<<-- HERE> in m/%s/
 
 (F) In a regular expression, there was a non-hexadecimal character where

@@ -1649,6 +1649,7 @@ PP(pp_repeat)
     dSP; dATARGET;
     IV count;
     SV *sv;
+    bool infnan = FALSE;
 
     if (GIMME_V == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	/* TODO: think of some way of doing list-repeat overloading ??? */
@@ -1691,19 +1692,27 @@ PP(pp_repeat)
 	 }
     }
     else if (SvNOKp(sv)) {
-	 const NV nv = SvNV_nomg(sv);
-	 if (nv < 0.0)
-              count = -1;   /* An arbitrary negative integer */
-	 else
-	      count = (IV)nv;
+        const NV nv = SvNV_nomg(sv);
+        infnan = Perl_isinfnan(nv);
+        if (UNLIKELY(infnan)) {
+            count = 0;
+        } else {
+            if (nv < 0.0)
+                count = -1;   /* An arbitrary negative integer */
+            else
+                count = (IV)nv;
+        }
     }
     else
-	 count = SvIV_nomg(sv);
+	count = SvIV_nomg(sv);
 
-    if (count < 0) {
+    if (infnan) {
+        Perl_ck_warner(aTHX_ packWARN(WARN_NUMERIC),
+                       "Non-finite repeat count does nothing");
+    } else if (count < 0) {
         count = 0;
         Perl_ck_warner(aTHX_ packWARN(WARN_NUMERIC),
-                                         "Negative repeat count does nothing");
+                       "Negative repeat count does nothing");
     }
 
     if (GIMME_V == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
