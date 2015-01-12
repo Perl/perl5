@@ -248,6 +248,14 @@ SKIP: {
     is("a" x $NInf, "", "x -Inf");
 }
 
+{
+    eval 'for my $x (0..$PInf) { last }';
+    like($@, qr/Range iterator outside integer range/, "0..+Inf fails");
+
+    eval 'for my $x ($NInf..0) { last }';
+    like($@, qr/Range iterator outside integer range/, "-Inf..0 fails");
+}
+
 # === NaN ===
 
 cmp_ok($NaN, '!=', $NaN, "NaN is NaN numerically (by not being NaN)");
