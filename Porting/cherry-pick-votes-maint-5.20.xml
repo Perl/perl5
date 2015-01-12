@@ -94,7 +94,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="steveh, arc, khw" id="c6c886efdb6df3d06613743e0e6780de4a145e66" ticket="" desc="perlsec: Typo"/>
 <commit votes="steveh, arc, khw" id="6fd9f6130d0c4ad34a2ddcf44d887097de5b2847" ticket="" desc="perlsec: Another typo"/>
 <commit votes="steveh, arc, khw" id="9a0afbbcb76a8ee786dfbbeff1930f173fefdbad" ticket="" desc="Fix documented return type for PAD_SV"/>
-<commit votes="steveh, arc, khw" id="f3ba690558ce39a2cc7b8e8cf53bd510503c428e" ticket="" desc="perldiag: Rewrap for better splain output"/>
 <commit votes="steveh, arc, khw" id="12d22d1fe17e8471834a01cd417792ac5c022d62" ticket="122661" desc="Semicolon before ellipsis inside block disambiguates."/>
 <commit votes="steveh, arc, khw" id="c43e874320ac47cebbfc6fdd4c881214d39128ad" ticket="" desc="Add epigraph for 5.20.1"/>
 <commit votes="steveh, arc, khw" id="b77865f5def4737f78822fa2cd0da2dbc4fc647b" ticket="" desc="Consistent spaces after dots in perlsub"/>
@@ -118,7 +117,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="steveh, arc, khw" id="dffcb1c02065e74cff64fd076677292796ee9845" ticket="" desc="RMG - Even RCs these days generally get an epigraph"/>
 <commit votes="steveh, arc, khw" id="282f36d45b3fd6109df025ed2228f0019b49c2e5" ticket="" desc="RMG - Remove out-of-date instruction about epigraph link"/>
 <commit votes="steveh, arc, khw" id="5e2d14fc932c50279eb04ac71b3d87d785d61420" ticket="" desc="RMG - RCs are now listed in perlhist"/>
-<commit votes="steveh, arc, khw" id="3617dbb697e46ddf316b2067f2ded656ad6a89f9" ticket="" desc="Consistent spaces after dots in perldiag"/>
 <commit votes="steveh, arc" id="2a2f23e4f8a50bdcdd10563dc5d933684cb70954" ticket="122853" desc="Remarks specialness of [A-Z] and [a-z]."/>
 <commit votes="steveh, arc, khw" id="8bbce0b10dd8ea0fad79a905746218306cf4fe17" ticket="" desc="import latest epigraphs from maint-5.18"/>
 <commit votes="steveh, arc, khw" id="086feb3e31adb54d781926d7d8df06c266c39fae" ticket="" desc="perlhist: bring in 5.18.3 and 5.18.4 release dates"/>
@@ -142,7 +140,6 @@ Part of this (but not the opcode part):
 <commit votes="steveh, arc, khw" id="c981563317d1c97170a53c9a89a80456442ed201" ticket="" desc="make it clear not to use git-send-email at all"/>
 <commit votes="steveh, arc, khw" id="5df244132ec94f1e67bd70db61d4ea89bd824b00" ticket="" desc="git format-patch -M option takes branch"/>
 <commit votes="steveh, arc" id="eb9e3b14fd77e43b36846b86f8780d23fda50258" ticket="" desc="recharclass: Corrections and nits"/>
-<commit votes="steveh, arc, khw" id="9a63e366d1167a528e8df0d80c9d85c0830d63e9" ticket="" desc="Consistent spaces after dots in perlapi.pod"/>
 <commit votes="steveh, arc, khw" id="920aefcab1aef66ce585b8cc2f371ae5bfc9ee63" ticket="123081" desc="Move the POD away from $a and $b."/>
 <commit votes="steveh, arc, khw" id="592708b4f2c747075fb01e3ad9276a2a9b338f27" ticket="123081" desc="Move away from $a and $b for examples."/>
 <commit votes="steveh, arc, khw" id="db69102781c2515ff4657c48b95696c5f5e3bb78" ticket="123081" desc="$a,$b deprecation in perlop.pod."/>
@@ -168,11 +165,8 @@ Part of this (but not the opcode part):
 <commit votes="steveh, arc, khw" id="e6ebbe921e63dbd445aa30e30a0b2b80574b88a0" ticket="122987" desc="perlfork.pod: convert \ts to spaces."/>
 <commit votes="steveh, arc, khw" id="15faabe4bd597caa63a35d745cc5e93792a347dc" ticket="123377" desc="Convert tabs to spaces and remove trailing space."/>
 <commit votes="steveh, arc, khw" id="4c0ef2088519deeee7642c58f661b5d8a70ccf2f" ticket="" desc="perlpolicy: Be explicit wrt crashing bug policy"/>
-dacd91898fcfc21090ad48dd88483172a4bc8914 won't apply cleanly, but should be easy to fix. --arc
-<commit votes="steveh, arc, khw" id="dacd91898fcfc21090ad48dd88483172a4bc8914" ticket="" desc="Consistent spaces after docs in perlfunc.pod"/>
 <commit votes="steveh, arc, khw" id="96cfa1df465e71dba7e2099fc37db1b569d300b4" ticket="" desc="perluniintro: Vertically stack ternarys"/>
 <commit votes="steveh, arc, khw" id="e990b8498fc52e996e6150d10fcb7786b74ee9b2" ticket="" desc="Import perl5184delta"/>
-<commit votes="steveh, arc, khw" id="0c54b9fe11cbd0e7072f3fbd9329148d54a7f500" ticket="" desc="perl.pod: Line things up vertically"/>
 <commit votes="steveh, arc, khw" id="d114830901d62f712502caecc496b189619643d5" ticket="" desc="perl.pod: Use consistent perldelta order"/>
 <commit votes="steveh, arc, khw" id="4eea8a8bce5fd908572c50464cc4216df1f0bc57" ticket="" desc="include reference to metacpan.org; refer to the module-authors list instead of modules, and include a link to the subscription page"/>
 <commit votes="steveh, arc, khw" id="846dac6786c1ada87b95d0268c0a9772a4bd04fc" ticket="" desc="add new release to perlhist"/>
