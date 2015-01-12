@@ -468,6 +468,11 @@ loop'.  [perl #103260] [perl #123071]
 
 C<gmtime> no longer crashes with not-a-number values.  [perl #123495]
 
+=item *
+
+C<\()> could do a bad write past the end of the stack.  It has been fixed
+to extend the stack first.
+
 =back
 
 =head1 Known Problems
