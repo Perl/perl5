@@ -241,6 +241,13 @@ SKIP: {
     }
 }
 
+{
+    # Silence "Non-finite repeat count", that is tested elsewhere.
+    local $^W = 0;
+    is("a" x $PInf, "", "x +Inf");
+    is("a" x $NInf, "", "x -Inf");
+}
+
 # === NaN ===
 
 cmp_ok($NaN, '!=', $NaN, "NaN is NaN numerically (by not being NaN)");
@@ -356,6 +363,12 @@ SKIP: {
     for my $i (@FNaN) {
         cmp_ok("$i" + 0, '==', 0, "false nan $i");
     }
+}
+
+{
+    # Silence "Non-finite repeat count", that is tested elsewhere.
+    local $^W = 0;
+    is("a" x $NaN, "", "x NaN");
 }
 
 # === Tests combining Inf and NaN ===
