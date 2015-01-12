@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..170\n";
+print "1..169\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
