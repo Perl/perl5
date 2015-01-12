@@ -34,10 +34,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
 
-<commit votes="sprout, steveh, khw" id="08b999a9d7e845b758c38568f45f6b2b8d552ed9" ticket="123542" desc="[perl #123452] Fix crash with s/${&lt;&gt;{})//"/>
-<commit votes="sprout, steveh, khw" id="ca949e9c3c10048fd3c2829b96293e6139846dcc" ticket="123542" desc="parser.t: Correct skip count"/>
-
-
 </div>
 
 <div><h3>Security Fixes</h3>
@@ -73,8 +69,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 
 <div><h3>Configure and hints Fixes (Consider whether these in particular would break binary compatibility)</h3>
 
-<commit votes="tux, arc, khw" id="44b62df7ceb322e1e0484f45065025f0a709303c" ticket="" desc="Darwin: if cc is explicitly gcc/g++, use it also as ld."/>
-<commit votes="tux, arc, khw" id="990a70b8c9866c888194f4c2c6d152d7911b3c34" ticket="" desc="Darwin: set ld to 'cc' if $cc is 'cc' or empty, $cc otherwise."/>
 <commit votes="tux, arc" id="54db7d57c29c9259228a6a4176caa32e391c6d0b" ticket="" desc="Upstream a patch from pkgsrc for NetBSD hints"/>
 <commit votes="arc" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
 <commit votes="tux, arc" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
@@ -86,18 +80,7 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 
 <div><h3>Platform-Specific Build/Test/Installation Fixes</h3>
 
-<commit votes="steveh, arc, khw" id="5b26a7b38f5eacab94ffc56c123c01ad6c3788dc" ticket="" desc="sv.c: Silence VMS compiler warning"/>
 <commit votes="steveh, arc, khw" id="e09e3cee34fbe40a471dc2fa31f2b8533598fb45" ticket="" desc="regcomp.c: Silence Win32 compiler warning"/>
-<commit votes="steveh, arc, khw" id="a3baa5664f4da7f412812e0188d5ac3bab0b8694" ticket="" desc="Improve Errno parsing of Win32 output"/>
-<commit votes="steveh, arc, khw" id="1ef3f55063eff0bda07fa2251ec16a7807dfb602" ticket="" desc="Tweak Errno parsing some more"/>
-<commit votes="steveh, arc, khw" id="2d4a3ccef465111dae0e5e71cf008e97efeb057c" ticket="" desc="Errno parsing: Don't match hex numbers in parts of function names"/>
-<commit votes="steveh, arc, khw" id="cc192ed19bd1c52dd1711a900ce276043ce418ae" ticket="" desc="Errno parsing: Skip expressions containing function names etc"/>
-<commit votes="steveh, arc, khw" id="5884c88b2d4d412c81919fffcc0c487b49521793" ticket="" desc="Bump $Errno::VERSION for previous commits"/>
-<commit votes="steveh, arc, khw" id="1e02895ff34c407637067df12a1b06eb07a5a96a" ticket="" desc="t/io/eintr.t: Make this pass on my ppc64 box"/>
-<commit votes="steveh, arc, khw" id="c7925a5e8559739ce765137cf6164c5872c63a96" ticket="" desc="fix WinCE build"/>
-<commit votes="steveh, arc, khw" id="dceaccf89041ac723759e83a3a31bedc8d82a38d" ticket="" desc="make -DNO_MATHOMS work on Win32"/>
-<commit votes="steveh, arc, khw" id="3415f8b9fb121a138ed954f9ced0b2c1f4660e48" ticket="120487" desc="[perl #120487] make sure we're using an unmodified @INC to load Win32"/>
-<commit votes="steveh, arc, khw" id="08088357011bedc22047b1d4a1ec3afaee813523" ticket="123438" desc="[perl #123438] Wrong comment style in win32/win32.h"/>
 
 </div>
 
