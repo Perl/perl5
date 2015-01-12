@@ -399,6 +399,14 @@ ok(!($NaN >  $NInf), "NaN is not gt -Inf");
 
 is(sin($PInf), $NaN, "sin(+Inf) is NaN");
 
+{
+    eval 'for my $x (0..$NaN) { last }';
+    like($@, qr/Range iterator outside integer range/, "0..NaN fails");
+
+    eval 'for my $x ($NaN..0) { last }';
+    like($@, qr/Range iterator outside integer range/, "NaN..0 fails");
+}
+
 # === Overflows and Underflows ===
 
 # 1e9999 (and 1e-9999) are large (and small) enough for even
