@@ -104,7 +104,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="steveh, arc, khw" id="d74605e51c7bb408573e37869390459a5232b4c7" ticket="" desc="perlop tweak"/>
 <commit votes="steveh, arc, khw" id="845392291027b157a962eea4a4c2a97f67b995ce" ticket="" desc="perlsyn: Remove reference to potential Unicode op"/>
 <commit votes="steveh, arc, khw" id="8af56b9d4cb926792c8f72b634303126a5b1d860" ticket="" desc="perldiag: Reunite 'perhaps you forgot to load'"/>
-<commit votes="steveh, arc" id="3cd61afa1bd59515cd57091c4a4af93a52fec327" ticket="" desc="perllocale: Nit"/>
 <commit votes="steveh, arc, khw" id="5654cc4ecbbe52f346fca1d568892a85c0a10040" ticket="" desc="Update release announcement template"/>
 <commit votes="steveh, arc, khw" id="84c122ba1d2b7b856521ceffc2a095716a739335" ticket="" desc="Perl 5.21.4 today"/>
 <commit votes="steveh, arc, khw" id="28c2c58fe259cabc1510ac5b4c5ead3a7c0321d2" ticket="" desc="Add epigraph for 5.12.4"/>
@@ -126,7 +125,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="steveh, arc, khw" id="b39691c2f7d54897113063413c374b78418a1684" ticket="" desc="clarify use VERSION docs"/>
 <commit votes="steveh, arc, khw" id="2a2626d8512fc09c6ef077095e4e075978a5c2df" ticket="" desc="Consistent spaces after dots in perlfunc"/>
 <commit votes="steveh, arc, khw" id="8f5839a98a66edafefd2ffd3056e5e3fc64e1d27" ticket="" desc="improve and reword README.win32"/>
-<commit votes="steveh, arc" id="1a83413c438a835495931877ff113ba7f7ef57cc" ticket="" desc="perlapi: Clarify two entries"/>
 <commit votes="steveh, arc, khw" id="d962e43687db045a52ba2406aafccd53e6af23ff" ticket="122942" desc="remove trailing whitespace."/>
 <commit votes="steveh, arc, khw" id="82f82fdb58cb3bf9651ec1ba6904780eb1105021" ticket="122938" desc="Remove trailing space from perlipc.pod."/>
 <commit votes="steveh, arc, khw" id="eee3e3021df1a54fbbae497b1d1c817aa9f2fc29" ticket="" desc="perlguts typo"/>
@@ -141,7 +139,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 Part of this (but not the opcode part):
 <commit votes="steveh, arc, khw" id="82ce0493f7a0b47a207f493f68ab035a48f2284b" ticket="" desc="More actions to take when bumping the version number."/>
 
-<commit votes="steveh, arc, khw" id="aae773bbd74e39596c3ed0ed403f36b245b6d687" ticket="" desc="perlebcdic: Add clarification"/>
 <commit votes="steveh, arc, khw" id="c981563317d1c97170a53c9a89a80456442ed201" ticket="" desc="make it clear not to use git-send-email at all"/>
 <commit votes="steveh, arc, khw" id="5df244132ec94f1e67bd70db61d4ea89bd824b00" ticket="" desc="git format-patch -M option takes branch"/>
 <commit votes="steveh, arc" id="eb9e3b14fd77e43b36846b86f8780d23fda50258" ticket="" desc="recharclass: Corrections and nits"/>
