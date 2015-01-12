@@ -435,6 +435,13 @@ C<qr/@array(?{block})/> no longer dies with "Bizarre copy of ARRAY".
 
 C<gmtime> no longer crashes with not-a-number values.  [perl #123495]
 
+=item *
+
+Certain syntax errors in substitutions, such as C<< s/${<>{})// >>, would
+crash, and had done so since Perl 5.10.  (In some cases the crash did not
+start happening till 5.16.)  The crash has, of course, been fixed.
+[perl #123542]
+
 =back
 
 =head1 Known Problems
