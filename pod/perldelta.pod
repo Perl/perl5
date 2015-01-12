@@ -474,7 +474,8 @@ C<gmtime> no longer crashes with not-a-number values.  [perl #123495]
 
 =item *
 
-C<\()> could do a bad write past the end of the stack.  It has been fixed
+C<\()> (reference to an empty list) and C<y///> with lexical $_ in scope
+could do a bad write past the end of the stack.  They have been fixed
 to extend the stack first.
 
 =item *
