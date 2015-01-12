@@ -537,21 +537,21 @@ for my $strict ("", "use re 'strict';") {
                                       $death_utf8_only_under_strict[$i+2]);
         }
     }
-for (my $i = 0; $i < @death; $i += 2) {
-    my $regex = $death[$i];
-    my $expect = fixup_expect($death[$i+1]);
-    no warnings 'experimental::regex_sets';
-    no warnings 'experimental::re_strict';
-    # skip the utf8 test on EBCDIC since they do not die
-    next if $::IS_EBCDIC && $regex =~ /utf8/;
+    for (my $i = 0; $i < @death; $i += 2) {
+        my $regex = $death[$i];
+        my $expect = fixup_expect($death[$i+1]);
+        no warnings 'experimental::regex_sets';
+        no warnings 'experimental::re_strict';
+        # skip the utf8 test on EBCDIC since they do not die
+        #next if $::IS_EBCDIC && $regex =~ /utf8/;
 
-    warning_is(sub {
-                   my $eval_string = "$strict $regex";
-		   $_ = "x";
-		   eval $eval_string;
-		   like($@, qr/\Q$expect/, $eval_string);
-	       }, undef, "... and died without any other warnings");
-}
+        warning_is(sub {
+                    my $eval_string = "$strict $regex";
+                    $_ = "x";
+                    eval $eval_string;
+                    like($@, qr/\Q$expect/, $eval_string);
+                }, undef, "... and died without any other warnings");
+    }
 }
 
 for my $strict ("no warnings 'experimental::re_strict'; use re 'strict';", "") {
@@ -567,74 +567,83 @@ for my $strict ("no warnings 'experimental::re_strict'; use re 'strict';", "") {
                            $death_only_under_strict[$i+1];  # The warning
         }
         for (my $i = 0; $i < @death_utf8_only_under_strict; $i += 3) {
-            push @warning, mark_as_utf8($death_utf8_only_under_strict[$i], $death_utf8_only_under_strict[$i+1]);
+            push @warning, mark_as_utf8($death_utf8_only_under_strict[$i],
+                                        $death_utf8_only_under_strict[$i+1]);
         }
     }
-foreach my $ref (\@warning, \@experimental_regex_sets, \@deprecated) {
-    my $warning_type;
-    my $default_on;
-    if ($ref == \@warning) {
-        $warning_type = 'regexp, digit';
-        $default_on = $strict;
-    }
-    elsif ($ref == \@deprecated) {
-        $warning_type = 'regexp, deprecated';
-        $default_on = 1;
-    }
-    else {
-        $warning_type = 'experimental::regex_sets';
-        $default_on = 1;
-    }
-    for (my $i = 0; $i < @$ref; $i += 2) {
-        my $regex = $ref->[$i];
-        my @expect = fixup_expect($ref->[$i+1]);
-        {
-            $_ = "x";
-            eval "$strict no warnings; $regex";
-        }
-        if (is($@, "", "$strict $regex did not die")) {
-            my @got = capture_warnings(sub {
-                                    $_ = "x";
-                                    eval "$strict $regex" });
-            my $count = @expect;
-            if (! is(scalar @got, scalar @expect, "... and gave expected number ($count) of warnings")) {
-                if (@got < @expect) {
-                    $count = @got;
-                    note "Expected warnings not gotten:\n\t" . join "\n\t", @expect[$count .. $#expect];
-                }
-                else {
-                    note "Unexpected warnings gotten:\n\t" . join("\n\t", @got[$count .. $#got]);
-                }
-            }
-            foreach my $i (0 .. $count - 1) {
-                if (! like($got[$i], qr/\Q$expect[$i]/, "... and gave expected warning")) {
-                    chomp($got[$i]);
-                    chomp($expect[$i]);
-                    diag("GOT\n'$got[$i]'\nEXPECT\n'$expect[$i]'");
-                }
-                else {
-                    ok (0 == capture_warnings(sub {
-                                    $_ = "x";
-                                    eval "$strict no warnings '$warning_type'; $regex;" }
-                                ),
-                    "... and turning off '$warning_type' warnings suppressed it");
 
-                    # Test that whether the warning is on by default is
-                    # correct.  This test relies on the fact that we
-                    # are outside the scope of any ‘use warnings’.
-                    local $^W;
-                    my @warns = capture_warnings(sub { $_ = "x"; eval "$strict $regex" });
-                    if ($default_on) {
-                        ok @warns > 0, "... and the warning is on by default";
+    foreach my $ref (\@warning, \@experimental_regex_sets, \@deprecated) {
+        my $warning_type;
+        my $default_on;
+        if ($ref == \@warning) {
+            $warning_type = 'regexp, digit';
+            $default_on = $strict;
+        }
+        elsif ($ref == \@deprecated) {
+            $warning_type = 'regexp, deprecated';
+            $default_on = 1;
+        }
+        else {
+            $warning_type = 'experimental::regex_sets';
+            $default_on = 1;
+        }
+        for (my $i = 0; $i < @$ref; $i += 2) {
+            my $regex = $ref->[$i];
+            my @expect = fixup_expect($ref->[$i+1]);
+            {
+                $_ = "x";
+                eval "$strict no warnings; $regex";
+            }
+            if (is($@, "", "$strict $regex did not die")) {
+                my @got = capture_warnings(sub {
+                                        $_ = "x";
+                                        eval "$strict $regex" });
+                my $count = @expect;
+                if (! is(scalar @got, scalar @expect,
+                            "... and gave expected number ($count) of warnings"))
+                {
+                    if (@got < @expect) {
+                        $count = @got;
+                        note "Expected warnings not gotten:\n\t" . join "\n\t",
+                                                    @expect[$count .. $#expect];
                     }
                     else {
-                        ok @warns == 0, "... and the warning is off by default";
+                        note "Unexpected warnings gotten:\n\t" . join("\n\t",
+                                                         @got[$count .. $#got]);
+                    }
+                }
+                foreach my $i (0 .. $count - 1) {
+                    if (! like($got[$i], qr/\Q$expect[$i]/,
+                                               "... and gave expected warning"))
+                    {
+                        chomp($got[$i]);
+                        chomp($expect[$i]);
+                        diag("GOT\n'$got[$i]'\nEXPECT\n'$expect[$i]'");
+                    }
+                    else {
+                        ok (0 == capture_warnings(sub {
+                            $_ = "x";
+                            eval "$strict no warnings '$warning_type'; $regex;" }
+                           ),
+                           "... and turning off '$warning_type' warnings suppressed it");
+
+                        # Test that whether the warning is on by default is
+                        # correct.  This test relies on the fact that we
+                        # are outside the scope of any ‘use warnings’.
+                        local $^W;
+                        my @warns = capture_warnings(sub { $_ = "x";
+                                                        eval "$strict $regex" });
+                        if ($default_on) {
+                           ok @warns > 0, "... and the warning is on by default";
+                        }
+                        else {
+                         ok @warns == 0, "... and the warning is off by default";
+                        }
                     }
                 }
             }
         }
     }
-}
 }
 
 done_testing();
