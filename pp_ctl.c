@@ -2090,6 +2090,26 @@ PP(pp_leave)
     RETURN;
 }
 
+static bool
+S_outside_integer(pTHX_ SV *sv)
+{
+  if (SvOK(sv)) {
+    const NV nv = SvNV_nomg(sv);
+#ifdef NV_PRESERVES_UV
+    if (nv < (NV)IV_MIN || nv > (NV)IV_MAX)
+      return TRUE;
+#else
+    if (nv <= (NV)IV_MIN)
+      return TRUE;
+    if ((nv > 0) &&
+        ((nv > (NV)UV_MAX ||
+          SvUV_nomg(sv) > (UV)IV_MAX)))
+      return TRUE;
+#endif
+  }
+  return FALSE;
+}
+
 PP(pp_enteriter)
 {
     dSP; dMARK;
@@ -2148,32 +2168,13 @@ PP(pp_enteriter)
 	    SvGETMAGIC(sv);
 	    SvGETMAGIC(right);
 	    if (RANGE_IS_NUMERIC(sv,right)) {
-		NV nv;
 		cx->cx_type &= ~CXTYPEMASK;
 		cx->cx_type |= CXt_LOOP_LAZYIV;
 		/* Make sure that no-one re-orders cop.h and breaks our
 		   assumptions */
 		assert(CxTYPE(cx) == CXt_LOOP_LAZYIV);
-#ifdef NV_PRESERVES_UV
-		if ((SvOK(sv) && (((nv = SvNV_nomg(sv)) < (NV)IV_MIN) ||
-				  (nv > (NV)IV_MAX)))
-			||
-		    (SvOK(right) && (((nv = SvNV_nomg(right)) > (NV)IV_MAX) ||
-				     (nv < (NV)IV_MIN))))
-#else
-		if ((SvOK(sv) && (((nv = SvNV_nomg(sv)) <= (NV)IV_MIN)
-				  ||
-				  ((nv > 0) &&
-					((nv > (NV)UV_MAX) ||
-					 (SvUV_nomg(sv) > (UV)IV_MAX)))))
-			||
-		    (SvOK(right) && (((nv = SvNV_nomg(right)) <= (NV)IV_MIN)
-				     ||
-				     ((nv > 0) &&
-					((nv > (NV)UV_MAX) ||
-					 (SvUV_nomg(right) > (UV)IV_MAX))
-				     ))))
-#endif
+		if (S_outside_integer(aTHX_ sv) ||
+                    S_outside_integer(aTHX_ right))
 		    DIE(aTHX_ "Range iterator outside integer range");
 		cx->blk_loop.state_u.lazyiv.cur = SvIV_nomg(sv);
 		cx->blk_loop.state_u.lazyiv.end = SvIV_nomg(right);
