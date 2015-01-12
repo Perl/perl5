@@ -491,6 +491,11 @@ longer do.
 
 =item *
 
+Some cases of nested lexical state subs inside anonymous subs could cause
+'Bizarre copy' errors or possibly even crash.
+
+=item *
+
 When trying to emit warnings, perl's default debugger (F<perl5db.pl>) was
 sometimes giving 'Undefined subroutine &DB::db_warn called' instead.  This
 bug, which started to occur in Perl 5.18, has been fixed.  [perl #123553]
