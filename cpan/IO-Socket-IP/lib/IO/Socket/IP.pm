@@ -7,7 +7,7 @@ package IO::Socket::IP;
 # $VERSION needs to be set before  use base 'IO::Socket'
 #  - https://rt.cpan.org/Ticket/Display.html?id=92107
 BEGIN {
-   $VERSION = '0.35';
+   $VERSION = '0.36';
 }
 
 use strict;
@@ -441,10 +441,16 @@ sub _io_socket_ip__configure
       ref $info eq "ARRAY" or croak "Expected 'LocalAddrInfo' to be an ARRAY ref";
       @localinfos = @$info;
    }
-   elsif( defined $arg->{LocalHost} or defined $arg->{LocalService} ) {
+   elsif( defined $arg->{LocalHost} or
+          defined $arg->{LocalService} or
+          HAVE_MSWIN32 and $arg->{Listen} ) {
       # Either may be undef
       my $host = $arg->{LocalHost};
       my $service = $arg->{LocalService};
+
+      unless ( defined $host or defined $service ) {
+         $service = 0;
+      }
 
       local $1; # Placate a taint-related bug; [perl #67962]
       defined $service and $service =~ s/\((\d+)\)$// and
