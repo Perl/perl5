@@ -12292,7 +12292,7 @@ tryagain:
 						       &error_msg,
 						       PASS2, /* out warnings */
                                                        RExC_strict,
-                                                       TRUE, /* Output warnings
+                                                       TRUE, /* Silence warnings
                                                                 for non-
                                                                 portables */
                                                        UTF);
@@ -12325,8 +12325,8 @@ tryagain:
                          * from \1 - \9 is a backreference, any multi-digit
                          * escape which does not start with 0 and which when
                          * evaluated as decimal could refer to an already
-                         * parsed capture buffer is a backslash. Anything else
-                         * is octal.
+                         * parsed capture buffer is a back reference. Anything
+                         * else is octal.
                          *
                          * Note this implies that \118 could be interpreted as
                          * 118 OR as "\11" . "8" depending on whether there
