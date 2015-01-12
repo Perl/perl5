@@ -6,10 +6,6 @@
 
 <commit votes="steveh, khw" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
 
-By the following, I mean just https://github.com/Perl-Toolchain-Gang/Module-Metadata/commit/26b9aa41977d173187ede63111e5ce977339b0d0#diff-1
-plus a $VERSION bump to 1.000019_01. See http://nntp.perl.org/group/perl.perl5.porters/224563
-<commit votes="steveh" id="" ticket="" desc="CPAN RT#101095 Module::Metadata does not extract correct version if use_our is enabled"/>
-
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
