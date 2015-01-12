@@ -80,8 +80,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 
 <div><h3>Platform-Specific Build/Test/Installation Fixes</h3>
 
-<commit votes="steveh, arc, khw" id="e09e3cee34fbe40a471dc2fa31f2b8533598fb45" ticket="" desc="regcomp.c: Silence Win32 compiler warning"/>
-
 </div>
 
 <div><h3>Documentation Fixes</h3>
