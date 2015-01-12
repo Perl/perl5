@@ -489,6 +489,12 @@ been fixed to infer $_ instead.  [perl #123514]
 Some cases of lexical state subs inside predeclared subs could crash but no
 longer do.
 
+=item *
+
+When trying to emit warnings, perl's default debugger (F<perl5db.pl>) was
+sometimes giving 'Undefined subroutine &DB::db_warn called' instead.  This
+bug, which started to occur in Perl 5.18, has been fixed.  [perl #123553]
+
 =back
 
 =head1 Known Problems
