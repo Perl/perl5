@@ -3707,8 +3707,8 @@ or C<next::can>.  See L<mro>.
 =item Non-finite repeat count does nothing
 
 (W numeric) You tried to execute the
-L<C<x>|perlop/Multiplicative Operators> repetition operator C<Inf>
-(or C<-Inf>) or C<NaN>, which doesn't make sense.
+L<C<x>|perlop/Multiplicative Operators> repetition operator C<Inf> (or
+C<-Inf>) or C<NaN> times, which doesn't make sense.
 
 =item Non-hex character in regex; marked by S<<-- HERE> in m/%s/
 
