@@ -1940,10 +1940,11 @@ the immediately surrounding code.
 =cut
 */
 
-static CV *S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside);
+static CV *S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned);
 
 static CV *
-S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
+S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
+		     bool newcv)
 {
     I32 ix;
     PADLIST* const protopadlist = CvPADLIST(proto);
@@ -1955,7 +1956,8 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
     const I32 fpad = AvFILLp(protopad);
     SV** outpad;
     long depth;
-    bool subclones = FALSE;
+    U32 subclones = 0;
+    bool trouble = FALSE;
 
     assert(!CvUNIQUE(proto));
 
@@ -2042,7 +2044,9 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 		       second pass. */
 		    if (SvPAD_STATE(namesv) && !CvCLONED(ppad[ix])) {
 			assert(SvTYPE(ppad[ix]) == SVt_PVCV);
-			subclones = 1;
+			subclones ++;
+			if (CvOUTSIDE(ppad[ix]) != proto)
+			     trouble = TRUE;
 			sv = newSV_type(SVt_PVCV);
 			CvLEXICAL_on(sv);
 		    }
@@ -2088,12 +2092,70 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
     }
 
     if (subclones)
-	for (ix = fpad; ix > 0; ix--) {
+    {
+	if (trouble || cloned) {
+	    /* Uh-oh, we have trouble!  At least one of the state subs here
+	       has its CvOUTSIDE pointer pointing somewhere unexpected.  It
+	       could be pointing to another state protosub that we are
+	       about to clone.  So we have to track which sub clones come
+	       from which protosubs.  If the CvOUTSIDE pointer for a parti-
+	       cular sub points to something we have not cloned yet, we
+	       delay cloning it.  We must loop through the pad entries,
+	       until we get a full pass with no cloning.  If any uncloned
+	       subs remain (probably nested inside anonymous or ‘my’ subs),
+	       then they get cloned in a final pass.
+	     */
+	    bool cloned_in_this_pass;
+	    if (!cloned)
+		cloned = (HV *)sv_2mortal((SV *)newHV());
+	    do {
+		cloned_in_this_pass = FALSE;
+		for (ix = fpad; ix > 0; ix--) {
+		    PADNAME * const name =
+			(ix <= fname) ? pname[ix] : NULL;
+		    if (name && name != &PL_padname_undef
+		     && !PadnameOUTER(name) && PadnamePV(name)[0] == '&'
+		     && PadnameIsSTATE(name) && !CvCLONED(PL_curpad[ix]))
+		    {
+			CV * const protokey = CvOUTSIDE(ppad[ix]);
+			CV ** const cvp = protokey == proto
+			    ? &cv
+			    : (CV **)hv_fetch(cloned, (char *)&protokey,
+					      sizeof(CV *), 0);
+			if (cvp && *cvp) {
+			    S_cv_clone(aTHX_ (CV *)ppad[ix],
+					     (CV *)PL_curpad[ix],
+					     *cvp, cloned);
+			    hv_store(cloned, (char *)&ppad[ix],
+				     sizeof(CV *),
+				     SvREFCNT_inc_simple_NN(PL_curpad[ix]),
+				     0);
+			    subclones--;
+			    cloned_in_this_pass = TRUE;
+			}
+		    }
+		}
+	    } while (cloned_in_this_pass);
+	    if (subclones)
+		for (ix = fpad; ix > 0; ix--) {
+		    PADNAME * const name =
+			(ix <= fname) ? pname[ix] : NULL;
+		    if (name && name != &PL_padname_undef
+		     && !PadnameOUTER(name) && PadnamePV(name)[0] == '&'
+		     && PadnameIsSTATE(name) && !CvCLONED(PL_curpad[ix]))
+			S_cv_clone(aTHX_ (CV *)ppad[ix],
+					 (CV *)PL_curpad[ix],
+					 CvOUTSIDE(ppad[ix]), cloned);
+		}
+	}
+	else for (ix = fpad; ix > 0; ix--) {
 	    PADNAME * const name = (ix <= fname) ? pname[ix] : NULL;
 	    if (name && name != &PL_padname_undef && !PadnameOUTER(name)
 	     && PadnamePV(name)[0] == '&' && PadnameIsSTATE(name))
-		S_cv_clone(aTHX_ (CV *)ppad[ix], (CV *)PL_curpad[ix], cv);
+		S_cv_clone(aTHX_ (CV *)ppad[ix], (CV *)PL_curpad[ix], cv,
+				 NULL);
 	}
+    }
 
     if (newcv) SvREFCNT_inc_simple_void_NN(cv);
     LEAVE;
@@ -2186,7 +2248,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 }
 
 static CV *
-S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
+S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
 {
 #ifdef USE_ITHREADS
     dVAR;
@@ -2221,7 +2283,7 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
     if (CvPADLIST(proto))
-	cv = S_cv_clone_pad(aTHX_ proto, cv, outside, newcv);
+	cv = S_cv_clone_pad(aTHX_ proto, cv, outside, cloned, newcv);
 
     DEBUG_Xv(
 	PerlIO_printf(Perl_debug_log, "\nPad CV clone\n");
@@ -2239,7 +2301,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     PERL_ARGS_ASSERT_CV_CLONE;
 
     if (!CvPADLIST(proto)) Perl_croak(aTHX_ "panic: no pad in cv_clone");
-    return S_cv_clone(aTHX_ proto, NULL, NULL);
+    return S_cv_clone(aTHX_ proto, NULL, NULL, NULL);
 }
 
 /* Called only by pp_clonecv */
@@ -2248,7 +2310,7 @@ Perl_cv_clone_into(pTHX_ CV *proto, CV *target)
 {
     PERL_ARGS_ASSERT_CV_CLONE_INTO;
     cv_undef(target);
-    return S_cv_clone(aTHX_ proto, target, NULL);
+    return S_cv_clone(aTHX_ proto, target, NULL, NULL);
 }
 
 /*
