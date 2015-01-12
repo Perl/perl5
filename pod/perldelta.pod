@@ -53,6 +53,10 @@ This is equivalent to putting C<?:> at the beginning of every capturing group.
 
 See L<perlre/"n"> for more information.
 
+=head2 C<prototype> with no arguments
+
+C<prototype()> with no arguments now infers C<$_>.  [perl #123514]
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -472,6 +476,12 @@ C<gmtime> no longer crashes with not-a-number values.  [perl #123495]
 
 C<\()> could do a bad write past the end of the stack.  It has been fixed
 to extend the stack first.
+
+=item *
+
+C<prototype()> with no arguments used to read the previous item on the
+stack, so C<print "foo", prototype()> would print foo's prototype.  It has
+been fixed to infer $_ instead.  [perl #123514]
 
 =back
 
