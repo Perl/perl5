@@ -464,6 +464,10 @@ and there must be a string of at least 128 consecutive bytes to match.
 C<s///> now works on very long strings instead of dying with 'Substitution
 loop'.  [perl #103260] [perl #123071]
 
+=item *
+
+C<gmtime> no longer crashes with not-a-number values.  [perl #123495]
+
 =back
 
 =head1 Known Problems
