@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..169\n";
+print "1..170\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -498,6 +498,9 @@ like $@, "^Identifier too long at ", 'ident buffer overflow';
 eval 'for my a1b $i (1) {}';
 # ng: 'Missing $ on loop variable'
 like $@, "^No such class a1b at ", 'TYPE of my of for statement';
+
+# Used to crash [perl #123452]
+eval 's /${<>{}) //';
 
 # Add new tests HERE (above this line)
 
