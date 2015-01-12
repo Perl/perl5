@@ -188,7 +188,7 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
 
 /*  Documentation to be supplied when interface nailed down finally
  *  This returns FALSE if there is an error which the caller need not recover
- *  from; , otherwise TRUE.  In either case the caller should look at *len
+ *  from; , otherwise TRUE.
  *  On input:
  *	s   is the address of a pointer to a NULL terminated string that begins
  *	    with 'x', and the previous character was a backslash.  At exit, *s
