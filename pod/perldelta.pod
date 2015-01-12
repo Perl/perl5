@@ -455,6 +455,11 @@ means they have to be compiled within the scope of C<S<"use locale">>),
 and there must be a string of at least 128 consecutive bytes to match.
 [perl #123539]
 
+=item *
+
+C<s///> now works on very long strings instead of dying with 'Substitution
+loop'.  [perl #103260] [perl #123071]
+
 =back
 
 =head1 Known Problems
