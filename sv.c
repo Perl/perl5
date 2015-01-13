@@ -14598,9 +14598,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Unicode features (see perlrun/-C) */
     PL_unicode		= proto_perl->Iunicode;
 
-    /* Should we warn if uses locale? */
-    PL_warn_locale      = proto_perl->Iwarn_locale;
-
     /* Pre-5.8 signals control */
     PL_signals		= proto_perl->Isignals;
 
@@ -14913,6 +14910,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
 
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
+
+#ifdef USE_LOCALE_CTYPE
+    /* Should we warn if uses locale? */
+    PL_warn_locale      = sv_dup_inc(proto_perl->Iwarn_locale, param);
+#endif
 
 #ifdef USE_LOCALE_COLLATE
     PL_collation_name	= SAVEPV(proto_perl->Icollation_name);
