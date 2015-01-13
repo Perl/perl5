@@ -45,6 +45,7 @@
 #define _to_utf8_lower_flags(a,b,c,d)	Perl__to_utf8_lower_flags(aTHX_ a,b,c,d)
 #define _to_utf8_title_flags(a,b,c,d)	Perl__to_utf8_title_flags(aTHX_ a,b,c,d)
 #define _to_utf8_upper_flags(a,b,c,d)	Perl__to_utf8_upper_flags(aTHX_ a,b,c,d)
+#define _warn_problematic_locale	Perl__warn_problematic_locale
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define amagic_deref_call(a,b)	Perl_amagic_deref_call(aTHX_ a,b)
 #define append_utf8_from_native_byte	S_append_utf8_from_native_byte

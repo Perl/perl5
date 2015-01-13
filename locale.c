@@ -414,6 +414,29 @@ Perl_new_ctype(pTHX_ const char *newctype)
 }
 
 void
+Perl__warn_problematic_locale()
+{
+    dTHX;
+
+    /* Outputs the message in PL_warn_locale, and then NULLS it */
+
+#ifdef USE_LOCALE_CTYPE
+
+    if (PL_warn_locale) {
+        /*GCC_DIAG_IGNORE(-Wformat-security);   Didn't work */
+        Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
+                             SvPVX(PL_warn_locale),
+                             0 /* dummy to avoid compiler warning */ );
+        /* GCC_DIAG_RESTORE; */
+        SvREFCNT_dec_NN(PL_warn_locale);
+        PL_warn_locale = NULL;
+    }
+
+#endif
+
+}
+
+void
 Perl_new_collate(pTHX_ const char *newcoll)
 {
 #ifdef USE_LOCALE_COLLATE

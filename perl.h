@@ -5796,17 +5796,14 @@ typedef struct am_table_short AMTS;
 
         /* This internal macro should be called from places that operate under
          * locale rules.  It there is a problem with the current locale that
-         * hasn't been raised yet, it will output a warning this time */
+         * hasn't been raised yet, it will output a warning this time.  Because
+         * this will so rarely  be true, there is no point to optimize for
+         * time; instead it makes sense to minimize space used and do all the
+         * work in the rarely called function */
 #       define _CHECK_AND_WARN_PROBLEMATIC_LOCALE                           \
 	STMT_START {                                                        \
-            if (PL_warn_locale) {                                           \
-                /*GCC_DIAG_IGNORE(-Wformat-security);   Didn't work */      \
-                Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),                 \
-                                     SvPVX(PL_warn_locale),                 \
-                                     0 /* dummy to avoid comp warning */ ); \
-                /* GCC_DIAG_RESTORE; */                                     \
-                SvREFCNT_dec_NN(PL_warn_locale);                            \
-                PL_warn_locale = NULL;                                      \
+            if (UNLIKELY(PL_warn_locale)) {                                 \
+                _warn_problematic_locale();                                 \
             }                                                               \
         }  STMT_END
 
