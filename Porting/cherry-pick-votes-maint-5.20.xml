@@ -10,7 +10,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including e7368224f1884f08b01b3cedcf693510ca964712 (Upgrade Devel::PPPort from 3.25 to 3.26 (to silence build warnings))
+Blead changes have been examined up to and including 162b417c061ec9190135629d421e3685e8d31dc0 (Update libnet to CPAN version 3.05)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -101,6 +101,8 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="steveh, khw" id="9650f35b1f161b417324376040f61ae47b518529" ticket="" desc="perlpolicy: the point is caution, not low stakes"/>
 <commit votes="steveh, khw" id="667f5e7f722e725f12e664e2dd66190f90db42d7" ticket="" desc="perlpolicy: clarify what 'feature can be replaced' means"/>
 <commit votes="steveh, khw" id="1adbeba0a4bd082e42cd1499f87faef5175d36a2" ticket="" desc="perlpolicy: add a missing verb"/>
+<commit votes="steveh" id="5bfb0af0b8971c7f063804d149384ca17bfc0ae2" ticket="" desc="Fix apidocs for OP_TYPE_IS(_OR_WAS) - arguments separated by |, not ,."/>
+<commit votes="steveh" id="9a5b9407081290adfb965563aed854ccd8560db6" ticket="" desc="perlpodspec: Corrections/adds to detecting =encoding"/>
 
 </div>
 
