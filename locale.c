@@ -400,6 +400,7 @@ Perl_new_ctype(pTHX_ const char *newctype)
                 /* The '0' below suppresses a bogus gcc compiler warning */
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE), SvPVX(PL_warn_locale), 0);
                 setlocale(LC_CTYPE, badlocale);
+                Safefree(badlocale);
                 SvREFCNT_dec_NN(PL_warn_locale);
                 PL_warn_locale = NULL;
             }
