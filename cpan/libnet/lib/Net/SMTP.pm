@@ -20,7 +20,7 @@ use Net::Cmd;
 use Net::Config;
 use Socket;
 
-our $VERSION = "3.04";
+our $VERSION = "3.05";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
@@ -193,10 +193,11 @@ sub auth {
     if ($client) {
       # $client mechanism failed, so we need to exclude this mechanism from list
       my $failed_mechanism = $client->mechanism;
+      return unless defined $failed_mechanism;
       $self->debug_text("Auth mechanism failed: $failed_mechanism")
         if $self->debug;
       $mechanisms =~ s/\b\Q$failed_mechanism\E\b//;
-      last unless $mechanisms =~ /\S/;
+      return unless $mechanisms =~ /\S/;
       $sasl->mechanism($mechanisms);
     }
     

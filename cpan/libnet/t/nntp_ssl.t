@@ -73,7 +73,7 @@ sub nntp_client {
     Debug => $debug,
     %sslopt,
   );
-  diag("created Net::NNTP object");
+  note("created Net::NNTP object");
   if (!$cl) {
     fail( ($ssl ? "SSL ":"" )."NNTP connect failed");
   } elsif ($ssl) {
@@ -125,5 +125,5 @@ sub nntp_server {
     }
   }
 
-  diag("NNTP dialog done");
+  note("NNTP dialog done");
 }

@@ -6,12 +6,12 @@ use strict;
 use warnings;
 
 BEGIN {
-    if (!eval { require Socket; 1 }) {
+    if (!eval { require Socket }) {
         print "1..0 # no Socket\n"; exit 0;
     }
     undef *{Socket::inet_aton};
     undef *{Socket::inet_ntoa};
-    if (ord('A') == 193 && !eval { require Convert::EBCDIC; 1 }) {
+    if (ord('A') == 193 && !eval { require Convert::EBCDIC }) {
         print "1..0 # EBCDIC but no Convert::EBCDIC\n"; exit 0;
     }
     $INC{'Socket.pm'} = 1;

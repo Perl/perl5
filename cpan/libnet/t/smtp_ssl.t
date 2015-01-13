@@ -67,7 +67,7 @@ sub smtp_client {
   );
   $sslopt{SSL} = 1 if $ssl;
   my $cl = Net::SMTP->new($saddr, %sslopt, Debug => $debug);
-  diag("created Net::SMTP object");
+  note("created Net::SMTP object");
   if (!$cl) {
     fail( ($ssl ? "SSL ":"" )."SMTP connect failed");
   } elsif ($ssl) {
@@ -123,5 +123,5 @@ sub smtp_server {
     }
   }
 
-  diag("SMTP dialog done");
+  note("SMTP dialog done");
 }

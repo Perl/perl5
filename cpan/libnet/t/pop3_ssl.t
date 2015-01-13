@@ -67,7 +67,7 @@ sub pop3_client {
   );
   $sslopt{SSL} = 1 if $ssl;
   my $cl = Net::POP3->new($saddr, %sslopt, Debug => $debug);
-  diag("created Net::POP3 object");
+  note("created Net::POP3 object");
   if (!$cl) {
     fail( ($ssl ? "SSL ":"" )."POP3 connect failed");
   } elsif ($ssl) {
@@ -121,5 +121,5 @@ sub pop3_server {
     }
   }
 
-  diag("POP3 dialog done");
+  note("POP3 dialog done");
 }

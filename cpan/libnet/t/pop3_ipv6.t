@@ -27,7 +27,7 @@ my $srv = $inet6class->new(
 );
 plan skip_all => "cannot create listener on ::1: $!" if ! $srv;
 my $saddr = "[".$srv->sockhost."]".':'.$srv->sockport;
-diag("server on $saddr");
+note("server on $saddr");
 
 plan tests => 1;
 
@@ -35,7 +35,7 @@ defined( my $pid = fork()) or die "fork failed: $!";
 exit(pop3_server()) if ! $pid;
 
 my $cl = Net::POP3->new($saddr, Debug => $debug);
-diag("created Net::POP3 object");
+note("created Net::POP3 object");
 if (!$cl) {
   fail("IPv6 POP3 connect failed");
 } else {
@@ -62,5 +62,5 @@ sub pop3_server {
     }
   }
 
-  diag("POP3 dialog done");
+  note("POP3 dialog done");
 }

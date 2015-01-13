@@ -28,7 +28,7 @@ my $srv = $inet6class->new(
 plan skip_all => "cannot create listener on ::1: $!" if ! $srv;
 my $host = $srv->sockhost;
 my $port = $srv->sockport;
-diag("server on $host port $port");
+note("server on $host port $port");
 
 plan tests => 1;
 
@@ -36,7 +36,7 @@ defined( my $pid = fork()) or die "fork failed: $!";
 exit(nntp_server()) if ! $pid;
 
 my $cl = Net::NNTP->new(Host => $host, Port => $port,, Debug => $debug);
-diag("created Net::NNTP object");
+note("created Net::NNTP object");
 if (!$cl) {
   fail("IPv6 NNTP connect failed");
 } else {
@@ -62,5 +62,5 @@ sub nntp_server {
       print "500 unknown cmd\r\n";
     }
   }
-  diag("NNTP dialog done");
+  note("NNTP dialog done");
 }

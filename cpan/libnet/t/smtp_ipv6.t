@@ -27,7 +27,7 @@ my $srv = $inet6class->new(
 );
 plan skip_all => "cannot create listener on ::1: $!" if ! $srv;
 my $saddr = "[".$srv->sockhost."]".':'.$srv->sockport;
-diag("server on $saddr");
+note("server on $saddr");
 
 plan tests => 1;
 
@@ -35,7 +35,7 @@ defined( my $pid = fork()) or die "fork failed: $!";
 exit(smtp_server()) if ! $pid;
 
 my $cl = Net::SMTP->new($saddr, Debug => $debug);
-diag("created Net::SMTP object");
+note("created Net::SMTP object");
 if (!$cl) {
   fail("IPv6 SMTP connect failed");
 } else {
@@ -64,5 +64,5 @@ sub smtp_server {
     }
   }
 
-  diag("SMTP dialog done");
+  note("SMTP dialog done");
 }
