@@ -2203,7 +2203,7 @@ of Perl are likely to eliminate these arbitrary limitations.
 =item Ignoring zero length \N{} in character class in regex; marked by
 S<<-- HERE> in m/%s/
 
-(W regexp) Named Unicode character escapes C<(\N{...})> may return a
+(W regexp) Named Unicode character escapes (C<\N{...}>) may return a
 zero-length sequence.  When such an escape is used in a character class
 its behaviour is not well defined.  Check that the correct escape has
 been used, and the correct charname handler is in scope.
@@ -3308,7 +3308,7 @@ probably not what you want.
 =item \N{} in character class restricted to one character in regex; marked
 by S<<-- HERE> in m/%s/
 
-(F) Named Unicode character escapes C<(\N{...})> may return a
+(F) Named Unicode character escapes (C<\N{...}>) may return a
 multi-character sequence.  Such an escape may not be used in
 a character class, because character classes always match one
 character of input.  Check that the correct escape has been used,
@@ -6757,7 +6757,7 @@ Something Very Wrong.
 
 =item Zero length \N{} in regex; marked by S<<-- HERE> in m/%s/
 
-(F) Named Unicode character escapes C<(\N{...})> may return a zero-length
+(F) Named Unicode character escapes (C<\N{...}>) may return a zero-length
 sequence.  Such an escape was used in an extended character class, i.e.
 C<(?[...])>, which is not permitted.  Check that the correct escape has
 been used, and the correct charnames handler is in scope.  The S<<-- HERE>
