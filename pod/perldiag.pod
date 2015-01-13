@@ -970,6 +970,13 @@ unable to locate this library.  See L<DynaLoader>.
 functioning as a class, but that package doesn't define that particular
 method, nor does any of its base classes.  See L<perlobj>.
 
+=item Can't locate object method "%s" via package "%s" (perhaps you forgot
+to load "%s"?)
+
+(F) You called a method on a class that did not exist, and the method
+could not be found in UNIVERSAL.  This often means that a method
+requires a package that has not been loaded.
+
 =item Can't locate package %s for @%s::ISA
 
 (W syntax) The @ISA array contained the name of another package that
@@ -4151,12 +4158,6 @@ the nesting limit is exceeded.
 (F) An error occurred during the implicit output invoked by the C<-p>
 command-line switch.  (This output goes to STDOUT unless you've
 redirected it with select().)
-
-=item (perhaps you forgot to load "%s"?)
-
-(F) This is an educated guess made in conjunction with the message
-"Can't locate object method \"%s\" via package \"%s\"".  It often means
-that a method requires a package that has not been loaded.
 
 =item Perl folding rules are not up-to-date for 0x%X; please use the perlbug 
 utility to report; in regex; marked by S<<-- HERE> in m/%s/
