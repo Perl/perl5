@@ -416,11 +416,14 @@ Perl_new_ctype(pTHX_ const char *newctype)
 void
 Perl__warn_problematic_locale()
 {
-    dTHX;
-
-    /* Outputs the message in PL_warn_locale, and then NULLS it */
 
 #ifdef USE_LOCALE_CTYPE
+
+    dTHX;
+
+    /* Internal-to-core function that outputs the message in PL_warn_locale,
+     * and then NULLS it.  Should be called only through the macro
+     * _CHECK_AND_WARN_PROBLEMATIC_LOCALE */
 
     if (PL_warn_locale) {
         /*GCC_DIAG_IGNORE(-Wformat-security);   Didn't work */
