@@ -184,6 +184,12 @@ L<Safe> has been upgraded from version 2.38 to 2.39.
 
 C<reval> was not propagating void context properly.
 
+=item *
+
+L<SDBM_File> has been upgraded from version 1.12 to 1.13.
+
+Simplified the build process.  [perl #123413]
+
 =back
 
 =head2 Removed Modules and Pragmata
