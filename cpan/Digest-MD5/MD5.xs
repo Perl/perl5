@@ -155,26 +155,29 @@ STATIC int dup_md5_ctx(pTHX_ MAGIC *mg, CLONE_PARAMS *params)
 }
 #endif
 
-STATIC MGVTBL vtbl_md5 = {
+#if defined(MGf_DUP) && defined(USE_ITHREADS)
+const STATIC MGVTBL vtbl_md5 = {
     NULL, /* get */
     NULL, /* set */
     NULL, /* len */
     NULL, /* clear */
     NULL, /* free */
-#ifdef MGf_COPY
     NULL, /* copy */
-#endif
-#ifdef MGf_DUP
-# ifdef USE_ITHREADS
-    dup_md5_ctx,
-# else
-    NULL, /* dup */
-# endif
-#endif
-#ifdef MGf_LOCAL
+    dup_md5_ctx, /* dup */
     NULL /* local */
-#endif
 };
+#else
+/* declare as 5 member, not normal 8 to save image space*/
+const STATIC struct {
+	int (*svt_get)(SV* sv, MAGIC* mg);
+	int (*svt_set)(SV* sv, MAGIC* mg);
+	U32 (*svt_len)(SV* sv, MAGIC* mg);
+	int (*svt_clear)(SV* sv, MAGIC* mg);
+	int (*svt_free)(SV* sv, MAGIC* mg);
+} vtbl_md5 = {
+	NULL, NULL, NULL, NULL, NULL
+};
+#endif
 
 
 /* Padding is added at the end of the message in order to fill a
@@ -503,7 +506,8 @@ static MD5_CTX* get_md5_ctx(pTHX_ SV* sv)
 	croak("Not a reference to a Digest::MD5 object");
 
     for (mg = SvMAGIC(SvRV(sv)); mg; mg = mg->mg_moremagic) {
-	if (mg->mg_type == PERL_MAGIC_ext && mg->mg_virtual == &vtbl_md5) {
+	if (mg->mg_type == PERL_MAGIC_ext
+	    && mg->mg_virtual == (const MGVTBL * const)&vtbl_md5) {
 	    return (MD5_CTX *)mg->mg_ptr;
 	}
     }
@@ -525,7 +529,7 @@ static SV * new_md5_ctx(pTHX_ MD5_CTX *context, const char *klass)
 #ifdef USE_ITHREADS
     mg =
 #endif
-	sv_magicext(sv, NULL, PERL_MAGIC_ext, &vtbl_md5, (const char *)context, 0);
+	sv_magicext(sv, NULL, PERL_MAGIC_ext, (const MGVTBL * const)&vtbl_md5, (const char *)context, 0);
 
 #if defined(USE_ITHREADS) && defined(MGf_DUP)
     mg->mg_flags |= MGf_DUP;
@@ -731,6 +735,45 @@ digest(context)
         XSRETURN(1);
 
 void
+context(ctx, ...)
+	MD5_CTX* ctx
+    PREINIT:
+	char out[16];
+        U32 w;
+    PPCODE:
+	if (items > 2) {
+	    STRLEN len;
+	    unsigned long blocks = SvUV(ST(1));
+	    unsigned char *buf = (unsigned char *)(SvPV(ST(2), len));
+	    ctx->A = buf[ 0] | (buf[ 1]<<8) | (buf[ 2]<<16) | (buf[ 3]<<24);
+	    ctx->B = buf[ 4] | (buf[ 5]<<8) | (buf[ 6]<<16) | (buf[ 7]<<24);
+	    ctx->C = buf[ 8] | (buf[ 9]<<8) | (buf[10]<<16) | (buf[11]<<24);
+	    ctx->D = buf[12] | (buf[13]<<8) | (buf[14]<<16) | (buf[15]<<24);
+	    ctx->bytes_low = blocks << 6;
+	    ctx->bytes_high = blocks >> 26;
+	    if (items == 4) {
+		buf = (unsigned char *)(SvPV(ST(3), len));
+		MD5Update(ctx, buf, len);
+	    }
+	    XSRETURN(1); /* ctx */
+	} else if (items != 1) {
+	    XSRETURN(0);
+	}
+
+        w=ctx->A; out[ 0]=w; out[ 1]=(w>>8); out[ 2]=(w>>16); out[ 3]=(w>>24);
+        w=ctx->B; out[ 4]=w; out[ 5]=(w>>8); out[ 6]=(w>>16); out[ 7]=(w>>24);
+        w=ctx->C; out[ 8]=w; out[ 9]=(w>>8); out[10]=(w>>16); out[11]=(w>>24);
+        w=ctx->D; out[12]=w; out[13]=(w>>8); out[14]=(w>>16); out[15]=(w>>24);
+
+	EXTEND(SP, 3);
+	ST(0) = sv_2mortal(newSVuv(ctx->bytes_high << 26 |
+				   ctx->bytes_low >> 6));
+	ST(1) = sv_2mortal(newSVpv(out, 16));
+	ST(2) = sv_2mortal(newSVpv((char *)ctx->buffer,
+				   ctx->bytes_low & 0x3F));
+	XSRETURN(3);
+
+void
 md5(...)
     ALIAS:
 	Digest::MD5::md5        = F_BIN
@@ -750,7 +793,9 @@ md5(...)
 	    if (items == 1) {
 		if (SvROK(ST(0))) {
                     SV* sv = SvRV(ST(0));
-		    if (SvOBJECT(sv) && strEQ(HvNAME(SvSTASH(sv)), "Digest::MD5"))
+                    char *name;
+		    if (SvOBJECT(sv) && (name = HvNAME(SvSTASH(sv)))
+                                     && strEQ(name, "Digest::MD5"))
 		        msg = "probably called as method";
 		    else
 			msg = "called with reference argument";
@@ -763,7 +808,9 @@ md5(...)
 		}
 		else if (SvROK(ST(0))) {
 		    SV* sv = SvRV(ST(0));
-		    if (SvOBJECT(sv) && strEQ(HvNAME(SvSTASH(sv)), "Digest::MD5"))
+                    char *name;
+		    if (SvOBJECT(sv) && (name = HvNAME(SvSTASH(sv)))
+                                     && strEQ(name, "Digest::MD5"))
 		        msg = "probably called as method";
 		}
 	    }
