@@ -453,13 +453,6 @@ crash, and had done so since Perl 5.10.  (In some cases the crash did not
 start happening till 5.16.)  The crash has, of course, been fixed.
 [perl #123542]
 
-=item *
-
-A regression has been fixed that was introduced in v5.20.0 (fixed in
-v5.20.1 as well as here) in which a UTF-8 encoded regular expression
-pattern that contains a single ASCII lowercase letter does not match its
-uppercase counterpart. [perl #122655]
-
 =back
 
 =head1 Known Problems
@@ -484,8 +477,10 @@ XXX
 
 =item *
 
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
+A regression has been fixed that was introduced in v5.20.0 (fixed in
+v5.20.1 as well as here) in which a UTF-8 encoded regular expression
+pattern that contains a single ASCII lowercase letter does not match its
+uppercase counterpart. [perl #122655]
 
 =back
 
