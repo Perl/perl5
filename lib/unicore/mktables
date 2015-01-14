@@ -18606,11 +18606,6 @@ __DATA__
 use strict;
 use warnings;
 
-# If run outside the normal test suite on an ASCII platform, you can
-# just create a latin1_to_native() function that just returns its
-# inputs, because that's the only function used from charset_tools.pl
-require "charset_tools.pl";
-
 # Test qr/\X/ and the \p{} regular expression constructs.  This file is
 # constructed by mktables from the tables it generates, so if mktables is
 # buggy, this won't necessarily catch those bugs.  Tests are generated for all
@@ -18760,7 +18755,7 @@ sub Test_X($) {
         my $this_string = "";
         my $this_display = "";
         foreach my $code_point (@code_points) {
-            $this_string .= latin1_to_native(chr(hex $code_point));
+            $this_string .= chr utf8::unicode_to_native(hex $code_point);
             $this_display .= "\\x{$code_point}";
         }
 

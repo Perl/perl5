@@ -3,7 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require './test.pl'; require './charset_tools.pl';
+    require './test.pl';
     skip_all_if_miniperl("no dynamic loading on miniperl, no File::Spec");
 }
 
@@ -158,7 +158,7 @@ push @tests, qq[like 'a', qr/\\p{Upper}/i, "'a' =~ /\\\\p{Upper}/i"];
 push @tests, q[my $c = "\x{212A}"; my $p = qr/(?:^[K_]+$)/i; utf8::upgrade($p); like $c, qr/$p/, 'Bug #78994: my $c = "\x{212A}"; my $p = qr/(?:^[K_]+$)/i; utf8::upgrade($p); $c =~ $p'];
 
 use charnames ":full";
-my $e_grave = latin1_to_native("\xE8");
+my $e_grave = chr utf8::unicode_to_native(0xE8);
 push @tests, q[my $re1 = "\N{WHITE SMILING FACE}";like $e_grave, qr/[\w$re1]/, 'my $re = "\N{WHITE SMILING FACE}"; $e_grave =~ qr/[\w$re]/'];
 push @tests, q[my $re2 = "\N{WHITE SMILING FACE}";like $e_grave, qr/\w|$re2/, 'my $re = "\N{WHITE SMILING FACE}"; $e_grave =~ qr/\w|$re/'];
 

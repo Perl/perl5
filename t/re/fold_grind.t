@@ -5,7 +5,7 @@ binmode STDOUT, ":utf8";
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require './test.pl'; require './charset_tools.pl';
+    require './test.pl';
     require Config; import Config;
     skip_all_if_miniperl("no dynamic loading on miniperl, no Encode nor POSIX");
     if ($^O eq 'dec_osf') {
@@ -481,8 +481,8 @@ foreach my $test (sort { numerically } keys %tests) {
     next if @target > 1 && @pattern > 1;
 
     # Have to convert non-utf8 chars to native char set
-    @target = map { $_ > 255 ? $_ : ord latin1_to_native(chr($_)) } @target;
-    @pattern = map { $_ > 255 ? $_ : ord latin1_to_native(chr($_)) } @pattern;
+    @target = map { utf8::unicode_to_native($_) } @target;
+    @pattern = map { utf8::unicode_to_native($_) } @pattern;
 
     # Get in hex form.
     my @x_target = map { sprintf "\\x{%04X}", $_ } @target;
