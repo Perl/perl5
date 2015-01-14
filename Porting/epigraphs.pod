@@ -1113,8 +1113,7 @@ the salute of the soldiers from the Skull Hill garrison.
 
 =head2 v5.16.1 - Emerald Rose - Never Split The Party
 
-L<Announced on 2012-08-08 by Ricardo
-Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190413.html>
+L<Announced on 2012-08-08 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190413.html>
 
   Don't you know?  You never split the party
   Clerics in the back to keep those fighters hale and hearty
@@ -1125,8 +1124,7 @@ Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190413.html>
 
 =head2 v5.16.1 RC1 - Tom Moldvay - Dungeons & Dragons
 
-L<Announced on 2012-08-03 by Ricardo
-Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190264.html>
+L<Announced on 2012-08-03 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190264.html>
 
 I was busy rescuing the captured maiden when the dragon showed up.
 Fifty feed of scaled terror glared down at us with smoldering red eyes.
@@ -1150,8 +1148,7 @@ dragon-tyrant.  The countryside was freed and I could return as a hero.
 
 =head2 v5.16.0 - W.H. Auden - September 1, 1939
 
-L<Announced on 2012-05-20 by Ricardo
-Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/05/msg186903.html>
+L<Announced on 2012-05-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/05/msg186903.html>
 
   All I have is a voice
   To undo the folded lie,
@@ -1169,8 +1166,7 @@ Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/05/msg186903.html>
 
 =head2 v5.15.9 - Bob Dylan - Blowin' In The Wind
 
-L<Announced on 2012-03-20 by
-Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2012/03/msg184824.html>
+L<Announced on 2012-03-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2012/03/msg184824.html>
 
  How many roads must a man walk down
  Before you call him a man?
@@ -1203,8 +1199,7 @@ Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2012/03/msg184824.html
 
 =head2 v5.15.8 - The KLF - The Manual-How To Have A Number One The Easy Way
 
-L<Announced on 2012-02-20 by Max
-Maischein|http://www.nntp.perl.org/group/perl.perl5.porters/2012/02/msg183919.html>
+L<Announced on 2012-02-20 by Max Maischein|http://www.nntp.perl.org/group/perl.perl5.porters/2012/02/msg183919.html>
 
   "Doctor Who, hey Doctor Who
    Doctor Who, in the Tardis
@@ -1232,8 +1227,7 @@ single it was all over - the Number One position was guaranteed:
 
 =head2 v5.15.7 - Penelope Lively, The Voyage of QV66
 
-L<Announced on 2012-01-20 by Chris 'BinGOs' Williams
-|http://www.nntp.perl.org/group/perl.perl5.porters/2012/01/msg182230.html>
+L<Announced on 2012-01-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2012/01/msg182230.html>
 
 "Laboratories," announced Henry. "Kindly don't touch anything."
 
@@ -1258,8 +1252,7 @@ down cheering and applauding.
 
 =head2 v5.15.6 - Ursula K. Leguin, A Wizard of Earthsea
 
-L<Announced on 2011-12-20 by Dave
-Rolsky|http://www.nntp.perl.org/group/perl.perl5.porters/2011/12/msg180962.html>
+L<Announced on 2011-12-20 by Dave Rolsky|http://www.nntp.perl.org/group/perl.perl5.porters/2011/12/msg180962.html>
 
 Ged had thought that as the prentice of a great mage he would enter at once
 into the mystery and mastery of power. He would understand the language of the
@@ -1279,8 +1272,7 @@ Ged's hearing, and had not taught him a single name or rune or spell.
 
 =head2 v5.15.5 - Nikolai Gogol, The Diary of a Madman
 
-L<Announced on 2011-11-20 by Steve
-Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2011/11/msg179588.html>
+L<Announced on 2011-11-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2011/11/msg179588.html>
 
 This day - is a day of the greatest solemnity!  Spain has a king.  He has
 been found.  I am that king.  Only this very day did I learn of it.  I
@@ -1309,8 +1301,7 @@ you won't lure me there now; I'm not going to copy your vile papers!
 
 =head2 v5.15.4 - Steve Jobs
 
-L<Announced on 2011-10-20 by Florian
-Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/10/msg178412.html>
+L<Announced on 2011-10-20 by Florian Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/10/msg178412.html>
 
 A lot of people in our industry haven't had very diverse experiences. So they
 don't have enough dots to connect, and they end up with very linear solutions
@@ -1338,9 +1329,7 @@ L<Announced on 2012-10-12 by Dominic Hargreaves|http://www.nntp.perl.org/group/p
 
 =head2 v5.14.2 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  |http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
 
-L<Announced on 2011-09-26 by Florian
-Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177618.html>
-
+L<Announced on 2011-09-26 by Florian Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177618.html>
 
 It's not so much that people don't value the programs after they have them--they
 do value them.  But they're not the sort of thing that would ever catch on if
@@ -1356,8 +1345,7 @@ the heart of the programmer.
 
 =head2 v5.15.3 - Oscar Wilde, All Art is Quite Useless
 
-L<Announced on 2011-09-20 by Stevan
-Little|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177427.html>
+L<Announced on 2011-09-20 by Stevan Little|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177427.html>
 
   All art is at once surface and symbol. Those who go beneath
   the surface do so at their peril. Those who read the symbol
@@ -1379,8 +1367,7 @@ Little|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177427.html>
 
 =head2 v5.15.2 - Rainer Maria Rilke, The Third Duina Elegy
 
-L<Announced on 2011-08-20 by Ricardo
-Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2011/08/msg176067.html>
+L<Announced on 2011-08-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2011/08/msg176067.html>
 
   True, it is strange to live no more on earth,
   no longer follow the folkways scarecely learned;
