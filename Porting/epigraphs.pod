@@ -143,7 +143,7 @@ occasional shouts, in which we could distinguish the words Anamoo-moo!
 and Lama-Lama!  They continued this for at least half an hour, during
 which we had a good opportunity of observing their appearance.
 
-=head2 v5.20.1 - Lorenzo da Ponte, Così fan tutte
+=head2 v5.20.1 - Lorenzo da Ponte, trans. Diana Reed, Così fan tutte
 
 L<Announced on 2014-09-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg219789.html>
 
@@ -174,10 +174,7 @@ L<Announced on 2014-09-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
   respond kindly
   to our wishes.
 
-    -- Lorenzo da Ponte, /Così fan tutte/,
-       trans. Diana Reed
-
-=head2 v5.20.1-RC2 - Lorenzo da Ponte, Così fan tutte
+=head2 v5.20.1-RC2 - Lorenzo da Ponte, trans. William Weaver, Così fan tutte
 
 L<Announced on 2014-09-07 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg219446.html>
 
@@ -217,10 +214,7 @@ L<Announced on 2014-09-07 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
   Ah, among so many misfortunes,
   who can ever love life?
 
-    -- Lorenzo da Ponte, /Così fan tutte/,
-       trans. William Weaver
-
-=head2 v5.20.1-RC1 - Lorenzo da Ponte, Così fan tutte
+=head2 v5.20.1-RC1 - Lorenzo da Ponte, trans. William Weaver, Così fan tutte
 
 L<Announced on 2014-08-25 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/08/msg218975.html>
 
@@ -256,9 +250,6 @@ L<Announced on 2014-08-25 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
   you wish it, they are ready...
   DORABELLA: Where are they?
   DON ALFONSO: Come in, friends.
-
-    -- Lorenzo da Ponte, /Così fan tutte/,
-       trans. William Weaver
 
 =head2 v5.21.3 - Robert Service, The Men that Don't Fit In
 
@@ -355,8 +346,6 @@ L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
     So long as men can breathe or eyes can see,
     So long lives this, and this gives life to thee.
 
-  -- William Shakespeare, Sonnet 18
-
 =head2 v5.20.0-RC1 - Lindsey Buckingham, "Second Hand News"
 
 L<Announced on 2014-05-17 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/05/msg215479.html>
@@ -366,9 +355,7 @@ L<Announced on 2014-05-17 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   Won't you lay me down in tall grass
   And let me do my stuff
 
-  -- Lindsey Buckingham, "Second Hand News"
-
-=head2 v5.19.11 - Lautréamont, Les Chants de Maldoror
+=head2 v5.19.11 - Isidore-Lucien Ducasse [as "Comte de Lautréamont"], trans. Paul Knight, Les Chants de Maldoror
 
 L<Announced on 2014-04-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/04/msg214580.html>
 
@@ -385,9 +372,6 @@ rapidly and took on immense proportions amid the ravishing lucidity which you
 bestow as a gift on all those who sincerely love you.  Arithmetic!  Algebra!
 Geometry!  Awe-inspiring trinity!  Luminous triangle!  He who has not known you
 is a fool!
-
-  -- Isidore-Lucien Ducasse [as "Comte de Lautréamont"],
-     /Les Chants de Maldoror/, trans. Paul Knight
 
 =head2 v5.19.10 - John Chadwick, The Decipherment of Linear B
 
@@ -501,7 +485,7 @@ L<Announced on 2013-11-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/gr
   Waitress: No, it wouldn't be egg, bacon, spam and sausage, would it?
   Mrs. Bun: I don't like spam!
 
-=head2 v5.19.5 - Charles Baudelaire, "The Flowers of Evil", 51. The Cat
+=head2 v5.19.5 - Charles Baudelaire, trans. James McGowan, "The Flowers of Evil", 51. The Cat
 
 L<Announced on 2013-10-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2013/10/msg208752.html>
 
@@ -558,9 +542,6 @@ L<Announced on 2013-10-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
   The fire of his opal eyes,
   Clear beacons glowing, living jewels,
   Taking my measure, steadily.
-
-  -- Charles Baudelaire, /The Flowers of Evil, 51. The Cat/,
-     trans. James McGowan
 
 =head2 v5.19.4 - Washington Irving, "The Widow and Her Son"
 
@@ -647,7 +628,7 @@ L<Announced on 2013-05-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   …that I can't fix…
   …with my hands…
 
-=head2 v5.18.4 - Robert W. Chambers, "The King in Yellow"
+=head2 v5.18.4 - Robert W. Chambers, Cassilda's Song in "The King in Yellow," Act I, Scene 2
 
 L<Announced on 2014-10-01 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/10/msg220770.html>
 
@@ -671,14 +652,11 @@ L<Announced on 2014-10-01 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   Shall dry and die in
     Lost Carcosa.
 
-  -- Cassilda's Song in "The King in Yellow," Act i, Scene 2.
-     Robert W. Chambers
-
 =head2 v5.18.3 - (no epigraph)
 
 (no epigraph)
 
-=head2 v5.18.3-RC2 - Robert W. Chambers, "The King in Yellow"
+=head2 v5.18.3-RC2 - Robert W. Chambers, "The King in Yellow", Act I, Scene 2
 
 L<Announced on 2014-09-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg220613.html>
 
@@ -686,9 +664,7 @@ L<Announced on 2014-09-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
 empire. Woe! woe to you who are crowned with the crown of the King in
 Yellow!"
 
-    -- Robert W. Chambers, The King in Yellow, Act I, Scene 2.
-
-=head2 v5.18.3-RC1 - Robert W. Chambers, "The King in Yellow"
+=head2 v5.18.3-RC1 - Robert W. Chambers, "The King in Yellow", Act I, Scene 2
 
 L<Announced on 2014-09-17 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg220072.html>
 
@@ -701,8 +677,6 @@ L<Announced on 2014-09-17 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   STRANGER: I wear no mask.
 
   CAMILLA: (Terrified, aside to Cassilda.) No mask? No mask!
-
-  -- Robert W. Chambers, The King in Yellow, Act I, Scene 2.
 
 =head2 v5.18.2 - Miss Manners
 
@@ -1107,9 +1081,7 @@ L<Announced on 2012-08-08 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   The wizard in the middle, where he can shed some light
   And you never let that damn thief out of sightâ€¦
 
-    -- Emerald Rose, Never Split The Party
-
-=head2 v5.16.1 RC1 - Tom Moldvay - Dungeons & Dragons
+=head2 v5.16.1 RC1 - Tom Moldvay - Foreward to the Dungeons & Dragons Basic Rulebook
 
 L<Announced on 2012-08-03 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190264.html>
 
@@ -1131,8 +1103,6 @@ side.  With an earth-shaking crash, the dragon dropped dead at my feet.
 The magic sword had saved my life and ended the reign of the
 dragon-tyrant.  The countryside was freed and I could return as a hero.
 
-  -- Tom Moldvay, Foreward to the Dungeons & Dragons Basic Rulebook
-
 =head2 v5.16.0 - W.H. Auden - September 1, 1939
 
 L<Announced on 2012-05-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/05/msg186903.html>
@@ -1148,8 +1118,6 @@ L<Announced on 2012-05-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   Hunger allows no choice
   To the citizen or the police;
   We must love one another or die.
-
-    -- W.H. Auden, September 1, 1939
 
 =head2 v5.15.9 - Bob Dylan - Blowin' In The Wind
 
@@ -1181,8 +1149,6 @@ L<Announced on 2012-03-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.p
   That too many people have died?
   The answer, my friend, is blowin' in the wind
   The answer is blowin' in the wind
-
-    -- Bob Dylan, Spring 1962
 
 =head2 v5.15.8 - The KLF - The Manual-How To Have A Number One The Easy Way
 
@@ -1257,7 +1223,7 @@ with eager dread was nothing but a stout staff to walk with. Three days went
 by and four days went by and still Ogion had not spoken a single charm in
 Ged's hearing, and had not taught him a single name or rune or spell.
 
-=head2 v5.15.5 - Nikolai Gogol, The Diary of a Madman
+=head2 v5.15.5 - Nikolai Gogol, trans. Richard Pevear and Larissa Volokhonsky, The Diary of a Madman
 
 L<Announced on 2011-11-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2011/11/msg179588.html>
 
@@ -1282,9 +1248,6 @@ Spain are like Philip II.  But I explained to her that there was no
 resemblance between me and Philip II, and that I didn't have a single
 Capuchin . . . I didn't go to the office . . . To hell with it!  No friends,
 you won't lure me there now; I'm not going to copy your vile papers!
-
-  -- Nikolai Gogol, The Diary of a Madman,
-     trans. Richard Pevear and Larissa Volokhonsky
 
 =head2 v5.15.4 - Steve Jobs
 
@@ -1312,8 +1275,6 @@ L<Announced on 2012-10-12 by Dominic Hargreaves|http://www.nntp.perl.org/group/p
   are all lies: men have died from time to time and worms have
   eaten them, but not for love.
 
-    -- As You Like It, William Shakespeare
-
 =head2 v5.14.2 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  |http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
 
 L<Announced on 2011-09-26 by Florian Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177618.html>
@@ -1329,8 +1290,7 @@ So I guess I'd say that the reason some software comes free is that the
 mechanism for selling it is missing, either from the work environment, or from
 the heart of the programmer.
 
-
-=head2 v5.15.3 - Oscar Wilde, All Art is Quite Useless
+=head2 v5.15.3 - Oscar Wilde, From the preface to The Picture of Dorian Gray
 
 L<Announced on 2011-09-20 by Stevan Little|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177427.html>
 
@@ -1349,10 +1309,7 @@ thing is that one admires it intensely.
 
 All art is quite useless.
 
-    -- Oscar Wilde, From the preface to The Picture of Dorian Gray
-
-
-=head2 v5.15.2 - Rainer Maria Rilke, The Third Duina Elegy
+=head2 v5.15.2 - Rainer Maria Rilke, trans., C. F. MacIntyre, Duino, The First Elegy
 
 L<Announced on 2011-08-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2011/08/msg176067.html>
 
@@ -1371,9 +1328,6 @@ L<Announced on 2011-08-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   among the quick or the dead.  The eternal current
   hurtles all ages along with it forever
   through both realms and drowns their voices in both.
-
-  -- Rainer Maria Rilke, Duino, The First Elegy
-     trans., C. F. MacIntyre
 
 =head2 v5.15.1 - Greg Egan, "Permutation City"
 
