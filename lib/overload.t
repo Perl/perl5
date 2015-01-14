@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-BEGIN { require './test.pl' }
+BEGIN { require './test.pl'; require './charset_tools.pl' }
 plan tests => 5215;
 
 use Scalar::Util qw(tainted);
@@ -2261,9 +2261,9 @@ fresh_perl_is
 
     $o->[0] = 1;
     $c = 0;
-    ::ok("\xc4\x80" =~ "^\x{100}\$",
+    ::ok(main::byte_utf8a_to_utf8n("\xc4\x80") =~ "^\x{100}\$",
 				"regex stringify utf8=1 ol=0 bytes=1");
-    ::ok("\xc4\x80" =~ $o,	"regex stringify utf8=1 ol=1 bytes=1");
+    ::ok(main::byte_utf8a_to_utf8n("\xc4\x80") =~ $o,	"regex stringify utf8=1 ol=1 bytes=1");
     ::is($c, 1,			"regex stringify utf8=1 ol=1 bytes=1 count");
 
 
