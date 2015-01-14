@@ -3277,7 +3277,7 @@ EOM
 		$sed -e 's/://' -e 's/\./_/'` && osname=next && osvers=$4
 	$test -d /usr/apollo/bin && osname=apollo
 	$test -f /etc/saf/_sactab && osname=svr4
-	$test -d /usr/include/minix && osname=minix
+	$test -d /usr/include/minix && osname=minix && osvers=`$uname -r`
 	$test -f /system/gnu_library/bin/ar.pm && osname=vos
 	if $test -d /MachTen -o -d /MachTen_Folder; then
 		osname=machten
