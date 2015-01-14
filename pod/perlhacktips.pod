@@ -173,7 +173,7 @@ NUM2PTR().)
 
 =item *
 
-Casting between data function pointers and data pointers
+Casting between function pointers and data pointers
 
 Technically speaking casting between function pointers and data
 pointers is unportable and undefined, but practically speaking it seems
