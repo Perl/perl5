@@ -38,7 +38,10 @@ latest version directly from the perl source:
 
 =item * Make your change
 
-Hack, hack, hack.
+Hack, hack, hack.  Keep in mind that Perl runs on many different
+platforms, with different operating systems that have different
+capabilities, different filesystem organizations, and even different
+character sets.  L<perlhacktips> gives advice on this.
 
 =item * Test your change
 
@@ -774,8 +777,53 @@ contains the test.  This causes some problems with the tests in
 F<lib/>, so here's some opportunity for some patching.
 
 You must be triply conscious of cross-platform concerns.  This usually
-boils down to using L<File::Spec> and avoiding things like C<fork()>
-and C<system()> unless absolutely necessary.
+boils down to using L<File::Spec>, avoiding things like C<fork()>
+and C<system()> unless absolutely necessary, and not assuming that a
+given character has a particular ordinal value (code point) or that its
+UTF-8 representation is composed of particular bytes.
+
+There are several functions available to specify characters and code
+points portably in tests.  The always-preloaded functions
+C<utf8::unicode_to_native()> and its inverse
+C<utf8::native_to_unicode()> take code points and translate
+appropriately.  The file F<t/charset_tools.pl> has several functions
+that can be useful.  It has versions of the previous two functions
+that take strings as inputs -- not single numeric code points:
+C<uni_to_native()> and C<native_to_uni()>.  If you must look at the
+individual bytes comprising a UTF-8 encoded string,
+C<byte_utf8a_to_utf8n()> takes as input a string of those bytes encoded
+for an ASCII platform, and returns the equivalent string in the native
+platform.  For example, C<byte_utf8a_to_utf8n("\xC2\xA0")> returns the
+byte sequence on the current platform that form the UTF-8 for C<U+00A0>,
+since C<"\xC2\xA0"> are the UTF-8 bytes on an ASCII platform for that
+code point.  This function returns C<"\xC2\xA0"> on an ASCII platform, and
+C<"\x80\x41"> on an EBCDIC 1047 one.
+
+But easiest is to use C<\N{}> to specify characters, if the side effects
+aren't troublesome.  Simply specify all your characters in hex, using
+C<\N{U+ZZ}> instead of C<\xZZ>.  C<\N{}> is the Unicode name, and so it
+always gives you the Unicode character.  C<\N{U+41}> is the character
+whose Unicode code point is C<0x41>, hence is C<'A'> on all platforms.
+The side effects are:
+
+=over 4
+
+=item 1)
+
+These select Unicode rules.  That means that in double-quotish strings,
+the string is always converted to UTF-8 to force a Unicode
+interpretation (you can C<utf8::downgrade()> afterwards to convert back
+to non-UTF8, if possible).  In regular expression patterns, the
+conversion isn't done, but if the character set modifier would
+otherwise be C</d>, it is changed to C</u>.
+
+=item 2)
+
+If you use the form C<\N{I<character name>}>, the L<charnames> module
+gets automatically loaded.  This may not be suitable for the test level
+you are doing.
+
+=back
 
 =head2 Special C<make test> targets
 

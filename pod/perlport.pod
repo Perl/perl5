@@ -88,7 +88,8 @@ and S<Mac OS> uses C<\015>.
 
 Perl uses C<\n> to represent the "logical" newline, where what is
 logical may depend on the platform in use.  In MacPerl, C<\n> always
-means C<\015>.  In DOSish perls, C<\n> usually means C<\012>, but when
+means C<\015>.  On EBCDIC platforms, C<\n> could be C<\025> or C<\045>.
+In DOSish perls, C<\n> usually means C<\012>, but when
 accessing a file in "text" mode, perl uses the C<:crlf> layer that
 translates it to (or from) C<\015\012>, depending on whether you're
 reading or writing. Unix does the same thing on ttys in canonical
@@ -646,11 +647,16 @@ value to get what should be the proper value on any system.
 Assume very little about character sets.
 
 Assume nothing about numerical values (C<ord>, C<chr>) of characters.
-Do not use explicit code point ranges (like \xHH-\xHH); use for
-example symbolic character classes like C<[:print:]>.
+Do not use explicit code point ranges (like C<\xHH-\xHH)>.  However,
+starting in Perl v5.22, regular expression pattern bracketed character
+class ranges specified like C<qr/[\N{U+HH}-\N{U+HH}]/> are portable.
+You can portably use, for example, symbolic character classes like
+C<[:print:]>.
 
 Do not assume that the alphabetic characters are encoded contiguously
-(in the numeric sense).  There may be gaps.
+(in the numeric sense).  There may be gaps.  Special coding in Perl,
+however, guarantees that all subsets of C<qr/[A-Z]/>, C<qr/[a-z]/>, and
+C<qr/[0-9]/> behave as expected.
 
 Do not assume anything about the ordering of the characters.
 The lowercase letters may come before or after the uppercase letters;
@@ -677,10 +683,11 @@ code under a UTF-8 locale, in which case random native bytes might be
 illegal ("Malformed UTF-8 ...")  This means that for example embedding
 ISO 8859-1 bytes beyond 0x7f into your strings might cause trouble
 later.  If the bytes are native 8-bit bytes, you can use the C<bytes>
-pragma.  If the bytes are in a string (regular expression being a
-curious string), you can often also use the C<\xHH> notation instead
+pragma.  If the bytes are in a string (regular expressions being
+curious strings), you can often also use the C<\xHH> or more portably,
+the C<\N{U+HH}> notations instead
 of embedding the bytes as-is.  If you want to write your code in UTF-8,
-you can use the C<utf8>.
+you can use L<utf8>.
 
 =head2 System Resources
 

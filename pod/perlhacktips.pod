@@ -143,7 +143,7 @@ as many as possible of the C<-std=c89>, C<-ansi>, C<-pedantic>, and a
 selection of C<-W> flags (see cflags.SH).
 
 Also study L<perlport> carefully to avoid any bad assumptions about the
-operating system, filesystems, and so forth.
+operating system, filesystems, character set, and so forth.
 
 You may once in a while try a "make microperl" to see whether we can
 still compile Perl with just the bare minimum of interfaces.  (See
@@ -275,11 +275,25 @@ Assuming the character set is ASCIIish
 Perl can compile and run under EBCDIC platforms.  See L<perlebcdic>.
 This is transparent for the most part, but because the character sets
 differ, you shouldn't use numeric (decimal, octal, nor hex) constants
-to refer to characters.  You can safely say 'A', but not 0x41.  You can
-safely say '\n', but not \012.  If a character doesn't have a trivial
-input form, you should add it to the list in
-F<regen/unicode_constants.pl>, and have Perl create #defines for you,
+to refer to characters.  You can safely say C<'A'>, but not C<0x41>.
+You can safely say C<'\n'>, but not C<\012>.  However, you can use
+macros defined in F<utf8.h> to specify any code point portably.
+C<LATIN1_TO_NATIVE(0xDF)> is going to be the code point that means
+LATIN SMALL LETTER SHARP S on whatever platform you are running on (on
+ASCII platforms it compiles without adding any extra code, so there is
+zero performance hit on those).  The acceptable inputs to
+C<LATIN1_TO_NATIVE> are from C<0x00> through C<0xFF>.  If your input
+isn't guaranteed to be in that range, use C<UNICODE_TO_NATIVE> instead.
+C<NATIVE_TO_LATIN1> and C<NATIVE_TO_UNICODE> translate the opposite
+direction.
+
+If you need the string representation of a character that doesn't have a
+mnemonic name in C, you should add it to the list in
+F<regen/unicode_constants.pl>, and have Perl create C<#define>s for you,
 based on the current platform.
+
+Note that the C<isI<FOO>> and C<toI<FOO>> macros in F<handy.h> work
+properly on native code points and strings.
 
 Also, the range 'A' - 'Z' in ASCII is an unbroken sequence of 26 upper
 case alphabetic characters.  That is not true in EBCDIC.  Nor for 'a' to
@@ -293,11 +307,11 @@ able to handle EBCDIC without having to change pre-existing code.
 
 UTF-8 and UTF-EBCDIC are two different encodings used to represent
 Unicode code points as sequences of bytes.  Macros  with the same names
-(but different definitions) in C<utf8.h> and C<utfebcdic.h> are used to
+(but different definitions) in F<utf8.h> and F<utfebcdic.h> are used to
 allow the calling code to think that there is only one such encoding.
 This is almost always referred to as C<utf8>, but it means the EBCDIC
 version as well.  Again, comments in the code may well be wrong even if
-the code itself is right.  For example, the concept of C<invariant
+the code itself is right.  For example, the concept of UTF-8 C<invariant
 characters> differs between ASCII and EBCDIC.  On ASCII platforms, only
 characters that do not have the high-order bit set (i.e.  whose ordinals
 are strict ASCII, 0 - 127) are invariant, and the documentation and
@@ -314,9 +328,9 @@ Assuming the character set is just ASCII
 ASCII is a 7 bit encoding, but bytes have 8 bits in them.  The 128 extra
 characters have different meanings depending on the locale.  Absent a
 locale, currently these extra characters are generally considered to be
-unassigned, and this has presented some problems.  This is being changed
-starting in 5.12 so that these characters will be considered to be
-Latin-1 (ISO-8859-1).
+unassigned, and this has presented some problems.  This has being
+changed starting in 5.12 so that these characters can be considered to
+be Latin-1 (ISO-8859-1).
 
 =item *
 
