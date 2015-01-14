@@ -825,7 +825,7 @@ eleven!  Look, right across the board: eleven, eleven, eleven, eleven!
 
 =head2 v5.17.10 - Vernor Vinge, A Fire Upon The Deep
 
-L<Announced on 2013-03-22 by Max Maischein|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-03/msg00908.html>
+L<Announced on 2013-03-23 by Max Maischein|http://www.nntp.perl.org/group/perl.perl5.porters/2013/03/msg200504.html>
 
 The archive informed the automation. Data structures were built, recipes
 followed.  A local network was built, faster than anything on Straum, but surely
@@ -841,7 +841,7 @@ powerful, it does not need to self-know.
 
 =head2 v5.16.3 - Devo, Freedom of Choice
 
-L<Announced on 2013-03-11 by Ricardo Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-03/msg00414.html>
+L<Announced on 2013-03-11 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/03/msg200009.html>
 
   A victim of collision on the open sea
   Nobody ever said that life was free
@@ -850,7 +850,7 @@ L<Announced on 2013-03-11 by Ricardo Signes|http://www.xray.mpe.mpg.de/mailing-l
 
 =head2 v5.14.4 - Arthur C. Clarke, The Nine Billion Names of God
 
-L<Announced on 2013-03-11 by Dave Mitchell|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-03/msg00393.html>
+L<Announced on 2013-03-11 by Dave Mitchell|http://www.nntp.perl.org/group/perl.perl5.porters/2013/03/msg199988.html>
 
 He began to sing, but gave it up after a while. This vast arena of
 mountains, gleaming like whitely hooded ghosts on every side, did not
@@ -871,7 +871,7 @@ Overhead, without any fuss, the stars were going out.
 
 =head2 v5.17.9 - Douglas Adams, The Hitch-Hikers Guide to the Galaxy
 
-L<Announced on 2013-02-20 by Chris 'BinGOs' Williams|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-02/msg01146.html>
+L<Announced on 2013-02-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2013/02/msg199115.html>
 
 Vogon poetry is of course, the third worst in the universe.
 The second worst is that of the Azgoths of Kria. During a
@@ -893,7 +893,7 @@ in the destruction of the planet Earth.
 
 =head2 v5.17.8 - Iain Pears, An Instance of the Fingerpost
 
-L<Announced on 2013-01-20 by Aaron Crane|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-01/msg00518.html>
+L<Announced on 2013-01-20 by Aaron Crane|http://www.nntp.perl.org/group/perl.perl5.porters/2013/01/msg197571.html>
 
 I must here declare myself as someone who does not for a moment subscribe to
 the general view that a willingness to perform oneself is detrimental to the
@@ -914,7 +914,7 @@ world is richer for it.
 
 =head2 v5.17.7 - R. Scott Bakker, The Darkness That Comes Before
 
-L<Announced on 2012-12-18 by Dave Rolsky|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-12/msg00679.html>
+L<Announced on 2012-12-18 by Dave Rolsky|http://www.nntp.perl.org/group/perl.perl5.porters/2012/12/msg196707.html>
 
 No thought.
   The boy extinguished. Only a place.
@@ -931,7 +931,7 @@ No thought.
 
 =head2 v5.17.6 - Kurt Vonnegut, The Sirens of Titan
 
-L<Announced on 2012-11-20 by Ricardo Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-11/msg00760.html>
+L<Announced on 2012-11-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/11/msg195659.html>
 
 Beatrice, looking like a gypsy queen, smoldered at the foot of a statue
 of a young physical student. At first glance, the laboratory-gowned
@@ -945,14 +945,14 @@ had engraved on the statue, "Discovery of Atomic Power."
 
 =head2 v5.12.5 - William Shakespeare, Measure for Measure
 
-Announced on 2012-11-10 by Dominic Hargreaves
+L<Announced on 2012-11-10 by Dominic Hargreaves|http://www.nntp.perl.org/group/perl.perl5.porters/2012/11/msg195171.html>
 
   Music oft hath such a charm
   To make bad good, and good provoke to harm.
 
 =head2 v5.16.2 - Stanislaw Lem, The Cyberiad, Trurl's Machine
 
-L<Announced on 2012-11-01 by Ricardo Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-11/msg00017.html>
+L<Announced on 2012-11-01 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/11/msg194915.html>
 
 Once upon a time Trurl the constructor built an eight-story thinking
 machine.  When it was finished, he gave it a coat of white paint,
@@ -975,7 +975,7 @@ machine ground to a halt and said in a voice like thunder: SEVEN!
 
 =head2 v5.17.5 - Charles Stross, "Singularity Sky"
 
-L<Announced on 2012-10-20 by Florian Ragwitz|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-10/msg01007.html>
+L<Announced on 2012-10-20 by Florian Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2012/10/msg194349.html>
 
 Neither of them noticed the pair of polka-dotted knickers hiding
 behind the ventilation duct overhead, listening patiently and
@@ -983,7 +983,7 @@ recording everything.
 
 =head2 v5.17.4 - Roald Dahl, "Little Red Riding Hood and the Wolf"
 
-L<Announced on 2012-09-20 by Florian Ragwitz|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-09/msg01226.html>
+L<Announced on 2012-09-19 by Florian Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2012/09/msg192635.html>
 
   The small girl smiles. One eyelid flickers.
   She whips a pistol from her knickers.
@@ -1114,7 +1114,7 @@ the salute of the soldiers from the Skull Hill garrison.
 =head2 v5.16.1 - Emerald Rose - Never Split The Party
 
 L<Announced on 2012-08-08 by Ricardo
-Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-08/msg00307.html>
+Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190413.html>
 
   Don't you know?  You never split the party
   Clerics in the back to keep those fighters hale and hearty
@@ -1126,7 +1126,7 @@ Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-08/msg00307.h
 =head2 v5.16.1 RC1 - Tom Moldvay - Dungeons & Dragons
 
 L<Announced on 2012-08-03 by Ricardo
-Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-08/msg00157.html>
+Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190264.html>
 
 I was busy rescuing the captured maiden when the dragon showed up.
 Fifty feed of scaled terror glared down at us with smoldering red eyes.
@@ -1151,7 +1151,7 @@ dragon-tyrant.  The countryside was freed and I could return as a hero.
 =head2 v5.16.0 - W.H. Auden - September 1, 1939
 
 L<Announced on 2012-05-20 by Ricardo
-Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-05/msg00728.html>
+Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/05/msg186903.html>
 
   All I have is a voice
   To undo the folded lie,
@@ -1380,7 +1380,7 @@ Little|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177427.html>
 =head2 v5.15.2 - Rainer Maria Rilke, The Third Duina Elegy
 
 L<Announced on 2011-08-20 by Ricardo
-Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2011-08/msg00694.html>
+Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2011/08/msg176067.html>
 
   True, it is strange to live no more on earth,
   no longer follow the folkways scarecely learned;
@@ -1561,7 +1561,7 @@ this had never reached me.
 
 =head2 v5.13.11 - Walt Whitman, L<Leaves of Grass|http://en.wikipedia.org/wiki/Leaves_of_Grass>
 
-L<Announced on 2011-03-20 by Florian Ragwitz|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2011-03/msg00560.html>
+L<Announced on 2011-03-20 by Florian Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/03/msg170206.html>
 
   When the full-grown poet came,
   Out spake pleased Nature (the round impassive globe, with all its
@@ -2186,7 +2186,7 @@ L<Announced on 2006-01-28 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group
 
 =head2 v5.9.2 - Thomas Pynchon, "V"
 
-L<Announced on 2005-04-01 by Rafael Garcia-Suarez|http://groups.google.com/groups?selm=20050401150702.2b4a70d5@grubert.mandrakesoft.com>
+L<Announced on 2005-04-01 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2005/04/msg99421.html>
 
 This word flip was weird. Every recording date of McClintic's he'd
 gotten into the habit of talking electricity with the audio men and
@@ -2216,13 +2216,13 @@ make you flip?
 
 =head2 v5.9.1 - Tom Stoppard, "Arcadia"
 
-L<Announced on 2004-03-16 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/8587d77c565f2d43>
+L<Announced on 2004-03-16 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2004/03/msg89722.html>
 
 Aren't you supposed to have a pony?
 
 =head2 v5.9.0 - Doris Lessing, "Martha Quest"
 
-L<Announced on 2003-10-27 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/63a8c34385de82a1>
+L<Announced on 2003-10-27 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2003/10/msg84147.html>
 
 What of October, that ambiguous month
 
@@ -2384,7 +2384,7 @@ revolving door and comes out in front.'
 
 =head2 v5.8.8 - Joe Raposo, "Bein' Green"
 
-L<Announced on 2006-02-01 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/28caf52e41ebe723>
+L<Announced on 2006-01-31 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2006/01/msg109190.html>
 
     It's not that easy bein' green
     Having to spend each day the color of the leaves
@@ -2410,7 +2410,7 @@ L<Announced on 2006-02-01 by Nicholas Clark|http://groups.google.com/group/perl.
 
 =head2 v5.8.8-RC1 - Cosgrove Hall Productions, "Dangermouse"
 
-L<Announced on 2006-01-20 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/d231fc554af8cc51>
+L<Announced on 2006-01-20 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2006/01/msg108833.html>
 
 Greenback: And the world is mine, all mine. Muhahahahaha. See to it!
 
@@ -2418,7 +2418,7 @@ Stiletto: Si, Barone. Subito, Barone.
 
 =head2 v5.8.7 - Sergei Prokofiev, "Peter and the Wolf"
 
-L<Announced on 2005-05-31 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/9a545704a0062f16>
+L<Announced on 2005-05-31 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2005/05/msg101088.html>
 
 And now, imagine the triumphant procession: Peter at the head; after him the
 hunters leading the wolf; and winding up the procession, grandfather and the
@@ -2454,7 +2454,7 @@ the bird was clever and the wolf simply couldn't do anything about it.
 
 =head2 v5.8.6 - A. A. Milne, "The House at Pooh Corner"
 
-L<Announced on 2004-11-28 by Nicholas Clark|http://groups.google.com/groups?selm=20041128000836.GA304@Bagpuss.unfortu.net>
+L<Announced on 2004-11-27 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2004/11/msg96304.html>
 
 "Hallo, Pooh," said Piglet, giving a jump of surprise. "I knew it was
 you."
@@ -2512,7 +2512,7 @@ excitement.  "Oh, Pooh!" Do you think it's a--a--a Woozle?"
 
 =head2 v5.8.5 - wikipedia, "Yew"
 
-L<Announced on 2004-07-19 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/68340e2e4c39222c>
+L<Announced on 2004-07-19 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2004/07/msg93189.html>
 
 Yews are relatively slow growing trees, widely used in landscaping and
 ornamental horticulture. They have flat, dark-green needles, reddish
@@ -2535,7 +2535,7 @@ T.S. Eliot, especially his Four Quartets.
 
 =head2 v5.8.5-RC2 - wikipedia, "Beech"
 
-L<Announced on 2004-07-09 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/f92175725af7a5ad>
+L<Announced on 2004-07-09 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2004/07/msg92934.html>
 
 Beeches are trees of the Genus Fagus, family Fagaceae, including about
 ten species in Europe, Asia, and North America. The leaves are entire or
@@ -2549,7 +2549,7 @@ Caledonia and South America.
 
 =head2 v5.8.5-RC1 - wikipedia, "Pedunculate Oak" (abridged)
 
-L<Announced on 2004-07-07 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/ca6ce4a7ed9f219c?pli=1>
+L<Announced on 2004-07-07 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2004/07/msg92840.html>
 
 The Pedunculate Oak is called the Common Oak  in Britain, and is also
 often called the English Oak in other English speaking countries It is a
@@ -2574,7 +2574,7 @@ heartwood, much in demand for interior and furniture work.
 
 =head2 v5.8.4 - T. S. Eliot, "The Old Gumbie Cat"
 
-L<Announced on 2004-04-22 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/c7333acf03ef4015>
+L<Announced on 2004-04-22 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2004/04/msg90984.html>
 
   I have a Gumbie Cat in mind, her name is Jennyanydots;
   The curtain-cord she likes to wind, and tie it into sailor-knots.
@@ -2596,7 +2596,7 @@ L<Announced on 2004-04-22 by Nicholas Clark|http://groups.google.com/group/perl.
 
 =head2 v5.8.4-RC2 - T. S. Eliot, "Macavity: The Mystery Cat"
 
-L<Announced on 2004-04-16 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/84f6fdd73cc56a1b>
+L<Announced on 2004-04-16 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2004/04/msg90796.html>
 
   Macavity's a Mystery Cat: he's called the Hidden Paw --
   For he's the master criminal who can defy the Law.
@@ -2612,7 +2612,7 @@ L<Announced on 2004-04-16 by Nicholas Clark|http://groups.google.com/group/perl.
 
 =head2 v5.8.4-RC1 - T. S. Eliot, "Skimbleshanks: The Railway Cat"
 
-L<Announced on 2004-04-05 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/e500353440769ebf>
+L<Announced on 2004-04-05 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2004/04/msg90422.html>
 
   There's a whisper down the line at 11.39
   When the Night Mail's ready to depart,
@@ -2633,7 +2633,7 @@ L<Announced on 2004-04-05 by Nicholas Clark|http://groups.google.com/group/perl.
 
 =head2 v5.8.3 - Arthur William Edgar O'Shaugnessy, "Ode"
 
-L<Announced on 2004-01-14 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/968fb8d71e23af69>
+L<Announced on 2004-01-14 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2004/01/msg87317.html>
 
   We are the music makers,
   And we are the dreamers of dreams,
@@ -2646,7 +2646,7 @@ L<Announced on 2004-01-14 by Nicholas Clark|http://groups.google.com/group/perl.
 
 =head2 v5.8.3-RC1 - Irving Berlin, "Let's Face the Music and Dance"
 
-L<Announced on 2004-01-07 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/5ced50bebcd11c96>
+L<Announced on 2004-01-07 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2004/01/msg86969.html>
 
   There may be trouble ahead,
   But while there's music and moonlight,
@@ -2668,7 +2668,7 @@ L<Announced on 2004-01-07 by Nicholas Clark|http://groups.google.com/group/perl.
 
 =head2 v5.8.2 - Walt Whitman, "Passage to India"
 
-L<Announced on 2003-11-06 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/4714574f93967673>
+L<Announced on 2003-11-05 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2003/11/msg84822.html>
 
   Passage, immediate passage! the blood burns in my veins!
   Away O soul! hoist instantly the anchor!
@@ -2689,7 +2689,7 @@ L<Announced on 2003-11-06 by Nicholas Clark|http://groups.google.com/group/perl.
 
 =head2 v5.8.2-RC2 - Eric Idle/John Du Prez, "Accountancy Shanty"
 
-L<Announced on 2003-11-03 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/7669de5804b792f6>
+L<Announced on 2003-11-03 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2003/11/msg84645.html>
 
   It's fun to charter an accountant
   And sail the wide accountan-cy,
@@ -2698,7 +2698,7 @@ L<Announced on 2003-11-03 by Nicholas Clark|http://groups.google.com/group/perl.
 
 =head2 v5.8.2-RC1 - Edward Lear, "The Jumblies"
 
-L<Announced on 2003-10-28 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/83680ef3bbf7378d>
+L<Announced on 2003-10-27 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2003/10/msg84194.html>
 
   They went to sea in a Sieve, they did,
     In a Sieve they went to sea:
@@ -2853,7 +2853,7 @@ but that had to be the 57th strangest.
 
 =head2 v5.6.2 - Sterne, "Tristram Shandy"
 
-L<Announced on 2003-11-15 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/deb8cb9ad918716f>
+L<Announced on 2003-11-15 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2003/11/msg85222.html>
 
 When great or unexpected events fall out upon the stage of this
 sublunary word--the mind of man, which is an inquisitive kind of
@@ -2863,7 +2863,7 @@ long in this instance.
 
 =head2 v5.6.2-RC1 - Sterne, "Tristram Shandy"
 
-L<Announced on 2003-11-15 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/e3d4acc7a8dd3ce5>
+L<Announced on 2003-11-08 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2003/11/msg84953.html>
 
 "Pray, my dear", quoth my mother, "have you not forgot to wind up the clock?"
 
@@ -2930,11 +2930,11 @@ L<Announced on 2009-02-16 by LE<0xe9>on Brocard|http://www.nntp.perl.org/group/p
 
 =head2 v5.005_04 - no epigraph
 
-L<Announced on 2004-03-01 by LE<0xe9>on Brocard|http://groups.google.com/group/perl.perl5.porters/msg/6c240ad0b189cb47>
+L<Announced on 2004-03-01 by LE<0xe9>on Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2004/03/msg89047.html>
 
 =head2 v5.005_04-RC2 - Rudyard Kipling, "The Jungle Book"
 
-L<Announced on 2004-02-19 by LE<0xe9>on Brocard|http://groups.google.com/group/perl.perl5.porters/msg/83e5421124a7b49d>
+L<Announced on 2004-02-19 by LE<0xe9>on Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2004/02/msg88672.html>
 
 The monkeys called the place their city, and pretended to despise
 the Jungle-People because they lived in the forest. And yet they
@@ -2950,7 +2950,7 @@ fall.
 
 =head2 v5.005_04-RC1 - Lewis Carroll, "Alice's Adventures in Wonderland"
 
-L<Announced on 2004-02-05 by LE<0xe9>on Brocard|http://groups.google.com/group/perl.perl5.porters/msg/6aaeb6ec699bd116>
+L<Announced on 2004-02-05 by LE<0xe9>on Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2004/02/msg88312.html>
 
 Either the well was very deep, or she fell very slowly, for she had
 plenty of time as she went down to look about her and to wonder what was
@@ -2966,7 +2966,12 @@ she fell past it.
 
 =head2 v1.0_16 - Johan Vromans, extemporarily
 
-L<Announced on 2003-12-18 by Richard Clamp|http://groups.google.com/group/perl.perl5.porters/msg/9281dc6194d15940>
+L<Announced on 2003-12-18 by Richard Clamp|http://www.nntp.perl.org/group/perl.perl5.porters/2003/12/msg86423.html>
+
+  't was 16 years ago today
+  Larry taught us a new game
+  of lazyness, impatience, and hubris
+  Happy birthday, Perl!
 
 =head1 ACKNOWLEDGEMENTS
 
