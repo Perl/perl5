@@ -224,12 +224,12 @@ __UNDEFINED__  SvVSTRING_mg(sv)  (SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_vstring
 #if { NEED mg_findext }
 
 MAGIC *
-mg_findext(pTHX_ SV * sv, int type, const MGVTBL *vtbl) {
+mg_findext(SV * sv, int type, const MGVTBL *vtbl) {
     if (sv) {
         MAGIC *mg;
 
 #ifdef AvPAD_NAMELIST
-	assert(!(SvTYPE(sv) == SVt_PVAV && AvPAD_NAMELIST(sv)));
+        assert(!(SvTYPE(sv) == SVt_PVAV && AvPAD_NAMELIST(sv)));
 #endif
 
         for (mg = SvMAGIC (sv); mg; mg = mg->mg_moremagic) {
@@ -420,7 +420,7 @@ as_string(self)
     if ((mg = mg_findext((SV*)obj, PERL_MAGIC_ext, &null_mg_vtbl))) {
         XPUSHs(sv_2mortal(newSVpv(mg->mg_ptr, strlen(mg->mg_ptr))));
     } else {
-	XPUSHs(sv_2mortal(newSVpvs("Sorry, your princess is in another castle.")));
+        XPUSHs(sv_2mortal(newSVpvs("Sorry, your princess is in another castle.")));
     }
 
 void

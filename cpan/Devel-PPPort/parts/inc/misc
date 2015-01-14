@@ -272,7 +272,11 @@ __UNDEFINED__ isXDIGIT(c)       isxdigit(c)
 # endif
 
 #ifdef HAS_QUAD
-# define WIDEST_UTYPE U64TYPE
+# ifdef U64TYPE
+#  define WIDEST_UTYPE U64TYPE
+# else
+#  define WIDEST_UTYPE Quad_t
+# endif
 #else
 # define WIDEST_UTYPE U32
 #endif
