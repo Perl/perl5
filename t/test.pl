@@ -1,7 +1,5 @@
 #
-# t/test.pl - most of Test::More functionality without the fuss, plus
-# has mappings native_to_latin1 and latin1_to_native so that fewer tests
-# on non ASCII-ish platforms need to be skipped
+# t/test.pl - most of Test::More functionality without the fuss
 
 
 # NOTE:
