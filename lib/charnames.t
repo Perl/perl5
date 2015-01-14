@@ -733,7 +733,7 @@ is($_, 'foobar', 'Verify charnames.pm doesnt clobbers $_');
 
 my $names = do "unicore/Name.pl";
 ok(defined $names, "Verify can read 'unicore/Name.pl'");
-my $non_ascii = native_to_latin1($names) =~ tr/\0-\177//c;
+my $non_ascii = native_to_uni($names) =~ tr/\0-\177//c;
 ok(! $non_ascii, "Verify all official names are ASCII-only");
 
 # Verify that charnames propagate to eval("")

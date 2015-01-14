@@ -108,13 +108,13 @@ is(fc($b)         , "\x{101}\x{101}aa",  'fc');
 # \x{149} is LATIN SMALL LETTER N PRECEDED BY APOSTROPHE, its uppercase is
 # \x{2BC}\x{E4} or MODIFIER LETTER APOSTROPHE and N.
 
-is(latin1_to_native("\U\x{DF}aB\x{149}cD"), latin1_to_native("SSAB\x{2BC}NCD"),
+is(uni_to_native("\U\x{DF}aB\x{149}cD"), uni_to_native("SSAB\x{2BC}NCD"),
        "multicharacter uppercase");
 
 # The \x{DF} is its own lowercase, ditto for \x{149}.
 # There are no single character -> multiple characters lowercase mappings.
 
-is(latin1_to_native("\L\x{DF}aB\x{149}cD"), latin1_to_native("\x{DF}ab\x{149}cd"),
+is(uni_to_native("\L\x{DF}aB\x{149}cD"), uni_to_native("\x{DF}ab\x{149}cd"),
        "multicharacter lowercase");
 
 # \x{DF} is LATIN SMALL LETTER SHARP S, its foldcase is ss or \x{73}\x{73};
@@ -122,7 +122,7 @@ is(latin1_to_native("\L\x{DF}aB\x{149}cD"), latin1_to_native("\x{DF}ab\x{149}cd"
 # \x{2BC}\x{6E} or MODIFIER LETTER APOSTROPHE and n.
 # Note that is this further tested in t/uni/fold.t
 
-is(latin1_to_native("\F\x{DF}aB\x{149}cD"), latin1_to_native("ssab\x{2BC}ncd"),
+is(uni_to_native("\F\x{DF}aB\x{149}cD"), uni_to_native("ssab\x{2BC}ncd"),
        "multicharacter foldcase");
 
 

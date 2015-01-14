@@ -93,8 +93,8 @@ is(rindex($a, "foo",    ), 0);
 {
     my $search;
     my $text;
-    $search = "foo " . latin1_to_native("\xc9") . " bar";
-    $text = "a" . latin1_to_native("\xa3\xa3") . "a $search    $search quux";
+    $search = "foo " . uni_to_native("\xc9") . " bar";
+    $text = "a" . uni_to_native("\xa3\xa3") . "a $search    $search quux";
 
     my $text_utf8 = $text;
     utf8::upgrade($text_utf8);

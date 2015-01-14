@@ -8,7 +8,7 @@ $::IS_EBCDIC = ord 'A' == 193;
 # the set of 256 characters which is usually called Latin1.  However, they
 # will work properly with any character input, not just Latin1.
 
-sub native_to_latin1($) {
+sub native_to_uni($) {
     my $string = shift;
 
     return $string if $::IS_ASCII;
@@ -23,7 +23,7 @@ sub native_to_latin1($) {
     return $output;
 }
 
-sub latin1_to_native($) {
+sub uni_to_native($) {
     my $string = shift;
 
     return $string if $::IS_ASCII;
