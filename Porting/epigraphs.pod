@@ -704,7 +704,7 @@ L<Announced on 2014-10-01 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
 
 =head2 v5.18.3-RC2 - Robert W. Chambers, "The King in Yellow"
 
-L<Announced on 2014-09-27|http://nntp.perl.org/group/perl.perl5.porters/220613>
+L<Announced on 2014-09-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg220613.html>
 
 "Ah! I see it now!" I shrieked. "You have seized the throne and the
 empire. Woe! woe to you who are crowned with the crown of the King in
@@ -714,7 +714,7 @@ Yellow!"
 
 =head2 v5.18.3-RC1 - Robert W. Chambers, "The King in Yellow"
 
-L<Announced on 2014-09-17|http://nntp.perl.org/group/perl.perl5.porters/220072>
+L<Announced on 2014-09-17 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg220072.html>
 
   CAMILLA: You, sir, should unmask.
 
@@ -781,13 +781,13 @@ search, in questions, in torment.
 
 =head2 v5.18.0-RC4 - Joseph Heller, Catch-22
 
-L<Announced on 2013-04-16 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201889.html>
+L<Announced on 2013-05-16 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201889.html>
 
 Clevinger was dead. That was the basic flaw in his philosophy.
 
 =head2 v5.18.0-RC3 - Tom Waits, "The Ocean Doesn't Want Me"
 
-L<Announced on 2013-04-14 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201823.html>
+L<Announced on 2013-05-14 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201823.html>
 
   I'd love to go drowning
   And to stay and to stay
@@ -1170,7 +1170,7 @@ Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-05/msg00728.h
 =head2 v5.15.9 - Bob Dylan - Blowin' In The Wind
 
 L<Announced on 2012-03-20 by
-Abigail|http://nntp.perl.org/group/perl.perl5.porters/184824>
+Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2012/03/msg184824.html>
 
  How many roads must a man walk down
  Before you call him a man?
@@ -1561,7 +1561,7 @@ this had never reached me.
 
 =head2 v5.13.11 - Walt Whitman, L<Leaves of Grass|http://en.wikipedia.org/wiki/Leaves_of_Grass>
 
-L<Announced on 2011-02-20 by Florian Ragwitz|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2011-03/msg00560.html>
+L<Announced on 2011-03-20 by Florian Ragwitz|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2011-03/msg00560.html>
 
   When the full-grown poet came,
   Out spake pleased Nature (the round impassive globe, with all its
@@ -2114,7 +2114,7 @@ their art.
 
 =head2 v5.10.1 - Right Hon. James Hacker MP, "The Complete Yes Minister: The Diaries of a Cabinet Minister"
 
-L<Announced on 2009-09-23 by Dave Mitchell|http://www.nntp.perl.org/group/perl.perl5.porters/2009/08/msg150172.html>
+L<Announced on 2009-08-23 by Dave Mitchell|http://www.nntp.perl.org/group/perl.perl5.porters/2009/08/msg150172.html>
 
 'Briefly, sir, I am the Permanent Under-Secretary of State, known as
 the Permanent Secretary. Woolley here is your Principal Private
@@ -2287,7 +2287,7 @@ diplomacy. It's what made Britain great, you know.'
 
 =head2 v5.8.9-RC2 - Right Hon. James Hacker MP, "The Complete Yes Minister: The Diaries of a Cabinet Minister"
 
-L<Announced on 2008-12-06 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2008/11/msg142422.html>
+L<Announced on 2008-12-06 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2008/12/msg142422.html>
 
 There was silence in the office. I didn't know what we were going to do
 about the four hundred new people supervising our economy drive or the
@@ -2822,7 +2822,7 @@ you can do about it, so let's have a drink."
 
 =head2 v5.7.1 - Terry Pratchett, "The Colour of Magic"
 
-L<Announced on 2001-07-13 by Jarkko Hietaniemi|http://www.nntp.perl.org/group/perl.perl5.porters/2001/04/msg33851.html>
+L<Announced on 2001-04-09 by Jarkko Hietaniemi|http://www.nntp.perl.org/group/perl.perl5.porters/2001/04/msg33851.html>
 
 "What happens next?" asked Twoflower.
 
@@ -2887,7 +2887,7 @@ my precious, three guesseses.'
 
 =head2 v5.6.1-foolish - no epigraph
 
-L<Announced on 2001-08-04 by Gurusamy Sarathy|http://www.nntp.perl.org/group/perl.perl5.porters/2001/04/msg33421.html>
+L<Announced on 2001-04-01 by Gurusamy Sarathy|http://www.nntp.perl.org/group/perl.perl5.porters/2001/04/msg33421.html>
 
 =head2 v5.6.1-TRIAL3 - I can't find the announcement
 
