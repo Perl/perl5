@@ -17,7 +17,7 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
-=head2 v5.21.7 - Robert Heinlein, The Number of the Beast
+=head2 v5.21.7 - Robert Heinlein, "The Number of the Beast"
 
 L<Announced on 2014-12-20 by Max Maischein|http://www.nntp.perl.org/group/perl.perl5.porters/2014/12/msg223774.html>
 
@@ -32,7 +32,7 @@ would be simpler for a basket that replenishes itself indefinitely
 than for one that does it once and stops-I would have to describe
 the discontinuity."
 
-=head2 v5.21.6 - Jeff Noon, Vurt
+=head2 v5.21.6 - Jeff Noon, "Vurt"
 
 L<Announced on 2014-11-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2014/11/msg222448.html>
 
@@ -57,7 +57,7 @@ and me, the Game Cat. Hey, listen; I've struggled to get
 where I am today; why should I give you the easy route?
 Get working, kittlings! Reach up higher. Work the Vurt.
 
-=head2 v5.21.5 - Friso Wiegersma (text), Jean Ferrat (music), Wim Sonneveld (performer), Het Dorp
+=head2 v5.21.5 - Friso Wiegersma (text), Jean Ferrat (music), Wim Sonneveld (performer), "Het Dorp"
 
 L<Announced on 2014-10-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2014/10/msg221399.html>
 
@@ -117,7 +117,7 @@ L<Announced on 2014-10-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.p
   Ik was een kind, hoe kon ik weten
   dat dat voorgoed voorbij zou gaan.
 
-=head2 v5.21.4 - Edgar Allan Poe, The Narrative of Arthur Gordon Pym of Nantucket
+=head2 v5.21.4 - Edgar Allan Poe, "The Narrative of Arthur Gordon Pym of Nantucket"
 
 L<Announced on 2014-09-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg220267.html>
 
@@ -143,7 +143,7 @@ occasional shouts, in which we could distinguish the words Anamoo-moo!
 and Lama-Lama!  They continued this for at least half an hour, during
 which we had a good opportunity of observing their appearance.
 
-=head2 v5.20.1 - Lorenzo da Ponte, trans. Diana Reed, Così fan tutte
+=head2 v5.20.1 - Lorenzo da Ponte, trans. Diana Reed, "Così fan tutte"
 
 L<Announced on 2014-09-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg219789.html>
 
@@ -174,7 +174,7 @@ L<Announced on 2014-09-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
   respond kindly
   to our wishes.
 
-=head2 v5.20.1-RC2 - Lorenzo da Ponte, trans. William Weaver, Così fan tutte
+=head2 v5.20.1-RC2 - Lorenzo da Ponte, trans. William Weaver, "Così fan tutte"
 
 L<Announced on 2014-09-07 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg219446.html>
 
@@ -214,7 +214,7 @@ L<Announced on 2014-09-07 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
   Ah, among so many misfortunes,
   who can ever love life?
 
-=head2 v5.20.1-RC1 - Lorenzo da Ponte, trans. William Weaver, Così fan tutte
+=head2 v5.20.1-RC1 - Lorenzo da Ponte, trans. William Weaver, "Così fan tutte"
 
 L<Announced on 2014-08-25 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/08/msg218975.html>
 
@@ -251,7 +251,7 @@ L<Announced on 2014-08-25 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
   DORABELLA: Where are they?
   DON ALFONSO: Come in, friends.
 
-=head2 v5.21.3 - Robert Service, The Men that Don't Fit In
+=head2 v5.21.3 - Robert Service, "The Men that Don't Fit In"
 
 L<Announced on 2014-08-20 by Peter Martini|http://www.nntp.perl.org/group/perl.perl5.porters/2014/08/msg218826.html>
 
@@ -264,7 +264,7 @@ L<Announced on 2014-08-20 by Peter Martini|http://www.nntp.perl.org/group/perl.p
   So they chop and change, and each fresh move
   Is only a fresh mistake.
 
-=head2 v5.21.2 - Neil Armstrong, Buzz Aldrin, Charlie Duke, Final minutes of communication of the first manned moon landing, July 20, 1969.
+=head2 v5.21.2 - Neil Armstrong, Buzz Aldrin, Charlie Duke, Final minutes of communication of the first manned moon landing, July 20, 1969
 
 L<Announced on 2014-07-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2014/07/msg217937.html>
 
@@ -307,7 +307,7 @@ L<Announced on 2014-07-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.p
              We're breathing again. Thanks a lot.
   Aldrin:    Thank you. 
 
-=head2 v5.21.1 - Robert Jordan, The Crossroads of Twilights, Book 10 of the Wheel of Time
+=head2 v5.21.1 - Robert Jordan, "The Crossroads of Twilights", Book 10 of "The Wheel of Time"
 
 L<Announced on 2014-06-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2014/06/msg217030.html>
 
@@ -322,7 +322,7 @@ L<Announced on 2014-06-20 by Matthew Horsfall|http://www.nntp.perl.org/group/per
               Sometimes attributed to the Dragon
                                          Reborn.
 
-=head2 v5.21.0 - Friedrich von Schiller, The Song of the Bell
+=head2 v5.21.0 - Friedrich von Schiller, "The Song of the Bell"
 
 L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/05/msg215826.html>
 
@@ -355,7 +355,7 @@ L<Announced on 2014-05-17 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   Won't you lay me down in tall grass
   And let me do my stuff
 
-=head2 v5.19.11 - Isidore-Lucien Ducasse [as "Comte de Lautréamont"], trans. Paul Knight, Les Chants de Maldoror
+=head2 v5.19.11 - Isidore-Lucien Ducasse [as "Comte de Lautréamont"], trans. Paul Knight, "Les Chants de Maldoror"
 
 L<Announced on 2014-04-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/04/msg214580.html>
 
@@ -373,7 +373,7 @@ bestow as a gift on all those who sincerely love you.  Arithmetic!  Algebra!
 Geometry!  Awe-inspiring trinity!  Luminous triangle!  He who has not known you
 is a fool!
 
-=head2 v5.19.10 - John Chadwick, The Decipherment of Linear B
+=head2 v5.19.10 - John Chadwick, "The Decipherment of Linear B"
 
 L<Announced on 2014-03-20 by Aaron Crane|http://www.nntp.perl.org/group/perl.perl5.porters/2014/03/msg213851.html>
 
@@ -385,7 +385,7 @@ tracks down a hitherto unknown nuclear particle or the policeman who
 detects a criminal. But most of us are driven to sublimate this urge
 by the solving of artificial puzzles devised for our entertainment.
 
-=head2 v5.19.9 - R. A. MacAvoy, Tea with the Black Dragon
+=head2 v5.19.9 - R. A. MacAvoy, "Tea with the Black Dragon"
 
 L<Announced on 2014-02-20 by Tony Cook|http://www.nntp.perl.org/group/perl.perl5.porters/2014/02/msg213047.html>
 
@@ -412,7 +412,7 @@ grew fierce.
 fool, yes, but you will find the very thing you seek.  You will find
 truth!"
 
-=head2 v5.19.8 - Joseph Heller, Catch-22
+=head2 v5.19.8 - Joseph Heller, "Catch-22"
 
 L<Announced on 2014-01-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/01/msg211729.html>
 
@@ -729,7 +729,7 @@ walk, speak, act. But they make no mistakes; only machines make no mistakes,
 and they produce only dead things. The alive-alive are constantly in error, in
 search, in questions, in torment.
 
-=head2 v5.18.0-RC4 - Joseph Heller, Catch-22
+=head2 v5.18.0-RC4 - Joseph Heller, "Catch-22"
 
 L<Announced on 2013-05-16 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201889.html>
 
@@ -766,14 +766,14 @@ L<Announced on 2013-05-11 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
 
   We have a right to know…
 
-=head2 v5.17.11 - Nigel Tufnel, This is Spın̈al Tap
+=head2 v5.17.11 - Nigel Tufnel in "This is Spın̈al Tap"
 
 L<Announced on 2013-04-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/04/msg201056.html>
 
 It's very special because, if you can see, the numbers all go to…
 eleven!  Look, right across the board: eleven, eleven, eleven, eleven!
 
-=head2 v5.17.10 - Vernor Vinge, A Fire Upon The Deep
+=head2 v5.17.10 - Vernor Vinge, "A Fire Upon The Deep"
 
 L<Announced on 2013-03-23 by Max Maischein|http://www.nntp.perl.org/group/perl.perl5.porters/2013/03/msg200504.html>
 
@@ -789,7 +789,7 @@ The omniscient view. Not self-aware really. Self-awareness is much over-rated.
 Most automation works far better as a part of a whole, and even if human-
 powerful, it does not need to self-know. 
 
-=head2 v5.16.3 - Devo, Freedom of Choice
+=head2 v5.16.3 - Devo, "Freedom of Choice"
 
 L<Announced on 2013-03-11 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/03/msg200009.html>
 
@@ -798,7 +798,7 @@ L<Announced on 2013-03-11 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   Sink, swim, go down with the ship
   But use your freedom of choice
 
-=head2 v5.14.4 - Arthur C. Clarke, The Nine Billion Names of God
+=head2 v5.14.4 - Arthur C. Clarke, "The Nine Billion Names of God"
 
 L<Announced on 2013-03-11 by Dave Mitchell|http://www.nntp.perl.org/group/perl.perl5.porters/2013/03/msg199988.html>
 
@@ -819,7 +819,7 @@ is always a last time for everything.)
 Overhead, without any fuss, the stars were going out.
 
 
-=head2 v5.17.9 - Douglas Adams, The Hitch-Hikers Guide to the Galaxy
+=head2 v5.17.9 - Douglas Adams, "The Hitch-Hikers Guide to the Galaxy"
 
 L<Announced on 2013-02-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2013/02/msg199115.html>
 
@@ -841,7 +841,7 @@ The very worst poetry of all perished along with its creator
 Paula Nancy Millstone Jennings of Greenbridge, Essex, England,
 in the destruction of the planet Earth.
 
-=head2 v5.17.8 - Iain Pears, An Instance of the Fingerpost
+=head2 v5.17.8 - Iain Pears, "An Instance of the Fingerpost"
 
 L<Announced on 2013-01-20 by Aaron Crane|http://www.nntp.perl.org/group/perl.perl5.porters/2013/01/msg197571.html>
 
@@ -862,7 +862,7 @@ a gentleman when he had finished. Indeed, in my opinion, his stature was all
 the greater, for in Boyle wealth, humility and curiosity mingled, and the
 world is richer for it.
 
-=head2 v5.17.7 - R. Scott Bakker, The Darkness That Comes Before
+=head2 v5.17.7 - R. Scott Bakker, "The Darkness That Comes Before"
 
 L<Announced on 2012-12-18 by Dave Rolsky|http://www.nntp.perl.org/group/perl.perl5.porters/2012/12/msg196707.html>
 
@@ -890,7 +890,7 @@ In his periphery, he could see the spike of the sun ease from the mountain. He f
 
 Now I understand.
 
-=head2 v5.17.6 - Kurt Vonnegut, The Sirens of Titan
+=head2 v5.17.6 - Kurt Vonnegut, "The Sirens of Titan"
 
 L<Announced on 2012-11-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/11/msg195659.html>
 
@@ -904,14 +904,14 @@ caves of Mercury. There, at first glance, was a young man without
 vanity, without lust — and one accepted at its face value the title Salo
 had engraved on the statue, "Discovery of Atomic Power."
 
-=head2 v5.12.5 - William Shakespeare, Measure for Measure
+=head2 v5.12.5 - William Shakespeare, "Measure for Measure"
 
 L<Announced on 2012-11-10 by Dominic Hargreaves|http://www.nntp.perl.org/group/perl.perl5.porters/2012/11/msg195171.html>
 
   Music oft hath such a charm
   To make bad good, and good provoke to harm.
 
-=head2 v5.16.2 - Stanislaw Lem, The Cyberiad, Trurl's Machine
+=head2 v5.16.2 - Stanislaw Lem, "The Cyberiad", Trurl's Machine
 
 L<Announced on 2012-11-01 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/11/msg194915.html>
 
@@ -1072,7 +1072,7 @@ for the brightly colored sporks of revolution.  A volley of shots rang
 out and Burya Rubenstein raised his hands, grinning wildly, to accept
 the salute of the soldiers from the Skull Hill garrison.
 
-=head2 v5.16.1 - Emerald Rose - Never Split The Party
+=head2 v5.16.1 - Emerald Rose, "Never Split The Party"
 
 L<Announced on 2012-08-08 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190413.html>
 
@@ -1081,7 +1081,7 @@ L<Announced on 2012-08-08 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   The wizard in the middle, where he can shed some light
   And you never let that damn thief out of sightâ€¦
 
-=head2 v5.16.1 RC1 - Tom Moldvay - Foreward to the Dungeons & Dragons Basic Rulebook
+=head2 v5.16.1 RC1 - Tom Moldvay, Foreward to the "Dungeons & Dragons Basic Rulebook"
 
 L<Announced on 2012-08-03 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190264.html>
 
@@ -1103,7 +1103,7 @@ side.  With an earth-shaking crash, the dragon dropped dead at my feet.
 The magic sword had saved my life and ended the reign of the
 dragon-tyrant.  The countryside was freed and I could return as a hero.
 
-=head2 v5.16.0 - W.H. Auden - September 1, 1939
+=head2 v5.16.0 - W.H. Auden, "September 1, 1939"
 
 L<Announced on 2012-05-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/05/msg186903.html>
 
@@ -1119,7 +1119,7 @@ L<Announced on 2012-05-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To the citizen or the police;
   We must love one another or die.
 
-=head2 v5.15.9 - Bob Dylan - Blowin' In The Wind
+=head2 v5.15.9 - Bob Dylan, "Blowin' In The Wind"
 
 L<Announced on 2012-03-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2012/03/msg184824.html>
 
@@ -1150,7 +1150,7 @@ L<Announced on 2012-03-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.p
   The answer, my friend, is blowin' in the wind
   The answer is blowin' in the wind
 
-=head2 v5.15.8 - The KLF - The Manual-How To Have A Number One The Easy Way
+=head2 v5.15.8 - The KLF, "The Manual-How To Have A Number One The Easy Way"
 
 L<Announced on 2012-02-20 by Max Maischein|http://www.nntp.perl.org/group/perl.perl5.porters/2012/02/msg183919.html>
 
@@ -1178,7 +1178,7 @@ single it was all over - the Number One position was guaranteed:
 
   "I'm never going to give you up"
 
-=head2 v5.15.7 - Penelope Lively, The Voyage of QV66
+=head2 v5.15.7 - Penelope Lively, "The Voyage of QV66"
 
 L<Announced on 2012-01-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2012/01/msg182230.html>
 
@@ -1203,7 +1203,7 @@ down cheering and applauding.
 
 "Chimps," said Henry. "They're awfully clever."
 
-=head2 v5.15.6 - Ursula K. Leguin, A Wizard of Earthsea
+=head2 v5.15.6 - Ursula K. Leguin, "A Wizard of Earthsea"
 
 L<Announced on 2011-12-20 by Dave Rolsky|http://www.nntp.perl.org/group/perl.perl5.porters/2011/12/msg180962.html>
 
@@ -1223,7 +1223,7 @@ with eager dread was nothing but a stout staff to walk with. Three days went
 by and four days went by and still Ogion had not spoken a single charm in
 Ged's hearing, and had not taught him a single name or rune or spell.
 
-=head2 v5.15.5 - Nikolai Gogol, trans. Richard Pevear and Larissa Volokhonsky, The Diary of a Madman
+=head2 v5.15.5 - Nikolai Gogol, trans. Richard Pevear and Larissa Volokhonsky, "The Diary of a Madman"
 
 L<Announced on 2011-11-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2011/11/msg179588.html>
 
@@ -1258,7 +1258,7 @@ don't have enough dots to connect, and they end up with very linear solutions
 without a broad perspective on the problem. The broader one's understanding of
 the human experience, the better design we will have.
 
-=head2 v5.14.3 - William Shakespeare, As You Like It
+=head2 v5.14.3 - William Shakespeare, "As You Like It"
 
 L<Announced on 2012-10-12 by Dominic Hargreaves|http://www.nntp.perl.org/group/perl.perl5.porters/2012/10/msg194057.html>
 
@@ -1290,7 +1290,7 @@ So I guess I'd say that the reason some software comes free is that the
 mechanism for selling it is missing, either from the work environment, or from
 the heart of the programmer.
 
-=head2 v5.15.3 - Oscar Wilde, From the preface to The Picture of Dorian Gray
+=head2 v5.15.3 - Oscar Wilde, From the preface to "The Picture of Dorian Gray"
 
 L<Announced on 2011-09-20 by Stevan Little|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177427.html>
 
@@ -1309,7 +1309,7 @@ thing is that one admires it intensely.
 
 All art is quite useless.
 
-=head2 v5.15.2 - Rainer Maria Rilke, trans., C. F. MacIntyre, Duino, The First Elegy
+=head2 v5.15.2 - Rainer Maria Rilke, trans., C. F. MacIntyre, "Duino", The First Elegy
 
 L<Announced on 2011-08-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2011/08/msg176067.html>
 
@@ -1454,7 +1454,7 @@ continuing service to San Francisco.  All passengers should already be
 aboard. If you aren't aboard at this time, you will be denied boarding
 and your bags will be offloaded.
 
-=head2 v5.14.0-RC2 - Greg Grandin, Fordlandia, "the Rise and Fall of Henry Ford's Forgotten Jungle City"
+=head2 v5.14.0-RC2 - Greg Grandin, "Fordlandia: The Rise and Fall of Henry Ford's Forgotten Jungle City"
 
 L<Announced on 2011-05-04 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/05/msg171879.html>
 
@@ -1486,7 +1486,7 @@ This seemed doubly astounding to me—first that Australia could
 just I<lose> a prime minister (I mean, come on) and second that news of
 this had never reached me.
 
-=head2 v5.13.11 - Walt Whitman, L<Leaves of Grass|http://en.wikipedia.org/wiki/Leaves_of_Grass>
+=head2 v5.13.11 - Walt Whitman, L<"Leaves of Grass"|http://en.wikipedia.org/wiki/Leaves_of_Grass>
 
 L<Announced on 2011-03-20 by Florian Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/03/msg170206.html>
 
@@ -1502,7 +1502,7 @@ L<Announced on 2011-03-20 by Florian Ragwitz|http://www.nntp.perl.org/group/perl
   Which he will never release until he reconciles the two,
   And wholly and joyously blends them.
 
-=head2 v5.13.10 - Egill Skalla-Grímsson, L<Egils saga Skalla-Grímssonar|http://www.heimskringla.no/wiki/Egils_saga_Skalla-Gr%C3%ADmssonar>
+=head2 v5.13.10 - Egill Skalla-Grímsson, L<"Egils saga Skalla-Grímssonar"|http://www.heimskringla.no/wiki/Egils_saga_Skalla-Gr%C3%ADmssonar>
 
 L<Announced on 2011-02-20 by Ævar Arnfjörð Bjarmason|http://www.nntp.perl.org/group/perl.perl5.porters/2011/02/msg169340.html>
 
@@ -1563,7 +1563,7 @@ and diamond with equal ease.  Copies of copies of copies of copies were
 indistinguishable from the originals at any magnification, even using
 techniques like X-ray crystallography.
 
-=head2 v5.13.7 - Andy Wachowski and Lana Wachowski, 'The Matrix'
+=head2 v5.13.7 - Andy Wachowski and Lana Wachowski, "The Matrix"
 
 L<Announced on 2010-11-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2010/11/msg166162.html>
 
@@ -2614,7 +2614,7 @@ L<Announced on 2003-11-05 by Nicholas Clark|http://www.nntp.perl.org/group/perl.
   O daring job, but safe! are they not all the seas of God?
   O farther, farther, farther sail!
 
-=head2 v5.8.2-RC2 - Eric Idle/John Du Prez, "Accountancy Shanty"
+=head2 v5.8.2-RC2 - Eric Idle and John Du Prez, "Accountancy Shanty"
 
 L<Announced on 2003-11-03 by Nicholas Clark|http://www.nntp.perl.org/group/perl.perl5.porters/2003/11/msg84645.html>
 
@@ -2778,7 +2778,7 @@ The Librarian had seen many weird things in his time,
 but that had to be the 57th strangest.
 [footnote: he had a tidy mind]
 
-=head2 v5.6.2 - Sterne, "Tristram Shandy"
+=head2 v5.6.2 - Laurence Sterne, "Tristram Shandy"
 
 L<Announced on 2003-11-15 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2003/11/msg85222.html>
 
@@ -2788,7 +2788,7 @@ a substance, naturally takes a flight, behind the scenes, to see
 what is the cause and first spring of them--The search was not
 long in this instance.
 
-=head2 v5.6.2-RC1 - Sterne, "Tristram Shandy"
+=head2 v5.6.2-RC1 - Laurence Sterne, "Tristram Shandy"
 
 L<Announced on 2003-11-08 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2003/11/msg84953.html>
 
