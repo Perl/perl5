@@ -143,6 +143,90 @@ occasional shouts, in which we could distinguish the words Anamoo-moo!
 and Lama-Lama!  They continued this for at least half an hour, during
 which we had a good opportunity of observing their appearance.
 
+=head2 v5.21.3 - Robert Service, "The Men that Don't Fit In"
+
+L<Announced on 2014-08-20 by Peter Martini|http://www.nntp.perl.org/group/perl.perl5.porters/2014/08/msg218826.html>
+
+  If they just went straight they might go far,
+  They are strong and brave and true;
+  But they're always tired of the things that are,
+  And they want the strange and new.
+  They say: "Could I find my proper groove,
+  What a deep mark I would make!"
+  So they chop and change, and each fresh move
+  Is only a fresh mistake.
+
+=head2 v5.21.2 - Neil Armstrong, Buzz Aldrin, Charlie Duke, Final minutes of communication of the first manned moon landing, July 20, 1969
+
+L<Announced on 2014-07-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2014/07/msg217937.html>
+
+  Armstrong: Okay. Here's a...Looks like a good area here.
+  Aldrin:    I got the shadow out there.
+  Aldrin:    250, down at 2 1/2, 19 forward.
+  Aldrin:    Altitude, velocity lights.
+  Aldrin:    3 1/2 down, 220 feet, 13 forward.
+  Aldrin:    11 forward. Coming down nicely.
+  Armstrong: Gonna be right over that crater.
+  Aldrin:    200 feet, 4 1/2 down.
+  Aldrin:    5 1/2 down.
+  Armstrong: I got a good spot [garbled].
+  Aldrin:    160 feet, 6 1/2 down.
+  Aldrin:    5 1/2 down, 9 forward. You're looking good.
+  Aldrin:    120 feet.
+  Aldrin:    100 feet, 3 1/2 down, 9 forward. Five percent. Quantity light.
+  Aldrin:    Okay. 75 feet. And it's looking good. Down a half, 6 forward.
+  Duke:      60 seconds.
+  Aldrin:    Light's on.
+  Aldrin:    60 feet, down 2 1/2. 2 forward. 2 forward. That's good.
+  Aldrin:    40 feet, down 2 1/2. Picking up some dust.
+  Aldrin:    30 feet, 2 1/2 down. [Garbled] shadow.
+  Aldrin:    4 forward. 4 forward. Drifting to the right a little. 20 feet,
+             down a half.
+  Duke:      30 seconds.
+  Aldrin:    Drifting forward just a little bit; that's good.
+  Aldrin:    Contact Light.
+  Armstrong: Shutdown.
+  Aldrin:    Okay. Engine Stop.
+  Aldrin:    ACA out of Detent.
+  Armstrong: Out of Detent. Auto.
+  Aldrin:    Mode Control, both Auto. Descent Engine Command Override, Off.
+             Engine Arm, Off. 413 is in.
+  Duke:      We copy you down, Eagle.
+  Armstrong: Engine arm is off.
+  Armstrong: Houston, Tranquility Base here. The Eagle has landed.
+  Duke:      Roger, Twan...[correcting himself] Tranquility. We copy you on
+             the ground. You got a bunch of guys about to turn blue.
+             We're breathing again. Thanks a lot.
+  Aldrin:    Thank you.
+
+=head2 v5.21.1 - Robert Jordan, "The Crossroads of Twilights", Book 10 of "The Wheel of Time"
+
+L<Announced on 2014-06-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2014/06/msg217030.html>
+
+  We rode on the winds of the rising storm,
+    We ran to the sounds of the thunder.
+   We danced among the lightning bolts,
+       and tore the world asunder.
+
+    --     Anonymous fragment of a poem believed
+       written near the end of the previous Age,
+                 known by some as the Third Age.
+              Sometimes attributed to the Dragon
+                                         Reborn.
+
+=head2 v5.21.0 - Friedrich von Schiller, "The Song of the Bell"
+
+L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/05/msg215826.html>
+
+  Walled in fast within the earth
+  Stands the form burnt out of clay.
+  This must be the bell’s great birth!
+  Fellows, lend a hand to-day.
+    Sweat must trickle now
+    From the burning brow,
+  Till the work its master honour.
+  Blessing comes from Heaven’s Donor.
+
 =head2 v5.20.1 - Lorenzo da Ponte, trans. Diana Reed, "Così fan tutte"
 
 L<Announced on 2014-09-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/09/msg219789.html>
@@ -250,90 +334,6 @@ L<Announced on 2014-08-25 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5
   you wish it, they are ready...
   DORABELLA: Where are they?
   DON ALFONSO: Come in, friends.
-
-=head2 v5.21.3 - Robert Service, "The Men that Don't Fit In"
-
-L<Announced on 2014-08-20 by Peter Martini|http://www.nntp.perl.org/group/perl.perl5.porters/2014/08/msg218826.html>
-
-  If they just went straight they might go far,
-  They are strong and brave and true;
-  But they're always tired of the things that are,
-  And they want the strange and new.
-  They say: "Could I find my proper groove,
-  What a deep mark I would make!"
-  So they chop and change, and each fresh move
-  Is only a fresh mistake.
-
-=head2 v5.21.2 - Neil Armstrong, Buzz Aldrin, Charlie Duke, Final minutes of communication of the first manned moon landing, July 20, 1969
-
-L<Announced on 2014-07-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2014/07/msg217937.html>
-
-  Armstrong: Okay. Here's a...Looks like a good area here.
-  Aldrin:    I got the shadow out there.
-  Aldrin:    250, down at 2 1/2, 19 forward.
-  Aldrin:    Altitude, velocity lights.
-  Aldrin:    3 1/2 down, 220 feet, 13 forward.
-  Aldrin:    11 forward. Coming down nicely.
-  Armstrong: Gonna be right over that crater.
-  Aldrin:    200 feet, 4 1/2 down.
-  Aldrin:    5 1/2 down.
-  Armstrong: I got a good spot [garbled].
-  Aldrin:    160 feet, 6 1/2 down.
-  Aldrin:    5 1/2 down, 9 forward. You're looking good.
-  Aldrin:    120 feet.
-  Aldrin:    100 feet, 3 1/2 down, 9 forward. Five percent. Quantity light.
-  Aldrin:    Okay. 75 feet. And it's looking good. Down a half, 6 forward.
-  Duke:      60 seconds.
-  Aldrin:    Light's on.
-  Aldrin:    60 feet, down 2 1/2. 2 forward. 2 forward. That's good.
-  Aldrin:    40 feet, down 2 1/2. Picking up some dust.
-  Aldrin:    30 feet, 2 1/2 down. [Garbled] shadow.
-  Aldrin:    4 forward. 4 forward. Drifting to the right a little. 20 feet,
-             down a half.
-  Duke:      30 seconds.
-  Aldrin:    Drifting forward just a little bit; that's good.
-  Aldrin:    Contact Light.
-  Armstrong: Shutdown.
-  Aldrin:    Okay. Engine Stop.
-  Aldrin:    ACA out of Detent.
-  Armstrong: Out of Detent. Auto.
-  Aldrin:    Mode Control, both Auto. Descent Engine Command Override, Off.
-             Engine Arm, Off. 413 is in.
-  Duke:      We copy you down, Eagle.
-  Armstrong: Engine arm is off.
-  Armstrong: Houston, Tranquility Base here. The Eagle has landed.
-  Duke:      Roger, Twan...[correcting himself] Tranquility. We copy you on
-             the ground. You got a bunch of guys about to turn blue.
-             We're breathing again. Thanks a lot.
-  Aldrin:    Thank you.
-
-=head2 v5.21.1 - Robert Jordan, "The Crossroads of Twilights", Book 10 of "The Wheel of Time"
-
-L<Announced on 2014-06-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2014/06/msg217030.html>
-
-  We rode on the winds of the rising storm,
-    We ran to the sounds of the thunder.
-   We danced among the lightning bolts,
-       and tore the world asunder.
-
-    --     Anonymous fragment of a poem believed
-       written near the end of the previous Age,
-                 known by some as the Third Age.
-              Sometimes attributed to the Dragon
-                                         Reborn.
-
-=head2 v5.21.0 - Friedrich von Schiller, "The Song of the Bell"
-
-L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/05/msg215826.html>
-
-  Walled in fast within the earth
-  Stands the form burnt out of clay.
-  This must be the bell’s great birth!
-  Fellows, lend a hand to-day.
-    Sweat must trickle now
-    From the burning brow,
-  Till the work its master honour.
-  Blessing comes from Heaven’s Donor.
 
 =head2 v5.20.0 - William Shakespeare, Sonnet 18
 
@@ -789,36 +789,6 @@ The omniscient view. Not self-aware really. Self-awareness is much over-rated.
 Most automation works far better as a part of a whole, and even if human-
 powerful, it does not need to self-know.
 
-=head2 v5.16.3 - Devo, "Freedom of Choice"
-
-L<Announced on 2013-03-11 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/03/msg200009.html>
-
-  A victim of collision on the open sea
-  Nobody ever said that life was free
-  Sink, swim, go down with the ship
-  But use your freedom of choice
-
-=head2 v5.14.4 - Arthur C. Clarke, "The Nine Billion Names of God"
-
-L<Announced on 2013-03-11 by Dave Mitchell|http://www.nntp.perl.org/group/perl.perl5.porters/2013/03/msg199988.html>
-
-He began to sing, but gave it up after a while. This vast arena of
-mountains, gleaming like whitely hooded ghosts on every side, did not
-encourage such ebullience. Presently George glanced at his watch.
-
-'Should be there in an hour,' he called back over his shoulder to
-Chuck.  Then he added, in an afterthought: 'Wonder if the computer's
-finished its run. It was due about now.'
-
-Chuck didn't reply, so George swung round in his saddle. He could just
-see Chuck's face, a white oval turned towards the sky.
-
-'Look,' whispered Chuck, and George lifted his eyes to heaven. (There
-is always a last time for everything.)
-
-Overhead, without any fuss, the stars were going out.
-
-
 =head2 v5.17.9 - Douglas Adams, "The Hitch-Hikers Guide to the Galaxy"
 
 L<Announced on 2013-02-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2013/02/msg199115.html>
@@ -903,36 +873,6 @@ much above the beastly concerns of mankind as the harmoniums in the
 caves of Mercury. There, at first glance, was a young man without
 vanity, without lust — and one accepted at its face value the title Salo
 had engraved on the statue, "Discovery of Atomic Power."
-
-=head2 v5.12.5 - William Shakespeare, "Measure for Measure"
-
-L<Announced on 2012-11-10 by Dominic Hargreaves|http://www.nntp.perl.org/group/perl.perl5.porters/2012/11/msg195171.html>
-
-  Music oft hath such a charm
-  To make bad good, and good provoke to harm.
-
-=head2 v5.16.2 - Stanislaw Lem, "The Cyberiad", Trurl's Machine
-
-L<Announced on 2012-11-01 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/11/msg194915.html>
-
-Once upon a time Trurl the constructor built an eight-story thinking
-machine.  When it was finished, he gave it a coat of white paint,
-trimmed the edges in lavender, stepped back, squinted, then added a
-little curlicue on the front and, where one might imagine the forehead
-to be, a few pale orange polkadots.  Extremely pleased with himself,
-he whistled an air and, as is always done on such occasions, asked it
-the ritual question of how much is two plus two.
-
-The machine stirred.  Its tubes began to glow, its coils warmed up,
-current coursed through all its circuits like a waterfall,
-transformers hummed and throbbed, there was a clanging, and a
-chugging, and such an ungodly racket that Trurl began to think of
-adding a special mentation muffler.  Meanwhile the machine labored on,
-as if it had been given the most difficult problem in the Universe to
-solve; the ground shook, the sand slid underfoot from the vibration,
-valves popped like champagne corks, the relays nearly gave way under
-the strain.  At last, when Trurl had grown extremely impatient, the
-machine ground to a halt and said in a voice like thunder: SEVEN!
 
 =head2 v5.17.5 - Charles Stross, "Singularity Sky"
 
@@ -1071,6 +1011,38 @@ astounding display of productivity, then bent to scrabble in the muck
 for the brightly colored sporks of revolution.  A volley of shots rang
 out and Burya Rubenstein raised his hands, grinning wildly, to accept
 the salute of the soldiers from the Skull Hill garrison.
+
+=head2 v5.16.3 - Devo, "Freedom of Choice"
+
+L<Announced on 2013-03-11 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/03/msg200009.html>
+
+  A victim of collision on the open sea
+  Nobody ever said that life was free
+  Sink, swim, go down with the ship
+  But use your freedom of choice
+
+=head2 v5.16.2 - Stanislaw Lem, "The Cyberiad", Trurl's Machine
+
+L<Announced on 2012-11-01 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/11/msg194915.html>
+
+Once upon a time Trurl the constructor built an eight-story thinking
+machine.  When it was finished, he gave it a coat of white paint,
+trimmed the edges in lavender, stepped back, squinted, then added a
+little curlicue on the front and, where one might imagine the forehead
+to be, a few pale orange polkadots.  Extremely pleased with himself,
+he whistled an air and, as is always done on such occasions, asked it
+the ritual question of how much is two plus two.
+
+The machine stirred.  Its tubes began to glow, its coils warmed up,
+current coursed through all its circuits like a waterfall,
+transformers hummed and throbbed, there was a clanging, and a
+chugging, and such an ungodly racket that Trurl began to think of
+adding a special mentation muffler.  Meanwhile the machine labored on,
+as if it had been given the most difficult problem in the Universe to
+solve; the ground shook, the sand slid underfoot from the vibration,
+valves popped like champagne corks, the relays nearly gave way under
+the strain.  At last, when Trurl had grown extremely impatient, the
+machine ground to a halt and said in a voice like thunder: SEVEN!
 
 =head2 v5.16.1 - Emerald Rose, "Never Split The Party"
 
@@ -1258,38 +1230,6 @@ don't have enough dots to connect, and they end up with very linear solutions
 without a broad perspective on the problem. The broader one's understanding of
 the human experience, the better design we will have.
 
-=head2 v5.14.3 - William Shakespeare, "As You Like It"
-
-L<Announced on 2012-10-12 by Dominic Hargreaves|http://www.nntp.perl.org/group/perl.perl5.porters/2012/10/msg194057.html>
-
-  The poor world is almost six thousand years old, and in all
-  this time there was not any man died in his own person,
-  videlicit, in a love-cause. Troilus had his brains dashed
-  out with a Grecian club; yet he did what he could to die
-  before, and he is one of the patterns of love. Leander, he
-  would have lived many a fair year, though Hero had turned
-  nun, if it had not been for a hot midsummer night; for, good
-  youth, he went but forth to wash him in the Hellespont and
-  being taken with the cramp was drowned and the foolish
-  coroners of that age found it was 'Hero of Sestos.' But these
-  are all lies: men have died from time to time and worms have
-  eaten them, but not for love.
-
-=head2 v5.14.2 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  |http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
-
-L<Announced on 2011-09-26 by Florian Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177618.html>
-
-It's not so much that people don't value the programs after they have them--they
-do value them.  But they're not the sort of thing that would ever catch on if
-they had to overcome the marketing barrier.  (I don't yet know if perl will
-catch on at all--I'm worried enough about it that I specifically included an
-awk-to-perl translator just to help it catch on.)  Maybe it's all just an
-inferiority complex.  Or maybe I don't like to be mercenary.
-
-So I guess I'd say that the reason some software comes free is that the
-mechanism for selling it is missing, either from the work environment, or from
-the heart of the programmer.
-
 =head2 v5.15.3 - Oscar Wilde, From the preface to "The Picture of Dorian Gray"
 
 L<Announced on 2011-09-20 by Stevan Little|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177427.html>
@@ -1358,22 +1298,57 @@ L<Announced on 2011-06-20 by David Golden|http://www.nntp.perl.org/group/perl.pe
 
 If you dare nothing, then when the day is over, nothing is all you will have gained.
 
-=head2 v5.12.4 - William Schwenck Gilbert, "Trial By Jury"
+=head2 v5.14.4 - Arthur C. Clarke, "The Nine Billion Names of God"
 
-L<Announced on 2011-06-20 by Leon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173725.html>
+L<Announced on 2013-03-11 by Dave Mitchell|http://www.nntp.perl.org/group/perl.perl5.porters/2013/03/msg199988.html>
 
-  You cannot eat breakfast all day,
-  Nor is it the act of a sinner,
-  When breakfast is taken away,
-  To turn his attention to dinner;
-  And it's not in the range of belief,
-  To look upon him as a glutton,
-  Who, when he is tired of beef,
-  Determines to tackle the mutton.
-  Ah! But this I am willing to say,
-  If it will appease her sorrow,
-  I'll marry this lady today,
-  And I'll marry the other tomorrow!
+He began to sing, but gave it up after a while. This vast arena of
+mountains, gleaming like whitely hooded ghosts on every side, did not
+encourage such ebullience. Presently George glanced at his watch.
+
+'Should be there in an hour,' he called back over his shoulder to
+Chuck.  Then he added, in an afterthought: 'Wonder if the computer's
+finished its run. It was due about now.'
+
+Chuck didn't reply, so George swung round in his saddle. He could just
+see Chuck's face, a white oval turned towards the sky.
+
+'Look,' whispered Chuck, and George lifted his eyes to heaven. (There
+is always a last time for everything.)
+
+Overhead, without any fuss, the stars were going out.
+
+=head2 v5.14.3 - William Shakespeare, "As You Like It"
+
+L<Announced on 2012-10-12 by Dominic Hargreaves|http://www.nntp.perl.org/group/perl.perl5.porters/2012/10/msg194057.html>
+
+  The poor world is almost six thousand years old, and in all
+  this time there was not any man died in his own person,
+  videlicit, in a love-cause. Troilus had his brains dashed
+  out with a Grecian club; yet he did what he could to die
+  before, and he is one of the patterns of love. Leander, he
+  would have lived many a fair year, though Hero had turned
+  nun, if it had not been for a hot midsummer night; for, good
+  youth, he went but forth to wash him in the Hellespont and
+  being taken with the cramp was drowned and the foolish
+  coroners of that age found it was 'Hero of Sestos.' But these
+  are all lies: men have died from time to time and worms have
+  eaten them, but not for love.
+
+=head2 v5.14.2 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  |http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
+
+L<Announced on 2011-09-26 by Florian Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177618.html>
+
+It's not so much that people don't value the programs after they have them--they
+do value them.  But they're not the sort of thing that would ever catch on if
+they had to overcome the marketing barrier.  (I don't yet know if perl will
+catch on at all--I'm worried enough about it that I specifically included an
+awk-to-perl translator just to help it catch on.)  Maybe it's all just an
+inferiority complex.  Or maybe I don't like to be mercenary.
+
+So I guess I'd say that the reason some software comes free is that the
+mechanism for selling it is missing, either from the work environment, or from
+the heart of the programmer.
 
 =head2 v5.14.1 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  |http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
 
@@ -1388,41 +1363,6 @@ to upgrade from readnews to rn?  How much money would you pay for
 the patch program?  As for warp, it's a mere game.  And anything you
 can do with perl you can eventually do with an amazing and totally
 unreadable conglomeration of awk, sed, sh and C.
-
-=head2 v5.12.4-RC2 - James Russell Lowell, "Eleanor makes macaroons"
-
-L<Announced on 2011-06-15 by Leon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173609.html>
-
-  Now for sugar, -- nay, our plan
-  Tolerates no work of man.
-  Hurry, then, ye golden bees;
-  Fetch your clearest honey, please,
-  Garnered on a Yorkshire moor,
-  While the last larks sing and soar,
-  From the heather-blossoms sweet
-  Where sea-breeze and sunshine meet,
-  And the Augusts mask as Junes, --
-  Eleanor makes macaroons!
-
-=head2 v5.12.4-RC1 - Ogden Nash, "The Clean Plater"
-
-L<Announced on 2011-06-08 by Leon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173352.html>
-
-  Pheasant is pleasant, of course,
-  And terrapin, too, is tasty,
-  Lobster I freely endorse,
-  In pate or patty or pasty.
-  But there's nothing the matter with butter,
-  And nothing the matter with jam,
-  And the warmest greetings I utter
-  To the ham and the yam and the clam.
-  For they're food,
-  All food,
-  And I think very fondly of food.
-  Through I'm broody at times
-  When bothered by rhymes,
-  I brood
-  On food.
 
 =head2 v5.14.0 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV> |http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
 
@@ -1734,6 +1674,65 @@ smoke, steam, and sulphurous stench!
 
 "Only to think of the consequences," I mused, "if the old
 volcano were once more to set to work."
+
+=head2 v5.12.5 - William Shakespeare, "Measure for Measure"
+
+L<Announced on 2012-11-10 by Dominic Hargreaves|http://www.nntp.perl.org/group/perl.perl5.porters/2012/11/msg195171.html>
+
+  Music oft hath such a charm
+  To make bad good, and good provoke to harm.
+
+=head2 v5.12.4 - William Schwenck Gilbert, "Trial By Jury"
+
+L<Announced on 2011-06-20 by Leon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173725.html>
+
+  You cannot eat breakfast all day,
+  Nor is it the act of a sinner,
+  When breakfast is taken away,
+  To turn his attention to dinner;
+  And it's not in the range of belief,
+  To look upon him as a glutton,
+  Who, when he is tired of beef,
+  Determines to tackle the mutton.
+  Ah! But this I am willing to say,
+  If it will appease her sorrow,
+  I'll marry this lady today,
+  And I'll marry the other tomorrow!
+
+=head2 v5.12.4-RC2 - James Russell Lowell, "Eleanor makes macaroons"
+
+L<Announced on 2011-06-15 by Leon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173609.html>
+
+  Now for sugar, -- nay, our plan
+  Tolerates no work of man.
+  Hurry, then, ye golden bees;
+  Fetch your clearest honey, please,
+  Garnered on a Yorkshire moor,
+  While the last larks sing and soar,
+  From the heather-blossoms sweet
+  Where sea-breeze and sunshine meet,
+  And the Augusts mask as Junes, --
+  Eleanor makes macaroons!
+
+=head2 v5.12.4-RC1 - Ogden Nash, "The Clean Plater"
+
+L<Announced on 2011-06-08 by Leon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173352.html>
+
+  Pheasant is pleasant, of course,
+  And terrapin, too, is tasty,
+  Lobster I freely endorse,
+  In pate or patty or pasty.
+  But there's nothing the matter with butter,
+  And nothing the matter with jam,
+  And the warmest greetings I utter
+  To the ham and the yam and the clam.
+  For they're food,
+  All food,
+  And I think very fondly of food.
+  Through I'm broody at times
+  When bothered by rhymes,
+  I brood
+  On food.
 
 =head2 v5.12.3 - Howard W. Campbell, Jr., "Reflections on Not Participating in Current Events"
 
