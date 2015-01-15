@@ -16485,10 +16485,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                 sv_catpvs(sv, "{non-utf8-latin1-all}");
             }
 
-            /* output information about the unicode matching */
-            if (flags & ANYOF_MATCHES_ALL_ABOVE_BITMAP)
-                sv_catpvs(sv, "{above_bitmap_all}");
-            else if (ARG(o) != ANYOF_ONLY_HAS_BITMAP) {
+            if (ARG(o) != ANYOF_ONLY_HAS_BITMAP) {
                 SV *lv; /* Set if there is something outside the bit map. */
                 bool byte_output = FALSE;   /* If something in the bitmap has
                                                been output */
@@ -16572,6 +16569,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                     invlist_iterfinish(only_utf8_locale);
                 }
             }
+
+            if (flags & ANYOF_MATCHES_ALL_ABOVE_BITMAP)
+                sv_catpvs(sv, "{above_bitmap_all}");
 	}
         SvREFCNT_dec(bitmap_invlist);
 
