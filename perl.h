@@ -1226,6 +1226,7 @@ EXTERN_C char *crypt(const char *, const char *);
 #   define SS_IVCHAN  		SS$_IVCHAN
 #   define SS_NORMAL  		SS$_NORMAL
 #   define SS_NOPRIV  		SS$_NOPRIV
+#   define SS_BUFFEROVF		SS$_BUFFEROVF
 #else
 #   define LIB_INVARG 		0
 #   define RMS_DIR    		0
@@ -1240,6 +1241,7 @@ EXTERN_C char *crypt(const char *, const char *);
 #   define SS_IVCHAN  		0
 #   define SS_NORMAL  		0
 #   define SS_NOPRIV  		0
+#   define SS_BUFFEROVF		0
 #endif
 
 #ifdef WIN32
