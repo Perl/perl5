@@ -135,6 +135,29 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
+=head3 L<perlexperiment>
+
+=over 4
+
+=item *
+
+Added reference to subroutine signatures.  This feature was actually added in
+Perl 5.20.0 but was accidentally omitted from the experimental feature
+documentation until now.
+
+=back
+
+=head3 L<perlpolicy>
+
+=over 4
+
+=item *
+
+The process whereby features may graduate from experimental status has now been
+formally documented.
+
+=back
+
 =head3 L<perlsyn>
 
 =over 4
@@ -163,7 +186,8 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Missing right brace on \N{}|perldiag/"Missing right brace on \N{}"> is now
+documented.  This warning is not new, but was not previously documented here.
 
 =back
 
