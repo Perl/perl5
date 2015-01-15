@@ -384,6 +384,12 @@ crash, and had done so since Perl 5.10.  (In some cases the crash did not
 start happening till 5.16.)  The crash has, of course, been fixed.
 [perl #123542]
 
+=item *
+
+A memory leak in some regular expressions, introduced in Perl 5.20.1, has been
+fixed.
+L<[perl #123198]|https://rt.perl.org/Ticket/Display.html?id=123198>
+
 =back
 
 =head1 Known Problems
