@@ -1053,7 +1053,7 @@ L<Announced on 2012-08-08 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   The wizard in the middle, where he can shed some light
   And you never let that damn thief out of sightâ€¦
 
-=head2 v5.16.1 RC1 - Tom Moldvay, Foreward to the "Dungeons & Dragons Basic Rulebook"
+=head2 v5.16.1-RC1 - Tom Moldvay, Foreward to the "Dungeons & Dragons Basic Rulebook"
 
 L<Announced on 2012-08-03 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190264.html>
 
