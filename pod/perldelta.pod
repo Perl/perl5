@@ -70,6 +70,21 @@ recursion when dumping deep data structures.
 
 =item *
 
+L<Errno> has been upgraded from version 1.20_03 to 1.20_05.
+
+Warnings when building the XS on Windows with the Visual C++ compiler are now
+avoided.
+
+=item *
+
+L<feature> has been upgraded from version 1.36 to 1.36_01.
+
+The C<postderef> feature has now been documented.  This feature was actually
+added in Perl 5.20.0 but was accidentally omitted from the feature
+documentation until now.
+
+=item *
+
 L<IO::Socket> has been upgraded from version 1.37 to 1.38.
 
 Document the limitations of the isconnected() method.  [perl #123096]
@@ -92,6 +107,12 @@ file position set to a negation location.
 
 C<eof()> on a C<PerlIO::scalar> handle now properly returns true when
 the file position is past the 2GB mark on 32-bit systems.
+
+=item *
+
+L<Storable> has been upgraded from version 2.49 to 2.49_01.
+
+Minor grammatical change to the documentation only.
 
 =back
 
