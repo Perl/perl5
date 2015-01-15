@@ -135,18 +135,14 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlsyn>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
-
-=item *
-
-L<perlsyn>: An ambiguity in the documentation of the Ellipsis statement has
-been corrected. [perl #122661]
+An ambiguity in the documentation of the Ellipsis statement has been corrected.
+L<[perl #122661]|https://rt.perl.org/Ticket/Display.html?id=122661>
 
 =back
 
