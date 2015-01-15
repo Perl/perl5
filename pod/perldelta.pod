@@ -63,9 +63,22 @@ L<[perl #122701]|https://rt.perl.org/Ticket/Display.html?id=122701>
 
 =item *
 
+L<Data::Dumper> has been upgraded from version 2.151 to 2.151_01.
+
+Fixes CVE-2014-4330 by adding a configuration variable/option to limit
+recursion when dumping deep data structures.
+
+=item *
+
 L<IO::Socket> has been upgraded from version 1.37 to 1.38.
 
 Document the limitations of the isconnected() method.  [perl #123096]
+
+=item *
+
+PathTools has been upgraded from version 3.48 to 3.48_01.
+
+A warning from the B<gcc> compiler is now avoided when building the XS.
 
 =item *
 
