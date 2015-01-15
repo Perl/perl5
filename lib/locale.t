@@ -9,6 +9,9 @@
 
 my $is_ebcdic = ord("A") == 193;
 
+no warnings 'locale';  # We test even weird locales; and do some scary things
+                       # in ok locales
+
 binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
@@ -711,8 +714,6 @@ my $final_without_setlocale = $test_num;
 debug "Scanning for locales...\n";
 
 require POSIX; import POSIX ':locale_h';
-
-no warnings 'locale';  # We test even weird locales;
 
 my @Locale = find_locales([ &POSIX::LC_CTYPE, &POSIX::LC_NUMERIC, &POSIX::LC_ALL ]);
 
