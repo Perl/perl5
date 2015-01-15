@@ -241,7 +241,9 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+The test script F<re/rt122747.t> has been added to verify that
+L<perl #122747|https://rt.perl.org/Ticket/Display.html?id=122747> remains
+fixed.
 
 =back
 
