@@ -11,7 +11,7 @@ from a literary or other creative work, chosen by the pumpking or release
 manager.  This file assembles the known list of epigraph for posterity,
 and also links to the release announcements in mailing list archives.
 
-I<Note>: these have also been referred to as <epigrams>, but the
+I<Note>: these have also been referred to as I<epigrams>, but the
 definition of I<epigraph> is closer to the way they have been used.
 Consult your favorite dictionary for details.
 
