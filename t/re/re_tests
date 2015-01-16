@@ -1898,5 +1898,9 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 /( (?&solution) | % ) \Z (?(DEFINE) (?<solution>7\%\ solution) )/x	7% solution	y	$1	7% solution		# [perl #122890]
 (.)(?{$~=$^N})	\x{100}	y	$~	\x{100}		# [perl #123135]
 
+# pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
+/[a-z]/i	\N{KELVIN SIGN}	y	$&	\N{KELVIN SIGN}
+/[A-Z]/i	\N{LATIN SMALL LETTER LONG S}	y	$&	\N{LATIN SMALL LETTER LONG S}
+
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

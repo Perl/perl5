@@ -14895,7 +14895,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     op = POSIXA;
                 }
             }
-            else if (prevvalue == 'A') {
+            else if (AT_LEAST_ASCII_RESTRICTED || ! FOLD) {
+                /* We can optimize A-Z or a-z, but not if they could match
+                 * something like the KELVIN SIGN under /i (/a means they
+                 * can't) */
+            if (prevvalue == 'A') {
                 if (value == 'Z'
 #ifdef EBCDIC
                     && literal_endpoint == 2
@@ -14914,6 +14918,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     arg = (FOLD) ? _CC_ALPHA : _CC_LOWER;
                     op = POSIXA;
                 }
+            }
             }
         }
 
