@@ -3827,11 +3827,10 @@ S_intuit_more(pTHX_ char *s)
 		    && !(last_un_char == '$' || last_un_char == '@'
 			 || last_un_char == '&')
 		    && isALPHA(*s) && s[1] && isALPHA(s[1])) {
-		    char *d = tmpbuf;
+		    char *d = s;
 		    while (isALPHA(*s))
-			*d++ = *s++;
-		    *d = '\0';
-		    if (keyword(tmpbuf, d - tmpbuf, 0))
+			s++;
+		    if (keyword(d, s - d, 0))
 			weight -= 150;
 		}
 		if (un_char == last_un_char + 1)
