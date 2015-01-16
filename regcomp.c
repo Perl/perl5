@@ -14463,10 +14463,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     SV** posixes_ptr = namedclass % 2 == 0
                                        ? &posixes
                                        : &nposixes;
-                    SV** source_ptr = &PL_XPosix_ptrs[classnum];
                     _invlist_union_maybe_complement_2nd(
                                                      *posixes_ptr,
-                                                     *source_ptr,
+                                                     PL_XPosix_ptrs[classnum],
                                                      namedclass % 2 != 0,
                                                      posixes_ptr);
                 }
@@ -16485,6 +16484,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                 sv_catpvs(sv, "{non-utf8-latin1-all}");
             }
 
+            if (flags & ANYOF_MATCHES_ALL_ABOVE_BITMAP)
+                sv_catpvs(sv, "{above_bitmap_all}");
+
             if (ARG(o) != ANYOF_ONLY_HAS_BITMAP) {
                 SV *lv; /* Set if there is something outside the bit map. */
                 bool byte_output = FALSE;   /* If something in the bitmap has
@@ -16569,9 +16571,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                     invlist_iterfinish(only_utf8_locale);
                 }
             }
-
-            if (flags & ANYOF_MATCHES_ALL_ABOVE_BITMAP)
-                sv_catpvs(sv, "{above_bitmap_all}");
 	}
         SvREFCNT_dec(bitmap_invlist);
 
