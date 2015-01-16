@@ -760,6 +760,12 @@ Perl recognizes the following POSIX character classes:
  word   A Perl extension ("[A-Za-z0-9_]"), equivalent to "\w".
  xdigit Any hexadecimal digit ("[0-9a-fA-F]").
 
+Like the L<Unicode properties|/Unicode Properties>, most of the POSIX
+properties match the same regardless of whether case-insensitive (C</i>)
+matching is in effect or not.  The two exceptions are C<[:upper:]> and
+C<[:lower:]>.  Under C</i>, they each match the union of C<[:upper:]> and
+C<[:lower:]>.
+
 Most POSIX character classes have two Unicode-style C<\p> property
 counterparts.  (They are not official Unicode properties, but Perl extensions
 derived from official Unicode properties.)  The table below shows the relation
@@ -805,8 +811,9 @@ C<\p{Blank}> and C<\p{HorizSpace}> are synonyms.
 
 Control characters don't produce output as such, but instead usually control
 the terminal somehow: for example, newline and backspace are control characters.
-In the ASCII range, characters whose code points are between 0 and 31 inclusive,
-plus 127 (C<DEL>) are control characters.
+On ASCII platforms, in the ASCII range, characters whose code points are
+between 0 and 31 inclusive, plus 127 (C<DEL>) are control characters; on
+EBCDIC platforms, their counterparts are control characters.
 
 =item [3]
 
