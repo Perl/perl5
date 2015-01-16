@@ -312,7 +312,7 @@ EOF
 EOF
             "LANG is used if LC_ALL, LC_NUMERIC are invalid"))
            {
-              note "To see details change this .t to not close STDERR";
+              note "To see details change this .t, do not close STDERR";
            }
         }
 
@@ -340,7 +340,7 @@ EOF
 EOF
                 'C locale is used if LC_ALL, LC_NUMERIC, LANG are invalid'))
                 {
-                    note "To see details change this .t to not close STDERR";
+                    note "To see details change this .t, do not close STDERR";
                 }
             }
         }
