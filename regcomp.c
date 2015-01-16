@@ -16517,8 +16517,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
             if (ARG(o) != ANYOF_ONLY_HAS_BITMAP) {
                 SV *lv; /* Set if there is something outside the bit map. */
-                bool byte_output = FALSE;   /* If something in the bitmap has
-                                               been output */
+                bool byte_output = FALSE;   /* If something has been output */
                 SV *only_utf8_locale;
 
                 /* Get the stuff that wasn't in the bitmap.  'bitmap_invlist'
