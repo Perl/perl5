@@ -13769,6 +13769,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                separate for a while from the non-complemented
                                versions because of complications with /d
                                matching */
+    SV* simple_posixes = NULL; /* But under some conditions, the classes can be
+                                  treated more simply than the general case,
+                                  leading to less compilation and execution
+                                  work */
     UV element_count = 0;   /* Number of distinct elements in the class.
 			       Optimizations may be possible if this is tiny */
     AV * multi_char_matches = NULL; /* Code points that fold to more than one
@@ -14458,7 +14462,26 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                 &cp_list);
                     }
                 }
-                else {  /* Garden variety class.  If is NASCII, NDIGIT, ...
+                else if (UNI_SEMANTICS
+                        || classnum == _CC_ASCII
+                        || (DEPENDS_SEMANTICS && (classnum == _CC_DIGIT
+                                                  || classnum == _CC_XDIGIT)))
+                {
+                    /* We usually have to worry about /d and /a affecting what
+                     * POSIX classes match, with special code needed for /d
+                     * because we won't know until runtime what all matches.
+                     * But there is no extra work needed under /u, and
+                     * [:ascii:] is unaffected by /a and /d; and :digit: and
+                     * :xdigit: don't have runtime differences under /d.  So we
+                     * can special case these, and avoid some extra work below,
+                     * and at runtime. */
+                    _invlist_union_maybe_complement_2nd(
+                                                     simple_posixes,
+                                                     PL_XPosix_ptrs[classnum],
+                                                     namedclass % 2 != 0,
+                                                     &simple_posixes);
+                }
+                else {  /* Garden variety class.  If is NUPPER, NALPHA, ...
                            complement and use nposixes */
                     SV** posixes_ptr = namedclass % 2 == 0
                                        ? &posixes
@@ -14943,6 +14966,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
             SvREFCNT_dec(posixes);
             SvREFCNT_dec(nposixes);
+            SvREFCNT_dec(simple_posixes);
             SvREFCNT_dec(cp_list);
             SvREFCNT_dec(cp_foldable_list);
             return ret;
@@ -15100,6 +15124,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * classes.  The lists are kept separate up to now because we don't want to
      * fold the classes (folding of those is automatically handled by the swash
      * fetching code) */
+    if (simple_posixes) {
+        _invlist_union(cp_list, simple_posixes, &cp_list);
+        SvREFCNT_dec_NN(simple_posixes);
+    }
     if (posixes || nposixes) {
         if (posixes && AT_LEAST_ASCII_RESTRICTED) {
             /* Under /a and /aa, nothing above ASCII matches these */
