@@ -14,7 +14,7 @@
 #define VALID_UTF_MAX    (0x10ffff)
 #define OVER_UTF_MAX(uv) (VALID_UTF_MAX < (uv))
 
-static const UV max_div_16 = UV_MAX / 16;
+#define MAX_DIV_16 (UV_MAX / 16)
 
 /* Supported Levels */
 #define MinLevel	(1)
@@ -67,7 +67,7 @@ static const UV max_div_16 = UV_MAX / 16;
 
 #define CJK_CompIni  (0xFA0E)
 #define CJK_CompFin  (0xFA29)
-static STDCHAR UnifiedCompat[] = {
+static const STDCHAR UnifiedCompat[] = {
       1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,0,0,1,1,1
 }; /* E F 0 1 2 3 4 5 6 7 8 9 A B C D E F 0 1 2 3 4 5 6 7 8 9 */
 
@@ -82,7 +82,7 @@ _fetch_rest ()
   PREINIT:
     char ** rest;
   PPCODE:
-    for (rest = UCA_rest; *rest; ++rest) {
+    for (rest = (char **)UCA_rest; *rest; ++rest) {
 	XPUSHs(sv_2mortal(newSVpv((char *) *rest, 0)));
     }
 
@@ -105,12 +105,13 @@ _fetch_simple (uv)
 	int i;
 	int num = (int)*result;
 	++result;
+	EXTEND(SP, num);
 	for (i = 0; i < num; ++i) {
-	    XPUSHs(sv_2mortal(newSVpvn((char *) result, VCE_Length)));
+	    PUSHs(sv_2mortal(newSVpvn((char *) result, VCE_Length)));
 	    result += VCE_Length;
 	}
     } else {
-	XPUSHs(sv_2mortal(newSViv(0)));
+	PUSHs(sv_2mortal(newSViv(0)));
     }
 
 SV*
@@ -154,7 +155,7 @@ _getHexArray (src)
     s = SvPV(src,byte);
     for (e = s + byte; s < e;) {
 	hexdigit = strchr((char *) PL_hexdigit, *s++);
-        if (! hexdigit)
+	if (! hexdigit)
 	    continue;
 	value = (hexdigit - PL_hexdigit) & 0xF;
 	while (*s) {
@@ -163,7 +164,7 @@ _getHexArray (src)
 		break;
 	    if (overflowed)
 		continue;
-	    if (value > max_div_16) {
+	    if (value > MAX_DIV_16) {
 		overflowed = TRUE;
 		continue;
 	    }
@@ -205,10 +206,11 @@ _decompHangul (code)
     vindex = (sindex % Hangul_NCount) / Hangul_TCount;
     tindex =  sindex % Hangul_TCount;
 
-    XPUSHs(sv_2mortal(newSVuv(lindex + Hangul_LBase)));
-    XPUSHs(sv_2mortal(newSVuv(vindex + Hangul_VBase)));
+    EXTEND(SP, tindex ? 3 : 2);
+    PUSHs(sv_2mortal(newSVuv(lindex + Hangul_LBase)));
+    PUSHs(sv_2mortal(newSVuv(vindex + Hangul_VBase)));
     if (tindex)
-	XPUSHs(sv_2mortal(newSVuv(tindex + Hangul_TBase)));
+	PUSHs(sv_2mortal(newSVuv(tindex + Hangul_TBase)));
 
 
 SV*
@@ -299,8 +301,9 @@ _derivCE_9 (code)
     b[2] = (U8)(bbbb & 0xFF);
     a[7] = b[7] = (U8)(code >> 8);
     a[8] = b[8] = (U8)(code & 0xFF);
-    XPUSHs(sv_2mortal(newSVpvn((char *) a, VCE_Length)));
-    XPUSHs(sv_2mortal(newSVpvn((char *) b, VCE_Length)));
+    EXTEND(SP, 2);
+    PUSHs(sv_2mortal(newSVpvn((char *) a, VCE_Length)));
+    PUSHs(sv_2mortal(newSVpvn((char *) b, VCE_Length)));
 
 
 void
@@ -319,8 +322,9 @@ _derivCE_8 (code)
     b[2] = (U8)(bbbb & 0xFF);
     a[7] = b[7] = (U8)(code >> 8);
     a[8] = b[8] = (U8)(code & 0xFF);
-    XPUSHs(sv_2mortal(newSVpvn((char *) a, VCE_Length)));
-    XPUSHs(sv_2mortal(newSVpvn((char *) b, VCE_Length)));
+    EXTEND(SP, 2);
+    PUSHs(sv_2mortal(newSVpvn((char *) a, VCE_Length)));
+    PUSHs(sv_2mortal(newSVpvn((char *) b, VCE_Length)));
 
 
 void
@@ -331,7 +335,7 @@ _uideoCE_8 (code)
   PPCODE:
     uice[1] = uice[7] = (U8)(code >> 8);
     uice[2] = uice[8] = (U8)(code & 0xFF);
-    XPUSHs(sv_2mortal(newSVpvn((char *) uice, VCE_Length)));
+    PUSHs(sv_2mortal(newSVpvn((char *) uice, VCE_Length)));
 
 
 SV*
@@ -598,7 +602,7 @@ visualizeSortKey (self, key)
     STRLEN klen, dlen;
     UV uv;
     IV uca_vers, sep = 0;
-    static const char *upperhex = "0123456789ABCDEF";
+    const char *upperhex = "0123456789ABCDEF";
   CODE:
     if (SvROK(self) && SvTYPE(SvRV(self)) == SVt_PVHV)
 	selfHV = (HV*)SvRV(self);
