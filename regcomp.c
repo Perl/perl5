@@ -14899,26 +14899,26 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 /* We can optimize A-Z or a-z, but not if they could match
                  * something like the KELVIN SIGN under /i (/a means they
                  * can't) */
-            if (prevvalue == 'A') {
-                if (value == 'Z'
+                if (prevvalue == 'A') {
+                    if (value == 'Z'
 #ifdef EBCDIC
-                    && literal_endpoint == 2
+                        && literal_endpoint == 2
 #endif
-                ) {
-                    arg = (FOLD) ? _CC_ALPHA : _CC_UPPER;
-                    op = POSIXA;
+                    ) {
+                        arg = (FOLD) ? _CC_ALPHA : _CC_UPPER;
+                        op = POSIXA;
+                    }
                 }
-            }
-            else if (prevvalue == 'a') {
-                if (value == 'z'
+                else if (prevvalue == 'a') {
+                    if (value == 'z'
 #ifdef EBCDIC
-                    && literal_endpoint == 2
+                        && literal_endpoint == 2
 #endif
-                ) {
-                    arg = (FOLD) ? _CC_ALPHA : _CC_LOWER;
-                    op = POSIXA;
+                    ) {
+                        arg = (FOLD) ? _CC_ALPHA : _CC_LOWER;
+                        op = POSIXA;
+                    }
                 }
-            }
             }
         }
 
