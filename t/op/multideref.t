@@ -187,7 +187,7 @@ sub defer {}
 }
 
 # RT #123609
-# don't evaluate a const array index unless its really a const array
+# don't evaluate a const array index unless it's really a const array
 # index
 
 {
