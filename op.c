@@ -12285,7 +12285,6 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
             /* look for another (rv2av/hv; get index;
              * aelem/helem/exists/delele) sequence */
 
-            IV iv;
             OP *kid;
             bool is_deref;
             bool ok;
@@ -12397,12 +12396,10 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                     }
                     else {
                         /* it's a constant array index */
+                        IV iv;
                         SV *ix_sv = cSVOPo->op_sv;
-                        if (pass && UNLIKELY(SvROK(ix_sv) && !SvGAMAGIC(ix_sv)
-                                                && ckWARN(WARN_MISC)))
-                        Perl_warner(aTHX_ packWARN(WARN_MISC),
-                                "Use of reference \"%"SVf"\" as array index",
-                                SVfARG(ix_sv));
+                        if (!SvIOK(ix_sv))
+                            break;
                         iv = SvIV(ix_sv);
 
                         if (   action_count == 0

@@ -18,7 +18,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 56;
+plan 58;
 
 
 # check that strict refs hint is handled
@@ -184,4 +184,24 @@ sub defer {}
     $h{foo} = {};
     defer($h{foo}{bar});
     ok(!exists $h{foo}{bar}, "defer");
+}
+
+# RT #123609
+# don't evalulate a const array index unlesss its really a const array
+# index
+
+{
+    my $warn = '';
+    local $SIG{__WARN__} = sub { $warn .= $_[0] };
+    ok(
+        eval q{
+            my @a = (1);
+            my $arg = 0;
+            my $x = $a[ 'foo' eq $arg ? 1 : 0 ];
+            1;
+        },
+        "#123609: eval"
+    )
+        or diag("eval gave: $@");
+    is($warn, "", "#123609: warn");
 }
