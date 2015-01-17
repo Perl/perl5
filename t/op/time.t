@@ -241,8 +241,8 @@ SKIP: { #rt #73040
 
 {
     local $^W;
-    gmtime("NaN");
+    scalar gmtime("NaN");
     pass('[perl #123495] gmtime(NaN) does not crash');
-    localtime("NaN");
+    scalar localtime("NaN");
     pass('localtime(NaN) does not crash');
 }
