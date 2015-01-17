@@ -13811,9 +13811,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     SV* only_utf8_locale_list = NULL;
 
 #ifdef EBCDIC
-    /* In a range, counts how many 0-2 of the ends of it came from literals,
-     * not escapes.  Thus we can tell if 'A' was input vs \x{C1} */
-    UV literal_endpoint = 0;
+    /* In a range, if one of the endpoints is non-character-set portable,
+     * meaning that it hard-codes a code point that may mean a different
+     * charactger in ASCII vs. EBCDIC, as opposed to, say, a literal 'A' or a
+     * mnemonic '\t' which each mean the same character no matter which
+     * character set the platform is on. */
+    unsigned int non_portable_endpoint = 0;
 
     /* Is the range unicode? which means on a platform that isn't 1-1 native
      * to Unicode (i.e. non-ASCII), each code point in it should be considered
@@ -13924,7 +13927,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    rangebegin = RExC_parse;
 	    element_count++;
 #ifdef EBCDIC
-            literal_endpoint = 0;
+            non_portable_endpoint = 0;
 #endif
 	}
 	if (UTF) {
@@ -13942,12 +13945,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         {
             namedclass = regpposixcc(pRExC_state, value, strict);
         }
-        else if (value != '\\') {
-#ifdef EBCDIC
-            literal_endpoint++;
-#endif
-        }
-        else {
+        else if (value == '\\') {
             /* Is a backslash; get the code point of the char after it */
 	    if (UTF && ! UTF8_IS_INVARIANT(UCHARAT(RExC_parse))) {
 		value = utf8n_to_uvchr((U8*)RExC_parse,
@@ -14031,10 +14029,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     }
                     /* Here, is a single code point, and <value> contains it */
 #ifdef EBCDIC
-                    /* We consider named characters to be literal characters,
-                     * and they are Unicode */
-                    literal_endpoint++;
-                    unicode_range = TRUE;
+                    unicode_range = TRUE;   /* \N{} are Unicode */
 #endif
                 }
                 break;
@@ -14233,6 +14228,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 			vFAIL(error_msg);
 		    }
 		}
+#ifdef EBCDIC
+                non_portable_endpoint++;
+#endif
 		if (IN_ENCODING && value < 0x100) {
 		    goto recode_encoding;
 		}
@@ -14252,11 +14250,17 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 			vFAIL(error_msg);
 		    }
 		}
+#ifdef EBCDIC
+                non_portable_endpoint++;
+#endif
 		if (IN_ENCODING && value < 0x100)
 		    goto recode_encoding;
 		break;
 	    case 'c':
 		value = grok_bslash_c(*RExC_parse++, PASS2);
+#ifdef EBCDIC
+                non_portable_endpoint++;
+#endif
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7':
@@ -14284,6 +14288,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             (void)ReREFCNT_inc(RExC_rx_sv);
                         }
                     }
+#ifdef EBCDIC
+                    non_portable_endpoint++;
+#endif
 		    if (IN_ENCODING && value < 0x100)
 			goto recode_encoding;
 		    break;
@@ -14667,7 +14674,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             if ((UNLIKELY(prevvalue == 0) && value >= 255)
                 || ! (prevvalue < 256
                       && (unicode_range
-                          || (literal_endpoint == 2
+                          || (! non_portable_endpoint
                               && ((isLOWER_A(prevvalue) && isLOWER_A(value))
                                   || (isUPPER_A(prevvalue)
                                       && isUPPER_A(value)))))))
@@ -14902,7 +14909,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 if (prevvalue == 'A') {
                     if (value == 'Z'
 #ifdef EBCDIC
-                        && literal_endpoint == 2
+                        && ! non_portable_end_point
 #endif
                     ) {
                         arg = (FOLD) ? _CC_ALPHA : _CC_UPPER;
@@ -14912,7 +14919,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 else if (prevvalue == 'a') {
                     if (value == 'z'
 #ifdef EBCDIC
-                        && literal_endpoint == 2
+                        && ! non_portable_end_point
 #endif
                     ) {
                         arg = (FOLD) ? _CC_ALPHA : _CC_LOWER;
