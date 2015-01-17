@@ -406,19 +406,6 @@ Function either returns an SV * of type AV, which contains the set of
 weakreferences which reference the passed in SV, or a simple RV * which
 is the only weakref to this item.
 
-=item *
-
-C<gv_add_by_type> which was added to public API in 5.11.0 but undocumented and
-shows no CPAN usage has been removed from public API. Please use public API
-C<GvSVn> C<GvIOn> C<GvAVn> and C<GvHVn> for adding elements to a GV.
-
-=item *
-
-C<GvSVn> C<GvIOn> C<GvAVn> and C<GvHVn> have been made rvalues, previously they
-were lvalues. If you are assigning a SV to C<GvSVn> C<GvIOn> C<GvAVn> and
-C<GvHVn> you are leaking memory. If you want an lvalue, use C<GvSV> C<GvIO>
-C<GvAV> and C<GvHV>.
-
 =back
 
 =head1 Selected Bug Fixes

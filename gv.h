@@ -101,9 +101,9 @@ Return the CV from the GV.
 
 #define GvSV(gv)	(GvGP(gv)->gp_sv)
 #ifdef PERL_DONT_CREATE_GVSV
-#define GvSVn(gv)	(GvGP(gv)->gp_sv ? \
-			 GvGP(gv)->gp_sv : \
-			 Perl_gv_add_by_type_p(aTHX_ (gv), GPe_SV))
+#define GvSVn(gv)	(*(GvGP(gv)->gp_sv ? \
+			 &(GvGP(gv)->gp_sv) : \
+			 &(GvGP(gv_SVadd(gv))->gp_sv)))
 #else
 #define GvSVn(gv)	GvSV(gv)
 #endif
@@ -121,22 +121,19 @@ Return the CV from the GV.
    : NULL                                         \
  )
 #define GvIOp(gv)	(GvGP(gv)->gp_io)
-#define GvIOn(gv) \
-	(GvIO(gv) \
-		? GvIOp(gv) \
-		: (struct io *)Perl_gv_add_by_type_p(aTHX_ (gv), GPe_IO))
+#define GvIOn(gv)	(GvIO(gv) ? GvIOp(gv) : GvIOp(gv_IOadd(gv)))
 
 #define GvFORM(gv)	(GvGP(gv)->gp_form)
 #define GvAV(gv)	(GvGP(gv)->gp_av)
 
 #define GvAVn(gv)	(GvGP(gv)->gp_av ? \
 			 GvGP(gv)->gp_av : \
-			 (AV*)Perl_gv_add_by_type_p(aTHX_ (gv), GPe_AV))
+			 GvGP(gv_AVadd(gv))->gp_av)
 #define GvHV(gv)	((GvGP(gv))->gp_hv)
 
 #define GvHVn(gv)	(GvGP(gv)->gp_hv ? \
 			 GvGP(gv)->gp_hv : \
-			 (HV*)Perl_gv_add_by_type_p(aTHX_ (gv), GPe_HV))
+			 GvGP(gv_HVadd(gv))->gp_hv)
 
 #define GvCV(gv)	(0+GvGP(gv)->gp_cv)
 #define GvCV_set(gv,cv)	(GvGP(gv)->gp_cv = (cv))
@@ -286,18 +283,10 @@ Return the CV from the GV.
 	    : mro_method_changed_in(GvSTASH(gv)) \
     )
 
-/* used by Perl_gv_add_by_type_p for option checking, low bits are free here*/
-typedef enum {
-    GPe_SV = STRUCT_OFFSET(GP, gp_sv),
-    GPe_IO = STRUCT_OFFSET(GP, gp_io),
-    GPe_HV = STRUCT_OFFSET(GP, gp_hv),
-    GPe_AV = STRUCT_OFFSET(GP, gp_av),
-} gv_add_type;
-
-#define gv_AVadd(gv) (Perl_gv_add_by_type_p(aTHX_ (gv), GPe_AV), gv)
-#define gv_HVadd(gv) (Perl_gv_add_by_type_p(aTHX_ (gv), GPe_HV), gv)
-#define gv_IOadd(gv) (Perl_gv_add_by_type_p(aTHX_ (gv), GPe_IO), gv)
-#define gv_SVadd(gv) (Perl_gv_add_by_type_p(aTHX_ (gv), GPe_SV), gv)
+#define gv_AVadd(gv) gv_add_by_type((gv), SVt_PVAV)
+#define gv_HVadd(gv) gv_add_by_type((gv), SVt_PVHV)
+#define gv_IOadd(gv) gv_add_by_type((gv), SVt_PVIO)
+#define gv_SVadd(gv) gv_add_by_type((gv), SVt_NULL)
 
 /*
  * Local variables:

@@ -216,17 +216,17 @@ Perl_save_pushptrptr(pTHX_ void *const ptr1, void *const ptr2, const int type)
 SV *
 Perl_save_scalar(pTHX_ GV *gv)
 {
-    SV * const sv = GvSVn(gv);
+    SV ** const sptr = &GvSVn(gv);
 
     PERL_ARGS_ASSERT_SAVE_SCALAR;
 
-    if (UNLIKELY(SvGMAGICAL(sv))) {
+    if (UNLIKELY(SvGMAGICAL(*sptr))) {
         PL_localizing = 1;
-        (void)mg_get(sv);
+        (void)mg_get(*sptr);
         PL_localizing = 0;
     }
-    save_pushptrptr(SvREFCNT_inc_simple(gv), SvREFCNT_inc(sv), SAVEt_SV);
-    return save_scalar_at(&GvSV(gv), SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
+    save_pushptrptr(SvREFCNT_inc_simple(gv), SvREFCNT_inc(*sptr), SAVEt_SV);
+    return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
 }
 
 /* Like save_sptr(), but also SvREFCNT_dec()s the new value.  Can be used to

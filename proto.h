@@ -1392,11 +1392,7 @@ PERL_CALLCONV UV	Perl_grok_oct(pTHX_ const char* start, STRLEN* len_p, I32* flag
 /* PERL_CALLCONV GV*	Perl_gv_AVadd(pTHX_ GV *gv); */
 /* PERL_CALLCONV GV*	Perl_gv_HVadd(pTHX_ GV *gv); */
 /* PERL_CALLCONV GV*	Perl_gv_IOadd(pTHX_ GV* gv); */
-PERL_CALLCONV SV*	Perl_gv_add_by_type_p(pTHX_ GV *gv, gv_add_type type)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GV_ADD_BY_TYPE_P	\
-	assert(gv)
-
+PERL_CALLCONV GV*	Perl_gv_add_by_type(pTHX_ GV *gv, svtype type);
 /* PERL_CALLCONV GV*	gv_autoload4(pTHX_ HV* stash, const char* name, STRLEN len, I32 method)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2); */

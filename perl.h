@@ -1754,19 +1754,6 @@ typedef UVTYPE UV;
 #define PTR2NV(p)	NUM2PTR(NV,p)
 #define PTR2nat(p)	(PTRV)(p)	/* pointer to integer of PTRSIZE */
 
-
-#if PTRSIZE == 8
-#  define PTRSIZELOG2 3
-#elif PTRSIZE == 4
-#  define PTRSIZELOG2 2
-#  else
-#    error unknown pointer size
-#  endif
-
-/* idx = PTRPTR2IDX(offset)
-        -turn an offset into array of void *s into an index into the array */
-#define PTRPTR2IDX(offset) ((offset) >> PTRSIZELOG2)
-
 /* According to strict ANSI C89 one cannot freely cast between
  * data pointers and function (code) pointers.  There are at least
  * two ways around this.  One (used below) is to do two casts,

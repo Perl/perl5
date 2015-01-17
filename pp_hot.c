@@ -891,6 +891,8 @@ PP(pp_rv2av)
 {
     dSP; dTOPss;
     const I32 gimme = GIMME_V;
+    static const char an_array[] = "an ARRAY";
+    static const char a_hash[] = "a HASH";
     const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV
 			  || PL_op->op_type == OP_LVAVREF;
     const svtype type = is_pp_rv2av ? SVt_PVAV : SVt_PVHV;
@@ -903,7 +905,7 @@ PP(pp_rv2av)
 	sv = SvRV(sv);
 	if (UNLIKELY(SvTYPE(sv) != type))
 	    /* diag_listed_as: Not an ARRAY reference */
-	    DIE(aTHX_ "Not %s reference", is_pp_rv2av ? "an ARRAY" : "a HASH");
+	    DIE(aTHX_ "Not %s reference", is_pp_rv2av ? an_array : a_hash);
 	else if (UNLIKELY(PL_op->op_flags & OPf_MOD
 		&& PL_op->op_private & OPpLVAL_INTRO))
 	    Perl_croak(aTHX_ "%s", PL_no_localize_ref);
@@ -912,7 +914,7 @@ PP(pp_rv2av)
 	    GV *gv;
 	
 	    if (!isGV_with_GP(sv)) {
-		gv = Perl_softref2xv(aTHX_ sv, is_pp_rv2av ? "an ARRAY" : "a HASH",
+		gv = Perl_softref2xv(aTHX_ sv, is_pp_rv2av ? an_array : a_hash,
 				     type, &sp);
 		if (!gv)
 		    RETURN;

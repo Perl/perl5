@@ -482,7 +482,7 @@ p	|char*	|getenv_len	|NN const char *env_elem|NN unsigned long *len
 pox	|void	|get_db_sub	|NULLOK SV **svp|NN CV *cv
 Ap	|void	|gp_free	|NULLOK GV* gv
 Ap	|GP*	|gp_ref		|NULLOK GP* gp
-Xp	|SV*	|gv_add_by_type_p|NN GV *gv|gv_add_type type
+Ap	|GV*	|gv_add_by_type	|NULLOK GV *gv|svtype type
 Apmb	|GV*	|gv_AVadd	|NULLOK GV *gv
 Apmb	|GV*	|gv_HVadd	|NULLOK GV *gv
 Apmb	|GV*	|gv_IOadd	|NULLOK GV* gv
