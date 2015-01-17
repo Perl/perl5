@@ -65,7 +65,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 
 <div><h3>Configure and hints Fixes (Consider whether these in particular would break binary compatibility)</h3>
 
-<commit votes="tux, arc" id="54db7d57c29c9259228a6a4176caa32e391c6d0b" ticket="" desc="Upstream a patch from pkgsrc for NetBSD hints"/>
 <commit votes="arc" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
 <commit votes="tux, arc" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
 
@@ -84,14 +83,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="steveh, arc" id="eb9e3b14fd77e43b36846b86f8780d23fda50258" ticket="" desc="recharclass: Corrections and nits"/>
 <commit votes="steveh" id="2174049d55b865d9bed8adad15157d3061d5ae10" ticket="" desc="Update release manager documents for producing .xz tarballs"/>
 <commit votes="steveh, arc" id="ecafefb82337acf1046f535da14a6fc0293f70b5" ticket="" desc="perlfunc: document immediate stricture effect of our"/>
-
-<commit votes="steveh, arc, rjbs" id="2561daa455347e2b981e853cf24c33f12c57c58b" ticket="" desc="Tom Christiansen's Perl Unicode Cookbook 1st draft"/>
-<commit votes="steveh, arc, rjbs" id="ddeccf1ffc8f43b11b4f333d8387265c4b449b3c" ticket="" desc="Fixes for a few trivial typos"/>
-<commit votes="steveh, arc, rjbs" id="d4d0a10ef54ca990c3e90457f90f03ea4bc9e10f" ticket="" desc="perlunicook: add perlunicook to MANIFEST"/>
-<commit votes="steveh, arc, rjbs" id="5dd47fd476d31d98fcd75101d115aca2ddcdbe49" ticket="" desc="perlunicook: add it to build files and TOC"/>
-<commit votes="steveh, arc, rjbs" id="32a9c674a9cef14c4bd3666bff64da2f2ff2b9a0" ticket="" desc="perlunicook: remove empty list item"/>
-<commit votes="steveh, arc, rjbs" id="efb8961587a30e930d4581a96246b02e20d2b1f4" ticket="" desc="perlunicook: add trusted-to-exist links for perlunicook"/>
-<commit votes="steveh, arc, rjbs" id="720a02e281a2a171c25d674b798fbfe46d2bbdaf" ticket="" desc="Fix long verbatim line in perlunicook"/>
 
 <commit votes="steveh" id="dbf3c4d788344c8d20eb2549c638ced519d3f0e8" ticket="" desc="perllocale: Nits"/>
 <commit votes="steveh, khw" id="a0879bf8a3066bd055931dcc51f2c4f80ec01ffb" ticket="" desc="perlpod: Latin1 pods need an =encoding"/>
