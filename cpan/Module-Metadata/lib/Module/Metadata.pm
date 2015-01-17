@@ -1,6 +1,6 @@
 # -*- mode: cperl; tab-width: 8; indent-tabs-mode: nil; basic-offset: 2 -*-
 # vim:ts=8:sw=2:et:sta:sts=2
-package Module::Metadata; # git description: v1.000024-12-g978f25c
+package Module::Metadata; # git description: v1.000025-7-g47ca1b2
 
 # Adapted from Perl-licensed code originally distributed with
 # Module-Build by Ken Williams
@@ -13,7 +13,7 @@ sub __clean_eval { eval $_[0] }
 use strict;
 use warnings;
 
-our $VERSION = '1.000025';
+our $VERSION = '1.000026';
 
 use Carp qw/croak/;
 use File::Spec;

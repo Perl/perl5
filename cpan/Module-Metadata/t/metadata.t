@@ -237,6 +237,11 @@ our $VERSION     = '1.12.B55J2qn'; our $WTF = $VERSION; $WTF =~ s/^\d+\.\d+\.//;
 package Simple;
 { our $VERSION = '1.12'; }
 ---
+  sub { defined $_[0] and $_[0] =~ /^3\.14159/ } => <<'---', # calculated version - from Acme-Pi-3.14
+package Simple;
+my $version = atan2(1,1) * 4; $Simple::VERSION = "$version";
+1;
+---
 );
 
 # format: expected package name => code snippet
@@ -308,12 +313,12 @@ sub tmpdir {
 }
 
 my $tmp;
-BEGIN { $tmp = tmpdir; diag "using temp dir $tmp"; }
+BEGIN { $tmp = tmpdir; note "using temp dir $tmp"; }
 
 END {
   die "tests failed; leaving temp dir $tmp behind"
     if $ENV{AUTHOR_TESTING} and not Test::Builder->new->is_passing;
-  diag "removing temp dir $tmp";
+  note "removing temp dir $tmp";
   chdir original_cwd;
   File::Path::rmtree($tmp);
 }
@@ -415,14 +420,24 @@ while (++$test_case and my ($expected_version, $code) = splice @modules, 0, 2 ) 
     # We want to ensure we preserve the original, as long as it's legal, so we
     # explicitly check the stringified form.
     isa_ok($got, 'version') if defined $expected_version;
-    is(
-      (defined $got ? "$got" : $got),
-      $expected_version,
-      "case $test_case: correct module version ("
-        . (defined $expected_version? "'$expected_version'" : 'undef')
-        . ')'
-    )
-    or $errs++;
+
+    if (ref($expected_version) eq 'CODE') {
+      ok(
+        $expected_version->($got),
+        "case $test_case: module version passes match sub"
+      )
+      or $errs++;
+    }
+    else {
+      is(
+        (defined $got ? "$got" : $got),
+        $expected_version,
+        "case $test_case: correct module version ("
+          . (defined $expected_version? "'$expected_version'" : 'undef')
+          . ')'
+      )
+      or $errs++;
+    }
 
     is( $warnings, '', "case $test_case: no warnings from parsing" ) or $errs++;
     diag Dumper({ got => $pm_info->version, module_contents => $code }) if $errs;
