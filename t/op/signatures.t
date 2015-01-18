@@ -6,14 +6,6 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-eval "#line 8 foo\nsub t004 :method (\$a) { }";
-is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
-    "error when not enabled";
-
-eval "#line 8 foo\nsub t005 (\$) (\$a) { }";
-is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
-    "error when not enabled";
-
 no warnings "illegalproto";
 
 our $a = 123;
@@ -1135,7 +1127,7 @@ is eval("\$t103->(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-my $t118 = sub :prototype($) ($a) { $a || "z" };
+my $t118 = sub ($a) :prototype($) { $a || "z" };
 is prototype($t118), "\$";
 is eval("\$t118->()"), undef;
 like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
@@ -1201,7 +1193,7 @@ is eval("t132(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" }, 789)"),
 like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-sub t104 :method ($a) { $a || "z" }
+sub t104($a) :method { $a || "z" }
 is prototype(\&t104), undef;
 is eval("t104()"), undef;
 like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
@@ -1213,7 +1205,7 @@ is eval("t104(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-sub t105 :prototype($) ($a) { $a || "z" }
+sub t105($a) :prototype($) { $a || "z" }
 is prototype(\&t105), "\$";
 is eval("t105()"), undef;
 like $@, qr/\ANot enough arguments for main::t105 /;
@@ -1225,7 +1217,7 @@ is eval("t105(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for main::t105 at \(eval \d+\) line 1, near/;
 is $a, 123;
 
-sub t106 :prototype(@) ($a) { $a || "z" }
+sub t106($a) :prototype(@) { $a || "z" }
 is prototype(\&t106), "\@";
 is eval("t106()"), undef;
 like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
@@ -1237,10 +1229,10 @@ is eval("t106(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
-eval "#line 8 foo\nsub t107 (\$a) :method { }";
+eval "#line 8 foo\nsub t107 :method (\$a) { }";
 isnt $@, "";
 
-eval "#line 8 foo\nsub t108 (\$a) :prototype(\$) { }";
+eval "#line 8 foo\nsub t108 :prototype(\$) (\$a) { }";
 isnt $@, "";
 
 sub t109 { }

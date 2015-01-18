@@ -74,7 +74,7 @@
 %type <opval> formname subname proto optsubbody cont my_scalar my_var
 %type <opval> refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
-%type <opval> realsubbody subsignature termbinop termunop anonymous termdo
+%type <opval> subsignature termbinop termunop anonymous termdo
 %type <opval> formstmtseq formline formarg
 
 %nonassoc <ival> PREC_LOW
@@ -292,6 +292,45 @@ barestmt:	PLUGSTMT
 			  $2->op_type == OP_CONST
 			      ? newATTRSUB($3, $2, $5, $6, $7)
 			      : newMYSUB($3, $2, $5, $6, $7)
+			  ;
+			  $$ = (OP*)NULL;
+			  intro_my();
+			  parser->parsed_sub = 1;
+			}
+	|	SUB subname startsub
+			{
+			  if ($2->op_type == OP_CONST) {
+			    const char *const name =
+				SvPV_nolen_const(((SVOP*)$2)->op_sv);
+			    if (strEQ(name, "BEGIN") || strEQ(name, "END")
+			      || strEQ(name, "INIT") || strEQ(name, "CHECK")
+			      || strEQ(name, "UNITCHECK"))
+			      CvSPECIAL_on(PL_compcv);
+			  }
+			  else
+			  /* State subs inside anonymous subs need to be
+			     clonable themselves. */
+			  if (CvANON(CvOUTSIDE(PL_compcv))
+			   || CvCLONE(CvOUTSIDE(PL_compcv))
+			   || !PadnameIsSTATE(PadlistNAMESARRAY(CvPADLIST(
+						CvOUTSIDE(PL_compcv)
+					     ))[$2->op_targ]))
+			      CvCLONE_on(PL_compcv);
+			  parser->in_my = 0;
+			  parser->in_my_stash = NULL;
+			}
+		remember subsignature subattrlist '{' stmtseq '}'
+			{
+			  OP *body;
+			  if (parser->copline > (line_t)$8)
+			      parser->copline = (line_t)$8;
+			  body = block_end($5,
+				op_append_list(OP_LINESEQ, $6, $9));
+
+			  SvREFCNT_inc_simple_void(PL_compcv);
+			  $2->op_type == OP_CONST
+			      ? newATTRSUB($3, $2, NULL, $7, body)
+			      : newMYSUB($3, $2, NULL, $7, body)
 			  ;
 			  $$ = (OP*)NULL;
 			  intro_my();
@@ -599,13 +638,12 @@ myattrlist:	COLONATTR THING
 			{ $$ = (OP*)NULL; }
 	;
 
-/* Optional subroutine signature */
-subsignature:	/* NULL */ { $$ = (OP*)NULL; }
-	|	'('
+/* Subroutine signature */
+subsignature:	'('
 			{
-			  if (!FEATURE_SIGNATURES_IS_ENABLED)
-			    Perl_croak(aTHX_ "Experimental "
-				"subroutine signatures not enabled");
+			  /* We shouldn't get here otherwise */
+			  assert(FEATURE_SIGNATURES_IS_ENABLED);
+
 			  Perl_ck_warner_d(aTHX_
 				packWARN(WARN_EXPERIMENTAL__SIGNATURES),
 				"The signatures feature is experimental");
@@ -615,22 +653,12 @@ subsignature:	/* NULL */ { $$ = (OP*)NULL; }
 			{
 			  $$ = op_append_list(OP_LINESEQ, $<opval>2,
 				newSTATEOP(0, NULL, sawparens(newNULLLIST())));
-			  parser->expect = XBLOCK;
-			}
-	;
-
-/* Subroutine body - block with optional signature */
-realsubbody:	remember subsignature '{' stmtseq '}'
-			{
-			  if (parser->copline > (line_t)$3)
-			      parser->copline = (line_t)$3;
-			  $$ = block_end($1,
-				op_append_list(OP_LINESEQ, $2, $4));
+			  parser->expect = XATTRBLOCK;
 			}
 	;
 
 /* Optional subroutine body, for named subroutine declaration */
-optsubbody:	realsubbody { $$ = $1; }
+optsubbody:	block
 	|	';'	{ $$ = (OP*)NULL; }
 	;
 
@@ -648,7 +676,7 @@ expr	:	expr ANDOP expr
 listexpr:	listexpr ','
 			{ $$ = $1; }
 	|	listexpr ',' term
-			{ 
+			{
 			  OP* term = $3;
 			  $$ = op_append_elem(OP_LIST, $1, term);
 			}
@@ -837,9 +865,19 @@ anonymous:	'[' expr ']'
 			{ $$ = newANONHASH($2); }
 	|	HASHBRACK ';' '}'	%prec '(' /* { } (';' by tokener) */
 			{ $$ = newANONHASH((OP*)NULL); }
-	|	ANONSUB startanonsub proto subattrlist realsubbody	%prec '('
+	|	ANONSUB startanonsub proto subattrlist block		%prec '('
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($2, $3, $4, $5); }
+	|	ANONSUB startanonsub remember subsignature subattrlist '{' stmtseq '}'	%prec '('
+			{
+			  OP *body;
+			  if (parser->copline > (line_t)$6)
+			      parser->copline = (line_t)$6;
+			  body = block_end($3,
+				op_append_list(OP_LINESEQ, $4, $7));
+			  SvREFCNT_inc_simple_void(PL_compcv);
+			  $$ = newANONATTRSUB($2, NULL, $5, body);
+			}
 
     ;
 
