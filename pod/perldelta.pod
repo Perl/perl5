@@ -86,6 +86,13 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 sub signatures moved before attributes
+
+The experimental sub signatures feature, as introduced in 5.20, parsed
+signatures after attributes.  In this release, the positioning has been
+moved such that signatures occur in exactly the same positioning a
+prototype would be found.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
