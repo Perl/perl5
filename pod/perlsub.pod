@@ -489,13 +489,12 @@ a signature.  They do different jobs: the prototype affects compilation
 of calls to the subroutine, and the signature puts argument values into
 lexical variables at runtime.  You can therefore write
 
-    sub foo :prototype($$) ($left, $right) {
+    sub foo ($left, $right) : prototype($$) {
 	return $left + $right;
     }
 
-The prototype attribute, and any other attributes, must come before
-the signature.  The signature always immediately precedes the block of
-the subroutine's body.
+The prototype attribute, and any other attributes, come after 
+the signature.
 
 =head2 Private Variables via my()
 X<my> X<variable, lexical> X<lexical> X<lexical variable> X<scope, lexical>
