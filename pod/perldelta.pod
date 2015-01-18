@@ -198,6 +198,13 @@ precedence, causing C<foo($a<$b)> to be deparsed without the parentheses.
 
 =item *
 
+L<File::Glob> has been upgraded from version 1.23 to 1.24.
+
+Avoid SvIV() expanding to call get_sv() three times in a few
+places. [perl #123606]
+
+=item *
+
 L<Module::Metadata> has been upgraded from version 1.000025 to 1.000026.
 
 =item *
