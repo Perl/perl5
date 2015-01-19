@@ -202,19 +202,28 @@ Returns true if C<<$self->make>> is the given type; possibilities are:
 
 =cut
 
+my %maketype2true;
+# undocumented - so t/cd.t can still do its thing
+sub _clear_maketype_cache { %maketype2true = () }
+
 sub is_make_type {
     my($self, $type) = @_;
+    return $maketype2true{$type} if defined $maketype2true{$type};
     (undef, undef, my $make_basename) = $self->splitpath($self->make);
-    return 1 if $make_basename =~ /\b$type\b/i; # executable's filename
-    return 0 if $make_basename =~ /\b(dmake|nmake)\b/i; # Never fall through for dmake/nmake
+    return $maketype2true{$type} = 1
+        if $make_basename =~ /\b$type\b/i; # executable's filename
+    return $maketype2true{$type} = 0
+        if $make_basename =~ /\b(dmake|nmake|gmake)\b/i; # Never fall through for dmake/nmake/gmake
     # now have to run with "-v" and guess
     my $redirect = $self->can_redirect_error ? '2>&1' : '';
     my $make = $self->make || $self->{MAKE};
     my $minus_v = `"$make" -v $redirect`;
-    return 1 if $type eq 'gmake' and $minus_v =~ /GNU make/i;
-    return 1 if $type eq 'bsdmake'
+    return $maketype2true{$type} = 1
+        if $type eq 'gmake' and $minus_v =~ /GNU make/i;
+    return $maketype2true{$type} = 1
+        if $type eq 'bsdmake'
       and $minus_v =~ /^usage: make \[-BeikNnqrstWwX\]/im;
-    0; # it wasn't whatever you asked
+    $maketype2true{$type} = 0; # it wasn't whatever you asked
 }
 
 
