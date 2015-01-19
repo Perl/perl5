@@ -2649,6 +2649,41 @@ nan(s = 0)
 #elif defined(NV_NAN)
 	/* XXX if s != NULL, warn about unused argument,
          * or implement the nan payload setting. */
+        /* NVSIZE == 8: the NaN "header" (the exponent) is 0x7FF (the 0x800
+         * is the sign bit, which should be irrelevant for NaN, so really
+         * also 0xFFF), leaving 64 - 12 = 52 bits for the NaN payload
+         * (6.5 bytes, note about infinities below).
+         *
+         * (USE_LONG_DOUBLE and)
+         * LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN:
+         * the NaN "header" is still 0x7FF, leaving 80 - 12 = 68 bits
+         * for the payload (8.5 bytes, note about infinities below).
+         *
+         * doubledouble? aargh. Maybe like doubles, 52 + 52 = 104 bits?
+         *
+         * NVSIZE == 16:
+         * the NaN "header" is still 0x7FF, leaving 128 - 12 = 116 bits
+         * for the payload (14.5 bytes, note about infinities below)
+         *
+         * Which ones of the NaNs are 'signaling' and which are 'quiet',
+         * depends.  In the IEEE-754 1985, nothing was specified.  But the
+         * majority of companies decided that the MSB of the mantissa was
+         * the bit for 'quiet'.  (Only PA-RISC and MIPS were different,
+         * using the MSB as 'signaling'.)  The IEEE-754 2008 *recommended*
+         * (but did not dictate) the MSB as the 'quiet' bit.
+         *
+         * In other words, on most platforms, and for 64-bit doubles:
+         * [7FF8000000000000, 7FFFFFFFFFFFFFFF] quiet
+         * [FFF8000000000000, FFFFFFFFFFFFFFFF] quiet
+         * [7FF0000000000001, 7FF7FFFFFFFFFFFF] signaling
+         * [FFF0000000000001, FFF7FFFFFFFFFFFF] signaling
+         *
+         * The C99 nan() is supposed to generate *quiet* NaNs.
+         *
+         * Note the asymmetry:
+         * The 7FF0000000000000 is positive infinity,
+         * the FFF0000000000000 is negative infinity.
+         */
 	RETVAL = NV_NAN;
 #else
 	not_here("nan");
