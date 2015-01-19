@@ -213,7 +213,7 @@ sub is_make_type {
     return $maketype2true{$type} = 1
         if $make_basename =~ /\b$type\b/i; # executable's filename
     return $maketype2true{$type} = 0
-        if $make_basename =~ /\b(dmake|nmake|gmake)\b/i; # Never fall through for dmake/nmake/gmake
+        if $make_basename =~ /\b[gdn]make\b/i; # Never fall through for dmake/nmake/gmake
     # now have to run with "-v" and guess
     my $redirect = $self->can_redirect_error ? '2>&1' : '';
     my $make = $self->make || $self->{MAKE};
