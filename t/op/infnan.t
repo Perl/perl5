@@ -20,7 +20,11 @@ BEGIN {
 
 my $PInf = "Inf"  + 0;
 my $NInf = "-Inf" + 0;
-my $NaN  = "NaN"  + 0;
+my $NaN;
+{
+    local $^W = 0; # warning-ness tested later.
+    $NaN  = "NaN" + 0;
+}
 
 my @PInf = ("Inf", "inf", "INF", "+Inf",
             "Infinity", "INFINITE",
@@ -275,8 +279,11 @@ ok($NaN eq $NaN, "NaN is NaN stringifically");
 
 is("$NaN", "NaN", "$NaN value stringifies as NaN");
 
-is("+NaN" + 0, "NaN", "+NaN is NaN");
-is("-NaN" + 0, "NaN", "-NaN is NaN");
+{
+    local $^W = 0; # warning-ness tested later.
+    is("+NaN" + 0, "NaN", "+NaN is NaN");
+    is("-NaN" + 0, "NaN", "-NaN is NaN");
+}
 
 is($NaN + 0, $NaN, "NaN + zero is NaN");
 
@@ -336,6 +343,7 @@ is eval { unpack "p", pack 'p', $NaN }, "NaN", "pack p +NaN";
 is eval { unpack "P3", pack 'P', $NaN }, "NaN", "pack P +NaN";
 
 for my $i (@NaN) {
+    local $^W = 0; # warning-ness tested later.
     cmp_ok($i + 0, '!=', $i + 0, "$i is NaN numerically (by not being NaN)");
     is("@{[$i+0]}", "NaN", "$i value stringifies as NaN");
 }
@@ -397,6 +405,22 @@ SKIP: {
     # Silence "Non-finite repeat count", that is tested elsewhere.
     local $^W = 0;
     is("a" x $NaN, "", "x NaN");
+}
+
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w = shift };
+    local $^W = 1;
+    my $a;
+    eval '$a = "nancy" + 1';
+    is($a, "$NaN", "nancy plus one is $NaN");
+    like($w, qr/^Argument "nancy" isn't numeric/, "nancy numify (compile time)");
+
+    my $n = "nanana";
+    my $b;
+    eval '$b = $n + 1';
+    is($b, "$NaN", "$n plus one is $NaN");
+    like($w, qr/^Argument "$n" isn't numeric/, "$n numify (runtime)");
 }
 
 # === Tests combining Inf and NaN ===

@@ -2249,6 +2249,8 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	    sv_upgrade(sv, SVt_PVNV);
 
         if ((numtype & (IS_NUMBER_INFINITY | IS_NUMBER_NAN))) {
+            if (ckWARN(WARN_NUMERIC) && ((numtype & IS_NUMBER_NAN)))
+		not_a_number(sv);
             S_sv_setnv(aTHX_ sv, numtype);
             return FALSE;
         }
