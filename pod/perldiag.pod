@@ -6440,6 +6440,13 @@ must be written as
 The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.  See L<perlre>.
 
+=item Useless use of attribute "const"
+
+(W misc) The "const" attribute has no effect except
+on anonymous closure prototypes.  You applied it to
+a subroutine via L<attributes.pm|attributes>.  This is only useful
+inside an attribute handler for an anonymous subroutine.
+
 =item Useless use of /d modifier in transliteration operator
 
 (W misc) You have used the /d modifier where the searchlist has the

@@ -389,4 +389,28 @@ package ProtoTest {
 }
 is $ProtoTest::Proto, '$', 'prototypes are visible in attr handlers';
 
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w = shift };
+    attributes ->import(__PACKAGE__, \&foo, "const");
+    like $w, qr/^Useless use of attribute "const" at /,
+            'Warning for useless const via attributes.pm';
+    $w = '';
+    attributes ->import(__PACKAGE__, \&foo, "const");
+    is $w, '', 'no warning for const if already applied';
+    attributes ->import(__PACKAGE__, \&foo, "-const");
+    is $w, '', 'no warning for -const with attr already applied';
+    attributes ->import(__PACKAGE__, \&bar, "-const");
+    is $w, '', 'no warning for -const with attr not already applied';
+    package ConstTest;
+    sub MODIFY_CODE_ATTRIBUTES {
+        attributes->import(shift, shift, lc shift) if $_[2]; ()
+    }
+    $_ = 32487;
+    my $sub = sub : Const { $_ };
+    undef $_;
+    ::is &$sub, 32487,
+        'applying const attr via attributes.pm';
+}
+
 done_testing();

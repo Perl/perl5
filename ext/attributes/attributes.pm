@@ -23,6 +23,12 @@ $deprecated{CODE} = qr/\A-?(locked)\z/;
 $deprecated{ARRAY} = $deprecated{HASH} = $deprecated{SCALAR}
     = qr/\A-?(unique)\z/;
 
+my %msg = (
+    lvalue => 'lvalue attribute applied to already-defined subroutine',
+   -lvalue => 'lvalue attribute removed from already-defined subroutine',
+    const  => 'Useless use of attribute "const"',
+);
+
 sub _modify_attrs_and_deprecate {
     my $svtype = shift;
     # Now that we've removed handling of locked from the XS code, we need to
@@ -34,13 +40,11 @@ sub _modify_attrs_and_deprecate {
 	    require warnings;
 	    warnings::warnif('deprecated', "Attribute \"$1\" is deprecated");
 	    0;
-	} : $svtype eq 'CODE' && /^-?lvalue\z/ ? do {
+	} : $svtype eq 'CODE' && exists $msg{$_} ? do {
 	    require warnings;
 	    warnings::warnif(
 		'misc',
-		"lvalue attribute "
-		   . (/^-/ ? "removed from" : "applied to")
-		   . " already-defined subroutine"
+		 $msg{$_}
 	    );
 	    0;
 	} : 1
