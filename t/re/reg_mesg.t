@@ -24,7 +24,7 @@ use open qw(:utf8 :std);
 
 sub fixup_expect {
     my $expect_ref = shift;
-    return if $expect_ref eq "";
+    return "" if $expect_ref eq "";
 
     my @expect;
     if (ref $expect_ref) {
@@ -501,6 +501,9 @@ my @warnings_utf8 = mark_as_utf8(
 
 push @warning, @warnings_utf8;
 
+my @warning_only_under_strict = (
+);
+
 my @experimental_regex_sets = (
     '/(?[ \t ])/' => 'The regex_sets feature is experimental {#} m/(?[{#} \t ])/',
     'use utf8; /utf8 ネ (?[ [\tネ] ])/' => do { use utf8; 'The regex_sets feature is experimental {#} m/utf8 ネ (?[{#} [\tネ] ])/' },
@@ -552,29 +555,42 @@ for my $strict ("", "use re 'strict';") {
     }
 }
 
-for my $strict ("no warnings 'experimental::re_strict'; use re 'strict';", "") {
+for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") {
+    my @warning_tests = @warning;
 
-    # First time through we use strict to make sure that that doesn't change
-    # any of the warnings into fatal, and outputs them correctly.  The second
-    # time we don't use strict, and add the messages that are warnings when
-    # not under strict to the list of warnings.  This checks that non-strict
-    # works.
-    if (! $strict) {
+    # Build the tests for @warning.  Use the strict/non-strict versions
+    # appropriately.
+    if ($strict) {
+        push @warning_tests, @warning_only_under_strict;
+    }
+    else {
+        for (my $i = 0; $i < @warning_only_under_strict; $i += 2) {
+            if ($warning_only_under_strict[$i] =~ /\Q(?[/) {
+                push @warning_tests, $warning_only_under_strict[$i],  # The regex
+                                    $warning_only_under_strict[$i+1];
+            }
+            else {
+                push @warning_tests, $warning_only_under_strict[$i],  # The regex
+                                    "";    # No warning because not strict
+            }
+        }
         for (my $i = 0; $i < @death_only_under_strict; $i += 3) {
-            push @warning, $death_only_under_strict[$i],    # The regex
-                           $death_only_under_strict[$i+1];  # The warning
+            push @warning_tests, $death_only_under_strict[$i],    # The regex
+                                 $death_only_under_strict[$i+1];  # The warning
         }
         for (my $i = 0; $i < @death_utf8_only_under_strict; $i += 3) {
-            push @warning, mark_as_utf8($death_utf8_only_under_strict[$i],
+            push @warning_tests, mark_as_utf8($death_utf8_only_under_strict[$i],
                                         $death_utf8_only_under_strict[$i+1]);
         }
     }
 
-    foreach my $ref (\@warning, \@experimental_regex_sets, \@deprecated) {
+    foreach my $ref (\@warning_tests, \@experimental_regex_sets, \@deprecated) {
         my $warning_type;
+        my $turn_off_warnings = "";
         my $default_on;
-        if ($ref == \@warning) {
+        if ($ref == \@warning_tests) {
             $warning_type = 'regexp, digit';
+            $turn_off_warnings = "no warnings 'experimental::regex_sets';";
             $default_on = $strict;
         }
         elsif ($ref == \@deprecated) {
@@ -588,6 +604,11 @@ for my $strict ("no warnings 'experimental::re_strict'; use re 'strict';", "") {
         for (my $i = 0; $i < @$ref; $i += 2) {
             my $regex = $ref->[$i];
             my @expect = fixup_expect($ref->[$i+1]);
+
+            # A length-1 array with an empty warning means no warning gets
+            # generated at all.
+            undef @expect if @expect == 1 && $expect[0] eq "";
+
             {
                 $_ = "x";
                 eval "$strict no warnings; $regex";
@@ -595,7 +616,7 @@ for my $strict ("no warnings 'experimental::re_strict'; use re 'strict';", "") {
             if (is($@, "", "$strict $regex did not die")) {
                 my @got = capture_warnings(sub {
                                         $_ = "x";
-                                        eval "$strict $regex" });
+                                        eval "$strict $turn_off_warnings $regex" });
                 my $count = @expect;
                 if (! is(scalar @got, scalar @expect,
                             "... and gave expected number ($count) of warnings"))
@@ -631,7 +652,9 @@ for my $strict ("no warnings 'experimental::re_strict'; use re 'strict';", "") {
                         local $^W;
                         my @warns = capture_warnings(sub { $_ = "x";
                                                         eval "$strict $regex" });
-                        if ($default_on) {
+                        # Warning should be on as well if is testing
+                        # '(?[...])' which turns on strict
+                        if ($default_on || grep { $_ =~ /\Q(?[/ } @expect ) {
                            ok @warns > 0, "... and the warning is on by default";
                         }
                         else {
