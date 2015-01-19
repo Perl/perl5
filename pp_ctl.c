@@ -590,6 +590,7 @@ PP(pp_formline)
                         break;
                 }
                 itembytes = s - item;
+                chophere = s;
 		break;
 	    }
 

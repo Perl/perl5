@@ -98,7 +98,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 21;
 
 # number of tests in section 3
-my $bug_tests = 66 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 11 + 2;
+my $bug_tests = 66 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 11 + 3;
 
 # number of tests in section 4
 my $hmb_tests = 37;
@@ -1959,6 +1959,18 @@ Not enough format arguments at - line 4.
 dd|
 EXPECT
 	      { stderr => 1 }, '#123245 different panic in sv_chop');
+
+fresh_perl_is(<<'EOP', <<'EXPECT',
+format STDOUT =
+# x at the end to make the spaces visible
+@... x
+q/a/
+.
+write;
+EOP
+a    x
+EXPECT
+	      { stderr => 1 }, '#123538 crash in FF_MORE');
 
 #############################
 ## Section 4
