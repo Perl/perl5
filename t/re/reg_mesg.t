@@ -502,6 +502,18 @@ my @warnings_utf8 = mark_as_utf8(
 push @warning, @warnings_utf8;
 
 my @warning_only_under_strict = (
+    '/[\N{U+00}-\x01]\x{100}/' => 'Both or neither range ends should be Unicode {#} m/[\N{U+00}-\x01{#}]\x{100}/',
+    '/[\x00-\N{SOH}]\x{100}/' => 'Both or neither range ends should be Unicode {#} m/[\x00-\N{U+01}{#}]\x{100}/',
+    '/[\N{DEL}-\o{377}]\x{100}/' => 'Both or neither range ends should be Unicode {#} m/[\N{U+7F}-\o{377}{#}]\x{100}/',
+    '/[\o{0}-\N{U+01}]\x{100}/' => 'Both or neither range ends should be Unicode {#} m/[\o{0}-\N{U+01}{#}]\x{100}/',
+    '/[\000-\N{U+01}]\x{100}/' => 'Both or neither range ends should be Unicode {#} m/[\000-\N{U+01}{#}]\x{100}/',
+    '/[\N{DEL}-\377]\x{100}/' => 'Both or neither range ends should be Unicode {#} m/[\N{U+7F}-\377{#}]\x{100}/',
+    '/[\N{U+00}-A]\x{100}/' => "",
+    '/[a-\N{U+FF}]\x{100}/' => "",
+    '/[\N{U+00}-\a]\x{100}/' => "",
+    '/[\a-\N{U+FF}]\x{100}/' => "",
+    '/[\N{U+FF}-\x{100}]/' => 'Both or neither range ends should be Unicode {#} m/[\N{U+FF}-\x{100}{#}]/',
+    '/[\N{U+100}-\x{101}]/' => "",
 );
 
 my @experimental_regex_sets = (

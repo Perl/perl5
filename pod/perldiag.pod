@@ -554,6 +554,22 @@ copiable.
 (P) When starting a new thread or returning values from a thread, Perl
 encountered an invalid data type.
 
+=item Both or neither range ends should be Unicode in regex; marked by
+<-- HERE in m/%s/
+
+(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
+
+In a bracketed character class in a regular expression pattern, you
+had a range which has exactly one end of it specified using C<\N{}>, and
+the other end is specified using a non-portable mechanism.  Perl treats
+the range as a Unicode range, that is, all the characters in it are
+considered to be the Unicode characters, and which may be different code
+points on some platforms Perl runs on.  For example, C<[\N{U+06}-\x08]>
+is treated as if you had instead said C<[\N{U+06}-\N{U+08}]>, that is it
+matches the characters whose code points in Unicode are 6, 7, and 8.
+But that C<\x08> might indicate that you meant something different, so
+the warning gets raised.
+
 =item Buffer overflow in prime_env_iter: %s
 
 (W internal) A warning peculiar to VMS.  While Perl was preparing to

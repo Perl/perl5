@@ -257,8 +257,6 @@ in future Perl releases in incompatible ways.  This means that a pattern
 that compiles today may not in a future Perl release.  This warning is
 to alert you to that risk.
 
-=item *
-
 L<Wide character (U+%X) in %s|perldiag/"Wide character (U+%X) in %s">
 
 (W locale) While in a single-byte locale (I<i.e.>, a non-UTF-8
@@ -272,6 +270,10 @@ also does 0x393.  This will make string comparisons unreliable.
 You likely need to figure out how this multi-byte character got mixed up
 with your single-byte locale (or perhaps you thought you had a UTF-8
 locale, but Perl disagrees).
+
+=item *
+
+L<Both or neither range ends should be Unicode in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Both or neither range ends should be Unicode in regex; marked by <-- HERE in m/%s/">
 
 =back
 

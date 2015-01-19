@@ -641,6 +641,12 @@ static const scan_data_t zero_scan_data =
 	    REPORT_LOCATION_ARGS(offset));		\
 } STMT_END
 
+#define	vWARN(loc, m) STMT_START {				        \
+    const IV offset = loc - RExC_precomp;				\
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
+	    REPORT_LOCATION_ARGS(offset));	        \
+} STMT_END
+
 #define	vWARN_dep(loc, m) STMT_START {				        \
     const IV offset = loc - RExC_precomp;				\
     __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), m REPORT_LOCATION,	\
@@ -13810,7 +13816,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * runtime locale is UTF-8 */
     SV* only_utf8_locale_list = NULL;
 
-#ifdef EBCDIC
     /* In a range, if one of the endpoints is non-character-set portable,
      * meaning that it hard-codes a code point that may mean a different
      * charactger in ASCII vs. EBCDIC, as opposed to, say, a literal 'A' or a
@@ -13822,7 +13827,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * to Unicode (i.e. non-ASCII), each code point in it should be considered
      * to be a Unicode value.  */
     bool unicode_range = FALSE;
-#endif
     bool invert = FALSE;    /* Is this class to be complemented */
 
     bool warn_super = ALWAYS_WARN_SUPER;
@@ -13926,9 +13930,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	if (!range) {
 	    rangebegin = RExC_parse;
 	    element_count++;
-#ifdef EBCDIC
             non_portable_endpoint = 0;
-#endif
 	}
 	if (UTF) {
 	    value = utf8n_to_uvchr((U8*)RExC_parse,
@@ -14027,10 +14029,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         prevvalue = save_prevvalue;
                         continue;   /* Back to top of loop to get next char */
                     }
+
                     /* Here, is a single code point, and <value> contains it */
-#ifdef EBCDIC
                     unicode_range = TRUE;   /* \N{} are Unicode */
-#endif
                 }
                 break;
 	    case 'p':
@@ -14228,9 +14229,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 			vFAIL(error_msg);
 		    }
 		}
-#ifdef EBCDIC
                 non_portable_endpoint++;
-#endif
 		if (IN_ENCODING && value < 0x100) {
 		    goto recode_encoding;
 		}
@@ -14250,17 +14249,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 			vFAIL(error_msg);
 		    }
 		}
-#ifdef EBCDIC
                 non_portable_endpoint++;
-#endif
 		if (IN_ENCODING && value < 0x100)
 		    goto recode_encoding;
 		break;
 	    case 'c':
 		value = grok_bslash_c(*RExC_parse++, PASS2);
-#ifdef EBCDIC
                 non_portable_endpoint++;
-#endif
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7':
@@ -14288,9 +14283,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             (void)ReREFCNT_inc(RExC_rx_sv);
                         }
                     }
-#ifdef EBCDIC
                     non_portable_endpoint++;
-#endif
 		    if (IN_ENCODING && value < 0x100)
 			goto recode_encoding;
 		    break;
@@ -14658,6 +14651,18 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     value = save_value;
                     prevvalue = save_prevvalue;
                     continue;
+                }
+            }
+        }
+
+        if (strict && PASS2 && ckWARN(WARN_REGEXP)) {
+            if (range) {
+
+                /* If the range starts above 255, everything is portable and
+                 * likely to be so for any forseeable character set, so don't
+                 * warn. */
+                if (unicode_range && non_portable_endpoint && prevvalue < 256) {
+                    vWARN(RExC_parse, "Both or neither range ends should be Unicode");
                 }
             }
         }

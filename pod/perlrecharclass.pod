@@ -619,6 +619,17 @@ endpoints.  These indicate that the specified range is to be interpreted
 using Unicode values, so C<[\N{U+27}-\N{U+3F}]> means to match
 C<\N{U+27}>, C<\N{U+28}>, C<\N{U+29}>, ..., C<\N{U+3D}>, C<\N{U+3E}>,
 and C<\N{U+3F}>, whatever the native code point versions for those are.
+These are called "Unicode" ranges.  If either end is of the C<\N{...}>
+form, the range is considered Unicode.  A C<regexp> warning is raised
+under C<S<"use re 'strict'">> if the other endpoint is specified
+non-portably:
+
+ [\N{U+00}-\x09]    # Warning under re 'strict'; \x09 is non-portable
+ [\N{U+00}-\t]      # No warning;
+
+Both of the above match the characters C<\N{U+00}> C<\N{U+01}>, ...
+C<\N{U+08}>, C<\N{U+09}>, but the C<\x09> looks like it could be a
+mistake so the warning is raised (under C<re 'strict'>) for it.
 
 Perl also guarantees that the ranges C<A-Z>, C<a-z>, C<0-9>, and any
 subranges of these match what an English-only speaker would expect them
