@@ -2892,7 +2892,7 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
  * shared string constants we point to, instead of generating a new
  * string for each instance. */
 STATIC size_t
-S_infnan_2pv(NV nv, char* buffer, size_t maxlen) {
+S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char plus) {
     assert(maxlen >= 4);
     if (maxlen < 4) /* "Inf\0", "NaN\0" */
         return 0;
@@ -2903,6 +2903,8 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen) {
                 if (maxlen < 5) /* "-Inf\0"  */
                     return 0;
                 *s++ = '-';
+            } else if (plus) {
+                *s++ = '+';
             }
             *s++ = 'I';
             *s++ = 'n';
@@ -3117,7 +3119,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
             STRLEN size = 5; /* "-Inf\0" */
 
             s = SvGROW_mutable(sv, size);
-            len = S_infnan_2pv(SvNVX(sv), s, size);
+            len = S_infnan_2pv(SvNVX(sv), s, size, 0);
             if (len > 0) {
                 s += len;
                 SvPOK_on(sv);
@@ -10778,7 +10780,7 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
     PERL_ARGS_ASSERT_F0CONVERT;
 
     if (UNLIKELY(Perl_isinfnan(nv))) {
-        STRLEN n = S_infnan_2pv(nv, endbuf - *len, *len);
+        STRLEN n = S_infnan_2pv(nv, endbuf - *len, *len, 0);
         *len = n;
         return endbuf - n;
     }
@@ -12472,8 +12474,25 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     elen = width;
                 }
             }
-            else
-                elen = S_infnan_2pv(fv, PL_efloatbuf, PL_efloatsize);
+            else {
+                elen = S_infnan_2pv(fv, PL_efloatbuf, PL_efloatsize, plus);
+                if (elen) {
+                    /* Not affecting infnan output: precision, alt, fill. */
+                    if (elen < width) {
+                        if (left) {
+                            /* Pack the back with spaces. */
+                            memset(PL_efloatbuf + elen, ' ', width - elen);
+                        } else {
+                            /* Move it to the right. */
+                            Move(PL_efloatbuf, PL_efloatbuf + width - elen,
+                                 elen, char);
+                            /* Pad the front with spaces. */
+                            memset(PL_efloatbuf, ' ', width - elen);
+                        }
+                        elen = width;
+                    }
+                }
+            }
 
             if (elen == 0) {
                 char *ptr = ebuf + sizeof ebuf;

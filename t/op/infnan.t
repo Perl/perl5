@@ -81,6 +81,18 @@ for my $f (@printf_fmt) {
     is(sprintf("%$f", $PInf), "Inf", "$PInf sprintf %$f is Inf");
 }
 
+is(sprintf("%+g", $PInf), "+Inf", "$PInf sprintf %+g");
+is(sprintf("%+g", $NInf), "-Inf", "$PInf sprintf %+g");
+
+is(sprintf("%4g",  $PInf), " Inf", "$PInf sprintf %4g");
+is(sprintf("%-4g", $PInf), "Inf ", "$PInf sprintf %-4g");
+
+is(sprintf("%+-5g", $PInf), "+Inf ", "$PInf sprintf %+-5g");
+is(sprintf("%-+5g", $PInf), "+Inf ", "$PInf sprintf %-+5g");
+
+is(sprintf("%-+5g", $NInf), "-Inf ", "$NInf sprintf %-+5g");
+is(sprintf("%+-5g", $NInf), "-Inf ", "$NInf sprintf %+-5g");
+
 ok(!defined eval { $a = sprintf("%c", $PInf)}, "sprintf %c +Inf undef");
 like($@, qr/Cannot printf/, "$PInf sprintf fails");
 ok(!defined eval { $a = sprintf("%c", "Inf")},
@@ -279,6 +291,14 @@ is($NaN / $NaN, $NaN, "NaN / NaN is NaN");
 for my $f (@printf_fmt) {
     is(sprintf("%$f", $NaN), "NaN", "$NaN sprintf %$f is NaN");
 }
+
+is(sprintf("%+g", $NaN), "NaN", "$NaN sprintf %+g");
+
+is(sprintf("%4g",  $NaN), " NaN", "$NaN sprintf %4g");
+is(sprintf("%-4g", $NaN), "NaN ", "$NaN sprintf %-4g");
+
+is(sprintf("%+-5g", $NaN), "NaN  ", "$NaN sprintf %+-5g");
+is(sprintf("%-+5g", $NaN), "NaN  ", "$NaN sprintf %-+5g");
 
 ok(!defined eval { $a = sprintf("%c", $NaN)}, "sprintf %c NaN undef");
 like($@, qr/Cannot printf/, "$NaN sprintf fails");
