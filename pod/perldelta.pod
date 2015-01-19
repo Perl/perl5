@@ -551,7 +551,7 @@ panic.  [perl 123554]
 
 =item *
 
-C<< formline("@...", "a"); >> would crash.  The C<FF_CHECKNL> cas in
+C<< formline("@...", "a"); >> would crash.  The C<FF_CHECKNL> case in
 pp_formline() didn't set the pointer used to mark the chop position,
 which led to the C<FF_MORE> case crashing with a segmentation fault.
 This has been fixed.  [perl #123538]
