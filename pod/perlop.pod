@@ -207,6 +207,11 @@ tightly than unary minus, so -2**4 is -(2**4), not (-2)**4.  (This is
 implemented using C's pow(3) function, which actually works on doubles
 internally.)
 
+Note that certain exponentiation expressions are ill-defined:
+these include C<0**0>, C<1**Inf>, and C<Inf**0>.  Do not expect
+any particular results from these special cases, the results
+are platform-dependent.
+
 =head2 Symbolic Unary Operators
 X<unary operator> X<operator, unary>
 
