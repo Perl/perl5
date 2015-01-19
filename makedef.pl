@@ -32,36 +32,33 @@
 #    perl.imp    NetWare
 #    makedef.lis VMS
 
-BEGIN { unshift @INC, "lib" }
-use Config;
-use strict;
-
-my %ARGS = (CCTYPE => 'MSVC', TARG_DIR => '');
-
+my $fold;
+my %ARGS;
 my %define;
 
-my $fold;
+BEGIN {
+    BEGIN { unshift @INC, "lib" }
+    use Config;
+    use strict;
 
-sub process_cc_flags {
-    foreach (map {split /\s+/, $_} @_) {
-	$define{$1} = $2 // 1 if /^-D(\w+)(?:=(.+))?/;
+    %ARGS = (CCTYPE => 'MSVC', TARG_DIR => '');
+
+    sub process_cc_flags {
+	foreach (map {split /\s+/, $_} @_) {
+	    $define{$1} = $2 // 1 if /^-D(\w+)(?:=(.+))?/;
+	}
     }
-}
 
-while (@ARGV) {
-    my $flag = shift;
-    if ($flag =~ /^(?:CC_FLAGS=)?(-D\w.*)/) {
-	process_cc_flags($1);
-    } elsif ($flag =~ /^(CCTYPE|FILETYPE|PLATFORM|TARG_DIR)=(.+)$/) {
-	$ARGS{$1} = $2;
-    } elsif ($flag eq '--sort-fold') {
-	++$fold;
+    while (@ARGV) {
+	my $flag = shift;
+	if ($flag =~ /^(?:CC_FLAGS=)?(-D\w.*)/) {
+	    process_cc_flags($1);
+	} elsif ($flag =~ /^(CCTYPE|FILETYPE|PLATFORM|TARG_DIR)=(.+)$/) {
+	    $ARGS{$1} = $2;
+	} elsif ($flag eq '--sort-fold') {
+	    ++$fold;
+	}
     }
-}
-
-require "$ARGS{TARG_DIR}regen/embed_lib.pl";
-
-{
     my @PLATFORM = qw(aix win32 wince os2 netware vms test);
     my %PLATFORM;
     @PLATFORM{@PLATFORM} = ();
@@ -71,6 +68,9 @@ require "$ARGS{TARG_DIR}regen/embed_lib.pl";
     die "PLATFORM must be one of: @PLATFORM\n"
 	unless exists $PLATFORM{$ARGS{PLATFORM}};
 }
+use constant PLATFORM => $ARGS{PLATFORM};
+
+require "$ARGS{TARG_DIR}regen/embed_lib.pl";
 
 # Is the following guard strictly necessary? Added during refactoring
 # to keep the same behaviour when merging other code into here.
@@ -1301,10 +1301,18 @@ elsif ($ARGS{PLATFORM} eq 'netware') {
 
 my @symbols = $fold ? sort {lc $a cmp lc $b} keys %export : sort keys %export;
 foreach my $symbol (@symbols) {
-    if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
-	print "\t$symbol\n";
+    if (PLATFORM eq 'win32' || PLATFORM eq 'wince') {
+	#remembering the origin file of each symbol is an alternative to PL_ matching
+	if(substr($symbol, 0, 3) eq 'PL_') {
+	    #PL_utf8_charname_continue @ 25 seems to be the longest symbol
+	    #pick 32 for visual alignment, plus 32 is 8/tab aligned
+	    print "\t$symbol".' 'x(32 - length $symbol )."DATA\n";
+	}
+	else {
+	    print "\t$symbol\n";
+	}
     }
-    elsif ($ARGS{PLATFORM} eq 'os2') {
+    elsif (PLATFORM eq 'os2') {
 	printf qq(    %-31s \@%s\n),
 	  qq("$symbol"), $ordinal{$symbol} || ++$sym_ord;
 	printf qq(    %-31s \@%s\n),
@@ -1312,7 +1320,7 @@ foreach my $symbol (@symbols) {
 	  $ordinal{$exportperlmalloc{$symbol}} || ++$sym_ord
 	  if $exportperlmalloc and exists $exportperlmalloc{$symbol};
     }
-    elsif ($ARGS{PLATFORM} eq 'netware') {
+    elsif (PLATFORM eq 'netware') {
 	print "\t$symbol,\n";
     } else {
 	print "$symbol\n";
