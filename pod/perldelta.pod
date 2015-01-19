@@ -542,6 +542,13 @@ crash, and had done so since Perl 5.10.  (In some cases the crash did not
 start happening till 5.16.)  The crash has, of course, been fixed.
 [perl #123542]
 
+=item *
+
+A repeat expression like C<33 x ~3> could cause a large buffer
+overflow since the new output buffer size was not correctly handled by
+SvGROW().  An expression like this now properly produces a memory wrap
+panic.  [perl 123554]
+
 =back
 
 =head1 Known Problems
