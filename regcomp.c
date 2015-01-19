@@ -14519,8 +14519,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	if (range) {
 #ifdef EBCDIC
             /* For unicode ranges, we have to test that the Unicode as opposed
-             * to the native values are not decreasing.  (Above 255, and there
-             * is no difference between native and Unicode) */
+             * to the native values are not decreasing.  (Above 255, there is
+             * no difference between native and Unicode) */
 	    if (unicode_range && prevvalue < 255 && value < 255) {
                 if (NATIVE_TO_LATIN1(prevvalue) > NATIVE_TO_LATIN1(value)) {
                     goto backwards_range;
