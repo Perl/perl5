@@ -58,7 +58,7 @@ BEGIN {
     # be to fake up a dummy constant that will never actually be true.
     foreach (qw(OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED OPpCONST_NOVER
 		OPpPAD_STATE PMf_SKIPWHITE RXf_SKIPWHITE
-		RXf_PMf_CHARSET RXf_PMf_KEEPCOPY
+		RXf_PMf_CHARSET RXf_PMf_KEEPCOPY CVf_ANONCONST
 		CVf_LOCKED OPpREVERSE_INPLACE OPpSUBSTR_REPL_FIRST
 		PMf_NONDESTRUCT OPpCONST_ARYBASE OPpEVAL_BYTES
 		OPpLVREF_TYPE OPpLVREF_SV OPpLVREF_AV OPpLVREF_HV
@@ -1213,11 +1213,12 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     if ($cv->FLAGS & SVf_POK) {
 	$proto = "(". $cv->PV . ") ";
     }
-    if ($cv->CvFLAGS & (CVf_METHOD|CVf_LOCKED|CVf_LVALUE)) {
+    if ($cv->CvFLAGS & (CVf_METHOD|CVf_LOCKED|CVf_LVALUE|CVf_ANONCONST)) {
         $proto .= ": ";
         $proto .= "lvalue " if $cv->CvFLAGS & CVf_LVALUE;
         $proto .= "locked " if $cv->CvFLAGS & CVf_LOCKED;
         $proto .= "method " if $cv->CvFLAGS & CVf_METHOD;
+        $proto .= "const "  if $cv->CvFLAGS & CVf_ANONCONST;
     }
 
     local($self->{'curcv'}) = $cv;
@@ -2587,6 +2588,9 @@ sub pp_refgen {
     my $kid = $op->first;
     if ($kid->name eq "null") {
 	my $anoncode = $kid = $kid->first;
+	if ($anoncode->name eq "anonconst") {
+	    $anoncode = $anoncode->first->first->sibling;
+	}
 	if ($anoncode->name eq "anoncode"
 	 or !null($anoncode = $kid->sibling) and
 		 $anoncode->name eq "anoncode") {

@@ -16,6 +16,7 @@ PERL_CALLCONV OP *Perl_pp_akeys(pTHX);
 PERL_CALLCONV OP *Perl_pp_alarm(pTHX);
 PERL_CALLCONV OP *Perl_pp_and(pTHX);
 PERL_CALLCONV OP *Perl_pp_anoncode(pTHX);
+PERL_CALLCONV OP *Perl_pp_anonconst(pTHX);
 PERL_CALLCONV OP *Perl_pp_anonhash(pTHX);
 PERL_CALLCONV OP *Perl_pp_anonlist(pTHX);
 PERL_CALLCONV OP *Perl_pp_aslice(pTHX);

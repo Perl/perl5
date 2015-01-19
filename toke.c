@@ -5366,6 +5366,15 @@ Perl_yylex(pTHX)
 			sv_free(sv);
 			CvMETHOD_on(PL_compcv);
 		    }
+		    else if (!PL_in_my && len == 5
+			  && strnEQ(SvPVX(sv), "const", len))
+		    {
+			sv_free(sv);
+			CvANONCONST_on(PL_compcv);
+			if (!CvANON(PL_compcv))
+			    yyerror(":const is not permitted on named "
+				    "subroutines");
+		    }
 		    /* After we've set the flags, it could be argued that
 		       we don't need to do the attributes.pm-based setting
 		       process, and shouldn't bother appending recognized
@@ -10591,7 +10600,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     CvFLAGS(PL_compcv) |= flags;
 
     PL_subline = CopLINE(PL_curcop);
-    CvPADLIST_set(PL_compcv, pad_new(padnew_SAVE|padnew_SAVESUB));
+    CvPADLIST(PL_compcv) = pad_new(padnew_SAVE|padnew_SAVESUB);
     CvOUTSIDE(PL_compcv) = MUTABLE_CV(SvREFCNT_inc_simple(outsidecv));
     CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
     if (outsidecv && CvPADLIST(outsidecv))

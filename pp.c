@@ -6376,6 +6376,17 @@ PP(pp_lvavref)
     }
 }
 
+PP(pp_anonconst)
+{
+    dSP;
+    dTOPss;
+    SETs(sv_2mortal((SV *)newCONSTSUB(SvTYPE(CopSTASH(PL_curcop))==SVt_PVHV
+					? CopSTASH(PL_curcop)
+					: NULL,
+				      NULL, SvREFCNT_inc_simple_NN(sv))));
+    RETURN;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

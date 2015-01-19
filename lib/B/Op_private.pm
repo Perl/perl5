@@ -240,6 +240,7 @@ $bits{akeys}{0} = $bf[0];
 $bits{alarm}{0} = $bf[0];
 $bits{and}{0} = $bf[0];
 $bits{andassign}{0} = $bf[0];
+$bits{anonconst}{0} = $bf[0];
 @{$bits{anonhash}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);
 @{$bits{anonlist}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);
 @{$bits{atan2}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);

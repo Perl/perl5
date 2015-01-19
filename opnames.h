@@ -401,10 +401,11 @@ typedef enum opcode {
 	OP_LVREF	 = 384,
 	OP_LVREFSLICE	 = 385,
 	OP_LVAVREF	 = 386,
+	OP_ANONCONST	 = 387,
 	OP_max		
 } opcode;
 
-#define MAXO 387
+#define MAXO 388
 #define OP_FREED MAXO
 
 /* the OP_IS_* macros are optimized to a simple range check because

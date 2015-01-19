@@ -1699,6 +1699,12 @@ to define an overloaded constant, or when trying to find the
 character name specified in the C<\N{...}> escape.  Perhaps you
 forgot to load the corresponding L<overload> pragma?.
 
+=item :const is not permitted on named subroutines
+
+(F) The "const" attribute causes an anonymous subroutine to be run and
+its value captured at the time that it is cloned.  Names subroutines are
+not cloned like this, so the attribute does not make sense on them.
+
 =item Copy method did not return a reference
 
 (F) The method which overloads "=" is buggy.  See
