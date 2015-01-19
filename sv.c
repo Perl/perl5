@@ -1594,8 +1594,11 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
      * make more strings COW-able.
      * If the new size is a big power of two, don't bother: we assume the
      * caller wanted a nice 2^N sized block and will be annoyed at getting
-     * 2^N+1 */
-    if (newlen & 0xff)
+     * 2^N+1.
+     * Only increment if the allocation isn't MEM_SIZE_MAX,
+     * otherwise it will wrap to 0.
+     */
+    if (newlen & 0xff && newlen != MEM_SIZE_MAX)
         newlen++;
 #endif
 
