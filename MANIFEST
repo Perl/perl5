@@ -5227,6 +5227,7 @@ t/mro/vulcan_dfs_utf8.t		utf8 mro tests
 toke.c				The tokener
 t/op/64bitint.t			See if 64 bit integers work
 t/op/alarm.t			See if alarm works
+t/op/anonconst.t		See if :const works
 t/op/anonsub.t			See if anonymous subroutines work
 t/op/append.t			See if . works
 t/op/args.t			See if operations on @_ work

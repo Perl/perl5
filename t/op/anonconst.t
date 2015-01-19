@@ -1,0 +1,40 @@
+#!./perl
+
+BEGIN {
+    chdir 't';
+    require './test.pl';
+}
+
+plan 7;
+
+push @subs, sub :const{$_} for 1..10;
+is join(" ", map &$_, @subs), "1 2 3 4 5 6 7 8 9 10",
+  ':const capturing global $_';
+
+my $x = 3;
+my $sub = sub : const { $x };
+$x++;
+is &$sub, 3, ':const capturing lexical';
+
+$x = 3;
+$sub = sub : const { $x+5 };
+$x++;
+is &$sub, 8, ':const capturing expression';
+
+is &{sub () : const { 42 }}, 42, ':const with truly constant sub';
+
+*foo = $sub;
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w .= shift };
+    *foo = sub (){};
+    like $w, qr/^Constant subroutine main::foo redefined at /,
+        ':const subs are constant';
+}
+
+eval 'sub bar : const';
+like $@, qr/^:const is not permitted on named subroutines at /,
+    ':const on named stub';
+eval 'sub baz : const { }';
+like $@, qr/^:const is not permitted on named subroutines at /,
+    ':const on named sub';
