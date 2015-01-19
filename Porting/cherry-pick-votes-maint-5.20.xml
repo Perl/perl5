@@ -10,7 +10,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 162b417c061ec9190135629d421e3685e8d31dc0 (Update libnet to CPAN version 3.05)
+Blead changes have been examined up to and including cb6cc22be04ebc9284469880f586341acf15fec5 (perldelta for 62db6ea5fed1)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -29,6 +29,12 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
+
+<commit votes="" id="fa8f4f85ec35b0f047603e5b90a788571f7141bd" ticket="123554" desc="[perl #123554] avoid a crash from SvGROW(MEM_SIZE_MAX)"/>
+<commit votes="" id="e3e8f263bd1cf5bb33710bdece3b572dd9785f75" ticket="123554" desc="perldelta for fa8f4f85ec35"/>
+
+<commit votes="" id="62db6ea5fed19611596cbc5fc0b8a4df2c604e58" ticket="123538" desc="[perl #123538] always set chophere and itembytes at the same time"/>
+<commit votes="" id="cb6cc22be04ebc9284469880f586341acf15fec5" ticket="123538" desc="perldelta for 62db6ea5fed1"/>
 
 </div>
 
@@ -71,6 +77,8 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="tux, khw" id="237050634b19905cdd9e8e25c2a43d0b24eb59f2" ticket="" desc="Add pthread to libswanted"/>
 <commit votes="tux, khw" id="90207ba1bd77fb10e2c39594d954b43a9e8ee948" ticket="" desc="Put pthread in front of libswanted and add cl"/>
 
+<commit votes="" id="0cf583b0808e2fb2ac90751d506f2b8ff75aed86" ticket="" desc="uname -r works on MINIX as well"/>
+
 </div>
 
 <div><h3>Platform-Specific Build/Test/Installation Fixes</h3>
@@ -83,7 +91,6 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="steveh, arc" id="eb9e3b14fd77e43b36846b86f8780d23fda50258" ticket="" desc="recharclass: Corrections and nits"/>
 <commit votes="steveh" id="2174049d55b865d9bed8adad15157d3061d5ae10" ticket="" desc="Update release manager documents for producing .xz tarballs"/>
 <commit votes="steveh, arc" id="ecafefb82337acf1046f535da14a6fc0293f70b5" ticket="" desc="perlfunc: document immediate stricture effect of our"/>
-
 <commit votes="steveh" id="dbf3c4d788344c8d20eb2549c638ced519d3f0e8" ticket="" desc="perllocale: Nits"/>
 <commit votes="steveh, khw" id="a0879bf8a3066bd055931dcc51f2c4f80ec01ffb" ticket="" desc="perlpod: Latin1 pods need an =encoding"/>
 <commit votes="sprout, steveh" id="e6d55c9947dea892b32541479147753415a72c46" ticket="" desc="perldiag: Document 'Bad symbol for scalar'"/>
@@ -94,6 +101,20 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 <commit votes="steveh, khw" id="1adbeba0a4bd082e42cd1499f87faef5175d36a2" ticket="" desc="perlpolicy: add a missing verb"/>
 <commit votes="steveh" id="5bfb0af0b8971c7f063804d149384ca17bfc0ae2" ticket="" desc="Fix apidocs for OP_TYPE_IS(_OR_WAS) - arguments separated by |, not ,."/>
 <commit votes="steveh" id="9a5b9407081290adfb965563aed854ccd8560db6" ticket="" desc="perlpodspec: Corrections/adds to detecting =encoding"/>
+<commit votes="steveh" id="28ffebafd3403d496952bd64c99bb9bd7cbe871f" ticket="" desc="perlhacktips: Fix typo"/>
+<commit votes="steveh" id="dd047fac8a62b125fc36f6faf9e9ba09b7687cd6" ticket="" desc="epigraphs - Correct some dates and links and fill in a couple of missing names"/>
+<commit votes="steveh" id="f3d0868876fe4009939d8fb9306dc9ca24756320" ticket="" desc="epigraphs - Prefer nntp.perl.org/ links, and fill in a missing one"/>
+<commit votes="steveh" id="6dab83b199828f0a9b00ae4985217a90c2446032" ticket="" desc="epigraphs - No need to break up long L&lt;&gt; lines"/>
+<commit votes="steveh" id="e91f1fc181bd1fbed6e335b5f07fb11b4461b363" ticket="" desc="epigraphs - Remove use of =over/=back in six cases since no others do that"/>
+<commit votes="steveh" id="4ed12d4a116fcb3b9752f554d2d4b6b44f54b69f" ticket="" desc="epigraphs - Standardize two-space indent for poetry etc; no indent for prose"/>
+<commit votes="steveh" id="40e1c3e8f1041a72d0c9014b0d481aad33c70b05" ticket="" desc="epigraphs - No  need to repeat authors/titles after the epigraphs"/>
+<commit votes="steveh" id="2ee7da68f1197e25cc1b4b38b9aa169d32d604a5" ticket="" desc="epigraphs - Consistent quoting of titles"/>
+<commit votes="steveh" id="72f869fd31700a4a97a90e5be4390144ee4d848d" ticket="" desc="epigraphs - Remove trailing whitespace"/>
+<commit votes="steveh" id="c682aa67a4f33d42168c0401bd211e65f7f24c52" ticket="" desc="epigraphs - Sort by Perl version number"/>
+<commit votes="steveh" id="c33412d7cc23023128412251144217a4fb0ed8b1" ticket="" desc="epigraphs - Consistent -RCn style"/>
+<commit votes="steveh" id="de6a572826be131d097fd215146f4016cea52671" ticket="" desc="epigraphs - Fix a broken I&lt;&gt;"/>
+<commit votes="steveh" id="931064641468002f31d00f3f4dd72409a265d717" ticket="" desc="perlrecharclass: Add some missing documentation"/>
+<commit votes="steveh" id="f2979eac0a03fcba1cd431ef3d46f697176ebcc8" ticket="" desc="improve SvPV_set's docs, it really shouldn't be public API"/>
 
 </div>
 
