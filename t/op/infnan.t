@@ -85,7 +85,7 @@ ok(!defined eval { $a = sprintf("%c", $PInf)}, "sprintf %c +Inf undef");
 like($@, qr/Cannot printf/, "$PInf sprintf fails");
 ok(!defined eval { $a = sprintf("%c", "Inf")},
   "stringy sprintf %c +Inf undef");
-like($@, qr/Cannot printf/, "stringy $PInf sprintf fails");
+like($@, qr/Cannot printf/, "stringy $PInf sprintf %c fails");
 
 ok(!defined eval { $a = chr($PInf) }, "chr(+Inf) undef");
 like($@, qr/Cannot chr/, "+Inf chr() fails");
@@ -96,7 +96,7 @@ ok(!defined eval { $a = sprintf("%c", $NInf)}, "sprintf %c -Inf undef");
 like($@, qr/Cannot printf/, "$NInf sprintf fails");
 ok(!defined eval { $a = sprintf("%c", "-Inf")},
   "sprintf %c stringy -Inf undef");
-like($@, qr/Cannot printf/, "stringy $NInf sprintf fails");
+like($@, qr/Cannot printf/, "stringy $NInf sprintf %c fails");
 
 ok(!defined eval { $a = chr($NInf) }, "chr(-Inf) undef");
 like($@, qr/Cannot chr/, "-Inf chr() fails");
@@ -284,7 +284,7 @@ ok(!defined eval { $a = sprintf("%c", $NaN)}, "sprintf %c NaN undef");
 like($@, qr/Cannot printf/, "$NaN sprintf fails");
 ok(!defined eval { $a = sprintf("%c", "NaN")},
   "sprintf %c stringy NaN undef");
-like($@, qr/Cannot printf/, "stringy $NaN sprintf fails");
+like($@, qr/Cannot printf/, "stringy $NaN sprintf %c fails");
 
 ok(!defined eval { $a = chr($NaN) }, "chr NaN undef");
 like($@, qr/Cannot chr/, "NaN chr() fails");
