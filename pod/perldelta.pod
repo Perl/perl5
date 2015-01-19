@@ -404,6 +404,13 @@ A memory leak in some regular expressions, introduced in Perl 5.20.1, has been
 fixed.
 L<[perl #123198]|https://rt.perl.org/Ticket/Display.html?id=123198>
 
+=item *
+
+C<< formline("@...", "a"); >> would crash.  The C<FF_CHECKNL> cas in
+pp_formline() didn't set the pointer used to mark the chop position,
+which led to the C<FF_MORE> case crashing with a segmentation fault.
+This has been fixed.  [perl #123538]
+
 =back
 
 =head1 Known Problems
