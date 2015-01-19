@@ -28,7 +28,6 @@
 static int
 modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 {
-    dVAR;
     SV *attr;
     int nret;
 
