@@ -10,7 +10,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including cb6cc22be04ebc9284469880f586341acf15fec5 (perldelta for 62db6ea5fed1)
+Blead changes have been examined up to and including cc31571878894dd5f5af83722ca0c2a24621300c ([perl #123554] stop checking the messag>)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -30,11 +30,13 @@ The same criteria apply to code in dual-life modules as to core code.)
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
 
-<commit votes="sprout" id="fa8f4f85ec35b0f047603e5b90a788571f7141bd" ticket="123554" desc="[perl #123554] avoid a crash from SvGROW(MEM_SIZE_MAX)"/>
-<commit votes="sprout" id="e3e8f263bd1cf5bb33710bdece3b572dd9785f75" ticket="123554" desc="perldelta for fa8f4f85ec35"/>
+<commit votes="sprout, steveh" id="fa8f4f85ec35b0f047603e5b90a788571f7141bd" ticket="123554" desc="[perl #123554] avoid a crash from SvGROW(MEM_SIZE_MAX)"/>
+<commit votes="sprout, steveh" id="e3e8f263bd1cf5bb33710bdece3b572dd9785f75" ticket="123554" desc="perldelta for fa8f4f85ec35"/>
+<commit votes="steveh" id="f63bc603acea5e0f476f181de698958c4ddcccba" ticket="123554" desc="perldelta: Fix typo"/>
+<commit votes="steveh" id="cc31571878894dd5f5af83722ca0c2a24621300c" ticket="123554" desc="[perl #123554] stop checking the message"/>
 
-<commit votes="sprout" id="62db6ea5fed19611596cbc5fc0b8a4df2c604e58" ticket="123538" desc="[perl #123538] always set chophere and itembytes at the same time"/>
-<commit votes="sprout" id="cb6cc22be04ebc9284469880f586341acf15fec5" ticket="123538" desc="perldelta for 62db6ea5fed1"/>
+<commit votes="sprout, steveh" id="62db6ea5fed19611596cbc5fc0b8a4df2c604e58" ticket="123538" desc="[perl #123538] always set chophere and itembytes at the same time"/>
+<commit votes="sprout, steveh" id="cb6cc22be04ebc9284469880f586341acf15fec5" ticket="123538" desc="perldelta for 62db6ea5fed1"/>
 
 </div>
 
