@@ -275,17 +275,69 @@ locale, but Perl disagrees).
 
 L<Both or neither range ends should be Unicode in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Both or neither range ends should be Unicode in regex; marked by <-- HERE in m/%s/">
 
+(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
+
+In a bracketed character class in a regular expression pattern, you
+had a range which has exactly one end of it specified using C<\N{}>, and
+the other end is specified using a non-portable mechanism.  Perl treats
+the range as a Unicode range, that is, all the characters in it are
+considered to be the Unicode characters, and which may be different code
+points on some platforms Perl runs on.  For example, C<[\N{U+06}-\x08]>
+is treated as if you had instead said C<[\N{U+06}-\N{U+08}]>, that is it
+matches the characters whose code points in Unicode are 6, 7, and 8.
+But that C<\x08> might indicate that you meant something different, so
+the warning gets raised.
+
 =item *
 
 L<Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" in regex; marked by <-- HERE in mE<sol>%sE<sol>">
+
+(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
+
+Stricter rules help to find typos and other errors.  Perhaps you didn't
+even intend a range here, if the C<"-"> was meant to be some other
+character, or should have been escaped (like C<"\-">).  If you did
+intend a range, the one that was used is not portable between ASCII and
+EBCDIC platforms, and doesn't have an obvious meaning to a casual
+reader.
+
+ [3-7]    # OK; Obvious and portable
+ [d-g]    # OK; Obvious and portable
+ [A-Y]    # OK; Obvious and portable
+ [A-z]    # WRONG; Not portable; not clear what is meant
+ [a-Z]    # WRONG; Not portable; not clear what is meant
+ [%-.]    # WRONG; Not portable; not clear what is meant
+ [\x41-Z] # WRONG; Not portable; not obvious to non-geek
+
+(You can force portablity by specifying a Unicode range, which means that
+the endpoints are specified by
+L<C<\N{...}>|perlrecharclass/Character Ranges>, but the meaning may
+still not be obvious.)
+The stricter rules require that ranges that start or stop with an ASCII
+character that is not a control have all their endpoints be the literal
+character, and not some escape sequence (like C<"\x41">), and the ranges
+must be all digits, or all uppercase letters, or all lowercase letters.
 
 =item *
 
 L<Ranges of digits should be from the same group in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Ranges of digits should be from the same group in regex; marked by <-- HERE in m/%s/">
 
+(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
+
+Stricter rules help to find typos and other errors.  You included a
+range, and at least one of the end points is a decimal digit.  Under the
+stricter rules, when this happens, both end points should be digits in
+the same group of 10 consecutive digits.
+
 =item *
 
 L<"%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in mE<sol>%sE<sol>>
+
+(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
+
+You specified a character that has the given plainer way of writing it,
+and which is also portable to platforms running with different character
+sets.
 
 =back
 
