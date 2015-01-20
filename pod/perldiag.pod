@@ -1709,7 +1709,7 @@ the risk that your code may break in a future Perl version.
 =item :const is not permitted on named subroutines
 
 (F) The "const" attribute causes an anonymous subroutine to be run and
-its value captured at the time that it is cloned.  Names subroutines are
+its value captured at the time that it is cloned.  Named subroutines are
 not cloned like this, so the attribute does not make sense on them.
 
 =item Copy method did not return a reference
