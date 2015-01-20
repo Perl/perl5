@@ -15,20 +15,20 @@ X<subroutine, declaration> X<sub>
 
     sub NAME BLOCK		  # A declaration and a definition.
     sub NAME(PROTO) BLOCK	  #  ditto, but with prototypes
-    sub NAME SIG BLOCK            #  with signature
+    sub NAME(SIG) BLOCK           #  with a signature instead
     sub NAME : ATTRS BLOCK	  #  with attributes
     sub NAME(PROTO) : ATTRS BLOCK #  with prototypes and attributes
-    sub NAME : ATTRS SIG BLOCK    #  with attributes and signature
+    sub NAME(SIG) : ATTRS BLOCK   #  with a signature and attributes
 
 To define an anonymous subroutine at runtime:
 X<subroutine, anonymous>
 
     $subref = sub BLOCK;		 # no proto
     $subref = sub (PROTO) BLOCK;	 # with proto
-    $subref = sub SIG BLOCK;             # with signature
+    $subref = sub (SIG) BLOCK;           # with signature
     $subref = sub : ATTRS BLOCK;	 # with attributes
     $subref = sub (PROTO) : ATTRS BLOCK; # with proto and attributes
-    $subref = sub : ATTRS SIG BLOCK;     # with attribs and signature
+    $subref = sub (SIG) : ATTRS BLOCK;   # with signature and attributes
 
 To import subroutines:
 X<import>
