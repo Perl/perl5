@@ -283,6 +283,10 @@ L<Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" in 
 
 L<Ranges of digits should be from the same group in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Ranges of digits should be from the same group in regex; marked by <-- HERE in m/%s/">
 
+=item *
+
+L<"%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in mE<sol>%sE<sol>>
+
 =back
 
 =head2 Changes to Existing Diagnostics

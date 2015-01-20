@@ -14720,10 +14720,37 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     }
                 }
             }
+            if ((! range || prevvalue == value) && non_portable_endpoint) {
+                if (isPRINT_A(value)) {
+                    char literal[3];
+                    unsigned d = 0;
+                    if (isBACKSLASHED_PUNCT(value)) {
+                        literal[d++] = '\\';
+                    }
+                    literal[d++] = (char) value;
+                    literal[d++] = '\0';
+
+                    vWARN4(RExC_parse,
+                           "\"%.*s\" is more clearly written simply as \"%s\"",
+                           (int) (RExC_parse - rangebegin),
+                           rangebegin,
+                           literal
+                        );
+                }
+                else if isMNEMONIC_CNTRL(value) {
+                    vWARN4(RExC_parse,
+                           "\"%.*s\" is more clearly written simply as \"%s\"",
+                           (int) (RExC_parse - rangebegin),
+                           rangebegin,
+                           cntrl_to_mnemonic((char) value)
+                        );
+                }
+            }
         }
 
         /* Deal with this element of the class */
 	if (! SIZE_ONLY) {
+
 #ifndef EBCDIC
             cp_foldable_list = _add_range_to_invlist(cp_foldable_list,
                                                      prevvalue, value);

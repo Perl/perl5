@@ -90,6 +90,9 @@ my $high_mixed_alpha = ('A' lt 'a') ? 'a' : 'A';
 my $low_mixed_digit = ('A' lt '0') ? 'A' : '0';
 my $high_mixed_digit = ('A' lt '0') ? '0' : 'A';
 
+my $colon_hex = sprintf "%02X", ord(":");
+my $tab_hex = sprintf "%02X", ord("\t");
+
 ##
 ## Key-value pairs of code/error of code that should have fatal errors.
 ##
@@ -492,6 +495,10 @@ my @warning = (
     '/a{1,1}?\x{100}/' => 'Useless use of greediness modifier \'?\' {#} m/a{1,1}?{#}\x{100}/',
     '/b{3}  +\x{100}/x' => 'Useless use of greediness modifier \'+\' {#} m/b{3}  +{#}\x{100}/',
     "/(?[ [ % - % ] ])/" => "",
+    "/(?[ [ : - \\x$colon_hex ] ])\\x{100}/" => "\": - \\x$colon_hex \" is more clearly written simply as \":\" {#} m/(?[ [ : - \\x$colon_hex {#}] ])\\x{100}/",
+    "/(?[ [ \\x$colon_hex - : ] ])\\x{100}/" => "\"\\x$colon_hex\ - : \" is more clearly written simply as \":\" {#} m/(?[ [ \\x$colon_hex - : {#}] ])\\x{100}/",
+    "/(?[ [ \\t - \\x$tab_hex ] ])\\x{100}/" => "\"\\t - \\x$tab_hex \" is more clearly written simply as \"\\t\" {#} m/(?[ [ \\t - \\x$tab_hex {#}] ])\\x{100}/",
+    "/(?[ [ \\x$tab_hex - \\t ] ])\\x{100}/" => "\"\\x$tab_hex\ - \\t \" is more clearly written simply as \"\\t\" {#} m/(?[ [ \\x$tab_hex - \\t {#}] ])\\x{100}/",
     "/(?[ [ $B_hex - C ] ])/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/(?[ [ $B_hex - C {#}] ])/",
     "/(?[ [ A - $B_hex ] ])/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/(?[ [ A - $B_hex {#}] ])/",
     "/(?[ [ $low_mixed_alpha - $high_mixed_alpha ] ])/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/(?[ [ $low_mixed_alpha - $high_mixed_alpha {#}] ])/",
@@ -528,6 +535,10 @@ my @warning_only_under_strict = (
     '/[\N{U+FF}-\x{100}]/' => 'Both or neither range ends should be Unicode {#} m/[\N{U+FF}-\x{100}{#}]/',
     '/[\N{U+100}-\x{101}]/' => "",
     "/[%-%]/" => "",
+    "/[:-\\x$colon_hex]\\x{100}/" => "\":-\\x$colon_hex\" is more clearly written simply as \":\" {#} m/[:-\\x$colon_hex\{#}]\\x{100}/",
+    "/[\\x$colon_hex-:]\\x{100}/" => "\"\\x$colon_hex-:\" is more clearly written simply as \":\" {#} m/[\\x$colon_hex\-:{#}]\\x{100}/",
+    "/[\\t-\\x$tab_hex]\\x{100}/" => "\"\\t-\\x$tab_hex\" is more clearly written simply as \"\\t\" {#} m/[\\t-\\x$tab_hex\{#}]\\x{100}/",
+    "/[\\x$tab_hex-\\t]\\x{100}/" => "\"\\x$tab_hex-\\t\" is more clearly written simply as \"\\t\" {#} m/[\\x$tab_hex\-\\t{#}]\\x{100}/",
     "/[$B_hex-C]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[$B_hex-C{#}]/",
     "/[A-$B_hex]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[A-$B_hex\{#}]/",
     "/[$low_mixed_alpha-$high_mixed_alpha]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[$low_mixed_alpha-$high_mixed_alpha\{#}]/",

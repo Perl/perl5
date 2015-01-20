@@ -2889,6 +2889,14 @@ with 'useperlio'.
 (F) Your machine doesn't implement the sockatmark() functionality,
 neither as a system call nor an ioctl call (SIOCATMARK).
 
+=item "%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in m/%s/
+
+(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
+
+You specified a character that has the given plainer way of writing it,
+and which is also portable to platforms running with different character
+sets.
+
 =item $* is no longer supported
 
 (D deprecated, syntax) The special variable C<$*>, deprecated in older
