@@ -131,7 +131,7 @@ Using this feature triggers warnings in the category
 C<experimental::const_attr>.
 
 The ticket for this feature is
-L<[perl #xxxxx]|https://rt.perl.org/rt3/Ticket/Display.html?id=xxxxx>.
+L<[perl #123630]|https://rt.perl.org/rt3/Ticket/Display.html?id=123630>.
 
 See also: L<perlsub/Constant Functions>
 
