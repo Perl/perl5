@@ -14664,6 +14664,59 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 if (unicode_range && non_portable_endpoint && prevvalue < 256) {
                     vWARN(RExC_parse, "Both or neither range ends should be Unicode");
                 }
+                else if (prevvalue != value) {
+
+                    /* Under strict, ranges that stop and/or end in an ASCII
+                     * printable should have each end point be a portable value
+                     * for it (preferably like 'A', but we don't warn if it is
+                     * a (portable) Unicode name or code point), and the range
+                     * must be be all digits or all letters of the same case.
+                     * Otherwise, the range is non-portable and unclear as to
+                     * what it contains */
+                    if ((isPRINT_A(prevvalue) || isPRINT_A(value))
+                        && (non_portable_endpoint
+                            || ! ((isDIGIT_A(prevvalue) && isDIGIT_A(value))
+                                   || (isLOWER_A(prevvalue) && isLOWER_A(value))
+                                   || (isUPPER_A(prevvalue) && isUPPER_A(value)))))
+                    {
+                        vWARN(RExC_parse, "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\"");
+                    }
+                    else if (prevvalue >= 0x660) { /* ARABIC_INDIC_DIGIT_ZERO */
+
+                        /* But the nature of Unicode and languages mean we
+                         * can't do the same checks for above-ASCII ranges,
+                         * except in the case of digit ones.  These should
+                         * contain only digits from the same group of 10.  The
+                         * ASCII case is handled just above.  0x660 is the
+                         * first digit character beyond ASCII.  Hence here, the
+                         * range could be a range of digits.  Find out.  */
+                        IV index_start = _invlist_search(PL_XPosix_ptrs[_CC_DIGIT],
+                                                         prevvalue);
+                        IV index_final = _invlist_search(PL_XPosix_ptrs[_CC_DIGIT],
+                                                         value);
+
+                        /* If the range start and final points are in the same
+                         * inversion list element, it means that either both
+                         * are not digits, or both are digits in a consecutive
+                         * sequence of digits.  (So far, Unicode has kept all
+                         * such sequences as distinct groups of 10, but assert
+                         * to make sure).  If the end points are not in the
+                         * same element, neither should be a digit. */
+                        if (index_start == index_final) {
+                            assert(! ELEMENT_RANGE_MATCHES_INVLIST(index_start)
+                            || invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start+1]
+                            - invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start]
+                            == 10);
+                        }
+                        else if ((index_start >= 0
+                                  && ELEMENT_RANGE_MATCHES_INVLIST(index_start))
+                                 || (index_final >= 0
+                                     && ELEMENT_RANGE_MATCHES_INVLIST(index_final)))
+                        {
+                            vWARN(RExC_parse, "Ranges of digits should be from the same group of 10");
+                        }
+                    }
+                }
             }
         }
 

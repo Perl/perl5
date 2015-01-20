@@ -84,6 +84,12 @@ sub mark_as_utf8 {
 my $inf_m1 = ($Config::Config{reg_infty} || 32767) - 1;
 my $inf_p1 = $inf_m1 + 2;
 
+my $B_hex = sprintf("\\x%02X", ord "B");
+my $low_mixed_alpha = ('A' lt 'a') ? 'A' : 'a';
+my $high_mixed_alpha = ('A' lt 'a') ? 'a' : 'A';
+my $low_mixed_digit = ('A' lt '0') ? 'A' : '0';
+my $high_mixed_digit = ('A' lt '0') ? '0' : 'A';
+
 ##
 ## Key-value pairs of code/error of code that should have fatal errors.
 ##
@@ -485,6 +491,11 @@ my @warning = (
                   ],
     '/a{1,1}?\x{100}/' => 'Useless use of greediness modifier \'?\' {#} m/a{1,1}?{#}\x{100}/',
     '/b{3}  +\x{100}/x' => 'Useless use of greediness modifier \'+\' {#} m/b{3}  +{#}\x{100}/',
+    "/(?[ [ % - % ] ])/" => "",
+    "/(?[ [ $B_hex - C ] ])/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/(?[ [ $B_hex - C {#}] ])/",
+    "/(?[ [ A - $B_hex ] ])/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/(?[ [ A - $B_hex {#}] ])/",
+    "/(?[ [ $low_mixed_alpha - $high_mixed_alpha ] ])/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/(?[ [ $low_mixed_alpha - $high_mixed_alpha {#}] ])/",
+    "/(?[ [ $low_mixed_digit - $high_mixed_digit ] ])/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/(?[ [ $low_mixed_digit - $high_mixed_digit {#}] ])/",
 ); # See comments before this for why '\x{100}' is generally needed
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
@@ -510,13 +521,27 @@ my @warning_only_under_strict = (
     '/[\o{0}-\N{U+01}]\x{100}/' => 'Both or neither range ends should be Unicode {#} m/[\o{0}-\N{U+01}{#}]\x{100}/',
     '/[\000-\N{U+01}]\x{100}/' => 'Both or neither range ends should be Unicode {#} m/[\000-\N{U+01}{#}]\x{100}/',
     '/[\N{DEL}-\377]\x{100}/' => 'Both or neither range ends should be Unicode {#} m/[\N{U+7F}-\377{#}]\x{100}/',
-    '/[\N{U+00}-A]\x{100}/' => "",
-    '/[a-\N{U+FF}]\x{100}/' => "",
+    '/[\N{U+00}-A]\x{100}/' => 'Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" {#} m/[\N{U+00}-A{#}]\x{100}/',
+    '/[a-\N{U+FF}]\x{100}/' => 'Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" {#} m/[a-\N{U+FF}{#}]\x{100}/',
     '/[\N{U+00}-\a]\x{100}/' => "",
     '/[\a-\N{U+FF}]\x{100}/' => "",
     '/[\N{U+FF}-\x{100}]/' => 'Both or neither range ends should be Unicode {#} m/[\N{U+FF}-\x{100}{#}]/',
     '/[\N{U+100}-\x{101}]/' => "",
+    "/[%-%]/" => "",
+    "/[$B_hex-C]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[$B_hex-C{#}]/",
+    "/[A-$B_hex]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[A-$B_hex\{#}]/",
+    "/[$low_mixed_alpha-$high_mixed_alpha]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[$low_mixed_alpha-$high_mixed_alpha\{#}]/",
+    "/[$low_mixed_digit-$high_mixed_digit]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[$low_mixed_digit-$high_mixed_digit\{#}]/",
 );
+
+my @warning_utf8_only_under_strict = mark_as_utf8(
+ '/ネ[᪉-᪐]/; #no latin1' => "Ranges of digits should be from the same group of 10 {#} m/ネ[᪉-᪐{#}]/",
+ '/ネ(?[ [ ᪉ - ᪐ ] ])/; #no latin1' => "Ranges of digits should be from the same group of 10 {#} m/ネ(?[ [ ᪉ - ᪐ {#}] ])/",
+ '/ネ[᧙-᧚]/; #no latin1' => "Ranges of digits should be from the same group of 10 {#} m/ネ[᧙-᧚{#}]/",
+ '/ネ(?[ [ ᧙ - ᧚ ] ])/; #no latin1' => "Ranges of digits should be from the same group of 10 {#} m/ネ(?[ [ ᧙ - ᧚ {#}] ])/",
+);
+
+push @warning_only_under_strict, @warning_utf8_only_under_strict;
 
 my @experimental_regex_sets = (
     '/(?[ \t ])/' => 'The regex_sets feature is experimental {#} m/(?[{#} \t ])/',

@@ -275,6 +275,14 @@ locale, but Perl disagrees).
 
 L<Both or neither range ends should be Unicode in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Both or neither range ends should be Unicode in regex; marked by <-- HERE in m/%s/">
 
+=item *
+
+L<Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" in regex; marked by <-- HERE in mE<sol>%sE<sol>">
+
+=item *
+
+L<Ranges of digits should be from the same group in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Ranges of digits should be from the same group in regex; marked by <-- HERE in m/%s/">
+
 =back
 
 =head2 Changes to Existing Diagnostics
