@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.21.8 - Bill Watterson, "Scientific Progress Goes 'Boink': A Calvin and Hobbes Collection"
 
-L<Announced on 2015-01-20 by Matthew Horsfall|XXX>
+L<Announced on 2015-01-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2015/01/msg224869.html>
 
 Calvin:   OK Hobbes, press the button and duplicate me.
 Hobbes:   Are you sure this is such a good idea?
