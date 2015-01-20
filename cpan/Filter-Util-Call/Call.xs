@@ -3,7 +3,7 @@
  * 
  * Author   : Paul Marquess 
  * Date     : 2014-12-09 02:48:44 rurban
- * Version  : 1.53
+ * Version  : 1.54
  *
  *    Copyright (c) 1995-2011 Paul Marquess. All rights reserved.
  *    Copyright (c) 2011-2014 Reini Urban. All rights reserved.
@@ -173,7 +173,7 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 	    if (fdebug) 
 	        warn ("filter_read %d returned %d , returning %" IVdf "\n", idx, n,
-		      (SvCUR(buf_sv)>0) ? SvCUR(buf_sv) : (IV)n);
+		      (SvCUR(buf_sv)>0) ? (IV)SvCUR(buf_sv) : (IV)n);
 
 	    /* PERL_MODULE(my_sv) ; */
 	    /* PERL_OBJECT(my_sv) ; */
@@ -184,7 +184,7 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 		return n ;
 
 	    /* return what we have so far else signal eof */
-	    return (SvCUR(buf_sv)>0) ? SvCUR(buf_sv) : n;
+	    return (SvCUR(buf_sv)>0) ? (int)SvCUR(buf_sv) : n;
 	}
 
     }
@@ -250,6 +250,7 @@ void
 unimport(package="$Package", ...)
     const char *package
     PPCODE:
+    PERL_UNUSED_VAR(package);
     filter_del(filter_call);
 
 
