@@ -1247,6 +1247,7 @@ _clobber:
 	-rm -rf host
 	rm -f t/test_state
 	rm -f config.sh cppstdin Policy.sh extras.lst
+	rm -f $(MANIFEST_SRT)
 
 clobber:	_realcleaner _mopup _clobber
 
