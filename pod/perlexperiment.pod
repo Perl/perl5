@@ -123,6 +123,18 @@ L<[perl #122947]|https://rt.perl.org/rt3/Ticket/Display.html?id=122947>.
 
 See also: L<perlref/Assigning to References>
 
+=item The "const" attribute
+
+Introduced in Perl 5.22.0
+
+Using this feature triggers warnings in the category
+C<experimental::const_attr>.
+
+The ticket for this feature is
+L<[perl #xxxxx]|https://rt.perl.org/rt3/Ticket/Display.html?id=xxxxx>.
+
+See also: L<perlsub/Constant Functions>
+
 =item The <:win32> IO pseudolayer
 
 The ticket for this feature is

@@ -565,3 +565,4 @@ refassign	lvalue ref assignment	ck_refassign	ds2
 lvref		lvalue ref assignment	ck_null		d%
 lvrefslice	lvalue ref assignment	ck_null		d@
 lvavref		lvalue array reference	ck_null		d%
+anonconst	anonymous constant	ck_null		ds1

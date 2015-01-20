@@ -28,7 +28,6 @@
 static int
 modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 {
-    dVAR;
     SV *attr;
     int nret;
 
@@ -44,6 +43,20 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 	switch (SvTYPE(sv)) {
 	case SVt_PVCV:
 	    switch ((int)len) {
+	    case 5:
+		if (memEQ(name, "const", 5)) {
+		    if (negated)
+			CvANONCONST_off(sv);
+		    else {
+			const bool warn = (!CvCLONE(sv) || CvCLONED(sv))
+				       && !CvANONCONST(sv);
+			CvANONCONST_on(sv);
+			if (warn)
+			    break;
+		    }
+		    continue;
+		}
+		break;
 	    case 6:
 		switch (name[3]) {
 		case 'l':

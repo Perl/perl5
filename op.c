@@ -9274,9 +9274,16 @@ Perl_newANONSUB(pTHX_ I32 floor, OP *proto, OP *block)
 OP *
 Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block)
 {
-    return newUNOP(OP_REFGEN, 0,
+    SV * const cv = MUTABLE_SV(newATTRSUB(floor, 0, proto, attrs, block));
+    OP * anoncode = 
 	newSVOP(OP_ANONCODE, 0,
-		MUTABLE_SV(newATTRSUB(floor, 0, proto, attrs, block))));
+		cv);
+    if (CvANONCONST(cv))
+	anoncode = newUNOP(OP_ANONCONST, 0,
+			   op_convert_list(OP_ENTERSUB,
+					   OPf_STACKED|OPf_WANT_SCALAR,
+					   anoncode));
+    return newUNOP(OP_REFGEN, 0, anoncode);
 }
 
 OP *
