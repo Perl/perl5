@@ -136,7 +136,7 @@
 /*
  * The shared things need an interpreter to live in ...
  */
-PerlInterpreter *PL_sharedsv_space;             /* The shared sv space */
+static PerlInterpreter *PL_sharedsv_space;             /* The shared sv space */
 /* To access shared space we fake aTHX in this scope and thread's context */
 
 /* Bug #24255: We include ENTER+SAVETMPS/FREETMPS+LEAVE with
@@ -177,7 +177,7 @@ typedef struct {
 #endif
 } recursive_lock_t;
 
-recursive_lock_t PL_sharedsv_lock;   /* Mutex protecting the shared sv space */
+static recursive_lock_t PL_sharedsv_lock;   /* Mutex protecting the shared sv space */
 
 void
 recursive_lock_init(pTHX_ recursive_lock_t *lock)
@@ -291,7 +291,7 @@ sharedsv_userlock_free(pTHX_ SV *sv, MAGIC *mg)
     return (0);
 }
 
-MGVTBL sharedsv_userlock_vtbl = {
+static const MGVTBL sharedsv_userlock_vtbl = {
     0,                          /* get */
     0,                          /* set */
     0,                          /* len */
@@ -332,10 +332,10 @@ MGVTBL sharedsv_userlock_vtbl = {
    the shared thing.
  */
 
-extern MGVTBL sharedsv_scalar_vtbl;    /* Scalars have this vtable */
-extern MGVTBL sharedsv_array_vtbl;     /* Hashes and arrays have this
+extern const MGVTBL sharedsv_scalar_vtbl;   /* Scalars have this vtable */
+extern const MGVTBL sharedsv_array_vtbl;     /* Hashes and arrays have this
                                             - like 'tie' */
-extern MGVTBL sharedsv_elem_vtbl;      /* Elements of hashes and arrays have
+extern const MGVTBL sharedsv_elem_vtbl;      /* Elements of hashes and arrays have
                                           this _AS WELL AS_ the scalar magic:
    The sharedsv_elem_vtbl associates the element with the array/hash and
    the sharedsv_scalar_vtbl associates it with the value
@@ -878,7 +878,7 @@ sharedsv_scalar_mg_local(pTHX_ SV* nsv, MAGIC *mg)
 }
 #endif
 
-MGVTBL sharedsv_scalar_vtbl = {
+const MGVTBL sharedsv_scalar_vtbl = {
     sharedsv_scalar_mg_get,     /* get */
     sharedsv_scalar_mg_set,     /* set */
     0,                          /* len */
@@ -1039,7 +1039,7 @@ sharedsv_elem_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
     return (0);
 }
 
-MGVTBL sharedsv_elem_vtbl = {
+const MGVTBL sharedsv_elem_vtbl = {
     sharedsv_elem_mg_FETCH,     /* get */
     sharedsv_elem_mg_STORE,     /* set */
     0,                          /* len */
@@ -1152,7 +1152,7 @@ sharedsv_array_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
     return (0);
 }
 
-MGVTBL sharedsv_array_vtbl = {
+const MGVTBL sharedsv_array_vtbl = {
     0,                          /* get */
     0,                          /* set */
     sharedsv_array_mg_FETCHSIZE,/* len */
