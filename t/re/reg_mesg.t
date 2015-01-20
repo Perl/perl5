@@ -1,5 +1,7 @@
 #!./perl -w
 
+$|=1;   # outherwise things get mixed up in output
+
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = qw '../lib ../ext/re';
