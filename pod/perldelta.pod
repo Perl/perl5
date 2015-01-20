@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.21.8
 
 =head1 DESCRIPTION
@@ -20,12 +17,6 @@ L<perl5217delta>, which describes differences between 5.21.6 and 5.21.7.
 XXX Any important notices here
 
 =head1 Core Enhancements
-
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
 
 =head2 The warnings pragma now supports warnings outside of "all"
 
@@ -85,14 +76,6 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
-
 =head2 sub signatures moved before attributes
 
 The experimental sub signatures feature, as introduced in 5.20, parsed
@@ -103,35 +86,6 @@ prototype would be found.
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-=head2 Module removals
-
-XXX Remove this section if inapplicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
 
 =head1 Performance Enhancements
 
@@ -245,27 +199,10 @@ file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 =head2 New Documentation
 
-XXX Changes which create B<new> files in F<pod/> go here.
+=head3 L<perlunicook>
 
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
-=head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX Description of the change here
-
-=back
+This document, by Tom Christiansen, provides examples of handling Unicode in 
+Perl.
 
 =head1 Diagnostics
 
@@ -273,13 +210,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
 
 =head3 New Errors
 
@@ -287,7 +218,18 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Bad symbol for scalar|perldiag/"Bad symbol for scalar">
+
+(P) An internal request asked to add a scalar entry to something that
+wasn't a symbol table entry.
+
+=item *
+
+L<:const is not permitted on named subroutines|perldiag/":const is not permitted on named subroutines">
+
+(F) The "const" attribute causes an anonymous subroutine to be run and
+its value captured at the time that it is cloned.  Names subroutines are
+not cloned like this, so the attribute does not make sense on them.
 
 =back
 
@@ -297,23 +239,76 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<:const is experimental|perldiag/":const is experimental">
+
+(S experimental::const_attr) The "const" attribute is experimental.
+If you want to use the feature, disable the warning with C<no warnings
+'experimental::const_attr'>, but know that in doing so you are taking
+the risk that your code may break in a future Perl version.
+
+=item *
+
+L<Non-finite repeat count does nothing|perldiag/"Non-finite repeat count does nothing">
+
+(W numeric) You tried to execute the
+L<C<x>|perlop/Multiplicative Operators> repetition operator C<Inf> (or
+C<-Inf>) or C<NaN> times, which doesn't make sense.
+
+=item *
+
+L<Useless use of attribute "const"|perldiag/"Useless use of attribute E<lt>constE<gt>">
+
+(W misc) The "const" attribute has no effect except
+on anonymous closure prototypes.  You applied it to
+a subroutine via L<attributes.pm|attributes>.  This is only useful
+inside an attribute handler for an anonymous subroutine.
+
+=item *
+
+L<Unusual use of %s in void context|perldiag/"Unusual use of %s in void context">
+
+(W void_unusual) Similar to the "Useless use of %s in void context"
+warning, but only turned on by the top-level "pedantic" warning
+category, used for e.g. C<grep> in void context, which may indicate a
+bug, but could also just be someone using C<grep> for its side-effects
+as a loop.
+
+Enabled as part of "extra" warnings, not in the "all" category. See
+L<warnings> for details
+
+=item *
+
+L<E<quot>use re 'strict'E<quot> is experimental|perldiag/"E<quot>use re 'strict'E<quot> is experimental">
+
+(S experimental::re_strict) The things that are different when a regular
+expression pattern is compiled under C<'strict'> are subject to change
+in future Perl releases in incompatible ways.  This means that a pattern
+that compiles today may not in a future Perl release.  This warning is
+to alert you to that risk.
 
 =item *
 
 L<Wide character (U+%X) in %s|perldiag/"Wide character (U+%X) in %s">
 
+(W locale) While in a single-byte locale (I<i.e.>, a non-UTF-8
+one), a multi-byte character was encountered.   Perl considers this
+character to be the specified Unicode code point.  Combining non-UTF8
+locales and Unicode is dangerous.  Almost certainly some characters
+will have two different representations.  For example, in the ISO 8859-7
+(Greek) locale, the code point 0xC3 represents a Capital Gamma.  But so
+also does 0x393.  This will make string comparisons unreliable.
+
+You likely need to figure out how this multi-byte character got mixed up
+with your single-byte locale (or perhaps you thought you had a UTF-8
+locale, but Perl disagrees).
+
 =back
 
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
 =over 4
 
 =item *
-
-XXX Describe change here
 
 The message
 L<Locale '%s' may not work well.%s|perldiag/"Locale '%s' may not work well.%s">
@@ -323,25 +318,6 @@ underlying locale.  All Perl programs have an underlying locale at all
 times, but something like a C<S<use locale>> is needed for that locale
 to actually have some effect.  This message will not be raised when
 the underlying locale is hidden.
-
-=back
-
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directory F<utils>.
-
-[ List utility changes as a =head2 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head2 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
 
 =back
 
@@ -358,68 +334,36 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+pthreads and lcl will be linked by default if present. This allows XS modules 
+that require threading to work on non-threaded perls. Note that you must still 
+pass C<-Dusethreads> if you want a threaded perl.
 
 =back
 
 =head1 Testing
 
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+A new test script, F<bigmem/subst.t>, has been added to test memory usage of
+subst on very large strings.
+
+=item *
+
+A new test script, F<op/anonconst.t>, has been added to test experimental
+:const subroutines.
+
+=item *
+
+A new test script, F<re/reg_nocapture.t>, has been added to test the new
+C</n> regexp flag.
 
 =back
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
@@ -452,12 +396,6 @@ module for each path in C<@INC>.
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as a =item entry ]
-
 =over 4
 
 =item *
@@ -481,18 +419,9 @@ were lvalues. If you are assigning a SV to C<GvSVn> C<GvIOn> C<GvAVn> and
 C<GvHVn> you are leaking memory. If you want an lvalue, use C<GvSV> C<GvIO>
 C<GvAV> and C<GvHV>.
 
-=item *
-
-XXX
-
 =back
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -564,38 +493,6 @@ which led to the C<FF_MORE> case crashing with a segmentation fault.
 This has been fixed.  [perl #123538]
 
 =back
-
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Errata From Previous Releases
-
-=over 4
-
-=item *
-
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
