@@ -3316,7 +3316,7 @@ reader.
  [%-.]    # WRONG; Not portable; not clear what is meant
  [\x41-Z] # WRONG; Not portable; not obvious to non-geek
 
-(You can force portablity by specifying a Unicode range, which means that
+(You can force portability by specifying a Unicode range, which means that
 the endpoints are specified by
 L<C<\N{...}>|perlrecharclass/Character Ranges>, but the meaning may
 still not be obvious.)

@@ -115,7 +115,7 @@ emit 'uninitialized' warnings in Perl 5.14.  This has been fixed.
 
 Deparsing calls to subs with a C<(;+)> prototype resulted in an infinite
 loop.  The C<(;$>) C<(_)> and C<(;_)> prototypes were given the wrong
-precedence, causing C<foo($a<$b)> to be deparsed without the parentheses.
+precedence, causing C<foo($aE<lt>$b)> to be deparsed without the parentheses.
 
 =item *
 
@@ -382,7 +382,7 @@ the warning gets raised.
 
 =item *
 
-L<Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" in regex; marked by <-- HERE in mE<sol>%sE<sol>">
+L<Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Ranges of ASCII printables should be some subset of "0-9", "A-Z", or "a-z" in regex; marked by <-- HERE in mE<sol>%sE<sol>">
 
 (W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
 
@@ -401,7 +401,7 @@ reader.
  [%-.]    # WRONG; Not portable; not clear what is meant
  [\x41-Z] # WRONG; Not portable; not obvious to non-geek
 
-(You can force portablity by specifying a Unicode range, which means that
+(You can force portability by specifying a Unicode range, which means that
 the endpoints are specified by
 L<C<\N{...}>|perlrecharclass/Character Ranges>, but the meaning may
 still not be obvious.)
@@ -412,7 +412,7 @@ must be all digits, or all uppercase letters, or all lowercase letters.
 
 =item *
 
-L<Ranges of digits should be from the same group in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Ranges of digits should be from the same group in regex; marked by <-- HERE in m/%s/">
+L<Ranges of digits should be from the same group in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Ranges of digits should be from the same group in regex; marked by <-- HERE in m/%s/">
 
 (W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
 
@@ -423,7 +423,7 @@ the same group of 10 consecutive digits.
 
 =item *
 
-L<"%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in mE<sol>%sE<sol>>
+L<"%s" is more clearly written simply as "%s" in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in mE<sol>%sE<sol>>
 
 (W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
 
@@ -497,7 +497,7 @@ C</n> regexp flag.
 
 Previously, on Visual C++ for Win64 built Perls only, when compiling every Perl
 XS module (including CPAN ones) and Perl aware .c file with a 64 bit Visual C++,
-would uncondtionally have around a dozen warnings from hv_func.h.  These
+would unconditionally have around a dozen warnings from hv_func.h.  These
 warnings have been silenced.  GCC all bitness and Visual C++ for Win32 were
 not affected.
 
@@ -582,7 +582,7 @@ bug, which started to occur in Perl 5.18, has been fixed.  [perl #123553]
 
 =item *
 
-Certain syntax errors in substitutions, such as C<< s/${<>{})// >>, would
+Certain syntax errors in substitutions, such as C<< s/${E<lt>E<gt>{})// >>, would
 crash, and had done so since Perl 5.10.  (In some cases the crash did not
 start happening till 5.16.)  The crash has, of course, been fixed.
 [perl #123542]
