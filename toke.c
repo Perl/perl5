@@ -5370,6 +5370,10 @@ Perl_yylex(pTHX)
 			  && strnEQ(SvPVX(sv), "const", len))
 		    {
 			sv_free(sv);
+			Perl_ck_warner_d(aTHX_
+			    packWARN(WARN_EXPERIMENTAL__CONST_ATTR),
+			   ":const is experimental"
+			);
 			CvANONCONST_on(PL_compcv);
 			if (!CvANON(PL_compcv))
 			    yyerror(":const is not permitted on named "
