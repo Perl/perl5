@@ -14,7 +14,8 @@ L<perl5217delta>, which describes differences between 5.21.6 and 5.21.7.
 
 =head1 Notice
 
-XXX Any important notices here
+With this release we are now in the contentious changes portion of the code
+freeze as we prepare for the next stable release of Perl 5.
 
 =head1 Core Enhancements
 
@@ -66,14 +67,6 @@ it to be executed immediately when it is cloned.  Its value is captured and
 used to create a new constant subroutine that is returned.  This feature is
 experimental.  See L<perlsub/Constant Functions>.
 
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
 =head1 Incompatible Changes
 
 =head2 sub signatures moved before attributes
@@ -82,25 +75,6 @@ The experimental sub signatures feature, as introduced in 5.20, parsed
 signatures after attributes.  In this release, the positioning has been
 moved such that signatures occur in exactly the same positioning a
 prototype would be found.
-
-=head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
 
 =head1 Modules and Pragmata
 
@@ -193,9 +167,6 @@ XXX
 =back
 
 =head1 Documentation
-
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 =head2 New Documentation
 
@@ -322,13 +293,6 @@ the underlying locale is hidden.
 =back
 
 =head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
 
 =over 4
 
