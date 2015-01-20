@@ -10,7 +10,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including cc31571878894dd5f5af83722ca0c2a24621300c ([perl #123554] stop checking the messag>)
+Blead changes have been examined up to and including db5cc9f9ace5f7ec3feeded852dc53793477c17e (Release prep - Copy descriptions of new errors in perldiag to delta)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -37,6 +37,8 @@ I feel a bit leery about this next one.  The code is a bit fragile, so I would f
 
 <commit votes="sprout, steveh" id="62db6ea5fed19611596cbc5fc0b8a4df2c604e58" ticket="123538" desc="[perl #123538] always set chophere and itembytes at the same time"/>
 <commit votes="sprout, steveh" id="cb6cc22be04ebc9284469880f586341acf15fec5" ticket="123538" desc="perldelta for 62db6ea5fed1"/>
+
+<commit votes="hv" id="56f81afc0f2d331537f38e6f12b86a850187cb8a" ticket="123604" desc="intuit_more: no need to copy before keyword check"/>
 
 </div>
 
