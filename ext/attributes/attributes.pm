@@ -260,6 +260,13 @@ attribute will be sanity checked at compile time.
 The "locked" attribute is deprecated, and has no effect in 5.10.0 and later.
 It was used as part of the now-removed "Perl 5.005 threads".
 
+=item const
+
+This experimental attribute, introduced in Perl 5.22, only applies to
+anonymous subroutines.  It causes the subroutine to be called as soon as
+the C<sub> expression is evaluated.  The return value is captured and
+turned into a constant subroutine.
+
 =back
 
 The following are the built-in attributes for variables:

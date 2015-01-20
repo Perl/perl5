@@ -1701,6 +1701,21 @@ declared.
         *ALSO_INLINED = sub () { $x };
     }
 
+Perl 5.22 also introduces the experimental "const" attribute as an
+alternative.  (Disable the "experimental::const_attr" warnings if you want
+to use it.)  When applied to an anonymous subroutine, it forces the sub to
+be called when the C<sub> expression is evaluated.  The return value is
+captured and turned into a constant subroutine:
+
+    my $x = 54321;
+    *INLINED = sub : const { $x };
+    $x++;
+
+The return value of C<INLINED> in this example will always be 54321,
+regardless of later modifications to $x.  You can also put any arbitrary
+code inside the sub, at it will be executed immediately and its return
+value captured the same way.
+
 If you really want a subroutine with a C<()> prototype that returns a
 lexical variable you can easily force it to not be inlined by adding
 an explicit C<return>:
