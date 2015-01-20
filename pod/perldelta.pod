@@ -182,7 +182,7 @@ L<Getopt::Long> has been upgraded from version 2.42 to 2.43.
 
 =item *
 
-L<IO-Compress> has been upgraded from version 2.067 to 2.068.
+L<IO::Compress> has been upgraded from version 2.067 to 2.068.
 
 =item *
 
