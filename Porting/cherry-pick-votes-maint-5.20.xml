@@ -30,6 +30,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
 
+This fix has a problem with it that needs to be solved before we can backport it.  See http://www.nntp.perl.org/group/perl.perl5.porters/;msgid=20150120104834.32035.qmail@lists-nntp.develooper.com
 <commit votes="sprout, steveh" id="fa8f4f85ec35b0f047603e5b90a788571f7141bd" ticket="123554" desc="[perl #123554] avoid a crash from SvGROW(MEM_SIZE_MAX)"/>
 <commit votes="sprout, steveh" id="e3e8f263bd1cf5bb33710bdece3b572dd9785f75" ticket="123554" desc="perldelta for fa8f4f85ec35"/>
 <commit votes="steveh" id="f63bc603acea5e0f476f181de698958c4ddcccba" ticket="123554" desc="perldelta: Fix typo"/>
