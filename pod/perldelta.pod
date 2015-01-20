@@ -68,6 +68,13 @@ experience, using this pragma will raise a category
 C<experimental:re_strict> warning.
 See L<'strict' in re|re/'strict' mode>.
 
+=head2 New "const" subroutine attribute
+
+The "const" attribute can be applied to an anonymous subroutine.  It causes
+it to be executed immediately when it is cloned.  Its value is captured and
+used to create a new constant subroutine that is returned.  This feature is
+experimental.  See L<perlsub/Constant Functions>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
