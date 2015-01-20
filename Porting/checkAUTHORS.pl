@@ -443,6 +443,7 @@ jhi                                     jhi\100iki.fi
 +                                       jhi\100hut.fi
 +                                       jarkko.hietaniemi\100nokia.com
 +                                       jarkko.hietaniemi\100cc.hut.fi
++                                       jarkko.hietaniemi\100booking.com
 jesse                                   jesse\100bestpractical.com
 +                                       jesse\100fsck.com
 +                                       jesse\100perl.org
