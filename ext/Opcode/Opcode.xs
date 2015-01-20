@@ -13,7 +13,9 @@ typedef struct {
     HV *	x_op_named_bits;	/* cache shared for whole process */
     SV *	x_opset_all;		/* mask with all bits set	*/
     IV		x_opset_len;		/* length of opmasks in bytes	*/
-    int		x_opcode_debug;
+#if 0
+    int		x_opcode_debug;		/* unused warn() emitting debugging code */
+#endif
 } my_cxt_t;
 
 START_MY_CXT
@@ -21,7 +23,12 @@ START_MY_CXT
 #define op_named_bits		(MY_CXT.x_op_named_bits)
 #define opset_all		(MY_CXT.x_opset_all)
 #define opset_len		(MY_CXT.x_opset_len)
-#define opcode_debug		(MY_CXT.x_opcode_debug)
+#if 0
+#  define opcode_debug		(MY_CXT.x_opcode_debug)
+#else
+ /* no API to turn this on at runtime, so constant fold the code away */
+#  define opcode_debug		0
+#endif
 
 static SV  *new_opset (pTHX_ SV *old_opset);
 static int  verify_opset (pTHX_ SV *opset, int fatal);
