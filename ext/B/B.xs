@@ -1736,13 +1736,13 @@ REGEX(sv)
 	    PUSHs(newSVpvn_flags(RX_PRECOMP(sv), RX_PRELEN(sv), SVs_TEMP));
 	} else if (ix == 2) {
 	    PUSHs(make_sv_object(aTHX_ (SV *)ReANY(sv)->qr_anoncv));
-	} else if (ix) {
-	    dXSTARG;
-	    PUSHu(RX_COMPFLAGS(sv));
 	} else {
 	    dXSTARG;
+	    if (ix)
+		PUSHu(RX_COMPFLAGS(sv));
+	    else
 	    /* FIXME - can we code this method more efficiently?  */
-	    PUSHi(PTR2IV(sv));
+		PUSHi(PTR2IV(sv));
 	}
 
 #endif
