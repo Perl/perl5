@@ -1217,6 +1217,14 @@ Perl_sv_mortalcopy(pTHX_ SV *const oldstr)
     return Perl_sv_mortalcopy_flags(aTHX_ oldstr, SV_GMAGIC);
 }
 
+void
+Perl_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
+{
+    PERL_ARGS_ASSERT_SV_COPYPV;
+
+    sv_copypv_flags(dsv, ssv, 0);
+}
+
 UV      /* Made into a function, so can be deprecated */
 NATIVE_TO_NEED(const UV enc, const UV ch)
 {
@@ -1693,6 +1701,22 @@ Perl_is_utf8_char(const U8 *s)
 
     /* Assumes we have enough space, which is why this is deprecated */
     return isUTF8_CHAR(s, s + UTF8SKIP(s));
+}
+
+/*
+=for apidoc is_utf8_char_buf
+
+This is identical to the macro L</isUTF8_CHAR>.
+
+=cut */
+
+STRLEN
+Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
+{
+
+    PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF;
+
+    return isUTF8_CHAR(buf, buf_end);
 }
 
 /* DEPRECATED!

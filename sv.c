@@ -3250,14 +3250,6 @@ include SV_GMAGIC.
 */
 
 void
-Perl_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
-{
-    PERL_ARGS_ASSERT_SV_COPYPV;
-
-    sv_copypv_flags(dsv, ssv, 0);
-}
-
-void
 Perl_sv_copypv_flags(pTHX_ SV *const dsv, SV *const ssv, const I32 flags)
 {
     STRLEN len;

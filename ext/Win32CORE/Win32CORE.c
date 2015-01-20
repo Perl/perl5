@@ -47,6 +47,8 @@ XS_EXTERNAL(boot_Win32CORE)
      * should never be called though, as Win32CORE.pm doesn't use DynaLoader.
      */
 }
+
+EXTERN_C
 #if !defined(__CYGWIN__) || defined(USEIMPORTLIB)
 __declspec(dllexport)
 #endif

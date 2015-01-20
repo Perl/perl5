@@ -319,22 +319,6 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 }
 
 /*
-=for apidoc is_utf8_char_buf
-
-This is identical to the macro L</isUTF8_CHAR>.
-
-=cut */
-
-STRLEN
-Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
-{
-
-    PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF;
-
-    return isUTF8_CHAR(buf, buf_end);
-}
-
-/*
 =for apidoc is_utf8_string
 
 Returns true if the first C<len> bytes of string C<s> form a valid
