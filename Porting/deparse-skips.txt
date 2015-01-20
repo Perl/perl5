@@ -447,7 +447,6 @@ op/range.t
 op/readline.t
 op/recurse.t
 op/ref.t
-op/signatures.t
 op/sort.t
 op/split.t
 op/sprintf2.t

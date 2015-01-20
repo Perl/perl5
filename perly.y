@@ -321,11 +321,16 @@ barestmt:	PLUGSTMT
 			}
 		remember subsignature subattrlist '{' stmtseq '}'
 			{
-			  OP *body;
+			  OP *sig = $6, *body = $9;
+                          /* empty sig sub needs a nextstate at the end
+                           * to clear the stack of any default expression
+                           * detritus */
+                          if (!body && !OpHAS_SIBLING(sig))
+                               body = newSTATEOP(0, NULL, NULL);
 			  if (parser->copline > (line_t)$8)
 			      parser->copline = (line_t)$8;
 			  body = block_end($5,
-				op_append_list(OP_LINESEQ, $6, $9));
+				op_append_list(OP_LINESEQ, sig, body));
 
 			  SvREFCNT_inc_simple_void(PL_compcv);
 			  $2->op_type == OP_CONST
@@ -651,8 +656,7 @@ subsignature:	'('
 			}
 		')'
 			{
-			  $$ = op_append_list(OP_LINESEQ, $<opval>2,
-				newSTATEOP(0, NULL, sawparens(newNULLLIST())));
+			  $$ = $<opval>2;
 			  parser->expect = XATTRBLOCK;
 			}
 	;
@@ -870,11 +874,16 @@ anonymous:	'[' expr ']'
 			  $$ = newANONATTRSUB($2, $3, $4, $5); }
 	|	ANONSUB startanonsub remember subsignature subattrlist '{' stmtseq '}'	%prec '('
 			{
-			  OP *body;
+			  OP *sig = $4, *body = $7;
+                          /* empty sig sub needs a nextstate at the end
+                           * to clear the stack of any default expression
+                           * detritus */
+                          if (!body && !OpHAS_SIBLING(sig))
+                               body = newSTATEOP(0, NULL, NULL);
 			  if (parser->copline > (line_t)$6)
 			      parser->copline = (line_t)$6;
 			  body = block_end($3,
-				op_append_list(OP_LINESEQ, $4, $7));
+				op_append_list(OP_LINESEQ, sig, body));
 			  SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($2, NULL, $5, body);
 			}

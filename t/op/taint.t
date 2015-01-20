@@ -16,7 +16,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 801;
+plan tests => 876;
 
 $| = 1;
 
@@ -2347,6 +2347,129 @@ is eval { eval $::x.1 }, 1, 'reset does not taint undef';
      ), "122669\n",
         'tainted constant as logop condition should not prevent "use"';
 }
+
+
+# test signatures and taint; each arg and default expression should
+# be independent
+
+{
+
+    local $::TAINT_PKG = $TAINT;
+    my $x = 1;
+
+    # first a non-signature sub for comparison
+
+    sub sig0 {
+        my ($t1, $u1, $t2, $u2, $t3, $u3, $t4, $u4, $t5, $u5, $t6, $u6) = @_;
+
+        $t3 //= $TAINT;       $u3 //= $x;
+        $t4 //= $t3;          $u4 //= 1;
+        $t5 //= $::TAINT_PKG; $u5 //= do { $TAINT; 1 };
+        $t6 //= "x$t5";       $u6 //= $x + 1;
+
+        is_tainted  ($t1, "sig0 t1");
+        isnt_tainted($u1, "sig0 u1");
+        is_tainted  ($t2, "sig0 t2");
+        isnt_tainted($u2, "sig0 u2");
+        is_tainted  ($t3, "sig0 t3");
+        isnt_tainted($u3, "sig0 u3");
+        is_tainted  ($t4, "sig0 t4");
+        isnt_tainted($u4, "sig0 u4");
+        is_tainted  ($t5, "sig0 t5");
+        isnt_tainted($u5, "sig0 u5");
+        is_tainted  ($t6, "sig0 t6");
+        isnt_tainted($u6, "sig0 u6");
+    }
+
+    sig0($TAINT, $x, $TAINT, $x,
+         $TAINT, $x, $TAINT, $x,
+         $TAINT, $x, $TAINT, $x);
+    sig0($TAINT, $x, $TAINT, $x);
+
+    # then signature sub
+
+    no warnings 'experimental::signatures';
+    use feature 'signatures';
+
+    sub sig1 (  $t1,                $u1,
+                $t2,                $u2,
+                $t3 = $TAINT,       $u3 = $x,
+                $t4 = $t3,          $u4 = 1,
+                $t5 = $::TAINT_PKG, $u5 = do { $TAINT; 1 },
+                $t6 = "x$t5",       $u6 = $x + 1)
+    {
+        is_tainted  ($t1, "sig1 t1");
+        isnt_tainted($u1, "sig1 u1");
+        is_tainted  ($t2, "sig1 t2");
+        isnt_tainted($u2, "sig1 u2");
+        is_tainted  ($t3, "sig1 t3");
+        isnt_tainted($u3, "sig1 u3");
+        is_tainted  ($t4, "sig1 t4");
+        isnt_tainted($u4, "sig1 u4");
+        is_tainted  ($t5, "sig1 t5");
+        isnt_tainted($u5, "sig1 u5");
+        is_tainted  ($t6, "sig1 t6");
+        isnt_tainted($u6, "sig1 u6");
+    }
+
+    sig1($TAINT, $x, $TAINT, $x,
+         $TAINT, $x, $TAINT, $x,
+         $TAINT, $x, $TAINT, $x);
+    sig1($TAINT, $x, $TAINT, $x);
+
+    # and slurpy
+
+    sub sig2 ($t1 = $TAINT + 1, @a)
+    {
+        is_tainted   ($t1,   "sig2 t1");
+        isnt_tainted ($a[0], "sig2 a[0]");
+        is_tainted   ($a[1], "sig2 a[1]");
+        isnt_tainted ($a[2], "sig2 a[2]");
+    }
+
+    sig2($TAINT, $x, $TAINT, $x);
+
+    sub sig3 ($t1 = $TAINT + 1, %h)
+    {
+        is_tainted   ($t1,     "sig3 t1");
+        isnt_tainted ($h{foo}, "sig3 h{foo}");
+        is_tainted   ($h{bar}, "sig3 h{bar}");
+    }
+
+    sig3($TAINT, 'foo', $x, 'bar', $TAINT);
+
+
+    # tainted const defaults
+
+    use constant TAINTED  => substr($^X,0,0);
+    use constant TAINTED0 => (TAINTED . "0") + 0;
+    use constant TAINTED1 => (TAINTED . "0") + 1;
+    use constant TAINTED2 => (TAINTED . "0") + 2;
+
+    sub sig4 (  $t1,            $u1,
+                $t2 = TAINTED0, $u2 = $x,
+                $t3 = TAINTED1, $u3 = $x,
+                $t4 = TAINTED2, $u4 = $x,
+                $t5 = TAINTED,  $u5 = $x)
+    {
+        is_tainted  ($t1, "sig1 t1");
+        isnt_tainted($u1, "sig1 u1");
+        is_tainted  ($t2, "sig1 t2");
+        isnt_tainted($u2, "sig1 u2");
+        is_tainted  ($t3, "sig1 t3");
+        isnt_tainted($u3, "sig1 u3");
+        is_tainted  ($t4, "sig1 t4");
+        isnt_tainted($u4, "sig1 u4");
+        is_tainted  ($t5, "sig1 t5");
+        isnt_tainted($u5, "sig1 u5");
+    }
+
+    sig4($TAINT, $x, $TAINT, $x,
+         $TAINT, $x, $TAINT, $x,
+         $TAINT, $x);
+    sig4($TAINT, $x);
+}
+
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {

@@ -15853,7 +15853,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                 break;
             case MDEREF_INDEX_const:
                 if (is_hv)
-                    index_const_sv = UNOP_AUX_item_sv(++items)
+                    index_const_sv = UNOP_AUX_item_sv(++items);
                 else
                     index_const_iv = (++items)->iv;
                 break;

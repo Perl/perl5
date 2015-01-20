@@ -20,7 +20,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2249;
+plan 2254;
 
 use B ();
 
@@ -260,3 +260,66 @@ test_opcount(0, 'multideref exists',
                     multideref => 1,
                 },
             );
+
+# various signature things
+
+{
+    use feature 'signatures';
+    no warnings 'experimental::signatures';
+
+
+    my $lex;
+    our $pkg;
+    my @array;
+
+    test_opcount(0, 'basic signature',
+                    sub ($a, $b) { },
+                    {
+                        signature  => 1,
+                        nextstate  => 2,
+                    },
+                );
+
+    test_opcount(0, 'signature with all-optimised defaults',
+                    sub ($a=undef, $b=0, $c=1, $d=2, $e="foo",
+                         $f=$lex, $g=$pkg) { },
+                    {
+                        signature  => 1,
+                        nextstate  => 2,
+                        sassign    => 0,
+                        add        => 0,
+                    },
+                );
+
+    test_opcount(0, 'signature with TARGMY default',
+                    sub ($a=$lex+1) { },
+                    {
+                        signature  => 1,
+                        nextstate  => 3,
+                        sassign    => 0,
+                        add        => 1,
+                    },
+                );
+
+    test_opcount(0, 'signature with non-TARGMY default',
+                    sub ($a=/foo/) { },
+                    {
+                        signature  => 1,
+                        nextstate  => 3,
+                        sassign    => 1,
+                        match      => 1,
+                    },
+                );
+
+    test_opcount(0, 'signature with peep-optimised default',
+                    sub ($a=$array[0]) { },
+                    {
+                        signature  => 1,
+                        nextstate  => 3,
+                        sassign    => 1,
+                        aelemfast_lex  => 1,
+                        aelem      => 0,
+                    },
+                );
+
+}

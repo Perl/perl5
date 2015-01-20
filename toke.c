@@ -11499,6 +11499,9 @@ Perl_parse_stmtseq(pTHX_ U32 flags)
     return stmtseqop;
 }
 
+
+/* Helper function for parse_subsignature */
+
 #define lex_token_boundary() S_lex_token_boundary(aTHX)
 static void
 S_lex_token_boundary(pTHX)
@@ -11507,158 +11510,451 @@ S_lex_token_boundary(pTHX)
     PL_oldbufptr = PL_bufptr;
 }
 
-#define parse_opt_lexvar() S_parse_opt_lexvar(aTHX)
-static OP *
+
+/* Parse the next token, which should either be a bare sigil, or a
+ * sigil + var name. For the latter, allocate a new named pad entry for the
+ * lexical and return the pad index. For the former, return NOT_IN_PAD.
+ * (Helper function for parse_subsignature).
+ */
+
+static PADOFFSET
 S_parse_opt_lexvar(pTHX)
 {
     I32 sigil, c;
     char *s, *d;
-    OP *var;
     lex_token_boundary();
     sigil = lex_read_unichar(0);
     if (lex_peek_unichar(0) == '#') {
 	qerror(Perl_mess(aTHX_ "Parse error"));
-	return NULL;
+	return NOT_IN_PAD;
     }
     lex_read_space(0);
     c = lex_peek_unichar(0);
     if (c == -1 || !(UTF ? isIDFIRST_uni(c) : isIDFIRST_A(c)))
-	return NULL;
+	return NOT_IN_PAD;
     s = PL_bufptr;
     d = PL_tokenbuf + 1;
     PL_tokenbuf[0] = (char)sigil;
     parse_ident(&s, &d, PL_tokenbuf + sizeof(PL_tokenbuf) - 1, 0, cBOOL(UTF));
     PL_bufptr = s;
     if (d == PL_tokenbuf+1)
-	return NULL;
-    var = newOP(sigil == '$' ? OP_PADSV : sigil == '@' ? OP_PADAV : OP_PADHV,
-		OPf_MOD | (OPpLVAL_INTRO<<8));
-    var->op_targ = allocmy(PL_tokenbuf, d - PL_tokenbuf, UTF ? SVf_UTF8 : 0);
-    return var;
+	return NOT_IN_PAD;
+    return allocmy(PL_tokenbuf, d - PL_tokenbuf, UTF ? SVf_UTF8 : 0);
 }
+
+
+
+/* These are local vars of Perl_parse_subsignature() that also
+ * need to be accessible by a couple of helper functions */
+
+struct parse_subsignature_state {
+    OP            *sig_op;           /* the OP_SIGNATURE op */
+    UNOP_AUX_item *items;            /* sig_op->op_aux */
+    int            items_size;       /* malloced size of items */
+    int            items_ix;         /* first free slot in items */
+    int            action_ix;        /* current slot holding actions */
+    int            action_count;     /* how many actions have been stored
+                                        in the current items[action_ix] */
+    UV             action_acc;       /* accumulated actions for the current
+                                        items[action_ix] slot, excluding
+                                        the temporary SIGNATURE_end */
+};
+
+
+/* Reallocate the items buf for sig_op.
+ * (Helper function for parse_subsignature()). */
+
+static void
+S_sig_items_grow(pTHX_ struct parse_subsignature_state *stp)
+{
+    stp->items_size = (stp->items_size < 8) ? 8 : stp->items_size << 1;
+    stp->items = (UNOP_AUX_item*)PerlMemShared_realloc(stp->items,
+                                sizeof(UNOP_AUX_item) * stp->items_size);
+    stp->items[0].uv = stp->items_size - 1;
+    ((UNOP_AUX *)stp->sig_op)->op_aux = stp->items + 1;
+}
+
+#define PUSH_ITEM(field, arg) \
+    if (stp->items_ix >= stp->items_size) \
+        S_sig_items_grow(aTHX_ stp); \
+    stp->items[stp->items_ix++].field = arg;
+
+
+/* Add another action to the current action slot, allocating a new slot if
+ * necessary. After adding the action, append a temporary SIGNATURE_end
+ * action too, so that if we croak() during signature parsing, op_clear()
+ * can correctly process the op_aux array as constructed-so-far.
+ * (Helper function for parse_subsignature()).
+ */
+
+static void
+S_sig_push_action(pTHX_ struct parse_subsignature_state *stp, UV action)
+{
+    stp->action_acc |= (action << (stp->action_count * SIGNATURE_SHIFT));
+    stp->action_count = (stp->action_count + 1) % (UVSIZE * 8 / SIGNATURE_SHIFT);
+
+    if (stp->action_count) {
+        stp->items[stp->action_ix].uv = (stp->action_acc |
+            ((UV)SIGNATURE_end << (stp->action_count * SIGNATURE_SHIFT)));
+    }
+    else {
+        /* need to allocate a new action slot */
+        stp->items[stp->action_ix].uv = stp->action_acc;
+        stp->action_acc = 0;
+        stp->action_ix = stp->items_ix;
+        PUSH_ITEM(uv, SIGNATURE_end);
+    }
+}
+
+
+
+/* parse a sub signature, i.e. the bit in parentheses in something like
+ *     sub f ($a, $b = 1) {...}
+ * return an OP_LINESEQ op, which has as its children, an OP_SIGNATURE,
+ * plus 0 or more (sassign, nextstate) pairs for each default arg
+ * expression that can't be optimised into the OP_SIGNATURE.
+ * Returns NULL on error.
+ *
+ * It gives the OP_SIGNATURE op an op_aux array, which contains
+ * collections of actions and args; the args being things like what pad
+ * ranges to introduce, and simple default args such as an integer
+ * constant, an SV constant, or a simple lex or package var.
+ *
+ * Note that we attach this data to CV via an OP_SIGNATURE rather than
+ * directly attaching it to the CV, so that it doesn't need copying
+ * each time a new thread is cloned.
+ */
 
 OP *
 Perl_parse_subsignature(pTHX)
 {
     I32 c;
-    int prev_type = 0, pos = 0, min_arity = 0, max_arity = 0;
-    OP *initops = NULL;
+    OP  *initops;
+    int  prev_type     =  0; /* 0 = mandatory, 1 = optional, 2 = splurp */
+    UV   pos           =  0; /* positional parameter number  (0..N-1) */
+    UV   mand_args     =  0; /* number of mandatory parameters */
+    UV   opt_args      =  0; /* number of optional parameters */
+    bool slurpy        =  0; /* has a @ or % */
+    int  defexpr_count =  0; /* how many non-optimised default exprs seen */
+    int  padintro_ix   = -1; /* data slot of current padintro action */
+    PADOFFSET prev_pad_offset = NOT_IN_PAD;
+    PADOFFSET pad_base = 0;     /* first pad index in current range */
+    PADOFFSET top_pad  = NOT_IN_PAD; /* highest pad var index seen so far */
+    PADOFFSET top_unsafe_pad  = NOT_IN_PAD; /* highest pad var that may be
+                                    affected by non-optimised default exprs */
+
+    /* keep some local vars in a struct so they can be accessed by helper
+     * functions */
+    struct parse_subsignature_state st;
+    struct parse_subsignature_state *stp = &st;
+
+    st.items        = NULL;
+    st.items_ix     = 3;
+    st.action_ix    = 2;
+    st.action_count = 0;
+    st.action_acc   = 0;
+    /* Minimum buf size: this corresponds to a sig with no quick default
+     * args, and where the number of args is small enough to fit into a
+     * single action UV. This should be a common case, and avoids the
+     * need to resize and copy at the end. */
+    st.items_size = 3;
+    st.items = (UNOP_AUX_item*)PerlMemShared_malloc(
+                                    sizeof(UNOP_AUX_item) * st.items_size);
+
+    /* Note that because we can croak at any moment, we have to ensure
+     * that anything we've allocated so far (such as the items array,
+     * consts moved to the pad, etc.) always get freed. So right from the
+     * start we attach 'items' to the op and ensure that its contents
+     * are up-to-date and consistent, so that op_clear() can handle it.
+     */
+
+    /* Note that when attached to the OP_SIGNATURE op, op_aux points
+     * to slot 1 of items[]; items[0] contains sizeof(items) and is
+     * not normally needed at runtime. So the indices seen in this
+     * function and in pp_signature() will typically differ by 1.
+     */
+    st.items[0].uv = st.items_size-1;
+    st.items[1].uv = 0;             /* numbers of args */
+    st.items[2].uv = SIGNATURE_end; /* actions */
+
+    st.sig_op = newUNOP_AUX(OP_SIGNATURE, 0, NULL, st.items+1);
+
+    initops = newSTATEOP(0, NULL, st.sig_op);
+
     lex_read_space(0);
     c = lex_peek_unichar(0);
+
     while (c != /*(*/')') {
+        I32       sigil;
+        bool      is_var;         /* '$foo' rather than '$' */
+        PADOFFSET pad_offset;
+        UV        action;
+        OP       *defexpr = NULL;
+
 	switch (c) {
-	    case '$': {
-		OP *var, *expr;
-		if (prev_type == 2)
-		    qerror(Perl_mess(aTHX_ "Slurpy parameter not last"));
-		var = parse_opt_lexvar();
-		expr = var ?
-		    newBINOP(OP_AELEM, 0,
-			ref(newUNOP(OP_RV2AV, 0, newGVOP(OP_GV, 0, PL_defgv)),
-			    OP_RV2AV),
-			newSVOP(OP_CONST, 0, newSViv(pos))) :
-		    NULL;
-		lex_read_space(0);
-		c = lex_peek_unichar(0);
-		if (c == '=') {
-		    lex_token_boundary();
-		    lex_read_unichar(0);
-		    lex_read_space(0);
-		    c = lex_peek_unichar(0);
-		    if (c == ',' || c == /*(*/')') {
-			if (var)
-			    qerror(Perl_mess(aTHX_ "Optional parameter "
-				    "lacks default expression"));
-		    } else {
-			OP *defexpr = parse_termexpr(0);
-			if (defexpr->op_type == OP_UNDEF &&
-				!(defexpr->op_flags & OPf_KIDS)) {
-			    op_free(defexpr);
-			} else {
-			    OP *ifop = 
-				newBINOP(OP_GE, 0,
-				    scalar(newUNOP(OP_RV2AV, 0,
-					    newGVOP(OP_GV, 0, PL_defgv))),
-				    newSVOP(OP_CONST, 0, newSViv(pos+1)));
-			    expr = var ?
-				newCONDOP(0, ifop, expr, defexpr) :
-				newLOGOP(OP_OR, 0, ifop, defexpr);
-			}
-		    }
-		    prev_type = 1;
-		} else {
-		    if (prev_type == 1)
-			qerror(Perl_mess(aTHX_ "Mandatory parameter "
-				"follows optional parameter"));
-		    prev_type = 0;
-		    min_arity = pos + 1;
-		}
-		if (var) expr = newASSIGNOP(OPf_STACKED, var, 0, expr);
-		if (expr)
-		    initops = op_append_list(OP_LINESEQ, initops,
-				newSTATEOP(0, NULL, expr));
-		max_arity = ++pos;
-	    } break;
-	    case '@':
-	    case '%': {
-		OP *var;
-		if (prev_type == 2)
-		    qerror(Perl_mess(aTHX_ "Slurpy parameter not last"));
-		var = parse_opt_lexvar();
-		if (c == '%') {
-		    OP *chkop = newLOGOP((pos & 1) ? OP_OR : OP_AND, 0,
-			    newBINOP(OP_BIT_AND, 0,
-				scalar(newUNOP(OP_RV2AV, 0,
-				    newGVOP(OP_GV, 0, PL_defgv))),
-				newSVOP(OP_CONST, 0, newSViv(1))),
-		            op_convert_list(OP_DIE, 0,
-		                op_convert_list(OP_SPRINTF, 0,
-		                    op_append_list(OP_LIST,
-		                        newSVOP(OP_CONST, 0,
-		                            newSVpvs("Odd name/value argument for subroutine at %s line %d.\n")),
-		                        newSLICEOP(0,
-		                            op_append_list(OP_LIST,
-		                                newSVOP(OP_CONST, 0, newSViv(1)),
-		                                newSVOP(OP_CONST, 0, newSViv(2))),
-		                            newOP(OP_CALLER, 0))))));
-		    if (pos != min_arity)
-			chkop = newLOGOP(OP_AND, 0,
-				    newBINOP(OP_GT, 0,
-					scalar(newUNOP(OP_RV2AV, 0,
-					    newGVOP(OP_GV, 0, PL_defgv))),
-					newSVOP(OP_CONST, 0, newSViv(pos))),
-				    chkop);
-		    initops = op_append_list(OP_LINESEQ,
-				newSTATEOP(0, NULL, chkop),
-				initops);
-		}
-		if (var) {
-		    OP *slice = pos ?
-			op_prepend_elem(OP_ASLICE,
-			    newOP(OP_PUSHMARK, 0),
-			    newLISTOP(OP_ASLICE, 0,
-				list(newRANGE(0,
-				    newSVOP(OP_CONST, 0, newSViv(pos)),
-				    newUNOP(OP_AV2ARYLEN, 0,
-					ref(newUNOP(OP_RV2AV, 0,
-						newGVOP(OP_GV, 0, PL_defgv)),
-					    OP_AV2ARYLEN)))),
-				ref(newUNOP(OP_RV2AV, 0,
-					newGVOP(OP_GV, 0, PL_defgv)),
-				    OP_ASLICE))) :
-			newUNOP(OP_RV2AV, 0, newGVOP(OP_GV, 0, PL_defgv));
-		    initops = op_append_list(OP_LINESEQ, initops,
-			newSTATEOP(0, NULL,
-			    newASSIGNOP(OPf_STACKED, var, 0, slice)));
-		}
-		prev_type = 2;
-		max_arity = -1;
-	    } break;
-	    default:
-		parse_error:
-		qerror(Perl_mess(aTHX_ "Parse error"));
-		return NULL;
-	}
+        default:
+        parse_error:
+            qerror(Perl_mess(aTHX_ "Parse error"));
+            return NULL;
+
+        case '$':
+        case '@':
+        case '%':
+            sigil = c;
+            if (prev_type == 2)
+                qerror(Perl_mess(aTHX_ "Slurpy parameter not last"));
+
+            pad_offset = S_parse_opt_lexvar(aTHX);
+            is_var = (pad_offset != NOT_IN_PAD);
+
+            if (is_var) {
+                top_pad = pad_offset;
+                /* at the first pad var, or after there are too
+                 * many vars for a single SAVEt_CLEARPADRANGE,
+                 * or if the pad indexes are non-continuous
+                 * (e.g. sub ($a = do {my $x}, $b) {} ),
+                 * then plant a new padintro action; else update
+                 * the existing action with a revised range */
+                if (   padintro_ix == -1
+                    || (pad_offset - pad_base + 1) > OPpPADRANGE_COUNTMASK
+                    || pad_offset != prev_pad_offset + 1)
+                {
+                    pad_base = pad_offset;
+                    /* reserve slot for padintro arg */
+                    padintro_ix = st.items_ix;
+                    PUSH_ITEM(uv, 0);
+                    /* note that arg items should always be pushed
+                     * before actions; otherwise, when actions fill up
+                     * and alloocate a new slot, the new actions slot and
+                     * the args slot are in the wrong order */
+                    S_sig_push_action(aTHX_ stp, SIGNATURE_padintro);
+                }
+                st.items[padintro_ix].uv =
+                                (pad_base << OPpPADRANGE_COUNTSHIFT)
+                              | (pad_offset - pad_base + 1);
+                prev_pad_offset = pad_offset;
+            }
+
+            action = SIGNATURE_arg;
+
+            lex_read_space(0);
+            c = lex_peek_unichar(0);
+
+            if (sigil != '$') {
+                /* array or hash */
+                prev_type = 2;
+                slurpy = TRUE;
+                action = (sigil == '@') ? SIGNATURE_slurp_array
+                                        : SIGNATURE_slurp_hash;
+            }
+            else {
+                /* scalar */
+                if (c != '=') {
+                    /* mandatory arg */
+                    if (prev_type == 1)
+                        qerror(Perl_mess(aTHX_ "Mandatory parameter "
+                                "follows optional parameter"));
+                    prev_type = 0;
+                    mand_args++;
+                }
+                else {
+                    /* optional arg */
+                    lex_token_boundary();
+                    lex_read_unichar(0);
+                    lex_read_space(0);
+                    c = lex_peek_unichar(0);
+                    if (c == ',' || c == /*(*/')') {
+                        if (is_var)
+                            qerror(Perl_mess(aTHX_ "Optional parameter "
+                                    "lacks default expression"));
+                        action = SIGNATURE_arg_default_none;
+                    } else {
+                        bool free_def = FALSE;
+                        defexpr = parse_termexpr(0);
+
+                        if (defexpr->op_type == OP_UNDEF &&
+                                !(defexpr->op_flags & OPf_KIDS))
+                        {
+                            /* optimise '$foo = undef' */
+                            free_def = TRUE;
+                            action = SIGNATURE_arg_default_undef;
+                        }
+                        else if (defexpr->op_type == OP_CONST) {
+                            /* optimise '$foo = const' */
+                            SV* constsv = cSVOPx(defexpr)->op_sv;
+                            /* don't optimise magical ints. Amongst other
+                             * things, taint would get lost */
+                            if (!SvMAGICAL(constsv) && SvIOK(constsv)) {
+                                IV i = SvIV_nomg(constsv);
+                                if (i == 0)
+                                    action = SIGNATURE_arg_default_0;
+                                else if (i == 1)
+                                    action = SIGNATURE_arg_default_1;
+                                else {
+                                    action = SIGNATURE_arg_default_iv;
+                                    PUSH_ITEM(iv,i);
+                                }
+                                free_def = TRUE;
+                            }
+                            /* see "DELAYED DEFEXPR" comment below for
+                             * why we don't optimise some some consts */
+                            else if (!defexpr_count || !SvMAGICAL(constsv))
+                            {
+                                /* general (non-int) const */
+#ifdef USE_ITHREADS
+                                PADOFFSET po;
+                                SV *dummy = constsv;
+                                /* Relocate sv to the pad for thread safety
+                                 * note that this causes non-contiguous
+                                 * pad indexes for the param lexicals,
+                                 * with more SIGNATURE_padintro actions.
+                                 * I can't think of any easy way round
+                                 * this - DAPM */
+                                Perl_op_relocate_sv(aTHX_ &dummy, &po);
+                                PUSH_ITEM(pad_offset, po);
+#else
+                                PUSH_ITEM(sv, constsv);
+#endif
+                                SvREFCNT_inc_simple_void_NN(constsv);
+                                free_def = TRUE;
+                                action = SIGNATURE_arg_default_const;
+                            }
+                        }
+                        /* simple lexical var? */
+                        else if (defexpr->op_type == OP_PADSV) {
+                            ASSUME(!(defexpr->op_flags & ~(OPf_WANT|OPf_PARENS
+                                            |OPf_REF|OPf_MOD|OPf_SPECIAL)));
+                            ASSUME(!(defexpr->op_private &
+                                    ~(OPpPAD_STATE|OPpDEREF|OPpLVAL_INTRO)));
+
+                            if ( !(defexpr->op_flags & (OPf_REF|OPf_MOD))
+                                && defexpr->op_private == 0)
+                            {
+                                PADOFFSET po = defexpr->op_targ;
+                                /* see "DELAYED DEFEXPR" comment below for
+                                 * why we don't optimise some some pad vars */
+                                if (   !defexpr_count
+                                    || (
+                                        !PadnameOUTER(PAD_COMPNAME(po))
+                                            && (   top_unsafe_pad == NOT_IN_PAD
+                                                || top_unsafe_pad < po)
+                                       ))
+                                {
+                                    PUSH_ITEM(pad_offset, po);
+                                    free_def = TRUE;
+                                    action = SIGNATURE_arg_default_padsv;
+                                }
+                            }
+                        }
+                        /* simple package var?
+                         * see "DELAYED DEFEXPR" comment below for
+                         * why we don't optimise some some package vars */
+                        else if (!defexpr_count
+                                 && defexpr->op_type == OP_RV2SV
+                                 && (defexpr->op_flags & OPf_KIDS)
+                                 && cUNOPx(defexpr)->op_first->op_type == OP_GV)
+                        {
+                            OP *gvop = cUNOPx(defexpr)->op_first;
+                            ASSUME(!(defexpr->op_flags &
+                                    ~(OPf_WANT|OPf_KIDS|OPf_MOD|OPf_REF
+                                     |OPf_SPECIAL|OPf_PARENS)));
+                            ASSUME(!(defexpr->op_private &
+                                            ~(OPpARG1_MASK
+                                             |OPpHINT_STRICT_REFS|OPpOUR_INTRO
+                                             |OPpDEREF|OPpLVAL_INTRO)));
+
+                            ASSUME(!(gvop->op_flags & ~(OPf_WANT|OPf_SPECIAL)));
+                            ASSUME(!(gvop->op_private & ~(OPpEARLY_CV)));
+
+                            if (   (defexpr->op_flags &~ OPf_PARENS)
+                                                == (OPf_WANT_SCALAR|OPf_KIDS)
+                                && !(defexpr->op_private &
+                                             ~(OPpARG1_MASK|HINT_STRICT_REFS))
+                                && (gvop->op_flags &~ OPf_SPECIAL)
+                                                            == OPf_WANT_SCALAR
+                                && gvop->op_private == 0)
+                            {
+#ifdef USE_ITHREADS
+                                PUSH_ITEM(pad_offset, cPADOPx(gvop)->op_padix);
+                                /* stop it being swiped when nulled */
+                                cPADOPx(gvop)->op_padix = 0;
+#else
+                                PUSH_ITEM(sv, cSVOPx(gvop)->op_sv);
+                                cSVOPx(gvop)->op_sv = NULL;
+#endif
+                                free_def = TRUE;
+                                action = SIGNATURE_arg_default_gvsv;
+                            }
+                        }
+
+                        if (free_def) {
+                            op_free(defexpr);
+                            defexpr = NULL;
+                        }
+
+                        if (defexpr) {
+                            /* not optimised away, so it's an arbitrary
+                             * expression; call ops at runtime */
+
+                            /* DELAYED DEFEXPR:
+                             *
+                             * Some simple default expressions can be
+                             * performed by pp_signature() itself; more
+                             * complex ones are appended to the ops chain
+                             * and get executed after pp_signature().
+                             * This re-ordering could affect vars being
+                             * used as default values. For example:
+                             *   sub f($a, $b = $a++, $c = $a)
+                             * naively gets executed as
+                             *   $a = $_[0];
+                             *   $b = $_[1];
+                             *   $c = $_[2] // $a;
+                             *   $b //= $a++;
+                             * since '=$a' is optimisable, but '=$a++'
+                             * isn't. But moving the ++ action to the end
+                             * can cause $c to get the wrong value.  So
+                             * whenever we defer an expression, mark all
+                             * lexicals already introduced as potentially
+                             * unsafe, and don't allow them to be used in
+                             * a subsequent lexical default. Outer
+                             * lexicals and package vars used as a default
+                             * are unsafe after *any* default exprs have
+                             * been deferred. Similarly for 'consts' that
+                             * have magic (e.g. tied values).
+                             */
+                            top_unsafe_pad = top_pad;
+                            defexpr_count++;
+
+                            if (is_var) {
+                                OP *var;
+                                var = newOP(OP_PADSV, 0);
+                                var->op_targ = pad_offset;
+                                defexpr = newASSIGNOP(OPf_STACKED,
+                                                        var, 0, defexpr);
+                            }
+                            action = SIGNATURE_arg_default_op;
+                        }
+                    }
+                    prev_type = 1;
+                    opt_args++;
+                }
+            }
+
+            if (!is_var)
+                action |= SIGNATURE_FLAG_skip;
+            S_sig_push_action(aTHX_ stp, action);
+
+            if (defexpr) {
+                initops = op_append_elem(OP_LINESEQ, initops,
+                                    newSTATEOP(0, NULL, NULL));
+                initops = op_append_elem(OP_LINESEQ, initops, defexpr);
+            }
+
+            (void)intro_my();
+            pos++;
+            break;
+	} /* switch */
+
 	lex_read_space(0);
 	c = lex_peek_unichar(0);
 	switch (c) {
@@ -11675,48 +11971,33 @@ Perl_parse_subsignature(pTHX)
 		goto parse_error;
 	}
     }
-    if (min_arity != 0) {
-	initops = op_append_list(OP_LINESEQ,
-	    newSTATEOP(0, NULL,
-		newLOGOP(OP_OR, 0,
-		    newBINOP(OP_GE, 0,
-			scalar(newUNOP(OP_RV2AV, 0,
-			    newGVOP(OP_GV, 0, PL_defgv))),
-			newSVOP(OP_CONST, 0, newSViv(min_arity))),
-		    op_convert_list(OP_DIE, 0,
-		        op_convert_list(OP_SPRINTF, 0,
-		            op_append_list(OP_LIST,
-		                newSVOP(OP_CONST, 0,
-		                    newSVpvs("Too few arguments for subroutine at %s line %d.\n")),
-		                newSLICEOP(0,
-		                    op_append_list(OP_LIST,
-		                        newSVOP(OP_CONST, 0, newSViv(1)),
-		                        newSVOP(OP_CONST, 0, newSViv(2))),
-		                    newOP(OP_CALLER, 0))))))),
-	    initops);
+
+    /* Sig parsing complete. Set param counts in items[1] */
+
+    if (mand_args + opt_args >= (1<<15))
+        qerror(Perl_mess(aTHX_
+                    "Subroutine signature has more than %d parameters",
+                    (int)((1<<15)-1) ));
+    else
+        st.items[1].uv =
+            (mand_args << 16) | opt_args | ((slurpy ? 1 : 0) << 15);
+
+    if (st.items_ix < st.items_size) {
+        /* copy to new allocation of exact size */
+        UNOP_AUX_item *new_items = (UNOP_AUX_item*)PerlMemShared_malloc(
+                                        sizeof(UNOP_AUX_item) * st.items_ix);
+        Copy(st.items, new_items, st.items_ix, UNOP_AUX_item);
+        PerlMemShared_free(st.items);
+        st.items = new_items;
+        st.items[0].uv = st.items_ix - 1;
+        ((UNOP_AUX*)st.sig_op)->op_aux = st.items + 1;
     }
-    if (max_arity != -1) {
-	initops = op_append_list(OP_LINESEQ,
-	    newSTATEOP(0, NULL,
-		newLOGOP(OP_OR, 0,
-		    newBINOP(OP_LE, 0,
-			scalar(newUNOP(OP_RV2AV, 0,
-			    newGVOP(OP_GV, 0, PL_defgv))),
-			newSVOP(OP_CONST, 0, newSViv(max_arity))),
-		    op_convert_list(OP_DIE, 0,
-		        op_convert_list(OP_SPRINTF, 0,
-		            op_append_list(OP_LIST,
-		                newSVOP(OP_CONST, 0,
-		                    newSVpvs("Too many arguments for subroutine at %s line %d.\n")),
-		                newSLICEOP(0,
-		                    op_append_list(OP_LIST,
-		                        newSVOP(OP_CONST, 0, newSViv(1)),
-		                        newSVOP(OP_CONST, 0, newSViv(2))),
-		                    newOP(OP_CALLER, 0))))))),
-	    initops);
-    }
+
+    CvHASSIG_on(PL_compcv);
     return initops;
 }
+
+#undef PUSH_ITEM
 
 /*
  * Local variables:

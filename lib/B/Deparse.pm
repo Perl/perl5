@@ -16,6 +16,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER OPpREPEAT_DOLIST
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
+         OPpPADRANGE_COUNTSHIFT
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP SVpad_TYPED
          CVf_METHOD CVf_LVALUE
@@ -44,9 +45,29 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_FLAG_last
         MDEREF_MASK
         MDEREF_SHIFT
+
+        SIGNATURE_reload
+        SIGNATURE_end
+        SIGNATURE_padintro
+        SIGNATURE_arg
+        SIGNATURE_arg_default_none
+        SIGNATURE_arg_default_undef
+        SIGNATURE_arg_default_0
+        SIGNATURE_arg_default_1
+        SIGNATURE_arg_default_iv
+        SIGNATURE_arg_default_const
+        SIGNATURE_arg_default_padsv
+        SIGNATURE_arg_default_gvsv
+        SIGNATURE_arg_default_op
+        SIGNATURE_slurp_array
+        SIGNATURE_slurp_hash
+        SIGNATURE_ACTION_MASK
+        SIGNATURE_FLAG_skip
+        SIGNATURE_MASK
+        SIGNATURE_SHIFT
     );
 
-$VERSION = '1.33';
+$VERSION = '1.34';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1221,22 +1242,132 @@ sub pad_subs {
 	sort {$a->[0] <=> $b->[0]} @{$self->{'subs_todo'}}, @todo
 }
 
+
+# handle a signature, with $op pointing to an OP_SIGNATURE.
+# return the next executable op (some default arg ops may get consumed),
+# and a string representation of the sub's signature.
+#
+sub deparse_signature {
+    my ($self, $op, $cv) = @_;
+
+    my $pad_ix = 0;
+    my @params;
+
+    my $next = $op;
+
+    # can't use stringify method here, because that truncates long
+    # string constants and don't handle SIGNATURE_arg_default_op
+
+    my @items = $op->aux_list($cv);
+    shift @items; # skip parameter counts
+    my $actions = shift @items;
+
+    for (;; $actions >>= SIGNATURE_SHIFT) {
+        my $action = ($actions & SIGNATURE_ACTION_MASK);
+
+        if ($action == SIGNATURE_reload) {
+            $actions = shift @items;
+            redo;
+        }
+
+        if ($action == SIGNATURE_end) {
+            last;
+        }
+
+        if ($action == SIGNATURE_padintro) {
+            $pad_ix = (shift @items) >> OPpPADRANGE_COUNTSHIFT;
+            next;
+        }
+
+        my $param;
+        if ($actions & SIGNATURE_FLAG_skip) {
+            $param =      $action == SIGNATURE_slurp_array ?
+                    '@' : $action == SIGNATURE_slurp_hash  ?
+                    '%' : '$';
+        }
+        else {
+            $param = $self->padname($pad_ix++);
+        }
+
+        my $default;
+
+        if ($action == SIGNATURE_arg_default_none) {
+            $default = "";
+        }
+        elsif ($action == SIGNATURE_arg_default_undef) {
+            $default = "undef";
+        }
+        elsif ($action == SIGNATURE_arg_default_op) {
+            my $defop;
+            # skip (sigop or previous assign)
+            $next = $next->sibling;
+            $self->pp_nextstate($next, 0); # set curcop etc
+            # skip nextstate
+            $next = $next->sibling;
+            if ($next->name eq 'sassign') {
+                $defop = $next->first;
+                $default = $self->deparse($defop, 7);
+            }
+            else {
+                # OPpTARGET_MY optimisation: $a = $b + $c
+                # is converted into $b + $c, where $b's targ
+                # is the same pad index as $a. '$b+$c' will be deparsed
+                # as '$a = $b+$c', so strip off the '$a = ' bit.
+                $defop = $next;
+                $default = $self->deparse($defop, 6);
+                $default =~ s/^\$\S+ = //;
+            }
+            $default = "($default)" if $defop->flags & OPf_PARENS;
+        }
+        elsif ($action == SIGNATURE_arg_default_0) {
+            $default = "0";
+        }
+        elsif ($action == SIGNATURE_arg_default_1) {
+            $default = "1";
+        }
+        elsif ($action == SIGNATURE_arg_default_iv) {
+            $default = shift @items;
+        }
+        elsif ($action == SIGNATURE_arg_default_padsv) {
+            $default = $self->padname(shift @items);
+        }
+        elsif ($action == SIGNATURE_arg_default_gvsv) {
+            $default = '$' . ($self->stash_variable_name('$', shift @items))[0];
+        }
+        elsif ($action == SIGNATURE_arg_default_const) {
+            $default = $self->const(shift(@items), 7);
+        }
+        elsif (   $action == SIGNATURE_arg
+               || $action == SIGNATURE_slurp_array
+               || $action == SIGNATURE_slurp_hash)
+        {
+            # nothing to do
+        }
+
+        $param .=" = $default" if defined $default;
+        push @params, $param;
+    }
+
+    return $next->next, join ', ', @params;
+}
+
+
 sub deparse_sub {
     my $self = shift;
     my $cv = shift;
-    my $proto = "";
+    my $proto;
+    my @attrs;
 Carp::confess("NULL in deparse_sub") if !defined($cv) || $cv->isa("B::NULL");
 Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     local $self->{'curcop'} = $self->{'curcop'};
     if ($cv->FLAGS & SVf_POK) {
-	$proto = "(". $cv->PV . ") ";
+	$proto = $cv->PV;
     }
     if ($cv->CvFLAGS & (CVf_METHOD|CVf_LOCKED|CVf_LVALUE|CVf_ANONCONST)) {
-        $proto .= ": ";
-        $proto .= "lvalue " if $cv->CvFLAGS & CVf_LVALUE;
-        $proto .= "locked " if $cv->CvFLAGS & CVf_LOCKED;
-        $proto .= "method " if $cv->CvFLAGS & CVf_METHOD;
-        $proto .= "const "  if $cv->CvFLAGS & CVf_ANONCONST;
+        push @attrs, "lvalue" if $cv->CvFLAGS & CVf_LVALUE;
+        push @attrs, "locked" if $cv->CvFLAGS & CVf_LOCKED;
+        push @attrs, "method" if $cv->CvFLAGS & CVf_METHOD;
+        push @attrs, "const"  if $cv->CvFLAGS & CVf_ANONCONST;
     }
 
     local($self->{'curcv'}) = $cv;
@@ -1251,8 +1382,19 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 	$self->pessimise($root, $cv->START);
 	my $lineseq = $root->first;
 	if ($lineseq->name eq "lineseq") {
+	    my $o = $lineseq->first;
+            my $sigop;
+            # nextstate followed by signature?
+            if ($$o && ($sigop = $o->sibling) && $$sigop
+                && $sigop->name eq 'signature')
+            {
+                $self->pp_nextstate($o, 0); # set curcop etc
+                ($o, my $sig) = $self->deparse_signature($sigop, $cv);
+                unshift @attrs, "prototype($proto)" if defined $proto;
+                $proto = $sig;
+            }
 	    my @ops;
-	    for(my$o=$lineseq->first; $$o; $o=$o->sibling) {
+	    for(; $$o; $o=$o->sibling) {
 		push @ops, $o;
 	    }
 	    $body = $self->lineseq(undef, 0, @ops).";";
@@ -1265,18 +1407,23 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 	else {
 	    $body = $self->deparse($root->first, 0);
 	}
+        $body = "{\n\t$body\n\b}";
     }
     else {
 	my $sv = $cv->const_sv;
 	if ($$sv) {
 	    # uh-oh. inlinable sub... format it differently
-	    return $proto . "{ " . $self->const($sv, 0) . " }\n";
+	    $body =  "{ " . $self->const($sv, 0) . " }";
 	} else { # XSUB? (or just a declaration)
-	    return "$proto;\n";
+            $body = ';';
 	}
     }
-    return $proto ."{\n\t$body\n\b}" ."\n";
+    $proto = defined $proto ? "($proto) "  : "";
+    my $attrs = '';
+    $attrs = ': ' . join(' ', @attrs) . ' ' if @attrs;
+    return "$proto$attrs$body\n";
 }
+
 
 sub deparse_format {
     my $self = shift;
@@ -4130,6 +4277,9 @@ sub pp_multideref {
     return $text;
 }
 
+# placeholder; signatures are handled specially in deparse_sub()
+
+sub pp_signature { }
 
 sub pp_aelem { maybe_local(@_, elem(@_, "[", "]", "padav")) }
 sub pp_helem { maybe_local(@_, elem(@_, "{", "}", "padhv")) }

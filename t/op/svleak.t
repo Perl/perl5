@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 129;
+plan tests => 131;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -492,4 +492,25 @@ $x = $r->[0]{foo}{$k}{$i};
 $x = $mdr::a[0]{foo}{$mdr::k}{$mdr::i};
 $x = $mdr::h[0]{foo}{$mdr::k}{$mdr::i};
 $x = $mdr::r->[0]{foo}{$mdr::k}{$mdr::i};
+EOF
+
+# check that OP_SIGNATURE doesn't leak
+
+eleak(2, 0, <<'EOF', 'OP_SIGNATURE');
+use feature 'signatures';
+no warnings 'experimental::signatures';
+sub Foo::f1 ($a, $b = undef, $c = 0, $d = 1, $e = -2, $f = "boo",
+     $g = $Foo::bar1, $h = $g + 1) {
+}
+delete $::{'Foo::'};
+EOF
+
+# check that OP_SIGNATURE with syntax error doesn't leak
+
+eleak(2, 0, <<'EOF', 'OP_SIGNATURE err');
+use feature 'signatures';
+no warnings 'experimental::signatures';
+sub Foo::f1 ($a, $b = undef, $c = 0, $d = 1, $e = -2, $f = "boo",
+     $g = $Foo::bar2, $h = $g + 1, BAD) {
+}
 EOF

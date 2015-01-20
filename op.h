@@ -182,9 +182,9 @@ typedef union  {
 } UNOP_AUX_item;
 
 #ifdef USE_ITHREADS
-#  define UNOP_AUX_item_sv(item) PAD_SVl((item)->pad_offset);
+#  define UNOP_AUX_item_sv(item) PAD_SVl((item)->pad_offset)
 #else
-#  define UNOP_AUX_item_sv(item) ((item)->sv);
+#  define UNOP_AUX_item_sv(item) ((item)->sv)
 #endif
 
 
@@ -1042,6 +1042,39 @@ Sets the sibling of o to sib
 
 #define MDEREF_MASK         0x7F
 #define MDEREF_SHIFT           7
+
+
+/* Stuff for OP_SIGNATURE/pp_signature. */
+
+/* actions */
+
+#define SIGNATURE_reload              0 /* load another word of actions:
+                                           must be zero */
+#define SIGNATURE_end                 1 /* finish */
+#define SIGNATURE_padintro            2 /* set new pad base index and range */
+#define SIGNATURE_arg                 3 /* mandatory arg */
+#define SIGNATURE_arg_default_none    4 /*  $=  */
+#define SIGNATURE_arg_default_undef   5 /* arg with default of undef */
+#define SIGNATURE_arg_default_0       6 /* arg with default of 0 */
+#define SIGNATURE_arg_default_1       7 /* arg with default of 1 */
+#define SIGNATURE_arg_default_iv      8 /* arg with default of an IV */
+#define SIGNATURE_arg_default_const   9 /* arg with default of a const */
+#define SIGNATURE_arg_default_padsv  10 /* arg with default of a lex var */
+#define SIGNATURE_arg_default_gvsv   11 /* arg with default of a pkg var */
+#define SIGNATURE_arg_default_op     12 /* arg with default which is a
+                                           general expression whose ops follow
+                                           the signature op */
+#define SIGNATURE_slurp_array        13 /* @array parameter */
+#define SIGNATURE_slurp_hash         14 /* %hash parameter */
+
+#define SIGNATURE_ACTION_MASK       0xf
+
+/* bit flags */
+
+#define SIGNATURE_FLAG_skip        0x10  /* placeholder param */
+
+#define SIGNATURE_MASK             0x1F
+#define SIGNATURE_SHIFT               5
 
 
 /*

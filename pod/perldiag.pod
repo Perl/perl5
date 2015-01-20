@@ -5559,6 +5559,12 @@ the scope or until all closure references to it are destroyed.
 	eval "sub name { ... }";
     }
 
+=item Subroutine signature has more than %d parameters
+
+(F) A subroutine signature had more than 32767 individual parameter
+entries..  In the unlikely event that you need so many parameters,
+use a slurpy array instead.
+
 =item Subroutine "%s" will not stay shared
 
 (W closure) An inner (nested) I<named> subroutine is referencing a "my"
@@ -5876,6 +5882,12 @@ uc(), or ucfirst() (or their string-inlined versions), but you
 specified an illegal mapping.
 See L<perlunicode/"User-Defined Character Properties">.
 
+=item Too %s arguments for subroutine
+
+(F) A subroutine using a signature received too few or too many arguments
+than required by the signature.  The caller of the subroutine is
+presumably at fault.
+
 =item Too deeply nested ()-groups
 
 (F) Your template contains ()-groups with a ridiculously deep nesting level.
@@ -5884,13 +5896,6 @@ See L<perlunicode/"User-Defined Character Properties">.
 
 (F) There has to be at least one argument to syscall() to specify the
 system call to call, silly dilly.
-
-=item Too few arguments for subroutine
-
-(F) A subroutine using a signature received fewer arguments than required
-by the signature.  The caller of the subroutine is presumably at fault.
-Inconveniently, this error will be reported at the location of the
-subroutine, not that of the caller.
 
 =item Too late for "-%s" option
 
@@ -5921,13 +5926,6 @@ BEGIN block.
 =item Too many arguments for %s
 
 (F) The function requires fewer arguments than you specified.
-
-=item Too many arguments for subroutine
-
-(F) A subroutine using a signature received more arguments than required
-by the signature.  The caller of the subroutine is presumably at fault.
-Inconveniently, this error will be reported at the location of the
-subroutine, not that of the caller.
 
 =item Too many )'s
 

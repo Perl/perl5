@@ -509,6 +509,7 @@ $bits{shift}{0} = $bf[0];
 @{$bits{shmwrite}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);
 $bits{shostent}{0} = $bf[0];
 @{$bits{shutdown}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);
+$bits{signature}{0} = $bf[0];
 $bits{sin}{0} = $bf[0];
 @{$bits{sle}}{1,0} = ($bf[1], $bf[1]);
 @{$bits{sleep}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);

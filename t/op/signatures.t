@@ -19,6 +19,8 @@ is $a, 123;
 no warnings "experimental::signatures";
 use feature "signatures";
 
+my $dummy1; # Deparse currently messes up pragmata just before sub def
+
 sub t001 { $a || "z" }
 is prototype(\&t001), undef;
 is eval("t001()"), 123;
@@ -301,6 +303,8 @@ like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 use feature "current_sub";
+my $dummy2; # Deparse currently messes up pragmata just before sub def
+
 sub t122 ($c = 5, $r = $c > 0 ? __SUB__->($c - 1) : "") { $c.$r }
 is prototype(\&t122), undef;
 is eval("t122()"), "543210";
@@ -348,6 +352,8 @@ like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 use feature "state";
+my $dummy3; # Deparse currently messes up pragmata just before sub def
+
 sub t126 ($c = (state $s = $z++)) { $c }
 is prototype(\&t126), undef;
 $z = 222;
@@ -1092,6 +1098,9 @@ eval "#line 8 foo\nsub t099 (\$\$) { }";
 like $@, qr/\AParse error at foo line 8\.\n/;
 
 no warnings "experimental::lexical_topic";
+
+my $dummy4; # Deparse currently messes up pragmata just before sub def
+
 sub t100 ($_) { "$::_/$_" }
 is prototype(\&t100), undef;
 $_ = "___";
@@ -1311,6 +1320,130 @@ while(<$kh>) {
         isnt $@, "", "$word does not swallow trailing comma";
     }
 }
+close $kh;
+
+sub t144 ($a = "abc") { $a }
+is prototype(\&t144), undef;
+is scalar(t144()), "abc";
+is scalar(t144("defg")), "defg";
+
+
+# check that deferred default expressions don't have side-effects
+
+{
+    my $x = 100;
+    sub t145 ($a = $x, $b = $x++, $c = $x, $d = $b) { "$a:$b:$c:$d" }
+    is prototype(\&t145), undef;
+    is scalar(t145()),    "100:100:101:100";
+    is scalar(t145(1)),   "1:101:102:101";
+    is scalar(t145(1,2)), "1:2:102:2";
+}
+
+# ditto with a package var
+
+{
+    local $x = 100;
+    sub t146 ($a = $x, $b = $x++, $c = $x, $d = $b) { "$a:$b:$c:$d" }
+    is prototype(\&t146), undef;
+    is scalar(t146()),    "100:100:101:100";
+    is scalar(t146(1)),   "1:101:102:101";
+    is scalar(t146(1,2)), "1:2:102:2";
+}
+
+
+# check that unused default args are skipped
+
+sub t147 ($, $=0, $=1, $=2, $="foo", $a="bar", $b="zoot") { "$a:$b" }
+is scalar(t147(1)),                 "bar:zoot";
+is scalar(t147(1,2,3,4)),           "bar:zoot";
+is scalar(t147(1,2,3,4,5)),         "bar:zoot";
+is scalar(t147(1,2,3,4,5,"baz")),   "baz:zoot";
+is scalar(t147(1,2,3,4,5,"baz",7)), "baz:7";
+
+# check that a sub can have 32767 parameters ...
+
+my $code = "#line 2 foo\nsub t148 ("
+            . join(',', map "\$a$_", 1..32767)
+            . ") { }";
+eval $code;
+is $@, "", '32767 params';
+
+# .. but not 32768
+
+$code = "#line 2 foo\nsub t149 ("
+            . join(',', map "\$a$_", 1..32768)
+            . ") { }";
+eval $code;
+is $@, "Subroutine signature has more than 32767 parameters at foo line 2\.\n",
+        '32768 params';
+
+# Greater than 128 vars - can't use a single padrange.
+# Make every param var a ref to a blessed object. If all the
+# vars are correctly introduced, they should all go out of scope
+# at the right point.
+
+{
+    package T150;
+
+    sub t150 (
+            $a001,$a002,$a003,$a004,$a005,$a006,$a007,$a008,
+            $a009,$a010,$a011,$a012,$a013,$a014,$a015,$a016,
+            $a017,$a018,$a019,$a020,$a021,$a022,$a023,$a024,
+            $a025,$a026,$a027,$a028,$a029,$a030,$a031,$a032,
+            $a033,$a034,$a035,$a036,$a037,$a038,$a039,$a040,
+            $a041,$a042,$a043,$a044,$a045,$a046,$a047,$a048,
+            $a049,$a050,$a051,$a052,$a053,$a054,$a055,$a056,
+            $a057,$a058,$a059,$a060,$a061,$a062,$a063,$a064,
+            $a065,$a066,$a067,$a068,$a069,$a070,$a071,$a072,
+            $a073,$a074,$a075,$a076,$a077,$a078,$a079,$a080,
+            $a081,$a082,$a083,$a084,$a085,$a086,$a087,$a088,
+            $a089,$a090,$a091,$a092,$a093,$a094,$a095,$a096,
+            $a097,$a098,$a099,$a100,$a101,$a102,$a103,$a104,
+            $a105,$a106,$a107,$a108,$a109,$a110,$a111,$a112,
+            $a113,$a114,$a115,$a116,$a117,$a118,$a119,$a120,
+            $a121,$a122,$a123,$a124,$a125,$a126,$a127,$a128,
+            $a129
+    ) {}
+
+    my $destroyed = 0;
+    sub DESTROY { $destroyed = 1 }
+    {
+        my $x = bless {}, 'T150';
+
+        t150(
+            $x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,
+            $x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,
+            $x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,
+            $x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,
+            $x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,
+            $x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,
+            $x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,
+            $x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,$x,
+            $x
+        );
+        ::is $destroyed, 0, "129 params: not destroyed yet";
+    }
+    ::is $destroyed, 1, "129 params: destroyed now"
+}
+
+# ditto non-consecutive pad ranges
+
+{
+    package T151;
+
+    sub t151 ($a, $b = do { my $foo; 1 }, $c = 1) {}
+
+    my $destroyed = 0;
+    sub DESTROY { $destroyed = 1 }
+    {
+        my $x = bless {}, 'T151';
+
+        t151($x,$x,$x);
+        ::is $destroyed, 0, "non-consec params: not destroyed yet";
+    }
+    ::is $destroyed, 1, "non-consec params: destroyed now"
+}
+
 
 done_testing;
 

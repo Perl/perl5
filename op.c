@@ -801,7 +801,8 @@ void S_op_clear_gv(pTHX_ OP *o, SV**svp)
 {
 
     GV *gv = (o->op_type == OP_GV || o->op_type == OP_GVSV
-            || o->op_type == OP_MULTIDEREF)
+            || o->op_type == OP_MULTIDEREF
+            || o->op_type == OP_SIGNATURE)
 #ifdef USE_ITHREADS
                 && PL_curpad
                 ? ((GV*)PAD_SVl(*ixp)) : NULL;
@@ -1082,7 +1083,55 @@ Perl_op_clear(pTHX_ OP *o)
             PerlMemShared_free(cUNOP_AUXo->op_aux - 1);
         }
         break;
-    }
+
+    case OP_SIGNATURE:
+        {
+            UNOP_AUX_item *items = cUNOP_AUXo->op_aux;
+            UV actions = (++items)->uv;
+            int go = 1;
+
+            while (go) {
+                switch (actions & SIGNATURE_ACTION_MASK) {
+                case SIGNATURE_reload:
+                    actions = (++items)->uv;
+                    continue;
+                case SIGNATURE_end:
+                    go = 0;
+                    break;
+                case SIGNATURE_padintro:
+                case SIGNATURE_arg_default_iv:
+                    items++;
+                    break;
+                case SIGNATURE_arg_default_padsv:
+                    pad_free((++items)->pad_offset);
+                    break;
+
+                case SIGNATURE_arg_default_gvsv:
+#ifdef USE_ITHREADS
+                    S_op_clear_gv(aTHX_ o, &((++items)->pad_offset));
+#else
+                    S_op_clear_gv(aTHX_ o, &((++items)->sv));
+#endif
+                    break;
+
+                case SIGNATURE_arg_default_const:
+#ifdef USE_ITHREADS
+                    /* see RT #15654 */
+                    pad_swipe((++items)->pad_offset, 1);
+#else
+                    SvREFCNT_dec((++items)->sv);
+#endif
+                    break;
+
+                } /* switch */
+                actions >>= SIGNATURE_SHIFT;
+            } /* while */
+
+            PerlMemShared_free(cUNOP_AUXo->op_aux - 1);
+            break;
+        } /* OP_SIGNATURE */
+
+    } /* switch */
 
     if (o->op_targ > 0) {
 	pad_free(o->op_targ);

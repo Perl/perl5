@@ -954,6 +954,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	break;
 
     case OP_MULTIDEREF:
+    case OP_SIGNATURE:
     {
         UNOP_AUX_item *items = cUNOP_AUXo->op_aux;
         UV i, count = items[-1].uv;
@@ -1348,7 +1349,9 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_SLABBED, "SLABBED,"},
     {CVf_NAMED, "NAMED,"},
     {CVf_LEXICAL, "LEXICAL,"},
-    {CVf_ISXSUB, "ISXSUB,"}
+    {CVf_ISXSUB, "ISXSUB,"},
+    {CVf_ANONCONST, "ANONCONST,"},
+    {CVf_HASSIG,    "HASSIG,"}
 };
 
 const struct flag_to_name hv_flags_names[] = {
@@ -2267,8 +2270,8 @@ S_deb_padvar(pTHX_ PADOFFSET off, int n, bool paren)
 }
 
 
-/* append to the out SV, the name of the lexical at offset off in the CV
- * cv */
+/* append to the out SV, the names of the n lexicals starting at offset
+ * off in the CV * cv */
 
 static void
 S_append_padvar(pTHX_ PADOFFSET off, CV *cv, SV *out, int n,
@@ -2289,9 +2292,9 @@ S_append_padvar(pTHX_ PADOFFSET off, CV *cv, SV *out, int n,
         if (namepad && (sv = padnamelist_fetch(namepad, off + i)))
         {
             STRLEN cur = SvCUR(out);
-            Perl_sv_catpvf(aTHX_ out, "[%"UTF8f,
-                                 UTF8fARG(1, PadnameLEN(sv) - 1,
-                                          PadnamePV(sv) + 1));
+            Perl_sv_catpvf(aTHX_ out, "%"UTF8f,
+                                 UTF8fARG(1, PadnameLEN(sv),
+                                          PadnamePV(sv)));
             if (is_scalar)
                 SvPVX(out)[cur] = '$';
         }
@@ -2320,7 +2323,7 @@ S_append_gv_name(pTHX_ GV *gv, SV *out)
 }
 
 #ifdef USE_ITHREADS
-#  define ITEM_SV(item) *av_fetch(comppad, (item)->pad_offset, FALSE);
+#  define ITEM_SV(item) *av_fetch(comppad, (item)->pad_offset, FALSE)
 #else
 #  define ITEM_SV(item) UNOP_AUX_item_sv(item)
 #endif
@@ -2444,6 +2447,135 @@ Perl_multideref_stringify(pTHX_ const OP *o, CV *cv)
 }
 
 
+/* return a temporary SV containing a stringified representation of
+ * the op_aux field of a SIGNATURE op, associated with CV cv
+ */
+
+SV*
+Perl_signature_stringify(pTHX_ const OP *o, CV *cv)
+{
+    UNOP_AUX_item *items = cUNOP_AUXo->op_aux;
+    UV actions = (++items)->uv;
+    UV action;
+    PADOFFSET pad_ix = 0; /* init to avoid 'uninit' compiler warning */
+    SV *out = newSVpvn_flags("" ,0, SVs_TEMP);
+    bool first = TRUE;
+#ifdef USE_ITHREADS
+    PADLIST * const padlist = CvPADLIST(cv);
+    PAD *comppad = PadlistARRAY(padlist)[1];
+#endif
+
+    PERL_ARGS_ASSERT_SIGNATURE_STRINGIFY;
+
+    while (1) {
+        switch (action = (actions & SIGNATURE_ACTION_MASK)) {
+
+        case SIGNATURE_reload:
+            actions = (++items)->uv;
+            continue;
+
+        case SIGNATURE_end:
+            goto finish;
+
+        case SIGNATURE_padintro:
+            pad_ix  = (++items)->uv >> OPpPADRANGE_COUNTSHIFT;
+            break;
+
+        case SIGNATURE_arg:
+        case SIGNATURE_arg_default_none:
+        case SIGNATURE_arg_default_undef:
+        case SIGNATURE_arg_default_0:
+        case SIGNATURE_arg_default_1:
+        case SIGNATURE_arg_default_iv:
+        case SIGNATURE_arg_default_const:
+        case SIGNATURE_arg_default_padsv:
+        case SIGNATURE_arg_default_gvsv:
+        case SIGNATURE_arg_default_op:
+            if (first)
+                first = FALSE;
+            else
+                sv_catpvs_nomg(out, ", ");
+
+            if (actions & SIGNATURE_FLAG_skip)
+                sv_catpvs_nomg(out, "$");
+            else
+                S_append_padvar(aTHX_ pad_ix++, cv, out, 1, 0, 1);
+
+            switch (action) {
+            case SIGNATURE_arg:
+                break;
+            case SIGNATURE_arg_default_none:
+                sv_catpvs_nomg(out, "=");
+                break;
+            case SIGNATURE_arg_default_undef:
+                sv_catpvs_nomg(out, "=undef");
+                break;
+            case SIGNATURE_arg_default_op:
+                sv_catpvs_nomg(out, "=<expr>");
+                break;
+            case SIGNATURE_arg_default_0:
+                sv_catpvs_nomg(out, "=0");
+                break;
+            case SIGNATURE_arg_default_1:
+                sv_catpvs_nomg(out, "=1");
+                break;
+            case SIGNATURE_arg_default_iv:
+                Perl_sv_catpvf(aTHX_ out, "=%"IVdf, (++items)->iv);
+                break;
+            case SIGNATURE_arg_default_padsv:
+                sv_catpvs_nomg(out, "=");
+                S_append_padvar(aTHX_ (++items)->pad_offset, cv, out, 1, 0, 1);
+                break;
+            case SIGNATURE_arg_default_gvsv:
+                sv_catpvs_nomg(out, "=");
+                S_append_gv_name(aTHX_ (GV*)(ITEM_SV(++items)), out);
+                break;
+            case SIGNATURE_arg_default_const:
+                {
+                    STRLEN cur;
+                    SV *sv  = ITEM_SV(++items);
+                    char *s = SvPV(sv, cur);
+
+                    sv_catpvs_nomg(out, "=");
+                    pv_pretty(out, s, cur, 30,
+                                NULL, NULL,
+                                (PERL_PV_PRETTY_NOCLEAR
+                                |PERL_PV_PRETTY_QUOTE
+                                |PERL_PV_PRETTY_ELLIPSES));
+                    break;
+                }
+            } /* inner switch */
+
+            break;
+
+        case SIGNATURE_slurp_array:
+        case SIGNATURE_slurp_hash:
+            if (first)
+                first = FALSE;
+            else
+                sv_catpvs_nomg(out, ", ");
+
+            if (actions & SIGNATURE_FLAG_skip)
+                sv_catpvn_nomg(out, action == SIGNATURE_slurp_array ? "@": "%", 1);
+            else
+                S_append_padvar(aTHX_ pad_ix++, cv, out, 1, 0, 0);
+            break;
+
+        default:
+            Perl_sv_catpvf(aTHX_ out, ":UNKNOWN(%d)",
+                            (int)action);
+            goto finish;
+
+        } /* switch */
+
+        actions >>= SIGNATURE_SHIFT;
+    } /* while */
+
+  finish:
+    return out;
+}
+
+
 I32
 Perl_debop(pTHX_ const OP *o)
 {
@@ -2499,6 +2631,11 @@ Perl_debop(pTHX_ const OP *o)
     case OP_MULTIDEREF:
         PerlIO_printf(Perl_debug_log, "(%-p)",
             multideref_stringify(o, deb_curcv(cxstack_ix)));
+        break;
+
+    case OP_SIGNATURE:
+        PerlIO_printf(Perl_debug_log, "(%-p)",
+            signature_stringify(o, deb_curcv(cxstack_ix)));
         break;
 
     default:

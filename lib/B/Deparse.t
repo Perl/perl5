@@ -2409,3 +2409,94 @@ $_ ^= $_;
 $_ |.= $_;
 $_ &.= $_;
 $_ ^.= $_;
+####
+# Should really use 'no warnings "experimental::signatures"',
+# but it doesn't yet deparse correctly.
+# I'm using anon subs because I can't seem to deparse named subs - DAPM
+# Signature
+no warnings;
+use feature 'signatures';
+my $x;
+sub ($a, $, $b = $glo::bal, $c = $a, $d = 'foo', $e = -37, $f = 0, $g = 1, $h = undef, $i = $a + 1, $j = /foo/, @) {
+    $x++;
+}
+;
+$x++;
+####
+# Signature and prototype
+no warnings;
+use feature 'signatures';
+my $x;
+sub ($a, $b) : prototype($$) {
+    $x++;
+}
+;
+$x++;
+####
+# Signature and prototype and attrs
+no warnings;
+use feature 'signatures';
+my $x;
+sub ($a, $b) : prototype($$) lvalue {
+    $x++;
+}
+;
+$x++;
+####
+# Signature and attrs
+no warnings;
+use feature 'signatures';
+my $x;
+sub ($a, $b) : lvalue method {
+    $x++;
+}
+;
+$x++;
+####
+# named array slurp, null body
+no warnings;
+use feature 'signatures';
+sub (@a) {
+    ;
+}
+;
+####
+# named hash slurp
+no warnings;
+use feature 'signatures';
+sub ($key, %h) {
+    $h{$key};
+}
+;
+####
+# anon hash slurp
+no warnings;
+use feature 'signatures';
+sub ($a, %) {
+    $a;
+}
+;
+####
+# parenthesised default arg
+no warnings;
+use feature 'signatures';
+sub ($a, $b = (/foo/), $c = 1) {
+    $a + $b + $c;
+}
+;
+####
+# parenthesised default arg with TARGMY
+no warnings;
+use feature 'signatures';
+sub ($a, $b = ($a + 1), $c = 1) {
+    $a + $b + $c;
+}
+;
+####
+# empty default
+no warnings;
+use feature 'signatures';
+sub ($a, $ = ) {
+    $a;
+}
+;

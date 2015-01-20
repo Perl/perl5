@@ -2168,3 +2168,48 @@ Use of uninitialized value $i in array element at - line 12.
 Use of uninitialized value $k in hash element at - line 12.
 Use of uninitialized value $i in array element at - line 13.
 Use of uninitialized value $k in hash element at - line 13.
+########
+# signatures
+use warnings;
+use feature 'signatures';
+no warnings 'experimental::signatures';
+use constant UNDEF => undef;
+
+my $x;
+
+sub f($a, $ = $x + 1, $b = $x - 1, $c = UNDEF) {
+    return "[$a:$b:$c]\n";
+}
+
+f(1);
+EXPECT
+Useless use of addition (+) in void context at - line 9.
+Use of uninitialized value $x in addition (+) at - line 9.
+Use of uninitialized value $x in subtraction (-) at - line 9.
+Use of uninitialized value $c in concatenation (.) or string at - line 10.
+########
+# signatures with defaults on different lines
+use warnings;
+use feature 'signatures';
+no warnings 'experimental::signatures';
+
+my $x;
+
+sub f($a,
+      $  = $x + 1,
+      $b = $x - 1,
+      $c = $x * 2,
+      $d = $x / 2,
+      $e = undef)
+{
+    return "[$a:$b:$c:$d:$e]\n";
+}
+
+f(1);
+EXPECT
+Useless use of addition (+) in void context at - line 9.
+Use of uninitialized value $x in addition (+) at - line 9.
+Use of uninitialized value $x in subtraction (-) at - line 10.
+Use of uninitialized value $x in multiplication (*) at - line 11.
+Use of uninitialized value $x in division (/) at - line 12.
+Use of uninitialized value $e in concatenation (.) or string at - line 15.

@@ -3296,6 +3296,361 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
     }
 }
 
+
+/* like croak, but report in context of caller */
+void
+S_croak_caller(const char *pat, ...)
+{
+    dTHX;
+    va_list args;
+    const PERL_CONTEXT *cx = caller_cx(0, NULL);
+
+    /* make error appear at call site */
+    assert(cx);
+    PL_curcop = cx->blk_oldcop;
+
+    va_start(args, pat);
+    vcroak(pat, &args);
+    NOT_REACHED; /* NOTREACHED */
+    va_end(args);
+}
+
+
+
+/* assign the args to the signature vars in foo ($a,$b) {...} */
+
+PP(pp_signature)
+{
+    UV   actions;     /* packed word of actions */
+    UV   argc;        /* scalar(@_) */
+    SV **argp;        /* current position in @_'s AvARRAY */
+    int  defop_skips; /* how many default op statements to skip */
+    SV **padp;        /* pad slot for current var */
+    UNOP_AUX_item *items = cUNOP_AUXx(PL_op)->op_aux;
+
+    /* process arg count limits */
+    {
+        UV   mand_params; /* number of mandatory parameters */
+        UV   opt_params;  /* number of optional parameters */
+        bool slurpy;      /* has a @ or % */
+        AV  *defav;       /* @_ */
+        UV   params = items[0].uv;
+
+        /* split on bits [31..16], [15..15], [14..0] */
+        mand_params = params >> 16;
+        slurpy      = cBOOL((params >> 15) & 1);
+        opt_params  = params & ((1<<15)-1);
+
+        defav = GvAV(PL_defgv);
+        assert(!SvMAGICAL(defav));
+        argc = AvFILLp(defav) + 1;
+
+        if (UNLIKELY(   argc < mand_params
+                     || (!slurpy && argc > mand_params + opt_params)))
+            S_croak_caller("Too %s arguments for subroutine",
+                                argc < mand_params ? "few" : "many");
+
+        /* For an empty signature, our only task was to check that the caller
+         * didn't provide any args */
+        if (!params)
+            return NORMAL;
+
+        argp = AvARRAY(defav);
+    }
+
+    defop_skips = 0;
+    padp = NULL; /* init to avoid 'uninit' compiler warning */
+    actions = (++items)->uv;
+
+    while (1) {
+        UV action = (actions & SIGNATURE_ACTION_MASK); /* current action */
+
+        switch (action) {
+        case SIGNATURE_reload:
+            actions = (++items)->uv;
+            continue;
+
+        case SIGNATURE_padintro:
+        {
+            /* Introduce the vars. Stripped-down pp_padrange() */
+            UV data     = (++items)->uv;
+            UV varcount = data & OPpPADRANGE_COUNTMASK;
+            PADOFFSET pad_ix = data >> OPpPADRANGE_COUNTSHIFT;
+            SV **svp = padp = &(PAD_SVl(pad_ix));
+            while (varcount--)
+                SvPADSTALE_off(*svp++); /* mark lexical as active */
+
+            {
+                dSS_ADD;
+                const UV save =   (data << SAVE_TIGHT_SHIFT)
+                                | SAVEt_CLEARPADRANGE;
+
+                assert((save >> (OPpPADRANGE_COUNTSHIFT+SAVE_TIGHT_SHIFT))
+                           == pad_ix);
+                SS_ADD_UV(save);
+                SS_ADD_END(1);
+            }
+            break;
+        }
+
+        case SIGNATURE_arg_default_op:
+            if (argc)
+                defop_skips++;
+            goto handle_arg;
+        case SIGNATURE_arg_default_iv:
+        case SIGNATURE_arg_default_const:
+        case SIGNATURE_arg_default_padsv:
+        case SIGNATURE_arg_default_gvsv:
+            items++;
+        case SIGNATURE_arg:
+        case SIGNATURE_arg_default_none:
+        case SIGNATURE_arg_default_undef:
+        case SIGNATURE_arg_default_0:
+        case SIGNATURE_arg_default_1:
+        handle_arg:
+        {
+            IV i;
+            SV *argsv;
+            SV *varsv = (actions & SIGNATURE_FLAG_skip) ?  NULL : *padp++;
+
+            if (argc) {
+                argc--;
+                if (!varsv) {
+                    argp++;
+                    break;
+                }
+                argsv = *argp++;
+                if (UNLIKELY(!argsv))
+                    argsv = &PL_sv_undef;
+                goto setsv;
+            }
+            if (!varsv)
+                break;
+
+            /* no arg; do the appropriate default instead */
+
+            switch (action) {
+            case SIGNATURE_arg:
+                assert(0);
+                break;
+
+            case SIGNATURE_arg_default_none:
+            case SIGNATURE_arg_default_undef:
+                /* new lex var already undef, no need to assign
+                 * an undef value to it */
+                break;
+
+            case SIGNATURE_arg_default_op:
+                /* we will later execute ops to assign a default expr */
+                break;
+
+            case SIGNATURE_arg_default_0:
+                i = 0;
+                goto setiv;
+
+            case SIGNATURE_arg_default_1:
+                i = 1;
+                goto setiv;
+
+            case SIGNATURE_arg_default_iv:
+                i = items->iv;
+              setiv:
+                /* do $varsv = i.
+                 * NB it's likely that on subsequent calls the cleared
+                 * lexical will have formerly been SVt_IV; if this
+                 * is the case, we can do a short-cut */
+                if (LIKELY(SvTYPE(varsv) == SVt_IV)) {
+                    assert(!SvOK(varsv));
+                    assert(!SvMAGICAL(varsv));
+                    (void)SvIOK_only(varsv);
+                    SvIV_set(varsv, i);
+                    break;
+                }
+                sv_setiv(varsv, i);
+                break;
+
+            case SIGNATURE_arg_default_padsv:
+                argsv = PAD_SVl(items->pad_offset);
+                goto setsv;
+
+            case SIGNATURE_arg_default_gvsv:
+                argsv = UNOP_AUX_item_sv(items);
+                assert(isGV_with_GP(argsv));
+                argsv = GvSVn((GV*)argsv);
+                goto setsv;
+
+            case SIGNATURE_arg_default_const:
+                argsv = UNOP_AUX_item_sv(items);
+              setsv:
+                /* do $varsv = $argsv */
+
+                /* cargo-culted from pp_sassign */
+                if (TAINTING_get && UNLIKELY(TAINT_get) && !SvTAINTED(argsv))
+                    TAINT_NOT;
+
+                /* Short-cut assignment of IV and RV values as these are
+                 * common and simple. For RVs, it's likely that on
+                 * subsequent calls to a function, varsv is already of the
+                 * correct storage class */
+                if (LIKELY(!SvMAGICAL(argsv))) {
+                    /* just an IV */
+                    if ((SvFLAGS(argsv) & (SVf_IOK|SVf_NOK|SVf_POK|SVf_IVisUV))
+                            == SVf_IOK)
+                    {
+                        i = SvIVX(argsv);
+                        goto setiv;
+                    }
+                    else if (SvROK(argsv) && SvTYPE(varsv) == SVt_IV) {
+                        /* quick ref assignment */
+                        assert(!SvOK(varsv));
+                        SvRV_set(varsv, SvREFCNT_inc(SvRV(argsv)));
+                        SvROK_on(varsv);
+                        break;
+                    }
+                }
+                sv_setsv(varsv, argsv);
+            } /* inner switch */
+            break;
+
+        } /* case arg_default_...  */
+
+        case SIGNATURE_slurp_array:
+        {
+            SV *varsv;
+            SSize_t i;
+
+            if (!argc || (actions & SIGNATURE_FLAG_skip))
+                goto finish;
+
+            /* This is a copy of the relevant parts of pp_aassign().
+             * We *know* that @foo is a plain empty lexical at this point,
+             * so we can avoid a lot of the extra baggage.
+             * We know, because all the usual tricks like 'my @a if 0',
+             * 'foo: my @a = ...; goto foo' can't be done with signatures.
+             */
+            varsv = *padp++;
+            assert(!SvMAGICAL(varsv));
+            assert(AvFILLp(varsv) == -1); /* can skip av_clear() */
+
+            TAINT_NOT;
+            av_extend((AV*)varsv, argc);
+            i = 0;
+
+            while (argc--) {
+                SV *tmpsv;
+                SV *arg = *argp++;
+
+                tmpsv = newSV(0);
+                sv_setsv(tmpsv, arg);
+                av_store((AV*)varsv, i++, tmpsv);
+                TAINT_NOT;
+            }
+        }
+        /* FALLTHROUGH */
+
+        finish:
+
+#ifdef DEBUGGING
+            {
+                /* If we 'goto finish' we are bailing out before we've
+                 * seen a 'SIGNATURE_end' action. We do this in situations
+                 * where we're confident that either
+                 *  -  the SIGNATURE_end action is next; or
+                 *  -  the remaining actions can be safely skipped.
+                 * So check that this assumption is correct.
+                 */
+                bool go = TRUE;
+
+                actions >>= SIGNATURE_SHIFT;
+                while (go) {
+                    switch (actions & SIGNATURE_ACTION_MASK) {
+                    case SIGNATURE_reload:
+                        actions = (++items)->uv;
+                        continue;
+                    case SIGNATURE_end:
+                        go = FALSE;
+                        break;
+                    default:
+                        assert(0);
+                    }
+                    actions >>= SIGNATURE_SHIFT;
+                }
+            }
+#endif
+        /* FALLTHROUGH */
+
+        case SIGNATURE_end:
+
+            /* The siblings of this op are zero or more {nextstate,
+             * defop-subtree} op pairs, followed by the sub body which
+             * consists of nextstate plus zero or more ops. In the case of
+             * of an empty body with no default ops, there is no trailing
+             * nextstate.
+             */
+
+            {
+                OP *o = PL_op;
+                /* skip defop_skips x (nextstate + default op) pairs */
+                while (defop_skips--) {
+                    /* skip sigop / defop */
+                    o = OpSIBLING(o);
+                    /* skip nextstate */
+                    assert(   o->op_type == OP_NEXTSTATE
+                           || o->op_type == OP_DBSTATE
+                           || o->op_type == OP_NULL);
+                    o = OpSIBLING(o);
+                }
+                return o->op_next;
+            }
+
+        case SIGNATURE_slurp_hash:
+        {
+            SV *varsv;
+
+            if (!argc)
+                goto finish;
+
+            if (UNLIKELY(argc % 2))
+                S_croak_caller("Odd name/value argument for subroutine");
+
+            if (actions & SIGNATURE_FLAG_skip)
+                goto finish;
+
+            /* see comments above about unrolled pp_aassign() */
+            varsv = *padp++;
+            assert(!SvMAGICAL(varsv));
+            assert(!HvTOTALKEYS(varsv)); /* can skip hv_clear() */
+
+            TAINT_NOT;
+
+            while (argc) {
+                SV *tmpsv;
+                SV *key = *argp++;
+                SV *val = *argp++;
+
+                assert(key); assert(val);
+                argc -= 2;
+                if (UNLIKELY(SvGMAGICAL(key)))
+                    key = sv_mortalcopy(key);
+                tmpsv = newSV(0);
+                sv_setsv(tmpsv, val);
+                hv_store_ent((HV*)varsv, key, tmpsv, 0);
+                TAINT_NOT;
+            }
+            goto finish;
+        }
+
+        default:
+            assert(0);
+            break;
+        } /* switch */
+
+        actions >>= SIGNATURE_SHIFT;
+    } /* while */
+    NOT_REACHED; /* NOTREACHED */
+}
+
+
 PP(pp_aelem)
 {
     dSP;

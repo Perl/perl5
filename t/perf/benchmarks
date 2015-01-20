@@ -59,6 +59,42 @@
         code    => 'f(1,2,3)',
     },
 
+    'call::sub::sig_3_params_3_args' => {
+        desc    => 'signature function call with 3 params',
+        setup   => '
+                    no warnings "experimental::signatures";
+                    use feature "signatures";
+                    my $self = {}; sub sig ($a, $b, $c) {}',
+        code    => 'sig($self,1,2)',
+    },
+
+    'call::sub::sig_3_params_1_arg_' => {
+        desc    => 'signature function call with 3 params, 1 arg',
+        setup   => '
+                    no warnings "experimental::signatures";
+                    use feature "signatures";
+                    my $self = {}; sub sig ($a, $b = 1, $c = 2) {}',
+        code    => 'sig($self)',
+    },
+
+    'call::sub::sig_3_params_1_arg_lexpkg' => {
+        desc    => 'signature function call with 3 params, 1 arg, lex/package defaults',
+        setup   => '
+                    no warnings "experimental::signatures";
+                    use feature "signatures";
+                    local $::x = 1;
+                    my $self = {}; sub sig ($a, $b = $a, $c = $::x) {}',
+        code    => 'sig($self)',
+    },
+
+    'call::sub::sig_3_params_1_arg_expr' => {
+        desc    => 'signature function call with 3 params, 1 arg, expression defaults',
+        setup   => '
+                    no warnings "experimental::signatures";
+                    use feature "signatures";
+                    my $self = {}; sub sig ($a, $b = $a+1, $c = $b++) {}',
+        code    => 'sig($self)',
+    },
 
     'expr::array::lex_1const_0' => {
         desc    => 'lexical $array[0]',
