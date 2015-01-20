@@ -20,4 +20,4 @@ require 't/test.pl';
 my $source = find_git_or_skip('all');
 chdir $source or die "Can't chdir to $source: $!";
 
-system "$^X Porting/cmpVERSION.pl --exclude --tap";
+system "$^X Porting/cmpVERSION.pl --tap";
