@@ -2,8 +2,6 @@ use strict; use warnings;
 use ExtUtils::MakeMaker;
 
 my $define = '-DSDBM -DDUFF';
-# no -DMSDOS because MSDOS and WIN32 treated same in code
-$define .= ' -DWIN32 -DPERL_STATIC_SYMS' if $^O eq 'MSWin32';
 
 WriteMakefile(
     NAME      => 'SDBM_File',
