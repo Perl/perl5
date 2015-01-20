@@ -38,7 +38,7 @@ I feel a bit leery about this next one.  The code is a bit fragile, so I would f
 <commit votes="sprout, steveh" id="62db6ea5fed19611596cbc5fc0b8a4df2c604e58" ticket="123538" desc="[perl #123538] always set chophere and itembytes at the same time"/>
 <commit votes="sprout, steveh" id="cb6cc22be04ebc9284469880f586341acf15fec5" ticket="123538" desc="perldelta for 62db6ea5fed1"/>
 
-<commit votes="hv" id="56f81afc0f2d331537f38e6f12b86a850187cb8a" ticket="123604" desc="intuit_more: no need to copy before keyword check"/>
+<commit votes="hv, sprout" id="56f81afc0f2d331537f38e6f12b86a850187cb8a" ticket="123604" desc="intuit_more: no need to copy before keyword check"/>
 
 </div>
 
