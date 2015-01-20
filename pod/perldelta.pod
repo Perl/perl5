@@ -256,7 +256,7 @@ C<-Inf>) or C<NaN> times, which doesn't make sense.
 
 =item *
 
-L<Useless use of attribute "const"|perldiag/"Useless use of attribute E<lt>constE<gt>">
+L<Useless use of attribute "const"|perldiag/Useless use of attribute "const">
 
 (W misc) The "const" attribute has no effect except
 on anonymous closure prototypes.  You applied it to
@@ -278,7 +278,7 @@ L<warnings> for details
 
 =item *
 
-L<E<quot>use re 'strict'E<quot> is experimental|perldiag/"E<quot>use re 'strict'E<quot> is experimental">
+L<E<quot>use re 'strict'E<quot> is experimental|perldiag/"use re 'strict'" is experimental>
 
 (S experimental::re_strict) The things that are different when a regular
 expression pattern is compiled under C<'strict'> are subject to change
