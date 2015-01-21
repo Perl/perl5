@@ -611,7 +611,7 @@ Examples:
  [\N{APOSTROPHE}-\N{QUESTION MARK}]
              #  Matches any of the characters  '()*+,-./0123456789:;<=>?
              #  even on an EBCDIC platform.
- [\N{U+27}-\N{U+3F}] # Same. (U+27 is "'", and U+3F is "?"
+ [\N{U+27}-\N{U+3F}] # Same. (U+27 is "'", and U+3F is "?")
 
 As the final two examples above show, you can achieve portablity to
 non-ASCII platforms by using the C<\N{...}> form for the range
