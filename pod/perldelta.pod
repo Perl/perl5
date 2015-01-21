@@ -423,6 +423,12 @@ This has been fixed.
 L<[perl #123538]|https://rt.perl.org/Ticket/Display.html?id=123538>
 L<[perl #123622]|https://rt.perl.org/Ticket/Display.html?id=123622>
 
+=item *
+
+A possible buffer overrun and crash when parsing a literal pattern during
+regular expression compilation has been fixed.
+L<[perl #123604]|https://rt.perl.org/Ticket/Display.html?id=123604>
+
 =back
 
 =head1 Known Problems
