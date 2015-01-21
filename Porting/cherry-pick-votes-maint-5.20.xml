@@ -36,11 +36,6 @@ This fix has a problem with it that needs to be solved before we can backport it
 <commit votes="steveh, khw" id="f63bc603acea5e0f476f181de698958c4ddcccba" ticket="123554" desc="perldelta: Fix typo"/>
 <commit votes="steveh" id="cc31571878894dd5f5af83722ca0c2a24621300c" ticket="123554" desc="[perl #123554] stop checking the message"/>
 
-<commit votes="sprout, steveh, khw" id="62db6ea5fed19611596cbc5fc0b8a4df2c604e58" ticket="123538" desc="[perl #123538] always set chophere and itembytes at the same time"/>
-<commit votes="sprout, steveh, khw" id="cb6cc22be04ebc9284469880f586341acf15fec5" ticket="123538" desc="perldelta for 62db6ea5fed1"/>
-
-<commit votes="hv, sprout, khw" id="56f81afc0f2d331537f38e6f12b86a850187cb8a" ticket="123604" desc="intuit_more: no need to copy before keyword check"/>
-
 </div>
 
 <div><h3>Security Fixes</h3>
@@ -97,12 +92,10 @@ This commit should not be in picked because it isn't accurate.  The blead pod is
 
 <commit votes="steveh, arc" id="eb9e3b14fd77e43b36846b86f8780d23fda50258" ticket="" desc="recharclass: Corrections and nits"/>
 <commit votes="steveh" id="2174049d55b865d9bed8adad15157d3061d5ae10" ticket="" desc="Update release manager documents for producing .xz tarballs"/>
-<commit votes="steveh, arc, khw" id="ecafefb82337acf1046f535da14a6fc0293f70b5" ticket="" desc="perlfunc: document immediate stricture effect of our"/>
 
 khw votes for the portions of the following except the reference to v5.22
 <commit votes="steveh" id="dbf3c4d788344c8d20eb2549c638ced519d3f0e8" ticket="" desc="perllocale: Nits"/>
 <commit votes="steveh, khw" id="a0879bf8a3066bd055931dcc51f2c4f80ec01ffb" ticket="" desc="perlpod: Latin1 pods need an =encoding"/>
-<commit votes="sprout, steveh, khw" id="e6d55c9947dea892b32541479147753415a72c46" ticket="" desc="perldiag: Document 'Bad symbol for scalar'"/>
 <commit votes="steveh, khw" id="5ae454f0f6fe0fcfbf51c1f9f4bfc593da8df756" ticket="" desc="proposed changes for perlpolicy updates"/>
 <commit votes="steveh, khw" id="b50cfd0a486367dd5f82cdf3ec88ee9d3aa67aa4" ticket="" desc="forward reference from 'new features' to 'experimental'"/>
 <commit votes="steveh, khw" id="9650f35b1f161b417324376040f61ae47b518529" ticket="" desc="perlpolicy: the point is caution, not low stakes"/>
