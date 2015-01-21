@@ -92,7 +92,9 @@ This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even
 
 <div><h3>Documentation Fixes</h3>
 
+This commit should not be in picked because it isn't accurate.  The blead pod is correct.
 <commit votes="steveh, arc" id="2a2f23e4f8a50bdcdd10563dc5d933684cb70954" ticket="122853" desc="Remarks specialness of [A-Z] and [a-z]."/>
+
 <commit votes="steveh, arc" id="eb9e3b14fd77e43b36846b86f8780d23fda50258" ticket="" desc="recharclass: Corrections and nits"/>
 <commit votes="steveh" id="2174049d55b865d9bed8adad15157d3061d5ae10" ticket="" desc="Update release manager documents for producing .xz tarballs"/>
 <commit votes="steveh, arc, khw" id="ecafefb82337acf1046f535da14a6fc0293f70b5" ticket="" desc="perlfunc: document immediate stricture effect of our"/>
