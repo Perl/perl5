@@ -188,6 +188,11 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
+L<Bad symbol for scalar|perldiag/"Bad symbol for scalar"> is now documented.
+This error is not new, but was not previously documented here.
+
+=item *
+
 L<Missing right brace on \N{}|perldiag/"Missing right brace on \N{}"> is now
 documented.  This warning is not new, but was not previously documented here.
 
