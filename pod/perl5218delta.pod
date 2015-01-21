@@ -601,6 +601,11 @@ pp_formline() didn't set the pointer used to mark the chop position,
 which led to the C<FF_MORE> case crashing with a segmentation fault.
 This has been fixed.  [perl #123538]
 
+=item *
+
+A possible buffer overrun and crash when parsing a literal pattern during
+regular expression compilation has been fixed.  [perl #123604]
+
 =back
 
 =head1 Acknowledgements
