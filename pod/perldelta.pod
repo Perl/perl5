@@ -261,6 +261,11 @@ XXX Any changes to platform support should be listed in the sections below.
 [ Within the sections, list each platform as a =item entry with specific
 changes as paragraphs below it. ]
 
+=head2 Regained Platforms
+
+IRIX and Tru64 platforms are working again.
+(Some C<make test> failures remain.)
+
 =head2 Platform-Specific Notes
 
 XXX List any changes for specific platforms.  This could include configuration
