@@ -1219,7 +1219,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    break;
 	}
     }
-finish:
+  finish:
     SvTAINT(sv);
 }
 

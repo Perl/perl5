@@ -806,13 +806,13 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
      *	    is the label <malformed>.
      */
 
-malformed:
+  malformed:
 
     if (sv && ckWARN_d(WARN_UTF8)) {
 	pack_warn = packWARN(WARN_UTF8);
     }
 
-disallowed:
+  disallowed:
 
     if (flags & UTF8_CHECK_ONLY) {
 	if (retlen)
@@ -820,7 +820,7 @@ disallowed:
 	return 0;
     }
 
-do_warn:
+  do_warn:
 
     if (pack_warn) {	/* <pack_warn> was initialized to 0, and changed only
 			   if warnings are to be raised. */
@@ -1919,7 +1919,7 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* c
 	return result;
     }
 
-bad_crossing:
+  bad_crossing:
 
     /* Failed, have to return the original */
     original = valid_utf8_to_uvchr(p, lenp);

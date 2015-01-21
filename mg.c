@@ -3341,7 +3341,7 @@ Perl_sighandler(int sig)
 	}
     }
 
-cleanup:
+  cleanup:
     /* pop any of SAVEFREESV, SAVEDESTRUCTOR_X and "save in progress" */
     PL_savestack_ix = old_ss_ix;
     if (flags & 8)

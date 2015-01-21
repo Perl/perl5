@@ -555,7 +555,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 	    }
 	}
     }
-done:
+  done:
     if (aux != small) Safefree(aux);	/* free iff allocated */
     if (flags) {
 	 PL_sort_RealCmp = savecmp;	/* Restore current comparison routine, if any */

@@ -6879,7 +6879,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         SAVEFREEPV(RExC_recurse);
     }
 
-reStudy:
+  reStudy:
     r->minlen = minlen = sawlookahead = sawplus = sawopen = sawminmod = 0;
     DEBUG_r(
         RExC_study_chunk_recursed_count= 0;
@@ -11621,7 +11621,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     PERL_ARGS_ASSERT_REGATOM;
 
-tryagain:
+  tryagain:
     switch ((U8)*RExC_parse) {
     case '^':
 	RExC_seen_zerolen++;

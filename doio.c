@@ -790,7 +790,7 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
     }
     return TRUE;
 
-say_false:
+  say_false:
     IoIFP(io) = saveifp;
     IoOFP(io) = saveofp;
     IoTYPE(io) = savetype;
@@ -1246,7 +1246,7 @@ Perl_mode_from_discipline(pTHX_ const char *s, STRLEN len)
 	    }
 	    else {
 		const char *end;
-fail_discipline:
+  fail_discipline:
 		end = strchr(s+1, ':');
 		if (!end)
 		    end = s+len;

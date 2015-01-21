@@ -953,7 +953,7 @@ Perl_op_clear(pTHX_ OP *o)
 	/* FALLTHROUGH */
     case OP_MATCH:
     case OP_QR:
-clear_pmop:
+    clear_pmop:
 	if (!(cPMOPo->op_pmflags & PMf_CODELIST_PRIVATE))
 	    op_free(cPMOPo->op_code_list);
 	cPMOPo->op_code_list = NULL;
@@ -6826,7 +6826,7 @@ S_search_const(pTHX_ OP *o)
 	    } while (kid);
 	    if (!kid)
 		kid = cLISTOPo->op_last;
-last:
+          last:
 	    return search_const(kid);
 	}
     }

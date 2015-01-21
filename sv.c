@@ -3528,7 +3528,7 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
 	if (extra) SvGROW(sv, SvCUR(sv) + extra);
 	return SvCUR(sv);
 
-must_be_utf8:
+      must_be_utf8:
 
 	/* Here, the string should be converted to utf8, either because of an
 	 * input flag (two_byte_count = 0), or because a character that
@@ -8587,13 +8587,13 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 	    goto thats_all_folks;
     }
 
-thats_all_folks:
+  thats_all_folks:
     /* check if we have actually found the separator - only really applies
      * when rslen > 1 */
     if ((rslen > 1 && (STRLEN)(bp - (STDCHAR*)SvPVX_const(sv)) < rslen) ||
 	  memNE((char*)bp - rslen, rsptr, rslen))
 	goto screamer;				/* go back to the fray */
-thats_really_all_folks:
+  thats_really_all_folks:
     if (shortbuffered)
 	cnt += shortbuffered;
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
@@ -8621,7 +8621,7 @@ thats_really_all_folks:
 	STDCHAR buf[8192];
 #endif
 
-screamer2:
+      screamer2:
 	if (rslen) {
             const STDCHAR * const bpe = buf + sizeof(buf);
 	    bp = buf;

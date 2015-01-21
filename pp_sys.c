@@ -717,7 +717,7 @@ PP(pp_pipe_op)
 #endif
     RETPUSHYES;
 
-badexit:
+  badexit:
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_func, "pipe");
@@ -2555,7 +2555,7 @@ PP(pp_bind)
     else
 	RETPUSHUNDEF;
 
-nuts:
+  nuts:
     report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
@@ -2576,7 +2576,7 @@ PP(pp_listen)
     else
 	RETPUSHUNDEF;
 
-nuts:
+  nuts:
     report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
@@ -2638,11 +2638,11 @@ PP(pp_accept)
     PUSHp(namebuf, len);
     RETURN;
 
-nuts:
+  nuts:
     report_evil_fh(ggv);
     SETERRNO(EBADF,SS_IVCHAN);
 
-badexit:
+  badexit:
     RETPUSHUNDEF;
 
 }
@@ -2660,7 +2660,7 @@ PP(pp_shutdown)
     PUSHi( PerlSock_shutdown(PerlIO_fileno(IoIFP(io)), how) >= 0 );
     RETURN;
 
-nuts:
+  nuts:
     report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
@@ -2740,10 +2740,10 @@ PP(pp_ssockopt)
     }
     RETURN;
 
-nuts:
+  nuts:
     report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
-nuts2:
+  nuts2:
     RETPUSHUNDEF;
 
 }
@@ -2804,10 +2804,10 @@ PP(pp_getpeername)
     PUSHs(sv);
     RETURN;
 
-nuts:
+  nuts:
     report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
-nuts2:
+  nuts2:
     RETPUSHUNDEF;
 }
 
@@ -3945,7 +3945,7 @@ PP(pp_open_dir)
 	goto nope;
 
     RETPUSHYES;
-nope:
+  nope:
     if (!errno)
 	SETERRNO(EBADF,RMS_DIR);
     RETPUSHUNDEF;
@@ -3996,7 +3996,7 @@ PP(pp_readdir)
 
     RETURN;
 
-nope:
+  nope:
     if (!errno)
 	SETERRNO(EBADF,RMS_ISI);
     if (gimme == G_ARRAY)
@@ -4029,7 +4029,7 @@ PP(pp_telldir)
 
     PUSHi( PerlDir_tell(IoDIRP(io)) );
     RETURN;
-nope:
+  nope:
     if (!errno)
 	SETERRNO(EBADF,RMS_ISI);
     RETPUSHUNDEF;
@@ -4055,7 +4055,7 @@ PP(pp_seekdir)
     (void)PerlDir_seek(IoDIRP(io), along);
 
     RETPUSHYES;
-nope:
+  nope:
     if (!errno)
 	SETERRNO(EBADF,RMS_ISI);
     RETPUSHUNDEF;
@@ -4079,7 +4079,7 @@ PP(pp_rewinddir)
     }
     (void)PerlDir_rewind(IoDIRP(io));
     RETPUSHYES;
-nope:
+  nope:
     if (!errno)
 	SETERRNO(EBADF,RMS_ISI);
     RETPUSHUNDEF;
@@ -4112,7 +4112,7 @@ PP(pp_closedir)
     IoDIRP(io) = 0;
 
     RETPUSHYES;
-nope:
+  nope:
     if (!errno)
 	SETERRNO(EBADF,RMS_IFI);
     RETPUSHUNDEF;

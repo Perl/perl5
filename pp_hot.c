@@ -1554,7 +1554,7 @@ PP(pp_match)
     }
     NOT_REACHED; /* NOTREACHED */
 
-nope:
+  nope:
     if (global && !(dynpm->op_pmflags & PMf_CONTINUE)) {
         if (!mg)
             mg = mg_find_mglob(TARG);
@@ -3096,7 +3096,7 @@ PP(pp_entersub)
 	}
 	/* should call AUTOLOAD now? */
 	else {
-try_autoload:
+          try_autoload:
 	    if ((autogv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
 				   GvNAMEUTF8(gv) ? SVf_UTF8 : 0)))
 	    {

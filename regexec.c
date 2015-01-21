@@ -3147,7 +3147,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     /* Failure. */
     goto phooey;
 
-got_it:
+  got_it:
     /* s/// doesn't like it if $& is earlier than where we asked it to
      * start searching (which can happen on something like /.\G/) */
     if (       (flags & REXEC_FAIL_ON_UNDERFLOW)
@@ -3187,7 +3187,7 @@ got_it:
 
     return 1;
 
-phooey:
+  phooey:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch failed%s\n",
 			  PL_colors[4], PL_colors[5]));
 
@@ -7042,7 +7042,7 @@ NULL
     sayNO;
     NOT_REACHED;
 
-yes:
+  yes:
     if (yes_state) {
 	/* we have successfully completed a subexpression, but we must now
 	 * pop to the state marked by yes_state and continue from there */
@@ -7103,7 +7103,7 @@ yes:
     result = 1;
     goto final_exit;
 
-no:
+  no:
     DEBUG_EXECUTE_r(
 	PerlIO_printf(Perl_debug_log,
             "%*s  %sfailed...%s\n",
@@ -7111,7 +7111,7 @@ no:
             PL_colors[4], PL_colors[5])
 	);
 
-no_silent:
+  no_silent:
     if (no_final) {
         if (yes_state) {
             goto yes;

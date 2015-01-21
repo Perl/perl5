@@ -3211,7 +3211,7 @@ PP(pp_substr)
     }
     RETURN;
 
-bound_fail:
+  bound_fail:
     if (repl)
 	Perl_croak(aTHX_ "substr outside of string");
     Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");

@@ -8447,7 +8447,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 	yyerror_pv(msg, UTF ? SVf_UTF8 : 0);
   	return SvREFCNT_inc_simple_NN(sv);
     }
-now_ok:
+  now_ok:
     cv = *cvp;
     if (!pv && s)
   	pv = newSVpvn_flags(s, len, SVs_TEMP);
@@ -9526,7 +9526,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 	    else {
 		GV *gv;
 		++d;
-intro_sym:
+              intro_sym:
 		gv = gv_fetchpv(d,
 				GV_ADDMULTI | ( UTF ? SVf_UTF8 : 0 ),
 				SVt_PV);
@@ -10468,7 +10468,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
     /* if it starts with a v, it could be a v-string */
     case 'v':
-vstring:
+    vstring:
 		sv = newSV(5); /* preallocate storage space */
 		ENTER_with_name("scan_vstring");
 		SAVEFREESV(sv);
