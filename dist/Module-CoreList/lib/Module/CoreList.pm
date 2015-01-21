@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.20150120';
+$VERSION = '5.20150220';
 
 my $dumpinc = 0;
 sub import {
@@ -10914,9 +10914,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'IO::Uncompress::RawInflate'=> '2.068',
             'IO::Uncompress::Unzip' => '2.068',
             'MIME::Base64'          => '3.15',
-            'Module::CoreList'      => '5.20150120',
-            'Module::CoreList::TieHashDelta'=> '5.20150120',
-            'Module::CoreList::Utils'=> '5.20150120',
+            'Module::CoreList'      => '5.20150220',
+            'Module::CoreList::TieHashDelta'=> '5.20150220',
+            'Module::CoreList::Utils'=> '5.20150220',
             'Module::Load::Conditional'=> '0.64',
             'Module::Metadata'      => '1.000026',
             'Net::Cmd'              => '3.05',
@@ -12419,9 +12419,9 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'ok'                    => 'http://github.com/Test-More/test-more/issues/',
     'parent'                => undef,
     'perlfaq'               => 'https://github.com/perl-doc-cats/perlfaq/issues',
-    'version'               => 'http://rt.cpan.org/Public/Dist/Display.html?version',
-    'version::regex'        => 'http://rt.cpan.org/Public/Dist/Display.html?version',
-    'version::vpp'          => 'http://rt.cpan.org/Public/Dist/Display.html?version',
+    'version'               => 'https://rt.cpan.org/Public/Dist/Display.html?Name=version',
+    'version::regex'        => 'https://rt.cpan.org/Public/Dist/Display.html?Name=version',
+    'version::vpp'          => 'https://rt.cpan.org/Public/Dist/Display.html?Name=version',
 );
 
 # Create aliases with trailing zeros for $] use
