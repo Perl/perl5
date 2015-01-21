@@ -11894,7 +11894,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	    }
 	    /* make class name a shared cow string to speedup method calls */
 	    /* constant string might be replaced with object, f.e. bigint */
-	    if (const_class && !SvROK(*const_class)) {
+	    if (const_class && SvPOK(*const_class)) {
 		STRLEN len;
 		const char* str = SvPV(*const_class, len);
 		if (len) {
