@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.32 2014/11/27 14:08:33 dankogai Exp $
+ $Id: Encode.xs,v 2.33 2015/01/22 10:17:32 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -7,6 +7,7 @@
 #include "perl.h"
 #include "XSUB.h"
 #include "encode.h"
+#include "def_t.h"
 
 # define PERLIO_MODNAME  "PerlIO::encoding"
 # define PERLIO_FILENAME "PerlIO/encoding.pm"
@@ -1002,6 +1003,5 @@ OUTPUT:
 
 BOOT:
 {
-#include "def_t.h"
 #include "def_t.exh"
 }

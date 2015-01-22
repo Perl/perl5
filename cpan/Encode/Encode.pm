@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.67 2014/12/04 20:12:29 dankogai Exp $
+# $Id: Encode.pm,v 2.68 2015/01/22 10:17:32 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.67 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.68 $ =~ /(\d+)/g;
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -483,7 +483,7 @@ If the $string is C<undef>, then C<undef> is returned.
 
 This function returns the string that results from decoding the scalar
 value I<OCTETS>, assumed to be a sequence of octets in I<ENCODING>, into
-Perl's internal form.  The returns the resulting string.  As with encode(),
+Perl's internal form.  As with encode(),
 I<ENCODING> can be either a canonical name or an alias. For encoding names
 and aliases, see L</"Defining Aliases">; for I<CHECK>, see L</"Handling
 Malformed Data">.
@@ -573,7 +573,7 @@ Also note that:
 
   from_to($octets, $from, $to, $check);
 
-is equivalent t:o
+is equivalent to:
 
   $octets = encode($to, decode($from, $octets), $check);
 
@@ -700,7 +700,7 @@ In the first version above, you let the appropriate encoding layer
 handle the conversion.  In the second, you explicitly translate
 from one encoding to the other.
 
-Unfortunately, it may be that encodings are C<PerlIO>-savvy.  You can check
+Unfortunately, it may be that encodings are not C<PerlIO>-savvy.  You can check
 to see whether your encoding is supported by C<PerlIO> by invoking the
 C<perlio_ok> method on it:
 
@@ -836,7 +836,7 @@ Acts like C<FB_PERLQQ> but U+I<XXXX> is used instead of C<\x{I<XXXX>}>.
 
 Even the fallback for C<decode> must return octets, which are
 then decoded with the character encoding that C<decode> accepts. So for
-example if you wish to decode octests as UTF-8, and use ISO-8859-15 as
+example if you wish to decode octets as UTF-8, and use ISO-8859-15 as
 a fallback for bytes that are not valid UTF-8, you could write
 
     $str = decode 'UTF-8', $octets, sub {

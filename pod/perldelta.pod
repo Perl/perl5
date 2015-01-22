@@ -119,7 +119,9 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Encode> has been upgraded from version 2.67 to 2.68.
+
+Building in C++ mode on Windows now works.
 
 =back
 

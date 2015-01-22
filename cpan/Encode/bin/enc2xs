@@ -10,7 +10,7 @@ use warnings;
 use Getopt::Std;
 use Config;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.16 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.17 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -133,10 +133,18 @@ my %opt;
 # -o <output> to specify the output file name (else it's the first arg)
 # -f <inlist> to give a file with a list of input files (else use the args)
 # -n <name> to name the encoding (else use the basename of the input file.
-getopts('CM:SQqOo:f:n:',\%opt);
+getopts('CM:SQqOo:f:n:v',\%opt);
 
 $opt{M} and make_makefile_pl($opt{M}, @ARGV);
 $opt{C} and make_configlocal_pm($opt{C}, @ARGV);
+$opt{v} ||= $ENV{ENC2XS_VERBOSE};
+
+sub verbose {
+    print STDERR @_ if $opt{v};
+}
+sub verbosef {
+    printf STDERR @_ if $opt{v};
+}
 
 # This really should go first, else the die here causes empty (non-erroneous)
 # output files to be written.
@@ -252,7 +260,7 @@ foreach my $enc (sort cmp_name @encfiles)
 
 if ($doC)
  {
-  print STDERR "Writing compiled form\n";
+  verbose "Writing compiled form\n";
   foreach my $name (sort cmp_name keys %encoding)
    {
     my ($e2u,$u2e,$erep,$min_el,$max_el) = @{$encoding{$name}};
@@ -272,8 +280,9 @@ if ($doC)
     # push(@{$encoding{$name}},outstring(\*C,$e2u->{Cname}.'_def',$erep));
    }
   my $cpp = ($Config{d_cplusplus} || '') eq 'define';
-  my $exta = $cpp ? 'extern "C" ' : "static";
-  my $extb = $cpp ? 'extern "C" ' : "";
+  my $ext  = $cpp ? 'extern "C"' : "extern";
+  my $exta = $cpp ? 'extern "C"' : "static";
+  my $extb = $cpp ? 'extern "C"' : "";
   foreach my $enc (sort cmp_name keys %encoding)
    {
     # my ($e2u,$u2e,$rep,$min_el,$max_el,$rsym) = @{$encoding{$enc}};
@@ -300,7 +309,7 @@ if ($doC)
    {
     my $sym = "${enc}_encoding";
     $sym =~ s/\W+/_/g;
-    print H "extern encode_t $sym;\n";
+    print H "${ext} encode_t $sym;\n";
     print D " Encode_XSEncoding(aTHX_ &$sym);\n";
    }
 
@@ -347,10 +356,10 @@ END
 
   my $perc_saved    = $saved/($strings + $saved) * 100;
   my $perc_subsaved = $subsave/($strings + $subsave) * 100;
-  printf STDERR "%d bytes in string tables\n",$strings;
-  printf STDERR "%d bytes (%.3g%%) saved spotting duplicates\n",
+  verbosef "%d bytes in string tables\n",$strings;
+  verbosef "%d bytes (%.3g%%) saved spotting duplicates\n",
     $saved, $perc_saved              if $saved;
-  printf STDERR "%d bytes (%.3g%%) saved using substrings\n",
+  verbosef "%d bytes (%.3g%%) saved using substrings\n",
     $subsave, $perc_subsaved         if $subsave;
  }
 elsif ($doEnc)

@@ -380,7 +380,7 @@ use File::Glob qw(:case);
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-2.67.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-2.68.tar.gz',
         'FILES'        => q[cpan/Encode],
         # Waiting to be merged upstream if it smokes ok: see CPAN RT#100347,
         # in particular see khw's comments on that ticket on 21 Nov 2014.
