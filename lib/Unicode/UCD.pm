@@ -43,13 +43,13 @@ Unicode::UCD - Unicode character database
     my $charinfo   = charinfo($codepoint);
 
     use Unicode::UCD 'casefold';
-    my $casefold = casefold(0xFB00);
+    my $casefold = casefold($codepoint);
 
     use Unicode::UCD 'all_casefolds';
     my $all_casefolds_ref = all_casefolds();
 
     use Unicode::UCD 'casespec';
-    my $casespec = casespec(0xFB00);
+    my $casespec = casespec($codepoint);
 
     use Unicode::UCD 'charblock';
     my $charblock  = charblock($codepoint);
