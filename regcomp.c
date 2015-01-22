@@ -11659,7 +11659,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                        FALSE, /* means parse the whole char class */
                        TRUE, /* allow multi-char folds */
                        FALSE, /* don't silence non-portable warnings. */
-                       RExC_strict,
+                       (bool) RExC_strict,
                        NULL);
 	if (*RExC_parse != ']') {
 	    RExC_parse = oregcomp_parse;
@@ -11895,7 +11895,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                FALSE, /* don't silence non-portable warnings.
                                          It would be a bug if these returned
                                          non-portables */
-                               RExC_strict,
+                               (bool) RExC_strict,
                                NULL);
                 /* regclass() can only return RESTART_UTF8 if multi-char folds
                    are allowed.  */
@@ -12270,7 +12270,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 						       &result,
 						       &error_msg,
 						       PASS2, /* out warnings */
-                                                       RExC_strict,
+                                                       (bool) RExC_strict,
                                                        TRUE, /* Output warnings
                                                                 for non-
                                                                 portables */
@@ -12299,7 +12299,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 						       &result,
 						       &error_msg,
 						       PASS2, /* out warnings */
-                                                       RExC_strict,
+                                                       (bool) RExC_strict,
                                                        TRUE, /* Silence warnings
                                                                 for non-
                                                                 portables */
