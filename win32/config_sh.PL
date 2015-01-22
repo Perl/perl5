@@ -286,6 +286,11 @@ if ($opt{useithreads} eq 'define' && $opt{ccflags} =~ /-DPERL_IMPLICIT_SYS\b/) {
     $opt{d_pseudofork} = 'define';
 }
 
+if ($opt{usecplusplus} eq 'define') {
+    $opt{d_cplusplus} = 'define';
+    $opt{extern_C} = 'extern "C"';
+}
+
 #if the fields above are defined, they override the defaults in the premade
 #config file
 while (<>) {

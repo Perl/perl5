@@ -133,6 +133,11 @@ CCTYPE		= MSVC60
 #__ICC		= define
 
 #
+# Uncomment this if you want to build everything in C++ mode
+#
+#USE_CPLUSPLUS	= define
+
+#
 # uncomment next line if you want debug version of perl (big,slow)
 # If not enabled, we automatically try to use maximum optimization
 # with all compilers that are known to have a working optimizer.
@@ -505,6 +510,9 @@ EXTRACFLAGS	= -nologo -GF -W3
 !IF "$(__ICC)" == "define"
 EXTRACFLAGS	= $(EXTRACFLAGS) -Qstd=c99
 !ENDIF
+!IF "$(USE_CPLUSPLUS)" == "define"
+EXTRACFLAGS	= $(EXTRACFLAGS) $(CXX_FLAG)
+!ENDIF
 CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \
@@ -791,6 +799,7 @@ CFG_VARS	=					\
 		"cc=$(CC)"				\
 		"ld=$(LINK32)"				\
 		"ccflags=$(EXTRACFLAGS) $(OPTIMIZE:"=\") $(DEFINES) $(BUILDOPT)"	\
+		"usecplusplus=$(USE_CPLUSPLUS)"		\
 		"cf_email=$(EMAIL)"	 		\
 		"d_mymalloc=$(PERL_MALLOC)"		\
 		"libs=$(LIBFILES)"			\
@@ -879,6 +888,7 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #undef UVXf>>$@
 	@echo #undef USE_64_BIT_INT>>$@
 	@echo #undef Size_t_size>>$@
+	@echo #undef USE_CPLUSPLUS>>$@
 !IF "$(USE_LARGE_FILES)"=="define"
 	@echo #define Off_t __int64>>$@
 	@echo #define LSEEKSIZE ^8>>$@
@@ -929,6 +939,11 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #define UVxf "lx">>$@
 	@echo #define UVXf "lX">>$@
 	@echo #undef USE_64_BIT_INT>>$@
+!ENDIF
+!IF "$(USE_CPLUSPLUS)"=="define"
+	@echo #define USE_CPLUSPLUS>>$@
+!ELSE
+	@echo #undef USE_CPLUSPLUS>>$@
 !ENDIF
 	@echo #endif>>$@
 
