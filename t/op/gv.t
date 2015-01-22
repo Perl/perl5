@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 271 );
+plan( tests => 273 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -1073,6 +1073,14 @@ package glob_constant_test {
   ::is eval { bar->() }, eval { &{+bar} },
     'glob_constant->() is not mangled at compile time';
   ::is "$@", "", 'no error from eval { &{+glob_constant} }';
+  use constant quux => do {
+    local *F;
+    my $f = *F;
+    *$f = *STDOUT{IO};
+  };
+  ::is eval { quux->autoflush; 420 }, 420,
+    'glob_constant->method() works';
+  ::is "$@", "", 'no error from eval { glob_constant->method() }';
 }
 
 {
