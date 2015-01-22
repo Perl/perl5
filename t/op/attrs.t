@@ -407,7 +407,9 @@ is $ProtoTest::Proto, '$', 'prototypes are visible in attr handlers';
         attributes->import(shift, shift, lc shift) if $_[2]; ()
     }
     $_ = 32487;
-    my $sub = sub : Const { $_ };
+    my $sub = eval '+sub : Const { $_ }';
+    ::is $w, '',
+     'no warning for :const applied to closure protosub via attributes.pm';
     undef $_;
     ::is &$sub, 32487,
         'applying const attr via attributes.pm';

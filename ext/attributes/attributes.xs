@@ -48,7 +48,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		    if (negated)
 			CvANONCONST_off(sv);
 		    else {
-			const bool warn = (!CvCLONE(sv) || CvCLONED(sv))
+			const bool warn = (!CvANON(sv) || CvCLONED(sv))
 				       && !CvANONCONST(sv);
 			CvANONCONST_on(sv);
 			if (warn)
