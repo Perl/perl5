@@ -51,7 +51,7 @@ typedef struct {
 	int dsize;
 } datum;
 
-EXTCONST datum nullitem
+extern const datum nullitem
 #ifdef DOINIT
                         = {0, 0}
 #endif
