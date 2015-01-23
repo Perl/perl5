@@ -14894,7 +14894,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 /* The actual POSIXish node for all the rest depends on the
                  * charset modifier.  The ones in the first set depend only on
-                 * ASCII or, if available on this platform, locale */
+                 * ASCII or, if available on this platform, also locale */
                 case ANYOF_ASCII:
                 case ANYOF_NASCII:
 #ifdef HAS_ISASCII
