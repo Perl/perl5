@@ -1845,7 +1845,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
         /* FALLTHROUGH */
 
-    do_exactf_non_utf8: /* Neither pattern nor string are UTF8, and there
+      do_exactf_non_utf8: /* Neither pattern nor string are UTF8, and there
                            are no glitches with fold-length differences
                            between the target string and pattern */
 
@@ -1879,8 +1879,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-    do_exactf_utf8:
-    {
+      do_exactf_utf8:
+      {
         unsigned expansion;
 
         /* If one of the operands is in utf8, we can't use the simpler folding
@@ -2021,7 +2021,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         else {
 
-      posix_utf8:
+          posix_utf8:
             classnum = (_char_class_number) FLAGS(c);
             if (classnum < _FIRST_NON_SWASH_CC) {
                 while (s < strend) {
@@ -4704,7 +4704,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case BOUNDA:  /*  /\b/a  */
 
-      bound_ascii_match_only:
+          bound_ascii_match_only:
             /* Here the string isn't utf8, or is utf8 and only ascii characters
              * are to match \w.  In the latter case looking at the byte just
              * prior to the current one may be just the final byte of a
@@ -4887,7 +4887,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 locinput += 2;
             }
             else {  /* Handle above Latin-1 code points */
-          utf8_posix_above_latin1:
+              utf8_posix_above_latin1:
                 classnum = (_char_class_number) FLAGS(scan);
                 if (classnum < _FIRST_NON_SWASH_CC) {
 
@@ -5143,7 +5143,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         locinput += UTF8SKIP(locinput);
                     }
 		}
-            exit_utf8:
+              exit_utf8:
 		if (locinput > reginfo->strend) sayNO;
 	    }
 	    break;
@@ -5580,7 +5580,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 maxopenparen = 0;
                 /* run the pattern returned from (??{...}) */
 
-        eval_recurse_doit: /* Share code with GOSUB below this line
+              eval_recurse_doit: /* Share code with GOSUB below this line
                             * At this point we expect the stack context to be
                             * set up correctly */
 
@@ -6682,7 +6682,7 @@ NULL
             /* NOTREACHED */
 	    NOT_REACHED;
 
-	curly_try_B_max:
+          curly_try_B_max:
 	    /* a successful greedy match: now try to match B */
             if (cur_eval && cur_eval->u.eval.close_paren &&
                 cur_eval->u.eval.close_paren == (U32)ST.paren) {
@@ -6732,7 +6732,7 @@ NULL
 #undef ST
 
 	case END: /*  last op of main pattern  */
-	    fake_end:
+          fake_end:
 	    if (cur_eval) {
 		/* we've just finished A in /(??{A})B/; now continue with B */
 
@@ -6983,7 +6983,7 @@ NULL
 
         /* this is a point to jump to in order to increment
          * locinput by one character */
-        increment_locinput:
+          increment_locinput:
             assert(!NEXTCHR_IS_EOS);
             if (utf8_target) {
                 locinput += PL_utf8skip[nextchr];
@@ -7376,7 +7376,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     case EXACTFU:
 	utf8_flags = reginfo->is_utf8_pat ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 
-    do_exactf: {
+      do_exactf: {
         int c1, c2;
         U8 c1_utf8[UTF8_MAXBYTES+1], c2_utf8[UTF8_MAXBYTES+1];
 
@@ -7537,7 +7537,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
             }
 	}
 	else {
-      utf8_posix:
+          utf8_posix:
             classnum = (_char_class_number) FLAGS(p);
             if (classnum < _FIRST_NON_SWASH_CC) {
 

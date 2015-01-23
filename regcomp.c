@@ -8447,7 +8447,7 @@ Perl__invlist_populate_swatch(SV* const invlist,
             swatch[offset >> 3] |= 1 << (offset & 7);
         }
 
-    join_end_of_list:
+      join_end_of_list:
 
 	/* Quit if at the end of the list */
         if (i >= len) {
@@ -9619,7 +9619,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                      : REGEX_DEPENDS_CHARSET;
                 has_charset_modifier = DEPENDS_PAT_MOD;
                 break;
-            excess_modifier:
+              excess_modifier:
                 RExC_parse++;
                 if (has_charset_modifier == ASCII_RESTRICT_PAT_MOD) {
                     vFAIL2("Regexp modifier \"%c\" may appear a maximum of twice", ASCII_RESTRICT_PAT_MOD);
@@ -9632,7 +9632,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                     vFAIL3("Regexp modifiers \"%c\" and \"%c\" are mutually exclusive", has_charset_modifier, *(RExC_parse - 1));
                 }
                 NOT_REACHED; /*NOTREACHED*/
-            neg_modifier:
+              neg_modifier:
                 RExC_parse++;
                 vFAIL2("Regexp modifier \"%c\" may not appear after the \"-\"",
                                     *(RExC_parse - 1));
@@ -9704,7 +9704,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 return;
                 /*NOTREACHED*/
             default:
-            fail_modifiers:
+              fail_modifiers:
                 RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
 		/* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
                 vFAIL2utf8f("Sequence (%"UTF8f"...) not recognized",
@@ -10849,7 +10849,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 nextchar(pRExC_state);
             }
 
-	do_curly:
+	  do_curly:
 	    if ((flags&SIMPLE)) {
                 MARK_NAUGHTY_EXP(2, 2);
 		reginsert(pRExC_state, CURLY, ret, depth+1);
@@ -11820,7 +11820,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	case 's':
             arg = ANYOF_SPACE;
 
-        join_posix:
+          join_posix:
 
 	    op = POSIXD + get_regex_charset(RExC_flags);
             if (op > POSIXA) {  /* /aa is same as /a */
@@ -11830,7 +11830,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 RExC_contains_locale = 1;
             }
 
-        join_posix_op_known:
+          join_posix_op_known:
 
             if (invert) {
                 op += NPOSIXD - POSIXD;
@@ -11844,7 +11844,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    *flagp |= HASWIDTH|SIMPLE;
             /* FALLTHROUGH */
 
-         finish_meta_pat:
+          finish_meta_pat:
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
 	    break;
@@ -11900,7 +11900,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             }
             break;
 	case 'k':    /* Handle \k<NAME> and \k'NAME' */
-	parse_named_seq:
+      parse_named_seq:
         {
             char ch= RExC_parse[1];
 	    if (ch != '<' && ch != '\'' && ch != '{') {
@@ -12066,7 +12066,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 	    RExC_parse++;
 
-	defchar: {
+	  defchar: {
 	    STRLEN len = 0;
 	    UV ender = 0;
 	    char *p;
@@ -12105,7 +12105,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
             s0 = s;
 
-	reparse:
+	  reparse:
 
             /* We do the EXACTFish to EXACT node only if folding.  (And we
              * don't need to figure this out until pass 2) */
@@ -12341,7 +12341,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			if (IN_ENCODING && ender < 0x100)
 			    goto recode_encoding;
 			break;
-		    recode_encoding:
+		      recode_encoding:
 			if (! RExC_override_recoding) {
 			    SV* enc = _get_encoding();
 			    ender = reg_recode((const char)(U8)ender, &enc);
@@ -12724,8 +12724,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }
 	    }   /* End of verifying node ends with an appropriate char */
 
-	loopdone:   /* Jumped to when encounters something that shouldn't be in
-		       the node */
+          loopdone:   /* Jumped to when encounters something that shouldn't be
+                         in the node */
 
             /* I (khw) don't know if you can get here with zero length, but the
              * old code handled this situation by creating a zero-length EXACT
@@ -13193,7 +13193,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
             RExC_parse++;
         }
 
-        no_close:
+      no_close:
         FAIL("Syntax error in (?[...])");
     }
 
@@ -13891,7 +13891,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             break;
         }
 
-    charclassloop:
+      charclassloop:
 
 	namedclass = OOB_NAMEDCLASS; /* initialize as illegal */
         save_value = value;
@@ -14258,7 +14258,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 			goto recode_encoding;
 		    break;
 		}
-	    recode_encoding:
+	      recode_encoding:
 		if (! RExC_override_recoding) {
 		    SV* enc = _get_encoding();
 		    value = reg_recode((const char)(U8)value, &enc);
@@ -14921,7 +14921,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         op = POSIXA;
                     }
 
-                join_posix:
+                  join_posix:
                     /* The odd numbered ones are the complements of the
                      * next-lower even number one */
                     if (namedclass % 2 == 1) {
@@ -16638,7 +16638,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                         sv_catpv(sv, t);
                     }
 
-                out_dump:
+                  out_dump:
 
                     Safefree(origs);
                     SvREFCNT_dec_NN(lv);
