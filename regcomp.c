@@ -14918,19 +14918,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     op = POSIXU;
                     goto join_posix;
 
-                case ANYOF_NCASED:
+                /* The following change to CASED under /i */
                 case ANYOF_LOWER:
                 case ANYOF_NLOWER:
                 case ANYOF_UPPER:
                 case ANYOF_NUPPER:
-                    /* under /a could be alpha */
                     if (FOLD) {
-                        if (ASCII_RESTRICTED) {
-                            namedclass = ANYOF_ALPHA + (namedclass % 2);
-                        }
-                        else if (! LOC) {
-                            break;
-                        }
+                        namedclass = ANYOF_CASED + (namedclass % 2);
                     }
                     /* FALLTHROUGH */
 
