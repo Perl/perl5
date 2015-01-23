@@ -1020,6 +1020,7 @@ static const char* const swash_property_names[] = {
 };
 #endif
 
+START_EXTERN_C
 #  ifdef DOINIT
 EXTCONST  U32 PL_charclass[] = {
 #    include "l1_char_class_tab.h"
@@ -1028,6 +1029,7 @@ EXTCONST  U32 PL_charclass[] = {
 #  else /* ! DOINIT */
 EXTCONST U32 PL_charclass[];
 #  endif
+END_EXTERN_C
 
     /* The 1U keeps Solaris from griping when shifting sets the uppermost bit */
 #   define _CC_mask(classnum) (1U << (classnum))
