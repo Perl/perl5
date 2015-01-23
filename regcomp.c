@@ -11791,7 +11791,15 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             /* FALLTHROUGH */
 	case 'd':
             arg = ANYOF_DIGIT;
-            goto join_posix;
+            if (! DEPENDS_SEMANTICS) {
+                goto join_posix;
+            }
+
+            /* \d doesn't have any matches in the upper Latin1 range, hence /d
+             * is equivalent to /u.  Changing to /u saves some branches at
+             * runtime */
+            op = POSIXU;
+            goto join_posix_op_known;
 
 	case 'R':
 	    ret = reg_node(pRExC_state, LNBREAK);
@@ -14896,6 +14904,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 #endif
                     goto join_posix;
 
+                /* The following don't have any matches in the upper Latin1
+                 * range, hence /d is equivalent to /u for them.  Making it /u
+                 * saves some branches at runtime */
+                case ANYOF_DIGIT:
+                case ANYOF_NDIGIT:
+                case ANYOF_XDIGIT:
+                case ANYOF_NXDIGIT:
+                    if (! DEPENDS_SEMANTICS) {
+                        goto treat_as_default;
+                    }
+
+                    op = POSIXU;
+                    goto join_posix;
+
                 case ANYOF_NCASED:
                 case ANYOF_LOWER:
                 case ANYOF_NLOWER:
@@ -14916,6 +14938,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * We take advantage of the enum ordering of the charset
                  * modifiers to get the exact node type, */
                 default:
+                  treat_as_default:
                     op = POSIXD + get_regex_charset(RExC_flags);
                     if (op > POSIXA) { /* /aa is same as /a */
                         op = POSIXA;
