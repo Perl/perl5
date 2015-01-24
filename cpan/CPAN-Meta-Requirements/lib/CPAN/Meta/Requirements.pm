@@ -3,7 +3,7 @@ use warnings;
 package CPAN::Meta::Requirements;
 # ABSTRACT: a set of version requirements for a CPAN dist
 
-our $VERSION = '2.131';
+our $VERSION = '2.132';
 
 #pod =head1 SYNOPSIS
 #pod
@@ -119,7 +119,7 @@ sub _version_object {
   }
 
   eval {
-    if (not defined $version or $version eq '0') {
+    if (not defined $version or (!ref($version) && $version eq '0')) {
       $vobj = $V0;
     }
     elsif ( ref($version) eq 'version' || _isa_version($version) ) {
@@ -229,7 +229,7 @@ BEGIN {
 sub add_minimum {
   my ($self, $name, $version) = @_;
 
-  if (not defined $version or $version eq '0') {
+  if (not defined $version or (!ref($version) && $version eq '0')) {
     return $self if $self->__entry_for($name);
     Carp::confess("can't add new requirements to finalized requirements")
       if $self->is_finalized;
@@ -787,7 +787,7 @@ CPAN::Meta::Requirements - a set of version requirements for a CPAN dist
 
 =head1 VERSION
 
-version 2.131
+version 2.132
 
 =head1 SYNOPSIS
 

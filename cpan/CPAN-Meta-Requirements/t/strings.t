@@ -55,6 +55,21 @@ ok(!$req->accepts_module('A::Tribe::Called' => '1.2'), 'lower version (>=, <=, !
 ok(!$req->accepts_module('A::Tribe::Called' => '2.1'), 'higher version (>=, <=, !)');
 ok(!$req->accepts_module('A::Tribe::Called' => '1.6'), 'excluded version (>=, <=, !)');
 
+# Test precision
+{
+  my $req = CPAN::Meta::Requirements->new;
+
+  $req->add_string_requirement(Foo => "0.00");
+
+  is_deeply(
+    $req->as_string_hash,
+    {
+      Foo => '0.00'
+    },
+    "0.00 precision preserved",
+  );
+}
+
 # Test fatal errors
 dies_ok { $req->add_string_requirement('Foo::Bar', "not really a version") }
   qr/Can't convert/,

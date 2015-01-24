@@ -233,4 +233,22 @@ sub foo_1 {
   is ( $scalar, undef, "requirements_for_module() returns undef for not found (scalar)" );
 }
 
+{
+  my $req = CPAN::Meta::Requirements->new;
+
+  $req->add_minimum(Foo => "0.00");
+
+  my $req2 = CPAN::Meta::Requirements->new;
+  $req2->add_requirements($req);
+
+  is_deeply(
+    $req2->as_string_hash,
+    {
+      Foo => '0.00'
+    },
+    "0.00 precision preserved",
+  );
+
+}
+
 done_testing;
