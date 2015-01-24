@@ -1092,7 +1092,7 @@ any previous C<my sub;> or C<state sub;> declaration.
     }
 
 It is a known bug that lexical subroutines cannot be used as the C<SUBNAME>
-argument to C<sort>.  This will be fixed in a future version of perl.
+argument to C<sort>.  This will be fixed in a future version of Perl.
 
 =head3 C<state sub> vs C<my sub>
 
