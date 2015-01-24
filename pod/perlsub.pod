@@ -1091,6 +1091,9 @@ any previous C<my sub;> or C<state sub;> declaration.
 	baz();		# recursive call
     }
 
+It is a known bug that lexical subroutines cannot be used as the C<SUBNAME>
+argument to C<sort>.  This will be fixed in a future version of perl.
+
 =head3 C<state sub> vs C<my sub>
 
 What is the difference between "state" subs and "my" subs?  Each time that
