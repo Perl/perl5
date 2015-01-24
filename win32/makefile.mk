@@ -389,6 +389,10 @@ ARCHNAME	!:= $(ARCHNAME)-64int
 .ENDIF
 .ENDIF
 
+.IF "$(USE_LONG_DOUBLE)" == "define"
+ARCHNAME	!:= $(ARCHNAME)-ld
+.ENDIF
+
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
 AUTODIR		= ..\lib\auto
