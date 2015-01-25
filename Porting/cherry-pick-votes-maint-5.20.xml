@@ -44,29 +44,6 @@ This fix has a problem with it that needs to be solved before we can backport it
 
 <div><h3>Other Regression Fixes</h3>
 
-<commit votes="steveh, arc, khw" id="a51d618a82a7057c3aabb600a7a8691d27f44a34" ticket="122283" desc="rt 122283 - do not recurse into GOSUB/GOSTART when not SCF_DO_SUBSTR"/>
-<commit votes="steveh, arc, khw" id="d9a72fccda5cacaccd2671769c010f3cda59ef8a" ticket="122283" desc="Add tests for a51d618a fix of RT #122283"/>
-<commit votes="steveh, arc, khw" id="74f9f9edcc88e2102b767ccefb4c4100eab199bd" ticket="122283" desc="Another perldelta entry"/>
-
-a51d618a82a7057c3aabb600a7a8691d27f44a34 caused #122890 so do we need this sequence of commits too?
-This is hard. #122283 is a genuine maint-worthy regression over 5.18.x, but even though the small, simple change in a51d618a82 fixed that case, it also caused the subsequent regression in #122890 – which is also maint-worthy. Sadly, the real fix is a little more invasive, especially since tracking it down clearly required additional internal debugging tools. I've gone with voting for the changes for #122283, plus the tests and bare-minimum fixes from #122890 (one of which partially reverts the code change for #122283), but I fear that getting the fixes to apply will require either manually reworking them, or pulling in some of the bigger changes (such as abd6de04db). Further, my votes on the commits for both bugs are conditional on the application of *at least* all the commits I've voted for (on the grounds that releasing 5.20.2 with a bug that was known in 5.20.0 and 5.20.1 is less bad than releasing it with a different known bug). That said, I'd be happy to look into manually applying the relevant commits, if need be; I believe I understand roughly what all the bits are doing, and how to select the ones that actually fix the bug. --arc
-<commit votes="" id="abd6de04dbc807cb1270d565e5019376c04c77fd" ticket="122890" desc="regcomp.c: struct scan_frame: rename members for clarity"/>
-<commit votes="arc" id="c9f0d54c3bad1139a1b0758ca0d999437ed93c95" ticket="122890" desc="regcomp.c: reuse temporary debugging temp sv's"/>
-<commit votes="arc" id="3f910e62fcf6ddef8eaffcfa6554e5ff7df08a08" ticket="122890" desc="regcomp.c: eliminate memory leak from GOSUB/GOSTART regops"/>
-<commit votes="" id="d615717366f1596d4a1b18ce2ca5a224dc076107" ticket="122890" desc="regcomp.c: study_chunk(): whitespace fixup for legibility"/>
-<commit votes="" id="e60d552100fc966cb2917d32cf2e708d20a6427f" ticket="122890" desc="regcomp.c: study_chunk(): improve branch-branch comment"/>
-<commit votes="" id="8b9781c905d8bc5e4fbf350df63e212283783324" ticket="122890" desc="regcomp.c: Improve re debug output by showing buffer names if they exist"/>
-<commit votes="" id="0a14d816d4f94b3847ccd7cea08086e2244d1e6e" ticket="122890" desc="regcomp.c: Fixup debug output so it matches other messages in context"/>
-<commit votes="" id="4420a417a2575a2656eb120d4b4048ac9dfbd46e" ticket="122890" desc="dump.c: Add PERL_PV_PRETTY_EXACTSIZE option"/>
-<commit votes="" id="fdfb4f2197409a1d793ee71f18be6e702a5461df" ticket="122890" desc="regcomp.c: Improve advanced re debug output"/>
-<commit votes="arc" id="64e04a51361b45dbbb94b038a93c7dc3cca0c7f9" ticket="122890" desc="regcomp.c: study_chunk(): Reset the entire data struct, not just a bit of it."/>
-<commit votes="" id="32c35d38c96a76c6f8360ea6854ad3f3fb462725" ticket="122890" desc="regcomp.c: Add comment."/>
-<commit votes="arc" id="4286711ac0be1bf8f37eadee54b2e9ebbb08e0d8" ticket="122890" desc="regcomp.c: study_chunk(): Avoid unnecessary recursion."/>
-<commit votes="" id="92b05f28a98d1b7301afb8746d17237f1a669174" ticket="122890" desc="Add test names to t/re/regexp.t and friends"/>
-<commit votes="" id="890fbec8b209c41a5902022a654cbd782f601bb7" ticket="122890" desc="t/re/re_tests: put comment in correct column"/>
-<commit votes="arc" id="f6f22b1fc01b8676e43ef64616ed7899a84bfec2" ticket="122890" desc="t/re/re_tests: Add test for perl #122890"/>
-<commit votes="arc" id="efcc8bfdc124f50d33aab3f1d7722b5f9e4de349" ticket="122890" desc="re_tests: More tests for #122890"/>
-
 </div>
 
 <div><h3>Configure and hints Fixes (Consider whether these in particular would break binary compatibility)</h3>
