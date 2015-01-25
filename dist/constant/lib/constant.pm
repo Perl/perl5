@@ -3,8 +3,8 @@ use 5.008;
 use strict;
 use warnings::register;
 
-use vars qw($VERSION %declared);
-$VERSION = '1.32';
+our $VERSION = '1.33';
+our %declared;
 
 #=======================================================================
 
