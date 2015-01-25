@@ -10,7 +10,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including db5cc9f9ace5f7ec3feeded852dc53793477c17e (Release prep - Copy descriptions of new errors in perldiag to delta)
+Blead changes have been examined up to and including 47b62f63607d1af76ce720886fdaffbf5aab33c5 (attempt again to const vtables in threads-shared)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -35,6 +35,8 @@ This fix has a problem with it that needs to be solved before we can backport it
 <commit votes="sprout, steveh" id="e3e8f263bd1cf5bb33710bdece3b572dd9785f75" ticket="123554" desc="perldelta for fa8f4f85ec35"/>
 <commit votes="steveh, khw" id="f63bc603acea5e0f476f181de698958c4ddcccba" ticket="123554" desc="perldelta: Fix typo"/>
 <commit votes="steveh" id="cc31571878894dd5f5af83722ca0c2a24621300c" ticket="123554" desc="[perl #123554] stop checking the message"/>
+
+<commit votes="steveh" id="2f465e08eb39981706429873d24e3bcc18015bfb" ticket="123652" desc="[perl #123652] eval {label:} crash"/>
 
 </div>
 
@@ -91,6 +93,10 @@ khw votes for the portions of the following except the reference to v5.22
 <commit votes="steveh, khw" id="de6a572826be131d097fd215146f4016cea52671" ticket="" desc="epigraphs - Fix a broken I&lt;&gt;"/>
 <commit votes="steveh, khw" id="931064641468002f31d00f3f4dd72409a265d717" ticket="" desc="perlrecharclass: Add some missing documentation"/>
 <commit votes="steveh, khw" id="f2979eac0a03fcba1cd431ef3d46f697176ebcc8" ticket="" desc="improve SvPV_set's docs, it really shouldn't be public API"/>
+<commit votes="steveh" id="bbd77aa1ffacca671a571e6a7aeaf50161ef49e6" ticket="" desc="Add new release to perlhist"/>
+<commit votes="steveh" id="8917c25b121f1ff10502f69bcd2dde9a3e89edbd" ticket="" desc="Add epigraph and update release schedule"/>
+<commit votes="steveh" id="06dcbead485fc1e807acffe0b20d327a1650a5ac" ticket="" desc="Update epigraph with mailing list link"/>
+<commit votes="steveh" id="6a40a726ac1d6a8f37527d834a781fc5c38e12f0" ticket="" desc="Convert tabs in indentation to spaces."/>
 
 </div>
 
