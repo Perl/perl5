@@ -417,7 +417,7 @@ $a <=> $b;		# OP_NCMP
 use 5.015;
 __SUB__	;		# OP_RUNCV
 [];			# OP_ANONLIST
-grep /42/, (1,2);	# OP_GREP, not warned about, in the "everything" & "void_unusual" category
+grep /42/, (1,2);	# OP_GREP. Not warned about (yet). Grep git logs for void_unusual to see why...
 EXPECT
 Useless use of a constant ("111") in void context at - line 2.
 Useless use of repeat (x) in void context at - line 3.
@@ -465,17 +465,6 @@ Useless use of a constant ("diatrewq") in void context at - line 58.
 Useless use of a constant ("igatrewq") in void context at - line 59.
 Useless use of __SUB__ in void context at - line 61.
 Useless use of anonymous array ([]) in void context at - line 62.
-########
-# op.c
-use warnings 'void_unusual' ; close STDIN ;
-grep /42/, (1,2);	# OP_GREP
-no warnings 'void_unusual';
-grep /42/, (1,2);	# OP_GREP
-use warnings 'everything';
-grep /42/, (1,2);	# OP_GREP
-EXPECT
-Unusual use of grep in void context at - line 3.
-Unusual use of grep in void context at - line 7.
 ########
 # op.c
 use warnings 'void' ; close STDIN ;

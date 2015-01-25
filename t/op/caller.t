@@ -106,14 +106,15 @@ sub testwarn {
 	    vec($default, $i, 2) = 1;
 	}
 	$registered = $default;
+	vec($registered, $warnings::LAST_BIT/2, 2) = 1;
     }
 
     BEGIN { check_bits( ${^WARNING_BITS}, "\0" x $warnings::BYTES, 'all bits off via "no warnings"' ) }
     testwarn("\0" x $warnings::BYTES, 'no bits');
 
-    use warnings qw(everything);
+    use warnings;
     BEGIN { check_bits( ${^WARNING_BITS}, $default,
-			'all bits on via "use warnings qw(everything)"' ); }
+			'default bits on via "use warnings"' ); }
     BEGIN { testwarn($default, 'all'); }
     # run-time :
     # the warning mask has been extended by warnings::register

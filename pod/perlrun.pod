@@ -925,13 +925,13 @@ of warnings; see L<warnings>.
 =item B<-W>
 X<-W>
 
-Enables "all" warnings regardless of C<no warnings> or C<$^W>.
+Enables all warnings regardless of C<no warnings> or C<$^W>.
 See L<warnings>.
 
 =item B<-X>
 X<-X>
 
-Disables "all" warnings regardless of C<use warnings> or C<$^W>.
+Disables all warnings regardless of C<use warnings> or C<$^W>.
 See L<warnings>.
 
 =item B<-x>
