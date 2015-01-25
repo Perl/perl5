@@ -28,7 +28,7 @@
 #  pragma message disable (ADDRCONSTEXT,NEEDCONSTEXT)
 #endif
 #ifdef __DECCXX
-#  pragma message informational (INTSIGNCHANGE,CASTQUALTYP,ASSCOMMEA,NOCTOBUTCONREFM)
+#  pragma message informational (INTSIGNCHANGE,CASTQUALTYP,ASSCOMMEA,NOCTOBUTCONREFM,MISSINGRETURN)
 #endif
 
 /* DEC's C compilers and gcc use incompatible definitions of _to(upp|low)er() */
