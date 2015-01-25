@@ -33,8 +33,7 @@ my @NInf = map { "-$_" } grep { ! /^\+/ } @PInf;
 
 my @NaN = ("NAN", "nan", "qnan", "SNAN", "NanQ", "NANS",
            "1.#QNAN", "+1#SNAN", "-1.#NAN", "1#IND", "1.#IND00",
-           "NaN123", "NAN(123)", "nan%",
-           "nanonano"); # RIP, Robin Williams.
+           "NAN(123)");
 
 my @printf_fmt = qw(e f g a d u o i b x p);
 my @packi_fmt = qw(c C s S l L i I n N v V j J w W U);
@@ -343,7 +342,6 @@ is eval { unpack "p", pack 'p', $NaN }, "NaN", "pack p +NaN";
 is eval { unpack "P3", pack 'P', $NaN }, "NaN", "pack P +NaN";
 
 for my $i (@NaN) {
-    local $^W = 0; # warning-ness tested later.
     cmp_ok($i + 0, '!=', $i + 0, "$i is NaN numerically (by not being NaN)");
     is("@{[$i+0]}", "NaN", "$i value stringifies as NaN");
 }

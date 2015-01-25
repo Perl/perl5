@@ -665,6 +665,9 @@ Perl_grok_infnan(const char** sp, const char* send)
             while (*s == '0') { /* 1.#IND00 */
                 s++;
             }
+            if (*s) {
+                flags |= IS_NUMBER_TRAILING;
+            }
         } else
             return 0;
     }
@@ -686,8 +689,98 @@ Perl_grok_infnan(const char** sp, const char* send)
             /* NaN can be followed by various stuff (NaNQ, NaNS), but
              * there are also multiple different NaN values, and some
              * implementations output the "payload" values,
-             * e.g. NaN123, NAN(abc), while some implementations just
+             * e.g. NaN123, NAN(abc), while some legacy implementations
              * have weird stuff like NaN%. */
+            if (isALPHA_FOLD_EQ(*s, 'q') ||
+                isALPHA_FOLD_EQ(*s, 's')) {
+                /* "nanq" or "nans" are ok, though generating
+                 * these portably is tricky. */
+                s++;
+            }
+            if (*s == '(') {
+                /* C99 style "nan(123)" or Perlish equivalent "nan($uv)". */
+                const char *t;
+                UV nanval;
+                s++;
+                if (s == send) {
+                    return flags | IS_NUMBER_TRAILING;
+                }
+                t = s + 1;
+                while (t < send && *t && *t != ')') {
+                    t++;
+                }
+                if (t == send) {
+                    return flags | IS_NUMBER_TRAILING;
+                }
+                if (*t == ')') {
+                    int nantype =
+                        grok_number_flags(s, t - s, &nanval,
+                                          PERL_SCAN_TRAILING |
+                                          PERL_SCAN_ALLOW_UNDERSCORES);
+                    /* nanval result currently unused */
+                    if ((nantype & IS_NUMBER_NOT_INT) ||
+                        !(nantype && IS_NUMBER_IN_UV)) {
+                        /* Certain configuration combinations where
+                         * NVSIZE is greater than UVSIZE mean that a
+                         * single UV cannot contain all the possible
+                         * NaN payload bits.  There would need to be
+                         * some more generic syntax than "nan($uv)".
+                         * Issues to keep in mind:
+                         * (1) In most common cases there would
+                         * not be an integral number of bytes that
+                         * could be set, only a certain number of bits.
+                         * For example for NVSIZE==UVSIZE there can be
+                         * up to 52 bits in the payload, but one bit is
+                         * commonly reserved for the signal/quiet bit,
+                         * so 51 bits.
+                         * (2) Endianness of the payload bits. If the
+                         * payload is specified as an UV, the low-order
+                         * bits of the UV are naturally little-endianed
+                         * (rightmost) bits of the payload. */
+                        return 0;
+                    }
+                    /* Unfortunately the grok_ interfaces don't tell
+                     * the count of the consumed bytes, so we cannot
+                     * figure out where the scanning left off.
+                     * So we need to duplicate the basics of
+                     * the scan ourselves. */
+                    if (s[0] == '0' && s < t &&
+                        isALPHA_FOLD_EQ(s[1], 'x')) {
+                        const char *u = s + 2;
+                        if (isXDIGIT(*u)) {
+                            while (u < t &&
+                                   (isXDIGIT(*u) || *u == '_')) {
+                                u++;
+                            }
+                        }
+                        s = u;
+                    } else if (isDIGIT(*s) && s < t) {
+                        const char *u = s + 2;
+                        while (u < t &&
+                               (isDIGIT(*u) || *u == '_')) {
+                            u++;
+                        }
+                        s = u;
+                    }
+                    /* XXX 0b... maybe, octal (really?) */
+                    if (s < t) {
+                        flags |= IS_NUMBER_TRAILING;
+                    }
+                } else {
+                    /* Looked like nan(...), but no close paren. */
+                    flags |= IS_NUMBER_TRAILING;
+                }
+            } else if (*s) {
+                /* Note that we here implicitly accept (parse as
+                 * "nan", but with warnings) also any other weird
+                 * trailing stuff for "nan".  In the above we just
+                 * check that if we got the C99-style "nan(...)",
+                 * the "..."  looks sane.
+                 * If in future we accept more ways of specifying
+                 * the nan payload, the accepting would happen around
+                 * here. */
+                flags |= IS_NUMBER_TRAILING;
+            }
             s = send;
         }
         else
