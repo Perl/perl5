@@ -1302,11 +1302,9 @@ elsif ($ARGS{PLATFORM} eq 'netware') {
 my @symbols = $fold ? sort {lc $a cmp lc $b} keys %export : sort keys %export;
 foreach my $symbol (@symbols) {
     if (PLATFORM eq 'win32' || PLATFORM eq 'wince') {
-	#remembering the origin file of each symbol is an alternative to PL_ matching
-	if(substr($symbol, 0, 3) eq 'PL_') {
-	    #PL_utf8_charname_continue @ 25 seems to be the longest symbol
-	    #pick 32 for visual alignment, plus 32 is 8/tab aligned
-	    print "\t$symbol".' 'x(32 - length $symbol )."DATA\n";
+	# Remembering the origin file of each symbol is an alternative to PL_ matching
+	if (substr($symbol, 0, 3) eq 'PL_') {
+	    print "\t$symbol DATA\n";
 	}
 	else {
 	    print "\t$symbol\n";
