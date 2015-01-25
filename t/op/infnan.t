@@ -28,11 +28,11 @@ my $NaN;
 
 my @PInf = ("Inf", "inf", "INF", "+Inf",
             "Infinity", "INFINITE",
-            "1.#INF", "1#INF");
+            "1.#INF", "1#INF", "1.#INF00");
 my @NInf = map { "-$_" } grep { ! /^\+/ } @PInf;
 
 my @NaN = ("NAN", "nan", "qnan", "SNAN", "NanQ", "NANS",
-           "1.#QNAN", "+1#SNAN", "-1.#NAN", "1#IND",
+           "1.#QNAN", "+1#SNAN", "-1.#NAN", "1#IND", "1.#IND00",
            "NaN123", "NAN(123)", "nan%",
            "nanonano"); # RIP, Robin Williams.
 

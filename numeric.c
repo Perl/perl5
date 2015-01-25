@@ -650,13 +650,21 @@ Perl_grok_infnan(const char** sp, const char* send)
                          !(isALPHA_FOLD_EQ(*s, 'Y') ||
                            isALPHA_FOLD_EQ(*s, 'E'))) return 0;
                 s++; if (s < send) return 0;
-            } else if (*s)
-                return 0;
+            } else {
+                while (*s == '0') { /* 1.#INF00 */
+                    s++;
+                }
+                if (*s)
+                    return 0;
+            }
             flags |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;
         }
         else if (isALPHA_FOLD_EQ(*s, 'D') && odh) { /* 1.#IND */
             s++;
             flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
+            while (*s == '0') { /* 1.#IND00 */
+                s++;
+            }
         } else
             return 0;
     }
