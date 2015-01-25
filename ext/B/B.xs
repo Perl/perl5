@@ -2421,7 +2421,7 @@ PadnameFLAGS(pn)
 	/* backward-compatibility hack, which should be removed if the
 	   flags field becomes large enough to hold SVf_FAKE (and
 	   PADNAMEt_OUTER should be renumbered to match SVf_FAKE) */
-	STATIC_ASSERT_STMT(SVf_FAKE >= 1<<(sizeof(PadnameFLAGS(pn)) * 8));
+	STATIC_ASSERT_STMT(SVf_FAKE >= 1<<(sizeof(PadnameFLAGS((B__PADNAME)NULL)) * 8));
 	if (PadnameOUTER(pn))
 	    RETVAL |= SVf_FAKE;
     OUTPUT:
