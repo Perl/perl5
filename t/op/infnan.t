@@ -27,7 +27,6 @@ my $NaN;
 }
 
 my @PInf = ("Inf", "inf", "INF", "+Inf",
-            "Infinity", "INFINITE",
             "1.#INF", "1#INF", "1.#INF00");
 my @NInf = map { "-$_" } grep { ! /^\+/ } @PInf;
 
@@ -245,14 +244,14 @@ TODO: {
 }
 
 SKIP: {
-    my @FInf = qw(Info Infiniti Infinityz);
+    my @FInf = qw(Infinity Infinite Info Inf123 Infiniti Infinityz);
     if ($Config{usequadmath}) {
         skip "quadmath strtoflt128() accepts false infinities", scalar @FInf;
     }
-    # Silence "isn't numeric in addition", that's kind of the point.
-    local $^W = 0;
     for my $i (@FInf) {
-        cmp_ok("$i" + 0, '==', 0, "false infinity $i");
+        # Silence "isn't numeric in addition", that's kind of the point.
+        local $^W = 0;
+        cmp_ok("$i" + 0, '==', $PInf, "false infinity $i");
     }
 }
 
