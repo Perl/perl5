@@ -8,7 +8,7 @@ package Win32;
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.49';
+    $VERSION = '0.51';
     $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
@@ -467,6 +467,15 @@ sub _GetOSName {
 	    else {
 	        $os = "2012";
 	    }
+	    }
+	    elsif ($minor == 3) {
+		if ($producttype == VER_NT_WORKSTATION) {
+		    $os = "8.1";
+		}
+		else {
+		    $os = "2012";
+		    $desc = "R2";
+		}
 	    }
 
         if ($productinfo == PRODUCT_ULTIMATE) {
