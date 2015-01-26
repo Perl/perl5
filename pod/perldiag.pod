@@ -189,6 +189,11 @@ alternatives.
 that expected a numeric value instead.  If you're fortunate the message
 will identify which operator was so unfortunate.
 
+Note that for the C<Inf> and C<NaN> (infinity and not-a-number) the
+definition of "numeric" is somewhat unusual: the strings themselves
+(like "Inf") are considered numeric, and anything following them is
+considered non-numeric.
+
 =item Argument list not closed for PerlIO layer "%s"
 
 (W layer) When pushing a layer with arguments onto the Perl I/O
