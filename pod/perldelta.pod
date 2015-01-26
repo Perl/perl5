@@ -119,6 +119,10 @@ XXX
 
 =item *
 
+L<B> has been upgraded from version 1.55 to 1.56.
+
+=item *
+
 L<Encode> has been upgraded from version 2.67 to 2.68.
 
 Building in C++ mode on Windows now works.
