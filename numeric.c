@@ -598,6 +598,8 @@ or "not a number", and returns one of the following flag combinations:
   IS_NUMBER_NAN | IS_NUMBER_NEG
   0
 
+possibly with IS_NUMBER_TRAILING.
+
 If an infinity or not-a-number is recognized, the *sp will point to
 one past the end of the recognized string.  If the recognition fails,
 zero is returned, and the *sp will not move.
@@ -644,7 +646,9 @@ Perl_grok_infnan(const char** sp, const char* send)
             while (*s == '0') { /* 1.#INF00 */
                 s++;
             }
-            if (*s) {
+            while (s < send && isSPACE(*s))
+                s++;
+            if (s < send && *s) {
                 flags |= IS_NUMBER_TRAILING;
             }
             flags |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;
@@ -760,22 +764,29 @@ Perl_grok_infnan(const char** sp, const char* send)
                     /* Looked like nan(...), but no close paren. */
                     flags |= IS_NUMBER_TRAILING;
                 }
-            } else if (*s) {
-                /* Note that we here implicitly accept (parse as
-                 * "nan", but with warnings) also any other weird
-                 * trailing stuff for "nan".  In the above we just
-                 * check that if we got the C99-style "nan(...)",
-                 * the "..."  looks sane.
-                 * If in future we accept more ways of specifying
-                 * the nan payload, the accepting would happen around
-                 * here. */
-                flags |= IS_NUMBER_TRAILING;
+            } else {
+                while (s < send && isSPACE(*s))
+                    s++;
+                if (s < send && *s) {
+                    /* Note that we here implicitly accept (parse as
+                     * "nan", but with warnings) also any other weird
+                     * trailing stuff for "nan".  In the above we just
+                     * check that if we got the C99-style "nan(...)",
+                     * the "..."  looks sane.
+                     * If in future we accept more ways of specifying
+                     * the nan payload, the accepting would happen around
+                     * here. */
+                    flags |= IS_NUMBER_TRAILING;
+                }
             }
             s = send;
         }
         else
             return 0;
     }
+
+    while (s < send && isSPACE(*s))
+        s++;
 
     *sp = s;
     return flags;

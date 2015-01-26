@@ -461,6 +461,9 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
          [ "1.#INFx",      1, $PInf ],
          [ "1.#INF00",     0, $PInf ],
          [ "1.#INFxy",     1, $PInf ],
+         [ " inf",         0, $PInf ],
+         [ "inf ",         0, $PInf ],
+         [ " inf ",        0, $PInf ],
 
          [ "nan",          0, $NaN ],
          [ "nanxy",        1, $NaN ],
@@ -483,10 +486,13 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
          [ "1.#IND",       0, $NaN ],
          [ "1.#IND00",     0, $NaN ],
          [ "1.#INDxy",     1, $NaN ],
+         [ " nan",         0, $NaN ],
+         [ "nan ",         0, $NaN ],
+         [ " nan ",        0, $NaN ],
         ];
 
     for my $t (@$T) {
-        print "# $t->[0] compile time\n";
+        print "# '$t->[0]' compile time\n";
         my $a;
         $w = '';
         eval '$a = "'.$t->[0].'" + 1';
@@ -497,7 +503,7 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
         } else {
             is($w, "", "no warning expected");
         }
-        print "# $t->[0] runtime\n";
+        print "# '$t->[0]' runtime\n";
         my $n = $t->[0];
         my $b;
         $w = '';
