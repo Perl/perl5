@@ -2,6 +2,10 @@
 
 perlfaq4 - Data Manipulation
 
+=head1 VERSION
+
+version 5.021009
+
 =head1 DESCRIPTION
 
 This section of the FAQ answers questions related to manipulating

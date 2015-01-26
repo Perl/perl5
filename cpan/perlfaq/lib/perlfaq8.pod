@@ -2,6 +2,10 @@
 
 perlfaq8 - System Interaction
 
+=head1 VERSION
+
+version 5.021009
+
 =head1 DESCRIPTION
 
 This section of the Perl FAQ covers questions involving operating

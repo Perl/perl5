@@ -2,6 +2,10 @@
 
 perlfaq1 - General Questions About Perl
 
+=head1 VERSION
+
+version 5.021009
+
 =head1 DESCRIPTION
 
 This section of the FAQ answers very general, high-level questions

@@ -2,6 +2,10 @@
 
 perlfaq7 - General Perl Language Issues
 
+=head1 VERSION
+
+version 5.021009
+
 =head1 DESCRIPTION
 
 This section deals with general Perl language issues that don't

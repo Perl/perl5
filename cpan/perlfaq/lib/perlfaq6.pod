@@ -2,6 +2,10 @@
 
 perlfaq6 - Regular Expressions
 
+=head1 VERSION
+
+version 5.021009
+
 =head1 DESCRIPTION
 
 This section is surprisingly small because the rest of the FAQ is
