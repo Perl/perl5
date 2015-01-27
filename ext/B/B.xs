@@ -1359,7 +1359,7 @@ string(o, cv)
     PPCODE:
         switch (o->op_type) {
         case OP_MULTIDEREF:
-            ret = unop_aux_stringify(o, cv);
+            ret = multideref_stringify(o, cv);
             break;
         default:
             ret = sv_2mortal(newSVpvn("", 0));

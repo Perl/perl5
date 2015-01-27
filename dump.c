@@ -2327,11 +2327,11 @@ S_append_gv_name(pTHX_ GV *gv, SV *out)
 
 
 /* return a temporary SV containing a stringified representation of
- * the op_aux field of a UNOP_AUX op, associated with CV cv
+ * the op_aux field of a MULTIDEREF op, associated with CV cv
  */
 
 SV*
-Perl_unop_aux_stringify(pTHX_ const OP *o, CV *cv)
+Perl_multideref_stringify(pTHX_ const OP *o, CV *cv)
 {
     UNOP_AUX_item *items = cUNOP_AUXo->op_aux;
     UV actions = items->uv;
@@ -2345,7 +2345,7 @@ Perl_unop_aux_stringify(pTHX_ const OP *o, CV *cv)
     PAD *comppad = PadlistARRAY(padlist)[1];
 #endif
 
-    PERL_ARGS_ASSERT_UNOP_AUX_STRINGIFY;
+    PERL_ARGS_ASSERT_MULTIDEREF_STRINGIFY;
 
     while (!last) {
         switch (actions & MDEREF_ACTION_MASK) {
@@ -2498,7 +2498,7 @@ Perl_debop(pTHX_ const OP *o)
 
     case OP_MULTIDEREF:
         PerlIO_printf(Perl_debug_log, "(%-p)",
-            unop_aux_stringify(o, deb_curcv(cxstack_ix)));
+            multideref_stringify(o, deb_curcv(cxstack_ix)));
         break;
 
     default:
