@@ -606,8 +606,18 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
         s++; if (s == send) return 0;
         if (isALPHA_FOLD_EQ(*s, 'F')) {
             s++;
-            while (*s == '0') { /* 1.#INF00 */
+            if (s < send && (isALPHA_FOLD_EQ(*s, 'I'))) {
+                int fail =
+                    flags | IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING;
+                s++; if (s == send || isALPHA_FOLD_NE(*s, 'N')) return fail;
+                s++; if (s == send || isALPHA_FOLD_NE(*s, 'I')) return fail;
+                s++; if (s == send || isALPHA_FOLD_NE(*s, 'T')) return fail;
+                s++; if (s == send || isALPHA_FOLD_NE(*s, 'Y')) return fail;
                 s++;
+            } else if (odh) {
+                while (*s == '0') { /* 1.#INF00 */
+                    s++;
+                }
             }
             while (s < send && isSPACE(*s))
                 s++;

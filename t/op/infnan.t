@@ -27,6 +27,7 @@ my $NaN;
 }
 
 my @PInf = ("Inf", "inf", "INF", "+Inf",
+            "Infinity",
             "1.#INF", "1#INF", "1.#INF00");
 my @NInf = map { "-$_" } grep { ! /^\+/ } @PInf;
 
@@ -244,7 +245,7 @@ TODO: {
 }
 
 SKIP: {
-    my @FInf = qw(Infinity Infinite Info Inf123 Infiniti Infinityz);
+    my @FInf = qw(Infinite Info Inf123 Infiniti Infinityz);
     if ($Config{usequadmath}) {
         skip "quadmath strtoflt128() accepts false infinities", scalar @FInf;
     }
@@ -455,6 +456,7 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
     my $T =
         [
          [ "inf",          0, $PInf ],
+         [ "infinity",     0, $PInf ],
          [ "infxy",        1, $PInf ],
          [ "inf34",        1, $PInf ],
          [ "1.#INF",       0, $PInf ],
