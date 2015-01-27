@@ -1936,6 +1936,7 @@ Perl_looks_like_number(pTHX_ SV *const sv)
 {
     const char *sbegin;
     STRLEN len;
+    int numtype;
 
     PERL_ARGS_ASSERT_LOOKS_LIKE_NUMBER;
 
@@ -1944,7 +1945,8 @@ Perl_looks_like_number(pTHX_ SV *const sv)
     }
     else
 	return SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
-    return grok_number(sbegin, len, NULL);
+    numtype = grok_number(sbegin, len, NULL);
+    return ((numtype & IS_NUMBER_TRAILING)) ? 0 : numtype;
 }
 
 STATIC bool
