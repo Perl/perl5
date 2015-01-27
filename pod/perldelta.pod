@@ -127,6 +127,13 @@ L<Encode> has been upgraded from version 2.67 to 2.68.
 
 Building in C++ mode on Windows now works.
 
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.21 to 0.22.
+
+Attemptting to write at file positions impossible for the platform now
+fail early rather than wrapping at 4GB.
+
 =back
 
 =head2 Removed Modules and Pragmata
