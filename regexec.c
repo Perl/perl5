@@ -1713,7 +1713,7 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
           FBC_UTF8(TEST_UV, TEST_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER),          \
           TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
 
-#define FBC_BOUND_A(TEST_NON_UTF8, TEST_UV, TEST_UTF8)                         \
+#define FBC_BOUND_A(TEST_NON_UTF8)                                             \
     FBC_BOUND_COMMON(                                                          \
             FBC_UTF8_A(TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER),           \
             TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
@@ -1723,7 +1723,7 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
           FBC_UTF8(TEST_UV, TEST_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT),          \
           TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
 
-#define FBC_NBOUND_A(TEST_NON_UTF8, TEST_UV, TEST_UTF8)                        \
+#define FBC_NBOUND_A(TEST_NON_UTF8)                                            \
     FBC_BOUND_COMMON(                                                          \
             FBC_UTF8_A(TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT),           \
             TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
@@ -1947,13 +1947,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         FBC_BOUND(isWORDCHAR, isWORDCHAR_uni, isWORDCHAR_utf8);
         break;
     case BOUNDA:
-        FBC_BOUND_A(isWORDCHAR_A, isWORDCHAR_A, isWORDCHAR_A);
+        FBC_BOUND_A(isWORDCHAR_A);
         break;
     case NBOUND:
         FBC_NBOUND(isWORDCHAR, isWORDCHAR_uni, isWORDCHAR_utf8);
         break;
     case NBOUNDA:
-        FBC_NBOUND_A(isWORDCHAR_A, isWORDCHAR_A, isWORDCHAR_A);
+        FBC_NBOUND_A(isWORDCHAR_A);
         break;
     case BOUNDU:
         FBC_BOUND(isWORDCHAR_L1, isWORDCHAR_uni, isWORDCHAR_utf8);
