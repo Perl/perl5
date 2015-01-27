@@ -1291,6 +1291,9 @@ use File::Glob qw(:case);
             qr{^ex/},
             't/pod.t',
         ],
+        # Already merged upstream:
+        # https://github.com/chorny/Win32API-File/commit/1657e97900
+        'CUSTOMIZED'   => [qw(File.pm File.xs)],
     },
 
     'XSLoader' => {

@@ -13,6 +13,8 @@ Text::Balanced cpan/Text-Balanced/t/08_extvar.t 0776ef2cbdad5b1fbefb300541d07921
 Text::Balanced cpan/Text-Balanced/t/09_gentag.t 42361b5dfb3bb728bce20f4fb0d92ccfb27c2ba7
 Text::ParseWords cpan/Text-ParseWords/t/ParseWords.t 9bae51c9b944cd5c0bbabe9d397e573976a2be8e
 Text::ParseWords cpan/Text-ParseWords/t/taint.t 3cff0dae812801f7aa1738d6070508f2c5bcc2e5
+Win32API::File cpan/Win32API-File/File.pm 91709e8f13b262807816e727e678c9e322bf6d41
+Win32API::File cpan/Win32API-File/File.xs 772b60e157d8d617715b93775e868686554a5a69
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
 podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d025d69
 threads dist/threads/lib/threads.pm e1b210ff6d66a0e1d43aa8f040954fc811e3d250
