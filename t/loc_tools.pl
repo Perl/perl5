@@ -227,6 +227,9 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
     # On z/OS, even locales marked as UTF-8 aren't.
     return 0 if ord "A" != 65;
 
+    eval { require POSIX; import POSIX 'locale_h'; };
+    return 0 if ! defined &POSIX::LC_CTYPE;
+
     my $locale = shift;
 
     use locale;
@@ -272,8 +275,11 @@ sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
                                   # tries all locales it can find on the
                                   # platform
     my $locales_ref = shift;
-    return if !defined &POSIX::LC_CTYPE;
+
     if (! defined $locales_ref) {
+        eval { require POSIX; import POSIX 'locale_h'; };
+        return if ! defined &POSIX::LC_CTYPE;
+
         my @locales = find_locales(&POSIX::LC_CTYPE(),
                                    1 # Reject iffy locales.
                                   );
