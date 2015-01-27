@@ -548,45 +548,6 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 }
 
 /*
-=for apidoc grok_number_flags
-
-Recognise (or not) a number.  The type of the number is returned
-(0 if unrecognised), otherwise it is a bit-ORed combination of
-IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
-IS_NUMBER_NEG, IS_NUMBER_INFINITY, IS_NUMBER_NAN (defined in perl.h).
-
-If the value of the number can fit in a UV, it is returned in the *valuep
-IS_NUMBER_IN_UV will be set to indicate that *valuep is valid, IS_NUMBER_IN_UV
-will never be set unless *valuep is valid, but *valuep may have been assigned
-to during processing even though IS_NUMBER_IN_UV is not set on return.
-If valuep is NULL, IS_NUMBER_IN_UV will be set for the same cases as when
-valuep is non-NULL, but no actual assignment (or SEGV) will occur.
-
-IS_NUMBER_NOT_INT will be set with IS_NUMBER_IN_UV if trailing decimals were
-seen (in which case *valuep gives the true value truncated to an integer), and
-IS_NUMBER_NEG if the number is negative (in which case *valuep holds the
-absolute value).  IS_NUMBER_IN_UV is not set if e notation was used or the
-number is larger than a UV.
-
-C<flags> allows only C<PERL_SCAN_TRAILING>, which allows for trailing
-non-numeric text on an otherwise successful I<grok>, setting
-C<IS_NUMBER_TRAILING> on the result.
-
-=for apidoc grok_number
-
-Identical to grok_number_flags() with flags set to zero.
-
-=cut
- */
-int
-Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
-{
-    PERL_ARGS_ASSERT_GROK_NUMBER;
-
-    return grok_number_flags(pv, len, valuep, 0);
-}
-
-/*
 =for apidoc grok_infnan
 
 Helper for grok_number(), accepts various ways of spelling "infinity"
@@ -790,6 +751,45 @@ Perl_grok_infnan(const char** sp, const char* send)
 
     *sp = s;
     return flags;
+}
+
+/*
+=for apidoc grok_number_flags
+
+Recognise (or not) a number.  The type of the number is returned
+(0 if unrecognised), otherwise it is a bit-ORed combination of
+IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
+IS_NUMBER_NEG, IS_NUMBER_INFINITY, IS_NUMBER_NAN (defined in perl.h).
+
+If the value of the number can fit in a UV, it is returned in the *valuep
+IS_NUMBER_IN_UV will be set to indicate that *valuep is valid, IS_NUMBER_IN_UV
+will never be set unless *valuep is valid, but *valuep may have been assigned
+to during processing even though IS_NUMBER_IN_UV is not set on return.
+If valuep is NULL, IS_NUMBER_IN_UV will be set for the same cases as when
+valuep is non-NULL, but no actual assignment (or SEGV) will occur.
+
+IS_NUMBER_NOT_INT will be set with IS_NUMBER_IN_UV if trailing decimals were
+seen (in which case *valuep gives the true value truncated to an integer), and
+IS_NUMBER_NEG if the number is negative (in which case *valuep holds the
+absolute value).  IS_NUMBER_IN_UV is not set if e notation was used or the
+number is larger than a UV.
+
+C<flags> allows only C<PERL_SCAN_TRAILING>, which allows for trailing
+non-numeric text on an otherwise successful I<grok>, setting
+C<IS_NUMBER_TRAILING> on the result.
+
+=for apidoc grok_number
+
+Identical to grok_number_flags() with flags set to zero.
+
+=cut
+ */
+int
+Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
+{
+    PERL_ARGS_ASSERT_GROK_NUMBER;
+
+    return grok_number_flags(pv, len, valuep, 0);
 }
 
 static const UV uv_max_div_10 = UV_MAX / 10;
