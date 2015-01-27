@@ -569,7 +569,7 @@ zero is returned, and the *sp will not move.
 */
 
 int
-Perl_grok_infnan(const char** sp, const char* send)
+Perl_grok_infnan(pTHX_ const char** sp, const char* send)
 {
     const char* s = *sp;
     int flags = 0;
@@ -986,7 +986,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
   if ((s + 2 < send) && strchr("inqs#", toFOLD(*s))) {
       /* Really detect inf/nan. Start at d, not s, since the above
        * code might have already consumed the "1." or "1". */
-      int infnan = Perl_grok_infnan(&d, send);
+      int infnan = Perl_grok_infnan(aTHX_ &d, send);
       if ((infnan & IS_NUMBER_INFINITY)) {
           return (numtype | infnan); /* Keep sign for infinity. */
       }
@@ -1229,7 +1229,7 @@ Perl_my_atof(pTHX_ const char* s)
 }
 
 static char*
-S_my_atof_infnan(const char* s, bool negative, const char* send, NV* value)
+S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value)
 {
     const char *p0 = negative ? s - 1 : s;
     const char *p = p0;
@@ -1384,7 +1384,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 
     {
         const char* endp;
-        if ((endp = S_my_atof_infnan(s, negative, send, value)))
+        if ((endp = S_my_atof_infnan(aTHX_ s, negative, send, value)))
             return (char*)endp;
     }
 
