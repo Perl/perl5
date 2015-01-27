@@ -4,7 +4,7 @@ use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
 
-our $VERSION = '0.053';
+our $VERSION = '0.054';
 
 use Carp ();
 
@@ -1228,7 +1228,7 @@ sub write_content_body {
     }
 
     $len == $content_length
-      or die(qq/Content-Length missmatch (got: $len expected: $content_length)\n/);
+      or die(qq/Content-Length mismatch (got: $len expected: $content_length)\n/);
 
     return $len;
 }
@@ -1395,11 +1395,16 @@ sub _find_CA_file {
     return Mozilla::CA::SSL_ca_file()
         if eval { require Mozilla::CA };
 
-    foreach my $ca_bundle (qw{
-        /etc/ssl/certs/ca-certificates.crt
-        /etc/pki/tls/certs/ca-bundle.crt
-        /etc/ssl/ca-bundle.pem
-        }
+    # cert list copied from golang src/crypto/x509/root_unix.go
+    foreach my $ca_bundle (
+        "/etc/ssl/certs/ca-certificates.crt",     # Debian/Ubuntu/Gentoo etc.
+        "/etc/pki/tls/certs/ca-bundle.crt",       # Fedora/RHEL
+        "/etc/ssl/ca-bundle.pem",                 # OpenSUSE
+        "/etc/openssl/certs/ca-certificates.crt", # NetBSD
+        "/etc/ssl/cert.pem",                      # OpenBSD
+        "/usr/local/share/certs/ca-root-nss.crt", # FreeBSD/DragonFly
+        "/etc/pki/tls/cacert.pem",                # OpenELEC
+        "/etc/certs/ca-certificates.crt",         # Solaris 11.2+
     ) {
         return $ca_bundle if -e $ca_bundle;
     }
@@ -1458,7 +1463,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.053
+version 0.054
 
 =head1 SYNOPSIS
 
@@ -2028,7 +2033,7 @@ David Golden <dagolden@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Alan Gardner Alessandro Ghedini Brad Gilbert Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry David Mitchell Dean Pearce Edward Zborowski James Raspass Jess Robinson Lukas Eklund Martin J. Evans Martin-Louis Bright Mike Doherty Petr Písař Serguei Trouchelle Sören Kornetzki Syohei YOSHIDA Tom Hukins Tony Cook
+=for stopwords Alan Gardner Alessandro Ghedini Brad Gilbert Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry David Mitchell Dean Pearce Edward Zborowski James Raspass Jess Robinson Lukas Eklund Martin J. Evans Martin-Louis Bright Mike Doherty Olaf Alders Petr Písař Serguei Trouchelle Sören Kornetzki Syohei YOSHIDA Tom Hukins Tony Cook
 
 =over 4
 
@@ -2102,6 +2107,10 @@ Mike Doherty <doherty@cpan.org>
 
 =item *
 
+Olaf Alders <olaf@wundersolutions.com>
+
+=item *
+
 Petr Písař <ppisar@redhat.com>
 
 =item *
@@ -2128,7 +2137,7 @@ Tony Cook <tony@develop-help.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2014 by Christian Hansen.
+This software is copyright (c) 2015 by Christian Hansen.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
