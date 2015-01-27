@@ -559,10 +559,10 @@ or "not a number", and returns one of the following flag combinations:
   IS_NUMBER_NAN | IS_NUMBER_NEG
   0
 
-possibly with IS_NUMBER_TRAILING.
+possibly |-ed with IS_NUMBER_TRAILING.
 
-If an infinity or not-a-number is recognized, the *sp will point to
-one past the end of the recognized string.  If the recognition fails,
+If an infinity or a not-a-number is recognized, the *sp will point to
+one byte past the end of the recognized string.  If the recognition fails,
 zero is returned, and the *sp will not move.
 
 =cut
@@ -573,7 +573,7 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
 {
     const char* s = *sp;
     int flags = 0;
-    bool odh = FALSE; /* one dot hash: 1.#INF */
+    bool odh = FALSE; /* one-dot-hash: 1.#INF */
 
     PERL_ARGS_ASSERT_GROK_INFNAN;
 
@@ -586,7 +586,8 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
     }
 
     if (*s == '1') {
-        /* Visual C: 1.#SNAN, -1.#QNAN, 1#INF, 1#.IND (maybe also 1.#NAN) */
+        /* Visual C: 1.#SNAN, -1.#QNAN, 1#INF, 1.#IND (maybe also 1.#NAN)
+         * Let's keep the dot optional. */
         s++; if (s == send) return 0;
         if (*s == '.') {
             s++; if (s == send) return 0;
@@ -599,7 +600,8 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
     }
 
     if (isALPHA_FOLD_EQ(*s, 'I')) {
-        /* INF or IND (1.#IND is indeterminate, a certain type of NAN) */
+        /* INF or IND (1.#IND is "indeterminate", a certain type of NAN) */
+
         s++; if (s == send || isALPHA_FOLD_NE(*s, 'N')) return 0;
         s++; if (s == send) return 0;
         if (isALPHA_FOLD_EQ(*s, 'F')) {
@@ -627,7 +629,8 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
             return 0;
     }
     else {
-        /* NAN */
+        /* Maybe NAN of some sort */
+
         if (isALPHA_FOLD_EQ(*s, 'S') || isALPHA_FOLD_EQ(*s, 'Q')) {
             /* snan, qNaN */
             /* XXX do something with the snan/qnan difference */
