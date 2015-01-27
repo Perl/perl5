@@ -325,9 +325,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Perl can now be built in C++ mode on Windows by setting the makefile macro
+C<USE_CPLUSPLUS> to the value "define".
 
 =back
 
