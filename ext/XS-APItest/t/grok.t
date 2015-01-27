@@ -93,14 +93,14 @@ my @groks =
    [ "Inf",  0,                  undef,
      IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT ],
    [ "In",   0,                  undef, 0 ],
-   [ "Infin",0,                  undef, 0 ],
+   [ "Infin",0,                  undef, IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
    # this doesn't work and hasn't been needed yet
    #[ "Infin",PERL_SCAN_TRAILING, undef,
    #  IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
    [ "nan",  0,                  undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT ],
    # even without PERL_SCAN_TRAILING nan can have weird stuff trailing
-   [ "nanx", 0,                  undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT ],
-   [ "nanx", PERL_SCAN_TRAILING, undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT ],
+   [ "nanx", 0,                  undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
+   [ "nanx", PERL_SCAN_TRAILING, undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
   );
 
 for my $grok (@groks) {
