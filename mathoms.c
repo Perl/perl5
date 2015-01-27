@@ -1019,8 +1019,6 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
 				NULL, 0));
 }
 
-/* Functions after here were made mathoms post 5.10.0 but pre 5.8.9 */
-
 AV *
 Perl_newAV(pTHX)
 {
