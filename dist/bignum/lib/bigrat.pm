@@ -1,7 +1,7 @@
 package bigrat;
 use 5.006;
 
-$VERSION = '0.37';
+$VERSION = '0.39';
 require Exporter;
 @ISA		= qw( bigint );
 @EXPORT_OK 	= qw( PI e bpi bexp hex oct );
@@ -476,6 +476,29 @@ This prints out the name and version of all modules used and then exits.
 =head1 CAVEATS
 
 =over 2
+
+=item Operator vs literal overloading
+
+C<bigrat> works by overloading handling of integer and floating point
+literals, converting them to L<Math::BigInt> or L<Math::BigRat>
+objects.
+
+This means that arithmetic involving only string values or string
+literals will be performed using Perl's built-in operators.
+
+For example:
+
+    use bigrat;
+    my $x = "900000000000000009";
+    my $y = "900000000000000007";
+    print $x - $y;
+
+will output C<0> on default 32-bit builds, since C<bigrat> never sees
+the string literals.  To ensure the expression is all treated as
+C<Math::BigInt> or C<Math::BigRat> objects, use a literal number in
+the expression:
+
+    print +(0+$x) - $y;
 
 =item in_effect()
 
