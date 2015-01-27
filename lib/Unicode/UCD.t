@@ -698,7 +698,7 @@ foreach my $alias (keys %utf8::stricter_to_file_of) {
     }
 }
 
-use Unicode::UCD qw(prop_value_aliases);
+use Unicode::UCD qw(prop_values prop_value_aliases);
 
 is(prop_value_aliases("unknown property", "unknown value"), undef,
     "prop_value_aliases(<unknown property>, <unknown value>) returns <undef>");
@@ -720,6 +720,12 @@ skip "PropValueAliases.txt is not in this Unicode version", 1 if $v_unicode_vers
 open my $propvalues, "<", "../lib/unicore/PropValueAliases.txt"
      or die "Can't open Unicode PropValueAliases.txt";
 local $/ = "\n";
+
+# Each examined line in the file is for a single value for a property.  We
+# accumulate all the values for each property using these two variables.
+my $prev_prop = "";
+my @this_prop_values;
+
 while (<$propvalues>) {
     s/\s*#.*//;           # Remove comments
     next if /^\s* $/x;    # Ignore empty and comment lines
@@ -731,6 +737,27 @@ while (<$propvalues>) {
 
     my @fields = split /\s*;\s*/; # Fields are separated by semi-colons
     my $prop = shift @fields;   # 0th field is the property,
+
+    # When changing properties, we examine the accumulated values for the old
+    # one to see if our function that returns them matches.
+    if ($prev_prop ne $prop) {
+        if ($prev_prop ne "") { # Skip for the first time through
+            my @ucd_function_values = prop_values($prev_prop);
+            @ucd_function_values = () unless @ucd_function_values;
+
+            # This perl extension doesn't appear in the official file
+            push @this_prop_values, "Non_Canon" if $prev_prop eq 'dt';
+
+            my @file_values = undef;
+            @file_values = sort { lc($a =~ s/_//gr) cmp lc($b =~ s/_//gr) }
+                                   @this_prop_values if @this_prop_values;
+            is_deeply(\@ucd_function_values, \@file_values,
+              "prop_values('$prev_prop') returns correct list of values");
+        }
+        $prev_prop = $prop;
+        undef @this_prop_values;
+    }
+
     my $count = 0;  # 0th field in line (after shifting off the property) is
                     # short name; 1th is long name
     my $short_name;
@@ -765,6 +792,7 @@ while (<$propvalues>) {
     my $loose_prop = &utf8::_loose_name(lc $prop);
     my $suppressed = grep { $_ eq $loose_prop }
                           @Unicode::UCD::suppressed_properties;
+    push @this_prop_values, $fields[0] unless $suppressed;
     foreach my $value (@fields) {
         if ($suppressed) {
             is(prop_value_aliases($prop, $value), undef, "prop_value_aliases('$prop', '$value') returns undef for suppressed property $prop");

@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.60';
+our $VERSION = '0.61';
 
 require Exporter;
 
@@ -22,6 +22,7 @@ our @EXPORT_OK = qw(charinfo
                     num
                     prop_aliases
                     prop_value_aliases
+                    prop_values
                     prop_invlist
                     prop_invmap
                     search_invlist
@@ -75,6 +76,9 @@ Unicode::UCD - Unicode character database
 
     use Unicode::UCD 'prop_value_aliases';
     my @gc_punct_names = prop_value_aliases("Gc", "Punct");
+
+    use Unicode::UCD 'prop_values';
+    my @all_EA_short_names = prop_values("East_Asian_Width");
 
     use Unicode::UCD 'prop_invlist';
     my @puncts = prop_invlist("gc=punctuation");
@@ -798,6 +802,9 @@ names>).
 L<prop_invmap("block")|/prop_invmap()> can be used to get this same data in a
 different type of data structure.
 
+L<prop_values("Block")|/prop_values()> can be used to get all
+the known new-style block names as a list, without the code point ranges.
+
 See also L</Blocks versus Scripts>.
 
 =cut
@@ -819,6 +826,9 @@ the values.
 
 L<prop_invmap("script")|/prop_invmap()> can be used to get this same data in a
 different type of data structure.
+
+L<C<prop_values("Script")>|/prop_values()> can be used to get all
+the known script names as a list, without the code point ranges.
 
 See also L</Blocks versus Scripts>.
 
@@ -903,8 +913,9 @@ from the long names to the short names.  The general category is the
 one returned from
 L</charinfo()> under the C<category> key.
 
-The L</prop_value_aliases()> function can be used to get all the synonyms of
-the category name.
+The L</prop_values()> and L</prop_value_aliases()> functions can be used as an
+alternative to this function; the first returning a simple list of the short
+category names; and the second gets all the synonyms of a given category name.
 
 =cut
 
@@ -948,8 +959,10 @@ the Unicode TR9 is recommended reading:
 L<http://www.unicode.org/reports/tr9/>
 (as of Unicode 5.0.0)
 
-The L</prop_value_aliases()> function can be used to get all the synonyms of
-the bidi type name.
+The L</prop_values()> and L</prop_value_aliases()> functions can be used as an
+alternative to this function; the first returning a simple list of the short
+bidi type names; and the second gets all the synonyms of a given bidi type
+name.
 
 =cut
 
@@ -1960,6 +1973,79 @@ sub prop_aliases ($) {
 
 =pod
 
+=head2 B<prop_values()>
+
+    use Unicode::UCD 'prop_values';
+
+    print "AHex values are: ", join(", ", prop_values("AHex")),
+                               "\n";
+  prints:
+    AHex values are: N, Y
+
+Some Unicode properties have a restricted set of legal values.  For example,
+all binary properties are restricted to just C<true> or C<false>; and there
+are only a few dozen possible General Categories.  Use C<prop_values>
+to find out if a given property is one such, and if so, to get a list of the
+values:
+
+    print join ", ", prop_values("NFC_Quick_Check");
+  prints:
+    M, N, Y
+
+If the property doesn't have such a restricted set, C<undef> is returned.
+
+There are usually several synonyms for each possible value.  Use
+L</prop_value_aliases()> to access those.
+
+Case, white space, hyphens, and underscores are ignored in the input property
+name (except for the trailing underscore in the old-form grandfathered-in
+general category property value C<"L_">, which is better written as C<"LC">).
+
+If the property name is unknown, C<undef> is returned.  Note that Perl typically
+recognizes property names in regular expressions with an optional C<"Is_>"
+(with or without the underscore) prefixed to them, such as C<\p{isgc=punct}>.
+This function does not recognize those in the property parameter, returning
+C<undef>.
+
+For the block property, new-style block names are returned (see
+L</Old-style versus new-style block names>).
+
+C<prop_values> does not know about any user-defined properties, and
+will return C<undef> if called with one of those.
+
+=cut
+
+# These are created by mktables for this module and stored in unicore/UCD.pl
+# where their structures are described.
+our %loose_to_standard_value;
+our %prop_value_aliases;
+
+sub prop_values ($) {
+    my $prop = shift;
+    return undef unless defined $prop;
+
+    require "unicore/UCD.pl";
+    require "utf8_heavy.pl";
+
+    # Find the property name synonym that's used as the key in other hashes,
+    # which is element 0 in the returned list.
+    ($prop) = prop_aliases($prop);
+    return undef if ! $prop;
+    $prop = utf8::_loose_name(lc $prop);
+
+    # Here is a legal property.
+    return undef unless exists $prop_value_aliases{$prop};
+    my @return;
+    foreach my $value_key (sort { lc $a cmp lc $b }
+                            keys %{$prop_value_aliases{$prop}})
+    {
+        push @return, $prop_value_aliases{$prop}{$value_key}[0];
+    }
+    return @return;
+}
+
+=pod
+
 =head2 B<prop_value_aliases()>
 
     use Unicode::UCD 'prop_value_aliases';
@@ -1973,7 +2059,7 @@ sub prop_aliases ($) {
     print "The short name is $short_name\n";
     print "The other aliases are: ", join(", ", @other_names), "\n";
 
-    prints:
+  prints:
     The full name is Punctuation
     The short name is P
     The other aliases are: Punct
@@ -1982,18 +2068,20 @@ Some Unicode properties have a restricted set of legal values.  For example,
 all binary properties are restricted to just C<true> or C<false>; and there
 are only a few dozen possible General Categories.
 
-For such properties, there are usually several synonyms for each possible
-value.  For example, in binary properties, I<truth> can be represented by any of
-the strings "Y", "Yes", "T", or "True"; and the General Category
-"Punctuation" by that string, or "Punct", or simply "P".
+You can use L</prop_values()> to find out if a given property is one which has
+a restricted set of values, and if so, what those values are.  But usually
+each value actually has several synonyms.  For example, in binary properties,
+I<truth> can be represented by any of the strings "Y", "Yes", "T", or "True";
+and the General Category "Punctuation" by that string, or "Punct", or simply
+"P".
 
 Like property names, there is typically at least a short name for each such
-property-value, and a long name.  If you know any name of the property-value,
-you can use C<prop_value_aliases>() to get the long name (when called in
-scalar context), or a list of all the names, with the short name in the 0th
-element, the long name in the next element, and any other synonyms in the
-remaining elements, in no particular order, except that any all-numeric
-synonyms will be last.
+property-value, and a long name.  If you know any name of the property-value
+(which you can get by L</prop_values()>, you can use C<prop_value_aliases>()
+to get the long name (when called in scalar context), or a list of all the
+names, with the short name in the 0th element, the long name in the next
+element, and any other synonyms in the remaining elements, in no particular
+order, except that any all-numeric synonyms will be last.
 
 The long name is returned in a form nicely capitalized, suitable for printing.
 
@@ -2021,11 +2109,6 @@ C<prop_value_aliases> does not know about any user-defined properties, and
 will return C<undef> if called with one of those.
 
 =cut
-
-# These are created by mktables for this routine and stored in unicore/UCD.pl
-# where their structures are described.
-our %loose_to_standard_value;
-our %prop_value_aliases;
 
 sub prop_value_aliases ($$) {
     my ($prop, $value) = @_;

@@ -169,6 +169,12 @@ L<POSIX> has been upgraded from version 1.49 to 1.50.
 
 L<Benchmark> has been upgraded from version 1.19 to 1.20.
 
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.60 to 0.61.
+A new function L<property_values()|Unicode::UCD/prop_values()>
+has been added to return a given property's possible values.
+
 =back
 
 =head2 Removed Modules and Pragmata
