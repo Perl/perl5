@@ -655,7 +655,6 @@ Perl_grok_infnan(const char** sp, const char* send)
             if (*s == '(') {
                 /* C99 style "nan(123)" or Perlish equivalent "nan($uv)". */
                 const char *t;
-                UV nanval;
                 s++;
                 if (s == send) {
                     return flags | IS_NUMBER_TRAILING;
@@ -668,11 +667,53 @@ Perl_grok_infnan(const char** sp, const char* send)
                     return flags | IS_NUMBER_TRAILING;
                 }
                 if (*t == ')') {
-                    int nantype =
-                        grok_number_flags(s, t - s, &nanval,
-                                          PERL_SCAN_TRAILING |
-                                          PERL_SCAN_ALLOW_UNDERSCORES);
-                    /* nanval result currently unused */
+                    int nantype;
+                    UV nanval;
+                    if (s[0] == '0' && s + 2 < t &&
+                        isALPHA_FOLD_EQ(s[1], 'x') &&
+                        isXDIGIT(s[2])) {
+                        STRLEN len = t - s;
+                        I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
+                        nanval = grok_hex(s, &len, &flags, NULL);
+                        if ((flags & PERL_SCAN_GREATER_THAN_UV_MAX)) {
+                            nantype = 0;
+                        } else {
+                            nantype = IS_NUMBER_IN_UV;
+                        }
+                        s += len;
+                    } else if (s[0] == '0' && s + 2 < t &&
+                               isALPHA_FOLD_EQ(s[1], 'b') &&
+                               (s[2] == '0' || s[2] == '1')) {
+                        STRLEN len = t - s;
+                        I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
+                        nanval = grok_bin(s, &len, &flags, NULL);
+                        if ((flags & PERL_SCAN_GREATER_THAN_UV_MAX)) {
+                            nantype = 0;
+                        } else {
+                            nantype = IS_NUMBER_IN_UV;
+                        }
+                        s += len;
+                    } else {
+                        const char *u;
+                        nantype =
+                            grok_number_flags(s, t - s, &nanval,
+                                              PERL_SCAN_TRAILING |
+                                              PERL_SCAN_ALLOW_UNDERSCORES);
+                        /* Unfortunately grok_number_flags() doesn't
+                         * tell how far we got and the ')' will always
+                         * be "trailing", so we need to double-check
+                         * whether we had something dubious. */
+                        for (u = s; u < t; u++) {
+                            if (!isDIGIT(*u)) {
+                                flags |= IS_NUMBER_TRAILING;
+                                break;
+                            }
+                        }
+                        s = u;
+                    }
+
+                    /* "What about octal?" Really? */
+
                     if ((nantype & IS_NUMBER_NOT_INT) ||
                         !(nantype && IS_NUMBER_IN_UV)) {
                         /* Certain configuration combinations where
@@ -694,30 +735,6 @@ Perl_grok_infnan(const char** sp, const char* send)
                          * (rightmost) bits of the payload. */
                         return 0;
                     }
-                    /* Unfortunately the grok_ interfaces don't tell
-                     * the count of the consumed bytes, so we cannot
-                     * figure out where the scanning left off.
-                     * So we need to duplicate the basics of
-                     * the scan ourselves. */
-                    if (s[0] == '0' && s < t &&
-                        isALPHA_FOLD_EQ(s[1], 'x')) {
-                        const char *u = s + 2;
-                        if (isXDIGIT(*u)) {
-                            while (u < t &&
-                                   (isXDIGIT(*u) || *u == '_')) {
-                                u++;
-                            }
-                        }
-                        s = u;
-                    } else if (isDIGIT(*s) && s < t) {
-                        const char *u = s + 2;
-                        while (u < t &&
-                               (isDIGIT(*u) || *u == '_')) {
-                            u++;
-                        }
-                        s = u;
-                    }
-                    /* XXX 0b... maybe, octal (really?) */
                     if (s < t) {
                         flags |= IS_NUMBER_TRAILING;
                     }
