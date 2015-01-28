@@ -741,17 +741,23 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                          * a single UV cannot contain all the possible
                          * NaN payload bits.  There would need to be
                          * some more generic syntax than "nan($uv)".
+                         *
                          * Issues to keep in mind:
                          *
                          * (1) In most common cases there would
                          * not be an integral number of bytes that
                          * could be set, only a certain number of bits.
-                         * For example for the common NVSIZE == UVSIZE
-                         * there is room for 52 bits in the payload,
-                         * but one bit is commonly reserved for the
-                         * signal/quiet bit, so 51 bits.  For the
-                         * x86 80-bit doubles there would be 62 bits,
-                         * and so forth.
+                         * For example for the common case of
+                         * NVSIZE == UVSIZE == 8 there is room for 52
+                         * bits in the payload, but the most significant
+                         * bit is commonly reserved for the
+                         * signaling/quiet bit, leaving 51 bits.
+                         * Furthermore, the C99 nan() is supposed
+                         * to generate quiet NaNs, so it is doubtful
+                         * whether it should be able to generate
+                         * signaling NaNs.  For the x86 80-bit doubles
+                         * (if building a long double Perl) there would
+                         * be 62 bits (s/q bit being the 63rd).
                          *
                          * (2) Endianness of the payload bits. If the
                          * payload is specified as an UV, the low-order
