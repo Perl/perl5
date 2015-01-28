@@ -725,27 +725,39 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                         s = u;
                     }
 
-                    /* "What about octal?" Really? */
+                    /* XXX Doesn't do octal: nan("0123").
+                     * Probably not a big loss. */
 
                     if ((nantype & IS_NUMBER_NOT_INT) ||
                         !(nantype && IS_NUMBER_IN_UV)) {
-                        /* Certain configuration combinations where
-                         * NVSIZE is greater than UVSIZE mean that a
-                         * single UV cannot contain all the possible
+                        /* XXX the nanval is currently unused, that is,
+                         * not inserted as the NaN payload of the NV.
+                         * But the above code already parses the C99
+                         * nan(...)  format.  See below, and see also
+                         * the nan() in POSIX.xs.
+                         *
+                         * Certain configuration combinations where
+                         * NVSIZE is greater than UVSIZE mean that
+                         * a single UV cannot contain all the possible
                          * NaN payload bits.  There would need to be
                          * some more generic syntax than "nan($uv)".
                          * Issues to keep in mind:
+                         *
                          * (1) In most common cases there would
                          * not be an integral number of bytes that
                          * could be set, only a certain number of bits.
-                         * For example for NVSIZE==UVSIZE there can be
-                         * up to 52 bits in the payload, but one bit is
-                         * commonly reserved for the signal/quiet bit,
-                         * so 51 bits.
+                         * For example for the common NVSIZE == UVSIZE
+                         * there is room for 52 bits in the payload,
+                         * but one bit is commonly reserved for the
+                         * signal/quiet bit, so 51 bits.  For the
+                         * x86 80-bit doubles there would be 62 bits,
+                         * and so forth.
+                         *
                          * (2) Endianness of the payload bits. If the
                          * payload is specified as an UV, the low-order
                          * bits of the UV are naturally little-endianed
-                         * (rightmost) bits of the payload. */
+                         * (rightmost) bits of the payload.  The endianness
+                         * of UVs and NVs can be different. */
                         return 0;
                     }
                     if (s < t) {
