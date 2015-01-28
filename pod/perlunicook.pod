@@ -33,7 +33,7 @@ This I<does> make even Unix programmers C<binmode> your binary streams,
 or open them with C<:raw>, but that's the only way to get at them
 portably anyway.
 
-B<WARNING>: C<use autoload> and C<use open> do not get along with each other.
+B<WARNING>: C<use autodie> and C<use open> do not get along with each other.
 
 =head2 ℞ 1: Generic Unicode-savvy filter
 
