@@ -108,8 +108,6 @@ Not in any of the above categories, but would be nice anyway?:
 Bugfix in Safe (Opcode) still needs backporting to maint-5.20:
 http://code.activestate.com/lists/perl5-porters/210398/
 
-I will also cherry-pick Module-CoreList changes as necessary in the unholy business of sorting that out for 5.20.2.
-
 </div>
 
 </data>
