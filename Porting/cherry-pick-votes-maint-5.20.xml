@@ -10,7 +10,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 47b62f63607d1af76ce720886fdaffbf5aab33c5 (attempt again to const vtables in threads-shared)
+Blead changes have been examined up to and including 2a403855670ae8592c5a3ca4396e6e909a4fc593 (perlunicook: Note that autodie &gt;= 2.26 should be okay with "use open".)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -97,6 +97,8 @@ khw votes for the portions of the following except the reference to v5.22
 <commit votes="steveh" id="8917c25b121f1ff10502f69bcd2dde9a3e89edbd" ticket="" desc="Add epigraph and update release schedule"/>
 <commit votes="steveh" id="06dcbead485fc1e807acffe0b20d327a1650a5ac" ticket="" desc="Update epigraph with mailing list link"/>
 <commit votes="steveh" id="6a40a726ac1d6a8f37527d834a781fc5c38e12f0" ticket="" desc="Convert tabs in indentation to spaces."/>
+<commit votes="steveh" id="730d89736d0ae5dfc7580108c451efe91b5102fc" ticket="" desc="Fix warning message regarding 'use autodie' and 'use open'."/>
+<commit votes="steveh" id="2a403855670ae8592c5a3ca4396e6e909a4fc593" ticket="" desc="perlunicook: Note that autodie &gt;= 2.26 should be okay with 'use open'."/>
 
 </div>
 
