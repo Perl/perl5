@@ -2006,9 +2006,10 @@ to "utf8" in a pod file:
 The match-once behavior is controlled by the match delimiter being
 C<?>; with any other delimiter this is the normal C<m//> operator.
 
-In the past, the leading C<m> in C<m?PATTERN?> was optional, but was
-long deprecated.  As of v5.22.0, it is a syntax error.  If you
-encounter this construct in older code, you can just add C<m>.
+In the past, the leading C<m> in C<m?PATTERN?> was optional, but omitting it
+would produce a deprecation warning.  As of v5.22.0, omitting it produces a
+syntax error.  If you encounter this construct in older code, you can just add
+C<m>.
 
 =item s/PATTERN/REPLACEMENT/msixpodualngcer
 X<substitute> X<substitution> X<replace> X<regexp, replace>
