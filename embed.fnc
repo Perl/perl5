@@ -27,10 +27,14 @@
 :
 :         proto.h: add __attribute__malloc__
 :
-:   b  Binary backward compatibility; function is a macro
-:      but has also Perl_ implementation (which is exported); must be
-:      implemented in mathoms.c (whose compilation can be suppressed; see
-:      INSTALL) as commit 075eb5c9b6:
+:   b  Binary backward compatibility; has an exported Perl_ implementation
+:      but function is also normally a macro (i.e. has the "m" flag as well).
+:      Backcompat functions ("b") can be anywhere, but if they are also
+:      macros ("m") then they have no proto.h entries so must either be in
+:      mathoms.c to get marked EXTERN_C (and skipped for -DNO_MATHOMS builds)
+:      or else will require special attention to ensure they are marked
+:      EXTERN_C (and then won't be automatically skipped for -DNO_MATHOMS
+:      builds).
 :
 :         add entry to the list of exported symbols;
 :         don't define PERL_ARGS_ASSERT_FOO
