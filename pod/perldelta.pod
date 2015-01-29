@@ -145,6 +145,12 @@ L<PerlIO::scalar> has been upgraded from version 0.21 to 0.22.
 Attempting to write at file positions impossible for the platform now
 fail early rather than wrapping at 4GB.
 
+=item *
+
+L<Win32API::File> has been upgraded from version 0.1201 to 0.1202
+
+Building in C++ mode now works.
+
 =back
 
 =head2 Removed Modules and Pragmata

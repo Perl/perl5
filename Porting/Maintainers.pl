@@ -1285,15 +1285,11 @@ use File::Glob qw(:case);
     },
 
     'Win32API::File' => {
-        'DISTRIBUTION' => 'CHORNY/Win32API-File-0.1201.tar.gz',
+        'DISTRIBUTION' => 'CHORNY/Win32API-File-0.1202.tar.gz',
         'FILES'        => q[cpan/Win32API-File],
         'EXCLUDED'     => [
             qr{^ex/},
-            't/pod.t',
         ],
-        # Already merged upstream:
-        # https://github.com/chorny/Win32API-File/commit/1657e97900
-        'CUSTOMIZED'   => [qw(File.pm File.xs)],
     },
 
     'XSLoader' => {
