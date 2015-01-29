@@ -24,7 +24,7 @@ use XS::APItest;
 }
 
 # [perl #78070]
-# multicall using a sub that aleady has CvDEPTH > 1 caused sub
+# multicall using a sub that already has CvDEPTH > 1 caused sub
 # to be prematurely freed
 
 {
