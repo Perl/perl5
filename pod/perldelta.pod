@@ -147,6 +147,12 @@ fail early rather than wrapping at 4GB.
 
 =item *
 
+L<Win32> has been upgraded from version 0.49 to 0.51.
+
+GetOSName() now supports Windows 8.1, and building in C++ mode now works.
+
+=item *
+
 L<Win32API::File> has been upgraded from version 0.1201 to 0.1202
 
 Building in C++ mode now works.
