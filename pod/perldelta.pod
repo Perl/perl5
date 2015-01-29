@@ -221,7 +221,7 @@ L<[perl #123029]|https://rt.perl.org/Ticket/Display.html?id=123029>
 
 =item *
 
-Fixed a bug that could cause perl to execute an infite loop during
+Fixed a bug that could cause perl to execute an infinite loop during
 compilation.
 L<[perl #122995]|https://rt.perl.org/Ticket/Display.html?id=122995>
 
@@ -288,7 +288,7 @@ L<[perl #123198]|https://rt.perl.org/Ticket/Display.html?id=123198>
 
 =item *
 
-C<< formline("@...", "a"); >> would crash.  The C<FF_CHECKNL> cas in
+C<< formline("@...", "a"); >> would crash.  The C<FF_CHECKNL> case in
 pp_formline() didn't set the pointer used to mark the chop position,
 which led to the C<FF_MORE> case crashing with a segmentation fault.
 This has been fixed.
