@@ -446,7 +446,7 @@ sub do_check {
   sub add_to_section {
     my ( $section, $data, $title ) = @_;
 
-    #undef is a valid version name in Module::CoreList so supress warnings about concatenating undef values
+    #undef is a valid version name in Module::CoreList so suppress warnings about concatenating undef values
     no warnings 'uninitialized';
     for ( values %{ $data->{$title} } ) {
       my ( $mod, $old_v, $new_v ) = @{$_};
@@ -479,7 +479,7 @@ sub do_check {
 
     # if we could not parse the module name, it will be uninitalized
     # in sort. This is not a problem as it will just result in these
-    # sections being placed near the begining of the section
+    # sections being placed near the beginning of the section
     no warnings 'uninitialized';
     $section->{items} =
       [ sort { lc $a->{name} cmp lc $b->{name} } @{ $section->{items} } ];
