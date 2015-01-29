@@ -186,6 +186,16 @@ XXX Description of the change here
 
 =back
 
+=head3 L<perlfaq>
+
+=over 4
+
+=item *
+
+L<perlfaq> has been synchronized with version 5.021009 from CPAN.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
