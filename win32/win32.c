@@ -2142,7 +2142,7 @@ do_raise(pTHX_ int sig)
 	    }
 	}
     }
-    /* Tell caller to exit thread/process as approriate */
+    /* Tell caller to exit thread/process as appropriate */
     return 1;
 }
 
@@ -2228,7 +2228,7 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
      * This scenario can only be created if the timespan from the return of
      * MsgWaitForMultipleObjects to GetSystemTimeAsFileTime exceeds 1 ms. To
      * generate the scenario, manual breakpoints in a C debugger are required,
-     * or a context switch occured in win32_async_check in PeekMessage, or random
+     * or a context switch occurred in win32_async_check in PeekMessage, or random
      * messages are delivered to the *thread* message queue of the Perl thread
      * from another process (msctf.dll doing IPC among its instances, VS debugger
      * causes msctf.dll to be loaded into Perl by kernel), see [perl #33096].

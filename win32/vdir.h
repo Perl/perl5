@@ -85,7 +85,7 @@ protected:
     {
 	char *ptr = dirTableA[index];
 	if (!ptr) {
-	    /* simulate the existance of this drive */
+	    /* simulate the existence of this drive */
 	    ptr = szLocalBufferA;
 	    ptr[0] = 'A' + index;
 	    ptr[1] = ':';
@@ -98,7 +98,7 @@ protected:
     {
 	WCHAR *ptr = dirTableW[index];
 	if (!ptr) {
-	    /* simulate the existance of this drive */
+	    /* simulate the existence of this drive */
 	    ptr = szLocalBufferW;
 	    ptr[0] = 'A' + index;
 	    ptr[1] = ':';

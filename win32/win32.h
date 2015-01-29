@@ -541,12 +541,12 @@ typedef struct {
     char pipech;    /* one char buffer for handles opened on pipes */
     int lockinitflag;
     CRITICAL_SECTION lock;
-/* this struct defintion breaks ABI compatibility with
+/* this struct definition breaks ABI compatibility with
  * not using, cl.exe's native VS version specitfic CRT. */
 #  if _MSC_VER >= 1400 && _MSC_VER < 1500
 #    error "This ioinfo struct is incomplete for Visual C 2005"
 #  endif
-/* VC 2005 CRT has atleast 3 different definitions of this struct based on the
+/* VC 2005 CRT has at least 3 different definitions of this struct based on the
  * CRT DLL's build number. */
 #  if _MSC_VER >= 1500
 #    ifndef _SAFECRT_IMPL
