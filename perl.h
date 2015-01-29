@@ -6430,6 +6430,10 @@ extern void moncontrol(int);
 #  define DOUBLE_MIX_ENDIAN
 #endif
 
+/* All the basic IEEE formats have the implicit bit,
+ * except for the 80-bit extended formats, which will undef this. */
+#define NV_IMPLICIT_BIT
+
 #ifdef LONG_DOUBLEKIND
 
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN || \
@@ -6447,6 +6451,9 @@ extern void moncontrol(int);
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
       LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
 #    define LONGDOUBLE_X86_80_BIT
+#    ifdef USE_LONG_DOUBLE
+#      undef NV_IMPLICIT_BIT
+#    endif
 #  endif
 
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN || \
