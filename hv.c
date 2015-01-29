@@ -1290,7 +1290,7 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
             dest->xhv_fill_lazy = 0;
         } else {
             /* no existing aux structure, but we allocated space for one
-             * so intialize it properly. This unrolls hv_auxinit() a bit,
+             * so initialize it properly. This unrolls hv_auxinit() a bit,
              * since we have to do the realloc anyway. */
             /* first we set the iterator's xhv_rand so it can be copied into lastrand below */
 #ifdef PERL_HASH_RANDOMIZE_KEYS

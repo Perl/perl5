@@ -2966,7 +2966,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 		*statusp = SvIVX(sv);
 		/* The hash iterator is currently on this entry, so simply
 		   calling hv_delete would trigger the lazy delete, which on
-		   aggregate does more work, beacuse next call to hv_iterinit()
+		   aggregate does more work, because next call to hv_iterinit()
 		   would spot the flag, and have to call the delete routine,
 		   while in the meantime any new entries can't re-use that
 		   memory.  */
@@ -3936,7 +3936,7 @@ Fill the sv with current working directory
 /* Originally written in Perl by John Bazik; rewritten in C by Ben Sugars.
  * rewritten again by dougm, optimized for use with xs TARG, and to prefer
  * getcwd(3) if available
- * Comments from the orignal:
+ * Comments from the original:
  *     This is a faster version of getcwd.  It's also more dangerous
  *     because you might chdir out of a directory that you can't chdir
  *     back into. */

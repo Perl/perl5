@@ -1524,7 +1524,7 @@ getpages(MEM_SIZE needed, int *nblksp, int bucket)
 		
 	if (add) {
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
-				  "sbrk(%ld) to fix non-continuous/off-page sbrk:\n\t%ld for alignement,\t%ld were assumed to come from the tail of the previous sbrk\n",
+				  "sbrk(%ld) to fix non-continuous/off-page sbrk:\n\t%ld for alignment,\t%ld were assumed to come from the tail of the previous sbrk\n",
 				  (long)add, (long) slack,
 				  (long) sbrked_remains));
 	    newcp = (char *)sbrk(add);

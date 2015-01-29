@@ -921,7 +921,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             }
 
             /* Calculate what fallback locales to try.  We have avoided this
-             * until we have to, becuase failure is quite unlikely.  This will
+             * until we have to, because failure is quite unlikely.  This will
              * usually change the upper bound of the loop we are in.
              *
              * Since the system's default way of setting the locale has not

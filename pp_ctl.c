@@ -3670,7 +3670,7 @@ S_doopen_pm(pTHX_ SV *name)
 #endif /* !PERL_DISABLE_PMC */
 
 /* require doesn't search for absolute names, or when the name is
-   explicity relative the current directory */
+   explicitly relative the current directory */
 PERL_STATIC_INLINE bool
 S_path_is_searchable(const char *name)
 {
@@ -5433,7 +5433,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     umaxlen = maxlen;
 
     /* I was having segfault trouble under Linux 2.2.5 after a
-       parse error occured.  (Had to hack around it with a test
+       parse error occurred.  (Had to hack around it with a test
        for PL_parser->error_count == 0.)  Solaris doesn't segfault --
        not sure where the trouble is yet.  XXX */
 
