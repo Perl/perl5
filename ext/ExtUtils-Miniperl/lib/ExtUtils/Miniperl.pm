@@ -234,6 +234,7 @@ C<writemain()> takes an argument list of directories containing archive
 libraries that relate to perl modules and should be linked into a new
 perl binary. It writes a corresponding F<perlmain.c> file that
 is a plain C file containing all the bootstrap code to make the
+modules associated with the libraries available from within perl.
 If the first argument to C<writemain()> is a reference to a scalar it is
 used as the filename to open for output. Any other reference is used as
 the filehandle to write to. Otherwise output defaults to C<STDOUT>.
