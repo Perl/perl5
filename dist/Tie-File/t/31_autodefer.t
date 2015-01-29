@@ -28,7 +28,7 @@ print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 
 # I am an undocumented feature
-$o->{autodefer_filelen_threshhold} = 0;
+$o->{autodefer_filelen_threshold} = 0;
 # Normally autodeferring only works on large files.  This disables that.
 
 # (3-22) Deferred storage
@@ -111,7 +111,7 @@ my $BUF = 20;
 $o = tie @a, 'Tie::File', $file, autodefer => 0;
 die $! unless $o;
 # I am an undocumented feature
-$o->{autodefer_filelen_threshhold} = 0;
+$o->{autodefer_filelen_threshold} = 0;
 # Normally autodeferring only works on large files.  This disables that.
 
 # (57-59) Did the autodefer => 0 option work?
