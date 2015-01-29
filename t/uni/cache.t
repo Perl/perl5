@@ -8,7 +8,7 @@ BEGIN {
 plan tests => 1;
 
 # Looks to see if a "do 'unicore/lib/Sc/Hira.pl'" is called more than once, by
-# putting a compile sub first on the libary path;
+# putting a compile sub first on the library path;
 # XXX Kludge: requires exact path, which might change, and has deep knowledge
 # of how utf8_heavy.pl works, which might also change.
 

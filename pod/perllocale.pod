@@ -32,7 +32,7 @@ L<perlunitut> for an introduction to that) in part to address these
 design deficiencies, and nowadays, there is a series of "UTF-8
 locales", based on Unicode.  These are locales whose character set is
 Unicode, encoded in UTF-8.  Starting in v5.20, Perl fully supports
-UTF-8 locales, except for sorting and string comparisions.  (Use
+UTF-8 locales, except for sorting and string comparisons.  (Use
 L<Unicode::Collate> for these.)  Perl continues to support the old
 non UTF-8 locales as well.
 

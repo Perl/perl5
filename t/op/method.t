@@ -634,7 +634,7 @@ SKIP: {
     seek DATA, $data_start, Fcntl::SEEK_SET() or die $!;
 
     is(Colour::H1->getline(), <DATA>, 'read from a file');
-    is(C3::H1->getline(), 'method in C3::H1', 'intial resolution is a method');
+    is(C3::H1->getline(), 'method in C3::H1', 'initial resolution is a method');
 
     *Copy:: = \*C3::;
     *C3:: = \*Colour::;

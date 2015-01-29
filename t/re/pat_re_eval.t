@@ -755,10 +755,10 @@ sub run_tests {
 	}
 
 	my $code1u = "(??{qw(\x{100})})";
-	eval {/^$code1u$/}; norun("reparse embeded unicode norun");
+	eval {/^$code1u$/}; norun("reparse embedded unicode norun");
 	{
 	    use re 'eval';
-	    ok("\x{100}" =~ /^$code1u$/, "reparse embeded unicode");
+	    ok("\x{100}" =~ /^$code1u$/, "reparse embedded unicode");
 	}
     }
 

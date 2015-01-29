@@ -126,7 +126,7 @@ customized.t - Test that CUSTOMIZED files in Maintainers.pl have not been overwr
 =head1 DESCRIPTION
 
 customized.t checks that files listed in C<Maintainers.pl> that have been C<CUSTOMIZED>
-are not accidently overwritten by CPAN module updates.
+are not accidentally overwritten by CPAN module updates.
 
 =head1 OPTIONS
 

@@ -2082,11 +2082,11 @@ foreach my $ord (78, 163, 256) {
 }
 
 # Bug RT #45167 the return value of sprintf sometimes wasn't tainted
-# when the args were tainted. This only occured on the first use of
+# when the args were tainted. This only occurred on the first use of
 # sprintf; after that, its TARG has taint magic attached, so setmagic
 # at the end works.  That's why there are multiple sprintf's below, rather
 # than just one wrapped in an inner loop. Also, any plaintext between
-# fprmat entires would correctly cause tainting to get set. so test with
+# fprmat entries would correctly cause tainting to get set. so test with
 # "%s%s" rather than eg "%s %s".
 
 {

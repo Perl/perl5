@@ -1481,7 +1481,7 @@ plan (tests => scalar @files) if ! $regen;
 
 
  # Sort file names so we get consistent results, and to put cpan last,
- # preceeded by the ones that we don't generally parse.  This is because both
+ # preceded by the ones that we don't generally parse.  This is because both
  # these classes are generally parsed only if there is a link to the interior
  # of them, and we have to parse all others first to guarantee that they don't
  # have such a link. 'lib' files come just before these, as some of these are

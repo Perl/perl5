@@ -1441,7 +1441,7 @@ sub class_ok {
     # Written so as to count as one test
     local $Level = $Level + 1;
     if( ref $class ) {
-        ok( 0, "$class is a refrence, not a class name" );
+        ok( 0, "$class is a reference, not a class name" );
     }
     else {
         isa_ok($class, $isa, $class_name);

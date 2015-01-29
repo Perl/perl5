@@ -67,7 +67,7 @@ sub close_and_rename {
     close $fh or die "Error closing $name: $!";
 
     if ($TAP) {
-        # Don't use compare beacuse if there are errors it doesn't give any
+        # Don't use compare because if there are errors it doesn't give any
         # way to generate diagnostics about what went wrong.
         # These files are small enough to read into memory.
         local $/;
