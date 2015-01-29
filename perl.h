@@ -6425,6 +6425,11 @@ extern void moncontrol(int);
 #  define DOUBLE_BIG_ENDIAN
 #endif
 
+#if DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE || \
+    DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
+#  define DOUBLE_MIX_ENDIAN
+#endif
+
 #ifdef LONG_DOUBLEKIND
 
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN || \
@@ -6457,6 +6462,9 @@ extern void moncontrol(int);
 #  endif
 #  ifdef DOUBLE_BIG_ENDIAN
 #    define NV_BIG_ENDIAN
+#  endif
+#  ifdef DOUBLE_MIX_ENDIAN
+#    define NV_MIX_ENDIAN
 #  endif
 #elif NVSIZE == LONG_DOUBLESIZE
 #  ifdef LONGDOUBLE_LITTLE_ENDIAN
