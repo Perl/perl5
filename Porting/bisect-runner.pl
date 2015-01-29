@@ -100,7 +100,7 @@ if (defined $target && $target =~ /\.t\z/) {
         die_255("$0: Test-case targets can't be run with --$_")
             if $options{$_};
     }
-    die_255("$0: Test-case targets can't be combined with an explict test")
+    die_255("$0: Test-case targets can't be combined with an explicit test")
         if @ARGV;
 
     # Needing this unless is a smell suggesting that this implementation of
@@ -624,7 +624,7 @@ file is fed to C<patch -p1> on standard input. For C<=~>, the patch is
 applied if no lines match the pattern.
 
 As the empty pattern in Perl is a special case (it matches the most recent
-sucessful match) which is not useful here, an the treatment of empty pattern
+successful match) which is not useful here, an the treatment of empty pattern
 is special-cased. C<I<filename> =~ //> applies the patch if filename is
 present. C<I<filename> !~ //> applies the patch if filename missing. This
 makes it easy to unconditionally apply patches to files, and to use a patch
