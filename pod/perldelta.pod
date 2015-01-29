@@ -70,15 +70,15 @@ A warning from the B<gcc> compiler is now avoided when building the XS.
 
 L<PerlIO::scalar> has been upgraded from version 0.18 to 0.18_01.
 
-Reading from a position well past the end of the scalar now correctly
-returns end of file.
+Reading from a position well past the end of the scalar now correctly returns
+end of file.
 L<[perl #123443]|https://rt.perl.org/Ticket/Display.html?id=123443>
 
-Seeking to a negative position still fails, but no longer leaves the
-file position set to a negation location.
+Seeking to a negative position still fails, but no longer leaves the file
+position set to a negation location.
 
-C<eof()> on a C<PerlIO::scalar> handle now properly returns true when
-the file position is past the 2GB mark on 32-bit systems.
+C<eof()> on a C<PerlIO::scalar> handle now properly returns true when the file
+position is past the 2GB mark on 32-bit systems.
 
 =item *
 
@@ -171,8 +171,8 @@ fixed.
 
 =head2 Regained Platforms
 
-IRIX and Tru64 platforms are working again.
-(Some C<make test> failures remain.)
+IRIX and Tru64 platforms are working again.  (Some C<make test> failures
+remain.)
 
 =head1 Selected Bug Fixes
 
@@ -187,8 +187,8 @@ L<[cpan #85570]|https://rt.cpan.org/Ticket/Display.html?id=85570>
 
 =item *
 
-In Perl 5.20.0, C<$^N> accidentally had the internal UTF8 flag turned off
-if accessed from a code block within a regular expression, effectively
+In Perl 5.20.0, C<$^N> accidentally had the internal UTF8 flag turned off if
+accessed from a code block within a regular expression, effectively
 UTF8-encoding the value.  This has been fixed.
 L<[perl #123135]|https://rt.perl.org/Ticket/Display.html?id=123135>
 
@@ -213,9 +213,9 @@ L<[perl #122747]|https://rt.perl.org/Ticket/Display.html?id=122747>
 =item *
 
 Due to a mistake in the string-copying logic, copying the value of a state
-variable could instead steal the value and undefine the variable.  This
-bug, introduced in 5.20, would happen mostly for long strings (1250 chars
-or more), but could happen for any strings under builds with copy-on-write
+variable could instead steal the value and undefine the variable.  This bug,
+introduced in Perl 5.20, would happen mostly for long strings (1250 chars or
+more), but could happen for any strings under builds with copy-on-write
 disabled.
 L<[perl #123029]|https://rt.perl.org/Ticket/Display.html?id=123029>
 
@@ -227,10 +227,9 @@ L<[perl #122995]|https://rt.perl.org/Ticket/Display.html?id=122995>
 
 =item *
 
-On Win32, restoring in a child pseudo-process a variable that was
-C<local()>ed in a parent pseudo-process before the C<fork> happened caused
-memory corruption and a crash in the child pseudo-process (and therefore OS
-process).
+On Win32, restoring in a child pseudo-process a variable that was C<local()>ed
+in a parent pseudo-process before the C<fork> happened caused memory corruption
+and a crash in the child pseudo-process (and therefore OS process).
 L<[perl #40565]|https://rt.perl.org/Ticket/Display.html?id=40565>
 
 =item *
@@ -241,26 +240,26 @@ L<[perl #122669]|https://rt.perl.org/Ticket/Display.html?id=122669>
 
 =item *
 
-Calling C<write> on a format with a C<^**> field could produce a panic
-in sv_chop() if there were insufficient arguments or if the variable
-used to fill the field was empty.
+Calling C<write> on a format with a C<^**> field could produce a panic in
+sv_chop() if there were insufficient arguments or if the variable used to fill
+the field was empty.
 L<[perl #123245]|https://rt.perl.org/Ticket/Display.html?id=123245>
 
 =item *
 
-In perl 5.20.0, C<sort CORE::fake> where 'fake' is anything other than a
-keyword started chopping of the last 6 characters and treating the result
-as a sort sub name.  The previous behaviour of treating "CORE::fake" as a
-sort sub name has been restored.
+In Perl 5.20.0, C<sort CORE::fake> where 'fake' is anything other than a
+keyword started chopping of the last 6 characters and treating the result as a
+sort sub name.  The previous behaviour of treating "CORE::fake" as a sort sub
+name has been restored.
 L<[perl #123410]|https://rt.perl.org/Ticket/Display.html?id=123410>
 
 =item *
 
-A bug in regular expression patterns that could lead to segfaults and
-other crashes has been fixed.  This occurred only in patterns compiled
-with C<"/i">, while taking into account the current POSIX locale (this usually
-means they have to be compiled within the scope of C<S<"use locale">>),
-and there must be a string of at least 128 consecutive bytes to match.
+A bug in regular expression patterns that could lead to segfaults and other
+crashes has been fixed.  This occurred only in patterns compiled with C<"/i">,
+while taking into account the current POSIX locale (this usually means they
+have to be compiled within the scope of C<S<"use locale">>), and there must be
+a string of at least 128 consecutive bytes to match.
 L<[perl #123539]|https://rt.perl.org/Ticket/Display.html?id=123539>
 
 =item *
@@ -276,8 +275,8 @@ L<[perl #123495]|https://rt.perl.org/Ticket/Display.html?id=123495>
 =item *
 
 Certain syntax errors in substitutions, such as C<< s/${<>{})// >>, would
-crash, and had done so since Perl 5.10.  (In some cases the crash did not
-start happening till 5.16.)  The crash has, of course, been fixed.
+crash, and had done so since Perl 5.10.  (In some cases the crash did not start
+happening until Perl 5.16.)  The crash has, of course, been fixed.
 L<[perl #123542]|https://rt.perl.org/Ticket/Display.html?id=123542>
 
 =item *
@@ -289,9 +288,9 @@ L<[perl #123198]|https://rt.perl.org/Ticket/Display.html?id=123198>
 =item *
 
 C<< formline("@...", "a"); >> would crash.  The C<FF_CHECKNL> case in
-pp_formline() didn't set the pointer used to mark the chop position,
-which led to the C<FF_MORE> case crashing with a segmentation fault.
-This has been fixed.
+pp_formline() didn't set the pointer used to mark the chop position, which led
+to the C<FF_MORE> case crashing with a segmentation fault.  This has been
+fixed.
 L<[perl #123538]|https://rt.perl.org/Ticket/Display.html?id=123538>
 L<[perl #123622]|https://rt.perl.org/Ticket/Display.html?id=123622>
 
@@ -320,10 +319,10 @@ argument to C<sort>.  This will be fixed in a future version of Perl.
 
 =item *
 
-A regression has been fixed that was introduced in v5.20.0 (fixed in
-v5.20.1 as well as here) in which a UTF-8 encoded regular expression
-pattern that contains a single ASCII lowercase letter does not match its
-uppercase counterpart.
+A regression has been fixed that was introduced in Perl 5.20.0 (fixed in Perl
+5.20.1 as well as here) in which a UTF-8 encoded regular expression pattern
+that contains a single ASCII lowercase letter does not match its uppercase
+counterpart.
 L<[perl #122655]|https://rt.perl.org/Ticket/Display.html?id=122655>
 
 =back
@@ -338,8 +337,8 @@ XXX Generate this with:
 
 If you find what you think is a bug, you might check the articles recently
 posted to the comp.lang.perl.misc newsgroup and the perl bug database at
-https://rt.perl.org/ .  There may also be information at
-http://www.perl.org/ , the Perl Home Page.
+https://rt.perl.org/ .  There may also be information at http://www.perl.org/ ,
+the Perl Home Page.
 
 If you believe you have an unreported bug, please run the L<perlbug> program
 included with your release.  Be sure to trim your bug down to a tiny but
