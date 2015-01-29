@@ -6425,7 +6425,7 @@ extern void moncontrol(int);
 #  define DOUBLE_BIG_ENDIAN
 #endif
 
-#ifdef HAS_LONG_DOUBLEKIND
+#ifdef LONG_DOUBLEKIND
 
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN || \
       LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
@@ -6449,7 +6449,7 @@ extern void moncontrol(int);
 #    define LONGDOUBLE_DOUBLEDOUBLE
 #  endif
 
-#endif /* HAS_LONG_DOUBLE */
+#endif /* LONG_DOUBLEKIND */
 
 /*
 
