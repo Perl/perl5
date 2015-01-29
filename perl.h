@@ -6451,6 +6451,22 @@ extern void moncontrol(int);
 
 #endif /* LONG_DOUBLEKIND */
 
+#if NVSIZE == DOUBLESIZE
+#  ifdef DOUBLE_LITTLE_ENDIAN
+#    define NV_LITTLE_ENDIAN
+#  endif
+#  ifdef DOUBLE_BIG_ENDIAN
+#    define NV_BIG_ENDIAN
+#  endif
+#elif NVSIZE == LONG_DOUBLESIZE
+#  ifdef LONGDOUBLE_LITTLE_ENDIAN
+#    define NV_LITTLE_ENDIAN
+#  endif
+#  ifdef LONGDOUBLE_BIG_ENDIAN
+#    define NV_BIG_ENDIAN
+#  endif
+#endif
+
 /*
 
    (KEEP THIS LAST IN perl.h!)
