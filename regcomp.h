@@ -232,7 +232,7 @@ struct regnode_charclass_class {
  * extra SV*, used only during its construction and which is not used by
  * regexec.c.  Note that the 'next_off' field is unused, as the SSC stands
  * alone, so there is never a next node.  Also, there is no alignment issue,
- * becase these are declared or allocated as a complete unit so the compiler
+ * because these are declared or allocated as a complete unit so the compiler
  * takes care of alignment.  This is unlike the other regnodes which are
  * allocated in terms of multiples of a single-argument regnode.  SSC nodes can
  * have a pointer field because there is no alignment issue, and because it is

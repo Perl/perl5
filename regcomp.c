@@ -1916,7 +1916,7 @@ then read 'r' and go to state 8 followed by 's' which takes us to state 9 which
 is also accepting. Thus we know that we can match both 'he' and 'hers' with a
 single traverse. We store a mapping from accepting to state to which word was
 matched, and then when we have multiple possibilities we try to complete the
-rest of the regex in the order in which they occured in the alternation.
+rest of the regex in the order in which they occurred in the alternation.
 
 The only prior NFA like behaviour that would be changed by the TRIE support is
 the silent ignoring of duplicate alternations which are of the form:

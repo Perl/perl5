@@ -894,7 +894,7 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
             elements in the middle of the partition, those are the ones we
             pick here (conveniently pointed at by u_right, pc_left, and
             u_left). The values of the left, center, and right elements
-            are refered to as l c and r in the following comments.
+            are referred to as l c and r in the following comments.
          */
 
 #ifdef QSORT_ORDER_GUESS

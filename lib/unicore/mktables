@@ -15424,7 +15424,7 @@ sub make_re_pod_entries($) {
                     }
                 }
 
-                # Ouput both short and single in the same parenthesized
+                # Output both short and single in the same parenthesized
                 # expression, but with only one of 'Single', 'Short' if there
                 # are both items.
                 if ($short_name || $single_form || $table->conflicting) {

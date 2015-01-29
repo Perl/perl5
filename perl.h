@@ -3541,7 +3541,7 @@ typedef pthread_key_t	perl_key;
    expression, which allows the compiler to generate better machine code.
    In a debug build, ASSUME(x) is a synonym for assert(x). ASSUME(0) means
    the control path is unreachable. In a for loop, ASSUME can be used to hint
-   that a loop will run atleast X times. ASSUME is based off MSVC's __assume
+   that a loop will run at least X times. ASSUME is based off MSVC's __assume
    intrinsic function, see its documents for more details.
 */
 

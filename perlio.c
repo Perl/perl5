@@ -849,7 +849,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
     XSRETURN(count);
 }
 
-#endif                          /* USE_ATTIBUTES_FOR_PERLIO */
+#endif                          /* USE_ATTRIBUTES_FOR_PERLIO */
 
 SV *
 PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
