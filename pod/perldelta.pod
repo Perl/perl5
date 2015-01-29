@@ -127,9 +127,10 @@ file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 XXX Changes which create B<new> files in F<pod/> go here.
 
-=head3 L<XXX>
+=head3 L<perlunicook>
 
-XXX Description of the purpose of the new file here
+This document, by Tom Christiansen, provides examples of handling Unicode in
+Perl.
 
 =head2 Changes to Existing Documentation
 
