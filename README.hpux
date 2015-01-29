@@ -104,7 +104,7 @@ Motorola chipset.
 
 The version of PA-RISC at the time of this document's last update is 2.0,
 which is also the last there will be. HP PA-RISC systems are usually
-refered to with model description "HP 9000". The last CPU in this series
+referred to with model description "HP 9000". The last CPU in this series
 is the PA-8900.  Support for PA-RISC architectured machines officially
 ends as shown in the following table:
 
@@ -243,7 +243,7 @@ attempt to use a PA-RISC version of Perl on an Itanium system.  This is
 because shared libraries created on an Itanium system cannot be loaded
 while running a PA-RISC executable.
 
-HP Itanium 2 systems are usually refered to with model description
+HP Itanium 2 systems are usually referred to with model description
 "HP Integrity".
 
 =head2 Itanium, Itanium 2 & Madison 6
