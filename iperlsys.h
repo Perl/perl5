@@ -318,7 +318,9 @@ struct IPerlStdIOInfo
 #if defined(__VMS)
      /* Unusual definition of ungetc() here to accommodate fast_sv_gets()'
       * belief that it can mix getc/ungetc with reads from stdio buffer */
+START_EXTERN_C
      int decc$ungetc(int __c, FILE *__stream);
+END_EXTERN_C
 #    define PerlSIO_ungetc(c,f) ((c) == EOF ? EOF : \
             ((*(f) && !((*(f))->_flag & _IONBF) && \
             ((*(f))->_ptr > (*(f))->_base)) ? \

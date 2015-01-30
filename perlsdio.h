@@ -36,45 +36,30 @@
 #define PerlIO_close(f)			PerlSIO_fclose(f)
 #define PerlIO_puts(f,s)		PerlSIO_fputs(s,f)
 #define PerlIO_putc(f,c)		PerlSIO_fputc(c,f)
-#if defined(VMS)
-#  if defined(__DECC)
+#if defined(__VMS)
      /* Unusual definition of ungetc() here to accommodate fast_sv_gets()'
       * belief that it can mix getc/ungetc with reads from stdio buffer */
+START_EXTERN_C
      int decc$ungetc(int __c, FILE *__stream);
+END_EXTERN_C
 #    define PerlIO_ungetc(f,c) ((c) == EOF ? EOF : \
             ((*(f) && !((*(f))->_flag & _IONBF) && \
             ((*(f))->_ptr > (*(f))->_base)) ? \
             ((*(f))->_cnt++, *(--(*(f))->_ptr) = (c)) : decc$ungetc(c,f)))
-#  else
-#    define PerlIO_ungetc(f,c)		ungetc(c,f)
-#  endif
-   /* Work around bug in DECCRTL/AXP (DECC v5.x) and some versions of old
-    * VAXCRTL which causes read from a pipe after EOF has been returned
-    * once to hang.
-    */
-#  define PerlIO_getc(f) \
-		(feof(f) ? EOF : getc(f))
-#  define PerlIO_read(f,buf,count) \
-		(feof(f) ? 0 : (SSize_t)fread(buf,1,count,f))
-#  define PerlIO_tell(f)		ftell(f)
 #else
-#  define PerlIO_getc(f)		PerlSIO_fgetc(f)
-#  define PerlIO_ungetc(f,c)		PerlSIO_ungetc(c,f)
-#  define PerlIO_read(f,buf,count)	(SSize_t)PerlSIO_fread(buf,1,count,f)
-#  define PerlIO_tell(f)		PerlSIO_ftell(f)
+#    define PerlIO_ungetc(f,c)		ungetc(c,f)
 #endif
+#define PerlIO_getc(f)		PerlSIO_fgetc(f)
+#define PerlIO_ungetc(f,c)		PerlSIO_ungetc(c,f)
+#define PerlIO_read(f,buf,count)	(SSize_t)PerlSIO_fread(buf,1,count,f)
+#define PerlIO_tell(f)		PerlSIO_ftell(f)
 #define PerlIO_eof(f)			PerlSIO_feof(f)
 #define PerlIO_getname(f,b)		fgetname(f,b)
 #define PerlIO_error(f)			PerlSIO_ferror(f)
 #define PerlIO_fileno(f)		PerlSIO_fileno(f)
 #define PerlIO_clearerr(f)		PerlSIO_clearerr(f)
 #define PerlIO_flush(f)			PerlSIO_fflush(f)
-#if defined(VMS) && !defined(__DECC)
-/* Old VAXC RTL doesn't reset EOF on seek; Perl folk seem to expect this */
-#define PerlIO_seek(f,o,w)	(((f) && (*f) && ((*f)->_flag &= ~_IOEOF)),fseek(f,o,w))
-#else
-#  define PerlIO_seek(f,o,w)		PerlSIO_fseek(f,o,w)
-#endif
+#define PerlIO_seek(f,o,w)		PerlSIO_fseek(f,o,w)
 
 #define PerlIO_rewind(f)		PerlSIO_rewind(f)
 #define PerlIO_tmpfile()		PerlSIO_tmpfile()
