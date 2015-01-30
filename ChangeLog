@@ -209,7 +209,7 @@ Fri Jun  7 23:55:41 BST 2002   Nicholas Clark
 	The bug was introduced as development perl change 16442 (on
 	2002/05/07), so has been present since 2.00.
 	Patches to introduce more regression tests to reduce the chance of
-	a reoccurence of this sort of goof are always welcome.
+	a reoccurrence of this sort of goof are always welcome.
 	
 Thu May 30 20:31:08 BST 2002   Nicholas Clark <nick@ccl4.org>
 
