@@ -62,6 +62,12 @@ L<[perl #123096]|https://rt.perl.org/Ticket/Display.html?id=123096>
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 5.020001 to 5.20150128.
+
+The list of Perl versions covered has been updated.
+
+=item *
+
 PathTools has been upgraded from version 3.48 to 3.48_01.
 
 A warning from the B<gcc> compiler is now avoided when building the XS.
@@ -128,7 +134,7 @@ formally documented.
 
 =item *
 
-An ambiguity in the documentation of the Ellipsis statement has been corrected.
+An ambiguity in the documentation of the ellipsis statement has been corrected.
 L<[perl #122661]|https://rt.perl.org/Ticket/Display.html?id=122661>
 
 =back
@@ -151,7 +157,7 @@ This error is not new, but was not previously documented here.
 =item *
 
 L<Missing right brace on \N{}|perldiag/"Missing right brace on \N{}"> is now
-documented.  This warning is not new, but was not previously documented here.
+documented.  This error is not new, but was not previously documented here.
 
 =back
 
