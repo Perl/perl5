@@ -464,13 +464,13 @@ p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
 s	|OP*	|force_list	|NULLOK OP* arg|bool nullit
 i	|OP*	|op_integerize	|NN OP *o
 i	|OP*	|op_std_init	|NN OP *o
-#if defined(USE_ITHREADS)
-i	|void	|op_relocate_sv	|NN SV** svp|NN PADOFFSET* targp
-#endif
 i	|OP*	|newMETHOP_internal	|I32 type|I32 flags|NULLOK OP* dynamic_meth \
 					|NULLOK SV* const_meth
 : FIXME
 s	|OP*	|fold_constants	|NN OP *o
+#endif
+#if defined(USE_ITHREADS)
+pXo	|void	|op_relocate_sv	|NN SV** svp|NN PADOFFSET* targp
 #endif
 Afpd	|char*	|form		|NN const char* pat|...
 Ap	|char*	|vform		|NN const char* pat|NULLOK va_list* args

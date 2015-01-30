@@ -2371,8 +2371,8 @@ Perl_finalize_optree(pTHX_ OP* o)
 /* Relocate sv to the pad for thread safety.
  * Despite being a "constant", the SV is written to,
  * for reference counts, sv_upgrade() etc. */
-PERL_STATIC_INLINE void
-S_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp)
+void
+Perl_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp)
 {
     PADOFFSET ix;
     PERL_ARGS_ASSERT_OP_RELOCATE_SV;
@@ -2440,7 +2440,7 @@ S_finalize_op(pTHX_ OP* o)
 	/* FALLTHROUGH */
 #ifdef USE_ITHREADS
     case OP_HINTSEVAL:
-        op_relocate_sv(&cSVOPo->op_sv, &o->op_targ);
+        Perl_op_relocate_sv(aTHX_ &cSVOPo->op_sv, &o->op_targ);
 #endif
         break;
 
@@ -2450,7 +2450,7 @@ S_finalize_op(pTHX_ OP* o)
     case OP_METHOD_SUPER:
     case OP_METHOD_REDIR:
     case OP_METHOD_REDIR_SUPER:
-        op_relocate_sv(&cMETHOPx(o)->op_u.op_meth_sv, &o->op_targ);
+        Perl_op_relocate_sv(aTHX_ &cMETHOPx(o)->op_u.op_meth_sv, &o->op_targ);
         break;
 #endif
 
@@ -10563,7 +10563,7 @@ Perl_ck_method(pTHX_ OP *o)
         new_op = newMETHOP_named(OP_METHOD_REDIR, 0, methsv);
     }
 #ifdef USE_ITHREADS
-    op_relocate_sv(&rclass, &cMETHOPx(new_op)->op_rclass_targ);
+    Perl_op_relocate_sv(aTHX_ &rclass, &cMETHOPx(new_op)->op_rclass_targ);
 #else
     cMETHOPx(new_op)->op_rclass_sv = rclass;
 #endif
@@ -12393,7 +12393,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
 #ifdef USE_ITHREADS
                             /* Relocate sv to the pad for thread safety */
-                            op_relocate_sv(&cSVOPo->op_sv, &o->op_targ);
+                            Perl_op_relocate_sv(aTHX_ &cSVOPo->op_sv, &o->op_targ);
                             arg->pad_offset = o->op_targ;
                             o->op_targ = 0;
 #else

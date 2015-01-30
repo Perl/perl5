@@ -6466,14 +6466,6 @@ STATIC OP*	S_too_many_arguments_pv(pTHX_ OP *o, const char* name, U32 flags)
 #define PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS_PV	\
 	assert(o); assert(name)
 
-#  if defined(USE_ITHREADS)
-PERL_STATIC_INLINE void	S_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_OP_RELOCATE_SV	\
-	assert(svp); assert(targp)
-
-#  endif
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
 PERL_CALLCONV void	Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv, SV * const *new_const_svp)
@@ -8134,6 +8126,12 @@ PERL_CALLCONV OP*	Perl_newPADOP(pTHX_ I32 type, I32 flags, SV* sv)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_NEWPADOP	\
 	assert(sv)
+
+PERL_CALLCONV void	Perl_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_OP_RELOCATE_SV	\
+	assert(svp); assert(targp)
 
 PERL_CALLCONV PADLIST *	Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 			__attribute__warn_unused_result__
