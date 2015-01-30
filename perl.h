@@ -6259,7 +6259,7 @@ int flock(int fd, int op);
 					      int).  value returned in pointed-
 					      to UV */
 #define IS_NUMBER_GREATER_THAN_UV_MAX 0x02 /* pointed to UV undefined */
-#define IS_NUMBER_NOT_INT	      0x04 /* saw . or E notation */
+#define IS_NUMBER_NOT_INT	      0x04 /* saw . or E notation or infnan */
 #define IS_NUMBER_NEG		      0x08 /* leading minus sign */
 #define IS_NUMBER_INFINITY	      0x10 /* this is big */
 #define IS_NUMBER_NAN                 0x20 /* this is not */
