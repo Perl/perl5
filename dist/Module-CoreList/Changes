@@ -52,7 +52,7 @@
 3.06 Thu Feb 20 2014
  - updated for 5.19.9
  - fix Module::CoreList::is_core default perl version
- - fix Module::CoreList::is_core version comparison
+ - fix Module::CoreList::is_core version comparision
 
 3.05
   - Prepared for v5.19.9

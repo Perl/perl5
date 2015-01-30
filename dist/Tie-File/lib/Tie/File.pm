@@ -7,14 +7,14 @@ use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'LOCK_SH', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
 
-$VERSION = "1.02";
+$VERSION = "1.01";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
-my $DEFAULT_AUTODEFER_THRESHOLD = 3; # 3 records
-my $DEFAULT_AUTODEFER_FILELEN_THRESHOLD = 65536; # 16 disk blocksful
+my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
+my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
 
 my %good_opt = map {$_ => 1, "-$_" => 1}
                  qw(memory dw_size mode recsep discipline 
-                    autodefer autochomp autodefer_threshold concurrent);
+                    autodefer autochomp autodefer_threshhold concurrent);
 
 sub TIEARRAY {
   if (@_ % 2 != 0) {
@@ -62,10 +62,10 @@ sub TIEARRAY {
   $opts{autodefer} = 1 unless defined $opts{autodefer};
   $opts{autodeferring} = 0;     # but is not initially active
   $opts{ad_history} = [];
-  $opts{autodefer_threshold} = $DEFAULT_AUTODEFER_THRESHOLD
-    unless defined $opts{autodefer_threshold};
-  $opts{autodefer_filelen_threshold} = $DEFAULT_AUTODEFER_FILELEN_THRESHOLD
-    unless defined $opts{autodefer_filelen_threshold};
+  $opts{autodefer_threshhold} = $DEFAULT_AUTODEFER_THRESHHOLD
+    unless defined $opts{autodefer_threshhold};
+  $opts{autodefer_filelen_threshhold} = $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD
+    unless defined $opts{autodefer_filelen_threshhold};
 
   $opts{offsets} = [0];
   $opts{filename} = $file;
@@ -1100,7 +1100,7 @@ sub _old_flush {
                    @{$self->{deferred}}{$first_rec .. $last_rec});
   }
 
-  $self->_discard;               # clear out deferred-write-cache
+  $self->_discard;               # clear out defered-write-cache
 }
 
 sub _flush {
@@ -1133,7 +1133,7 @@ sub _flush {
   }
 
   $self->_mtwrite(@args);  # write multiple record groups
-  $self->_discard;               # clear out deferred-write-cache
+  $self->_discard;               # clear out defered-write-cache
   $self->_oadjust(@adjust);
 }
 
@@ -1201,7 +1201,7 @@ sub autodefer {
 # Now, what does the ad_history mean, and what is this function doing?
 # Essentially, the idea is to enable autodeferring when we see that the
 # user has made three consecutive STORE calls to three consecutive records.
-# ("Three" is actually ->{autodefer_threshold}.)
+# ("Three" is actually ->{autodefer_threshhold}.)
 # A STORE call for record #$n inserts $n into the autodefer history,
 # and if the history contains three consecutive records, we enable 
 # autodeferment.  An ad_history of [X, Y] means that the most recent
@@ -1220,7 +1220,7 @@ sub _annotate_ad_history {
   my ($self, $n) = @_;
   return unless $self->{autodefer}; # feature is disabled
   return if $self->{defer};     # already in explicit defer mode
-  return unless $self->{offsets}[-1] >= $self->{autodefer_filelen_threshold};
+  return unless $self->{offsets}[-1] >= $self->{autodefer_filelen_threshhold};
 
   local *H = $self->{ad_history};
   if ($n eq 'CLEAR') {
@@ -1232,7 +1232,7 @@ sub _annotate_ad_history {
     } else {                    # @H == 2
       if ($H[1] == $n-1) {      # another consecutive record
         $H[1]++;
-        if ($H[1] - $H[0] + 1 >= $self->{autodefer_threshold}) {
+        if ($H[1] - $H[0] + 1 >= $self->{autodefer_threshhold}) {
           $self->{autodeferring} = 1;
         }
       } else {                  # nonconsecutive- erase and start over
@@ -1562,7 +1562,7 @@ sub lookup {
 #    $self->[MISS]++  if $self->[STAT][$key]++ == 0;
 #    $self->[REQ]++;
 #    my $hit_rate = 1 - $self->[MISS] / $self->[REQ];
-#    # Do some testing to determine this threshold
+#    # Do some testing to determine this threshhold
 #    $#$self = STAT - 1 if $hit_rate > 0.20; 
 #  }
 

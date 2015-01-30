@@ -3720,7 +3720,7 @@ undef_special_case:
  * Write magic number and system information into the file.
  * Layout is <magic> <network> [<len> <byteorder> <sizeof int> <sizeof long>
  * <sizeof ptr>] where <len> is the length of the byteorder hexa string.
- * All size and lengths are written as single characters here.
+ * All size and lenghts are written as single characters here.
  *
  * Note that no byte ordering info is emitted when <network> is true, since
  * integers will be emitted in network order in that case.

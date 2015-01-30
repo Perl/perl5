@@ -381,7 +381,7 @@ Revision history for Perl extension ExtUtils::CBuilder.
    somehow never got into this copy. [Steve Hay]
 
  - Added a new 'defines' parameter to compile(), which gives a
-   platform-independent way to specify various -Dfoo=bar (or the
+   platform-independant way to specify various -Dfoo=bar (or the
    equivalent) compiler defines. [Randy W. Sims]
 
 0.14  Mon Sep 19 13:40:37 CDT 2005
