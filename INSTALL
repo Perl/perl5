@@ -2417,7 +2417,7 @@ http://www.chiark.greenend.org.uk/~sgtatham/bugs.html
 
 =head1 Coexistence with earlier versions of perl 5
 
-Perl 5.20.2 is not binary compatible with earlier versions of Perl.
+Perl 5.20.2 is not binary compatible with versions of Perl earlier than 5.20.0.
 In other words, you will have to recompile your XS modules.
 
 In general, you can usually safely upgrade from one version of Perl (e.g.
@@ -2506,7 +2506,7 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.19.0 or earlier
+=head2 Upgrading from 5.19.11 or earlier
 
 B<Perl 5.20.2 may not be binary compatible with Perl 5.19.11 or
 earlier Perl releases.>  Perl modules having binary parts
