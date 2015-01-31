@@ -15,14 +15,14 @@ document that starts with a checklist for your release.
 
 This script is run as:
 
-  perl Porting/make-rmg-checklist \
-      --type [BLEAD-POINT or MAINT or ...] > /tmp/rmg.pod
+    perl Porting/make-rmg-checklist \
+        --type [BLEAD-POINT or MAINT or ...] > /tmp/rmg.pod
 
 You can also pass the C<--html> flag to generate an HTML document instead of
 POD.
 
-  perl Porting/make-rmg-checklist --html \
-      --type [BLEAD-POINT or MAINT or ...] > /tmp/rmg.html
+    perl Porting/make-rmg-checklist --html \
+        --type [BLEAD-POINT or MAINT or ...] > /tmp/rmg.html
 
 =head1 SYNOPSIS
 
@@ -321,23 +321,23 @@ C<nmake> instead.
 
 Ensure dual-life CPAN modules are stable, which comes down to:
 
- for each module that fails its regression tests on $current
-     did it fail identically on $previous?
-     if yes, "SEP" (Somebody Else's Problem)
-     else work out why it failed (a bisect is useful for this)
+   for each module that fails its regression tests on $current
+       did it fail identically on $previous?
+       if yes, "SEP" (Somebody Else's Problem)
+       else work out why it failed (a bisect is useful for this)
 
- attempt to group failure causes
+   attempt to group failure causes
 
- for each failure cause
-     is that a regression?
-     if yes, figure out how to fix it
-         (more code? revert the code that broke it)
-     else
-         (presumably) it's relying on something un-or-under-documented
-         should the existing behaviour stay?
-             yes - goto "regression"
-             no - note it in perldelta as a significant bugfix
-             (also, try to inform the module's author)
+   for each failure cause
+       is that a regression?
+       if yes, figure out how to fix it
+           (more code? revert the code that broke it)
+       else
+           (presumably) it's relying on something un-or-under-documented
+           should the existing behaviour stay?
+               yes - goto "regression"
+               no - note it in perldelta as a significant bugfix
+               (also, try to inform the module's author)
 
 =head3 monitor smoke tests for failures
 
@@ -377,7 +377,7 @@ bump the version further.
 
 There is a tool to semi-automate this process:
 
-     $ ./perl -Ilib Porting/bump-perl-version -i 5.10.0 5.10.1
+    $ ./perl -Ilib Porting/bump-perl-version -i 5.10.0 5.10.1
 
 Remember that this tool is largely just grepping for '5.10.0' or whatever,
 so it will generate false positives. Be careful not change text like
@@ -400,7 +400,7 @@ to guarantee binary compatibility in maint branches.
 After editing, regenerate uconfig.h (this must be run on a system with a
 /bin/sh available):
 
- $ perl regen/uconfig_h.pl
+    $ perl regen/uconfig_h.pl
 
 This might not cause any new changes.
 
@@ -410,18 +410,18 @@ If so, you must up their version numbers as well.
 
 Test your changes:
 
- $ git clean -xdf   # careful if you don't have local files to keep!
- $ ./Configure -des -Dusedevel
- $ make
- $ make test
+    $ git clean -xdf   # careful if you don't have local files to keep!
+    $ ./Configure -des -Dusedevel
+    $ make
+    $ make test
 
 Commit your changes:
 
- $ git status
- $ git diff
- B<review the delta carefully>
+    $ git status
+    $ git diff
+    B<review the delta carefully>
 
- $ git commit -a -m 'Bump the perl version in various places for 5.x.y'
+    $ git commit -a -m 'Bump the perl version in various places for 5.x.y'
 
 At this point you may want to compare the commit with a previous bump to
 see if they look similar.  See commit f7cf42bb69 for an example of a
@@ -454,7 +454,7 @@ release (so for 5.15.3 this would be 5.15.2).
 
 Check that the copyright years are up to date by running:
 
- $ ./perl t/porting/copyright.t --now
+    $ ./perl t/porting/copyright.t --now
 
 Remedy any test failures by editing README or perl.c accordingly (search for
 the "Copyright"). If updating perl.c, check if the file's own copyright date in
@@ -515,7 +515,7 @@ need to freeze blead during the release. This is less important for
 BLEAD-FINAL, MAINT, and RC releases, since blead will already be frozen in
 those cases. Create the branch by running
 
-  git checkout -b release-5.xx.yy
+    git checkout -b release-5.xx.yy
 
 =head3 build a clean perl
 
@@ -547,8 +547,8 @@ maintainer for 'cpan' upstream modules.
 
 =head4 Bump Module::CoreList* $VERSIONs
 
-If necessary, bump C<$Module::CoreList::VERSION> (there's no need to do this for
-every RC; in RC1, bump the version to a new clean number that will
+If necessary, bump C<$Module::CoreList::VERSION> (there's no need to do this
+for every RC; in RC1, bump the version to a new clean number that will
 appear in the final release, and leave as-is for the later RCs and final).
 It may also happen that C<Module::CoreList> has been modified in blead, and
 hence has a new version number already.  (But make sure it is not the same
@@ -642,27 +642,33 @@ Finally, commit the new version of Module::CoreList:
 (unless this is for MAINT; in which case commit it to blead first, then
 cherry-pick it back).
 
-    $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/Changes dist/Module-CoreList/lib/Module/CoreList.pm dist/Module-CoreList/lib/Module/CoreList/Utils.pm
+    $ git commit -m 'Update Module::CoreList for 5.x.y' \
+        dist/Module-CoreList/Changes \
+        dist/Module-CoreList/lib/Module/CoreList.pm \
+        dist/Module-CoreList/lib/Module/CoreList/Utils.pm
 
 =head4 Rebuild and test
 
-Build and test to get the changes into the currently built lib directory and to ensure
-all tests are passing.
+Build and test to get the changes into the currently built lib directory and to
+ensure all tests are passing.
 
 =head3 finalize perldelta
 
 Finalize the perldelta.  In particular, fill in the Acknowledgements
 section, which can be generated with something like:
 
-  $ perl Porting/acknowledgements.pl v5.15.0..HEAD
+    $ perl Porting/acknowledgements.pl v5.15.0..HEAD
 
-Fill in the "New/Updated Modules" sections now that Module::CoreList is updated:
+Fill in the "New/Updated Modules" sections now that Module::CoreList is
+updated:
 
-  $ ./perl -Ilib Porting/corelist-perldelta.pl --mode=update pod/perldelta.pod
+    $ ./perl -Ilib Porting/corelist-perldelta.pl \
+        --mode=update pod/perldelta.pod
 
 For a MAINT release use something like this instead:
 
-  $ ./perl -Ilib Porting/corelist-perldelta.pl 5.020001 5.020002 --mode=update pod/perldelta.pod
+    $ ./perl -Ilib Porting/corelist-perldelta.pl 5.020001 5.020002 \
+        --mode=update pod/perldelta.pod
 
 Ideally, also fill in a summary of the major changes to each module for which
 an entry has been added by F<corelist-perldelta.pl>.
@@ -678,7 +684,8 @@ run through pod and spell checkers, e.g.
 Also, you may want to generate and view an HTML version of it to check
 formatting, e.g.
 
-    $ ./perl -Ilib ext/Pod-Html/bin/pod2html pod/perldelta.pod > /tmp/perldelta.html
+    $ ./perl -Ilib ext/Pod-Html/bin/pod2html pod/perldelta.pod > \
+        /tmp/perldelta.html
 
 Another good HTML preview option is http://search.cpan.org/pod2html
 
@@ -825,7 +832,7 @@ directory, they will still identify themselves using git tags and
 commits. (Note that for an odd-numbered version, perl will install
 itself as C<perl5.x.y>). C<perl -v> will identify itself as:
 
- This is perl 5, version X, subversion Y (v5.X.Y (v5.X.Z-NNN-gdeadbeef))
+    This is perl 5, version X, subversion Y (v5.X.Y (v5.X.Z-NNN-gdeadbeef))
 
 where 5.X.Z is the latest tag, NNN the number of commits since this tag,
 and C<< deadbeef >> commit of that tag.
@@ -859,13 +866,13 @@ up.
 Create a tarball. Use the C<-s> option to specify a suitable suffix for
 the tarball and directory name:
 
- $ cd root/of/perl/tree
- $ make distclean
- $ git clean -xdf       # make sure perl and git agree on files
- $ git status           # and there's nothing lying around
+    $ cd root/of/perl/tree
+    $ make distclean
+    $ git clean -xdf       # make sure perl and git agree on files
+    $ git status           # and there's nothing lying around
 
- $ perl Porting/makerel -b -s RC1            # for a release candidate
- $ perl Porting/makerel -b                   # for a final release
+    $ perl Porting/makerel -b -s RC1            # for a release candidate
+    $ perl Porting/makerel -b                   # for a final release
 
 This creates the  directory F<../perl-x.y.z-RC1> or similar, copies all
 the MANIFEST files into it, sets the correct permissions on them, then
@@ -1075,11 +1082,11 @@ Send a carbon copy to C<noc@metacpan.org>
 
 Merge the (local) release branch back into master now, and delete it.
 
-  git checkout blead
-  git pull
-  git merge release-5.xx.yy
-  git push
-  git branch -d release-5.xx.yy
+    git checkout blead
+    git pull
+    git merge release-5.xx.yy
+    git push
+    git branch -d release-5.xx.yy
 
 Note: The merge will create a merge commit if other changes have been pushed
 to blead while you've been working on your release branch. Do NOT rebase your
@@ -1282,9 +1289,9 @@ I<You MUST SKIP this step for RC, BLEAD-POINT>
 
 Copy the perldelta.pod for this release into blead; for example:
 
- $ cd ..../blead
- $ cp -i ../5.10.x/pod/perldelta.pod pod/perl5101delta.pod  # for example
- $ git add pod/perl5101delta.pod
+    $ cd ..../blead
+    $ cp -i ../5.10.x/pod/perldelta.pod pod/perl5101delta.pod  # for example
+    $ git add pod/perl5101delta.pod
 
 Don't forget to set the NAME correctly in the new file (e.g. perl5101delta
 rather than perldelta).
@@ -1309,7 +1316,7 @@ Finally, commit and push:
 Make sure any recent F<pod/perlhist.pod> entries are copied to
 F<perlhist.pod> on blead.  e.g.
 
-          5.8.9         2008-Dec-14
+    5.8.9         2008-Dec-14
 
 =head3 bump RT version number
 
@@ -1388,7 +1395,8 @@ test_porting makefile target to check that they're ok.
 
 Run
 
-    $ ./perl -Ilib -MModule::CoreList -le 'print Module::CoreList->find_version($]) ? "ok" : "not ok"'
+    $ ./perl -Ilib -MModule::CoreList \
+        -le 'print Module::CoreList->find_version($]) ? "ok" : "not ok"'
 
 and check that it outputs "ok" to prove that Module::CoreList now knows
 about blead's current version.
