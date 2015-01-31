@@ -83,6 +83,11 @@ my %skip;
 @skip{
     'cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/BFD.pm', # just a test module
     'cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/XS.pm',  # just a test module
+    'cpan/Module-Build/t/lib/DistGen.pm', # just a test module
+    'cpan/Module-Build/t/lib/MBTest.pm',  # just a test module
+    'cpan/Module-Metadata/t/lib/DistGen.pm',    # just a test module
+    'cpan/Module-Metadata/t/lib/MBTest.pm',     # just a test module
+    'cpan/Module-Metadata/t/lib/Tie/CPHash.pm', # just a test module
     'dist/Attribute-Handlers/demo/MyClass.pm', # it's just demonstration code
     'dist/Exporter/lib/Exporter/Heavy.pm',
     'lib/Carp/Heavy.pm',
