@@ -388,8 +388,7 @@ Use git status and git diff to select changes you want to keep.
 Be particularly careful with F<INSTALL>, which contains a mixture of
 C<5.10.0>-type strings, some of which need bumping on every release, and
 some of which need to be left unchanged.
-The line in F<INSTALL> about "is binary incompatible with" requires a
-correct choice of earlier version to declare incompatibility with.
+See below in L<"update INSTALL"> for more details.
 
 When doing a BLEAD-POINT or BLEAD-FINAL release, also make sure the
 C<PERL_API_*> constants in F<patchlevel.h> are in sync with the version
@@ -434,8 +433,11 @@ version number.
 
 =head3 update INSTALL
 
-Review and update INSTALL to account for the change in version number;
-in particular, the "Coexistence with earlier versions of perl 5" section.
+Review and update INSTALL to account for the change in version number.
+The lines in F<INSTALL> about "is not binary compatible with" may require a
+correct choice of earlier version to declare incompatibility with. These are
+in the "Changes and Incompatibilities" and "Coexistence with earlier versions
+of perl 5" sections.
 
 Be particularly careful with the section "Upgrading from 5.X.Y or earlier".
 The "X.Y" needs to be changed to the most recent version that we are
