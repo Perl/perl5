@@ -1222,7 +1222,7 @@ Run a clean build and test to make sure nothing obvious is broken.
 In particular, F<Porting/perldelta_template.pod> is intentionally exempted
 from podchecker tests, to avoid false positives about placeholder text.
 However, once it's copied to F<pod/perldelta.pod> the contents can now
-cause test failures. Problems should resolved by doing one of the
+cause test failures. Problems should be resolved by doing one of the
 following:
 
 =over
