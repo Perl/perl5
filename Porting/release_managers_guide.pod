@@ -632,17 +632,10 @@ Add a perldelta entry for the new Module::CoreList version.
 
 =for checklist skip RC
 
-=head4 Update C<%Module::CoreList::released> and C<CAVEATS>
+=head4 Update C<%Module::CoreList::released>
 
-For any release except an RC:
-
-=over 4
-
-=item *
-
-Update this version's entry in the C<%released> hash with today's date.
-
-=back
+For any release except an RC: Update this version's entry in the C<%released>
+hash with today's date.
 
 =head4 Commit Module::CoreList changes
 
