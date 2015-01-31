@@ -62,7 +62,7 @@ L<[perl #123096]|https://rt.perl.org/Ticket/Display.html?id=123096>
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.020001 to 5.20150128.
+L<Module::CoreList> has been upgraded from version 5.020001 to 5.20150131.
 
 The list of Perl versions covered has been updated.
 
@@ -91,6 +91,18 @@ position is past the 2GB mark on 32-bit systems.
 L<Storable> has been upgraded from version 2.49 to 2.49_01.
 
 Minor grammatical change to the documentation only.
+
+=item *
+
+L<VMS::DCLsym> has been upgraded from version 1.05 to 1.05_01.
+
+Minor formatting change to the documentation only.
+
+=item *
+
+L<VMS::Stdio> has been upgraded from version 2.4 to 2.41.
+
+Minor formatting change to the documentation only.
 
 =back
 
