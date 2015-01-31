@@ -165,6 +165,7 @@ sub is_dualvar($) {
 
     # Objects are not dualvars.
     return 0 if ref $val;
+    return 0 unless defined $val;
 
     no warnings 'numeric';
     my $numval = $val + 0;
@@ -214,6 +215,10 @@ sub translate_filename {
 1;
 
 __END__
+
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -275,8 +280,6 @@ Translate filenames from whatever perl has them stored as into the proper,
 specified, encoding.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

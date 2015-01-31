@@ -54,6 +54,11 @@ sub debug {
 }
 
 1;
+__END__
+
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -97,8 +102,6 @@ Which lists the type of event, the file that generated, and the line number on
 which it was generated.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

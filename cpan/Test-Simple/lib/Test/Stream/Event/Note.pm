@@ -11,7 +11,12 @@ use Test::Stream::Carp qw/confess/;
 
 sub init {
     $_[0]->SUPER::init();
-    $_[0]->[MESSAGE] = 'undef' unless defined $_[0]->[MESSAGE];
+    if (defined $_[0]->[MESSAGE]) {
+        $_[0]->[MESSAGE] .= "";
+    }
+    else {
+        $_[0]->[MESSAGE] = 'undef';
+    }
 }
 
 sub to_tap {
@@ -33,11 +38,13 @@ sub extra_details {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Event::Note - Note event type
-
-=encoding utf8
 
 =head1 DESCRIPTION
 

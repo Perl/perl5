@@ -4,7 +4,7 @@ use B;
 
 use Test::Stream;
 use Test::MostlyLike;
-use Test::More tests => 6;
+use Test::More tests => 8;
 use Test::Builder; # Not loaded by default in modern mode
 my $orig = Test::Builder->can('plan');
 
@@ -84,3 +84,32 @@ mostly_like(
     "Got the warning once"
 );
 
+
+
+no warnings 'redefine';
+*Test::Builder::plan = sub { };
+use warnings;
+my $ok;
+events_are(
+    intercept {
+        $ok = eval {
+            plan(tests => 1);
+            plan(tests => 2);
+            ok(1);
+            ok(1);
+            ok(1);
+            done_testing;
+            1;
+        };
+    },
+    check {
+        event ok => { bool => 1 };
+        event ok => { bool => 1 };
+        event ok => { bool => 1 };
+        event plan => { max => 3 };
+        directive 'end';
+    },
+    "Make sure plan monkeypatching does not effect done_testing"
+);
+
+ok($ok, "Did not die");

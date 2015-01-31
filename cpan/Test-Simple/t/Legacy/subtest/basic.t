@@ -15,7 +15,7 @@ use warnings;
 
 use Test::Builder::NoOutput;
 
-use Test::More tests => 16;
+use Test::More tests => 18;
 
 # Formatting may change if we're running under Test::Harness.
 $ENV{HARNESS_ACTIVE} = 0;
@@ -166,8 +166,18 @@ END
     my $tb = Test::Builder::NoOutput->create;
 
     {
+        my @warnings;
+        local $SIG{__WARN__} = sub { push @warnings, $_[0] };
+
         my $child = $tb->child('skippy says he loves you');
-        eval { $child->plan( skip_all => 'cuz I said so' ) };
+        eval { $child->plan(skip_all => 'cuz I said so') };
+
+        is(scalar(@warnings), 1, "one warning");
+        like(
+            $warnings[0],
+            qr/^SKIP_ALL in subtest could not find flow-control label,/,
+            "the warning"
+        );
     }
     subtest 'skip all', sub {
         plan skip_all => 'subtest with skip_all';

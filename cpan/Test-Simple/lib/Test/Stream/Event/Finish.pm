@@ -18,6 +18,10 @@ sub extra_details {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Event::Finish - The finish event type
@@ -25,8 +29,6 @@ Test::Stream::Event::Finish - The finish event type
 =head1 DESCRIPTION
 
 Sent after testing is finished.
-
-=encoding utf8
 
 =head1 SOURCE
 

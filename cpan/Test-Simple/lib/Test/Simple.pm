@@ -5,10 +5,10 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_097';
+our $VERSION = '1.301001_098';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
-use Test::Stream 1.301001_097 '-internal';
+use Test::Stream 1.301001_098 '-internal';
 use Test::Stream::Toolset;
 
 use Test::Stream::Exporter;
@@ -60,6 +60,10 @@ sub ok ($;$) {    ## no critic (Subroutines::ProhibitSubroutinePrototypes)
 1;
 
 __END__
+
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -233,9 +237,6 @@ programs and things will still work).
 =back
 
 Look in L<Test::More>'s SEE ALSO for more testing modules.
-
-
-=encoding utf8
 
 =head1 SOURCE
 

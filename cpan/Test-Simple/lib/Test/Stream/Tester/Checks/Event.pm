@@ -82,6 +82,11 @@ sub validate_check {
 }
 
 1;
+__END__
+
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -92,8 +97,6 @@ specification.
 
 Used internally by L<Test::Stream::Tester>. Please do not use directly. No
 backwords compatability will be provided if the API for this module changes.
-
-=encoding utf8
 
 =head1 SOURCE
 

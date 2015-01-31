@@ -217,6 +217,10 @@ sub _check_hash {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::More::DeepCheck::Strict - Where is_deeply() is implemented.
@@ -226,8 +230,6 @@ Test::More::DeepCheck::Strict - Where is_deeply() is implemented.
 This is the package where the code for C<is_deeply()> from L<Test::More> lives.
 This code was refactored into this form, but should remain 100% compatible with
 the old implementation. If you find an incompatability please report it.
-
-=encoding utf8
 
 =head1 SOURCE
 

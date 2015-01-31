@@ -36,6 +36,9 @@ WARNING
 1;
 
 __END__
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -188,8 +191,6 @@ Sometimes you want to ignore the methods and get the hash value directly.
     my $exp = { ':foo' => 'secret' };
 
     mostly_like($got, $exp, "Did not call the fatal method");
-
-=encoding utf8
 
 =head1 SOURCE
 

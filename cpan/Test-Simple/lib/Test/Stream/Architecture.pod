@@ -1,3 +1,7 @@
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Architecture - overview of how the Test-More dist works.
@@ -349,8 +353,6 @@ the hood, a L<Child> event is started which adds a subtest to a stack in
 Test::Stream, and then all events get intercepted by that subtest. When the
 subtest is done, issue another Child event to close it out. Once closed, a
 Subtest event will be generated for you and sent to the stream.
-
-=encoding utf8
 
 =head1 SOURCE
 

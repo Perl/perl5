@@ -105,6 +105,10 @@ This is almost certainly not what you wanted. Did you fork and forget to exit?
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 Name
 
 Test::Stream::Subtest - Encapsulate subtest start, run, and finish.
@@ -114,8 +118,6 @@ Test::Stream::Subtest - Encapsulate subtest start, run, and finish.
     use Test::Stream::Subtest;
 
     subtest $name => sub { ... };
-
-=encoding utf8
 
 =head1 SOURCE
 

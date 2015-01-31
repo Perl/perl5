@@ -1,0 +1,943 @@
+package Test::Stream::Explanation;
+
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+Test::Stream::Explanation - Explanation of all things Test::Stream
+
+=head1 Summary of problems the new internals solve
+
+=over 4
+
+=item Monolithic singleton
+
+=item Subtests are a horrible hack
+
+=item No event monitoring/munging
+
+=item Diags and Oks are not linked
+
+=item $Level is fragile, non-obvious, and actively harmful
+
+=item Depth ($Level) is a bad thing to test against
+
+=item There is no good way to validate testing tools, only mediocre ways
+
+=item Cannot reuse Test::More tools without generating TAP
+
+=item TAP is mandatory
+
+=item Setting the encoding requires major hackery
+
+=item No forking support
+
+=item Shared variable hackery in thread support
+
+=back
+
+=head1 Solutions
+
+=head2 Singleton
+
+The biggest problem with Test::Builder is that it does 2 things at once.  The
+first thing it does is synchronization, which is accomplished by making it a
+singleton. The second thing it does is provide a collection of useful tools and
+shortcuts for generating events. This is an issue because the tools are tied to
+the singleton, Subclassing Test::Builder is not an option, and there are few
+hooks. You essentially have to hack the Test::Builder object, and hope nobody
+else does the same.
+
+Test::Stream now houses synchronization code, all events come to Test::Stream,
+which makes sure the state is updated, and then forwards the events to where
+they need to be, including producing the TAP output. This module synchronizes
+state, threads, processes, and events.
+
+Unlike Test::Builder, Test::Stream is not a true singleton. Test::Stream has a
+singleton stack, and code always uses the instance at the top of the stack.
+This allows you to temporarily push an instance to the top in order to
+intercept events.
+
+Anything not essential to synchronization is kept in other modules. This model
+allows you to subclass tools as you see fit. You can create and destroy
+instances as needed. You can create your own toolboxes without accounting for
+the nature of a singleton.
+
+=head2 Subtests
+
+Do not read the subtest implementation in the legacy Test::Builder code, if
+your eyes bleed that much you won't be able to finish reading this document.
+They first copy the singleton, then reset the originals internals, do their
+thing, then restore the original internals. This is not an attack against the
+people that wrote it; they did the best that could be done with the singleton
+they had to work with. The only way to write a better implementation is to move
+away from the monolithic singleton model.
+
+Subtests are now integrated into the design of Test::Stream. Test::Stream
+maintains a state stack. When a subtest starts it pushes a new state to the top
+of the stack, when it is finished it pops the state. Designing the internals
+with subtests in mind from the beginning significantly reduces the hackery
+necessary to make them work.
+
+Note: There is still some other stuff that makes subtests non-trivial, such as
+TODO inheritance. But most of the problems related to subtests are solved in
+much saner ways now.
+
+=head2 Event Handling
+
+In Test::Builder, ok, diag, note, etc. were all simply methods. You call the
+method you get some TAP. There was no easy way to hook into the system and
+modify an event. There is also no easy way to listen for events, or maintain a
+complete list, short of parsing TAP.
+
+All "events" are now proper objects. Tools generate events such as 'ok' and
+'diag', then send them to the Test::Stream instance at the top of the stack.
+Test::Stream provides hooks for you to modify events before the test state is
+updated, as well as hooks for reading/displaying/storing events after the state
+is updated. There is also a hook for the end of the test run (done_testing, or
+test ended).
+
+This is what Test::Stream is named Test::Stream, all events stream from the
+tools into the Test::Stream funnel, which then gets them where they need to go.
+Previously these kinds of actions required monkeypatching.
+
+=head2 Linking ok and diag
+
+Tools would typically call C<< $TB->ok >>, then call C<< $TB->diag >>. Both
+would produce output. There is no easy way to associate the diag and the ok.
+Often the messages can appear out of order, or far apart. Usually a human can
+figure out what goes where, but connecting them programmatically is very hard
+to do after the fact.
+
+Diags and oks can still exist as independent events, but by default all Test::More
+tools link the 'ok' and 'diag' events they produce. This allows code to process
+the ok and attached diagnostics as one unit. This prevents guess work
+previously required to accomplish this. Any downstream tool can also link 'ok'
+and 'diag' objects, but they are not required to do so for compatibility
+reasons.
+
+NOTE: Once the events are turned into TAP they still have the same issue as
+before, TAP itself does not provide any way of linking the diag and the ok.
+
+=head2 $Level
+
+=head3 Whats the problem with $Level?
+
+    local $Test::Builder::Level = $Test::Builder::Level + $x;
+
+At a glance the code above seems reasonable... But there are caveats:
+
+=over 4
+
+=item What if you have multiple Test::Builder instances?
+
+Don't
+
+=item What about subtests?
+
+$Level is zeroed out and restored later.
+
+=item What if my unit tests validate the value of $Level, but Test::Builder adds another layer?
+
+Test::Builder can never break large subs into small ones for this reason. Or
+better yet, don't use Test::Tester since you have to jump through hoops for it
+to skip testing level.
+
+=item This is a non-obvious interface for new perl developers.
+
+This code requires you to know about local, package variables, and scope. In
+some cases you also need to do math, something better left to the computer.
+
+=back
+
+=head3 How is it solved?
+
+L<Test::Stream::Context>
+
+Instead of bumping $Level, you ask for a $context instance. You normally ask
+for the $context at the shallowest level of your tools code. The context
+figures out what file+line errors should be reported to, as well as recording
+other critical per-test state such as TODO.
+
+Once you obtain a context, anything else that asks for the context will find
+the one you already have. Once nothing is holding a reference to the context, a
+new one can be generated. Essentially this lets the first tool in the stack
+lock in a context, and all deeper tools find it. When your tool is finished the
+Context is destroyed allowing the next tool to repeat the process. This lets
+you stack tools arbitrarily without concerning yourself with depth value.
+
+Note: You can pass a level/depth value when obtaining a context if for some
+reason you cannot obtain it at the shallowest level.
+
+Note: Context takes the value of $Level into account for compatibility reasons.
+Backcompat like this adds an unfortunate level of complexity to Context.
+
+=head2 Validating test tools
+
+Test::Builder::Tester simply captures all output from Test::Builder. Your job
+is to compare the strings it intercepts with the strings you expect. There are
+a few helpers to reduce the tedious nature of these string compares, but
+ultimately they are not very flexible. Changing the indentation of a comment
+intended for human consumption can break any and all modules that use
+Test::Builder::Tester.
+
+Test::Tester is a huge improvement, but lacks support for numerous features.
+Test::Tester also works (worked) by replacing the singleton and monkeypatching
+a lot of methods. Testing tools that also need to monkeypatch is not possible.
+In addition it made too many assumptions about what you wanted to do with the
+results it found.
+
+The solution here is Test::Stream::Tester. Test::Stream::Tester leverages the
+stack nature of Test::Stream to intercept events generated over a specific
+scope. These event objects can then be verified using well known tools from
+Test::More, or the tools Test::Stream::Tester itself provides to make
+validating events super easy.
+
+Another validation problem solved here is that you can filter, or be selective
+about what events you care about. This allows you to test only the parts that
+your module generates. This is helpful in ensuring changes upstream do not
+break your tests unless they actually break your modules behavior.
+
+=head2 Resusable Test::More tools.
+
+Often people would write test subs that make use of tools such as C<like>,
+C<is_deeply>, and others in a sequence to validate a single result. This
+produces an 'ok' and/or diag for each tool used. In many cases people would
+prefer to produce only a single final event, and a combined diagnostic message.
+This is now possible.
+
+L<Test::More::Tools> and L<Test::More::DeepCheck> solve this problem. Nearly
+all the internals of Test::More have been moved into these 2 modules. The subs
+in these modules return a boolean and diagnostics messages, but do not fire off
+events. These are then wrapped in Test::More to actually produce the events.
+Using these tools you can create composite tools that produce a single event.
+
+L<Test::More::DeepCheck> is the base for is_deeply. This is useful because it
+gives you a chance to create tools like is_deeply with similar diagnostics (for
+better or worse). An example of this is L<Test::MostlyLike>.
+
+=head2 Mandatory TAP.
+
+99% of the time you want TAP. With the old internals turning TAP off was hard,
+and usually resulted in a useless Test::Builder.
+
+There is now a single switch you can use to turn TAP on and off. The listener
+feature of Test::Stream gives you the ability to produce whatever output you
+desire for any event that comes along. All the test state is still kept
+properly.
+
+=head2 Setting the encoding
+
+Legacy Test::Builder would clone the standard filehandles, reset them, and
+modify them in various ways as soon as it loaded. Changes made to STDERR and
+STDOUT after this action would have no effect on Test::Builder. You could
+modify/set/reset Test::Builders filehandles, but this was not obvious. Setting
+the encoding of the handles in Test::Builder could also be dangerous as other
+modules might have changes the handles.
+
+For compatibility reasons Test::Stream still has to do all the filehandle
+manipulation Test::Builder did. However it encapsulates it better and makes it
+significantly easier to modify. Every class that produces events gets a
+meta-object. The meta-object has an option for encoding. You can ask for a
+specific encoding when you load Test::More, or you can change it at any point
+in the test.
+
+Encodings are managed by <Test::Stream::IOSets>. Each Test::Stream instance has
+an instance of L<Test::Stream::IOSets>. The default encoding is called 'legacy'
+and it does what Test::Builder has always done. You can ask for a specific
+encoding, such as utf8, and IOSets will create a new clone of STDERR and STDOUT
+and handle setting the encoding for you. IOSets can manage several encodings
+all at once, so you can switch as necessary in your tests, or have multiple
+tests under the same process that use different encodings.
+
+=head2 Threads and Forking
+
+Legacy Test::Builder does not support producing results from multiple threads
+without serious hacking or questionable third party modules (Of which I own
+one, and help maintain another).
+
+Legacy Test::Builder does support threading, but only if threads are loaded
+first. It uses shared variables and locking to maintain the test state and
+ensure test numbers are consistent.
+
+Test::Stream has forking support baked in (though you have to ask for it).
+Thread support has been changed to use the same mechanism as forking support.
+There are no shared variables. Test::Stream implements checks to ensure that
+all events generated get funneled to the parent process/thread where they can
+then be properly processed.
+
+=head1 Module justifications
+
+All code is a liability. Any module which is included in the dist requires
+some justification. If there is no justification for including the module the
+sensible thing to do would be to purge it.
+
+=head2 Test::Builder
+
+Required for legacy support and backwards compatibility.
+
+=head2 Test::Builder::Module
+
+Required for legacy support and backwards compatibility. In the past people
+were urged to use this as a base class for all testing tools. To my knowledge
+adoption was very low.
+
+=head2 Test::Builder::Tester
+
+Has been included for many years. Tightly coupled with the rest of the testing
+tools. Wide adoption.
+
+=head3 Additional components
+
+=over 4
+
+=item Test::Builder::Tester::Color
+
+=back
+
+=head2 Test::CanFork
+
+Encapsulation of some logic that used to be duplicated in several Test-Simple
+tests. Now usable by anyone.
+
+This module lets you make a test conditional upon support for forking.
+
+=head2 Test::CanThread
+
+Encapsulation of some logic that used to be duplicated in several Test-Simple
+tests. Now usable by anyone.
+
+This module lets you make a test conditional upon support for threads.
+
+=head2 Test::More
+
+This requires no justification.
+
+=head3 Additional components
+
+=over 4
+
+=item Test::More::DeepCheck
+
+This is a base class for tools that resemble is_deeply. A lot of this is
+valuable logic that is now reusable.
+
+=item Test::More::DeepCheck::Strict
+
+This is the subclass that implements is_Deeply itself. I will not that this was
+a refactor, not a re-implementation, there should be zero net-change to how
+is_deeply behaves.
+
+=item Test::More::Tools
+
+This is where the guts of Test::More tools live. This is here so that they can
+be reused in composite tests without any hacking. This was a refactor, not
+redesign from the ground up.
+
+=back
+
+=head2 Test::MostlyLike
+
+This implements a new tool similar to is_deeply called mostly_like. This is
+included in the dist because I wrote it specifically to test the Test-Simple
+internals. It is also useful enough to publish publicly.
+
+=head3 Additional components
+
+=over 4
+
+=item Test::More::DeepCheck::Tolerant
+
+This is the subclass that implements mostly_like.
+
+=back
+
+=head2 Test::Simple
+
+This requires no justification. This is also the module the dist is named after.
+
+=head2 Test::Stream
+
+This is the new crux of Test-Simple.
+
+Test::Stream is the hub to which all events flow. It is also responsible for
+ensuring all events get to the correct place. This is where all synchronization
+happens.
+
+=head3 Additional components
+
+=over 4
+
+=item Test::Stream::API
+
+This is sugar-coating. This is the go-to place when people wish to know the
+easiest way to accomplish something fancy.
+
+=item Test::Stream::Meta
+
+Metadata assigned to test files/packages
+
+=item Test::Stream::PackageUtil
+
+Utilities for inspecting package internals
+
+=item Test::Stream::Subtest
+
+Encapsulation of subtest logic
+
+=item Test::Stream::Threads
+
+Encapsulation of threading tools
+
+=item Test::Stream::Util
+
+Misc Utilities used all over Test-Simple
+
+=back
+
+=head2 Test::Stream::ArrayBase
+
+All objects in Test::Stream use this to generate methods and constructors. This
+is done here, and the way it is, for performance. Before implementing this ans
+switching to it, performance was bad enough to keep the new internals out of
+core.
+
+=head3 Additional components
+
+=over 4
+
+=item Test::Stream::ArrayBase::Meta
+
+=back
+
+=head2 Test::Stream::Block
+
+Subtests are typically codeblocks. This is an object to represent them. There
+is some development in this module that will provide profoundly useful
+debugging for subtests, though it has not yet been enabled. This module is in
+the dist mainly to give it a shakedown and prove it before turning on the extra
+debugging.
+
+=head2 Test::Stream::Carp
+
+We cannot load Carp until we actually need it, if we do it can cause unexpected
+test passes downstream. This is one of few core modules I am willing to do this
+for, mainly because legacy had the same policy.
+
+This module provides the same tools as Carp, they simple load Carp and call the
+correct sub from there.
+
+=head2 Test::Stream::Context
+
+This module is responsible for gathering details about events that are to be
+generated. It is responsible for figuring out where errors should be reported,
+if we are in a TODO, and various other meta-data.
+
+This module is an essential module.
+
+It also handles backwards compatibility with $Level, $TODO, and
+C<< Test::Builder->todo_start >>.
+
+=head2 Test::Stream::Event
+
+All 'events' are now proper objects, this is the base class for all events.
+
+=head3 Additional components
+
+=over 4
+
+=item Test::Stream::Event::Bail
+
+Event for bailing out.
+
+=item Test::Stream::Event::Diag
+
+Event for diagnostics
+
+=item Test::Stream::Event::Finish
+
+Event for the end of the test.
+
+=item Test::Stream::Event::Note
+
+Event for notes.
+
+=item Test::Stream::Event::Ok
+
+The 'ok' event is the most well known. This is an essential event.
+
+=item Test::Stream::Event::Plan
+
+This event is triggered whenever a plan is declared.
+
+=item Test::Stream::Event::Subtest
+
+Subtests are their own event, it is a subclass of the
+L<Test::Stream::Event::Ok> event.
+
+=back
+
+=head2 Test::Stream::ExitMagic
+
+This is where the magic that happens when a test process exists is
+encapsulated. Some of this is pretty grody or questionable, nearly all of it is
+here for legacy reasons.
+
+=head3 Additional components
+
+=over 4
+
+=item Test::Stream::ExitMagic::Context
+
+Special Context object to use from ExitMagic. This is because a lot of Context
+logic is a bad idea when run from an END block.
+
+=back
+
+=head2 Test::Stream::Exporter
+
+Test-Simple has to do a lot of exporting. Some of the exporting is not easy to
+achieve using L<Exporter>. I can't use an export tool from cpan, so I had to
+implement the bare minimum I needed here.
+
+=head3 Additional components
+
+=over 4
+
+=item Test::Stream::Exporter::Meta
+
+=back
+
+=head2 Test::Stream::ForceExit
+
+This module is used to ensure that code exits by the end of a scope. This is
+mainly for cases where you fork down stack from an eval and your code throws
+and exception before it can exit.
+
+(A quick grep of the code tells me this is not in use anymore/yet. It can
+probably be purged)
+
+=head2 Test::Stream::IOSets
+
+This is where filehandles and encodings are managed. This is here both to
+implement legacy filehandle support, and to enable support for encodings.
+
+=head2 Test::Stream::Tester
+
+This module is intended to be the new and proper way to validate testing tools.
+It supports all features of Test::Stream, and provides tools and helpers that
+make the job easier.
+
+=head3 Additional components
+
+=over 4
+
+=item Test::Stream::Tester::Checks
+
+=item Test::Stream::Tester::Checks::Event
+
+=item Test::Stream::Tester::Events
+
+=item Test::Stream::Tester::Events::Event
+
+=item Test::Stream::Tester::Grab
+
+=back
+
+=head2 Test::Stream::Toolset
+
+This module provides the minimum set of tools most test tools need to work.
+
+=head2 Test::Tester
+
+This is an important part of the ecosystem. It makes no sense to ship this
+independently. Changes to Test-Simple can break this in any number of ways,
+integration is the only sane option.
+
+=head3 Additional components
+
+Most of these remain for legacy support.
+
+=over 4
+
+=item Test::Tester::Capture
+
+=item Test::Tester::CaptureRunner
+
+=item Test::Tester::Delegate
+
+=back
+
+=head2 Test::use::ok
+
+This module implements the sane companion to C<use_ok> which is C<use ok>.
+There has been a desire to combine this into Test-Simple for years, I finally
+did it.
+
+=head3 Additional components
+
+=over 4
+
+=item ok
+
+This is where the actual implementation lives.
+
+=back
+
+=head1 Compatability Shims
+
+Some modules need to jump through extra hoops in order to support legacy code.
+This section describes these instances.
+
+=head2 Test::Builder
+
+Nearly everything in this module is here purely for legacy and compatibility.
+But there are some extra-notable items:
+
+=over 4
+
+=item $_ORIG_Test
+
+=item %ORIG
+
+=item %WARNED
+
+These 3 variables are used to track and warn about changes to the singleton or
+method monkeypatching that could cause problems.
+
+=item ctx()
+
+A special context method that does extra C<$Level> accounting.
+
+=item %TB15_METHODS
+
+=item AUTOLOAD
+
+Used to warn people when they appear to be using Test::Builder 1.5 methods that
+never actually made it into production anywhere.
+
+=item underscore methods
+
+There are several private methods (underscore prefix) that were never intended
+for external use. Despite underscores, warnings, and other such things people
+used them externally anyway. Most were purged, but these were left because an
+unbelievable amount of downstream things appear to depend on them.
+
+=back
+
+=head2 Test::Stream
+
+The state array has an extra field identified by the constant C<STATE_LEGACY>.
+This is an array of all events of some types. Test::Builder used to maintain an
+array of hashes representing events for inspection later. Code which relied on
+this capability now depends on this and some translation logic in
+Test::Builder.
+
+Unlike in old Test::Builder this feature can be turned off for performance and
+memory improvement.
+
+=head2 Test::Stream::Util
+
+=over 4
+
+=item is_dualvar
+
+Test::More has its own is_dualvar. This differs from Scalar::Utils dualvar
+checker, enough to break cmp_ok. Because of the breakage I have not switched.
+
+=item is_regex
+
+Test::More tools check if things are regexes in many places. The way it does
+this, and the things it considers to be regexes are suprising. Much of this is
+due to VERY old code that might predate quick regexes. Switching away from this
+would break a lot of things.
+
+=item unoverload
+
+Test::More has its own ideas of unoverloading things and when it is necessary.
+Not safe to migrate away from this.
+
+=back
+
+=head2 Test::Stream::Context
+
+=over 4
+
+=item TODO
+
+Has to look for todo in 4 places. $TODO in the test package, $TODO in
+Test::More, the todo value of the Test::Builder singleton, and the todo in test
+package meta-data. The main issue here is no good TODO system has ever been
+found, so we use and support 4 mediocre or even bad ones.
+
+=item $Level
+
+Test::Builder has historically been very forgiving and clever when it comes to
+$Level. Context takes $Level into account when finding the proper file + line
+number for reporting errors. If $Level is wrong it attempts to be as forgiving
+as Test::Builder was. Requiring $Level to be correct breaks an unfortunate
+number of downstream tools, so we have to stay forgiving for now.
+
+=item Test::Builder monkeypatching
+
+When Test::Builder gets monkeypatched, we need to detect it here and try to
+incorporate the monkeypatching. This is a horrible hack that works surprisingly
+well.
+
+=item hide_todo + restore_todo
+
+Subtests need to hide the TODO state, they have always done this historically.
+These methods accomplish this... for all 4 ways you can set TODO.
+
+=back
+
+=head2 Test::Stream::ExitMagic
+
+Test::Builder does a lot of stuff at exit. I would argue that a lot of this
+should be harness logic. However compatibility and people relying on it means
+we cannot just remove it all at once.
+
+This magic is called though either an END block, or done_testing. Sometimes
+both.
+
+=head2 Test::Stream::IOSets
+
+Test::Builder clones STDERR and STDOUT and resets them to what it thinks they
+should be. This encapsulates that logic and calls it 'legacy'. It then provides
+mechanisms for actually supporting custom filehandles and encodings.
+
+=head2 Test::Tester
+
+This makes use of the STATE_LEGACY key mentioned in the Test::Stream section.
+This also needs to do some gymnastics and monkeypatching for $Level support.
+
+=head1 Design Decisions
+
+=head2 Test::Builder
+
+Decided to turn this into a legacy wrapper. It is no longer essential for
+anything new.
+
+=head2 Test::More
+
+Decided to refactor the logic out into reusable parts. No net change except for
+some bug fixes.
+
+At one point some redesign was started, but it was abandoned, this mainly had
+to do with use_ok and require_ok, which are horrible.
+
+=head3 Additional components
+
+Most logic was moved into these 3 modules
+
+=over 4
+
+=item Test::More::DeepCheck
+
+is_deeply stack and diagnostics
+
+=item Test::More::DeepCheck::Strict
+
+is_deeply inner check functions
+
+=item Test::More::Tools
+
+Everything else.
+
+=back
+
+=head2 Test::Stream
+
+=over 4
+
+=item Instead of a singleton, we have a stack of singletons
+
+We can't avoid using a singleton-like pattern when we are dealing with a shared
+state. However there are times where we need to work around the singleton
+model. The main example is writing tests for testing tools. The singleton stack
+allows us to put new instances in place that will steal focus.
+
+Anything that produces events should send them to the topmost instance of
+Test::Stream. Using tools like Test::Stream::Context and Test::Builder handle
+this for you.
+
+In the old system you were expected to cache a copy of the Test::Builder
+singleton, this caused problems when code needed to replace the singleton.
+Subtests had to implement and ugly hack around this problem. In the new system
+test state is also a stack, subtests work by pushing a new state, they do not
+need to replace the entire singleton.
+
+=item Only state and synchronization is handled here
+
+Since this module is somewhat singleton in nature, we keep it as small as
+possible. Anything that is put into a singleton-like object is hard to expand.
+If it is not related to synchronization or common state, I tried to put it
+somewhere else.
+
+=item Events are proper objects
+
+In the old design events were just methods that produced TAP.  Now they are
+proper objects that can be constructed, altered, passed around, etc.
+
+=item This module is a hub through which events stream
+
+Events are built by testing tools, once ready the events are given to
+Test::Stream to ensure they get to the right place.
+
+=back
+
+=head2 Test::Stream::Meta
+
+Attaching meta-data to tests was a design decision adopted for settings that
+people want, but might be different from test file to test file. Being able to
+use different settings in different files is necessary for advanced testing
+tools that might load multiple files at a time. Examples include Fennec,
+Test::Class, etc.
+
+Currently TODO and tap_encoding are the only significant settings here.
+
+=head2 Test::Stream::ArrayBase
+
+This is the OO implementation used all over Test::Stream. The initial upgrade
+to OO from a single object where hash elements were directly accessed resulted
+in a significant slowdown.
+
+To avoid the slowdown a couple design decision were made:
+
+=over 4
+
+=item Objects would be array based
+
+=item Constants would be used to access elements
+
+=item Single inheritance only for simplicity
+
+=item Seperate reader+writer methods
+
+=item generate methods for each attribute that use $_[xxx] and constants
+
+=back
+
+Together these designs resulted in huge performance gains.
+
+=head2 Test::Stream::Context
+
+The context object is created when a testing tool is called. Any testing tools
+called within will find the existing context. This context stores important
+things like test file, line number, etc.
+
+This is implemented as a weak singleton. When a tool gets a context is is
+crated. When a tool returns the context is garbage collected and destroyed.
+This allows the next tool to obtain a new context.
+
+=head2 Test::Stream::Event::Subtest
+
+The subtest event is a subclass of the ok event. This is done because a subtest
+ultimately boils down to an 'ok'.
+
+=head2 Test::Stream::Exporter
+
+Test::Stream has to do some fancy exporting, specially due to
+Test::Stream::ArrayBase and the attribute constants. This exporter is a very
+light implementation modeled on Exporter::Declare. It uses a meta-object to
+track exports.
+
+=head1 SOURCE
+
+The source code repository for Test::More can be found at
+F<http://github.com/Test-More/test-more/>.
+
+=head1 MAINTAINER
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=back
+
+=head1 AUTHORS
+
+The following people have all contributed to the Test-More dist (sorted using
+VIM's sort function).
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=item Fergal Daly E<lt>fergal@esatclear.ie>E<gt>
+
+=item Mark Fowler E<lt>mark@twoshortplanks.comE<gt>
+
+=item Michael G Schwern E<lt>schwern@pobox.comE<gt>
+
+=item 唐鳳
+
+=back
+
+=head1 COPYRIGHT
+
+There has been a lot of code migration between modules,
+here are all the original copyrights together:
+
+=over 4
+
+=item Test::Stream
+
+=item Test::Stream::Tester
+
+Copyright 2014 Chad Granum E<lt>exodist7@gmail.comE<gt>.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See F<http://www.perl.com/perl/misc/Artistic.html>
+
+=item Test::Simple
+
+=item Test::More
+
+=item Test::Builder
+
+Originally authored by Michael G Schwern E<lt>schwern@pobox.comE<gt> with much
+inspiration from Joshua Pritikin's Test module and lots of help from Barrie
+Slaymaker, Tony Bowden, blackstar.co.uk, chromatic, Fergal Daly and the perl-qa
+gang.
+
+Idea by Tony Bowden and Paul Johnson, code by Michael G Schwern
+E<lt>schwern@pobox.comE<gt>, wardrobe by Calvin Klein.
+
+Copyright 2001-2008 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See F<http://www.perl.com/perl/misc/Artistic.html>
+
+=item Test::use::ok
+
+To the extent possible under law, 唐鳳 has waived all copyright and related
+or neighboring rights to L<Test-use-ok>.
+
+This work is published from Taiwan.
+
+L<http://creativecommons.org/publicdomain/zero/1.0>
+
+=item Test::Tester
+
+This module is copyright 2005 Fergal Daly <fergal@esatclear.ie>, some parts
+are based on other people's work.
+
+Under the same license as Perl itself
+
+See http://www.perl.com/perl/misc/Artistic.html
+
+=item Test::Builder::Tester
+
+Copyright Mark Fowler E<lt>mark@twoshortplanks.comE<gt> 2002, 2004.
+
+This program is free software; you can redistribute it
+and/or modify it under the same terms as Perl itself.
+
+=back

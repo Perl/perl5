@@ -16,7 +16,7 @@ require Exporter;
 
 use vars qw( @ISA @EXPORT $VERSION );
 
-our $VERSION = '1.301001_097';
+our $VERSION = '1.301001_098';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 @EXPORT  = qw( run_tests check_tests check_test cmp_results show_space );
@@ -319,6 +319,10 @@ sub _export_to_level {
 1;
 
 __END__
+
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -668,8 +672,6 @@ for an alternative approach to the problem tackled by Test::Tester -
 captures the strings output by Test::Builder. This means you cannot get
 separate access to the individual pieces of information and you must predict
 B<exactly> what your test will output.
-
-=encoding utf8
 
 =head1 SOURCE
 

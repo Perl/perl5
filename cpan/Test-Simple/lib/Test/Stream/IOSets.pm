@@ -108,6 +108,10 @@ sub _apply_layers {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::IOSets - Manage sets of IO Handles in specific encodings.
@@ -141,8 +145,6 @@ created by cloning STDER and STDOUT and modifying them to use the correct
 encoding.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

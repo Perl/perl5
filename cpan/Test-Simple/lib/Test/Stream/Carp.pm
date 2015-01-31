@@ -15,6 +15,10 @@ Test::Stream::Exporter->cleanup;
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Carp - Delayed Carp loader.
@@ -40,8 +44,6 @@ See L<Carp> for details on each of these functions.
 =item carp
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

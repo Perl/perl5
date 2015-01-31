@@ -61,6 +61,11 @@ Test::Stream::Exporter->cleanup();
 
 
 1;
+__END__
+
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -314,8 +319,6 @@ complete.
 
 See L<Test::Stream::Tester>. This library gives you all the tools you need to
 test your testing tools.
-
-=encoding utf8
 
 =head1 SOURCE
 

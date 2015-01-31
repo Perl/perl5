@@ -57,6 +57,8 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Tester::Grab - Object used to temporarily steal all events.
@@ -113,8 +115,6 @@ Get an arrayref of all events so far, does not clear the internal list.
 Get an arrayref of all the events, then destroy the grab object.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

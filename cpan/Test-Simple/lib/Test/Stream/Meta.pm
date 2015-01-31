@@ -38,6 +38,10 @@ sub init_tester {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Meta - Meta object for unit test packages.
@@ -100,8 +104,6 @@ original does.
 These are various attributes stored on the meta object.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

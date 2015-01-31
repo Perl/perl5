@@ -19,7 +19,7 @@ unless ($pid) {
 
     {
         my $force_exit = Test::Stream::ForceExit->new;
-        diag "In Child";
+        note "In Child";
     }
 
     print $write "Did not exit!";
@@ -48,7 +48,7 @@ unless ($pid) {
 
     {
         my $force_exit = Test::Stream::ForceExit->new;
-        diag "In Child $$";
+        note "In Child $$";
         $force_exit->done(1);
     }
 

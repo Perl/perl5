@@ -126,6 +126,10 @@ sub get {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Exporter::Meta - Meta object for exporters.
@@ -133,8 +137,6 @@ Test::Stream::Exporter::Meta - Meta object for exporters.
 =head1 DESCRIPTION
 
 L<Test::Stream::Exporter> uses this package to manage exports.
-
-=encoding utf8
 
 =head1 SOURCE
 

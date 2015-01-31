@@ -1,3 +1,7 @@
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::FAQ - Frequently Asked Questions about testing with Perl
@@ -375,8 +379,6 @@ not do any testing.  It simply returns true or false.  Use the following code...
 
     # Now you can use the testing function.
     print is_deeply( "foo", "bar" ) ? "Yes" : "No";
-
-=encoding utf8
 
 =head1 SOURCE
 

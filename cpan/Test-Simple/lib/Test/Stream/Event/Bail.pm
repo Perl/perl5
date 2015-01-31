@@ -28,6 +28,10 @@ sub extra_details {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Event::Bail - Bailout!
@@ -80,8 +84,6 @@ Reason for the bailout
 Boolean, true if the bailout should be quiet.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

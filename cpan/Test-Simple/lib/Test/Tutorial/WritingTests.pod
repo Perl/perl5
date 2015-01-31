@@ -1,5 +1,7 @@
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Tutorial::WritingTests - A Complete Introduction to writing tests
@@ -96,8 +98,6 @@ L<Test::More>
 =head1 Writing tools.
 
 See L<Test::Tutorial::WritingTools>
-
-=encoding utf8
 
 =head1 SOURCE
 

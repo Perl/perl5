@@ -32,7 +32,7 @@ __END__
 
 =head1 NAME
 
-Test::ForceExit - Ensure C<exit()> is called bvy the end of a scope, force the issue.
+Test::ForceExit - Ensure C<exit()> is called by the end of a scope, force the issue.
 
 =head1 DESCRIPTION
 

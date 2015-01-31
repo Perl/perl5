@@ -119,6 +119,10 @@ sub add_accessors {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::ArrayBase::Meta - Meta Object for ArrayBase objects.
@@ -180,8 +184,6 @@ Add an accessor to the package. Also defines the C<"set_$name"> method, and the
 C<uc($name)> constant.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

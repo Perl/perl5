@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.005;
 
-our $VERSION = '1.301001_097';
+our $VERSION = '1.301001_098';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream 1.301001 '-internal';
@@ -11,7 +11,9 @@ use Test::Stream 1.301001 '-internal';
 1;
 __END__
 
-=encoding utf8
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -48,8 +50,6 @@ makes it clear that this is a single compile-time action.
 =head1 SEE ALSO
 
 L<Test::More>
-
-=encoding utf8
 
 =head1 SOURCE
 

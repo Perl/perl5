@@ -97,6 +97,10 @@ sub to_hash {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::ArrayBase - Base class for classes that use an arrayref instead
@@ -269,8 +273,6 @@ When Test::Builder was initially refactored to support events, it was slow
 beyond reason. A large part of the slowdown was due to the use of proper
 methods instead of directly accessing elements. We also switched to using a LOT
 more objects that have methods.
-
-=encoding utf8
 
 =head1 SOURCE
 

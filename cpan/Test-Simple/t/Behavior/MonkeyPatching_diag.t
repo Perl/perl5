@@ -13,6 +13,7 @@ my $orig = Test::Builder->can('diag');
     use Test::More;
     use Test::Stream;
     use Test::MostlyLike;
+    use Test::Stream::Tester qw/intercept/;
 
     no warnings 'redefine';
     local *Test::Builder::diag = sub {
@@ -29,8 +30,10 @@ my $orig = Test::Builder->can('diag');
     my @warnings;
     {
         local $SIG{__WARN__} = sub { push @warnings => @_ };
-        diag('first');
-        diag('seconds');
+        intercept {
+            diag('first');
+            diag('seconds');
+        };
     }
     mostly_like(
         \@warnings,
@@ -47,6 +50,7 @@ my $orig = Test::Builder->can('diag');
     use Test::More;
     use Test::Stream;
     use Test::MostlyLike;
+    use Test::Stream::Tester qw/intercept/;
 
     no warnings 'redefine';
     local *Test::Builder::diag = sub {
@@ -63,8 +67,10 @@ my $orig = Test::Builder->can('diag');
     my @warnings;
     {
         local $SIG{__WARN__} = sub { push @warnings => @_ };
-        diag('first');
-        diag('seconds');
+        intercept {
+            diag('first');
+            diag('seconds');
+        };
     }
     mostly_like(
         \@warnings,
@@ -79,6 +85,7 @@ my $orig = Test::Builder->can('diag');
 {
     package MyLegacyTester;
     use Test::More;
+    use Test::Stream::Tester qw/intercept/;
 
     no warnings 'redefine';
     local *Test::Builder::diag = sub {
@@ -90,8 +97,10 @@ my $orig = Test::Builder->can('diag');
     my @warnings;
     {
         local $SIG{__WARN__} = sub { push @warnings => @_ };
-        diag('first');
-        diag('seconds');
+        intercept {
+            diag('first');
+            diag('seconds');
+        };
     }
     is(@warnings, 0, "no warnings for a legacy tester");
 }

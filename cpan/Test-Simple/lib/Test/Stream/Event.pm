@@ -80,6 +80,10 @@ sub subevents { }
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Event - Base class for events
@@ -300,8 +304,6 @@ The PID in which the event was generated.
 The skip message if the event was generated via skip.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

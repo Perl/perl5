@@ -171,6 +171,10 @@ sub events_are {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Tester - Tools for validating the events produced by your testing
@@ -623,8 +627,6 @@ A nice, but very limited tool for testing 'ok' results.
 The original test tester, checks TAP output as giant strings.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

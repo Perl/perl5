@@ -32,6 +32,11 @@ sub clone {
 }
 
 1;
+__END__
+
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -64,8 +69,6 @@ Get the next event of the specific type (not a package name).
 Clone the events list object in its current state.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

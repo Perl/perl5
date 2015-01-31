@@ -124,6 +124,10 @@ sub extra_details {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Event::Subtest - Subtest event
@@ -193,8 +197,6 @@ Number of tests run inside the subtest.
 Number of tests that failed inside the subtest.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

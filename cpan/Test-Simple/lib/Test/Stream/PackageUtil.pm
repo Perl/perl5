@@ -73,6 +73,10 @@ sub package_purge_sym {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::PackageUtil - Utils for manipulating package symbol tables.
@@ -106,8 +110,6 @@ slots: HASH SCALAR ARRAY IO FORMAT CODE). The value in the pair should be the
 name of the symbol to remove.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

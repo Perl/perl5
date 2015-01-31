@@ -65,11 +65,13 @@ sub extra_details {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Event::Plan - The event of a plan
-
-=encoding utf8
 
 =head1 DESCRIPTION
 

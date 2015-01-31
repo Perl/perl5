@@ -132,6 +132,10 @@ sub default_exports {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Exporter - Declarative exporter for Test::Stream and friends.
@@ -224,8 +228,6 @@ if the package has imported it.
 =back
 
 =head1 HOOKS
-
-=encoding utf8
 
 =head1 SOURCE
 

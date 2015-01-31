@@ -28,6 +28,10 @@ Test::Stream::Exporter->cleanup;
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::Threads - Tools for using threads with Test::Stream.
@@ -61,8 +65,6 @@ This will return the id of the current thread when threads are enabled,
 otherwise it returns 0.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

@@ -108,6 +108,10 @@ sub format_stack {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::More::DeepCheck - Base class or is_deeply() and mostly_like()
@@ -121,8 +125,6 @@ code shared betweent he 2 tools.
 
 Most of this was refactored from the original C<is_deeply()> implementation. If
 you find any bugs or incompatabilities please report them.
-
-=encoding utf8
 
 =head1 SOURCE
 

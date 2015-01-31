@@ -2343,6 +2343,7 @@ cpan/Test-Simple/lib/Test/Stream/Event.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Event/Subtest.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/ExitMagic/Context.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/ExitMagic.pm			Test::Simple module
+cpan/Test-Simple/lib/Test/Stream/Explanation.pod			Test::Simple POD
 cpan/Test-Simple/lib/Test/Stream/Exporter/Meta.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Exporter.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/ForceExit.pm			Test-Simple module
@@ -2372,9 +2373,11 @@ cpan/Test-Simple/t/Behavior/388-threadedsubtest.load			Test::Simple Test
 cpan/Test-Simple/t/Behavior/388-threadedsubtest.t			Test::Simple test
 cpan/Test-Simple/t/Behavior/478-cmp_ok_hash.t			Test::Simple test
 cpan/Test-Simple/t/Behavior/490-inherit_exporter.t			Test::Simple test
+cpan/Test-Simple/t/Behavior/cmp_ok_undef.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/cmp_ok_xor.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/CustomOutput.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/encoding_test.t			Test::Simple Test
+cpan/Test-Simple/t/Behavior/event_clone_args.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/fork_new_end.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/MonkeyPatching_diag.t			Test::Simple Test
 cpan/Test-Simple/t/Behavior/MonkeyPatching_done_testing.t			Test::Simple Test
@@ -2463,7 +2466,6 @@ cpan/Test-Simple/t/Legacy/plan_skip_all.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/plan.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/pod.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/require_ok.t			Test::Simple Test
-cpan/Test-Simple/t/Legacy/ribasushi_diag.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/ribasushi_threads2.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/ribasushi_threads.t			Test::Simple Test
 cpan/Test-Simple/t/Legacy/Simple/load.t			Test::Simple Test

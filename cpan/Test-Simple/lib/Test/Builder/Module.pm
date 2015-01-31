@@ -8,9 +8,12 @@ use Test::Builder 0.99;
 require Exporter;
 our @ISA = qw(Exporter);
 
-our $VERSION = '1.301001_097';
+our $VERSION = '1.301001_098';
 $VERSION = eval $VERSION;      ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -184,8 +187,6 @@ sub builder {
 1;
 
 __END__
-
-=encoding utf8
 
 =head1 SOURCE
 

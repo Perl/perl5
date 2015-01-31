@@ -153,6 +153,10 @@ sub be_helpful_magic {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream::ExitMagic - Encapsulate the magic exit logic
@@ -164,8 +168,6 @@ It's magic! well kinda..
 =head1 SYNOPSYS
 
 Don't use this yourself, let L<Test::Stream> handle it.
-
-=encoding utf8
 
 =head1 SOURCE
 

@@ -50,6 +50,10 @@ sub details {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Tester::Capture - Capture module for TesT::Tester
@@ -57,8 +61,6 @@ Test::Tester::Capture - Capture module for TesT::Tester
 =head1 DESCRIPTION
 
 Legacy support for Test::Tester.
-
-=encoding utf8
 
 =head1 SOURCE
 

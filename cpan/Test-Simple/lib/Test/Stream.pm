@@ -2,7 +2,7 @@ package Test::Stream;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_097';
+our $VERSION = '1.301001_098';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream::Context qw/context/;
@@ -404,7 +404,8 @@ sub done_testing {
         return;
     }
 
-    $ctx->plan($num || $plan || $ran) unless $state->[STATE_PLAN];
+    # Use _plan to bypass Test::Builder::plan() monkeypatching
+    $ctx->_plan($num || $plan || $ran) unless $state->[STATE_PLAN];
 
     if ($plan && $plan != $ran) {
         $state->[STATE_PASSING] = 0;
@@ -743,6 +744,10 @@ sub STORABLE_thaw {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Test::Stream - A modern infrastructure for testing.
@@ -1079,8 +1084,6 @@ in will be run. Once your codelbock returns the stack will be popped and
 restored to the previous state.
 
 =back
-
-=encoding utf8
 
 =head1 SOURCE
 

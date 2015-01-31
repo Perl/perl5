@@ -1071,7 +1071,7 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.301001_073.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.301001_098.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^t/xt},
@@ -1083,6 +1083,9 @@ use File::Glob qw(:case);
                 examples/subtest.t
                 t/Legacy/00compile.t
                 t/Legacy/pod.t
+                t/xxx-changes_updated.t
+                t/zzz-check-breaks.t
+                t/Legacy/ribasushi_diag.t
                 ),
         ],
        'CUSTOMIZED'   => [

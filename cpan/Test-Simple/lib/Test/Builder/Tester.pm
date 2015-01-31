@@ -1,13 +1,17 @@
 package Test::Builder::Tester;
 
 use strict;
-our $VERSION = '1.301001_097';
+our $VERSION = '1.301001_098';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream 1.301001 '-internal';
 use Test::Builder 1.301001;
 use Symbol;
 use Test::Stream::Carp qw/croak/;
+
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -464,8 +468,6 @@ me use his testing system to try this module out on.
 =head1 SEE ALSO
 
 L<Test::Builder>, L<Test::Builder::Tester::Color>, L<Test::More>.
-
-=encoding utf8
 
 =head1 SOURCE
 

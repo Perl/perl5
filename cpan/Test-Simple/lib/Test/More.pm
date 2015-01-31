@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.301001_097';
+our $VERSION = '1.301001_098';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Stream 1.301001 '-internal';
@@ -392,6 +392,10 @@ sub use_ok($;@) {
 1;
 
 __END__
+
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -1741,8 +1745,6 @@ comes from.
 L<Bundle::Test> installs a whole bunch of useful test modules.
 
 L<Test::Most> Most commonly needed test functions and features.
-
-=encoding utf8
 
 =head1 SOURCE
 
