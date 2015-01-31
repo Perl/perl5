@@ -412,7 +412,7 @@ You may also need to regen opcodes:
 
     $ ./perl -Ilib regen/opcode.pl
 
-You may have to add stub entries in C<%Module::CoreList::version>, 
+You may have to add stub entries in C<%Module::CoreList::version>,
 C<%Module::CoreList::deprecated> and C<%Module::CoreList::Utils::delta>.
 If so, you must up their version numbers as well.
 
