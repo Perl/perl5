@@ -3301,45 +3301,6 @@ arguments than were supplied, but might be used in the future for
 other cases where we can statically determine that arguments to
 functions are missing, e.g. for the L<perlfunc/pack> function.
 
-=item Ranges of ASCII printables should be some subset of "0-9", "A-Z", or
-"a-z" in regex; marked by <-- HERE in m/%s/
-
-(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
-
-Stricter rules help to find typos and other errors.  Perhaps you didn't
-even intend a range here, if the C<"-"> was meant to be some other
-character, or should have been escaped (like C<"\-">).  If you did
-intend a range, the one that was used is not portable between ASCII and
-EBCDIC platforms, and doesn't have an obvious meaning to a casual
-reader.
-
- [3-7]    # OK; Obvious and portable
- [d-g]    # OK; Obvious and portable
- [A-Y]    # OK; Obvious and portable
- [A-z]    # WRONG; Not portable; not clear what is meant
- [a-Z]    # WRONG; Not portable; not clear what is meant
- [%-.]    # WRONG; Not portable; not clear what is meant
- [\x41-Z] # WRONG; Not portable; not obvious to non-geek
-
-(You can force portability by specifying a Unicode range, which means that
-the endpoints are specified by
-L<C<\N{...}>|perlrecharclass/Character Ranges>, but the meaning may
-still not be obvious.)
-The stricter rules require that ranges that start or stop with an ASCII
-character that is not a control have all their endpoints be the literal
-character, and not some escape sequence (like C<"\x41">), and the ranges
-must be all digits, or all uppercase letters, or all lowercase letters.
-
-=item Ranges of digits should be from the same group in regex; marked by
-<-- HERE in m/%s/
-
-(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
-
-Stricter rules help to find typos and other errors.  You included a
-range, and at least one of the end points is a decimal digit.  Under the
-stricter rules, when this happens, both end points should be digits in
-the same group of 10 consecutive digits.
-
 =item Missing argument to -%c
 
 (F) The argument to the indicated command line switch must follow
@@ -4903,6 +4864,45 @@ C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
 are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string increment
 by prepending "0" to your numbers.
+
+=item Ranges of ASCII printables should be some subset of "0-9", "A-Z", or
+"a-z" in regex; marked by <-- HERE in m/%s/
+
+(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
+
+Stricter rules help to find typos and other errors.  Perhaps you didn't
+even intend a range here, if the C<"-"> was meant to be some other
+character, or should have been escaped (like C<"\-">).  If you did
+intend a range, the one that was used is not portable between ASCII and
+EBCDIC platforms, and doesn't have an obvious meaning to a casual
+reader.
+
+ [3-7]    # OK; Obvious and portable
+ [d-g]    # OK; Obvious and portable
+ [A-Y]    # OK; Obvious and portable
+ [A-z]    # WRONG; Not portable; not clear what is meant
+ [a-Z]    # WRONG; Not portable; not clear what is meant
+ [%-.]    # WRONG; Not portable; not clear what is meant
+ [\x41-Z] # WRONG; Not portable; not obvious to non-geek
+
+(You can force portability by specifying a Unicode range, which means that
+the endpoints are specified by
+L<C<\N{...}>|perlrecharclass/Character Ranges>, but the meaning may
+still not be obvious.)
+The stricter rules require that ranges that start or stop with an ASCII
+character that is not a control have all their endpoints be the literal
+character, and not some escape sequence (like C<"\x41">), and the ranges
+must be all digits, or all uppercase letters, or all lowercase letters.
+
+=item Ranges of digits should be from the same group in regex; marked by
+<-- HERE in m/%s/
+
+(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
+
+Stricter rules help to find typos and other errors.  You included a
+range, and at least one of the end points is a decimal digit.  Under the
+stricter rules, when this happens, both end points should be digits in
+the same group of 10 consecutive digits.
 
 =item readdir() attempted on invalid dirhandle %s
 
