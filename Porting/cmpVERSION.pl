@@ -189,11 +189,11 @@ foreach my $pm_file (sort keys %module_diffs) {
 		and grep $pm_version eq $_, @{$skip_versions{$pm_file}}) {
 		print "ok $count - SKIP $pm_file version $pm_version\n";
 	    } else {
-		print "not ok $count - $pm_file\n";
+		print "not ok $count - $pm_file version $pm_version\n";
 	    }
 	} else {
 	    push @diff, @{$module_diffs{$pm_file}};
-	    print "$pm_file\n";
+	    print "$pm_file version $pm_version\n";
 	}
     }
 }
