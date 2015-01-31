@@ -869,6 +869,7 @@ the tarball and directory name:
     $ cd root/of/perl/tree
     $ make distclean       # make sure distclean works
     $ git clean -xdf       # make sure perl and git agree on files
+                           # git clean should not output anything!
     $ git status           # and there's nothing lying around
 
     $ perl Porting/makerel -b -s RC1            # for a release candidate
