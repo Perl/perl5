@@ -1,3 +1,11 @@
+CPAN cpan/CPAN/lib/CPAN/Author.pm 792d7c8fbe6ed45e1244e589a8b712878c5dd2a5
+CPAN cpan/CPAN/lib/CPAN/CacheMgr.pm 132adb7f96014ec7ded45457044ed925d3181475
+CPAN cpan/CPAN/lib/CPAN/FTP.pm 3f0d5fc572c8749a566d73ca892c6c89ce3fb676
+CPAN cpan/CPAN/lib/CPAN/HandleConfig.pm e52052b6ef6d1d664f0ffa6cf01d48a8d1321520
+CPAN cpan/CPAN/lib/CPAN/HTTP/Client.pm 242842ca566fd8e3d776deb549ff758a571ca2e3
+CPAN cpan/CPAN/lib/CPAN/Index.pm 73aee30450127c5ac4dc05abc2c10a8accd4b198
+CPAN cpan/CPAN/lib/CPAN/LWP/UserAgent.pm e09525b0c2377c5ac28b7fad1b6d70c57e343913
+CPAN cpan/CPAN/lib/CPAN/Mirrors.pm 580e74746abaf1628d533015d5b529d82a470af4
 Encode cpan/Encode/encoding.pm 506ec84f1fbbff189c3f4f47b92aff5afc95b98e
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/pm_to_blib.t 71ebcee355691ce374fcad251b12d8b2412462b3
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691

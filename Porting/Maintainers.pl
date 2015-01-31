@@ -277,6 +277,18 @@ use File::Glob qw(:case);
                 t/yaml_code.yml
                 ),
         ],
+        # Waiting to be merged upstream: see pull request #83
+        'CUSTOMIZED'   => [
+            qw( lib/CPAN/Author.pm
+                lib/CPAN/CacheMgr.pm
+                lib/CPAN/FTP.pm
+                lib/CPAN/HTTP/Client.pm
+                lib/CPAN/HandleConfig.pm
+                lib/CPAN/Index.pm
+                lib/CPAN/LWP/UserAgent.pm
+                lib/CPAN/Mirrors.pm
+                ),
+        ],
     },
 
     # Note: When updating CPAN-Meta the META.* files will need to be regenerated
