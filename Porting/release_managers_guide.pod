@@ -613,13 +613,11 @@ This will chug for a while, possibly reporting various warnings about
 badly-indexed CPAN modules unrelated to the modules actually in core.
 Assuming all goes well, it will update
 F<dist/Module-CoreList/lib/Module/CoreList.pm> and possibly
-F<dist/Module-CoreList/lib/Module/CoreList.pod> and/or
 F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm>.
 
 Check those files over carefully:
 
     $ git diff dist/Module-CoreList/lib/Module/CoreList.pm
-    $ git diff dist/Module-CoreList/lib/Module/CoreList.pod
     $ git diff dist/Module-CoreList/lib/Module/CoreList/Utils.pm
 
 =head4 Bump version in Module::CoreList F<Changes>
@@ -642,12 +640,6 @@ For any release except an RC:
 
 Update this version's entry in the C<%released> hash with today's date.
 
-=item *
-
-Make sure that the script has correctly updated the C<CAVEATS> section
-(Note, the C<CAVEATS> section is in
-F<dist/Module-CoreList/lib/Module/CoreList.pod>)
-
 =back
 
 =head4 Commit Module::CoreList changes
@@ -656,7 +648,7 @@ Finally, commit the new version of Module::CoreList:
 (unless this is for MAINT; in which case commit it to blead first, then
 cherry-pick it back).
 
-    $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/Changes dist/Module-CoreList/lib/Module/CoreList.pm dist/Module-CoreList/lib/Module/CoreList.pod dist/Module-CoreList/lib/Module/CoreList/Utils.pm
+    $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/Changes dist/Module-CoreList/lib/Module/CoreList.pm dist/Module-CoreList/lib/Module/CoreList/Utils.pm
 
 =head4 Rebuild and test
 
@@ -1390,8 +1382,7 @@ Otherwise, run:
 
     $ ./perl -Ilib Porting/corelist.pl cpan
 
-This will update F<dist/Module-CoreList/lib/Module/CoreList.pm>,
-F<dist/Module-CoreList/lib/Module/CoreList.pod> and
+This will update F<dist/Module-CoreList/lib/Module/CoreList.pm> and
 F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm> as it did before,
 but this time adding new sections for the next BLEAD-POINT release.
 
