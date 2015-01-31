@@ -1013,13 +1013,6 @@ my %delta = (
         removed => {
         }
     },
-    5.020002 => {
-        delta_from => 5.020001,
-        changed => {
-        },
-        removed => {
-        }
-    },
 );
 
 for my $version (sort { $a <=> $b } keys %delta) {
