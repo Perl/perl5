@@ -960,6 +960,8 @@ use File::Glob qw(:case);
     'Pod::Parser' => {
         'DISTRIBUTION' => 'MAREKR/Pod-Parser-1.62.tar.gz',
         'FILES'        => q[cpan/Pod-Parser],
+        # Waiting to be merged upstream: see CPAN RT#101847
+        'CUSTOMIZED'   => [ qw( lib/Pod/PlainText.pm) ],
     },
 
     'Pod::Perldoc' => {
