@@ -652,6 +652,10 @@ Fill in the "New/Updated Modules" sections now that Module::CoreList is updated:
 
   $ ./perl -Ilib Porting/corelist-perldelta.pl --mode=update pod/perldelta.pod
 
+For a MAINT release use something like this instead:
+
+  $ ./perl -Ilib Porting/corelist-perldelta.pl 5.020001 5.020002 --mode=update pod/perldelta.pod
+
 Ideally, also fill in a summary of the major changes to each module for which
 an entry has been added by F<corelist-perldelta.pl>.
 
