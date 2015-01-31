@@ -261,6 +261,7 @@ sub changes_between {
     5.021006 => '2014-11-20',
     5.021007 => '2014-12-20',
     5.021008 => '2015-01-20',
+    5.020002 => '????-??-??',
     5.021009 => '????-??-??',
   );
 
@@ -11050,6 +11051,45 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.020002 => {
+        delta_from => 5.020001,
+        changed => {
+            'CPAN::Author'          => '5.5002',
+            'CPAN::CacheMgr'        => '5.5002',
+            'CPAN::FTP'             => '5.5006',
+            'CPAN::HTTP::Client'    => '1.9601',
+            'CPAN::HandleConfig'    => '5.5005',
+            'CPAN::Index'           => '1.9601',
+            'CPAN::LWP::UserAgent'  => '1.9601',
+            'CPAN::Mirrors'         => '1.9601',
+            'Config'                => '5.020002',
+            'Cwd'                   => '3.48_01',
+            'Data::Dumper'          => '2.151_01',
+            'Errno'                 => '1.20_05',
+            'File::Spec'            => '3.48_01',
+            'File::Spec::Cygwin'    => '3.48_01',
+            'File::Spec::Epoc'      => '3.48_01',
+            'File::Spec::Functions' => '3.48_01',
+            'File::Spec::Mac'       => '3.48_01',
+            'File::Spec::OS2'       => '3.48_01',
+            'File::Spec::Unix'      => '3.48_01',
+            'File::Spec::VMS'       => '3.48_01',
+            'File::Spec::Win32'     => '3.48_01',
+            'IO::Socket'            => '1.38',
+            'Module::CoreList'      => '5.20150131',
+            'Module::CoreList::TieHashDelta'=> '5.20150131',
+            'Module::CoreList::Utils'=> '5.20150131',
+            'PerlIO::scalar'        => '0.18_01',
+            'Pod::PlainText'        => '2.07',
+            'Storable'              => '2.49_01',
+            'VMS::DCLsym'           => '1.05_01',
+            'VMS::Stdio'            => '2.41',
+            'attributes'            => '0.23',
+            'feature'               => '1.36_01',
+        },
+        removed => {
+        }
+    },
     5.021009 => {
         delta_from => 5.021008,
         changed => {
@@ -11539,6 +11579,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.021008 => {
         delta_from => 5.021007,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.020002 => {
+        delta_from => 5.020001,
         changed => {
         },
         removed => {
