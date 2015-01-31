@@ -89,7 +89,8 @@ potential incompatibilities introduced with this release.  A few of
 the most important issues are listed below, but you should refer
 to pod/perldelta.pod for more detailed information.
 
-B<WARNING:> This version is not binary compatible with prior releases of Perl.
+B<WARNING:> This version is not binary compatible with versions of Perl
+earlier than 5.20.0.
 If you have built extensions (i.e. modules that include C code)
 using an earlier version of Perl, you will need to rebuild and reinstall
 those extensions.
