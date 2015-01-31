@@ -5955,7 +5955,7 @@ Perl_sv_kill_backrefs()
 */
 
 SV *
-Perl_sv_get_backrefs(pTHX_ SV *const sv)
+Perl_sv_get_backrefs(SV *const sv)
 {
     SV *backrefs= NULL;
 
