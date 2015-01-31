@@ -93,9 +93,6 @@ khw votes for the portions of the following except the reference to v5.22
 <commit votes="steveh, khw" id="de6a572826be131d097fd215146f4016cea52671" ticket="" desc="epigraphs - Fix a broken I&lt;&gt;"/>
 <commit votes="steveh, khw" id="931064641468002f31d00f3f4dd72409a265d717" ticket="" desc="perlrecharclass: Add some missing documentation"/>
 <commit votes="steveh, khw" id="f2979eac0a03fcba1cd431ef3d46f697176ebcc8" ticket="" desc="improve SvPV_set's docs, it really shouldn't be public API"/>
-<commit votes="steveh" id="bbd77aa1ffacca671a571e6a7aeaf50161ef49e6" ticket="" desc="Add new release to perlhist"/>
-<commit votes="steveh" id="8917c25b121f1ff10502f69bcd2dde9a3e89edbd" ticket="" desc="Add epigraph and update release schedule"/>
-<commit votes="steveh" id="06dcbead485fc1e807acffe0b20d327a1650a5ac" ticket="" desc="Update epigraph with mailing list link"/>
 <commit votes="steveh" id="6a40a726ac1d6a8f37527d834a781fc5c38e12f0" ticket="" desc="Convert tabs in indentation to spaces."/>
 <commit votes="steveh" id="730d89736d0ae5dfc7580108c451efe91b5102fc" ticket="" desc="Fix warning message regarding 'use autodie' and 'use open'."/>
 <commit votes="steveh" id="2a403855670ae8592c5a3ca4396e6e909a4fc593" ticket="" desc="perlunicook: Note that autodie &gt;= 2.26 should be okay with 'use open'."/>
