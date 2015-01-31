@@ -17,6 +17,19 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.8 - Bill Watterson, "Scientific Progress Goes 'Boink': A Calvin and Hobbes Collection"
+
+L<Announced on 2015-01-20 by Matthew Horsfall|XXX>
+
+Calvin:   OK Hobbes, press the button and duplicate me.
+Hobbes:   Are you sure this is such a good idea?
+Calvin:   Brother! You doubting Thomases get in the way of more scientific advances with your stupid ethical questions! This is a *BRILLIANT* idea! Hit the button, will ya?
+Hobbes:   I'd hate to be accused of inhibiting scientific progress... Here you go.
+[Box]:    *BOINK*
+Hobbes:   Scientific progress goes "BOINK"?
+Calvin?:  It worked! It worked! I'm a genius!
+Cavlin??: No you're not, you liar! *I* invented this!
+
 =head2 v5.21.7 - Robert Heinlein, The Number of the Beast
 
 L<Announced on 2014-12-20 by Max Maischein|http://www.nntp.perl.org/group/perl.perl5.porters/2014/12/msg223774.html>
