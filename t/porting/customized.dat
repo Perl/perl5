@@ -1,3 +1,11 @@
+CPAN cpan/CPAN/lib/CPAN/Author.pm 792d7c8fbe6ed45e1244e589a8b712878c5dd2a5
+CPAN cpan/CPAN/lib/CPAN/CacheMgr.pm 132adb7f96014ec7ded45457044ed925d3181475
+CPAN cpan/CPAN/lib/CPAN/FTP.pm 3f0d5fc572c8749a566d73ca892c6c89ce3fb676
+CPAN cpan/CPAN/lib/CPAN/HandleConfig.pm e52052b6ef6d1d664f0ffa6cf01d48a8d1321520
+CPAN cpan/CPAN/lib/CPAN/HTTP/Client.pm 242842ca566fd8e3d776deb549ff758a571ca2e3
+CPAN cpan/CPAN/lib/CPAN/Index.pm 73aee30450127c5ac4dc05abc2c10a8accd4b198
+CPAN cpan/CPAN/lib/CPAN/LWP/UserAgent.pm e09525b0c2377c5ac28b7fad1b6d70c57e343913
+CPAN cpan/CPAN/lib/CPAN/Mirrors.pm 580e74746abaf1628d533015d5b529d82a470af4
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
 Encode cpan/Encode/bin/enc2xs f60036fd3574ec05c9aab7f4db00a828d5dea92d
 Encode cpan/Encode/Byte/Makefile.PL 0986e25f981a3bf182a13a0060d28d4efedd87e6
