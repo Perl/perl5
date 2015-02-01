@@ -4323,9 +4323,11 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #   endif
 #   if !defined(NV_NAN) && defined(LDBL_QNAN)
 #       define NV_NAN LDBL_QNAN
+#       define NV_QNAN LDBL_QNAN
 #   endif
 #   if !defined(NV_NAN) && defined(LDBL_SNAN)
 #       define NV_NAN LDBL_SNAN
+#       define NV_SNAN LDBL_SNAN
 #   endif
 #endif
 #if !defined(NV_NAN) && defined(DBL_NAN)
@@ -4333,9 +4335,11 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #endif
 #if !defined(NV_NAN) && defined(DBL_QNAN)
 #  define NV_NAN (NV)DBL_QNAN
+#  define NV_QNAN DBL_QNAN
 #endif
 #if !defined(NV_NAN) && defined(DBL_SNAN)
 #  define NV_NAN (NV)DBL_SNAN
+#  define NV_SNAN DBL_QNAN
 #endif
 #if !defined(NV_NAN) && defined(NAN)
 #  define NV_NAN (NV)NAN
