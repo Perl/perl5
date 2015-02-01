@@ -406,7 +406,7 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
     return (OP *)newop;
 }
 
-const static XOP my_xop = {
+static const XOP my_xop = {
     XOPf_xop_name|XOPf_xop_desc|XOPf_xop_class,		/* xop_flags */
     "Devel_Peek_Dump",					/* xop_name */
     "Dump",						/* xop_desc */
