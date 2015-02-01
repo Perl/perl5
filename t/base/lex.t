@@ -482,3 +482,6 @@ print "not " unless &{sub :lvalue { "a" }} eq "a";
 print "ok $test - &{sub :lvalue...}\n"; $test++;
 print "not " unless ref +(map{sub :lvalue { "a" }} 1)[0] eq "CODE";
 print "ok $test - map{sub :lvalue...}\n"; $test++;
+
+# Used to crash [perl #123711]
+0-5x-l{0};
