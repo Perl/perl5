@@ -145,10 +145,7 @@ Using this feature triggers warnings in the category
 C<experimental::bitwise>.
 
 The ticket for this feature is
-L<[perl #123466]|https://rt.perl.org/rt3/Ticket/Display.html?id=123466>.
-
-XXX #123466 is the ticket proposing the feature, not the "[EXPERIMENT]"
-ticket to track the implemented feature.  The latter does not exist yet.
+L<[perl #123707]|https://rt.perl.org/rt3/Ticket/Display.html?id=123707>.
 
 =item The <:win32> IO pseudolayer
 
