@@ -4346,6 +4346,11 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #if !defined(NV_NAN) && defined(SNAN)
 #  define NV_NAN (NV)SNAN
 #endif
+#if !defined(NV_NAN) && defined(I_SUNMATH)
+#  define NV_NAN (NV)quiet_nan()
+#  define NV_QNAN (NV)quiet_nan()
+#  define NV_SNAN (NV)signaling_nan()
+#endif
 #if !defined(NV_NAN)
 #  if INTSIZE == 4
 /* See the discussion near __PL_inf_u. */
