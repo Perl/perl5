@@ -2224,6 +2224,34 @@ PP(pp_bit_and)
     }
 }
 
+PP(pp_nbit_and)
+{
+    dSP;
+    tryAMAGICbin_MG(band_amg, AMGf_assign|AMGf_numarg);
+    {
+	dATARGET; dPOPTOPssrl;
+	if (PL_op->op_private & HINT_INTEGER) {
+	  const IV i = SvIV_nomg(left) & SvIV_nomg(right);
+	  SETi(i);
+	}
+	else {
+	  const UV u = SvUV_nomg(left) & SvUV_nomg(right);
+	  SETu(u);
+	}
+    }
+    RETURN;
+}
+
+PP(pp_sbit_and)
+{
+    dSP;
+    tryAMAGICbin_MG(sband_amg, AMGf_assign);
+    {
+	dATARGET; dPOPTOPssrl;
+	do_vop(OP_BIT_AND, TARG, left, right);
+	RETSETTARG;
+    }
+}
 
 /* also used for: pp_bit_xor() */
 
@@ -2258,6 +2286,50 @@ PP(pp_bit_or)
 	SETTARG;
       }
       RETURN;
+    }
+}
+
+/* also used for: pp_nbit_xor() */
+
+PP(pp_nbit_or)
+{
+    dSP;
+    const int op_type = PL_op->op_type;
+
+    tryAMAGICbin_MG((op_type == OP_NBIT_OR ? bor_amg : bxor_amg),
+		    AMGf_assign|AMGf_numarg);
+    {
+	dATARGET; dPOPTOPssrl;
+	if (PL_op->op_private & HINT_INTEGER) {
+	  const IV l = (USE_LEFT(left) ? SvIV_nomg(left) : 0);
+	  const IV r = SvIV_nomg(right);
+	  const IV result = op_type == OP_NBIT_OR ? (l | r) : (l ^ r);
+	  SETi(result);
+	}
+	else {
+	  const UV l = (USE_LEFT(left) ? SvUV_nomg(left) : 0);
+	  const UV r = SvUV_nomg(right);
+	  const UV result = op_type == OP_NBIT_OR ? (l | r) : (l ^ r);
+	  SETu(result);
+	}
+    }
+    RETURN;
+}
+
+/* also used for: pp_sbit_xor() */
+
+PP(pp_sbit_or)
+{
+    dSP;
+    const int op_type = PL_op->op_type;
+
+    tryAMAGICbin_MG((op_type == OP_SBIT_OR ? sbor_amg : sbxor_amg),
+		    AMGf_assign);
+    {
+	dATARGET; dPOPTOPssrl;
+	do_vop(op_type == OP_SBIT_OR ? OP_BIT_OR : OP_BIT_XOR, TARG, left,
+	       right);
+	RETSETTARG;
     }
 }
 
@@ -2336,23 +2408,9 @@ PP(pp_not)
     return NORMAL;
 }
 
-PP(pp_complement)
+static void
+S_scomplement(pTHX_ SV *targ, SV *sv)
 {
-    dSP; dTARGET;
-    tryAMAGICun_MG(compl_amg, AMGf_numeric);
-    {
-      dTOPss;
-      if (SvNIOKp(sv)) {
-	if (PL_op->op_private & HINT_INTEGER) {
-	  const IV i = ~SvIV_nomg(sv);
-	  SETi(i);
-	}
-	else {
-	  const UV u = ~SvUV_nomg(sv);
-	  SETu(u);
-	}
-      }
-      else {
 	U8 *tmps;
 	I32 anum;
 	STRLEN len;
@@ -2413,8 +2471,7 @@ PP(pp_complement)
 	      sv_usepvn_flags(TARG, (char*)result, nchar, SV_HAS_TRAILING_NUL);
 	      SvUTF8_off(TARG);
 	  }
-	  SETTARG;
-	  return NORMAL;
+	  return;
 	}
 #ifdef LIBERAL
 	{
@@ -2429,9 +2486,59 @@ PP(pp_complement)
 #endif
 	for ( ; anum > 0; anum--, tmps++)
 	    *tmps = ~*tmps;
+}
+
+PP(pp_complement)
+{
+    dSP; dTARGET;
+    tryAMAGICun_MG(compl_amg, AMGf_numeric);
+    {
+      dTOPss;
+      if (SvNIOKp(sv)) {
+	if (PL_op->op_private & HINT_INTEGER) {
+	  const IV i = ~SvIV_nomg(sv);
+	  SETi(i);
+	}
+	else {
+	  const UV u = ~SvUV_nomg(sv);
+	  SETu(u);
+	}
+      }
+      else {
+	S_scomplement(aTHX_ TARG, sv);
 	SETTARG;
       }
       return NORMAL;
+    }
+}
+
+PP(pp_ncomplement)
+{
+    dSP;
+    tryAMAGICun_MG(compl_amg, AMGf_numeric|AMGf_numarg);
+    {
+	dTARGET; dTOPss;
+	if (PL_op->op_private & HINT_INTEGER) {
+	  const IV i = ~SvIV_nomg(sv);
+	  SETi(i);
+	}
+	else {
+	  const UV u = ~SvUV_nomg(sv);
+	  SETu(u);
+	}
+    }
+    return NORMAL;
+}
+
+PP(pp_scomplement)
+{
+    dSP;
+    tryAMAGICun_MG(scompl_amg, AMGf_numeric);
+    {
+	dTARGET; dTOPss;
+	S_scomplement(aTHX_ TARG, sv);
+	SETTARG;
+	return NORMAL;
     }
 }
 

@@ -100,6 +100,8 @@
 
     Use of /g modifier is meaningless in split
 
+    The bitwise feature is experimental			[Perl_ck_bitop]
+
     Possible precedence problem on bitwise %c operator	[Perl_ck_bitop]
 
     Mandatory Warnings 
@@ -1501,6 +1503,81 @@ split /blah/g, "blah";
 EXPECT
 Use of /g modifier is meaningless in split at - line 4.
 ########
+use feature "bitwise";
+$_ = $_ | $_;
+$_ = $_ & $_;
+$_ = $_ ^ $_;
+$_ = ~$_;
+$_ = $_ |. $_;
+$_ = $_ &. $_;
+$_ = $_ ^. $_;
+$_ = ~.$_;
+$_ |= $_;
+$_ &= $_;
+$_ ^= $_;
+$_ |.= $_;
+$_ &.= $_;
+$_ ^.= $_;
+use warnings "experimental::bitwise";
+$_ = $_ | $_;
+$_ = $_ & $_;
+$_ = $_ ^ $_;
+$_ = ~$_;
+$_ = $_ |. $_;
+$_ = $_ &. $_;
+$_ = $_ ^. $_;
+$_ = ~.$_;
+$_ |= $_;
+$_ &= $_;
+$_ ^= $_;
+$_ |.= $_;
+$_ &.= $_;
+$_ ^.= $_;
+no warnings "experimental::bitwise";
+$_ = $_ | $_;
+$_ = $_ & $_;
+$_ = $_ ^ $_;
+$_ = ~$_;
+$_ = $_ |. $_;
+$_ = $_ &. $_;
+$_ = $_ ^. $_;
+$_ = ~.$_;
+$_ |= $_;
+$_ &= $_;
+$_ ^= $_;
+$_ |.= $_;
+$_ &.= $_;
+$_ ^.= $_;
+EXPECT
+The bitwise feature is experimental at - line 2.
+The bitwise feature is experimental at - line 3.
+The bitwise feature is experimental at - line 4.
+The bitwise feature is experimental at - line 5.
+The bitwise feature is experimental at - line 6.
+The bitwise feature is experimental at - line 7.
+The bitwise feature is experimental at - line 8.
+The bitwise feature is experimental at - line 9.
+The bitwise feature is experimental at - line 10.
+The bitwise feature is experimental at - line 11.
+The bitwise feature is experimental at - line 12.
+The bitwise feature is experimental at - line 13.
+The bitwise feature is experimental at - line 14.
+The bitwise feature is experimental at - line 15.
+The bitwise feature is experimental at - line 17.
+The bitwise feature is experimental at - line 18.
+The bitwise feature is experimental at - line 19.
+The bitwise feature is experimental at - line 20.
+The bitwise feature is experimental at - line 21.
+The bitwise feature is experimental at - line 22.
+The bitwise feature is experimental at - line 23.
+The bitwise feature is experimental at - line 24.
+The bitwise feature is experimental at - line 25.
+The bitwise feature is experimental at - line 26.
+The bitwise feature is experimental at - line 27.
+The bitwise feature is experimental at - line 28.
+The bitwise feature is experimental at - line 29.
+The bitwise feature is experimental at - line 30.
+########
 # op.c
 use warnings 'precedence';
 $a = $b & $c == $d;
@@ -1511,6 +1588,25 @@ $a = $b >= $c ^ $d;
 $a = $b <= $c | $d;
 $a = $b <=> $c & $d;
 $a &= $b == $c; $a |= $b == $c; $a ^= $b == $c; # shouldn't warn
+{
+ use experimental 'bitwise';
+ $a = $b & $c == $d;
+ $a = $b ^ $c != $d;
+ $a = $b | $c > $d;
+ $a = $b < $c & $d;
+ $a = $b >= $c ^ $d;
+ $a = $b <= $c | $d;
+ $a = $b <=> $c & $d;
+ $a &= $b == $c; $a |= $b == $c; $a ^= $b == $c; # shouldn't warn
+ $a = $b &. $c == $d;
+ $a = $b ^. $c != $d;
+ $a = $b |. $c > $d;
+ $a = $b < $c &. $d;
+ $a = $b >= $c ^. $d;
+ $a = $b <= $c |. $d;
+ $a = $b <=> $c &. $d;
+ $a &.= $b == $c; $a |.= $b == $c; $a ^.= $b == $c; # shouldn't warn
+}
 no warnings 'precedence';
 $a = $b & $c == $d;
 $a = $b ^ $c != $d;
@@ -1519,6 +1615,25 @@ $a = $b < $c & $d;
 $a = $b >= $c ^ $d;
 $a = $b <= $c | $d;
 $a = $b <=> $c & $d;
+{
+ use experimental 'bitwise';
+ $a = $b & $c == $d;
+ $a = $b ^ $c != $d;
+ $a = $b | $c > $d;
+ $a = $b < $c & $d;
+ $a = $b >= $c ^ $d;
+ $a = $b <= $c | $d;
+ $a = $b <=> $c & $d;
+ $a &= $b == $c; $a |= $b == $c; $a ^= $b == $c; # shouldn't warn
+ $a = $b &. $c == $d;
+ $a = $b ^. $c != $d;
+ $a = $b |. $c > $d;
+ $a = $b < $c &. $d;
+ $a = $b >= $c ^. $d;
+ $a = $b <= $c |. $d;
+ $a = $b <=> $c &. $d;
+ $a &.= $b == $c; $a |.= $b == $c; $a ^.= $b == $c; # shouldn't warn
+}
 EXPECT
 Possible precedence problem on bitwise & operator at - line 3.
 Possible precedence problem on bitwise ^ operator at - line 4.
@@ -1527,6 +1642,20 @@ Possible precedence problem on bitwise & operator at - line 6.
 Possible precedence problem on bitwise ^ operator at - line 7.
 Possible precedence problem on bitwise | operator at - line 8.
 Possible precedence problem on bitwise & operator at - line 9.
+Possible precedence problem on bitwise & operator at - line 13.
+Possible precedence problem on bitwise ^ operator at - line 14.
+Possible precedence problem on bitwise | operator at - line 15.
+Possible precedence problem on bitwise & operator at - line 16.
+Possible precedence problem on bitwise ^ operator at - line 17.
+Possible precedence problem on bitwise | operator at - line 18.
+Possible precedence problem on bitwise & operator at - line 19.
+Possible precedence problem on bitwise &. operator at - line 21.
+Possible precedence problem on bitwise ^. operator at - line 22.
+Possible precedence problem on bitwise |. operator at - line 23.
+Possible precedence problem on bitwise &. operator at - line 24.
+Possible precedence problem on bitwise ^. operator at - line 25.
+Possible precedence problem on bitwise |. operator at - line 26.
+Possible precedence problem on bitwise &. operator at - line 27.
 ########
 # op.c
 use integer;

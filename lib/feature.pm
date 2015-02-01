@@ -5,13 +5,14 @@
 
 package feature;
 
-our $VERSION = '1.39';
+our $VERSION = '1.40';
 
 our %feature = (
     fc              => 'feature_fc',
     say             => 'feature_say',
     state           => 'feature_state',
     switch          => 'feature_switch',
+    bitwise         => 'feature_bitwise',
     evalbytes       => 'feature_evalbytes',
     postderef       => 'feature_postderef',
     array_base      => 'feature_arybase',
@@ -28,7 +29,7 @@ our %feature_bundle = (
     "5.10"    => [qw(array_base say state switch)],
     "5.11"    => [qw(array_base say state switch unicode_strings)],
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(array_base current_sub evalbytes fc lexical_subs postderef postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
+    "all"     => [qw(array_base bitwise current_sub evalbytes fc lexical_subs postderef postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
     "default" => [qw(array_base)],
 );
 
@@ -316,6 +317,24 @@ This enables aliasing via assignment to references:
     }
 
 See L<perlref/Assigning to References> for details.
+
+This feature is available from Perl 5.22 onwards.
+
+=head2 The 'bitwise' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental::bitwise";
+
+This makes the four standard bitwise operators (C<& | ^ ~>) treat their
+operands consistently as numbers, and introduces four new dotted operators
+(C<&. |. ^. ~.>) that treat their operands consistently as strings.  The
+same applies to the assignment variants (C<&= |= ^= &.= |.= ^.=>).
+
+See L<perlop/Bitwise String Operators> for details.
 
 This feature is available from Perl 5.22 onwards.
 

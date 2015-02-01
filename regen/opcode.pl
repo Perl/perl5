@@ -122,6 +122,8 @@ my @raw_alias = (
 		 Perl_pp_shift => ['pop'],
 		 Perl_pp_sin => [qw(cos exp log sqrt)],
 		 Perl_pp_bit_or => ['bit_xor'],
+		 Perl_pp_nbit_or => ['nbit_xor'],
+		 Perl_pp_sbit_or => ['sbit_xor'],
 		 Perl_pp_rv2av => ['rv2hv'],
 		 Perl_pp_akeys => ['avalues'],
 		 Perl_pp_rkeys => [qw(rvalues reach)],
@@ -1134,6 +1136,7 @@ my %OP_IS_FILETEST;	# /F-/
 my %OP_IS_FT_ACCESS;	# /F-+/
 my %OP_IS_NUMCOMPARE;	# /S</
 my %OP_IS_DIRHOP;	# /Fd/
+my %OP_IS_INFIX_BIT;	# /S\|/
 
 my $OCSHIFT = 8;
 my $OASHIFT = 12;
@@ -1163,8 +1166,9 @@ for my $op (@ops) {
 	    $OP_IS_FILETEST{$op} = $opnum{$op} if $arg =~ s/-//;
 	    $OP_IS_FT_ACCESS{$op} = $opnum{$op} if $arg =~ s/\+//;
         }
-	elsif ($arg =~ /^S</) {
+	elsif ($arg =~ /^S./) {
 	    $OP_IS_NUMCOMPARE{$op} = $opnum{$op} if $arg =~ s/<//;
+	    $OP_IS_INFIX_BIT {$op} = $opnum{$op} if $arg =~ s/\|//;
 	}
 	my $argnum = ($arg =~ s/\?//) ? 8 : 0;
         die "op = $op, arg = $arg\n"
@@ -1204,6 +1208,7 @@ gen_op_is_macro( \%OP_IS_FILETEST, 'OP_IS_FILETEST');
 gen_op_is_macro( \%OP_IS_FT_ACCESS, 'OP_IS_FILETEST_ACCESS');
 gen_op_is_macro( \%OP_IS_NUMCOMPARE, 'OP_IS_NUMCOMPARE');
 gen_op_is_macro( \%OP_IS_DIRHOP, 'OP_IS_DIRHOP');
+gen_op_is_macro( \%OP_IS_INFIX_BIT, 'OP_IS_INFIX_BIT');
 
 sub gen_op_is_macro {
     my ($op_is, $macname) = @_;

@@ -25,6 +25,7 @@ my %feature = (
     say             => 'say',
     state           => 'state',
     switch          => 'switch',
+    bitwise         => 'bitwise',
     evalbytes       => 'evalbytes',
     postderef       => 'postderef',
     array_base      => 'arybase',
@@ -364,7 +365,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.39';
+our $VERSION = '1.40';
 
 FEATURES
 
@@ -631,6 +632,24 @@ This enables aliasing via assignment to references:
     }
 
 See L<perlref/Assigning to References> for details.
+
+This feature is available from Perl 5.22 onwards.
+
+=head2 The 'bitwise' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental::bitwise";
+
+This makes the four standard bitwise operators (C<& | ^ ~>) treat their
+operands consistently as numbers, and introduces four new dotted operators
+(C<&. |. ^. ~.>) that treat their operands consistently as strings.  The
+same applies to the assignment variants (C<&= |= ^= &.= |.= ^.=>).
+
+See L<perlop/Bitwise String Operators> for details.
 
 This feature is available from Perl 5.22 onwards.
 

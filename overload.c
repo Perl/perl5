@@ -65,13 +65,20 @@ static const U8 PL_AMG_namelens[NofAMmeth] = {
     4,
     2,
     3,
+    3,
+    4,
     2,
     3,
+    3,
+    4,
     2,
+    3,
     3,
     4,
     4,
+    4,
     2,
+    3,
     6,
     4,
     4,
@@ -141,13 +148,20 @@ static const char * const PL_AMG_names[NofAMmeth] = {
     "(>>=",		/* rshift_ass */
     "(&",		/* band       */
     "(&=",		/* band_ass   */
+    "(&.",		/* sband      */
+    "(&.=",		/* sband_ass  */
     "(|",		/* bor        */
     "(|=",		/* bor_ass    */
+    "(|.",		/* sbor       */
+    "(|.=",		/* sbor_ass   */
     "(^",		/* bxor       */
     "(^=",		/* bxor_ass   */
+    "(^.",		/* sbxor      */
+    "(^.=",		/* sbxor_ass  */
     "(<=>",		/* ncmp       */
     "(cmp",		/* scmp       */
     "(~",		/* compl      */
+    "(~.",		/* scompl     */
     "(atan2",		/* atan2      */
     "(cos",		/* cos        */
     "(sin",		/* sin        */

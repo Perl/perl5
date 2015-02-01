@@ -46,7 +46,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.32';
+$VERSION = '1.33';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -2258,6 +2258,8 @@ sub pp_i_predec { pfixop(@_, "--", 23) }
 sub pp_i_postinc { maybe_targmy(@_, \&pfixop, "++", 23, POSTFIX) }
 sub pp_i_postdec { maybe_targmy(@_, \&pfixop, "--", 23, POSTFIX) }
 sub pp_complement { maybe_targmy(@_, \&pfixop, "~", 21) }
+*pp_ncomplement = *pp_complement;
+sub pp_scomplement { maybe_targmy(@_, \&pfixop, "~.", 21) }
 
 sub pp_negate { maybe_targmy(@_, \&real_negate) }
 sub real_negate {
@@ -2763,8 +2765,10 @@ BEGIN {
 	     'subtract' => 18, 'i_subtract' => 18,
 	     'concat' => 18,
 	     'left_shift' => 17, 'right_shift' => 17,
-	     'bit_and' => 13,
+	     'bit_and' => 13, 'nbit_and' => 13, 'sbit_and' => 13,
 	     'bit_or' => 12, 'bit_xor' => 12,
+	     'sbit_or' => 12, 'sbit_xor' => 12,
+	     'nbit_or' => 12, 'nbit_xor' => 12,
 	     'and' => 3,
 	     'or' => 2, 'xor' => 2,
 	    );
@@ -2796,8 +2800,9 @@ BEGIN {
 	      'subtract=' => 7, 'i_subtract=' => 7,
 	      'concat=' => 7,
 	      'left_shift=' => 7, 'right_shift=' => 7,
-	      'bit_and=' => 7,
-	      'bit_or=' => 7, 'bit_xor=' => 7,
+	      'bit_and=' => 7, 'sbit_and=' => 7, 'nbit_and=' => 7,
+	      'nbit_or=' => 7, 'nbit_xor=' => 7,
+	      'sbit_or=' => 7, 'sbit_xor=' => 7,
 	      'andassign' => 7,
 	      'orassign' => 7,
 	     );
@@ -2860,6 +2865,12 @@ sub pp_right_shift { maybe_targmy(@_, \&binop, ">>", 17, ASSIGN) }
 sub pp_bit_and { maybe_targmy(@_, \&binop, "&", 13, ASSIGN) }
 sub pp_bit_or { maybe_targmy(@_, \&binop, "|", 12, ASSIGN) }
 sub pp_bit_xor { maybe_targmy(@_, \&binop, "^", 12, ASSIGN) }
+*pp_nbit_and = *pp_bit_and;
+*pp_nbit_or  = *pp_bit_or;
+*pp_nbit_xor = *pp_bit_xor;
+sub pp_sbit_and { maybe_targmy(@_, \&binop, "&.", 13, ASSIGN) }
+sub pp_sbit_or { maybe_targmy(@_, \&binop, "|.", 12, ASSIGN) }
+sub pp_sbit_xor { maybe_targmy(@_, \&binop, "^.", 12, ASSIGN) }
 
 sub pp_eq { binop(@_, "==", 14) }
 sub pp_ne { binop(@_, "!=", 14) }
@@ -4358,8 +4369,8 @@ sub retscalar {
                  |divide|i_divide|modulo|i_modulo|add|i_add|subtract
                  |i_subtract|concat|stringify|left_shift|right_shift|lt
                  |i_lt|gt|i_gt|le|i_le|ge|i_ge|eq|i_eq|ne|i_ne|ncmp|i_ncmp
-                 |slt|sgt|sle|sge|seq|sne|scmp|bit_and|bit_xor|bit_or
-                 |negate|i_negate|not|complement|smartmatch|atan2|sin|cos
+                 |slt|sgt|sle|sge|seq|sne|scmp|[sn]?bit_(?:and|x?or)|negate
+                 |i_negate|not|[sn]?complement|smartmatch|atan2|sin|cos
                  |rand|srand|exp|log|sqrt|int|hex|oct|abs|length|substr
                  |vec|index|rindex|sprintf|formline|ord|chr|crypt|ucfirst
                  |lcfirst|uc|lc|quotemeta|aelemfast|aelem|exists|helem

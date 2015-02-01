@@ -186,6 +186,7 @@ static const char* const lex_state_names[] = {
  * FUN1         : not used, except for not, which isn't a UNIOP
  * BOop         : bitwise or or xor
  * BAop         : bitwise and
+ * BCop         : bitwise complement
  * SHop         : shift operator
  * PWop         : power operator
  * PMop         : pattern-matching operator
@@ -222,6 +223,8 @@ static const char* const lex_state_names[] = {
 #define FUN1(f)  return (pl_yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC1))
 #define BOop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)BITOROP))
 #define BAop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)BITANDOP))
+#define BCop(f) return pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr = s, \
+		       REPORT('~')
 #define SHop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)SHIFTOP))
 #define PWop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)POWOP))
 #define PMop(f)  return(pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MATCHOP))
@@ -5238,11 +5241,18 @@ Perl_yylex(pTHX)
 	TERM('%');
     }
     case '^':
+	d = s;
+	bof = FEATURE_BITWISE_IS_ENABLED;
+	if (bof && s[1] == '.')
+	    s++;
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >=
 		(s[1] == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE))
+	{
+	    s = d;
 	    TOKEN(0);
+	}
 	s++;
-	BOop(OP_BIT_XOR);
+	BOop(bof ? d == s-2 ? OP_SBIT_XOR : OP_NBIT_XOR : OP_BIT_XOR);
     case '[':
 	if (PL_lex_brackets > 100)
 	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
@@ -5265,7 +5275,11 @@ Perl_yylex(pTHX)
 	    Eop(OP_SMARTMATCH);
 	}
 	s++;
-	OPERATOR('~');
+	if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.') {
+	    s++;
+	    BCop(OP_SCOMPLEMENT);
+	}
+	BCop(bof ? OP_NCOMPLEMENT : OP_COMPLEMENT);
     case ',':
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMMA)
 	    TOKEN(0);
@@ -5734,13 +5748,21 @@ Perl_yylex(pTHX)
 		Perl_warner(aTHX_ packWARN(WARN_SEMICOLON), "%s", PL_warn_nosemi);
 		CopLINE_inc(PL_curcop);
 	    }
+	    d = s;
+	    if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.')
+		s++;
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
 		    (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE)) {
+		s = d;
 		s--;
 		TOKEN(0);
 	    }
-	    PL_parser->saw_infix_sigil = 1;
-	    BAop(OP_BIT_AND);
+	    if (d == s) {
+		PL_parser->saw_infix_sigil = 1;
+		BAop(bof ? OP_NBIT_AND : OP_BIT_AND);
+	    }
+	    else
+		BAop(OP_SBIT_AND);
 	}
 
 	PL_tokenbuf[0] = '&';
@@ -5766,12 +5788,15 @@ Perl_yylex(pTHX)
 	    AOPERATOR(OROR);
 	}
 	s--;
+	d = s;
+	if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.')
+	    s++;
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >=
 		(*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE)) {
-	    s--;
+	    s = d - 1;
 	    TOKEN(0);
 	}
-	BOop(OP_BIT_OR);
+	BOop(bof ? s == d ? OP_NBIT_OR : OP_SBIT_OR : OP_BIT_OR);
     case '=':
 	s++;
 	{

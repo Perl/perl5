@@ -246,6 +246,13 @@ characters will be in either 32- or 64-bit complements, depending on your
 architecture.  So for example, C<~"\x{3B1}"> is C<"\x{FFFF_FC4E}"> on
 32-bit machines and C<"\x{FFFF_FFFF_FFFF_FC4E}"> on 64-bit machines.
 
+If the experimental "bitwise" feature is enabled via C<use feature
+'bitwise'>, then unary "~" always treats its argument as a number, and an
+alternate form of the operator, "~.", always treats its argument as a
+string.  So C<~0> and C<~"0"> will both give 2**32-1 on 32-bit platforms,
+whereas C<~.0> and C<~."0"> will both yield C<"\xff">.  This feature
+produces a warning unless you use C<no warnings 'experimental::bitwise'>.
+
 Unary "+" has no effect whatsoever, even on strings.  It is useful
 syntactically for separating a function name from a parenthesized expression
 that would otherwise be interpreted as the complete list of function
@@ -824,6 +831,11 @@ the parentheses are essential in a test like
 
     print "Even\n" if ($x & 1) == 0;
 
+If the experimental "bitwise" feature is enabled via C<use feature
+'bitwise'>, then this operator always treats its operand as numbers.  This
+feature produces a warning unless you use C<no warnings
+'experimental::bitwise'>.
+
 =head2 Bitwise Or and Exclusive Or
 X<operator, bitwise, or> X<bitwise or> X<|> X<operator, bitwise, xor>
 X<bitwise xor> X<^>
@@ -841,6 +853,11 @@ Note that "|" and "^" have lower priority than relational operators, so
 for example the brackets are essential in a test like
 
     print "false\n" if (8 | 2) != 10;
+
+If the experimental "bitwise" feature is enabled via C<use feature
+'bitwise'>, then this operator always treats its operand as numbers.  This
+feature produces a warning unless you use C<no warnings
+'experimental::bitwise'>.
 
 =head2 C-style Logical And
 X<&&> X<logical and> X<operator, logical, and>
@@ -1114,7 +1131,7 @@ That should probably be written more simply as:
 =head2 Assignment Operators
 X<assignment> X<operator, assignment> X<=> X<**=> X<+=> X<*=> X<&=>
 X<<< <<= >>> X<&&=> X<-=> X</=> X<|=> X<<< >>= >>> X<||=> X<//=> X<.=>
-X<%=> X<^=> X<x=>
+X<%=> X<^=> X<x=> X<&.=> X<|.=> X<^.=>
 
 "=" is the ordinary assignment operator.
 
@@ -1130,9 +1147,9 @@ although without duplicating any side effects that dereferencing the lvalue
 might trigger, such as from tie().  Other assignment operators work similarly.
 The following are recognized:
 
-    **=    +=    *=    &=    <<=    &&=
-           -=    /=    |=    >>=    ||=
-           .=    %=    ^=           //=
+    **=    +=    *=    &=    &.=    <<=    &&=
+           -=    /=    |=    |.=    >>=    ||=
+           .=    %=    ^=    ^.=           //=
                  x=
 
 Although these are grouped by family, they all have the precedence
@@ -1167,6 +1184,9 @@ Similarly, a list assignment in list context produces the list of
 lvalues assigned to, and a list assignment in scalar context returns
 the number of elements produced by the expression on the right hand
 side of the assignment.
+
+The three dotted bitwise assignment operators (C<&.= |.= ^.=>) are new in
+Perl 5.22 and experimental.  See L</Bitwise String Operators>.
 
 =head2 Comma Operator
 X<comma> X<operator, comma> X<,>
@@ -3142,7 +3162,7 @@ context, so you can for example safely do
     1 while foo();
 
 =head2 Bitwise String Operators
-X<operator, bitwise, string>
+X<operator, bitwise, string> X<&.> X<|.> X<^.> X<~.>
 
 Bitstrings of any size may be manipulated by the bitwise operators
 (C<~ | & ^>).
@@ -3172,6 +3192,31 @@ operation you intend by using C<""> or C<0+>, as in the examples below.
 
     $baz = 0+$foo & 0+$bar;	# both ops explicitly numeric
     $biz = "$foo" ^ "$bar";	# both ops explicitly stringy
+
+This somewhat unpredictable behavior can be avoided with the experimental
+"bitwise" feature, new in Perl 5.22.  You can enable it via C<use feature
+'bitwise'>.  By default, it will warn unless the "experimental::bitwise"
+warnings category has been disabled.  (C<use experimental 'bitwise'> will
+enable the feature and disable the warning.)  Under this feature, the four
+standard bitwise operators (C<~ | & ^>) are always numeric.  Adding a dot
+after each operator (C<~. |. &. ^.>) forces it to treat its operands as
+strings:
+
+    use experimental "bitwise";
+    $foo =  150  |  105;	# yields 255  (0x96 | 0x69 is 0xFF)
+    $foo = '150' |  105;	# yields 255
+    $foo =  150  | '105';	# yields 255
+    $foo = '150' | '105';	# yields 255
+    $foo =  150  |. 105;	# yields string '155' (under ASCII)
+    $foo = '150' |. 105;	# yields string '155'
+    $foo =  150  |.'105';	# yields string '155'
+    $foo = '150' |.'105';	# yields string '155'
+
+    $baz = $foo &  $bar;	# both operands numeric
+    $biz = $foo ^. $bar;	# both operands stringy
+
+The assignment variants of these operators (C<&= |= ^= &.= |.= ^.=>)
+behave likewise under the feature.
 
 See L<perlfunc/vec> for information on how to manipulate individual bits
 in a bit vector.

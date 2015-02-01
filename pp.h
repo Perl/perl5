@@ -376,6 +376,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define RETSETYES	RETURNX(SETs(&PL_sv_yes))
 #define RETSETNO	RETURNX(SETs(&PL_sv_no))
 #define RETSETUNDEF	RETURNX(SETs(&PL_sv_undef))
+#define RETSETTARG	STMT_START { SETTARG; RETURN; } STMT_END
 
 #define ARGTARG		PL_op->op_targ
 
@@ -404,6 +405,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define AMGf_numeric	0x10	/* for Perl_try_amagic_bin */
 #define AMGf_set	0x20	/* for Perl_try_amagic_bin */
 #define AMGf_want_list	0x40
+#define AMGf_numarg	0x80
 
 
 /* do SvGETMAGIC on the stack args before checking for overload */

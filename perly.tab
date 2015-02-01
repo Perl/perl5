@@ -222,7 +222,7 @@ static const yytype_uint16 yyrline[] =
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 0
+#if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
@@ -241,19 +241,18 @@ static const char *const yytname[] =
   "ANDOP", "NOTOP", "','", "ASSIGNOP", "'?'", "':'", "DORDOR", "OROR",
   "ANDAND", "BITOROP", "BITANDOP", "SHIFTOP", "MATCHOP", "'!'", "'~'",
   "REFGEN", "UMINUS", "POWOP", "POSTJOIN", "POSTDEC", "POSTINC", "PREDEC",
-  "PREINC", "ARROW", "')'", "'('", "'/'", "$accept", "grammar", "$@1",
-  "$@2", "$@3", "$@4", "$@5", "$@6", "block", "formblock", "remember",
-  "mblock", "mremember", "stmtseq", "formstmtseq", "fullstmt",
-  "labfullstmt", "barestmt", "$@7", "$@8", "$@9", "$@10", "$@11", "@12",
-  "$@13", "formline", "formarg", "sideff", "else", "cont", "mintro",
-  "nexpr", "texpr", "iexpr", "mexpr", "mnexpr", "miexpr", "formname",
-  "startsub", "startanonsub", "startformsub", "subname", "proto",
-  "subattrlist", "myattrlist", "subsignature", "@14", "optsubbody", "expr",
-  "listexpr", "listop", "@15", "method", "subscripted", "termbinop",
-  "termunop", "anonymous", "termdo", "term", "@16", "myattrterm", "myterm",
-  "optlistexpr", "optexpr", "optrepl", "my_scalar", "my_var",
-  "refgen_topic", "amper", "scalar", "ary", "hsh", "arylen", "star",
-  "sliceme", "kvslice", "gelem", "indirob", YY_NULL
+  "PREINC", "ARROW", "')'", "'('", "'/'", "$accept", "grammar", "@1", "@2",
+  "@3", "@4", "@5", "@6", "block", "formblock", "remember", "mblock",
+  "mremember", "stmtseq", "formstmtseq", "fullstmt", "labfullstmt",
+  "barestmt", "@7", "@8", "@9", "@10", "@11", "@12", "@13", "formline",
+  "formarg", "sideff", "else", "cont", "mintro", "nexpr", "texpr", "iexpr",
+  "mexpr", "mnexpr", "miexpr", "formname", "startsub", "startanonsub",
+  "startformsub", "subname", "proto", "subattrlist", "myattrlist",
+  "subsignature", "@14", "optsubbody", "expr", "listexpr", "listop", "@15",
+  "method", "subscripted", "termbinop", "termunop", "anonymous", "termdo",
+  "term", "@16", "myattrterm", "myterm", "optlistexpr", "optexpr",
+  "optrepl", "my_scalar", "my_var", "refgen_topic", "amper", "scalar",
+  "ary", "hsh", "arylen", "star", "sliceme", "kvslice", "gelem", "indirob", 0
 };
 #endif
 
@@ -338,8 +337,8 @@ static const yytype_uint8 yyr2[] =
        1,     1,     1,     1
 };
 
-/* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
-   Performed when YYTABLE doesn't specify something else to do.  Zero
+/* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
+   STATE-NUM when YYTABLE doesn't specify something else to do.  Zero
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
@@ -482,7 +481,8 @@ static const yytype_int16 yypgoto[] =
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
-   number is the opposite.  If YYTABLE_NINF, syntax error.  */
+   number is the opposite.  If zero, do what YYDEFACT says.
+   If YYTABLE_NINF, syntax error.  */
 #define YYTABLE_NINF -249
 static const yytype_int16 yytable[] =
 {
@@ -776,12 +776,6 @@ static const yytype_int16 yytable[] =
      179,     0,     0,     0,     0,   180,   181,   182,   183,     0,
        0,   184
 };
-
-#define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-419)))
-
-#define yytable_value_is_error(Yytable_value) \
-  (!!((Yytable_value) == (-249)))
 
 static const yytype_int16 yycheck[] =
 {
@@ -1154,22 +1148,21 @@ static const toketypes yy_type_tab[] =
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval, toketype_ival,
-  toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival,
-  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
-  toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_opval, toketype_opval
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval, toketype_ival, toketype_opval,
+  toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_ival,
+  toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval
 };
 
 /* Generated from:
- * 12bc2d35e1af6b72fc94eb1621fe7f5c3e605bbacc097f6fd0e4598864ad9939 perly.y
+ * 0d7275f3d26eba5194cb04d866bf174da7b0efd786c93da356327709423460ee perly.y
  * d1d4df7b8e30ac9dede664af9179e6e5e7ddc7f2ad9c4eff9e2e5b32c9e16a6e regen_perly.pl
  * ex: set ro: */

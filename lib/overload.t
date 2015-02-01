@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5199;
+plan tests => 5215;
 
 use Scalar::Util qw(tainted);
 
@@ -2753,6 +2753,69 @@ package xstack { use overload 'x' => sub { shift . " x " . shift },
 is join(",", 1..3, scalar((bless([], 'xstack')) x 3, 1), 4..6),
   "1,2,3,1,4,5,6",
   '(...)x... in void cx with x overloaded [perl #121827]';
+
+package bitops {
+    our @o;
+    use overload do {
+	my %o;
+	for my $o (qw(& | ^ ~ &. |. ^. ~. &= |= ^= &.= |.= ^.=)) {
+	    $o{$o} = sub {
+		::ok !defined $_[3], "undef (or nonexistent) arg 3 for $o";
+		push @o, $o, scalar @_, $_[4]//'u';
+		$_[0]
+	    }
+	}
+	%o, '=' => sub { bless [] };
+    }
+}
+{
+    use experimental 'bitwise';
+    my $o = bless [], bitops::;
+    $_ = $o & 0;
+    $_ = $o | 0;
+    $_ = $o ^ 0;
+    $_ = ~$o;
+    $_ = $o &. 0;
+    $_ = $o |. 0;
+    $_ = $o ^. 0;
+    $_ = ~.$o;
+    $o &= 0;
+    $o |= 0;
+    $o ^= 0;
+    $o &.= 0;
+    $o |.= 0;
+    $o ^.= 0;
+    # elems are in triplets: op, length of @_, numeric? (1/u for y/n)
+    is "@bitops::o", '& 5 1 | 5 1 ^ 5 1 ~ 5 1 &. 3 u |. 3 u ^. 3 u ~. 3 u ' 		   . '&= 5 1 |= 5 1 ^= 5 1 &.= 3 u |.= 3 u ^.= 3 u',
+       'experimental "bitwise" ops'
+}
+package bitops2 {
+    our @o;
+    use overload
+	 nomethod => sub { push @o, $_[3], scalar @_, $_[4]//'u'; $_[0] },
+	'=' => sub { bless [] };
+}
+{
+    use experimental 'bitwise';
+    my $o = bless [], bitops2::;
+    $_ = $o & 0;
+    $_ = $o | 0;
+    $_ = $o ^ 0;
+    $_ = ~$o;
+    $_ = $o &. 0;
+    $_ = $o |. 0;
+    $_ = $o ^. 0;
+    $_ = ~.$o;
+    $o &= 0;
+    $o |= 0;
+    $o ^= 0;
+    $o &.= 0;
+    $o |.= 0;
+    $o ^.= 0;
+    # elems are in triplets: op, length of @_, numeric? (1/u for y/n)
+    is "@bitops2::o", '& 5 1 | 5 1 ^ 5 1 ~ 5 1 &. 4 u |. 4 u ^. 4 u ~. 4 u ' 		    . '&= 5 1 |= 5 1 ^= 5 1 &.= 4 u |.= 4 u ^.= 4 u',
+       'experimental "bitwise" ops with nomethod'
+}
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
     package ant;
