@@ -78,10 +78,10 @@ char *
 bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 {
 	char *p, *q, *s;
-	size_t left_len, resolved_len;
+	size_t remaining_len, resolved_len;
 	unsigned symlinks;
 	int serrno;
-	char left[MAXPATHLEN], next_token[MAXPATHLEN];
+	char remaining[MAXPATHLEN], next_token[MAXPATHLEN];
 
 	serrno = errno;
 	symlinks = 0;
@@ -91,39 +91,41 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
             if (path[1] == '\0')
                     return (resolved);
             resolved_len = 1;
-            left_len = my_strlcpy(left, path + 1, sizeof(left));
+            remaining_len = my_strlcpy(remaining, path + 1, sizeof(remaining));
 	} else {
             if (getcwd(resolved, MAXPATHLEN) == NULL) {
                 my_strlcpy(resolved, ".", MAXPATHLEN);
                 return (NULL);
             }
             resolved_len = strlen(resolved);
-            left_len = my_strlcpy(left, path, sizeof(left));
+            remaining_len = my_strlcpy(remaining, path, sizeof(remaining));
 	}
-	if (left_len >= sizeof(left) || resolved_len >= MAXPATHLEN) {
+	if (remaining_len >= sizeof(remaining) || resolved_len >= MAXPATHLEN) {
             errno = ENAMETOOLONG;
             return (NULL);
 	}
 
 	/*
-	 * Iterate over path components in 'left'.
+	 * Iterate over path components in 'remaining'.
 	 */
-	while (left_len != 0) {
+	while (remaining_len != 0) {
+
             /*
-             * Extract the next path component and adjust 'left'
+             * Extract the next path component and adjust 'remaining'
              * and its length.
              */
-            p = strchr(left, '/');
-            s = p ? p : left + left_len;
-            if ((STRLEN)(s - left) >= (STRLEN)sizeof(next_token)) {
+
+            p = strchr(remaining, '/');
+            s = p ? p : remaining + remaining_len;
+            if ((STRLEN)(s - remaining) >= (STRLEN)sizeof(next_token)) {
                 errno = ENAMETOOLONG;
                 return (NULL);
             }
-            memcpy(next_token, left, s - left);
-            next_token[s - left] = '\0';
-            left_len -= s - left;
+            memcpy(next_token, remaining, s - remaining);
+            next_token[s - remaining] = '\0';
+            remaining_len -= s - remaining;
             if (p != NULL)
-                memmove(left, s + 1, left_len + 1);
+                memmove(remaining, s + 1, remaining_len + 1);
             if (resolved[resolved_len - 1] != '/') {
                 if (resolved_len + 1 >= MAXPATHLEN) {
                     errno = ENAMETOOLONG;
@@ -196,7 +198,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                     /*
                      * If there are any path components left, then
                      * append them to symlink. The result is placed
-                     * in 'left'.
+                     * in 'remaining'.
                      */
                     if (p != NULL) {
                         if (symlink[slen - 1] != '/') {
@@ -207,13 +209,13 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                             symlink[slen] = '/';
                             symlink[slen + 1] = 0;
                         }
-                        left_len = my_strlcat(symlink, left, sizeof(symlink));
-                        if (left_len >= sizeof(left)) {
+                        remaining_len = my_strlcat(symlink, remaining, sizeof(symlink));
+                        if (remaining_len >= sizeof(remaining)) {
                             errno = ENAMETOOLONG;
                             return (NULL);
                         }
                     }
-                    left_len = my_strlcpy(left, symlink, sizeof(left));
+                    remaining_len = my_strlcpy(remaining, symlink, sizeof(remaining));
                 }
             }
 #endif
