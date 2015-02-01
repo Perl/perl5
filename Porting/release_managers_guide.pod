@@ -793,7 +793,9 @@ a final release, remove it. For example:
      static const char * const local_patches[] = {
              NULL
     +        ,"RC1"
-             PERL_GIT_UNPUSHED_COMMITS /* do not remove this line */
+     #ifdef PERL_GIT_UNCOMMITTED_CHANGES
+             ,"uncommitted-changes"
+     #endif
 
 Be sure to commit your change:
 
@@ -1067,7 +1069,9 @@ Disarm the F<patchlevel.h> change; for example,
      static const char * const local_patches[] = {
              NULL
     -        ,"RC1"
-             PERL_GIT_UNPUSHED_COMMITS /* do not remove this line */
+     #ifdef PERL_GIT_UNCOMMITTED_CHANGES
+             ,"uncommitted-changes"
+     #endif
 
 Be sure to commit your change:
 
