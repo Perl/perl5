@@ -6482,6 +6482,15 @@ extern void moncontrol(int);
 #  endif
 #endif
 
+/* The implicit bit platforms include the implicit bit
+ * in the NV_MANT_DIG.  The bit isn't really there, however,
+ * so the real count of mantissa bits is one less. */
+#ifdef NV_IMPLICIT_BIT
+#  define NV_MANT_REAL_DIG (NV_MANT_DIG - 1)
+#else
+#  define NV_MANT_REAL_DIG
+#endif
+
 /*
 
    (KEEP THIS LAST IN perl.h!)
