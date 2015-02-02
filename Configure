@@ -618,7 +618,9 @@ d_lgamma_r=''
 d_libm_lib_version=''
 d_link=''
 d_llrint=''
+d_llrintl=''
 d_llround=''
+d_llroundl=''
 d_localtime_r=''
 d_localtime_r_needs_tzset=''
 localtime_r_proto=''
@@ -634,7 +636,9 @@ longdblsize=''
 d_longlong=''
 longlongsize=''
 d_lrint=''
+d_lrintl=''
 d_lround=''
+d_lroundl=''
 d_lseekproto=''
 d_lstat=''
 d_madvise=''
@@ -16016,8 +16020,16 @@ eval $inlibc
 set llrint d_llrint
 eval $inlibc
 
+: see if llrintl exists
+set llrintl d_llrintl
+eval $inlibc
+
 : see if llround exists
 set llround d_llround
+eval $inlibc
+
+: see if llroundl exists
+set llroundl d_llroundl
 eval $inlibc
 
 : see if localtime_r exists
@@ -16159,8 +16171,16 @@ eval $inlibc
 set lrint d_lrint
 eval $inlibc
 
+: see if lrintl exists
+set lrintl d_lrintl
+eval $inlibc
+
 : see if lround exists
 set lround d_lround
+eval $inlibc
+
+: see if lroundl exists
+set lroundl d_lroundl
 eval $inlibc
 
 : see if prototype for lseek is available
@@ -23981,7 +24001,9 @@ d_libm_lib_version='$d_libm_lib_version'
 d_libname_unique='$d_libname_unique'
 d_link='$d_link'
 d_llrint='$d_llrint'
+d_llrintl='$d_llrintl'
 d_llround='$d_llround'
+d_llroundl='$d_llroundl'
 d_localtime64='$d_localtime64'
 d_localtime_r='$d_localtime_r'
 d_localtime_r_needs_tzset='$d_localtime_r_needs_tzset'
@@ -23993,7 +24015,9 @@ d_logb='$d_logb'
 d_longdbl='$d_longdbl'
 d_longlong='$d_longlong'
 d_lrint='$d_lrint'
+d_lrintl='$d_lrintl'
 d_lround='$d_lround'
+d_lroundl='$d_lroundl'
 d_lseekproto='$d_lseekproto'
 d_lstat='$d_lstat'
 d_madvise='$d_madvise'

@@ -3995,11 +3995,25 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_llrint HAS_LLRINT		/**/
 
+/* HAS_LLRINTL:
+ *	This symbol, if defined, indicates that the llrintl routine is
+ *	available to return the closest long long value of the long double
+ *	argument according to the current rounding mode.
+ */
+#$d_llrintl HAS_LLRINTL		/**/
+
 /* HAS_LLROUND:
  *	This symbol, if defined, indicates that the llround routine is
  *	available to return the nearest long long value.
  */
 #$d_llround HAS_LLROUND		/**/
+
+/* HAS_LLROUNDL:
+ *	This symbol, if defined, indicates that the llroundl routine is
+ *	available to return the nearest long long value of the long double
+ *	argument value.
+ */
+#$d_llroundl HAS_LLROUNDL		/**/
 
 /* HAS_LOG1P:
  *	This symbol, if defined, indicates that the log1p routine is
@@ -4026,11 +4040,25 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_lrint HAS_LRINT		/**/
 
+/* HAS_LRINTL:
+ *	This symbol, if defined, indicates that the lrintl routine is
+ *	available to return the closest integral value to the long double
+ *	argument according to the current rounding mode.
+ */
+#$d_lrintl HAS_LRINTL		/**/
+
 /* HAS_LROUND:
  *	This symbol, if defined, indicates that the lround routine is
  *	available to return the nearest integral value.
  */
 #$d_lround HAS_LROUND		/**/
+
+/* HAS_LROUNDL:
+ *	This symbol, if defined, indicates that the lroundl routine is
+ *	available to return the nearest integral value to the long double
+ *	argument.
+ */
+#$d_lroundl HAS_LROUNDL		/**/
 
 /* HAS_MADVISE:
  *	This symbol, if defined, indicates that the madvise system call is
