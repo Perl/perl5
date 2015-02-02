@@ -788,6 +788,7 @@ BOOT:
 {
     CV *cv;
     const char *file = __FILE__;
+    SV *sv;
     MY_CXT_INIT;
     B_init_my_cxt(aTHX_ &(MY_CXT));
     cv = newXS("B::init_av", intrpvar_sv_common, file);
@@ -820,6 +821,14 @@ BOOT:
     ASSIGN_COMMON_ALIAS(I, warnhook);
     cv = newXS("B::diehook", intrpvar_sv_common, file);
     ASSIGN_COMMON_ALIAS(I, diehook);
+    sv = get_sv("B::OP::does_parent", GV_ADDMULTI);
+    sv_setsv(sv,
+#ifdef PERL_OP_PARENT
+        &PL_sv_yes
+#else
+        &PL_sv_no
+#endif
+    );
 }
 
 #ifndef PL_formfeed

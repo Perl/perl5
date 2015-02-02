@@ -1139,6 +1139,11 @@ data structure.  See top of C<op.h> for more info.
 Returns the OP's parent. If it has no parent, or if your perl wasn't built
 with C<-DPERL_OP_PARENT>, returns NULL.
 
+Note that the global variable C<$B::OP::does_parent> is undefined on older
+perls that don't support the C<parent> method, is defined but false on
+perls that support the method but were built without  C<-DPERL_OP_PARENT>,
+and is true otherwise.
+
 =item name
 
 This returns the op name as a string (e.g. "add", "rv2av").
