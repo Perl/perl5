@@ -3288,44 +3288,43 @@ S_scan_const(pTHX_ char *start)
 		/* Here it looks like a named character */
 
 		if (*s == 'U' && s[1] == '+') { /* \N{U+...} */
-		    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
-				| PERL_SCAN_SILENT_ILLDIGIT
-				| PERL_SCAN_DISALLOW_PREFIX;
-		    STRLEN len;
-
 		    s += 2;	    /* Skip to next char after the 'U+' */
-		    len = e - s;
-		    uv = grok_hex(s, &len, &flags, NULL);
-		    if (len == 0
-		     || (  len != (STRLEN)(e - s) && s[len] != '.'
-			&& PL_lex_inpat))
-		    {
-		      bad_NU:
-			yyerror("Invalid hexadecimal number in \\N{U+...}");
-			s = e + 1;
-			continue;
-		    }
-
 		    if (PL_lex_inpat) {
 
                         /* In patterns, we can have \N{U+xxxx.yyyy.zzzz...} */
-                        const char * const orig_s = s - 5;
-                        while (*s == '.') {
-                            s++;
-                            len = e - s;
-                            uv = grok_hex(s, &len, &flags, NULL);
-                            if (!len
-                             || (len != (STRLEN)(e - s) && s[len] != '.'))
-                                goto bad_NU;
+                        /* Check the syntax.  */
+                        const char *orig_s;
+                        orig_s = s - 5;
+                        if (!isXDIGIT(*s)) {
+                          bad_NU:
+                            yyerror(
+                                "Invalid hexadecimal number in \\N{U+...}"
+                            );
+                            s = e + 1;
+                            continue;
+                        }
+                        while (++s < e) {
+                            if (isXDIGIT(*s))
+                                continue;
+                            else if ((*s == '.' || *s == '_')
+                                  && isXDIGIT(s[1]))
+                                continue;
+                            goto bad_NU;
                         }
 
-                        /* Pass everything through unchanged.  The reason we
-                         * evaluate the numbers is to make sure there wasn't a
-                         * syntax error.  +1 is for the '}' */
+                        /* Pass everything through unchanged.
+                         * +1 is for the '}' */
                         Copy(orig_s, d, e - orig_s + 1, char);
                         d += e - orig_s + 1;
 		    }
 		    else {  /* Not a pattern: convert the hex to string */
+                        I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
+				| PERL_SCAN_SILENT_ILLDIGIT
+				| PERL_SCAN_DISALLOW_PREFIX;
+                        STRLEN len = e - s;
+                        uv = grok_hex(s, &len, &flags, NULL);
+                        if (len == 0 || (len != (STRLEN)(e - s)))
+                            goto bad_NU;
 
                          /* If the destination is not in utf8, unconditionally
 			  * recode it to be so.  This is because \N{} implies
