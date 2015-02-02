@@ -276,14 +276,14 @@
 #  define c99_log1p	log1pl
 #  define c99_log2	log2l
 #  define c99_logb	logbl
-#  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
-#   define c99_lrint	llrintl
-#  else
+#  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLRINTL)
+#    define c99_lrint	llrintl
+#  elif defined(HAS_LRINTL)
 #    define c99_lrint	lrintl
 #  endif
-#  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
+#  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLROUNDL)
 #    define c99_lround	llroundl
-#  else
+#  elif defined(HAS_LROUNDL)
 #    define c99_lround	lroundl
 #  endif
 #  define c99_nan	nanl
