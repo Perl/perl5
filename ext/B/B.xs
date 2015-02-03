@@ -822,13 +822,11 @@ BOOT:
     cv = newXS("B::diehook", intrpvar_sv_common, file);
     ASSIGN_COMMON_ALIAS(I, diehook);
     sv = get_sv("B::OP::does_parent", GV_ADDMULTI);
-    sv_setsv(sv,
 #ifdef PERL_OP_PARENT
-        &PL_sv_yes
+    sv_setsv(sv, &PL_sv_yes);
 #else
-        &PL_sv_no
+    sv_setsv(sv, &PL_sv_no);
 #endif
-    );
 }
 
 #ifndef PL_formfeed
