@@ -161,6 +161,10 @@ L<Win32API::File> has been upgraded from version 0.1201 to 0.1202
 
 Building in C++ mode now works.
 
+=item *
+
+L<POSIX> has been upgraded from version 1.49 to 1.50.
+
 =back
 
 =head2 Removed Modules and Pragmata
