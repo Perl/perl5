@@ -11351,6 +11351,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #ifndef FV_ISFINITE
 #  define FV_ISFINITE(x) Perl_isfinite((NV)(x))
 #endif
+        NV nv;
 	STRLEN have;
 	STRLEN need;
 	STRLEN gap;
@@ -12094,19 +12095,25 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #ifdef USE_QUADMATH
                 fv = intsize == 'q' ?
                     va_arg(*args, NV) : va_arg(*args, double);
+                nv = fv;
 #elif LONG_DOUBLESIZE > DOUBLESIZE
-                if (intsize == 'q')
+                if (intsize == 'q') {
                     fv = va_arg(*args, long double);
-                else
-                    NV_TO_FV(va_arg(*args, double), fv);
+                    nv = fv;
+                } else {
+                    nv = va_arg(*args, double);
+                    NV_TO_FV(nv, fv);
+                }
 #else
-                fv = va_arg(*args, double);
+                nv = va_arg(*args, double);
+                fv = nv;
 #endif
             }
             else
             {
                 if (!infnan) SvGETMAGIC(argsv);
-                NV_TO_FV(SvNV_nomg(argsv), fv);
+                nv = SvNV_nomg(argsv);
+                NV_TO_FV(nv, fv);
             }
 
 	    need = 0;
@@ -12253,7 +12260,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			goto float_converted;
 		    }
 		} else if ( c == 'f' && !precis ) {
-		    if ((eptr = F0convert(fv, ebuf + sizeof ebuf, &elen)))
+		    if ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
 			break;
 		}
 	    }
@@ -12281,10 +12288,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * should be output as 0x0.0000000000001p-1022 to
                  * match its internal structure. */
 
-                /* Note: fv can be (and often is) long double.
-                 * Here it is explicitly cast to NV. */
-                vend = S_hextract(aTHX_ (NV)fv, &exponent, vhex, NULL);
-                S_hextract(aTHX_ (NV)fv, &exponent, vhex, vend);
+                vend = S_hextract(aTHX_ nv, &exponent, vhex, NULL);
+                S_hextract(aTHX_ nv, &exponent, vhex, vend);
 
 #if NVSIZE > DOUBLESIZE
 #  ifdef HEXTRACT_HAS_IMPLICIT_BIT
@@ -12442,7 +12447,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
             }
             else {
-                elen = S_infnan_2pv(fv, PL_efloatbuf, PL_efloatsize, plus);
+                elen = S_infnan_2pv(nv, PL_efloatbuf, PL_efloatsize, plus);
                 if (elen) {
                     /* Not affecting infnan output: precision, alt, fill. */
                     if (elen < width) {
@@ -12518,7 +12523,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     if (!qfmt)
                         Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", ptr);
                     elen = quadmath_snprintf(PL_efloatbuf, PL_efloatsize,
-                                             qfmt, fv);
+                                             qfmt, nv);
                     if ((IV)elen == -1)
                         Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s|'", qfmt);
                     if (qfmt != ptr)
