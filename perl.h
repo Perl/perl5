@@ -6497,7 +6497,7 @@ extern void moncontrol(int);
 #ifdef NV_IMPLICIT_BIT
 #  define NV_MANT_REAL_DIG (NV_MANT_DIG - 1)
 #else
-#  define NV_MANT_REAL_DIG
+#  define NV_MANT_REAL_DIG (NV_MANT_DIG)
 #endif
 
 /*
