@@ -21,6 +21,10 @@
 #   include <unistd.h>
 #endif
 
+/* For special handling of os390 sysplexed systems */
+#define SYSNAME "$SYSNAME"
+#define SYSNAME_LEN (sizeof(SYSNAME) - 1)
+
 /* The realpath() implementation from OpenBSD 3.9 to 4.2 (realpath.c 1.13)
  * Renamed here to bsd_realpath() to avoid library conflicts.
  */
@@ -184,6 +188,16 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                     if (slen < 0)
                         return (NULL);
                     symlink[slen] = '\0';
+#ifdef EBCDIC /* XXX Probably this should be only os390 */
+                    /* Replace all instances of $SYSNAME/foo simply by /foo */
+                    if (slen > SYSNAME_LEN + strlen(next_token)
+                        && strnEQ(symlink, SYSNAME, SYSNAME_LEN)
+                        && *(symlink + SYSNAME_LEN) == '/'
+                        && strEQ(symlink + SYSNAME_LEN + 1, next_token))
+                    {
+                        goto not_symlink;
+                    }
+#endif
                     if (symlink[0] == '/') {
                         resolved[1] = 0;
                         resolved_len = 1;
@@ -217,6 +231,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                     }
                     remaining_len = my_strlcpy(remaining, symlink, sizeof(remaining));
                 }
+              not_symlink: ;
             }
 #endif
 	}
