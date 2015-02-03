@@ -123,16 +123,20 @@ L<B> has been upgraded from version 1.55 to 1.56.
 
 =item *
 
-L<Encode> has been upgraded from version 2.67 to 2.68.
-
-Building in C++ mode on Windows now works.
-
-=item *
-
 L<bigint>, L<bignum>, L<bigrat> have been upgraded to version 0.39.
 
 Document in CAVEATS that using strings as numbers won't always invoke
 the big number overloading, and how to invoke it.  [perl #123064]
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.21 to 1.22.
+
+=item *
+
+L<Encode> has been upgraded from version 2.67 to 2.68.
+
+Building in C++ mode on Windows now works.
 
 =item *
 
