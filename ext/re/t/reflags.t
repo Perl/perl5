@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 63;
+use Test::More tests => 67;
 
 my @flags = qw( a d l u );
 
@@ -52,6 +52,18 @@ no re '/sm';
 }
 ok 'f r e l p' =~ /f r e l p/,
  "use re '/x' turns off when it drops out of scope";
+
+{
+  use re '/i';
+  ok "Foo" =~ /foo/, 'use re "/i"';
+  no re;
+  ok "Foo" !~ /foo/, "bare 'no re' reverts to no /i";
+  use re '/u';
+  my $nbsp = chr utf8::unicode_to_native(0xa0);
+  ok $nbsp =~ /\s/, 'nbsp matches \\s under /u';
+  no re;
+  ok $nbsp !~ /\s/, "bare 'no re' reverts to /d";
+}
 
 SKIP: {
   if (

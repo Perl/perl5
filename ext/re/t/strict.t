@@ -12,7 +12,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 9;
+use Test::More tests => 10;
 BEGIN { require_ok( 're' ); }
 
 {
@@ -29,6 +29,13 @@ BEGIN { require_ok( 're' ); }
         qr/\b*/;
 
         BEGIN { is(scalar @w, 1, 'use re "strict" turns on warnings'); }
+
+        BEGIN { undef @w; }
+
+        no re 'strict';
+        qr/\b*/;
+
+        BEGIN { is(scalar @w, 0, 'no re "strict" restores warnings state'); }
     }
 
     BEGIN {undef @w; }
