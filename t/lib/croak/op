@@ -11,13 +11,14 @@ EXPECT
 Can't use global $! in "my" at - line 1, near "my $!"
 Execution of - aborted due to compilation errors.
 ########
-# NAME my $<latin1>
+# NAME my $<non-ASCII> doesn't output garbage
+# \xB6 is same character in all three EBCDIC pages and Latin1
 use open ":std", ":utf8";
-eval qq|my \$\xe9;|; # é in Latin-1
+eval qq|my \$\xb6;|; # ¶ in Latin-1, and EBCDIC 1047, 037, POSIX-BC
 print $@;
 exit 1;
 EXPECT
-Can't use global $é in "my" at (eval 1) line 1, near "my $é"
+Can't use global $¶ in "my" at (eval 1) line 1, near "my $¶"
 ########
 # NAME OP_HELEM fields
 package Foo;
