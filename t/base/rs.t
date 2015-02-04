@@ -1,7 +1,7 @@
 #!./perl
-# Test $!
+# Test $/
 
-print "1..38\n";
+print "1..39\n";
 
 $test_count = 1;
 $teststring = "1\n12\n123\n1234\n1234\n12345\n\n123456\n1234567\n";
@@ -34,8 +34,13 @@ test_record(*TESTFILE);
 close TESTFILE;
 $test_count_end = $test_count;  # Needed to know how many tests to skip
 
+$/ = "\n";
+my $note = "\$/ preserved when set to bad value";
+# none of the setting of $/ to bad values should modify its value
 test_bad_setting();
-
+print +($/ ne "\n" ? "not " : "") .
+  "ok $test_count # \$/ preserved when set to bad value\n";
+++$test_count;
 
 # Now for the tricky bit--full record reading
 if ($^O eq 'VMS') {

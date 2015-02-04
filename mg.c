@@ -1105,6 +1105,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case ':':
 	break;
     case '/':
+        sv_setsv(sv, PL_rs);
 	break;
     case '[':
 	sv_setiv(sv, 0);
