@@ -221,8 +221,8 @@ sub bits {
 		    }
 		    else {
 			delete $^H{reflags_charset}
-			 if  defined $^H{reflags_charset}
-			  && $^H{reflags_charset} == $reflags{$_};
+                                     if defined $^H{reflags_charset}
+                                        && $^H{reflags_charset} == $reflags{$_};
 		    }
 		} elsif (exists $reflags{$_}) {
                     $seen{$_}++;
@@ -238,8 +238,8 @@ sub bits {
 		}
 	    }
 	    ($^H{reflags} = $reflags or defined $^H{reflags_charset})
-	     ? $^H |= $flags_hint
-	     : ($^H &= ~$flags_hint);
+	                    ? $^H |= $flags_hint
+	                    : ($^H &= ~$flags_hint);
 	} else {
 	    require Carp;
 	    Carp::carp("Unknown \"re\" subpragma '$s' (known ones are: ",
