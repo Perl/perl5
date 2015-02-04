@@ -269,7 +269,15 @@ is_deeply( \%split_seen, \%exp,
       if ($^O eq 'dec_osf' && $rp =~ m[^/cluster/members/]) {
           skip "Tru64 cluster filesystem", 1;
       } # SKIP
-      is( uc($rv), uc($rp), "perl_src(): identified directory" );
+      elsif ($^O eq 'os390') {
+        # os390 also has cluster-like things called 'sysplexed'.  So far, the
+        # tail end of the path matches what we passed it (with some prepended
+        # directories).  So test for that.
+        like( uc($rp), qr/\U\Q$rp\E$/, "perl_src(): identified directory" );
+      }
+      else {
+        is( uc($rv), uc($rp), "perl_src(): identified directory" );
+      }
     }
     is( $capture, q{}, "perl_src(): no warning, as expected" );
 
