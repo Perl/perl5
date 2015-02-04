@@ -292,7 +292,12 @@ is($NaN * 2, $NaN, "twice NaN is NaN");
 is($NaN / 2, $NaN, "half of NaN is NaN");
 
 is($NaN * $NaN, $NaN, "NaN * NaN is NaN");
-is($NaN / $NaN, $NaN, "NaN / NaN is NaN");
+SKIP: {
+    if ($NaN == 0) {
+        skip "NaN looks like zero, avoiding dividing by it", 1;
+    }
+    is($NaN / $NaN, $NaN, "NaN / NaN is NaN");
+}
 
 for my $f (@printf_fmt) {
     is(sprintf("%$f", $NaN), "NaN", "$NaN sprintf %$f is NaN");
