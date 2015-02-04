@@ -393,7 +393,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+The original visible value of C<$/> is now preserved when it is set to
+an invalid value.  Previously if you set C<$/> to a reference to an
+array, for example, perl would produce a runtime error and not set
+C<PL_rs>, but perl code that checked C<$/> would see the array
+reference.  [perl #123218]
 
 =back
 
