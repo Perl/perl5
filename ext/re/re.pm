@@ -116,7 +116,7 @@ sub bits {
     if ($turning_all_off) {
 
         # Pretend were called with certain parameters, which are best dealt
-        # with XXX
+        # with that way.
         push @_, keys %bitmask; # taint and eval
         push @_, 'strict';
     }
