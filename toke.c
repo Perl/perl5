@@ -7677,10 +7677,8 @@ Perl_yylex(pTHX)
 	    }
 	    if (!words)
 		words = newNULLLIST();
-	    if (PL_lex_stuff) {
-		SvREFCNT_dec(PL_lex_stuff);
-		PL_lex_stuff = NULL;
-	    }
+	    SvREFCNT_dec_NN(PL_lex_stuff);
+	    PL_lex_stuff = NULL;
 	    PL_expect = XOPERATOR;
 	    pl_yylval.opval = sawparens(words);
 	    TOKEN(QWLIST);
@@ -8995,10 +8993,8 @@ S_scan_subst(pTHX_ char *start)
     first_line = CopLINE(PL_curcop);
     s = scan_str(s,FALSE,FALSE,FALSE,NULL);
     if (!s) {
-	if (PL_lex_stuff) {
-	    SvREFCNT_dec(PL_lex_stuff);
-	    PL_lex_stuff = NULL;
-	}
+	SvREFCNT_dec_NN(PL_lex_stuff);
+	PL_lex_stuff = NULL;
 	Perl_croak(aTHX_ "Substitution replacement not terminated");
     }
     PL_multi_start = first_start;	/* so whole substitution is taken together */
@@ -9077,10 +9073,8 @@ S_scan_trans(pTHX_ char *start)
 
     s = scan_str(s,FALSE,FALSE,FALSE,NULL);
     if (!s) {
-	if (PL_lex_stuff) {
-	    SvREFCNT_dec(PL_lex_stuff);
-	    PL_lex_stuff = NULL;
-	}
+	SvREFCNT_dec_NN(PL_lex_stuff);
+	PL_lex_stuff = NULL;
 	Perl_croak(aTHX_ "Transliteration replacement not terminated");
     }
 
