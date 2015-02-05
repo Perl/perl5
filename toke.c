@@ -5323,7 +5323,7 @@ Perl_yylex(pTHX)
 		    sv_catsv(sv, PL_lex_stuff);
 		    attrs = op_append_elem(OP_LIST, attrs,
 					newSVOP(OP_CONST, 0, sv));
-		    SvREFCNT_dec(PL_lex_stuff);
+		    SvREFCNT_dec_NN(PL_lex_stuff);
 		    PL_lex_stuff = NULL;
 		}
 		else {
