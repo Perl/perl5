@@ -347,6 +347,45 @@
 #  define c99_trunc	trunc
 #endif
 
+/* AIX xlc (__IBMC__) really doesn't have the following long double
+ * math interfaces (no __acoshl128 aka acoshl, etc.), see
+ * hints/aix.sh.  These are in the -lc128 but fail to be found
+ * during dynamic linking/loading.
+ *
+ * XXX1 Better Configure scans
+ * XXX2 Is this xlc version dependent? */
+#if defined(USE_LONG_DOUBLE) && defined(__IBMC__)
+#  undef c99_acosh
+#  undef c99_asinh
+#  undef c99_atanh
+#  undef c99_cbrt
+#  undef c99_copysign
+#  undef c99_exp2
+#  undef c99_expm1
+#  undef c99_fdim
+#  undef c99_fma
+#  undef c99_fmax
+#  undef c99_fmin
+#  undef c99_hypot
+#  undef c99_ilogb
+#  undef c99_lrint
+#  undef c99_lround
+#  undef c99_log1p
+#  undef c99_log2
+#  undef c99_logb
+#  undef c99_nan
+#  undef c99_nearbyint
+#  undef c99_nextafter
+#  undef c99_nexttoward
+#  undef c99_remainder
+#  undef c99_remquo
+#  undef c99_rint
+#  undef c99_round
+#  undef c99_scalbn
+#  undef c99_tgamma
+#  undef c99_trunc
+#endif
+
 #ifndef isunordered
 #  ifdef Perl_isnan
 #    define isunordered(x, y) (Perl_isnan(x) || Perl_isnan(y))
