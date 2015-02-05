@@ -2276,7 +2276,9 @@ S_sublex_start(pTHX)
 	return THING;
     }
     if (op_type == OP_CONST) {
-	SV *sv = tokeq(PL_lex_stuff);
+	SV *sv = PL_lex_stuff;
+	PL_lex_stuff = NULL;
+	sv = tokeq(sv);
 
 	if (SvTYPE(sv) == SVt_PVIV) {
 	    /* Overloaded constants, nothing fancy: Convert to SVt_PV: */
@@ -2287,7 +2289,6 @@ S_sublex_start(pTHX)
 	    sv = nsv;
 	}
 	pl_yylval.opval = (OP*)newSVOP(op_type, 0, sv);
-	PL_lex_stuff = NULL;
 	return THING;
     }
 

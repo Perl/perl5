@@ -186,6 +186,32 @@ Constant(qq): Call to &{$^H{qr}} did not return a defined value at - line 3, wit
 Constant(q): Call to &{$^H{qr}} did not return a defined value at - line 3, within pattern
 Execution of - aborted due to compilation errors.
 ########
+# NAME Failed constant overloading should not cause a double free
+use overload;
+BEGIN { overload::constant q => sub {}; undef *^H }
+undef(1,2);
+undef(1,2);
+undef(1,2);
+undef(1,2);
+undef(1,2);
+undef(1,2);
+undef(1,2);
+undef(1,2);
+undef(1,2);
+"a"
+EXPECT
+Too many arguments for undef operator at - line 3, near "2)"
+Too many arguments for undef operator at - line 4, near "2)"
+Too many arguments for undef operator at - line 5, near "2)"
+Too many arguments for undef operator at - line 6, near "2)"
+Too many arguments for undef operator at - line 7, near "2)"
+Too many arguments for undef operator at - line 8, near "2)"
+Too many arguments for undef operator at - line 9, near "2)"
+Too many arguments for undef operator at - line 10, near "2)"
+Too many arguments for undef operator at - line 11, near "2)"
+Constant(q) unknown at - line 12, near ""a""
+- has too many errors.
+########
 # NAME Unterminated delimiter for here document
 <<"foo
 EXPECT
