@@ -779,16 +779,18 @@ static IV my_ilogb(NV x)
 /* Note that the tgamma() and lgamma() implementations
  * here depend on each other. */
 
-#ifndef HAS_TGAMMA
+#if !defined(HAS_TGAMMA) || !defined(c99_tgamma)
 static NV my_tgamma(NV x);
 #  define c99_tgamma my_tgamma
+#  define USE_MY_TGAMMA
 #endif
-#ifndef HAS_LGAMMA
+#if !defined(HAS_LGAMMA) || !defined(c99_lgamma)
 static NV my_lgamma(NV x);
 #  define c99_lgamma my_lgamma
+#  define USE_MY_LGAMMA
 #endif
 
-#ifndef HAS_TGAMMA
+#ifdef USE_MY_TGAMMA
 static NV my_tgamma(NV x)
 {
   const NV gamma = 0.577215664901532860606512090; /* Euler's gamma constant. */
@@ -882,7 +884,7 @@ static NV my_tgamma(NV x)
 }
 #endif
 
-#ifndef HAS_LGAMMA
+#ifdef USE_MY_LGAMMA
 static NV my_lgamma(NV x)
 {
   if (Perl_isnan(x))
