@@ -2368,6 +2368,12 @@ S_sublex_push(pTHX)
     PL_lex_stuff = NULL;
     PL_sublex_info.repl = NULL;
 
+    /* Arrange for PL_lex_stuff to be freed on scope exit, in case it gets
+       set for an inner quote-like operator and then an error causes scope-
+       popping.  We must not have a PL_lex_stuff value left dangling, as
+       that breaks assumptions elsewhere.  See bug #123617.  */
+    SAVEGENERICSV(PL_lex_stuff);
+
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
 	= SvPVX(PL_linestr);
     PL_bufend += SvCUR(PL_linestr);

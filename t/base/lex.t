@@ -485,3 +485,6 @@ print "ok $test - map{sub :lvalue...}\n"; $test++;
 
 # Used to crash [perl #123711]
 0-5x-l{0};
+
+# Used to fail an assertion [perl #123617]
+eval '"$a{ 1 m// }"; //';
