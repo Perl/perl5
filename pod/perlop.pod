@@ -525,6 +525,11 @@ encodings.  The standard L<Unicode::Collate> and
 L<Unicode::Collate::Locale> modules offer much more powerful solutions to
 collation issues.
 
+For case-insensitive comparisions, look at the L<perlfunc/fc> case-folding
+function, available in Perl v5.16 or later:
+
+    if ( fc($x) eq fc($y) ) { ... }
+
 =head2 Smartmatch Operator
 
 First available in Perl 5.10.1 (the 5.10.0 version behaved differently),
