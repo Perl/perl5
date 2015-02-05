@@ -451,6 +451,7 @@ my @death_utf8_only_under_strict = (
 my @warning = (
     'm/\b*\x{100}/' => '\b* matches null string many times {#} m/\b*{#}\x{100}/',
     'm/[:blank:]\x{100}/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:blank:]{#}\x{100}/',
+    'm/[[:cntrl:]][:^ascii:]\x{100}/' =>  'POSIX syntax [: :] belongs inside character classes {#} m/[[:cntrl:]][:^ascii:]{#}\x{100}/',
     "m'\\y\\x{100}'"     => 'Unrecognized escape \y passed through {#} m/\y{#}\x{100}/',
     '/x{3,1}/'   => 'Quantifier {n,m} with n > m can\'t match {#} m/x{3,1}{#}/',
     '/\08/' => '\'\08\' resolved to \'\o{0}8\' {#} m/\08{#}/',

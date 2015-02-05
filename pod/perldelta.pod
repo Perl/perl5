@@ -399,6 +399,14 @@ array, for example, perl would produce a runtime error and not set
 C<PL_rs>, but perl code that checked C<$/> would see the array
 reference.  [perl #123218]
 
+=item *
+
+In a regular expression pattern, a POSIX class, like C<[:ascii:]>, must
+be inside a bracketed character class, like C</qr[[:ascii:]]>.  A
+warning is issued when something looking like a POSIX class is not
+inside a bracketed class.  That warning wasn't getting generated when
+the POSIX class was negated: C<[:^ascii:]>.  This is now fixed.
+
 =back
 
 =head1 Known Problems

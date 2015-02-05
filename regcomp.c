@@ -13864,6 +13864,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	const char *s = RExC_parse;
 	const char  c = *s++;
 
+        if (*s == '^') {
+            s++;
+        }
 	while (isWORDCHAR(*s))
 	    s++;
 	if (*s && c == *s && s[1] == ']') {
