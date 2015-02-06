@@ -508,7 +508,7 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
      * otherwise to use the particular category's variable if set; otherwise to
      * use the LANG variable. */
 
-    bool override_LC_ALL = 0;
+    bool override_LC_ALL = FALSE;
     char * result;
 
     if (locale && strEQ(locale, "")) {
@@ -654,7 +654,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     char *curnum     = NULL;
 #endif /* USE_LOCALE_NUMERIC */
 #ifdef __GLIBC__
-    char * const language   = PerlEnv_getenv("LANGUAGE");
+    const char * const language   = savepv(PerlEnv_getenv("LANGUAGE"));
 #endif
 
     /* NULL uses the existing already set up locale */
@@ -663,15 +663,19 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                         : "";
     const char* trial_locales[5];   /* 5 = 1 each for "", LC_ALL, LANG, "", C */
     unsigned int trial_locales_count;
-    char * const lc_all     = PerlEnv_getenv("LC_ALL");
-    char * const lang       = PerlEnv_getenv("LANG");
+    const char * const lc_all     = savepv(PerlEnv_getenv("LC_ALL"));
+    const char * const lang       = savepv(PerlEnv_getenv("LANG"));
     bool setlocale_failure = FALSE;
     unsigned int i;
     char *p;
-    const bool locwarn = (printwarn > 1 ||
-                    (printwarn &&
-                     (!(p = PerlEnv_getenv("PERL_BADLANG")) ||
-                      grok_atou(p, NULL))));
+
+    /* A later getenv() could zap this, so only use here */
+    const char * const bad_lang_use_once = PerlEnv_getenv("PERL_BADLANG");
+
+    const bool locwarn = (printwarn > 1
+                          || (printwarn
+                              && (! bad_lang_use_once
+                                  || grok_atou(bad_lang_use_once, NULL))));
     bool done = FALSE;
 #ifdef WIN32
     /* In some systems you can find out the system default locale
@@ -1079,6 +1083,13 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #else  /* !USE_LOCALE */
     PERL_UNUSED_ARG(printwarn);
 #endif /* USE_LOCALE */
+
+#ifdef __GLIBC__
+    Safefree(language);
+#endif
+
+    Safefree(lc_all);
+    Safefree(lang);
 
     return ok;
 }
