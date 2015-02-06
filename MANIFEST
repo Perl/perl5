@@ -784,6 +784,7 @@ cpan/Digest/t/file.t		See if Digest extensions work
 cpan/Digest/t/lib/Digest/Dummy.pm		See if Digest extensions work
 cpan/Digest/t/security.t		See if Digest extensions work
 cpan/Encode/bin/enc2xs		Encode module generator
+cpan/Encode/bin/encguess		guess character encodings of files
 cpan/Encode/bin/piconv		iconv by perl
 cpan/Encode/bin/ucm2table	Table Generator for testing
 cpan/Encode/bin/ucmlint		A UCM Lint utility
@@ -5625,6 +5626,7 @@ utils/c2ph.PL			program to translate dbx stabs to perl
 utils/corelist.PL		Module::CoreList
 utils/cpan.PL			easily interact with CPAN from the command line
 utils/enc2xs.PL			Encode module generator
+utils/encguess.PL			guess character encodings of files
 utils/h2ph.PL			A thing to turn C .h files into perl .ph files
 utils/h2xs.PL			Program to make .xs files from C header files
 utils/instmodsh.PL		Give information about installed extensions

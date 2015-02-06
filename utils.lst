@@ -7,6 +7,7 @@ utils/c2ph      # link = utils/pstruct
 utils/cpan
 utils/corelist
 utils/enc2xs
+utils/encguess
 utils/h2ph
 utils/h2xs
 utils/instmodsh

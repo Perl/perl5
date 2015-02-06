@@ -7,7 +7,6 @@ CPAN cpan/CPAN/lib/CPAN/Index.pm 73aee30450127c5ac4dc05abc2c10a8accd4b198
 CPAN cpan/CPAN/lib/CPAN/LWP/UserAgent.pm e09525b0c2377c5ac28b7fad1b6d70c57e343913
 CPAN cpan/CPAN/lib/CPAN/Mirrors.pm 580e74746abaf1628d533015d5b529d82a470af4
 Encode cpan/Encode/encoding.pm baa25e197ba4d5fa228dbf7b440afb5ae18ec5ed
-Encode cpan/Encode/Unicode/Unicode.pm 3ba3aeffd03c89c40195a189a98f7e47a11c2a11
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/pm_to_blib.t 71ebcee355691ce374fcad251b12d8b2412462b3
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Pod::Parser cpan/Pod-Parser/lib/Pod/PlainText.pm f0b490545b4e52e141450d1192d0ca00bd8d7a82

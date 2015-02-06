@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 2.12 2013/09/14 07:51:59 dankogai Exp $
+# $Id: Makefile.PL,v 2.13 2015/02/05 10:53:00 dankogai Exp dankogai $
 #
 use 5.007003;
 use strict;
@@ -23,6 +23,7 @@ my %tables =
 
 my @exe_files = qw(bin/enc2xs
            bin/piconv
+           bin/encguess
            );
 my @more_exe_files = qw(
             unidump
