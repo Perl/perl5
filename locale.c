@@ -574,7 +574,7 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
         return result;
     }
 
-    /* Here the input locale was LC_ALL, and we have set it to what is in the
+    /* Here the input category was LC_ALL, and we have set it to what is in the
      * LANG variable or the system default if there is no LANG.  But these have
      * lower priority than the other LC_foo variables, so override it for each
      * one that is set.  (If they are set to "", it means to use the same thing
