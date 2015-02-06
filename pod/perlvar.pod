@@ -661,15 +661,16 @@ represented as a L<version> object.
 
 This variable first appeared in perl v5.6.0; earlier versions of perl
 will see an undefined value.  Before perl v5.10.0 C<$^V> was represented
-as a v-string.
+as a v-string rather than a L<version> object.
 
 C<$^V> can be used to determine whether the Perl interpreter executing
 a script is in the right range of versions.  For example:
 
     warn "Hashes not randomized!\n" if !$^V or $^V lt v5.8.1
 
-To convert C<$^V> into its string representation use C<sprintf()>'s
-C<"%vd"> conversion:
+While version objects overload stringification, to portably convert
+C<$^V> into its string representation, use C<sprintf()>'s C<"%vd">
+conversion, which works for both v-strings or version objects:
 
     printf "version is v%vd\n", $^V;  # Perl's version
 
@@ -678,7 +679,11 @@ for a convenient way to fail if the running Perl interpreter is too old.
 
 See also C<$]> for a decimal representation of the Perl version.
 
-This variable was added in Perl v5.6.0.
+The main advantage of C<$^V> over C<$]> is that, for Perl v5.10.0 or
+later, it overloads operators, allowing easy comparison against other
+version representations (e.g. decimal, literal v-string, "v1.2.3", or
+objects).  The disadvantage is that prior to v5.10.0, it was only a
+literal v-string, which can't be easily printed or compared.
 
 Mnemonic: use ^V for a version object.
 
@@ -2282,14 +2287,23 @@ executing a script is in the right range of versions:
 
     warn "No PerlIO!\n" if $] lt '5.008';
 
-The floating point representation can sometimes lead to inaccurate
-numeric comparisons, so string comparisons are recommended.
+When comparing C<$]>, string comparison operators are B<highly
+recommended>.  The inherent limitations of binary floating point
+representation can sometimes lead to incorrect comparisons for some
+numbers on some architectures.
 
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
 See L</$^V> for a representation of the Perl version as a L<version>
 object, which allows more flexible string comparisons.
+
+The main advantage of C<$]> over C<$^V> is that it works the same on any
+version of Perl.  The disadvantages are that it can't easily be compared
+to versions in other formats (e.g. literal v-strings, "v1.2.3" or
+version objects) and numeric comparisons can occsionally fail; it's good
+for string literal version checks and bad for comparing to a variable
+that hasn't been sanity-checked.
 
 Mnemonic: Is this version of perl in the right bracket?
 
