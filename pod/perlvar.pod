@@ -657,7 +657,7 @@ and B<-C> filetests are based on this value.
 X<$^V> X<$PERL_VERSION>
 
 The revision, version, and subversion of the Perl interpreter,
-represented as a C<version> object.
+represented as a L<version> object.
 
 This variable first appeared in perl v5.6.0; earlier versions of perl
 will see an undefined value.  Before perl v5.10.0 C<$^V> was represented
@@ -676,11 +676,11 @@ C<"%vd"> conversion:
 See the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
-See also C<$]> for an older representation of the Perl version.
+See also C<$]> for a decimal representation of the Perl version.
 
 This variable was added in Perl v5.6.0.
 
-Mnemonic: use ^V for Version Control.
+Mnemonic: use ^V for a version object.
 
 =item ${^WIN32_SLOPPY_STAT}
 X<${^WIN32_SLOPPY_STAT}> X<sitecustomize> X<sitecustomize.pl>
@@ -2273,12 +2273,12 @@ Deprecated in Perl v5.12.0.
 =item $]
 X<$]>
 
-See L</$^V> for a more modern representation of the Perl version that allows
-accurate string comparisons.
+The revision, version, and subversion of the Perl interpreter, represented
+as a decimal of the form 5.XXXYYY, where XXX is the version / 1e3 and YYY
+is the subversion / 1e6.  For example, Perl v5.10.1 would be "5.010001".
 
-The version + patchlevel / 1000 of the Perl interpreter.  This variable
-can be used to determine whether the Perl interpreter executing a
-script is in the right range of versions:
+This variable can be used to determine whether the Perl interpreter
+executing a script is in the right range of versions:
 
     warn "No PerlIO!\n" if $] lt '5.008';
 
@@ -2287,6 +2287,9 @@ numeric comparisons, so string comparisons are recommended.
 
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
+
+See L</$^V> for a representation of the Perl version as a L<version>
+object, which allows more flexible string comparisons.
 
 Mnemonic: Is this version of perl in the right bracket?
 
