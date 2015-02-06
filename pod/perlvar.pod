@@ -2301,7 +2301,7 @@ object, which allows more flexible string comparisons.
 The main advantage of C<$]> over C<$^V> is that it works the same on any
 version of Perl.  The disadvantages are that it can't easily be compared
 to versions in other formats (e.g. literal v-strings, "v1.2.3" or
-version objects) and numeric comparisons can occsionally fail; it's good
+version objects) and numeric comparisons can occasionally fail; it's good
 for string literal version checks and bad for comparing to a variable
 that hasn't been sanity-checked.
 
