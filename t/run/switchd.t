@@ -301,7 +301,7 @@ local $ENV{PERL5OPT} = '-d:switchd_empty';
 
 like(
   runperl(
-   switches => [ '-Ilib', '-e "print \"hi\""' ],
+   switches => [ '-Ilib' ], prog => 'print q(hi)',
   ),
   qr/hi/,
  'putenv does not interfere with PERL5OPT parsing',
