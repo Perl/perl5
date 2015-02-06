@@ -2602,45 +2602,45 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      128, /* sort */
      135, /* reverse */
      137, /* grepstart */
-     138, /* grepwhile */
+     137, /* grepwhile */
      137, /* mapstart */
-     138, /* mapwhile */
+     137, /* mapwhile */
        0, /* range */
-     140, /* flip */
-     140, /* flop */
+     139, /* flip */
+     139, /* flop */
        0, /* and */
        0, /* or */
       12, /* xor */
        0, /* dor */
-     142, /* cond_expr */
+     141, /* cond_expr */
        0, /* andassign */
        0, /* orassign */
        0, /* dorassign */
        0, /* method */
-     144, /* entersub */
-     151, /* leavesub */
-     151, /* leavesublv */
-     153, /* caller */
+     143, /* entersub */
+     150, /* leavesub */
+     150, /* leavesublv */
+     152, /* caller */
       48, /* warn */
       48, /* die */
       48, /* reset */
       -1, /* lineseq */
-     155, /* nextstate */
-     155, /* dbstate */
+     154, /* nextstate */
+     154, /* dbstate */
       -1, /* unstack */
       -1, /* enter */
-     156, /* leave */
+     155, /* leave */
       -1, /* scope */
-     158, /* enteriter */
-     162, /* iter */
+     157, /* enteriter */
+     161, /* iter */
       -1, /* enterloop */
-     163, /* leaveloop */
+     162, /* leaveloop */
       -1, /* return */
-     165, /* last */
-     165, /* next */
-     165, /* redo */
-     165, /* dump */
-     165, /* goto */
+     164, /* last */
+     164, /* next */
+     164, /* redo */
+     164, /* dump */
+     164, /* goto */
       48, /* exit */
        0, /* method_named */
        0, /* method_super */
@@ -2652,7 +2652,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* leavewhen */
       -1, /* break */
       -1, /* continue */
-     167, /* open */
+     166, /* open */
       48, /* close */
       48, /* pipe_op */
       48, /* fileno */
@@ -2668,7 +2668,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       48, /* getc */
       48, /* read */
       48, /* enterwrite */
-     151, /* leavewrite */
+     150, /* leavewrite */
       -1, /* prtf */
       -1, /* print */
       -1, /* say */
@@ -2698,33 +2698,33 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* getpeername */
        0, /* lstat */
        0, /* stat */
-     172, /* ftrread */
-     172, /* ftrwrite */
-     172, /* ftrexec */
-     172, /* fteread */
-     172, /* ftewrite */
-     172, /* fteexec */
-     177, /* ftis */
-     177, /* ftsize */
-     177, /* ftmtime */
-     177, /* ftatime */
-     177, /* ftctime */
-     177, /* ftrowned */
-     177, /* fteowned */
-     177, /* ftzero */
-     177, /* ftsock */
-     177, /* ftchr */
-     177, /* ftblk */
-     177, /* ftfile */
-     177, /* ftdir */
-     177, /* ftpipe */
-     177, /* ftsuid */
-     177, /* ftsgid */
-     177, /* ftsvtx */
-     177, /* ftlink */
-     177, /* fttty */
-     177, /* fttext */
-     177, /* ftbinary */
+     171, /* ftrread */
+     171, /* ftrwrite */
+     171, /* ftrexec */
+     171, /* fteread */
+     171, /* ftewrite */
+     171, /* fteexec */
+     176, /* ftis */
+     176, /* ftsize */
+     176, /* ftmtime */
+     176, /* ftatime */
+     176, /* ftctime */
+     176, /* ftrowned */
+     176, /* fteowned */
+     176, /* ftzero */
+     176, /* ftsock */
+     176, /* ftchr */
+     176, /* ftblk */
+     176, /* ftfile */
+     176, /* ftdir */
+     176, /* ftpipe */
+     176, /* ftsuid */
+     176, /* ftsgid */
+     176, /* ftsvtx */
+     176, /* ftlink */
+     176, /* fttty */
+     176, /* fttext */
+     176, /* ftbinary */
       79, /* chdir */
       79, /* chown */
       72, /* chroot */
@@ -2744,17 +2744,17 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* rewinddir */
        0, /* closedir */
       -1, /* fork */
-     181, /* wait */
+     180, /* wait */
       79, /* waitpid */
       79, /* system */
       79, /* exec */
       79, /* kill */
-     181, /* getppid */
+     180, /* getppid */
       79, /* getpgrp */
       79, /* setpgrp */
       79, /* getpriority */
       79, /* setpriority */
-     181, /* time */
+     180, /* time */
       -1, /* tms */
        0, /* localtime */
       48, /* gmtime */
@@ -2774,8 +2774,8 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* require */
        0, /* dofile */
       -1, /* hintseval */
-     182, /* entereval */
-     151, /* leaveeval */
+     181, /* entereval */
+     150, /* leaveeval */
        0, /* entertry */
       -1, /* leavetry */
        0, /* ghbyname */
@@ -2816,17 +2816,17 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* reach */
       39, /* rkeys */
        0, /* rvalues */
-     188, /* coreargs */
+     187, /* coreargs */
        3, /* runcv */
        0, /* fc */
       -1, /* padcv */
       -1, /* introcv */
       -1, /* clonecv */
-     192, /* padrange */
-     194, /* refassign */
-     200, /* lvref */
-     206, /* lvrefslice */
-     207, /* lvavref */
+     191, /* padrange */
+     193, /* refassign */
+     199, /* lvref */
+     205, /* lvrefslice */
+     206, /* lvavref */
        0, /* anonconst */
 
 };
@@ -2887,8 +2887,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x29dc, 0x1e99, /* list */
     0x3af8, 0x3194, 0x0fb0, 0x254c, 0x34e8, 0x2644, 0x2e61, /* sort */
     0x254c, 0x0003, /* reverse */
-    0x1cc5, /* grepstart, mapstart */
-    0x1cc4, 0x0003, /* grepwhile, mapwhile */
+    0x1cc4, 0x0003, /* grepstart, grepwhile, mapstart, mapwhile */
     0x2778, 0x0003, /* flip, flop */
     0x29dc, 0x0003, /* cond_expr */
     0x29dc, 0x0b98, 0x0256, 0x028c, 0x3e48, 0x3c84, 0x2301, /* entersub */
@@ -3088,9 +3087,9 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* UNSHIFT    */ (OPpARG4_MASK|OPpTARGET_MY),
     /* SORT       */ (OPpSORT_NUMERIC|OPpSORT_INTEGER|OPpSORT_REVERSE|OPpSORT_INPLACE|OPpSORT_DESCEND|OPpSORT_QSORT|OPpSORT_STABLE),
     /* REVERSE    */ (OPpARG1_MASK|OPpREVERSE_INPLACE),
-    /* GREPSTART  */ (OPpGREP_LEX),
+    /* GREPSTART  */ (OPpARG1_MASK|OPpGREP_LEX),
     /* GREPWHILE  */ (OPpARG1_MASK|OPpGREP_LEX),
-    /* MAPSTART   */ (OPpGREP_LEX),
+    /* MAPSTART   */ (OPpARG1_MASK|OPpGREP_LEX),
     /* MAPWHILE   */ (OPpARG1_MASK|OPpGREP_LEX),
     /* RANGE      */ (OPpARG1_MASK),
     /* FLIP       */ (OPpARG1_MASK|OPpFLIP_LINENUM),

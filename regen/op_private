@@ -202,6 +202,9 @@ use strict;
 
     $args1{$_} = 1 for (
                         qw(reverse), # ck_fun(), but most bits stolen
+                        qw(mapstart grepstart), # set in ck_fun, but
+                                                # cleared in ck_grep,
+                                                # unless there is an error
                         grep !$maxarg{$_} && !$args0{$_},
                             ops_with_flag('1'), # UNOP
                             ops_with_flag('+'), # UNOP_AUX
