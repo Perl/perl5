@@ -503,6 +503,9 @@ S_ao(pTHX_ int toketype)
  * It prints "Missing operator before end of line" if there's nothing
  * after the missing operator, or "... before <...>" if there is something
  * after the missing operator.
+ *
+ * PL_bufptr is expected to point to the start of the thing that was found,
+ * and s after the next token or partial token.
  */
 
 STATIC void
@@ -5994,8 +5997,14 @@ Perl_yylex(pTHX)
 	PL_tokenbuf[0] = '$';
 	s = scan_ident(s, PL_tokenbuf + 1,
 		       sizeof PL_tokenbuf - 1, FALSE);
-	if (PL_expect == XOPERATOR)
-	    no_op("Scalar", s);
+	if (PL_expect == XOPERATOR) {
+	    d = s;
+	    if (PL_bufptr > s) {
+		d = PL_bufptr-1;
+		PL_bufptr = PL_oldbufptr;
+	    }
+	    no_op("Scalar", d);
+	}
 	if (!PL_tokenbuf[1]) {
 	    if (s == PL_bufend)
 		yyerror("Final $ should be \\$ or $name");
