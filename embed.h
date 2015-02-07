@@ -182,10 +182,11 @@
 #define grok_atou		Perl_grok_atou
 #define grok_bin(a,b,c,d)	Perl_grok_bin(aTHX_ a,b,c,d)
 #define grok_hex(a,b,c,d)	Perl_grok_hex(aTHX_ a,b,c,d)
-#define grok_infnan(a,b)	Perl_grok_infnan(aTHX_ a,b)
+#define grok_infnan(a,b,c)	Perl_grok_infnan(aTHX_ a,b,c)
 #define grok_nan(a,b,c,d)	Perl_grok_nan(aTHX_ a,b,c,d)
 #define grok_nan_payload(a,b,c,d,e)	Perl_grok_nan_payload(aTHX_ a,b,c,d,e)
 #define grok_number(a,b,c)	Perl_grok_number(aTHX_ a,b,c)
+#define grok_number2_flags(a,b,c,d,e)	Perl_grok_number2_flags(aTHX_ a,b,c,d,e)
 #define grok_number_flags(a,b,c,d)	Perl_grok_number_flags(aTHX_ a,b,c,d)
 #define grok_numeric_radix(a,b)	Perl_grok_numeric_radix(aTHX_ a,b)
 #define grok_oct(a,b,c,d)	Perl_grok_oct(aTHX_ a,b,c,d)

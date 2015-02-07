@@ -813,11 +813,12 @@ EMsPR	|char*|form_short_octal_warning|NN const char * const s  \
 				|const STRLEN len
 #endif
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
-Apd	|int	|grok_infnan	|NN const char** sp|NN const char *send
+Apd	|int	|grok_infnan	|NN const char** sp|NN const char *send|NULLOK NV *nvp
 Apd	|const char *|grok_nan	|NN const char* s|NN const char *send|NN int *flags|NULLOK NV *nvp
 Apd	|const char *|grok_nan_payload|NN const char* s|NN const char *send|bool signaling|NN int *flags|NULLOK NV *nvp
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep
 Apd	|int	|grok_number_flags|NN const char *pv|STRLEN len|NULLOK UV *valuep|U32 flags
+Apd	|int	|grok_number2_flags|NN const char *pv|STRLEN len|NULLOK UV *valuep|NULLOK NV* nvp|U32 flags
 ApdR	|bool	|grok_numeric_radix|NN const char **sp|NN const char *send
 Apd	|UV	|grok_oct	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apdn	|UV	|grok_atou	|NN const char* pv|NULLOK const char** endptr

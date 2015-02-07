@@ -1359,7 +1359,7 @@ PERL_CALLCONV UV	Perl_grok_hex(pTHX_ const char* start, STRLEN* len_p, I32* flag
 #define PERL_ARGS_ASSERT_GROK_HEX	\
 	assert(start); assert(len_p); assert(flags)
 
-PERL_CALLCONV int	Perl_grok_infnan(pTHX_ const char** sp, const char *send)
+PERL_CALLCONV int	Perl_grok_infnan(pTHX_ const char** sp, const char *send, NV *nvp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GROK_INFNAN	\
@@ -1382,6 +1382,11 @@ PERL_CALLCONV const char *	Perl_grok_nan_payload(pTHX_ const char* s, const char
 PERL_CALLCONV int	Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GROK_NUMBER	\
+	assert(pv)
+
+PERL_CALLCONV int	Perl_grok_number2_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, NV* nvp, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GROK_NUMBER2_FLAGS	\
 	assert(pv)
 
 PERL_CALLCONV int	Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)

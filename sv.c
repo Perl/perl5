@@ -2112,7 +2112,7 @@ S_sv_2iuv_non_preserve(pTHX_ SV *const sv
 #  pragma warning(disable:4756;disable:4056)
 #endif
 static void
-S_sv_setnv(pTHX_ SV* sv, int numtype)
+S_sv_setnv(pTHX_ SV* sv, int numtype, NV nanv)
 {
     bool pok = cBOOL(SvPOK(sv));
     bool nok = FALSE;
@@ -2121,7 +2121,7 @@ S_sv_setnv(pTHX_ SV* sv, int numtype)
         nok = TRUE;
     }
     else if ((numtype & IS_NUMBER_NAN)) {
-        SvNV_set(sv, NV_NAN);
+        SvNV_set(sv, nanv);
         nok = TRUE;
     }
     else if (pok) {
@@ -2234,7 +2234,8 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
     }
     else if (SvPOKp(sv)) {
 	UV value;
-	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
+        NV nanv;
+	const int numtype = grok_number2_flags(SvPVX_const(sv), SvCUR(sv), &value, &nanv, 0);
 	/* We want to avoid a possible problem when we cache an IV/ a UV which
 	   may be later translated to an NV, and the resulting NV is not
 	   the same as the direct translation of the initial string
@@ -2260,7 +2261,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
         if ((numtype & (IS_NUMBER_INFINITY | IS_NUMBER_NAN))) {
             if (ckWARN(WARN_NUMERIC) && ((numtype & IS_NUMBER_TRAILING)))
 		not_a_number(sv);
-            S_sv_setnv(aTHX_ sv, numtype);
+            S_sv_setnv(aTHX_ sv, numtype, nanv);
             return FALSE;
         }
 
@@ -2310,7 +2311,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	    != IS_NUMBER_IN_UV) {
 	    /* It wasn't an (integer that doesn't overflow the UV). */
-            S_sv_setnv(aTHX_ sv, numtype);
+            S_sv_setnv(aTHX_ sv, numtype, nanv);
 
 	    if (! numtype && ckWARN(WARN_NUMERIC))
 		not_a_number(sv);
@@ -2716,7 +2717,8 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
     }
     else if (SvPOKp(sv)) {
 	UV value;
-	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
+        NV nanv;
+	const int numtype = grok_number2_flags(SvPVX_const(sv), SvCUR(sv), &value, &nanv, 0);
 	if (!SvIOKp(sv) && !numtype && ckWARN(WARN_NUMERIC))
 	    not_a_number(sv);
 #ifdef NV_PRESERVES_UV
@@ -2725,7 +2727,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	    /* It's definitely an integer */
 	    SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -(NV)value : (NV)value);
 	} else {
-            S_sv_setnv(aTHX_ sv, numtype);
+            S_sv_setnv(aTHX_ sv, numtype, nanv);
         }
 	if (numtype)
 	    SvNOK_on(sv);
