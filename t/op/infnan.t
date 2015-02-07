@@ -525,4 +525,92 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
     }
 }
 
+# === NaN quiet/signaling/payload ===
+
+# The '#' or 'the alt' of printf knows how to prettyprint NaN payloads.
+
+SKIP: {
+    # Test only on certain known platforms since the features
+    # are not that well standardized.
+    unless (
+         (
+          $^O eq 'linux'
+          ||
+          $^O eq 'darwin' # OS X
+          ||
+          $^O eq 'freebsd'
+         )
+         &&
+        (
+         (
+          $Config{nvsize} == 8 # double
+          &&
+          $Config{doublekind} == 3 # IEEE double little-endian (x86)
+         )
+         ||
+         (
+          $Config{nvsize} == 16 # double
+          &&
+          $Config{longdblkind} == 3 # x86 80-bit extended precision
+         )
+        )
+        ||
+        ($^O eq 'solaris'
+         &&
+         $Config{nvsize} == 8 && # double
+         (
+          $Config{uvsize} == 4 # 32-bit
+          ||
+          $Config{uvsize} == 8 # 64-bit (-Duse64bitint)
+         ) &&
+         $Config{doublesize} == 8 &&
+         $Config{doublekind} == 4 # IEEE double big-endian (sparc)
+        )
+        ) {
+        my ($uselongdouble, $longdblsize, $longdblkind) =
+            $Config{uselongdouble} ?
+            ($Config{uselongdouble},
+             $Config{longdblsize},
+             $Config{longdblkind}) :
+            ('undef', 'undef', 'undef');
+        skip("skipping NaN specials testing on os=$^O, uvsize=$Config{uvsize}, nvsize=$Config{nvsize}, doublekind=$Config{doublekind}, uselongdouble=$uselongdouble, longdblsize=$longdblsize, longdblkind=$longdblkind", 16);
+    }
+
+    is(sprintf("%#g", $NaN), "NaN(0x0)", "sprintf %#g");
+    is(sprintf("%#g", "nan"), "NaN(0x0)");
+    is(sprintf("%#g", "nanq"), "NaN(0x0)");
+    is(sprintf("%#g", "qnan"), "NaN(0x0)");
+
+    # This might look wrong but actually works as designed:
+    # there cannot be a signaling nan with zero payload.
+    # A signaling nan needs to have at least 0x1 as the payload.
+    #
+    # There can be a quiet nan with zero payload: this, in fact,
+    # is usually the default "nan" of a platform.
+    #
+    # This weirdness brought to you courtesy of asymmetry in the IEEE spec.
+    is(sprintf("%#g", "nans"), "Inf");
+    is(sprintf("%#g", "snan"), "Inf");
+
+    is(sprintf("%#g", "nan(12345)"), "NaN(0x3039)");
+    is(sprintf("%#g", "nan(0b101101)"), "NaN(0x2d)");
+    is(sprintf("%#g", "nan(0x12345)"), "NaN(0x12345)");
+    is(sprintf("%#g", "nanq(0x123EF)"), "NaN(0x123ef)");
+    is(sprintf("%#g", "nans(0x12345)"), "NaNs(0x12345)");
+    is(sprintf("%#g", "snan(0x12345)"), "NaNs(0x12345)");
+
+    is(sprintf("%#G", "nanq(0x123ef)"), "NaN(0X123EF)");
+
+  SKIP: {
+      if (ord('A') == 65) { # ASCII
+          is(sprintf("%#g", "nan('obot')"), "NaN(0x6f626f74)", "nanobot");
+      } elsif (ord('A') == 193) { # EBCDIC
+          is(sprintf("%#g", "nan('obot')"), "NaN(0x968296a3)", "nanobot");
+      } else {
+          skip "unknown encoding", 1;
+    }
+}
+
+}
+
 done_testing();

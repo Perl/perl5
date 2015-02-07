@@ -547,6 +547,26 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
     return FALSE;
 }
 
+/* x86 80-bit extended precision mantissa bits:
+ *
+ * 63 62 61   30387+    pre-387
+ * --------   ----      --------
+ *  0  0  0   invalid   infinity
+ *  0  0  n   invalid   snan
+ *  0  1  *   invalid   snan
+ *  1  0  0   infinity  snan
+ *  1  0  n   snan
+ *  1  1  0   qnan (1.#IND)
+ *  1  1  n   qnan
+ *
+ * This means that there are 61 bits for nan payload.
+ */
+#if defined(USE_LONG_DOUBLE) && (LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN)
+#  define NV_NAN_BITS 61
+#else
+#  define NV_NAN_BITS (NV_MANT_REAL_DIG - 1)
+#endif
+
 /*
 =for apidoc nan_hibyte
 
@@ -569,11 +589,18 @@ U8*
 Perl_nan_hibyte(NV *nvp, U8* mask)
 {
     STRLEN i = (NV_MANT_REAL_DIG - 1) / 8;
-    STRLEN j = (NV_MANT_REAL_DIG - 1) % 8;
 
     PERL_ARGS_ASSERT_NAN_HIBYTE;
 
-    *mask = 1 << j;
+#if defined(USE_LONG_DOUBLE) && (LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN)
+    /* See the definition of NV_NAN_BITS. */
+    *mask = 1 << 6;
+#else
+    {
+        STRLEN j = (NV_MANT_REAL_DIG - 1) % 8;
+        *mask = 1 << j;
+    }
+#endif
 #ifdef NV_BIG_ENDIAN
     return (U8*) nvp + NVSIZE - 1 - i;
 #endif
@@ -699,7 +726,7 @@ Perl_nan_payload_set(pTHX_ NV *nvp, const void *bytes, STRLEN byten, bool signal
      * signaling NaNs.
      *
      * C99 nan() is supposed to generate quiet NaNs. */
-    int bits = NV_MANT_REAL_DIG - 1;
+    int bits = NV_NAN_BITS;
 
     STRLEN i, nvi;
     bool error = FALSE;
