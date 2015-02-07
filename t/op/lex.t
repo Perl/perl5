@@ -1,4 +1,7 @@
 #!perl
+
+# Tests too complex for t/base/lex.t
+
 use strict;
 use warnings;
 
