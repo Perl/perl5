@@ -531,6 +531,53 @@ Perl 5.8.0, but that caused more confusion and breakage than good.
 Multi-number v-strings like C<v65.66> and C<65.66.67> continue to
 be v-strings always.
 
+=head3 Special floating point
+
+Floating point values include the special values C<Inf> and C<NaN>,
+for infinity and not-a-number.  The infinity can be also negative.
+
+The infinity is the result of certain math operations that overflow
+the floating point range, like 9**9**9.  The not-a-number is the
+result when the result is undefined or unrepresentable.  Though note
+that you cannot get C<NaN> from some common "undefined" or
+"out-of-range" operations like dividing by zero, or square root of
+a negative number, since Perl generates fatal errors for those.
+
+The infinity and not-a-number have their own special arithmetic rules.
+The general rule is that they are "contagious": C<Inf> plus one is
+C<Inf>, and C<NaN> plus one is C<NaN>.  Where things get interesting
+is when you combine infinities and not-a-numbers: C<Inf> minus C<Inf>
+and C<Inf> divided by C<INf> are C<NaN> (while C<Inf> plus C<Inf> is
+C<Inf> and C<Inf> times C<Inf> is C<Inf>).
+
+Perl doesn't understand C<Inf> and C<NaN> as numeric literals, but you
+can have them as strings, and Perl will convert them as needed: "Inf" + 1.
+(If you want to have them as kind of literals, you can import them from
+the POSIX extension.)
+
+Note that on input (string to number) Perl accepts C<Inf> and C<NaN>
+in many forms.   Case is ignored, and the Win32-specific forms like
+C<1.#INF> are understood, but on output the values are normalized to
+C<Inf> and C<NaN>.
+
+The C<NaN> has two special features of its own. Firstly, it comes in
+two flavors, quiet and signaling.  What this means is depends on the
+platform.  Secondly, it may have "payload" of a number of bits.  The
+number of bits available again depends on the platform.  (Though for
+the most common floating point format, 64-bit IEEE 754, there is
+room for 51 bits.)
+
+The payload is propagated on straight copies, but on operations
+(like addition) the result (which payload bits end up where) again
+depends on the platform.  You can generate a NaN with payload by
+e.g. "nan(0x123)".
+
+The default stringification of not-a-numbers will just show the C<NaN>
+but you can use C<printf %#g> to see the payload: the C<#> is the key.
+The payload will be shown as hexadecimal integer if possible on
+the platform (floating point values may have more bits than integers),
+if not, as a string of hexadecimal bytes.
+
 =head3 Special Literals
 X<special literal> X<__END__> X<__DATA__> X<END> X<DATA>
 X<end> X<data> X<^D> X<^Z>
