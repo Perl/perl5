@@ -747,6 +747,237 @@ Perl_nan_payload_set(NV *nvp, const void *bytes, STRLEN byten, bool signaling)
 }
 
 /*
+=for apidoc grok_nan_payload
+
+Helper for grok_nan().
+
+Parses the "..." in C99-style "nan(...)" strings, and sets the nvp accordingly.
+
+If you want the parse the "nan" part you need to use grok_nan().
+
+=cut
+*/
+const char *
+Perl_grok_nan_payload(pTHX_ const char* s, const char* send, bool signaling, int *flags, NV* nvp)
+{
+    U8 bytes[MAX_NV_BYTES];
+    STRLEN byten = 0;
+    const char *t = send - 1; /* minus one for ')' */
+    bool error = FALSE;
+
+    PERL_ARGS_ASSERT_GROK_NAN_PAYLOAD;
+
+    /* XXX: legacy nan payload formats like "nan123",
+     * "nan0xabc", or "nan(s123)" ("s" for signaling). */
+
+    while (t > s && isSPACE(*t)) t--;
+    if (*t != ')') {
+        return send;
+    }
+
+    if (++s == send) {
+        *flags |= IS_NUMBER_TRAILING;
+        return s;
+    }
+
+    while (s < t && byten < MAX_NV_BYTES) {
+        UV uv;
+        int nantype = 0;
+
+        if (s[0] == '0' && s + 2 < t &&
+            isALPHA_FOLD_EQ(s[1], 'x') &&
+            isXDIGIT(s[2])) {
+            const char *u = s + 3;
+            STRLEN len;
+            I32 uvflags;
+
+            while (isXDIGIT(*u)) u++;
+            len = u - s;
+            uvflags = PERL_SCAN_ALLOW_UNDERSCORES;
+            uv = grok_hex(s, &len, &uvflags, NULL);
+            if ((uvflags & PERL_SCAN_GREATER_THAN_UV_MAX)) {
+                nantype = 0;
+            } else {
+                nantype = IS_NUMBER_IN_UV;
+            }
+            s += len;
+        } else if (s[0] == '0' && s + 2 < t &&
+                   isALPHA_FOLD_EQ(s[1], 'b') &&
+                   (s[2] == '0' || s[2] == '1')) {
+            const char *u = s + 3;
+            STRLEN len;
+            I32 uvflags;
+
+            while (*u == '0' || *u == '1') u++;
+            len = u - s;
+            uvflags = PERL_SCAN_ALLOW_UNDERSCORES;
+            uv = grok_bin(s, &len, &uvflags, NULL);
+            if ((uvflags & PERL_SCAN_GREATER_THAN_UV_MAX)) {
+                nantype = 0;
+            } else {
+                nantype = IS_NUMBER_IN_UV;
+            }
+            s += len;
+        } else if ((s[0] == '\'' || s[0] == '"') &&
+                   s + 2 < t && t[-1] == s[0]) {
+            /* Perl extension: if the input looks like a string
+             * constant ('' or ""), read its bytes as-they-come. */
+            STRLEN n = t - s - 2;
+            STRLEN i;
+            if ((n > MAX_NV_BYTES - byten) ||
+                (n * 8 > NV_MANT_REAL_DIG)) {
+                error = TRUE;
+                break;
+            }
+            /* Copy the bytes in reverse so that \x41\x42 ('AB')
+             * is equivalent to 0x4142.  In other words, the bytes
+             * are in big-endian order. */
+            for (i = 0; i < n; i++) {
+                bytes[n - i - 1] = s[i + 1];
+            }
+            byten += n;
+            break;
+        } else if (s < t && isDIGIT(*s)) {
+            const char *u;
+            nantype =
+                grok_number_flags(s, (STRLEN)(t - s), &uv,
+                                  PERL_SCAN_TRAILING |
+                                  PERL_SCAN_ALLOW_UNDERSCORES);
+            /* Unfortunately grok_number_flags() doesn't
+             * tell how far we got and the ')' will always
+             * be "trailing", so we need to double-check
+             * whether we had something dubious. */
+            for (u = s; u < send - 1; u++) {
+                if (!isDIGIT(*u)) {
+                    *flags |= IS_NUMBER_TRAILING;
+                    break;
+                }
+            }
+            s = u;
+        } else {
+            error = TRUE;
+            break;
+        }
+        /* XXX Doesn't do octal: nan("0123").
+         * Probably not a big loss. */
+
+        if (!(nantype & IS_NUMBER_IN_UV)) {
+            error = TRUE;
+            break;
+        }
+
+        if (uv) {
+            while (uv && byten < MAX_NV_BYTES) {
+                bytes[byten++] = (U8) (uv & 0xFF);
+                uv >>= 8;
+            }
+        }
+    }
+
+    if (byten == 0) {
+        bytes[byten++] = 0;
+    }
+
+    if (error) {
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
+                         nan_payload_error);
+    }
+
+    if (s == send) {
+        *flags |= IS_NUMBER_TRAILING;
+        return s;
+    }
+
+    if (nvp) {
+        nan_payload_set(nvp, bytes, byten, signaling);
+    }
+
+    return s;
+}
+
+/*
+=for apidoc grok_nan
+
+Helper for grok_infnan().
+
+Parses the C99-style "nan(...)" strings, and sets the nvp accordingly.
+
+*sp points to the beginning of "nan", which can be also "qnan", "nanq",
+or "snan", "nans", and case is ignored.
+
+The "..." is parsed with grok_nan_payload().
+
+=cut
+*/
+const char *
+Perl_grok_nan(pTHX_ const char* s, const char* send, int *flags, NV* nvp)
+{
+    bool signaling = FALSE;
+
+    PERL_ARGS_ASSERT_GROK_NAN;
+
+    if (isALPHA_FOLD_EQ(*s, 'S')) {
+        signaling = TRUE;
+        s++; if (s == send) return s;
+    } else if (isALPHA_FOLD_EQ(*s, 'Q')) {
+        s++; if (s == send) return s;
+    }
+
+    if (isALPHA_FOLD_EQ(*s, 'N')) {
+        s++; if (s == send || isALPHA_FOLD_NE(*s, 'A')) return s;
+        s++; if (s == send || isALPHA_FOLD_NE(*s, 'N')) return s;
+        s++;
+
+        *flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
+
+        /* NaN can be followed by various stuff (NaNQ, NaNS), while
+         * some legacy implementations have weird stuff like "NaN%"
+         * (no idea what that means). */
+        if (isALPHA_FOLD_EQ(*s, 's')) {
+            signaling = TRUE;
+            s++;
+        } else if (isALPHA_FOLD_EQ(*s, 'q')) {
+            s++;
+        }
+
+        if (*s == '(') {
+            const char *n = grok_nan_payload(s, send, signaling, flags, nvp);
+            if (n == send) return NULL;
+            s = n;
+            if (*s != ')') {
+                *flags |= IS_NUMBER_TRAILING;
+                return s;
+            }
+        } else {
+            if (nvp) {
+                U8 bytes[1] = { 0 };
+                nan_payload_set(nvp, bytes, 1, signaling);
+            }
+
+            while (s < send && isSPACE(*s)) s++;
+
+            if (s < send && *s) {
+                /* Note that we here implicitly accept (parse as
+                 * "nan", but with warnings) also any other weird
+                 * trailing stuff for "nan".  In the above we just
+                 * check that if we got the C99-style "nan(...)",
+                 * the "..."  looks sane.  If in future we accept
+                 * more ways of specifying the nan payload (like
+                 * "nan123" or "nan0xabc"), the accepting would
+                 * happen around here. */
+                *flags |= IS_NUMBER_TRAILING;
+            }
+        }
+
+        s = send;
+    }
+    else
+        return NULL;
+
+    return s;
+}
+
+/*
 =for apidoc grok_infnan
 
 Helper for grok_number(), accepts various ways of spelling "infinity"

@@ -1365,6 +1365,20 @@ PERL_CALLCONV int	Perl_grok_infnan(pTHX_ const char** sp, const char *send)
 #define PERL_ARGS_ASSERT_GROK_INFNAN	\
 	assert(sp); assert(send)
 
+PERL_CALLCONV const char *	Perl_grok_nan(pTHX_ const char* s, const char *send, int *flags, NV *nvp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_GROK_NAN	\
+	assert(s); assert(send); assert(flags)
+
+PERL_CALLCONV const char *	Perl_grok_nan_payload(pTHX_ const char* s, const char *send, bool signaling, int *flags, NV *nvp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_GROK_NAN_PAYLOAD	\
+	assert(s); assert(send); assert(flags)
+
 PERL_CALLCONV int	Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GROK_NUMBER	\
