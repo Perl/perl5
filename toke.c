@@ -1520,6 +1520,8 @@ Perl_lex_read_space(pTHX_ U32 flags)
 		incline(s);
 		need_incline = 0;
 	    }
+	} else if (!c) {
+	    s++;
 	} else {
 	    break;
 	}
@@ -1796,7 +1798,7 @@ S_skipspace_flags(pTHX_ char *s, U32 flags)
 {
     PERL_ARGS_ASSERT_SKIPSPACE_FLAGS;
     if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
-	while (s < PL_bufend && SPACE_OR_TAB(*s))
+	while (s < PL_bufend && (SPACE_OR_TAB(*s) || !*s))
 	    s++;
     } else {
 	STRLEN bufptr_pos = PL_bufptr - SvPVX(PL_linestr);
@@ -8593,7 +8595,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 
     PERL_ARGS_ASSERT_SCAN_IDENT;
 
-    if (isSPACE(*s))
+    if (isSPACE(*s) || !*s)
 	s = skipspace(s);
     if (isDIGIT(*s)) {
 	while (isDIGIT(*s)) {
