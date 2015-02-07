@@ -45,7 +45,7 @@
 
 %token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ
 
-%token <ival> '{' '}' '[' ']' '-' '+' '$' '@' '%' '*' '&' ';' '=' '.'
+%token <ival> '{' '}' '[' ']' '-' '+' '@' '%' '&' ';' '=' '.'
 
 %token <opval> WORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
