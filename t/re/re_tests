@@ -1102,7 +1102,7 @@ X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 (?P<n>foo)(??{ $+{n} })	snofooefoofoowaa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 (?P<=n>foo|bar|baz)	-	c	-	Group name must start with a non-digit word character
 (?P<!n>foo|bar|baz)	-	c	-	Group name must start with a non-digit word character
-(?PX<n>foo|bar|baz)	-	c	-	Sequence (?PX<...) not recognized
+(?PX<n>foo|bar|baz)	-	c	-	Sequence (?PX...) not recognized
 /(?'n'foo|bar|baz)/	snofooewa	y	$1	foo
 /(?'n'foo|bar|baz)/	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?'n'foo|bar|baz)(?'m'[ew]+)/	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture

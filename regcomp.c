@@ -521,6 +521,10 @@ static const scan_data_t zero_scan_data =
                 UTF8fARG(UTF, offset, RExC_precomp), \
                 UTF8fARG(UTF, RExC_end - RExC_precomp - offset, RExC_precomp + offset)
 
+/* Used to point after bad bytes for an error message, but avoid skipping
+ * past a nul byte. */
+#define SKIP_IF_CHAR(s) (!*(s) ? 0 : UTF ? UTF8SKIP(s) : 1)
+
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then calls Perl_croak with the given
  * arg. Show regex, up to a maximum length. If it's too long, chop and add
@@ -9705,7 +9709,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 /*NOTREACHED*/
             default:
               fail_modifiers:
-                RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+                RExC_parse += SKIP_IF_CHAR(RExC_parse);
 		/* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
                 vFAIL2utf8f("Sequence (%"UTF8f"...) not recognized",
                       UTF8fARG(UTF, RExC_parse-seqstart, seqstart));
@@ -9953,7 +9957,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     nextchar(pRExC_state);
                     return ret;
                 }
-                RExC_parse++;
+                --RExC_parse;
+                RExC_parse += SKIP_IF_CHAR(RExC_parse);
                 /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
 		vFAIL3("Sequence (%.*s...) not recognized",
                                 RExC_parse-seqstart, seqstart);
@@ -10176,7 +10181,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case '?':           /* (??...) */
 		is_logical = 1;
 		if (*RExC_parse != '{') {
-		    RExC_parse++;
+                    RExC_parse += SKIP_IF_CHAR(RExC_parse);
                     /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
                     vFAIL2utf8f(
                         "Sequence (%"UTF8f"...) not recognized",

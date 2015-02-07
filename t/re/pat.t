@@ -22,7 +22,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 759;  # Update this when adding/deleting tests.
+plan tests => 765;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1634,6 +1634,17 @@ EOP
 		my $match = eval $eval;
 		ok(1, "did not crash");
 		ok($match, "[bbb...] resolved as character class, not subscript");
+	}
+
+	{	# [perl #123755]
+		for my $pat ('(??', '(?P', '(?i-') {
+			eval qq{ qr/$pat/ };
+			ok(1, "qr/$pat/ did not crash");
+			eval qq{ qr/${pat}\x{123}/ };
+			my $e = $@;
+			like($e, qr{\x{123}},
+				"qr/${pat}x/ shows x in error even if it's a wide character");
+		}
 	}
 } # End of sub run_tests
 
