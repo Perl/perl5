@@ -3016,9 +3016,11 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
 
     const U8* vmaxend = vhex + HEXTRACTSIZE;
     PERL_UNUSED_VAR(ix); /* might happen */
-    (void)Perl_frexp(PERL_ABS(nv), exponent);
-    if (vend && (vend <= vhex || vend > vmaxend))
-        Perl_croak(aTHX_ "Hexadecimal float: internal error");
+    if (!Perl_isinfnan(nv)) {
+        (void)Perl_frexp(PERL_ABS(nv), exponent);
+        if (vend && (vend <= vhex || vend > vmaxend))
+            Perl_croak(aTHX_ "Hexadecimal float: internal error");
+    }
     {
         /* First check if using long doubles. */
 #if defined(USE_LONG_DOUBLE) && (NVSIZE > DOUBLESIZE)
@@ -3233,13 +3235,9 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
  * infinity or a not-a-number, writes the appropriate strings to the
  * buffer, including a zero byte.  On success returns the written length,
  * excluding the zero byte, on failure (not an infinity, not a nan, or the
- * maxlen too small) returns zero.
- *
- * XXX for "Inf", "-Inf", and "NaN", we could have three read-only
- * shared string constants we point to, instead of generating a new
- * string for each instance. */
+ * maxlen too small) returns zero. */
 STATIC size_t
-S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char plus) {
+S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char format, char plus, char alt) {
     assert(maxlen >= 4);
     if (maxlen < 4) /* "Inf\0", "NaN\0" */
         return 0;
@@ -3257,19 +3255,91 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char plus) {
             *s++ = 'n';
             *s++ = 'f';
         } else if (Perl_isnan(nv)) {
+            U8 mask;
+            NV payload = nv;
+            U8* hibyte = nan_hibyte(&payload, &mask);
             *s++ = 'N';
             *s++ = 'a';
             *s++ = 'N';
-            /* XXX optionally output the payload mantissa bits as
-             * "(unsigned)" (to match the nan("...") C99 function,
-             * or maybe as "(0xhhh...)"  would make more sense...
-             * provide a format string so that the user can decide?
-             * NOTE: would affect the maxlen and assert() logic.*/
-        }
+            if (nan_is_signaling(nv)) {
+                *s++ = 's';
+            }
+            /* Detect and clear the "quiet bit" from the NV copy.
+             * This is done so that in *most* platforms the bit is
+             * skipped and not included in the hexadecimal result. */
+            *hibyte &= ~mask;
+            if (alt) {
+                U8 vhex[VHEX_SIZE];
+                U8* vend;
+                U8* v;
+                int exponent = 0;
+                char* start;
+                bool upper = isUPPER(format);
+                const char* xdig = PL_hexdigit + (upper ? 16 : 0);
+                char xhex = upper ? 'X' : 'x';
 
+                /* We need to clear the bits of the first
+                 * byte that are not part of the payload. */
+                *hibyte &= (1 << (7 - NV_MANT_REAL_DIG % 8)) - 1;
+
+                vend = S_hextract(aTHX_ payload, &exponent, vhex, NULL);
+                S_hextract(aTHX_ payload, &exponent, vhex, vend);
+
+                v = vhex;
+
+#ifdef NV_IMPLICIT_BIT
+                /* S_hextract thinks it needs to extract the implicit bit,
+                 * which is bogus with NaN. */
+                v++;
+#endif
+                while (v < vend && *v == 0) v++;
+
+                *s++ = '(';
+
+                start = s;
+                if (vend - v <= 2 * UVSIZE) {
+                    *s++ = '0';
+                    *s++ = xhex;
+                    start = s;
+                    while (v < vend) {
+                        *s++ = xdig[*v++];
+                    }
+                    if (s == start) {
+                        *s++ = '0';
+                    }
+                } else {
+                    /* If not displayable as an UV, display as hex
+                     * bytes, then.  This happens with e.g. 32-bit
+                     * (UVSIZE=4) platforms.  The format is "\xHH..."
+                     *
+                     * Similar formats are accepted on numification.
+                     *
+                     * The choice of quoting in the result is not
+                     * customizable currently.  Maybe something could
+                     * be rigged to follow the '%#'. */
+                    *s++ = '"';
+
+                    if ((vend - vhex) % 2) {
+                        *s++ = '\\';
+                        *s++ = xhex;
+                        *s++ = '0';
+                        *s++ = xdig[*v++];
+                    }
+                    while (v < vend) {
+                        *s++ = '\\';
+                        *s++ = 'x';
+                        *s++ = xdig[*v++];
+                        *s++ = xdig[*v++];
+                    }
+
+                    *s++ = '"';
+                }
+
+                *s++ = ')';
+            }
+        }
         else
             return 0;
-        assert((s == buffer + 3) || (s == buffer + 4));
         *s++ = 0;
         return s - buffer - 1; /* -1: excluding the zero byte */
     }
@@ -3466,7 +3536,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
             STRLEN size = 5; /* "-Inf\0" */
 
             s = SvGROW_mutable(sv, size);
-            len = S_infnan_2pv(SvNVX(sv), s, size, 0);
+            len = S_infnan_2pv(SvNVX(sv), s, size, 'g', 0, 0);
             if (len > 0) {
                 s += len;
                 SvPOK_on(sv);
@@ -11119,7 +11189,7 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
     PERL_ARGS_ASSERT_F0CONVERT;
 
     if (UNLIKELY(Perl_isinfnan(nv))) {
-        STRLEN n = S_infnan_2pv(nv, endbuf - *len, *len, 0);
+        STRLEN n = S_infnan_2pv(nv, endbuf - *len, *len, 'g', 0, 0);
         *len = n;
         return endbuf - n;
     }
@@ -12476,9 +12546,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
             }
             else {
-                elen = S_infnan_2pv(nv, PL_efloatbuf, PL_efloatsize, plus);
+                elen = S_infnan_2pv(nv, PL_efloatbuf, PL_efloatsize, c, plus, alt);
                 if (elen) {
-                    /* Not affecting infnan output: precision, alt, fill. */
+                    /* Not affecting infnan output: precision, fill. */
                     if (elen < width) {
                         if (left) {
                             /* Pack the back with spaces. */
