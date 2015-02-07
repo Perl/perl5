@@ -583,6 +583,52 @@ Perl_nan_hibyte(NV *nvp, U8* mask)
 }
 
 /*
+=for apidoc nan_signaling_set
+
+Set or unset the NaN signaling-ness.
+
+Of those platforms that differentiate between quiet and signaling
+platforms the majority has the semantics of the most significant bit
+being on meaning quiet NaN, so for signaling we need to clear the bit.
+
+Some platforms (older MIPS, and HPPA) have the opposite
+semantics, and we set the bit for a signaling NaN.
+
+=cut
+*/
+void
+Perl_nan_signaling_set(NV *nvp, bool signaling)
+{
+    U8 mask;
+    U8* hibyte;
+
+    PERL_ARGS_ASSERT_NAN_SIGNALING_SET;
+
+    hibyte = nan_hibyte(nvp, &mask);
+    if (hibyte) {
+        const NV nan = NV_NAN;
+        /* Decent optimizers should make the irrelevant branch to disappear. */
+        if ((((U8*)&nan)[hibyte - (U8*)nvp] & mask)) {
+            /* x86 style: the most significant bit of the NaN is off
+             * for a signaling NaN, and on for a quiet NaN. */
+            if (signaling) {
+                *hibyte &= ~mask;
+            } else {
+                *hibyte |=  mask;
+            }
+        } else {
+            /* MIPS/HPPA style: the most significant bit of the NaN is on
+             * for a signaling NaN, and off for a quiet NaN. */
+            if (signaling) {
+                *hibyte |=  mask;
+            } else {
+                *hibyte &= ~mask;
+            }
+        }
+    }
+}
+
+/*
 =for apidoc grok_infnan
 
 Helper for grok_number(), accepts various ways of spelling "infinity"
