@@ -207,6 +207,10 @@
 
    j0 j1 jn y0 y1 yn
 
+ * other extensions:
+
+   issignaling (http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1664.pdf)
+
  * Configure already (5.21.5) scans for:
 
    copysign*l* fpclassify isfinite isinf isnan isnan*l* ilogb*l* signbit scalbn*l*
@@ -2437,9 +2441,10 @@ fpclassify(x)
 	isinf = 3
 	isnan = 4
 	isnormal = 5
-	lrint = 6
-	lround = 7
-        signbit = 8
+	issignaling = 6
+	lrint = 7
+	lround = 8
+        signbit = 9
     CODE:
         PERL_UNUSED_VAR(x);
 	RETVAL = -1;
@@ -2475,20 +2480,23 @@ fpclassify(x)
 #endif
 	    break;
 	case 6:
+	    RETVAL = nan_is_signaling(x);
+	    break;
+	case 7:
 #ifdef c99_lrint
 	    RETVAL = c99_lrint(x);
 #else
 	    not_here("lrint");
 #endif
 	    break;
-	case 7:
+	case 8:
 #ifdef c99_lround
 	    RETVAL = c99_lround(x);
 #else
 	    not_here("lround");
 #endif
 	    break;
-	case 8:
+	case 9:
 	default:
 #ifdef Perl_signbit
 	    RETVAL = Perl_signbit(x);

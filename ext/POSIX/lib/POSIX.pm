@@ -4,7 +4,7 @@ use warnings;
 
 our ($AUTOLOAD, %SIGRT);
 
-our $VERSION = '1.51';
+our $VERSION = '1.52';
 
 require XSLoader;
 
@@ -307,7 +307,7 @@ our %EXPORT_TAGS = (
                   erfc exp2 expm1 fabs fdim floor fma fmax fmin fmod
                   fpclassify frexp hypot ilogb isfinite isgreater
                   isgreaterequal isinf isless islessequal
-                  islessgreater isnan isnormal isunordered j0 j1 jn
+                  islessgreater isnan isnormal issignaling isunordered j0 j1 jn
                   ldexp lgamma log10 log1p log2 logb lrint modf nan
                   nearbyint nextafter nexttoward pow remainder remquo
                   rint round scalbn signbit sinh tan tanh tgamma trunc
