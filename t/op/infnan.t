@@ -347,8 +347,14 @@ is eval { unpack "p", pack 'p', $NaN }, "NaN", "pack p +NaN";
 is eval { unpack "P3", pack 'P', $NaN }, "NaN", "pack P +NaN";
 
 for my $i (@NaN) {
-    cmp_ok($i + 0, '!=', $i + 0, "$i is NaN numerically (by not being NaN)");
-    is("@{[$i+0]}", "NaN", "$i value stringifies as NaN");
+    if (($i =~ /snan/i || $i =~ /nans/i) &&
+        (($i + 0) eq $PInf || ($i + 0 eq $NInf))) {
+        # Crazy but apparently true: signaling nan with zero payload
+        # can be Inf or -Inf on some platforms (like x86).
+    } else {
+        cmp_ok($i + 0, '!=', $i + 0, "$i is NaN numerically (by not being NaN)");
+        is("@{[$i+0]}", "NaN", "$i value stringifies as NaN");
+    }
 }
 
 ok(!($NaN <  0), "NaN is not lt zero");
@@ -475,8 +481,9 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
          [ "nan",          0, $NaN ],
          [ "nanxy",        1, $NaN ],
          [ "nan34",        1, $NaN ],
+         [ "nan0x34",      1, $NaN ],
          [ "nanq",         0, $NaN ],
-         [ "nans",         0, $NaN ],
+         # [ "nans",         0, $NaN, $PInf ], # Odd but valid.
          [ "nanx",         1, $NaN ],
          [ "nanqy",        1, $NaN ],
          [ "nan(123)",     0, $NaN ],
@@ -484,8 +491,6 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
          [ "nan(123xy)",   1, $NaN ],
          [ "nan(0x123xy)", 1, $NaN ],
          [ "nanq(123)",    0, $NaN ],
-         [ "nan(123",      1, $NaN ],
-         [ "nan(",         1, $NaN ],
          [ "1.#NANQ",      0, $NaN ],
          [ "1.#QNAN",      0, $NaN ],
          [ "1.#NANQx",     1, $NaN ],
@@ -533,7 +538,7 @@ SKIP: {
     # Test only on certain known platforms since the features
     # are not that well standardized.
     unless (
-         (
+        ((
           $^O eq 'linux'
           ||
           $^O eq 'darwin' # OS X
@@ -543,29 +548,40 @@ SKIP: {
          &&
         (
          (
-          $Config{nvsize} == 8 # double
-          &&
+          $Config{nvsize} == 8 && # double
           $Config{doublekind} == 3 # IEEE double little-endian (x86)
          )
          ||
          (
-          $Config{nvsize} == 16 # double
-          &&
+          $Config{uselongdouble} &&
+          $Config{nvsize} == 16 && # long double
           $Config{longdblkind} == 3 # x86 80-bit extended precision
          )
-        )
+        ))
         ||
-        ($^O eq 'solaris'
-         &&
+        ($^O eq 'solaris' &&
          $Config{nvsize} == 8 && # double
-         (
-          $Config{uvsize} == 4 # 32-bit
+         ($Config{uvsize} == 4 # 32-bit
           ||
           $Config{uvsize} == 8 # 64-bit (-Duse64bitint)
          ) &&
          $Config{doublesize} == 8 &&
          $Config{doublekind} == 4 # IEEE double big-endian (sparc)
         )
+        ||
+        ($^O eq 'hpux' &&
+         $Config{nvsize} == 8 && # double
+         $Config{uvsize} == 4 && # 32-bit
+         $Config{doublesize} == 8 &&
+         $Config{doublekind} == 4 # IEEE double big-endian (hppa)
+         )
+        ||
+        ($^O eq 'dec_osf' && # Digital UNIX aka Tru64
+         $Config{nvsize} == 8 && # double
+         $Config{uvsize} == 8 && # 32-bit
+         $Config{doublesize} == 8 &&
+         $Config{doublekind} == 3 # IEEE double little-endian (alpha)
+         )
         ) {
         my ($uselongdouble, $longdblsize, $longdblkind) =
             $Config{uselongdouble} ?
@@ -573,7 +589,7 @@ SKIP: {
              $Config{longdblsize},
              $Config{longdblkind}) :
             ('undef', 'undef', 'undef');
-        skip("skipping NaN specials testing on os=$^O, uvsize=$Config{uvsize}, nvsize=$Config{nvsize}, doublekind=$Config{doublekind}, uselongdouble=$uselongdouble, longdblsize=$longdblsize, longdblkind=$longdblkind", 16);
+        skip("skipping NaN specials testing on os=$^O, uvsize=$Config{uvsize}, nvsize=$Config{nvsize}, doublesize=$Config{doublesize}, doublekind=$Config{doublekind}, uselongdouble=$uselongdouble, longdblsize=$longdblsize, longdblkind=$longdblkind", 16);
     }
 
     is(sprintf("%#g", $NaN), "NaN(0x0)", "sprintf %#g");
@@ -581,16 +597,11 @@ SKIP: {
     is(sprintf("%#g", "nanq"), "NaN(0x0)");
     is(sprintf("%#g", "qnan"), "NaN(0x0)");
 
-    # This might look wrong but actually works as designed:
-    # there cannot be a signaling nan with zero payload.
-    # A signaling nan needs to have at least 0x1 as the payload.
-    #
-    # There can be a quiet nan with zero payload: this, in fact,
-    # is usually the default "nan" of a platform.
-    #
     # This weirdness brought to you courtesy of asymmetry in the IEEE spec.
-    is(sprintf("%#g", "nans"), "Inf");
-    is(sprintf("%#g", "snan"), "Inf");
+    # In x86 style nans, nans(0) is equal to infinity or -infinity.
+    # In mips/hppa style, nans(0) is nans(0).
+    like(sprintf("%#g", "nans"), qr/^(?:-?Inf|NaNs\(0x0\))$/);
+    like(sprintf("%#g", "snan"), qr/^(?:-?Inf|NaNs\(0x0\))$/);
 
     is(sprintf("%#g", "nan(12345)"), "NaN(0x3039)");
     is(sprintf("%#g", "nan(0b101101)"), "NaN(0x2d)");
