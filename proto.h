@@ -2838,6 +2838,12 @@ PERL_CALLCONV int	Perl_my_vsnprintf(char *buffer, const Size_t len, const char *
 #define PERL_ARGS_ASSERT_MY_VSNPRINTF	\
 	assert(buffer); assert(format)
 
+PERL_CALLCONV U8*	Perl_nan_hibyte(pTHX_ NV *nvp, U8* mask)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_NAN_HIBYTE	\
+	assert(nvp); assert(mask)
+
 PERL_CALLCONV OP*	Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block);
 PERL_CALLCONV OP*	Perl_newANONHASH(pTHX_ OP* o)
 			__attribute__malloc__

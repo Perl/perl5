@@ -548,6 +548,41 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 }
 
 /*
+=for apidoc nan_hibyte
+
+Given an NV, returns pointer to the byte containing the most
+significant bit of the NaN, this bit is most commonly the
+quiet/signaling bit of the NaN.  The mask will contain a mask
+appropriate for manipulating the most significant bit.
+Note that this bit may not be the highest bit of the byte.
+
+If the NV is not a NaN, returns NULL.
+
+Most platforms have "high bit is one" -> quiet nan.
+The known opposite exceptions are older MIPS and HPPA platforms.
+
+Some platforms do not differentiate between quiet and signaling NaNs.
+
+=cut
+*/
+U8*
+Perl_nan_hibyte(NV *nvp, U8* mask)
+{
+    STRLEN i = (NV_MANT_REAL_DIG - 1) / 8;
+    STRLEN j = (NV_MANT_REAL_DIG - 1) % 8;
+
+    PERL_ARGS_ASSERT_NAN_HIBYTE;
+
+    *mask = 1 << j;
+#ifdef NV_BIG_ENDIAN
+    return (U8*) nvp + NVSIZE - 1 - i;
+#endif
+#ifdef NV_LITTLE_ENDIAN
+    return (U8*) nvp + i;
+#endif
+}
+
+/*
 =for apidoc grok_infnan
 
 Helper for grok_number(), accepts various ways of spelling "infinity"
