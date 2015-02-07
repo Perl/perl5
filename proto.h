@@ -2845,6 +2845,12 @@ PERL_CALLCONV U8*	Perl_nan_hibyte(pTHX_ NV *nvp, U8* mask)
 	assert(nvp); assert(mask)
 
 PERL_CALLCONV int	Perl_nan_is_signaling(pTHX_ NV nv);
+PERL_CALLCONV void	Perl_nan_payload_set(NV *nvp, const void *bytes, STRLEN byten, bool signaling)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
+#define PERL_ARGS_ASSERT_NAN_PAYLOAD_SET	\
+	assert(nvp); assert(bytes)
+
 PERL_CALLCONV void	Perl_nan_signaling_set(pTHX_ NV *nvp, bool signaling)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_NAN_SIGNALING_SET	\

@@ -822,6 +822,7 @@ Apdn	|UV	|grok_atou	|NN const char* pv|NULLOK const char** endptr
 Apd	|U8*	|nan_hibyte|NN NV *nvp|NN U8* mask
 Apd	|void	|nan_signaling_set|NN NV *nvp|bool signaling
 Apd	|int	|nan_is_signaling|NV nv
+Apdn	|void	|nan_payload_set|NN NV *nvp|NN const void *bytes|STRLEN byten|bool signaling
 : These are all indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_clearenv	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clear_all_env|NN SV* sv|NN MAGIC* mg

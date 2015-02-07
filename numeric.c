@@ -663,6 +663,89 @@ Perl_nan_is_signaling(NV nv)
 #endif
 }
 
+/* The largest known floating point numbers are the IEEE quadruple
+ * precision of 128 bits. */
+#define MAX_NV_BYTES (128/8)
+
+static const char nan_payload_error[] = "NaN payload error";
+
+/*
+
+=for apidoc nan_payload_set
+
+Set the NaN payload of the nv.
+
+The first byte is the highest order byte of the payload (big-endian).
+
+The signaling flag, if true, turns the generated NaN into a signaling one.
+In most platforms this means turning _off_ the most significant bit of the
+NaN.  Note the _most_ - some platforms have the opposite semantics.
+Do not assume any portability of the NaN semantics.
+
+=cut
+*/
+void
+Perl_nan_payload_set(NV *nvp, const void *bytes, STRLEN byten, bool signaling)
+{
+    /* How many bits we can set in the payload.
+     *
+     * Note that whether the most signicant bit is a quiet or
+     * signaling NaN is actually unstandardized.  Most platforms use
+     * it as the 'quiet' bit.  The known exceptions to this are older
+     * MIPS, and HPPA.
+     *
+     * Yet another unstandardized area is what does the difference
+     * actually mean - if it exists: some platforms do not even have
+     * signaling NaNs.
+     *
+     * C99 nan() is supposed to generate quiet NaNs. */
+    int bits = NV_MANT_REAL_DIG - 1;
+
+    STRLEN i, nvi;
+    bool error = FALSE;
+
+    /* XXX None of this works for doubledouble platforms, or for mixendians. */
+
+    PERL_ARGS_ASSERT_NAN_PAYLOAD_SET;
+
+    *nvp = NV_NAN;
+
+#ifdef NV_BIG_ENDIAN
+    nvi = NVSIZE - 1;
+#endif
+#ifdef NV_LITTLE_ENDIAN
+    nvi = 0;
+#endif
+
+    if (byten > MAX_NV_BYTES) {
+        byten = MAX_NV_BYTES;
+        error = TRUE;
+    }
+    for (i = 0; bits > 0; i++) {
+        U8 b = i < byten ? ((U8*) bytes)[i] : 0;
+        if (bits > 0 && bits < 8) {
+            U8 m = (1 << bits) - 1;
+            ((U8*)nvp)[nvi] &= ~m;
+            ((U8*)nvp)[nvi] |= b & m;
+            bits = 0;
+        } else {
+            ((U8*)nvp)[nvi] = b;
+            bits -= 8;
+        }
+#ifdef NV_BIG_ENDIAN
+        nvi--;
+#endif
+#ifdef NV_LITTLE_ENDIAN
+        nvi++;
+#endif
+    }
+    if (error) {
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
+                         nan_payload_error);
+    }
+    nan_signaling_set(nvp, signaling);
+}
+
 /*
 =for apidoc grok_infnan
 

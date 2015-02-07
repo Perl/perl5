@@ -358,6 +358,7 @@
 #define my_strftime(a,b,c,d,e,f,g,h,i,j)	Perl_my_strftime(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #define nan_hibyte(a,b)		Perl_nan_hibyte(aTHX_ a,b)
 #define nan_is_signaling(a)	Perl_nan_is_signaling(aTHX_ a)
+#define nan_payload_set		Perl_nan_payload_set
 #define nan_signaling_set(a,b)	Perl_nan_signaling_set(aTHX_ a,b)
 #define newANONATTRSUB(a,b,c,d)	Perl_newANONATTRSUB(aTHX_ a,b,c,d)
 #define newANONHASH(a)		Perl_newANONHASH(aTHX_ a)
