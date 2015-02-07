@@ -12150,7 +12150,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         2 * NVSIZE + /* 2 hexdigits for each byte */
                         2 + /* "p+" */
                         6 + /* exponent: sign, plus up to 16383 (quad fp) */
-                        1;   /* \0 */
+                        1;  /* \0 */
 #ifdef LONGDOUBLE_DOUBLEDOUBLE
                     /* However, for the "double double", we need more.
                      * Since each double has their own exponent, the
@@ -12173,7 +12173,29 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 else if (i > 0) {
                     need = BIT_DIGITS(i);
                 } /* if i < 0, the number of digits is hard to predict. */
-	    }
+            } else if (UNLIKELY(Perl_isnan(nv))) {
+                need +=
+                    3 + /* nan */
+                    1 + /* 's', maybe */
+                    1;  /* \0 */
+
+                if (alt) {
+                    /* NaN payload - all of it really only needed
+                     * if we have a full payload. */
+                    need +=
+                        1 + /* '(' */
+#if NVSIZE == UVSIZE
+                        /* 0x... */
+                        2 + /* "0x" */
+                        2 * (NV_MANT_REAL_DIG + 7) / 8 +
+#else
+                        /* hexbytes \xHH */
+                        2 + /* '...' */
+                        4 * (NV_MANT_REAL_DIG + 7) / 8 +
+#endif
+                        1;  /* ')' */
+                }
+            }
 	    need += has_precis ? precis : 6; /* known default */
 
 	    if (need < width)
