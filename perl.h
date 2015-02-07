@@ -4319,7 +4319,6 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #       define NV_QNAN LDBL_QNAN
 #   endif
 #   if !defined(NV_NAN) && defined(LDBL_SNAN)
-#       define NV_NAN LDBL_SNAN
 #       define NV_SNAN LDBL_SNAN
 #   endif
 #endif
@@ -4331,7 +4330,6 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #  define NV_QNAN DBL_QNAN
 #endif
 #if !defined(NV_NAN) && defined(DBL_SNAN)
-#  define NV_NAN (NV)DBL_SNAN
 #  define NV_SNAN DBL_SNAN
 #endif
 #if !defined(NV_NAN) && defined(NAN)
@@ -4342,7 +4340,6 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #  define NV_QNAN QNAN
 #endif
 #if !defined(NV_NAN) && defined(SNAN)
-#  define NV_NAN (NV)SNAN
 #  define NV_SNAN SNAN
 #endif
 #if !defined(NV_NAN) && defined(I_SUNMATH)
