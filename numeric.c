@@ -629,6 +629,41 @@ Perl_nan_signaling_set(NV *nvp, bool signaling)
 }
 
 /*
+=for apidoc nan_is_signaling
+
+Returns true if the nv is a NaN is a signaling NaN.
+
+=cut
+*/
+int
+Perl_nan_is_signaling(NV nv)
+{
+    /* Quiet NaN bit pattern (64-bit doubles, ignore endianness):
+     * x86    00 00 00 00 00 00 f8 7f
+     * sparc  7f ff ff ff ff ff ff ff
+     * mips   7f f7 ff ff ff ff ff ff
+     * hppa   7f f4 00 00 00 00 00 00
+     * The "7ff" is the exponent.  The most significant bit of the NaN
+     * (note: here, not the most significant bit of the byte) is of
+     * interest: in the x86 style (also in sparc) the bit on means
+     * 'quiet', in the mips style the bit off means 'quiet'. */
+#ifdef Perl_fp_classify_snan
+    return Perl_fp_classify_snan(nv);
+#else
+    if (Perl_isnan(nv)) {
+        U8 mask;
+        U8 *hibyte = Perl_nan_hibyte(&nv, &mask);
+        /* Hoping NV_NAN is a quiet nan - this might be a false hope.
+         * XXX Configure test */
+        const NV nan = NV_NAN;
+        return (*hibyte & mask) != (((U8*)&nan)[hibyte - (U8*)&nv] & mask);
+    } else {
+        return 0;
+    }
+#endif
+}
+
+/*
 =for apidoc grok_infnan
 
 Helper for grok_number(), accepts various ways of spelling "infinity"
