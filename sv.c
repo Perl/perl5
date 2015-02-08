@@ -3257,19 +3257,12 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char format, char plus, char al
             *s++ = 'n';
             *s++ = 'f';
         } else if (Perl_isnan(nv)) {
-            U8 mask;
-            NV payload = nv;
-            U8* hibyte = nan_hibyte(&payload, &mask);
             *s++ = 'N';
             *s++ = 'a';
             *s++ = 'N';
             if (nan_is_signaling(nv)) {
                 *s++ = 's';
             }
-            /* Detect and clear the "quiet bit" from the NV copy.
-             * This is done so that in *most* platforms the bit is
-             * skipped and not included in the hexadecimal result. */
-            *hibyte &= ~mask;
             if (alt) {
                 U8 vhex[VHEX_SIZE];
                 U8* vend;
@@ -3279,10 +3272,13 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char format, char plus, char al
                 bool upper = isUPPER(format);
                 const char* xdig = PL_hexdigit + (upper ? 16 : 0);
                 char xhex = upper ? 'X' : 'x';
+                U8 mask;
+                NV payload = nv;
+                U8* hibyte = nan_hibyte(&payload, &mask);
 
-                /* We need to clear the bits of the first
-                 * byte that are not part of the payload. */
-                *hibyte &= (1 << (7 - NV_MANT_REAL_DIG % 8)) - 1;
+                /* Clear the bits that are not part of the payload. */
+                *hibyte &= ~mask;
+                *hibyte &= ((1 << (NV_NAN_BITS % 8)) - 1);
 
                 vend = S_hextract(payload, &exponent, vhex, NULL);
                 S_hextract(payload, &exponent, vhex, vend);

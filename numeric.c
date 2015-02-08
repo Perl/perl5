@@ -547,24 +547,20 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
     return FALSE;
 }
 
-/* x86 80-bit extended precision mantissa bits:
- *
- * 63 62 61   30387+    pre-387
- * --------   ----      --------
- *  0  0  0   invalid   infinity
- *  0  0  n   invalid   snan
- *  0  1  *   invalid   snan
- *  1  0  0   infinity  snan
- *  1  0  n   snan
- *  1  1  0   qnan (1.#IND)
- *  1  1  n   qnan
- *
- * This means that there are 61 bits for nan payload.
- */
-#if defined(USE_LONG_DOUBLE) && (LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN)
-#  define NV_NAN_BITS 61
-#else
-#  define NV_NAN_BITS (NV_MANT_REAL_DIG - 1)
+#if 0
+/* For debugging. */
+static void
+S_hexdump_nv(NV nv)
+{
+    int i;
+    /* Remember that NVSIZE may include garbage bytes, the most
+     * notable case being the x86 80-bit extended precision long doubles,
+     * which have 6 or 2 unused bytes (NVSIZE = 16 or NVSIZE = 12). */
+    for (i = 0; i < NVSIZE; i++) {
+        PerlIO_printf(Perl_debug_log, "%02x ", ((U8*)&nv)[i]);
+    }
+    PerlIO_printf(Perl_debug_log, "\n");
+}
 #endif
 
 /*
@@ -634,7 +630,8 @@ Perl_nan_signaling_set(pTHX_ NV *nvp, bool signaling)
     hibyte = nan_hibyte(nvp, &mask);
     if (hibyte) {
         const NV nan = NV_NAN;
-        /* Decent optimizers should make the irrelevant branch to disappear. */
+        /* Decent optimizers should make the irrelevant branch to disappear.
+         * XXX Configure scan */
         if ((((U8*)&nan)[hibyte - (U8*)nvp] & mask)) {
             /* x86 style: the most significant bit of the NaN is off
              * for a signaling NaN, and on for a quiet NaN. */
@@ -673,20 +670,21 @@ Perl_nan_is_signaling(NV nv)
      * The "7ff" is the exponent.  The most significant bit of the NaN
      * (note: here, not the most significant bit of the byte) is of
      * interest: in the x86 style (also in sparc) the bit on means
-     * 'quiet', in the mips style the bit off means 'quiet'. */
+     * 'quiet', in the mips/hppa style the bit off means 'quiet'. */
 #ifdef Perl_fp_classify_snan
     return Perl_fp_classify_snan(nv);
 #else
     if (Perl_isnan(nv)) {
         U8 mask;
         U8 *hibyte = nan_hibyte(&nv, &mask);
-        /* Hoping NV_NAN is a quiet nan - this might be a false hope.
-         * XXX Configure test */
-        const NV nan = NV_NAN;
-        return (*hibyte & mask) != (((U8*)&nan)[hibyte - (U8*)&nv] & mask);
-    } else {
-        return 0;
+        if (hibyte) {
+            /* Hoping NV_NAN is a quiet nan - this might be a false hope.
+             * XXX Configure test */
+            const NV nan = NV_NAN;
+            return (*hibyte & mask) != (((U8*)&nan)[hibyte - (U8*)&nv] & mask);
+        }
     }
+    return 0;
 #endif
 }
 
@@ -727,6 +725,9 @@ Perl_nan_payload_set(pTHX_ NV *nvp, const void *bytes, STRLEN byten, bool signal
      *
      * C99 nan() is supposed to generate quiet NaNs. */
     int bits = NV_NAN_BITS;
+    U8 mask;
+    U8* hibyte;
+    U8 hibit;
 
     STRLEN i, nvi;
     bool error = FALSE;
@@ -736,6 +737,8 @@ Perl_nan_payload_set(pTHX_ NV *nvp, const void *bytes, STRLEN byten, bool signal
     PERL_ARGS_ASSERT_NAN_PAYLOAD_SET;
 
     *nvp = NV_NAN;
+    hibyte = nan_hibyte(nvp, &mask);
+    hibit = *hibyte & mask;
 
 #ifdef NV_BIG_ENDIAN
     nvi = NVSIZE - 1;
@@ -765,6 +768,11 @@ Perl_nan_payload_set(pTHX_ NV *nvp, const void *bytes, STRLEN byten, bool signal
 #ifdef NV_LITTLE_ENDIAN
         nvi++;
 #endif
+    }
+    if (hibit) {
+        *hibyte |=  mask;
+    } else {
+        *hibyte &= ~mask;
     }
     if (error) {
         Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
