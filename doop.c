@@ -619,18 +619,18 @@ I32
 Perl_do_trans(pTHX_ SV *sv)
 {
     STRLEN len;
-    const I32 hasutf = (PL_op->op_private &
-                    (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF));
+    const I32 flags = PL_op->op_private;
+    const I32 hasutf = flags & (OPpTRANS_FROM_UTF | OPpTRANS_TO_UTF);
 
     PERL_ARGS_ASSERT_DO_TRANS;
 
-    if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL)) {
-            Perl_croak_no_modify();
+    if (SvREADONLY(sv) && !(flags & OPpTRANS_IDENTICAL)) {
+        Perl_croak_no_modify();
     }
     (void)SvPV_const(sv, len);
     if (!len)
 	return 0;
-    if (!(PL_op->op_private & OPpTRANS_IDENTICAL)) {
+    if (!(flags & OPpTRANS_IDENTICAL)) {
 	if (!SvPOKp(sv) || SvTHINKFIRST(sv))
 	    (void)SvPV_force_nomg(sv, len);
 	(void)SvPOK_only_UTF8(sv);
@@ -638,27 +638,15 @@ Perl_do_trans(pTHX_ SV *sv)
 
     DEBUG_t( Perl_deb(aTHX_ "2.TBL\n"));
 
-    switch (PL_op->op_private & ~hasutf & (
-		OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF|OPpTRANS_IDENTICAL|
-		OPpTRANS_SQUASH|OPpTRANS_DELETE|OPpTRANS_COMPLEMENT)) {
-    case 0:
-	if (hasutf)
-	    return do_trans_simple_utf8(sv);
-	else
-	    return do_trans_simple(sv);
-
-    case OPpTRANS_IDENTICAL:
-    case OPpTRANS_IDENTICAL|OPpTRANS_COMPLEMENT:
-	if (hasutf)
-	    return do_trans_count_utf8(sv);
-	else
-	    return do_trans_count(sv);
-
-    default:
-	if (hasutf)
-	    return do_trans_complex_utf8(sv);
-	else
-	    return do_trans_complex(sv);
+    /* If we use only OPpTRANS_IDENTICAL to bypass the READONLY check,
+     * we must also rely on it to choose the readonly strategy.
+     */
+    if (flags & OPpTRANS_IDENTICAL) {
+        return hasutf ? do_trans_count_utf8(sv) : do_trans_count(sv);
+    } else if (flags & (OPpTRANS_SQUASH|OPpTRANS_DELETE|OPpTRANS_COMPLEMENT)) {
+        return hasutf ? do_trans_complex_utf8(sv) : do_trans_complex(sv);
+    } else {
+        return hasutf ? do_trans_simple_utf8(sv) : do_trans_simple(sv);
     }
 }
 
