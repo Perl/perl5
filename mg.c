@@ -1103,9 +1103,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    sv_setiv(sv, (IV)IoPAGE(GvIOp(PL_defoutgv)));
 	break;
     case ':':
-	break;
     case '/':
-        sv_setsv(sv, PL_rs);
 	break;
     case '[':
 	sv_setiv(sv, 0);
@@ -2869,6 +2867,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                         );
                     }
                 } else {
+                    sv_setsv(sv, PL_rs);
               /* diag_listed_as: Setting $/ to %s reference is forbidden */
                     Perl_croak(aTHX_ "Setting $/ to a%s %s reference is forbidden",
                                       *reftype == 'A' ? "n" : "", reftype);
