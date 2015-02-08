@@ -404,7 +404,7 @@ outputs something like this:
 =head1 INHERITANCE
 
 Benchmark inherits from no other class, except of course
-for Exporter.
+from Exporter.
 
 =head1 CAVEATS
 
@@ -482,7 +482,7 @@ our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.19;
+$VERSION = 1.20;
 
 # --- ':hireswallclock' special handling
 

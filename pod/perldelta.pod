@@ -165,6 +165,10 @@ Building in C++ mode now works.
 
 L<POSIX> has been upgraded from version 1.49 to 1.50.
 
+=item *
+
+L<Benchmark> has been upgraded from version 1.19 to 1.20.
+
 =back
 
 =head2 Removed Modules and Pragmata
