@@ -597,7 +597,7 @@ semantics, and we set the bit for a signaling NaN.
 =cut
 */
 void
-Perl_nan_signaling_set(NV *nvp, bool signaling)
+Perl_nan_signaling_set(pTHX_ NV *nvp, bool signaling)
 {
     U8 mask;
     U8* hibyte;
@@ -652,7 +652,7 @@ Perl_nan_is_signaling(NV nv)
 #else
     if (Perl_isnan(nv)) {
         U8 mask;
-        U8 *hibyte = Perl_nan_hibyte(&nv, &mask);
+        U8 *hibyte = nan_hibyte(&nv, &mask);
         /* Hoping NV_NAN is a quiet nan - this might be a false hope.
          * XXX Configure test */
         const NV nan = NV_NAN;
@@ -685,7 +685,7 @@ Do not assume any portability of the NaN semantics.
 =cut
 */
 void
-Perl_nan_payload_set(NV *nvp, const void *bytes, STRLEN byten, bool signaling)
+Perl_nan_payload_set(pTHX_ NV *nvp, const void *bytes, STRLEN byten, bool signaling)
 {
     /* How many bits we can set in the payload.
      *

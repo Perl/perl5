@@ -822,10 +822,10 @@ Apd	|int	|grok_number2_flags|NN const char *pv|STRLEN len|NULLOK UV *valuep|NULL
 ApdR	|bool	|grok_numeric_radix|NN const char **sp|NN const char *send
 Apd	|UV	|grok_oct	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apdn	|UV	|grok_atou	|NN const char* pv|NULLOK const char** endptr
-Apd	|U8*	|nan_hibyte|NN NV *nvp|NN U8* mask
+Apdn	|U8*	|nan_hibyte|NN NV *nvp|NN U8* mask
 Apd	|void	|nan_signaling_set|NN NV *nvp|bool signaling
-Apd	|int	|nan_is_signaling|NV nv
-Apdn	|void	|nan_payload_set|NN NV *nvp|NN const void *bytes|STRLEN byten|bool signaling
+Apdn	|int	|nan_is_signaling|NV nv
+Apd	|void	|nan_payload_set|NN NV *nvp|NN const void *bytes|STRLEN byten|bool signaling
 : These are all indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_clearenv	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clear_all_env|NN SV* sv|NN MAGIC* mg

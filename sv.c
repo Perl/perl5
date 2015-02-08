@@ -2959,7 +2959,7 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
  * (the extraction of the hexadecimal values) takes place.
  * Sanity failures cause fatal failures during both rounds. */
 STATIC U8*
-S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
+S_hextract(const NV nv, int* exponent, U8* vhex, U8* vend)
 {
     U8* v = vhex;
     int ix;
@@ -3021,7 +3021,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     if (!Perl_isinfnan(nv)) {
         (void)Perl_frexp(PERL_ABS(nv), exponent);
         if (vend && (vend <= vhex || vend > vmaxend))
-            Perl_croak(aTHX_ "Hexadecimal float: internal error");
+            Perl_croak_nocontext("Hexadecimal float: internal error");
     }
     {
         /* First check if using long doubles. */
@@ -3229,7 +3229,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
          * for double-double. */
         ixmin < 0 || ixmax >= NVSIZE ||
         (vend && v != vend))
-        Perl_croak(aTHX_ "Hexadecimal float: internal error");
+        Perl_croak_nocontext("Hexadecimal float: internal error");
     return v;
 }
 
@@ -3284,8 +3284,8 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char format, char plus, char al
                  * byte that are not part of the payload. */
                 *hibyte &= (1 << (7 - NV_MANT_REAL_DIG % 8)) - 1;
 
-                vend = S_hextract(aTHX_ payload, &exponent, vhex, NULL);
-                S_hextract(aTHX_ payload, &exponent, vhex, vend);
+                vend = S_hextract(payload, &exponent, vhex, NULL);
+                S_hextract(payload, &exponent, vhex, vend);
 
                 v = vhex;
 
@@ -12389,8 +12389,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * should be output as 0x0.0000000000001p-1022 to
                  * match its internal structure. */
 
-                vend = S_hextract(aTHX_ nv, &exponent, vhex, NULL);
-                S_hextract(aTHX_ nv, &exponent, vhex, vend);
+                vend = S_hextract(nv, &exponent, vhex, NULL);
+                S_hextract(nv, &exponent, vhex, vend);
 
 #if NVSIZE > DOUBLESIZE
 #  ifdef HEXTRACT_HAS_IMPLICIT_BIT
