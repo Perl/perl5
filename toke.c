@@ -5753,7 +5753,6 @@ Perl_yylex(pTHX)
 	s = scan_ident(s - 1, PL_tokenbuf + 1,
 		       sizeof PL_tokenbuf - 1, TRUE);
 	if (PL_tokenbuf[1]) {
-	    PL_expect = XOPERATOR;
 	    force_ident_maybe_lex('&');
 	}
 	else
