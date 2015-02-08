@@ -5752,12 +5752,12 @@ Perl_yylex(pTHX)
 	PL_tokenbuf[0] = '&';
 	s = scan_ident(s - 1, PL_tokenbuf + 1,
 		       sizeof PL_tokenbuf - 1, TRUE);
+	pl_yylval.ival = (OPpENTERSUB_AMPER<<8);
 	if (PL_tokenbuf[1]) {
 	    force_ident_maybe_lex('&');
 	}
 	else
 	    PREREF('&');
-	pl_yylval.ival = (OPpENTERSUB_AMPER<<8);
 	TERM('&');
 
     case '|':

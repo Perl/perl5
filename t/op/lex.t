@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 16);
+plan(tests => 17);
 
 {
     no warnings 'deprecated';
@@ -129,7 +129,7 @@ fresh_perl_is(
   '* <null> ident'
 );
 SKIP: {
-    skip "Different output on EBCDIC (presumably)", 1 if ord("A") != 65;
+    skip "Different output on EBCDIC (presumably)", 2 if ord("A") != 65;
     fresh_perl_is(
       qq'"ab}"ax;&\0z\x8Ao}\x82x;', <<gibberish,
 Bareword found where operator expected at - line 1, near ""ab}"ax"
@@ -139,5 +139,15 @@ Unrecognized character \\x8A; marked by <-- HERE after ab}"ax;&\0z<-- HERE near 
 gibberish
        { stderr => 1 },
       'gibberish containing &\0z - used to crash [perl #123753]'
+    );
+    fresh_perl_is(
+      qq'"ab}"ax;&{+z}\x8Ao}\x82x;', <<gibberish,
+Bareword found where operator expected at - line 1, near ""ab}"ax"
+	(Missing operator before ax?)
+syntax error at - line 1, near ""ab}"ax"
+Unrecognized character \\x8A; marked by <-- HERE after }"ax;&{+z}<-- HERE near column 14 at - line 1.
+gibberish
+       { stderr => 1 },
+      'gibberish containing &{+z} - used to crash [perl #123753]'
     );
 }
