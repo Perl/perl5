@@ -244,7 +244,8 @@ pass "undef *_ in a re-eval does not cause a double free";
 
 # make sure regexp warnings are reported on the right line
 # (we don't care what warning */
-{
+SKIP: {
+    skip("no \\p{Unassigned} under miniperl", 1) if is_miniperl;
     use warnings;
     my $w;
     local $SIG{__WARN__} = sub { $w = "@_" };
