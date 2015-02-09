@@ -1638,6 +1638,9 @@ distcheck: FORCE
 
 .PHONY: ctags
 
+TAGS: $(c1) $(c2) $(c3) $(c4) $(c5) $(h)
+	etags $(c1) $(c2) $(c3) $(c4) $(c5) $(h)
+
 ctags:
 	ctags -f Tags -N --totals --languages=c --langmap=c:+.h --exclude=opmini.c --exclude=perlmini.c *.c *.h
 
