@@ -1616,7 +1616,9 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
         /* Don't round up on the first allocation, as odds are pretty good that
          * the initial request is accurate as to what is really needed */
         if (SvLEN(sv)) {
-            newlen = PERL_STRLEN_ROUNDUP(newlen);
+            STRLEN rounded = PERL_STRLEN_ROUNDUP(newlen);
+            if (rounded > newlen)
+                newlen = rounded;
         }
 #endif
 	if (SvLEN(sv) && s) {

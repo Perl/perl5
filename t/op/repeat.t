@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan(tests => 48);
+plan(tests => 47);
 
 # compile time
 
@@ -173,6 +173,3 @@ for(($#that_array)x2) {
     $_ *= 2;
 }
 is($#that_array, 28, 'list repetition propagates lvalue cx to its lhs');
-
-# see [perl #123554]
-ok(!eval '33x~3', "eval 33x~3 should panic, not crash perl");

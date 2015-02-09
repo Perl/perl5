@@ -128,7 +128,12 @@ Perl_safesysmalloc(MEM_SIZE size)
     dTHX;
 #endif
     Malloc_t ptr;
+
+#ifdef USE_MDH
+    if (size + PERL_MEMORY_DEBUG_HEADER_SIZE < size)
+        goto out_of_memory;
     size += PERL_MEMORY_DEBUG_HEADER_SIZE;
+#endif
 #ifdef DEBUGGING
     if ((SSize_t)size < 0)
 	Perl_croak_nocontext("panic: malloc, size=%"UVuf, (UV) size);
@@ -175,9 +180,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 
     }
     else {
-#ifndef ALWAYS_NEED_THX
-	dTHX;
-#endif
+      out_of_memory:
 	if (PL_nomemok)
 	    ptr =  NULL;
 	else
@@ -214,6 +217,8 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     else {
 #ifdef USE_MDH
 	where = (Malloc_t)((char*)where-PERL_MEMORY_DEBUG_HEADER_SIZE);
+        if (size + PERL_MEMORY_DEBUG_HEADER_SIZE < size)
+            goto out_of_memory;
 	size += PERL_MEMORY_DEBUG_HEADER_SIZE;
 	{
 	    struct perl_memory_debug_header *const header
@@ -292,9 +297,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
 	if (ptr == NULL) {
-#ifndef ALWAYS_NEED_THX
-	    dTHX;
-#endif
+          out_of_memory:
 	    if (PL_nomemok)
 		ptr = NULL;
 	    else
