@@ -488,3 +488,9 @@ print "ok $test - map{sub :lvalue...}\n"; $test++;
 
 # Used to fail an assertion [perl #123617]
 eval '"$a{ 1 m// }"; //';
+
+# Pending token stack overflow [perl #123677]
+{
+ local $SIG{__WARN__}=sub{};
+ eval q|s)$0{0h());qx(@0);qx(@0);qx(@0)|;
+}

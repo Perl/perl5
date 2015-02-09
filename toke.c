@@ -4312,13 +4312,8 @@ Perl_yylex(pTHX)
 	SvREFCNT_dec(tmp);
     } );
 
-    switch (PL_lex_state) {
-    case LEX_NORMAL:
-    case LEX_INTERPNORMAL:
-	break;
-
     /* when we've already built the next token, just pull it out of the queue */
-    case LEX_KNOWNEXT:
+    if (PL_nexttoke) {
 	PL_nexttoke--;
 	pl_yylval = PL_nextval[PL_nexttoke];
 	if (!PL_nexttoke) {
@@ -4343,6 +4338,12 @@ Perl_yylex(pTHX)
 	    }
 	    return REPORT(next_type == 'p' ? pending_ident() : next_type);
 	}
+    }
+
+    switch (PL_lex_state) {
+    case LEX_NORMAL:
+    case LEX_INTERPNORMAL:
+	break;
 
     /* interpolated case modifiers like \L \U, including \Q and \E.
        when we get here, PL_bufptr is at the \
