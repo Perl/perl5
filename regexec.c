@@ -4910,14 +4910,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
               bound_utf8:
                 switch((bound_type) FLAGS(scan)) {
                     case TRADITIONAL_BOUND:
-                ln = (locinput == reginfo->strbeg)
-                     ? isWORDCHAR_L1('\n')
-                     : isWORDCHAR_utf8(reghop3((U8*)locinput, -1,
-                                                        (U8*)(reginfo->strbeg)));
-                n = (NEXTCHR_IS_EOS)
-                    ? isWORDCHAR_L1('\n')
-                    : isWORDCHAR_utf8((U8*)locinput);
-
+                        ln = (locinput == reginfo->strbeg)
+                             ? isWORDCHAR_L1('\n')
+                             : isWORDCHAR_utf8(reghop3((U8*)locinput, -1,
+                                                                (U8*)(reginfo->strbeg)));
+                        n = (NEXTCHR_IS_EOS)
+                            ? isWORDCHAR_L1('\n')
+                            : isWORDCHAR_utf8((U8*)locinput);
                         match = ln != n;
                         break;
                     case GCB_BOUND:
@@ -4942,12 +4941,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    else {  /* Not utf8 target */
                 switch((bound_type) FLAGS(scan)) {
                     case TRADITIONAL_BOUND:
-                ln = (locinput == reginfo->strbeg)
-                    ? isWORDCHAR_L1('\n')
-                    : isWORDCHAR_L1(UCHARAT(locinput - 1));
-                n = (NEXTCHR_IS_EOS)
-                    ? isWORDCHAR_L1('\n')
-                    : isWORDCHAR_L1(nextchr);
+                        ln = (locinput == reginfo->strbeg)
+                            ? isWORDCHAR_L1('\n')
+                            : isWORDCHAR_L1(UCHARAT(locinput - 1));
+                        n = (NEXTCHR_IS_EOS)
+                            ? isWORDCHAR_L1('\n')
+                            : isWORDCHAR_L1(nextchr);
                         match = ln != n;
                         break;
 
