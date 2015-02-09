@@ -560,7 +560,7 @@ in many forms.   Case is ignored, and the Win32-specific forms like
 C<1.#INF> are understood, but on output the values are normalized to
 C<Inf> and C<NaN>.
 
-The C<NaN> has two special features of its own. Firstly, it comes in
+The C<NaN> has two special features of its own.  Firstly, it comes in
 two flavors, quiet and signaling.  What this means is depends on the
 platform.  Secondly, it may have "payload" of a number of bits.  The
 number of bits available again depends on the platform.  (Though for
