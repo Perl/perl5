@@ -692,7 +692,7 @@ Perl_nan_is_signaling(NV nv)
  * precision of 128 bits. */
 #define MAX_NV_BYTES (128/8)
 
-static const char nan_payload_error[] = "NaN payload error";
+static const char invalid_nan_payload[] = "Invalid NaN payload";
 
 /*
 
@@ -775,8 +775,8 @@ Perl_nan_payload_set(pTHX_ NV *nvp, const void *bytes, STRLEN byten, bool signal
         *hibyte &= ~mask;
     }
     if (error) {
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
-                         nan_payload_error);
+        Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
+                       invalid_nan_payload);
     }
     nan_signaling_set(nvp, signaling);
 }
@@ -917,8 +917,8 @@ Perl_grok_nan_payload(pTHX_ const char* s, const char* send, bool signaling, int
     }
 
     if (error) {
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
-                         nan_payload_error);
+        Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
+                       invalid_nan_payload);
     }
 
     if (s == send) {

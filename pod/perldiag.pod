@@ -2790,6 +2790,14 @@ where C<foo> is not a valid method resolution order (MRO).  Currently,
 the only valid ones supported are C<dfs> and C<c3>, unless you have loaded
 a module that is a MRO plugin.  See L<mro> and L<perlmroapi>.
 
+=item Invalid NaN payload
+
+(W overflow) C<Nan> (not-a-number) floating point values can carry
+payload information in addition to just being NaN.  The amount of
+information is limited, and dependent on the platform.
+Either the payload overflowed, or simply could not be parsed.
+See L<perldata/Special floating point>.
+
 =item Invalid negative number (%s) in chr
 
 (W utf8) You passed a negative number to C<chr>.  Negative numbers are
