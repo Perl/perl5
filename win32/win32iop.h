@@ -289,11 +289,11 @@ END_EXTERN_C
 #  undef abort
 #endif
 #define abort()			win32_abort()
-#ifdef UNDER_CE
+#if defined(UNDER_CE) || defined(__MINGW32__)
 #  undef fstat
 #endif
 #define fstat(fd,bufptr)   	win32_fstat(fd,bufptr)
-#ifdef UNDER_CE
+#if defined(UNDER_CE) || defined(__MINGW32__)
 #  undef stat
 #endif
 #define stat(pth,bufptr)   	win32_stat(pth,bufptr)
