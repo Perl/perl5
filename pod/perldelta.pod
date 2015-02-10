@@ -368,6 +368,8 @@ L</Modules and Pragmata> section.
 Perl can now be built in C++ mode on Windows by setting the makefile macro
 C<USE_CPLUSPLUS> to the value "define".
 
+List form pipe open no longer falls back to the shell.
+
 =back
 
 =head1 Internal Changes
