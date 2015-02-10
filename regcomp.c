@@ -10118,12 +10118,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
               parse_recursion:
                 {
                     bool is_neg = FALSE;
+                    UV unum;
                     parse_start = RExC_parse - 1; /* MJD */
                     if (*RExC_parse == '-') {
                         RExC_parse++;
                         is_neg = TRUE;
                     }
-                    num = grok_atou(RExC_parse, &endptr);
+                    unum = grok_atou(RExC_parse, &endptr);
+                    num = (unum > I32_MAX) ? I32_MAX : (I32)unum;
                     if (endptr)
 			RExC_parse = (char*)endptr;
                     if (is_neg) {

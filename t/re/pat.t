@@ -22,7 +22,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 765;  # Update this when adding/deleting tests.
+plan tests => 769;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1646,6 +1646,19 @@ EOP
 				"qr/${pat}x/ shows x in error even if it's a wide character");
 		}
 	}
+
+	{
+		# Expect one of these sizes to cause overflow and wrap to negative
+		for my $bits (32, 64) {
+			my $wrapneg = 2 ** ($bits - 2) * 3;
+			for my $sign ('', '-') {
+				my $pat = sprintf "qr/(?%s%u)/", $sign, $wrapneg;
+				eval $pat;
+				ok(1, "big backref $pat did not crash");
+			}
+		}
+	}
+
 } # End of sub run_tests
 
 1;
