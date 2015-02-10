@@ -10414,7 +10414,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
               parse_flags:
 		parse_lparen_question_flags(pRExC_state);
                 if (UCHARAT(RExC_parse) != ':') {
-                    nextchar(pRExC_state);
+                    if (*RExC_parse)
+                        nextchar(pRExC_state);
                     *flagp = TRYAGAIN;
                     return NULL;
                 }
