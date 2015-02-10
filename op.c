@@ -12891,7 +12891,8 @@ Perl_rpeep(pTHX_ OP *o)
                  * update the code accordingly. This applies to all the
                  * other ASSUMEs in the block of code too.
                  */
-                ASSUME(!(o2->op_flags & ~(OPf_WANT|OPf_MOD|OPf_SPECIAL)));
+                ASSUME(!(o2->op_flags &
+                            ~(OPf_WANT|OPf_MOD|OPf_PARENS|OPf_SPECIAL)));
                 ASSUME(!(o2->op_private & ~OPpEARLY_CV));
 
                 o2 = o2->op_next;
