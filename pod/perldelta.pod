@@ -411,6 +411,10 @@ warning is issued when something looking like a POSIX class is not
 inside a bracketed class.  That warning wasn't getting generated when
 the POSIX class was negated: C<[:^ascii:]>.  This is now fixed.
 
+=item *
+
+Fix a couple of other size calculation overflows.  [perl #123554]
+
 =back
 
 =head1 Known Problems
