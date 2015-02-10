@@ -806,8 +806,11 @@ Perl_grok_nan_payload(pTHX_ const char* s, const char* send, bool signaling, int
      * "nan0xabc", or "nan(s123)" ("s" for signaling). */
 
     while (t > s && isSPACE(*t)) t--;
+
     if (*t != ')') {
-        return send;
+        U8 bytes[1] = { 0 };
+        nan_payload_set(nvp, bytes, 1, signaling);
+        return t;
     }
 
     if (++s == send) {
