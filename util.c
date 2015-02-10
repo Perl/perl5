@@ -180,11 +180,18 @@ Perl_safesysmalloc(MEM_SIZE size)
 
     }
     else {
+#ifdef USE_MDH
       out_of_memory:
-	if (PL_nomemok)
-	    ptr =  NULL;
-	else
-	    croak_no_mem();
+#endif
+        {
+#ifndef ALWAYS_NEED_THX
+            dTHX;
+#endif
+            if (PL_nomemok)
+                ptr =  NULL;
+            else
+                croak_no_mem();
+        }
     }
     return ptr;
 }
@@ -297,11 +304,18 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
 	if (ptr == NULL) {
+#ifdef USE_MDH
           out_of_memory:
-	    if (PL_nomemok)
-		ptr = NULL;
-	    else
-		croak_no_mem();
+#endif
+            {
+#ifndef ALWAYS_NEED_THX
+                dTHX;
+#endif
+                if (PL_nomemok)
+                    ptr = NULL;
+                else
+                    croak_no_mem();
+            }
 	}
     }
     return ptr;
