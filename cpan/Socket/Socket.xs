@@ -95,7 +95,7 @@ NETINET_DEFINE_CONTEXT
 #endif /* !Newx */
 
 #ifndef croak_sv
-# define croak_sv(sv)	croak(SvPV_nolen(sv))
+# define croak_sv(sv)	croak(SvPVx_nolen(sv))
 #endif
 
 #ifndef hv_stores
@@ -530,6 +530,7 @@ static void xs_getnameinfo(pTHX_ CV *cv)
 	SP -= items;
 
 	addr = ST(0);
+	SvGETMAGIC(addr);
 
 	if(items < 2)
 		flags = 0;
@@ -635,10 +636,10 @@ inet_ntoa(ip_address_sv)
 	 * so let's use this sprintf() workaround everywhere.
 	 * This is also more threadsafe than using inet_ntoa(). */
 	ST(0) = sv_2mortal(Perl_newSVpvf(aTHX_ "%d.%d.%d.%d", /* IPv6? */
-					 ((addr.s_addr >> 24) & 0xFF),
-					 ((addr.s_addr >> 16) & 0xFF),
-					 ((addr.s_addr >>  8) & 0xFF),
-					 ( addr.s_addr        & 0xFF)));
+					 (int)((addr.s_addr >> 24) & 0xFF),
+					 (int)((addr.s_addr >> 16) & 0xFF),
+					 (int)((addr.s_addr >>  8) & 0xFF),
+					 (int)( addr.s_addr        & 0xFF)));
 	}
 
 void
@@ -793,10 +794,10 @@ pack_sockaddr_in(port, ip_address_sv)
 	ip_address = SvPVbyte(ip_address_sv, addrlen);
 	if (addrlen == sizeof(addr) || addrlen == 4)
 		addr.s_addr =
-		    (ip_address[0] & 0xFF) << 24 |
-		    (ip_address[1] & 0xFF) << 16 |
-		    (ip_address[2] & 0xFF) <<  8 |
-		    (ip_address[3] & 0xFF);
+		    (unsigned int)(ip_address[0] & 0xFF) << 24 |
+		    (unsigned int)(ip_address[1] & 0xFF) << 16 |
+		    (unsigned int)(ip_address[2] & 0xFF) <<  8 |
+		    (unsigned int)(ip_address[3] & 0xFF);
 	else
 		croak("Bad arg length for %s, length is %"UVuf", should be %"UVuf,
 		      "Socket::pack_sockaddr_in",
@@ -876,6 +877,8 @@ pack_sockaddr_in6(port, sin6_addr, scope_id=0, flowinfo=0)
 #  endif
 	ST(0) = sv_2mortal(newSVpvn((char *)&sin6, sizeof(sin6)));
 #else
+	PERL_UNUSED_VAR(port);
+	PERL_UNUSED_VAR(sin6_addr);
 	ST(0) = (SV*)not_here("pack_sockaddr_in6");
 #endif
 	}
@@ -914,6 +917,7 @@ unpack_sockaddr_in6(sin6_sv)
 	    mPUSHs(ip_address_sv);
 	}
 #else
+	PERL_UNUSED_VAR(sin6_sv);
 	ST(0) = (SV*)not_here("pack_sockaddr_in6");
 #endif
 	}
@@ -973,6 +977,8 @@ inet_ntop(af, ip_address_sv)
 
 	ST(0) = sv_2mortal(newSVpvn(str, strlen(str)));
 #else
+	PERL_UNUSED_VAR(af);
+	PERL_UNUSED_VAR(ip_address_sv);
 	ST(0) = (SV*)not_here("inet_ntop");
 #endif
 
@@ -1015,6 +1021,8 @@ inet_pton(af, host)
 		sv_setpvn( ST(0), (char *)&ip_address, addrlen);
 	}
 #else
+	PERL_UNUSED_VAR(af);
+	PERL_UNUSED_VAR(host);
 	ST(0) = (SV*)not_here("inet_pton");
 #endif
 
@@ -1116,6 +1124,8 @@ pack_ip_mreq_source(multiaddr, source, interface=&PL_sv_undef)
 		mreq.imr_interface.s_addr = INADDR_ANY;
 	ST(0) = sv_2mortal(newSVpvn((char *)&mreq, sizeof(mreq)));
 #else
+	PERL_UNUSED_VAR(multiaddr);
+	PERL_UNUSED_VAR(source);
 	not_here("pack_ip_mreq_source");
 #endif
 	}
@@ -1138,6 +1148,7 @@ unpack_ip_mreq_source(mreq_sv)
 	mPUSHp((char *)&mreq.imr_sourceaddr, sizeof(mreq.imr_sourceaddr));
 	mPUSHp((char *)&mreq.imr_interface, sizeof(mreq.imr_interface));
 #else
+	PERL_UNUSED_VAR(mreq_sv);
 	not_here("unpack_ip_mreq_source");
 #endif
 	}
@@ -1163,6 +1174,8 @@ pack_ipv6_mreq(multiaddr, ifindex)
 	mreq.ipv6mr_interface = ifindex;
 	ST(0) = sv_2mortal(newSVpvn((char *)&mreq, sizeof(mreq)));
 #else
+	PERL_UNUSED_VAR(multiaddr);
+	PERL_UNUSED_VAR(ifindex);
 	not_here("pack_ipv6_mreq");
 #endif
 	}
@@ -1184,6 +1197,7 @@ unpack_ipv6_mreq(mreq_sv)
 	mPUSHp((char *)&mreq.ipv6mr_multiaddr, sizeof(mreq.ipv6mr_multiaddr));
 	mPUSHi(mreq.ipv6mr_interface);
 #else
+	PERL_UNUSED_VAR(mreq_sv);
 	not_here("unpack_ipv6_mreq");
 #endif
 	}

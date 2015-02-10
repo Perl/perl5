@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 13;
 
 use Socket qw(:addrinfo AF_INET pack_sockaddr_in inet_aton);
 
@@ -32,3 +32,8 @@ ok( length $host, '$host is nonzero length for NS' );
 cmp_ok( $err, "==", 0, '$err == 0 for {family=AF_INET,port=80,sinaddr=127.0.0.1}/NI_NUMERICHOST' );
 
 ok( length $service, '$service is nonzero length for NH' );
+
+# RT79557
+pack_sockaddr_in( 80, inet_aton( "127.0.0.1" ) ) =~ m/^(.*)$/s;
+( $err, $host, $service ) = getnameinfo( $1, NI_NUMERICHOST|NI_NUMERICSERV );
+cmp_ok( $err, "==", 0, '$err == 0 for $1' ) or diag( '$err was: ' . $err );
