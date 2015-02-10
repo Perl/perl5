@@ -121,12 +121,12 @@ for my $cmds (@commands) {
 	$^D = 0;
 
 	note "# pipe [".join(";", @cmds, @args). "]";
-	if (open my $io, "|-", @cmds, @args) {
+	if (open my $io, "-|", @cmds, @args) {
 	    print <$io>;
 	    close $io;
 	}
 	else {
-	    print "Failed pipe open: $!\n";
+	    print STDERR "Failed pipe open [",join(";", @cmds, @args),"]: $!\n";
 	}
     }
 }

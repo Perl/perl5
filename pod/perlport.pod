@@ -1874,9 +1874,6 @@ Not implemented. (Android, Win32, VMS, S<Plan 9>, S<RISC OS>, VOS)
 
 open to C<|-> and C<-|> are unsupported. (Win32, S<RISC OS>)
 
-List-form pipe opens may fall back to the shell if the first spawn()
-fails. (Win32)
-
 Opening a process does not automatically flush output handles on some
 platforms.  (SunOS, Solaris, HP-UX)
 
