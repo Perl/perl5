@@ -347,14 +347,8 @@ is eval { unpack "p", pack 'p', $NaN }, "NaN", "pack p +NaN";
 is eval { unpack "P3", pack 'P', $NaN }, "NaN", "pack P +NaN";
 
 for my $i (@NaN) {
-    if (($i =~ /snan/i || $i =~ /nans/i) &&
-        (($i + 0) eq $PInf || ($i + 0 eq $NInf))) {
-        # Crazy but apparently true: signaling nan with zero payload
-        # can be Inf or -Inf on some platforms (like x86).
-    } else {
-        cmp_ok($i + 0, '!=', $i + 0, "$i is NaN numerically (by not being NaN)");
-        is("@{[$i+0]}", "NaN", "$i value stringifies as NaN");
-    }
+    cmp_ok($i + 0, '!=', $i + 0, "$i is NaN numerically (by not being NaN)");
+    is("@{[$i+0]}", "NaN", "$i value stringifies as NaN");
 }
 
 ok(!($NaN <  0), "NaN is not lt zero");
@@ -481,31 +475,17 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
          [ "nan",          0, $NaN ],
          [ "nanxy",        1, $NaN ],
          [ "nan34",        1, $NaN ],
-         [ "nan0x34",      1, $NaN ],
-         [ "nan 34",       1, $NaN ],
-         [ "nan 0x34",     1, $NaN ],
          [ "nanq",         0, $NaN ],
-         # [ "nans",         0, $NaN, $PInf ], # Odd but valid.
+         [ "nans",         0, $NaN ],
          [ "nanx",         1, $NaN ],
          [ "nanqy",        1, $NaN ],
-         [ "nanxy",        1, $NaN ],
          [ "nan(123)",     0, $NaN ],
-         [ "nan(123)xy",   1, $NaN ],
          [ "nan(0x123)",   0, $NaN ],
          [ "nan(123xy)",   1, $NaN ],
-         [ "nan(123x)y",   1, $NaN ],
-         [ "nan(1)(2)",    1, $NaN ],
-         [ "nan(1xy2)",    1, $NaN ],
-         [ "nan(1)x(2)",   1, $NaN ],
-         [ "nan(1)x(2)",   1, $NaN ],
-         [ "nan(1)x(2)y",  1, $NaN ],
          [ "nan(0x123xy)", 1, $NaN ],
          [ "nanq(123)",    0, $NaN ],
-         [ "nanx(123)",    1, $NaN ],
-         [ "nanx(123)y",   1, $NaN ],
-         [ "nanx(123y)",   1, $NaN ],
-         [ "nanx(123y)z",  1, $NaN ],
          [ "nan(123",      1, $NaN ],
+         [ "nan(",         1, $NaN ],
          [ "1.#NANQ",      0, $NaN ],
          [ "1.#QNAN",      0, $NaN ],
          [ "1.#NANQx",     1, $NaN ],
@@ -516,7 +496,6 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
          [ " nan",         0, $NaN ],
          [ "nan ",         0, $NaN ],
          [ " nan ",        0, $NaN ],
-         [ " nan(123) ",   0, $NaN ],
         ];
 
     for my $t (@$T) {
@@ -527,7 +506,7 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
         is("$a", "$t->[2]", "$t->[0] plus one is $t->[2]");
         if ($t->[1]) {
             like($w, qr/^Argument \Q"$t->[0]"\E isn't numeric/,
-                 "'$t->[2]' numify warn");
+                 "$t->[2] numify warn");
         } else {
             is($w, "", "no warning expected");
         }
@@ -539,105 +518,11 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
         is("$b", "$t->[2]", "$n plus one is $t->[2]");
         if ($t->[1]) {
             like($w, qr/^Argument \Q"$n"\E isn't numeric/,
-                 "'$n' numify warn");
+                 "$n numify warn");
         } else {
             is($w, "", "no warning expected");
         }
     }
-}
-
-# === NaN quiet/signaling/payload ===
-
-# The '#' or 'the alt' of printf knows how to prettyprint NaN payloads.
-
-SKIP: {
-    # Test only on certain known platforms since the features
-    # are not that well standardized.
-    unless (
-        ((
-          $^O eq 'linux'
-          ||
-          $^O eq 'darwin' # OS X
-          ||
-          $^O eq 'freebsd'
-         )
-         &&
-        (
-         (
-          $Config{nvsize} == 8 && # double
-          $Config{doublekind} == 3 # IEEE double little-endian (x86)
-         )
-         ||
-         (
-          $Config{uselongdouble} &&
-          $Config{nvsize} == 16 && # long double
-          $Config{longdblkind} == 3 # x86 80-bit extended precision
-         )
-        ))
-        ||
-        ($^O eq 'solaris' &&
-         $Config{nvsize} == 8 && # double
-         ($Config{uvsize} == 4 # 32-bit
-          ||
-          $Config{uvsize} == 8 # 64-bit (-Duse64bitint)
-         ) &&
-         $Config{doublesize} == 8 &&
-         $Config{doublekind} == 4 # IEEE double big-endian (sparc)
-        )
-        ||
-        ($^O eq 'hpux' &&
-         $Config{nvsize} == 8 && # double
-         $Config{uvsize} == 4 && # 32-bit
-         $Config{doublesize} == 8 &&
-         $Config{doublekind} == 4 # IEEE double big-endian (hppa)
-         )
-        ||
-        ($^O eq 'dec_osf' && # Digital UNIX aka Tru64
-         $Config{nvsize} == 8 && # double
-         $Config{uvsize} == 8 && # 32-bit
-         $Config{doublesize} == 8 &&
-         $Config{doublekind} == 3 # IEEE double little-endian (alpha)
-         )
-        ) {
-        my ($uselongdouble, $longdblsize, $longdblkind) =
-            $Config{uselongdouble} ?
-            ($Config{uselongdouble},
-             $Config{longdblsize},
-             $Config{longdblkind}) :
-            ('undef', 'undef', 'undef');
-        skip("skipping NaN specials testing on os=$^O, uvsize=$Config{uvsize}, nvsize=$Config{nvsize}, doublesize=$Config{doublesize}, doublekind=$Config{doublekind}, uselongdouble=$uselongdouble, longdblsize=$longdblsize, longdblkind=$longdblkind", 16);
-    }
-
-    is(sprintf("%#g", $NaN), "NaN(0x0)", "sprintf %#g");
-    is(sprintf("%#g", "nan"), "NaN(0x0)");
-    is(sprintf("%#g", "nanq"), "NaN(0x0)");
-    is(sprintf("%#g", "qnan"), "NaN(0x0)");
-
-    # This weirdness brought to you courtesy of asymmetry in the IEEE spec.
-    # In x86 style nans, nans(0) is equal to infinity or -infinity.
-    # In mips/hppa style, nans(0) is nans(0).
-    like(sprintf("%#g", "nans"), qr/^(?:-?Inf|NaNs\(0x0\))$/);
-    like(sprintf("%#g", "snan"), qr/^(?:-?Inf|NaNs\(0x0\))$/);
-
-    is(sprintf("%#g", "nan(12345)"), "NaN(0x3039)");
-    is(sprintf("%#g", "nan(0b101101)"), "NaN(0x2d)");
-    is(sprintf("%#g", "nan(0x12345)"), "NaN(0x12345)");
-    is(sprintf("%#g", "nanq(0x123EF)"), "NaN(0x123ef)");
-    is(sprintf("%#g", "nans(0x12345)"), "NaNs(0x12345)");
-    is(sprintf("%#g", "snan(0x12345)"), "NaNs(0x12345)");
-
-    is(sprintf("%#G", "nanq(0x123ef)"), "NaN(0X123EF)");
-
-  SKIP: {
-      if (ord('A') == 65) { # ASCII
-          is(sprintf("%#g", "nan('obot')"), "NaN(0x6f626f74)", "nanobot");
-      } elsif (ord('A') == 193) { # EBCDIC
-          is(sprintf("%#g", "nan('obot')"), "NaN(0x968296a3)", "nanobot");
-      } else {
-          skip "unknown encoding", 1;
-    }
-}
-
 }
 
 done_testing();

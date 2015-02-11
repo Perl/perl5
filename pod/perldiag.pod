@@ -3531,26 +3531,6 @@ but also uses any of the others it will not trigger this warning.
 Symbols beginning with an underscore and symbols using special
 identifiers (q.v. L<perldata>) are exempt from this warning.
 
-=item NaN payload overflowed %d bits
-
-(W overflow) C<Nan> (not-a-number) floating point values can carry
-payload information in addition to just being NaN.  The amount of
-information is limited, and dependent on the platform.
-See L<perldata/Special floating point>.
-
-=item NaN payload "%s" overflowed %d bits
-
-(W overflow) C<Nan> (not-a-number) floating point values can carry
-payload information in addition to just being NaN.  The amount of
-information is limited, and dependent on the platform.
-See L<perldata/Special floating point>.
-
-=item NaN payload "%s" invalid
-
-(W digit) C<Nan> (not-a-number) floating point values can carry
-payload information in addition to just being NaN.  The payload
-could not be parsed.  See L<perldata/Special floating point>.
-
 =item Need exactly 3 octal digits in regex; marked by S<<-- HERE> in m/%s/
 
 (F) Within S<C<(?[   ])>>, all constants interpreted as octal need to be

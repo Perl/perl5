@@ -1359,34 +1359,15 @@ PERL_CALLCONV UV	Perl_grok_hex(pTHX_ const char* start, STRLEN* len_p, I32* flag
 #define PERL_ARGS_ASSERT_GROK_HEX	\
 	assert(start); assert(len_p); assert(flags)
 
-PERL_CALLCONV int	Perl_grok_infnan(pTHX_ const char** sp, const char *send, NV *nvp)
+PERL_CALLCONV int	Perl_grok_infnan(pTHX_ const char** sp, const char *send)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GROK_INFNAN	\
 	assert(sp); assert(send)
 
-PERL_CALLCONV const char *	Perl_grok_nan(pTHX_ const char* s, const char *send, int *flags, NV *nvp, SV* svp)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_GROK_NAN	\
-	assert(s); assert(send); assert(flags)
-
-PERL_CALLCONV const char *	Perl_grok_nan_payload(pTHX_ const char* s, const char *send, bool signaling, int *flags, NV *nvp, SV *svp)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_4);
-#define PERL_ARGS_ASSERT_GROK_NAN_PAYLOAD	\
-	assert(s); assert(send); assert(flags)
-
 PERL_CALLCONV int	Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GROK_NUMBER	\
-	assert(pv)
-
-PERL_CALLCONV int	Perl_grok_number2_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, NV* nvp, U32 flags)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GROK_NUMBER2_FLAGS	\
 	assert(pv)
 
 PERL_CALLCONV int	Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
@@ -2856,24 +2837,6 @@ PERL_CALLCONV int	Perl_my_vsnprintf(char *buffer, const Size_t len, const char *
 			__attribute__nonnull__(3);
 #define PERL_ARGS_ASSERT_MY_VSNPRINTF	\
 	assert(buffer); assert(format)
-
-PERL_CALLCONV U8*	Perl_nan_hibyte(NV *nvp, U8* mask)
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(2);
-#define PERL_ARGS_ASSERT_NAN_HIBYTE	\
-	assert(nvp); assert(mask)
-
-PERL_CALLCONV int	Perl_nan_is_signaling(NV nv);
-PERL_CALLCONV void	Perl_nan_payload_set(pTHX_ NV *nvp, SV *svp, const void *bytes, STRLEN byten, bool signaling)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_NAN_PAYLOAD_SET	\
-	assert(nvp); assert(bytes)
-
-PERL_CALLCONV void	Perl_nan_signaling_set(pTHX_ NV *nvp, bool signaling)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_NAN_SIGNALING_SET	\
-	assert(nvp)
 
 PERL_CALLCONV OP*	Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block);
 PERL_CALLCONV OP*	Perl_newANONHASH(pTHX_ OP* o)

@@ -2114,7 +2114,7 @@ S_sv_2iuv_non_preserve(pTHX_ SV *const sv
 #  pragma warning(disable:4756;disable:4056)
 #endif
 static void
-S_sv_setnv(pTHX_ SV* sv, int numtype, NV nanv)
+S_sv_setnv(pTHX_ SV* sv, int numtype)
 {
     bool pok = cBOOL(SvPOK(sv));
     bool nok = FALSE;
@@ -2123,7 +2123,7 @@ S_sv_setnv(pTHX_ SV* sv, int numtype, NV nanv)
         nok = TRUE;
     }
     else if ((numtype & IS_NUMBER_NAN)) {
-        SvNV_set(sv, nanv);
+        SvNV_set(sv, NV_NAN);
         nok = TRUE;
     }
     else if (pok) {
@@ -2236,8 +2236,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
     }
     else if (SvPOKp(sv)) {
 	UV value;
-        NV nanv;
-	const int numtype = grok_number2_flags(SvPVX_const(sv), SvCUR(sv), &value, &nanv, 0);
+	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
 	/* We want to avoid a possible problem when we cache an IV/ a UV which
 	   may be later translated to an NV, and the resulting NV is not
 	   the same as the direct translation of the initial string
@@ -2263,7 +2262,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
         if ((numtype & (IS_NUMBER_INFINITY | IS_NUMBER_NAN))) {
             if (ckWARN(WARN_NUMERIC) && ((numtype & IS_NUMBER_TRAILING)))
 		not_a_number(sv);
-            S_sv_setnv(aTHX_ sv, numtype, nanv);
+            S_sv_setnv(aTHX_ sv, numtype);
             return FALSE;
         }
 
@@ -2313,7 +2312,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	    != IS_NUMBER_IN_UV) {
 	    /* It wasn't an (integer that doesn't overflow the UV). */
-            S_sv_setnv(aTHX_ sv, numtype, nanv);
+            S_sv_setnv(aTHX_ sv, numtype);
 
 	    if (! numtype && ckWARN(WARN_NUMERIC))
 		not_a_number(sv);
@@ -2719,8 +2718,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
     }
     else if (SvPOKp(sv)) {
 	UV value;
-        NV nanv;
-	const int numtype = grok_number2_flags(SvPVX_const(sv), SvCUR(sv), &value, &nanv, 0);
+	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
 	if (!SvIOKp(sv) && !numtype && ckWARN(WARN_NUMERIC))
 	    not_a_number(sv);
 #ifdef NV_PRESERVES_UV
@@ -2729,7 +2727,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	    /* It's definitely an integer */
 	    SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -(NV)value : (NV)value);
 	} else {
-            S_sv_setnv(aTHX_ sv, numtype, nanv);
+            S_sv_setnv(aTHX_ sv, numtype);
         }
 	if (numtype)
 	    SvNOK_on(sv);
@@ -2897,351 +2895,17 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
     return ptr;
 }
 
-#ifdef LONGDOUBLE_DOUBLEDOUBLE
-/* The first double can be as large as 2**1023, or '1' x '0' x 1023.
- * The second double can be as small as 2**-1074, or '0' x 1073 . '1'.
- * The sum of them can be '1' . '0' x 2096 . '1', with implied radix point
- * after the first 1023 zero bits.
- *
- * XXX The 2098 is quite large (262.25 bytes) and therefore some sort
- * of dynamically growing buffer might be better, start at just 16 bytes
- * (for example) and grow only when necessary.  Or maybe just by looking
- * at the exponents of the two doubles? */
-#  define DOUBLEDOUBLE_MAXBITS 2098
-#endif
-
-/* vhex will contain the values (0..15) of the hex digits ("nybbles"
- * of 4 bits); 1 for the implicit 1, and the mantissa bits, four bits
- * per xdigit.  For the double-double case, this can be rather many.
- * The non-double-double-long-double overshoots since all bits of NV
- * are not mantissa bits, there are also exponent bits. */
-#ifdef LONGDOUBLE_DOUBLEDOUBLE
-#  define VHEX_SIZE (1+DOUBLEDOUBLE_MAXBITS/4)
-#else
-#  define VHEX_SIZE (1+(NVSIZE * 8)/4)
-#endif
-
-/* If we do not have a known long double format, (including not using
- * long doubles, or long doubles being equal to doubles) then we will
- * fall back to the ldexp/frexp route, with which we can retrieve at
- * most as many bits as our widest unsigned integer type is.  We try
- * to get a 64-bit unsigned integer even if we are not using a 64-bit UV.
- *
- * (If you want to test the case of UVSIZE == 4, NVSIZE == 8,
- *  set the MANTISSATYPE to int and the MANTISSASIZE to 4.)
- */
-#if defined(HAS_QUAD) && defined(Uquad_t)
-#  define MANTISSATYPE Uquad_t
-#  define MANTISSASIZE 8
-#else
-#  define MANTISSATYPE UV
-#  define MANTISSASIZE UVSIZE
-#endif
-
-#if defined(DOUBLE_LITTLE_ENDIAN) || defined(LONGDOUBLE_LITTLE_ENDIAN)
-#  define HEXTRACT_LITTLE_ENDIAN
-#elif defined(DOUBLE_BIG_ENDIAN) || defined(LONGDOUBLE_BIG_ENDIAN)
-#  define HEXTRACT_BIG_ENDIAN
-#else
-#  define HEXTRACT_MIX_ENDIAN
-#endif
-
-/* S_hextract() is a helper for Perl_sv_vcatpvfn_flags, for extracting
- * the hexadecimal values (for %a/%A).  The nv is the NV where the value
- * are being extracted from (either directly from the long double in-memory
- * presentation, or from the uquad computed via frexp+ldexp).  frexp also
- * is used to update the exponent.  vhex is the pointer to the beginning
- * of the output buffer (of VHEX_SIZE).
- *
- * The tricky part is that S_hextract() needs to be called twice:
- * the first time with vend as NULL, and the second time with vend as
- * the pointer returned by the first call.  What happens is that on
- * the first round the output size is computed, and the intended
- * extraction sanity checked.  On the second round the actual output
- * (the extraction of the hexadecimal values) takes place.
- * Sanity failures cause fatal failures during both rounds. */
-STATIC U8*
-S_hextract(const NV nv, int* exponent, U8* vhex, U8* vend)
-{
-    U8* v = vhex;
-    int ix;
-    int ixmin = 0, ixmax = 0;
-
-    /* XXX Inf/NaN/denormal handling in the HEXTRACT_IMPLICIT_BIT,
-     * and elsewhere. */
-
-    /* These macros are just to reduce typos, they have multiple
-     * repetitions below, but usually only one (or sometimes two)
-     * of them is really being used. */
-    /* HEXTRACT_OUTPUT() extracts the high nybble first. */
-#define HEXTRACT_OUTPUT_HI(ix) (*v++ = nvp[ix] >> 4)
-#define HEXTRACT_OUTPUT_LO(ix) (*v++ = nvp[ix] & 0xF)
-#define HEXTRACT_OUTPUT(ix) \
-    STMT_START { \
-      HEXTRACT_OUTPUT_HI(ix); HEXTRACT_OUTPUT_LO(ix); \
-   } STMT_END
-#define HEXTRACT_COUNT(ix, c) \
-    STMT_START { \
-      v += c; if (ix < ixmin) ixmin = ix; else if (ix > ixmax) ixmax = ix; \
-   } STMT_END
-#define HEXTRACT_BYTE(ix) \
-    STMT_START { \
-      if (vend) HEXTRACT_OUTPUT(ix); else HEXTRACT_COUNT(ix, 2); \
-   } STMT_END
-#define HEXTRACT_LO_NYBBLE(ix) \
-    STMT_START { \
-      if (vend) HEXTRACT_OUTPUT_LO(ix); else HEXTRACT_COUNT(ix, 1); \
-   } STMT_END
-    /* HEXTRACT_TOP_NYBBLE is just convenience disguise,
-     * to make it look less odd when the top bits of a NV
-     * are extracted using HEXTRACT_LO_NYBBLE: the highest
-     * order bits can be in the "low nybble" of a byte. */
-#define HEXTRACT_TOP_NYBBLE(ix) HEXTRACT_LO_NYBBLE(ix)
-#define HEXTRACT_BYTES_LE(a, b) \
-    for (ix = a; ix >= b; ix--) { HEXTRACT_BYTE(ix); }
-#define HEXTRACT_BYTES_BE(a, b) \
-    for (ix = a; ix <= b; ix++) { HEXTRACT_BYTE(ix); }
-#define HEXTRACT_IMPLICIT_BIT(nv) \
-    STMT_START { \
-        if (vend) *v++ = ((nv) == 0.0) ? 0 : 1; else v++; \
-   } STMT_END
-
-/* Most formats do.  Those which don't should undef this. */
-#define HEXTRACT_HAS_IMPLICIT_BIT
-/* Many formats do.  Those which don't should undef this. */
-#define HEXTRACT_HAS_TOP_NYBBLE
-
-    /* HEXTRACTSIZE is the maximum number of xdigits. */
-#if defined(USE_LONG_DOUBLE) && defined(LONGDOUBLE_DOUBLEDOUBLE)
-#  define HEXTRACTSIZE (DOUBLEDOUBLE_MAXBITS/4)
-#else
-#  define HEXTRACTSIZE 2 * NVSIZE
-#endif
-
-    const U8* vmaxend = vhex + HEXTRACTSIZE;
-    PERL_UNUSED_VAR(ix); /* might happen */
-    if (!Perl_isinfnan(nv)) {
-        (void)Perl_frexp(PERL_ABS(nv), exponent);
-        if (vend && (vend <= vhex || vend > vmaxend))
-            Perl_croak_nocontext("Hexadecimal float: internal error");
-    }
-    {
-        /* First check if using long doubles. */
-#if defined(USE_LONG_DOUBLE) && (NVSIZE > DOUBLESIZE)
-#  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
-        /* Used in e.g. VMS and HP-UX IA-64, e.g. -0.1L:
-         * 9a 99 99 99 99 99 99 99 99 99 99 99 99 99 fb 3f */
-        /* The bytes 13..0 are the mantissa/fraction,
-         * the 15,14 are the sign+exponent. */
-        const U8* nvp = (const U8*)(&nv);
-        HEXTRACT_IMPLICIT_BIT(nv);
-#   undef HEXTRACT_HAS_TOP_NYBBLE
-        HEXTRACT_BYTES_LE(13, 0);
-#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
-        /* Used in e.g. Solaris Sparc and HP-UX PA-RISC, e.g. -0.1L:
-         * bf fb 99 99 99 99 99 99 99 99 99 99 99 99 99 9a */
-        /* The bytes 2..15 are the mantissa/fraction,
-         * the 0,1 are the sign+exponent. */
-        const U8* nvp = (const U8*)(&nv);
-        HEXTRACT_IMPLICIT_BIT(nv);
-#   undef HEXTRACT_HAS_TOP_NYBBLE
-        HEXTRACT_BYTES_BE(2, 15);
-#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
-        /* x86 80-bit "extended precision", 64 bits of mantissa / fraction /
-         * significand, 15 bits of exponent, 1 bit of sign.  NVSIZE can
-         * be either 12 (ILP32, Solaris x86) or 16 (LP64, Linux and OS X),
-         * meaning that 2 or 6 bytes are empty padding. */
-        /* The bytes 7..0 are the mantissa/fraction */
-        const U8* nvp = (const U8*)(&nv);
-#    undef HEXTRACT_HAS_IMPLICIT_BIT
-#    undef HEXTRACT_HAS_TOP_NYBBLE
-        HEXTRACT_BYTES_LE(7, 0);
-#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
-        /* Does this format ever happen? (Wikipedia says the Motorola
-         * 6888x math coprocessors used format _like_ this but padded
-         * to 96 bits with 16 unused bits between the exponent and the
-         * mantissa.) */
-        const U8* nvp = (const U8*)(&nv);
-#    undef HEXTRACT_HAS_IMPLICIT_BIT
-#    undef HEXTRACT_HAS_TOP_NYBBLE
-        HEXTRACT_BYTES_BE(0, 7);
-#  else
-#    define HEXTRACT_FALLBACK
-        /* Double-double format: two doubles next to each other.
-         * The first double is the high-order one, exactly like
-         * it would be for a "lone" double.  The second double
-         * is shifted down using the exponent so that that there
-         * are no common bits.  The tricky part is that the value
-         * of the double-double is the SUM of the two doubles and
-         * the second one can be also NEGATIVE.
-         *
-         * Because of this tricky construction the bytewise extraction we
-         * use for the other long double formats doesn't work, we must
-         * extract the values bit by bit.
-         *
-         * The little-endian double-double is used .. somewhere?
-         *
-         * The big endian double-double is used in e.g. PPC/Power (AIX)
-         * and MIPS (SGI).
-         *
-         * The mantissa bits are in two separate stretches, e.g. for -0.1L:
-         * 9a 99 99 99 99 99 59 bc 9a 99 99 99 99 99 b9 3f (LE)
-         * 3f b9 99 99 99 99 99 9a bc 59 99 99 99 99 99 9a (BE)
-         */
-#  endif
-#else /* #if defined(USE_LONG_DOUBLE) && (NVSIZE > DOUBLESIZE) */
-        /* Using normal doubles, not long doubles.
-         *
-         * We generate 4-bit xdigits (nybble/nibble) instead of 8-bit
-         * bytes, since we might need to handle printf precision, and
-         * also need to insert the radix. */
-#  if NVSIZE == 8
-#    ifdef HEXTRACT_LITTLE_ENDIAN
-        /* 0 1 2 3 4 5 6 7 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
-        const U8* nvp = (const U8*)(&nv);
-        HEXTRACT_IMPLICIT_BIT(nv);
-        HEXTRACT_TOP_NYBBLE(6);
-        HEXTRACT_BYTES_LE(5, 0);
-#    elif defined(HEXTRACT_BIG_ENDIAN)
-        /* 7 6 5 4 3 2 1 0 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
-        const U8* nvp = (const U8*)(&nv);
-        HEXTRACT_IMPLICIT_BIT(nv);
-        HEXTRACT_TOP_NYBBLE(1);
-        HEXTRACT_BYTES_BE(2, 7);
-#    elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
-        /* 4 5 6 7 0 1 2 3 (MSB = 7, LSB = 0, 6:7 = nybble:exponent:sign) */
-        const U8* nvp = (const U8*)(&nv);
-        HEXTRACT_IMPLICIT_BIT(nv);
-        HEXTRACT_TOP_NYBBLE(2); /* 6 */
-        HEXTRACT_BYTE(1); /* 5 */
-        HEXTRACT_BYTE(0); /* 4 */
-        HEXTRACT_BYTE(7); /* 3 */
-        HEXTRACT_BYTE(6); /* 2 */
-        HEXTRACT_BYTE(5); /* 1 */
-        HEXTRACT_BYTE(4); /* 0 */
-#    elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
-        /* 3 2 1 0 7 6 5 4 (MSB = 7, LSB = 0, 7:6 = sign:exponent:nybble) */
-        const U8* nvp = (const U8*)(&nv);
-        HEXTRACT_IMPLICIT_BIT(nv);
-        HEXTRACT_TOP_NYBBLE(5); /* 6 */
-        HEXTRACT_BYTE(6); /* 5 */
-        HEXTRACT_BYTE(7); /* 4 */
-        HEXTRACT_BYTE(0); /* 3 */
-        HEXTRACT_BYTE(1); /* 2 */
-        HEXTRACT_BYTE(2); /* 1 */
-        HEXTRACT_BYTE(3); /* 0 */
-#    else
-#      define HEXTRACT_FALLBACK
-#    endif
-#  else
-#    define HEXTRACT_FALLBACK
-#  endif
-#endif /* #if defined(USE_LONG_DOUBLE) && (NVSIZE > DOUBLESIZE) #else */
-#  ifdef HEXTRACT_FALLBACK
-#    undef HEXTRACT_HAS_TOP_NYBBLE /* Meaningless, but consistent. */
-        /* The fallback is used for the double-double format, and
-         * for unknown long double formats, and for unknown double
-         * formats, or in general unknown NV formats. */
-        if (nv == (NV)0.0) {
-            if (vend)
-                *v++ = 0;
-            else
-                v++;
-            *exponent = 0;
-        }
-        else {
-            NV d = nv < 0 ? -nv : nv;
-            NV e = (NV)1.0;
-            U8 ha = 0x0; /* hexvalue accumulator */
-            U8 hd = 0x8; /* hexvalue digit */
-
-            /* Shift d and e (and update exponent) so that e <= d < 2*e,
-             * this is essentially manual frexp(). Multiplying by 0.5 and
-             * doubling should be lossless in binary floating point. */
-
-            *exponent = 1;
-
-            while (e > d) {
-                e *= (NV)0.5;
-                (*exponent)--;
-            }
-            /* Now d >= e */
-
-            while (d >= e + e) {
-                e += e;
-                (*exponent)++;
-            }
-            /* Now e <= d < 2*e */
-
-            /* First extract the leading hexdigit (the implicit bit). */
-            if (d >= e) {
-                d -= e;
-                if (vend)
-                    *v++ = 1;
-                else
-                    v++;
-            }
-            else {
-                if (vend)
-                    *v++ = 0;
-                else
-                    v++;
-            }
-            e *= (NV)0.5;
-
-            /* Then extract the remaining hexdigits. */
-            while (d > (NV)0.0) {
-                if (d >= e) {
-                    ha |= hd;
-                    d -= e;
-                }
-                if (hd == 1) {
-                    /* Output or count in groups of four bits,
-                     * that is, when the hexdigit is down to one. */
-                    if (vend)
-                        *v++ = ha;
-                    else
-                        v++;
-                    /* Reset the hexvalue. */
-                    ha = 0x0;
-                    hd = 0x8;
-                }
-                else
-                    hd >>= 1;
-                e *= (NV)0.5;
-            }
-
-            /* Flush possible pending hexvalue. */
-            if (ha) {
-                if (vend)
-                    *v++ = ha;
-                else
-                    v++;
-            }
-        }
-#  endif
-    }
-    /* Croak for various reasons: if the output pointer escaped the
-     * output buffer, if the extraction index escaped the extraction
-     * buffer, or if the ending output pointer didn't match the
-     * previously computed value. */
-    if (v <= vhex || v - vhex >= VHEX_SIZE ||
-        /* For double-double the ixmin and ixmax stay at zero,
-         * which is convenient since the HEXTRACTSIZE is tricky
-         * for double-double. */
-        ixmin < 0 || ixmax >= NVSIZE ||
-        (vend && v != vend))
-        Perl_croak_nocontext("Hexadecimal float: internal error");
-    return v;
-}
-
 /* Helper for sv_2pv_flags and sv_vcatpvfn_flags.  If the NV is an
  * infinity or a not-a-number, writes the appropriate strings to the
  * buffer, including a zero byte.  On success returns the written length,
  * excluding the zero byte, on failure (not an infinity, not a nan, or the
- * maxlen too small) returns zero. */
+ * maxlen too small) returns zero.
+ *
+ * XXX for "Inf", "-Inf", and "NaN", we could have three read-only
+ * shared string constants we point to, instead of generating a new
+ * string for each instance. */
 STATIC size_t
-S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char format, char plus, char alt) {
+S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char plus) {
     assert(maxlen >= 4);
     if (maxlen < 4) /* "Inf\0", "NaN\0" */
         return 0;
@@ -3262,84 +2926,16 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char format, char plus, char al
             *s++ = 'N';
             *s++ = 'a';
             *s++ = 'N';
-            if (nan_is_signaling(nv)) {
-                *s++ = 's';
-            }
-            if (alt) {
-                U8 vhex[VHEX_SIZE];
-                U8* vend;
-                U8* v;
-                int exponent = 0;
-                char* start;
-                bool upper = isUPPER(format);
-                const char* xdig = PL_hexdigit + (upper ? 16 : 0);
-                char xhex = upper ? 'X' : 'x';
-                U8 mask;
-                NV payload = nv;
-                U8* hibyte = nan_hibyte(&payload, &mask);
-
-                /* Clear the bits that are not part of the payload. */
-                *hibyte &= ~mask;
-                *hibyte &= ((1 << (NV_NAN_BITS % 8)) - 1);
-
-                vend = S_hextract(payload, &exponent, vhex, NULL);
-                S_hextract(payload, &exponent, vhex, vend);
-
-                v = vhex;
-
-#ifdef NV_IMPLICIT_BIT
-                /* S_hextract thinks it needs to extract the implicit bit,
-                 * which is bogus with NaN. */
-                v++;
-#endif
-                while (v < vend && *v == 0) v++;
-
-                *s++ = '(';
-
-                start = s;
-                if (vend - v <= 2 * UVSIZE) {
-                    *s++ = '0';
-                    *s++ = xhex;
-                    start = s;
-                    while (v < vend) {
-                        *s++ = xdig[*v++];
-                    }
-                    if (s == start) {
-                        *s++ = '0';
-                    }
-                } else {
-                    /* If not displayable as an UV, display as hex
-                     * bytes, then.  This happens with e.g. 32-bit
-                     * (UVSIZE=4) platforms.  The format is "\xHH..."
-                     *
-                     * Similar formats are accepted on numification.
-                     *
-                     * The choice of quoting in the result is not
-                     * customizable currently.  Maybe something could
-                     * be rigged to follow the '%#'. */
-                    *s++ = '"';
-
-                    if ((vend - vhex) % 2) {
-                        *s++ = '\\';
-                        *s++ = xhex;
-                        *s++ = '0';
-                        *s++ = xdig[*v++];
-                    }
-                    while (v < vend) {
-                        *s++ = '\\';
-                        *s++ = 'x';
-                        *s++ = xdig[*v++];
-                        *s++ = xdig[*v++];
-                    }
-
-                    *s++ = '"';
-                }
-
-                *s++ = ')';
-            }
+            /* XXX optionally output the payload mantissa bits as
+             * "(unsigned)" (to match the nan("...") C99 function,
+             * or maybe as "(0xhhh...)"  would make more sense...
+             * provide a format string so that the user can decide?
+             * NOTE: would affect the maxlen and assert() logic.*/
         }
+
         else
             return 0;
+        assert((s == buffer + 3) || (s == buffer + 4));
         *s++ = 0;
         return s - buffer - 1; /* -1: excluding the zero byte */
     }
@@ -3536,7 +3132,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
             STRLEN size = 5; /* "-Inf\0" */
 
             s = SvGROW_mutable(sv, size);
-            len = S_infnan_2pv(SvNVX(sv), s, size, 'g', 0, 0);
+            len = S_infnan_2pv(SvNVX(sv), s, size, 0);
             if (len > 0) {
                 s += len;
                 SvPOK_on(sv);
@@ -11189,7 +10785,7 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
     PERL_ARGS_ASSERT_F0CONVERT;
 
     if (UNLIKELY(Perl_isinfnan(nv))) {
-        STRLEN n = S_infnan_2pv(nv, endbuf - *len, *len, 'g', 0, 0);
+        STRLEN n = S_infnan_2pv(nv, endbuf - *len, *len, 0);
         *len = n;
         return endbuf - n;
     }
@@ -11245,6 +10841,342 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
     PERL_ARGS_ASSERT_SV_VCATPVFN;
 
     sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, svmax, maybe_tainted, SV_GMAGIC|SV_SMAGIC);
+}
+
+#ifdef LONGDOUBLE_DOUBLEDOUBLE
+/* The first double can be as large as 2**1023, or '1' x '0' x 1023.
+ * The second double can be as small as 2**-1074, or '0' x 1073 . '1'.
+ * The sum of them can be '1' . '0' x 2096 . '1', with implied radix point
+ * after the first 1023 zero bits.
+ *
+ * XXX The 2098 is quite large (262.25 bytes) and therefore some sort
+ * of dynamically growing buffer might be better, start at just 16 bytes
+ * (for example) and grow only when necessary.  Or maybe just by looking
+ * at the exponents of the two doubles? */
+#  define DOUBLEDOUBLE_MAXBITS 2098
+#endif
+
+/* vhex will contain the values (0..15) of the hex digits ("nybbles"
+ * of 4 bits); 1 for the implicit 1, and the mantissa bits, four bits
+ * per xdigit.  For the double-double case, this can be rather many.
+ * The non-double-double-long-double overshoots since all bits of NV
+ * are not mantissa bits, there are also exponent bits. */
+#ifdef LONGDOUBLE_DOUBLEDOUBLE
+#  define VHEX_SIZE (1+DOUBLEDOUBLE_MAXBITS/4)
+#else
+#  define VHEX_SIZE (1+(NVSIZE * 8)/4)
+#endif
+
+/* If we do not have a known long double format, (including not using
+ * long doubles, or long doubles being equal to doubles) then we will
+ * fall back to the ldexp/frexp route, with which we can retrieve at
+ * most as many bits as our widest unsigned integer type is.  We try
+ * to get a 64-bit unsigned integer even if we are not using a 64-bit UV.
+ *
+ * (If you want to test the case of UVSIZE == 4, NVSIZE == 8,
+ *  set the MANTISSATYPE to int and the MANTISSASIZE to 4.)
+ */
+#if defined(HAS_QUAD) && defined(Uquad_t)
+#  define MANTISSATYPE Uquad_t
+#  define MANTISSASIZE 8
+#else
+#  define MANTISSATYPE UV
+#  define MANTISSASIZE UVSIZE
+#endif
+
+#if defined(DOUBLE_LITTLE_ENDIAN) || defined(LONGDOUBLE_LITTLE_ENDIAN)
+#  define HEXTRACT_LITTLE_ENDIAN
+#elif defined(DOUBLE_BIG_ENDIAN) || defined(LONGDOUBLE_BIG_ENDIAN)
+#  define HEXTRACT_BIG_ENDIAN
+#else
+#  define HEXTRACT_MIX_ENDIAN
+#endif
+
+/* S_hextract() is a helper for Perl_sv_vcatpvfn_flags, for extracting
+ * the hexadecimal values (for %a/%A).  The nv is the NV where the value
+ * are being extracted from (either directly from the long double in-memory
+ * presentation, or from the uquad computed via frexp+ldexp).  frexp also
+ * is used to update the exponent.  vhex is the pointer to the beginning
+ * of the output buffer (of VHEX_SIZE).
+ *
+ * The tricky part is that S_hextract() needs to be called twice:
+ * the first time with vend as NULL, and the second time with vend as
+ * the pointer returned by the first call.  What happens is that on
+ * the first round the output size is computed, and the intended
+ * extraction sanity checked.  On the second round the actual output
+ * (the extraction of the hexadecimal values) takes place.
+ * Sanity failures cause fatal failures during both rounds. */
+STATIC U8*
+S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
+{
+    U8* v = vhex;
+    int ix;
+    int ixmin = 0, ixmax = 0;
+
+    /* XXX Inf/NaN/denormal handling in the HEXTRACT_IMPLICIT_BIT,
+     * and elsewhere. */
+
+    /* These macros are just to reduce typos, they have multiple
+     * repetitions below, but usually only one (or sometimes two)
+     * of them is really being used. */
+    /* HEXTRACT_OUTPUT() extracts the high nybble first. */
+#define HEXTRACT_OUTPUT_HI(ix) (*v++ = nvp[ix] >> 4)
+#define HEXTRACT_OUTPUT_LO(ix) (*v++ = nvp[ix] & 0xF)
+#define HEXTRACT_OUTPUT(ix) \
+    STMT_START { \
+      HEXTRACT_OUTPUT_HI(ix); HEXTRACT_OUTPUT_LO(ix); \
+   } STMT_END
+#define HEXTRACT_COUNT(ix, c) \
+    STMT_START { \
+      v += c; if (ix < ixmin) ixmin = ix; else if (ix > ixmax) ixmax = ix; \
+   } STMT_END
+#define HEXTRACT_BYTE(ix) \
+    STMT_START { \
+      if (vend) HEXTRACT_OUTPUT(ix); else HEXTRACT_COUNT(ix, 2); \
+   } STMT_END
+#define HEXTRACT_LO_NYBBLE(ix) \
+    STMT_START { \
+      if (vend) HEXTRACT_OUTPUT_LO(ix); else HEXTRACT_COUNT(ix, 1); \
+   } STMT_END
+    /* HEXTRACT_TOP_NYBBLE is just convenience disguise,
+     * to make it look less odd when the top bits of a NV
+     * are extracted using HEXTRACT_LO_NYBBLE: the highest
+     * order bits can be in the "low nybble" of a byte. */
+#define HEXTRACT_TOP_NYBBLE(ix) HEXTRACT_LO_NYBBLE(ix)
+#define HEXTRACT_BYTES_LE(a, b) \
+    for (ix = a; ix >= b; ix--) { HEXTRACT_BYTE(ix); }
+#define HEXTRACT_BYTES_BE(a, b) \
+    for (ix = a; ix <= b; ix++) { HEXTRACT_BYTE(ix); }
+#define HEXTRACT_IMPLICIT_BIT(nv) \
+    STMT_START { \
+        if (vend) *v++ = ((nv) == 0.0) ? 0 : 1; else v++; \
+   } STMT_END
+
+/* Most formats do.  Those which don't should undef this. */
+#define HEXTRACT_HAS_IMPLICIT_BIT
+/* Many formats do.  Those which don't should undef this. */
+#define HEXTRACT_HAS_TOP_NYBBLE
+
+    /* HEXTRACTSIZE is the maximum number of xdigits. */
+#if defined(USE_LONG_DOUBLE) && defined(LONGDOUBLE_DOUBLEDOUBLE)
+#  define HEXTRACTSIZE (DOUBLEDOUBLE_MAXBITS/4)
+#else
+#  define HEXTRACTSIZE 2 * NVSIZE
+#endif
+
+    const U8* vmaxend = vhex + HEXTRACTSIZE;
+    PERL_UNUSED_VAR(ix); /* might happen */
+    (void)Perl_frexp(PERL_ABS(nv), exponent);
+    if (vend && (vend <= vhex || vend > vmaxend))
+        Perl_croak(aTHX_ "Hexadecimal float: internal error");
+    {
+        /* First check if using long doubles. */
+#if defined(USE_LONG_DOUBLE) && (NVSIZE > DOUBLESIZE)
+#  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+        /* Used in e.g. VMS and HP-UX IA-64, e.g. -0.1L:
+         * 9a 99 99 99 99 99 99 99 99 99 99 99 99 99 fb 3f */
+        /* The bytes 13..0 are the mantissa/fraction,
+         * the 15,14 are the sign+exponent. */
+        const U8* nvp = (const U8*)(&nv);
+        HEXTRACT_IMPLICIT_BIT(nv);
+#   undef HEXTRACT_HAS_TOP_NYBBLE
+        HEXTRACT_BYTES_LE(13, 0);
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
+        /* Used in e.g. Solaris Sparc and HP-UX PA-RISC, e.g. -0.1L:
+         * bf fb 99 99 99 99 99 99 99 99 99 99 99 99 99 9a */
+        /* The bytes 2..15 are the mantissa/fraction,
+         * the 0,1 are the sign+exponent. */
+        const U8* nvp = (const U8*)(&nv);
+        HEXTRACT_IMPLICIT_BIT(nv);
+#   undef HEXTRACT_HAS_TOP_NYBBLE
+        HEXTRACT_BYTES_BE(2, 15);
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
+        /* x86 80-bit "extended precision", 64 bits of mantissa / fraction /
+         * significand, 15 bits of exponent, 1 bit of sign.  NVSIZE can
+         * be either 12 (ILP32, Solaris x86) or 16 (LP64, Linux and OS X),
+         * meaning that 2 or 6 bytes are empty padding. */
+        /* The bytes 7..0 are the mantissa/fraction */
+        const U8* nvp = (const U8*)(&nv);
+#    undef HEXTRACT_HAS_IMPLICIT_BIT
+#    undef HEXTRACT_HAS_TOP_NYBBLE
+        HEXTRACT_BYTES_LE(7, 0);
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
+        /* Does this format ever happen? (Wikipedia says the Motorola
+         * 6888x math coprocessors used format _like_ this but padded
+         * to 96 bits with 16 unused bits between the exponent and the
+         * mantissa.) */
+        const U8* nvp = (const U8*)(&nv);
+#    undef HEXTRACT_HAS_IMPLICIT_BIT
+#    undef HEXTRACT_HAS_TOP_NYBBLE
+        HEXTRACT_BYTES_BE(0, 7);
+#  else
+#    define HEXTRACT_FALLBACK
+        /* Double-double format: two doubles next to each other.
+         * The first double is the high-order one, exactly like
+         * it would be for a "lone" double.  The second double
+         * is shifted down using the exponent so that that there
+         * are no common bits.  The tricky part is that the value
+         * of the double-double is the SUM of the two doubles and
+         * the second one can be also NEGATIVE.
+         *
+         * Because of this tricky construction the bytewise extraction we
+         * use for the other long double formats doesn't work, we must
+         * extract the values bit by bit.
+         *
+         * The little-endian double-double is used .. somewhere?
+         *
+         * The big endian double-double is used in e.g. PPC/Power (AIX)
+         * and MIPS (SGI).
+         *
+         * The mantissa bits are in two separate stretches, e.g. for -0.1L:
+         * 9a 99 99 99 99 99 59 bc 9a 99 99 99 99 99 b9 3f (LE)
+         * 3f b9 99 99 99 99 99 9a bc 59 99 99 99 99 99 9a (BE)
+         */
+#  endif
+#else /* #if defined(USE_LONG_DOUBLE) && (NVSIZE > DOUBLESIZE) */
+        /* Using normal doubles, not long doubles.
+         *
+         * We generate 4-bit xdigits (nybble/nibble) instead of 8-bit
+         * bytes, since we might need to handle printf precision, and
+         * also need to insert the radix. */
+#  if NVSIZE == 8
+#    ifdef HEXTRACT_LITTLE_ENDIAN
+        /* 0 1 2 3 4 5 6 7 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
+        const U8* nvp = (const U8*)(&nv);
+        HEXTRACT_IMPLICIT_BIT(nv);
+        HEXTRACT_TOP_NYBBLE(6);
+        HEXTRACT_BYTES_LE(5, 0);
+#    elif defined(HEXTRACT_BIG_ENDIAN)
+        /* 7 6 5 4 3 2 1 0 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
+        const U8* nvp = (const U8*)(&nv);
+        HEXTRACT_IMPLICIT_BIT(nv);
+        HEXTRACT_TOP_NYBBLE(1);
+        HEXTRACT_BYTES_BE(2, 7);
+#    elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
+        /* 4 5 6 7 0 1 2 3 (MSB = 7, LSB = 0, 6:7 = nybble:exponent:sign) */
+        const U8* nvp = (const U8*)(&nv);
+        HEXTRACT_IMPLICIT_BIT(nv);
+        HEXTRACT_TOP_NYBBLE(2); /* 6 */
+        HEXTRACT_BYTE(1); /* 5 */
+        HEXTRACT_BYTE(0); /* 4 */
+        HEXTRACT_BYTE(7); /* 3 */
+        HEXTRACT_BYTE(6); /* 2 */
+        HEXTRACT_BYTE(5); /* 1 */
+        HEXTRACT_BYTE(4); /* 0 */
+#    elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
+        /* 3 2 1 0 7 6 5 4 (MSB = 7, LSB = 0, 7:6 = sign:exponent:nybble) */
+        const U8* nvp = (const U8*)(&nv);
+        HEXTRACT_IMPLICIT_BIT(nv);
+        HEXTRACT_TOP_NYBBLE(5); /* 6 */
+        HEXTRACT_BYTE(6); /* 5 */
+        HEXTRACT_BYTE(7); /* 4 */
+        HEXTRACT_BYTE(0); /* 3 */
+        HEXTRACT_BYTE(1); /* 2 */
+        HEXTRACT_BYTE(2); /* 1 */
+        HEXTRACT_BYTE(3); /* 0 */
+#    else
+#      define HEXTRACT_FALLBACK
+#    endif
+#  else
+#    define HEXTRACT_FALLBACK
+#  endif
+#endif /* #if defined(USE_LONG_DOUBLE) && (NVSIZE > DOUBLESIZE) #else */
+#  ifdef HEXTRACT_FALLBACK
+#    undef HEXTRACT_HAS_TOP_NYBBLE /* Meaningless, but consistent. */
+        /* The fallback is used for the double-double format, and
+         * for unknown long double formats, and for unknown double
+         * formats, or in general unknown NV formats. */
+        if (nv == (NV)0.0) {
+            if (vend)
+                *v++ = 0;
+            else
+                v++;
+            *exponent = 0;
+        }
+        else {
+            NV d = nv < 0 ? -nv : nv;
+            NV e = (NV)1.0;
+            U8 ha = 0x0; /* hexvalue accumulator */
+            U8 hd = 0x8; /* hexvalue digit */
+
+            /* Shift d and e (and update exponent) so that e <= d < 2*e,
+             * this is essentially manual frexp(). Multiplying by 0.5 and
+             * doubling should be lossless in binary floating point. */
+
+            *exponent = 1;
+
+            while (e > d) {
+                e *= (NV)0.5;
+                (*exponent)--;
+            }
+            /* Now d >= e */
+
+            while (d >= e + e) {
+                e += e;
+                (*exponent)++;
+            }
+            /* Now e <= d < 2*e */
+
+            /* First extract the leading hexdigit (the implicit bit). */
+            if (d >= e) {
+                d -= e;
+                if (vend)
+                    *v++ = 1;
+                else
+                    v++;
+            }
+            else {
+                if (vend)
+                    *v++ = 0;
+                else
+                    v++;
+            }
+            e *= (NV)0.5;
+
+            /* Then extract the remaining hexdigits. */
+            while (d > (NV)0.0) {
+                if (d >= e) {
+                    ha |= hd;
+                    d -= e;
+                }
+                if (hd == 1) {
+                    /* Output or count in groups of four bits,
+                     * that is, when the hexdigit is down to one. */
+                    if (vend)
+                        *v++ = ha;
+                    else
+                        v++;
+                    /* Reset the hexvalue. */
+                    ha = 0x0;
+                    hd = 0x8;
+                }
+                else
+                    hd >>= 1;
+                e *= (NV)0.5;
+            }
+
+            /* Flush possible pending hexvalue. */
+            if (ha) {
+                if (vend)
+                    *v++ = ha;
+                else
+                    v++;
+            }
+        }
+#  endif
+    }
+    /* Croak for various reasons: if the output pointer escaped the
+     * output buffer, if the extraction index escaped the extraction
+     * buffer, or if the ending output pointer didn't match the
+     * previously computed value. */
+    if (v <= vhex || v - vhex >= VHEX_SIZE ||
+        /* For double-double the ixmin and ixmax stay at zero,
+         * which is convenient since the HEXTRACTSIZE is tricky
+         * for double-double. */
+        ixmin < 0 || ixmax >= NVSIZE ||
+        (vend && v != vend))
+        Perl_croak(aTHX_ "Hexadecimal float: internal error");
+    return v;
 }
 
 void
@@ -12220,7 +12152,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         2 * NVSIZE + /* 2 hexdigits for each byte */
                         2 + /* "p+" */
                         6 + /* exponent: sign, plus up to 16383 (quad fp) */
-                        1;  /* \0 */
+                        1;   /* \0 */
 #ifdef LONGDOUBLE_DOUBLEDOUBLE
                     /* However, for the "double double", we need more.
                      * Since each double has their own exponent, the
@@ -12243,29 +12175,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 else if (i > 0) {
                     need = BIT_DIGITS(i);
                 } /* if i < 0, the number of digits is hard to predict. */
-            } else if (UNLIKELY(Perl_isnan(nv))) {
-                need +=
-                    3 + /* nan */
-                    1 + /* 's', maybe */
-                    1;  /* \0 */
-
-                if (alt) {
-                    /* NaN payload - all of it really only needed
-                     * if we have a full payload. */
-                    need +=
-                        1 + /* '(' */
-#if NVSIZE == UVSIZE
-                        /* 0x... */
-                        2 + /* "0x" */
-                        2 * (NV_MANT_REAL_DIG + 7) / 8 +
-#else
-                        /* hexbytes \xHH */
-                        2 + /* '...' */
-                        4 * (NV_MANT_REAL_DIG + 7) / 8 +
-#endif
-                        1;  /* ')' */
-                }
-            }
+	    }
 	    need += has_precis ? precis : 6; /* known default */
 
 	    if (need < width)
@@ -12387,8 +12297,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * should be output as 0x0.0000000000001p-1022 to
                  * match its internal structure. */
 
-                vend = S_hextract(nv, &exponent, vhex, NULL);
-                S_hextract(nv, &exponent, vhex, vend);
+                vend = S_hextract(aTHX_ nv, &exponent, vhex, NULL);
+                S_hextract(aTHX_ nv, &exponent, vhex, vend);
 
 #if NVSIZE > DOUBLESIZE
 #  ifdef HEXTRACT_HAS_IMPLICIT_BIT
@@ -12546,9 +12456,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
             }
             else {
-                elen = S_infnan_2pv(nv, PL_efloatbuf, PL_efloatsize, c, plus, alt);
+                elen = S_infnan_2pv(nv, PL_efloatbuf, PL_efloatsize, plus);
                 if (elen) {
-                    /* Not affecting infnan output: precision, fill. */
+                    /* Not affecting infnan output: precision, alt, fill. */
                     if (elen < width) {
                         if (left) {
                             /* Pack the back with spaces. */

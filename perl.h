@@ -4319,6 +4319,7 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #       define NV_QNAN LDBL_QNAN
 #   endif
 #   if !defined(NV_NAN) && defined(LDBL_SNAN)
+#       define NV_NAN LDBL_SNAN
 #       define NV_SNAN LDBL_SNAN
 #   endif
 #endif
@@ -4330,6 +4331,7 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #  define NV_QNAN DBL_QNAN
 #endif
 #if !defined(NV_NAN) && defined(DBL_SNAN)
+#  define NV_NAN (NV)DBL_SNAN
 #  define NV_SNAN DBL_SNAN
 #endif
 #if !defined(NV_NAN) && defined(NAN)
@@ -4340,6 +4342,7 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #  define NV_QNAN QNAN
 #endif
 #if !defined(NV_NAN) && defined(SNAN)
+#  define NV_NAN (NV)SNAN
 #  define NV_SNAN SNAN
 #endif
 #if !defined(NV_NAN) && defined(I_SUNMATH)
@@ -4362,38 +4365,6 @@ static const union { unsigned int __i; float __f; } __PL_nan_u =
 /* Do NOT try doing NV_NAN based on NV_INF and trying (NV_INF-NV_INF).
  * Though IEEE-754-logically correct, some compilers (like Visual C 2003)
  * falsely misoptimize that to zero (x-x is zero, right?) */
-
-/* x86 80-bit extended precision mantissa bits:
- *
- * 63 62 61   30387+    pre-387
- * --------   ----      --------
- *  0  0  0   invalid   infinity
- *  0  0  n   invalid   snan
- *  0  1  *   invalid   snan
- *  1  0  0   infinity  snan
- *  1  0  n   snan
- *  1  1  0   qnan (1.#IND)
- *  1  1  n   qnan
- *
- * This means that there are 61 bits for nan payload.
- */
-#if defined(USE_LONG_DOUBLE) && (LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN)
-#  define NV_NAN_BITS 61
-#elif defined(__hppa) /* XXX Configure scan */
-#  define NV_NAN_BITS 50 /* qnan: 7f f4 00 00 00 00 00 00 */
-#elif defined(__mips) && UVSIZE == 4 /* IRIX64/MIPS cc -32 */
-#  define NV_NAN_BITS 35 /* qnan: 7f ff 2f 30 00 00 00 00
-                          * +inf: 7f ff 2f 20 00 00 00 00
-                          * -inf: 7f ff 2f 28 00 00 00 00 */
-#else
-#  define NV_NAN_BITS (NV_MANT_REAL_DIG - 1)
-#endif
-/* IRIX64/MIPS cc -64 is something bizarre:
- * qnan 00 00 0f ff ff ff ae 90
- * +inf 00 00 0f ff ff ff ae 80
- * -inf 00 00 0f ff ff ff ae 88
- * In other words, it doesn't seem to follow any IEEE pattern for infnan,
- * and even seems more little-endian than big-endian. */
 
 #ifndef __cplusplus
 #  if !defined(WIN32) && !defined(VMS)

@@ -813,19 +813,12 @@ EMsPR	|char*|form_short_octal_warning|NN const char * const s  \
 				|const STRLEN len
 #endif
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
-Apd	|int	|grok_infnan	|NN const char** sp|NN const char *send|NULLOK NV *nvp
-Apd	|const char *|grok_nan	|NN const char* s|NN const char *send|NN int *flags|NULLOK NV *nvp|NULLOK SV* svp
-Apd	|const char *|grok_nan_payload|NN const char* s|NN const char *send|bool signaling|NN int *flags|NULLOK NV *nvp|NULLOK SV *svp
+Apd	|int	|grok_infnan	|NN const char** sp|NN const char *send
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep
 Apd	|int	|grok_number_flags|NN const char *pv|STRLEN len|NULLOK UV *valuep|U32 flags
-Apd	|int	|grok_number2_flags|NN const char *pv|STRLEN len|NULLOK UV *valuep|NULLOK NV* nvp|U32 flags
 ApdR	|bool	|grok_numeric_radix|NN const char **sp|NN const char *send
 Apd	|UV	|grok_oct	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apdn	|UV	|grok_atou	|NN const char* pv|NULLOK const char** endptr
-Apdn	|U8*	|nan_hibyte|NN NV *nvp|NN U8* mask
-Apd	|void	|nan_signaling_set|NN NV *nvp|bool signaling
-Apdn	|int	|nan_is_signaling|NV nv
-Apd	|void	|nan_payload_set|NN NV *nvp|NULLOK SV *svp|NN const void *bytes|STRLEN byten|bool signaling
 : These are all indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_clearenv	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clear_all_env|NN SV* sv|NN MAGIC* mg

@@ -105,7 +105,7 @@ my %expect = (
 		  isatty iscntrl isdigit isfinite isgraph isgreater
 		  isgreaterequal isinf isless islessequal
 		  islessgreater islower isnan isnormal isprint ispunct
-		  issignaling isspace isunordered isupper isxdigit j0 j1 jn labs
+		  isspace isunordered isupper isxdigit j0 j1 jn labs
 		  ldexp ldiv lgamma localeconv log10 log1p log2 logb
 		  longjmp lrint lseek malloc mblen mbstowcs mbtowc
 		  memchr memcmp memcpy memmove memset mkfifo mktime

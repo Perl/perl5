@@ -793,7 +793,7 @@ construct instead.
 Returns true if the argument is a finite number (that is, not an
 infinity, or the not-a-number) [C99].
 
-See also L</nan>, L</isinf>, L</issignaling>, and L</fpclassify>.
+See also L</isinf>, L</isnan>, and L</fpclassify>.
 
 =item C<isgraph>
 
@@ -892,12 +892,6 @@ modifier is in effect?>).
 
 The function returns C<TRUE> if the input string is empty, or if the
 corresponding C function returns C<TRUE> for every byte in the string.
-
-=item C<issignaling>
-
-Returns true if the argument is a signaling C<NaN> (not-a-number)
-
-See also L</isnan> and L</fpclassify>.  (There is no "isquiet".)
 
 =item C<isspace>
 
