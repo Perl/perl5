@@ -567,10 +567,14 @@ number of bits available again depends on the platform.  (Though for
 the most common floating point format, 64-bit IEEE 754, there is
 room for 51 bits.)
 
-The payload is propagated on straight copies, but on operations
-(like addition) the result (which payload bits end up where) again
-depends on the platform.  You can generate a NaN with payload by
-e.g. "nan(0x123)".
+You can generate a NaN with payload with e.g. "nan(0x123)" or "nans(456)".
+Note that you have to be aware of the binary representation of the payload:
+because of how negative numbers are stored, they often cannot be used as
+the payload.
+
+The payload (and quiet/signaling flag) is propagated on straight
+copies, but on operations (like addition) the result (which payload
+bits end up where) again depends on the platform.
 
 The default stringification of not-a-numbers will just show the C<NaN>
 but you can use C<printf %#g> to see the payload: the C<#> is the key.
