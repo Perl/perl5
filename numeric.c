@@ -692,8 +692,6 @@ Perl_nan_is_signaling(NV nv)
  * precision of 128 bits. */
 #define MAX_NV_BYTES (128/8)
 
-static const char invalid_nan_payload[] = "Invalid NaN payload";
-
 /*
 
 =for apidoc nan_payload_set
@@ -730,7 +728,7 @@ Perl_nan_payload_set(pTHX_ NV *nvp, const void *bytes, STRLEN byten, bool signal
     U8 hibit;
 
     STRLEN i, nvi;
-    bool error = FALSE;
+    bool overflow = FALSE;
 
     /* XXX None of this works for doubledouble platforms, or for mixendians. */
 
@@ -749,7 +747,7 @@ Perl_nan_payload_set(pTHX_ NV *nvp, const void *bytes, STRLEN byten, bool signal
 
     if (byten > MAX_NV_BYTES) {
         byten = MAX_NV_BYTES;
-        error = TRUE;
+        overflow = TRUE;
     }
     for (i = 0; bits > 0; i++) {
         U8 b = i < byten ? ((U8*) bytes)[i] : 0;
@@ -774,9 +772,9 @@ Perl_nan_payload_set(pTHX_ NV *nvp, const void *bytes, STRLEN byten, bool signal
     } else {
         *hibyte &= ~mask;
     }
-    if (error) {
+    if (overflow) {
         Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                       invalid_nan_payload);
+                       "NaN payload overflowed %d bits", NV_NAN_BITS);
     }
     nan_signaling_set(nvp, signaling);
 }
@@ -798,7 +796,9 @@ Perl_grok_nan_payload(pTHX_ const char* s, const char* send, bool signaling, int
     U8 bytes[MAX_NV_BYTES];
     STRLEN byten = 0;
     const char *t = send - 1; /* minus one for ')' */
-    bool error = FALSE;
+    bool overflow = FALSE;
+    bool bogus = FALSE;
+    const char *orig = s;
 
     PERL_ARGS_ASSERT_GROK_NAN_PAYLOAD;
 
@@ -810,6 +810,8 @@ Perl_grok_nan_payload(pTHX_ const char* s, const char* send, bool signaling, int
     if (*t != ')') {
         U8 bytes[1] = { 0 };
         nan_payload_set(nvp, bytes, 1, signaling);
+        Perl_ck_warner(aTHX_ packWARN(WARN_DIGIT),
+                       "NaN payload \"%s\" invalid", orig);
         return t;
     }
 
@@ -864,7 +866,7 @@ Perl_grok_nan_payload(pTHX_ const char* s, const char* send, bool signaling, int
             STRLEN i;
             if ((n > MAX_NV_BYTES - byten) ||
                 (n * 8 > NV_MANT_REAL_DIG)) {
-                error = TRUE;
+                overflow = TRUE;
                 break;
             }
             /* Copy the bytes in reverse so that \x41\x42 ('AB')
@@ -875,7 +877,7 @@ Perl_grok_nan_payload(pTHX_ const char* s, const char* send, bool signaling, int
             }
             byten += n;
             break;
-        } else if (s < t && isDIGIT(*s)) {
+        } else if (s < t && (isDIGIT(*s) || *s == '-' || *s == '+')) {
             const char *u;
             nantype =
                 grok_number_flags(s, (STRLEN)(t - s), &uv,
@@ -885,30 +887,42 @@ Perl_grok_nan_payload(pTHX_ const char* s, const char* send, bool signaling, int
              * tell how far we got and the ')' will always
              * be "trailing", so we need to double-check
              * whether we had something dubious. */
-            for (u = s; u < send - 1; u++) {
+            u = s;
+            if ((*u == '-' || *u == '+')) {
+                u++;
+            }
+            for (; u < t; u++) {
                 if (!isDIGIT(*u)) {
                     *flags |= IS_NUMBER_TRAILING;
                     break;
                 }
             }
+            if ((nantype & IS_NUMBER_NEG)) {
+                uv = (UV) (-uv);
+            }
             s = u;
         } else {
-            error = TRUE;
+            bogus = TRUE;
             break;
         }
         /* XXX Doesn't do octal: nan("0123").
          * Probably not a big loss. */
 
         if (!(nantype & IS_NUMBER_IN_UV)) {
-            error = TRUE;
+            overflow = TRUE;
             break;
         }
 
         if (uv) {
-            while (uv && byten < MAX_NV_BYTES) {
+            int bits = NV_NAN_BITS;
+            while (uv && byten < MAX_NV_BYTES && bits > 0) {
                 bytes[byten++] = (U8) (uv & 0xFF);
                 uv >>= 8;
+                bits -= 8;
             }
+        }
+        if (uv) {
+            overflow = TRUE;
         }
     }
 
@@ -916,9 +930,14 @@ Perl_grok_nan_payload(pTHX_ const char* s, const char* send, bool signaling, int
         bytes[byten++] = 0;
     }
 
-    if (error) {
+    if (overflow) {
         Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                       invalid_nan_payload);
+                       "NaN payload \"%s\" overflowed %d bits",
+                       orig, NV_NAN_BITS);
+    }
+    if (bogus) {
+        Perl_ck_warner(aTHX_ packWARN(WARN_DIGIT),
+                       "NaN payload \"%s\" invalid", orig);
     }
 
     if (s == send) {

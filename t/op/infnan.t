@@ -516,7 +516,7 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
          [ " nan",         0, $NaN ],
          [ "nan ",         0, $NaN ],
          [ " nan ",        0, $NaN ],
-         [ " nan(123) ",   1, $NaN ],
+         [ " nan(123) ",   0, $NaN ],
         ];
 
     for my $t (@$T) {
@@ -527,7 +527,7 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
         is("$a", "$t->[2]", "$t->[0] plus one is $t->[2]");
         if ($t->[1]) {
             like($w, qr/^Argument \Q"$t->[0]"\E isn't numeric/,
-                 "$t->[2] numify warn");
+                 "'$t->[2]' numify warn");
         } else {
             is($w, "", "no warning expected");
         }
@@ -539,7 +539,7 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
         is("$b", "$t->[2]", "$n plus one is $t->[2]");
         if ($t->[1]) {
             like($w, qr/^Argument \Q"$n"\E isn't numeric/,
-                 "$n numify warn");
+                 "'$n' numify warn");
         } else {
             is($w, "", "no warning expected");
         }
