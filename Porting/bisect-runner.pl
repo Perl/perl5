@@ -53,7 +53,7 @@ push @paths, qw(/usr/local/lib /lib /usr/lib)
         unless $linux64;
 
 unless(GetOptions(\%options,
-                  'target=s', 'make=s', 'jobs|j=i', 'expect-pass=i',
+                  'target=s', 'make=s', 'jobs|j=i', 'crash', 'expect-pass=i',
                   'expect-fail' => sub { $options{'expect-pass'} = 0; },
                   'clean!', 'one-liner|e=s@', 'c', 'l', 'w', 'match=s',
                   'no-match=s' => sub {
@@ -151,6 +151,8 @@ bisect.pl - use git bisect to pinpoint changes
     .../Porting/bisect.pl --expect-fail --match '\buseithreads\b'
     # When did this test program stop exiting 0?
     .../Porting/bisect.pl -- ./perl -Ilib ../test_prog.pl
+    # When did this test program start crashing (any signal or coredump)?
+    .../Porting/bisect.pl --crash -- ./perl -Ilib ../test_prog.pl
     # When did this first become valid syntax?
     .../Porting/bisect.pl --target=miniperl --end=v5.10.0 \
          --expect-fail -e 'my $a := 2;'
@@ -394,6 +396,13 @@ also using C<-e>
 
 The test case should fail for the I<start> revision, and pass for the I<end>
 revision. The bisect run will find the first commit where it passes.
+
+=item *
+
+--crash
+
+Treat any non-crash as success, any crash as failure. (Crashing defined
+as exiting with a signal or a core dump.)
 
 =item *
 
@@ -1137,6 +1146,7 @@ sub run_report_and_exit {
     my $ret = run_with_options({setprgp => $options{setpgrp},
                                 timeout => $options{timeout},
                                }, @_);
+    $ret &= 0xff if $options{crash};
     report_and_exit(!$ret, 'zero exit from', 'non-zero exit from', "@_");
 }
 
