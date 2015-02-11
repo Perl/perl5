@@ -1365,14 +1365,14 @@ PERL_CALLCONV int	Perl_grok_infnan(pTHX_ const char** sp, const char *send, NV *
 #define PERL_ARGS_ASSERT_GROK_INFNAN	\
 	assert(sp); assert(send)
 
-PERL_CALLCONV const char *	Perl_grok_nan(pTHX_ const char* s, const char *send, int *flags, NV *nvp)
+PERL_CALLCONV const char *	Perl_grok_nan(pTHX_ const char* s, const char *send, int *flags, NV *nvp, SV* svp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_GROK_NAN	\
 	assert(s); assert(send); assert(flags)
 
-PERL_CALLCONV const char *	Perl_grok_nan_payload(pTHX_ const char* s, const char *send, bool signaling, int *flags, NV *nvp)
+PERL_CALLCONV const char *	Perl_grok_nan_payload(pTHX_ const char* s, const char *send, bool signaling, int *flags, NV *nvp, SV *svp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_4);
@@ -2864,9 +2864,9 @@ PERL_CALLCONV U8*	Perl_nan_hibyte(NV *nvp, U8* mask)
 	assert(nvp); assert(mask)
 
 PERL_CALLCONV int	Perl_nan_is_signaling(NV nv);
-PERL_CALLCONV void	Perl_nan_payload_set(pTHX_ NV *nvp, const void *bytes, STRLEN byten, bool signaling)
+PERL_CALLCONV void	Perl_nan_payload_set(pTHX_ NV *nvp, SV *svp, const void *bytes, STRLEN byten, bool signaling)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_NAN_PAYLOAD_SET	\
 	assert(nvp); assert(bytes)
 

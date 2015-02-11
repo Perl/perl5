@@ -183,8 +183,8 @@
 #define grok_bin(a,b,c,d)	Perl_grok_bin(aTHX_ a,b,c,d)
 #define grok_hex(a,b,c,d)	Perl_grok_hex(aTHX_ a,b,c,d)
 #define grok_infnan(a,b,c)	Perl_grok_infnan(aTHX_ a,b,c)
-#define grok_nan(a,b,c,d)	Perl_grok_nan(aTHX_ a,b,c,d)
-#define grok_nan_payload(a,b,c,d,e)	Perl_grok_nan_payload(aTHX_ a,b,c,d,e)
+#define grok_nan(a,b,c,d,e)	Perl_grok_nan(aTHX_ a,b,c,d,e)
+#define grok_nan_payload(a,b,c,d,e,f)	Perl_grok_nan_payload(aTHX_ a,b,c,d,e,f)
 #define grok_number(a,b,c)	Perl_grok_number(aTHX_ a,b,c)
 #define grok_number2_flags(a,b,c,d,e)	Perl_grok_number2_flags(aTHX_ a,b,c,d,e)
 #define grok_number_flags(a,b,c,d)	Perl_grok_number_flags(aTHX_ a,b,c,d)
@@ -361,7 +361,7 @@
 #define my_strftime(a,b,c,d,e,f,g,h,i,j)	Perl_my_strftime(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #define nan_hibyte		Perl_nan_hibyte
 #define nan_is_signaling	Perl_nan_is_signaling
-#define nan_payload_set(a,b,c,d)	Perl_nan_payload_set(aTHX_ a,b,c,d)
+#define nan_payload_set(a,b,c,d,e)	Perl_nan_payload_set(aTHX_ a,b,c,d,e)
 #define nan_signaling_set(a,b)	Perl_nan_signaling_set(aTHX_ a,b)
 #define newANONATTRSUB(a,b,c,d)	Perl_newANONATTRSUB(aTHX_ a,b,c,d)
 #define newANONHASH(a)		Perl_newANONHASH(aTHX_ a)
