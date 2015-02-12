@@ -139,27 +139,27 @@ bisect.pl - use git bisect to pinpoint changes
 
 =head1 SYNOPSIS
 
-    # When did this become an error?
-    .../Porting/bisect.pl -e 'my $a := 2;'
-    # When did this stop being an error?
-    .../Porting/bisect.pl --expect-fail -e '1 // 2'
-    # When did this test start failing?
-    .../Porting/bisect.pl --target t/op/sort.t
-    # When were all lines matching this pattern removed from all files?
-    .../Porting/bisect.pl --match '\b(?:PL_)hash_seed_set\b'
-    # When was some line matching this pattern added to some file?
-    .../Porting/bisect.pl --expect-fail --match '\buseithreads\b'
-    # When did this test program stop exiting 0?
-    .../Porting/bisect.pl -- ./perl -Ilib ../test_prog.pl
-    # When did this test program start crashing (any signal or coredump)?
-    .../Porting/bisect.pl --crash -- ./perl -Ilib ../test_prog.pl
-    # When did this first become valid syntax?
-    .../Porting/bisect.pl --target=miniperl --end=v5.10.0 \
-         --expect-fail -e 'my $a := 2;'
-    # What was the last revision to build with these options?
-    .../Porting/bisect.pl --test-build -Dd_dosuid
-    # When did this test program start generating errors from valgrind?
-    .../Porting/bisect.pl --valgrind ../test_prog.pl
+ # When did this become an error?
+ .../Porting/bisect.pl -e 'my $a := 2;'
+ # When did this stop being an error?
+ .../Porting/bisect.pl --expect-fail -e '1 // 2'
+ # When did this test start failing?
+ .../Porting/bisect.pl --target t/op/sort.t
+ # When were all lines matching this pattern removed from all files?
+ .../Porting/bisect.pl --match '\b(?:PL_)hash_seed_set\b'
+ # When was some line matching this pattern added to some file?
+ .../Porting/bisect.pl --expect-fail --match '\buseithreads\b'
+ # When did this test program stop exiting 0?
+ .../Porting/bisect.pl -- ./perl -Ilib ../test_prog.pl
+ # When did this test program start crashing (any signal or coredump)?
+ .../Porting/bisect.pl --crash -- ./perl -Ilib ../test_prog.pl
+ # When did this first become valid syntax?
+ .../Porting/bisect.pl --target=miniperl --end=v5.10.0 \
+      --expect-fail -e 'my $a := 2;'
+ # What was the last revision to build with these options?
+ .../Porting/bisect.pl --test-build -Dd_dosuid
+ # When did this test program start generating errors from valgrind?
+ .../Porting/bisect.pl --valgrind ../test_prog.pl
 
 =head1 DESCRIPTION
 
