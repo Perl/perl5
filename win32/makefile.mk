@@ -158,9 +158,21 @@ CCTYPE		*= GCC
 #USE_CPLUSPLUS	*= define
 
 #
-# uncomment next line if you want debug version of perl (big,slow)
+# uncomment next line if you want debug version of perl (big/slow)
 # If not enabled, we automatically try to use maximum optimization
 # with all compilers that are known to have a working optimizer.
+#
+# You can also set CFG = DebugSymbols for a slightly smaller/faster
+# debug build without the special debugging code in perl which is
+# enabled via -DDEBUGGING;
+#
+# or you can set CFG = DebugFull for an even fuller (bigger/slower)
+# debug build using the debug version of the CRT, and enabling VC++
+# debug features such as extra assertions and invalid parameter warnings
+# in perl and CRT code via -D_DEBUG.  (Note that the invalid parameter
+# handler does get triggered from time to time in this configuration,
+# which causes warnings to be printed on STDERR, which in turn causes a
+# few tests to fail.)  (This configuration is only available for VC++ builds.)
 #
 #CFG		*= Debug
 
@@ -480,6 +492,9 @@ LIBFILES	= $(LIBC) \
 .IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -g -O2 -DDEBUGGING
 LINK_DBG	= -g
+.ELIF  "$(CFG)" == "DebugSymbols"
+OPTIMIZE	= -g -O2
+LINK_DBG	= -g
 .ELSE
 OPTIMIZE	= -s -O2
 LINK_DBG	= -s
@@ -545,10 +560,17 @@ LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -TP -EHsc
 
-LIBC	= msvcrt.lib
+LIBC		= msvcrt.lib
 
 .IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
+LINK_DBG	= -debug
+.ELIF  "$(CFG)" == "DebugSymbols"
+OPTIMIZE	= -Od -MD -Zi
+LINK_DBG	= -debug
+.ELIF  "$(CFG)" == "DebugFull"
+LIBC		= msvcrtd.lib
+OPTIMIZE	= -Od -MDd -Zi -D_DEBUG -DDEBUGGING
 LINK_DBG	= -debug
 .ELSE
 # -O1 yields smaller code, which turns out to be faster than -O2 on x86 and x64
