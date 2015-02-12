@@ -1938,7 +1938,10 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 {
     dVAR;
     PERL_ARGS_ASSERT_VWARNER;
-    if (PL_warnhook == PERL_WARNHOOK_FATAL || ckDEAD(err)) {
+    if (
+        (PL_warnhook == PERL_WARNHOOK_FATAL || ckDEAD(err)) &&
+        !(PL_in_eval & EVAL_KEEPERR)
+    ) {
 	SV * const msv = vmess(pat, args);
 
 	if (PL_parser && PL_parser->error_count) {
