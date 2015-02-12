@@ -393,15 +393,15 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * code point whose UTF-8 is known to occupy 2 bytes; they are less efficient
  * than the EIGHT_BIT versions on EBCDIC platforms.  We use the logical '~'
  * operator instead of "<=" to avoid getting compiler warnings.
- * MAX_PORTABLE_UTF8_TWO_BYTE should be exactly all one bits in the lower few
+ * MAX_UTF8_TWO_BYTE should be exactly all one bits in the lower few
  * places, so the ~ works */
 #define UTF8_TWO_BYTE_HI(c)                                                    \
        (__ASSERT_((sizeof(c) ==  1)                                            \
-                  || !(((WIDEST_UTYPE)(c)) & ~MAX_PORTABLE_UTF8_TWO_BYTE))     \
+                  || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE))              \
         ((U8) __BASE_TWO_BYTE_HI(c, NATIVE_TO_UNI)))
 #define UTF8_TWO_BYTE_LO(c)                                                    \
        (__ASSERT_((sizeof(c) ==  1)                                            \
-                  || !(((WIDEST_UTYPE)(c)) & ~MAX_PORTABLE_UTF8_TWO_BYTE))     \
+                  || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE))              \
         ((U8) __BASE_TWO_BYTE_LO(c, NATIVE_TO_UNI)))
 
 /* This is illegal in any well-formed UTF-8 in both EBCDIC and ASCII
