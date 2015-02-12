@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.24';
+$VERSION = '3.25';
 
 #..........................................................................
 
@@ -431,6 +431,16 @@ sub init {
 
   # Make sure creat()s are neither too much nor too little
   eval { umask(0077) };   # doubtless someone has no mask
+
+  if ( $] < 5.008 ) {
+      $self->aside("Your old perl doesn't have proper unicode support.");
+    }
+  else {
+      # http://www.perl.com/pub/2012/04/perlunicookbook-decode-argv-as-utf8.html
+      # Decode command line arguments as UTF-8. See RT#98906 for example problem.
+      use Encode qw(decode_utf8);
+      @ARGV = map { decode_utf8($_, 1) } @ARGV;
+    }
 
   $self->{'args'}              ||= \@ARGV;
   $self->{'found'}             ||= [];
@@ -1028,6 +1038,33 @@ sub add_translator { # $self->add_translator($lang);
 
 #..........................................................................
 
+sub open_fh {
+    my ($self, $op, $path) = @_;
+
+    open my $fh, $op, $path or $self->die("Couldn't open $path: $!");
+    return $fh;
+}
+
+sub set_encoding {
+    my ($self, $fh, $encoding) = @_;
+
+    if ( $encoding =~ /utf-?8/i ) {
+        $encoding = ":encoding(UTF-8)";
+    }
+    else {
+        $encoding = ":encoding($encoding)";
+    }
+
+    if ( $] < 5.008 ) {
+        $self->aside("Your old perl doesn't have proper unicode support.");
+    }
+    else {
+        binmode($fh, $encoding);
+    }
+
+    return $fh;
+}
+
 sub search_perlvar {
     my($self, $found_things, $pod) = @_;
 
@@ -1040,10 +1077,8 @@ sub search_perlvar {
     DEBUG > 2 and print "Search: @$found_things\n";
 
     my $perlvar = shift @$found_things;
-    open(PVAR, "<", $perlvar)               # "Funk is its own reward"
-        or $self->die("Can't open $perlvar: $!");
+    my $fh = $self->open_fh("<", $perlvar);
 
-    binmode(PVAR, ":encoding(UTF-8)");
     if ( $opt ne '$0' && $opt =~ /^\$\d+$/ ) { # handle $1, $2, ...
       $opt = '$<I<digits>>';
     }
@@ -1054,15 +1089,19 @@ sub search_perlvar {
 
     # Skip introduction
     local $_;
-    while (<PVAR>) {
+    my $enc;
+    while (<$fh>) {
+        $enc = $1 if /^=encoding\s+(\S+)/;
         last if /^=over 8/;
     }
+
+    $fh = $self->set_encoding($fh, $enc) if $enc;
 
     # Look for our variable
     my $found = 0;
     my $inheader = 1;
     my $inlist = 0;
-    while (<PVAR>) {  # "The Mothership Connection is here!"
+    while (<$fh>) {  
         last if /^=head2 Error Indicators/;
         # \b at the end of $` and friends borks things!
         if ( m/^=item\s+$search_re\s/ )  {
@@ -1096,7 +1135,7 @@ sub search_perlvar {
     if (!@$pod) {
         CORE::die( "No documentation for perl variable '$opt' found\n" );
     }
-    close PVAR                or $self->die( "Can't open $perlvar: $!" );
+    close $fh                or $self->die( "Can't close $perlvar: $!" );
 
     return;
 }
@@ -1112,8 +1151,7 @@ sub search_perlop {
   # XXX FIXME: getting filehandles should probably be done in a single place
   # especially since we need to support UTF8 or other encoding when dealing
   # with perlop, perlfunc, perlapi, perlfaq[1-9]
-  open( PERLOP, '<', $perlop ) or $self->die( "Can't open $perlop: $!" );
-  binmode(PERLOP, ":encoding(UTF-8)");
+  my $fh = $self->open_fh('<', $perlop);
 
   my $thing = $self->opt_f;
 
@@ -1122,7 +1160,8 @@ sub search_perlop {
   my $seen_item = 0;
   my $skip = 1;
 
-  while( my $line = <PERLOP> ) {
+  while( my $line = <$fh> ) {
+    $line =~ /^=encoding\s+(\S+)/ && $self->set_encoding($fh, $1);
     # only start search after we hit the operator section
     if ($line =~ m!^X<operator, regexp>!) {
         $skip = 0;
@@ -1176,7 +1215,7 @@ sub search_perlop {
     DEBUG > 4 and print "No pod from perlop\n";
   }
 
-  close PERLOP;
+  close $fh;
 
   return;
 }
@@ -1189,24 +1228,12 @@ sub search_perlapi {
     DEBUG > 2 and print "Search: @$found_things\n";
 
     my $perlapi = shift @$found_things;
-    open(PAPI, "<", $perlapi)               # "Funk is its own reward"
-        or $self->die("Can't open $perlapi: $!");
+    my $fh = $self->open_fh('<', $perlapi);
 
     my $search_re = quotemeta($self->opt_a);
 
     DEBUG > 2 and
      print "Going to perlapi-scan for $search_re in $perlapi\n";
-
-    # Check available translator or backup to default (english)
-    if ( $self->opt_L && defined $self->{'translators'}->[0] ) {
-        my $tr = $self->{'translators'}->[0];
-        if ( $] < 5.008 ) {
-            $self->aside("Your old perl doesn't really have proper unicode support.");
-        }
-        else {
-            binmode(PAPI, ":encoding(UTF-8)");
-        }
-    }
 
     local $_;
 
@@ -1216,7 +1243,9 @@ sub search_perlapi {
 
     my @related;
     my $related_re;
-    while (<PAPI>) {  # "The Mothership Connection is here!"
+    while (<$fh>) {
+        /^=encoding\s+(\S+)/ && $self->set_encoding($fh, $1);
+
         if ( m/^=item\s+$search_re\b/ )  {
             $found = 1;
         }
@@ -1253,7 +1282,7 @@ sub search_perlapi {
           $self->opt_a )
         ;
     }
-    close PAPI                or $self->die( "Can't open $perlapi: $!" );
+    close $fh                or $self->die( "Can't open $perlapi: $!" );
 
     return;
 }
@@ -1265,16 +1294,15 @@ sub search_perlfunc {
 
     DEBUG > 2 and print "Search: @$found_things\n";
 
-    my $perlfunc = shift @$found_things;
-    open(PFUNC, "<", $perlfunc)               # "Funk is its own reward"
-        or $self->die("Can't open $perlfunc: $!");
+    my $pfunc = shift @$found_things;
+    my $fh = $self->open_fh("<", $pfunc); # "Funk is its own reward"
 
     # Functions like -r, -e, etc. are listed under `-X'.
     my $search_re = ($self->opt_f =~ /^-[rwxoRWXOeszfdlpSbctugkTBMAC]$/)
                         ? '(?:I<)?-X' : quotemeta($self->opt_f) ;
 
     DEBUG > 2 and
-     print "Going to perlfunc-scan for $search_re in $perlfunc\n";
+     print "Going to perlfunc-scan for $search_re in $pfunc\n";
 
     my $re = 'Alphabetical Listing of Perl Functions';
 
@@ -1285,14 +1313,12 @@ sub search_perlfunc {
         if ( $] < 5.008 ) {
             $self->aside("Your old perl doesn't really have proper unicode support.");
         }
-        else {
-            binmode(PFUNC, ":encoding(UTF-8)");
-        }
     }
 
     # Skip introduction
     local $_;
-    while (<PFUNC>) {
+    while (<$fh>) {
+        /^=encoding\s+(\S+)/ && $self->set_encoding($fh, $1);
         last if /^=head2 $re/;
     }
 
@@ -1304,7 +1330,7 @@ sub search_perlfunc {
 
     my @related;
     my $related_re;
-    while (<PFUNC>) {  # "The Mothership Connection is here!"
+    while (<$fh>) {  # "The Mothership Connection is here!"
         last if( grep{ $self->opt_f eq $_ }@perlops );
 
         if ( /^=over/ and not $found ) {
@@ -1354,7 +1380,7 @@ sub search_perlfunc {
           $self->opt_f )
         ;
     }
-    close PFUNC                or $self->die( "Can't close $perlfunc: $!" );
+    close $fh                or $self->die( "Can't close $pfunc: $!" );
 
     return;
 }
@@ -1379,10 +1405,9 @@ EOD
     local $_;
     foreach my $file (@$found_things) {
         $self->die( "invalid file spec: $!" ) if $file =~ /[<>|]/;
-        open(INFAQ, "<", $file)  # XXX 5.6ism
-         or $self->die( "Can't read-open $file: $!\nAborting" );
-        binmode(INFAQ, ":encoding(UTF-8)");
-        while (<INFAQ>) {
+        my $fh = $self->open_fh("<", $file);
+        while (<$fh>) {
+            /^=encoding\s+(\S+)/ && $self->set_encoding($fh, $1);
             if ( m/^=head2\s+.*(?:$search_key)/i ) {
                 $found = 1;
                 push @$pod, "=head1 Found in $file\n\n" unless $found_in{$file}++;
@@ -1393,7 +1418,7 @@ EOD
             next unless $found;
             push @$pod, $_;
         }
-        close(INFAQ);
+        close($fh);
     }
     CORE::die("No documentation for perl FAQ keyword '$search_key' found\n")
      unless @$pod;
@@ -1617,6 +1642,9 @@ sub minus_f_nocase {   # i.e., do like -f, but without regard to case
 #..........................................................................
 
 sub pagers_guessing {
+    # TODO: This whole subroutine needs to be rewritten. It's semi-insane
+    # right now.
+
     my $self = shift;
 
     my @pagers;
@@ -1653,6 +1681,7 @@ sub pagers_guessing {
         unshift @pagers, "$ENV{PERLDOC_SRC_PAGER}" if $ENV{PERLDOC_SRC_PAGER}
     }
     else {
+        unshift @pagers, "$ENV{MANPAGER} <" if $ENV{MANPAGER};
         unshift @pagers, "$ENV{PERLDOC_PAGER} <" if $ENV{PERLDOC_PAGER};
     }
 
@@ -1732,9 +1761,9 @@ sub isprintable {
 
 	my $data;
 	local($_);
-	open(TEST,"<", $file)     or $self->die( "Can't open $file: $!" );
-	read TEST, $data, $size;
-	close TEST;
+	my $fh = $self->open_fh("<", $file);
+	read $fh, $data, $size;
+	close $fh;
 	$size= length($data);
 	$data =~ tr/\x09-\x0D\x20-\x7E//d;
 	return length($data) <= $size*$maxunprintfrac;
@@ -1767,14 +1796,14 @@ sub containspod {
     }
 
     local($_);
-    open(TEST,"<", $file)   or $self->die( "Can't open $file: $!" );   # XXX 5.6ism
-    while (<TEST>) {
+    my $fh = $self->open_fh("<", $file);
+    while (<$fh>) {
     if (/^=head/) {
-        close(TEST)     or $self->die( "Can't close $file: $!" );
+        close($fh)     or $self->die( "Can't close $file: $!" );
         return 1;
     }
     }
-    close(TEST)         or $self->die( "Can't close $file: $!" );
+    close($fh)         or $self->die( "Can't close $file: $!" );
     return 0;
 }
 
@@ -1810,15 +1839,8 @@ sub new_output_file {
 
   # Otherwise open a write-handle on opt_d!f
 
-  my $fh;
-  # If we are running before perl5.6.0, we can't autovivify
-  if ($^V < 5.006) {
-    require Symbol;
-    $fh = Symbol::gensym();
-  }
   DEBUG > 3 and print "About to try writing to specified output file $outspec\n";
-  $self->die( "Can't write-open $outspec: $!" )
-   unless open($fh, ">", $outspec); # XXX 5.6ism
+  my $fh = $self->open_fh(">", $outspec);
 
   DEBUG > 3 and print "Successfully opened $outspec\n";
   binmode($fh) if $self->{'output_is_binary'};
@@ -1872,12 +1894,12 @@ sub page {  # apply a pager to the output file
     my ($self, $output, $output_to_stdout, @pagers) = @_;
     if ($output_to_stdout) {
         $self->aside("Sending unpaged output to STDOUT.\n");
-        open(TMP, "<", $output)  or  $self->die( "Can't open $output: $!" ); # XXX 5.6ism
+        my $fh = $self->open_fh("<", $output);
         local $_;
-        while (<TMP>) {
+        while (<$fh>) {
             print or $self->die( "Can't print to stdout: $!" );
         }
-        close TMP  or $self->die( "Can't close while $output: $!" );
+        close $fh or $self->die( "Can't close while $output: $!" );
         $self->unlink_if_temp_file($output);
     } else {
         # On VMS, quoting prevents logical expansion, and temp files with no
@@ -1895,6 +1917,9 @@ sub page {  # apply a pager to the output file
             if ($self->is_vms) {
                 last if system("$pager $output") == 0;
             } else {
+                # fix visible escape codes in ToTerm output
+                # https://bugs.debian.org/758689
+                local $ENV{LESS} = defined $ENV{LESS} ? "$ENV{LESS} -R" : "-R";
                 last if system("$pager \"$output\"") == 0;
             }
         }
