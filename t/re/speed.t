@@ -23,7 +23,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 17;  # Update this when adding/deleting tests.
+plan tests => 25;  # Update this when adding/deleting tests.
 
 use strict;
 use warnings;
@@ -102,14 +102,22 @@ sub run_tests {
         # things tend to go quadratic (RT #123743)
 
         $s = ('0' x 200_000) . '::: 0c';
-        ok ($s !~ /.*:::\s*ab/,   'PREGf_IMPLICIT');
-        ok ($s !~ /.*:::\s*ab/i,  'PREGf_IMPLICIT/i');
-        ok ($s !~ /.*:::\s*ab/m,  'PREGf_IMPLICIT/m');
-        ok ($s !~ /.*:::\s*ab/mi, 'PREGf_IMPLICIT/mi');
-        ok ($s !~ /.*:::\s*ab/s,  'PREGf_IMPLICIT/s');
-        ok ($s !~ /.*:::\s*ab/si, 'PREGf_IMPLICIT/si');
-        ok ($s !~ /.*:::\s*ab/ms, 'PREGf_IMPLICIT/ms');
-        ok ($s !~ /.*:::\s*ab/msi,'PREGf_IMPLICIT/msi');
+        ok ($s !~ /.*:::\s*ab/,    'PREGf_IMPLICIT');
+        ok ($s !~ /.*:::\s*ab/i,   'PREGf_IMPLICIT/i');
+        ok ($s !~ /.*:::\s*ab/m,   'PREGf_IMPLICIT/m');
+        ok ($s !~ /.*:::\s*ab/mi,  'PREGf_IMPLICIT/mi');
+        ok ($s !~ /.*:::\s*ab/s,   'PREGf_IMPLICIT/s');
+        ok ($s !~ /.*:::\s*ab/si,  'PREGf_IMPLICIT/si');
+        ok ($s !~ /.*:::\s*ab/ms,  'PREGf_IMPLICIT/ms');
+        ok ($s !~ /.*:::\s*ab/msi, 'PREGf_IMPLICIT/msi');
+        ok ($s !~ /.*?:::\s*ab/,   'PREGf_IMPLICIT');
+        ok ($s !~ /.*?:::\s*ab/i,  'PREGf_IMPLICIT/i');
+        ok ($s !~ /.*?:::\s*ab/m,  'PREGf_IMPLICIT/m');
+        ok ($s !~ /.*?:::\s*ab/mi, 'PREGf_IMPLICIT/mi');
+        ok ($s !~ /.*?:::\s*ab/s,  'PREGf_IMPLICIT/s');
+        ok ($s !~ /.*?:::\s*ab/si, 'PREGf_IMPLICIT/si');
+        ok ($s !~ /.*?:::\s*ab/ms, 'PREGf_IMPLICIT/ms');
+        ok ($s !~ /.*?:::\s*ab/msi,'PREGf_IMPLICIT/msi');
     }
 
 } # End of sub run_tests
