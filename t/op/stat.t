@@ -25,7 +25,7 @@ if ($^O eq 'MSWin32') {
     ${^WIN32_SLOPPY_STAT} = 0;
 }
 
-plan tests => 113;
+plan tests => 115;
 
 my $Perl = which_perl();
 
@@ -620,6 +620,16 @@ SKIP: {
     stat 'prepeinamehyparcheiarcheiometoonomaavto';
     stat _;
     is $w, undef, 'no unopened warning from stat _';
+}
+
+{
+    # [perl #123816]
+    # Inappropriate stacking of l?stat with filetests should either work or
+    # give a syntax error, they shouldn't crash.
+    eval { stat -t };
+    ok(1, 'can "stat -t" without crashing');
+	eval { lstat -t };
+    ok(1, 'can "lstat -t" without crashing');
 }
 
 END {
