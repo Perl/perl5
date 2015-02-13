@@ -9273,7 +9273,7 @@ sub utf8_heavy_name ($$) {
 {   # Closure
 
     my $indent_increment = " " x (($debugging_build) ? 2 : 0);
-    my %already_output;
+    %main::already_output = ();
 
     $main::simple_dumper_nesting = 0;
 
@@ -9293,7 +9293,7 @@ sub utf8_heavy_name ($$) {
         # nesting level is localized, so that as the call stack pops, it goes
         # back to the prior value.
         local $main::simple_dumper_nesting = $main::simple_dumper_nesting;
-        undef %already_output if $main::simple_dumper_nesting == 0;
+        local %main::already_output = %main::already_output;
         $main::simple_dumper_nesting++;
         #print STDERR __LINE__, ": $main::simple_dumper_nesting: $indent$item\n";
 
@@ -9324,10 +9324,10 @@ sub utf8_heavy_name ($$) {
 
             # Keep track of cycles in the input, and refuse to infinitely loop
             my $addr = do { no overloading; pack 'J', $item; };
-            if (defined $already_output{$addr}) {
+            if (defined $main::already_output{$addr}) {
                 return "${indent}ALREADY OUTPUT: $item\n";
             }
-            $already_output{$addr} = $item;
+            $main::already_output{$addr} = $item;
 
             if (ref $item eq 'ARRAY') {
                 my $using_brackets;
