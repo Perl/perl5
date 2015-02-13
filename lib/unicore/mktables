@@ -17329,7 +17329,7 @@ sub write_all_tables() {
                         }
 
                         # To save memory, unlike the similar list for property
-                        # aliases above, only the standard forms hve the list.
+                        # aliases above, only the standard forms have the list.
                         # This forces an extra step of converting from input
                         # name to standard name, but the savings are
                         # considerable.  (There is only marginal savings if we
