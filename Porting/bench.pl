@@ -149,7 +149,7 @@ high counts will dominate.
 
 =item *
 
---sort=I<perl:field>
+--sort=I<field:perl>
 
 Order the tests in the output based on the value of I<field> in the
 column I<perl>. The I<perl> value is as per C<--norm>. For example
@@ -238,7 +238,7 @@ usage: $0 [options] perl[=label] ...
                        [default: 0].
   --perlargs=foo     Optional command-line args to pass to each perl to run.
   --raw              Display raw data counts rather than percentages.
-  --sort=perl:field  Sort the tests based on the value of 'field' in the
+  --sort=field:perl  Sort the tests based on the value of 'field' in the
                        column 'perl'. The perl value is as per --norm.
   -r|--read=file     Read in previously saved data from the specified file.
   --tests=FOO        Select only the specified tests from the benchmarks file;
