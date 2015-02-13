@@ -13418,7 +13418,7 @@ sub compile_perl() {
     # have Uppercase and Lowercase defined, so use the general category
     # instead for them, modified by hard-coding in the code points each is
     # missing.
-    my $Lower = $perl->add_match_table('Lower');
+    my $Lower = $perl->add_match_table('XPosixLower');
     my $Unicode_Lower = property_ref('Lowercase');
     if (defined $Unicode_Lower && ! $Unicode_Lower->is_empty) {
         $Lower->set_equivalent_to($Unicode_Lower->table('Y'), Related => 1);
@@ -13456,13 +13456,12 @@ sub compile_perl() {
             $Lower += $code_point;
         }
     }
-    $Lower->add_alias('XPosixLower');
     my $Posix_Lower = $perl->add_match_table("PosixLower",
                             Description => "[a-z]",
                             Initialize => $Lower & $ASCII,
                             );
 
-    my $Upper = $perl->add_match_table('Upper');
+    my $Upper = $perl->add_match_table("XPosixUpper");
     my $Unicode_Upper = property_ref('Uppercase');
     if (defined $Unicode_Upper && ! $Unicode_Upper->is_empty) {
         $Upper->set_equivalent_to($Unicode_Upper->table('Y'), Related => 1);
@@ -13475,7 +13474,6 @@ sub compile_perl() {
         $Upper->add_range(0x2160, 0x216F);  # Uppercase Roman numerals
         $Upper->add_range(0x24B6, 0x24CF);  # Circled Latin upper case letters
     }
-    $Upper->add_alias('XPosixUpper');
     my $Posix_Upper = $perl->add_match_table("PosixUpper",
                             Description => "[A-Z]",
                             Initialize => $Upper & $ASCII,
@@ -13597,7 +13595,7 @@ sub compile_perl() {
     # one whose name generally begins with Posix that is posix-compliant, and
     # one that matches Unicode characters beyond the Posix, ASCII range
 
-    my $Alpha = $perl->add_match_table('Alpha');
+    my $Alpha = $perl->add_match_table('XPosixAlpha');
 
     # Alphabetic was not present in early releases
     my $Alphabetic = property_ref('Alphabetic');
@@ -13684,7 +13682,6 @@ sub compile_perl() {
         $Alpha->add_description('Alphabetic');
         $Alpha->add_alias('Alphabetic');
     }
-    $Alpha->add_alias('XPosixAlpha');
     my $Posix_Alpha = $perl->add_match_table("PosixAlpha",
                             Description => "[A-Za-z]",
                             Initialize => $Alpha & $ASCII,
@@ -13692,22 +13689,20 @@ sub compile_perl() {
     $Posix_Upper->set_caseless_equivalent($Posix_Alpha);
     $Posix_Lower->set_caseless_equivalent($Posix_Alpha);
 
-    my $Alnum = $perl->add_match_table('Alnum',
+    my $Alnum = $perl->add_match_table('Alnum', Full_Name => 'XPosixAlnum',
                         Description => 'Alphabetic and (decimal) Numeric',
                         Initialize => $Alpha + $gc->table('Decimal_Number'),
                         );
-    $Alnum->add_alias('XPosixAlnum');
     $perl->add_match_table("PosixAlnum",
                             Description => "[A-Za-z0-9]",
                             Initialize => $Alnum & $ASCII,
                             );
 
-    my $Word = $perl->add_match_table('Word',
+    my $Word = $perl->add_match_table('Word', Full_Name => 'XPosixWord',
                                 Description => '\w, including beyond ASCII;'
                                             . ' = \p{Alnum} + \pM + \p{Pc}',
                                 Initialize => $Alnum + $gc->table('Mark'),
                                 );
-    $Word->add_alias('XPosixWord');
     my $Pc = $gc->table('Connector_Punctuation'); # 'Pc' Not in release 1
     if (defined $Pc) {
         $Word += $Pc;
@@ -13724,13 +13719,13 @@ sub compile_perl() {
     }
 
     # This is a Perl extension, so the name doesn't begin with Posix.
-    my $PerlWord = $perl->add_match_table('PerlWord',
+    my $PerlWord = $perl->add_match_table('PosixWord',
                     Description => '\w, restricted to ASCII = [A-Za-z0-9_]',
                     Initialize => $Word & $ASCII,
                     );
-    $PerlWord->add_alias('PosixWord');
+    $PerlWord->add_alias('PerlWord');
 
-    my $Blank = $perl->add_match_table('Blank',
+    my $Blank = $perl->add_match_table('Blank', Full_Name => 'XPosixBlank',
                                 Description => '\h, Horizontal white space',
 
                                 # 200B is Zero Width Space which is for line
@@ -13741,7 +13736,6 @@ sub compile_perl() {
                                             -   0x200B, # ZWSP
                                 );
     $Blank->add_alias('HorizSpace');        # Another name for it.
-    $Blank->add_alias('XPosixBlank');
     $perl->add_match_table("PosixBlank",
                             Description => "\\t and ' '",
                             Initialize => $Blank & $ASCII,
@@ -13760,11 +13754,10 @@ sub compile_perl() {
                     );
     # No Posix equivalent for vertical space
 
-    my $Space = $perl->add_match_table('Space',
+    my $Space = $perl->add_match_table('XPosixSpace',
                 Description => '\s including beyond ASCII and vertical tab',
                 Initialize => $Blank + $VertSpace,
     );
-    $Space->add_alias('XPosixSpace');
     $Space->add_alias('XPerlSpace');    # Pre-existing synonyms
     $Space->add_alias('SpacePerl');
 
@@ -13774,11 +13767,9 @@ sub compile_perl() {
                             );
     $Posix_space->add_alias('PerlSpace'); # A pre-existing synonym
 
-
-    my $Cntrl = $perl->add_match_table('Cntrl',
+    my $Cntrl = $perl->add_match_table('Cntrl', Full_Name => 'XPosixCntrl',
                                         Description => 'Control characters');
     $Cntrl->set_equivalent_to($gc->table('Cc'), Related => 1);
-    $Cntrl->add_alias('XPosixCntrl');
     $perl->add_match_table("PosixCntrl",
                             Description => "ASCII control characters: NUL, SOH, STX, ETX, EOT, ENQ, ACK, BEL, BS, HT, LF, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, DC4, NAK, SYN, ETB, CAN, EOM, SUB, ESC, FS, GS, RS, US, and DEL",
                             Initialize => $Cntrl & $ASCII,
@@ -13791,22 +13782,20 @@ sub compile_perl() {
     $controls += $gc->table('Surrogate') if defined $gc->table('Surrogate');
 
     # Graph is  ~space &  ~(Cc|Cs|Cn) = ~(space + $controls)
-    my $Graph = $perl->add_match_table('Graph',
+    my $Graph = $perl->add_match_table('Graph', Full_Name => 'XPosixGraph',
                         Description => 'Characters that are graphical',
                         Initialize => ~ ($Space + $controls),
                         );
-    $Graph->add_alias('XPosixGraph');
     $perl->add_match_table("PosixGraph",
                             Description =>
                                 '[-!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~0-9A-Za-z]',
                             Initialize => $Graph & $ASCII,
                             );
 
-    $print = $perl->add_match_table('Print',
+    $print = $perl->add_match_table('Print', Full_Name => 'XPosixPrint',
                         Description => 'Characters that are graphical plus space characters (but no controls)',
                         Initialize => $Blank + $Graph - $gc->table('Control'),
                         );
-    $print->add_alias('XPosixPrint');
     $perl->add_match_table("PosixPrint",
                             Description =>
                               '[- 0-9A-Za-z!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~]',
@@ -13828,18 +13817,16 @@ sub compile_perl() {
         Initialize => $ASCII & $XPosixPunct,
         );
 
-    my $Digit = $perl->add_match_table('Digit',
+    my $Digit = $perl->add_match_table('Digit', Full_Name => 'XPosixDigit',
                             Description => '[0-9] + all other decimal digits');
     $Digit->set_equivalent_to($gc->table('Decimal_Number'), Related => 1);
-    $Digit->add_alias('XPosixDigit');
     my $PosixDigit = $perl->add_match_table("PosixDigit",
                                             Description => '[0-9]',
                                             Initialize => $Digit & $ASCII,
                                             );
 
     # Hex_Digit was not present in first release
-    my $Xdigit = $perl->add_match_table('XDigit');
-    $Xdigit->add_alias('XPosixXDigit');
+    my $Xdigit = $perl->add_match_table('XDigit', Full_Name => 'XPosixXDigit');
     my $Hex = property_ref('Hex_Digit');
     if (defined $Hex && ! $Hex->is_empty) {
         $Xdigit->set_equivalent_to($Hex->table('Y'), Related => 1);

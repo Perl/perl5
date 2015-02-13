@@ -172,8 +172,21 @@ L<Benchmark> has been upgraded from version 1.19 to 1.20.
 =item *
 
 L<Unicode::UCD> has been upgraded from version 0.60 to 0.61.
+
+=over 4
+
+=item *
+
 A new function L<property_values()|Unicode::UCD/prop_values()>
 has been added to return a given property's possible values.
+
+=item *
+
+A bug has been fixed so that L<propaliases()|Unicode::UCD/prop_aliases()>
+returns the correct short and long names for the Perl extensions where
+it was incorrect.
+
+=back
 
 =back
 

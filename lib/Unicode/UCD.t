@@ -678,6 +678,15 @@ foreach my $alias (sort keys %utf8::loose_to_file_of) {
     }
 }
 
+# Some of the Perl extensions should always be built; make sure they have the
+# correct full name, etc.
+for my $prop (qw(Alnum Blank Cntrl Digit Graph Print Word XDigit)) {
+    my @expected = ( $prop, "XPosix$prop" );
+    my @got = prop_aliases($prop);
+    splice @got, 2;
+    is_deeply(\@got, \@expected, "Got expected aliases for $prop");
+}
+
 my $done_equals = 0;
 foreach my $alias (keys %utf8::stricter_to_file_of) {
     if ($alias =~ /=/) {    # Only test one case where there is an equals
