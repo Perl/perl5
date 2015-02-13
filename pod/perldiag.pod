@@ -2802,6 +2802,13 @@ character (U+FFFD).
 with the B<-D> option with no flags to see the list of acceptable values.
 See also L<perlrun/-Dletters>.
 
+=item Invalid quantifier in {,} in regex; marked by <-- HERE in m/%s/
+
+(F) The pattern looks like a {min,max} quantifier, but the min or max
+could not be parsed as a valid number - either it has leading zeroes,
+or it represents too big a number to cope with.  The S<<-- HERE> shows
+where in the regular expression the problem was discovered.  See L<perlre>.
+
 =item Invalid [] range "%s" in regex; marked by S<<-- HERE> in m/%s/
 
 (F) The range specified in a character class had a minimum character

@@ -10772,6 +10772,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     char *parse_start;
 #endif
     const char *maxpos = NULL;
+    UV uv;
 
     /* Save the original in case we change the emitted regop to a FAIL. */
     regnode * const orig_emit = RExC_emit;
@@ -10813,16 +10814,30 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    if (!maxpos)
 		maxpos = next;
 	    RExC_parse++;
-	    min = grok_atou(RExC_parse, &endptr);
+            if (isDIGIT(*RExC_parse)) {
+                uv = grok_atou(RExC_parse, &endptr);
+                if (!endptr)
+                    vFAIL("Invalid quantifier in {,}");
+                if (uv >= REG_INFTY)
+                    vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
+                min = (I32)uv;
+            } else {
+                min = 0;
+            }
 	    if (*maxpos == ',')
 		maxpos++;
 	    else
 		maxpos = RExC_parse;
-	    max = grok_atou(maxpos, &endptr);
-	    if (!max && *maxpos != '0')
+            if (isDIGIT(*maxpos)) {
+                uv = grok_atou(maxpos, &endptr);
+                if (!endptr)
+                    vFAIL("Invalid quantifier in {,}");
+                if (uv >= REG_INFTY)
+                    vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
+                max = (I32)uv;
+            } else {
 		max = REG_INFTY;		/* meaning "infinity" */
-	    else if (max >= REG_INFTY)
-		vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
+            }
 	    RExC_parse = next;
 	    nextchar(pRExC_state);
             if (max < min) {    /* If can't match, warn and optimize to fail
