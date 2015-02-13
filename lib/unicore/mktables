@@ -17289,8 +17289,6 @@ sub write_all_tables() {
                     # Similarly, we create for Unicode::UCD a list of
                     # property-value aliases.
 
-                    my $property_full_name = $property->full_name;
-
                     # Look at each table in the property...
                     foreach my $table ($property->tables) {
                         my @values_list;
