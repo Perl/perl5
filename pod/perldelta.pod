@@ -62,7 +62,7 @@ L<[perl #123096]|https://rt.perl.org/Ticket/Display.html?id=123096>
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.020001 to 5.20150131.
+L<Module::CoreList> has been upgraded from version 5.020001 to 5.20150214.
 
 The list of Perl versions covered has been updated.
 
