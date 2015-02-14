@@ -111,7 +111,8 @@ Character Database.
 
 Some of the functions are called with a I<code point argument>, which is either
 a decimal or a hexadecimal scalar designating a code point in the platform's
-native character set (extended to Unicode), or C<U+> followed by hexadecimals
+native character set (extended to Unicode), or a string containing C<U+>
+followed by hexadecimals
 designating a Unicode code point.  A leading 0 will force a hexadecimal
 interpretation, as will a hexadecimal digit that isn't a decimal digit.
 
@@ -120,7 +121,7 @@ Examples:
     223     # Decimal 223 in native character set
     0223    # Hexadecimal 223, native (= 547 decimal)
     0xDF    # Hexadecimal DF, native (= 223 decimal
-    U+DF    # Hexadecimal DF, in Unicode's character set
+    'U+DF'  # Hexadecimal DF, in Unicode's character set
                               (= LATIN SMALL LETTER SHARP S)
 
 Note that the largest code point in Unicode is U+10FFFF.
@@ -284,30 +285,30 @@ As of Unicode 6.0, this is always empty.
 
 =item B<upper>
 
-is empty if there is no single code point uppercase mapping for I<code>
-(its uppercase mapping is itself);
-otherwise it is that mapping expressed as at least four hexdigits.
-(L</casespec()> should be used in addition to B<charinfo()>
-for case mappings when the calling program can cope with multiple code point
-mappings.)
+is, if non-empty, the uppercase mapping for I<code> expressed as at least four
+hexdigits.  This indicates that the full uppercase mapping is a single
+character, and is identical to the simple (single-character only) mapping.
+When this field is empty, it means that the simple uppercase mapping is
+I<code> itself; you'll need some other means, (like
+L</casespec()> to get the full mapping.
 
 =item B<lower>
 
-is empty if there is no single code point lowercase mapping for I<code>
-(its lowercase mapping is itself);
-otherwise it is that mapping expressed as at least four hexdigits.
-(L</casespec()> should be used in addition to B<charinfo()>
-for case mappings when the calling program can cope with multiple code point
-mappings.)
+is, if non-empty, the lowercase mapping for I<code> expressed as at least four
+hexdigits.  This indicates that the full lowercase mapping is a single
+character, and is identical to the simple (single-character only) mapping.
+When this field is empty, it means that the simple lowercase mapping is
+I<code> itself; you'll need some other means, (like
+L</casespec()> to get the full mapping.
 
 =item B<title>
 
-is empty if there is no single code point titlecase mapping for I<code>
-(its titlecase mapping is itself);
-otherwise it is that mapping expressed as at least four hexdigits.
-(L</casespec()> should be used in addition to B<charinfo()>
-for case mappings when the calling program can cope with multiple code point
-mappings.)
+is, if non-empty, the titlecase mapping for I<code> expressed as at least four
+hexdigits.  This indicates that the full titlecase mapping is a single
+character, and is identical to the simple (single-character only) mapping.
+When this field is empty, it means that the simple titlecase mapping is
+I<code> itself; you'll need some other means, (like
+L</casespec()> to get the full mapping.
 
 =item B<block>
 
@@ -2070,10 +2071,10 @@ are only a few dozen possible General Categories.
 
 You can use L</prop_values()> to find out if a given property is one which has
 a restricted set of values, and if so, what those values are.  But usually
-each value actually has several synonyms.  For example, in binary properties,
-I<truth> can be represented by any of the strings "Y", "Yes", "T", or "True";
-and the General Category "Punctuation" by that string, or "Punct", or simply
-"P".
+each value actually has several synonyms.  For example, in Unicode binary
+properties, I<truth> can be represented by any of the strings "Y", "Yes", "T",
+or "True"; and the General Category "Punctuation" by that string, or "Punct",
+or simply "P".
 
 Like property names, there is typically at least a short name for each such
 property-value, and a long name.  If you know any name of the property-value
@@ -2097,7 +2098,7 @@ C<undef>.
 
 If called with a property that doesn't have synonyms for its values, it
 returns the input value, possibly normalized with capitalization and
-underscores.
+underscores, but not necessarily checking that the input value is valid.
 
 For the block property, new-style block names are returned (see
 L</Old-style versus new-style block names>).
@@ -2889,6 +2890,14 @@ Use L</casefold()> for these.
 
 C<prop_invmap> does not know about any user-defined properties, and will
 return C<undef> if called with one of those.
+
+The returned values for the Perl extension properties, such as C<Any> and
+C<Greek> are somewhat misleading.  The values are either C<"Y"> or C<"N>".
+All Unicode properties are bipartite, so you can actually use the C<"Y"> or
+C<"N>" in a Perl regular rexpression for these, like C<qr/\p{ID_Start=Y/}> or
+C<qr/\p{Upper=N/}>.  But the Perl extensions aren't specified this way, only
+like C</qr/\p{Any}>, I<etc>.  You can't actually use the C<"Y"> and C<"N>" in
+them.
 
 =cut
 
@@ -3794,7 +3803,7 @@ as C<Basic Latin>, C<Latin 1 Supplement>, C<Latin Extended-A>, and
 C<Latin Extended-B>.  On the other hand, the Latin script does not
 contain all the characters of the C<Basic Latin> block (also known as
 ASCII): it includes only the letters, and not, for example, the digits
-or the punctuation.
+nor the punctuation.
 
 For blocks see L<http://www.unicode.org/Public/UNIDATA/Blocks.txt>
 
