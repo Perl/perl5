@@ -348,7 +348,7 @@ L<[perl #122655]|https://rt.perl.org/Ticket/Display.html?id=122655>
 =head1 Acknowledgements
 
 Perl 5.20.2 represents approximately 5 months of development since Perl 5.20.1
-and contains approximately 6,200 lines of changes across 170 files from 34
+and contains approximately 6,300 lines of changes across 170 files from 34
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
