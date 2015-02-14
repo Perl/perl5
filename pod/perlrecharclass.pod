@@ -571,7 +571,7 @@ Examples:
  "]"   =~ /[][]/      #  Match, as the character class contains.
                       #  both [ and ].
  "[]"  =~ /[[]]/      #  Match, the pattern contains a character class
-                      #  containing just ], and the character class is
+                      #  containing just [, and the character class is
                       #  followed by a ].
 
 =head3 Character Ranges
