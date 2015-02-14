@@ -186,6 +186,10 @@ A bug has been fixed so that L<propaliases()|Unicode::UCD/prop_aliases()>
 returns the correct short and long names for the Perl extensions where
 it was incorrect.
 
+=item *
+
+This module now works on EBCDIC platforms.
+
 =back
 
 =back

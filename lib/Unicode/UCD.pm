@@ -3530,8 +3530,15 @@ RETRY:
                 # If the overrides came from SPECIALS, the code point keys are
                 # packed UTF-8.
                 if ($overrides == $swash->{'SPECIALS'}) {
-                    $cp = unpack("C0U", $cp_maybe_utf8);
-                    @map = unpack "U0U*", $swash->{'SPECIALS'}{$cp_maybe_utf8};
+                    $cp = $cp_maybe_utf8;
+                    if (! utf8::decode($cp)) {
+                        croak __PACKAGE__, "::prop_invmap: Malformed UTF-8: ",
+                              map { sprintf("\\x{%02X}", unpack("C", $_)) }
+                                                                split "", $cp;
+                    }
+
+                    $cp = unpack("W", $cp);
+                    @map = unpack "W*", $swash->{'SPECIALS'}{$cp_maybe_utf8};
 
                     # The empty string will show up unpacked as an empty
                     # array.

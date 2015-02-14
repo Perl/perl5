@@ -1,9 +1,7 @@
 #!perl -w
 BEGIN {
-    if (ord("A") != 65) {
-	print "1..0 # Skip: EBCDIC\n";
-	exit 0;
-    }
+    $::IS_ASCII = (ord("A") == 65) ? 1 : 0;
+    $::IS_EBCDIC = (ord("A") == 193) ? 1 : 0;
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
@@ -49,9 +47,11 @@ is($charinfo->{title},          '');
 is($charinfo->{block},          'Basic Latin');
 is($charinfo->{script},         'Common');
 
-$charinfo = charinfo(0x41);
+my $A_code = sprintf("%04X", ord("A"));
+my $a_code = sprintf("%04X", ord("a"));
+$charinfo = charinfo(utf8::unicode_to_native(0x41));
 
-is($charinfo->{code},           '0041', 'LATIN CAPITAL LETTER A');
+is($charinfo->{code},           $A_code, 'LATIN CAPITAL LETTER A');
 is($charinfo->{name},           'LATIN CAPITAL LETTER A');
 is($charinfo->{category},       'Lu');
 is($charinfo->{combining},      '0');
@@ -64,7 +64,7 @@ is($charinfo->{mirrored},       'N');
 is($charinfo->{unicode10},      '');
 is($charinfo->{comment},        '');
 is($charinfo->{upper},          '');
-is($charinfo->{lower},          '0061');
+is($charinfo->{lower},          $a_code);
 is($charinfo->{title},          '');
 is($charinfo->{block},          'Basic Latin');
 is($charinfo->{script},         'Latin');
@@ -76,7 +76,7 @@ is($charinfo->{name},           'LATIN CAPITAL LETTER A WITH MACRON');
 is($charinfo->{category},       'Lu');
 is($charinfo->{combining},      '0');
 is($charinfo->{bidi},           'L');
-is($charinfo->{decomposition},  '0041 0304');
+is($charinfo->{decomposition},  "$A_code 0304");
 is($charinfo->{decimal},        '');
 is($charinfo->{digit},          '');
 is($charinfo->{numeric},        '');
@@ -184,7 +184,7 @@ is($charinfo->{name},           'MATHEMATICAL BOLD CAPITAL A');
 is($charinfo->{category},       'Lu');
 is($charinfo->{combining},      '0');
 is($charinfo->{bidi},           'L');
-is($charinfo->{decomposition},  '<font> 0041');
+is($charinfo->{decomposition},  "<font> $A_code");
 is($charinfo->{decimal},        '');
 is($charinfo->{digit},          '');
 is($charinfo->{numeric},        '');
@@ -225,14 +225,18 @@ is(charblock(0x590),          'Hebrew', '0x0590 - Hebrew unused charblock');
 is(charscript(0x590),         'Unknown',    '0x0590 - Hebrew unused charscript');
 is(charblock(0x1FFFF),        'No_Block', '0x1FFFF - unused charblock');
 
-$charinfo = charinfo(0xbe);
+my $fraction_3_4_code = sprintf("%04X", utf8::unicode_to_native(0xbe));
+$charinfo = charinfo(hex $fraction_3_4_code);
 
-is($charinfo->{code},           '00BE', 'VULGAR FRACTION THREE QUARTERS');
+is($charinfo->{code},           $fraction_3_4_code, 'VULGAR FRACTION THREE QUARTERS');
 is($charinfo->{name},           'VULGAR FRACTION THREE QUARTERS');
 is($charinfo->{category},       'No');
 is($charinfo->{combining},      '0');
 is($charinfo->{bidi},           'ON');
-is($charinfo->{decomposition},  '<fraction> 0033 2044 0034');
+is($charinfo->{decomposition},  '<fraction> '
+                                . sprintf("%04X", ord "3")
+                                . " 2044 "
+                                . sprintf("%04X", ord "4"));
 is($charinfo->{decimal},        '');
 is($charinfo->{digit},          '');
 is($charinfo->{numeric},        '3/4');
@@ -248,13 +252,15 @@ is($charinfo->{script},         'Common');
 # This is to test a case where both simple and full lowercases exist and
 # differ
 $charinfo = charinfo(0x130);
+my $I_code = sprintf("%04X", ord("I"));
+my $i_code = sprintf("%04X", ord("i"));
 
 is($charinfo->{code},           '0130', 'LATIN CAPITAL LETTER I WITH DOT ABOVE');
 is($charinfo->{name},           'LATIN CAPITAL LETTER I WITH DOT ABOVE');
 is($charinfo->{category},       'Lu');
 is($charinfo->{combining},      '0');
 is($charinfo->{bidi},           'L');
-is($charinfo->{decomposition},  '0049 0307');
+is($charinfo->{decomposition},  "$I_code 0307");
 is($charinfo->{decimal},        '');
 is($charinfo->{digit},          '');
 is($charinfo->{numeric},        '');
@@ -262,7 +268,7 @@ is($charinfo->{mirrored},       'N');
 is($charinfo->{unicode10},      'LATIN CAPITAL LETTER I DOT');
 is($charinfo->{comment},        '');
 is($charinfo->{upper},          '');
-is($charinfo->{lower},          '0069');
+is($charinfo->{lower},          $i_code);
 is($charinfo->{title},          '');
 is($charinfo->{block},          'Latin Extended-A');
 is($charinfo->{script},         'Latin');
@@ -359,23 +365,26 @@ use Unicode::UCD qw(casefold);
 
 my $casefold;
 
-$casefold = casefold(0x41);
+$casefold = casefold(utf8::unicode_to_native(0x41));
 
-is($casefold->{code}, '0041', 'casefold 0x41 code');
-is($casefold->{status}, 'C', 'casefold 0x41 status');
-is($casefold->{mapping}, '0061', 'casefold 0x41 mapping');
-is($casefold->{full}, '0061', 'casefold 0x41 full');
-is($casefold->{simple}, '0061', 'casefold 0x41 simple');
-is($casefold->{turkic}, "", 'casefold 0x41 turkic');
+is($casefold->{code}, $A_code, 'casefold native(0x41) code');
+is($casefold->{status}, 'C', 'casefold native(0x41) status');
+is($casefold->{mapping}, $a_code, 'casefold native(0x41) mapping');
+is($casefold->{full}, $a_code, 'casefold native(0x41) full');
+is($casefold->{simple}, $a_code, 'casefold native(0x41) simple');
+is($casefold->{turkic}, "", 'casefold native(0x41) turkic');
 
-$casefold = casefold(0xdf);
+$casefold = casefold(utf8::unicode_to_native(0xdf));
+my $sharp_s_code = sprintf("%04X", utf8::unicode_to_native(0xdf));
+my $S_code = sprintf("%04X", ord "S");
+my $s_code = sprintf("%04X", ord "s");
 
-is($casefold->{code}, '00DF', 'casefold 0xDF code');
-is($casefold->{status}, 'F', 'casefold 0xDF status');
-is($casefold->{mapping}, '0073 0073', 'casefold 0xDF mapping');
-is($casefold->{full}, '0073 0073', 'casefold 0xDF full');
-is($casefold->{simple}, "", 'casefold 0xDF simple');
-is($casefold->{turkic}, "", 'casefold 0xDF turkic');
+is($casefold->{code}, $sharp_s_code, 'casefold native(0xDF) code');
+is($casefold->{status}, 'F', 'casefold native(0xDF) status');
+is($casefold->{mapping}, "$s_code $s_code", 'casefold native(0xDF) mapping');
+is($casefold->{full}, "$s_code $s_code", 'casefold native(0xDF) full');
+is($casefold->{simple}, "", 'casefold native(0xDF) simple');
+is($casefold->{turkic}, "", 'casefold native(0xDF) turkic');
 
 # Do different tests depending on if version < 3.2, or not.
 my $v_unicode_version = pack "C*", split /\./, Unicode::UCD::UnicodeVersion();
@@ -384,37 +393,37 @@ if ($v_unicode_version lt v3.2.0) {
 
 	is($casefold->{code}, '0130', 'casefold 0x130 code');
 	is($casefold->{status}, 'I' , 'casefold 0x130 status');
-	is($casefold->{mapping}, '0069', 'casefold 0x130 mapping');
-	is($casefold->{full}, '0069', 'casefold 0x130 full');
-	is($casefold->{simple}, "0069", 'casefold 0x130 simple');
-	is($casefold->{turkic}, "0069", 'casefold 0x130 turkic');
+	is($casefold->{mapping}, $i_code, 'casefold 0x130 mapping');
+	is($casefold->{full}, $i_code, 'casefold 0x130 full');
+	is($casefold->{simple}, $i_code, 'casefold 0x130 simple');
+	is($casefold->{turkic}, $i_code, 'casefold 0x130 turkic');
 
 	$casefold = casefold(0x131);
 
 	is($casefold->{code}, '0131', 'casefold 0x131 code');
 	is($casefold->{status}, 'I' , 'casefold 0x131 status');
-	is($casefold->{mapping}, '0069', 'casefold 0x131 mapping');
-	is($casefold->{full}, '0069', 'casefold 0x131 full');
-	is($casefold->{simple}, "0069", 'casefold 0x131 simple');
-	is($casefold->{turkic}, "0069", 'casefold 0x131 turkic');
+	is($casefold->{mapping}, $i_code, 'casefold 0x131 mapping');
+	is($casefold->{full}, $i_code, 'casefold 0x131 full');
+	is($casefold->{simple}, $i_code, 'casefold 0x131 simple');
+	is($casefold->{turkic}, $i_code, 'casefold 0x131 turkic');
 } else {
-	$casefold = casefold(0x49);
+	$casefold = casefold(utf8::unicode_to_native(0x49));
 
-	is($casefold->{code}, '0049', 'casefold 0x49 code');
-	is($casefold->{status}, 'C' , 'casefold 0x49 status');
-	is($casefold->{mapping}, '0069', 'casefold 0x49 mapping');
-	is($casefold->{full}, '0069', 'casefold 0x49 full');
-	is($casefold->{simple}, "0069", 'casefold 0x49 simple');
-	is($casefold->{turkic}, "0131", 'casefold 0x49 turkic');
+	is($casefold->{code}, $I_code, 'casefold native(0x49) code');
+	is($casefold->{status}, 'C' , 'casefold native(0x49) status');
+	is($casefold->{mapping}, $i_code, 'casefold native(0x49) mapping');
+	is($casefold->{full}, $i_code, 'casefold native(0x49) full');
+	is($casefold->{simple}, $i_code, 'casefold native(0x49) simple');
+	is($casefold->{turkic}, "0131", 'casefold native(0x49) turkic');
 
 	$casefold = casefold(0x130);
 
 	is($casefold->{code}, '0130', 'casefold 0x130 code');
 	is($casefold->{status}, 'F' , 'casefold 0x130 status');
-	is($casefold->{mapping}, '0069 0307', 'casefold 0x130 mapping');
-	is($casefold->{full}, '0069 0307', 'casefold 0x130 full');
+	is($casefold->{mapping}, "$i_code 0307", 'casefold 0x130 mapping');
+	is($casefold->{full}, "$i_code 0307", 'casefold 0x130 full');
 	is($casefold->{simple}, "", 'casefold 0x130 simple');
-	is($casefold->{turkic}, "0069", 'casefold 0x130 turkic');
+	is($casefold->{turkic}, $i_code, 'casefold 0x130 turkic');
 }
 
 $casefold = casefold(0x1F88);
@@ -426,21 +435,21 @@ is($casefold->{full}, '1F00 03B9', 'casefold 0x1F88 full');
 is($casefold->{simple}, '1F80', 'casefold 0x1F88 simple');
 is($casefold->{turkic}, "", 'casefold 0x1F88 turkic');
 
-ok(!casefold(0x20));
+ok(!casefold(utf8::unicode_to_native(0x20)));
 
 use Unicode::UCD qw(casespec);
 
 my $casespec;
 
-ok(!casespec(0x41));
+ok(!casespec(utf8::unicode_to_native(0x41)));
 
-$casespec = casespec(0xdf);
+$casespec = casespec(utf8::unicode_to_native(0xdf));
 
-ok($casespec->{code} eq '00DF' &&
-   $casespec->{lower} eq '00DF'  &&
-   $casespec->{title} eq '0053 0073'  &&
-   $casespec->{upper} eq '0053 0053' &&
-   !defined $casespec->{condition}, 'casespec 0xDF');
+ok($casespec->{code} eq $sharp_s_code &&
+   $casespec->{lower} eq $sharp_s_code  &&
+   $casespec->{title} eq "$S_code $s_code"  &&
+   $casespec->{upper} eq "$S_code $S_code" &&
+   !defined $casespec->{condition}, 'casespec native(0xDF)');
 
 $casespec = casespec(0x307);
 
@@ -475,7 +484,7 @@ is(Unicode::UCD::_getcode('U+123x'),  undef, "_getcode(x123)");
     my $r1 = charscript('Latin');
     if (ok(defined $r1, "Found Latin script")) {
         my $n1 = @$r1;
-        is($n1, 33, "number of ranges in Latin script (Unicode 7.0.0)");
+        is($n1, 33, "number of ranges in Latin script (Unicode 7.0.0)") if $::IS_ASCII;
         shift @$r1 while @$r1;
         my $r2 = charscript('Latin');
         is(@$r2, $n1, "modifying results should not mess up internal caches");
@@ -507,6 +516,8 @@ use charnames ":full";
 is(num("0"), 0, 'Verify num("0") == 0');
 is(num("98765"), 98765, 'Verify num("98765") == 98765');
 ok(! defined num("98765\N{FULLWIDTH DIGIT FOUR}"), 'Verify num("98765\N{FULLWIDTH DIGIT FOUR}") isnt defined');
+is(num("\N{NEW TAI LUE DIGIT TWO}"), 2, 'Verify num("\N{NEW TAI LUE DIGIT TWO}") == 2');
+is(num("\N{NEW TAI LUE DIGIT ONE}"), 1, 'Verify num("\N{NEW TAI LUE DIGIT ONE}") == 1');
 is(num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}"), 21, 'Verify num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}") == 21');
 ok(! defined num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}"), 'Verify num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}") isnt defined');
 is(num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}"), 3, 'Verify num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}") == 3');
@@ -930,8 +941,13 @@ use Unicode::UCD qw(prop_invlist prop_invmap MAX_CP);
 # elements are; just look at the first element to see if are getting the
 # distinction right.  The general inversion map testing below will test the
 # whole thing.
-my $prop = "uc";
-my ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
+
+my $prop;
+my ($invlist_ref, $invmap_ref, $format, $missing);
+if ($::IS_ASCII) { # On EBCDIC, other things will come first, and can vary
+                # according to code page
+$prop = "uc";
+($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
 is($format, 'al', "prop_invmap() format of '$prop' is 'al'");
 is($missing, '0', "prop_invmap() missing of '$prop' is '0'");
 is($invlist_ref->[1], 0x61, "prop_invmap('$prop') list[1] is 0x61");
@@ -957,15 +973,30 @@ is($format, 'al', "prop_invmap() format of '$prop' is 'al'");
 is($missing, '0', "prop_invmap() missing of '$prop' is '0'");
 is($invlist_ref->[1], 0x41, "prop_invmap('$prop') list[1] is 0x41");
 is($invmap_ref->[1], 0x61, "prop_invmap('$prop') map[1] is 0x61");
+}
 
 # This property is stable and small, so can test all of it
 $prop = "ASCII_Hex_Digit";
 ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
 is($format, 's', "prop_invmap() format of '$prop' is 's'");
 is($missing, 'N', "prop_invmap() missing of '$prop' is 'N'");
-is_deeply($invlist_ref, [ 0x0000, 0x0030, 0x003A, 0x0041,
-                          0x0047, 0x0061, 0x0067, 0x110000 ],
+if ($::IS_ASCII) {
+    is_deeply($invlist_ref, [ 0x0000, 0x0030, 0x003A,
+                              0x0041, 0x0047,
+                              0x0061, 0x0067, 0x110000
+                            ],
           "prop_invmap('$prop') code point list is correct");
+}
+elsif ($::IS_EBCDIC) {
+    is_deeply($invlist_ref, [
+            utf8::unicode_to_native(0x0000),
+            utf8::unicode_to_native(0x0061), utf8::unicode_to_native(0x0066) + 1,
+            utf8::unicode_to_native(0x0041), utf8::unicode_to_native(0x0046) + 1,
+            utf8::unicode_to_native(0x0030), utf8::unicode_to_native(0x0039) + 1,
+            utf8::unicode_to_native(0x110000)
+          ],
+          "prop_invmap('$prop') code point list is correct");
+}
 is_deeply($invmap_ref, [ 'N', 'Y', 'N', 'Y', 'N', 'Y', 'N', 'N' ] ,
           "prop_invmap('$prop') map list is correct");
 
@@ -988,14 +1019,37 @@ is(prop_invlist("InKana"), undef, "prop_invlist(<user-defined property returns u
 # are there in the files.  As a small hedge against that, test some
 # prop_invlist() tables fully with the known correct result.  We choose
 # ASCII_Hex_Digit again, as it is stable.
-@invlist = prop_invlist("AHex");
-is_deeply(\@invlist, [ 0x0030, 0x003A, 0x0041,
+if ($::IS_ASCII) {
+    @invlist = prop_invlist("AHex");
+    is_deeply(\@invlist, [ 0x0030, 0x003A, 0x0041,
                                  0x0047, 0x0061, 0x0067 ],
           "prop_invlist('AHex') is exactly the expected set of points");
-@invlist = prop_invlist("AHex=f");
-is_deeply(\@invlist, [ 0x0000, 0x0030, 0x003A, 0x0041,
+    @invlist = prop_invlist("AHex=f");
+    is_deeply(\@invlist, [ 0x0000, 0x0030, 0x003A, 0x0041,
                                  0x0047, 0x0061, 0x0067 ],
           "prop_invlist('AHex=f') is exactly the expected set of points");
+}
+elsif ($::IS_EBCDIC) { # Relies on the ranges 0-9, a-f, and A-F each being
+                    # contiguous
+    @invlist = prop_invlist("AHex");
+    is_deeply(\@invlist, [
+            utf8::unicode_to_native(0x0061), utf8::unicode_to_native(0x0066) + 1,
+            utf8::unicode_to_native(0x0041), utf8::unicode_to_native(0x0046) + 1,
+            utf8::unicode_to_native(0x0030), utf8::unicode_to_native(0x0039) + 1,
+       ],
+       "prop_invlist('AHex') is exactly the expected set of points");
+    @invlist = prop_invlist("AHex=f");
+    is_deeply(\@invlist, [
+            utf8::unicode_to_native(0x0000),
+            utf8::unicode_to_native(0x0061),
+            utf8::unicode_to_native(0x0066) + 1,
+            utf8::unicode_to_native(0x0041),
+            utf8::unicode_to_native(0x0046) + 1,
+            utf8::unicode_to_native(0x0030),
+            utf8::unicode_to_native(0x0039) + 1,
+       ],
+       "prop_invlist('AHex=f') is exactly the expected set of points");
+}
 
 sub fail_with_diff ($$$$) {
     # For use below to output better messages
@@ -1489,23 +1543,46 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
         if ($name eq 'blk') {
 
             # The blk property is special.  The original file with old block
-            # names is retained, and the default is to not write out a
-            # new-name file.  What we do is get the old names into a data
-            # structure, and from that create what the new file would look
-            # like.  $base_file is needed to be defined, just to avoid a
-            # message below.
+            # names is retained, and the default (on ASCII platforms) is to
+            # not write out a new-name file.  What we do is get the old names
+            # into a data structure, and from that create what the new file
+            # would look like.  $base_file is needed to be defined, just to
+            # avoid a message below.
             $base_file = "This is a dummy name";
             my $blocks_ref = charblocks();
+
+            if ($::IS_EBCDIC) {
+                # On EBCDIC, the first two blocks can each contain multiple
+                # ranges.  We create a new version with each of these
+                # flattened, so have one level.  ($index is used as a dummy
+                # key.)
+                my %new_blocks;
+                my $index = 0;
+                foreach my $block (values %$blocks_ref) {
+                    foreach my $range (@$block) {
+                        $new_blocks{$index++}[0] = $range;
+                    }
+                }
+                $blocks_ref = \%new_blocks;
+            }
             $official = "";
             for my $range (sort { $a->[0][0] <=> $b->[0][0] }
                            values %$blocks_ref)
             {
                 # Translate the charblocks() data structure to what the file
-                # would like.
-                $official .= sprintf"%X\t%X\t%s\n",
-                             $range->[0][0],
-                             $range->[0][1],
-                             $range->[0][2];
+                # would look like.  (The sub range is for EBCDIC platforms
+                # where Latin1 and ASCII are intermixed.)
+                if ($range->[0][0] == $range->[0][1]) {
+                    $official .= sprintf("%X\t\t%s\n",
+                                         $range->[0][0],
+                                         $range->[0][2]);
+                }
+                else {
+                    $official .= sprintf("%X\t%X\t%s\n",
+                                         $range->[0][0],
+                                         $range->[0][1],
+                                         $range->[0][2]);
+                }
             }
         }
         else {
@@ -1624,10 +1701,13 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
             # including the ones that are overridden by the specials.  These
             # need to be removed as the list is for just the full ones.
 
-            # Go through any special mappings one by one.  They are packed.
+            # Go through any special mappings one by one.  The keys are the
+            # UTF-8 representation of code points.
             my $i = 0;
             foreach my $utf8_cp (sort keys %$specials_ref) {
-                my $cp = unpack("C0U", $utf8_cp);
+                my $cp = $utf8_cp;
+                utf8::decode($cp);
+                $cp = ord $cp;
 
                 # Find the spot in the @list of simple mappings that this
                 # special applies to; uses a linear search.
@@ -1773,17 +1853,18 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
                 elsif ($format =~ / ^ al e? $/x) {
 
                     # For an al property, the stringified result should be in
-                    # the specials hash.  The key is the packed code point,
-                    # and the value is the packed map.
+                    # the specials hash.  The key is the utf8 bytes of the
+                    # code point, and the value is its map as a utf-8 string.
                     my $value;
-                    if (! defined ($value = delete $specials{pack("C0U",
-                                                        $invlist_ref->[$i]) }))
-                    {
+                    my $key = chr $invlist_ref->[$i];
+                    utf8::encode($key);
+                    if (! defined ($value = delete $specials{$key})) {
                         fail("prop_invmap('$display_prop')");
                         diag(sprintf "There was no specials element for %04X", $invlist_ref->[$i]);
                         next PROPERTY;
                     }
-                    my $packed = pack "U*", @{$invmap_ref->[$i]};
+                    my $packed = pack "W*", @{$invmap_ref->[$i]};
+                    utf8::upgrade($packed);
                     if ($value ne $packed) {
                         fail("prop_invmap('$display_prop')");
                         diag(sprintf "For %04X, expected the mapping to be "
@@ -1851,12 +1932,12 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
                 if ($format eq 'ale' && $invmap_ref->[$i] eq "") {
 
                     # ale properties have maps to the empty string that also
-                    # should be in the specials hash, with the key the packed
-                    # code point, and the map just empty.
+                    # should be in the specials hash, with the key the utf8
+                    # bytes representing the code point, and the map just empty.
                     my $value;
-                    if (! defined ($value = delete $specials{pack("C0U",
-                                                        $invlist_ref->[$i]) }))
-                    {
+                    my $key = chr $invlist_ref->[$i];
+                    utf8::encode($key);
+                    if (! defined ($value = delete $specials{$key})) {
                         fail("prop_invmap('$display_prop')");
                         diag(sprintf "There was no specials element for %04X", $invlist_ref->[$i]);
                         next PROPERTY;
@@ -1995,8 +2076,14 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
         # shouldn't be in the property.  This gets rid of the two ranges in
         # one fell swoop, and also all the Unicode1_Name values that may not
         # be in Name_Alias.
-        $official =~ s/ 00000 \t .* 0001F .*? \n//xs;
-        $official =~ s/ 0007F \t .* 0009F .*? \n//xs;
+        if ($::IS_ASCII) {
+            $official =~ s/ 00000 \t .* 0001F .*? \n//xs;
+            $official =~ s/ 0007F \t .* 0009F .*? \n//xs;
+        }
+        elsif ($::IS_EBCDIC) { # Won't work for POSIX-BC
+            $official =~ s/ 00000 \t .* 0003F .*? \n//xs;
+            $official =~ s/ 000FF \t .* 000FF .*? \n//xs;
+        }
 
         # And remove the aliases.  We read in the Name_Alias property, and go
         # through them one by one.
