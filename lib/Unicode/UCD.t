@@ -29,71 +29,71 @@ is(charinfo(0x110000), undef, "Verify charinfo() of non-unicode is undef");
 
 $charinfo = charinfo(0);    # Null is often problematic, so test it.
 
-is($charinfo->{code},           '0000', '<control>');
-is($charinfo->{name},           '<control>');
-is($charinfo->{category},       'Cc');
-is($charinfo->{combining},      '0');
-is($charinfo->{bidi},           'BN');
-is($charinfo->{decomposition},  '');
-is($charinfo->{decimal},        '');
-is($charinfo->{digit},          '');
-is($charinfo->{numeric},        '');
-is($charinfo->{mirrored},       'N');
-is($charinfo->{unicode10},      'NULL');
-is($charinfo->{comment},        '');
-is($charinfo->{upper},          '');
-is($charinfo->{lower},          '');
-is($charinfo->{title},          '');
-is($charinfo->{block},          'Basic Latin');
-is($charinfo->{script},         'Common');
+is($charinfo->{code},           "0000", "<control>");
+is($charinfo->{name},           "<control>");
+is($charinfo->{category},       "Cc");
+is($charinfo->{combining},      "0");
+is($charinfo->{bidi},           "BN");
+is($charinfo->{decomposition},  "");
+is($charinfo->{decimal},        "");
+is($charinfo->{digit},          "");
+is($charinfo->{numeric},        "");
+is($charinfo->{mirrored},       "N");
+is($charinfo->{unicode10},      "NULL");
+is($charinfo->{comment},        "");
+is($charinfo->{upper},          "");
+is($charinfo->{lower},          "");
+is($charinfo->{title},          "");
+is($charinfo->{block},          "Basic Latin");
+is($charinfo->{script},         "Common");
 
 my $A_code = sprintf("%04X", ord("A"));
 my $a_code = sprintf("%04X", ord("a"));
 $charinfo = charinfo(utf8::unicode_to_native(0x41));
 
-is($charinfo->{code},           $A_code, 'LATIN CAPITAL LETTER A');
-is($charinfo->{name},           'LATIN CAPITAL LETTER A');
-is($charinfo->{category},       'Lu');
-is($charinfo->{combining},      '0');
-is($charinfo->{bidi},           'L');
-is($charinfo->{decomposition},  '');
-is($charinfo->{decimal},        '');
-is($charinfo->{digit},          '');
-is($charinfo->{numeric},        '');
-is($charinfo->{mirrored},       'N');
-is($charinfo->{unicode10},      '');
-is($charinfo->{comment},        '');
-is($charinfo->{upper},          '');
+is($charinfo->{code},           $A_code, "LATIN CAPITAL LETTER A");
+is($charinfo->{name},           "LATIN CAPITAL LETTER A");
+is($charinfo->{category},       "Lu");
+is($charinfo->{combining},      "0");
+is($charinfo->{bidi},           "L");
+is($charinfo->{decomposition},  "");
+is($charinfo->{decimal},        "");
+is($charinfo->{digit},          "");
+is($charinfo->{numeric},        "");
+is($charinfo->{mirrored},       "N");
+is($charinfo->{unicode10},      "");
+is($charinfo->{comment},        "");
+is($charinfo->{upper},          "");
 is($charinfo->{lower},          $a_code);
-is($charinfo->{title},          '');
-is($charinfo->{block},          'Basic Latin');
-is($charinfo->{script},         'Latin');
+is($charinfo->{title},          "");
+is($charinfo->{block},          "Basic Latin");
+is($charinfo->{script},         "Latin");
 
 $charinfo = charinfo(0x100);
 
-is($charinfo->{code},           '0100', 'LATIN CAPITAL LETTER A WITH MACRON');
-is($charinfo->{name},           'LATIN CAPITAL LETTER A WITH MACRON');
-is($charinfo->{category},       'Lu');
-is($charinfo->{combining},      '0');
-is($charinfo->{bidi},           'L');
+is($charinfo->{code},           "0100", "LATIN CAPITAL LETTER A WITH MACRON");
+is($charinfo->{name},           "LATIN CAPITAL LETTER A WITH MACRON");
+is($charinfo->{category},       "Lu");
+is($charinfo->{combining},      "0");
+is($charinfo->{bidi},           "L");
 is($charinfo->{decomposition},  "$A_code 0304");
-is($charinfo->{decimal},        '');
-is($charinfo->{digit},          '');
-is($charinfo->{numeric},        '');
-is($charinfo->{mirrored},       'N');
-is($charinfo->{unicode10},      'LATIN CAPITAL LETTER A MACRON');
-is($charinfo->{comment},        '');
-is($charinfo->{upper},          '');
-is($charinfo->{lower},          '0101');
-is($charinfo->{title},          '');
-is($charinfo->{block},          'Latin Extended-A');
-is($charinfo->{script},         'Latin');
+is($charinfo->{decimal},        "");
+is($charinfo->{digit},          "");
+is($charinfo->{numeric},        "");
+is($charinfo->{mirrored},       "N");
+is($charinfo->{unicode10},      "LATIN CAPITAL LETTER A MACRON");
+is($charinfo->{comment},        "");
+is($charinfo->{upper},          "");
+is($charinfo->{lower},          "0101");
+is($charinfo->{title},          "");
+is($charinfo->{block},          "Latin Extended-A");
+is($charinfo->{script},         "Latin");
 
 # 0x0590 is in the Hebrew block but unused.
 
 $charinfo = charinfo(0x590);
 
-is($charinfo->{code},          undef,	'0x0590 - unused Hebrew');
+is($charinfo->{code},          undef,	"0x0590 - unused Hebrew");
 is($charinfo->{name},          undef);
 is($charinfo->{category},      undef);
 is($charinfo->{combining},     undef);
@@ -115,139 +115,139 @@ is($charinfo->{script},        undef);
 
 $charinfo = charinfo(0x5d0);
 
-is($charinfo->{code},           '05D0', '05D0 - used Hebrew');
-is($charinfo->{name},           'HEBREW LETTER ALEF');
-is($charinfo->{category},       'Lo');
-is($charinfo->{combining},      '0');
-is($charinfo->{bidi},           'R');
-is($charinfo->{decomposition},  '');
-is($charinfo->{decimal},        '');
-is($charinfo->{digit},          '');
-is($charinfo->{numeric},        '');
-is($charinfo->{mirrored},       'N');
-is($charinfo->{unicode10},      '');
-is($charinfo->{comment},        '');
-is($charinfo->{upper},          '');
-is($charinfo->{lower},          '');
-is($charinfo->{title},          '');
-is($charinfo->{block},          'Hebrew');
-is($charinfo->{script},         'Hebrew');
+is($charinfo->{code},           "05D0", "05D0 - used Hebrew");
+is($charinfo->{name},           "HEBREW LETTER ALEF");
+is($charinfo->{category},       "Lo");
+is($charinfo->{combining},      "0");
+is($charinfo->{bidi},           "R");
+is($charinfo->{decomposition},  "");
+is($charinfo->{decimal},        "");
+is($charinfo->{digit},          "");
+is($charinfo->{numeric},        "");
+is($charinfo->{mirrored},       "N");
+is($charinfo->{unicode10},      "");
+is($charinfo->{comment},        "");
+is($charinfo->{upper},          "");
+is($charinfo->{lower},          "");
+is($charinfo->{title},          "");
+is($charinfo->{block},          "Hebrew");
+is($charinfo->{script},         "Hebrew");
 
 # An open syllable in Hangul.
 
 $charinfo = charinfo(0xAC00);
 
-is($charinfo->{code},           'AC00', 'HANGUL SYLLABLE U+AC00');
-is($charinfo->{name},           'HANGUL SYLLABLE GA');
-is($charinfo->{category},       'Lo');
-is($charinfo->{combining},      '0');
-is($charinfo->{bidi},           'L');
-is($charinfo->{decomposition},  '1100 1161');
-is($charinfo->{decimal},        '');
-is($charinfo->{digit},          '');
-is($charinfo->{numeric},        '');
-is($charinfo->{mirrored},       'N');
-is($charinfo->{unicode10},      '');
-is($charinfo->{comment},        '');
-is($charinfo->{upper},          '');
-is($charinfo->{lower},          '');
-is($charinfo->{title},          '');
-is($charinfo->{block},          'Hangul Syllables');
-is($charinfo->{script},         'Hangul');
+is($charinfo->{code},           "AC00", "HANGUL SYLLABLE U+AC00");
+is($charinfo->{name},           "HANGUL SYLLABLE GA");
+is($charinfo->{category},       "Lo");
+is($charinfo->{combining},      "0");
+is($charinfo->{bidi},           "L");
+is($charinfo->{decomposition},  "1100 1161");
+is($charinfo->{decimal},        "");
+is($charinfo->{digit},          "");
+is($charinfo->{numeric},        "");
+is($charinfo->{mirrored},       "N");
+is($charinfo->{unicode10},      "");
+is($charinfo->{comment},        "");
+is($charinfo->{upper},          "");
+is($charinfo->{lower},          "");
+is($charinfo->{title},          "");
+is($charinfo->{block},          "Hangul Syllables");
+is($charinfo->{script},         "Hangul");
 
 # A closed syllable in Hangul.
 
 $charinfo = charinfo(0xAE00);
 
-is($charinfo->{code},           'AE00', 'HANGUL SYLLABLE U+AE00');
-is($charinfo->{name},           'HANGUL SYLLABLE GEUL');
-is($charinfo->{category},       'Lo');
-is($charinfo->{combining},      '0');
-is($charinfo->{bidi},           'L');
+is($charinfo->{code},           "AE00", "HANGUL SYLLABLE U+AE00");
+is($charinfo->{name},           "HANGUL SYLLABLE GEUL");
+is($charinfo->{category},       "Lo");
+is($charinfo->{combining},      "0");
+is($charinfo->{bidi},           "L");
 is($charinfo->{decomposition},  "1100 1173 11AF");
-is($charinfo->{decimal},        '');
-is($charinfo->{digit},          '');
-is($charinfo->{numeric},        '');
-is($charinfo->{mirrored},       'N');
-is($charinfo->{unicode10},      '');
-is($charinfo->{comment},        '');
-is($charinfo->{upper},          '');
-is($charinfo->{lower},          '');
-is($charinfo->{title},          '');
-is($charinfo->{block},          'Hangul Syllables');
-is($charinfo->{script},         'Hangul');
+is($charinfo->{decimal},        "");
+is($charinfo->{digit},          "");
+is($charinfo->{numeric},        "");
+is($charinfo->{mirrored},       "N");
+is($charinfo->{unicode10},      "");
+is($charinfo->{comment},        "");
+is($charinfo->{upper},          "");
+is($charinfo->{lower},          "");
+is($charinfo->{title},          "");
+is($charinfo->{block},          "Hangul Syllables");
+is($charinfo->{script},         "Hangul");
 
 $charinfo = charinfo(0x1D400);
 
-is($charinfo->{code},           '1D400', 'MATHEMATICAL BOLD CAPITAL A');
-is($charinfo->{name},           'MATHEMATICAL BOLD CAPITAL A');
-is($charinfo->{category},       'Lu');
-is($charinfo->{combining},      '0');
-is($charinfo->{bidi},           'L');
+is($charinfo->{code},           "1D400", "MATHEMATICAL BOLD CAPITAL A");
+is($charinfo->{name},           "MATHEMATICAL BOLD CAPITAL A");
+is($charinfo->{category},       "Lu");
+is($charinfo->{combining},      "0");
+is($charinfo->{bidi},           "L");
 is($charinfo->{decomposition},  "<font> $A_code");
-is($charinfo->{decimal},        '');
-is($charinfo->{digit},          '');
-is($charinfo->{numeric},        '');
-is($charinfo->{mirrored},       'N');
-is($charinfo->{unicode10},      '');
-is($charinfo->{comment},        '');
-is($charinfo->{upper},          '');
-is($charinfo->{lower},          '');
-is($charinfo->{title},          '');
-is($charinfo->{block},          'Mathematical Alphanumeric Symbols');
-is($charinfo->{script},         'Common');
+is($charinfo->{decimal},        "");
+is($charinfo->{digit},          "");
+is($charinfo->{numeric},        "");
+is($charinfo->{mirrored},       "N");
+is($charinfo->{unicode10},      "");
+is($charinfo->{comment},        "");
+is($charinfo->{upper},          "");
+is($charinfo->{lower},          "");
+is($charinfo->{title},          "");
+is($charinfo->{block},          "Mathematical Alphanumeric Symbols");
+is($charinfo->{script},         "Common");
 
 $charinfo = charinfo(0x9FBA);	#Bug 58428
 
-is($charinfo->{code},           '9FBA', 'U+9FBA');
-is($charinfo->{name},           'CJK UNIFIED IDEOGRAPH-9FBA');
-is($charinfo->{category},       'Lo');
-is($charinfo->{combining},      '0');
-is($charinfo->{bidi},           'L');
-is($charinfo->{decomposition},  '');
-is($charinfo->{decimal},        '');
-is($charinfo->{digit},          '');
-is($charinfo->{numeric},        '');
-is($charinfo->{mirrored},       'N');
-is($charinfo->{unicode10},      '');
-is($charinfo->{comment},        '');
-is($charinfo->{upper},          '');
-is($charinfo->{lower},          '');
-is($charinfo->{title},          '');
-is($charinfo->{block},          'CJK Unified Ideographs');
-is($charinfo->{script},         'Han');
+is($charinfo->{code},           "9FBA", "U+9FBA");
+is($charinfo->{name},           "CJK UNIFIED IDEOGRAPH-9FBA");
+is($charinfo->{category},       "Lo");
+is($charinfo->{combining},      "0");
+is($charinfo->{bidi},           "L");
+is($charinfo->{decomposition},  "");
+is($charinfo->{decimal},        "");
+is($charinfo->{digit},          "");
+is($charinfo->{numeric},        "");
+is($charinfo->{mirrored},       "N");
+is($charinfo->{unicode10},      "");
+is($charinfo->{comment},        "");
+is($charinfo->{upper},          "");
+is($charinfo->{lower},          "");
+is($charinfo->{title},          "");
+is($charinfo->{block},          "CJK Unified Ideographs");
+is($charinfo->{script},         "Han");
 
 use Unicode::UCD qw(charblock charscript);
 
 # 0x0590 is in the Hebrew block but unused.
 
-is(charblock(0x590),          'Hebrew', '0x0590 - Hebrew unused charblock');
-is(charscript(0x590),         'Unknown',    '0x0590 - Hebrew unused charscript');
-is(charblock(0x1FFFF),        'No_Block', '0x1FFFF - unused charblock');
+is(charblock(0x590),          "Hebrew", "0x0590 - Hebrew unused charblock");
+is(charscript(0x590),         "Unknown",    "0x0590 - Hebrew unused charscript");
+is(charblock(0x1FFFF),        "No_Block", "0x1FFFF - unused charblock");
 
 my $fraction_3_4_code = sprintf("%04X", utf8::unicode_to_native(0xbe));
 $charinfo = charinfo(hex $fraction_3_4_code);
 
-is($charinfo->{code},           $fraction_3_4_code, 'VULGAR FRACTION THREE QUARTERS');
-is($charinfo->{name},           'VULGAR FRACTION THREE QUARTERS');
-is($charinfo->{category},       'No');
-is($charinfo->{combining},      '0');
-is($charinfo->{bidi},           'ON');
-is($charinfo->{decomposition},  '<fraction> '
+is($charinfo->{code},           $fraction_3_4_code, "VULGAR FRACTION THREE QUARTERS");
+is($charinfo->{name},           "VULGAR FRACTION THREE QUARTERS");
+is($charinfo->{category},       "No");
+is($charinfo->{combining},      "0");
+is($charinfo->{bidi},           "ON");
+is($charinfo->{decomposition},  "<fraction> "
                                 . sprintf("%04X", ord "3")
                                 . " 2044 "
                                 . sprintf("%04X", ord "4"));
-is($charinfo->{decimal},        '');
-is($charinfo->{digit},          '');
-is($charinfo->{numeric},        '3/4');
-is($charinfo->{mirrored},       'N');
-is($charinfo->{unicode10},      'FRACTION THREE QUARTERS');
-is($charinfo->{comment},        '');
-is($charinfo->{upper},          '');
-is($charinfo->{lower},          '');
-is($charinfo->{title},          '');
-is($charinfo->{block},          'Latin-1 Supplement');
-is($charinfo->{script},         'Common');
+is($charinfo->{decimal},        "");
+is($charinfo->{digit},          "");
+is($charinfo->{numeric},        "3/4");
+is($charinfo->{mirrored},       "N");
+is($charinfo->{unicode10},      "FRACTION THREE QUARTERS");
+is($charinfo->{comment},        "");
+is($charinfo->{upper},          "");
+is($charinfo->{lower},          "");
+is($charinfo->{title},          "");
+is($charinfo->{block},          "Latin-1 Supplement");
+is($charinfo->{script},         "Common");
 
 # This is to test a case where both simple and full lowercases exist and
 # differ
@@ -255,45 +255,45 @@ $charinfo = charinfo(0x130);
 my $I_code = sprintf("%04X", ord("I"));
 my $i_code = sprintf("%04X", ord("i"));
 
-is($charinfo->{code},           '0130', 'LATIN CAPITAL LETTER I WITH DOT ABOVE');
-is($charinfo->{name},           'LATIN CAPITAL LETTER I WITH DOT ABOVE');
-is($charinfo->{category},       'Lu');
-is($charinfo->{combining},      '0');
-is($charinfo->{bidi},           'L');
+is($charinfo->{code},           "0130", "LATIN CAPITAL LETTER I WITH DOT ABOVE");
+is($charinfo->{name},           "LATIN CAPITAL LETTER I WITH DOT ABOVE");
+is($charinfo->{category},       "Lu");
+is($charinfo->{combining},      "0");
+is($charinfo->{bidi},           "L");
 is($charinfo->{decomposition},  "$I_code 0307");
-is($charinfo->{decimal},        '');
-is($charinfo->{digit},          '');
-is($charinfo->{numeric},        '');
-is($charinfo->{mirrored},       'N');
-is($charinfo->{unicode10},      'LATIN CAPITAL LETTER I DOT');
-is($charinfo->{comment},        '');
-is($charinfo->{upper},          '');
+is($charinfo->{decimal},        "");
+is($charinfo->{digit},          "");
+is($charinfo->{numeric},        "");
+is($charinfo->{mirrored},       "N");
+is($charinfo->{unicode10},      "LATIN CAPITAL LETTER I DOT");
+is($charinfo->{comment},        "");
+is($charinfo->{upper},          "");
 is($charinfo->{lower},          $i_code);
-is($charinfo->{title},          '');
-is($charinfo->{block},          'Latin Extended-A');
-is($charinfo->{script},         'Latin');
+is($charinfo->{title},          "");
+is($charinfo->{block},          "Latin Extended-A");
+is($charinfo->{script},         "Latin");
 
 # This is to test a case where both simple and full uppercases exist and
 # differ
 $charinfo = charinfo(0x1F80);
 
-is($charinfo->{code},           '1F80', 'GREEK SMALL LETTER ALPHA WITH PSILI AND YPOGEGRAMMENI');
-is($charinfo->{name},           'GREEK SMALL LETTER ALPHA WITH PSILI AND YPOGEGRAMMENI');
-is($charinfo->{category},       'Ll');
-is($charinfo->{combining},      '0');
-is($charinfo->{bidi},           'L');
-is($charinfo->{decomposition},  '1F00 0345');
-is($charinfo->{decimal},        '');
-is($charinfo->{digit},          '');
-is($charinfo->{numeric},        '');
-is($charinfo->{mirrored},       'N');
-is($charinfo->{unicode10},      '');
-is($charinfo->{comment},        '');
-is($charinfo->{upper},          '1F88');
-is($charinfo->{lower},          '');
-is($charinfo->{title},          '1F88');
-is($charinfo->{block},          'Greek Extended');
-is($charinfo->{script},         'Greek');
+is($charinfo->{code},           "1F80", "GREEK SMALL LETTER ALPHA WITH PSILI AND YPOGEGRAMMENI");
+is($charinfo->{name},           "GREEK SMALL LETTER ALPHA WITH PSILI AND YPOGEGRAMMENI");
+is($charinfo->{category},       "Ll");
+is($charinfo->{combining},      "0");
+is($charinfo->{bidi},           "L");
+is($charinfo->{decomposition},  "1F00 0345");
+is($charinfo->{decimal},        "");
+is($charinfo->{digit},          "");
+is($charinfo->{numeric},        "");
+is($charinfo->{mirrored},       "N");
+is($charinfo->{unicode10},      "");
+is($charinfo->{comment},        "");
+is($charinfo->{upper},          "1F88");
+is($charinfo->{lower},          "");
+is($charinfo->{title},          "1F88");
+is($charinfo->{block},          "Greek Extended");
+is($charinfo->{script},         "Greek");
 
 use Unicode::UCD qw(charblocks charscripts);
 
