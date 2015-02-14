@@ -566,9 +566,9 @@ escaping.
 Examples:
 
  "+"   =~ /[+?*]/     #  Match, "+" in a character class is not special.
- "\cH" =~ /[\b]/      #  Match, \b inside in a character class.
+ "\cH" =~ /[\b]/      #  Match, \b inside in a character class
                       #  is equivalent to a backspace.
- "]"   =~ /[][]/      #  Match, as the character class contains.
+ "]"   =~ /[][]/      #  Match, as the character class contains
                       #  both [ and ].
  "[]"  =~ /[[]]/      #  Match, the pattern contains a character class
                       #  containing just [, and the character class is
