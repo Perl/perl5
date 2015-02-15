@@ -61,8 +61,8 @@ you should reset the version numbers to the next blead series.
   2014-11-20  5.21.6 ✓        Chris "BinGOs" Williams
   2014-12-20  5.21.7 ✓        Max Maischein
   2015-01-20  5.21.8 ✓        Matthew Horsfall
-  2015-02-20  5.21.9          ?
-  2015-03-20  5.21.10         ?
+  2015-02-20  5.21.9          Sawyer X
+  2015-03-20  5.21.10         Steve Hay
   2015-04-20  5.21.11         ?
 
 (RC0 for 5.22.0 will be released once we think that all the blockers have been
