@@ -22,7 +22,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 770;  # Update this when adding/deleting tests.
+plan tests => 772;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1676,6 +1676,14 @@ EOP
             fresh_perl_is($code, "No infinite loop here!", {},
                 "test that we handle things like m/\\888888888/ without infinite loops" );
         }
+
+	{
+		# [perl #123843] hits SEGV trying to compile this pattern
+		my $match;
+		eval q{ ($match) = ("xxyxxyxy" =~ m{(x+(y(?1))*)}) };
+		ok(1, "compiled GOSUB in CURLYM ok");
+		is($match, 'xxyxxyx', "matched GOSUB in CURLYM");
+	}
 } # End of sub run_tests
 
 1;

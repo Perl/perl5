@@ -4386,7 +4386,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     ( flags & SCF_IN_DEFINE )
                     ||
                     (
-                        (is_inf_internal || is_inf || data->flags & SF_IS_INF)
+                        (is_inf_internal || is_inf || (data && data->flags & SF_IS_INF))
                         &&
                         ( (flags & (SCF_DO_STCLASS | SCF_DO_SUBSTR)) == 0 )
                     )
