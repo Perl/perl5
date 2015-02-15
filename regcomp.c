@@ -12009,8 +12009,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     /* bare \NNN might be backref or octal - if it is larger than or equal
                      * RExC_npar then it is assumed to be and octal escape.
                      * Note RExC_npar is +1 from the actual number of parens*/
-                    if (num == I32_MAX || (num > 9 && num >= RExC_npar
-                            && *RExC_parse != '8' && *RExC_parse != '9'))
+                    /* Note we do NOT check if num == I32_MAX here, as that is
+                     * handled by the RExC_npar check */
+                    if (num > 9 && num >= RExC_npar
+                            && *RExC_parse != '8' && *RExC_parse != '9')
                     {
                         /* Probably a character specified in octal, e.g. \35 */
                         goto defchar;

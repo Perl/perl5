@@ -1659,8 +1659,6 @@ EOP
 		}
 	}
         {
-            local $::TODO = "not fixed yet";
-
             # Test that we handle qr/\8888888/ and variants without an infinite loop,
             # we use a test within a test so we can todo it, and make sure we don't
             # infinite loop our tests.
