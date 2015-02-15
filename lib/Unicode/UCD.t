@@ -93,23 +93,23 @@ is($charinfo->{script},         "Latin");
 
 $charinfo = charinfo(0x590);
 
-is($charinfo->{code},          undef,	"0x0590 - unused Hebrew");
-is($charinfo->{name},          undef);
-is($charinfo->{category},      undef);
-is($charinfo->{combining},     undef);
-is($charinfo->{bidi},          undef);
-is($charinfo->{decomposition}, undef);
-is($charinfo->{decimal},       undef);
-is($charinfo->{digit},         undef);
-is($charinfo->{numeric},       undef);
-is($charinfo->{mirrored},      undef);
-is($charinfo->{unicode10},     undef);
-is($charinfo->{comment},       undef);
-is($charinfo->{upper},         undef);
-is($charinfo->{lower},         undef);
-is($charinfo->{title},         undef);
-is($charinfo->{block},         undef);
-is($charinfo->{script},        undef);
+is($charinfo->{code},           undef,	"0x0590 - unused Hebrew");
+is($charinfo->{name},           undef);
+is($charinfo->{category},       undef);
+is($charinfo->{combining},      undef);
+is($charinfo->{bidi},           undef);
+is($charinfo->{decomposition},  undef);
+is($charinfo->{decimal},        undef);
+is($charinfo->{digit},          undef);
+is($charinfo->{numeric},        undef);
+is($charinfo->{mirrored},       undef);
+is($charinfo->{unicode10},      undef);
+is($charinfo->{comment},        undef);
+is($charinfo->{upper},          undef);
+is($charinfo->{lower},          undef);
+is($charinfo->{title},          undef);
+is($charinfo->{block},          undef);
+is($charinfo->{script},         undef);
 
 # 0x05d0 is in the Hebrew block and used.
 
