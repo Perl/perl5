@@ -252,3 +252,7 @@ d_attribute_warn_unused_result='undef'
 # (C++ but C99 math agrees)
 # XXX: Configure scan for proper behavior
 d_nan='undef'
+
+# Configures says this exists, but it doesn't work properly.  See
+# <54DCE073.4010100@khwilliamson.com>
+d_dir_dd_fd='undef'
