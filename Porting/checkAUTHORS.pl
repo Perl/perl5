@@ -3,6 +3,7 @@ use strict;
 my ($committer, $patch, $author);
 use utf8;
 use Getopt::Long;
+use Unicode::Collate;
 use Text::Wrap;
 $Text::Wrap::columns = 80;
 
@@ -85,9 +86,9 @@ EOS
 sub list_authors {
     my ($patchers, $authors) = @_;
     binmode(STDOUT, ":utf8");
-    print wrap '', '', join(', ', sort { lc $a cmp lc $b }
+    print wrap '', '', join(', ', Unicode::Collate->new(level => 1)->sort(
                       map { $authors->{$_} }
-                      keys %$patchers) . ".\n";
+                      keys %$patchers)) . ".\n";
 }
 
 sub parse_commits_from_stdin {
