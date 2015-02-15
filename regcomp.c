@@ -12006,21 +12006,37 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }
                 else {
                     num = S_backref_value(RExC_parse);
-                    /* bare \NNN might be backref or octal - if it is larger than or equal
-                     * RExC_npar then it is assumed to be and octal escape.
-                     * Note RExC_npar is +1 from the actual number of parens*/
+                    /* bare \NNN might be backref or octal - if it is larger
+                     * than or equal RExC_npar then it is assumed to be an
+                     * octal escape. Note RExC_npar is +1 from the actual
+                     * number of parens. */
                     /* Note we do NOT check if num == I32_MAX here, as that is
                      * handled by the RExC_npar check */
-                    if (num > 9 && num >= RExC_npar
-                            && *RExC_parse != '8' && *RExC_parse != '9')
+
+                    if (
+                        /* any numeric escape < 10 is always a backref */
+                        num > 9
+                        /* any numeric escape < RExC_npar is a backref */
+                        && num >= RExC_npar
+                        /* cannot be an octal escape if it starts with 8 */
+                        && *RExC_parse != '8'
+                        /* cannot be an octal escape it it starts with 9 */
+                        && *RExC_parse != '9'
+                    )
                     {
-                        /* Probably a character specified in octal, e.g. \35 */
+                        /* Probably not a backref, instead likely to be an
+                         * octal character escape, e.g. \35 or \777.
+                         * The above logic should make it obvious why using
+                         * octal escapes in patterns is problematic. - Yves */
                         goto defchar;
                     }
                 }
 
-                /* at this point RExC_parse definitely points to a backref
-                 * number */
+                /* At this point RExC_parse points at a numeric escape like
+                 * \12 or \88 or something similar, which we should NOT treat
+                 * as an octal escape. It may or may not be a valid backref
+                 * escape. For instance \88888888 is unlikely to be a valid
+                 * backref. */
 		{
 #ifdef RE_TRACK_PATTERN_OFFSETS
 		    char * const parse_start = RExC_parse - 1; /* MJD */
@@ -12311,6 +12327,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			break;
                     case '8': case '9': /* must be a backreference */
                         --p;
+                        /* we have an escape like \8 which cannot be an octal escape
+                         * so we exit the loop, and let the outer loop handle this
+                         * escape which may or may not be a legitimate backref. */
                         goto loopdone;
                     case '1': case '2': case '3':case '4':
 		    case '5': case '6': case '7':
