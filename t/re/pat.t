@@ -22,7 +22,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 769;  # Update this when adding/deleting tests.
+plan tests => 770;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1658,7 +1658,26 @@ EOP
 			}
 		}
 	}
+        {
+            local $::TODO = "not fixed yet";
 
+            # Test that we handle qr/\8888888/ and variants without an infinite loop,
+            # we use a test within a test so we can todo it, and make sure we don't
+            # infinite loop our tests.
+            # NOTE - Do not put quotes in the code!
+            # NOTE - We have to triple escape the backref in the pattern below.
+            my $code='
+                BEGIN{require q(test.pl);}
+                watchdog(3);
+                for my $len (1 .. 20) {
+                    my $eights= q(8) x $len;
+                    eval qq{ qr/\\\\$eights/ };
+                }
+                print q(No infinite loop here!);
+            ';
+            fresh_perl_is($code, "No infinite loop here!", {},
+                "test that we handle things like m/\\888888888/ without infinite loops" );
+        }
 } # End of sub run_tests
 
 1;
