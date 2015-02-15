@@ -730,6 +730,7 @@ sub _create_runperl { # Create the string to qx in runperl().
     return $runperl;
 }
 
+# sub run_perl {} is alias to below
 sub runperl {
     die "test.pl:runperl() does not take a hashref"
 	if ref $_[0] and ref $_[0] eq 'HASH';
