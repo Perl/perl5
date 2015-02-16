@@ -745,6 +745,10 @@ addbits('multideref',
     5 => qw(OPpMULTIDEREF_DELETE DELETE), # deref is actually delete
 );
 
+addbits('signature',
+    1 => qw(OPpSIGNATURE_FAKE FAKE), # my(..)=@_ masquerading as a signature
+);
+
 1;
 
 # ex: set ts=8 sts=4 sw=4 et:

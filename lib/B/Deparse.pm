@@ -16,7 +16,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER OPpREPEAT_DOLIST
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
-         OPpPADRANGE_COUNTSHIFT
+         OPpPADRANGE_COUNTSHIFT OPpSIGNATURE_FAKE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP SVpad_TYPED
          CVf_METHOD CVf_LVALUE
@@ -1374,7 +1374,7 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     local($self->{'curcvlex'});
     local(@$self{qw'curstash warnings hints hinthash'})
 		= @$self{qw'curstash warnings hints hinthash'};
-    my $body;
+    my $body ='';
     my $root = $cv->ROOT;
     local $B::overlay = {};
     if (not null $root) {
@@ -1390,14 +1390,20 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
             {
                 $self->pp_nextstate($o, 0); # set curcop etc
                 ($o, my $sig) = $self->deparse_signature($sigop, $cv);
-                unshift @attrs, "prototype($proto)" if defined $proto;
-                $proto = $sig;
+                if ($sigop->private &  OPpSIGNATURE_FAKE) {
+                    $sig =~ s/\$(,|$)/undef$1/g;
+                    $body = "my($sig) = \@_;\n";
+                }
+                else {
+                    unshift @attrs, "prototype($proto)" if defined $proto;
+                    $proto = $sig;
+                }
             }
 	    my @ops;
 	    for(; $$o; $o=$o->sibling) {
 		push @ops, $o;
 	    }
-	    $body = $self->lineseq(undef, 0, @ops).";";
+	    $body .= $self->lineseq(undef, 0, @ops).";";
 	    my $scope_en = $self->find_scope_en($lineseq);
 	    if (defined $scope_en) {
 		my $subs = join"", $self->seq_subs($scope_en);

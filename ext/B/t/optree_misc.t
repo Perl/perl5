@@ -255,7 +255,7 @@ EOT_EOT
 EONT_EONT
 
 checkOptree ( name      => 'padrange and @_',
-	      code	=> sub { my ($a,$b) = @_;
+	      code	=> sub { my (@a,$b) = @_;
 				 my ($c,$d) = @X::_;
 				 package Y;
 				 my ($e,$f) = @_;
@@ -268,12 +268,12 @@ checkOptree ( name      => 'padrange and @_',
 # 1        <;> nextstate(main 1 p3:1) v:>,<,% ->2
 # 3        <2> aassign[t5] vKS ->4
 # -           <1> ex-list lK ->-
-# 2              <0> padrange[$a:1,4; $b:1,4] */LVINTRO,2 ->3
+# 2              <0> padrange[@a:1,4; $b:1,4] */LVINTRO,2 ->3
 # -              <1> rv2av[t4] lK/1 ->-
 # -                 <#> gv[*_] s ->-
 # -           <1> ex-list lKPRM* ->3
 # -              <0> pushmark sRM*/LVINTRO ->-
-# -              <0> padsv[$a:1,4] sRM*/LVINTRO ->-
+# -              <0> padav[@a:1,4] lRM*/LVINTRO ->-
 # -              <0> padsv[$b:1,4] sRM*/LVINTRO ->-
 # 4        <;> nextstate(main 2 p3:2) v:>,<,% ->5
 # 9        <2> aassign[t10] vKS ->a
@@ -301,12 +301,12 @@ EOT_EOT
 # 1        <;> nextstate(main 1 p3:1) v:>,<,% ->2
 # 3        <2> aassign[t5] vKS ->4
 # -           <1> ex-list lK ->-
-# 2              <0> padrange[$a:1,4; $b:1,4] */LVINTRO,2 ->3
+# 2              <0> padrange[@a:1,4; $b:1,4] */LVINTRO,2 ->3
 # -              <1> rv2av[t4] lK/1 ->-
 # -                 <$> gv(*_) s ->-
 # -           <1> ex-list lKPRM* ->3
 # -              <0> pushmark sRM*/LVINTRO ->-
-# -              <0> padsv[$a:1,4] sRM*/LVINTRO ->-
+# -              <0> padav[@a:1,4] lRM*/LVINTRO ->-
 # -              <0> padsv[$b:1,4] sRM*/LVINTRO ->-
 # 4        <;> nextstate(main 2 p3:2) v:>,<,% ->5
 # 9        <2> aassign[t10] vKS ->a

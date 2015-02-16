@@ -20,7 +20,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2254;
+plan 2261;
 
 use B ();
 
@@ -319,6 +319,78 @@ test_opcount(0, 'multideref exists',
                         sassign    => 1,
                         aelemfast_lex  => 1,
                         aelem      => 0,
+                    },
+                );
+
+}
+
+# test fake OP_SIGNATURE  optimisation
+
+test_opcount(0, 'stuff after slurpy fake sig not optimised',
+                sub { my (@a, $b) = @_; 1; },
+                {
+                    signature  => 0,
+                },
+            );
+
+test_opcount(0, 'with label fake sig not optimised',
+                sub { FOO: my ($a, $b) = @_; 1; },
+                {
+                    signature  => 0,
+                },
+            );
+
+test_opcount(0, 'non-void fake sig not optimised',
+                sub { my ($a, $b) = @_; },
+                {
+                    signature  => 0,
+                },
+            );
+
+SKIP: {
+    use Config;
+    unless ($Config{ccflags} =~ /PERL_FAKE_SIGNATURE\b/) {
+        skip "not built with PERL_FAKE_SIGNATURE", 4;
+    }
+
+    test_opcount(0, 'basic fake sig',
+                    sub { my ($a, $b) = @_; 1 },
+                    {
+                        signature  => 1,
+                        nextstate  => 2,
+                        padrange   => 0,
+                        padsv      => 0,
+                    },
+                );
+
+
+    test_opcount(0, 'fake sig with undef',
+                    sub { my ($a, undef, $b) = @_; 1 },
+                    {
+                        signature  => 1,
+                        nextstate  => 2,
+                        padrange   => 0,
+                        padsv      => 0,
+                    },
+                );
+
+    test_opcount(0, 'fake sig with slurpy array',
+                    sub { my ($a, @b) = @_; 1 },
+                    {
+                        signature  => 1,
+                        nextstate  => 2,
+                        padrange   => 0,
+                        padsv      => 0,
+                    },
+                );
+
+    test_opcount(0, 'fake sig with slurpy hash',
+                    sub { my ($a, %b) = @_; 1 },
+                    {
+                        signature  => 1,
+                        nextstate  => 2,
+                        padrange   => 0,
+                        padsv      => 0,
                     },
                 );
 

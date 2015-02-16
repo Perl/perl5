@@ -2432,6 +2432,196 @@ S_postprocess_optree(pTHX_ CV *cv, OP *root, OP **startp)
 }
 
 
+
+/* If the sub starts with 'my (...) = @_',
+ * replace those ops with an OP_SIGNATURE */
+
+#ifdef PERL_FAKE_SIGNATURE
+STATIC void
+S_maybe_op_signature(pTHX_ CV *cv, OP *o)
+{
+    OP *lineseq, *nextstate, *aassign, *kid, *first_padop, *sigop;
+    UNOP_AUX_item *items;
+    int items_ix;
+    int actions_ix;
+    UV action_acc;    /* accumulated actions for the current
+                                        items[action_ix] slot */
+    int action_count; /* how many actions have been stored in the
+                            current items[action_ix] */
+    int size;
+    bool slurp_av      = FALSE;
+    bool slurp_hv      = FALSE;
+    int args           = 0;
+    int pad_vars       = 0;
+    PADOFFSET pad_base = NOT_IN_PAD;
+
+    PERL_UNUSED_ARG(cv);
+
+    lineseq   = cUNOPo->op_first;
+    nextstate = cUNOPx(lineseq)->op_first;
+    aassign   = OpSIBLING(nextstate);
+
+    /* ops up to this point already verified by caller */
+
+    /* look for '= @_':
+        aassign
+          null (ex-list)
+              pushmark
+              rv2av
+                gv[*_]
+    */
+    kid = cUNOPx(aassign)->op_first;
+    if (!kid || kid->op_type != OP_NULL)
+        return;
+    kid = cUNOPx(kid)->op_first;
+    if (!kid || kid->op_type != OP_PUSHMARK)
+        return;
+    kid = OpSIBLING(kid);
+    if (!kid || kid->op_type != OP_RV2AV)
+        return;
+    if (kid->op_private
+                & (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpOUR_INTRO|OPpLVAL_INTRO))
+        return;
+    kid = cUNOPx(kid)->op_first;
+    if (!kid || kid->op_type != OP_GV)
+        return;
+    if (cGVOPx_gv(kid)!= PL_defgv)
+        return;
+
+    /* at this point the RHS of the aassign is definitely @_ */
+
+    /* LHS of aassign looks like
+     * null (ex-list)
+     *   pushmark
+     *   padsv and/or undef x N
+     *   with optional trailing padav/padhv
+     *
+     * skip the null and pushmark, then process all the
+     * pad ops. Return on anything unexpected/
+     */
+
+    kid = cBINOPx(aassign)->op_last;
+    if (!kid || kid->op_type != OP_NULL)
+        return;
+    kid = cUNOPx(kid)->op_first;
+    if (!kid || kid->op_type != OP_PUSHMARK)
+        return;
+    kid = first_padop = OpSIBLING(kid);
+
+    for(; kid; kid = OpSIBLING(kid)) {
+        if (slurp_av || slurp_hv) /* @foo or %foo must be last */
+            return;
+
+        if (kid->op_flags & OPf_KIDS) /* something weird */
+            return;
+
+        args++;
+        if (args > 32767)
+            return;
+
+        if (kid->op_type == OP_UNDEF)
+            continue;
+
+        if (kid->op_type == OP_PADAV) {
+            if (kid->op_private &
+                    (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpPAD_STATE))
+                return;
+            slurp_av = TRUE;
+        }
+        else if (kid->op_type == OP_PADHV) {
+            if (kid->op_private &
+                    ( OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpMAYBE_TRUEBOOL
+                     |OPpTRUEBOOL|OPpPAD_STATE))
+                return;
+            slurp_hv = TRUE;
+        }
+        else if (kid->op_type == OP_PADSV) {
+            if (kid->op_private & (OPpDEREF|OPpPAD_STATE))
+                return;
+        }
+        else 
+            return;
+
+        if ((kid->op_flags & (OPf_REF|OPf_MOD)) != (OPf_REF|OPf_MOD))
+            return;
+
+        if (!(kid->op_private & OPpLVAL_INTRO))
+            return;
+
+        pad_vars++;
+        if (pad_vars >= OPpPADRANGE_COUNTMASK)
+            return;
+
+        if (pad_base == NOT_IN_PAD)
+            pad_base = kid->op_targ;
+        else if (pad_base + pad_vars -1 != kid->op_targ)
+            return;
+
+    }
+
+    /* We have a match! Create an OP_SIGNATURE op */
+
+    /* calculate size of items array */
+
+    size =
+            1    /* size field */
+          + 1    /* numbers of args field */
+          + 1    /* padintro item field */
+
+          /* number of action item fields */
+          + (args /* number of arg actions */
+              + 1 /* padintro action */
+              + 1 /* end action */
+              - 1 /* 1..N fits in 1 slot rather than 0..N-1 */
+            ) / (UVSIZE * 8 / SIGNATURE_SHIFT) + 1;
+
+    items = (UNOP_AUX_item*)PerlMemShared_malloc(sizeof(UNOP_AUX_item) * size);
+
+    items[0].uv = size - 1;
+    items[1].uv = args | (1  << 15); /* fake slurpy bit */
+    actions_ix = 2;
+    items[actions_ix].uv = 0;
+    items[3].uv = ((pad_base << OPpPADRANGE_COUNTSHIFT) | pad_vars);
+    items_ix = 4;
+
+    action_acc = SIGNATURE_padintro;
+    action_count = 1;
+
+    for (kid = first_padop; ; kid = OpSIBLING(kid)) {
+        UV action =
+            !kid                     ? SIGNATURE_end
+          : kid->op_type == OP_UNDEF ? (SIGNATURE_arg|SIGNATURE_FLAG_skip)
+          : kid->op_type == OP_PADSV ? SIGNATURE_arg
+          : kid->op_type == OP_PADAV ? SIGNATURE_slurp_array
+          :                            SIGNATURE_slurp_hash;
+
+        action_acc |= action << (action_count * SIGNATURE_SHIFT);
+        assert(actions_ix < size);
+        items[actions_ix].uv = action_acc;
+        action_count = (action_count + 1) % (UVSIZE * 8 / SIGNATURE_SHIFT);
+
+        if (!action_count) {
+            actions_ix = items_ix++;
+            action_acc = 0;
+        }
+
+        if (!kid)
+            break;
+    }
+
+    sigop = newUNOP_AUX(OP_SIGNATURE, 0, NULL, items + 1);
+    sigop->op_private |= OPpSIGNATURE_FAKE; /* not a real signature */
+
+    /* excise the aassign from the lineseq and
+     * replace them with the OP_SIGNATURE */
+    op_sibling_splice(lineseq, nextstate, 1, sigop);
+    nextstate->op_next = sigop;
+    sigop->op_next = aassign->op_next;
+    op_free(aassign);
+}
+#endif
+
+
 /* per op-level helper function for Perl_finalize_optree() */
 
 STATIC void
@@ -2466,6 +2656,26 @@ Perl_prefinalize_optree(pTHX_ CV *cv, OP* o)
 
     ENTER;
     SAVEVPTR(PL_curcop);
+
+#ifdef PERL_FAKE_SIGNATURE
+    /* does the sub look like it might start with 'my (...) = @_' ? */
+    if (cv && (o->op_type == OP_LEAVESUB || o->op_type == OP_LEAVESUB)) {
+        OP *kid = cUNOPo->op_first;
+        if (   kid
+            && kid->op_type == OP_LINESEQ
+            && (kid = cUNOPx(kid)->op_first)
+            && (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+            && (!CopLABEL((COP*)kid))
+            && (kid = OpSIBLING(kid))
+            && kid->op_type == OP_AASSIGN
+            && (kid->op_flags & OPf_WANT) == OPf_WANT_VOID
+        )
+        {
+            S_maybe_op_signature(aTHX_ cv, o);
+            o = CvROOT(cv);
+        }
+    }
+#endif
 
     S_prefinalize_op(aTHX_ cv, o);
 

@@ -3431,8 +3431,10 @@ PP(pp_signature)
 
             switch (action) {
             case SIGNATURE_arg:
-                assert(0);
-                break;
+                /* we only get here with a fake signature and when
+                 * we've run out of args */
+                assert(PL_op->op_private & OPpSIGNATURE_FAKE);
+                goto finish;
 
             case SIGNATURE_arg_default_none:
             case SIGNATURE_arg_default_undef:
@@ -3567,6 +3569,11 @@ PP(pp_signature)
                     case SIGNATURE_reload:
                         actions = (++items)->uv;
                         continue;
+                    case SIGNATURE_arg:
+                    case SIGNATURE_slurp_array:
+                    case SIGNATURE_slurp_hash:
+                        assert(PL_op->op_private & OPpSIGNATURE_FAKE);
+                        break;
                     case SIGNATURE_end:
                         go = FALSE;
                         break;
@@ -3610,8 +3617,12 @@ PP(pp_signature)
             if (!argc)
                 goto finish;
 
-            if (UNLIKELY(argc % 2))
-                S_croak_caller("Odd name/value argument for subroutine");
+            if (UNLIKELY(argc % 2)) {
+                if (!(PL_op->op_private & OPpSIGNATURE_FAKE))
+                    S_croak_caller("Odd name/value argument for subroutine");
+                /* warn */
+                do_oddball(argp + argc -1, argp);
+            }
 
             if (actions & SIGNATURE_FLAG_skip)
                 goto finish;
@@ -3623,13 +3634,20 @@ PP(pp_signature)
 
             TAINT_NOT;
 
-            while (argc) {
+            while (argc--) {
                 SV *tmpsv;
+                SV *val;
                 SV *key = *argp++;
-                SV *val = *argp++;
 
-                assert(key); assert(val);
-                argc -= 2;
+                assert(key);
+                if (argc) {
+                    val = *argp++;
+                    argc--;
+                }
+                else
+                    val = &PL_sv_undef;
+                assert(val);
+
                 if (UNLIKELY(SvGMAGICAL(key)))
                     key = sv_mortalcopy(key);
                 tmpsv = newSV(0);

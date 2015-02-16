@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan( tests => 36 );
+plan( tests => 38 );
 
 sub empty_sub {}
 
@@ -245,3 +245,19 @@ sub predeclared {
 predeclared(); # set $x to 42
 $main::x = $main::x = "You should not see this.";
 inside_predeclared(); # run test
+
+# when a sub has my(...)=@_ replaced with an OP_SIGNATURE, make sure
+# it handles odd-numbered hash assignments correctly
+
+{
+    sub fake_sig {
+        my ($a, %h) = @_;
+        "$a:" . join('-', map $_ // 'undef', %h);
+    }
+    my $w = '';
+    local $SIG{__WARN__} = sub { $w .= $_[0] };
+    is fake_sig(1,"foo"), "1:foo-undef",
+            "fake sig shouldnt croak on odd hash assign";
+    like $w, qr/Odd number of elements in hash assignment/,
+            "fake sig should warn on odd hash assign";
+}
