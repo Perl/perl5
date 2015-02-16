@@ -3975,8 +3975,8 @@
 
 /* HAS_LLROUNDL:
  *	This symbol, if defined, indicates that the llroundl routine is
- *	available to return the nearest long long value of the long double
- *	argument value.
+ *	available to return the nearest long long value away from zero of
+ *	the long double argument value.
  */
 /*#define HAS_LLROUNDL		/ **/
 
@@ -4007,7 +4007,7 @@
 
 /* HAS_LRINTL:
  *	This symbol, if defined, indicates that the lrintl routine is
- *	available to return the closest integral value to the long double
+ *	available to return the closest integral value of the long double
  *	argument according to the current rounding mode.
  */
 /*#define HAS_LRINTL		/ **/
@@ -4020,8 +4020,8 @@
 
 /* HAS_LROUNDL:
  *	This symbol, if defined, indicates that the lroundl routine is
- *	available to return the nearest integral value to the long double
- *	argument.
+ *	available to return the nearest integral value away from zero of
+ *	the long double argument value.
  */
 /*#define HAS_LROUNDL		/ **/
 
@@ -5161,6 +5161,6 @@
 #endif
 
 /* Generated from:
- * d654b628ee93a97d86e8830d2d3ba0d822699ba7279c759d3c66e779c56f6675 config_h.SH
+ * 0b960722a4dac6f7f6060a886109bb674ad8acdc08d0d14e9c3af5e1bf9e89a6 config_h.SH
  * f00aaa095a00a83a70716ff4b9df8a1e7feb27fbb4d9b759d4ca27e6412545b1 uconfig.sh
  * ex: set ro: */
