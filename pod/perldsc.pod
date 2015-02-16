@@ -8,9 +8,9 @@ perldsc - Perl Data Structures Cookbook
 Perl lets us have complex data structures.  You can write something like
 this and all of a sudden, you'd have an array with three dimensions!
 
-    for $x (1 .. 10) {
-        for $y (1 .. 10) {
-            for $z (1 .. 10) {
+    for my $x (1 .. 10) {
+        for my $y (1 .. 10) {
+            for my $z (1 .. 10) {
                 $AoA[$x][$y][$z] =
                     $x ** $y + $z;
             }
@@ -94,7 +94,7 @@ Now, because the top level contains only references, if you try to print
 out your array in with a simple print() function, you'll get something
 that doesn't look very nice, like this:
 
-    @AoA = ( [2, 3], [4, 5, 7], [0] );
+    my @AoA = ( [2, 3], [4, 5, 7], [0] );
     print $AoA[1][2];
   7
     print @AoA;
@@ -115,8 +115,8 @@ elements or else taking a reference to the same memory location
 repeatedly.  Here's the case where you just get the count instead
 of a nested array:
 
-    for $i (1..10) {
-        @array = somefunc($i);
+    for my $i (1..10) {
+        my @array = somefunc($i);
         $AoA[$i] = @array;      # WRONG!
     }
 
@@ -124,15 +124,17 @@ That's just the simple case of assigning an array to a scalar and getting
 its element count.  If that's what you really and truly want, then you
 might do well to consider being a tad more explicit about it, like this:
 
-    for $i (1..10) {
-        @array = somefunc($i);
+    for my $i (1..10) {
+        my @array = somefunc($i);
         $counts[$i] = scalar @array;
     }
 
 Here's the case of taking a reference to the same memory location
 again and again:
 
-    for $i (1..10) {
+    # Either without strict or having an outer-scope my @array; declaration.
+
+    for my $i (1..10) {
         @array = somefunc($i);
         $AoA[$i] = \@array;     # WRONG!
     }
@@ -168,7 +170,9 @@ hash constructor C<{}> instead.   Here's the right way to do the preceding
 broken code fragments:
 X<[]> X<{}>
 
-    for $i (1..10) {
+    # Either without strict or having an outer-scope my @array; declaration.
+
+    for my $i (1..10) {
         @array = somefunc($i);
         $AoA[$i] = [ @array ];
     }
@@ -180,7 +184,8 @@ you want.
 Note that this will produce something similar, but it's
 much harder to read:
 
-    for $i (1..10) {
+    # Either without strict or having an outer-scope my @array; declaration.
+    for my $i (1..10) {
         @array = 0 .. $i;
         @{$AoA[$i]} = @array;
     }
@@ -214,7 +219,7 @@ efficient.
 Surprisingly, the following dangerous-looking construct will
 actually work out fine:
 
-    for $i (1..10) {
+    for my $i (1..10) {
         my @array = somefunc($i);
         $AoA[$i] = \@array;
     }
