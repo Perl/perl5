@@ -1266,7 +1266,7 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     bool got_some;
     if (flags & ~(LEX_KEEP_PREVIOUS|LEX_FAKE_EOF|LEX_NO_TERM))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_next_chunk");
-    if (!(flags & LEX_NO_TERM) && PL_sublex_info.sub_inwhat)
+    if (!(flags & LEX_NO_TERM) && PL_lex_inwhat)
 	return FALSE;
     linestr = PL_parser->linestr;
     buf = SvPVX(linestr);
@@ -1806,7 +1806,7 @@ S_skipspace_flags(pTHX_ char *s, U32 flags)
 	STRLEN bufptr_pos = PL_bufptr - SvPVX(PL_linestr);
 	PL_bufptr = s;
 	lex_read_space(flags | LEX_KEEP_PREVIOUS |
-		(PL_sublex_info.sub_inwhat || PL_lex_state == LEX_FORMLINE ?
+		(PL_lex_inwhat || PL_lex_state == LEX_FORMLINE ?
 		    LEX_NO_NEXT_CHUNK : 0));
 	s = PL_bufptr;
 	PL_bufptr = SvPVX(PL_linestr) + bufptr_pos;
@@ -2486,7 +2486,6 @@ S_sublex_done(pTHX)
 	PL_bufend = SvPVX(PL_linestr);
 	PL_bufend += SvCUR(PL_linestr);
 	PL_expect = XOPERATOR;
-	PL_sublex_info.sub_inwhat = 0;
 	return ')';
     }
 }
