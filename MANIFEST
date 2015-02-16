@@ -5280,6 +5280,7 @@ t/op/die.t			See if die works
 t/op/die_unwind.t		Check die/eval early-$@ backcompat hack
 t/op/dor.t			See if defined-or (//) works
 t/op/do.t			See if subroutines work
+t/op/dump.t			See if dump works.
 t/op/each_array.t		See if array iterators work
 t/op/each.t			See if hash iterators work
 t/op/evalbytes.t		See if evalbytes operator works
