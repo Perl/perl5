@@ -440,6 +440,11 @@ the POSIX class was negated: C<[:^ascii:]>.  This is now fixed.
 
 Fix a couple of other size calculation overflows.  [perl #123554]
 
+=item *
+
+A bug introduced in 5.21.6, C<dump LABEL> acted the same as C<goto
+LABEL>.  This has been fixed.  [perl #123836]
+
 =back
 
 =head1 Known Problems
