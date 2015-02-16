@@ -3121,8 +3121,7 @@ PP(pp_goto)
 	}
     }
 
-    else {
-        assert(do_dump);
+    if (do_dump) {
 #ifdef VMS
 	if (!retop) retop = PL_main_start;
 #endif

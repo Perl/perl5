@@ -43,8 +43,6 @@ dump;
 print qq(B);
 PROG
 
-{
-local $TODO = "[perl #123836]";
 fresh_perl_like(<<'PROG', qr/A(?!B\z)/, {}, "dump with label quits");
 ++$|;
 print qq(A);
@@ -52,7 +50,6 @@ dump foo;
 foo:
 print qq(B);
 PROG
-}
 
 END {
   chdir $start;
