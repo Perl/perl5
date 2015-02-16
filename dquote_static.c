@@ -267,6 +267,8 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
             *error_msg = "Number with no digits";
             return FALSE;
         }
+        *s = e + 1;
+        *uv = 0;
         return TRUE;
     }
 
