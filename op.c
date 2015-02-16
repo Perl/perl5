@@ -2392,6 +2392,44 @@ S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
     }
 }
 
+/* do the post-compilation processing of an op_tree with specified
+ * root and start (startp may be updated):
+ *   * attach it to cv (if non-null)
+ *   * set refcnt
+ *   * run peep, finalize etc
+ *   * tidy pad
+ */
+
+void
+S_postprocess_optree(pTHX_ CV *cv, OP *root, OP **startp)
+{
+    bool is_format = root->op_type == OP_LEAVEWRITE;
+
+    if (cv) {
+        CvROOT(cv) = root;
+        /* XXX I don't know why this is isn't done for formats - DAPM */
+        if (!is_format) {
+            /* The cv no longer needs to hold a refcount on the slab, as CvROOT
+               itself has a refcount. */
+            CvSLABBED_off(cv);
+            OpslabREFCNT_dec_padok((OPSLAB *)CvSTART(cv));
+        }
+        CvSTART(cv) = *startp;
+        startp = &CvSTART(cv);
+    }
+    root->op_private |= OPpREFCOUNTED;
+    OpREFCNT_set(root, 1);
+    CALL_PEEP(*startp);
+    finalize_optree(root);
+    S_prune_chain_head(startp);
+
+    /* now that optimizer has done its work, adjust pad values */
+    if (cv)
+        pad_tidy(is_format
+                    ? padtidy_FORMAT
+                    : CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
+}
+
 
 /*
 =for apidoc finalize_optree
@@ -4082,15 +4120,11 @@ Perl_newPROG(pTHX_ OP *o)
 	    scalar(PL_eval_root);
 
 	PL_eval_start = op_linklist(PL_eval_root);
-	PL_eval_root->op_private |= OPpREFCOUNTED;
-	OpREFCNT_set(PL_eval_root, 1);
 	PL_eval_root->op_next = 0;
 	i = PL_savestack_ix;
 	SAVEFREEOP(o);
 	ENTER;
-	CALL_PEEP(PL_eval_start);
-	finalize_optree(PL_eval_root);
-        S_prune_chain_head(&PL_eval_start);
+        S_postprocess_optree(aTHX_ NULL, PL_eval_root, &PL_eval_start);
 	LEAVE;
 	PL_savestack_ix = i;
     }
@@ -4130,12 +4164,8 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_main_root = op_scope(sawparens(scalarvoid(o)));
 	PL_curcop = &PL_compiling;
 	PL_main_start = LINKLIST(PL_main_root);
-	PL_main_root->op_private |= OPpREFCOUNTED;
-	OpREFCNT_set(PL_main_root, 1);
 	PL_main_root->op_next = 0;
-	CALL_PEEP(PL_main_start);
-	finalize_optree(PL_main_root);
-        S_prune_chain_head(&PL_main_start);
+        S_postprocess_optree(aTHX_ NULL, PL_main_root, &PL_main_start);
 	cv_forget_slab(PL_compcv);
 	PL_compcv = 0;
 
@@ -8350,24 +8380,10 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
        exit.  */
        
     PL_breakable_sub_gen++;
-    CvROOT(cv) = block;
-    CvROOT(cv)->op_private |= OPpREFCOUNTED;
-    OpREFCNT_set(CvROOT(cv), 1);
-    /* The cv no longer needs to hold a refcount on the slab, as CvROOT
-       itself has a refcount. */
-    CvSLABBED_off(cv);
-    OpslabREFCNT_dec_padok((OPSLAB *)CvSTART(cv));
 #ifdef PERL_DEBUG_READONLY_OPS
     slab = (OPSLAB *)CvSTART(cv);
 #endif
-    CvSTART(cv) = start;
-    CALL_PEEP(start);
-    finalize_optree(CvROOT(cv));
-    S_prune_chain_head(&CvSTART(cv));
-
-    /* now that optimizer has done its work, adjust pad values */
-
-    pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
+    S_postprocess_optree(aTHX_ cv, block, &start);
 
   attrs:
     if (attrs) {
@@ -8815,24 +8831,10 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
        exit.  */
        
     PL_breakable_sub_gen++;
-    CvROOT(cv) = block;
-    CvROOT(cv)->op_private |= OPpREFCOUNTED;
-    OpREFCNT_set(CvROOT(cv), 1);
-    /* The cv no longer needs to hold a refcount on the slab, as CvROOT
-       itself has a refcount. */
-    CvSLABBED_off(cv);
-    OpslabREFCNT_dec_padok((OPSLAB *)CvSTART(cv));
 #ifdef PERL_DEBUG_READONLY_OPS
     slab = (OPSLAB *)CvSTART(cv);
 #endif
-    CvSTART(cv) = start;
-    CALL_PEEP(start);
-    finalize_optree(CvROOT(cv));
-    S_prune_chain_head(&CvSTART(cv));
-
-    /* now that optimizer has done its work, adjust pad values */
-
-    pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
+    S_postprocess_optree(aTHX_ cv, block, &start);
 
   attrs:
     if (attrs) {
@@ -9234,8 +9236,8 @@ void
 Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 {
     CV *cv;
-
     GV *gv;
+    OP *start, *root;
 
     if (PL_parser && PL_parser->error_count) {
 	op_free(block);
@@ -9270,15 +9272,10 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     CvFILE_set_from_cop(cv, PL_curcop);
 
 
-    pad_tidy(padtidy_FORMAT);
-    CvROOT(cv) = newUNOP(OP_LEAVEWRITE, 0, scalarseq(block));
-    CvROOT(cv)->op_private |= OPpREFCOUNTED;
-    OpREFCNT_set(CvROOT(cv), 1);
-    CvSTART(cv) = LINKLIST(CvROOT(cv));
-    CvROOT(cv)->op_next = 0;
-    CALL_PEEP(CvSTART(cv));
-    finalize_optree(CvROOT(cv));
-    S_prune_chain_head(&CvSTART(cv));
+    root = newUNOP(OP_LEAVEWRITE, 0, scalarseq(block));
+    start = LINKLIST(root);
+    root->op_next = 0;
+    S_postprocess_optree(aTHX_ cv, root, &start);
     cv_forget_slab(cv);
 
   finish:
