@@ -350,6 +350,15 @@ the raw reports.
 Similarly, monitor the smoking of perl for compiler warnings, and try to
 fix.
 
+=for checklist skip BLEAD-POINT
+
+=head3 monitor CPAN testers for failures
+
+For any release except a BLEAD-POINT: Examine the relevant analysis report(s)
+at http://analysis.cpantesters.org/beforemaintrelease to see how the impending
+release is performing compared to previous releases with regard to building
+and testing CPAN modules.
+
 =head3 update perldelta
 
 Get perldelta in a mostly finished state.
