@@ -4010,8 +4010,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_LLROUNDL:
  *	This symbol, if defined, indicates that the llroundl routine is
- *	available to return the nearest long long value of the long double
- *	argument value.
+ *	available to return the nearest long long value away from zero of
+ *	the long double argument value.
  */
 #$d_llroundl HAS_LLROUNDL		/**/
 
@@ -4042,7 +4042,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_LRINTL:
  *	This symbol, if defined, indicates that the lrintl routine is
- *	available to return the closest integral value to the long double
+ *	available to return the closest integral value of the long double
  *	argument according to the current rounding mode.
  */
 #$d_lrintl HAS_LRINTL		/**/
@@ -4055,8 +4055,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_LROUNDL:
  *	This symbol, if defined, indicates that the lroundl routine is
- *	available to return the nearest integral value to the long double
- *	argument.
+ *	available to return the nearest integral value away from zero of
+ *	the long double argument value.
  */
 #$d_lroundl HAS_LROUNDL		/**/
 
