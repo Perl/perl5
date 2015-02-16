@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 17);
+plan(tests => 18);
 
 {
     no warnings 'deprecated';
@@ -151,3 +151,11 @@ gibberish
       'gibberish containing &{+z} - used to crash [perl #123753]'
     );
 }
+
+fresh_perl_is(
+  '/$a[/<<a',
+  "syntax error at - line 1, next char ;\n" .
+  "Can't find string terminator \"a\" anywhere before EOF at - line 1.\n",
+   { stderr => 1 },
+  '/$a[/<<a with no newline [perl #123712]'
+);
