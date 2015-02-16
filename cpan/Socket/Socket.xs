@@ -545,7 +545,7 @@ static void xs_getnameinfo(pTHX_ CV *cv)
 	want_host = !(xflags & NIx_NOHOST);
 	want_serv = !(xflags & NIx_NOSERV);
 
-	if(!SvPOK(addr))
+	if(!SvPOKp(addr))
 		croak("addr is not a string");
 
 	addr_len = SvCUR(addr);
