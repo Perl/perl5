@@ -1285,6 +1285,7 @@
 #define parser_free(a)		Perl_parser_free(aTHX_ a)
 #define peep(a)			Perl_peep(aTHX_ a)
 #define pmruntime(a,b,c,d,e)	Perl_pmruntime(aTHX_ a,b,c,d,e)
+#define prefinalize_optree(a,b)	Perl_prefinalize_optree(aTHX_ a,b)
 #define re_op_compile(a,b,c,d,e,f,g,h)	Perl_re_op_compile(aTHX_ a,b,c,d,e,f,g,h)
 #define refcounted_he_chain_2hv(a,b)	Perl_refcounted_he_chain_2hv(aTHX_ a,b)
 #define refcounted_he_fetch_pv(a,b,c,d)	Perl_refcounted_he_fetch_pv(aTHX_ a,b,c,d)

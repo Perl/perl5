@@ -916,6 +916,7 @@ Ap	|I32	|mg_size	|NN SV* sv
 Apn	|void	|mini_mktime	|NN struct tm *ptm
 AMmd	|OP*	|op_lvalue	|NULLOK OP* o|I32 type
 poX	|OP*	|op_lvalue_flags|NULLOK OP* o|I32 type|U32 flags
+p	|void	|prefinalize_optree		|NULLOK CV* cv|NN OP* o
 p	|void	|finalize_optree		|NN OP* o
 #if defined(PERL_IN_OP_C)
 s	|void	|finalize_op	|NN OP* o

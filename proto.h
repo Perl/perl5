@@ -3472,6 +3472,11 @@ PERL_CALLCONV void	Perl_populate_isa(pTHX_ const char *name, STRLEN len, ...)
 #define PERL_ARGS_ASSERT_POPULATE_ISA	\
 	assert(name)
 
+PERL_CALLCONV void	Perl_prefinalize_optree(pTHX_ CV* cv, OP* o)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_PREFINALIZE_OPTREE	\
+	assert(o)
+
 PERL_CALLCONV REGEXP*	Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PREGCOMP	\

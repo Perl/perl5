@@ -2419,6 +2419,7 @@ S_postprocess_optree(pTHX_ CV *cv, OP *root, OP **startp)
     }
     root->op_private |= OPpREFCOUNTED;
     OpREFCNT_set(root, 1);
+    prefinalize_optree(cv, root);
     CALL_PEEP(*startp);
     finalize_optree(root);
     S_prune_chain_head(startp);
@@ -2428,6 +2429,47 @@ S_postprocess_optree(pTHX_ CV *cv, OP *root, OP **startp)
         pad_tidy(is_format
                     ? padtidy_FORMAT
                     : CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
+}
+
+
+/* per op-level helper function for Perl_finalize_optree() */
+
+STATIC void
+S_prefinalize_op(pTHX_ CV *cv, OP* o)
+{
+    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(cv);
+    PERL_UNUSED_ARG(o);
+
+    /* XXX currently not needed. When first needed, add a big switch
+     * statement and recursion similar to S_finalize_op()
+     */
+
+}
+
+
+/*
+=for apidoc prefinalize_optree
+
+This function is like finalize_optree(), but is called prior to the
+peephole optimiser being called (finalize_optree() is called after peep()).
+Thus it gives you access to the optree before optimisations.
+
+If non-null, cv is the CV which the optree is attached to.
+
+=cut
+*/
+void
+Perl_prefinalize_optree(pTHX_ CV *cv, OP* o)
+{
+    PERL_ARGS_ASSERT_PREFINALIZE_OPTREE;
+
+    ENTER;
+    SAVEVPTR(PL_curcop);
+
+    S_prefinalize_op(aTHX_ cv, o);
+
+    LEAVE;
 }
 
 
