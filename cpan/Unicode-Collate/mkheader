@@ -114,7 +114,7 @@ my $init = '';
 	$line =~ s/\s*\z//;
 	next if $line eq '';
 	$init .= "/*$line*/\n" if $line =~ /^[A-Za-z0-9_.:;@\ \[\]]+\z/;
-	$init .= "($type)".stringify($line).",\n";
+	$init .= stringify($line).",\n";
     }
     $init .= "NULL\n"; # sentinel
     $init .= "};\n\n";
@@ -167,7 +167,7 @@ EOF
 	    printf "static const $type ${head}_%02x_%02x [256] = {\n", $p, $r;
 	    for (my $c = 0; $c < 256; $c++) {
 		print "\t", defined $val{$p}{$r}{$c}
-		    ? "($type)".$val{$p}{$r}{$c}
+		    ? $val{$p}{$r}{$c}
 		    : $null;
 		print ','  if $c != 255;
 		print "\n" if $c % 8 == 7;

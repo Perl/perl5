@@ -40,7 +40,7 @@ my $objFr = Unicode::Collate::Locale->
     new(locale => 'FR', normalization => undef);
 
 ok($objFr->getlocale, 'fr');
-ok($objFr->locale_version, 1.10);
+ok($objFr->locale_version, 1.11);
 
 $objFr->change(level => 1);
 

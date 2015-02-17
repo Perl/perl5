@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.10,
+   locale_version => 1.11,
 # schwa doesn't require tailoring
    entry => <<'ENTRY', # for DUCET v7.0.0
 00E7      ; [.193F.0020.0002] # LATIN SMALL LETTER C WITH CEDILLA
