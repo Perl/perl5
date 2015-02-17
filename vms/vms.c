@@ -1781,20 +1781,6 @@ static char *mp_do_rmsexpand(pTHX_ const char *, char *, int, const char *, unsi
 static char *mp_do_fileify_dirspec(pTHX_ const char *, char *, int, int *);
 static char *mp_do_tovmsspec(pTHX_ const char *, char *, int, int, int *);
 
-/* fixup barenames that are directories for internal use.
- * There have been problems with the consistent handling of UNIX
- * style directory names when routines are presented with a name that
- * has no directory delimiters at all.  So this routine will eventually
- * fix the issue.
- */
-static char * fixup_bare_dirnames(const char * name)
-{
-  if (decc_disable_to_vms_logname_translation) {
-/* fix me */
-  }
-  return NULL;
-}
-
 /* 8.3, remove() is now broken on symbolic links */
 static int rms_erase(const char * vmsname);
 
