@@ -269,8 +269,8 @@ will match "foo" using the locale's rules for case-insensitive matching,
 but the C</l> does not affect how the C<\U> operates.  Most likely you
 want both of them to use locale rules.  To do this, instead compile the
 regular expression within the scope of C<use locale>.  This both
-implicitly adds the C</l> and applies locale rules to the C<\U>.   The
-lesson is to C<use locale> and not C</l> explicitly.
+implicitly adds the C</l>, and applies locale rules to the C<\U>.   The
+lesson is to C<use locale>, and not C</l> explicitly.
 
 Similarly, it would be better to use C<use feature 'unicode_strings'>
 instead of,
@@ -384,7 +384,7 @@ the pattern uses a Unicode name (C<\N{...}>);  or
 
 =item 5
 
-the pattern uses a Unicode property (C<\p{...}>); or
+the pattern uses a Unicode property (C<\p{...}> or C<\P{...}>); or
 
 =item 6
 
