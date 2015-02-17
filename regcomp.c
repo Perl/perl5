@@ -10450,6 +10450,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             Set_Node_Offset(ret, RExC_parse); /* MJD */
 	    is_open = 1;
 	} else {
+            /* with RXf_PMf_NOCAPTURE treat (...) as (?:...) */
+            paren = ':';
 	    ret = NULL;
 	}
     }

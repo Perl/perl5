@@ -22,7 +22,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 772;  # Update this when adding/deleting tests.
+plan tests => 774;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1683,6 +1683,16 @@ EOP
 		eval q{ ($match) = ("xxyxxyxy" =~ m{(x+(y(?1))*)}) };
 		ok(1, "compiled GOSUB in CURLYM ok");
 		is($match, 'xxyxxyx', "matched GOSUB in CURLYM");
+	}
+
+	{
+		# [perl #123852] doesn't avoid all the capture-related work with
+		# //n, leading to possible memory corruption
+		eval q{ qr{()(?1)}n };
+		my $error = $@;
+		ok(1, "qr{()(?1)}n didn't crash");
+		like($error, qr{Reference to nonexistent group},
+				'gave appropriate error for qr{()(?1)}n');
 	}
 } # End of sub run_tests
 
