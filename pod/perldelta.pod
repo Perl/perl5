@@ -25,7 +25,14 @@ XXX New core language features go here.  Summarize user-visible core language
 enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
-[ List each enhancement as a =head2 entry ]
+=head2 qr/\b{gcb}/ is now handled in regular expressions
+
+C<gcb> stands for Grapheme Cluster Boundary.  It is a Unicode property
+that finds the boundary between sequences of characters that look like a
+single character to a native speaker of a language.  Perl has long had
+the ability to deal with these through the C<\X> regular escape
+sequence.  Now, there is an alternative way of handling these.  See
+L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
 
 =head1 Security
 

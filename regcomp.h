@@ -993,6 +993,11 @@ re.pm, especially to the documentation.
 
 #endif /* DEBUG RELATED DEFINES */
 
+typedef enum {
+	TRADITIONAL_BOUND = _CC_WORDCHAR,
+	GCB_BOUND
+} bound_type;
+
 /*
  * Local variables:
  * c-indentation-style: bsd

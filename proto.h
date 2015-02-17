@@ -7432,6 +7432,9 @@ STATIC bool	S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
 #define PERL_ARGS_ASSERT_ISFOO_UTF8_LC	\
 	assert(character)
 
+STATIC bool	S_isGCB(const PL_GCB_enum before, const PL_GCB_enum after)
+			__attribute__warn_unused_result__;
+
 STATIC I32	S_reg_check_named_buff_matched(const regexp *rex, const regnode *scan)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)

@@ -53,6 +53,7 @@
 #define PL_DBtrace		(vTHX->IDBtrace)
 #define PL_Dir			(vTHX->IDir)
 #define PL_Env			(vTHX->IEnv)
+#define PL_GCB_invlist		(vTHX->IGCB_invlist)
 #define PL_HasMultiCharFold	(vTHX->IHasMultiCharFold)
 #define PL_InBitmap		(vTHX->IInBitmap)
 #define PL_LIO			(vTHX->ILIO)

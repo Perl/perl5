@@ -388,6 +388,10 @@ the pattern uses a Unicode property (C<\p{...}> or C<\P{...}>); or
 
 =item 6
 
+the pattern uses a Unicode break (C<\b{...}> or C<\B{...}>); or
+
+=item 7
+
 the pattern uses L</C<(?[ ])>>
 
 =back
@@ -770,6 +774,8 @@ X<regexp, zero-width assertion>
 X<regular expression, zero-width assertion>
 X<\b> X<\B> X<\A> X<\Z> X<\z> X<\G>
 
+    \b{} Match at Unicode boundary of specified type
+    \B{} Match where corresponding \b{} doesn't match
     \b  Match a word boundary
     \B  Match except at a word boundary
     \A  Match only at beginning of string
@@ -777,6 +783,12 @@ X<\b> X<\B> X<\A> X<\Z> X<\z> X<\G>
     \z  Match only at end of string
     \G  Match only at pos() (e.g. at the end-of-match position
         of prior m//g)
+
+A Unicode boundary (C<\b{}>), available starting in v5.22, is a spot
+between two characters, or before the first character in the string, or
+after the final character in the string where certain criteria defined
+by Unicode are met.  See L<perlrebackslash/\b{}, \b, \B{}, \B> for
+details.
 
 A word boundary (C<\b>) is a spot between two characters
 that has a C<\w> on one side of it and a C<\W> on the other side

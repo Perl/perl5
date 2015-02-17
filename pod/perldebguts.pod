@@ -573,19 +573,23 @@ will be lost.
 
  # Word Boundary Opcodes:
  BOUND           no         Match "" at any word boundary using native
-                            charset rules for non-utf8
- BOUNDL          no         Match "" at any locale word boundary
- BOUNDU          no         Match "" at any word boundary using Unicode
-                            rules
- BOUNDA          no         Match "" at any word boundary using ASCII
-                            rules
- NBOUND          no         Match "" at any word non-boundary using
-                            native charset rules for non-utf8
- NBOUNDL         no         Match "" at any locale word non-boundary
- NBOUNDU         no         Match "" at any word non-boundary using
+                            charset rules for non-utf8, otherwise
                             Unicode rules
- NBOUNDA         no         Match "" at any word non-boundary using
-                            ASCII rules
+ BOUNDL          no         Match "" at any boundary of a given type
+                            using locale rules
+ BOUNDU          no         Match "" at any boundary of a given type
+                            using Unicode rules
+ BOUNDA          no         Match "" at any boundary of a given type
+                            using ASCII rules
+ NBOUND          no         Match "" at any word non-boundary using
+                            native charset rules for non-utf8, otherwise
+                            Unicode rules
+ NBOUNDL         no         Match "" at any boundary of a given type
+                            using locale rules
+ NBOUNDU         no         Match "" at any boundary of a given type
+                            using using Unicode rules
+ NBOUNDA         no         Match "" at any boundary of a given type
+                            using using ASCII rules
 
  # [Special] alternatives:
  REG_ANY         no         Match any one character (except newline).

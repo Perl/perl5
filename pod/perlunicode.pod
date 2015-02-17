@@ -1100,7 +1100,8 @@ Level 2 - Extended Unicode Support
 
  [10] see UAX#15 "Unicode Normalization Forms"
  [11] have Unicode::Normalize but not integrated to regexes
- [12] have \X but we don't have a "Grapheme Cluster Mode"
+ [12] have \X and \b{gcb} but we don't have a "Grapheme Cluster
+      Mode"
  [14] see UAX#29, Word Boundaries
  [15] This is covered in Chapter 3.13 (in Unicode 6.0)
 
@@ -1575,8 +1576,9 @@ regular expressions outside the scope.
 
 =item *
 
-Matching any of several properties in regular expressions, namely C<\b>,
-C<\B>, C<\s>, C<\S>, C<\w>, C<\W>, and all the Posix character classes
+Matching any of several properties in regular expressions, namely
+C<\b> (without braces), C<\B> (without braces), C<\s>, C<\S>, C<\w>,
+C<\W>, and all the Posix character classes
 I<except> C<[[:ascii:]]>.
 Starting in Perl 5.14.0, regular expressions compiled within
 the scope of C<unicode_strings> use character semantics

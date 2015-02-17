@@ -2894,6 +2894,12 @@ with 'useperlio'.
 (F) Your machine doesn't implement the sockatmark() functionality,
 neither as a system call nor an ioctl call (SIOCATMARK).
 
+=item '%s' is an unknown bound type in regex; marked by <-- HERE in m/%s/
+
+(F) You used C<\b{...}> or C<\B{...}> and the C<...> is not known to
+Perl.  The current valid ones are given in
+L<perlrebackslash/\b{}, \b, \B{}, \B>.
+
 =item "%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in m/%s/
 
 (W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
@@ -6638,6 +6644,15 @@ is deprecated.  See L<perlvar/"$[">.
 form if you wish to use an empty line as the terminator of the
 here-document.
 
+=item Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale
+
+(W locale)  You are matching a regular expression using locale rules,
+and a Unicode boundary is being matched, but the locale is not a Unicode
+one.  This doesn't make sense.  Perl will continue, assuming a Unicode
+(UTF-8) locale, but the results could well be wrong except if the locale
+happens to be ISO-8859-1 (Latin1) where this message is spurious and can
+be ignored.
+
 =item Use of chdir('') or chdir(undef) as chdir() deprecated
 
 (D deprecated) chdir() with no arguments is documented to change to
@@ -6858,6 +6873,15 @@ the whole thing correctly, except when the class is inverted
 a range.  For these, what should happen isn't clear at all.  In
 these circumstances, Perl discards all but the first character
 of the returned sequence, which is not likely what you want.
+
+=item Using /u for '%s' instead of /%s in regex; marked by <-- HERE in m/%s/
+
+(W regexp) You used a Unicode boundary (C<\b{...}> or C<\B{...}>) in a
+portion of a regular expression where the character set modifiers C</a>
+or C</aa> are in effect.  These two modifiers indicate an ASCII
+interpretation, and this doesn't make sense for a Unicode definiton.
+The generated regular expression will compile so that the boundary uses
+all of Unicode.  No other portion of the regular expression is affected.
 
 =item Using !~ with %s doesn't make sense
 

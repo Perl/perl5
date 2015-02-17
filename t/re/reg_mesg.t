@@ -142,8 +142,6 @@ my @death =
 '/(?lil:foo)/' => 'Regexp modifier "l" may not appear twice {#} m/(?lil{#}:foo)/',
 '/(?aaia:foo)/' => 'Regexp modifier "a" may appear a maximum of twice {#} m/(?aaia{#}:foo)/',
 '/(?i-l:foo)/' => 'Regexp modifier "l" may not appear after the "-" {#} m/(?i-l{#}:foo)/',
-'/a\b{cde/' => 'Use "\b\{" instead of "\b{" {#} m/a\{#}b{cde/',
-'/a\B{cde/' => 'Use "\B\{" instead of "\B{" {#} m/a\{#}B{cde/',
 
  '/((x)/' => 'Unmatched ( {#} m/({#}(x)/',
 
@@ -188,8 +186,17 @@ my @death =
  '/[z-a]/' => 'Invalid [] range "z-a" {#} m/[z-a{#}]/',
 
  '/\p/' => 'Empty \p{} {#} m/\p{#}/',
-
  '/\P{}/' => 'Empty \P{} {#} m/\P{{#}}/',
+
+'/a\b{cde/' => 'Missing right brace on \b{} {#} m/a\b{{#}cde/',
+'/a\B{cde/' => 'Missing right brace on \B{} {#} m/a\B{{#}cde/',
+
+ '/\b{}/' => 'Empty \b{} {#} m/\b{}{#}/',
+ '/\B{}/' => 'Empty \B{} {#} m/\B{}{#}/',
+
+ '/\b{gc}/' => "'gc' is an unknown bound type {#} m/\\b{gc{#}}/",
+ '/\B{gc}/' => "'gc' is an unknown bound type {#} m/\\B{gc{#}}/",
+
  '/(?[[[:word]]])/' => "Unmatched ':' in POSIX class {#} m/(?[[[:word{#}]]])/",
  '/(?[[:word]])/' => "Unmatched ':' in POSIX class {#} m/(?[[:word{#}]])/",
  '/(?[[[:digit: ])/' => "Unmatched '[' in POSIX class {#} m/(?[[[:digit:{#} ])/",
@@ -417,6 +424,8 @@ my @death_utf8 = mark_as_utf8(
  '/(?[ \t + \e # ネ This was supposed to be a comment ])/' => 'Syntax error in (?[...]) in regex m/(?[ \t + \e # ネ This was supposed to be a comment ])/',
  'm/(*ネ)ネ/' => q<Unknown verb pattern 'ネ' {#} m/(*ネ){#}ネ/>,
  '/\cネ/' => "Character following \"\\c\" must be printable ASCII",
+ '/\b{ネ}/' => "'ネ' is an unknown bound type {#} m/\\b{ネ{#}}/",
+ '/\B{ネ}/' => "'ネ' is an unknown bound type {#} m/\\B{ネ{#}}/",
 );
 push @death, @death_utf8;
 
@@ -450,6 +459,8 @@ my @death_utf8_only_under_strict = (
 
 my @warning = (
     'm/\b*\x{100}/' => '\b* matches null string many times {#} m/\b*{#}\x{100}/',
+    '/\b{g}/a' => "Using /u for '\\b{g}' instead of /a {#} m/\\b{g}{#}/",
+    '/\B{gcb}/a' => "Using /u for '\\B{gcb}' instead of /a {#} m/\\B{gcb}{#}/",
     'm/[:blank:]\x{100}/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:blank:]{#}\x{100}/',
     'm/[[:cntrl:]][:^ascii:]\x{100}/' =>  'POSIX syntax [: :] belongs inside character classes {#} m/[[:cntrl:]][:^ascii:]{#}\x{100}/',
     "m'\\y\\x{100}'"     => 'Unrecognized escape \y passed through {#} m/\y{#}\x{100}/',

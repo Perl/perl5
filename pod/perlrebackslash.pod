@@ -66,8 +66,8 @@ as C<Not in [].>
  \1                Absolute backreference.  Not in [].
  \a                Alarm or bell.
  \A                Beginning of string.  Not in [].
- \b                Word/non-word boundary. (Backspace in []).
- \B                Not a word/non-word boundary.  Not in [].
+ \b{}, \b          Boundary. (\b is a backspace in []).
+ \B{}, \B          Not a boundary.
  \cX               Control-X.
  \C                Single octet, even under UTF-8.  Not in [].
                    (Deprecated)
@@ -134,7 +134,8 @@ description.  (For EBCDIC platforms, see L<perlebcdic/OPERATOR DIFFERENCES>.)
 =item [1]
 
 C<\b> is the backspace character only inside a character class. Outside a
-character class, C<\b> is a word/non-word boundary.
+character class, C<\b> alone is a word-character/non-word-character
+boundary, and C<\b{}> is some other type of boundary.
 
 =item [2]
 
@@ -525,10 +526,21 @@ or the beginning of that string if there was no previous match.
 
 Mnemonic: I<G>lobal.
 
-=item \b, \B
+=item \b{}, \b, \B{}, \B
 
-C<\b> matches at any place between a word and a non-word character; C<\B>
-matches at any place between characters where C<\b> doesn't match. C<\b>
+C<\b{...}>, available starting in v5.22, matches a boundary (between two
+characters, or before the first character of the string, or after the
+final character of the string) based on the Unicode rules for the
+boundary type specified inside the braces.  The currently known boundary
+types are given a few paragraphs below.  C<\B{...}> matches at any place
+between characters where C<\b{...}> of the same type doesn't match.
+
+C<\b> when not immediately followed by a C<"{"> matches at any place
+between a word (something matched by C<\w>) and a non-word character
+(C<\W>); C<\B> when not immediately followed by a C<"{"> matches at any
+place between characters where C<\b> doesn't match.
+
+C<\b>
 and C<\B> assume there's a non-word character before the beginning and after
 the end of the source string; so C<\b> will match at the beginning (or end)
 of the source string if the source string begins (or ends) with a word
@@ -537,12 +549,21 @@ character. Otherwise, C<\B> will match.
 Do not use something like C<\b=head\d\b> and expect it to match the
 beginning of a line.  It can't, because for there to be a boundary before
 the non-word "=", there must be a word character immediately previous.  
-All boundary determinations look for word characters alone, not for
-non-words characters nor for string ends.  It may help to understand how
+All plain C<\b> and C<\B> boundary determinations look for word
+characters alone, not for
+non-word characters nor for string ends.  It may help to understand how
 <\b> and <\B> work by equating them as follows:
 
     \b	really means	(?:(?<=\w)(?!\w)|(?<!\w)(?=\w))
     \B	really means	(?:(?<=\w)(?=\w)|(?<!\w)(?!\w))
+
+In contrast, C<\b{...}> always matches at the beginning and end of the
+line (and C<\B{...}> never does).  The only boundary type currently
+"Grapheme Cluster Boundary".  (Actually Perl always uses the improved
+"extended" grapheme cluster").  These are explained below under C<\X>.
+In fact, C<\X> is another way to get the same functionality.  It is
+equivalent to C</.+?\b{gcb}/>.  Use whichever is most convenient for
+your situation.
 
 Mnemonic: I<b>oundary.
 
@@ -649,6 +670,8 @@ were a single character.
 
 The match is greedy and non-backtracking, so that the cluster is never
 broken up into smaller components.
+
+See also L<C<\b{gcb}>|/\b{}, \b, \B{}, \B>.
 
 Mnemonic: eI<X>tended Unicode character.
 

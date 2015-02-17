@@ -14944,6 +14944,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     for (i = 0; i < POSIX_CC_COUNT; i++) {
         PL_XPosix_ptrs[i] = sv_dup_inc(proto_perl->IXPosix_ptrs[i], param);
     }
+    PL_GCB_invlist = sv_dup_inc(proto_perl->IGCB_invlist, param);
     PL_utf8_mark	= sv_dup_inc(proto_perl->Iutf8_mark, param);
     PL_utf8_X_regular_begin	= sv_dup_inc(proto_perl->Iutf8_X_regular_begin, param);
     PL_utf8_X_extend	= sv_dup_inc(proto_perl->Iutf8_X_extend, param);

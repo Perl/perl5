@@ -201,6 +201,8 @@ All are zero-width assertions.
 
    ^  Match string start (or line, if /m is used)
    $  Match string end (or line, if /m is used) or before newline
+   \b{} Match boundary of type specified within the braces
+   \B{} Match wherever \b{} doesn't match
    \b Match word boundary (between \w and \W)
    \B Match except at word boundary (between \w and \w or \W and \W)
    \A Match string start (regardless of /m)

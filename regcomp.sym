@@ -43,15 +43,15 @@ GPOS        GPOS,       no        ; Matches where last m//g left off.
 # in regcomp.c uses the enum value of the modifier as an offset from the /d
 # version.  The complements must come after the non-complements.
 # BOUND, POSIX and their complements are affected, as well as EXACTF.
-BOUND       BOUND,      no        ; Match "" at any word boundary using native charset rules for non-utf8
-BOUNDL      BOUND,      no        ; Match "" at any locale word boundary
-BOUNDU      BOUND,      no        ; Match "" at any word boundary using Unicode rules
-BOUNDA      BOUND,      no         ; Match "" at any word boundary using ASCII rules
+BOUND       BOUND,      no        ; Match "" at any word boundary using native charset rules for non-utf8, otherwise Unicode rules
+BOUNDL      BOUND,      no        ; Match "" at any boundary of a given type using locale rules
+BOUNDU      BOUND,      no        ; Match "" at any boundary of a given type using Unicode rules
+BOUNDA      BOUND,      no        ; Match "" at any boundary of a given type using ASCII rules
 # All NBOUND nodes are required by code in regexec.c to be greater than all BOUND ones
-NBOUND      NBOUND,     no        ; Match "" at any word non-boundary using native charset rules for non-utf8
-NBOUNDL     NBOUND,     no        ; Match "" at any locale word non-boundary
-NBOUNDU     NBOUND,     no        ; Match "" at any word non-boundary using Unicode rules
-NBOUNDA     NBOUND,     no        ; Match "" at any word non-boundary using ASCII rules
+NBOUND      NBOUND,     no        ; Match "" at any word non-boundary using native charset rules for non-utf8, otherwise Unicode rules
+NBOUNDL     NBOUND,     no        ; Match "" at any boundary of a given type using locale rules
+NBOUNDU     NBOUND,     no        ; Match "" at any boundary of a given type using using Unicode rules
+NBOUNDA     NBOUND,     no        ; Match "" at any boundary of a given type using using ASCII rules
 
 #* [Special] alternatives:
 REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).

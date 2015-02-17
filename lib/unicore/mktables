@@ -18762,6 +18762,7 @@ sub _test_break($$) {
     my @should_match = map { eval "\"$_\"" } @should_display;
 
     # If a string can be represented in both non-ut8 and utf8, test both cases
+    my $display_upgrade = "";
     UPGRADE:
     for my $to_upgrade (0 .. 1) {
 
@@ -18771,7 +18772,53 @@ sub _test_break($$) {
             next UPGRADE if utf8::is_utf8($string);
 
             utf8::upgrade($string);
+            $display_upgrade = " (utf8-upgraded)";
         }
+
+        # The /l modifier has C after it to indicate the locale to try
+        my @modifiers = qw(a aa d lC u i);
+        push @modifiers, "l$utf8_locale" if defined $utf8_locale;
+
+        # Test for each of the regex modifiers.
+        for my $modifier (@modifiers) {
+            my $display_locale = "";
+
+            # For /l, set the locale to what it says to.
+            if ($modifier =~ / ^ l (.*) /x) {
+                my $locale = $1;
+                $display_locale = "(locale = $locale)";
+                use Config;
+                if (defined $Config{d_setlocale}) {
+                    eval { require POSIX; import POSIX 'locale_h'; };
+                    if (defined &POSIX::LC_CTYPE) {
+                        POSIX::setlocale(&POSIX::LC_CTYPE, $locale);
+                    }
+                }
+                $modifier = 'l';
+            }
+
+            no warnings qw(locale regexp surrogate);
+            my $pattern = "(?$modifier:$break_pattern)";
+
+            # Actually do the test
+            my $matched = $string =~ qr/$pattern/;
+            print "not " unless $matched;
+
+            # Fancy display of test results
+            $matched = ($matched) ? "matched" : "failed to match";
+            print "ok ", ++$Tests, " - \"$display_string\" $matched /$pattern/$display_upgrade; line $line $display_locale\n";
+
+            # Repeat with the first \B{} in the pattern.  This makes sure the
+            # code in regexec.c:find_byclass() for \B gets executed
+            if ($pattern =~ / ( .*? : ) .* ( \\B\{ .* ) /x) {
+                my $B_pattern = "$1$2";
+                $matched = $string =~ qr/$B_pattern/;
+                print "not " unless $matched;
+                print "ok ", ++$Tests, " - \"$display_string\" $matched /$B_pattern/$display_upgrade; line $line $display_locale\n";
+            }
+        }
+
+        next if $break_type ne 'gcb';
 
         # Finally, do the \X match.
         my @matches = $string =~ /(\X)/g;

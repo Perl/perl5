@@ -19,14 +19,14 @@
 #define	MEOL                  	5	/* 0x05 Same, assuming multiline: /$/m */
 #define	EOS                   	6	/* 0x06 Match "" at end of string: /\z/ */
 #define	GPOS                  	7	/* 0x07 Matches where last m//g left off. */
-#define	BOUND                 	8	/* 0x08 Match "" at any word boundary using native charset rules for non-utf8 */
-#define	BOUNDL                	9	/* 0x09 Match "" at any locale word boundary */
-#define	BOUNDU                	10	/* 0x0a Match "" at any word boundary using Unicode rules */
-#define	BOUNDA                	11	/* 0x0b Match "" at any word boundary using ASCII rules */
-#define	NBOUND                	12	/* 0x0c Match "" at any word non-boundary using native charset rules for non-utf8 */
-#define	NBOUNDL               	13	/* 0x0d Match "" at any locale word non-boundary */
-#define	NBOUNDU               	14	/* 0x0e Match "" at any word non-boundary using Unicode rules */
-#define	NBOUNDA               	15	/* 0x0f Match "" at any word non-boundary using ASCII rules */
+#define	BOUND                 	8	/* 0x08 Match "" at any word boundary using native charset rules for non-utf8, otherwise Unicode rules */
+#define	BOUNDL                	9	/* 0x09 Match "" at any boundary of a given type using locale rules */
+#define	BOUNDU                	10	/* 0x0a Match "" at any boundary of a given type using Unicode rules */
+#define	BOUNDA                	11	/* 0x0b Match "" at any boundary of a given type using ASCII rules */
+#define	NBOUND                	12	/* 0x0c Match "" at any word non-boundary using native charset rules for non-utf8, otherwise Unicode rules */
+#define	NBOUNDL               	13	/* 0x0d Match "" at any boundary of a given type using locale rules */
+#define	NBOUNDU               	14	/* 0x0e Match "" at any boundary of a given type using using Unicode rules */
+#define	NBOUNDA               	15	/* 0x0f Match "" at any boundary of a given type using using ASCII rules */
 #define	REG_ANY               	16	/* 0x10 Match any one character (except newline). */
 #define	SANY                  	17	/* 0x11 Match any one character. */
 #define	CANY                  	18	/* 0x12 Match any one byte. */

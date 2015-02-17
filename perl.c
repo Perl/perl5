@@ -33,7 +33,6 @@
 #include "perl.h"
 #include "patchlevel.h"			/* for local_patches */
 #include "XSUB.h"
-#include "charclass_invlists.h"
 
 #ifdef NETWARE
 #include "nwutil.h"	
@@ -391,6 +390,7 @@ perl_construct(pTHXx)
     PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(VertSpace_invlist);
     PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(XPosixWord_invlist);
     PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(XPosixXDigit_invlist);
+    PL_GCB_invlist = _new_invlist_C_array(Grapheme_Cluster_Break_invlist);
 
     ENTER;
 }
@@ -1060,6 +1060,7 @@ perl_destruct(pTHXx)
         SvREFCNT_dec(PL_XPosix_ptrs[i]);
         PL_XPosix_ptrs[i] = NULL;
     }
+    PL_GCB_invlist = NULL;
 
     if (!specialWARN(PL_compiling.cop_warnings))
 	PerlMemShared_free(PL_compiling.cop_warnings);

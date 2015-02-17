@@ -2685,6 +2685,7 @@ typedef struct padname PADNAME;
 #endif
 
 #include "handy.h"
+#include "charclass_invlists.h"
 
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_RAWIO)
 #   if LSEEKSIZE == 8 && !defined(USE_64_BIT_RAWIO)
