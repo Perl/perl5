@@ -1278,19 +1278,26 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 #define LAST_HIGH_SURROGATE  0xDBFF
 #define FIRST_LOW_SURROGATE  0xDC00
 #define LAST_LOW_SURROGATE   UNICODE_SURROGATE_LAST
-	if (uv >= FIRST_HIGH_SURROGATE && uv <= LAST_HIGH_SURROGATE) {
-	    if (p >= pend) {
-		Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
-	    } else {
+
+        /* This assumes that most uses will be in the first Unicode plane, not
+         * needing surrogates */
+	if (UNLIKELY(uv >= UNICODE_SURROGATE_FIRST
+                  && uv <= UNICODE_SURROGATE_LAST))
+        {
+            if (UNLIKELY(p >= pend) || UNLIKELY(uv > LAST_HIGH_SURROGATE)) {
+                Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
+            }
+	    else {
 		UV low = (p[0] << 8) + p[1];
-		p += 2;
-		if (low < FIRST_LOW_SURROGATE || low > LAST_LOW_SURROGATE)
+		if (   UNLIKELY(low < FIRST_LOW_SURROGATE)
+                    || UNLIKELY(low > LAST_LOW_SURROGATE))
+                {
 		    Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
+                }
+		p += 2;
 		uv = ((uv - FIRST_HIGH_SURROGATE) << 10)
                                        + (low - FIRST_LOW_SURROGATE) + 0x10000;
 	    }
-	} else if (uv >= FIRST_LOW_SURROGATE && uv <= LAST_LOW_SURROGATE) {
-	    Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
 	}
 #ifdef EBCDIC
         d = uvoffuni_to_utf8_flags(d, uv, 0);
