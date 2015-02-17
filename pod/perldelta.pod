@@ -140,6 +140,14 @@ Building in C++ mode on Windows now works.
 
 =item *
 
+L<Errno> has been upgraded from version 1.22 to 1.23.
+
+Add C<-P> to the preprocessor command-line on GCC 5.  GCC added extra
+line directives, breaking parsing of error code definitions.  [perl
+#123784]
+
+=item *
+
 L<Opcode> has been upgraded from version 1.31 to 1.32.
 
 =item *
@@ -304,7 +312,9 @@ Use L<XXX> with program names to get proper documentation linking. ]
 
 =item *
 
-XXX
+F<h2ph> now handles hexadecimal constants in the compiler's predefined
+macro definitions, as visible in C<$Config{cppsymbols}>.  [perl
+#123784]
 
 =back
 
