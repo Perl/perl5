@@ -132,7 +132,8 @@ might do well to consider being a tad more explicit about it, like this:
 Here's the case of taking a reference to the same memory location
 again and again:
 
-    # Either without strict or having an outer-scope my @array; declaration.
+    # Either without strict or having an outer-scope my @array;
+    # declaration.
 
     for my $i (1..10) {
         @array = somefunc($i);
@@ -170,7 +171,8 @@ hash constructor C<{}> instead.   Here's the right way to do the preceding
 broken code fragments:
 X<[]> X<{}>
 
-    # Either without strict or having an outer-scope my @array; declaration.
+    # Either without strict or having an outer-scope my @array;
+    # declaration.
 
     for my $i (1..10) {
         @array = somefunc($i);
@@ -184,7 +186,8 @@ you want.
 Note that this will produce something similar, but it's
 much harder to read:
 
-    # Either without strict or having an outer-scope my @array; declaration.
+    # Either without strict or having an outer-scope my @array;
+    # declaration.
     for my $i (1..10) {
         @array = 0 .. $i;
         @{$AoA[$i]} = @array;
@@ -240,9 +243,9 @@ do the right thing behind the scenes.
 
 In summary:
 
-    $AoA[$i] = [ @array ];      # usually best
-    $AoA[$i] = \@array;         # perilous; just how my() was that array?
-    @{ $AoA[$i] } = @array;     # way too tricky for most programmers
+    $AoA[$i] = [ @array ];     # usually best
+    $AoA[$i] = \@array;        # perilous; just how my() was that array?
+    @{ $AoA[$i] } = @array;    # way too tricky for most programmers
 
 
 =head1 CAVEAT ON PRECEDENCE
@@ -654,7 +657,9 @@ X<hash of hashes> X<HoH>
 
 
  # print the whole thing sorted by number of members
- foreach $family ( sort { keys %{$HoH{$b}} <=> keys %{$HoH{$a}} } keys %HoH ) {
+ foreach $family ( sort { keys %{$HoH{$b}} <=> keys %{$HoH{$a}} }
+                                                             keys %HoH )
+ {
      print "$family: { ";
      for $role ( sort keys %{ $HoH{$family} } ) {
          print "$role=$HoH{$family}{$role} ";
@@ -667,10 +672,14 @@ X<hash of hashes> X<HoH>
  for ( qw(lead wife son daughter pal pet) ) { $rank{$_} = ++$i }
 
  # now print the whole thing sorted by number of members
- foreach $family ( sort { keys %{ $HoH{$b} } <=> keys %{ $HoH{$a} } } keys %HoH ) {
+ foreach $family ( sort { keys %{ $HoH{$b} } <=> keys %{ $HoH{$a} } }
+                                                             keys %HoH )
+ {
      print "$family: { ";
      # and print these according to rank order
-     for $role ( sort { $rank{$a} <=> $rank{$b} }  keys %{ $HoH{$family} } ) {
+     for $role ( sort { $rank{$a} <=> $rank{$b} }
+                                               keys %{ $HoH{$family} } )
+     {
          print "$role=$HoH{$family}{$role} ";
      }
      print "}\n";
