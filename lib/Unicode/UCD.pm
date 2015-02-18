@@ -15,6 +15,7 @@ our @EXPORT_OK = qw(charinfo
 		    charblock charscript
 		    charblocks charscripts
 		    charinrange
+		    charprop
 		    general_categories bidi_types
 		    compexcl
 		    casefold all_casefolds casespec
@@ -41,6 +42,9 @@ Unicode::UCD - Unicode character database
 
     use Unicode::UCD 'charinfo';
     my $charinfo   = charinfo($codepoint);
+
+    use Unicode::UCD 'charprop';
+    my $value  = charprop($codepoint, $property);
 
     use Unicode::UCD 'casefold';
     my $casefold = casefold($codepoint);
@@ -198,6 +202,10 @@ C<undef> is returned.
 Fields that aren't applicable to the particular code point argument exist in the
 returned hash, and are empty. 
 
+For results that are less "raw" than this function returns, or to get the values for
+any property, not just the few covered by this function, use the
+L</charprop()> function.
+
 The keys in the hash with the meanings of their values are:
 
 =over
@@ -289,7 +297,7 @@ is, if non-empty, the uppercase mapping for I<code> expressed as at least four
 hexdigits.  This indicates that the full uppercase mapping is a single
 character, and is identical to the simple (single-character only) mapping.
 When this field is empty, it means that the simple uppercase mapping is
-I<code> itself; you'll need some other means, (like
+I<code> itself; you'll need some other means, (like L</charprop()> or
 L</casespec()> to get the full mapping.
 
 =item B<lower>
@@ -298,7 +306,7 @@ is, if non-empty, the lowercase mapping for I<code> expressed as at least four
 hexdigits.  This indicates that the full lowercase mapping is a single
 character, and is identical to the simple (single-character only) mapping.
 When this field is empty, it means that the simple lowercase mapping is
-I<code> itself; you'll need some other means, (like
+I<code> itself; you'll need some other means, (like L</charprop()> or
 L</casespec()> to get the full mapping.
 
 =item B<title>
@@ -307,7 +315,7 @@ is, if non-empty, the titlecase mapping for I<code> expressed as at least four
 hexdigits.  This indicates that the full titlecase mapping is a single
 character, and is identical to the simple (single-character only) mapping.
 When this field is empty, it means that the simple titlecase mapping is
-I<code> itself; you'll need some other means, (like
+I<code> itself; you'll need some other means, (like L</charprop()> or
 L</casespec()> to get the full mapping.
 
 =item B<block>
@@ -601,6 +609,170 @@ sub charinrange {
     croak __PACKAGE__, "::charinrange: unknown code '$arg'"
 	unless defined $code;
     _search($range, 0, $#$range, $code);
+}
+
+=head2 B<charprop()>
+
+    use Unicode::UCD 'charprop';
+
+    print charprop(0x41, "Gc"), "\n";
+    print charprop(0x61, "General_Category"), "\n";
+
+  prints
+    Lu
+    Ll
+
+This returns the value of the Unicode property given by the second parameter
+for the  L</code point argument> given by the first.
+
+The passed-in property may be specified as any of the synonyms returned by
+L</prop_aliases()>.
+
+The return value is always a scalar, either a string or a number.  For
+properties where there are synonyms for the values, the synonym returned by
+this function is the longest, most descriptive form, the one returned by
+L</prop_value_aliases()> when called in a scalar context.  Of course, you can
+call L</prop_value_aliases()> on the result to get other synonyms.
+
+The return values are more "cooked" than the L</charinfo()> ones.  For
+example, the C<"uc"> property value is the actual string containing the full
+uppercase mapping of the input code point.  You have to go to extra trouble
+with C<charinfo> to get this value from its C<upper> hash element when the
+full mapping differs from the simple one.
+
+Special note should be made of the return values for a few properties:
+
+=over
+
+=item Block
+
+The value returned is the new-style (see L</Old-style versus new-style block
+names>).
+
+=item Decomposition_Mapping
+
+Like L</charinfo()>, the result may be an intermediate decomposition whose
+components are also decomposable.  Use L<Unicode::Normalize> to get the final
+decomposition in one step.
+
+Unlike L</charinfo()>, this does not include the decomposition type.  Use the
+C<Decomposition_Type> property to get that.
+
+=item Name_Alias
+
+If the input code point's name has more than one synonym, they are returned
+joined into a single comma-separated string.
+
+=item Numeric_Value
+
+If the result is a fraction, it is converted into a floating point number to
+the accuracy of your platform.
+
+=item Script_Extensions
+
+If the result is multiple script names, they are returned joined into a single
+comma-separated string.
+
+=back
+
+When called with a property that is a Perl extension that isn't expressible in
+a compound form, this function currently returns C<undef>, as the only two
+possible values are I<true> or I<false> (1 or 0 I suppose).  This behavior may
+change in the future, so don't write code that relies on it.  C<Present_In> is
+a Perl extension that is expressible in a bipartite or compound form (for
+example, C<\p{Present_In=4.0}>), so C<charprop> accepts it.  But C<Any> is a
+Perl extension that isn't expressible that way, so C<charprop> returns
+C<undef> for it.  Also C<charprop> returns C<undef> for all Perl extensions
+that are internal-only.
+
+=cut
+
+sub charprop ($$) {
+    my ($input_cp, $prop) = @_;
+
+    my $cp = _getcode($input_cp);
+    croak __PACKAGE__, "::charprop: unknown code point '$input_cp'" unless defined $cp;
+
+    my ($list_ref, $map_ref, $format, $default)
+                                      = prop_invmap($prop);
+    return undef unless defined $list_ref;
+
+    my $i = search_invlist($list_ref, $cp);
+    croak __PACKAGE__, "::charprop: prop_invmap return is invalid for charprop('$input_cp', '$prop)" unless defined $i;
+
+    # $i is the index into both the inversion list and map of $cp.
+    my $map = $map_ref->[$i];
+
+    # Convert enumeration values to their most complete form.
+    if (! ref $map) {
+        my $long_form = prop_value_aliases($prop, $map);
+        $map = $long_form if defined $long_form;
+    }
+
+    if ($format =~ / ^ s /x) {  # Scalars
+        return join ",", @$map if ref $map; # Convert to scalar with comma
+                                            # separated array elements
+
+        # Resolve ambiguity as to whether an all digit value is a code point
+        # that should be converted to a character, or whether it is really
+        # just a number.  To do this, look at the default.  If it is a
+        # non-empty number, we can safely assume the result is also a number.
+        if ($map =~ / ^ \d+ $ /ax && $default !~ / ^ \d+ $ /ax) {
+            $map = chr $map;
+        }
+        elsif ($map =~ / ^ (?: Y | N ) $ /x) {
+
+            # prop_invmap() returns these values for properties that are Perl
+            # extensions.  But this is misleading.  For now, return undef for
+            # these, as currently documented.
+            undef $map unless
+                exists $Unicode::UCD::prop_aliases{utf8::_loose_name(lc $prop)};
+        }
+        return $map;
+    }
+    elsif ($format eq 'ar') {   # numbers, including rationals
+        my $offset = $cp - $list_ref->[$i];
+        return $map if $map =~ /nan/i;
+        return $map + $offset if $offset != 0;  # If needs adjustment
+        return eval $map;   # Convert e.g., 1/2 to 0.5
+    }
+    elsif ($format =~ /^a/) {   # Some entries need adjusting
+
+        # Linearize sequences into a string.
+        return join "", map { chr $_ } @$map if ref $map; # XXX && $format =~ /^ a [dl] /x;
+
+        return "" if $map eq "" && $format =~ /^a.*e/;
+
+        # These are all character mappings.  Return the chr if no adjustment
+        # is needed
+        return chr $cp if $map eq "0";
+
+        # Convert special entry.
+        if ($map eq '<hangul syllable>' && $format eq 'ad') {
+            use Unicode::Normalize qw(NFD);
+            return NFD(chr $cp);
+        }
+
+        # The rest need adjustment from the first entry in the inversion list
+        # corresponding to this map.
+        my $offset = $cp - $list_ref->[$i];
+        return chr($map + $cp - $list_ref->[$i]);
+    }
+    elsif ($format eq 'n') {    # The name property
+
+        # There are two special cases, handled here.
+        if ($map =~ / ( .+ ) <code\ point> $ /x) {
+            $map = sprintf("$1%04X", $cp);
+        }
+        elsif ($map eq '<hangul syllable>') {
+            $map = charnames::viacode($cp);
+        }
+        return $map;
+    }
+    else {
+        croak __PACKAGE__, "::charprop: Internal error: unknown format '$format'.  Please perlbug this";
+        return undef;
+    }
 }
 
 =head2 B<charblock()>
@@ -3843,8 +4015,9 @@ The newer style replaces these with underscores, like this:
 
 This newer style is consistent with the values of other Unicode properties.
 To preserve backward compatibility, all the functions in Unicode::UCD that
-return block names (except one) return the old-style ones.  That one function,
-L</prop_value_aliases()> can be used to convert from old-style to new-style:
+return block names (except as noted) return the old-style ones.
+L</prop_value_aliases()> returns the new-style and can be used to convert from
+old-style to new-style:
 
  my $new_style = prop_values_aliases("block", $old_style);
 

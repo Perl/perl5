@@ -190,6 +190,12 @@ has been added to return a given property's possible values.
 
 =item *
 
+A new function L<charprop()|Unicode::UCD/charprop()>
+has been added to return the value of a given property for a given code
+point.
+
+=item *
+
 A bug has been fixed so that L<propaliases()|Unicode::UCD/prop_aliases()>
 returns the correct short and long names for the Perl extensions where
 it was incorrect.

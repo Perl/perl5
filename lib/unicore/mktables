@@ -956,7 +956,7 @@ my %why_obsolete;    # Documentation only
         # contains the same information, but without the algorithmically
         # determinable Hangul syllables'.  This file is not published, so it's
         # existence is not noted in the comment.
-        'Decomposition_Mapping' => 'Accessible via Unicode::Normalize or Unicode::UCD::prop_invmap()',
+        'Decomposition_Mapping' => 'Accessible via Unicode::Normalize or prop_invmap() or charprop() in Unicode::UCD::',
 
         'Indic_Matra_Category' => "Provisional",
         'Indic_Syllabic_Category' => "Provisional",
@@ -965,12 +965,12 @@ my %why_obsolete;    # Documentation only
         # to differentiate between it and gc=c, which can be written as 'isc',
         # which is the same characters as ISO_Comment's short name.
 
-        'Name' => "Accessible via \\N{...} or 'use charnames;' or Unicode::UCD::prop_invmap()",
+        'Name' => "Accessible via \\N{...} or 'use charnames;' or charprop() or prop_invmap() in Unicode::UCD::",
 
-        'Simple_Case_Folding' => "$simple.  Can access this through Unicode::UCD::casefold or Unicode::UCD::prop_invmap()",
-        'Simple_Lowercase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo or Unicode::UCD::prop_invmap()",
-        'Simple_Titlecase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo or Unicode::UCD::prop_invmap()",
-        'Simple_Uppercase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo or Unicode::UCD::prop_invmap()",
+        'Simple_Case_Folding' => "$simple.  Can access this through casefold(), charprop(), or prop_invmap() in Unicode::UCD",
+        'Simple_Lowercase_Mapping' => "$simple.  Can access this through charinfo(), charprop(), or prop_invmap() in Unicode::UCD",
+        'Simple_Titlecase_Mapping' => "$simple.  Can access this through charinfo(), charprop(), or prop_invmap() in Unicode::UCD",
+        'Simple_Uppercase_Mapping' => "$simple.  Can access this through charinfo(), charprop(), or prop_invmap() in Unicode::UCD",
 
         FC_NFKC_Closure => 'Deprecated by Unicode, and supplanted in usage by NFKC_Casefold; otherwise not useful',
     );
@@ -6727,7 +6727,8 @@ sub trace { return main::trace(@_); }
 # but its format and even its name or existence are subject to change without
 # notice in a future Perl version.  Don't use it directly.  Instead, its
 # contents are now retrievable through a stable API in the Unicode::UCD
-# module: Unicode::UCD::prop_invmap('$property_name').
+# module: Unicode::UCD::prop_invmap('$property_name') (Values for individual
+# code points can be retrieved via Unicode::UCD::charprop());
 END
         }
         return $return;
@@ -6854,7 +6855,7 @@ END
         }
         $comment .= "\nwhere 'cp' is $cp.";
         if ($ucd_accessible_name) {
-            $comment .= "  Note that $these_mappings $are accessible via the function prop_invmap('$full_name') in Unicode::UCD";
+            $comment .= "  Note that $these_mappings $are accessible via the functions prop_invmap('$full_name') or charprop() in Unicode::UCD";
         }
 
         # And append any commentary already set from the actual property.
@@ -16175,9 +16176,13 @@ $zero_matches
 
 =head1 Properties accessible through Unicode::UCD
 
-All the Unicode character properties mentioned above (except for those marked
-as for internal use by Perl) are also accessible by
-L<Unicode::UCD/prop_invlist()>.
+The value of any Unicode (not including Perl extensions) character
+property mentioned above for any single code point is available through
+L<Unicode::UCD/charprop()>.
+
+Besides this, all the Unicode character properties mentioned above
+(except for those marked as for internal use by Perl) are also
+accessible by L<Unicode::UCD/prop_invlist()>.
 
 Due to their nature, not all Unicode character properties are suitable for
 regular expression matches, nor C<prop_invlist()>.  The remaining
