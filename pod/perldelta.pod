@@ -196,6 +196,13 @@ it was incorrect.
 
 =item *
 
+A bug has been fixed so that
+L<prop_value_aliases()|Unicode::UCD/prop_value_aliases()>
+returns C<undef> instead of a wrong result for properties that are Perl
+extensions.
+
+=item *
+
 This module now works on EBCDIC platforms.
 
 =back

@@ -727,6 +727,8 @@ is(prop_value_aliases(undef, undef), undef,
 is((prop_value_aliases("na", "A")), "A", "test that prop_value_aliases returns its input for properties that don't have synonyms");
 is(prop_value_aliases("isgc", "C"), undef, "prop_value_aliases('isgc', 'C') returns <undef> since is not covered Perl extension");
 is(prop_value_aliases("gc", "isC"), undef, "prop_value_aliases('gc', 'isC') returns <undef> since is not covered Perl extension");
+is(prop_value_aliases("Any", "None"), undef, "prop_value_aliases('Any', 'None') returns <undef> since is Perl extension and 'None' is not valid");
+is(prop_value_aliases("lc", "A"), "A", "prop_value_aliases('lc', 'A') returns its input, as docs say it does");
 
 # We have no way of knowing if mktables omitted a Perl extension that it
 # shouldn't have, but we can check if it omitted an official Unicode property

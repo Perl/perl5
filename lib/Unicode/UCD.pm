@@ -2130,7 +2130,18 @@ sub prop_value_aliases ($$) {
     # anything, like most (if not all) string properties.  These don't have
     # synonyms anyway.  Simply return the input.  For example, there is no
     # synonym for ('Uppercase_Mapping', A').
-    return $value if ! exists $prop_value_aliases{$prop};
+    if (! exists $prop_value_aliases{$prop}) {
+
+        # Here, we have a legal property, but an unknown value.  Since the
+        # property is legal, if it isn't in the prop_aliases hash, it must be
+        # a Perl-extension All perl extensions are binary, hence are
+        # enumerateds, which means that we know that the input unknown value
+        # is illegal.
+        return if ! exists $Unicode::UCD::prop_aliases{$prop};
+
+        # Otherwise, we assume it's valid, as documented.
+        return $value;
+    }
 
     # The value name may be loosely or strictly matched; we don't know yet.
     # But both types use lower-case.
