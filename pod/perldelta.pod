@@ -196,7 +196,7 @@ point.
 
 =item *
 
-A new function L<charprop()|Unicode::UCD/charprops_all()>
+A new function L<charprops_all()|Unicode::UCD/charprops_all()>
 has been added to return the values of all Unicode properties for a
 given code point.
 
