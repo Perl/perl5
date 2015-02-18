@@ -4422,8 +4422,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    DEBUG_EXECUTE_r({
 		AV *const trie_words
 		    = MUTABLE_AV(rexi->data->data[ARG(ST.me)+TRIE_WORDS_OFFSET]);
-		SV ** const tmp = av_fetch( trie_words,
-		    ST.nextword-1, 0 );
+		SV ** const tmp = trie_words
+                        ? av_fetch(trie_words, ST.nextword - 1, 0) : NULL;
 		SV *sv= tmp ? sv_newmortal() : NULL;
 
 		PerlIO_printf( Perl_debug_log,
