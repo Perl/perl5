@@ -504,7 +504,7 @@ like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
 like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
              prog => 'use feature lexical_subs=>state=>;
                       state sub sb5; sub { sub sb5 { } }'),
-     qr/sub \{\s*\(\);\s*sub sb5 {/m,
+     qr/sub \{\s*\(\);\s*sub sb5 \{/m,
     'state sub in anon sub but declared outside';
 
 is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
