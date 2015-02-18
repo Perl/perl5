@@ -24,7 +24,7 @@ find({no_chdir => 1, wanted => sub {
 	   $name =~ s/^\..//;
 
 	   # Special exemption for Makefile, makefile
-	   return if $name =~ m!\A(?:x2p/)?[Mm]akefile\z!;
+	   return if $name =~ m!\A[Mm]akefile\z!;
 
 	   if ($name eq '.git') {
 	       # Don't scan the .git directory, as its contents are outside

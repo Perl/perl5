@@ -158,10 +158,6 @@ The old home for the module tests, you shouldn't put anything new in
 here. There are still some bits and pieces hanging around in here that
 need to be moved. Perhaps you could move them?  Thanks!
 
-=item * F<t/x2p>
-
-A test suite for the s2p converter.
-
 =back
 
 =head2 Documentation

@@ -2217,7 +2217,6 @@ make install will install the following:
 	perl,
 	    perl5.n.n	where 5.n.n is the current release number.  This
 			will be a link to perl.
-	a2p          	awk-to-perl translator.
 
     scripts
 
@@ -2230,7 +2229,6 @@ make install will install the following:
 			versions of perl.
 	cpan		The CPAN shell.
 	enc2xs		Encoding module generator.
-	find2perl	find-to-perl translator.
 	h2ph		Extract constants and simple macros from C
                         headers.
 	h2xs		Converts C .h header files to Perl extensions.
@@ -2253,7 +2251,6 @@ make install will install the following:
 	ptar		A Perl implementation of tar.
 	ptardiff	A diff for tar archives.
 	ptargrep	A grep for tar archives.
-	s2p		sed-to-perl translator.
 	shasum		A tool to print or check SHA checksums.
 	splain		Describe Perl warnings and errors.
 	xsubpp		Compiler to convert Perl XS code into C code.

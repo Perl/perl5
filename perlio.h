@@ -14,7 +14,7 @@
   Interface for perl to IO functions.
   There is a hierarchy of Configure determined #define controls:
    USE_STDIO   - forces PerlIO_xxx() to be #define-d onto stdio functions.
-                 This is used for x2p subdirectory and for conservative
+                 This is used for conservative
                  builds - "just like perl5.00X used to be".
                  This dominates over the others.
 

@@ -197,7 +197,7 @@ while (my $file = <$fh>) {
     $file =~ s/\s+.*//;
     next unless $file =~ /\.(?:c|cpp|h|xs|y)\z/ or $file =~ /^perly\./;
     # OS/2 extensions have never been migrated to ext/, hence the special case:
-    next if $file =~ m!\A(?:ext|dist|cpan|lib|t|os2/OS2|x2p)/!
+    next if $file =~ m!\A(?:ext|dist|cpan|lib|t|os2/OS2)/!
             && $file !~ m!\Aext/DynaLoader/!;
     check_file($file);
 }

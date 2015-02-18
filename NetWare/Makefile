@@ -653,7 +653,6 @@ PERLIMPLIB	= ..\perl.lib
 MINIPERL	= ..\miniperl.exe
 CONFIGPM	= ..\lib\Config.pm
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
-X2P			= ..\x2p\a2p.nlm
 
 PL2BAT		= ..\win32\bin\pl2bat.pl
 
@@ -670,9 +669,7 @@ UTILS		=			\
 		..\pod\pod2text		\
 		..\pod\pod2usage	\
 		..\pod\podchecker	\
-		..\pod\podselect	\
-		..\x2p\find2perl	\
-		..\x2p\s2p		
+		..\pod\podselect
 
 MAKE		= nmake -nologo
 #NMAKE       = $(C_COMPILER) $(INCLUDE) $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(ERROR_FLAG) $(*F).c -o $@
@@ -738,13 +735,6 @@ NW_SRC	= $(NW_SRC) .\$(CRYPT_SRC)
 
 DLL_SRC		= $(DYNALOADER).c
 
-X2P_SRC		=		\
-		..\x2p\a2p.c	\
-		..\x2p\hash.c	\
-		..\x2p\str.c	\
-		..\x2p\util.c	\
-		..\x2p\walk.c
-
 CORE_NOCFG_H	=		\
 		..\av.h		\
 		..\cop.h	\
@@ -783,7 +773,6 @@ CORE_NOCFG_H	=		\
 CORE_H		= $(CORE_NOCFG_H) .\config.h
 
 DLL_OBJ		= $(DLL_SRC:.c=.obj)
-X2P_OBJ		= $(X2P_SRC:.c=.obj)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attributes B re \
 		Data/Dumper Devel/Peek ByteLoader File/Glob \
@@ -890,47 +879,6 @@ $(MINIPERL) :
 
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 	cd .. && miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
-
-..\x2p\a2p$(o) : ..\x2p\a2p.c
-	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
-    @echo Built $(@)
-
-..\x2p\hash$(o) : ..\x2p\hash.c
-	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
-    @echo Built $(@)
-	
-..\x2p\str$(o) : ..\x2p\str.c
-	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
-    @echo Built $(@)
-
-..\x2p\util$(o) : ..\x2p\util.c
-	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
-    @echo Built $(@)
-
-..\x2p\walk$(o) : ..\x2p\walk.c
-	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
-    @echo Built $(@)
-	
-$(X2P) : $(MINIPERL) $(X2P_OBJ)
-	@echo Building $@..........
-	$(MINIPERL) ..\x2p\find2perl.PL
-	$(MINIPERL) ..\x2p\s2p.PL
-# Linker definitions and lining come here for CODEWARRIOR
-    @echo $(BASE_IMPORT_FILES) > $*.def
-    @echo MODULE clib >> $*.def
-    @echo Import @perl.imp >> $*.def
-!ifdef USE_XDC
-	$(MPKTOOL) $(XDCFLAGS) $*.xdc
-	@echo Import Mp.imp >> $*.def
-	@echo xdcdata $*.xdc >> $*.def
-!endif
-##    $(LINK) $(LDFLAGS) $(BS_CFLAGS) -desc "Awk to Perl Translator" $(X2P_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@ 
-    $(LINK) $(LDFLAGS) -desc "Awk to Perl Translator" $(X2P_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@ 
 
 $(EXTDIR)\DynaLoader\dl_netware.xs: dl_netware.xs
 	copy dl_netware.xs $(EXTDIR)\DynaLoader\dl_netware.xs
@@ -1357,7 +1305,7 @@ nwclean:
 	-del /f /q *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err *.lib *.def *.pdb *.bs
 	cd ..\..\
 
-utils: $(BLDDIR)\$(NLM_NAME8).$(NLM_EXT) $(X2P)
+utils: $(BLDDIR)\$(NLM_NAME8).$(NLM_EXT)
 	cd ..\utils
 	$(MAKE) PERL=$(MINIPERL)
 	cd ..\pod
@@ -1401,11 +1349,6 @@ distclean: clean nwclean
 	cd ..\utils
 	-del /f /q h2ph splain perlbug pl2pm c2ph h2xs perldoc
 	-del /f /q *.bat
-	cd ..\netware
-	cd ..\x2p
-	-del /f /q find2perl s2p
-	-del /f /q *.bat *.exe
-	-del /f /q *.obj *.map *.link *.xdc *.err
 	cd ..\netware
 	-del /f /q ..\config.sh ..\splittree.pl dlutils.c config.h.new
 	-del /f /q $(CONFIGPM)
@@ -1463,4 +1406,3 @@ clean :
 	-@erase $(DLL_OBJ)
 	-@erase ..\*$(o) ..\*.lib ..\*.exp *$(o) *.lib *.exp *.res
 	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
-	-@erase ..\x2p\*.nlm ..\x2p\*.bat

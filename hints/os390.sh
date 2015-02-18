@@ -167,7 +167,7 @@ esac
 
 #
 # Note that Makefile.SH employs a bare yacc command to generate 
-# perly.[hc] and a2p.[hc], hence you may wish to:
+# perly.[hc], hence you may wish to:
 #
 #    alias yacc='myyacc'
 #

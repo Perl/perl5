@@ -1381,7 +1381,7 @@ The files of Perl source code distribution do carry a lot of
 copyrights, by various people.  (There are many copyrights embedded in
 perl.c, for example.)  The most straightforward thing for pumpkings to
 do is to simply update Larry's copyrights at the beginning of the
-*.[hcy], x2p/*.[hcy], *.pl, and README files, and leave all other
+*.[hcy], *.pl, and README files, and leave all other
 copyrights alone.  Doing more than that requires quite a bit of tracking. 
 
 =back

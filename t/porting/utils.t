@@ -62,11 +62,7 @@ my %excuses = (
 foreach (@maybe) {
     if (/\.p[lm]$/) {
         push @victims, $_;
-    } elsif ($_ !~ m{^x2p/a2p}) {
-        # test_prep doesn't (yet) have a dependency on a2p, so it seems a bit
-        # silly adding one (and forcing it to be built) just so that we can open
-        # it and determine that it's *not* a perl program, and hence of no
-        # further interest to us.
+    } else {
         open $fh, '<', $_ or die "Can't open '$_': $!";
         my $line = <$fh>;
         if ($line =~ m{^#!(?:\S*|/usr/bin/env\s+)perl}

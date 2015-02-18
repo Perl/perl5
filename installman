@@ -83,7 +83,7 @@ while (<$fh>) {
     next if /^#/;
     chomp;
     my ($path, $leaf) = m|^(\S*/(\S+))|;
-    # Have we already installed the manpage for this? (eg perldoc, a2p)
+    # Have we already installed the manpage for this? (eg perldoc)
     next if $man1{$leaf};
     pod2man({$leaf, $path}, $opts{man1dir}, $opts{man1ext});
     if ($has_man1dir) {
