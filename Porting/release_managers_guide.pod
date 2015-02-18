@@ -889,7 +889,7 @@ the tarball and directory name:
     $ git status           # and there's nothing lying around
 
     $ perl Porting/makerel -bx -s RC1            # for a release candidate
-    $ perl Porting/makerel -bx                   # for a final release
+    $ perl Porting/makerel -bx                   # for the release itself
 
 This creates the  directory F<../perl-x.y.z-RC1> or similar, copies all
 the MANIFEST files into it, sets the correct permissions on them, then
