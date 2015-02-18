@@ -16178,9 +16178,10 @@ $zero_matches
 
 The value of any Unicode (not including Perl extensions) character
 property mentioned above for any single code point is available through
-L<Unicode::UCD/charprop()>.
+L<Unicode::UCD/charprop()>.  L<Unicode::UCD/charprops_all()> returns the
+values of all the Unicode properties for a given code point.
 
-Besides this, all the Unicode character properties mentioned above
+Besides these, all the Unicode character properties mentioned above
 (except for those marked as for internal use by Perl) are also
 accessible by L<Unicode::UCD/prop_invlist()>.
 

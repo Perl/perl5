@@ -17,7 +17,7 @@ local $SIG{__WARN__} = sub { push @warnings, @_  };
 use strict;
 use Test::More;
 
-use Unicode::UCD qw(charinfo charprop);
+use Unicode::UCD qw(charinfo charprop charprops_all);
 
 my $input_record_separator = 7; # Make sure Unicode::UCD isn't affected by
 $/ = $input_record_separator;   # setting this.
@@ -491,6 +491,28 @@ is(charprop(ord("9"), "nv"),     9,
                             "Verify charprop can adjust an ar-type property");
 is(charprop(utf8::unicode_to_native(0xAD), "NFKC_Casefold"), "",
                     "Verify charprop can handle an \"\" in ae-type property");
+
+my $mark_props_ref = charprops_all(0x300);
+is($mark_props_ref->{'Bidi_Class'}, "Nonspacing_Mark",
+                                    "Next tests are charprops_all of 0x300");
+is($mark_props_ref->{'Bidi_Mirrored'}, "No");
+is($mark_props_ref->{'Canonical_Combining_Class'}, "Above");
+is($mark_props_ref->{'Case_Folding'}, "\x{300}");
+is($mark_props_ref->{'Decomposition_Mapping'}, "\x{300}");
+is($mark_props_ref->{'Decomposition_Type'}, "None");
+is($mark_props_ref->{'General_Category'}, "Nonspacing_Mark");
+is($mark_props_ref->{'ISO_Comment'}, "");
+is($mark_props_ref->{'Lowercase_Mapping'}, "\x{300}");
+is($mark_props_ref->{'Name'}, "COMBINING GRAVE ACCENT");
+is($mark_props_ref->{'Numeric_Type'}, "None");
+is($mark_props_ref->{'Numeric_Value'}, "NaN");
+is($mark_props_ref->{'Simple_Case_Folding'}, "\x{300}");
+is($mark_props_ref->{'Simple_Lowercase_Mapping'}, "\x{300}");
+is($mark_props_ref->{'Simple_Titlecase_Mapping'}, "\x{300}");
+is($mark_props_ref->{'Simple_Uppercase_Mapping'}, "\x{300}");
+is($mark_props_ref->{'Titlecase_Mapping'}, "\x{300}");
+is($mark_props_ref->{'Unicode_1_Name'}, "NON-SPACING GRAVE");
+is($mark_props_ref->{'Uppercase_Mapping'}, "\x{300}");
 
 use Unicode::UCD qw(charblocks charscripts);
 

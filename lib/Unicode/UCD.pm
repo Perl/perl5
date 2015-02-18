@@ -16,6 +16,7 @@ our @EXPORT_OK = qw(charinfo
 		    charblocks charscripts
 		    charinrange
 		    charprop
+		    charprops_all
 		    general_categories bidi_types
 		    compexcl
 		    casefold all_casefolds casespec
@@ -45,6 +46,9 @@ Unicode::UCD - Unicode character database
 
     use Unicode::UCD 'charprop';
     my $value  = charprop($codepoint, $property);
+
+    use Unicode::UCD 'charprops_all';
+    my $all_values_hash_ref = charprops_all($codepoint);
 
     use Unicode::UCD 'casefold';
     my $casefold = casefold($codepoint);
@@ -773,6 +777,46 @@ sub charprop ($$) {
         croak __PACKAGE__, "::charprop: Internal error: unknown format '$format'.  Please perlbug this";
         return undef;
     }
+}
+
+=head2 B<charprops_all()>
+
+    use Unicode::UCD 'charprops_all';
+
+    my $%properties_of_A_hash_ref = charprops_all("U+41");
+
+This returns a reference to a hash whose keys are all the distinct Unicode (no
+Perl extension) properties, and whose values are the respective values for
+those properties for the input L</code point argument>.
+
+Each key is the property name in its longest, most descriptive form.  The
+values are what L</charprop()> would return.
+
+This function is expensive in time and memory.
+
+=cut
+
+sub charprops_all($) {
+    my $input_cp = shift;
+
+    my $cp = _getcode($input_cp);
+    croak __PACKAGE__, "::charprops_all: unknown code point '$input_cp'" unless defined $cp;
+
+    my %return;
+
+    require "unicore/UCD.pl";
+
+    foreach my $prop (keys %Unicode::UCD::prop_aliases) {
+
+        # Don't return a Perl extension.  (This is the only one that
+        # %prop_aliases has in it.)
+        next if $prop eq 'perldecimaldigit';
+
+        # Use long name for $prop in the hash
+        $return{scalar prop_aliases($prop)} = charprop($cp, $prop);
+    }
+
+    return \%return;
 }
 
 =head2 B<charblock()>
