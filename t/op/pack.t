@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 14707;
+plan tests => 14708;
 
 use strict;
 use warnings qw(FATAL all);
@@ -2012,3 +2012,7 @@ package o {
 is pack("c", bless [], "o"), chr(42), 'overloading called';
 is $o::str, undef, 'pack "c" does not call string overloading';
 is $o::num, 1,     'pack "c" does call num overloading';
+
+#[perl #123874]: argument underflow leads to corrupt length
+eval q{ pack "pi/x" };
+ok(1, "argument underflow did not crash");

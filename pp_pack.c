@@ -2094,7 +2094,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	char *cur   = start + SvCUR(cat);
         bool needs_swap;
 
-#define NEXTFROM (lengthcode ? lengthcode : items-- > 0 ? *beglist++ : &PL_sv_no)
+#define NEXTFROM (lengthcode ? lengthcode : items > 0 ? (--items, *beglist++) : &PL_sv_no)
 #define PEEKFROM (lengthcode ? lengthcode : items > 0 ? *beglist : &PL_sv_no)
 
         switch (howlen) {
