@@ -370,6 +370,7 @@ for my $charset (get_supported_code_pages()) {
                              &UpperLatin1
                              _Perl_IDStart
                              _Perl_IDCont
+                             Grapheme_Cluster_Break,EDGE
                            )
     ) {
 
