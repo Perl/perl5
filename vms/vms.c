@@ -10954,7 +10954,11 @@ do_spawn2(pTHX_ const char *cmd, int flags)
     fp = safe_popen(aTHX_ cmd, mode, (int *)&sts);
     if (fp != NULL)
       my_pclose(fp);
-    /* sts will be the pid in the nowait case */
+    /* sts will be the pid in the nowait case, so leave a
+     * hint saying not to do any bit shifting to it.
+     */
+    if (flags & CLI$M_NOWAIT)
+        PL_statusvalue = -1;
   }
   return sts;
 }  /* end of do_spawn2() */
