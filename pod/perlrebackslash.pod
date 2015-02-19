@@ -538,7 +538,8 @@ between characters where C<\b{...}> of the same type doesn't match.
 C<\b> when not immediately followed by a C<"{"> matches at any place
 between a word (something matched by C<\w>) and a non-word character
 (C<\W>); C<\B> when not immediately followed by a C<"{"> matches at any
-place between characters where C<\b> doesn't match.
+place between characters where C<\b> doesn't match.  To get better
+word matching of natural language text, see L<\b{wb}> below.
 
 C<\b>
 and C<\B> assume there's a non-word character before the beginning and after
@@ -557,13 +558,29 @@ non-word characters nor for string ends.  It may help to understand how
     \b	really means	(?:(?<=\w)(?!\w)|(?<!\w)(?=\w))
     \B	really means	(?:(?<=\w)(?=\w)|(?<!\w)(?!\w))
 
-In contrast, C<\b{...}> always matches at the beginning and end of the
-line (and C<\B{...}> never does).  The only boundary type currently
-"Grapheme Cluster Boundary".  (Actually Perl always uses the improved
-"extended" grapheme cluster").  These are explained below under C<\X>.
-In fact, C<\X> is another way to get the same functionality.  It is
-equivalent to C</.+?\b{gcb}/>.  Use whichever is most convenient for
-your situation.
+In contrast, C<\b{...}> may or may not match at the beginning and end of
+the line depending on the boundary type (and C<\B{...}> never does).
+The boundary types currently available are:
+
+=over
+
+=item C<\b{gcb}> or C<\b{g}>
+
+This matches a Unicode "Grapheme Cluster Boundary".  (Actually Perl
+always uses the improved "extended" grapheme cluster").  These are
+explained below under L</C<\X>>.  In fact, C<\X> is another way to get
+the same functionality.  It is equivalent to C</.+?\b{gcb}/>.  Use
+whichever is most convenient for your situation.
+
+=item C<\b{wb}>
+
+This matches a Unicode "Word Boundary".  This gives better (though not
+perfect) results for natural language processing than plain C<\b>
+(without braces) does.  For example, it understands that apostrophes can
+be in the middle of words.   More details are at
+L<http://www.unicode.org/reports/tr29/>.
+
+=back
 
 Mnemonic: I<b>oundary.
 
@@ -587,6 +604,10 @@ Mnemonic: I<b>oundary.
   while ("cat dog" =~ /\G(\w+)/g) {
       print $1;           # Prints 'cat'
   }
+
+  print join "\n", "I don't care" =~ m/ ( .+? \b{wb} ) /xg;
+ prints
+  I, ,don't, ,care
 
 =head2 Misc
 

@@ -34,6 +34,14 @@ the ability to deal with these through the C<\X> regular escape
 sequence.  Now, there is an alternative way of handling these.  See
 L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
 
+=head2 qr/\b{wb}/ is now handled in regular expressions
+
+C<wb> stands for Word Boundary.  It is a Unicode property
+that finds the boundary between words.  This is similar to the plain
+C<\b> (without braces) but is more suitable for natural language
+processing.  It knows, for example that apostrophes can occur in the
+middle of words.  See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

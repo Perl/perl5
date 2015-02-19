@@ -68,6 +68,7 @@
 #define PL_StdIO		(vTHX->IStdIO)
 #define PL_Sv			(vTHX->ISv)
 #define PL_UpperLatin1		(vTHX->IUpperLatin1)
+#define PL_WB_invlist		(vTHX->IWB_invlist)
 #define PL_XPosix_ptrs		(vTHX->IXPosix_ptrs)
 #define PL_Xpv			(vTHX->IXpv)
 #define PL_an			(vTHX->Ian)

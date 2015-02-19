@@ -995,7 +995,8 @@ re.pm, especially to the documentation.
 
 typedef enum {
 	TRADITIONAL_BOUND = _CC_WORDCHAR,
-	GCB_BOUND
+	GCB_BOUND,
+	WB_BOUND
 } bound_type;
 
 /*

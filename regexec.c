@@ -1737,6 +1737,18 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
 #define getGCB_VAL_UTF8(pos, strend)                                           \
     _generic_GET_BREAK_VAL_UTF8(getGCB_VAL_CP, pos, strend)
 
+/* Returns the WB value for the input code point */
+#define getWB_VAL_CP(cp)                                                       \
+          _generic_GET_BREAK_VAL_CP(                                           \
+                                    PL_WB_invlist,                             \
+                                    Word_Break_invmap,                         \
+                                    (cp))
+
+/* Returns the WB value for the first code point in the UTF-8 encoded string
+ * bounded by pos and strend */
+#define getWB_VAL_UTF8(pos, strend)                                            \
+    _generic_GET_BREAK_VAL_UTF8(getWB_VAL_CP, pos, strend)
+
 /* We know what class REx starts with.  Try to find this position... */
 /* if reginfo->intuit, its a dryrun */
 /* annoyingly all the vars in this routine have different names from their counterparts
@@ -2055,6 +2067,79 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 if (to_complement ^ cBOOL(reginfo->intuit || regtry(reginfo, &s))) {
                     goto got_it;
                 }
+                break;
+
+            case WB_BOUND:
+                if (s == reginfo->strbeg) {
+                    if (to_complement ^ cBOOL(reginfo->intuit
+                                              || regtry(reginfo, &s)))
+                    {
+                        goto got_it;
+                    }
+                    s += (utf8_target) ? UTF8SKIP(s) : 1;
+                }
+
+                if (utf8_target) {
+                    /* We are at a boundary between char_sub_0 and char_sub_1.
+                     * We also keep track of the value for char_sub_-1 as we
+                     * loop through the line.   Context may be needed to make a
+                     * determination, and if so, this can save having to
+                     * recalculate it */
+                    PL_WB_enum previous = PL_WB_UNKNOWN;
+                    PL_WB_enum before = getWB_VAL_UTF8(
+                                              reghop3((U8*)s,
+                                                      -1,
+                                                      (U8*)(reginfo->strbeg)),
+                                              (U8*) reginfo->strend);
+                    while (s < strend) {
+                        PL_WB_enum after = getWB_VAL_UTF8((U8*) s,
+                                                        (U8*) reginfo->strend);
+                        if (to_complement ^ isWB(previous,
+                                                 before,
+                                                 after,
+                                                 (U8*) reginfo->strbeg,
+                                                 (U8*) s,
+                                                 (U8*) reginfo->strend,
+                                                 utf8_target))
+                        {
+                            if (reginfo->intuit || regtry(reginfo, &s)) {
+                                goto got_it;
+                            }
+                            previous = before;
+                            before = after;
+                        }
+                        s += UTF8SKIP(s);
+                    }
+                }
+                else {  /* Not utf8. */
+                    PL_WB_enum previous = PL_WB_UNKNOWN;
+                    PL_WB_enum before = getWB_VAL_CP((U8) *(s -1));
+                    while (s < strend) {
+                        PL_WB_enum after = getWB_VAL_CP((U8) *s);
+                        if (to_complement ^ isWB(previous,
+                                                 before,
+                                                 after,
+                                                 (U8*) reginfo->strbeg,
+                                                 (U8*) s,
+                                                 (U8*) reginfo->strend,
+                                                 utf8_target))
+                        {
+                            if (reginfo->intuit || regtry(reginfo, &s)) {
+                                goto got_it;
+                            }
+                            previous = before;
+                            before = after;
+                        }
+                        s++;
+                    }
+                }
+
+                if (to_complement ^ cBOOL(reginfo->intuit
+                                          || regtry(reginfo, &s)))
+                {
+                    goto got_it;
+                }
+
                 break;
         }
         break;
@@ -4089,6 +4174,277 @@ S_isGCB(const PL_GCB_enum before, const PL_GCB_enum after)
     NOT_REACHED;
 }
 
+#define WBcase(before, after) ((PL_WB_ENUM_COUNT * before) + after)
+
+STATIC bool
+S_isWB(pTHX_ PL_WB_enum previous,
+             PL_WB_enum before,
+             PL_WB_enum after,
+             const U8 * const strbeg,
+             const U8 * const curpos,
+             const U8 * const strend,
+             const bool utf8_target)
+{
+    /*  Return a boolean as to if the boundary between 'before' and 'after' is
+     *  a Unicode word break, using their published algorithm.  Context may be
+     *  needed to make this determination.  If the value for the character
+     *  before 'before' is known, it is passed as 'previous'; otherwise that
+     *  should be set to PL_WB_UNKNOWN.  The other input parameters give the
+     *  boundaries and current position in the matching of the string.  That
+     *  is, 'curpos' marks the position where the character whose wb value is
+     *  'after' begins.  See http://www.unicode.org/reports/tr29/ */
+
+    U8 * before_pos = (U8 *) curpos;
+    U8 * after_pos = (U8 *) curpos;
+
+    PERL_ARGS_ASSERT_ISWB;
+
+    /* WB1 and WB2: Break at the start and end of text. */
+    if (before == PL_WB_EDGE || after == PL_WB_EDGE) {
+        return TRUE;
+    }
+
+    /* WB 3: Do not break within CRLF. */
+    if (before == PL_WB_CR && after == PL_WB_LF) {
+        return FALSE;
+    }
+
+    /* WB 3a and WB 3b: Otherwise break before and after Newlines (including CR
+     * and LF) */
+    if (   before == PL_WB_CR || before == PL_WB_LF || before == PL_WB_Newline
+        || after ==  PL_WB_CR || after ==  PL_WB_LF || after ==  PL_WB_Newline)
+    {
+        return TRUE;
+    }
+
+    /* Ignore Format and Extend characters, except when they appear at the
+     * beginning of a region of text.
+     * WB4.  X (Extend | Format)*  →  X. */
+
+    if (after == PL_WB_Extend || after == PL_WB_Format) {
+        return FALSE;
+    }
+
+    if (before == PL_WB_Extend || before == PL_WB_Format) {
+        before = backup_one_WB(&previous, strbeg, &before_pos, utf8_target);
+    }
+
+    switch (WBcase(before, after)) {
+            /* Otherwise, break everywhere (including around ideographs).
+                WB14.  Any  ÷  Any */
+            default:
+                return TRUE;
+
+            /* Do not break between most letters.
+                WB5.  (ALetter | Hebrew_Letter) × (ALetter | Hebrew_Letter) */
+            case WBcase(PL_WB_ALetter, PL_WB_ALetter):
+            case WBcase(PL_WB_ALetter, PL_WB_Hebrew_Letter):
+            case WBcase(PL_WB_Hebrew_Letter, PL_WB_ALetter):
+            case WBcase(PL_WB_Hebrew_Letter, PL_WB_Hebrew_Letter):
+                return FALSE;
+
+            /* Do not break letters across certain punctuation.
+                WB6.  (ALetter | Hebrew_Letter)
+                        × (MidLetter | MidNumLet | Single_Quote) (ALetter
+                                                            | Hebrew_Letter) */
+            case WBcase(PL_WB_ALetter, PL_WB_MidLetter):
+            case WBcase(PL_WB_ALetter, PL_WB_MidNumLet):
+            case WBcase(PL_WB_ALetter, PL_WB_Single_Quote):
+            case WBcase(PL_WB_Hebrew_Letter, PL_WB_MidLetter):
+            case WBcase(PL_WB_Hebrew_Letter, PL_WB_MidNumLet):
+            /*case WBcase(PL_WB_Hebrew_Letter, PL_WB_Single_Quote):*/
+                after = advance_one_WB(&after_pos, strend, utf8_target);
+                return after != PL_WB_ALetter && after != PL_WB_Hebrew_Letter;
+
+            /* WB7.  (ALetter | Hebrew_Letter) (MidLetter | MidNumLet |
+             *                    Single_Quote) ×  (ALetter | Hebrew_Letter) */
+            case WBcase(PL_WB_MidLetter, PL_WB_ALetter):
+            case WBcase(PL_WB_MidLetter, PL_WB_Hebrew_Letter):
+            case WBcase(PL_WB_MidNumLet, PL_WB_ALetter):
+            case WBcase(PL_WB_MidNumLet, PL_WB_Hebrew_Letter):
+            case WBcase(PL_WB_Single_Quote, PL_WB_ALetter):
+            case WBcase(PL_WB_Single_Quote, PL_WB_Hebrew_Letter):
+                before
+                  = backup_one_WB(&previous, strbeg, &before_pos, utf8_target);
+                return before != PL_WB_ALetter && before != PL_WB_Hebrew_Letter;
+
+            /* WB7a.  Hebrew_Letter  ×  Single_Quote */
+            case WBcase(PL_WB_Hebrew_Letter, PL_WB_Single_Quote):
+                return FALSE;
+
+            /* WB7b.  Hebrew_Letter  ×  Double_Quote Hebrew_Letter */
+            case WBcase(PL_WB_Hebrew_Letter, PL_WB_Double_Quote):
+                return advance_one_WB(&after_pos, strend, utf8_target)
+                                                        != PL_WB_Hebrew_Letter;
+
+            /* WB7c.  Hebrew_Letter Double_Quote  ×  Hebrew_Letter */
+            case WBcase(PL_WB_Double_Quote, PL_WB_Hebrew_Letter):
+                return backup_one_WB(&previous, strbeg, &before_pos, utf8_target)
+                                                        != PL_WB_Hebrew_Letter;
+
+            /* Do not break within sequences of digits, or digits adjacent to
+             * letters (“3a”, or “A3”).
+                WB8.  Numeric  ×  Numeric */
+            case WBcase(PL_WB_Numeric, PL_WB_Numeric):
+                return FALSE;
+
+            /* WB9.  (ALetter | Hebrew_Letter)  ×  Numeric */
+            case WBcase(PL_WB_ALetter, PL_WB_Numeric):
+            case WBcase(PL_WB_Hebrew_Letter, PL_WB_Numeric):
+                return FALSE;
+
+            /* WB10.  Numeric  ×  (ALetter | Hebrew_Letter) */
+            case WBcase(PL_WB_Numeric, PL_WB_ALetter):
+            case WBcase(PL_WB_Numeric, PL_WB_Hebrew_Letter):
+                return FALSE;
+
+            /* Do not break within sequences, such as “3.2” or “3,456.789”.
+                WB11.   Numeric (MidNum | MidNumLet | Single_Quote)  ×  Numeric
+             */
+            case WBcase(PL_WB_MidNum, PL_WB_Numeric):
+            case WBcase(PL_WB_MidNumLet, PL_WB_Numeric):
+            case WBcase(PL_WB_Single_Quote, PL_WB_Numeric):
+                return backup_one_WB(&previous, strbeg, &before_pos, utf8_target)
+                                                               != PL_WB_Numeric;
+
+            /*  WB12.   Numeric  ×  (MidNum | MidNumLet | Single_Quote) Numeric
+             *  */
+            case WBcase(PL_WB_Numeric, PL_WB_MidNum):
+            case WBcase(PL_WB_Numeric, PL_WB_MidNumLet):
+            case WBcase(PL_WB_Numeric, PL_WB_Single_Quote):
+                return advance_one_WB(&after_pos, strend, utf8_target)
+                                                               != PL_WB_Numeric;
+
+            /* Do not break between Katakana.
+               WB13.  Katakana  ×  Katakana */
+            case WBcase(PL_WB_Katakana, PL_WB_Katakana):
+                return FALSE;
+
+            /* Do not break from extenders.
+               WB13a.  (ALetter | Hebrew_Letter | Numeric | Katakana |
+                                            ExtendNumLet)  ×  ExtendNumLet */
+            case WBcase(PL_WB_ALetter, PL_WB_ExtendNumLet):
+            case WBcase(PL_WB_Hebrew_Letter, PL_WB_ExtendNumLet):
+            case WBcase(PL_WB_Numeric, PL_WB_ExtendNumLet):
+            case WBcase(PL_WB_Katakana, PL_WB_ExtendNumLet):
+            case WBcase(PL_WB_ExtendNumLet, PL_WB_ExtendNumLet):
+                return FALSE;
+
+            /* WB13b.  ExtendNumLet  ×  (ALetter | Hebrew_Letter | Numeric
+             *                                                 | Katakana) */
+            case WBcase(PL_WB_ExtendNumLet, PL_WB_ALetter):
+            case WBcase(PL_WB_ExtendNumLet, PL_WB_Hebrew_Letter):
+            case WBcase(PL_WB_ExtendNumLet, PL_WB_Numeric):
+            case WBcase(PL_WB_ExtendNumLet, PL_WB_Katakana):
+                return FALSE;
+
+            /* Do not break between regional indicator symbols.
+               WB13c.  Regional_Indicator  ×  Regional_Indicator */
+            case WBcase(PL_WB_Regional_Indicator, PL_WB_Regional_Indicator):
+                return FALSE;
+
+    }
+
+    NOT_REACHED;
+}
+
+STATIC PL_WB_enum
+S_advance_one_WB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_target)
+{
+    PL_WB_enum wb;
+
+    PERL_ARGS_ASSERT_ADVANCE_ONE_WB;
+
+    if (*curpos >= strend) {
+        return PL_WB_EDGE;
+    }
+
+    if (utf8_target) {
+
+        /* Advance over Extend and Format */
+        do {
+            *curpos += UTF8SKIP(*curpos);
+            if (*curpos >= strend) {
+                return PL_WB_EDGE;
+            }
+            wb = getWB_VAL_UTF8(*curpos, strend);
+        } while (wb == PL_WB_Extend || wb == PL_WB_Format);
+    }
+    else {
+        do {
+            (*curpos)++;
+            if (*curpos >= strend) {
+                return PL_WB_EDGE;
+            }
+            wb = getWB_VAL_CP(**curpos);
+        } while (wb == PL_WB_Extend || wb == PL_WB_Format);
+    }
+
+    return wb;
+}
+
+STATIC PL_WB_enum
+S_backup_one_WB(pTHX_ PL_WB_enum * previous, const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
+{
+    PL_WB_enum wb;
+
+    PERL_ARGS_ASSERT_BACKUP_ONE_WB;
+
+    /* If we know what the previous character's break value is, don't have
+        * to look it up */
+    if (*previous != PL_WB_UNKNOWN) {
+        wb = *previous;
+        *previous = PL_WB_UNKNOWN;
+        /* XXX Note that doesn't change curpos, and maybe should */
+
+        /* But we always back up over these two types */
+        if (wb != PL_WB_Extend && wb != PL_WB_Format) {
+            return wb;
+        }
+    }
+
+    if (*curpos < strbeg) {
+        return PL_WB_EDGE;
+    }
+
+    if (utf8_target) {
+        U8 * prev_char_pos = reghopmaybe3(*curpos, -1, strbeg);
+        if (! prev_char_pos) {
+            return PL_WB_EDGE;
+        }
+
+        /* Back up over Extend and Format.  curpos is always just to the right
+         * of the characater whose value we are getting */
+        do {
+            U8 * prev_prev_char_pos;
+            if ((prev_prev_char_pos = reghopmaybe3((U8 *) prev_char_pos,
+                                                   -1,
+                                                   strbeg)))
+            {
+                wb = getWB_VAL_UTF8(prev_prev_char_pos, prev_char_pos);
+                *curpos = prev_char_pos;
+                prev_char_pos = prev_prev_char_pos;
+            }
+            else {
+                *curpos = (U8 *) strbeg;
+                return PL_WB_EDGE;
+            }
+        } while (wb == PL_WB_Extend || wb == PL_WB_Format);
+    }
+    else {
+        do {
+            if (*curpos - 2 < strbeg) {
+                *curpos = (U8 *) strbeg;
+                return PL_WB_EDGE;
+            }
+            (*curpos)--;
+            wb = getWB_VAL_CP(*(*curpos - 1));
+        } while (wb == PL_WB_Extend || wb == PL_WB_Format);
+    }
+
+    return wb;
+}
+
 /* returns -1 on failure, $+[0] on success */
 STATIC SSize_t
 S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
@@ -4936,6 +5292,25 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                                         (U8*) reginfo->strend));
                         }
                         break;
+                    case WB_BOUND:
+                        if (locinput == reginfo->strbeg || NEXTCHR_IS_EOS) {
+                            match = TRUE;
+                        }
+                        else {
+                            match = isWB(PL_WB_UNKNOWN,
+                                         getWB_VAL_UTF8(
+                                                reghop3((U8*)locinput,
+                                                        -1,
+                                                        (U8*)(reginfo->strbeg)),
+                                                (U8*) reginfo->strend),
+                                          getWB_VAL_UTF8((U8*) locinput,
+                                                        (U8*) reginfo->strend),
+                                          (U8*) reginfo->strbeg,
+                                          (U8*) locinput,
+                                          (U8*) reginfo->strend,
+                                          utf8_target);
+                        }
+                        break;
                 }
 	    }
 	    else {  /* Not utf8 target */
@@ -4959,6 +5334,20 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                    range */
                             match =    UCHARAT(locinput - 1) != '\r'
                                     || UCHARAT(locinput) != '\n';
+                        }
+                        break;
+                    case WB_BOUND:
+                        if (locinput == reginfo->strbeg || NEXTCHR_IS_EOS) {
+                            match = TRUE;
+                        }
+                        else {
+                            match = isWB(PL_WB_UNKNOWN,
+                                         getWB_VAL_CP(UCHARAT(locinput -1)),
+                                         getWB_VAL_CP(UCHARAT(locinput)),
+                                         (U8*) reginfo->strbeg,
+                                         (U8*) locinput,
+                                         (U8*) reginfo->strend,
+                                         utf8_target);
                         }
                         break;
                 }

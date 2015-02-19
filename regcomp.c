@@ -11823,6 +11823,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         }
                         FLAGS(ret) = GCB_BOUND;
                         break;
+                    case 'w':
+                        if (length != 2 || *(RExC_parse + 1) != 'b') {
+                            goto bad_bound_type;
+                        }
+                        FLAGS(ret) = WB_BOUND;
+                        break;
                     default:
                       bad_bound_type:
                         RExC_parse = endbrace;
@@ -16801,7 +16807,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* Must be synced with order of 'bound_type' in regcomp.h */
         const char * const bounds[] = {
             "",      /* Traditional */
-            "{gcb}"
+            "{gcb}",
+            "{wb}"
         };
         sv_catpv(sv, bounds[FLAGS(o)]);
     }

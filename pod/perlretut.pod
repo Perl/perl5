@@ -459,6 +459,11 @@ character C<\w\W> or C<\W\w>:
 Note in the last example, the end of the string is considered a word
 boundary.
 
+For natural language processing (so that, for example, apostrophes are
+included in words), use instead C<\b{wb}>
+
+    "don't" =~ / .+? \b{wb} /x;  # matches the whole string
+
 You might wonder why C<'.'> matches everything but C<"\n"> - why not
 every character? The reason is that often one is matching against
 lines and would like to ignore the newline characters.  For instance,

@@ -233,6 +233,11 @@ character and a non-word character C<\w\W> or C<\W\w>:
 In the last example, the end of the string is considered a word
 boundary.
 
+For natural language processing (so that, for example, apostrophes are
+included in words), use instead C<\b{wb}>
+
+    "don't" =~ / .+? \b{wb} /x;  # matches the whole string
+
 =head2 Matching this or that
 
 We can match different character strings with the B<alternation>
