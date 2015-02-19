@@ -371,6 +371,7 @@ for my $charset (get_supported_code_pages()) {
                              _Perl_IDStart
                              _Perl_IDCont
                              Grapheme_Cluster_Break,EDGE
+                             Word_Break,EDGE,UNKNOWN
                            )
     ) {
 
