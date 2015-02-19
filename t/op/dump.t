@@ -52,5 +52,5 @@ print qq(B);
 PROG
 
 END {
-  chdir $start;
+  chdir $start if defined $start;
 }
