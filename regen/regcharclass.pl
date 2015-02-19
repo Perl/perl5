@@ -1613,34 +1613,6 @@ SURROGATE: Surrogate characters
 => UTF8 :fast
 \p{Gc=Cs}
 
-GCB_L: Grapheme_Cluster_Break=L
-=> UTF8 :fast
-\p{_X_GCB_L}
-
-GCB_LV_LVT_V: Grapheme_Cluster_Break=(LV or LVT or V)
-=> UTF8 :fast
-\p{_X_LV_LVT_V}
-
-GCB_Prepend: Grapheme_Cluster_Break=Prepend
-=> UTF8 :fast
-\p{_X_GCB_Prepend}
-
-GCB_RI: Grapheme_Cluster_Break=RI
-=> UTF8 :fast
-\p{_X_RI}
-
-GCB_SPECIAL_BEGIN_START: Grapheme_Cluster_Break=special_begin_starts
-=> UTF8 :fast
-\p{_X_Special_Begin_Start}
-
-GCB_T: Grapheme_Cluster_Break=T
-=> UTF8 :fast
-\p{_X_GCB_T}
-
-GCB_V: Grapheme_Cluster_Break=V
-=> UTF8 :fast
-\p{_X_GCB_V}
-
 # This program was run with this enabled, and the results copied to utf8.h;
 # then this was commented out because it takes so long to figure out these 2
 # million code points.  The results would not change unless utf8.h decides it

@@ -598,8 +598,6 @@ PERLVAR(I, HasMultiCharFold,   SV *)
 
 /* utf8 character class swashes */
 PERLVAR(I, utf8_mark,	SV *)
-PERLVAR(I, utf8_X_regular_begin, SV *)
-PERLVAR(I, utf8_X_extend, SV *)
 PERLVAR(I, utf8_toupper, SV *)
 PERLVAR(I, utf8_totitle, SV *)
 PERLVAR(I, utf8_tolower, SV *)

@@ -333,8 +333,6 @@
 #define PL_unitcheckav_save	(vTHX->Iunitcheckav_save)
 #define PL_unlockhook		(vTHX->Iunlockhook)
 #define PL_unsafe		(vTHX->Iunsafe)
-#define PL_utf8_X_extend	(vTHX->Iutf8_X_extend)
-#define PL_utf8_X_regular_begin	(vTHX->Iutf8_X_regular_begin)
 #define PL_utf8_charname_begin	(vTHX->Iutf8_charname_begin)
 #define PL_utf8_charname_continue	(vTHX->Iutf8_charname_continue)
 #define PL_utf8_foldable	(vTHX->Iutf8_foldable)
