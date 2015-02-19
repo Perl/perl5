@@ -136,7 +136,6 @@ sub NOT_DEF() { undef }
 {
   # [perl #123860]
   # this can but might not crash
-  local $::TODO = "not yet fixed...";
   # This can but might not crash
   #
   # The second smartmatch would leave a &PL_sv_no on the stack for

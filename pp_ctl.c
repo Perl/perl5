@@ -4507,6 +4507,7 @@ STATIC bool
 S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
 {
     dSP;
+    bool result;
 
     PERL_ARGS_ASSERT_MATCHER_MATCHES_SV;
     
@@ -4515,7 +4516,10 @@ S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
     PUTBACK;
     (void) Perl_pp_match(aTHX);
     SPAGAIN;
-    return (SvTRUEx(POPs));
+    result = SvTRUEx(POPs);
+    PUTBACK;
+
+    return result;
 }
 
 STATIC void
