@@ -310,7 +310,7 @@ pod/perlvms.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlwin32.pod	Verbatim line length including indents exceeds 79 by	12
 porting/epigraphs.pod	Verbatim line length including indents exceeds 79 by	16
 porting/expand-macro.pl	Verbatim line length including indents exceeds 79 by	2
-porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	6
+porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	7
 porting/todo.pod	Verbatim line length including indents exceeds 79 by	7
 utils/c2ph	Verbatim line length including indents exceeds 79 by	44
 utils/encguess	Apparent broken link	1
