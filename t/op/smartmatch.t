@@ -10,6 +10,8 @@ use warnings;
 no warnings 'uninitialized';
 no warnings 'experimental::smartmatch';
 
+++$|;
+
 use Tie::Array;
 use Tie::Hash;
 
@@ -74,7 +76,7 @@ my %keyandmore = map { $_ => 0 } @keyandmore;
 my %fooormore = map { $_ => 0 } @fooormore;
 
 # Load and run the tests
-plan tests => 349;
+plan tests => 349+1;
 
 while (<DATA>) {
   SKIP: {
@@ -130,6 +132,24 @@ sub fatal {die "fatal sub\n"}
 sub FALSE() { 0 }
 sub TRUE() { 1 }
 sub NOT_DEF() { undef }
+
+{
+  # [perl #123860]
+  # this can but might not crash
+  local $::TODO = "not yet fixed...";
+  # This can but might not crash
+  #
+  # The second smartmatch would leave a &PL_sv_no on the stack for
+  # each key it checked in %!, this could then cause various types of
+  # crash or assertion failure.
+  #
+  # This isn't guaranteed to crash, but if the stack issue is
+  # re-introduced it will probably crash in one of the many smoke
+  # builds.
+  fresh_perl_is('print (q(x) ~~ q(x)) | (/x/ ~~ %!)', "1",
+		{ switches => [ "-MErrno", "-M-warnings=experimental::smartmatch" ] },
+		 "don't fill the stack with rubbish");
+}
 
 # Prefix character :
 #   - expected to match
