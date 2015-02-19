@@ -7,7 +7,7 @@
 /* See the generating file for comments */
 
 
-#ifndef PERL_IN_XSUB_RE
+#if defined(PERL_IN_REGCOMP_C)
 
 static const UV Latin1_invlist[] = {
 	2,	/* Number of elements */
@@ -27,11 +27,11 @@ static const UV AboveLatin1_invlist[] = {
 	0x100
 };
 
-#endif	/* #ifndef PERL_IN_XSUB_RE */
+#endif	/* defined(PERL_IN_REGCOMP_C) */
 
 #if 'A' == 65 /* ASCII/Latin1 */
 
-#ifndef PERL_IN_XSUB_RE
+#if defined(PERL_IN_PERL_C)
 
 static const UV ASCII_invlist[] = { /* for ASCII/Latin1 */
 	2,	/* Number of elements */
@@ -304,7 +304,9 @@ static const UV Cased_invlist[] = { /* for ASCII/Latin1 */
 	0x1F18A
 };
 
-#endif	/* #ifndef PERL_IN_XSUB_RE */
+#endif	/* defined(PERL_IN_PERL_C) */
+
+#if defined(PERL_IN_REGCOMP_C)
 
 static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for ASCII/Latin1 */
 	45,	/* Number of elements */
@@ -357,8 +359,6 @@ static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for ASCII/Latin1 */
 	0x1F7C,
 	0x1F7D
 };
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_Any_Folds_invlist[] = { /* for ASCII/Latin1 */
 	235,	/* Number of elements */
@@ -667,6 +667,10 @@ static const UV _Perl_Folds_To_Multi_Char_invlist[] = { /* for ASCII/Latin1 */
 	0xFB13,
 	0xFB18
 };
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
+#if defined(PERL_IN_UTF8_C)
 
 static const UV _Perl_IDCont_invlist[] = { /* for ASCII/Latin1 */
 	1267,	/* Number of elements */
@@ -3044,6 +3048,10 @@ static const UV _Perl_IDStart_invlist[] = { /* for ASCII/Latin1 */
 	0x2FA1E
 };
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if defined(PERL_IN_REGCOMP_C)
+
 static const UV UpperLatin1_invlist[] = { /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -3053,6 +3061,10 @@ static const UV UpperLatin1_invlist[] = { /* for ASCII/Latin1 */
 	0x80,
 	0x100
 };
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
+#if defined(PERL_IN_PERL_C)
 
 static const UV VertSpace_invlist[] = { /* for ASCII/Latin1 */
 	7,	/* Number of elements */
@@ -12305,7 +12317,7 @@ static const UV XPosixXDigit_invlist[] = { /* for ASCII/Latin1 */
 	0xFF47
 };
 
-#endif	/* #ifndef PERL_IN_XSUB_RE */
+#endif	/* defined(PERL_IN_PERL_C) */
 
 #endif	/* ASCII/Latin1 */
 
@@ -12314,7 +12326,7 @@ static const UV XPosixXDigit_invlist[] = { /* for ASCII/Latin1 */
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-#ifndef PERL_IN_XSUB_RE
+#if defined(PERL_IN_PERL_C)
 
 static const UV ASCII_invlist[] = { /* for EBCDIC 1047 */
 	54,	/* Number of elements */
@@ -12665,7 +12677,9 @@ static const UV Cased_invlist[] = { /* for EBCDIC 1047 */
 	0x1F18A
 };
 
-#endif	/* #ifndef PERL_IN_XSUB_RE */
+#endif	/* defined(PERL_IN_PERL_C) */
+
+#if defined(PERL_IN_REGCOMP_C)
 
 static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC 1047 */
 	45,	/* Number of elements */
@@ -12718,8 +12732,6 @@ static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC 1047 */
 	0x1F7C,
 	0x1F7D
 };
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_Any_Folds_invlist[] = { /* for EBCDIC 1047 */
 	267,	/* Number of elements */
@@ -13060,6 +13072,10 @@ static const UV _Perl_Folds_To_Multi_Char_invlist[] = { /* for EBCDIC 1047 */
 	0xFB13,
 	0xFB18
 };
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
+#if defined(PERL_IN_UTF8_C)
 
 static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC 1047 */
 	1291,	/* Number of elements */
@@ -15487,6 +15503,10 @@ static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC 1047 */
 	0x2FA1E
 };
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if defined(PERL_IN_REGCOMP_C)
+
 static const UV UpperLatin1_invlist[] = { /* for EBCDIC 1047 */
 	55,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -15548,6 +15568,10 @@ static const UV UpperLatin1_invlist[] = { /* for EBCDIC 1047 */
 	0xFA,
 	0x100
 };
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
+#if defined(PERL_IN_PERL_C)
 
 static const UV VertSpace_invlist[] = { /* for EBCDIC 1047 */
 	9,	/* Number of elements */
@@ -24912,7 +24936,7 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC 1047 */
 	0xFF47
 };
 
-#endif	/* #ifndef PERL_IN_XSUB_RE */
+#endif	/* defined(PERL_IN_PERL_C) */
 
 #endif	/* EBCDIC 1047 */
 
@@ -24921,7 +24945,7 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC 1047 */
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121
 
-#ifndef PERL_IN_XSUB_RE
+#if defined(PERL_IN_PERL_C)
 
 static const UV ASCII_invlist[] = { /* for EBCDIC 037 */
 	56,	/* Number of elements */
@@ -25270,7 +25294,9 @@ static const UV Cased_invlist[] = { /* for EBCDIC 037 */
 	0x1F18A
 };
 
-#endif	/* #ifndef PERL_IN_XSUB_RE */
+#endif	/* defined(PERL_IN_PERL_C) */
+
+#if defined(PERL_IN_REGCOMP_C)
 
 static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC 037 */
 	45,	/* Number of elements */
@@ -25323,8 +25349,6 @@ static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC 037 */
 	0x1F7C,
 	0x1F7D
 };
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_Any_Folds_invlist[] = { /* for EBCDIC 037 */
 	263,	/* Number of elements */
@@ -25661,6 +25685,10 @@ static const UV _Perl_Folds_To_Multi_Char_invlist[] = { /* for EBCDIC 037 */
 	0xFB13,
 	0xFB18
 };
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
+#if defined(PERL_IN_UTF8_C)
 
 static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC 037 */
 	1287,	/* Number of elements */
@@ -28080,6 +28108,10 @@ static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC 037 */
 	0x2FA1E
 };
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if defined(PERL_IN_REGCOMP_C)
+
 static const UV UpperLatin1_invlist[] = { /* for EBCDIC 037 */
 	57,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -28143,6 +28175,10 @@ static const UV UpperLatin1_invlist[] = { /* for EBCDIC 037 */
 	0xFA,
 	0x100
 };
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
+#if defined(PERL_IN_PERL_C)
 
 static const UV VertSpace_invlist[] = { /* for EBCDIC 037 */
 	9,	/* Number of elements */
@@ -37493,7 +37529,7 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC 037 */
 	0xFF47
 };
 
-#endif	/* #ifndef PERL_IN_XSUB_RE */
+#endif	/* defined(PERL_IN_PERL_C) */
 
 #endif	/* EBCDIC 037 */
 
@@ -37502,7 +37538,7 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC 037 */
      && '^' == 106 && '~' == 255 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 74
 
-#ifndef PERL_IN_XSUB_RE
+#if defined(PERL_IN_PERL_C)
 
 static const UV ASCII_invlist[] = { /* for EBCDIC POSIX-BC */
 	58,	/* Number of elements */
@@ -37855,7 +37891,9 @@ static const UV Cased_invlist[] = { /* for EBCDIC POSIX-BC */
 	0x1F18A
 };
 
-#endif	/* #ifndef PERL_IN_XSUB_RE */
+#endif	/* defined(PERL_IN_PERL_C) */
+
+#if defined(PERL_IN_REGCOMP_C)
 
 static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC POSIX-BC */
 	45,	/* Number of elements */
@@ -37908,8 +37946,6 @@ static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC POSIX-BC 
 	0x1F7C,
 	0x1F7D
 };
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_Any_Folds_invlist[] = { /* for EBCDIC POSIX-BC */
 	265,	/* Number of elements */
@@ -38248,6 +38284,10 @@ static const UV _Perl_Folds_To_Multi_Char_invlist[] = { /* for EBCDIC POSIX-BC *
 	0xFB13,
 	0xFB18
 };
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
+#if defined(PERL_IN_UTF8_C)
 
 static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC POSIX-BC */
 	1289,	/* Number of elements */
@@ -40671,6 +40711,10 @@ static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC POSIX-BC */
 	0x2FA1E
 };
 
+#endif	/* defined(PERL_IN_UTF8_C) */
+
+#if defined(PERL_IN_REGCOMP_C)
+
 static const UV UpperLatin1_invlist[] = { /* for EBCDIC POSIX-BC */
 	57,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -40734,6 +40778,10 @@ static const UV UpperLatin1_invlist[] = { /* for EBCDIC POSIX-BC */
 	0xFE,
 	0xFF
 };
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
+#if defined(PERL_IN_PERL_C)
 
 static const UV VertSpace_invlist[] = { /* for EBCDIC POSIX-BC */
 	9,	/* Number of elements */
@@ -50096,7 +50144,7 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC POSIX-BC */
 	0xFF47
 };
 
-#endif	/* #ifndef PERL_IN_XSUB_RE */
+#endif	/* defined(PERL_IN_PERL_C) */
 
 #endif	/* EBCDIC POSIX-BC */
 
@@ -50142,5 +50190,5 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC POSIX-BC */
  * a17a0330e57d774343a53c019f1bc69827c2676982a1bf48e0898a76710e8877 lib/unicore/extracted/DNumType.txt
  * c2cb810a67cc5fb4a8d236b6c1bc6dd4d89733d8603881997e8aae2c816a3db1 lib/unicore/extracted/DNumValues.txt
  * 746472de66b936ac885ca6d6e68058242b4e909e3260c6317f3ec719f78f76cc lib/unicore/version
- * 7e16ea29ac35eda35bb9d7d5e4259f3f966a8c6018abe130125a14b665637eb2 regen/mk_invlists.pl
+ * d2f4d6b72ebe8a99a7be2ebe9aecb388f207806e3a4b72aaeac76d64b95233ed regen/mk_invlists.pl
  * ex: set ro: */

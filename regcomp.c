@@ -6413,7 +6413,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
-#ifndef PERL_IN_XSUB_RE
     /* Initialize these here instead of as-needed, as is quick and avoids
      * having to test them each time otherwise */
     if (! PL_AboveLatin1) {
@@ -6431,7 +6430,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_InBitmap = _add_range_to_invlist(PL_InBitmap, 0,
                                                     NUM_ANYOF_CODE_POINTS - 1);
     }
-#endif
 
     pRExC_state->code_blocks = NULL;
     pRExC_state->num_code_blocks = 0;
