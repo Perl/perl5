@@ -2,7 +2,7 @@
  *
  *    VMS-specific routines for perl5
  *
- *    Copyright (C) 1993-2013 by Charles Bailey and others.
+ *    Copyright (C) 1993-2015 by Charles Bailey and others.
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
