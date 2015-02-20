@@ -572,6 +572,13 @@ explained below under L</C<\X>>.  In fact, C<\X> is another way to get
 the same functionality.  It is equivalent to C</.+?\b{gcb}/>.  Use
 whichever is most convenient for your situation.
 
+=item C<\b{sb}>
+
+This matches a Unicode "Sentence Boundary".  This is an aid to parsing
+natural language sentences.  It gives good, but imperfect results.  For
+example, it thinks that "Mr. Smith" is two sentences.  More details are
+at L<http://www.unicode.org/reports/tr29/>.
+
 =item C<\b{wb}>
 
 This matches a Unicode "Word Boundary".  This gives better (though not

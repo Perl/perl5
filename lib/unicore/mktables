@@ -1466,6 +1466,7 @@ my $has_hangul_syllables = 0;
 my $needing_code_points_ending_in_code_point = 0;
 
 my @backslash_X_tests;     # List of tests read in for testing \X
+my @SB_tests;              # List of tests read in for testing \b{sb}
 my @WB_tests;              # List of tests read in for testing \b{wb}
 my @unhandled_properties;  # Will contain a list of properties found in
                            # the input that we didn't process.
@@ -11722,6 +11723,18 @@ sub process_GCB_test {
     return;
 }
 
+sub process_SB_test {
+
+    my $file = shift;
+    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+    while ($file->next_line) {
+        push @SB_tests, $_;
+    }
+
+    return;
+}
+
 sub process_WB_test {
 
     my $file = shift;
@@ -17795,6 +17808,7 @@ sub make_property_test_script() {
             <DATA>,
             @output,
             (map {"Test_GCB('$_');\n"} @backslash_X_tests),
+            (map {"Test_SB('$_');\n"} @SB_tests),
             (map {"Test_WB('$_');\n"} @WB_tests),
             "Finished();\n"
            ]);
@@ -18108,7 +18122,7 @@ my @input_file_objects = (
                     Skip => 'Validation Tests',
                     ),
     Input_file->new("$AUXILIARY/SBTest.txt", v4.1.0,
-                    Skip => 'Validation Tests',
+                    Handler => \&process_SB_test,
                     ),
     Input_file->new("$AUXILIARY/WBTest.txt", v4.1.0,
                     Handler => \&process_WB_test,
@@ -18775,6 +18789,10 @@ sub _test_break($$) {
 
 sub Test_GCB($) {
     _test_break(shift, 'gcb');
+}
+
+sub Test_SB($) {
+    _test_break(shift, 'sb');
 }
 
 sub Test_WB($) {

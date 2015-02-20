@@ -2277,11 +2277,16 @@ Es	|bool	|to_byte_substr	|NN regexp * prog
 ERsn	|I32	|reg_check_named_buff_matched	|NN const regexp *rex \
 						|NN const regnode *scan
 EsnR	|bool	|isGCB		|const PL_GCB_enum before|const PL_GCB_enum after
-EsR	|PL_WB_enum|advance_one_WB|NN U8 ** curpos				\
+EsR	|bool	|isSB		|PL_SB_enum before				\
+				|PL_SB_enum after				\
+				|NN const U8 * const strbeg			\
+				|NN const U8 * const curpos			\
 				|NN const U8 * const strend			\
 				|const bool utf8_target
-EsR	|PL_WB_enum|backup_one_WB|NN PL_WB_enum * previous			\
-				|NN const U8 * const strbeg			\
+EsR	|PL_SB_enum|advance_one_SB|NN U8 ** curpos				\
+				|NN const U8 * const strend			\
+				|const bool utf8_target
+EsR	|PL_SB_enum|backup_one_SB|NN const U8 * const strbeg			\
 				|NN U8 ** curpos				\
 				|const bool utf8_target
 EsR	|bool	|isWB		|PL_WB_enum previous				\
@@ -2290,6 +2295,13 @@ EsR	|bool	|isWB		|PL_WB_enum previous				\
 				|NN const U8 * const strbeg			\
 				|NN const U8 * const curpos			\
 				|NN const U8 * const strend			\
+				|const bool utf8_target
+EsR	|PL_WB_enum|advance_one_WB|NN U8 ** curpos				\
+				|NN const U8 * const strend			\
+				|const bool utf8_target
+EsR	|PL_WB_enum|backup_one_WB|NN PL_WB_enum * previous			\
+				|NN const U8 * const strbeg			\
+				|NN U8 ** curpos				\
 				|const bool utf8_target
 #  ifdef DEBUGGING
 Es	|void	|dump_exec_pos	|NN const char *locinput|NN const regnode *scan|NN const char *loc_regeol\

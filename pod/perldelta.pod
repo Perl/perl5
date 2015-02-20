@@ -42,6 +42,12 @@ C<\b> (without braces) but is more suitable for natural language
 processing.  It knows, for example that apostrophes can occur in the
 middle of words.  See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
 
+=head2 qr/\b{sb}/ is now handled in regular expressions
+
+C<sb> stands for Sentence Boundary.  It is a Unicode property
+to aid in parsing natural language sentences.
+See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

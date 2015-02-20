@@ -7414,12 +7414,26 @@ PERL_CALLCONV SV*	Perl__swash_to_invlist(pTHX_ SV* const swash)
 
 #endif
 #if defined(PERL_IN_REGEXEC_C)
+STATIC PL_SB_enum	S_advance_one_SB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_target)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_ADVANCE_ONE_SB	\
+	assert(curpos); assert(strend)
+
 STATIC PL_WB_enum	S_advance_one_WB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_target)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_ADVANCE_ONE_WB	\
 	assert(curpos); assert(strend)
+
+STATIC PL_SB_enum	S_backup_one_SB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_BACKUP_ONE_SB	\
+	assert(strbeg); assert(curpos)
 
 STATIC PL_WB_enum	S_backup_one_WB(pTHX_ PL_WB_enum * previous, const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
 			__attribute__warn_unused_result__
@@ -7449,6 +7463,14 @@ STATIC bool	S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
 
 STATIC bool	S_isGCB(const PL_GCB_enum before, const PL_GCB_enum after)
 			__attribute__warn_unused_result__;
+
+STATIC bool	S_isSB(pTHX_ PL_SB_enum before, PL_SB_enum after, const U8 * const strbeg, const U8 * const curpos, const U8 * const strend, const bool utf8_target)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5);
+#define PERL_ARGS_ASSERT_ISSB	\
+	assert(strbeg); assert(curpos); assert(strend)
 
 STATIC bool	S_isWB(pTHX_ PL_WB_enum previous, PL_WB_enum before, PL_WB_enum after, const U8 * const strbeg, const U8 * const curpos, const U8 * const strend, const bool utf8_target)
 			__attribute__warn_unused_result__
