@@ -517,6 +517,13 @@ has been fixed.  [perl #123652]
 Various crashes due to the parser getting confused by syntax errors have
 been fixed.  [perl #123617] [perl #123737] [perl #123753] [perl #123677]
 
+=item *
+
+Code like C</$a[/> used to read the next line of input and treat it as
+though it came immediately after the opening bracket.  Some invalid code
+consequently would parse and run, but some code caused crashes, so this is
+now disallowed.  [perl #123712]
+
 =back
 
 =head1 Known Problems
