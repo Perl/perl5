@@ -152,7 +152,19 @@ XXX
 
 =item *
 
+L<attributes> has been upgraded from version 0.25 to 0.26.
+
+=item *
+
 L<B> has been upgraded from version 1.55 to 1.56.
+
+=item *
+
+L<B::Debug> has been upgraded from version 1.22 to 1.23.
+
+=item *
+
+L<Benchmark> has been upgraded from version 1.19 to 1.20.
 
 =item *
 
@@ -163,11 +175,23 @@ the big number overloading, and how to invoke it.  [perl #123064]
 
 =item *
 
+L<Carp> has been upgraded from version 1.34 to 1.35.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.22 to 0.23.
+
+=item *
+
+L<CPAN::Meta::Requirements> has been upgraded from version 2.131 to 2.132
+
+=item *
+
 L<Devel::Peek> has been upgraded from version 1.21 to 1.22.
 
 =item *
 
-L<Encode> has been upgraded from version 2.67 to 2.68.
+L<Encode> has been upgraded from version 2.67 to 2.70.
 
 Building in C++ mode on Windows now works.
 
@@ -181,7 +205,15 @@ line directives, breaking parsing of error code definitions.  [perl
 
 =item *
 
+L<HTTP::Tiny> has been upgraded from version 0.053 to 0.054.
+
+=item *
+
 L<Opcode> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<Perl::OSType> has been upgraded from version 1.007 to 1.008.
 
 =item *
 
@@ -189,6 +221,30 @@ L<PerlIO::scalar> has been upgraded from version 0.21 to 0.22.
 
 Attempting to write at file positions impossible for the platform now
 fail early rather than wrapping at 4GB.
+
+=item *
+
+L<Pod::Parser> has been upgraded from version 1.62 to 1.63.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.24 to 3.25.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.49 to 1.51.
+
+=item *
+
+L<re> has been upgraded from version 0.30 to 0.31.
+
+=item *
+
+L<Socket> has been upgraded from version 2.016 to 2.018.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.301001_097 to 1.301001_098.
 
 =item *
 
@@ -204,11 +260,7 @@ Building in C++ mode now works.
 
 =item *
 
-L<POSIX> has been upgraded from version 1.49 to 1.50.
-
-=item *
-
-L<Benchmark> has been upgraded from version 1.19 to 1.20.
+L<Unicode::Collate> has been upgraded from version 1.10 to 1.11.
 
 =item *
 
@@ -407,10 +459,13 @@ XXX
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
+=over 4
 
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
+=item Windows
+
+In release 5.21.8 compiling on VC with dmake was broken. Fixed.
+
+=back
 
 =head2 New Platforms
 
