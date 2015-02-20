@@ -327,8 +327,8 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_
 }
 
 STATIC char *
-S_bytes_to_utf8(const U8 *start, STRLEN len, char *dest, const bool needs_swap) {
-    PERL_ARGS_ASSERT_BYTES_TO_UNI;
+S_my_bytes_to_utf8(const U8 *start, STRLEN len, char *dest, const bool needs_swap) {
+    PERL_ARGS_ASSERT_MY_BYTES_TO_UTF8;
 
     if (UNLIKELY(needs_swap)) {
         const U8 *p = start + len;
@@ -348,7 +348,7 @@ S_bytes_to_utf8(const U8 *start, STRLEN len, char *dest, const bool needs_swap) 
 #define PUSH_BYTES(utf8, cur, buf, len, needs_swap)             \
 STMT_START {							\
     if (UNLIKELY(utf8))	                                        \
-	(cur) = S_bytes_to_utf8((U8 *) buf, len, (cur), needs_swap);       \
+	(cur) = my_bytes_to_utf8((U8 *) buf, len, (cur), needs_swap);       \
     else {							\
         if (UNLIKELY(needs_swap))                               \
             S_reverse_copy((char *)(buf), cur, len);            \
@@ -386,7 +386,7 @@ STMT_START {					\
 STMT_START {					\
     if (utf8) {					\
 	const U8 au8 = (byte);			\
-	(s) = S_bytes_to_utf8(&au8, 1, (s), 0);	\
+	(s) = my_bytes_to_utf8(&au8, 1, (s), 0);\
     } else *(U8 *)(s)++ = (byte);		\
 } STMT_END
 
@@ -2640,7 +2640,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 				len+(endb-buffer)*UTF8_EXPAND);
 			end = start+SvLEN(cat);
 		    }
-                    cur = S_bytes_to_utf8(buffer, endb-buffer, cur, 0);
+                    cur = my_bytes_to_utf8(buffer, endb-buffer, cur, 0);
 		} else {
 		    if (cur >= end) {
 			*cur = '\0';

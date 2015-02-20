@@ -6704,13 +6704,6 @@ PERL_STATIC_INLINE HV*	S_opmethod_stash(pTHX_ SV* meth)
 
 #endif
 #if defined(PERL_IN_PP_PACK_C)
-STATIC char *	S_bytes_to_uni(const U8 *start, STRLEN len, char *dest, const bool needs_swap)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(3);
-#define PERL_ARGS_ASSERT_BYTES_TO_UNI	\
-	assert(start); assert(dest)
-
 STATIC int	S_div128(pTHX_ SV *pnum, bool *done)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -6751,6 +6744,13 @@ STATIC SV*	S_mul128(pTHX_ SV *sv, U8 m)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MUL128	\
 	assert(sv)
+
+STATIC char *	S_my_bytes_to_utf8(const U8 *start, STRLEN len, char *dest, const bool needs_swap)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(3);
+#define PERL_ARGS_ASSERT_MY_BYTES_TO_UTF8	\
+	assert(start); assert(dest)
 
 STATIC bool	S_need_utf8(const char *pat, const char *patend)
 			__attribute__nonnull__(1)

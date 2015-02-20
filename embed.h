@@ -1630,7 +1630,6 @@
 #define opmethod_stash(a)	S_opmethod_stash(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_PP_PACK_C)
-#define bytes_to_uni		S_bytes_to_uni
 #define div128(a,b)		S_div128(aTHX_ a,b)
 #define first_symbol		S_first_symbol
 #define get_num(a,b)		S_get_num(aTHX_ a,b)
@@ -1638,6 +1637,7 @@
 #define is_an_int(a,b)		S_is_an_int(aTHX_ a,b)
 #define measure_struct(a)	S_measure_struct(aTHX_ a)
 #define mul128(a,b)		S_mul128(aTHX_ a,b)
+#define my_bytes_to_utf8	S_my_bytes_to_utf8
 #define need_utf8		S_need_utf8
 #define next_symbol(a)		S_next_symbol(aTHX_ a)
 #define pack_rec(a,b,c,d)	S_pack_rec(aTHX_ a,b,c,d)
