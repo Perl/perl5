@@ -8283,32 +8283,6 @@ posix_to_vmsspec_hardway(char *vmspath, int vmspath_len, const char *unixpath,
 }
 #endif
 
- /* Eventual routine to convert a UTF-8 specification to VTF-7. */
-static char *
-utf8_to_vtf7(char * rslt, const char * path, int *utf8_fl)
-{
-   char * result;
-   int utf8_flag;
-
-   /* If a UTF8 flag is being passed, honor it */
-   utf8_flag = 0;
-   if (utf8_fl != NULL) {
-     utf8_flag = *utf8_fl;
-    *utf8_fl = 0;
-   }
-
-   if (utf8_flag) {
-     /* If there is a possibility of UTF8, then if any UTF8 characters
-        are present, then they must be converted to VTF-7
-      */
-     result = strcpy(rslt, path); /* FIX-ME */
-   }
-   else
-     result = strcpy(rslt, path);
-
-   return result;
-}
-
 /* A convenience macro for copying dots in filenames and escaping
  * them when they haven't already been escaped, with guards to
  * avoid checking before the start of the buffer or advancing
