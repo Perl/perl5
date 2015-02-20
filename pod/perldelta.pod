@@ -58,7 +58,7 @@ assignment variants (C<&= |= ^= &.= |.= ^.=>).
 
 To use this, enable the "bitwise" feature and disable the
 "experimental::bitwise" warnings category.  See L<perlop/Bitwise String
-Operators> for details.
+Operators> for details.  [perl #123466]
 
 =head1 Security
 
@@ -511,6 +511,11 @@ LABEL>.  This has been fixed.  [perl #123836]
 
 Perl 5.14.0 introduced a bug whereby C<eval { LABEL: }> would crash.  This
 has been fixed.  [perl #123652]
+
+=item *
+
+Various crashes due to the parser getting confused by syntax errors have
+been fixed.  [perl #123617] [perl #123737] [perl #123753] [perl #123677]
 
 =back
 
