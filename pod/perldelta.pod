@@ -48,6 +48,18 @@ C<sb> stands for Sentence Boundary.  It is a Unicode property
 to aid in parsing natural language sentences.
 See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
 
+=head2 New bitwise operators
+
+A new experimental facility has been added that makes the four standard
+bitwise operators (C<& | ^ ~>) treat their operands consistently as
+numbers, and introduces four new dotted operators (C<&. |. ^. ~.>) that
+treat their operands consistently as strings.  The same applies to the
+assignment variants (C<&= |= ^= &.= |.= ^.=>).
+
+To use this, enable the "bitwise" feature and disable the
+"experimental::bitwise" warnings category.  See L<perlop/Bitwise String
+Operators> for details.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
