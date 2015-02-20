@@ -17882,9 +17882,10 @@ sub make_property_test_script() {
            [$HEADER,
             <DATA>,
             @output,
-            (map {"Test_X('$_');\n"} @backslash_X_tests),
+            (map {"Test_GCB('$_');\n"} @backslash_X_tests),
             "Finished();\n"
            ]);
+
     return;
 }
 
@@ -18684,16 +18685,22 @@ sub Error($) {
     return;
 }
 
-# GCBTest.txt character that separates grapheme clusters
+# Break test files (e.g. GCBTest.txt) character that break allowed here
 my $breakable_utf8 = my $breakable = chr(utf8::unicode_to_native(0xF7));
 utf8::upgrade($breakable_utf8);
 
-# GCBTest.txt character that indicates that the adjoining code points are part
-# of the same grapheme cluster
+# Break test files (e.g. GCBTest.txt) character that indicates can't break
+# here
 my $nobreak_utf8 = my $nobreak = chr(utf8::unicode_to_native(0xD7));
 utf8::upgrade($nobreak_utf8);
 
-sub Test_X($) {
+use Config;
+my $utf8_locale;
+chdir 't' if -d 't';
+eval { require "./loc_tools.pl" };
+$utf8_locale = &find_utf8_ctype_locale if defined &find_utf8_ctype_locale;
+
+sub _test_break($$) {
     # Test qr/\X/ matches.  The input is a line from auxiliary/GCBTest.txt
     # Each such line is a sequence of code points given by their hex numbers,
     # separated by the two characters defined just before this subroutine that
@@ -18706,8 +18713,9 @@ sub Test_X($) {
     # Each \X should match the next cluster; and that is what is checked.
 
     my $template = shift;
+    my $break_type = shift;
 
-    my $line   = (caller)[2];
+    my $line   = (caller 1)[2];   # Line number
 
     # The line contains characters above the ASCII range, but in Latin1.  It
     # may or may not be in utf8, and if it is, it may or may not know it.  So,
@@ -18725,38 +18733,33 @@ sub Test_X($) {
         $template =~ s/$breakable_utf8/$breakable/g;
     }
 
-    # Get rid of the leading and trailing breakables
+    # The input is just the break/no-break symbols and sequences of Unicode
+    # code points as hex digits separated by spaces for legibility. e.g.:
+    # ÷ 0020 × 0308 ÷ 0020 ÷
+    # Convert to native \x format
+    $template =~ s/ \s* ( [[:xdigit:]]+ ) \s* /sprintf("\\x{%02X}", utf8::unicode_to_native(hex $1))/gex;
+    $template =~ s/ \s* //gx;   # Probably the line above removed all spaces;
+                                # but be sure
+
+    # Make a copy of the input with the symbols replaced by \b{} and \B{} as
+    # appropriate
+    my $break_pattern = $template =~ s/ $breakable /\\b{$break_type}/grx;
+    $break_pattern =~ s/ $nobreak /\\B{$break_type}/gx;
+
+    my $display_string = $template =~ s/[$breakable$nobreak]//gr;
+    my $string = eval "\"$display_string\"";
+
+    # The remaining massaging of the input is for the \X tests.  Get rid of
+    # the leading and trailing breakables
     $template =~ s/^ \s* $breakable \s* //x;
     $template =~ s/ \s* $breakable \s* $ //x;
 
-    # And no-breaks become just a space.
-    $template =~ s/ \s* $nobreak \s* / /xg;
+    # Delete no-breaks
+    $template =~ s/ \s* $nobreak \s* //xg;
 
     # Split the input into segments that are breakable between them.
-    my @segments = split /\s*$breakable\s*/, $template;
-
-    my $string = "";
-    my $display_string = "";
-    my @should_match;
-    my @should_display;
-
-    # Convert the code point sequence in each segment into a Perl string of
-    # characters
-    foreach my $segment (@segments) {
-        my @code_points = split /\s+/, $segment;
-        my $this_string = "";
-        my $this_display = "";
-        foreach my $code_point (@code_points) {
-            $this_string .= chr utf8::unicode_to_native(hex $code_point);
-            $this_display .= "\\x{$code_point}";
-        }
-
-        # The next cluster should match the string in this segment.
-        push @should_match, $this_string;
-        push @should_display, $this_display;
-        $string .= $this_string;
-        $display_string .= $this_display;
-    }
+    my @should_display = split /\s*$breakable\s*/, $template;
+    my @should_match = map { eval "\"$_\"" } @should_display;
 
     # If a string can be represented in both non-ut8 and utf8, test both cases
     UPGRADE:
@@ -18788,7 +18791,7 @@ sub Test_X($) {
                 print " correctly matched $should_display[$i]; line $line\n";
             } else {
                 $matches[$i] = join("", map { sprintf "\\x{%04X}", $_ }
-                                                    unpack("U*", $matches[$i]));
+                                                    split "", $matches[$i]);
                 print "not ok $Tests - In \"$display_string\" =~ /(\\X)/g, \\X #",
                     $i + 1,
                     " should have matched $should_display[$i]",
@@ -18810,13 +18813,17 @@ sub Test_X($) {
     return;
 }
 
+sub Test_GCB($) {
+    _test_break(shift, 'gcb');
+}
+
 sub Finished() {
     print "1..$Tests\n";
     exit($Fails ? -1 : 0);
 }
 
 Error('\p{Script=InGreek}');    # Bug #69018
-Test_X("1100 $nobreak 1161");  # Bug #70940
+Test_GCB("1100 $nobreak 1161");  # Bug #70940
 Expect(0, 0x2028, '\p{Print}', ""); # Bug # 71722
 Expect(0, 0x2029, '\p{Print}', ""); # Bug # 71722
 Expect(1, 0xFF10, '\p{XDigit}', ""); # Bug # 71726
