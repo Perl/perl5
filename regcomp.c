@@ -15472,6 +15472,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     }
 
     if (ret_invlist) {
+        assert(cp_list);
+
         *ret_invlist = cp_list;
         SvREFCNT_dec(swash);
 
