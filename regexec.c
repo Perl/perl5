@@ -456,7 +456,6 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
         case _CC_ENUM_GRAPH:     return isGRAPH_LC(character);
         case _CC_ENUM_LOWER:     return isLOWER_LC(character);
         case _CC_ENUM_PRINT:     return isPRINT_LC(character);
-        case _CC_ENUM_PSXSPC:    return isPSXSPC_LC(character);
         case _CC_ENUM_PUNCT:     return isPUNCT_LC(character);
         case _CC_ENUM_SPACE:     return isSPACE_LC(character);
         case _CC_ENUM_UPPER:     return isUPPER_LC(character);
@@ -513,9 +512,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
     }
 
     switch ((_char_class_number) classnum) {
-        case _CC_ENUM_SPACE:
-        case _CC_ENUM_PSXSPC:    return is_XPERLSPACE_high(character);
-
+        case _CC_ENUM_SPACE:     return is_XPERLSPACE_high(character);
         case _CC_ENUM_BLANK:     return is_HORIZWS_high(character);
         case _CC_ENUM_XDIGIT:    return is_XDIGIT_high(character);
         case _CC_ENUM_VERTSPACE: return is_VERTWS_high(character);
@@ -2318,11 +2315,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             }
             else switch (classnum) {    /* These classes are implemented as
                                            macros */
-                case _CC_ENUM_SPACE: /* XXX would require separate code if we
-                                        revert the change of \v matching this */
-                    /* FALLTHROUGH */
-
-                case _CC_ENUM_PSXSPC:
+                case _CC_ENUM_SPACE:
                     REXEC_FBC_UTF8_CLASS_SCAN(
                                         to_complement ^ cBOOL(isSPACE_utf8(s)));
                     break;
@@ -5870,10 +5863,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
                 else {  /* Here, uses macros to find above Latin-1 code points */
                     switch (classnum) {
-                        case _CC_ENUM_SPACE:    /* XXX would require separate
-                                                   code if we revert the change
-                                                   of \v matching this */
-                        case _CC_ENUM_PSXSPC:
+                        case _CC_ENUM_SPACE:
                             if (! (to_complement
                                         ^ cBOOL(is_XPERLSPACE_high(locinput))))
                             {
@@ -8388,11 +8378,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                  * code is written for making the loops as tight as possible.
                  * It could be refactored to save space instead */
                 switch (classnum) {
-                    case _CC_ENUM_SPACE:    /* XXX would require separate code
-                                               if we revert the change of \v
-                                               matching this */
-                        /* FALLTHROUGH */
-                    case _CC_ENUM_PSXSPC:
+                    case _CC_ENUM_SPACE:
                         while (hardcount < max
                                && scan < loceol
                                && (to_complement ^ cBOOL(isSPACE_utf8(scan))))

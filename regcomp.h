@@ -474,8 +474,6 @@ struct regnode_ssc {
 #define ANYOF_NLOWER   ((ANYOF_LOWER) + 1)
 #define ANYOF_PRINT    ((_CC_PRINT) * 2)
 #define ANYOF_NPRINT   ((ANYOF_PRINT) + 1)
-#define ANYOF_PSXSPC   ((_CC_PSXSPC) * 2)    /* POSIX space: \s plus the vertical tab */
-#define ANYOF_NPSXSPC  ((ANYOF_PSXSPC) + 1)
 #define ANYOF_PUNCT    ((_CC_PUNCT) * 2)
 #define ANYOF_NPUNCT   ((ANYOF_PUNCT) + 1)
 #define ANYOF_SPACE    ((_CC_SPACE) * 2)     /* \s */

@@ -429,8 +429,8 @@ When it appears singly, it causes the sequences C<\d>, C<\s>, C<\w>, and
 the Posix character classes to match only in the ASCII range.  They thus
 revert to their pre-5.6, pre-Unicode meanings.  Under C</a>,  C<\d>
 always means precisely the digits C<"0"> to C<"9">; C<\s> means the five
-characters C<[ \f\n\r\t]>, and starting in Perl v5.18, experimentally,
-the vertical tab; C<\w> means the 63 characters
+characters C<[ \f\n\r\t]>, and starting in Perl v5.18, the vertical tab;
+C<\w> means the 63 characters
 C<[A-Za-z0-9_]>; and likewise, all the Posix classes such as
 C<[[:print:]]> match only the appropriate ASCII-range characters.
 

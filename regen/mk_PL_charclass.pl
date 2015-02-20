@@ -38,7 +38,6 @@ my @properties = qw(
     LOWER
     NON_FINAL_FOLD
     PRINT
-    PSXSPC
     PUNCT
     QUOTEMETA
     SPACE
@@ -219,8 +218,6 @@ for my $ord (0..255) {
             $re = qr/\p{XPerlSpace}/;
         } elsif ($name eq 'IDFIRST') {
             $re = qr/[_\p{Alpha}]/;
-        } elsif ($name eq 'PSXSPC') {
-            $re = qr/[\v\p{Space}]/;
         } elsif ($name eq 'WORDCHAR') {
             $re = qr/\p{XPosixWord}/;
         } elsif ($name eq 'ALPHANUMERIC') {

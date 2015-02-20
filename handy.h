@@ -651,9 +651,7 @@ C<isPUNCT_LC_uvchr>, and C<isPUNCT_LC_utf8>.
 Returns a boolean indicating whether the specified character is a
 whitespace character.  This is analogous
 to what C<m/\s/> matches in a regular expression.  Starting in Perl 5.18
-(experimentally), this also matches what C<m/[[:space:]]/> does.
-("Experimentally" means that this change may be backed out in 5.22 if
-field experience indicates that it was unwise.)  Prior to 5.18, only the
+this also matches what C<m/[[:space:]]/> does.  Prior to 5.18, only the
 locale forms of this macro (the ones with C<LC> in their names) matched
 precisely what C<m/[[:space:]]/> does.  In those releases, the only difference,
 in the non-locale variants, was that C<isSPACE()> did not match a vertical tab.
@@ -665,10 +663,8 @@ C<isSPACE_LC_uvchr>, and C<isSPACE_LC_utf8>.
 
 =for apidoc Am|bool|isPSXSPC|char ch
 (short for Posix Space)
-Starting in 5.18, this is identical (experimentally) in all its forms to the
-corresponding C<isSPACE()> macros.  ("Experimentally" means that this change
-may be backed out in 5.22 if field experience indicates that it
-was unwise.)
+Starting in 5.18, this is identical in all its forms to the
+corresponding C<isSPACE()> macros.
 The locale forms of this macro are identical to their corresponding
 C<isSPACE()> forms in all Perl releases.  In releases prior to 5.18, the
 non-locale forms differ from their C<isSPACE()> forms only in that the
@@ -939,27 +935,26 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * useful to group these which have no members that match above Latin1, (or
  * above ASCII in the latter case) */
 
-#  define _CC_SPACE             10      /* \s */
+#  define _CC_SPACE             10      /* \s, [:space:] */
 #  define _CC_BLANK             11      /* [:blank:] */
 #  define _CC_XDIGIT            12      /* [:xdigit:] */
-#  define _CC_PSXSPC            13      /* [:space:] */
-#  define _CC_CNTRL             14      /* [:cntrl:] */
-#  define _CC_ASCII             15      /* [:ascii:] */
-#  define _CC_VERTSPACE         16      /* \v */
+#  define _CC_CNTRL             13      /* [:cntrl:] */
+#  define _CC_ASCII             14      /* [:ascii:] */
+#  define _CC_VERTSPACE         15      /* \v */
 
 #  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_VERTSPACE
 
 /* The members of the third group below do not need to be coordinated with data
  * structures in regcomp.[ch] and regexec.c. */
-#  define _CC_IDFIRST                  17
-#  define _CC_CHARNAME_CONT            18
-#  define _CC_NONLATIN1_FOLD           19
-#  define _CC_NONLATIN1_SIMPLE_FOLD    20
-#  define _CC_QUOTEMETA                21
-#  define _CC_NON_FINAL_FOLD           22
-#  define _CC_IS_IN_SOME_FOLD          23
-#  define _CC_MNEMONIC_CNTRL           24
-/* Unused: 25-31
+#  define _CC_IDFIRST                  16
+#  define _CC_CHARNAME_CONT            17
+#  define _CC_NONLATIN1_FOLD           18
+#  define _CC_NONLATIN1_SIMPLE_FOLD    19
+#  define _CC_QUOTEMETA                20
+#  define _CC_NON_FINAL_FOLD           21
+#  define _CC_IS_IN_SOME_FOLD          22
+#  define _CC_MNEMONIC_CNTRL           23
+/* Unused: 24-31
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
  * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it
@@ -982,7 +977,6 @@ typedef enum {
     _CC_ENUM_GRAPH          = _CC_GRAPH,
     _CC_ENUM_LOWER          = _CC_LOWER,
     _CC_ENUM_PRINT          = _CC_PRINT,
-    _CC_ENUM_PSXSPC         = _CC_PSXSPC,
     _CC_ENUM_PUNCT          = _CC_PUNCT,
     _CC_ENUM_SPACE          = _CC_SPACE,
     _CC_ENUM_UPPER          = _CC_UPPER,
@@ -1058,7 +1052,6 @@ END_EXTERN_C
 #   define isGRAPH_A(c)  _generic_isCC_A(c, _CC_GRAPH)
 #   define isLOWER_A(c)  _generic_isCC_A(c, _CC_LOWER)
 #   define isPRINT_A(c)  _generic_isCC_A(c, _CC_PRINT)
-#   define isPSXSPC_A(c) _generic_isCC_A(c, _CC_PSXSPC)
 #   define isPUNCT_A(c)  _generic_isCC_A(c, _CC_PUNCT)
 #   define isSPACE_A(c)  _generic_isCC_A(c, _CC_SPACE)
 #   define isUPPER_A(c)  _generic_isCC_A(c, _CC_UPPER)
@@ -1076,7 +1069,7 @@ END_EXTERN_C
 #   define isGRAPH_L1(c)  _generic_isCC(c, _CC_GRAPH)
 #   define isLOWER_L1(c)  _generic_isCC(c, _CC_LOWER)
 #   define isPRINT_L1(c)  _generic_isCC(c, _CC_PRINT)
-#   define isPSXSPC_L1(c) _generic_isCC(c, _CC_PSXSPC)
+#   define isPSXSPC_L1(c) isSPACE_L1(c)
 #   define isPUNCT_L1(c)  _generic_isCC(c, _CC_PUNCT)
 #   define isSPACE_L1(c)  _generic_isCC(c, _CC_SPACE)
 #   define isUPPER_L1(c)  _generic_isCC(c, _CC_UPPER)
@@ -1189,7 +1182,6 @@ END_EXTERN_C
 #   if ! defined(EBCDIC) && ! defined(NATIVE_TO_LATIN1)
 #       define NATIVE_TO_LATIN1(ch) (ch)
 #   endif
-#   define isPSXSPC_A(c)     isSPACE_A(c) /* XXX Assumes SPACE matches '\v' */
 #   define isALPHA_L1(c)     (isUPPER_L1(c) || isLOWER_L1(c))
 #   define isALPHANUMERIC_L1(c) (isALPHA_L1(c) || isDIGIT_A(c))
 #   define isBLANK_L1(c)     (isBLANK_A(c)                                   \
@@ -1207,7 +1199,6 @@ END_EXTERN_C
 #   define isPRINT_L1(c)     (isPRINT_A(c)                                   \
                               || (FITS_IN_8_BITS(c)                          \
                                   && NATIVE_TO_LATIN1((U8) c) >= 0xA0))
-#   define isPSXSPC_L1(c)    isSPACE_L1(c)
 #   define isPUNCT_L1(c)     (isPUNCT_A(c)                                   \
                               || (FITS_IN_8_BITS(c)                          \
                                   && (NATIVE_TO_LATIN1((U8) c) == 0xA1       \
@@ -1269,7 +1260,9 @@ END_EXTERN_C
 #define isIDFIRST(c) isIDFIRST_A(c)
 #define isLOWER(c)   isLOWER_A(c)
 #define isPRINT(c)   isPRINT_A(c)
+#define isPSXSPC_A(c) isSPACE_A(c)
 #define isPSXSPC(c)  isPSXSPC_A(c)
+#define isPSXSPC_L1(c) isSPACE_L1(c)
 #define isPUNCT(c)   isPUNCT_A(c)
 #define isSPACE(c)   isSPACE_A(c)
 #define isUPPER(c)   isUPPER_A(c)
@@ -1508,11 +1501,10 @@ END_EXTERN_C
 #define isLOWER_uni(c)      _generic_swash_uni(_CC_LOWER, c)
 #define isPRINT_uni(c)      _generic_swash_uni(_CC_PRINT, c)
 
-/* Posix and regular space are identical above Latin1 */
-#define isPSXSPC_uni(c)     _generic_uni(_CC_PSXSPC, is_XPERLSPACE_cp_high, c)
-
 #define isPUNCT_uni(c)      _generic_swash_uni(_CC_PUNCT, c)
 #define isSPACE_uni(c)      _generic_uni(_CC_SPACE, is_XPERLSPACE_cp_high, c)
+#define isPSXSPC_uni(c)     isSPACE_uni(c)
+
 #define isUPPER_uni(c)      _generic_swash_uni(_CC_UPPER, c)
 #define isVERTWS_uni(c)     _generic_uni(_CC_VERTSPACE, is_VERTWS_cp_high, c)
 #define isWORDCHAR_uni(c)   _generic_swash_uni(_CC_WORDCHAR, c)
@@ -1547,8 +1539,7 @@ END_EXTERN_C
                                                   _is_uni_perl_idstart, c)
 #define isLOWER_LC_uvchr(c)  _generic_LC_swash_uvchr(isLOWER_LC, _CC_LOWER, c)
 #define isPRINT_LC_uvchr(c)  _generic_LC_swash_uvchr(isPRINT_LC, _CC_PRINT, c)
-#define isPSXSPC_LC_uvchr(c) isSPACE_LC_uvchr(c) /* space is identical to posix
-                                                    space under locale */
+#define isPSXSPC_LC_uvchr(c) isSPACE_LC_uvchr(c)
 #define isPUNCT_LC_uvchr(c)  _generic_LC_swash_uvchr(isPUNCT_LC, _CC_PUNCT, c)
 #define isSPACE_LC_uvchr(c)  _generic_LC_uvchr(isSPACE_LC,                     \
                                                     is_XPERLSPACE_cp_high, c)
@@ -1634,10 +1625,7 @@ END_EXTERN_C
 
 #define isLOWER_utf8(p)         _generic_swash_utf8(_CC_LOWER, p)
 #define isPRINT_utf8(p)         _generic_swash_utf8(_CC_PRINT, p)
-
-/* Posix and regular space are identical above Latin1 */
-#define isPSXSPC_utf8(p)        _generic_func_utf8(_CC_PSXSPC, is_XPERLSPACE_high, p)
-
+#define isPSXSPC_utf8(p)        isSPACE_utf8(p)
 #define isPUNCT_utf8(p)         _generic_swash_utf8(_CC_PUNCT, p)
 #define isSPACE_utf8(p)         _generic_func_utf8(_CC_SPACE, is_XPERLSPACE_high, p)
 #define isUPPER_utf8(p)         _generic_swash_utf8(_CC_UPPER, p)
@@ -1679,8 +1667,7 @@ END_EXTERN_C
 #define isIDFIRST_LC_utf8(p) _generic_LC_func_utf8(isIDFIRST_LC, _is_utf8_perl_idstart, p)
 #define isLOWER_LC_utf8(p)   _generic_LC_swash_utf8(isLOWER_LC, _CC_LOWER, p)
 #define isPRINT_LC_utf8(p)   _generic_LC_swash_utf8(isPRINT_LC, _CC_PRINT, p)
-#define isPSXSPC_LC_utf8(p)  isSPACE_LC_utf8(p) /* space is identical to posix
-                                                   space under locale */
+#define isPSXSPC_LC_utf8(p)  isSPACE_LC_utf8(p)
 #define isPUNCT_LC_utf8(p)   _generic_LC_swash_utf8(isPUNCT_LC, _CC_PUNCT, p)
 #define isSPACE_LC_utf8(p)   _generic_LC_func_utf8(isSPACE_LC, is_XPERLSPACE_high, p)
 #define isUPPER_LC_utf8(p)   _generic_LC_swash_utf8(isUPPER_LC, _CC_UPPER, p)

@@ -725,7 +725,7 @@ This is a synonym for C<\p{Present_In=*}>
 =item B<C<\p{PerlSpace}>>
 
 This is the same as C<\s>, restricted to ASCII, namely C<S<[ \f\n\r\t]>>
-and starting in Perl v5.18, experimentally, a vertical tab.
+and starting in Perl v5.18, a vertical tab.
 
 Mnemonic: Perl's (original) space
 
@@ -784,7 +784,7 @@ This matches any character that is graphical or blank, except controls.
 This is the same as C<\s>, including beyond ASCII.
 
 Mnemonic: Space, as modified by Perl.  (It doesn't include the vertical tab
-which both the Posix standard and Unicode consider white space.)
+until v5.18, which both the Posix standard and Unicode consider white space.)
 
 =item B<C<\p{Title}>> and  B<C<\p{Titlecase}>>
 

@@ -13051,7 +13051,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
 			    break;
 			case 'e':
 			    if (memEQ(posixcc, "spac", 4)) /* space */
-				namedclass = ANYOF_PSXSPC;
+				namedclass = ANYOF_SPACE;
 			    break;
 			case 'h':
 			    if (memEQ(posixcc, "grap", 4)) /* graph */
@@ -16481,8 +16481,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6                   \
     || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8 || _CC_CASED != 9            \
     || _CC_SPACE != 10 || _CC_BLANK != 11 || _CC_XDIGIT != 12               \
-    || _CC_PSXSPC != 13 || _CC_CNTRL != 14 || _CC_ASCII != 15               \
-    || _CC_VERTSPACE != 16
+    || _CC_CNTRL != 13 || _CC_ASCII != 14 || _CC_VERTSPACE != 15
   #error Need to adjust order of anyofs[]
 #endif
         "\\w",
@@ -16511,8 +16510,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         "[:^blank:]",
         "[:xdigit:]",
         "[:^xdigit:]",
-        "[:space:]",
-        "[:^space:]",
         "[:cntrl:]",
         "[:^cntrl:]",
         "[:ascii:]",

@@ -214,7 +214,7 @@ C<\s> matches any single character considered whitespace.
 In all Perl versions, C<\s> matches the 5 characters [\t\n\f\r ]; that
 is, the horizontal tab,
 the newline, the form feed, the carriage return, and the space.
-Starting in Perl v5.18, experimentally, it also matches the vertical tab, C<\cK>.
+Starting in Perl v5.18, it also matches the vertical tab, C<\cK>.
 See note C<[1]> below for a discussion of this.
 
 =item otherwise ...
@@ -241,7 +241,7 @@ table below.
 
 =item otherwise ...
 
-C<\s> matches [\t\n\f\r ] and, starting, experimentally in Perl
+C<\s> matches [\t\n\f\r ] and, starting in Perl
 v5.18, the vertical tab, C<\cK>.
 (See note C<[1]> below for a discussion of this.)
 Note that this list doesn't include the non-breaking space.
@@ -324,13 +324,8 @@ effect that changes the C<\s> matching).
 
 =item [1]
 
-Prior to Perl v5.18, C<\s> did not match the vertical tab.  The change
-in v5.18 is considered an experiment, which means it could be backed out
-in v5.22 if experience indicates that it breaks too much
-existing code.  If this change adversely affects you, send email to
-C<perlbug@perl.org>; if it affects you positively, email
-C<perlthanks@perl.org>.  In the meantime, C<[^\S\cK]> (obscurely)
-matches what C<\s> traditionally did.
+Prior to Perl v5.18, C<\s> did not match the vertical tab.
+C<[^\S\cK]> (obscurely) matches what C<\s> traditionally did.
 
 =item [2]
 
@@ -862,7 +857,7 @@ Unicode considers symbols.
 
 C<\p{XPerlSpace}> and C<\p{Space}> match identically starting with Perl
 v5.18.  In earlier versions, these differ only in that in non-locale
-matching, C<\p{XPerlSpace}> does not match the vertical tab, C<\cK>.
+matching, C<\p{XPerlSpace}> did not match the vertical tab, C<\cK>.
 Same for the two ASCII-only range forms.
 
 =back

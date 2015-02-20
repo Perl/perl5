@@ -385,7 +385,6 @@ perl_construct(pTHXx)
     PL_XPosix_ptrs[_CC_PRINT] = _new_invlist_C_array(XPosixPrint_invlist);
     PL_XPosix_ptrs[_CC_PUNCT] = _new_invlist_C_array(XPosixPunct_invlist);
     PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(XPerlSpace_invlist);
-    PL_XPosix_ptrs[_CC_PSXSPC] = _new_invlist_C_array(XPosixSpace_invlist);
     PL_XPosix_ptrs[_CC_UPPER] = _new_invlist_C_array(XPosixUpper_invlist);
     PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(VertSpace_invlist);
     PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(XPosixWord_invlist);

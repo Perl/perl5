@@ -87,10 +87,6 @@ See also: L<perlrecharclass/Extended Bracketed Character Classes>
 Using this feature triggers warnings in the category
 C<experimental::regex_sets>.
 
-=item C<\s> in regexp matches vertical tab
-
-Introduced in Perl 5.18
-
 =item Subroutine signatures
 
 Introduced in Perl 5.20.0
@@ -260,6 +256,10 @@ Accepted in Perl 5.20.0
 See also L<perlrun>
 
 Accepted in Perl 5.20.0
+
+=item C<\s> in regexp matches vertical tab
+
+Accepted in Perl 5.22.0
 
 =back
 
