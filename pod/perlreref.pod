@@ -245,6 +245,7 @@ There is no quantifier C<{,n}>. That's interpreted as a literal string.
    (?<name>...)      Named capture
    (?'name'...)      Named capture
    (?P<name>...)     Named capture (python syntax)
+   (?[...])          Extended bracketed character class
    (?{ code })       Embedded code, return value becomes $^R
    (??{ code })      Dynamic regex, return value used as regex
    (?N)              Recurse into subpattern number N
