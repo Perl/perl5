@@ -32,8 +32,8 @@ Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay,
 Matt S Trout, David Golden, Florian Ragwitz, Tatsuhiko Miyagawa,
 Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason, Stevan
 Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook,
-Dominic Hargreaves, Aaron Crane, Aristotle Pagaltzis, Matthew Horsfall
-and Peter Martini.
+Dominic Hargreaves, Aaron Crane, Aristotle Pagaltzis, Matthew Horsfall,
+Peter Martini, and Sawyer X.
 
 =head2 PUMPKIN?
 
@@ -550,6 +550,7 @@ the strings?).
  BinGOs    5.21.6       2014-Nov-20
  Max M     5.21.7       2014-Dec-20
  Matthew H 5.21.8       2015-Jan-20
+ Sawyer X  5.21.9       2015-Feb-20
 
 =head2 SELECTED RELEASE SIZES
 
