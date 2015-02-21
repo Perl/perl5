@@ -278,6 +278,12 @@ use File::Glob qw(:case);
                 t/yaml_code.yml
                 ),
         ],
+        # Waiting to be merged upstream: see pull request #85
+        'CUSTOMIZED'   => [
+            qw( lib/CPAN/HandleConfig.pm
+                lib/CPAN/Module.pm
+                ),
+        ],
     },
 
     # Note: When updating CPAN-Meta the META.* files will need to be regenerated

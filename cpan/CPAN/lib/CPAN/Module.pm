@@ -7,7 +7,7 @@ use strict;
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5001";
+$VERSION = "5.5002";
 
 BEGIN {
     # alarm() is not implemented in perl 5.6.x and earlier under Windows
