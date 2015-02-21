@@ -232,6 +232,8 @@ cpan/CPAN/lib/CPAN/LWP/UserAgent.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Mirrors.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Module.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
+cpan/CPAN/lib/CPAN/Plugin.pm
+cpan/CPAN/lib/CPAN/Plugin/Specfile.pm
 cpan/CPAN/lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 cpan/CPAN/lib/CPAN/Prompt.pm
 cpan/CPAN/lib/CPAN/Queue.pm		queueing system for CPAN.pm

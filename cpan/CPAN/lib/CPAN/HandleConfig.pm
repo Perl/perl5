@@ -88,6 +88,7 @@ $VERSION = "5.5005"; # see also CPAN::Config::VERSION at end of file
      "patch",
      "patches_dir",
      "perl5lib_verbosity",
+     "plugin_list",
      "prefer_external_tar",
      "prefer_installer",
      "prefs_dir",
@@ -153,7 +154,7 @@ sub edit {
         # one day I used randomize_urllist for a boolean, so we must
         # list them explicitly --ak
         if (0) {
-        } elsif ($o =~ /^(wait_list|urllist|dontload_list)$/) {
+        } elsif ($o =~ /^(wait_list|urllist|dontload_list|plugin_list)$/) {
 
             #
             # ARRAYS

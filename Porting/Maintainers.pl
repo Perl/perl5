@@ -243,13 +243,14 @@ use File::Glob qw(:case);
     },
 
     'CPAN' => {
-        'DISTRIBUTION' => 'ANDK/CPAN-2.05.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.09-TRIAL.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},
             qr{^inc/Test/},
             qr{^t/CPAN/},
             qr{^t/data/},
+            qr{^t/97-},
             qw( lib/CPAN/Admin.pm
                 scripts/cpan-mirrors
                 PAUSE2015.pub
@@ -275,18 +276,6 @@ use File::Glob qw(:case);
                 t/local_utils.pm
                 t/perlcriticrc
                 t/yaml_code.yml
-                ),
-        ],
-        # Waiting to be merged upstream: see pull request #83
-        'CUSTOMIZED'   => [
-            qw( lib/CPAN/Author.pm
-                lib/CPAN/CacheMgr.pm
-                lib/CPAN/FTP.pm
-                lib/CPAN/HTTP/Client.pm
-                lib/CPAN/HandleConfig.pm
-                lib/CPAN/Index.pm
-                lib/CPAN/LWP/UserAgent.pm
-                lib/CPAN/Mirrors.pm
                 ),
         ],
     },
