@@ -4,8 +4,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Jan 14 15:03:41 2015
-# Update Count    : 1680
+# Last Modified On: Thu Feb 19 09:15:53 2015
+# Update Count    : 1682
 # Status          : Released
 
 ################ Module Preamble ################
@@ -17,10 +17,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.43;
+$VERSION        =  2.44;
 # For testing versions only.
 use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.43";
+$VERSION_STRING = "2.44";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -374,7 +374,9 @@ sub GetOptionsFromArray(@) {
 	    }
 	    $linkage{'<>'} = shift (@optionlist);
 	    if ( $passthrough ) {
-		$error .= "Option spec <> cannot be used with pass_through\n";
+		# Too harsh... for now.
+		# $error .= "Option spec <> cannot be used with pass_through\n";
+		warn("Option spec <> cannot be used with pass_through. FIX IT!\n");
 	    }
 	    next;
 	}
