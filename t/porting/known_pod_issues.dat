@@ -18,6 +18,7 @@ Apache::MP3
 Archive::Extract
 Array::Base
 Attribute::Constant
+autobox
 B::Generate
 B::Lint
 B::Lint::Debug
