@@ -1381,7 +1381,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 #ifdef USE_QUADMATH
     {
         char* endp;
-        if ((endp = S_my_atof_infnan(s, negative, send, value)))
+        if ((endp = S_my_atof_infnan(aTHX_ s, negative, send, value)))
             return endp;
         result[2] = strtoflt128(s, &endp);
         if (s != endp) {
