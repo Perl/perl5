@@ -179,7 +179,7 @@ PERLVAR(I, statgv,	GV *)
 PERLVARI(I, statname,	SV *,	NULL)
 
 #ifdef HAS_TIMES
-/* Will be removed soon after v5.21.9. See RT #121351 */
+/* Will be removed soon after v5.21.10. See RT #121351 */
 PERLVAR(I, timesbuf,	struct tms)
 #endif
 
@@ -751,7 +751,7 @@ PERLVARI(I, globhook,	globhook_t, NULL)
 
 PERLVARI(I, padlist_generation, U32, 1)	/* id to identify padlist clones */
 
-/* The last unconditional member of the interpreter structure when 5.21.9 was
+/* The last unconditional member of the interpreter structure when 5.21.10 was
    released. The offset of the end of this is baked into a global variable in 
    any shared perl library which will allow a sanity test in future perl
    releases.  */
