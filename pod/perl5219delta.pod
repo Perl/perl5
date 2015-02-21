@@ -1,0 +1,756 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5219delta - what is new for perl v5.21.9
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.21.8 release and the 5.21.9
+release.
+
+If you are upgrading from an earlier release such as 5.21.7, first read
+L<perl5218delta>, which describes differences between 5.21.7 and 5.21.8.
+
+=head1 Notice
+
+With this release we are now in the user-visible changes portion of the code
+freeze as we prepare for the next stable release of Perl 5.
+
+=head1 Core Enhancements
+
+=head2 qr/\b{gcb}/ is now handled in regular expressions
+
+C<gcb> stands for Grapheme Cluster Boundary.  It is a Unicode property
+that finds the boundary between sequences of characters that look like a
+single character to a native speaker of a language.  Perl has long had
+the ability to deal with these through the C<\X> regular escape
+sequence.  Now, there is an alternative way of handling these.  See
+L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
+
+=head2 qr/\b{wb}/ is now handled in regular expressions
+
+C<wb> stands for Word Boundary.  It is a Unicode property
+that finds the boundary between words.  This is similar to the plain
+C<\b> (without braces) but is more suitable for natural language
+processing.  It knows, for example that apostrophes can occur in the
+middle of words.  See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
+
+=head2 qr/\b{sb}/ is now handled in regular expressions
+
+C<sb> stands for Sentence Boundary.  It is a Unicode property
+to aid in parsing natural language sentences.
+See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
+
+=head2 New bitwise operators
+
+A new experimental facility has been added that makes the four standard
+bitwise operators (C<& | ^ ~>) treat their operands consistently as
+numbers, and introduces four new dotted operators (C<&. |. ^. ~.>) that
+treat their operands consistently as strings.  The same applies to the
+assignment variants (C<&= |= ^= &.= |.= ^.=>).
+
+To use this, enable the "bitwise" feature and disable the
+"experimental::bitwise" warnings category.  See L<perlop/Bitwise String
+Operators> for details.  [rt.perl.org #123466]
+
+=head2 C<no re> covers more and is lexical
+
+Previously running C<no re> would only turn off a few things. Now it
+turns off all the enabled things. For example, previously, you
+couldn't turn off debugging, once enabled, inside the same block.
+
+=head1 Incompatible Changes
+
+There are no changes intentionally incompatible with 5.21.8.
+If any exist, they are bugs, and we request that you submit a
+report.  See L</Reporting Bugs> below.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<attributes> has been upgraded from version 0.25 to 0.26.
+
+=item *
+
+L<B> has been upgraded from version 1.55 to 1.56.
+
+=item *
+
+L<B::Debug> has been upgraded from version 1.22 to 1.23.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.32 to 1.33.
+
+=over 4
+
+=item *
+
+Deparse now provides a defined state sub in inner subs.
+
+=item *
+
+Since version Perl 5.21.6, Deparse would croak on special constants, but
+this has now been fixed.
+
+=back
+
+=item *
+
+L<Benchmark> has been upgraded from version 1.19 to 1.20.
+
+=item *
+
+L<bigint>, L<bignum>, L<bigrat> have been upgraded to version 0.39.
+
+Document in CAVEATS that using strings as numbers won't always invoke
+the big number overloading, and how to invoke it.  [rt.perl.org #123064]
+
+=item *
+
+L<bignum> has been upgraded from version 0.38 to 0.39.
+
+=item *
+
+L<Carp> has been upgraded from version 1.34 to 1.35.
+
+=over 4
+
+=item *
+
+Carp now handles non-ASCII platforms better.
+
+=item *
+
+Off-by-one error fix for Perl E<lt> 5.14.
+
+=back
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.22 to 0.23.
+
+=item *
+
+L<constant> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<CPAN::Meta::Requirements> has been upgraded from version 2.131 to 2.132
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.156 to 2.157.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.21 to 1.22.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.30 to 1.31.
+
+=item *
+
+L<Encode> has been upgraded from version 2.67 to 2.70.
+
+Building in C++ mode on Windows now works.
+
+=item *
+
+L<encoding> has been upgraded from version 2.12 to 2.13.
+
+=item *
+
+L<Errno> has been upgraded from version 1.22 to 1.23.
+
+Add C<-P> to the preprocessor command-line on GCC 5.  GCC added extra
+line directives, breaking parsing of error code definitions.  [rt.perl.org
+#123784]
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
+L<feature> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.053 to 0.054.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<overload> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<Perl::OSType> has been upgraded from version 1.007 to 1.008.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.0150046 to 5.021009.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.21 to 0.22.
+
+Attempting to write at file positions impossible for the platform now
+fail early rather than wrapping at 4GB.
+
+=item *
+
+L<Pod::Parser> has been upgraded from version 1.62 to 1.63.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.24 to 3.25.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.49 to 1.51.
+
+=item *
+
+L<re> has been upgraded from version 0.30 to 0.31.
+
+=item *
+
+L<Socket> has been upgraded from version 2.016 to 2.018.
+
+=item *
+
+L<Storable> has been upgraded from version 2.52 to 2.53.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.301001_097 to 1.301001_098.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.47 to 1.48.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.10 to 1.11.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.59 to 0.61.
+
+=over 4
+
+=item *
+
+A new function L<property_values()|Unicode::UCD/prop_values()>
+has been added to return a given property's possible values.
+
+=item *
+
+A new function L<charprop()|Unicode::UCD/charprop()>
+has been added to return the value of a given property for a given code
+point.
+
+=item *
+
+A new function L<charprops_all()|Unicode::UCD/charprops_all()>
+has been added to return the values of all Unicode properties for a
+given code point.
+
+=item *
+
+A bug has been fixed so that L<propaliases()|Unicode::UCD/prop_aliases()>
+returns the correct short and long names for the Perl extensions where
+it was incorrect.
+
+=item *
+
+A bug has been fixed so that
+L<prop_value_aliases()|Unicode::UCD/prop_value_aliases()>
+returns C<undef> instead of a wrong result for properties that are Perl
+extensions.
+
+=item *
+
+This module now works on EBCDIC platforms.
+
+=back
+
+=item *
+
+L<VMS::Stdio> has been upgraded from version 2.4 to 2.41.
+
+=item *
+
+L<warnings> has been upgraded from version 1.30 to 1.31.
+
+=item *
+
+L<Win32> has been upgraded from version 0.49 to 0.51.
+
+GetOSName() now supports Windows 8.1, and building in C++ mode now works.
+
+=item *
+
+L<Win32API::File> has been upgraded from version 0.1201 to 0.1202
+
+Building in C++ mode now works.
+
+=back
+
+=head1 Documentation
+
+=head2 New Documentation
+
+=head3 L<perlrebackslash>
+
+=over 4
+
+=item *
+
+Added documentation of C<\b{sb}>, C<\b{wb}>, C<\b{gcb}>, and C<\b{g}>.
+
+=back
+
+=head3 L<perlrequick>
+
+=over 4
+
+=item *
+
+Added example for C<\b{wb}>.
+
+=back
+
+=head3 L<perlretut>
+
+=over 4
+
+=item *
+
+Added example for C<\b{wb}>.
+
+=back
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlunicode>
+
+=over 4
+
+=item *
+
+Update B<Default Word Boundaries> under
+L<perlunicode/"Unicode Regular Expression Support Level">'s
+B<Extended Unicode Support>.
+
+=back
+
+=head3 L<perlunicook>
+
+=over 4
+
+=item *
+
+Clarify that autodie E<gt>= 2.26 works with C<use open>.
+
+=item *
+
+Correct warning message for C<use autodie> and C<use open>.
+
+=back
+
+=head3 L<perlfaq>
+
+=over 4
+
+=item *
+
+L<perlfaq> has been synchronized with version 5.021009 from CPAN.
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+Correct the version number which removes C<m?PATTERN?>. It was Perl 5.22.0.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Further clarify version number representations and usage.
+
+=back
+
+=head3 L<perlmodstyle>
+
+=over 4
+
+=item *
+
+Instead of pointing to the module list, we are now pointing to
+L<PrePAN|http://prepan.org/>.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<'%s' is an unknown bound type in regex|perldiag/"'%s' is an unknown bound type in regex; marked by <-- HERE in m/%s/">
+
+You used C<\b{...}> or C<\B{...}> and the C<...> is not known to
+Perl.  The current valid ones are given in
+L<perlrebackslash/\b{}, \b, \B{}, \B>.
+
+=item *
+
+L<Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale|perldiag/"Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale">
+
+You are matching a regular expression using locale rules,
+and a Unicode boundary is being matched, but the locale is not a Unicode
+one.  This doesn't make sense.  Perl will continue, assuming a Unicode
+(UTF-8) locale, but the results could well be wrong except if the locale
+happens to be ISO-8859-1 (Latin1) where this message is spurious and can
+be ignored.
+
+=item *
+
+L<< Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>
+
+You used a Unicode boundary (C<\b{...}> or C<\B{...}>) in a
+portion of a regular expression where the character set modifiers C</a>
+or C</aa> are in effect.  These two modifiers indicate an ASCII
+interpretation, and this doesn't make sense for a Unicode definition.
+The generated regular expression will compile so that the boundary uses
+all of Unicode.  No other portion of the regular expression is affected.
+
+=item *
+
+L<The bitwise feature is experimental|perldiag/"The bitwise feature is experimental">
+
+This warning is emitted if you use bitwise
+operators (C<& | ^ ~ &. |. ^. ~.>) with the "bitwise" feature enabled.
+Simply suppress the warning if you want to use the feature, but know
+that in doing so you are taking the risk of using an experimental
+feature which may change or be removed in a future Perl version:
+
+    no warnings "experimental::bitwise";
+    use feature "bitwise";
+    $x |.= $y;
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+B<Unusual use of %s in void context> has been removed. It might
+come back in a future release.
+
+=item *
+
+L<Argument "%s" isn't numeric%s|perldiag/"Argument "%s" isn't numeric%s">
+now adds the following note:
+
+    Note that for the C<Inf> and C<NaN> (infinity and not-a-number) the
+    definition of "numeric" is somewhat unusual: the strings themselves
+    (like "Inf") are considered numeric, and anything following them is
+    considered non-numeric.
+
+=item *
+
+B<Possible precedence problem on bitwise %c operator> reworded as
+L<Possible precedence problem on bitwise %s operator|perldiag/"Possible precedence problem on bitwise %s operator">.
+
+=back
+
+=head1 Utility Changes
+
+=head2 L<h2ph>
+
+=over 4
+
+=item *
+
+F<h2ph> now handles hexadecimal constants in the compiler's predefined
+macro definitions, as visible in C<$Config{cppsymbols}>.  [rt.perl.org
+#123784]
+
+=back
+
+=head2 L<encguess>
+
+=over 4
+
+=item *
+
+No longer depends on non-core module anymore.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+F<Configure> now checks for F<lrintl>, F<lroundl>, F<llrintl>, and F<llroundl>.
+
+=back
+
+=head1 Testing
+
+=over 4
+
+=item *
+
+Added F<t/op/dump.t> for testing C<dump>.
+
+=back
+
+=head1 Deprecations
+
+=head2 Support for new warnings categories outside of "all"
+
+The new option for warnings outside the B<all> category in the L<warnings>
+pragma has been removed for now.
+
+For more context, you can refer to the following
+L<discussion thread|http://www.nntp.perl.org/group/perl.perl5.porters/2015/01/msg225066.html>.
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=head3 Win32
+
+=over 4
+
+=item *
+
+Perl can now be built in C++ mode on Windows by setting the makefile macro
+C<USE_CPLUSPLUS> to the value "define".
+
+=item *
+
+List form pipe open no longer falls back to the shell.
+
+=item *
+
+In release 5.21.8 compiling on VC with dmake was broken. Fixed.
+
+=item *
+
+New C<DebugSymbols> and C<DebugFull> configuration options added to
+Windows makefiles.
+
+=item *
+
+L<B> now compiles again on Windows.
+
+=back
+
+=head3 Solaris
+
+Look for the Sun Studio compiler in both F</opt/solstudio*> and
+F</opt/solarisstudio*>.
+
+=head3 VMS
+
+=over 4
+
+=item *
+
+When spawning a subprocess without waiting, the return value is now
+the correct PID.
+
+=item *
+
+Fix a prototype so linking doesn't fail under the VMS C++ compiler.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Patterns starting with C</.*/> are now fast again. [rt.perl.org #123743]
+
+=item *
+
+The original visible value of C<$/> is now preserved when it is set to
+an invalid value.  Previously if you set C<$/> to a reference to an
+array, for example, perl would produce a runtime error and not set
+C<PL_rs>, but perl code that checked C<$/> would see the array
+reference.  [rt.perl.org #123218]
+
+=item *
+
+In a regular expression pattern, a POSIX class, like C<[:ascii:]>, must
+be inside a bracketed character class, like C</qr[[:ascii:]]>.  A
+warning is issued when something looking like a POSIX class is not
+inside a bracketed class.  That warning wasn't getting generated when
+the POSIX class was negated: C<[:^ascii:]>.  This is now fixed.
+
+=item *
+
+Fix a couple of other size calculation overflows.  [rt.perl.org #123554]
+
+=item *
+
+A bug introduced in 5.21.6, C<dump LABEL> acted the same as C<goto
+LABEL>.  This has been fixed.  [rt.perl.org #123836]
+
+=item *
+
+Perl 5.14.0 introduced a bug whereby C<eval { LABEL: }> would crash.  This
+has been fixed.  [rt.perl.org #123652]
+
+=item *
+
+Various crashes due to the parser getting confused by syntax errors have
+been fixed.  [rt.perl.org #123617] [rt.perl.org #123737]
+[rt.perl.org #123753] [rt.perl.org #123677]
+
+=item *
+
+Code like C</$a[/> used to read the next line of input and treat it as
+though it came immediately after the opening bracket.  Some invalid code
+consequently would parse and run, but some code caused crashes, so this is
+now disallowed.  [rt.perl.org #123712]
+
+=item *
+
+Fix argument underflow for C<pack>.  [rt.perl.org #123874]
+
+=item *
+
+Fix handling of non-strict C<\x{}>. Now C<\x{}> is equivalent to C<\x{0}>
+instead of faulting.
+
+=item *
+
+C<stat -t> is now no longer treated as stackable, just like C<-t stat>.
+[rt.perl.org #123816]
+
+=item *
+
+The following no longer causes a SEGV: C<qr{x+(y(?0))*}>.
+
+=item *
+
+Fixed infinite loop in parsing backrefs in regexp patterns.
+
+=item *
+
+Several minor bug fixes in behavior of Inf and NaN, including
+warnings when stringifying Inf-like or NaN-like strings. For example,
+"NaNcy" doesn't numify to NaN anymore.
+
+=item *
+
+Only stringy classnames are now shared. This fixes some failures in L<autobox>.  [rt.cpan.org #100819]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.21.9 represents approximately 4 weeks of development since Perl 5.21.8
+and contains approximately 170,000 lines of changes across 520 files from 32
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 160,000 lines of changes to 270 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.21.9:
+
+Chad Granum, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari
+Mannsåker, Daniel Dragan, David Golden, David Mitchell, Father Chrysostomos,
+H.Merijn Brand, Hugo van der Sanden, James E Keenan, James Raspass, Jarkko
+Hietaniemi, Karen Etheridge, Karl Williamson, Kent Fredric, Lajos Veres, Leon
+Timmermans, Lukas Mai, Mathieu Arnold, Matthew Horsfall, Peter Martini, Petr
+Písař, Randy Stauner, Ricardo Signes, Sawyer X, Shlomi Fish, Sisyphus, Steve
+Hay, Tony Cook, Yves Orton, Ævar Arnfjörð Bjarmason.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+https://rt.perl.org/ .  There may also be information at
+http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
