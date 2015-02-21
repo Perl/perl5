@@ -6879,7 +6879,7 @@ of the returned sequence, which is not likely what you want.
 (W regexp) You used a Unicode boundary (C<\b{...}> or C<\B{...}>) in a
 portion of a regular expression where the character set modifiers C</a>
 or C</aa> are in effect.  These two modifiers indicate an ASCII
-interpretation, and this doesn't make sense for a Unicode definiton.
+interpretation, and this doesn't make sense for a Unicode defintion.
 The generated regular expression will compile so that the boundary uses
 all of Unicode.  No other portion of the regular expression is affected.
 

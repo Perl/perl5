@@ -411,7 +411,7 @@ L<< Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by <-- HERE in m
 You used a Unicode boundary (C<\b{...}> or C<\B{...}>) in a
 portion of a regular expression where the character set modifiers C</a>
 or C</aa> are in effect.  These two modifiers indicate an ASCII
-interpretation, and this doesn't make sense for a Unicode definiton.
+interpretation, and this doesn't make sense for a Unicode definition.
 The generated regular expression will compile so that the boundary uses
 all of Unicode.  No other portion of the regular expression is affected.
 
