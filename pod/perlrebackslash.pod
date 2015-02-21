@@ -577,15 +577,24 @@ whichever is most convenient for your situation.
 This matches a Unicode "Sentence Boundary".  This is an aid to parsing
 natural language sentences.  It gives good, but imperfect results.  For
 example, it thinks that "Mr. Smith" is two sentences.  More details are
-at L<http://www.unicode.org/reports/tr29/>.
+at L<http://www.unicode.org/reports/tr29/>.  Note also that it thinks
+that anything matching L</\R> (except form feed and vertical tab) is a
+sentence boundary.  This works with word-processor text which line wraps
+automatically for display, but hard-coded line boundaries are considered
+to be essentially the ends of text blocks (paragraphs really), and hence
+the ends of sententces.  It doesn't well with text containing embedded
+newlines, like the source text of the document you are reading.  Such
+text needs to be preprocessed to get rid of the line separators before
+looking for sentence boundaries.  Some people view this as a bug in the
+Unicode standard.
 
 =item C<\b{wb}>
 
 This matches a Unicode "Word Boundary".  This gives better (though not
 perfect) results for natural language processing than plain C<\b>
 (without braces) does.  For example, it understands that apostrophes can
-be in the middle of words.   More details are at
-L<http://www.unicode.org/reports/tr29/>.
+be in the middle of words and that parentheses aren't.   More details
+are at L<http://www.unicode.org/reports/tr29/>.
 
 =back
 
@@ -612,9 +621,10 @@ Mnemonic: I<b>oundary.
       print $1;           # Prints 'cat'
   }
 
-  print join "\n", "I don't care" =~ m/ ( .+? \b{wb} ) /xg;
+  print join "|", "He said, \"Do you care? (I don't).\""
+                                               =~ m/ ( .+? \b{wb} ) /xg;
  prints
-  I, ,don't, ,care
+  He| |said|,| |"|Do| |you| |care|?| |(|I| |don't|)|.|"
 
 =head2 Misc
 
