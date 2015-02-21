@@ -66,16 +66,6 @@ There are no changes intentionally incompatible with 5.21.8.
 If any exist, they are bugs, and we request that you submit a
 report.  See L</Reporting Bugs> below.
 
-=head1 Performance Enhancements
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Modules and Pragmata
 
 =head2 Updated Modules and Pragmata
@@ -124,6 +114,10 @@ the big number overloading, and how to invoke it.  [rt.perl.org #123064]
 
 =item *
 
+L<bignum> has been upgraded from version 0.38 to 0.39.
+
+=item *
+
 L<Carp> has been upgraded from version 1.34 to 1.35.
 
 =over 4
@@ -134,7 +128,7 @@ Carp now handles non-ASCII platforms better.
 
 =item *
 
-Off-by-one error fix for Perl < 5.14.
+Off-by-one error fix for Perl E<lt> 5.14.
 
 =back
 
@@ -144,7 +138,15 @@ L<Config::Perl::V> has been upgraded from version 0.22 to 0.23.
 
 =item *
 
+L<constant> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
 L<CPAN::Meta::Requirements> has been upgraded from version 2.131 to 2.132
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.156 to 2.157.
 
 =item *
 
@@ -152,9 +154,17 @@ L<Devel::Peek> has been upgraded from version 1.21 to 1.22.
 
 =item *
 
+L<DynaLoader> has been upgraded from version 1.30 to 1.31.
+
+=item *
+
 L<Encode> has been upgraded from version 2.67 to 2.70.
 
 Building in C++ mode on Windows now works.
+
+=item *
+
+L<encoding> has been upgraded from version 2.12 to 2.13.
 
 =item *
 
@@ -166,6 +176,14 @@ line directives, breaking parsing of error code definitions.  [rt.perl.org
 
 =item *
 
+L<ExtUtils::Miniperl> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
+L<feature> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
 L<HTTP::Tiny> has been upgraded from version 0.053 to 0.054.
 
 =item *
@@ -174,7 +192,15 @@ L<Opcode> has been upgraded from version 1.31 to 1.32.
 
 =item *
 
+L<overload> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
 L<Perl::OSType> has been upgraded from version 1.007 to 1.008.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.0150046 to 5.021009.
 
 =item *
 
@@ -205,7 +231,15 @@ L<Socket> has been upgraded from version 2.016 to 2.018.
 
 =item *
 
+L<Storable> has been upgraded from version 2.52 to 2.53.
+
+=item *
+
 L<Test::Simple> has been upgraded from version 1.301001_097 to 1.301001_098.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.47 to 1.48.
 
 =item *
 
@@ -213,7 +247,7 @@ L<Unicode::Collate> has been upgraded from version 1.10 to 1.11.
 
 =item *
 
-L<Unicode::UCD> has been upgraded from version 0.60 to 0.61.
+L<Unicode::UCD> has been upgraded from version 0.59 to 0.61.
 
 =over 4
 
@@ -256,6 +290,10 @@ This module now works on EBCDIC platforms.
 =item *
 
 L<VMS::Stdio> has been upgraded from version 2.4 to 2.41.
+
+=item *
+
+L<warnings> has been upgraded from version 1.30 to 1.31.
 
 =item *
 
@@ -325,7 +363,7 @@ B<Extended Unicode Support>.
 
 =item *
 
-Clarify that autodie >= 2.26 works with C<use open>.
+Clarify that autodie E<gt>= 2.26 works with C<use open>.
 
 =item *
 
@@ -369,7 +407,8 @@ Further clarify version number representations and usage.
 
 =item *
 
-Instead of pointing to the module list, we are now pointing to PrePAN.
+Instead of pointing to the module list, we are now pointing to
+L<PrePAN|http://prepan.org/>.
 
 =back
 
@@ -406,7 +445,7 @@ be ignored.
 
 =item *
 
-L<< Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>
+L<< Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>
 
 You used a Unicode boundary (C<\b{...}> or C<\B{...}>) in a
 portion of a regular expression where the character set modifiers C</a>
