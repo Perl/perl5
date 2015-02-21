@@ -271,9 +271,9 @@ They use the platform's native character set, and do not consider any
 locale that may otherwise be in use.
 
 C<\R> matches anything that can be considered a newline under Unicode
-rules. It's not a character class, as it can match a multi-character
-sequence. Therefore, it cannot be used inside a bracketed character
-class; use C<\v> instead (vertical whitespace).  It uses the platform's
+rules. It can match a multi-character sequence. It cannot be used inside
+a bracketed character class; use C<\v> instead (vertical whitespace).
+It uses the platform's
 native character set, and does not consider any locale that may
 otherwise be in use.
 Details are discussed in L<perlrebackslash>.
