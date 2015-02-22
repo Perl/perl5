@@ -1080,10 +1080,7 @@ use File::Glob qw(:case);
                 t/Legacy/ribasushi_diag.t
                 ),
         ],
-       'CUSTOMIZED'   => [
-            # Waiting to be merged upstream: see pull request #494
-            qw( t/Legacy/exit.t ),
-        ],    },
+    },
 
     'Text::Abbrev' => {
         'DISTRIBUTION' => 'FLORA/Text-Abbrev-1.02.tar.gz',

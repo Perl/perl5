@@ -3,7 +3,6 @@ CPAN cpan/CPAN/lib/CPAN/Module.pm 7d12bb547f7a268a90c6f8320f439a2dc805b850
 Encode cpan/Encode/encoding.pm baa25e197ba4d5fa228dbf7b440afb5ae18ec5ed
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/pm_to_blib.t 71ebcee355691ce374fcad251b12d8b2412462b3
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
-Test::Simple cpan/Test-Simple/t/Legacy/exit.t 83edbf569d56d8cdbabea552dfe5602ea1c1822e
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d
 Text::Balanced cpan/Text-Balanced/t/02_extbrk.t 6ba1b64a4604e822dc2260b8ffcea6b406339ee8
 Text::Balanced cpan/Text-Balanced/t/03_extcbk.t 3307c980af28963414cab799c427b359ef3b8657
