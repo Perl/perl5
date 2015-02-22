@@ -2320,7 +2320,6 @@ cpan/Test-Simple/lib/Test/Builder/Tester/Color.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Builder/Tester.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/CanFork.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/CanThread.pm			Test::Simple module
-cpan/Test-Simple/lib/Test/FAQ.pod			Test::Simple module
 cpan/Test-Simple/lib/Test/More/DeepCheck.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/More/DeepCheck/Strict.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/More/DeepCheck/Tolerant.pm			Test::Simple module
@@ -2336,7 +2335,6 @@ cpan/Test-Simple/lib/Test/Stream/Block.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Carp.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Context.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Event/Bail.pm			Test::Simple module
-cpan/Test-Simple/lib/Test/Stream/Event/Child.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Event/Diag.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Event/Finish.pm			Test::Simple module
 cpan/Test-Simple/lib/Test/Stream/Event/Note.pm			Test::Simple module
@@ -2571,7 +2569,6 @@ cpan/Test-Simple/t/Test-Stream-Util.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Tester-Capture.t			Test::Simple Test
 cpan/Test-Simple/t/Test-Tester.t			Test::Simple Test
 cpan/Test-Simple/t/Test-use-ok.t			Test::Simple Test
-cpan/Test-Simple/t/xt/dependents.t			Test::Simple Test
 cpan/Test/t/05_about_verbose.t	See if Test works
 cpan/Test/t/fail.t		See if Test works
 cpan/Test/t/mix.t		See if Test works
