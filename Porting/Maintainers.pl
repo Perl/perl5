@@ -881,6 +881,7 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/perlfaq],
         'EXCLUDED'     => [
             qw( inc/CreateQuestionList.pm
+                inc/perlfaq.tt
                 t/00-compile.t),
             qr{^xt/},
         ],
