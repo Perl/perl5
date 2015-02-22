@@ -494,3 +494,6 @@ eval '"$a{ 1 m// }"; //';
  local $SIG{__WARN__}=sub{};
  eval q|s)$0{0h());qx(@0);qx(@0);qx(@0)|;
 }
+
+# Used to crash [perl #123801]
+eval q|s##[}#e|;
