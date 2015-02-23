@@ -4,8 +4,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Feb 19 09:15:53 2015
-# Update Count    : 1682
+# Last Modified On: Mon Feb 23 20:29:11 2015
+# Update Count    : 1683
 # Status          : Released
 
 ################ Module Preamble ################
@@ -17,10 +17,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.44;
+$VERSION        =  2.45;
 # For testing versions only.
 use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.44";
+$VERSION_STRING = "2.45";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -373,11 +373,6 @@ sub GetOptionsFromArray(@) {
 		next;
 	    }
 	    $linkage{'<>'} = shift (@optionlist);
-	    if ( $passthrough ) {
-		# Too harsh... for now.
-		# $error .= "Option spec <> cannot be used with pass_through\n";
-		warn("Option spec <> cannot be used with pass_through. FIX IT!\n");
-	    }
 	    next;
 	}
 
@@ -723,7 +718,7 @@ sub GetOptionsFromArray(@) {
 	elsif ( $order == $PERMUTE ) {
 	    # Try non-options call-back.
 	    my $cb;
-	    if ( !$passthrough && (defined ($cb = $linkage{'<>'})) ) {
+	    if ( defined ($cb = $linkage{'<>'}) ) {
 		print STDERR ("=> &L{$tryopt}(\"$tryopt\")\n")
 		  if $debug;
 		my $eval_error = do {
@@ -2451,21 +2446,21 @@ C<require> statement.
 
 =item pass_through (default: disabled)
 
-Anything that is unknown, ambiguous or supplied with an invalid option
-value is passed through in C<@ARGV> instead of being flagged as
-errors. This makes it possible to write wrapper scripts that process
-only part of the user supplied command line arguments, and pass the
+With C<pass_through> anything that is unknown, ambiguous or supplied with
+an invalid option will not be flagged as an error. Instead the unknown
+option(s) will be passed to the catchall C<< <> >> if present, otherwise
+through to C<@ARGV>. This makes it possible to write wrapper scripts that
+process only part of the user supplied command line arguments, and pass the
 remaining options to some other program.
 
-If C<require_order> is enabled, options processing will terminate at
-the first unrecognized option, or non-option, whichever comes first.
-However, if C<permute> is enabled instead, results can become confusing.
+If C<require_order> is enabled, options processing will terminate at the
+first unrecognized option, or non-option, whichever comes first and all
+remaining arguments are passed to C<@ARGV> instead of the catchall
+C<< <> >> if present.  However, if C<permute> is enabled instead, results
+can become confusing.
 
 Note that the options terminator (default C<-->), if present, will
 also be passed through in C<@ARGV>.
-
-For obvious reasons, B<pass_through> cannot be used with the
-non-option catchall C<< <> >>.
 
 =item prefix
 
