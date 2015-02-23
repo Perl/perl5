@@ -550,7 +550,11 @@ perl_destruct(pTHXx)
             if (strEQ(s, "-1")) { /* Special case: modperl folklore. */
                 i = -1;
             } else {
-                i = grok_atou(s, NULL);
+                UV uv;
+                if (grok_atoUV(s, &uv, NULL) && uv <= INT_MAX)
+                    i = (int)uv;
+                else
+                    i = 0;
             }
 #ifdef DEBUGGING
 	    if (destruct_level < i) destruct_level = i;
@@ -1473,7 +1477,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     {
         const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 
-        if (s && (grok_atou(s, NULL) == 1)) {
+        if (s && strEQ(s, "1")) {
             unsigned char *seed= PERL_HASH_SEED;
             unsigned char *seed_end= PERL_HASH_SEED + PERL_HASH_SEED_BYTES;
             PerlIO_printf(Perl_debug_log, "HASH_FUNCTION = %s HASH_SEED = 0x", PERL_HASH_FUNC);
@@ -2312,7 +2316,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #ifdef MYMALLOC
     {
 	const char *s;
-        if ((s=PerlEnv_getenv("PERL_DEBUG_MSTATS")) && grok_atou(s, NULL) >= 2)
+        UV uv;
+        s = PerlEnv_getenv("PERL_DEBUG_MSTATS");
+        if (s && grok_atoUV(s, &uv, NULL) && uv >= 2)
             dump_mstats("after compilation:");
     }
 #endif
@@ -3046,7 +3052,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  L  trace some locale setting information--for Perl core development\n",
       NULL
     };
-    int i = 0;
+    UV uv = 0;
 
     PERL_ARGS_ASSERT_GET_DEBUG_OPTS;
 
@@ -3057,7 +3063,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 	for (; isWORDCHAR(**s); (*s)++) {
 	    const char * const d = strchr(debopts,**s);
 	    if (d)
-		i |= 1 << (d - debopts);
+		uv |= 1 << (d - debopts);
 	    else if (ckWARN_d(WARN_DEBUGGING))
 	        Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
 		    "invalid option -D%c, use -D'' to see choices\n", **s);
@@ -3065,8 +3071,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
     }
     else if (isDIGIT(**s)) {
         const char* e;
-	i = grok_atou(*s, &e);
-        if (e)
+	if (grok_atoUV(*s, &uv, &e))
             *s = e;
 	for (; isWORDCHAR(**s); (*s)++) ;
     }
@@ -3074,7 +3079,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       const char *const *p = usage_msgd;
       while (*p) PerlIO_puts(PerlIO_stdout(), *p++);
     }
-    return i;
+    return (int)uv; /* ignore any UV->int conversion loss */
 }
 #endif
 
@@ -3668,14 +3673,17 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	PL_origfilename = savepvs("-e");
     }
     else {
+        const char *s;
+        UV uv;
 	/* if find_script() returns, it returns a malloc()-ed value */
 	scriptname = PL_origfilename = find_script(scriptname, dosearch, NULL, 1);
 
-	if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
-            const char *s = scriptname + 8;
-            const char* e;
-	    fdscript = grok_atou(s, &e);
-	    s = e;
+	if (strnEQ(scriptname, "/dev/fd/", 8)
+            && isDIGIT(scriptname[8])
+            && grok_atoUV(scriptname + 8, &uv, &s)
+            && uv <= PERL_INT_MAX
+        ) {
+            fdscript = (int)uv;
 	    if (*s) {
 		/* PSz 18 Feb 04
 		 * Tell apart "normal" usage of fdscript, e.g.

@@ -178,7 +178,7 @@
 #define getcwd_sv(a)		Perl_getcwd_sv(aTHX_ a)
 #define gp_free(a)		Perl_gp_free(aTHX_ a)
 #define gp_ref(a)		Perl_gp_ref(aTHX_ a)
-#define grok_atou		Perl_grok_atou
+#define grok_atoUV		Perl_grok_atoUV
 #define grok_bin(a,b,c,d)	Perl_grok_bin(aTHX_ a,b,c,d)
 #define grok_hex(a,b,c,d)	Perl_grok_hex(aTHX_ a,b,c,d)
 #define grok_infnan(a,b)	Perl_grok_infnan(aTHX_ a,b)

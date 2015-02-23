@@ -1033,11 +1033,9 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 }
 
 /*
-=for apidoc grok_atou
+=for apidoc grok_atoUV
 
-grok_atou is a safer replacement for atoi and strtol.
-
-grok_atou parses a C-style zero-byte terminated string, looking for
+grok_atoUV parses a C-style zero-byte terminated string, looking for
 a decimal unsigned integer.
 
 Returns the unsigned integer, if a valid value can be parsed
@@ -1045,23 +1043,17 @@ from the beginning of the string.
 
 Accepts only the decimal digits '0'..'9'.
 
-As opposed to atoi or strtol, grok_atou does NOT allow optional
+As opposed to atoi or strtol, grok_atoUV does NOT allow optional
 leading whitespace, or negative inputs.  If such features are
 required, the calling code needs to explicitly implement those.
 
-If a valid value cannot be parsed, returns either zero (if non-digits
-are met before any digits) or UV_MAX (if the value overflows).
+Returns true if a valid value could be parsed. In that case, valptr
+is set to the parsed value, and endptr (if provided) is set to point
+to the character after the last digit.
 
-Note that extraneous leading zeros also count as an overflow
-(meaning that only "0" is the zero).
-
-On failure, the *endptr is also set to NULL, unless endptr is NULL.
-
-Trailing non-digit bytes are allowed if the endptr is non-NULL.
-On return the *endptr will contain the pointer to the first non-digit byte.
-
-If the endptr is NULL, the first non-digit byte MUST be
-the zero byte terminating the pv, or zero will be returned.
+Returns false otherwise. This can happen if a) there is a leading zero
+followed by another digit; b) the digits would overflow a UV; or c)
+there are trailing non-digits AND endptr is not provided.
 
 Background: atoi has severe problems with illegal inputs, it cannot be
 used for incremental parsing, and therefore should be avoided
@@ -1071,26 +1063,24 @@ seen as a bug (global state controlled by user environment).
 =cut
 */
 
-UV
-Perl_grok_atou(const char *pv, const char** endptr)
+bool
+Perl_grok_atoUV(const char *pv, UV *valptr, const char** endptr)
 {
     const char* s = pv;
     const char** eptr;
     const char* end2; /* Used in case endptr is NULL. */
-    UV val = 0; /* The return value. */
+    UV val = 0; /* The parsed value. */
 
-    PERL_ARGS_ASSERT_GROK_ATOU;
+    PERL_ARGS_ASSERT_GROK_ATOUV;
 
     eptr = endptr ? endptr : &end2;
     if (isDIGIT(*s)) {
         /* Single-digit inputs are quite common. */
         val = *s++ - '0';
         if (isDIGIT(*s)) {
-            /* Extra leading zeros cause overflow. */
-            if (val == 0) {
-                *eptr = NULL;
-                return UV_MAX;
-            }
+            /* Fail on extra leading zeros. */
+            if (val == 0)
+                return FALSE;
             while (isDIGIT(*s)) {
                 /* This could be unrolled like in grok_number(), but
                  * the expected uses of this are not speed-needy, and
@@ -1100,21 +1090,18 @@ Perl_grok_atou(const char *pv, const char** endptr)
                     (val == uv_max_div_10 && digit <= uv_max_mod_10)) {
                     val = val * 10 + digit;
                 } else {
-                    *eptr = NULL;
-                    return UV_MAX;
+                    return FALSE;
                 }
             }
         }
     }
-    if (s == pv) {
-        *eptr = NULL; /* If no progress, failed to parse anything. */
-        return 0;
-    }
-    if (endptr == NULL && *s) {
-        return 0; /* If endptr is NULL, no trailing non-digits allowed. */
-    }
+    if (s == pv)
+        return FALSE;
+    if (endptr == NULL && *s)
+        return FALSE; /* If endptr is NULL, no trailing non-digits allowed. */
     *eptr = s;
-    return val;
+    *valptr = val;
+    return TRUE;
 }
 
 #ifndef USE_QUADMATH

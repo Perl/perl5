@@ -137,26 +137,26 @@ my @atous =
    [ "12x",  "x",   12, 2 ],
 
    # Leading whitespace is failure.
-   [ " 0",   " 0",  0,  0 ],
-   [ " 1",   " 1",  0,  0 ],
-   [ " 12",  " 12", 0,  0 ],
+   [ " 0",   undef, 0,  0 ],
+   [ " 1",   undef, 0,  0 ],
+   [ " 12",  undef, 0,  0 ],
 
    # Leading garbage is outright failure.
-   [ "x0",   "x0",  0,  0 ],
-   [ "x1",   "x1",  0,  0 ],
-   [ "x12",  "x12", 0,  0 ],
+   [ "x0",   undef,  0,  0 ],
+   [ "x1",   undef,  0,  0 ],
+   [ "x12",  undef, 0,  0 ],
 
    # We do not parse decimal point.
-   [ "12.3",  ".3", 12, 2 ],
+   [ "12.3", ".3", 12, 2 ],
 
    # Leading pluses or minuses are no good.
-   [ "+12", "+12",  0, 0 ],
-   [ "-12", "-12",  0, 0 ],
+   [ "+12", undef,  0, 0 ],
+   [ "-12", undef,  0, 0 ],
 
-   # Extra leading zeros cause overflow.
-   [ "00",   "00",  $ATOU_MAX,  0 ],
-   [ "01",   "01",  $ATOU_MAX,  0 ],
-   [ "012",  "012", $ATOU_MAX,  0 ],
+   # Extra leading zeros are no good.
+   [ "00",   undef,  $ATOU_MAX,  0 ],
+   [ "01",   undef,  $ATOU_MAX,  0 ],
+   [ "012",  undef, $ATOU_MAX,  0 ],
   );
 
 # Values near overflow point.
@@ -173,83 +173,93 @@ if ($Config{uvsize} == 8) {
        # This is well within 64-bit.
        [ "9999999999", "", 9999999999, 10, ],
 
-       # Values valid up to 64-bit and beyond.
+       # Values valid up to 64-bit, failing beyond.
        [ "18446744073709551613", "", 18446744073709551613, 20, ],
        [ "18446744073709551614", "", 18446744073709551614, 20, ],
        [ "18446744073709551615", "", $ATOU_MAX, 20, ],
-       [ "18446744073709551616", "", $ATOU_MAX, 0, ],
-       [ "18446744073709551617", "", $ATOU_MAX, 0, ],
+       [ "18446744073709551616", undef, $ATOU_MAX, 0, ],
+       [ "18446744073709551617", undef, $ATOU_MAX, 0, ],
       );
 } elsif ($Config{uvsize} == 4) {
     push @atous,
       (
-       # Values valid up to 32-bit and beyond.
+       # Values valid up to 32-bit, failing beyond.
        [ "4294967293", "", 4294967293, 10, ],
        [ "4294967294", "", 4294967294, 10, ],
        [ "4294967295", "", $ATOU_MAX, 10, ],
-       [ "4294967296", "", $ATOU_MAX, 0, ],
-       [ "4294967297", "", $ATOU_MAX, 0, ],
+       [ "4294967296", undef, $ATOU_MAX, 0, ],
+       [ "4294967297", undef, $ATOU_MAX, 0, ],
 
        # Still beyond 32-bit.
-       [ "4999999999", "", $ATOU_MAX, 0, ],
-       [ "5678901234", "", $ATOU_MAX, 0, ],
-       [ "6789012345", "", $ATOU_MAX, 0, ],
-       [ "7890123456", "", $ATOU_MAX, 0, ],
-       [ "8901234567", "", $ATOU_MAX, 0, ],
-       [ "9012345678", "", $ATOU_MAX, 0, ],
-       [ "9999999999", "", $ATOU_MAX, 0, ],
-       [ "10000000000", "", $ATOU_MAX, 0, ],
-       [ "12345678901", "", $ATOU_MAX, 0, ],
+       [ "4999999999", undef, $ATOU_MAX, 0, ],
+       [ "5678901234", undef, $ATOU_MAX, 0, ],
+       [ "6789012345", undef, $ATOU_MAX, 0, ],
+       [ "7890123456", undef, $ATOU_MAX, 0, ],
+       [ "8901234567", undef, $ATOU_MAX, 0, ],
+       [ "9012345678", undef, $ATOU_MAX, 0, ],
+       [ "9999999999", undef, $ATOU_MAX, 0, ],
+       [ "10000000000", undef, $ATOU_MAX, 0, ],
+       [ "12345678901", undef, $ATOU_MAX, 0, ],
 
        # 64-bit values are way beyond.
-       [ "18446744073709551613", "", $ATOU_MAX, 0, ],
-       [ "18446744073709551614", "", $ATOU_MAX, 0, ],
-       [ "18446744073709551615", "", $ATOU_MAX, 0, ],
-       [ "18446744073709551616", "", $ATOU_MAX, 0, ],
-       [ "18446744073709551617", "", $ATOU_MAX, 0, ],
+       [ "18446744073709551613", undef, $ATOU_MAX, 0, ],
+       [ "18446744073709551614", undef, $ATOU_MAX, 0, ],
+       [ "18446744073709551615", undef, $ATOU_MAX, 0, ],
+       [ "18446744073709551616", undef, $ATOU_MAX, 0, ],
+       [ "18446744073709551617", undef, $ATOU_MAX, 0, ],
       );
 }
 
 # These will fail to fail once 128/256-bit systems arrive.
 push @atous,
     (
-       [ "23456789012345678901", "", $ATOU_MAX, 0 ],
-       [ "34567890123456789012", "", $ATOU_MAX, 0 ],
-       [ "98765432109876543210", "", $ATOU_MAX, 0 ],
-       [ "98765432109876543211", "", $ATOU_MAX, 0 ],
-       [ "99999999999999999999", "", $ATOU_MAX, 0 ],
+       [ "23456789012345678901", undef, $ATOU_MAX, 0 ],
+       [ "34567890123456789012", undef, $ATOU_MAX, 0 ],
+       [ "98765432109876543210", undef, $ATOU_MAX, 0 ],
+       [ "98765432109876543211", undef, $ATOU_MAX, 0 ],
+       [ "99999999999999999999", undef, $ATOU_MAX, 0 ],
     );
 
 for my $grok (@atous) {
     my $input = $grok->[0];
     my $endsv = $grok->[1];
+    my $expect_ok = defined $endsv;
+    my $strict_ok = $expect_ok && $endsv eq '';
 
-    my ($out_uv, $out_len);
+    my ($ok, $out_uv, $out_len);
 
     # First with endsv.
-    ($out_uv, $out_len) = grok_atou($input, $endsv);
-    is($out_uv,  $grok->[2],
-       "'$input' $endsv - number success (got $out_uv cf $grok->[2])");
-    ok($grok->[3] <= length $input, "'$input' $endsv - length sanity 1");
-    unless (length $grok->[1]) {
-        is($out_len, $grok->[3], "'$input' $endsv - length sanity 2");
-    } # else { ... } ?
-    if ($out_len) {
-        is($endsv, substr($input, $out_len),
-           "'$input' $endsv - length sanity 3");
+    ($ok, $out_uv, $out_len) = grok_atoUV($input, $endsv);
+    is($expect_ok, $ok, sprintf "'$input' expected %s, got %s",
+        ($expect_ok ? 'success' : 'failure'),
+        ($ok ? 'success' : 'failure'),
+    );
+    if ($expect_ok) {
+        is($expect_ok, $ok, "'$input' expect success");
+        is($out_uv,  $grok->[2],
+            "'$input' $endsv - number success (got $out_uv cf $grok->[2])");
+        ok($grok->[3] <= length $input, "'$input' $endsv - length sanity 1");
+        unless (length $grok->[1]) {
+            is($out_len, $grok->[3], "'$input' $endsv - length sanity 2");
+        } # else { ... } ?
+        if ($out_len) {
+            is($endsv, substr($input, $out_len),
+                "'$input' $endsv - length sanity 3");
+        }
+    } else {
+        is($expect_ok, $ok, "'$input' expect failure");
+        is(0xdeadbeef, $out_uv, "'$input' on failure expect value unchanged");
     }
 
     # Then without endsv (undef == NULL).
-    ($out_uv, $out_len) = grok_atou($input, undef);
-    if (length $grok->[1]) {
-        if ($grok->[2] == $ATOU_MAX) {
-            is($out_uv,  $ATOU_MAX, "'$input' undef - number overflow");
-        } else {
-            is($out_uv,  0, "'$input' undef - number zero");
-        }
-    } else {
+    ($ok, $out_uv, $out_len) = grok_atoUV($input, undef);
+    if ($strict_ok) {
+        is($strict_ok, $ok, "'$input' expect strict success");
         is($out_uv,  $grok->[2],
-           "'$input' undef - number success (got $out_uv cf $grok->[2])");
+            "'$input' $endsv - strict number success (got $out_uv cf $grok->[2])");
+    } else {
+        is($strict_ok, $ok, "'$input' expect strict failure");
+        is(0xdeadbeef, $out_uv, "'$input' on strict failure expect value unchanged");
     }
 }
 

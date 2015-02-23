@@ -3340,6 +3340,7 @@ PP(pp_fttty)
     GV *gv;
     char *name = NULL;
     STRLEN namelen;
+    UV uv;
 
     tryAMAGICftest_MG('t');
 
@@ -3355,8 +3356,8 @@ PP(pp_fttty)
 
     if (GvIO(gv) && IoIFP(GvIOp(gv)))
 	fd = PerlIO_fileno(IoIFP(GvIOp(gv)));
-    else if (name && isDIGIT(*name))
-        fd = grok_atou(name, NULL);
+    else if (name && isDIGIT(*name) && grok_atoUV(name, &uv, NULL) && uv <= PERL_INT_MAX)
+        fd = (int)uv;
     else
 	FT_RETURNUNDEF;
     if (fd < 0) {

@@ -377,6 +377,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
 		else {
 		    PerlIO *that_fp = NULL;
                     int wanted_fd;
+                    UV uv;
 		    if (num_svs > 1) {
 			/* diag_listed_as: More than one argument to '%s' open */
 			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
@@ -390,8 +391,11 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
                         wanted_fd = SvUV(*svp);
 			num_svs = 0;
 		    }
-		    else if (isDIGIT(*type)) {
-                        wanted_fd = grok_atou(type, NULL);
+		    else if (isDIGIT(*type)
+                        && grok_atoUV(type, &uv, NULL)
+                        && uv <= INT_MAX
+                    ) {
+                        wanted_fd = (int)uv;
 		    }
 		    else {
 			const IO* thatio;

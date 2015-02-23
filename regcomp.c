@@ -10121,10 +10121,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         RExC_parse++;
                         is_neg = TRUE;
                     }
-                    unum = grok_atou(RExC_parse, &endptr);
-                    num = (unum > I32_MAX) ? I32_MAX : (I32)unum;
-                    if (endptr)
-			RExC_parse = (char*)endptr;
+                    if (grok_atoUV(RExC_parse, &unum, &endptr)
+                        && unum <= I32_MAX
+                    ) {
+                        num = (I32)unum;
+                        RExC_parse = (char*)endptr;
+                    } else
+                        num = I32_MAX;
                     if (is_neg) {
                         /* Some limit for num? */
                         num = -num;
@@ -10308,9 +10311,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    RExC_parse++;
 		    parno = 0;
 		    if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
-		        parno = grok_atou(RExC_parse, &endptr);
-		        if (endptr)
+                        UV uv;
+                        if (grok_atoUV(RExC_parse, &uv, &endptr)
+                            && uv <= I32_MAX
+                        ) {
+                            parno = (I32)uv;
                             RExC_parse = (char*)endptr;
+                        }
+                        /* XXX else what? */
 		    } else if (RExC_parse[0] == '&') {
 		        SV *sv_dat;
 		        RExC_parse++;
@@ -10327,9 +10335,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     /* (?(1)...) */
 		    char c;
 		    char *tmp;
-		    parno = grok_atou(RExC_parse, &endptr);
-                    if (endptr)
-			RExC_parse = (char*)endptr;
+                    UV uv;
+                    if (grok_atoUV(RExC_parse, &uv, &endptr)
+                        && uv <= I32_MAX
+                    ) {
+                        parno = (I32)uv;
+                        RExC_parse = (char*)endptr;
+                    }
+                    /* XXX else what? */
                     ret = reganode(pRExC_state, GROUPP, parno);
 
                  insert_if_check_paren:
@@ -10815,8 +10828,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		maxpos = next;
 	    RExC_parse++;
             if (isDIGIT(*RExC_parse)) {
-                uv = grok_atou(RExC_parse, &endptr);
-                if (!endptr)
+                if (!grok_atoUV(RExC_parse, &uv, &endptr))
                     vFAIL("Invalid quantifier in {,}");
                 if (uv >= REG_INFTY)
                     vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
@@ -10829,8 +10841,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    else
 		maxpos = RExC_parse;
             if (isDIGIT(*maxpos)) {
-                uv = grok_atou(maxpos, &endptr);
-                if (!endptr)
+                if (!grok_atoUV(maxpos, &uv, &endptr))
                     vFAIL("Invalid quantifier in {,}");
                 if (uv >= REG_INFTY)
                     vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
@@ -11531,10 +11542,10 @@ static I32
 S_backref_value(char *p)
 {
     const char* endptr;
-    UV val = grok_atou(p, &endptr);
-    if (endptr == p || endptr == NULL || val > I32_MAX)
-        return I32_MAX;
-    return (I32)val;
+    UV val;
+    if (grok_atoUV(p, &val, &endptr) && val <= I32_MAX)
+        return (I32)val;
+    return I32_MAX;
 }
 
 

@@ -32,22 +32,24 @@ grok_number_flags(number, flags)
 	    PUSHs(sv_2mortal(newSVuv(value)));
 
 void
-grok_atou(number, endsv)
+grok_atoUV(number, endsv)
 	SV *number
 	SV *endsv
     PREINIT:
 	STRLEN len;
 	const char *pv = SvPV(number, len);
-	UV result;
+	UV value = 0xdeadbeef;
+	bool result;
 	const char* endptr;
     PPCODE:
 	EXTEND(SP,2);
 	if (endsv == &PL_sv_undef) {
-          result = grok_atou(pv, NULL);
+          result = grok_atoUV(pv, &value, NULL);
         } else {
-          result = grok_atou(pv, &endptr);
+          result = grok_atoUV(pv, &value, &endptr);
         }
-	PUSHs(sv_2mortal(newSVuv(result)));
+	PUSHs(result ? &PL_sv_yes : &PL_sv_no);
+	PUSHs(sv_2mortal(newSVuv(value)));
 	if (endsv == &PL_sv_undef) {
           PUSHs(sv_2mortal(newSVpvn(NULL, 0)));
 	} else {

@@ -1984,13 +1984,11 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	    {
 		/* Ensures that we have an all-digit variable, ${"1foo"} fails
 		   this test  */
-		/* This snippet is taken from is_gv_magical */
-		const char *end = name + len;
-		while (--end > name) {
-		    if (!isDIGIT(*end))
-                        return addmg;
-		}
-                paren = grok_atou(name, NULL);
+                UV uv;
+                if (!grok_atoUV(name, &uv, NULL) || uv > I32_MAX)
+                    return addmg;
+                /* XXX why are we using a SSize_t? */
+                paren = (SSize_t)(I32)uv;
                 goto storeparen;
 	    }
 	    }

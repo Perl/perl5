@@ -1375,11 +1375,13 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 #if defined(USE_C_BACKTRACE) && defined(USE_C_BACKTRACE_ON_ERROR)
     {
         char *ws;
-        int wi;
+        UV wi;
         /* The PERL_C_BACKTRACE_ON_WARN must be an integer of one or more. */
-        if ((ws = PerlEnv_getenv("PERL_C_BACKTRACE_ON_ERROR")) &&
-            (wi = grok_atou(ws, NULL)) > 0) {
-            Perl_dump_c_backtrace(aTHX_ Perl_debug_log, wi, 1);
+        if ((ws = PerlEnv_getenv("PERL_C_BACKTRACE_ON_ERROR"))
+            && grok_atoUV(ws, &wi, NULL)
+            && wi <= PERL_INT_MAX
+        ) {
+            Perl_dump_c_backtrace(aTHX_ Perl_debug_log, (int)wi, 1);
         }
     }
 #endif
@@ -4420,15 +4422,20 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
   if (*p) {
        if (isDIGIT(*p)) {
             const char* endptr;
-            opt = (U32) grok_atou(p, &endptr);
-	    p = endptr;
-	    if (*p && *p != '\n' && *p != '\r') {
-	     if(isSPACE(*p)) goto the_end_of_the_opts_parser;
-	     else
-		 Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
-	    }
-       }
-       else {
+            UV uv;
+            if (grok_atoUV(p, &uv, &endptr)
+                && uv <= U32_MAX
+                && (p = endptr)
+                && *p && *p != '\n' && *p != '\r'
+            ) {
+                opt = (U32)uv;
+                if (isSPACE(*p))
+                    goto the_end_of_the_opts_parser;
+                else
+                    Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
+            }
+        }
+        else {
 	    for (; *p; p++) {
 		 switch (*p) {
 		 case PERL_UNICODE_STDIN:
@@ -4729,14 +4736,14 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 
 #ifdef PERL_MEM_LOG
 
-/* -DPERL_MEM_LOG: the Perl_mem_log_..() is compiled, including the
+/* -DPERL_MEM_LOG: the Perl_mem_log_..() is compiled, including
  * the default implementation, unless -DPERL_MEM_LOG_NOIMPL is also
  * given, and you supply your own implementation.
  *
  * The default implementation reads a single env var, PERL_MEM_LOG,
  * expecting one or more of the following:
  *
- *    \d+ - fd		fd to write to		: must be 1st (grok_atou)
+ *    \d+ - fd		fd to write to		: must be 1st (grok_atoUV)
  *    'm' - memlog	was PERL_MEM_LOG=1
  *    's' - svlog	was PERL_SV_LOG=1
  *    't' - timestamp	was PERL_MEM_LOG_TIMESTAMP=1
@@ -4805,9 +4812,15 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 	{
 	    STRLEN len;
             const char* endptr;
-	    int fd = grok_atou(pmlenv, &endptr); /* Ignore endptr. */
-	    if (!fd)
+	    int fd;
+            UV uv;
+            if (grok_atoUV(pmlenv, &uv, &endptr) /* Ignore endptr. */
+                && uv && uv <= PERL_INT_MAX
+            ) {
+                fd = (int)uv;
+            } else {
 		fd = PERL_MEM_LOG_FD;
+            }
 
 	    if (strchr(pmlenv, 't')) {
 		len = my_snprintf(buf, sizeof(buf),
@@ -6008,6 +6021,8 @@ static const char* atos_parse(const char* p,
     const char* source_name_end;
     const char* source_line_end;
     const char* close_paren;
+    UV uv;
+
     /* Skip trailing whitespace. */
     while (p > start && isspace(*p)) p--;
     /* Now we should be at the close paren. */
@@ -6034,10 +6049,14 @@ static const char* atos_parse(const char* p,
         return NULL;
     p++;
     *source_name_size = source_name_end - p;
-    *source_line = grok_atou(source_number_start, &source_line_end);
-    if (source_line_end != close_paren)
-        return NULL;
-    return p;
+    if (grok_atoUV(source_number_start, &uv,  &source_line_end)
+        && source_line_end == close_paren
+        && uv <= MAX_STRLEN
+    ) {
+        *source_line = (STRLEN)uv;
+        return p;
+    }
+    return NULL;
 }
 
 /* Given a raw frame, read a pipe from the symbolicator (that's the

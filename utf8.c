@@ -3549,7 +3549,9 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 
         /* The first number is a count of the rest */
         l++;
-        elements = grok_atou((const char *)l, &after_atou);
+        if (!grok_atoUV((const char *)l, &elements, &after_atou)) {
+            Perl_croak(aTHX_ "panic: Expecting a valid count of elements at start of inversion list");
+        }
         if (elements == 0) {
             invlist = _new_invlist(0);
         }
@@ -3559,7 +3561,9 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 
             /* Get the 0th element, which is needed to setup the inversion list */
             while (isSPACE(*l)) l++;
-            element0 = (UV) grok_atou((const char *)l, &after_atou);
+            if (!grok_atoUV((const char *)l, &element0, &after_atou)) {
+                Perl_croak(aTHX_ "panic: Expecting a valid 0th element for inversion list");
+            }
             l = (U8 *) after_atou;
             invlist = _setup_canned_invlist(elements, element0, &other_elements_ptr);
             elements--;
@@ -3570,7 +3574,9 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
                     Perl_croak(aTHX_ "panic: Expecting %"UVuf" more elements than available", elements);
                 }
                 while (isSPACE(*l)) l++;
-                *other_elements_ptr++ = (UV) grok_atou((const char *)l, &after_atou);
+                if (!grok_atoUV((const char *)l, other_elements_ptr++, &after_atou)) {
+                    Perl_croak(aTHX_ "panic: Expecting a valid element in inversion list");
+                }
                 l = (U8 *) after_atou;
             }
         }

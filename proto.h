@@ -1340,10 +1340,11 @@ PERL_CALLCONV int	Perl_getcwd_sv(pTHX_ SV* sv)
 
 PERL_CALLCONV void	Perl_gp_free(pTHX_ GV* gv);
 PERL_CALLCONV GP*	Perl_gp_ref(pTHX_ GP* gp);
-PERL_CALLCONV UV	Perl_grok_atou(const char* pv, const char** endptr)
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_GROK_ATOU	\
-	assert(pv)
+PERL_CALLCONV bool	Perl_grok_atoUV(const char* pv, UV* valptr, const char** endptr)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
+#define PERL_ARGS_ASSERT_GROK_ATOUV	\
+	assert(pv); assert(valptr)
 
 PERL_CALLCONV UV	Perl_grok_bin(pTHX_ const char* start, STRLEN* len_p, I32* flags, NV *result)
 			__attribute__nonnull__(pTHX_1)

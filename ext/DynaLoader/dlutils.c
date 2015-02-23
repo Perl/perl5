@@ -100,6 +100,7 @@ dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
 {
 #if defined(PERL_IN_DL_HPUX_XS) || defined(PERL_IN_DL_DLOPEN_XS)
     char *perl_dl_nonlazy;
+    UV uv;
 #endif
     MY_CXT_INIT;
 
@@ -115,9 +116,12 @@ dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
 #endif
 
 #if defined(PERL_IN_DL_HPUX_XS) || defined(PERL_IN_DL_DLOPEN_XS)
-    if ( (perl_dl_nonlazy = getenv("PERL_DL_NONLAZY")) != NULL )
-	dl_nonlazy = grok_atou(perl_dl_nonlazy, NULL);
-    else
+    if ( (perl_dl_nonlazy = getenv("PERL_DL_NONLAZY")) != NULL
+	&& grok_atoUV(perl_dl_nonlazy, &uv, NULL)
+	&& uv <= INT_MAX
+    ) {
+	dl_nonlazy = (int)uv;
+    } else
 	dl_nonlazy = 0;
     if (dl_nonlazy)
 	DLDEBUG(1,PerlIO_printf(Perl_debug_log, "DynaLoader bind mode is 'non-lazy'\n"));
