@@ -1772,7 +1772,7 @@ S_Internals_V(pTHX_ CV *cv)
 #  endif	       
 	;
     PERL_UNUSED_ARG(cv);
-    PERL_UNUSED_ARG(items);
+    PERL_UNUSED_VAR(items);
 
     EXTEND(SP, entries);
 

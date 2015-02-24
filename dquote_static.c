@@ -218,8 +218,6 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
 
     PERL_ARGS_ASSERT_GROK_BSLASH_X;
 
-    PERL_UNUSED_ARG(output_warning);
-
     assert(**s == 'x');
     (*s)++;
 
