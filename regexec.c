@@ -5589,7 +5589,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         n = (NEXTCHR_IS_EOS)
                             ? isWORDCHAR_L1('\n')
                             : isWORDCHAR_utf8((U8*)locinput);
-                        match = ln != n;
+                        match = cBOOL(ln != n);
                         break;
                     case GCB_BOUND:
                         if (locinput == reginfo->strbeg || NEXTCHR_IS_EOS) {
@@ -5658,7 +5658,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         n = (NEXTCHR_IS_EOS)
                             ? isWORDCHAR_L1('\n')
                             : isWORDCHAR_L1(nextchr);
-                        match = ln != n;
+                        match = cBOOL(ln != n);
                         break;
 
                     case GCB_BOUND:
@@ -8004,7 +8004,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     char *loceol = reginfo->strend;   /* local version */
     I32 hardcount = 0;  /* How many matches so far */
     bool utf8_target = reginfo->is_utf8_target;
-    int to_complement = 0;  /* Invert the result? */
+    unsigned int to_complement = 0;  /* Invert the result? */
     UV utf8_flags;
     _char_class_number classnum;
 #ifndef DEBUGGING

@@ -2126,7 +2126,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
 			    S_cv_clone(aTHX_ (CV *)ppad[ix],
 					     (CV *)PL_curpad[ix],
 					     *cvp, cloned);
-			    hv_store(cloned, (char *)&ppad[ix],
+			    (void)hv_store(cloned, (char *)&ppad[ix],
 				     sizeof(CV *),
 				     SvREFCNT_inc_simple_NN(PL_curpad[ix]),
 				     0);
