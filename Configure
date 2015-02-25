@@ -10108,6 +10108,8 @@ case "$doublekind" in
 4) echo "You have IEEE 754 64-bit big endian doubles." >&4 ;;
 5) echo "You have IEEE 754 128-bit little endian doubles." >&4 ;;
 6) echo "You have IEEE 754 128-bit big endian doubles." >&4 ;;
+7) echo "You have IEEE 754 64-bit mixed endian doubles (32-bit LEs in BE)." >&4 ;;
+8) echo "You have IEEE 754 64-bit mixed endian doubles (32-bit BEs in LE)." >&4 ;;
 *) echo "Cannot figure out your double.  You VAX, or something?" >&4 ;;
 esac
 $rm_try
