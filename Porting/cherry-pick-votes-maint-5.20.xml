@@ -2,9 +2,9 @@
 
 <data>
 
-<div><h2>Tickets Listed in #122913: [META] perl 5.20.2</h2>
+<div><h2>Tickets Listed in #123921: 5.20.3 blockers</h2>
 
-<commit votes="steveh, khw" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
+<commit votes="" id="" ticket="123786" desc="'use utf8;' leaks memory"/>
 
 </div>
 
@@ -62,6 +62,8 @@ This fix has a problem with it that needs to be solved before we can backport it
 
 <div><h3>Platform-Specific Build/Test/Installation Fixes</h3>
 
+<commit votes="steveh, khw" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
+
 </div>
 
 <div><h3>Documentation Fixes</h3>
@@ -100,9 +102,6 @@ khw votes for the portions of the following except the reference to v5.22
 </div>
 
 <div><h3>Other</h3>
-
-Not in any of the above categories, but would be nice anyway?:
-<commit votes="steveh" id="f276fdad8f6660f36944c895587a7748585e4969" ticket="" desc="Added -x option to makerel to produce .xz tarballs"/>
 
 Bugfix in Safe (Opcode) still needs backporting to maint-5.20:
 http://code.activestate.com/lists/perl5-porters/210398/
