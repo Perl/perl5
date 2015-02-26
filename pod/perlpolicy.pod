@@ -251,9 +251,6 @@ no longer ship with Perl, but will continue to be available on CPAN.
 =head1 MAINTENANCE BRANCHES
 
 New releases of maint should contain as few changes as possible.
-If there is any question about whether a given patch might merit
-inclusion in a maint release, then it almost certainly should not
-be included.
 
 The following types of change may be considered acceptable, as long as they do
 not also fall into any of the "unacceptable" categories set out below:
@@ -333,6 +330,10 @@ New versions of dual-life modules should NOT be imported into maint.
 Those belong in the next stable series.
 
 =back
+
+If there is any question about whether a given patch might merit
+inclusion in a maint release, then it almost certainly should not
+be included.
 
 =head2 Getting changes into a maint branch
 
