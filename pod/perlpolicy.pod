@@ -262,7 +262,7 @@ not also fall into any of the "unacceptable" categories set out below:
 
 =item *
 
-Patches that fix CVEs or security issues are acceptable, but should
+Patches that fix CVEs or security issues.  These changes should
 be run through the perl5-security-report@perl.org mailing list
 rather than applied directly.
 
@@ -270,30 +270,29 @@ rather than applied directly.
 
 Patches that fix crashing bugs, assertion failures and
 memory corruption that do not otherwise change Perl's
-functionality or negatively impact performance are acceptable.
+functionality or negatively impact performance.
 
 =item *
 
 Patches that fix regressions in perl's behavior relative to previous
-releases are acceptable.
+releases.
 
 =item *
 
 Portability fixes, such as changes to Configure and the files in
-hints/ are acceptable.
+the hints/ folder.
 
 =item *
 
 Minimal patches that fix platform-specific test failures or build or
-installation issues are acceptable. When these changes are made
+installation issues. When these changes are made
 to dual-life modules for which CPAN is canonical, any changes
 should be coordinated with the upstream author.
 
 =item *
 
-Acceptable documentation updates are those that correct factual errors,
-explain significant bugs or deficiencies in the current implementation,
-or fix broken markup.
+Documentation updates that correct factual errors, explain significant
+bugs or deficiencies in the current implementation, or fix broken markup.
 
 =item *
 
@@ -308,23 +307,20 @@ The following types of change are NOT acceptable:
 
 =item *
 
-Patches that break binary compatibility are not acceptable.  (Please
-talk to a pumpking.)
+Patches that break binary compatibility.  (Please talk to a pumpking.)
 
 =item *
 
-Patches that add or remove features are not acceptable.
+Patches that add or remove features.
 
 =item *
 
-Patches that add new warnings or errors or deprecate features
-are not acceptable.
+Patches that add new warnings or errors or deprecate features.
 
 =item *
 
-Ports of Perl to a new platform, architecture
-or OS release that involve changes to the implementation are NOT
-acceptable.
+Ports of Perl to a new platform, architecture or OS release that
+involve changes to the implementation.
 
 =item *
 
