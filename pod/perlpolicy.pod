@@ -269,7 +269,7 @@ rather than applied directly.
 =item *
 
 Patches that fix crashing bugs, assertion failures and
-memory corruption that do not otherwise change Perl's
+memory corruption but which do not otherwise change perl's
 functionality or negatively impact performance.
 
 =item *
