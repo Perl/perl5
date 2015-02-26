@@ -368,6 +368,12 @@ votes is gathered in a transparent manner.  Specifically, proposals of
 which changes to cherry-pick must be visible to everyone on perl5-porters
 so that the views of everyone interested may be heard.
 
+It is not necessary for voting to be held on cherry-picking perldelta
+entries associated with changes that have already been cherry-picked, nor
+for the maint-pumpking to obtain votes on changes required by the
+F<Porting/release_managers_guide.pod> where such changes can be applied by
+the means of cherry-picking from blead.
+
 =head1 CONTRIBUTED MODULES
 
 
