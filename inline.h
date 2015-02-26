@@ -378,6 +378,30 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 }
 
 /*
+
+Return false if any get magic is on the SV other than taint magic.
+
+*/
+
+PERL_STATIC_INLINE bool
+S_sv_only_taint_gmagic(SV *sv) {
+    MAGIC *mg = SvMAGIC(sv);
+
+    PERL_ARGS_ASSERT_SV_ONLY_TAINT_GMAGIC;
+
+    while (mg) {
+        if (mg->mg_type != PERL_MAGIC_taint
+            && !(mg->mg_flags & MGf_GSKIP)
+            && mg->mg_virtual->svt_get) {
+            return FALSE;
+        }
+        mg = mg->mg_moremagic;
+    }
+
+    return TRUE;
+}
+
+/*
  * Local variables:
  * c-indentation-style: bsd
  * c-basic-offset: 4

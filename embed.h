@@ -914,6 +914,7 @@
 #define reg_temp_copy(a,b)	Perl_reg_temp_copy(aTHX_ a,b)
 #define report_uninit(a)	Perl_report_uninit(aTHX_ a)
 #define sv_magicext_mglob(a)	Perl_sv_magicext_mglob(aTHX_ a)
+#define sv_only_taint_gmagic	S_sv_only_taint_gmagic
 #define validate_proto(a,b,c)	Perl_validate_proto(aTHX_ a,b,c)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define yylex()			Perl_yylex(aTHX)
