@@ -12777,7 +12777,9 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
             /* excise and free the original tree, and replace with
              * the multideref op */
-            op_free(op_sibling_splice(top_op, NULL, -1, mderef));
+            p = op_sibling_splice(top_op, NULL, -1, mderef);
+            for(; p; p = OpSIBLING(p))
+                op_free(p);
             op_null(top_op);
         }
         else {
