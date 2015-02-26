@@ -280,13 +280,17 @@ upgrade from very old versions of perl to the latest version.
 
 =item *
 
+Patches that fix anything which prevents or seriously impacts the build
+or installation of perl.
+
+=item *
+
 Portability fixes, such as changes to Configure and the files in
 the hints/ folder.
 
 =item *
 
-Minimal patches that fix platform-specific test failures or build or
-installation issues.
+Minimal patches that fix platform-specific test failures.
 
 =item *
 
