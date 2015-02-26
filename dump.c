@@ -572,7 +572,10 @@ Perl_dump_packsubs_perl(pTHX_ const HV *stash, bool justperl)
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
         const HE *entry;
 	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
-	    const GV * const gv = (const GV *)HeVAL(entry);
+	    GV * gv = (GV *)HeVAL(entry);
+            if (SvROK(gv) && SvTYPE(SvRV(gv)) == SVt_PVCV)
+                /* unfake a fake GV */
+                (void)CvGV(SvRV(gv));
 	    if (SvTYPE(gv) != SVt_PVGV || !GvGP(gv))
 		continue;
 	    if (GvCVu(gv))
