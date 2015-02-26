@@ -250,32 +250,26 @@ no longer ship with Perl, but will continue to be available on CPAN.
 
 =head1 MAINTENANCE BRANCHES
 
-=over
-
-=item *
-
 New releases of maint should contain as few changes as possible.
 If there is any question about whether a given patch might merit
 inclusion in a maint release, then it almost certainly should not
 be included.
 
+The following types of change may be considered acceptable, as long as they do
+not also fall into any of the "unacceptable" categories set out below:
+
+=over
+
 =item *
 
 Portability fixes, such as changes to Configure and the files in
-hints/ are acceptable. Ports of Perl to a new platform, architecture
-or OS release that involve changes to the implementation are NOT
-acceptable.
+hints/ are acceptable.
 
 =item *
 
 Acceptable documentation updates are those that correct factual errors,
 explain significant bugs or deficiencies in the current implementation,
 or fix broken markup.
-
-=item *
-
-Patches that add new warnings or errors or deprecate features
-are not acceptable.
 
 =item *
 
@@ -306,6 +300,23 @@ installation issues are acceptable. When these changes are made
 to dual-life modules for which CPAN is canonical, any changes
 should be coordinated with the upstream author.
 
+=back
+
+The following types of change are NOT acceptable:
+
+=over
+
+=item *
+
+Ports of Perl to a new platform, architecture
+or OS release that involve changes to the implementation are NOT
+acceptable.
+
+=item *
+
+Patches that add new warnings or errors or deprecate features
+are not acceptable.
+
 =item *
 
 New versions of dual-life modules should NOT be imported into maint.
@@ -321,7 +332,6 @@ Patches that break binary compatibility are not acceptable.  (Please
 talk to a pumpking.)
 
 =back
-
 
 =head2 Getting changes into a maint branch
 
