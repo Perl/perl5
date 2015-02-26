@@ -250,7 +250,21 @@ no longer ship with Perl, but will continue to be available on CPAN.
 
 =head1 MAINTENANCE BRANCHES
 
-New releases of maint should contain as few changes as possible.
+New releases of maintenance branches should only contain changes that fall into
+one of the "acceptable" categories set out below, but must not contain any
+changes that fall into one of the "unacceptable" categories.  (For example, a
+fix for a crashing bug must not be included if it breaks binary compatibility.)
+
+It is not necessary to include every change meeting these criteria, and in
+general the focus should be on addressing security issues, crashing bugs,
+regressions and serious installation issues.  The temptation to include a
+plethora of minor changes that don't affect the installation or execution of
+perl (e.g. spelling corrections in documentation) should be resisted in order
+to reduce the overall risk of overlooking something.  The intention is to
+create maintenance releases which are both worthwhile and which users can have
+full confidence in the stability of.  (A secondary concern is to avoid burning
+out the maint-pumpking or overwhelming other committers voting on changes to be
+included (see L</"Getting changes into a maint branch"> below).)
 
 The following types of change may be considered acceptable, as long as they do
 not also fall into any of the "unacceptable" categories set out below:
