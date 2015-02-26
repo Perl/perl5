@@ -368,7 +368,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Repeated global pattern matches in scalar context on large tainted
+strings were exponentially slow depending on the current match
+position in the string. [perl #123202]
 
 =back
 
