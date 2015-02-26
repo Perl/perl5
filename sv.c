@@ -6520,7 +6520,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
     SV* iter_sv = NULL;
     SV* next_sv = NULL;
     SV *sv = orig_sv;
-    STRLEN hash_index;
+    STRLEN hash_index = 0; /* initialise to make Coverity et al happy.
+                              Not strictly necessary */
 
     PERL_ARGS_ASSERT_SV_CLEAR;
 
