@@ -905,7 +905,10 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
                         sv_catpv(tmpsv, &PL_op_private_labels[label]);
                         sv_catpv(tmpsv, "=");
                     }
-                    sv_catpv(tmpsv, &PL_op_private_labels[enum_label]);
+                    if (enum_label == -1)
+                        Perl_sv_catpvf(aTHX_ tmpsv, "0x%"UVxf, (UV)val);
+                    else
+                        sv_catpv(tmpsv, &PL_op_private_labels[enum_label]);
 
                 }
                 else {
