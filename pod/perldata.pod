@@ -502,6 +502,37 @@ anything more complicated in the subscript will be interpreted as an
 expression.  This means for example that C<$version{2.0}++> is
 equivalent to C<$version{2}++>, not to C<$version{'2.0'}++>.
 
+=head3 Special floating point: infinity (Inf) and not-a-number (NaN)
+
+Floating point values include the special values C<Inf> and C<NaN>,
+for infinity and not-a-number.  The infinity can be also negative.
+
+The infinity is the result of certain math operations that overflow
+the floating point range, like 9**9**9.  The not-a-number is the
+result when the result is undefined or unrepresentable.  Though note
+that you cannot get C<NaN> from some common "undefined" or
+"out-of-range" operations like dividing by zero, or square root of
+a negative number, since Perl generates fatal errors for those.
+
+The infinity and not-a-number have their own special arithmetic rules.
+The general rule is that they are "contagious": C<Inf> plus one is
+C<Inf>, and C<NaN> plus one is C<NaN>.  Where things get interesting
+is when you combine infinities and not-a-numbers: C<Inf> minus C<Inf>
+and C<Inf> divided by C<INf> are C<NaN> (while C<Inf> plus C<Inf> is
+C<Inf> and C<Inf> times C<Inf> is C<Inf>).  C<NaN> is also curious
+in that it does not equal any number, I<including> itself:
+C<NaN> != C<NaN>.
+
+Perl doesn't understand C<Inf> and C<NaN> as numeric literals, but
+you can have them as strings, and Perl will convert them as needed:
+"Inf" + 1.  (You can, however, import them from the POSIX extension;
+C<use POSIX qw(Inf NaN);> and then use them as literals.)
+
+Note that on input (string to number) Perl accepts C<Inf> and C<NaN>
+in many forms.   Case is ignored, and the Win32-specific forms like
+C<1.#INF> are understood, but on output the values are normalized to
+C<Inf> and C<NaN>.
+
 =head3 Version Strings
 X<version string> X<vstring> X<v-string>
 
