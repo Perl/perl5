@@ -1025,14 +1025,11 @@ There is one unary operator:
 
  !    complement
 
-All the binary operators left associate, and are of equal precedence.
-The unary operator right associates, and has higher precedence.  Use
-parentheses to override the default associations.  Some feedback we've
-received indicates a desire for intersection to have higher precedence
-than union.  This is something that feedback from the field may cause us
-to change in future releases; you may want to parenthesize copiously to
-avoid such changes affecting your code, until this feature is no longer
-considered experimental.
+All the binary operators left associate; C<"&"> is higher precedence
+than the others, which all have equal precedence.  The unary operator
+right associates, and has highest precedence.  Thus this follows the
+normal Perl precedence rules for logical operators.  Use parentheses to
+override the default precedence and associativity.
 
 The main restriction is that everything is a metacharacter.  Thus,
 you cannot refer to single characters by doing something like this:

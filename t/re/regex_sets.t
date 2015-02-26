@@ -68,13 +68,19 @@ like("\N{LAO DIGIT NINE}", $thai_or_lao_digit, 'embedded qr/(?[ ])/ works');
 unlike(chr(ord("\N{LAO DIGIT NINE}") + 1), $thai_or_lao_digit, 'embedded qr/(?[ ])/ works');
 
 my $ascii_word = qr/(?[ \w ])/a;
-my $ascii_digits_plus_all_of_arabic = qr/(?[ \p{Digit} & $ascii_word + \p{Arabic} ])/;
+my $ascii_digits_plus_all_of_arabic = qr/(?[ \p{Arabic} + \p{Digit} & $ascii_word ])/;
 like("9", $ascii_digits_plus_all_of_arabic, "/a, then interpolating and intersection works for ASCII in the set");
 unlike("A", $ascii_digits_plus_all_of_arabic, "/a, then interpolating and intersection works for ASCII not in the set");
 unlike("\N{BENGALI DIGIT ZERO}", $ascii_digits_plus_all_of_arabic, "/a, then interpolating and intersection works for non-ASCII not in either set");
 unlike("\N{BENGALI LETTER A}", $ascii_digits_plus_all_of_arabic, "/a, then interpolating and intersection works for non-ASCII in one set");
-like("\N{ARABIC LETTER HAMZA}", $ascii_digits_plus_all_of_arabic, "interpolation and intersection is left-associative");
-like("\N{EXTENDED ARABIC-INDIC DIGIT ZERO}", $ascii_digits_plus_all_of_arabic, "interpolation and intersection is left-associative");
+like("\N{ARABIC LETTER HAMZA}", $ascii_digits_plus_all_of_arabic, "intersection has higher precedence than union");
+like("\N{EXTENDED ARABIC-INDIC DIGIT ZERO}", $ascii_digits_plus_all_of_arabic, "intersection has higher precedence than union");
+
+like("\r", qr/(?[ \p{lb=cr} ])/, '\r matches \p{lb=cr}');
+unlike("\r", qr/(?[ ! \p{lb=cr} ])/, '\r doesnt match ! \p{lb=cr}');
+like("\r", qr/(?[ ! ! \p{lb=cr} ])/, 'Two ! ! are the original');
+unlike("\r", qr/(?[ ! ! ! \p{lb=cr} ])/, 'Three ! ! ! are the complement');
+# left associatve
 
 my $kelvin = qr/(?[ \N{KELVIN SIGN} ])/;
 my $fold = qr/(?[ $kelvin ])/i;

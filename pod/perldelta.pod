@@ -45,6 +45,16 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 C<(?[...])> operators now follow standard Perl precedence
+
+This experimental feature allows set operations in regular expression
+patterns.  Prior to this, the intersection operator had the same
+precedence as the other binary operators.  Now it has higher precedence.
+This could lead to different outcomes than existing code expects (though
+the documentation has always noted that this change might happen,
+recommending fully parenthesizing the expressions).  See
+L<perlrecharclass/Extended Bracketed Character Classes>.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

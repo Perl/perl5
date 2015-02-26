@@ -2136,6 +2136,7 @@ Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state                 \
 Es	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
 Esn	|bool|could_it_be_a_POSIX_class|NN RExC_state_t *pRExC_state
+EsnP	|unsigned int|regex_set_precedence|const U8 my_operator
 Es	|regnode*|handle_regex_sets|NN RExC_state_t *pRExC_state \
 				|NULLOK SV ** return_invlist            \
 				|NN I32 *flagp|U32 depth                \
