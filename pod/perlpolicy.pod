@@ -275,7 +275,8 @@ functionality or negatively impact performance.
 =item *
 
 Patches that fix regressions in perl's behavior relative to previous
-releases.
+releases, no matter how old the regression, since some people may
+upgrade from very old versions of perl to the latest version.
 
 =item *
 
