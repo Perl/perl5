@@ -1876,14 +1876,44 @@ PoisonWith(0xEF) for catching access to freed memory.
 
 #define MEM_SIZE_MAX ((MEM_SIZE)~0)
 
-/* The +0.0 in MEM_WRAP_CHECK_ is an attempt to foil
- * overly eager compilers that will bleat about e.g.
- * (U16)n > (size_t)~0/sizeof(U16) always being false. */
+
 #ifdef PERL_MALLOC_WRAP
-#define MEM_WRAP_CHECK(n,t) \
-	(void)(UNLIKELY(sizeof(t) > 1 && ((MEM_SIZE)(n)+0.0) > MEM_SIZE_MAX/sizeof(t)) && (croak_memory_wrap(),0))
-#define MEM_WRAP_CHECK_1(n,t,a) \
-	(void)(UNLIKELY(sizeof(t) > 1 && ((MEM_SIZE)(n)+0.0) > MEM_SIZE_MAX/sizeof(t)) && (Perl_croak_nocontext("%s",(a)),0))
+
+/* This expression will be constant-folded at compile time.  It checks
+ * whether or not the type of the count n is so small (e.g. U8 or U16, or
+ * U32 on 64-bit systems) that there's no way a wrap-around could occur.
+ * As well as avoiding the need for a run-time check in some cases, it's
+ * designed to avoid compiler warnings like:
+ *     comparison is always false due to limited range of data type
+ */
+
+#  define _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) \
+    (sizeof(t) > ((MEM_SIZE)1 << 8*(sizeof(MEM_SIZE) - sizeof(n))))
+
+/* this is written in a slightly odd way because for an expression like
+ *    cond && (n > expr)
+ * even when cond constant-folds to false at compile-time, g++ insists
+ * on emitting warnings about expr (e.g. "comparison is always false").
+ * So rewrite it as
+ *    (cond ? n : 1) > expr
+ *
+ * We happen to know that (1 > expr) will always be false (unless someone
+ * is doing something with a struct whose sizeof > MEM_SIZE_MAX/2), so
+ * this is safe.
+ */
+
+#  define _MEM_WRAP_WILL_WRAP(n,t) \
+      ((MEM_SIZE)(_MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) ? n : 1) \
+                 > MEM_SIZE_MAX/sizeof(t))
+
+#  define MEM_WRAP_CHECK(n,t) \
+	(void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
+        && (croak_memory_wrap(),0))
+
+#  define MEM_WRAP_CHECK_1(n,t,a) \
+	(void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
+	&& (Perl_croak_nocontext("%s",(a)),0))
+
 #define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
 #define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0):0),((n-1+PERL_STRLEN_ROUNDUP_QUANTUM)&~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM-1)))
