@@ -326,8 +326,6 @@ ok($symbols{text}{'Perl_pp_uc'}{'pp.o'}, "has text Perl_pp_uc in pp.o");
 ok(exists $symbols{data}{const}, "has data const symbols");
 ok($symbols{data}{const}{PL_no_mem}{'globals.o'}, "has PL_no_mem");
 
-my $DEBUGGING = $Config{ccflags} =~ /-DDEBUGGING/ ? 1 : 0;
-
 my $GS  = $Config{ccflags} =~ /-DPERL_GLOBAL_STRUCT\b/ ? 1 : 0;
 my $GSP = $Config{ccflags} =~ /-DPERL_GLOBAL_STRUCT_PRIVATE/ ? 1 : 0;
 
