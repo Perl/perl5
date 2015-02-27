@@ -607,7 +607,7 @@ as signaling that the file is Unicode encoded as in UTF-16 (whether
 big-endian or little-endian) or UTF-8, Pod parsers should do the
 same.  Otherwise, the character encoding should be understood as
 being UTF-8 if the first highbit byte sequence in the file seems
-valid as a UTF-8 sequence, or otherwise as Latin-1.
+valid as a UTF-8 sequence, or otherwise as CP-1252.
 
 Future versions of this specification may specify
 how Pod can accept other encodings.  Presumably treatment of other
@@ -641,7 +641,7 @@ I<and> whether the next byte is in the range
 0x80 - 0xBF.  If so, the parser may conclude that this file is in
 UTF-8, and all highbit sequences in the file should be assumed to
 be UTF-8.  Otherwise the parser should treat the file as being
-in Latin-1.  (A better check is to pass a copy of the sequence to
+in CP-1252.  (A better check is to pass a copy of the sequence to
 L<utf8::decode()|utf8> which performs a full validity check on the
 sequence and returns TRUE if it is valid UTF-8, FALSE otherwise.  This
 function is always pre-loaded, is fast because it is written in C, and

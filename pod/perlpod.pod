@@ -286,7 +286,7 @@ users won't need this; but if your encoding isn't US-ASCII,
 then put a C<=encoding I<encodingname>> command very early in the document so
 that pod formatters will know how to decode the document.  For
 I<encodingname>, use a name recognized by the L<Encode::Supported>
-module.  Some pod formatters may try to guess between a Latin-1 versus
+module.  Some pod formatters may try to guess between a CP-1252 versus
 UTF-8 encoding, but they may guess wrong.  It's best to be explicit if
 you use anything besides strict ASCII.  Examples:
 
@@ -496,7 +496,7 @@ e with an acute (/-shaped) accent.
 
 C<EE<lt>numberE<gt>>
 
-The ASCII/Latin-1/Unicode character with that number.  A
+The ASCII/CP-1252/Unicode character with that number.  A
 leading "0x" means that I<number> is hex, as in
 C<EE<lt>0x201EE<gt>>.  A leading "0" means that I<number> is octal,
 as in C<EE<lt>075E<gt>>.  Otherwise I<number> is interpreted as being
@@ -505,7 +505,7 @@ in decimal, as in C<EE<lt>181E<gt>>.
 Note that older Pod formatters might not recognize octal or
 hex numeric escapes, and that many formatters cannot reliably
 render characters above 255.  (Some formatters may even have
-to use compromised renderings of Latin-1 characters, like
+to use compromised renderings of CP-1252 characters, like
 rendering C<EE<lt>eacuteE<gt>> as just a plain "e".)
 
 =back
