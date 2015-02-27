@@ -6630,6 +6630,21 @@ extern void moncontrol(int);
 #  endif
 #endif
 
+/* NV_MANT_BITS is the number of _real_ mantissa bits in an NV.
+ * For the standard IEEE 754 fp this number is usually one less that
+ * *DBL_MANT_DIG because of the implicit (aka hidden) bit, which isn't
+ * real.  For the 80-bit extended precision formats (x86*), the number
+ * of mantissa bits... depends. For normal floats, it's 64.  But for
+ * the inf/nan, it's different (zero for inf, 61 for nan).
+ * NV_MANT_BITS works for normal floats. */
+#ifdef USE_QUADMATH /* IEEE 754 128-bit */
+#  define NV_MANT_BITS (FLT128_MANT_DIG - 1)
+#elif NVSIZE == DOUBLESIZE
+#  define NV_MANT_BITS DOUBLEMANTBITS
+#elif NVSIZE == LONG_DOUBLESIZE
+#  define NV_MANT_BITS LONGDBLMANTBITS
+#endif
+
 /*
 
    (KEEP THIS LAST IN perl.h!)
