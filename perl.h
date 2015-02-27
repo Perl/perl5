@@ -4329,11 +4329,9 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #   endif
 #   if !defined(NV_NAN) && defined(LDBL_QNAN)
 #       define NV_NAN LDBL_QNAN
-#       define NV_QNAN LDBL_QNAN
 #   endif
 #   if !defined(NV_NAN) && defined(LDBL_SNAN)
 #       define NV_NAN LDBL_SNAN
-#       define NV_SNAN LDBL_SNAN
 #   endif
 #endif
 #if !defined(NV_NAN) && defined(DBL_NAN)
@@ -4341,27 +4339,21 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #endif
 #if !defined(NV_NAN) && defined(DBL_QNAN)
 #  define NV_NAN (NV)DBL_QNAN
-#  define NV_QNAN DBL_QNAN
 #endif
 #if !defined(NV_NAN) && defined(DBL_SNAN)
 #  define NV_NAN (NV)DBL_SNAN
-#  define NV_SNAN DBL_SNAN
 #endif
 #if !defined(NV_NAN) && defined(NAN)
 #  define NV_NAN (NV)NAN
 #endif
 #if !defined(NV_NAN) && defined(QNAN)
 #  define NV_NAN (NV)QNAN
-#  define NV_QNAN QNAN
 #endif
 #if !defined(NV_NAN) && defined(SNAN)
 #  define NV_NAN (NV)SNAN
-#  define NV_SNAN SNAN
 #endif
 #if !defined(NV_NAN) && defined(I_SUNMATH)
 #  define NV_NAN (NV)quiet_nan()
-#  define NV_QNAN (NV)quiet_nan()
-#  define NV_SNAN (NV)signaling_nan()
 #endif
 #if !defined(NV_NAN)
 #  if INTSIZE == 4
