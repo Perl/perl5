@@ -69,7 +69,6 @@ This fix has a problem with it that needs to be solved before we can backport it
 <div><h3>Documentation Fixes</h3>
 
 <commit votes="steveh, arc" id="eb9e3b14fd77e43b36846b86f8780d23fda50258" ticket="" desc="recharclass: Corrections and nits"/>
-<commit votes="steveh" id="2174049d55b865d9bed8adad15157d3061d5ae10" ticket="" desc="Update release manager documents for producing .xz tarballs"/>
 
 khw votes for the portions of the following except the reference to v5.22
 <commit votes="steveh" id="dbf3c4d788344c8d20eb2549c638ced519d3f0e8" ticket="" desc="perllocale: Nits"/>
