@@ -14122,6 +14122,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    case 'P':
 		{
 		char *e;
+                int braced;
 
                 /* We will handle any undefined properties ourselves */
                 U8 swash_init_flags = _CORE_SWASH_INIT_RETURN_IF_UNDEF
@@ -14145,28 +14146,38 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 		    n = e - RExC_parse;
 		    while (isSPACE(*(RExC_parse + n - 1)))
 		        n--;
+                    braced = 1;
 		}
 		else {
-		    e = RExC_parse;
-		    n = 1;
+                    braced = 0;
+                    /* just initialize these, will be reset once we've
+                     * found the start of the property */
+                    e = RExC_parse;
+                    n = 1;
 		}
+                if (UCHARAT(RExC_parse) == '^') {
+                    RExC_parse++;
+                    n--;
+                    /* toggle.  (The rhs xor gets the single bit that
+                     * differs between P and p; the other xor inverts just
+                     * that bit) */
+                    value ^= 'P' ^ 'p';
+
+                    while (isSPACE(*RExC_parse)) {
+                        RExC_parse++;
+                        n--;
+                    }
+                }
+                if (!braced) {
+                    if (RExC_parse >= RExC_end)
+                        vFAIL2("Empty \\%c{}", (U8)value);
+                    e = RExC_parse;
+                    n = 1;
+                }
 		if (!SIZE_ONLY) {
                     SV* invlist;
                     char* name;
 
-		    if (UCHARAT(RExC_parse) == '^') {
-			 RExC_parse++;
-			 n--;
-                         /* toggle.  (The rhs xor gets the single bit that
-                          * differs between P and p; the other xor inverts just
-                          * that bit) */
-                         value ^= 'P' ^ 'p';
-
-			 while (isSPACE(*RExC_parse)) {
-			      RExC_parse++;
-			      n--;
-			 }
-		    }
                     /* Try to get the definition of the property into
                      * <invlist>.  If /i is in effect, the effective property
                      * will have its name be <__NAME_i>.  The design is

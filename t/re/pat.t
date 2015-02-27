@@ -22,7 +22,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 774;  # Update this when adding/deleting tests.
+plan tests => 778;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1693,6 +1693,17 @@ EOP
 		ok(1, "qr{()(?1)}n didn't crash");
 		like($error, qr{Reference to nonexistent group},
 				'gave appropriate error for qr{()(?1)}n');
+	}
+
+	{
+		# [perl #123946] gets lengths and pointers wrong on unbraced \p
+		eval q{ qr{\p^} };
+		my $error = $@;
+		ok(1, q{qr{\\p^} didn't crash});
+		like($error, qr{Empty \\p}i, 'gave appropriate error for qr{\p^}');
+		my $re = eval q{ qr{\p^ L} };
+		is($@, '', 'accepted qr{\p^ L}');
+		like("-", $re, 'matched qr{\p^ L} as non-letter');
 	}
 } # End of sub run_tests
 
