@@ -1974,8 +1974,6 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   define NV_EPSILON FLT128_EPSILON
 #   define NV_MIN_10_EXP FLT128_MIN_10_EXP
 #   define NV_MAX_10_EXP FLT128_MAX_10_EXP
-#   define NV_INF HUGE_VALQ
-#   define NV_NAN nanq("0")
 #   define Perl_acos acosq
 #   define Perl_asin asinq
 #   define Perl_atan atanq
@@ -4293,98 +4291,6 @@ START_EXTERN_C
 END_EXTERN_C
 #endif
 
-/* If you are thinking of using HUGE_VAL for infinity, or using
- * <math.h> functions to generate NV_INF (e.g. exp(1e9), log(-1.0)),
- * stop.  Neither will work portably: HUGE_VAL can be just DBL_MAX,
- * and the math functions might be just generating DBL_MAX, or even
- * zero.  */
-
-#if !defined(NV_INF) && defined(USE_LONG_DOUBLE)
-#  if !defined(NV_INF) && defined(LDBL_INFINITY)
-#    define NV_INF LDBL_INFINITY
-#  endif
-#  if !defined(NV_INF) && defined(INFINITYL)
-#    define NV_INF INFINITYL
-#  endif
-#endif
-#if !defined(NV_INF) && defined(DBL_INFINITY)
-#  define NV_INF (NV)DBL_INFINITY
-#endif
-#if !defined(NV_INF) && defined(INFINITY)
-#  define NV_INF (NV)INFINITY
-#endif
-#if !defined(NV_INF) && defined(INF)
-#  define NV_INF (NV)INF
-#endif
-#if !defined(NV_INF)
-#  if INTSIZE == 4
-/* At this point we assume the IEEE 754 floating point (and of course,
- * we also assume a floating point format that can encode an infinity).
- * We will coerce an int32 (which will encode the infinity) into
- * a 32-bit float, which will then be cast into NV.
- *
- * Note that we intentionally use a float and 32-bit int, instead of
- * shifting a small integer into a full IV, and from that into a full
- * NV, because:
- *
- * (1) an IV might not be wide enough to cover all the bits of an NV.
- * (2) the exponent part (including the infinity and nan bits) of a NV
- *     might be wider than just 16 bits.
- *
- * Below the NV_NAN logic has similar __PL_nan_u fallback, the only
- * difference being the int32 constant being coerced. */
-#    define __PL_inf_float_int32 0x7F800000
-static const union { unsigned int __i; float __f; } __PL_inf_u =
-    { __PL_inf_float_int32 };
-#    define NV_INF ((NV)(__PL_inf_u.__f))
-#  endif
-#endif
-#if !defined(NV_INF)
-#  define NV_INF ((NV)1.0/0.0) /* Some compilers will warn. */
-#endif
-
-#if !defined(NV_NAN) && defined(USE_LONG_DOUBLE)
-#   if !defined(NV_NAN) && defined(LDBL_NAN)
-#       define NV_NAN LDBL_NAN
-#   endif
-#   if !defined(NV_NAN) && defined(NANL)
-#       define NV_NAN NANL
-#   endif
-#   if !defined(NV_NAN) && defined(LDBL_QNAN)
-#       define NV_NAN LDBL_QNAN
-#   endif
-#endif
-#if !defined(NV_NAN) && defined(DBL_NAN)
-#  define NV_NAN (NV)DBL_NAN
-#endif
-#if !defined(NV_NAN) && defined(DBL_QNAN)
-#  define NV_NAN (NV)DBL_QNAN
-#endif
-#if !defined(NV_NAN) && defined(NAN)
-#  define NV_NAN (NV)NAN
-#endif
-#if !defined(NV_NAN) && defined(QNAN)
-#  define NV_NAN (NV)QNAN
-#endif
-#if !defined(NV_NAN) && defined(USE_LONG_DOUBLE) && defined(I_SUNMATH)
-#  define NV_NAN (NV)quiet_nan()
-#endif
-#if !defined(NV_NAN)
-#  if INTSIZE == 4
-/* See the discussion near __PL_inf_u. */
-#    define __PL_nan_float_int32 0x7FC00000
-static const union { unsigned int __i; float __f; } __PL_nan_u =
-    { __PL_nan_float_int32 };
-#    define NV_NAN ((NV)(__PL_nan_u.__f))
-#  endif
-#endif
-#if !defined(NV_NAN)
-#  define NV_NAN ((NV)0.0/0.0) /* Some compilers will warn. */
-#endif
-/* Do NOT try doing NV_NAN based on NV_INF and trying (NV_INF-NV_INF).
- * Though IEEE-754-logically correct, some compilers (like Visual C 2003)
- * falsely misoptimize that to zero (x-x is zero, right?) */
-
 #ifndef __cplusplus
 #  if !defined(WIN32) && !defined(VMS)
 #ifndef crypt
@@ -5619,6 +5525,124 @@ EXTCONST bool PL_valid_types_NV_set[];
 
 #endif
 
+/* In C99 we could use designated (named field) union initializers.
+ * In C89 we need to initialize the member declared first.
+ *
+ * With the U8_NV version you will want to have inner braces,
+ * while with the NV_U8 use just the NV.*/
+#define INFNAN_U8_NV_DECL EXTCONST union { U8 u8[NVSIZE]; NV nv; }
+#define INFNAN_NV_U8_DECL EXTCONST union { NV nv; U8 u8[NVSIZE]; }
+
+#ifdef DOINIT
+
+/* PL_inf and PL_nan initialization.
+ *
+ * For inf and nan initialization the ultimate fallback is dividing
+ * one or zero by zero: however, some compilers will warn or even fail
+ * on divide-by-zero, but hopefully something earlier will work.
+ *
+ * If you are thinking of using HUGE_VAL for infinity, or using
+ * <math.h> functions to generate NV_INF (e.g. exp(1e9), log(-1.0)),
+ * stop.  Neither will work portably: HUGE_VAL can be just DBL_MAX,
+ * and the math functions might be just generating DBL_MAX, or even zero.
+ *
+ * Also, do NOT try doing NV_NAN based on NV_INF and trying (NV_INF-NV_INF).
+ * Though logically correct, some compilers (like Visual C 2003)
+ * falsely misoptimize that to zero (x-x is always zero, right?)
+ */
+
+#  ifdef USE_QUADMATH
+/* Cannot use HUGE_VALQ for PL_inf because not a compile-time
+ * constant.  Also, the quadmath literals are anon structs which
+ * -Wc++-compat doesn't like. */
+GCC_DIAG_IGNORE(-Wc++-compat);
+INFNAN_NV_U8_DECL PL_inf = { 1.0Q/0.0Q };
+GCC_DIAG_RESTORE;
+#  elif NVSIZE == LONG_DOUBLESIZE && defined(LONGDBLINFBYTES)
+INFNAN_U8_NV_DECL PL_inf = { { LONGDBLINFBYTES } };
+#  elif NVSIZE == DOUBLESIZE && defined(DOUBLEINFBYTES)
+INFNAN_U8_NV_DECL PL_inf = { { DOUBLEINFBYTES } };
+#  else
+#    if NVSIZE == LONG_DOUBLESIZE && defined(USE_LONG_DOUBLE)
+#      if defined(LDBL_INFINITY)
+INFNAN_NV_U8_DECL PL_inf = { LDBL_INFINITY };
+#      elif defined(LDBL_INF)
+INFNAN_NV_U8_DECL PL_inf = { LDBL_INF };
+#      elif defined(INFINITY)
+INFNAN_NV_U8_DECL PL_inf = { (NV)INFINITY };
+#      elif defined(INF)
+INFNAN_NV_U8_DECL PL_inf = { (NV)INF };
+#      else
+INFNAN_NV_U8_DECL PL_inf = { 1.0L/0.0L }; /* keep last */
+#      endif
+#    else
+#      if defined(DBL_INFINITY)
+INFNAN_NV_U8_DECL PL_inf = { DBL_INFINITY };
+#      elif defined(DBL_INF)
+INFNAN_NV_U8_DECL PL_inf = { DBL_INF };
+#      elif defined(INFINITY) /* C99 */
+INFNAN_NV_U8_DECL PL_inf = { (NV)INFINITY };
+#      elif defined(INF)
+INFNAN_NV_U8_DECL PL_inf = { (NV)INF };
+#      else
+INFNAN_NV_U8_DECL PL_inf = { 1.0/0.0 }; /* keep last */
+#      endif
+#    endif
+#  endif
+
+#  ifdef USE_QUADMATH
+/* Cannot use nanq("0") for PL_nan because not a compile-time
+ * constant.  Also, the quadmath literals are anon structs which
+ * -Wc++-compat doesn't like. */
+GCC_DIAG_IGNORE(-Wc++-compat);
+INFNAN_NV_U8_DECL PL_nan = { 0.0Q/0.0Q };
+GCC_DIAG_RESTORE;
+#  elif NVSIZE == LONG_DOUBLESIZE && defined(LONGDBLNANBYTES)
+INFNAN_U8_NV_DECL PL_nan = { { LONGDBLNANBYTES } };
+#  elif NVSIZE == DOUBLESIZE && defined(DOUBLENANBYTES)
+INFNAN_U8_NV_DECL PL_nan = { { DOUBLENANBYTES } };
+#  else
+#    if NVSIZE == LONG_DOUBLESIZE && defined(USE_LONG_DOUBLE)
+#      if defined(LDBL_NAN)
+INFNAN_NV_U8_DECL PL_nan = { LDBL_NAN };
+#      elif defined(LDBL_QNAN)
+INFNAN_NV_U8_DECL PL_nan = { LDBL_QNAN };
+#      elif defined(NAN)
+INFNAN_NV_U8_DECL PL_nan = { (NV)NAN };
+#      else
+INFNAN_NV_U8_DECL PL_nan = { 0.0L/0.0L }; /* keep last */
+#      endif
+#    else
+#      if defined(DBL_NAN)
+INFNAN_NV_U8_DECL PL_nan = { DBL_NAN };
+#      elif defined(DBL_QNAN)
+INFNAN_NV_U8_DECL PL_nan = { DBL_QNAN };
+#      elif defined(NAN) /* C99 */
+INFNAN_NV_U8_DECL PL_nan = { (NV)NAN };
+#      else
+INFNAN_NV_U8_DECL PL_nan = { 0.0/0.0 }; /* keep last */
+#      endif
+#    endif
+#  endif
+
+#else
+
+INFNAN_NV_U8_DECL PL_inf;
+INFNAN_NV_U8_DECL PL_nan;
+
+#endif
+
+/* If you have not defined NV_INF/NV_NAN (like for example win32/win32.h),
+ * we will define NV_INF/NV_NAN as the nv part of the global const
+ * PL_inf/PL_nan.  Note, however, that the preexisting NV_INF/NV_NAN
+ * might not be a compile-time constant, in which case it cannot be
+ * used to initialize PL_inf/PL_nan above. */
+#ifndef NV_INF
+#  define NV_INF PL_inf.nv
+#endif
+#ifndef NV_NAN
+#  define NV_NAN PL_nan.nv
+#endif
 
 /* if these never got defined, they need defaults */
 #ifndef PERL_SET_CONTEXT
@@ -6579,7 +6603,15 @@ extern void moncontrol(int);
 
 #endif /* LONG_DOUBLEKIND */
 
-#if NVSIZE == DOUBLESIZE
+#ifdef USE_QUADMATH /* assume quadmath endianness == native double endianness */
+#  if defined(DOUBLE_LITTLE_ENDIAN)
+#    define NV_LITTLE_ENDIAN
+#  elif defined(DOUBLE_BIG_ENDIAN)
+#    define NV_BIG_ENDIAN
+#  elif defined(DOUBLE_MIX_ENDIAN) /* stretch */
+#    define NV_MIX_ENDIAN
+#  endif
+#elif NVSIZE == DOUBLESIZE
 #  ifdef DOUBLE_LITTLE_ENDIAN
 #    define NV_LITTLE_ENDIAN
 #  endif

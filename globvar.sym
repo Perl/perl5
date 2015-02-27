@@ -15,6 +15,7 @@ PL_fold_locale
 PL_freq
 PL_global_struct_size
 PL_hexdigit
+PL_inf
 PL_interp_size
 PL_interp_size_5_18_0
 PL_keyword_plugin
@@ -24,6 +25,7 @@ PL_magic_vtable_names
 PL_magic_vtables
 PL_memory_wrap
 PL_mod_latin1_uc
+PL_nan
 PL_no_aelem
 PL_no_dir_func
 PL_no_func
