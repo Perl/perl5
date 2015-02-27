@@ -119,6 +119,7 @@ sub _loose_name ($) {
 
             $type =~ s/^\s+//;
             $type =~ s/\s+$//;
+            return $type unless length $type;
 
             # regcomp.c surrounds the property name with '__" and '_i' if this
             # is to be caseless matching.
