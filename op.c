@@ -12613,7 +12613,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
         if (pass) {
             OP *mderef;
-            OP *p;
+            OP *p, *q;
 
             mderef = newUNOP_AUX(OP_MULTIDEREF, 0, NULL, arg_buf);
             if (index_skip == -1) {
@@ -12778,8 +12778,11 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
             /* excise and free the original tree, and replace with
              * the multideref op */
             p = op_sibling_splice(top_op, NULL, -1, mderef);
-            for(; p; p = OpSIBLING(p))
+            while (p) {
+                q = OpSIBLING(p);
                 op_free(p);
+                p = q;
+            }
             op_null(top_op);
         }
         else {
