@@ -6645,6 +6645,60 @@ extern void moncontrol(int);
 #  define NV_MANT_BITS LONGDBLMANTBITS
 #endif
 
+/* NaNs (not-a-numbers) can carry payload bits, in addition to
+ * "nan-ness".  Part of the payload is the quiet/signaling bit.
+ * To back up a bit (harhar):
+ *
+ * For IEEE 754 64-bit formats [1]:
+ *
+ * s 000 (mantissa all-zero)  zero
+ * s 000 (mantissa non-zero)  subnormals (denormals)
+ * s 001 ... 7fe              normals
+ * s 7ff q                    nan
+ *
+ * For IEEE 754 128-bit formats:
+ *
+ * s 0000 (mantissa all-zero)  zero
+ * s 0000 (mantissa non-zero)  subnormals (denormals)
+ * s 0001 ... 7ffe             normals
+ * s 7fff q                    nan
+ *
+ * [1] this looks like big-endian, but applies equally to little-endian.
+ *
+ * s = Sign bit.  Yes, zeros and nans can have negative sign,
+ *     the interpretation is application-specific.
+ *
+ * q = Quietness bit, the interpretation is platform-specific.
+ *     most platforms have the most significant bit being one
+ *     meaning quiet, but some (older mips, hppa) have the msb
+ *     being one meaning signaling.  Note that the above means
+ *     that on most platforms there cannot be signaling nan with
+ *     zero payload because that is identical with infinity.
+ *
+ * x86 80-bit extended precision is different, the mantissa bits:
+ *
+ * 63 62 61   30387+    pre-387    visual c
+ * --------   ----      --------   --------
+ *  0  0  0   invalid   infinity
+ *  0  0  1   invalid   snan
+ *  0  1  0   invalid   snan
+ *  0  1  1   invalid   snan
+ *  1  0  0   infinity  snan        1.#INF
+ *  1  0  1   snan                  1.#SNAN
+ *  1  1  0   qnan                 -1.#IND  (x86 chooses this to negative)
+ *  1  1  1   qnan                  1.#QNAN
+ *
+ * This means that in this format there are 61 bits available
+ * for the nan payload.
+ *
+ * NV_NAN_PAYLOAD_BITS tells how many bits there are available for
+ * the nan payload, *not* including the quiet/signaling bit. */
+#if defined(USE_LONG_DOUBLE) && defined(LONGDOUBLE_X86_80_BIT)
+#  define NV_NAN_PAYLOAD_BITS 61
+#else
+#  define NV_NAN_PAYLOAD_BITS (NV_MANT_BITS - 1)
+#endif
+
 /*
 
    (KEEP THIS LAST IN perl.h!)
