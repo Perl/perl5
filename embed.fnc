@@ -818,7 +818,7 @@ Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep
 Apd	|int	|grok_number_flags|NN const char *pv|STRLEN len|NULLOK UV *valuep|U32 flags
 ApdR	|bool	|grok_numeric_radix|NN const char **sp|NN const char *send
 Apd	|UV	|grok_oct	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
-Apdn	|bool	|grok_atoUV	|NN const char* pv|NN UV* valptr|NULLOK const char** endptr
+EXpn	|bool	|grok_atoUV	|NN const char* pv|NN UV* valptr|NULLOK const char** endptr
 : These are all indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_clearenv	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clear_all_env|NN SV* sv|NN MAGIC* mg

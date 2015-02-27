@@ -117,6 +117,7 @@
 */
 
 #define PERL_NO_GET_CONTEXT
+#define PERL_EXT
 
 #include "EXTERN.h"
 #define PERL_IN_DL_DLOPEN_XS

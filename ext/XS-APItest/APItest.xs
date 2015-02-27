@@ -1,4 +1,8 @@
 #define PERL_IN_XS_APITEST
+
+/* We want to be able to test things that aren't API yet. */
+#define PERL_EXT
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"

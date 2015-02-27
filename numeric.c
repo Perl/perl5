@@ -1033,7 +1033,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 }
 
 /*
-=for apidoc grok_atoUV
+grok_atoUV
 
 grok_atoUV parses a C-style zero-byte terminated string, looking for
 a decimal unsigned integer.
@@ -1060,7 +1060,6 @@ used for incremental parsing, and therefore should be avoided
 atoi and strtol are also affected by locale settings, which can also be
 seen as a bug (global state controlled by user environment).
 
-=cut
 */
 
 bool

@@ -3,6 +3,7 @@
  * Stubs for platforms that do not support dynamic linking
  */
 
+#define PERL_EXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"

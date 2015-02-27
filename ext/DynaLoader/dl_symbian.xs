@@ -26,6 +26,7 @@
  * trouble because of Symbian's New(), Copy(), etc definitions. */
 
 #define DL_SYMBIAN_XS
+#define PERL_EXT
 
 #include "EXTERN.h"
 #include "perl.h"

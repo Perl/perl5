@@ -25,6 +25,7 @@ calls.
 #include <string.h>
 
 #define PERL_NO_GET_CONTEXT
+#define PERL_EXT
 
 #include "EXTERN.h"
 #include "perl.h"

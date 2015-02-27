@@ -84,6 +84,7 @@
    Other comments within the dl_dlopen.xs file may be helpful as well.
 */
 
+#define PERL_EXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"

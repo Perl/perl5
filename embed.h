@@ -178,7 +178,6 @@
 #define getcwd_sv(a)		Perl_getcwd_sv(aTHX_ a)
 #define gp_free(a)		Perl_gp_free(aTHX_ a)
 #define gp_ref(a)		Perl_gp_ref(aTHX_ a)
-#define grok_atoUV		Perl_grok_atoUV
 #define grok_bin(a,b,c,d)	Perl_grok_bin(aTHX_ a,b,c,d)
 #define grok_hex(a,b,c,d)	Perl_grok_hex(aTHX_ a,b,c,d)
 #define grok_infnan(a,b)	Perl_grok_infnan(aTHX_ a,b)
@@ -901,6 +900,7 @@
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
+#define grok_atoUV		Perl_grok_atoUV
 #define mg_find_mglob(a)	Perl_mg_find_mglob(aTHX_ a)
 #define multideref_stringify(a,b)	Perl_multideref_stringify(aTHX_ a,b)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)

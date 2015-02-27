@@ -10,6 +10,7 @@
 
 #define PERL_EUPXS_ALWAYS_EXPORT
 #ifndef START_MY_CXT /* Some IDEs try compiling this standalone. */
+#   define PERL_EXT
 #   include "EXTERN.h"
 #   include "perl.h"
 #   include "XSUB.h"
