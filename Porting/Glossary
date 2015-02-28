@@ -2840,6 +2840,10 @@ dlsrc (dlsrc.U):
 	This variable contains the name of the dynamic loading file that
 	will be used with the package.
 
+doubleinfbytes (infnan.U):
+	This variable contains comma-separated list of hexadecimal bytes
+	for the double precision infinity.
+
 doublekind (longdblfio.U):
 	This variable, if defined, encodes the type of a double:
 	1 = IEEE 754 32-bit big little endian,
@@ -2851,6 +2855,10 @@ doublekind (longdblfio.U):
 	7 = IEEE 754 64-bit big mixed endian le-be,
 	8 = IEEE 754 64-bit big mixed endian be-le,
 	-1 = unknown format.
+
+doublenanbytes (infnan.U):
+	This variable contains comma-separated list of hexadecimal bytes
+	for the double precision not-a-number.
 
 doublesize (doublesize.U):
 	This variable contains the value of the DOUBLESIZE symbol, which
@@ -4076,12 +4084,20 @@ loclibpth (libpth.U):
 	libraries.  It is prepended to libpth, and is intended to be easily
 	set from the command line.
 
+longdblinfbytes (infnan.U):
+	This variable contains comma-separated list of hexadecimal bytes
+	for the long double precision infinity.
+
 longdblkind (d_longdbl.U):
 	This variable, if defined, encodes the type of a long double:
 	0 = double, 1 = IEEE 754 128-bit big little endian,
 	2 = IEEE 754 128-bit big big endian, 3 = x86 80-bit little endian,
 	4 = x86 80-bit big endian, 5 = double-double 128-bit little endian,
 	6 = double-double 128-bit big endian, -1 = unknown format.
+
+longdblnanbytes (infnan.U):
+	This variable contains comma-separated list of hexadecimal bytes
+	for the long double precision not-a-number.
 
 longdblsize (d_longdbl.U):
 	This variable contains the value of the LONG_DOUBLESIZE symbol, which

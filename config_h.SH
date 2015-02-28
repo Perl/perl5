@@ -4837,6 +4837,27 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_PRIeldbl PERL_PRIeldbl	$sPRIeldbl	/**/
 #$d_SCNfldbl PERL_SCNfldbl	$sSCNfldbl	/**/
 
+/* DOUBLEINFBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes for the double precision infinity.
+ */
+/* DOUBLENANBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes (0xHH) for the double precision not-a-number.
+ */
+/* LONGDBLINFBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes for the long double precision infinity.
+ */
+/* LONGDBLNANBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes (0xHH) for the long double precision not-a-number.
+ */
+#define DOUBLEINFBYTES $doubleinfbytes		/**/
+#define DOUBLENANBYTES $doublenanbytes		/**/
+#define LONGDBLINFBYTES $longdblinfbytes		/**/
+#define LONGDBLNANBYTES $longdblnanbytes		/**/
+
 /* NEED_VA_COPY:
  *	This symbol, if defined, indicates that the system stores
  *	the variable argument list datatype, va_list, in a format

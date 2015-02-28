@@ -2671,6 +2671,27 @@
  */
 #define DOUBLESIZE 8		/**/
 
+/* DOUBLEINFBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes for the double precision infinity.
+ */
+/* DOUBLENANBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes (0xHH) for the double precision not-a-number.
+ */
+/* LONGDBLINFBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes for the long double precision infinity.
+ */
+/* LONGDBLNANBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes (0xHH) for the long double precision not-a-number.
+ */
+#define DOUBLEINFBYTES 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f		/**/
+#define DOUBLENANBYTES 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f		/**/
+#define LONGDBLINFBYTES 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x7f, 0x00, 0x00		/**/
+#define LONGDBLNANBYTES 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x7f, 0x00, 0x00		/**/
+
 /* EBCDIC:
  *	This symbol, if defined, indicates that this system uses
  *	EBCDIC encoding.
