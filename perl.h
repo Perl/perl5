@@ -6693,11 +6693,104 @@ extern void moncontrol(int);
  *
  * NV_NAN_PAYLOAD_BITS tells how many bits there are available for
  * the nan payload, *not* including the quiet/signaling bit. */
-#if defined(USE_LONG_DOUBLE) && defined(LONGDOUBLE_X86_80_BIT)
+#if defined(USE_LONG_DOUBLE) && NVSIZE > DOUBLESIZE && \
+    (LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
+     LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN)
 #  define NV_NAN_PAYLOAD_BITS 61
 #else
 #  define NV_NAN_PAYLOAD_BITS (NV_MANT_BITS - 1)
 #endif
+
+#if defined(USE_LONG_DOUBLE) && NVSIZE > DOUBLESIZE
+#  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 13
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 2
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 7
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 2
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 13
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 1
+#  else
+#    error "Unexpected long double format"
+#  endif
+#else
+#  ifdef USE_QUADMATH
+#    ifdef NV_LITTLE_ENDIAN
+#      define NV_NAN_QS_BYTE_OFFSET 13
+#    elif defined(NV_BIG_ENDIAN)
+#      define NV_NAN_QS_BYTE_OFFSET 2
+#    else
+#      error "Unexpected quadmath format"
+#    endif
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 2
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 1
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 6
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 1
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 13
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
+#    define NV_NAN_QS_BYTE_OFFSET 2
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
+#    define NV_NAN_QS_BYTE_OFFSET 2 /* bytes 4 5 6 7 0 1 2 3 (MSB 7) */
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
+#    define NV_NAN_QS_BYTE_OFFSET 5 /* bytes 3 2 1 0 7 6 5 4 (MSB 7) */
+#  else
+#    error "Unexpected double format"
+#  endif
+#endif
+/* NV_NAN_QS_BYTE is the byte to test for the quiet/signaling */
+#define NV_NAN_QS_BYTE(nvp) (((U8*)(nvp))[NV_NAN_QS_BYTE_OFFSET])
+/* NV_NAN_QS_BIT is the bit to test in the NV_NAN_QS_BYTE_OFFSET
+ * for the quiet/signaling */
+#if defined(USE_LONG_DOUBLE) && \
+  (LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
+   LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN)
+#  define NV_NAN_QS_BIT_SHIFT 6 /* 0x40 */
+#elif defined(USE_LONG_DOUBLE) && \
+  (LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN || \
+   LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN)
+#  define NV_NAN_QS_BIT_SHIFT 3 /* 0x08, but not via NV_NAN_PAYLOAD_BITS */
+#else
+#  define NV_NAN_QS_BIT_SHIFT \
+    ((NV_NAN_PAYLOAD_BITS) % 8) /* usually 3, or 0x08 */
+#endif
+#define NV_NAN_QS_BIT (1 << (NV_NAN_QS_BIT_SHIFT))
+/* NV_NAN_QS_BIT_OFFSET is the bit offset from the beginning of a NV
+ * (bytes ordered big-endianly) for the quiet/signaling bit
+ * for the quiet/signaling */
+#define NV_NAN_QS_BIT_OFFSET \
+    (8 * (NV_NAN_QS_BYTE_OFFSET) + (NV_NAN_QS_BIT_SHIFT))
+/* NV_NAN_QS_QUIET (always defined) is one if the NV_NAN_QS_QS_BIT being
+ * on/one indicates quiet NaN. NV_NAN_QS_SIGNALING (also always defined)
+ * is on/one if the NV_NAN_QS_BIT being one indicates signaling NaN. */
+#define NV_NAN_QS_QUIET \
+    ((NV_NAN_QS_BYTE(PL_nan.u8) & NV_NAN_QS_BIT) == NV_NAN_QS_BIT)
+#define NV_NAN_QS_SIGNALING (!(NV_NAN_QS_QUIET))
+#define NV_NAN_QS_TEST(nvp) (NV_NAN_QS_BYTE(nvp) & NV_NAN_QS_BIT)
+/* NV_NAN_IS_QUIET() returns true if the NV behind nvp is a NaN,
+ * whether it is a quiet NaN, NV_NAN_IS_SIGNALING() if a signaling NaN.
+ * Note however that these do not check whether the nvp is a NaN. */
+#define NV_NAN_IS_QUIET(nvp) \
+    (NV_NAN_QS_TEST(nvp) == (NV_NAN_QS_QUIET ? NV_NAN_QS_BIT : 0))
+#define NV_NAN_IS_SIGNALING(nvp) \
+    (NV_NAN_QS_TEST(nvp) == (NV_NAN_QS_QUIET ? 0 : NV_NAN_QS_BIT))
+#define NV_NAN_SET_QUIET(nvp) \
+    (NV_NAN_QS_QUIET ? \
+     (NV_NAN_QS_BYTE(nvp) |= NV_NAN_QS_BIT) : \
+     (NV_NAN_QS_BYTE(nvp) &= ~NV_NAN_QS_BIT))
+#define NV_NAN_SET_SIGNALING(nvp) \
+    (NV_NAN_QS_QUIET ? \
+     (NV_NAN_QS_BYTE(nvp) &= ~NV_NAN_QS_BIT) : \
+     (NV_NAN_QS_BYTE(nvp) |= NV_NAN_QS_BIT))
+#define NV_NAN_QS_XOR(nvp) (NV_NAN_QS_BYTE(nvp) ^= NV_NAN_QS_BIT)
 
 /*
 
