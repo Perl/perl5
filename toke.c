@@ -4493,6 +4493,14 @@ Perl_yylex(pTHX)
 	/* FALLTHROUGH */
 
     case LEX_INTERPEND:
+	/* Treat state as LEX_NORMAL if we have no inner lexing scope.
+	   XXX This hack can be removed if we stop setting PL_lex_state to
+	   LEX_KNOWNEXT, as can the hack under LEX_INTREPCONCAT below.  */
+	if (UNLIKELY(!PL_lex_inwhat)) {
+	    PL_lex_state = LEX_NORMAL;
+	    break;
+	}
+
 	if (PL_lex_dojoin) {
 	    const U8 dojoin_was = PL_lex_dojoin;
 	    PL_lex_dojoin = FALSE;
