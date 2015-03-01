@@ -497,3 +497,9 @@ eval '"$a{ 1 m// }"; //';
 
 # Used to crash [perl #123801]
 eval q|s##[}#e|;
+
+# Used to fail an assertion [perl #123763]
+{
+ local $SIG{__WARN__}=sub{};
+ eval q|my($_);0=split|;
+}
