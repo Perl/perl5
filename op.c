@@ -3412,7 +3412,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 		       newSVOP(OP_CONST, 0, stashsv),
 		       op_prepend_elem(OP_LIST,
 				    newUNOP(OP_REFGEN, 0,
-					    op_lvalue(arg, OP_REFGEN)),
+					    arg),
 				    dup_attrlist(attrs)));
 
     /* Fake up a method call to import */
