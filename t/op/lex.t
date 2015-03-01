@@ -183,5 +183,5 @@ fresh_perl_is(
   'syntax error at - line 1, near "{}"' . "\n" .
   "Execution of - aborted due to compilation errors.\n",
    { stderr => 1 },
-  '/$0{}/ with no newline [perl #123712]'
+  '/$0{}/ with no newline [perl #123802]'
 );
