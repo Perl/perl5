@@ -2446,26 +2446,26 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       20, /* padhv */
       -1, /* padany */
       26, /* pushre */
-      27, /* rv2gv */
-      34, /* rv2sv */
-      39, /* av2arylen */
-      41, /* rv2cv */
+      28, /* rv2gv */
+      35, /* rv2sv */
+      40, /* av2arylen */
+      42, /* rv2cv */
       -1, /* anoncode */
        0, /* prototype */
        0, /* refgen */
        0, /* srefgen */
        0, /* ref */
-      48, /* bless */
-      49, /* backtick */
-      48, /* glob */
+      49, /* bless */
+      50, /* backtick */
+      49, /* glob */
        0, /* readline */
       -1, /* rcatline */
        0, /* regcmaybe */
        0, /* regcreset */
        0, /* regcomp */
-      54, /* match */
-      26, /* qr */
-      54, /* subst */
+      26, /* match */
+      55, /* qr */
+      26, /* subst */
       56, /* substcont */
       58, /* trans */
       58, /* transr */
@@ -2478,7 +2478,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* defined */
        0, /* undef */
        0, /* study */
-      39, /* pos */
+      40, /* pos */
        0, /* preinc */
        0, /* i_preinc */
        0, /* predec */
@@ -2557,8 +2557,8 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       84, /* vec */
       79, /* index */
       79, /* rindex */
-      48, /* sprintf */
-      48, /* formline */
+      49, /* sprintf */
+      49, /* formline */
       72, /* ord */
       72, /* chr */
       79, /* crypt */
@@ -2578,7 +2578,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* avalues */
        0, /* each */
        0, /* values */
-      39, /* keys */
+      40, /* keys */
      103, /* delete */
      106, /* exists */
      108, /* rv2hv */
@@ -2586,15 +2586,15 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       99, /* hslice */
      102, /* kvhslice */
      116, /* multideref */
-      48, /* unpack */
-      48, /* pack */
+      49, /* unpack */
+      49, /* pack */
      123, /* split */
-      48, /* join */
+      49, /* join */
      126, /* list */
       12, /* lslice */
-      48, /* anonlist */
-      48, /* anonhash */
-      48, /* splice */
+      49, /* anonlist */
+      49, /* anonhash */
+      49, /* splice */
       79, /* push */
        0, /* pop */
        0, /* shift */
@@ -2621,9 +2621,9 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      150, /* leavesub */
      150, /* leavesublv */
      152, /* caller */
-      48, /* warn */
-      48, /* die */
-      48, /* reset */
+      49, /* warn */
+      49, /* die */
+      49, /* reset */
       -1, /* lineseq */
      154, /* nextstate */
      154, /* dbstate */
@@ -2641,7 +2641,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      164, /* redo */
      164, /* dump */
      164, /* goto */
-      48, /* exit */
+      49, /* exit */
        0, /* method_named */
        0, /* method_super */
        0, /* method_redir */
@@ -2653,47 +2653,47 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       -1, /* break */
       -1, /* continue */
      166, /* open */
-      48, /* close */
-      48, /* pipe_op */
-      48, /* fileno */
-      48, /* umask */
-      48, /* binmode */
-      48, /* tie */
+      49, /* close */
+      49, /* pipe_op */
+      49, /* fileno */
+      49, /* umask */
+      49, /* binmode */
+      49, /* tie */
        0, /* untie */
        0, /* tied */
-      48, /* dbmopen */
+      49, /* dbmopen */
        0, /* dbmclose */
-      48, /* sselect */
-      48, /* select */
-      48, /* getc */
-      48, /* read */
-      48, /* enterwrite */
+      49, /* sselect */
+      49, /* select */
+      49, /* getc */
+      49, /* read */
+      49, /* enterwrite */
      150, /* leavewrite */
       -1, /* prtf */
       -1, /* print */
       -1, /* say */
-      48, /* sysopen */
-      48, /* sysseek */
-      48, /* sysread */
-      48, /* syswrite */
-      48, /* eof */
-      48, /* tell */
-      48, /* seek */
-      48, /* truncate */
-      48, /* fcntl */
-      48, /* ioctl */
+      49, /* sysopen */
+      49, /* sysseek */
+      49, /* sysread */
+      49, /* syswrite */
+      49, /* eof */
+      49, /* tell */
+      49, /* seek */
+      49, /* truncate */
+      49, /* fcntl */
+      49, /* ioctl */
       79, /* flock */
-      48, /* send */
-      48, /* recv */
-      48, /* socket */
-      48, /* sockpair */
-      48, /* bind */
-      48, /* connect */
-      48, /* listen */
-      48, /* accept */
-      48, /* shutdown */
-      48, /* gsockopt */
-      48, /* ssockopt */
+      49, /* send */
+      49, /* recv */
+      49, /* socket */
+      49, /* sockpair */
+      49, /* bind */
+      49, /* connect */
+      49, /* listen */
+      49, /* accept */
+      49, /* shutdown */
+      49, /* gsockopt */
+      49, /* ssockopt */
        0, /* getsockname */
        0, /* getpeername */
        0, /* lstat */
@@ -2737,10 +2737,10 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* readlink */
       79, /* mkdir */
       72, /* rmdir */
-      48, /* open_dir */
+      49, /* open_dir */
        0, /* readdir */
        0, /* telldir */
-      48, /* seekdir */
+      49, /* seekdir */
        0, /* rewinddir */
        0, /* closedir */
       -1, /* fork */
@@ -2757,20 +2757,20 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      180, /* time */
       -1, /* tms */
        0, /* localtime */
-      48, /* gmtime */
+      49, /* gmtime */
        0, /* alarm */
       79, /* sleep */
-      48, /* shmget */
-      48, /* shmctl */
-      48, /* shmread */
-      48, /* shmwrite */
-      48, /* msgget */
-      48, /* msgctl */
-      48, /* msgsnd */
-      48, /* msgrcv */
-      48, /* semop */
-      48, /* semget */
-      48, /* semctl */
+      49, /* shmget */
+      49, /* shmctl */
+      49, /* shmread */
+      49, /* shmwrite */
+      49, /* msgget */
+      49, /* msgctl */
+      49, /* msgsnd */
+      49, /* msgrcv */
+      49, /* semop */
+      49, /* semget */
+      49, /* semctl */
        0, /* require */
        0, /* dofile */
       -1, /* hintseval */
@@ -2779,16 +2779,16 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* entertry */
       -1, /* leavetry */
        0, /* ghbyname */
-      48, /* ghbyaddr */
+      49, /* ghbyaddr */
       -1, /* ghostent */
        0, /* gnbyname */
-      48, /* gnbyaddr */
+      49, /* gnbyaddr */
       -1, /* gnetent */
        0, /* gpbyname */
-      48, /* gpbynumber */
+      49, /* gpbynumber */
       -1, /* gprotoent */
-      48, /* gsbyname */
-      48, /* gsbyport */
+      49, /* gsbyname */
+      49, /* gsbyport */
       -1, /* gservent */
        0, /* shostent */
        0, /* snetent */
@@ -2809,12 +2809,12 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       -1, /* sgrent */
       -1, /* egrent */
       -1, /* getlogin */
-      48, /* syscall */
+      49, /* syscall */
        0, /* lock */
        0, /* once */
       -1, /* custom */
        0, /* reach */
-      39, /* rkeys */
+      40, /* rkeys */
        0, /* rvalues */
      187, /* coreargs */
        3, /* runcv */
@@ -2856,14 +2856,14 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x29dc, 0x3bd8, 0x0257, /* padsv */
     0x29dc, 0x3bd8, 0x2acc, 0x38c9, /* padav */
     0x29dc, 0x3bd8, 0x0534, 0x05d0, 0x2acc, 0x38c9, /* padhv */
-    0x3699, /* pushre, qr */
+    0x3698, 0x3ef1, /* pushre, match, subst */
     0x29dc, 0x1758, 0x0256, 0x2acc, 0x2cc8, 0x3c84, 0x0003, /* rv2gv */
     0x29dc, 0x2ef8, 0x0256, 0x3c84, 0x0003, /* rv2sv */
     0x2acc, 0x0003, /* av2arylen, pos, keys, rkeys */
     0x2c3c, 0x0b98, 0x08f4, 0x028c, 0x3e48, 0x3c84, 0x0003, /* rv2cv */
     0x012f, /* bless, glob, sprintf, formline, unpack, pack, join, anonlist, anonhash, splice, warn, die, reset, exit, close, pipe_op, fileno, umask, binmode, tie, dbmopen, sselect, select, getc, read, enterwrite, sysopen, sysseek, sysread, syswrite, eof, tell, seek, truncate, fcntl, ioctl, send, recv, socket, sockpair, bind, connect, listen, accept, shutdown, gsockopt, ssockopt, open_dir, seekdir, gmtime, shmget, shmctl, shmread, shmwrite, msgget, msgctl, msgsnd, msgrcv, semop, semget, semctl, ghbyaddr, gnbyaddr, gpbynumber, gsbyname, gsbyport, syscall */
     0x30dc, 0x2ff8, 0x24b4, 0x23f0, 0x0003, /* backtick */
-    0x3698, 0x3ef1, /* match, subst */
+    0x3699, /* qr */
     0x3698, 0x0003, /* substcont */
     0x0c9c, 0x1dd8, 0x0834, 0x3ef0, 0x3a0c, 0x2168, 0x01e4, 0x0141, /* trans, transr */
     0x0adc, 0x0458, 0x0067, /* sassign */
@@ -2931,7 +2931,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* PADAV      */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpPAD_STATE|OPpLVAL_INTRO),
     /* PADHV      */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL|OPpPAD_STATE|OPpLVAL_INTRO),
     /* PADANY     */ (0),
-    /* PUSHRE     */ (OPpRUNTIME),
+    /* PUSHRE     */ (OPpTARGET_MY|OPpRUNTIME),
     /* RV2GV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpDONT_INIT_GV|OPpMAYBE_LVSUB|OPpDEREF|OPpALLOW_FAKE|OPpLVAL_INTRO),
     /* RV2SV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpDEREF|OPpOUR_INTRO|OPpLVAL_INTRO),
     /* AV2ARYLEN  */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
