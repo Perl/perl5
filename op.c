@@ -4577,7 +4577,10 @@ Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
     if (!o || o->op_type != OP_LIST)
         o = force_list(o, 0);
     else
+    {
 	o->op_flags &= ~OPf_WANT;
+	o->op_private &= ~OPpLVAL_INTRO;
+    }
 
     if (!(PL_opargs[type] & OA_MARK))
 	op_null(cLISTOPo->op_first);
