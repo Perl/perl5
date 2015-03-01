@@ -587,3 +587,6 @@ SKIP: {
     \(@a) = \($x,$y);
     goto do_test3;
 }
+
+# Used to fail an assertion [perl #123821]
+eval '\(&$0)=0';
