@@ -502,4 +502,5 @@ eval q|s##[}#e|;
 {
  local $SIG{__WARN__}=sub{};
  eval q|my($_);0=split|;
+ eval q|my $_; @x = split|;
 }

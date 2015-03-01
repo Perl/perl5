@@ -11097,6 +11097,8 @@ Perl_ck_split(pTHX_ OP *o)
         op_sibling_splice(o, NULL, 0, kid);
     }
     CHANGE_TYPE(kid, OP_PUSHRE);
+    /* target implies @ary=..., so wipe it */
+    kid->op_targ = 0;
     scalar(kid);
     if (((PMOP *)kid)->op_pmflags & PMf_GLOBAL) {
       Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
