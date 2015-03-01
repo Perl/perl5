@@ -534,6 +534,12 @@ eval{$1=eval{a:}};
 eval "map+map";
 eval "grep+grep";
 
+# ALso failed an assertion [perl #123848]
+{
+ local $SIG{__WARN__} = sub{};
+ eval 'my $_; m// ~~ 0';
+}
+
 # Add new tests HERE (above this line)
 
 # bug #74022: Loop on characters in \p{OtherIDContinue}

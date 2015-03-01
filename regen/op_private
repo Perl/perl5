@@ -381,7 +381,7 @@ addbits($_, 4 => qw(OPpTARGET_MY TARGMY))
     for ops_with_flag('T'),
     # This flag is also used to indicate matches against implicit $_,
     # where $_ is lexical; e.g. my $_; ....; /foo/
-    qw(match subst pushre trans transr);
+    qw(match subst pushre qr trans transr);
 ;
 
 
