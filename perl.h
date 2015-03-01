@@ -6777,6 +6777,131 @@ extern void moncontrol(int);
      (NV_NAN_QS_BYTE(nvp) |= NV_NAN_QS_BIT))
 #define NV_NAN_QS_XOR(nvp) (NV_NAN_QS_BYTE(nvp) ^= NV_NAN_QS_BIT)
 
+/* NV_NAN_PAYLOAD_MASK: masking the nan payload bits.
+ *
+ * NV_NAN_PAYLOAD_PERM: permuting the nan payload bytes.
+ * 0xFF means "don't go here".*/
+
+/* Shorthands to avoid typoses. */
+#define NV_NAN_PAYLOAD_PERM_0_TO_7 \
+  0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7
+#define NV_NAN_PAYLOAD_PERM_7_TO_0 \
+  0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0
+#define NV_NAN_PAYLOAD_MASK_IEEE_754_128_LE \
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, \
+  0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x00, 0x00
+#define NV_NAN_PAYLOAD_PERM_IEEE_754_128_LE \
+  NV_NAN_PAYLOAD_PERM_0_TO_7, \
+  0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xFF, 0xFF
+#define NV_NAN_PAYLOAD_MASK_IEEE_754_128_BE \
+  0x00, 0x00, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, \
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+#define NV_NAN_PAYLOAD_PERM_IEEE_754_128_BE \
+  0xFF, 0xFF, 0xd, 0xc, 0xb, 0xa, 0x9, 0x8, \
+  NV_NAN_PAYLOAD_PERM_7_TO_0
+#define NV_NAN_PAYLOAD_MASK_IEEE_754_64_LE \
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00
+#define NV_NAN_PAYLOAD_PERM_IEEE_754_64_LE \
+  0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0xFF
+#define NV_NAN_PAYLOAD_MASK_IEEE_754_64_BE \
+  0x00, 0x07, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+#define NV_NAN_PAYLOAD_PERM_IEEE_754_64_BE \
+  0xFF, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0
+
+#if defined(USE_LONG_DOUBLE) && NVSIZE > DOUBLESIZE
+#  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+#    define NV_NAN_PAYLOAD_MASK NV_NAN_PAYLOAD_MASK_IEEE_754_128_LE
+#    define NV_NAN_PAYLOAD_PERM NV_NAN_PAYLOAD_PERM_IEEE_754_128_LE
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
+#    define NV_NAN_PAYLOAD_MASK NV_NAN_PAYLOAD_MASK_IEEE_754_128_BE
+#    define NV_NAN_PAYLOAD_PERM NV_NAN_PAYLOAD_PERM_IEEE_754_128_BE
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
+#    if LONG_DOUBLESIZE == 12
+#      define NV_NAN_PAYLOAD_MASK \
+         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, \
+         0x00, 0x00, 0x00, 0x00
+#      define NV_NAN_PAYLOAD_PERM \
+         NV_NAN_PAYLOAD_PERM_0_TO_7, 0xFF, 0xFF, 0xFF, 0xFF
+#    elif LONG_DOUBLESIZE == 16
+#      define NV_NAN_PAYLOAD_MASK \
+         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, \
+         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+#      define NV_NAN_PAYLOAD_PERM \
+         NV_NAN_PAYLOAD_PERM_0_TO_7, \
+         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+#    else
+#      error "Unexpected x86 80-bit little-endian long double format"
+#    endif
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
+#    if LONG_DOUBLESIZE == 12
+#      define NV_NAN_PAYLOAD_MASK \
+         0x00, 0x00, 0x1f, 0xff, 0xff, 0xff, 0xff, 0xff, \
+         0xff, 0xff, 0x00, 0x00
+#      define NV_NAN_PAYLOAD_PERM \
+         NV_NAN_PAYLOAD_PERM_7_TO_0, 0xFF, 0xFF, 0xFF, 0xFF
+#    elif LONG_DOUBLESIZE == 16
+#      define NV_NAN_PAYLOAD_MASK \
+         0x00, 0x00, 0x1f, 0xff, 0xff, 0xff, 0xff, 0xff, \
+         0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+#      define NV_NAN_PAYLOAD_PERM \
+         NV_NAN_PAYLOAD_PERM_7_TO_0, \
+         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+#    else
+#      error "Unexpected x86 80-bit little-endian long double format"
+#    endif
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
+/* For double-double we assume only the first double is used for NaN. */
+#    define NV_NAN_PAYLOAD_MASK \
+       NV_NAN_PAYLOAD_MASK_IEEE_754_64_LE
+#    define NV_NAN_PAYLOAD_PERM \
+       NV_NAN_PAYLOAD_PERM_IEEE_754_64_LE
+#  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
+#    define NV_NAN_PAYLOAD_MASK \
+       NV_NAN_PAYLOAD_MASK_IEEE_754_64_BE
+#    define NV_NAN_PAYLOAD_PERM \
+       NV_NAN_PAYLOAD_PERM_IEEE_754_64_BE
+#  else
+#    error "Unexpected long double format"
+#  endif
+#else
+#  ifdef USE_QUADMATH /* quadmath is not long double */
+#    ifdef NV_LITTLE_ENDIAN
+#      define NV_NAN_PAYLOAD_MASK NV_NAN_PAYLOAD_MASK_IEEE_754_128_LE
+#      define NV_NAN_PAYLOAD_PERM NV_NAN_PAYLOAD_PERM_IEEE_754_128_LE
+#    elif defined(NV_BIG_ENDIAN)
+#      define NV_NAN_PAYLOAD_MASK NV_NAN_PAYLOAD_MASK_IEEE_754_128_BE
+#      define NV_NAN_PAYLOAD_PERM NV_NAN_PAYLOAD_PERM_IEEE_754_128_BE
+#    else
+#      error "Unexpected quadmath format"
+#    endif
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN
+#    define NV_NAN_PAYLOAD_MASK 0xff, 0xff, 0x07, 0x00
+#    define NV_NAN_PAYLOAD_PERM 0x0, 0x1, 0x2, 0xFF
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN
+#    define NV_NAN_PAYLOAD_MASK 0x00, 0x07, 0xff, 0xff
+#    define NV_NAN_PAYLOAD_PERM 0xFF, 0x2, 0x1, 0x0
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN
+#    define NV_NAN_PAYLOAD_MASK NV_NAN_PAYLOAD_MASK_IEEE_754_64_LE
+#    define NV_NAN_PAYLOAD_PERM NV_NAN_PAYLOAD_PERM_IEEE_754_64_LE
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN
+#    define NV_NAN_PAYLOAD_MASK NV_NAN_PAYLOAD_MASK_IEEE_754_64_BE
+#    define NV_NAN_PAYLOAD_PERM NV_NAN_PAYLOAD_PERM_IEEE_754_64_BE
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+#    define NV_NAN_PAYLOAD_MASK NV_NAN_PAYLOAD_MASK_IEEE_754_128_LE
+#    define NV_NAN_PAYLOAD_PERM NV_NAN_PAYLOAD_PERM_IEEE_754_128_LE
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
+#    define NV_NAN_PAYLOAD_MASK NV_NAN_PAYLOAD_MASK_IEEE_754_128_BE
+#    define NV_NAN_PAYLOAD_PERM NV_NAN_PAYLOAD_PERM_IEEE_754_128_BE
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
+#    define NV_NAN_PAYLOAD_MASK 0xff, 0xff, 0x07, 0x00, 0xff, 0xff, 0xff, 0xff
+#    define NV_NAN_PAYLOAD_PERM 0x4, 0x5, 0x6, 0xFF, 0x0, 0x1, 0x2, 0x3
+#  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
+#    define NV_NAN_PAYLOAD_MASK 0xff, 0xff, 0xff, 0xff, 0x00, 0x07, 0xff, 0xff
+#    define NV_NAN_PAYLOAD_PERM 0x3, 0x2, 0x1, 0x0, 0xFF, 0x6, 0x5, 0x4
+#  else
+#    error "Unexpected double format"
+#  endif
+#endif
 /*
 
    (KEEP THIS LAST IN perl.h!)
