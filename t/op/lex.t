@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 21);
+plan(tests => 23);
 
 {
     no warnings 'deprecated';
@@ -184,4 +184,18 @@ fresh_perl_is(
   "Execution of - aborted due to compilation errors.\n",
    { stderr => 1 },
   '/$0{}/ with no newline [perl #123802]'
+);
+fresh_perl_is(
+  '"\L\L"',
+  'syntax error at - line 1, near "\L\L"' . "\n" .
+  "Execution of - aborted due to compilation errors.\n",
+   { stderr => 1 },
+  '"\L\L" with no newline [perl #123802]'
+);
+fresh_perl_is(
+  '<\L\L>',
+  'syntax error at - line 1, near "\L\L"' . "\n" .
+  "Execution of - aborted due to compilation errors.\n",
+   { stderr => 1 },
+  '<\L\L> with no newline [perl #123802]'
 );

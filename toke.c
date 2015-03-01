@@ -4552,16 +4552,16 @@ Perl_yylex(pTHX)
 	    Perl_croak(aTHX_ "panic: INTERPCONCAT, lex_brackets=%ld",
 		       (long) PL_lex_brackets);
 #endif
-	if (PL_bufptr == PL_bufend)
-	    return REPORT(sublex_done());
-
-	/* Treat state as LEX_NORMAL if SvIVX is not valid on PL_linestr.
+	/* Treat state as LEX_NORMAL when not in an inner lexing scope.
 	   XXX This hack can be removed if we stop setting PL_lex_state to
 	   LEX_KNOWNEXT.  */
-	if (SvTYPE(PL_linestr) == SVt_PV) {
+	if (UNLIKELY(!PL_lex_inwhat)) {
 	    PL_lex_state = LEX_NORMAL;
 	    break;
 	}
+
+	if (PL_bufptr == PL_bufend)
+	    return REPORT(sublex_done());
 
 	/* m'foo' still needs to be parsed for possible (?{...}) */
 	if (SvIVX(PL_linestr) == '\'' && !PL_lex_inpat) {
