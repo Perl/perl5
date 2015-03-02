@@ -1917,7 +1917,8 @@
 /* LONG_DOUBLESIZE:
  *	This symbol contains the size of a long double, so that the
  *	C preprocessor can make decisions based on it.  It is only
- *	defined if the system supports long doubles.
+ *	defined if the system supports long doubles.   Note that this
+ *	is sizeof(long double), which may include unused bytes.
  */
 /* HAS_LDEXPL:
  *	This symbol, if defined, indicates that the ldexpl routine is
@@ -4877,6 +4878,11 @@
  */
 /* NVSIZE:
  *	This symbol contains the sizeof(NV).
+ *	Note that some floating point formats have unused bytes.
+ *	The most notable example is the x86* 80-bit extended precision
+ *	which comes in byte sizes of 12 and 16 (for 32 and 64 bit
+ *	platforms, respectively), but which only uses 10 bytes.
+ *	Perl compiled with -Duselongdouble on x86* is like this.
  */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
@@ -5161,6 +5167,6 @@
 #endif
 
 /* Generated from:
- * 0b960722a4dac6f7f6060a886109bb674ad8acdc08d0d14e9c3af5e1bf9e89a6 config_h.SH
+ * 496e563499c7b715275d61ae663d25dd20d963c75f9d3ee7850dae949df14136 config_h.SH
  * f00aaa095a00a83a70716ff4b9df8a1e7feb27fbb4d9b759d4ca27e6412545b1 uconfig.sh
  * ex: set ro: */
