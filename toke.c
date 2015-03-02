@@ -2381,6 +2381,7 @@ S_sublex_push(pTHX)
        popping.  We must not have a PL_lex_stuff value left dangling, as
        that breaks assumptions elsewhere.  See bug #123617.  */
     SAVEGENERICSV(PL_lex_stuff);
+    SAVEGENERICSV(PL_sublex_info.repl);
 
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
 	= SvPVX(PL_linestr);
