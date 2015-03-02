@@ -46,7 +46,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.33';
+$VERSION = '1.34';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1724,7 +1724,7 @@ sub stash_variable {
 	return "$prefix$name";
     }
 
-    if ($name =~ /^[^[:alpha:]+-]$/) {
+    if ($name =~ /^[^[:alpha:]_+-]$/) {
       if (defined $cx && $cx == 26) {
 	if ($prefix eq '@') {
 	    return "$prefix\{$name}";
