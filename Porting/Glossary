@@ -4382,6 +4382,10 @@ nvGUformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl NV using %G-ish floating point format.
 
+nvmantbits (mantbits.U):
+	This variable tells how many bits the mantissa of a Perl NV has,
+	not including the possible implicit bit.
+
 nvsize (perlxv.U):
 	This variable is the size of a Perl NV in bytes.
 	Note that some floating point formats have unused bytes.

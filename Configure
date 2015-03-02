@@ -1180,6 +1180,7 @@ ivsize=''
 ivtype=''
 nv_overflows_integers_at=''
 nv_preserves_uv_bits=''
+nvmantbits=''
 nvsize=''
 nvtype=''
 u16size=''
@@ -18834,6 +18835,21 @@ else
 fi
 $rm_try
 
+$echo "Checking how many mantissa bits your NVs have..." >&4
+if test "X$usequadmath" = "X$define"; then
+  nvmantbits=112 # 128-1-15
+else
+  if test "X$nvsize" = "X$doublesize"; then
+    nvmantbits="$doublemantbits"
+  else
+     if test "X$nvsize" = "X$longdblsize"; then
+       nvmantbits="$longdblmantbits"
+     else
+       nvmantbits="$undef"
+     fi
+  fi
+fi
+
 : see if sigprocmask exists
 set sigprocmask d_sigprocmask
 eval $inlibc
@@ -24840,6 +24856,7 @@ nv_preserves_uv_bits='$nv_preserves_uv_bits'
 nveformat='$nveformat'
 nvfformat='$nvfformat'
 nvgformat='$nvgformat'
+nvmantbits='$nvmantbits'
 nvsize='$nvsize'
 nvtype='$nvtype'
 o_nonblock='$o_nonblock'

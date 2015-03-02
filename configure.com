@@ -5579,6 +5579,9 @@ $ doublemantbits = "52"
 $ IF uselongdouble .OR. uselongdouble .EQS. "define"
 $ THEN
 $   nvtype="long double"
+$   nvmantbits = longdblmantbits
+$ ELSE
+$   nvmantbits = doublemantbits
 $ ENDIF
 $!
 $ tmp = "''ivtype'"
@@ -6660,6 +6663,7 @@ $ WC "longdblsize='" + longdblsize + "'"
 $ WC "longdblkind='" + longdblkind + "'"
 $ WC "longdblinfbytes='" + longdblinfbytes + "'"
 $ WC "longdblnanbytes='" + longdblnanbytes + "'"
+$ WC "longdblmantbits='" + longdblmantbits + "'"
 $ WC "longlongsize='" + longlongsize + "'"
 $ WC "longsize='" + longsize + "'"
 $ IF uselargefiles .OR. uselargefiles .EQS. "define"
@@ -6695,6 +6699,7 @@ $ WC "nvfformat='" + nvfformat + "'"
 $ WC "nvFUformat='" + nvFUformat + "'"
 $ WC "nvgformat='" + nvgformat + "'"
 $ WC "nvGUformat='" + nvGUformat + "'"
+$ WC "nvmantbits='" + nvmantbits + "'"
 $ WC "nvsize='" + nvsize + "'"
 $ WC "nvtype='" + nvtype + "'"
 $ WC "o_nonblock=' '"

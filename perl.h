@@ -6630,21 +6630,6 @@ extern void moncontrol(int);
 #  endif
 #endif
 
-/* NV_MANT_BITS is the number of _real_ mantissa bits in an NV.
- * For the standard IEEE 754 fp this number is usually one less that
- * *DBL_MANT_DIG because of the implicit (aka hidden) bit, which isn't
- * real.  For the 80-bit extended precision formats (x86*), the number
- * of mantissa bits... depends. For normal floats, it's 64.  But for
- * the inf/nan, it's different (zero for inf, 61 for nan).
- * NV_MANT_BITS works for normal floats. */
-#ifdef USE_QUADMATH /* IEEE 754 128-bit */
-#  define NV_MANT_BITS (FLT128_MANT_DIG - 1)
-#elif NVSIZE == DOUBLESIZE
-#  define NV_MANT_BITS DOUBLEMANTBITS
-#elif NVSIZE == LONG_DOUBLESIZE
-#  define NV_MANT_BITS LONGDBLMANTBITS
-#endif
-
 /* NaNs (not-a-numbers) can carry payload bits, in addition to
  * "nan-ness".  Part of the payload is the quiet/signaling bit.
  * To back up a bit (harhar):
@@ -6691,15 +6676,16 @@ extern void moncontrol(int);
  * This means that in this format there are 61 bits available
  * for the nan payload.
  *
- * NV_NAN_PAYLOAD_BITS tells how many bits there are available for
- * the nan payload, *not* including the quiet/signaling bit. */
-#if defined(USE_LONG_DOUBLE) && NVSIZE > DOUBLESIZE && \
-    (LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
-     LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN)
-#  define NV_NAN_PAYLOAD_BITS 61
-#else
-#  define NV_NAN_PAYLOAD_BITS (NV_MANT_BITS - 1)
-#endif
+ * NVMANTBITS is the number of _real_ mantissa bits in an NV.
+ * For the standard IEEE 754 fp this number is usually one less that
+ * *DBL_MANT_DIG because of the implicit (aka hidden) bit, which isn't
+ * real.  For the 80-bit extended precision formats (x86*), the number
+ * of mantissa bits... depends. For normal floats, it's 64.  But for
+ * the inf/nan, it's different (zero for inf, 61 for nan).
+ * NVMANTBITS works for normal floats. */
+
+/* We do not want to include the quiet/signaling bit. */
+#define NV_NAN_BITS (NVMANTBITS - 1)
 
 #if defined(USE_LONG_DOUBLE) && NVSIZE > DOUBLESIZE
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
@@ -6757,10 +6743,9 @@ extern void moncontrol(int);
 #elif defined(USE_LONG_DOUBLE) && \
   (LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN || \
    LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN)
-#  define NV_NAN_QS_BIT_SHIFT 3 /* 0x08, but not via NV_NAN_PAYLOAD_BITS */
+#  define NV_NAN_QS_BIT_SHIFT 3 /* 0x08, but not via NV_NAN_BITS */
 #else
-#  define NV_NAN_QS_BIT_SHIFT \
-    ((NV_NAN_PAYLOAD_BITS) % 8) /* usually 3, or 0x08 */
+#  define NV_NAN_QS_BIT_SHIFT ((NV_NAN_BITS) % 8) /* usually 3, or 0x08 */
 #endif
 #define NV_NAN_QS_BIT (1 << (NV_NAN_QS_BIT_SHIFT))
 /* NV_NAN_QS_BIT_OFFSET is the bit offset from the beginning of a NV

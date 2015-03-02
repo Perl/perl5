@@ -4877,6 +4877,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define LONGDBLMANTBITS $longdblmantbits
 
+/* NVMANTBITS:
+ *	This symbol, if defined, tells how many mantissa bits
+ *	(not including implicit bit) there are in a Perl NV.
+ *	This depends on which floating point type was chosen.
+ */
+#define NVMANTBITS $nvmantbits		/**/
+
 /* NEED_VA_COPY:
  *	This symbol, if defined, indicates that the system stores
  *	the variable argument list datatype, va_list, in a format
