@@ -3899,6 +3899,7 @@ ext/XS-APItest/t/fetch_pad_names.t	Tests for UTF8 names in pad
 ext/XS-APItest/t/gotosub.t	XS::APItest: tests goto &xsub and hints
 ext/XS-APItest/t/grok.t		XS::APItest: tests for grok* functions
 ext/XS-APItest/t/gv_autoload4.t	XS::APItest: tests for gv_autoload4() and variants
+ext/XS-APItest/t/gv_const_sv.t	XS::APItest: test gv_const_sv()
 ext/XS-APItest/t/gv_fetchmeth_autoload.t	XS::APItest: tests for gv_fetchmeth_autoload() and variants
 ext/XS-APItest/t/gv_fetchmethod_flags.t	XS::APItest: tests for gv_fetchmethod_flags() and variants
 ext/XS-APItest/t/gv_fetchmeth.t		XS::APItest: tests for gv_fetchmeth() and variants

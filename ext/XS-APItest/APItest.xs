@@ -2379,6 +2379,26 @@ gv_autoload_type(stash, methname, type, method)
         }
 	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);
 
+SV *
+gv_const_sv(SV *name)
+    PREINIT:
+        GV *gv;
+    CODE:
+        if (SvPOK(name)) {
+	    HV *stash = gv_stashpv("main",0);
+	    HE *he = hv_fetch_ent(stash, name, 0, 0);
+	    gv = (GV *)HeVAL(he);
+        }
+	else {
+	    gv = (GV *)name;
+        }
+        RETVAL = gv_const_sv(gv);
+        if (!RETVAL)
+            XSRETURN_EMPTY;
+	RETVAL = newSVsv(RETVAL);
+    OUTPUT:
+        RETVAL
+
 void
 whichsig_type(namesv, type)
     SV* namesv
