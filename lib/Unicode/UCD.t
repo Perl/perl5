@@ -72,7 +72,7 @@ is(charprop($cp, "script"),     "Common");
 $cp = utf8::unicode_to_native(0x41);
 my $A_code = sprintf("%04X", ord("A"));
 my $a_code = sprintf("%04X", ord("a"));
-$charinfo = charinfo(utf8::unicode_to_native($cp));
+$charinfo = charinfo($cp);
 
 is($charinfo->{code},           $A_code, "LATIN CAPITAL LETTER A");
 is($charinfo->{name},           "LATIN CAPITAL LETTER A");
@@ -367,7 +367,7 @@ is(charblock(0x1FFFF),        "No_Block", "0x1FFFF - unused charblock");
 
 my $fraction_3_4_code = sprintf("%04X", utf8::unicode_to_native(0xbe));
 $cp = $fraction_3_4_code;
-$charinfo = charinfo(hex $fraction_3_4_code);
+$charinfo = charinfo($fraction_3_4_code);
 
 is($charinfo->{code},           $fraction_3_4_code, "VULGAR FRACTION THREE QUARTERS");
 is($charinfo->{name},           "VULGAR FRACTION THREE QUARTERS");
@@ -394,11 +394,11 @@ is(charprop($cp, 'na1'),        "FRACTION THREE QUARTERS");
 is($charinfo->{comment},        "");
 is(charprop($cp, 'isc'),        "");
 is($charinfo->{upper},          "");
-is(charprop($cp, 'uc'),         "\x{be}");
+is(charprop($cp, 'uc'),         chr hex $cp);
 is($charinfo->{lower},          "");
-is(charprop($cp, 'lc'),         "\x{be}");
+is(charprop($cp, 'lc'),         chr hex $cp);
 is($charinfo->{title},          "");
-is(charprop($cp, 'tc'),         "\x{be}");
+is(charprop($cp, 'tc'),         chr hex $cp);
 is($charinfo->{block},          "Latin-1 Supplement");
 is(charprop($cp, 'block'),      "Latin_1_Supplement");
 is($charinfo->{script},         "Common");
