@@ -3,7 +3,7 @@ Locale::Codes::Currency_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Mon Nov 24 13:38:10 GMT 2014
+#    Generated on: Fri Feb 20 15:27:22 GMT 2015
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.33';
+$VERSION='3.34';
 
 $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(ADP) => q(Andorran Peseta),
@@ -36,6 +36,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(GWP) => q(Guinea-Bissau Peso),
    q(IEP) => q(Irish Pound),
    q(ITL) => q(Italian Lira),
+   q(LTL) => q(Lithuanian Litas),
    q(LUF) => q(Luxembourg Franc),
    q(LVL) => q(Latvian Lats),
    q(MGF) => q(Malagasy Franc),
@@ -69,6 +70,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
 
 $Locale::Codes::Retired{'currency'}{'num'}{'code'} = {
    q(428) => q(Latvian Lats),
+   q(440) => q(Lithuanian Litas),
    q(654) => q(Saint Helena Pound),
    q(998) => q(US Dollar (Same day)),
 };
@@ -111,6 +113,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(latvian lats) => [ q(LVL), q(Latvian Lats) ],
    q(leu) => [ q(RON), q(Leu) ],
    q(lev) => [ q(BGL), q(Lev) ],
+   q(lithuanian litas) => [ q(LTL), q(Lithuanian Litas) ],
    q(luxembourg franc) => [ q(LUF), q(Luxembourg Franc) ],
    q(malagasy franc) => [ q(MGF), q(Malagasy Franc) ],
    q(maltese lira) => [ q(MTL), q(Maltese Lira) ],
@@ -153,6 +156,7 @@ $Locale::Codes::Retired{'currency'}{'num'}{'name'} = {
    q(cedi) => [ q(936), q(Cedi) ],
    q(latvian lats) => [ q(428), q(Latvian Lats) ],
    q(leu) => [ q(946), q(Leu) ],
+   q(lithuanian litas) => [ q(440), q(Lithuanian Litas) ],
    q(metical) => [ q(943), q(Metical) ],
    q(new manat) => [ q(934), q(New Manat) ],
    q(saint helena pound) => [ q(654), q(Saint Helena Pound) ],

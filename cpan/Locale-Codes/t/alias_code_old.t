@@ -48,7 +48,7 @@ $tests = "
 
 gb
    ~
-   United Kingdom
+   United Kingdom of Great Britain and Northern Ireland
 
 uk
    ~
@@ -69,7 +69,7 @@ alias_code uk gb LOCALE_CODE_ALPHA_3 ~ 0
 
 gb
    ~
-   United Kingdom
+   United Kingdom of Great Britain and Northern Ireland
 
 uk
    ~
@@ -84,11 +84,11 @@ alias_code uk gb ~ uk
 
 gb
    ~
-   United Kingdom
+   United Kingdom of Great Britain and Northern Ireland
 
 uk
    ~
-   United Kingdom
+   United Kingdom of Great Britain and Northern Ireland
 
 country2code
 United Kingdom

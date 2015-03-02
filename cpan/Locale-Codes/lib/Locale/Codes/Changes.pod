@@ -22,7 +22,15 @@ September, December). I will also check on request, so if a code
 changes that you use, feel free to contact me.  Any time there are new
 codes, I will add them to the module and release a new version.
 
-=head1 VERSION 3.34  (planned 2015-03-01; sbeck)
+=head1 VERSION 3.37  (planned 2015-12-01; sbeck)
+
+=head1 VERSION 3.36  (planned 2015-09-01; sbeck)
+
+=head1 VERSION 3.35  (planned 2015-06-01; sbeck)
+
+=head1 VERSION 3.34  (2015-03-01; sbeck)
+
+NEW CODE(s)
 
 =head1 VERSION 3.33  (2014-12-01; sbeck)
 
@@ -732,7 +740,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
 =head1 COPYRIGHT
 
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2014 Sullivan Beck
+   Copyright (c) 2010-2015 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
