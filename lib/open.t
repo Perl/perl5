@@ -194,6 +194,8 @@ SKIP: {
 {
     local $ENV{PERL_UNICODE};
     delete $ENV{PERL_UNICODE};
+    local $TODO;
+    $TODO = "Encode not working on EBCDIC" if $::IS_EBCDIC;
     is runperl(
          progs => [
             'use open q\:encoding(UTF-8)\, q-:std-;',
