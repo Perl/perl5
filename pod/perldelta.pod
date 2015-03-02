@@ -119,6 +119,12 @@ XXX
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.33 to 1.34.
+
+Deparse C<$#_> as that instead of as C<$#{_}>.  [perl #123947]
+
+=item *
+
 L<CPAN> has been upgraded from version 2.05 to 2.09-TRIAL.
 
 =over 4
