@@ -1952,7 +1952,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* LONG_DOUBLESIZE:
  *	This symbol contains the size of a long double, so that the
  *	C preprocessor can make decisions based on it.  It is only
- *	defined if the system supports long doubles.
+ *	defined if the system supports long doubles.   Note that this
+ *	is sizeof(long double), which may include unused bytes.
  */
 /* HAS_LDEXPL:
  *	This symbol, if defined, indicates that the ldexpl routine is
@@ -4912,6 +4913,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* NVSIZE:
  *	This symbol contains the sizeof(NV).
+ *	Note that some floating point formats have unused bytes.
+ *	The most notable example is the x86* 80-bit extended precision
+ *	which comes in byte sizes of 12 and 16 (for 32 and 64 bit
+ *	platforms, respectively), but which only uses 10 bytes.
+ *	Perl compiled with -Duselongdouble on x86* is like this.
  */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE

@@ -4086,7 +4086,8 @@ longdblkind (d_longdbl.U):
 longdblsize (d_longdbl.U):
 	This variable contains the value of the LONG_DOUBLESIZE symbol, which
 	indicates to the C program how many bytes there are in a long double,
-	if this system supports long doubles.
+	if this system supports long doubles.  Note that this is
+	sizeof(long double), which may include unused bytes.
 
 longlongsize (d_longlong.U):
 	This variable contains the value of the LONGLONGSIZE symbol, which
@@ -4351,7 +4352,8 @@ nvGUformat (perlxvf.U):
 	a Perl NV using %G-ish floating point format.
 
 nvsize (perlxv.U):
-	This variable is the size of an NV in bytes.
+	This variable is the size of a Perl NV in bytes.
+	Note that some floating point formats have unused bytes.
 
 nvtype (perlxv.U):
 	This variable contains the C type used for Perl's NV.
