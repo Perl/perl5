@@ -167,22 +167,7 @@ EOF
 	*"-c99: Unknown flag"*)
 		_ccflags_strict_ansi="-std1"
 		;;
-	*)	# However, use the -c99 only if compiling for
-		# -DPERL_MEM_LOG, where the C99 feature __func__
-		# is useful to have.  Otherwise use the good old
-		# -std1 so that we stay C89 strict, which the goal
-		# of the Perl C code base (no //, no code between
-		# declarations, etc).  Moreover, the Tru64 cc is
-		# not fully C99, and most probably never will be.
-		#
-		# The -DPERL_MEM_LOG can be either in ccflags
-		# (if using an old config.sh) or in the command line
-		# (which has been stowed away in UU/cmdline.opt).
-		#
-		case "$ccflags `cat UU/cmdline.opt`" in
-		*-DPERL_MEM_LOG*)	_ccflags_strict_ansi="-c99"  ;;
-		*)			_ccflags_strict_ansi="-std1" ;;
-		esac
+	*)	_ccflags_strict_ansi="-c99"
 		;;
 	esac
 	_lddlflags_strict_ansi="-std1"
