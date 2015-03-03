@@ -157,6 +157,10 @@ L<[cpan #95271]|https://rt.cpan.org/Ticket/Display.html?id=95271>
 
 =back
 
+=item *
+
+L<threads> has been upgraded from version 1.96 to 1.97.
+
 =back
 
 =head2 Removed Modules and Pragmata
