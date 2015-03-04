@@ -6306,8 +6306,6 @@ Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN l
 
     PERL_ARGS_ASSERT_SV_INSERT_FLAGS;
 
-    if (!bigstr)
-	Perl_croak(aTHX_ "Can't modify nonexistent substring");
     SvPV_force_flags(bigstr, curlen, flags);
     (void)SvPOK_only_UTF8(bigstr);
     if (offset + len > curlen) {
@@ -15352,7 +15350,7 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
 
     PERL_ARGS_ASSERT_SV_CAT_DECODE;
 
-    if (SvPOK(ssv) && SvPOK(dsv) && SvROK(encoding) && offset) {
+    if (SvPOK(ssv) && SvPOK(dsv) && SvROK(encoding)) {
 	SV *offsv;
 	dSP;
 	ENTER;

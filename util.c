@@ -556,10 +556,6 @@ Perl_instr(const char *big, const char *little)
 
     PERL_ARGS_ASSERT_INSTR;
 
-    /* libc prior to 4.6.27 (late 1994) did not work properly on a NULL
-     * 'little' */
-    if (!little)
-	return (char*)big;
     return strstr((char*)big, (char*)little);
 }
 

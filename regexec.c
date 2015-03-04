@@ -2783,7 +2783,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     PERL_UNUSED_ARG(data);
 
     /* Be paranoid... */
-    if (prog == NULL || stringarg == NULL) {
+    if (prog == NULL) {
 	Perl_croak(aTHX_ "NULL regexp parameter");
     }
 
@@ -2802,7 +2802,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         reginfo->ganch =
             (flags & REXEC_IGNOREPOS)
             ? stringarg /* use start pos rather than pos() */
-            : (sv && (mg = mg_find_mglob(sv)) && mg->mg_len >= 0)
+            : ((mg = mg_find_mglob(sv)) && mg->mg_len >= 0)
               /* Defined pos(): */
             ? strbeg + MgBYTEPOS(mg, sv, strbeg, strend-strbeg)
             : strbeg; /* pos() not defined; use start of string */

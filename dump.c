@@ -1090,9 +1090,6 @@ Perl_gv_dump(pTHX_ GV *gv)
     const char* name;
     SV *sv, *tmp = newSVpvs_flags("", SVs_TEMP);
 
-
-    PERL_ARGS_ASSERT_GV_DUMP;
-
     if (!gv) {
 	PerlIO_printf(Perl_debug_log, "{}\n");
 	return;

@@ -2601,13 +2601,11 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
     PERL_ARGS_ASSERT_CALL_ARGV;
 
     PUSHMARK(SP);
-    if (argv) {
-	while (*argv) {
-	    mXPUSHs(newSVpv(*argv,0));
-	    argv++;
-	}
-	PUTBACK;
+    while (*argv) {
+        mXPUSHs(newSVpv(*argv,0));
+        argv++;
     }
+    PUTBACK;
     return call_pv(sub_name, flags);
 }
 

@@ -400,7 +400,7 @@ Perl_opslab_free(pTHX_ OPSLAB *slab)
     PERL_UNUSED_CONTEXT;
     DEBUG_S_warn((aTHX_ "freeing slab %p", (void*)slab));
     assert(slab->opslab_refcnt == 1);
-    for (; slab; slab = slab2) {
+    do {
 	slab2 = slab->opslab_next;
 #ifdef DEBUGGING
 	slab->opslab_refcnt = ~(size_t)0;
@@ -415,7 +415,8 @@ Perl_opslab_free(pTHX_ OPSLAB *slab)
 #else
 	PerlMemShared_free(slab);
 #endif
-    }
+        slab = slab2;
+    } while (slab);
 }
 
 void
@@ -3236,7 +3237,7 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 
     PERL_ARGS_ASSERT_DOREF;
 
-    if (!o || (PL_parser && PL_parser->error_count))
+    if (PL_parser && PL_parser->error_count)
 	return o;
 
     switch (o->op_type) {
@@ -8390,7 +8391,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (slab)
 	Slab_to_ro(slab);
 #endif
-    if (o) op_free(o);
+    op_free(o);
     return cv;
 }
 
@@ -9080,9 +9081,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
     bool interleave = FALSE;
 
     PERL_ARGS_ASSERT_NEWXS_LEN_FLAGS;
-    if (!subaddr)
-	Perl_croak_nocontext("panic: no address for '%s' in '%s'",
-	    name, filename ? filename : PL_xsubfilename);
+
     {
         GV * const gv = gv_fetchpvn(
 			    name ? name : PL_curstash ? "__ANON__" : "__ANON__::__ANON__",

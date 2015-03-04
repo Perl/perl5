@@ -685,7 +685,7 @@ S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
     PERL_ARGS_ASSERT_MRO_CLEAN_ISAREV;
 
     /* Delete our name from our former parents' isarevs. */
-    if(isa && HvARRAY(isa) && hv_iterinit(isa)) {
+    if(HvARRAY(isa) && hv_iterinit(isa)) {
         SV **svp;
         while((iter = hv_iternext(isa))) {
             I32 klen;
