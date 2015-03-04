@@ -1891,20 +1891,20 @@ PoisonWith(0xEF) for catching access to freed memory.
     (sizeof(t) > ((MEM_SIZE)1 << 8*(sizeof(MEM_SIZE) - sizeof(n))))
 
 /* This is written in a slightly odd way to avoid various spurious
- * compiler warnings. We *want* to write
- *    _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) && (n > const)
- * but even when the LHS constant-folds to false at compile-time, g++
- * insists on emitting warnings about the RHS (e.g. "comparison is always
- * false"), so instead we write it as
+ * compiler warnings. We *want* to write the expression as
+ *    _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) && (n > C)
+ * (for some compile-time constant C), but even when the LHS
+ * constant-folds to false at compile-time, g++ insists on emitting
+ * warnings about the RHS (e.g. "comparison is always false"), so instead
+ * we write it as
  *
- *    (cond ? n : X) > const
+ *    (cond ? n : X) > C
  *
- * where X is a constant where X > const is always false.
- * Choosing a value for X is tricky. If 0, some compilers will
- * complain about 0 > const always being false; if 1, Coverity
- * complains when n happens to be the constant value '1', that cond ? 1 : 1
- * has the same value on both branches; so use const for X and hope
- * that nothing else whines.
+ * where X is a constant with X > C always false. Choosing a value for X
+ * is tricky. If 0, some compilers will complain about 0 > C always being
+ * false; if 1, Coverity complains when n happens to be the constant value
+ * '1', that cond ? 1 : 1 has the same value on both branches; so use C
+ * for X and hope that nothing else whines.
  */
 
 #  define _MEM_WRAP_WILL_WRAP(n,t) \
