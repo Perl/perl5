@@ -16,7 +16,5 @@ Text::ParseWords cpan/Text-ParseWords/t/ParseWords.t 9bae51c9b944cd5c0bbabe9d397
 Text::ParseWords cpan/Text-ParseWords/t/taint.t 3cff0dae812801f7aa1738d6070508f2c5bcc2e5
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
 podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d025d69
-threads dist/threads/lib/threads.pm 0ca973d4537d7c8ee5884cc413e602b5b9ed74d7
-threads dist/threads/threads.xs f492e1266d30f62faba625bee1d11652eb349955
 version cpan/version/lib/version.pm d0923b895d57f1d669ae36fcf85c87b16db341d1
 version vutil.c 668f17ca43e2527645674d29ba772b86330d5663
