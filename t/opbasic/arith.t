@@ -467,6 +467,7 @@ try $T++,  0.153000e-305 != 0.0,           '0.153000e-305';
 try $T++,  0.1530000e-305 != 0.0,          '0.1530000e-305';
 try $T++,  0.1530001e-305 != 0.0,          '0.1530001e-305';
 try $T++,  1.17549435100e-38 != 0.0,       'min single';
+# For flush-to-zero systems this may flush-to-zero, see PERL_SYS_FPU_INIT
 try $T++,  2.2250738585072014e-308 != 0.0, 'min double';
 
 # string-to-nv should equal float literals

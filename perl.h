@@ -2918,6 +2918,26 @@ typedef struct padname PADNAME;
          signal(SIGFPE, SIG_IGN); \
      } STMT_END
 #endif
+/* In IRIX the default for Flush to Zero bit is true,
+ * which means that results going below the minimum of normal
+ * floating points go to zero, instead of going denormal/subnormal.
+ * This is unlike almost any other system running Perl, so let's clear it.
+ * [perl #123767] IRIX64 blead (ddce084a) opbasic/arith.t failure, originally
+ * [perl #120426] small numbers shouldn't round to zero if they have extra floating digits
+ *
+ * XXX The flush-to-zero behaviour should be a Configure scan.
+ * To change the behaviour usually requires some system-specific
+ * incantation, though, like the below. */
+#ifdef __sgi
+#  include <sys/fpu.h>
+#  define PERL_SYS_FPU_INIT \
+     STMT_START { \
+         union fpc_csr csr; \
+         csr.fc_word = get_fpc_csr(); \
+         csr.fc_struct.flush = 0; \
+         set_fpc_csr(csr.fc_word); \
+     } STMT_END
+#endif
 
 #ifndef PERL_SYS_FPU_INIT
 #  define PERL_SYS_FPU_INIT NOOP
