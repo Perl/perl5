@@ -139,7 +139,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	    {
 #ifdef EBCDIC
                 Perl_die(aTHX_ "Can't represent character for Ox%"UVXf" on this platform", uv);
-                NOT_REACHED;
+                NOT_REACHED; /* NOTREACHED */
 #endif
 		return NULL;
 	    }

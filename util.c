@@ -5693,7 +5693,7 @@ Perl_my_dirfd(DIR * dir) {
     return dir->dd_fd;
 #else
     Perl_croak_nocontext(PL_no_func, "dirfd");
-    NOT_REACHED; /* NOT REACHED */
+    NOT_REACHED; /* NOTREACHED */
     return 0;
 #endif 
 }

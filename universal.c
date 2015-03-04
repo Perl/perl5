@@ -996,7 +996,7 @@ XS(XS_re_regexp_pattern)
             XSRETURN_NO;
         }
     }
-    NOT_REACHED; /* NOT-REACHED */
+    NOT_REACHED; /* NOTREACHED */
 }
 
 #include "vutil.h"

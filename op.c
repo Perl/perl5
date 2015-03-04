@@ -11654,7 +11654,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	                           )
 	                        );
 	}
-	NOT_REACHED;
+	NOT_REACHED; /* NOTREACHED */
     }
     else {
 	OP *prev, *cvop, *first, *parent;
@@ -11712,7 +11712,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    return op_convert_list(opnum,0,aop);
 	}
     }
-    NOT_REACHED;
+    NOT_REACHED; /* NOTREACHED */
     return entersubop;
 }
 
@@ -12288,7 +12288,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
             break;
 
         default:
-            NOT_REACHED;
+            NOT_REACHED; /* NOTREACHED */
             return;
         }
 
@@ -14084,7 +14084,7 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 		    any.xop_peep = xop->xop_peep;
 		    break;
 		default:
-		    NOT_REACHED;
+		    NOT_REACHED; /* NOTREACHED */
 		    break;
 		}
 	    } else {
@@ -14102,7 +14102,7 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 		    any.xop_peep = XOPd_xop_peep;
 		    break;
 		default:
-		    NOT_REACHED;
+		    NOT_REACHED; /* NOTREACHED */
 		    break;
 		}
 	    }

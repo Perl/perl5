@@ -5637,7 +5637,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
         }
         return final_minlen;
     }
-    NOT_REACHED;
+    NOT_REACHED; /* NOTREACHED */
 }
 
 STATIC U32
@@ -7891,7 +7891,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
             Perl_croak(aTHX_ "panic: bad flag %lx in reg_scan_name",
 		       (unsigned long) flags);
         }
-        NOT_REACHED; /* NOT REACHED */
+        NOT_REACHED; /* NOTREACHED */
     }
     return NULL;
 }
@@ -10095,14 +10095,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 if (RExC_parse == RExC_end || *RExC_parse != ')')
                     vFAIL("Sequence (?&... not terminated");
                 goto gen_recurse_regop;
-                /* NOT REACHED */
+                /* NOTREACHED */
             case '+':
                 if (!(RExC_parse[0] >= '1' && RExC_parse[0] <= '9')) {
                     RExC_parse++;
                     vFAIL("Illegal pattern");
                 }
                 goto parse_recursion;
-                /* NOT REACHED*/
+                /* NOTREACHED*/
             case '-': /* (?-1) */
                 if (!(RExC_parse[0] >= '1' && RExC_parse[0] <= '9')) {
                     RExC_parse--; /* rewind to let it be handled later */
@@ -10175,7 +10175,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 nextchar(pRExC_state);
                 return ret;
 
-            /* NOT REACHED */
+            /* NOTREACHED */
 
 	    case '?':           /* (??...) */
 		is_logical = 1;
@@ -14614,7 +14614,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 vFAIL2utf8f(
                     "Invalid [] range \"%"UTF8f"\"",
                     UTF8fARG(UTF, w, rangebegin));
-                NOT_REACHED; /* NOT REACHED */
+                NOT_REACHED; /* NOTREACHED */
 	    }
 	}
 	else {

@@ -1726,7 +1726,7 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
     } while (--i >= 0);
     /* You can't get here, hence assertion should always fail.  */
     assert (items == 0);
-    NOT_REACHED;
+    NOT_REACHED; /* NOTREACHED */
 }
 
 STATIC void
