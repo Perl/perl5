@@ -1890,21 +1890,26 @@ PoisonWith(0xEF) for catching access to freed memory.
 #  define _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) \
     (sizeof(t) > ((MEM_SIZE)1 << 8*(sizeof(MEM_SIZE) - sizeof(n))))
 
-/* this is written in a slightly odd way because for an expression like
- *    cond && (n > expr)
- * even when cond constant-folds to false at compile-time, g++ insists
- * on emitting warnings about expr (e.g. "comparison is always false").
- * So rewrite it as
- *    (cond ? n : 1) > expr
+/* This is written in a slightly odd way to avoid various spurious
+ * compiler warnings. We *want* to write
+ *    _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) && (n > const)
+ * but even when the LHS constant-folds to false at compile-time, g++
+ * insists on emitting warnings about the RHS (e.g. "comparison is always
+ * false"), so instead we write it as
  *
- * We happen to know that (1 > expr) will always be false (unless someone
- * is doing something with a struct whose sizeof > MEM_SIZE_MAX/2), so
- * this is safe.
+ *    (cond ? n : X) > const
+ *
+ * where X is a constant where X > const is always false.
+ * Choosing a value for X is tricky. If 0, some compilers will
+ * complain about 0 > const always being false; if 1, Coverity
+ * complains when n happens to be the constant value '1', that cond ? 1 : 1
+ * has the same value on both branches; so use const for X and hope
+ * that nothing else whines.
  */
 
 #  define _MEM_WRAP_WILL_WRAP(n,t) \
-      ((MEM_SIZE)(_MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) ? n : 1) \
-                 > MEM_SIZE_MAX/sizeof(t))
+      ((_MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) ? (MEM_SIZE)(n) : \
+            MEM_SIZE_MAX/sizeof(t)) > MEM_SIZE_MAX/sizeof(t))
 
 #  define MEM_WRAP_CHECK(n,t) \
 	(void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
