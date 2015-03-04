@@ -1089,7 +1089,7 @@ use File::Glob qw(:case);
     },
 
     'Text::Balanced' => {
-        'DISTRIBUTION' => 'ADAMK/Text-Balanced-2.02.tar.gz',
+        'DISTRIBUTION' => 'SHAY/Text-Balanced-2.03.tar.gz',
         'FILES'        => q[cpan/Text-Balanced],
         'EXCLUDED'     => [
             qw( t/97_meta.t
@@ -1097,21 +1097,6 @@ use File::Glob qw(:case);
                 t/99_pmv.t
                 ),
         ],
-
-        # Waiting to be merged upstream: see CPAN RT#87788
-        'CUSTOMIZED'   => [
-            qw( t/01_compile.t
-                t/02_extbrk.t
-                t/03_extcbk.t
-                t/04_extdel.t
-                t/05_extmul.t
-                t/06_extqlk.t
-                t/07_exttag.t
-                t/08_extvar.t
-                t/09_gentag.t
-                ),
-        ],
-
     },
 
     'Text::ParseWords' => {

@@ -3,15 +3,6 @@ CPAN cpan/CPAN/lib/CPAN/Module.pm 7d12bb547f7a268a90c6f8320f439a2dc805b850
 Encode cpan/Encode/encoding.pm baa25e197ba4d5fa228dbf7b440afb5ae18ec5ed
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/pm_to_blib.t 71ebcee355691ce374fcad251b12d8b2412462b3
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
-Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d
-Text::Balanced cpan/Text-Balanced/t/02_extbrk.t 6ba1b64a4604e822dc2260b8ffcea6b406339ee8
-Text::Balanced cpan/Text-Balanced/t/03_extcbk.t 3307c980af28963414cab799c427b359ef3b8657
-Text::Balanced cpan/Text-Balanced/t/04_extdel.t be993c5c295b125b4be0ed55f866a249599f5835
-Text::Balanced cpan/Text-Balanced/t/05_extmul.t 4d1bc60add35ac203873f5371d8c6fcc9c8b6d80
-Text::Balanced cpan/Text-Balanced/t/06_extqlk.t 81a5804d392013393a338325b197cea52c4c44e0
-Text::Balanced cpan/Text-Balanced/t/07_exttag.t 5a209ed156387d4614d3003292e5fc412b8541e5
-Text::Balanced cpan/Text-Balanced/t/08_extvar.t 0776ef2cbdad5b1fbefb300541d079212cc24d92
-Text::Balanced cpan/Text-Balanced/t/09_gentag.t 42361b5dfb3bb728bce20f4fb0d92ccfb27c2ba7
 Text::ParseWords cpan/Text-ParseWords/t/ParseWords.t 9bae51c9b944cd5c0bbabe9d397e573976a2be8e
 Text::ParseWords cpan/Text-ParseWords/t/taint.t 3cff0dae812801f7aa1738d6070508f2c5bcc2e5
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
