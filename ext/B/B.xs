@@ -1418,36 +1418,46 @@ aux_list(o, cv)
                         actions = (++items)->uv;
                         PUSHs(sv_2mortal(newSVuv(actions)));
                         continue;
+                        NOT_REACHED; /* NOTREACHED */
 
                     case MDEREF_HV_padhv_helem:
                         is_hash = TRUE;
+                        /* FALLTHROUGH */
                     case MDEREF_AV_padav_aelem:
                         PUSHs(sv_2mortal(newSVuv((++items)->pad_offset)));
                         goto do_elem;
+                        NOT_REACHED; /* NOTREACHED */
 
                     case MDEREF_HV_gvhv_helem:
                         is_hash = TRUE;
+                        /* FALLTHROUGH */
                     case MDEREF_AV_gvav_aelem:
                         sv = ITEM_SV(++items);
                         PUSHs(make_sv_object(aTHX_ sv));
                         goto do_elem;
+                        NOT_REACHED; /* NOTREACHED */
 
                     case MDEREF_HV_gvsv_vivify_rv2hv_helem:
                         is_hash = TRUE;
+                        /* FALLTHROUGH */
                     case MDEREF_AV_gvsv_vivify_rv2av_aelem:
                         sv = ITEM_SV(++items);
                         PUSHs(make_sv_object(aTHX_ sv));
                         goto do_vivify_rv2xv_elem;
+                        NOT_REACHED; /* NOTREACHED */
 
                     case MDEREF_HV_padsv_vivify_rv2hv_helem:
                         is_hash = TRUE;
+                        /* FALLTHROUGH */
                     case MDEREF_AV_padsv_vivify_rv2av_aelem:
                         PUSHs(sv_2mortal(newSVuv((++items)->pad_offset)));
                         goto do_vivify_rv2xv_elem;
+                        NOT_REACHED; /* NOTREACHED */
 
                     case MDEREF_HV_pop_rv2hv_helem:
                     case MDEREF_HV_vivify_rv2hv_helem:
                         is_hash = TRUE;
+                        /* FALLTHROUGH */
                     do_vivify_rv2xv_elem:
                     case MDEREF_AV_pop_rv2av_aelem:
                     case MDEREF_AV_vivify_rv2av_aelem:

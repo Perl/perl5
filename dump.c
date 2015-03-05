@@ -2359,38 +2359,48 @@ Perl_multideref_stringify(pTHX_ const OP *o, CV *cv)
         case MDEREF_reload:
             actions = (++items)->uv;
             continue;
+            NOT_REACHED; /* NOTREACHED */
 
         case MDEREF_HV_padhv_helem:
             is_hash = TRUE;
+            /* FALLTHROUGH */
         case MDEREF_AV_padav_aelem:
             derefs = 1;
             S_append_padvar(aTHX_ (++items)->pad_offset, cv, out, 1, 0, 1);
             goto do_elem;
+            NOT_REACHED; /* NOTREACHED */
 
         case MDEREF_HV_gvhv_helem:
             is_hash = TRUE;
+            /* FALLTHROUGH */
         case MDEREF_AV_gvav_aelem:
             derefs = 1;
             sv = ITEM_SV(++items);
             S_append_gv_name(aTHX_ (GV*)sv, out);
             goto do_elem;
+            NOT_REACHED; /* NOTREACHED */
 
         case MDEREF_HV_gvsv_vivify_rv2hv_helem:
             is_hash = TRUE;
+            /* FALLTHROUGH */
         case MDEREF_AV_gvsv_vivify_rv2av_aelem:
             sv = ITEM_SV(++items);
             S_append_gv_name(aTHX_ (GV*)sv, out);
             goto do_vivify_rv2xv_elem;
+            NOT_REACHED; /* NOTREACHED */
 
         case MDEREF_HV_padsv_vivify_rv2hv_helem:
             is_hash = TRUE;
+            /* FALLTHROUGH */
         case MDEREF_AV_padsv_vivify_rv2av_aelem:
             S_append_padvar(aTHX_ (++items)->pad_offset, cv, out, 1, 0, 1);
             goto do_vivify_rv2xv_elem;
+            NOT_REACHED; /* NOTREACHED */
 
         case MDEREF_HV_pop_rv2hv_helem:
         case MDEREF_HV_vivify_rv2hv_helem:
             is_hash = TRUE;
+            /* FALLTHROUGH */
         do_vivify_rv2xv_elem:
         case MDEREF_AV_pop_rv2av_aelem:
         case MDEREF_AV_vivify_rv2av_aelem:

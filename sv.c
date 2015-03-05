@@ -1425,6 +1425,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	   no route from NV to PVIV, NOK can never be true  */
 	assert(!SvNOKp(sv));
 	assert(!SvNOK(sv));
+        /* FALLTHROUGH */
     case SVt_PVIO:
     case SVt_PVFM:
     case SVt_PVGV:
@@ -6675,6 +6676,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    else if (LvTYPE(sv) != 't') /* unless tie: unrefcnted fake SV**  */
 		SvREFCNT_dec(LvTARG(sv));
 	    if (isREGEXP(sv)) goto freeregexp;
+            /* FALLTHROUGH */
 	case SVt_PVGV:
 	    if (isGV_with_GP(sv)) {
 		if(GvCVu((const GV *)sv) && (stash = GvSTASH(MUTABLE_GV(sv)))
@@ -6699,6 +6701,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		PL_statgv = NULL;
             else if ((const GV *)sv == PL_stderrgv)
                 PL_stderrgv = NULL;
+            /* FALLTHROUGH */
 	case SVt_PVMG:
 	case SVt_PVNV:
 	case SVt_PVIV:
@@ -13880,17 +13883,22 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    case CXt_LOOP_LAZYSV:
 		ncx->blk_loop.state_u.lazysv.end
 		    = sv_dup_inc(ncx->blk_loop.state_u.lazysv.end, param);
-		/* We are taking advantage of av_dup_inc and sv_dup_inc
-		   actually being the same function, and order equivalence of
-		   the two unions.
+                /* Fallthrough: duplicate lazysv.cur by using the ary.ary
+                   duplication code instead.
+                   We are taking advantage of (1) av_dup_inc and sv_dup_inc
+                   actually being the same function, and (2) order
+                   equivalence of the two unions.
 		   We can assert the later [but only at run time :-(]  */
 		assert ((void *) &ncx->blk_loop.state_u.ary.ary ==
 			(void *) &ncx->blk_loop.state_u.lazysv.cur);
+                /* FALLTHROUGH */
 	    case CXt_LOOP_FOR:
 		ncx->blk_loop.state_u.ary.ary
 		    = av_dup_inc(ncx->blk_loop.state_u.ary.ary, param);
+                /* FALLTHROUGH */
 	    case CXt_LOOP_LAZYIV:
 	    case CXt_LOOP_PLAIN:
+                /* code common to all CXt_LOOP_* types */
 		if (CxPADLOOP(ncx)) {
 		    ncx->blk_loop.itervar_u.oldcomppad
 			= (PAD*)ptr_table_fetch(PL_ptr_table,

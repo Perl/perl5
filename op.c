@@ -10650,8 +10650,10 @@ Perl_ck_refassign(pTHX_ OP *o)
     case OP_RV2AV:
 	o->op_private |= OPpLVREF_AV;
 	goto checkgv;
+        NOT_REACHED; /* NOTREACHED */
     case OP_RV2HV:
 	o->op_private |= OPpLVREF_HV;
+        /* FALLTHROUGH */
     case OP_RV2SV:
       checkgv:
 	if (cUNOPx(varop)->op_first->op_type != OP_GV) goto bad;

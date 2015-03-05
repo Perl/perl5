@@ -3206,9 +3206,12 @@ Perl_moreswitches(pTHX_ const char *s)
 	for (s++; isWORDCHAR(*s); s++) ;
 #endif
 	return s;
+        NOT_REACHED; /* NOTREACHED */
     }	
     case 'h':
 	usage();
+        NOT_REACHED; /* NOTREACHED */
+
     case 'i':
 	Safefree(PL_inplace);
 #if defined(__CYGWIN__) /* do backup extension automagically */
