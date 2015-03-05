@@ -10334,7 +10334,7 @@ Perl_ck_readline(pTHX_ OP *o)
     }
     else {
 	OP * const newop
-	    = newUNOP(OP_READLINE, o->op_flags | OPf_SPECIAL, newGVOP(OP_GV, 0, PL_argvgv));
+	    = newUNOP(OP_READLINE, 0, newGVOP(OP_GV, 0, PL_argvgv));
 	op_free(o);
 	return newop;
     }

@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 36);
+plan(tests => 37);
 
 my ($devnull, $no_devnull);
 
@@ -38,6 +38,15 @@ is($x, "1a line\n2a line\n", '<> from two files');
 	args	=> [ 'Io_argv1.tmp', '-' ],
     );
     is($x, "a line\nfoo\n", '<> from a file and STDIN');
+
+    # readline should behave as <>, not <<>>
+    $x = runperl(
+        prog	=> 'while (readline) { print $_; }',
+        stdin	=> "foo\n",
+        stderr 	=> 1,
+        args	=> [ '-' ],
+    );
+    is($x, "foo\n", 'readline() from STDIN');
 
     $x = runperl(
 	prog	=> 'while (<>) { print $_; }',
@@ -91,7 +100,7 @@ close TRY or die "Could not close: $!";
 @ARGV = ('Io_argv1.tmp', 'Io_argv2.tmp');
 $^I = '_bak';   # not .bak which confuses VMS
 $/ = undef;
-my $i = 10;
+my $i = 11;
 while (<>) {
     s/^/ok $i\n/;
     ++$i;
@@ -116,7 +125,7 @@ open STDIN, 'Io_argv1.tmp' or die $!;
 @ARGV = ();
 ok( !eof(),     'STDIN has something' );
 
-is( <>, "ok 10\n" );
+is( <>, "ok 11\n" );
 
 SKIP: {
     skip_if_miniperl($no_devnull, 4);
@@ -196,13 +205,13 @@ like($x, qr/^Can't open -: .* at -e line 1/, '<<>> does not treat - as STDIN');
         prog	=> 'push @ARGV,q//;print while <>',
         stderr	=> 1,
     );
-    like($x, qr/^Can't open : .* at -e line 1/, '<<>> does not treat - as STDIN');
+    like($x, qr/^Can't open : .* at -e line 1/, '<> does not open empty string in ARGV');
 
     $x = runperl(
         prog	=> 'push @ARGV,q//;print while <<>>',
         stderr	=> 1,
     );
-    like($x, qr/^Can't open : .* at -e line 1/, '<<>> does not treat - as STDIN');
+    like($x, qr/^Can't open : .* at -e line 1/, '<<>> does not open empty string in ARGV');
 }
 
 SKIP: {
