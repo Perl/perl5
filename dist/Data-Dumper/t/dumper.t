@@ -77,17 +77,20 @@ sub SKIP_TEST {
   ++$TNUM; print "ok $TNUM # skip $reason\n";
 }
 
+$TMAX = 438;
+
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
 # it direct. Out here it lets us knobble the next if to test that the perl
 # only tests do work (and count correctly)
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 438; $XS = 1;
+  $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 219; $XS = 0;
+  $TMAX /= 2;
+  $XS = 0;
 }
 
 print "1..$TMAX\n";
