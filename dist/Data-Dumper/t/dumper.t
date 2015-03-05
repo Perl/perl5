@@ -108,7 +108,7 @@ sub SKIP_TEST {
   ++$TNUM; print "ok $TNUM # skip $reason\n";
 }
 
-$TMAX = 438;
+$TMAX = 444;
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
 # it direct. Out here it lets us knobble the next if to test that the perl
@@ -1722,3 +1722,27 @@ EOW
     if $XS;
 }
 #############
+
+{
+    if($] lt 5.007_003) {
+        SKIP_TEST "Test is only problematic for EBCDIC, which only works for >= 5.8";
+        SKIP_TEST "Test is only problematic for EBCDIC, which only works for >= 5.8";
+    }
+    else {
+        # There is special code to handle the single control that in EBCDIC is
+        # not in the block with all the other controls, when it is UTF-8 and
+        # there are no variants in it (All controls in EBCDIC are invariant.)
+        # This tests that.  There is no harm in testing this works on ASCII,
+        # and is better to not have split code paths.
+        my $outlier = chr utf8::unicode_to_native(0x9F);
+        my $outlier_hex = sprintf "%x", ord $outlier;
+        $WANT = <<EOT;
+#\$VAR1 = \"\\x{$outlier_hex}\";
+EOT
+        $foo = "$outlier\x{100}";
+        chop $foo;
+        local $Data::Dumper::Useqq = 1;
+        TEST (q(Dumper($foo)), 'EBCDIC outlier control');
+        TEST (q(Data::Dumper::DumperX($foo)), 'EBCDIC outlier control: DumperX') if $XS;
+    }
+}
