@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan(tests => 61);
+plan(tests => 64);
 
 require mro;
 
@@ -395,4 +395,42 @@ undef *UNIVERSAL::DESTROY;
     no warnings 'uninitialized';
     $#_119433::ISA++;
     pass "no crash when ISA contains nonexistent elements";
+}
+
+{ # 123788
+    local $::TODO = "crashes";
+    fresh_perl_is(<<'PROG', "ok", {}, "don't crash when deleting ISA");
+$x = \@{q(Foo::ISA)};
+delete $Foo::{ISA};
+@$x = "Bar";
+print "ok\n";
+PROG
+
+    # when there are multiple references to an ISA array, the mg_obj
+    # turns into an AV of globs, which is a different code path
+    # this test only crashes on -DDEBUGGING builds
+    fresh_perl_is(<<'PROG', "ok", {}, "a case with multiple refs to ISA");
+@Foo::ISA = qw(Abc Def);
+$x = \@{q(Foo::ISA)};
+*Bar::ISA = $x;
+delete $Bar::{ISA};
+delete $Foo::{ISA};
+++$y;
+$x->[1] = "Ghi";
+@$x = "Bar";
+print "ok\n";
+PROG
+
+    # reverse order of delete to exercise removing from the other end
+    # of the array
+    # again, may only crash on -DDEBUGGING builds
+    fresh_perl_is(<<'PROG', "ok", {}, "a case with multiple refs to ISA");
+$x = \@{q(Foo::ISA)};
+*Bar::ISA = $x;
+delete $Foo::{ISA};
+delete $Bar::{ISA};
+++$y;
+@$x = "Bar";
+print "ok\n";
+PROG
 }
