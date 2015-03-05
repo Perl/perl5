@@ -12227,7 +12227,13 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
      * determines whether the op chain is convertible and calculates the
      * buffer size; the second pass populates the buffer and makes any
      * changes necessary to ops (such as moving consts to the pad on
-     * threaded builds)
+     * threaded builds).
+     *
+     * NB: for things like Coverity, note that both passes take the same
+     * path through the logic tree (except for 'if (pass)' bits), since
+     * both passes are following the same op_next chain; and in
+     * particular, if it would return early on the second pass, it would
+     * already have returned early on the first pass.
      */
     for (pass = 0; pass < 2; pass++) {
         OP *o                = orig_o;
