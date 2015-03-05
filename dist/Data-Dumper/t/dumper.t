@@ -1384,7 +1384,7 @@ EOT
     if ($Is_ebcdic) {
 	$b = "Bad. XS didn't escape dollar sign";
 ############# 322
-	$WANT = <<"EOT"; # Careful. This is '' string written inside '' here doc
+	$WANT = <<"EOT"; # Careful. This is '' string written inside "" here doc
 #\$VAR1 = '\$b\"\@\\\\\xB1';
 EOT
         $a = "\$b\"\@\\\xB1\x{100}";
@@ -1399,7 +1399,7 @@ EOT
     } else {
 	$b = "Bad. XS didn't escape dollar sign";
 ############# 322
-	$WANT = <<"EOT"; # Careful. This is '' string written inside '' here doc
+	$WANT = <<"EOT"; # Careful. This is '' string written inside "" here doc
 #\$VAR1 = '\$b\"\@\\\\\xA3';
 EOT
 
