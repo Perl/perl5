@@ -921,3 +921,12 @@ gmtime(NaN) too large at - line 6.
 gmtime(NaN) failed at - line 6.
 localtime(NaN) too large at - line 7.
 localtime(NaN) failed at - line 7.
+
+########
+# pp_sys.c [pp_alarm]
+alarm(-1);
+no warnings "misc";
+alarm(-1);
+
+EXPECT
+alarm() with negative argument at - line 2.

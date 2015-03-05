@@ -4708,13 +4708,30 @@ PP(pp_alarm)
 {
 #ifdef HAS_ALARM
     dSP; dTARGET;
-    int anum;
-    anum = POPi;
-    anum = alarm((unsigned int)anum);
-    if (anum < 0)
-	RETPUSHUNDEF;
-    PUSHi(anum);
-    RETURN;
+    /* alarm() takes an unsigned int number of seconds, and return the
+     * unsigned int number of seconds remaining in the previous alarm
+     * (alarms don't stack).  Therefore negative return values are not
+     * possible. */
+    int anum = POPi;
+    if (anum < 0) {
+        /* Note that while the C library function alarm() as such has
+         * no errors defined (or in other words, properly behaving client
+         * code shouldn't expect any), alarm() being obsoleted by
+         * setitimer() and often being implemented in terms of
+         * setitimer(), can fail. */
+        /* diag_listed_as: %s() with negative argument */
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_MISC),
+                         "alarm() with negative argument");
+        SETERRNO(EINVAL, LIB_INVARG);
+        RETPUSHUNDEF;
+    }
+    else {
+        unsigned int retval = alarm(anum);
+        if ((int)retval < 0) /* Strictly speaking "cannot happen". */
+            RETPUSHUNDEF;
+        PUSHu(retval);
+        RETURN;
+    }
 #else
     DIE(aTHX_ PL_no_func, "alarm");
 #endif

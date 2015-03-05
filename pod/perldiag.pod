@@ -7099,6 +7099,11 @@ You likely need to figure out how this multi-byte character got mixed up
 with your single-byte locale (or perhaps you thought you had a UTF-8
 locale, but Perl disagrees).
 
+=item %s() with negative argument
+
+(S misc) Certain operations make no sense with negative arguments.
+Warning is given and the operation is not done.
+
 =item Within []-length '%c' not allowed
 
 (F) The count in the (un)pack template may be replaced by C<[TEMPLATE]>
