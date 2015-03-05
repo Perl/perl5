@@ -165,7 +165,7 @@ No changes to installed files other than the version bump.
 
 =item *
 
-L<threads> has been upgraded from version 1.96 to 1.97.
+L<threads> has been upgraded from version 1.96 to 1.98.
 
 =back
 
