@@ -5435,7 +5435,7 @@ PP(pp_push)
 	ENTER_with_name("call_PUSH");
 	call_sv(SV_CONST(PUSH),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
 	LEAVE_with_name("call_PUSH");
-	SPAGAIN;
+	/* SPAGAIN; not needed: SP is assigned to immediately below */
     }
     else {
 	if (SvREADONLY(ary) && MARK < SP) Perl_croak_no_modify();
@@ -5488,7 +5488,7 @@ PP(pp_unshift)
 	ENTER_with_name("call_UNSHIFT");
 	call_sv(SV_CONST(UNSHIFT),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
 	LEAVE_with_name("call_UNSHIFT");
-	SPAGAIN;
+	/* SPAGAIN; not needed: SP is assigned to immediately below */
     }
     else {
 	SSize_t i = 0;
