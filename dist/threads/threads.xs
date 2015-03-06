@@ -28,6 +28,13 @@
 #ifndef sv_dup_inc
 #  define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
 #endif
+#ifndef PERL_UNUSED_RESULT
+#  if defined(__GNUC__) && defined(HASATTRIBUTE_WARN_UNUSED_RESULT)
+#    define PERL_UNUSED_RESULT(v) STMT_START { __typeof__(v) z = (v); (void)sizeof(z); } STMT_END
+#  else
+#    define PERL_UNUSED_RESULT(v) ((void)(v))
+#  endif
+#endif
 
 #ifdef USE_ITHREADS
 
