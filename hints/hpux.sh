@@ -598,6 +598,14 @@ EOCBU
 cat >UU/uselargefiles.cbu <<'EOCBU'
 # This script UU/uselargefiles.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use large files.
+
+case "$archname:$use64bitall:$use64bitint" in
+    *-LP64*:undef:define)
+	archname=`echo "$archname" | sed 's/-LP64/-64int/'`
+	echo "Archname changed to $archname"
+	;;
+    esac
+
 case "$uselargefiles" in
     ""|$define|true|[yY]*)
 	# there are largefile flags available via getconf(1)
