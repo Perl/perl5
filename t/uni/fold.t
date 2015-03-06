@@ -10,6 +10,7 @@ BEGIN {
     set_up_inc('../lib');
     skip_all_without_unicode_tables();
     require Config; import Config;
+    require './charset_tools.pl';
     require './loc_tools.pl';   # Contains find_utf8_ctype_locale()
 }
 
@@ -48,14 +49,15 @@ foreach my $decimal_code_point (sort { $a <=> $b } keys %$casefolds) {
     push @CF, [ $code, $full, $type, $name ];
 
     # Get the inverse fold for single-char mappings.
-    $reverse_fold{pack "U0U*", hex $simple} = pack "U0U*", $decimal_code_point if $simple;
+    $reverse_fold{pack "W*", hex $simple} = pack "W*", $decimal_code_point if $simple;
 }
 
 foreach my $test_ref ( @simple_folds ) {
     use feature 'fc';
     my ($code, $mapping, $type, $name) = @$test_ref;
-    my $c = pack("U0U*", hex $code);
-    my $f = pack("U0U*", map { hex } split " ", $mapping);
+    my $c = pack("W*", hex $code);
+    utf8::upgrade($c);
+    my $f = pack("W*", map { hex } split " ", $mapping);
 
     my $against = join "", "qq{", map("\\x{$_}", split " ", $mapping), "}";
     {
@@ -66,8 +68,9 @@ foreach my $test_ref ( @simple_folds ) {
 
 foreach my $test_ref (@CF) {
     my ($code, $mapping, $type, $name) = @$test_ref;
-    my $c = pack("U0U*", hex $code);
-    my $f = pack("U0U*", map { hex } split " ", $mapping);
+    my $c = pack("W*", hex $code);
+    utf8::upgrade($c);
+    my $f = pack("W*", map { hex } split " ", $mapping);
     my $f_length = length $f;
     foreach my $test (
             qq[":$c:" =~ /:$c:/],
@@ -184,7 +187,8 @@ foreach my $test_ref (@CF) {
     is( fc("ΜΆΪΟΣ"), "μάϊοσ" );
     is( fc("Μάϊος"), "μάϊοσ" );
     is( fc("𐐖"), "𐐾"       );
-    is( fc("r\xe9sum\xe9"), "r\xe9sum\xe9" );
+    is( fc("r" . uni_to_native("\xe9") . "sum" . uni_to_native("\xe9")),
+           "r" . uni_to_native("\xe9") . "sum" . uni_to_native("\xe9") );
     is( fc("re\x{0301}sume\x{0301}"), "re\x{301}sume\x{301}" );
     is( fc("ELİF"), "eli\x{307}f" );
     is( fc("eli\x{307}f"), "eli\x{307}f");
@@ -194,18 +198,18 @@ foreach my $test_ref (@CF) {
     # Which uses ICU as the backend.
 
     my @folding_mixed = (
-        "\x{61}\x{42}\x{130}\x{49}\x{131}\x{3d0}\x{df}\x{fb03}",
-        "A\x{df}\x{b5}\x{fb03}\x{1040C}\x{130}\x{131}",
+        uni_to_native("\x{61}\x{42}\x{130}\x{49}\x{131}\x{3d0}\x{df}\x{fb03}"),
+        "A" . uni_to_native("\x{df}\x{b5}\x{fb03}\x{1040C}\x{130}\x{131}"),
     );
 
     my @folding_default = (
-        "\x{61}\x{62}\x{69}\x{307}\x{69}\x{131}\x{3b2}\x{73}\x{73}\x{66}\x{66}\x{69}",
-        "ass\x{3bc}ffi\x{10434}i\x{307}\x{131}",
+        uni_to_native("\x{61}\x{62}\x{69}\x{307}\x{69}\x{131}\x{3b2}\x{73}\x{73}\x{66}\x{66}\x{69}"),
+        "ass\x{3bc}ffi\x{10434}i\x{307}\x{131}"
     );
 
     my @folding_exclude_turkic = (
-        "\x{61}\x{62}\x{69}\x{131}\x{131}\x{3b2}\x{73}\x{73}\x{66}\x{66}\x{69}",
-        "ass\x{3bc}ffi\x{10434}i\x{131}",
+        uni_to_native("\x{61}\x{62}\x{69}\x{131}\x{131}\x{3b2}\x{73}\x{73}\x{66}\x{66}\x{69}"),
+                         "ass\x{3bc}ffi\x{10434}i\x{131}",
     );
 
     is( fc($folding_mixed[1]), $folding_default[1] );
@@ -355,7 +359,7 @@ foreach my $test_ref (@CF) {
 
 {
     use feature qw(fc);
-    package Eeyup  { use overload q{""} => sub { "\x{df}"   }, fallback => 1 }
+    package Eeyup  { use overload q{""} => sub { main::uni_to_native("\x{df}")   }, fallback => 1 }
     package Uunope { use overload q{""} => sub { "\x{30cb}" }, fallback => 1 }
     package Undef  { use overload q{""} => sub {   undef    }, fallback => 1 }
 
@@ -381,7 +385,7 @@ foreach my $test_ref (@CF) {
     is( $warnings, 2, "correct number of warnings" );
 
     my $fetched = 0;
-    package Derpy { sub TIESCALAR { bless {}, shift } sub FETCH { $fetched++; "\x{df}" } }
+    package Derpy { sub TIESCALAR { bless {}, shift } sub FETCH { $fetched++; main::uni_to_native("\x{df}") } }
 
     tie my $x, "Derpy";
 
@@ -392,30 +396,34 @@ foreach my $test_ref (@CF) {
 
 {
     use feature qw( fc );
-    my $troublesome1 = "\xdf" x 11; #SvLEN should be 12, SvCUR should be 11
+    my $troublesome1 = uni_to_native("\xdf") x 11; #SvLEN should be 12, SvCUR should be 11
                                     #So this should force fc() to grow the string.
 
     is( fc($troublesome1), "ss" x 11, "fc() grows the string" );
 
-    my $troublesome2 = "abcdef:\x{df}:fjksjs"; #SvLEN should be 16, SvCUR should be 15
+    my $troublesome2 = "abcdef:" . uni_to_native("\x{df}")
+                     . ":fjksjs"; #SvLEN should be 16, SvCUR should be 15
     is( fc($troublesome2), "abcdef:ss:fjksjs", "fc() expands \\x{DF} in the middle of a string that needs to grow" );
 
-    my $troublesome3 = ":\x{df}:";
+    my $troublesome3 = ":" . uni_to_native("\x{df}") . ":";
     is( fc($troublesome3), ":ss:", "fc() expands \\x{DF} in the middle of a string" );
 
 
-    my $troublesome4 = "\x{B5}"; #\N{MICRON SIGN} is latin-1, but its foldcase is in UTF-8
+    my $troublesome4 = uni_to_native("\x{B5}"); #\N{MICRON SIGN} is latin-1, but its foldcase is in UTF-8
 
     is( fc($troublesome4), "\x{3BC}", "fc() for a latin-1 \x{B5} returns UTF-8" );
     ok( !utf8::is_utf8($troublesome4), "fc() doesn't upgrade the original string" );
 
 
-    my $troublesome5 = "\x{C9}abda\x{B5}aaf\x{C8}"; # Up until foldcasing \x{B5}, the string
+    my $troublesome5 = uni_to_native("\x{C9}") . "abda"
+                     . uni_to_native("\x{B5}") . "aaf"
+                     . uni_to_native("\x{C8}");  # Up until foldcasing \x{B5}, the string
                                                     # was in Latin-1. This tests that the
                                                     # results don't have illegal UTF-8
                                                     # (i.e. leftover latin-1) in them
 
-    is( fc($troublesome5), "\x{E9}abda\x{3BC}aaf\x{E8}" );
+    is( fc($troublesome5), uni_to_native("\x{E9}") . "abda\x{3BC}aaf"
+                         . uni_to_native("\x{E8}") );
 }
 
 

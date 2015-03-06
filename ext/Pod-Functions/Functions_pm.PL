@@ -91,11 +91,19 @@ while (my ($type, $funcs) = each %Kinds) {
 }
 
 # We sort __SUB__ after sub, but before substr, but __PACKAGE__ after package,
-# and __END__ after END.
+# and __END__ after END.  (We create a temporary array of two elements, where
+# the second has the underscores squeezed out, and sort on that element
+# first.)
 sub sort_funcs {
     map { $_->[0] }
-        sort { uc $a->[1] cmp uc $b->[1] || $b->[1] cmp $a->[1] || $a->[0] cmp $b->[0] }
-            map  { my $f = tr/_//dr; [ $_, $f ] }
+        sort { uc $a->[1] cmp uc $b->[1]
+               || $b->[1] cmp $a->[1]
+               || $a->[0] =~ /^_/   # here $a and $b are identical when
+                                    # underscores squeezed out; so if $a
+                                    # begins with an underscore, it should
+                                    # sort after $b
+               || $a->[0] cmp $b->[0]
+             } map  { my $f = tr/_//dr; [ $_, $f ] }
                 @_;
 }
 
@@ -196,7 +204,7 @@ L<perlfunc/"Perl Functions by Category"> section.
 
 =cut
 
-our $VERSION = '1.08';
+our $VERSION = '1.09';
 
 require Exporter;
 

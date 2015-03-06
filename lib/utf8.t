@@ -5,7 +5,7 @@ my $has_perlio;
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require './test.pl';
+    require './test.pl'; require './charset_tools.pl';
     unless ($has_perlio = find PerlIO::Layer 'perlio') {
 	print <<EOF;
 # Since you don't have perlio you might get failures with UTF-8 locales.
@@ -44,8 +44,8 @@ no utf8; # Ironic, no?
 
     my ($a, $b);
 
-    { use bytes; $a = "\xc3\xa4" }
-    { use utf8;  $b = "\xe4"     }
+    { use bytes; $a = byte_utf8a_to_utf8n("\xc3\xa4") }
+    { use utf8;  $b = uni_to_native("\xe4")     }
 
     my $test = 68;
 
@@ -429,7 +429,7 @@ SKIP: {
 {
     # Make sure utf8::decode respects copy-on-write [perl #91834].
     # Hash keys are the easiest way to test this.
-    my $name = "\x{c3}\x{b3}";
+    my $name = byte_utf8a_to_utf8n("\x{c3}\x{b3}");
     my ($k1) = keys %{ { $name=>undef } };
     my $k2 = $name;
     utf8::decode($k1);
@@ -442,7 +442,7 @@ SKIP: {
     # Make sure utf8::decode does not modify read-only scalars
     # [perl #91850].
     
-    my $name = "\x{c3}\x{b3}";
+    my $name = byte_utf8a_to_utf8n("\x{c3}\x{b3}");
     Internals::SvREADONLY($name, 1);
     eval { utf8::decode($name) };
     like $@, qr/^Modification of a read-only/,
@@ -452,12 +452,12 @@ SKIP: {
 {
     # utf8::decode should stringify refs [perl #91852].
 
-    package eieifg { use overload '""'      => sub { "\x{c3}\x{b3}" },
+    package eieifg { use overload '""'      => sub { main::byte_utf8a_to_utf8n("\x{c3}\x{b3}") },
                                    fallback => 1 }
 
     my $name = bless[], eieifg::;
     utf8::decode($name);
-    is $name, "\xf3", 'utf8::decode flattens references';
+    is $name, uni_to_native("\xf3"), 'utf8::decode flattens references';
 }
 
 {
@@ -500,10 +500,10 @@ SKIP: {
 }
 
 {
-    my $a = "456\xb6";
+    my $a = "456" . uni_to_native("\xb6");
     utf8::upgrade($a);
 
-    my $b = "123456\xb6";
+    my $b = "123456" . uni_to_native("\xb6");
     $b =~ s/^...//;
     utf8::upgrade($b);
     is($b, $a, "utf8::upgrade OffsetOK");
@@ -563,7 +563,8 @@ SKIP: {
 for my $pos (0..5) {
 
     my $p;
-    my $s = "A\xc8\x81\xe8\xab\x86\x{100}";
+    my $utf8_bytes = byte_utf8a_to_utf8n("\xc8\x81\xe3\xbf\xbf");
+    my $s = "A$utf8_bytes\x{100}";
     chop($s);
 
     pos($s) = $pos;
@@ -573,17 +574,17 @@ for my $pos (0..5) {
     utf8::downgrade($s);
     is(length($s), 6,		   "(pos $pos) len after     utf8::downgrade");
     is(pos($s),    $pos,	   "(pos $pos) pos after     utf8::downgrade");
-    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after     utf8::downgrade");
+    is($s, "A$utf8_bytes","(pos $pos) str after     utf8::downgrade");
     utf8::decode($s);
     is(length($s), 3,		   "(pos $pos) len after  D; utf8::decode");
     is(pos($s),    undef,	   "(pos $pos) pos after  D; utf8::decode");
-    is($s, "A\x{201}\x{8ac6}",	   "(pos $pos) str after  D; utf8::decode");
+    is($s, "A\x{201}\x{3fff}",	   "(pos $pos) str after  D; utf8::decode");
     utf8::encode($s);
     is(length($s), 6,		   "(pos $pos) len after  D; utf8::encode");
     is(pos($s),    undef,	   "(pos $pos) pos after  D; utf8::encode");
-    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after  D; utf8::encode");
+    is($s, "A$utf8_bytes","(pos $pos) str after  D; utf8::encode");
 
-    $s = "A\xc8\x81\xe8\xab\x86";
+    $s = "A$utf8_bytes";
 
     pos($s) = $pos;
     is(length($s), 6,		   "(pos $pos) len before    utf8::upgrade");
@@ -591,15 +592,15 @@ for my $pos (0..5) {
     utf8::upgrade($s);
     is(length($s), 6,		   "(pos $pos) len after     utf8::upgrade");
     is(pos($s),    $pos,	   "(pos $pos) pos after     utf8::upgrade");
-    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after     utf8::upgrade");
+    is($s, "A$utf8_bytes","(pos $pos) str after     utf8::upgrade");
     utf8::decode($s);
     is(length($s), 3,		   "(pos $pos) len after  U; utf8::decode");
     is(pos($s),    undef,	   "(pos $pos) pos after  U; utf8::decode");
-    is($s, "A\x{201}\x{8ac6}",	   "(pos $pos) str after  U; utf8::decode");
+    is($s, "A\x{201}\x{3fff}",	   "(pos $pos) str after  U; utf8::decode");
     utf8::encode($s);
     is(length($s), 6,		   "(pos $pos) len after  U; utf8::encode");
     is(pos($s),    undef,	   "(pos $pos) pos after  U; utf8::encode");
-    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after  U; utf8::encode");
+    is($s, "A$utf8_bytes","(pos $pos) str after  U; utf8::encode");
 }
 
 # [perl #119043] utf8::upgrade should not croak on read-only COWs

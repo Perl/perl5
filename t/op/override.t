@@ -184,7 +184,7 @@ like runperl(prog => 'use constant foo=>1; '
 
 is runperl(prog => 'use constant t=>42; '
                   .'BEGIN { *{q|CORE::GLOBAL::time|} = \&{q|t|};1}'
-                  .'print time, chr 10',
+                  .'print time, chr utf8::unicode_to_native(10)',
           stderr => 1),
    "42\n",
    'keywords respect global constant overrides';

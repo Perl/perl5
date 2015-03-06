@@ -18,6 +18,9 @@ if ( $^O eq "VMS" ) {
 if ($^O eq 'dec_osf') {
     skip_all("$^O cannot handle this test");
 }
+if ( $::IS_EBCDIC || $::IS_EBCDIC) {
+  skip_all( "- We don't regen on EBCDIC." );
+}
 use Config;
 if ( $Config{usecrosscompile} ) {
   skip_all( "Not all files are available during cross-compilation" );
@@ -74,6 +77,7 @@ OUTER: foreach my $file (@files) {
 	    fail("Bad line in $file: '$_'");
 	    next OUTER;
 	}
+
 	my $digest = digest($2);
 	note("$digest $2");
 	push @bad, $2 unless $digest eq $1;

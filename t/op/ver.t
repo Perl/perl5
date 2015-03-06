@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
     $SIG{'__WARN__'} = sub { warn $_[0] if $DOWARN };
-    require "./test.pl";
+    require "./test.pl"; require "./charset_tools.pl";
 }
 
 $DOWARN = 1; # enable run-time warnings now
@@ -175,7 +175,7 @@ is(sprintf("%vd", join("", map { chr }
 my $vs = v1.20.300.4000;
 is($vs,"\x{1}\x{14}\x{12c}\x{fa0}","v-string ne \\x{}");
 is($vs,chr(1).chr(20).chr(300).chr(4000),"v-string ne chr()");
-is('foo',((chr(193) eq 'A') ? v134.150.150 : v102.111.111),"v-string ne ''");
+is('foo',($::IS_EBCDIC ? v134.150.150 : v102.111.111),"v-string ne ''");
 
 # Chapter 15, pp403
 
@@ -225,7 +225,7 @@ ok( abs($v - $]) < 10**-8 , "\$^V == \$] (numeric)" );
 
 SKIP: {
   skip("In EBCDIC the v-string components cannot exceed 2147483647", 6)
-    if ord "A" == 193;
+    if $::IS_EBCDIC;
 
   # [ID 20010902.001] check if v-strings handle full UV range or not
   if ( $Config{'uvsize'} >= 4 ) {
@@ -270,10 +270,10 @@ ok( exists $h{chr(65).chr(66).chr(67)}, "v-stringness is engaged for X.Y.Z" );
     is $|, 1, 'clobbering vstrings does not clobber all magic';
 }
 
-$a = v102; $a =~ s/f/f/;
+$a = $::IS_EBCDIC ? v134 : v102; $a =~ s/f/f/;
 is ref \$a, 'SCALAR',
   's/// flattens vstrings even when the subst results in the same value';
-$a = v102; $a =~ y/f/g/;
+$a = $::IS_EBCDIC ? v134 : v102; $a =~ y/f/g/;
 is ref \$a, 'SCALAR', 'y/// flattens vstrings';
 
 sub { $_[0] = v3;

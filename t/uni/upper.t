@@ -3,6 +3,8 @@ BEGIN {
     require "uni/case.pl";
 }
 
+use feature 'unicode_strings';
+
 is(uc("\x{3B1}\x{345}\x{301}"), "\x{391}\x{301}\x{399}",
                                                    'Verify moves YPOGEGRAMMENI');
 

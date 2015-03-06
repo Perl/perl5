@@ -26,7 +26,7 @@ BEGIN {
 	# avoid using any global vars here:
 	if ($v =~ s/^\^(?=.)//) {
 	    for(substr $v, 0, 1) {
-		$_ = chr ord() - 64;
+		$_ = chr(utf8::native_to_unicode(ord($_)) - 64);
 	    }
 	}
 	SKIP:

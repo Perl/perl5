@@ -20,7 +20,7 @@ sub test_fetch_absent;
 my $utf8_for_258 = chr 258;
 utf8::encode $utf8_for_258;
 
-my @testkeys = ('N', chr 198, chr 256);
+my @testkeys = ('N', chr utf8::unicode_to_native(198), chr 256);
 my @keys = (@testkeys, $utf8_for_258);
 
 foreach (@keys) {
@@ -396,7 +396,7 @@ sub test_U_hash {
 sub main_tests {
   my ($keys, $testkeys, $description) = @_;
   foreach my $key (@$testkeys) {
-    my $lckey = ($key eq chr 198) ? chr 230 : lc $key;
+    my $lckey = ($key eq chr utf8::unicode_to_native(198)) ? chr utf8::unicode_to_native(230) : lc $key;
     my $unikey = $key;
     utf8::encode $unikey;
 

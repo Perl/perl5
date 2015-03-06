@@ -225,7 +225,7 @@ for my $i (0 .. 255) {
 
                     # With the legacy, nothing above 128 should be in the
                     # class
-                    if ($i >= 128) {
+                    if (utf8::native_to_unicode($i) >= 128) {
                         $expect_success = 0;
                         $expect_success = ! $expect_success if $complement;
                         $expect_success = ! $expect_success if $complement_class;
@@ -259,7 +259,7 @@ for my $i (0 .. 255) {
 
         no feature 'unicode_strings';
         $prefix = "no uni8bit; Verify $string";
-        if ($i >= 128) {
+        if (utf8::native_to_unicode($i) >= 128) {
             $expect_success = 1;
             $expect_success = ! $expect_success if $complement;
         }

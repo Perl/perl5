@@ -18,15 +18,15 @@ plan('no_plan');
 # Each case is a valid element of its hash key.  Choose, where available, an
 # ASCII-range, Latin-1 non-ASCII range, and above Latin1 range code point.
 my %testcases = (
-    '\w' => [ ord("A"), 0xE2, 0x16B ],   # Below expects these to all be alpha
+    '\w' => [ ord("A"), utf8::unicode_to_native(0xE2), 0x16B ],   # Below expects these to all be alpha
     '\d' => [ ord("0"), 0x0662 ],
-    '\s' => [ ord("\t"), 0xA0, 0x1680 ],  # Below expects these to be [:blank:]
-    '[:cntrl:]' => [ 0x00, 0x88 ],
-    '[:graph:]' => [ ord("&"), 0xF7, 0x02C7 ], # Below expects these to be
-                                               # [:print:]
-    '[:lower:]' => [ ord("g"), 0xE3, 0x0127 ],
-    '[:punct:]' => [ ord("!"), 0xBF, 0x055C ],
-    '[:upper:]' => [ ord("G"), 0xC3, 0x0126 ],
+    '\s' => [ ord("\t"), utf8::unicode_to_native(0xA0), 0x1680 ],  # Below expects these to be [:blank:]
+    '[:cntrl:]' => [ utf8::unicode_to_native(0x00), utf8::unicode_to_native(0x88) ],
+    '[:graph:]' => [ ord("&"), utf8::unicode_to_native(0xF7), 0x02C7 ], # Below expects these to be
+                                                                     # [:print:]
+    '[:lower:]' => [ ord("g"), utf8::unicode_to_native(0xE3), 0x0127 ],
+    '[:punct:]' => [ ord('`'), ord('^'), ord('~'), ord('<'), ord('='), ord('>'), ord('|'), ord('-'), ord(','), ord(';'), ord(':'), ord('!'), ord('?'), ord('/'), ord('.'), ord('"'), ord('('), ord(')'), ord('['), ord(']'), ord('{'), ord('}'), ord('@'), ord('$'), ord('*'), ord('\\'), ord('&'), ord('#'), ord('%'), ord('+'), ord("'"), utf8::unicode_to_native(0xBF), 0x055C ],
+    '[:upper:]' => [ ord("G"), utf8::unicode_to_native(0xC3), 0x0126 ],
     '[:xdigit:]' => [ ord("4"), 0xFF15 ],
 );
 
@@ -55,7 +55,8 @@ if (! is_miniperl() && $Config{d_setlocale}) {
         # legal, but since we don't know what the right answers should be,
         # skip the locale tests in that situation.
         for my $i (128 .. 255) {
-            goto skip_adding_C_locale if chr($i) =~ /[[:print:]]/;
+            goto skip_adding_C_locale
+                              if chr(utf8::unicode_to_native($i)) =~ /[[:print:]]/;
         }
         push @charsets, 'l';
 
@@ -98,7 +99,8 @@ foreach my $charset (@charsets) {
 
             # For each test case
             foreach my $ord (@{$testcases{$class}}) {
-                my $char = display(chr($ord));
+                my $char = chr($ord);
+                $char = ($char eq '$') ? '\$' : display($char);
 
                 # > 255 already implies upgraded.  Skip the ones that don't
                 # have an explicit upgrade.  This shows more clearly in the
@@ -112,7 +114,10 @@ foreach my $charset (@charsets) {
 
                 # Everything always matches in ASCII, or under /u, or under /l
                 # with a UTF-8 locale
-                if ($ord < 128 || $charset eq 'u' || $charset eq 'L') {
+                if (utf8::native_to_unicode($ord) < 128
+                    || $charset eq 'u'
+                    || $charset eq 'L')
+                {
                     $reason = "\"$char\" is a $class under /$charset_display";
                     $neg_reason = "\"$char\" is not a $complement under /$charset_display";
                 }
@@ -242,7 +247,7 @@ foreach my $charset (@charsets) {
                     my $other_is_word = 1;
                     my $other_reason = "\"$other\" is a $class under /$charset_display";
                     my $other_neg_reason = "\"$other\" is not a $complement under /$charset_display";
-                    if ($other_ord > 127
+                    if (utf8::native_to_unicode($other_ord) > 127
                         && $charset ne 'u' && $charset ne 'L'
                         && (($charset eq "a" || $charset eq "aa")
                             || ($other_ord < 256 && ($charset eq 'l' || ! $upgrade))))

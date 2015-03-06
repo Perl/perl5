@@ -66,9 +66,9 @@ if ($^O eq 'vos') {
   $VAR = "";
   is (DPeek ($VAR),	'PVIV(""\0)',		' $VAR ""');
   is (DPeek (\$VAR),	'\PVIV(""\0)',		'\$VAR ""');
-  $VAR = "\xa8";
-  is (DPeek ($VAR),	'PVIV("\250"\0)',	' $VAR "\xa8"');
-  is (DPeek (\$VAR),	'\PVIV("\250"\0)',	'\$VAR "\xa8"');
+  $VAR = "\xdf";    # \xdf works for both ASCII and EBCDIC
+  is (DPeek ($VAR),	'PVIV("\337"\0)',	' $VAR "\xdf"');
+  is (DPeek (\$VAR),	'\PVIV("\337"\0)',	'\$VAR "\xdf"');
   $VAR = "a\x0a\x{20ac}";
   is (DPeek ($VAR), 'PVIV("a\n\342\202\254"\0) [UTF8 "a\n\x{20ac}"]',
 					' $VAR "a\x0a\x{20ac}"');

@@ -21,6 +21,12 @@ Non-octal character '8'.  Resolved as "\o{123}" at - line 3.
 Non-octal character '8'.  Resolved as "\o{654}" at - line 4.
 ########
 # regcomp.c.c
+BEGIN {
+    if (ord('A') == 193) {
+        print "SKIPPED\n# Different results on EBCDIC";
+        exit 0;
+    }
+}
 use warnings;
 $a = qr/\c,/;
 $a = qr/[\c,]/;
@@ -28,5 +34,5 @@ no warnings 'syntax';
 $a = qr/\c,/;
 $a = qr/[\c,]/;
 EXPECT
-"\c," is more clearly written simply as "l" at - line 3.
-"\c," is more clearly written simply as "l" at - line 4.
+"\c," is more clearly written simply as "l" at - line 9.
+"\c," is more clearly written simply as "l" at - line 10.

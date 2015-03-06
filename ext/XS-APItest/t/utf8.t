@@ -5,13 +5,15 @@ use Test::More;
 
 use XS::APItest;
 
+my $pound_sign = chr utf8::unicode_to_native(163);
+
 foreach ([0, '', '', 'empty'],
 	 [0, 'N', 'N', '1 char'],
 	 [1, 'NN', 'N', '1 char substring'],
 	 [-2, 'Perl', 'Rules', 'different'],
-	 [0, chr 163, chr 163, 'pound sign'],
-	 [1, chr (163) . 10, chr (163) . 1, '10 pounds is more than 1 pound'],
-	 [1, chr(163) . chr(163), chr 163, '2 pound signs are more than 1'],
+	 [0, $pound_sign, $pound_sign, 'pound sign'],
+	 [1, $pound_sign . 10, $pound_sign . 1, '10 pounds is more than 1 pound'],
+	 [1, $pound_sign . $pound_sign, $pound_sign, '2 pound signs are more than 1'],
 	 [-2, ' $!', " \x{1F42B}!", 'Camels are worth more than 1 dollar'],
 	 [-1, '!', "!\x{1F42A}", 'Initial substrings match'],
 	) {
@@ -23,6 +25,8 @@ foreach ([0, '', '', 'empty'],
     utf8::encode($left);
     is(bytes_cmp_utf8($right, $left), -$expect, "$desc reversed");
 }
+
+if (ord("A") == 65) { # EBCDIC is too hard to test for malformations
 
 # Test uft8n_to_uvchr().  These provide essentially complete code coverage.
 
@@ -318,6 +322,7 @@ foreach my $test (@tests) {
             }
         }
     }
+}
 }
 
 done_testing;

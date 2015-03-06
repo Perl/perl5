@@ -10,7 +10,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib ../dist/if);
-    require "./test.pl";
+    require "./test.pl"; require './charset_tools.pl';
     $^P |= 0x100;
 }
 
@@ -462,7 +462,8 @@ test_proto $_ for qw(
 test_proto 'evalbytes';
 $tests += 4;
 {
-  chop(my $upgraded = "use utf8; '\xc4\x80'" . chr 256);
+  my $U_100_bytes = byte_utf8a_to_utf8n("\xc4\x80");
+  chop(my $upgraded = "use utf8; $U_100_bytes" . chr 256);
   is &myevalbytes($upgraded), chr 256, '&evalbytes';
   # Test hints
   require strict;
@@ -500,7 +501,7 @@ test_proto 'exp';
 test_proto 'fc';
 $tests += 2;
 {
-  my $sharp_s = "\xdf";
+  my $sharp_s = uni_to_native("\xdf");
   is &myfc($sharp_s), $sharp_s, '&fc, no unicode_strings';
   use feature 'unicode_strings';
   is &myfc($sharp_s), "ss", '&fc, unicode_strings';
@@ -632,12 +633,15 @@ close file;
 }
 
 test_proto 'opendir';
-test_proto 'ord', chr(64), 64;
+test_proto 'ord', chr(utf8::unicode_to_native(64)), utf8::unicode_to_native(64);
 
 test_proto 'pack';
 $tests += 2;
-is &mypack("H*", '5065726c'), 'Perl', '&pack';
-lis [&mypack("H*", '5065726c')], ['Perl'], '&pack in list context';
+my $Perl_as_a_hex_string = join "", map
+                                    { sprintf("%2X", utf8::unicode_to_native($_)) }
+                                    0x50, 0x65, 0x72, 0x6c;
+is &mypack("H*", $Perl_as_a_hex_string), 'Perl', '&pack';
+lis [&mypack("H*", $Perl_as_a_hex_string)], ['Perl'], '&pack in list context';
 
 test_proto 'pipe';
 
@@ -949,9 +953,15 @@ undef @_;
 
 test_proto 'unpack';
 $tests += 2;
+my $abcd_as_a_hex_string = join "", map
+                                    { sprintf("%2X", utf8::unicode_to_native($_)) }
+                                    0x61, 0x62, 0x63, 0x64;
+my $bcde_as_a_hex_string = join "", map
+                                    { sprintf("%2X", utf8::unicode_to_native($_)) }
+                                    0x62, 0x63, 0x64, 0x65;
 $_ = 'abcd';
-is &myunpack("H*"), '61626364', '&unpack with one arg';
-is &myunpack("H*", "bcde"), '62636465', '&unpack with two arg';
+is &myunpack("H*"), $abcd_as_a_hex_string, '&unpack with one arg';
+is &myunpack("H*", "bcde"), $bcde_as_a_hex_string, '&unpack with two arg';
 
 
 test_proto 'untie'; # behaviour already tested along with tie(d)

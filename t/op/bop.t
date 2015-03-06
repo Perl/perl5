@@ -7,7 +7,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require "./test.pl";
+    require "./test.pl"; require "./charset_tools.pl";
     require Config;
 }
 
@@ -63,19 +63,25 @@ is (($foo | $bar), ($Aoz x 75 . $zap));
 # ^ does not truncate
 is (($foo ^ $bar), ($Axz x 75 . $zap));
 
-# string constants
-sub _and($) { $_[0] & "+0" }
-sub _oar($) { $_[0] | "+0" }
-sub _xor($) { $_[0] ^ "+0" }
-is _and "waf", '# ',  'str var & const str'; # These three
-is _and  0,    '0',   'num var & const str';    # are from
-is _and "waf", '# ',  'str var & const str again'; # [perl #20661]
-is _oar "yit", '{yt', 'str var | const str';
-is _oar  0,    '0',   'num var | const str';
-is _oar "yit", '{yt', 'str var | const str again';
-is _xor "yit", 'RYt', 'str var ^ const str';
-is _xor  0,    '0',   'num var ^ const str';
-is _xor "yit", 'RYt', 'str var ^ const str again';
+# string constants.  These tests expect the bit patterns of these strings in
+# ASCII, so convert to that.
+sub _and($) { $_[0] & native_to_uni("+0") }
+sub _oar($) { $_[0] | native_to_uni("+0") }
+sub _xor($) { $_[0] ^ native_to_uni("+0") }
+is _and native_to_uni("waf"), native_to_uni('# '),  'str var & const str'; # [perl #20661]
+is _and native_to_uni("waf"), native_to_uni('# '),  'str var & const str again'; # [perl #20661]
+is _oar native_to_uni("yit"), native_to_uni('{yt'), 'str var | const str';
+is _oar native_to_uni("yit"), native_to_uni('{yt'), 'str var | const str again';
+is _xor native_to_uni("yit"), native_to_uni('RYt'), 'str var ^ const str';
+is _xor native_to_uni("yit"), native_to_uni('RYt'), 'str var ^ const str again';
+
+SKIP: {
+    skip "Converting a numeric doesn't work with EBCDIC unlike the above tests",
+         3 if $::IS_EBCDIC;
+    is _and  0, '0',   'num var & const str';     # [perl #20661]
+    is _oar  0, '0',   'num var | const str';
+    is _xor  0, '0',   'num var ^ const str';
+}
 
 # But don’t mistake a COW for a constant when assigning to it
 %h=(150=>1);
@@ -126,68 +132,54 @@ is (sprintf("%vd", $a), '248.444');
 # UTF8 ~ behaviour
 #
 
-my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
-
-my @not36;
-
-for (0x100...0xFFF) {
-  $a = ~(chr $_);
-  if ($Is_EBCDIC) {
-      push @not36, sprintf("%#03X", $_)
-          if $a ne chr(~$_) or length($a) != 1;
-  }
-  else {
-      push @not36, sprintf("%#03X", $_)
-          if $a ne chr(~$_) or length($a) != 1 or ~$a ne chr($_);
-  }
-}
-is (join (', ', @not36), '');
-
-my @not37;
-
-for my $i (0xEEE...0xF00) {
-  for my $j (0x0..0x120) {
-    $a = ~(chr ($i) . chr $j);
-    if ($Is_EBCDIC) {
-        push @not37, sprintf("%#03X %#03X", $i, $j)
-	    if $a ne chr(~$i).chr(~$j) or
-	       length($a) != 2;
-    }
-    else {
-        push @not37, sprintf("%#03X %#03X", $i, $j)
-	    if $a ne chr(~$i).chr(~$j) or
-	       length($a) != 2 or 
-               ~$a ne chr($i).chr($j);
-    }
-  }
-}
-is (join (', ', @not37), '');
-
 SKIP: {
-  skip "EBCDIC" if $Is_EBCDIC;
-  is (~chr(~0), "\0");
-}
+    skip "Complements exceed maximum representable on EBCDIC ", 5 if $::IS_EBCDIC;
 
+    my @not36;
 
-my @not39;
-
-for my $i (0x100..0x120) {
-    for my $j (0x100...0x120) {
-	push @not39, sprintf("%#03X %#03X", $i, $j)
-	    if ~(chr($i)|chr($j)) ne (~chr($i)&~chr($j));
+    for (0x100...0xFFF) {
+    $a = ~(chr $_);
+        push @not36, sprintf("%#03X", $_)
+            if $a ne chr(~$_) or length($a) != 1 or ~$a ne chr($_);
     }
-}
-is (join (', ', @not39), '');
+    is (join (', ', @not36), '');
 
-my @not40;
+    my @not37;
 
-for my $i (0x100..0x120) {
-    for my $j (0x100...0x120) {
-	push @not40, sprintf("%#03X %#03X", $i, $j)
-	    if ~(chr($i)&chr($j)) ne (~chr($i)|~chr($j));
+    for my $i (0xEEE...0xF00) {
+        for my $j (0x0..0x120) {
+            $a = ~(chr ($i) . chr $j);
+                push @not37, sprintf("%#03X %#03X", $i, $j)
+                    if $a ne chr(~$i).chr(~$j) or
+                    length($a) != 2 or
+                    ~$a ne chr($i).chr($j);
+        }
     }
+    is (join (', ', @not37), '');
+
+    is (~chr(~0), "\0");
+
+
+    my @not39;
+
+    for my $i (0x100..0x120) {
+        for my $j (0x100...0x120) {
+            push @not39, sprintf("%#03X %#03X", $i, $j)
+                if ~(chr($i)|chr($j)) ne (~chr($i)&~chr($j));
+        }
+    }
+    is (join (', ', @not39), '');
+
+    my @not40;
+
+    for my $i (0x100..0x120) {
+        for my $j (0x100...0x120) {
+            push @not40, sprintf("%#03X %#03X", $i, $j)
+                if ~(chr($i)&chr($j)) ne (~chr($i)|~chr($j));
+        }
+    }
+    is (join (', ', @not40), '');
 }
-is (join (', ', @not40), '');
 
 
 # More variations on 19 and 22.
@@ -441,7 +433,7 @@ SKIP: {
 # update to pp_complement() via Coverity
 SKIP: {
   # UTF-EBCDIC is limited to 0x7fffffff and can't encode ~0.
-  skip "EBCDIC" if $Is_EBCDIC;
+  skip "Complements exceed maximum representable on EBCDIC ", 2 if $::IS_EBCDIC;
 
   my $str = "\x{10000}\x{800}";
   # U+10000 is four bytes in UTF-8/UTF-EBCDIC.
@@ -484,7 +476,14 @@ SKIP: {
   is 22 &. 66, 22,     '&. with numbers';
   is 22 |. 66, 66,     '|. with numbers';
   is 22 ^. 66, "\4\4", '^. with numbers';
-  is ~.22, "\xcd\xcd", '~. with number';
+  if ($::IS_EBCDIC) {
+    # ord('2') is 0xF2 on EBCDIC
+    is ~.22, "\x0d\x0d", '~. with number';
+  }
+  else {
+    # ord('2') is 0x32 on ASCII
+    is ~.22, "\xcd\xcd", '~. with number';
+  }
   $_ = "22";
   is $_ &= "66", 2,  'numeric &= with strings';
   $_ = "22";
@@ -617,5 +616,7 @@ $strval = "z";
 is("$obj", "z", "|= doesn't break string overload");
 
 # [perl #29070]
-$^A .= new version ~$_ for "\xce", v205, "\xcc";
+$^A .= new version ~$_ for eval sprintf('"\\x%02x"', 0xff - ord("1")),
+                           $::IS_EBCDIC ? v13 : v205, # 255 - ord('2')
+                           eval sprintf('"\\x%02x"', 0xff - ord("3"));
 is $^A, "123", '~v0 clears vstring magic on retval';

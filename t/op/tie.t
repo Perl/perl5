@@ -576,7 +576,11 @@ print $h.$h;
 EXPECT
 01
 ########
+# SKIP ? $IS_EBCDIC
+# skipped on EBCDIC because "2" | "8" is 0xFA (not COLON as it is on ASCII),
+# which isn't representable in this file's UTF-8 encoding.
 # Bug 53482 (and maybe others)
+
 sub TIESCALAR { my $foo = $_[1]; bless \$foo, $_[0] }
 sub FETCH { ${$_[0]} }
 tie my $x1, "main", 2;
@@ -1417,6 +1421,9 @@ EXPECT
 main
 ok
 ########
+# SKIP ? $::IS_EBCDIC
+# skipped on EBCDIC because different from ASCII and results vary depending on
+# code page
 
 # &xsub and goto &xsub with tied @_
 use Tie::Array;

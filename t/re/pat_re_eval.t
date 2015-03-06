@@ -17,7 +17,7 @@ $| = 1;
 
 BEGIN {
     chdir 't' if -d 't';
-    require './test.pl';
+    require './test.pl'; require './charset_tools.pl';
     set_up_inc('../lib');
 }
 
@@ -91,7 +91,8 @@ sub run_tests {
         ok 'goodfood' =~ $a,     "Reblessed qr // matches";
         is($a, '(?^:foo)', "Reblessed qr // stringifies");
         my $x = "\x{3fe}";
-        my $z = my $y = "\317\276";  # Byte representation of $x
+        my $z = my $y = byte_utf8a_to_utf8n("\317\276");  # Byte representation
+                                                          # of $x
         $a = qr /$x/;
         ok $x =~ $a, "UTF-8 interpolation in qr //";
         ok "a$a" =~ $x, "Stringified qr // preserves UTF-8";
@@ -688,7 +689,9 @@ sub run_tests {
 	    my $s = shift;
 	    $s =~ s{(.)}{
 			my $c = ord($1);
-			($c< 32 || $c > 127) ? sprintf("<0x%x>", $c) : $1;
+			(utf8::native_to_unicode($c)< 32
+                         || utf8::native_to_unicode($c) > 127)
+                        ? sprintf("<0x%x>", $c) : $1;
 		}ge;
 	    $s;
 	}
@@ -720,12 +723,14 @@ sub run_tests {
 		ok($ss =~ /^$cc/, fmt("plain      $u->[2]", $ss, $cc));
 
 		no strict;
-		my $chr41 = "\x41";
-		$ss = "$u->[0]\t${q}$chr41${b}x42$s";
 		$nine = $nine = "bad";
+                $ss = "$u->[0]\t${q}\x41${b}x42$s" if $::IS_ASCII;
+                $ss = "$u->[0]\t${q}\xC1${b}xC2$s" if $::IS_EBCDIC;
 		for my $use_qr ('', 'qr') {
 		    $c =  qq[(??{my \$z='{';]
-			. qq[$use_qr"$b${b}t$b$q$b${b}x41$b$b$b${b}x42"]
+			. (($::IS_ASCII)
+                           ? qq[$use_qr"$b${b}t$b$q$b${b}x41$b$b$b${b}x42"]
+                           : qq[$use_qr"$b${b}t$b$q$b${b}xC1$b$b$b${b}xC2"])
 			. qq[. \$nine})];
 		    # (??{ qr/str/ }) goes through one less interpolation
 		    # stage than  (??{ qq/str/ })

@@ -3,6 +3,8 @@ BEGIN {
     require "uni/case.pl";
 }
 
+use feature 'unicode_strings';
+
 casetest(0, # No extra tests run here,
 	"Titlecase_Mapping",
         ucfirst                        => sub { ucfirst $_[0] },

@@ -251,8 +251,9 @@ print ((exists $str{xyz::bar} ? "" : "not ")."ok $test\n"); ++$test;
 sub foo::::::bar { print "ok $test\n"; $test++ }
 foo::::::bar;
 
-eval "\$x =\xE2foo";
-if ($@ =~ /Unrecognized character \\xE2; marked by <-- HERE after \$x =<-- HERE near column 5/) { print "ok $test\n"; } else { print "not ok $test\n"; }
+# \xDF is a non-ASCII alpha on both ASCII and EBCDIC.
+eval "\$x =\xDFfoo";
+if ($@ =~ /Unrecognized character \\xDF; marked by <-- HERE after \$x =<-- HERE near column 5/) { print "ok $test\n"; } else { print "not ok $test\n"; }
 $test++;
 
 # Is "[~" scanned correctly?
@@ -383,7 +384,7 @@ eval "package v10::foo; sub test2 { return 'v10::foo' }
 print "not " unless $output eq 'v10::foo';
 print "ok $test - call a function in package v10::foo\n"; $test++;
 
-print "not " unless (1?v65:"bar") eq 'A';
+print "not " unless (1?v65:"bar") eq chr(65);
 print "ok $test - colon detection after vstring does not break ? vstring :\n"; $test++;
 if (ord("\t") == 9) {
     print v35;
