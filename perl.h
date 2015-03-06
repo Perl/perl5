@@ -5954,8 +5954,6 @@ typedef struct am_table_short AMTS;
 #define RESTORE_NUMERIC_STANDARD() \
 	if (_was_standard) SET_NUMERIC_STANDARD();
 
-#define Atof				my_atof
-
 #else /* !USE_LOCALE_NUMERIC */
 
 #define SET_NUMERIC_STANDARD()  	/**/
@@ -5973,9 +5971,9 @@ typedef struct am_table_short AMTS;
 #define LOCK_NUMERIC_STANDARD()
 #define UNLOCK_NUMERIC_STANDARD()
 
-#define Atof				my_atof
-
 #endif /* !USE_LOCALE_NUMERIC */
+
+#define Atof				my_atof
 
 #ifdef USE_QUADMATH
 #  define Perl_strtod(s, e) strtoflt128(s, e)
