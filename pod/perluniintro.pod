@@ -654,7 +654,7 @@ How Do I Know Whether My String Is In Unicode?
 
 You shouldn't have to care.  But you may if your Perl is before 5.14.0
 or you haven't specified C<use feature 'unicode_strings'> or C<use
-5.012> (or higher) because otherwise the semantics of the code points
+5.012> (or higher) because otherwise the rules for the code points
 in the range 128 to 255 are different depending on
 whether the string they are contained within is in Unicode or not.
 (See L<perlunicode/When Unicode Does Not Happen>.)

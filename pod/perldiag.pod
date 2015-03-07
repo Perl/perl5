@@ -3806,7 +3806,7 @@ find the name of the file to which to write data destined for stdout.
 
 (F) Fully qualified variable names are not allowed in "our"
 declarations, because that doesn't make much sense under existing
-semantics.  Such syntax is reserved for future extensions.
+rules.  Such syntax is reserved for future extensions.
 
 =item No Perl script found in input
 
@@ -4061,7 +4061,7 @@ the C<fallback> overloading key is specified to be true.  See L<overload>.
 
 =item Operation "%s" returns its argument for non-Unicode code point 0x%X
 
-(S non_unicode) You performed an operation requiring Unicode semantics
+(S non_unicode) You performed an operation requiring Unicode rules
 on a code point that is not in Unicode, so what it should do is not
 defined.  Perl has chosen to have it do nothing, and warn you.
 
@@ -4074,9 +4074,9 @@ C<no warnings 'non_unicode';>.
 =item Operation "%s" returns its argument for UTF-16 surrogate U+%X
 
 (S surrogate) You performed an operation requiring Unicode
-semantics on a Unicode surrogate.  Unicode frowns upon the use
+rules on a Unicode surrogate.  Unicode frowns upon the use
 of surrogates for anything but storing strings in UTF-16, but
-semantics are (reluctantly) defined for the surrogates, and
+rules are (reluctantly) defined for the surrogates, and
 they are to do nothing for this operation.  Because the use of
 surrogates can be dangerous, Perl warns.
 
