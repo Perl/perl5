@@ -131,6 +131,15 @@ L<[perl #123630]|https://rt.perl.org/rt3/Ticket/Display.html?id=123630>.
 
 See also: L<perlsub/Constant Functions>
 
+=item use re 'strict';
+
+Introduced in Perl 5.22.0
+
+Using this feature triggers warnings in the category
+C<experimental::re_strict>.
+
+See L<re/'strict' mode>
+
 =item String- and number-specific bitwise operators
 
 Introduced in: Perl 5.22.0

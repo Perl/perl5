@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.31";
+our $VERSION     = "0.32";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -372,6 +372,9 @@ if $pat contains C<(?{ ... })> assertions or C<(??{ ... })> subexpressions.
 
 =head2 'strict' mode
 
+Note that this is an experimental feature which may be changed or removed in a
+future Perl release.
+
 When C<use re 'strict'> is in effect, stricter checks are applied than
 otherwise when compiling regular expressions patterns.  These may cause more
 warnings to be raised than otherwise, and more things to be fatal instead of
@@ -380,8 +383,8 @@ things, which may be legal, but have a reasonable possibility of not being the
 programmer's actual intent.  This automatically turns on the C<"regexp">
 warnings category (if not already on) within its scope.
 
-As an example of something that is caught under C<"strict'> but not otherwise
-is the pattern
+As an example of something that is caught under C<"strict'>, but not
+otherwise, is the pattern
 
  qr/\xABC/
 
@@ -405,8 +408,9 @@ if there are more than two.
 It is expected that what exactly C<'strict'> does will evolve over time as we
 gain experience with it.  This means that programs that compile under it in
 today's Perl may not compile, or may have more or fewer warnings, in future
-Perls.  There is no backwards compatibility promises with regards to it.  For
-this reason, using it will raise a C<experimental::re_strict> class warning,
+Perls.  There is no backwards compatibility promises with regards to it.  Also
+there are already proposals for an alternate syntax for enabling it.  For
+these reasons, using it will raise a C<experimental::re_strict> class warning,
 unless that category is turned off.
 
 Note that if a pattern compiled within C<'strict'> is recompiled, say by
