@@ -120,7 +120,8 @@ Execute the following commands:
   ln -s libm.so.6 libm.so
   ln -s libcrypt.so.1 libcrypt.so
   ln -s libdl.so.2 libdl.so
-  cd /opt/powerpc-linux-gnuspe/lib  (or /opt/arm-none-linux-gnueabi/lib)
+  cd /opt/powerpc-linux-gnuspe/lib  (or
+                                    /opt/arm-none-linux-gnueabi/lib)
   ln -s /lib/libdl.so.2 libdl.so
 
 =back
