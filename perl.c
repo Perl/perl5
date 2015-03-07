@@ -1041,7 +1041,9 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_Latin1);
     SvREFCNT_dec(PL_NonL1NonFinalFold);
     SvREFCNT_dec(PL_HasMultiCharFold);
+#ifdef USE_LOCALE_CTYPE
     SvREFCNT_dec(PL_warn_locale);
+#endif
     PL_utf8_mark	= NULL;
     PL_utf8_toupper	= NULL;
     PL_utf8_totitle	= NULL;
@@ -1053,7 +1055,9 @@ perl_destruct(pTHXx)
     PL_AboveLatin1       = NULL;
     PL_InBitmap          = NULL;
     PL_HasMultiCharFold  = NULL;
+#ifdef USE_LOCALE_CTYPE
     PL_warn_locale       = NULL;
+#endif
     PL_Latin1            = NULL;
     PL_NonL1NonFinalFold = NULL;
     PL_UpperLatin1       = NULL;
