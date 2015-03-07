@@ -1080,16 +1080,16 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     Safefree(curnum);
 #endif /* USE_LOCALE_NUMERIC */
 
-#else  /* !USE_LOCALE */
-    PERL_UNUSED_ARG(printwarn);
-#endif /* USE_LOCALE */
-
 #ifdef __GLIBC__
     Safefree(language);
 #endif
 
     Safefree(lc_all);
     Safefree(lang);
+
+#else  /* !USE_LOCALE */
+    PERL_UNUSED_ARG(printwarn);
+#endif /* USE_LOCALE */
 
     return ok;
 }
