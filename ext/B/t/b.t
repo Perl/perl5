@@ -230,7 +230,7 @@ SKIP: {
         my $type = <$r>;
         close $r;
         waitpid($pid,0);
-        is($type, "B::SPECIAL", "special SV table works after psuedofork");
+        is($type, "B::SPECIAL", "special SV table works after pseudofork");
     }
     else {
         close $r;
