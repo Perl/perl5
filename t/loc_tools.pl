@@ -73,6 +73,65 @@ sub _decode_encodings {
     return @enc;
 }
 
+# Initialize this hash so that it looks like e.g.,
+#   6 => 'CTYPE',
+# where 6 is the value of &POSIX::LC_CTYPE
+my %category_name;
+eval { require POSIX; import POSIX 'locale_h'; };
+unless ($@) {
+    foreach my $name (qw(ALL COLLATE CTYPE MESSAGES MONETARY NUMERIC TIME)) {
+        my $number = eval "&POSIX::LC_$name";
+        next if $@;
+        $category_name{$number} = "$name";
+    }
+}
+
+sub locales_enabled(;$) {
+    # Returns 0 if no locale handling is available on this platform; otherwise
+    # 1.
+    #
+    # The optional parameter is a reference to a list of individual POSIX
+    # locale categories.  If present, this function also returns 0 if any of
+    # them are individually not available on this platform; otherwise 1.
+    # Actually, it is acceptable for the list to be just a simple scalar
+    # denoting a single category.
+    #
+    # If any of the individual categories specified by the optional parameter
+    # is all digits, it is taken to be the C enum for the category (e.g.,
+    # &POSIX::LC_CTYPE).  Otherwise it should be a string name of the
+    # category, like 'LC_TIME'.  The initial 'LC_' is optional.  It is a fatal
+    # error to call this with something that isn't a known category
+
+    use Config;;
+
+    return 0 unless    $Config{d_setlocale}
+                        # I (khw) cargo-culted the '?' in the pattern on the
+                        # next line.
+                    && $Config{ccflags} !~ /\bD?NO_LOCALE\b/;
+
+    # Done with the global possibilities.  Now check if any passed in category
+    # is disabled.
+    my $categories_ref = shift;
+    $categories_ref = [ $categories_ref ] if ! ref $categories_ref;
+    for my $category (@$categories_ref) {
+        if ($category =~ /\D/) {
+            $category =~ s/ ^ LC_ //x;
+            die "Invalid locale category name '$category'"
+                unless grep { $category eq $_ } values %category_name;
+        }
+        else {
+            die "Invalid locale category number '$category'"
+                unless grep { $category == $_ } keys %category_name;
+            $category = $category_name{$category};
+        }
+
+        return 0 if $Config{ccflags} =~ /\bD?NO_LOCALE_$category\b/;
+    }
+
+    return 1;
+}
+
+
 sub find_locales ($;$) {  # Returns an array of all the locales we found on the
                           # system.  If the optional 2nd parameter is
                           # non-zero, the list is restricted to those locales
@@ -84,8 +143,7 @@ sub find_locales ($;$) {  # Returns an array of all the locales we found on the
     my $categories = shift;
     my $only_plays_well = shift // 0;
 
-    use Config;;
-    my $have_setlocale = $Config{d_setlocale};
+    return unless locales_enabled($categories);
 
     # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
     # and mingw32 uses said silly CRT
@@ -93,13 +151,11 @@ sub find_locales ($;$) {  # Returns an array of all the locales we found on the
     # so re-enable the tests for Windows XP onwards.
     my $winxp = ($^O eq 'MSWin32' && defined &Win32::GetOSVersion &&
                     join('.', (Win32::GetOSVersion())[1..2]) >= 5.1);
-    $have_setlocale = 0 if ((($^O eq 'MSWin32' && !$winxp) || $^O eq 'NetWare') &&
-                    $Config{cc} =~ /^(cl|gcc|g\+\+|ici)/i);
+    return if ((($^O eq 'MSWin32' && !$winxp) || $^O eq 'NetWare')
+                && $Config{cc} =~ /^(cl|gcc|g\+\+|ici)/i);
 
     # UWIN seems to loop after taint tests, just skip for now
-    $have_setlocale = 0 if ($^O =~ /^uwin/);
-
-    return unless $have_setlocale;
+    return if ($^O =~ /^uwin/);
 
     # Done this way in case this is 'required' in the caller before seeing if
     # this is miniperl.
@@ -229,6 +285,7 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
 
     eval { require POSIX; import POSIX 'locale_h'; };
     return 0 if ! defined &POSIX::LC_CTYPE;
+    return 0 if ! locales_enabled('LC_CTYPE');
 
     my $locale = shift;
 
