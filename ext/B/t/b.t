@@ -15,7 +15,6 @@ use strict;
 BEGIN  {
     eval { require threads; threads->import; }
 }
-use Test::Stream 'enable_fork';
 use Test::More;
 
 BEGIN { use_ok( 'B' ); }
@@ -225,11 +224,19 @@ SKIP: {
     skip('no fork', 1)
 	unless ($Config::Config{d_fork} or $Config::Config{d_pseudofork});
     my $pid;
+    pipe my $r, my $w or die "Can't pipe: $!";;
     if ($pid = fork) {
+        close $w;
+        my $type = <$r>;
+        close $r;
         waitpid($pid,0);
+        is($type, "B::SPECIAL", "special SV table works after psuedofork");
     }
     else {
-        is(ref B::svref_2object(\(!!0)), "B::SPECIAL", "special SV table works after psuedofork");
+        close $r;
+        $|++;
+        print $w ref B::svref_2object(\(!!0));
+        close $w;
         exit;
     }
 }
