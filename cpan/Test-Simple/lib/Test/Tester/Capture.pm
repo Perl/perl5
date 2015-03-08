@@ -1,161 +1,231 @@
-package Test::Tester::Capture;
 use strict;
-use warnings;
 
-use base 'Test::Builder';
-use Test::Stream qw/-internal STATE_LEGACY/;
+package Test::Tester::Capture;
 
-sub new {
-    my $class = shift;
-    my $self = $class->SUPER::create(@_);
-    $self->{stream}->set_use_tap(0);
-    $self->{stream}->set_use_legacy(1);
-    return $self;
+use Test::Builder;
+
+use vars qw( @ISA );
+@ISA = qw( Test::Builder );
+
+# Make Test::Tester::Capture thread-safe for ithreads.
+BEGIN {
+	use Config;
+	if( $] >= 5.008 && $Config{useithreads} ) {
+		require threads::shared;
+		threads::shared->import;
+	}
+	else {
+		*share = sub { 0 };
+		*lock  = sub { 0 };
+	}
+}
+
+my $Curr_Test = 0;      share($Curr_Test);
+my @Test_Results = ();  share(@Test_Results);
+my $Prem_Diag = {diag => ""};	 share($Curr_Test);
+
+sub new
+{
+  # Test::Tester::Capgture::new used to just return __PACKAGE__
+  # because Test::Builder::new enforced it's singleton nature by
+  # return __PACKAGE__. That has since changed, Test::Builder::new now
+  # returns a blessed has and around version 0.78, Test::Builder::todo
+  # started wanting to modify $self. To cope with this, we now return
+  # a blessed hash. This is a short-term hack, the correct thing to do
+  # is to detect which style of Test::Builder we're dealing with and
+  # act appropriately.
+
+  my $class = shift;
+  return bless {}, $class;
+}
+
+sub ok {
+	my($self, $test, $name) = @_;
+
+	# $test might contain an object which we don't want to accidentally
+	# store, so we turn it into a boolean.
+	$test = $test ? 1 : 0;
+
+	lock $Curr_Test;
+	$Curr_Test++;
+
+	my($pack, $file, $line) = $self->caller;
+
+	my $todo = $self->todo($pack);
+
+	my $result = {};
+	share($result);
+
+	unless( $test ) {
+		@$result{ 'ok', 'actual_ok' } = ( ( $todo ? 1 : 0 ), 0 );
+	}
+	else {
+		@$result{ 'ok', 'actual_ok' } = ( 1, $test );
+	}
+
+	if( defined $name ) {
+		$name =~ s|#|\\#|g;	 # # in a name can confuse Test::Harness.
+		$result->{name} = $name;
+	}
+	else {
+		$result->{name} = '';
+	}
+
+	if( $todo ) {
+		my $what_todo = $todo;
+		$result->{reason} = $what_todo;
+		$result->{type}   = 'todo';
+	}
+	else {
+		$result->{reason} = '';
+		$result->{type}   = '';
+	}
+
+	$Test_Results[$Curr_Test-1] = $result;
+
+	unless( $test ) {
+		my $msg = $todo ? "Failed (TODO)" : "Failed";
+		$result->{fail_diag} = ("	$msg test ($file at line $line)\n");
+	} 
+
+	$result->{diag} = "";
+	$result->{_level} = $Test::Builder::Level;
+	$result->{_depth} = Test::Tester::find_run_tests();
+
+	return $test ? 1 : 0;
+}
+
+sub skip {
+	my($self, $why) = @_;
+	$why ||= '';
+
+	lock($Curr_Test);
+	$Curr_Test++;
+
+	my %result;
+	share(%result);
+	%result = (
+		'ok'	  => 1,
+		actual_ok => 1,
+		name	  => '',
+		type	  => 'skip',
+		reason	=> $why,
+		diag    => "",
+		_level   => $Test::Builder::Level,
+		_depth => Test::Tester::find_run_tests(),
+	);
+	$Test_Results[$Curr_Test-1] = \%result;
+
+	return 1;
+}
+
+sub todo_skip {
+	my($self, $why) = @_;
+	$why ||= '';
+
+	lock($Curr_Test);
+	$Curr_Test++;
+
+	my %result;
+	share(%result);
+	%result = (
+		'ok'	  => 1,
+		actual_ok => 0,
+		name	  => '',
+		type	  => 'todo_skip',
+		reason	=> $why,
+		diag    => "",
+		_level   => $Test::Builder::Level,
+		_depth => Test::Tester::find_run_tests(),
+	);
+
+	$Test_Results[$Curr_Test-1] = \%result;
+
+	return 1;
+}
+
+sub diag {
+	my($self, @msgs) = @_;
+	return unless @msgs;
+
+	# Prevent printing headers when compiling (i.e. -c)
+	return if $^C;
+
+	# Escape each line with a #.
+	foreach (@msgs) {
+		$_ = 'undef' unless defined;
+	}
+
+	push @msgs, "\n" unless $msgs[-1] =~ /\n\Z/;
+
+	my $result = $Curr_Test ? $Test_Results[$Curr_Test - 1] : $Prem_Diag;
+
+	$result->{diag} .= join("", @msgs);
+
+	return 0;
 }
 
 sub details {
-    my $self = shift;
+	return @Test_Results;
+}
 
-    my $prem;
-    my @out;
-    for my $e (@{$self->{stream}->state->[-1]->[STATE_LEGACY]}) {
-        if ($e->isa('Test::Stream::Event::Ok')) {
-            push @out => $e->to_legacy;
-            $out[-1]->{diag} ||= "";
-            $out[-1]->{depth} = $e->level;
-            for my $d (@{$e->diag || []}) {
-                next if $d->message =~ m{Failed test .*\n\s*at .* line \d+\.};
-                chomp(my $msg = $d->message);
-                $msg .= "\n";
-                $out[-1]->{diag} .= $msg;
-            }
-        }
-        elsif ($e->isa('Test::Stream::Event::Diag')) {
-            chomp(my $msg = $e->message);
-            $msg .= "\n";
-            if (!@out) {
-                $prem .= $msg;
-                next;
-            }
-            next if $msg =~ m{Failed test .*\n\s*at .* line \d+\.};
-            $out[-1]->{diag} .= $msg;
-        }
-    }
 
-    return ($prem, @out) if $prem;
-    return @out;
+# Stub. Feel free to send me a patch to implement this.
+sub note {
+}
+
+sub explain {
+	return Test::Builder::explain(@_);
+}
+
+sub premature
+{
+	return $Prem_Diag->{diag};
+}
+
+sub current_test
+{
+	if (@_ > 1)
+	{
+		die "Don't try to change the test number!";
+	}
+	else
+	{
+		return $Curr_Test;
+	}
+}
+
+sub reset
+{
+	$Curr_Test = 0;
+	@Test_Results = ();
+	$Prem_Diag = {diag => ""};
 }
 
 1;
 
 __END__
 
-=pod
-
-=encoding UTF-8
-
 =head1 NAME
 
-Test::Tester::Capture - Capture module for TesT::Tester
+Test::Tester::Capture - Help testing test modules built with Test::Builder
 
 =head1 DESCRIPTION
 
-Legacy support for Test::Tester.
+This is a subclass of Test::Builder that overrides many of the methods so
+that they don't output anything. It also keeps track of it's own set of test
+results so that you can use Test::Builder based modules to perform tests on
+other Test::Builder based modules.
 
-=head1 SOURCE
+=head1 AUTHOR
 
-The source code repository for Test::More can be found at
-F<http://github.com/Test-More/test-more/>.
+Most of the code here was lifted straight from Test::Builder and then had
+chunks removed by Fergal Daly <fergal@esatclear.ie>.
 
-=head1 MAINTAINER
-
-=over 4
-
-=item Chad Granum E<lt>exodist@cpan.orgE<gt>
-
-=back
-
-=head1 AUTHORS
-
-The following people have all contributed to the Test-More dist (sorted using
-VIM's sort function).
-
-=over 4
-
-=item Chad Granum E<lt>exodist@cpan.orgE<gt>
-
-=item Fergal Daly E<lt>fergal@esatclear.ie>E<gt>
-
-=item Mark Fowler E<lt>mark@twoshortplanks.comE<gt>
-
-=item Michael G Schwern E<lt>schwern@pobox.comE<gt>
-
-=item 唐鳳
-
-=back
-
-=head1 COPYRIGHT
-
-There has been a lot of code migration between modules,
-here are all the original copyrights together:
-
-=over 4
-
-=item Test::Stream
-
-=item Test::Stream::Tester
-
-Copyright 2014 Chad Granum E<lt>exodist7@gmail.comE<gt>.
-
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-See F<http://www.perl.com/perl/misc/Artistic.html>
-
-=item Test::Simple
-
-=item Test::More
-
-=item Test::Builder
-
-Originally authored by Michael G Schwern E<lt>schwern@pobox.comE<gt> with much
-inspiration from Joshua Pritikin's Test module and lots of help from Barrie
-Slaymaker, Tony Bowden, blackstar.co.uk, chromatic, Fergal Daly and the perl-qa
-gang.
-
-Idea by Tony Bowden and Paul Johnson, code by Michael G Schwern
-E<lt>schwern@pobox.comE<gt>, wardrobe by Calvin Klein.
-
-Copyright 2001-2008 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
-
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-See F<http://www.perl.com/perl/misc/Artistic.html>
-
-=item Test::use::ok
-
-To the extent possible under law, 唐鳳 has waived all copyright and related
-or neighboring rights to L<Test-use-ok>.
-
-This work is published from Taiwan.
-
-L<http://creativecommons.org/publicdomain/zero/1.0>
-
-=item Test::Tester
-
-This module is copyright 2005 Fergal Daly <fergal@esatclear.ie>, some parts
-are based on other people's work.
+=head1 LICENSE
 
 Under the same license as Perl itself
 
 See http://www.perl.com/perl/misc/Artistic.html
 
-=item Test::Builder::Tester
-
-Copyright Mark Fowler E<lt>mark@twoshortplanks.comE<gt> 2002, 2004.
-
-This program is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
-
-=back
+=cut

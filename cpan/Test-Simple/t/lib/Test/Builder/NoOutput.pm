@@ -26,7 +26,7 @@ Test::Builder::NoOutput - A subclass of Test::Builder which prints nothing
 This is a subclass of Test::Builder which traps all its output.
 It is mostly useful for testing Test::Builder.
 
-=head2 read
+=head3 read
 
     my $all_output = $tb->read;
     my $output     = $tb->read($stream);
