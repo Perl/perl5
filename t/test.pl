@@ -4,12 +4,15 @@
 
 # NOTE:
 #
-# Increment ($x++) has a certain amount of cleverness for things like
+# It's best to not features found only in more modern Perls here, as some cpan
+# distributions copy this file and operate on older Perls.  Similarly keep
+# things simple as this may be run under fairly broken circumstances.  For
+# example, increment ($x++) has a certain amount of cleverness for things like
 #
 #   $x = 'zz';
 #   $x++; # $x eq 'aaa';
 #
-# stands more chance of breaking than just a simple
+# This stands more chance of breaking than just a simple
 #
 #   $x = $x + 1
 #
