@@ -303,7 +303,12 @@ sub display {
                     $y = $y . $backslash_escape{$c};
                 } else {
                     my $z = chr $c; # Maybe we can get away with a literal...
-                    if ($z =~ /[[:^print:]]/a) {
+
+                    if ($z !~ /[^[:^print:][:^ascii:]]/) {
+                        # The pattern above is equivalent (by de Morgan's
+                        # laws) to:
+                        #     $z !~ /(?[ [:print:] & [:ascii:] ])/
+                        # or, $z is not an ascii printable character
 
                         # Use octal for characters with small ordinals that
                         # are traditionally expressed as octal: the controls
