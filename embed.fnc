@@ -1134,7 +1134,7 @@ ApOM	|int	|init_i18nl14n	|int printwarn
 ApM	|char*	|my_strerror	|const int errnum
 ApOM	|void	|new_collate	|NULLOK const char* newcoll
 ApOM	|void	|new_ctype	|NN const char* newctype
-ApMn	|void	|_warn_problematic_locale
+EXpMn	|void	|_warn_problematic_locale
 ApOM	|void	|new_numeric	|NULLOK const char* newcoll
 Ap	|void	|set_numeric_local
 Ap	|void	|set_numeric_radix
