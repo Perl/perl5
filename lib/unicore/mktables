@@ -16185,6 +16185,10 @@ controlling lists contained in the program
 C<\$Config{privlib}>/F<unicore/mktables> and then re-compiling and installing.
 (C<\%Config> is available from the Config module).
 
+Also, perl can be recompiled to operate on an earlier version of the Unicode
+standard.  Further information is at
+C<\$Config{privlib}>/F<unicore/README.perl>.
+
 =head1 Other information in the Unicode data base
 
 The Unicode data base is delivered in two different formats.  The XML version
