@@ -1907,14 +1907,14 @@ foreach my $Locale (@Locale) {
 
     $ok21 = 1;
     if (locales_enabled('LC_MESSAGES')) {
-    foreach my $err (keys %!) {
-        no locale;
-        use Errno;
-        $! = eval "&Errno::$err";   # Convert to strerror() output
-        my $strerror = "$!";
-        if ("$strerror" =~ /\P{ASCII}/) {
-            $ok21 = 0;
-            last;
+        foreach my $err (keys %!) {
+            no locale;
+            use Errno;
+            $! = eval "&Errno::$err";   # Convert to strerror() output
+            my $strerror = "$!";
+            if ("$strerror" =~ /\P{ASCII}/) {
+                $ok21 = 0;
+                last;
             }
         }
     }
