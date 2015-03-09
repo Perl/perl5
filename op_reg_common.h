@@ -105,6 +105,7 @@ get_regex_charset(const U32 flags)
 #define RXf_PMf_FLAGCOPYMASK   (RXf_PMf_COMPILETIME|RXf_PMf_SPLIT)
 
 #if 0   /* Temporary to get Jenkins happy again */
+See thread starting at http://nntp.perl.org/group/perl.perl5.porters/220710
     /* Exclude win32 because it can't cope with I32_MAX definition */
 #ifndef WIN32
 #   if RXf_PMf_COMPILETIME > I32_MAX
