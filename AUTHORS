@@ -11,6 +11,9 @@
 # is strictly forbidden.  (Passive distribution with the Perl source
 # code kit is, of course, allowed.)
 #
+# This should contain the preferred addresses.  Alternate addresses are in
+# Porting/checkAUTHORS.pl.
+#
 # After editing, please run: make test_porting
 -- 
 A. C. Yardley			<yardley@tanet.net>
