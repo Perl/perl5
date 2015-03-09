@@ -558,8 +558,10 @@ non-word characters nor for string ends.  It may help to understand how
     \b	really means	(?:(?<=\w)(?!\w)|(?<!\w)(?=\w))
     \B	really means	(?:(?<=\w)(?=\w)|(?<!\w)(?!\w))
 
-In contrast, C<\b{...}> may or may not match at the beginning and end of
-the line depending on the boundary type (and C<\B{...}> never does).
+In contrast, C<\b{...}> and C<\B{...}> may or may not match at the
+beginning and end of the line, depending on the boundary type.  These
+implement the Unicode default boundaries, specified in
+L<http://www.unicode.org/reports/tr29/>.
 The boundary types currently available are:
 
 =over
@@ -579,24 +581,40 @@ natural language sentences.  It gives good, but imperfect results.  For
 example, it thinks that "Mr. Smith" is two sentences.  More details are
 at L<http://www.unicode.org/reports/tr29/>.  Note also that it thinks
 that anything matching L</\R> (except form feed and vertical tab) is a
-sentence boundary.  This works with word-processor text which line wraps
+sentence boundary.  C<\b{sb}> works with text designed for
+word-processors which wrap lines
 automatically for display, but hard-coded line boundaries are considered
 to be essentially the ends of text blocks (paragraphs really), and hence
-the ends of sententces.  It doesn't well with text containing embedded
-newlines, like the source text of the document you are reading.  Such
-text needs to be preprocessed to get rid of the line separators before
-looking for sentence boundaries.  Some people view this as a bug in the
-Unicode standard.
+the ends of sententces.  C<\b{sb}> doesn't do well with text containing
+embedded newlines, like the source text of the document you are reading.
+Such text needs to be preprocessed to get rid of the line separators
+before looking for sentence boundaries.  Some people view this as a bug
+in the Unicode standard.
 
 =item C<\b{wb}>
 
 This matches a Unicode "Word Boundary".  This gives better (though not
 perfect) results for natural language processing than plain C<\b>
 (without braces) does.  For example, it understands that apostrophes can
-be in the middle of words and that parentheses aren't.   More details
-are at L<http://www.unicode.org/reports/tr29/>.
+be in the middle of words and that parentheses aren't (see the examples
+below).   More details are at L<http://www.unicode.org/reports/tr29/>.
 
 =back
+
+It is important to realize that these are default boundary definitions,
+and that implementations may wish to tailor the results for particular
+purposes and locales.  Also note that Perl gives you the definitions
+valid for the version of the Unicode Standard compiled into Perl.  These
+rules are not considered stable and have been somewhat more subject to
+change than the rest of the Standard, and hence changing to a later Perl
+version may give you a different Unicode version whose changes may not
+be compatibile with what you coded for.  If, necessary, you can
+recompile Perl with an earlier version of the Unicode standard.  More
+information about that is in L<perluniprops/Unicode character properties
+that are NOT accepted by Perl>
+
+Unicode defines a fourth boundary type, accessible through the
+L<Unicode::LineBreak> module.
 
 Mnemonic: I<b>oundary.
 
@@ -621,10 +639,12 @@ Mnemonic: I<b>oundary.
       print $1;           # Prints 'cat'
   }
 
-  print join "|", "He said, \"Do you care? (I don't).\""
-                                               =~ m/ ( .+? \b{wb} ) /xg;
+  my $s = "He said, \"Is pi 3.14? (I'm not sure).\"";
+  print join("|", $s =~ m/ ( .+? \b     ) /xg), "\n";
+  print join("|", $s =~ m/ ( .+? \b{wb} ) /xg), "\n";
  prints
-  He| |said|,| |"|Do| |you| |care|?| |(|I| |don't|)|.|"
+  He| |said|, "|Is| |pi| |3|.|14|? (|I|'|m| |not| |sure
+  He| |said|,| |"|Is| |pi| |3.14|?| |(|I'm| |not| |sure|)|.|"
 
 =head2 Misc
 
