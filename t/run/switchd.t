@@ -313,6 +313,9 @@ is(
 # then moreswitches(s), which, if -d:switchd_empty is given,
 # will call my_setenv("PERL5DB", "use Devel::switchd_empty"),
 # and then return to continue parsing s.
+#
+# This may need -Accflags="-DPERL_USE_SAFE_PUTENV" to fail on
+# affected systems.
 {
 local $ENV{PERL5OPT} = '-d:switchd_empty';
 
