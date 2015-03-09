@@ -298,7 +298,7 @@ beginning with a "0".
 =head3 Hexadecimal escapes
 
 Like octal escapes, there are two forms of hexadecimal escapes, but both start
-with the same thing, C<\x>.  This is followed by either exactly two hexadecimal
+with the sequence C<\x>.  This is followed by either exactly two hexadecimal
 digits forming a number, or a hexadecimal number of arbitrary length surrounded
 by curly braces. The hexadecimal number is the code point of the character you
 want to express.
