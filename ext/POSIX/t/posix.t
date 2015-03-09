@@ -6,6 +6,7 @@ BEGIN {
 	print "1..0\n";
 	exit 0;
     }
+    require 'loc_tools.pl';
 }
 
 use Test::More tests => 120;
@@ -344,7 +345,8 @@ eval { use strict; POSIX->import("S_ISBLK"); my $x = S_ISBLK };
 unlike( $@, qr/Can't use string .* as a symbol ref/, "Can import autoloaded constants" );
 
 SKIP: {
-    skip("localeconv() not present", 26) unless $Config{d_locconv};
+    skip("locales not available", 26) unless locales_enabled(qw(NUMERIC MONETARY));
+    skip("localeconv() not available", 26) unless $Config{d_locconv};
     my $conv = localeconv;
     is(ref $conv, 'HASH', 'localconv returns a hash reference');
 

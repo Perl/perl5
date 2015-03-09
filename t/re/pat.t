@@ -18,6 +18,7 @@ BEGIN {
     @INC = ('../lib','.','../ext/re');
     require Config; import Config;
     require './test.pl'; require './charset_tools.pl';
+    require './loc_tools.pl';
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 }
@@ -522,7 +523,7 @@ sub run_tests {
         my $locale;
 
       SKIP: {
-            skip 'No locale testing without d_setlocale', 1 if(!$Config{d_setlocale});
+            skip 'Locales not available', 1 unless locales_enabled('LC_CTYPE');
 
             use locale;
             $locale = qr/\b\v$/;
@@ -536,22 +537,21 @@ sub run_tests {
         is(qr/abc$dual/,    '(?^u:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale');
 
       SKIP: {
-            skip 'No locale testing without d_setlocale', 1 if(!$Config{d_setlocale});
+            skip 'Locales not available', 1 unless locales_enabled('LC_CTYPE');
 
             is(qr/abc$locale/,    '(?^u:abc(?^l:\b\v$))', 'Verify retains l when interpolated under unicode_strings');
         }
 
         no feature 'unicode_strings';
       SKIP: {
-            skip 'No locale testing without d_setlocale', 1 if(!$Config{d_setlocale});
-
+            skip 'Locales not available', 1 unless locales_enabled('LC_CTYPE');
             is(qr/abc$locale/,    '(?^:abc(?^l:\b\v$))', 'Verify retains l when interpolated outside locale and unicode strings');
         }
 
         is(qr/def$unicode/,    '(?^:def(?^u:\b\v$))', 'Verify retains u when interpolated outside locale and unicode strings');
 
       SKIP: {
-            skip 'No locale testing without d_setlocale', 2 if(!$Config{d_setlocale});
+            skip 'Locales not available', 2 unless locales_enabled('LC_CTYPE');
 
              use locale;
             is(qr/abc$dual/,    '(?^l:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale');

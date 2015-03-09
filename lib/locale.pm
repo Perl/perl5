@@ -1,6 +1,6 @@
 package locale;
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 use Config;
 
 $Carp::Internal{ (__PACKAGE__) } = 1;

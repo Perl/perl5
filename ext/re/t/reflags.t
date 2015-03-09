@@ -6,6 +6,7 @@ BEGIN {
         	print "1..0 # Skip -- Perl configured without re module\n";
 		exit 0;
 	}
+        require 'loc_tools.pl';
 }
 
 use strict;
@@ -66,12 +67,7 @@ ok 'f r e l p' =~ /f r e l p/,
 }
 
 SKIP: {
-  if (
-      !$Config::Config{d_setlocale}
-   || $Config::Config{ccflags} =~ /\bD?NO_LOCALE\b/
-  ) {
-    skip "no locale support", 7
-  }
+  skip "no locale support", 7 unless locales_enabled('CTYPE');
   use locale;
   use re '/u';
   is qr//, '(?^u:)', 'use re "/u" with active locale';

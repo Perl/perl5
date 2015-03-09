@@ -19,13 +19,13 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     unshift @INC, '.';
-    require Config; import Config;
-    if (!$Config{d_setlocale} || $Config{ccflags} =~ /\bD?NO_LOCALE\b/) {
+    require './loc_tools.pl';
+    unless (locales_enabled('LC_CTYPE')) {
 	print "1..0\n";
 	exit;
     }
-    require './loc_tools.pl';
     $| = 1;
+    require Config; import Config;
 }
 
 use strict;
@@ -1856,7 +1856,9 @@ foreach my $Locale (@Locale) {
             # first).  This is only done if the current locale has LC_MESSAGES
             $ok14 = 1;
             $ok14_5 = 1;
-            if (setlocale(&POSIX::LC_MESSAGES, $Locale)) {
+            if (   locales_enabled('LC_MESSAGES')
+                && setlocale(&POSIX::LC_MESSAGES, $Locale))
+            {
                 foreach my $err (keys %!) {
                     use Errno;
                     $! = eval "&Errno::$err";   # Convert to strerror() output
@@ -1904,6 +1906,7 @@ foreach my $Locale (@Locale) {
     }
 
     $ok21 = 1;
+    if (locales_enabled('LC_MESSAGES')) {
     foreach my $err (keys %!) {
         no locale;
         use Errno;
@@ -1912,6 +1915,7 @@ foreach my $Locale (@Locale) {
         if ("$strerror" =~ /\P{ASCII}/) {
             $ok21 = 0;
             last;
+            }
         }
     }
 

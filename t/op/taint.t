@@ -10,6 +10,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    require './loc_tools.pl';
     set_up_inc('../lib');
 }
 
@@ -298,7 +299,7 @@ my $TEST = 'TEST';
     is($one, 'a',      "$desc: \$1 value");
 
   SKIP: {
-        skip 'No locale testing without d_setlocale', 10 if(!$Config{d_setlocale});
+        skip 'Locales not available', 10 unless locales_enabled('LC_CTYPE');
 
         $desc = "match with pattern tainted via locale";
 
@@ -351,7 +352,7 @@ my $TEST = 'TEST';
     is($one, 'd',      "$desc: \$1 value");
 
   SKIP: {
-        skip 'No locale testing without d_setlocale', 12 if(!$Config{d_setlocale});
+        skip 'Locales not available', 12 unless locales_enabled('LC_CTYPE');
 
         $desc = "match with pattern tainted via locale, list cxt";
 
@@ -503,7 +504,7 @@ my $TEST = 'TEST';
     is($one, 'abcd',   "$desc: \$1 value");
 
   SKIP: {
-        skip 'No locale testing without d_setlocale', 18 if(!$Config{d_setlocale});
+        skip 'Locales not available', 18 unless locales_enabled('LC_CTYPE');
 
         $desc = "substitution with pattern tainted via locale";
 
@@ -687,7 +688,7 @@ my $TEST = 'TEST';
 	is($one, 'a',      "$desc: \$1 value");
 
   SKIP: {
-        skip 'No locale testing without d_setlocale', 10 if(!$Config{d_setlocale});
+        skip 'Locales not available', 10 unless locales_enabled('LC_CTYPE');
 
         $desc = "use re 'taint': match with pattern tainted via locale";
 
@@ -740,7 +741,7 @@ my $TEST = 'TEST';
 	is($one, 'd',      "$desc: \$1 value");
 
   SKIP: {
-        skip 'No locale testing without d_setlocale', 12 if(!$Config{d_setlocale});
+        skip 'Locales not available', 12 unless locales_enabled('LC_CTYPE');
 
         $desc = "use re 'taint': match with pattern tainted via locale, list cxt";
 
@@ -893,7 +894,7 @@ my $TEST = 'TEST';
 	is($one, 'abcd',   "$desc: \$1 value");
 
   SKIP: {
-        skip 'No locale testing without d_setlocale', 18 if(!$Config{d_setlocale});
+        skip 'Locales not available', 18 unless locales_enabled('LC_CTYPE');
 
         $desc = "use re 'taint': substitution with pattern tainted via locale";
 
@@ -2297,7 +2298,7 @@ pass("no death when TARG of ref is tainted");
 }
 
 SKIP: {
-    skip 'No locale testing without d_setlocale', 4 if(!$Config{d_setlocale});
+    skip 'Locales not available', 4 unless locales_enabled('LC_CTYPE');
 
     use feature 'fc';
     use locale;

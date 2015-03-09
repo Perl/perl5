@@ -5,6 +5,7 @@ BEGIN {
     @INC = qw(../lib .);
     require Config; import Config;
     require "./test.pl";
+    require "./loc_tools.pl";
 }
 
 plan tests => 60;
@@ -80,7 +81,7 @@ is(length(quotemeta($char)), 1, "quotemeta '\\N{U+DF}'  in UTF-8 length");
     is(length(quotemeta("\x{df}")), 2, "quotemeta Latin1 no unicode_strings quoted length");
 
   SKIP: {
-    skip 'No locale testing without d_setlocale', 8 if(!$Config{d_setlocale});
+    skip 'Locales not available', 8 unless locales_enabled('LC_CTYPE');
     use locale;
 
     my $char = ":";
@@ -109,7 +110,7 @@ is(length(quotemeta($char)), 1, "quotemeta '\\N{U+DF}'  in UTF-8 length");
     is(length(quotemeta("\x{df}")), 1, "quotemeta Latin1 unicode_strings nonquoted length");
 
   SKIP: {
-    skip 'No locale testing without d_setlocale', 12 if(!$Config{d_setlocale});
+    skip 'Locales not available', 12 unless locales_enabled('LC_CTYPE');
     use locale;
 
     my $char = ":";
