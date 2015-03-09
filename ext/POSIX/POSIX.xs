@@ -2011,7 +2011,7 @@ localeconv()
 	    const struct lconv_offset *integers = lconv_integers;
 	    const char *ptr = (const char *) lcbuf;
 
-	    do {
+	    while (strings->name) {
                 /* This string may be controlled by either LC_NUMERIC, or
                  * LC_MONETARY */
                 bool is_utf8_locale
@@ -2042,16 +2042,18 @@ localeconv()
                                         && ! is_invariant_string((U8 *) value, 0)
                                         && is_utf8_string((U8 *) value, 0)),
                         0);
-                  }
-	    } while ((++strings)->name);
+                }
+                strings++;
+	    }
 
-	    do {
+	    while (integers->name) {
 		const char value = *((const char *)(ptr + integers->offset));
 
 		if (value != CHAR_MAX)
 		    (void) hv_store(RETVAL, integers->name,
 				    strlen(integers->name), newSViv(value), 0);
-	    } while ((++integers)->name);
+                integers++;
+            }
 	}
         RESTORE_NUMERIC_STANDARD();
 #endif  /* HAS_LOCALECONV */
