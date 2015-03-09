@@ -5809,12 +5809,16 @@ typedef struct am_table_short AMTS;
          * this will so rarely  be true, there is no point to optimize for
          * time; instead it makes sense to minimize space used and do all the
          * work in the rarely called function */
-#       define _CHECK_AND_WARN_PROBLEMATIC_LOCALE                           \
-	STMT_START {                                                        \
-            if (UNLIKELY(PL_warn_locale)) {                                 \
-                _warn_problematic_locale();                                 \
-            }                                                               \
-        }  STMT_END
+#       ifdef USE_LOCALE_CTYPE
+#           define _CHECK_AND_WARN_PROBLEMATIC_LOCALE                         \
+                STMT_START {                                                  \
+                    if (UNLIKELY(PL_warn_locale)) {                           \
+                        _warn_problematic_locale();                           \
+                    }                                                         \
+                }  STMT_END
+#       else
+#           define _CHECK_AND_WARN_PROBLEMATIC_LOCALE
+#       endif
 
 
     /* These two internal macros are called when a warning should be raised,
