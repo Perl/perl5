@@ -591,7 +591,9 @@ dan\100sidhe.org                        sugalsd\100lbcc.cc.or.us
 +                                       sugalskd\100osshe.edu
 daniel\100bitpusher.com                 daniel\100biz.bitpusher.com
 david.dyck\100fluke.com                 dcd\100tc.fluke.com
-david\100kineticode.com                 david\100wheeler.com
+david\100justatheory.com                david\100wheeler.net
++                                       david\100kineticode.com
++                                       david\100wheeler.com
 +                                       david\100wheeler.net
 dennis\100booking.com                   dennis\100camel.ams6.corp.booking.com
 +					dennis.kaarsemaker\100booking.com
