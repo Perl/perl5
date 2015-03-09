@@ -79,9 +79,15 @@ sub _decode_encodings {
 my %category_name;
 eval { require POSIX; import POSIX 'locale_h'; };
 unless ($@) {
+    my $number_for_missing_category = 0;
     foreach my $name (qw(ALL COLLATE CTYPE MESSAGES MONETARY NUMERIC TIME)) {
         my $number = eval "&POSIX::LC_$name";
-        next if $@;
+
+        # Use a negative number if the platform doesn't support this category,
+        # so we have an entry for all ones that might be specified in calls to
+        # us.
+        $number = --$number_for_missing_category if $@;
+
         $category_name{$number} = "$name";
     }
 }
