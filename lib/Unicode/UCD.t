@@ -381,6 +381,15 @@ is(charblock(0x590),          "Hebrew", "0x0590 - Hebrew unused charblock");
 is(charscript(0x590),         $unknown_script, "0x0590 - Hebrew unused charscript") if $v_unicode_version gt v3.0.1;
 is(charblock(0x1FFFF),        "No_Block", "0x1FFFF - unused charblock");
 
+{
+    my @warnings;
+    local $SIG{__WARN__} = sub { push @warnings, @_  };
+    is(charblock(chr(0x6237)), undef,
+        "Verify charblock of non-code point returns <undef>");
+    cmp_ok(scalar @warnings, '==', 1, "  ... and generates 1 warning");
+    like($warnings[0], qr/unknown code/, "  ... with the right text");
+}
+
 my $fraction_3_4_code = sprintf("%04X", utf8::unicode_to_native(0xbe));
 $cp = $fraction_3_4_code;
 $charinfo = charinfo($fraction_3_4_code);
@@ -762,10 +771,20 @@ is(Unicode::UCD::_getcode('U+123x'),  undef, "_getcode(x123)");
 SKIP:
 {
     skip("Script property not in this release", 3) if $v_unicode_version lt v3.1.0;
+
+    {
+        my @warnings;
+        local $SIG{__WARN__} = sub { push @warnings, @_  };
+        is(charscript(chr(0x6237)), undef,
+           "Verify charscript of non-code point returns <undef>");
+        cmp_ok(scalar @warnings, '==', 1, "  ... and generates 1 warning");
+        like($warnings[0], qr/unknown code/, "  ... with the right text");
+    }
+
     my $r1 = charscript('Latin');
     if (ok(defined $r1, "Found Latin script")) {
         skip("Latin range count will be wrong when using older Unicode release",
-             2) if $v_unicode_version lt $expected_version;
+             2) if $current_version lt $expected_version;
         my $n1 = @$r1;
         is($n1, 31, "number of ranges in Latin script (Unicode $expected_version)") if $::IS_ASCII;
         shift @$r1 while @$r1;

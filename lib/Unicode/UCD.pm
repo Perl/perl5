@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.62';
+our $VERSION = '0.63';
 
 require Exporter;
 
@@ -937,6 +937,9 @@ sub charblock {
     elsif (exists $BLOCKS{$arg}) {
         return _dclone $BLOCKS{$arg};
     }
+
+    carp __PACKAGE__, "::charblock: unknown code '$arg'";
+    return;
 }
 
 =head2 B<charscript()>
@@ -1004,6 +1007,7 @@ sub charscript {
         return _dclone $SCRIPTS{$arg};
     }
 
+    carp __PACKAGE__, "::charscript: unknown code '$arg'";
     return;
 }
 
