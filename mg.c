@@ -3013,6 +3013,12 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
     case ')':
 	{
+/* (hv) best guess: maybe we'll need configure probes to do a better job,
+ * but you can override it if you need to.
+ */
+#ifndef INVALID_GID
+#define INVALID_GID ((Gid_t)-1)
+#endif
         /* XXX $) currently silently ignores failures */
 	Gid_t new_egid;
 #ifdef HAS_SETGROUPS
@@ -3035,7 +3041,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
             if (grok_atoUV(p, &uv, &endptr))
                 new_egid = (Gid_t)uv;
             else {
-                new_egid = 0;   /* XXX is this safe? */
+                new_egid = INVALID_GID;
                 endptr = NULL;
             }
             for (i = 0; i < maxgrp; ++i) {
@@ -3053,7 +3059,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                 if (grok_atoUV(p, &uv, &endptr))
                     gary[i] = (Groups_t)uv;
                 else {
-                    gary[i] = 0;    /* XXX is this safe? */
+                    gary[i] = INVALID_GID;
                     endptr = NULL;
                 }
             }
