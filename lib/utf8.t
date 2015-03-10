@@ -481,7 +481,7 @@ SKIP: {
             use strict;
             my $s = "hlagh";
             my $r = \$s;
-            %s($r);
+            my $dummy = %s($r);
             $$r;
         ], $func;
         my $ret = eval $code or my $error = $@;
@@ -602,6 +602,21 @@ for my $pos (0..5) {
     is(pos($s),    undef,	   "(pos $pos) pos after  U; utf8::encode");
     is($s, "A$utf8_bytes","(pos $pos) str after  U; utf8::encode");
 }
+
+SKIP: {
+    skip("Test only valid on ASCII platform", 1) unless $::IS_ASCII;
+    require Config;
+    skip("Test needs a B module, which is lacking in this Perl", 1)
+        if $Config::Config{'extensions'} !~ /\bB\b/;
+
+    my $out = runperl ( switches => ["-XMO=Concise"],
+                    prog => 'utf8::unicode_to_native(0x41);
+                             utf8::native_to_unicode(0x42)',
+                    stderr => 1 );
+    unlike($out, qr/entersub/,
+            "utf8::unicode_to_native() and native_to_unicode() optimized out");
+}
+
 
 # [perl #119043] utf8::upgrade should not croak on read-only COWs
 for(__PACKAGE__) {

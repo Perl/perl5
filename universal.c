@@ -1035,6 +1035,53 @@ static const struct xsub_details details[] = {
     {"re::regexp_pattern", XS_re_regexp_pattern, "$"},
 };
 
+STATIC OP*
+optimize_out_native_convert_function(pTHX_ OP* entersubop,
+                                           GV* namegv,
+                                           SV* protosv)
+{
+    /* Optimizes out an identity function, i.e., one that just returns its
+     * argument.  The passed in function is assumed to be an identity function,
+     * with no checking.  This is designed to be called for utf8_to_native()
+     * and native_to_utf8() on ASCII platforms, as they just return their
+     * arguments, but it could work on any such function.
+     *
+     * The code is mostly just cargo-culted from Memoize::Lift */
+
+    OP *pushop, *argop;
+    SV* prototype = newSVpvs("$");
+
+    PERL_UNUSED_ARG(protosv);
+
+    assert(entersubop->op_type == OP_ENTERSUB);
+
+    entersubop = ck_entersub_args_proto(entersubop, namegv, prototype);
+
+    SvREFCNT_dec(prototype);
+
+    pushop = cUNOPx(entersubop)->op_first;
+    if (! pushop->op_sibling) {
+        pushop = cUNOPx(pushop)->op_first;
+    }
+    argop = pushop->op_sibling;
+
+    /* Carry on without doing the optimization if it is not something we're
+     * expecting, so continues to work */
+    if (   ! argop
+        || ! argop->op_sibling
+        ||   argop->op_sibling->op_sibling
+    ) {
+        return entersubop;
+    }
+
+    pushop->op_sibling = argop->op_sibling;
+    argop->op_sibling = NULL;
+    argop->op_lastsib = 1;
+
+    op_free(entersubop);
+    return argop;
+}
+
 void
 Perl_boot_core_UNIVERSAL(pTHX)
 {
@@ -1045,6 +1092,22 @@ Perl_boot_core_UNIVERSAL(pTHX)
     do {
 	newXS_flags(xsub->name, xsub->xsub, file, xsub->proto, 0);
     } while (++xsub < end);
+
+#ifndef EBCDIC
+    { /* On ASCII platforms these functions just return their argument, so can
+         be optimized away */
+
+        CV* to_native_cv = get_cv("utf8::unicode_to_native", 0);
+        CV* to_unicode_cv = get_cv("utf8::native_to_unicode", 0);
+
+        cv_set_call_checker(to_native_cv,
+                            optimize_out_native_convert_function,
+                            (SV*) to_native_cv);
+        cv_set_call_checker(to_unicode_cv,
+                            optimize_out_native_convert_function,
+                            (SV*) to_unicode_cv);
+    }
+#endif
 
     /* Providing a Regexp::DESTROY fixes #21347. See test in t/op/ref.t  */
     {

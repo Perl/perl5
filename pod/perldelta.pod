@@ -89,7 +89,12 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+The functions
+C<utf8::native_to_unicode()> and
+C<utf8::unicode_to_native()> (see L<utf8>)
+are now optimized out on ASCII platforms.
+There is now not even a minimal performance hit in writing code portable
+between ASCII and EBCDIC platforms.
 
 =back
 

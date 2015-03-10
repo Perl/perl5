@@ -2,7 +2,7 @@ package utf8;
 
 $utf8::hint_bits = 0x00800000;
 
-our $VERSION = '1.14';
+our $VERSION = '1.15';
 
 sub import {
     $^H |= $utf8::hint_bits;
@@ -186,6 +186,7 @@ L<Encode>.
 
 =item * C<$unicode = utf8::native_to_unicode($code_point)>
 
+(Since Perl v5.8.0)
 This takes an unsigned integer (which represents the ordinal number of a
 character (or a code point) on the platform the program is being run on) and
 returns its Unicode equivalent value.  Since ASCII platforms natively use the
@@ -195,14 +196,21 @@ platforms it converts from EBCIDC to Unicode.
 A meaningless value will currently be returned if the input is not an unsigned
 integer.
 
+Since Perl v5.22.0, calls to this function are optimized out on ASCII
+platforms, so there is no performance hit in using it there.
+
 =item * C<$native = utf8::unicode_to_native($code_point)>
 
+(Since Perl v5.8.0)
 This is the inverse of C<utf8::native_to_unicode()>, converting the other
 direction.  Again, on ASCII platforms, this returns its input, but on EBCDIC
 platforms it will find the native platform code point, given any Unicode one.
 
 A meaningless value will currently be returned if the input is not an unsigned
 integer.
+
+Since Perl v5.22.0, calls to this function are optimized out on ASCII
+platforms, so there is no performance hit in using it there.
 
 =item * C<$flag = utf8::is_utf8($string)>
 
