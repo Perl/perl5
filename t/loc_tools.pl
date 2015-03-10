@@ -118,20 +118,23 @@ sub locales_enabled(;$) {
     # Done with the global possibilities.  Now check if any passed in category
     # is disabled.
     my $categories_ref = shift;
-    $categories_ref = [ $categories_ref ] if ! ref $categories_ref;
-    for my $category (@$categories_ref) {
-        if ($category =~ /\D/) {
-            $category =~ s/ ^ LC_ //x;
-            die "Invalid locale category name '$category'"
-                unless grep { $category eq $_ } values %category_name;
-        }
-        else {
-            die "Invalid locale category number '$category'"
-                unless grep { $category == $_ } keys %category_name;
-            $category = $category_name{$category};
-        }
+    if (defined $categories_ref) {
+        $categories_ref = [ $categories_ref ] if ! ref $categories_ref;
+        my @local_categories_copy = @$categories_ref;
+        for my $category (@local_categories_copy) {
+            if ($category =~ / ^ -? \d+ $ /x) {
+                die "Invalid locale category number '$category'"
+                    unless grep { $category == $_ } keys %category_name;
+                $category = $category_name{$category};
+            }
+            else {
+                $category =~ s/ ^ LC_ //x;
+                die "Invalid locale category name '$category'"
+                    unless grep { $category eq $_ } values %category_name;
+            }
 
-        return 0 if $Config{ccflags} =~ /\bD?NO_LOCALE_$category\b/;
+            return 0 if $Config{ccflags} =~ /\bD?NO_LOCALE_$category\b/;
+        }
     }
 
     return 1;
