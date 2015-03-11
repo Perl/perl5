@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 23);
+plan(tests => 24);
 
 {
     no warnings 'deprecated';
@@ -199,3 +199,6 @@ fresh_perl_is(
    { stderr => 1 },
   '<\L\L> with no newline [perl #123802]'
 );
+
+is eval "qq'@\x{ff13}'", "\@\x{ff13}",
+  '"@<fullwidth digit>" [perl #123963]';
