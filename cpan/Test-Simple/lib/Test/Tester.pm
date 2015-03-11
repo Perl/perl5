@@ -2,317 +2,287 @@ use strict;
 
 package Test::Tester;
 
-# Turn this back on later
-#warn "Test::Tester is deprecated, see Test::Stream::Tester\n";
+BEGIN
+{
+	if (*Test::Builder::new{CODE})
+	{
+		warn "You should load Test::Tester before Test::Builder (or anything that loads Test::Builder)" 
+	}
+}
 
-use Test::Stream 1.301001 '-internal';
-use Test::Builder 1.301001;
-use Test::Stream::Toolset;
-use Test::More::Tools;
-use Test::Stream qw/-internal STATE_LEGACY/;
-use Test::Tester::Capture;
+use Test::Builder;
+use Test::Tester::CaptureRunner;
+use Test::Tester::Delegate;
 
 require Exporter;
 
 use vars qw( @ISA @EXPORT $VERSION );
 
-our $VERSION = '1.301001_098';
-$VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
+$VERSION = "0.114";
+@EXPORT = qw( run_tests check_tests check_test cmp_results show_space );
+@ISA = qw( Exporter );
 
-@EXPORT  = qw( run_tests check_tests check_test cmp_results show_space );
-@ISA     = qw( Exporter );
+my $Test = Test::Builder->new;
+my $Capture = Test::Tester::Capture->new;
+my $Delegator = Test::Tester::Delegate->new;
+$Delegator->{Object} = $Test;
+
+my $runner = Test::Tester::CaptureRunner->new;
 
 my $want_space = $ENV{TESTTESTERSPACE};
 
-sub show_space {
-    $want_space = 1;
+sub show_space
+{
+	$want_space = 1;
 }
 
 my $colour = '';
-my $reset  = '';
+my $reset = '';
 
-if (my $want_colour = $ENV{TESTTESTERCOLOUR} || $ENV{TESTTESTERCOLOUR}) {
-    if (eval "require Term::ANSIColor") {
-        my ($f, $b) = split(",", $want_colour);
-        $colour = Term::ANSIColor::color($f) . Term::ANSIColor::color("on_$b");
-        $reset  = Term::ANSIColor::color("reset");
-    }
+if (my $want_colour = $ENV{TESTTESTERCOLOUR} || $ENV{TESTTESTERCOLOUR})
+{
+	if (eval "require Term::ANSIColor")
+	{
+		my ($f, $b) = split(",", $want_colour);
+		$colour = Term::ANSIColor::color($f).Term::ANSIColor::color("on_$b");
+		$reset = Term::ANSIColor::color("reset");
+	}
 
 }
 
-my $capture = Test::Tester::Capture->new;
-sub capture { $capture }
-
-sub find_depth {
-    my ($start, $end);
-    my $l = 1;
-    while (my @call = caller($l++)) {
-        $start = $l if $call[3] =~ m/^Test::Builder::(ok|skip|todo_skip)$/;
-        next unless $start;
-        next unless $call[3] eq 'Test::Tester::run_tests';
-        $end = $l;
-        last;
-    }
-
-    return $Test::Builder::Level + 1 unless defined $start && defined $end;
-    # 2 the eval and the anon sub
-    return $end - $start - 2;
+sub new_new
+{
+	return $Delegator;
 }
 
-require Test::Stream::Event::Ok;
-my $META = Test::Stream::ArrayBase::Meta->get('Test::Stream::Event::Ok');
-my $idx = $META->{index} + 1;
-
-sub run_tests {
-    my $test = shift;
-
-    my $cstream;
-    if ($capture) {
-        $cstream = $capture->{stream};
-    }
-
-    my ($stream, $old) = Test::Stream->intercept_start($cstream);
-    $stream->set_use_legacy(1);
-    $stream->state->[-1] = [0, 0, undef, 1];
-    $stream->munge(sub {
-        my ($stream, $e) = @_;
-        $e->[$idx] = find_depth() - $Test::Builder::Level;
-        $e->[$idx+1] = $Test::Builder::Level;
-        require Carp;
-        $e->[$idx + 2] = Carp::longmess();
-    });
-
-    my $level = $Test::Builder::Level;
-
-    my @out;
-    my $prem = "";
-
-    my $ok = eval {
-        $test->();
-
-        for my $e (@{$stream->state->[-1]->[STATE_LEGACY]}) {
-            if ($e->isa('Test::Stream::Event::Ok')) {
-                push @out => $e->to_legacy;
-                $out[-1]->{name} = '' unless defined $out[-1]->{name};
-                $out[-1]->{diag} ||= "";
-                $out[-1]->{depth} = $e->[$idx];
-                for my $d (@{$e->diag || []}) {
-                    next if $d->message =~ m{Failed (\(TODO\) )?test (.*\n\s*)?at .* line \d+\.};
-                    next if $d->message =~ m{You named your test '.*'\.  You shouldn't use numbers for your test names};
-                    chomp(my $msg = $d->message);
-                    $msg .= "\n";
-                    $out[-1]->{diag} .= $msg;
-                }
-            }
-            elsif ($e->isa('Test::Stream::Event::Diag')) {
-                chomp(my $msg = $e->message);
-                $msg .= "\n";
-                if (!@out) {
-                    $prem .= $msg;
-                    next;
-                }
-                next if $msg =~ m{Failed test .*\n\s*at .* line \d+\.};
-                $out[-1]->{diag} .= $msg;
-            }
-        }
-
-        1;
-    };
-    my $err = $@;
-
-    $stream->state->[-1] = [0, 0, undef, 1];
-
-    Test::Stream->intercept_stop($stream);
-
-    die $err unless $ok;
-
-    return ($prem, @out);
+sub capture
+{
+	return Test::Tester::Capture->new;
 }
 
-sub check_test {
-    my $test   = shift;
-    my $expect = shift;
-    my $name   = shift;
-    $name = "" unless defined($name);
+sub fh
+{
+	# experiment with capturing output, I don't like it
+	$runner = Test::Tester::FHRunner->new;
 
-    @_ = ($test, [$expect], $name);
-    goto &check_tests;
+	return $Test;
 }
 
-sub check_tests {
-    my $test    = shift;
-    my $expects = shift;
-    my $name    = shift;
-    $name = "" unless defined($name);
+sub find_run_tests
+{
+	my $d = 1;
+	my $found = 0;
+	while ((not $found) and (my ($sub) = (caller($d))[3]) )
+	{
+#		print "$d: $sub\n";
+		$found = ($sub eq "Test::Tester::run_tests");
+		$d++;
+	}
 
-    my ($prem, @results) = eval { run_tests($test, $name) };
-
-    my $ctx = context();
-
-    my $ok = !$@;
-    $ctx->ok($ok, "Test '$name' completed");
-    $ctx->diag($@) unless $ok;
-
-    $ok = !length($prem);
-    $ctx->ok($ok, "Test '$name' no premature diagnostication");
-    $ctx->diag("Before any testing anything, your tests said\n$prem") unless $ok;
-
-    cmp_results(\@results, $expects, $name);
-    return ($prem, @results);
+#	die "Didn't find 'run_tests' in caller stack" unless $found;
+	return $d;
 }
 
-sub cmp_field {
-    my ($result, $expect, $field, $desc) = @_;
+sub run_tests
+{
+	local($Delegator->{Object}) = $Capture;
 
-    my $ctx = context();
-    if (defined $expect->{$field}) {
-        my ($ok, @diag) = Test::More::Tools->is_eq(
-            $result->{$field},
-            $expect->{$field},
-        );
-        $ctx->ok($ok, "$desc compare $field");
-    }
+	$runner->run_tests(@_);
+
+	return ($runner->get_premature, $runner->get_results);
 }
 
-sub cmp_result {
-    my ($result, $expect, $name) = @_;
+sub check_test
+{
+	my $test = shift;
+	my $expect = shift;
+	my $name = shift;
+	$name = "" unless defined($name);
 
-    my $ctx = context();
+	@_ = ($test, [$expect], $name);
+	goto &check_tests;
+}
 
-    my $sub_name = $result->{name};
-    $sub_name = "" unless defined($name);
+sub check_tests
+{
+	my $test = shift;
+	my $expects = shift;
+	my $name = shift;
+	$name = "" unless defined($name);
 
-    my $desc = "subtest '$sub_name' of '$name'";
+	my ($prem, @results) = eval { run_tests($test, $name) };
 
-    {
-        cmp_field($result, $expect, "ok", $desc);
+	$Test->ok(! $@, "Test '$name' completed") || $Test->diag($@);
+	$Test->ok(! length($prem), "Test '$name' no premature diagnostication") ||
+		$Test->diag("Before any testing anything, your tests said\n$prem");
 
-        cmp_field($result, $expect, "actual_ok", $desc);
+	local $Test::Builder::Level = $Test::Builder::Level + 1;
+	cmp_results(\@results, $expects, $name);
+	return ($prem, @results);
+}
 
-        cmp_field($result, $expect, "type", $desc);
+sub cmp_field
+{
+	my ($result, $expect, $field, $desc) = @_;
 
-        cmp_field($result, $expect, "reason", $desc);
+	if (defined $expect->{$field})
+	{
+		$Test->is_eq($result->{$field}, $expect->{$field},
+			"$desc compare $field");
+	}
+}
 
-        cmp_field($result, $expect, "name", $desc);
-    }
+sub cmp_result
+{
+	my ($result, $expect, $name) = @_;
 
-    # if we got no depth then default to 1
-    my $depth = 1;
-    if (exists $expect->{depth}) {
-        $depth = $expect->{depth};
-    }
+	my $sub_name = $result->{name};
+	$sub_name = "" unless defined($name);
 
-    # if depth was explicitly undef then don't test it
-    if (defined $depth) {
-        $ctx->ok(1, "depth checking is deprecated, dummy pass result...");
-    }
+	my $desc = "subtest '$sub_name' of '$name'";
 
-    if (defined(my $exp = $expect->{diag})) {
-        # if there actually is some diag then put a \n on the end if it's not
-        # there already
+	{
+		local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-        $exp .= "\n" if (length($exp) and $exp !~ /\n$/);
-        my $ok = $result->{diag} eq $exp;
-        $ctx->ok(
-            $ok,
-            "subtest '$sub_name' of '$name' compare diag"
-        );
-        unless($ok) {
-            my $got  = $result->{diag};
-            my $glen = length($got);
-            my $elen = length($exp);
-            for ($got, $exp) {
-                my @lines = split("\n", $_);
-                $_ = join(
-                    "\n",
-                    map {
-                        if ($want_space) {
-                            $_ = $colour . escape($_) . $reset;
-                        }
-                        else {
-                            "'$colour$_$reset'";
-                        }
-                    } @lines
-                );
-            }
+		cmp_field($result, $expect, "ok", $desc);
 
-            $ctx->diag(<<EOM);
+		cmp_field($result, $expect, "actual_ok", $desc);
+
+		cmp_field($result, $expect, "type", $desc);
+
+		cmp_field($result, $expect, "reason", $desc);
+
+		cmp_field($result, $expect, "name", $desc);
+	}
+
+	# if we got no depth then default to 1
+	my $depth = 1;
+	if (exists $expect->{depth})
+	{
+		$depth = $expect->{depth};
+	}
+
+	# if depth was explicitly undef then don't test it
+	if (defined $depth)
+	{
+		$Test->is_eq($result->{depth}, $depth, "checking depth") ||
+			$Test->diag('You need to change $Test::Builder::Level');
+	}
+
+	if (defined(my $exp = $expect->{diag}))
+	{
+		# if there actually is some diag then put a \n on the end if it's not
+		# there already
+
+		$exp .= "\n" if (length($exp) and $exp !~ /\n$/);
+		if (not $Test->ok($result->{diag} eq $exp,
+			"subtest '$sub_name' of '$name' compare diag")
+		)
+		{
+			my $got = $result->{diag};
+			my $glen = length($got);
+			my $elen = length($exp);
+			for ($got, $exp)
+			{
+				my @lines = split("\n", $_);
+	 			$_ = join("\n", map {
+					if ($want_space)
+					{
+						$_ = $colour.escape($_).$reset;
+					}
+					else
+					{
+						"'$colour$_$reset'"
+					}
+				} @lines);
+			}
+
+			$Test->diag(<<EOM);
 Got diag ($glen bytes):
 $got
 Expected diag ($elen bytes):
 $exp
 EOM
 
-        }
-    }
+		}
+	}
 }
 
-sub escape {
-    my $str = shift;
-    my $res = '';
-    for my $char (split("", $str)) {
-        my $c = ord($char);
-        if (($c > 32 and $c < 125) or $c == 10) {
-            $res .= $char;
-        }
-        else {
-            $res .= sprintf('\x{%x}', $c);
-        }
-    }
-    return $res;
+sub escape
+{
+	my $str = shift;
+	my $res = '';
+	for my $char (split("", $str))
+	{
+		my $c = ord($char);
+		if(($c>32 and $c<125) or $c == 10)
+		{
+			$res .= $char;
+		}
+		else
+		{
+			$res .= sprintf('\x{%x}', $c)
+		}
+	}
+	return $res;
 }
 
-sub cmp_results {
-    my ($results, $expects, $name) = @_;
+sub cmp_results
+{
+	my ($results, $expects, $name) = @_;
 
-    my $ctx = context();
+	$Test->is_num(scalar @$results, scalar @$expects, "Test '$name' result count");
 
-    my ($ok, @diag) = Test::More::Tools->is_num(scalar @$results, scalar @$expects, "Test '$name' result count");
-    $ctx->ok($ok, @diag);
+	for (my $i = 0; $i < @$expects; $i++)
+	{
+		my $expect = $expects->[$i];
+		my $result = $results->[$i];
 
-    for (my $i = 0; $i < @$expects; $i++) {
-        my $expect = $expects->[$i];
-        my $result = $results->[$i];
-
-        cmp_result($result, $expect, $name);
-    }
+		local $Test::Builder::Level = $Test::Builder::Level + 1;
+		cmp_result($result, $expect, $name);
+	}
 }
 
 ######## nicked from Test::More
+sub plan {
+	my(@plan) = @_;
+
+	my $caller = caller;
+
+	$Test->exported_to($caller);
+
+	my @imports = ();
+	foreach my $idx (0..$#plan) {
+		if( $plan[$idx] eq 'import' ) {
+			my($tag, $imports) = splice @plan, $idx, 2;
+			@imports = @$imports;
+			last;
+		}
+	}
+
+	$Test->plan(@plan);
+
+	__PACKAGE__->_export_to_level(1, __PACKAGE__, @imports);
+}
+
 sub import {
-    my $class = shift;
-    my @plan = @_;
-
-    my $caller = caller;
-    my $ctx = context();
-
-    my @imports = ();
-    foreach my $idx (0 .. $#plan) {
-        if ($plan[$idx] eq 'import') {
-            my ($tag, $imports) = splice @plan, $idx, 2;
-            @imports = @$imports;
-            last;
-        }
-    }
-
-    my ($directive, $arg) = @plan;
-    if ($directive eq 'tests') {
-        $ctx->plan($arg);
-    }
-    elsif ($directive) {
-        $ctx->plan(0, $directive, $arg);
-    }
-
-    $class->_export_to_level(1, __PACKAGE__, @imports);
+	my($class) = shift;
+		{
+			no warnings 'redefine';
+			*Test::Builder::new = \&new_new;
+		}
+	goto &plan;
 }
 
-sub _export_to_level {
-    my $pkg   = shift;
-    my $level = shift;
-    (undef) = shift;    # redundant arg
-    my $callpkg = caller($level);
-    $pkg->export($callpkg, @_);
+sub _export_to_level
+{
+        my $pkg = shift;
+	my $level = shift;
+	(undef) = shift;	# redundant arg
+	my $callpkg = caller($level);
+	$pkg->export($callpkg, @_);
 }
+
 
 ############
 
@@ -320,17 +290,9 @@ sub _export_to_level {
 
 __END__
 
-=pod
-
-=encoding UTF-8
-
 =head1 NAME
 
-Test::Tester - *DEPRECATED* Ease testing test modules built with Test::Builder
-
-=head1 DEPRECATED
-
-See L<Test::Stream::Tester> for a modern and maintained alternative.
+Test::Tester - Ease testing test modules built with Test::Builder
 
 =head1 SYNOPSIS
 
@@ -439,7 +401,7 @@ should allow your test scripts to do
 
 and after that any tests inside your module will captured.
 
-=head1 TEST EVENTS
+=head1 TEST RESULTS
 
 The result of each test is captured in a hash. These hashes are the same as
 the hashes returned by Test::Builder->details but with a couple of extra
@@ -490,10 +452,6 @@ you are expecting no diagnostics. See below for help tracking down
 hard to find space and tab related problems.
 
 =item depth
-
-B<Note:> Depth checking is disabled on newer versions of Test::Builder which no
-longer uses $Test::Builder::Level. In these versions this will simple produce a
-dummy true result.
 
 This allows you to check that your test module is setting the correct value
 for $Test::Builder::Level and thus giving the correct file and line number
@@ -577,7 +535,7 @@ variable also works (if both are set then the British spelling wins out).
 
 =head1 EXPORTED FUNCTIONS
 
-=head2 ($premature, @results) = run_tests(\&test_sub)
+=head3 ($premature, @results) = run_tests(\&test_sub)
 
 \&test_sub is a reference to a subroutine.
 
@@ -590,7 +548,7 @@ the first test.
 
 @results is an array of test result hashes.
 
-=head2 cmp_result(\%result, \%expect, $name)
+=head3 cmp_result(\%result, \%expect, $name)
 
 \%result is a ref to a test result hash.
 
@@ -600,7 +558,7 @@ cmp_result compares the result with the expected values. If any differences
 are found it outputs diagnostics. You may leave out any field from the
 expected result and cmp_result will not do the comparison of that field.
 
-=head2 cmp_results(\@results, \@expects, $name)
+=head3 cmp_results(\@results, \@expects, $name)
 
 \@results is a ref to an array of test results.
 
@@ -612,7 +570,7 @@ number of elements in \@results and \@expects is the same. Then it goes
 through each result checking it against the expected result as in
 cmp_result() above.
 
-=head2 ($premature, @results) = check_tests(\&test_sub, \@expects, $name)
+=head3 ($premature, @results) = check_tests(\&test_sub, \@expects, $name)
 
 \&test_sub is a reference to a subroutine.
 
@@ -624,7 +582,7 @@ checks if the tests died at any stage.
 It returns the same values as run_tests, so you can further examine the test
 results if you need to.
 
-=head2 ($premature, @results) = check_test(\&test_sub, \%expect, $name)
+=head3 ($premature, @results) = check_test(\&test_sub, \%expect, $name)
 
 \&test_sub is a reference to a subroutine.
 
@@ -638,7 +596,7 @@ make sure this is true.
 It returns the same values as run_tests, so you can further examine the test
 results if you need to.
 
-=head2 show_space()
+=head3 show_space()
 
 Turn on the escaping of characters as described in the SPACES AND TABS
 section.
@@ -673,100 +631,22 @@ captures the strings output by Test::Builder. This means you cannot get
 separate access to the individual pieces of information and you must predict
 B<exactly> what your test will output.
 
-=head1 SOURCE
-
-The source code repository for Test::More can be found at
-F<http://github.com/Test-More/test-more/>.
-
-=head1 MAINTAINER
-
-=over 4
-
-=item Chad Granum E<lt>exodist@cpan.orgE<gt>
-
-=back
-
-=head1 AUTHORS
-
-The following people have all contributed to the Test-More dist (sorted using
-VIM's sort function).
-
-=over 4
-
-=item Chad Granum E<lt>exodist@cpan.orgE<gt>
-
-=item Fergal Daly E<lt>fergal@esatclear.ie>E<gt>
-
-=item Mark Fowler E<lt>mark@twoshortplanks.comE<gt>
-
-=item Michael G Schwern E<lt>schwern@pobox.comE<gt>
-
-=item 唐鳳
-
-=back
-
-=head1 COPYRIGHT
-
-There has been a lot of code migration between modules,
-here are all the original copyrights together:
-
-=over 4
-
-=item Test::Stream
-
-=item Test::Stream::Tester
-
-Copyright 2014 Chad Granum E<lt>exodist7@gmail.comE<gt>.
-
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-See F<http://www.perl.com/perl/misc/Artistic.html>
-
-=item Test::Simple
-
-=item Test::More
-
-=item Test::Builder
-
-Originally authored by Michael G Schwern E<lt>schwern@pobox.comE<gt> with much
-inspiration from Joshua Pritikin's Test module and lots of help from Barrie
-Slaymaker, Tony Bowden, blackstar.co.uk, chromatic, Fergal Daly and the perl-qa
-gang.
-
-Idea by Tony Bowden and Paul Johnson, code by Michael G Schwern
-E<lt>schwern@pobox.comE<gt>, wardrobe by Calvin Klein.
-
-Copyright 2001-2008 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
-
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-See F<http://www.perl.com/perl/misc/Artistic.html>
-
-=item Test::use::ok
-
-To the extent possible under law, 唐鳳 has waived all copyright and related
-or neighboring rights to L<Test-use-ok>.
-
-This work is published from Taiwan.
-
-L<http://creativecommons.org/publicdomain/zero/1.0>
-
-=item Test::Tester
+=head1 AUTHOR
 
 This module is copyright 2005 Fergal Daly <fergal@esatclear.ie>, some parts
 are based on other people's work.
+
+Plan handling lifted from Test::More. written by Michael G Schwern
+<schwern@pobox.com>.
+
+Test::Tester::Capture is a cut down and hacked up version of Test::Builder.
+Test::Builder was written by chromatic <chromatic@wgz.org> and Michael G
+Schwern <schwern@pobox.com>.
+
+=head1 LICENSE
 
 Under the same license as Perl itself
 
 See http://www.perl.com/perl/misc/Artistic.html
 
-=item Test::Builder::Tester
-
-Copyright Mark Fowler E<lt>mark@twoshortplanks.comE<gt> 2002, 2004.
-
-This program is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
-
-=back
+=cut

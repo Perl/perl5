@@ -1,3 +1,0 @@
-use Test::More;
-ok(1,"name");
-done_testing;

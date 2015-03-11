@@ -1310,26 +1310,22 @@ _cleaner2:
 	-rmdir lib/autodie/Scope lib/autodie lib/XS lib/Win32API lib/VMS
 	-rmdir lib/Unicode/Collate/Locale lib/Unicode/Collate/CJK
 	-rmdir lib/Unicode/Collate lib/Tie/Hash lib/Thread lib/Text
-	-rmdir lib/Test/use lib/Test/Tutorial lib/Test/Tester
-	-rmdir lib/Test/Stream/Tester/Events lib/Test/Stream/Tester/Checks
-	-rmdir lib/Test/Stream/Tester lib/Test/Stream/Exporter
-	-rmdir lib/Test/Stream/ExitMagic lib/Test/Stream/Event
-	-rmdir lib/Test/Stream/ArrayBase lib/Test/Stream
-	-rmdir lib/Test/More/DeepCheck lib/Test/More lib/Test/Builder/Tester
-	-rmdir lib/Test/Builder lib/Test lib/Term lib/TAP/Parser/YAMLish
-	-rmdir lib/TAP/Parser/SourceHandler lib/TAP/Parser/Scheduler
-	-rmdir lib/TAP/Parser/Result lib/TAP/Parser/Iterator lib/TAP/Parser
-	-rmdir lib/TAP/Harness lib/TAP/Formatter/File
-	-rmdir lib/TAP/Formatter/Console lib/TAP/Formatter lib/TAP
-	-rmdir lib/Sys/Syslog lib/Sys lib/Sub lib/Search lib/Scalar
-	-rmdir lib/Pod/Text lib/Pod/Simple lib/Pod/Perldoc lib/PerlIO/via
-	-rmdir lib/PerlIO lib/Perl lib/Parse/CPAN lib/Parse lib/Params
-	-rmdir lib/Net/FTP lib/Module/Load lib/Module/CoreList lib/Module
-	-rmdir lib/Memoize lib/Math/BigInt lib/Math/BigFloat lib/Math lib/MIME
-	-rmdir lib/Locale/Maketext lib/Locale/Codes lib/Locale lib/List/Util
-	-rmdir lib/List lib/JSON/PP lib/JSON lib/IPC lib/IO/Uncompress/Adapter
-	-rmdir lib/IO/Uncompress lib/IO/Socket lib/IO/Compress/Zlib
-	-rmdir lib/IO/Compress/Zip lib/IO/Compress/Gzip lib/IO/Compress/Base
+	-rmdir lib/Test/use lib/Test/Tester lib/Test/Builder/Tester
+	-rmdir lib/Test/Builder/IO lib/Test/Builder lib/Test lib/Term
+	-rmdir lib/TAP/Parser/YAMLish lib/TAP/Parser/SourceHandler
+	-rmdir lib/TAP/Parser/Scheduler lib/TAP/Parser/Result
+	-rmdir lib/TAP/Parser/Iterator lib/TAP/Parser lib/TAP/Harness
+	-rmdir lib/TAP/Formatter/File lib/TAP/Formatter/Console
+	-rmdir lib/TAP/Formatter lib/TAP lib/Sys/Syslog lib/Sys lib/Sub
+	-rmdir lib/Search lib/Scalar lib/Pod/Text lib/Pod/Simple
+	-rmdir lib/Pod/Perldoc lib/PerlIO/via lib/PerlIO lib/Perl
+	-rmdir lib/Parse/CPAN lib/Parse lib/Params lib/Net/FTP lib/Module/Load
+	-rmdir lib/Module/CoreList lib/Module lib/Memoize lib/Math/BigInt
+	-rmdir lib/Math/BigFloat lib/Math lib/MIME lib/Locale/Maketext
+	-rmdir lib/Locale/Codes lib/Locale lib/List/Util lib/List lib/JSON/PP
+	-rmdir lib/JSON lib/IPC lib/IO/Uncompress/Adapter lib/IO/Uncompress
+	-rmdir lib/IO/Socket lib/IO/Compress/Zlib lib/IO/Compress/Zip
+	-rmdir lib/IO/Compress/Gzip lib/IO/Compress/Base
 	-rmdir lib/IO/Compress/Adapter lib/IO/Compress lib/IO
 	-rmdir lib/I18N/LangTags lib/I18N lib/Hash/Util lib/Hash lib/HTTP
 	-rmdir lib/Filter/Util lib/Filter lib/File/Spec lib/ExtUtils/Typemaps

@@ -321,6 +321,4 @@ lib/config.pod	? Should you be using L<...> instead of	-1
 lib/extutils/embed.pm	Verbatim line length including indents exceeds 79 by	2
 lib/perl5db.pl	? Should you be using L<...> instead of	1
 lib/pod/text/overstrike.pm	Verbatim line length including indents exceeds 79 by	1
-lib/test/stream/subtest.pm	Apparent broken link	1
-lib/test/stream/subtest.pm	There is no NAME	1
 porting/perl5220delta.pod	Pod NAME already used	1
