@@ -2,7 +2,12 @@
 
 use strict;
 use Config;
-require '../../t/test.pl';
+push @INC, '.';
+if (-f 't/test.pl') {
+  require 't/test.pl';
+} else {
+  require '../../t/test.pl';
+}
 
 my %modules;
 
