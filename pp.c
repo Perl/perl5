@@ -1717,17 +1717,19 @@ PP(pp_repeat)
 
     if (GIMME_V == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
-	static const char* const oom_list_extend = "Out of memory during list extend";
-	const I32 items = SP - MARK;
-	const I32 max = items * count;
+	const Size_t items = SP - MARK;
 	const U8 mod = PL_op->op_flags & OPf_MOD;
 
-	MEM_WRAP_CHECK_1(max, SV*, oom_list_extend);
-	/* Did the max computation overflow? */
-	if (items > 0 && max > 0 && (max < items || max < count))
-	   Perl_croak(aTHX_ "%s", oom_list_extend);
-	MEXTEND(MARK, max);
 	if (count > 1) {
+	    Size_t max;
+
+            if (  items > MEM_SIZE_MAX / (UV)count   /* max would overflow */
+               || items > (U32)I32_MAX / sizeof(SV *) /* repeatcpy would overflow */
+            )
+               Perl_croak(aTHX_ "%s","Out of memory during list extend");
+            max = items * count;
+            MEXTEND(MARK, max);
+
 	    while (SP > MARK) {
                 if (*SP) {
                    if (mod && SvPADTMP(*SP)) {
@@ -1749,8 +1751,6 @@ PP(pp_repeat)
 	SV * const tmpstr = POPs;
 	STRLEN len;
 	bool isutf;
-	static const char* const oom_string_extend =
-	  "Out of memory during string extend";
 
 	if (TARG != tmpstr)
 	    sv_setsv_nomg(TARG, tmpstr);
@@ -1760,11 +1760,16 @@ PP(pp_repeat)
 	    if (count < 1)
 		SvCUR_set(TARG, 0);
 	    else {
-		const STRLEN max = (UV)count * len;
-		if (len > MEM_SIZE_MAX / count)
-		     Perl_croak(aTHX_ "%s", oom_string_extend);
-	        MEM_WRAP_CHECK_1(max, char, oom_string_extend);
-		SvGROW(TARG, max + 1);
+		STRLEN max;
+
+		if (   len > (MEM_SIZE_MAX-1) / (UV)count /* max would overflow */
+		    || len > (U32)I32_MAX  /* repeatcpy would overflow */
+                )
+		     Perl_croak(aTHX_ "%s",
+                                        "Out of memory during string extend");
+		max = (UV)count * len + 1;
+		SvGROW(TARG, max);
+
 		repeatcpy(SvPVX(TARG) + len, SvPVX(TARG), len, count - 1);
 		SvCUR_set(TARG, SvCUR(TARG) * count);
 	    }
