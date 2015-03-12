@@ -163,8 +163,8 @@ dl_load_file(filename, flags=0)
     if (h && h->error == KErrNone)
 	sv_setiv(ST(0), PTR2IV(h));
     else
-	PerlIO_printf(Perl_debug_log, "(dl_load_file %s %d)",
-                      filename, h ? h->error : -1);
+        SaveError(aTHX_ "(dl_load_file %s %d)"
+                        filename, h ? h->error : -1);
 }
 
 
@@ -178,20 +178,23 @@ dl_unload_file(libhandle)
 
 
 void
-dl_find_symbol(libhandle, symbolname)
+    dl_find_symbol(libhandle, symbolname, ign_err=0)
     void *	libhandle
     char *	symbolname
+    int	        ign_err
     PREINIT:
     void *sym;
     CODE:
     PerlSymbianLibHandle* h = (PerlSymbianLibHandle*)libhandle;
     sym = dlsym(libhandle, symbolname);
     ST(0) = sv_newmortal();
-    if (sym)
+    if (sym) {
        sv_setiv(ST(0), PTR2IV(sym));
-    else
-       PerlIO_printf(Perl_debug_log, "(dl_find_symbol %s %d)",
+    } else {
+       if (!ign_err)
+           SaveError(aTHX_ "(dl_find_symbol %s %d)",
                      symbolname, h ? h->error : -1);
+    }
 
 
 void

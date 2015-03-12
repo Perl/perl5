@@ -12,6 +12,7 @@
  *                      basic FreeBSD support, removed ClearError
  * 29th February 2000 - Alan Burlison: Added functionality to close dlopen'd
  *                      files when the interpreter exits
+ * 2015-03-12         - rurban: Added optional 3rd dl_find_symbol argument
  *
  */
 
@@ -217,9 +218,10 @@ dl_unload_file(libref)
 
 
 void
-dl_find_symbol(libhandle, symbolname)
+dl_find_symbol(libhandle, symbolname, ign_err=0)
     void *	libhandle
     char *	symbolname
+    int	        ign_err
     PREINIT:
     void *sym;
     CODE:
@@ -232,10 +234,11 @@ dl_find_symbol(libhandle, symbolname)
     sym = dlsym(libhandle, symbolname);
     DLDEBUG(2, PerlIO_printf(Perl_debug_log,
 			     "  symbolref = %lx\n", (unsigned long) sym));
-    ST(0) = sv_newmortal() ;
-    if (sym == NULL)
-	SaveError(aTHX_ "%s",dlerror()) ;
-    else
+    ST(0) = sv_newmortal();
+    if (sym == NULL) {
+        if (!ign_err)
+	    SaveError(aTHX_ "%s", dlerror());
+    } else
 	sv_setiv( ST(0), PTR2IV(sym));
 
 

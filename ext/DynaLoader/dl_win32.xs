@@ -157,9 +157,10 @@ dl_unload_file(libref)
     RETVAL
 
 void
-dl_find_symbol(libhandle, symbolname)
+dl_find_symbol(libhandle, symbolname, ign_err=0)
     void *	libhandle
     char *	symbolname
+    int	        ign_err
     PREINIT:
     void *retv;
     CODE:
@@ -167,11 +168,10 @@ dl_find_symbol(libhandle, symbolname)
 		      libhandle, symbolname));
     retv = (void*) GetProcAddress((HINSTANCE) libhandle, symbolname);
     DLDEBUG(2,PerlIO_printf(Perl_debug_log,"  symbolref = %x\n", retv));
-    ST(0) = sv_newmortal() ;
-    if (retv == NULL)
-	SaveError(aTHX_ "find_symbol:%s",
-		  OS_Error_String(aTHX)) ;
-    else
+    ST(0) = sv_newmortal();
+    if (retv == NULL) {
+        if (!ign_err) SaveError(aTHX_ "find_symbol:%s", OS_Error_String(aTHX));
+    } else
 	sv_setiv( ST(0), (IV)retv);
 
 

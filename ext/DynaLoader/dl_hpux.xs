@@ -118,9 +118,10 @@ dl_unload_file(libref)
 
 
 void
-dl_find_symbol(libhandle, symbolname)
+dl_find_symbol(libhandle, symbolname, ign_err=0)
     void *	libhandle
     char *	symbolname
+    int   	ign_err
     PREINIT:
     shl_t obj = (shl_t) libhandle;
     void *symaddr = NULL;
@@ -145,7 +146,7 @@ dl_find_symbol(libhandle, symbolname)
     }
 
     if (status == -1) {
-	SaveError(aTHX_ "%s",(errno) ? Strerror(errno) : "Symbol not found") ;
+	if (!ign_err) SaveError(aTHX_ "%s",(errno) ? Strerror(errno) : "Symbol not found") ;
     } else {
 	sv_setiv( ST(0), PTR2IV(symaddr) );
     }

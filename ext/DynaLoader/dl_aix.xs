@@ -721,9 +721,10 @@ dl_unload_file(libref)
     RETVAL
 
 void
-dl_find_symbol(libhandle, symbolname)
+dl_find_symbol(libhandle, symbolname, ign_err=0)
 	void *		libhandle
 	char *		symbolname
+        int	        ign_err
 	PREINIT:
         void *retv;
         CODE:
@@ -731,10 +732,11 @@ dl_find_symbol(libhandle, symbolname)
 		libhandle, symbolname));
 	retv = dlsym(libhandle, symbolname);
 	DLDEBUG(2,PerlIO_printf(Perl_debug_log, "  symbolref = %x\n", retv));
-	ST(0) = sv_newmortal() ;
-	if (retv == NULL)
-	    SaveError(aTHX_ "%s",dlerror()) ;
-	else
+	ST(0) = sv_newmortal();
+	if (retv == NULL) {
+            if (!ign_err)
+	        SaveError(aTHX_ "%s", dlerror());
+	} else
 	    sv_setiv( ST(0), PTR2IV(retv));
 
 
