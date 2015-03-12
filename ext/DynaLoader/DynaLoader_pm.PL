@@ -376,7 +376,7 @@ sub bootstrap {
     my $boot_symbol_ref;
 
     <<$^O-eq-darwin>>
-    if ($boot_symbol_ref = dl_find_symbol(0, $bootname)) {
+    if ($boot_symbol_ref = dl_find_symbol(0, $bootname, 1)) {
         goto boot; #extension library has already been loaded, e.g. darwin
     }
     <</$^O-eq-darwin>>
@@ -545,7 +545,7 @@ sub dl_find_symbol_anywhere
     my $sym = shift;
     my $libref;
     foreach $libref (@dl_librefs) {
-	my $symref = dl_find_symbol($libref,$sym);
+	my $symref = dl_find_symbol($libref,$sym,1);
 	return $symref if $symref;
     }
     return undef;

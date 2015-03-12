@@ -301,9 +301,10 @@ dl_load_file(filename, flags=0)
 
 
 void
-dl_find_symbol(librefptr,symname)
+dl_find_symbol(librefptr,symname,ign_err=0)
     void *	librefptr
     SV *	symname
+    int	        ign_err
     PREINIT:
     struct libref thislib = *((struct libref *)librefptr);
     struct dsc$descriptor_s
@@ -321,7 +322,7 @@ dl_find_symbol(librefptr,symname)
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "\tentry point is %d\n",
                       (unsigned long int) entry));
     if (!(sts & 1)) {
-      dl_set_error(sts,0);
+      if (!ign_err) dl_set_error(sts,0);
       ST(0) = &PL_sv_undef;
     }
     else ST(0) = sv_2mortal(newSViv(PTR2IV(entry)));

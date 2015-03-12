@@ -141,9 +141,10 @@ dl_unload_file(libref)
 
 
 void
-dl_find_symbol(libhandle, symbolname)
+dl_find_symbol(libhandle, symbolname, ign_err=0)
     void *	libhandle
     char *	symbolname
+    int	        ign_err
     PREINIT:
     void *retv;
     PPCODE:
@@ -154,9 +155,9 @@ dl_find_symbol(libhandle, symbolname)
     retv  = dllqueryvar(libhandle, symbolname);
     DLDEBUG(2, PerlIO_printf(Perl_debug_log,
 			     "  symbolref = %lx\n", (unsigned long) retv));
-    ST(0) = sv_newmortal() ;
+    ST(0) = sv_newmortal();
     if (retv == NULL)
-	SaveError(aTHX_ "%s",strerror(errno)) ;
+	if (!ign_err) SaveError(aTHX_ "%s", strerror(errno));
     else
 	sv_setiv( ST(0), PTR2IV(retv));
     XSRETURN(1);

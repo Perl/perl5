@@ -174,9 +174,10 @@ dl_load_file(filename, flags=0)
 
 
 void *
-dl_find_symbol(libhandle, symbolname)
+dl_find_symbol(libhandle, symbolname, ign_err=0)
     void *		libhandle
     char *		symbolname
+    int	        	ign_err
     CODE:
     symbolname = Perl_form_nocontext("_%s", symbolname);
     DLDEBUG(2, PerlIO_printf(Perl_debug_log,
@@ -186,9 +187,10 @@ dl_find_symbol(libhandle, symbolname)
     DLDEBUG(2, PerlIO_printf(Perl_debug_log,
 			     "  symbolref = %lx\n", (unsigned long) RETVAL));
     ST(0) = sv_newmortal() ;
-    if (RETVAL == NULL)
-	SaveError(aTHX_ "%s",dlerror()) ;
-    else
+    if (RETVAL == NULL) {
+        if (!ign_err)
+	    SaveError(aTHX_ "%s",dlerror()) ;
+    } else
 	sv_setiv( ST(0), PTR2IV(RETVAL) );
 
 
