@@ -2470,7 +2470,6 @@ cpan/Test-Simple/t/useing.t
 cpan/Test-Simple/t/use_ok.t
 cpan/Test-Simple/t/utf8.t
 cpan/Test-Simple/t/versions.t
-cpan/Test-Simple/t/xxx-changes_updated.t
 cpan/Test/t/05_about_verbose.t	See if Test works
 cpan/Test/t/fail.t		See if Test works
 cpan/Test/t/mix.t		See if Test works
