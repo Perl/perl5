@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 50 );
+plan( tests => 51 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -327,3 +327,10 @@ is runperl(
    ),
    "SUPER\n",
    'bareword lookup does not vivify stashes';
+
+is runperl(
+    prog => '%0; *bar::=*foo::=0; print qq|ok\n|',
+    stderr => 1,
+   ),
+   "ok\n",
+   '[perl #123847] no crash from *foo::=*bar::=*glob_with_hash';

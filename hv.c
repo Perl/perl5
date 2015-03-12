@@ -2314,10 +2314,12 @@ Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     PERL_HASH(hash, name, len);
 
     if (aux->xhv_name_count) {
-	HEK ** const xhv_name = aux->xhv_name_u.xhvnameu_names;
 	I32 count = aux->xhv_name_count;
-	HEK **hekp = xhv_name + (count < 0 ? -count : count);
+	HEK ** const xhv_name = aux->xhv_name_u.xhvnameu_names + (count<0);
+	HEK **hekp = xhv_name + (count < 0 ? -count - 1 : count);
 	while (hekp-- > xhv_name)
+	{
+	    assert(*hekp);
 	    if (
                  (HEK_UTF8(*hekp) || (flags & SVf_UTF8)) 
                     ? hek_eq_pvn_flags(aTHX_ *hekp, name, (I32)len, flags)
@@ -2327,6 +2329,7 @@ Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 		    aux->xhv_name_count = -count;
 		return;
 	    }
+	}
 	if (count < 0) aux->xhv_name_count--, count = -count;
 	else aux->xhv_name_count++;
 	Renew(aux->xhv_name_u.xhvnameu_names, count + 1, HEK *);
