@@ -159,6 +159,10 @@ L<[cpan #95271]|https://rt.cpan.org/Ticket/Display.html?id=95271>
 
 =item *
 
+L<Test::Simple> has been reverted from version 1.301001_098 to 1.001014.
+
+=item *
+
 L<Text::Balanced> has been upgraded from version 2.02 to 2.03.
 
 No changes to installed files other than the version bump.
