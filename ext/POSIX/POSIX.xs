@@ -2322,6 +2322,8 @@ acos(x)
 	case 20:
 #ifdef c99_logb
 	    RETVAL = c99_logb(x);
+#elif defined(c99_log2) && FLT_RADIX == 2
+	    RETVAL = Perl_floor(c99_log2(PERL_ABS(x)));
 #else
 	    not_here("logb");
 #endif
