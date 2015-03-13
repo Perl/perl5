@@ -5252,7 +5252,7 @@ PERL_CALLCONV void	Perl_write_to_stderr(pTHX_ SV* msv)
 #define PERL_ARGS_ASSERT_WRITE_TO_STDERR	\
 	assert(msv)
 
-PERL_CALLCONV void	Perl_xs_boot_epilog(pTHX_ const U32 ax);
+PERL_CALLCONV void	Perl_xs_boot_epilog(pTHX_ const I32 ax);
 PERL_CALLCONV I32	Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
 			__attribute__nonnull__(2)
 			__attribute__nonnull__(3);

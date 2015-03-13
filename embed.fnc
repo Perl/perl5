@@ -2745,7 +2745,7 @@ so	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
 #endif
 Xpon	|I32	|xs_handshake	|const U32 key|NN void * v_my_perl\
 				|NN const char * file| ...
-Xp	|void	|xs_boot_epilog	|const U32 ax
+Xp	|void	|xs_boot_epilog	|const I32 ax
 #ifndef HAS_STRLCAT
 Apnod	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
