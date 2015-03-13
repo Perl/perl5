@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '3.54';
+$VERSION = '3.55';
 $VERSION =~ tr/_//;
 
 @ISA = qw(File::Spec::Unix);
