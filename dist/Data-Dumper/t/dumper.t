@@ -16,13 +16,67 @@ local $Data::Dumper::Sortkeys = 1;
 
 use Data::Dumper;
 use Config;
-my $Is_ebcdic = defined($Config{'ebcdic'}) && $Config{'ebcdic'} eq 'define';
 
 $Data::Dumper::Pad = "#";
 my $TMAX;
 my $XS;
 my $TNUM = 0;
 my $WANT = '';
+
+sub convert_to_native($) {
+    my $input = shift;
+
+    # unicode_to_native() not available before this release; hence won't work
+    # on EBCDIC platforms for earlier.
+    return $input if $] lt 5.007_003;
+
+    my @output;
+
+    # The input should always be one of the following constructs
+    while ($input =~ m/ ( \\ [0-7]+ )
+                      | ( \\ x \{ [[:xdigit:]]+ } )
+                      | ( \\ . )
+                      | ( . ) /gx)
+    {
+        #print STDERR __LINE__, ": ", $&, "\n";
+        my $index;
+        my $replacement;
+        if (defined $4) {       # Literal
+            $index = ord $4;
+            $replacement = $4;
+        }
+        elsif (defined $3) {    # backslash escape
+            $index = ord eval "\"$3\"";
+            $replacement = $3;
+        }
+        elsif (defined $2) {    # Hex
+            $index = utf8::unicode_to_native(ord eval "\"$2\"");
+
+            # But low hex numbers are always in octal.  These are all
+            # controls.
+            my $format = ($index < ord(" "))
+                         ? "\\%o"
+                         : "\\x{%x}";
+            $replacement = sprintf($format, $index);
+        }
+        elsif (defined $1) {    # Octal
+            $index = utf8::unicode_to_native(ord eval "\"$1\"");
+            $replacement = sprintf("\\%o", $index);
+        }
+        else {
+            die "Unexpected match in convert_to_native()";
+        }
+
+        if (defined $output[$index]) {
+            print STDERR "ordinal $index already has '$output[$index]'; skipping '$replacement'\n";
+            next;
+        }
+
+        $output[$index] = $replacement;
+    }
+
+    return join "", grep { defined } @output;
+}
 
 sub TEST {
   my $string = shift;
@@ -31,41 +85,18 @@ sub TEST {
   ++$TNUM;
   $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
     if ($WANT =~ /deadbeef/);
-  if ($Is_ebcdic) {
-    # these data need massaging with non ascii character sets
-    # because of hashing order differences
-    $WANT = join("\n",sort(split(/\n/,$WANT)));
-    $WANT =~ s/\,$//mg;
-    $t    = join("\n",sort(split(/\n/,$t)));
-    $t    =~ s/\,$//mg;
-  }
   $name = $name ? " - $name" : '';
   print( ($t eq $WANT and not $@) ? "ok $TNUM$name\n"
     : "not ok $TNUM$name\n--Expected--\n$WANT\n--Got--\n$@$t\n");
 
   ++$TNUM;
-  if ($Is_ebcdic) { # EBCDIC.
-    if ($TNUM == 311 || $TNUM == 314) {
-      eval $string;
-    } else {
-      eval $t;
-    }
-  } else {
-    eval "$t";
-  }
+  eval "$t";
   print $@ ? "not ok $TNUM\n# \$@ says: $@\n" : "ok $TNUM -   no eval error\n";
 
   $t = eval $string;
   ++$TNUM;
   $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
     if ($WANT =~ /deadbeef/);
-  if ($Is_ebcdic) {
-    # here too there are hashing order differences
-    $WANT = join("\n",sort(split(/\n/,$WANT)));
-    $WANT =~ s/\,$//mg;
-    $t    = join("\n",sort(split(/\n/,$t)));
-    $t    =~ s/\,$//mg;
-  }
   print( ($t eq $WANT and not $@) ? "ok $TNUM -   works a 2nd time after intervening eval\n"
     : "not ok $TNUM\n--Expected--\n$WANT\n--Got--\n$@$t\n");
 }
@@ -1522,9 +1553,11 @@ TEST q(join " ", new Data::Dumper [[]],[] =>->Dumpxs),
 
 #############
 {
-  $WANT = <<'EOT';
-#$VAR1 = [
-#  "\0\1\2\3\4\5\6\a\b\t\n\13\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\e\34\35\36\37 !\"#\$%&'()*+,-./0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377"
+  $WANT = '\0\1\2\3\4\5\6\a\b\t\n\13\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\e\34\35\36\37 !\"#\$%&\'()*+,-./0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377';
+  $WANT = convert_to_native($WANT);
+  $WANT = <<EOT;
+#\$VAR1 = [
+#  "$WANT"
 #];
 EOT
 
@@ -1536,9 +1569,11 @@ EOT
 
 #############
 {
-  $WANT = <<'EOT';
-#$VAR1 = [
-#  "\0\1\2\3\4\5\6\a\b\t\n\13\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\e\34\35\36\37 !\"#\$%&'()*+,-./0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\x{80}\x{81}\x{82}\x{83}\x{84}\x{85}\x{86}\x{87}\x{88}\x{89}\x{8a}\x{8b}\x{8c}\x{8d}\x{8e}\x{8f}\x{90}\x{91}\x{92}\x{93}\x{94}\x{95}\x{96}\x{97}\x{98}\x{99}\x{9a}\x{9b}\x{9c}\x{9d}\x{9e}\x{9f}\x{a0}\x{a1}\x{a2}\x{a3}\x{a4}\x{a5}\x{a6}\x{a7}\x{a8}\x{a9}\x{aa}\x{ab}\x{ac}\x{ad}\x{ae}\x{af}\x{b0}\x{b1}\x{b2}\x{b3}\x{b4}\x{b5}\x{b6}\x{b7}\x{b8}\x{b9}\x{ba}\x{bb}\x{bc}\x{bd}\x{be}\x{bf}\x{c0}\x{c1}\x{c2}\x{c3}\x{c4}\x{c5}\x{c6}\x{c7}\x{c8}\x{c9}\x{ca}\x{cb}\x{cc}\x{cd}\x{ce}\x{cf}\x{d0}\x{d1}\x{d2}\x{d3}\x{d4}\x{d5}\x{d6}\x{d7}\x{d8}\x{d9}\x{da}\x{db}\x{dc}\x{dd}\x{de}\x{df}\x{e0}\x{e1}\x{e2}\x{e3}\x{e4}\x{e5}\x{e6}\x{e7}\x{e8}\x{e9}\x{ea}\x{eb}\x{ec}\x{ed}\x{ee}\x{ef}\x{f0}\x{f1}\x{f2}\x{f3}\x{f4}\x{f5}\x{f6}\x{f7}\x{f8}\x{f9}\x{fa}\x{fb}\x{fc}\x{fd}\x{fe}\x{ff}\x{20ac}"
+  $WANT = '\0\1\2\3\4\5\6\a\b\t\n\13\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\e\34\35\36\37 !\"#\$%&\'()*+,-./0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\x{80}\x{81}\x{82}\x{83}\x{84}\x{85}\x{86}\x{87}\x{88}\x{89}\x{8a}\x{8b}\x{8c}\x{8d}\x{8e}\x{8f}\x{90}\x{91}\x{92}\x{93}\x{94}\x{95}\x{96}\x{97}\x{98}\x{99}\x{9a}\x{9b}\x{9c}\x{9d}\x{9e}\x{9f}\x{a0}\x{a1}\x{a2}\x{a3}\x{a4}\x{a5}\x{a6}\x{a7}\x{a8}\x{a9}\x{aa}\x{ab}\x{ac}\x{ad}\x{ae}\x{af}\x{b0}\x{b1}\x{b2}\x{b3}\x{b4}\x{b5}\x{b6}\x{b7}\x{b8}\x{b9}\x{ba}\x{bb}\x{bc}\x{bd}\x{be}\x{bf}\x{c0}\x{c1}\x{c2}\x{c3}\x{c4}\x{c5}\x{c6}\x{c7}\x{c8}\x{c9}\x{ca}\x{cb}\x{cc}\x{cd}\x{ce}\x{cf}\x{d0}\x{d1}\x{d2}\x{d3}\x{d4}\x{d5}\x{d6}\x{d7}\x{d8}\x{d9}\x{da}\x{db}\x{dc}\x{dd}\x{de}\x{df}\x{e0}\x{e1}\x{e2}\x{e3}\x{e4}\x{e5}\x{e6}\x{e7}\x{e8}\x{e9}\x{ea}\x{eb}\x{ec}\x{ed}\x{ee}\x{ef}\x{f0}\x{f1}\x{f2}\x{f3}\x{f4}\x{f5}\x{f6}\x{f7}\x{f8}\x{f9}\x{fa}\x{fb}\x{fc}\x{fd}\x{fe}\x{ff}\x{20ac}';
+  $WANT = convert_to_native($WANT);
+  $WANT = <<EOT;
+#\$VAR1 = [
+#  "$WANT"
 #];
 EOT
 
@@ -1566,11 +1601,12 @@ EOT
 #$c = \'ABC';
 #$d = \'ABC';
 NOVSTRINGS
-  my $vstrings_corr = <<'VSTRINGS_CORRECT';
-#$a = \v65.66.67;
-#$b = \v65.66.067;
-#$c = \v65.66.6_7;
-#$d = \'ABC';
+my $ABC_native = chr(65) . chr(66) . chr(67);
+  my $vstrings_corr = <<VSTRINGS_CORRECT;
+#\$a = \\v65.66.67;
+#\$b = \\v65.66.067;
+#\$c = \\v65.66.6_7;
+#\$d = \\'$ABC_native';
 VSTRINGS_CORRECT
   $WANT = $] <= 5.0080001
           ? $no_vstrings
