@@ -507,8 +507,6 @@ brackets C<"[{]">, or by using C<\Q>; otherwise a deprecation warning
 will be raised.  This was first announced as forthcoming in the v5.16
 release; it will allow future extensions to the language to happen.
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-
 =head2 Module removals
 
 XXX Remove this section if inapplicable.
@@ -1076,13 +1074,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
 
 =head3 New Errors
 
@@ -1842,26 +1834,6 @@ working correctly.  See L</Infinity and NaN (not-a-number) handling improved>.
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head2 Regained Platforms
 
 IRIX and Tru64 platforms are working again.
@@ -1881,11 +1853,6 @@ for building Perl on them has been removed.
 =back
 
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
@@ -2182,12 +2149,6 @@ Changing the program's locale should be avoided by XS code.  Nevertheless,
 certain non-Perl libraries called from XS, such as C<Gtk> do so.  When this
 happens, Perl needs to be told that the locale has changed.  Use this function
 to do so, before returning to Perl.
-
-=item *
-
-Added L<perlapi/grok_atou> as a safer replacement for atoi and strtol.
-
-XXX - I know this needs replacing. -- rjbs, 2015-03-13
 
 =item *
 
@@ -3106,17 +3067,6 @@ L<Parse::Keyword> 0.08
 
 =back
 
-=head1 Errata From Previous Releases
-
-=over 4
-
-=item *
-
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
-
-=back
-
 =head1 Obituary
 
 XXX If any significant core contributor has died, we've added a short obituary
@@ -3126,7 +3076,7 @@ here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.21.12..HEAD
+  perl Porting/acknowledgements.pl v5.20.0..HEAD
 
 =head1 Reporting Bugs
 
