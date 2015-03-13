@@ -2537,19 +2537,27 @@ Perl_debop(pTHX_ const OP *o)
 }
 
 STATIC CV*
-S_deb_curcv(pTHX_ const I32 ix)
+S_deb_curcv(pTHX_ I32 ix)
 {
-    const PERL_CONTEXT * const cx = &cxstack[ix];
-    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT)
-        return cx->blk_sub.cv;
-    else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
-        return cx->blk_eval.cv;
-    else if (ix == 0 && PL_curstackinfo->si_type == PERLSI_MAIN)
-        return PL_main_cv;
-    else if (ix <= 0)
-        return NULL;
-    else
-        return deb_curcv(ix - 1);
+    PERL_SI *si = PL_curstackinfo;
+    for (; ix >=0; ix--) {
+        const PERL_CONTEXT * const cx = &(si->si_cxstack)[ix];
+
+        if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT)
+            return cx->blk_sub.cv;
+        else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
+            return cx->blk_eval.cv;
+        else if (ix == 0 && si->si_type == PERLSI_MAIN)
+            return PL_main_cv;
+        else if (ix == 0 && CxTYPE(cx) == CXt_NULL
+               && si->si_type == PERLSI_SORT)
+        {
+            /* fake sort sub; use CV of caller */
+            si = si->si_prev;
+            ix = si->si_cxix + 1;
+        }
+    }
+    return NULL;
 }
 
 void
