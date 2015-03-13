@@ -53,7 +53,7 @@ sub TEST {
   } else {
     eval "$t";
   }
-  print $@ ? "not ok $TNUM\n# \$@ says: $@\n" : "ok $TNUM\n";
+  print $@ ? "not ok $TNUM\n# \$@ says: $@\n" : "ok $TNUM -   no eval error\n";
 
   $t = eval $string;
   ++$TNUM;
@@ -66,7 +66,7 @@ sub TEST {
     $t    = join("\n",sort(split(/\n/,$t)));
     $t    =~ s/\,$//mg;
   }
-  print( ($t eq $WANT and not $@) ? "ok $TNUM\n"
+  print( ($t eq $WANT and not $@) ? "ok $TNUM -   works a 2nd time after intervening eval\n"
     : "not ok $TNUM\n--Expected--\n$WANT\n--Got--\n$@$t\n");
 }
 
