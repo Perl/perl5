@@ -205,7 +205,7 @@ sub output_invmap ($$$$$$$) {
             # better for those if they are upper. XXX
             $short_name = uc($short_name) if length($short_name) < 3
                                              || substr($short_name, 0, 1) =~ /[[:lower:]]/;
-            $name_prefix = "PL_${short_name}_";
+            $name_prefix = "${short_name}_";
             my $enum_count = keys %enums;
             print $out_fh "\n#define ${name_prefix}ENUM_COUNT ", scalar keys %enums, "\n";
 

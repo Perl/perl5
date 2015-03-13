@@ -2080,12 +2080,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 }
 
                 if (utf8_target) {
-                    PL_GCB_enum before = getGCB_VAL_UTF8(
+                    GCB_enum before = getGCB_VAL_UTF8(
                                                reghop3((U8*)s, -1,
                                                        (U8*)(reginfo->strbeg)),
                                                (U8*) reginfo->strend);
                     while (s < strend) {
-                        PL_GCB_enum after = getGCB_VAL_UTF8((U8*) s,
+                        GCB_enum after = getGCB_VAL_UTF8((U8*) s,
                                                         (U8*) reginfo->strend);
                         if (to_complement ^ isGCB(before, after)) {
                             if (reginfo->intuit || regtry(reginfo, &s)) {
@@ -2128,12 +2128,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 }
 
                 if (utf8_target) {
-                    PL_SB_enum before = getSB_VAL_UTF8(reghop3((U8*)s,
+                    SB_enum before = getSB_VAL_UTF8(reghop3((U8*)s,
                                                         -1,
                                                         (U8*)(reginfo->strbeg)),
                                                       (U8*) reginfo->strend);
                     while (s < strend) {
-                        PL_SB_enum after = getSB_VAL_UTF8((U8*) s,
+                        SB_enum after = getSB_VAL_UTF8((U8*) s,
                                                          (U8*) reginfo->strend);
                         if (to_complement ^ isSB(before,
                                                  after,
@@ -2151,9 +2151,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     }
                 }
                 else {  /* Not utf8. */
-                    PL_SB_enum before = getSB_VAL_CP((U8) *(s -1));
+                    SB_enum before = getSB_VAL_CP((U8) *(s -1));
                     while (s < strend) {
-                        PL_SB_enum after = getSB_VAL_CP((U8) *s);
+                        SB_enum after = getSB_VAL_CP((U8) *s);
                         if (to_complement ^ isSB(before,
                                                  after,
                                                  (U8*) reginfo->strbeg,
@@ -2197,14 +2197,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                      * loop through the line.   Context may be needed to make a
                      * determination, and if so, this can save having to
                      * recalculate it */
-                    PL_WB_enum previous = PL_WB_UNKNOWN;
-                    PL_WB_enum before = getWB_VAL_UTF8(
+                    WB_enum previous = WB_UNKNOWN;
+                    WB_enum before = getWB_VAL_UTF8(
                                               reghop3((U8*)s,
                                                       -1,
                                                       (U8*)(reginfo->strbeg)),
                                               (U8*) reginfo->strend);
                     while (s < strend) {
-                        PL_WB_enum after = getWB_VAL_UTF8((U8*) s,
+                        WB_enum after = getWB_VAL_UTF8((U8*) s,
                                                         (U8*) reginfo->strend);
                         if (to_complement ^ isWB(previous,
                                                  before,
@@ -2224,10 +2224,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     }
                 }
                 else {  /* Not utf8. */
-                    PL_WB_enum previous = PL_WB_UNKNOWN;
-                    PL_WB_enum before = getWB_VAL_CP((U8) *(s -1));
+                    WB_enum previous = WB_UNKNOWN;
+                    WB_enum before = getWB_VAL_CP((U8) *(s -1));
                     while (s < strend) {
-                        PL_WB_enum after = getWB_VAL_CP((U8) *s);
+                        WB_enum after = getWB_VAL_CP((U8) *s);
                         if (to_complement ^ isWB(previous,
                                                  before,
                                                  after,
@@ -4186,10 +4186,10 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
 /* This creates a single number by combining two, with 'before' being like the
  * 10's digit, but this isn't necessarily base 10; it is base however many
  * elements of the enum there are */
-#define GCBcase(before, after) ((PL_GCB_ENUM_COUNT * before) + after)
+#define GCBcase(before, after) ((GCB_ENUM_COUNT * before) + after)
 
 STATIC bool
-S_isGCB(const PL_GCB_enum before, const PL_GCB_enum after)
+S_isGCB(const GCB_enum before, const GCB_enum after)
 {
     /* returns a boolean indicating if there is a Grapheme Cluster Boundary
      * between the inputs.  See http://www.unicode.org/reports/tr29/ */
@@ -4211,71 +4211,71 @@ S_isGCB(const PL_GCB_enum before, const PL_GCB_enum after)
 
         /* Do not break between a CR and LF.
             GB3.  CR  ×  LF */
-        case GCBcase(PL_GCB_CR, PL_GCB_LF):
+        case GCBcase(GCB_CR, GCB_LF):
             return FALSE;
 
         /* Do not break Hangul syllable sequences.
             GB6.  L  ×  ( L | V | LV | LVT ) */
-        case GCBcase(PL_GCB_L, PL_GCB_L):
-        case GCBcase(PL_GCB_L, PL_GCB_V):
-        case GCBcase(PL_GCB_L, PL_GCB_LV):
-        case GCBcase(PL_GCB_L, PL_GCB_LVT):
+        case GCBcase(GCB_L, GCB_L):
+        case GCBcase(GCB_L, GCB_V):
+        case GCBcase(GCB_L, GCB_LV):
+        case GCBcase(GCB_L, GCB_LVT):
             return FALSE;
 
         /*  GB7.  ( LV | V )  ×  ( V | T ) */
-        case GCBcase(PL_GCB_LV, PL_GCB_V):
-        case GCBcase(PL_GCB_LV, PL_GCB_T):
-        case GCBcase(PL_GCB_V, PL_GCB_V):
-        case GCBcase(PL_GCB_V, PL_GCB_T):
+        case GCBcase(GCB_LV, GCB_V):
+        case GCBcase(GCB_LV, GCB_T):
+        case GCBcase(GCB_V, GCB_V):
+        case GCBcase(GCB_V, GCB_T):
             return FALSE;
 
         /*  GB8.  ( LVT | T)  ×  T */
-        case GCBcase(PL_GCB_LVT, PL_GCB_T):
-        case GCBcase(PL_GCB_T, PL_GCB_T):
+        case GCBcase(GCB_LVT, GCB_T):
+        case GCBcase(GCB_T, GCB_T):
             return FALSE;
 
         /* Do not break between regional indicator symbols.
             GB8a.  Regional_Indicator  ×  Regional_Indicator */
-        case GCBcase(PL_GCB_Regional_Indicator, PL_GCB_Regional_Indicator):
+        case GCBcase(GCB_Regional_Indicator, GCB_Regional_Indicator):
             return FALSE;
 
         /* Do not break before extending characters.
             GB9.     ×  Extend */
-        case GCBcase(PL_GCB_Other, PL_GCB_Extend):
-        case GCBcase(PL_GCB_Extend, PL_GCB_Extend):
-        case GCBcase(PL_GCB_L, PL_GCB_Extend):
-        case GCBcase(PL_GCB_LV, PL_GCB_Extend):
-        case GCBcase(PL_GCB_LVT, PL_GCB_Extend):
-        case GCBcase(PL_GCB_Prepend, PL_GCB_Extend):
-        case GCBcase(PL_GCB_Regional_Indicator, PL_GCB_Extend):
-        case GCBcase(PL_GCB_SpacingMark, PL_GCB_Extend):
-        case GCBcase(PL_GCB_T, PL_GCB_Extend):
-        case GCBcase(PL_GCB_V, PL_GCB_Extend):
+        case GCBcase(GCB_Other, GCB_Extend):
+        case GCBcase(GCB_Extend, GCB_Extend):
+        case GCBcase(GCB_L, GCB_Extend):
+        case GCBcase(GCB_LV, GCB_Extend):
+        case GCBcase(GCB_LVT, GCB_Extend):
+        case GCBcase(GCB_Prepend, GCB_Extend):
+        case GCBcase(GCB_Regional_Indicator, GCB_Extend):
+        case GCBcase(GCB_SpacingMark, GCB_Extend):
+        case GCBcase(GCB_T, GCB_Extend):
+        case GCBcase(GCB_V, GCB_Extend):
             return FALSE;
 
         /* Do not break before SpacingMarks, or after Prepend characters.
             GB9a.     ×  SpacingMark */
-        case GCBcase(PL_GCB_Other, PL_GCB_SpacingMark):
-        case GCBcase(PL_GCB_Extend, PL_GCB_SpacingMark):
-        case GCBcase(PL_GCB_L, PL_GCB_SpacingMark):
-        case GCBcase(PL_GCB_LV, PL_GCB_SpacingMark):
-        case GCBcase(PL_GCB_LVT, PL_GCB_SpacingMark):
-        case GCBcase(PL_GCB_Prepend, PL_GCB_SpacingMark):
-        case GCBcase(PL_GCB_Regional_Indicator, PL_GCB_SpacingMark):
-        case GCBcase(PL_GCB_SpacingMark, PL_GCB_SpacingMark):
-        case GCBcase(PL_GCB_T, PL_GCB_SpacingMark):
-        case GCBcase(PL_GCB_V, PL_GCB_SpacingMark):
+        case GCBcase(GCB_Other, GCB_SpacingMark):
+        case GCBcase(GCB_Extend, GCB_SpacingMark):
+        case GCBcase(GCB_L, GCB_SpacingMark):
+        case GCBcase(GCB_LV, GCB_SpacingMark):
+        case GCBcase(GCB_LVT, GCB_SpacingMark):
+        case GCBcase(GCB_Prepend, GCB_SpacingMark):
+        case GCBcase(GCB_Regional_Indicator, GCB_SpacingMark):
+        case GCBcase(GCB_SpacingMark, GCB_SpacingMark):
+        case GCBcase(GCB_T, GCB_SpacingMark):
+        case GCBcase(GCB_V, GCB_SpacingMark):
             return FALSE;
 
         /* GB9b.  Prepend  ×   */
-        case GCBcase(PL_GCB_Prepend, PL_GCB_Other):
-        case GCBcase(PL_GCB_Prepend, PL_GCB_L):
-        case GCBcase(PL_GCB_Prepend, PL_GCB_LV):
-        case GCBcase(PL_GCB_Prepend, PL_GCB_LVT):
-        case GCBcase(PL_GCB_Prepend, PL_GCB_Prepend):
-        case GCBcase(PL_GCB_Prepend, PL_GCB_Regional_Indicator):
-        case GCBcase(PL_GCB_Prepend, PL_GCB_T):
-        case GCBcase(PL_GCB_Prepend, PL_GCB_V):
+        case GCBcase(GCB_Prepend, GCB_Other):
+        case GCBcase(GCB_Prepend, GCB_L):
+        case GCBcase(GCB_Prepend, GCB_LV):
+        case GCBcase(GCB_Prepend, GCB_LVT):
+        case GCBcase(GCB_Prepend, GCB_Prepend):
+        case GCBcase(GCB_Prepend, GCB_Regional_Indicator):
+        case GCBcase(GCB_Prepend, GCB_T):
+        case GCBcase(GCB_Prepend, GCB_V):
             return FALSE;
     }
 
@@ -4285,8 +4285,8 @@ S_isGCB(const PL_GCB_enum before, const PL_GCB_enum after)
 #define SBcase(before, after) ((SB_ENUM_COUNT * before) + after)
 
 STATIC bool
-S_isSB(pTHX_ PL_SB_enum before,
-             PL_SB_enum after,
+S_isSB(pTHX_ SB_enum before,
+             SB_enum after,
              const U8 * const strbeg,
              const U8 * const curpos,
              const U8 * const strend,
@@ -4297,37 +4297,37 @@ S_isSB(pTHX_ PL_SB_enum before,
 
     U8 * lpos = (U8 *) curpos;
     U8 * temp_pos;
-    PL_SB_enum backup;
+    SB_enum backup;
 
     PERL_ARGS_ASSERT_ISSB;
 
     /* Break at the start and end of text.
         SB1.  sot  ÷
         SB2.  ÷  eot */
-    if (before == PL_SB_EDGE || after == PL_SB_EDGE) {
+    if (before == SB_EDGE || after == SB_EDGE) {
         return TRUE;
     }
 
     /* SB 3: Do not break within CRLF. */
-    if (before == PL_SB_CR && after == PL_SB_LF) {
+    if (before == SB_CR && after == SB_LF) {
         return FALSE;
     }
 
     /* Break after paragraph separators.  (though why CR and LF are considered
      * so is beyond me (khw)
        SB4.  Sep | CR | LF  ÷ */
-    if (before == PL_SB_Sep || before == PL_SB_CR || before == PL_SB_LF) {
+    if (before == SB_Sep || before == SB_CR || before == SB_LF) {
         return TRUE;
     }
 
     /* Ignore Format and Extend characters, except after sot, Sep, CR, or LF.
      * (See Section 6.2, Replacing Ignore Rules.)
         SB5.  X (Extend | Format)*  →  X */
-    if (after == PL_SB_Extend || after == PL_SB_Format) {
+    if (after == SB_Extend || after == SB_Format) {
         return FALSE;
     }
 
-    if (before == PL_SB_Extend || before == PL_SB_Format) {
+    if (before == SB_Extend || before == SB_Format) {
         before = backup_one_SB(strbeg, &lpos, utf8_target);
     }
 
@@ -4340,14 +4340,14 @@ S_isSB(pTHX_ PL_SB_enum before,
      * not mark the end of a sentence.
 
      * SB6. ATerm  ×  Numeric */
-    if (before == PL_SB_ATerm && after == PL_SB_Numeric) {
+    if (before == SB_ATerm && after == SB_Numeric) {
         return FALSE;
     }
 
     /* SB7.  Upper ATerm  ×  Upper */
-    if (before == PL_SB_ATerm && after == PL_SB_Upper) {
+    if (before == SB_ATerm && after == SB_Upper) {
         temp_pos = lpos;
-        if (PL_SB_Upper == backup_one_SB(strbeg, &temp_pos, utf8_target)) {
+        if (SB_Upper == backup_one_SB(strbeg, &temp_pos, utf8_target)) {
             return FALSE;
         }
     }
@@ -4356,43 +4356,43 @@ S_isSB(pTHX_ PL_SB_enum before,
      * SB10.  (STerm | ATerm) Close* Sp*  ×  ( Sp | Sep | CR | LF )      */
     backup = before;
     temp_pos = lpos;
-    while (backup == PL_SB_Sp) {
+    while (backup == SB_Sp) {
         backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
     }
-    while (backup == PL_SB_Close) {
+    while (backup == SB_Close) {
         backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
     }
-    if ((backup == PL_SB_STerm || backup == PL_SB_ATerm)
-        && (   after == PL_SB_SContinue
-            || after == PL_SB_STerm
-            || after == PL_SB_ATerm
-            || after == PL_SB_Sp
-            || after == PL_SB_Sep
-            || after == PL_SB_CR
-            || after == PL_SB_LF))
+    if ((backup == SB_STerm || backup == SB_ATerm)
+        && (   after == SB_SContinue
+            || after == SB_STerm
+            || after == SB_ATerm
+            || after == SB_Sp
+            || after == SB_Sep
+            || after == SB_CR
+            || after == SB_LF))
     {
         return FALSE;
     }
 
     /* SB8.  ATerm Close* Sp*  ×  ( ¬(OLetter | Upper | Lower | Sep | CR | LF |
      *                                              STerm | ATerm) )* Lower */
-    if (backup == PL_SB_ATerm) {
+    if (backup == SB_ATerm) {
         U8 * rpos = (U8 *) curpos;
-        PL_SB_enum later = after;
+        SB_enum later = after;
 
-        while (    later != PL_SB_OLetter
-                && later != PL_SB_Upper
-                && later != PL_SB_Lower
-                && later != PL_SB_Sep
-                && later != PL_SB_CR
-                && later != PL_SB_LF
-                && later != PL_SB_STerm
-                && later != PL_SB_ATerm
-                && later != PL_SB_EDGE)
+        while (    later != SB_OLetter
+                && later != SB_Upper
+                && later != SB_Lower
+                && later != SB_Sep
+                && later != SB_CR
+                && later != SB_LF
+                && later != SB_STerm
+                && later != SB_ATerm
+                && later != SB_EDGE)
         {
             later = advance_one_SB(&rpos, strend, utf8_target);
         }
-        if (later == PL_SB_Lower) {
+        if (later == SB_Lower) {
             return FALSE;
         }
     }
@@ -4403,15 +4403,15 @@ S_isSB(pTHX_ PL_SB_enum before,
      * SB9.  ( STerm | ATerm ) Close*  ×  ( Close | Sp | Sep | CR | LF ) */
     backup = before;
     temp_pos = lpos;
-    while (backup == PL_SB_Close) {
+    while (backup == SB_Close) {
         backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
     }
-    if ((backup == PL_SB_STerm || backup == PL_SB_ATerm)
-        && (   after == PL_SB_Close
-            || after == PL_SB_Sp
-            || after == PL_SB_Sep
-            || after == PL_SB_CR
-            || after == PL_SB_LF))
+    if ((backup == SB_STerm || backup == SB_ATerm)
+        && (   after == SB_Close
+            || after == SB_Sp
+            || after == SB_Sep
+            || after == SB_CR
+            || after == SB_LF))
     {
         return FALSE;
     }
@@ -4420,22 +4420,22 @@ S_isSB(pTHX_ PL_SB_enum before,
     /* SB11.  ( STerm | ATerm ) Close* Sp* ( Sep | CR | LF )?  ÷ */
     temp_pos = lpos;
     backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
-    if (   backup == PL_SB_Sep
-        || backup == PL_SB_CR
-        || backup == PL_SB_LF)
+    if (   backup == SB_Sep
+        || backup == SB_CR
+        || backup == SB_LF)
     {
         lpos = temp_pos;
     }
     else {
         backup = before;
     }
-    while (backup == PL_SB_Sp) {
+    while (backup == SB_Sp) {
         backup = backup_one_SB(strbeg, &lpos, utf8_target);
     }
-    while (backup == PL_SB_Close) {
+    while (backup == SB_Close) {
         backup = backup_one_SB(strbeg, &lpos, utf8_target);
     }
-    if (backup == PL_SB_STerm || backup == PL_SB_ATerm) {
+    if (backup == SB_STerm || backup == SB_ATerm) {
         return TRUE;
     }
 
@@ -4445,54 +4445,54 @@ S_isSB(pTHX_ PL_SB_enum before,
     return FALSE;
 }
 
-STATIC PL_SB_enum
+STATIC SB_enum
 S_advance_one_SB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_target)
 {
-    PL_SB_enum sb;
+    SB_enum sb;
 
     PERL_ARGS_ASSERT_ADVANCE_ONE_SB;
 
     if (*curpos >= strend) {
-        return PL_SB_EDGE;
+        return SB_EDGE;
     }
 
     if (utf8_target) {
         do {
             *curpos += UTF8SKIP(*curpos);
             if (*curpos >= strend) {
-                return PL_SB_EDGE;
+                return SB_EDGE;
             }
             sb = getSB_VAL_UTF8(*curpos, strend);
-        } while (sb == PL_SB_Extend || sb == PL_SB_Format);
+        } while (sb == SB_Extend || sb == SB_Format);
     }
     else {
         do {
             (*curpos)++;
             if (*curpos >= strend) {
-                return PL_SB_EDGE;
+                return SB_EDGE;
             }
             sb = getSB_VAL_CP(**curpos);
-        } while (sb == PL_SB_Extend || sb == PL_SB_Format);
+        } while (sb == SB_Extend || sb == SB_Format);
     }
 
     return sb;
 }
 
-STATIC PL_SB_enum
+STATIC SB_enum
 S_backup_one_SB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
 {
-    PL_SB_enum sb;
+    SB_enum sb;
 
     PERL_ARGS_ASSERT_BACKUP_ONE_SB;
 
     if (*curpos < strbeg) {
-        return PL_SB_EDGE;
+        return SB_EDGE;
     }
 
     if (utf8_target) {
         U8 * prev_char_pos = reghopmaybe3(*curpos, -1, strbeg);
         if (! prev_char_pos) {
-            return PL_SB_EDGE;
+            return SB_EDGE;
         }
 
         /* Back up over Extend and Format.  curpos is always just to the right
@@ -4508,30 +4508,30 @@ S_backup_one_SB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_tar
             }
             else {
                 *curpos = (U8 *) strbeg;
-                return PL_SB_EDGE;
+                return SB_EDGE;
             }
-        } while (sb == PL_SB_Extend || sb == PL_SB_Format);
+        } while (sb == SB_Extend || sb == SB_Format);
     }
     else {
         do {
             if (*curpos - 2 < strbeg) {
                 *curpos = (U8 *) strbeg;
-                return PL_SB_EDGE;
+                return SB_EDGE;
             }
             (*curpos)--;
             sb = getSB_VAL_CP(*(*curpos - 1));
-        } while (sb == PL_SB_Extend || sb == PL_SB_Format);
+        } while (sb == SB_Extend || sb == SB_Format);
     }
 
     return sb;
 }
 
-#define WBcase(before, after) ((PL_WB_ENUM_COUNT * before) + after)
+#define WBcase(before, after) ((WB_ENUM_COUNT * before) + after)
 
 STATIC bool
-S_isWB(pTHX_ PL_WB_enum previous,
-             PL_WB_enum before,
-             PL_WB_enum after,
+S_isWB(pTHX_ WB_enum previous,
+             WB_enum before,
+             WB_enum after,
              const U8 * const strbeg,
              const U8 * const curpos,
              const U8 * const strend,
@@ -4541,7 +4541,7 @@ S_isWB(pTHX_ PL_WB_enum previous,
      *  a Unicode word break, using their published algorithm.  Context may be
      *  needed to make this determination.  If the value for the character
      *  before 'before' is known, it is passed as 'previous'; otherwise that
-     *  should be set to PL_WB_UNKNOWN.  The other input parameters give the
+     *  should be set to WB_UNKNOWN.  The other input parameters give the
      *  boundaries and current position in the matching of the string.  That
      *  is, 'curpos' marks the position where the character whose wb value is
      *  'after' begins.  See http://www.unicode.org/reports/tr29/ */
@@ -4552,19 +4552,19 @@ S_isWB(pTHX_ PL_WB_enum previous,
     PERL_ARGS_ASSERT_ISWB;
 
     /* WB1 and WB2: Break at the start and end of text. */
-    if (before == PL_WB_EDGE || after == PL_WB_EDGE) {
+    if (before == WB_EDGE || after == WB_EDGE) {
         return TRUE;
     }
 
     /* WB 3: Do not break within CRLF. */
-    if (before == PL_WB_CR && after == PL_WB_LF) {
+    if (before == WB_CR && after == WB_LF) {
         return FALSE;
     }
 
     /* WB 3a and WB 3b: Otherwise break before and after Newlines (including CR
      * and LF) */
-    if (   before == PL_WB_CR || before == PL_WB_LF || before == PL_WB_Newline
-        || after ==  PL_WB_CR || after ==  PL_WB_LF || after ==  PL_WB_Newline)
+    if (   before == WB_CR || before == WB_LF || before == WB_Newline
+        || after ==  WB_CR || after ==  WB_LF || after ==  WB_Newline)
     {
         return TRUE;
     }
@@ -4573,11 +4573,11 @@ S_isWB(pTHX_ PL_WB_enum previous,
      * beginning of a region of text.
      * WB4.  X (Extend | Format)*  →  X. */
 
-    if (after == PL_WB_Extend || after == PL_WB_Format) {
+    if (after == WB_Extend || after == WB_Format) {
         return FALSE;
     }
 
-    if (before == PL_WB_Extend || before == PL_WB_Format) {
+    if (before == WB_Extend || before == WB_Format) {
         before = backup_one_WB(&previous, strbeg, &before_pos, utf8_target);
     }
 
@@ -4589,110 +4589,110 @@ S_isWB(pTHX_ PL_WB_enum previous,
 
             /* Do not break between most letters.
                 WB5.  (ALetter | Hebrew_Letter) × (ALetter | Hebrew_Letter) */
-            case WBcase(PL_WB_ALetter, PL_WB_ALetter):
-            case WBcase(PL_WB_ALetter, PL_WB_Hebrew_Letter):
-            case WBcase(PL_WB_Hebrew_Letter, PL_WB_ALetter):
-            case WBcase(PL_WB_Hebrew_Letter, PL_WB_Hebrew_Letter):
+            case WBcase(WB_ALetter, WB_ALetter):
+            case WBcase(WB_ALetter, WB_Hebrew_Letter):
+            case WBcase(WB_Hebrew_Letter, WB_ALetter):
+            case WBcase(WB_Hebrew_Letter, WB_Hebrew_Letter):
                 return FALSE;
 
             /* Do not break letters across certain punctuation.
                 WB6.  (ALetter | Hebrew_Letter)
                         × (MidLetter | MidNumLet | Single_Quote) (ALetter
                                                             | Hebrew_Letter) */
-            case WBcase(PL_WB_ALetter, PL_WB_MidLetter):
-            case WBcase(PL_WB_ALetter, PL_WB_MidNumLet):
-            case WBcase(PL_WB_ALetter, PL_WB_Single_Quote):
-            case WBcase(PL_WB_Hebrew_Letter, PL_WB_MidLetter):
-            case WBcase(PL_WB_Hebrew_Letter, PL_WB_MidNumLet):
-            /*case WBcase(PL_WB_Hebrew_Letter, PL_WB_Single_Quote):*/
+            case WBcase(WB_ALetter, WB_MidLetter):
+            case WBcase(WB_ALetter, WB_MidNumLet):
+            case WBcase(WB_ALetter, WB_Single_Quote):
+            case WBcase(WB_Hebrew_Letter, WB_MidLetter):
+            case WBcase(WB_Hebrew_Letter, WB_MidNumLet):
+            /*case WBcase(WB_Hebrew_Letter, WB_Single_Quote):*/
                 after = advance_one_WB(&after_pos, strend, utf8_target);
-                return after != PL_WB_ALetter && after != PL_WB_Hebrew_Letter;
+                return after != WB_ALetter && after != WB_Hebrew_Letter;
 
             /* WB7.  (ALetter | Hebrew_Letter) (MidLetter | MidNumLet |
              *                    Single_Quote) ×  (ALetter | Hebrew_Letter) */
-            case WBcase(PL_WB_MidLetter, PL_WB_ALetter):
-            case WBcase(PL_WB_MidLetter, PL_WB_Hebrew_Letter):
-            case WBcase(PL_WB_MidNumLet, PL_WB_ALetter):
-            case WBcase(PL_WB_MidNumLet, PL_WB_Hebrew_Letter):
-            case WBcase(PL_WB_Single_Quote, PL_WB_ALetter):
-            case WBcase(PL_WB_Single_Quote, PL_WB_Hebrew_Letter):
+            case WBcase(WB_MidLetter, WB_ALetter):
+            case WBcase(WB_MidLetter, WB_Hebrew_Letter):
+            case WBcase(WB_MidNumLet, WB_ALetter):
+            case WBcase(WB_MidNumLet, WB_Hebrew_Letter):
+            case WBcase(WB_Single_Quote, WB_ALetter):
+            case WBcase(WB_Single_Quote, WB_Hebrew_Letter):
                 before
                   = backup_one_WB(&previous, strbeg, &before_pos, utf8_target);
-                return before != PL_WB_ALetter && before != PL_WB_Hebrew_Letter;
+                return before != WB_ALetter && before != WB_Hebrew_Letter;
 
             /* WB7a.  Hebrew_Letter  ×  Single_Quote */
-            case WBcase(PL_WB_Hebrew_Letter, PL_WB_Single_Quote):
+            case WBcase(WB_Hebrew_Letter, WB_Single_Quote):
                 return FALSE;
 
             /* WB7b.  Hebrew_Letter  ×  Double_Quote Hebrew_Letter */
-            case WBcase(PL_WB_Hebrew_Letter, PL_WB_Double_Quote):
+            case WBcase(WB_Hebrew_Letter, WB_Double_Quote):
                 return advance_one_WB(&after_pos, strend, utf8_target)
-                                                        != PL_WB_Hebrew_Letter;
+                                                        != WB_Hebrew_Letter;
 
             /* WB7c.  Hebrew_Letter Double_Quote  ×  Hebrew_Letter */
-            case WBcase(PL_WB_Double_Quote, PL_WB_Hebrew_Letter):
+            case WBcase(WB_Double_Quote, WB_Hebrew_Letter):
                 return backup_one_WB(&previous, strbeg, &before_pos, utf8_target)
-                                                        != PL_WB_Hebrew_Letter;
+                                                        != WB_Hebrew_Letter;
 
             /* Do not break within sequences of digits, or digits adjacent to
              * letters (“3a”, or “A3”).
                 WB8.  Numeric  ×  Numeric */
-            case WBcase(PL_WB_Numeric, PL_WB_Numeric):
+            case WBcase(WB_Numeric, WB_Numeric):
                 return FALSE;
 
             /* WB9.  (ALetter | Hebrew_Letter)  ×  Numeric */
-            case WBcase(PL_WB_ALetter, PL_WB_Numeric):
-            case WBcase(PL_WB_Hebrew_Letter, PL_WB_Numeric):
+            case WBcase(WB_ALetter, WB_Numeric):
+            case WBcase(WB_Hebrew_Letter, WB_Numeric):
                 return FALSE;
 
             /* WB10.  Numeric  ×  (ALetter | Hebrew_Letter) */
-            case WBcase(PL_WB_Numeric, PL_WB_ALetter):
-            case WBcase(PL_WB_Numeric, PL_WB_Hebrew_Letter):
+            case WBcase(WB_Numeric, WB_ALetter):
+            case WBcase(WB_Numeric, WB_Hebrew_Letter):
                 return FALSE;
 
             /* Do not break within sequences, such as “3.2” or “3,456.789”.
                 WB11.   Numeric (MidNum | MidNumLet | Single_Quote)  ×  Numeric
              */
-            case WBcase(PL_WB_MidNum, PL_WB_Numeric):
-            case WBcase(PL_WB_MidNumLet, PL_WB_Numeric):
-            case WBcase(PL_WB_Single_Quote, PL_WB_Numeric):
+            case WBcase(WB_MidNum, WB_Numeric):
+            case WBcase(WB_MidNumLet, WB_Numeric):
+            case WBcase(WB_Single_Quote, WB_Numeric):
                 return backup_one_WB(&previous, strbeg, &before_pos, utf8_target)
-                                                               != PL_WB_Numeric;
+                                                               != WB_Numeric;
 
             /*  WB12.   Numeric  ×  (MidNum | MidNumLet | Single_Quote) Numeric
              *  */
-            case WBcase(PL_WB_Numeric, PL_WB_MidNum):
-            case WBcase(PL_WB_Numeric, PL_WB_MidNumLet):
-            case WBcase(PL_WB_Numeric, PL_WB_Single_Quote):
+            case WBcase(WB_Numeric, WB_MidNum):
+            case WBcase(WB_Numeric, WB_MidNumLet):
+            case WBcase(WB_Numeric, WB_Single_Quote):
                 return advance_one_WB(&after_pos, strend, utf8_target)
-                                                               != PL_WB_Numeric;
+                                                               != WB_Numeric;
 
             /* Do not break between Katakana.
                WB13.  Katakana  ×  Katakana */
-            case WBcase(PL_WB_Katakana, PL_WB_Katakana):
+            case WBcase(WB_Katakana, WB_Katakana):
                 return FALSE;
 
             /* Do not break from extenders.
                WB13a.  (ALetter | Hebrew_Letter | Numeric | Katakana |
                                             ExtendNumLet)  ×  ExtendNumLet */
-            case WBcase(PL_WB_ALetter, PL_WB_ExtendNumLet):
-            case WBcase(PL_WB_Hebrew_Letter, PL_WB_ExtendNumLet):
-            case WBcase(PL_WB_Numeric, PL_WB_ExtendNumLet):
-            case WBcase(PL_WB_Katakana, PL_WB_ExtendNumLet):
-            case WBcase(PL_WB_ExtendNumLet, PL_WB_ExtendNumLet):
+            case WBcase(WB_ALetter, WB_ExtendNumLet):
+            case WBcase(WB_Hebrew_Letter, WB_ExtendNumLet):
+            case WBcase(WB_Numeric, WB_ExtendNumLet):
+            case WBcase(WB_Katakana, WB_ExtendNumLet):
+            case WBcase(WB_ExtendNumLet, WB_ExtendNumLet):
                 return FALSE;
 
             /* WB13b.  ExtendNumLet  ×  (ALetter | Hebrew_Letter | Numeric
              *                                                 | Katakana) */
-            case WBcase(PL_WB_ExtendNumLet, PL_WB_ALetter):
-            case WBcase(PL_WB_ExtendNumLet, PL_WB_Hebrew_Letter):
-            case WBcase(PL_WB_ExtendNumLet, PL_WB_Numeric):
-            case WBcase(PL_WB_ExtendNumLet, PL_WB_Katakana):
+            case WBcase(WB_ExtendNumLet, WB_ALetter):
+            case WBcase(WB_ExtendNumLet, WB_Hebrew_Letter):
+            case WBcase(WB_ExtendNumLet, WB_Numeric):
+            case WBcase(WB_ExtendNumLet, WB_Katakana):
                 return FALSE;
 
             /* Do not break between regional indicator symbols.
                WB13c.  Regional_Indicator  ×  Regional_Indicator */
-            case WBcase(PL_WB_Regional_Indicator, PL_WB_Regional_Indicator):
+            case WBcase(WB_Regional_Indicator, WB_Regional_Indicator):
                 return FALSE;
 
     }
@@ -4700,15 +4700,15 @@ S_isWB(pTHX_ PL_WB_enum previous,
     NOT_REACHED; /* NOTREACHED */
 }
 
-STATIC PL_WB_enum
+STATIC WB_enum
 S_advance_one_WB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_target)
 {
-    PL_WB_enum wb;
+    WB_enum wb;
 
     PERL_ARGS_ASSERT_ADVANCE_ONE_WB;
 
     if (*curpos >= strend) {
-        return PL_WB_EDGE;
+        return WB_EDGE;
     }
 
     if (utf8_target) {
@@ -4717,52 +4717,52 @@ S_advance_one_WB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_ta
         do {
             *curpos += UTF8SKIP(*curpos);
             if (*curpos >= strend) {
-                return PL_WB_EDGE;
+                return WB_EDGE;
             }
             wb = getWB_VAL_UTF8(*curpos, strend);
-        } while (wb == PL_WB_Extend || wb == PL_WB_Format);
+        } while (wb == WB_Extend || wb == WB_Format);
     }
     else {
         do {
             (*curpos)++;
             if (*curpos >= strend) {
-                return PL_WB_EDGE;
+                return WB_EDGE;
             }
             wb = getWB_VAL_CP(**curpos);
-        } while (wb == PL_WB_Extend || wb == PL_WB_Format);
+        } while (wb == WB_Extend || wb == WB_Format);
     }
 
     return wb;
 }
 
-STATIC PL_WB_enum
-S_backup_one_WB(pTHX_ PL_WB_enum * previous, const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
+STATIC WB_enum
+S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
 {
-    PL_WB_enum wb;
+    WB_enum wb;
 
     PERL_ARGS_ASSERT_BACKUP_ONE_WB;
 
     /* If we know what the previous character's break value is, don't have
         * to look it up */
-    if (*previous != PL_WB_UNKNOWN) {
+    if (*previous != WB_UNKNOWN) {
         wb = *previous;
-        *previous = PL_WB_UNKNOWN;
+        *previous = WB_UNKNOWN;
         /* XXX Note that doesn't change curpos, and maybe should */
 
         /* But we always back up over these two types */
-        if (wb != PL_WB_Extend && wb != PL_WB_Format) {
+        if (wb != WB_Extend && wb != WB_Format) {
             return wb;
         }
     }
 
     if (*curpos < strbeg) {
-        return PL_WB_EDGE;
+        return WB_EDGE;
     }
 
     if (utf8_target) {
         U8 * prev_char_pos = reghopmaybe3(*curpos, -1, strbeg);
         if (! prev_char_pos) {
-            return PL_WB_EDGE;
+            return WB_EDGE;
         }
 
         /* Back up over Extend and Format.  curpos is always just to the right
@@ -4779,19 +4779,19 @@ S_backup_one_WB(pTHX_ PL_WB_enum * previous, const U8 * const strbeg, U8 ** curp
             }
             else {
                 *curpos = (U8 *) strbeg;
-                return PL_WB_EDGE;
+                return WB_EDGE;
             }
-        } while (wb == PL_WB_Extend || wb == PL_WB_Format);
+        } while (wb == WB_Extend || wb == WB_Format);
     }
     else {
         do {
             if (*curpos - 2 < strbeg) {
                 *curpos = (U8 *) strbeg;
-                return PL_WB_EDGE;
+                return WB_EDGE;
             }
             (*curpos)--;
             wb = getWB_VAL_CP(*(*curpos - 1));
-        } while (wb == PL_WB_Extend || wb == PL_WB_Format);
+        } while (wb == WB_Extend || wb == WB_Format);
     }
 
     return wb;
@@ -5669,7 +5669,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                             match = TRUE;
                         }
                         else {
-                            match = isWB(PL_WB_UNKNOWN,
+                            match = isWB(WB_UNKNOWN,
                                          getWB_VAL_UTF8(
                                                 reghop3((U8*)locinput,
                                                         -1,
@@ -5728,7 +5728,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                             match = TRUE;
                         }
                         else {
-                            match = isWB(PL_WB_UNKNOWN,
+                            match = isWB(WB_UNKNOWN,
                                          getWB_VAL_CP(UCHARAT(locinput -1)),
                                          getWB_VAL_CP(UCHARAT(locinput)),
                                          (U8*) reginfo->strbeg,
@@ -5959,7 +5959,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    else {
 
                 /* Get the gcb type for the current character */
-                PL_GCB_enum prev_gcb = getGCB_VAL_UTF8((U8*) locinput,
+                GCB_enum prev_gcb = getGCB_VAL_UTF8((U8*) locinput,
                                                        (U8*) reginfo->strend);
 
                 /* Then scan through the input until we get to the first
@@ -5968,7 +5968,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                  * end-of-input) */
                 locinput += UTF8SKIP(locinput);
                 while (locinput < reginfo->strend) {
-                    PL_GCB_enum cur_gcb = getGCB_VAL_UTF8((U8*) locinput,
+                    GCB_enum cur_gcb = getGCB_VAL_UTF8((U8*) locinput,
                                                          (U8*) reginfo->strend);
                     if (isGCB(prev_gcb, cur_gcb)) {
                         break;
