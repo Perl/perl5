@@ -2770,10 +2770,9 @@ PERL_CALLCONV SV*	Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta, 
 	assert(smeta); assert(which); assert(data)
 
 PERL_CALLCONV SV*	Perl_multideref_stringify(pTHX_ const OP* o, CV *cv)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MULTIDEREF_STRINGIFY	\
-	assert(o); assert(cv)
+	assert(o)
 
 PERL_CALLCONV NV	Perl_my_atof(pTHX_ const char *s)
 			__attribute__nonnull__(pTHX_1);

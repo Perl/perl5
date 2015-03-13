@@ -2323,7 +2323,8 @@ S_append_gv_name(pTHX_ GV *gv, SV *out)
 }
 
 #ifdef USE_ITHREADS
-#  define ITEM_SV(item) *av_fetch(comppad, (item)->pad_offset, FALSE);
+#  define ITEM_SV(item) (comppad ? \
+    *av_fetch(comppad, (item)->pad_offset, FALSE) : NULL);
 #else
 #  define ITEM_SV(item) UNOP_AUX_item_sv(item)
 #endif
@@ -2344,8 +2345,14 @@ Perl_multideref_stringify(pTHX_ const OP *o, CV *cv)
     int derefs = 0;
     SV *out = newSVpvn_flags("",0,SVs_TEMP);
 #ifdef USE_ITHREADS
-    PADLIST * const padlist = CvPADLIST(cv);
-    PAD *comppad = PadlistARRAY(padlist)[1];
+    PAD *comppad;
+
+    if (cv) {
+        PADLIST *padlist = CvPADLIST(cv);
+        comppad = PadlistARRAY(padlist)[1];
+    }
+    else
+        comppad = NULL;
 #endif
 
     PERL_ARGS_ASSERT_MULTIDEREF_STRINGIFY;
@@ -2372,7 +2379,8 @@ Perl_multideref_stringify(pTHX_ const OP *o, CV *cv)
             /* FALLTHROUGH */
         case MDEREF_AV_gvav_aelem:
             derefs = 1;
-            sv = ITEM_SV(++items);
+            items++;
+            sv = ITEM_SV(items);
             S_append_gv_name(aTHX_ (GV*)sv, out);
             goto do_elem;
             NOT_REACHED; /* NOTREACHED */
@@ -2381,7 +2389,8 @@ Perl_multideref_stringify(pTHX_ const OP *o, CV *cv)
             is_hash = TRUE;
             /* FALLTHROUGH */
         case MDEREF_AV_gvsv_vivify_rv2av_aelem:
-            sv = ITEM_SV(++items);
+            items++;
+            sv = ITEM_SV(items);
             S_append_gv_name(aTHX_ (GV*)sv, out);
             goto do_vivify_rv2xv_elem;
             NOT_REACHED; /* NOTREACHED */
@@ -2414,15 +2423,20 @@ Perl_multideref_stringify(pTHX_ const OP *o, CV *cv)
             switch (actions & MDEREF_INDEX_MASK) {
             case MDEREF_INDEX_const:
                 if (is_hash) {
-                    STRLEN cur;
-                    char *s;
-                    sv = ITEM_SV(++items);
-                    s = SvPV(sv, cur);
-                    pv_pretty(out, s, cur, 30,
-                                NULL, NULL,
-                                (PERL_PV_PRETTY_NOCLEAR
-                                |PERL_PV_PRETTY_QUOTE
-                                |PERL_PV_PRETTY_ELLIPSES));
+                    items++;
+                    sv = ITEM_SV(items);
+                    if (!sv)
+                        sv_catpvs_nomg(out, "???");
+                    else {
+                        STRLEN cur;
+                        char *s;
+                        s = SvPV(sv, cur);
+                        pv_pretty(out, s, cur, 30,
+                                    NULL, NULL,
+                                    (PERL_PV_PRETTY_NOCLEAR
+                                    |PERL_PV_PRETTY_QUOTE
+                                    |PERL_PV_PRETTY_ELLIPSES));
+                    }
                 }
                 else
                     Perl_sv_catpvf(aTHX_ out, "%"IVdf, (++items)->iv);
@@ -2431,7 +2445,8 @@ Perl_multideref_stringify(pTHX_ const OP *o, CV *cv)
                 S_append_padvar(aTHX_ (++items)->pad_offset, cv, out, 1, 0, 1);
                 break;
             case MDEREF_INDEX_gvsv:
-                sv = ITEM_SV(++items);
+                items++;
+                sv = ITEM_SV(items);
                 S_append_gv_name(aTHX_ (GV*)sv, out);
                 break;
             }
