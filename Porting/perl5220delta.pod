@@ -84,6 +84,60 @@ It is now possible to pass a parameter to S<C<use locale>> to specify
 a subset of locale categories to be locale-aware, with the remaining
 ones unaffected.  See L<perllocale/The "use locale" pragma> for details.
 
+=head2 New double-diamond operator
+
+C<<< <<>> >>> is like C<< <> >> but uses three-argument C<open> to open
+each file in @ARGV.  So each element of @ARGV is an actual file name, and
+"|foo" won't be treated as a pipe open.
+
+=head2 Aliasing via reference
+
+Variables and subroutines can now be aliased by assigning to a reference:
+
+    \$c = \$d;
+    \&x = \&y;
+
+Or by using a backslash before a C<foreach> iterator variable, which is
+perhaps the most useful idiom this feature provides:
+
+    foreach \%hash (@array_of_hash_refs) { ... }
+
+This feature is experimental and must be enabled via C<use feature
+'refaliasing'>.  It will warn unless the C<experimental::refaliasing>
+warnings category is disabled.
+
+See L<perlref/Assigning to References>
+
+=head2 Perl now supports POSIX 2008 locale currency additions.
+
+On platforms that are able to handle POSIX.1-2008, the
+hash returned by
+L<C<POSIX::localeconv()>|perllocale/The localeconv function>
+includes the international currency fields added by that version of the
+POSIX standard.  These are
+C<int_n_cs_precedes>,
+C<int_n_sep_by_space>,
+C<int_n_sign_posn>,
+C<int_p_cs_precedes>,
+C<int_p_sep_by_space>,
+and
+C<int_p_sign_posn>.
+
+=head2 Packing infinity or not-a-number into a character is now fatal
+
+Before, when trying to pack infinity or not-a-number into a
+(signed) character, Perl would warn, and assumed you tried to
+pack C<< 0xFF >>; if you gave it as an argument to C<< chr >>,
+C<< U+FFFD >> was returned.
+
+But now, all such actions (C<< pack >>, C<< chr >>, and C<< print '%c' >>)
+result in a fatal error.
+
+=head2 Inf and NaN
+
+Many small improvements, bug fixes and added test cases for dealing
+with math related to infinity and not-a-number.
+
 =head1 Security
 
 =head2 Perl is now compiled with -fstack-protector-strong if available
@@ -218,6 +272,21 @@ in a multi-byte character has been deprecated. Matching single bytes
 in a multi-byte character breaks encapsulation, and can corrupt utf8
 strings.
 
+=head2 Use of multiple /x regexp modifiers
+
+It is now deprecated to say something like any of the following:
+
+    qr/foo/xx;
+    /(?xax:foo)/;
+    use re qw(/amxx);
+
+That is, now C<x> should only occur once in any string of contiguous
+regular expression pattern modifiers.  We do not believe there are any
+occurrences of this in all of CPAN.  This is in preparation for a future
+Perl release having C</xx> mean to allow white-space for readability in
+bracketed character classes (those enclosed in square brackets:
+C<[...]>).
+
 =head2 Using a NO-BREAK space in a character alias for C<\N{...}> is now
 deprecated
 
@@ -266,6 +335,43 @@ as an updated module in the L</Modules and Pragmata> section.
 =head1 Performance Enhancements
 
 =over 4
+
+=item *
+
+C<length> is up to 20% faster for non-magical/non-tied scalars containing a
+string if it is a non-utf8 string or if C<use bytes;> is in scope.
+
+=item *
+
+Non-magical/non-tied scalars that contain only a floating point value and are
+on most Perl builds with 64 bit integers now use 8-32 less bytes of memory
+depending on OS.
+
+=item *
+
+In C<@array = split>, the assignment can be optimized away with C<split>
+writing directly to the array.  This optimisation was happening only for
+package arrays other than @_ and only
+sometimes.  Now this optimisation happens
+almost all the time.
+
+=item *
+
+C<join> is now subject to constant folding.  Moreover, C<join> with a
+scalar or constant for the separator and a single-item list to join is
+simplified to a stringification.  The separator doesn't even get evaluated.
+
+=item *
+
+C<qq(@array)> is implemented using two ops: a stringify op and a join op.
+If the qq contains nothing but a single array, the stringification is
+optimized away.
+
+=item *
+
+C<our $var> and C<our($s,@a,%h)> in void context are no longer evaluated at
+run time.  Even a whole sequence of C<our $foo;> statements will simply be
+skipped over.  The same applies to C<state> variables.
 
 =item *
 
@@ -367,6 +473,21 @@ XXX Changes which create B<new> files in F<pod/> go here.
 XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
+
+=head3 L<perlrecharclass>
+
+=over 4
+
+=item *
+
+Clarifications have been added to L<perlrecharclass/Character Ranges>
+to the effect that Perl guarantees that C<[A-Z]>, C<[a-z]>, C<[0-9]> and
+any subranges thereof in regular expression bracketed character classes
+are guaranteed to match exactly what a naive English speaker would
+expect them to match, even on platforms (such as EBCDIC) where special
+handling is required to accomplish this.
+
+=back
 
 =head3 L<perlfunc>
 
@@ -608,6 +729,22 @@ and New Warnings
 
 =item *
 
+L<Cannot chr %f|perldiag/"Cannot chr %f">
+
+=item *
+
+L<Cannot compress %f in pack|perldiag/"Cannot compress %f in pack">
+
+=item *
+
+L<Cannot pack %f with '%c'|perldiag/"Cannot pack %f with '%c'">
+
+=item *
+
+L<Cannot print %f with '%c'|perldiag/"Cannot printf %f with '%c'">
+
+=item *
+
 L<Hexadecimal float: internal error|perldiag/"Hexadecimal float: internal error">
 
 (F) Something went horribly bad in hexadecimal float handling.
@@ -619,7 +756,6 @@ L<Hexadecimal float: unsupported long double format|perldiag/"Hexadecimal float:
 (F) You have configured Perl to use long doubles but
 the internals of the long double format are unknown,
 therefore the hexadecimal float output is impossible.
-
 
 =item *
 
@@ -772,7 +908,6 @@ digits than could be output.  This can be caused by unsupported
 long double formats, or by 64-bit integers not being available
 (needed to retrieve the digits under some configurations).
 
-
 =item *
 
 L<Unescaped left brace in regex is deprecated, passed through in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is deprecated, passed through in regex; marked by <-- HERE in m/%s/">
@@ -877,6 +1012,11 @@ The warnings category C<< redundant >> is new. See also [RT #121025]
 
 =item *
 
+'"my" variable &foo::bar can't be in a package' has been reworded to say
+'subroutine' instead of 'variable'.
+
+=item *
+
 L<Global symbol "%s" requires explicit package name|perldiag/"Global symbol "%s" requires explicit package name (did you forget to declare "my %s"?)">
 
 This message has had '(did you forget to declare "my %s"?)' appended to it, to
@@ -897,7 +1037,6 @@ L<panic: frexp|perldiag/"panic: frexp: %f">
 
 This message has had ': %f' appended to it, to show what the offending floating
 point number is.
-
 
 =item *
 
@@ -950,7 +1089,7 @@ the filename.
 
 =head2 Diagnostic Removals
 
-=over 
+=over
 
 =item *
 
@@ -1037,6 +1176,13 @@ see the discussion below at L<< /Internal Changes >>.
 
 =item *
 
+Some regular expression tests are written in such a way that they will
+run very slowly if certain optimizations break. These tests have been
+moved into new files, F<< t/re/speed.t >> and F<< t/re/speed_thr.t >>,
+and are run with a C<< watchdog() >>.
+
+=item *
+
 C<< test.pl >> now allows C<< plan skip_all => $reason >>, to make it
 more compatible with C<< Test::More >>.
 
@@ -1069,6 +1215,11 @@ XXX
 
 =back
 
+=head2 Regained Platforms
+
+IRIX and Tru64 platforms are working again.
+(Some C<make test> failures remain.)
+
 =head2 Discontinued Platforms
 
 =over 4
@@ -1090,6 +1241,16 @@ changes within modules for platforms should generally be listed in the
 L</Modules and Pragmata> section.
 
 =over 4
+
+=item EBCDIC
+
+Special handling is required on EBCDIC platforms to get C<qr/[i-j]/> to
+match only C<"i"> and C<"j">, since there are 7 characters between the
+code points for C<"i"> and C<"j">.  This special handling had only been
+invoked when both ends of the range are literals.  Now it is also
+invoked if any of the C<\N{...}> forms for specifying a character by
+name or Unicode code point is used instead of a literal.  See
+L<perlrecharclass/Character Ranges>.
 
 =item Android
 
@@ -1139,6 +1300,65 @@ as well as C<SUNWspro>, and support for native C<setenv> has been added.
 =head1 Internal Changes
 
 =over 4
+
+=item *
+
+SVs of type SVt_NV are now bodyless when a build configure and platform allow
+it, specifically C<sizeof(NV) <= sizeof(IV)>. The bodyless trick is the same one
+as for IVs since 5.9.2, but for NVs, unlike IVs, is not guaranteed on all
+platforms and build configurations.
+
+=item *
+
+The C<$DB::single>, C<$DB::signal> and C<$DB::trace> now have set and
+get magic that stores their values as IVs and those IVs are used when
+testing their values in C<pp_dbstate>.  This prevents perl from
+recursing infinity if an overloaded object is assigned to any of those
+variables. [perl #122445]
+
+=item *
+
+C<Perl_tmps_grow> which is marked as public API but undocumented has been
+removed from public API. If you use C<EXTEND_MORTAL> macro in your XS code to
+preextend the mortal stack, you are unaffected by this change.
+
+=item *
+
+C<cv_name>, which was introduced in 5.21.4, has been changed incompatibly.
+It now has a flags field that allows the caller to specify whether the name
+should be fully qualified.  See L<perlapi/cv_name>.
+
+=item *
+
+Internally Perl no longer uses the C<SVs_PADMY> flag.  C<SvPADMY()> now
+returns a true value for anything not marked PADTMP.  C<SVs_PADMY> is now
+defined as 0.
+
+=item *
+
+The macros SETsv and SETsvUN have been removed. They were no longer used
+in the core since commit 6f1401dc2a, and have not been found present on
+CPAN.
+
+=item *
+
+The C<< SvFAKE >> bit (unused on HVs) got informally reserved by
+David Mitchell for future work on vtables.
+
+=item *
+
+The C<sv_catpvn_flags> function accepts C<SV_CATBYTES> and C<SV_CATUTF8>
+flags, which specify whether the appended string is bytes or utf8,
+respectively.
+
+=item *
+
+A new opcode class, C<< METHOP >> has been introduced, which holds
+class/method related info needed at runtime to improve performance
+of class/object method calls.
+
+C<< OP_METHOD >> and C<< OP_METHOD_NAMED >> are moved from being
+C<< UNOP/SVOP >> to being C<< METHOP >>.
 
 =item *
 
@@ -1542,6 +1762,103 @@ L<[perl #122761]|https://rt.perl.org/Ticket/Display.html?id=122761>
 The little-known C<my Class $var> syntax (see L<fields> and L<attributes>)
 could get confused in the scope of C<use utf8> if C<Class> were a constant
 whose value contained Latin-1 characters.
+
+=item *
+
+Locking and unlocking values via L<Hash::Util> or C<Internals::SvREADONLY>
+no longer has any effect on values that are read-only to begin.
+Previously, unlocking such values could result in crashes, hangs or
+other erratic behaviour.
+
+=item *
+
+The internal C<looks_like_number> function (which L<Scalar::Util> provides
+access to) began erroneously to return true for "-e1" in 5.21.4, affecting
+also C<-'-e1'>.  This has been fixed.
+
+=item *
+
+The flip-flop operator (C<..> in scalar context) would return the same
+scalar each time, unless the containing subroutine was called recursively.
+Now it always returns a new scalar.  [perl #122829]
+
+=item *
+
+Some unterminated C<(?(...)...)> constructs in regular expressions would
+either crash or give erroneous error messages.  C</(?(1)/> is one such
+example.
+
+=item *
+
+C<pack "w", $tied> no longer calls FETCH twice.
+
+=item *
+
+List assignments like C<($x, $z) = (1, $y)> now work correctly if $x and $y
+have been aliased by C<foreach>.
+
+=item *
+
+Some patterns including code blocks with syntax errors, such as
+C</ (?{(^{})/>, would hang or fail assertions on debugging builds.  Now
+they produce errors.
+
+=item *
+
+An assertion failure when parsing C<sort> with debugging enabled has been
+fixed.  [perl #122771]
+
+=item *
+
+C<*a = *b; @a = split //, $b[1]> could do a bad read and produce junk
+results.
+
+=item *
+
+In C<() = @array = split>, the C<() => at the beginning no longer confuses
+the optimizer, making it assume a limit of 1.
+
+=item *
+
+Fatal warnings no longer prevent the output of syntax errors.
+[perl #122966]
+
+=item *
+
+Fixed a NaN double to long double conversion error on VMS. For quiet NaNs
+(and only on Itanium, not Alpha) negative infinity instead of NaN was
+produced. 
+
+=item *
+
+Fixed the issue that caused C<< make distclean >> to leave files behind
+that shouldn't. [perl #122820]
+
+=item *
+
+AIX now sets the length in C<< getsockopt >> correctly. [perl #120835],
+[rt #91183], [rt #85570].
+
+=item *
+
+During the pattern optimization phase, we no longer recurse into
+GOSUB/GOSTART when not SCF_DO_SUBSTR. This prevents the optimizer
+to run "forever" and exhaust all memory. [perl #122283]
+
+=item *
+
+F<< t/op/crypt.t >> now performs SHA-256 algorithm if the default one
+is disabled. [perl #121591]
+
+=item *
+
+Fixed an off-by-one error when setting the size of shared array.
+[perl #122950]
+
+=item *
+
+Fixed a bug that could cause perl to execute an infinite loop during
+compilation. [perl #122995]
 
 =back
 
