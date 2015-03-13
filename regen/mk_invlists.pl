@@ -710,16 +710,22 @@ for my $charset (get_supported_code_pages()) {
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
+my $sources_list = "lib/unicore/mktables.lst";
 my @sources = ($0, "lib/Unicode/UCD.pm");
 {
     # Depend on mktables’ own sources.  It’s a shorter list of files than
     # those that Unicode::UCD uses.
-    open my $mktables_list, "lib/unicore/mktables.lst"
-        or die "$0 cannot open lib/unicore/mktables.lst: $!";
-    while(<$mktables_list>) {
-        last if /===/;
-        chomp;
-        push @sources, "lib/unicore/$_" if /^[^#]/;
+    if (! open my $mktables_list, $sources_list) {
+
+          # This should force a rebuild once $sources_list exists
+          push @sources, $sources_list;
+    }
+    else {
+        while(<$mktables_list>) {
+            last if /===/;
+            chomp;
+            push @sources, "lib/unicore/$_" if /^[^#]/;
+        }
     }
 }
 read_only_bottom_close_and_rename($out_fh, \@sources)
