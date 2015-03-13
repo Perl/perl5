@@ -182,7 +182,13 @@ sub read_only_bottom_close_and_rename {
     if ($sources) {
 	$comment = "Generated from:\n";
 	foreach my $file (sort @$sources) {
-	    my $digest = digest($file);
+            my $digest = (-e $file)
+                         ? digest($file)
+                           # Use a random number that won't match the real
+                           # digest, so will always show as out-of-date, so
+                           # Porting tests likely will fail drawing attention
+                           # to the problem.
+                         : int(rand(1_000_000));
 	    $comment .= "$digest $file\n";
 	}
     }
