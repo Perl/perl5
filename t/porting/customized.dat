@@ -1,5 +1,3 @@
-CPAN cpan/CPAN/lib/CPAN/HandleConfig.pm 6cb07139b6ce5c45dc6c8de017583e4eddcaedfe
-CPAN cpan/CPAN/lib/CPAN/Module.pm 7d12bb547f7a268a90c6f8320f439a2dc805b850
 Encode cpan/Encode/encoding.pm baa25e197ba4d5fa228dbf7b440afb5ae18ec5ed
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/pm_to_blib.t 71ebcee355691ce374fcad251b12d8b2412462b3
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691

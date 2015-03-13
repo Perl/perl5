@@ -130,7 +130,7 @@ Deparse C<$#_> as that instead of as C<$#{_}>.  [perl #123947]
 
 =item *
 
-L<CPAN> has been upgraded from version 2.05 to 2.09-TRIAL.
+L<CPAN> has been upgraded from version 2.05 to 2.10.
 
 =over 4
 

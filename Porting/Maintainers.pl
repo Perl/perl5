@@ -243,7 +243,7 @@ use File::Glob qw(:case);
     },
 
     'CPAN' => {
-        'DISTRIBUTION' => 'ANDK/CPAN-2.09-TRIAL.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.10.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},
@@ -276,12 +276,6 @@ use File::Glob qw(:case);
                 t/local_utils.pm
                 t/perlcriticrc
                 t/yaml_code.yml
-                ),
-        ],
-        # Waiting to be merged upstream: see pull request #85
-        'CUSTOMIZED'   => [
-            qw( lib/CPAN/HandleConfig.pm
-                lib/CPAN/Module.pm
                 ),
         ],
     },

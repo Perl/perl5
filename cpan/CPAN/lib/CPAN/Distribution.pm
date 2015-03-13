@@ -8,7 +8,7 @@ use CPAN::InfoObj;
 use File::Path ();
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
-$VERSION = "2.03";
+$VERSION = "2.04";
 
 # no prepare, because prepare is not a command on the shell command line
 # TODO: clear instance cache on reload
@@ -2164,10 +2164,10 @@ is part of the perl-%s distribution. To install that, you need to run
 
     my %env;
     while (my($k,$v) = each %ENV) {
-        next unless defined $v;
-        $env{$k} = $v;
+        next if defined $v;
+        $env{$k} = '';
     }
-    local %ENV = %env;
+    local @ENV{keys %env} = values %env;
     my $satisfied = eval { $self->satisfy_requires };
     return $self->goodbye($@) if $@;
     return unless $satisfied ;
@@ -3204,8 +3204,9 @@ sub prereq_pm {
         return;
     }
     # no Makefile/Build means configuration aborted, so don't look for prereqs
-    return unless   -f File::Spec->catfile($self->{build_dir},'Makefile')
-                ||  -f File::Spec->catfile($self->{build_dir},'Build');
+    my $makefile  = File::Spec->catfile($self->{build_dir}, $^O eq 'VMS' ? 'descrip.mms' : 'Makefile');
+    my $buildfile = File::Spec->catfile($self->{build_dir}, $^O eq 'VMS' ? 'Build.com' : 'Build');
+    return unless   -f $makefile || -f $buildfile;
     CPAN->debug(sprintf "writemakefile[%s]modulebuild[%s]",
                 $self->{writemakefile}||"",
                 $self->{modulebuild}||"",
