@@ -124,10 +124,11 @@ print OUT <<'EOT';
 EOT
 
     if ($^O eq 'darwin') {
-print OUT <<'EOT';
-        if ($boot_symbol_ref = dl_find_symbol(0, $bootname)) {
-            goto boot; #extension library has already been loaded, e.g. darwin
-        }
+      my $extra_arg = ', 1 ' if $DynaLoader::VERSION ge '1.37';
+print OUT <<"EOT";
+    if (\$boot_symbol_ref = dl_find_symbol( 0, \$bootname $extra_arg)) {
+        goto boot; #extension library has already been loaded, e.g. darwin
+    }
 EOT
     }
 
