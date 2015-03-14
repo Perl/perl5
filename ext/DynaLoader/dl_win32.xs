@@ -26,6 +26,7 @@ calls.
 
 #define PERL_NO_GET_CONTEXT
 #define PERL_EXT
+#define PERL_IN_DL_WIN32_XS
 
 #include "EXTERN.h"
 #include "perl.h"

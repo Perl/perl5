@@ -47,6 +47,7 @@
 
 #define PERL_EXT
 #include "EXTERN.h"
+#define PERL_IN_DL_VMS_XS
 #include "perl.h"
 #include "XSUB.h"
 

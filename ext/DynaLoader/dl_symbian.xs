@@ -25,8 +25,8 @@
  * only after that the Perl ones.  Otherwise you will get a lot
  * trouble because of Symbian's New(), Copy(), etc definitions. */
 
-#define DL_SYMBIAN_XS
 #define PERL_EXT
+#define PERL_IN_DL_SYMBIAN_XS
 
 #include "EXTERN.h"
 #include "perl.h"
