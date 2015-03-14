@@ -2,7 +2,7 @@ package Encode::Alias;
 use strict;
 use warnings;
 no warnings 'redefine';
-our $VERSION = do { my @r = ( q$Revision: 2.18 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.19 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 
 use Exporter 'import';
@@ -255,6 +255,10 @@ sub init_aliases {
         define_alias( qr/\bbig5-?hk(?:scs)?$/i    => '"big5-hkscs"' );
         define_alias( qr/\bhk(?:scs)?[-_]?big5$/i => '"big5-hkscs"' );
     }
+
+    # https://github.com/dankogai/p5-encode/issues/37
+    define_alias(qr/cp65000/i => '"UTF-7"');
+    define_alias(qr/cp65001/i => '"utf-8-strict"');
 
     # utf8 is blessed :)
     define_alias( qr/\bUTF-8$/i => '"utf-8-strict"' );
