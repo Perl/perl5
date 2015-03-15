@@ -528,7 +528,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.47';
+$VERSION = '1.48';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -6540,11 +6540,10 @@ sub _dump_trace_calc_saved_single_arg
         s/(.*)/'$1'/s
         unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
 
-        # Turn high-bit characters into meta-whatever.
-        s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
-
-        # Turn control characters into ^-whatever.
-        s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
+        # Turn high-bit characters into meta-whatever, and controls into like
+        # '^D'.
+        require 'meta_notation.pm';
+        $_ = _meta_notation($_) if /[[:^print:]]/a;
 
         return $_;
     }

@@ -4182,6 +4182,8 @@ lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
+lib/meta_notation.pm		Helper for certain /lib .pm's
+lib/meta_notation.t		See if meta_notation.t works
 lib/Net/hostent.pm		By-name interface to Perl's builtin gethost*
 lib/Net/hostent.t		See if Net::hostent works
 lib/Net/netent.pm		By-name interface to Perl's builtin getnet*

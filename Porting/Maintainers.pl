@@ -1368,6 +1368,7 @@ use File::Glob qw(:case);
                 lib/FindBin.{pm,t}
                 lib/Getopt/Std.{pm,t}
                 lib/Internals.t
+                lib/meta_notation.{pm,t}
                 lib/Net/hostent.{pm,t}
                 lib/Net/netent.{pm,t}
                 lib/Net/protoent.{pm,t}
