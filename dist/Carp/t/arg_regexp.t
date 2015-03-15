@@ -43,8 +43,14 @@ like lm(qr/a\x{666}/), qr/main::lm\(qr\(a\\x\{666\}\)u?\)/;
 like lm(rx("a\x{666}")), qr/main::lm\(qr\(a${x666_rx}\)u?\)/;
 like lm(qr/L${chr_e9}on/), qr/main::lm\(qr\(L\\x\{?${e9}\}?on\)u?\)/;
 like lm(rx("L${chr_e9}on")), qr/main::lm\(qr\(L${xe9_rx}on\)u?\)/;
-like lm(qr/L${chr_e9}on \x{2603} !/), qr/main::lm\(qr\(L\\x\{?${e9}\}?on \\x\{2603\} !\)u?\)/;
-like lm(rx("L${chr_e9}on \x{2603} !")), qr/main::lm\(qr\(L${xe9_rx}on ${x2603_rx} !\)u?\)/;
+
+
+SKIP: {
+    skip "wide-character-related bug in pre-5.18 perls", 2 if $] lt 5.017_001;
+
+    like lm(qr/L${chr_e9}on \x{2603} !/), qr/main::lm\(qr\(L\\x\{?${e9}\}?on \\x\{2603\} !\)u?\)/;
+    like lm(rx("L${chr_e9}on \x{2603} !")), qr/main::lm\(qr\(L${xe9_rx}on ${x2603_rx} !\)u?\)/;
+}
 
 $Carp::MaxArgLen = 5;
 foreach my $arg ("foo bar baz", "foo bar ba", "foo bar b", "foo bar ", "foo bar", "foo ba") {
@@ -54,10 +60,16 @@ foreach my $arg ("foo b", "foo ", "foo", "fo", "f", "") {
     like lm(rx($arg)), qr/main::lm\(qr\(\Q$arg\E\)u?\)/;
 }
 like lm(qr/foo.bar$/sm), qr/main::lm\(qr\(fo\)\.\.\.u?ms\)/;
-like lm(qr/L${chr_e9}on \x{2603} !/), qr/main::lm\(qr\(L\\\)\.\.\.u?\)/;
-like lm(rx("L${chr_e9}on \x{2603} !")), qr/main::lm\(qr\(L\\\)\.\.\.u?\)/;
-like lm(qr/L${chr_e9}on\x{2603}/), qr/main::lm\(qr\(L\\\)\.\.\.u?\)/;
-like lm(rx("L${chr_e9}on\x{2603}")), qr/main::lm\(qr\(L\\\)\.\.\.u?\)/;
+
+SKIP: {
+    skip "wide-character-related bug in pre-5.18 perls", 4 if $] lt 5.017_001;
+
+    like lm(qr/L${chr_e9}on \x{2603} !/), qr/main::lm\(qr\(L\\\)\.\.\.u?\)/;
+    like lm(rx("L${chr_e9}on \x{2603} !")), qr/main::lm\(qr\(L\\\)\.\.\.u?\)/;
+    like lm(qr/L${chr_e9}on\x{2603}/), qr/main::lm\(qr\(L\\\)\.\.\.u?\)/;
+    like lm(rx("L${chr_e9}on\x{2603}")), qr/main::lm\(qr\(L\\\)\.\.\.u?\)/;
+}
+
 like lm(qr/foo\x{2603}/), qr/main::lm\(qr\(fo\)\.\.\.u?\)/;
 like lm(rx("foo\x{2603}")), qr/main::lm\(qr\(fo\)\.\.\.u?\)/;
 
@@ -65,7 +77,12 @@ $Carp::MaxArgLen = 0;
 foreach my $arg ("wibble:" x 20, "foo bar baz") {
     like lm(rx($arg)), qr/main::lm\(qr\(\Q$arg\E\)u?\)/;
 }
-like lm(qr/L${chr_e9}on\x{2603}/), qr/main::lm\(qr\(L\\x\{?${e9}\}?on\\x\{2603\}\)u?\)/;
-like lm(rx("L${chr_e9}on\x{2603}")), qr/main::lm\(qr\(L${xe9_rx}on${x2603_rx}\)u?\)/;
+
+SKIP: {
+    skip "wide-character-related bug in pre-5.18 perls", 2 if $] lt 5.017_001;
+
+    like lm(qr/L${chr_e9}on\x{2603}/), qr/main::lm\(qr\(L\\x\{?${e9}\}?on\\x\{2603\}\)u?\)/;
+    like lm(rx("L${chr_e9}on\x{2603}")), qr/main::lm\(qr\(L${xe9_rx}on${x2603_rx}\)u?\)/;
+}
 
 1;
