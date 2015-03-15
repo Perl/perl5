@@ -1790,8 +1790,7 @@ PP(pp_helem)
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool preeminent = TRUE;
 
-    if (SvTYPE(hv) != SVt_PVHV)
-	RETPUSHUNDEF;
+    assert(SvTYPE(hv) == SVt_PVHV);
 
     if (localizing) {
 	MAGIC *mg;
