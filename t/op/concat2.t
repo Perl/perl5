@@ -14,6 +14,7 @@ BEGIN {
 plan 3;
 
 SKIP: {
+skip("no encoding pragma in EBCDIC", 1) if $::IS_EBCDIC;
 skip_if_miniperl("no dynamic loading on miniperl, no Encode", 1);
 fresh_perl_is <<'end', "ok\n", {},
     no warnings 'deprecated';
