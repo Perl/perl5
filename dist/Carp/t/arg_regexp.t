@@ -13,7 +13,7 @@ sub rx { qr/$_[0]/ }
 # releases, U+E9 is 0x51 on all EBCDIC code pages supported then.
 my $e9 = sprintf "%02x", (($] ge 5.007_003)
                           ? utf8::unicode_to_native(0xe9)
-                          : ((ord("A" == 193))
+                          : ((ord("A") == 193)
                              ? 0x51
                              : 0xE9));
 my $chr_e9 = chr eval "0x$e9";
