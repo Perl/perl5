@@ -7588,7 +7588,9 @@ sub set_list {
     for my $i ( 0 .. $#list ) {
         $val = $list[$i];
         $val =~ s/\\/\\\\/g;
-        $val =~ s/([\0-\37\177\200-\377])/"\\0x" . unpack('H2',$1)/eg;
+        no warnings 'experimental::regex_sets';
+        $val =~ s/ ( (?[ [\000-\xFF] & [:^print:] ]) ) /
+                                                "\\0x" . unpack('H2',$1)/xaeg;
         $ENV{"${stem}_$i"} = $val;
     } ## end for $i (0 .. $#list)
 } ## end sub set_list
@@ -8428,7 +8430,7 @@ sub print_help {
     # wide.  If it's wider than that, an extra space will be added.
     $help_str =~ s{
         ^                       # only matters at start of line
-          ( \040{4} | \t )*     # some subcommands are indented
+          ( \ {4} | \t )*       # some subcommands are indented
           ( < ?                 # so <CR> works
             [BI] < [^\t\n] + )  # find an eeevil ornament
           ( \t+ )               # original separation, discarded
