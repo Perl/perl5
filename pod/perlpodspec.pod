@@ -842,17 +842,19 @@ Pod::Parser, comes with modern versions of Perl.
 
 Characters in Pod documents may be conveyed either as literals, or by
 number in EE<lt>n> codes, or by an equivalent mnemonic, as in
-EE<lt>eacute> which is exactly equivalent to EE<lt>233>.
+EE<lt>eacute> which is exactly equivalent to EE<lt>233>.  The numbers
+are the Latin1/Unicode values, even on EBCDIC platforms.
 
-Characters in the range 32-126 refer to those well known US-ASCII
-characters (also defined there by Unicode, with the same meaning),
-which all Pod formatters must render faithfully.  Characters
-in the ranges 0-31 and 127-159 should not be used (neither as
-literals, nor as EE<lt>number> codes), except for the
-literal byte-sequences for newline (13, 13 10, or 10), and tab (9).
+When referring to characters by using a EE<lt>n> numeric code, numbers
+in the range 32-126 refer to those well known US-ASCII characters (also
+defined there by Unicode, with the same meaning), which all Pod
+formatters must render faithfully.  Numbers in the ranges 0-31 and
+127-159 should not be used (neither as literals, nor as EE<lt>number>
+codes), except for the literal byte-sequences for newline (13, 13 10, or
+10), and tab (9).
 
-Characters in the range 160-255 refer to Latin-1 characters (also
-defined there by Unicode, with the same meaning).  Characters above
+Numbers in the range 160-255 refer to Latin-1 characters (also
+defined there by Unicode, with the same meaning).  Numbers above
 255 should be understood to refer to Unicode characters.
 
 =item *
