@@ -3667,6 +3667,7 @@ ext/IPC-Open3/t/fd.t		See if IPC::Open3 works w/ file descriptors
 ext/IPC-Open3/t/IPC-Open2.t	See if IPC::Open2 works
 ext/IPC-Open3/t/IPC-Open3.t	See if IPC::Open3 works
 ext/mro/Changes			mro extension
+ext/mro/Makefile.PL		mro extension
 ext/mro/mro.pm			mro extension
 ext/mro/mro.xs			mro extension
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
