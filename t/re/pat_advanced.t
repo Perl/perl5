@@ -995,7 +995,7 @@ sub run_tests {
         #
         my $w;
         local $SIG {__WARN__} = sub {$w .= "@_"};
-        $result = eval 'q(WARN) =~ /[\N{WARN}]/';
+        $result = eval 'q(WARN) =~ /^[\N{WARN}]$/';
         ok !$@ && $result && ! $w,  '\N{} returning multi-char works';
 
         undef $w;
