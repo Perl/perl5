@@ -3157,9 +3157,9 @@ PP(pp_grepwhile)
 	ENTER_with_name("grep_item");					/* enter inner scope */
 	SAVEVPTR(PL_curpm);
 
-	src = PL_stack_base[*PL_markstack_ptr];
+	src = PL_stack_base[TOPMARK];
 	if (SvPADTMP(src)) {
-	    src = PL_stack_base[*PL_markstack_ptr] = sv_mortalcopy(src);
+	    src = PL_stack_base[TOPMARK] = sv_mortalcopy(src);
 	    PL_tmps_floor++;
 	}
 	SvTEMP_off(src);

@@ -928,13 +928,13 @@ PP(pp_grepstart)
     dSP;
     SV *src;
 
-    if (PL_stack_base + *PL_markstack_ptr == SP) {
+    if (PL_stack_base + TOPMARK == SP) {
 	(void)POPMARK;
 	if (GIMME_V == G_SCALAR)
 	    mXPUSHi(0);
 	RETURNOP(PL_op->op_next->op_next);
     }
-    PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;
+    PL_stack_sp = PL_stack_base + TOPMARK + 1;
     Perl_pp_pushmark(aTHX);				/* push dst */
     Perl_pp_pushmark(aTHX);				/* push src */
     ENTER_with_name("grep");					/* enter outer scope */
@@ -944,9 +944,9 @@ PP(pp_grepstart)
     ENTER_with_name("grep_item");					/* enter inner scope */
     SAVEVPTR(PL_curpm);
 
-    src = PL_stack_base[*PL_markstack_ptr];
+    src = PL_stack_base[TOPMARK];
     if (SvPADTMP(src)) {
-	src = PL_stack_base[*PL_markstack_ptr] = sv_mortalcopy(src);
+	src = PL_stack_base[TOPMARK] = sv_mortalcopy(src);
 	PL_tmps_floor++;
     }
     SvTEMP_off(src);
@@ -962,7 +962,7 @@ PP(pp_mapwhile)
 {
     dSP;
     const I32 gimme = GIMME_V;
-    I32 items = (SP - PL_stack_base) - *PL_markstack_ptr; /* how many new items */
+    I32 items = (SP - PL_stack_base) - TOPMARK; /* how many new items */
     I32 count;
     I32 shift;
     SV** src;
@@ -1063,7 +1063,7 @@ PP(pp_mapwhile)
     LEAVE_with_name("grep_item");					/* exit inner scope */
 
     /* All done yet? */
-    if (PL_markstack_ptr[-1] > *PL_markstack_ptr) {
+    if (PL_markstack_ptr[-1] > TOPMARK) {
 
 	(void)POPMARK;				/* pop top */
 	LEAVE_with_name("grep");					/* exit outer scope */
