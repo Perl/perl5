@@ -366,10 +366,9 @@ sub make_corelist_delta {
   my %deltas;
   # Search for the release with the least amount of changes (this avoids having
   # to ask for where this perl was branched from).
-  for my $previous (reverse sort keys %$existing) {
+  for my $previous (reverse sort { $a <=> $b } keys %$existing) {
     # Shouldn't happen, but ensure we don't load weird data...
-    next if $previous > $version || $previous == $version && $previous eq $version;
-
+    next if $previous > $version || $previous == $version;
     my $delta = $deltas{$previous} = {};
     ($delta->{changed}, $delta->{removed}) = calculate_delta(
       $existing->{$previous}, \%versions);
@@ -400,9 +399,9 @@ sub make_coreutils_delta {
   my %deltas;
   # Search for the release with the least amount of changes (this avoids having
   # to ask for where this perl was branched from).
-  for my $previous (reverse sort keys %Module::CoreList::Utils::utilities) {
+  for my $previous (reverse sort { $a <=> $b } keys %Module::CoreList::Utils::utilities) {
     # Shouldn't happen, but ensure we don't load weird data...
-    next if $previous > $version || $previous == $version && $previous eq $version;
+    next if $previous > $version || $previous == $version;
 
     my $delta = $deltas{$previous} = {};
     ($delta->{changed}, $delta->{removed}) = calculate_delta(
