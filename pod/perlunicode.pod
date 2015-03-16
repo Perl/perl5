@@ -1710,7 +1710,7 @@ a valid UTF-8 character.
 
 C<UTF8SKIP(buf)> will return the number of bytes in the UTF-8 encoded
 character in the buffer.  C<UNISKIP(chr)> will return the number of bytes
-required to UTF-8-encode the Unicode character code point.  C<UTF8SKIP()>
+required to UTF-8-encode the code point.  C<UTF8SKIP()>
 is useful for example for iterating over the characters of a UTF-8
 encoded buffer; C<UNISKIP()> is useful, for example, in computing
 the size required for a UTF-8 encoded buffer.
