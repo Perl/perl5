@@ -8,6 +8,7 @@ BEGIN {
 }
 
 use strict;
+use Config ();
 
 plan(tests => 16);
 
@@ -27,6 +28,8 @@ my $out = runperl(stderr => 1,
     }
 EOS
 
+$out =~ s/^ALLOCATED at .*\n//m
+    if $Config::Config{ccflags} =~ /-DDEBUG_LEAKING_SCALARS/;
 like($out, qr/\ASV =/, "check we got dump output"); # [perl #121337]
 
 my $utf8magic = qr{ ^ \s+ MAGIC \s = .* \n
