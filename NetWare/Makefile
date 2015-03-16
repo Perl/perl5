@@ -692,7 +692,7 @@ MICROCORE_SRC	=		\
 		..\dump.c	\
 		..\globals.c	\
 		..\gv.c		\
-		..\mro.c	\
+		..\mro_core.c	\
 		..\hv.c		\
 		..\keywords.c	\
 		..\locale.c	\

@@ -58,7 +58,7 @@ struct shared_he {
 
 /* Subject to change.
    Don't access this directly.
-   Use the funcs in mro.c
+   Use the funcs in mro_core.c
 */
 
 struct mro_alg {

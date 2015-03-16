@@ -4370,7 +4370,7 @@ mg_vtable.h			Generated magic vtable data
 miniperlmain.c			Basic perl w/o dynamic loading or extensions
 mkppport			A script that distributes ppport.h
 mkppport.lst			List of extensions that need a ppport.h
-mro.c				Method Resolution Order code
+mro_core.c				Method Resolution Order code
 myconfig.SH			Prints summary of the current configuration
 mydtrace.h			Support for optional DTrace probes
 NetWare/bat/Buildtype.bat	NetWare port

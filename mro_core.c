@@ -1,4 +1,4 @@
-/*    mro.c
+/*    mro_core.c
  *
  *    Copyright (c) 2007 Brandon L Black
  *    Copyright (c) 2007, 2008, 2009, 2010, 2011 Larry Wall and others
@@ -6,6 +6,9 @@
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
+ *    This was 'mro.c', but changed because there is another mro.c in /ext, and
+ *    the os390 loader can't cope with this situation (which involves the two
+ *    files calling functions defined in the other)
  */
 
 /*
@@ -66,13 +69,13 @@ Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta,
 	} else {
 	    HV *const hv = newHV();
 	    /* Start with 2 buckets. It's unlikely we'll need more. */
-	    HvMAX(hv) = 1;	
+	    HvMAX(hv) = 1;
 	    smeta->mro_linear_all = hv;
 
 	    if (smeta->mro_linear_current) {
 		/* If we were storing something directly, put it in the hash
 		   before we lose it. */
-		Perl_mro_set_private_data(aTHX_ smeta, smeta->mro_which, 
+		Perl_mro_set_private_data(aTHX_ smeta, smeta->mro_which,
 					  smeta->mro_linear_current);
 	    }
 	}
@@ -126,7 +129,7 @@ Perl_mro_register(pTHX_ const struct mro_alg *mro) {
 
     PERL_ARGS_ASSERT_MRO_REGISTER;
 
-    
+
     if (!Perl_hv_common(aTHX_ PL_registered_mros, NULL,
 			mro->name, mro->length, mro->kflags,
 			HV_FETCH_ISSTORE, wrapper, mro->hash)) {
@@ -620,7 +623,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
                        so on aggregate we expect to save time by not making
                        two calls to the common HV code for the case where
                        it doesn't exist.  */
-	   
+
                     (void)
                       hv_storehek(mroisarev, namehek, &PL_sv_yes);
                 }
@@ -664,7 +667,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 	   almost as cheap as calling hv_exists, so on aggregate we expect to
 	   save time by not making two calls to the common HV code for the
 	   case where it doesn't exist.  */
-	   
+
 	(void)hv_storehek(mroisarev, stashhek, &PL_sv_yes);
     }
 
@@ -856,7 +859,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 	       mro_gather_and_rename set aside for us) this way, in case
 	       one class in this list is a superclass of a another class
 	       that we have already encountered. In such a case, meta->isa
-	       will have been overwritten without old entries being deleted 
+
 	       from PL_isarev. */
 	    struct mro_meta * const meta = HvMROMETA(stash);
 	    if(meta->isa != (HV *)HeVAL(iter)){
@@ -1103,7 +1106,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
        ing that here, as we want to avoid resetting the hash iterator. */
 
     /* Skip the entire loop if the hash is empty.   */
-    if(oldstash && HvUSEDKEYS(oldstash)) { 
+    if(oldstash && HvUSEDKEYS(oldstash)) {
 	xhv = (XPVHV*)SvANY(oldstash);
 	seen = (HV *) sv_2mortal((SV *)newHV());
 
@@ -1358,7 +1361,7 @@ void
 Perl_mro_set_mro(pTHX_ struct mro_meta *const meta, SV *const name)
 {
     const struct mro_alg *const which = Perl_mro_get_from_name(aTHX_ name);
- 
+
     PERL_ARGS_ASSERT_MRO_SET_MRO;
 
     if (!which)
@@ -1368,7 +1371,7 @@ Perl_mro_set_mro(pTHX_ struct mro_meta *const meta, SV *const name)
 	if (meta->mro_linear_current && !meta->mro_linear_all) {
 	    /* If we were storing something directly, put it in the hash before
 	       we lose it. */
-	    Perl_mro_set_private_data(aTHX_ meta, meta->mro_which, 
+	    Perl_mro_set_private_data(aTHX_ meta, meta->mro_which,
 				      MUTABLE_SV(meta->mro_linear_current));
 	}
 	meta->mro_which = which;
@@ -1404,7 +1407,7 @@ XS(XS_mro_method_changed_in)
 
     if(items != 1)
 	croak_xs_usage(cv, "classname");
-    
+
     classname = ST(0);
 
     class_stash = gv_stashsv(classname, 0);

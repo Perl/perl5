@@ -85,8 +85,8 @@ uglobals$(_O):	$(H) globals.c INTERN.h perlapi.h $(generated_headers)
 ugv$(_O):	$(HE) gv.c
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) gv.c
 
-umro$(_O):	$(HE) mro.c
-	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) mro.c
+umro$(_O):	$(HE) mro_core.c
+	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) mro_core.c
 
 uhv$(_O):	$(HE) hv.c
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) hv.c
