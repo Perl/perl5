@@ -447,7 +447,7 @@ SvPV_nomg_nolen(sv)
 void
 SvPV_renew(sv, nlen, insv)
         SV *sv
-        IV nlen
+        STRLEN nlen
         SV *insv
         PREINIT:
                 STRLEN slen;

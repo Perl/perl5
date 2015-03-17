@@ -27,10 +27,14 @@
 :
 :         proto.h: add __attribute__malloc__
 :
-:   b  Binary backward compatibility; function is a macro
-:      but has also Perl_ implementation (which is exported); often
-:      implemented in mathoms.c (whose compilation can be suppressed; see
-:      INSTALL):
+:   b  Binary backward compatibility; has an exported Perl_ implementation
+:      but function is also normally a macro (i.e. has the "m" flag as well).
+:      Backcompat functions ("b") can be anywhere, but if they are also
+:      macros ("m") then they have no proto.h entries so must either be in
+:      mathoms.c to get marked EXTERN_C (and skipped for -DNO_MATHOMS builds)
+:      or else will require special attention to ensure they are marked
+:      EXTERN_C (and then won't be automatically skipped for -DNO_MATHOMS
+:      builds).
 :
 :         add entry to the list of exported symbols;
 :         don't define PERL_ARGS_ASSERT_FOO
@@ -330,7 +334,7 @@ ApR	|I32	|cxinc
 Afp	|void	|deb		|NN const char* pat|...
 Ap	|void	|vdeb		|NN const char* pat|NULLOK va_list* args
 Ap	|void	|debprofdump
-EXp	|SV*	|unop_aux_stringify	|NN const OP* o|NN CV *cv
+EXp	|SV*	|multideref_stringify	|NN const OP* o|NN CV *cv
 Ap	|I32	|debop		|NN const OP* o
 Ap	|I32	|debstack
 Ap	|I32	|debstackptrs
@@ -441,7 +445,7 @@ Ap	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Ap	|void	|dump_eval
 Ap	|void	|dump_form	|NN const GV* gv
-Ap	|void	|gv_dump	|NN GV* gv
+Ap	|void	|gv_dump	|NULLOK GV* gv
 Ap	|void	|op_dump	|NN const OP *o
 Ap	|void	|pmop_dump	|NULLOK PMOP* pm
 Ap	|void	|dump_packsubs	|NN const HV* stash
@@ -482,7 +486,7 @@ p	|char*	|getenv_len	|NN const char *env_elem|NN unsigned long *len
 pox	|void	|get_db_sub	|NULLOK SV **svp|NN CV *cv
 Ap	|void	|gp_free	|NULLOK GV* gv
 Ap	|GP*	|gp_ref		|NULLOK GP* gp
-Xp	|SV*	|gv_add_by_type_p|NN GV *gv|gv_add_type type
+Ap	|GV*	|gv_add_by_type	|NULLOK GV *gv|svtype type
 Apmb	|GV*	|gv_AVadd	|NULLOK GV *gv
 Apmb	|GV*	|gv_HVadd	|NULLOK GV *gv
 Apmb	|GV*	|gv_IOadd	|NULLOK GV* gv
@@ -809,12 +813,12 @@ EMsPR	|char*|form_short_octal_warning|NN const char * const s  \
 				|const STRLEN len
 #endif
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
-Apdn	|int	|grok_infnan	|NN const char** sp|NN const char *send
+Apd	|int	|grok_infnan	|NN const char** sp|NN const char *send
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep
 Apd	|int	|grok_number_flags|NN const char *pv|STRLEN len|NULLOK UV *valuep|U32 flags
 ApdR	|bool	|grok_numeric_radix|NN const char **sp|NN const char *send
 Apd	|UV	|grok_oct	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
-Apdn	|UV	|grok_atou	|NN const char* pv|NULLOK const char** endptr
+EXpn	|bool	|grok_atoUV	|NN const char* pv|NN UV* valptr|NULLOK const char** endptr
 : These are all indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_clearenv	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clear_all_env|NN SV* sv|NN MAGIC* mg
@@ -1130,6 +1134,7 @@ ApOM	|int	|init_i18nl14n	|int printwarn
 ApM	|char*	|my_strerror	|const int errnum
 ApOM	|void	|new_collate	|NULLOK const char* newcoll
 ApOM	|void	|new_ctype	|NN const char* newctype
+EXpMn	|void	|_warn_problematic_locale
 ApOM	|void	|new_numeric	|NULLOK const char* newcoll
 Ap	|void	|set_numeric_local
 Ap	|void	|set_numeric_radix
@@ -1144,7 +1149,8 @@ Apd	|void	|packlist 	|NN SV *cat|NN const char *pat|NN const char *patend|NN SV 
 s	|void	|pidgone	|Pid_t pid|int status
 #endif
 : Used in perly.y
-p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|bool isreg|I32 floor
+p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|NULLOK OP *repl \
+				|bool isreg|I32 floor
 #if defined(PERL_IN_OP_C)
 s	|OP*	|pmtrans	|NN OP* o|NN OP* expr|NN OP* repl
 #endif
@@ -1441,6 +1447,7 @@ Apd	|void	|sv_magic	|NN SV *const sv|NULLOK SV *const obj|const int how \
 Apd	|MAGIC *|sv_magicext	|NN SV *const sv|NULLOK SV *const obj|const int how \
 				|NULLOK const MGVTBL *const vtbl|NULLOK const char *const name \
 				|const I32 namlen
+Ein	|bool	|sv_only_taint_gmagic|NN SV *sv
 : exported for re.pm
 EXp	|MAGIC *|sv_magicext_mglob|NN SV *sv
 ApdbamR	|SV*	|sv_mortalcopy	|NULLOK SV *const oldsv
@@ -1511,7 +1518,6 @@ Ap	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
 EiMR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
 EsM	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
 EiMRn	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
-EiMRn	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
 EiMRn	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
@@ -1554,6 +1560,7 @@ EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name \
 		|NULLOK SV* invlist|NULLOK U8* const flags_p
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+EiMRn	|UV*	|invlist_array	|NN SV* const invlist
 EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
 EiMRn	|bool*	|get_invlist_offset_addr|NN SV* invlist
 EiMRn	|UV	|_invlist_len	|NN SV* const invlist
@@ -1763,7 +1770,7 @@ Ap	|void	|do_gvgv_dump	|I32 level|NN PerlIO *file|NN const char *name\
 				|NULLOK GV *sv
 Ap	|void	|do_hv_dump	|I32 level|NN PerlIO *file|NN const char *name\
 				|NULLOK HV *sv
-Ap	|void	|do_magic_dump	|I32 level|NN PerlIO *file|NN const MAGIC *mg|I32 nest \
+Ap	|void	|do_magic_dump	|I32 level|NN PerlIO *file|NULLOK const MAGIC *mg|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 Ap	|void	|do_op_dump	|I32 level|NN PerlIO *file|NULLOK const OP *o
 Ap	|void	|do_pmop_dump	|I32 level|NN PerlIO *file|NULLOK const PMOP *pm
@@ -1786,7 +1793,7 @@ Apdmb	|void	|sv_force_normal|NN SV *sv
 Apd	|void	|sv_force_normal_flags|NN SV *const sv|const U32 flags
 pX	|SSize_t|tmps_grow_p	|SSize_t ix
 Apd	|SV*	|sv_rvweaken	|NN SV *const sv
-ApPMd	|SV*	|sv_get_backrefs|NN SV *const sv
+AnpPMd	|SV*	|sv_get_backrefs|NN SV *const sv
 : This is indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
@@ -1937,8 +1944,8 @@ s	|OP *	|my_kid		|NULLOK OP *o|NULLOK OP *attrs|NN OP **imopsp
 s	|OP *	|dup_attrlist	|NN OP *o
 s	|void	|apply_attrs	|NN HV *stash|NN SV *target|NULLOK OP *attrs
 s	|void	|apply_attrs_my	|NN HV *stash|NN OP *target|NULLOK OP *attrs|NN OP **imopsp
-s	|void	|bad_type_pv	|I32 n|NN const char *t|NN const char *name|U32 flags|NN const OP *kid
-s	|void	|bad_type_gv	|I32 n|NN const char *t|NN GV *gv|U32 flags|NN const OP *kid
+s	|void	|bad_type_pv	|I32 n|NN const char *t|NN const OP *o|NN const OP *kid
+s	|void	|bad_type_gv	|I32 n|NN GV *gv|NN const OP *kid|NN const char *t
 s	|void	|no_bareword_allowed|NN OP *o
 sR	|OP*	|no_fh_allowed|NN OP *o
 sR	|OP*	|too_few_arguments_pv|NN OP *o|NN const char* name|U32 flags
@@ -2024,7 +2031,7 @@ sR	|const char *|get_num	|NN const char *patptr|NN I32 *lenptr
 ns	|bool	|need_utf8	|NN const char *pat|NN const char *patend
 ns	|char	|first_symbol	|NN const char *pat|NN const char *patend
 sR	|char *	|sv_exp_grow	|NN SV *sv|STRLEN needed
-snR	|char *	|bytes_to_uni	|NN const U8 *start|STRLEN len|NN char *dest \
+snR	|char *	|my_bytes_to_utf8|NN const U8 *start|STRLEN len|NN char *dest \
 	      			|const bool needs_swap
 #endif
 
@@ -2120,10 +2127,11 @@ Es	|void	 |set_ANYOF_arg	|NN RExC_state_t* const pRExC_state \
 Es	|AV*	 |add_multi_match|NULLOK AV* multi_char_matches		    \
 				|NN SV* multi_string			    \
 				|const STRLEN cp_count
-Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state \
+Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state                 \
 				|NN I32 *flagp|U32 depth|const bool stop_at_1 \
 				|bool allow_multi_fold                        \
-				|const bool silence_non_portable	      \
+				|const bool silence_non_portable              \
+				|const bool strict                            \
 				|NULLOK SV** ret_invlist
 Es	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
@@ -2210,6 +2218,7 @@ Es	|I32	|make_trie	|NN RExC_state_t *pRExC_state \
 				|U32 word_count|U32 flags|U32 depth
 Es	|regnode *|construct_ahocorasick_from_trie|NN RExC_state_t *pRExC_state \
                                 |NN regnode *source|U32 depth
+EnPs	|const char *|cntrl_to_mnemonic|const U8 c
 #  ifdef DEBUGGING
 Es        |void        |regdump_intflags|NULLOK const char *lead| const U32 flags
 Es	|void	|regdump_extflags|NULLOK const char *lead| const U32 flags
@@ -2218,7 +2227,6 @@ Es	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
 				|NULLOK const regnode *last \
 				|NULLOK const regnode *plast \
 				|NN SV* sv|I32 indent|U32 depth
-EnPs	|const char *|cntrl_to_mnemonic|const U8 c
 Es	|void	|put_code_point	|NN SV* sv|UV c
 Es	|bool	|put_charclass_bitmap_innards|NN SV* sv	    \
 				|NN char* bitmap	    \
@@ -2269,6 +2277,33 @@ Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|bool	|to_byte_substr	|NN regexp * prog
 ERsn	|I32	|reg_check_named_buff_matched	|NN const regexp *rex \
 						|NN const regnode *scan
+EsnR	|bool	|isGCB		|const PL_GCB_enum before|const PL_GCB_enum after
+EsR	|bool	|isSB		|PL_SB_enum before				\
+				|PL_SB_enum after				\
+				|NN const U8 * const strbeg			\
+				|NN const U8 * const curpos			\
+				|NN const U8 * const strend			\
+				|const bool utf8_target
+EsR	|PL_SB_enum|advance_one_SB|NN U8 ** curpos				\
+				|NN const U8 * const strend			\
+				|const bool utf8_target
+EsR	|PL_SB_enum|backup_one_SB|NN const U8 * const strbeg			\
+				|NN U8 ** curpos				\
+				|const bool utf8_target
+EsR	|bool	|isWB		|PL_WB_enum previous				\
+				|PL_WB_enum before				\
+				|PL_WB_enum after				\
+				|NN const U8 * const strbeg			\
+				|NN const U8 * const curpos			\
+				|NN const U8 * const strend			\
+				|const bool utf8_target
+EsR	|PL_WB_enum|advance_one_WB|NN U8 ** curpos				\
+				|NN const U8 * const strend			\
+				|const bool utf8_target
+EsR	|PL_WB_enum|backup_one_WB|NN PL_WB_enum * previous			\
+				|NN const U8 * const strbeg			\
+				|NN U8 ** curpos				\
+				|const bool utf8_target
 #  ifdef DEBUGGING
 Es	|void	|dump_exec_pos	|NN const char *locinput|NN const regnode *scan|NN const char *loc_regeol\
 				|NN const char *loc_bostr|NN const char *loc_reg_starttry|const bool do_utf8
