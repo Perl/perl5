@@ -572,24 +572,22 @@ will be lost.
  GPOS            no         Matches where last m//g left off.
 
  # Word Boundary Opcodes:
- BOUND           no         Match "" at any word boundary using native
-                            charset rules for non-utf8, otherwise
-                            Unicode rules
- BOUNDL          no         Match "" at any boundary of a given type
-                            using locale rules
+ BOUND           no         Like BOUNDA for non-utf8, otherwise match ""
+                            between any Unicode \w\W or \W\w
+ BOUNDL          no         Like BOUND/BOUNDU, but \w and \W are defined
+                            by current locale
  BOUNDU          no         Match "" at any boundary of a given type
                             using Unicode rules
- BOUNDA          no         Match "" at any boundary of a given type
-                            using ASCII rules
- NBOUND          no         Match "" at any word non-boundary using
-                            native charset rules for non-utf8, otherwise
-                            Unicode rules
- NBOUNDL         no         Match "" at any boundary of a given type
-                            using locale rules
- NBOUNDU         no         Match "" at any boundary of a given type
+ BOUNDA          no         Match "" at any boundary between \w\W or
+                            \W\w, where \w is [_a-zA-Z0-9]
+ NBOUND          no         Like NBOUNDA for non-utf8, otherwise match
+                            "" between any Unicode \w\w or \W\W
+ NBOUNDL         no         Like NBOUND/NBOUNDU, but \w and \W are
+                            defined by current locale
+ NBOUNDU         no         Match "" at any non-boundary of a given type
                             using using Unicode rules
- NBOUNDA         no         Match "" at any boundary of a given type
-                            using using ASCII rules
+ NBOUNDA         no         Match "" betweeen any \w\w or \W\W, where \w
+                            is [_a-zA-Z0-9]
 
  # [Special] alternatives:
  REG_ANY         no         Match any one character (except newline).
