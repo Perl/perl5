@@ -230,7 +230,7 @@ L<Text::ParseWords> has been upgraded from version 3.29 to 3.30.
 
 =item *
 
-L<threads> has been upgraded from version 1.96_001 to 1.99.
+L<threads> has been upgraded from version 1.96_001 to 2.01.
 
 =item *
 
