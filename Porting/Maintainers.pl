@@ -1259,6 +1259,21 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qr{^ex/},
         ],
+
+        # Currently all EOL differences. Waiting for a new upstream release:
+        # All the files in the GitHub repo have UNIX EOLs already.
+        'CUSTOMIZED'   => [
+            qw( ExtUtils/Myconst2perl.pm
+                Makefile.PL
+                buffers.h
+                cFile.h
+                cFile.pc
+                const2perl.h
+                t/file.t
+                t/tie.t
+                typemap
+                ),
+        ],
     },
 
     'XSLoader' => {
