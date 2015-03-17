@@ -168,6 +168,10 @@ L<[cpan #95271]|https://rt.cpan.org/Ticket/Display.html?id=95271>
 
 =item *
 
+L<CPAN::Meta> has been upgraded from version 2.143240 to 2.150001.
+
+=item *
+
 L<Data::Dumper> has been upgraded from version 2.157 to 2.158.
 
 =item *

@@ -2,11 +2,12 @@ use strict;
 use warnings;
 
 package CPAN::Meta::Merge;
-# VERSION
-$CPAN::Meta::Merge::VERSION = '2.143240';
+
+our $VERSION = '2.150001';
+
 use Carp qw/croak/;
 use Scalar::Util qw/blessed/;
-use CPAN::Meta::Converter;
+use CPAN::Meta::Converter 2.141170;
 
 sub _identical {
   my ($left, $right, $path) = @_;
@@ -230,7 +231,7 @@ CPAN::Meta::Merge - Merging CPAN Meta fragments
 
 =head1 VERSION
 
-version 2.143240
+version 2.150001
 
 =head1 SYNOPSIS
 

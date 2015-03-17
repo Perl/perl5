@@ -17,6 +17,11 @@ Modifications from the original:
 
 Conversion from the original HTML to POD format
 
+=item *
+
+Include list of valid licenses from L<Module::Build> 0.18 rather than
+linking to the module.
+
 =back
 
 =head1 DESCRIPTION
@@ -86,8 +91,56 @@ a descriptive term for the licenses ... not authoritative, but must
 be consistent with licensure statements in the READMEs, documentation, etc.
 
 The license under which this distribution may be used and
-redistributed.  See L<Module::Build>
-for the list of valid options.
+redistributed.
+
+Must be one of the following licenses:
+
+=over 4
+
+=item perl
+
+The distribution may be copied and redistributed under the same terms as perl
+itself (this is by far the most common licensing option for modules on CPAN).
+This is a dual license, in which the user may choose between either the GPL or
+the Artistic license.
+
+=item gpl
+
+The distribution is distributed under the terms of the Gnu General Public
+License (L<http://www.opensource.org/licenses/gpl-license.php>).
+
+=item lgpl
+
+The distribution is distributed under the terms of the Gnu Lesser General
+Public License (L<http://www.opensource.org/licenses/lgpl-license.php>).
+
+=item artistic
+
+The distribution is licensed under the Artistic License, as specified by the
+Artistic file in the standard perl distribution.
+
+=item bsd
+
+The distribution is licensed under the BSD License
+(L<http://www.opensource.org/licenses/bsd-license.php>).
+
+=item open_source
+
+The distribution is licensed under some other Open Source Initiative-approved
+license listed at L<http://www.opensource.org/licenses/>.
+
+=item unrestricted
+
+The distribution is licensed under a license that is B<not> approved by
+L<www.opensource.org|http://www.opensource.org> but that allows distribution
+without restrictions.
+
+=item restrictive
+
+The distribution may not be redistributed without special permission from the
+author and/or copyright holder.
+
+=back
 
 =item license_uri
 

@@ -2,8 +2,9 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Feature;
-# VERSION
-$CPAN::Meta::Feature::VERSION = '2.143240';
+
+our $VERSION = '2.150001';
+
 use CPAN::Meta::Prereqs;
 
 #pod =head1 DESCRIPTION
@@ -78,7 +79,7 @@ CPAN::Meta::Feature - an optional feature provided by a CPAN distribution
 
 =head1 VERSION
 
-version 2.143240
+version 2.150001
 
 =head1 DESCRIPTION
 

@@ -17,6 +17,11 @@ Modifications from the original:
 
 Various spelling corrections
 
+=item *
+
+Include list of valid licenses from L<Module::Build> 0.2807 rather than
+linking to the module.
+
 =back
 
 =head1 SYNOPSIS
@@ -221,9 +226,72 @@ Example:
   license: perl
 
 (Spec 1.0) [required] {string} The license under which this
-distribution may be used and redistributed.  See
-L<http://search.cpan.org/dist/Module-Build/lib/Module/Build/API.pod>
-for the list of valid options.
+distribution may be used and redistributed.
+
+Must be one of the following licenses:
+
+=over 4
+
+=item apache
+
+The distribution is licensed under the Apache Software License
+(L<http://opensource.org/licenses/apachepl.php>).
+
+=item artistic
+
+The distribution is licensed under the Artistic License, as specified by the
+Artistic file in the standard perl distribution.
+
+=item bsd
+
+The distribution is licensed under the BSD License
+(L<http://www.opensource.org/licenses/bsd-license.php>).
+
+=item gpl
+
+The distribution is licensed under the terms of the Gnu General Public License
+(L<http://www.opensource.org/licenses/gpl-license.php>).
+
+=item lgpl
+
+The distribution is licensed under the terms of the Gnu Lesser General Public
+License (L<http://www.opensource.org/licenses/lgpl-license.php>).
+
+=item mit
+
+The distribution is licensed under the MIT License
+(L<http://opensource.org/licenses/mit-license.php>).
+
+=item mozilla
+
+The distribution is licensed under the Mozilla Public License.
+(L<http://opensource.org/licenses/mozilla1.0.php> or
+L<http://opensource.org/licenses/mozilla1.1.php>)
+
+=item open_source
+
+The distribution is licensed under some other Open Source Initiative-approved
+license listed at L<http://www.opensource.org/licenses/>.
+
+=item perl
+
+The distribution may be copied and redistributed under the same terms as perl
+itself (this is by far the most common licensing option for modules on CPAN).
+This is a dual license, in which the user may choose between either the GPL or
+the Artistic license.
+
+=item restrictive
+
+The distribution may not be redistributed without special permission from the
+author and/or copyright holder.
+
+=item unrestricted
+
+The distribution is licensed under a license that is not approved by
+L<www.opensource.org|http://www.opensource.org/> but that allows distribution
+without restrictions.
+
+=back
 
 =head2 distribution_type
 

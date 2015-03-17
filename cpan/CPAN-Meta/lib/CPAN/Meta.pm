@@ -2,8 +2,9 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta;
-# VERSION
-$CPAN::Meta::VERSION = '2.143240';
+
+our $VERSION = '2.150001';
+
 #pod =head1 SYNOPSIS
 #pod
 #pod     use v5.10;
@@ -643,7 +644,7 @@ CPAN::Meta - the distribution metadata for a CPAN dist
 
 =head1 VERSION
 
-version 2.143240
+version 2.150001
 
 =head1 SYNOPSIS
 
@@ -1024,7 +1025,7 @@ Ricardo Signes <rjbs@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Ansgar Burchardt Avar Arnfjord Bjarmason Christopher J. Madsen Chuck Adams Cory G Watson Damyan Ivanov Eric Wilhelm Graham Knop Gregor Hermann Karen Etheridge Kenichi Ishigaki Ken Williams Lars Dieckow Leon Timmermans majensen Mark Fowler Matt S Trout Michael G. Schwern moznion Olaf Alders Olivier Mengue Randy Sims
+=for stopwords Ansgar Burchardt Avar Arnfjord Bjarmason Christopher J. Madsen Chuck Adams Cory G Watson Damyan Ivanov Eric Wilhelm Graham Knop Gregor Hermann Karen Etheridge Kenichi Ishigaki Ken Williams Lars Dieckow Leon Timmermans majensen Mark Fowler Matt S Trout Michael G. Schwern mohawk2 moznion Olaf Alders Olivier Mengue Randy Sims
 
 =over 4
 
@@ -1099,6 +1100,10 @@ Matt S Trout <mst@shadowcat.co.uk>
 =item *
 
 Michael G. Schwern <mschwern@cpan.org>
+
+=item *
+
+mohawk2 <mohawk2@users.noreply.github.com>
 
 =item *
 

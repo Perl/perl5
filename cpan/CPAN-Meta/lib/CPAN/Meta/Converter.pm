@@ -2,8 +2,9 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-# VERSION
-$CPAN::Meta::Converter::VERSION = '2.143240';
+
+our $VERSION = '2.150001';
+
 #pod =head1 SYNOPSIS
 #pod
 #pod   my $struct = decode_json_file('META.json');
@@ -319,11 +320,11 @@ sub _no_index_1_2 {
 
   # common mistake: files -> file
   if ( exists $no_index->{files} ) {
-    $no_index->{file} = delete $no_index->{file};
+    $no_index->{file} = delete $no_index->{files};
   }
   # common mistake: modules -> module
   if ( exists $no_index->{modules} ) {
-    $no_index->{module} = delete $no_index->{module};
+    $no_index->{module} = delete $no_index->{modules};
   }
   return _convert($no_index, $no_index_spec_1_2);
 }
@@ -347,11 +348,11 @@ sub _no_index_directory {
   }
   # common mistake: files -> file
   if ( exists $element->{files} ) {
-    $element->{file} = delete $element->{file};
+    $element->{file} = delete $element->{files};
   }
   # common mistake: modules -> module
   if ( exists $element->{modules} ) {
-    $element->{module} = delete $element->{module};
+    $element->{module} = delete $element->{modules};
   }
   my $spec = $version == 2 ? $no_index_spec_2 : $no_index_spec_1_3;
   return _convert($element, $spec);
@@ -1462,6 +1463,8 @@ sub convert {
 #pod of the CPAN Meta Spec.  No validation is done on the result -- you must
 #pod validate after merging fragments into a complete metadata document.
 #pod
+#pod Available since version 2.141170.
+#pod
 #pod =cut
 
 sub upgrade_fragment {
@@ -1494,7 +1497,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.143240
+version 2.150001
 
 =head1 SYNOPSIS
 
@@ -1593,6 +1596,8 @@ license
 Returns a new hash reference with the metadata converted to the latest version
 of the CPAN Meta Spec.  No validation is done on the result -- you must
 validate after merging fragments into a complete metadata document.
+
+Available since version 2.141170.
 
 =head1 BUGS
 
