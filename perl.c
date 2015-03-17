@@ -1313,6 +1313,13 @@ perl_destruct(pTHXx)
     Perl_reentrant_free(aTHX);
 #endif
 
+    /* These all point to HVs that are about to be blown away.
+       Code in core and on CPAN assumes that if the interpreter is re-started
+       that they will be cleanly NULL or pointing to a valid HV.  */
+    PL_custom_op_names = NULL;
+    PL_custom_op_descs = NULL;
+    PL_custom_ops = NULL;
+
     sv_free_arenas();
 
     while (PL_regmatch_slab) {
