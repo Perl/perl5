@@ -856,7 +856,7 @@ Perl_re_intuit_start(pTHX_
                 "  At restart: rx_origin=%"IVdf" Check offset min: %"IVdf
                 " Start shift: %"IVdf" End shift %"IVdf
                 " Real end Shift: %"IVdf"\n",
-                (IV)(rx_origin - strpos),
+                (IV)(rx_origin - strbeg),
                 (IV)prog->check_offset_min,
                 (IV)start_shift,
                 (IV)end_shift,
@@ -904,15 +904,15 @@ Perl_re_intuit_start(pTHX_
             }
         }
 
-	DEBUG_OPTIMISE_MORE_r({
-            PerlIO_printf(Perl_debug_log, "  fbm_instr len=%d str=<%.*s>\n",
-                (int)(end_point - start_point),
-                (int)(end_point - start_point) > 20 ? 20 : (int)(end_point - start_point), 
-                start_point);
-        });
-
 	check_at = fbm_instr( start_point, end_point,
 		      check, multiline ? FBMrf_MULTILINE : 0);
+
+	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+            "  doing 'check' fbm scan, [%"IVdf"..%"IVdf"] gave %"IVdf"\n",
+            (IV)((char*)start_point - strbeg),
+            (IV)((char*)end_point   - strbeg),
+            (IV)(check_at ? check_at - strbeg : -1)
+        ));
 
         /* Update the count-of-usability, remove useless subpatterns,
             unshift s.  */
@@ -931,9 +931,6 @@ Perl_re_intuit_start(pTHX_
 
         if (!check_at)
             goto fail_finish;
-        /* Finish the diagnostic message */
-        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(check_at - strpos)) );
-
         /* set rx_origin to the minimum position where the regex could start
          * matching, given the constraint of the just-matched check substring.
          * But don't set it lower than previously.
@@ -941,6 +938,12 @@ Perl_re_intuit_start(pTHX_
 
         if (check_at - rx_origin > prog->check_offset_max)
             rx_origin = HOP3c(check_at, -prog->check_offset_max, rx_origin);
+        /* Finish the diagnostic message */
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+            "%ld (rx_origin now %"IVdf")...\n",
+            (long)(check_at - strbeg),
+            (IV)(rx_origin - strbeg)
+        ));
     }
 
 
@@ -1044,12 +1047,24 @@ Perl_re_intuit_start(pTHX_
 
         must = utf8_target ? other->utf8_substr : other->substr;
         assert(SvPOK(must));
-        s = fbm_instr(
-            (unsigned char*)s,
-            (unsigned char*)last + SvCUR(must) - (SvTAIL(must)!=0),
-            must,
-            multiline ? FBMrf_MULTILINE : 0
-        );
+        {
+            char *from = s;
+            char *to   = last + SvCUR(must) - (SvTAIL(must)!=0);
+
+            s = fbm_instr(
+                (unsigned char*)from,
+                (unsigned char*)to,
+                must,
+                multiline ? FBMrf_MULTILINE : 0
+            );
+            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                "  doing 'other' fbm scan, [%"IVdf"..%"IVdf"] gave %"IVdf"\n",
+                (IV)(from - strbeg),
+                (IV)(to   - strbeg),
+                (IV)(s ? s - strbeg : -1)
+            ));
+        }
+
         DEBUG_EXECUTE_r({
             RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
                 SvPVX_const(must), RE_SV_DUMPLEN(must), 30);
@@ -1065,29 +1080,27 @@ Perl_re_intuit_start(pTHX_
              * find it before there, we never will */
             if (last >= last1) {
                 DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                                        ", giving up...\n"));
+                                        "; giving up...\n"));
                 goto fail_finish;
             }
 
             /* try to find the check substr again at a later
              * position. Maybe next time we'll find the "other" substr
              * in range too */
-            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                ", trying %s at offset %ld...\n",
-                (other_ix ? "floating" : "anchored"),
-                (long)(HOP3c(check_at, 1, strend) - strpos)));
-
             other_last = HOP3c(last, 1, strend) /* highest failure */;
             rx_origin =
                 other_ix /* i.e. if other-is-float */
                     ? HOP3c(rx_origin, 1, strend)
                     : HOP4c(last, 1 - other->min_offset, strbeg, strend);
+            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                "; about to retry %s at offset %ld (rx_origin now %"IVdf")...\n",
+                (other_ix ? "floating" : "anchored"),
+                (long)(HOP3c(check_at, 1, strend) - strbeg),
+                (IV)(rx_origin - strbeg)
+            ));
             goto restart;
         }
         else {
-            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
-                  (long)(s - strpos)));
-
             if (other_ix) { /* if (other-is-float) */
                 /* other_last is set to s, not s+1, since its possible for
                  * a floating substr to fail first time, then succeed
@@ -1103,6 +1116,12 @@ Perl_re_intuit_start(pTHX_
                 rx_origin = HOP3c(s, -other->min_offset, strbeg);
                 other_last = HOP3c(s, 1, strend);
             }
+            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                " at offset %ld (rx_origin now %"IVdf")...\n",
+                  (long)(s - strbeg),
+                (IV)(rx_origin - strbeg)
+              ));
+
         }
     }
     else {
@@ -1110,13 +1129,13 @@ Perl_re_intuit_start(pTHX_
             PerlIO_printf(Perl_debug_log,
                 "  Check-only match: offset min:%"IVdf" max:%"IVdf
                 " check_at:%"IVdf" rx_origin:%"IVdf" rx_origin-check_at:%"IVdf
-                " strend-strpos:%"IVdf"\n",
+                " strend:%"IVdf"\n",
                 (IV)prog->check_offset_min,
                 (IV)prog->check_offset_max,
-                (IV)(check_at-strpos),
-                (IV)(rx_origin-strpos),
+                (IV)(check_at-strbeg),
+                (IV)(rx_origin-strbeg),
                 (IV)(rx_origin-check_at),
-                (IV)(strend-strpos)
+                (IV)(strend-strbeg)
             )
         );
     }
@@ -1137,7 +1156,7 @@ Perl_re_intuit_start(pTHX_
          * scanning ahead for the next \n or the next substr is debatable.
          * On the one hand you'd expect rare substrings to appear less
          * often than \n's. On the other hand, searching for \n means
-         * we're effectively flipping been check_substr and "\n" on each
+         * we're effectively flipping between check_substr and "\n" on each
          * iteration as the current "rarest" string candidate, which
          * means for example that we'll quickly reject the whole string if
          * hasn't got a \n, rather than trying every substr position
@@ -1166,8 +1185,8 @@ Perl_re_intuit_start(pTHX_
              * check was anchored (and thus has no wiggle room),
              * or check was float and rx_origin is above the float range */
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                "  Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
-                PL_colors[0], PL_colors[1], (long)(rx_origin - strpos)));
+                "  Found /%s^%s/m, about to restart lookup for check-string with rx_origin %ld...\n",
+                PL_colors[0], PL_colors[1], (long)(rx_origin - strbeg)));
             goto restart;
         }
 
@@ -1182,18 +1201,19 @@ Perl_re_intuit_start(pTHX_
              * didn't contradict, so just retry the anchored "other"
              * substr */
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                "  Found /%s^%s/m at offset %ld, rescanning for anchored from offset %ld...\n",
+                "  Found /%s^%s/m, rescanning for anchored from offset %ld (rx_origin now %"IVdf")...\n",
                 PL_colors[0], PL_colors[1],
-                (long)(rx_origin - strpos),
-                (long)(rx_origin - strpos + prog->anchored_offset)));
+                (long)(rx_origin - strbeg + prog->anchored_offset),
+                (long)(rx_origin - strbeg)
+            ));
             goto do_other_substr;
         }
 
         /* success: we don't contradict the found floating substring
          * (and there's no anchored substr). */
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-            "  Found /%s^%s/m at offset %ld...\n",
-            PL_colors[0], PL_colors[1], (long)(rx_origin - strpos)));
+            "  Found /%s^%s/m with rx_origin %ld...\n",
+            PL_colors[0], PL_colors[1], (long)(rx_origin - strbeg)));
     }
     else {
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
@@ -1288,8 +1308,10 @@ Perl_re_intuit_start(pTHX_
                          * do_other_substr', where a more accurate
                          * char-based calculation will be done */
                         DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-                                  "  Looking for anchored substr starting at offset %ld...\n",
-                                  (long)(other_last - strpos)) );
+                            "  about to retry anchored at offset %ld (rx_origin now %"IVdf")...\n",
+                            (long)(other_last - strbeg),
+                            (IV)(rx_origin - strbeg)
+                        ));
                         goto do_other_substr;
                     }
                 }
@@ -1307,9 +1329,9 @@ Perl_re_intuit_start(pTHX_
                      * search for the next \n if any, its safe here */
                     rx_origin++;
                     DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-                              "  Looking for /%s^%s/m starting at offset %ld...\n",
+                              "  about to look for /%s^%s/m starting at rx_origin %ld...\n",
                               PL_colors[0], PL_colors[1],
-                              (long)(rx_origin - strpos)) );
+                              (long)(rx_origin - strbeg)) );
                     goto postprocess_substr_matches;
                 }
 
@@ -1335,9 +1357,11 @@ Perl_re_intuit_start(pTHX_
                 goto fail;
             }
             DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-                "  Looking for %s substr starting at offset %ld...\n",
+                "  about to look for %s substr starting at offset %ld (rx_origin now %"IVdf")...\n",
                 (prog->substrs->check_ix ? "floating" : "anchored"),
-                (long)(rx_origin + start_shift - strpos)) );
+                (long)(rx_origin + start_shift - strbeg),
+                (IV)(rx_origin - strbeg)
+            ));
             goto restart;
 	}
 
@@ -1346,7 +1370,7 @@ Perl_re_intuit_start(pTHX_
 	if (rx_origin != s) {
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 			"  By STCLASS: moving %ld --> %ld\n",
-                                  (long)(rx_origin - strpos), (long)(s - strpos))
+                                  (long)(rx_origin - strbeg), (long)(s - strbeg))
                    );
         }
         else {
@@ -1398,7 +1422,7 @@ Perl_re_intuit_start(pTHX_
 
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
             "Intuit: %sSuccessfully guessed:%s match at offset %ld\n",
-             PL_colors[4], PL_colors[5], (long)(rx_origin - strpos)) );
+             PL_colors[4], PL_colors[5], (long)(rx_origin - strbeg)) );
 
     return rx_origin;
 
