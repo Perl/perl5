@@ -1918,5 +1918,9 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 /[a-z]/i	\N{KELVIN SIGN}	y	$&	\N{KELVIN SIGN}
 /[A-Z]/i	\N{LATIN SMALL LETTER LONG S}	y	$&	\N{LATIN SMALL LETTER LONG S}
 
+# RT #123840: these used to hang in re_intuit_start
+/w\zxy?\z/i	\x{100}a\x{80}a	n	-	-
+/w\z\R\z/i	\x{100}a\x{80}a	n	-	-
+
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

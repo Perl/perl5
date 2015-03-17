@@ -1051,18 +1051,28 @@ Perl_re_intuit_start(pTHX_
             char *from = s;
             char *to   = last + SvCUR(must) - (SvTAIL(must)!=0);
 
-            s = fbm_instr(
-                (unsigned char*)from,
-                (unsigned char*)to,
-                must,
-                multiline ? FBMrf_MULTILINE : 0
-            );
-            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                "  doing 'other' fbm scan, [%"IVdf"..%"IVdf"] gave %"IVdf"\n",
-                (IV)(from - strbeg),
-                (IV)(to   - strbeg),
-                (IV)(s ? s - strbeg : -1)
-            ));
+            if (from > to) {
+                s = NULL;
+                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                    "  skipping 'other' fbm scan: %"IVdf" > %"IVdf"\n",
+                    (IV)(from - strbeg),
+                    (IV)(to   - strbeg)
+                ));
+            }
+            else {
+                s = fbm_instr(
+                    (unsigned char*)from,
+                    (unsigned char*)to,
+                    must,
+                    multiline ? FBMrf_MULTILINE : 0
+                );
+                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                    "  doing 'other' fbm scan, [%"IVdf"..%"IVdf"] gave %"IVdf"\n",
+                    (IV)(from - strbeg),
+                    (IV)(to   - strbeg),
+                    (IV)(s ? s - strbeg : -1)
+                ));
+            }
         }
 
         DEBUG_EXECUTE_r({
@@ -1305,8 +1315,10 @@ Perl_re_intuit_start(pTHX_
                          * The condition above is in bytes rather than
                          * chars for efficiency. It's conservative, in
                          * that it errs on the side of doing 'goto
-                         * do_other_substr', where a more accurate
-                         * char-based calculation will be done */
+                         * do_other_substr'. In this case, at worst,
+                         * an extra anchored search may get done, but in
+                         * practice the extra fbm_instr() is likely to
+                         * get skipped anyway. */
                         DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
                             "  about to retry anchored at offset %ld (rx_origin now %"IVdf")...\n",
                             (long)(other_last - strbeg),
