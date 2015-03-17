@@ -326,6 +326,7 @@ cpan/CPAN-Meta/t/repository.t
 cpan/CPAN-Meta/t/save-load.t
 cpan/CPAN-Meta/t/validator.t
 cpan/CPAN-Meta-YAML/lib/CPAN/Meta/YAML.pm		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/00-report-prereqs.dd
 cpan/CPAN-Meta-YAML/t/01_api.t
 cpan/CPAN-Meta-YAML/t/01_compile.t		CPAN-Meta-YAML files
 cpan/CPAN-Meta-YAML/t/10_read.t
@@ -337,6 +338,7 @@ cpan/CPAN-Meta-YAML/t/21_yamlpm_compat.t
 cpan/CPAN-Meta-YAML/t/30_yaml_spec_tml.t
 cpan/CPAN-Meta-YAML/t/31_local_tml.t
 cpan/CPAN-Meta-YAML/t/32_world_tml.t
+cpan/CPAN-Meta-YAML/t/86_fail.t
 cpan/CPAN-Meta-YAML/t/data/ascii.yml
 cpan/CPAN-Meta-YAML/t/data/latin1.yml
 cpan/CPAN-Meta-YAML/t/data/multibyte.yml		CPAN-Meta-YAML files

@@ -1,6 +1,6 @@
-# Guide to CPAN::Meta::YAML testing
+# Guide to YAML::Tiny testing
 
-CPAN::Meta::YAML tests use several components:
+YAML::Tiny tests use several components:
 
 * .t files
 * Test libraries in t/lib
@@ -120,10 +120,10 @@ functions used to process test blocks.
 TestML data files are organized into three directories:
 
 * t/tml-spec — these test files are provided by the YAML spec maintainers and
-should not be modified except to skip testing features that CPAN::Meta::YAML does not
+should not be modified except to skip testing features that YAML::Tiny does not
 support
 
-* t/tml-local — these test files are CPAN::Meta::YAML's own unit tests; generally new
+* t/tml-local — these test files are YAML::Tiny's own unit tests; generally new
 test cases for coverage or correctness should be added here; these are
 broken into subdirectories, described later
 

@@ -38,6 +38,7 @@ my %ERROR = (
     E_FEATURE  => qr{\QCPAN::Meta::YAML does not support a feature},
     E_PLAIN    => qr{\QCPAN::Meta::YAML found illegal characters in plain scalar},
     E_CLASSIFY => qr{\QCPAN::Meta::YAML failed to classify the line},
+    E_DUPKEY   => qr{\QCPAN::Meta::YAML found a duplicate key},
 );
 
 # use XXX -with => 'YAML::XS';
@@ -194,7 +195,7 @@ sub test_perl_to_yaml {
 #--------------------------------------------------------------------------#
 # test_dump_error
 #
-# two blocks: perl, error 
+# two blocks: perl, error
 #
 # Tests that perl references result in an error when dumped
 #
@@ -225,7 +226,7 @@ sub test_dump_error {
 #--------------------------------------------------------------------------#
 # test_load_error
 #
-# two blocks: yaml, error 
+# two blocks: yaml, error
 #
 # Tests that a YAML string results in an error when loaded
 #

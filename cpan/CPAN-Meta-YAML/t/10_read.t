@@ -101,12 +101,5 @@ subtest "bad read arguments" => sub {
 };
 
 done_testing;
-#
-# This file is part of CPAN-Meta-YAML
-#
-# This software is copyright (c) 2010 by Adam Kennedy.
-#
-# This is free software; you can redistribute it and/or modify it under
-# the same terms as the Perl 5 programming language system itself.
-#
+# COPYRIGHT
 # vim: ts=4 sts=4 sw=4 et:
