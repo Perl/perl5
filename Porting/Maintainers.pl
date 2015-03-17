@@ -1085,21 +1085,15 @@ use File::Glob qw(:case);
     },
 
     'Text::ParseWords' => {
-        'DISTRIBUTION' => 'CHORNY/Text-ParseWords-3.29.tar.gz',
+        'DISTRIBUTION' => 'CHORNY/Text-ParseWords-3.30.tar.gz',
         'FILES'        => q[cpan/Text-ParseWords],
 
-        # Waiting to be merged upstream: see CPAN RT#50929
+        # Waiting to be merged upstream:
+        # see https://github.com/chorny/Text-ParseWords/pull/6
         'CUSTOMIZED'   => [
             qw( t/ParseWords.t
-                t/taint.t
                 ),
         ],
-
-        # For the benefit of make_ext.pl, we have to have this accessible:
-        'MAP' => {
-            'ParseWords.pm' => 'cpan/Text-ParseWords/lib/Text/ParseWords.pm',
-            ''              => 'cpan/Text-ParseWords/',
-        },
     },
 
     'Text-Tabs+Wrap' => {

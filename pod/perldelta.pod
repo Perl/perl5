@@ -226,6 +226,10 @@ No changes to installed files other than the version bump.
 
 =item *
 
+L<Text::ParseWords> has been upgraded from version 3.29 to 3.30.
+
+=item *
+
 L<threads> has been upgraded from version 1.96_001 to 1.99.
 
 =item *
