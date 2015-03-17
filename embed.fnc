@@ -2145,10 +2145,12 @@ Es	|regnode*|reg_node	|NN RExC_state_t *pRExC_state|U8 op
 Es	|UV	|reg_recode	|const char value|NN SV **encp
 Es	|regnode*|regpiece	|NN RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth
-Es	|STRLEN	|grok_bslash_N	|NN RExC_state_t *pRExC_state		    \
-				|NULLOK regnode** nodep|NULLOK UV *valuep   \
-				|NN I32 *flagp|U32 depth		    \
-				|NULLOK SV** substitute_parse
+Es	|bool	|grok_bslash_N	|NN RExC_state_t *pRExC_state		    \
+				|NULLOK regnode** nodep			    \
+				|NULLOK UV *code_point_p		    \
+				|NULLOK int* cp_count			    \
+				|NN I32 *flagp				    \
+				|const U32 depth
 Es	|void	|reginsert	|NN RExC_state_t *pRExC_state \
 				|U8 op|NN regnode *opnd|U32 depth
 Es	|void	|regtail	|NN RExC_state_t *pRExC_state \
