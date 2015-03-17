@@ -108,7 +108,7 @@ sub SKIP_TEST {
   ++$TNUM; print "ok $TNUM # skip $reason\n";
 }
 
-$TMAX = 444;
+$TMAX = 450;
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
 # it direct. Out here it lets us knobble the next if to test that the perl
@@ -1745,4 +1745,13 @@ EOT
         TEST (q(Dumper($foo)), 'EBCDIC outlier control');
         TEST (q(Data::Dumper::DumperX($foo)), 'EBCDIC outlier control: DumperX') if $XS;
     }
+}
+############# [perl #124091]
+{
+        $WANT = <<'EOT';
+#$VAR1 = "\n";
+EOT
+        local $Data::Dumper::Useqq = 1;
+        TEST (qq(Dumper("\n")), '\n alone');
+        TEST (qq(Data::Dumper::DumperX("\n")), '\n alone') if $XS;
 }

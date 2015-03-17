@@ -761,7 +761,7 @@ sub qquote {
        # this.
        || (! $IS_ASCII && $] ge 5.008_001 && utf8::is_utf8($_));
 
-  return qq("$_") if / ^ [[:print:]]* $ /x;    # fast exit
+  return qq("$_") unless /[[:^print:]]/;  # fast exit if only printables
 
   # Here, there is at least one non-printable to output.  First, translate the
   # escapes.
