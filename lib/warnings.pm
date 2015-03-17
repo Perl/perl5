@@ -895,8 +895,8 @@ believes that FATAL warnings should not be used.
 Moreover, users of FATAL warnings, especially those using
 C<< FATAL => 'all' >> should be fully aware that they are risking future
 portability of their programs by doing so.  Perl makes absolutely no
-commitments to not introduce new warnings, or warnings categories in the
-future, and indeed we explicitly reserve the right to do so.  Code that may
+commitments to not introduce new warnings or warnings categories in the
+future; indeed, we explicitly reserve the right to do so.  Code that may
 not warn now may warn in a future release of Perl if the Perl5 development
 team deems it in the best interests of the community to do so.  Should code
 using FATAL warnings break due to the introduction of a new warning we will
