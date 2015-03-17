@@ -11236,22 +11236,22 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 	/* The tokenizer should have guaranteed validity, but it's possible to
          * bypass it by using single quoting, so check.  Don't do the check
          * here when there are multiple chars; we do it below anyway. */
-            if (length_of_hex == 0
-                || length_of_hex != (STRLEN)(endchar - RExC_parse) )
-            {
-                RExC_parse += length_of_hex;	/* Includes all the valid */
-                RExC_parse += (RExC_orig_utf8)	/* point to after 1st invalid */
-                                ? UTF8SKIP(RExC_parse)
-                                : 1;
-                /* Guard against malformed utf8 */
-                if (RExC_parse >= endchar) {
-                    RExC_parse = endchar;
-                }
-                vFAIL("Invalid hexadecimal number in \\N{U+...}");
+        if (length_of_hex == 0
+            || length_of_hex != (STRLEN)(endchar - RExC_parse) )
+        {
+            RExC_parse += length_of_hex;	/* Includes all the valid */
+            RExC_parse += (RExC_orig_utf8)	/* point to after 1st invalid */
+                            ? UTF8SKIP(RExC_parse)
+                            : 1;
+            /* Guard against malformed utf8 */
+            if (RExC_parse >= endchar) {
+                RExC_parse = endchar;
             }
+            vFAIL("Invalid hexadecimal number in \\N{U+...}");
+        }
 
-            RExC_parse = endbrace + 1;
-            return TRUE;
+        RExC_parse = endbrace + 1;
+        return TRUE;
     }
     else {  /* Is a multiple character sequence */
 	SV * substitute_parse;
