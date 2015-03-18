@@ -289,11 +289,5 @@ Return the CV from the GV.
 #define gv_SVadd(gv) gv_add_by_type((gv), SVt_NULL)
 
 /*
- * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
- * End:
- *
  * ex: set ts=8 sts=4 sw=4 et:
  */

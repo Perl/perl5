@@ -123,6 +123,26 @@ L<Module::CoreList> has been upgraded from version 5.20150320 to 5.20150420.
 
 Updated to cover the latest releases of Perl.
 
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
+FindExt has been upgraded from version 1.02 to 1.03.
+
+=item *
+
+L<Cwd> has been upgraded from version 3.55 to 3.56.
+
+=item *
+
+L<PerlIO::mmap> has been upgraded from version 0.013 to 0.014.
+
+=item *
+
+L<attributes> has been upgraded from version 0.26 to 0.27.
+
 =back
 
 =head2 Removed Modules and Pragmata

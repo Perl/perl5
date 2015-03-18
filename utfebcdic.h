@@ -217,11 +217,5 @@ END_EXTERN_C
 #define MAX_UTF8_TWO_BYTE 0x3FF
 
 /*
- * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
- * End:
- *
  * ex: set ts=8 sts=4 sw=4 et:
  */

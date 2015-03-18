@@ -132,8 +132,4 @@ is @warnings, 0, "Malformed prototype isn't just a warning";
     is @warnings, 0, "No more warnings";
 }
 
-# Local variables:
-# indent-tabs-mode: nil
-# End:
-#
 # ex: set ts=8 sts=4 sw=4 et:

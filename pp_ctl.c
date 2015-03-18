@@ -5621,11 +5621,5 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 }
 
 /*
- * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
- * End:
- *
  * ex: set ts=8 sts=4 sw=4 et:
  */

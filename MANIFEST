@@ -785,6 +785,7 @@ cpan/Digest/t/digest.t		See if Digest extensions work
 cpan/Digest/t/file.t		See if Digest extensions work
 cpan/Digest/t/lib/Digest/Dummy.pm		See if Digest extensions work
 cpan/Digest/t/security.t		See if Digest extensions work
+cpan/.dir-locals.el			Emacs control file
 cpan/Encode/bin/enc2xs		Encode module generator
 cpan/Encode/bin/encguess		guess character encodings of files
 cpan/Encode/bin/piconv		iconv by perl
@@ -2852,6 +2853,7 @@ Cross/warp			Cross-compilation
 cv.h				Code value header
 cygwin/cygwin.c			Additional code for Cygwin port
 deb.c				Debugging routines
+.dir-locals.el			Emacs control file
 dist/Attribute-Handlers/Changes				Attribute::Handlers
 dist/Attribute-Handlers/demo/demo2.pl			Attribute::Handlers demo
 dist/Attribute-Handlers/demo/demo3.pl			Attribute::Handlers demo

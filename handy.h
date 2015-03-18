@@ -2137,11 +2137,5 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #endif  /* HANDY_H */
 
 /*
- * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
- * End:
- *
  * ex: set ts=8 sts=4 sw=4 et:
  */

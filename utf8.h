@@ -674,11 +674,5 @@ machines) is a valid UTF-8 character.
 #endif /* H_UTF8 */
 
 /*
- * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
- * End:
- *
  * ex: set ts=8 sts=4 sw=4 et:
  */

@@ -225,9 +225,4 @@ pod/$_: pod/$state->{copies}{$_}
 process($_, $Build{$_}, main->can("do_$_"), $Test && ++$test, $Verbose)
     foreach sort keys %Build;
 
-# Local variables:
-# cperl-indent-level: 4
-# indent-tabs-mode: nil
-# End:
-#
 # ex: set ts=8 sts=4 sw=4 et:

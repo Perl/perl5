@@ -18174,11 +18174,5 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 #endif	/* DEBUGGING */
 
 /*
- * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
- * End:
- *
  * ex: set ts=8 sts=4 sw=4 et:
  */

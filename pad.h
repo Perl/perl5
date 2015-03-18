@@ -515,11 +515,5 @@ of a string/length pair.
     Perl_pad_findmy_pvn(aTHX_ STR_WITH_LEN(name), flags)
 
 /*
- * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
- * End:
- *
  * ex: set ts=8 sts=4 sw=4 et:
  */

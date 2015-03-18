@@ -700,11 +700,5 @@ S_perl_hash_murmur_hash_64b (const unsigned char * const seed, const unsigned ch
 #endif /*compile once*/
 
 /*
- * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
- * End:
- *
  * ex: set ts=8 sts=4 sw=4 et:
  */

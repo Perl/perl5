@@ -8,7 +8,7 @@ use vars qw($VERSION @ISA @EXPORT);
 
 @ISA = qw(Exporter);
 @EXPORT = qw(writemain);
-$VERSION = '1.04';
+$VERSION = '1.05';
 
 # blead will run this with miniperl, hence we can't use autodie or File::Temp
 my $temp;
@@ -249,10 +249,4 @@ L<ExtUtils::MakeMaker>
 
 =cut
 
-# Local variables:
-# c-indentation-style: bsd
-# c-basic-offset: 4
-# indent-tabs-mode: nil
-# End:
-#
 # ex: set ts=8 sts=4 sw=4 et:
