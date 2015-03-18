@@ -160,5 +160,32 @@ setlocale(&POSIX::LC_CTYPE, "C");
 no warnings 'locale';
 "a" =~ /\b{gcb}/l;
 EXPECT
-Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 8.
-Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 8.
+Use of \b{} or \B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 8.
+Use of \b{} or \B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 8.
+########
+# NAME \b{} in UTF-8 locale
+require '../loc_tools.pl';
+unless (locales_enabled()) {
+    print("SKIPPED\n# locales not available\n"),exit;
+}
+eval { require POSIX; POSIX->import("locale_h") };
+if ($@) {
+    print("SKIPPED\n# no POSIX\n"),exit;
+}
+my $utf8_locale = find_utf8_ctype_locale();
+unless ($utf8_locale) {
+    print("SKIPPED\n# No UTF-8 locale available\n"),exit;
+}
+use warnings 'locale';
+use locale;
+setlocale(&POSIX::LC_CTYPE, "C");
+ "abc def" =~ /\b{wb}.*?/;
+ "abc def" =~ /\B{wb}.*?/;
+setlocale(&POSIX::LC_CTYPE, $utf8_locale);
+ "abc def" =~ /\b{wb}.*?/;
+ "abc def" =~ /\B{wb}.*?/;
+EXPECT
+Use of \b{} or \B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 16.
+Use of \b{} or \B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 16.
+Use of \b{} or \B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 17.
+Use of \b{} or \B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 17.

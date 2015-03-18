@@ -38,7 +38,7 @@
 #endif
 
 #define B_ON_NON_UTF8_LOCALE_IS_WRONG            \
-      "Use of \\b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale"
+      "Use of \\b{} or \\B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale"
 
 /*
  * pregcomp and pregexec -- regsub and regerror are not used in perl
@@ -2004,8 +2004,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case BOUNDL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         if (FLAGS(c) != TRADITIONAL_BOUND) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
+            if (! IN_UTF8_CTYPE_LOCALE) {
+                Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
                                                 B_ON_NON_UTF8_LOCALE_IS_WRONG);
+            }
             goto do_boundu;
         }
 
@@ -2015,8 +2017,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case NBOUNDL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
         if (FLAGS(c) != TRADITIONAL_BOUND) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
+            if (! IN_UTF8_CTYPE_LOCALE) {
+                Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
                                                 B_ON_NON_UTF8_LOCALE_IS_WRONG);
+            }
             goto do_nboundu;
         }
 
