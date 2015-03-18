@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 24);
+plan(tests => 25);
 
 {
     no warnings 'deprecated';
@@ -202,3 +202,10 @@ fresh_perl_is(
 
 is eval "qq'@\x{ff13}'", "\@\x{ff13}",
   '"@<fullwidth digit>" [perl #123963]';
+
+fresh_perl_is(
+  "s;\@{<<a;\n",
+  "Can't find string terminator \"a\" anywhere before EOF at - line 1.\n",
+   { stderr => 1 },
+  's;@{<<a; [perl #123995]'
+);

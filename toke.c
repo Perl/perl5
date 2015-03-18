@@ -9284,8 +9284,13 @@ S_scan_heredoc(pTHX_ char *s)
 	       lexing scope.  In a file, we will have broken out of the
 	       loop in the previous iteration.  In an eval, the string buf-
 	       fer ends with "\n;", so the while condition above will have
-	       evaluated to false.  So shared can never be null. */
-	    assert(shared);
+	       evaluated to false.  So shared can never be null.  Or so you
+	       might think.  Odd syntax errors like s;@{<<; can gobble up
+	       the implicit semicolon at the end of a flie, causing the
+	       file handle to be closed even when we are not in a string
+	       eval.  So shared may be null in that case.  */
+	    if (UNLIKELY(!shared))
+		goto interminable;
 	    /* A LEXSHARED struct with a null ls_prev pointer is the outer-
 	       most lexing scope.  In a file, shared->ls_linestr at that
 	       level is just one line, so there is no body to steal. */
