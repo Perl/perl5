@@ -975,7 +975,7 @@ cmp_ok($ok,'==',1,'dynamically scoped');
     for my $x (reverse @a37725) {
 	$x = $i++;
     }
-    cmp_ok("@a37725",'eq',"5 4 3 2",'bug 27725: reverse with empty slots bug');
+    cmp_ok("@a37725",'eq',"5 4 3 2",'bug 37725: reverse with empty slots bug');
 }
 
 # [perl #21469] bad things happened with for $x (...) { *x = *y }
