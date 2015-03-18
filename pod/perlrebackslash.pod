@@ -601,17 +601,26 @@ below).   More details are at L<http://www.unicode.org/reports/tr29/>.
 
 =back
 
-It is important to realize that these are default boundary definitions,
-and that implementations may wish to tailor the results for particular
-purposes and locales.  Also note that Perl gives you the definitions
-valid for the version of the Unicode Standard compiled into Perl.  These
-rules are not considered stable and have been somewhat more subject to
-change than the rest of the Standard, and hence changing to a later Perl
-version may give you a different Unicode version whose changes may not
-be compatibile with what you coded for.  If, necessary, you can
-recompile Perl with an earlier version of the Unicode standard.  More
-information about that is in L<perluniprops/Unicode character properties
-that are NOT accepted by Perl>
+It is important to realize when you use these Unicode boundaries,
+that you are taking a risk that a future version of Perl which contains
+a later version of the Unicode Standard will not work precisely the same
+way as it did when your code was written.  These rules are not
+considered stable and have been somewhat more subject to change than the
+rest of the Standard.  Unicode reserves the right to change them at
+will, and Perl reserves the right to update its implementation to
+Unicode's new rules.  In the past, some changes have been because new
+characters have been added to the Standard which have different
+characteristics than all previous characters, so new rules are
+formulated for handling them.  These should not cause any backward
+compatibility issues.  But some changes have changed the treatment of
+existing characters because the Unicode Technical Committee has decided
+that the change is warranted for whatever reason.  This could be to fix
+a bug, or because they think better results are obtained with the new
+rule.
+
+It is also important to realize that these are default boundary
+definitions, and that implementations may wish to tailor the results for
+particular purposes and locales.
 
 Unicode defines a fourth boundary type, accessible through the
 L<Unicode::LineBreak> module.
