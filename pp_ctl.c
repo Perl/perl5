@@ -4581,7 +4581,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
     }
 
     SP -= 2;	/* Pop the values */
-
+    PUTBACK;
 
     /* ~~ undef */
     if (!SvOK(e)) {
@@ -4778,11 +4778,14 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 		(void) hv_iterinit(hv);
 		while ( (he = hv_iternext(hv)) ) {
 		    DEBUG_M(Perl_deb(aTHX_ "        testing key against pattern...\n"));
+                    PUTBACK;
 		    if (matcher_matches_sv(matcher, hv_iterkeysv(he))) {
+                        SPAGAIN;
 			(void) hv_iterinit(hv);
 			destroy_matcher(matcher);
 			RETPUSHYES;
 		    }
+                    SPAGAIN;
 		}
 		destroy_matcher(matcher);
 		RETPUSHNO;
@@ -4887,10 +4890,13 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 		for(i = 0; i <= this_len; ++i) {
 		    SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
 		    DEBUG_M(Perl_deb(aTHX_ "        testing element against pattern...\n"));
+                    PUTBACK;
 		    if (svp && matcher_matches_sv(matcher, *svp)) {
+                        SPAGAIN;
 			destroy_matcher(matcher);
 			RETPUSHYES;
 		    }
+                    SPAGAIN;
 		}
 		destroy_matcher(matcher);
 		RETPUSHNO;
@@ -4951,12 +4957,13 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	}
 	else {
 	    PMOP * const matcher = make_matcher((REGEXP*) SvRV(e));
+            bool result;
 
 	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Regex\n"));
 	    PUTBACK;
-	    PUSHs(matcher_matches_sv(matcher, d)
-		    ? &PL_sv_yes
-		    : &PL_sv_no);
+	    result = matcher_matches_sv(matcher, d);
+            SPAGAIN;
+	    PUSHs(result ? &PL_sv_yes : &PL_sv_no);
 	    destroy_matcher(matcher);
 	    RETURN;
 	}
