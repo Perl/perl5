@@ -90,7 +90,7 @@ S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
  *  This returns FALSE if there is an error which the caller need not recover
  *  from; otherwise TRUE.  In either case the caller should look at *len [???].
  *  It guarantees that the returned codepoint, *uv, when expressed as
- *  utf8 bytes, would fit within the skipped "\x{...}" bytes.
+ *  utf8 bytes, would fit within the skipped "\o{...}" bytes.
  *  On input:
  *	s   is the address of a pointer to a NULL terminated string that begins
  *	    with 'o', and the previous character was a backslash.  At exit, *s
@@ -183,7 +183,7 @@ S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
     /* Return past the '}' */
     *s = e + 1;
 
-    /* guarantee replacing "\x{...}" with utf8 bytes fits within
+    /* guarantee replacing "\o{...}" with utf8 bytes fits within
      * existing space */
     assert(OFFUNISKIP(*uv) < *s - start);
 
