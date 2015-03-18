@@ -1,7 +1,7 @@
 #! perl -w
 
 use strict;
-use Test::More tests => 64;
+use Test::More tests => 65;
 use Config;
 use Cwd;
 use File::Path qw( mkpath );
@@ -152,7 +152,6 @@ my ($lib, @temps);
     ok( -d $include_dir, "perl_inc() returned directory" );
 }
 
-#
 $base = ExtUtils::CBuilder::Base->new( quiet => 1 );
 ok( $base, "ExtUtils::CBuilder::Base->new() returned true value" );
 isa_ok( $base, 'ExtUtils::CBuilder::Base' );
@@ -165,13 +164,27 @@ my %args = ();
 my @defines = $base->arg_defines( %args );
 ok( ! @defines, "Empty hash passed to arg_defines() returns empty list" );
 
-%args = ( alpha => 'beta', gamma => 'delta' );
-my $defines_seen_ref = { map { $_ => 1 } $base->arg_defines( %args ) };
+my @epsilon = ( epsilon => 'zeta' );
+my @eta     = ( eta => 'theta' );
+my @alpha   = ( alpha => 'beta' );
+my @gamma   = ( gamma => 'delta' );
+my @all = (\@epsilon, \@eta, \@alpha, \@gamma);
+
+%args = map { @{$_} } @all;
+@defines = $base->arg_defines( %args );
+my $defines_seen_ref = { map { $_ => 1 } @defines };
+my $defines_expected_ref;
+for my $r (@all) {
+    $defines_expected_ref->{"-D$r->[0]=$r->[1]"} = 1;
+}
 is_deeply(
     $defines_seen_ref,
-    { '-Dalpha=beta' => 1, '-Dgamma=delta' => 1 },
+    $defines_expected_ref,
     "arg_defines(): got expected defines",
 );
+my $ordered_defines_expected_ref = [ sort keys %{$defines_expected_ref} ];
+is_deeply(\@defines, $ordered_defines_expected_ref,
+    "Got expected order of defines: RT #124106");
 
 my $include_dirs_seen_ref =
     { map {$_ => 1} $base->arg_include_dirs( qw| alpha beta gamma | ) };

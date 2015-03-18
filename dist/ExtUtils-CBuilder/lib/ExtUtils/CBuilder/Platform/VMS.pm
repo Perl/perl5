@@ -1,5 +1,5 @@
 package ExtUtils::CBuilder::Platform::VMS;
-$ExtUtils::CBuilder::Platform::VMS::VERSION = '0.280221';
+$ExtUtils::CBuilder::Platform::VMS::VERSION = '0.280222';
 use strict;
 use ExtUtils::CBuilder::Base;
 
@@ -27,11 +27,11 @@ sub arg_defines {
 
   return '' unless keys(%args) || @config_defines;
 
-  return ('/define=(' 
-          . join(',', 
+  return ('/define=('
+          . join(',',
 		 @config_defines,
-                 map "\"$_" . ( length($args{$_}) ? "=$args{$_}" : '') . "\"", 
-                     keys %args) 
+                 map "\"$_" . ( length($args{$_}) ? "=$args{$_}" : '') . "\"",
+                     sort keys %args)
           . ')');
 }
 
@@ -50,7 +50,7 @@ sub arg_include_dirs {
 # We override the compile method because we consume the includes and defines
 # parts of ccflags in the process of compiling but don't save those parts
 # anywhere, so $self->{config}{ccflags} needs to be reset for each compile
-# operation.  
+# operation.
 
 sub compile {
   my ($self, %args) = @_;
@@ -63,10 +63,10 @@ sub compile {
 
 sub _do_link {
   my ($self, $type, %args) = @_;
-  
+
   my $objects = delete $args{objects};
   $objects = [$objects] unless ref $objects;
-  
+
   if ($args{lddl}) {
 
     # prelink will call Mksymlists, which creates the extension-specific
@@ -77,7 +77,7 @@ sub _do_link {
     # We now add the rest of what we need to the linker options file.  We
     # should replicate the functionality of C<ExtUtils::MM_VMS::dlsyms>,
     # but there is as yet no infrastructure for handling object libraries,
-    # so for now we depend on object files being listed individually on the 
+    # so for now we depend on object files being listed individually on the
     # command line, which should work for simple cases.  We do bring in our
     # own version of C<ExtUtils::Liblist::Kid::ext> so that any additional
     # libraries (including PERLSHR) can be added to the options file.
@@ -85,7 +85,7 @@ sub _do_link {
     my @optlibs = $self->_liblist_ext( $args{'libs'} );
 
     my $optfile = 'sys$disk:[]' . $temp_files[0];
-    open my $opt_fh, '>>', $optfile 
+    open my $opt_fh, '>>', $optfile
         or die "_do_link: Unable to open $optfile: $!";
     for my $lib (@optlibs) {print $opt_fh "$lib\n" if length $lib }
     close $opt_fh;
@@ -136,7 +136,7 @@ sub _liblist_ext {
   # which a system-wide logical may point.
   if ($self->perl_src) {
     my($lib,$locspec,$type);
-    foreach $lib (@crtls) { 
+    foreach $lib (@crtls) {
       if (($locspec,$type) = $lib =~ m{^([\w\$-]+)(/\w+)?} and $locspec =~ /perl/i) {
         if    (lc $type eq '/share')   { $locspec .= $self->{'config'}{'exe_ext'}; }
         elsif (lc $type eq '/library') { $locspec .= $self->{'config'}{'lib_ext'}; }
@@ -188,8 +188,8 @@ sub _liblist_ext {
       next;
     }
     warn "Resolving directory $dir\n" if $verbose;
-    if (!File::Spec->file_name_is_absolute($dir)) { 
-        $dir = catdir($cwd,$dir); 
+    if (!File::Spec->file_name_is_absolute($dir)) {
+        $dir = catdir($cwd,$dir);
     }
   }
   @dirs = grep { length($_) } @dirs;
@@ -243,14 +243,14 @@ sub _liblist_ext {
           $type = 'SHR';
           $name = $fullname unless $fullname =~ /exe;?\d*$/i;
         }
-        elsif (not length($ctype) and  # If we've got a lib already, 
+        elsif (not length($ctype) and  # If we've got a lib already,
                                        # don't bother
                ( -f ($fullname = VMS::Filespec::rmsexpand($name,$lib_ext)) or
                  -f ($fullname = VMS::Filespec::rmsexpand($name,'.olb'))))  {
           $type = 'OLB';
           $name = $fullname unless $fullname =~ /olb;?\d*$/i;
         }
-        elsif (not length($ctype) and  # If we've got a lib already, 
+        elsif (not length($ctype) and  # If we've got a lib already,
                                        # don't bother
                ( -f ($fullname = VMS::Filespec::rmsexpand($name,$obj_ext)) or
                  -f ($fullname = VMS::Filespec::rmsexpand($name,'.obj'))))  {
@@ -264,9 +264,9 @@ sub _liblist_ext {
           last if $ctype eq 'SHR';
         }
       }
-      if ($ctype) { 
+      if ($ctype) {
         push @{$found{$ctype}}, $cand;
-        warn "\tFound as $cand (really $fullname), type $ctype\n" 
+        warn "\tFound as $cand (really $fullname), type $ctype\n"
           if $verbose > 1;
 	push @flibs, $name unless $libs_seen{$fullname}++;
         next LIB;
