@@ -662,7 +662,8 @@ sub run_tests {
     # does all the right escapes
 
     {
-	my $enc = eval 'use Encode; find_encoding("ascii")';
+	my $enc;
+        $enc = eval 'use Encode; find_encoding("ascii")' unless $::IS_EBCDIC;
 
 	my $x = 0;
 	my $y = 'bad';
@@ -745,7 +746,9 @@ sub run_tests {
 			ok($ss =~ /^$cc/, fmt("code         $u->[2]", $ss, $cc));
 		    }
 
+                    SKIP:
 		    {
+                        skip("Encode not working on EBCDIC", 1) unless defined $enc;
 			# Poor man's "use encoding 'ascii'".
 			# This causes a different code path in S_const_str()
 			# to be used
