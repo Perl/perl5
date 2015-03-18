@@ -5,7 +5,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(108);
+plan(109);
 
 # A lot of tests to check that reversed for works.
 
@@ -592,3 +592,8 @@ for my $x (my $y) {
     ($x, my $z) = (1, $y);
     is $z, 3, 'list assignment after aliasing lexical var via foreach';
 }
+
+@_ = ();
+@_ = (1,2,3,scalar do{for(@_){}} + 1, 4, 5, 6);
+is "@_", "1 2 3 1 4 5 6",
+   '[perl #124004] scalar for(@empty_array) stack bug';

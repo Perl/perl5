@@ -7505,8 +7505,9 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         expr = op_lvalue(force_list(expr, 1), OP_GREPSTART);
     }
 
-    loop = (LOOP*)list(op_convert_list(OP_ENTERITER, iterflags,
-			       op_append_elem(OP_LIST, expr, scalar(sv))));
+    loop = (LOOP*)op_convert_list(OP_ENTERITER, iterflags,
+                                  op_append_elem(OP_LIST, list(expr),
+                                                 scalar(sv)));
     assert(!loop->op_next);
     /* for my  $x () sets OPpLVAL_INTRO;
      * for our $x () sets OPpOUR_INTRO */
@@ -13870,8 +13871,7 @@ Perl_rpeep(pTHX_ OP *o)
 
 	    rv2av = OpSIBLING(ourmark);
 	    if (rv2av && rv2av->op_type == OP_RV2AV && !OpHAS_SIBLING(rv2av)
-		&& rv2av->op_flags == (OPf_WANT_LIST | OPf_KIDS)
-		&& enter->op_flags == (OPf_WANT_LIST | OPf_KIDS)) {
+		&& rv2av->op_flags == (OPf_WANT_LIST | OPf_KIDS)) {
 		/* We're just reversing a single array.  */
 		rv2av->op_flags = OPf_WANT_SCALAR | OPf_KIDS | OPf_REF;
 		enter->op_flags |= OPf_STACKED;

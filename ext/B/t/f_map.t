@@ -165,7 +165,7 @@ checkOptree(note   => q{},
 # c  <1> rv2av[t6] sKRM/1
 # d  <#> gv[*_] s
 # e  <1> rv2gv sKRM/1
-# f  <{> enteriter(next->q last->t redo->g) lKS/DEF
+# f  <{> enteriter(next->q last->t redo->g) KS/DEF
 # r  <0> iter s
 # s  <|> and(other->g) K/1
 # g      <;> nextstate(main 475 (eval 10):1) v:{
@@ -198,7 +198,7 @@ EOT_EOT
 # c  <1> rv2av[t3] sKRM/1
 # d  <$> gv(*_) s
 # e  <1> rv2gv sKRM/1
-# f  <{> enteriter(next->q last->t redo->g) lKS/DEF
+# f  <{> enteriter(next->q last->t redo->g) KS/DEF
 # r  <0> iter s
 # s  <|> and(other->g) K/1
 # g      <;> nextstate(main 559 (eval 15):1) v:{
