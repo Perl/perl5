@@ -188,7 +188,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                     if (slen < 0)
                         return (NULL);
                     symlink[slen] = '\0';
-#ifdef EBCDIC /* XXX Probably this should be only os390 */
+#  ifdef EBCDIC /* XXX Probably this should be only os390 */
                     /* Replace all instances of $SYSNAME/foo simply by /foo */
                     if (slen > SYSNAME_LEN + strlen(next_token)
                         && strnEQ(symlink, SYSNAME, SYSNAME_LEN)
@@ -197,7 +197,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                     {
                         goto not_symlink;
                     }
-#endif
+#  endif
                     if (symlink[0] == '/') {
                         resolved[1] = 0;
                         resolved_len = 1;
@@ -231,7 +231,9 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                     }
                     remaining_len = my_strlcpy(remaining, symlink, sizeof(remaining));
                 }
+#  ifdef EBCDIC
               not_symlink: ;
+#  endif
             }
 #endif
 	}
