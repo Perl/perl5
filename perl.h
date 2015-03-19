@@ -5963,7 +5963,8 @@ expression, but with an empty argument list, like this:
 #define _NOT_IN_NUMERIC_STANDARD (! PL_numeric_standard)
 
 /* We can lock the category to stay in the C locale, making requests to the
- * contrary noops, in the dynamic scope by setting PL_numeric_standard to 2 */
+ * contrary be noops, in the dynamic scope by setting PL_numeric_standard to 2.
+ * */
 #define _NOT_IN_NUMERIC_UNDERLYING                                          \
                         (! PL_numeric_local && PL_numeric_standard < 2)
 
