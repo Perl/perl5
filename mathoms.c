@@ -1792,12 +1792,6 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
     return NATIVE_TO_UNI(valid_utf8_to_uvchr(s, retlen));
 }
 
-void
-Perl_save_re_context(pTHX)
-{
-    PERL_UNUSED_CONTEXT;
-}
-
 /*
 =for apidoc Am|HV *|pad_compname_type|PADOFFSET po
 

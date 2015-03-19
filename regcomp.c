@@ -17710,6 +17710,17 @@ S_re_croak2(pTHX_ bool utf8, const char* pat1,const char* pat2,...)
     Perl_croak(aTHX_ "%"UTF8f, UTF8fARG(utf8, l1-1, buf));
 }
 
+/* Get this:  We have an empty void function here.  But it somehow got into
+   the API, so there you go.  */
+
+#ifndef PERL_IN_XSUB_RE
+void
+Perl_save_re_context(pTHX)
+{
+    PERL_UNUSED_CONTEXT;
+}
+#endif
+
 #ifdef DEBUGGING
 
 STATIC void
