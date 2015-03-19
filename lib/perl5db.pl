@@ -7572,7 +7572,7 @@ variables during a restart.
 Set_list packages up items to be stored in a set of environment variables
 (VAR_n, containing the number of items, and VAR_0, VAR_1, etc., containing
 the values). Values outside the standard ASCII charset are stored by encoding
-then as hexadecimal values.
+them as hexadecimal values.
 
 =cut
 
