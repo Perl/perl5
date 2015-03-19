@@ -1456,7 +1456,26 @@ EOF
     if($path eq '-') {
 	print $out_fh "/* ex: set ro: */\n";
     } else {
-	read_only_bottom_close_and_rename($out_fh, [$0])
+        # Some of the sources for these macros come from Unicode tables
+        my $sources_list = "lib/unicore/mktables.lst";
+        my @sources = ($0, qw(lib/unicore/mktables lib/Unicode/UCD.pm));
+        {
+            # Depend on mktables’ own sources.  It’s a shorter list of files than
+            # those that Unicode::UCD uses.
+            if (! open my $mktables_list, $sources_list) {
+
+                # This should force a rebuild once $sources_list exists
+                push @sources, $sources_list;
+            }
+            else {
+                while(<$mktables_list>) {
+                    last if /===/;
+                    chomp;
+                    push @sources, "lib/unicore/$_" if /^[^#]/;
+                }
+            }
+        }
+        read_only_bottom_close_and_rename($out_fh, \@sources)
     }
 }
 
