@@ -193,10 +193,8 @@ use File::Glob qw(:case);
     },
 
     'Carp' => {
-        'DISTRIBUTION' => 'RJBS/Carp-1.35.tar.gz',
+        'DISTRIBUTION' => 'RJBS/Carp-1.36.tar.gz',
         'FILES'        => q[dist/Carp],
-        # Waiting for resolution upstream: CPAN RT#102835
-        'CUSTOMIZED'   => [ qw[ lib/Carp/Heavy.pm ] ],
     },
 
     'Compress::Raw::Bzip2' => {
