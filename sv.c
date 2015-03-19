@@ -3160,7 +3160,8 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 #else
                 {
                     bool local_radix;
-                    DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
+                    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+                    STORE_LC_NUMERIC_SET_TO_NEEDED();
 
                     local_radix =
                         PL_numeric_local &&
@@ -11205,7 +11206,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     bool no_redundant_warning = FALSE; /* did we use any explicit format parameter index? */
     bool hexfp = FALSE; /* hexadecimal floating point? */
 
-    DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED;
+    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
     PERL_ARGS_ASSERT_SV_VCATPVFN_FLAGS;
     PERL_UNUSED_ARG(maybe_tainted);

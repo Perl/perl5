@@ -522,7 +522,8 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
     PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX;
 
     if (IN_LC(LC_NUMERIC)) {
-        DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
+        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+        STORE_LC_NUMERIC_SET_TO_NEEDED();
         if (PL_numeric_radix_sv) {
             STRLEN len;
             const char * const radix = SvPV(PL_numeric_radix_sv, len);
@@ -1209,7 +1210,8 @@ Perl_my_atof(pTHX_ const char* s)
     PERL_ARGS_ASSERT_MY_ATOF;
 
     {
-        DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
+        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+        STORE_LC_NUMERIC_SET_TO_NEEDED();
         if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
             const char *standard = NULL, *local = NULL;
             bool use_standard_radix;
@@ -1232,7 +1234,7 @@ Perl_my_atof(pTHX_ const char* s)
             Perl_atof2(s, x);
 
             if (use_standard_radix)
-                SET_NUMERIC_LOCAL();
+                SET_NUMERIC_UNDERLYING();
         }
         else
             Perl_atof2(s, x);

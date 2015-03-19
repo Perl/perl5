@@ -5866,44 +5866,32 @@ typedef struct am_table_short AMTS;
 
 #ifdef USE_LOCALE_NUMERIC
 
-/* These macros are for toggling between the underlying locale (LOCAL) and the
- * C locale. */
-
-/* The first set makes sure that the locale is set to C unless within a 'use
- * locale's scope; otherwise to the default locale.  A function pointer is
- * used, which can be declared separately by
- * DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED, followed by the actual
- * setting (using STORE_LC_NUMERIC_SET_TO_NEEDED()), or the two can be combined
- * into one call DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED().
- * RESTORE_LC_NUMERIC() in all cases restores the locale to what it was before
- * these were called */
+/* These macros are for toggling between the underlying locale (UNDERLYING or
+ * LOCAL) and the C locale (STANDARD). */
 
 #define _NOT_IN_NUMERIC_STANDARD (! PL_numeric_standard)
 
 /* We can lock the category to stay in the C locale, making requests to the
  * contrary noops, in the dynamic scope by setting PL_numeric_standard to 2 */
-#define _NOT_IN_NUMERIC_LOCAL    (! PL_numeric_local && PL_numeric_standard < 2)
+#define _NOT_IN_NUMERIC_UNDERLYING                                          \
+                        (! PL_numeric_local && PL_numeric_standard < 2)
 
-#define DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED                       \
-    void (*_restore_LC_NUMERIC_function)(pTHX) = NULL;
+#define DECLARATION_FOR_LC_NUMERIC_MANIPULATION                             \
+    void (*_restore_LC_NUMERIC_function)(pTHX) = NULL
 
-#define STORE_LC_NUMERIC_SET_TO_NEEDED()                                     \
-    if (IN_LC(LC_NUMERIC)) {                                                 \
-        if (_NOT_IN_NUMERIC_LOCAL) {                                         \
-            set_numeric_local();                                             \
-            _restore_LC_NUMERIC_function = &Perl_set_numeric_standard;       \
-        }                                                                    \
-    }                                                                        \
-    else {                                                                   \
-        if (_NOT_IN_NUMERIC_STANDARD) {                                      \
-            SET_NUMERIC_STANDARD();                                          \
-            _restore_LC_NUMERIC_function = &Perl_set_numeric_local;          \
-        }                                                                    \
+#define STORE_LC_NUMERIC_SET_TO_NEEDED()                                    \
+    if (IN_LC(LC_NUMERIC)) {                                                \
+        if (_NOT_IN_NUMERIC_UNDERLYING) {                                   \
+            set_numeric_local();                                            \
+            _restore_LC_NUMERIC_function = &Perl_set_numeric_standard;      \
+        }                                                                   \
+    }                                                                       \
+    else {                                                                  \
+        if (_NOT_IN_NUMERIC_STANDARD) {                                     \
+            SET_NUMERIC_STANDARD();                                         \
+            _restore_LC_NUMERIC_function = &Perl_set_numeric_local;         \
+        }                                                                   \
     }
-
-#define DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED()                             \
-    DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED;                          \
-    STORE_LC_NUMERIC_SET_TO_NEEDED();
 
 #define RESTORE_LC_NUMERIC()                                                 \
     if (_restore_LC_NUMERIC_function) {                                      \
@@ -5916,64 +5904,87 @@ typedef struct am_table_short AMTS;
 	STMT_START { if (_NOT_IN_NUMERIC_STANDARD) set_numeric_standard();  \
                                                                  } STMT_END
 
-#define SET_NUMERIC_LOCAL()                                                 \
-	STMT_START { if (_NOT_IN_NUMERIC_LOCAL)                             \
+#define SET_NUMERIC_UNDERLYING()                                            \
+	STMT_START { if (_NOT_IN_NUMERIC_UNDERLYING)                        \
                                             set_numeric_local(); } STMT_END
 
 /* The rest of these LC_NUMERIC macros toggle to one or the other state, with
  * the RESTORE_foo ones called to switch back, but only if need be */
-#define STORE_NUMERIC_LOCAL_SET_STANDARD()          \
-	bool _was_local = _NOT_IN_NUMERIC_STANDARD; \
+#define STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD()                          \
+	bool _was_local = _NOT_IN_NUMERIC_STANDARD;                         \
 	if (_was_local) set_numeric_standard();
 
 /* Doesn't change to underlying locale unless within the scope of some form of
  * 'use locale'.  This is the usual desired behavior. */
-#define STORE_NUMERIC_STANDARD_SET_LOCAL()              \
-	bool _was_standard = _NOT_IN_NUMERIC_LOCAL      \
-                            && IN_LC(LC_NUMERIC);       \
+#define STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()                          \
+	bool _was_standard = _NOT_IN_NUMERIC_UNDERLYING                     \
+                            && IN_LC(LC_NUMERIC);                           \
 	if (_was_standard) set_numeric_local();
 
 /* Rarely, we want to change to the underlying locale even outside of 'use
  * locale'.  This is principally in the POSIX:: functions */
-#define STORE_NUMERIC_STANDARD_FORCE_LOCAL()            \
-	bool _was_standard = _NOT_IN_NUMERIC_LOCAL;     \
-	if (_was_standard) set_numeric_local();
+#define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()                              \
+    if (_NOT_IN_NUMERIC_UNDERLYING) {                                       \
+        set_numeric_local();                                                \
+        _restore_LC_NUMERIC_function = &Perl_set_numeric_standard;          \
+    }
 
 /* Lock to the C locale until unlock is called */
-#define LOCK_NUMERIC_STANDARD()                         \
-        (__ASSERT_(PL_numeric_standard)                 \
+#define LOCK_LC_NUMERIC_STANDARD()                          \
+        (__ASSERT_(PL_numeric_standard)                     \
         PL_numeric_standard = 2)
 
-#define UNLOCK_NUMERIC_STANDARD()                       \
-        (__ASSERT_(PL_numeric_standard == 2)            \
+#define UNLOCK_LC_NUMERIC_STANDARD()                        \
+        (__ASSERT_(PL_numeric_standard == 2)                \
         PL_numeric_standard = 1)
 
-#define RESTORE_NUMERIC_LOCAL() \
+#define RESTORE_LC_NUMERIC_UNDERLYING()                     \
 	if (_was_local) set_numeric_local();
 
-#define RESTORE_NUMERIC_STANDARD() \
-	if (_was_standard) SET_NUMERIC_STANDARD();
+#define RESTORE_LC_NUMERIC_STANDARD()                       \
+    if (_restore_LC_NUMERIC_function) {                     \
+        _restore_LC_NUMERIC_function(aTHX);                 \
+    }
 
 #else /* !USE_LOCALE_NUMERIC */
 
-#define SET_NUMERIC_STANDARD()  	/**/
-#define SET_NUMERIC_LOCAL()     	/**/
+#define SET_LC_NUMERIC_STANDARD()  	/**/
+#define SET_LC_NUMERIC_UNDERLYING()
 #define IS_NUMERIC_RADIX(a, b)		(0)
-#define STORE_NUMERIC_LOCAL_SET_STANDARD()	/**/
-#define STORE_NUMERIC_STANDARD_SET_LOCAL()	/**/
-#define STORE_NUMERIC_STANDARD_FORCE_LOCAL()
-#define RESTORE_NUMERIC_LOCAL()		/**/
-#define RESTORE_NUMERIC_STANDARD()	/**/
-#define DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED
+#define STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD()
+#define STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()
+#define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()
+#define RESTORE_LC_NUMERIC_UNDERLYING()
+#define RESTORE_LC_NUMERIC_STANDARD()	/**/
+#define DECLARATION_FOR_LC_NUMERIC_MANIPULATION
 #define STORE_LC_NUMERIC_SET_TO_NEEDED()
-#define DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED()
 #define RESTORE_LC_NUMERIC()
-#define LOCK_NUMERIC_STANDARD()
-#define UNLOCK_NUMERIC_STANDARD()
+#define LOCK_LC_NUMERIC_STANDARD()
+#define UNLOCK_LC_NUMERIC_STANDARD()
 
 #endif /* !USE_LOCALE_NUMERIC */
 
 #define Atof				my_atof
+
+/* Back-compat names */
+#define DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED              \
+                        DECLARATION_FOR_LC_NUMERIC_MANIPULATION
+#define DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED()                    \
+                DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED;     \
+                STORE_LC_NUMERIC_SET_TO_NEEDED();
+#define LOCK_NUMERIC_STANDARD() LOCK_LC_NUMERIC_STANDARD()
+#define RESTORE_NUMERIC_LOCAL() RESTORE_LC_NUMERIC_UNDERLYING()
+#define RESTORE_NUMERIC_STANDARD() RESTORE_LC_NUMERIC_STANDARD()
+#define SET_NUMERIC_LOCAL() SET_NUMERIC_UNDERLYING()
+#define STORE_NUMERIC_LOCAL_SET_STANDARD()                          \
+                    STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD()
+#define STORE_NUMERIC_STANDARD_SET_LOCAL()                          \
+                    STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()
+#define STORE_NUMERIC_STANDARD_FORCE_LOCAL()                        \
+                        STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()
+#define UNLOCK_NUMERIC_STANDARD() UNLOCK_LC_NUMERIC_STANDARD()
+
+
 
 #ifdef USE_QUADMATH
 #  define Perl_strtod(s, e) strtoflt128(s, e)

@@ -824,7 +824,8 @@ PP(pp_formline)
 	    {
                 Size_t max = SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget));
                 int len;
-                DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
+                DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+                STORE_LC_NUMERIC_SET_TO_NEEDED();
                 arg &= ~(FORM_NUM_POINT|FORM_NUM_BLANK);
 #ifdef USE_QUADMATH
                 {
