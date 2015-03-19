@@ -842,7 +842,7 @@ use File::Glob qw(:case);
     },
 
     'parent' => {
-        'DISTRIBUTION' => 'CORION/parent-0.228.tar.gz',
+        'DISTRIBUTION' => 'CORION/parent-0.232.tar.gz',
         'FILES'        => q[cpan/parent],
     },
 

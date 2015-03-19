@@ -204,6 +204,12 @@ L<Module::CoreList> has been reverted from version 5.20150220 to 5.20150320.
 
 =item *
 
+L<parent> has been upgraded from version 0.228 to 0.232.
+
+No changes to installed files other than the version bump.
+
+=item *
+
 L<Pod::Functions> has been upgraded from version 1.08 to 1.09.
 
 =item *
