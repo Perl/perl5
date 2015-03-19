@@ -711,7 +711,7 @@ for my $charset (get_supported_code_pages()) {
 }
 
 my $sources_list = "lib/unicore/mktables.lst";
-my @sources = ($0, "lib/Unicode/UCD.pm");
+my @sources = ($0, qw(lib/unicore/mktables lib/Unicode/UCD.pm));
 {
     # Depend on mktables’ own sources.  It’s a shorter list of files than
     # those that Unicode::UCD uses.

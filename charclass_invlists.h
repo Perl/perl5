@@ -97321,6 +97321,7 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC POSIX-BC */
  * a9791f08281d7b0a417e4ad882cf64463f6815db8156932acd85228ac717fd94 lib/unicore/extracted/DLineBreak.txt
  * a17a0330e57d774343a53c019f1bc69827c2676982a1bf48e0898a76710e8877 lib/unicore/extracted/DNumType.txt
  * c2cb810a67cc5fb4a8d236b6c1bc6dd4d89733d8603881997e8aae2c816a3db1 lib/unicore/extracted/DNumValues.txt
+ * 2ee1b1f995a63cfdc5abe9b16f165447f85030420f452f7bbd47586c1b64020a lib/unicore/mktables
  * 746472de66b936ac885ca6d6e68058242b4e909e3260c6317f3ec719f78f76cc lib/unicore/version
- * f401ed39bfaff60a47b89ddb89df4fe517a60a523c8f4332280b4fce0048434e regen/mk_invlists.pl
+ * 72754dc48de5bcad92cd0f84c691d099f429ddf2222f24531c928ad610cd8050 regen/mk_invlists.pl
  * ex: set ro: */
