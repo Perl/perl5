@@ -28,10 +28,10 @@ BEGIN {
 }
 
 {
-  my $str = Carp::longmess("foo");
+  my $line = __LINE__; my $str = Carp::longmess("foo");
   is(
     $str,
-    "foo at t/Carp.t line 31.\n",
+    "foo at $0 line $line.\n",
     "we don't overshoot the top stack frame",
   );
 }
