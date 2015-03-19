@@ -508,7 +508,7 @@ Perl_op_refcnt_dec(pTHX_ OP *o)
 
 #define RETURN_UNLIMITED_NUMBER (PERL_INT_MAX / 2)
 
-#define CHANGE_TYPE(o,type) \
+#define OpTYPE_set(o,type) \
     STMT_START {				\
 	o->op_type = (OPCODE)type;		\
 	o->op_ppaddr = PL_ppaddr[type];		\
@@ -1181,7 +1181,7 @@ Perl_op_null(pTHX_ OP *o)
 	return;
     op_clear(o);
     o->op_targ = o->op_type;
-    CHANGE_TYPE(o, OP_NULL);
+    OpTYPE_set(o, OP_NULL);
 }
 
 void
@@ -1402,7 +1402,7 @@ S_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
     LOGOP *logop;
     OP *kid = first;
     NewOp(1101, logop, 1, LOGOP);
-    CHANGE_TYPE(logop, type);
+    OpTYPE_set(logop, type);
     logop->op_first = first;
     logop->op_other = other;
     logop->op_flags = OPf_KIDS;
@@ -1971,19 +1971,19 @@ Perl_scalarvoid(pTHX_ OP *arg)
             break;
 
         case OP_POSTINC:
-            CHANGE_TYPE(o, OP_PREINC);  /* pre-increment is faster */
+            OpTYPE_set(o, OP_PREINC);  /* pre-increment is faster */
             break;
 
         case OP_POSTDEC:
-            CHANGE_TYPE(o, OP_PREDEC);  /* pre-decrement is faster */
+            OpTYPE_set(o, OP_PREDEC);  /* pre-decrement is faster */
             break;
 
         case OP_I_POSTINC:
-            CHANGE_TYPE(o, OP_I_PREINC);        /* pre-increment is faster */
+            OpTYPE_set(o, OP_I_PREINC);        /* pre-increment is faster */
             break;
 
         case OP_I_POSTDEC:
-            CHANGE_TYPE(o, OP_I_PREDEC);        /* pre-decrement is faster */
+            OpTYPE_set(o, OP_I_PREDEC);        /* pre-decrement is faster */
             break;
 
         case OP_SASSIGN: {
@@ -2040,9 +2040,9 @@ Perl_scalarvoid(pTHX_ OP *arg)
             if (kid->op_type == OP_NOT
                 && (kid->op_flags & OPf_KIDS)) {
                 if (o->op_type == OP_AND) {
-                    CHANGE_TYPE(o, OP_OR);
+                    OpTYPE_set(o, OP_OR);
                 } else {
-                    CHANGE_TYPE(o, OP_AND);
+                    OpTYPE_set(o, OP_AND);
                 }
                 op_null(kid);
             }
@@ -2644,7 +2644,7 @@ S_lvref(pTHX_ OP *o, I32 type)
 		return;
 	    }
 	  slurpy:
-            CHANGE_TYPE(o, OP_LVAVREF);
+            OpTYPE_set(o, OP_LVAVREF);
 	    o->op_private &= OPpLVAL_INTRO|OPpPAD_STATE;
 	    o->op_flags |= OPf_MOD|OPf_REF;
 	    return;
@@ -2701,7 +2701,7 @@ S_lvref(pTHX_ OP *o, I32 type)
 	break;
     case OP_ASLICE:
     case OP_HSLICE:
-        CHANGE_TYPE(o, OP_LVREFSLICE);
+        OpTYPE_set(o, OP_LVREFSLICE);
 	o->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM;
 	return;
     case OP_NULL:
@@ -2733,7 +2733,7 @@ S_lvref(pTHX_ OP *o, I32 type)
 		      : OP_DESC(o),
 		     PL_op_desc[type]));
     }
-    CHANGE_TYPE(o, OP_LVREF);
+    OpTYPE_set(o, OP_LVREF);
     o->op_private &=
 	OPpLVAL_INTRO|OPpLVREF_ELEM|OPpLVREF_TYPE|OPpPAD_STATE;
     if (type == OP_ENTERLOOP)
@@ -2772,7 +2772,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_ENTERSUB:
 	if ((type == OP_UNDEF || type == OP_REFGEN || type == OP_LOCK) &&
 	    !(o->op_flags & OPf_STACKED)) {
-            CHANGE_TYPE(o, OP_RV2CV);		/* entersub => rv2cv */
+            OpTYPE_set(o, OP_RV2CV);		/* entersub => rv2cv */
 	    assert(cUNOPo->op_first->op_type == OP_NULL);
 	    op_null(((LISTOP*)cUNOPo->op_first)->op_first);/* disable pushmark */
 	    break;
@@ -3244,7 +3244,7 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
     case OP_ENTERSUB:
 	if ((type == OP_EXISTS || type == OP_DEFINED) &&
 	    !(o->op_flags & OPf_STACKED)) {
-            CHANGE_TYPE(o, OP_RV2CV);             /* entersub => rv2cv */
+            OpTYPE_set(o, OP_RV2CV);             /* entersub => rv2cv */
 	    assert(cUNOPo->op_first->op_type == OP_NULL);
 	    op_null(((LISTOP*)cUNOPo->op_first)->op_first);	/* disable pushmark */
 	    o->op_flags |= OPf_SPECIAL;
@@ -3827,11 +3827,11 @@ Perl_op_scope(pTHX_ OP *o)
     if (o) {
 	if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || TAINTING_get) {
 	    o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
-            CHANGE_TYPE(o, OP_LEAVE);
+            OpTYPE_set(o, OP_LEAVE);
 	}
 	else if (o->op_type == OP_LINESEQ) {
 	    OP *kid;
-            CHANGE_TYPE(o, OP_SCOPE);
+            OpTYPE_set(o, OP_SCOPE);
 	    kid = ((LISTOP*)o)->op_first;
 	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
 		op_null(kid);
@@ -4414,7 +4414,7 @@ S_gen_constant_list(pTHX_ OP *o)
     Perl_pp_anonlist(aTHX);
     PL_tmps_floor = oldtmps_floor;
 
-    CHANGE_TYPE(o, OP_RV2AV);
+    OpTYPE_set(o, OP_RV2AV);
     o->op_flags &= ~OPf_REF;	/* treat \(1..2) like an ordinary list */
     o->op_flags |= OPf_PARENS;	/* and flatten \(1..2,3) */
     o->op_opt = 0;		/* needs to be revisited in rpeep() */
@@ -4592,7 +4592,7 @@ Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
 	}
     }
 
-    CHANGE_TYPE(o, type);
+    OpTYPE_set(o, type);
     o->op_flags |= flags;
     if (flags & OPf_FOLDED)
 	o->op_folded = 1;
@@ -4687,7 +4687,7 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 
     NewOp(1101, listop, 1, LISTOP);
 
-    CHANGE_TYPE(listop, type);
+    OpTYPE_set(listop, type);
     if (first || last)
 	flags |= OPf_KIDS;
     listop->op_flags = (U8)flags;
@@ -4749,7 +4749,7 @@ Perl_newOP(pTHX_ I32 type, I32 flags)
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP);
 
     NewOp(1101, o, 1, OP);
-    CHANGE_TYPE(o, type);
+    OpTYPE_set(o, type);
     o->op_flags = (U8)flags;
 
     o->op_next = o;
@@ -4801,7 +4801,7 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 	first = force_list(first, 1);
 
     NewOp(1101, unop, 1, UNOP);
-    CHANGE_TYPE(unop, type);
+    OpTYPE_set(unop, type);
     unop->op_first = first;
     unop->op_flags = (U8)(flags | OPf_KIDS);
     unop->op_private = (U8)(1 | (flags >> 8));
@@ -4903,7 +4903,7 @@ S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth
     methop->op_rclass_sv = NULL;
 #endif
 
-    CHANGE_TYPE(methop, type);
+    OpTYPE_set(methop, type);
     return CHECKOP(type, methop);
 }
 
@@ -4960,7 +4960,7 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     if (!first)
 	first = newOP(OP_NULL, 0);
 
-    CHANGE_TYPE(binop, type);
+    OpTYPE_set(binop, type);
     binop->op_first = first;
     binop->op_flags = (U8)(flags | OPf_KIDS);
     if (!last) {
@@ -5362,7 +5362,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 	|| type == OP_CUSTOM);
 
     NewOp(1101, pmop, 1, PMOP);
-    CHANGE_TYPE(pmop, type);
+    OpTYPE_set(pmop, type);
     pmop->op_flags = (U8)flags;
     pmop->op_private = (U8)(0 | (flags >> 8));
     if (PL_opargs[type] & OA_RETSCALAR)
@@ -5808,7 +5808,7 @@ Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
 	|| type == OP_CUSTOM);
 
     NewOp(1101, svop, 1, SVOP);
-    CHANGE_TYPE(svop, type);
+    OpTYPE_set(svop, type);
     svop->op_sv = sv;
     svop->op_next = (OP*)svop;
     svop->op_flags = (U8)flags;
@@ -5874,7 +5874,7 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
 	|| type == OP_CUSTOM);
 
     NewOp(1101, padop, 1, PADOP);
-    CHANGE_TYPE(padop, type);
+    OpTYPE_set(padop, type);
     padop->op_padix =
 	pad_alloc(type, isGV(sv) ? SVf_READONLY : SVs_PADTMP);
     SvREFCNT_dec(PAD_SVl(padop->op_padix));
@@ -5941,7 +5941,7 @@ Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP);
 
     NewOp(1101, pvop, 1, PVOP);
-    CHANGE_TYPE(pvop, type);
+    OpTYPE_set(pvop, type);
     pvop->op_pv = pv;
     pvop->op_next = (OP*)pvop;
     pvop->op_flags = (U8)flags;
@@ -6700,10 +6700,10 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 
     NewOp(1101, cop, 1, COP);
     if (PERLDB_LINE && CopLINE(PL_curcop) && PL_curstash != PL_debstash) {
-        CHANGE_TYPE(cop, OP_DBSTATE);
+        OpTYPE_set(cop, OP_DBSTATE);
     }
     else {
-        CHANGE_TYPE(cop, OP_NEXTSTATE);
+        OpTYPE_set(cop, OP_NEXTSTATE);
     }
     cop->op_flags = (U8)flags;
     CopHINTS_set(cop, PL_hints);
@@ -7366,7 +7366,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
 
     if (!loop) {
 	NewOp(1101,loop,1,LOOP);
-        CHANGE_TYPE(loop, OP_ENTERLOOP);
+        OpTYPE_set(loop, OP_ENTERLOOP);
 	loop->op_private = 0;
 	loop->op_next = (OP*)loop;
     }
@@ -7425,7 +7425,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     if (sv) {
 	if (sv->op_type == OP_RV2SV) {	/* symbol table variable */
 	    iterpflags = sv->op_private & OPpOUR_INTRO; /* for our $x () */
-            CHANGE_TYPE(sv, OP_RV2GV);
+            OpTYPE_set(sv, OP_RV2GV);
 
 	    /* The op_type check is needed to prevent a possible segfault
 	     * if the loop variable is undeclared and 'strict vars' is in
@@ -9285,12 +9285,12 @@ Perl_oopsAV(pTHX_ OP *o)
     switch (o->op_type) {
     case OP_PADSV:
     case OP_PADHV:
-        CHANGE_TYPE(o, OP_PADAV);
+        OpTYPE_set(o, OP_PADAV);
 	return ref(o, OP_RV2AV);
 
     case OP_RV2SV:
     case OP_RV2HV:
-        CHANGE_TYPE(o, OP_RV2AV);
+        OpTYPE_set(o, OP_RV2AV);
 	ref(o, OP_RV2AV);
 	break;
 
@@ -9311,12 +9311,12 @@ Perl_oopsHV(pTHX_ OP *o)
     switch (o->op_type) {
     case OP_PADSV:
     case OP_PADAV:
-        CHANGE_TYPE(o, OP_PADHV);
+        OpTYPE_set(o, OP_PADHV);
 	return ref(o, OP_RV2HV);
 
     case OP_RV2SV:
     case OP_RV2AV:
-        CHANGE_TYPE(o, OP_RV2HV);
+        OpTYPE_set(o, OP_RV2HV);
 	ref(o, OP_RV2HV);
 	break;
 
@@ -9335,7 +9335,7 @@ Perl_newAVREF(pTHX_ OP *o)
     PERL_ARGS_ASSERT_NEWAVREF;
 
     if (o->op_type == OP_PADANY) {
-        CHANGE_TYPE(o, OP_PADAV);
+        OpTYPE_set(o, OP_PADAV);
 	return o;
     }
     else if ((o->op_type == OP_RV2AV || o->op_type == OP_PADAV)) {
@@ -9360,7 +9360,7 @@ Perl_newHVREF(pTHX_ OP *o)
     PERL_ARGS_ASSERT_NEWHVREF;
 
     if (o->op_type == OP_PADANY) {
-        CHANGE_TYPE(o, OP_PADHV);
+        OpTYPE_set(o, OP_PADHV);
 	return o;
     }
     else if ((o->op_type == OP_RV2HV || o->op_type == OP_PADHV)) {
@@ -9374,7 +9374,7 @@ Perl_newCVREF(pTHX_ I32 flags, OP *o)
 {
     if (o->op_type == OP_PADANY) {
 	dVAR;
-        CHANGE_TYPE(o, OP_PADCV);
+        OpTYPE_set(o, OP_PADCV);
     }
     return newUNOP(OP_RV2CV, flags, scalar(o));
 }
@@ -9387,7 +9387,7 @@ Perl_newSVREF(pTHX_ OP *o)
     PERL_ARGS_ASSERT_NEWSVREF;
 
     if (o->op_type == OP_PADANY) {
-        CHANGE_TYPE(o, OP_PADSV);
+        OpTYPE_set(o, OP_PADSV);
         scalar(o);
 	return o;
     }
@@ -9684,7 +9684,7 @@ Perl_ck_eval(pTHX_ OP *o)
 	    enter->op_next = (OP*)enter;
 
 	    o = op_prepend_elem(OP_LINESEQ, (OP*)enter, (OP*)kid);
-            CHANGE_TYPE(o, OP_LEAVETRY);
+            OpTYPE_set(o, OP_LEAVETRY);
 	    enter->op_other = o;
 	    return o;
 	}
@@ -9835,7 +9835,7 @@ Perl_ck_rvconst(pTHX_ OP *o)
 		  && SvTYPE(SvRV(gv)) != SVt_PVCV)
 		    gv_fetchsv(kidsv, GV_ADDMULTI, SVt_PVCV);
 	    }
-            CHANGE_TYPE(kid, OP_GV);
+            OpTYPE_set(kid, OP_GV);
 	    SvREFCNT_dec(kid->op_sv);
 #ifdef USE_ITHREADS
 	    /* XXX hack: dependence on sizeof(PADOP) <= sizeof(SVOP) */
@@ -10409,10 +10409,10 @@ Perl_ck_smartmatch(pTHX_ OP *o)
 	
 	/* Implicitly take a reference to a regular expression */
 	if (first->op_type == OP_MATCH) {
-            CHANGE_TYPE(first, OP_QR);
+            OpTYPE_set(first, OP_QR);
 	}
 	if (second->op_type == OP_MATCH) {
-            CHANGE_TYPE(second, OP_QR);
+            OpTYPE_set(second, OP_QR);
         }
     }
     
@@ -10479,7 +10479,7 @@ Perl_ck_sassign(pTHX_ OP *o)
 		newCONDOP(0, first, S_maybe_targlex(aTHX_ o), other);
 	    OP *const condop = first->op_next;
 
-            CHANGE_TYPE(condop, OP_ONCE);
+            OpTYPE_set(condop, OP_ONCE);
 	    other->op_targ = target;
 	    nullop->op_flags |= OPf_WANT_SCALAR;
 
@@ -10840,7 +10840,7 @@ Perl_ck_select(pTHX_ OP *o)
     if (o->op_flags & OPf_KIDS) {
         kid = OpSIBLING(cLISTOPo->op_first);     /* get past pushmark */
         if (kid && OpHAS_SIBLING(kid)) {
-            CHANGE_TYPE(o, OP_SSELECT);
+            OpTYPE_set(o, OP_SSELECT);
 	    o = ck_fun(o);
 	    return fold_constants(op_integerize(op_std_init(o)));
 	}
@@ -11100,7 +11100,7 @@ Perl_ck_split(pTHX_ OP *o)
         kid = pmruntime( newPMOP(OP_MATCH, OPf_SPECIAL), kid, NULL, 0, 0);
         op_sibling_splice(o, NULL, 0, kid);
     }
-    CHANGE_TYPE(kid, OP_PUSHRE);
+    OpTYPE_set(kid, OP_PUSHRE);
     /* target implies @ary=..., so wipe it */
     kid->op_targ = 0;
     scalar(kid);
@@ -12045,7 +12045,7 @@ Perl_ck_each(pTHX_ OP *o)
 		break;
 	    case OP_PADAV:
 	    case OP_RV2AV:
-		CHANGE_TYPE(o, array_type);
+		OpTYPE_set(o, array_type);
 		break;
 	    case OP_CONST:
 		if (kid->op_private == OPpCONST_BARE
@@ -12056,7 +12056,7 @@ Perl_ck_each(pTHX_ OP *o)
 		    /* we let ck_fun handle it */
 		    break;
 	    default:
-		CHANGE_TYPE(o, ref_type);
+		OpTYPE_set(o, ref_type);
 		scalar(kid);
 	}
     }
@@ -13279,7 +13279,7 @@ Perl_rpeep(pTHX_ OP *o)
                     o->op_flags &=~ OPf_KIDS;
                     /* stub is a baseop; repeat is a binop */
                     STATIC_ASSERT_STMT(sizeof(OP) <= sizeof(BINOP));
-                    CHANGE_TYPE(o, OP_STUB);
+                    OpTYPE_set(o, OP_STUB);
                     o->op_private = 0;
                     break;
                 }
@@ -13511,7 +13511,7 @@ Perl_rpeep(pTHX_ OP *o)
                  * *always* formerly a pushmark */
                 assert(o->op_type == OP_PUSHMARK);
                 o->op_next = followop;
-                CHANGE_TYPE(o, OP_PADRANGE);
+                OpTYPE_set(o, OP_PADRANGE);
                 o->op_targ = base;
                 /* bit 7: INTRO; bit 6..0: count */
                 o->op_private = (intro | count);
@@ -13597,7 +13597,7 @@ Perl_rpeep(pTHX_ OP *o)
 		    o->op_private |= o->op_next->op_private & (OPpLVAL_INTRO
 							       | OPpOUR_INTRO);
 		    o->op_next = o->op_next->op_next;
-                    CHANGE_TYPE(o, OP_GVSV);
+                    OpTYPE_set(o, OP_GVSV);
 		}
 	    }
 	    else if (o->op_next->op_type == OP_READLINE
@@ -13605,7 +13605,7 @@ Perl_rpeep(pTHX_ OP *o)
 		    && (o->op_next->op_next->op_flags & OPf_STACKED))
 	    {
 		/* Turn "$a .= <FH>" into an OP_RCATLINE. AMS 20010917 */
-                CHANGE_TYPE(o, OP_RCATLINE);
+                OpTYPE_set(o, OP_RCATLINE);
 		o->op_flags |= OPf_STACKED;
 		op_null(o->op_next->op_next);
 		op_null(o->op_next);
@@ -13908,7 +13908,7 @@ Perl_rpeep(pTHX_ OP *o)
 		    sv_rvweaken(sv);
 		    SvREADONLY_on(sv);
 		}
-                CHANGE_TYPE(o, OP_CONST);
+                OpTYPE_set(o, OP_CONST);
 		o->op_flags |= OPf_SPECIAL;
 		cSVOPo->op_sv = sv;
 	    }
