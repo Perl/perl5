@@ -1049,6 +1049,7 @@ optimize_out_native_convert_function(pTHX_ OP* entersubop,
      * The code is mostly just cargo-culted from Memoize::Lift */
 
     OP *pushop, *argop;
+    OP *parent;
     SV* prototype = newSVpvs("$");
 
     PERL_UNUSED_ARG(protosv);
@@ -1056,27 +1057,28 @@ optimize_out_native_convert_function(pTHX_ OP* entersubop,
     assert(entersubop->op_type == OP_ENTERSUB);
 
     entersubop = ck_entersub_args_proto(entersubop, namegv, prototype);
+    parent = entersubop;
 
     SvREFCNT_dec(prototype);
 
     pushop = cUNOPx(entersubop)->op_first;
     if (! OpHAS_SIBLING(pushop)) {
+        parent = pushop;
         pushop = cUNOPx(pushop)->op_first;
     }
-    argop = pushop->op_sibling;
+    argop = OpSIBLING(pushop);
 
     /* Carry on without doing the optimization if it is not something we're
      * expecting, so continues to work */
     if (   ! argop
         || ! OpHAS_SIBLING(argop)
-        ||   OpHAS_SIBLING(argop->op_sibling)
+        ||   OpHAS_SIBLING(OpSIBLING(argop))
     ) {
         return entersubop;
     }
 
-    pushop->op_sibling = argop->op_sibling;
-    argop->op_sibling = NULL;
-    argop->op_lastsib = 1;
+    /* cut argop from the subtree */
+    (void)op_sibling_splice(parent, pushop, 1, NULL);
 
     op_free(entersubop);
     return argop;
