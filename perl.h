@@ -5893,9 +5893,9 @@ typedef struct am_table_short AMTS;
         }                                                                   \
     }
 
-#define RESTORE_LC_NUMERIC()                                                 \
-    if (_restore_LC_NUMERIC_function) {                                      \
-        _restore_LC_NUMERIC_function(aTHX);                                  \
+#define RESTORE_LC_NUMERIC()                                                \
+    if (_restore_LC_NUMERIC_function) {                                     \
+        _restore_LC_NUMERIC_function(aTHX);                                 \
     }
 
 /* The next two macros set unconditionally.  These should be rarely used, and
@@ -5948,14 +5948,14 @@ typedef struct am_table_short AMTS;
 
 #else /* !USE_LOCALE_NUMERIC */
 
-#define SET_LC_NUMERIC_STANDARD()  	/**/
+#define SET_LC_NUMERIC_STANDARD()
 #define SET_LC_NUMERIC_UNDERLYING()
 #define IS_NUMERIC_RADIX(a, b)		(0)
 #define STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD()
 #define STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()
 #define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()
 #define RESTORE_LC_NUMERIC_UNDERLYING()
-#define RESTORE_LC_NUMERIC_STANDARD()	/**/
+#define RESTORE_LC_NUMERIC_STANDARD()
 #define DECLARATION_FOR_LC_NUMERIC_MANIPULATION
 #define STORE_LC_NUMERIC_SET_TO_NEEDED()
 #define RESTORE_LC_NUMERIC()
