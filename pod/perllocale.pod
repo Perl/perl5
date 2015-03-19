@@ -104,7 +104,8 @@ deficiencies, so keep reading.
 
 =head1 PREPARING TO USE LOCALES
 
-Perl itself will not use locales unless specifically requested to (but
+Perl itself (outside the L<POSIX> module) will not use locales unless
+specifically requested to (but
 again note that Perl may interact with code that does use them).  Even
 if there is such a request, B<all> of the following must be true
 for it to work properly:
@@ -162,7 +163,8 @@ L<The setlocale function>.
 
 =head2 The C<"use locale"> pragma
 
-By default, Perl itself ignores the current locale.  The S<C<use locale>>
+By default, Perl itself (outside the L<POSIX> module)
+ignores the current locale.  The S<C<use locale>>
 pragma tells Perl to use the current locale for some operations.
 Starting in v5.16, there are optional parameters to this pragma,
 described below, which restrict which operations are affected by it.
@@ -214,6 +216,15 @@ locale, and hence any C library functions they call will use that
 underlying locale.  For more discussion, see L<perlxs/CAVEATS>.
 
 =back
+
+Note that all C programs (including the perl interpreter, which is
+written in C) always have an underlying locale.  That locale is the "C"
+locale unless changed by a call to L<setlocale()|/The setlocale
+function>.  When Perl starts up, it changes the underlying locale to the
+one which is indicated by the L</ENVIRONMENT>.  When using the L<POSIX>
+module or writing XS code, it is important to keep in mind that the
+underlying locale may be something other than "C", even if the program
+hasn't explicitly changed it.
 
 =for comment
 The nbsp below makes this look better (though not great)
@@ -1183,8 +1194,8 @@ of a match involving C<\w> while C<use locale> is in effect.
 
 =item PERL_SKIP_LOCALE_INIT
 
-This environment variable, available starting in Perl v5.20, and if it
-evaluates to a TRUE value, tells Perl to not use the rest of the
+This environment variable, available starting in Perl v5.20, if set
+(to any value), tells Perl to not use the rest of the
 environment variables to initialize with.  Instead, Perl uses whatever
 the current locale settings are.  This is particularly useful in
 embedded environments, see
