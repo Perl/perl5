@@ -1802,6 +1802,7 @@ Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, SV *meth, U32 flags,
     if (flags & G_WRITING_TO_STDERR) {
 	SAVETMPS;
 
+	save_re_context();
 	SAVESPTR(PL_stderrgv);
 	PL_stderrgv = NULL;
     }

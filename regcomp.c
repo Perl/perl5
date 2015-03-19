@@ -6180,6 +6180,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 
 	ENTER;
 	SAVETMPS;
+	save_re_context();
 	PUSHSTACKi(PERLSI_REQUIRE);
         /* G_RE_REPARSING causes the toker to collapse \\ into \ when
          * parsing qr''; normally only q'' does this. It also alters

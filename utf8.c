@@ -2407,6 +2407,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	PUSHSTACKi(PERLSI_MAGIC);
 	ENTER;
 	SAVEHINTS();
+	save_re_context();
 	/* We might get here via a subroutine signature which uses a utf8
 	 * parameter name, at which point PL_subname will have been set
 	 * but not yet used. */
@@ -2421,6 +2422,10 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 #ifndef NO_TAINT_SUPPORT
 	    /* It is assumed that callers of this routine are not passing in
 	     * any user derived data.  */
+	    /* Need to do this after save_re_context() as it will set
+	     * PL_tainted to 1 while saving $1 etc (see the code after getrx:
+	     * in Perl_magic_get).  Even line to create errsv_save can turn on
+	     * PL_tainted.  */
 	    SAVEBOOL(TAINT_get);
 	    TAINT_NOT;
 #endif
