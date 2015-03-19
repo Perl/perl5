@@ -5867,7 +5867,98 @@ typedef struct am_table_short AMTS;
 #ifdef USE_LOCALE_NUMERIC
 
 /* These macros are for toggling between the underlying locale (UNDERLYING or
- * LOCAL) and the C locale (STANDARD). */
+ * LOCAL) and the C locale (STANDARD).
+
+=head1 Locale-related functions and macros
+
+=for apidoc Amn|void|DECLARATION_FOR_LC_NUMERIC_MANIPULATION
+
+This macro should be used as a statement.  It declares a private variable
+(whose name begins with an underscore) that is needed by the other macros in
+this section.  Failing to include this correctly should lead to a syntax error.
+For compatibility with C89 C compilers it should be placed in a block before
+any executable statements.
+
+=for apidoc Am|void|STORE_LC_NUMERIC_FORCE_TO_UNDERLYING
+
+This is used by XS code that that is C<LC_NUMERIC> locale-aware to force the
+locale for category C<LC_NUMERIC> to be what perl thinks is the current
+underlying locale.  (The perl interpreter could be wrong about what the
+underlying locale actually is if some C or XS code has called the C library
+function L<setlocale(3)> behind its back; calling L</sync_locale> before calling
+this macro will update perl's records.)
+
+A call to L</DECLARATION_FOR_LC_NUMERIC_MANIPULATION> must have been made to
+declare at compile time a private variable used by this macro.  This macro
+should be called as a single statement, not an expression, but with an empty
+argument list, like this:
+
+ {
+    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+     ...
+    STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
+     ...
+    RESTORE_LC_NUMERIC();
+     ...
+ }
+
+The private variable is used to save the current locale state, so
+that the requisite matching call to L</RESTORE_LC_NUMERIC> can restore it.
+
+=for apidoc Am|void|STORE_LC_NUMERIC_SET_TO_NEEDED
+
+This is used to help wrap XS or C code that that is C<LC_NUMERIC> locale-aware.
+This locale category is generally kept set to the C locale by Perl for
+backwards compatibility, and because most XS code that reads floating point
+values can cope only with the decimal radix character being a dot.
+
+This macro makes sure the current C<LC_NUMERIC> state is set properly, to be
+aware of locale if the call to the XS or C code from the Perl program is
+from within the scope of a S<C<use locale>>; or to ignore locale if the call is
+instead from outside such scope.
+
+This macro is the start of wrapping the C or XS code; the wrap ending is done
+by calling the L</RESTORE_LC_NUMERIC> macro after the operation.  Otherwise
+the state can be changed that will adversely affect other XS code.
+
+A call to L</DECLARATION_FOR_LC_NUMERIC_MANIPULATION> must have been made to
+declare at compile time a private variable used by this macro.  This macro
+should be called as a single statement, not an expression, but with an empty
+argument list, like this:
+
+ {
+    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+     ...
+    STORE_LC_NUMERIC_SET_TO_NEEDED();
+     ...
+    RESTORE_LC_NUMERIC();
+     ...
+ }
+
+=for apidoc Am|void|RESTORE_LC_NUMERIC
+
+This is used in conjunction with one of the macros
+L</STORE_LC_NUMERIC_SET_TO_NEEDED>
+and
+L</STORE_LC_NUMERIC_FORCE_TO_UNDERLYING>
+
+to properly restore the C<LC_NUMERIC> state.
+
+A call to L</DECLARATION_FOR_LC_NUMERIC_MANIPULATION> must have been made to
+declare at compile time a private variable used by this macro and the two
+C<STORE> ones.  This macro should be called as a single statement, not an
+expression, but with an empty argument list, like this:
+
+ {
+    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+     ...
+    RESTORE_LC_NUMERIC();
+     ...
+ }
+
+=cut
+
+*/
 
 #define _NOT_IN_NUMERIC_STANDARD (! PL_numeric_standard)
 

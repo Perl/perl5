@@ -480,7 +480,9 @@ well.
 
 =item *
 
-XXX
+Macros have been created to allow XS code to better manipulate the POSIX
+locale category C<LC_NUMERIC>.
+See L<perlapi/Locale-related functions and macros>.
 
 =back
 
