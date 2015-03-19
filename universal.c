@@ -1060,7 +1060,7 @@ optimize_out_native_convert_function(pTHX_ OP* entersubop,
     SvREFCNT_dec(prototype);
 
     pushop = cUNOPx(entersubop)->op_first;
-    if (! pushop->op_sibling) {
+    if (! OpHAS_SIBLING(pushop)) {
         pushop = cUNOPx(pushop)->op_first;
     }
     argop = pushop->op_sibling;
@@ -1068,8 +1068,8 @@ optimize_out_native_convert_function(pTHX_ OP* entersubop,
     /* Carry on without doing the optimization if it is not something we're
      * expecting, so continues to work */
     if (   ! argop
-        || ! argop->op_sibling
-        ||   argop->op_sibling->op_sibling
+        || ! OpHAS_SIBLING(argop)
+        ||   OpHAS_SIBLING(argop->op_sibling)
     ) {
         return entersubop;
     }
