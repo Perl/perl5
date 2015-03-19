@@ -1962,7 +1962,7 @@ C<op_first> field but also an C<op_last> field.  The most complex type of
 op is a C<LISTOP>, which has any number of children.  In this case, the
 first child is pointed to by C<op_first> and the last child by
 C<op_last>.  The children in between can be found by iteratively
-following the C<op_sibling> pointer from the first child to the last 9but
+following the C<op_sibling> pointer from the first child to the last (but
 see below).
 
 There are also some other op types: a C<PMOP> holds a regular expression,
@@ -1988,7 +1988,8 @@ C<op_sibling> chain. This frees up the C<op_sibling> field on the last
 sibling to point back to the parent op. The macro C<OpSIBLING(o)> wraps
 this special behaviour, and always returns NULL on the last sibling.
 With this build the C<op_parent(o)> function can be used to find the
-parent of any op.
+parent of any op. Thus for forward compatibility, you should always use
+the C<OpSIBLING(o)> macro rather than accessing C<op_sibling> directly.
 
 Another way to examine the tree is to use a compiler back-end module, such
 as L<B::Concise>.
