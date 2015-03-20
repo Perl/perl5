@@ -140,7 +140,8 @@ L<B> has been upgraded from version 1.56 to 1.57.
 
 L<B::Deparse> has been upgraded from version 1.33 to 1.34.
 
-Deparse C<$#_> as that instead of as C<$#{_}>.  [perl #123947]
+Deparse C<$#_> as that instead of as C<$#{_}>.
+L<[perl #123947]|https://rt.perl.org/Ticket/Display.html?id=123947>
 
 =item *
 
@@ -190,6 +191,10 @@ L<Data::Dumper> has been upgraded from version 2.157 to 2.158.
 
 =item *
 
+L<DB> has been upgraded from version 1.07 to 1.08.
+
+=item *
+
 L<Devel::PPPort> has been upgraded from version 3.28 to 3.31.
 
 =item *
@@ -218,13 +223,17 @@ L<Locale::Codes> has been upgraded from version 3.33 to 3.34.
 
 =item *
 
-L<Module::CoreList> has been reverted from version 5.20150220 to 5.20150320.
+L<Module::CoreList> has been upgraded from version 5.20150220 to 5.20150320.
 
 =item *
 
 L<parent> has been upgraded from version 0.228 to 0.232.
 
 No changes to installed files other than the version bump.
+
+=item *
+
+The PathTools modules have been upgraded from version 3.54 to 3.55.
 
 =item *
 
@@ -237,6 +246,14 @@ L<POSIX> has been upgraded from version 1.51 to 1.52.
 =item *
 
 L<re> has been upgraded from version 0.31 to 0.32.
+
+=item *
+
+L<sigtrap> has been upgraded from version 1.07 to 1.08.
+
+=item *
+
+L<Term::Complete> has been upgraded from version 1.402 to 1.403.
 
 =item *
 
@@ -263,10 +280,6 @@ L<Unicode::Collate> has been upgraded from version 1.11 to 1.12.
 =item *
 
 L<utf8> has been upgraded from version 1.14 to 1.15.
-
-=item *
-
-L<XS::APItest> has been upgraded from version 0.70 to 0.71.
 
 =back
 
@@ -492,9 +505,9 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item HP-UX
 
-XXX
+The archname now distinguishes use64bitint from use64bitall.
 
 =back
 
@@ -514,6 +527,11 @@ Macros have been created to allow XS code to better manipulate the POSIX
 locale category C<LC_NUMERIC>.
 See L<perlapi/Locale-related functions and macros>.
 
+=item *
+
+The previous C<atoi> et al replacement function, C<grok_atou>, has now been
+superseded by C<grok_atoUV>.  See L<perlclib> for details.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -529,39 +547,65 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 Repeated global pattern matches in scalar context on large tainted
 strings were exponentially slow depending on the current match
-position in the string. [perl #123202]
+position in the string.
+L<[perl #123202]|https://rt.perl.org/Ticket/Display.html?id=123202>
 
 =item *
 
 Various crashes due to the parser getting confused by syntax errors have
-been fixed.  [perl #123801] [perl #123802] [perl #123955] [perl #123995]
+been fixed.
+L<[perl #123801]|https://rt.perl.org/Ticket/Display.html?id=123801>
+L<[perl #123802]|https://rt.perl.org/Ticket/Display.html?id=123802>
+L<[perl #123955]|https://rt.perl.org/Ticket/Display.html?id=123955>
+L<[perl #123995]|https://rt.perl.org/Ticket/Display.html?id=123995>
 
 =item *
 
 C<split> in the scope of lexical $_ has been fixed not to fail assertions.
-[perl #123763]
+L<[perl #123763]|https://rt.perl.org/Ticket/Display.html?id=123763>
 
 =item *
 
 C<my $x : attr> syntax inside various list operators no longer fails
-assertions.  [perl #123817]
+assertions.
+L<[perl #123817]|https://rt.perl.org/Ticket/Display.html?id=123817>
 
 =item *
 
 An @ sign in quotes followed by a non-ASCII digit (which is not a valid
 identifier) would cause the parser to crash, instead of simply trying the @
-as literal.  This has been fixed.  [perl #123963]
+as literal.  This has been fixed.
+L<[perl #123963]|https://rt.perl.org/Ticket/Display.html?id=123963>
 
 =item *
 
 C<*bar::=*foo::=*glob_with_hash> has been crashing since 5.14, but no
-longer does.  [perl #123847]
+longer does.
+L<[perl #123847]|https://rt.perl.org/Ticket/Display.html?id=123847>
 
 =item *
 
 C<foreach> in scalar context was not pushing an item on to the stack,
 resulting in bugs.  (C<print 4, scalar do { foreach(@x){} } + 1> would
-print 5.)  It has been fixed to return C<undef>.  [perl #124004]
+print 5.)  It has been fixed to return C<undef>.
+L<[perl #124004]|https://rt.perl.org/Ticket/Display.html?id=124004>
+
+=item *
+
+A memory leak introduced in Perl 5.21.6 has been fixed.
+L<[perl #123922]|https://rt.perl.org/Ticket/Display.html?id=123922>
+
+=item *
+
+A regression in the behaviour of the C<readline> built-in function, caused by
+the introduction of the C<< <<>> >> operator, has been fixed.
+L<[perl #123990]|https://rt.perl.org/Ticket/Display.html?id=123990>
+
+=item *
+
+Several cases of data used to store environment variable contents in core C
+code being potentailly overwritten before being used have been fixed.
+L<[perl #123748]|https://rt.perl.org/Ticket/Display.html?id=123748>
 
 =back
 
