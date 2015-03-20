@@ -604,7 +604,7 @@ L<[perl #123990]|https://rt.perl.org/Ticket/Display.html?id=123990>
 =item *
 
 Several cases of data used to store environment variable contents in core C
-code being potentailly overwritten before being used have been fixed.
+code being potentially overwritten before being used have been fixed.
 L<[perl #123748]|https://rt.perl.org/Ticket/Display.html?id=123748>
 
 =back
