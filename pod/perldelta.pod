@@ -512,7 +512,7 @@ position in the string. [perl #123202]
 =item *
 
 Various crashes due to the parser getting confused by syntax errors have
-been fixed.  [perl #123801] [perl #123802] [perl #123955]
+been fixed.  [perl #123801] [perl #123802] [perl #123955] [perl #123995]
 
 =item *
 
