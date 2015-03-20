@@ -17,9 +17,26 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.10 - Aldous Huxley, "The Devils of Loudun"
+
+L<Announced on 2015-03-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/03/msg226847.html>
+
+The fire burned on, the good fathers continued to sprinkle and intone.
+Suddenly a flock of pigeons came swooping down from the church and
+started to wheel around the roaring column of flame and smoke.  The
+crowd shouted, the archers waved their halberds at the birds, Lactance
+and Tranquille splashed them on the wing with holy water.  In vain.  The
+pigeons were not to be driven away.  Round and round they flew, diving
+through the smoke, singeing their feathers in the flames.  Both parties
+claimed a miracle.  For the parson's enemies the birds, quite obviously,
+were a troop of devils, come to fetch away his soul.  For his friends,
+they were emblems of the Holy Ghost and living proof of his innocence.
+It never seems to have occurred to anyone that they were just pigeons,
+obeying the laws of their own, their blessedly other-than-human nature.
+
 =head2 v5.21.9 - Emily Dickinson, "There is Another Sky"
 
-L<Announced on 2015-02-20 by Sawyer X|http://nntp.perl.org/group/perl.perl5.porters/226002>
+L<Announced on 2015-02-20 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2015/02/msg226002.html>
 
 There is another sky,
 Ever serene and fair,
