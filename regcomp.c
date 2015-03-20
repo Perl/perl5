@@ -15093,9 +15093,18 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                          * same element, neither should be a digit. */
                         if (index_start == index_final) {
                             assert(! ELEMENT_RANGE_MATCHES_INVLIST(index_start)
-                            || invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start+1]
-                            - invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start]
-                            == 10);
+                            || (invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start+1]
+                               - invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start]
+                               == 10)
+                               /* But actually Unicode did have one group of 11
+                                * 'digits' in 5.2, so in case we are operating
+                                * on that version, let that pass */
+                            || (invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start+1]
+                               - invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start]
+                                == 11
+                               && invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start]
+                                == 0x19D0)
+                            );
                         }
                         else if ((index_start >= 0
                                   && ELEMENT_RANGE_MATCHES_INVLIST(index_start))
