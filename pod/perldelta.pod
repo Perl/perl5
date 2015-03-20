@@ -535,6 +535,12 @@ as literal.  This has been fixed.  [perl #123963]
 C<*bar::=*foo::=*glob_with_hash> has been crashing since 5.14, but no
 longer does.  [perl #123847]
 
+=item *
+
+C<foreach> in scalar context was not pushing an item on to the stack,
+resulting in bugs.  (C<print 4, scalar do { foreach(@x){} } + 1> would
+print 5.)  It has been fixed to return C<undef>.  [perl #124004]
+
 =back
 
 =head1 Known Problems
