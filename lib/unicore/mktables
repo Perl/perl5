@@ -2289,6 +2289,8 @@ sub trace { return main::trace(@_); }
         $file{$addr} = main::internal_file_to_platform(shift);
         $first_released{$addr} = shift;
 
+        undef $file{$addr} if $first_released{$addr} gt $v_version;
+
         # The rest of the arguments are key => value pairs
         # %constructor_fields has been set up earlier to list all possible
         # ones.  Either set or push, depending on how the default has been set
@@ -2337,7 +2339,7 @@ sub trace { return main::trace(@_); }
         # including its reason
         if ($skip{$addr}) {
             $optional{$addr} = 1;
-            $skipped_files{$file{$addr}} = $skip{$addr}
+            $skipped_files{$file{$addr}} = $skip{$addr} if $file{$addr};
         }
         elsif ($properties{$addr}) {
 
@@ -2418,7 +2420,8 @@ sub trace { return main::trace(@_); }
         # than this Unicode version), and isn't there.  This means if someone
         # copies it into an earlier version's directory, we will go ahead and
         # process it.
-        return if $first_released{$addr} gt $v_version && ! -e $file;
+        return if $first_released{$addr} gt $v_version
+                  && (! defined $file || ! -e $file);
 
         # If in debugging mode and this file doesn't have the non-skip
         # flag set, and isn't one of the critical files, skip it.
