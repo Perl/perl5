@@ -866,6 +866,7 @@ BEGIN {
         lock($DBGR);
         print "Threads support enabled\n";
     } else {
+        *lock = sub(*) {};
         *share = sub(\[$@%]) {};
     }
 }
