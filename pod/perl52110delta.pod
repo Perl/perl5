@@ -1,0 +1,482 @@
+=encoding utf8
+
+=head1 NAME
+
+perl52110delta - what is new for perl v5.21.10
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.21.9 release and the 5.21.10
+release.
+
+If you are upgrading from an earlier release such as 5.21.8, first read
+L<perl5219delta>, which describes differences between 5.21.8 and 5.21.9.
+
+=head1 Incompatible Changes
+
+=head2 C<(?[...])> operators now follow standard Perl precedence
+
+This experimental feature allows set operations in regular expression patterns.
+Prior to this, the intersection operator had the same precedence as the other
+binary operators.  Now it has higher precedence.  This could lead to different
+outcomes than existing code expects (though the documentation has always noted
+that this change might happen, recommending fully parenthesizing the
+expressions).  See L<perlrecharclass/Extended Bracketed Character Classes>.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+The functions C<utf8::native_to_unicode()> and C<utf8::unicode_to_native()>
+(see L<utf8>) are now optimized out on ASCII platforms.  There is now not even
+a minimal performance hit in writing code portable between ASCII and EBCDIC
+platforms.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.56 to 1.57.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.33 to 1.34.
+
+Deparse C<$#_> as that instead of as C<$#{_}>.
+L<[perl #123947]|https://rt.perl.org/Ticket/Display.html?id=123947>
+
+=item *
+
+L<Carp> has been upgraded from version 1.35 to 1.36.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.05 to 2.10.
+
+=over 4
+
+=item *
+
+Add support for C<Cwd::getdcwd()> and introduce workaround for a misbehaviour
+seen on Strawberry Perl 5.20.1.
+
+=item *
+
+Fix C<chdir()> after building dependencies bug.
+
+=item *
+
+Introduce experimental support for plugins/hooks.
+
+=item *
+
+Integrate the App::Cpan sources.
+
+=item *
+
+Do not check recursion on optional dependencies.
+
+=item *
+
+Sanity check META.yml to contain a hash.
+L<[cpan #95271]|https://rt.cpan.org/Ticket/Display.html?id=95271>
+
+=back
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.143240 to 2.150001.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.157 to 2.158.
+
+=item *
+
+L<DB> has been upgraded from version 1.07 to 1.08.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.28 to 3.31.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<Encode> has been upgraded from version 2.70 to 2.72.
+
+=item *
+
+L<encoding> has been upgraded from version 2.13 to 2.14.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.43 to 2.45.
+
+=item *
+
+L<locale> has been upgraded from version 1.05 to 1.06.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.33 to 3.34.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20150220 to 5.20150320.
+
+=item *
+
+L<parent> has been upgraded from version 0.228 to 0.232.
+
+No changes to installed files other than the version bump.
+
+=item *
+
+The PathTools modules have been upgraded from version 3.54 to 3.55.
+
+=item *
+
+L<Pod::Functions> has been upgraded from version 1.08 to 1.09.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.51 to 1.52.
+
+=item *
+
+L<re> has been upgraded from version 0.31 to 0.32.
+
+=item *
+
+L<sigtrap> has been upgraded from version 1.07 to 1.08.
+
+=item *
+
+L<Term::Complete> has been upgraded from version 1.402 to 1.403.
+
+=item *
+
+L<Test::Simple> has been reverted from version 1.301001_098 to 1.001014.
+
+=item *
+
+L<Text::Balanced> has been upgraded from version 2.02 to 2.03.
+
+No changes to installed files other than the version bump.
+
+=item *
+
+L<Text::ParseWords> has been upgraded from version 3.29 to 3.30.
+
+=item *
+
+L<threads> has been upgraded from version 1.96_001 to 2.01.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
+L<utf8> has been upgraded from version 1.14 to 1.15.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perldata>
+
+=over 4
+
+=item *
+
+Documentation has been added regarding the special floating point values C<Inf>
+and C<NaN>.
+
+=back
+
+=head3 L<perlexperiment>
+
+=over 4
+
+=item *
+
+Removed note about C<\s> matching C<VT> now that it is no longer experimental.
+
+=item *
+
+Added note that C<use re 'strict'> has been introduced experimentally.
+
+=back
+
+=head3 L<perlpolicy>
+
+=over 4
+
+=item *
+
+The documentation of what to expect to see in future maintenance releases has
+been updated.  Essentially the same types of changes will be included as before
+but with fewer changes that don't affect the installation or execution of perl.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Invalid quantifier in {,} in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Invalid quantifier in {,} in regex; marked by <-- HERE in m/%s/">
+
+(F) The pattern looks like a {min,max} quantifier, but the min or max could not
+be parsed as a valid number - either it has leading zeroes, or it represents
+too big a number to cope with.  The S<<-- HERE> shows where in the regular
+expression the problem was discovered.  See L<perlre>.
+
+=back
+
+=head1 Testing
+
+=over 4
+
+=item *
+
+Tests for performance issues have been added in the file F<t/perf/taint.t>.
+
+=back
+
+=head1 Platform Support
+
+=head2 New Platforms
+
+=over 4
+
+=item z/OS running EBCDIC Code Page 1047
+
+Core perl now works on this EBCDIC platform.  Early perls also worked, but,
+even though support wasn't officially withdrawn, recent perls would not compile
+and run well.  Perl 5.20 would work, but had many bugs which have now been
+fixed.  Many CPAN modules that ship with Perl still fail tests, including
+Pod::Simple.  However the version of Pod::Simple currently on CPAN should work;
+it was fixed too late to include in Perl 5.22.  Work is under way to fix many
+of the still-broken CPAN modules, which likely will be installed on CPAN when
+completed, so that you may not have to wait until Perl 5.24 to get a working
+version.
+
+=back
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item HP-UX
+
+The archname now distinguishes use64bitint from use64bitall.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Macros have been created to allow XS code to better manipulate the POSIX locale
+category C<LC_NUMERIC>.  See L<perlapi/Locale-related functions and macros>.
+
+=item *
+
+The previous C<atoi> et al replacement function, C<grok_atou>, has now been
+superseded by C<grok_atoUV>.  See L<perlclib> for details.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Repeated global pattern matches in scalar context on large tainted strings were
+exponentially slow depending on the current match position in the string.
+L<[perl #123202]|https://rt.perl.org/Ticket/Display.html?id=123202>
+
+=item *
+
+Various crashes due to the parser getting confused by syntax errors have been
+fixed.
+L<[perl #123801]|https://rt.perl.org/Ticket/Display.html?id=123801>
+L<[perl #123802]|https://rt.perl.org/Ticket/Display.html?id=123802>
+L<[perl #123955]|https://rt.perl.org/Ticket/Display.html?id=123955>
+L<[perl #123995]|https://rt.perl.org/Ticket/Display.html?id=123995>
+
+=item *
+
+C<split> in the scope of lexical $_ has been fixed not to fail assertions.
+L<[perl #123763]|https://rt.perl.org/Ticket/Display.html?id=123763>
+
+=item *
+
+C<my $x : attr> syntax inside various list operators no longer fails
+assertions.
+L<[perl #123817]|https://rt.perl.org/Ticket/Display.html?id=123817>
+
+=item *
+
+An @ sign in quotes followed by a non-ASCII digit (which is not a valid
+identifier) would cause the parser to crash, instead of simply trying the @ as
+literal.  This has been fixed.
+L<[perl #123963]|https://rt.perl.org/Ticket/Display.html?id=123963>
+
+=item *
+
+C<*bar::=*foo::=*glob_with_hash> has been crashing since Perl 5.14, but no
+longer does.
+L<[perl #123847]|https://rt.perl.org/Ticket/Display.html?id=123847>
+
+=item *
+
+C<foreach> in scalar context was not pushing an item on to the stack, resulting
+in bugs.  (C<print 4, scalar do { foreach(@x){} } + 1> would print 5.)  It has
+been fixed to return C<undef>.
+L<[perl #124004]|https://rt.perl.org/Ticket/Display.html?id=124004>
+
+=item *
+
+A memory leak introduced in Perl 5.21.6 has been fixed.
+L<[perl #123922]|https://rt.perl.org/Ticket/Display.html?id=123922>
+
+=item *
+
+A regression in the behaviour of the C<readline> built-in function, caused by
+the introduction of the C<< <<>> >> operator, has been fixed.
+L<[perl #123990]|https://rt.perl.org/Ticket/Display.html?id=123990>
+
+=item *
+
+Several cases of data used to store environment variable contents in core C
+code being potentially overwritten before being used have been fixed.
+L<[perl #123748]|https://rt.perl.org/Ticket/Display.html?id=123748>
+
+=back
+
+=head1 Known Problems
+
+=over 4
+
+=item *
+
+A goal is for Perl to be able to be recompiled to work reasonably well on any
+Unicode version.  In Perl 5.22, though, the earliest such version is Unicode
+5.1 (current is 7.0).
+
+=item *
+
+EBCDIC platforms
+
+=over 4
+
+=item *
+
+Encode and encoding are mostly broken.
+
+=item *
+
+Many cpan modules that are shipped with core show failing tests.
+
+=item *
+
+C<pack>/C<unpack> with C<"U0"> format may not work properly.
+
+=back
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.21.10 represents approximately 4 weeks of development since Perl 5.21.9
+and contains approximately 170,000 lines of changes across 860 files from 27
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 170,000 lines of changes to 610 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.21.10:
+
+Chris 'BinGOs' Williams, David Golden, David Mitchell, David Wheeler, Father
+Chrysostomos, H.Merijn Brand, Hugo van der Sanden, James E Keenan, Jarkko
+Hietaniemi, Jasmine Ngan, Jerry D. Hedden, John Goodyear, Karen Etheridge, Karl
+Williamson, Lukas Mai, Matthew Horsfall, Nicholas Clark, Petr Písař, Rafael
+Garcia-Suarez, Reini Urban, Ricardo Signes, Sawyer X, Steffen Müller, Steve
+Hay, Sullivan Beck, Tony Cook, Vincent Pit.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+https://rt.perl.org/ .  There may also be information at http://www.perl.org/ ,
+the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
