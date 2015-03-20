@@ -488,8 +488,9 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #
 #   croak("Weird Canonical Decomposition of U+$h");
 #
-# Simply change to a carp.  It will compile, but will not know about any three
-# character decomposition.
+# Simply comment it out.  It will compile, but will not know about any three
+# character decompositions.  If using the .pm version, there is a similar
+# line.
 
 # The number of code points in \p{alpha=True} halved in 2.1.9.  It turns out
 # that the reason is that the CJK block starting at 4E00 was removed from
