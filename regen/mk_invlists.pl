@@ -56,6 +56,68 @@ my %exceptions_to_where_to_define =
                           _Perl_IDStart              => 'PERL_IN_UTF8_C',
                         );
 
+# This hash contains the properties with enums that have hard-coded references
+# to them in C code.  Its only use is to make sure that if perl is compiled
+# with an older Unicode data set, that all the enum values the code is
+# expecting will still be in the enum typedef.  Thus the code doesn't have to
+# change.  The Unicode version won't have any code points that have these enum
+# values, so the code that handles them will not get exercised.  This is far
+# better than having to #ifdef things.
+my %hard_coded_enums =
+ ( gcb => [
+            'Control',
+            'CR',
+            'Extend',
+            'L',
+            'LF',
+            'LV',
+            'LVT',
+            'Other',
+            'Prepend',
+            'Regional_Indicator',
+            'SpacingMark',
+            'T',
+            'V',
+        ],
+   sb  => [
+            'ATerm',
+            'Close',
+            'CR',
+            'Extend',
+            'Format',
+            'LF',
+            'Lower',
+            'Numeric',
+            'OLetter',
+            'Other',
+            'SContinue',
+            'Sep',
+            'Sp',
+            'STerm',
+            'Upper',
+        ],
+   wb  => [
+            'ALetter',
+            'CR',
+            'Double_Quote',
+            'Extend',
+            'ExtendNumLet',
+            'Format',
+            'Hebrew_Letter',
+            'Katakana',
+            'LF',
+            'MidLetter',
+            'MidNum',
+            'MidNumLet',
+            'Newline',
+            'Numeric',
+            'Other',
+            'Regional_Indicator',
+            'Single_Quote',
+            'UNKNOWN',
+        ],
+);
+
 my @a2n;
 
 sub uniques {
@@ -174,14 +236,31 @@ sub output_invmap ($$$$$$$) {
 
     if ($input_format eq 's') {
         $prop_name = (prop_aliases($prop_name))[1]; # Get full name
+        my $short_name = (prop_aliases($prop_name))[0];
             my @enums = prop_values($prop_name);
             if (! @enums) {
                 die "Only enum properties are currently handled; '$prop_name' isn't one";
             }
             else {
 
-                # Convert short names to long, add in the extras, and sort.
+                # Convert short names to long
                 @enums = map { (prop_value_aliases($prop_name, $_))[1] } @enums;
+
+                my @expected_enums = @{$hard_coded_enums{lc $short_name}};
+                die 'You need to update %hard_coded_enums to reflect new entries in this Unicode version'
+                    if @expected_enums < @enums;
+
+                # Remove the enums found in the input from the ones we expect
+                for (my $i = @expected_enums - 1; $i >= 0; $i--) {
+                    splice(@expected_enums, $i, 1)
+                                if grep { $expected_enums[$i] eq $_ } @enums;
+                }
+
+                # The ones remaining must be because we're using an older
+                # Unicode version.  Add them to the list.
+                push @enums, @expected_enums;
+
+                # Add in the extra values coded into this program, and sort.
                 push @enums, split /,/, $extra_enums if $extra_enums ne "";
                 @enums = sort @enums;
 
@@ -198,8 +277,6 @@ sub output_invmap ($$$$$$$) {
             # Inversion map stuff is currently used only by regexec
             switch_pound_if($name, 'PERL_IN_REGEXEC_C');
         {
-
-            my $short_name = (prop_aliases($prop_name))[0];
 
             # The short names tend to be two lower case letters, but it looks
             # better for those if they are upper. XXX
