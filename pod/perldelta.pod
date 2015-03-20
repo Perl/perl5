@@ -519,6 +519,11 @@ been fixed.  [perl #123801] [perl #123802]
 C<split> in the scope of lexical $_ has been fixed not to fail assertions.
 [perl #123763]
 
+=item *
+
+C<my $x : attr> syntax inside various list operators no longer fails
+assertions.  [perl #123817]
+
 =back
 
 =head1 Known Problems
