@@ -16,13 +16,12 @@ L<perl5219delta>, which describes differences between 5.21.8 and 5.21.9.
 
 =head2 C<(?[...])> operators now follow standard Perl precedence
 
-This experimental feature allows set operations in regular expression
-patterns.  Prior to this, the intersection operator had the same
-precedence as the other binary operators.  Now it has higher precedence.
-This could lead to different outcomes than existing code expects (though
-the documentation has always noted that this change might happen,
-recommending fully parenthesizing the expressions).  See
-L<perlrecharclass/Extended Bracketed Character Classes>.
+This experimental feature allows set operations in regular expression patterns.
+Prior to this, the intersection operator had the same precedence as the other
+binary operators.  Now it has higher precedence.  This could lead to different
+outcomes than existing code expects (though the documentation has always noted
+that this change might happen, recommending fully parenthesizing the
+expressions).  See L<perlrecharclass/Extended Bracketed Character Classes>.
 
 =head1 Performance Enhancements
 
@@ -30,12 +29,10 @@ L<perlrecharclass/Extended Bracketed Character Classes>.
 
 =item *
 
-The functions
-C<utf8::native_to_unicode()> and
-C<utf8::unicode_to_native()> (see L<utf8>)
-are now optimized out on ASCII platforms.
-There is now not even a minimal performance hit in writing code portable
-between ASCII and EBCDIC platforms.
+The functions C<utf8::native_to_unicode()> and C<utf8::unicode_to_native()>
+(see L<utf8>) are now optimized out on ASCII platforms.  There is now not even
+a minimal performance hit in writing code portable between ASCII and EBCDIC
+platforms.
 
 =back
 
@@ -278,15 +275,15 @@ Tests for performance issues have been added in the file F<t/perf/taint.t>.
 
 =item z/OS running EBCDIC Code Page 1047
 
-Core perl now works on this EBCDIC platform.  Early perls also worked,
-but, even though support wasn't officially withdrawn, recent perls would
-not compile and run well.  Perl v5.20 would work, but had many bugs
-which have now been fixed.  Many CPAN modules that ship with Perl still
-fail tests, including Pod::Simple.  However the version of Pod::Simple
-currently on CPAN should work; it was fixed too late to include in
-Perl v5.22.  Work is under way to fix many of the still-broken CPAN
-modules, which likely will be installed on CPAN when completed, so that
-you may not have to wait until v5.24 to get a working version.
+Core perl now works on this EBCDIC platform.  Early perls also worked, but,
+even though support wasn't officially withdrawn, recent perls would not compile
+and run well.  Perl 5.20 would work, but had many bugs which have now been
+fixed.  Many CPAN modules that ship with Perl still fail tests, including
+Pod::Simple.  However the version of Pod::Simple currently on CPAN should work;
+it was fixed too late to include in Perl 5.22.  Work is under way to fix many
+of the still-broken CPAN modules, which likely will be installed on CPAN when
+completed, so that you may not have to wait until Perl 5.24 to get a working
+version.
 
 =back
 
@@ -306,9 +303,8 @@ The archname now distinguishes use64bitint from use64bitall.
 
 =item *
 
-Macros have been created to allow XS code to better manipulate the POSIX
-locale category C<LC_NUMERIC>.
-See L<perlapi/Locale-related functions and macros>.
+Macros have been created to allow XS code to better manipulate the POSIX locale
+category C<LC_NUMERIC>.  See L<perlapi/Locale-related functions and macros>.
 
 =item *
 
@@ -323,15 +319,14 @@ superseded by C<grok_atoUV>.  See L<perlclib> for details.
 
 =item *
 
-Repeated global pattern matches in scalar context on large tainted
-strings were exponentially slow depending on the current match
-position in the string.
+Repeated global pattern matches in scalar context on large tainted strings were
+exponentially slow depending on the current match position in the string.
 L<[perl #123202]|https://rt.perl.org/Ticket/Display.html?id=123202>
 
 =item *
 
-Various crashes due to the parser getting confused by syntax errors have
-been fixed.
+Various crashes due to the parser getting confused by syntax errors have been
+fixed.
 L<[perl #123801]|https://rt.perl.org/Ticket/Display.html?id=123801>
 L<[perl #123802]|https://rt.perl.org/Ticket/Display.html?id=123802>
 L<[perl #123955]|https://rt.perl.org/Ticket/Display.html?id=123955>
@@ -351,21 +346,21 @@ L<[perl #123817]|https://rt.perl.org/Ticket/Display.html?id=123817>
 =item *
 
 An @ sign in quotes followed by a non-ASCII digit (which is not a valid
-identifier) would cause the parser to crash, instead of simply trying the @
-as literal.  This has been fixed.
+identifier) would cause the parser to crash, instead of simply trying the @ as
+literal.  This has been fixed.
 L<[perl #123963]|https://rt.perl.org/Ticket/Display.html?id=123963>
 
 =item *
 
-C<*bar::=*foo::=*glob_with_hash> has been crashing since 5.14, but no
+C<*bar::=*foo::=*glob_with_hash> has been crashing since Perl 5.14, but no
 longer does.
 L<[perl #123847]|https://rt.perl.org/Ticket/Display.html?id=123847>
 
 =item *
 
-C<foreach> in scalar context was not pushing an item on to the stack,
-resulting in bugs.  (C<print 4, scalar do { foreach(@x){} } + 1> would
-print 5.)  It has been fixed to return C<undef>.
+C<foreach> in scalar context was not pushing an item on to the stack, resulting
+in bugs.  (C<print 4, scalar do { foreach(@x){} } + 1> would print 5.)  It has
+been fixed to return C<undef>.
 L<[perl #124004]|https://rt.perl.org/Ticket/Display.html?id=124004>
 
 =item *
@@ -393,9 +388,9 @@ L<[perl #123748]|https://rt.perl.org/Ticket/Display.html?id=123748>
 
 =item *
 
-A goal is for Perl to be able to be recompiled to work reasonably well
-on any Unicode version.  In v5.22, though, the earliest such version is
-Unicode 5.1 (current is 7.0).
+A goal is for Perl to be able to be recompiled to work reasonably well on any
+Unicode version.  In Perl 5.22, though, the earliest such version is Unicode
+5.1 (current is 7.0).
 
 =item *
 
@@ -409,7 +404,7 @@ Encode and encoding are mostly broken.
 
 =item *
 
-Many cpan modules that are shipped with core show failing tests
+Many cpan modules that are shipped with core show failing tests.
 
 =item *
 
@@ -429,8 +424,8 @@ XXX Generate this with:
 
 If you find what you think is a bug, you might check the articles recently
 posted to the comp.lang.perl.misc newsgroup and the perl bug database at
-https://rt.perl.org/ .  There may also be information at
-http://www.perl.org/ , the Perl Home Page.
+https://rt.perl.org/ .  There may also be information at http://www.perl.org/ ,
+the Perl Home Page.
 
 If you believe you have an unreported bug, please run the L<perlbug> program
 included with your release.  Be sure to trim your bug down to a tiny but
