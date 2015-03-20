@@ -453,9 +453,17 @@ source tree.
 
 =over 4
 
-=item XXX-some-platform
+=item z/OS running EBCDIC Code Page 1047
 
-XXX
+Core perl now works on this EBCDIC platform.  Early perls also worked,
+but, even though support wasn't officially withdrawn, recent perls would
+not compile and run well.  Perl v5.20 would work, but had many bugs
+which have now been fixed.  Many CPAN modules that ship with Perl still
+fail tests, including Pod::Simple.  However the version of Pod::Simple
+currently on CPAN should work; it was fixed too late to include in
+Perl v5.22.  Work is under way to fix many of the still-broken CPAN
+modules, which likely will be installed on CPAN when completed, so that
+you may not have to wait until v5.24 to get a working version.
 
 =back
 
@@ -568,6 +576,26 @@ platform specific bugs also go here.
 A goal is for Perl to be able to be recompiled to work reasonably well
 on any Unicode version.  In v5.22, though, the earliest such version is
 Unicode 5.1 (current is 7.0).
+
+=item *
+
+EBCDIC platforms
+
+=over 4
+
+=item *
+
+Encode and encoding are mostly broken.
+
+=item *
+
+Many cpan modules that are shipped with core show failing tests
+
+=item *
+
+C<pack>/C<unpack> with C<"U0"> format may not work properly.
+
+=back
 
 =back
 
