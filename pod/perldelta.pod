@@ -530,6 +530,11 @@ An @ sign in quotes followed by a non-ASCII digit (which is not a valid
 identifier) would cause the parser to crash, instead of simply trying the @
 as literal.  This has been fixed.  [perl #123963]
 
+=item *
+
+C<*bar::=*foo::=*glob_with_hash> has been crashing since 5.14, but no
+longer does.  [perl #123847]
+
 =back
 
 =head1 Known Problems
