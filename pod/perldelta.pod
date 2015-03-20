@@ -565,7 +565,9 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+A goal is for Perl to be able to be recompiled to work reasonably well
+on any Unicode version.  In v5.22, though, the earliest such version is
+Unicode 5.1 (current is 7.0).
 
 =back
 

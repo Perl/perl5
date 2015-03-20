@@ -1,12 +1,15 @@
-# Perl should compile and reasonably run any version of Unicode.  That doesn't
-# mean that the test suite will run without showing errors.  A few of the
-# very-Unicode specific test files have been modified to account for different
-# versions, but most have not.  For example, some tests use characters that
-# aren't encoded in all Unicode versions; others have hard-coded the General
-# Categories that were correct at the time the test was written.  Perl itself
-# will not compile under Unicode releases prior to 3.0 without a simple change to
-# Unicode::Normalize.  mktables contains instructions for this, as well as other
-# hints for using older Unicode versions.
+# The goal is for perl to compile and reasonably run any version of Unicode.
+# But in v5.22, the earliest version that this works for is Unicode 5.1.
+# Working reasonably well doesn't mean that the test suite will run without
+# showing errors.  You may be able to compile an earlier version, and get
+# things to sort-of work. A few of the very-Unicode specific test files have been
+# modified to account for different versions, but most have not.  For example,
+# some tests use characters that aren't encoded in all Unicode versions; others
+# have hard-coded the General Categories for a code point that were correct at
+# the time the test was written.  Perl itself will not compile under Unicode
+# releases prior to 3.0 without a simple change to Unicode::Normalize.
+# mktables contains instructions for this, as well as other hints for using
+# older Unicode versions.
 
 # The *.txt files were copied from
 
