@@ -134,6 +134,10 @@ Deparse C<$#_> as that instead of as C<$#{_}>.  [perl #123947]
 
 =item *
 
+L<Carp> has been upgraded from version 1.35 to 1.36.
+
+=item *
+
 L<CPAN> has been upgraded from version 2.05 to 2.10.
 
 =over 4
@@ -173,6 +177,10 @@ L<CPAN::Meta> has been upgraded from version 2.143240 to 2.150001.
 =item *
 
 L<Data::Dumper> has been upgraded from version 2.157 to 2.158.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.28 to 3.31.
 
 =item *
 
