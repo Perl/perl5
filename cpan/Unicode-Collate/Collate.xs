@@ -268,8 +268,8 @@ _derivCE_9 (code)
     _derivCE_24 = 5
   PREINIT:
     UV base, aaaa, bbbb;
-    U8 a[VCE_Length + 1] = "\x00\xFF\xFF\x00\x20\x00\x02\xFF\xFF";
-    U8 b[VCE_Length + 1] = "\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF";
+    U8 a[VCE_Length + 1] = "\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+    U8 b[VCE_Length + 1] = "\x00\x00\x00\x00\x00\x00\x00\x00\x00";
     bool basic_unified = 0;
   PPCODE:
     if (CJK_UidIni <= code) {
@@ -299,6 +299,8 @@ _derivCE_9 (code)
     a[2] = (U8)(aaaa & 0xFF);
     b[1] = (U8)(bbbb >> 8);
     b[2] = (U8)(bbbb & 0xFF);
+    a[4] = (U8)(0x20); /* second octet of level 2 */
+    a[6] = (U8)(0x02); /* second octet of level 3 */
     a[7] = b[7] = (U8)(code >> 8);
     a[8] = b[8] = (U8)(code & 0xFF);
     EXTEND(SP, 2);
@@ -311,8 +313,8 @@ _derivCE_8 (code)
     UV code
   PREINIT:
     UV aaaa, bbbb;
-    U8 a[VCE_Length + 1] = "\x00\xFF\xFF\x00\x02\x00\x01\xFF\xFF";
-    U8 b[VCE_Length + 1] = "\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF";
+    U8 a[VCE_Length + 1] = "\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+    U8 b[VCE_Length + 1] = "\x00\x00\x00\x00\x00\x00\x00\x00\x00";
   PPCODE:
     aaaa =  0xFF80 + (code >> 15);
     bbbb = (code & 0x7FFF) | 0x8000;
@@ -320,6 +322,8 @@ _derivCE_8 (code)
     a[2] = (U8)(aaaa & 0xFF);
     b[1] = (U8)(bbbb >> 8);
     b[2] = (U8)(bbbb & 0xFF);
+    a[4] = (U8)(0x02); /* second octet of level 2 */
+    a[6] = (U8)(0x01); /* second octet of level 3 */
     a[7] = b[7] = (U8)(code >> 8);
     a[8] = b[8] = (U8)(code & 0xFF);
     EXTEND(SP, 2);
@@ -331,10 +335,12 @@ void
 _uideoCE_8 (code)
     UV code
   PREINIT:
-    U8 uice[VCE_Length + 1] = "\x00\xFF\xFF\x00\x20\x00\x02\xFF\xFF";
+    U8 uice[VCE_Length + 1] = "\x00\x00\x00\x00\x00\x00\x00\x00\x00";
   PPCODE:
     uice[1] = uice[7] = (U8)(code >> 8);
     uice[2] = uice[8] = (U8)(code & 0xFF);
+    uice[4] = (U8)(0x20); /* second octet of level 2 */
+    uice[6] = (U8)(0x02); /* second octet of level 3 */
     PUSHs(sv_2mortal(newSVpvn((char *) uice, VCE_Length)));
 
 

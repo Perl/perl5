@@ -258,6 +258,10 @@ L<threads> has been upgraded from version 1.96_001 to 2.01.
 
 =item *
 
+L<Unicode::Collate> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
 L<utf8> has been upgraded from version 1.14 to 1.15.
 
 =item *
