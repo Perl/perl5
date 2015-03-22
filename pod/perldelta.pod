@@ -158,6 +158,11 @@ L<utf8> has been upgraded from version 1.15 to 1.16.
 
 L<warnings> has been upgraded from version 1.31 to 1.32.
 
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.27 (with certain
+components which were at version 3.25) to version 3.28.
+
 =back
 
 =head2 Removed Modules and Pragmata
