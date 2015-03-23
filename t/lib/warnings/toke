@@ -1510,3 +1510,13 @@ Use of literal control characters in variable names is deprecated at (eval 2) li
 -a;
 ;-a;
 EXPECT
+########
+# toke.c
+# [perl #124113] Compile-time warning with UTF8 variable in array index
+use warnings;
+use utf8;
+my $𝛃 = 0;
+my @array = (0);
+my $v = $array[ 0 + $𝛃 ];
+   $v = $array[ $𝛃 + 0 ];
+EXPECT

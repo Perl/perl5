@@ -6621,7 +6621,7 @@ Perl_yylex(pTHX)
 			char *t = s+1;
 
 			while (isSPACE(*t) || isWORDCHAR_lazy_if(t,UTF) || *t == '$')
-			    t++;
+			    t += UTF ? UTF8SKIP(t) : 1;
 			if (*t++ == ',') {
 			    PL_bufptr = PEEKSPACE(PL_bufptr); /* XXX can realloc */
 			    while (t < PL_bufend && *t != ']')
