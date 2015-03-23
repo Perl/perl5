@@ -9210,10 +9210,14 @@ S_scan_heredoc(pTHX_ char *s)
 	    term = '"';
 	if (!isWORDCHAR_lazy_if(s,UTF))
 	    deprecate("bare << to mean <<\"\"");
-	for (; isWORDCHAR_lazy_if(s,UTF); s++) {
-	    if (d < e)
-		*d++ = *s;
+	peek = s;
+	while (isWORDCHAR_lazy_if(peek,UTF)) {
+	    peek += UTF ? UTF8SKIP(peek) : 1;
 	}
+	len = (peek - s >= e - d) ? (e - d) : (peek - s);
+	Copy(s, d, len, char);
+	s += len;
+	d += len;
     }
     if (d >= PL_tokenbuf + sizeof PL_tokenbuf - 1)
 	Perl_croak(aTHX_ "Delimiter for here document is too long");
