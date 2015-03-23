@@ -1520,3 +1520,14 @@ my @array = (0);
 my $v = $array[ 0 + $𝛃 ];
    $v = $array[ $𝛃 + 0 ];
 EXPECT
+########
+# toke.c
+# Allow Unicode here doc boundaries
+use warnings;
+use utf8;
+my $v = <<EnFraçais;
+Comme ca!
+EnFraçais
+print $v;
+EXPECT
+Comme ca!
