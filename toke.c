@@ -5856,12 +5856,12 @@ Perl_yylex(pTHX)
 		    else
 			/* skip plain q word */
 			while (t < PL_bufend && isWORDCHAR_lazy_if(t,UTF))
-			     t += UTF8SKIP(t);
+			    t += UTF ? UTF8SKIP(t) : 1;
 		}
 		else if (isWORDCHAR_lazy_if(t,UTF)) {
-		    t += UTF8SKIP(t);
+		    t += UTF ? UTF8SKIP(t) : 1;
 		    while (t < PL_bufend && isWORDCHAR_lazy_if(t,UTF))
-			 t += UTF8SKIP(t);
+			t += UTF ? UTF8SKIP(t) : 1;
 		}
 		while (t < PL_bufend && isSPACE(*t))
 		    t++;
