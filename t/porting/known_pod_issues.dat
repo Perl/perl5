@@ -193,6 +193,7 @@ SOM
 splain
 sprintf(3)
 stat(2)
+strictures
 String::Base
 String::Scanf
 Switch

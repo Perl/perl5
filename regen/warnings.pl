@@ -483,7 +483,7 @@ read_only_bottom_close_and_rename($pm);
 __END__
 package warnings;
 
-our $VERSION = '1.31';
+our $VERSION = '1.32';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
@@ -996,9 +996,55 @@ is now a top-level category in its own right.
 =head2 Fatal Warnings
 X<warning, fatal>
 
-The presence of the word "FATAL" in the category list will escalate any
-warnings detected from the categories specified in the lexical scope
-into fatal errors.  In the code below, the use of C<time>, C<length>
+The presence of the word "FATAL" in the category list will escalate
+warnings in those categories into fatal errors in that lexical scope.
+
+B<NOTE:> FATAL warnings should be used with care, particularly
+C<< FATAL => 'all' >>.
+
+Libraries using L<warnings::warn|/FUNCTIONS> for custom warning categories
+generally don't expect L<warnings::warn|/FUNCTIONS> to be fatal and can wind up
+in an unexpected state as a result.  For XS modules issuing categorized
+warnings, such unanticipated exceptions could also expose memory leak bugs.
+
+Moreover, the Perl interpreter itself has had serious bugs involving
+fatalized warnings.  For a summary of resolved and unresolved problems as
+of January 2015, please see
+L<this perl5-porters post|http://www.nntp.perl.org/group/perl.perl5.porters/2015/01/msg225235.html>.
+
+While some developers find fatalizing some warnings to be a useful
+defensive programming technique, using C<< FATAL => 'all' >> to fatalize
+all possible warning categories -- including custom ones -- is particularly
+risky.  Therefore, the use of C<< FATAL => 'all' >> is
+L<discouraged|perlpolicy/discouraged>.
+
+The L<strictures|strictures/VERSION-2> module on CPAN offers one example of
+a warnings subset that the module's authors believe is relatively safe to
+fatalize.
+
+B<NOTE:> users of FATAL warnings, especially those using
+C<< FATAL => 'all' >>, should be fully aware that they are risking future
+portability of their programs by doing so.  Perl makes absolutely no
+commitments to not introduce new warnings or warnings categories in the
+future; indeed, we explicitly reserve the right to do so.  Code that may
+not warn now may warn in a future release of Perl if the Perl5 development
+team deems it in the best interests of the community to do so.  Should code
+using FATAL warnings break due to the introduction of a new warning we will
+NOT consider it an incompatible change.  Users of FATAL warnings should
+take special caution during upgrades to check to see if their code triggers
+any new warnings and should pay particular attention to the fine print of
+the documentation of the features they use to ensure they do not exploit
+features that are documented as risky, deprecated, or unspecified, or where
+the documentation says "so don't do that", or anything with the same sense
+and spirit.  Use of such features in combination with FATAL warnings is
+ENTIRELY AT THE USER'S RISK.
+
+The following documentation describes how to use FATAL warnings but the
+perl5 porters strongly recommend that you understand the risks before doing
+so, especially for library code intended for use by others, as there is no
+way for downstream users to change the choice of fatal categories.
+
+In the code below, the use of C<time>, C<length>
 and C<join> can all produce a C<"Useless use of xxx in void context">
 warning.
 
@@ -1050,24 +1096,6 @@ previous versions of Perl, the behavior of the statements
 C<< use warnings 'FATAL'; >>, C<< use warnings 'NONFATAL'; >> and
 C<< no warnings 'FATAL'; >> was unspecified; they did not behave as if
 they included the C<< => 'all' >> portion.  As of 5.20, they do.)
-
-B<NOTE:> Users of FATAL warnings, especially
-those using C<< FATAL => 'all' >>
-should be fully aware that they are risking future portability of their
-programs by doing so.  Perl makes absolutely no commitments to not
-introduce new warnings, or warnings categories in the future, and indeed
-we explicitly reserve the right to do so.  Code that may not warn now may
-warn in a future release of Perl if the Perl5 development team deems it
-in the best interests of the community to do so.  Should code using FATAL
-warnings break due to the introduction of a new warning we will NOT
-consider it an incompatible change.  Users of FATAL warnings should take
-special caution during upgrades to check to see if their code triggers
-any new warnings and should pay particular attention to the fine print of
-the documentation of the features they use to ensure they do not exploit
-features that are documented as risky, deprecated, or unspecified, or where
-the documentation says "so don't do that", or anything with the same sense
-and spirit.  Use of such features in combination with FATAL warnings is
-ENTIRELY AT THE USER'S RISK.
 
 =head2 Reporting Warnings from a Module
 X<warning, reporting> X<warning, registering>
