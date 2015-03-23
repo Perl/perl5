@@ -1841,7 +1841,7 @@ S_check_uni(pTHX)
 	PL_last_uni++;
     s = PL_last_uni;
     while (isWORDCHAR_lazy_if(s,UTF) || *s == '-')
-	s++;
+	s += UTF ? UTF8SKIP(s) : 1;
     if ((t = strchr(s, '(')) && t < PL_bufptr)
 	return;
 

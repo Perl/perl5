@@ -1542,3 +1542,13 @@ EnFraçais
 print $v;
 EXPECT
 Comme ca!
+########
+# toke.c
+# Fix 'Use of "..." without parentheses is ambiguous' warning for
+# Unicode function names
+use utf8;
+use warnings;
+sub 𝛃(;$) { return 0; }
+my $v = 𝛃 - 5;
+EXPECT
+Warning: Use of "𝛃" without parentheses is ambiguous at - line 7.
