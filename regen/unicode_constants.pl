@@ -68,13 +68,13 @@ foreach my $charset (get_supported_code_pages()) {
         my $name;
         my $cp;
         my $U_cp;   # code point in Unicode (not-native) terms
-        my $undef_ok = $desired_name || $flag =~ /skip_if_undef/;
 
         if ($name_or_cp =~ /^U\+(.*)/) {
             $U_cp = hex $1;
             $name = charnames::viacode($name_or_cp);
             if (! defined $name) {
-                die "Unknown code point '$name_or_cp' at line $.: $_\n" unless $undef_ok;
+                next if $flag =~ /skip_if_undef/;
+                die "Unknown code point '$name_or_cp' at line $.: $_\n" unless $desired_name;
                 $name = "";
             }
         }
