@@ -635,6 +635,9 @@ readline 'FH';
 readline *$_;
 readline *{$_;};
 ####
+# <<>>
+$_ = <<>>;
+####
 # \x{}
 my $foo = "Ab\x{100}\200\x{200}\237Cd\000Ef\x{1000}\cA\x{2000}\cZ";
 my $bar = "\x{100}";
