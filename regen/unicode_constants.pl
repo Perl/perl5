@@ -28,34 +28,7 @@ print $out_fh <<END;
 
 END
 
-# The data are at the end of this file.  A blank line is output as-is.
-# Comments (lines whose first non-blank is a '#') are converted to C-style,
-# though empty comments are converted to blank lines.  Otherwise, each line
-# represents one #define, and begins with either a Unicode character name with
-# the blanks and dashes in it squeezed out or replaced by underscores; or it
-# may be a hexadecimal Unicode code point of the form U+xxxx.  In the latter
-# case, the name will be looked-up to use as the name of the macro.  In either
-# case, the macro name will have suffixes as listed above, and all blanks and
-# dashes will be replaced by underscores.
-#
-# Each line may optionally have one of the following flags on it, separated by
-# white space from the initial token.
-#   string  indicates that the output is to be of the string form
-#           described in the comments above that are placed in the file.
-#   string_skip_ifundef  is the same as 'string', but instead of dying if the
-#           code point doesn't exist, the line is just skipped: no output is
-#           generated for it
-#   first   indicates that the output is to be of the FIRST_BYTE form.
-#   tail    indicates that the output is of the _TAIL form.
-#   native  indicates that the output is the code point, converted to the
-#           platform's native character set if applicable
-#
-# If the code point has no official name, the desired name may be appended
-# after the flag, which will be ignored if there is an official name.
-#
-# This program is used to make it convenient to create compile time constants
-# of UTF-8, and to generate proper EBCDIC as well as ASCII without manually
-# having to figure things out.
+# The data are at __DATA__  in this file.
 
 my @data = <DATA>;
 
@@ -175,6 +148,37 @@ printf $out_fh "\n/* The number of code points not matching \\pC */\n"
 print $out_fh "\n#endif /* H_UNICODE_CONSTANTS */\n";
 
 read_only_bottom_close_and_rename($out_fh);
+
+# DATA FORMAT
+#
+# A blank line is output as-is.
+# Comments (lines whose first non-blank is a '#') are converted to C-style,
+# though empty comments are converted to blank lines.  Otherwise, each line
+# represents one #define, and begins with either a Unicode character name with
+# the blanks and dashes in it squeezed out or replaced by underscores; or it
+# may be a hexadecimal Unicode code point of the form U+xxxx.  In the latter
+# case, the name will be looked-up to use as the name of the macro.  In either
+# case, the macro name will have suffixes as listed above, and all blanks and
+# dashes will be replaced by underscores.
+#
+# Each line may optionally have one of the following flags on it, separated by
+# white space from the initial token.
+#   string  indicates that the output is to be of the string form
+#           described in the comments above that are placed in the file.
+#   string_skip_ifundef  is the same as 'string', but instead of dying if the
+#           code point doesn't exist, the line is just skipped: no output is
+#           generated for it
+#   first   indicates that the output is to be of the FIRST_BYTE form.
+#   tail    indicates that the output is of the _TAIL form.
+#   native  indicates that the output is the code point, converted to the
+#           platform's native character set if applicable
+#
+# If the code point has no official name, the desired name may be appended
+# after the flag, which will be ignored if there is an official name.
+#
+# This program is used to make it convenient to create compile time constants
+# of UTF-8, and to generate proper EBCDIC as well as ASCII without manually
+# having to figure things out.
 
 __DATA__
 U+017F string
