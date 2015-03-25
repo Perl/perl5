@@ -5384,6 +5384,7 @@ t/porting/perlfunc.t		Test that Functions_pm.PL can parse perlfunc.pod
 t/porting/podcheck.t		Test the POD of shipped modules is well formed
 t/porting/pod_rules.t		Check that various pod lists are consistent
 t/porting/readme.t		Check that all files in Porting/ are mentioned in Porting/README.pod
+t/porting/re_context.t		Check assumptions made by save_re_context()
 t/porting/regen.t		Check that regen.pl doesn't need running
 t/porting/ss_dup.t		Check that sv.c:ss_dup handle everything
 t/porting/test_bootstrap.t	Test that the instructions for test bootstrapping aren't accidentally overlooked.
