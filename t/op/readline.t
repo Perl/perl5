@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 31;
+plan tests => 32;
 
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
@@ -274,6 +274,15 @@ is tell, tell *foom, 'readline *$glob_copy sets PL_last_in_gv';
 # This used to fail an assertion or return a scalar ref.
 readline undef;
 is ${^LAST_FH}, undef, '${^LAST_FH} after readline undef';
+
+{
+    my $w;
+    local($SIG{__WARN__},$^W) = (sub { $w .= shift }, 1);
+    *x=<y>;
+    like $w, qr/^readline\(\) on unopened filehandle y at .*\n(?x:
+                )Undefined value assigned to typeglob at .*\n\z/,
+        '[perl #123790] *x=<y> used to fail an assertion';
+}
 
 __DATA__
 moo
