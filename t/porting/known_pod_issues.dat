@@ -1,4 +1,4 @@
-# This file is the data file for porting/podcheck.t.
+# This file is the data file for t/porting/podcheck.t.
 # There are three types of lines.
 # Comment lines are white-space only or begin with a '#', like this one.  Any
 #   changes you make to the comment lines will be lost when the file is
@@ -278,6 +278,7 @@ pod/perlgit.pod	Verbatim line length including indents exceeds 79 by	12
 pod/perlgpl.pod	Verbatim line length including indents exceeds 79 by	50
 pod/perlguts.pod	? Should you be using F<...> or maybe L<...> instead of	2
 pod/perlguts.pod	? Should you be using L<...> instead of	1
+pod/perlguts.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlhack.pod	? Should you be using L<...> instead of	1
 pod/perlhist.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlhpux.pod	Verbatim line length including indents exceeds 79 by	7
