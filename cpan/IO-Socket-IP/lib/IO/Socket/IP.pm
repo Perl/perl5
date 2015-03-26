@@ -7,7 +7,7 @@ package IO::Socket::IP;
 # $VERSION needs to be set before  use base 'IO::Socket'
 #  - https://rt.cpan.org/Ticket/Display.html?id=92107
 BEGIN {
-   $VERSION = '0.36';
+   $VERSION = '0.37';
 }
 
 use strict;
@@ -396,6 +396,12 @@ sub _io_socket_ip__configure
    my @localinfos;
    my @peerinfos;
 
+   my $listenqueue = $arg->{Listen};
+   if( defined $listenqueue and
+       ( defined $arg->{PeerHost} || defined $arg->{PeerService} || defined $arg->{PeerAddrInfo} ) ) {
+      croak "Cannot Listen with a peer address";
+   }
+
    if( defined $arg->{GetAddrInfoFlags} ) {
       $hints{flags} = $arg->{GetAddrInfoFlags};
    }
@@ -502,10 +508,6 @@ sub _io_socket_ip__configure
    push @sockopts_enabled, SO_REUSEADDR if $arg->{ReuseAddr};
    push @sockopts_enabled, SO_REUSEPORT if $arg->{ReusePort};
    push @sockopts_enabled, SO_BROADCAST if $arg->{Broadcast};
-
-   my $listenqueue = $arg->{Listen};
-
-   croak "Cannot Listen with a PeerHost" if defined $listenqueue and @peerinfos;
 
    my $blocking = $arg->{Blocking};
    defined $blocking or $blocking = 1;
@@ -628,7 +630,7 @@ sub setup
             return 1;
          }
 
-         if( $! == EINPROGRESS or HAVE_MSWIN32 && $! == Errno::EWOULDBLOCK() ) {
+         if( $! == EINPROGRESS or $! == EWOULDBLOCK ) {
             ${*$self}{io_socket_ip_connect_in_progress} = 1;
             return 0;
          }
@@ -820,11 +822,11 @@ Return the resolved name of the local port number
 
 =cut
 
-sub sockhost { my $self = shift; ( $self->_get_host_service( $self->sockname, NI_NUMERICHOST, NIx_NOSERV ) )[0] }
-sub sockport { my $self = shift; ( $self->_get_host_service( $self->sockname, NI_NUMERICSERV, NIx_NOHOST ) )[1] }
+sub sockhost { my $self = shift; scalar +( $self->_get_host_service( $self->sockname, NI_NUMERICHOST, NIx_NOSERV ) )[0] }
+sub sockport { my $self = shift; scalar +( $self->_get_host_service( $self->sockname, NI_NUMERICSERV, NIx_NOHOST ) )[1] }
 
-sub sockhostname { my $self = shift; ( $self->_get_host_service( $self->sockname, 0, NIx_NOSERV ) )[0] }
-sub sockservice  { my $self = shift; ( $self->_get_host_service( $self->sockname, 0, NIx_NOHOST ) )[1] }
+sub sockhostname { my $self = shift; scalar +( $self->_get_host_service( $self->sockname, 0, NIx_NOSERV ) )[0] }
+sub sockservice  { my $self = shift; scalar +( $self->_get_host_service( $self->sockname, 0, NIx_NOHOST ) )[1] }
 
 =head2 $addr = $sock->sockaddr
 
@@ -873,11 +875,11 @@ Return the resolved name of the peer port number
 
 =cut
 
-sub peerhost { my $self = shift; ( $self->_get_host_service( $self->peername, NI_NUMERICHOST, NIx_NOSERV ) )[0] }
-sub peerport { my $self = shift; ( $self->_get_host_service( $self->peername, NI_NUMERICSERV, NIx_NOHOST ) )[1] }
+sub peerhost { my $self = shift; scalar +( $self->_get_host_service( $self->peername, NI_NUMERICHOST, NIx_NOSERV ) )[0] }
+sub peerport { my $self = shift; scalar +( $self->_get_host_service( $self->peername, NI_NUMERICSERV, NIx_NOHOST ) )[1] }
 
-sub peerhostname { my $self = shift; ( $self->_get_host_service( $self->peername, 0, NIx_NOSERV ) )[0] }
-sub peerservice  { my $self = shift; ( $self->_get_host_service( $self->peername, 0, NIx_NOHOST ) )[1] }
+sub peerhostname { my $self = shift; scalar +( $self->_get_host_service( $self->peername, 0, NIx_NOSERV ) )[0] }
+sub peerservice  { my $self = shift; scalar +( $self->_get_host_service( $self->peername, 0, NIx_NOHOST ) )[1] }
 
 =head2 $addr = $peer->peeraddr
 
@@ -917,7 +919,7 @@ sub socket :method
 # Versions of IO::Socket before 1.35 may leave socktype undef if from, say, an
 #   ->fdopen call. In this case we'll apply a fix
 BEGIN {
-   if( $IO::Socket::VERSION < 1.35 ) {
+   if( eval($IO::Socket::VERSION) < 1.35 ) {
       *socktype = sub {
          my $self = shift;
          my $type = $self->SUPER::socktype;

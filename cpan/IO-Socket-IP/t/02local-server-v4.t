@@ -27,7 +27,7 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
    my $testserver = IO::Socket::IP->new(
       ( $socktype eq "SOCK_STREAM" ? ( Listen => 1 ) : () ),
       LocalHost => "127.0.0.1",
-      Port      => 0,
+      LocalPort => "0",
       Type      => Socket->$socktype,
    );
 
@@ -42,6 +42,10 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
 
    ok( eval { $testserver->peerport; 1 }, "\$testserver->peerport does not die for $socktype" )
       or do { chomp( my $e = $@ ); diag( "Exception was: $e" ) };
+
+   is_deeply( { host => $testserver->peerhost, port => $testserver->peerport },
+              { host => undef, port => undef },
+      'peerhost/peersock yield scalar' );
 
    my $socket = IO::Socket::INET->new(
       PeerHost => "127.0.0.1",

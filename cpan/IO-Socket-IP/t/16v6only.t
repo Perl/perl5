@@ -14,6 +14,10 @@ eval { IO::Socket::IP->new( LocalHost => "::1" ) } or
 eval { defined IPV6_V6ONLY } or
    plan skip_all => "IPV6_V6ONLY not available";
 
+# https://rt.cpan.org/Ticket/Display.html?id=102662
+$^O eq "irix" and
+   plan skip_all => "$^O: IPV6_V6ONLY exists but getnameinfo() fails with EAI_NONAME";
+
 # Don't be locale-sensitive
 $! = Errno::ECONNREFUSED;
 my $ECONNREFUSED_STR = "$!";
