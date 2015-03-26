@@ -127,7 +127,7 @@ divide		division (/)		ck_null		IfsT2	S S
 i_divide	integer division (/)	ck_null		ifsT2	S S
 modulo		modulus (%)		ck_null		IifsT2	S S
 i_modulo	integer modulus (%)	ck_null		ifsT2	S S
-repeat		repeat (x)		ck_repeat	fmT2	L S
+repeat		repeat (x)		ck_repeat	fmt2	L S
 
 add		addition (+)		ck_null		IfsT2	S S
 i_add		integer addition (+)	ck_null		ifsT2	S S
@@ -152,7 +152,7 @@ i_eq		integer eq (==)		ck_null		ifs2	S S<
 ne		numeric ne (!=)		ck_null		Iifs2	S S<
 i_ne		integer ne (!=)		ck_null		ifs2	S S<
 ncmp		numeric comparison (<=>)	ck_null		Iifst2	S S<
-i_ncmp		integer comparison (<=>)	ck_null		ifsT2	S S<
+i_ncmp		integer comparison (<=>)	ck_null		ifst2	S S<
 
 slt		string lt		ck_null		ifs2	S S
 sgt		string gt		ck_null		ifs2	S S
@@ -160,7 +160,7 @@ sle		string le		ck_null		ifs2	S S
 sge		string ge		ck_null		ifs2	S S
 seq		string eq		ck_null		ifs2	S S
 sne		string ne		ck_null		ifs2	S S
-scmp		string comparison (cmp)	ck_null		ifsT2	S S
+scmp		string comparison (cmp)	ck_null		ifst2	S S
 
 bit_and		bitwise and (&)		ck_bitop	fst2	S S|
 bit_xor		bitwise xor (^)		ck_bitop	fst2	S S|
@@ -175,7 +175,7 @@ sbit_or		string bitwise or (|)	ck_bitop	fst2	S S|
 negate		negation (-)		ck_null		Ifst1	S
 i_negate	integer negation (-)	ck_null		ifst1	S
 not		not			ck_null		ifs1	S
-complement	1's complement (~)	ck_bitop	fsT1	S
+complement	1's complement (~)	ck_bitop	fst1	S
 ncomplement	numeric 1's complement (~)	ck_bitop	fsT1	S
 # scomplement uses ck_bitop only for the experimental warning.  Once the
 # warning is gone, this can change to ck_null.
@@ -205,7 +205,7 @@ abs		abs			ck_fun		fsTu%	S?
 
 length		length			ck_length	ifsTu%	S?
 substr		substr			ck_substr	st@	S S S? S?
-vec		vec			ck_fun		isT@	S S S
+vec		vec			ck_fun		ist@	S S S
 
 index		index			ck_index	isT@	S S S?
 rindex		rindex			ck_index	isT@	S S S?
@@ -254,7 +254,7 @@ multideref	array or hash lookup	ck_null		ds+
 
 unpack		unpack			ck_fun		u@	S S?
 pack		pack			ck_fun		fmst@	S L
-split		split			ck_split	T@	S S S
+split		split			ck_split	t@	S S S
 join		join or string		ck_join		fmst@	S L
 
 # List operators.

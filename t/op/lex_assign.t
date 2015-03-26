@@ -169,6 +169,19 @@ EOE
   }
 }
 
+# [perl #123790] Assigning to a typeglob
+# These used to die or crash.
+# Once the bug is fixed for all ops, we can combine this with the tests
+# above that use <DATA>.
+for my $glob (*__) {
+  $glob = $y x $z;
+  { use integer; $glob = $y <=> $z; }
+  $glob = $y cmp $z;
+  $glob = vec 1, 2, 4;
+  $glob = ~${\""};
+  $glob = split;
+}
+
 # XXX This test does not really belong here, as it has nothing to do with
 #     OPpTARGET_MY optimisation.  But where should it go?
 eval {
