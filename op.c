@@ -10476,7 +10476,10 @@ Perl_ck_sassign(pTHX_ OP *o)
 				    | ((kkid->op_private & ~OPpLVAL_INTRO) << 8));
 	    OP *const first = newOP(OP_NULL, 0);
 	    OP *const nullop =
+		newCONDOP(0, first, o, other);
+	    /* XXX targlex disabled for now; see ticket #124160
 		newCONDOP(0, first, S_maybe_targlex(aTHX_ o), other);
+	     */
 	    OP *const condop = first->op_next;
 
             OpTYPE_set(condop, OP_ONCE);
