@@ -34,7 +34,7 @@ if (grep -e, @files_to_delete) {
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 56;
+my $total_tests = 57;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -69,6 +69,10 @@ print "ok ",$i++," - require 5.005 try 4\n";
 eval { require v5.5.630; };
 print "# $@\nnot " if $@;
 print "ok ",$i++," - require 5.5.630\n";
+
+eval { require(v5.5.630); };
+print "# $@\nnot " if $@;
+print "ok ",$i++," - require(v5.5.630) with parens [perl #124153]\n";
 
 sub v5 { die }
 eval { require v5; };

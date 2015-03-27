@@ -10775,7 +10775,8 @@ Perl_ck_require(pTHX_ OP *o)
 	    unshare_hek(hek);
 	    SvFLAGS(sv) |= was_readonly;
 	  }
-	  else if (SvPOK(sv) && !SvNIOK(sv) && !SvGMAGICAL(sv)) {
+	  else if (SvPOK(sv) && !SvNIOK(sv) && !SvGMAGICAL(sv)
+		&& !SvVOK(sv)) {
 	    s = SvPV(sv, len);
 	    if (SvREFCNT(sv) > 1) {
 		kid->op_sv = newSVpvn_share(
