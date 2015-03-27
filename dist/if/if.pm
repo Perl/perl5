@@ -1,11 +1,13 @@
 package if;
 
-$VERSION = '0.0604';
+$VERSION = '0.0605';
 
 sub work {
   my $method = shift() ? 'import' : 'unimport';
-  die "Too few arguments to 'use if' (some code returning an empty list in list context?)"
-    unless @_ >= 2;
+  unless (@_ >= 2) {
+    my $type = ($method eq 'import') ? 'use' : 'no';
+    die "Too few arguments to '$type if' (some code returning an empty list in list context?)"
+  }
   return unless shift;		# CONDITION
 
   my $p = $_[0];		# PACKAGE
@@ -102,4 +104,3 @@ based on what version of Perl is running.
 Ilya Zakharevich L<mailto:ilyaz@cpan.org>.
 
 =cut
-
