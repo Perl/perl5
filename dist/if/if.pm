@@ -1,6 +1,6 @@
 package if;
 
-$VERSION = '0.0603';
+$VERSION = '0.0604';
 
 sub work {
   my $method = shift() ? 'import' : 'unimport';
@@ -23,15 +23,16 @@ __END__
 
 =head1 NAME
 
-if - C<use> a Perl module if a condition holds
+if - C<use> a Perl module if a condition holds (also can C<no> a module)
 
 =head1 SYNOPSIS
 
   use if CONDITION, MODULE => ARGUMENTS;
+  no if CONDITION, MODULE => ARGUMENTS;
 
 =head1 DESCRIPTION
 
-The C<if> module is used to conditionally load another module.
+The C<if> module is used to conditionally load or unload another module.
 The construct
 
   use if CONDITION, MODULE => ARGUMENTS;
@@ -70,6 +71,14 @@ then you'll get a warning message
 calling module was C<use>'d from a core library directory,
 and if so, generates a warning),
 unless you've installed a more recent version of L<Text::Soundex> from CPAN.
+
+You can also specify to NOT use something:
+
+ no if $] ge 5.021_006, warnings => "locale";
+
+This warning category was added in the specified Perl version (a development
+release).  Without the C<'if'>, trying to use it in an earlier release would
+generate an unknown warning category error.
 
 =head1 BUGS
 
