@@ -1833,7 +1833,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     int argc = PL_origargc;
     char **argv = PL_origargv;
     const char *scriptname = NULL;
-    VOL bool dosearch = FALSE;
+    bool dosearch = FALSE;
     char c;
     bool doextract = FALSE;
     const char *cddir = NULL;
