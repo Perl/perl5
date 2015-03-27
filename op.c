@@ -11238,7 +11238,7 @@ Perl_find_lexical_cv(pTHX_ PADOFFSET off)
     CV *compcv = PL_compcv;
     while (PadnameOUTER(name)) {
 	assert(PARENT_PAD_INDEX(name));
-	compcv = CvOUTSIDE(PL_compcv);
+	compcv = CvOUTSIDE(compcv);
 	name = PadlistNAMESARRAY(CvPADLIST(compcv))
 		[off = PARENT_PAD_INDEX(name)];
     }

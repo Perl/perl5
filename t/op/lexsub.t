@@ -961,3 +961,9 @@ like runperl(
   @AutoloadTest::ISA = AutoloadTestSuper::;
   AutoloadTest->blah;
 }
+
+# This used to crash because op.c:find_lexical_cv was looking at the wrong
+# CV’s OUTSIDE pointer.  [perl #124099]
+{
+  my sub h; sub{my $x; sub{h}}
+}
