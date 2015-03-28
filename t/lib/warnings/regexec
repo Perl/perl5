@@ -148,6 +148,29 @@ Wide character (U+100) in pattern match (m//) at - line 15.
 Wide character (U+100) in pattern match (m//) at - line 16.
 Wide character (U+100) in pattern match (m//) at - line 16.
 ########
+# NAME Wide character in UTF-8 locale
+require '../loc_tools.pl';
+unless (locales_enabled()) {
+    print("SKIPPED\n# locales not available\n"),exit;
+}
+eval { require POSIX; POSIX->import("locale_h") };
+if ($@) {
+    print("SKIPPED\n# no POSIX\n"),exit;
+}
+my @utf8_locales = find_utf8_ctype_locale();
+unless (@utf8_locales) {
+    print("SKIPPED\n# no UTF-8 locales\n"),exit;
+}
+use warnings 'locale';
+use locale;
+setlocale(&POSIX::LC_CTYPE, $utf8_locales[0]);
+"\x{100}" =~ /\x{100}|\x{101}/il;
+"\x{100}" =~ /\x{100}|\x{101}/l;
+"\x{100}" =~ /\w/l;
+"\x{100}" =~ /\x{100}+/l;
+"\x{100}" =~ /[\x{100}\x{102}]/l;
+EXPECT
+########
 # NAME \b{} in non-UTF-8 locale
 eval { require POSIX; POSIX->import("locale_h") };
 if ($@) {

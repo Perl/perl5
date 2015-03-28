@@ -648,3 +648,28 @@ Wide character (U+101) in lcfirst at - line 15.
 Wide character (U+102) in fc at - line 16.
 Wide character (U+103) in uc at - line 17.
 Wide character (U+104) in ucfirst at - line 18.
+########
+# NAME Wide character in UTF-8 locale
+require '../loc_tools.pl';
+unless (locales_enabled('LC_CTYPE')) {
+    print("SKIPPED\n# locales not available\n"),exit;
+}
+eval { require POSIX; POSIX->import("locale_h") };
+if ($@) {
+    print("SKIPPED\n# no POSIX\n"),exit;
+}
+my @utf8_locales = find_utf8_ctype_locale();
+unless (@utf8_locales) {
+    print("SKIPPED\n# no UTF-8 locales\n"),exit;
+}
+use warnings 'locale';
+use feature 'fc';
+use locale;
+setlocale(&POSIX::LC_CTYPE, $utf8_locales[0]);
+my $a;
+$a = lc("\x{100}");
+$a = lcfirst("\x{101}");
+$a = fc("\x{102}");
+$a = uc("\x{103}");
+$a = ucfirst("\x{104}");
+EXPECT

@@ -5826,12 +5826,17 @@ typedef struct am_table_short AMTS;
      * argument; the 2nd, is a pointer to the first byte of the UTF-8 encoded
      * string, and an end position which it won't try to read past */
 #   define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(cp)                         \
-      Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),                           \
-             "Wide character (U+%"UVXf") in %s", (UV) cp, OP_DESC(PL_op));
+	STMT_START {                                                        \
+            if (! PL_in_utf8_CTYPE_locale && ckWARN(WARN_LOCALE)) {         \
+                Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
+                                        "Wide character (U+%"UVXf") in %s", \
+                                        (UV) cp, OP_DESC(PL_op));           \
+            }                                                               \
+        }  STMT_END
 
 #  define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)                   \
 	STMT_START { /* Check if to warn before doing the conversion work */\
-            if (ckWARN(WARN_LOCALE)) {                                      \
+            if (! PL_in_utf8_CTYPE_locale && ckWARN(WARN_LOCALE)) {         \
                 UV cp = utf8_to_uvchr_buf((U8 *) s, (U8 *) send, NULL);     \
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
                     "Wide character (U+%"UVXf") in %s",                     \
