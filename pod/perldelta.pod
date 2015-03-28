@@ -154,6 +154,10 @@ L<attributes> has been upgraded from version 0.26 to 0.27.
 
 L<warnings> has been upgraded from version 1.31 to 1.32.
 
+=item *
+
+L<utf8> has been upgraded from version 1.15 to 1.16.
+
 =back
 
 =head2 Removed Modules and Pragmata

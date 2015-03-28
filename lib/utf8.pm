@@ -2,7 +2,7 @@ package utf8;
 
 $utf8::hint_bits = 0x00800000;
 
-our $VERSION = '1.15';
+our $VERSION = '1.16';
 
 sub import {
     $^H |= $utf8::hint_bits;
@@ -74,7 +74,7 @@ I<UTF-X> is used to refer to UTF-8 on ASCII and ISO Latin based
 platforms and UTF-EBCDIC on EBCDIC based platforms.
 
 See also the effects of the C<-C> switch and its cousin, the
-C<$ENV{PERL_UNICODE}>, in L<perlrun>.
+C<PERL_UNICODE> environment variable, in L<perlrun>.
 
 Enabling the C<utf8> pragma has the following effect:
 
