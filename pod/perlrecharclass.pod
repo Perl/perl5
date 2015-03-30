@@ -478,7 +478,7 @@ Ranges> will be explained shortly.) Therefore,
  'ss' =~ /\A[\0-\x{ff}]\z/ui       # Doesn't match
  'ss' =~ /\A[\0-\N{LATIN SMALL LETTER SHARP S}]\z/ui   # No match
  'ss' =~ /\A[\xDF-\xDF]\z/ui   # Matches on ASCII platforms, since
-                               # \XDF is LATIN SMALL LETTER SHARP S,
+                               # \xDF is LATIN SMALL LETTER SHARP S,
                                # and the range is just a single
                                # element
 
