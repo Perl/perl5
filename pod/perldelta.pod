@@ -138,10 +138,6 @@ L<ExtUtils::Miniperl> has been upgraded from version 1.04 to 1.05.
 
 =item *
 
-FindExt has been upgraded from version 1.02 to 1.03.
-
-=item *
-
 L<IO::Socket::IP> has been upgraded from version 0.36 to 0.37.
 
 =item *
