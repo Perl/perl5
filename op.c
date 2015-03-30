@@ -2654,7 +2654,7 @@ S_lvref(pTHX_ OP *o, I32 type)
     case OP_RV2CV:
 	kid = cUNOPo->op_first;
 	if (kid->op_type == OP_NULL)
-	    kid = cUNOPx(kUNOP->op_first->op_sibling)
+	    kid = cUNOPx(OpSIBLING(kUNOP->op_first))
 		->op_first;
 	o->op_private = OPpLVREF_CV;
 	if (kid->op_type == OP_GV)
@@ -10667,7 +10667,7 @@ Perl_ck_refassign(pTHX_ OP *o)
 	break;
     case OP_RV2CV: {
 	OP * const kidparent =
-	    cUNOPx(cUNOPx(varop)->op_first)->op_first->op_sibling;
+	    OpSIBLING(cUNOPx(cUNOPx(varop)->op_first)->op_first);
 	OP * const kid = cUNOPx(kidparent)->op_first;
 	o->op_private |= OPpLVREF_CV;
 	if (kid->op_type == OP_GV) {
@@ -10943,10 +10943,8 @@ Perl_ck_sort(pTHX_ OP *o)
 		else {
 		    OP * const padop = newOP(OP_PADCV, 0);
 		    padop->op_targ = off;
-		    cUNOPx(firstkid)->op_first = padop;
-#ifdef PERL_OP_PARENT
-                    padop->op_sibling = firstkid;
-#endif
+                    /* replace the const op with the pad op */
+                    op_sibling_splice(firstkid, NULL, 1, padop);
 		    op_free(kid);
 		}
 	    }
