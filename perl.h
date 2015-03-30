@@ -6045,8 +6045,8 @@ expression, but with an empty argument list, like this:
 
 #else /* !USE_LOCALE_NUMERIC */
 
-#define SET_LC_NUMERIC_STANDARD()
-#define SET_LC_NUMERIC_UNDERLYING()
+#define SET_NUMERIC_STANDARD()
+#define SET_NUMERIC_UNDERLYING()
 #define IS_NUMERIC_RADIX(a, b)		(0)
 #define STORE_LC_NUMERIC_UNDERLYING_SET_STANDARD()
 #define STORE_LC_NUMERIC_STANDARD_SET_UNDERLYING()
