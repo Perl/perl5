@@ -67,7 +67,7 @@ as C<Not in [].>
  \a                Alarm or bell.
  \A                Beginning of string.  Not in [].
  \b{}, \b          Boundary. (\b is a backspace in []).
- \B{}, \B          Not a boundary.
+ \B{}, \B          Not a boundary.  Not in [].
  \cX               Control-X.
  \C                Single octet, even under UTF-8.  Not in [].
                    (Deprecated)
