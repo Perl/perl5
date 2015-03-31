@@ -1545,10 +1545,12 @@ Comme ca!
 ########
 # toke.c
 # Fix 'Use of "..." without parentheses is ambiguous' warning for
-# Unicode function names
+# Unicode function names.  If not under PERL_UNICODE, this will generate
+# a "Wide character" warning
 use utf8;
 use warnings;
 sub 𝛃(;$) { return 0; }
 my $v = 𝛃 - 5;
 EXPECT
-Warning: Use of "𝛃" without parentheses is ambiguous at - line 7.
+OPTION regex
+(Wide character.*\n)?Warning: Use of "𝛃" without parentheses is ambiguous

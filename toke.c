@@ -1846,8 +1846,8 @@ S_check_uni(pTHX)
 	return;
 
     Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
-		     "Warning: Use of \"%.*s\" without parentheses is ambiguous",
-		     (int)(s - PL_last_uni), PL_last_uni);
+		     "Warning: Use of \"%"UTF8f"\" without parentheses is ambiguous",
+		     UTF8fARG(UTF, (int)(s - PL_last_uni), PL_last_uni));
 }
 
 /*
@@ -2529,9 +2529,10 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         /* We deliberately don't try to print the malformed character, which
          * might not print very well; it also may be just the first of many
          * malformations, so don't print what comes after it */
-        yyerror(Perl_form(aTHX_
+        yyerror_pv(Perl_form(aTHX_
             "Malformed UTF-8 character immediately after '%.*s'",
-            (int) (first_bad_char_loc - (U8 *) backslash_ptr), backslash_ptr));
+            (int) (first_bad_char_loc - (U8 *) backslash_ptr), backslash_ptr),
+                   SVf_UTF8);
 	return NULL;
     }
 
@@ -6055,8 +6056,8 @@ Perl_yylex(pTHX)
 			    while (t < PL_bufend && *t != ']')
 				t++;
 			    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-					"Multidimensional syntax %.*s not supported",
-				    (int)((t - PL_bufptr) + 1), PL_bufptr);
+					"Multidimensional syntax %"UTF8f" not supported",
+                                        UTF8fARG(UTF,(int)((t - PL_bufptr) + 1), PL_bufptr));
 			}
 		    }
 		}
