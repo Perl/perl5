@@ -88,15 +88,15 @@ Because of backward compatibility with legacy encodings, the "a unique
 number for every character" idea breaks down a bit: instead, there is
 "at least one number for every character".  The same character could
 be represented differently in several legacy encodings.  The
-converse is not also true: some code points do not have an assigned
+converse is not true: some code points do not have an assigned
 character.  Firstly, there are unallocated code points within
 otherwise used blocks.  Secondly, there are special Unicode control
 characters that do not represent true characters.
 
 When Unicode was first conceived, it was thought that all the world's
 characters could be represented using a 16-bit word; that is a maximum of
-C<0x10000> (or 65536) characters from C<0x0000> to C<0xFFFF> would be
-needed.  This soon proved to be false, and since Unicode 2.0 (July
+C<0x10000> (or 65,536) characters would be needed, from C<0x0000> to
+C<0xFFFF>.  This soon proved to be wrong, and since Unicode 2.0 (July
 1996), Unicode has been defined all the way up to 21 bits (C<0x10FFFF>),
 and Unicode 3.1 (March 2001) defined the first characters above C<0xFFFF>.
 The first C<0x10000> characters are called the I<Plane 0>, or the
@@ -133,8 +133,8 @@ aren't really about languages, such as symbols like C<BAGGAGE CLAIM>.)
 The Unicode code points are just abstract numbers.  To input and
 output these abstract numbers, the numbers must be I<encoded> or
 I<serialised> somehow.  Unicode defines several I<character encoding
-forms>, of which I<UTF-8> is perhaps the most popular.  UTF-8 is a
-variable length encoding that encodes Unicode characters as 1 to 6
+forms>, of which I<UTF-8> is the most popular.  UTF-8 is a
+variable length encoding that encodes Unicode characters as 1 to 4
 bytes.  Other encodings
 include UTF-16 and UTF-32 and their big- and little-endian variants
 (UTF-8 is byte-order independent).  The ISO/IEC 10646 defines the UCS-2
@@ -152,7 +152,7 @@ problems of the initial Unicode implementation, but for example
 regular expressions still do not work with Unicode in 5.6.1.
 Perl v5.14.0 is the first release where Unicode support is
 (almost) seamlessly integrable without some gotchas (the exception being
-some differences in L<quotemeta|perlfunc/quotemeta>, which is fixed
+some differences in L<quotemeta|perlfunc/quotemeta>, and that is fixed
 starting in Perl 5.16.0).   To enable this
 seamless support, you should C<use feature 'unicode_strings'> (which is
 automatically selected if you C<use 5.012> or higher).  See L<feature>.
@@ -945,6 +945,7 @@ mailing lists for their valuable feedback.
 
 =head1 AUTHOR, COPYRIGHT, AND LICENSE
 
-Copyright 2001-2011 Jarkko Hietaniemi E<lt>jhi@iki.fiE<gt>
+Copyright 2001-2011 Jarkko Hietaniemi E<lt>jhi@iki.fiE<gt>.
+Now maintained by Perl 5 Porters.
 
 This document may be distributed under the same terms as Perl itself.
