@@ -2514,7 +2514,7 @@
  * a9791f08281d7b0a417e4ad882cf64463f6815db8156932acd85228ac717fd94 lib/unicore/extracted/DLineBreak.txt
  * a17a0330e57d774343a53c019f1bc69827c2676982a1bf48e0898a76710e8877 lib/unicore/extracted/DNumType.txt
  * c2cb810a67cc5fb4a8d236b6c1bc6dd4d89733d8603881997e8aae2c816a3db1 lib/unicore/extracted/DNumValues.txt
- * 868dbf83a2c62170b63a1fc4f52e11d0a32c8af0f7833dd7823c6ca496cc0d9c lib/unicore/mktables
+ * 23509f3190e5de421bea70bc351fe6f853b750bf418d62d967331ee3ba11a1ec lib/unicore/mktables
  * 746472de66b936ac885ca6d6e68058242b4e909e3260c6317f3ec719f78f76cc lib/unicore/version
  * 3eaedce3745bef6219cff3b5f63e5f8622c58dc66736281a82df991636d54451 regen/regcharclass.pl
  * ex: set ro: */

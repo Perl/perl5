@@ -11162,8 +11162,10 @@ END
                 $fields[$NUMERIC_TYPE_OTHER_DIGIT] = 'Numeric';
 
                 # Rationals require extra effort.
-                register_fraction($fields[$NUMERIC])
-                                                if $fields[$NUMERIC] =~ qr{/};
+                if ($fields[$NUMERIC] =~ qr{/}) {
+                    reduce_fraction(\$fields[$NUMERIC]);
+                    register_fraction($fields[$NUMERIC])
+                }
             }
         }
 
@@ -12201,6 +12203,50 @@ sub register_fraction($) {
     return;
 }
 
+sub gcd($$) {   # Greatest-common-divisor; from
+                # http://en.wikipedia.org/wiki/Euclidean_algorithm
+    my ($a, $b) = @_;
+
+    use integer;
+
+    while ($b != 0) {
+       my $temp = $b;
+       $b = $a % $b;
+       $a = $temp;
+    }
+    return $a;
+}
+
+sub reduce_fraction($) {
+    my $fraction_ref = shift;
+
+    # Reduce a fraction to lowest terms.  The Unicode data may be reducible,
+    # hence this is needed.  The argument is a reference to the
+    # string denoting the fraction, which must be of the form:
+    if ($$fraction_ref !~ / ^ (-?) (\d+) \/ (\d+) $ /ax) {
+        Carp::my_carp_bug("Non-fraction input '$$fraction_ref'.  Unchanged");
+        return;
+    }
+
+    my $sign = $1;
+    my $numerator = $2;
+    my $denominator = $3;
+
+    use integer;
+
+    # Find greatest common divisor
+    my $gcd = gcd($numerator, $denominator);
+
+    # And reduce using the gcd.
+    if ($gcd != 1) {
+        $numerator    /= $gcd;
+        $denominator  /= $gcd;
+        $$fraction_ref = "$sign$numerator/$denominator";
+    }
+
+    return;
+}
+
 sub filter_numeric_value_line {
     # DNumValues contains lines of a different syntax than the typical
     # property file:
@@ -12225,7 +12271,9 @@ sub filter_numeric_value_line {
             $_ = "";
             return;
         }
+        reduce_fraction(\$fields[3]) if $fields[3] =~ qr{/};
         $rational = $fields[3];
+
         $_ = join '; ', @fields[ 0, 3 ];
     }
     else {
