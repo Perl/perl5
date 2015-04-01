@@ -1,12 +1,12 @@
-# NamedSequences-7.0.0.txt
-# Date: 2014-01-24, 15:00:00 GMT [KW, LI]
+# NamedSequences-8.0.0.txt
+# Date: 2015-02-19, 00:30:00 GMT [KW, LI]
 #
 # Unicode Named Character Sequences
 #
 # This file is a normative contributory data file in the Unicode
 # Character Database.
 #
-# Copyright (c) 1991-2014 Unicode, Inc.
+# Copyright (c) 1991-2015 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 # Format:

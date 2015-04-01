@@ -1,8 +1,8 @@
-# DerivedJoiningGroup-7.0.0.txt
-# Date: 2013-11-27, 09:54:34 GMT [MD]
+# DerivedJoiningGroup-8.0.0.txt
+# Date: 2015-02-13, 13:47:12 GMT [MD]
 #
 # Unicode Character Database
-# Copyright (c) 1991-2013 Unicode, Inc.
+# Copyright (c) 1991-2015 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 # For documentation, see http://www.unicode.org/reports/tr44/
 
@@ -21,8 +21,9 @@
 06A0          ; Ain # Lo       ARABIC LETTER AIN WITH THREE DOTS ABOVE
 06FC          ; Ain # Lo       ARABIC LETTER GHAIN WITH DOT BELOW
 075D..075F    ; Ain # Lo   [3] ARABIC LETTER AIN WITH TWO DOTS ABOVE..ARABIC LETTER AIN WITH TWO DOTS VERTICALLY ABOVE
+08B3          ; Ain # Lo       ARABIC LETTER AIN WITH THREE DOTS BELOW
 
-# Total code points: 7
+# Total code points: 8
 
 # ================================================
 
@@ -164,8 +165,9 @@
 0643          ; Kaf # Lo       ARABIC LETTER KAF
 06AC..06AE    ; Kaf # Lo   [3] ARABIC LETTER KAF WITH DOT ABOVE..ARABIC LETTER KAF WITH THREE DOTS BELOW
 077F          ; Kaf # Lo       ARABIC LETTER KAF WITH TWO DOTS ABOVE
+08B4          ; Kaf # Lo       ARABIC LETTER KAF WITH DOT BELOW
 
-# Total code points: 5
+# Total code points: 6
 
 # ================================================
 

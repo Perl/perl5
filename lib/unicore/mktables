@@ -959,8 +959,7 @@ my %why_obsolete;    # Documentation only
         # existence is not noted in the comment.
         'Decomposition_Mapping' => 'Accessible via Unicode::Normalize or prop_invmap() or charprop() in Unicode::UCD::',
 
-        'Indic_Matra_Category' => "Provisional",
-        'Indic_Syllabic_Category' => "Provisional",
+        'Indic_Matra_Category' => "Withdrawn by Unicode while still provisional",
 
         # Don't suppress ISO_Comment, as otherwise special handling is needed
         # to differentiate between it and gc=c, which can be written as 'isc',
@@ -18250,12 +18249,14 @@ my @input_file_objects = (
     Input_file->new('IndicMatraCategory.txt', v6.1.0,
                     Property => 'Indic_Matra_Category',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    Skip => "Provisional; for the analysis and processing of Indic scripts",
+                    Skip => "Withdrawn by Unicode while still provisional",
                     ),
     Input_file->new('IndicSyllabicCategory.txt', v6.1.0,
                     Property => 'Indic_Syllabic_Category',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    Skip => "Provisional; for the analysis and processing of Indic scripts",
+                    Skip => (($v_version lt v8.0.0)
+                              ? "Provisional; for the analysis and processing of Indic scripts"
+                              : 0),
                     ),
     Input_file->new('BidiBrackets.txt', v6.3.0,
                     Properties => [ 'Bidi_Paired_Bracket', 'Bidi_Paired_Bracket_Type' ],
@@ -18263,6 +18264,10 @@ my @input_file_objects = (
                     ),
     Input_file->new("BidiCharacterTest.txt", v6.3.0,
                     Skip => 'Validation Tests',
+                    ),
+    Input_file->new('IndicPositionalCategory.txt', v8.0.0,
+                    Property => 'Indic_Positional_Category',
+                    Has_Missings_Defaults => $NOT_IGNORED,
                     ),
 );
 

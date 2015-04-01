@@ -1,14 +1,14 @@
 ; charset=UTF-8
-@@@	The Unicode Standard 7.0.0
-@@@+	U70M140523.lst
-	Unicode 7.0.0 final names list.
+@@@	The Unicode Standard 8.0.0
+@@@+	U80M150527.lst
+	Unicode 8.0.0 final names list.
 	This file is semi-automatically derived from UnicodeData.txt and
 	a set of manually created annotations using a script to select
 	or suppress information from the data file. The rules used
 	for this process are aimed at readability for the human reader,
 	at the expense of some details; therefore, this file should not
 	be parsed for machine-readable information.
-@+		Copyright (c) 1991-2014 Unicode, Inc.
+@+		Copyright (c) 1991-2015 Unicode, Inc.
 	For terms of use, see http://www.unicode.org/terms_of_use.html
 @@	0000	C0 Controls and Basic Latin (Basic Latin)	007F
 @@+
@@ -416,7 +416,7 @@
 @		Control character
 007F	<control>
 	= DELETE
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	0080	C1 Controls and Latin-1 Supplement (Latin-1 Supplement)	00FF
 @		C1 controls
 @+		Alias names are those for ISO/IEC 6429:1992.
@@ -507,7 +507,7 @@
 	x (dollar sign - 0024)
 00A5	YEN SIGN
 	= yuan sign
-	* glyph may have one or two crossbars
+	* glyph may have one or two crossbars, but official symbol in Japan and China has two
 00A6	BROKEN BAR
 	= broken vertical bar (1.0)
 	= parted rule (in typography)
@@ -520,6 +520,8 @@
 00A9	COPYRIGHT SIGN
 	x (sound recording copyright - 2117)
 	x (circled latin capital letter c - 24B8)
+	~ 00A9 FE0E text style
+	~ 00A9 FE0F emoji style
 00AA	FEMININE ORDINAL INDICATOR
 	* Spanish
 	# <super> 0061
@@ -538,6 +540,8 @@
 00AE	REGISTERED SIGN
 	= registered trade mark sign (1.0)
 	x (circled latin capital letter r - 24C7)
+	~ 00AE FE0E text style
+	~ 00AE FE0F emoji style
 00AF	MACRON
 	= overline, APL overbar
 	* this is a spacing character
@@ -592,6 +596,7 @@
 	x (word separator middle dot - 2E31)
 	x (raised dot - 2E33)
 	x (katakana middle dot - 30FB)
+	x (latin letter sinological dot - A78F)
 00B8	CEDILLA
 	* this is a spacing character
 	* other spacing accent characters: 02D8-02DB
@@ -793,6 +798,7 @@
 	* French, medieval Hungarian orthography
 	x (latin capital letter y with diaeresis - 0178)
 	: 0079 0308
+@~	!
 @@	0100	Latin Extended-A	017F
 @		European Latin
 0100	LATIN CAPITAL LETTER A WITH MACRON
@@ -1211,6 +1217,7 @@
 	* African
 	* lowercase is 025B
 	x (euler constant - 2107)
+	x (turned digit three - 218B)
 0191	LATIN CAPITAL LETTER F WITH HOOK
 	* African
 	x (latin capital letter f with stroke - A798)
@@ -1279,7 +1286,7 @@
 	* African
 01A6	LATIN LETTER YR
 	* Old Norse
-@+		* from German Standard DIN 31624 and ISO 5426-2
+@+	* from German Standard DIN 31624 and ISO 5426-2
 	* lowercase is 0280
 01A7	LATIN CAPITAL LETTER TONE TWO
 01A8	LATIN SMALL LETTER TONE TWO
@@ -1809,10 +1816,10 @@
 	= barred i, i bar
 	* high central unrounded vowel
 	* uppercase is 0197
-@+		* ISO 6438 gives lowercase of 0197 as 026A, not 0268
+@+	* ISO 6438 gives lowercase of 0197 as 026A, not 0268
 0269	LATIN SMALL LETTER IOTA
 	* semi-high front unrounded vowel
-@+		* obsoleted by IPA in 1989
+@+	* obsoleted by IPA in 1989
 	* preferred use is 026A latin letter small capital i
 	* uppercase is 0196
 	x (greek small letter iota - 03B9)
@@ -1858,7 +1865,7 @@
 	x (latin small ligature oe - 0153)
 0277	LATIN SMALL LETTER CLOSED OMEGA
 	* semi-high back rounded vowel
-@+		* obsoleted by IPA in 1989
+@+	* obsoleted by IPA in 1989
 	* preferred use is 028A latin small letter upsilon
 	x (greek letter small capital omega - AB65)
 0278	LATIN SMALL LETTER PHI
@@ -1874,7 +1881,7 @@
 	x (modifier letter small turned r with hook - 02B5)
 027C	LATIN SMALL LETTER R WITH LONG LEG
 	* voiced strident apico-alveolar trill
-@+		* obsoleted by IPA in 1989
+@+	* obsoleted by IPA in 1989
 	* sound spelled with 0159 in Czech
 	* preferred phonetic representation for Czech is 0072 031D
 	* in current use in Gaelic types (as glyph variant of 0072)
@@ -1997,10 +2004,11 @@
 	* voiceless epiglottal fricative
 029D	LATIN SMALL LETTER J WITH CROSSED-TAIL
 	* voiced palatal fricative
+	* uppercase is A7B2
 029E	LATIN SMALL LETTER TURNED K
 	* proposed for velar click
 	* uppercase is A7B0
-@+		* withdrawn by IPA in 1970
+@+	* withdrawn by IPA in 1970
 029F	LATIN LETTER SMALL CAPITAL L
 	* velar lateral approximant
 02A0	LATIN SMALL LETTER Q WITH HOOK
@@ -2331,7 +2339,7 @@
 	x (combining cyrillic kavyka - A67C)
 0307	COMBINING DOT ABOVE
 	= derivative (Newtonian notation)
-@+		* IPA (withdrawn in 1976): palatalization
+@+	* IPA (withdrawn in 1976): palatalization
 	x (dot above - 02D9)
 0308	COMBINING DIAERESIS
 	= double dot above, umlaut
@@ -2362,7 +2370,7 @@
 	* Marshallese
 	x (quotation mark - 0022)
 030F	COMBINING DOUBLE GRAVE ACCENT
-	* Serbian and Croatian poetics
+	* Serbian and Croatian phonetics
 0310	COMBINING CANDRABINDU
 	x (devanagari sign candrabindu - 0901)
 0311	COMBINING INVERTED BREVE
@@ -2717,6 +2725,7 @@
 03B2	GREEK SMALL LETTER BETA
 	x (latin small letter sharp s - 00DF)
 	x (latin small letter b with stroke - 0180)
+	x (latin small letter beta - A7B5)
 03B3	GREEK SMALL LETTER GAMMA
 	x (latin small letter gamma - 0263)
 	x (double-struck small gamma - 213D)
@@ -2761,6 +2770,7 @@
 	x (latin small letter chi - AB53)
 03C8	GREEK SMALL LETTER PSI
 03C9	GREEK SMALL LETTER OMEGA
+	x (latin small letter omega - A7B7)
 03CA	GREEK SMALL LETTER IOTA WITH DIALYTIKA
 	: 03B9 0308
 03CB	GREEK SMALL LETTER UPSILON WITH DIALYTIKA
@@ -3040,8 +3050,10 @@
 0462	CYRILLIC CAPITAL LETTER YAT
 0463	CYRILLIC SMALL LETTER YAT
 	x (cyrillic small letter iotified yat - A653)
+	x (latin small letter sakha yat - AB60)
 0464	CYRILLIC CAPITAL LETTER IOTIFIED E
 0465	CYRILLIC SMALL LETTER IOTIFIED E
+	x (latin small letter iotified e - AB61)
 0466	CYRILLIC CAPITAL LETTER LITTLE YUS
 0467	CYRILLIC SMALL LETTER LITTLE YUS
 	x (cyrillic small letter closed little yus - A659)
@@ -3831,7 +3843,7 @@
 065F	ARABIC WAVY HAMZA BELOW
 	* Kashmiri
 @		Arabic-Indic digits
-@+		These digits are used with Arabic proper; for languages of Iran, Afghanistan, Pakistan, and India, see the Eastern Arabic-Indic digits at 06F0..06F9.
+@+		These digits are used with Arabic proper; for languages of Iran, Afghanistan, Pakistan, and India, see the Eastern Arabic-Indic digits at 06F0-06F9.
 0660	ARABIC-INDIC DIGIT ZERO
 0661	ARABIC-INDIC DIGIT ONE
 0662	ARABIC-INDIC DIGIT TWO
@@ -3901,7 +3913,8 @@
 0680	ARABIC LETTER BEHEH
 	* Sindhi
 0681	ARABIC LETTER HAH WITH HAMZA ABOVE
-	* Pashto letter "dze"
+	* Pashto
+	* represents the phoneme /dz/
 0682	ARABIC LETTER HAH WITH TWO DOTS VERTICAL ABOVE
 	* not used in modern Pashto
 0683	ARABIC LETTER NYEH
@@ -3910,6 +3923,7 @@
 	* Sindhi
 0685	ARABIC LETTER HAH WITH THREE DOTS ABOVE
 	* Pashto, Khwarazmian
+	* represents the phoneme /ts/ in Pashto
 0686	ARABIC LETTER TCHEH
 	* Persian, Urdu, ...
 0687	ARABIC LETTER TCHEHEH
@@ -4314,6 +4328,8 @@
 	* Torwali, Ormuri
 076C	ARABIC LETTER REH WITH HAMZA ABOVE
 	* Ormuri
+	* represents a voiced alveolo-palatal laminal fricative
+	x (latin small letter z with curl - 0291)
 076D	ARABIC LETTER SEEN WITH TWO DOTS VERTICALLY ABOVE
 	* Kalami, Ormuri
 @		Additions for Khowar
@@ -4569,6 +4585,7 @@
 	= u
 0846	MANDAIC LETTER AZ
 0847	MANDAIC LETTER IT
+	= pharyngeal hu
 0848	MANDAIC LETTER ATT
 0849	MANDAIC LETTER AKSA
 	= i
@@ -4598,6 +4615,9 @@
 @		Extended Arabic letters for African languages
 08A0	ARABIC LETTER BEH WITH SMALL V BELOW
 08A1	ARABIC LETTER BEH WITH HAMZA ABOVE
+	* Adamawa Fulfulde (Cameroon)
+	* used for the implosive bilabial stop
+	x (latin small letter b with hook - 0253)
 08A2	ARABIC LETTER JEEM WITH TWO DOTS ABOVE
 08A3	ARABIC LETTER TAH WITH TWO DOTS ABOVE
 08A4	ARABIC LETTER FEH WITH DOT BELOW AND THREE DOTS ABOVE
@@ -4605,7 +4625,13 @@
 08A6	ARABIC LETTER LAM WITH DOUBLE BAR
 08A7	ARABIC LETTER MEEM WITH THREE DOTS ABOVE
 08A8	ARABIC LETTER YEH WITH TWO DOTS BELOW AND HAMZA ABOVE
+	* Adamawa Fulfulde
+	* used for the implosive palatal approximant, realized as pharyngealization of the approximant
+	x (latin small letter y with hook - 01B4)
 08A9	ARABIC LETTER YEH WITH TWO DOTS BELOW AND DOT ABOVE
+	* Adamawa Fulfulde
+	* used for the voiced palatal nasal
+	x (latin small letter n with left hook - 0272)
 @		Dependent consonants for Rohingya
 08AA	ARABIC LETTER REH WITH LOOP
 	= bottya-reh
@@ -4626,6 +4652,11 @@
 	* Tatar
 @		Arabic letter for Berber
 08B2	ARABIC LETTER ZAIN WITH INVERTED V ABOVE
+@		Arabic letters for Arwi
+08B3	ARABIC LETTER AIN WITH THREE DOTS BELOW
+08B4	ARABIC LETTER KAF WITH DOT BELOW
+@		Extended vowel sign for Arwi
+08E3	ARABIC TURNED DAMMA BELOW
 @		Extended vowel signs for Rohingya
 08E4	ARABIC CURLY FATHA
 08E5	ARABIC CURLY DAMMA
@@ -4864,6 +4895,7 @@
 0978	DEVANAGARI LETTER MARWARI DDA
 0979	DEVANAGARI LETTER ZHA
 	* used in transliteration of Avestan
+	x (gujarati letter zha - 0AF9)
 097A	DEVANAGARI LETTER HEAVY YA
 	* used for an affricated glide JJYA
 @		Sindhi implosives
@@ -4976,7 +5008,7 @@
 09E2	BENGALI VOWEL SIGN VOCALIC L
 09E3	BENGALI VOWEL SIGN VOCALIC LL
 @		Reserved
-@+		For viram punctuation, use the generic Indic 0964 and 0965.
+@+		For viram punctuation, use the generic Indic 0964 and 0965. Note that these punctuation marks are referred to as dahri and double dahri in Bangla.
 09E4	<reserved>
 	x (devanagari danda - 0964)
 09E5	<reserved>
@@ -5249,6 +5281,10 @@
 @		Currency sign
 0AF1	GUJARATI RUPEE SIGN
 	* preferred spelling is 0AB0 0AC2 0AF0
+@		Additional consonant
+0AF9	GUJARATI LETTER ZHA
+	* used in transliteration of Avestan
+	x (devanagari letter zha - 0979)
 @@	0B00	Oriya	0B7F
 @+		As of 2012, the name "Oriya" for this script and language is officially spelled "Odia" in India. That change in spelling does not affect the Unicode block or character names, which are constrained by stability guarantees.
 @		Various signs
@@ -5404,23 +5440,30 @@
 @		Consonants
 0B95	TAMIL LETTER KA
 0B99	TAMIL LETTER NGA
+	* also denotes the measure kuruni/marakkaal
 0B9A	TAMIL LETTER CA
 0B9C	TAMIL LETTER JA
 0B9E	TAMIL LETTER NYA
 0B9F	TAMIL LETTER TTA
 0BA3	TAMIL LETTER NNA
 0BA4	TAMIL LETTER TA
+	* also denotes the measure tuuni
 0BA8	TAMIL LETTER NA
 0BA9	TAMIL LETTER NNNA
 0BAA	TAMIL LETTER PA
+	= maa
+	* also denotes the fraction one twentieth
 0BAE	TAMIL LETTER MA
 0BAF	TAMIL LETTER YA
 0BB0	TAMIL LETTER RA
 0BB1	TAMIL LETTER RRA
 0BB2	TAMIL LETTER LA
 0BB3	TAMIL LETTER LLA
+	* also denotes the measure kalam
 0BB4	TAMIL LETTER LLLA
 0BB5	TAMIL LETTER VA
+	= kaal
+	* also denotes the fraction one quarter
 0BB6	TAMIL LETTER SHA
 0BB7	TAMIL LETTER SSA
 0BB8	TAMIL LETTER SA
@@ -5473,17 +5516,23 @@
 0BF0	TAMIL NUMBER TEN
 0BF1	TAMIL NUMBER ONE HUNDRED
 0BF2	TAMIL NUMBER ONE THOUSAND
-@		Tamil symbols
+@		Tamil calendrical symbols
 0BF3	TAMIL DAY SIGN
-	= naal
+	= naal, naali/padi
+	* denotes a measure of grain that equals 2 uri or 4 ulakku
+	= pillaiyaar suli
+	* denotes auspiciousness
 0BF4	TAMIL MONTH SIGN
 	= maatham
 0BF5	TAMIL YEAR SIGN
 	= varudam
+@		Tamil clerical symbols
 0BF6	TAMIL DEBIT SIGN
 	= patru
 0BF7	TAMIL CREDIT SIGN
-	= varavu
+	= eduppu
+	* denotes incoming cash which is set aside for unknown expenses
+	* sometimes used as the credit sign; the traditional credit sign is distinct
 0BF8	TAMIL AS ABOVE SIGN
 	= merpadi
 @		Currency symbol
@@ -5491,7 +5540,9 @@
 	= rupai
 @		Tamil symbol
 0BFA	TAMIL NUMBER SIGN
-	= enn
+	= enn, niluvai
+	* denotes balance
+	* sometimes used as the number sign; the traditional number sign is distinct
 @@	0C00	Telugu	0C7F
 @		Various signs
 0C00	TELUGU SIGN COMBINING CANDRABINDU ABOVE
@@ -5579,6 +5630,8 @@
 @		Historic phonetic variants
 0C58	TELUGU LETTER TSA
 0C59	TELUGU LETTER DZA
+0C5A	TELUGU LETTER RRRA
+	* letter for an alveolar consonant whose exact phonetic value is not known
 @		Additional vowels for Sanskrit
 0C60	TELUGU LETTER VOCALIC RR
 0C61	TELUGU LETTER VOCALIC LL
@@ -5789,6 +5842,7 @@
 0D2C	MALAYALAM LETTER BA
 0D2D	MALAYALAM LETTER BHA
 0D2E	MALAYALAM LETTER MA
+	* also used to denote the fraction one eightieth (kaani)
 0D2F	MALAYALAM LETTER YA
 0D30	MALAYALAM LETTER RA
 0D31	MALAYALAM LETTER RRA
@@ -5843,6 +5897,8 @@
 0D57	MALAYALAM AU LENGTH MARK
 	* used alone to write the /au/ dependent vowel in modern texts
 	x (malayalam vowel sign au - 0D4C)
+@		Additional historic vowel
+0D5F	MALAYALAM LETTER ARCHAIC II
 @		Additional vowels for Sanskrit
 0D60	MALAYALAM LETTER VOCALIC RR
 0D61	MALAYALAM LETTER VOCALIC LL
@@ -5872,8 +5928,11 @@
 0D72	MALAYALAM NUMBER ONE THOUSAND
 @		Fractions
 0D73	MALAYALAM FRACTION ONE QUARTER
+	= kaal
 0D74	MALAYALAM FRACTION ONE HALF
+	= ara
 0D75	MALAYALAM FRACTION THREE QUARTERS
+	= mukkaal
 @		Date mark
 0D79	MALAYALAM DATE MARK
 @		Chillu letters
@@ -6059,7 +6118,7 @@
 0DDF	SINHALA VOWEL SIGN GAYANUKITTA
 	= sinhala vowel sign vocalic l
 @		Astrological digits
-@+	These digits, also known as Sinhala Lith Illakkam, have been used primarily for writing horoscopes. This number system has a zero place holder concept, unlike the Sinhala archaic numbers, Sinhala Illakkam, encoded in the range 111E1-111F4.
+@+		These digits, also known as Sinhala Lith Illakkam, have been used primarily for writing horoscopes. This number system has a zero place holder concept, unlike the Sinhala archaic numbers, Sinhala Illakkam, encoded in the range 111E1-111F4.
 0DE6	SINHALA LITH DIGIT ZERO
 0DE7	SINHALA LITH DIGIT ONE
 0DE8	SINHALA LITH DIGIT TWO
@@ -6181,6 +6240,7 @@
 @		Signs
 0E4C	THAI CHARACTER THANTHAKHAT
 	* cancellation mark
+	x (khmer sign toandakhiat - 17CD)
 0E4D	THAI CHARACTER NIKHAHIT
 	= nikkhahit
 	* final nasal
@@ -7076,7 +7136,7 @@
 113C	HANGUL CHOSEONG CHITUEUMSIOS
 	* voiceless lenis dental fricative
 113D	HANGUL CHOSEONG CHITUEUMSSANGSIOS
-	* voicless fortis dental fricative
+	* voiceless fortis dental fricative
 113E	HANGUL CHOSEONG CEONGCHIEUMSIOS
 	* voiceless lenis retroflex fricative
 113F	HANGUL CHOSEONG CEONGCHIEUMSSANGSIOS
@@ -7738,7 +7798,8 @@
 1398	ETHIOPIC TONAL MARK DERET-HIDET
 1399	ETHIOPIC TONAL MARK KURT
 @@	13A0	Cherokee	13FF
-@		Syllables
+@+		Most lowercase Cherokee syllables are encoded in the Cherokee Supplement block at AB70..ABBF.
+@		Uppercase syllables
 13A0	CHEROKEE LETTER A
 13A1	CHEROKEE LETTER E
 13A2	CHEROKEE LETTER I
@@ -7824,6 +7885,16 @@
 13F2	CHEROKEE LETTER YO
 13F3	CHEROKEE LETTER YU
 13F4	CHEROKEE LETTER YV
+@		Archaic uppercase syllable
+13F5	CHEROKEE LETTER MV
+@		Lowercase syllables
+13F8	CHEROKEE SMALL LETTER YE
+13F9	CHEROKEE SMALL LETTER YI
+13FA	CHEROKEE SMALL LETTER YO
+13FB	CHEROKEE SMALL LETTER YU
+13FC	CHEROKEE SMALL LETTER YV
+@		Archaic lowercase syllable
+13FD	CHEROKEE SMALL LETTER MV
 @@	1400	Unified Canadian Aboriginal Syllabics	167F
 @		Punctuation
 1400	CANADIAN SYLLABICS HYPHEN
@@ -8959,6 +9030,7 @@
 	* a diacritic historically corresponding to the repha form of ra in Devanagari
 17CD	KHMER SIGN TOANDAKHIAT
 	* indicates that the base character is not pronounced
+	x (thai character thanthakhat - 0E4C)
 17CE	KHMER SIGN KAKABAT
 	* sign used with some exclamations
 17CF	KHMER SIGN AHSDA
@@ -9343,7 +9415,7 @@
 18A9	MONGOLIAN LETTER ALI GALI DAGALGA
 18AA	MONGOLIAN LETTER MANCHU ALI GALI LHA
 @~	Standardized Variation Sequences
-@+	Unlike other blocks, these variation sequences use the script-specific variation selectors for Mongolian.
+@+		Unlike other blocks, these variation sequences use the script-specific variation selectors for Mongolian.
 @@	18B0	Unified Canadian Aboriginal Syllabics Extended	18FF
 @		Syllables for Moose Cree
 18B0	CANADIAN SYLLABICS OY
@@ -9557,7 +9629,7 @@
 1973	TAI LE LETTER TONE-5
 1974	TAI LE LETTER TONE-6
 @@	1980	New Tai Lue	19DF
-@+		Note the similarly named but distinct Tai Le script encoded at 1950..197F. The New Tai Lue script is also known as Xishuang Banna Dai.
+@+		Note the similarly named but distinct Tai Le script encoded at 1950..197F. The New Tai Lue script is also known as Xishuangbanna Dai.
 @		Consonants
 1980	NEW TAI LUE LETTER HIGH QA
 1981	NEW TAI LUE LETTER LOW QA
@@ -9905,6 +9977,7 @@
 	* intended to surround a diacritic below
 1ABE	COMBINING PARENTHESES OVERLAY
 	* intended to surround a base letter
+	* exact placement is font dependent
 @@	1B00	Balinese	1B7F
 @		Various signs
 1B00	BALINESE SIGN ULU RICEM
@@ -10528,7 +10601,7 @@
 1CF1	VEDIC SIGN ANUSVARA UBHAYATO MUKHA
 	= vaidika anusvaara ubhayato mukha
 @		Ardhavisarga
-@+		Ardhavisarga denotes the sounds jihvamuliya and upadhmaniya (velar and bilabial voicelss fricatives) in Sanskrit. Its use is not limited to Vedic.
+@+		Ardhavisarga denotes the sounds jihvamuliya and upadhmaniya (velar and bilabial voiceless fricatives) in Sanskrit. Its use is not limited to Vedic.
 1CF2	VEDIC SIGN ARDHAVISARGA
 	= vaidika jihvaamuuliiya upadhmaaniiya
 1CF3	VEDIC SIGN ROTATED ARDHAVISARGA
@@ -11115,7 +11188,7 @@
 1E37	LATIN SMALL LETTER L WITH DOT BELOW
 	* Indic transliteration
 	: 006C 0323
-@+		* see ISO 15919 on the use of dot below versus ring below in Indic transliteration
+@+	* see ISO 15919 on the use of dot below versus ring below in Indic transliteration
 	x (combining ring below - 0325)
 1E38	LATIN CAPITAL LETTER L WITH DOT BELOW AND MACRON
 	: 1E36 0304
@@ -11198,7 +11271,7 @@
 1E5B	LATIN SMALL LETTER R WITH DOT BELOW
 	* Indic transliteration
 	: 0072 0323
-@+		* see ISO 15919 on the use of dot below versus ring below in Indic transliteration
+@+	* see ISO 15919 on the use of dot below versus ring below in Indic transliteration
 	x (combining ring below - 0325)
 1E5C	LATIN CAPITAL LETTER R WITH DOT BELOW AND MACRON
 	: 1E5A 0304
@@ -12391,7 +12464,7 @@
 206D	ACTIVATE ARABIC FORM SHAPING
 206E	NATIONAL DIGIT SHAPES
 206F	NOMINAL DIGIT SHAPES
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	2070	Superscripts and Subscripts	209F
 @		Superscripts
 @+		See also superscript Latin letters in the Spacing Modifier Letters block starting at 02B0.
@@ -12496,6 +12569,7 @@
 		x (currency sign - 00A4)
 		x (yen sign - 00A5)
 		x (latin small letter f with hook - 0192)
+		x (armenian dram sign - 058F)
 		x (afghani sign - 060B)
 		x (bengali rupee mark - 09F2)
 		x (bengali rupee sign - 09F3)
@@ -12593,6 +12667,8 @@
 	* Azerbaijan
 20BD	RUBLE SIGN
 	* Russia
+20BE	LARI SIGN
+	* Georgia
 @@	20D0	Combining Diacritical Marks for Symbols	20FF
 @		Combining diacritical marks for symbols
 20D0	COMBINING LEFT HARPOON ABOVE
@@ -12766,6 +12842,8 @@
 	# 0054 0045 004C
 2122	TRADE MARK SIGN
 	x (circled wz - 1F12E)
+	~ 2122 FE0E text style
+	~ 2122 FE0F emoji style
 	# <super> 0054 004D
 2123	VERSICLE
 2124	DOUBLE-STRUCK CAPITAL Z
@@ -12907,7 +12985,7 @@
 	x (greek small letter digamma - 03DD)
 @		Biblical editorial symbol
 214F	SYMBOL FOR SAMARITAN SOURCE
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	2150	Number Forms	218F
 @		Fractions
 @+		Other fraction number forms are found in the Latin-1 Supplement block.
@@ -13037,6 +13115,14 @@
 2189	VULGAR FRACTION ZERO THIRDS
 	* used in baseball scoring, from ARIB STD B24
 	# <fraction> 0030 2044 0033
+@		Turned digits
+218A	TURNED DIGIT TWO
+	* digit for 10 in some duodecimal systems
+218B	TURNED DIGIT THREE
+	* digit for 11 in some duodecimal systems
+	x (latin capital letter open e - 0190)
+	x (euler constant - 2107)
+	x (latin small letter tresillo - A72B)
 @@	2190	Arrows	21FF
 @		Simple arrows
 2190	LEFTWARDS ARROW
@@ -13078,6 +13164,7 @@
 219D	RIGHTWARDS WAVE ARROW
 219E	LEFTWARDS TWO HEADED ARROW
 	= fast cursor left
+	x (leftwards two-headed arrow with triangle arrowheads - 2BEC)
 219F	UPWARDS TWO HEADED ARROW
 	= fast cursor up
 21A0	RIGHTWARDS TWO HEADED ARROW
@@ -13239,7 +13326,7 @@
 21FD	LEFTWARDS OPEN-HEADED ARROW
 21FE	RIGHTWARDS OPEN-HEADED ARROW
 21FF	LEFT RIGHT OPEN-HEADED ARROW
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	2200	Mathematical Operators	22FF
 @@+
 @		Miscellaneous mathematical symbols
@@ -13335,10 +13422,13 @@
 	x (arabic-indic fourth root - 0607)
 221D	PROPORTIONAL TO
 	x (greek small letter alpha - 03B1)
-@		Miscellaneous mathematical symbols
+@		Miscellaneous mathematical symbol
 221E	INFINITY
+@		Angles
+@+	Other angle symbols are found at 299B-29AF.
 221F	RIGHT ANGLE
 2220	ANGLE
+	x (acute angle - 299F)
 2221	MEASURED ANGLE
 2222	SPHERICAL ANGLE
 	= angle arc
@@ -13790,7 +13880,7 @@
 2300	DIAMETER SIGN
 	x (empty set - 2205)
 2301	ELECTRIC ARROW
-@+		* from ISO 2047
+@+	* from ISO 2047
 	* symbol for End of Transmission
 2302	HOUSE
 2303	UP ARROWHEAD
@@ -13957,7 +14047,7 @@
 	x (reversed empty set - 29B0)
 234A	APL FUNCTIONAL SYMBOL DOWN TACK UNDERBAR
 	= up tack underbar
-@+		* preferred naming for APL tack symbols now follows the London Convention in ISO/IEC 13751:2000 (APL Extended)
+@+	* preferred naming for APL tack symbols now follows the London Convention in ISO/IEC 13751:2000 (APL Extended)
 	x (up tack - 22A5)
 234B	APL FUNCTIONAL SYMBOL DELTA STILE
 234C	APL FUNCTIONAL SYMBOL QUAD DOWN CARET
@@ -14025,19 +14115,19 @@
 237A	APL FUNCTIONAL SYMBOL ALPHA
 @		Graphics for control codes
 237B	NOT CHECK MARK
-@+		* from ISO 2047
+@+	* from ISO 2047
 	* symbol for Negative Acknowledge
 @		Miscellaneous technical
 237C	RIGHT ANGLE WITH DOWNWARDS ZIGZAG ARROW
 @		Graphics for control codes
 237D	SHOULDERED OPEN BOX
-@+		* from ISO 9995-7
+@+	* from ISO 9995-7
 	* keyboard symbol for No Break Space
 	x (open box - 2423)
 237E	BELL SYMBOL
-@+		* from ISO 2047
+@+	* from ISO 2047
 237F	VERTICAL LINE WITH MIDDLE DOT
-@+		* from ISO 2047
+@+	* from ISO 2047
 	* symbol for End of Medium
 @		Keyboard symbols from ISO 9995-7
 2380	INSERTION SYMBOL
@@ -14255,7 +14345,7 @@
 23FA	BLACK CIRCLE FOR RECORD
 	= record
 	x (medium black circle - 26AB)
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	2400	Control Pictures	243F
 @+		The diagonal lettering glyphs are only exemplary; alternate representations may be, and often are used in the visible display of control codes.
 @		Graphic pictures for control codes
@@ -14304,11 +14394,11 @@
 2424	SYMBOL FOR NEWLINE
 @		Keyboard symbol
 2425	SYMBOL FOR DELETE FORM TWO
-@+		* from ISO 9995-7
+@+	* from ISO 9995-7
 	* keyboard symbol for undoable delete
 @		Specific symbol for control code
 2426	SYMBOL FOR SUBSTITUTE FORM TWO
-@+		* from ISO 2047
+@+	* from ISO 2047
 	x (arabic question mark - 061F)
 @@	2440	Optical Character Recognition	245F
 @		OCR-A
@@ -14651,7 +14741,7 @@
 @		Additional white on black circled number
 24FF	NEGATIVE CIRCLED DIGIT ZERO
 	x (dingbat negative circled digit one - 2776)
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	2500	Box Drawing	257F
 @+		All of these characters are intended for compatibility with character cell graphic sets in use prior to 1990.
 @		Light and heavy solid lines
@@ -15071,7 +15161,7 @@
 	~ 25FE FE0F emoji style
 25FF	LOWER RIGHT TRIANGLE
 	x (right triangle - 22BF)
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	2600	Miscellaneous Symbols	26FF
 @@+
 @		Weather and astrological symbols
@@ -15160,6 +15250,7 @@
 2619	REVERSED ROTATED FLORAL HEART BULLET
 	* a binding signature mark
 	x (rotated floral heart bullet - 2767)
+	x (south west pointing vine leaf - 1F659)
 @		Pointing hand symbols
 261A	BLACK LEFT POINTING INDEX
 261B	BLACK RIGHT POINTING INDEX
@@ -15283,9 +15374,11 @@
 	~ 264A FE0E text style
 	~ 264A FE0F emoji style
 264B	CANCER
+	x (crab - 1F980)
 	~ 264B FE0E text style
 	~ 264B FE0F emoji style
 264C	LEO
+	x (lion face - 1F981)
 	~ 264C FE0E text style
 	~ 264C FE0F emoji style
 264D	VIRGO
@@ -15300,15 +15393,18 @@
 264F	SCORPIUS
 	= scorpio
 	= minim, drop
+	x (scorpion - 1F982)
 	~ 264F FE0E text style
 	~ 264F FE0F emoji style
 2650	SAGITTARIUS
+	x (bow and arrow - 1F3F9)
 	~ 2650 FE0E text style
 	~ 2650 FE0F emoji style
 2651	CAPRICORN
 	~ 2651 FE0E text style
 	~ 2651 FE0F emoji style
 2652	AQUARIUS
+	x (amphora - 1F3FA)
 	~ 2652 FE0E text style
 	~ 2652 FE0F emoji style
 2653	PISCES
@@ -15451,6 +15547,7 @@
 	= medical term
 	* both inclined or upright renderings of this symbol are common
 	x (caduceus - 2624)
+	x (bowl of hygieia - 1F54F)
 2696	SCALES
 	= legal term, jurisprudence
 	x (libra - 264E)
@@ -15503,13 +15600,13 @@
 	* a glyph variant has the two circles on the same line
 	= bisexuality
 26A5	MALE AND FEMALE SIGN
-	= transgendered sexuality
+	= transgender
 	= hermaphrodite (in entomology)
 26A6	MALE WITH STROKE SIGN
-	= transgendered sexuality
+	= transgender
 	= alchemical symbol for iron or crocus of iron
 26A7	MALE WITH STROKE AND MALE AND FEMALE SIGN
-	= transgendered sexuality
+	= transgender
 26A8	VERTICAL MALE WITH STROKE SIGN
 	= alchemical symbol for iron
 26A9	HORIZONTAL MALE WITH STROKE SIGN
@@ -15615,6 +15712,7 @@
 	= icy road
 26D1	HELMET WITH WHITE CROSS
 	= maintenance
+	x (construction worker - 1F477)
 26D2	CIRCLED CROSSING LANES
 	= road closed
 	x (circled times - 2297)
@@ -15740,7 +15838,7 @@
 	x (teacup without handle - 1F375)
 26FF	WHITE FLAG WITH HORIZONTAL MIDDLE BLACK STRIPE
 	= Japanese self-defence force site
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	2700	Dingbats	27BF
 @+		ITC Zapf dingbats series 100. Some of the ITC Zapf dingbats have been unified with geometric shape characters. Gaps in the chart have subsequently been filled with other dingbat-like symbols.
 	x (black telephone - 260E)
@@ -15833,7 +15931,7 @@
 271F	OUTLINED LATIN CROSS
 2720	MALTESE CROSS
 	* Historically, the Maltese cross took many forms; the shape shown in the Zapf Dingbats is similar to one known as the Cross Formée.
-@		Stars, asterisks and snowflakes
+@		Stars and asterisks
 2721	STAR OF DAVID
 	x (six pointed star with middle dot - 1F52F)
 2722	FOUR TEARDROP-SPOKED ASTERISK
@@ -15880,6 +15978,7 @@
 273B	TEARDROP-SPOKED ASTERISK
 273C	OPEN CENTRE TEARDROP-SPOKED ASTERISK
 273D	HEAVY TEARDROP-SPOKED ASTERISK
+@		Fleurons
 273E	SIX PETALLED BLACK AND WHITE FLORETTE
 273F	BLACK FLORETTE
 2740	WHITE FLORETTE
@@ -15887,6 +15986,7 @@
 	x (white flower - 1F4AE)
 2741	EIGHT PETALLED OUTLINED BLACK FLORETTE
 	x (black rosette - 1F3F6)
+@		Stars, asterisks and snowflakes
 2742	CIRCLED OPEN CENTRE EIGHT POINTED STAR
 2743	HEAVY TEARDROP-SPOKED PINWHEEL ASTERISK
 2744	SNOWFLAKE
@@ -15953,11 +16053,13 @@
 	~ 2764 FE0E text style
 	~ 2764 FE0F emoji style
 2765	ROTATED HEAVY BLACK HEART BULLET
+@		Fleurons
 2766	FLORAL HEART
 	= Aldus leaf
 2767	ROTATED FLORAL HEART BULLET
 	= hedera, ivy leaf
 	x (reversed rotated floral heart bullet - 2619)
+	x (south east pointing vine leaf - 1F65B)
 @		Ornamental brackets
 2768	MEDIUM LEFT PARENTHESIS ORNAMENT
 	x (left parenthesis - 0028)
@@ -16084,7 +16186,7 @@
 27BE	OPEN-OUTLINED RIGHTWARDS ARROW
 @		Miscellaneous
 27BF	DOUBLE CURLY LOOP
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	27C0	Miscellaneous Mathematical Symbols-A	27EF
 @		Miscellaneous symbols
 27C0	THREE DIMENSIONAL ANGLE
@@ -16710,7 +16812,7 @@
 297D	RIGHT FISH TAIL
 297E	UP FISH TAIL
 297F	DOWN FISH TAIL
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	2980	Miscellaneous Mathematical Symbols-B	29FF
 @		Miscellaneous mathematical symbols
 2980	TRIPLE VERTICAL BAR DELIMITER
@@ -16766,6 +16868,7 @@
 299D	MEASURED RIGHT ANGLE WITH DOT
 299E	ANGLE WITH S INSIDE
 299F	ACUTE ANGLE
+	x (angle - 2220)
 29A0	SPHERICAL ANGLE OPENING LEFT
 	x (spherical angle - 2222)
 29A1	SPHERICAL ANGLE OPENING UP
@@ -16794,6 +16897,7 @@
 29B4	EMPTY SET WITH LEFT ARROW ABOVE
 @		Circle symbols
 29B5	CIRCLE WITH HORIZONTAL BAR
+	* used in superscripted form to mean standard state (chemistry)
 	x (circled minus - 2296)
 29B6	CIRCLED VERTICAL BAR
 	x (alchemical symbol for nitre - 1F715)
@@ -17653,7 +17757,7 @@
 	x (black rightwards arrow - 27A1)
 	x (leftwards black arrow - 2B05)
 @		Arrowheads
-@+	These sets of arrowheads are narrower than the dingbats set.
+@+		These sets of arrowheads are narrower than the dingbats set.
 2B98	THREE-D TOP-LIGHTED LEFTWARDS EQUILATERAL ARROWHEAD
 2B99	THREE-D RIGHT-LIGHTED UPWARDS EQUILATERAL ARROWHEAD
 2B9A	THREE-D TOP-LIGHTED RIGHTWARDS EQUILATERAL ARROWHEAD
@@ -17742,7 +17846,18 @@
 	= query
 	x (apl functional symbol quad question - 2370)
 	x (replacement character - FFFD)
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@		Two-headed arrow symbols
+@+		The following four arrow symbols are the preferred representation for fast cursor direction for ISO 9995-7.
+2BEC	LEFTWARDS TWO-HEADED ARROW WITH TRIANGLE ARROWHEADS
+	= fast cursor left
+	x (leftwards two headed arrow - 219E)
+2BED	UPWARDS TWO-HEADED ARROW WITH TRIANGLE ARROWHEADS
+	= fast cursor up
+2BEE	RIGHTWARDS TWO-HEADED ARROW WITH TRIANGLE ARROWHEADS
+	= fast cursor right
+2BEF	DOWNWARDS TWO-HEADED ARROW WITH TRIANGLE ARROWHEADS
+	= fast cursor down
+@~	!
 @@	2C00	Glagolitic	2C5F
 @		Capital letters
 2C00	GLAGOLITIC CAPITAL LETTER AZU
@@ -18274,6 +18389,7 @@
 2DF3	COMBINING CYRILLIC LETTER SHCHA
 2DF4	COMBINING CYRILLIC LETTER FITA
 2DF5	COMBINING CYRILLIC LETTER ES-TE
+	* preferred representation is the sequence: 2DED 2DEE 
 2DF6	COMBINING CYRILLIC LETTER A
 	x (combining latin small letter a - 0363)
 2DF7	COMBINING CYRILLIC LETTER IE
@@ -18441,7 +18557,7 @@
 	* ancestor of the pilcrow sign
 	x (pilcrow sign - 00B6)
 @		Double hyphen
-@+	The double hyphen is used in transcription of old German manuscripts, and occasionally as a non-standard punctuation mark. It is not intended for the representation of normal hyphens, whose doubled forms in Fraktur text are considered glyphic variants.
+@+		The double hyphen is used in transcription of old German manuscripts, and occasionally as a non-standard punctuation mark. It is not intended for the representation of normal hyphens, whose doubled forms in Fraktur text are considered glyphic variants.
 2E40	DOUBLE HYPHEN
 	x (equals sign - 003D)
 	x (hyphen - 2010)
@@ -19244,7 +19360,8 @@
 	x (mathematical right white square bracket - 27E7)
 @		CJK symbols and punctuation
 301C	WAVE DASH
-@+		* This character was encoded to match JIS C 6226-1978 1-33 "wave dash". The JIS standards and some industry practice disagree in mapping.
+@+		This character was encoded to match JIS C 6226-1978 1-33 "wave dash".
+	x (swung dash - 2053)
 	x (wavy dash - 3030)
 	x (fullwidth tilde - FF5E)
 301D	REVERSED DOUBLE PRIME QUOTATION MARK
@@ -19282,6 +19399,8 @@
 3030	WAVY DASH
 	x (wavy line - 2307)
 	x (wave dash - 301C)
+	~ 3030 FE0E text style
+	~ 3030 FE0F emoji style
 3031	VERTICAL KANA REPEAT MARK
 3032	VERTICAL KANA REPEAT WITH VOICED SOUND MARK
 	* the preceding two semantic characters are preferred to the following three glyphic forms
@@ -19314,7 +19433,7 @@
 	* visual indicator that the following ideograph is to be taken as a variant of the intended character
 303F	IDEOGRAPHIC HALF FILL SPACE
 	* visual indicator of a screen space for half of an ideograph
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	3040	Hiragana	309F
 @		Hiragana letters
 3041	HIRAGANA LETTER SMALL A
@@ -19638,7 +19757,7 @@
 3125	BOPOMOFO LETTER ENG
 3126	BOPOMOFO LETTER ER
 3127	BOPOMOFO LETTER I
-	* the horizontal stroke form is considered a vertical variant
+	* the vertical stroke form is considered a rendering variant
 3128	BOPOMOFO LETTER U
 3129	BOPOMOFO LETTER IU
 @		Dialect (non-Mandarin) letters
@@ -20581,7 +20700,7 @@
 	# <circle> 30F1
 32FE	CIRCLED KATAKANA WO
 	# <circle> 30F2
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	3300	CJK Compatibility	33FF
 @		Squared Katakana words
 3300	SQUARE APAATO
@@ -21264,7 +21383,7 @@
 4DFD	HEXAGRAM FOR SMALL PREPONDERANCE
 4DFE	HEXAGRAM FOR AFTER COMPLETION
 4DFF	HEXAGRAM FOR BEFORE COMPLETION
-@@	4E00	CJK Unified Ideographs	9FCC
+@@	4E00	CJK Unified Ideographs	9FD5
 @@	A000	Yi Syllables	A48F
 @@+
 @		Syllables
@@ -23033,7 +23152,8 @@ A69C	MODIFIER LETTER CYRILLIC HARD SIGN
 	# <super> 044A
 A69D	MODIFIER LETTER CYRILLIC SOFT SIGN
 	# <super> 044C
-@		Combining mark for Old Cyrillic
+@		Combining marks for Old Cyrillic
+A69E	COMBINING CYRILLIC LETTER EF
 A69F	COMBINING CYRILLIC LETTER IOTIFIED E
 @@	A6A0	Bamum	A6FF
 @		Syllables
@@ -23197,6 +23317,7 @@ A728	LATIN CAPITAL LETTER TZ
 A729	LATIN SMALL LETTER TZ
 A72A	LATIN CAPITAL LETTER TRESILLO
 A72B	LATIN SMALL LETTER TRESILLO
+	x (turned digit three - 218B)
 A72C	LATIN CAPITAL LETTER CUATRILLO
 A72D	LATIN SMALL LETTER CUATRILLO
 A72E	LATIN CAPITAL LETTER CUATRILLO WITH COMMA
@@ -23324,6 +23445,10 @@ A78D	LATIN CAPITAL LETTER TURNED H
 A78E	LATIN SMALL LETTER L WITH RETROFLEX HOOK AND BELT
 	* voiceless lateral retroflex fricative
 	* used to transcribe Toda
+@		Transliteration letter
+A78F	LATIN LETTER SINOLOGICAL DOT
+	* used for transliteration for Phags-Pa and phonetic transcription for Tangut
+	x (middle dot - 00B7)
 @		Additional letters
 A790	LATIN CAPITAL LETTER N WITH DESCENDER
 A791	LATIN SMALL LETTER N WITH DESCENDER
@@ -23381,6 +23506,20 @@ A7B0	LATIN CAPITAL LETTER TURNED K
 A7B1	LATIN CAPITAL LETTER TURNED T
 	* lowercase is 0287
 	* also used in Unifon
+@		Letter for African languages
+A7B2	LATIN CAPITAL LETTER J WITH CROSSED-TAIL
+	* lowercase is 029D
+@		Letter for German dialectology
+A7B3	LATIN CAPITAL LETTER CHI
+	* lower case is AB53
+	x (greek capital letter chi - 03A7)
+@		Letters for African languages
+A7B4	LATIN CAPITAL LETTER BETA
+A7B5	LATIN SMALL LETTER BETA
+	x (greek small letter beta - 03B2)
+A7B6	LATIN CAPITAL LETTER OMEGA
+A7B7	LATIN SMALL LETTER OMEGA
+	x (greek small letter omega - 03C9)
 @		Additional letter
 A7F7	LATIN EPIGRAPHIC LETTER SIDEWAYS I
 	* Celtic inscriptions
@@ -23731,7 +23870,7 @@ A8D8	SAURASHTRA DIGIT EIGHT
 A8D9	SAURASHTRA DIGIT NINE
 @@	A8E0	Devanagari Extended	A8FF
 @		Cantillation marks (svara) for the Samaveda
-@+	See the similar set of Grantha svara markers for the Samaveda, encoded in the range 11366-11374.
+@+		See the similar set of Grantha svara markers for the Samaveda, encoded in the range 11366-11374.
 A8E0	COMBINING DEVANAGARI DIGIT ZERO
 	= vaidika saamasvara anka shuunya
 A8E1	COMBINING DEVANAGARI DIGIT ONE
@@ -23797,6 +23936,13 @@ A8FA	DEVANAGARI CARET
 A8FB	DEVANAGARI HEADSTROKE
 	= shirorekhaa
 	* used to indicate uncertain manuscript readings
+	x (sharada headstroke - 111DC)
+@		Signs
+A8FC	DEVANAGARI SIGN SIDDHAM
+	= siddhirastu
+	* used at the beginning of texts as an invocation
+	x (sharada sign siddham - 111DB)
+A8FD	DEVANAGARI JAIN OM
 @@	A900	Kayah Li	A92F
 @		Digits
 A900	KAYAH LI DIGIT ZERO
@@ -24453,6 +24599,7 @@ AB50	LATIN SMALL LETTER UI
 AB51	LATIN SMALL LETTER TURNED UI
 AB52	LATIN SMALL LETTER U WITH LEFT HOOK
 AB53	LATIN SMALL LETTER CHI
+	* uppercase is A7B3
 	x (greek small letter chi - 03C7)
 AB54	LATIN SMALL LETTER CHI WITH LOW RIGHT RING
 AB55	LATIN SMALL LETTER CHI WITH LOW LEFT SERIF
@@ -24474,6 +24621,15 @@ AB5E	MODIFIER LETTER SMALL L WITH MIDDLE TILDE
 	# <super> 026B
 AB5F	MODIFIER LETTER SMALL U WITH LEFT HOOK
 	# <super> AB52
+@		Historic letters for Sakha (Yakut)
+@+		These letters were used from 1917 to 1927 in the official IPA-based Latin orthography of that era.
+AB60	LATIN SMALL LETTER SAKHA YAT
+	x (cyrillic small letter yat - 0463)
+AB61	LATIN SMALL LETTER IOTIFIED E
+	x (cyrillic small letter iotified e - 0465)
+AB62	LATIN SMALL LETTER OPEN OE
+	x (latin small letter open o - 0254)
+AB63	LATIN SMALL LETTER UO
 @		Letters for Americanist orthographies
 AB64	LATIN SMALL LETTER INVERTED ALPHA
 	x (latin small letter turned alpha - 0252)
@@ -24481,6 +24637,89 @@ AB65	GREEK LETTER SMALL CAPITAL OMEGA
 	* obsolete for mid back rounded vowel
 	x (latin small letter closed omega - 0277)
 	x (greek small letter omega - 03C9)
+@@	AB70	Cherokee Supplement	ABBF
+@+		The uppercase Cherokee syllables are encoded in the Cherokee block at 13A0..13FF. Lowercase ye, yi, yo, yu, yv, and mv are encoded in that same block.
+@		Lowercase syllables
+AB70	CHEROKEE SMALL LETTER A
+AB71	CHEROKEE SMALL LETTER E
+AB72	CHEROKEE SMALL LETTER I
+AB73	CHEROKEE SMALL LETTER O
+AB74	CHEROKEE SMALL LETTER U
+AB75	CHEROKEE SMALL LETTER V
+AB76	CHEROKEE SMALL LETTER GA
+AB77	CHEROKEE SMALL LETTER KA
+AB78	CHEROKEE SMALL LETTER GE
+AB79	CHEROKEE SMALL LETTER GI
+AB7A	CHEROKEE SMALL LETTER GO
+AB7B	CHEROKEE SMALL LETTER GU
+AB7C	CHEROKEE SMALL LETTER GV
+AB7D	CHEROKEE SMALL LETTER HA
+AB7E	CHEROKEE SMALL LETTER HE
+AB7F	CHEROKEE SMALL LETTER HI
+AB80	CHEROKEE SMALL LETTER HO
+AB81	CHEROKEE SMALL LETTER HU
+AB82	CHEROKEE SMALL LETTER HV
+AB83	CHEROKEE SMALL LETTER LA
+AB84	CHEROKEE SMALL LETTER LE
+AB85	CHEROKEE SMALL LETTER LI
+AB86	CHEROKEE SMALL LETTER LO
+AB87	CHEROKEE SMALL LETTER LU
+AB88	CHEROKEE SMALL LETTER LV
+AB89	CHEROKEE SMALL LETTER MA
+AB8A	CHEROKEE SMALL LETTER ME
+AB8B	CHEROKEE SMALL LETTER MI
+AB8C	CHEROKEE SMALL LETTER MO
+AB8D	CHEROKEE SMALL LETTER MU
+AB8E	CHEROKEE SMALL LETTER NA
+AB8F	CHEROKEE SMALL LETTER HNA
+AB90	CHEROKEE SMALL LETTER NAH
+AB91	CHEROKEE SMALL LETTER NE
+AB92	CHEROKEE SMALL LETTER NI
+AB93	CHEROKEE SMALL LETTER NO
+AB94	CHEROKEE SMALL LETTER NU
+AB95	CHEROKEE SMALL LETTER NV
+AB96	CHEROKEE SMALL LETTER QUA
+AB97	CHEROKEE SMALL LETTER QUE
+AB98	CHEROKEE SMALL LETTER QUI
+AB99	CHEROKEE SMALL LETTER QUO
+AB9A	CHEROKEE SMALL LETTER QUU
+AB9B	CHEROKEE SMALL LETTER QUV
+AB9C	CHEROKEE SMALL LETTER SA
+AB9D	CHEROKEE SMALL LETTER S
+AB9E	CHEROKEE SMALL LETTER SE
+AB9F	CHEROKEE SMALL LETTER SI
+ABA0	CHEROKEE SMALL LETTER SO
+ABA1	CHEROKEE SMALL LETTER SU
+ABA2	CHEROKEE SMALL LETTER SV
+ABA3	CHEROKEE SMALL LETTER DA
+ABA4	CHEROKEE SMALL LETTER TA
+ABA5	CHEROKEE SMALL LETTER DE
+ABA6	CHEROKEE SMALL LETTER TE
+ABA7	CHEROKEE SMALL LETTER DI
+ABA8	CHEROKEE SMALL LETTER TI
+ABA9	CHEROKEE SMALL LETTER DO
+ABAA	CHEROKEE SMALL LETTER DU
+ABAB	CHEROKEE SMALL LETTER DV
+ABAC	CHEROKEE SMALL LETTER DLA
+ABAD	CHEROKEE SMALL LETTER TLA
+ABAE	CHEROKEE SMALL LETTER TLE
+ABAF	CHEROKEE SMALL LETTER TLI
+ABB0	CHEROKEE SMALL LETTER TLO
+ABB1	CHEROKEE SMALL LETTER TLU
+ABB2	CHEROKEE SMALL LETTER TLV
+ABB3	CHEROKEE SMALL LETTER TSA
+ABB4	CHEROKEE SMALL LETTER TSE
+ABB5	CHEROKEE SMALL LETTER TSI
+ABB6	CHEROKEE SMALL LETTER TSO
+ABB7	CHEROKEE SMALL LETTER TSU
+ABB8	CHEROKEE SMALL LETTER TSV
+ABB9	CHEROKEE SMALL LETTER WA
+ABBA	CHEROKEE SMALL LETTER WE
+ABBB	CHEROKEE SMALL LETTER WI
+ABBC	CHEROKEE SMALL LETTER WO
+ABBD	CHEROKEE SMALL LETTER WU
+ABBE	CHEROKEE SMALL LETTER WV
+ABBF	CHEROKEE SMALL LETTER YA
 @@	ABC0	Meetei Mayek	ABFF
 @+		The name "Meetei Mayek" is used in official documentation in Manipur. Many linguists also use the name "Meitei Mayek", and other transliterations also occur.
 @		Letters
@@ -25763,7 +26002,7 @@ FB4E	HEBREW LETTER PE WITH RAFE
 FB4F	HEBREW LIGATURE ALEF LAMED
 	# 05D0 05DC
 @@	FB50	Arabic Presentation Forms-A	FDFF
-@+		Preferred characters are found in the Arabic block 0600 - 06FF. This block also contains 32 noncharacters in the range FDD0 - FDDF.
+@+		Preferred characters are found in the Arabic block 0600-06FF. This block also contains 32 noncharacters in the range FDD0-FDEF.
 @		Glyphs for contextual forms of letters for Persian, Urdu, Sindhi, etc.
 FB50	ARABIC LETTER ALEF WASLA ISOLATED FORM
 	# <isolated> 0671
@@ -27089,7 +27328,7 @@ FE26	COMBINING CONJOINING MACRON
 	x (combining macron - 0304)
 	x (combining double macron - 035E)
 @		Combining half marks below
-@+	These are used in combinations to represent a ligature, tilde, or macron that extend underneath more than two characters.
+@+		These are used in combinations to represent a ligature, tilde, or macron that extend underneath more than two characters.
 FE27	COMBINING LIGATURE LEFT HALF BELOW
 FE28	COMBINING LIGATURE RIGHT HALF BELOW
 	x (combining double breve below - 035C)
@@ -27100,6 +27339,10 @@ FE2C	COMBINING MACRON RIGHT HALF BELOW
 FE2D	COMBINING CONJOINING MACRON BELOW
 	x (combining macron below - 0331)
 	x (combining double macron below - 035F)
+@		Combining half marks
+@+		These are used for supralineation in Church Slavonic texts.
+FE2E	COMBINING CYRILLIC TITLO LEFT HALF
+FE2F	COMBINING CYRILLIC TITLO RIGHT HALF
 @@	FE30	CJK Compatibility Forms	FE4F
 @		Glyphs for vertical variants
 FE30	PRESENTATION FORM FOR VERTICAL TWO DOT LEADER
@@ -27534,7 +27777,7 @@ FEFF	ZERO WIDTH NO-BREAK SPACE
 	x (<not a character> - FFFE)
 @@	FF00	Halfwidth and Fullwidth Forms	FFEF
 @		Fullwidth ASCII variants
-@+		See ASCII 0020 - 007E
+@+		See ASCII 0020-007E
 FF01	FULLWIDTH EXCLAMATION MARK
 	# <wide> 0021
 FF02	FULLWIDTH QUOTATION MARK
@@ -29818,6 +30061,35 @@ FFFF	<not a character>
 108AD	NABATAEAN NUMBER TEN
 108AE	NABATAEAN NUMBER TWENTY
 108AF	NABATAEAN NUMBER ONE HUNDRED
+@@	108E0	Hatran	108FF
+@		Letters
+108E0	HATRAN LETTER ALEPH
+108E1	HATRAN LETTER BETH
+108E2	HATRAN LETTER GIMEL
+108E3	HATRAN LETTER DALETH-RESH
+108E4	HATRAN LETTER HE
+108E5	HATRAN LETTER WAW
+108E6	HATRAN LETTER ZAYN
+108E7	HATRAN LETTER HETH
+108E8	HATRAN LETTER TETH
+108E9	HATRAN LETTER YODH
+108EA	HATRAN LETTER KAPH
+108EB	HATRAN LETTER LAMEDH
+108EC	HATRAN LETTER MEM
+108ED	HATRAN LETTER NUN
+108EE	HATRAN LETTER SAMEKH
+108EF	HATRAN LETTER AYN
+108F0	HATRAN LETTER PE
+108F1	HATRAN LETTER SADHE
+108F2	HATRAN LETTER QOPH
+108F4	HATRAN LETTER SHIN
+108F5	HATRAN LETTER TAW
+@		Numbers
+108FB	HATRAN NUMBER ONE
+108FC	HATRAN NUMBER FIVE
+108FD	HATRAN NUMBER TEN
+108FE	HATRAN NUMBER TWENTY
+108FF	HATRAN NUMBER ONE HUNDRED
 @@	10900	Phoenician	1091F
 @		Letters
 10900	PHOENICIAN LETTER ALF
@@ -30000,9 +30272,81 @@ FFFF	<not a character>
 109B5	MEROITIC CURSIVE LETTER TE
 109B6	MEROITIC CURSIVE LETTER TO
 109B7	MEROITIC CURSIVE LETTER DA
+@		Fractions
+109BC	MEROITIC CURSIVE FRACTION ELEVEN TWELFTHS
+109BD	MEROITIC CURSIVE FRACTION ONE HALF
 @		Logograms
 109BE	MEROITIC CURSIVE LOGOGRAM RMT
 109BF	MEROITIC CURSIVE LOGOGRAM IMN
+@		Digits
+109C0	MEROITIC CURSIVE NUMBER ONE
+109C1	MEROITIC CURSIVE NUMBER TWO
+109C2	MEROITIC CURSIVE NUMBER THREE
+109C3	MEROITIC CURSIVE NUMBER FOUR
+109C4	MEROITIC CURSIVE NUMBER FIVE
+109C5	MEROITIC CURSIVE NUMBER SIX
+109C6	MEROITIC CURSIVE NUMBER SEVEN
+109C7	MEROITIC CURSIVE NUMBER EIGHT
+109C8	MEROITIC CURSIVE NUMBER NINE
+@		Tens
+109C9	MEROITIC CURSIVE NUMBER TEN
+109CA	MEROITIC CURSIVE NUMBER TWENTY
+109CB	MEROITIC CURSIVE NUMBER THIRTY
+109CC	MEROITIC CURSIVE NUMBER FORTY
+109CD	MEROITIC CURSIVE NUMBER FIFTY
+109CE	MEROITIC CURSIVE NUMBER SIXTY
+109CF	MEROITIC CURSIVE NUMBER SEVENTY
+@		Hundreds
+109D2	MEROITIC CURSIVE NUMBER ONE HUNDRED
+109D3	MEROITIC CURSIVE NUMBER TWO HUNDRED
+109D4	MEROITIC CURSIVE NUMBER THREE HUNDRED
+109D5	MEROITIC CURSIVE NUMBER FOUR HUNDRED
+109D6	MEROITIC CURSIVE NUMBER FIVE HUNDRED
+109D7	MEROITIC CURSIVE NUMBER SIX HUNDRED
+109D8	MEROITIC CURSIVE NUMBER SEVEN HUNDRED
+109D9	MEROITIC CURSIVE NUMBER EIGHT HUNDRED
+109DA	MEROITIC CURSIVE NUMBER NINE HUNDRED
+@		Thousands
+109DB	MEROITIC CURSIVE NUMBER ONE THOUSAND
+109DC	MEROITIC CURSIVE NUMBER TWO THOUSAND
+109DD	MEROITIC CURSIVE NUMBER THREE THOUSAND
+109DE	MEROITIC CURSIVE NUMBER FOUR THOUSAND
+109DF	MEROITIC CURSIVE NUMBER FIVE THOUSAND
+109E0	MEROITIC CURSIVE NUMBER SIX THOUSAND
+109E1	MEROITIC CURSIVE NUMBER SEVEN THOUSAND
+109E2	MEROITIC CURSIVE NUMBER EIGHT THOUSAND
+109E3	MEROITIC CURSIVE NUMBER NINE THOUSAND
+@		Ten thousands
+109E4	MEROITIC CURSIVE NUMBER TEN THOUSAND
+109E5	MEROITIC CURSIVE NUMBER TWENTY THOUSAND
+109E6	MEROITIC CURSIVE NUMBER THIRTY THOUSAND
+109E7	MEROITIC CURSIVE NUMBER FORTY THOUSAND
+109E8	MEROITIC CURSIVE NUMBER FIFTY THOUSAND
+109E9	MEROITIC CURSIVE NUMBER SIXTY THOUSAND
+109EA	MEROITIC CURSIVE NUMBER SEVENTY THOUSAND
+109EB	MEROITIC CURSIVE NUMBER EIGHTY THOUSAND
+109EC	MEROITIC CURSIVE NUMBER NINETY THOUSAND
+@		Hundred thousands
+109ED	MEROITIC CURSIVE NUMBER ONE HUNDRED THOUSAND
+109EE	MEROITIC CURSIVE NUMBER TWO HUNDRED THOUSAND
+109EF	MEROITIC CURSIVE NUMBER THREE HUNDRED THOUSAND
+109F0	MEROITIC CURSIVE NUMBER FOUR HUNDRED THOUSAND
+109F1	MEROITIC CURSIVE NUMBER FIVE HUNDRED THOUSAND
+109F2	MEROITIC CURSIVE NUMBER SIX HUNDRED THOUSAND
+109F3	MEROITIC CURSIVE NUMBER SEVEN HUNDRED THOUSAND
+109F4	MEROITIC CURSIVE NUMBER EIGHT HUNDRED THOUSAND
+109F5	MEROITIC CURSIVE NUMBER NINE HUNDRED THOUSAND
+@		Fractions
+109F6	MEROITIC CURSIVE FRACTION ONE TWELFTH
+109F7	MEROITIC CURSIVE FRACTION TWO TWELFTHS
+109F8	MEROITIC CURSIVE FRACTION THREE TWELFTHS
+109F9	MEROITIC CURSIVE FRACTION FOUR TWELFTHS
+109FA	MEROITIC CURSIVE FRACTION FIVE TWELFTHS
+109FB	MEROITIC CURSIVE FRACTION SIX TWELFTHS
+109FC	MEROITIC CURSIVE FRACTION SEVEN TWELFTHS
+109FD	MEROITIC CURSIVE FRACTION EIGHT TWELFTHS
+109FE	MEROITIC CURSIVE FRACTION NINE TWELFTHS
+109FF	MEROITIC CURSIVE FRACTION TEN TWELFTHS
 @@	10A00	Kharoshthi	10A5F
 @		Vowels
 10A00	KHAROSHTHI LETTER A
@@ -30322,7 +30666,9 @@ FFFF	<not a character>
 10AC3	MANICHAEAN LETTER GIMEL
 10AC4	MANICHAEAN LETTER GHIMEL
 10AC5	MANICHAEAN LETTER DALETH
+	~ 10AC5 FE00 alternate form (isolate)
 10AC6	MANICHAEAN LETTER HE
+	~ 10AC6 FE00 alternate form (isolate)
 10AC7	MANICHAEAN LETTER WAW
 10AC8	MANICHAEAN SIGN UD
 10AC9	MANICHAEAN LETTER ZAYIN
@@ -30339,7 +30685,10 @@ FFFF	<not a character>
 10AD4	MANICHAEAN LETTER DHAMEDH
 10AD5	MANICHAEAN LETTER THAMEDH
 10AD6	MANICHAEAN LETTER MEM
+	~ 10AD6 FE00 alternate form (isolate)
+	~ 10AD6 FE00 alternate form (final)
 10AD7	MANICHAEAN LETTER NUN
+	~ 10AD7 FE00 alternate form (isolate)
 10AD8	MANICHAEAN LETTER SAMEKH
 10AD9	MANICHAEAN LETTER AYIN
 10ADA	MANICHAEAN LETTER AAYIN
@@ -30350,10 +30699,11 @@ FFFF	<not a character>
 10ADF	MANICHAEAN LETTER XOPH
 10AE0	MANICHAEAN LETTER QHOPH
 10AE1	MANICHAEAN LETTER RESH
+	~ 10AE1 FE00 alternate form (isolate)
 10AE2	MANICHAEAN LETTER SHIN
 10AE3	MANICHAEAN LETTER SSHIN
 10AE4	MANICHAEAN LETTER TAW
-@	Combining marks
+@		Combining marks
 10AE5	MANICHAEAN ABBREVIATION MARK ABOVE
 10AE6	MANICHAEAN ABBREVIATION MARK BELOW
 @		Numbers
@@ -30370,6 +30720,7 @@ FFFF	<not a character>
 10AF4	MANICHAEAN PUNCTUATION DOT
 10AF5	MANICHAEAN PUNCTUATION TWO DOTS
 10AF6	MANICHAEAN PUNCTUATION LINE FILLER
+@~	Standardized Variation Sequences
 @@	10B00	Avestan	10B3F
 @		Vowels
 10B00	AVESTAN LETTER A
@@ -30610,6 +30961,200 @@ FFFF	<not a character>
 10C46	OLD TURKIC LETTER YENISEI AET
 10C47	OLD TURKIC LETTER ORKHON OT
 10C48	OLD TURKIC LETTER ORKHON BASH
+@@	10C80	Old Hungarian	10CFF
+@		Uppercase letters
+@+		The use of uppercase letters is a modern innovation.
+10C80	OLD HUNGARIAN CAPITAL LETTER A
+10C81	OLD HUNGARIAN CAPITAL LETTER AA
+	= Á
+10C82	OLD HUNGARIAN CAPITAL LETTER EB
+	= B
+10C83	OLD HUNGARIAN CAPITAL LETTER AMB
+10C84	OLD HUNGARIAN CAPITAL LETTER EC
+	= C
+10C85	OLD HUNGARIAN CAPITAL LETTER ENC
+10C86	OLD HUNGARIAN CAPITAL LETTER ECS
+	= Cs
+10C87	OLD HUNGARIAN CAPITAL LETTER ED
+	= D
+10C88	OLD HUNGARIAN CAPITAL LETTER AND
+10C89	OLD HUNGARIAN CAPITAL LETTER E
+10C8A	OLD HUNGARIAN CAPITAL LETTER CLOSE E
+	= Ë
+10C8B	OLD HUNGARIAN CAPITAL LETTER EE
+	= É
+10C8C	OLD HUNGARIAN CAPITAL LETTER EF
+	= F
+10C8D	OLD HUNGARIAN CAPITAL LETTER EG
+	= G
+10C8E	OLD HUNGARIAN CAPITAL LETTER EGY
+	= Gy
+10C8F	OLD HUNGARIAN CAPITAL LETTER EH
+	= H
+10C90	OLD HUNGARIAN CAPITAL LETTER I
+10C91	OLD HUNGARIAN CAPITAL LETTER II
+	= Í
+10C92	OLD HUNGARIAN CAPITAL LETTER EJ
+	= J
+10C93	OLD HUNGARIAN CAPITAL LETTER EK
+	= K
+10C94	OLD HUNGARIAN CAPITAL LETTER AK
+10C95	OLD HUNGARIAN CAPITAL LETTER UNK
+10C96	OLD HUNGARIAN CAPITAL LETTER EL
+	= L
+10C97	OLD HUNGARIAN CAPITAL LETTER ELY
+	= Ly
+10C98	OLD HUNGARIAN CAPITAL LETTER EM
+	= M
+10C99	OLD HUNGARIAN CAPITAL LETTER EN
+	= N
+10C9A	OLD HUNGARIAN CAPITAL LETTER ENY
+	= Ny
+10C9B	OLD HUNGARIAN CAPITAL LETTER O
+	= O
+10C9C	OLD HUNGARIAN CAPITAL LETTER OO
+	= Ó
+10C9D	OLD HUNGARIAN CAPITAL LETTER NIKOLSBURG OE
+	= Ö
+10C9E	OLD HUNGARIAN CAPITAL LETTER RUDIMENTA OE
+	= Ö
+10C9F	OLD HUNGARIAN CAPITAL LETTER OEE
+	= O with double acute
+10CA0	OLD HUNGARIAN CAPITAL LETTER EP
+	= P
+10CA1	OLD HUNGARIAN CAPITAL LETTER EMP
+10CA2	OLD HUNGARIAN CAPITAL LETTER ER
+	= R
+10CA3	OLD HUNGARIAN CAPITAL LETTER SHORT ER
+10CA4	OLD HUNGARIAN CAPITAL LETTER ES
+	= S
+10CA5	OLD HUNGARIAN CAPITAL LETTER ESZ
+	= Sz
+10CA6	OLD HUNGARIAN CAPITAL LETTER ET
+	= T
+10CA7	OLD HUNGARIAN CAPITAL LETTER ENT
+	* also used for Ant and Int
+10CA8	OLD HUNGARIAN CAPITAL LETTER ETY
+	= Ty
+10CA9	OLD HUNGARIAN CAPITAL LETTER ECH
+10CAA	OLD HUNGARIAN CAPITAL LETTER U
+10CAB	OLD HUNGARIAN CAPITAL LETTER UU
+	= Ú
+10CAC	OLD HUNGARIAN CAPITAL LETTER NIKOLSBURG UE
+	= Ü
+	* also used for Ö
+	* used for U with double acute in Sándor Forrai's orthography
+10CAD	OLD HUNGARIAN CAPITAL LETTER RUDIMENTA UE
+	= Ü, U with double acute
+	* used for Ü in Sándor Forrai's orthography
+10CAE	OLD HUNGARIAN CAPITAL LETTER EV
+	= V
+10CAF	OLD HUNGARIAN CAPITAL LETTER EZ
+	= Z
+10CB0	OLD HUNGARIAN CAPITAL LETTER EZS
+	= Zs
+10CB1	OLD HUNGARIAN CAPITAL LETTER ENT-SHAPED SIGN
+10CB2	OLD HUNGARIAN CAPITAL LETTER US
+@		Lowercase letters
+10CC0	OLD HUNGARIAN SMALL LETTER A
+10CC1	OLD HUNGARIAN SMALL LETTER AA
+	= á
+10CC2	OLD HUNGARIAN SMALL LETTER EB
+	= b
+10CC3	OLD HUNGARIAN SMALL LETTER AMB
+10CC4	OLD HUNGARIAN SMALL LETTER EC
+	= c
+10CC5	OLD HUNGARIAN SMALL LETTER ENC
+10CC6	OLD HUNGARIAN SMALL LETTER ECS
+	= cs
+10CC7	OLD HUNGARIAN SMALL LETTER ED
+	= d
+10CC8	OLD HUNGARIAN SMALL LETTER AND
+10CC9	OLD HUNGARIAN SMALL LETTER E
+10CCA	OLD HUNGARIAN SMALL LETTER CLOSE E
+	= ë
+10CCB	OLD HUNGARIAN SMALL LETTER EE
+	= é
+10CCC	OLD HUNGARIAN SMALL LETTER EF
+	= f
+10CCD	OLD HUNGARIAN SMALL LETTER EG
+	= g
+10CCE	OLD HUNGARIAN SMALL LETTER EGY
+	= gy
+10CCF	OLD HUNGARIAN SMALL LETTER EH
+	= h
+10CD0	OLD HUNGARIAN SMALL LETTER I
+10CD1	OLD HUNGARIAN SMALL LETTER II
+	= í
+10CD2	OLD HUNGARIAN SMALL LETTER EJ
+	= j
+10CD3	OLD HUNGARIAN SMALL LETTER EK
+	= k
+10CD4	OLD HUNGARIAN SMALL LETTER AK
+10CD5	OLD HUNGARIAN SMALL LETTER UNK
+10CD6	OLD HUNGARIAN SMALL LETTER EL
+	= l
+10CD7	OLD HUNGARIAN SMALL LETTER ELY
+	= ly
+10CD8	OLD HUNGARIAN SMALL LETTER EM
+	= m
+10CD9	OLD HUNGARIAN SMALL LETTER EN
+	= n
+10CDA	OLD HUNGARIAN SMALL LETTER ENY
+	= ny
+10CDB	OLD HUNGARIAN SMALL LETTER O
+10CDC	OLD HUNGARIAN SMALL LETTER OO
+	= ó
+10CDD	OLD HUNGARIAN SMALL LETTER NIKOLSBURG OE
+	= ö
+	* also used for ü
+10CDE	OLD HUNGARIAN SMALL LETTER RUDIMENTA OE
+	= ö
+10CDF	OLD HUNGARIAN SMALL LETTER OEE
+	= o with double acute
+10CE0	OLD HUNGARIAN SMALL LETTER EP
+	= p
+10CE1	OLD HUNGARIAN SMALL LETTER EMP
+10CE2	OLD HUNGARIAN SMALL LETTER ER
+	= r
+10CE3	OLD HUNGARIAN SMALL LETTER SHORT ER
+10CE4	OLD HUNGARIAN SMALL LETTER ES
+	= s
+10CE5	OLD HUNGARIAN SMALL LETTER ESZ
+	= sz
+10CE6	OLD HUNGARIAN SMALL LETTER ET
+	= t
+10CE7	OLD HUNGARIAN SMALL LETTER ENT
+	* also used for ant and int
+10CE8	OLD HUNGARIAN SMALL LETTER ETY
+	= ty
+10CE9	OLD HUNGARIAN SMALL LETTER ECH
+10CEA	OLD HUNGARIAN SMALL LETTER U
+10CEB	OLD HUNGARIAN SMALL LETTER UU
+	= ú
+10CEC	OLD HUNGARIAN SMALL LETTER NIKOLSBURG UE
+	= ü
+	* also used for ö
+	* used for u with double acute in Sándor Forrai's orthography
+10CED	OLD HUNGARIAN SMALL LETTER RUDIMENTA UE
+	= ü, u with double acute
+	* used for ü in Sándor Forrai's orthography
+10CEE	OLD HUNGARIAN SMALL LETTER EV
+	= v
+10CEF	OLD HUNGARIAN SMALL LETTER EZ
+	= z
+10CF0	OLD HUNGARIAN SMALL LETTER EZS
+	= zs
+10CF1	OLD HUNGARIAN SMALL LETTER ENT-SHAPED SIGN
+	* in earlier literature called "tprus" (later recognized as an abbreviation for "temperius")
+10CF2	OLD HUNGARIAN SMALL LETTER US
+@		Numbers
+10CFA	OLD HUNGARIAN NUMBER ONE
+10CFB	OLD HUNGARIAN NUMBER FIVE
+10CFC	OLD HUNGARIAN NUMBER TEN
+10CFD	OLD HUNGARIAN NUMBER FIFTY
+10CFE	OLD HUNGARIAN NUMBER ONE HUNDRED
+10CFF	OLD HUNGARIAN NUMBER ONE THOUSAND
 @@	10E60	Rumi Numeral Symbols	10E7F
 @		Digits
 10E60	RUMI DIGIT ONE
@@ -31147,6 +31692,16 @@ FFFF	<not a character>
 111C6	SHARADA DOUBLE DANDA
 111C7	SHARADA ABBREVIATION SIGN
 111C8	SHARADA SEPARATOR
+111C9	SHARADA SANDHI MARK
+	* indicates external sandhi in Sanskrit documents
+@		Signs for Kashmiri
+111CA	SHARADA SIGN NUKTA
+	* for extending the alphabet to new letters
+111CB	SHARADA VOWEL MODIFIER MARK
+	* represents regressive metaphony
+111CC	SHARADA EXTRA SHORT VOWEL MARK
+	* used for writing "matra-vowels"
+@		Punctuation
 111CD	SHARADA SUTRA MARK
 	* used for indicating the end of a sutra in the Bakhshali manuscript
 @		Digits
@@ -31163,8 +31718,20 @@ FFFF	<not a character>
 @		Punctuation
 111DA	SHARADA EKAM
 	* invocation symbol used at the beginning or end of texts
+111DB	SHARADA SIGN SIDDHAM
+	= siddhirastu
+	* used at the beginning of texts as an invocation
+	x (devanagari sign siddham - A8FC)
+111DC	SHARADA HEADSTROKE
+	* used for joining words across imperfections
+	x (devanagari headstroke - A8FB)
+111DD	SHARADA CONTINUATION SIGN
+	* indicates a breaking opportunity within a word
+@		Section marks
+111DE	SHARADA SECTION MARK-1
+111DF	SHARADA SECTION MARK-2
 @@	111E0	Sinhala Archaic Numbers	111FF
-@+	This number system is also known as Sinhala Illakkam. This number system does not have a zero place holder concept, unlike the Sinhala astrological numbers, Sinhala Lith Illakkam, encoded in the range 0DE6-0DEF.
+@+		This number system is also known as Sinhala Illakkam. This number system does not have a zero place holder concept, unlike the Sinhala astrological numbers, Sinhala Lith Illakkam, encoded in the range 0DE6-0DEF.
 @		Historical digits
 111E1	SINHALA ARCHAIC DIGIT ONE
 111E2	SINHALA ARCHAIC DIGIT TWO
@@ -31258,6 +31825,49 @@ FFFF	<not a character>
 	* delimits larger chunks of text, such as paragraphs
 	x (kaithi double section mark - 110BF)
 1123D	KHOJKI ABBREVIATION SIGN
+@@	11280	Multani	112AF
+@		Vowels
+11280	MULTANI LETTER A
+11281	MULTANI LETTER I
+11282	MULTANI LETTER U
+11283	MULTANI LETTER E
+@		Consonants
+11284	MULTANI LETTER KA
+11285	MULTANI LETTER KHA
+11286	MULTANI LETTER GA
+11288	MULTANI LETTER GHA
+1128A	MULTANI LETTER CA
+1128B	MULTANI LETTER CHA
+1128C	MULTANI LETTER JA
+1128D	MULTANI LETTER JJA
+1128F	MULTANI LETTER NYA
+11290	MULTANI LETTER TTA
+11291	MULTANI LETTER TTHA
+11292	MULTANI LETTER DDA
+11293	MULTANI LETTER DDDA
+	= tra
+11294	MULTANI LETTER DDHA
+11295	MULTANI LETTER NNA
+11296	MULTANI LETTER TA
+11297	MULTANI LETTER THA
+11298	MULTANI LETTER DA
+11299	MULTANI LETTER DHA
+1129A	MULTANI LETTER NA
+1129B	MULTANI LETTER PA
+1129C	MULTANI LETTER PHA
+1129D	MULTANI LETTER BA
+1129F	MULTANI LETTER BHA
+112A0	MULTANI LETTER MA
+112A1	MULTANI LETTER YA
+112A2	MULTANI LETTER RA
+112A3	MULTANI LETTER LA
+112A4	MULTANI LETTER VA
+112A5	MULTANI LETTER SA
+112A6	MULTANI LETTER HA
+112A7	MULTANI LETTER RRA
+112A8	MULTANI LETTER RHA
+@		Punctuation
+112A9	MULTANI SECTION MARK
 @@	112B0	Khudawadi	112FF
 @		Independent vowels
 112B0	KHUDAWADI LETTER A
@@ -31336,8 +31946,11 @@ FFFF	<not a character>
 112F9	KHUDAWADI DIGIT NINE
 @@	11300	Grantha	1137F
 @		Various signs
+11300	GRANTHA SIGN COMBINING ANUSVARA ABOVE
+	* used in Prakrit language Jain texts for the linguistic anusvara
 11301	GRANTHA SIGN CANDRABINDU
 11302	GRANTHA SIGN ANUSVARA
+	* used in Prakrit language Jain texts to indicate gemination of the following consonant
 11303	GRANTHA SIGN VISARGA
 @		Independent vowels
 11305	GRANTHA LETTER A
@@ -31407,6 +32020,8 @@ FFFF	<not a character>
 	: 11347 11357
 @		Virama
 1134D	GRANTHA SIGN VIRAMA
+@		Sign
+11350	GRANTHA OM
 @		Dependent vowel sign
 11357	GRANTHA AU LENGTH MARK
 @		Sign
@@ -31422,7 +32037,7 @@ FFFF	<not a character>
 11362	GRANTHA VOWEL SIGN VOCALIC L
 11363	GRANTHA VOWEL SIGN VOCALIC LL
 @		Cantillation marks (svara) for the Samaveda
-@+	See the similar set of Devanagari svara markers for the Samaveda, encoded in the range A8E0-A8F1.
+@+		See the similar set of Devanagari svara markers for the Samaveda, encoded in the range A8E0-A8F1.
 11366	COMBINING GRANTHA DIGIT ZERO
 11367	COMBINING GRANTHA DIGIT ONE
 11368	COMBINING GRANTHA DIGIT TWO
@@ -31436,7 +32051,7 @@ FFFF	<not a character>
 11373	COMBINING GRANTHA LETTER VI
 11374	COMBINING GRANTHA LETTER PA
 @@	11480	Tirhuta	114DF
-@+	The Tirhuta script is also known by the names 'Mithilakshara' and 'Maithili'.
+@+		The Tirhuta script is also known by the names 'Mithilakshara' and 'Maithili'.
 @		Sign
 11480	TIRHUTA ANJI
 @		Independent vowels
@@ -31620,6 +32235,34 @@ FFFF	<not a character>
 @		Terminal mark
 115C9	SIDDHAM END OF TEXT MARK
 	* indicates the completion of a text
+@		Section marks
+@+		These characters are used at the end of a section or text.
+115CA	SIDDHAM SECTION MARK WITH TRIDENT AND U-SHAPED ORNAMENTS
+115CB	SIDDHAM SECTION MARK WITH TRIDENT AND DOTTED CRESCENTS
+115CC	SIDDHAM SECTION MARK WITH RAYS AND DOTTED CRESCENTS
+115CD	SIDDHAM SECTION MARK WITH RAYS AND DOTTED DOUBLE CRESCENTS
+115CE	SIDDHAM SECTION MARK WITH RAYS AND DOTTED TRIPLE CRESCENTS
+115CF	SIDDHAM SECTION MARK DOUBLE RING
+115D0	SIDDHAM SECTION MARK DOUBLE RING WITH RAYS
+115D1	SIDDHAM SECTION MARK WITH DOUBLE CRESCENTS
+115D2	SIDDHAM SECTION MARK WITH TRIPLE CRESCENTS
+115D3	SIDDHAM SECTION MARK WITH QUADRUPLE CRESCENTS
+115D4	SIDDHAM SECTION MARK WITH SEPTUPLE CRESCENTS
+115D5	SIDDHAM SECTION MARK WITH CIRCLES AND RAYS
+115D6	SIDDHAM SECTION MARK WITH CIRCLES AND TWO ENCLOSURES
+115D7	SIDDHAM SECTION MARK WITH CIRCLES AND FOUR ENCLOSURES
+@		Alternate letters
+115D8	SIDDHAM LETTER THREE-CIRCLE ALTERNATE I
+	x (siddham letter i - 11582)
+115D9	SIDDHAM LETTER TWO-CIRCLE ALTERNATE I
+115DA	SIDDHAM LETTER TWO-CIRCLE ALTERNATE II
+	x (siddham letter ii - 11583)
+115DB	SIDDHAM LETTER ALTERNATE U
+	x (siddham letter u - 11584)
+@		Alternate vowel signs
+@+		These alternate vowel signs are the 'warbler' forms while the regular vowel signs are the 'cloud' forms.
+115DC	SIDDHAM VOWEL SIGN ALTERNATE U
+115DD	SIDDHAM VOWEL SIGN ALTERNATE UU
 @@	11600	Modi	1165F
 @		Independent vowels
 11600	MODI LETTER A
@@ -31784,6 +32427,70 @@ FFFF	<not a character>
 116C7	TAKRI DIGIT SEVEN
 116C8	TAKRI DIGIT EIGHT
 116C9	TAKRI DIGIT NINE
+@@	11700	Ahom	1173F
+@		Consonants
+11700	AHOM LETTER KA
+11701	AHOM LETTER KHA
+11702	AHOM LETTER NGA
+11703	AHOM LETTER NA
+11704	AHOM LETTER TA
+11705	AHOM LETTER ALTERNATE TA
+11706	AHOM LETTER PA
+11707	AHOM LETTER PHA
+11708	AHOM LETTER BA
+11709	AHOM LETTER MA
+1170A	AHOM LETTER JA
+1170B	AHOM LETTER CHA
+1170C	AHOM LETTER THA
+1170D	AHOM LETTER RA
+1170E	AHOM LETTER LA
+1170F	AHOM LETTER SA
+11710	AHOM LETTER NYA
+11711	AHOM LETTER HA
+11712	AHOM LETTER A
+11713	AHOM LETTER DA
+11714	AHOM LETTER DHA
+11715	AHOM LETTER GA
+11716	AHOM LETTER ALTERNATE GA
+11717	AHOM LETTER GHA
+11718	AHOM LETTER BHA
+11719	AHOM LETTER JHA
+@		Medials
+1171D	AHOM CONSONANT SIGN MEDIAL LA
+1171E	AHOM CONSONANT SIGN MEDIAL RA
+1171F	AHOM CONSONANT SIGN MEDIAL LIGATING RA
+@		Vowel signs
+11720	AHOM VOWEL SIGN A
+11721	AHOM VOWEL SIGN AA
+11722	AHOM VOWEL SIGN I
+11723	AHOM VOWEL SIGN II
+11724	AHOM VOWEL SIGN U
+11725	AHOM VOWEL SIGN UU
+11726	AHOM VOWEL SIGN E
+11727	AHOM VOWEL SIGN AW
+11728	AHOM VOWEL SIGN O
+11729	AHOM VOWEL SIGN AI
+1172A	AHOM VOWEL SIGN AM
+1172B	AHOM SIGN KILLER
+@		Digits
+11730	AHOM DIGIT ZERO
+11731	AHOM DIGIT ONE
+11732	AHOM DIGIT TWO
+11733	AHOM DIGIT THREE
+11734	AHOM DIGIT FOUR
+11735	AHOM DIGIT FIVE
+11736	AHOM DIGIT SIX
+11737	AHOM DIGIT SEVEN
+11738	AHOM DIGIT EIGHT
+11739	AHOM DIGIT NINE
+@		Numbers
+1173A	AHOM NUMBER TEN
+1173B	AHOM NUMBER TWENTY
+@		Punctuation
+1173C	AHOM SIGN SMALL SECTION
+1173D	AHOM SIGN SECTION
+1173E	AHOM SIGN RULAI
+1173F	AHOM SYMBOL VI
 @@	118A0	Warang Citi	118FF
 @		Uppercase vowels
 118A0	WARANG CITI CAPITAL LETTER NGAA
@@ -32867,6 +33574,7 @@ FFFF	<not a character>
 12396	CUNEIFORM SIGN SAG TIMES IGI GUNU
 12397	CUNEIFORM SIGN TI2
 12398	CUNEIFORM SIGN UM TIMES ME
+12399	CUNEIFORM SIGN U U
 @@	12400	Cuneiform Numbers and Punctuation	1247F
 @		Numeric signs
 12400	CUNEIFORM NUMERIC SIGN TWO ASH
@@ -32992,6 +33700,204 @@ FFFF	<not a character>
 12472	CUNEIFORM PUNCTUATION SIGN DIAGONAL COLON
 12473	CUNEIFORM PUNCTUATION SIGN DIAGONAL TRICOLON
 12474	CUNEIFORM PUNCTUATION SIGN DIAGONAL QUADCOLON
+@@	12480	Early Dynastic Cuneiform	1254F
+@		Signs
+12480	CUNEIFORM SIGN AB TIMES NUN TENU
+12481	CUNEIFORM SIGN AB TIMES SHU2
+12482	CUNEIFORM SIGN AD TIMES ESH2
+12483	CUNEIFORM SIGN BAD TIMES DISH TENU
+12484	CUNEIFORM SIGN BAHAR2 TIMES AB2
+12485	CUNEIFORM SIGN BAHAR2 TIMES NI
+12486	CUNEIFORM SIGN BAHAR2 TIMES ZA
+12487	CUNEIFORM SIGN BU OVER BU TIMES NA2
+12488	CUNEIFORM SIGN DA TIMES TAK4
+12489	CUNEIFORM SIGN DAG TIMES KUR
+1248A	CUNEIFORM SIGN DIM TIMES IGI
+1248B	CUNEIFORM SIGN DIM TIMES U U U
+1248C	CUNEIFORM SIGN DIM2 TIMES UD
+1248D	CUNEIFORM SIGN DUG TIMES ANSHE
+1248E	CUNEIFORM SIGN DUG TIMES ASH
+1248F	CUNEIFORM SIGN DUG TIMES ASH AT LEFT
+12490	CUNEIFORM SIGN DUG TIMES DIN
+12491	CUNEIFORM SIGN DUG TIMES DUN
+12492	CUNEIFORM SIGN DUG TIMES ERIN2
+12493	CUNEIFORM SIGN DUG TIMES GA
+12494	CUNEIFORM SIGN DUG TIMES GI
+12495	CUNEIFORM SIGN DUG TIMES GIR2 GUNU
+12496	CUNEIFORM SIGN DUG TIMES GISH
+12497	CUNEIFORM SIGN DUG TIMES HA
+12498	CUNEIFORM SIGN DUG TIMES HI
+12499	CUNEIFORM SIGN DUG TIMES IGI GUNU
+1249A	CUNEIFORM SIGN DUG TIMES KASKAL
+1249B	CUNEIFORM SIGN DUG TIMES KUR
+1249C	CUNEIFORM SIGN DUG TIMES KUSHU2
+1249D	CUNEIFORM SIGN DUG TIMES KUSHU2 PLUS KASKAL
+1249E	CUNEIFORM SIGN DUG TIMES LAK-020
+1249F	CUNEIFORM SIGN DUG TIMES LAM
+124A0	CUNEIFORM SIGN DUG TIMES LAM TIMES KUR
+124A1	CUNEIFORM SIGN DUG TIMES LUH PLUS GISH
+124A2	CUNEIFORM SIGN DUG TIMES MASH
+124A3	CUNEIFORM SIGN DUG TIMES MES
+124A4	CUNEIFORM SIGN DUG TIMES MI
+124A5	CUNEIFORM SIGN DUG TIMES NI
+124A6	CUNEIFORM SIGN DUG TIMES PI
+124A7	CUNEIFORM SIGN DUG TIMES SHE
+124A8	CUNEIFORM SIGN DUG TIMES SI GUNU
+124A9	CUNEIFORM SIGN E2 TIMES KUR
+124AA	CUNEIFORM SIGN E2 TIMES PAP
+124AB	CUNEIFORM SIGN ERIN2 X
+124AC	CUNEIFORM SIGN ESH2 CROSSING ESH2
+124AD	CUNEIFORM SIGN EZEN SHESHIG TIMES ASH
+124AE	CUNEIFORM SIGN EZEN SHESHIG TIMES HI
+124AF	CUNEIFORM SIGN EZEN SHESHIG TIMES IGI GUNU
+124B0	CUNEIFORM SIGN EZEN SHESHIG TIMES LA
+124B1	CUNEIFORM SIGN EZEN SHESHIG TIMES LAL
+124B2	CUNEIFORM SIGN EZEN SHESHIG TIMES ME
+124B3	CUNEIFORM SIGN EZEN SHESHIG TIMES MES
+124B4	CUNEIFORM SIGN EZEN SHESHIG TIMES SU
+124B5	CUNEIFORM SIGN EZEN TIMES SU
+124B6	CUNEIFORM SIGN GA2 TIMES BAHAR2
+124B7	CUNEIFORM SIGN GA2 TIMES DIM GUNU
+124B8	CUNEIFORM SIGN GA2 TIMES DUG TIMES IGI GUNU
+124B9	CUNEIFORM SIGN GA2 TIMES DUG TIMES KASKAL
+124BA	CUNEIFORM SIGN GA2 TIMES EREN
+124BB	CUNEIFORM SIGN GA2 TIMES GA
+124BC	CUNEIFORM SIGN GA2 TIMES GAR PLUS DI
+124BD	CUNEIFORM SIGN GA2 TIMES GAR PLUS NE
+124BE	CUNEIFORM SIGN GA2 TIMES HA PLUS A
+124BF	CUNEIFORM SIGN GA2 TIMES KUSHU2 PLUS KASKAL
+124C0	CUNEIFORM SIGN GA2 TIMES LAM
+124C1	CUNEIFORM SIGN GA2 TIMES LAM TIMES KUR
+124C2	CUNEIFORM SIGN GA2 TIMES LUH
+124C3	CUNEIFORM SIGN GA2 TIMES MUSH
+124C4	CUNEIFORM SIGN GA2 TIMES NE
+124C5	CUNEIFORM SIGN GA2 TIMES NE PLUS E2
+124C6	CUNEIFORM SIGN GA2 TIMES NE PLUS GI
+124C7	CUNEIFORM SIGN GA2 TIMES SHIM
+124C8	CUNEIFORM SIGN GA2 TIMES ZIZ2
+124C9	CUNEIFORM SIGN GABA ROTATED NINETY DEGREES
+124CA	CUNEIFORM SIGN GESHTIN TIMES U
+124CB	CUNEIFORM SIGN GISH TIMES GISH CROSSING GISH
+124CC	CUNEIFORM SIGN GU2 TIMES IGI GUNU
+124CD	CUNEIFORM SIGN GUD PLUS GISH TIMES TAK4
+124CE	CUNEIFORM SIGN HA TENU GUNU
+124CF	CUNEIFORM SIGN HI TIMES ASH OVER HI TIMES ASH
+124D0	CUNEIFORM SIGN KA TIMES BU
+124D1	CUNEIFORM SIGN KA TIMES KA
+124D2	CUNEIFORM SIGN KA TIMES U U U
+124D3	CUNEIFORM SIGN KA TIMES UR
+124D4	CUNEIFORM SIGN LAGAB TIMES ZU OVER ZU
+124D5	CUNEIFORM SIGN LAK-003
+124D6	CUNEIFORM SIGN LAK-021
+124D7	CUNEIFORM SIGN LAK-025
+124D8	CUNEIFORM SIGN LAK-030
+124D9	CUNEIFORM SIGN LAK-050
+124DA	CUNEIFORM SIGN LAK-051
+124DB	CUNEIFORM SIGN LAK-062
+124DC	CUNEIFORM SIGN LAK-079 OVER LAK-079 GUNU
+124DD	CUNEIFORM SIGN LAK-080
+124DE	CUNEIFORM SIGN LAK-081 OVER LAK-081
+124DF	CUNEIFORM SIGN LAK-092
+124E0	CUNEIFORM SIGN LAK-130
+124E1	CUNEIFORM SIGN LAK-142
+124E2	CUNEIFORM SIGN LAK-210
+124E3	CUNEIFORM SIGN LAK-219
+124E4	CUNEIFORM SIGN LAK-220
+124E5	CUNEIFORM SIGN LAK-225
+124E6	CUNEIFORM SIGN LAK-228
+124E7	CUNEIFORM SIGN LAK-238
+124E8	CUNEIFORM SIGN LAK-265
+124E9	CUNEIFORM SIGN LAK-266
+124EA	CUNEIFORM SIGN LAK-343
+124EB	CUNEIFORM SIGN LAK-347
+124EC	CUNEIFORM SIGN LAK-348
+124ED	CUNEIFORM SIGN LAK-383
+124EE	CUNEIFORM SIGN LAK-384
+124EF	CUNEIFORM SIGN LAK-390
+124F0	CUNEIFORM SIGN LAK-441
+124F1	CUNEIFORM SIGN LAK-449
+124F2	CUNEIFORM SIGN LAK-449 TIMES GU
+124F3	CUNEIFORM SIGN LAK-449 TIMES IGI
+124F4	CUNEIFORM SIGN LAK-449 TIMES PAP PLUS LU3
+124F5	CUNEIFORM SIGN LAK-449 TIMES PAP PLUS PAP PLUS LU3
+124F6	CUNEIFORM SIGN LAK-449 TIMES U2 PLUS BA
+124F7	CUNEIFORM SIGN LAK-450
+124F8	CUNEIFORM SIGN LAK-457
+124F9	CUNEIFORM SIGN LAK-470
+124FA	CUNEIFORM SIGN LAK-483
+124FB	CUNEIFORM SIGN LAK-490
+124FC	CUNEIFORM SIGN LAK-492
+124FD	CUNEIFORM SIGN LAK-493
+124FE	CUNEIFORM SIGN LAK-495
+124FF	CUNEIFORM SIGN LAK-550
+12500	CUNEIFORM SIGN LAK-608
+12501	CUNEIFORM SIGN LAK-617
+12502	CUNEIFORM SIGN LAK-617 TIMES ASH
+12503	CUNEIFORM SIGN LAK-617 TIMES BAD
+12504	CUNEIFORM SIGN LAK-617 TIMES DUN3 GUNU GUNU
+12505	CUNEIFORM SIGN LAK-617 TIMES KU3
+12506	CUNEIFORM SIGN LAK-617 TIMES LA
+12507	CUNEIFORM SIGN LAK-617 TIMES TAR
+12508	CUNEIFORM SIGN LAK-617 TIMES TE
+12509	CUNEIFORM SIGN LAK-617 TIMES U2
+1250A	CUNEIFORM SIGN LAK-617 TIMES UD
+1250B	CUNEIFORM SIGN LAK-617 TIMES URUDA
+1250C	CUNEIFORM SIGN LAK-636
+1250D	CUNEIFORM SIGN LAK-648
+1250E	CUNEIFORM SIGN LAK-648 TIMES DUB
+1250F	CUNEIFORM SIGN LAK-648 TIMES GA
+12510	CUNEIFORM SIGN LAK-648 TIMES IGI
+12511	CUNEIFORM SIGN LAK-648 TIMES IGI GUNU
+12512	CUNEIFORM SIGN LAK-648 TIMES NI
+12513	CUNEIFORM SIGN LAK-648 TIMES PAP PLUS PAP PLUS LU3
+12514	CUNEIFORM SIGN LAK-648 TIMES SHESH PLUS KI
+12515	CUNEIFORM SIGN LAK-648 TIMES UD
+12516	CUNEIFORM SIGN LAK-648 TIMES URUDA
+12517	CUNEIFORM SIGN LAK-724
+12518	CUNEIFORM SIGN LAK-749
+12519	CUNEIFORM SIGN LU2 GUNU TIMES ASH
+1251A	CUNEIFORM SIGN LU2 TIMES DISH
+1251B	CUNEIFORM SIGN LU2 TIMES HAL
+1251C	CUNEIFORM SIGN LU2 TIMES PAP
+1251D	CUNEIFORM SIGN LU2 TIMES PAP PLUS PAP PLUS LU3
+1251E	CUNEIFORM SIGN LU2 TIMES TAK4
+1251F	CUNEIFORM SIGN MI PLUS ZA7
+12520	CUNEIFORM SIGN MUSH OVER MUSH TIMES GA
+12521	CUNEIFORM SIGN MUSH OVER MUSH TIMES KAK
+12522	CUNEIFORM SIGN NINDA2 TIMES DIM GUNU
+12523	CUNEIFORM SIGN NINDA2 TIMES GISH
+12524	CUNEIFORM SIGN NINDA2 TIMES GUL
+12525	CUNEIFORM SIGN NINDA2 TIMES HI
+12526	CUNEIFORM SIGN NINDA2 TIMES KESH2
+12527	CUNEIFORM SIGN NINDA2 TIMES LAK-050
+12528	CUNEIFORM SIGN NINDA2 TIMES MASH
+12529	CUNEIFORM SIGN NINDA2 TIMES PAP PLUS PAP
+1252A	CUNEIFORM SIGN NINDA2 TIMES U
+1252B	CUNEIFORM SIGN NINDA2 TIMES U PLUS U
+1252C	CUNEIFORM SIGN NINDA2 TIMES URUDA
+1252D	CUNEIFORM SIGN SAG GUNU TIMES HA
+1252E	CUNEIFORM SIGN SAG TIMES EN
+1252F	CUNEIFORM SIGN SAG TIMES SHE AT LEFT
+12530	CUNEIFORM SIGN SAG TIMES TAK4
+12531	CUNEIFORM SIGN SHA6 TENU
+12532	CUNEIFORM SIGN SHE OVER SHE
+12533	CUNEIFORM SIGN SHE PLUS HUB2
+12534	CUNEIFORM SIGN SHE PLUS NAM2
+12535	CUNEIFORM SIGN SHE PLUS SAR
+12536	CUNEIFORM SIGN SHU2 PLUS DUG TIMES NI
+12537	CUNEIFORM SIGN SHU2 PLUS E2 TIMES AN
+12538	CUNEIFORM SIGN SI TIMES TAK4
+12539	CUNEIFORM SIGN TAK4 PLUS SAG
+1253A	CUNEIFORM SIGN TUM TIMES GAN2 TENU
+1253B	CUNEIFORM SIGN TUM TIMES THREE DISH
+1253C	CUNEIFORM SIGN UR2 INVERTED
+1253D	CUNEIFORM SIGN UR2 TIMES UD
+1253E	CUNEIFORM SIGN URU TIMES DARA3
+1253F	CUNEIFORM SIGN URU TIMES LAK-668
+12540	CUNEIFORM SIGN URU TIMES LU3
+12541	CUNEIFORM SIGN ZA7
+12542	CUNEIFORM SIGN ZU OVER ZU PLUS SAR
+12543	CUNEIFORM SIGN ZU5 TIMES THREE DISH TENU
 @@	13000	Egyptian Hieroglyphs	1342F
 @+		The characters in this block are taken primarily from Alan Gardiner's works on Middle Egyptian.
 @		A. Man and his occupations
@@ -34244,6 +35150,1033 @@ FFFF	<not a character>
 1342C	EGYPTIAN HIEROGLYPH AA030
 1342D	EGYPTIAN HIEROGLYPH AA031
 1342E	EGYPTIAN HIEROGLYPH AA032
+@@	14400	Anatolian Hieroglyphs	1467F
+@+		In the names list, most of the comments are in Latin. Those which have a Luwian phonetic value are identified as syllabic.
+@		A. The human body and clothing
+14400	ANATOLIAN HIEROGLYPH A001
+	= ego
+14401	ANATOLIAN HIEROGLYPH A002
+	= ego2
+14402	ANATOLIAN HIEROGLYPH A003
+14403	ANATOLIAN HIEROGLYPH A004
+	= mons2
+14404	ANATOLIAN HIEROGLYPH A005
+14405	ANATOLIAN HIEROGLYPH A006
+	= adorare
+14406	ANATOLIAN HIEROGLYPH A007
+	= edere
+14407	ANATOLIAN HIEROGLYPH A008
+	= bibere
+14408	ANATOLIAN HIEROGLYPH A009
+	= amplecti
+14409	ANATOLIAN HIEROGLYPH A010
+	= caput
+1440A	ANATOLIAN HIEROGLYPH A010A
+	= caput+scalprum
+1440B	ANATOLIAN HIEROGLYPH A011
+1440C	ANATOLIAN HIEROGLYPH A012
+	= statua
+1440D	ANATOLIAN HIEROGLYPH A013
+1440E	ANATOLIAN HIEROGLYPH A014
+	= prae
+	= logosyllabic pari
+1440F	ANATOLIAN HIEROGLYPH A015
+	= domina
+14410	ANATOLIAN HIEROGLYPH A016
+	= magnus.domina
+14411	ANATOLIAN HIEROGLYPH A017
+	= rex
+14412	ANATOLIAN HIEROGLYPH A018
+	= magnus.rex
+14413	ANATOLIAN HIEROGLYPH A019
+	= syllabic á
+14414	ANATOLIAN HIEROGLYPH A020
+14415	ANATOLIAN HIEROGLYPH A021
+	= heros
+14416	ANATOLIAN HIEROGLYPH A022
+	= loqui
+14417	ANATOLIAN HIEROGLYPH A023
+14418	ANATOLIAN HIEROGLYPH A024
+	= lis
+14419	ANATOLIAN HIEROGLYPH A025
+	= oculus
+1441A	ANATOLIAN HIEROGLYPH A026
+	= frons
+1441B	ANATOLIAN HIEROGLYPH A026A
+	= versus
+1441C	ANATOLIAN HIEROGLYPH A027
+	= libare
+1441D	ANATOLIAN HIEROGLYPH A028
+	= fortis
+1441E	ANATOLIAN HIEROGLYPH A029
+	= syllabic tá
+1441F	ANATOLIAN HIEROGLYPH A030
+14420	ANATOLIAN HIEROGLYPH A031
+	= ligare, pugnus+pugnus
+14421	ANATOLIAN HIEROGLYPH A032
+	= bracchium
+14422	ANATOLIAN HIEROGLYPH A033
+14423	ANATOLIAN HIEROGLYPH A034
+	= post
+14424	ANATOLIAN HIEROGLYPH A035
+	= syllabic na
+14425	ANATOLIAN HIEROGLYPH A036
+	= lituus+na
+14426	ANATOLIAN HIEROGLYPH A037
+14427	ANATOLIAN HIEROGLYPH A038
+14428	ANATOLIAN HIEROGLYPH A039
+	= pugnus
+14429	ANATOLIAN HIEROGLYPH A039A
+	= pugnus+x
+1442A	ANATOLIAN HIEROGLYPH A040
+1442B	ANATOLIAN HIEROGLYPH A041
+	= capere
+	= syllabic tà
+1442C	ANATOLIAN HIEROGLYPH A041A
+	= syllabic tà
+1442D	ANATOLIAN HIEROGLYPH A042
+	= capere2.capere2
+	= syllabic ta-x?
+1442E	ANATOLIAN HIEROGLYPH A043
+	= capere2
+1442F	ANATOLIAN HIEROGLYPH A044
+14430	ANATOLIAN HIEROGLYPH A045
+	= infans, filius, frater
+14431	ANATOLIAN HIEROGLYPH A045A
+	= filia
+14432	ANATOLIAN HIEROGLYPH A046
+	= rex.infans, rex.filius
+14433	ANATOLIAN HIEROGLYPH A046A
+	= rex.filia
+14434	ANATOLIAN HIEROGLYPH A046B
+	= magnus.filia
+14435	ANATOLIAN HIEROGLYPH A047
+14436	ANATOLIAN HIEROGLYPH A048
+14437	ANATOLIAN HIEROGLYPH A049
+	= syllabic a+tá
+14438	ANATOLIAN HIEROGLYPH A050
+14439	ANATOLIAN HIEROGLYPH A051
+1443A	ANATOLIAN HIEROGLYPH A052
+	= manus.culter
+1443B	ANATOLIAN HIEROGLYPH A053
+	= manus+culter, ensis
+1443C	ANATOLIAN HIEROGLYPH A054
+1443D	ANATOLIAN HIEROGLYPH A055
+	= syllabic nì
+1443E	ANATOLIAN HIEROGLYPH A056
+	= syllabic ká
+1443F	ANATOLIAN HIEROGLYPH A057
+	= infra, sub
+	= syllabic ká
+14440	ANATOLIAN HIEROGLYPH A058
+	= cum
+14441	ANATOLIAN HIEROGLYPH A059
+	= manus
+14442	ANATOLIAN HIEROGLYPH A060
+14443	ANATOLIAN HIEROGLYPH A061
+14444	ANATOLIAN HIEROGLYPH A062
+	= longus, manus+minus?
+14445	ANATOLIAN HIEROGLYPH A063
+14446	ANATOLIAN HIEROGLYPH A064
+14447	ANATOLIAN HIEROGLYPH A065
+	= ponere
+14448	ANATOLIAN HIEROGLYPH A066
+	= dare
+	= syllabic pi
+14449	ANATOLIAN HIEROGLYPH A066A
+	= syllabic pi
+1444A	ANATOLIAN HIEROGLYPH A066B
+	= mandare, dare.dare
+1444B	ANATOLIAN HIEROGLYPH A066C
+	= mandare2
+1444C	ANATOLIAN HIEROGLYPH A067
+1444D	ANATOLIAN HIEROGLYPH A068
+1444E	ANATOLIAN HIEROGLYPH A069
+1444F	ANATOLIAN HIEROGLYPH A070
+	= super
+	= logosyllabic sara/i
+14450	ANATOLIAN HIEROGLYPH A071
+14451	ANATOLIAN HIEROGLYPH A072
+14452	ANATOLIAN HIEROGLYPH A073
+	= audire, auris+tu+mi
+14453	ANATOLIAN HIEROGLYPH A074
+14454	ANATOLIAN HIEROGLYPH A075
+14455	ANATOLIAN HIEROGLYPH A076
+14456	ANATOLIAN HIEROGLYPH A077
+14457	ANATOLIAN HIEROGLYPH A078
+	= ala
+14458	ANATOLIAN HIEROGLYPH A079
+	= femina, mater
+14459	ANATOLIAN HIEROGLYPH A080
+	= Sarma
+1445A	ANATOLIAN HIEROGLYPH A081
+	= Sarma2
+1445B	ANATOLIAN HIEROGLYPH A082
+	= crus
+	= syllabic ta6
+1445C	ANATOLIAN HIEROGLYPH A083
+	= crus+flumen
+1445D	ANATOLIAN HIEROGLYPH A084
+	= crus2
+	= syllabic nà
+1445E	ANATOLIAN HIEROGLYPH A085
+	= genuflectere
+1445F	ANATOLIAN HIEROGLYPH A086
+	= crus.crus
+14460	ANATOLIAN HIEROGLYPH A087
+14461	ANATOLIAN HIEROGLYPH A088
+14462	ANATOLIAN HIEROGLYPH A089
+	= syllabic tu
+14463	ANATOLIAN HIEROGLYPH A090
+	= pes
+	= syllabic ti
+14464	ANATOLIAN HIEROGLYPH A091
+	= pes.scala.rotae
+14465	ANATOLIAN HIEROGLYPH A092
+14466	ANATOLIAN HIEROGLYPH A093
+	= pes2
+14467	ANATOLIAN HIEROGLYPH A094
+14468	ANATOLIAN HIEROGLYPH A095
+	= pes2.pes2
+14469	ANATOLIAN HIEROGLYPH A096
+	= pes2.pes
+@		B. Animals
+1446A	ANATOLIAN HIEROGLYPH A097
+	= leo, bestia
+1446B	ANATOLIAN HIEROGLYPH A097A
+	= leo2
+1446C	ANATOLIAN HIEROGLYPH A098
+	= canis
+1446D	ANATOLIAN HIEROGLYPH A098A
+	= canis2
+1446E	ANATOLIAN HIEROGLYPH A099
+	= equus
+1446F	ANATOLIAN HIEROGLYPH A100
+	= asinus
+	= syllabic ta
+14470	ANATOLIAN HIEROGLYPH A100A
+	= syllabic ta
+14471	ANATOLIAN HIEROGLYPH A101
+	= asinus2
+14472	ANATOLIAN HIEROGLYPH A101A
+	= asinus2a
+14473	ANATOLIAN HIEROGLYPH A102
+	= cervus
+	= syllabic rú
+14474	ANATOLIAN HIEROGLYPH A102A
+	= cervus2
+	= syllabic rú
+14475	ANATOLIAN HIEROGLYPH A103
+	= cervus3
+	= syllabic rú
+14476	ANATOLIAN HIEROGLYPH A104
+	= capra
+	= syllabic sà
+14477	ANATOLIAN HIEROGLYPH A104A
+	= syllabic sà
+14478	ANATOLIAN HIEROGLYPH A104B
+	= capra2
+	= syllabic sà
+14479	ANATOLIAN HIEROGLYPH A104C
+	= capra2a
+	= syllabic sà
+1447A	ANATOLIAN HIEROGLYPH A105
+	= bos
+	= syllabic u
+1447B	ANATOLIAN HIEROGLYPH A105A
+	= bos
+	= syllabic u
+1447C	ANATOLIAN HIEROGLYPH A105B
+	= bos2
+	= syllabic u
+1447D	ANATOLIAN HIEROGLYPH A106
+1447E	ANATOLIAN HIEROGLYPH A107
+	= bos+mi
+	= syllabic mu
+	= logosyllabic muwa
+1447F	ANATOLIAN HIEROGLYPH A107A
+	= syllabic mu
+	= logosyllabic muwa
+14480	ANATOLIAN HIEROGLYPH A107B
+	= bos.mi
+	= syllabic mu
+	= logosyllabic muwa
+14481	ANATOLIAN HIEROGLYPH A107C
+	= bos2.mi
+	= syllabic mu
+	= logosyllabic muwa
+14482	ANATOLIAN HIEROGLYPH A108
+	= cornu
+	= sú
+14483	ANATOLIAN HIEROGLYPH A109
+	= vitellus
+	= syllabic ma-x
+14484	ANATOLIAN HIEROGLYPH A110
+	= ovis
+	= syllabic ma
+14485	ANATOLIAN HIEROGLYPH A110A
+	= syllabic ma
+14486	ANATOLIAN HIEROGLYPH A110B
+	= ovis2
+	= syllabic ma
+14487	ANATOLIAN HIEROGLYPH A111
+	= ovis3
+14488	ANATOLIAN HIEROGLYPH A112
+	= lingere
+	= syllabic za4
+14489	ANATOLIAN HIEROGLYPH A113
+1448A	ANATOLIAN HIEROGLYPH A114
+	= lituus+u
+1448B	ANATOLIAN HIEROGLYPH A115
+	= lepus
+	= logosyllabic tapa
+1448C	ANATOLIAN HIEROGLYPH A115A
+	= lepus2
+	= logosyllabic tapa
+1448D	ANATOLIAN HIEROGLYPH A116
+1448E	ANATOLIAN HIEROGLYPH A117
+1448F	ANATOLIAN HIEROGLYPH A118
+14490	ANATOLIAN HIEROGLYPH A119
+14491	ANATOLIAN HIEROGLYPH A120
+	= gryllus
+14492	ANATOLIAN HIEROGLYPH A121
+	= sphinx
+14493	ANATOLIAN HIEROGLYPH A122
+14494	ANATOLIAN HIEROGLYPH A123
+14495	ANATOLIAN HIEROGLYPH A124
+14496	ANATOLIAN HIEROGLYPH A125
+	= syllabic lí
+14497	ANATOLIAN HIEROGLYPH A125A
+	= ungula
+	= syllabic li-x
+14498	ANATOLIAN HIEROGLYPH A126
+14499	ANATOLIAN HIEROGLYPH A127
+1449A	ANATOLIAN HIEROGLYPH A128
+	= avis
+	= zi4
+1449B	ANATOLIAN HIEROGLYPH A129
+1449C	ANATOLIAN HIEROGLYPH A130
+	= avis3
+1449D	ANATOLIAN HIEROGLYPH A131
+	= avis5
+1449E	ANATOLIAN HIEROGLYPH A132
+	= avis2
+1449F	ANATOLIAN HIEROGLYPH A133
+	= aquila, avis4
+	= syllabic ara/i
+144A0	ANATOLIAN HIEROGLYPH A134
+	= syllabic ara/i
+	* 1449F anatolian hieroglyph a133 + 145B1 anatolian hieroglyph a383 ra or ri
+144A1	ANATOLIAN HIEROGLYPH A135
+	= avis-x
+144A2	ANATOLIAN HIEROGLYPH A135A
+144A3	ANATOLIAN HIEROGLYPH A136
+144A4	ANATOLIAN HIEROGLYPH A137
+	= libatio
+144A5	ANATOLIAN HIEROGLYPH A138
+	= piscis
+144A6	ANATOLIAN HIEROGLYPH A139
+144A7	ANATOLIAN HIEROGLYPH A140
+144A8	ANATOLIAN HIEROGLYPH A141
+144A9	ANATOLIAN HIEROGLYPH A142
+144AA	ANATOLIAN HIEROGLYPH A143
+144AB	ANATOLIAN HIEROGLYPH A144
+144AC	ANATOLIAN HIEROGLYPH A145
+144AD	ANATOLIAN HIEROGLYPH A146
+144AE	ANATOLIAN HIEROGLYPH A147
+144AF	ANATOLIAN HIEROGLYPH A148
+	= Janus
+@		C. Plants
+144B0	ANATOLIAN HIEROGLYPH A149
+144B1	ANATOLIAN HIEROGLYPH A150
+144B2	ANATOLIAN HIEROGLYPH A151
+	= Telipinu
+144B3	ANATOLIAN HIEROGLYPH A152
+144B4	ANATOLIAN HIEROGLYPH A153
+	= syllabic nu
+144B5	ANATOLIAN HIEROGLYPH A154
+144B6	ANATOLIAN HIEROGLYPH A155
+144B7	ANATOLIAN HIEROGLYPH A156
+144B8	ANATOLIAN HIEROGLYPH A157
+144B9	ANATOLIAN HIEROGLYPH A158
+144BA	ANATOLIAN HIEROGLYPH A159
+144BB	ANATOLIAN HIEROGLYPH A160
+	= vitis
+	= syllabic wi(ya)
+144BC	ANATOLIAN HIEROGLYPH A161
+144BD	ANATOLIAN HIEROGLYPH A162
+144BE	ANATOLIAN HIEROGLYPH A163
+144BF	ANATOLIAN HIEROGLYPH A164
+144C0	ANATOLIAN HIEROGLYPH A165
+	= bonus
+	= syllabic wà/ì
+144C1	ANATOLIAN HIEROGLYPH A166
+	= syllabic wá/í
+144C2	ANATOLIAN HIEROGLYPH A167
+144C3	ANATOLIAN HIEROGLYPH A168
+144C4	ANATOLIAN HIEROGLYPH A169
+144C5	ANATOLIAN HIEROGLYPH A170
+144C6	ANATOLIAN HIEROGLYPH A171
+144C7	ANATOLIAN HIEROGLYPH A172
+	= syllabic ta/i5, lá/í
+144C8	ANATOLIAN HIEROGLYPH A173
+	= hastarius
+144C9	ANATOLIAN HIEROGLYPH A174
+	= syllabic si
+144CA	ANATOLIAN HIEROGLYPH A175
+	= lingua
+	= syllabic la
+144CB	ANATOLIAN HIEROGLYPH A176
+	= syllabic la+la
+144CC	ANATOLIAN HIEROGLYPH A177
+	= lingua+clavus
+144CD	ANATOLIAN HIEROGLYPH A178
+	= syllabic la+ra+a
+144CE	ANATOLIAN HIEROGLYPH A179
+	= hordeum
+	= syllabic hwi-x
+144CF	ANATOLIAN HIEROGLYPH A180
+144D0	ANATOLIAN HIEROGLYPH A181
+	= panis
+	= syllabic pa-x
+@		D. Nature
+144D1	ANATOLIAN HIEROGLYPH A182
+	= caelum
+144D2	ANATOLIAN HIEROGLYPH A183
+144D3	ANATOLIAN HIEROGLYPH A184
+144D4	ANATOLIAN HIEROGLYPH A185
+144D5	ANATOLIAN HIEROGLYPH A186
+144D6	ANATOLIAN HIEROGLYPH A187
+144D7	ANATOLIAN HIEROGLYPH A188
+144D8	ANATOLIAN HIEROGLYPH A189
+144D9	ANATOLIAN HIEROGLYPH A190
+	= sol2
+144DA	ANATOLIAN HIEROGLYPH A191
+	= sol
+144DB	ANATOLIAN HIEROGLYPH A192
+	= oriens
+144DC	ANATOLIAN HIEROGLYPH A193
+	= luna
+144DD	ANATOLIAN HIEROGLYPH A194
+144DE	ANATOLIAN HIEROGLYPH A195
+144DF	ANATOLIAN HIEROGLYPH A196
+	= Hatti
+	= syllabic há
+144E0	ANATOLIAN HIEROGLYPH A197
+	= Hatti+li, Hattusili
+	= logosyllabic há-li
+144E1	ANATOLIAN HIEROGLYPH A198
+144E2	ANATOLIAN HIEROGLYPH A199
+	= tonitrus
+144E3	ANATOLIAN HIEROGLYPH A200
+	= fulgur
+144E4	ANATOLIAN HIEROGLYPH A201
+	= terra, locus
+	= syllabic wa/i6
+144E5	ANATOLIAN HIEROGLYPH A202
+	= via+terra.scalprum
+144E6	ANATOLIAN HIEROGLYPH A202A
+	= via+terra+scalprum
+144E7	ANATOLIAN HIEROGLYPH A202B
+	= (deus)via+terra
+144E8	ANATOLIAN HIEROGLYPH A203
+144E9	ANATOLIAN HIEROGLYPH A204
+	= syllabic wa/i5
+144EA	ANATOLIAN HIEROGLYPH A205
+144EB	ANATOLIAN HIEROGLYPH A206
+144EC	ANATOLIAN HIEROGLYPH A207
+	= mons
+	= syllabic wa/i5
+144ED	ANATOLIAN HIEROGLYPH A207A
+	= leo+mons.tu+leo
+144EE	ANATOLIAN HIEROGLYPH A208
+144EF	ANATOLIAN HIEROGLYPH A209
+	= syllabic i, i(a)
+144F0	ANATOLIAN HIEROGLYPH A209A
+	= syllabic i+ra/i, ri+i
+	* 144EF anatolian hieroglyph a209 + 145B1 anatolian hieroglyph a383 ra or ri
+144F1	ANATOLIAN HIEROGLYPH A210
+	= syllabic ia
+144F2	ANATOLIAN HIEROGLYPH A211
+144F3	ANATOLIAN HIEROGLYPH A212
+	= flumen
+144F4	ANATOLIAN HIEROGLYPH A213
+144F5	ANATOLIAN HIEROGLYPH A214
+	= syllabic ní
+144F6	ANATOLIAN HIEROGLYPH A215
+	= fons
+144F7	ANATOLIAN HIEROGLYPH A215A
+	= syllabic ha
+144F8	ANATOLIAN HIEROGLYPH A216
+	= fines
+	= syllabic arha
+144F9	ANATOLIAN HIEROGLYPH A216A
+	= fines+ha, arha
+144FA	ANATOLIAN HIEROGLYPH A217
+144FB	ANATOLIAN HIEROGLYPH A218
+144FC	ANATOLIAN HIEROGLYPH A219
+144FD	ANATOLIAN HIEROGLYPH A220
+144FE	ANATOLIAN HIEROGLYPH A221
+	= via
+144FF	ANATOLIAN HIEROGLYPH A222
+14500	ANATOLIAN HIEROGLYPH A223
+	= syllabic sa6
+14501	ANATOLIAN HIEROGLYPH A224
+	= syllabic ha? pa?
+@		E. Buildings
+14502	ANATOLIAN HIEROGLYPH A225
+	= urbs
+14503	ANATOLIAN HIEROGLYPH A226
+	= Ishuwa
+14504	ANATOLIAN HIEROGLYPH A227
+	= urbs+ra/i?+li, urbs+ra/i?-li
+14505	ANATOLIAN HIEROGLYPH A227A
+	= urbs+li, urbs-li, Mursili
+14506	ANATOLIAN HIEROGLYPH A228
+	= regio
+	= syllabic tu4
+14507	ANATOLIAN HIEROGLYPH A229
+	= syllabic mí.regio
+14508	ANATOLIAN HIEROGLYPH A230
+14509	ANATOLIAN HIEROGLYPH A231
+	= castrum
+1450A	ANATOLIAN HIEROGLYPH A232
+1450B	ANATOLIAN HIEROGLYPH A233
+1450C	ANATOLIAN HIEROGLYPH A234
+1450D	ANATOLIAN HIEROGLYPH A235
+	= turris?
+1450E	ANATOLIAN HIEROGLYPH A236
+	= murus?
+1450F	ANATOLIAN HIEROGLYPH A237
+	= porta
+14510	ANATOLIAN HIEROGLYPH A238
+14511	ANATOLIAN HIEROGLYPH A239
+	= porta2
+14512	ANATOLIAN HIEROGLYPH A240
+14513	ANATOLIAN HIEROGLYPH A241
+	= syllabic ki-x
+14514	ANATOLIAN HIEROGLYPH A242
+14515	ANATOLIAN HIEROGLYPH A243
+	= cubitum
+14516	ANATOLIAN HIEROGLYPH A244
+	= aedificium
+14517	ANATOLIAN HIEROGLYPH A245
+	= vacuus, aedificium+minus
+14518	ANATOLIAN HIEROGLYPH A246
+	= aedificare, aedificium.ponere
+14519	ANATOLIAN HIEROGLYPH A247
+	= domus
+1451A	ANATOLIAN HIEROGLYPH A248
+	= delere, domus+minus
+1451B	ANATOLIAN HIEROGLYPH A249
+	= deus.domus
+1451C	ANATOLIAN HIEROGLYPH A250
+	= magnus.domus
+1451D	ANATOLIAN HIEROGLYPH A251
+	= domus+x
+1451E	ANATOLIAN HIEROGLYPH A252
+	= domus+scala
+1451F	ANATOLIAN HIEROGLYPH A253
+14520	ANATOLIAN HIEROGLYPH A254
+	= eunuchus2
+14521	ANATOLIAN HIEROGLYPH A255
+	= horreum
+14522	ANATOLIAN HIEROGLYPH A256
+14523	ANATOLIAN HIEROGLYPH A257
+	= argentum
+14524	ANATOLIAN HIEROGLYPH A258
+14525	ANATOLIAN HIEROGLYPH A259
+14526	ANATOLIAN HIEROGLYPH A260
+14527	ANATOLIAN HIEROGLYPH A261
+14528	ANATOLIAN HIEROGLYPH A262
+14529	ANATOLIAN HIEROGLYPH A263
+1452A	ANATOLIAN HIEROGLYPH A264
+	= podium
+1452B	ANATOLIAN HIEROGLYPH A265
+1452C	ANATOLIAN HIEROGLYPH A266
+	= pes.regio
+1452D	ANATOLIAN HIEROGLYPH A267
+	= stele, lapis+scalprum
+1452E	ANATOLIAN HIEROGLYPH A267A
+	= lapis
+1452F	ANATOLIAN HIEROGLYPH A268
+	= scalprum
+@		F. Arms, tools, furniture, and other instruments
+14530	ANATOLIAN HIEROGLYPH A269
+	= exercitus
+14531	ANATOLIAN HIEROGLYPH A270
+14532	ANATOLIAN HIEROGLYPH A271
+14533	ANATOLIAN HIEROGLYPH A272
+	= scutum
+14534	ANATOLIAN HIEROGLYPH A273
+14535	ANATOLIAN HIEROGLYPH A274
+14536	ANATOLIAN HIEROGLYPH A275
+14537	ANATOLIAN HIEROGLYPH A276
+	= frater2
+14538	ANATOLIAN HIEROGLYPH A277
+	=  iudex.la, iudex+la
+14539	ANATOLIAN HIEROGLYPH A278
+	= syllabic li
+1453A	ANATOLIAN HIEROGLYPH A279
+1453B	ANATOLIAN HIEROGLYPH A280
+	= malleus
+	= syllabic wa/i9
+1453C	ANATOLIAN HIEROGLYPH A281
+	= ascia
+1453D	ANATOLIAN HIEROGLYPH A282
+1453E	ANATOLIAN HIEROGLYPH A283
+	= logosyllabic tuzzi
+1453F	ANATOLIAN HIEROGLYPH A284
+14540	ANATOLIAN HIEROGLYPH A285
+	= iaculum
+	= syllabic zu?
+	= logosyllabic zuwa
+14541	ANATOLIAN HIEROGLYPH A286
+	= syllabic wa/i7
+14542	ANATOLIAN HIEROGLYPH A287
+14543	ANATOLIAN HIEROGLYPH A288
+	= currus
+14544	ANATOLIAN HIEROGLYPH A289
+	= auriga
+14545	ANATOLIAN HIEROGLYPH A289A
+	= auriga2
+14546	ANATOLIAN HIEROGLYPH A290
+	= syllabic hara/i
+	* 14548 anatolian hieroglyph a292 + 145B1 anatolian hieroglyph a383 ra or ri
+14547	ANATOLIAN HIEROGLYPH A291
+	= syllabic lì
+14548	ANATOLIAN HIEROGLYPH A292
+	= rota
+	= logosyllabic hala/i
+14549	ANATOLIAN HIEROGLYPH A293
+1454A	ANATOLIAN HIEROGLYPH A294
+	= thronus, mensa
+1454B	ANATOLIAN HIEROGLYPH A294A
+	= thronus, mensa2
+	= Sarpa
+1454C	ANATOLIAN HIEROGLYPH A295
+	= sol2.thronus/mensa
+1454D	ANATOLIAN HIEROGLYPH A296
+	= (deus)mons.Sarpa, (deus)mons.mensa
+	= thronus
+1454E	ANATOLIAN HIEROGLYPH A297
+1454F	ANATOLIAN HIEROGLYPH A298
+	= thronus2
+14550	ANATOLIAN HIEROGLYPH A299
+	= solium
+	= syllabic í
+14551	ANATOLIAN HIEROGLYPH A299A
+	= syllabic iá
+14552	ANATOLIAN HIEROGLYPH A300
+	= nepos
+14553	ANATOLIAN HIEROGLYPH A301
+	= lectus
+14554	ANATOLIAN HIEROGLYPH A302
+14555	ANATOLIAN HIEROGLYPH A303
+	= syllabic sara/i
+	* 1456E anatolian hieroglyph a327 + 145B1 anatolian hieroglyph a383 ra or ri
+14556	ANATOLIAN HIEROGLYPH A304
+	= syllabic mà
+14557	ANATOLIAN HIEROGLYPH A305
+	= fusus
+14558	ANATOLIAN HIEROGLYPH A306
+	= syllabic hí
+14559	ANATOLIAN HIEROGLYPH A307
+	= syllabic hu
+1455A	ANATOLIAN HIEROGLYPH A308
+1455B	ANATOLIAN HIEROGLYPH A309
+	= crux
+1455C	ANATOLIAN HIEROGLYPH A309A
+	= crux2
+1455D	ANATOLIAN HIEROGLYPH A310
+1455E	ANATOLIAN HIEROGLYPH A311
+1455F	ANATOLIAN HIEROGLYPH A312
+14560	ANATOLIAN HIEROGLYPH A313
+	= vir
+	= syllabic zí
+14561	ANATOLIAN HIEROGLYPH A314
+	= syllabic ha-x
+14562	ANATOLIAN HIEROGLYPH A315
+	= syllabic kar
+	* 14561 anatolian hieroglyph a314 + 145B1 anatolian hieroglyph a383 ra or ri
+14563	ANATOLIAN HIEROGLYPH A316
+	= syllabic sa7
+14564	ANATOLIAN HIEROGLYPH A317
+14565	ANATOLIAN HIEROGLYPH A318
+	= Teshub
+14566	ANATOLIAN HIEROGLYPH A319
+	= syllabic ta/i4, la/i
+14567	ANATOLIAN HIEROGLYPH A320
+14568	ANATOLIAN HIEROGLYPH A321
+14569	ANATOLIAN HIEROGLYPH A322
+	= purus
+1456A	ANATOLIAN HIEROGLYPH A323
+1456B	ANATOLIAN HIEROGLYPH A324
+1456C	ANATOLIAN HIEROGLYPH A325
+	= syllabic tú
+1456D	ANATOLIAN HIEROGLYPH A326
+	= scriba
+	= syllabic tù
+1456E	ANATOLIAN HIEROGLYPH A327
+	= sigillum
+	= syllabic sa5
+1456F	ANATOLIAN HIEROGLYPH A328
+	= syllabic pu
+14570	ANATOLIAN HIEROGLYPH A329
+	= relative
+	= syllabic kwi/a
+14571	ANATOLIAN HIEROGLYPH A329A
+14572	ANATOLIAN HIEROGLYPH A330
+	= capere+scalprum
+14573	ANATOLIAN HIEROGLYPH A331
+	= avus
+14574	ANATOLIAN HIEROGLYPH A332A
+	= negative
+14575	ANATOLIAN HIEROGLYPH A332B
+	= negative2
+	= syllabic ná
+14576	ANATOLIAN HIEROGLYPH A332C
+	= negative3
+@		G. Vases and receptacles
+14577	ANATOLIAN HIEROGLYPH A333
+14578	ANATOLIAN HIEROGLYPH A334
+	= syllabic pa
+14579	ANATOLIAN HIEROGLYPH A335
+	= syllabic zá
+1457A	ANATOLIAN HIEROGLYPH A336
+	= annus, pithos.scutella, pithos
+	= syllabic zì
+1457B	ANATOLIAN HIEROGLYPH A336A
+	= syllabic zì
+1457C	ANATOLIAN HIEROGLYPH A336B
+	= syllabic zà
+1457D	ANATOLIAN HIEROGLYPH A336C
+	= syllabic za-x
+1457E	ANATOLIAN HIEROGLYPH A337
+	= pithos
+1457F	ANATOLIAN HIEROGLYPH A338
+	= culter
+14580	ANATOLIAN HIEROGLYPH A339
+14581	ANATOLIAN HIEROGLYPH A340
+	= annus+annus
+14582	ANATOLIAN HIEROGLYPH A341
+	= vas
+14583	ANATOLIAN HIEROGLYPH A342
+14584	ANATOLIAN HIEROGLYPH A343
+	= pithos
+14585	ANATOLIAN HIEROGLYPH A344
+	= contractus
+14586	ANATOLIAN HIEROGLYPH A345
+	= urceus
+14587	ANATOLIAN HIEROGLYPH A346
+	= poculum
+14588	ANATOLIAN HIEROGLYPH A347
+	= syllabic hú
+14589	ANATOLIAN HIEROGLYPH A348
+1458A	ANATOLIAN HIEROGLYPH A349
+1458B	ANATOLIAN HIEROGLYPH A350
+1458C	ANATOLIAN HIEROGLYPH A351
+1458D	ANATOLIAN HIEROGLYPH A352
+1458E	ANATOLIAN HIEROGLYPH A353
+1458F	ANATOLIAN HIEROGLYPH A354
+14590	ANATOLIAN HIEROGLYPH A355
+	= sacerdos
+14591	ANATOLIAN HIEROGLYPH A356
+14592	ANATOLIAN HIEROGLYPH A357
+14593	ANATOLIAN HIEROGLYPH A358
+	= dies
+14594	ANATOLIAN HIEROGLYPH A359
+14595	ANATOLIAN HIEROGLYPH A359A
+@		H. Symbols
+14596	ANATOLIAN HIEROGLYPH A360
+	= deus
+14597	ANATOLIAN HIEROGLYPH A361
+14598	ANATOLIAN HIEROGLYPH A362
+	= syllabic má
+14599	ANATOLIAN HIEROGLYPH A363
+	= magnus
+	= syllabic ur
+1459A	ANATOLIAN HIEROGLYPH A364
+	= syllabic u
+1459B	ANATOLIAN HIEROGLYPH A364A
+	= syllabic mu
+1459C	ANATOLIAN HIEROGLYPH A365
+1459D	ANATOLIAN HIEROGLYPH A366
+	= omnis(+mi)
+1459E	ANATOLIAN HIEROGLYPH A367
+	= logosyllabic tala
+1459F	ANATOLIAN HIEROGLYPH A368
+	= malus
+145A0	ANATOLIAN HIEROGLYPH A368A
+	= malus2
+145A1	ANATOLIAN HIEROGLYPH A369
+	= vita
+145A2	ANATOLIAN HIEROGLYPH A370
+	= bonus2
+	= syllabic su
+145A3	ANATOLIAN HIEROGLYPH A371
+	= iustitia, iudex
+145A4	ANATOLIAN HIEROGLYPH A371A
+	= iudex+ra/i, tara/i-x
+	* 145A3 anatolian hieroglyph a371 + 145B1 anatolian hieroglyph a383 ra or ri
+145A5	ANATOLIAN HIEROGLYPH A372
+	= sacerdos2
+145A6	ANATOLIAN HIEROGLYPH A373
+145A7	ANATOLIAN HIEROGLYPH A374
+145A8	ANATOLIAN HIEROGLYPH A375
+145A9	ANATOLIAN HIEROGLYPH A376
+	= syllabic zi, zi/a
+145AA	ANATOLIAN HIEROGLYPH A377
+	= syllabic za
+145AB	ANATOLIAN HIEROGLYPH A378
+	= lituus
+145AC	ANATOLIAN HIEROGLYPH A379
+	= occidens
+	= syllabic ià
+@		J. Lines, numbers, and geometric shapes
+145AD	ANATOLIAN HIEROGLYPH A380
+	= one
+	= unus
+	= syllabic sa8
+145AE	ANATOLIAN HIEROGLYPH A381
+	= minus
+145AF	ANATOLIAN HIEROGLYPH A381A
+	= mori, vir2.minus
+145B0	ANATOLIAN HIEROGLYPH A382
+	= lignum
+145B1	ANATOLIAN HIEROGLYPH A383 RA OR RI
+	x (anatolian hieroglyph a134 - 144A0)
+	x (anatolian hieroglyph a209a - 144F0)
+	x (anatolian hieroglyph a290 - 14546)
+	x (anatolian hieroglyph a303 - 14555)
+	x (anatolian hieroglyph a315 - 14562)
+	x (anatolian hieroglyph a371a - 145A4)
+	x (anatolian hieroglyph a389 - 145B9)
+	x (anatolian hieroglyph a450a - 145F8)
+145B2	ANATOLIAN HIEROGLYPH A383A
+	= personal determinative
+145B3	ANATOLIAN HIEROGLYPH A384
+	= two
+145B4	ANATOLIAN HIEROGLYPH A385
+	= two
+145B5	ANATOLIAN HIEROGLYPH A386
+	= vir2
+	= word divider
+145B6	ANATOLIAN HIEROGLYPH A386A
+	= vir2a
+145B7	ANATOLIAN HIEROGLYPH A387
+	= servus
+	= syllabic mì
+145B8	ANATOLIAN HIEROGLYPH A388
+	= three
+	= tara/i
+145B9	ANATOLIAN HIEROGLYPH A389
+	= tara/i
+	* 145B8 anatolian hieroglyph a388 + 145B1 anatolian hieroglyph a383 ra or ri
+145BA	ANATOLIAN HIEROGLYPH A390
+	= dominus
+145BB	ANATOLIAN HIEROGLYPH A391
+	= four
+	= syllabic mi
+145BC	ANATOLIAN HIEROGLYPH A392
+	= five
+145BD	ANATOLIAN HIEROGLYPH A393 EIGHT
+	= eight
+145BE	ANATOLIAN HIEROGLYPH A394
+145BF	ANATOLIAN HIEROGLYPH A395
+	= nine
+	= syllabic nú
+145C0	ANATOLIAN HIEROGLYPH A396
+145C1	ANATOLIAN HIEROGLYPH A397
+	= ten
+	= decem
+145C2	ANATOLIAN HIEROGLYPH A398
+145C3	ANATOLIAN HIEROGLYPH A399
+	= hundred
+	= centum
+145C4	ANATOLIAN HIEROGLYPH A400
+	= thousand
+	= mille
+145C5	ANATOLIAN HIEROGLYPH A401
+145C6	ANATOLIAN HIEROGLYPH A402
+	= scutella
+	= syllabic sa4
+145C7	ANATOLIAN HIEROGLYPH A403
+145C8	ANATOLIAN HIEROGLYPH A404
+	= animal
+145C9	ANATOLIAN HIEROGLYPH A405
+145CA	ANATOLIAN HIEROGLYPH A406
+145CB	ANATOLIAN HIEROGLYPH A407
+145CC	ANATOLIAN HIEROGLYPH A408
+145CD	ANATOLIAN HIEROGLYPH A409
+145CE	ANATOLIAN HIEROGLYPH A410 BEGIN LOGOGRAM MARK
+145CF	ANATOLIAN HIEROGLYPH A410A END LOGOGRAM MARK
+145D0	ANATOLIAN HIEROGLYPH A411
+	= syllabic ni
+145D1	ANATOLIAN HIEROGLYPH A412
+	= syllabic ru
+145D2	ANATOLIAN HIEROGLYPH A413
+	= syllabic hi
+145D3	ANATOLIAN HIEROGLYPH A414
+145D4	ANATOLIAN HIEROGLYPH A415
+	= syllabic sa
+145D5	ANATOLIAN HIEROGLYPH A416
+145D6	ANATOLIAN HIEROGLYPH A417
+	= syllabic sa-x
+145D7	ANATOLIAN HIEROGLYPH A418
+145D8	ANATOLIAN HIEROGLYPH A419
+	= syllabic mí
+	= logosyllabic urhi
+145D9	ANATOLIAN HIEROGLYPH A420
+145DA	ANATOLIAN HIEROGLYPH A421
+	= syllabic us
+145DB	ANATOLIAN HIEROGLYPH A422
+	= panis.scutella
+145DC	ANATOLIAN HIEROGLYPH A423
+	= syllabic ku
+145DD	ANATOLIAN HIEROGLYPH A424
+145DE	ANATOLIAN HIEROGLYPH A425
+145DF	ANATOLIAN HIEROGLYPH A426
+145E0	ANATOLIAN HIEROGLYPH A427
+145E1	ANATOLIAN HIEROGLYPH A428
+145E2	ANATOLIAN HIEROGLYPH A429
+	= syllabic tana
+145E3	ANATOLIAN HIEROGLYPH A430
+	= omnis2
+	= syllabic pú
+145E4	ANATOLIAN HIEROGLYPH A431
+145E5	ANATOLIAN HIEROGLYPH A432
+	= syllabic zu?
+@		K. Varia
+145E6	ANATOLIAN HIEROGLYPH A433
+	= syllabic sá
+145E7	ANATOLIAN HIEROGLYPH A434
+	= syllabic ka
+145E8	ANATOLIAN HIEROGLYPH A435
+	= syllabic a-x?
+145E9	ANATOLIAN HIEROGLYPH A436
+145EA	ANATOLIAN HIEROGLYPH A437
+145EB	ANATOLIAN HIEROGLYPH A438
+	= pastor
+145EC	ANATOLIAN HIEROGLYPH A439
+	= syllabic wa/i
+145ED	ANATOLIAN HIEROGLYPH A440
+145EE	ANATOLIAN HIEROGLYPH A441
+145EF	ANATOLIAN HIEROGLYPH A442
+145F0	ANATOLIAN HIEROGLYPH A443
+145F1	ANATOLIAN HIEROGLYPH A444
+145F2	ANATOLIAN HIEROGLYPH A445
+	= syllabic la, li, lu
+145F3	ANATOLIAN HIEROGLYPH A446
+	= syllabic ki
+145F4	ANATOLIAN HIEROGLYPH A447
+	= syllabic ni-x
+145F5	ANATOLIAN HIEROGLYPH A448
+	= syllabic sù?, zú?
+145F6	ANATOLIAN HIEROGLYPH A449
+145F7	ANATOLIAN HIEROGLYPH A450
+	= syllabic a
+	= end of a word
+145F8	ANATOLIAN HIEROGLYPH A450A
+	= a+ra/i, ra+a
+	* 145F7 anatolian hieroglyph a450 + 145B1 anatolian hieroglyph a383 ra or ri
+145F9	ANATOLIAN HIEROGLYPH A451
+	= logosyllabic huru
+145FA	ANATOLIAN HIEROGLYPH A452
+145FB	ANATOLIAN HIEROGLYPH A453
+145FC	ANATOLIAN HIEROGLYPH A454
+145FD	ANATOLIAN HIEROGLYPH A455
+	= syllabic la-x
+145FE	ANATOLIAN HIEROGLYPH A456
+	= syllabic sí?
+145FF	ANATOLIAN HIEROGLYPH A457
+14600	ANATOLIAN HIEROGLYPH A457A
+14601	ANATOLIAN HIEROGLYPH A458
+14602	ANATOLIAN HIEROGLYPH A459
+14603	ANATOLIAN HIEROGLYPH A460
+14604	ANATOLIAN HIEROGLYPH A461
+14605	ANATOLIAN HIEROGLYPH A462
+	= syllabic ma-x?
+14606	ANATOLIAN HIEROGLYPH A463
+14607	ANATOLIAN HIEROGLYPH A464
+14608	ANATOLIAN HIEROGLYPH A465
+14609	ANATOLIAN HIEROGLYPH A466
+1460A	ANATOLIAN HIEROGLYPH A467
+1460B	ANATOLIAN HIEROGLYPH A468
+1460C	ANATOLIAN HIEROGLYPH A469
+1460D	ANATOLIAN HIEROGLYPH A470
+	= twelve
+1460E	ANATOLIAN HIEROGLYPH A471
+1460F	ANATOLIAN HIEROGLYPH A472
+14610	ANATOLIAN HIEROGLYPH A473
+14611	ANATOLIAN HIEROGLYPH A474
+	= eunuchus
+14612	ANATOLIAN HIEROGLYPH A475
+14613	ANATOLIAN HIEROGLYPH A476
+14614	ANATOLIAN HIEROGLYPH A477
+	= flammae?
+14615	ANATOLIAN HIEROGLYPH A478
+14616	ANATOLIAN HIEROGLYPH A479
+14617	ANATOLIAN HIEROGLYPH A480
+14618	ANATOLIAN HIEROGLYPH A481
+14619	ANATOLIAN HIEROGLYPH A482
+1461A	ANATOLIAN HIEROGLYPH A483
+1461B	ANATOLIAN HIEROGLYPH A484
+1461C	ANATOLIAN HIEROGLYPH A485
+1461D	ANATOLIAN HIEROGLYPH A486
+	= falx?
+1461E	ANATOLIAN HIEROGLYPH A487
+1461F	ANATOLIAN HIEROGLYPH A488
+	= syllabic tí
+14620	ANATOLIAN HIEROGLYPH A489
+14621	ANATOLIAN HIEROGLYPH A490
+14622	ANATOLIAN HIEROGLYPH A491
+14623	ANATOLIAN HIEROGLYPH A492
+14624	ANATOLIAN HIEROGLYPH A493
+14625	ANATOLIAN HIEROGLYPH A494
+14626	ANATOLIAN HIEROGLYPH A495
+14627	ANATOLIAN HIEROGLYPH A496
+14628	ANATOLIAN HIEROGLYPH A497
+@		M. Additional signs
+14629	ANATOLIAN HIEROGLYPH A501
+1462A	ANATOLIAN HIEROGLYPH A502
+1462B	ANATOLIAN HIEROGLYPH A503
+1462C	ANATOLIAN HIEROGLYPH A504
+1462D	ANATOLIAN HIEROGLYPH A505
+1462E	ANATOLIAN HIEROGLYPH A506
+	= syllabic hana
+1462F	ANATOLIAN HIEROGLYPH A507
+14630	ANATOLIAN HIEROGLYPH A508
+	= currere
+	= syllabic hwi/a
+14631	ANATOLIAN HIEROGLYPH A509
+14632	ANATOLIAN HIEROGLYPH A510
+14633	ANATOLIAN HIEROGLYPH A511
+14634	ANATOLIAN HIEROGLYPH A512
+14635	ANATOLIAN HIEROGLYPH A513
+14636	ANATOLIAN HIEROGLYPH A514
+14637	ANATOLIAN HIEROGLYPH A515
+14638	ANATOLIAN HIEROGLYPH A516
+14639	ANATOLIAN HIEROGLYPH A517
+1463A	ANATOLIAN HIEROGLYPH A518
+1463B	ANATOLIAN HIEROGLYPH A519
+1463C	ANATOLIAN HIEROGLYPH A520
+1463D	ANATOLIAN HIEROGLYPH A521
+1463E	ANATOLIAN HIEROGLYPH A522
+1463F	ANATOLIAN HIEROGLYPH A523
+14640	ANATOLIAN HIEROGLYPH A524
+	= propheta?, cornu+caput
+14641	ANATOLIAN HIEROGLYPH A525
+	= princeps
+14642	ANATOLIAN HIEROGLYPH A526
+	= Güterbock G195
+14643	ANATOLIAN HIEROGLYPH A527
+	= aper
+14644	ANATOLIAN HIEROGLYPH A528
+	= tì
+14645	ANATOLIAN HIEROGLYPH A529
+	= lingua+x
+14646	ANATOLIAN HIEROGLYPH A530
 @@	16800	Bamum Supplement	16A3F
 @		Characters found through Phase A
 16800	BAMUM LETTER PHASE-A NGKUE MFON
@@ -34939,7 +36872,7 @@ FFFF	<not a character>
 @		Punctuation
 16AF5	BASSA VAH FULL STOP
 @@	16B00	Pahawh Hmong	16B8F
-@+	The character names used for Pahawh Hmong vowel rimes and consonant onsets follow the Third Stage Reduced Version orthography. Annotations give the character names in the Second Stage Reduced Version orthography.
+@+		The character names used for Pahawh Hmong vowel rimes and consonant onsets follow the Third Stage Reduced Version orthography. Annotations give the character names in the Second Stage Reduced Version orthography.
 @		Vowel rimes
 16B00	PAHAWH HMONG VOWEL KEEB
 	= keem
@@ -35633,7 +37566,7 @@ FFFF	<not a character>
 1BC60	DUPLOYAN LETTER WOW
 	* Salishan
 @		Basic nasal vowels
-@+	These nasal vowel characters position diacritically, as an orientating vowel, or as an invariant vowel.
+@+		These nasal vowel characters position diacritically, as an orientating vowel, or as an invariant vowel.
 1BC61	DUPLOYAN LETTER NASAL U
 	* secondary orientating; invariant direction downwards
 	* French number 1
@@ -35668,7 +37601,7 @@ FFFF	<not a character>
 	* primary orientating vowel
 	* Perrault am, em, im, um (with accents)
 @		Attached affixes
-@+	The dots in the chart glyphs for these attached affixes show the position on and relative orientation to the base glyph they are attached to, and are not visibly rendered.
+@+		The dots in the chart glyphs for these attached affixes show the position on and relative orientation to the base glyph they are attached to, and are not visibly rendered.
 1BC70	DUPLOYAN AFFIX LEFT HORIZONTAL SECANT
 	* Pernin Reporters' extra-
 	x (duployan letter d - 1BC08)
@@ -36340,6 +38273,8 @@ FFFF	<not a character>
 1D1B4	MUSICAL SYMBOL DAMP
 1D1B5	MUSICAL SYMBOL DAMP ALL
 @		Mensural notation
+@+		The following range is specific to Mensural notation.
+@		Mensural notes
 1D1B6	MUSICAL SYMBOL MAXIMA
 1D1B7	MUSICAL SYMBOL LONGA
 1D1B8	MUSICAL SYMBOL BREVIS
@@ -36376,9 +38311,13 @@ FFFF	<not a character>
 @		Miscellaneous symbol
 1D1CF	MUSICAL SYMBOL CROIX
 @		Gregorian notation
+@+		The following range is specific to Gregorian notation.
+@		Clefs
 1D1D0	MUSICAL SYMBOL GREGORIAN C CLEF
 1D1D1	MUSICAL SYMBOL GREGORIAN F CLEF
+@		Accidental
 1D1D2	MUSICAL SYMBOL SQUARE B
+@		Notes
 1D1D3	MUSICAL SYMBOL VIRGA
 1D1D4	MUSICAL SYMBOL PODATUS
 1D1D5	MUSICAL SYMBOL CLIVIS
@@ -36390,6 +38329,28 @@ FFFF	<not a character>
 1D1DB	MUSICAL SYMBOL SCANDICUS FLEXUS
 1D1DC	MUSICAL SYMBOL TORCULUS RESUPINUS
 1D1DD	MUSICAL SYMBOL PES SUBPUNCTIS
+@		Kievan notation
+@+		The following range is specific to Kievan notation.
+@		Clef
+1D1DE	MUSICAL SYMBOL KIEVAN C CLEF
+	* Tsefaut (do or fa) clef
+@		Ornamentation
+1D1DF	MUSICAL SYMBOL KIEVAN END OF PIECE
+@		Notes
+1D1E0	MUSICAL SYMBOL KIEVAN FINAL NOTE
+	* nominal note located between the two rectangles
+1D1E1	MUSICAL SYMBOL KIEVAN RECITATIVE MARK
+	* nominal note located between the two rectangles
+1D1E2	MUSICAL SYMBOL KIEVAN WHOLE NOTE
+	* nominal note located between the two diamonds
+1D1E3	MUSICAL SYMBOL KIEVAN HALF NOTE
+1D1E4	MUSICAL SYMBOL KIEVAN QUARTER NOTE STEM DOWN
+1D1E5	MUSICAL SYMBOL KIEVAN QUARTER NOTE STEM UP
+1D1E6	MUSICAL SYMBOL KIEVAN EIGHTH NOTE STEM DOWN
+	* nominal note located on the top diamond
+1D1E7	MUSICAL SYMBOL KIEVAN EIGHTH NOTE STEM UP
+@		Accidental
+1D1E8	MUSICAL SYMBOL KIEVAN FLAT SIGN
 @@	1D200	Ancient Greek Musical Notation	1D24F
 @		Ancient Greek vocalic notation
 @+		In a few instances vocalic and instrumental symbols have been unified with each other. In other instances they have been unified with regular Greek letters.
@@ -38769,6 +40730,701 @@ FFFF	<not a character>
 	# <font> 0038 digit eight
 1D7FF	MATHEMATICAL MONOSPACE DIGIT NINE
 	# <font> 0039 digit nine
+@@	1D800	Sutton SignWriting	1DAAF
+@		Hand shapes with index finger
+1D800	SIGNWRITING HAND-FIST INDEX
+1D801	SIGNWRITING HAND-CIRCLE INDEX
+1D802	SIGNWRITING HAND-CUP INDEX
+1D803	SIGNWRITING HAND-OVAL INDEX
+1D804	SIGNWRITING HAND-HINGE INDEX
+1D805	SIGNWRITING HAND-ANGLE INDEX
+1D806	SIGNWRITING HAND-FIST INDEX BENT
+1D807	SIGNWRITING HAND-CIRCLE INDEX BENT
+1D808	SIGNWRITING HAND-FIST THUMB UNDER INDEX BENT
+1D809	SIGNWRITING HAND-FIST INDEX RAISED KNUCKLE
+1D80A	SIGNWRITING HAND-FIST INDEX CUPPED
+1D80B	SIGNWRITING HAND-FIST INDEX HINGED
+1D80C	SIGNWRITING HAND-FIST INDEX HINGED LOW
+1D80D	SIGNWRITING HAND-CIRCLE INDEX HINGE
+@		Hand shapes with index and middle fingers
+1D80E	SIGNWRITING HAND-FIST INDEX MIDDLE
+1D80F	SIGNWRITING HAND-CIRCLE INDEX MIDDLE
+1D810	SIGNWRITING HAND-FIST INDEX MIDDLE BENT
+1D811	SIGNWRITING HAND-FIST INDEX MIDDLE RAISED KNUCKLES
+1D812	SIGNWRITING HAND-FIST INDEX MIDDLE HINGED
+1D813	SIGNWRITING HAND-FIST INDEX UP MIDDLE HINGED
+1D814	SIGNWRITING HAND-FIST INDEX HINGED MIDDLE UP
+1D815	SIGNWRITING HAND-FIST INDEX MIDDLE CONJOINED
+1D816	SIGNWRITING HAND-FIST INDEX MIDDLE CONJOINED INDEX BENT
+1D817	SIGNWRITING HAND-FIST INDEX MIDDLE CONJOINED MIDDLE BENT
+1D818	SIGNWRITING HAND-FIST INDEX MIDDLE CONJOINED CUPPED
+1D819	SIGNWRITING HAND-FIST INDEX MIDDLE CONJOINED HINGED
+1D81A	SIGNWRITING HAND-FIST INDEX MIDDLE CROSSED
+1D81B	SIGNWRITING HAND-CIRCLE INDEX MIDDLE CROSSED
+1D81C	SIGNWRITING HAND-FIST MIDDLE BENT OVER INDEX
+1D81D	SIGNWRITING HAND-FIST INDEX BENT OVER MIDDLE
+@		Hand shapes with index and middle fingers and thumb
+1D81E	SIGNWRITING HAND-FIST INDEX MIDDLE THUMB
+1D81F	SIGNWRITING HAND-CIRCLE INDEX MIDDLE THUMB
+1D820	SIGNWRITING HAND-FIST INDEX MIDDLE STRAIGHT THUMB BENT
+1D821	SIGNWRITING HAND-FIST INDEX MIDDLE BENT THUMB STRAIGHT
+1D822	SIGNWRITING HAND-FIST INDEX MIDDLE THUMB BENT
+1D823	SIGNWRITING HAND-FIST INDEX MIDDLE HINGED SPREAD THUMB SIDE
+1D824	SIGNWRITING HAND-FIST INDEX UP MIDDLE HINGED THUMB SIDE
+1D825	SIGNWRITING HAND-FIST INDEX UP MIDDLE HINGED THUMB CONJOINED
+1D826	SIGNWRITING HAND-FIST INDEX HINGED MIDDLE UP THUMB SIDE
+1D827	SIGNWRITING HAND-FIST INDEX MIDDLE UP SPREAD THUMB FORWARD
+1D828	SIGNWRITING HAND-FIST INDEX MIDDLE THUMB CUPPED
+1D829	SIGNWRITING HAND-FIST INDEX MIDDLE THUMB CIRCLED
+1D82A	SIGNWRITING HAND-FIST INDEX MIDDLE THUMB HOOKED
+1D82B	SIGNWRITING HAND-FIST INDEX MIDDLE THUMB HINGED
+1D82C	SIGNWRITING HAND-FIST THUMB BETWEEN INDEX MIDDLE STRAIGHT
+1D82D	SIGNWRITING HAND-FIST INDEX MIDDLE CONJOINED THUMB SIDE
+1D82E	SIGNWRITING HAND-FIST INDEX MIDDLE CONJOINED THUMB SIDE CONJOINED
+1D82F	SIGNWRITING HAND-FIST INDEX MIDDLE CONJOINED THUMB SIDE BENT
+1D830	SIGNWRITING HAND-FIST MIDDLE THUMB HOOKED INDEX UP
+1D831	SIGNWRITING HAND-FIST INDEX THUMB HOOKED MIDDLE UP
+1D832	SIGNWRITING HAND-FIST INDEX MIDDLE CONJOINED HINGED THUMB SIDE
+1D833	SIGNWRITING HAND-FIST INDEX MIDDLE CROSSED THUMB SIDE
+1D834	SIGNWRITING HAND-FIST INDEX MIDDLE CONJOINED THUMB FORWARD
+1D835	SIGNWRITING HAND-FIST INDEX MIDDLE CONJOINED CUPPED THUMB FORWARD
+1D836	SIGNWRITING HAND-FIST MIDDLE THUMB CUPPED INDEX UP
+1D837	SIGNWRITING HAND-FIST INDEX THUMB CUPPED MIDDLE UP
+1D838	SIGNWRITING HAND-FIST MIDDLE THUMB CIRCLED INDEX UP
+1D839	SIGNWRITING HAND-FIST MIDDLE THUMB CIRCLED INDEX HINGED
+1D83A	SIGNWRITING HAND-FIST INDEX THUMB ANGLED OUT MIDDLE UP
+1D83B	SIGNWRITING HAND-FIST INDEX THUMB ANGLED IN MIDDLE UP
+1D83C	SIGNWRITING HAND-FIST INDEX THUMB CIRCLED MIDDLE UP
+1D83D	SIGNWRITING HAND-FIST INDEX MIDDLE THUMB CONJOINED HINGED
+1D83E	SIGNWRITING HAND-FIST INDEX MIDDLE THUMB ANGLED OUT
+1D83F	SIGNWRITING HAND-FIST INDEX MIDDLE THUMB ANGLED
+1D840	SIGNWRITING HAND-FIST MIDDLE THUMB ANGLED OUT INDEX UP
+1D841	SIGNWRITING HAND-FIST MIDDLE THUMB ANGLED OUT INDEX CROSSED
+1D842	SIGNWRITING HAND-FIST MIDDLE THUMB ANGLED INDEX UP
+1D843	SIGNWRITING HAND-FIST INDEX THUMB HOOKED MIDDLE HINGED
+@		Hand shapes with four fingers
+1D844	SIGNWRITING HAND-FLAT FOUR FINGERS
+1D845	SIGNWRITING HAND-FLAT FOUR FINGERS BENT
+1D846	SIGNWRITING HAND-FLAT FOUR FINGERS HINGED
+1D847	SIGNWRITING HAND-FLAT FOUR FINGERS CONJOINED
+1D848	SIGNWRITING HAND-FLAT FOUR FINGERS CONJOINED SPLIT
+1D849	SIGNWRITING HAND-CLAW FOUR FINGERS CONJOINED
+1D84A	SIGNWRITING HAND-FIST FOUR FINGERS CONJOINED BENT
+1D84B	SIGNWRITING HAND-HINGE FOUR FINGERS CONJOINED
+@		Hand shapes with five fingers
+1D84C	SIGNWRITING HAND-FLAT FIVE FINGERS SPREAD
+1D84D	SIGNWRITING HAND-FLAT HEEL FIVE FINGERS SPREAD
+1D84E	SIGNWRITING HAND-FLAT FIVE FINGERS SPREAD FOUR BENT
+1D84F	SIGNWRITING HAND-FLAT HEEL FIVE FINGERS SPREAD FOUR BENT
+1D850	SIGNWRITING HAND-FLAT FIVE FINGERS SPREAD BENT
+1D851	SIGNWRITING HAND-FLAT HEEL FIVE FINGERS SPREAD BENT
+1D852	SIGNWRITING HAND-FLAT FIVE FINGERS SPREAD THUMB FORWARD
+1D853	SIGNWRITING HAND-CUP FIVE FINGERS SPREAD
+1D854	SIGNWRITING HAND-CUP FIVE FINGERS SPREAD OPEN
+1D855	SIGNWRITING HAND-HINGE FIVE FINGERS SPREAD OPEN
+1D856	SIGNWRITING HAND-OVAL FIVE FINGERS SPREAD
+1D857	SIGNWRITING HAND-FLAT FIVE FINGERS SPREAD HINGED
+1D858	SIGNWRITING HAND-FLAT FIVE FINGERS SPREAD HINGED THUMB SIDE
+1D859	SIGNWRITING HAND-FLAT FIVE FINGERS SPREAD HINGED NO THUMB
+1D85A	SIGNWRITING HAND-FLAT
+1D85B	SIGNWRITING HAND-FLAT BETWEEN PALM FACINGS
+1D85C	SIGNWRITING HAND-FLAT HEEL
+1D85D	SIGNWRITING HAND-FLAT THUMB SIDE
+1D85E	SIGNWRITING HAND-FLAT HEEL THUMB SIDE
+1D85F	SIGNWRITING HAND-FLAT THUMB BENT
+1D860	SIGNWRITING HAND-FLAT THUMB FORWARD
+1D861	SIGNWRITING HAND-FLAT SPLIT INDEX THUMB SIDE
+1D862	SIGNWRITING HAND-FLAT SPLIT CENTRE
+1D863	SIGNWRITING HAND-FLAT SPLIT CENTRE THUMB SIDE
+1D864	SIGNWRITING HAND-FLAT SPLIT CENTRE THUMB SIDE BENT
+1D865	SIGNWRITING HAND-FLAT SPLIT LITTLE
+1D866	SIGNWRITING HAND-CLAW
+1D867	SIGNWRITING HAND-CLAW THUMB SIDE
+1D868	SIGNWRITING HAND-CLAW NO THUMB
+1D869	SIGNWRITING HAND-CLAW THUMB FORWARD
+1D86A	SIGNWRITING HAND-HOOK CURLICUE
+1D86B	SIGNWRITING HAND-HOOK
+1D86C	SIGNWRITING HAND-CUP OPEN
+1D86D	SIGNWRITING HAND-CUP
+1D86E	SIGNWRITING HAND-CUP OPEN THUMB SIDE
+1D86F	SIGNWRITING HAND-CUP THUMB SIDE
+1D870	SIGNWRITING HAND-CUP OPEN NO THUMB
+1D871	SIGNWRITING HAND-CUP NO THUMB
+1D872	SIGNWRITING HAND-CUP OPEN THUMB FORWARD
+1D873	SIGNWRITING HAND-CUP THUMB FORWARD
+1D874	SIGNWRITING HAND-CURLICUE OPEN
+1D875	SIGNWRITING HAND-CURLICUE
+1D876	SIGNWRITING HAND-CIRCLE
+1D877	SIGNWRITING HAND-OVAL
+1D878	SIGNWRITING HAND-OVAL THUMB SIDE
+1D879	SIGNWRITING HAND-OVAL NO THUMB
+1D87A	SIGNWRITING HAND-OVAL THUMB FORWARD
+1D87B	SIGNWRITING HAND-HINGE OPEN
+1D87C	SIGNWRITING HAND-HINGE OPEN THUMB FORWARD
+1D87D	SIGNWRITING HAND-HINGE
+1D87E	SIGNWRITING HAND-HINGE SMALL
+1D87F	SIGNWRITING HAND-HINGE OPEN THUMB SIDE
+1D880	SIGNWRITING HAND-HINGE THUMB SIDE
+1D881	SIGNWRITING HAND-HINGE OPEN NO THUMB
+1D882	SIGNWRITING HAND-HINGE NO THUMB
+1D883	SIGNWRITING HAND-HINGE THUMB SIDE TOUCHING INDEX
+1D884	SIGNWRITING HAND-HINGE THUMB BETWEEN MIDDLE RING
+1D885	SIGNWRITING HAND-ANGLE
+@		Hand shapes with little finger
+1D886	SIGNWRITING HAND-FIST INDEX MIDDLE RING
+1D887	SIGNWRITING HAND-CIRCLE INDEX MIDDLE RING
+1D888	SIGNWRITING HAND-HINGE INDEX MIDDLE RING
+1D889	SIGNWRITING HAND-ANGLE INDEX MIDDLE RING
+1D88A	SIGNWRITING HAND-HINGE LITTLE
+1D88B	SIGNWRITING HAND-FIST INDEX MIDDLE RING BENT
+1D88C	SIGNWRITING HAND-FIST INDEX MIDDLE RING CONJOINED
+1D88D	SIGNWRITING HAND-HINGE INDEX MIDDLE RING CONJOINED
+1D88E	SIGNWRITING HAND-FIST LITTLE DOWN
+1D88F	SIGNWRITING HAND-FIST LITTLE DOWN RIPPLE STRAIGHT
+1D890	SIGNWRITING HAND-FIST LITTLE DOWN RIPPLE CURVED
+1D891	SIGNWRITING HAND-FIST LITTLE DOWN OTHERS CIRCLED
+1D892	SIGNWRITING HAND-FIST LITTLE UP
+1D893	SIGNWRITING HAND-FIST THUMB UNDER LITTLE UP
+1D894	SIGNWRITING HAND-CIRCLE LITTLE UP
+1D895	SIGNWRITING HAND-OVAL LITTLE UP
+1D896	SIGNWRITING HAND-ANGLE LITTLE UP
+1D897	SIGNWRITING HAND-FIST LITTLE RAISED KNUCKLE
+1D898	SIGNWRITING HAND-FIST LITTLE BENT
+1D899	SIGNWRITING HAND-FIST LITTLE TOUCHES THUMB
+1D89A	SIGNWRITING HAND-FIST LITTLE THUMB
+1D89B	SIGNWRITING HAND-HINGE LITTLE THUMB
+1D89C	SIGNWRITING HAND-FIST LITTLE INDEX THUMB
+1D89D	SIGNWRITING HAND-HINGE LITTLE INDEX THUMB
+1D89E	SIGNWRITING HAND-ANGLE LITTLE INDEX THUMB INDEX THUMB OUT
+1D89F	SIGNWRITING HAND-ANGLE LITTLE INDEX THUMB INDEX THUMB
+1D8A0	SIGNWRITING HAND-FIST LITTLE INDEX
+1D8A1	SIGNWRITING HAND-CIRCLE LITTLE INDEX
+1D8A2	SIGNWRITING HAND-HINGE LITTLE INDEX
+1D8A3	SIGNWRITING HAND-ANGLE LITTLE INDEX
+@		Hand shapes with ring finger
+1D8A4	SIGNWRITING HAND-FIST INDEX MIDDLE LITTLE
+1D8A5	SIGNWRITING HAND-CIRCLE INDEX MIDDLE LITTLE
+1D8A6	SIGNWRITING HAND-HINGE INDEX MIDDLE LITTLE
+1D8A7	SIGNWRITING HAND-HINGE RING
+1D8A8	SIGNWRITING HAND-ANGLE INDEX MIDDLE LITTLE
+1D8A9	SIGNWRITING HAND-FIST INDEX MIDDLE CROSS LITTLE
+1D8AA	SIGNWRITING HAND-CIRCLE INDEX MIDDLE CROSS LITTLE
+1D8AB	SIGNWRITING HAND-FIST RING DOWN
+1D8AC	SIGNWRITING HAND-HINGE RING DOWN INDEX THUMB HOOK MIDDLE
+1D8AD	SIGNWRITING HAND-ANGLE RING DOWN MIDDLE THUMB INDEX CROSS
+1D8AE	SIGNWRITING HAND-FIST RING UP
+1D8AF	SIGNWRITING HAND-FIST RING RAISED KNUCKLE
+1D8B0	SIGNWRITING HAND-FIST RING LITTLE
+1D8B1	SIGNWRITING HAND-CIRCLE RING LITTLE
+1D8B2	SIGNWRITING HAND-OVAL RING LITTLE
+1D8B3	SIGNWRITING HAND-ANGLE RING LITTLE
+1D8B4	SIGNWRITING HAND-FIST RING MIDDLE
+1D8B5	SIGNWRITING HAND-FIST RING MIDDLE CONJOINED
+1D8B6	SIGNWRITING HAND-FIST RING MIDDLE RAISED KNUCKLES
+1D8B7	SIGNWRITING HAND-FIST RING INDEX
+1D8B8	SIGNWRITING HAND-FIST RING THUMB
+1D8B9	SIGNWRITING HAND-HOOK RING THUMB
+@		Hand shapes with middle finger
+1D8BA	SIGNWRITING HAND-FIST INDEX RING LITTLE
+1D8BB	SIGNWRITING HAND-CIRCLE INDEX RING LITTLE
+1D8BC	SIGNWRITING HAND-CURLICUE INDEX RING LITTLE ON
+1D8BD	SIGNWRITING HAND-HOOK INDEX RING LITTLE OUT
+1D8BE	SIGNWRITING HAND-HOOK INDEX RING LITTLE IN
+1D8BF	SIGNWRITING HAND-HOOK INDEX RING LITTLE UNDER
+1D8C0	SIGNWRITING HAND-CUP INDEX RING LITTLE
+1D8C1	SIGNWRITING HAND-HINGE INDEX RING LITTLE
+1D8C2	SIGNWRITING HAND-ANGLE INDEX RING LITTLE OUT
+1D8C3	SIGNWRITING HAND-ANGLE INDEX RING LITTLE
+1D8C4	SIGNWRITING HAND-FIST MIDDLE DOWN
+1D8C5	SIGNWRITING HAND-HINGE MIDDLE
+1D8C6	SIGNWRITING HAND-FIST MIDDLE UP
+1D8C7	SIGNWRITING HAND-CIRCLE MIDDLE UP
+1D8C8	SIGNWRITING HAND-FIST MIDDLE RAISED KNUCKLE
+1D8C9	SIGNWRITING HAND-FIST MIDDLE UP THUMB SIDE
+1D8CA	SIGNWRITING HAND-HOOK MIDDLE THUMB
+1D8CB	SIGNWRITING HAND-FIST MIDDLE THUMB LITTLE
+1D8CC	SIGNWRITING HAND-FIST MIDDLE LITTLE
+@		Hand shapes with index finger and thumb
+1D8CD	SIGNWRITING HAND-FIST MIDDLE RING LITTLE
+1D8CE	SIGNWRITING HAND-CIRCLE MIDDLE RING LITTLE
+1D8CF	SIGNWRITING HAND-CURLICUE MIDDLE RING LITTLE ON
+1D8D0	SIGNWRITING HAND-CUP MIDDLE RING LITTLE
+1D8D1	SIGNWRITING HAND-HINGE MIDDLE RING LITTLE
+1D8D2	SIGNWRITING HAND-ANGLE MIDDLE RING LITTLE OUT
+1D8D3	SIGNWRITING HAND-ANGLE MIDDLE RING LITTLE IN
+1D8D4	SIGNWRITING HAND-ANGLE MIDDLE RING LITTLE
+1D8D5	SIGNWRITING HAND-CIRCLE MIDDLE RING LITTLE BENT
+1D8D6	SIGNWRITING HAND-CLAW MIDDLE RING LITTLE CONJOINED
+1D8D7	SIGNWRITING HAND-CLAW MIDDLE RING LITTLE CONJOINED SIDE
+1D8D8	SIGNWRITING HAND-HOOK MIDDLE RING LITTLE CONJOINED OUT
+1D8D9	SIGNWRITING HAND-HOOK MIDDLE RING LITTLE CONJOINED IN
+1D8DA	SIGNWRITING HAND-HOOK MIDDLE RING LITTLE CONJOINED
+1D8DB	SIGNWRITING HAND-HINGE INDEX HINGED
+1D8DC	SIGNWRITING HAND-FIST INDEX THUMB SIDE
+1D8DD	SIGNWRITING HAND-HINGE INDEX THUMB SIDE
+1D8DE	SIGNWRITING HAND-FIST INDEX THUMB SIDE THUMB DIAGONAL
+1D8DF	SIGNWRITING HAND-FIST INDEX THUMB SIDE THUMB CONJOINED
+1D8E0	SIGNWRITING HAND-FIST INDEX THUMB SIDE THUMB BENT
+1D8E1	SIGNWRITING HAND-FIST INDEX THUMB SIDE INDEX BENT
+1D8E2	SIGNWRITING HAND-FIST INDEX THUMB SIDE BOTH BENT
+1D8E3	SIGNWRITING HAND-FIST INDEX THUMB SIDE INDEX HINGE
+1D8E4	SIGNWRITING HAND-FIST INDEX THUMB FORWARD INDEX STRAIGHT
+1D8E5	SIGNWRITING HAND-FIST INDEX THUMB FORWARD INDEX BENT
+1D8E6	SIGNWRITING HAND-FIST INDEX THUMB HOOK
+1D8E7	SIGNWRITING HAND-FIST INDEX THUMB CURLICUE
+1D8E8	SIGNWRITING HAND-FIST INDEX THUMB CURVE THUMB INSIDE
+1D8E9	SIGNWRITING HAND-CLAW INDEX THUMB CURVE THUMB INSIDE
+1D8EA	SIGNWRITING HAND-FIST INDEX THUMB CURVE THUMB UNDER
+1D8EB	SIGNWRITING HAND-FIST INDEX THUMB CIRCLE
+1D8EC	SIGNWRITING HAND-CUP INDEX THUMB
+1D8ED	SIGNWRITING HAND-CUP INDEX THUMB OPEN
+1D8EE	SIGNWRITING HAND-HINGE INDEX THUMB OPEN
+1D8EF	SIGNWRITING HAND-HINGE INDEX THUMB LARGE
+1D8F0	SIGNWRITING HAND-HINGE INDEX THUMB
+1D8F1	SIGNWRITING HAND-HINGE INDEX THUMB SMALL
+1D8F2	SIGNWRITING HAND-ANGLE INDEX THUMB OUT
+1D8F3	SIGNWRITING HAND-ANGLE INDEX THUMB IN
+1D8F4	SIGNWRITING HAND-ANGLE INDEX THUMB
+@		Hand shapes with thumb
+1D8F5	SIGNWRITING HAND-FIST THUMB
+1D8F6	SIGNWRITING HAND-FIST THUMB HEEL
+1D8F7	SIGNWRITING HAND-FIST THUMB SIDE DIAGONAL
+1D8F8	SIGNWRITING HAND-FIST THUMB SIDE CONJOINED
+1D8F9	SIGNWRITING HAND-FIST THUMB SIDE BENT
+1D8FA	SIGNWRITING HAND-FIST THUMB FORWARD
+1D8FB	SIGNWRITING HAND-FIST THUMB BETWEEN INDEX MIDDLE
+1D8FC	SIGNWRITING HAND-FIST THUMB BETWEEN MIDDLE RING
+1D8FD	SIGNWRITING HAND-FIST THUMB BETWEEN RING LITTLE
+1D8FE	SIGNWRITING HAND-FIST THUMB UNDER TWO FINGERS
+1D8FF	SIGNWRITING HAND-FIST THUMB OVER TWO FINGERS
+1D900	SIGNWRITING HAND-FIST THUMB UNDER THREE FINGERS
+1D901	SIGNWRITING HAND-FIST THUMB UNDER FOUR FINGERS
+1D902	SIGNWRITING HAND-FIST THUMB OVER FOUR RAISED KNUCKLES
+1D903	SIGNWRITING HAND-FIST
+1D904	SIGNWRITING HAND-FIST HEEL
+@		Contact movement indicators
+1D905	SIGNWRITING TOUCH SINGLE
+1D906	SIGNWRITING TOUCH MULTIPLE
+1D907	SIGNWRITING TOUCH BETWEEN
+1D908	SIGNWRITING GRASP SINGLE
+1D909	SIGNWRITING GRASP MULTIPLE
+1D90A	SIGNWRITING GRASP BETWEEN
+1D90B	SIGNWRITING STRIKE SINGLE
+1D90C	SIGNWRITING STRIKE MULTIPLE
+1D90D	SIGNWRITING STRIKE BETWEEN
+1D90E	SIGNWRITING BRUSH SINGLE
+1D90F	SIGNWRITING BRUSH MULTIPLE
+1D910	SIGNWRITING BRUSH BETWEEN
+1D911	SIGNWRITING RUB SINGLE
+1D912	SIGNWRITING RUB MULTIPLE
+1D913	SIGNWRITING RUB BETWEEN
+1D914	SIGNWRITING SURFACE SYMBOLS
+1D915	SIGNWRITING SURFACE BETWEEN
+@		Finger movement indicators
+1D916	SIGNWRITING SQUEEZE LARGE SINGLE
+1D917	SIGNWRITING SQUEEZE SMALL SINGLE
+1D918	SIGNWRITING SQUEEZE LARGE MULTIPLE
+1D919	SIGNWRITING SQUEEZE SMALL MULTIPLE
+1D91A	SIGNWRITING SQUEEZE SEQUENTIAL
+1D91B	SIGNWRITING FLICK LARGE SINGLE
+1D91C	SIGNWRITING FLICK SMALL SINGLE
+1D91D	SIGNWRITING FLICK LARGE MULTIPLE
+1D91E	SIGNWRITING FLICK SMALL MULTIPLE
+1D91F	SIGNWRITING FLICK SEQUENTIAL
+1D920	SIGNWRITING SQUEEZE FLICK ALTERNATING
+1D921	SIGNWRITING MOVEMENT-HINGE UP DOWN LARGE
+1D922	SIGNWRITING MOVEMENT-HINGE UP DOWN SMALL
+1D923	SIGNWRITING MOVEMENT-HINGE UP SEQUENTIAL
+1D924	SIGNWRITING MOVEMENT-HINGE DOWN SEQUENTIAL
+1D925	SIGNWRITING MOVEMENT-HINGE UP DOWN ALTERNATING LARGE
+1D926	SIGNWRITING MOVEMENT-HINGE UP DOWN ALTERNATING SMALL
+1D927	SIGNWRITING MOVEMENT-HINGE SIDE TO SIDE SCISSORS
+1D928	SIGNWRITING MOVEMENT-WALLPLANE FINGER CONTACT
+1D929	SIGNWRITING MOVEMENT-FLOORPLANE FINGER CONTACT
+@		Movement indicators
+1D92A	SIGNWRITING MOVEMENT-WALLPLANE SINGLE STRAIGHT SMALL
+1D92B	SIGNWRITING MOVEMENT-WALLPLANE SINGLE STRAIGHT MEDIUM
+1D92C	SIGNWRITING MOVEMENT-WALLPLANE SINGLE STRAIGHT LARGE
+1D92D	SIGNWRITING MOVEMENT-WALLPLANE SINGLE STRAIGHT LARGEST
+1D92E	SIGNWRITING MOVEMENT-WALLPLANE SINGLE WRIST FLEX
+1D92F	SIGNWRITING MOVEMENT-WALLPLANE DOUBLE STRAIGHT
+1D930	SIGNWRITING MOVEMENT-WALLPLANE DOUBLE WRIST FLEX
+1D931	SIGNWRITING MOVEMENT-WALLPLANE DOUBLE ALTERNATING
+1D932	SIGNWRITING MOVEMENT-WALLPLANE DOUBLE ALTERNATING WRIST FLEX
+1D933	SIGNWRITING MOVEMENT-WALLPLANE CROSS
+1D934	SIGNWRITING MOVEMENT-WALLPLANE TRIPLE STRAIGHT MOVEMENT
+1D935	SIGNWRITING MOVEMENT-WALLPLANE TRIPLE WRIST FLEX
+1D936	SIGNWRITING MOVEMENT-WALLPLANE TRIPLE ALTERNATING
+1D937	SIGNWRITING MOVEMENT-WALLPLANE TRIPLE ALTERNATING WRIST FLEX
+1D938	SIGNWRITING MOVEMENT-WALLPLANE BEND SMALL
+1D939	SIGNWRITING MOVEMENT-WALLPLANE BEND MEDIUM
+1D93A	SIGNWRITING MOVEMENT-WALLPLANE BEND LARGE
+1D93B	SIGNWRITING MOVEMENT-WALLPLANE CORNER SMALL
+1D93C	SIGNWRITING MOVEMENT-WALLPLANE CORNER MEDIUM
+1D93D	SIGNWRITING MOVEMENT-WALLPLANE CORNER LARGE
+1D93E	SIGNWRITING MOVEMENT-WALLPLANE CORNER ROTATION
+1D93F	SIGNWRITING MOVEMENT-WALLPLANE CHECK SMALL
+1D940	SIGNWRITING MOVEMENT-WALLPLANE CHECK MEDIUM
+1D941	SIGNWRITING MOVEMENT-WALLPLANE CHECK LARGE
+1D942	SIGNWRITING MOVEMENT-WALLPLANE BOX SMALL
+1D943	SIGNWRITING MOVEMENT-WALLPLANE BOX MEDIUM
+1D944	SIGNWRITING MOVEMENT-WALLPLANE BOX LARGE
+1D945	SIGNWRITING MOVEMENT-WALLPLANE ZIGZAG SMALL
+1D946	SIGNWRITING MOVEMENT-WALLPLANE ZIGZAG MEDIUM
+1D947	SIGNWRITING MOVEMENT-WALLPLANE ZIGZAG LARGE
+1D948	SIGNWRITING MOVEMENT-WALLPLANE PEAKS SMALL
+1D949	SIGNWRITING MOVEMENT-WALLPLANE PEAKS MEDIUM
+1D94A	SIGNWRITING MOVEMENT-WALLPLANE PEAKS LARGE
+1D94B	SIGNWRITING TRAVEL-WALLPLANE ROTATION-WALLPLANE SINGLE
+1D94C	SIGNWRITING TRAVEL-WALLPLANE ROTATION-WALLPLANE DOUBLE
+1D94D	SIGNWRITING TRAVEL-WALLPLANE ROTATION-WALLPLANE ALTERNATING
+1D94E	SIGNWRITING TRAVEL-WALLPLANE ROTATION-FLOORPLANE SINGLE
+1D94F	SIGNWRITING TRAVEL-WALLPLANE ROTATION-FLOORPLANE DOUBLE
+1D950	SIGNWRITING TRAVEL-WALLPLANE ROTATION-FLOORPLANE ALTERNATING
+1D951	SIGNWRITING TRAVEL-WALLPLANE SHAKING
+1D952	SIGNWRITING TRAVEL-WALLPLANE ARM SPIRAL SINGLE
+1D953	SIGNWRITING TRAVEL-WALLPLANE ARM SPIRAL DOUBLE
+1D954	SIGNWRITING TRAVEL-WALLPLANE ARM SPIRAL TRIPLE
+1D955	SIGNWRITING MOVEMENT-DIAGONAL AWAY SMALL
+1D956	SIGNWRITING MOVEMENT-DIAGONAL AWAY MEDIUM
+1D957	SIGNWRITING MOVEMENT-DIAGONAL AWAY LARGE
+1D958	SIGNWRITING MOVEMENT-DIAGONAL AWAY LARGEST
+1D959	SIGNWRITING MOVEMENT-DIAGONAL TOWARDS SMALL
+1D95A	SIGNWRITING MOVEMENT-DIAGONAL TOWARDS MEDIUM
+1D95B	SIGNWRITING MOVEMENT-DIAGONAL TOWARDS LARGE
+1D95C	SIGNWRITING MOVEMENT-DIAGONAL TOWARDS LARGEST
+1D95D	SIGNWRITING MOVEMENT-DIAGONAL BETWEEN AWAY SMALL
+1D95E	SIGNWRITING MOVEMENT-DIAGONAL BETWEEN AWAY MEDIUM
+1D95F	SIGNWRITING MOVEMENT-DIAGONAL BETWEEN AWAY LARGE
+1D960	SIGNWRITING MOVEMENT-DIAGONAL BETWEEN AWAY LARGEST
+1D961	SIGNWRITING MOVEMENT-DIAGONAL BETWEEN TOWARDS SMALL
+1D962	SIGNWRITING MOVEMENT-DIAGONAL BETWEEN TOWARDS MEDIUM
+1D963	SIGNWRITING MOVEMENT-DIAGONAL BETWEEN TOWARDS LARGE
+1D964	SIGNWRITING MOVEMENT-DIAGONAL BETWEEN TOWARDS LARGEST
+1D965	SIGNWRITING MOVEMENT-FLOORPLANE SINGLE STRAIGHT SMALL
+1D966	SIGNWRITING MOVEMENT-FLOORPLANE SINGLE STRAIGHT MEDIUM
+1D967	SIGNWRITING MOVEMENT-FLOORPLANE SINGLE STRAIGHT LARGE
+1D968	SIGNWRITING MOVEMENT-FLOORPLANE SINGLE STRAIGHT LARGEST
+1D969	SIGNWRITING MOVEMENT-FLOORPLANE SINGLE WRIST FLEX
+1D96A	SIGNWRITING MOVEMENT-FLOORPLANE DOUBLE STRAIGHT
+1D96B	SIGNWRITING MOVEMENT-FLOORPLANE DOUBLE WRIST FLEX
+1D96C	SIGNWRITING MOVEMENT-FLOORPLANE DOUBLE ALTERNATING
+1D96D	SIGNWRITING MOVEMENT-FLOORPLANE DOUBLE ALTERNATING WRIST FLEX
+1D96E	SIGNWRITING MOVEMENT-FLOORPLANE CROSS
+1D96F	SIGNWRITING MOVEMENT-FLOORPLANE TRIPLE STRAIGHT MOVEMENT
+1D970	SIGNWRITING MOVEMENT-FLOORPLANE TRIPLE WRIST FLEX
+1D971	SIGNWRITING MOVEMENT-FLOORPLANE TRIPLE ALTERNATING MOVEMENT
+1D972	SIGNWRITING MOVEMENT-FLOORPLANE TRIPLE ALTERNATING WRIST FLEX
+1D973	SIGNWRITING MOVEMENT-FLOORPLANE BEND
+1D974	SIGNWRITING MOVEMENT-FLOORPLANE CORNER SMALL
+1D975	SIGNWRITING MOVEMENT-FLOORPLANE CORNER MEDIUM
+1D976	SIGNWRITING MOVEMENT-FLOORPLANE CORNER LARGE
+1D977	SIGNWRITING MOVEMENT-FLOORPLANE CHECK
+1D978	SIGNWRITING MOVEMENT-FLOORPLANE BOX SMALL
+1D979	SIGNWRITING MOVEMENT-FLOORPLANE BOX MEDIUM
+1D97A	SIGNWRITING MOVEMENT-FLOORPLANE BOX LARGE
+1D97B	SIGNWRITING MOVEMENT-FLOORPLANE ZIGZAG SMALL
+1D97C	SIGNWRITING MOVEMENT-FLOORPLANE ZIGZAG MEDIUM
+1D97D	SIGNWRITING MOVEMENT-FLOORPLANE ZIGZAG LARGE
+1D97E	SIGNWRITING MOVEMENT-FLOORPLANE PEAKS SMALL
+1D97F	SIGNWRITING MOVEMENT-FLOORPLANE PEAKS MEDIUM
+1D980	SIGNWRITING MOVEMENT-FLOORPLANE PEAKS LARGE
+1D981	SIGNWRITING TRAVEL-FLOORPLANE ROTATION-FLOORPLANE SINGLE
+1D982	SIGNWRITING TRAVEL-FLOORPLANE ROTATION-FLOORPLANE DOUBLE
+1D983	SIGNWRITING TRAVEL-FLOORPLANE ROTATION-FLOORPLANE ALTERNATING
+1D984	SIGNWRITING TRAVEL-FLOORPLANE ROTATION-WALLPLANE SINGLE
+1D985	SIGNWRITING TRAVEL-FLOORPLANE ROTATION-WALLPLANE DOUBLE
+1D986	SIGNWRITING TRAVEL-FLOORPLANE ROTATION-WALLPLANE ALTERNATING
+1D987	SIGNWRITING TRAVEL-FLOORPLANE SHAKING
+1D988	SIGNWRITING MOVEMENT-WALLPLANE CURVE QUARTER SMALL
+1D989	SIGNWRITING MOVEMENT-WALLPLANE CURVE QUARTER MEDIUM
+1D98A	SIGNWRITING MOVEMENT-WALLPLANE CURVE QUARTER LARGE
+1D98B	SIGNWRITING MOVEMENT-WALLPLANE CURVE QUARTER LARGEST
+1D98C	SIGNWRITING MOVEMENT-WALLPLANE CURVE HALF-CIRCLE SMALL
+1D98D	SIGNWRITING MOVEMENT-WALLPLANE CURVE HALF-CIRCLE MEDIUM
+1D98E	SIGNWRITING MOVEMENT-WALLPLANE CURVE HALF-CIRCLE LARGE
+1D98F	SIGNWRITING MOVEMENT-WALLPLANE CURVE HALF-CIRCLE LARGEST
+1D990	SIGNWRITING MOVEMENT-WALLPLANE CURVE THREE-QUARTER CIRCLE SMALL
+1D991	SIGNWRITING MOVEMENT-WALLPLANE CURVE THREE-QUARTER CIRCLE MEDIUM
+1D992	SIGNWRITING MOVEMENT-WALLPLANE HUMP SMALL
+1D993	SIGNWRITING MOVEMENT-WALLPLANE HUMP MEDIUM
+1D994	SIGNWRITING MOVEMENT-WALLPLANE HUMP LARGE
+1D995	SIGNWRITING MOVEMENT-WALLPLANE LOOP SMALL
+1D996	SIGNWRITING MOVEMENT-WALLPLANE LOOP MEDIUM
+1D997	SIGNWRITING MOVEMENT-WALLPLANE LOOP LARGE
+1D998	SIGNWRITING MOVEMENT-WALLPLANE LOOP SMALL DOUBLE
+1D999	SIGNWRITING MOVEMENT-WALLPLANE WAVE CURVE DOUBLE SMALL
+1D99A	SIGNWRITING MOVEMENT-WALLPLANE WAVE CURVE DOUBLE MEDIUM
+1D99B	SIGNWRITING MOVEMENT-WALLPLANE WAVE CURVE DOUBLE LARGE
+1D99C	SIGNWRITING MOVEMENT-WALLPLANE WAVE CURVE TRIPLE SMALL
+1D99D	SIGNWRITING MOVEMENT-WALLPLANE WAVE CURVE TRIPLE MEDIUM
+1D99E	SIGNWRITING MOVEMENT-WALLPLANE WAVE CURVE TRIPLE LARGE
+1D99F	SIGNWRITING MOVEMENT-WALLPLANE CURVE THEN STRAIGHT
+1D9A0	SIGNWRITING MOVEMENT-WALLPLANE CURVED CROSS SMALL
+1D9A1	SIGNWRITING MOVEMENT-WALLPLANE CURVED CROSS MEDIUM
+1D9A2	SIGNWRITING ROTATION-WALLPLANE SINGLE
+1D9A3	SIGNWRITING ROTATION-WALLPLANE DOUBLE
+1D9A4	SIGNWRITING ROTATION-WALLPLANE ALTERNATE
+1D9A5	SIGNWRITING MOVEMENT-WALLPLANE SHAKING
+1D9A6	SIGNWRITING MOVEMENT-WALLPLANE CURVE HITTING FRONT WALL
+1D9A7	SIGNWRITING MOVEMENT-WALLPLANE HUMP HITTING FRONT WALL
+1D9A8	SIGNWRITING MOVEMENT-WALLPLANE LOOP HITTING FRONT WALL
+1D9A9	SIGNWRITING MOVEMENT-WALLPLANE WAVE HITTING FRONT WALL
+1D9AA	SIGNWRITING ROTATION-WALLPLANE SINGLE HITTING FRONT WALL
+1D9AB	SIGNWRITING ROTATION-WALLPLANE DOUBLE HITTING FRONT WALL
+1D9AC	SIGNWRITING ROTATION-WALLPLANE ALTERNATING HITTING FRONT WALL
+1D9AD	SIGNWRITING MOVEMENT-WALLPLANE CURVE HITTING CHEST
+1D9AE	SIGNWRITING MOVEMENT-WALLPLANE HUMP HITTING CHEST
+1D9AF	SIGNWRITING MOVEMENT-WALLPLANE LOOP HITTING CHEST
+1D9B0	SIGNWRITING MOVEMENT-WALLPLANE WAVE HITTING CHEST
+1D9B1	SIGNWRITING ROTATION-WALLPLANE SINGLE HITTING CHEST
+1D9B2	SIGNWRITING ROTATION-WALLPLANE DOUBLE HITTING CHEST
+1D9B3	SIGNWRITING ROTATION-WALLPLANE ALTERNATING HITTING CHEST
+1D9B4	SIGNWRITING MOVEMENT-WALLPLANE WAVE DIAGONAL PATH SMALL
+1D9B5	SIGNWRITING MOVEMENT-WALLPLANE WAVE DIAGONAL PATH MEDIUM
+1D9B6	SIGNWRITING MOVEMENT-WALLPLANE WAVE DIAGONAL PATH LARGE
+1D9B7	SIGNWRITING MOVEMENT-FLOORPLANE CURVE HITTING CEILING SMALL
+1D9B8	SIGNWRITING MOVEMENT-FLOORPLANE CURVE HITTING CEILING LARGE
+1D9B9	SIGNWRITING MOVEMENT-FLOORPLANE HUMP HITTING CEILING SMALL DOUBLE
+1D9BA	SIGNWRITING MOVEMENT-FLOORPLANE HUMP HITTING CEILING LARGE DOUBLE
+1D9BB	SIGNWRITING MOVEMENT-FLOORPLANE HUMP HITTING CEILING SMALL TRIPLE
+1D9BC	SIGNWRITING MOVEMENT-FLOORPLANE HUMP HITTING CEILING LARGE TRIPLE
+1D9BD	SIGNWRITING MOVEMENT-FLOORPLANE LOOP HITTING CEILING SMALL SINGLE
+1D9BE	SIGNWRITING MOVEMENT-FLOORPLANE LOOP HITTING CEILING LARGE SINGLE
+1D9BF	SIGNWRITING MOVEMENT-FLOORPLANE LOOP HITTING CEILING SMALL DOUBLE
+1D9C0	SIGNWRITING MOVEMENT-FLOORPLANE LOOP HITTING CEILING LARGE DOUBLE
+1D9C1	SIGNWRITING MOVEMENT-FLOORPLANE WAVE HITTING CEILING SMALL
+1D9C2	SIGNWRITING MOVEMENT-FLOORPLANE WAVE HITTING CEILING LARGE
+1D9C3	SIGNWRITING ROTATION-FLOORPLANE SINGLE HITTING CEILING
+1D9C4	SIGNWRITING ROTATION-FLOORPLANE DOUBLE HITTING CEILING
+1D9C5	SIGNWRITING ROTATION-FLOORPLANE ALTERNATING HITTING CEILING
+1D9C6	SIGNWRITING MOVEMENT-FLOORPLANE CURVE HITTING FLOOR SMALL
+1D9C7	SIGNWRITING MOVEMENT-FLOORPLANE CURVE HITTING FLOOR LARGE
+1D9C8	SIGNWRITING MOVEMENT-FLOORPLANE HUMP HITTING FLOOR SMALL DOUBLE
+1D9C9	SIGNWRITING MOVEMENT-FLOORPLANE HUMP HITTING FLOOR LARGE DOUBLE
+1D9CA	SIGNWRITING MOVEMENT-FLOORPLANE HUMP HITTING FLOOR TRIPLE SMALL TRIPLE
+1D9CB	SIGNWRITING MOVEMENT-FLOORPLANE HUMP HITTING FLOOR TRIPLE LARGE TRIPLE
+1D9CC	SIGNWRITING MOVEMENT-FLOORPLANE LOOP HITTING FLOOR SMALL SINGLE
+1D9CD	SIGNWRITING MOVEMENT-FLOORPLANE LOOP HITTING FLOOR LARGE SINGLE
+1D9CE	SIGNWRITING MOVEMENT-FLOORPLANE LOOP HITTING FLOOR SMALL DOUBLE
+1D9CF	SIGNWRITING MOVEMENT-FLOORPLANE LOOP HITTING FLOOR LARGE DOUBLE
+1D9D0	SIGNWRITING MOVEMENT-FLOORPLANE WAVE HITTING FLOOR SMALL
+1D9D1	SIGNWRITING MOVEMENT-FLOORPLANE WAVE HITTING FLOOR LARGE
+1D9D2	SIGNWRITING ROTATION-FLOORPLANE SINGLE HITTING FLOOR
+1D9D3	SIGNWRITING ROTATION-FLOORPLANE DOUBLE HITTING FLOOR
+1D9D4	SIGNWRITING ROTATION-FLOORPLANE ALTERNATING HITTING FLOOR
+1D9D5	SIGNWRITING MOVEMENT-FLOORPLANE CURVE SMALL
+1D9D6	SIGNWRITING MOVEMENT-FLOORPLANE CURVE MEDIUM
+1D9D7	SIGNWRITING MOVEMENT-FLOORPLANE CURVE LARGE
+1D9D8	SIGNWRITING MOVEMENT-FLOORPLANE CURVE LARGEST
+1D9D9	SIGNWRITING MOVEMENT-FLOORPLANE CURVE COMBINED
+1D9DA	SIGNWRITING MOVEMENT-FLOORPLANE HUMP SMALL
+1D9DB	SIGNWRITING MOVEMENT-FLOORPLANE LOOP SMALL
+1D9DC	SIGNWRITING MOVEMENT-FLOORPLANE WAVE SNAKE
+1D9DD	SIGNWRITING MOVEMENT-FLOORPLANE WAVE SMALL
+1D9DE	SIGNWRITING MOVEMENT-FLOORPLANE WAVE LARGE
+1D9DF	SIGNWRITING ROTATION-FLOORPLANE SINGLE
+1D9E0	SIGNWRITING ROTATION-FLOORPLANE DOUBLE
+1D9E1	SIGNWRITING ROTATION-FLOORPLANE ALTERNATING
+1D9E2	SIGNWRITING MOVEMENT-FLOORPLANE SHAKING PARALLEL
+1D9E3	SIGNWRITING MOVEMENT-WALLPLANE ARM CIRCLE SMALL SINGLE
+1D9E4	SIGNWRITING MOVEMENT-WALLPLANE ARM CIRCLE MEDIUM SINGLE
+1D9E5	SIGNWRITING MOVEMENT-WALLPLANE ARM CIRCLE SMALL DOUBLE
+1D9E6	SIGNWRITING MOVEMENT-WALLPLANE ARM CIRCLE MEDIUM DOUBLE
+1D9E7	SIGNWRITING MOVEMENT-FLOORPLANE ARM CIRCLE HITTING WALL SMALL SINGLE
+1D9E8	SIGNWRITING MOVEMENT-FLOORPLANE ARM CIRCLE HITTING WALL MEDIUM SINGLE
+1D9E9	SIGNWRITING MOVEMENT-FLOORPLANE ARM CIRCLE HITTING WALL LARGE SINGLE
+1D9EA	SIGNWRITING MOVEMENT-FLOORPLANE ARM CIRCLE HITTING WALL SMALL DOUBLE
+1D9EB	SIGNWRITING MOVEMENT-FLOORPLANE ARM CIRCLE HITTING WALL MEDIUM DOUBLE
+1D9EC	SIGNWRITING MOVEMENT-FLOORPLANE ARM CIRCLE HITTING WALL LARGE DOUBLE
+1D9ED	SIGNWRITING MOVEMENT-WALLPLANE WRIST CIRCLE FRONT SINGLE
+1D9EE	SIGNWRITING MOVEMENT-WALLPLANE WRIST CIRCLE FRONT DOUBLE
+1D9EF	SIGNWRITING MOVEMENT-FLOORPLANE WRIST CIRCLE HITTING WALL SINGLE
+1D9F0	SIGNWRITING MOVEMENT-FLOORPLANE WRIST CIRCLE HITTING WALL DOUBLE
+1D9F1	SIGNWRITING MOVEMENT-WALLPLANE FINGER CIRCLES SINGLE
+1D9F2	SIGNWRITING MOVEMENT-WALLPLANE FINGER CIRCLES DOUBLE
+1D9F3	SIGNWRITING MOVEMENT-FLOORPLANE FINGER CIRCLES HITTING WALL SINGLE
+1D9F4	SIGNWRITING MOVEMENT-FLOORPLANE FINGER CIRCLES HITTING WALL DOUBLE
+@		Dynamics indicators
+1D9F5	SIGNWRITING DYNAMIC ARROWHEAD SMALL
+1D9F6	SIGNWRITING DYNAMIC ARROWHEAD LARGE
+1D9F7	SIGNWRITING DYNAMIC FAST
+1D9F8	SIGNWRITING DYNAMIC SLOW
+1D9F9	SIGNWRITING DYNAMIC TENSE
+1D9FA	SIGNWRITING DYNAMIC RELAXED
+1D9FB	SIGNWRITING DYNAMIC SIMULTANEOUS
+1D9FC	SIGNWRITING DYNAMIC SIMULTANEOUS ALTERNATING
+1D9FD	SIGNWRITING DYNAMIC EVERY OTHER TIME
+1D9FE	SIGNWRITING DYNAMIC GRADUAL
+@		Head shapes
+1D9FF	SIGNWRITING HEAD
+1DA00	SIGNWRITING HEAD RIM
+1DA01	SIGNWRITING HEAD MOVEMENT-WALLPLANE STRAIGHT
+1DA02	SIGNWRITING HEAD MOVEMENT-WALLPLANE TILT
+1DA03	SIGNWRITING HEAD MOVEMENT-FLOORPLANE STRAIGHT
+1DA04	SIGNWRITING HEAD MOVEMENT-WALLPLANE CURVE
+1DA05	SIGNWRITING HEAD MOVEMENT-FLOORPLANE CURVE
+1DA06	SIGNWRITING HEAD MOVEMENT CIRCLE
+1DA07	SIGNWRITING FACE DIRECTION POSITION NOSE FORWARD TILTING
+1DA08	SIGNWRITING FACE DIRECTION POSITION NOSE UP OR DOWN
+1DA09	SIGNWRITING FACE DIRECTION POSITION NOSE UP OR DOWN TILTING
+1DA0A	SIGNWRITING EYEBROWS STRAIGHT UP
+1DA0B	SIGNWRITING EYEBROWS STRAIGHT NEUTRAL
+1DA0C	SIGNWRITING EYEBROWS STRAIGHT DOWN
+1DA0D	SIGNWRITING DREAMY EYEBROWS NEUTRAL DOWN
+1DA0E	SIGNWRITING DREAMY EYEBROWS DOWN NEUTRAL
+1DA0F	SIGNWRITING DREAMY EYEBROWS UP NEUTRAL
+1DA10	SIGNWRITING DREAMY EYEBROWS NEUTRAL UP
+1DA11	SIGNWRITING FOREHEAD NEUTRAL
+1DA12	SIGNWRITING FOREHEAD CONTACT
+1DA13	SIGNWRITING FOREHEAD WRINKLED
+1DA14	SIGNWRITING EYES OPEN
+1DA15	SIGNWRITING EYES SQUEEZED
+1DA16	SIGNWRITING EYES CLOSED
+1DA17	SIGNWRITING EYE BLINK SINGLE
+1DA18	SIGNWRITING EYE BLINK MULTIPLE
+1DA19	SIGNWRITING EYES HALF OPEN
+1DA1A	SIGNWRITING EYES WIDE OPEN
+1DA1B	SIGNWRITING EYES HALF CLOSED
+1DA1C	SIGNWRITING EYES WIDENING MOVEMENT
+1DA1D	SIGNWRITING EYE WINK
+	* squeezed eye blink
+1DA1E	SIGNWRITING EYELASHES UP
+1DA1F	SIGNWRITING EYELASHES DOWN
+1DA20	SIGNWRITING EYELASHES FLUTTERING
+1DA21	SIGNWRITING EYEGAZE-WALLPLANE STRAIGHT
+1DA22	SIGNWRITING EYEGAZE-WALLPLANE STRAIGHT DOUBLE
+1DA23	SIGNWRITING EYEGAZE-WALLPLANE STRAIGHT ALTERNATING
+1DA24	SIGNWRITING EYEGAZE-FLOORPLANE STRAIGHT
+1DA25	SIGNWRITING EYEGAZE-FLOORPLANE STRAIGHT DOUBLE
+1DA26	SIGNWRITING EYEGAZE-FLOORPLANE STRAIGHT ALTERNATING
+1DA27	SIGNWRITING EYEGAZE-WALLPLANE CURVED
+1DA28	SIGNWRITING EYEGAZE-FLOORPLANE CURVED
+1DA29	SIGNWRITING EYEGAZE-WALLPLANE CIRCLING
+1DA2A	SIGNWRITING CHEEKS PUFFED
+1DA2B	SIGNWRITING CHEEKS NEUTRAL
+1DA2C	SIGNWRITING CHEEKS SUCKED
+1DA2D	SIGNWRITING TENSE CHEEKS HIGH
+1DA2E	SIGNWRITING TENSE CHEEKS MIDDLE
+1DA2F	SIGNWRITING TENSE CHEEKS LOW
+1DA30	SIGNWRITING EARS
+1DA31	SIGNWRITING NOSE NEUTRAL
+1DA32	SIGNWRITING NOSE CONTACT
+1DA33	SIGNWRITING NOSE WRINKLES
+1DA34	SIGNWRITING NOSE WIGGLES
+1DA35	SIGNWRITING AIR BLOWING OUT
+1DA36	SIGNWRITING AIR SUCKING IN
+1DA37	SIGNWRITING AIR BLOW SMALL ROTATIONS
+1DA38	SIGNWRITING AIR SUCK SMALL ROTATIONS
+1DA39	SIGNWRITING BREATH INHALE
+1DA3A	SIGNWRITING BREATH EXHALE
+1DA3B	SIGNWRITING MOUTH CLOSED NEUTRAL
+1DA3C	SIGNWRITING MOUTH CLOSED FORWARD
+1DA3D	SIGNWRITING MOUTH CLOSED CONTACT
+1DA3E	SIGNWRITING MOUTH SMILE
+1DA3F	SIGNWRITING MOUTH SMILE WRINKLED
+1DA40	SIGNWRITING MOUTH SMILE OPEN
+1DA41	SIGNWRITING MOUTH FROWN
+1DA42	SIGNWRITING MOUTH FROWN WRINKLED
+1DA43	SIGNWRITING MOUTH FROWN OPEN
+1DA44	SIGNWRITING MOUTH OPEN CIRCLE
+1DA45	SIGNWRITING MOUTH OPEN FORWARD
+1DA46	SIGNWRITING MOUTH OPEN WRINKLED
+1DA47	SIGNWRITING MOUTH OPEN OVAL
+1DA48	SIGNWRITING MOUTH OPEN OVAL WRINKLED
+1DA49	SIGNWRITING MOUTH OPEN OVAL YAWN
+1DA4A	SIGNWRITING MOUTH OPEN RECTANGLE
+1DA4B	SIGNWRITING MOUTH OPEN RECTANGLE WRINKLED
+1DA4C	SIGNWRITING MOUTH OPEN RECTANGLE YAWN
+1DA4D	SIGNWRITING MOUTH KISS
+1DA4E	SIGNWRITING MOUTH KISS FORWARD
+1DA4F	SIGNWRITING MOUTH KISS WRINKLED
+1DA50	SIGNWRITING MOUTH TENSE
+1DA51	SIGNWRITING MOUTH TENSE FORWARD
+1DA52	SIGNWRITING MOUTH TENSE SUCKED
+1DA53	SIGNWRITING LIPS PRESSED TOGETHER
+1DA54	SIGNWRITING LIP LOWER OVER UPPER
+1DA55	SIGNWRITING LIP UPPER OVER LOWER
+1DA56	SIGNWRITING MOUTH CORNERS
+1DA57	SIGNWRITING MOUTH WRINKLES SINGLE
+1DA58	SIGNWRITING MOUTH WRINKLES DOUBLE
+1DA59	SIGNWRITING TONGUE STICKING OUT FAR
+1DA5A	SIGNWRITING TONGUE LICKING LIPS
+1DA5B	SIGNWRITING TONGUE TIP BETWEEN LIPS
+1DA5C	SIGNWRITING TONGUE TIP TOUCHING INSIDE MOUTH
+1DA5D	SIGNWRITING TONGUE INSIDE MOUTH RELAXED
+1DA5E	SIGNWRITING TONGUE MOVES AGAINST CHEEK
+1DA5F	SIGNWRITING TONGUE CENTRE STICKING OUT
+1DA60	SIGNWRITING TONGUE CENTRE INSIDE MOUTH
+1DA61	SIGNWRITING TEETH
+1DA62	SIGNWRITING TEETH MOVEMENT
+1DA63	SIGNWRITING TEETH ON TONGUE
+1DA64	SIGNWRITING TEETH ON TONGUE MOVEMENT
+1DA65	SIGNWRITING TEETH ON LIPS
+1DA66	SIGNWRITING TEETH ON LIPS MOVEMENT
+1DA67	SIGNWRITING TEETH BITE LIPS
+1DA68	SIGNWRITING MOVEMENT-WALLPLANE JAW
+1DA69	SIGNWRITING MOVEMENT-FLOORPLANE JAW
+1DA6A	SIGNWRITING NECK
+1DA6B	SIGNWRITING HAIR
+1DA6C	SIGNWRITING EXCITEMENT
+@		Body shapes
+1DA6D	SIGNWRITING SHOULDER HIP SPINE
+1DA6E	SIGNWRITING SHOULDER HIP POSITIONS
+1DA6F	SIGNWRITING WALLPLANE SHOULDER HIP MOVE
+1DA70	SIGNWRITING FLOORPLANE SHOULDER HIP MOVE
+1DA71	SIGNWRITING SHOULDER TILTING FROM WAIST
+1DA72	SIGNWRITING TORSO-WALLPLANE STRAIGHT STRETCH
+1DA73	SIGNWRITING TORSO-WALLPLANE CURVED BEND
+1DA74	SIGNWRITING TORSO-FLOORPLANE TWISTING
+1DA75	SIGNWRITING UPPER BODY TILTING FROM HIP JOINTS
+1DA76	SIGNWRITING LIMB COMBINATION
+1DA77	SIGNWRITING LIMB LENGTH-1
+1DA78	SIGNWRITING LIMB LENGTH-2
+1DA79	SIGNWRITING LIMB LENGTH-3
+1DA7A	SIGNWRITING LIMB LENGTH-4
+1DA7B	SIGNWRITING LIMB LENGTH-5
+1DA7C	SIGNWRITING LIMB LENGTH-6
+1DA7D	SIGNWRITING LIMB LENGTH-7
+1DA7E	SIGNWRITING FINGER
+@		Location bases
+1DA7F	SIGNWRITING LOCATION-WALLPLANE SPACE
+1DA80	SIGNWRITING LOCATION-FLOORPLANE SPACE
+1DA81	SIGNWRITING LOCATION HEIGHT
+1DA82	SIGNWRITING LOCATION WIDTH
+1DA83	SIGNWRITING LOCATION DEPTH
+1DA84	SIGNWRITING LOCATION HEAD NECK
+1DA85	SIGNWRITING LOCATION TORSO
+1DA86	SIGNWRITING LOCATION LIMBS DIGITS
+@		Punctuation
+1DA87	SIGNWRITING COMMA
+1DA88	SIGNWRITING FULL STOP
+1DA89	SIGNWRITING SEMICOLON
+1DA8A	SIGNWRITING COLON
+1DA8B	SIGNWRITING PARENTHESIS
+	* is a closing parenthesis when used with 1DAA4 signwriting rotation modifier-5
+@		Fill modifiers
+1DA9B	SIGNWRITING FILL MODIFIER-2
+1DA9C	SIGNWRITING FILL MODIFIER-3
+1DA9D	SIGNWRITING FILL MODIFIER-4
+1DA9E	SIGNWRITING FILL MODIFIER-5
+1DA9F	SIGNWRITING FILL MODIFIER-6
+@		Rotation modifiers
+1DAA1	SIGNWRITING ROTATION MODIFIER-2
+1DAA2	SIGNWRITING ROTATION MODIFIER-3
+1DAA3	SIGNWRITING ROTATION MODIFIER-4
+1DAA4	SIGNWRITING ROTATION MODIFIER-5
+1DAA5	SIGNWRITING ROTATION MODIFIER-6
+1DAA6	SIGNWRITING ROTATION MODIFIER-7
+1DAA7	SIGNWRITING ROTATION MODIFIER-8
+1DAA8	SIGNWRITING ROTATION MODIFIER-9
+1DAA9	SIGNWRITING ROTATION MODIFIER-10
+1DAAA	SIGNWRITING ROTATION MODIFIER-11
+1DAAB	SIGNWRITING ROTATION MODIFIER-12
+1DAAC	SIGNWRITING ROTATION MODIFIER-13
+1DAAD	SIGNWRITING ROTATION MODIFIER-14
+1DAAE	SIGNWRITING ROTATION MODIFIER-15
+1DAAF	SIGNWRITING ROTATION MODIFIER-16
 @@	1E800	Mende Kikakui	1E8DF
 @		Syllables in k-
 1E800	MENDE KIKAKUI SYLLABLE M001 KI
@@ -39450,7 +42106,7 @@ FFFF	<not a character>
 1F02A	MAHJONG TILE JOKER
 	= baida
 1F02B	MAHJONG TILE BACK
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	1F030	Domino Tiles	1F09F
 @		Horizontal tiles
 1F030	DOMINO TILE HORIZONTAL BACK
@@ -39934,8 +42590,12 @@ FFFF	<not a character>
 @+		The square edges may be slightly rounded.
 1F170	NEGATIVE SQUARED LATIN CAPITAL LETTER A
 	= blood type A
+	~ 1F170 FE0E text style
+	~ 1F170 FE0F emoji style
 1F171	NEGATIVE SQUARED LATIN CAPITAL LETTER B
 	= blood type B
+	~ 1F171 FE0E text style
+	~ 1F171 FE0F emoji style
 1F172	NEGATIVE SQUARED LATIN CAPITAL LETTER C
 	= centre, city centre
 1F173	NEGATIVE SQUARED LATIN CAPITAL LETTER D
@@ -39957,6 +42617,8 @@ FFFF	<not a character>
 1F17D	NEGATIVE SQUARED LATIN CAPITAL LETTER N
 1F17E	NEGATIVE SQUARED LATIN CAPITAL LETTER O
 	= blood type O
+	~ 1F17E FE0E text style
+	~ 1F17E FE0F emoji style
 1F17F	NEGATIVE SQUARED LATIN CAPITAL LETTER P
 	= parking space empty-full (ARIB STD B24)
 	~ 1F17F FE0E text style
@@ -40005,7 +42667,7 @@ FFFF	<not a character>
 1F19A	SQUARED VS
 	= versus
 @		Regional indicator symbols
-@+	These characters can be used in pairs to represent regional codes. In some emoji implementations, certain pairs may be recognized and displayed by alternate means; for instance, an implementation might recognize F + R and display this combination with a symbol representing the flag of France.
+@+		These characters can be used in pairs to represent regional codes. In some emoji implementations, certain pairs may be recognized and displayed by alternate means; for instance, an implementation might recognize F + R and display this combination with a symbol representing the flag of France.
 1F1E6	REGIONAL INDICATOR SYMBOL LETTER A
 1F1E7	REGIONAL INDICATOR SYMBOL LETTER B
 1F1E8	REGIONAL INDICATOR SYMBOL LETTER C
@@ -40032,7 +42694,7 @@ FFFF	<not a character>
 1F1FD	REGIONAL INDICATOR SYMBOL LETTER X
 1F1FE	REGIONAL INDICATOR SYMBOL LETTER Y
 1F1FF	REGIONAL INDICATOR SYMBOL LETTER Z
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	1F200	Enclosed Ideographic Supplement	1F2FF
 @		Squared hiragana from ARIB STD B24
 1F200	SQUARE HIRAGANA HOKA
@@ -40045,6 +42707,8 @@ FFFF	<not a character>
 1F202	SQUARED KATAKANA SA
 	= service sign
 	x (circled katakana sa - 32DA)
+	~ 1F202 FE0E text style
+	~ 1F202 FE0F emoji style
 	# <square> 30B5
 @		Squared ideographs and kana from ARIB STD B24
 1F210	SQUARED CJK UNIFIED IDEOGRAPH-624B
@@ -40176,6 +42840,8 @@ FFFF	<not a character>
 1F237	SQUARED CJK UNIFIED IDEOGRAPH-6708
 	= monthly sign
 	x (circled ideograph moon - 328A)
+	~ 1F237 FE0E text style
+	~ 1F237 FE0F emoji style
 	# <square> 6708
 1F238	SQUARED CJK UNIFIED IDEOGRAPH-7533
 	= application sign
@@ -40221,7 +42887,7 @@ FFFF	<not a character>
 1F251	CIRCLED IDEOGRAPH ACCEPT
 	= accept sign
 	# <circle> 53EF
-@~	!{FE0E FE0F} Standardized Variation Sequences
+@~	!
 @@	1F300	Miscellaneous Symbols and Pictographs	1F5FF
 @		Weather, landscape, and sky symbols
 1F300	CYCLONE
@@ -40301,6 +42967,10 @@ FFFF	<not a character>
 	x (foggy - 1F301)
 1F32C	WIND BLOWING FACE
 	= wind
+@		Food symbols
+1F32D	HOT DOG
+1F32E	TACO
+1F32F	BURRITO
 @		Plant symbols
 1F330	CHESTNUT
 1F331	SEEDLING
@@ -40411,6 +43081,9 @@ FFFF	<not a character>
 1F37D	FORK AND KNIFE WITH PLATE
 	= dining
 	x (fork and knife - 1F374)
+@		Beverage and food symbols
+1F37E	BOTTLE WITH POPPING CORK
+1F37F	POPCORN
 @		Celebration symbols
 1F380	RIBBON
 1F381	WRAPPED PRESENT
@@ -40518,6 +43191,7 @@ FFFF	<not a character>
 	x (bullseye - 25CE)
 1F3B0	SLOT MACHINE
 1F3B1	BILLIARDS
+	* sometimes depicted as just an 8-ball
 1F3B2	GAME DIE
 1F3B3	BOWLING
 1F3B4	FLOWER PLAYING CARDS
@@ -40565,8 +43239,14 @@ FFFF	<not a character>
 1F3CC	GOLFER
 1F3CD	RACING MOTORCYCLE
 	= motorcycle
+	* may be depicted as an ordinary motorcycle, especially in emoji presentation
 1F3CE	RACING CAR
 	= race car
+1F3CF	CRICKET BAT AND BALL
+1F3D0	VOLLEYBALL
+1F3D1	FIELD HOCKEY STICK AND BALL
+1F3D2	ICE HOCKEY STICK AND PUCK
+1F3D3	TABLE TENNIS PADDLE AND BALL
 @		Buiding and map symbols
 1F3D4	SNOW CAPPED MOUNTAIN
 	x (mountain - 26F0)
@@ -40595,6 +43275,7 @@ FFFF	<not a character>
 	= island
 	x (palm tree - 1F334)
 1F3DE	NATIONAL PARK
+	* by semantic extension has come to connote saving trees, and hence is also used as a symbol meaning "do not print this (email, document)"
 	x (evergreen tree - 1F332)
 1F3DF	STADIUM
 1F3E0	HOUSE BUILDING
@@ -40644,6 +43325,21 @@ FFFF	<not a character>
 1F3F7	LABEL
 	= price, price tag
 	x (bookmark - 1F516)
+@		Sport symbols
+1F3F8	BADMINTON RACQUET AND SHUTTLECOCK
+1F3F9	BOW AND ARROW
+	* used for Sagittarius
+	x (sagittarius - 2650)
+@		Miscellaneous symbol
+1F3FA	AMPHORA
+	* used for Aquarius
+	x (aquarius - 2652)
+@		Emoji modifiers
+1F3FB	EMOJI MODIFIER FITZPATRICK TYPE-1-2
+1F3FC	EMOJI MODIFIER FITZPATRICK TYPE-3
+1F3FD	EMOJI MODIFIER FITZPATRICK TYPE-4
+1F3FE	EMOJI MODIFIER FITZPATRICK TYPE-5
+1F3FF	EMOJI MODIFIER FITZPATRICK TYPE-6
 @		Animal symbols
 1F400	RAT
 	* first of the signs of the Asian zodiac
@@ -40822,14 +43518,18 @@ FFFF	<not a character>
 1F46D	TWO WOMEN HOLDING HANDS
 1F46E	POLICE OFFICER
 1F46F	WOMAN WITH BUNNY EARS
+	* most popularly depicted as two women dancing
 1F470	BRIDE WITH VEIL
 1F471	PERSON WITH BLOND HAIR
 1F472	MAN WITH GUA PI MAO
 1F473	MAN WITH TURBAN
+	* may be shown with or without a beard
 1F474	OLDER MAN
 1F475	OLDER WOMAN
 1F476	BABY
 1F477	CONSTRUCTION WORKER
+	* the helmet may show a green cross, used as a safety reminder in Japan
+	x (helmet with white cross - 26D1)
 @		Fairy tale symbols
 1F478	PRINCESS
 1F479	JAPANESE OGRE
@@ -40838,12 +43538,16 @@ FFFF	<not a character>
 1F47C	BABY ANGEL
 1F47D	EXTRATERRESTRIAL ALIEN
 1F47E	ALIEN MONSTER
+	x (robot face - 1F916)
 1F47F	IMP
+	* commonly depicted as a frowning/angry version of 1F608 smiling face with horns
 1F480	SKULL
 @		Role symbols
 1F481	INFORMATION DESK PERSON
+	* often used to indicate "sassy" or "carefree"
 1F482	GUARDSMAN
 1F483	DANCER
+	* also used for "let's party"
 @		Personal care symbols
 1F484	LIPSTICK
 1F485	NAIL POLISH
@@ -40909,6 +43613,7 @@ FFFF	<not a character>
 	= running dash, briffits
 1F4A9	PILE OF POO
 	= dog dirt
+	* may be depicted with a friendly face
 1F4AA	FLEXED BICEPS
 	= strong, muscled
 1F4AB	DIZZY SYMBOL
@@ -40938,6 +43643,7 @@ FFFF	<not a character>
 1F4B9	CHART WITH UPWARDS TREND AND YEN SIGN
 @		Office symbols
 1F4BA	SEAT
+	* intended to denote a reserved or ticketed seat, as for an airplane, train, or theater
 1F4BB	PERSONAL COMPUTER
 	x (old personal computer - 1F5B3)
 1F4BC	BRIEFCASE
@@ -40993,6 +43699,7 @@ FFFF	<not a character>
 @		Communication symbols
 1F4DD	MEMO
 1F4DE	TELEPHONE RECEIVER
+	* commonly oriented rightwards, so that a face emoticon can be positioned to the right
 	x (left hand telephone receiver - 1F57B)
 	x (right hand telephone receiver - 1F57D)
 1F4DF	PAGER
@@ -41011,7 +43718,7 @@ FFFF	<not a character>
 1F4E6	PACKAGE
 	x (wrapped present - 1F381)
 1F4E7	E-MAIL SYMBOL
-	* glyph may show an @-sign instead of an E
+	* glyph may show an E instead of an @-sign
 	x (envelope with lightning - 1F584)
 1F4E8	INCOMING ENVELOPE
 	x (envelope - 2709)
@@ -41052,6 +43759,8 @@ FFFF	<not a character>
 	x (cinema - 1F3A6)
 1F4FE	PORTABLE STEREO
 	= stereo
+@		Religious symbol
+1F4FF	PRAYER BEADS
 @		User interface symbols
 1F500	TWISTED RIGHTWARDS ARROWS
 	= shuffle
@@ -41101,6 +43810,7 @@ FFFF	<not a character>
 	x (ringing bell - 1F56D)
 1F515	BELL WITH CANCELLATION STROKE
 1F516	BOOKMARK
+	* indicates a bookmark, not a price tag
 	x (label - 1F3F7)
 1F517	LINK SYMBOL
 1F518	RADIO BUTTON
@@ -41199,6 +43909,14 @@ FFFF	<not a character>
 	x (devanagari om - 0950)
 1F54A	DOVE OF PEACE
 	= peace
+1F54B	KAABA
+1F54C	MOSQUE
+1F54D	SYNAGOGUE
+1F54E	MENORAH WITH NINE BRANCHES
+	= hanukiah
+@		Miscellaneous symbol
+1F54F	BOWL OF HYGIEIA
+	x (staff of aesculapius - 2695)
 @		Clock face symbols
 1F550	CLOCK FACE ONE OCLOCK
 	x (watch - 231A)
@@ -41530,7 +44248,7 @@ FFFF	<not a character>
 1F5FF	MOYAI
 	* Japanese stone statue like Moai on Easter Island
 @@	1F600	Emoticons	1F64F
-@+	The emoticons have been organized by mouth shape to make it easier to locate the different characters in the code chart.
+@+		The emoticons have been organized by mouth shape to make it easier to locate the different characters in the code chart.
 @		Faces
 1F600	GRINNING FACE
 1F601	GRINNING FACE WITH SMILING EYES
@@ -41542,10 +44260,12 @@ FFFF	<not a character>
 1F606	SMILING FACE WITH OPEN MOUTH AND TIGHTLY-CLOSED EYES
 1F607	SMILING FACE WITH HALO
 1F608	SMILING FACE WITH HORNS
+	* commonly depicted as a (sinister) smiling version of 1F47F imp
 1F609	WINKING FACE
 1F60A	SMILING FACE WITH SMILING EYES
 1F60B	FACE SAVOURING DELICIOUS FOOD
 1F60C	RELIEVED FACE
+	* indicates relief, not sleeping
 1F60D	SMILING FACE WITH HEART-SHAPED EYES
 1F60E	SMILING FACE WITH SUNGLASSES
 1F60F	SMIRKING FACE
@@ -41571,17 +44291,22 @@ FFFF	<not a character>
 1F61F	WORRIED FACE
 1F620	ANGRY FACE
 1F621	POUTING FACE
+	* intended to depict pouting rather than simply anger
 1F622	CRYING FACE
 1F623	PERSEVERING FACE
 1F624	FACE WITH LOOK OF TRIUMPH
+	* indicates triumph, not anger
 1F625	DISAPPOINTED BUT RELIEVED FACE
 1F626	FROWNING FACE WITH OPEN MOUTH
+	* frowning, not shocked or surprised
 1F627	ANGUISHED FACE
 1F628	FEARFUL FACE
 1F629	WEARY FACE
 1F62A	SLEEPY FACE
 1F62B	TIRED FACE
 1F62C	GRIMACING FACE
+	* should not be depicted with zipper mouth
+	x (zipper-mouth face - 1F910)
 1F62D	LOUDLY CRYING FACE
 1F62E	FACE WITH OPEN MOUTH
 1F62F	HUSHED FACE
@@ -41589,6 +44314,7 @@ FFFF	<not a character>
 1F631	FACE SCREAMING IN FEAR
 1F632	ASTONISHED FACE
 1F633	FLUSHED FACE
+	* embarrassed
 1F634	SLEEPING FACE
 1F635	DIZZY FACE
 1F636	FACE WITHOUT MOUTH
@@ -41603,15 +44329,20 @@ FFFF	<not a character>
 1F63C	CAT FACE WITH WRY SMILE
 1F63D	KISSING CAT FACE WITH CLOSED EYES
 1F63E	POUTING CAT FACE
+	* intended to depict pouting rather than simply anger
 1F63F	CRYING CAT FACE
 1F640	WEARY CAT FACE
+	* indicates tired, not horrified
 @		Faces
 1F641	SLIGHTLY FROWNING FACE
 	x (white frowning face - 2639)
 1F642	SLIGHTLY SMILING FACE
 	x (white smiling face - 263A)
+1F643	UPSIDE-DOWN FACE
+1F644	FACE WITH ROLLING EYES
 @		Gesture symbols
 1F645	FACE WITH NO GOOD GESTURE
+	* conveys "no deal" or "not ok", not anger; the inverse of 1F646 face with ok gesture
 1F646	FACE WITH OK GESTURE
 1F647	PERSON BOWING DEEPLY
 1F648	SEE-NO-EVIL MONKEY
@@ -41622,11 +44353,13 @@ FFFF	<not a character>
 	= banzai!
 1F64D	PERSON FROWNING
 1F64E	PERSON WITH POUTING FACE
+	* intended to depict pouting rather than simply anger
 1F64F	PERSON WITH FOLDED HANDS
 	* can indicate sorrow or regret
-	* can indicate pleading
+	* can also indicate pleading, praying, bowing, or thanking
 @@	1F650	Ornamental Dingbats	1F67F
-@		Leaf ornaments
+@		Fleurons
+@+		Fleurons are leaf or floral-shaped ornaments used for text decoration.
 1F650	NORTH WEST POINTING LEAF
 1F651	SOUTH WEST POINTING LEAF
 1F652	NORTH EAST POINTING LEAF
@@ -41635,16 +44368,16 @@ FFFF	<not a character>
 1F655	TURNED SOUTH WEST POINTING LEAF
 1F656	TURNED NORTH EAST POINTING LEAF
 1F657	TURNED SOUTH EAST POINTING LEAF
-@		Vine leaf ornaments
 1F658	NORTH WEST POINTING VINE LEAF
 1F659	SOUTH WEST POINTING VINE LEAF
+	x (reversed rotated floral heart bullet - 2619)
 1F65A	NORTH EAST POINTING VINE LEAF
 1F65B	SOUTH EAST POINTING VINE LEAF
+	x (rotated floral heart bullet - 2767)
 1F65C	HEAVY NORTH WEST POINTING VINE LEAF
 1F65D	HEAVY SOUTH WEST POINTING VINE LEAF
 1F65E	HEAVY NORTH EAST POINTING VINE LEAF
 1F65F	HEAVY SOUTH EAST POINTING VINE LEAF
-@		Pointing bud ornaments
 1F660	NORTH WEST POINTING BUD
 1F661	SOUTH WEST POINTING BUD
 1F662	NORTH EAST POINTING BUD
@@ -41661,6 +44394,7 @@ FFFF	<not a character>
 1F66B	SOLID QUILT SQUARE ORNAMENT IN BLACK SQUARE
 	= inverse fourfold knot ornament
 @		Rocket ornaments
+@+		The rocket ornaments function similarly to fleurons for text decoration, and are not intended as pictographs for spaceships.
 1F66C	LEFTWARDS ROCKET
 	x (rocket - 1F680)
 1F66D	UPWARDS ROCKET
@@ -41823,6 +44557,8 @@ FFFF	<not a character>
 1F6CE	BELLHOP BELL
 	= reception, services
 1F6CF	BED
+@		Signage
+1F6D0	PLACE OF WORSHIP
 @		Miscellaneous symbols
 1F6E0	HAMMER AND WRENCH
 	= tools, repair facility
@@ -42087,7 +44823,7 @@ FFFF	<not a character>
 	= uncia semis
 	x (ounce sign - 2125)
 @@	1F780	Geometric Shapes Extended	1F7FF
-@+	These geometric shapes originate from the Webdings/Wingdings collections.
+@+		These geometric shapes originate from the Webdings/Wingdings collections.
 @		Isosceles right triangles
 1F780	BLACK LEFT-POINTING ISOSCELES RIGHT TRIANGLE
 	x (black medium left-pointing triangle - 23F4)
@@ -42098,11 +44834,11 @@ FFFF	<not a character>
 1F783	BLACK DOWN-POINTING ISOSCELES RIGHT TRIANGLE
 	x (black medium down-pointing triangle - 23F7)
 @		Black circles
-@+	Constitute a set as follows: 22C5, 2219, 1F784, 2022, 2981, 26AB, 25CF, and 2B24
+@+		Constitute a set as follows: 22C5, 2219, 1F784, 2022, 2981, 26AB, 25CF, and 2B24
 1F784	BLACK SLIGHTLY SMALL CIRCLE
 @		White circles
-@+	Adjective refers to the thickness of the ring.
-@+	Constitute a set as follows: 25CB, 2B58, 1F785..1F789. 
+@+		Adjective refers to the thickness of the ring.
+@+		Constitute a set as follows: 25CB, 2B58, 1F785-1F789. 
 1F785	MEDIUM BOLD WHITE CIRCLE
 	x (medium white circle - 26AA)
 1F786	BOLD WHITE CIRCLE
@@ -42111,7 +44847,7 @@ FFFF	<not a character>
 1F788	VERY HEAVY WHITE CIRCLE
 1F789	EXTREMELY HEAVY WHITE CIRCLE
 @		White circles containing another black circle
-@+	Constitute a set as follows: 2299, 1F78A, and 29BF
+@+		Constitute a set as follows: 2299, 1F78A, and 29BF
 1F78A	WHITE CIRCLE CONTAINING BLACK SMALL CIRCLE
 @		Target symbol
 1F78B	ROUND TARGET
@@ -42119,11 +44855,11 @@ FFFF	<not a character>
 	x (circled white bullet - 29BE)
 	x (heavy circle with circle inside - 2B57)
 @		Black squares
-@+	Constitute a set as follows: 1F78C, 2B1D, 1F78D, 25AA, 25FE, 25FC, 25A0, and 2B1B
+@+		Constitute a set as follows: 1F78C, 2B1D, 1F78D, 25AA, 25FE, 25FC, 25A0, and 2B1B
 1F78C	BLACK TINY SQUARE
 1F78D	BLACK SLIGHTLY SMALL SQUARE
 @		White squares
-@+	Constitute a set as follows: 25A1, 1F78E..1F792
+@+		Constitute a set as follows: 25A1, 1F78E-1F793
 1F78E	LIGHT WHITE SQUARE
 1F78F	MEDIUM WHITE SQUARE
 1F790	BOLD WHITE SQUARE
@@ -42132,24 +44868,24 @@ FFFF	<not a character>
 1F792	VERY HEAVY WHITE SQUARE
 1F793	EXTREMELY HEAVY WHITE SQUARE
 @		White squares containing another black square
-@+	Constitute a set as follows: 1F794, 25A3, and 1F795
+@+		Constitute a set as follows: 1F794, 25A3, and 1F795
 1F794	WHITE SQUARE CONTAINING BLACK VERY SMALL SQUARE
 1F795	WHITE SQUARE CONTAINING BLACK MEDIUM SQUARE
 @		Target symbol
 1F796	SQUARE TARGET
 @		Black diamonds
-@+	Constitute a set as follows: 1F797, 1F798, 2B29, 1F799, 2B25, and 25C6
+@+		Constitute a set as follows: 1F797, 1F798, 2B29, 1F799, 2B25, and 25C6
 1F797	BLACK TINY DIAMOND
 1F798	BLACK VERY SMALL DIAMOND
 1F799	BLACK MEDIUM SMALL DIAMOND
 @		White diamonds containing another black diamond
-@+	Constitute a set as follows: 1F79A, 25C8, and 1F79B
+@+		Constitute a set as follows: 1F79A, 25C8, and 1F79B
 1F79A	WHITE DIAMOND CONTAINING BLACK VERY SMALL DIAMOND
 1F79B	WHITE DIAMOND CONTAINING BLACK MEDIUM DIAMOND
 @		Target symbol
 1F79C	DIAMOND TARGET
-@		Lozenges
-@+	Constitute a set as follows: 1F79D, 1F79E, 2B2A, 1F79F, 2B27, 29EB, and 25CA
+@		Black lozenges
+@+		Constitute a set as follows: 1F79D, 1F79E, 2B2A, 1F79F, 2B27, and 29EB
 1F79D	BLACK TINY LOZENGE
 1F79E	BLACK VERY SMALL LOZENGE
 1F79F	BLACK MEDIUM SMALL LOZENGE
@@ -42210,16 +44946,16 @@ FFFF	<not a character>
 1F7C8	REVERSE LIGHT FOUR POINTED PINWHEEL STAR
 	= navigate
 @		Five pointed stars
-@+	Constitute a set as follows: 1F7C9, 2605, 1F7CA, and 272F
+@+		Constitute a set as follows: 1F7C9, 2605, 1F7CA, and 272F
 1F7C9	LIGHT FIVE POINTED BLACK STAR
 1F7CA	HEAVY FIVE POINTED BLACK STAR
 @		Six pointed stars
-@+	Constitute a set as follows: 2736, 1F7CB..1F7CD
+@+		Constitute a set as follows: 2736, 1F7CB-1F7CD
 1F7CB	MEDIUM SIX POINTED BLACK STAR
 1F7CC	HEAVY SIX POINTED BLACK STAR
 1F7CD	SIX POINTED PINWHEEL STAR
 @		Eight pointed stars
-@+	Constitute a set as follows: 2735, 1F7CE..1F7D1
+@+		Constitute a set as follows: 2735, 1F7CE-1F7D1
 1F7CE	MEDIUM EIGHT POINTED BLACK STAR
 	x (eight pointed rectilinear black star - 2737)
 1F7CF	HEAVY EIGHT POINTED BLACK STAR
@@ -42228,7 +44964,7 @@ FFFF	<not a character>
 1F7D1	HEAVY EIGHT POINTED PINWHEEL STAR
 	x (eight pointed pinwheel star - 2735)
 @		Twelve pointed stars
-@+	Constitute a set as follows: 1F7D2, 2739, 1F7D3, and 1F7D4
+@+		Constitute a set as follows: 1F7D2, 2739, 1F7D3, and 1F7D4
 1F7D2	LIGHT TWELVE POINTED BLACK STAR
 1F7D3	HEAVY TWELVE POINTED BLACK STAR
 1F7D4	HEAVY TWELVE POINTED PINWHEEL STAR
@@ -42388,7 +45124,7 @@ FFFF	<not a character>
 	x (notched lower right-shadowed white rightwards arrow - 27AF)
 1F89B	DOWNWARDS ARROW WITH NOTCHED TAIL
 @		Heavy arrow shafts
-@+	The vertical alignment and thickness of this set are compatible with heavy shaft arrows.
+@+		The vertical alignment and thickness of this set are compatible with heavy shaft arrows.
 1F89C	HEAVY ARROW SHAFT WIDTH ONE
 1F89D	HEAVY ARROW SHAFT WIDTH TWO THIRDS
 1F89E	HEAVY ARROW SHAFT WIDTH ONE HALF
@@ -42411,9 +45147,36 @@ FFFF	<not a character>
 1F8AB	RIGHTWARDS FRONT-TILTED SHADOWED WHITE ARROW
 	x (front-tilted shadowed white rightwards arrow - 27AC)
 @		White arrow shafts
-@+	The vertical alignment and thickness of this set are compatible with white arrows.
+@+		The vertical alignment and thickness of this set are compatible with white arrows.
 1F8AC	WHITE ARROW SHAFT WIDTH ONE
 1F8AD	WHITE ARROW SHAFT WIDTH TWO THIRDS
+@@	1F900	Supplemental Symbols and Pictographs	1F9FF
+@		Emoticon faces
+1F910	ZIPPER-MOUTH FACE
+1F911	MONEY-MOUTH FACE
+1F912	FACE WITH THERMOMETER
+1F913	NERD FACE
+1F914	THINKING FACE
+1F915	FACE WITH HEAD-BANDAGE
+1F916	ROBOT FACE
+	x (alien monster - 1F47E)
+1F917	HUGGING FACE
+@		Hand symbol
+1F918	SIGN OF THE HORNS
+@		Animal symbols
+1F980	CRAB
+	* used for Cancer
+	x (cancer - 264B)
+1F981	LION FACE
+	* used for Leo
+	x (leo - 264C)
+1F982	SCORPION
+	* used for Scorpio
+	x (scorpius - 264F)
+1F983	TURKEY
+1F984	UNICORN FACE
+@		Food symbol
+1F9C0	CHEESE WEDGE
 @@	1FF80	Unassigned	1FFFF
 @		Noncharacters
 @+		These codes are intended for process-internal uses.
@@ -42422,6 +45185,7 @@ FFFF	<not a character>
 @@	20000	CJK Unified Ideographs Extension B	2A6D6
 @@	2A700	CJK Unified Ideographs Extension C	2B734
 @@	2B740	CJK Unified Ideographs Extension D	2B81D
+@@	2B820	CJK Unified Ideographs Extension E	2CEA1
 @@	2F800	CJK Compatibility Ideographs Supplement	2FA1F
 @		Duplicate characters from CNS 11643-1992
 2F800	CJK COMPATIBILITY IDEOGRAPH-2F800
@@ -43581,9 +46345,10 @@ CFFFF	<not a character>
 DFFFE	<not a character>
 DFFFF	<not a character>
 @@	E0000	Tags	E007F
-@+		Tag characters are deprecated, and their use is strongly discouraged.
+@+		The use of tag characters to convey language tags is strongly discouraged.
 @		Tag identifiers
 E0001	LANGUAGE TAG
+	* This character is deprecated, and its use is strongly discouraged.
 @		Tag components
 E0020	TAG SPACE
 E0021	TAG EXCLAMATION MARK
@@ -43680,7 +46445,9 @@ E007B	TAG LEFT CURLY BRACKET
 E007C	TAG VERTICAL LINE
 E007D	TAG RIGHT CURLY BRACKET
 E007E	TAG TILDE
+@		Stateful tag terminator
 E007F	CANCEL TAG
+	* This character is deprecated, and its use is strongly discouraged.
 @@	E0100	Variation Selectors Supplement	E01EF
 @+		These complete the set started at FE00 to FE0F
 @		Variation selectors

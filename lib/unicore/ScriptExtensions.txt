@@ -1,16 +1,19 @@
-# ScriptExtensions-7.0.0.txt
-# Date: 2014-05-15, 00:11:35 GMT [MD]
+# ScriptExtensions-8.0.0.txt
+# Date: 2015-05-14, 22:31:55 GMT [MD]
 #
 # Unicode Character Database
-# Copyright (c) 1991-2014 Unicode, Inc.
+# Copyright (c) 1991-2015 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 # For documentation, see http://www.unicode.org/reports/tr44/
+#
 # The Script_Extensions property indicates which characters are commonly used
 # with more than one script, but with a limited number of scripts.
 # For each code point, there is one or more property values.  Each such value is a Script property value.
 # For more information, see:
-#   UAX #24: http://www.unicode.org/reports/tr24/ and
-#   UAX #44: http://www.unicode.org/reports/tr44/
+#   UAX #24, Unicode Script Property: http://www.unicode.org/reports/tr24/
+#     Especially the sections:
+#       http://www.unicode.org/reports/tr24/#Assignment_Script_Values
+#       http://www.unicode.org/reports/tr24/#Assignment_ScriptX_Values
 #
 # Each Script_Extensions value in this file consists of a set
 # of one or more abbreviated Script property values. The ordering of the
@@ -23,7 +26,6 @@
 #
 # Following each distinct Script_Extensions value is the list of code
 # points associated with that value, listed in code point order.
-#
 #
 # All code points not explicitly listed for Script_Extensions
 # have as their value the corresponding Script property value
@@ -38,16 +40,19 @@
 
 # Script_Extensions=Deva
 
-1CD0..1CD2    ; Deva # Mn   [3] VEDIC TONE KARSHANA..VEDIC TONE PRENKHA
-1CD4..1CE0    ; Deva # Mn  [13] VEDIC SIGN YAJURVEDIC MIDLINE SVARITA..VEDIC TONE RIGVEDIC KASHMIRI INDEPENDENT SVARITA
+1CD1          ; Deva # Mn       VEDIC TONE SHARA
+1CD4..1CD6    ; Deva # Mn   [3] VEDIC SIGN YAJURVEDIC MIDLINE SVARITA..VEDIC TONE YAJURVEDIC INDEPENDENT SVARITA
+1CD8          ; Deva # Mn       VEDIC TONE CANDRA BELOW
+1CDB          ; Deva # Mn       VEDIC TONE TRIPLE SVARITA
+1CDE..1CDF    ; Deva # Mn   [2] VEDIC TONE TWO DOTS BELOW..VEDIC TONE THREE DOTS BELOW
 1CE1          ; Deva # Mc       VEDIC TONE ATHARVAVEDIC INDEPENDENT SVARITA
 1CE2..1CE8    ; Deva # Mn   [7] VEDIC SIGN VISARGA SVARITA..VEDIC SIGN VISARGA ANUDATTA WITH TAIL
+1CE9..1CEC    ; Deva # Lo   [4] VEDIC SIGN ANUSVARA ANTARGOMUKHA..VEDIC SIGN ANUSVARA VAMAGOMUKHA WITH TAIL
 1CED          ; Deva # Mn       VEDIC SIGN TIRYAK
-1CF2..1CF3    ; Deva # Mc   [2] VEDIC SIGN ARDHAVISARGA..VEDIC SIGN ROTATED ARDHAVISARGA
-1CF4          ; Deva # Mn       VEDIC TONE CANDRA ABOVE
-1CF8..1CF9    ; Deva # Mn   [2] VEDIC TONE RING ABOVE..VEDIC TONE DOUBLE RING ABOVE
+1CEE..1CF1    ; Deva # Lo   [4] VEDIC SIGN HEXIFORM LONG ANUSVARA..VEDIC SIGN ANUSVARA UBHAYATO MUKHA
+1CF6          ; Deva # Lo       VEDIC SIGN UPADHMANIYA
 
-# Total code points: 30
+# Total code points: 26
 
 # ================================================
 
@@ -66,6 +71,14 @@
 1DC0..1DC1    ; Grek # Mn   [2] COMBINING DOTTED GRAVE ACCENT..COMBINING DOTTED ACUTE ACCENT
 
 # Total code points: 4
+
+# ================================================
+
+# Script_Extensions=Hani
+
+1D360..1D371  ; Hani # No  [18] COUNTING ROD UNIT DIGIT ONE..COUNTING ROD TENS DIGIT NINE
+
+# Total code points: 18
 
 # ================================================
 
@@ -139,6 +152,15 @@ A9CF          ; Bugi Java # Lm       JAVANESE PANGRANGKEP
 
 # ================================================
 
+# Script_Extensions=Cyrl Glag
+
+0487          ; Cyrl Glag # Mn       COMBINING CYRILLIC POKRYTIE
+A66F          ; Cyrl Glag # Mn       COMBINING CYRILLIC VZMET
+
+# Total code points: 2
+
+# ================================================
+
 # Script_Extensions=Cyrl Latn
 
 0485..0486    ; Cyrl Latn # Mn   [2] COMBINING CYRILLIC DASIA PNEUMATA..COMBINING CYRILLIC PSILI PNEUMATA
@@ -147,17 +169,76 @@ A9CF          ; Bugi Java # Lm       JAVANESE PANGRANGKEP
 
 # ================================================
 
-# Script_Extensions=Deva Latn
+# Script_Extensions=Cyrl Perm
 
-0951..0952    ; Deva Latn # Mn   [2] DEVANAGARI STRESS SIGN UDATTA..DEVANAGARI STRESS SIGN ANUDATTA
+0483          ; Cyrl Perm # Mn       COMBINING CYRILLIC TITLO
 
-# Total code points: 2
+# Total code points: 1
+
+# ================================================
+
+# Script_Extensions=Deva Gran
+
+1CD0          ; Deva Gran # Mn       VEDIC TONE KARSHANA
+1CD2          ; Deva Gran # Mn       VEDIC TONE PRENKHA
+1CD3          ; Deva Gran # Po       VEDIC SIGN NIHSHVASA
+1CF2..1CF3    ; Deva Gran # Mc   [2] VEDIC SIGN ARDHAVISARGA..VEDIC SIGN ROTATED ARDHAVISARGA
+1CF4          ; Deva Gran # Mn       VEDIC TONE CANDRA ABOVE
+1CF8..1CF9    ; Deva Gran # Mn   [2] VEDIC TONE RING ABOVE..VEDIC TONE DOUBLE RING ABOVE
+
+# Total code points: 8
+
+# ================================================
+
+# Script_Extensions=Deva Knda
+
+1CF5          ; Deva Knda # Lo       VEDIC SIGN JIHVAMULIYA
+
+# Total code points: 1
+
+# ================================================
+
+# Script_Extensions=Deva Shrd
+
+1CD7          ; Deva Shrd # Mn       VEDIC TONE YAJURVEDIC KATHAKA INDEPENDENT SVARITA
+1CD9          ; Deva Shrd # Mn       VEDIC TONE YAJURVEDIC KATHAKA INDEPENDENT SVARITA SCHROEDER
+1CDC..1CDD    ; Deva Shrd # Mn   [2] VEDIC TONE KATHAKA ANUDATTA..VEDIC TONE DOT BELOW
+1CE0          ; Deva Shrd # Mn       VEDIC TONE RIGVEDIC KASHMIRI INDEPENDENT SVARITA
+
+# Total code points: 5
+
+# ================================================
+
+# Script_Extensions=Deva Taml
+
+A8F3          ; Deva Taml # Lo       DEVANAGARI SIGN CANDRABINDU VIRAMA
+
+# Total code points: 1
+
+# ================================================
+
+# Script_Extensions=Gran Taml
+
+0BAA          ; Gran Taml # Lo       TAMIL LETTER PA
+0BB5          ; Gran Taml # Lo       TAMIL LETTER VA
+0BE6..0BEF    ; Gran Taml # Nd  [10] TAMIL DIGIT ZERO..TAMIL DIGIT NINE
+0BF0..0BF2    ; Gran Taml # No   [3] TAMIL NUMBER TEN..TAMIL NUMBER ONE THOUSAND
+
+# Total code points: 15
 
 # ================================================
 
 # Script_Extensions=Gujr Khoj
 
 0AE6..0AEF    ; Gujr Khoj # Nd  [10] GUJARATI DIGIT ZERO..GUJARATI DIGIT NINE
+
+# Total code points: 10
+
+# ================================================
+
+# Script_Extensions=Guru Mult
+
+0A66..0A6F    ; Guru Mult # Nd  [10] GURMUKHI DIGIT ZERO..GURMUKHI DIGIT NINE
 
 # Total code points: 10
 
@@ -209,6 +290,14 @@ FF9E..FF9F    ; Hira Kana # Lm   [2] HALFWIDTH KATAKANA VOICED SOUND MARK..HALFW
 1040..1049    ; Cakm Mymr Tale # Nd  [10] MYANMAR DIGIT ZERO..MYANMAR DIGIT NINE
 
 # Total code points: 10
+
+# ================================================
+
+# Script_Extensions=Deva Gran Latn
+
+20F0          ; Deva Gran Latn # Mn       COMBINING ASTERISK ABOVE
+
+# Total code points: 1
 
 # ================================================
 
@@ -282,6 +371,14 @@ FE45..FE46    ; Bopo Hang Hani Hira Kana # Po   [2] SESAME DOT..WHITE SESAME DOT
 
 # ================================================
 
+# Script_Extensions=Deva Knda Mlym Taml Telu
+
+1CDA          ; Deva Knda Mlym Taml Telu # Mn       VEDIC TONE DOUBLE SVARITA
+
+# Total code points: 1
+
+# ================================================
+
 # Script_Extensions=Bopo Hang Hani Hira Kana Yiii
 
 3001..3002    ; Bopo Hang Hani Hira Kana Yiii # Po   [2] IDEOGRAPHIC COMMA..IDEOGRAPHIC FULL STOP
@@ -321,6 +418,22 @@ A838          ; Deva Gujr Guru Kthi Mahj Modi Sind Takr Tirh # Sc       NORTH IN
 A839          ; Deva Gujr Guru Kthi Mahj Modi Sind Takr Tirh # So       NORTH INDIC QUANTITY MARK
 
 # Total code points: 10
+
+# ================================================
+
+# Script_Extensions=Beng Deva Gran Gujr Guru Knda Latn Mlym Orya Taml Telu
+
+0952          ; Beng Deva Gran Gujr Guru Knda Latn Mlym Orya Taml Telu # Mn       DEVANAGARI STRESS SIGN ANUDATTA
+
+# Total code points: 1
+
+# ================================================
+
+# Script_Extensions=Beng Deva Gran Gujr Guru Knda Latn Mlym Orya Shrd Taml Telu
+
+0951          ; Beng Deva Gran Gujr Guru Knda Latn Mlym Orya Shrd Taml Telu # Mn       DEVANAGARI STRESS SIGN UDATTA
+
+# Total code points: 1
 
 # ================================================
 

@@ -4329,7 +4329,7 @@ lib/unicore/extracted/DNumType.txt		Unicode character database
 lib/unicore/extracted/DNumValues.txt		Unicode character database
 lib/unicore/HangulSyllableType.txt		Unicode character database
 lib/unicore/Index.txt				Unicode character database
-lib/unicore/IndicMatraCategory.txt		Unicode character database
+lib/unicore/IndicPositionalCategory.txt		Unicode character database
 lib/unicore/IndicSyllabicCategory.txt		Unicode character database
 lib/unicore/Jamo.txt				Unicode character database
 lib/unicore/LineBreak.txt			Unicode character database

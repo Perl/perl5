@@ -171,7 +171,7 @@
 #endif	/* EBCDIC POSIX-BC */
 
 /* The number of code points not matching \pC */
-#define NON_OTHER_COUNT_FOR_USE_ONLY_BY_REGCOMP_DOT_C  112806
+#define NON_OTHER_COUNT_FOR_USE_ONLY_BY_REGCOMP_DOT_C  120522
 
 #endif /* H_UNICODE_CONSTANTS */
 

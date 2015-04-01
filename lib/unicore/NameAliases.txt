@@ -1,15 +1,15 @@
-# NameAliases-7.0.0.txt
-# Date: 2013-12-10, 22:01:00 GMT [KW]
+# NameAliases-8.0.0.txt
+# Date: 2014-11-19, 01:30:00 GMT [KW, LI]
 #
 # This file is a normative contributory data file in the
 # Unicode Character Database.
 #
-# Copyright (c) 2005-2013 Unicode, Inc.
+# Copyright (c) 2005-2014 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 # This file defines the formal name aliases for Unicode characters.
 #
-# For informative aliases see NamesList.txt
+# For informative aliases, see NamesList.txt
 #
 # The formal name aliases are divided into five types, each with a distinct label.
 #
@@ -33,9 +33,9 @@
 # includes the character names and the names of named character sequences.
 # The inclusion of ISO 6429 names and other commonly occurring names and
 # abbreviations for control codes and format characters as formal name aliases
-# is to help avoid name collisions between Unicode character names and the 
+# is to help avoid name collisions between Unicode character names and the
 # labels which commonly appear in text and/or in implementations such as regex, for
-# control codes (which for historical reasons have no Unicode character name) 
+# control codes (which for historical reasons have no Unicode character name)
 # or for format characters.
 #
 # For documentation, see NamesList.html and http://www.unicode.org/reports/tr44/
@@ -87,6 +87,7 @@
 
 0007;ALERT;control
 0007;BEL;abbreviation
+
 0008;BACKSPACE;control
 0008;BS;abbreviation
 0009;CHARACTER TABULATION;control
@@ -283,6 +284,8 @@
 2118;WEIERSTRASS ELLIPTIC FUNCTION;correction
 2448;MICR ON US SYMBOL;correction
 2449;MICR DASH SYMBOL;correction
+2B7A;LEFTWARDS TRIANGLE-HEADED ARROW WITH DOUBLE VERTICAL STROKE;correction
+2B7C;RIGHTWARDS TRIANGLE-HEADED ARROW WITH DOUBLE VERTICAL STROKE;correction
 A015;YI SYLLABLE ITERATION MARK;correction
 FE18;PRESENTATION FORM FOR VERTICAL RIGHT WHITE LENTICULAR BRACKET;correction
 FE00;VS1;abbreviation
