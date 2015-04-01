@@ -513,6 +513,8 @@ LIBOUT_FLAG	=
 BUILDOPT	+= -fno-strict-aliasing -mms-bitfields
 MINIBUILDOPT	+= -fno-strict-aliasing
 
+TESTPREPGCC	= test-prep-gcc
+
 .ELSE
 
 # All but the free version of VC++ 7.x can load DLLs on demand.  Makes the test
@@ -657,6 +659,8 @@ LIB_FLAGS	= $(LIB_FLAGS) -nologo
 OBJOUT_FLAG	= -Fo
 EXEOUT_FLAG	= -Fe
 LIBOUT_FLAG	= /out:
+
+TESTPREPGCC	=
 
 .ENDIF
 
@@ -1631,15 +1635,14 @@ test-prep : all utils ..\pod\perltoc.pod $(TESTPREPGCC)
 # Without this copying, the op/taint.t test script will fail.
 
 .IF "$(CCTYPE)" == "GCC"
-TESTPREPGCC	= test-prep-gcc
+
 test-prep-gcc :
 	if exist $(CCDLLDIR)\libgcc_s_seh-1.dll $(XCOPY) $(CCDLLDIR)\libgcc_s_seh-1.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libgcc_s_sjlj-1.dll $(XCOPY) $(CCDLLDIR)\libgcc_s_sjlj-1.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libgcc_s_dw2-1.dll $(XCOPY) $(CCDLLDIR)\libgcc_s_dw2-1.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libstdc++-6.dll $(XCOPY) $(CCDLLDIR)\libstdc++-6.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libwinpthread-1.dll $(XCOPY) $(CCDLLDIR)\libwinpthread-1.dll ..\t\$(NULL)
-.ELSE
-TESTPREPGCC	=
+
 .ENDIF
 
 test : test-prep
