@@ -1458,7 +1458,11 @@ EOF
     } else {
         # Some of the sources for these macros come from Unicode tables
         my $sources_list = "lib/unicore/mktables.lst";
-        my @sources = ($0, qw(lib/unicore/mktables lib/Unicode/UCD.pm));
+        my @sources = ($0, qw(lib/unicore/mktables
+                              lib/Unicode/UCD.pm
+                              regen/regcharclass_multi_char_folds.pl
+                              regen/charset_translations.pl
+                             ));
         {
             # Depend on mktables’ own sources.  It’s a shorter list of files than
             # those that Unicode::UCD uses.
