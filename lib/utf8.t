@@ -270,7 +270,7 @@ BANG
 #   "my" variable $strict::VERSION can't be in a package
 #
 SKIP: {
-    skip("Embedded UTF-8 does not work in EBCDIC", 1) if ord("A") == 193;
+    skip("Embedded UTF-8 does not work in EBCDIC", 1) if $::IS_EBCDIC;
     ok('' eq runperl(prog => <<'CODE'), "change #17928");
 	my $code = qq{ my \$\xe3\x83\x95\xe3\x83\xbc = 5; };
     {
@@ -324,7 +324,7 @@ END
 }
 
 SKIP: {
-    skip("Embedded UTF-8 does not work in EBCDIC", 1) if ord("A") == 193;
+    skip("Embedded UTF-8 does not work in EBCDIC", 1) if $::IS_EBCDIC;
     use utf8;
     is eval qq{q \xc3\xbc test \xc3\xbc . qq\xc2\xb7 test \xc2\xb7},
       ' test  test ',
@@ -347,7 +347,7 @@ SKIP: {
     ok( utf8::is_utf8($c), "utf8::is_utf8 unicode");
 
     is(utf8::upgrade($a), 1, "utf8::upgrade basic");
-    if (ord('A') == 193) { # EBCDIC.
+    if ($::IS_EBCDIC) { # EBCDIC.
 	is(utf8::upgrade($b), 1, "utf8::upgrade beyond");
     } else {
 	is(utf8::upgrade($b), 2, "utf8::upgrade beyond");
@@ -383,7 +383,7 @@ SKIP: {
     utf8::encode($c);
 
     is($a, "A",       "basic");
-    if (ord('A') == 193) { # EBCDIC.
+    if ($::IS_EBCDIC) { # EBCDIC.
 	is(length($b), 1, "beyond length");
     } else {
 	is(length($b), 2, "beyond length");
@@ -412,7 +412,7 @@ SKIP: {
     ok(utf8::valid($c), " utf8::valid unicode");
 
     ok(!utf8::is_utf8($a), "!utf8::is_utf8 basic");
-    if (ord('A') == 193) { # EBCDIC.
+    if ($::IS_EBCDIC) { # EBCDIC.
 	ok( utf8::is_utf8(pack('U',0x0ff)), " utf8::is_utf8 beyond");
     } else {
 	ok( utf8::is_utf8($b), " utf8::is_utf8 beyond"); # $b stays in UTF-8.

@@ -530,7 +530,7 @@ is($str, "Hi, world!");
 
 $str = "Made w/ JavaScript";
 sub veclv : lvalue { vec($str, 2, 32) }
-if (ord('A') != 193) {
+if ($::IS_ASCII) {
     veclv() = 0x5065726C;
 }
 else { # EBCDIC?

@@ -265,7 +265,7 @@ is($cnt, scalar(@ary));
     my $s = "\x20\x40\x{80}\x{100}\x{80}\x40\x20";
 
   SKIP: {
-    if (ord('A') == 193) {
+    if ($::IS_EBCDIC) {
 	skip("EBCDIC", 1);
     } else {
 	# bug id 20000426.003
@@ -282,7 +282,7 @@ is($cnt, scalar(@ary));
     ok($a eq "\x20\x40" && $b eq "\x40\x20");
 
   SKIP: {
-    if (ord('A') == 193) {
+    if ($::IS_EBCDIC) {
 	skip("EBCDIC", 1);
     }  else {
 	my ($a, $b) = split(/\x40\x{80}/, $s);

@@ -129,7 +129,7 @@ fresh_perl_is(
   '* <null> ident'
 );
 SKIP: {
-    skip "Different output on EBCDIC (presumably)", 2 if ord("A") != 65;
+    skip "Different output on EBCDIC (presumably)", 2 if $::IS_EBCDIC;
     fresh_perl_is(
       qq'"ab}"ax;&\0z\x8Ao}\x82x;', <<gibberish,
 Bareword found where operator expected at - line 1, near ""ab}"ax"

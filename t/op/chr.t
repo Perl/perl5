@@ -49,7 +49,7 @@ is chr "-2.2", chr -2.2, 'chr "-2.2" eq chr -2.2';
 
 # Check UTF-8 (not UTF-EBCDIC).
 SKIP: {
-    skip "no UTF-8 on EBCDIC", 21 if chr(193) eq 'A';
+    skip "no UTF-8 on EBCDIC", 21 if $::IS_EBCDIC;
 
 sub hexes {
     no warnings 'utf8'; # avoid surrogate and beyond Unicode warnings

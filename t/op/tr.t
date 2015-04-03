@@ -14,8 +14,6 @@ plan tests => 138;
 # This caused an asan failure due to a bad write past the end of the stack.
 eval { my $x; die  1..127, $x =~ y/// };
 
-my $Is_EBCDIC = (ord('i') == 0x89 & ord('J') == 0xd1);
-
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
 tr/a-z/A-Z/;
@@ -96,7 +94,7 @@ is(length $x, 3);
 
 $x =~ tr/A/B/;
 is(length $x, 3);
-if (ord("\t") == 9) { # ASCII
+if ($::IS_ASCII) { # ASCII
     is($x, 256.66.258);
 }
 else {
@@ -110,7 +108,7 @@ is($x, 256.193.258);
 
 $x =~ tr/A/B/;
 is(length $x, 3);
-if (ord("\t") == 9) { # ASCII
+if ($::IS_ASCII) { # ASCII
     is($x, 256.193.258);
 }
 else {
@@ -326,7 +324,7 @@ is($c, 8);
 is($a, "XXXXXXXX");
 
 SKIP: {
-    skip "not EBCDIC", 4 unless $Is_EBCDIC;
+    skip "not EBCDIC", 4 unless $::IS_EBCDIC;
 
     $c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/i-j/X/;
     is($c, 2);
