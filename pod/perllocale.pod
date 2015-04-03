@@ -34,7 +34,8 @@ locales", based on Unicode.  These are locales whose character set is
 Unicode, encoded in UTF-8.  Starting in v5.20, Perl fully supports
 UTF-8 locales, except for sorting and string comparisons.  (Use
 L<Unicode::Collate> for these.)  Perl continues to support the old
-non UTF-8 locales as well.
+non UTF-8 locales as well.  There are currently no UTF-8 locales for
+EBCDIC platforms.
 
 (Unicode is also creating C<CLDR>, the "Common Locale Data Repository",
 L<http://cldr.unicode.org/> which includes more types of information than
@@ -909,8 +910,10 @@ but new-line) works on the platform character set.
 
 Starting in v5.22, Perl will by default warn when switching into a
 locale that redefines any ASCII printable character (plus C<\t> and
-C<\n>) into a different class than expected.  This is unlikely to
-happen on modern locales, but can happen with the ISO 646 and other
+C<\n>) into a different class than expected.  This is likely to
+happen on modern locales only on EBCDIC platforms, where, for example,
+a CCSID 0037 locale on a CCSID 1047 machine moves C<"[">, but it can
+happen on ASCII platforms with the ISO 646 and other
 7-bit locales that are essentially obsolete.  Things may still work,
 depending on what features of Perl are used by the program.  For
 example, in the example from above where C<"|"> becomes a C<\w>, and
