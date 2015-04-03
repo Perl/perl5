@@ -887,8 +887,8 @@ L<Perl will warn, default enabled|warnings/Category Hierarchy>,
 using the C<locale> warning category, whenever such a locale is switched
 into.)  The UTF-8 locale support is actually a
 superset of POSIX locales, because it is really full Unicode behavior
-as if no locale were in effect at all (except for tainting; see
-L</SECURITY>).  POSIX locales, even UTF-8 ones,
+as if no C<LC_CTYPE> locale were in effect at all (except for tainting;
+see L</SECURITY>).  POSIX locales, even UTF-8 ones,
 are lacking certain concepts in Unicode, such as the idea that changing
 the case of a character could expand to be more than one character.
 Perl in a UTF-8 locale, will give you that expansion.  Prior to v5.20,
