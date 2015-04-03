@@ -89,6 +89,8 @@ getpriority(2)
 Hook::LexWrap
 HTML::StripScripts
 HTTP::Lite
+iconv(1)
+iconv(3)
 inetd(8)
 IO::Socket::IP
 IPC::Run
