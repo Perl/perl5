@@ -4007,8 +4007,7 @@ Gid_t getegid (void);
 #define DEBUG_MASK		0x07FFEFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
-#define DEBUG_TOP_FLAG		0x80000000 /* XXX what's this for ??? Signal
-					      that something was done? */
+#define DEBUG_TOP_FLAG		0x80000000 /* -D was given --> PL_debug |= FLAG */
 
 #  define DEBUG_p_TEST_ (PL_debug & DEBUG_p_FLAG)
 #  define DEBUG_s_TEST_ (PL_debug & DEBUG_s_FLAG)
