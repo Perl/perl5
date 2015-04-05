@@ -625,7 +625,7 @@ literal byte value 0xFF 0xFE, this is the BOM for little-endian
 UTF-16.  On an ASCII platform, if the file begins with the three literal
 byte values
 0xEF 0xBB 0xBF, this is the BOM for UTF-8.
-(A mechanism portable to EBCDIC platforms is to:
+A mechanism portable to EBCDIC platforms is to:
 
   my $utf8_bom = "\x{FEFF}";
   utf8::encode($utf8_bom);
