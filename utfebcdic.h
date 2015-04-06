@@ -51,8 +51,7 @@
  * The EBCDIC invariants have been chosen to be those characters whose Unicode
  * equivalents have ordinal numbers less than 160, that is the same characters
  * that are expressible in ASCII, plus the C1 controls.  So there are 160
- * invariants instead of the 128 in UTF-8.  (My guess is that this is because
- * the C1 control NEL (and maybe others) is important in IBM.)
+ * invariants instead of the 128 in UTF-8.
  *
  * The purpose of Step 3 is to make the encoding be invariant for the chosen
  * characters.  This messes up the convenient patterns found in step 2, so
@@ -83,8 +82,6 @@
  * This complicates interchanging files between computers using different code
  * pages.  Best is to convert to I8 before sending them, as the I8
  * representation is the same no matter what the underlying code page is.
- *
- * tr16 also says that NEL and LF be swapped.  We don't do that.
  *
  * Because of the way UTF-EBCDIC is constructed, the lowest 32 code points that
  * aren't equivalent to ASCII characters nor C1 controls form the set of
