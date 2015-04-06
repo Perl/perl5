@@ -480,6 +480,7 @@ EXEOUT_FLAG	= -o
 LIBOUT_FLAG	=
 
 BUILDOPT	+= -fno-strict-aliasing -mms-bitfields
+MINIBUILDOPT	+= -fno-strict-aliasing
 
 .ELSE
 
