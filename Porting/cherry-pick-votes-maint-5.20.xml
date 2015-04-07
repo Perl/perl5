@@ -5,6 +5,9 @@
 <div><h2>Tickets Listed in #123921: 5.20.3 blockers</h2>
 
 <commit votes="" id="" ticket="123786" desc="'use utf8;' leaks memory"/>
+<commit votes="" id="c0388966161bb22622ebac402bb1ebe081ad0b39" ticket="123976" desc="[Win32] Unable to build 64-bit blead using gcc-4.8.2"/>
+<commit votes="" id="3553f4fa11fd9e8bb0797ace43605cc33ebf32fa" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
+<commit votes="" id="4e0341d2ce817c9956f7f78e36bcaf8b764e18fc" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
 
 </div>
 
