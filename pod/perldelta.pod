@@ -347,9 +347,13 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Win32
 
-XXX
+F<miniperl.exe> is now built with C<-fno-strict-aliasing>, allowing
+64-bit builds to complete on GCC 4.8. [perl #123976]
+
+C<test-prep> again depends on C<test-prep-gcc> for GCC builds. [perl
+#124221]
 
 =back
 
