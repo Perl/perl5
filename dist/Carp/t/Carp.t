@@ -3,7 +3,7 @@ no warnings "once";
 use Config;
 
 use IPC::Open3 1.0103 qw(open3);
-use Test::More tests => 60;
+use Test::More tests => 65;
 
 sub runperl {
     my(%args) = @_;
@@ -237,16 +237,28 @@ sub w { cluck @_ }
 
 # $Carp::MaxArgNums
 {
-    my $i    = 0;
     my $aref = [
-        qr/1234 at \S*(?i:carp.t) line \d+\.\n\s*main::w\(1, 2, 3, 4\) called at \S*(?i:carp.t) line \d+/,
-        qr/1234 at \S*(?i:carp.t) line \d+\.\n\s*main::w\(1, 2, \.\.\.\) called at \S*(?i:carp.t) line \d+/,
+        [ -1            => '(...)' ],
+        [ 0             => '(1, 2, 3, 4)' ],
+        [ '0 but true'  => '(...)' ],
+        [ 1             => '(1, ...)' ],
+        [ 3             => '(1, 2, 3, ...)' ],
+        [ 4             => '(1, 2, 3, 4)' ],
+        [ 5             => '(1, 2, 3, 4)' ],
     ];
 
     for (@$aref) {
-        local $Carp::MaxArgNums = $i++;
+        my ($arg_count, $expected_signature) = @$_;
+
+        my $expected = join('',
+            '1234 at \S*(?i:carp.t) line \d+\.\n\s*main::w',
+            quotemeta $expected_signature,
+            ' called at \S*(?i:carp.t) line \d+'
+        );
+
+        local $Carp::MaxArgNums = $arg_count;
         local $SIG{__WARN__} = sub {
-            like "@_", $_, 'MaxArgNums';
+            like "@_", qr/$expected/, "MaxArgNums=$arg_count";
         };
 
         package Z;

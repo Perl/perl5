@@ -87,7 +87,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.36';
+our $VERSION = '1.37';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
@@ -229,7 +229,7 @@ sub caller_info {
             my $overflow;
             if ( $MaxArgNums and @args > $MaxArgNums )
             {    # More than we want to show?
-                $#args = $MaxArgNums;
+                $#args = $MaxArgNums - 1;
                 $overflow = 1;
             }
 
@@ -783,7 +783,8 @@ Defaults to C<64>.
 =head2 $Carp::MaxArgNums
 
 This variable determines how many arguments to each function to show.
-Use a value of C<0> to show all arguments to a function call.
+Use a false value to show all arguments to a function call.  To suppress all
+arguments, use C<-1> or C<'0 but true'>.
 
 Defaults to C<8>.
 
