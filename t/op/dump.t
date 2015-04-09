@@ -25,6 +25,9 @@ skip_all("only tested on devel builds")
 skip_all("no point in dumping on $^O")
   unless $^O =~ /^(linux|.*bsd|solaris)$/;
 
+skip_all("avoid coredump under ASan")
+  if  $Config{ccflags} =~ /-fsanitize=/;
+
 # execute in a work directory so File::Temp can clean up core dumps
 my $tmp = tempdir(CLEANUP => 1);
 
