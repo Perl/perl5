@@ -1917,6 +1917,8 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 /[a-z]/i	\N{KELVIN SIGN}	y	$&	\N{KELVIN SIGN}
+/[A-Z]/ia	\N{KELVIN SIGN}	y	$&	\N{KELVIN SIGN}
+/[A-Z]/iaa	\N{KELVIN SIGN}	n	-	-
 /[A-Z]/i	\N{LATIN SMALL LETTER LONG S}	y	$&	\N{LATIN SMALL LETTER LONG S}
 
 # RT #123840: these used to hang in re_intuit_start

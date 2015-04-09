@@ -15395,10 +15395,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     op = POSIXA;
                 }
             }
-            else if (AT_LEAST_ASCII_RESTRICTED || ! FOLD) {
+            else if (! FOLD || ASCII_FOLD_RESTRICTED) {
                 /* We can optimize A-Z or a-z, but not if they could match
-                 * something like the KELVIN SIGN under /i (/a means they
-                 * can't) */
+                 * something like the KELVIN SIGN under /i. */
                 if (prevvalue == 'A') {
                     if (value == 'Z'
 #ifdef EBCDIC
