@@ -11911,6 +11911,8 @@ Perl_ck_subr(pTHX_ OP *o)
                                     ? -(SSize_t)len : (SSize_t)len,
                         0
 		    );
+                    if (SvREADONLY(*const_class))
+                        SvREADONLY_on(shared);
 		    SvREFCNT_dec(*const_class);
 		    *const_class = shared;
 		}

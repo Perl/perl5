@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 146);
+plan(tests => 147);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -647,6 +647,14 @@ SKIP: {
 
     is(C3::H1->getline(), 'method in C3::H1',
        'restoring the stash returns to a method');
+}
+
+# RT #123619 constant class name should be read-only
+
+{
+    sub RT123619::f { chop $_[0] }
+    eval { 'RT123619'->f(); };
+    like ($@, qr/Modification of a read-only value attempted/, 'RT #123619');
 }
 
 __END__
