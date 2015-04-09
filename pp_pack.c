@@ -2709,6 +2709,12 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 #ifdef __GNUC__
 		/* to work round a gcc/x86 bug; don't use SvNV */
 		anv.nv = sv_2nv(fromstr);
+#    if defined(LONGDOUBLE_X86_80_BIT) && defined(USE_LONG_DOUBLE) \
+         && LONG_DOUBLESIZE > 10
+                /* GCC sometimes overwrites the padding in the
+                   assignment above */
+                Zero(anv.bytes+10, sizeof(anv.bytes) - 10, U8);
+#    endif
 #else
 		anv.nv = SvNV(fromstr);
 #endif
@@ -2726,6 +2732,11 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 #  ifdef __GNUC__
 		/* to work round a gcc/x86 bug; don't use SvNV */
 		aldouble.ld = (long double)sv_2nv(fromstr);
+#    if defined(LONGDOUBLE_X86_80_BIT) && LONG_DOUBLESIZE > 10
+                /* GCC sometimes overwrites the padding in the
+                   assignment above */
+                Zero(aldouble.bytes+10, sizeof(aldouble.bytes) - 10, U8);
+#    endif
 #  else
 		aldouble.ld = (long double)SvNV(fromstr);
 #  endif
