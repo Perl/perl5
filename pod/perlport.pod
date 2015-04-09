@@ -436,13 +436,14 @@ table.
 
 On VMS, some entries in the %ENV hash are dynamically created when
 their key is used on a read if they did not previously exist.  The
-values for C<$ENV{HOME}>, C<$ENV{TERM}>, C<$ENV{HOME}>, and C<$ENV{USER}>,
+values for C<$ENV{HOME}>, C<$ENV{TERM}>, C<$ENV{PATH}>, and C<$ENV{USER}>,
 are known to be dynamically generated.  The specific names that are
 dynamically generated may vary with the version of the C library on VMS,
-and more may exist than is documented.
+and more may exist than are documented.
 
-On VMS by default, changes to the %ENV hash are persistent after the process
-exits.  This can cause unintended issues.
+On VMS by default, changes to the %ENV hash persist after Perl exits.
+Subsequent invocations of Perl in the same process can inadvertently
+inherit environment settings that were meant to be temporary.
 
 Don't count on signals or C<%SIG> for anything.
 
@@ -976,17 +977,6 @@ Perl on VMS is discussed in L<perlvms> in the perl distribution.
 
 The official name of VMS as of this writing is OpenVMS.
 
-Perl on VMS can accept either VMS- or Unix-style file
-specifications as in either of the following:
-
-    $ perl -ne "print if /perl_setup/i" SYS$LOGIN:LOGIN.COM
-    $ perl -ne "print if /perl_setup/i" /sys$login/login.com
-
-but not a mixture of both as in:
-
-    $ perl -ne "print if /perl_setup/i" sys$login:/login.com
-    Can't open sys$login:/login.com: file specification syntax error
-
 Interacting with Perl from the Digital Command Language (DCL) shell
 often requires a different set of quotation marks than Unix shells do.
 For example:
@@ -1012,98 +1002,39 @@ you are so inclined.  For example:
 Do take care with C<$ ASSIGN/nolog/user SYS$COMMAND: SYS$INPUT> if your
 perl-in-DCL script expects to do things like C<< $read = <STDIN>; >>.
 
-The VMS operating system has two filesystems, known as ODS-2 and ODS-5.
+The VMS operating system has two filesystems, designated by their
+on-disk structure (ODS) level: ODS-2 and its successor ODS-5.  The
+initial port of Perl to VMS pre-dates ODS-5, but all current testing and
+development assumes ODS-5 and its capabilities, including case
+preservation, extended characters in filespecs, and names up to 8192
+bytes long.
 
-For ODS-2, filenames are in the format "name.extension;version".  The
-maximum length for filenames is 39 characters, and the maximum length for
-extensions is also 39 characters.  Version is a number from 1 to
-32767.  Valid characters are C</[A-Z0-9$_-]/>.
+Perl on VMS can accept either VMS- or Unix-style file
+specifications as in either of the following:
 
-The ODS-2 filesystem is case-insensitive and does not preserve case.
-Perl simulates this by converting all filenames to lowercase internally.
+    $ perl -ne "print if /perl_setup/i" SYS$LOGIN:LOGIN.COM
+    $ perl -ne "print if /perl_setup/i" /sys$login/login.com
 
-For ODS-5, filenames may have almost any character in them and can include
-Unicode characters.  Characters that could be misinterpreted by the DCL
-shell or file parsing utilities need to be prefixed with the C<^>
-character, or replaced with hexadecimal characters prefixed with the
-C<^> character.  Such prefixing is only needed with the pathnames are
-in VMS format in applications.  Programs that can accept the Unix format
-of pathnames do not need the escape characters.  The maximum length for
-filenames is 255 characters.  The ODS-5 file system can handle both
-a case preserved and a case sensitive mode.
+but not a mixture of both as in:
 
-ODS-5 is only available on the OpenVMS for 64 bit platforms.
+    $ perl -ne "print if /perl_setup/i" sys$login:/login.com
+    Can't open sys$login:/login.com: file specification syntax error
 
-Support for the extended file specifications is being done as optional
-settings to preserve backward compatibility with Perl scripts that
-assume the previous VMS limitations.
+In general, the easiest path to portability is always to specify
+filenames in Unix format unless they will need to be processed by native
+commands or utilities.  Because of this latter consideration, the
+File::Spec module by default returns native format specifications
+regardless of input format.  This default may be reversed so that
+filenames are always reported in Unix format by specifying the
+C<DECC$FILENAME_UNIX_REPORT> feature logical in the environment.
 
-In general routines on VMS that get a Unix format file specification
-should return it in a Unix format, and when they get a VMS format
-specification they should return a VMS format unless they are documented
-to do a conversion.
-
-For routines that generate return a file specification, VMS allows setting
-if the C library which Perl is built on if it will be returned in VMS
-format or in Unix format.
-
-With the ODS-2 file system, there is not much difference in syntax of
-filenames without paths for VMS or Unix.  With the extended character
-set available with ODS-5 there can be a significant difference.
-
-Because of this, existing Perl scripts written for VMS were sometimes
-treating VMS and Unix filenames interchangeably.  Without the extended
-character set enabled, this behavior will mostly be maintained for
-backwards compatibility.
-
-When extended characters are enabled with ODS-5, the handling of
-Unix formatted file specifications is to that of a Unix system.
-
-VMS file specifications without extensions have a trailing dot.  An
-equivalent Unix file specification should not show the trailing dot.
-
-The result of all of this, is that for VMS, for portable scripts, you
-can not depend on Perl to present the filenames in lowercase, to be
-case sensitive, and that the filenames could be returned in either
-Unix or VMS format.
-
-And if a routine returns a file specification, unless it is intended to
-convert it, it should return it in the same format as it found it.
-
-C<readdir> by default has traditionally returned lowercased filenames.
-When the ODS-5 support is enabled, it will return the exact case of the
-filename on the disk.
-
-Files without extensions have a trailing period on them, so doing a
-C<readdir> in the default mode with a file named F<A.;5> will
-return F<a.> when VMS is (though that file could be opened with
-C<open(FH, 'A')>).
-
-With support for extended file specifications and if C<opendir> was
-given a Unix format directory, a file named F<A.;5> will return F<a>
-and optionally in the exact case on the disk.  When C<opendir> is given
-a VMS format directory, then C<readdir> should return F<a.>, and
-again with the optionally the exact case.
-
-RMS had an eight level limit on directory depths from any rooted logical
-(allowing 16 levels overall) prior to VMS 7.2, and even with versions of
-VMS on VAX up through 7.3.  Hence C<PERL_ROOT:[LIB.2.3.4.5.6.7.8]> is a
-valid directory specification but C<PERL_ROOT:[LIB.2.3.4.5.6.7.8.9]> is
-not.  F<Makefile.PL> authors might have to take this into account, but at
-least they can refer to the former as C</PERL_ROOT/lib/2/3/4/5/6/7/8/>.
-
-Pumpkings and module integrators can easily see whether files with too many
-directory levels have snuck into the core by running the following in the
-top-level source directory:
-
- $ perl -ne "$_=~s/\s+.*//; print if scalar(split /\//) > 8;" < MANIFEST
-
-
-The VMS::Filespec module, which gets installed as part of the build
-process on VMS, is a pure Perl module that can easily be installed on
-non-VMS platforms and can be helpful for conversions to and from RMS
-native formats.  It is also now the only way that you should check to
-see if VMS is in a case sensitive mode.
+The file type, or extension, is always present in a VMS-format file
+specification even if it's zero-length.  This means that, by default,
+C<readdir> will return a trailing dot on a file with no extension, so
+where you would see C<a> on Unix you'll see C<a.> on VMS.  However, the
+trailing dot may be suppressed by enabling the
+C<DECC$READDIR_DROPDOTNOTYPE> feature in the environment (see the CRTL
+documentation on feature logical names).
 
 What C<\n> represents depends on the type of file opened.  It usually
 represents C<\012> but it could also be C<\015>, C<\012>, C<\015\012>,
@@ -1111,32 +1042,8 @@ C<\000>, C<\040>, or nothing depending on the file organization and
 record format.  The VMS::Stdio module provides access to the
 special fopen() requirements of files with unusual attributes on VMS.
 
-TCP/IP stacks are optional on VMS, so socket routines might not be
-implemented.  UDP sockets may not be supported.
-
-The TCP/IP library support for all current versions of VMS is dynamically
-loaded if present, so even if the routines are configured, they may
-return a status indicating that they are not implemented.
-
 The value of C<$^O> on OpenVMS is "VMS".  To determine the architecture
-that you are running on without resorting to loading all of C<%Config>
-you can examine the content of the C<@INC> array like so:
-
-    if (grep(/VMS_AXP/, @INC)) {
-        print "I'm on Alpha!\n";
-
-    } elsif (grep(/VMS_VAX/, @INC)) {
-        print "I'm on VAX!\n";
-
-    } elsif (grep(/VMS_IA64/, @INC)) {
-        print "I'm on IA64!\n";
-
-    } else {
-        print "I'm not so sure about where $^O is...\n";
-    }
-
-In general, the significant differences should only be if Perl is running
-on VMS_VAX or one of the 64 bit OpenVMS platforms.
+that you are running on refer to C<$Config{'archname'}>.
 
 On VMS, perl determines the UTC offset from the C<SYS$TIMEZONE_DIFFERENTIAL>
 logical name.  Although the VMS epoch began at 17-NOV-1858 00:00:00.00,
@@ -1158,6 +1065,10 @@ vmsperl list, vmsperl-subscribe@perl.org
 =item *
 
 vmsperl on the web, L<http://www.sidhe.org/vmsperl/index.html>
+
+=item *
+
+VMS Software Inc. web site, L<http://www.vmssoftware.com>
 
 =back
 
