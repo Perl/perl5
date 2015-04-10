@@ -384,7 +384,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<pack("D", $x)> and C<pack("F", $x)> now zero the padding on x86 long
+double builds.  GCC 4.8 and later, under some build options, would
+either overwrite the zero-initialized padding, or bypass the
+initialized buffer entirely.  This caused F<op/pack.t> to fail.  [perl
+#123971]
 
 =back
 
