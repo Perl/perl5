@@ -1404,7 +1404,7 @@ NaNmul:-inf:NaN
 6:120:720
 10:10000:100000
 &fdiv-list
-0:0:NaN,NaN
+0:0:NaN,0
 0:1:0,0
 9:4:2,1
 9:5:1,4
@@ -1499,13 +1499,13 @@ $div_scale = 40
 0:inf:0
 0:-inf:0
 5:inf:5
-5:-inf:5
--5:inf:-5
+5:-inf:-inf
+-5:inf:inf
 -5:-inf:-5
-inf:5:0
--inf:5:0
-inf:-5:0
--inf:-5:0
+inf:5:NaN
+-inf:5:NaN
+inf:-5:NaN
+-inf:-5:NaN
 5:5:0
 -5:-5:0
 inf:inf:NaN
@@ -1514,14 +1514,12 @@ inf:inf:NaN
 inf:-inf:NaN
 8:0:8
 inf:0:inf
-# exceptions to remainder rule
 -inf:0:-inf
 -8:0:-8
-0:0:NaN
+0:0:0
 abc:abc:NaN
 abc:1:abc:NaN
 1:abc:NaN
-0:0:NaN
 0:1:0
 1:0:1
 0:-1:0

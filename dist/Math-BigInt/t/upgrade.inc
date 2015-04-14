@@ -841,19 +841,19 @@ NaNmul:-inf:NaN
 5:8:0,5
 0:8:0,0
 11:2:5,1
-11:-2:-5,-1
--11:2:-5,1
+11:-2:-6,-1
+-11:2:-6,1
 # see table in documentation in MBI
 0:inf:0,0
 0:-inf:0,0
 5:inf:0,5
-5:-inf:0,5
--5:inf:0,-5
+5:-inf:-1,-inf
+-5:inf:-1,inf
 -5:-inf:0,-5
-inf:5:inf,0
--inf:5:-inf,0
-inf:-5:-inf,0
--inf:-5:inf,0
+inf:5:inf,NaN
+-inf:5:-inf,NaN
+inf:-5:-inf,NaN
+-inf:-5:inf,NaN
 5:5:1,0
 -5:-5:1,0
 inf:inf:NaN,NaN
@@ -865,7 +865,7 @@ inf:0:inf,inf
 # exceptions to remainder rule
 -8:0:-inf,-8
 -inf:0:-inf,-inf
-0:0:NaN,NaN
+0:0:NaN,0
 &bdiv
 abc:abc:NaN
 abc:1:NaN
@@ -875,8 +875,8 @@ abc:1:NaN
 0:inf:0
 0:-inf:0
 5:inf:0
-5:-inf:0
--5:inf:0
+5:-inf:-1
+-5:inf:-1
 -5:-inf:0
 inf:5:inf
 -inf:5:-inf
@@ -892,7 +892,6 @@ inf:-inf:NaN
 inf:0:inf
 -8:0:-inf
 -inf:0:-inf
-0:0:NaN
 11:2:5.5^
 -11:-2:5.5^
 -11:2:-5.5^
@@ -950,13 +949,13 @@ inf:0:inf
 0:inf:0
 0:-inf:0
 5:inf:5
-5:-inf:5
--5:inf:-5
+5:-inf:-inf
+-5:inf:inf
 -5:-inf:-5
-inf:5:0
--inf:5:0
-inf:-5:0
--inf:-5:0
+inf:5:NaN
+-inf:5:NaN
+inf:-5:NaN
+-inf:-5:NaN
 5:5:0
 -5:-5:0
 inf:inf:NaN
@@ -965,14 +964,12 @@ inf:inf:NaN
 inf:-inf:NaN
 8:0:8
 inf:0:inf
-# exceptions to remainder rule
 -inf:0:-inf
 -8:0:-8
-0:0:NaN
+0:0:0
 abc:abc:NaN
 abc:1:abc:NaN
 1:abc:NaN
-0:0:NaN
 0:1:0
 1:0:1
 0:-1:0

@@ -18,10 +18,10 @@ use Math::BigFloat;
 use Math::BigInt::Subclass;
 use Math::BigFloat::Subclass;
 
-my @classes = 
-  qw/Math::BigInt Math::BigFloat
-     Math::BigInt::Subclass Math::BigFloat::Subclass
-    /;
+my @biclasses = 
+  qw/ Math::BigInt   Math::BigInt::Subclass /;
+my @bfclasses =
+  qw/ Math::BigFloat Math::BigFloat::Subclass /;
 
 my (@args,$x,$y,$z);
 
@@ -77,7 +77,7 @@ foreach (qw/
   /)
   {
   @args = split /:/,$_;
-  for my $class (@classes)
+  for my $class (@biclasses, @bfclasses)
     {
     $x = $class->new($args[0]);
     $y = $class->new($args[1]);
@@ -141,7 +141,7 @@ foreach (qw/
   /)
   {
   @args = split /:/,$_;
-  for my $class (@classes)
+  for my $class (@biclasses, @bfclasses)
     {
     $x = $class->new($args[0]);
     $y = $class->new($args[1]);
@@ -205,7 +205,7 @@ foreach (qw/
   /)
   {
   @args = split /:/,$_;
-  for my $class (@classes)
+  for my $class (@biclasses, @bfclasses)
     {
     $x = $class->new($args[0]);
     $y = $class->new($args[1]);
@@ -215,6 +215,92 @@ foreach (qw/
 
     is($x->bstr(),$args[2],"x $class $args[0] * $args[1]");
     is($r->bstr(),$args[2],"r $class $args[0] * $args[1]");
+    }
+  }
+
+# /
+foreach (qw/
+  -inf:-inf:NaN
+  -1:-inf:0
+  -0:-inf:0
+  0:-inf:-0
+  1:-inf:-1
+  inf:-inf:NaN
+  NaN:-inf:NaN
+
+  -inf:-1:inf
+  -1:-1:1
+  -0:-1:0
+  0:-1:-0
+  1:-1:-1
+  inf:-1:-inf
+  NaN:-1:NaN
+
+  -inf:0:-inf
+  -1:0:-inf
+  -0:0:NaN
+  0:0:NaN
+  1:0:inf
+  inf:0:inf
+  NaN:0:NaN
+
+  -inf:1:-inf
+  -1:1:-1
+  -0:1:-0
+  0:1:0
+  1:1:1
+  inf:1:inf
+  NaN:1:NaN
+
+  -inf:inf:NaN
+  -1:inf:-1
+  -0:inf:-0
+  0:inf:0
+  1:inf:0
+  inf:inf:NaN
+  NaN:inf:NaN
+
+  -inf:NaN:NaN
+  -1:NaN:NaN
+  -0:NaN:NaN
+  0:NaN:NaN
+  1:NaN:NaN
+  inf:NaN:NaN
+  NaN:NaN:NaN
+  /)
+  {
+  @args = split /:/,$_;
+  for my $class (@biclasses, @bfclasses)
+    {
+    $x = $class->new($args[0]);
+    $y = $class->new($args[1]);
+    $args[2] = '0' if $args[2] eq '-0';		# BigInt/Float hasn't got -0
+
+    my $t = $x->copy();
+    my $tmod = $t->copy();
+
+    # bdiv in scalar context
+    unless ($class =~ /^Math::BigFloat/) {
+    my $r = $x->bdiv($y);
+    is($x->bstr(),$args[2],"x $class $args[0] / $args[1]");
+    is($r->bstr(),$args[2],"r $class $args[0] / $args[1]");
+    }
+
+    # bmod and bdiv in list context
+    my ($d,$rem) = $t->bdiv($y);
+
+    # bdiv in list context
+    is($t->bstr(),$args[2],"t $class $args[0] / $args[1]");
+    is($d->bstr(),$args[2],"d $class $args[0] / $args[1]");
+    
+    # bmod
+    my $m = $tmod->bmod($y);
+
+    # bmod() agrees with bdiv?
+    is($m->bstr(),$rem->bstr(),"m $class $args[0] % $args[1]");
+    # bmod() return agrees with set value?
+    is($tmod->bstr(),$m->bstr(),"o $class $args[0] % $args[1]");
+
     }
   }
 
@@ -270,7 +356,7 @@ foreach (qw/
   /)
   {
   @args = split /:/,$_;
-  for my $class (@classes)
+  for my $class (@bfclasses)
     {
     $x = $class->new($args[0]);
     $y = $class->new($args[1]);
@@ -284,21 +370,6 @@ foreach (qw/
     is($x->bstr(),$args[2],"x $class $args[0] / $args[1]");
     is($r->bstr(),$args[2],"r $class $args[0] / $args[1]");
 
-    # bmod and bdiv in list context
-    my ($d,$rem) = $t->bdiv($y);
-
-    # bdiv in list context
-    is($t->bstr(),$args[2],"t $class $args[0] / $args[1]");
-    is($d->bstr(),$args[2],"d $class $args[0] / $args[1]");
-    
-    # bmod
-    my $m = $tmod->bmod($y);
-
-    # bmod() agrees with bdiv?
-    is($m->bstr(),$rem->bstr(),"m $class $args[0] % $args[1]");
-    # bmod() return agrees with set value?
-    is($tmod->bstr(),$m->bstr(),"o $class $args[0] % $args[1]");
-
     }
   }
 
@@ -309,7 +380,7 @@ foreach (qw/
 # mind what NaN actually is, see [perl #33106].
 
 #
-#foreach my $c (@classes)
+#foreach my $c (@biclasses, @bfclasses)
 #  {
 #  my $x = $c->bnan();
 #  my $y = $c->bnan();		# test with two different objects, too
