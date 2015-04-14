@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 686;
+use Test::More tests => 696;
 
 use Math::BigRat lib => 'Calc';
 
