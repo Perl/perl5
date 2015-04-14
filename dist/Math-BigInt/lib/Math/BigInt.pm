@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.9997';
+$VERSION = '1.999701';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -1657,103 +1657,175 @@ sub bmuladd
   $x->round(@r);
   }
 
-sub _div_inf
+sub bdiv
   {
-  # helper function that handles +-inf cases for bdiv()/bmod() to reuse code
-  my ($self,$x,$y) = @_;
 
-  # NaN if x == NaN or y == NaN or x==y==0
-  return wantarray ? ($x->bnan(),$self->bnan()) : $x->bnan()
-   if (($x->is_nan() || $y->is_nan())   ||
-       ($x->is_zero() && $y->is_zero()));
+    # This does floored division, where the quotient is floored toward negative
+    # infinity and the remainder has the same sign as the divisor.
 
-  # +-inf / +-inf == NaN, remainder also NaN
-  if (($x->{sign} =~ /^[+-]inf$/) && ($y->{sign} =~ /^[+-]inf$/))
-    {
-    return wantarray ? ($x->bnan(),$self->bnan()) : $x->bnan();
-    }
-  # x / +-inf => 0, remainder x (works even if x == 0)
-  if ($y->{sign} =~ /^[+-]inf$/)
-    {
-    my $t = $x->copy();		# bzero clobbers up $x
-    return wantarray ? ($x->bzero(),$t) : $x->bzero()
+    # Set up parameters.
+    my ($self,$x,$y,@r) = (ref($_[0]),@_);
+
+    # objectify() is costly, so avoid it if we can.
+    if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1]))) {
+        ($self,$x,$y,@r) = objectify(2,@_);
     }
 
-  # 5 / 0 => +inf, -6 / 0 => -inf
-  # +inf / 0 = inf, inf,  and -inf / 0 => -inf, -inf 
-  # exception:   -8 / 0 has remainder -8, not 8
-  # exception: -inf / 0 has remainder -inf, not inf
-  if ($y->is_zero())
-    {
-    # +-inf / 0 => special case for -inf
-    return wantarray ?  ($x,$x->copy()) : $x if $x->is_inf();
-    if (!$x->is_zero() && !$x->is_inf())
-      {
-      my $t = $x->copy();		# binf clobbers up $x
-      return wantarray ?
-       ($x->binf($x->{sign}),$t) : $x->binf($x->{sign})
+    return $x if $x->modify('bdiv');
+
+    my $wantarray = wantarray;          # call only once
+
+    # At least one argument is NaN. Return NaN for both quotient and the
+    # modulo/remainder.
+
+    if ($x -> is_nan() || $y -> is_nan()) {
+        return $wantarray ? ($x -> bnan(), $self -> bnan()) : $x -> bnan();
+    }
+
+    # Divide by zero and modulo zero.
+    #
+    # Division: Use the common convention that x / 0 is inf with the same sign
+    # as x, except when x = 0, where we return NaN. This is also what earlier
+    # versions did.
+    #
+    # Modulo: In modular arithmetic, the congruence relation z = x (mod y)
+    # means that there is some integer k such that z - x = k y. If y = 0, we
+    # get z - x = 0 or z = x. This is also what earlier versions did, except
+    # that 0 % 0 returned NaN.
+    #
+    #     inf / 0 =  inf                     inf % 0 =  inf
+    #       5 / 0 =  inf                       5 % 0 =    5
+    #       0 / 0 =  NaN                       0 % 0 =    0 (before: NaN)
+    #      -5 / 0 = -inf                      -5 % 0 =   -5
+    #    -inf / 0 = -inf                    -inf % 0 = -inf
+
+    if ($y -> is_zero()) {
+        my ($quo, $rem);
+        if ($wantarray) {
+                $rem = $x -> copy();
+            }
+        if ($x -> is_zero()) {
+            $quo = $x -> bnan();
+        } else {
+            $quo = $x -> binf($x -> {sign});
+        }
+        return $wantarray ? ($quo, $rem) : $quo;
+    }
+
+    # Numerator (dividend) is +/-inf, and denominator is finite and non-zero.
+    # The divide by zero cases are covered above. In all of the cases listed
+    # below we return the same as core Perl.
+    #
+    #     inf / -inf =  NaN                  inf % -inf =  NaN
+    #     inf /   -5 = -inf                  inf %   -5 =  NaN (before: 0)
+    #     inf /    5 =  inf                  inf %    5 =  NaN (before: 0)
+    #     inf /  inf =  NaN                  inf %  inf =  NaN
+    #
+    #    -inf / -inf =  NaN                 -inf % -inf =  NaN
+    #    -inf /   -5 =  inf                 -inf %   -5 =  NaN (before: 0)
+    #    -inf /    5 = -inf                 -inf %    5 =  NaN (before: 0)
+    #    -inf /  inf =  NaN                 -inf %  inf =  NaN
+
+    if ($x -> is_inf()) {
+        my ($quo, $rem);
+        $rem = $self -> bnan() if $wantarray;
+        if ($y -> is_inf()) {
+            $quo = $x -> bnan();
+        } else {
+            my $sign = $x -> bcmp(0) == $y -> bcmp(0) ? '+' : '-';
+            $quo = $x -> binf($sign);
       }
+        return $wantarray ? ($quo, $rem) : $quo;
     }
 
-  # last case: +-inf / ordinary number
-  my $sign = '+inf';
-  $sign = '-inf' if substr($x->{sign},0,1) ne $y->{sign};
-  $x->{sign} = $sign;
-  return wantarray ? ($x,$self->bzero()) : $x;
+    # Denominator (divisor) is +/-inf. The cases when the numerator is +/-inf
+    # are covered above. In the modulo cases (in the right column) we return
+    # the same as core Perl, which does floored division, so for consistency we
+    # also do floored division in the division cases (in the left column).
+    #
+    #      -5 /  inf =   -1 (before: 0)       -5 %  inf =  inf (before: -5)
+    #       0 /  inf =    0                    0 %  inf =    0
+    #       5 /  inf =    0                    5 %  inf =    5
+    #
+    #      -5 / -inf =    0                   -5 % -inf =   -5
+    #       0 / -inf =    0                    0 % -inf =    0
+    #       5 / -inf =   -1 (before: 0)        5 % -inf = -inf (before: 5)
+
+    if ($y -> is_inf()) {
+        my ($quo, $rem);
+        if ($x -> is_zero() || $x -> bcmp(0) == $y -> bcmp(0)) {
+            $rem = $x -> copy() if $wantarray;
+            $quo = $x -> bzero();
+        } else {
+            $rem = $self -> binf($y -> {sign}) if $wantarray;
+            $quo = $x -> bone('-');
+        }
+        return $wantarray ? ($quo, $rem) : $quo;
   }
 
-sub bdiv 
-  {
-  # (dividend: BINT or num_str, divisor: BINT or num_str) return 
-  # (BINT,BINT) (quo,rem) or BINT (only rem)
-
-  # set up parameters
-  my ($self,$x,$y,@r) = (ref($_[0]),@_);
-  # objectify is costly, so avoid it 
-  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
-    {
-    ($self,$x,$y,@r) = objectify(2,@_);
-    } 
-
-  return $x if $x->modify('bdiv');
-
-  return $self->_div_inf($x,$y)
-   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
+  # At this point, both the numerator and denominator are finite numbers, and
+  # the denominator (divisor) is non-zero.
 
   return $upgrade->bdiv($upgrade->new($x),$upgrade->new($y),@r)
    if defined $upgrade;
 
   $r[3] = $y;					# no push!
 
-  # calc new sign and in case $y == +/- 1, return $x
-  my $xsign = $x->{sign};				# keep
-  $x->{sign} = ($x->{sign} ne $y->{sign} ? '-' : '+'); 
+    # Inialize remainder.
 
-  if (wantarray)
-    {
     my $rem = $self->bzero(); 
+
+    # Are both operands the same object, i.e., like $x -> bdiv($x)?
+    # If so, flipping the sign of $y also flips the sign of $x.
+
+    my $xsign = $x->{sign};
+    my $ysign = $y->{sign};
+
+    $y->{sign} =~ tr/+-/-+/;            # Flip the sign of $y, and see ...
+    my $same = $xsign ne $x->{sign};    # ... if that changed the sign of $x.
+    $y->{sign} = $ysign;                # Re-insert the original sign.
+
+    if ($same) {
+        $x -> bone();
+    } else {
     ($x->{value},$rem->{value}) = $CALC->_div($x->{value},$y->{value});
-    $x->{sign} = '+' if $CALC->_is_zero($x->{value});
-    $rem->{_a} = $x->{_a};
-    $rem->{_p} = $x->{_p};
+
+        if ($CALC -> _is_zero($rem->{value})) {
+            if ($xsign eq $ysign || $CALC -> _is_zero($x->{value})) {
+                $x->{sign} = '+';
+            } else {
+                $x->{sign} = '-';
+            }
+        } else {
+            if ($xsign eq $ysign) {
+                $x->{sign} = '+';
+            } else {
+                if ($xsign eq '+') {
+                    $x -> badd(1);
+                } else {
+                    $x -> bsub(1);
+                }
+                $x->{sign} = '-';
+            }
+        }
+    }
+
     $x->round(@r);
-    if (! $CALC->_is_zero($rem->{value}))
-      {
-      $rem->{sign} = $y->{sign};
-      $rem = $y->copy()->bsub($rem) if $xsign ne $y->{sign}; # one of them '-'
+
+    if ($wantarray) {
+        unless ($CALC -> _is_zero($rem->{value})) {
+            if ($xsign ne $ysign) {
+                $rem = $y -> copy() -> babs() -> bsub($rem);
       }
-    else
-      {
-      $rem->{sign} = '+';			# do not leave -0
+            $rem->{sign} = $ysign;
       }
+        $rem->{_a} = $x->{_a};
+        $rem->{_p} = $x->{_p};
     $rem->round(@r);
     return ($x,$rem);
     }
 
-  $x->{value} = $CALC->_div($x->{value},$y->{value});
-  $x->{sign} = '+' if $CALC->_is_zero($x->{value});
-
-  $x->round(@r);
+    return $x;
   }
 
 ###############################################################################
@@ -1761,11 +1833,14 @@ sub bdiv
 
 sub bmod 
   {
-  # modulus (or remainder)
-  # (BINT or num_str, BINT or num_str) return BINT
 
-  # set up parameters
+    # This is the remainder after floored division, where the quotient is
+    # floored toward negative infinity and the remainder has the same sign as
+    # the divisor.
+
+    # Set up parameters.
   my ($self,$x,$y,@r) = (ref($_[0]),@_);
+
   # objectify is costly, so avoid it
   if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
     {
@@ -1774,35 +1849,62 @@ sub bmod
 
   return $x if $x->modify('bmod');
   $r[3] = $y;					# no push!
-  if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero())
-    {
-    my ($d,$r) = $self->_div_inf($x,$y);
-    $x->{sign} = $r->{sign};
-    $x->{value} = $r->{value};
-    return $x->round(@r);
+
+    # At least one argument is NaN.
+
+    if ($x -> is_nan() || $y -> is_nan()) {
+        return $x -> bnan();
     }
 
-  # calc new sign and in case $y == +/- 1, return $x
+    # Modulo zero. See documentation for bdiv().
+
+    if ($y -> is_zero()) {
+            return $x;
+        }
+
+    # Numerator (dividend) is +/-inf.
+
+    if ($x -> is_inf()) {
+        return $x -> bnan();
+    }
+
+    # Denominator (divisor) is +/-inf.
+
+    if ($y -> is_inf()) {
+        if ($x -> is_zero() || $x -> bcmp(0) == $y -> bcmp(0)) {
+            return $x;
+        } else {
+            return $x -> binf($y -> sign());
+        }
+    }
+
+    # Calc new sign and in case $y == +/- 1, return $x.
+
   $x->{value} = $CALC->_mod($x->{value},$y->{value});
-  if (!$CALC->_is_zero($x->{value}))
+  if ($CALC -> _is_zero($x->{value}))
+    {
+        $x->{sign} = '+';       # do not leave -0
+    }
+  else
     {
     $x->{value} = $CALC->_sub($y->{value},$x->{value},1) 	# $y-$x
       if ($x->{sign} ne $y->{sign});
     $x->{sign} = $y->{sign};
     }
-   else
-    {
-    $x->{sign} = '+';				# do not leave -0
-    }
+
   $x->round(@r);
   }
 
 sub bmodinv
   {
-  # Return modular multiplicative inverse: z is the modular inverse of x (mod
-  # y) if and only if x*z (mod y) = 1 (mod y). If the modulus y is larger than
-  # one, x and z are relative primes (i.e., their greatest common divisor is
-  # one).
+  # Return modular multiplicative inverse:
+  #
+  #   z is the modular inverse of x (mod y) if and only if
+  #
+  #       x*z ≡ 1  (mod y)
+  #
+  # If the modulus y is larger than one, x and z are relative primes (i.e.,
+  # their greatest common divisor is one).
   #
   # If no modular multiplicative inverse exists, NaN is returned.
 
@@ -1896,8 +1998,17 @@ sub bmodpow
 
   return $num->bnan() if ($num->{sign} =~ /NaN|inf/ ||  # NaN, -inf, +inf
                           $exp->{sign} =~ /NaN|inf/ ||  # NaN, -inf, +inf
-                          $mod->{sign} =~ /NaN|inf/ ||  # NaN, -inf, +inf
-                          $mod->is_zero());
+                          $mod->{sign} =~ /NaN|inf/);   # NaN, -inf, +inf
+
+  # Modulo zero. See documentation for Math::BigInt's bmod() method.
+
+  if ($mod -> is_zero()) {
+      if ($num -> is_zero()) {
+          return $self -> bnan();
+      } else {
+          return $num -> copy();
+      }
+  }
 
   # Compute 'a (mod m)', ignoring the signs on 'a' and 'm'. If the resulting
   # value is zero, the output is also zero, regardless of the signs on 'a' and
@@ -3927,11 +4038,19 @@ This method was added in v1.87 of Math::BigInt (June 2007).
 =item bdiv()
 
     $x->bdiv($y);		# divide, set $x to quotient
-				# return (quo,rem) or quo if scalar
+
+Returns $x divided by $y. In list context, does floored division (F-division),
+where the quotient is the greatest integer less than or equal to the quotient
+of the two operands. Consequently, the remainder is either zero or has the same
+sign as the second operand. In scalar context, only the quotient is returned.
 
 =item bmod()
 
     $x->bmod($y);		# modulus (x % y)
+
+Returns $x modulo $y. When $x is finite, and $y is finite and non-zero, the
+result is identical to the remainder after floored division (F-division), i.e.,
+identical to the result from Perl's % operator.
 
 =item bmodinv()
 

@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.9997';
+$VERSION = '1.999701';
 require 5.006002;
 
 require Exporter;
@@ -1776,7 +1776,7 @@ sub bmuladd
 sub bdiv 
   {
   # (dividend: BFLOAT or num_str, divisor: BFLOAT or num_str) return 
-  # (BFLOAT,BFLOAT) (quo,rem) or BFLOAT (only rem)
+    # (BFLOAT, BFLOAT) (quo, rem) or BFLOAT (only quo)
 
   # set up parameters
   my ($self,$x,$y,$a,$p,$r) = (ref($_[0]),@_);
@@ -1788,10 +1788,80 @@ sub bdiv
 
   return $x if $x->modify('bdiv');
 
-  return $self->_div_inf($x,$y)
-   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
+    my $wantarray = wantarray;          # call only once
 
-  # x== 0 # also: or y == 1 or y == -1
+    # At least one argument is NaN. This is handled the same way as in
+    # Math::BigInt -> bdiv().
+
+    if ($x -> is_nan() || $y -> is_nan()) {
+        return $wantarray ? ($x -> bnan(), $self -> bnan()) : $x -> bnan();
+    }
+
+    # Divide by zero and modulo zero. This is handled the same way as in
+    # Math::BigInt -> bdiv(). See the comment in the code for Math::BigInt ->
+    # bdiv() for further details.
+
+    if ($y -> is_zero()) {
+        my ($quo, $rem);
+        if ($wantarray) {
+            $rem = $x -> copy();
+        }
+        if ($x -> is_zero()) {
+            $quo = $x -> bnan();
+        } else {
+            $quo = $x -> binf($x -> {sign});
+        }
+        return $wantarray ? ($quo, $rem) : $quo;
+    }
+
+    # Numerator (dividend) is +/-inf. This is handled the same way as in
+    # Math::BigInt -> bdiv(). See the comment in the code for Math::BigInt ->
+    # bdiv() for further details.
+
+    if ($x -> is_inf()) {
+        my ($quo, $rem);
+        $rem = $self -> bnan() if $wantarray;
+        if ($y -> is_inf()) {
+            $quo = $x -> bnan();
+        } else {
+            my $sign = $x -> bcmp(0) == $y -> bcmp(0) ? '+' : '-';
+            $quo = $x -> binf($sign);
+        }
+        return $wantarray ? ($quo, $rem) : $quo;
+    }
+
+  # Denominator (divisor) is +/-inf. This is handled the same way as in
+  # Math::BigInt -> bdiv(), with one exception: In scalar context,
+  # Math::BigFloat does true division (although rounded), not floored division
+  # (F-division), so a finite number divided by +/-inf is always zero. See the
+  # comment in the code for Math::BigInt -> bdiv() for further details.
+
+  if ($y -> is_inf()) {
+      my ($quo, $rem);
+      if ($wantarray) {
+          if ($x -> is_zero() || $x -> bcmp(0) == $y -> bcmp(0)) {
+              $rem = $x -> copy();
+              $quo = $x -> bzero();
+          } else {
+              $rem = $self -> binf($y -> {sign});
+              $quo = $x -> bone('-');
+          }
+          return ($quo, $rem);
+      } else {
+        if ($y -> is_inf()) {
+            if ($x -> is_nan() || $x -> is_inf()) {
+                return $x -> bnan();
+            } else {
+                return $x -> bzero();
+            }
+        }
+    }
+    }
+
+  # At this point, both the numerator and denominator are finite numbers, and
+  # the denominator (divisor) is non-zero.
+
+  # x == 0?
   return wantarray ? ($x,$self->bzero()) : $x if $x->is_zero();
 
   # upgrade ?
@@ -1805,32 +1875,29 @@ sub bdiv
   return $x if $x->is_nan();		# error in _find_round_parameters?
 
   # no rounding at all, so must use fallback
-  if (scalar @params == 0)
+    if (scalar @params == 0)
     {
     # simulate old behaviour
     $params[0] = $self->div_scale();	# and round to it as accuracy
     $scale = $params[0]+4; 		# at least four more for proper round
     $params[2] = $r;			# round mode by caller or undef
     $fallback = 1;			# to clear a/p afterwards
-    }
-  else
-    {
+    } else {
     # the 4 below is empirical, and there might be cases where it is not
     # enough...
     $scale = abs($params[0] || $params[1]) + 4;	# take whatever is defined
     }
 
-  my $rem; $rem = $self->bzero() if wantarray;
+    my $rem;
+    $rem = $self -> bzero() if wantarray;
 
   $y = $self->new($y) unless $y->isa('Math::BigFloat');
 
-  my $lx = $MBI->_len($x->{_m}); my $ly = $MBI->_len($y->{_m});
+  my $lx = $MBI -> _len($x->{_m}); my $ly = $MBI -> _len($y->{_m});
   $scale = $lx if $lx > $scale;
   $scale = $ly if $ly > $scale;
   my $diff = $ly - $lx;
   $scale += $diff if $diff > 0;		# if lx << ly, but not if ly << lx!
-
-  # already handled inf/NaN/-inf above:
 
   # check that $y is not 1 nor -1 and cache the result:
   my $y_not_one = !($MBI->_is_zero($y->{_e}) && $MBI->_is_one($y->{_m}));
@@ -1899,7 +1966,7 @@ sub bdiv
     {
     if ($y_not_one)
       {
-      $x -> bint();
+      $x -> bfloor();
       $rem->bmod($y,@params);			# copy already done
       }
     if ($fallback)
@@ -1926,19 +1993,35 @@ sub bmod
 
   return $x if $x->modify('bmod');
 
-  # handle NaN, inf, -inf
-  if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
-    {
-    my ($d,$re) = $self->SUPER::_div_inf($x,$y);
-    $x->{sign} = $re->{sign};
-    $x->{_e} = $re->{_e};
-    $x->{_m} = $re->{_m};
-    return $x->round($a,$p,$r,$y);
+    # At least one argument is NaN. This is handled the same way as in
+    # Math::BigInt -> bmod().
+
+    if ($x -> is_nan() || $y -> is_nan()) {
+        return $x -> bnan();
     } 
-  if ($y->is_zero())
-    {
-    return $x->bnan() if $x->is_zero();
+
+    # Modulo zero. This is handled the same way as in Math::BigInt -> bmod().
+
+    if ($y -> is_zero()) {
     return $x;
+    }
+
+    # Numerator (dividend) is +/-inf. This is handled the same way as in
+    # Math::BigInt -> bmod().
+
+    if ($x -> is_inf()) {
+        return $x -> bnan();
+    }
+
+    # Denominator (divisor) is +/-inf. This is handled the same way as in
+    # Math::BigInt -> bmod().
+
+    if ($y -> is_inf()) {
+        if ($x -> is_zero() || $x -> bcmp(0) == $y -> bcmp(0)) {
+            return $x;
+        } else {
+            return $x -> binf($y -> sign());
+        }
     }
 
   return $x->bzero() if $x->is_zero()
@@ -1947,13 +2030,17 @@ sub bmod
     ($MBI->_is_zero($y->{_e}) && $MBI->_is_one($y->{_m})));
 
   my $cmp = $x->bacmp($y);			# equal or $x < $y?
-  return $x->bzero($a,$p) if $cmp == 0;		# $x == $y => result 0
+    if ($cmp == 0) {                            # $x == $y => result 0
+        return $x -> bzero($a, $p);
+    }
 
   # only $y of the operands negative? 
-  my $neg = 0; $neg = 1 if $x->{sign} ne $y->{sign};
+    my $neg = $x->{sign} ne $y->{sign} ? 1 : 0;
 
   $x->{sign} = $y->{sign};				# calc sign first
-  return $x->round($a,$p,$r) if $cmp < 0 && $neg == 0;	# $x < $y => result $x
+    if ($cmp < 0 && $neg == 0) {                # $x < $y => result $x
+        return $x -> round($a, $p, $r);
+    }
   
   my $ym = $MBI->_copy($y->{_m});
   
@@ -1996,7 +2083,7 @@ sub bmod
   $x->{sign} = '+' if $MBI->_is_zero($x->{_m});		# fix sign for -0
   $x->bnorm();
 
-  if ($neg != 0)	# one of them negative => correct in place
+    if ($neg != 0 && ! $x -> is_zero())   # one of them negative => correct in place
     {
     my $r = $y - $x;
     $x->{_m} = $r->{_m};
@@ -4027,8 +4114,8 @@ Actual math is done by using the class defined with C<< with => Class; >>
 (which defaults to BigInts) to represent the mantissa and exponent.
 
 The sign C</^[+-]$/> is stored separately. The string 'NaN' is used to 
-represent the result when input arguments are not numbers, as well as 
-the result of dividing by zero.
+represent the result when input arguments are not numbers, and 'inf' and
+'-inf' are used to represent positive and negative infinity, respectively.
 
 =head2 mantissa(), exponent() and parts()
 
@@ -4207,6 +4294,25 @@ to the math operation as additional parameter:
 Note: You probably want to use L</accuracy()> instead. With L</accuracy()> you
 set the number of digits each result should have, with L</precision()> you
 set the place where to round!
+
+=item bdiv()
+
+        $q = $x->bdiv($y);
+        ($q, $r) = $x->bdiv($y);
+
+In scalar context, divides $x by $y and returns the result to the given or
+default accuracy/precision. In list context, does floored division
+(F-division), returning an integer $q and a remainder $r so that $x = $q * $y +
+$r. The remainer (modulo) is equal to what is returned by C<$x->bmod($y)>.
+
+=item bmod()
+
+	$x->bmod($y);
+
+Returns $x modulo $y. When $x is finite, and $y is finite and non-zero, the
+result is identical to the remainder after floored division (F-division). If,
+in addition, both $x and $y are integers, the result is identical to the result
+from Perl's % operator.
 
 =item bexp()
 
