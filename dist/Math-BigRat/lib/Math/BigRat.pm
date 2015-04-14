@@ -24,7 +24,7 @@ use vars qw($VERSION @ISA $upgrade $downgrade
 
 @ISA = qw(Math::BigFloat);
 
-$VERSION = '0.2608';
+$VERSION = '0.260801';
 $VERSION = eval $VERSION;
 
 # inherit overload from Math::BigFloat, but disable the bitwise ops that don't
@@ -640,10 +640,81 @@ sub bdiv
     ($self,$x,$y,@r) = objectify(2,@_);
     }
 
-  return $self->_div_inf($x,$y)
-   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
+  return $x if $x->modify('bdiv');
 
-  # x== 0 # also: or y == 1 or y == -1
+    my $wantarray = wantarray;          # call only once
+
+    # At least one argument is NaN. This is handled the same way as in
+    # Math::BigInt -> bdiv(). See the comments in the code implementing that
+    # method.
+
+    if ($x -> is_nan() || $y -> is_nan()) {
+        return $wantarray ? ($x -> bnan(), $self -> bnan()) : $x -> bnan();
+    }
+
+    # Divide by zero and modulo zero. This is handled the same way as in
+    # Math::BigInt -> bdiv(). See the comments in the code implementing that
+    # method.
+
+    if ($y -> is_zero()) {
+        my ($quo, $rem);
+        if ($wantarray) {
+            $rem = $x -> copy();
+        }
+        if ($x -> is_zero()) {
+            $quo = $x -> bnan();
+        } else {
+            $quo = $x -> binf($x -> {sign});
+        }
+        return $wantarray ? ($quo, $rem) : $quo;
+    }
+
+    # Numerator (dividend) is +/-inf. This is handled the same way as in
+    # Math::BigInt -> bdiv(). See the comments in the code implementing that
+    # method.
+
+    if ($x -> is_inf()) {
+        my ($quo, $rem);
+        $rem = $self -> bnan() if $wantarray;
+        if ($y -> is_inf()) {
+            $quo = $x -> bnan();
+        } else {
+            my $sign = $x -> bcmp(0) == $y -> bcmp(0) ? '+' : '-';
+            $quo = $x -> binf($sign);
+        }
+        return $wantarray ? ($quo, $rem) : $quo;
+    }
+
+  # Denominator (divisor) is +/-inf. This is handled the same way as in
+  # Math::BigFloat -> bdiv(). See the comments in the code implementing that
+  # method.
+
+  if ($y -> is_inf()) {
+      my ($quo, $rem);
+      if ($wantarray) {
+          if ($x -> is_zero() || $x -> bcmp(0) == $y -> bcmp(0)) {
+              $rem = $x -> copy();
+              $quo = $x -> bzero();
+          } else {
+              $rem = $self -> binf($y -> {sign});
+              $quo = $x -> bone('-');
+          }
+          return ($quo, $rem);
+      } else {
+          if ($y -> is_inf()) {
+              if ($x -> is_nan() || $x -> is_inf()) {
+                  return $x -> bnan();
+              } else {
+                  return $x -> bzero();
+              }
+          }
+      }
+  }
+
+  # At this point, both the numerator and denominator are finite numbers, and
+  # the denominator (divisor) is non-zero.
+
+  # x == 0?
   return wantarray ? ($x,$self->bzero()) : $x if $x->is_zero();
 
   # XXX TODO: list context, upgrade
@@ -660,8 +731,17 @@ sub bdiv
   # compute new sign
   $x->{sign} = $x->{sign} eq $y->{sign} ? '+' : '-';
 
-  $x->bnorm()->round(@r);
-  $x;
+  $x -> bnorm();
+  if (wantarray) {
+      my $rem = $x -> copy();
+      $x -> bfloor();
+      $x -> round(@r);
+      $rem -> bsub($x -> copy()) -> bmul($y);
+      return $x, $rem;
+  } else {
+      $x -> round(@r);
+      return $x;
+  }
   }
 
 sub bmod
@@ -676,35 +756,49 @@ sub bmod
     ($self,$x,$y,@r) = objectify(2,@_);
     }
 
-  return $self->_div_inf($x,$y)
-   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
+  return $x if $x->modify('bmod');
+
+    # At least one argument is NaN. This is handled the same way as in
+    # Math::BigInt -> bmod().
+
+    if ($x -> is_nan() || $y -> is_nan()) {
+        return $x -> bnan();
+    }
+
+    # Modulo zero. This is handled the same way as in Math::BigInt -> bmod().
+
+    if ($y -> is_zero()) {
+        return $x;
+    }
+
+    # Numerator (dividend) is +/-inf. This is handled the same way as in
+    # Math::BigInt -> bmod().
+
+    if ($x -> is_inf()) {
+        return $x -> bnan();
+    }
+
+    # Denominator (divisor) is +/-inf. This is handled the same way as in
+    # Math::BigInt -> bmod().
+
+    if ($y -> is_inf()) {
+        if ($x -> is_zero() || $x -> bcmp(0) == $y -> bcmp(0)) {
+            return $x;
+        } else {
+            return $x -> binf($y -> sign());
+        }
+    }
+
+  # At this point, both the numerator and denominator are finite numbers, and
+  # the denominator (divisor) is non-zero.
 
   return $x if $x->is_zero();           # 0 / 7 = 0, mod 0
 
-  # compute $x - $y * floor($x/$y), keeping the sign of $x
+  # Compute $x - $y * floor($x/$y). This can probably be optimized by working
+  # on a lower level.
 
-  # copy x to u, make it positive and then do a normal division ($u/$y)
-  my $u = bless { sign => '+' }, $self;
-  $u->{_n} = $MBI->_mul( $MBI->_copy($x->{_n}), $y->{_d} );
-  $u->{_d} = $MBI->_mul( $MBI->_copy($x->{_d}), $y->{_n} );
-
-  # compute floor(u)
-  if (! $MBI->_is_one($u->{_d}))
-    {
-    $u->{_n} = $MBI->_div($u->{_n},$u->{_d});	# 22/7 => 3/1 w/ truncate
-    # no need to set $u->{_d} to 1, since below we set it to $y->{_d} anyway
-    }
-
-  # now compute $y * $u
-  $u->{_d} = $MBI->_copy($y->{_d});		# 1 * $y->{_d}, see floor above
-  $u->{_n} = $MBI->_mul($u->{_n},$y->{_n});
-
-  my $xsign = $x->{sign}; $x->{sign} = '+';	# remember sign and make x positive
-  # compute $x - $u
-  $x->bsub($u);
-  $x->{sign} = $xsign;				# put sign back
-
-  $x->bnorm()->round(@r);
+  $x -> bsub($x -> copy() -> bdiv($y) -> bfloor() -> bmul($y));
+  return $x -> round(@r);
   }
 
 ##############################################################################
@@ -1796,12 +1890,12 @@ Are not yet implemented.
 
 =head2 bmod()
 
-	use Math::BigRat;
-	my $x = Math::BigRat->new('7/4');
-	my $y = Math::BigRat->new('4/3');
-	print $x->bmod($y);
+	$x->bmod($y);
 
-Set $x to the remainder of the division of $x by $y.
+Returns $x modulo $y. When $x is finite, and $y is finite and non-zero, the
+result is identical to the remainder after floored division (F-division). If,
+in addition, both $x and $y are integers, the result is identical to the result
+from Perl's % operator.
 
 =head2 bneg()
 
@@ -1883,9 +1977,45 @@ Calculate the square root of $x.
 
 Calculate the N'th root of $x.
 
-=head2 badd()/bmul()/bsub()/bdiv()/bdec()/binc()
+=head2 badd()
 
-Please see the documentation in L<Math::BigInt>.
+        $x->badd($y);
+
+Adds $y to $x and returns the result.
+
+=head2 bmul()
+
+        $x->bmul($y);
+
+Multiplies $y to $x and returns the result.
+
+=head2 bsub()
+
+        $x->bsub($y);
+
+Subtracts $y from $x and returns the result.
+
+=head2 bdiv()
+
+        $q = $x->bdiv($y);
+        ($q, $r) = $x->bdiv($y);
+
+In scalar context, divides $x by $y and returns the result. In list context,
+does floored division (F-division), returning an integer $q and a remainder $r
+so that $x = $q * $y + $r. The remainer (modulo) is equal to what is returned
+by C<$x->bmod($y)>.
+
+=head2 bdec()
+
+        $x->bdec();
+
+Decrements $x by 1 and returns the result.
+
+=head2 binc()
+
+        $x->binc();
+
+Increments $x by 1 and returns the result.
 
 =head2 copy()
 
@@ -2067,6 +2197,6 @@ L<Math::BigInt::FastCalc>, L<Math::BigInt::GMP>, and L<Math::BigInt::Pari>.
 
 (C) by Tels L<http://bloodgate.com/> 2001 - 2009.
 
-Currently maintained by Jonathan "Duke" Leto <jonathan@leto.net> L<http://leto.net>
+Currently maintained by Peter John Acklam <pjacklam@online.no>.
 
 =cut
