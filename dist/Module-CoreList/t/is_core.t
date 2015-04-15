@@ -1,7 +1,7 @@
 #!perl -w
 use strict;
 use Module::CoreList;
-use Test::More tests => 34;
+use Test::More tests => 38;
 
 BEGIN { require_ok('Module::CoreList'); }
 
