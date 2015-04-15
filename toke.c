@@ -2342,6 +2342,7 @@ S_sublex_push(pTHX)
     SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_starts);
     SAVEI8(PL_lex_state);
+    SAVEI8(PL_lex_defer);
     SAVESPTR(PL_lex_repl);
     SAVEVPTR(PL_lex_inpat);
     SAVEI16(PL_lex_inwhat);

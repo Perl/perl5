@@ -9,7 +9,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan (tests => 51);
+plan (tests => 52);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -196,4 +196,28 @@ like( $@, qr/Bad name after Ｆｏｏ'/, 'Bad name after Ｆｏｏ\'' );
                            : "\x{c0}\x{a0}";
     CORE::evalbytes "use charnames ':full'; use utf8; my \$x = \"\\N{abc$malformed_to_be}\"";
     like( $@, qr/Malformed UTF-8 character immediately after '\\N\{abc' at .* within string/, 'Malformed UTF-8 input to \N{}');
+}
+
+# RT# 124216: Perl_sv_clear: Assertion
+# If a parsing error occurred during a forced token within an interpolated
+# context, the stack unwinding failed to restore PL_lex_defer and so after
+# error recovery the state restored after the forced token was processed
+# was the wrong one, resulting in the lexer thinking we're still inside a
+# quoted string and things getting freed multiple times.
+#
+# \xe3\x80\xb0 are the utf8 bytes making up the character \x{3030}.
+# The \x{3030} char isn't a legal var name, and this triggers the error.
+#
+# NB: this only failed if the closing quote of the interpolated string is
+# the last char of the file (i.e. no trailing \n).
+
+{
+    no utf8;
+
+    fresh_perl_is(qq{use utf8; "\$\xe3\x80\xb0"}, <<EOF, { stderr => 1},
+Wide character in print at - line 1.\
+syntax error at - line 1, near "\$\xe3\x80\xb0"
+Execution of - aborted due to compilation errors.
+EOF
+    "RT# 124216");
 }
