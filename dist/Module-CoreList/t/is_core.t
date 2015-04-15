@@ -69,3 +69,6 @@ ok(Module::CoreList->is_core('Text::Soundex', '3.03', '5.01'), "5.01 had Text::S
 ok(Module::CoreList->is_core('DB_File', '1.01', '5.002'), "DB_File 1.01 was included in 5.002");
 ok(!Module::CoreList->is_core('DB_File', '1.03', '5.002'), "DB_File 1.03 wasn't included in 5.002");
 ok(Module::CoreList->is_core('DB_File', '1.03', '5.00307'), "DB_File 1.03 was included in 5.00307");
+
+ok(! Module::CoreList->is_core("CGI", undef, 5.021), "CGI not in 5.021");
+ok(! Module::CoreList->is_core("CGI", undef, 5.021001), "CGI not in 5.021001");
