@@ -299,7 +299,9 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
   gotit:
     /* lastsib == 1, op_sibling == 0 implies a solitary unattached op */
     o->op_lastsib = 1;
+#ifdef PERL_OP_PARENT
     assert(!o->op_sibling);
+#endif
 
     return (void *)o;
 }
@@ -2554,14 +2556,8 @@ S_finalize_op(pTHX_ OP* o)
                 assert(kid->op_sibling == o);
             }
 #  else
-            if (OpHAS_SIBLING(kid)) {
-                assert(!kid->op_lastsib);
-            }
-            else {
-                assert(kid->op_lastsib);
-                if (has_last)
-                    assert(kid == cLISTOPo->op_last);
-            }
+            if (has_last && !OpHAS_SIBLING(kid))
+                assert(kid == cLISTOPo->op_last);
 #  endif
         }
 #endif
