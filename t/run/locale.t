@@ -27,6 +27,9 @@ my @locales = eval { find_locales( [ &LC_ALL, &LC_CTYPE, &LC_NUMERIC ],
                                  ) };
 skip_all("no locales available") unless @locales;
 
+# reset the locale environment
+local @ENV{'LANG', (grep /^LC_/, keys %ENV)};
+
 plan tests => &last;
 
 my $non_C_locale;
@@ -58,9 +61,6 @@ EOF
 SKIP: {
     skip("Windows stores locale defaults in the registry", 1 )
                                                             if $^O eq 'MSWin32';
-    local $ENV{LC_NUMERIC}; # So not taken as a default
-    local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
-    local $ENV{LANG};   # So not taken as a default
     fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
         use POSIX qw(locale_h);
         use locale;
@@ -120,7 +120,6 @@ SKIP: {
     note("using the '$different' locale for LC_NUMERIC tests");
     {
 	local $ENV{LC_NUMERIC} = $different;
-	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
 
 	fresh_perl_is(<<'EOF', "4.2", {},
 format STDOUT =
@@ -260,7 +259,6 @@ EOF
 
     {
 	local $ENV{LC_NUMERIC} = $different;
-	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
 	fresh_perl_is(<<'EOF', "$difference "x4, {},
             use locale;
 	    use POSIX qw(locale_h);
@@ -272,8 +270,6 @@ EOF
 
     {
 	local $ENV{LC_NUMERIC} = $different;
-	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
-	local $ENV{LANG};   # so on Windows gets sys default locale
 	fresh_perl_is(<<'EOF', "$difference "x4, {},
             use locale;
 	    use POSIX qw(locale_h);
@@ -348,7 +344,6 @@ EOF
 
     {
 	local $ENV{LC_NUMERIC} = $different;
-	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
 	fresh_perl_is(<<"EOF",
 	    use POSIX qw(locale_h);
 
