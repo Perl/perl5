@@ -11381,7 +11381,7 @@ sub is_core
 
     my $final_release = removed_from($module);
 
-    return 0 if defined($final_release) && $perl_version > $final_release;
+    return 0 if defined($final_release) && $perl_version >= $final_release;
 
     # If a minimum version of the module was specified:
     # Step through all perl releases ($prn)
