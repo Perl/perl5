@@ -11396,7 +11396,9 @@ sub is_core
         my @releases = ($perl_version);
         my $rel = $perl_version;
         while (defined($rel)) {
-            $rel = $delta{$rel}->{delta_from};
+            # XXX: This line is a sign of failure. -- rjbs, 2015-04-15
+            my $this_delta = $delta{$rel} // $delta{ sprintf '%0.6f', $rel };
+            $rel = $this_delta->{delta_from};
             unshift(@releases, $rel) if defined($rel);
         }
         RELEASE:
