@@ -148,6 +148,12 @@ Updated to cover the latest releases of Perl.
 
 =item *
 
+L<perl5db.pl> has been upgraded from 1.48 to 1.49.
+
+The debugger would cause an assertion failure.  [perl #124127]
+
+=item *
+
 L<PerlIO::mmap> has been upgraded from version 0.013 to 0.014.
 
 =item *
@@ -389,6 +395,12 @@ double builds.  GCC 4.8 and later, under some build options, would
 either overwrite the zero-initialized padding, or bypass the
 initialized buffer entirely.  This caused F<op/pack.t> to fail.  [perl
 #123971]
+
+=item *
+
+Extending an array cloned from a parent thread could result in
+"Modification of a read-only value attempted" errors when attempting
+to modify the new elements. [perl #124127]
 
 =back
 
