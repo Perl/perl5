@@ -389,7 +389,7 @@ should be at end-of-line otherwise
 
 =item *
 
-In function definitions, name starts in column 0 (return value is on
+In function definitions, name starts in column 0 (return value-type is on
 previous line)
 
 =item *
@@ -749,7 +749,7 @@ Protocol|http://testanything.org>.
 
 =item * F<t/base>, F<t/comp> and F<t/opbasic>
 
-Since we don't know if require works, or even subroutines, use ad hoc
+Since we don't know if C<require> works, or even subroutines, use ad hoc
 tests for these three.  Step carefully to avoid using the feature being
 tested.  Tests in F<t/opbasic>, for instance, have been placed there
 rather than in F<t/op> because they test functionality which
@@ -799,9 +799,11 @@ since C<"\xC2\xA0"> are the UTF-8 bytes on an ASCII platform for that
 code point.  This function returns C<"\xC2\xA0"> on an ASCII platform, and
 C<"\x80\x41"> on an EBCDIC 1047 one.
 
-But easiest is to use C<\N{}> to specify characters, if the side effects
-aren't troublesome.  Simply specify all your characters in hex, using
-C<\N{U+ZZ}> instead of C<\xZZ>.  C<\N{}> is the Unicode name, and so it
+But easiest is, if the character is specifiable as a literal, like
+C<"A"> or C<"%">, to use that; if not so specificable, you can use use
+C<\N{}> , if the side effects aren't troublesome.  Simply specify all
+your characters in hex, using C<\N{U+ZZ}> instead of C<\xZZ>.  C<\N{}>
+is the Unicode name, and so it
 always gives you the Unicode character.  C<\N{U+41}> is the character
 whose Unicode code point is C<0x41>, hence is C<'A'> on all platforms.
 The side effects are:
@@ -824,6 +826,10 @@ gets automatically loaded.  This may not be suitable for the test level
 you are doing.
 
 =back
+
+If you are testing locales (see L<perllocale>), there are helper
+functions in F<t/loc_tools.pl> to enable you to see what locales there
+are on the current platform.
 
 =head2 Special C<make test> targets
 
@@ -1211,4 +1217,3 @@ metaphor, so being meta is, after all, what it's for.
 
 This document was originally written by Nathan Torkington, and is
 maintained by the perl5-porters mailing list.
-
