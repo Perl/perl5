@@ -8998,7 +8998,13 @@ Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
     }
 
     /* Here, can't just append things, create and return a new inversion list
-     * which is the union of this range and the existing inversion list */
+     * which is the union of this range and the existing inversion list.  (If
+     * the new range is well-behaved wrt to the old one, we could just insert
+     * it, doing a Move() down on the tail of the old one (potentially growing
+     * it first).  But to determine that means we would have the extra
+     * (possibly throw-away) work of first finding where the new one goes and
+     * whether it disrupts (splits) an existing range, so it doesn't appear to
+     * me (khw) that it's worth it) */
     range_invlist = _new_invlist(2);
     _append_range_to_invlist(range_invlist, start, end);
 
