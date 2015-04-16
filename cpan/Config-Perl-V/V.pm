@@ -8,7 +8,7 @@ use warnings;
 use Config;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION     = "0.23";
+$VERSION     = "0.24";
 @ISA         = ("Exporter");
 @EXPORT_OK   = qw( plv2hash summary myconfig signature );
 %EXPORT_TAGS = (
@@ -106,6 +106,7 @@ my %BTD = map { $_ => 0 } qw(
     USE_LOCALE_TIME
     USE_LONG_DOUBLE
     USE_PERLIO
+    USE_QUADMATH
     USE_REENTRANT_API
     USE_SFIO
     USE_SOCKS
