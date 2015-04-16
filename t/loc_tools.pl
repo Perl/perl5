@@ -8,13 +8,17 @@
 # anyway later during the scanning process (and besides, some clueless
 # vendor might have them capitalized erroneously anyway).
 
-sub _trylocale ($$$$) { # Adds the locale given by the first parameter to the
-                        # list given by the 3rd iff the platform supports the
-                        # locale in each of the categories given by the 2nd
-                        # parameter, which is either a single category or a
-                        # reference to a list of categories
-                        # The 4th parameter is true if to reject locales that
-                        # aren't apparently fully compatible with Perl.
+# Functions whose names begin with underscore are internal helper functions
+# for this file, and are not to be used by outside callers.
+
+sub _trylocale ($$$$) { # For use only by other functions in this file!
+
+    # Adds the locale given by the first parameter to the list given by the
+    # 3rd iff the platform supports the locale in each of the categories given
+    # by the 2nd parameter, which is either a single category or a reference
+    # to a list of categories The 4th parameter is true if to reject locales
+    # that aren't apparently fully compatible with Perl.
+
     my $locale = shift;
     my $categories = shift;
     my $list = shift;
@@ -46,7 +50,7 @@ sub _trylocale ($$$$) { # Adds the locale given by the first parameter to the
     push @$list, $locale;
 }
 
-sub _decode_encodings {
+sub _decode_encodings { # For use only by other functions in this file!
     my @enc;
 
     foreach (split(/ /, shift)) {
