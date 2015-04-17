@@ -1980,7 +1980,7 @@ C<op_first> field but also an C<op_last> field.  The most complex type of
 op is a C<LISTOP>, which has any number of children.  In this case, the
 first child is pointed to by C<op_first> and the last child by
 C<op_last>.  The children in between can be found by iteratively
-following the C<op_sibling> pointer from the first child to the last (but
+following the C<OpSIBLING> pointer from the first child to the last (but
 see below).
 
 There are also some other op types: a C<PMOP> holds a regular expression,
@@ -1992,7 +1992,7 @@ have children in accordance with its former type.
 
 Finally, there is a C<LOGOP>, or logic op. Like a C<LISTOP>, this has one
 or more children, but it doesn't have an C<op_last> field: so you have to
-follow C<op_first> and then the C<op_sibling> chain itself to find the
+follow C<op_first> and then the C<OpSIBLING> chain itself to find the
 last child. Instead it has an C<op_other> field, which is comparable to
 the C<op_next> field described below, and represents an alternate
 execution path. Operators like C<and>, C<or> and C<?> are C<LOGOP>s. Note
@@ -2002,12 +2002,14 @@ of the C<LOGOP>.
 Starting in version 5.21.2, perls built with the experimental
 define C<-DPERL_OP_PARENT> add an extra boolean flag for each op,
 C<op_lastsib>.  When set, this indicates that this is the last op in an
-C<op_sibling> chain. This frees up the C<op_sibling> field on the last
-sibling to point back to the parent op. The macro C<OpSIBLING(o)> wraps
-this special behaviour, and always returns NULL on the last sibling.
-With this build the C<op_parent(o)> function can be used to find the
-parent of any op. Thus for forward compatibility, you should always use
-the C<OpSIBLING(o)> macro rather than accessing C<op_sibling> directly.
+C<OpSIBLING> chain. This frees up the C<op_sibling> field on the last
+sibling to point back to the parent op. Under this build, that field is
+also renamed C<op_sibparent> to reflect its joint role. The macro
+C<OpSIBLING(o)> wraps this special behaviour, and always returns NULL on
+the last sibling.  With this build the C<op_parent(o)> function can be
+used to find the parent of any op. Thus for forward compatibility, you
+should always use the C<OpSIBLING(o)> macro rather than accessing
+C<op_sibling> directly.
 
 Another way to examine the tree is to use a compiler back-end module, such
 as L<B::Concise>.

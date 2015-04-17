@@ -3677,7 +3677,7 @@ CODE:
 	CvROOT(PL_compcv) = (OP *)1;
 	o = newFOROP(0, 0, newOP(OP_PUSHMARK, 0), 0, 0);
 #ifdef PERL_OP_PARENT
-	if (cLOOPx(cUNOPo->op_first)->op_last->op_sibling
+	if (cLOOPx(cUNOPo->op_first)->op_last->op_sibparent
 		!= cUNOPo->op_first)
 	{
 	    Perl_warn(aTHX_ "Op parent pointer is stale");

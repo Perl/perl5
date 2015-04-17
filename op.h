@@ -38,12 +38,21 @@
 
 typedef PERL_BITFIELD16 Optype;
 
+/* this field now either points to the next sibling or to the parent,
+ * depending on op_lastsib. So rename it from op_sibling to op_sibparent.
+ */
+#ifdef PERL_OP_PARENT
+#  define _OP_SIBPARENT_FIELDNAME op_sibparent
+#else
+#  define _OP_SIBPARENT_FIELDNAME op_sibling
+#endif
+
 #ifdef BASEOP_DEFINITION
 #define BASEOP BASEOP_DEFINITION
 #else
 #define BASEOP				\
     OP*		op_next;		\
-    OP*		op_sibling;		\
+    OP*		_OP_SIBPARENT_FIELDNAME;\
     OP*		(*op_ppaddr)(pTHX);	\
     PADOFFSET	op_targ;		\
     PERL_BITFIELD16 op_type:9;		\
@@ -973,8 +982,8 @@ Sets the sibling of o to sib
 
 #ifdef PERL_OP_PARENT
 #  define OpHAS_SIBLING(o)	(!cBOOL((o)->op_lastsib))
-#  define OpSIBLING(o)		(0 + (o)->op_lastsib ? NULL : (o)->op_sibling)
-#  define OpSIBLING_set(o, sib)	((o)->op_sibling = (sib))
+#  define OpSIBLING(o)		(0 + (o)->op_lastsib ? NULL : (o)->op_sibparent)
+#  define OpSIBLING_set(o, sib)	((o)->op_sibparent = (sib))
 #else
 #  define OpHAS_SIBLING(o)	(cBOOL((o)->op_sibling))
 #  define OpSIBLING(o)		(0 + (o)->op_sibling)

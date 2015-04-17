@@ -297,10 +297,10 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     DEBUG_S_warn((aTHX_ "allocating op at %p, slab %p", (void*)o, (void*)slab));
 
   gotit:
-    /* lastsib == 1, op_sibling == 0 implies a solitary unattached op */
+    /* lastsib == 1, op_sibparent == 0 implies a solitary unattached op */
     o->op_lastsib = 1;
 #ifdef PERL_OP_PARENT
-    assert(!o->op_sibling);
+    assert(!o->op_sibparent);
 #endif
 
     return (void *)o;
@@ -1216,7 +1216,7 @@ you to delete zero or more sequential nodes, replacing them with zero or
 more different nodes.  Performs the necessary op_first/op_last
 housekeeping on the parent node and op_sibling manipulation on the
 children.  The last deleted node will be marked as as the last node by
-updating the op_sibling or op_lastsib field as appropriate.
+updating the op_sibling/op_sibparent or op_lastsib field as appropriate.
 
 Note that op_next is not manipulated, and nodes are not freed; that is the
 responsibility of the caller.  It also won't create a new list op for an
@@ -1328,7 +1328,7 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
         if (lastop) {
             lastop->op_lastsib = 1;
 #ifdef PERL_OP_PARENT
-            lastop->op_sibling = parent;
+            lastop->op_sibparent = parent;
 #endif
         }
     }
@@ -1352,7 +1352,7 @@ Perl_op_parent(OP *o)
 #ifdef PERL_OP_PARENT
     while (OpHAS_SIBLING(o))
         o = OpSIBLING(o);
-    return o->op_sibling;
+    return o->op_sibparent;
 #else
     PERL_UNUSED_ARG(o);
     return NULL;
@@ -1413,7 +1413,7 @@ S_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
     if (kid) {
         kid->op_lastsib = 1;
 #ifdef PERL_OP_PARENT
-        kid->op_sibling = (OP*)logop;
+        kid->op_sibparent = (OP*)logop;
 #endif
     }
     return logop;
@@ -2512,9 +2512,9 @@ S_finalize_op(pTHX_ OP* o)
 
 #ifdef DEBUGGING
         /* check that op_last points to the last sibling, and that
-         * the last op_sibling field points back to the parent, and
-         * that the only ops with KIDS are those which are entitled to
-         * them */
+         * the last op_sibling/op_sibparent field points back to the
+         * parent, and that the only ops with KIDS are those which are
+         * entitled to them */
         U32 type = o->op_type;
         U32 family;
         bool has_last;
@@ -2553,7 +2553,7 @@ S_finalize_op(pTHX_ OP* o)
             if (!OpHAS_SIBLING(kid)) {
                 if (has_last)
                     assert(kid == cLISTOPo->op_last);
-                assert(kid->op_sibling == o);
+                assert(kid->op_sibparent == o);
             }
 #  else
             if (has_last && !OpHAS_SIBLING(kid))
@@ -4503,7 +4503,7 @@ Perl_op_append_list(pTHX_ I32 type, OP *first, OP *last)
     ((LISTOP*)first)->op_last = ((LISTOP*)last)->op_last;
     ((LISTOP*)first)->op_last->op_lastsib = 1;
 #ifdef PERL_OP_PARENT
-    ((LISTOP*)first)->op_last->op_sibling = first;
+    ((LISTOP*)first)->op_last->op_sibparent = first;
 #endif
     first->op_flags |= (last->op_flags & OPf_KIDS);
 
@@ -4710,7 +4710,7 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     if (listop->op_last) {
         listop->op_last->op_lastsib = 1;
 #ifdef PERL_OP_PARENT
-        listop->op_last->op_sibling = (OP*)listop;
+        listop->op_last->op_sibparent = (OP*)listop;
 #endif
     }
 
@@ -4804,7 +4804,7 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 
 #ifdef PERL_OP_PARENT
     if (!OpHAS_SIBLING(first)) /* true unless weird syntax error */
-        first->op_sibling = (OP*)unop;
+        first->op_sibparent = (OP*)unop;
 #endif
 
     unop = (UNOP*) CHECKOP(type, unop);
@@ -4842,7 +4842,7 @@ Perl_newUNOP_AUX(pTHX_ I32 type, I32 flags, OP *first, UNOP_AUX_item *aux)
 
 #ifdef PERL_OP_PARENT
     if (first && !OpHAS_SIBLING(first)) /* true unless weird syntax error */
-        first->op_sibling = (OP*)unop;
+        first->op_sibparent = (OP*)unop;
 #endif
 
     unop = (UNOP_AUX*) CHECKOP(type, unop);
@@ -4882,7 +4882,7 @@ S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth
 
 #ifdef PERL_OP_PARENT
         if (!OpHAS_SIBLING(dynamic_meth))
-            dynamic_meth->op_sibling = (OP*)methop;
+            dynamic_meth->op_sibparent = (OP*)methop;
 #endif
     }
     else {
@@ -4971,13 +4971,13 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 
 #ifdef PERL_OP_PARENT
     if (!OpHAS_SIBLING(last)) /* true unless weird syntax error */
-        last->op_sibling = (OP*)binop;
+        last->op_sibparent = (OP*)binop;
 #endif
 
     binop->op_last = OpSIBLING(binop->op_first);
 #ifdef PERL_OP_PARENT
     if (binop->op_last)
-        binop->op_last->op_sibling = (OP*)binop;
+        binop->op_last->op_sibparent = (OP*)binop;
 #endif
 
     binop = (BINOP*)CHECKOP(type, binop);
@@ -7516,8 +7516,8 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	NewOp(1234,tmp,1,LOOP);
 	Copy(loop,tmp,1,LISTOP);
 #ifdef PERL_OP_PARENT
-        assert(loop->op_last->op_sibling == (OP*)loop);
-        loop->op_last->op_sibling = (OP*)tmp; /*point back to new parent */
+        assert(loop->op_last->op_sibparent == (OP*)loop);
+        loop->op_last->op_sibparent = (OP*)tmp; /*point back to new parent */
 #endif
 	S_op_destroy(aTHX_ (OP*)loop);
 	loop = tmp;
@@ -7526,7 +7526,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     {
 	loop = (LOOP*)PerlMemShared_realloc(loop, sizeof(LOOP));
 #ifdef PERL_OP_PARENT
-	loop->op_last->op_sibling = (OP *)loop;
+	loop->op_last->op_sibparent = (OP *)loop;
 #endif
     }
     loop->op_targ = padoff;
