@@ -24,7 +24,7 @@
  *                      !op_slabbed.
  *	op_savefree	on savestack via SAVEFREEOP
  *	op_folded	Result/remainder of a constant fold operation.
- *	op_lastsib	this op is is the last sibling
+ *	op_moresib	this op is is not the last sibling
  *	op_spare	One spare bit
  *	op_flags	Flags common to all operations.  See OPf_* below.
  *	op_private	Flags peculiar to a particular operation (BUT,
@@ -39,7 +39,7 @@
 typedef PERL_BITFIELD16 Optype;
 
 /* this field now either points to the next sibling or to the parent,
- * depending on op_lastsib. So rename it from op_sibling to op_sibparent.
+ * depending on op_moresib. So rename it from op_sibling to op_sibparent.
  */
 #ifdef PERL_OP_PARENT
 #  define _OP_SIBPARENT_FIELDNAME op_sibparent
@@ -61,7 +61,7 @@ typedef PERL_BITFIELD16 Optype;
     PERL_BITFIELD16 op_savefree:1;	\
     PERL_BITFIELD16 op_static:1;	\
     PERL_BITFIELD16 op_folded:1;	\
-    PERL_BITFIELD16 op_lastsib:1;       \
+    PERL_BITFIELD16 op_moresib:1;       \
     PERL_BITFIELD16 op_spare:1;		\
     U8		op_flags;		\
     U8		op_private;
@@ -981,8 +981,8 @@ Sets the sibling of o to sib
     ( (o) && OP_TYPE_ISNT_AND_WASNT_NN(o, type) )
 
 #ifdef PERL_OP_PARENT
-#  define OpHAS_SIBLING(o)	(!cBOOL((o)->op_lastsib))
-#  define OpSIBLING(o)		(0 + (o)->op_lastsib ? NULL : (o)->op_sibparent)
+#  define OpHAS_SIBLING(o)	(cBOOL((o)->op_moresib))
+#  define OpSIBLING(o)		(0 + (o)->op_moresib ? (o)->op_sibparent : NULL)
 #  define OpSIBLING_set(o, sib)	((o)->op_sibparent = (sib))
 #else
 #  define OpHAS_SIBLING(o)	(cBOOL((o)->op_sibling))

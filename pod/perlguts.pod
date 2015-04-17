@@ -2001,7 +2001,7 @@ of the C<LOGOP>.
 
 Starting in version 5.21.2, perls built with the experimental
 define C<-DPERL_OP_PARENT> add an extra boolean flag for each op,
-C<op_lastsib>.  When set, this indicates that this is the last op in an
+C<op_moresib>.  When not set, this indicates that this is the last op in an
 C<OpSIBLING> chain. This frees up the C<op_sibling> field on the last
 sibling to point back to the parent op. Under this build, that field is
 also renamed C<op_sibparent> to reflect its joint role. The macro
