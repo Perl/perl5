@@ -1351,12 +1351,13 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
 }
 
 
+#ifdef PERL_OP_PARENT
+
 /*
 =for apidoc op_parent
 
-returns the parent OP of o, if it has a parent.  Returns NULL otherwise.
-(Currently perl must be built with C<-DPERL_OP_PARENT> for this feature to
-work.
+Returns the parent OP of o, if it has a parent. Returns NULL otherwise.
+This function is only available on perls built with C<-DPERL_OP_PARENT>.
 
 =cut
 */
@@ -1365,15 +1366,12 @@ OP *
 Perl_op_parent(OP *o)
 {
     PERL_ARGS_ASSERT_OP_PARENT;
-#ifdef PERL_OP_PARENT
     while (OpHAS_SIBLING(o))
         o = OpSIBLING(o);
     return o->op_sibparent;
-#else
-    PERL_UNUSED_ARG(o);
-    return NULL;
-#endif
 }
+
+#endif
 
 
 /* replace the sibling following start with a new UNOP, which becomes

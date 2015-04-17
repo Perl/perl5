@@ -1260,7 +1260,11 @@ next(o)
 			PTR2IV(CopHINTHASH_get(cCOPo)));
 		break;
 	    case 52: /* B::OP::parent */
+#ifdef PERL_OP_PARENT
 		ret = make_op_object(aTHX_ op_parent(o));
+#else
+		ret = make_op_object(aTHX_ NULL);
+#endif
 		break;
 	    case 53: /* B::METHOP::first   */
                 /* METHOP struct has an op_first/op_meth_sv union

@@ -433,7 +433,6 @@
 #define op_free(a)		Perl_op_free(aTHX_ a)
 #define op_linklist(a)		Perl_op_linklist(aTHX_ a)
 #define op_null(a)		Perl_op_null(aTHX_ a)
-#define op_parent		Perl_op_parent
 #define op_prepend_elem(a,b,c)	Perl_op_prepend_elem(aTHX_ a,b,c)
 #define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
 #define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
@@ -824,6 +823,9 @@
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #define _get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
+#endif
+#if defined(PERL_OP_PARENT)
+#define op_parent		Perl_op_parent
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)

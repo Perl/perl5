@@ -421,6 +421,13 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    Perl_my_cxt_index
 			 );
 }
+
+unless ($define{'PERL_OP_PARENT'}) {
+    ++$skip{$_} foreach qw(
+		    Perl_op_parent
+                );
+}
+
 if ($define{'NO_MATHOMS'}) {
     # win32 builds happen in the win32/ subdirectory, but vms builds happen
     # at the top level, so we need to look in two candidate locations for
