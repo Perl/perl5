@@ -1222,7 +1222,8 @@ Note that op_next is not manipulated, and nodes are not freed; that is the
 responsibility of the caller.  It also won't create a new list op for an
 empty list etc; use higher-level functions like op_append_elem() for that.
 
-parent is the parent node of the sibling chain.
+parent is the parent node of the sibling chain. It may passed as NULL if
+the splicing doesn't affect the first or last op in the chain.
 
 start is the node preceding the first node to be spliced.  Node(s)
 following it will be deleted, and ops will be inserted after it.  If it is
@@ -1266,12 +1267,17 @@ For example:
 OP *
 Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
 {
-    OP *first = start ? OpSIBLING(start) : cLISTOPx(parent)->op_first;
+    OP *first;
     OP *rest;
     OP *last_del = NULL;
     OP *last_ins = NULL;
 
-    PERL_ARGS_ASSERT_OP_SIBLING_SPLICE;
+    if (start)
+        first = OpSIBLING(start);
+    else if (!parent)
+        goto no_parent;
+    else
+        first = cLISTOPx(parent)->op_first;
 
     assert(del_count >= -1);
 
@@ -1301,6 +1307,8 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
         start->op_moresib = insert ? 1 : 0;
     }
     else {
+        if (!parent)
+            goto no_parent;
         cLISTOPx(parent)->op_first = insert;
         if (insert)
             parent->op_flags |= OPf_KIDS;
@@ -1310,9 +1318,13 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
 
     if (!rest) {
         /* update op_last etc */
-        U32 type = parent->op_type;
+        U32 type;
         OP *lastop;
 
+        if (!parent)
+            goto no_parent;
+
+        type = parent->op_type;
         if (type == OP_NULL)
             type = parent->op_targ;
         type = PL_opargs[type] & OA_CLASS_MASK;
@@ -1333,7 +1345,11 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
         }
     }
     return last_del ? first : NULL;
+
+  no_parent:
+    Perl_croak_nocontext("panic: op_sibling_splice(): NULL parent");
 }
+
 
 /*
 =for apidoc op_parent
