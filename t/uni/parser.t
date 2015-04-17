@@ -214,10 +214,13 @@ like( $@, qr/Bad name after Ｆｏｏ'/, 'Bad name after Ｆｏｏ\'' );
 {
     no utf8;
 
-    fresh_perl_is(qq{use utf8; "\$\xe3\x80\xb0"}, <<EOF, { stderr => 1},
-Wide character in print at - line 1.\
-syntax error at - line 1, near "\$\xe3\x80\xb0"
-Execution of - aborted due to compilation errors.
-EOF
-    "RT# 124216");
+    fresh_perl_like(qq{use utf8; "\$\xe3\x80\xb0"},
+        qr/
+            \A
+            ( \QWide character in print at - line 1.\E\n )?
+            \Qsyntax error at - line 1, near \E"\$.*"\n
+            \QExecution of - aborted due to compilation errors.\E\z
+        /xm,
+
+        {stderr => 1}, "RT# 124216");
 }
