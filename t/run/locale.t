@@ -10,7 +10,7 @@ use strict;
 
 ########
 # These tests are here instead of lib/locale.t because
-# some bugs depend on in the internal state of the locale
+# some bugs depend on the internal state of the locale
 # settings and pragma/locale messes up that state pretty badly.
 # We need "fresh runs".
 BEGIN {
