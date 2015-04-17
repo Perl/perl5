@@ -1091,6 +1091,8 @@ E23:NaN
 -1010E-2:NaN
 -1.01E+1:NaN
 -1.01E-1:NaN
+1E-999999:NaN
+0.5:NaN
 &bnan
 1:NaN
 2:NaN
@@ -2407,8 +2409,6 @@ inf:-inf:NaN
 15241:2:123
 144:2:12
 12:2:3
-0.49:2:0
-0.0049:2:0
 # invalid ones
 1:NaN:NaN
 -1:NaN:NaN

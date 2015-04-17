@@ -626,9 +626,13 @@ sub new
     elsif ($e < 0)
       {
       # xE-y, and empty mfv
-      #print "xE-y\n";
-      $e = abs($e);
-      if ($$miv !~ s/0{$e}$//)		# can strip so many zero's?
+      # Split the mantissa at the decimal point. E.g., if
+      # $$miv = 12345 and $e = -2, then $frac = 45 and $$miv = 123.
+
+      my $frac = substr($$miv, $e);     # $frac is fraction part
+      substr($$miv, $e) = "";           # $$miv is now integer part
+
+      if ($frac =~ /[^0]/)
         {
         if ($_trap_nan)
           {
@@ -640,8 +644,10 @@ sub new
         }
       }
     }
-  $self->{sign} = '+' if $$miv eq '0';			# normalize -0 => +0
-  $self->{value} = $CALC->_new($$miv) if $self->{sign} =~ /^[+-]$/;
+  unless ($self->{sign} eq $nan) {
+      $self->{sign} = '+' if $$miv eq '0';		# normalize -0 => +0
+      $self->{value} = $CALC->_new($$miv) if $self->{sign} =~ /^[+-]$/;
+  }
   # if any of the globals is set, use them to round and store them inside $self
   # do not round for new($x,undef,undef) since that is used by MBF to signal
   # no rounding
