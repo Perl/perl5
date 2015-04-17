@@ -13163,32 +13163,33 @@ Perl_rpeep(pTHX_ OP *o)
                 assert(OpSIBLING(ns2)  == pad2);
                 assert(OpSIBLING(pad2) == ns3);
 
+                /* excise and delete ns2 */
+                op_sibling_splice(NULL, pad1, 1, NULL);
+                op_free(ns2);
+
+                /* excise pad1 and pad2 */
+                op_sibling_splice(NULL, o, 2, NULL);
+
                 /* create new listop, with children consisting of:
                  * a new pushmark, pad1, pad2. */
-		OpSIBLING_set(pad2, NULL);
 		newop = newLISTOP(OP_LIST, 0, pad1, pad2);
 		newop->op_flags |= OPf_PARENS;
 		newop->op_flags = (newop->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
+
+                /* insert newop between o and ns3 */
+                op_sibling_splice(NULL, o, 0, newop);
+
+                /*fixup op_next chain */
                 newpm = cUNOPx(newop)->op_first; /* pushmark */
-
-		/* Kill nextstate2 between padop1/padop2 */
-		op_free(ns2);
-
 		o    ->op_next = newpm;
 		newpm->op_next = pad1;
 		pad1 ->op_next = pad2;
 		pad2 ->op_next = newop; /* listop */
 		newop->op_next = ns3;
 
-		OpSIBLING_set(o, newop);
-		OpSIBLING_set(newop, ns3);
-                newop->op_moresib = 1;
-
-		newop->op_flags = (newop->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
-
 		/* Ensure pushmark has this flag if padops do */
 		if (pad1->op_flags & OPf_MOD && pad2->op_flags & OPf_MOD) {
-		    o->op_next->op_flags |= OPf_MOD;
+		    newpm->op_flags |= OPf_MOD;
 		}
 
 		break;
