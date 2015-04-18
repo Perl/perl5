@@ -65,7 +65,7 @@ unless(GetOptions(\%options,
                   'test-build', 'validate',
                   'all-fixups', 'early-fixup=s@', 'late-fixup=s@', 'valgrind',
                   'check-args', 'check-shebang!', 'usage|help|?', 'gold=s',
-                  'module=s',
+                  'module=s', 'with-module=s',
                   'A=s@',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
@@ -164,6 +164,8 @@ bisect.pl - use git bisect to pinpoint changes
  .../Porting/bisect.pl --valgrind ../test_prog.pl
  # When did these cpan modules start failing to compile/pass tests?
  .../Porting/bisect.pl --module=autobox,Moose
+ # When did this code stop working in blead with these modules?
+ .../Porting/bisect.pl --with-module=Moose,Moo -e 'use Moose; 1;'
 
 =head1 DESCRIPTION
 
@@ -555,6 +557,17 @@ determine success for arguments like
 MSCHWERN/Test-Simple-1.005000_005.tar.gz.
 
 In so far, it is not such a misnomer.
+
+=item *
+
+--with-module module1,module2,...
+
+Like B<--module> above, except this simply installs the requested
+modules and they can then be used in other tests.
+
+For example:
+
+  .../Porting/bisect.pl --with-module=Moose -e 'use Moose; ...'
 
 =item *
 
@@ -1326,7 +1339,7 @@ push @ARGS, map {"-A$_"} @{$options{A}};
 
 my $prefix;
 
-if ($options{module}) {
+if ($options{module} || $options{'with-module'}) {
   $prefix = tempdir(CLEANUP => 1);
 
   push @ARGS, "-Dprefix=$prefix";
@@ -1409,11 +1422,11 @@ if ($target ne 'miniperl') {
 }
 
 # Testing a cpan module? See if it will install
-if ($options{module}) {
+if ($options{module} || $options{'with-module'}) {
   # First we need to install this perl somewhere
   system_or_die('./installperl');
 
-  my @m = split(',', $options{module});
+  my @m = split(',', $options{module} || $options{'with-module'});
 
   my $bdir = File::Temp::tempdir(
     CLEANUP => 1,
@@ -1433,7 +1446,19 @@ if ($options{module}) {
   my $last = $m[-1];
   my $shellcmd = "install($install); die unless CPAN::Shell->expand(Module => '$last')->uptodate;";
 
-  run_report_and_exit(@cpanshell, $shellcmd);
+  if ($options{module}) {
+    run_report_and_exit(@cpanshell, $shellcmd);
+  } else {
+    my $ret = run_with_options({setprgp => $options{setpgrp},
+                                timeout => $options{timeout},
+                               }, @cpanshell, $shellcmd);
+    $ret &= 0xff if $options{crash};
+
+    # Failed? Give up
+    if ($ret) {
+      report_and_exit(!$ret, 'zero exit from', 'non-zero exit from', "@_");
+    }
+  }
 }
 
 my $expected_file_found = $expected_file =~ /perl$/
