@@ -560,7 +560,7 @@ copiable.
 encountered an invalid data type.
 
 =item Both or neither range ends should be Unicode in regex; marked by
-<-- HERE in m/%s/
+S<<-- HERE> in m/%s/
 
 (W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
 
@@ -1559,7 +1559,7 @@ defined in the C<:alias> import argument to C<use charnames>, but they
 could be defined by a translator installed into C<$^H{charnames}>.
 See L<charnames/CUSTOM ALIASES>.
 
-=item \C is deprecated in regex; marked by <-- HERE in m/%s/
+=item \C is deprecated in regex; marked by S<<-- HERE> in m/%s/
 
 (D deprecated, regexp) The \C character class is deprecated, and will
 become a compile-time error in a future release of perl (tentatively
@@ -1801,7 +1801,7 @@ S<<-- HERE> in m/%s/
 most likely cause of this error is that you left out a parenthesis inside
 of the C<....> part.
 
-The <-- HERE shows whereabouts in the regular expression the problem was
+The S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.
 
 =item %s defines neither package nor VERSION--version check failed
@@ -2024,7 +2024,7 @@ S<<-- HERE> in m/%s/
 (F) You used a pattern that nested too many EVAL calls without consuming
 any text.  Restructure the pattern so that text is consumed.
 
-The <-- HERE shows whereabouts in the regular expression the problem was
+The S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.
 
 =item Excessively long <> operator
@@ -2802,7 +2802,7 @@ character (U+FFFD).
 with the B<-D> option with no flags to see the list of acceptable values.
 See also L<perlrun/-Dletters>.
 
-=item Invalid quantifier in {,} in regex; marked by <-- HERE in m/%s/
+=item Invalid quantifier in {,} in regex; marked by S<<-- HERE> in m/%s/
 
 (F) The pattern looks like a {min,max} quantifier, but the min or max
 could not be parsed as a valid number - either it has leading zeroes,
@@ -2901,13 +2901,13 @@ with 'useperlio'.
 (F) Your machine doesn't implement the sockatmark() functionality,
 neither as a system call nor an ioctl call (SIOCATMARK).
 
-=item '%s' is an unknown bound type in regex; marked by <-- HERE in m/%s/
+=item '%s' is an unknown bound type in regex; marked by S<<-- HERE> in m/%s/
 
 (F) You used C<\b{...}> or C<\B{...}> and the C<...> is not known to
 Perl.  The current valid ones are given in
 L<perlrebackslash/\b{}, \b, \B{}, \B>.
 
-=item "%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in m/%s/
+=item "%s" is more clearly written simply as "%s" in regex; marked by S<<-- HERE> in m/%s/
 
 (W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
 
@@ -4600,7 +4600,7 @@ take the risk of using this feature, simply disable this warning:
 
     no warnings "experimental::autoderef";
 
-=item POSIX class [:%s:] unknown in regex; marked by S<< <-- HERE in m/%s/ >>
+=item POSIX class [:%s:] unknown in regex; marked by S<<-- HERE> in m/%s/
 
 (F) The class in the character class [: :] syntax is unknown.  The S<<-- HERE>
 shows whereabouts in the regular expression the problem was discovered.
@@ -4842,14 +4842,13 @@ take the risk of using this feature, simply disable this warning:
 
     no warnings "experimental::autoderef";
 
-=item Quantifier follows nothing in regex; marked by S<< <-- HERE in m/%s/ >>
+=item Quantifier follows nothing in regex; marked by S<<-- HERE> in m/%s/
 
 (F) You started a regular expression with a quantifier.  Backslash it if
 you meant it literally.  The S<<-- HERE> shows whereabouts in the regular
 expression the problem was discovered.  See L<perlre>.
 
-=item Quantifier in {,} bigger than %d in regex; marked by S<<-- HERE> in
-m/%s/
+=item Quantifier in {,} bigger than %d in regex; marked by S<<-- HERE> in m/%s/
 
 (F) There is currently a limit to the size of the min and max values of
 the {min,max} construct.  The S<<-- HERE> shows whereabouts in the regular
@@ -4879,7 +4878,7 @@ One possible workaround is to force Perl to use magical string increment
 by prepending "0" to your numbers.
 
 =item Ranges of ASCII printables should be some subset of "0-9", "A-Z", or
-"a-z" in regex; marked by <-- HERE in m/%s/
+"a-z" in regex; marked by S<<-- HERE> in m/%s/
 
 (W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
 
@@ -4908,7 +4907,7 @@ character, and not some escape sequence (like C<"\x41">), and the ranges
 must be all digits, or all uppercase letters, or all lowercase letters.
 
 =item Ranges of digits should be from the same group in regex; marked by
-<-- HERE in m/%s/
+S<<-- HERE> in m/%s/
 
 (W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
 
@@ -5011,7 +5010,7 @@ not at least seven sets of capturing parentheses in the expression.  If
 you wanted to have the character with ordinal 7 inserted into the regular
 expression, prepend zeroes to make it three digits long: C<\007>
 
-The <-- HERE shows whereabouts in the regular expression the problem was
+The S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.
 
 =item Reference to nonexistent named group in regex; marked by S<<-- HERE>
@@ -5022,7 +5021,7 @@ expression, but there is no corresponding named capturing parentheses
 such as C<(?'NAME'...)> or C<< (?<NAME>...) >>.  Check if the name has been
 spelled correctly both in the backreference and the declaration.
 
-The <-- HERE shows whereabouts in the regular expression the problem was
+The S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.
 
 =item Reference to nonexistent or unclosed group in regex; marked by
@@ -5032,7 +5031,7 @@ S<<-- HERE> in m/%s/
 are not at least seven sets of closed capturing parentheses in the
 expression before where the C<\g{-7}> was located.
 
-The <-- HERE shows whereabouts in the regular expression the problem was
+The S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.
 
 =item regexp memory corruption
@@ -5651,7 +5650,7 @@ is not known.  The condition must be one of the following:
  (R&NAME)           true if directly inside named capture
  (DEFINE)           always false; for defining named subpatterns
 
-The <-- HERE shows whereabouts in the regular expression the problem was
+The S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.  See L<perlre>.
 
 =item Switch (?(condition)... not terminated in regex; marked by
@@ -6064,7 +6063,7 @@ C<undef *foo>.
 Check the #! line, or manually feed your script into Perl yourself.
 
 =item Unescaped left brace in regex is deprecated, passed through in regex;
-marked by <-- HERE in m/%s/
+marked by S<<-- HERE> in m/%s/
 
 (D deprecated, regexp) You used a literal C<"{"> character in a regular
 expression pattern.  You should change to use C<"\{"> instead, because a
@@ -6237,7 +6236,7 @@ is not known.  The condition must be one of the following:
  (R&NAME)           true if directly inside named capture
  (DEFINE)           always false; for defining named subpatterns
 
-The <-- HERE shows whereabouts in the regular expression the problem was
+The S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.  See L<perlre>.
 
 =item Unknown Unicode option letter '%c'
@@ -6516,7 +6515,7 @@ must be written as
 
     if ($string =~ /$pattern/) { ... }
 
-The <-- HERE shows whereabouts in the regular expression the problem was
+The S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.  See L<perlre>.
 
 =item Useless localization of %s
@@ -6537,7 +6536,7 @@ must be written as
 
     if ($string =~ /$pattern/o) { ... }
 
-The <-- HERE shows whereabouts in the regular expression the problem was
+The S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.  See L<perlre>.
 
 =item Useless use of attribute "const"
@@ -6881,7 +6880,7 @@ a range.  For these, what should happen isn't clear at all.  In
 these circumstances, Perl discards all but the first character
 of the returned sequence, which is not likely what you want.
 
-=item Using /u for '%s' instead of /%s in regex; marked by <-- HERE in m/%s/
+=item Using /u for '%s' instead of /%s in regex; marked by S<<-- HERE> in m/%s/
 
 (W regexp) You used a Unicode boundary (C<\b{...}> or C<\B{...}>) in a
 portion of a regular expression where the character set modifiers C</a>
