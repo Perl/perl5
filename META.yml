@@ -51,6 +51,7 @@ no_index:
     - dist/threads-shared
     - dist/Tie-File
     - dist/XSLoader
+    - lib/perl5db
     - win32
   file:
     - autodoc.pl
