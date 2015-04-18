@@ -903,7 +903,7 @@ XS(XS_re_regexp_pattern)
 {
     dXSARGS;
     REGEXP *re;
-    U8 const gimme = GIMME_V;
+    I32 const gimme = GIMME_V;
 
     EXTEND(SP, 2);
     SP -= items;

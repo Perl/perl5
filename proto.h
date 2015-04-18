@@ -6043,7 +6043,7 @@ STATIC I32	S_do_trans_simple_utf8(pTHX_ SV * const sv)
 
 #endif
 #if defined(PERL_IN_DUMP_C)
-STATIC CV*	S_deb_curcv(pTHX_ const I32 ix);
+STATIC CV*	S_deb_curcv(pTHX_ I32 ix);
 STATIC void	S_debprof(pTHX_ const OP *o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_DEBPROF	\
