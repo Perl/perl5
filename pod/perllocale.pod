@@ -1251,7 +1251,7 @@ priority than C<LC_ALL>.  Moreover, it's not a single value but
 instead a "path" (":"-separated list) of I<languages> (not locales).
 See the GNU C<gettext> library documentation for more information.
 
-=item C<LC_CTYPE>.
+=item C<LC_CTYPE>
 
 In the absence of C<LC_ALL>, C<LC_CTYPE> chooses the character type
 locale.  In the absence of both C<LC_ALL> and C<LC_CTYPE>, C<LANG>
@@ -1285,7 +1285,7 @@ C<LANG> chooses the date and time formatting locale.
 
 C<LANG> is the "catch-all" locale environment variable. If it is set, it
 is used as the last resort after the overall C<LC_ALL> and the
-category-specific C<LC_I<foo>>
+category-specific C<LC_I<foo>>.
 
 =back
 

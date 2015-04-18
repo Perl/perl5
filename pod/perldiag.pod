@@ -1718,7 +1718,7 @@ workarounds.
 (F) The parser found inconsistencies either while attempting
 to define an overloaded constant, or when trying to find the
 character name specified in the C<\N{...}> escape.  Perhaps you
-forgot to load the corresponding L<overload> pragma?.
+forgot to load the corresponding L<overload> pragma?
 
 =item :const is experimental
 

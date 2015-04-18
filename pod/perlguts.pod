@@ -39,7 +39,7 @@ values that can be loaded: an integer value (IV), an unsigned integer
 value (UV), a double (NV), a string (PV), and another scalar (SV).
 ("PV" stands for "Pointer Value".  You might think that it is misnamed
 because it is described as pointing only to strings.  However, it is
-possible to have it point to other things  For example, it could point
+possible to have it point to other things.  For example, it could point
 to an array of UVs.  But,
 using it for non-strings requires care, as the underlying assumption of
 much of the internals is that PVs are just for strings.  Often, for
