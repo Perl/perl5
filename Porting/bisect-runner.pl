@@ -4,6 +4,7 @@ use strict;
 use Getopt::Long qw(:config bundling no_auto_abbrev);
 use Pod::Usage;
 use Config;
+use File::Temp qw(tempdir);
 
 my @targets
     = qw(none config.sh config.h miniperl lib/Config.pm Fcntl perl test_prep);
@@ -64,6 +65,7 @@ unless(GetOptions(\%options,
                   'test-build', 'validate',
                   'all-fixups', 'early-fixup=s@', 'late-fixup=s@', 'valgrind',
                   'check-args', 'check-shebang!', 'usage|help|?', 'gold=s',
+                  'module=s',
                   'A=s@',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
@@ -124,7 +126,7 @@ if (defined $target && $target =~ /\.t\z/) {
 }
 
 pod2usage(exitval => 255, verbose => 1)
-    unless @ARGV || $match || $options{'test-build'} || defined $options{'one-liner'};
+    unless @ARGV || $match || $options{'test-build'} || defined $options{'one-liner'} || defined $options{module};
 pod2usage(exitval => 255, verbose => 1)
     if !$options{'one-liner'} && ($options{l} || $options{w});
 
@@ -160,6 +162,8 @@ bisect.pl - use git bisect to pinpoint changes
  .../Porting/bisect.pl --test-build -Dd_dosuid
  # When did this test program start generating errors from valgrind?
  .../Porting/bisect.pl --valgrind ../test_prog.pl
+ # When did these cpan modules start failing to compile/pass tests?
+ .../Porting/bisect.pl --module=autobox,Moose
 
 =head1 DESCRIPTION
 
@@ -536,6 +540,21 @@ and then a test case that runs C<make>. For example:
 will find the first revision capable of building L<DynaLoader> and then
 F<perl>, without becoming confused by revisions where F<miniperl> won't
 even link.
+
+=item *
+
+--module module1,module2,...
+
+Install this (or these) module(s), die when it (the last of those)
+cannot be updated to the current version.
+
+Misnomer. the argument can be any argument that can be passed to CPAN
+shell's install command. B<But>: since we only have the uptodate
+command to verify that an install has taken place, we are unable to
+determine success for arguments like
+MSCHWERN/Test-Simple-1.005000_005.tar.gz.
+
+In so far, it is not such a misnomer.
 
 =item *
 
@@ -1305,6 +1324,15 @@ foreach my $key (sort keys %defines) {
 }
 push @ARGS, map {"-A$_"} @{$options{A}};
 
+my $prefix;
+
+if ($options{module}) {
+  $prefix = tempdir(CLEANUP => 1);
+
+  push @ARGS, "-Dprefix=$prefix";
+  push @ARGS, "-Uversiononly", "-Dinstallusrbinperl=n";
+}
+
 # If a file in MANIFEST is missing, Configure asks if you want to
 # continue (the default being 'n'). With stdin closed or /dev/null,
 # it exits immediately and the check for config.sh below will skip.
@@ -1378,6 +1406,34 @@ if ($target ne 'miniperl') {
     }
 
     system "$options{make} $j $real_target </dev/null";
+}
+
+# Testing a cpan module? See if it will install
+if ($options{module}) {
+  # First we need to install this perl somewhere
+  system_or_die('./installperl');
+
+  my @m = split(',', $options{module});
+
+  my $bdir = File::Temp::tempdir(
+    CLEANUP => 1,
+  ) or die $!;
+
+  my @cpanshell = (
+    "$prefix/bin/perl",
+    "-MCPAN",
+    "-e","\$CPAN::Config->{build_dir}=q{$bdir};",
+    "-e",
+  );
+
+  for (@m) {
+    s/-/::/g if /-/ and !m|/|;
+  }
+  my $install = join ",", map { "'$_'" } @m;
+  my $last = $m[-1];
+  my $shellcmd = "install($install); die unless CPAN::Shell->expand(Module => '$last')->uptodate;";
+
+  run_report_and_exit(@cpanshell, $shellcmd);
 }
 
 my $expected_file_found = $expected_file =~ /perl$/
