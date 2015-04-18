@@ -1432,6 +1432,10 @@ if ($options{module} || $options{'with-module'}) {
     CLEANUP => 1,
   ) or die $!;
 
+  # Don't ever stop to ask the user for input
+  $ENV{AUTOMATED_TESTING} = 1;
+  $ENV{PERL_MM_USE_DEFAULT} = 1;
+
   my @cpanshell = (
     "$prefix/bin/perl",
     "-MCPAN",
