@@ -5,7 +5,7 @@
 quote() {
 	case "$1" in
 	'') echo "''" ;;
-	*)  echo "$1" | sed 's/\([^a-zA-Z0-9.:_\-\/]\)/\\\1/g' ;;
+	*)  echo "$1" | sed 's/\([^a-zA-Z0-9.:_/-]\)/\\\1/g' ;;
 	esac
 }
 
