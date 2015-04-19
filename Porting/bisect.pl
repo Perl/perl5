@@ -10,13 +10,27 @@ Documentation for this is in bisect-runner.pl
 # The default, auto_abbrev will treat -e as an abbreviation of --end
 # Which isn't what we want.
 use Getopt::Long qw(:config pass_through no_auto_abbrev);
+use File::Spec;
+use File::Path qw(mkpath);
 
-my ($start, $end, $validate, $usage, $bad, $jobs, $make, $gold);
+my ($start, $end, $validate, $usage, $bad, $jobs, $make, $gold,
+    $module, $with_module);
+
+my $need_cpan_config;
+
 $bad = !GetOptions('start=s' => \$start, 'end=s' => \$end,
                    'jobs|j=i' => \$jobs, 'make=s' => \$make, 'gold=s' => \$gold,
-                   validate => \$validate, 'usage|help|?' => \$usage);
+                   validate => \$validate, 'usage|help|?' => \$usage,
+                   'module=s' => \$module, 'with-module=s' => \$with_module);
 unshift @ARGV, '--help' if $bad || $usage;
 unshift @ARGV, '--validate' if $validate;
+
+if ($module || $with_module) {
+  $need_cpan_config = 1;
+
+  unshift @ARGV, '--module', $module if defined $module;
+  unshift @ARGV, '--with-module', $with_module if defined $with_module;
+}
 
 my $runner = $0;
 $runner =~ s/bisect\.pl/bisect-runner.pl/;
@@ -48,6 +62,45 @@ if (!defined $jobs &&
 
 unshift @ARGV, '--jobs', $jobs if defined $jobs;
 unshift @ARGV, '--make', $make if defined $make;
+
+if ($need_cpan_config) {
+  # Make sure we have a CPAN::MyConfig so if we start at an old
+  # revision CPAN doesn't ask for user input to configure itself
+
+  my $cdir = File::Spec->catdir($ENV{HOME},".cpan","CPAN");
+  my $cfile = File::Spec->catfile($cdir, "MyConfig.pm");
+
+  unless (-e $cfile) {
+    printf <<EOF;
+I could not find a CPAN::MyConfig. We need to create one now so that
+you can bisect with --module or --with-module. I'll boot up the CPAN
+shell for you. Feel free to use defaults or change things as needed.
+Type 'quit' when finished.
+EOF
+    system("$^X -MCPAN -e shell");
+
+    # mkpath for older File::Spec support (5.8.8, etc)
+    eval { mkpath($cdir); };
+    die "Failed to mkdir $cdir: $@\n" if $@;
+
+    open (my $fh, '>', $cfile)
+      || die "Could not open $cfile for writing: $!\n";
+
+    my $data = `$^X -mCPAN -MData::Dumper -e 'CPAN::Config->load;
+                print Dumper(\$CPAN::Config)' 2>/dev/null`;
+
+    # Replace $VAR1 = { with $CPAN::Config = {
+    unless ($data =~ s/^.*\$VAR1\s+=\s+{/\$CPAN::Config = {/s) {
+      die "CPAN::Config does not look right, can't continue.\n",
+          "Try creating a CPAN::MyConfig manually.\n",
+          "The unrecognized output was: $data";
+    }
+
+    print $fh $data;
+    print $fh "\n1;\n";
+    close $data;
+  }
+}
 
 # We try these in this order for the start revision if none is specified.
 my @stable = map {chomp $_; $_} grep {/v5\.[0-9]+[02468]\.0$/} `git tag -l`;

@@ -558,6 +558,12 @@ MSCHWERN/Test-Simple-1.005000_005.tar.gz.
 
 In so far, it is not such a misnomer.
 
+Note that this and B<--with-module> will both require a CPAN::MyConfig.
+If F</home/.cpan/CPAN/MyConfig.pm> does not exist, a CPAN shell will
+be started up for you so you can configure one. Feel free to let
+CPAN pick defaults for you. Enter 'quit' when you are done, and
+then everything should be all set.
+
 =item *
 
 --with-module module1,module2,...
