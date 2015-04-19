@@ -365,17 +365,61 @@ C<test-prep> again depends on C<test-prep-gcc> for GCC builds. [perl
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
+=over 4
 
-[ List each change as a =item entry ]
+=item *
+
+5.21.2 introduced a new build option, C<-DPERL_OP_PARENT>, which causes
+the last C<op_sibling> pointer to refer back to the parent rather than
+being C<NULL>, and where instead a new flag indicates the end of the
+chain. In this release, the new implementation has been revised; in
+particular:
 
 =over 4
 
 =item *
 
-XXX
+On C<PERL_OP_PARENT> builds, the C<op_sibling> field has been renamed
+C<op_sibparent> to reflect its new dual purpose. Since the intention is that
+this field should primarily be accessed via macros, this change should be
+transparent for code written to work under C<PERL_OP_PARENT>.
+
+=item *
+
+The newly-introduced C<op_lastsib> flag bit has been renamed C<op_moresib>
+and its logic inverted; i.e. it is initialised to zero in a new op, and is
+changed to 1 when an op gains a sibling.
+
+=item *
+
+The function C<Perl_op_parent> is now only available on C<PERL_OP_PARENT>
+builds. Using it on a plain build will be a compile-timer error.
+
+=item *
+
+Three new macros, C<OpMORESIB_set>, C<OpLASTSIB_set>, C<OpMAYBESIB_set>
+have been added, which are intended to be be a low-level portable way to
+set C<op_sibling> / C<op_sibparent> while also updating C<op_moresib>.
+The first sets the sibling pointer to a new sibling, the second makes the
+op the last sibling, and the third conditionally does the first or second
+action. The C<op_sibling_splice()> function is retained as a higher-level
+interface that can also maintain consistency in the parent at the same time
+(e.g. by updating C<op_first> and C<op_last> where appropriate).
+
+=item *
+
+The macro C<OpSIBLING_set>, added in 5.21.2, has been removed. It didn't
+manipulate C<op_moresib> and has been superseded by C<OpMORESIB_set> et
+al.
+
+=item *
+
+The C<op_sibling_splice> function now accepts a null C<parent> argument
+where the splicing doesn't affect the first or last ops in the sibling
+chain, and thus where the parent doesn't need to be updated accordingly.
+
+=back
+
 
 =back
 
