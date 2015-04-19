@@ -564,6 +564,22 @@ be started up for you so you can configure one. Feel free to let
 CPAN pick defaults for you. Enter 'quit' when you are done, and
 then everything should be all set.
 
+Also, if you want to bisect a module that needs a display (like
+TK) and you don't want random screens appearing and disappearing
+on your computer while you're working, you can do something like
+this:
+
+In a terminal:
+
+  $ while true; do date ; if ! ps auxww | grep -v grep | grep -q Xvfb;\
+    then Xvfb :121 & fi; echo -n 'sleeping 60 '; sleep 60; done
+
+And then:
+
+  DISPLAY=":121" .../Porting/bisect.pl --module=TK
+
+(Some display alternatives are vncserver and Xnest.)
+
 =item *
 
 --with-module module1,module2,...
