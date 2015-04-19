@@ -474,7 +474,7 @@ EOS
 # test op_parent
 
 SKIP: {
-    unless ($Config::Config{ccflags} =~ /PERL_OP_PARENT/) {
+    unless ($B::OP::does_parent) {
         skip "op_parent only present with -DPERL_OP_PARENT builds", 6;
     }
     my $lineseq = B::svref_2object(sub{my $x = 1})->ROOT->first;
@@ -483,8 +483,8 @@ SKIP: {
     my $first  = $lineseq->first;
     my $second = $first->sibling;
     is(ref $second->sibling, "B::NULL", 'op_parent: second sibling is null');
-    is($first->lastsib,  0 , 'op_parent: first  sibling: !lastsib');
-    is($second->lastsib, 1,  'op_parent: second sibling: lastsib');
+    is($first->moresib,  1 , 'op_parent: first  sibling: moresib');
+    is($second->moresib, 0,  'op_parent: second sibling: !moresib');
     is($$lineseq,  ${$first->parent},   'op_parent: first  sibling okay');
     is($$lineseq,  ${$second->parent},  'op_parent: second sibling okay');
 }

@@ -24,7 +24,7 @@
  *                      !op_slabbed.
  *	op_savefree	on savestack via SAVEFREEOP
  *	op_folded	Result/remainder of a constant fold operation.
- *	op_lastsib	this op is is the last sibling
+ *	op_moresib	this op is is not the last sibling
  *	op_spare	One spare bit
  *	op_flags	Flags common to all operations.  See OPf_* below.
  *	op_private	Flags peculiar to a particular operation (BUT,
@@ -38,12 +38,21 @@
 
 typedef PERL_BITFIELD16 Optype;
 
+/* this field now either points to the next sibling or to the parent,
+ * depending on op_moresib. So rename it from op_sibling to op_sibparent.
+ */
+#ifdef PERL_OP_PARENT
+#  define _OP_SIBPARENT_FIELDNAME op_sibparent
+#else
+#  define _OP_SIBPARENT_FIELDNAME op_sibling
+#endif
+
 #ifdef BASEOP_DEFINITION
 #define BASEOP BASEOP_DEFINITION
 #else
 #define BASEOP				\
     OP*		op_next;		\
-    OP*		op_sibling;		\
+    OP*		_OP_SIBPARENT_FIELDNAME;\
     OP*		(*op_ppaddr)(pTHX);	\
     PADOFFSET	op_targ;		\
     PERL_BITFIELD16 op_type:9;		\
@@ -52,7 +61,7 @@ typedef PERL_BITFIELD16 Optype;
     PERL_BITFIELD16 op_savefree:1;	\
     PERL_BITFIELD16 op_static:1;	\
     PERL_BITFIELD16 op_folded:1;	\
-    PERL_BITFIELD16 op_lastsib:1;       \
+    PERL_BITFIELD16 op_moresib:1;       \
     PERL_BITFIELD16 op_spare:1;		\
     U8		op_flags;		\
     U8		op_private;
@@ -929,11 +938,23 @@ the NULL pointer check.
 =for apidoc Am|bool|OpHAS_SIBLING|OP *o
 Returns true if o has a sibling
 
-=for apidoc Am|bool|OpSIBLING|OP *o
+=for apidoc Am|OP*|OpSIBLING|OP *o
 Returns the sibling of o, or NULL if there is no sibling
 
-=for apidoc Am|bool|OpSIBLING_set|OP *o|OP *sib
-Sets the sibling of o to sib
+=for apidoc Am|void|OpMORESIB_set|OP *o|OP *sib
+Sets the sibling of o to the non-zero value sib. See also C<OpLASTSIB_set>
+and C<OpMAYBESIB_set>. For a higher-level interface, see
+C<op_sibling_splice>.
+
+=for apidoc Am|void|OpLASTSIB_set|OP *o|OP *parent
+Marks o as having no further siblings. On C<PERL_OP_PARENT> builds, marks
+o as having the specified parent. See also C<OpMORESIB_set> and
+C<OpMAYBESIB_set>. For a higher-level interface, see
+C<op_sibling_splice>.
+
+=for apidoc Am|void|OpMAYBESIB_set|OP *o|OP *sib|OP *parent
+Conditionally does C<OpMORESIB_set> or C<OpLASTSIB_set> depending on whether
+sib is non-null. For a higher-level interface, see C<op_sibling_splice>.
 
 =cut
 */
@@ -971,16 +992,27 @@ Sets the sibling of o to sib
 #define OP_TYPE_ISNT_AND_WASNT(o, type) \
     ( (o) && OP_TYPE_ISNT_AND_WASNT_NN(o, type) )
 
+
 #ifdef PERL_OP_PARENT
-#  define OpHAS_SIBLING(o)	(!cBOOL((o)->op_lastsib))
-#  define OpSIBLING(o)		(0 + (o)->op_lastsib ? NULL : (o)->op_sibling)
-#  define OpSIBLING_set(o, sib)	((o)->op_sibling = (sib))
+#  define OpHAS_SIBLING(o)	(cBOOL((o)->op_moresib))
+#  define OpSIBLING(o)		(0 + (o)->op_moresib ? (o)->op_sibparent : NULL)
+#  define OpMORESIB_set(o, sib) ((o)->op_moresib = 1, (o)->op_sibparent = (sib))
+#  define OpLASTSIB_set(o, parent) \
+       ((o)->op_moresib = 0, (o)->op_sibparent = (parent))
+#  define OpMAYBESIB_set(o, sib, parent) \
+       ((o)->op_sibparent = ((o)->op_moresib = cBOOL(sib)) ? (sib) : (parent))
 #else
 #  define OpHAS_SIBLING(o)	(cBOOL((o)->op_sibling))
 #  define OpSIBLING(o)		(0 + (o)->op_sibling)
-#  define OpSIBLING_set(o, sib)	((o)->op_sibling = (sib))
+#  define OpMORESIB_set(o, sib) ((o)->op_moresib = 1, (o)->op_sibling = (sib))
+#  define OpLASTSIB_set(o, parent) \
+       ((o)->op_moresib = 0, (o)->op_sibling = NULL)
+#  define OpMAYBESIB_set(o, sib, parent) \
+       ((o)->op_moresib = cBOOL(sib), (o)->op_sibling = (sib))
 #endif
+
 #if !defined(PERL_CORE) && !defined(PERL_EXT)
+/* for backwards compatibility only */
 #  define OP_SIBLING(o)		OpSIBLING(o)
 #endif
 

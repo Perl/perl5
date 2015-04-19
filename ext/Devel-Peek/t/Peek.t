@@ -1489,40 +1489,40 @@ dumpindent is 4 at -e line 1.
 {
 1   TYPE = leave  ===> NULL
     TARG = 1
-    FLAGS = (VOID,KIDS,PARENS,SLABBED,LASTSIB)
+    FLAGS = (VOID,KIDS,PARENS,SLABBED)
     PRIVATE = (REFC)
     REFCNT = 1
     {
 2       TYPE = enter  ===> 3
-        FLAGS = (UNKNOWN,SLABBED)
+        FLAGS = (UNKNOWN,SLABBED,MORESIB)
     }
     {
 3       TYPE = nextstate  ===> 4
-        FLAGS = (VOID,SLABBED)
+        FLAGS = (VOID,SLABBED,MORESIB)
         LINE = 1
         PACKAGE = "t"
     }
     {
 5       TYPE = entersub  ===> 1
         TARG = 1
-        FLAGS = (VOID,KIDS,STACKED,SLABBED,LASTSIB)
+        FLAGS = (VOID,KIDS,STACKED,SLABBED)
         PRIVATE = (TARG)
         {
 6           TYPE = null  ===> (5)
               (was list)
-            FLAGS = (UNKNOWN,KIDS,SLABBED,LASTSIB)
+            FLAGS = (UNKNOWN,KIDS,SLABBED)
             {
 4               TYPE = pushmark  ===> 7
-                FLAGS = (SCALAR,SLABBED)
+                FLAGS = (SCALAR,SLABBED,MORESIB)
             }
             {
 8               TYPE = null  ===> (6)
                   (was rv2cv)
-                FLAGS = (SCALAR,KIDS,SLABBED,LASTSIB)
+                FLAGS = (SCALAR,KIDS,SLABBED)
                 PRIVATE = (0x1)
                 {
 7                   TYPE = gv  ===> 5
-                    FLAGS = (SCALAR,SLABBED,LASTSIB)
+                    FLAGS = (SCALAR,SLABBED)
                     GV_OR_PADIX
                 }
             }

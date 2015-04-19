@@ -760,7 +760,7 @@ const struct OP_methods {
   { STR_WITH_LEN("static"),  op_offset_special, 0,                     },/*49*/
 #  if PERL_VERSION >= 19
   { STR_WITH_LEN("folded"),  op_offset_special, 0,                     },/*50*/
-  { STR_WITH_LEN("lastsib"), op_offset_special, 0,                     },/*51*/
+  { STR_WITH_LEN("moresib"), op_offset_special, 0,                     },/*51*/
   { STR_WITH_LEN("parent"),  op_offset_special, 0,                     },/*52*/
 #  endif
 #endif
@@ -1060,7 +1060,7 @@ next(o)
 	B::OP::savefree      = 48
 	B::OP::static        = 49
 	B::OP::folded        = 50
-	B::OP::lastsib       = 51
+	B::OP::moresib       = 51
 	B::OP::parent        = 52
 	B::METHOP::first     = 53
 	B::METHOP::meth_sv   = 54
@@ -1146,7 +1146,7 @@ next(o)
 	    case 49: /* B::OP::static   */
 #if PERL_VERSION >= 19
 	    case 50: /* B::OP::folded   */
-	    case 51: /* B::OP::lastsib  */
+	    case 51: /* B::OP::moresib  */
 #endif
 #endif
 	    /* These are all bitfields, so we can't take their addresses */
@@ -1157,7 +1157,7 @@ next(o)
 		                    : ix == 48 ? o->op_savefree
 		                    : ix == 49 ? o->op_static
 		                    : ix == 50 ? o->op_folded
-		                    : ix == 51 ? o->op_lastsib
+		                    : ix == 51 ? o->op_moresib
 		                    :            o->op_spare)));
 		break;
 	    case 33: /* B::LISTOP::children */
@@ -1260,7 +1260,11 @@ next(o)
 			PTR2IV(CopHINTHASH_get(cCOPo)));
 		break;
 	    case 52: /* B::OP::parent */
+#ifdef PERL_OP_PARENT
 		ret = make_op_object(aTHX_ op_parent(o));
+#else
+		ret = make_op_object(aTHX_ NULL);
+#endif
 		break;
 	    case 53: /* B::METHOP::first   */
                 /* METHOP struct has an op_first/op_meth_sv union

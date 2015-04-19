@@ -803,7 +803,7 @@ Prints the C definition of the argument given.
   (gdb) ptype PL_op
   type = struct op {
       OP *op_next;
-      OP *op_sibling;
+      OP *op_sibparent;
       OP *(*op_ppaddr)(void);
       PADOFFSET op_targ;
       unsigned int op_type : 9;
