@@ -5,6 +5,7 @@ use Getopt::Long qw(:config bundling no_auto_abbrev);
 use Pod::Usage;
 use Config;
 use File::Temp qw(tempdir);
+use File::Spec;
 
 my @targets
     = qw(none config.sh config.h miniperl lib/Config.pm Fcntl perl test_prep);
@@ -1462,8 +1463,15 @@ if ($options{module} || $options{'with-module'}) {
   delete $ENV{PERL_MB_OPT};
   delete $ENV{PERL_MM_OPT};
 
+  # Make sure we load up our CPAN::MyConfig and then
+  # override the build_dir so we have a fresh one
+  # every build
+  my $cdir = File::Spec->catfile($ENV{HOME},".cpan");
+
   my @cpanshell = (
     "$prefix/bin/perl",
+    "-I", "$cdir",
+    "-MCPAN::MyConfig",
     "-MCPAN",
     "-e","\$CPAN::Config->{build_dir}=q{$bdir};",
     "-e",
