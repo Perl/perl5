@@ -1458,6 +1458,10 @@ if ($options{module} || $options{'with-module'}) {
   $ENV{AUTOMATED_TESTING} = 1;
   $ENV{PERL_MM_USE_DEFAULT} = 1;
 
+  # Don't let these interfere with our cpan installs
+  delete $ENV{PERL_MB_OPT};
+  delete $ENV{PERL_MM_OPT};
+
   my @cpanshell = (
     "$prefix/bin/perl",
     "-MCPAN",
