@@ -60,20 +60,20 @@ obeying the laws of their own, their blessedly other-than-human nature.
 
 L<Announced on 2015-02-20 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2015/02/msg226002.html>
 
-There is another sky,
-Ever serene and fair,
-And there is another sunshine,
-Though it be darkness there;
-Never mind faded forests, Austin,
-Never mind silent fields -
-Here is a little forest,
-Whose leaf is ever green;
-Here is a brighter garden,
-Where not a frost has been;
-In its unfading flowers
-I hear the bright bee hum:
-Prithee, my brother,
-Into my garden come!
+  There is another sky,
+  Ever serene and fair,
+  And there is another sunshine,
+  Though it be darkness there;
+  Never mind faded forests, Austin,
+  Never mind silent fields -
+  Here is a little forest,
+  Whose leaf is ever green;
+  Here is a brighter garden,
+  Where not a frost has been;
+  In its unfading flowers
+  I hear the bright bee hum:
+  Prithee, my brother,
+  Into my garden come!
 
 =head2 v5.21.8 - Bill Watterson, "Scientific Progress Goes 'Boink': A Calvin and Hobbes Collection"
 
