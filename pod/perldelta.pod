@@ -352,7 +352,10 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<t/porting/re_context.t> has been added to test that L<utf8> and its
+dependencies only use the subset of the C<$1..$n> capture vars that
+Perl_save_re_context() is hard-coded to localize, because that function has no
+efficient way of determining at runtime what vars to localize.
 
 =back
 
