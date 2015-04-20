@@ -144,6 +144,10 @@ L<Config::Perl::V> has been upgraded from version 0.23 to 0.24.
 
 =item *
 
+L<CPAN> has been upgraded from version 2.10 to 2.11.
+
+=item *
+
 L<Cwd> has been upgraded from version 3.55 to 3.56.
 
 =item *
