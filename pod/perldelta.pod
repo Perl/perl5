@@ -223,13 +223,36 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlebcdic>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+This document has been significantly updated in the light of recent
+improvements to EBCDIC support.
+
+=back
+
+=head3 L<perlhacktips>
+
+=over 4
+
+=item *
+
+Documentation has been added illustrating the perils of assuming the contents of
+static memory pointed to by the return values of Perl wrappers for C library
+functions doesn't change.
+
+=back
+
+=head3 L<perlvms>
+
+=over 4
+
+=item *
+
+Out-of-date and/or incorrect material has been removed.
 
 =back
 
