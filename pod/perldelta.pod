@@ -366,9 +366,35 @@ A regression in Perl 5.21 in the matching of C</[A-Z]/ai> has been fixed.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.21.11 represents approximately 4 weeks of development since Perl 5.21.10
+and contains approximately 5,800 lines of changes across 240 files from 24
+authors.
 
-  perl Porting/acknowledgements.pl v5.21.10..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 1,700 lines of changes to 160 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.21.11:
+
+Alex Vandiver, Andreas König, Craig A. Berry, Dagfinn Ilmari Mannsåker, Daniel
+Dragan, David Golden, David Mitchell, Father Chrysostomos, H.Merijn Brand,
+Herbert Breunung, Hugo van der Sanden, James E Keenan, James McCoy, Karl
+Williamson, Matthew Horsfall, Max Maischein, Nicholas Clark, Rafael
+Garcia-Suarez, Randy Stauner, Ricardo Signes, Shirakata Kentaro, Steffen
+Müller, Steve Hay, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
