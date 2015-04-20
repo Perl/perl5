@@ -187,7 +187,8 @@ is_core() and copes with versions that do not match x.yyyzzz.
 
 L<perl5db.pl> has been upgraded from 1.48 to 1.49.
 
-The debugger would cause an assertion failure.  [perl #124127]
+The debugger would cause an assertion failure.
+L<[perl #124127]|https://rt.perl.org/Ticket/Display.html?id=124127>
 
 =item *
 
@@ -459,10 +460,11 @@ L</Modules and Pragmata> section.
 =item Win32
 
 F<miniperl.exe> is now built with C<-fno-strict-aliasing>, allowing
-64-bit builds to complete on GCC 4.8. [perl #123976]
+64-bit builds to complete on GCC 4.8.
+L<[perl #123976]|https://rt.perl.org/Ticket/Display.html?id=123976>
 
-C<test-prep> again depends on C<test-prep-gcc> for GCC builds. [perl
-#124221]
+C<test-prep> again depends on C<test-prep-gcc> for GCC builds.
+L<[perl #124221]|https://rt.perl.org/Ticket/Display.html?id=124221>
 
 =back
 
@@ -540,31 +542,34 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 C<pack("D", $x)> and C<pack("F", $x)> now zero the padding on x86 long
 double builds.  GCC 4.8 and later, under some build options, would
 either overwrite the zero-initialized padding, or bypass the
-initialized buffer entirely.  This caused F<op/pack.t> to fail.  [perl
-#123971]
+initialized buffer entirely.  This caused F<op/pack.t> to fail.
+L<[perl #123971]|https://rt.perl.org/Ticket/Display.html?id=123971>
 
 =item *
 
 Extending an array cloned from a parent thread could result in
 "Modification of a read-only value attempted" errors when attempting
-to modify the new elements. [perl #124127]
+to modify the new elements.
+L<[perl #124127]|https://rt.perl.org/Ticket/Display.html?id=124127>
 
 =item *
 
 An assertion failure and subsequent crash with C<< *x=<y> >> has been fixed.
-[perl #123790]
+L<[perl #123790]|https://rt.perl.org/Ticket/Display.html?id=123790>
 
 =item *
 
 An optimization for state variable initialization introduced in Perl 5.21.6 has
 been reverted because it was found to exacerbate some other existing buggy
-behaviour. [perl #124160]
+behaviour.
+L<[perl #124160]|https://rt.perl.org/Ticket/Display.html?id=124160>
 
 =item *
 
 The extension of another optimization to cover more ops in Perl 5.21 has also
 been reverted to its Perl 5.20 state as a temporary fix for regression issues
-that it caused. [perl #123790]
+that it caused.
+L<[perl #123790]|https://rt.perl.org/Ticket/Display.html?id=123790>
 
 =item *
 
@@ -573,28 +578,33 @@ to enable all features.  This has now been fixed.
 
 =item *
 
-A possible crashing/looping bug has been fixed. [perl #124099]
+A possible crashing/looping bug has been fixed.
+L<[perl #124099]|https://rt.perl.org/Ticket/Display.html?id=124099>
 
 =item *
 
 UTF-8 variable names used in array indexes, unquoted UTF-8 HERE-document
-terminators and UTF-8 function names all now work correctly. [perl #124113]
+terminators and UTF-8 function names all now work correctly.
+L<[perl #124113]|https://rt.perl.org/Ticket/Display.html?id=124113>
 
 =item *
 
 Breakage in C<require(VERSION)> (with parentheses), introduced in Perl 5.21.6,
-has been fixed. [perl #124135]
+has been fixed.
+L<[perl #124135]|https://rt.perl.org/Ticket/Display.html?id=124135>
 
 =item *
 
 Wide char warnings, wrongly raised in UTF-8 locales since Perl 5.21.8, are now
-suppressed. [perl #123527]
+suppressed.
+L<[perl #123527]|https://rt.perl.org/Ticket/Display.html?id=123527>
 
 =item *
 
 A subtle bug introduced in Perl 5.21.4 involving UTF-8 in regular expressions
 and sometimes causing a crash has been fixed. A new test script has been added
-to test this fix; see under L</Testing>. [perl #124109]
+to test this fix; see under L</Testing>.
+L<[perl #124109]|https://rt.perl.org/Ticket/Display.html?id=124109>
 
 =item *
 
@@ -604,7 +614,8 @@ has been reverted.
 =item *
 
 A bug whereby C<< 'FOO'->f() >> lost the read-only status of C<FOO>, introduced
-in Perl 5.21.7, has been fixed. [perl #123619]
+in Perl 5.21.7, has been fixed.
+L<[perl #123619]|https://rt.perl.org/Ticket/Display.html?id=123619>
 
 =item *
 
