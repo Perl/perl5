@@ -136,6 +136,8 @@ L<B> has been upgraded from version 1.57 to 1.58.
 
 L<B::Deparse> has been upgraded from version 1.34 to 1.35.
 
+C<< <<>> >> is now correctly deparsed.
+
 =item *
 
 L<Config::Perl::V> has been upgraded from version 0.23 to 0.24.
@@ -231,6 +233,27 @@ section.
 
 This document has been significantly updated in the light of recent
 improvements to EBCDIC support.
+
+=back
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Mention that C<study()> is currently a no-op.
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+The OOK example has been updated to account for COW changes and a change in the
+storage of the offset.
 
 =back
 
@@ -494,6 +517,23 @@ initialized buffer entirely.  This caused F<op/pack.t> to fail.  [perl
 Extending an array cloned from a parent thread could result in
 "Modification of a read-only value attempted" errors when attempting
 to modify the new elements. [perl #124127]
+
+=item *
+
+An assertion failure and subsequent crash with C<< *x=<y> >> has been fixed.
+[perl #123790]
+
+=item *
+
+An optimization for state variable initialization introduced in Perl 5.21.6 has
+been reverted because it was found to exacerbate some other existing buggy
+behaviour. [perl #124160]
+
+=item *
+
+The extension of another optimization to cover more ops in Perl 5.21 has also
+been reverted to its Perl 5.20 state as a temporary fix for regression issues
+that it caused. [perl #123790]
 
 =back
 
