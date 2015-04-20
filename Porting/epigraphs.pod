@@ -17,6 +17,28 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.11 - Algernon Charles Swinburne, "Dolores (Notre-Dame des Sept Douleurs)"
+
+L<Announced on 2015-04-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/04/msg227472.html>
+
+  They shall pass and their places be taken,
+    The gods and the priests that are pure.
+  They shall pass, and shalt thou not be shaken?
+    They shall perish, and shalt thou endure?
+  Death laughs, breathing close and relentless
+    In the nostrils and eyelids of lust,
+  With a pinch in his fingers of scentless
+    And delicate dust.
+
+  But the worm shall revive thee with kisses;
+    Thou shalt change and transmute as a god,
+  As the rod to a serpent that hisses,
+    As the serpent again to a rod.
+  Thy life shall not cease though thou doff it;
+    Thou shalt live until evil be slain,
+  And good shall die first, said thy prophet,
+    Our Lady of Pain.
+
 =head2 v5.21.10 - Aldous Huxley, "The Devils of Loudun"
 
 L<Announced on 2015-03-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/03/msg226847.html>
