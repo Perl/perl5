@@ -16,10 +16,9 @@ L<perl52110delta>, which describes differences between 5.21.9 and 5.21.10.
 
 =head2 Making all warnings fatal is discouraged
 
-The documentation for L<fatal warnings|warnings/Fatal Warnings> notes
-that C<< use warnings FATAL => 'all' >> is discouraged
-and provides stronger language about the risks of fatal warnings
-in general.
+The documentation for L<fatal warnings|warnings/Fatal Warnings> notes that
+C<< use warnings FATAL => 'all' >> is discouraged and provides stronger
+language about the risks of fatal warnings in general.
 
 =head1 Modules and Pragmata
 
@@ -83,7 +82,7 @@ L<IO::Socket::IP> has been upgraded from version 0.36 to 0.37.
 
 L<Module::CoreList> has been upgraded from version 5.20150320 to 5.20150420.
 
-Updated to cover the latest releases of Perl. Also fixes a fencepost error in
+Updated to cover the latest releases of Perl.  Also fixes a fencepost error in
 is_core() and copes with versions that do not match x.yyyzzz.
 
 =item *
@@ -151,8 +150,8 @@ storage of the offset.
 
 =item *
 
-Documentation has been added illustrating the perils of assuming the contents of
-static memory pointed to by the return values of Perl wrappers for C library
+Documentation has been added illustrating the perils of assuming the contents
+of static memory pointed to by the return values of Perl wrappers for C library
 functions doesn't change.
 
 =back
@@ -174,7 +173,7 @@ Out-of-date VMS-specific information has been fixed/simplified.
 =item *
 
 Advice for how to make sure your strings and regular expression patterns are
-interpreted as Unicode has been revised to account for the new 5.22 EBCDIC
+interpreted as Unicode has been revised to account for the new Perl 5.22 EBCDIC
 handling.
 
 =back
@@ -210,8 +209,8 @@ efficient way of determining at runtime what vars to localize.
 
 =item Win32
 
-F<miniperl.exe> is now built with C<-fno-strict-aliasing>, allowing
-64-bit builds to complete on GCC 4.8.
+F<miniperl.exe> is now built with C<-fno-strict-aliasing>, allowing 64-bit
+builds to complete on GCC 4.8.
 L<[perl #123976]|https://rt.perl.org/Ticket/Display.html?id=123976>
 
 C<test-prep> again depends on C<test-prep-gcc> for GCC builds.
@@ -225,54 +224,52 @@ L<[perl #124221]|https://rt.perl.org/Ticket/Display.html?id=124221>
 
 =item *
 
-5.21.2 introduced a new build option, C<-DPERL_OP_PARENT>, which causes
-the last C<op_sibling> pointer to refer back to the parent rather than
-being C<NULL>, and where instead a new flag indicates the end of the
-chain. In this release, the new implementation has been revised; in
-particular:
+Perl 5.21.2 introduced a new build option, C<-DPERL_OP_PARENT>, which causes
+the last C<op_sibling> pointer to refer back to the parent rather than being
+C<NULL>, and where instead a new flag indicates the end of the chain.  In this
+release, the new implementation has been revised; in particular:
 
 =over 4
 
 =item *
 
 On C<PERL_OP_PARENT> builds, the C<op_sibling> field has been renamed
-C<op_sibparent> to reflect its new dual purpose. Since the intention is that
+C<op_sibparent> to reflect its new dual purpose.  Since the intention is that
 this field should primarily be accessed via macros, this change should be
 transparent for code written to work under C<PERL_OP_PARENT>.
 
 =item *
 
-The newly-introduced C<op_lastsib> flag bit has been renamed C<op_moresib>
-and its logic inverted; i.e. it is initialised to zero in a new op, and is
-changed to 1 when an op gains a sibling.
+The newly-introduced C<op_lastsib> flag bit has been renamed C<op_moresib> and
+its logic inverted; i.e. it is initialised to zero in a new op, and is changed
+to 1 when an op gains a sibling.
 
 =item *
 
 The function C<Perl_op_parent> is now only available on C<PERL_OP_PARENT>
-builds. Using it on a plain build will be a compile-timer error.
+builds.  Using it on a plain build will be a compile-timer error.
 
 =item *
 
-Three new macros, C<OpMORESIB_set>, C<OpLASTSIB_set>, C<OpMAYBESIB_set>
-have been added, which are intended to be be a low-level portable way to
-set C<op_sibling> / C<op_sibparent> while also updating C<op_moresib>.
-The first sets the sibling pointer to a new sibling, the second makes the
-op the last sibling, and the third conditionally does the first or second
-action. The C<op_sibling_splice()> function is retained as a higher-level
-interface that can also maintain consistency in the parent at the same time
-(e.g. by updating C<op_first> and C<op_last> where appropriate).
+Three new macros, C<OpMORESIB_set>, C<OpLASTSIB_set>, C<OpMAYBESIB_set> have
+been added, which are intended to be a low-level portable way to set
+C<op_sibling> / C<op_sibparent> while also updating C<op_moresib>.  The first
+sets the sibling pointer to a new sibling, the second makes the op the last
+sibling, and the third conditionally does the first or second action.  The
+C<op_sibling_splice()> function is retained as a higher-level interface that
+can also maintain consistency in the parent at the same time (e.g. by updating
+C<op_first> and C<op_last> where appropriate).
 
 =item *
 
-The macro C<OpSIBLING_set>, added in 5.21.2, has been removed. It didn't
-manipulate C<op_moresib> and has been superseded by C<OpMORESIB_set> et
-al.
+The macro C<OpSIBLING_set>, added in Perl 5.21.2, has been removed.  It didn't
+manipulate C<op_moresib> and has been superseded by C<OpMORESIB_set> et al.
 
 =item *
 
-The C<op_sibling_splice> function now accepts a null C<parent> argument
-where the splicing doesn't affect the first or last ops in the sibling
-chain, and thus where the parent doesn't need to be updated accordingly.
+The C<op_sibling_splice> function now accepts a null C<parent> argument where
+the splicing doesn't affect the first or last ops in the sibling chain, and
+thus where the parent doesn't need to be updated accordingly.
 
 =back
 
@@ -284,17 +281,16 @@ chain, and thus where the parent doesn't need to be updated accordingly.
 
 =item *
 
-C<pack("D", $x)> and C<pack("F", $x)> now zero the padding on x86 long
-double builds.  GCC 4.8 and later, under some build options, would
-either overwrite the zero-initialized padding, or bypass the
-initialized buffer entirely.  This caused F<op/pack.t> to fail.
+C<pack("D", $x)> and C<pack("F", $x)> now zero the padding on x86 long double
+builds.  GCC 4.8 and later, under some build options, would either overwrite
+the zero-initialized padding, or bypass the initialized buffer entirely.  This
+caused F<op/pack.t> to fail.
 L<[perl #123971]|https://rt.perl.org/Ticket/Display.html?id=123971>
 
 =item *
 
-Extending an array cloned from a parent thread could result in
-"Modification of a read-only value attempted" errors when attempting
-to modify the new elements.
+Extending an array cloned from a parent thread could result in "Modification of
+a read-only value attempted" errors when attempting to modify the new elements.
 L<[perl #124127]|https://rt.perl.org/Ticket/Display.html?id=124127>
 
 =item *
@@ -347,7 +343,7 @@ L<[perl #123527]|https://rt.perl.org/Ticket/Display.html?id=123527>
 =item *
 
 A subtle bug introduced in Perl 5.21.4 involving UTF-8 in regular expressions
-and sometimes causing a crash has been fixed. A new test script has been added
+and sometimes causing a crash has been fixed.  A new test script has been added
 to test this fix; see under L</Testing>.
 L<[perl #124109]|https://rt.perl.org/Ticket/Display.html?id=124109>
 
