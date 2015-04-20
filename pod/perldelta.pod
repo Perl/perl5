@@ -166,6 +166,8 @@ L<File::Spec> has been upgraded from version 3.55 to 3.56.
 
 L<if> has been upgraded from version 0.0603 to 0.0604.
 
+The documentation now notes that this module also works with C<no>.
+
 =item *
 
 L<IO::Socket::IP> has been upgraded from version 0.36 to 0.37.
@@ -174,7 +176,8 @@ L<IO::Socket::IP> has been upgraded from version 0.36 to 0.37.
 
 L<Module::CoreList> has been upgraded from version 5.20150320 to 5.20150420.
 
-Updated to cover the latest releases of Perl.
+Updated to cover the latest releases of Perl. Also fixes a fencepost error in
+is_core() and copes with versions that do not match x.yyyzzz.
 
 =item *
 
@@ -189,6 +192,8 @@ L<PerlIO::mmap> has been upgraded from version 0.013 to 0.014.
 =item *
 
 L<utf8> has been upgraded from version 1.15 to 1.16.
+
+Minor documentation update only.
 
 =item *
 
@@ -266,6 +271,28 @@ storage of the offset.
 Documentation has been added illustrating the perils of assuming the contents of
 static memory pointed to by the return values of Perl wrappers for C library
 functions doesn't change.
+
+=back
+
+=head3 L<perlport>
+
+=over 4
+
+=item *
+
+Out-of-date VMS-specific information has been fixed/simplified.
+
+=back
+
+=head3 L<perluniintro>
+
+=over 4
+
+=item *
+
+Advice for how to make sure your strings and regular expression patterns are
+interpreted as Unicode has been revised to account for the new 5.22 EBCDIC
+handling.
 
 =back
 
@@ -534,6 +561,50 @@ behaviour. [perl #124160]
 The extension of another optimization to cover more ops in Perl 5.21 has also
 been reverted to its Perl 5.20 state as a temporary fix for regression issues
 that it caused. [perl #123790]
+
+=item *
+
+New bitwise ops added in Perl 5.21.9 accidentally caused C<$^H |= 0x1c020000>
+to enable all features.  This has now been fixed.
+
+=item *
+
+A possible crashing/looping bug has been fixed. [perl #124099]
+
+=item *
+
+UTF-8 variable names used in array indexes, unquoted UTF-8 HERE-document
+terminators and UTF-8 function names all now work correctly. [perl #124113]
+
+=item *
+
+Breakage in C<require(VERSION)> (with parentheses), introduced in Perl 5.21.6,
+has been fixed. [perl #124135]
+
+=item *
+
+Wide char warnings, wrongly raised in UTF-8 locales since Perl 5.21.8, are now
+suppressed. [perl #123527]
+
+=item *
+
+A subtle bug introduced in Perl 5.21.4 involving UTF-8 in regular expressions
+and sometimes causing a crash has been fixed. A new test script has been added
+to test this fix; see under L</Testing>. [perl #124109]
+
+=item *
+
+A change introduced in Perl 5.21.10 that broke the autovivification CPAN module
+has been reverted.
+
+=item *
+
+A bug whereby C<< 'FOO'->f() >> lost the read-only status of C<FOO>, introduced
+in Perl 5.21.7, has been fixed. [perl #123619]
+
+=item *
+
+A regression in Perl 5.21 in the matching of C</[A-Z]/ai> has been fixed.
 
 =back
 
