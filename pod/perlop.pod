@@ -404,7 +404,7 @@ If you get tired of being subject to your platform's native integers,
 the S<C<use bigint>> pragma neatly sidesteps the issue altogether:
 
     print 20 << 20;  # 20971520
-    print 20 << 40;  # 5120 on 32-bit machines, 
+    print 20 << 40;  # 5120 on 32-bit machines,
                      # 21990232555520 on 64-bit machines
     use bigint;
     print 20 << 100; # 25353012004564588029934064107520
@@ -449,7 +449,7 @@ See also L</"Terms and List Operators (Leftward)">.
 =head2 Relational Operators
 X<relational operator> X<operator, relational>
 
-Perl operators that return true or false generally return values 
+Perl operators that return true or false generally return values
 that can be safely used as numbers.  For example, the relational
 operators in this section and the equality operators in the next
 one return C<1> for true and a special version of the defined empty
@@ -579,81 +579,81 @@ whose types apply determines the smartmatch behavior.  Because what
 actually happens is mostly determined by the type of the second operand,
 the table is sorted on the right operand instead of on the left.
 
- Left      Right      Description and pseudocode                               
+ Left      Right      Description and pseudocode
  ===============================================================
- Any       undef      check whether Any is undefined                    
+ Any       undef      check whether Any is undefined
                 like: !defined Any
 
  Any       Object     invoke ~~ overloading on Object, or die
 
  Right operand is an ARRAY:
 
- Left      Right      Description and pseudocode                               
+ Left      Right      Description and pseudocode
  ===============================================================
  ARRAY1    ARRAY2     recurse on paired elements of ARRAY1 and ARRAY2[2]
                 like: (ARRAY1[0] ~~ ARRAY2[0])
                         && (ARRAY1[1] ~~ ARRAY2[1]) && ...
- HASH      ARRAY      any ARRAY elements exist as HASH keys             
+ HASH      ARRAY      any ARRAY elements exist as HASH keys
                 like: grep { exists HASH->{$_} } ARRAY
  Regexp    ARRAY      any ARRAY elements pattern match Regexp
                 like: grep { /Regexp/ } ARRAY
- undef     ARRAY      undef in ARRAY                                    
+ undef     ARRAY      undef in ARRAY
                 like: grep { !defined } ARRAY
- Any       ARRAY      smartmatch each ARRAY element[3]                   
+ Any       ARRAY      smartmatch each ARRAY element[3]
                 like: grep { Any ~~ $_ } ARRAY
 
  Right operand is a HASH:
 
- Left      Right      Description and pseudocode                               
+ Left      Right      Description and pseudocode
  ===============================================================
- HASH1     HASH2      all same keys in both HASHes                      
+ HASH1     HASH2      all same keys in both HASHes
                 like: keys HASH1 ==
                          grep { exists HASH2->{$_} } keys HASH1
- ARRAY     HASH       any ARRAY elements exist as HASH keys             
+ ARRAY     HASH       any ARRAY elements exist as HASH keys
                 like: grep { exists HASH->{$_} } ARRAY
- Regexp    HASH       any HASH keys pattern match Regexp                
+ Regexp    HASH       any HASH keys pattern match Regexp
                 like: grep { /Regexp/ } keys HASH
- undef     HASH       always false (undef can't be a key)               
+ undef     HASH       always false (undef can't be a key)
                 like: 0 == 1
- Any       HASH       HASH key existence                                
+ Any       HASH       HASH key existence
                 like: exists HASH->{Any}
 
  Right operand is CODE:
 
- Left      Right      Description and pseudocode                               
+ Left      Right      Description and pseudocode
  ===============================================================
  ARRAY     CODE       sub returns true on all ARRAY elements[1]
                 like: !grep { !CODE->($_) } ARRAY
  HASH      CODE       sub returns true on all HASH keys[1]
                 like: !grep { !CODE->($_) } keys HASH
- Any       CODE       sub passed Any returns true              
+ Any       CODE       sub passed Any returns true
                 like: CODE->(Any)
 
 Right operand is a Regexp:
 
- Left      Right      Description and pseudocode                               
+ Left      Right      Description and pseudocode
  ===============================================================
- ARRAY     Regexp     any ARRAY elements match Regexp                   
+ ARRAY     Regexp     any ARRAY elements match Regexp
                 like: grep { /Regexp/ } ARRAY
- HASH      Regexp     any HASH keys match Regexp                        
+ HASH      Regexp     any HASH keys match Regexp
                 like: grep { /Regexp/ } keys HASH
- Any       Regexp     pattern match                                     
+ Any       Regexp     pattern match
                 like: Any =~ /Regexp/
 
  Other:
 
- Left      Right      Description and pseudocode                               
+ Left      Right      Description and pseudocode
  ===============================================================
  Object    Any        invoke ~~ overloading on Object,
                       or fall back to...
 
- Any       Num        numeric equality                                  
+ Any       Num        numeric equality
                  like: Any == Num
  Num       nummy[4]    numeric equality
                  like: Num == nummy
  undef     Any        check whether undefined
                  like: !defined(Any)
- Any       Any        string equality                                   
+ Any       Any        string equality
                  like: Any eq Any
 
 
@@ -662,13 +662,13 @@ Notes:
 =over
 
 =item 1.
-Empty hashes or arrays match. 
+Empty hashes or arrays match.
 
 =item 2.
 That is, each element smartmatches the element of the same index in the other array.[3]
 
 =item 3.
-If a circular reference is found, fall back to referential equality. 
+If a circular reference is found, fall back to referential equality.
 
 =item 4.
 Either an actual number, or a string that looks like one.
@@ -723,7 +723,7 @@ recursively.
     my @bigger = ("red", "blue", [ "orange", "green" ] );
     if (@little ~~ @bigger) {  # true!
         say "little is contained in bigger";
-    } 
+    }
 
 Because the smartmatch operator recurses on nested arrays, this
 will still report that "red" is in the array.
@@ -737,21 +737,21 @@ If two arrays smartmatch each other, then they are deep
 copies of each others' values, as this example reports:
 
     use v5.12.0;
-    my @a = (0, 1, 2, [3, [4, 5], 6], 7); 
-    my @b = (0, 1, 2, [3, [4, 5], 6], 7); 
+    my @a = (0, 1, 2, [3, [4, 5], 6], 7);
+    my @b = (0, 1, 2, [3, [4, 5], 6], 7);
 
     if (@a ~~ @b && @b ~~ @a) {
         say "a and b are deep copies of each other";
-    } 
+    }
     elsif (@a ~~ @b) {
         say "a smartmatches in b";
-    } 
+    }
     elsif (@b ~~ @a) {
         say "b smartmatches in a";
-    } 
+    }
     else {
         say "a and b don't smartmatch each other at all";
-    } 
+    }
 
 
 If you were to set S<C<$b[3] = 4>>, then instead of reporting that "a and b
@@ -818,7 +818,7 @@ C<I<X>>, overloading may or may not be invoked.  For simple strings or
 numbers, "in" becomes equivalent to this:
 
     $object ~~ $number          ref($object) == $number
-    $object ~~ $string          ref($object) eq $string 
+    $object ~~ $string          ref($object) eq $string
 
 For example, this reports that the handle smells IOish
 (but please don't really do this!):
@@ -827,7 +827,7 @@ For example, this reports that the handle smells IOish
     my $fh = IO::Handle->new();
     if ($fh ~~ /\bIO\b/) {
         say "handle smells IOish";
-    } 
+    }
 
 That's because it treats C<$fh> as a string like
 C<"IO::Handle=GLOB(0x8039e0)">, then pattern matches against that.
@@ -940,7 +940,7 @@ It would be even more readable to write that this way:
     unless(unlink("alpha", "beta", "gamma")) {
         gripe();
         next LINE;
-    } 
+    }
 
 Using C<"or"> for assignment is unlikely to do what you want; see below.
 
@@ -1092,9 +1092,9 @@ To get the 25 traditional lowercase Greek letters, including both sigmas,
 you could use this instead:
 
     use charnames "greek";
-    my @greek_small =  map { chr } ( ord("\N{alpha}") 
+    my @greek_small =  map { chr } ( ord("\N{alpha}")
                                         ..
-                                     ord("\N{omega}") 
+                                     ord("\N{omega}")
                                    );
 
 However, because there are I<many> other lowercase Greek characters than
@@ -1694,7 +1694,7 @@ interpolation is done.  Returns a Perl value which may be used instead of the
 corresponding C</I<STRING>/msixpodualn> expression.  The returned value is a
 normalized version of the original pattern.  It magically differs from
 a string containing the same characters: C<ref(qr/x/)> returns "Regexp";
-however, dereferencing it is not well defined (you currently get the 
+however, dereferencing it is not well defined (you currently get the
 normalized version of the original pattern, but this may change).
 
 
@@ -1874,7 +1874,7 @@ If the C</g> option is not used, C<m//> in list context returns a
 list consisting of the subexpressions matched by the parentheses in the
 pattern, that is, (C<$1>, C<$2>, C<$3>...)  (Note that here C<$1> etc. are
 also set).  When there are no parentheses in the pattern, the return
-value is the list C<(1)> for success.  
+value is the list C<(1)> for success.
 With or without parentheses, an empty list is returned upon failure.
 
 Examples:
@@ -2294,7 +2294,7 @@ On some platforms (notably DOS-like ones), the shell may not be
 capable of dealing with multiline commands, so putting newlines in
 the string may not get you what you want.  You may be able to evaluate
 multiple commands in a single line by separating them with the command
-separator character, if your shell supports that (for example, C<;> on 
+separator character, if your shell supports that (for example, C<;> on
 many Unix shells and C<&> on the Windows NT C<cmd> shell).
 
 Perl will attempt to flush all files opened for
@@ -2790,7 +2790,7 @@ If the left part is delimited by bracketing punctuation (that is C<()>,
 C<[]>, C<{}>, or C<< <> >>), the right part needs another pair of
 delimiters such as C<s(){}> and C<tr[]//>.  In these cases, whitespace
 and comments are allowed between the two parts, although the comment must follow
-at least one whitespace character; otherwise a character expected as the 
+at least one whitespace character; otherwise a character expected as the
 start of the comment may be regarded as the starting delimiter of the right part.
 
 During this search no attention is paid to the semantics of the construct.
@@ -3077,7 +3077,7 @@ The following lines are equivalent:
     print while ($_ = <STDIN>);
     print while <STDIN>;
 
-This also behaves similarly, but assigns to a lexical variable 
+This also behaves similarly, but assigns to a lexical variable
 instead of to C<$_>:
 
     while (my $line = <STDIN>) { print $line }
@@ -3284,7 +3284,7 @@ variable substitution.  Backslash interpolation also happens at
 compile time.  You can say
 
       'Now is the time for all'
-    . "\n" 
+    . "\n"
     .  'good men to come to.'
 
 and this all reduces to one string internally.  Likewise, if
