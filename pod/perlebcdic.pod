@@ -152,19 +152,22 @@ Character code set ID 0037 is a mapping of the ASCII plus Latin-1
 characters (i.e. ISO 8859-1) to an EBCDIC set.  0037 is used
 in North American English locales on the OS/400 operating system
 that runs on AS/400 computers.  CCSID 0037 differs from ISO 8859-1
-in 237 places; in other words they agree on only 19 code point values.
+in 236 places; in other words they agree on only 20 code point values.
 
 =item B<1047>
 
 Character code set ID 1047 is also a mapping of the ASCII plus
 Latin-1 characters (i.e. ISO 8859-1) to an EBCDIC set.  1047 is
 used under Unix System Services for OS/390 or z/OS, and OpenEdition
-for VM/ESA.  CCSID 1047 differs from CCSID 0037 in eight places.
+for VM/ESA.  CCSID 1047 differs from CCSID 0037 in eight places,
+and from ISO 8859-1 in 236.
 
 =item B<POSIX-BC>
 
 The EBCDIC code page in use on Siemens' BS2000 system is distinct from
 1047 and 0037.  It is identified below as the POSIX-BC set.
+Like 0037 and 1047, it is the same as ISO 8859-1 in 20 code point
+values.
 
 =back
 
