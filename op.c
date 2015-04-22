@@ -11118,11 +11118,11 @@ Perl_ck_stringify(pTHX_ OP *o)
 {
     OP * const kid = OpSIBLING(cUNOPo->op_first);
     PERL_ARGS_ASSERT_CK_STRINGIFY;
-    if (kid->op_type == OP_JOIN || kid->op_type == OP_QUOTEMETA
-     || kid->op_type == OP_LC   || kid->op_type == OP_LCFIRST
-     || kid->op_type == OP_UC   || kid->op_type == OP_UCFIRST)
+    if ((   kid->op_type == OP_JOIN || kid->op_type == OP_QUOTEMETA
+         || kid->op_type == OP_LC   || kid->op_type == OP_LCFIRST
+         || kid->op_type == OP_UC   || kid->op_type == OP_UCFIRST)
+	&& !OpHAS_SIBLING(kid)) /* syntax errs can leave extra children */
     {
-	assert(!OpHAS_SIBLING(kid));
 	op_sibling_splice(o, cUNOPo->op_first, -1, NULL);
 	op_free(o);
 	return kid;

@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..172\n";
+print "1..173\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -540,6 +540,13 @@ eval "grep+grep";
  eval 'my $_; m// ~~ 0';
 }
 
+# RT #124207 syntax error during stringify can leave stringify op
+# with multiple children and assertion failures
+
+eval 'qq{@{0]}${}},{})';
+is(1, 1, "RT #124207");
+
+
 # Add new tests HERE (above this line)
 
 # bug #74022: Loop on characters in \p{OtherIDContinue}
@@ -688,4 +695,4 @@ check_line(642, 'line number after ${expr} surrounding heredoc body');
 
 
 __END__
-# Don't add new tests HERE. See note above
+# Don't add new tests HERE. See "Add new tests HERE" above.
