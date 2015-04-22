@@ -312,10 +312,16 @@ PP(pp_substcont)
 	SV * const sv
 	    = (pm->op_pmflags & PMf_NONDESTRUCT) ? cx->sb_dstr : cx->sb_targ;
 	MAGIC *mg;
+
+        /* the string being matched against may no longer be a string,
+         * e.g. $_=0; s/.../$_++/ge */
+
+        if (!SvPOK(sv))
+            SvPV_force_nomg_nolen(sv);
+
 	if (!(mg = mg_find_mglob(sv))) {
 	    mg = sv_magicext_mglob(sv);
 	}
-	assert(SvPOK(sv));
 	MgBYTEPOS_set(mg, sv, SvPVX(sv), m - orig);
     }
     if (old != rx)

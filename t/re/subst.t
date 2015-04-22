@@ -8,7 +8,7 @@ BEGIN {
     require './charset_tools.pl';
 }
 
-plan( tests => 260 );
+plan( tests => 261 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -1051,4 +1051,13 @@ SKIP: {
     is("\x{2028}\x{2028}\x{2028}" =~ s/\B/!/gr, "!\x{2028}!\x{2028}!\x{2028}!", '\\B matches above-Latin1 before string, mid, and end, /l');
 }
 
+}
+
+{
+    # RT #123954 if the string getting matched against got converted during
+    # s///e so that it was no longer SvPOK, an assertion would fail when
+    # setting pos.
+    my $s1 = 0;
+    $s1 =~ s/.?/$s1++/ge;
+    is($s1, "01","RT #123954 s1");
 }
