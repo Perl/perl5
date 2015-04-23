@@ -205,16 +205,20 @@ like( $@, qr/Bad name after Ｆｏｏ'/, 'Bad name after Ｆｏｏ\'' );
 # was the wrong one, resulting in the lexer thinking we're still inside a
 # quoted string and things getting freed multiple times.
 #
-# \xe3\x80\xb0 are the utf8 bytes making up the character \x{3030}.
 # The \x{3030} char isn't a legal var name, and this triggers the error.
 #
 # NB: this only failed if the closing quote of the interpolated string is
 # the last char of the file (i.e. no trailing \n).
 
 {
-    no utf8;
+    my $bad = "\x{3030}";
+    # Write out the individual utf8 bytes making up \x{3030}. This
+    # avoids 'Wide char in print' warnings from test.pl. (We may still
+    # get that warning when compiling the prog itself, since the
+    # error it prints to stderr contains a wide char.)
+    utf8::encode($bad);
 
-    fresh_perl_like(qq{use utf8; "\$\xe3\x80\xb0"},
+    fresh_perl_like(qq{use utf8; "\$$bad"},
         qr/
             \A
             ( \QWide character in print at - line 1.\E\n )?
