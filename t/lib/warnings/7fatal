@@ -548,3 +548,21 @@ syntax error at - line 4, near "1 {"
 "my" variable $x masks earlier declaration in same statement at - line 6.
 syntax error at - line 7, near "}"
 Execution of - aborted due to compilation errors.
+########
+
+# fatal warnings in DESTROY should be made non-fatal [perl #123398]
+# This test will blow up your memory with SEGV without the patch
+package Foo;
+use strict; use utf8; use warnings FATAL => 'all';
+sub new {
+    return bless{ 'field' => undef }, 'Foo';
+}
+sub DESTROY {
+    my $self = shift;
+    $self->{'field'}->missing_method;
+}
+package main;
+my $foo = new Foo;
+undef($foo);
+EXPECT
+	(in cleanup) Can't call method "missing_method" on an undefined value at - line 11.
