@@ -14,36 +14,36 @@
 =head1 Stack Manipulation Macros
 
 =for apidoc AmU||SP
-Stack pointer.  This is usually handled by C<xsubpp>.  See C<dSP> and
+Stack pointer.  This is usually handled by C<xsubpp>.  See C<L</dSP>> and
 C<SPAGAIN>.
 
 =for apidoc AmU||MARK
-Stack marker variable for the XSUB.  See C<dMARK>.
+Stack marker variable for the XSUB.  See C<L</dMARK>>.
 
 =for apidoc Am|void|PUSHMARK|SP
-Opening bracket for arguments on a callback.  See C<PUTBACK> and
+Opening bracket for arguments on a callback.  See C<L</PUTBACK>> and
 L<perlcall>.
 
 =for apidoc Ams||dSP
 Declares a local copy of perl's stack pointer for the XSUB, available via
-the C<SP> macro.  See C<SP>.
+the C<SP> macro.  See C<L</SP>>.
 
 =for apidoc ms||djSP
 
 Declare Just C<SP>.  This is actually identical to C<dSP>, and declares
 a local copy of perl's stack pointer, available via the C<SP> macro.
-See C<SP>.  (Available for backward source code compatibility with the
-old (Perl 5.005) thread model.)
+See C<L<perlapi/SP>>.  (Available for backward source code compatibility with
+the old (Perl 5.005) thread model.)
 
 =for apidoc Ams||dMARK
-Declare a stack marker variable, C<mark>, for the XSUB.  See C<MARK> and
-C<dORIGMARK>.
+Declare a stack marker variable, C<mark>, for the XSUB.  See C<L</MARK>> and
+C<L</dORIGMARK>>.
 
 =for apidoc Ams||dORIGMARK
-Saves the original stack mark for the XSUB.  See C<ORIGMARK>.
+Saves the original stack mark for the XSUB.  See C<L</ORIGMARK>>.
 
 =for apidoc AmU||ORIGMARK
-The original stack mark for the XSUB.  See C<dORIGMARK>.
+The original stack mark for the XSUB.  See C<L</dORIGMARK>>.
 
 =for apidoc Ams||SPAGAIN
 Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
@@ -92,7 +92,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 /*
 =for apidoc Ams||PUTBACK
 Closing bracket for XSUB arguments.  This is usually handled by C<xsubpp>.
-See C<PUSHMARK> and L<perlcall> for other uses.
+See C<L</PUSHMARK>> and L<perlcall> for other uses.
 
 =for apidoc Amn|SV*|POPs
 Pops an SV off the stack.
@@ -162,40 +162,40 @@ onto the stack.
 
 =for apidoc Am|void|PUSHs|SV* sv
 Push an SV onto the stack.  The stack must have room for this element.
-Does not handle 'set' magic.  Does not use C<TARG>.  See also C<PUSHmortal>,
-C<XPUSHs> and C<XPUSHmortal>.
+Does not handle 'set' magic.  Does not use C<TARG>.  See also
+C<L</PUSHmortal>>, C<L</XPUSHs>>, and C<L</XPUSHmortal>>.
 
 =for apidoc Am|void|PUSHp|char* str|STRLEN len
 Push a string onto the stack.  The stack must have room for this element.
 The C<len> indicates the length of the string.  Handles 'set' magic.  Uses
 C<TARG>, so C<dTARGET> or C<dXSTARG> should be called to declare it.  Do not
 call multiple C<TARG>-oriented macros to return lists from XSUB's - see
-C<mPUSHp> instead.  See also C<XPUSHp> and C<mXPUSHp>.
+C<L</mPUSHp>> instead.  See also C<L</XPUSHp>> and C<L</mXPUSHp>>.
 
 =for apidoc Am|void|PUSHn|NV nv
 Push a double onto the stack.  The stack must have room for this element.
 Handles 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be
 called to declare it.  Do not call multiple C<TARG>-oriented macros to
-return lists from XSUB's - see C<mPUSHn> instead.  See also C<XPUSHn> and
-C<mXPUSHn>.
+return lists from XSUB's - see C<L</mPUSHn>> instead.  See also C<L</XPUSHn>>
+and C<L</mXPUSHn>>.
 
 =for apidoc Am|void|PUSHi|IV iv
 Push an integer onto the stack.  The stack must have room for this element.
 Handles 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be
 called to declare it.  Do not call multiple C<TARG>-oriented macros to 
-return lists from XSUB's - see C<mPUSHi> instead.  See also C<XPUSHi> and
-C<mXPUSHi>.
+return lists from XSUB's - see C<L</mPUSHi>> instead.  See also C<L</XPUSHi>>
+and C<L</mXPUSHi>>.
 
 =for apidoc Am|void|PUSHu|UV uv
 Push an unsigned integer onto the stack.  The stack must have room for this
 element.  Handles 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG>
 should be called to declare it.  Do not call multiple C<TARG>-oriented
-macros to return lists from XSUB's - see C<mPUSHu> instead.  See also
-C<XPUSHu> and C<mXPUSHu>.
+macros to return lists from XSUB's - see C<L</mPUSHu>> instead.  See also
+C<L</XPUSHu>> and C<L</mXPUSHu>>.
 
 =for apidoc Am|void|XPUSHs|SV* sv
 Push an SV onto the stack, extending the stack if necessary.  Does not
-handle 'set' magic.  Does not use C<TARG>.  See also C<XPUSHmortal>,
+handle 'set' magic.  Does not use C<TARG>.  See also C<L</XPUSHmortal>>,
 C<PUSHs> and C<PUSHmortal>.
 
 =for apidoc Am|void|XPUSHp|char* str|STRLEN len
@@ -203,76 +203,82 @@ Push a string onto the stack, extending the stack if necessary.  The C<len>
 indicates the length of the string.  Handles 'set' magic.  Uses C<TARG>, so
 C<dTARGET> or C<dXSTARG> should be called to declare it.  Do not call
 multiple C<TARG>-oriented macros to return lists from XSUB's - see
-C<mXPUSHp> instead.  See also C<PUSHp> and C<mPUSHp>.
+C<L</mXPUSHp>> instead.  See also C<L</PUSHp>> and C<L</mPUSHp>>.
 
 =for apidoc Am|void|XPUSHn|NV nv
 Push a double onto the stack, extending the stack if necessary.  Handles
 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be called to
 declare it.  Do not call multiple C<TARG>-oriented macros to return lists
-from XSUB's - see C<mXPUSHn> instead.  See also C<PUSHn> and C<mPUSHn>.
+from XSUB's - see C<L</mXPUSHn>> instead.  See also C<L</PUSHn>> and
+C<L</mPUSHn>>.
 
 =for apidoc Am|void|XPUSHi|IV iv
 Push an integer onto the stack, extending the stack if necessary.  Handles
 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be called to
 declare it.  Do not call multiple C<TARG>-oriented macros to return lists
-from XSUB's - see C<mXPUSHi> instead.  See also C<PUSHi> and C<mPUSHi>.
+from XSUB's - see C<L</mXPUSHi>> instead.  See also C<L</PUSHi>> and
+C<L</mPUSHi>>.
 
 =for apidoc Am|void|XPUSHu|UV uv
 Push an unsigned integer onto the stack, extending the stack if necessary.
 Handles 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be
 called to declare it.  Do not call multiple C<TARG>-oriented macros to
-return lists from XSUB's - see C<mXPUSHu> instead.  See also C<PUSHu> and
-C<mPUSHu>.
+return lists from XSUB's - see C<L</mXPUSHu>> instead.  See also C<L</PUSHu>> and
+C<L</mPUSHu>>.
 
 =for apidoc Am|void|mPUSHs|SV* sv
 Push an SV onto the stack and mortalizes the SV.  The stack must have room
-for this element.  Does not use C<TARG>.  See also C<PUSHs> and C<mXPUSHs>.
+for this element.  Does not use C<TARG>.  See also C<L</PUSHs>> and
+C<L</mXPUSHs>>.
 
 =for apidoc Am|void|PUSHmortal
 Push a new mortal SV onto the stack.  The stack must have room for this
-element.  Does not use C<TARG>.  See also C<PUSHs>, C<XPUSHmortal> and C<XPUSHs>.
+element.  Does not use C<TARG>.  See also C<L</PUSHs>>, C<L</XPUSHmortal>> and
+C<L</XPUSHs>>.
 
 =for apidoc Am|void|mPUSHp|char* str|STRLEN len
 Push a string onto the stack.  The stack must have room for this element.
 The C<len> indicates the length of the string.  Does not use C<TARG>.
-See also C<PUSHp>, C<mXPUSHp> and C<XPUSHp>.
+See also C<L</PUSHp>>, C<L</mXPUSHp>> and C<L</XPUSHp>>.
 
 =for apidoc Am|void|mPUSHn|NV nv
 Push a double onto the stack.  The stack must have room for this element.
-Does not use C<TARG>.  See also C<PUSHn>, C<mXPUSHn> and C<XPUSHn>.
+Does not use C<TARG>.  See also C<L</PUSHn>>, C<L</mXPUSHn>> and C<L</XPUSHn>>.
 
 =for apidoc Am|void|mPUSHi|IV iv
 Push an integer onto the stack.  The stack must have room for this element.
-Does not use C<TARG>.  See also C<PUSHi>, C<mXPUSHi> and C<XPUSHi>.
+Does not use C<TARG>.  See also C<L</PUSHi>>, C<L</mXPUSHi>> and C<L</XPUSHi>>.
 
 =for apidoc Am|void|mPUSHu|UV uv
 Push an unsigned integer onto the stack.  The stack must have room for this
-element.  Does not use C<TARG>.  See also C<PUSHu>, C<mXPUSHu> and C<XPUSHu>.
+element.  Does not use C<TARG>.  See also C<L</PUSHu>>, C<L</mXPUSHu>> and
+C<L</XPUSHu>>.
 
 =for apidoc Am|void|mXPUSHs|SV* sv
 Push an SV onto the stack, extending the stack if necessary and mortalizes
-the SV.  Does not use C<TARG>.  See also C<XPUSHs> and C<mPUSHs>.
+the SV.  Does not use C<TARG>.  See also C<L</XPUSHs>> and C<L</mPUSHs>>.
 
 =for apidoc Am|void|XPUSHmortal
 Push a new mortal SV onto the stack, extending the stack if necessary.
-Does not use C<TARG>.  See also C<XPUSHs>, C<PUSHmortal> and C<PUSHs>.
+Does not use C<TARG>.  See also C<L</XPUSHs>>, C<L</PUSHmortal>> and
+C<L</PUSHs>>.
 
 =for apidoc Am|void|mXPUSHp|char* str|STRLEN len
 Push a string onto the stack, extending the stack if necessary.  The C<len>
-indicates the length of the string.  Does not use C<TARG>.  See also C<XPUSHp>,
-C<mPUSHp> and C<PUSHp>.
+indicates the length of the string.  Does not use C<TARG>.  See also
+C<L</XPUSHp>>, C<mPUSHp> and C<PUSHp>.
 
 =for apidoc Am|void|mXPUSHn|NV nv
 Push a double onto the stack, extending the stack if necessary.
-Does not use C<TARG>.  See also C<XPUSHn>, C<mPUSHn> and C<PUSHn>.
+Does not use C<TARG>.  See also C<L</XPUSHn>>, C<L</mPUSHn>> and C<L</PUSHn>>.
 
 =for apidoc Am|void|mXPUSHi|IV iv
 Push an integer onto the stack, extending the stack if necessary.
-Does not use C<TARG>.  See also C<XPUSHi>, C<mPUSHi> and C<PUSHi>.
+Does not use C<TARG>.  See also C<L</XPUSHi>>, C<L</mPUSHi>> and C<L</PUSHi>>.
 
 =for apidoc Am|void|mXPUSHu|UV uv
 Push an unsigned integer onto the stack, extending the stack if necessary.
-Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
+Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 =cut
 */

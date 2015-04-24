@@ -1018,15 +1018,15 @@ struct context {
 
 /*
 =for apidoc AmU||G_SCALAR
-Used to indicate scalar context.  See C<GIMME_V>, C<GIMME>, and
+Used to indicate scalar context.  See C<L</GIMME_V>>, C<L</GIMME>>, and
 L<perlcall>.
 
 =for apidoc AmU||G_ARRAY
-Used to indicate list context.  See C<GIMME_V>, C<GIMME> and
+Used to indicate list context.  See C<L</GIMME_V>>, C<L</GIMME>> and
 L<perlcall>.
 
 =for apidoc AmU||G_VOID
-Used to indicate void context.  See C<GIMME_V> and L<perlcall>.
+Used to indicate void context.  See C<L</GIMME_V>> and L<perlcall>.
 
 =for apidoc AmU||G_DISCARD
 Indicates that arguments returned from a callback should be discarded.  See

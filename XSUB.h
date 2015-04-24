@@ -18,7 +18,8 @@
 
 =for apidoc Amn|char*|CLASS
 Variable which is setup by C<xsubpp> to indicate the 
-class name for a C++ XS constructor.  This is always a C<char*>.  See C<THIS>.
+class name for a C++ XS constructor.  This is always a C<char*>.  See
+C<L</THIS>>.
 
 =for apidoc Amn|(whatever)|RETVAL
 Variable which is setup by C<xsubpp> to hold the return value for an 
@@ -27,7 +28,7 @@ L<perlxs/"The RETVAL Variable">.
 
 =for apidoc Amn|(whatever)|THIS
 Variable which is setup by C<xsubpp> to designate the object in a C++ 
-XSUB.  This is always the proper type for the C++ object.  See C<CLASS> and 
+XSUB.  This is always the proper type for the C++ object.  See C<L</CLASS>> and
 L<perlxs/"Using XS With C++">.
 
 =for apidoc Amn|I32|ax
@@ -281,7 +282,8 @@ the subs.
 
 =for apidoc AmU||XS_VERSION
 The version identifier for an XS module.  This is usually
-handled automatically by C<ExtUtils::MakeMaker>.  See C<XS_VERSION_BOOTCHECK>.
+handled automatically by C<ExtUtils::MakeMaker>.  See
+C<L</XS_VERSION_BOOTCHECK>>.
 
 =for apidoc Ams||XS_VERSION_BOOTCHECK
 Macro to verify that a PM module's $VERSION variable matches the XS

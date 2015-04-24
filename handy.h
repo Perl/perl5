@@ -1812,13 +1812,13 @@ there for use in XS modules supporting older perls.
 
 =for apidoc Am|void|Newxc|void* ptr|int nitems|type|cast
 The XSUB-writer's interface to the C C<malloc> function, with
-cast.  See also C<Newx>.
+cast.  See also C<L</Newx>>.
 
 Memory obtained by this should B<ONLY> be freed with L<"Safefree">.
 
 =for apidoc Am|void|Newxz|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.  The allocated
-memory is zeroed with C<memzero>.  See also C<Newx>.
+memory is zeroed with C<memzero>.  See also C<L</Newx>>.
 
 Memory obtained by this should B<ONLY> be freed with L<"Safefree">.
 
@@ -1841,7 +1841,7 @@ This should B<ONLY> be used on memory obtained using L<"Newx"> and friends.
 =for apidoc Am|void|Move|void* src|void* dest|int nitems|type
 The XSUB-writer's interface to the C C<memmove> function.  The C<src> is the
 source, C<dest> is the destination, C<nitems> is the number of items, and
-C<type> is the type.  Can do overlapping moves.  See also C<Copy>.
+C<type> is the type.  Can do overlapping moves.  See also C<L</Copy>>.
 
 =for apidoc Am|void *|MoveD|void* src|void* dest|int nitems|type
 Like C<Move> but returns dest.  Useful
@@ -1851,7 +1851,7 @@ optimise.
 =for apidoc Am|void|Copy|void* src|void* dest|int nitems|type
 The XSUB-writer's interface to the C C<memcpy> function.  The C<src> is the
 source, C<dest> is the destination, C<nitems> is the number of items, and
-C<type> is the type.  May fail on overlapping copies.  See also C<Move>.
+C<type> is the type.  May fail on overlapping copies.  See also C<L</Move>>.
 
 =for apidoc Am|void *|CopyD|void* src|void* dest|int nitems|type
 

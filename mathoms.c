@@ -123,7 +123,7 @@ Perl_ref(pTHX_ OP *o, I32 type)
 Unsets the RV status of the SV, and decrements the reference count of
 whatever was being referenced by the RV.  This can almost be thought of
 as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
-being zero.  See C<SvROK_off>.
+being zero.  See C<L</SvROK_off>>.
 
 =cut
 */
@@ -258,7 +258,7 @@ Perl_sv_2pvutf8_nolen(pTHX_ SV *sv)
 
 Undo various types of fakery on an SV: if the PV is a shared string, make
 a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
-an xpvmg.  See also C<sv_force_normal_flags>.
+an xpvmg.  See also C<L</sv_force_normal_flags>>.
 
 =cut
 */
@@ -846,7 +846,7 @@ Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len)
 
 Tells an SV to use C<ptr> to find its string value.  Implemented by
 calling C<sv_usepvn_flags> with C<flags> of 0, hence does not handle 'set'
-magic.  See C<sv_usepvn_flags>.
+magic.  See C<L</sv_usepvn_flags>>.
 
 =cut
 */

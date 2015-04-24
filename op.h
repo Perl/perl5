@@ -942,19 +942,19 @@ Returns true if o has a sibling
 Returns the sibling of o, or NULL if there is no sibling
 
 =for apidoc Am|void|OpMORESIB_set|OP *o|OP *sib
-Sets the sibling of o to the non-zero value sib. See also C<OpLASTSIB_set>
-and C<OpMAYBESIB_set>. For a higher-level interface, see
-C<op_sibling_splice>.
+Sets the sibling of o to the non-zero value sib. See also C<L</OpLASTSIB_set>>
+and C<L</OpMAYBESIB_set>>. For a higher-level interface, see
+C<L</op_sibling_splice>>.
 
 =for apidoc Am|void|OpLASTSIB_set|OP *o|OP *parent
 Marks o as having no further siblings. On C<PERL_OP_PARENT> builds, marks
-o as having the specified parent. See also C<OpMORESIB_set> and
+o as having the specified parent. See also C<L</OpMORESIB_set>> and
 C<OpMAYBESIB_set>. For a higher-level interface, see
-C<op_sibling_splice>.
+C<L</op_sibling_splice>>.
 
 =for apidoc Am|void|OpMAYBESIB_set|OP *o|OP *sib|OP *parent
 Conditionally does C<OpMORESIB_set> or C<OpLASTSIB_set> depending on whether
-sib is non-null. For a higher-level interface, see C<op_sibling_splice>.
+sib is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 
 =cut
 */

@@ -2784,7 +2784,7 @@ Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
 
 Constructs and returns a new pad name.  C<s> must be a UTF8 string.  Do not
 use this for pad names that point to outer lexicals.  See
-L</newPADNAMEouter>.
+C<L</newPADNAMEouter>>.
 
 =cut
 */

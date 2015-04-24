@@ -320,11 +320,11 @@ is not NULL.  Since we don't have to check the NULLness, it's faster
 and smaller.
 
 =for apidoc Am|svtype|SvTYPE|SV* sv
-Returns the type of the SV.  See C<svtype>.
+Returns the type of the SV.  See C<L</svtype>>.
 
 =for apidoc Am|void|SvUPGRADE|SV* sv|svtype type
 Used to upgrade an SV to a more complex form.  Uses C<sv_upgrade> to
-perform the upgrade if necessary.  See C<svtype>.
+perform the upgrade if necessary.  See C<L</svtype>>.
 
 =cut
 */
@@ -760,15 +760,15 @@ Dereferences an RV to return the SV.
 
 =for apidoc Am|IV|SvIVX|SV* sv
 Returns the raw value in the SV's IV slot, without checks or conversions.
-Only use when you are sure SvIOK is true.  See also C<SvIV()>.
+Only use when you are sure SvIOK is true.  See also C<L</SvIV>>.
 
 =for apidoc Am|UV|SvUVX|SV* sv
 Returns the raw value in the SV's UV slot, without checks or conversions.
-Only use when you are sure SvIOK is true.  See also C<SvUV()>.
+Only use when you are sure SvIOK is true.  See also C<L</SvUV>>.
 
 =for apidoc Am|NV|SvNVX|SV* sv
 Returns the raw value in the SV's NV slot, without checks or conversions.
-Only use when you are sure SvNOK is true.  See also C<SvNV()>.
+Only use when you are sure SvNOK is true.  See also C<L</SvNV>>.
 
 =for apidoc Am|char*|SvPVX|SV* sv
 Returns a pointer to the physical string in the SV.  The SV must contain a
@@ -780,17 +780,17 @@ This is also used to store the name of an autoloaded subroutine in an XS
 AUTOLOAD routine.  See L<perlguts/Autoloading with XSUBs>.
 
 =for apidoc Am|STRLEN|SvCUR|SV* sv
-Returns the length of the string which is in the SV.  See C<SvLEN>.
+Returns the length of the string which is in the SV.  See C<L</SvLEN>>.
 
 =for apidoc Am|STRLEN|SvLEN|SV* sv
 Returns the size of the string buffer in the SV, not including any part
-attributable to C<SvOOK>.  See C<SvCUR>.
+attributable to C<SvOOK>.  See C<L</SvCUR>>.
 
 =for apidoc Am|char*|SvEND|SV* sv
 Returns a pointer to the spot just after the last character in
 the string which is in the SV, where there is usually a trailing
 C<NUL> character (even though Perl scalars do not strictly require it).
-See C<SvCUR>.  Access the character as *(SvEND(sv)).
+See C<L</SvCUR>>.  Access the character as *(SvEND(sv)).
 
 Warning: If C<SvCUR> is equal to C<SvLEN>, then C<SvEND> points to
 unallocated memory.
@@ -805,14 +805,14 @@ With future Perls, however, it will be more efficient to use
 C<SvIV_set> instead of the lvalue assignment to C<SvIVX>.
 
 =for apidoc Am|void|SvNV_set|SV* sv|NV val
-Set the value of the NV pointer in sv to val.  See C<SvIV_set>.
+Set the value of the NV pointer in sv to val.  See C<L</SvIV_set>>.
 
 =for apidoc Am|void|SvPV_set|SV* sv|char* val
 This is probably not what you want to use, you probably wanted
 L</sv_usepvn_flags> or L</sv_setpvn> or L</sv_setpvs>.
 
 Set the value of the PV pointer in C<sv> to the Perl allocated
-C<NUL>-terminated string C<val>.  See also C<SvIV_set>.
+C<NUL>-terminated string C<val>.  See also C<L</SvIV_set>>.
 
 Remember to free the previous PV buffer. There are many things to check.
 Beware that the existing pointer may be involved in copy-on-write or other
@@ -822,23 +822,23 @@ modification is safe. Then finally, if it is not a COW, call C<SvPV_free> to
 free the previous PV buffer.
 
 =for apidoc Am|void|SvUV_set|SV* sv|UV val
-Set the value of the UV pointer in sv to val.  See C<SvIV_set>.
+Set the value of the UV pointer in sv to val.  See C<L</SvIV_set>>.
 
 =for apidoc Am|void|SvRV_set|SV* sv|SV* val
-Set the value of the RV pointer in sv to val.  See C<SvIV_set>.
+Set the value of the RV pointer in sv to val.  See C<L</SvIV_set>>.
 
 =for apidoc Am|void|SvMAGIC_set|SV* sv|MAGIC* val
-Set the value of the MAGIC pointer in sv to val.  See C<SvIV_set>.
+Set the value of the MAGIC pointer in sv to val.  See C<L</SvIV_set>>.
 
 =for apidoc Am|void|SvSTASH_set|SV* sv|HV* val
-Set the value of the STASH pointer in sv to val.  See C<SvIV_set>.
+Set the value of the STASH pointer in sv to val.  See C<L</SvIV_set>>.
 
 =for apidoc Am|void|SvCUR_set|SV* sv|STRLEN len
-Set the current length of the string which is in the SV.  See C<SvCUR>
-and C<SvIV_set>.
+Set the current length of the string which is in the SV.  See C<L</SvCUR>>
+and C<SvIV_set>>.
 
 =for apidoc Am|void|SvLEN_set|SV* sv|STRLEN len
-Set the actual length of the string which is in the SV.  See C<SvIV_set>.
+Set the actual length of the string which is in the SV.  See C<L</SvIV_set>>.
 
 =cut
 */
@@ -1499,7 +1499,7 @@ Returns a pointer to the string in the SV, or a stringified form of
 the SV if the SV does not contain a string.  The SV may cache the
 stringified version becoming C<SvPOK>.  Handles 'get' magic.  The
 C<len> variable will be set to the length of the string (this is a macro, so
-don't use C<&len>).  See also C<SvPVx> for a version which guarantees to
+don't use C<&len>).  See also C<L</SvPVx>> for a version which guarantees to
 evaluate sv only once.
 
 Note that there is no guarantee that the return value of C<SvPV()> is
@@ -1509,7 +1509,7 @@ time.  This is due to the way that things like overloading and
 Copy-On-Write are handled.  In these cases, the return value may point to
 a temporary buffer or similar.  If you absolutely need the SvPVX field to
 be valid (for example, if you intend to write to it), then see
-L</SvPV_force>.
+C<L</SvPV_force>>.
 
 =for apidoc Am|char*|SvPVx|SV* sv|STRLEN len
 A version of C<SvPV> which guarantees to evaluate C<sv> only once.
@@ -1526,7 +1526,7 @@ Like C<SvPV> but doesn't set a length variable.
 Like C<SvPV_nolen> but doesn't process magic.
 
 =for apidoc Am|IV|SvIV|SV* sv
-Coerces the given SV to an integer and returns it.  See C<SvIVx> for a
+Coerces the given SV to an integer and returns it.  See C<L</SvIVx>> for a
 version which guarantees to evaluate sv only once.
 
 =for apidoc Am|IV|SvIV_nomg|SV* sv
@@ -1539,7 +1539,7 @@ this if C<sv> is an expression with side effects,
 otherwise use the more efficient C<SvIV>.
 
 =for apidoc Am|NV|SvNV|SV* sv
-Coerce the given SV to a double and return it.  See C<SvNVx> for a version
+Coerce the given SV to a double and return it.  See C<L</SvNVx>> for a version
 which guarantees to evaluate sv only once.
 
 =for apidoc Am|NV|SvNV_nomg|SV* sv
@@ -1552,7 +1552,7 @@ this if C<sv> is an expression with side effects,
 otherwise use the more efficient C<SvNV>.
 
 =for apidoc Am|UV|SvUV|SV* sv
-Coerces the given SV to an unsigned integer and returns it.  See C<SvUVx>
+Coerces the given SV to an unsigned integer and returns it.  See C<L</SvUVx>>
 for a version which guarantees to evaluate sv only once.
 
 =for apidoc Am|UV|SvUV_nomg|SV* sv
@@ -2079,7 +2079,7 @@ alternative is to call C<sv_grow> if you are not sure of the type of SV.
 
 Returns a true SV if C<b> is a true value, or a false SV if C<b> is 0.
 
-See also C<PL_sv_yes> and C<PL_sv_no>.
+See also C<L</PL_sv_yes>> and C<L</PL_sv_no>>.
 
 =cut
 */

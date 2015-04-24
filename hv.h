@@ -153,7 +153,7 @@ Null HV pointer.
 
 =for apidoc Am|char*|HvNAME|HV* stash
 Returns the package name of a stash, or NULL if C<stash> isn't a stash.
-See C<SvSTASH>, C<CvSTASH>.
+See C<L</SvSTASH>>, C<L</CvSTASH>>.
 
 =for apidoc Am|STRLEN|HvNAMELEN|HV *stash
 Returns the length of the stash's name.
@@ -208,7 +208,7 @@ variable C<PL_na>, though this is rather less efficient than using a local
 variable.  Remember though, that hash keys in perl are free to contain
 embedded nulls, so using C<strlen()> or similar is not a good way to find
 the length of hash keys.  This is very similar to the C<SvPV()> macro
-described elsewhere in this document.  See also C<HeUTF8>.
+described elsewhere in this document.  See also C<L</HeUTF8>>.
 
 If you are using C<HePV> to get values to pass to C<newSVpvn()> to create a
 new SV, you should consider using C<newSVhek(HeKEY_hek(he))> as it is more

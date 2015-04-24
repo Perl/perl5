@@ -1438,7 +1438,7 @@ cached.  Implements both C<gv_stashpvn> and C<gc_stashsv>.
 
 Requires one of either namesv or namepv to be non-null.
 
-See C<gv_stashpvn> for details on "flags".
+See C<L</gv_stashpvn>> for details on "flags".
 
 Note the sv interface is strongly preferred for performance reasons.
 
@@ -1494,9 +1494,11 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
 /*
 =for apidoc gv_stashsv
 
-Returns a pointer to the stash for a specified package.  See C<gv_stashpvn>.
+Returns a pointer to the stash for a specified package.  See
+C<L</gv_stashpvn>>.
 
-Note this interface is strongly preferred over C<gv_stashpvn> for performance reasons.
+Note this interface is strongly preferred over C<gv_stashpvn> for performance
+reasons.
 
 =cut
 */

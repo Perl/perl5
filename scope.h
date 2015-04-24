@@ -158,18 +158,18 @@
 =head1 Callback Functions
 
 =for apidoc Ams||SAVETMPS
-Opening bracket for temporaries on a callback.  See C<FREETMPS> and
+Opening bracket for temporaries on a callback.  See C<L</FREETMPS>> and
 L<perlcall>.
 
 =for apidoc Ams||FREETMPS
-Closing bracket for temporaries on a callback.  See C<SAVETMPS> and
+Closing bracket for temporaries on a callback.  See C<L</SAVETMPS>> and
 L<perlcall>.
 
 =for apidoc Ams||ENTER
-Opening bracket on a callback.  See C<LEAVE> and L<perlcall>.
+Opening bracket on a callback.  See C<L</LEAVE>> and L<perlcall>.
 
 =for apidoc Ams||LEAVE
-Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
+Closing bracket on a callback.  See C<L</ENTER>> and L<perlcall>.
 
 =over
 

@@ -127,7 +127,7 @@ S_save_magic_flags(pTHX_ I32 mgs_ix, SV *sv, U32 flags)
 /*
 =for apidoc mg_magical
 
-Turns on the magical status of an SV.  See C<sv_magic>.
+Turns on the magical status of an SV.  See C<L</sv_magic>>.
 
 =cut
 */
@@ -160,7 +160,7 @@ Perl_mg_magical(SV *sv)
 =for apidoc mg_get
 
 Do magic before a value is retrieved from the SV.  The type of SV must
-be >= SVt_PVMG.  See C<sv_magic>.
+be >= SVt_PVMG.  See C<L</sv_magic>>.
 
 =cut
 */
@@ -245,7 +245,7 @@ Perl_mg_get(pTHX_ SV *sv)
 /*
 =for apidoc mg_set
 
-Do magic after a value is assigned to the SV.  See C<sv_magic>.
+Do magic after a value is assigned to the SV.  See C<L</sv_magic>>.
 
 =cut
 */
@@ -352,7 +352,7 @@ Perl_mg_size(pTHX_ SV *sv)
 /*
 =for apidoc mg_clear
 
-Clear something magical that the SV represents.  See C<sv_magic>.
+Clear something magical that the SV represents.  See C<L</sv_magic>>.
 
 =cut
 */
@@ -403,7 +403,7 @@ S_mg_findext_flags(const SV *sv, int type, const MGVTBL *vtbl, U32 flags)
 /*
 =for apidoc mg_find
 
-Finds the magic pointer for type matching the SV.  See C<sv_magic>.
+Finds the magic pointer for type matching the SV.  See C<L</sv_magic>>.
 
 =cut
 */
@@ -418,7 +418,7 @@ Perl_mg_find(const SV *sv, int type)
 =for apidoc mg_findext
 
 Finds the magic pointer of C<type> with the given C<vtbl> for the C<SV>.  See
-C<sv_magicext>.
+C<L</sv_magicext>>.
 
 =cut
 */
@@ -447,7 +447,7 @@ Perl_mg_find_mglob(pTHX_ SV *sv)
 /*
 =for apidoc mg_copy
 
-Copies the magic from one SV to another.  See C<sv_magic>.
+Copies the magic from one SV to another.  See C<L</sv_magic>>.
 
 =cut
 */
@@ -553,7 +553,7 @@ S_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
 /*
 =for apidoc mg_free
 
-Free any magic storage used by the SV.  See C<sv_magic>.
+Free any magic storage used by the SV.  See C<L</sv_magic>>.
 
 =cut
 */

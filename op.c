@@ -1263,7 +1263,7 @@ For example:
 
 
 For lower-level direct manipulation of C<op_sibparent> and C<op_moresib>,
-see C<OpMORESIB_set>, C<OpLASTSIB_set>, C<OpMAYBESIB_set>.
+see C<L</OpMORESIB_set>>, C<L</OpLASTSIB_set>>, C<L</OpMAYBESIB_set>>.
 
 =cut
 */
