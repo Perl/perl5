@@ -11613,9 +11613,8 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.01701  => { delta_from => 5.017009 },
     5.017011 => { delta_from => 5.01701  },
-    5.017012 => { delta_from => 5.017011 },
 
-    5.018    => { delta_from => 5.017012 },
+    5.018    => { delta_from => 5.017011 },
     5.018001 => {
         delta_from => 5.018,
         changed => {
@@ -11831,10 +11830,45 @@ for my $version (sort { $a <=> $b } keys %delta) {
         changed => {
         },
         removed => {
+            'CGI'                   => 1,
+            'CGI::Apache'           => 1,
+            'CGI::Carp'             => 1,
+            'CGI::Cookie'           => 1,
+            'CGI::Fast'             => 1,
+            'CGI::Pretty'           => 1,
+            'CGI::Push'             => 1,
+            'CGI::Switch'           => 1,
+            'CGI::Util'             => 1,
+            'Module::Build'         => 1,
+            'Module::Build::Base'   => 1,
+            'Module::Build::Compat' => 1,
+            'Module::Build::Config' => 1,
+            'Module::Build::ConfigData'=> 1,
+            'Module::Build::Cookbook'=> 1,
+            'Module::Build::Dumper' => 1,
+            'Module::Build::ModuleInfo'=> 1,
+            'Module::Build::Notes'  => 1,
+            'Module::Build::PPMMaker'=> 1,
+            'Module::Build::Platform::Default'=> 1,
+            'Module::Build::Platform::MacOS'=> 1,
+            'Module::Build::Platform::Unix'=> 1,
+            'Module::Build::Platform::VMS'=> 1,
+            'Module::Build::Platform::VOS'=> 1,
+            'Module::Build::Platform::Windows'=> 1,
+            'Module::Build::Platform::aix'=> 1,
+            'Module::Build::Platform::cygwin'=> 1,
+            'Module::Build::Platform::darwin'=> 1,
+            'Module::Build::Platform::os2'=> 1,
+            'Module::Build::PodParser'=> 1,
+            'Module::Build::Version'=> 1,
+            'Module::Build::YAML'   => 1,
+            'Package::Constants'    => 1,
+            'Simple'                => 1,
+            'inc::latest'           => 1,
         }
     },
     5.021001 => {
-        delta_from => 5.017007,
+        delta_from => 5.021000,
         changed => {
         },
         removed => {
