@@ -1476,6 +1476,7 @@ sub _log_10
     {
     $twos++; $x->bdiv($two,$scale+4);		# keep all digits
     }
+  $x->bround($scale+4);
   # $twos > 0 => did mul 2, < 0 => did div 2 (but we never did both)
   # So calculate correction factor based on ln(2):
   if ($twos != 0)
