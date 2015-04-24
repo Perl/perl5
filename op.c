@@ -11711,7 +11711,7 @@ The C-level function pointer is returned in I<*ckfun_p>, and an SV
 argument for it is returned in I<*ckobj_p>.  The function is intended
 to be called in this manner:
 
-    entersubop = (*ckfun_p)(aTHX_ entersubop, namegv, (*ckobj_p));
+ entersubop = (*ckfun_p)(aTHX_ entersubop, namegv, (*ckobj_p));
 
 In this call, I<entersubop> is a pointer to the C<entersub> op,
 which may be replaced by the check function, and I<namegv> is a GV

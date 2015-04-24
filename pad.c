@@ -79,11 +79,14 @@ the variable.  The COP_SEQ_RANGE_LOW and _HIGH fields form a range
 valid.  During compilation, these fields may hold the special value
 PERL_PADSEQ_INTRO to indicate various stages:
 
-   COP_SEQ_RANGE_LOW        _HIGH
-   -----------------        -----
-   PERL_PADSEQ_INTRO            0   variable not yet introduced:   { my ($x
-   valid-seq#   PERL_PADSEQ_INTRO   variable in scope:             { my ($x)
-   valid-seq#          valid-seq#   compilation of scope complete: { my ($x) }
+ COP_SEQ_RANGE_LOW        _HIGH
+ -----------------        -----
+ PERL_PADSEQ_INTRO            0   variable not yet introduced:
+                                  { my ($x
+ valid-seq#   PERL_PADSEQ_INTRO   variable in scope:
+                                  { my ($x)
+ valid-seq#          valid-seq#   compilation of scope complete:
+                                  { my ($x) }
 
 For typed lexicals PadnameTYPE points at the type stash.  For C<our>
 lexicals, PadnameOURSTASH points at the stash of the associated global (so
@@ -582,9 +585,9 @@ identifies the type.  If I<ourstash> is non-null, it's a lexical reference
 to a package variable, and this identifies the package.  The following
 flags can be OR'ed together:
 
-    padadd_OUR          redundantly specifies if it's a package var
-    padadd_STATE        variable will retain value persistently
-    padadd_NO_DUP_CHECK skip check for lexical shadowing
+ padadd_OUR          redundantly specifies if it's a package var
+ padadd_STATE        variable will retain value persistently
+ padadd_NO_DUP_CHECK skip check for lexical shadowing
 
 =cut
 */
