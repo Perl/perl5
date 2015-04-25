@@ -6011,8 +6011,14 @@ Perl_yylex(pTHX)
 	    PL_tokenbuf[0] = '@';
 	    s = scan_ident(s + 1, PL_tokenbuf + 1,
 			   sizeof PL_tokenbuf - 1, FALSE);
-	    if (PL_expect == XOPERATOR)
-		no_op("Array length", s);
+            if (PL_expect == XOPERATOR) {
+                d = s;
+                if (PL_bufptr > s) {
+                    d = PL_bufptr-1;
+                    PL_bufptr = PL_oldbufptr;
+                }
+		no_op("Array length", d);
+            }
 	    if (!PL_tokenbuf[1])
 		PREREF(DOLSHARP);
 	    PL_expect = XOPERATOR;

@@ -28,6 +28,15 @@ syntax error at - line 1, near "0$"
 Missing right curly or square bracket at - line 1, at end of line
 Execution of - aborted due to compilation errors.
 ########
+# NAME (Missing operator before $#{?) [perl #123737]
+0$#{
+EXPECT
+Array length found where operator expected at - line 1, near "0$#{"
+	(Missing operator before $#{?)
+syntax error at - line 1, near "0$#"
+Missing right curly or square bracket at - line 1, at end of line
+Execution of - aborted due to compilation errors.
+########
 # NAME Unterminated here-doc in string eval
 eval "<<foo"; die $@
 EXPECT
