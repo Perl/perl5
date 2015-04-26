@@ -18,29 +18,6 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-=head2 qr/\b{gcb}/ is now handled in regular expressions
-
-C<gcb> stands for Grapheme Cluster Boundary.  It is a Unicode property
-that finds the boundary between sequences of characters that look like a
-single character to a native speaker of a language.  Perl has long had
-the ability to deal with these through the C<\X> regular escape
-sequence.  Now, there is an alternative way of handling these.  See
-L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
-
-=head2 qr/\b{wb}/ is now handled in regular expressions
-
-C<wb> stands for Word Boundary.  It is a Unicode property
-that finds the boundary between words.  This is similar to the plain
-C<\b> (without braces) but is more suitable for natural language
-processing.  It knows, for example that apostrophes can occur in the
-middle of words.  See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
-
-=head2 qr/\b{sb}/ is now handled in regular expressions
-
-C<sb> stands for Sentence Boundary.  It is a Unicode property
-to aid in parsing natural language sentences.
-See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
-
 =head2 New bitwise operators
 
 A new experimental facility has been added that makes the four standard
@@ -52,6 +29,37 @@ assignment variants (C<&= |= ^= &.= |.= ^.=>).
 To use this, enable the "bitwise" feature and disable the
 "experimental::bitwise" warnings category.  See L<perlop/Bitwise String
 Operators> for details.  [rt.perl.org #123466]
+
+=head2 New double-diamond operator
+
+C<<< <<>> >>> is like C<< <> >> but uses three-argument C<open> to open
+each file in @ARGV.  So each element of @ARGV is an actual file name, and
+"|foo" won't be treated as a pipe open.
+
+=head2 New \b boundaries in regular expressions
+
+=head3 qr/\b{gcb}/
+
+C<gcb> stands for Grapheme Cluster Boundary.  It is a Unicode property
+that finds the boundary between sequences of characters that look like a
+single character to a native speaker of a language.  Perl has long had
+the ability to deal with these through the C<\X> regular escape
+sequence.  Now, there is an alternative way of handling these.  See
+L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
+
+=head3 qr/\b{wb}/
+
+C<wb> stands for Word Boundary.  It is a Unicode property
+that finds the boundary between words.  This is similar to the plain
+C<\b> (without braces) but is more suitable for natural language
+processing.  It knows, for example that apostrophes can occur in the
+middle of words.  See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
+
+=head3 qr/\b{sb}/
+
+C<sb> stands for Sentence Boundary.  It is a Unicode property
+to aid in parsing natural language sentences.
+See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
 
 =head2 C<no re> covers more and is lexical
 
@@ -70,10 +78,6 @@ This is equivalent to putting C<?:> at the beginning of every capturing group.
 
 See L<perlre/"n"> for more information.
 
-=head2 C<prototype> with no arguments
-
-C<prototype()> with no arguments now infers C<$_>.  [perl #123514]
-
 =head2 C<use re 'strict'>
 
 This applies stricter syntax rules to regular expression patterns
@@ -84,6 +88,74 @@ behavior of this is subject to change in future Perl releases as we gain
 experience, using this pragma will raise a category
 C<experimental:re_strict> warning.
 See L<'strict' in re|re/'strict' mode>.
+
+=head2 C<qr/foo/x> now ignores any Unicode pattern white space
+
+The C</x> regular expression modifier allows the pattern to contain
+white space and comments, both of which are ignored, for improved
+readability.  Until now, not all the white space characters that Unicode
+designates for this purpose were handled.  The additional ones now
+recognized are
+U+0085 NEXT LINE,
+U+200E LEFT-TO-RIGHT MARK,
+U+200F RIGHT-TO-LEFT MARK,
+U+2028 LINE SEPARATOR,
+and
+U+2029 PARAGRAPH SEPARATOR.
+
+=head2 Unicode 7.0 is now supported
+
+For details on what is in this release, see
+L<http://www.unicode.org/versions/Unicode7.0.0/>.
+
+=head2 S<C<use locale>> can restrict which locale categories are affected
+
+It is now possible to pass a parameter to S<C<use locale>> to specify
+a subset of locale categories to be locale-aware, with the remaining
+ones unaffected.  See L<perllocale/The "use locale" pragma> for details.
+
+=head2 Perl now supports POSIX 2008 locale currency additions.
+
+On platforms that are able to handle POSIX.1-2008, the
+hash returned by
+L<C<POSIX::localeconv()>|perllocale/The localeconv function>
+includes the international currency fields added by that version of the
+POSIX standard.  These are
+C<int_n_cs_precedes>,
+C<int_n_sep_by_space>,
+C<int_n_sign_posn>,
+C<int_p_cs_precedes>,
+C<int_p_sep_by_space>,
+and
+C<int_p_sign_posn>.
+
+=head2 Better heuristics on older platforms for determining locale UTF8ness
+
+On platforms that implement neither the C99 standard nor the POSIX 2001
+standard, determining if the current locale is UTF8 or not depends on
+heuristics.  These are improved in this release.
+
+=head2 Aliasing via reference
+
+Variables and subroutines can now be aliased by assigning to a reference:
+
+    \$c = \$d;
+    \&x = \&y;
+
+Or by using a backslash before a C<foreach> iterator variable, which is
+perhaps the most useful idiom this feature provides:
+
+    foreach \%hash (@array_of_hash_refs) { ... }
+
+This feature is experimental and must be enabled via C<use feature
+'refaliasing'>.  It will warn unless the C<experimental::refaliasing>
+warnings category is disabled.
+
+See L<perlref/Assigning to References>
+
+=head2 C<prototype> with no arguments
+
+C<prototype()> with no arguments now infers C<$_>.  [perl #123514]
 
 =head2 New "const" subroutine attribute
 
@@ -104,17 +176,6 @@ indicate that the operation is not supported.
 Currently, this uses either a C<dd_fd> member in the OS C<DIR>
 structure, or a dirfd(3) function as specified by POSIX.1-2008.
 
-=head2 Unicode 7.0 is now supported
-
-For details on what is in this release, see
-L<http://www.unicode.org/versions/Unicode7.0.0/>.
-
-=head2 Better heuristics on older platforms for determining locale UTF8ness
-
-On platforms that implement neither the C99 standard nor the POSIX 2001
-standard, determining if the current locale is UTF8 or not depends on
-heuristics.  These are improved in this release.
-
 =head2 List form of pipe open implemented for Win32
 
 The list form of pipe:
@@ -125,12 +186,6 @@ is now implemented on Win32.  It has the same limitations as C<system
 LIST> on Win32, since the Win32 API doesn't accept program arguments
 as a list.
 
-=head2 Assignment to list repetition
-
-C<(...) x ...> can now be used within a list that is assigned to, as long
-as the left-hand side is a valid lvalue.  This allows C<(undef,undef,$foo)
-= that_function()> to be written as C<((undef)x2, $foo) = that_function()>.
-
 =head2 C<close> now sets C<$!>
 
 When an I/O error occurs, the fact that there has been an error is recorded
@@ -139,6 +194,11 @@ value of C<$!> would be untouched by C<close>, so the common convention of
 writing C<close $fh or die $!> did not work reliably.  Now the handle
 records the value of C<$!>, too, and C<close> restores it.
 
+=head2 Assignment to list repetition
+
+C<(...) x ...> can now be used within a list that is assigned to, as long
+as the left-hand side is a valid lvalue.  This allows C<(undef,undef,$foo)
+= that_function()> to be written as C<((undef)x2, $foo) = that_function()>.
 
 =head2 Infinity and NaN (not-a-number) handling improved
 
@@ -157,6 +217,16 @@ As a completely new feature, hexadecimal floating point literals
 (like 0x1.23p-4)  are now supported, and they can be output with
 C<printf %a>.
 
+=head2 Packing infinity or not-a-number into a character is now fatal
+
+Before, when trying to pack infinity or not-a-number into a
+(signed) character, Perl would warn, and assumed you tried to
+pack C<< 0xFF >>; if you gave it as an argument to C<< chr >>,
+C<< U+FFFD >> was returned.
+
+But now, all such actions (C<< pack >>, C<< chr >>, and C<< print '%c' >>)
+result in a fatal error.
+
 =head2 Experimental C Backtrace API
 
 Starting from Perl 5.21.1, on some platforms Perl supports retrieving
@@ -174,80 +244,6 @@ The feature needs to be enabled with C<Configure -Dusecbacktrace>.
 Also included is a C API to retrieve backtraces.
 
 See L<perlhacktips/"C backtrace"> for more information.
-
-=head2 C<qr/foo/x> now ignores any Unicode pattern white space
-
-The C</x> regular expression modifier allows the pattern to contain
-white space and comments, both of which are ignored, for improved
-readability.  Until now, not all the white space characters that Unicode
-designates for this purpose were handled.  The additional ones now
-recognized are
-U+0085 NEXT LINE,
-U+200E LEFT-TO-RIGHT MARK,
-U+200F RIGHT-TO-LEFT MARK,
-U+2028 LINE SEPARATOR,
-and
-U+2029 PARAGRAPH SEPARATOR.
-
-=head2 S<C<use locale>> can restrict which locale categories are affected
-
-It is now possible to pass a parameter to S<C<use locale>> to specify
-a subset of locale categories to be locale-aware, with the remaining
-ones unaffected.  See L<perllocale/The "use locale" pragma> for details.
-
-=head2 New double-diamond operator
-
-C<<< <<>> >>> is like C<< <> >> but uses three-argument C<open> to open
-each file in @ARGV.  So each element of @ARGV is an actual file name, and
-"|foo" won't be treated as a pipe open.
-
-=head2 Aliasing via reference
-
-Variables and subroutines can now be aliased by assigning to a reference:
-
-    \$c = \$d;
-    \&x = \&y;
-
-Or by using a backslash before a C<foreach> iterator variable, which is
-perhaps the most useful idiom this feature provides:
-
-    foreach \%hash (@array_of_hash_refs) { ... }
-
-This feature is experimental and must be enabled via C<use feature
-'refaliasing'>.  It will warn unless the C<experimental::refaliasing>
-warnings category is disabled.
-
-See L<perlref/Assigning to References>
-
-=head2 Perl now supports POSIX 2008 locale currency additions.
-
-On platforms that are able to handle POSIX.1-2008, the
-hash returned by
-L<C<POSIX::localeconv()>|perllocale/The localeconv function>
-includes the international currency fields added by that version of the
-POSIX standard.  These are
-C<int_n_cs_precedes>,
-C<int_n_sep_by_space>,
-C<int_n_sign_posn>,
-C<int_p_cs_precedes>,
-C<int_p_sep_by_space>,
-and
-C<int_p_sign_posn>.
-
-=head2 Packing infinity or not-a-number into a character is now fatal
-
-Before, when trying to pack infinity or not-a-number into a
-(signed) character, Perl would warn, and assumed you tried to
-pack C<< 0xFF >>; if you gave it as an argument to C<< chr >>,
-C<< U+FFFD >> was returned.
-
-But now, all such actions (C<< pack >>, C<< chr >>, and C<< print '%c' >>)
-result in a fatal error.
-
-=head2 Inf and NaN
-
-Many small improvements, bug fixes and added test cases for dealing
-with math related to infinity and not-a-number.
 
 =head1 Security
 
