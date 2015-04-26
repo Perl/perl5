@@ -323,6 +323,31 @@ EBCDIC machines, but as long as the code itself uses the
 C<NATIVE_IS_INVARIANT()> macro appropriately, it works, even if the
 comments are wrong.
 
+As noted in L<perlhack/TESTING>, when writing test scripts, the file
+F<t/charset_tools.pl> contains some helpful functions for writing tests
+valid on both ASCII and EBCDIC platforms.  Sometimes, though, a test
+can't use a function and it's inconvenient to have different test
+versions depending on the platform.  There are 20 code points that are
+the same in all 4 character sets currently recognized by Perl (the 3
+EBCDIC code pages plus ISO 8859-1 (ASCII/Latin1)).  These can be used in
+such tests, though there is a small possibility that Perl will become
+available in yet another character set, breaking your test.  All but one
+of these code points are C0 control characters.  The most significant
+controls that are the same are C<\0>, C<\r>, and C<\N{VT}> (also
+specifiable as C<\cK>, C<\x0B>, C<\N{U+0B}>, or C<\013>).  The single
+non-control is U+00B6 PILCROW SIGN.  The controls that are the same have
+the same bit pattern in all 4 character sets, regardless of the UTF8ness
+of the string containing them.  The bit pattern for U+B6 is the same in
+all 4 for non-UTF8 strings, but differs in each when its containing
+string is UTF-8 encoded.  The only other code points that have some sort
+of sameness across all 4 character sets are the pair 0xDC and 0xFC.
+Together these represent upper- and lowercase LATIN LETTER U WITH
+DIAERESIS, but which is upper and which is lower may be reversed: 0xDC
+is the capital in Latin1 and 0xFC is the small letter, while 0xFC is the
+capital in EBCDIC and 0xDC is the small one.  This factoid may be
+exploited in writing case insensitive tests that are the same across all
+4 character sets.
+
 =item *
 
 Assuming the character set is just ASCII
