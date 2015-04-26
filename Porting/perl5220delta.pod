@@ -713,337 +713,6 @@ Perl.
 
 =head2 Changes to Existing Documentation
 
-=head3 L<perlebcdic>
-
-=over 4
-
-=item *
-
-This document has been significantly updated in the light of recent
-improvements to EBCDIC support.
-
-=back
-
-=head3 L<perlfunc>
-
-=over 4
-
-=item *
-
-Mention that C<study()> is currently a no-op.
-
-=back
-
-=head3 L<perlguts>
-
-=over 4
-
-=item *
-
-The OOK example has been updated to account for COW changes and a change in the
-storage of the offset.
-
-=back
-
-=head3 L<perlhacktips>
-
-=over 4
-
-=item *
-
-Documentation has been added illustrating the perils of assuming the contents
-of static memory pointed to by the return values of Perl wrappers for C library
-functions doesn't change.
-
-=back
-
-=head3 L<perlport>
-
-=over 4
-
-=item *
-
-Out-of-date VMS-specific information has been fixed/simplified.
-
-=back
-
-=head3 L<perluniintro>
-
-=over 4
-
-=item *
-
-Advice for how to make sure your strings and regular expression patterns are
-interpreted as Unicode has been revised to account for the new Perl 5.22 EBCDIC
-handling.
-
-=back
-
-=head3 L<perlvms>
-
-=over 4
-
-=item *
-
-Out-of-date and/or incorrect material has been removed.
-
-=back
-
-
-=head3 L<perlunicode>
-
-=over 4
-
-=item *
-
-Update B<Default Word Boundaries> under
-L<perlunicode/"Unicode Regular Expression Support Level">'s
-B<Extended Unicode Support>.
-
-=back
-
-=head3 L<perlunicook>
-
-=over 4
-
-=item *
-
-Clarify that autodie E<gt>= 2.26 works with C<use open>.
-
-=item *
-
-Correct warning message for C<use autodie> and C<use open>.
-
-=back
-
-=head3 L<perlfaq>
-
-=over 4
-
-=item *
-
-L<perlfaq> has been synchronized with version 5.021009 from CPAN.
-
-=back
-
-=head3 L<perlop>
-
-=over 4
-
-=item *
-
-Correct the version number which removes C<m?PATTERN?>. It was Perl 5.22.0.
-
-=back
-
-=head3 L<perlvar>
-
-=over 4
-
-=item *
-
-Further clarify version number representations and usage.
-
-=back
-
-=head3 L<perlmodstyle>
-
-=over 4
-
-=item *
-
-Instead of pointing to the module list, we are now pointing to
-L<PrePAN|http://prepan.org/>.
-
-=back
-
-=head3 L<perlrebackslash>
-
-=over 4
-
-=item *
-
-Added documentation of C<\b{sb}>, C<\b{wb}>, C<\b{gcb}>, and C<\b{g}>.
-
-=back
-
-=head3 L<perlrequick>
-
-=over 4
-
-=item *
-
-Added example for C<\b{wb}>.
-
-=back
-
-=head3 L<perlretut>
-
-=over 4
-
-=item *
-
-Added example for C<\b{wb}>.
-
-=back
-
-=head3 L<perldata/Identifier parsing>
-
-=over 4
-
-=item *
-
-The syntax of single-character variable names has been brought
-up-to-date and more fully explained.
-
-=back
-
-=head3 L<perlrecharclass>
-
-=over 4
-
-=item *
-
-Clarifications have been added to L<perlrecharclass/Character Ranges>
-to the effect that Perl guarantees that C<[A-Z]>, C<[a-z]>, C<[0-9]> and
-any subranges thereof in regular expression bracketed character classes
-are guaranteed to match exactly what a naive English speaker would
-expect them to match, even on platforms (such as EBCDIC) where special
-handling is required to accomplish this.
-
-=back
-
-=head3 L<perlfunc>
-
-=over 4
-
-=item *
-
-Calling C<delete> or C<exists> on array values is now described as "strongly
-discouraged" rather than "deprecated".
-
-=back
-
-=head3 L<perlpolicy>
-
-=over 4
-
-=item *
-
-The conditions for marking an experimental feature as non-experimental are now
-set out.
-
-=back
-
-=head3 L<perlrecharclass>
-
-=over 4
-
-=item *
-
-The documentation of Bracketed Character Classes has been expanded to cover the
-improvements in C<qr/[\N{named sequence}]/> (see under L</Selected Bug Fixes>).
-
-=back
-
-=head3 L<perlsyn>
-
-=over 4
-
-=item *
-
-An ambiguity in the documentation of the Ellipsis statement has been corrected.
-L<[perl #122661]|https://rt.perl.org/Ticket/Display.html?id=122661>
-
-=back
-
-=head3 L<perlxs>
-
-=over 4
-
-=item *
-
-Added a discussion of locale issues in XS code.
-
-=back
-
-=head3 L<perlguts>
-
-=over 4
-
-=item *
-
-Details on C level symbols and libperl.t added.
-
-=back
-
-=head3 L<perlhacktips>
-
-=over 4
-
-=item *
-
-Recommended replacements for tmpfile, atoi, strtol, and strtoul added.
-
-=back
-
-=head3 L<perlop>
-
-=over 4
-
-=item *
-
-ASCII v. EBCDIC clarifications added.
-
-=back
-
-=head3 L<perlsec>
-
-=over 4
-
-=item *
-
-Comments added on algorithmic complexity and tied hashes.
-
-=back
-
-=head3 L<perlvms>
-
-=over 4
-
-=item *
-
-Updated documentation on environment and shell interaction in VMS.
-
-=back
-
-=head3 L<perlfunc>
-
-=over 4
-
-=item *
-
-Improve documentation of C<< our >>.
-
-=item *
-
-C<-l> now notes that it will return false if symlinks aren't supported by the
-file system.
-
-L<[perl #121523]|https://rt.perl.org/Ticket/Display.html?id=121523>
-
-=item *
-
-Note that C<exec LIST> and C<system LIST> may fall back to the shell on
-Win32. Only C<exec PROGRAM LIST> and C<system PROGRAM LIST> indirect object
-syntax will reliably avoid using the shell.
-
-This has also been noted in L<perlport>.
-
-L<[perl #122046]|https://rt.perl.org/Ticket/Display.html?id=122046>
-
-=back
-
 =head3 L<perlapi>
 
 =over 4
@@ -1078,15 +747,135 @@ entries easier to find when scanning.
 
 =back
 
+=head3 L<perldata>
+
+=over 4
+
+=item *
+
+The syntax of single-character variable names has been brought
+up-to-date and more fully explained.
+
+=back
+
+=head3 L<perlebcdic>
+
+=over 4
+
+=item *
+
+This document has been significantly updated in the light of recent
+improvements to EBCDIC support.
+
+=back
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Mention that C<study()> is currently a no-op.
+
+=item *
+
+Calling C<delete> or C<exists> on array values is now described as "strongly
+discouraged" rather than "deprecated".
+
+=item *
+
+Improve documentation of C<< our >>.
+
+=item *
+
+C<-l> now notes that it will return false if symlinks aren't supported by the
+file system.
+
+L<[perl #121523]|https://rt.perl.org/Ticket/Display.html?id=121523>
+
+=item *
+
+Note that C<exec LIST> and C<system LIST> may fall back to the shell on
+Win32. Only C<exec PROGRAM LIST> and C<system PROGRAM LIST> indirect object
+syntax will reliably avoid using the shell.
+
+This has also been noted in L<perlport>.
+
+L<[perl #122046]|https://rt.perl.org/Ticket/Display.html?id=122046>
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+The OOK example has been updated to account for COW changes and a change in the
+storage of the offset.
+
+=item *
+
+Details on C level symbols and libperl.t added.
+
+=back
+
 =head3 L<perlhacktips>
 
 =over 4
 
 =item *
 
+Documentation has been added illustrating the perils of assuming the contents
+of static memory pointed to by the return values of Perl wrappers for C library
+functions doesn't change.
+
+=item *
+
+Recommended replacements for tmpfile, atoi, strtol, and strtoul added.
+
+=item *
+
 Updated documentation for the C<test.valgrind> C<make> target.
 
 L<[perl #121431]|https://rt.perl.org/Ticket/Display.html?id=121431>
+
+=back
+
+=head3 L<perlmodstyle>
+
+=over 4
+
+=item *
+
+Instead of pointing to the module list, we are now pointing to
+L<PrePAN|http://prepan.org/>.
+
+=back
+
+=head3 L<perlpolicy>
+
+=over 4
+
+=item *
+
+We now have a code of conduct for the I<< p5p >> mailing list, as documented
+in L<< perlpolicy/STANDARDS OF CONDUCT >>.
+
+=item *
+
+The conditions for marking an experimental feature as non-experimental are now
+set out.
+
+=back
+
+=head3 L<perlport>
+
+=over 4
+
+=item *
+
+Out-of-date VMS-specific information has been fixed/simplified.
 
 =back
 
@@ -1101,20 +890,54 @@ onto the next line by escaping them.
 
 =back
 
-=head3 L<< perlpolicy >>
+=head3 L<perlrebackslash>
 
 =over 4
 
 =item *
 
-We now have a code of conduct for the I<< p5p >> mailing list, as documented
-in L<< perlpolicy/STANDARDS OF CONDUCT >>.
+Added documentation of C<\b{sb}>, C<\b{wb}>, C<\b{gcb}>, and C<\b{g}>.
 
 =back
 
-=head3 L<< perlsyn >>
+=head3 L<perlrecharclass>
 
 =over 4
+
+=item *
+
+Clarifications have been added to L<perlrecharclass/Character Ranges>
+to the effect that Perl guarantees that C<[A-Z]>, C<[a-z]>, C<[0-9]> and
+any subranges thereof in regular expression bracketed character classes
+are guaranteed to match exactly what a naive English speaker would
+expect them to match, even on platforms (such as EBCDIC) where special
+handling is required to accomplish this.
+
+=item *
+
+The documentation of Bracketed Character Classes has been expanded to cover the
+improvements in C<qr/[\N{named sequence}]/> (see under L</Selected Bug Fixes>).
+
+=back
+
+=head3 L<perlsec>
+
+=over 4
+
+=item *
+
+Comments added on algorithmic complexity and tied hashes.
+
+=back
+
+=head3 L<perlsyn>
+
+=over 4
+
+=item *
+
+An ambiguity in the documentation of the C<...> statement has been corrected.
+L<[perl #122661]|https://rt.perl.org/Ticket/Display.html?id=122661>
 
 =item *
 
@@ -1123,15 +946,64 @@ in L<< perlsyn >>.
 
 =back
 
-=head3 L<Unicode::UCD>
+=head3 L<perlunicode>
 
 =over 4
 
 =item *
 
-The documentation includes many clarifications and fixes.
+Update B<Default Word Boundaries> under
+L<perlunicode/"Unicode Regular Expression Support Level">'s
+B<Extended Unicode Support>.
 
 =back
+
+=head3 L<perluniintro>
+
+=over 4
+
+=item *
+
+Advice for how to make sure your strings and regular expression patterns are
+interpreted as Unicode has been revised to account for the new Perl 5.22 EBCDIC
+handling.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Further clarify version number representations and usage.
+
+=back
+
+=head3 L<perlvms>
+
+=over 4
+
+=item *
+
+Out-of-date and/or incorrect material has been removed.
+
+=item *
+
+Updated documentation on environment and shell interaction in VMS.
+
+=back
+
+=head3 L<perlxs>
+
+=over 4
+
+=item *
+
+Added a discussion of locale issues in XS code.
+
+=back
+
 
 =head1 Diagnostics
 
