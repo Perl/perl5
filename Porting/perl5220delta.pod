@@ -339,6 +339,15 @@ consistency, this is now changed to match what terminates comment lines
 outside S<C<(?[ ])>>, namely a C<\n> (even if escaped), which is the
 same as what terminates a heredoc string and formats.
 
+=head2 C<(?[...])> operators now follow standard Perl precedence
+
+This experimental feature allows set operations in regular expression patterns.
+Prior to this, the intersection operator had the same precedence as the other
+binary operators.  Now it has higher precedence.  This could lead to different
+outcomes than existing code expects (though the documentation has always noted
+that this change might happen, recommending fully parenthesizing the
+expressions).  See L<perlrecharclass/Extended Bracketed Character Classes>.
+
 =head2 Omitting % and @ on hash and array names is no longer permitted
 
 Really old Perl let you omit the @ on array names and the % on hash
@@ -670,6 +679,14 @@ optimization does not currently apply to XSUBs or exported subroutines, and
 method calls will undo it, since they cache things in typeglobs.
 L<[perl #120441]|https://rt.perl.org/Ticket/Display.html?id=120441>
 
+=item *
+
+The functions C<utf8::native_to_unicode()> and C<utf8::unicode_to_native()>
+(see L<utf8>) are now optimized out on ASCII platforms.  There is now not even
+a minimal performance hit in writing code portable between ASCII and EBCDIC
+platforms.
+
+
 =back
 
 =head1 Modules and Pragmata
@@ -787,6 +804,8 @@ Further clarify version number representations and usage.
 
 Instead of pointing to the module list, we are now pointing to
 L<PrePAN|http://prepan.org/>.
+
+=back
 
 =head3 L<perlrebackslash>
 
@@ -1075,6 +1094,15 @@ diagnostic messages, see L<perldiag>.
 =head3 New Errors
 
 =over 4
+
+=item *
+
+L<Invalid quantifier in {,} in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Invalid quantifier in {,} in regex; marked by <-- HERE in m/%s/">
+
+(F) The pattern looks like a {min,max} quantifier, but the min or max could not
+be parsed as a valid number - either it has leading zeroes, or it represents
+too big a number to cope with.  The S<<-- HERE> shows where in the regular
+expression the problem was discovered.  See L<perlre>.
 
 =item *
 
@@ -1811,6 +1839,10 @@ see the discussion below at L<< /Internal Changes >>.
 
 =item *
 
+Tests for performance issues have been added in the file F<t/perf/taint.t>.
+
+=item *
+
 Some regular expression tests are written in such a way that they will
 run very slowly if certain optimizations break. These tests have been
 moved into new files, F<< t/re/speed.t >> and F<< t/re/speed_thr.t >>,
@@ -1832,8 +1864,25 @@ working correctly.  See L</Infinity and NaN (not-a-number) handling improved>.
 
 =head2 Regained Platforms
 
-IRIX and Tru64 platforms are working again.
+=over 4
+
+=item IRIX and Tru64 platforms are working again.
+
 (Some C<make test> failures remain.)
+
+=item z/OS running EBCDIC Code Page 1047
+
+Core perl now works on this EBCDIC platform.  Earlier perls also worked, but,
+even though support wasn't officially withdrawn, recent perls would not compile
+and run well.  Perl 5.20 would work, but had many bugs which have now been
+fixed.  Many CPAN modules that ship with Perl still fail tests, including
+Pod::Simple.  However the version of Pod::Simple currently on CPAN should work;
+it was fixed too late to include in Perl 5.22.  Work is under way to fix many
+of the still-broken CPAN modules, which likely will be installed on CPAN when
+completed, so that you may not have to wait until Perl 5.24 to get a working
+version.
+
+=back
 
 =head2 Discontinued Platforms
 
@@ -1861,6 +1910,10 @@ invoked when both ends of the range are literals.  Now it is also
 invoked if any of the C<\N{...}> forms for specifying a character by
 name or Unicode code point is used instead of a literal.  See
 L<perlrecharclass/Character Ranges>.
+
+=item HP-UX
+
+The archname now distinguishes use64bitint from use64bitall.
 
 =item Android
 
@@ -1994,6 +2047,16 @@ as well as C<SUNWspro>, and support for native C<setenv> has been added.
 =head1 Internal Changes
 
 =over 4
+
+=item *
+
+Macros have been created to allow XS code to better manipulate the POSIX locale
+category C<LC_NUMERIC>.  See L<perlapi/Locale-related functions and macros>.
+
+=item *
+
+The previous C<atoi> et al replacement function, C<grok_atou>, has now been
+superseded by C<grok_atoUV>.  See L<perlclib> for details.
 
 =item *
 
@@ -2238,6 +2301,69 @@ index is still done using C<aelemfast>.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+Repeated global pattern matches in scalar context on large tainted strings were
+exponentially slow depending on the current match position in the string.
+L<[perl #123202]|https://rt.perl.org/Ticket/Display.html?id=123202>
+
+=item *
+
+Various crashes due to the parser getting confused by syntax errors have been
+fixed.
+L<[perl #123801]|https://rt.perl.org/Ticket/Display.html?id=123801>
+L<[perl #123802]|https://rt.perl.org/Ticket/Display.html?id=123802>
+L<[perl #123955]|https://rt.perl.org/Ticket/Display.html?id=123955>
+L<[perl #123995]|https://rt.perl.org/Ticket/Display.html?id=123995>
+
+=item *
+
+C<split> in the scope of lexical $_ has been fixed not to fail assertions.
+L<[perl #123763]|https://rt.perl.org/Ticket/Display.html?id=123763>
+
+=item *
+
+C<my $x : attr> syntax inside various list operators no longer fails
+assertions.
+L<[perl #123817]|https://rt.perl.org/Ticket/Display.html?id=123817>
+
+=item *
+
+An @ sign in quotes followed by a non-ASCII digit (which is not a valid
+identifier) would cause the parser to crash, instead of simply trying the @ as
+literal.  This has been fixed.
+L<[perl #123963]|https://rt.perl.org/Ticket/Display.html?id=123963>
+
+=item *
+
+C<*bar::=*foo::=*glob_with_hash> has been crashing since Perl 5.14, but no
+longer does.
+L<[perl #123847]|https://rt.perl.org/Ticket/Display.html?id=123847>
+
+=item *
+
+C<foreach> in scalar context was not pushing an item on to the stack, resulting
+in bugs.  (C<print 4, scalar do { foreach(@x){} } + 1> would print 5.)  It has
+been fixed to return C<undef>.
+L<[perl #124004]|https://rt.perl.org/Ticket/Display.html?id=124004>
+
+=item *
+
+A memory leak introduced in Perl 5.21.6 has been fixed.
+L<[perl #123922]|https://rt.perl.org/Ticket/Display.html?id=123922>
+
+=item *
+
+A regression in the behaviour of the C<readline> built-in function, caused by
+the introduction of the C<< <<>> >> operator, has been fixed.
+L<[perl #123990]|https://rt.perl.org/Ticket/Display.html?id=123990>
+
+=item *
+
+Several cases of data used to store environment variable contents in core C
+code being potentially overwritten before being used have been fixed.
+L<[perl #123748]|https://rt.perl.org/Ticket/Display.html?id=123748>
 
 =item *
 
@@ -3011,6 +3137,33 @@ platform specific bugs also go here.
 [ List each fix as a =item entry ]
 
 =over 4
+
+=item *
+
+A goal is for Perl to be able to be recompiled to work reasonably well on any
+Unicode version.  In Perl 5.22, though, the earliest such version is Unicode
+5.1 (current is 7.0).
+
+=item *
+
+EBCDIC platforms
+
+=over 4
+
+=item *
+
+Encode and encoding are mostly broken.
+
+=item *
+
+Many cpan modules that are shipped with core show failing tests.
+
+=item *
+
+C<pack>/C<unpack> with C<"U0"> format may not work properly.
+
+=back
+
 
 =item *
 
