@@ -263,7 +263,6 @@ Note that this isn't necessarily a huge step since in many platforms
 the step had already been taken several years ago: many Linux
 distributions (like Fedora) have been using this option for Perl,
 and OS X has enforced the same for many years.
-[ List each security issue as a =head2 entry ]
 
 =head1 Incompatible Changes
 
@@ -513,33 +512,6 @@ release; it will allow future extensions to the language to happen.
 The documentation for L<fatal warnings|warnings/Fatal Warnings> notes that
 C<< use warnings FATAL => 'all' >> is discouraged and provides stronger
 language about the risks of fatal warnings in general.
-
-=head2 Module removals
-
-XXX Remove this section if inapplicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
 
 =head1 Performance Enhancements
 
