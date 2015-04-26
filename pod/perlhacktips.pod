@@ -289,7 +289,7 @@ direction.
 
 If you need the string representation of a character that doesn't have a
 mnemonic name in C, you should add it to the list in
-F<regen/unicode_constants.pl>, and have Perl create C<#define>s for you,
+F<regen/unicode_constants.pl>, and have Perl create C<#define>'s for you,
 based on the current platform.
 
 Note that the C<isI<FOO>> and C<toI<FOO>> macros in F<handy.h> work
@@ -298,7 +298,9 @@ properly on native code points and strings.
 Also, the range 'A' - 'Z' in ASCII is an unbroken sequence of 26 upper
 case alphabetic characters.  That is not true in EBCDIC.  Nor for 'a' to
 'z'.  But '0' - '9' is an unbroken range in both systems.  Don't assume
-anything about other ranges.
+anything about other ranges.  (Note that special handling of ranges in
+regular expression patterns makes it appear to Perl
+code that the aforementioned ranges are all unbroken.)
 
 Many of the comments in the existing code ignore the possibility of
 EBCDIC, and may be wrong therefore, even if the code works.  This is
