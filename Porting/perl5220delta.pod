@@ -12,10 +12,6 @@ release.
 If you are upgrading from an earlier release such as 5.18.0, first read
 L<perl5200delta>, which describes differences between 5.18.0 and 5.20.0.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
 
 =head2 New bitwise operators
