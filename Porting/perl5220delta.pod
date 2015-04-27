@@ -1177,102 +1177,22 @@ L<perlrebackslash/\b{}, \b, \B{}, \B>.
 
 =item *
 
-L<Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale|perldiag/"Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale">
+L<"%s" is more clearly written simply as "%s" in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in mE<sol>%sE<sol>>
 
-You are matching a regular expression using locale rules,
-and a Unicode boundary is being matched, but the locale is not a Unicode
-one.  This doesn't make sense.  Perl will continue, assuming a Unicode
-(UTF-8) locale, but the results could well be wrong except if the locale
-happens to be ISO-8859-1 (Latin1) where this message is spurious and can
-be ignored.
+(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
 
-=item *
-
-L<< Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>
-
-You used a Unicode boundary (C<\b{...}> or C<\B{...}>) in a
-portion of a regular expression where the character set modifiers C</a>
-or C</aa> are in effect.  These two modifiers indicate an ASCII
-interpretation, and this doesn't make sense for a Unicode definition.
-The generated regular expression will compile so that the boundary uses
-all of Unicode.  No other portion of the regular expression is affected.
+You specified a character that has the given plainer way of writing it,
+and which is also portable to platforms running with different character
+sets.
 
 =item *
 
-L<The bitwise feature is experimental|perldiag/"The bitwise feature is experimental">
+L<Argument "%s" treated as 0 in increment (++)|perldiag/"Argument "%s" treated
+as 0 in increment (++)">
 
-This warning is emitted if you use bitwise
-operators (C<& | ^ ~ &. |. ^. ~.>) with the "bitwise" feature enabled.
-Simply suppress the warning if you want to use the feature, but know
-that in doing so you are taking the risk of using an experimental
-feature which may change or be removed in a future Perl version:
-
-    no warnings "experimental::bitwise";
-    use feature "bitwise";
-    $x |.= $y;
-
-=item *
-
-L<:const is experimental|perldiag/":const is experimental">
-
-(S experimental::const_attr) The "const" attribute is experimental.
-If you want to use the feature, disable the warning with C<no warnings
-'experimental::const_attr'>, but know that in doing so you are taking
-the risk that your code may break in a future Perl version.
-
-=item *
-
-L<Non-finite repeat count does nothing|perldiag/"Non-finite repeat count does nothing">
-
-(W numeric) You tried to execute the
-L<C<x>|perlop/Multiplicative Operators> repetition operator C<Inf> (or
-C<-Inf>) or C<NaN> times, which doesn't make sense.
-
-=item *
-
-L<Useless use of attribute "const"|perldiag/Useless use of attribute "const">
-
-(W misc) The "const" attribute has no effect except
-on anonymous closure prototypes.  You applied it to
-a subroutine via L<attributes.pm|attributes>.  This is only useful
-inside an attribute handler for an anonymous subroutine.
-
-=item *
-
-L<Unusual use of %s in void context|perldiag/"Unusual use of %s in void context">
-
-(W void_unusual) Similar to the "Useless use of %s in void context"
-warning, but only turned on by the top-level "pedantic" warning
-category, used for e.g. C<grep> in void context, which may indicate a
-bug, but could also just be someone using C<grep> for its side-effects
-as a loop.
-
-Enabled as part of "extra" warnings, not in the "all" category. See
-L<warnings> for details
-
-=item *
-
-L<E<quot>use re 'strict'E<quot> is experimental|perldiag/"use re 'strict'" is experimental>
-
-(S experimental::re_strict) The things that are different when a regular
-expression pattern is compiled under C<'strict'> are subject to change
-in future Perl releases in incompatible ways.  This means that a pattern
-that compiles today may not in a future Perl release.  This warning is
-to alert you to that risk.
-
-L<Wide character (U+%X) in %s|perldiag/"Wide character (U+%X) in %s">
-
-(W locale) While in a single-byte locale (I<i.e.>, a non-UTF-8
-one), a multi-byte character was encountered.   Perl considers this
-character to be the specified Unicode code point.  Combining non-UTF8
-locales and Unicode is dangerous.  Almost certainly some characters
-will have two different representations.  For example, in the ISO 8859-7
-(Greek) locale, the code point 0xC3 represents a Capital Gamma.  But so
-also does 0x393.  This will make string comparisons unreliable.
-
-You likely need to figure out how this multi-byte character got mixed up
-with your single-byte locale (or perhaps you thought you had a UTF-8
-locale, but Perl disagrees).
+(W numeric) The indicated string was fed as an argument to the C<++> operator
+which expects either a number or a string matching C</^[a-zA-Z]*[0-9]*\z/>.
+See L<perlop/Auto-increment and Auto-decrement> for details.
 
 =item *
 
@@ -1290,6 +1210,116 @@ is treated as if you had instead said C<[\N{U+06}-\N{U+08}]>, that is it
 matches the characters whose code points in Unicode are 6, 7, and 8.
 But that C<\x08> might indicate that you meant something different, so
 the warning gets raised.
+
+=item *
+
+L<Character in 'C' format overflow in pack|perldiag/"Character in 'C' format overflow in pack">
+
+(W pack) You tried converting an infinity or not-a-number to an unsigned
+character, which makes no sense.  Perl behaved as if you tried to pack 0xFF.
+
+=item *
+
+L<Character in 'c' format overflow in pack|perldiag/"Character in 'c' format overflow in pack">
+
+(W pack) You tried converting an infinity or not-a-number to a signed
+character, which makes no sense.  Perl behaved as if you tried to pack 0xFF.
+
+=item *
+
+L<:const is experimental|perldiag/":const is experimental">
+
+(S experimental::const_attr) The "const" attribute is experimental.
+If you want to use the feature, disable the warning with C<no warnings
+'experimental::const_attr'>, but know that in doing so you are taking
+the risk that your code may break in a future Perl version.
+
+=item *
+
+L<gmtime(%f) failed|perldiag/"gmtime(%f) failed">
+
+(W overflow) You called C<gmtime> with a number that it could not handle:
+too large, too small, or NaN.  The returned value is C<undef>.
+
+=item *
+
+L<Hexadecimal float: exponent overflow|perldiag/"Hexadecimal float: exponent overflow">
+
+(W overflow) The hexadecimal floating point has larger exponent
+than the floating point supports.
+
+=item *
+
+L<Hexadecimal float: exponent underflow|perldiag/"Hexadecimal float: exponent underflow">
+
+(W overflow) The hexadecimal floating point has smaller exponent
+than the floating point supports.
+
+=item *
+
+L<Hexadecimal float: mantissa overflow|perldiag/"Hexadecimal float: mantissa overflow">
+
+(W overflow) The hexadecimal floating point literal had more bits in
+the mantissa (the part between the 0x and the exponent, also known as
+the fraction or the significand) than the floating point supports.
+
+=item *
+
+L<Hexadecimal float: precision loss|perldiag/"Hexadecimal float: precision loss">
+
+(W overflow) The hexadecimal floating point had internally more
+digits than could be output.  This can be caused by unsupported
+long double formats, or by 64-bit integers not being available
+(needed to retrieve the digits under some configurations).
+
+L<Invalid number (%f) in chr|perldiag/"Invalid number (%f) in chr">
+
+(W utf8) You passed an invalid number (like an infinity or not-a-number) to
+C<chr>.  Those are not valid character numbers, so it returned the Unicode
+replacement character (U+FFFD).
+
+=item *
+
+L<localtime(%f) failed|perldiag/"localtime(%f) failed">
+
+(W overflow) You called C<localtime> with a number that it could not handle:
+too large, too small, or NaN.  The returned value is C<undef>.
+
+=item *
+
+L<Negative repeat count does nothing|perldiag/"Negative repeat count does nothing">
+
+(W numeric) You tried to execute the
+L<C<x>|perlop/Multiplicative Operators> repetition operator fewer than 0
+times, which doesn't make sense.
+
+=item *
+
+L<NO-BREAK SPACE in a charnames alias definition is deprecated|perldiag/"NO-BREAK SPACE in a charnames alias definition is deprecated">
+
+(D deprecated) You defined a character name which contained a no-break
+space character.  Change it to a regular space.  Usually these names are
+defined in the C<:alias> import argument to C<use charnames>, but they
+could be defined by a translator installed into C<$^H{charnames}>.  See
+L<charnames/CUSTOM ALIASES>.
+
+=item *
+
+L<Non-finite repeat count does nothing|perldiag/"Non-finite repeat count does nothing">
+
+(W numeric) You tried to execute the
+L<C<x>|perlop/Multiplicative Operators> repetition operator C<Inf> (or
+C<-Inf>) or C<NaN> times, which doesn't make sense.
+
+=item *
+
+L<PerlIO layer ':win32' is experimental|perldiag/"PerlIO layer ':win32' is experimental">
+
+(S experimental::win32_perlio) The C<:win32> PerlIO layer is
+experimental.  If you want to take the risk of using this layer,
+simply disable this warning:
+
+    no warnings "experimental::win32_perlio";
 
 =item *
 
@@ -1334,17 +1364,116 @@ the same group of 10 consecutive digits.
 
 =item *
 
-L<"%s" is more clearly written simply as "%s" in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"%s" is more clearly written simply as "%s" in regex; marked by <-- HERE in mE<sol>%sE<sol>>
+L<Redundant argument in %s|perldiag/Redundant argument in %s>
 
-(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
+(W redundant) You called a function with more arguments than other
+arguments you supplied indicated would be needed. Currently only
+emitted when a printf-type format required fewer arguments than were
+supplied, but might be used in the future for e.g. L<perlfunc/pack>.
 
-You specified a character that has the given plainer way of writing it,
-and which is also portable to platforms running with different character
-sets.
+The warnings category C<< redundant >> is new. See also [RT #121025]
+
+=item *
+
+L<Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale|perldiag/"Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale">
+
+You are matching a regular expression using locale rules,
+and a Unicode boundary is being matched, but the locale is not a Unicode
+one.  This doesn't make sense.  Perl will continue, assuming a Unicode
+(UTF-8) locale, but the results could well be wrong except if the locale
+happens to be ISO-8859-1 (Latin1) where this message is spurious and can
+be ignored.
+
+=item *
+
+L<< Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>
+
+You used a Unicode boundary (C<\b{...}> or C<\B{...}>) in a
+portion of a regular expression where the character set modifiers C</a>
+or C</aa> are in effect.  These two modifiers indicate an ASCII
+interpretation, and this doesn't make sense for a Unicode definition.
+The generated regular expression will compile so that the boundary uses
+all of Unicode.  No other portion of the regular expression is affected.
+
+=item *
+
+L<The bitwise feature is experimental|perldiag/"The bitwise feature is experimental">
+
+This warning is emitted if you use bitwise
+operators (C<& | ^ ~ &. |. ^. ~.>) with the "bitwise" feature enabled.
+Simply suppress the warning if you want to use the feature, but know
+that in doing so you are taking the risk of using an experimental
+feature which may change or be removed in a future Perl version:
+
+    no warnings "experimental::bitwise";
+    use feature "bitwise";
+    $x |.= $y;
+
+=item *
+
+L<Unescaped left brace in regex is deprecated, passed through in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is deprecated, passed through in regex; marked by <-- HERE in m/%s/">
+
+(D deprecated, regexp) You used a literal C<"{"> character in a regular
+expression pattern. You should change to use C<"\{"> instead, because a future
+version of Perl (tentatively v5.26) will consider this to be a syntax error.  If
+the pattern delimiters are also braces, any matching right brace
+(C<"}">) should also be escaped to avoid confusing the parser, for
+example,
+
+    qr{abc\{def\}ghi}
 
 =item *
 
 L<Use of literal non-graphic characters in variable names is deprecated|perldiag/"Use of literal non-graphic characters in variable names is deprecated">
+
+=item *
+
+L<Useless use of attribute "const"|perldiag/Useless use of attribute "const">
+
+(W misc) The "const" attribute has no effect except
+on anonymous closure prototypes.  You applied it to
+a subroutine via L<attributes.pm|attributes>.  This is only useful
+inside an attribute handler for an anonymous subroutine.
+
+=item *
+
+L<E<quot>use re 'strict'E<quot> is experimental|perldiag/"use re 'strict'" is experimental>
+
+(S experimental::re_strict) The things that are different when a regular
+expression pattern is compiled under C<'strict'> are subject to change
+in future Perl releases in incompatible ways.  This means that a pattern
+that compiles today may not in a future Perl release.  This warning is
+to alert you to that risk.
+
+=item *
+
+L<Warning: unable to close filehandle %s properly: %s|perldiag/"Warning: unable to close filehandle %s properly: %s">
+
+=item *
+
+L<Wide character (U+%X) in %s|perldiag/"Wide character (U+%X) in %s">
+
+(W locale) While in a single-byte locale (I<i.e.>, a non-UTF-8
+one), a multi-byte character was encountered.   Perl considers this
+character to be the specified Unicode code point.  Combining non-UTF8
+locales and Unicode is dangerous.  Almost certainly some characters
+will have two different representations.  For example, in the ISO 8859-7
+(Greek) locale, the code point 0xC3 represents a Capital Gamma.  But so
+also does 0x393.  This will make string comparisons unreliable.
+
+You likely need to figure out how this multi-byte character got mixed up
+with your single-byte locale (or perhaps you thought you had a UTF-8
+locale, but Perl disagrees).
+
+=item *
+
+The following two warnings for C<tr///> used to be skipped if the
+transliteration contained wide characters, but now they occur regardless of
+whether there are wide characters or not:
+
+L<Useless use of E<sol>d modifier in transliteration operator|perldiag/"Useless use of /d modifier in transliteration operator">
+
+L<Replacement list is longer than search list|perldiag/Replacement list is longer than search list>
 
 =item *
 
@@ -1362,169 +1491,6 @@ L<Locale '%s' may not work well.%s|perldiag/Locale '%s' may not work well.%s>
 L<Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".|perldiag/Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".>
 
 =back
-
-=item *
-
-L<Warning: unable to close filehandle %s properly: %s|perldiag/"Warning: unable to close filehandle %s properly: %s">
-
-=item *
-
-The following two warnings for C<tr///> used to be skipped if the
-transliteration contained wide characters, but now they occur regardless of
-whether there are wide characters or not:
-
-L<Useless use of E<sol>d modifier in transliteration operator|perldiag/"Useless use of /d modifier in transliteration operator">
-
-L<Replacement list is longer than search list|perldiag/Replacement list is longer than search list>
-
-=item *
-
-L<Character in 'C' format overflow in pack|perldiag/"Character in 'C' format overflow in pack">
-
-(W pack) You tried converting an infinity or not-a-number to an unsigned
-character, which makes no sense.  Perl behaved as if you tried to pack 0xFF.
-
-=item *
-
-L<Character in 'c' format overflow in pack|perldiag/"Character in 'c' format overflow in pack">
-
-(W pack) You tried converting an infinity or not-a-number to a signed
-character, which makes no sense.  Perl behaved as if you tried to pack 0xFF.
-
-=item *
-
-L<Invalid number (%f) in chr|perldiag/"Invalid number (%f) in chr">
-
-(W utf8) You passed an invalid number (like an infinity or not-a-number) to
-C<chr>.  Those are not valid character numbers, so it returned the Unicode
-replacement character (U+FFFD).
-
-=item *
-
-L<Hexadecimal float: exponent overflow|perldiag/"Hexadecimal float: exponent overflow">
-
-(W overflow) The hexadecimal floating point has larger exponent
-than the floating point supports.
-
-=item *
-
-L<Hexadecimal float: exponent underflow|perldiag/"Hexadecimal float: exponent underflow">
-
-(W overflow) The hexadecimal floating point has smaller exponent
-than the floating point supports.
-
-=item *
-
-L<Hexadecimal float: mantissa overflow|perldiag/"Hexadecimal float: mantissa overflow">
-
-(W overflow) The hexadecimal floating point literal had more bits in
-the mantissa (the part between the 0x and the exponent, also known as
-the fraction or the significand) than the floating point supports.
-
-=item *
-
-L<Hexadecimal float: precision loss|perldiag/"Hexadecimal float: precision loss">
-
-(W overflow) The hexadecimal floating point had internally more
-digits than could be output.  This can be caused by unsupported
-long double formats, or by 64-bit integers not being available
-(needed to retrieve the digits under some configurations).
-
-=item *
-
-L<Unescaped left brace in regex is deprecated, passed through in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is deprecated, passed through in regex; marked by <-- HERE in m/%s/">
-
-(D deprecated, regexp) You used a literal C<"{"> character in a regular
-expression pattern. You should change to use C<"\{"> instead, because a future
-version of Perl (tentatively v5.26) will consider this to be a syntax error.  If
-the pattern delimiters are also braces, any matching right brace
-(C<"}">) should also be escaped to avoid confusing the parser, for
-example,
-
-    qr{abc\{def\}ghi}
-
-=item *
-
-L<NO-BREAK SPACE in a charnames alias definition is deprecated|perldiag/"NO-BREAK SPACE in a charnames alias definition is deprecated">
-
-(D deprecated) You defined a character name which contained a no-break
-space character.  Change it to a regular space.  Usually these names are
-defined in the C<:alias> import argument to C<use charnames>, but they
-could be defined by a translator installed into C<$^H{charnames}>.  See
-L<charnames/CUSTOM ALIASES>.
-
-=item *
-
-L<PerlIO layer ':win32' is experimental|perldiag/"PerlIO layer ':win32' is experimental">
-
-(S experimental::win32_perlio) The C<:win32> PerlIO layer is
-experimental.  If you want to take the risk of using this layer,
-simply disable this warning:
-
-    no warnings "experimental::win32_perlio";
-
-=item *
-
-L<Negative repeat count does nothing|perldiag/"Negative repeat count does nothing">
-
-(W numeric) You tried to execute the
-L<C<x>|perlop/Multiplicative Operators> repetition operator fewer than 0
-times, which doesn't make sense.
-
-=item *
-
-L<localtime(%f) failed|perldiag/"localtime(%f) failed">
-
-(W overflow) You called C<localtime> with a number that it could not handle:
-too large, too small, or NaN.  The returned value is C<undef>.
-
-=item *
-
-L<gmtime(%f) failed|perldiag/"gmtime(%f) failed">
-
-(W overflow) You called C<gmtime> with a number that it could not handle:
-too large, too small, or NaN.  The returned value is C<undef>.
-
-=item *
-
-L<PerlIO layer ':win32' is experimental|perldiag/"PerlIO layer ':win32' is experimental">:
-
-(S experimental::win32_perlio) The C<:win32> PerlIO layer is
-experimental.  If you want to take the risk of using this layer,
-simply disable this warning:
-
-    no warnings "experimental::win32_perlio";
-
-=item *
-
-L<Negative repeat count does nothing|perldiag/"Negative repeat count does nothing">
-
-(W numeric)  This warns when the repeat count of the
-L<C<x>|perlop/Multiplicative Operators> repetition operator is
-negative.
-
-This warning may be changed or removed if it turn out that it was
-unwise to have added it.
-
-=item *
-
-L<Argument "%s" treated as 0 in increment (++)|perldiag/"Argument "%s" treated
-as 0 in increment (++)">
-
-(W numeric) The indicated string was fed as an argument to the C<++> operator
-which expects either a number or a string matching C</^[a-zA-Z]*[0-9]*\z/>.
-See L<perlop/Auto-increment and Auto-decrement> for details.
-
-=item *
-
-L<Redundant argument in %s|perldiag/Redundant argument in %s>
-
-(W redundant) You called a function with more arguments than other
-arguments you supplied indicated would be needed. Currently only
-emitted when a printf-type format required fewer arguments than were
-supplied, but might be used in the future for e.g. L<perlfunc/pack>.
-
-The warnings category C<< redundant >> is new. See also [RT #121025]
 
 =back
 
