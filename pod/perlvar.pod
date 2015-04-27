@@ -433,6 +433,8 @@ Previously, only child processes received stringified values:
 This happens because you can't really share arbitrary data structures with
 foreign processes.
 
+=item $OLD_PERL_VERSION
+
 =item $]
 X<$]>
 
