@@ -433,6 +433,38 @@ Previously, only child processes received stringified values:
 This happens because you can't really share arbitrary data structures with
 foreign processes.
 
+=item $]
+X<$]>
+
+The revision, version, and subversion of the Perl interpreter, represented
+as a decimal of the form 5.XXXYYY, where XXX is the version / 1e3 and YYY
+is the subversion / 1e6.  For example, Perl v5.10.1 would be "5.010001".
+
+This variable can be used to determine whether the Perl interpreter
+executing a script is in the right range of versions:
+
+    warn "No PerlIO!\n" if $] lt '5.008';
+
+When comparing C<$]>, string comparison operators are B<highly
+recommended>.  The inherent limitations of binary floating point
+representation can sometimes lead to incorrect comparisons for some
+numbers on some architectures.
+
+See also the documentation of C<use VERSION> and C<require VERSION>
+for a convenient way to fail if the running Perl interpreter is too old.
+
+See L</$^V> for a representation of the Perl version as a L<version>
+object, which allows more flexible string comparisons.
+
+The main advantage of C<$]> over C<$^V> is that it works the same on any
+version of Perl.  The disadvantages are that it can't easily be compared
+to versions in other formats (e.g. literal v-strings, "v1.2.3" or
+version objects) and numeric comparisons can occasionally fail; it's good
+for string literal version checks and bad for comparing to a variable
+that hasn't been sanity-checked.
+
+Mnemonic: Is this version of perl in the right bracket?
+
 =item $SYSTEM_FD_MAX
 
 =item $^F
@@ -2274,38 +2306,6 @@ other value will produce an error.
 Mnemonic: [ begins subscripts.
 
 Deprecated in Perl v5.12.0.
-
-=item $]
-X<$]>
-
-The revision, version, and subversion of the Perl interpreter, represented
-as a decimal of the form 5.XXXYYY, where XXX is the version / 1e3 and YYY
-is the subversion / 1e6.  For example, Perl v5.10.1 would be "5.010001".
-
-This variable can be used to determine whether the Perl interpreter
-executing a script is in the right range of versions:
-
-    warn "No PerlIO!\n" if $] lt '5.008';
-
-When comparing C<$]>, string comparison operators are B<highly
-recommended>.  The inherent limitations of binary floating point
-representation can sometimes lead to incorrect comparisons for some
-numbers on some architectures.
-
-See also the documentation of C<use VERSION> and C<require VERSION>
-for a convenient way to fail if the running Perl interpreter is too old.
-
-See L</$^V> for a representation of the Perl version as a L<version>
-object, which allows more flexible string comparisons.
-
-The main advantage of C<$]> over C<$^V> is that it works the same on any
-version of Perl.  The disadvantages are that it can't easily be compared
-to versions in other formats (e.g. literal v-strings, "v1.2.3" or
-version objects) and numeric comparisons can occasionally fail; it's good
-for string literal version checks and bad for comparing to a variable
-that hasn't been sanity-checked.
-
-Mnemonic: Is this version of perl in the right bracket?
 
 =back
 
