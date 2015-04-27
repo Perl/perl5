@@ -82,7 +82,7 @@ other unintentional behavior that backwards-compatibility issues prevent
 us from doing in normal regular expression compilations.  Because the
 behavior of this is subject to change in future Perl releases as we gain
 experience, using this pragma will raise a category
-C<experimental:re_strict> warning.
+C<experimental::re_strict> warning.
 See L<'strict' in re|re/'strict' mode>.
 
 =head2 C<qr/foo/x> now ignores any Unicode pattern white space
@@ -295,7 +295,6 @@ unrelated modules that are included in the same program.
 List slices return an empty list now only if the original list was empty
 (or if there are no indices).  Formerly, a list slice would return an empty
 list if all indices fell outside the original list.  [perl #114498]
-
 
 =head2 C<\N{}> with a sequence of multiple spaces is now a fatal error.
 
@@ -1003,7 +1002,6 @@ Updated documentation on environment and shell interaction in VMS.
 Added a discussion of locale issues in XS code.
 
 =back
-
 
 =head1 Diagnostics
 
@@ -2039,7 +2037,6 @@ thus where the parent doesn't need to be updated accordingly.
 
 =back
 
-
 =item *
 
 Macros have been created to allow XS code to better manipulate the POSIX locale
@@ -2342,7 +2339,6 @@ L<[perl #124099]|https://rt.perl.org/Ticket/Display.html?id=124099>
 UTF-8 variable names used in array indexes, unquoted UTF-8 HERE-document
 terminators and UTF-8 function names all now work correctly.
 L<[perl #124113]|https://rt.perl.org/Ticket/Display.html?id=124113>
-
 
 =item *
 
@@ -3172,12 +3168,6 @@ argument, instead of the context the current sub was called in.
 
 =head1 Known Problems
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
 =over 4
 
 =item *
@@ -3206,11 +3196,7 @@ C<pack>/C<unpack> with C<"U0"> format may not work properly.
 
 =back
 
-
 =item *
-
-XXX Check this list before the release of 5.22.0 for modules that have
-been fixed.
 
 The following modules are known to have test failures with this version of
 Perl.  Patches have been submitted, so there will hopefully be new releases
@@ -3257,11 +3243,6 @@ L<Parse::Keyword> 0.08
 =back
 
 =back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
