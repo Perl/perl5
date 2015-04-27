@@ -1017,95 +1017,10 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-L<Invalid quantifier in {,} in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Invalid quantifier in {,} in regex; marked by <-- HERE in m/%s/">
-
-(F) The pattern looks like a {min,max} quantifier, but the min or max could not
-be parsed as a valid number - either it has leading zeroes, or it represents
-too big a number to cope with.  The S<<-- HERE> shows where in the regular
-expression the problem was discovered.  See L<perlre>.
-
-=item *
-
 L<Bad symbol for scalar|perldiag/"Bad symbol for scalar">
 
 (P) An internal request asked to add a scalar entry to something that
 wasn't a symbol table entry.
-
-=item *
-
-L<:const is not permitted on named subroutines|perldiag/":const is not permitted on named subroutines">
-
-(F) The "const" attribute causes an anonymous subroutine to be run and
-its value captured at the time that it is cloned.  Names subroutines are
-not cloned like this, so the attribute does not make sense on them.
-
-=item *
-
-L<Cannot chr %f|perldiag/"Cannot chr %f">
-
-=item *
-
-L<Cannot compress %f in pack|perldiag/"Cannot compress %f in pack">
-
-=item *
-
-L<Cannot pack %f with '%c'|perldiag/"Cannot pack %f with '%c'">
-
-=item *
-
-L<Cannot print %f with '%c'|perldiag/"Cannot printf %f with '%c'">
-
-=item *
-
-L<Hexadecimal float: internal error|perldiag/"Hexadecimal float: internal error">
-
-(F) Something went horribly bad in hexadecimal float handling.
-
-=item *
-
-L<Hexadecimal float: unsupported long double format|perldiag/"Hexadecimal float: unsupported long double format">
-
-(F) You have configured Perl to use long doubles but
-the internals of the long double format are unknown,
-therefore the hexadecimal float output is impossible.
-
-=item *
-
-L<In '(?...)', the '(' and '?' must be adjacent in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"In '(?...)', the '(' and '?' must be adjacent in regex; marked by <-- HERE in m/%s/">
-
-(F) The two-character sequence C<"(?"> in
-this context in a regular expression pattern should be an
-indivisible token, with nothing intervening between the C<"(">
-and the C<"?">, but you separated them.
-
-=item *
-
-L<In '(*VERB...)', the '(' and '*' must be adjacent in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"In '(*VERB...)', the '(' and '*' must be adjacent in regex; marked by <-- HERE in m/%s/">
-
-(F) The two-character sequence C<"(*"> in
-this context in a regular expression pattern should be an
-indivisible token, with nothing intervening between the C<"(">
-and the C<"*">, but you separated them.
-
-=item *
-
-L<charnames alias definitions may not contain a sequence of multiple spaces|perldiag/"charnames alias definitions may not contain a sequence of multiple spaces">
-
-(F) You defined a character name which had multiple space
-characters in a row.  Change them to single spaces.  Usually these
-names are defined in the C<:alias> import argument to C<use charnames>, but
-they could be defined by a translator installed into C<$^H{charnames}>.
-See L<charnames/CUSTOM ALIASES>.
-
-=item *
-
-L<charnames alias definitions may not contain trailing white-space|perldiag/"charnames alias definitions may not contain trailing white-space">
-
-(F) You defined a character name which ended in a space
-character.  Remove the trailing space(s).  Usually these names are
-defined in the C<:alias> import argument to C<use charnames>, but they
-could be defined by a translator installed into C<$^H{charnames}>.
-See L<charnames/CUSTOM ALIASES>.
 
 =item *
 
@@ -1157,9 +1072,94 @@ it's loaded, etc.
 
 =item *
 
+L<Cannot chr %f|perldiag/"Cannot chr %f">
+
+=item *
+
+L<Cannot compress %f in pack|perldiag/"Cannot compress %f in pack">
+
+=item *
+
+L<Cannot pack %f with '%c'|perldiag/"Cannot pack %f with '%c'">
+
+=item *
+
+L<Cannot print %f with '%c'|perldiag/"Cannot printf %f with '%c'">
+
+=item *
+
+L<charnames alias definitions may not contain a sequence of multiple spaces|perldiag/"charnames alias definitions may not contain a sequence of multiple spaces">
+
+(F) You defined a character name which had multiple space
+characters in a row.  Change them to single spaces.  Usually these
+names are defined in the C<:alias> import argument to C<use charnames>, but
+they could be defined by a translator installed into C<$^H{charnames}>.
+See L<charnames/CUSTOM ALIASES>.
+
+=item *
+
+L<charnames alias definitions may not contain trailing white-space|perldiag/"charnames alias definitions may not contain trailing white-space">
+
+(F) You defined a character name which ended in a space
+character.  Remove the trailing space(s).  Usually these names are
+defined in the C<:alias> import argument to C<use charnames>, but they
+could be defined by a translator installed into C<$^H{charnames}>.
+See L<charnames/CUSTOM ALIASES>.
+
+=item *
+
+L<:const is not permitted on named subroutines|perldiag/":const is not permitted on named subroutines">
+
+(F) The "const" attribute causes an anonymous subroutine to be run and
+its value captured at the time that it is cloned.  Names subroutines are
+not cloned like this, so the attribute does not make sense on them.
+
+=item *
+
+L<Hexadecimal float: internal error|perldiag/"Hexadecimal float: internal error">
+
+(F) Something went horribly bad in hexadecimal float handling.
+
+=item *
+
+L<Hexadecimal float: unsupported long double format|perldiag/"Hexadecimal float: unsupported long double format">
+
+(F) You have configured Perl to use long doubles but
+the internals of the long double format are unknown,
+therefore the hexadecimal float output is impossible.
+
+=item *
+
 L<Illegal suidscript|perldiag/"Illegal suidscript">
 
 (F) The script run under suidperl was somehow illegal.
+
+=item *
+
+L<In '(?...)', the '(' and '?' must be adjacent in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"In '(?...)', the '(' and '?' must be adjacent in regex; marked by <-- HERE in m/%s/">
+
+(F) The two-character sequence C<"(?"> in
+this context in a regular expression pattern should be an
+indivisible token, with nothing intervening between the C<"(">
+and the C<"?">, but you separated them.
+
+=item *
+
+L<In '(*VERB...)', the '(' and '*' must be adjacent in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"In '(*VERB...)', the '(' and '*' must be adjacent in regex; marked by <-- HERE in m/%s/">
+
+(F) The two-character sequence C<"(*"> in
+this context in a regular expression pattern should be an
+indivisible token, with nothing intervening between the C<"(">
+and the C<"*">, but you separated them.
+
+=item *
+
+L<Invalid quantifier in {,} in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Invalid quantifier in {,} in regex; marked by <-- HERE in m/%s/">
+
+(F) The pattern looks like a {min,max} quantifier, but the min or max could not
+be parsed as a valid number - either it has leading zeroes, or it represents
+too big a number to cope with.  The S<<-- HERE> shows where in the regular
+expression the problem was discovered.  See L<perlre>.
 
 =back
 
