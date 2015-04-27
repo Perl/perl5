@@ -1500,8 +1500,11 @@ L<Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".|perldiag/Can't do %s(
 
 =item *
 
-B<Unusual use of %s in void context> has been removed. It might
-come back in a future release.
+<> should be quotes
+
+This warning has been changed to
+L<< <> at require-statement should be quotes|perldiag/"<> at require-statement should be quotes" >>
+to make the issue more identifiable.
 
 =item *
 
@@ -1515,26 +1518,16 @@ now adds the following note:
 
 =item *
 
-B<Possible precedence problem on bitwise %c operator> reworded as
-L<Possible precedence problem on bitwise %s operator|perldiag/"Possible precedence problem on bitwise %s operator">.
-
-=item *
-
-'"my" variable &foo::bar can't be in a package' has been reworded to say
-'subroutine' instead of 'variable'.
-
-=item *
-
-"Variable %s will not stay shared" has been changed to say "Subroutine"
-when it is actually a lexical sub that will not stay shared.
-
-=item *
-
 L<Global symbol "%s" requires explicit package name|perldiag/"Global symbol "%s" requires explicit package name (did you forget to declare "my %s"?)">
 
 This message has had '(did you forget to declare "my %s"?)' appended to it, to
 make it more helpful to new Perl programmers.
 L<[perl #121638]|https://rt.perl.org/Ticket/Display.html?id=121638>
+
+=item *
+
+'"my" variable &foo::bar can't be in a package' has been reworded to say
+'subroutine' instead of 'variable'.
 
 =item *
 
@@ -1553,25 +1546,16 @@ point number is.
 
 =item *
 
+B<Possible precedence problem on bitwise %c operator> reworded as
+L<Possible precedence problem on bitwise %s operator|perldiag/"Possible precedence problem on bitwise %s operator">.
+
+=item *
+
 C<require> with no argument or undef used to warn about a Null filename; now
 it dies with C<Missing or undefined argument to require>.
 
 =item *
 
-L<Variable length lookbehind not implemented in regex mE<sol>%sE<sol>|perldiag/"Variable length lookbehind not implemented in regex m/%s/">
-
-Information about Unicode behaviour has been added.
-
-=item *
-
-<> should be quotes
-
-This warning has been changed to
-L<< <> at require-statement should be quotes|perldiag/"<> at require-statement should be quotes" >>
-to make the issue more identifiable.
-
-=item *
-
 L<Unsuccessful %s on filename containing newline|perldiag/"Unsuccessful %s on filename containing newline">
 
 This warning is now only produced when the newline is at the end of
@@ -1579,24 +1563,14 @@ the filename.
 
 =item *
 
+"Variable %s will not stay shared" has been changed to say "Subroutine"
+when it is actually a lexical sub that will not stay shared.
+
+=item *
+
 L<Variable length lookbehind not implemented in regex mE<sol>%sE<sol>|perldiag/"Variable length lookbehind not implemented in regex m/%s/">
 
 Information about Unicode behaviour has been added.
-
-=item *
-
-<> should be quotes
-
-This warning has been changed to
-L<< <> at require-statement should be quotes|perldiag/"<> at require-statement should be quotes" >>
-to make the issue more identifiable.
-
-=item *
-
-L<Unsuccessful %s on filename containing newline|perldiag/"Unsuccessful %s on filename containing newline">
-
-This warning is now only produced when the newline is at the end of
-the filename.
 
 =back
 
@@ -1606,19 +1580,19 @@ the filename.
 
 =item *
 
+"Ambiguous use of -foo resolved as -&foo()"
+
+There is actually no ambiguity here, and this impedes the use of negated
+constants; e.g., C<-Inf>.
+
+=item *
+
 "Constant is not a FOO reference"
 
 Compile-time checking of constant dereferencing (e.g., C<< my_constant->() >>)
 has been removed, since it was not taking overloading into account.
 L<[perl #69456]|https://rt.perl.org/Ticket/Display.html?id=69456>
 L<[perl #122607]|https://rt.perl.org/Ticket/Display.html?id=122607>
-
-=item *
-
-"Ambiguous use of -foo resolved as -&foo()"
-
-There is actually no ambiguity here, and this impedes the use of negated
-constants; e.g., C<-Inf>.
 
 =back
 
