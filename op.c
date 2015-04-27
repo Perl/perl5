@@ -1325,10 +1325,19 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
         if (!parent)
             goto no_parent;
 
+        /* ought to use OP_CLASS(parent) here, but that can't handle
+         * ex-foo OP_NULL ops. Also note that XopENTRYCUSTOM() can't
+         * either */
         type = parent->op_type;
-        if (type == OP_NULL)
-            type = parent->op_targ;
-        type = PL_opargs[type] & OA_CLASS_MASK;
+        if (type == OP_CUSTOM) {
+            dTHX;
+            type = XopENTRYCUSTOM(parent, xop_class);
+        }
+        else {
+            if (type == OP_NULL)
+                type = parent->op_targ;
+            type = PL_opargs[type] & OA_CLASS_MASK;
+        }
 
         lastop = last_ins ? last_ins : start ? start : NULL;
         if (   type == OA_BINOP
