@@ -7320,7 +7320,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          * flags appropriately - Yves */
         regnode *first = ri->program + 1;
         U8 fop = OP(first);
-        regnode *next = NEXTOPER(first);
+        regnode *next = regnext(first);
         U8 nop = OP(next);
 
         if (PL_regkind[fop] == NOTHING && nop == END)
@@ -7334,13 +7334,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             r->extflags |= RXf_START_ONLY;
         else if (fop == PLUS
                  && PL_regkind[nop] == POSIXD && FLAGS(next) == _CC_SPACE
-                 && OP(regnext(first)) == END)
+                 && nop == END)
             r->extflags |= RXf_WHITE;
         else if ( r->extflags & RXf_SPLIT
                   && (fop == EXACT || fop == EXACTL)
                   && STR_LEN(first) == 1
                   && *(STRING(first)) == ' '
-                  && OP(regnext(first)) == END )
+                  && nop == END )
             r->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
 
     }
