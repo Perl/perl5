@@ -436,7 +436,7 @@ foreign processes.
 =item $OLD_PERL_VERSION
 
 =item $]
-X<$]>
+X<$]> X<$OLD_PERL_VERSION>
 
 The revision, version, and subversion of the Perl interpreter, represented
 as a decimal of the form 5.XXXYYY, where XXX is the version / 1e3 and YYY
