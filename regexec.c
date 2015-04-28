@@ -5623,11 +5623,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 switch((bound_type) FLAGS(scan)) {
                     case TRADITIONAL_BOUND:
                         ln = (locinput == reginfo->strbeg)
-                             ? isWORDCHAR_L1('\n')
+                             ? 0 /* isWORDCHAR_L1('\n') */
                              : isWORDCHAR_utf8(reghop3((U8*)locinput, -1,
                                                                 (U8*)(reginfo->strbeg)));
                         n = (NEXTCHR_IS_EOS)
-                            ? isWORDCHAR_L1('\n')
+                            ? 0 /* isWORDCHAR_L1('\n') */
                             : isWORDCHAR_utf8((U8*)locinput);
                         match = cBOOL(ln != n);
                         break;
@@ -5693,10 +5693,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 switch((bound_type) FLAGS(scan)) {
                     case TRADITIONAL_BOUND:
                         ln = (locinput == reginfo->strbeg)
-                            ? isWORDCHAR_L1('\n')
+                            ? 0 /* isWORDCHAR_L1('\n') */
                             : isWORDCHAR_L1(UCHARAT(locinput - 1));
                         n = (NEXTCHR_IS_EOS)
-                            ? isWORDCHAR_L1('\n')
+                            ? 0 /* isWORDCHAR_L1('\n') */
                             : isWORDCHAR_L1(nextchr);
                         match = cBOOL(ln != n);
                         break;
