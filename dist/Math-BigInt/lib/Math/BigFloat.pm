@@ -3528,7 +3528,11 @@ sub bceil
     $x->{_m} = $MBI->_rsft($x->{_m},$x->{_e},10); # cut off digits after dot
     $x->{_e} = $MBI->_zero();			# trunc/norm	
     $x->{_es} = '+';				# abs e
-    $MBI->_inc($x->{_m}) if $x->{sign} eq '+';	# increment if positive
+    if ($x->{sign} eq '+') {
+        $MBI->_inc($x->{_m});                   # increment if positive
+    } else {
+        $x->{sign} = '+' if $MBI->_is_zero($x->{_m});   # avoid -0
+    }
     }
   $x->round($a,$p,$r);
   }
@@ -3547,6 +3551,7 @@ sub bint
     $x->{_m} = $MBI->_rsft($x->{_m},$x->{_e},10); # cut off digits after dot
     $x->{_e} = $MBI->_zero();                     # truncate/normalize
     $x->{_es} = '+';                              # abs e
+    $x->{sign} = '+' if $MBI->_is_zero($x->{_m}); # avoid -0
     }
   $x->round($a,$p,$r);
   }
