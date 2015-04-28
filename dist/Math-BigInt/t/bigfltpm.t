@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 2336
+use Test::More tests => 2340
     + 5;		# own tests
 
 
