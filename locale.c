@@ -759,7 +759,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif /* !LOCALE_ENVIRON_REQUIRED */
 
     /* We try each locale in the list until we get one that works, or exhaust
-     * the list */
+     * the list.  Normally the loop is executed just once.  But if setting the
+     * locale fails, inside the loop we add fallback trials to the array and so
+     * will execute the loop multiple times */
     trial_locales[0] = setlocale_init;
     trial_locales_count = 1;
     for (i= 0; i < trial_locales_count; i++) {
@@ -868,18 +870,18 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
                 PerlIO_printf(Perl_error_log,
                 "perl: warning: Setting locale failed for the categories:\n\t");
-#ifdef USE_LOCALE_CTYPE
+#  ifdef USE_LOCALE_CTYPE
                 if (! curctype)
                     PerlIO_printf(Perl_error_log, "LC_CTYPE ");
-#endif /* USE_LOCALE_CTYPE */
-#ifdef USE_LOCALE_COLLATE
+#  endif /* USE_LOCALE_CTYPE */
+#  ifdef USE_LOCALE_COLLATE
                 if (! curcoll)
                     PerlIO_printf(Perl_error_log, "LC_COLLATE ");
-#endif /* USE_LOCALE_COLLATE */
-#ifdef USE_LOCALE_NUMERIC
+#  endif /* USE_LOCALE_COLLATE */
+#  ifdef USE_LOCALE_NUMERIC
                 if (! curnum)
                     PerlIO_printf(Perl_error_log, "LC_NUMERIC ");
-#endif /* USE_LOCALE_NUMERIC */
+#  endif /* USE_LOCALE_NUMERIC */
                 PerlIO_printf(Perl_error_log, "and possibly others\n");
 
 #endif /* LC_ALL */
