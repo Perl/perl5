@@ -10,17 +10,14 @@ plan(skip_all => "POSIX is unavailable")
 require POSIX;
 POSIX->import();
 
-require($ENV{PERL_CORE} ? "../../t/charset_tools.pl" : "../t/charset_tools.pl");
-
-sub ascii_order {   # Sort helper
-    return native_to_uni($a) cmp native_to_uni($b);
-}
-
 # @POSIX::EXPORT and @POSIX::EXPORT_OK are generated. The intent of this test is
 # to catch *unintended* changes to them introduced by bugs in refactoring.
 
+# N.B. the data must be sorted at runtime even though it appears sorted here
+# because it is given in ASCII order and we might be on a non-ASCII platform
 my %expect = (
-    EXPORT => [qw(%SIGRT ARG_MAX B0 B110 B1200 B134 B150 B1800 B19200 B200
+    EXPORT => [sort qw(
+		  %SIGRT ARG_MAX B0 B110 B1200 B134 B150 B1800 B19200 B200
 		  B2400 B300 B38400 B4800 B50 B600 B75 B9600 BRKINT BUFSIZ
 		  CHAR_BIT CHAR_MAX CHAR_MIN CHILD_MAX CLK_TCK CLOCAL
 		  CLOCKS_PER_SEC CREAD CS5 CS6 CS7 CS8 CSIZE CSTOPB DBL_DIG
@@ -130,14 +127,16 @@ my %expect = (
 		  tcsetpgrp tgamma tmpfile tmpnam tolower toupper
 		  trunc ttyname tzname tzset uname ungetc vfprintf
 		  vprintf vsprintf wcstombs wctomb y0 y1 yn )],
-		  EXPORT_OK => [qw(abs alarm atan2 chdir chmod chown
+    EXPORT_OK => [sort qw(
+		  abs alarm atan2 chdir chmod chown
 		  close closedir cos exit exp fcntl fileno fork getc
 		  getgrgid getgrnam getlogin getpgrp getppid getpwnam
 		  getpwuid gmtime kill lchown link localtime log mkdir
 		  nice open opendir pipe printf rand read readdir
 		  rename rewinddir rmdir sin sleep sprintf sqrt srand
 		  stat system time times umask unlink utime wait
-		  waitpid write)], );
+		  waitpid write)],
+);
 
 plan (tests => 2 * keys %expect);
 
@@ -145,5 +144,5 @@ while (my ($var, $expect) = each %expect) {
     my $have = *{$POSIX::{$var}}{ARRAY};
     cmp_ok(@$have, '==', @$expect,
 	   "Correct number of entries for \@POSIX::$var");
-    is_deeply([sort ascii_order @$have], $expect, "Correct entries for \@POSIX::$var");
+    is_deeply([sort @$have], $expect, "Correct entries for \@POSIX::$var");
 }
