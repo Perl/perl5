@@ -1188,9 +1188,6 @@ can fit in a 64-bit word.  However, Perl will warn if you output any of
 these as being non-portable; and under strict UTF-8 input protocols,
 they are forbidden.
 
-The Unicode non-character code points are also disallowed in UTF-8 in
-"open interchange".  See L</Non-character code points>.
-
 =item *
 
 UTF-EBCDIC
@@ -1288,25 +1285,76 @@ transport or storage is not eight-bit safe.  Defined by RFC 2152.
 
 =back
 
-=head2 Non-character code points
+=head2 Noncharacter code points
 
-66 code points are set aside in Unicode as "non-character code points".
+66 code points are set aside in Unicode as "noncharacter code points".
 These all have the C<Unassigned> (C<Cn>) C<L</General_Category>>, and
-they never will
-be assigned.  These are never supposed to be in legal Unicode input
-streams, so that code can use them as sentinels that can be mixed in
-with character data, and they always will be distinguishable from that data.
-To keep them out of Perl input streams, strict UTF-8 should be
-specified, such as by using the layer C<:encoding('UTF-8')>.  The
-non-character code points are the 32 between C<U+FDD0> and C<U+FDEF>, and the
-34 code points C<U+FFFE>, C<U+FFFF>, C<U+1FFFE>, C<U+1FFFF>, ... C<U+10FFFE>, C<U+10FFFF>.
-Some people are under the mistaken impression that these are "illegal",
-but that is not true.  An application or cooperating set of applications
-can legally use them at will internally; but these code points are
-"illegal for open interchange".  Therefore, Perl will not accept these
-from input streams unless lax rules are being used, and will warn
-(using the warning category C<"nonchar">, which is a sub-category of C<"utf8">) if
-an attempt is made to output them.
+no character will ever be assigned to any of them.  They are the 32 code
+points between C<U+FDD0> and C<U+FDEF> inclusive, and the 34 code
+points:
+
+ U+FFFE   U+FFFF
+ U+1FFFE  U+1FFFF
+ U+2FFFE  U+2FFFF
+ ...
+ U+EFFFE  U+EFFFF
+ U+FFFFE  U+FFFFF
+ U+10FFFE U+10FFFF
+
+Until Unicode 7.0, the noncharacters were "B<forbidden> for use in open
+interchange of Unicode text data", so that code that processed those
+streams could use these code points as sentinels that could be mixed in
+with character data, and would always be distinguishable from that data.
+(Emphasis above and in the next paragraph are added in this document.)
+
+Unicode 7.0 changed the wording so that they are "B<not recommended> for
+use in open interchange of Unicode text data".  The 7.0 Standard goes on
+to say:
+
+=over 4
+
+"If a noncharacter is received in open interchange, an application is
+not required to interpret it in any way.  It is good practice, however,
+to recognize it as a noncharacter and to take appropriate action, such
+as replacing it with C<U+FFFD> replacement character, to indicate the
+problem in the text.  It is not recommended to simply delete
+noncharacter code points from such text, because of the potential
+security issues caused by deleting uninterpreted characters.  (See
+conformance clause C7 in Section 3.2, Conformance Requirements, and
+L<Unicode Technical Report #36, "Unicode Security
+Considerations"|http://www.unicode.org/reports/tr36/#Substituting_for_Ill_Formed_Subsequences>)."
+
+=back
+
+This change was made because it was found that various commercial tools
+like editors, or for things like source code control, had been written
+so that they would not handle program files that used these code points,
+effectively precluding their use almost entirely!  And that was never
+the intent.  They've always been meant to be usable within an
+application, or cooperating set of applications, at will.
+
+If you're writing code, such as an editor, that is supposed to be able
+to handle any Unicode text data, then you shouldn't be using these code
+points yourself, and instead allow them in the input.  If you need
+sentinels, they should instead be something that isn't legal Unicode.
+For UTF-8 data, you can use the bytes 0xC1 and 0xC2 as sentinels, as
+they never appear in well-formed UTF-8.  (There are equivalents for
+UTF-EBCDIC).  You can also store your Unicode code points in integer
+variables and use negative values as sentinels.
+
+If you're not writing such a tool, then whether you accept noncharacters
+as input is up to you (though the Standard recommends that you not).  If
+you do strict input stream checking with Perl, these code points
+continue to be forbidden.  This is to maintain backward compatibility
+(otherwise potential security holes could open up, as an unsuspecting
+application that was written assuming the noncharacters would be
+filtered out before getting to it, could now, without warning, start
+getting them).  To do strict checking, you can use the layer
+C<:encoding('UTF-8')>.
+
+Perl continues to warn (using the warning category C<"nonchar">, which
+is a sub-category of C<"utf8">) if an attempt is made to output
+noncharacters.
 
 =head2 Beyond Unicode code points
 
@@ -1358,7 +1406,7 @@ above-Unicode code point is being matched against.
 As a result of these problems, starting in v5.20, what Perl does is
 to treat non-Unicode code points as just typical unassigned Unicode
 characters, and matches accordingly.  (Note: Unicode has atypical
-unassigned code points.  For example, it has non-character code points,
+unassigned code points.  For example, it has noncharacter code points,
 and ones that, when they do get assigned, are destined to be written
 Right-to-left, as Arabic and Hebrew are.  Perl assumes that no
 non-Unicode code point has any atypical properties.)
