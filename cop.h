@@ -7,7 +7,7 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * Control ops (cops) are one of the two ops OP_NEXTSTATE and OP_DBSTATE,
- * that (loosely speaking) are separate statements.
+ * that (loosely speaking) are statement separators.
  * They hold information important for lexical state and error reporting.
  * At run time, PL_curcop is set to point to the most recently executed cop,
  * and thus can be used to determine our current state.
