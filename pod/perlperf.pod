@@ -82,7 +82,7 @@ key into a consistent string can be an efficient way to build a single string
 to compare, instead of using multiple sort keys, which makes it possible to use
 the standard, written in C<c> and fast, perl C<sort()> function on the output,
 and is the basis of the C<GRT> (Guttman Rossler Transform).  Some string
-combinations can slow the C<GRT> down, by just being too plain complex for it's
+combinations can slow the C<GRT> down, by just being too plain complex for its
 own good.
 
 For applications using database backends, the standard C<DBIx> namespace has
@@ -952,7 +952,7 @@ the first program run, this is where the Unix system C<cksum> utility comes in.
 
 BTW. Beware too of pressure from managers who see you speed a program up by 50%
 of the runtime once, only to get a request one month later to do the same again
-(true story) - you'll just have to point out your only human, even if you are a
+(true story) - you'll just have to point out you're only human, even if you are a
 Perl programmer, and you'll see what you can do...
 
 =head1 LOGGING
@@ -971,7 +971,7 @@ The problem is that this code will always be parsed and executed, even when the
 debug level set in the logging configuration file is zero.  Once the debug()
 subroutine has been entered, and the internal C<$debug> variable confirmed to
 be zero, for example, the message which has been sent in will be discarded and
-the program will continue.  In the example given though, the \%INC hash will
+the program will continue.  In the example given though, the C<\%INC> hash will
 already have been dumped, and the message string constructed, all of which work
 could be bypassed by a debug variable at the statement level, like this:
 
