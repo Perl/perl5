@@ -962,6 +962,10 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
 	Perl_croak(aTHX_ "panic: pad_findmy_pvn illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
+    /* compilation errors can zero PL_compcv */
+    if (!PL_compcv)
+        return NOT_IN_PAD;
+
     offset = pad_findlex(namepv, namelen, flags,
                 PL_compcv, PL_cop_seqmax, 1, NULL, &out_pn, &out_flags);
     if ((PADOFFSET)offset != NOT_IN_PAD) 

@@ -506,3 +506,8 @@ eval q|s##[}#e|;
  eval q|my($_);0=split|;
  eval q|my $_; @x = split|;
 }
+
+{
+ # Used to crash [perl #124187]
+ eval q|qq{@{[{}}*sub{]]}}}=u|;
+}
