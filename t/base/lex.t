@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..102\n";
+print "1..103\n";
 
 $x = 'x';
 
@@ -510,4 +510,10 @@ eval q|s##[}#e|;
 {
  # Used to crash [perl #124187]
  eval q|qq{@{[{}}*sub{]]}}}=u|;
+}
+
+{
+ # Used to crash [perl #124385]
+ eval '0; qq{@{sub{]]}}}}}';
+ print "ok $test - 124385\n"; $test++;
 }

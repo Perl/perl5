@@ -500,11 +500,12 @@ finished its job, so it can forget the slab.
 void
 Perl_cv_forget_slab(pTHX_ CV *cv)
 {
-    const bool slabbed = !!CvSLABBED(cv);
+    bool slabbed;
     OPSLAB *slab = NULL;
 
-    PERL_ARGS_ASSERT_CV_FORGET_SLAB;
-
+    if (!cv)
+        return;
+    slabbed = cBOOL(CvSLABBED(cv));
     if (!slabbed) return;
 
     CvSLABBED_off(cv);

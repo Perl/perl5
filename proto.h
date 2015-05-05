@@ -818,11 +818,7 @@ PERL_CALLCONV SV*	Perl_cv_const_sv(const CV *const cv)
 PERL_CALLCONV SV*	Perl_cv_const_sv_or_av(const CV *const cv)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV void	Perl_cv_forget_slab(pTHX_ CV *cv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_CV_FORGET_SLAB	\
-	assert(cv)
-
+PERL_CALLCONV void	Perl_cv_forget_slab(pTHX_ CV *cv);
 PERL_CALLCONV void	Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
