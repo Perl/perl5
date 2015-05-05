@@ -7073,9 +7073,8 @@ int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
   else {  /* the VMS spec begins with directories */
     cp2++;
     if (*cp2 == ']' || *cp2 == '>') {
-      *(cp1++) = '.'; *(cp1++) = '/'; *(cp1++) = '\0';
-      PerlMem_free(tmp);
-      return rslt;
+      *(cp1++) = '.';
+      *(cp1++) = '/';
     }
     else if ( *cp2 != '^' && *cp2 != '.' && *cp2 != '-') { /* add the implied device */
       if (getcwd(tmp, VMS_MAXRSS-1 ,1) == NULL) {
