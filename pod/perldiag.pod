@@ -3612,8 +3612,7 @@ bracketed character class, for the same reason that C<.> in a character
 class loses its specialness: it matches almost everything, which is
 probably not what you want.
 
-=item \N{} in inverted character class or as a range end-point is restricted to one character in regex; marked
-by S<<-- HERE> in m/%s/
+=item \N{} in inverted character class or as a range end-point is restricted to one character in regex; marked by <-- HERE in m/%s/
 
 (F) Named Unicode character escapes (C<\N{...}>) may return a
 multi-character sequence.  Even though a character class is
