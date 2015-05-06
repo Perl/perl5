@@ -11417,11 +11417,12 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    case '&':
 		proto++;
 		arg++;
-		if (o3->op_type != OP_SREFGEN
-		 || (  cUNOPx(cUNOPx(o3)->op_first)->op_first->op_type
-			!= OP_ANONCODE
-		    && cUNOPx(cUNOPx(o3)->op_first)->op_first->op_type
-			!= OP_RV2CV))
+		if (    o3->op_type != OP_UNDEF
+                    && (o3->op_type != OP_SREFGEN
+                        || (  cUNOPx(cUNOPx(o3)->op_first)->op_first->op_type
+                                != OP_ANONCODE
+                            && cUNOPx(cUNOPx(o3)->op_first)->op_first->op_type
+                                != OP_RV2CV)))
 		    bad_type_gv(arg, namegv, o3,
 			    arg == 1 ? "block or sub {}" : "sub {}");
 		break;

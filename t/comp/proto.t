@@ -278,6 +278,7 @@ testing \&a_sub, '&';
 
 sub a_sub (&) {
     print "# \@_ = (",join(",",@_),")\n";
+    return unless defined $_[0];
     &{$_[0]};
 }
 
@@ -304,7 +305,7 @@ eval 'a_sub \($list, %of, @refs)';
 print "not " unless $@ =~ /Type of arg/;
 printf "ok %d\n",$i++;
 eval 'a_sub undef';
-print "not " unless $@ =~ /Type of arg/;
+print "not " if $@;
 printf "ok %d\n",$i++;
 
 ##
