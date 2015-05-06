@@ -25,8 +25,9 @@ C<W>) is the scalar variable whose name is the single character
 control-C<W>.  This is better than typing a literal control-C<W>
 into your program.
 
-Since Perl v5.6.0, Perl variable names may be alphanumeric
-strings that begin with control characters (or better yet, a caret).
+Since Perl v5.6.0, Perl variable names may be alphanumeric strings that
+begin with a caret (or a control character, but this form is
+deprecated).
 These variables must be written in the form C<${^Foo}>; the braces
 are not optional.  C<${^Foo}> denotes the scalar variable whose
 name is a control-C<F> followed by two C<o>'s.  These variables are
