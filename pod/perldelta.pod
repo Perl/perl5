@@ -1074,17 +1074,29 @@ it's loaded, etc.
 
 L<Cannot chr %f|perldiag/"Cannot chr %f">
 
+(F) You passed an invalid number (like an infinity or not-a-number) to
+C<chr>.
+
 =item *
 
 L<Cannot compress %f in pack|perldiag/"Cannot compress %f in pack">
+
+(F) You tried converting an infinity or not-a-number to an unsigned
+character, which makes no sense.
 
 =item *
 
 L<Cannot pack %f with '%c'|perldiag/"Cannot pack %f with '%c'">
 
+(F) You tried converting an infinity or not-a-number to a character,
+which makes no sense.
+
 =item *
 
 L<Cannot print %f with '%c'|perldiag/"Cannot printf %f with '%c'">
+
+(F) You tried printing an infinity or not-a-number as a character (%c),
+which makes no sense.  Maybe you meant '%s', or just stringifying it?
 
 =item *
 
@@ -1213,20 +1225,6 @@ the warning gets raised.
 
 =item *
 
-L<Character in 'C' format overflow in pack|perldiag/"Character in 'C' format overflow in pack">
-
-(W pack) You tried converting an infinity or not-a-number to an unsigned
-character, which makes no sense.  Perl behaved as if you tried to pack 0xFF.
-
-=item *
-
-L<Character in 'c' format overflow in pack|perldiag/"Character in 'c' format overflow in pack">
-
-(W pack) You tried converting an infinity or not-a-number to a signed
-character, which makes no sense.  Perl behaved as if you tried to pack 0xFF.
-
-=item *
-
 L<:const is experimental|perldiag/":const is experimental">
 
 (S experimental::const_attr) The "const" attribute is experimental.
@@ -1271,12 +1269,6 @@ L<Hexadecimal float: precision loss|perldiag/"Hexadecimal float: precision loss"
 digits than could be output.  This can be caused by unsupported
 long double formats, or by 64-bit integers not being available
 (needed to retrieve the digits under some configurations).
-
-L<Invalid number (%f) in chr|perldiag/"Invalid number (%f) in chr">
-
-(W utf8) You passed an invalid number (like an infinity or not-a-number) to
-C<chr>.  Those are not valid character numbers, so it returned the Unicode
-replacement character (U+FFFD).
 
 =item *
 
