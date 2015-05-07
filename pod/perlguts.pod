@@ -2800,6 +2800,12 @@ characters, and the one Perl uses is called UTF-8.  UTF-8 uses
 a variable number of bytes to represent a character.  You can learn more
 about Unicode and Perl's Unicode model in L<perlunicode>.
 
+(On EBCDIC platforms, Perl uses instead UTF-EBCDIC, which is a form of
+UTF-8 adapted for EBCDIC platforms.  Below, we just talk about UTF-8.
+UTF-EBCDIC is like UTF-8, but the details are different.  The macros
+hide the differences from you, just remember that the particular numbers
+and bit patterns presented below will differ in UTF-EBCDIC.)
+
 =head2 How can I recognise a UTF-8 string?
 
 You can't.  This is because UTF-8 data is stored in bytes just like
