@@ -107,23 +107,23 @@ Perl_cast_uv(NV f)
 
 converts a string representing a binary number to numeric form.
 
-On entry I<start> and I<*len> give the string to scan, I<*flags> gives
-conversion flags, and I<result> should be NULL or a pointer to an NV.
+On entry C<start> and C<*len> give the string to scan, C<*flags> gives
+conversion flags, and C<result> should be NULL or a pointer to an NV.
 The scan stops at the end of the string, or the first invalid character.
-Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in I<*flags>, encountering an
+Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>, encountering an
 invalid character will also trigger a warning.
-On return I<*len> is set to the length of the scanned string,
-and I<*flags> gives output flags.
+On return C<*len> is set to the length of the scanned string,
+and C<*flags> gives output flags.
 
 If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
-and nothing is written to I<*result>.  If the value is > UV_MAX C<grok_bin>
+and nothing is written to C<*result>.  If the value is > UV_MAX C<grok_bin>
 returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
-and writes the value to I<*result> (or the value is discarded if I<result>
+and writes the value to C<*result> (or the value is discarded if C<result>
 is NULL).
 
 The binary number may optionally be prefixed with "0b" or "b" unless
-C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry.  If
-C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the binary
+C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.  If
+C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the binary
 number may use '_' characters to separate digits.
 
 =cut
@@ -230,23 +230,23 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 
 converts a string representing a hex number to numeric form.
 
-On entry I<start> and I<*len_p> give the string to scan, I<*flags> gives
-conversion flags, and I<result> should be NULL or a pointer to an NV.
+On entry C<start> and C<*len_p> give the string to scan, C<*flags> gives
+conversion flags, and C<result> should be NULL or a pointer to an NV.
 The scan stops at the end of the string, or the first invalid character.
-Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in I<*flags>, encountering an
+Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>, encountering an
 invalid character will also trigger a warning.
-On return I<*len> is set to the length of the scanned string,
-and I<*flags> gives output flags.
+On return C<*len> is set to the length of the scanned string,
+and C<*flags> gives output flags.
 
 If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
-and nothing is written to I<*result>.  If the value is > UV_MAX C<grok_hex>
+and nothing is written to C<*result>.  If the value is > UV_MAX C<grok_hex>
 returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
-and writes the value to I<*result> (or the value is discarded if I<result>
+and writes the value to C<*result> (or the value is discarded if C<result>
 is NULL).
 
 The hex number may optionally be prefixed with "0x" or "x" unless
-C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry.  If
-C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the hex
+C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.  If
+C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the hex
 number may use '_' characters to separate digits.
 
 =cut
@@ -351,21 +351,21 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 
 converts a string representing an octal number to numeric form.
 
-On entry I<start> and I<*len> give the string to scan, I<*flags> gives
-conversion flags, and I<result> should be NULL or a pointer to an NV.
+On entry C<start> and C<*len> give the string to scan, C<*flags> gives
+conversion flags, and C<result> should be NULL or a pointer to an NV.
 The scan stops at the end of the string, or the first invalid character.
-Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in I<*flags>, encountering an
+Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>, encountering an
 8 or 9 will also trigger a warning.
-On return I<*len> is set to the length of the scanned string,
-and I<*flags> gives output flags.
+On return C<*len> is set to the length of the scanned string,
+and C<*flags> gives output flags.
 
 If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
-and nothing is written to I<*result>.  If the value is > UV_MAX C<grok_oct>
+and nothing is written to C<*result>.  If the value is > UV_MAX C<grok_oct>
 returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
-and writes the value to I<*result> (or the value is discarded if I<result>
+and writes the value to C<*result> (or the value is discarded if C<result>
 is NULL).
 
-If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the octal
+If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the octal
 number may use '_' characters to separate digits.
 
 =cut

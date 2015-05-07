@@ -154,10 +154,10 @@ typedef struct refcounted_he COPHH;
 /*
 =for apidoc Amx|SV *|cophh_fetch_pvn|const COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
 
-Look up the entry in the cop hints hash I<cophh> with the key specified by
-I<keypv> and I<keylen>.  If I<flags> has the C<COPHH_KEY_UTF8> bit set,
+Look up the entry in the cop hints hash C<cophh> with the key specified by
+C<keypv> and C<keylen>.  If C<flags> has the C<COPHH_KEY_UTF8> bit set,
 the key octets are interpreted as UTF-8, otherwise they are interpreted
-as Latin-1.  I<hash> is a precomputed hash of the key string, or zero if
+as Latin-1.  C<hash> is a precomputed hash of the key string, or zero if
 it has not been precomputed.  Returns a mortal scalar copy of the value
 associated with the key, or C<&PL_sv_placeholder> if there is no value
 associated with the key.
@@ -208,7 +208,7 @@ string/length pair.
 =for apidoc Amx|HV *|cophh_2hv|const COPHH *cophh|U32 flags
 
 Generates and returns a standard Perl hash representing the full set of
-key/value pairs in the cop hints hash I<cophh>.  I<flags> is currently
+key/value pairs in the cop hints hash C<cophh>.  C<flags> is currently
 unused and must be zero.
 
 =cut
@@ -220,7 +220,7 @@ unused and must be zero.
 /*
 =for apidoc Amx|COPHH *|cophh_copy|COPHH *cophh
 
-Make and return a complete copy of the cop hints hash I<cophh>.
+Make and return a complete copy of the cop hints hash C<cophh>.
 
 =cut
 */
@@ -230,7 +230,7 @@ Make and return a complete copy of the cop hints hash I<cophh>.
 /*
 =for apidoc Amx|void|cophh_free|COPHH *cophh
 
-Discard the cop hints hash I<cophh>, freeing all resources associated
+Discard the cop hints hash C<cophh>, freeing all resources associated
 with it.
 
 =cut
@@ -251,18 +251,18 @@ Generate and return a fresh cop hints hash containing no entries.
 /*
 =for apidoc Amx|COPHH *|cophh_store_pvn|COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|SV *value|U32 flags
 
-Stores a value, associated with a key, in the cop hints hash I<cophh>,
+Stores a value, associated with a key, in the cop hints hash C<cophh>,
 and returns the modified hash.  The returned hash pointer is in general
 not the same as the hash pointer that was passed in.  The input hash is
 consumed by the function, and the pointer to it must not be subsequently
 used.  Use L</cophh_copy> if you need both hashes.
 
-The key is specified by I<keypv> and I<keylen>.  If I<flags> has the
+The key is specified by C<keypv> and C<keylen>.  If C<flags> has the
 C<COPHH_KEY_UTF8> bit set, the key octets are interpreted as UTF-8,
-otherwise they are interpreted as Latin-1.  I<hash> is a precomputed
+otherwise they are interpreted as Latin-1.  C<hash> is a precomputed
 hash of the key string, or zero if it has not been precomputed.
 
-I<value> is the scalar value to store for this key.  I<value> is copied
+C<value> is the scalar value to store for this key.  C<value> is copied
 by this function, which thus does not take ownership of any reference
 to it, and later changes to the scalar will not be reflected in the
 value visible in the cop hints hash.  Complex types of scalar will not
@@ -313,15 +313,15 @@ string/length pair.
 /*
 =for apidoc Amx|COPHH *|cophh_delete_pvn|COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
 
-Delete a key and its associated value from the cop hints hash I<cophh>,
+Delete a key and its associated value from the cop hints hash C<cophh>,
 and returns the modified hash.  The returned hash pointer is in general
 not the same as the hash pointer that was passed in.  The input hash is
 consumed by the function, and the pointer to it must not be subsequently
 used.  Use L</cophh_copy> if you need both hashes.
 
-The key is specified by I<keypv> and I<keylen>.  If I<flags> has the
+The key is specified by C<keypv> and C<keylen>.  If C<flags> has the
 C<COPHH_KEY_UTF8> bit set, the key octets are interpreted as UTF-8,
-otherwise they are interpreted as Latin-1.  I<hash> is a precomputed
+otherwise they are interpreted as Latin-1.  C<hash> is a precomputed
 hash of the key string, or zero if it has not been precomputed.
 
 =cut
@@ -457,10 +457,10 @@ struct cop {
 /*
 =for apidoc Am|SV *|cop_hints_fetch_pvn|const COP *cop|const char *keypv|STRLEN keylen|U32 hash|U32 flags
 
-Look up the hint entry in the cop I<cop> with the key specified by
-I<keypv> and I<keylen>.  If I<flags> has the C<COPHH_KEY_UTF8> bit set,
+Look up the hint entry in the cop C<cop> with the key specified by
+C<keypv> and C<keylen>.  If C<flags> has the C<COPHH_KEY_UTF8> bit set,
 the key octets are interpreted as UTF-8, otherwise they are interpreted
-as Latin-1.  I<hash> is a precomputed hash of the key string, or zero if
+as Latin-1.  C<hash> is a precomputed hash of the key string, or zero if
 it has not been precomputed.  Returns a mortal scalar copy of the value
 associated with the key, or C<&PL_sv_placeholder> if there is no value
 associated with the key.
@@ -511,7 +511,7 @@ string/length pair.
 =for apidoc Am|HV *|cop_hints_2hv|const COP *cop|U32 flags
 
 Generates and returns a standard Perl hash representing the full set of
-hint entries in the cop I<cop>.  I<flags> is currently unused and must
+hint entries in the cop C<cop>.  C<flags> is currently unused and must
 be zero.
 
 =cut

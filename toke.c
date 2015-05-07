@@ -652,15 +652,15 @@ is made on the save stack so that upon unwinding the new state object
 will be destroyed and the former value of L</PL_parser> will be restored.
 Nothing else need be done to clean up the parsing context.
 
-The code to be parsed comes from I<line> and I<rsfp>.  I<line>, if
+The code to be parsed comes from C<line> and C<rsfp>.  C<line>, if
 non-null, provides a string (in SV form) containing code to be parsed.
-A copy of the string is made, so subsequent modification of I<line>
-does not affect parsing.  I<rsfp>, if non-null, provides an input stream
+A copy of the string is made, so subsequent modification of C<line>
+does not affect parsing.  C<rsfp>, if non-null, provides an input stream
 from which code will be read to be parsed.  If both are non-null, the
-code in I<line> comes first and must consist of complete lines of input,
-and I<rsfp> supplies the remainder of the source.
+code in C<line> comes first and must consist of complete lines of input,
+and C<rsfp> supplies the remainder of the source.
 
-The I<flags> parameter is reserved for future use.  Currently it is only
+The C<flags> parameter is reserved for future use.  Currently it is only
 used by perl internally, so extensions should always pass zero.
 
 =cut
@@ -887,7 +887,7 @@ Perl_lex_bufutf8(pTHX)
 =for apidoc Amx|char *|lex_grow_linestr|STRLEN len
 
 Reallocates the lexer buffer (L</PL_parser-E<gt>linestr>) to accommodate
-at least I<len> octets (including terminating C<NUL>).  Returns a
+at least C<len> octets (including terminating C<NUL>).  Returns a
 pointer to the reallocated buffer.  This is necessary before making
 any direct modification of the buffer that would increase its length.
 L</lex_stuff_pvn> provides a more convenient way to insert text into
@@ -948,9 +948,9 @@ It is not recommended to do this as part of normal parsing, and most
 uses of this facility run the risk of the inserted characters being
 interpreted in an unintended manner.
 
-The string to be inserted is represented by I<len> octets starting
-at I<pv>.  These octets are interpreted as either UTF-8 or Latin-1,
-according to whether the C<LEX_STUFF_UTF8> flag is set in I<flags>.
+The string to be inserted is represented by C<len> octets starting
+at C<pv>.  These octets are interpreted as either UTF-8 or Latin-1,
+according to whether the C<LEX_STUFF_UTF8> flag is set in C<flags>.
 The characters are recoded for the lexer buffer, according to how the
 buffer is currently being interpreted (L</lex_bufutf8>).  If a string
 to be inserted is available as a Perl scalar, the L</lex_stuff_sv>
@@ -1060,10 +1060,10 @@ It is not recommended to do this as part of normal parsing, and most
 uses of this facility run the risk of the inserted characters being
 interpreted in an unintended manner.
 
-The string to be inserted is represented by octets starting at I<pv>
+The string to be inserted is represented by octets starting at C<pv>
 and continuing to the first nul.  These octets are interpreted as either
 UTF-8 or Latin-1, according to whether the C<LEX_STUFF_UTF8> flag is set
-in I<flags>.  The characters are recoded for the lexer buffer, according
+in C<flags>.  The characters are recoded for the lexer buffer, according
 to how the buffer is currently being interpreted (L</lex_bufutf8>).
 If it is not convenient to nul-terminate a string to be inserted, the
 L</lex_stuff_pvn> function is more appropriate.
@@ -1089,7 +1089,7 @@ It is not recommended to do this as part of normal parsing, and most
 uses of this facility run the risk of the inserted characters being
 interpreted in an unintended manner.
 
-The string to be inserted is the string value of I<sv>.  The characters
+The string to be inserted is the string value of C<sv>.  The characters
 are recoded for the lexer buffer, according to how the buffer is currently
 being interpreted (L</lex_bufutf8>).  If a string to be inserted is
 not already a Perl scalar, the L</lex_stuff_pvn> function avoids the
@@ -1114,7 +1114,7 @@ Perl_lex_stuff_sv(pTHX_ SV *sv, U32 flags)
 =for apidoc Amx|void|lex_unstuff|char *ptr
 
 Discards text about to be lexed, from L</PL_parser-E<gt>bufptr> up to
-I<ptr>.  Text following I<ptr> will be moved, and the buffer shortened.
+C<ptr>.  Text following C<ptr> will be moved, and the buffer shortened.
 This hides the discarded text from any lexing code that runs later,
 as if the text had never appeared.
 
@@ -1148,7 +1148,7 @@ Perl_lex_unstuff(pTHX_ char *ptr)
 =for apidoc Amx|void|lex_read_to|char *ptr
 
 Consume text in the lexer buffer, from L</PL_parser-E<gt>bufptr> up
-to I<ptr>.  This advances L</PL_parser-E<gt>bufptr> to match I<ptr>,
+to C<ptr>.  This advances L</PL_parser-E<gt>bufptr> to match C<ptr>,
 performing the correct bookkeeping whenever a newline character is passed.
 This is the normal way to consume lexed text.
 
@@ -1179,8 +1179,8 @@ Perl_lex_read_to(pTHX_ char *ptr)
 =for apidoc Amx|void|lex_discard_to|char *ptr
 
 Discards the first part of the L</PL_parser-E<gt>linestr> buffer,
-up to I<ptr>.  The remaining content of the buffer will be moved, and
-all pointers into the buffer updated appropriately.  I<ptr> must not
+up to C<ptr>.  The remaining content of the buffer will be moved, and
+all pointers into the buffer updated appropriately.  C<ptr> must not
 be later in the buffer than the position of L</PL_parser-E<gt>bufptr>:
 it is not permitted to discard text that has yet to be lexed.
 
@@ -1241,7 +1241,7 @@ the current chunk at this time.
 If L</PL_parser-E<gt>bufptr> is pointing to the very end of the current
 chunk (i.e., the current chunk has been entirely consumed), normally the
 current chunk will be discarded at the same time that the new chunk is
-read in.  If I<flags> includes C<LEX_KEEP_PREVIOUS>, the current chunk
+read in.  If C<flags> includes C<LEX_KEEP_PREVIOUS>, the current chunk
 will not be discarded.  If the current chunk has not been entirely
 consumed, then it will not be discarded regardless of the flag.
 
@@ -1362,7 +1362,7 @@ peeked character, use L</lex_read_unichar>.
 
 If the next character is in (or extends into) the next chunk of input
 text, the next chunk will be read in.  Normally the current chunk will be
-discarded at the same time, but if I<flags> includes C<LEX_KEEP_PREVIOUS>
+discarded at the same time, but if C<flags> includes C<LEX_KEEP_PREVIOUS>
 then the current chunk will not be discarded.
 
 If the input is being interpreted as UTF-8 and a UTF-8 encoding error
@@ -1433,7 +1433,7 @@ examine the next character, use L</lex_peek_unichar> instead.
 
 If the next character is in (or extends into) the next chunk of input
 text, the next chunk will be read in.  Normally the current chunk will be
-discarded at the same time, but if I<flags> includes C<LEX_KEEP_PREVIOUS>
+discarded at the same time, but if C<flags> includes C<LEX_KEEP_PREVIOUS>
 then the current chunk will not be discarded.
 
 If the input is being interpreted as UTF-8 and a UTF-8 encoding error
@@ -1471,7 +1471,7 @@ at a non-space character (or the end of the input text).
 
 If spaces extend into the next chunk of input text, the next chunk will
 be read in.  Normally the current chunk will be discarded at the same
-time, but if I<flags> includes C<LEX_KEEP_PREVIOUS> then the current
+time, but if C<flags> includes C<LEX_KEEP_PREVIOUS> then the current
 chunk will not be discarded.
 
 =cut
@@ -11263,7 +11263,7 @@ Parse a Perl arithmetic expression.  This may contain operators of precedence
 down to the bit shift operators.  The expression must be followed (and thus
 terminated) either by a comparison or lower-precedence operator or by
 something that would normally terminate an expression such as semicolon.
-If I<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
+If C<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
 otherwise it is mandatory.  It is up to the caller to ensure that the
 dynamic parser state (L</PL_parser> et al) is correctly set to reflect
 the source of the code to be parsed and the lexical context for the
@@ -11295,7 +11295,7 @@ Parse a Perl term expression.  This may contain operators of precedence
 down to the assignment operators.  The expression must be followed (and thus
 terminated) either by a comma or lower-precedence operator or by
 something that would normally terminate an expression such as semicolon.
-If I<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
+If C<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
 otherwise it is mandatory.  It is up to the caller to ensure that the
 dynamic parser state (L</PL_parser> et al) is correctly set to reflect
 the source of the code to be parsed and the lexical context for the
@@ -11327,7 +11327,7 @@ Parse a Perl list expression.  This may contain operators of precedence
 down to the comma operator.  The expression must be followed (and thus
 terminated) either by a low-precedence logic operator such as C<or> or by
 something that would normally terminate an expression such as semicolon.
-If I<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
+If C<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
 otherwise it is mandatory.  It is up to the caller to ensure that the
 dynamic parser state (L</PL_parser> et al) is correctly set to reflect
 the source of the code to be parsed and the lexical context for the
@@ -11360,7 +11360,7 @@ expression grammar, including the lowest-precedence operators such
 as C<or>.  The expression must be followed (and thus terminated) by a
 token that an expression would normally be terminated by: end-of-file,
 closing bracketing punctuation, semicolon, or one of the keywords that
-signals a postfix expression-statement modifier.  If I<flags> includes
+signals a postfix expression-statement modifier.  If C<flags> includes
 C<PARSE_OPTIONAL> then the expression is optional, otherwise it is
 mandatory.  It is up to the caller to ensure that the dynamic parser
 state (L</PL_parser> et al) is correctly set to reflect the source of
@@ -11407,7 +11407,7 @@ the parser state, normally resulting in a single exception at the top
 level of parsing which covers all the compilation errors that occurred.
 Some compilation errors, however, will throw an exception immediately.
 
-The I<flags> parameter is reserved for future use, and must always
+The C<flags> parameter is reserved for future use, and must always
 be zero.
 
 =cut
@@ -11445,7 +11445,7 @@ the parser state, normally resulting in a single exception at the top
 level of parsing which covers all the compilation errors that occurred.
 Some compilation errors, however, will throw an exception immediately.
 
-The I<flags> parameter is reserved for future use, and must always
+The C<flags> parameter is reserved for future use, and must always
 be zero.
 
 =cut
@@ -11465,7 +11465,7 @@ Perl_parse_barestmt(pTHX_ U32 flags)
 Parse a single label, possibly optional, of the type that may prefix a
 Perl statement.  It is up to the caller to ensure that the dynamic parser
 state (L</PL_parser> et al) is correctly set to reflect the source of
-the code to be parsed.  If I<flags> includes C<PARSE_OPTIONAL> then the
+the code to be parsed.  If C<flags> includes C<PARSE_OPTIONAL> then the
 label is optional, otherwise it is mandatory.
 
 The name of the label is returned in the form of a fresh scalar.  If an
@@ -11549,7 +11549,7 @@ the parser state, normally resulting in a single exception at the top
 level of parsing which covers all the compilation errors that occurred.
 Some compilation errors, however, will throw an exception immediately.
 
-The I<flags> parameter is reserved for future use, and must always
+The C<flags> parameter is reserved for future use, and must always
 be zero.
 
 =cut
@@ -11587,7 +11587,7 @@ normally resulting in a single exception at the top level of parsing
 which covers all the compilation errors that occurred.  Some compilation
 errors, however, will throw an exception immediately.
 
-The I<flags> parameter is reserved for future use, and must always
+The C<flags> parameter is reserved for future use, and must always
 be zero.
 
 =cut

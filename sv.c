@@ -7203,7 +7203,7 @@ the start of the string, to a count of the equivalent number of bytes; if
 lenp is non-zero, it does the same to lenp, but this time starting from
 the offset, rather than from the start
 of the string.  Handles type coercion.
-I<flags> is passed to C<SvPV_flags>, and usually should be
+C<flags> is passed to C<SvPV_flags>, and usually should be
 C<SV_GMAGIC|SV_CONST_RETURN> to handle magic.
 
 =cut
@@ -7480,7 +7480,7 @@ S_sv_pos_b2u_midway(pTHX_ const U8 *const s, const U8 *const target,
 
 Converts the offset from a count of bytes from the start of the string, to
 a count of the equivalent number of UTF-8 chars.  Handles type coercion.
-I<flags> is passed to C<SvPV_flags>, and usually should be
+C<flags> is passed to C<SvPV_flags>, and usually should be
 C<SV_GMAGIC|SV_CONST_RETURN> to handle magic.
 
 =cut

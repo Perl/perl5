@@ -532,10 +532,10 @@ Perl_cv_forget_slab(pTHX_ CV *cv)
 
 Allocates a place in the currently-compiling
 pad (via L<perlapi/pad_alloc>) and
-then stores a name for that entry.  I<name> is adopted and
+then stores a name for that entry.  C<name> is adopted and
 becomes the name entry; it must already contain the name
-string.  I<typestash> and I<ourstash> and the C<padadd_STATE>
-flag get added to I<name>.  None of the other
+string.  C<typestash> and C<ourstash> and the C<padadd_STATE>
+flag get added to C<name>.  None of the other
 processing of L<perlapi/pad_add_name_pvn>
 is done.  Returns the offset of the allocated pad slot.
 
@@ -580,9 +580,9 @@ variable.  Stores the name and other metadata in the name part of the
 pad, and makes preparations to manage the variable's lexical scoping.
 Returns the offset of the allocated pad slot.
 
-I<namepv>/I<namelen> specify the variable's name, including leading sigil.
-If I<typestash> is non-null, the name is for a typed lexical, and this
-identifies the type.  If I<ourstash> is non-null, it's a lexical reference
+C<namepv>/C<namelen> specify the variable's name, including leading sigil.
+If C<typestash> is non-null, the name is for a typed lexical, and this
+identifies the type.  If C<ourstash> is non-null, it's a lexical reference
 to a package variable, and this identifies the package.  The following
 flags can be OR'ed together:
 
@@ -686,7 +686,7 @@ Perl_pad_add_name_sv(pTHX_ SV *name, U32 flags, HV *typestash, HV *ourstash)
 Allocates a place in the currently-compiling pad,
 returning the offset of the allocated pad slot.
 No name is initially attached to the pad slot.
-I<tmptype> is a set of flags indicating the kind of pad entry required,
+C<tmptype> is a set of flags indicating the kind of pad entry required,
 which will be set in the value SV for the allocated pad entry:
 
     SVs_PADMY    named lexical variable ("my", "our", "state")
@@ -699,7 +699,7 @@ does not cause the SV in the pad slot to be marked read-only, but simply
 tells C<pad_alloc> that it I<will> be made read-only (by the caller), or at
 least should be treated as such.
 
-I<optype> should be an opcode indicating the type of operation that the
+C<optype> should be an opcode indicating the type of operation that the
 pad entry is to support.  This doesn't affect operational semantics,
 but is used for debugging.
 
@@ -789,12 +789,12 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 Allocates a place in the currently-compiling pad (via L</pad_alloc>)
 for an anonymous function that is lexically scoped inside the
 currently-compiling function.
-The function I<func> is linked into the pad, and its C<CvOUTSIDE> link
+The function C<func> is linked into the pad, and its C<CvOUTSIDE> link
 to the outer scope is weakened to avoid a reference loop.
 
 One reference count is stolen, so you may need to do C<SvREFCNT_inc(func)>.
 
-I<optype> should be an opcode indicating the type of operation that the
+C<optype> should be an opcode indicating the type of operation that the
 pad entry is to support.  This doesn't affect operational semantics,
 but is used for debugging.
 
@@ -936,8 +936,8 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 
 Given the name of a lexical variable, find its position in the
 currently-compiling pad.
-I<namepv>/I<namelen> specify the variable's name, including leading sigil.
-I<flags> is reserved and must be zero.
+C<namepv>/C<namelen> specify the variable's name, including leading sigil.
+C<flags> is reserved and must be zero.
 If it is not in the current pad but appears in the pad of any lexically
 enclosing scope, then a pseudo-entry for it is added in the current pad.
 Returns the offset in the current pad,
@@ -1382,7 +1382,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 /*
 =for apidoc Am|SV *|pad_sv|PADOFFSET po
 
-Get the value at offset I<po> in the current (compiling or executing) pad.
+Get the value at offset C<po> in the current (compiling or executing) pad.
 Use macro PAD_SV instead of calling this function directly.
 
 =cut
@@ -1405,7 +1405,7 @@ Perl_pad_sv(pTHX_ PADOFFSET po)
 /*
 =for apidoc Am|void|pad_setsv|PADOFFSET po|SV *sv
 
-Set the value at offset I<po> in the current (compiling or executing) pad.
+Set the value at offset C<po> in the current (compiling or executing) pad.
 Use the macro PAD_SETSV() rather than calling this function directly.
 
 =cut
@@ -1667,7 +1667,7 @@ S_pad_reset(pTHX)
 
 Tidy up a pad at the end of compilation of the code to which it belongs.
 Jobs performed here are: remove most stuff from the pads of anonsub
-prototypes; give it a @_; mark temporaries as such.  I<type> indicates
+prototypes; give it a @_; mark temporaries as such.  C<type> indicates
 the kind of subroutine:
 
     padtidy_SUB        ordinary subroutine
@@ -1939,7 +1939,7 @@ S_cv_dump(pTHX_ const CV *cv, const char *title)
 /*
 =for apidoc Am|CV *|cv_clone|CV *proto
 
-Clone a CV, making a lexical closure.  I<proto> supplies the prototype
+Clone a CV, making a lexical closure.  C<proto> supplies the prototype
 of the function: its code, pad structure, and other attributes.
 The prototype is combined with a capture of outer lexicals to which the
 code refers, which are taken from the currently-executing instance of
@@ -2333,7 +2333,7 @@ An SV may be passed as a second argument.  If so, the name will be assigned
 to it and it will be returned.  Otherwise the returned SV will be a new
 mortal.
 
-If the I<flags> include CV_NAME_NOTQUAL, then the package name will not be
+If the C<flags> include CV_NAME_NOTQUAL, then the package name will not be
 included.  If the first argument is neither a CV nor a GV, this flag is
 ignored (subject to change).
 
@@ -2782,7 +2782,7 @@ Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
 /*
 =for apidoc newPADNAMEpvn
 
-Constructs and returns a new pad name.  I<s> must be a UTF8 string.  Do not
+Constructs and returns a new pad name.  C<s> must be a UTF8 string.  Do not
 use this for pad names that point to outer lexicals.  See
 L</newPADNAMEouter>.
 
@@ -2813,7 +2813,7 @@ Perl_newPADNAMEpvn(const char *s, STRLEN len)
 =for apidoc newPADNAMEouter
 
 Constructs and returns a new pad name.  Only use this function for names
-that refer to outer lexicals.  (See also L</newPADNAMEpvn>.)  I<outer> is
+that refer to outer lexicals.  (See also L</newPADNAMEpvn>.)  C<outer> is
 the outer pad name that this one mirrors.  The returned pad name has the
 PADNAMEt_OUTER flag already set.
 

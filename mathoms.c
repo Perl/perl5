@@ -1795,7 +1795,7 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 /*
 =for apidoc Am|HV *|pad_compname_type|PADOFFSET po
 
-Looks up the type of the lexical variable at position I<po> in the
+Looks up the type of the lexical variable at position C<po> in the
 currently-compiling pad.  If the variable is typed, the stash of the
 class to which it is typed is returned.  If not, C<NULL> is returned.
 

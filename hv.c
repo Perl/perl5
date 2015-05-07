@@ -1490,10 +1490,10 @@ Perl_newHVhv(pTHX_ HV *ohv)
 /*
 =for apidoc Am|HV *|hv_copy_hints_hv|HV *ohv
 
-A specialised version of L</newHVhv> for copying C<%^H>.  I<ohv> must be
+A specialised version of L</newHVhv> for copying C<%^H>.  C<ohv> must be
 a pointer to a hash (which may have C<%^H> magic, but should be generally
 non-magical), or C<NULL> (interpreted as an empty hash).  The content
-of I<ohv> is copied to a new hash, which has the C<%^H>-specific magic
+of C<ohv> is copied to a new hash, which has the C<%^H>-specific magic
 added to it.  A pointer to the new hash is returned.
 
 =cut
@@ -3064,7 +3064,7 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 
 Generates and returns a C<HV *> representing the content of a
 C<refcounted_he> chain.
-I<flags> is currently unused and must be zero.
+C<flags> is currently unused and must be zero.
 
 =cut
 */
@@ -3171,9 +3171,9 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
 =for apidoc m|SV *|refcounted_he_fetch_pvn|const struct refcounted_he *chain|const char *keypv|STRLEN keylen|U32 hash|U32 flags
 
 Search along a C<refcounted_he> chain for an entry with the key specified
-by I<keypv> and I<keylen>.  If I<flags> has the C<REFCOUNTED_HE_KEY_UTF8>
+by C<keypv> and C<keylen>.  If C<flags> has the C<REFCOUNTED_HE_KEY_UTF8>
 bit set, the key octets are interpreted as UTF-8, otherwise they
-are interpreted as Latin-1.  I<hash> is a precomputed hash of the key
+are interpreted as Latin-1.  C<hash> is a precomputed hash of the key
 string, or zero if it has not been precomputed.  Returns a mortal scalar
 representing the value associated with the key, or C<&PL_sv_placeholder>
 if there is no value associated with the key.
@@ -3310,25 +3310,25 @@ be empty), and thus forms a longer chain.  When using the longer chain,
 the new key/value pair takes precedence over any entry for the same key
 further along the chain.
 
-The new key is specified by I<keypv> and I<keylen>.  If I<flags> has
+The new key is specified by C<keypv> and C<keylen>.  If C<flags> has
 the C<REFCOUNTED_HE_KEY_UTF8> bit set, the key octets are interpreted
-as UTF-8, otherwise they are interpreted as Latin-1.  I<hash> is
+as UTF-8, otherwise they are interpreted as Latin-1.  C<hash> is
 a precomputed hash of the key string, or zero if it has not been
 precomputed.
 
-I<value> is the scalar value to store for this key.  I<value> is copied
+C<value> is the scalar value to store for this key.  C<value> is copied
 by this function, which thus does not take ownership of any reference
 to it, and later changes to the scalar will not be reflected in the
 value visible in the C<refcounted_he>.  Complex types of scalar will not
 be stored with referential integrity, but will be coerced to strings.
-I<value> may be either null or C<&PL_sv_placeholder> to indicate that no
+C<value> may be either null or C<&PL_sv_placeholder> to indicate that no
 value is to be associated with the key; this, as with any non-null value,
 takes precedence over the existence of a value for the key further along
 the chain.
 
-I<parent> points to the rest of the C<refcounted_he> chain to be
+C<parent> points to the rest of the C<refcounted_he> chain to be
 attached to the new C<refcounted_he>.  This function takes ownership
-of one reference to I<parent>, and returns one reference to the new
+of one reference to C<parent>, and returns one reference to the new
 C<refcounted_he>.
 
 =cut

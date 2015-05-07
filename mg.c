@@ -579,7 +579,7 @@ Perl_mg_free(pTHX_ SV *sv)
 /*
 =for apidoc Am|void|mg_free_type|SV *sv|int how
 
-Remove any magic of type I<how> from the SV I<sv>.  See L</sv_magic>.
+Remove any magic of type C<how> from the SV C<sv>.  See L</sv_magic>.
 
 =cut
 */
