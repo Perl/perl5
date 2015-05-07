@@ -3232,7 +3232,7 @@ strings:
     $foo = '150' |  105;	# yields 255
     $foo =  150  | '105';	# yields 255
     $foo = '150' | '105';	# yields 255
-    $foo =  150  |. 105;	# yields string '155' (under ASCII)
+    $foo =  150  |. 105;	# yields string '155'
     $foo = '150' |. 105;	# yields string '155'
     $foo =  150  |.'105';	# yields string '155'
     $foo = '150' |.'105';	# yields string '155'
