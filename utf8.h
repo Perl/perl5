@@ -41,6 +41,12 @@
 
 /*
 =head1 Unicode Support
+L<perlguts/Unicode Support> has an introduction to this API.
+
+See also L</Character classification>,
+and L</Character case changing>.
+Various functions outside this section also work specially with Unicode.
+Search for the string "utf8" in this document.
 
 =for apidoc is_ascii_string
 
