@@ -3243,6 +3243,10 @@ strings:
 The assignment variants of these operators (C<&= |= ^= &.= |.= ^.=>)
 behave likewise under the feature.
 
+The behavior of these operators is problematic (and subject to change)
+if either or both of the strings are encoded in UTF-8 (see
+L<perlunicode/Byte and Character Semantics>.
+
 See L<perlfunc/vec> for information on how to manipulate individual bits
 in a bit vector.
 
