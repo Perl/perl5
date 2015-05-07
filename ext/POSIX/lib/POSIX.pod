@@ -21,15 +21,6 @@ The POSIX module permits you to access all (or nearly all) the standard
 POSIX 1003.1 identifiers.  Many of these identifiers have been given Perl-ish
 interfaces.
 
-I<Everything is exported by default> with the exception of any POSIX
-functions with the same name as a built-in Perl function, such as
-C<abs>, C<alarm>, C<rmdir>, C<write>, etc.., which will be exported
-only if you ask for them explicitly.  This is an unfortunate backwards
-compatibility feature.  You can stop the exporting by saying S<C<use
-POSIX ()>> and then use the fully qualified names (I<e.g.>, C<POSIX::SEEK_END>),
-or by giving an explicit import list.  If you do neither, and opt for the
-default, S<C<use POSIX;>> has to import I<553 symbols>.
-
 This document gives a condensed list of the features available in the POSIX
 module.  Consult your operating system's manpages for general information on
 most features.  Consult L<perlfunc> for functions which are noted as being
@@ -42,6 +33,15 @@ constants and macros in an organization which roughly follows IEEE Std
 1003.1b-1993.
 
 =head1 CAVEATS
+
+I<Everything is exported by default> (with a handful of exceptions).
+This is an unfortunate backwards compatibility feature and its use is
+B<strongly L<discouraged|perlpolicy/discouraged>>.
+You should either prevent the exporting (by saying S<C<use POSIX ();>>,
+as usual) and then use fully qualified names (e.g. C<POSIX::SEEK_END>),
+or give an explicit import list.
+If you do neither and opt for the default (as in S<C<use POSIX;>>), you
+will import I<hundreds and hundreds> of symbols into your namespace.
 
 A few functions are not implemented because they are C specific.  If you
 attempt to call these, they will print a message telling you that they
