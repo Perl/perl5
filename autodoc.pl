@@ -404,8 +404,8 @@ whose ordinal numbers are in the range 0 - 127).
 And documentation and comments may still use the term ASCII, when
 sometimes in fact the entire range from 0 - 255 is meant.
 
-Note that Perl can be compiled and run under EBCDIC (See L<perlebcdic>)
-or ASCII.  Most of the documentation (and even comments in the code)
+Note that Perl can be compiled and run under either ASCII or EBCDIC (See
+L<perlebcdic>).  Most of the documentation (and even comments in the code)
 ignore the EBCDIC possibility.  
 For almost all purposes the differences are transparent.
 As an example, under EBCDIC,
