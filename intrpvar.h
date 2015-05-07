@@ -84,7 +84,7 @@ PERLVAR(I, defgv,	GV *)           /* the *_ glob */
 
 =for apidoc mn|bool|PL_dowarn
 
-The C variable which corresponds to Perl's $^W warning variable.
+The C variable which corresponds to Perl's C<$^W> warning variable.
 
 =cut
 */

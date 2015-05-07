@@ -287,11 +287,11 @@ S__is_utf8_char_slow(const U8 *s, const U8 *e)
 =for apidoc AiR|bool|is_safe_syscall|const char *pv|STRLEN len|const char *what|const char *op_name
 
 Test that the given C<pv> doesn't contain any internal C<NUL> characters.
-If it does, set C<errno> to ENOENT, optionally warn, and return FALSE.
+If it does, set C<errno> to C<ENOENT>, optionally warn, and return FALSE.
 
 Return TRUE if the name is safe.
 
-Used by the IS_SAFE_SYSCALL() macro.
+Used by the C<IS_SAFE_SYSCALL()> macro.
 
 =cut
 */

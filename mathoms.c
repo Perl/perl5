@@ -258,7 +258,7 @@ Perl_sv_2pvutf8_nolen(pTHX_ SV *sv)
 
 Undo various types of fakery on an SV: if the PV is a shared string, make
 a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
-an xpvmg.  See also C<L</sv_force_normal_flags>>.
+an C<xpvmg>.  See also C<L</sv_force_normal_flags>>.
 
 =cut
 */
@@ -739,10 +739,10 @@ Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep)
 =for apidoc sv_nolocking
 
 Dummy routine which "locks" an SV when there is no locking module present.
-Exists to avoid test for a NULL function pointer and because it could
+Exists to avoid test for a C<NULL> function pointer and because it could
 potentially warn under some level of strict-ness.
 
-"Superseded" by sv_nosharing().
+"Superseded" by C<sv_nosharing()>.
 
 =cut
 */
@@ -759,10 +759,10 @@ Perl_sv_nolocking(pTHX_ SV *sv)
 =for apidoc sv_nounlocking
 
 Dummy routine which "unlocks" an SV when there is no locking module present.
-Exists to avoid test for a NULL function pointer and because it could
+Exists to avoid test for a C<NULL> function pointer and because it could
 potentially warn under some level of strict-ness.
 
-"Superseded" by sv_nosharing().
+"Superseded" by C<sv_nosharing()>.
 
 =cut
 */
@@ -862,9 +862,9 @@ Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len)
 /*
 =for apidoc unpack_str
 
-The engine implementing unpack() Perl function.  Note: parameters strbeg,
-new_s and ocnt are not used.  This call should not be used, use
-unpackstring instead.
+The engine implementing C<unpack()> Perl function.  Note: parameters C<strbeg>,
+C<new_s> and C<ocnt> are not used.  This call should not be used, use
+C<unpackstring> instead.
 
 =cut */
 
@@ -885,9 +885,9 @@ Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s,
 /*
 =for apidoc pack_cat
 
-The engine implementing pack() Perl function.  Note: parameters
-next_in_list and flags are not used.  This call should not be used; use
-packlist instead.
+The engine implementing C<pack()> Perl function.  Note: parameters
+C<next_in_list> and C<flags> are not used.  This call should not be used; use
+C<packlist> instead.
 
 =cut
 */
@@ -1145,13 +1145,13 @@ Perl_sv_2bool(pTHX_ SV *const sv)
 
 /*
 =for apidoc custom_op_name
-Return the name for a given custom op.  This was once used by the OP_NAME
+Return the name for a given custom op.  This was once used by the C<OP_NAME>
 macro, but is no longer: it has only been kept for compatibility, and
 should not be used.
 
 =for apidoc custom_op_desc
 Return the description of a given custom op.  This was once used by the
-OP_DESC macro, but is no longer: it has only been kept for
+C<OP_DESC> macro, but is no longer: it has only been kept for
 compatibility, and should not be used.
 
 =cut
@@ -1743,7 +1743,7 @@ is why this function is deprecated.  Use L</utf8_to_uvchr_buf> instead.
 
 If C<s> points to one of the detected malformations, and UTF8 warnings are
 enabled, zero is returned and C<*retlen> is set (if C<retlen> isn't
-NULL) to -1.  If those warnings are off, the computed value if well-defined (or
+C<NULL>) to -1.  If those warnings are off, the computed value if well-defined (or
 the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
 is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
 next possible position in C<s> that could begin a non-malformed character.

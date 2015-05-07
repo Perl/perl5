@@ -288,7 +288,7 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
 =for apidoc av_store
 
 Stores an SV in an array.  The array index is specified as C<key>.  The
-return value will be NULL if the operation failed or if the value did not
+return value will be C<NULL> if the operation failed or if the value did not
 need to be actually stored within the array (as in the case of tied
 arrays).  Otherwise, it can be dereferenced
 to get the C<SV*> that was stored
@@ -296,7 +296,7 @@ there (= C<val>)).
 
 Note that the caller is responsible for suitably incrementing the reference
 count of C<val> before the call, and decrementing it if the function
-returned NULL.
+returned C<NULL>.
 
 Approximate Perl equivalent: C<$myarray[$key] = $val;>.
 
@@ -383,7 +383,7 @@ Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
 =for apidoc av_make
 
 Creates a new AV and populates it with a list of SVs.  The SVs are copied
-into the array, so they may be freed after the call to av_make.  The new AV
+into the array, so they may be freed after the call to C<av_make>.  The new AV
 will have a reference count of 1.
 
 Perl equivalent: C<my @new_array = ($scalar1, $scalar2, $scalar3...);>
@@ -432,9 +432,9 @@ Perl_av_make(pTHX_ SSize_t size, SV **strp)
 /*
 =for apidoc av_clear
 
-Clears an array, making it empty.  Does not free the memory the av uses to
+Clears an array, making it empty.  Does not free the memory C<av> uses to
 store its list of scalars.  If any destructors are triggered as a result,
-the av itself may be freed when this function returns.
+C<av> itself may be freed when this function returns.
 
 Perl equivalent: C<@myarray = ();>.
 
@@ -497,7 +497,7 @@ Perl_av_clear(pTHX_ AV *av)
 =for apidoc av_undef
 
 Undefines the array.  Frees the memory used by the av to store its list of
-scalars.  If any destructors are triggered as a result, the av itself may
+scalars.  If any destructors are triggered as a result, C<av> itself may
 be freed.
 
 =cut
@@ -783,7 +783,7 @@ Set the highest index in the array to the given number, equivalent to
 Perl's C<$#array = $fill;>.
 
 The number of elements in the array will be C<fill + 1> after
-av_fill() returns.  If the array was previously shorter, then the
+C<av_fill()> returns.  If the array was previously shorter, then the
 additional elements appended are set to NULL.  If the array
 was longer, then the excess elements are freed.  C<av_fill(av, -1)> is
 the same as C<av_clear(av)>.
@@ -912,7 +912,7 @@ Perl_av_delete(pTHX_ AV *av, SSize_t key, I32 flags)
 Returns true if the element indexed by C<key> has been initialized.
 
 This relies on the fact that uninitialized array elements are set to
-NULL.
+C<NULL>.
 
 Perl equivalent: C<exists($myarray[$key])>.
 

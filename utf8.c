@@ -287,23 +287,23 @@ This function will convert to UTF-8 (and not warn) even code points that aren't
 legal Unicode or are problematic, unless C<flags> contains one or more of the
 following flags:
 
-If C<uv> is a Unicode surrogate code point and UNICODE_WARN_SURROGATE is set,
+If C<uv> is a Unicode surrogate code point and C<UNICODE_WARN_SURROGATE> is set,
 the function will raise a warning, provided UTF8 warnings are enabled.  If instead
-UNICODE_DISALLOW_SURROGATE is set, the function will fail and return NULL.
+C<UNICODE_DISALLOW_SURROGATE> is set, the function will fail and return NULL.
 If both flags are set, the function will both warn and return NULL.
 
-The UNICODE_WARN_NONCHAR and UNICODE_DISALLOW_NONCHAR flags
+The C<UNICODE_WARN_NONCHAR> and C<UNICODE_DISALLOW_NONCHAR> flags
 affect how the function handles a Unicode non-character.  And likewise, the
-UNICODE_WARN_SUPER and UNICODE_DISALLOW_SUPER flags affect the handling of
+C<UNICODE_WARN_SUPER> and C<UNICODE_DISALLOW_SUPER> flags affect the handling of
 code points that are
 above the Unicode maximum of 0x10FFFF.  Code points above 0x7FFF_FFFF (which are
 even less portable) can be warned and/or disallowed even if other above-Unicode
-code points are accepted, by the UNICODE_WARN_FE_FF and UNICODE_DISALLOW_FE_FF
-flags.
+code points are accepted, by the C<UNICODE_WARN_FE_FF> and
+C<UNICODE_DISALLOW_FE_FF> flags.
 
-And finally, the flag UNICODE_WARN_ILLEGAL_INTERCHANGE selects all four of the
-above WARN flags; and UNICODE_DISALLOW_ILLEGAL_INTERCHANGE selects all four
-DISALLOW flags.
+And finally, the flag C<UNICODE_WARN_ILLEGAL_INTERCHANGE> selects all four of
+the above WARN flags; and C<UNICODE_DISALLOW_ILLEGAL_INTERCHANGE> selects all
+four DISALLOW flags.
 
 =cut
 */
@@ -430,13 +430,13 @@ overlong sequences, the computed code point is returned; for all other allowed
 malformations, the Unicode REPLACEMENT CHARACTER is returned, as these have no
 determinable reasonable value.
 
-The UTF8_CHECK_ONLY flag overrides the behavior when a non-allowed (by other
+The C<UTF8_CHECK_ONLY> flag overrides the behavior when a non-allowed (by other
 flags) malformation is found.  If this flag is set, the routine assumes that
 the caller will raise a warning, and this function will silently just set
 C<retlen> to C<-1> (cast to C<STRLEN>) and return zero.
 
 Note that this API requires disambiguation between successful decoding a C<NUL>
-character, and an error return (unless the UTF8_CHECK_ONLY flag is set), as
+character, and an error return (unless the C<UTF8_CHECK_ONLY> flag is set), as
 in both cases, 0 is returned.  To disambiguate, upon a zero return, see if the
 first byte of C<s> is 0 as well.  If so, the input was a C<NUL>; if not, the
 input had an error.
@@ -445,18 +445,18 @@ Certain code points are considered problematic.  These are Unicode surrogates,
 Unicode non-characters, and code points above the Unicode maximum of 0x10FFFF.
 By default these are considered regular code points, but certain situations
 warrant special handling for them.  If C<flags> contains
-UTF8_DISALLOW_ILLEGAL_INTERCHANGE, all three classes are treated as
-malformations and handled as such.  The flags UTF8_DISALLOW_SURROGATE,
-UTF8_DISALLOW_NONCHAR, and UTF8_DISALLOW_SUPER (meaning above the legal Unicode
-maximum) can be set to disallow these categories individually.
+C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>, all three classes are treated as
+malformations and handled as such.  The flags C<UTF8_DISALLOW_SURROGATE>,
+C<UTF8_DISALLOW_NONCHAR>, and C<UTF8_DISALLOW_SUPER> (meaning above the legal
+Unicode maximum) can be set to disallow these categories individually.
 
-The flags UTF8_WARN_ILLEGAL_INTERCHANGE, UTF8_WARN_SURROGATE,
-UTF8_WARN_NONCHAR, and UTF8_WARN_SUPER will cause warning messages to be raised
-for their respective categories, but otherwise the code points are considered
-valid (not malformations).  To get a category to both be treated as a
-malformation and raise a warning, specify both the WARN and DISALLOW flags.
+The flags C<UTF8_WARN_ILLEGAL_INTERCHANGE>, C<UTF8_WARN_SURROGATE>,
+C<UTF8_WARN_NONCHAR>, and C<UTF8_WARN_SUPER> will cause warning messages to be
+raised for their respective categories, but otherwise the code points are
+considered valid (not malformations).  To get a category to both be treated as
+a malformation and raise a warning, specify both the WARN and DISALLOW flags.
 (But note that warnings are not raised if lexically disabled nor if
-UTF8_CHECK_ONLY is also specified.)
+C<UTF8_CHECK_ONLY> is also specified.)
 
 Very large code points (above 0x7FFF_FFFF) are considered more problematic than
 the others that are above the Unicode legal maximum.  There are several
@@ -467,11 +467,11 @@ imposed later).  (The smaller ones, those that fit into 32 bits, are
 representable by a UV on ASCII platforms, but not by an IV, which means that
 the number of operations that can be performed on them is quite restricted.)
 The UTF-8 encoding on ASCII platforms for these large code points begins with a
-byte containing 0xFE or 0xFF.  The UTF8_DISALLOW_FE_FF flag will cause them to
+byte containing 0xFE or 0xFF.  The C<UTF8_DISALLOW_FE_FF> flag will cause them to
 be treated as malformations, while allowing smaller above-Unicode code points.
-(Of course UTF8_DISALLOW_SUPER will treat all above-Unicode code points,
+(Of course C<UTF8_DISALLOW_SUPER> will treat all above-Unicode code points,
 including these, as malformations.)
-Similarly, UTF8_WARN_FE_FF acts just like
+Similarly, C<UTF8_WARN_FE_FF> acts just like
 the other WARN flags, but applies just to these code points.
 
 All other code points corresponding to Unicode characters, including private
@@ -831,9 +831,9 @@ C<*retlen> will be set to the length, in bytes, of that character.
 
 If C<s> does not point to a well-formed UTF-8 character and UTF8 warnings are
 enabled, zero is returned and C<*retlen> is set (if C<retlen> isn't
-NULL) to -1.  If those warnings are off, the computed value, if well-defined
+C<NULL>) to -1.  If those warnings are off, the computed value, if well-defined
 (or the Unicode REPLACEMENT CHARACTER if not), is silently returned, and
-C<*retlen> is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is
+C<*retlen> is set (if C<retlen> isn't C<NULL>) so that (S<C<s> + C<*retlen>>) is
 the next possible position in C<s> that could begin a non-malformed character.
 See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is
 returned.
@@ -1765,7 +1765,7 @@ of the result.
 C<swashp> is a pointer to the swash to use.
 
 Both the special and normal mappings are stored in F<lib/unicore/To/Foo.pl>,
-and loaded by SWASHNEW, using F<lib/utf8_heavy.pl>.  C<special> (usually,
+and loaded by C<SWASHNEW>, using F<lib/utf8_heavy.pl>.  C<special> (usually,
 but not always, a multicharacter mapping), is tried first.
 
 C<special> is a string, normally C<NULL> or C<"">.  C<NULL> means to not use
@@ -1773,8 +1773,8 @@ any special mappings; C<""> means to use the special mappings.  Values other
 than these two are treated as the name of the hash containing the special
 mappings, like C<"utf8::ToSpecLower">.
 
-C<normal> is a string like "ToLower" which means the swash
-%utf8::ToLower.
+C<normal> is a string like C<"ToLower"> which means the swash
+C<%utf8::ToLower>.
 
 =cut */
 
@@ -3876,14 +3876,14 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 
 Build to the scalar C<dsv> a displayable version of the string C<spv>,
 length C<len>, the displayable version being at most C<pvlim> bytes long
-(if longer, the rest is truncated and "..." will be appended).
+(if longer, the rest is truncated and C<"..."> will be appended).
 
-The C<flags> argument can have UNI_DISPLAY_ISPRINT set to display
-isPRINT()able characters as themselves, UNI_DISPLAY_BACKSLASH
-to display the \\[nrfta\\] as the backslashed versions (like '\n')
-(UNI_DISPLAY_BACKSLASH is preferred over UNI_DISPLAY_ISPRINT for \\).
-UNI_DISPLAY_QQ (and its alias UNI_DISPLAY_REGEX) have both
-UNI_DISPLAY_BACKSLASH and UNI_DISPLAY_ISPRINT turned on.
+The C<flags> argument can have C<UNI_DISPLAY_ISPRINT> set to display
+C<isPRINT()>able characters as themselves, C<UNI_DISPLAY_BACKSLASH>
+to display the C<\\[nrfta\\]> as the backslashed versions (like C<"\n">)
+(C<UNI_DISPLAY_BACKSLASH> is preferred over C<UNI_DISPLAY_ISPRINT> for C<"\\">).
+C<UNI_DISPLAY_QQ> (and its alias C<UNI_DISPLAY_REGEX>) have both
+C<UNI_DISPLAY_BACKSLASH> and C<UNI_DISPLAY_ISPRINT> turned on.
 
 The pointer to the PV of the C<dsv> is returned.
 
@@ -3994,7 +3994,7 @@ scan will not be considered to be a match unless the goal is reached, and
 scanning won't continue past that goal.  Correspondingly for C<l2> with respect to
 C<s2>.
 
-If C<pe1> is non-NULL and the pointer it points to is not NULL, that pointer is
+If C<pe1> is non-C<NULL> and the pointer it points to is not C<NULL>, that pointer is
 considered an end pointer to the position 1 byte past the maximum point
 in C<s1> beyond which scanning will not continue under any circumstances.
 (This routine assumes that UTF-8 encoded input strings are not malformed;
@@ -4011,7 +4011,7 @@ reached for a successful match.   Also, if the fold of a character is multiple
 characters, all of them must be matched (see tr21 reference below for
 'folding').
 
-Upon a successful match, if C<pe1> is non-NULL,
+Upon a successful match, if C<pe1> is non-C<NULL>,
 it will be set to point to the beginning of the I<next> character of C<s1>
 beyond what was matched.  Correspondingly for C<pe2> and C<s2>.
 

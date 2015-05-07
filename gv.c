@@ -142,7 +142,7 @@ Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN namelen,
 If C<gv> is a typeglob whose subroutine entry is a constant sub eligible for
 inlining, or C<gv> is a placeholder reference that would be promoted to such
 a typeglob, then returns the value returned by the sub.  Otherwise, returns
-NULL.
+C<NULL>.
 
 =cut
 */
@@ -304,8 +304,8 @@ Perl_cvstash_set(pTHX_ CV *cv, HV *st)
 
 Converts a scalar into a typeglob.  This is an incoercible typeglob;
 assigning a reference to it will assign to one of its slots, instead of
-overwriting it as happens with typeglobs created by SvSetSV.  Converting
-any scalar that is SvOK() may produce unpredictable results and is reserved
+overwriting it as happens with typeglobs created by C<SvSetSV>.  Converting
+any scalar that is C<SvOK()> may produce unpredictable results and is reserved
 for perl's internal use.
 
 C<gv> is the scalar to be converted.
@@ -318,25 +318,25 @@ stash element, it is the caller's responsibility to ensure that the name
 passed to this function matches the name of the element.  If it does not
 match, perl's internal bookkeeping will get out of sync.
 
-C<flags> can be set to SVf_UTF8 if C<name> is a UTF8 string, or
+C<flags> can be set to C<SVf_UTF8> if C<name> is a UTF8 string, or
 the return value of SvUTF8(sv).  It can also take the
-GV_ADDMULTI flag, which means to pretend that the GV has been
+C<GV_ADDMULTI> flag, which means to pretend that the GV has been
 seen before (i.e., suppress "Used once" warnings).
 
 =for apidoc gv_init
 
-The old form of gv_init_pvn().  It does not work with UTF8 strings, as it
+The old form of C<gv_init_pvn()>.  It does not work with UTF8 strings, as it
 has no flags parameter.  If the C<multi> parameter is set, the
-GV_ADDMULTI flag will be passed to gv_init_pvn().
+C<GV_ADDMULTI> flag will be passed to C<gv_init_pvn()>.
 
 =for apidoc gv_init_pv
 
-Same as gv_init_pvn(), but takes a nul-terminated string for the name
+Same as C<gv_init_pvn()>, but takes a nul-terminated string for the name
 instead of separate char * and length parameters.
 
 =for apidoc gv_init_sv
 
-Same as gv_init_pvn(), but takes an SV * for the name instead of separate
+Same as C<gv_init_pvn()>, but takes an SV * for the name instead of separate
 char * and length parameters.  C<flags> is currently unused.
 
 =cut
@@ -669,16 +669,16 @@ Perl_gv_fetchmeth_pv(pTHX_ HV *stash, const char *name, I32 level, U32 flags)
 
 Returns the glob with the given C<name> and a defined subroutine or
 C<NULL>.  The glob lives in the given C<stash>, or in the stashes
-accessible via @ISA and UNIVERSAL::.
+accessible via C<@ISA> and C<UNIVERSAL::>.
 
 The argument C<level> should be either 0 or -1.  If C<level==0>, as a
 side-effect creates a glob with the given C<name> in the given C<stash>
 which in the case of success contains an alias for the subroutine, and sets
 up caching info for this glob.
 
-The only significant values for C<flags> are GV_SUPER and SVf_UTF8.
+The only significant values for C<flags> are C<GV_SUPER> and C<SVf_UTF8>.
 
-GV_SUPER indicates that we want to look up the method in the superclasses
+C<GV_SUPER> indicates that we want to look up the method in the superclasses
 of the C<stash>.
 
 The
@@ -909,14 +909,14 @@ Perl_gv_fetchmeth_pv_autoload(pTHX_ HV *stash, const char *name, I32 level, U32 
 /*
 =for apidoc gv_fetchmeth_pvn_autoload
 
-Same as gv_fetchmeth_pvn(), but looks for autoloaded subroutines too.
+Same as C<gv_fetchmeth_pvn()>, but looks for autoloaded subroutines too.
 Returns a glob for the subroutine.
 
 For an autoloaded subroutine without a GV, will create a GV even
-if C<level < 0>.  For an autoloaded subroutine without a stub, GvCV()
+if C<level < 0>.  For an autoloaded subroutine without a stub, C<GvCV()>
 of the result may be zero.
 
-Currently, the only significant value for C<flags> is SVf_UTF8.
+Currently, the only significant value for C<flags> is C<SVf_UTF8>.
 
 =cut
 */
@@ -958,7 +958,7 @@ Perl_gv_fetchmeth_pvn_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I3
 
 Returns the glob which contains the subroutine to call to invoke the method
 on the C<stash>.  In fact in the presence of autoloading this may be the
-glob for "AUTOLOAD".  In this case the corresponding variable $AUTOLOAD is
+glob for "AUTOLOAD".  In this case the corresponding variable C<$AUTOLOAD> is
 already setup.
 
 The third parameter of C<gv_fetchmethod_autoload> determines whether
@@ -971,7 +971,7 @@ These functions grant C<"SUPER"> token
 as a prefix of the method name.  Note
 that if you want to keep the returned glob for a long time, you need to
 check for it being "AUTOLOAD", since at the later time the call may load a
-different subroutine due to $AUTOLOAD changing its value.  Use the glob
+different subroutine due to C<$AUTOLOAD> changing its value.  Use the glob
 created as a side effect to do this.
 
 These functions have the same side-effects as C<gv_fetchmeth> with
@@ -1364,7 +1364,7 @@ Returns a pointer to the stash for a specified package.  The C<namelen>
 parameter indicates the length of the C<name>, in bytes.  C<flags> is passed
 to C<gv_fetchpvn_flags()>, so if set to C<GV_ADD> then the package will be
 created if it does not already exist.  If the package does not exist and
-C<flags> is 0 (or any other setting that does not create packages) then NULL
+C<flags> is 0 (or any other setting that does not create packages) then C<NULL>
 is returned.
 
 Flags may be one of:
@@ -1376,7 +1376,7 @@ Flags may be one of:
     GV_NOEXPAND
     GV_ADDMG
 
-The most important of which are probably GV_ADD and SVf_UTF8.
+The most important of which are probably C<GV_ADD> and C<SVf_UTF8>.
 
 Note, use of C<gv_stashsv> instead of C<gv_stashpvn> where possible is strongly
 recommended for performance reasons.

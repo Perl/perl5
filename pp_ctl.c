@@ -3161,8 +3161,8 @@ S_docatch(pTHX_ OP *o)
 =for apidoc find_runcv
 
 Locate the CV corresponding to the currently executing sub or eval.
-If db_seqp is non_null, skip CVs that are in the DB package and populate
-*db_seqp with the cop sequence number at the point that the DB:: code was
+If C<db_seqp> is non_null, skip CVs that are in the DB package and populate
+C<*db_seqp> with the cop sequence number at the point that the DB:: code was
 entered.  (This allows debuggers to eval in the scope of the breakpoint
 rather than in the scope of the debugger itself.)
 

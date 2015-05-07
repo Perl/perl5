@@ -1211,7 +1211,7 @@ Perl_op_refcnt_unlock(pTHX)
 =for apidoc op_sibling_splice
 
 A general function for editing the structure of an existing chain of
-op_sibling nodes.  By analogy with the perl-level splice() function, allows
+op_sibling nodes.  By analogy with the perl-level C<splice()> function, allows
 you to delete zero or more sequential nodes, replacing them with zero or
 more different nodes.  Performs the necessary op_first/op_last
 housekeeping on the parent node and op_sibling manipulation on the
@@ -1222,22 +1222,22 @@ Note that op_next is not manipulated, and nodes are not freed; that is the
 responsibility of the caller.  It also won't create a new list op for an
 empty list etc; use higher-level functions like op_append_elem() for that.
 
-parent is the parent node of the sibling chain. It may passed as NULL if
+C<parent> is the parent node of the sibling chain. It may passed as C<NULL> if
 the splicing doesn't affect the first or last op in the chain.
 
-start is the node preceding the first node to be spliced.  Node(s)
+C<start> is the node preceding the first node to be spliced.  Node(s)
 following it will be deleted, and ops will be inserted after it.  If it is
-NULL, the first node onwards is deleted, and nodes are inserted at the
+C<NULL>, the first node onwards is deleted, and nodes are inserted at the
 beginning.
 
-del_count is the number of nodes to delete.  If zero, no nodes are deleted.
+C<del_count> is the number of nodes to delete.  If zero, no nodes are deleted.
 If -1 or greater than or equal to the number of remaining kids, all
 remaining kids are deleted.
 
-insert is the first of a chain of nodes to be inserted in place of the nodes.
-If NULL, no nodes are inserted.
+C<insert> is the first of a chain of nodes to be inserted in place of the nodes.
+If C<NULL>, no nodes are inserted.
 
-The head of the chain of deleted ops is returned, or NULL if no ops were
+The head of the chain of deleted ops is returned, or C<NULL> if no ops were
 deleted.
 
 For example:
@@ -1362,7 +1362,7 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
 /*
 =for apidoc op_parent
 
-Returns the parent OP of o, if it has a parent. Returns NULL otherwise.
+Returns the parent OP of C<o>, if it has a parent. Returns C<NULL> otherwise.
 This function is only available on perls built with C<-DPERL_OP_PARENT>.
 
 =cut
@@ -2365,7 +2365,7 @@ S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
 
 This function finalizes the optree.  Should be called directly after
 the complete optree is built.  It does some additional
-checking which can't be done in the normal ck_xxx functions and makes
+checking which can't be done in the normal C<ck_>xxx functions and makes
 the tree thread-safe.
 
 =cut
@@ -2585,13 +2585,13 @@ S_finalize_op(pTHX_ OP* o)
 
 Propagate lvalue ("modifiable") context to an op and its children.
 C<type> represents the context type, roughly based on the type of op that
-would do the modifying, although C<local()> is represented by OP_NULL,
+would do the modifying, although C<local()> is represented by C<OP_NULL>,
 because it has no op type of its own (it is signalled by a flag on
 the lvalue op).
 
 This function detects things that can't be modified, such as C<$x+1>, and
 generates errors for them.  For example, C<$x+1 = 2> would cause it to be
-called with an op of type OP_ADD and a C<type> argument of OP_SASSIGN.
+called with an op of type C<OP_ADD> and a C<type> argument of C<OP_SASSIGN>.
 
 It also flags things that need to behave specially in an lvalue context,
 such as C<$$x = 5> which might have to vivify a reference in C<$x>.
@@ -4673,7 +4673,7 @@ consumed by this function and become part of the constructed op tree.
 For most list operators, the check function expects all the kid ops to be
 present already, so calling C<newLISTOP(OP_JOIN, ...)> (e.g.) is not
 appropriate.  What you want to do in that case is create an op of type
-OP_LIST, append more children to it, and then call L</op_convert_list>.
+C<OP_LIST>, append more children to it, and then call L</op_convert_list>.
 See L</op_convert_list> for more information.
 
 
@@ -4816,8 +4816,8 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 /*
 =for apidoc newUNOP_AUX
 
-Similar to C<newUNOP>, but creates an UNOP_AUX struct instead, with op_aux
-initialised to aux
+Similar to C<newUNOP>, but creates an C<UNOP_AUX> struct instead, with C<op_aux>
+initialised to C<aux>
 
 =cut
 */
@@ -4857,7 +4857,7 @@ and, shifted up eight bits, the eight bits of C<op_private>, except that
 the bit with value 1 is automatically set.  C<dynamic_meth> supplies an
 op which evaluates method name; it is consumed by this function and
 become part of the constructed op tree.
-Supported optypes: OP_METHOD.
+Supported optypes: C<OP_METHOD>.
 
 =cut
 */
@@ -4912,7 +4912,7 @@ method name.  C<type> is the opcode.  C<flags> gives the eight bits of
 C<op_flags>, and, shifted up eight bits, the eight bits of
 C<op_private>.  C<const_meth> supplies a constant method name;
 it must be a shared COW string.
-Supported optypes: OP_METHOD_NAMED.
+Supported optypes: C<OP_METHOD_NAMED>.
 
 =cut
 */
@@ -6105,15 +6105,15 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 Loads the module whose name is pointed to by the string part of name.
 Note that the actual module name, not its filename, should be given.
 Eg, "Foo::Bar" instead of "Foo/Bar.pm".  flags can be any of
-PERL_LOADMOD_DENY, PERL_LOADMOD_NOIMPORT, or PERL_LOADMOD_IMPORT_OPS
+C<PERL_LOADMOD_DENY>, C<PERL_LOADMOD_NOIMPORT>, or C<PERL_LOADMOD_IMPORT_OPS>
 (or 0 for no flags).  ver, if specified
 and not NULL, provides version semantics
 similar to C<use Foo::Bar VERSION>.  The optional trailing SV*
-arguments can be used to specify arguments to the module's import()
+arguments can be used to specify arguments to the module's C<import()>
 method, similar to C<use Foo::Bar VERSION LIST>.  They must be
-terminated with a final NULL pointer.  Note that this list can only
-be omitted when the PERL_LOADMOD_NOIMPORT flag has been used.
-Otherwise at least a single NULL pointer to designate the default
+terminated with a final C<NULL> pointer.  Note that this list can only
+be omitted when the C<PERL_LOADMOD_NOIMPORT> flag has been used.
+Otherwise at least a single C<NULL> pointer to designate the default
 import list is required.
 
 The reference count for each specified C<SV*> parameter is decremented.
@@ -7597,7 +7597,7 @@ C<cond> supplies the expression that will be locally assigned to a lexical
 variable, and C<block> supplies the body of the C<given> construct; they
 are consumed by this function and become part of the constructed op tree.
 C<defsv_off> is the pad offset of the scalar lexical variable that will
-be affected.  If it is 0, the global $_ will be used.
+be affected.  If it is 0, the global C<$_> will be used.
 
 =cut
 */
@@ -7733,7 +7733,7 @@ static void const_av_xsub(pTHX_ CV* cv);
 =for apidoc cv_const_sv
 
 If C<cv> is a constant sub eligible for inlining, returns the constant
-value returned by the sub.  Otherwise, returns NULL.
+value returned by the sub.  Otherwise, returns C<NULL>.
 
 Constant subs can be created with C<newCONSTSUB> or as described in
 L<perlsub/"Constant Functions">.
@@ -8803,12 +8803,12 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 Creates a constant sub equivalent to Perl C<sub FOO () { 123 }> which is
 eligible for inlining at compile-time.
 
-Currently, the only useful value for C<flags> is SVf_UTF8.
+Currently, the only useful value for C<flags> is C<SVf_UTF8>.
 
 The newly created subroutine takes ownership of a reference to the passed in
 SV.
 
-Passing NULL for SV creates a constant sub equivalent to C<sub BAR () {}>,
+Passing C<NULL> for SV creates a constant sub equivalent to C<sub BAR () {}>,
 which won't be called if used as a destructor, but will suppress the overhead
 of a call to C<AUTOLOAD>.  (This form, however, isn't eligible for inlining at
 compile time.)
@@ -14342,7 +14342,7 @@ Perl_peep(pTHX_ OP *o)
 
 =for apidoc Ao||custom_op_xop
 Return the XOP structure for a given custom op.  This macro should be
-considered internal to OP_NAME and the other access macros: use them instead.
+considered internal to C<OP_NAME> and the other access macros: use them instead.
 This macro does call a function.  Prior
 to 5.19.6, this was implemented as a
 function.
@@ -14479,8 +14479,8 @@ Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)
 =for apidoc core_prototype
 
 This function assigns the prototype of the named core function to C<sv>, or
-to a new mortal SV if C<sv> is NULL.  It returns the modified C<sv>, or
-NULL if the core function has no prototype.  C<code> is a code as returned
+to a new mortal SV if C<sv> is C<NULL>.  It returns the modified C<sv>, or
+C<NULL> if the core function has no prototype.  C<code> is a code as returned
 by C<keyword()>.  It must not be equal to 0.
 
 =cut

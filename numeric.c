@@ -108,7 +108,7 @@ Perl_cast_uv(NV f)
 converts a string representing a binary number to numeric form.
 
 On entry C<start> and C<*len> give the string to scan, C<*flags> gives
-conversion flags, and C<result> should be NULL or a pointer to an NV.
+conversion flags, and C<result> should be C<NULL> or a pointer to an NV.
 The scan stops at the end of the string, or the first invalid character.
 Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>, encountering an
 invalid character will also trigger a warning.
@@ -116,15 +116,15 @@ On return C<*len> is set to the length of the scanned string,
 and C<*flags> gives output flags.
 
 If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
-and nothing is written to C<*result>.  If the value is > UV_MAX C<grok_bin>
-returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
+and nothing is written to C<*result>.  If the value is > C<UV_MAX>, C<grok_bin>
+returns C<UV_MAX>, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to C<*result> (or the value is discarded if C<result>
 is NULL).
 
-The binary number may optionally be prefixed with "0b" or "b" unless
+The binary number may optionally be prefixed with C<"0b"> or C<"b"> unless
 C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.  If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the binary
-number may use '_' characters to separate digits.
+number may use C<"_"> characters to separate digits.
 
 =cut
 
@@ -231,23 +231,23 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 converts a string representing a hex number to numeric form.
 
 On entry C<start> and C<*len_p> give the string to scan, C<*flags> gives
-conversion flags, and C<result> should be NULL or a pointer to an NV.
+conversion flags, and C<result> should be C<NULL> or a pointer to an NV.
 The scan stops at the end of the string, or the first invalid character.
 Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>, encountering an
 invalid character will also trigger a warning.
 On return C<*len> is set to the length of the scanned string,
 and C<*flags> gives output flags.
 
-If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
-and nothing is written to C<*result>.  If the value is > UV_MAX C<grok_hex>
-returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
+If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
+and nothing is written to C<*result>.  If the value is > C<UV_MAX>, C<grok_hex>
+returns C<UV_MAX>, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to C<*result> (or the value is discarded if C<result>
-is NULL).
+is C<NULL>).
 
-The hex number may optionally be prefixed with "0x" or "x" unless
+The hex number may optionally be prefixed with C<"0x"> or C<"x"> unless
 C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.  If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the hex
-number may use '_' characters to separate digits.
+number may use C<"_"> characters to separate digits.
 
 =cut
 
@@ -352,21 +352,21 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 converts a string representing an octal number to numeric form.
 
 On entry C<start> and C<*len> give the string to scan, C<*flags> gives
-conversion flags, and C<result> should be NULL or a pointer to an NV.
+conversion flags, and C<result> should be C<NULL> or a pointer to an NV.
 The scan stops at the end of the string, or the first invalid character.
 Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>, encountering an
 8 or 9 will also trigger a warning.
 On return C<*len> is set to the length of the scanned string,
 and C<*flags> gives output flags.
 
-If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
-and nothing is written to C<*result>.  If the value is > UV_MAX C<grok_oct>
-returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
+If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
+and nothing is written to C<*result>.  If the value is > C<UV_MAX>, C<grok_oct>
+returns C<UV_MAX>, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to C<*result> (or the value is discarded if C<result>
-is NULL).
+is C<NULL>).
 
 If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then the octal
-number may use '_' characters to separate digits.
+number may use C<"_"> characters to separate digits.
 
 =cut
 
@@ -551,7 +551,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 /*
 =for apidoc grok_infnan
 
-Helper for grok_number(), accepts various ways of spelling "infinity"
+Helper for C<grok_number()>, accepts various ways of spelling "infinity"
 or "not a number", and returns one of the following flag combinations:
 
   IS_NUMBER_INFINITE
@@ -560,11 +560,11 @@ or "not a number", and returns one of the following flag combinations:
   IS_NUMBER_NAN | IS_NUMBER_NEG
   0
 
-possibly |-ed with IS_NUMBER_TRAILING.
+possibly |-ed with C<IS_NUMBER_TRAILING>.
 
-If an infinity or a not-a-number is recognized, the *sp will point to
+If an infinity or a not-a-number is recognized, C<*sp> will point to
 one byte past the end of the recognized string.  If the recognition fails,
-zero is returned, and the *sp will not move.
+zero is returned, and C<*sp> will not move.
 
 =cut
 */
@@ -807,20 +807,20 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
 
 Recognise (or not) a number.  The type of the number is returned
 (0 if unrecognised), otherwise it is a bit-ORed combination of
-IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
-IS_NUMBER_NEG, IS_NUMBER_INFINITY, IS_NUMBER_NAN (defined in F<perl.h>).
+C<IS_NUMBER_IN_UV>, C<IS_NUMBER_GREATER_THAN_UV_MAX>, C<IS_NUMBER_NOT_INT>,
+C<IS_NUMBER_NEG>, C<IS_NUMBER_INFINITY>, C<IS_NUMBER_NAN> (defined in perl.h).
 
-If the value of the number can fit in a UV, it is returned in the *valuep
-IS_NUMBER_IN_UV will be set to indicate that *valuep is valid, IS_NUMBER_IN_UV
-will never be set unless *valuep is valid, but *valuep may have been assigned
-to during processing even though IS_NUMBER_IN_UV is not set on return.
-If valuep is NULL, IS_NUMBER_IN_UV will be set for the same cases as when
-valuep is non-NULL, but no actual assignment (or SEGV) will occur.
+If the value of the number can fit in a UV, it is returned in C<*valuep>.
+C<IS_NUMBER_IN_UV> will be set to indicate that C<*valuep> is valid, C<IS_NUMBER_IN_UV>
+will never be set unless C<*valuep> is valid, but C<*valuep> may have been assigned
+to during processing even though C<IS_NUMBER_IN_UV> is not set on return.
+If C<valuep> is C<NULL>, C<IS_NUMBER_IN_UV> will be set for the same cases as when
+C<valuep> is non-C<NULL>, but no actual assignment (or SEGV) will occur.
 
-IS_NUMBER_NOT_INT will be set with IS_NUMBER_IN_UV if trailing decimals were
-seen (in which case *valuep gives the true value truncated to an integer), and
-IS_NUMBER_NEG if the number is negative (in which case *valuep holds the
-absolute value).  IS_NUMBER_IN_UV is not set if e notation was used or the
+C<IS_NUMBER_NOT_INT> will be set with C<IS_NUMBER_IN_UV> if trailing decimals were
+seen (in which case C<*valuep> gives the true value truncated to an integer), and
+C<IS_NUMBER_NEG> if the number is negative (in which case C<*valuep> holds the
+absolute value).  C<IS_NUMBER_IN_UV> is not set if e notation was used or the
 number is larger than a UV.
 
 C<flags> allows only C<PERL_SCAN_TRAILING>, which allows for trailing
@@ -829,7 +829,7 @@ C<IS_NUMBER_TRAILING> on the result.
 
 =for apidoc grok_number
 
-Identical to grok_number_flags() with flags set to zero.
+Identical to C<grok_number_flags()> with C<flags> set to zero.
 
 =cut
  */
@@ -1525,9 +1525,9 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 /*
 =for apidoc isinfnan
 
-Perl_isinfnan() is utility function that returns true if the NV
-argument is either an infinity or a NaN, false otherwise.  To test
-in more detail, use Perl_isinf() and Perl_isnan().
+C<Perl_isinfnan()> is utility function that returns true if the NV
+argument is either an infinity or a C<NaN>, false otherwise.  To test
+in more detail, use C<Perl_isinf()> and C<Perl_isnan()>.
 
 This is also the logical inverse of Perl_isfinite().
 
@@ -1550,9 +1550,9 @@ Perl_isinfnan(NV nv)
 /*
 =for apidoc
 
-Checks whether the argument would be either an infinity or NaN when used
+Checks whether the argument would be either an infinity or C<NaN> when used
 as a number, but is careful not to trigger non-numeric or uninitialized
-warnings.  it assumes the caller has done SvGETMAGIC(sv) already.
+warnings.  it assumes the caller has done C<SvGETMAGIC(sv)> already.
 
 =cut
 */
@@ -1610,19 +1610,19 @@ Perl_my_frexpl(long double x, int *e) {
 Return a non-zero integer if the sign bit on an NV is set, and 0 if
 it is not.  
 
-If F<Configure> detects this system has a signbit() that will work with
-our NVs, then we just use it via the #define in perl.h.  Otherwise,
+If F<Configure> detects this system has a C<signbit()> that will work with
+our NVs, then we just use it via the C<#define> in F<perl.h>.  Otherwise,
 fall back on this implementation.  The main use of this function
-is catching -0.0.
+is catching C<-0.0>.
 
-Configure notes:  This function is called 'Perl_signbit' instead of a
-plain 'signbit' because it is easy to imagine a system having a signbit()
+C<Configure> notes:  This function is called C<'Perl_signbit'> instead of a
+plain C<'signbit'> because it is easy to imagine a system having a C<signbit()>
 function or macro that doesn't happen to work with our particular choice
-of NVs.  We shouldn't just re-#define signbit as Perl_signbit and expect
+of NVs.  We shouldn't just re-C<#define> C<signbit> as C<Perl_signbit> and expect
 the standard system headers to be happy.  Also, this is a no-context
-function (no pTHX_) because Perl_signbit() is usually re-#defined in
-F<perl.h> as a simple macro call to the system's signbit().
-Users should just always call Perl_signbit().
+function (no C<pTHX_>) because C<Perl_signbit()> is usually re-C<#defined> in
+F<perl.h> as a simple macro call to the system's C<signbit()>.
+Users should just always call C<Perl_signbit()>.
 
 =cut
 */

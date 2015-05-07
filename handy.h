@@ -1844,7 +1844,7 @@ source, C<dest> is the destination, C<nitems> is the number of items, and
 C<type> is the type.  Can do overlapping moves.  See also C<L</Copy>>.
 
 =for apidoc Am|void *|MoveD|void* src|void* dest|int nitems|type
-Like C<Move> but returns dest.  Useful
+Like C<Move> but returns C<dest>.  Useful
 for encouraging compilers to tail-call
 optimise.
 
@@ -1855,7 +1855,7 @@ C<type> is the type.  May fail on overlapping copies.  See also C<L</Move>>.
 
 =for apidoc Am|void *|CopyD|void* src|void* dest|int nitems|type
 
-Like C<Copy> but returns dest.  Useful
+Like C<Copy> but returns C<dest>.  Useful
 for encouraging compilers to tail-call
 optimise.
 

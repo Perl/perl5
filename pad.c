@@ -38,10 +38,10 @@ not callable at will and are always thrown away after the eval"" is done
 executing).  Require'd files are simply evals without any outer lexical
 scope.
 
-XSUBs do not have a CvPADLIST.  dXSTARG fetches values from PL_curpad,
+XSUBs do not have a C<CvPADLIST>.  C<dXSTARG> fetches values from C<PL_curpad>,
 but that is really the callers pad (a slot of which is allocated by
-every entersub). Do not get or set CvPADLIST if a CV is an XSUB (as
-determined by C<CvISXSUB()>), CvPADLIST slot is reused for a different
+every entersub). Do not get or set C<CvPADLIST> if a CV is an XSUB (as
+determined by C<CvISXSUB()>), C<CvPADLIST> slot is reused for a different
 internal purpose in XSUBs.
 
 The PADLIST has a C array where pads are stored.
@@ -55,26 +55,27 @@ array, so don't rely on it.  See L</PadlistNAMES>.
 
 The CvDEPTH'th entry of a PADLIST is a PAD (an AV) which is the stack frame
 at that depth of recursion into the CV.  The 0th slot of a frame AV is an
-AV which is @_.  Other entries are storage for variables and op targets.
+AV which is C<@_>.  Other entries are storage for variables and op targets.
 
 Iterating over the PADNAMELIST iterates over all possible pad
-items.  Pad slots for targets (SVs_PADTMP)
+items.  Pad slots for targets (C<SVs_PADTMP>)
 and GVs end up having &PL_padname_undef "names", while slots for constants 
-have &PL_padname_const "names" (see pad_alloc()).  That &PL_padname_undef
-and &PL_padname_const are used is an implementation detail subject to
-change.  To test for them, use C<!PadnamePV(name)> and C<PadnamePV(name)
-&& !PadnameLEN(name)>, respectively.
+have C<&PL_padname_const> "names" (see C<L</pad_alloc>>).  That
+C<&PL_padname_undef>
+and C<&PL_padname_const> are used is an implementation detail subject to
+change.  To test for them, use C<!PadnamePV(name)> and
+C<PadnamePV(name) && !PadnameLEN(name)>, respectively.
 
-Only my/our variable slots get valid names.
+Only C<my>/C<our> variable slots get valid names.
 The rest are op targets/GVs/constants which are statically allocated
 or resolved at compile time.  These don't have names by which they
 can be looked up from Perl code at run time through eval"" the way
-my/our variables can be.  Since they can't be looked up by "name"
+C<my>/C<our> variables can be.  Since they can't be looked up by "name"
 but only by their index allocated at compile time (which is usually
-in PL_op->op_targ), wasting a name SV for them doesn't make sense.
+in C<PL_op->op_targ>), wasting a name SV for them doesn't make sense.
 
 The pad names in the PADNAMELIST have their PV holding the name of
-the variable.  The COP_SEQ_RANGE_LOW and _HIGH fields form a range
+the variable.  The C<COP_SEQ_RANGE_LOW> and C<_HIGH> fields form a range
 (low+1..high inclusive) of cop_seq numbers for which the name is
 valid.  During compilation, these fields may hold the special value
 PERL_PADSEQ_INTRO to indicate various stages:
@@ -88,13 +89,13 @@ PERL_PADSEQ_INTRO to indicate various stages:
  valid-seq#          valid-seq#   compilation of scope complete:
                                   { my ($x) }
 
-For typed lexicals PadnameTYPE points at the type stash.  For C<our>
-lexicals, PadnameOURSTASH points at the stash of the associated global (so
+For typed lexicals C<PadnameTYPE> points at the type stash.  For C<our>
+lexicals, C<PadnameOURSTASH> points at the stash of the associated global (so
 that duplicate C<our> declarations in the same package can be detected).
-PadnameGEN is sometimes used to store the generation number during
+C<PadnameGEN> is sometimes used to store the generation number during
 compilation.
 
-If PadnameOUTER is set on the pad name, then that slot in the frame AV
+If C<PadnameOUTER> is set on the pad name, then that slot in the frame AV
 is a REFCNT'ed reference to a lexical from "outside".  Such entries
 are sometimes referred to as 'fake'.  In this case, the name does not
 use 'low' and 'high' to store a cop_seq range, since it is in scope
@@ -104,20 +105,20 @@ instantiated multiple times?), and for fake ANONs, 'low' contains the index
 within the parent's pad where the lexical's value is stored, to make
 cloning quicker.
 
-If the 'name' is '&' the corresponding entry in the PAD
+If the 'name' is C<&> the corresponding entry in the PAD
 is a CV representing a possible closure.
 
 Note that formats are treated as anon subs, and are cloned each time
 write is called (if necessary).
 
-The flag SVs_PADSTALE is cleared on lexicals each time the my() is executed,
+The flag C<SVs_PADSTALE> is cleared on lexicals each time the C<my()> is executed,
 and set on scope exit.  This allows the
-'Variable $x is not available' warning
+C<"Variable $x is not available"> warning
 to be generated in evals, such as 
 
     { my $x = 1; sub f { eval '$x'} } f();
 
-For state vars, SVs_PADSTALE is overloaded to mean 'not yet initialised',
+For state vars, C<SVs_PADSTALE> is overloaded to mean 'not yet initialised',
 but this internal state is stored in a separate pad entry.
 
 =for apidoc AmxU|PADNAMELIST *|PL_comppad_name
@@ -288,7 +289,7 @@ Perl_pad_new(pTHX_ int flags)
 
 Clear out all the active components of a CV.  This can happen either
 by an explicit C<undef &foo>, or by the reference count going to zero.
-In the former case, we keep the CvOUTSIDE pointer, so that any anonymous
+In the former case, we keep the C<CvOUTSIDE> pointer, so that any anonymous
 children can still follow the full lexical scope chain.
 
 =cut
@@ -488,10 +489,10 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 /*
 =for apidoc cv_forget_slab
 
-When a CV has a reference count on its slab (CvSLABBED), it is responsible
+When a CV has a reference count on its slab (C<CvSLABBED>), it is responsible
 for making sure it is freed.  (Hence, no two CVs should ever have a
 reference count on the same slab.)  The CV only needs to reference the slab
-during compilation.  Once it is compiled and CvROOT attached, it has
+during compilation.  Once it is compiled and C<CvROOT> attached, it has
 finished its job, so it can forget the slab.
 
 =cut
@@ -853,11 +854,11 @@ Perl_pad_add_weakref(pTHX_ CV* func)
 
 Check for duplicate declarations: report any of:
 
-     * a my in the current scope with the same name;
-     * an our (anywhere in the pad) with the same name and the
-       same stash as C<ourstash>
+     * a 'my' in the current scope with the same name;
+     * an 'our' (anywhere in the pad) with the same name and the
+       same stash as 'ourstash'
 
-C<is_our> indicates that the name to check is an 'our' declaration.
+C<is_our> indicates that the name to check is an C<"our"> declaration.
 
 =cut
 */
@@ -1103,18 +1104,18 @@ Find a named lexical anywhere in a chain of nested pads.  Add fake entries
 in the inner pads if it's found in an outer one.
 
 Returns the offset in the bottom pad of the lex or the fake lex.
-cv is the CV in which to start the search, and seq is the current cop_seq
-to match against.  If warn is true, print appropriate warnings.  The out_*
+C<cv> is the CV in which to start the search, and seq is the current C<cop_seq>
+to match against.  If C<warn> is true, print appropriate warnings.  The C<out_>*
 vars return values, and so are pointers to where the returned values
-should be stored.  out_capture, if non-null, requests that the innermost
-instance of the lexical is captured; out_name is set to the innermost
-matched pad name or fake pad name; out_flags returns the flags normally
-associated with the PARENT_FAKELEX_FLAGS field of a fake pad name.
+should be stored.  C<out_capture>, if non-null, requests that the innermost
+instance of the lexical is captured; C<out_name> is set to the innermost
+matched pad name or fake pad name; C<out_flags> returns the flags normally
+associated with the C<PARENT_FAKELEX_FLAGS> field of a fake pad name.
 
-Note that pad_findlex() is recursive; it recurses up the chain of CVs,
+Note that C<pad_findlex()> is recursive; it recurses up the chain of CVs,
 then comes back down, adding fake entries
 as it goes.  It has to be this way
-because fake names in anon protoypes have to store in xlow the index into
+because fake names in anon protoypes have to store in C<xlow> the index into
 the parent pad.
 
 =cut
@@ -1383,7 +1384,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 =for apidoc Am|SV *|pad_sv|PADOFFSET po
 
 Get the value at offset C<po> in the current (compiling or executing) pad.
-Use macro PAD_SV instead of calling this function directly.
+Use macro C<PAD_SV> instead of calling this function directly.
 
 =cut
 */
@@ -1406,7 +1407,7 @@ Perl_pad_sv(pTHX_ PADOFFSET po)
 =for apidoc Am|void|pad_setsv|PADOFFSET po|SV *sv
 
 Set the value at offset C<po> in the current (compiling or executing) pad.
-Use the macro PAD_SETSV() rather than calling this function directly.
+Use the macro C<PAD_SETSV()> rather than calling this function directly.
 
 =cut
 */
@@ -1578,7 +1579,7 @@ Perl_pad_leavemy(pTHX)
 /*
 =for apidoc m|void|pad_swipe|PADOFFSET po|bool refadjust
 
-Abandon the tmp in the current pad at offset po and replace with a
+Abandon the tmp in the current pad at offset C<po> and replace with a
 new one.
 
 =cut
@@ -1667,7 +1668,7 @@ S_pad_reset(pTHX)
 
 Tidy up a pad at the end of compilation of the code to which it belongs.
 Jobs performed here are: remove most stuff from the pads of anonsub
-prototypes; give it a @_; mark temporaries as such.  C<type> indicates
+prototypes; give it a C<@_>; mark temporaries as such.  C<type> indicates
 the kind of subroutine:
 
     padtidy_SUB        ordinary subroutine
@@ -2333,7 +2334,7 @@ An SV may be passed as a second argument.  If so, the name will be assigned
 to it and it will be returned.  Otherwise the returned SV will be a new
 mortal.
 
-If the C<flags> include CV_NAME_NOTQUAL, then the package name will not be
+If C<flags> include C<CV_NAME_NOTQUAL>, then the package name will not be
 included.  If the first argument is neither a CV nor a GV, this flag is
 ignored (subject to change).
 
@@ -2373,8 +2374,8 @@ Perl_cv_name(pTHX_ CV *cv, SV *sv, U32 flags)
 /*
 =for apidoc m|void|pad_fixup_inner_anons|PADLIST *padlist|CV *old_cv|CV *new_cv
 
-For any anon CVs in the pad, change CvOUTSIDE of that CV from
-old_cv to new_cv if necessary.  Needed when a newly-compiled CV has to be
+For any anon CVs in the pad, change C<CvOUTSIDE> of that CV from
+C<old_cv> to C<new_cv> if necessary.  Needed when a newly-compiled CV has to be
 moved to a pre-existing CV struct.
 
 =cut
@@ -2445,7 +2446,7 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 
 Push a new pad frame onto the padlist, unless there's already a pad at
 this depth, in which case don't bother creating a new one.  Then give
-the new pad an @_ in slot zero.
+the new pad an C<@_> in slot zero.
 
 =cut
 */
@@ -2815,7 +2816,7 @@ Perl_newPADNAMEpvn(const char *s, STRLEN len)
 Constructs and returns a new pad name.  Only use this function for names
 that refer to outer lexicals.  (See also L</newPADNAMEpvn>.)  C<outer> is
 the outer pad name that this one mirrors.  The returned pad name has the
-PADNAMEt_OUTER flag already set.
+C<PADNAMEt_OUTER> flag already set.
 
 =cut
 */

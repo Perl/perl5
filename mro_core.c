@@ -199,7 +199,7 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 /*
 =for apidoc mro_get_linear_isa_dfs
 
-Returns the Depth-First Search linearization of @ISA
+Returns the Depth-First Search linearization of C<@ISA>
 the given stash.  The return value is a read-only AV*.
 C<level> should be 0 (it is used internally in this
 function's recursion).
@@ -461,7 +461,7 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
 =for apidoc mro_isa_changed_in
 
 Takes the necessary steps (cache invalidations, mostly)
-when the @ISA of the given package has changed.  Invoked
+when the C<@ISA> of the given package has changed.  Invoked
 by the C<setisa> magic, should not need to invoke directly.
 
 =cut

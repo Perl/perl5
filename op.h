@@ -714,7 +714,7 @@ Return the BHK's flags.
 =for apidoc mx|void *|BhkENTRY|BHK *hk|which
 Return an entry from the BHK structure.  C<which> is a preprocessor token
 indicating which entry to return.  If the appropriate flag is not set
-this will return NULL.  The type of the return value depends on which
+this will return C<NULL>.  The type of the return value depends on which
 entry you ask for.
 
 =for apidoc Amx|void|BhkENTRY_set|BHK *hk|which|void *ptr
@@ -912,13 +912,13 @@ Return a short description of the provided OP.
 =for apidoc Am|U32|OP_CLASS|OP *o
 Return the class of the provided OP: that is, which of the *OP
 structures it uses.  For core ops this currently gets the information out
-of PL_opargs, which does not always accurately reflect the type used.
+of C<PL_opargs>, which does not always accurately reflect the type used.
 For custom ops the type is returned from the registration, and it is up
 to the registree to ensure it is accurate.  The value returned will be
-one of the OA_* constants from F<op.h>.
+one of the C<OA_>* constants from F<op.h>.
 
 =for apidoc Am|bool|OP_TYPE_IS|OP *o|Optype type
-Returns true if the given OP is not a NULL pointer
+Returns true if the given OP is not a C<NULL> pointer
 and if it is of the given type.
 
 The negation of this macro, C<OP_TYPE_ISNT> is also available
@@ -933,28 +933,28 @@ replaced by an OP of type OP_NULL.
 The negation of this macro, C<OP_TYPE_ISNT_AND_WASNT>
 is also available as well as C<OP_TYPE_IS_OR_WAS_NN>
 and C<OP_TYPE_ISNT_AND_WASNT_NN> which elide
-the NULL pointer check.
+the C<NULL> pointer check.
 
 =for apidoc Am|bool|OpHAS_SIBLING|OP *o
-Returns true if o has a sibling
+Returns true if C<o> has a sibling
 
 =for apidoc Am|OP*|OpSIBLING|OP *o
-Returns the sibling of o, or NULL if there is no sibling
+Returns the sibling of C<o>, or C<NULL> if there is no sibling
 
 =for apidoc Am|void|OpMORESIB_set|OP *o|OP *sib
-Sets the sibling of o to the non-zero value sib. See also C<L</OpLASTSIB_set>>
+Sets the sibling of C<o> to the non-zero value C<sib>. See also C<L</OpLASTSIB_set>>
 and C<L</OpMAYBESIB_set>>. For a higher-level interface, see
 C<L</op_sibling_splice>>.
 
 =for apidoc Am|void|OpLASTSIB_set|OP *o|OP *parent
-Marks o as having no further siblings. On C<PERL_OP_PARENT> builds, marks
+Marks C<o> as having no further siblings. On C<PERL_OP_PARENT> builds, marks
 o as having the specified parent. See also C<L</OpMORESIB_set>> and
 C<OpMAYBESIB_set>. For a higher-level interface, see
 C<L</op_sibling_splice>>.
 
 =for apidoc Am|void|OpMAYBESIB_set|OP *o|OP *sib|OP *parent
 Conditionally does C<OpMORESIB_set> or C<OpLASTSIB_set> depending on whether
-sib is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
+C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 
 =cut
 */

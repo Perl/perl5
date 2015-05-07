@@ -222,19 +222,19 @@ C<hash> parameter is the precomputed hash value; if it is zero then
 Perl will compute it.
 
 The return value will be
-NULL if the operation failed or if the value did not need to be actually
+C<NULL> if the operation failed or if the value did not need to be actually
 stored within the hash (as in the case of tied hashes).  Otherwise it can
 be dereferenced to get the original C<SV*>.  Note that the caller is
 responsible for suitably incrementing the reference count of C<val> before
-the call, and decrementing it if the function returned NULL.  Effectively
-a successful hv_store takes ownership of one reference to C<val>.  This is
+the call, and decrementing it if the function returned C<NULL>.  Effectively
+a successful C<hv_store> takes ownership of one reference to C<val>.  This is
 usually what you want; a newly created SV has a reference count of one, so
-if all your code does is create SVs then store them in a hash, hv_store
+if all your code does is create SVs then store them in a hash, C<hv_store>
 will own the only reference to the new SV, and your code doesn't need to do
-anything further to tidy up.  hv_store is not implemented as a call to
-hv_store_ent, and does not create a temporary SV for the key, so if your
-key data is not already in SV form then use hv_store in preference to
-hv_store_ent.
+anything further to tidy up.  C<hv_store> is not implemented as a call to
+C<hv_store_ent>, and does not create a temporary SV for the key, so if your
+key data is not already in SV form then use C<hv_store> in preference to
+C<hv_store_ent>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -244,22 +244,22 @@ information on how to use this function on tied hashes.
 Stores C<val> in a hash.  The hash key is specified as C<key>.  The C<hash>
 parameter is the precomputed hash value; if it is zero then Perl will
 compute it.  The return value is the new hash entry so created.  It will be
-NULL if the operation failed or if the value did not need to be actually
+C<NULL> if the operation failed or if the value did not need to be actually
 stored within the hash (as in the case of tied hashes).  Otherwise the
 contents of the return value can be accessed using the C<He?> macros
 described here.  Note that the caller is responsible for suitably
 incrementing the reference count of C<val> before the call, and
 decrementing it if the function returned NULL.  Effectively a successful
-hv_store_ent takes ownership of one reference to C<val>.  This is
+C<hv_store_ent> takes ownership of one reference to C<val>.  This is
 usually what you want; a newly created SV has a reference count of one, so
-if all your code does is create SVs then store them in a hash, hv_store
+if all your code does is create SVs then store them in a hash, C<hv_store>
 will own the only reference to the new SV, and your code doesn't need to do
-anything further to tidy up.  Note that hv_store_ent only reads the C<key>;
+anything further to tidy up.  Note that C<hv_store_ent> only reads the C<key>;
 unlike C<val> it does not take ownership of it, so maintaining the correct
-reference count on C<key> is entirely the caller's responsibility.  hv_store
-is not implemented as a call to hv_store_ent, and does not create a temporary
+reference count on C<key> is entirely the caller's responsibility.  C<hv_store>
+is not implemented as a call to C<hv_store_ent>, and does not create a temporary
 SV for the key, so if your key data is not already in SV form then use
-hv_store in preference to hv_store_ent.
+C<hv_store> in preference to C<hv_store_ent>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -973,15 +973,15 @@ Deletes a key/value pair in the hash.  The value's SV is removed from
 the hash, made mortal, and returned to the caller.  The absolute
 value of C<klen> is the length of the key.  If C<klen> is negative the
 key is assumed to be in UTF-8-encoded Unicode.  The C<flags> value
-will normally be zero; if set to G_DISCARD then NULL will be returned.
-NULL will also be returned if the key is not found.
+will normally be zero; if set to C<G_DISCARD> then C<NULL> will be returned.
+C<NULL> will also be returned if the key is not found.
 
 =for apidoc hv_delete_ent
 
 Deletes a key/value pair in the hash.  The value SV is removed from the hash,
 made mortal, and returned to the caller.  The C<flags> value will normally be
-zero; if set to G_DISCARD then NULL will be returned.  NULL will also be
-returned if the key is not found.  C<hash> can be a valid precomputed hash
+zero; if set to C<G_DISCARD> then C<NULL> will be returned.  C<NULL> will also
+be returned if the key is not found.  C<hash> can be a valid precomputed hash
 value, or 0 to ask for it to be computed.
 
 =cut
@@ -1664,11 +1664,12 @@ Perl_hv_clear(pTHX_ HV *hv)
 
 Clears any placeholders from a hash.  If a restricted hash has any of its keys
 marked as readonly and the key is subsequently deleted, the key is not actually
-deleted but is marked by assigning it a value of &PL_sv_placeholder.  This tags
+deleted but is marked by assigning it a value of C<&PL_sv_placeholder>.  This tags
 it so it will be ignored by future operations such as iterating over the hash,
 but will still allow the hash to have a value reassigned to the key at some
 future point.  This function clears any such placeholder keys from the hash.
-See Hash::Util::lock_keys() for an example of its use.
+See C<L<Hash::Util::lock_keys()|Hash::Util/lock_keys>> for an example of its
+use.
 
 =cut
 */
@@ -1830,7 +1831,7 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 
 Undefines the hash.  The XS equivalent of C<undef(%hash)>.
 
-As well as freeing all the elements of the hash (like hv_clear()), this
+As well as freeing all the elements of the hash (like C<hv_clear()>), this
 also frees any auxiliary data and storage associated with the hash.
 
 If any destructors are triggered as a result, the hv itself may
@@ -2480,7 +2481,7 @@ trigger the resource deallocation.
 
 Returns entries from a hash iterator.  See C<L</hv_iterinit>> and
 C<L</hv_iternext>>.
-The C<flags> value will normally be zero; if HV_ITERNEXT_WANTPLACEHOLDERS is
+The C<flags> value will normally be zero; if C<HV_ITERNEXT_WANTPLACEHOLDERS> is
 set the placeholders keys (for restricted hashes) will be returned in addition
 to normal keys.  By default placeholders are automatically skipped over.
 Currently a placeholder is implemented with a value that is

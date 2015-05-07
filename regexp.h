@@ -242,7 +242,7 @@ equivalent to the following snippet:
     if (SvTYPE(sv) == SVt_REGEXP)
         return (REGEXP*) sv;
 
-NULL will be returned if a REGEXP* is not found.
+C<NULL> will be returned if a REGEXP* is not found.
 
 =for apidoc Am|bool|SvRXOK|SV* sv
 

@@ -1265,10 +1265,10 @@ PP(pp_sselect)
 
 =for apidoc setdefout
 
-Sets PL_defoutgv, the default file handle for output, to the passed in
-typeglob.  As PL_defoutgv "owns" a reference on its typeglob, the reference
+Sets C<PL_defoutgv>, the default file handle for output, to the passed in
+typeglob.  As C<PL_defoutgv> "owns" a reference on its typeglob, the reference
 count of the passed in typeglob is increased by one, and the reference count
-of the typeglob that PL_defoutgv points to is decreased by one.
+of the typeglob that C<PL_defoutgv> points to is decreased by one.
 
 =cut
 */

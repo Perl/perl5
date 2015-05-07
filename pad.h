@@ -179,10 +179,10 @@ Save a pad slot (used to restore after an iteration)
 XXX DAPM it would make more sense to make the arg a PADOFFSET
 =for apidoc m|void|SAVECLEARSV	|SV **svp
 Clear the pointed to pad value on scope exit.  (i.e. the runtime action of
-'my')
+C<my>)
 
 =for apidoc m|void|SAVECOMPPAD
-save PL_comppad and PL_curpad
+save C<PL_comppad> and C<PL_curpad>
 
 
 =for apidoc Amx|PAD **|PadlistARRAY|PADLIST padlist
@@ -191,7 +191,7 @@ numbers >= 1, as the 0th entry is not guaranteed to remain usable.
 
 =for apidoc Amx|SSize_t|PadlistMAX|PADLIST padlist
 The index of the last allocated space in the padlist.  Note that the last
-pad may be in an earlier slot.  Any entries following it will be NULL in
+pad may be in an earlier slot.  Any entries following it will be C<NULL> in
 that case.
 
 =for apidoc Amx|PADNAMELIST *|PadlistNAMES|PADLIST padlist
@@ -225,7 +225,7 @@ The C array of pad entries.
 The index of the last pad entry.
 
 =for apidoc Amx|char *|PadnamePV|PADNAME pn	
-The name stored in the pad name struct.  This returns NULL for a target
+The name stored in the pad name struct.  This returns C<NULL> for a target
 slot.
 
 =for apidoc Amx|STRLEN|PadnameLEN|PADNAME pn	
@@ -251,7 +251,7 @@ are often referred to as 'fake'.
 Whether this is a "state" variable.
 
 =for apidoc m|HV *|PadnameTYPE|PADNAME pn
-The stash associated with a typed lexical.  This returns the %Foo:: hash
+The stash associated with a typed lexical.  This returns the C<%Foo::> hash
 for C<my Foo $bar>.
 
 =for apidoc Amx|SSize_t|PadnameREFCNT|PADNAME pn
@@ -292,11 +292,11 @@ like PAD_SET_CUR, but without the save
 Save the current pad then set it to null.
 
 =for apidoc m|void|PAD_SAVE_LOCAL|PAD *opad|PAD *npad
-Save the current pad to the local variable opad, then make the
-current pad equal to npad
+Save the current pad to the local variable C<opad>, then make the
+current pad equal to C<npad>
 
 =for apidoc m|void|PAD_RESTORE_LOCAL|PAD *opad
-Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
+Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 
 =cut
 */
@@ -412,7 +412,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 Save the current pad in the given context block structure.
 
 =for apidoc m|SV *|CX_CURPAD_SV|struct context|PADOFFSET po
-Access the SV at offset po in the saved current pad in the given
+Access the SV at offset C<po> in the saved current pad in the given
 context block structure (can be used as an lvalue).
 
 =cut

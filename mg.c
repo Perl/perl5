@@ -160,7 +160,7 @@ Perl_mg_magical(SV *sv)
 =for apidoc mg_get
 
 Do magic before a value is retrieved from the SV.  The type of SV must
-be >= SVt_PVMG.  See C<L</sv_magic>>.
+be >= C<SVt_PVMG>.  See C<L</sv_magic>>.
 
 =cut
 */
@@ -285,10 +285,10 @@ Perl_mg_set(pTHX_ SV *sv)
 =for apidoc mg_length
 
 Reports on the SV's length in bytes, calling length magic if available,
-but does not set the UTF8 flag on the sv.  It will fall back to 'get'
+but does not set the UTF8 flag on C<sv>.  It will fall back to 'get'
 magic if there is no 'length' magic, but with no indication as to
-whether it called 'get' magic.  It assumes the sv is a PVMG or
-higher.  Use sv_len() instead.
+whether it called 'get' magic.  It assumes C<sv> is a C<PVMG> or
+higher.  Use C<sv_len()> instead.
 
 =cut
 */
@@ -403,7 +403,7 @@ S_mg_findext_flags(const SV *sv, int type, const MGVTBL *vtbl, U32 flags)
 /*
 =for apidoc mg_find
 
-Finds the magic pointer for type matching the SV.  See C<L</sv_magic>>.
+Finds the magic pointer for C<type> matching the SV.  See C<L</sv_magic>>.
 
 =cut
 */
@@ -486,12 +486,12 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
 =for apidoc mg_localize
 
 Copy some of the magic from an existing SV to new localized version of that
-SV.  Container magic (eg %ENV, $1, tie)
+SV.  Container magic (eg C<%ENV>, C<$1>, C<tie>)
 gets copied, value magic doesn't (eg
-taint, pos).
+C<taint>, C<pos>).
 
-If setmagic is false then no set magic will be called on the new (empty) SV.
-This typically means that assignment will soon follow (e.g. 'local $x = $y'),
+If C<setmagic> is false then no set magic will be called on the new (empty) SV.
+This typically means that assignment will soon follow (e.g. C<'local $x = $y'>),
 and that will handle the magic.
 
 =cut
@@ -1782,7 +1782,7 @@ The C<flags> can be:
 
 The arguments themselves are any values following the C<flags> argument.
 
-Returns the SV (if any) returned by the method, or NULL on failure.
+Returns the SV (if any) returned by the method, or C<NULL> on failure.
 
 
 =cut
@@ -3451,7 +3451,7 @@ S_unwind_handler_stack(pTHX_ const void *p)
 /*
 =for apidoc magic_sethint
 
-Triggered by a store to %^H, records the key/value pair to
+Triggered by a store to C<%^H>, records the key/value pair to
 C<PL_compiling.cop_hints_hash>.  It is assumed that hints aren't storing
 anything that would need a deep copy.  Maybe we should warn if we find a
 reference.
@@ -3483,7 +3483,7 @@ Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
 /*
 =for apidoc magic_clearhint
 
-Triggered by a delete from %^H, records the key to
+Triggered by a delete from C<%^H>, records the key to
 C<PL_compiling.cop_hints_hash>.
 
 =cut
@@ -3507,7 +3507,7 @@ Perl_magic_clearhint(pTHX_ SV *sv, MAGIC *mg)
 /*
 =for apidoc magic_clearhints
 
-Triggered by clearing %^H, resets C<PL_compiling.cop_hints_hash>.
+Triggered by clearing C<%^H>, resets C<PL_compiling.cop_hints_hash>.
 
 =cut
 */
