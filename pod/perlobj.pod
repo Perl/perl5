@@ -949,7 +949,7 @@ C<Devel::GlobalDestruction> module on CPAN.
 
 If your C<DESTROY> method issues a warning during global destruction,
 the Perl interpreter will append the string " during global
-destruction" the warning.
+destruction" to the warning.
 
 During global destruction, Perl will always garbage collect objects
 before unblessed references. See L<perlhacktips/PERL_DESTRUCT_LEVEL>
