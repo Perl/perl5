@@ -449,6 +449,16 @@ Test two strings to see if they are equal.  The C<len> parameter indicates
 the number of bytes to compare.  Returns true or false.  (A wrapper for
 C<strncmp>).
 
+=for apidoc Am|bool|memEQ|char* s1|char* s2|STRLEN len
+Test two buffers (which may contain embedded C<NUL> characters, to see if they
+are equal.  The C<len> parameter indicates the number of bytes to compare.
+Returns zero if equal, or non-zero if non-equal.
+
+=for apidoc Am|bool|memNE|char* s1|char* s2|STRLEN len
+Test two buffers (which may contain embedded C<NUL> characters, to see if they
+are not equal.  The C<len> parameter indicates the number of bytes to compare.
+Returns zero if non-equal, or non-zero if equal.
+
 =cut
 */
 

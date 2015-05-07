@@ -324,6 +324,16 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 /* Number of bytes a code point occupies in UTF-8. */
 #define NATIVE_SKIP(uv) OFFUNISKIP(NATIVE_TO_UNI(uv))
 
+/*
+
+=for apidoc Am|STRLEN|UVCHR_SKIP|UV cp
+returns the number of bytes required to represent the code point C<cp> when
+encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
+255; a Unicode code point otherwise.
+
+=cut
+ */
+
 /* Most code which says UNISKIP is really thinking in terms of native code
  * points (0-255) plus all those beyond.  This is an imprecise term, but having
  * it means existing code continues to work.  For precision, use UVCHR_SKIP,
@@ -343,8 +353,14 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 /* Should never be used, and be deprecated */
 #define TWO_BYTE_UTF8_TO_UNI(HI, LO) NATIVE_TO_UNI(TWO_BYTE_UTF8_TO_NATIVE(HI, LO))
 
-/* How many bytes in the UTF-8 encoded character whose first (perhaps only)
- * byte is pointed to by 's' */
+/*
+
+=for apidoc Am|STRLEN|UTF8SKIP|char* s
+returns the number of bytes in the UTF-8 encoded character whose first (perhaps
+only) byte is pointed to by C<s>.
+
+=cut
+ */
 #define UTF8SKIP(s) PL_utf8skip[*(const U8*)(s)]
 
 /* Is the byte 'c' the same character when encoded in UTF-8 as when not.  This
@@ -430,6 +446,18 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UTF8_MAX_FOLD_CHAR_EXPAND 3
 
 #define IN_BYTES (CopHINTS_get(PL_curcop) & HINT_BYTES)
+
+/*
+
+=for apidoc Am|bool|DO_UTF8|SV* sv
+Returns a bool giving whether or not the PV in C<sv> is to be treated as being
+encoded in UTF-8.
+
+You should use this I<after> a call to C<SvPV()> or one of its variants, in
+case any call to string overloading updates the internal UTF-8 encoding flag.
+
+=cut
+*/
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTES)
 #define IN_UNI_8_BIT \
 	    (((CopHINTS_get(PL_curcop) & (HINT_UNI_8_BIT))                       \
