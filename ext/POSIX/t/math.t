@@ -2,7 +2,7 @@
 
 use strict;
 
-use POSIX;
+use POSIX ':math_h_c99';
 use Test::More;
 
 use Config;
