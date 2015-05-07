@@ -2931,18 +2931,39 @@ old SV has the UTF8 flag set (I<after> the C<SvPV> call), and act
 accordingly:
 
     p = SvPV(sv, len);
-    frobnicate(p);
+    is_utf8 = SvUTF8(sv);
+    frobnicate(p, is_utf8);
     nsv = newSVpvn(p, len);
-    if (SvUTF8(sv))
+    if (is_utf8)
         SvUTF8_on(nsv);
 
-In fact, your C<frobnicate> function should be made aware of whether or
-not it's dealing with UTF-8 data, so that it can handle the string
-appropriately.
+In the above, your C<frobnicate> function has been changed to be made
+aware of whether or not it's dealing with UTF-8 data, so that it can
+handle the string appropriately.
 
 Since just passing an SV to an XS function and copying the data of
 the SV is not enough to copy the UTF8 flags, even less right is just
 passing a S<C<char *>> to an XS function.
+
+For full generality, use the L<perlapi/DO_UTF8> macro to see if the
+string in an SV is to be I<treated> as UTF-8.  This takes into account
+if the call to the XS function is being made from within the scope of
+L<S<C<use bytes>>|bytes>.  If so, the underlying bytes that comprise the
+UTF-8 string are to be exposed, rather than the character they
+represent.  But this pragma should only really be used for debugging and
+perhaps low-level testing at the byte level.  Hence most XS code need
+not concern itself with this, but various areas of the perl core do need
+to support it.
+
+And this isn't the whole story.  Starting in Perl v5.12, strings that
+aren't encoded in UTF-8 may also be treated as Unicode under various
+conditions.
+This is only really a problem for characters whose ordinals are between
+128 and 255, and their behavior varies under ASCII versus Unicode rules
+in ways that your code cares about (see L<perlunicode/The "Unicode Bug">).
+There is no published API for dealing with this, as it is subject to
+change, but you can look at the code for C<pp_lc> in F<pp.c> for an
+example as to how it's currently done.
 
 =head2 How do I convert a string to UTF-8?
 
@@ -2968,6 +2989,21 @@ C<utf8_to_bytes> to go the other way, but naturally, this will fail if
 the string contains any characters above 255 that can't be represented
 in a single byte.
 
+=head2 How do I compare strings?
+
+L<perlapi/sv_cmp> and L<perlapi/sv_cmp_flags> do a lexigraphic
+comparison of two SV's, and handle UTF-8ness properly.  Note, however,
+that Unicode specifies a much fancier mechanism for collation, available
+via the L<Unicode::Collate> module.
+
+To just compare two strings for equality/non-equality, you can just use
+L<C<memEQ()>|perlapi/memEQ> and L<C<memNE()>|perlapi/memEQ> as usual,
+except the strings must be both UTF-8 or not UTF-8 encoded.
+
+To compare two strings case-insensitively, use
+L<C<foldEQ_utf8()>|perlapi/foldEQ_utf8> (the strings don't have to have
+the same UTF-8ness).
+
 =head2 Is there anything else I need to know?
 
 Not really.  Just remember these things:
@@ -2976,11 +3012,15 @@ Not really.  Just remember these things:
 
 =item *
 
-There's no way to tell if a string is UTF-8 or not.  You can tell if an SV
-is UTF-8 by looking at its C<SvUTF8> flag after stringifying it
-with C<SvPV> or a similar macro.  Don't forget to set the flag if
-something should be UTF-8.  Treat the flag as part of the PV, even though
-it's not - if you pass on the PV to somewhere, pass on the flag too.
+There's no way to tell if a S<C<char *>> or S<C<U8 *>> string is UTF-8
+or not.  But you can tell if an SV is to be treated as UTF-8 by calling
+C<DO_UTF8> on it, after stringifying it with C<SvPV> or a similar
+macro.  And, you can tell if SV is actually UTF-8 (even if it is not to
+be treated as such) by looking at its C<SvUTF8> flag (again after
+stringifying it).  Don't forget to set the flag if something should be
+UTF-8.
+Treat the flag as part of the PV, even though it's not -- if you pass on
+the PV to somewhere, pass on the flag too.
 
 =item *
 
