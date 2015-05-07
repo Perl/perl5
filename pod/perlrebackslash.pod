@@ -589,7 +589,8 @@ the ends of sententces.  C<\b{sb}> doesn't do well with text containing
 embedded newlines, like the source text of the document you are reading.
 Such text needs to be preprocessed to get rid of the line separators
 before looking for sentence boundaries.  Some people view this as a bug
-in the Unicode standard.
+in the Unicode standard, and this behavior is quite subject to change in
+future Perl versions.
 
 =item C<\b{wb}>
 
