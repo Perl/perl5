@@ -326,9 +326,10 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 /* Most code which says UNISKIP is really thinking in terms of native code
  * points (0-255) plus all those beyond.  This is an imprecise term, but having
- * it means existing code continues to work.  For precision, use NATIVE_SKIP
- * and OFFUNISKIP */
+ * it means existing code continues to work.  For precision, use UVCHR_SKIP,
+ * NATIVE_SKIP, and OFFUNISKIP */
 #define UNISKIP(uv)   NATIVE_SKIP(uv)
+#define UVCHR_SKIP(uv) NATIVE_SKIP(uv)
 
 /* Convert a two (not one) byte utf8 character to a native code point value.
  * Needs just one iteration of accumulate.  Should not be used unless it is
