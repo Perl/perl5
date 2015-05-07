@@ -1797,19 +1797,6 @@ the Unicode properties (character classes) like C<\p{Nd}> are known to
 be quite a bit slower (5-20 times) than their simpler counterparts
 like C<\d> (then again, there are hundreds of Unicode characters matching C<Nd>
 compared with the 10 ASCII characters matching C<d>).
-
-=head2 Problems on EBCDIC platforms
-
-There are several known problems with Perl on EBCDIC platforms.  If you
-want to use Perl there, send email to perlbug@perl.org.
-
-In earlier versions, when byte and character data were concatenated,
-the new string was sometimes created by
-decoding the byte strings as I<ISO 8859-1 (Latin-1)>, even if the
-old Unicode string used EBCDIC.
-
-If you find any of these, please report them as bugs.
-
 =head2 Porting code from perl-5.6.X
 
 Perl 5.8 has a different Unicode model from 5.6. In 5.6 the programmer

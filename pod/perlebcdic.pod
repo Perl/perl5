@@ -1867,6 +1867,13 @@ L<Unicode::Normalize> are not supported under EBCDIC; likewise for the
 
 L<Encode> partially works.
 
+=item *
+
+In earlier versions, when byte and character data were concatenated,
+the new string was sometimes created by
+decoding the byte strings as I<ISO 8859-1 (Latin-1)>, even if the
+old Unicode string used EBCDIC.
+
 =back
 
 =head1 SEE ALSO
