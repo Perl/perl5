@@ -4,16 +4,37 @@ perlunicode - Unicode support in Perl
 
 =head1 DESCRIPTION
 
+If you haven't already, before reading this document, you should become
+familiar with both L<perlunitut> and L<perluniintro>.
+
+Unicode aims to B<UNI>-fy the en-B<CODE>-ings of all the world's
+character sets into a single Standard.   For quite a few of the various
+coding standards that existed when Unicode was first created, converting
+from each to Unicode essentially meant adding a constant to each code
+point in the original standard, and converting back meant just
+subtracting that same constant.  For ASCII and ISO-8859-1, the constant
+is 0.  For ISO-8859-5, (Cyrillic) the constant is 864; for Hebrew
+(ISO-8859-8), it's 1488; Thai (ISO-8859-11), 3424; and so forth.  This
+made it easy to do the conversions, and facilitated the adoption of
+Unicode.
+
+And it worked; nowadays, those legacy standards are rarely used.  Most
+everyone uses Unicode.
+
+Unicode is a comprehensive standard.  It specifies many things outside
+the scope of Perl, such as how to display sequences of characters.  For
+a full discussion of all aspects of Unicode, see
+L<http://www.unicode.org>.
+
 =head2 Important Caveats
+
+Even though some of this section may not be understandable to you on
+first reading, we think it's important enough to highlight some of the
+gotchas before delving further, so here goes:
 
 Unicode support is an extensive requirement. While Perl does not
 implement the Unicode standard or the accompanying technical reports
 from cover to cover, Perl does support many Unicode features.
-
-People who want to learn to use Unicode in Perl, should probably read
-the L<Perl Unicode tutorial, perlunitut|perlunitut> and
-L<perluniintro>, before reading
-this reference document.
 
 Also, the use of Unicode may present security issues that aren't obvious.
 Read L<Unicode Security Considerations|http://www.unicode.org/reports/tr36>.
@@ -36,105 +57,103 @@ filenames.
 
 =item Input and Output Layers
 
-Perl knows when a filehandle uses Perl's internal Unicode encodings
-(UTF-8, or UTF-EBCDIC if in EBCDIC) if the filehandle is opened with
-the C<:encoding(utf8)> layer.  Other encodings can be converted to Perl's
-encoding on input or from Perl's encoding on output by use of the
-C<:encoding(...)>  layer.  See L<open>.
+Use the C<:encoding(...)> layer  to read from and write to
+filehandles using the specified encoding.  (See L<open>.)
 
-To indicate that Perl source itself is in UTF-8, use C<use utf8;>.
+=item You should convert your non-ASCII, non-UTF-8 Perl scripts to be
+UTF-8.
 
-=item C<use utf8> still needed to enable UTF-8/UTF-EBCDIC in scripts
+See L<encoding>.
 
-As a compatibility measure, the C<use utf8> pragma must be explicitly
-included to enable recognition of UTF-8 in the Perl scripts themselves
-(in string or regular expression literals, or in identifier names) on
-ASCII-based machines or to recognize UTF-EBCDIC on EBCDIC-based
-machines.  B<These are the only times when an explicit C<use utf8>
-is needed.>  See L<utf8>.
+=item C<use utf8> still needed to enable L<UTF-8|/Unicode Encodings> in scripts
 
-=item C<BOM>-marked scripts and UTF-16 scripts autodetected
+If your Perl script is itself encoded in L<UTF-8|/Unicode Encodings>,
+the S<C<use utf8>> pragma must be explicitly included to enable
+recognition of that (in string or regular expression literals, or in
+identifier names).  B<This is the only time when an explicit S<C<use
+utf8>> is needed.>  (See L<utf8>).
 
-If a Perl script begins marked with the Unicode C<BOM> (UTF-16LE, UTF16-BE,
-or UTF-8), or if the script looks like non-C<BOM>-marked UTF-16 of either
-endianness, Perl will correctly read in the script as Unicode.
-(C<BOM>less UTF-8 cannot be effectively recognized or differentiated from
-ISO 8859-1 or other eight-bit encodings.)
+=item C<BOM>-marked scripts and L<UTF-16|/Unicode Encodings> scripts autodetected
 
-=item C<use encoding> needed to upgrade non-Latin-1 byte strings
-
-By default, there is a fundamental asymmetry in Perl's Unicode model:
-implicit upgrading from byte strings to Unicode strings assumes that
-they were encoded in I<ISO 8859-1 (Latin-1)>, but Unicode strings are
-downgraded with UTF-8 encoding.  This happens because the first 256
-codepoints in Unicode happens to agree with Latin-1.
-
-See L</"Byte and Character Semantics"> for more details.
+However, if a Perl script begins with the Unicode C<BOM> (UTF-16LE,
+UTF16-BE, or UTF-8), or if the script looks like non-C<BOM>-marked
+UTF-16 of either endianness, Perl will correctly read in the script as
+the appropriate Unicode encoding.  (C<BOM>-less UTF-8 cannot be
+effectively recognized or differentiated from ISO 8859-1 or other
+eight-bit encodings.)
 
 =back
 
 =head2 Byte and Character Semantics
 
-Perl uses logically-wide characters to represent strings internally.
+Before Unicode, most encodings used 8 bits (a single byte) to encode
+each character.  Thus a character was a byte, and a byte was a
+character, and there could be only 256 or fewer possible characters.
+"Byte Semantics" in the title of this section refers to
+this behavior.  There was no need to distinguish between "Byte" and
+"Character".
 
-Starting in Perl 5.14, Perl-level operations work with
-characters rather than bytes within the scope of a
-C<L<use feature 'unicode_strings'|feature>> (or equivalently
-C<use 5.012> or higher).  (This is not true if bytes have been
-explicitly requested by C<L<use bytes|bytes>>, nor necessarily true
-for interactions with the platform's operating system.)
+Then along comes Unicode which has room for over a million characters
+(and Perl allows for even more).  This means that a character may
+require more than a single byte to represent it, and so the two terms
+are no longer equivalent.  What matter are the characters as whole
+entities, and not usually the bytes that comprise them.  That's what the
+term "Character Semantics" in the title of this section refers to.
 
-For earlier Perls, and when C<unicode_strings> is not in effect, Perl
-provides a fairly safe environment that can handle both types of
-semantics in programs.  For operations where Perl can unambiguously
-decide that the input data are characters, Perl switches to character
-semantics.  For operations where this determination cannot be made
-without additional information from the user, Perl decides in favor of
-compatibility and chooses to use byte semantics.
+Perl had to change internally to decouple "bytes" from "characters".
+It is important that you too change your ideas, if you haven't already,
+so that "byte" and "character" no longer mean the same thing in your
+mind.
 
-When C<use locale> (but not C<use locale ':not_characters'>) is in
-effect, Perl uses the rules associated with the current locale.
-(C<use locale> overrides C<use feature 'unicode_strings'> in the same scope;
-while C<use locale ':not_characters'> effectively also selects
-C<use feature 'unicode_strings'> in its scope; see L<perllocale>.)
-Otherwise, Perl uses the platform's native
-byte semantics for characters whose code points are less than 256, and
-Unicode rules for those greater than 255.  That means that non-ASCII
-characters are undefined except for their
-ordinal numbers.  This means that none have case (upper and lower), nor are any
-a member of character classes, like C<[:alpha:]> or C<\w>.  (But all do belong
-to the C<\W> class or the Perl regular expression extension C<[:^alpha:]>.)
+The basic building block of Perl strings has always been a "character".
+The changes basically come down to that the implementation no longer
+thinks that a character is always just a single byte.
 
-This behavior preserves compatibility with earlier versions of Perl,
-which allowed byte semantics in Perl operations only if
-none of the program's inputs were marked as being a source of Unicode
-character data.  Such data may come from filehandles, from calls to
-external programs, from information provided by the system (such as C<%ENV>),
-or from literals and constants in the source text.
-
-The C<utf8> pragma is primarily a compatibility device that enables
-recognition of UTF-(8|EBCDIC) in literals encountered by the parser.
-Note that this pragma is only required while Perl defaults to byte
-semantics; when character semantics become the default, this pragma
-may become a no-op.  See L<utf8>.
-
-If strings operating under byte semantics and strings with Unicode
-character data are concatenated, the new string will have
-character semantics.  This can cause surprises: See L</BUGS>, below.
-You can choose to be warned when this happens.  See C<L<encoding::warnings>>.
-
-Under character semantics, many operations that formerly operated on
-bytes now operate on characters. A character in Perl is
-logically just a number ranging from 0 to 2**31 or so. Larger
-characters may encode into longer sequences of bytes internally, but
-this internal detail is mostly hidden for Perl code.
-See L<perluniintro> for more.
-
-=head2 Effects of Character Semantics
-
-Character semantics have the following effects:
+There are various things to note:
 
 =over 4
+
+=item *
+
+String handling functions, for the most part, continue to operate in
+terms of characters.  C<length()>, for example, returns the number of
+characters in a string, just as before.  But that number no longer is
+necessarily the same as the number of bytes in the string (there may be
+more bytes than characters).  The other such functions include
+C<chop()>, C<chomp()>, C<substr()>, C<pos()>, C<index()>, C<rindex()>,
+C<sort()>, C<sprintf()>, and C<write()>.
+
+The exceptions are:
+
+=over 4
+
+=item *
+
+the bit-oriented C<vec>
+
+E<nbsp>
+
+=item *
+
+the byte-oriented C<pack>/C<unpack> C<"C"> format
+
+However, the C<W> specifier does operate on whole characters, as does the
+C<U> specifier.
+
+=item *
+
+some operators that interact with the platform's operating system
+
+Operators dealing with filenames are examples.
+
+=item *
+
+when the functions are called from within the scope of the
+S<C<L<use bytes|bytes>>> pragma
+
+Likely, you should use this only for debugging anyway.
+
+=back
 
 =item *
 
@@ -145,139 +164,234 @@ If you use a Unicode editor to edit your program, Unicode characters may
 occur directly within the literal strings in UTF-8 encoding, or UTF-16.
 (The former requires a C<BOM> or C<use utf8>, the latter requires a C<BOM>.)
 
-Unicode characters can also be added to a string by using the C<\N{U+...}>
-notation.  The Unicode code for the desired character, in hexadecimal,
-should be placed in the braces, after the C<U>. For instance, a smiley face is
-C<\N{U+263A}>.
-
-Alternatively, you can use the C<\x{...}> notation for characters C<0x100> and
-above.  For characters below C<0x100> you may get byte semantics instead of
-character semantics;  see L</The "Unicode Bug">.  On EBCDIC machines there is
-the additional problem that the value for such characters gives the EBCDIC
-character rather than the Unicode one, thus it is more portable to use
-C<\N{U+...}> instead.
-
-Additionally, you can use the C<\N{...}> notation and put the official
-Unicode character name within the braces, such as
-C<\N{WHITE SMILING FACE}>.  This automatically loads the L<charnames>
-module with the C<:full> and C<:short> options.  If you prefer different
-options for this module, you can instead, before the C<\N{...}>,
-explicitly load it with your desired options; for example,
-
-   use charnames ':loose';
+L<perluniintro/Creating Unicode> gives other ways to place non-ASCII
+characters in your strings.
 
 =item *
 
-If an appropriate L<encoding> is specified, identifiers within the
-Perl script may contain Unicode alphanumeric characters, including
-ideographs.  Perl does not currently attempt to canonicalize variable
-names.
+The C<chr()> and C<ord()> functions work on whole characters.
 
 =item *
 
-Regular expressions match characters instead of bytes.  C<"."> matches
-a character instead of a byte.
+Regular expressions match whole characters.  For example, C<"."> matches
+a whole character instead of only a single byte.
 
 =item *
 
-Bracketed character classes in regular expressions match characters instead of
-bytes and match against the character properties specified in the
-Unicode properties database.  C<\w> can be used to match a Japanese
-ideograph, for instance.
+The C<tr///> operator translates whole characters.  (Note that the
+C<tr///CU> functionality has been removed.  For similar functionality to
+that, see C<pack('U0', ...)> and C<pack('C0', ...)>).
 
 =item *
 
-Named Unicode properties, scripts, and block ranges may be used (like bracketed
-character classes) by using the C<\p{}> "matches property" construct and
-the C<\P{}> negation, "doesn't match property".
+C<scalar reverse()> reverses by character rather than by byte.
+
+=item *
+
+The bit string operators, C<& | ^ ~> and (starting in v5.22)
+C<&. |. ^.  ~.> can operate on characters that don't fit into a byte.
+However, the current behavior is likely to change.  You should not use
+these operators on strings that are encoded in UTF-8.  If you're not
+sure about the encoding of a string, downgrade it before using any of
+these operators; you can use
+L<C<utf8::utf8_downgrade()>|utf8/Utility functions>.
+
+=back
+
+The bottom line is that Perl has always practiced "Character Semantics",
+but with the advent of Unicode, that is now different than "Byte
+Semantics".
+
+=head2 ASCII Rules versus Unicode Rules
+
+Before Unicode, when a character was a byte was a character,
+Perl knew only about the 128 characters defined by ASCII, code points 0
+through 127 (except for under S<C<use locale>>).  That left the code
+points 128 to 255 as unassigned, and available for whatever use a
+program might want.  The only semantics they have is their ordinal
+numbers, and that they are members of none of the non-negative character
+classes.  None are considered to match C<\w> for example, but all match
+C<\W>.
+
+Unicode, of course, assigns each of those code points a particular
+meaning (along with ones above 255).  To preserve backward
+compatibility, Perl only uses the Unicode meanings when there is some
+indication that Unicode is what is intended; otherwise the non-ASCII
+code points remain treated as if they are unassigned.
+
+Here are the ways that Perl knows that a string should be treated as
+Unicode:
+
+=over
+
+=item *
+
+Within the scope of S<C<use utf8>>
+
+If the whole program is Unicode (signified by using 8-bit B<U>nicode
+B<T>ransformation B<F>ormat), then all strings within it must be
+Unicode.
+
+=item *
+
+Within the scope of
+L<S<C<use feature 'unicode_strings'>>|feature/The 'unicode_strings' feature>
+
+This pragma was created so you can explicitly tell Perl that operations
+executed within its scope are to use Unicode rules.  More operations are
+affected with newer perls.  See L</The "Unicode Bug">.
+
+=item *
+
+Within the scope of S<C<use 5.012>> or higher
+
+This implicitly turns on S<C<use feature 'unicode_strings'>>.
+
+=item *
+
+Within the scope of
+L<S<C<use locale 'not_characters'>>|perllocale/Unicode and UTF-8>,
+or L<S<C<use locale>>|perllocale> and the current
+locale is a UTF-8 locale.
+
+The former is defined to imply Unicode handling; and the latter
+indicates a Unicode locale, hence a Unicode interpretation of all
+strings within it.
+
+=item *
+
+When the string contains a Unicode-only code point
+
+Perl has never accepted code points above 255 without them being
+Unicode, so their use implies Unicode for the whole string.
+
+=item *
+
+When the string contains a Unicode named code point C<\N{...}>
+
+The C<\N{...}> construct explicitly refers to a Unicode code point,
+even if it is one that is also in ASCII.  Therefore the string
+containing it must be Unicode.
+
+=item *
+
+When the string has come from an external source marked as
+Unicode
+
+The L<C<-C>|perlrun/-C [numberE<sol>list]> command line option can
+specify that certain inputs to the program are Unicode, and the values
+of this can be read by your Perl code, see L<perlvar/"${^UNICODE}">.
+
+=item * When the string has been upgraded to UTF-8
+
+The function L<C<utf8::utf8_upgrade()>|utf8/Utility functions>
+can be explicitly used to permanently (unless a subsequent
+C<utf8::utf8_downgrade()> is called) cause a string to be treated as
+Unicode.
+
+=item * There are additional methods for regular expression patterns
+
+A pattern that is compiled with the L<C<E<sol>u>|perlre/E<sol>u> modifier is
+treated as Unicode.  Under the C</d> modifier, there are several other
+indications of Unicode; see L<perlre/E<sol>d>.
+
+=back
+
+Note that all of the above are overridden within the scope of
+C<L<use bytes|bytes>>; but you should be using this pragma only for
+debugging.
+
+Note also that some interactions with the platform's operating system
+never use Unicode rules.
+
+When Unicode rules are in effect:
+
+=over 4
+
+=item *
+
+Case translation operators use the Unicode case translation tables.
+
+Note that C<uc()>, or C<\U> in interpolated strings, translates to
+uppercase, while C<ucfirst>, or C<\u> in interpolated strings,
+translates to titlecase in languages that make the distinction (which is
+equivalent to uppercase in languages without the distinction).
+
+There is a CPAN module, C<L<Unicode::Casing>>, which allows you to
+define your own mappings to be used in C<lc()>, C<lcfirst()>, C<uc()>,
+C<ucfirst()>, and C<fc> (or their double-quoted string inlined versions
+such as C<\U>).  (Prior to Perl 5.16, this functionality was partially
+provided in the Perl core, but suffered from a number of insurmountable
+drawbacks, so the CPAN module was written instead.)
+
+=item *
+
+Character classes in regular expressions match based on the character
+properties specified in the Unicode properties database.
+
+C<\w> can be used to match a Japanese ideograph, for instance; and
+C<[[:digit:]]> a Bengali number.
+
+=item *
+
+Named Unicode properties, scripts, and block ranges may be used (like
+bracketed character classes) by using the C<\p{}> "matches property"
+construct and the C<\P{}> negation, "doesn't match property".
+
 See L</"Unicode Character Properties"> for more details.
 
 You can define your own character properties and use them
 in the regular expression with the C<\p{}> or C<\P{}> construct.
 See L</"User-Defined Character Properties"> for more details.
 
-=item *
-
-The special pattern C<\X> matches a logical character, an "extended grapheme
-cluster" in Standardese.  In Unicode what appears to the user to be a single
-character, for example an accented C<G>, may in fact be composed of a sequence
-of characters, in this case a C<G> followed by an accent character.  C<\X>
-will match the entire sequence.
-
-=item *
-
-The C<tr///> operator translates characters instead of bytes.  Note
-that the C<tr///CU> functionality has been removed.  For similar
-functionality see pack('U0', ...) and pack('C0', ...).
-
-=item *
-
-Case translation operators use the Unicode case translation tables
-when character input is provided.  Note that C<uc()>, or C<\U> in
-interpolated strings, translates to uppercase, while C<ucfirst>,
-or C<\u> in interpolated strings, translates to titlecase in languages
-that make the distinction (which is equivalent to uppercase in languages
-without the distinction).
-
-=item *
-
-Most operators that deal with positions or lengths in a string will
-automatically switch to using character positions, including
-C<chop()>, C<chomp()>, C<substr()>, C<pos()>, C<index()>, C<rindex()>,
-C<sprintf()>, C<write()>, and C<length()>.  An operator that
-specifically does not switch is C<vec()>.  Operators that really don't
-care include operators that treat strings as a bucket of bits such as
-C<sort()>, and operators dealing with filenames.
-
-=item *
-
-The C<pack()>/C<unpack()> letter C<C> does I<not> change, since it is often
-used for byte-oriented formats.  Again, think C<char> in the C language.
-
-There is a new C<U> specifier that converts between Unicode characters
-and code points. There is also a C<W> specifier that is the equivalent of
-C<chr>/C<ord> and properly handles character values even if they are above 255.
-
-=item *
-
-The C<chr()> and C<ord()> functions work on characters, similar to
-C<pack("W")> and C<unpack("W")>, I<not> C<pack("C")> and
-C<unpack("C")>.  C<pack("C")> and C<unpack("C")> are methods for
-emulating byte-oriented C<chr()> and C<ord()> on Unicode strings.
-While these methods reveal the internal encoding of Unicode strings,
-that is not something one normally needs to care about at all.
-
-=item *
-
-The bit string operators, C<& | ^ ~>, can operate on character data.
-However, for backward compatibility, such as when using bit string
-operations when characters are all less than 256 in ordinal value, one
-should not use C<~> (the bit complement) with characters of both
-values less than 256 and values greater than 256.  Most importantly,
-DeMorgan's laws (C<~($x|$y) eq ~$x&~$y> and C<~($x&$y) eq ~$x|~$y>)
-will not hold.  The reason for this mathematical I<faux pas> is that
-the complement cannot return B<both> the 8-bit (byte-wide) bit
-complement B<and> the full character-wide bit complement.
-
-=item *
-
-There is a CPAN module, C<L<Unicode::Casing>>, which allows you to define
-your own mappings to be used in C<lc()>, C<lcfirst()>, C<uc()>,
-C<ucfirst()>, and C<fc> (or their double-quoted string inlined
-versions such as C<\U>).
-(Prior to Perl 5.16, this functionality was partially provided
-in the Perl core, but suffered from a number of insurmountable
-drawbacks, so the CPAN module was written instead.)
-
 =back
 
-=over 4
+=head2 Extended Grapheme Clusters (Logical characters)
 
-=item *
+Consider a character, say C<H>.  It could appear with various marks around it,
+such as an acute accent, or a circumflex, or various hooks, circles, arrows,
+I<etc.>, above, below, to one side or the other, I<etc>.  There are many
+possibilities among the world's languages.  The number of combinations is
+astronomical, and if there were a character for each combination, it would
+soon exhaust Unicode's more than a million possible characters.  So Unicode
+took a different approach: there is a character for the base C<H>, and a
+character for each of the possible marks, and these can be variously combined
+to get a final logical character.  So a logical character--what appears to be a
+single character--can be a sequence of more than one individual characters.
+The Unicode standard calls these "extended grapheme clusters" (which
+is an improved version of the no-longer much used "grapheme cluster");
+Perl furnishes the C<\X> regular expression construct to match such
+sequences in their entirety.
 
-And finally, C<scalar reverse()> reverses by character rather than by byte.
+But Unicode's intent is to unify the existing character set standards and
+practices, and several pre-existing standards have single characters that
+mean the same thing as some of these combinations, like ISO-8859-1,
+which has quite a few of them. For example, C<"LATIN CAPITAL LETTER E
+WITH ACUTE"> was already in this standard when Unicode came along.
+Unicode therefore added it to its repertoire as that single character.
+But this character is considered by Unicode to be equivalent to the
+sequence consisting of the character C<"LATIN CAPITAL LETTER E">
+followed by the character C<"COMBINING ACUTE ACCENT">.
 
-=back
+C<"LATIN CAPITAL LETTER E WITH ACUTE"> is called a "pre-composed"
+character, and its equivalence with the "E" and the "COMBINING ACCENT"
+sequence is called canonical equivalence.  All pre-composed characters
+are said to have a decomposition (into the equivalent sequence), and the
+decomposition type is also called canonical.  A string may be comprised
+as much as possible of precomposed characters, or it may be comprised of
+entirely decomposed characters.  Unicode calls these respectively,
+"Normalization Form Composed" (NFC) and "Normalization Form Decomposed".
+The C<L<Unicode::Normalize>> module contains functions that convert
+between the two.  A string may also have both composed characters and
+decomposed characters; this module can be used to make it all one or the
+other.
+
+You may be presented with strings in any of these equivalent forms.
+There is currently nothing in Perl 5 that ignores the differences.  So
+you'll have to specially hanlde it.  The usual advice is to convert your
+inputs to C<NFD> before processing further.
+
+For more detailed information, see L<http://unicode.org/reports/tr15/>.
 
 =head2 Unicode Character Properties
 
@@ -582,34 +696,28 @@ with the nuts and bolts of Unicode.
 
 Block names are matched in the compound form, like C<\p{Block: Arrows}> or
 C<\p{Blk=Hebrew}>.  Unlike most other properties, only a few block names have a
-Unicode-defined short name.  But Perl does provide a (slight) shortcut:  You
-can say, for example C<\p{In_Arrows}> or C<\p{In_Hebrew}>.  For backwards
-compatibility, the C<In> prefix may be omitted if there is no naming conflict
-with a script or any other property, and you can even use an C<Is> prefix
-instead in those cases.  But it is not a good idea to do this, for a couple
-reasons:
+Unicode-defined short name.  But Perl does provide a (slight, no longer
+recommended) shortcut:  You can say, for example C<\p{In_Arrows}> or
+C<\p{In_Hebrew}>.
 
-=over 4
+For backwards compatibility, the C<In> prefix may be
+omitted if there is no naming conflict with a script or any other
+property, and you can even use an C<Is> prefix instead in those cases.
+But don't do this for new code because your code could break in new
+releases, and this has already happened: There was a time in very
+early Unicode releases when C<\p{Hebrew}> would have matched the
+I<block> Hebrew; now it doesn't.
 
-=item 1
+Using the C<In> prefix avoids this ambiguity, so far.  But new versions
+of Unicode continue to add new properties whose names begin with C<In>.
+There is a possibility that one of them someday will conflict with your
+usage.  Since this is just a Perl extension, Unicode's name will take
+precedence and your code will become broken.  Also, Unicode is free to
+add a script whose name begins with C<In>; that would cause problems.
 
-It is confusing.  There are many naming conflicts, and you may forget some.
-For example, C<\p{Hebrew}> means the I<script> Hebrew, and NOT the I<block>
-Hebrew.  But would you remember that 6 months from now?
-
-=item 2
-
-It is unstable.  A new version of Unicode may preempt the current meaning by
-creating a property with the same name.  There was a time in very early Unicode
-releases when C<\p{Hebrew}> would have matched the I<block> Hebrew; now it
-doesn't.
-
-=back
-
-Some people prefer to always use C<\p{Block: foo}> and C<\p{Script: bar}>
-instead of the shortcuts, whether for clarity, because they can't remember the
-difference between 'In' and 'Is' anyway, or they aren't confident that those who
-eventually will read their code will know that difference.
+So it's clearer and best to use the compound form when specifying
+blocks.  And be sure that is what you really really want to do.  In most
+cases scripts are what you want instead.
 
 A complete list of blocks and their shortcuts is in L<perluniprops>.
 
@@ -666,41 +774,14 @@ spacing horizontally.
 
 Matches a character that has a non-canonical decomposition.
 
-To understand the use of this rarely used I<property=value> combination, it is
-necessary to know some basics about decomposition.
-Consider a character, say H.  It could appear with various marks around it,
-such as an acute accent, or a circumflex, or various hooks, circles, arrows,
-I<etc.>, above, below, to one side or the other, etc.  There are many
-possibilities among the world's languages.  The number of combinations is
-astronomical, and if there were a character for each combination, it would
-soon exhaust Unicode's more than a million possible characters.  So Unicode
-took a different approach: there is a character for the base H, and a
-character for each of the possible marks, and these can be variously combined
-to get a final logical character.  So a logical character--what appears to be a
-single character--can be a sequence of more than one individual characters.
-This is called an "extended grapheme cluster";  Perl furnishes the C<\X>
-regular expression construct to match such sequences.
-
-But Unicode's intent is to unify the existing character set standards and
-practices, and several pre-existing standards have single characters that
-mean the same thing as some of these combinations.  An example is ISO-8859-1,
-which has quite a few of these in the Latin-1 range, an example being C<"LATIN
-CAPITAL LETTER E WITH ACUTE">.  Because this character was in this pre-existing
-standard, Unicode added it to its repertoire.  But this character is considered
-by Unicode to be equivalent to the sequence consisting of the character
-C<"LATIN CAPITAL LETTER E"> followed by the character C<"COMBINING ACUTE ACCENT">.
-
-C<"LATIN CAPITAL LETTER E WITH ACUTE"> is called a "pre-composed" character, and
-its equivalence with the sequence is called canonical equivalence.  All
-pre-composed characters are said to have a decomposition (into the equivalent
-sequence), and the decomposition type is also called canonical.
-
-However, many more characters have a different type of decomposition, a
-"compatible" or "non-canonical" decomposition.  The sequences that form these
-decompositions are not considered canonically equivalent to the pre-composed
-character.  An example, again in the Latin-1 range, is the C<"SUPERSCRIPT ONE">.
-It is somewhat like a regular digit 1, but not exactly; its decomposition
-into the digit 1 is called a "compatible" decomposition, specifically a
+The L</Extended Grapheme Clusters (Logical characters)> section above
+talked about canonical decompositions.  However, many more characters
+have a different type of decomposition, a "compatible" or
+"non-canonical" decomposition.  The sequences that form these
+decompositions are not considered canonically equivalent to the
+pre-composed character.  An example is the C<"SUPERSCRIPT ONE">.  It is
+somewhat like a regular digit 1, but not exactly; its decomposition into
+the digit 1 is called a "compatible" decomposition, specifically a
 "super" decomposition.  There are several such compatibility
 decompositions (see L<http://www.unicode.org/reports/tr44>), including
 one called "compat", which means some miscellaneous type of
@@ -1004,31 +1085,27 @@ Level 1 - Basic Unicode Support
 
 =over 4
 
-=item [1]
+=item [1] C<\N{U+...}> and C<\x{...}>
 
-C<\x{...}>
+=item [2] C<\p{...}> C<\P{...}>
 
-=item [2]
+=item [3] supports not only minimal list, but all Unicode character
+properties (see Unicode Character Properties above)
 
-C<\p{...}> C<\P{...}>
+=item [4] C<\d> C<\D> C<\s> C<\S> C<\w> C<\W> C<\X> C<[:I<prop>:]>
+C<[:^I<prop>:]>
 
-=item [3]
+=item [5] The experimental feature starting in v5.18 C<"(?[...])"> accomplishes
+this.
 
-supports not only minimal list, but all Unicode character properties (see Unicode Character Properties above)
-
-=item [4]
-
-C<\d> C<\D> C<\s> C<\S> C<\w> C<\W> C<\X> C<[:I<prop>:]> C<[:^I<prop>:]>
-
-=item [5]
-
-The experimental feature in v5.18 C<"(?[...])"> accomplishes this.  See
-L<perlre/(?[ ])>.  If you don't want to use an experimental feature,
-you can use one of the following:
+See L<perlre/(?[ ])>.  If you don't want to use an experimental
+feature, you can use one of the following:
 
 =over 4
 
-=item * Regular expression look-ahead
+=item *
+
+Regular expression look-ahead
 
 You can mimic class subtraction using lookahead.
 For example, what UTS#18 might write as
@@ -1046,47 +1123,60 @@ But in this particular example, you probably really want
 
 which will match assigned characters known to be part of the Greek script.
 
-=item * CPAN module C<L<Unicode::Regex::Set>>
+=item *
+
+CPAN module C<L<Unicode::Regex::Set>>
 
 It does implement the full UTS#18 grouping, intersection, union, and
 removal (subtraction) syntax.
 
-=item * L</"User-Defined Character Properties">
+=item *
+
+L</"User-Defined Character Properties">
 
 C<"+"> for union, C<"-"> for removal (set-difference), C<"&"> for intersection
 
 =back
 
-=item [6]
-
-C<\b> C<\B>
+=item [6] C<\b> C<\B>
 
 =item [7]
+Note that Perl does Full case-folding in matching, not Simple:
 
-Note that Perl does Full case-folding in matching (but with bugs), not
-Simple: for example C<U+1F88> is equivalent to C<U+1F00 U+03B9>, instead of
-just C<U+1F80>.  This difference matters mainly for certain Greek capital
+For example C<U+1F88> is equivalent to C<U+1F00 U+03B9>, instead of just
+C<U+1F80>.  This difference matters mainly for certain Greek capital
 letters with certain modifiers: the Full case-folding decomposes the
 letter, while the Simple case-folding would map it to a single
 character.
 
 =item [8]
+Perl treats C<\n> as the start- and end-line delimiter.  Unicode
+specifies more characters that should be so-interpreted.
 
-Should do C<^> and C<$> also on C<U+000B> (C<\v> in C), C<FF> (C<\f>),
-C<CR> (C<\r>), C<CRLF> (C<\r\n>), C<NEL> (C<U+0085>), C<LS> (C<U+2028>),
-and C<PS> (C<U+2029>); should also affect C<E<lt>E<gt>>, C<$.>, and
-script line numbers; should not split lines within C<CRLF> (i.e. there
-is no empty line between C<\r> and C<\n>).  For C<CRLF>, try the
-C<:crlf> layer (see L<PerlIO>).
+These are:
 
-=item [9]
+ VT   U+000B  (\v in C)
+ FF   U+000C  (\f)
+ CR   U+000D  (\r)
+ NEL  U+0085
+ LS   U+2028
+ PS   U+2029
 
-Linebreaking conformant with L<UAX#14 "Unicode Line Breaking
-Algorithm"|http://www.unicode.org/reports/tr14>
-is available through the C<L<Unicode::LineBreak>> module.
+C<^> and C<$> in regular expression patterns are supposed to match all
+these, but don't.
+These characters also don't, but should, affect C<< <> >> C<$.>, and
+script line numbers.
+
+Also, lines should not be split within C<CRLF> (i.e. there is no
+empty line between C<\r> and C<\n>).  For C<CRLF>, try the C<:crlf>
+layer (see L<PerlIO>).
+
+=item [9] But C<L<Unicode::LineBreak>> is available.
+
+This module supplies line breaking conformant with
+L<UAX#14 "Unicode Line Breaking Algorithm"|http://www.unicode.org/reports/tr14>.
 
 =item [10]
-
 UTF-8/UTF-EBDDIC used in Perl allows not only C<U+10000> to
 C<U+10FFFF> but also beyond C<U+10FFFF>
 
@@ -1149,8 +1239,11 @@ numbers.  To use these numbers, various encodings are needed.
 UTF-8
 
 UTF-8 is a variable-length (1 to 4 bytes), byte-order independent
-encoding. For ASCII (and we really do mean 7-bit ASCII, not another
-8-bit encoding), UTF-8 is transparent.
+encoding.  In most of Perl's documentation, including elsewhere in this
+document, the term "UTF-8" means also "UTF-EBCDIC".  But in this section,
+"UTF-8" refers only to the encoding used on ASCII platforms.  It is a
+superset of 7-bit US-ASCII, so anything encoded in ASCII has the
+identical representation when encoded in UTF-8.
 
 The following table is from Unicode 3.2.
 
@@ -1198,6 +1291,14 @@ they are forbidden.
 UTF-EBCDIC
 
 Like UTF-8, but EBCDIC-safe, in the way that UTF-8 is ASCII-safe.
+This means that all the basic characters (which includes all
+those that have ASCII equivalents (like C<"A">, C<"0">, C<"%">, I<etc.>)
+are the same in both EBCDIC and UTF-EBCDIC.)
+
+UTF-EBCDIC is used on EBCDIC platforms.  The largest Unicode code points
+take 5 bytes to represent (instead of 4 in UTF-8), and Perl extends it
+to a maximum of 7 bytes to encode pode points up to what can fit in a
+32-bit word (instead of 13 bytes and a 64-bit word in UTF-8).
 
 =item *
 
@@ -1509,25 +1610,25 @@ modifiers.  Details are given in L<perlre/Character set modifiers>.
 =back
 
 As discussed elsewhere, Perl has one foot (two hooves?) planted in
-each of two worlds: the old world of bytes and the new world of
-characters, upgrading from bytes to characters when necessary.
+each of two worlds: the old world of ASCII and single-byte locales, and
+the new world of Unicode, upgrading when necessary.
 If your legacy code does not explicitly use Unicode, no automatic
-switch-over to characters should happen.  Characters shouldn't get
-downgraded to bytes, either.  It is possible to accidentally mix bytes
-and characters, however (see L<perluniintro>), in which case C<\w> in
-regular expressions might start behaving differently (unless the C</a>
-modifier is in effect).  Review your code.  Use warnings and the C<strict> pragma.
+switch-over to Unicode should happen.
 
 =head2 Unicode in Perl on EBCDIC
 
-The way Unicode is handled on EBCDIC platforms is still
-experimental.  On such platforms, references to UTF-8 encoding in this
-document and elsewhere should be read as meaning the UTF-EBCDIC
-specified in Unicode Technical Report 16, unless ASCII vs. EBCDIC issues
-are specifically discussed. There is no C<utfebcdic> pragma or
-C<":utfebcdic"> layer; rather, C<"utf8"> and C<":utf8"> are reused to mean
-the platform's "natural" 8-bit encoding of Unicode. See L<perlebcdic>
-for more discussion of the issues.
+Unicode is supported on EBCDIC platforms.  See L<perlebcdic>.
+
+Unless ASCII vs. EBCDIC issues are specifically being discussed,
+references to UTF-8 encoding in this document and elsewhere should be
+read as meaning UTF-EBCDIC on EBCDIC platforms.
+See L<perlebcdic/Unicode and UTF>.
+
+Because UTF-EBCDIC is so similar to UTF-8, the differences are mostly
+hidden from you; S<C<use utf8>> (and NOT something like
+S<C<use utfebcdic>>) declares the the script is in the platform's
+"native" 8-bit encoding of Unicode.  (Similarly for the C<":utf8">
+layer.)
 
 =head2 Locales
 
@@ -1584,77 +1685,25 @@ C<readdir>, C<readlink>
 
 =head2 The "Unicode Bug"
 
-The term, "Unicode bug" has been applied to an inconsistency
-on ASCII platforms with the
-Unicode code points in the C<Latin-1 Supplement> block, that
-is, between 128 and 255.  Without a locale specified, unlike all other
-characters or code points, these characters have very different semantics in
-byte semantics versus character semantics, unless
-C<use feature 'unicode_strings'> is specified, directly or indirectly.
-(It is indirectly specified by a C<use v5.12> or higher.)
+The term, "Unicode bug" has been applied to an inconsistency with the
+code points in the C<Latin-1 Supplement> block, that is, between
+128 and 255.  Without a locale specified, unlike all other characters or
+code points, these characters can have very different semantics
+depending on the rules in effect.  (Characters whose code points are
+above 255 force Unicode rules; whereas the rules for ASCII characters
+are the same under both ASCII and Unicode rules.)
 
-In character semantics these upper-Latin1 characters are interpreted as
-Unicode code points, which means
-they have the same semantics as Latin-1 (ISO-8859-1).
+Under Unicode rules, these upper-Latin1 characters are interpreted as
+Unicode code points, which means they have the same semantics as Latin-1
+(ISO-8859-1) and C1 controls.
 
-In byte semantics (without C<unicode_strings>), they are considered to
-be unassigned characters, meaning that the only semantics they have is
-their ordinal numbers, and that they are
-not members of various character classes.  None are considered to match C<\w>
-for example, but all match C<\W>.
+As explained in L</ASCII Rules versus Unicode Rules>, under ASCII rules,
+they are considered to be unassigned characters.
 
-Perl 5.12.0 added C<unicode_strings> to force character semantics on
-these code points in some circumstances, which fixed portions of the
-bug; Perl 5.14.0 fixed almost all of it; and Perl 5.16.0 fixed the
-remainder (so far as we know, anyway).  The lesson here is to enable
-C<unicode_strings> to avoid the headaches described below.
-
-The old, problematic behavior affects these areas:
-
-=over 4
-
-=item *
-
-Changing the case of a scalar, that is, using C<uc()>, C<ucfirst()>, C<lc()>,
-and C<lcfirst()>, or C<\L>, C<\U>, C<\u> and C<\l> in double-quotish
-contexts, such as regular expression substitutions.
-Under C<unicode_strings> starting in Perl 5.12.0, character semantics are
-generally used.  See L<perlfunc/lc> for details on how this works
-in combination with various other pragmas.
-
-=item *
-
-Using caseless (C</i>) regular expression matching.
-Starting in Perl 5.14.0, regular expressions compiled within
-the scope of C<unicode_strings> use character semantics
-even when executed or compiled into larger
-regular expressions outside the scope.
-
-=item *
-
-Matching any of several properties in regular expressions, namely
-C<\b> (without braces), C<\B> (without braces), C<\s>, C<\S>, C<\w>,
-C<\W>, and all the Posix character classes
-I<except> C<[[:ascii:]]>.
-Starting in Perl 5.14.0, regular expressions compiled within
-the scope of C<unicode_strings> use character semantics
-even when executed or compiled into larger
-regular expressions outside the scope.
-
-=item *
-
-In C<quotemeta> or its inline equivalent C<\Q>, no code points above 127
-are quoted in UTF-8 encoded strings, but in byte encoded strings, code
-points between 128-255 are always quoted.
-Starting in Perl 5.16.0, consistent quoting rules are used within the
-scope of C<unicode_strings>, as described in L<perlfunc/quotemeta>.
-
-=back
-
-This behavior can lead to unexpected results in which a string's semantics
-suddenly change if a code point above 255 is appended to or removed from it,
-which changes the string's semantics from byte to character or vice versa.  As
-an example, consider the following program and its output:
+This can lead to unexpected results.  For example, a string's
+semantics can suddenly change if a code point above 255 is appended to
+it, which changes the rules from ASCII to Unicode.  As an
+example, consider the following program and its output:
 
  $ perl -le'
      no feature 'unicode_strings';
@@ -1668,29 +1717,83 @@ an example, consider the following program and its output:
  0
  1
 
-If there's no C<\w> in C<s1> or in C<s2>, why does their concatenation have one?
+If there's no C<\w> in C<s1> nor in C<s2>, why does their concatenation
+have one?
 
 This anomaly stems from Perl's attempt to not disturb older programs that
-didn't use Unicode, and hence had no semantics for characters outside of the
-ASCII range (except in a locale), along with Perl's desire to add Unicode
-support seamlessly.  The result wasn't seamless: these characters were
-orphaned.
+didn't use Unicode, along with Perl's desire to add Unicode support
+seamlessly.  But the result turned out to not be seamless.  (By the way,
+you can choose to be warned when things like this happen.  See
+C<L<encoding::warnings>>.)
+
+L<S<C<use feature 'unicode_strings'>>|feature/The 'unicode_strings' feature>
+was added, starting in Perl v5.12, to address this problem.  It affects
+these things:
+
+=over 4
+
+=item *
+
+Changing the case of a scalar, that is, using C<uc()>, C<ucfirst()>, C<lc()>,
+and C<lcfirst()>, or C<\L>, C<\U>, C<\u> and C<\l> in double-quotish
+contexts, such as regular expression substitutions.
+
+Under C<unicode_strings> starting in Perl 5.12.0, Unicode rules are
+generally used.  See L<perlfunc/lc> for details on how this works
+in combination with various other pragmas.
+
+=item *
+
+Using caseless (C</i>) regular expression matching.
+
+Starting in Perl 5.14.0, regular expressions compiled within
+the scope of C<unicode_strings> use Unicode rules
+even when executed or compiled into larger
+regular expressions outside the scope.
+
+=item *
+
+Matching any of several properties in regular expressions.
+
+These properties are C<\b> (without braces), C<\B> (without braces),
+C<\s>, C<\S>, C<\w>, C<\W>, and all the Posix character classes
+I<except> C<[[:ascii:]]>.
+
+Starting in Perl 5.14.0, regular expressions compiled within
+the scope of C<unicode_strings> use Unicode rules
+even when executed or compiled into larger
+regular expressions outside the scope.
+
+=item *
+
+In C<quotemeta> or its inline equivalent C<\Q>.
+
+Starting in Perl 5.16.0, consistent quoting rules are used within the
+scope of C<unicode_strings>, as described in L<perlfunc/quotemeta>.
+Prior to that, or outside its scope, no code points above 127 are quoted
+in UTF-8 encoded strings, but in byte encoded strings, code points
+between 128-255 are always quoted.
+
+=back
+
+You can see from the above that the effect of C<unicode_strings>
+increased over several Perl releases.  (And Perl's support for Unicode
+continues to improve; it's best to use the latest available release in
+order to get the most complete and accurate results possible.)  Note that
+C<unicode_strings> is automatically chosen if you S<C<use 5.012>> or
+higher.
 
 For Perls earlier than those described above, or when a string is passed
-to a function outside the subpragma's scope, a workaround is to always
-call L<C<utf8::upgrade($string)>|utf8/Utility functions>,
-or to use the standard module L<Encode>.   Also, a scalar that has any characters
-whose ordinal is C<0x100> or above, or which were specified using either of the
-C<\N{...}> notations, will automatically have character semantics.
+to a function outside the scope of C<unicode_strings>, see the next section.
 
 =head2 Forcing Unicode in Perl (Or Unforcing Unicode in Perl)
 
 Sometimes (see L</"When Unicode Does Not Happen"> or L</The "Unicode Bug">)
 there are situations where you simply need to force a byte
-string into UTF-8, or vice versa.  The low-level calls
+string into UTF-8, or vice versa.  The standard module L<Encode> can be
+used for this, or the low-level calls
 L<C<utf8::upgrade($bytestring)>|utf8/Utility functions> and
-L<C<utf8::downgrade($utf8string[, FAIL_OK])>|utf8/Utility functions> are
-the answers.
+L<C<utf8::downgrade($utf8string[, FAIL_OK])>|utf8/Utility functions>.
 
 Note that C<utf8::downgrade()> can fail if the string contains characters
 that don't fit into a byte.
@@ -1698,6 +1801,8 @@ that don't fit into a byte.
 Calling either function on a string that already is in the desired state is a
 no-op.
 
+L</ASCII Rules versus Unicode Rules> gives all the ways that a string is
+made to use Unicode rules.
 
 =head2 Using Unicode in XS
 
@@ -1706,8 +1811,10 @@ the XS level, and L<perlapi/Unicode Support> for the API details.
 
 =head2 Hacking Perl to work on earlier Unicode versions (for very serious hackers only)
 
-Perl by default comes with the latest supported Unicode version built in, but
-you can change to use any earlier one.
+Perl by default comes with the latest supported Unicode version built-in, but
+the goal is to allow you to change to use any earlier one.  In Perls
+v5.20 and v5.22, however, the earliest usable version is Unicode 5.1.
+Perl v5.18 is able to handle all earlier versions.
 
 Download the files in the desired version of Unicode from the Unicode web
 site L<http://www.unicode.org>).  These should replace the existing files in
@@ -1715,105 +1822,15 @@ F<lib/unicore> in the Perl source tree.  Follow the instructions in
 F<README.perl> in that directory to change some of their names, and then build
 perl (see L<INSTALL>).
 
-=head1 BUGS
-
-=head2 Interaction with Locales
-
-See L<perllocale/Unicode and UTF-8>
-
-=head2 Problems with characters in the Latin-1 Supplement range
-
-See L</The "Unicode Bug">
-
-=head2 Interaction with Extensions
-
-When Perl exchanges data with an extension, the extension should be
-able to understand the UTF8 flag and act accordingly. If the
-extension doesn't recognize that flag, it's likely that the extension
-will return incorrectly-flagged data.
-
-So if you're working with Unicode data, consult the documentation of
-every module you're using if there are any issues with Unicode data
-exchange. If the documentation does not talk about Unicode at all,
-suspect the worst and probably look at the source to learn how the
-module is implemented. Modules written completely in Perl shouldn't
-cause problems. Modules that directly or indirectly access code written
-in other programming languages are at risk.
-
-For affected functions, the simple strategy to avoid data corruption is
-to always make the encoding of the exchanged data explicit. Choose an
-encoding that you know the extension can handle. Convert arguments passed
-to the extensions to that encoding and convert results back from that
-encoding. Write wrapper functions that do the conversions for you, so
-you can later change the functions when the extension catches up.
-
-To provide an example, let's say the popular C<Foo::Bar::escape_html>
-function doesn't deal with Unicode data yet. The wrapper function
-would convert the argument to raw UTF-8 and convert the result back to
-Perl's internal representation like so:
-
-    sub my_escape_html ($) {
-        my($what) = shift;
-        return unless defined $what;
-        Encode::decode_utf8(Foo::Bar::escape_html(
-                                         Encode::encode_utf8($what)));
-    }
-
-Sometimes, when the extension does not convert data but just stores
-and retrieves them, you will be able to use the otherwise
-dangerous L<C<Encode::_utf8_on()>|Encode/_utf8_on> function. Let's say
-the popular C<Foo::Bar> extension, written in C, provides a C<param>
-method that lets you store and retrieve data according to these prototypes:
-
-    $self->param($name, $value);            # set a scalar
-    $value = $self->param($name);           # retrieve a scalar
-
-If it does not yet provide support for any encoding, one could write a
-derived class with such a C<param> method:
-
-    sub param {
-      my($self,$name,$value) = @_;
-      utf8::upgrade($name);     # make sure it is UTF-8 encoded
-      if (defined $value) {
-        utf8::upgrade($value);  # make sure it is UTF-8 encoded
-        return $self->SUPER::param($name,$value);
-      } else {
-        my $ret = $self->SUPER::param($name);
-        Encode::_utf8_on($ret); # we know, it is UTF-8 encoded
-        return $ret;
-      }
-    }
-
-Some extensions provide filters on data entry/exit points, such as
-C<DB_File::filter_store_key> and family. Look out for such filters in
-the documentation of your extensions, they can make the transition to
-Unicode data much easier.
-
-=head2 Speed
-
-Some functions are slower when working on UTF-8 encoded strings than
-on byte encoded strings.  All functions that need to hop over
-characters such as C<length()>, C<substr()> or C<index()>, or matching
-regular expressions can work B<much> faster when the underlying data are
-byte-encoded.
-
-In Perl 5.8.0 the slowness was often quite spectacular; in Perl 5.8.1
-a caching scheme was introduced which will hopefully make the slowness
-somewhat less spectacular, at least for some operations.  In general,
-operations with UTF-8 encoded strings are still slower. As an example,
-the Unicode properties (character classes) like C<\p{Nd}> are known to
-be quite a bit slower (5-20 times) than their simpler counterparts
-like C<\d> (then again, there are hundreds of Unicode characters matching C<Nd>
-compared with the 10 ASCII characters matching C<d>).
 =head2 Porting code from perl-5.6.X
 
-Perl 5.8 has a different Unicode model from 5.6. In 5.6 the programmer
-was required to use the C<utf8> pragma to declare that a given scope
-expected to deal with Unicode data and had to make sure that only
-Unicode data were reaching that scope. If you have code that is
+Perls starting in 5.8 have a different Unicode model from 5.6. In 5.6 the
+programmer was required to use the C<utf8> pragma to declare that a
+given scope expected to deal with Unicode data and had to make sure that
+only Unicode data were reaching that scope. If you have code that is
 working with 5.6, you will need some of the following adjustments to
-your code. The examples are written such that the code will continue
-to work under 5.6, so you should be safe to try them out.
+your code. The examples are written such that the code will continue to
+work under 5.6, so you should be safe to try them out.
 
 =over 3
 
@@ -1915,6 +1932,90 @@ the UTF8 flag:
   utf8::downgrade($val) if $] > 5.008;
 
 =back
+
+=head1 BUGS
+
+See also L</The "Unicode Bug"> above.
+
+=head2 Interaction with Extensions
+
+When Perl exchanges data with an extension, the extension should be
+able to understand the UTF8 flag and act accordingly. If the
+extension doesn't recognize that flag, it's likely that the extension
+will return incorrectly-flagged data.
+
+So if you're working with Unicode data, consult the documentation of
+every module you're using if there are any issues with Unicode data
+exchange. If the documentation does not talk about Unicode at all,
+suspect the worst and probably look at the source to learn how the
+module is implemented. Modules written completely in Perl shouldn't
+cause problems. Modules that directly or indirectly access code written
+in other programming languages are at risk.
+
+For affected functions, the simple strategy to avoid data corruption is
+to always make the encoding of the exchanged data explicit. Choose an
+encoding that you know the extension can handle. Convert arguments passed
+to the extensions to that encoding and convert results back from that
+encoding. Write wrapper functions that do the conversions for you, so
+you can later change the functions when the extension catches up.
+
+To provide an example, let's say the popular C<Foo::Bar::escape_html>
+function doesn't deal with Unicode data yet. The wrapper function
+would convert the argument to raw UTF-8 and convert the result back to
+Perl's internal representation like so:
+
+    sub my_escape_html ($) {
+        my($what) = shift;
+        return unless defined $what;
+        Encode::decode_utf8(Foo::Bar::escape_html(
+                                         Encode::encode_utf8($what)));
+    }
+
+Sometimes, when the extension does not convert data but just stores
+and retrieves it, you will be able to use the otherwise
+dangerous L<C<Encode::_utf8_on()>|Encode/_utf8_on> function. Let's say
+the popular C<Foo::Bar> extension, written in C, provides a C<param>
+method that lets you store and retrieve data according to these prototypes:
+
+    $self->param($name, $value);            # set a scalar
+    $value = $self->param($name);           # retrieve a scalar
+
+If it does not yet provide support for any encoding, one could write a
+derived class with such a C<param> method:
+
+    sub param {
+      my($self,$name,$value) = @_;
+      utf8::upgrade($name);     # make sure it is UTF-8 encoded
+      if (defined $value) {
+        utf8::upgrade($value);  # make sure it is UTF-8 encoded
+        return $self->SUPER::param($name,$value);
+      } else {
+        my $ret = $self->SUPER::param($name);
+        Encode::_utf8_on($ret); # we know, it is UTF-8 encoded
+        return $ret;
+      }
+    }
+
+Some extensions provide filters on data entry/exit points, such as
+C<DB_File::filter_store_key> and family. Look out for such filters in
+the documentation of your extensions; they can make the transition to
+Unicode data much easier.
+
+=head2 Speed
+
+Some functions are slower when working on UTF-8 encoded strings than
+on byte encoded strings.  All functions that need to hop over
+characters such as C<length()>, C<substr()> or C<index()>, or matching
+regular expressions can work B<much> faster when the underlying data are
+byte-encoded.
+
+In Perl 5.8.0 the slowness was often quite spectacular; in Perl 5.8.1
+a caching scheme was introduced which improved the situation.  In general,
+operations with UTF-8 encoded strings are still slower. As an example,
+the Unicode properties (character classes) like C<\p{Nd}> are known to
+be quite a bit slower (5-20 times) than their simpler counterparts
+like C<[0-9]> (then again, there are hundreds of Unicode characters matching
+C<Nd> compared with the 10 ASCII characters matching C<[0-9]>).
 
 =head1 SEE ALSO
 
