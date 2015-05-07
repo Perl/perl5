@@ -54,6 +54,14 @@ between(0.76, tanh(1), 0.77, 'tanh(1)');
 between(-0.77, tanh(-1), -0.76, 'tanh(-1)');
 cmp_ok(tanh(1), '==', -tanh(-1), 'tanh(1) == -tanh(-1)');
 
+SKIP: {
+    skip "no fpclassify", 4 unless $Config{d_fpclassify};
+    is(fpclassify(1), FP_NORMAL, "fpclassify 1");
+    is(fpclassify(0), FP_ZERO, "fpclassify 0");
+    is(fpclassify(INFINITY), FP_INFINITE, "fpclassify INFINITY");
+    is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
+}
+
 sub near {
     my ($got, $want, $msg, $eps) = @_;
     $eps ||= 1e-6;
@@ -61,7 +69,7 @@ sub near {
 }
 
 SKIP: {
-    my $C99_SKIP = 63;
+    my $C99_SKIP = 59;
 
     unless ($Config{d_acosh}) {
         skip "no acosh, suspecting no C99 math", $C99_SKIP;
@@ -84,10 +92,6 @@ SKIP: {
     is(fdim(34, 12), 22, "fdim 34 12");
     is(fmax(12, 34), 34, "fmax 12 34");
     is(fmin(12, 34), 12, "fmin 12 34");
-    is(fpclassify(1), FP_NORMAL, "fpclassify 1");
-    is(fpclassify(0), FP_ZERO, "fpclassify 0");
-    is(fpclassify(INFINITY), FP_INFINITE, "fpclassify INFINITY");
-    is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
     is(hypot(3, 4), 5, "hypot 3 4");
     near(hypot(-2, 1), sqrt(5), "hypot -1 2", 1e-9);
     is(ilogb(255), 7, "ilogb 255");
