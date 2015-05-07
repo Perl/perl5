@@ -3107,7 +3107,7 @@ Check for the cases 0 or 3 of cur_env.je_ret, only used inside an eval context.
 
 3 is used for a die caught by an inner eval - continue inner loop
 
-See cop.h: je_mustcatch, when set at any runlevel to TRUE, means eval ops must
+See F<cop.h>: je_mustcatch, when set at any runlevel to TRUE, means eval ops must
 establish a local jmpenv to handle exception traps.
 
 =cut

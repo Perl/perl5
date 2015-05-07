@@ -14234,7 +14234,7 @@ the ptr_table using the function
 C<ptr_table_free(PL_ptr_table); PL_ptr_table = NULL;>,
 reason to keep it around is if you want to dup some of your own
 variable who are outside the graph perl scans, example of this
-code is in threads.xs create.
+code is in F<threads.xs> create.
 
 CLONEf_CLONE_HOST -
 This is a win32 thing, it is ignored on unix, it tells perls

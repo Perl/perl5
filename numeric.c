@@ -808,7 +808,7 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
 Recognise (or not) a number.  The type of the number is returned
 (0 if unrecognised), otherwise it is a bit-ORed combination of
 IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
-IS_NUMBER_NEG, IS_NUMBER_INFINITY, IS_NUMBER_NAN (defined in perl.h).
+IS_NUMBER_NEG, IS_NUMBER_INFINITY, IS_NUMBER_NAN (defined in F<perl.h>).
 
 If the value of the number can fit in a UV, it is returned in the *valuep
 IS_NUMBER_IN_UV will be set to indicate that *valuep is valid, IS_NUMBER_IN_UV
@@ -1610,7 +1610,7 @@ Perl_my_frexpl(long double x, int *e) {
 Return a non-zero integer if the sign bit on an NV is set, and 0 if
 it is not.  
 
-If Configure detects this system has a signbit() that will work with
+If F<Configure> detects this system has a signbit() that will work with
 our NVs, then we just use it via the #define in perl.h.  Otherwise,
 fall back on this implementation.  The main use of this function
 is catching -0.0.
@@ -1621,7 +1621,7 @@ function or macro that doesn't happen to work with our particular choice
 of NVs.  We shouldn't just re-#define signbit as Perl_signbit and expect
 the standard system headers to be happy.  Also, this is a no-context
 function (no pTHX_) because Perl_signbit() is usually re-#defined in
-perl.h as a simple macro call to the system's signbit().
+F<perl.h> as a simple macro call to the system's signbit().
 Users should just always call Perl_signbit().
 
 =cut

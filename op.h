@@ -915,7 +915,7 @@ structures it uses.  For core ops this currently gets the information out
 of PL_opargs, which does not always accurately reflect the type used.
 For custom ops the type is returned from the registration, and it is up
 to the registree to ensure it is accurate.  The value returned will be
-one of the OA_* constants from op.h.
+one of the OA_* constants from F<op.h>.
 
 =for apidoc Am|bool|OP_TYPE_IS|OP *o|Optype type
 Returns true if the given OP is not a NULL pointer

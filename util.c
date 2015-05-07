@@ -6393,7 +6393,7 @@ be missing) tells how much inside the S_parse_body the program counter was.
 
 The util.c:1716 is the source code file and line number.
 
-The /usr/bin/perl is obvious (hopefully).
+The F</usr/bin/perl> is obvious (hopefully).
 
 Unknowns are C<"-">.  Unknowns can happen unfortunately quite easily:
 if the platform doesn't support retrieving the information;

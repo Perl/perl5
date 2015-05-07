@@ -1295,7 +1295,7 @@ XS code.
 
 2) Assigning a reference to a readonly scalar
 constant into a stash entry in order to create
-a constant subroutine (like constant.pm
+a constant subroutine (like F<constant.pm>
 does).
 
 This same method is available from pure perl
