@@ -2832,6 +2832,7 @@ C<v194.128>; this continues up to character 191, which is
 C<v194.191>.  Now we've run out of bits (191 is binary
 C<10111111>) so we move on; character 192 is C<v195.128>.  And
 so it goes on, moving to three bytes at character 2048.
+L<perlunicode/Unicode Encodings> has pictures of how this works.
 
 Assuming you know you're dealing with a UTF-8 string, you can find out
 how long the first character in it is with the C<UTF8SKIP> macro:
@@ -2957,7 +2958,7 @@ to support it.
 
 And this isn't the whole story.  Starting in Perl v5.12, strings that
 aren't encoded in UTF-8 may also be treated as Unicode under various
-conditions.
+conditions (see L<perlunicode/ASCII Rules versus Unicode Rules>).
 This is only really a problem for characters whose ordinals are between
 128 and 255, and their behavior varies under ASCII versus Unicode rules
 in ways that your code cares about (see L<perlunicode/The "Unicode Bug">).
