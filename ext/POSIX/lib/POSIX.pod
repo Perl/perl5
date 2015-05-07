@@ -41,32 +41,6 @@ and other miscellaneous objects.  The remaining sections list various
 constants and macros in an organization which roughly follows IEEE Std
 1003.1b-1993.
 
-=head1 C99 "math" interfaces
-
-Mathematic functions and constants from the C99 standard are available
-on many platforms.  In the below functions list they are marked [C99].
-
-The mathematical constants include:
-
-  M_SQRT2    # the square root of two
-  M_E        # the Euler's (or Napier's) constant
-  M_PI       # the Pi
-
-and other related/similar ones
-
-  M_SQRT1_2  # sqrt(1/2)
-  M_LN10 M_LN2 M_LOG10E M_LOG2E
-  M_1_PI M_2_PI M_2_SQRTPI M_PI_2 M_PI_4  # 1/Pi, ..., Pi/4
-
-and the
-
-  INFINITY
-  NAN
-
-The last two are also available as just C<Inf> and C<NaN>.
-
-The Bessel functions (j0, j1, jn, y0, y1, yn) are also available.
-
 =head1 CAVEATS
 
 A few functions are not implemented because they are C specific.  If you
@@ -948,7 +922,15 @@ corresponding C function returns C<TRUE> for every byte in the string.
 
 =item C<j0>
 
-(Also C<j1>, C<jn>, C<y0>, C<y1>, C<yn>)
+=item C<j1>
+
+=item C<jn>
+
+=item C<y0>
+
+=item C<y1>
+
+=item C<yn>
 
 The Bessel function of the first kind of the order zero.
 
@@ -2505,6 +2487,17 @@ C<LDBL_MAX_EXP> C<LDBL_MIN> C<LDBL_MIN_10_EXP> C<LDBL_MIN_EXP>
 
 =back
 
+=head1 FLOATING-POINT ENVIRONMENT
+
+=over 8
+
+=item Constants
+
+C<FE_DOWNWARD> C<FE_TONEAREST> C<FE_TOWARDZERO> C<FE_UPWARD>
+on systems that support them.
+
+=back
+
 =head1 LIMITS
 
 =over 8
@@ -2536,6 +2529,12 @@ on systems that support them.
 =item Constants
 
 C<HUGE_VAL>
+
+C<FP_ILOGB0> C<FP_ILOGBNAN> C<FP_INFINITE> C<FP_NAN> C<FP_NORMAL> C<FP_SUBNORMAL> C<FP_ZERO>
+C<INFINITY> C<NAN> C<Inf> C<NaN>
+C<M_1_PI> C<M_2_PI> C<M_2_SQRTPI> C<M_E> C<M_LN10> C<M_LN2> C<M_LOG10E> C<M_LOG2E> C<M_PI>
+C<M_PI_2> C<M_PI_4> C<M_SQRT1_2> C<M_SQRT2>
+on systems with C99 support.
 
 =back
 
