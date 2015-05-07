@@ -638,13 +638,16 @@ character classes that are Unicode-aware.  There are dozens of them, see
 L<perluniprops>.
 
 Starting in v5.22, you can use Unicode code points as the end points of
-character ranges, and the range will include all Unicode code points
-that lie between those end points, inclusive.
+regular expression pattern character ranges, and the range will include
+all Unicode code points that lie between those end points, inclusive.
 
  qr/ [\N{U+03]-\N{U+20}] /x
 
 includes the code points
 C<\N{U+03}>, C<\N{U+04}>, ..., C<\N{U+20}>.
+
+(It is planned to extend this behavior to ranges in C<tr///> in Perl
+v5.24.)
 
 =item *
 
