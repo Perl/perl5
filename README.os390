@@ -12,6 +12,9 @@ perlos390 - building and installing Perl for OS/390 and z/OS
 This document will help you Configure, build, test and install Perl
 on OS/390 (aka z/OS) Unix System Services.
 
+B<This document needs to be updated, but we don't know what it should say.
+Please email comments to L<perlbug@perl.org|mailto:perlbug@perl.org>.>
+
 =head1 DESCRIPTION
 
 This is a fully ported Perl for OS/390 Version 2 Release 3, 5, 6, 7,
