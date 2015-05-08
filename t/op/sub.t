@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan( tests => 36 );
+plan(tests => 39);
 
 sub empty_sub {}
 
@@ -245,3 +245,53 @@ sub predeclared {
 predeclared(); # set $x to 42
 $main::x = $main::x = "You should not see this.";
 inside_predeclared(); # run test
+
+# RT #124156 death during unwinding causes crash
+# the tie allows us to trigger another die while cleaning up the stack
+# from an earlier die.
+
+{
+    package RT124156;
+
+    sub TIEHASH { bless({}, $_[0]) }
+    sub EXISTS { 0 }
+    sub FETCH { undef }
+    sub STORE { }
+    sub DELETE { die "outer\n" }
+
+    my @value;
+    eval {
+        @value = sub {
+            @value = sub {
+                my %a;
+                tie %a, "RT124156";
+                local $a{foo} = "bar";
+                die "inner";
+                ("dd2a", "dd2b");
+            }->();
+            ("cc3a", "cc3b");
+        }->();
+    };
+    ::is($@, "outer\n", "RT124156 plain");
+
+    my $destroyed = 0;
+    sub DESTROY { $destroyed = 1 }
+
+    sub f {
+        my $x;
+        my $f = sub {
+            $x = 1; # force closure
+            my %a;
+            tie %a, "RT124156";
+            local $a{foo} = "bar";
+            die "inner";
+        };
+        bless $f, 'RT124156';
+        $f->();
+    }
+
+    eval { f(); };
+    # as opposed to $@ eq "Can't undef active subroutine"
+    ::is($@, "outer\n", "RT124156 depth");
+    ::is($destroyed, 1, "RT124156 freed cv");
+}
