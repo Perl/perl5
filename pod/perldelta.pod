@@ -3158,6 +3158,10 @@ L<Data::Util> version 0.63
 
 =item *
 
+L<Devel::Spy> version 0.07
+
+=item *
+
 L<Lexical::Var> version 0.009
 
 =item *
