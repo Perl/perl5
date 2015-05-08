@@ -11405,6 +11405,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Module::CoreList::Utils'=> '5.20150520',
             'B::Op_private'         => '5.022000',
             'Config'                => '5.022',
+            'overload'              => '1.26',
         },
         removed => {
         }
