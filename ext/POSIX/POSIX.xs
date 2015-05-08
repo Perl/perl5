@@ -2269,6 +2269,9 @@ setlocale(category, locale = 0)
 #else
 	retval = setlocale(category, locale);
 #endif
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+            "%s:%d: %s\n", __FILE__, __LINE__,
+                _setlocale_debug_string(category, locale, retval)));
 	if (! retval) {
             /* Should never happen that a query would return an error, but be
              * sure and reset to C locale */
@@ -2298,8 +2301,12 @@ setlocale(category, locale = 0)
 	    {
 		char *newctype;
 #ifdef LC_ALL
-		if (category == LC_ALL)
+		if (category == LC_ALL) {
 		    newctype = setlocale(LC_CTYPE, NULL);
+                    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                        "%s:%d: %s\n", __FILE__, __LINE__,
+                        _setlocale_debug_string(LC_CTYPE, NULL, newctype)));
+                }
 		else
 #endif
 		    newctype = RETVAL;
@@ -2315,8 +2322,12 @@ setlocale(category, locale = 0)
 	    {
 		char *newcoll;
 #ifdef LC_ALL
-		if (category == LC_ALL)
+		if (category == LC_ALL) {
 		    newcoll = setlocale(LC_COLLATE, NULL);
+                    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                        "%s:%d: %s\n", __FILE__, __LINE__,
+                        _setlocale_debug_string(LC_COLLATE, NULL, newcoll)));
+                }
 		else
 #endif
 		    newcoll = RETVAL;
@@ -2332,8 +2343,12 @@ setlocale(category, locale = 0)
 	    {
 		char *newnum;
 #ifdef LC_ALL
-		if (category == LC_ALL)
+		if (category == LC_ALL) {
 		    newnum = setlocale(LC_NUMERIC, NULL);
+                    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                        "%s:%d: %s\n", __FILE__, __LINE__,
+                        _setlocale_debug_string(LC_NUMERIC, NULL, newnum)));
+                }
 		else
 #endif
 		    newnum = RETVAL;

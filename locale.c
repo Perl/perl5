@@ -569,6 +569,8 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
     }
 
     result = setlocale(category, locale);
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n", __FILE__, __LINE__,
+                            _setlocale_debug_string(category, locale, result)));
 
     if (! override_LC_ALL)  {
         return result;
@@ -583,41 +585,63 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
     result = PerlEnv_getenv("LC_TIME");
     if (result && strNE(result, "")) {
         setlocale(LC_TIME, result);
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
+                    __FILE__, __LINE__,
+                    _setlocale_debug_string(LC_TIME, result, "not captured")));
     }
 #   endif
 #   ifdef USE_LOCALE_CTYPE
     result = PerlEnv_getenv("LC_CTYPE");
     if (result && strNE(result, "")) {
         setlocale(LC_CTYPE, result);
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
+                    __FILE__, __LINE__,
+                    _setlocale_debug_string(LC_CTYPE, result, "not captured")));
     }
 #   endif
 #   ifdef USE_LOCALE_COLLATE
     result = PerlEnv_getenv("LC_COLLATE");
     if (result && strNE(result, "")) {
         setlocale(LC_COLLATE, result);
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
+                  __FILE__, __LINE__,
+                  _setlocale_debug_string(LC_COLLATE, result, "not captured")));
     }
 #   endif
 #   ifdef USE_LOCALE_MONETARY
     result = PerlEnv_getenv("LC_MONETARY");
     if (result && strNE(result, "")) {
         setlocale(LC_MONETARY, result);
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
+                 __FILE__, __LINE__,
+                 _setlocale_debug_string(LC_MONETARY, result, "not captured")));
     }
 #   endif
 #   ifdef USE_LOCALE_NUMERIC
     result = PerlEnv_getenv("LC_NUMERIC");
     if (result && strNE(result, "")) {
         setlocale(LC_NUMERIC, result);
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
+                 __FILE__, __LINE__,
+                 _setlocale_debug_string(LC_NUMERIC, result, "not captured")));
     }
 #   endif
 #   ifdef USE_LOCALE_MESSAGES
     result = PerlEnv_getenv("LC_MESSAGES");
     if (result && strNE(result, "")) {
         setlocale(LC_MESSAGES, result);
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
+                 __FILE__, __LINE__,
+                 _setlocale_debug_string(LC_MESSAGES, result, "not captured")));
     }
 #   endif
 
-    return setlocale(LC_ALL, NULL);
+    result = setlocale(LC_ALL, NULL);
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
+                               __FILE__, __LINE__,
+                               _setlocale_debug_string(LC_ALL, NULL, result)));
 
+    return result;
 }
 
 #endif
