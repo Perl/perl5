@@ -3120,7 +3120,7 @@ Encode and encoding are mostly broken.
 
 =item *
 
-Many cpan modules that are shipped with core show failing tests.
+Many CPAN modules that are shipped with core show failing tests.
 
 =item *
 
