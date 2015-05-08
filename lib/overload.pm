@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.25';
+our $VERSION = '1.26';
 
 %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -383,6 +383,7 @@ hash C<%overload::ops>:
 Most of the overloadable operators map one-to-one to these keys.
 Exceptions, including additional overloadable operations not
 apparent from this hash, are included in the notes which follow.
+This list is subject to growth over time.
 
 A warning is issued if an attempt is made to register an operator not found
 above.
