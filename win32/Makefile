@@ -5,7 +5,7 @@
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl521.dll).  Also makes individual DLLs for the XS extensions.
+# (perl522.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -38,7 +38,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	= \5.21.12
+#INST_VER	= \5.22.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -185,7 +185,7 @@ CCTYPE		= MSVC60
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl521s.lib will also be created.
+# variables below. A static library perl522s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	= define
@@ -590,9 +590,9 @@ $(o).dll:
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	= ..\perl521.lib
-PERLSTATICLIB	= ..\perl521s.lib
-PERLDLL		= ..\perl521.dll
+PERLIMPLIB	= ..\perl522.lib
+PERLSTATICLIB	= ..\perl522s.lib
+PERLDLL		= ..\perl522.dll
 
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
@@ -1176,7 +1176,7 @@ utils: $(PERLEXE) ..\utils\Makefile
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perldelta.pod ..\pod\perl52112delta.pod
+	copy ..\pod\perldelta.pod ..\pod\perl5220delta.pod
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
@@ -1272,7 +1272,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
-	    perl52112delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
+	    perl5220delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
 	    perlapi.pod perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
 	    perldos.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
