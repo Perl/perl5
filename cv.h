@@ -264,7 +264,7 @@ There is a further complication with non-closure anonymous subs (i.e. those
 that do not refer to any lexicals outside that sub).  In this case, the
 anonymous prototype is shared rather than being cloned.  This has the
 consequence that the parent may be freed while there are still active
-children, eg
+children, I<e.g.>,
 
     BEGIN { $a = sub { eval '$x' } }
 
