@@ -897,6 +897,9 @@ properly, this indicates whether or not the SV contains UTF-8 encoded data.
 You should use this I<after> a call to SvPV() or one of its variants, in
 case any call to string overloading updates the internal flag.
 
+If you want to take into account the L<bytes> pragma, use C<L</DO_UTF8>>
+instead.
+
 =for apidoc Am|void|SvUTF8_on|SV *sv
 Turn on the UTF-8 status of an SV (the data is not changed, just the flag).
 Do not use frivolously.
