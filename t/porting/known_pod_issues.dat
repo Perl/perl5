@@ -67,6 +67,7 @@ Devel::InnerPackage
 Devel::NYTProf
 Devel::PPPort
 Devel::SawAmpersand
+Devel::Spy
 dirname(1)
 Encode::Locale
 Eval::WithLexicals
