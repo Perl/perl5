@@ -2420,7 +2420,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 =for apidoc sv_2iv_flags
 
 Return the integer value of an SV, doing any necessary string
-conversion.  If C<flags> includes C<SV_GMAGIC>, does an C<mg_get()> first.
+conversion.  If C<flags> has the C<SV_GMAGIC> bit set, does an C<mg_get()> first.
 Normally used via the C<SvIV(sv)> and C<SvIVx(sv)> macros.
 
 =cut
@@ -2516,7 +2516,7 @@ Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags)
 =for apidoc sv_2uv_flags
 
 Return the unsigned integer value of an SV, doing any necessary string
-conversion.  If C<flags> includes C<SV_GMAGIC>, does an C<mg_get()> first.
+conversion.  If C<flags> has the C<SV_GMAGIC> bit set, does an C<mg_get()> first.
 Normally used via the C<SvUV(sv)> and C<SvUVx(sv)> macros.
 
 =cut
@@ -2599,7 +2599,7 @@ Perl_sv_2uv_flags(pTHX_ SV *const sv, const I32 flags)
 =for apidoc sv_2nv_flags
 
 Return the num value of an SV, doing any necessary string or integer
-conversion.  If C<flags> includes C<SV_GMAGIC>, does an C<mg_get()> first.
+conversion.  If C<flags> has the C<SV_GMAGIC> bit set, does an C<mg_get()> first.
 Normally used via the C<SvNV(sv)> and C<SvNVx(sv)> macros.
 
 =cut
@@ -2925,7 +2925,7 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char plus) {
 =for apidoc sv_2pv_flags
 
 Returns a pointer to the string value of an SV, and sets C<*lp> to its length.
-If flags includes C<SV_GMAGIC>, does an C<mg_get()> first.  Coerces C<sv> to a
+If flags has the C<SV_GMAGIC> bit set, does an C<mg_get()> first.  Coerces C<sv> to a
 string if necessary.  Normally invoked via the C<SvPV_flags> macro.
 C<sv_2pv()> and C<sv_2pv_nomg> usually end up here too.
 
@@ -3236,7 +3236,7 @@ Like C<sv_copypv>, but doesn't invoke get magic first.
 =for apidoc sv_copypv_flags
 
 Implementation of C<sv_copypv> and C<sv_copypv_nomg>.  Calls get magic iff flags
-include C<SV_GMAGIC>.
+has the C<SV_GMAGIC> bit set.
 
 =cut
 */
@@ -5408,8 +5408,8 @@ and C<L</sv_catsv_nomg>>.
 
 Concatenates the string from SV C<ssv> onto the end of the string in SV
 C<dsv>.  If C<ssv> is null, does nothing; otherwise modifies only C<dsv>.
-If C<flags> include C<SV_GMAGIC> bit set, will call C<mg_get> on both SVs if
-appropriate.  If C<flags> include C<SV_SMAGIC>, C<mg_set> will be called on
+If C<flags> has the C<SV_GMAGIC> bit set, will call C<mg_get> on both SVs if
+appropriate.  If C<flags> has the C<SV_SMAGIC> bit set, C<mg_set> will be called on
 the modified SV afterward, if appropriate.  C<sv_catsv>, C<sv_catsv_nomg>,
 and C<sv_catsv_mg> are implemented in terms of this function.
 
@@ -7637,7 +7637,7 @@ coerce its args to strings if necessary.
 
 Returns a boolean indicating whether the strings in the two SVs are
 identical.  Is UTF-8 and S<C<'use bytes'>> aware and coerces its args to strings
-if necessary.  If C<flags> includes C<SV_GMAGIC>, it handles get-magic, too.
+if necessary.  If the flags has the C<SV_GMAGIC> bit set, it handles get-magic, too.
 
 =cut
 */
@@ -7730,7 +7730,7 @@ coerce its args to strings if necessary.  See also C<L</sv_cmp_locale>>.
 Compares the strings in two SVs.  Returns -1, 0, or 1 indicating whether the
 string in C<sv1> is less than, equal to, or greater than the string in
 C<sv2>.  Is UTF-8 and S<C<'use bytes'>> aware and will coerce its args to strings
-if necessary.  If the flags includes C<SV_GMAGIC>, it handles get magic.  See
+if necessary.  If the flags has the C<SV_GMAGIC> bit set, it handles get magic.  See
 also C<L</sv_cmp_locale_flags>>.
 
 =cut
@@ -9825,7 +9825,7 @@ can't cope with complex macro expressions.  Always use the macro instead.
 =for apidoc sv_pvn_force_flags
 
 Get a sensible string out of the SV somehow.
-If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<sv> if
+If C<flags> has the C<SV_GMAGIC> bit set, will C<mg_get> on C<sv> if
 appropriate, else not.  C<sv_pvn_force> and C<sv_pvn_force_nomg> are
 implemented in terms of this function.
 You normally want to use the various wrapper macros instead: see
@@ -10817,7 +10817,7 @@ When running with taint checks enabled, indicates via
 C<maybe_tainted> if results are untrustworthy (often due to the use of
 locales).
 
-If called as C<sv_vcatpvfn> or flags include C<SV_GMAGIC>, calls get magic.
+If called as C<sv_vcatpvfn> or flags has the C<SV_GMAGIC> bit set, calls get magic.
 
 Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
 

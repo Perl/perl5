@@ -1241,7 +1241,7 @@ the current chunk at this time.
 If L</PL_parser-E<gt>bufptr> is pointing to the very end of the current
 chunk (i.e., the current chunk has been entirely consumed), normally the
 current chunk will be discarded at the same time that the new chunk is
-read in.  If C<flags> includes C<LEX_KEEP_PREVIOUS>, the current chunk
+read in.  If C<flags> has the C<LEX_KEEP_PREVIOUS> bit set, the current chunk
 will not be discarded.  If the current chunk has not been entirely
 consumed, then it will not be discarded regardless of the flag.
 
@@ -1362,8 +1362,8 @@ peeked character, use L</lex_read_unichar>.
 
 If the next character is in (or extends into) the next chunk of input
 text, the next chunk will be read in.  Normally the current chunk will be
-discarded at the same time, but if C<flags> includes C<LEX_KEEP_PREVIOUS>
-then the current chunk will not be discarded.
+discarded at the same time, but if C<flags> has the C<LEX_KEEP_PREVIOUS>
+bit set, then the current chunk will not be discarded.
 
 If the input is being interpreted as UTF-8 and a UTF-8 encoding error
 is encountered, an exception is generated.
@@ -1433,8 +1433,8 @@ examine the next character, use L</lex_peek_unichar> instead.
 
 If the next character is in (or extends into) the next chunk of input
 text, the next chunk will be read in.  Normally the current chunk will be
-discarded at the same time, but if C<flags> includes C<LEX_KEEP_PREVIOUS>
-then the current chunk will not be discarded.
+discarded at the same time, but if C<flags> has the C<LEX_KEEP_PREVIOUS>
+bit set, then the current chunk will not be discarded.
 
 If the input is being interpreted as UTF-8 and a UTF-8 encoding error
 is encountered, an exception is generated.
@@ -1471,7 +1471,7 @@ at a non-space character (or the end of the input text).
 
 If spaces extend into the next chunk of input text, the next chunk will
 be read in.  Normally the current chunk will be discarded at the same
-time, but if C<flags> includes C<LEX_KEEP_PREVIOUS> then the current
+time, but if C<flags> has the C<LEX_KEEP_PREVIOUS> bit set, then the current
 chunk will not be discarded.
 
 =cut
@@ -11275,7 +11275,7 @@ Parse a Perl arithmetic expression.  This may contain operators of precedence
 down to the bit shift operators.  The expression must be followed (and thus
 terminated) either by a comparison or lower-precedence operator or by
 something that would normally terminate an expression such as semicolon.
-If C<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
+If C<flags> has the C<PARSE_OPTIONAL> bit set, then the expression is optional,
 otherwise it is mandatory.  It is up to the caller to ensure that the
 dynamic parser state (L</PL_parser> et al) is correctly set to reflect
 the source of the code to be parsed and the lexical context for the
@@ -11307,7 +11307,7 @@ Parse a Perl term expression.  This may contain operators of precedence
 down to the assignment operators.  The expression must be followed (and thus
 terminated) either by a comma or lower-precedence operator or by
 something that would normally terminate an expression such as semicolon.
-If C<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
+If C<flags> has the C<PARSE_OPTIONAL> bit set, then the expression is optional,
 otherwise it is mandatory.  It is up to the caller to ensure that the
 dynamic parser state (L</PL_parser> et al) is correctly set to reflect
 the source of the code to be parsed and the lexical context for the
@@ -11339,7 +11339,7 @@ Parse a Perl list expression.  This may contain operators of precedence
 down to the comma operator.  The expression must be followed (and thus
 terminated) either by a low-precedence logic operator such as C<or> or by
 something that would normally terminate an expression such as semicolon.
-If C<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
+If C<flags> has the C<PARSE_OPTIONAL> bit set, then the expression is optional,
 otherwise it is mandatory.  It is up to the caller to ensure that the
 dynamic parser state (L</PL_parser> et al) is correctly set to reflect
 the source of the code to be parsed and the lexical context for the
@@ -11372,8 +11372,8 @@ expression grammar, including the lowest-precedence operators such
 as C<or>.  The expression must be followed (and thus terminated) by a
 token that an expression would normally be terminated by: end-of-file,
 closing bracketing punctuation, semicolon, or one of the keywords that
-signals a postfix expression-statement modifier.  If C<flags> includes
-C<PARSE_OPTIONAL> then the expression is optional, otherwise it is
+signals a postfix expression-statement modifier.  If C<flags> has the
+C<PARSE_OPTIONAL> bit set, then the expression is optional, otherwise it is
 mandatory.  It is up to the caller to ensure that the dynamic parser
 state (L</PL_parser> et al) is correctly set to reflect the source of
 the code to be parsed and the lexical context for the expression.
@@ -11477,7 +11477,7 @@ Perl_parse_barestmt(pTHX_ U32 flags)
 Parse a single label, possibly optional, of the type that may prefix a
 Perl statement.  It is up to the caller to ensure that the dynamic parser
 state (L</PL_parser> et al) is correctly set to reflect the source of
-the code to be parsed.  If C<flags> includes C<PARSE_OPTIONAL> then the
+the code to be parsed.  If C<flags> has the C<PARSE_OPTIONAL> bit set, then the
 label is optional, otherwise it is mandatory.
 
 The name of the label is returned in the form of a fresh scalar.  If an
