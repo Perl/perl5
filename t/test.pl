@@ -1591,7 +1591,7 @@ sub watchdog ($;$)
                 my $sig = $is_vms ? 'TERM' : 'KILL';
                 my $cmd = _create_runperl( prog =>  "sleep($timeout);" .
                                                     "warn qq/# $timeout_msg" . '\n/;' .
-                                                    "kill($sig, $pid_to_kill);");
+                                                    "kill(q/$sig/, $pid_to_kill);");
                 $watchdog = system(1, $cmd);
             };
             if ($@ || ($watchdog <= 0)) {
