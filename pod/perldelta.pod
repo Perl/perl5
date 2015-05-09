@@ -1503,10 +1503,10 @@ to make the issue more identifiable.
 L<Argument "%s" isn't numeric%s|perldiag/"Argument "%s" isn't numeric%s">
 now adds the following note:
 
-    Note that for the C<Inf> and C<NaN> (infinity and not-a-number) the
-    definition of "numeric" is somewhat unusual: the strings themselves
-    (like "Inf") are considered numeric, and anything following them is
-    considered non-numeric.
+ Note that for the C<Inf> and C<NaN> (infinity and not-a-number) the
+ definition of "numeric" is somewhat unusual: the strings themselves
+ (like "Inf") are considered numeric, and anything following them is
+ considered non-numeric.
 
 =item *
 
@@ -2214,7 +2214,7 @@ variable. For example the expression C<$a[0]{$k}[$i]>, which previously
 involved ten C<rv2Xv>, C<Xelem>, C<gvsv> and C<const> ops is now performed
 by a single C<multideref> op. It can also handle C<local>, C<exists> and
 C<delete>. A non-simple index expression, such as C<[$i+1]> is still done
-using C<aelem/helem>, and single-level array lookup with a small constant
+using C<aelem>/C<helem>, and single-level array lookup with a small constant
 index is still done using C<aelemfast>.
 
 =back
