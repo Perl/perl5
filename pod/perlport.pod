@@ -1158,11 +1158,18 @@ VOS Open-Source Software on the web at L<http://ftp.stratus.com/pub/vos/vos.html
 
 =head2 EBCDIC Platforms
 
-Recent versions of Perl have been ported to platforms such as OS/400 on
-AS/400 minicomputers as well as OS/390, VM/ESA, and BS2000 for S/390
-Mainframes.  Such computers use EBCDIC character sets internally (usually
+v5.22 core Perl runs on z/OS (formerly OS/390).  Theoretically it could
+run on the successors of OS/400 on AS/400 minicomputers as well as
+VM/ESA, and BS2000 for S/390 Mainframes.  Such computers use EBCDIC
+character sets internally (usually
 Character Code Set ID 0037 for OS/400 and either 1047 or POSIX-BC for S/390
-systems).  On the mainframe perl currently works under the "Unix system
+systems).
+
+The rest of this section may need updating, but we don't know what it
+should say.  Please email comments to
+L<perlbug@perl.org|mailto:perlbug@perl.org>.
+
+On the mainframe Perl currently works under the "Unix system
 services for OS/390" (formerly known as OpenEdition), VM/ESA OpenEdition, or
 the BS200 POSIX-BC system (BS2000 is supported in Perl 5.6 and greater).
 See L<perlos390> for details.  Note that for OS/400 there is also a port of
@@ -1237,7 +1244,7 @@ Also see:
 
 =item *
 
-L<perlos390>, L<perlos400>, F<perlbs2000>, L<perlebcdic>.
+L<perlos390>, L<perlos400>, L<perlbs2000>, L<perlebcdic>.
 
 =item *
 
