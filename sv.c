@@ -6838,7 +6838,7 @@ Perl_sv_newref(pTHX_ SV *const sv)
 
 Decrement an SV's reference count, and if it drops to zero, call
 C<sv_clear> to invoke destructors and free up any memory used by
-the body; finally, deallocate the SV's head itself.
+the body; finally, deallocating the SV's head itself.
 Normally called via a wrapper macro C<SvREFCNT_dec>.
 
 =cut
@@ -15359,7 +15359,7 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 C<encoding> is assumed to be an C<Encode> object, the PV of C<ssv> is
 assumed to be octets in that encoding and decoding the input starts
 from the position which S<C<(PV + *offset)>> pointed to.  C<dsv> will be
-concatenated the decoded UTF-8 string from C<ssv>.  Decoding will terminate
+concatenated with the decoded UTF-8 string from C<ssv>.  Decoding will terminate
 when the string C<tstr> appears in decoding output or the input ends on
 the PV of C<ssv>.  The value which C<offset> points will be modified
 to the last input position on C<ssv>.

@@ -1445,7 +1445,8 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 =for apidoc Am|SV *|vmess|const char *pat|va_list *args
 
 C<pat> and C<args> are a sprintf-style format pattern and encapsulated
-argument list.  These are used to generate a string message.  If the
+argument list, respectively.  These are used to generate a string message.  If
+the
 message does not end with a newline, then it will be extended with
 some indication of the current location in the code, as described for
 L</mess_sv>.
@@ -4948,7 +4949,7 @@ Perl_my_sprintf(char *buffer, const char* pat, ...)
 =for apidoc quadmath_format_single
 
 C<quadmath_snprintf()> is very strict about its C<format> string and will
-fail, returning -1, if the format is invalid.  It acccepts exactly
+fail, returning -1, if the format is invalid.  It accepts exactly
 one format spec.
 
 C<quadmath_format_single()> checks that the intended single spec looks
