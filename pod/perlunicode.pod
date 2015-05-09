@@ -291,9 +291,10 @@ Unicode.
 
 =item * There are additional methods for regular expression patterns
 
-A pattern that is compiled with the L<C<E<sol>u>|perlre/E<sol>u> modifier is
-treated as Unicode.  Under the C</d> modifier, there are several other
-indications of Unicode; see L<perlre/E<sol>d>.
+A pattern that is compiled with the C<< /u >> or C<< /a >> modifiers is
+treated as Unicode (though there are some restrictions with C<< /a >>).
+Under the C<< /d >> and C<< /l >> modifiers, there are several other
+indications for Unicode; see L<perlre/Character set modifiers>.
 
 =back
 
