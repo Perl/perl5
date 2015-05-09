@@ -2783,7 +2783,7 @@ Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
 /*
 =for apidoc newPADNAMEpvn
 
-Constructs and returns a new pad name.  C<s> must be a UTF8 string.  Do not
+Constructs and returns a new pad name.  C<s> must be a UTF-8 string.  Do not
 use this for pad names that point to outer lexicals.  See
 C<L</newPADNAMEouter>>.
 

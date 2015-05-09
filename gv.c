@@ -318,14 +318,14 @@ stash element, it is the caller's responsibility to ensure that the name
 passed to this function matches the name of the element.  If it does not
 match, perl's internal bookkeeping will get out of sync.
 
-C<flags> can be set to C<SVf_UTF8> if C<name> is a UTF8 string, or
+C<flags> can be set to C<SVf_UTF8> if C<name> is a UTF-8 string, or
 the return value of SvUTF8(sv).  It can also take the
 C<GV_ADDMULTI> flag, which means to pretend that the GV has been
 seen before (i.e., suppress "Used once" warnings).
 
 =for apidoc gv_init
 
-The old form of C<gv_init_pvn()>.  It does not work with UTF8 strings, as it
+The old form of C<gv_init_pvn()>.  It does not work with UTF-8 strings, as it
 has no flags parameter.  If the C<multi> parameter is set, the
 C<GV_ADDMULTI> flag will be passed to C<gv_init_pvn()>.
 

@@ -159,7 +159,7 @@ See C<L</SvSTASH>>, C<L</CvSTASH>>.
 Returns the length of the stash's name.
 
 =for apidoc Am|unsigned char|HvNAMEUTF8|HV *stash
-Returns true if the name is in UTF8 encoding.
+Returns true if the name is in UTF-8 encoding.
 
 =for apidoc Am|char*|HvENAME|HV* stash
 Returns the effective name of a stash, or NULL if there is none.  The
@@ -173,7 +173,7 @@ caches.
 Returns the length of the stash's effective name.
 
 =for apidoc Am|unsigned char|HvENAMEUTF8|HV *stash
-Returns true if the effective name is in UTF8 encoding.
+Returns true if the effective name is in UTF-8 encoding.
 
 =for apidoc Am|void*|HeKEY|HE* he
 Returns the actual pointer stored in the key slot of the hash entry.  The

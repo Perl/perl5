@@ -1152,7 +1152,7 @@ the newly-created string, and updates C<len> to contain the new
 length.  Returns the original string if no conversion occurs, C<len>
 is unchanged.  Do nothing if C<is_utf8> points to 0.  Sets C<is_utf8> to
 0 if C<s> is converted or consisted entirely of characters that are invariant
-in utf8 (i.e., US-ASCII on non-EBCDIC machines).
+in UTF-8 (i.e., US-ASCII on non-EBCDIC machines).
 
 =cut
 */
@@ -1384,7 +1384,7 @@ UV
 Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_or_s)
 {
     /* We have the latin1-range values compiled into the core, so just use
-     * those, converting the result to utf8.  The only difference between upper
+     * those, converting the result to UTF-8.  The only difference between upper
      * and title case in this range is that LATIN_SMALL_LETTER_SHARP_S is
      * either "SS" or "Ss".  Which one to use is passed into the routine in
      * 'S_or_s' to avoid a test */
@@ -1490,7 +1490,7 @@ STATIC U8
 S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp)
 {
     /* We have the latin1-range values compiled into the core, so just use
-     * those, converting the result to utf8.  Since the result is always just
+     * those, converting the result to UTF-8.  Since the result is always just
      * one character, we allow <p> to be NULL */
 
     U8 converted = toLOWER_LATIN1(c);
@@ -1847,7 +1847,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
     }
 
     if (!len && *swashp) {
-	const UV uv2 = swash_fetch(*swashp, p, TRUE /* => is utf8 */);
+	const UV uv2 = swash_fetch(*swashp, p, TRUE /* => is UTF-8 */);
 
 	 if (uv2) {
 	      /* It was "normal" (a single character mapping). */
@@ -1879,7 +1879,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 STATIC UV
 S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* const ustrp, STRLEN *lenp)
 {
-    /* This is called when changing the case of a utf8-encoded character above
+    /* This is called when changing the case of a UTF-8-encoded character above
      * the Latin1 range, and the operation is in a non-UTF-8 locale.  If the
      * result contains a character that crosses the 255/256 boundary, disallow
      * the change, and return the original code point.  See L<perlfunc/lc> for
@@ -1979,7 +1979,7 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 				          ustrp, lenp, 'S');
 	}
     }
-    else {  /* utf8, ord above 255 */
+    else {  /* UTF-8, ord above 255 */
 	result = CALL_UPPER_CASE(p, ustrp, lenp);
 
 	if (flags) {
@@ -1988,7 +1988,7 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 	return result;
     }
 
-    /* Here, used locale rules.  Convert back to utf8 */
+    /* Here, used locale rules.  Convert back to UTF-8 */
     if (UTF8_IS_INVARIANT(result)) {
 	*ustrp = (U8) result;
 	*lenp = 1;
@@ -2050,7 +2050,7 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 				          ustrp, lenp, 's');
 	}
     }
-    else {  /* utf8, ord above 255 */
+    else {  /* UTF-8, ord above 255 */
 	result = CALL_TITLE_CASE(p, ustrp, lenp);
 
 	if (flags) {
@@ -2059,7 +2059,7 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 	return result;
     }
 
-    /* Here, used locale rules.  Convert back to utf8 */
+    /* Here, used locale rules.  Convert back to UTF-8 */
     if (UTF8_IS_INVARIANT(result)) {
 	*ustrp = (U8) result;
 	*lenp = 1;
@@ -2120,7 +2120,7 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 		                   ustrp, lenp);
 	}
     }
-    else {  /* utf8, ord above 255 */
+    else {  /* UTF-8, ord above 255 */
 	result = CALL_LOWER_CASE(p, ustrp, lenp);
 
 	if (flags) {
@@ -2130,7 +2130,7 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 	return result;
     }
 
-    /* Here, used locale rules.  Convert back to utf8 */
+    /* Here, used locale rules.  Convert back to UTF-8 */
     if (UTF8_IS_INVARIANT(result)) {
 	*ustrp = (U8) result;
 	*lenp = 1;
@@ -2203,7 +2203,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
                             flags & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII));
 	}
     }
-    else {  /* utf8, ord above 255 */
+    else {  /* UTF-8, ord above 255 */
 	result = CALL_FOLD_CASE(p, ustrp, lenp, flags & FOLD_FLAGS_FULL);
 
 	if (flags & FOLD_FLAGS_LOCALE) {
@@ -2266,7 +2266,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 	    return result;
 	}
 	else {
-	    /* This is called when changing the case of a utf8-encoded
+	    /* This is called when changing the case of a UTF-8-encoded
              * character above the ASCII range, and the result should not
              * contain an ASCII character. */
 
@@ -2312,7 +2312,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 	}
     }
 
-    /* Here, used locale rules.  Convert back to utf8 */
+    /* Here, used locale rules.  Convert back to UTF-8 */
     if (UTF8_IS_INVARIANT(result)) {
 	*ustrp = (U8) result;
 	*lenp = 1;
@@ -2471,7 +2471,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	if (PL_parser && PL_parser->error_count)
 	    SAVEI8(PL_parser->error_count), PL_parser->error_count = 0;
 	method = gv_fetchmeth(stash, "SWASHNEW", 8, -1);
-	if (!method) {	/* demand load utf8 */
+	if (!method) {	/* demand load UTF-8 */
 	    ENTER;
 	    if ((errsv_save = GvSV(PL_errgv))) SAVEFREESV(errsv_save);
 	    GvSV(PL_errgv) = NULL;
@@ -2654,7 +2654,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 /* Note:
  * Returns the value of property/mapping C<swash> for the first character
  * of the string C<ptr>. If C<do_utf8> is true, the string C<ptr> is
- * assumed to be in well-formed utf8. If C<do_utf8> is false, the string C<ptr>
+ * assumed to be in well-formed UTF-8. If C<do_utf8> is false, the string C<ptr>
  * is assumed to be in native 8-bit encoding. Caches the swatch in C<swash>.
  *
  * A "swash" is a hash which contains initially the keys/values set up by
@@ -2765,7 +2765,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     }
 
     /*
-     * This single-entry cache saves about 1/3 of the utf8 overhead in test
+     * This single-entry cache saves about 1/3 of the UTF-8 overhead in test
      * suite.  (That is, only 7-8% overall over just a hash cache.  Still,
      * it's nothing to sniff at.)  Pity we usually come through at least
      * two function calls to get here...
@@ -3282,10 +3282,10 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     * 004C		006C
     * 212A		006B
     *
-    * The returned hash would have two keys, the utf8 for 006B and the utf8 for
+    * The returned hash would have two keys, the UTF-8 for 006B and the UTF-8 for
     * 006C.  The value for each key is an array.  For 006C, the array would
-    * have two elements, the utf8 for itself, and for 004C.  For 006B, there
-    * would be three elements in its array, the utf8 for 006B, 004B and 212A.
+    * have two elements, the UTF-8 for itself, and for 004C.  For 006B, there
+    * would be three elements in its array, the UTF-8 for 006B, 004B and 212A.
     *
     * Note that there are no elements in the hash for 004B, 004C, 212A.  The
     * keys are only code points that are folded-to, so it isn't a full closure.
@@ -3299,7 +3299,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     *
     * The specials hash can be extra code points, and most likely consists of
     * maps from single code points to multiple ones (each expressed as a string
-    * of utf8 characters).   This function currently returns only 1-1 mappings.
+    * of UTF-8 characters).   This function currently returns only 1-1 mappings.
     * However consider this possible input in the specials hash:
     * "\xEF\xAC\x85" => "\x{0073}\x{0074}",         # U+FB05 => 0073 0074
     * "\xEF\xAC\x86" => "\x{0073}\x{0074}",         # U+FB06 => 0073 0074
@@ -3370,8 +3370,8 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 
 	hv_iterinit(specials_hv);
 
-	/* The keys are the characters (in utf8) that map to the corresponding
-	 * utf8 string value.  Iterate through the list creating the inverse
+	/* The keys are the characters (in UTF-8) that map to the corresponding
+	 * UTF-8 string value.  Iterate through the list creating the inverse
 	 * list. */
 	while ((sv_to = hv_iternextsv(specials_hv, &char_from, &from_len))) {
 	    SV** listp;
@@ -3383,7 +3383,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 	    /*DEBUG_U(PerlIO_printf(Perl_debug_log, "Found mapping from %"UVXf", First char of to is %"UVXf"\n", valid_utf8_to_uvchr((U8*) char_from, 0), valid_utf8_to_uvchr((U8*) SvPVX(sv_to), 0)));*/
 
 	    /* Each key in the inverse list is a mapped-to value, and the key's
-	     * hash value is a list of the strings (each in utf8) that map to
+	     * hash value is a list of the strings (each in UTF-8) that map to
 	     * it.  Those strings are all one character long */
 	    if ((listp = hv_fetch(specials_inverse,
 				    SvPVX(sv_to),
@@ -4159,7 +4159,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
                 else if (u1) {
                     _to_utf8_fold_flags(p1, foldbuf1, &n1, flags_for_folder);
                 }
-                else {  /* Not utf8, get utf8 fold */
+                else {  /* Not UTF-8, get UTF-8 fold */
                     _to_uni_fold_flags(*p1, foldbuf1, &n1, flags_for_folder);
                 }
                 f1 = foldbuf1;
@@ -4192,7 +4192,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 
 	/* Here f1 and f2 point to the beginning of the strings to compare.
 	 * These strings are the folds of the next character from each input
-	 * string, stored in utf8. */
+	 * string, stored in UTF-8. */
 
         /* While there is more to look for in both folds, see if they
         * continue to match */

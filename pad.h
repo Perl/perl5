@@ -232,7 +232,7 @@ slot.
 The length of the name.
 
 =for apidoc Amx|bool|PadnameUTF8|PADNAME pn
-Whether PadnamePV is in UTF8.  Currently, this is always true.
+Whether PadnamePV is in UTF-8.  Currently, this is always true.
 
 =for apidoc Amx|SV *|PadnameSV|PADNAME pn
 Returns the pad name as a mortal SV.
