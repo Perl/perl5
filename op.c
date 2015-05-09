@@ -5161,7 +5161,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		}
 	    }
 
-	    /* now see which range will peter our first, if either. */
+	    /* now see which range will peter out first, if either. */
 	    tdiff = tlast - tfirst;
 	    rdiff = rlast - rfirst;
 	    tcount += tdiff + 1;
