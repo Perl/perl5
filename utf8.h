@@ -30,9 +30,9 @@
 #include "unicode_constants.h"
 
 /* For to_utf8_fold_flags, q.v. */
-#define FOLD_FLAGS_LOCALE 0x1
-#define FOLD_FLAGS_FULL   0x2
-#define FOLD_FLAGS_NOMIX_ASCII 0x4
+#define FOLD_FLAGS_LOCALE       0x1
+#define FOLD_FLAGS_FULL         0x2
+#define FOLD_FLAGS_NOMIX_ASCII  0x4
 
 /* For _core_swash_init(), internal core use only */
 #define _CORE_SWASH_INIT_USER_DEFINED_PROPERTY 0x1
@@ -196,16 +196,16 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 /* Is the UTF8-encoded byte 'c' part of a variant sequence in UTF-8?  This is
  * the inverse of UTF8_IS_INVARIANT */
-#define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)
+#define UTF8_IS_CONTINUED(c)        (((U8)c) &  0x80)
 
 /* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
  * This doesn't catch invariants (they are single-byte).  It also excludes the
  * illegal overlong sequences that begin with C0 and C1. */
-#define UTF8_IS_START(c)		(((U8)c) >= 0xc2)
+#define UTF8_IS_START(c)            (((U8)c) >= 0xc2)
 
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
  * first byte thereof?  */
-#define UTF8_IS_CONTINUATION(c)		((((U8)c) & 0xC0) == 0x80)
+#define UTF8_IS_CONTINUATION(c)     ((((U8)c) & 0xC0) == 0x80)
 
 /* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
  * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
@@ -215,7 +215,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 /* Is the UTF8-encoded byte 'c' the first byte of a sequence of bytes that
  * represent a code point > 255? */
-#define UTF8_IS_ABOVE_LATIN1(c)	((U8)(c) >= 0xc4)
+#define UTF8_IS_ABOVE_LATIN1(c)     ((U8)(c) >= 0xc4)
 
 /* This defines the 1-bits that are to be in the first byte of a multi-byte
  * UTF-8 encoded character that give the number of bytes that comprise the
