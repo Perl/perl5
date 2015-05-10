@@ -268,7 +268,7 @@ EO_NOPCS
     SV *sv;
 
     if (!he) {
-        Perl_croak($athx "Couldn't add key '%s' to %%$package_sprintf_safe\::",
+        croak("Couldn't add key '%s' to %%$package_sprintf_safe\::",
 		   name);
     }
     sv = HeVAL(he);
@@ -306,9 +306,8 @@ static int
 Im_sorry_Dave(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_UNUSED_ARG(mg);
-    Perl_croak(aTHX_
-	       "Your vendor has not defined $package_sprintf_safe macro %"SVf
-	       " used", sv);
+    croak("Your vendor has not defined $package_sprintf_safe macro %"SVf
+	  " used", sv);
     NORETURN_FUNCTION_END;
 }
 
@@ -373,7 +372,7 @@ MISSING
     print $xs_fh <<"EOBOOT";
 BOOT:
   {
-#ifdef dTHX
+#if defined(dTHX) && !defined(PERL_NO_GET_CONTEXT)
     dTHX;
 #endif
     HV *symbol_table = get_hv("$symbol_table", GV_ADD);
@@ -491,9 +490,8 @@ EXPLODE
 		HEK *hek;
 #endif
 		if (!he) {
-		    Perl_croak($athx
-			       "Couldn't add key '%s' to %%$package_sprintf_safe\::",
-			       value_for_notfound->name);
+		    croak("Couldn't add key '%s' to %%$package_sprintf_safe\::",
+			  value_for_notfound->name);
 		}
 		sv = HeVAL(he);
 		if (!SvOK(sv) && SvTYPE(sv) != SVt_PVGV) {
@@ -521,8 +519,8 @@ EXPLODE
 		if (!hv_common(${c_subname}_missing, NULL, HEK_KEY(hek),
  			       HEK_LEN(hek), HEK_FLAGS(hek), HV_FETCH_ISSTORE,
 			       &PL_sv_yes, HEK_HASH(hek)))
-		    Perl_croak($athx "Couldn't add key '%s' to missing_hash",
-			       value_for_notfound->name);
+		    croak("Couldn't add key '%s' to missing_hash",
+			  value_for_notfound->name);
 #endif
 DONT
 
