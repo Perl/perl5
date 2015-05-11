@@ -4973,7 +4973,7 @@ will not in general equal $foo.
 =item *
 
 Pack and unpack can operate in two modes: character mode (C<C0> mode) where
-the packed string is processed per character, and UTF-8 mode (C<U0> mode)
+the packed string is processed per character, and UTF-8 byte mode (C<U0> mode)
 where the packed string is processed in its UTF-8-encoded Unicode form on
 a byte-by-byte basis.  Character mode is the default
 unless the format string starts with C<U>.  You
