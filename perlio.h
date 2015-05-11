@@ -96,15 +96,15 @@ typedef PerlIOl *PerlIO;
 #define PERLIO_FUNCS_CAST(funcs) (funcs)
 #endif
 
-PERL_EXPORT_C void PerlIO_define_layer(pTHX_ PerlIO_funcs *tab);
-PERL_EXPORT_C PerlIO_funcs *PerlIO_find_layer(pTHX_ const char *name,
+PERL_CALLCONV void PerlIO_define_layer(pTHX_ PerlIO_funcs *tab);
+PERL_CALLCONV PerlIO_funcs *PerlIO_find_layer(pTHX_ const char *name,
                                               STRLEN len,
 				              int load);
-PERL_EXPORT_C PerlIO *PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab),
+PERL_CALLCONV PerlIO *PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab),
 			          const char *mode, SV *arg);
-PERL_EXPORT_C void PerlIO_pop(pTHX_ PerlIO *f);
-PERL_EXPORT_C AV* PerlIO_get_layers(pTHX_ PerlIO *f);
-PERL_EXPORT_C void PerlIO_clone(pTHX_ PerlInterpreter *proto,
+PERL_CALLCONV void PerlIO_pop(pTHX_ PerlIO *f);
+PERL_CALLCONV AV* PerlIO_get_layers(pTHX_ PerlIO *f);
+PERL_CALLCONV void PerlIO_clone(pTHX_ PerlInterpreter *proto,
                                 CLONE_PARAMS *param);
 
 #endif				/* PerlIO */
@@ -202,161 +202,161 @@ START_EXTERN_C
 #  endif
 #endif
 #ifndef PerlIO_init
-PERL_EXPORT_C void PerlIO_init(pTHX);
+PERL_CALLCONV void PerlIO_init(pTHX);
 #endif
 #ifndef PerlIO_stdoutf
-PERL_EXPORT_C int PerlIO_stdoutf(const char *, ...)
+PERL_CALLCONV int PerlIO_stdoutf(const char *, ...)
     __attribute__format__(__printf__, 1, 2);
 #endif
 #ifndef PerlIO_puts
-PERL_EXPORT_C int PerlIO_puts(PerlIO *, const char *);
+PERL_CALLCONV int PerlIO_puts(PerlIO *, const char *);
 #endif
 #ifndef PerlIO_open
-PERL_EXPORT_C PerlIO *PerlIO_open(const char *, const char *);
+PERL_CALLCONV PerlIO *PerlIO_open(const char *, const char *);
 #endif
 #ifndef PerlIO_openn
-PERL_EXPORT_C PerlIO *PerlIO_openn(pTHX_ const char *layers, const char *mode,
+PERL_CALLCONV PerlIO *PerlIO_openn(pTHX_ const char *layers, const char *mode,
 				   int fd, int imode, int perm, PerlIO *old,
 				   int narg, SV **arg);
 #endif
 #ifndef PerlIO_eof
-PERL_EXPORT_C int PerlIO_eof(PerlIO *);
+PERL_CALLCONV int PerlIO_eof(PerlIO *);
 #endif
 #ifndef PerlIO_error
-PERL_EXPORT_C int PerlIO_error(PerlIO *);
+PERL_CALLCONV int PerlIO_error(PerlIO *);
 #endif
 #ifndef PerlIO_clearerr
-PERL_EXPORT_C void PerlIO_clearerr(PerlIO *);
+PERL_CALLCONV void PerlIO_clearerr(PerlIO *);
 #endif
 #ifndef PerlIO_getc
-PERL_EXPORT_C int PerlIO_getc(PerlIO *);
+PERL_CALLCONV int PerlIO_getc(PerlIO *);
 #endif
 #ifndef PerlIO_putc
-PERL_EXPORT_C int PerlIO_putc(PerlIO *, int);
+PERL_CALLCONV int PerlIO_putc(PerlIO *, int);
 #endif
 #ifndef PerlIO_ungetc
-PERL_EXPORT_C int PerlIO_ungetc(PerlIO *, int);
+PERL_CALLCONV int PerlIO_ungetc(PerlIO *, int);
 #endif
 #ifndef PerlIO_fdopen
-PERL_EXPORT_C PerlIO *PerlIO_fdopen(int, const char *);
+PERL_CALLCONV PerlIO *PerlIO_fdopen(int, const char *);
 #endif
 #ifndef PerlIO_importFILE
-PERL_EXPORT_C PerlIO *PerlIO_importFILE(FILE *, const char *);
+PERL_CALLCONV PerlIO *PerlIO_importFILE(FILE *, const char *);
 #endif
 #ifndef PerlIO_exportFILE
-PERL_EXPORT_C FILE *PerlIO_exportFILE(PerlIO *, const char *);
+PERL_CALLCONV FILE *PerlIO_exportFILE(PerlIO *, const char *);
 #endif
 #ifndef PerlIO_findFILE
-PERL_EXPORT_C FILE *PerlIO_findFILE(PerlIO *);
+PERL_CALLCONV FILE *PerlIO_findFILE(PerlIO *);
 #endif
 #ifndef PerlIO_releaseFILE
-PERL_EXPORT_C void PerlIO_releaseFILE(PerlIO *, FILE *);
+PERL_CALLCONV void PerlIO_releaseFILE(PerlIO *, FILE *);
 #endif
 #ifndef PerlIO_read
-PERL_EXPORT_C SSize_t PerlIO_read(PerlIO *, void *, Size_t);
+PERL_CALLCONV SSize_t PerlIO_read(PerlIO *, void *, Size_t);
 #endif
 #ifndef PerlIO_unread
-PERL_EXPORT_C SSize_t PerlIO_unread(PerlIO *, const void *, Size_t);
+PERL_CALLCONV SSize_t PerlIO_unread(PerlIO *, const void *, Size_t);
 #endif
 #ifndef PerlIO_write
-PERL_EXPORT_C SSize_t PerlIO_write(PerlIO *, const void *, Size_t);
+PERL_CALLCONV SSize_t PerlIO_write(PerlIO *, const void *, Size_t);
 #endif
 #ifndef PerlIO_setlinebuf
-PERL_EXPORT_C void PerlIO_setlinebuf(PerlIO *);
+PERL_CALLCONV void PerlIO_setlinebuf(PerlIO *);
 #endif
 #ifndef PerlIO_printf
-PERL_EXPORT_C int PerlIO_printf(PerlIO *, const char *, ...)
+PERL_CALLCONV int PerlIO_printf(PerlIO *, const char *, ...)
     __attribute__format__(__printf__, 2, 3);
 #endif
 #ifndef PerlIO_vprintf
-PERL_EXPORT_C int PerlIO_vprintf(PerlIO *, const char *, va_list);
+PERL_CALLCONV int PerlIO_vprintf(PerlIO *, const char *, va_list);
 #endif
 #ifndef PerlIO_tell
-PERL_EXPORT_C Off_t PerlIO_tell(PerlIO *);
+PERL_CALLCONV Off_t PerlIO_tell(PerlIO *);
 #endif
 #ifndef PerlIO_seek
-PERL_EXPORT_C int PerlIO_seek(PerlIO *, Off_t, int);
+PERL_CALLCONV int PerlIO_seek(PerlIO *, Off_t, int);
 #endif
 #ifndef PerlIO_rewind
-PERL_EXPORT_C void PerlIO_rewind(PerlIO *);
+PERL_CALLCONV void PerlIO_rewind(PerlIO *);
 #endif
 #ifndef PerlIO_has_base
-PERL_EXPORT_C int PerlIO_has_base(PerlIO *);
+PERL_CALLCONV int PerlIO_has_base(PerlIO *);
 #endif
 #ifndef PerlIO_has_cntptr
-PERL_EXPORT_C int PerlIO_has_cntptr(PerlIO *);
+PERL_CALLCONV int PerlIO_has_cntptr(PerlIO *);
 #endif
 #ifndef PerlIO_fast_gets
-PERL_EXPORT_C int PerlIO_fast_gets(PerlIO *);
+PERL_CALLCONV int PerlIO_fast_gets(PerlIO *);
 #endif
 #ifndef PerlIO_canset_cnt
-PERL_EXPORT_C int PerlIO_canset_cnt(PerlIO *);
+PERL_CALLCONV int PerlIO_canset_cnt(PerlIO *);
 #endif
 #ifndef PerlIO_get_ptr
-PERL_EXPORT_C STDCHAR *PerlIO_get_ptr(PerlIO *);
+PERL_CALLCONV STDCHAR *PerlIO_get_ptr(PerlIO *);
 #endif
 #ifndef PerlIO_get_cnt
-PERL_EXPORT_C SSize_t PerlIO_get_cnt(PerlIO *);
+PERL_CALLCONV SSize_t PerlIO_get_cnt(PerlIO *);
 #endif
 #ifndef PerlIO_set_cnt
-PERL_EXPORT_C void PerlIO_set_cnt(PerlIO *, SSize_t);
+PERL_CALLCONV void PerlIO_set_cnt(PerlIO *, SSize_t);
 #endif
 #ifndef PerlIO_set_ptrcnt
-PERL_EXPORT_C void PerlIO_set_ptrcnt(PerlIO *, STDCHAR *, SSize_t);
+PERL_CALLCONV void PerlIO_set_ptrcnt(PerlIO *, STDCHAR *, SSize_t);
 #endif
 #ifndef PerlIO_get_base
-PERL_EXPORT_C STDCHAR *PerlIO_get_base(PerlIO *);
+PERL_CALLCONV STDCHAR *PerlIO_get_base(PerlIO *);
 #endif
 #ifndef PerlIO_get_bufsiz
-PERL_EXPORT_C SSize_t PerlIO_get_bufsiz(PerlIO *);
+PERL_CALLCONV SSize_t PerlIO_get_bufsiz(PerlIO *);
 #endif
 #ifndef PerlIO_tmpfile
-PERL_EXPORT_C PerlIO *PerlIO_tmpfile(void);
+PERL_CALLCONV PerlIO *PerlIO_tmpfile(void);
 #endif
 #ifndef PerlIO_stdin
-PERL_EXPORT_C PerlIO *PerlIO_stdin(void);
+PERL_CALLCONV PerlIO *PerlIO_stdin(void);
 #endif
 #ifndef PerlIO_stdout
-PERL_EXPORT_C PerlIO *PerlIO_stdout(void);
+PERL_CALLCONV PerlIO *PerlIO_stdout(void);
 #endif
 #ifndef PerlIO_stderr
-PERL_EXPORT_C PerlIO *PerlIO_stderr(void);
+PERL_CALLCONV PerlIO *PerlIO_stderr(void);
 #endif
 #ifndef PerlIO_getpos
-PERL_EXPORT_C int PerlIO_getpos(PerlIO *, SV *);
+PERL_CALLCONV int PerlIO_getpos(PerlIO *, SV *);
 #endif
 #ifndef PerlIO_setpos
-PERL_EXPORT_C int PerlIO_setpos(PerlIO *, SV *);
+PERL_CALLCONV int PerlIO_setpos(PerlIO *, SV *);
 #endif
 #ifndef PerlIO_fdupopen
-PERL_EXPORT_C PerlIO *PerlIO_fdupopen(pTHX_ PerlIO *, CLONE_PARAMS *, int);
+PERL_CALLCONV PerlIO *PerlIO_fdupopen(pTHX_ PerlIO *, CLONE_PARAMS *, int);
 #endif
 #if !defined(PerlIO_modestr) && !defined(PERLIO_IS_STDIO)
-PERL_EXPORT_C char *PerlIO_modestr(PerlIO *, char *buf);
+PERL_CALLCONV char *PerlIO_modestr(PerlIO *, char *buf);
 #endif
 #ifndef PerlIO_isutf8
-PERL_EXPORT_C int PerlIO_isutf8(PerlIO *);
+PERL_CALLCONV int PerlIO_isutf8(PerlIO *);
 #endif
 #ifndef PerlIO_apply_layers
-PERL_EXPORT_C int PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode,
+PERL_CALLCONV int PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode,
 				      const char *names);
 #endif
 #ifndef PerlIO_binmode
-PERL_EXPORT_C int PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int omode,
+PERL_CALLCONV int PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int omode,
 			  	 const char *names);
 #endif
 #ifndef PerlIO_getname
-PERL_EXPORT_C char *PerlIO_getname(PerlIO *, char *);
+PERL_CALLCONV char *PerlIO_getname(PerlIO *, char *);
 #endif
 
-PERL_EXPORT_C void PerlIO_destruct(pTHX);
+PERL_CALLCONV void PerlIO_destruct(pTHX);
 
-PERL_EXPORT_C int PerlIO_intmode2str(int rawmode, char *mode, int *writing);
+PERL_CALLCONV int PerlIO_intmode2str(int rawmode, char *mode, int *writing);
 
 #ifdef PERLIO_LAYERS
-PERL_EXPORT_C void PerlIO_cleanup(pTHX);
+PERL_CALLCONV void PerlIO_cleanup(pTHX);
 
-PERL_EXPORT_C void PerlIO_debug(const char *fmt, ...)
+PERL_CALLCONV void PerlIO_debug(const char *fmt, ...)
     __attribute__format__(__printf__, 1, 2);
 typedef struct PerlIO_list_s PerlIO_list_t;
 

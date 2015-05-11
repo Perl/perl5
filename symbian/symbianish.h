@@ -142,11 +142,7 @@ pid_t wait(int *status);
 #  define PERL_UNSET_VARS(v) symbian_unset_vars()
 #endif /* #ifdef PERL_GLOBAL_STRUCT_PRIVATE */
 
-#undef PERL_EXPORT_C
-#define PERL_EXPORT_C EXPORT_C /* for perlio.h */
 #define PERL_CALLCONV EXPORT_C /* for proto.h */
-#undef PERL_XS_EXPORT_C
-#define PERL_XS_EXPORT_C EXPORT_C
 
 #ifndef PERL_CORE
 #define PERL_CORE /* for WINS builds under VC */

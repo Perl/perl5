@@ -231,7 +231,7 @@
     Perl_pregfree(aTHX_ (prog))
 
 #define CALLREGFREE_PVT(prog) \
-    if(prog) RX_ENGINE(prog)->free(aTHX_ (prog))
+    if(prog) RX_ENGINE(prog)->rxfree(aTHX_ (prog))
 
 #define CALLREG_NUMBUF_FETCH(rx,paren,usesv)                                \
     RX_ENGINE(rx)->numbered_buff_FETCH(aTHX_ (rx),(paren),(usesv))
@@ -493,26 +493,6 @@
 #    define dTHXs		dVAR
 #  else
 #    define dTHXs		dNOOP
-#  endif
-#endif
-
-/* Some platforms require marking function declarations
- * for them to be exportable.  Used in perlio.h, proto.h
- * is handled either by the makedef.pl or by defining the
- * PERL_CALLCONV to be something special.  See also the
- * definition of XS() in XSUB.h. */
-#ifndef PERL_EXPORT_C
-#  ifdef __cplusplus
-#    define PERL_EXPORT_C extern "C"
-#  else
-#    define PERL_EXPORT_C extern
-#  endif
-#endif
-#ifndef PERL_XS_EXPORT_C
-#  ifdef __cplusplus
-#    define PERL_XS_EXPORT_C extern "C"
-#  else
-#    define PERL_XS_EXPORT_C
 #  endif
 #endif
 
@@ -3684,6 +3664,30 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #endif /* threading */
 #endif /* AIX */
 
+#ifndef PERL_CALLCONV
+#  ifdef __cplusplus
+#    define PERL_CALLCONV extern "C"
+#  else
+#    define PERL_CALLCONV
+#  endif
+#endif
+#ifndef PERL_CALLCONV_NO_RET
+#    define PERL_CALLCONV_NO_RET PERL_CALLCONV
+#endif
+
+/* PERL_STATIC_NO_RET is supposed to be equivalent to STATIC on builds that
+   dont have a noreturn as a declaration specifier
+*/
+#ifndef PERL_STATIC_NO_RET
+#  define PERL_STATIC_NO_RET STATIC
+#endif
+/* PERL_STATIC_NO_RET is supposed to be equivalent to PERL_STATIC_INLINE on
+   builds that dont have a noreturn as a declaration specifier
+*/
+#ifndef PERL_STATIC_INLINE_NO_RET
+#  define PERL_STATIC_INLINE_NO_RET PERL_STATIC_INLINE
+#endif
+
 #if !defined(OS2)
 #  include "iperlsys.h"
 #endif
@@ -5468,31 +5472,6 @@ struct tempsym; /* defined in pp_pack.c */
 #include "thread.h"
 #include "pp.h"
 
-#ifndef PERL_CALLCONV
-#  ifdef __cplusplus
-#    define PERL_CALLCONV extern "C"
-#  else
-#    define PERL_CALLCONV
-#  endif
-#endif
-#ifndef PERL_CALLCONV_NO_RET
-#    define PERL_CALLCONV_NO_RET PERL_CALLCONV
-#endif
-
-/* PERL_STATIC_NO_RET is supposed to be equivalent to STATIC on builds that
-   dont have a noreturn as a declaration specifier
-*/
-#ifndef PERL_STATIC_NO_RET
-#  define PERL_STATIC_NO_RET STATIC
-#endif
-/* PERL_STATIC_NO_RET is supposed to be equivalent to PERL_STATIC_INLINE on
-   builds that dont have a noreturn as a declaration specifier
-*/
-#ifndef PERL_STATIC_INLINE_NO_RET
-#  define PERL_STATIC_INLINE_NO_RET PERL_STATIC_INLINE
-#endif
-
-
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s)	PERL_CALLCONV OP *s (pTHX_ OP *o);
@@ -5500,6 +5479,14 @@ struct tempsym; /* defined in pp_pack.c */
 
 #ifdef MYMALLOC
 #  include "malloc_ctl.h"
+#endif
+
+/*
+ * This provides a layer of functions and macros to ensure extensions will
+ * get to use the same RTL functions as the core.
+ */
+#if defined(WIN32)
+#  include "win32iop.h"
 #endif
 
 #include "proto.h"
