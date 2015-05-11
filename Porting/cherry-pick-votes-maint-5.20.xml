@@ -49,6 +49,8 @@ This fix has a problem with it that needs to be solved before we can backport it
 
 <div><h3>Other Regression Fixes</h3>
 
+<commit votes="tonyc" id="bae8cfc6926f9b04d8adac6a9ee6d563cc18263f" ticket="125121" desc="Don’t treat setpgrp($nonzero) as setpgrp(1)"/>
+
 </div>
 
 <div><h3>Configure and hints Fixes (Consider whether these in particular would break binary compatibility)</h3>
