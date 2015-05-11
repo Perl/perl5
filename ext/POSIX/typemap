@@ -17,13 +17,15 @@ POSIX::SigAction	T_HVREF
 
 INPUT
 T_OPAQUEPTROBJ
-	if (SvROK($arg) && sv_derived_from($arg, \"${ntype}\")) {
-	    $var = ($type)SvPV_nolen(SvRV($arg));
+	{
+	    SV * sv = $arg;
+	    if (SvROK(sv) && sv_derived_from(sv, \"${ntype}\"))
+		$var = ($type)SvPV_nolen(SvRV(sv));
+	    else
+		croak(\"%s: %s is not of type %s\",
+			    ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
+			\"$var\", \"$ntype\");
 	}
-	else
-	    Perl_croak(aTHX_ \"%s: %s is not of type %s\",
-			${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
-			\"$var\", \"$ntype\")
 
 OUTPUT
 T_OPAQUEPTROBJ

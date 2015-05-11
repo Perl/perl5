@@ -1660,7 +1660,6 @@ MODULE = POSIX		PACKAGE = POSIX
 BOOT:
 {
     CV *cv;
-    const char *file = __FILE__;
 
 
     /* silence compiler warning about not_here() defined but not used */
@@ -1669,37 +1668,37 @@ BOOT:
     /* Ensure we get the function, not a macro implementation. Like the C89
        standard says we can...  */
 #undef isalnum
-    cv = newXS("POSIX::isalnum", is_common, file);
+    cv = newXS_deffile("POSIX::isalnum", is_common);
     XSANY.any_dptr = (any_dptr_t) &isalnum;
 #undef isalpha
-    cv = newXS("POSIX::isalpha", is_common, file);
+    cv = newXS_deffile("POSIX::isalpha", is_common);
     XSANY.any_dptr = (any_dptr_t) &isalpha;
 #undef iscntrl
-    cv = newXS("POSIX::iscntrl", is_common, file);
+    cv = newXS_deffile("POSIX::iscntrl", is_common);
     XSANY.any_dptr = (any_dptr_t) &iscntrl;
 #undef isdigit
-    cv = newXS("POSIX::isdigit", is_common, file);
+    cv = newXS_deffile("POSIX::isdigit", is_common);
     XSANY.any_dptr = (any_dptr_t) &isdigit;
 #undef isgraph
-    cv = newXS("POSIX::isgraph", is_common, file);
+    cv = newXS_deffile("POSIX::isgraph", is_common);
     XSANY.any_dptr = (any_dptr_t) &isgraph;
 #undef islower
-    cv = newXS("POSIX::islower", is_common, file);
+    cv = newXS_deffile("POSIX::islower", is_common);
     XSANY.any_dptr = (any_dptr_t) &islower;
 #undef isprint
-    cv = newXS("POSIX::isprint", is_common, file);
+    cv = newXS_deffile("POSIX::isprint", is_common);
     XSANY.any_dptr = (any_dptr_t) &isprint;
 #undef ispunct
-    cv = newXS("POSIX::ispunct", is_common, file);
+    cv = newXS_deffile("POSIX::ispunct", is_common);
     XSANY.any_dptr = (any_dptr_t) &ispunct;
 #undef isspace
-    cv = newXS("POSIX::isspace", is_common, file);
+    cv = newXS_deffile("POSIX::isspace", is_common);
     XSANY.any_dptr = (any_dptr_t) &isspace;
 #undef isupper
-    cv = newXS("POSIX::isupper", is_common, file);
+    cv = newXS_deffile("POSIX::isupper", is_common);
     XSANY.any_dptr = (any_dptr_t) &isupper;
 #undef isxdigit
-    cv = newXS("POSIX::isxdigit", is_common, file);
+    cv = newXS_deffile("POSIX::isxdigit", is_common);
     XSANY.any_dptr = (any_dptr_t) &isxdigit;
 }
 
@@ -1974,7 +1973,7 @@ WEXITSTATUS(status)
 #endif
 	    break;
 	default:
-	    Perl_croak(aTHX_ "Illegal alias %d for POSIX::W*", (int)ix);
+	    croak("Illegal alias %d for POSIX::W*", (int)ix);
 	}
     OUTPUT:
 	RETVAL
