@@ -49,7 +49,7 @@ L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
 C<wb> stands for Word Boundary.  It is a Unicode property
 that finds the boundary between words.  This is similar to the plain
 C<\b> (without braces) but is more suitable for natural language
-processing.  It knows, for example that apostrophes can occur in the
+processing.  It knows, for example, that apostrophes can occur in the
 middle of words.  See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
 
 =head3 qr/\b{sb}/
@@ -111,7 +111,7 @@ It is now possible to pass a parameter to S<C<use locale>> to specify
 a subset of locale categories to be locale-aware, with the remaining
 ones unaffected.  See L<perllocale/The "use locale" pragma> for details.
 
-=head2 Perl now supports POSIX 2008 locale currency additions.
+=head2 Perl now supports POSIX 2008 locale currency additions
 
 On platforms that are able to handle POSIX.1-2008, the
 hash returned by
@@ -300,7 +300,7 @@ List slices return an empty list now only if the original list was empty
 list if all indices fell outside the original list.
 L<[perl #114498]|https://rt.perl.org/Ticket/Display.html?id=114498>.
 
-=head2 C<\N{}> with a sequence of multiple spaces is now a fatal error.
+=head2 C<\N{}> with a sequence of multiple spaces is now a fatal error
 
 This has been deprecated since v5.18.
 
@@ -387,7 +387,7 @@ invokes match-once behaviour.
 These have been deprecated since v5.6.1 and have raised deprecation
 warnings since v5.16.
 
-=head2 Using a hash or an array as a reference are now fatal errors.
+=head2 Using a hash or an array as a reference are now fatal errors
 
 For example, C<%foo-E<gt>{"bar"}> now causes a fatal compilation
 error.  These have been deprecated since before v5.8, and have raised
@@ -619,7 +619,7 @@ L<[perl #121489]|https://rt.perl.org/Ticket/Display.html?id=121489>
 
 =item *
 
-Refactoring of C<< pp_tied >> and CC<< pp_ref >> for small improvements.
+Refactoring of C<< pp_tied >> and C<< pp_ref >> for small improvements.
 
 =item *
 
@@ -631,7 +631,7 @@ A typo fix reduces the size of the C<< OP >> structure.
 
 =item *
 
-Hash lookups where the key is a constant is faster.
+Hash lookups where the key is a constant are faster.
 
 =item *
 
