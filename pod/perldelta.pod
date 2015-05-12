@@ -30,8 +30,8 @@ L<[perl #123466]|https://rt.perl.org/Ticket/Display.html?id=123466>.
 =head2 New double-diamond operator
 
 C<<< <<>> >>> is like C<< <> >> but uses three-argument C<open> to open
-each file in @ARGV.  This means that each element of @ARGV will be treated
-as an actual file name, and "|foo" won't be treated as a pipe open.
+each file in C<@ARGV>.  This means that each element of C<@ARGV> will be treated
+as an actual file name, and C<"|foo"> won't be treated as a pipe open.
 
 =head2 New \b boundaries in regular expressions
 
@@ -172,7 +172,7 @@ continues to return the undefined value, as before, but also sets C<$!> to
 indicate that the operation is not supported.
 
 Currently, this uses either a C<dd_fd> member in the OS C<DIR>
-structure, or a dirfd(3) function as specified by POSIX.1-2008.
+structure, or a C<dirfd(3)> function as specified by POSIX.1-2008.
 
 =head2 List form of pipe open implemented for Win32
 
@@ -189,14 +189,14 @@ as a list.
 When an I/O error occurs, the fact that there has been an error is recorded
 in the handle.  C<close> returns false for such a handle.  Previously, the
 value of C<$!> would be untouched by C<close>, so the common convention of
-writing C<close $fh or die $!> did not work reliably.  Now the handle
+writing S<C<close $fh or die $!>> did not work reliably.  Now the handle
 records the value of C<$!>, too, and C<close> restores it.
 
 =head2 Assignment to list repetition
 
 C<(...) x ...> can now be used within a list that is assigned to, as long
-as the left-hand side is a valid lvalue.  This allows C<(undef,undef,$foo)
-= that_function()> to be written as C<((undef)x2, $foo) = that_function()>.
+as the left-hand side is a valid lvalue.  This allows S<C<(undef,undef,$foo)
+= that_function()>> to be written as S<C<((undef)x2, $foo) = that_function()>>.
 
 =head2 Infinity and NaN (not-a-number) handling improved
 
@@ -212,7 +212,7 @@ See also the L<POSIX> enhancements.
 Parsing and printing of floating point values has been improved.
 
 As a completely new feature, hexadecimal floating point literals
-(like 0x1.23p-4)  are now supported, and they can be output with
+(like C<0x1.23p-4>)  are now supported, and they can be output with
 C<printf %a>.
 
 =head2 Packing infinity or not-a-number into a character is now fatal
@@ -346,9 +346,9 @@ outcomes than existing code expects (though the documentation has always noted
 that this change might happen, recommending fully parenthesizing the
 expressions).  See L<perlrecharclass/Extended Bracketed Character Classes>.
 
-=head2 Omitting % and @ on hash and array names is no longer permitted
+=head2 Omitting C<%> and C<@> on hash and array names is no longer permitted
 
-Really old Perl let you omit the @ on array names and the % on hash
+Really old Perl let you omit the C<@> on array names and the C<%> on hash
 names in some spots.  This has issued a deprecation warning since Perl
 5.0, and is no longer permitted.
 
@@ -368,7 +368,8 @@ when the text is actually non-ASCII UTF-8.  This will enable programs
 that are set up to be locale-aware to properly output messages in the
 user's native language.  Code that needs to continue the 5.20 and
 earlier behavior can do the stringification within the scopes of both
-'use bytes' and 'use locale ":messages".  No other Perl operations will
+S<C<'use bytes'>> and S<C<'use locale ":messages">>.  No other Perl
+operations will
 be affected by locale; only C<$!> and C<$^E> stringification.  The
 'bytes' pragma causes the UTF-8 flag to not be set, just as in previous
 Perl releases.  This resolves
@@ -439,10 +440,10 @@ utf8">>, and affects just the C1 controls (code points 0x80 through
 
 =head2 Inlining of C<sub () { $var }> with observable side-effects
 
-In many cases Perl makes sub () { $var } into an inlinable constant
-subroutine, capturing the value of $var at the time the C<sub> expression
+In many cases Perl makes S<C<sub () { $var }>> into an inlinable constant
+subroutine, capturing the value of C<$var> at the time the C<sub> expression
 is evaluated.  This can break the closure behaviour in those cases where
-$var is subsequently modified.  The subroutine won't return the new value.
+C<$var> is subsequently modified.  The subroutine won't return the new value.
 
 This usage is now deprecated in those cases where the variable could be
 modified elsewhere.  Perl detects those cases and emits a deprecation
@@ -469,14 +470,14 @@ Perl will continue to make the sub inlinable with no warnings.
         return sub () { $var }; # deprecated
     }
 
-In the second example above, detecting that $var is assigned to only once
+In the second example above, detecting that C<$var> is assigned to only once
 is too hard to detect.  That it happens in a spot other than the C<my>
 declaration is enough for Perl to find it suspicious.
 
 This deprecation warning happens only for a simple variable for the body of
 the sub.  (A C<BEGIN> block or C<use> statement inside the sub is ignored,
 because it does not become part of the sub's body.)  For more complex
-cases, such as C<sub () { do_something() if 0; $var }> the behaviour has
+cases, such as S<C<sub () { do_something() if 0; $var }>> the behaviour has
 changed such that inlining does not happen if the variable is modifiable
 elsewhere.  Such cases should be rare.
 
@@ -558,7 +559,7 @@ has also been made to work with state variable initialization.
 
 =item *
 
-In "\L...", "\Q...", etc., the extra "stringify" op is now optimised away,
+In "C<\L>...", "C<\Q>...", etc., the extra "stringify" op is now optimised away,
 making these just as fast as C<lcfirst>, C<quotemeta>, etc.
 
 =item *
@@ -570,7 +571,7 @@ used to sometimes.
 =item *
 
 C<length> is up to 20% faster for non-magical/non-tied scalars containing a
-string if it is a non-utf8 string or if C<use bytes;> is in scope.
+string if it is a non-utf8 string or if is in scope of C<use bytes>.
 
 =item *
 
@@ -582,7 +583,7 @@ depending on OS.
 
 In C<@array = split>, the assignment can be optimized away with C<split>
 writing directly to the array.  This optimisation was happening only for
-package arrays other than @_ and only
+package arrays other than C<@_> and only
 sometimes.  Now this optimisation happens
 almost all the time.
 
@@ -595,13 +596,13 @@ simplified to a stringification.  The separator doesn't even get evaluated.
 =item *
 
 C<qq(@array)> is implemented using two ops: a stringify op and a join op.
-If the qq contains nothing but a single array, the stringification is
+If the C<qq> contains nothing but a single array, the stringification is
 optimized away.
 
 =item *
 
-C<our $var> and C<our($s,@a,%h)> in void context are no longer evaluated at
-run time.  Even a whole sequence of C<our $foo;> statements will simply be
+S<C<our $var>> and S<C<our($s,@a,%h)>> in void context are no longer evaluated at
+run time.  Even a whole sequence of S<C<our $foo;>> statements will simply be
 skipped over.  The same applies to C<state> variables.
 
 =item *
@@ -1045,9 +1046,9 @@ allow this syntax, but shouldn't have.
 
 L<Can't use 'defined(@array)' (Maybe you should just omit the defined()?)|perldiag/"Can't use 'defined(@array)' (Maybe you should just omit the defined()?)">
 
-(F) defined() is not useful on arrays because it
+(F) C<defined()> is not useful on arrays because it
 checks for an undefined I<scalar> value.  If you want to see if the
-array is empty, just use C<if (@array) { # not empty }> for example.
+array is empty, just use S<C<if (@array) { # not empty }>> for example.
 
 =item *
 
@@ -1055,10 +1056,10 @@ L<Can't use 'defined(%hash)' (Maybe you should just omit the defined()?)|perldia
 
 (F) C<defined()> is not usually right on hashes.
 
-Although C<defined %hash> is false on a plain not-yet-used hash, it
+Although S<C<defined %hash>> is false on a plain not-yet-used hash, it
 becomes true in several non-obvious circumstances, including iterators,
-weak references, stash names, even remaining true after C<undef %hash>.
-These things make C<defined %hash> fairly useless in practice, so it now
+weak references, stash names, even remaining true after S<C<undef %hash>>.
+These things make S<C<defined %hash>> fairly useless in practice, so it now
 generates a fatal error.
 
 If a check for non-empty is what you wanted then just put it in boolean
@@ -1068,7 +1069,7 @@ context (see L<perldata/Scalar values>):
        # not empty
     }
 
-If you had C<defined %Foo::Bar::QUUX> to check whether such a package
+If you had S<C<defined %Foo::Bar::QUUX>> to check whether such a package
 variable exists then that's never really been reliable, and isn't
 a good way to enquire about the features of a package, or whether
 it's loaded, etc.
@@ -1098,8 +1099,8 @@ which makes no sense.
 
 L<Cannot print %f with '%c'|perldiag/"Cannot printf %f with '%c'">
 
-(F) You tried printing an infinity or not-a-number as a character (%c),
-which makes no sense.  Maybe you meant '%s', or just stringifying it?
+(F) You tried printing an infinity or not-a-number as a character (C<%c>),
+which makes no sense.  Maybe you meant C<'%s'>, or just stringifying it?
 
 =item *
 
@@ -1507,7 +1508,7 @@ to make the issue more identifiable.
 L<Argument "%s" isn't numeric%s|perldiag/"Argument "%s" isn't numeric%s">
 now adds the following note:
 
- Note that for the C<Inf> and C<NaN> (infinity and not-a-number) the
+ Note that for the Inf and NaN (infinity and not-a-number) the
  definition of "numeric" is somewhat unusual: the strings themselves
  (like "Inf") are considered numeric, and anything following them is
  considered non-numeric.
@@ -1537,7 +1538,7 @@ as a range end-point is' to reflect improvements in C<qr/[\N{named sequence}]/>
 
 L<panic: frexp|perldiag/"panic: frexp: %f">
 
-This message has had ': %f' appended to it, to show what the offending floating
+This message has had ': C<%f>' appended to it, to show what the offending floating
 point number is.
 
 =item *
@@ -1559,7 +1560,7 @@ the filename.
 
 =item *
 
-"Variable %s will not stay shared" has been changed to say "Subroutine"
+"Variable C<%s> will not stay shared" has been changed to say "Subroutine"
 when it is actually a lexical sub that will not stay shared.
 
 =item *
@@ -1698,7 +1699,7 @@ see the discussion below at L<< /Internal Changes >>.
 
 F<t/porting/re_context.t> has been added to test that L<utf8> and its
 dependencies only use the subset of the C<$1..$n> capture vars that
-Perl_save_re_context() is hard-coded to localize, because that function has no
+C<Perl_save_re_context()> is hard-coded to localize, because that function has no
 efficient way of determining at runtime what vars to localize.
 
 =item *
@@ -2018,7 +2019,7 @@ superseded by C<grok_atoUV>.  See L<perlclib> for details.
 
 =item *
 
-Added Perl_sv_get_backrefs() to determine if an SV is a weak-referent.
+Added C<Perl_sv_get_backrefs()> to determine if an SV is a weak-referent.
 
 Function either returns an SV * of type AV, which contains the set of
 weakreferences which reference the passed in SV, or a simple RV * which
@@ -2306,7 +2307,7 @@ L<[perl #123995]|https://rt.perl.org/Ticket/Display.html?id=123995>
 
 =item *
 
-C<split> in the scope of lexical $_ has been fixed not to fail assertions.
+C<split> in the scope of lexical C<$>_ has been fixed not to fail assertions.
 L<[perl #123763]|https://rt.perl.org/Ticket/Display.html?id=123763>
 
 =item *
@@ -2317,8 +2318,8 @@ L<[perl #123817]|https://rt.perl.org/Ticket/Display.html?id=123817>
 
 =item *
 
-An @ sign in quotes followed by a non-ASCII digit (which is not a valid
-identifier) would cause the parser to crash, instead of simply trying the @ as
+An C<@> sign in quotes followed by a non-ASCII digit (which is not a valid
+identifier) would cause the parser to crash, instead of simply trying the C<@> as
 literal.  This has been fixed.
 L<[perl #123963]|https://rt.perl.org/Ticket/Display.html?id=123963>
 
@@ -2331,7 +2332,7 @@ L<[perl #123847]|https://rt.perl.org/Ticket/Display.html?id=123847>
 =item *
 
 C<foreach> in scalar context was not pushing an item on to the stack, resulting
-in bugs.  (C<print 4, scalar do { foreach(@x){} } + 1> would print 5.)  It has
+in bugs.  (S<C<print 4, scalar do { foreach(@x){} } + 1>> would print 5.)  It has
 been fixed to return C<undef>.
 L<[perl #124004]|https://rt.perl.org/Ticket/Display.html?id=124004>
 
@@ -2465,7 +2466,7 @@ L<[perl #123495]|https://rt.perl.org/Ticket/Display.html?id=123495>.
 
 =item *
 
-C<\()> (reference to an empty list) and C<y///> with lexical $_ in scope
+C<\()> (reference to an empty list) and C<y///> with lexical C<$_> in scope
 could do a bad write past the end of the stack.  They have been fixed
 to extend the stack first.
 
@@ -2473,7 +2474,7 @@ to extend the stack first.
 
 C<prototype()> with no arguments used to read the previous item on the
 stack, so C<print "foo", prototype()> would print foo's prototype.  It has
-been fixed to infer $_ instead.
+been fixed to infer C<$_> instead.
 L<[perl #123514]|https://rt.perl.org/Ticket/Display.html?id=123514>.
 
 =item *
@@ -2524,7 +2525,7 @@ L<[perl #123604]|https://rt.perl.org/Ticket/Display.html?id=123604>.
 
 =item *
 
-fchmod() and futimes() now set C<$!> when they fail due to being
+C<fchmod()> and C<futimes()> now set C<$!> when they fail due to being
 passed a closed file handle.
 L<[perl #122703]|https://rt.perl.org/Ticket/Display.html?id=122703>.
 
@@ -2601,7 +2602,7 @@ L<[perl #122782]|https://rt.perl.org/Ticket/Display.html?id=122782>.
 
 The repetition operator C<x> now propagates lvalue context to its left-hand
 argument when used in contexts like C<foreach>.  That allows
-C<for(($#that_array)x2) { ... }> to work as expected if the loop modifies
+S<C<for(($#that_array)x2) { ... }>> to work as expected if the loop modifies
 $_.
 
 =item *
@@ -2634,18 +2635,18 @@ to mean C<setpgrp(0)>.  This has been fixed.
 =item *
 
 C<__SUB__> could return the wrong value or even corrupt memory under the
-debugger (the B<-d> switch) and in subs containing C<eval $string>.
+debugger (the C<-d> switch) and in subs containing C<eval $string>.
 
 =item *
 
-When C<sub () { $var }> becomes inlinable, it now returns a different
+When S<C<sub () { $var }>> becomes inlinable, it now returns a different
 scalar each time, just as a non-inlinable sub would, though Perl still
 optimises the copy away in cases where it would make no observable
 difference.
 
 =item *
 
-C<my sub f () { $var }> and C<sub () : attr { $var }> are no longer
+S<C<my sub f () { $var }>> and S<C<sub () : attr { $var }>> are no longer
 eligible for inlining.  The former would crash; the latter would just
 throw the attributes away.  An exception is made for the little-known
 ":method" attribute, which does nothing much.
@@ -2689,7 +2690,7 @@ L<[perl #108276]|https://rt.perl.org/Ticket/Display.html?id=108276>.
 
 =item *
 
-index() and rindex() no longer crash when used on strings over 2GB in
+C<index()> and C<rindex()> no longer crash when used on strings over 2GB in
 size.
 L<[perl #121562]|https://rt.perl.org/Ticket/Display.html?id=121562>.
 
@@ -2748,9 +2749,9 @@ fixed.
 
 system() and friends should now work properly on more Android builds.
 
-Due to an oversight, the value specified through -Dtargetsh to Configure
+Due to an oversight, the value specified through C<-Dtargetsh> to F<Configure>
 would end up being ignored by some of the build process.  This caused perls
-cross-compiled for Android to end up with defective versions of system(),
+cross-compiled for Android to end up with defective versions of C<system()>,
 exec() and backticks: the commands would end up looking for C</bin/sh>
 instead of C</system/bin/sh>, and so would fail for the vast majority
 of devices, leaving C<$!> as C<ENOENT>.
@@ -2821,13 +2822,14 @@ L<[perl #69456]|https://rt.perl.org/Ticket/Display.html?id=69456>
 
 =item *
 
-When parsing a funny character ($ @ % &) followed by braces, the parser no
+When parsing a funny character (C<$> C<@> C<%> C<&)> followed by braces,
+the parser no
 longer tries to guess whether it is a block or a hash constructor (causing a
 syntax error when it guesses the latter), since it can only be a block.
 
 =item *
 
-C<undef $reference> now frees the referent immediately, instead of hanging on
+S<C<undef $reference>> now frees the referent immediately, instead of hanging on
 to it until the next statement.
 L<[perl #122556]|https://rt.perl.org/Ticket/Display.html?id=122556>
 
@@ -2880,14 +2882,14 @@ L<[perl #122669]|https://rt.perl.org/Ticket/Display.html?id=122669>
 
 =item *
 
-C<open $$fh, ...>, which vivifies a handle with a name like "main::_GEN_0", was
+S<C<open $$fh, ...>>, which vivifies a handle with a name like C<"main::_GEN_0">, was
 not giving the handle the right reference count, so a double free could happen.
 
 =item *
 
 When deciding that a bareword was a method name, the parser would get confused
-if an "our" sub with the same name existed, and look up the method in the
-package of the "our" sub, instead of the package of the invocant.
+if an C<our> sub with the same name existed, and look up the method in the
+package of the C<our> sub, instead of the package of the invocant.
 
 =item *
 
@@ -2943,8 +2945,8 @@ fixed.
 
 =item *
 
-C<(caller $n)[3]> now reports names of lexical subs, instead of treating them
-as "(unknown)".
+S<C<(caller $n)[3]>> now reports names of lexical subs, instead of treating them
+as C<"(unknown)">.
 
 =item *
 
@@ -2975,7 +2977,7 @@ L<[perl #122761]|https://rt.perl.org/Ticket/Display.html?id=122761>
 
 =item *
 
-The little-known C<my Class $var> syntax (see L<fields> and L<attributes>)
+The little-known S<C<my Class $var>> syntax (see L<fields> and L<attributes>)
 could get confused in the scope of C<use utf8> if C<Class> were a constant
 whose value contained Latin-1 characters.
 
@@ -3007,12 +3009,12 @@ example.
 
 =item *
 
-C<pack "w", $tied> no longer calls FETCH twice.
+S<C<pack "w", $tied>> no longer calls FETCH twice.
 
 =item *
 
-List assignments like C<($x, $z) = (1, $y)> now work correctly if $x and $y
-have been aliased by C<foreach>.
+List assignments like S<C<($x, $z) = (1, $y)>> now work correctly if C<$x> and
+C<$y> have been aliased by C<foreach>.
 
 =item *
 
@@ -3028,12 +3030,12 @@ L<[perl #122771]|https://rt.perl.org/Ticket/Display.html?id=122771>.
 
 =item *
 
-C<*a = *b; @a = split //, $b[1]> could do a bad read and produce junk
+S<C<*a = *b; @a = split //, $b[1]>> could do a bad read and produce junk
 results.
 
 =item *
 
-In C<() = @array = split>, the C<() => at the beginning no longer confuses
+In S<C<() = @array = split>>, the S<C<() =>> at the beginning no longer confuses
 the optimizer, making it assume a limit of 1.
 
 =item *
@@ -3063,7 +3065,7 @@ L<[cpan #85570]|https://rt.cpan.org/Ticket/Display.html?id=85570>.
 =item *
 
 During the pattern optimization phase, we no longer recurse into
-GOSUB/GOSTART when not SCF_DO_SUBSTR. This prevents the optimizer
+C<GOSUB>/C<GOSTART> when not C<SCF_DO_SUBSTR>. This prevents the optimizer
 to run "forever" and exhaust all memory.
 L<[perl #122283]|https://rt.perl.org/Ticket/Display.html?id=122283>.
 
@@ -3095,7 +3097,7 @@ L<[perl #40565]|https://rt.perl.org/Ticket/Display.html?id=40565>.
 =item *
 
 Calling C<write> on a format with a C<^**> field could produce a panic
-in sv_chop() if there were insufficient arguments or if the variable
+in C<sv_chop()> if there were insufficient arguments or if the variable
 used to fill the field was empty.
 L<[perl #123245]|https://rt.perl.org/Ticket/Display.html?id=123245>.
 
@@ -3122,7 +3124,7 @@ L<[perl #123286]|https://rt.perl.org/Ticket/Display.html?id=123286>.
 =item *
 
 C<scalar()> now propagates lvalue context, so that
-C<for(scalar($#foo)) { ... }> can modify C<$#foo> through C<$_>.
+S<C<for(scalar($#foo)) { ... }>> can modify C<$#foo> through C<$_>.
 
 =item *
 
@@ -3131,7 +3133,7 @@ L<[perl #123344]|https://rt.perl.org/Ticket/Display.html?id=123344>.
 
 =item *
 
-C<eval '$variable'> in nested named subroutines would sometimes look up a
+S<C<eval '$variable'>> in nested named subroutines would sometimes look up a
 global variable even with a lexical variable in scope.
 
 =item *
@@ -3145,7 +3147,7 @@ L<[perl #123410]|https://rt.perl.org/Ticket/Display.html?id=123410>.
 =item *
 
 Outside of C<use utf8>, a single-character Latin-1 lexical variable is
-disallowed.  The error message for it, "Can't use global $foo...", was
+disallowed.  The error message for it, "Can't use global C<$foo>...", was
 giving garbage instead of the variable name.
 
 =item *
