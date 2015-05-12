@@ -1920,52 +1920,84 @@ as well as C<SUNWspro>, and support for native C<setenv> has been added.
 
 =item *
 
-Perl 5.21.2 introduced a new build option, C<-DPERL_OP_PARENT>, which causes
-the last C<op_sibling> pointer to refer back to the parent rather than being
-C<NULL>, and where instead a new flag indicates the end of the chain.  In this
-release, the new implementation has been revised; in particular:
+Experimental support has been added to allow ops in the optree to locate
+their parent, if any. This is enabled by the non-default build option
+C<-DPERL_OP_PARENT>. It is envisaged that this will eventually become
+enabled by default, so XS code which directly accesses the C<op_silbing>
+field of ops should be updated to be future-proofed.
+
+On C<PERL_OP_PARENT> builds, the C<op_sibling> field has been renamed
+C<op_sibparent> and a new flag, C<op_moresib>, added. On the last op in a
+sibling chain, C<op_moresib> is false and C<op_sibparent> points to the
+parent (if any) rather than to being C<NULL>.
+
+To make existing code work transparently whether using C<-DPERL_OP_PARENT>
+or not, a number of new macros and functions have been added that should
+be used, rather than directly manipulating C<op_sibling>.
+
+For the case of just reading C<op_sibling> to determine the next sibling,
+two new macros have been added. A simple scan through a sibling chain
+like this:
+
+    for (; kid->op_sibling; kid = kid->op_sibling) { ...  }
+
+should now be written as:
+
+    for (; OpHAS_SIBLING(kid); kid = OpSIBLING(kid)) { ...  }
+
+For altering optrees, A general-purpose function C<op_sibling_splice()>
+has been added, which allows for manipulation of a chain of sibling ops.
+By analogy with the Perl function C<splice()>, it allows you to cut out
+zero or more ops from a sibling chain and replace them with zero or more
+new ops.  It transparently handles all the updating of sibling, parent,
+op_last pointers etc.
+
+If you need to manipulate ops at a lower level, then three new macros,
+C<OpMORESIB_set>, C<OpLASTSIB_set> and C<OpMAYBESIB_set> are intended to
+be a low-level portable way to set C<op_sibling> / C<op_sibparent> while
+also updating C<op_moresib>.  The first sets the sibling pointer to a new
+sibling, the second makes the op the last sibling, and the third
+conditionally does the first or second action.  Note that unlike
+C<op_sibling_splice()> these macros won't maintain consistency in the
+parent at the same time (e.g. by updating C<op_first> and C<op_last> where
+appropriate).
+
+A C-level C<Perl_op_parent()> function and a perl-level C<B::OP::parent()>
+method have been added. The C function only exists under
+C<-DPERL_OP_PARENT> builds (using it is build-time error on vanilla
+perls).  C<B::OP::parent()> exists always, but on a vanilla build it
+always returns C<NULL>. Under C<-DPERL_OP_PARENT>, they return the parent
+of the current op, if any. The variable C<$B::OP::does_parent> allows you
+to determine whether C<B> supports retrieving an op's parent.
+
+C<-DPERL_OP_PARENT> was introduced in 5.21.2, but the interface was
+changed considerably in 5.21.11. If you updated your code before the
+5.21.11 changes, it may require further revision. The main changes after
+5.21.2 were:
 
 =over 4
 
 =item *
 
-On C<PERL_OP_PARENT> builds, the C<op_sibling> field has been renamed
-C<op_sibparent> to reflect its new dual purpose.  Since the intention is that
-this field should primarily be accessed via macros, this change should be
-transparent for code written to work under C<PERL_OP_PARENT>.
+The C<OP_SIBLING> and C<OP_HAS_SIBLING> macros have been renamed
+C<OpSIBLING> and C<OpHAS_SIBLING> for consistency with other
+op-manipulating macros.
 
 =item *
 
-The newly-introduced C<op_lastsib> flag bit has been renamed C<op_moresib> and
-its logic inverted; i.e. it is initialised to zero in a new op, and is changed
-to 1 when an op gains a sibling.
+The C<op_lastsib> field has been renamed C<op_moresib>, and its meaning
+inverted.
 
 =item *
 
-The function C<Perl_op_parent> is now only available on C<PERL_OP_PARENT>
-builds.  Using it on a plain build will be a compile-timer error.
+The macro C<OpSIBLING_set> has been removed, and has been superseded by
+C<OpMORESIB_set> et al.
 
 =item *
 
-Three new macros, C<OpMORESIB_set>, C<OpLASTSIB_set>, C<OpMAYBESIB_set> have
-been added, which are intended to be a low-level portable way to set
-C<op_sibling> / C<op_sibparent> while also updating C<op_moresib>.  The first
-sets the sibling pointer to a new sibling, the second makes the op the last
-sibling, and the third conditionally does the first or second action.  The
-C<op_sibling_splice()> function is retained as a higher-level interface that
-can also maintain consistency in the parent at the same time (e.g. by updating
-C<op_first> and C<op_last> where appropriate).
-
-=item *
-
-The macro C<OpSIBLING_set>, added in Perl 5.21.2, has been removed.  It didn't
-manipulate C<op_moresib> and has been superseded by C<OpMORESIB_set> et al.
-
-=item *
-
-The C<op_sibling_splice> function now accepts a null C<parent> argument where
-the splicing doesn't affect the first or last ops in the sibling chain, and
-thus where the parent doesn't need to be updated accordingly.
+The C<op_sibling_splice()> function now accepts a null C<parent> argument
+where the splicing doesn't affect the first or last ops in the sibling
+chain
 
 =back
 
@@ -2166,22 +2198,6 @@ Users of the public API prefix-less calls remain unaffected.
 
 =item *
 
-Experimental support for ops in the optree to be able to locate their
-parent, if any. A general-purpose function, C<< op_sibling_splice() >>
-allows for general manipulating an C<< op_sibling >> chain. The last op
-in such a chain is now marked with the field C<< op_lastsib >>.
-
-A new build define, C<< -DPERL_OP_PARENT >> has been added; if
-given, it forces the core to use C<< op_lastsib >> to detect the
-last sibling in a chain, freeing the last C<< op_sibling >> pointer,
-which then points back to the parent (instead of being C<< NULL >>).
-
-A C-level C<< op_parent() >> function, and a C<< B >> C<< parent() >> method
-have been added; under a default build, they return C<< NULL >>, but when
-C<< -DPERL_OP_PARENT >> has been set, they return the parent of the current op.
-
-=item *
-
 The PADNAME and PADNAMELIST types are now separate types, and no longer
 simply aliases for SV and AV.  [perl #123223]
 
@@ -2191,12 +2207,6 @@ Pad names are now always UTF8.  The C<PadnameUTF8> macro always returns
 true.  Previously, this was effectively the case already, but any support
 for two different internal representations of pad names has now been
 removed.
-
-=item *
-
-The C<OP_SIBLING> and C<OP_HAS_SIBLING> macros added in an earlier 5.21.x
-release have been renamed C<OpSIBLING> and C<OpHAS_SIBLING>, following the
-existing convention.
 
 =item *
 
