@@ -30,8 +30,8 @@ L<[perl #123466]|https://rt.perl.org/Ticket/Display.html?id=123466>.
 =head2 New double-diamond operator
 
 C<<< <<>> >>> is like C<< <> >> but uses three-argument C<open> to open
-each file in @ARGV.  So each element of @ARGV is an actual file name, and
-"|foo" won't be treated as a pipe open.
+each file in @ARGV.  This means that each element of @ARGV will be treated
+as an actual file name, and "|foo" won't be treated as a pipe open.
 
 =head2 New \b boundaries in regular expressions
 
