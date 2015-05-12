@@ -100,10 +100,14 @@ U+2028 LINE SEPARATOR,
 and
 U+2029 PARAGRAPH SEPARATOR.
 
-=head2 Unicode 7.0 is now supported
+=head2 Unicode 7.0 (with correction) is now supported
 
 For details on what is in this release, see
 L<http://www.unicode.org/versions/Unicode7.0.0/>.
+The version of Unicode 7.0 that comes with Perl includes
+a correction dealing with glyph shaping in Arabic
+(see L<http://www.unicode.org/errata/#current_errata>).
+
 
 =head2 S<C<use locale>> can restrict which locale categories are affected
 
@@ -821,6 +825,14 @@ storage of the offset.
 
 Details on C level symbols and libperl.t added.
 
+=item *
+
+Information on Unicode handling has been added
+
+=item *
+
+Information on EBCDIC handling has been added
+
 =back
 
 =head3 L<perlhacktips>
@@ -879,6 +891,10 @@ set out.
 =item *
 
 Out-of-date VMS-specific information has been fixed/simplified.
+
+=item *
+
+Notes about EBCDIC have been added.
 
 =back
 
@@ -955,9 +971,8 @@ in L<< perlsyn >>.
 
 =item *
 
-Update B<Default Word Boundaries> under
-L<perlunicode/"Unicode Regular Expression Support Level">'s
-B<Extended Unicode Support>.
+This has had extensive revisions to bring it up-to-date with current
+Unicode support and to make it more readable.
 
 =back
 
@@ -968,8 +983,7 @@ B<Extended Unicode Support>.
 =item *
 
 Advice for how to make sure your strings and regular expression patterns are
-interpreted as Unicode has been revised to account for the new Perl 5.22 EBCDIC
-handling.
+interpreted as Unicode has been updated.
 
 =back
 
@@ -2163,14 +2177,6 @@ C<op_private>.
 
 =item *
 
-Added L<perlapi/sync_locale>.
-Changing the program's locale should be avoided by XS code.  Nevertheless,
-certain non-Perl libraries called from XS, such as C<Gtk> do so.  When this
-happens, Perl needs to be told that the locale has changed.  Use this function
-to do so, before returning to Perl.
-
-=item *
-
 The deprecated variable C<PL_sv_objcount> has been removed.
 
 =item *
@@ -2182,11 +2188,11 @@ with the decimal radix character not being a dot.  Prior to this
 release, Perl initialized this category to "C", but a call to
 C<POSIX::setlocale()> would change it.  Now such a call will change the
 underlying locale of the C<LC_NUMERIC> category for the program, but the
-locale exposed to XS code will remain "C".  There is an API under
-development for those relatively few modules that need to use the
-underlying locale.  This API will be nailed down during the course of
-developing v5.21.  Send email to L<mailto:perl5-porters@perl.org> for
-guidance.
+locale exposed to XS code will remain "C".  There are new macros
+to manipulate the LC_NUMERIC locale, including
+C<STORE_LC_NUMERIC_SET_TO_NEEDED> and
+C<STORE_LC_NUMERIC_FORCE_TO_UNDERLYING>.
+See L<perlapi/Locale-related functions and macros>.
 
 =item *
 
@@ -2528,12 +2534,6 @@ L<[perl #123604]|https://rt.perl.org/Ticket/Display.html?id=123604>.
 C<fchmod()> and C<futimes()> now set C<$!> when they fail due to being
 passed a closed file handle.
 L<[perl #122703]|https://rt.perl.org/Ticket/Display.html?id=122703>.
-
-=item *
-
-Perl now comes with a corrected Unicode 7.0 for the erratum issued on
-October 21, 2014 (see L<http://www.unicode.org/errata/#current_errata>),
-dealing with glyph shaping in Arabic.
 
 =item *
 
@@ -3179,6 +3179,22 @@ Unicode version.  In Perl 5.22, though, the earliest such version is Unicode
 EBCDIC platforms
 
 =over 4
+
+=item *
+
+The C<cmp> (and hence C<sort>) operators do not necessarily give the
+correct results when both operands are UTF-EBCDIC encoded strings and
+there is a mixture of ASCII and/or control characters, along with other
+characters.
+
+=item *
+
+Ranges containing C<\N{...}> in the C<tr///> (and C<y///>)
+transliteration operators are treated differently than the equivalent
+ranges in regular expression pattersn.  They should, but don't, cause
+the values in the ranges to all be treated as Unicode code points, and
+not native ones.  (L<perlre/Version 8 Regular Expressions> gives
+details as to how it should work.)
 
 =item *
 
