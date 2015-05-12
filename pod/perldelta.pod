@@ -6,7 +6,7 @@ perldelta - what is new for perl v5.22.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.22.0 release and the 5.20.0
+This document describes differences between the 5.20.0 release and the 5.22.0
 release.
 
 If you are upgrading from an earlier release such as 5.18.0, first read
