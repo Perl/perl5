@@ -350,7 +350,7 @@ expressions).  See L<perlrecharclass/Extended Bracketed Character Classes>.
 
 Really old Perl let you omit the C<@> on array names and the C<%> on hash
 names in some spots.  This has issued a deprecation warning since Perl
-5.0, and is no longer permitted.
+5.000, and is no longer permitted.
 
 =head2 C<"$!"> text is now in English outside C<"use locale"> scope
 
@@ -1343,7 +1343,7 @@ the endpoints are specified by
 L<C<\N{...}>|perlrecharclass/Character Ranges>, but the meaning may
 still not be obvious.)
 The stricter rules require that ranges that start or stop with an ASCII
-character that is not a control have all their endpoints be the literal
+character that is not a control have all their endpoints be a literal
 character, and not some escape sequence (like C<"\x41">), and the ranges
 must be all digits, or all uppercase letters, or all lowercase letters.
 
@@ -2370,14 +2370,14 @@ L<[perl #123218]|https://rt.perl.org/Ticket/Display.html?id=123218>.
 =item *
 
 In a regular expression pattern, a POSIX class, like C<[:ascii:]>, must
-be inside a bracketed character class, like C</qr[[:ascii:]]>.  A
+be inside a bracketed character class, like C<qr/[[:ascii:]]/>.  A
 warning is issued when something looking like a POSIX class is not
 inside a bracketed class.  That warning wasn't getting generated when
 the POSIX class was negated: C<[:^ascii:]>.  This is now fixed.
 
 =item *
 
-Fix a couple of other size calculation overflows.
+Fix a couple of size calculation overflows.
 L<[perl #123554]|https://rt.perl.org/Ticket/Display.html?id=123554>.
 
 =item *
