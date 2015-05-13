@@ -161,10 +161,11 @@ L<[perl #123514]|https://rt.perl.org/Ticket/Display.html?id=123514>.
 
 =head2 New "const" subroutine attribute
 
-The "const" attribute can be applied to an anonymous subroutine.  It causes
-it to be executed immediately when it is cloned.  Its value is captured and
-used to create a new constant subroutine that is returned.  This feature is
-experimental.  See L<perlsub/Constant Functions>.
+The "const" attribute can be applied to an anonymous subroutine.  It
+causes the new sub to be executed immediately whenever one is created
+(i.e. when the C<sub> expression is evaluated).  Its value is captured
+and used to create a new constant subroutine that is returned.  This
+feature is experimental.  See L<perlsub/Constant Functions>.
 
 =head2 C<fileno> now works on directory handles
 
@@ -628,7 +629,8 @@ Refactoring of C<< pp_tied >> and C<< pp_ref >> for small improvements.
 
 =item *
 
-Pathtools don't try to load XS on miniperl.
+Pathtools doesn't try to load XS on miniperl. This speeds up building perl
+slightly.
 
 =item *
 
@@ -1640,7 +1642,7 @@ L<[perl #123784]|https://rt.perl.org/Ticket/Display.html?id=123784>.
 
 =item *
 
-No longer depends on non-core module anymore.
+No longer depends on non-core modules.
 
 =back
 
@@ -1667,8 +1669,8 @@ pass C<-Dusethreads> if you want a threaded perl.
 
 For long doubles (to get more precision and range for floating point numbers)
 one can now use the GCC quadmath library which implements the quadruple
-precision floating point numbers in x86 and ia64 platforms.  See F<INSTALL> for
-details.
+precision floating point numbers on x86 and IA-64 platforms.  See
+F<INSTALL> for details.
 
 =item *
 
@@ -1769,10 +1771,10 @@ version.
 
 =item NeXTSTEP/OPENSTEP
 
-NeXTSTEP was proprietary OS bundled with NeXT's workstations in the early
-to mid 90s; OPENSTEP was an API specification that provided a NeXTSTEP-like
-environment on a non-NeXTSTEP system.  Both are now long dead, so support
-for building Perl on them has been removed.
+NeXTSTEP was a proprietary operating system bundled with NeXT's
+workstations in the early to mid 90s; OPENSTEP was an API specification
+that provided a NeXTSTEP-like environment on a non-NeXTSTEP system.  Both
+are now long dead, so support for building Perl on them has been removed.
 
 =back
 
@@ -1846,10 +1848,6 @@ List form pipe open no longer falls back to the shell.
 
 =item *
 
-XXX In release 5.21.8 compiling on VC with dmake was broken. Fixed.
-
-=item *
-
 New C<DebugSymbols> and C<DebugFull> configuration options added to
 Windows makefiles.
 
@@ -1859,11 +1857,9 @@ L<B> now compiles again on Windows.
 
 =item *
 
-Previously, on Visual C++ for Win64 built Perls only, when compiling every Perl
-XS module (including CPAN ones) and Perl aware .c file with a 64 bit Visual C++,
-would unconditionally have around a dozen warnings from hv_func.h.  These
-warnings have been silenced.  GCC all bitness and Visual C++ for Win32 were
-not affected.
+Previously compiling XS modules (including CPAN ones) using Visual C++ for
+Win64 resulted in around a dozen warnings per file from hv_func.h.  These
+warnings have been silenced.
 
 =item *
 
@@ -2041,9 +2037,9 @@ is the only weakref to this item.
 
 =item *
 
-C<screaminstr> has been removed. Although marked as public API, it is
-undocumented and has no usage in modern perl versions on CPAN Grep. Calling it
-has been fatal since 5.17.0.
+The C<screaminstr> perl function has been removed. Although marked as
+public API, it was undocumented and had no usage in CPAN modules. Calling
+it has been fatal since 5.17.0.
 
 =item *
 
@@ -2080,13 +2076,13 @@ platforms and build configurations.
 The C<$DB::single>, C<$DB::signal> and C<$DB::trace> now have set and
 get magic that stores their values as IVs and those IVs are used when
 testing their values in C<pp_dbstate>.  This prevents perl from
-recursing infinity if an overloaded object is assigned to any of those
+recursing infinitely if an overloaded object is assigned to any of those
 variables.
 L<[perl #122445]|https://rt.perl.org/Ticket/Display.html?id=122445>.
 
 =item *
 
-C<Perl_tmps_grow> which is marked as public API but undocumented has been
+C<Perl_tmps_grow> which is marked as public API but is undocumented, has been
 removed from public API. If you use C<EXTEND_MORTAL> macro in your XS code to
 preextend the mortal stack, you are unaffected by this change.
 
@@ -2121,7 +2117,7 @@ respectively.
 
 =item *
 
-A new opcode class, C<< METHOP >> has been introduced, which holds
+A new opcode class, C<< METHOP >>, has been introduced. It holds
 class/method related info needed at runtime to improve performance
 of class/object method calls.
 
@@ -2720,7 +2716,7 @@ C<[[:upper:]]>,
 C<[[:word:]]>,
 and
 C<[[:xdigit:]]>.
-These are because the underlying Microsoft implementation does not
+This was because the underlying Microsoft implementation does not
 follow the standard.  Perl now takes special precautions to correct for
 this.
 
@@ -2839,11 +2835,6 @@ back to Perl 5.8.0.
 Stub declarations like C<sub f;> and C<sub f ();> no longer wipe out constants
 of the same name declared by C<use constant>.  This bug was introduced in Perl
 5.10.0.
-
-=item *
-
-Under some conditions a warning raised in compilation of regular expression
-patterns could be displayed multiple times.  This is now fixed.
 
 =item *
 
