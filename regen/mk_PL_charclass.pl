@@ -343,6 +343,8 @@ foreach my $charset (get_supported_code_pages()) {
                     ? sprintf "/* U+%02X %s */ %s,\n", $ord, $name, $bits[$ord]
                     : sprintf "/* 0x%02X U+%02X %s */ %s,\n", $index, $ord, $name, $bits[$ord];
     }
+    $out[-1] =~ s/,$//;     # No trailing comma in the final entry
+
     print $out_fh join "", @out;
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
