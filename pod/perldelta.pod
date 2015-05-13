@@ -231,7 +231,7 @@ result in a fatal error.
 
 =head2 Experimental C Backtrace API
 
-Starting from Perl 5.21.1, on some platforms Perl supports retrieving
+Perl now supports retrieving
 the C level backtrace (similar to what symbolic debuggers like gdb do).
 
 The backtrace returns the stack trace of the C call frames,
@@ -1846,7 +1846,7 @@ List form pipe open no longer falls back to the shell.
 
 =item *
 
-In release 5.21.8 compiling on VC with dmake was broken. Fixed.
+XXX In release 5.21.8 compiling on VC with dmake was broken. Fixed.
 
 =item *
 
@@ -1990,7 +1990,7 @@ always returns C<NULL>. Under C<-DPERL_OP_PARENT>, they return the parent
 of the current op, if any. The variable C<$B::OP::does_parent> allows you
 to determine whether C<B> supports retrieving an op's parent.
 
-C<-DPERL_OP_PARENT> was introduced in 5.21.2, but the interface was
+XXX C<-DPERL_OP_PARENT> was introduced in 5.21.2, but the interface was
 changed considerably in 5.21.11. If you updated your code before the
 5.21.11 changes, it may require further revision. The main changes after
 5.21.2 were:
@@ -2063,7 +2063,7 @@ L<[perl #123103]|https://rt.perl.org/Ticket/Display.html?id=123103>.
 
 =item *
 
-Starting in 5.21.6, accessing L<perlapi/CvPADLIST> in an XSUB is forbidden.
+Accessing L<perlapi/CvPADLIST> in an XSUB is now forbidden.
 C<CvPADLIST> has been reused for a different internal purpose for XSUBs. Guard all
 C<CvPADLIST> expressions with C<CvISXSUB()> if your code doesn't already block
 XSUB CV*s from going through optree CV* expecting code.
@@ -2092,7 +2092,7 @@ preextend the mortal stack, you are unaffected by this change.
 
 =item *
 
-C<cv_name>, which was introduced in 5.21.4, has been changed incompatibly.
+XXX C<cv_name>, which was introduced in 5.21.4, has been changed incompatibly.
 It now has a flags field that allows the caller to specify whether the name
 should be fully qualified.  See L<perlapi/cv_name>.
 
@@ -2268,22 +2268,17 @@ L<[perl #123790]|https://rt.perl.org/Ticket/Display.html?id=123790>
 
 =item *
 
-An optimization for state variable initialization introduced in Perl 5.21.6 has
+XXX An optimization for state variable initialization introduced in Perl 5.21.6 has
 been reverted because it was found to exacerbate some other existing buggy
 behaviour.
 L<[perl #124160]|https://rt.perl.org/Ticket/Display.html?id=124160>
 
 =item *
 
-The extension of another optimization to cover more ops in Perl 5.21 has also
+XXX The extension of another optimization to cover more ops in Perl 5.21 has also
 been reverted to its Perl 5.20 state as a temporary fix for regression issues
 that it caused.
 L<[perl #123790]|https://rt.perl.org/Ticket/Display.html?id=123790>
-
-=item *
-
-New bitwise ops added in Perl 5.21.9 accidentally caused C<$^H |= 0x1c020000>
-to enable all features.  This has now been fixed.
 
 =item *
 
@@ -2344,11 +2339,6 @@ L<[perl #124004]|https://rt.perl.org/Ticket/Display.html?id=124004>
 
 =item *
 
-A memory leak introduced in Perl 5.21.6 has been fixed.
-L<[perl #123922]|https://rt.perl.org/Ticket/Display.html?id=123922>
-
-=item *
-
 A regression in the behaviour of the C<readline> built-in function, caused by
 the introduction of the C<< <<>> >> operator, has been fixed.
 L<[perl #123990]|https://rt.perl.org/Ticket/Display.html?id=123990>
@@ -2385,12 +2375,6 @@ the POSIX class was negated: C<[:^ascii:]>.  This is now fixed.
 
 Fix a couple of size calculation overflows.
 L<[perl #123554]|https://rt.perl.org/Ticket/Display.html?id=123554>.
-
-=item *
-
-A bug introduced in 5.21.6, C<dump LABEL> acted the same as C<goto
-LABEL>.  This has been fixed.
-L<[perl #123836]|https://rt.perl.org/Ticket/Display.html?id=123836>.
 
 =item *
 
@@ -2572,7 +2556,7 @@ itself writes directly to the array.  This caused a bug, preventing this
 assignment from being used in lvalue context.  So
 C<(@a=split//,"foo")=bar()> was an error.  (This bug probably goes back to
 Perl 3, when the optimisation was added.)  This optimisation, and the bug,
-started to happen in more cases in 5.21.5.  It has now been fixed.
+started to happen in more cases in XXX 5.21.5.  It has now been fixed.
 L<[perl #123057]|https://rt.perl.org/Ticket/Display.html?id=123057>.
 
 =item *
@@ -2987,12 +2971,6 @@ Locking and unlocking values via L<Hash::Util> or C<Internals::SvREADONLY>
 no longer has any effect on values that are read-only to begin.
 Previously, unlocking such values could result in crashes, hangs or
 other erratic behaviour.
-
-=item *
-
-The internal C<looks_like_number> function (which L<Scalar::Util> provides
-access to) began erroneously to return true for "-e1" in 5.21.4, affecting
-also C<-'-e1'>.  This has been fixed.
 
 =item *
 
