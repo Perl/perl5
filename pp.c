@@ -3470,7 +3470,7 @@ PP(pp_index)
 	   SvPV_const some lines above. We can't remove that, as we need to
 	   call some SvPV to trigger overloading early and find out if the
 	   string is UTF-8.
-	   This is all getting to messy. The API isn't quite clean enough,
+	   This is all getting too messy. The API isn't quite clean enough,
 	   because data access has side effects.
 	*/
 	little = newSVpvn_flags(little_p, llen,
