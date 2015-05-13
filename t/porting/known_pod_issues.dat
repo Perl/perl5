@@ -96,6 +96,7 @@ inetd(8)
 IO::Socket::IP
 IPC::Run
 IPC::Signal
+invoker
 kill(3)
 langinfo(3)
 LaTeX::Encode
@@ -136,6 +137,7 @@ Module::Starter
 Moo
 Moose
 MRO::Compat
+NgxQueue
 nl_langinfo(3)
 Number::Format
 Object::Accessor
