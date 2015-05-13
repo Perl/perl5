@@ -94,7 +94,7 @@ This function is like them, but the input is a strict Unicode
 (as opposed to native) code point.  Only in very rare circumstances should code
 not be using the native code point.
 
-For details, see the description for L</uvchr_to_utf8_flags>>.
+For details, see the description for L</uvchr_to_utf8_flags>.
 
 =cut
 */
@@ -4194,7 +4194,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 =for apidoc uvuni_to_utf8_flags
 
 Instead you almost certainly want to use L</uvchr_to_utf8> or
-L</uvchr_to_utf8_flags>>.
+L</uvchr_to_utf8_flags>.
 
 This function is a deprecated synonym for L</uvoffuni_to_utf8_flags>,
 which itself, while not deprecated, should be used only in isolated
