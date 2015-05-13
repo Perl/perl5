@@ -87,7 +87,8 @@
  * aren't equivalent to ASCII characters nor C1 controls form the set of
  * continuation bytes; the remaining 64 non-ASCII, non-control code points form
  * the potential start bytes, in order.  (However, the first 5 of these lead to
- * malformed overlongs, so there really are only 59 start bytes.) Hence the
+ * malformed overlongs, so there really are only 59 start bytes, and the first
+ * three of the 59 are the start bytes for the Latin1 range.)  Hence the
  * UTF-EBCDIC for the smallest variant code point, 0x160, will have likely 0x41
  * as its continuation byte, provided 0x41 isn't an ASCII or C1 equivalent.
  * And its start byte will be the code point that is 37 (32+5) non-ASCII,
@@ -143,7 +144,7 @@ END_EXTERN_C
 /*
   The following table is adapted from tr16, it shows I8 encoding of Unicode code points.
 
-        Unicode                             Bit pattern 1st Byte 2nd Byte 3rd Byte 4th Byte 5th Byte 6th Byte 7th byte
+        Unicode                         U32 Bit pattern 1st Byte 2nd Byte 3rd Byte 4th Byte 5th Byte 6th Byte 7th byte
     U+0000..U+007F                     000000000xxxxxxx 0xxxxxxx
     U+0080..U+009F                     00000000100xxxxx 100xxxxx
     U+00A0..U+03FF                     000000yyyyyxxxxx 110yyyyy 101xxxxx
