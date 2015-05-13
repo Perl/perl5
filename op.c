@@ -5193,7 +5193,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		    max = rfirst + diff;
 		if (!grows)
 		    grows = (tfirst < rfirst &&
-			     UNISKIP(tfirst) < UNISKIP(rfirst + diff));
+			     UVCHR_SKIP(tfirst) < UVCHR_SKIP(rfirst + diff));
 		rfirst += diff + 1;
 	    }
 	    tfirst += diff + 1;

@@ -1831,7 +1831,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
         }
 
 	 if (hv
-             && (svp = hv_fetch(hv, (const char*)p, UNISKIP(uv1), FALSE))
+             && (svp = hv_fetch(hv, (const char*)p, UVCHR_SKIP(uv1), FALSE))
              && (*svp))
          {
 	     const char *s;

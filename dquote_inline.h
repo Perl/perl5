@@ -153,7 +153,7 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
   ok:
     /* guarantee replacing "\x{...}" with utf8 bytes fits within
      * existing space */
-    assert(OFFUNISKIP(*uv) < *s - start);
+    assert(UVCHR_SKIP(*uv) < *s - start);
     return TRUE;
 }
 

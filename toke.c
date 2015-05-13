@@ -3227,12 +3227,12 @@ S_scan_const(pTHX_ char *start)
 			*d = '\0';
 			/* See Note on sizing above.  */
 			sv_utf8_upgrade_flags_grow(
-                                         sv,
-                                         SV_GMAGIC|SV_FORCE_UTF8_UPGRADE
+                                       sv,
+                                       SV_GMAGIC|SV_FORCE_UTF8_UPGRADE
                                                   /* Above-latin1 in string
                                                    * implies no encoding */
                                                   |SV_UTF8_NO_ENCODING,
-                                         UNISKIP(uv) + (STRLEN)(send - s) + 1);
+                                       UVCHR_SKIP(uv) + (STRLEN)(send - s) + 1);
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf8 = TRUE;
                     }
@@ -3362,9 +3362,9 @@ S_scan_const(pTHX_ char *start)
 			    *d = '\0';
 			    /* See Note on sizing above.  */
 			    sv_utf8_upgrade_flags_grow(
-					sv,
-					SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-					UNISKIP(uv) + (STRLEN)(send - e) + 1);
+                                    sv,
+                                    SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
+				    UVCHR_SKIP(uv) + (STRLEN)(send - e) + 1);
 			    d = SvPVX(sv) + SvCUR(sv);
 			    has_utf8 = TRUE;
 			}
@@ -3597,7 +3597,7 @@ S_scan_const(pTHX_ char *start)
 	    const UV nextuv   = (this_utf8)
                                 ? utf8n_to_uvchr((U8*)s, send - s, &len, 0)
                                 : (UV) ((U8) *s);
-	    const STRLEN need = UNISKIP(nextuv);
+	    const STRLEN need = UVCHR_SKIP(nextuv);
 	    if (!has_utf8) {
 		SvCUR_set(sv, d - SvPVX_const(sv));
 		SvPOK_on(sv);

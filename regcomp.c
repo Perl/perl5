@@ -11579,7 +11579,7 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
 
     /* A single character node is SIMPLE, except for the special-cased SHARP S
      * under /di. */
-    if ((len == 1 || (UTF && len == UNISKIP(code_point)))
+    if ((len == 1 || (UTF && len == UVCHR_SKIP(code_point)))
 #if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
    || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
                                       || UNICODE_DOT_DOT_VERSION > 0)
@@ -12635,7 +12635,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * its representation until PASS2. */
                     if (SIZE_ONLY) {
                         if (UTF) {
-                            const STRLEN unilen = UNISKIP(ender);
+                            const STRLEN unilen = UVCHR_SKIP(ender);
                             s += unilen;
 
                             /* We have to subtract 1 just below (and again in

@@ -3135,10 +3135,10 @@ Perl_moreswitches(pTHX_ const char *s)
 		   s--;
 	      }
 	      PL_rs = newSVpvs("");
-	      SvGROW(PL_rs, (STRLEN)(UNISKIP(rschar) + 1));
+	      SvGROW(PL_rs, (STRLEN)(UVCHR_SKIP(rschar) + 1));
 	      tmps = (U8*)SvPVX(PL_rs);
 	      uvchr_to_utf8(tmps, rschar);
-	      SvCUR_set(PL_rs, UNISKIP(rschar));
+	      SvCUR_set(PL_rs, UVCHR_SKIP(rschar));
 	      SvUTF8_on(PL_rs);
 	 }
 	 else {

@@ -2464,7 +2464,7 @@ S_scomplement(pTHX_ SV *targ, SV *sv)
 	  while (tmps < send) {
 	    const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, utf8flags);
 	    tmps += l;
-	    targlen += UNISKIP(~c);
+	    targlen += UVCHR_SKIP(~c);
 	    nchar++;
 	    if (c > 0xff)
 		nwide++;
@@ -3578,7 +3578,7 @@ PP(pp_chr)
     SvUPGRADE(TARG,SVt_PV);
 
     if (value > 255 && !IN_BYTES) {
-	SvGROW(TARG, (STRLEN)UNISKIP(value)+1);
+	SvGROW(TARG, (STRLEN)UVCHR_SKIP(value)+1);
 	tmps = (char*)uvchr_to_utf8_flags((U8*)SvPVX(TARG), value, 0);
 	SvCUR_set(TARG, tmps - SvPVX_const(TARG));
 	*tmps = '\0';
