@@ -3252,6 +3252,10 @@ L<Mason> version 2.22
 
 =item *
 
+L<NgxQueue> version 0.02
+
+=item *
+
 L<Padre> version 1.00
 
 =item *
