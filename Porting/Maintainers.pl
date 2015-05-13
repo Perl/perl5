@@ -474,7 +474,7 @@ use File::Glob qw(:case);
             'README.packaging',
         ],
         # Applied upstream remove customisation when updating EUMM
-        'CUSTOMIZED'   => [ qw[ t/pm_to_blib.t ] ],
+        'CUSTOMIZED'   => [ qw[ t/pm_to_blib.t lib/ExtUtils/MakeMaker/Locale.pm ] ],
     },
 
     'ExtUtils::Manifest' => {
