@@ -3244,6 +3244,10 @@ L<Devel::Spy> version 0.07
 
 =item *
 
+L<invoker> version 0.34
+
+=item *
+
 L<Lexical::Var> version 0.009
 
 =item *
