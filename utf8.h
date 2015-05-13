@@ -367,7 +367,8 @@ only) byte is pointed to by C<s>.
 
 =cut
  */
-#define UTF8SKIP(s) PL_utf8skip[*(const U8*)(s)]
+#define UTF8SKIP(s)  PL_utf8skip[*(const U8*)(s)]
+#define UTF8_SKIP(s) UTF8SKIP(s)
 
 /* Is the byte 'c' the same character when encoded in UTF-8 as when not.  This
  * works on both UTF-8 encoded strings and non-encoded, as it returns TRUE in
