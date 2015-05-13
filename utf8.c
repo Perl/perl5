@@ -147,7 +147,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	else if (UNICODE_IS_NONCHAR(uv)) {
 	    if (flags & UNICODE_WARN_NONCHAR) {
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_NONCHAR),
-		 "Unicode non-character U+%04"UVXf" is illegal for open interchange",
+		 "Unicode non-character U+%04"UVXf" is not recommended for open interchange",
 		 uv);
 	    }
 	    if (flags & UNICODE_DISALLOW_NONCHAR) {
@@ -742,7 +742,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	    if ((flags & (UTF8_WARN_NONCHAR|UTF8_CHECK_ONLY)) == UTF8_WARN_NONCHAR
 		&& ckWARN_d(WARN_NONCHAR))
 	    {
-		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Unicode non-character U+%04"UVXf" is illegal for open interchange", uv));
+		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Unicode non-character U+%04"UVXf" is not recommended for open interchange", uv));
 		pack_warn = packWARN(WARN_NONCHAR);
 	    }
 	    if (flags & UTF8_DISALLOW_NONCHAR) {
@@ -3774,7 +3774,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 	    {
 		UV uv = utf8_to_uvchr_buf(s, e, &char_len);
 		Perl_warner(aTHX_ packWARN(WARN_NONCHAR),
-		    "Unicode non-character U+%04"UVXf" is illegal for open interchange", uv);
+		    "Unicode non-character U+%04"UVXf" is not recommended for open interchange", uv);
 		ok = FALSE;
 	    }
 	}

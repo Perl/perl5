@@ -6121,7 +6121,7 @@ There should be an operator before the C<"(">, as there's
 no indication as to how the digits are to be combined
 with the characters in the Lao and Thai scripts.
 
-=item Unicode non-character U+%X is illegal for open interchange
+=item Unicode non-character U+%X is not recommended for open interchange
 
 (S nonchar) Certain codepoints, such as U+FFFE and U+FFFF, are
 defined by the Unicode standard to be non-characters.  Those

@@ -163,7 +163,7 @@ my @tests = (
     ],
     [ "non-character code point", "\xEF\xB7\x90",
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, 'nonchar', 0xFDD0, 3,
-        qr/Unicode non-character.*is illegal for open interchange/
+        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "begins with FE", "\xfe\x82\x80\x80\x80\x80\x80",
 
