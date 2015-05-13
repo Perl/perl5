@@ -1573,7 +1573,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    U8 ch;
 		    ch = SHIFT_BYTE(utf8, s, strend, datumtype);
 		    auv = (auv << 7) | (ch & 0x7f);
-		    /* UTF8_IS_XXXXX not right here - using constant 0x80 */
+                    /* UTF8_IS_XXXXX not right here because this is a BER, not
+                     * UTF-8 format - using constant 0x80 */
 		    if (ch < 0x80) {
 			bytes = 0;
 			mPUSHu(auv);
