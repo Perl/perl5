@@ -1849,7 +1849,9 @@ C<USE_CPLUSPLUS> to the value "define".
 
 =item *
 
-List form pipe open no longer falls back to the shell.
+List form of pipe open has been implemented for Win32.  Note: unlike
+C< system LIST >> this does not fall back to the shell.
+L<[perl #121159]|https://rt.perl.org/Ticket/Display.html?id=121159>
 
 =item *
 
