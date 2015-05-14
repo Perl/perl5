@@ -3248,6 +3248,17 @@ L<Parse::Keyword> 0.08
 
 =back
 
+=head1 Obituary
+
+Brian McCauley died on May 8, 2015.  He was a frequent poster to Usenet, Perl
+Monks, and other Perl forums, and made several CPAN contributions under the
+nick NOBULL, including to the Perl FAQ.  He attended almost every
+YAPC::Europe, and indeed, helped organise YAPC::Europe 2006 and the QA
+Hackathon 2009.  His wit and his delight in intricate systems were
+particularly apparent in his love of board games; many Perl mongers will
+have fond memories of playing Fluxx and other games with Brian.  He will be
+missed.
+
 =head1 Acknowledgements
 
 XXX Generate this with:
