@@ -33,11 +33,27 @@ use File::Temp qw[tempdir];
 my $perl = which_perl();
 my $Is_VMS = $^O eq 'VMS';
 my $OLD_CP; # crude but...
+my $w32worked; # or whether we had to fallback to chcp
 if ($^O eq "MSWin32") {
-    $OLD_CP = $1 if qx(chcp) =~ /(\d+)$/ and $? == 0;
-    qx(chcp 1252) if defined $OLD_CP;
+    eval { require Win32; $w32worked = $OLD_CP = Win32::GetConsoleCP() };
+    $OLD_CP = $1 if !$w32worked and qx(chcp) =~ /(\d+)$/ and $? == 0;
+    if (defined $OLD_CP) {
+        if ($w32worked) {
+            Win32::SetConsoleCP(1252)
+        } else {
+            qx(chcp 1252);
+        }
+    }
 }
-END { qx(chcp $OLD_CP) if $^O eq "MSWin32" and defined $OLD_CP }
+END {
+    if ($^O eq "MSWin32" and defined $OLD_CP) {
+        if ($w32worked) {
+            Win32::SetConsoleCP($OLD_CP)
+        } else {
+            qx(chcp $OLD_CP);
+        }
+    }
+}
 
 my $tmpdir = tempdir( DIR => 't', CLEANUP => 1 );
 chdir $tmpdir;
