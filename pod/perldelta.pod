@@ -1839,11 +1839,6 @@ L<[perl #123976]|https://rt.perl.org/Ticket/Display.html?id=123976>
 
 =item *
 
-C<test-prep> again depends on C<test-prep-gcc> for GCC builds.
-L<[perl #124221]|https://rt.perl.org/Ticket/Display.html?id=124221>
-
-=item *
-
 Perl can now be built in C++ mode on Windows by setting the makefile macro
 C<USE_CPLUSPLUS> to the value "define".
 
