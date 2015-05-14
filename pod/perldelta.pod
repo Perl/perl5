@@ -1460,7 +1460,12 @@ to alert you to that risk.
 
 =item *
 
+L<Warning: unable to close filehandle properly: %s|perldiag/"Warning: unable to close filehandle properly: %s">
+
 L<Warning: unable to close filehandle %s properly: %s|perldiag/"Warning: unable to close filehandle %s properly: %s">
+
+(S io) An error occurred when Perl implicitly closed a filehandle.  This
+usually indicates your file system ran out of disk space.
 
 =item *
 
