@@ -86,20 +86,6 @@ experience, using this pragma will raise a category
 C<experimental::re_strict> warning.
 See L<'strict' in re|re/'strict' mode>.
 
-=head2 C<qr/foo/x> now ignores any Unicode pattern white space
-
-The C</x> regular expression modifier allows the pattern to contain
-white space and comments, both of which are ignored, for improved
-readability.  Until now, not all the white space characters that Unicode
-designates for this purpose were handled.  The additional ones now
-recognized are
-U+0085 NEXT LINE,
-U+200E LEFT-TO-RIGHT MARK,
-U+200F RIGHT-TO-LEFT MARK,
-U+2028 LINE SEPARATOR,
-and
-U+2029 PARAGRAPH SEPARATOR.
-
 =head2 Unicode 7.0 (with correction) is now supported
 
 For details on what is in this release, see
@@ -232,7 +218,7 @@ result in a fatal error.
 
 =head2 Experimental C Backtrace API
 
-Perl now supports retrieving
+Perl now supports (via a C level API) retrieving
 the C level backtrace (similar to what symbolic debuggers like gdb do).
 
 The backtrace returns the stack trace of the C call frames,
@@ -243,8 +229,6 @@ The supported platforms are Linux and OS X (some *BSD might work at
 least partly, but they have not yet been tested).
 
 The feature needs to be enabled with C<Configure -Dusecbacktrace>.
-
-Also included is a C API to retrieve backtraces.
 
 See L<perlhacktips/"C backtrace"> for more information.
 
@@ -282,14 +266,16 @@ before the attribute list (if any).
 
 =head2 C<&> and C<\&> prototypes accepts only subs
 
-The C<&> prototype character now accepts only anonymous subs (C<sub {...}>)
-and things beginning with C<\&>.  Formerly it erroneously also allowed
-C<undef> and references to array, hashes, and lists.
+The C<&> prototype character now accepts only anonymous subs (C<sub
+{...}>), things beginning with C<\&>, or an explicit C<undef>.  Formerly
+it erroneously also allowed references to arrays, hashes, and lists.
 L<[perl #4539]|https://rt.perl.org/Ticket/Display.html?id=4539>.
 L<[perl #123062]|https://rt.perl.org/Ticket/Display.html?id=123062>.
+L<[perl #123062]|https://rt.perl.org/Ticket/Display.html?id=123475>.
 
-The C<\&> prototype was allowing subroutine calls, whereas now it only
-allows subroutines.  C<&foo> is permitted.  C<&foo()> and C<foo()> are not.
+In addition, the C<\&> prototype was allowing subroutine calls, whereas
+now it only allows subroutines: C<&foo> is still permitted as an argument,
+while C<&foo()> and C<foo()> no longer are.
 L<[perl #77860]|https://rt.perl.org/Ticket/Display.html?id=77860>.
 
 =head2 C<use encoding> is now lexical
@@ -302,11 +288,13 @@ unrelated modules that are included in the same program.
 
 List slices return an empty list now only if the original list was empty
 (or if there are no indices).  Formerly, a list slice would return an empty
-list if all indices fell outside the original list.
+list if all indices fell outside the original list; now it returns a list
+of undef values.
 L<[perl #114498]|https://rt.perl.org/Ticket/Display.html?id=114498>.
 
 =head2 C<\N{}> with a sequence of multiple spaces is now a fatal error
 
+E.g. C<\N{TOO  MANY SPACES}> or C<\N{TRAILING SPACE }>.
 This has been deprecated since v5.18.
 
 =head2 S<C<use UNIVERSAL '...'>> is now a fatal error
@@ -324,18 +312,28 @@ now a fatal compilation error.
 
 These had been deprecated since v5.18.
 
-=head2 5 additional characters are treated as white space under C</x> in
-regex patterns (unless escaped)
+=head2 C<qr/foo/x> now ignores all Unicode pattern white space
+
+The C</x> regular expression modifier allows the pattern to contain
+white space and comments (both of which are ignored) for improved
+readability.  Until now, not all the white space characters that Unicode
+designates for this purpose were handled.  The additional ones now
+recognized are
+
+    U+0085 NEXT LINE
+    U+200E LEFT-TO-RIGHT MARK
+    U+200F RIGHT-TO-LEFT MARK
+    U+2028 LINE SEPARATOR
+    U+2029 PARAGRAPH SEPARATOR
 
 The use of these characters with C</x> outside bracketed character
 classes and when not preceded by a backslash has raised a deprecation
-warning since v5.18.  Now they will be ignored.  See L</"qr/foo/x">
-for the list of the five characters.
+warning since v5.18.  Now they will be ignored.
 
-=head2 Comment lines within S<C<(?[ ])>> now are ended only by a C<\n>
+=head2 Comment lines within S<C<(?[ ])>> are now ended only by a C<\n>
 
 S<C<(?[ ])>>  is an experimental feature, introduced in v5.18.  It operates
-as if C</x> is always enabled.  But there was a difference, comment
+as if C</x> is always enabled.  But there was a difference: comment
 lines (following a C<#> character) were terminated by anything matching
 C<\R> which includes all vertical whitespace, such as form feeds.  For
 consistency, this is now changed to match what terminates comment lines
@@ -395,15 +393,15 @@ warnings since v5.16.
 
 =head2 Using a hash or an array as a reference are now fatal errors
 
-For example, C<%foo-E<gt>{"bar"}> now causes a fatal compilation
+For example, C<< %foo->{"bar"} >> now causes a fatal compilation
 error.  These have been deprecated since before v5.8, and have raised
 deprecation warnings since then.
 
 =head2 Changes to the C<*> prototype
 
 The C<*> character in a subroutine's prototype used to allow barewords to take
-precedence over most, but not all subroutines.  It was never consistent and
-exhibited buggy behaviour.
+precedence over most, but not all, subroutine names.  It was never
+consistent and exhibited buggy behaviour.
 
 Now it has been changed, so subroutines always take precedence over barewords,
 which brings it into conformity with similarly prototyped built-in functions:
@@ -425,13 +423,6 @@ to wrong answers and segmentation faults.  New scripts should be written
 in UTF-8; old scripts should be converted to UTF-8, which is easily done
 with the L<encoding> pragma.
 
-=head2 C<< /\C/ >> character class
-
-This character class, which matches a single byte, even if it appears
-in a multi-byte character has been deprecated. Matching single bytes
-in a multi-byte character breaks encapsulation, and can corrupt utf8
-strings.
-
 =head2 Use of non-graphic characters in single-character variable names
 
 The syntax for single-character variable names is more lenient than
@@ -448,7 +439,9 @@ utf8">>, and affects just the C1 controls (code points 0x80 through
 In many cases Perl makes S<C<sub () { $var }>> into an inlinable constant
 subroutine, capturing the value of C<$var> at the time the C<sub> expression
 is evaluated.  This can break the closure behaviour in those cases where
-C<$var> is subsequently modified.  The subroutine won't return the new value.
+C<$var> is subsequently modified, since the subroutine won't return the
+changed value. (Note that this all only applies to anonymous subroutines
+with an empty prototype (C<sub ()>).)
 
 This usage is now deprecated in those cases where the variable could be
 modified elsewhere.  Perl detects those cases and emits a deprecation
@@ -529,7 +522,7 @@ language about the risks of fatal warnings in general.
 
 =item *
 
-If method and class names are known at compile time, hashes are precomputed
+If a method or class name is known at compile time, a hash is precomputed
 to speed up run-time method lookup.  Also, compound method names like
 C<SUPER::new> are parsed at compile time, to save having to parse them at
 run time.
@@ -556,7 +549,8 @@ optimisation only happened in void context.
 
 =item *
 
-Assignment to lexical variables is often optimised away.  For instance, in
+Assignment to lexical variables is now more often optimised away.  For
+instance, in
 C<$lexical = chr $foo>, the C<chr> operator writes directly to the lexical
 variable instead of returning a value that gets copied.  This optimisation
 has been extended to C<split>, C<x> and C<vec> on the right-hand side.  It
@@ -564,8 +558,8 @@ has also been made to work with state variable initialization.
 
 =item *
 
-In "C<\L>...", "C<\Q>...", etc., the extra "stringify" op is now optimised away,
-making these just as fast as C<lcfirst>, C<quotemeta>, etc.
+In C<"\L...">, C<"\Q...">, etc., the extra "stringify" op is now optimised
+away, making these just as fast as C<lcfirst>, C<quotemeta>, etc.
 
 =item *
 
@@ -580,23 +574,24 @@ string if it is a non-utf8 string or if is in scope of C<use bytes>.
 
 =item *
 
-Non-magical/non-tied scalars that contain only a floating point value and are
-on most Perl builds with 64 bit integers now use 8-32 less bytes of memory
-depending on OS.
+On most perl builds with 64 bit integers, non-magical/non-tied scalars
+that contain only a floating point value now use between 8 and 32 less bytes
+of memory, depending on OS.
 
 =item *
 
 In C<@array = split>, the assignment can be optimized away with C<split>
 writing directly to the array.  This optimisation was happening only for
-package arrays other than C<@_> and only
-sometimes.  Now this optimisation happens
-almost all the time.
+package arrays other than C<@_>, and only sometimes.  Now this
+optimisation happens almost all the time.
 
 =item *
 
-C<join> is now subject to constant folding.  Moreover, C<join> with a
-scalar or constant for the separator and a single-item list to join is
-simplified to a stringification.  The separator doesn't even get evaluated.
+C<join> is now subject to constant folding.  So for example
+C<join "-", "a", "b"> is converted at compile-time to C<"a-b">.
+Moreover, C<join> with a scalar or constant for the separator and a
+single-item list to join is simplified to a stringification.  The
+separator doesn't even get evaluated.
 
 =item *
 
@@ -625,19 +620,6 @@ L<[perl #121489]|https://rt.perl.org/Ticket/Display.html?id=121489>
 
 =item *
 
-Refactoring of C<< pp_tied >> and C<< pp_ref >> for small improvements.
-
-=item *
-
-Pathtools doesn't try to load XS on miniperl. This speeds up building perl
-slightly.
-
-=item *
-
-A typo fix reduces the size of the C<< OP >> structure.
-
-=item *
-
 Hash lookups where the key is a constant are faster.
 
 =item *
@@ -648,12 +630,14 @@ L<[perl #122728]|https://rt.perl.org/Ticket/Display.html?id=122728>
 
 =item *
 
-Subroutines in packages no longer need to carry typeglobs around with them.
-Declaring a subroutine will now put a simple sub reference in the stash if
-possible, saving memory.  The typeglobs still notionally exist, so accessing
-them will cause the subroutine reference to be upgraded to a typeglob.  This
-optimization does not currently apply to XSUBs or exported subroutines, and
-method calls will undo it, since they cache things in typeglobs.
+Subroutines in packages no longer need to be stored in typeglobs:
+declaring a subroutine will now put a simple sub reference directly in the
+stash if possible, saving memory.  The typeglob still notionally exists,
+so accessing it will cause the stash entry to be upgraded to a typeglob
+(i.e. this is just an internal implementation detail).
+This optimization does not currently apply to XSUBs or exported
+subroutines, and method calls will undo it, since they cache things in
+typeglobs.
 L<[perl #120441]|https://rt.perl.org/Ticket/Display.html?id=120441>
 
 =item *
@@ -666,7 +650,7 @@ platforms.
 =item *
 
 Win32 Perl uses 8 KB less of per-process memory than before for every perl
-process of this version. This data is now memory mapped from disk and shared
+process, because some data is now memory mapped from disk and shared
 between perl processes from the same perl binary.
 
 =back
@@ -1201,6 +1185,16 @@ expression the problem was discovered.  See L<perlre>.
 
 =item *
 
+L<\C is deprecated in regex|perldiag/"\C is deprecated in regex; marked by <-- HERE in m/%s/">
+
+(D deprecated) The C<< /\C/ >> character class was deprecated in v5.20, and
+now emits a warning. It is intended that it will become an error in v5.24.
+This character class matches a single byte even if it appears within a
+multi-byte character, breaks encapsulation, and can corrupt utf8
+strings.
+
+=item *
+
 L<'%s' is an unknown bound type in regex|perldiag/"'%s' is an unknown bound type in regex; marked by <-- HERE in m/%s/">
 
 You used C<\b{...}> or C<\B{...}> and the C<...> is not known to
@@ -1709,6 +1703,12 @@ and had probably seriously diverged on both Perl 5 and Perl 6 sides.
 
 A new compilation flag, C<< -DPERL_OP_PARENT >> is available. For details,
 see the discussion below at L<< /Internal Changes >>.
+
+=item *
+
+Pathtools no longer tries to load XS on miniperl. This speeds up building perl
+slightly.
+
 
 =back
 
