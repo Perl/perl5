@@ -338,10 +338,14 @@ foreach my $charset (get_supported_code_pages()) {
                 $name =~ s/:.*//;
             }
         }
+
         my $index = $a2n[$ord];
-        $out[$index] = ($ord == $index)
-                    ? sprintf "/* U+%02X %s */ %s,\n", $ord, $name, $bits[$ord]
-                    : sprintf "/* 0x%02X U+%02X %s */ %s,\n", $index, $ord, $name, $bits[$ord];
+        $out[$index] = "/* ";
+        $out[$index] .= sprintf "0x%02X ", $index if $ord != $index;
+        $out[$index] .= sprintf "U+%02X ", $ord;
+        $out[$index] .= "$name */ ";
+        $out[$index] .= $bits[$ord];
+        $out[$index] .= ",\n";
     }
     $out[-1] =~ s/,$//;     # No trailing comma in the final entry
 
