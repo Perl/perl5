@@ -1579,7 +1579,7 @@ END_EXTERN_C
                                          ? _generic_isCC(*(p), classnum)       \
                                          : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
                                            ? _generic_isCC(                    \
-                                                TWO_BYTE_UTF8_TO_NATIVE(*(p),  \
+                                                EIGHT_BIT_UTF8_TO_NATIVE(*(p), \
                                                                    *((p)+1 )), \
                                                 classnum)                      \
                                            : utf8)
@@ -1665,7 +1665,7 @@ END_EXTERN_C
                          (UTF8_IS_INVARIANT(*(p))                           \
                          ? macro(*(p))                                      \
                          : (UTF8_IS_DOWNGRADEABLE_START(*(p)))              \
-                           ? macro(TWO_BYTE_UTF8_TO_NATIVE(*(p), *((p)+1))) \
+                           ? macro(EIGHT_BIT_UTF8_TO_NATIVE(*(p), *((p)+1)))\
                            : utf8)
 
 #define _generic_LC_swash_utf8(macro, classnum, p)                         \

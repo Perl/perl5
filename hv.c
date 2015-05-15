@@ -3223,7 +3223,7 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
                 }
                 else {
                     p++;
-                    *q = (char) TWO_BYTE_UTF8_TO_NATIVE(c, *p);
+                    *q = (char) EIGHT_BIT_UTF8_TO_NATIVE(c, *p);
                 }
 	    }
 	}
@@ -3399,7 +3399,7 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
                 }
                 else {
                     p++;
-                    *q = (char) TWO_BYTE_UTF8_TO_NATIVE(c, *p);
+                    *q = (char) EIGHT_BIT_UTF8_TO_NATIVE(c, *p);
                 }
 	    }
 	}

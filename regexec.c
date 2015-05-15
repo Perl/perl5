@@ -492,7 +492,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
     }
     else if (UTF8_IS_DOWNGRADEABLE_START(*character)) {
         return isFOO_lc(classnum,
-                        TWO_BYTE_UTF8_TO_NATIVE(*character, *(character + 1)));
+                        EIGHT_BIT_UTF8_TO_NATIVE(*character, *(character + 1)));
     }
 
     _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(character, character + UTF8SKIP(character));
@@ -2329,7 +2329,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                                                 classnum)))
                         || (UTF8_IS_DOWNGRADEABLE_START(*s)
                             && to_complement ^ cBOOL(
-                                _generic_isCC(TWO_BYTE_UTF8_TO_NATIVE(*s,
+                                _generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(*s,
                                                                       *(s + 1)),
                                               classnum))))
                     {
@@ -5386,7 +5386,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                             l++;
                         }
                         else {
-                            if (TWO_BYTE_UTF8_TO_NATIVE(*l, *(l+1)) != * (U8*) s)
+                            if (EIGHT_BIT_UTF8_TO_NATIVE(*l, *(l+1)) != * (U8*) s)
                             {
                                 sayNO;
                             }
@@ -5410,7 +5410,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                             s++;
                         }
                         else {
-                            if (TWO_BYTE_UTF8_TO_NATIVE(*s, *(s+1)) != * (U8*) l)
+                            if (EIGHT_BIT_UTF8_TO_NATIVE(*s, *(s+1)) != * (U8*) l)
                             {
                                 sayNO;
                             }
@@ -5783,7 +5783,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             else if (UTF8_IS_DOWNGRADEABLE_START(nextchr)) {
                 if (! (to_complement ^ cBOOL(isFOO_lc(FLAGS(scan),
-                                           (U8) TWO_BYTE_UTF8_TO_NATIVE(nextchr,
+                                           (U8) EIGHT_BIT_UTF8_TO_NATIVE(nextchr,
                                                             *(locinput + 1))))))
                 {
                     sayNO;
@@ -5864,7 +5864,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             else if (UTF8_IS_DOWNGRADEABLE_START(nextchr)) {
                 if (! (to_complement
-                       ^ cBOOL(_generic_isCC(TWO_BYTE_UTF8_TO_NATIVE(nextchr,
+                       ^ cBOOL(_generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(nextchr,
                                                                *(locinput + 1)),
                                              FLAGS(scan)))))
                 {
@@ -8141,7 +8141,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
                 /* Target isn't utf8; convert the character in the UTF-8
                  * pattern to non-UTF8, and do a simple loop */
-                c = TWO_BYTE_UTF8_TO_NATIVE(c, *(STRING(p) + 1));
+                c = EIGHT_BIT_UTF8_TO_NATIVE(c, *(STRING(p) + 1));
                 while (scan < loceol && UCHARAT(scan) == c) {
                     scan++;
                 }
@@ -8385,7 +8385,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                     }
                     else if (UTF8_IS_DOWNGRADEABLE_START(*scan)) {
                         if (! (to_complement
-                              ^ cBOOL(_generic_isCC(TWO_BYTE_UTF8_TO_NATIVE(*scan,
+                              ^ cBOOL(_generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(*scan,
                                                                      *(scan + 1)),
                                                     classnum))))
                         {

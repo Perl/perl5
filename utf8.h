@@ -350,6 +350,21 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 /* Longer, but more accurate name */
 #define UTF8_IS_ABOVE_LATIN1_START(c)     UTF8_IS_ABOVE_LATIN1(c)
 
+/* Convert a UTF-8 variant Latin1 character to a native code point value.
+ * Needs just one iteration of accumulate.  Should be used only if it is known
+ * that the code point is < 256, and is not UTF-8 invariant.  Use the slower
+ * but more general TWO_BYTE_UTF8_TO_NATIVE() which handles any code point
+ * representable by two bytes (which turns out to be up through
+ * MAX_PORTABLE_UTF8_TWO_BYTE).  The two parameters are:
+ *  HI: a downgradable start byte;
+ *  LO: continuation.
+ * */
+#define EIGHT_BIT_UTF8_TO_NATIVE(HI, LO)                                        \
+    ( __ASSERT_(UTF8_IS_DOWNGRADEABLE_START(HI))                                \
+      __ASSERT_(UTF8_IS_CONTINUATION(LO))                                       \
+     LATIN1_TO_NATIVE(UTF8_ACCUMULATE((                                         \
+                            NATIVE_UTF8_TO_I8(HI) & UTF_START_MASK(2)), (LO))))
+
 /* Convert a two (not one) byte utf8 character to a native code point value.
  * Needs just one iteration of accumulate.  Should not be used unless it is
  * known that the two bytes are legal: 1) two-byte start, and 2) continuation.

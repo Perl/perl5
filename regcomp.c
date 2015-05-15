@@ -12854,7 +12854,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             }
                         }
                         else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
-                            if (! IS_NON_FINAL_FOLD(TWO_BYTE_UTF8_TO_NATIVE(
+                            if (! IS_NON_FINAL_FOLD(EIGHT_BIT_UTF8_TO_NATIVE(
                                                                   *s, *(s+1))))
                             {
                                 break;

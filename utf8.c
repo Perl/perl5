@@ -1057,7 +1057,7 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
 		if (u < uend) {
 		    U8 c1 = *u++;
 		    if (UTF8_IS_CONTINUATION(c1)) {
-			c = TWO_BYTE_UTF8_TO_NATIVE(c, c1);
+			c = EIGHT_BIT_UTF8_TO_NATIVE(c, c1);
 		    } else {
 			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
 					 "Malformed UTF-8 character "
@@ -1133,7 +1133,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
 	U8 c = *s++;
 	if (! UTF8_IS_INVARIANT(c)) {
 	    /* Then it is two-byte encoded */
-	    c = TWO_BYTE_UTF8_TO_NATIVE(c, *s);
+	    c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
             s++;
 	}
 	*d++ = c;
@@ -1190,7 +1190,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
 	U8 c = *s++;
 	if (! UTF8_IS_INVARIANT(c)) {
 	    /* Then it is two-byte encoded */
-	    c = TWO_BYTE_UTF8_TO_NATIVE(c, *s);
+	    c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
             s++;
 	}
 	*d++ = c;
@@ -1971,11 +1971,11 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
 	if (flags) {
-            U8 c = TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1));
+            U8 c = EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1));
 	    result = toUPPER_LC(c);
 	}
 	else {
-	    return _to_upper_title_latin1(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)),
+	    return _to_upper_title_latin1(EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1)),
 				          ustrp, lenp, 'S');
 	}
     }
@@ -2042,11 +2042,11 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
 	if (flags) {
-            U8 c = TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1));
+            U8 c = EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1));
 	    result = toUPPER_LC(c);
 	}
 	else {
-	    return _to_upper_title_latin1(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)),
+	    return _to_upper_title_latin1(EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1)),
 				          ustrp, lenp, 's');
 	}
     }
@@ -2112,11 +2112,11 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
 	if (flags) {
-            U8 c = TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1));
+            U8 c = EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1));
 	    result = toLOWER_LC(c);
 	}
 	else {
-	    return to_lower_latin1(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)),
+	    return to_lower_latin1(EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1)),
 		                   ustrp, lenp);
 	}
     }
@@ -2194,11 +2194,11 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
 	if (flags & FOLD_FLAGS_LOCALE) {
-            U8 c = TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1));
+            U8 c = EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1));
 	    result = toFOLD_LC(c);
 	}
 	else {
-	    return _to_fold_latin1(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)),
+	    return _to_fold_latin1(EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1)),
                             ustrp, lenp,
                             flags & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII));
 	}
@@ -2723,7 +2723,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     else if (UTF8_IS_DOWNGRADEABLE_START(c)) {
         klen = 0;
 	needents = 256;
-        off = TWO_BYTE_UTF8_TO_NATIVE(c, *(ptr + 1));
+        off = EIGHT_BIT_UTF8_TO_NATIVE(c, *(ptr + 1));
     }
     else {
         klen = UTF8SKIP(ptr) - 1;

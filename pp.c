@@ -4349,7 +4349,7 @@ PP(pp_quotemeta)
 		    IN_LC_RUNTIME(LC_CTYPE)
 			||
 #endif
-			_isQUOTEMETA(TWO_BYTE_UTF8_TO_NATIVE(*s, *(s + 1))))
+			_isQUOTEMETA(EIGHT_BIT_UTF8_TO_NATIVE(*s, *(s + 1))))
 		    {
 			to_quote = TRUE;
 		    }
