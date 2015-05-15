@@ -324,7 +324,7 @@ is($c, 8);
 is($a, "XXXXXXXX");
 
 SKIP: {
-    skip "not EBCDIC", 4 unless $::IS_EBCDIC;
+    skip "valid only on EBCDIC platforms", 4 unless $::IS_EBCDIC;
 
     $c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/i-j/X/;
     is($c, 2);
