@@ -209,7 +209,6 @@ U+0130 string
 U+0131 string
 
 U+2010 string
-U+D800 first FIRST_SURROGATE
 BOM first
 BOM tail
 

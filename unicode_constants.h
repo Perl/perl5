@@ -42,7 +42,6 @@
 #   define LATIN_SMALL_LETTER_DOTLESS_I_UTF8  "\xC4\xB1"    /* U+0131 */
 
 #   define HYPHEN_UTF8  "\xE2\x80\x90"    /* U+2010 */
-#   define FIRST_SURROGATE_UTF8_FIRST_BYTE  0xED    /* U+D800 */
 #   define BOM_UTF8_FIRST_BYTE  0xEF    /* U+FEFF */
 #   define BOM_UTF8_TAIL  "\xBB\xBF"    /* U+FEFF */
 
@@ -82,7 +81,6 @@
 #   define LATIN_SMALL_LETTER_DOTLESS_I_UTF8  "\x8D\x58"    /* U+0131 */
 
 #   define HYPHEN_UTF8  "\xCA\x41\x57"    /* U+2010 */
-#   define FIRST_SURROGATE_UTF8_FIRST_BYTE  0xDD    /* U+D800 */
 #   define BOM_UTF8_FIRST_BYTE  0xDD    /* U+FEFF */
 #   define BOM_UTF8_TAIL  "\x73\x66\x73"    /* U+FEFF */
 
@@ -122,7 +120,6 @@
 #   define LATIN_SMALL_LETTER_DOTLESS_I_UTF8  "\x8C\x58"    /* U+0131 */
 
 #   define HYPHEN_UTF8  "\xCA\x41\x57"    /* U+2010 */
-#   define FIRST_SURROGATE_UTF8_FIRST_BYTE  0xDD    /* U+D800 */
 #   define BOM_UTF8_FIRST_BYTE  0xDD    /* U+FEFF */
 #   define BOM_UTF8_TAIL  "\x72\x65\x72"    /* U+FEFF */
 
@@ -162,7 +159,6 @@
 #   define LATIN_SMALL_LETTER_DOTLESS_I_UTF8  "\x8E\x59"    /* U+0131 */
 
 #   define HYPHEN_UTF8  "\xCA\x41\x58"    /* U+2010 */
-#   define FIRST_SURROGATE_UTF8_FIRST_BYTE  0xDC    /* U+D800 */
 #   define BOM_UTF8_FIRST_BYTE  0xDC    /* U+FEFF */
 #   define BOM_UTF8_TAIL  "\x75\x67\x75"    /* U+FEFF */
 
