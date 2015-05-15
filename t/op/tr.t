@@ -313,9 +313,8 @@ is($a, "X");
 ($a = "\x{200}") =~ tr/\x00-\x{100}/X/cs;
 is($a, "X");
 
-
-# Tricky on EBCDIC: while [a-z] [A-Z] must not match the gap characters,
-# (i-j, r-s, I-J, R-S), [\x89-\x91] [\xc9-\xd1] has to match them,
+# Tricky on EBCDIC: while [a-z] [A-Z] must not match the gap characters (as
+# well as i-j, r-s, I-J, R-S), [\x89-\x91] [\xc9-\xd1] has to match them,
 # from Karsten Sperling.
 
 $c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/\x89-\x91/X/;
