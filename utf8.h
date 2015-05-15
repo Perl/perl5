@@ -112,7 +112,7 @@ EXTCONST unsigned char PL_utf8skip[] = {
 /* 0xA0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* bogus: continuation byte */
 /* 0xB0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* bogus: continuation byte */
 /* 0xC0 */ 2,2,				    /* overlong */
-/* 0xC2 */ 2,2,2,2,2,2,2,2,2,2,2,2,2,2,     /* U+0080 to U+03FF */
+/* 0xC2 */     2,2,2,2,2,2,2,2,2,2,2,2,2,2, /* U+0080 to U+03FF */
 /* 0xD0 */ 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, /* U+0400 to U+07FF */
 /* 0xE0 */ 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3, /* U+0800 to U+FFFF */
 /* 0xF0 */ 4,4,4,4,4,4,4,4,5,5,5,5,6,6,	    /* above BMP to 2**31 - 1 */
@@ -391,8 +391,8 @@ only) byte is pointed to by C<s>.
 
 /* These two are helper macros for the other three sets, and should not be used
  * directly anywhere else.  'translate_function' is either NATIVE_TO_LATIN1
- * (which works for code points up to 0xFF) or NATIVE_TO_UNI which works for any
- * code point */
+ * (which works for code points up through 0xFF) or NATIVE_TO_UNI which works
+ * for any code point */
 #define __BASE_TWO_BYTE_HI(c, translate_function)                               \
             I8_TO_NATIVE_UTF8((translate_function(c) >> UTF_ACCUMULATION_SHIFT) \
                               | UTF_START_MARK(2))
@@ -466,7 +466,12 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 =cut
 */
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTES)
-#define IN_UNI_8_BIT \
+
+/* Should all strings be treated as Unicode, and not just UTF-8 encoded ones?
+ * Is so within 'feature unicode_strings' or 'locale :not_characters', and not
+ * within 'use bytes'.  UTF-8 locales are not tested for here, but perhaps
+ * could be */
+#define IN_UNI_8_BIT                                                             \
 	    (((CopHINTS_get(PL_curcop) & (HINT_UNI_8_BIT))                       \
                || (CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL                 \
                    /* -1 below is for :not_characters */                         \
@@ -659,9 +664,9 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
  * on the order of 10 minutes to generate, and is never going to change, unless
  * the generated code is improved.
  *
- * The EBCDIC versions have been cut to not cover all of legal Unicode, so
- * don't take too long to generate, and there is a separate one for each code
- * page, so they are in regcharclass.h instead of here */
+ * The EBCDIC versions have been cut to not cover all of legal Unicode,
+ * otherwise they take too long to generate; besides there is a separate one
+ * for each code page, so they are in regcharclass.h instead of here */
 /*
 	UTF8_CHAR: Matches legal UTF-8 encoded characters from 2 through 4 bytes
 

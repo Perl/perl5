@@ -161,17 +161,18 @@ END_EXTERN_C
 
 /* Input is a true Unicode (not-native) code point */
 #define OFFUNISKIP(uv) ( (uv) < 0xA0        ? 1 : \
-		      (uv) < 0x400          ? 2 : \
-		      (uv) < 0x4000         ? 3 : \
-		      (uv) < 0x40000        ? 4 : \
-		      (uv) < 0x400000       ? 5 : \
-		      (uv) < 0x4000000      ? 6 : 7 )
+		         (uv) < 0x400       ? 2 : \
+		         (uv) < 0x4000      ? 3 : \
+		         (uv) < 0x40000     ? 4 : \
+		         (uv) < 0x400000    ? 5 : \
+		         (uv) < 0x4000000   ? 6 : 7 )
+
 
 #define UNI_IS_INVARIANT(c)		(((UV)(c)) <  0xA0)
 
 /* UTF-EBCDIC semantic macros - transform back into I8 and then compare
  * Comments as to the meaning of each are given at their corresponding utf8.h
- * definitions */
+ * definitions. */
 
 #define UTF8_IS_START(c)		(NATIVE_UTF8_TO_I8(c) >= 0xC5     \
                                          && NATIVE_UTF8_TO_I8(c) != 0xE0)
