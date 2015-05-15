@@ -3842,7 +3842,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 	}
 	if (UNLIKELY(*s >= UTF8_FIRST_PROBLEMATIC_CODE_POINT_FIRST_BYTE)) {
 	    STRLEN char_len;
-	    if (UTF8_IS_SUPER(s)) {
+	    if (UTF8_IS_SUPER(s, e)) {
 		if (ckWARN_d(WARN_NON_UNICODE)) {
 		    UV uv = utf8_to_uvchr_buf(s, e, &char_len);
 		    Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
@@ -3850,7 +3850,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 		    ok = FALSE;
 		}
 	    }
-	    else if (UTF8_IS_SURROGATE(s)) {
+	    else if (UTF8_IS_SURROGATE(s, e)) {
 		if (ckWARN_d(WARN_SURROGATE)) {
 		    UV uv = utf8_to_uvchr_buf(s, e, &char_len);
 		    Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
@@ -3858,10 +3858,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 		    ok = FALSE;
 		}
 	    }
-	    else if
-		((UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s))
-		 && (ckWARN_d(WARN_NONCHAR)))
-	    {
+	    else if ((UTF8_IS_NONCHAR(s, e)) && (ckWARN_d(WARN_NONCHAR))) {
 		UV uv = utf8_to_uvchr_buf(s, e, &char_len);
 		Perl_warner(aTHX_ packWARN(WARN_NONCHAR),
 		    "Unicode non-character U+%04"UVXf" is not recommended for open interchange", uv);

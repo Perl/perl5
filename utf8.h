@@ -535,7 +535,11 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_FIRST_PROBLEMATIC_CODE_POINT_FIRST_BYTE \
                                     FIRST_SURROGATE_UTF8_FIRST_BYTE
 
-#define UTF8_IS_SURROGATE(s) cBOOL(is_SURROGATE_utf8(s))
+/* Several of the macros below have a second parameter that is currently
+ * unused; but could be used in the future to make sure that the input is
+ * well-formed. */
+
+#define UTF8_IS_SURROGATE(s, e) cBOOL(is_SURROGATE_utf8(s))
 #define UTF8_IS_REPLACEMENT(s, send) cBOOL(is_REPLACEMENT_utf8_safe(s,send))
 
 /*		  ASCII		     EBCDIC I8
@@ -546,20 +550,20 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
  * BE AWARE that this test doesn't rule out malformed code points, in
  * particular overlongs */
 #ifdef EBCDIC /* Both versions assume well-formed UTF8 */
-#   define UTF8_IS_SUPER(s) (NATIVE_UTF8_TO_I8(* (U8*) (s)) >= 0xF9             \
+#   define UTF8_IS_SUPER(s, e) (NATIVE_UTF8_TO_I8(* (U8*) (s)) >= 0xF9          \
                          && (NATIVE_UTF8_TO_I8(* (U8*) (s)) > 0xF9              \
                              || (NATIVE_UTF8_TO_I8(* ((U8*) (s) + 1)) >= 0xA2)))
 #else
-#   define UTF8_IS_SUPER(s) (*(U8*) (s) >= 0xF4                                 \
-                            && (*(U8*) (s) > 0xF4 || (*((U8*) (s) + 1) >= 0x90)))
+#   define UTF8_IS_SUPER(s, e) (*(U8*) (s) >= 0xF4                              \
+                           && (*(U8*) (s) > 0xF4 || (*((U8*) (s) + 1) >= 0x90)))
 #endif
 
 /* These are now machine generated, and the 'given' clause is no longer
  * applicable */
-#define UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s)             \
+#define UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s, e)          \
                                                     cBOOL(is_NONCHAR_utf8(s))
-#define UTF8_IS_NONCHAR(s)                                                     \
-                    UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s)
+#define UTF8_IS_NONCHAR(s, e)                                                  \
+                UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s, e)
 
 #define UNICODE_SURROGATE_FIRST		0xD800
 #define UNICODE_SURROGATE_LAST		0xDFFF
