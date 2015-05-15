@@ -681,7 +681,11 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<ExtUtils::MakeMaker> has been upgraded from version 6.98 to 7.04_01.
+
+Some changes from github have been backported to prevent failures and
+noise on Win32 when C<chcp> is missing or unavailable.
+L<[perl #123998]|https://rt.perl.org/Ticket/Display.html?id=123998>
 
 =back
 
