@@ -558,7 +558,7 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
  * applicable */
 #define UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s)             \
                                                     cBOOL(is_NONCHAR_utf8(s))
-#define UTF8_IS_NONCHAR_(s)                                                    \
+#define UTF8_IS_NONCHAR(s)                                                     \
                     UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s)
 
 #define UNICODE_SURROGATE_FIRST		0xD800
