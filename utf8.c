@@ -3840,7 +3840,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 			   "%s in %s", unees, PL_op ? OP_DESC(PL_op) : "print");
 	    return FALSE;
 	}
-	if (UNLIKELY(*s >= UTF8_FIRST_PROBLEMATIC_CODE_POINT_FIRST_BYTE)) {
+	if (UNLIKELY(isUTF8_POSSIBLY_PROBLEMATIC(*s))) {
 	    STRLEN char_len;
 	    if (UTF8_IS_SUPER(s, e)) {
 		if (ckWARN_d(WARN_NON_UNICODE)) {

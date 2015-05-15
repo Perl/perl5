@@ -552,8 +552,11 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
  * problematic in some contexts.  This allows code that needs to check for
  * those to to quickly exclude the vast majority of code points it will
  * encounter */
-#define UTF8_FIRST_PROBLEMATIC_CODE_POINT_FIRST_BYTE \
-                                    FIRST_SURROGATE_UTF8_FIRST_BYTE
+#ifdef EBCDIC
+#   define isUTF8_POSSIBLY_PROBLEMATIC(c) (NATIVE_UTF8_TO_I8(c) >= 0xF1)
+#else
+#   define isUTF8_POSSIBLY_PROBLEMATIC(c) ((U8) c >= 0xED)
+#endif
 
 /* Several of the macros below have a second parameter that is currently
  * unused; but could be used in the future to make sure that the input is
