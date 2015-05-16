@@ -1249,7 +1249,7 @@ sub match_and_exit {
         while (<$fh>) {
             if ($_ =~ $re) {
                 ++$matches;
-                if (tr/\t\r\n -~\200-\377//c) {
+                if (/[^[:^cntrl:]\h\v]/a) { # Matches non-spacing non-C1 controls
                     print "Binary file $file matches\n";
                 } else {
                     $_ .= "\n" unless /\n\z/;
