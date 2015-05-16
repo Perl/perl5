@@ -725,7 +725,7 @@ Note that C<SvSetSV> doesn't do set magic.
 
 =item *
 
-C<sv_usepvn_flags> - Fix documentation to mention the use of C<NewX> instead of
+C<sv_usepvn_flags> - fix documentation to mention the use of C<NewX> instead of
 C<malloc>.
 
 L<[perl #121869]|https://rt.perl.org/Ticket/Display.html?id=121869>
@@ -1138,7 +1138,7 @@ See L<charnames/CUSTOM ALIASES>.
 L<:const is not permitted on named subroutines|perldiag/":const is not permitted on named subroutines">
 
 (F) The "const" attribute causes an anonymous subroutine to be run and
-its value captured at the time that it is cloned.  Names subroutines are
+its value captured at the time that it is cloned.  Named subroutines are
 not cloned like this, so the attribute does not make sense on them.
 
 =item *
@@ -1383,10 +1383,11 @@ the same group of 10 consecutive digits.
 
 L<Redundant argument in %s|perldiag/Redundant argument in %s>
 
-(W redundant) You called a function with more arguments than other
-arguments you supplied indicated would be needed. Currently only
-emitted when a printf-type format required fewer arguments than were
-supplied, but might be used in the future for e.g. L<perlfunc/pack>.
+(W redundant) You called a function with more arguments than were
+needed, as indicated by information within other arguments you supplied
+(e.g. a printf format). Currently only emitted when a printf-type format
+required fewer arguments than were supplied, but might be used in the
+future for e.g. L<perlfunc/pack>.
 
 The warnings category C<< redundant >> is new. See also
 L<[perl #121025]|https://rt.perl.org/Ticket/Display.html?id=121025>.
