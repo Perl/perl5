@@ -194,6 +194,11 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * being encoded in UTF-8 or not? */
 #define UNI_IS_INVARIANT(cp)     isASCII(cp)
 
+/* Is the representation of the code point 'cp' the same regardless of
+ * being encoded in UTF-8 or not?  'cp' is native if < 256; Unicode otherwise
+ * */
+#define UVCHR_IS_INVARIANT(uv)      UNI_IS_INVARIANT(uv)
+
 /* Is the UTF8-encoded byte 'c' part of a variant sequence in UTF-8?  This is
  * the inverse of UTF8_IS_INVARIANT */
 #define UTF8_IS_CONTINUED(c)        (((U8)c) &  0x80)
@@ -396,12 +401,8 @@ only) byte is pointed to by C<s>.
  * UTF-8 encoded string) */
 #define UTF8_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_UTF8_TO_I8(c))
 
-/* Like the above, but its name implies a non-UTF8 input, and is implemented
- * differently (for no particular reason) */
-#define NATIVE_BYTE_IS_INVARIANT(c)	UNI_IS_INVARIANT(NATIVE_TO_LATIN1(c))
-
-/* Like the above, but accepts any UV as input */
-#define UVCHR_IS_INVARIANT(uv)          UNI_IS_INVARIANT(NATIVE_TO_UNI(uv))
+/* Like the above, but its name implies a non-UTF8 input */
+#define NATIVE_BYTE_IS_INVARIANT(c)	UVCHR_IS_INVARIANT(c)
 
 #define MAX_PORTABLE_UTF8_TWO_BYTE 0x3FF    /* constrained by EBCDIC */
 
