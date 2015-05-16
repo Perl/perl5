@@ -190,9 +190,9 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 */
 
-/* Is the representation of the Unicode code point 'c' the same regardless of
+/* Is the representation of the Unicode code point 'cp' the same regardless of
  * being encoded in UTF-8 or not? */
-#define UNI_IS_INVARIANT(c)		(((UV)c) <  0x80)
+#define UNI_IS_INVARIANT(cp)     isASCII(cp)
 
 /* Is the UTF8-encoded byte 'c' part of a variant sequence in UTF-8?  This is
  * the inverse of UTF8_IS_INVARIANT */
