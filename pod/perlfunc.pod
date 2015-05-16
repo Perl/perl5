@@ -1701,7 +1701,7 @@ but in a different order:
         print "$key=$value\n";
     }
 
-Starting with Perl 5.14, C<each> can take a scalar EXPR, which must hold
+Starting with Perl 5.14, C<each> can take a scalar EXPR, which must hold a
 reference to an unblessed hash or array.  The argument will be dereferenced
 automatically.  This aspect of C<each> is considered highly experimental.
 The exact behaviour may change in a future version of Perl.
