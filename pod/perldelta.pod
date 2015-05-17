@@ -2082,17 +2082,19 @@ L<[perl #123103]|https://rt.perl.org/Ticket/Display.html?id=123103>.
 
 Accessing L<perlapi/CvPADLIST> on an XSUB is now forbidden.
 
-C<CvPADLIST> has been reused for a different internal purpose for XSUBs.
-Padlist-inspecting code that isn't otherwise prevented from seeing an XSUB
-C<CV*> should guard all C<CvPADLIST> expressions with C<CvISXSUB()>.
+The C<CvPADLIST> field has been reused for a different internal purpose
+for XSUBs. So in particular, you can no longer rely on it being NULL as a
+test of whether a CV is an XSUB. Use C<CvISXSUB()> instead.
+
 
 =item *
 
-SVs of type C<SVt_NV> are now bodyless when the build configuration and
-platform allow it; specifically, bodyless NVs require C<< sizeof(NV) <=
-sizeof(IV) >>. The bodyless trick is the same one as used for IVs since
-5.9.2 (though in the case of IVs, it is used of platform and build
-configuration).
+SVs of type C<SVt_NV> are now sometimes bodyless when the build
+configuration and platform allow it: specifically, when C<< sizeof(NV) <=
+sizeof(IV) >>. "Bodyless" means that the NV value is stored directly in
+the head of an SV, without requiring a separate body to be allocated. This
+trick has already been used for IVs since 5.9.2 (though in the case of
+IVs, it is always used, regardless of platform and build configuration).
 
 =item *
 
@@ -2227,7 +2229,8 @@ C<Perl_cast_ulong>,  C<Perl_cast_i32>, C<Perl_cast_iv>,    C<Perl_cast_uv>,
 C<Perl_cv_const_sv>, C<Perl_mg_find>,  C<Perl_mg_findext>, C<Perl_mg_magical>,
 C<Perl_mini_mktime>, C<Perl_my_dirfd>, C<Perl_sv_backoff>, C<Perl_utf8_hop>.
 
-Uses of the prefix-less calls that form the public API remain unaffected.
+Note that the prefix-less versions of those functions that are part of the
+public API, such as C<cast_i32()>, remain unaffected.
 
 =item *
 
@@ -3060,8 +3063,8 @@ L<[cpan #85570]|https://rt.cpan.org/Ticket/Display.html?id=85570>.
 =item *
 
 During the pattern optimization phase, we no longer recurse into
-C<GOSUB>/C<GOSTART> when C<SCF_DO_SUBSTR> is false. This prevents the
-optimizer from running "forever" and exhausting all memory.
+C<GOSUB>/C<GOSTART> when the C<SCF_DO_SUBSTR> flag is false. This prevents
+the optimizer from running "forever" and exhausting all memory.
 L<[perl #122283]|https://rt.perl.org/Ticket/Display.html?id=122283>.
 
 =item *
@@ -3083,7 +3086,7 @@ L<[perl #122995]|https://rt.perl.org/Ticket/Display.html?id=122995>.
 
 =item *
 
-On Win32, if a variable was C<local>-ized in a pseudo-process that then
+On Win32, if a variable was C<local>-ized in a pseudo-process that later
 forked, restoring the original value in the child pseudo-process caused
 memory corruption and a crash in the child pseudo-process (and therefore the
 OS process).
