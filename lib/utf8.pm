@@ -191,7 +191,7 @@ This takes an unsigned integer (which represents the ordinal number of a
 character (or a code point) on the platform the program is being run on) and
 returns its Unicode equivalent value.  Since ASCII platforms natively use the
 Unicode code points, this function returns its input on them.  On EBCDIC
-platforms it converts from EBCIDC to Unicode.
+platforms it converts from EBCDIC to Unicode.
 
 A meaningless value will currently be returned if the input is not an unsigned
 integer.
