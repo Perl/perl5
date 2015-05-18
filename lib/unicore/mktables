@@ -9443,7 +9443,6 @@ sub dump_inside_out {
 
     my $object = shift;
     my $fields_ref = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     my $addr = do { no overloading; pack 'J', $object; };
 
