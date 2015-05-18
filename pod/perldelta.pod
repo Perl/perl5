@@ -553,15 +553,6 @@ optimisation only happened in void context.
 
 =item *
 
-Assignment to lexical variables is now more often optimised away.  For
-instance, in
-C<$lexical = chr $foo>, the C<chr> operator writes directly to the lexical
-variable instead of returning a value that gets copied.  This optimisation
-has been extended to C<split>, C<x> and C<vec> on the right-hand side.  It
-has also been made to work with state variable initialization.
-
-=item *
-
 In C<"\L...">, C<"\Q...">, etc., the extra "stringify" op is now optimised
 away, making these just as fast as C<lcfirst>, C<quotemeta>, etc.
 
@@ -2299,11 +2290,10 @@ index is still done using C<aelemfast>.
 
 =item *
 
-C<pack("D", $x)> and C<pack("F", $x)> now zero the padding on x86 long double
-builds.  Under some build options on GCC 4.8 and later, they would either
-overwrite
-the zero-initialized padding, or bypass the initialized buffer entirely.  This
-caused F<op/pack.t> to fail.
+C<pack("D", $x)> and C<pack("F", $x)> now zero the padding on x86 long
+double builds.  Under some build options on GCC 4.8 and later, they used
+to either overwrite the zero-initialized padding, or bypass the
+initialized buffer entirely.  This caused F<op/pack.t> to fail.
 L<[perl #123971]|https://rt.perl.org/Ticket/Display.html?id=123971>
 
 =item *
@@ -2319,21 +2309,8 @@ L<[perl #123790]|https://rt.perl.org/Ticket/Display.html?id=123790>
 
 =item *
 
-XXX An optimization for state variable initialization introduced in Perl 5.21.6 has
-been reverted because it was found to exacerbate some other existing buggy
-behaviour.
-L<[perl #124160]|https://rt.perl.org/Ticket/Display.html?id=124160>
-
-=item *
-
-XXX The extension of another optimization to cover more ops in Perl 5.21 has also
-been reverted to its Perl 5.20 state as a temporary fix for regression issues
-that it caused.
-L<[perl #123790]|https://rt.perl.org/Ticket/Display.html?id=123790>
-
-=item *
-
-A possible crashing/looping bug has been fixed.
+A possible crashing/looping bug related to compiling lexical subs has been
+fixed.
 L<[perl #124099]|https://rt.perl.org/Ticket/Display.html?id=124099>
 
 =item *
@@ -2371,8 +2348,8 @@ L<[perl #123817]|https://rt.perl.org/Ticket/Display.html?id=123817>
 =item *
 
 An C<@> sign in quotes followed by a non-ASCII digit (which is not a valid
-identifier) would cause the parser to crash, instead of simply trying the C<@> as
-literal.  This has been fixed.
+identifier) would cause the parser to crash, instead of simply trying the
+C<@> as literal.  This has been fixed.
 L<[perl #123963]|https://rt.perl.org/Ticket/Display.html?id=123963>
 
 =item *
@@ -2384,15 +2361,9 @@ L<[perl #123847]|https://rt.perl.org/Ticket/Display.html?id=123847>
 =item *
 
 C<foreach> in scalar context was not pushing an item on to the stack, resulting
-in bugs.  (S<C<print 4, scalar do { foreach(@x){} } + 1>> would print 5.)  It has
-been fixed to return C<undef>.
+in bugs.  (S<C<print 4, scalar do { foreach(@x){} } + 1>> would print 5.)
+It has been fixed to return C<undef>.
 L<[perl #124004]|https://rt.perl.org/Ticket/Display.html?id=124004>
-
-=item *
-
-A regression has been fixed in the behaviour of the C<readline> built-in
-function, caused by the introduction of the C<<< <<>> >>> operator.
-L<[perl #123990]|https://rt.perl.org/Ticket/Display.html?id=123990>
 
 =item *
 
@@ -2402,7 +2373,9 @@ L<[perl #123748]|https://rt.perl.org/Ticket/Display.html?id=123748>
 
 =item *
 
-Patterns starting with C</.*/> are now fast again.
+Some patterns starting with C</.*..../> matched against long strings have
+been slow since v5.8, and some of the form C</.*..../i> have been slow
+since v5.18. They are now all fast again.
 L<[perl #123743]|https://rt.perl.org/Ticket/Display.html?id=123743>.
 
 =item *
@@ -2421,11 +2394,6 @@ be inside a bracketed character class, like C<qr/[[:ascii:]]/>.  A
 warning is issued when something looking like a POSIX class is not
 inside a bracketed class.  That warning wasn't getting generated when
 the POSIX class was negated: C<[:^ascii:]>.  This is now fixed.
-
-=item *
-
-Fix a couple of size calculation overflows.
-L<[perl #123554]|https://rt.perl.org/Ticket/Display.html?id=123554>.
 
 =item *
 
@@ -2481,11 +2449,6 @@ warnings when stringifying Inf-like or NaN-like strings. For example,
 
 =item *
 
-Only stringy classnames are now shared. This fixes some failures in L<autobox>.
-L<[perl #100819]|https://rt.cpan.org/Ticket/Display.html?id=100819>.
-
-=item *
-
 A bug in regular expression patterns that could lead to segfaults and
 other crashes has been fixed.  This occurred only in patterns compiled
 with C</i> while taking into account the current POSIX locale (which usually
@@ -2495,8 +2458,8 @@ L<[perl #123539]|https://rt.perl.org/Ticket/Display.html?id=123539>.
 
 =item *
 
-C<s///> now works on very long strings instead of dying with 'Substitution
-loop'.
+C<s///g> now works on very long strings (where there are more than 2
+billion iterations) instead of dying with 'Substitution loop'.
 L<[perl #103260]|https://rt.perl.org/Ticket/Display.html?id=103260>.
 L<[perl #123071]|https://rt.perl.org/Ticket/Display.html?id=123071>.
 
@@ -2507,9 +2470,9 @@ L<[perl #123495]|https://rt.perl.org/Ticket/Display.html?id=123495>.
 
 =item *
 
-C<\()> (reference to an empty list) and C<y///> with lexical C<$_> in scope
-could do a bad write past the end of the stack.  They have been fixed
-to extend the stack first.
+C<\()> (a reference to an empty list), and C<y///> with lexical C<$_> in
+scope, could both do a bad write past the end of the stack.  They have
+both been fixed to extend the stack first.
 
 =item *
 
@@ -2520,8 +2483,9 @@ L<[perl #123514]|https://rt.perl.org/Ticket/Display.html?id=123514>.
 
 =item *
 
-Some cases of lexical state subs inside predeclared subs could crash but no
-longer do.
+Some cases of lexical state subs declared inside predeclared subs could
+crash, for example when evalling a string including the name of an outer
+variable, but no longer do.
 
 =item *
 
@@ -2544,7 +2508,8 @@ L<[perl #123542]|https://rt.perl.org/Ticket/Display.html?id=123542>.
 
 =item *
 
-A repeat expression like C<33 x ~3> could cause a large buffer
+Fix a couple of string grow size calculation overflows; in particular,
+a repeat expression like C<33 x ~3> could cause a large buffer
 overflow since the new output buffer size was not correctly handled by
 SvGROW().  An expression like this now properly produces a memory wrap
 panic.
@@ -2572,14 +2537,8 @@ L<[perl #122703]|https://rt.perl.org/Ticket/Display.html?id=122703>.
 
 =item *
 
-C<op_free()> no longer crashes due to a stack overflow when freeing a
-deeply recursive op tree.
-L<[perl #108276]|https://rt.perl.org/Ticket/Display.html?id=108276>.
-
-=item *
-
-C<scalarvoid()> would crash due to a stack overflow when processing a
-deeply recursive op tree.
+C<op_free()> and C<scalarvoid()> no longer crash due to a stack overflow
+when freeing a deeply recursive op tree.
 L<[perl #108276]|https://rt.perl.org/Ticket/Display.html?id=108276>.
 
 =item *
@@ -2592,7 +2551,8 @@ L<[perl #123135]|https://rt.perl.org/Ticket/Display.html?id=123135>.
 =item *
 
 A failed C<semctl> call no longer overwrites existing items on the stack,
-causing C<(semctl(-1,0,0,0))[0]> to give an "uninitialized" warning.
+which means that C<(semctl(-1,0,0,0))[0]> no longer gives an
+"uninitialized" warning.
 
 =item *
 
@@ -2606,23 +2566,30 @@ Sometimes the assignment in C<@array = split> gets optimised so that C<split>
 itself writes directly to the array.  This caused a bug, preventing this
 assignment from being used in lvalue context.  So
 C<(@a=split//,"foo")=bar()> was an error.  (This bug probably goes back to
-Perl 3, when the optimisation was added.)  This optimisation, and the bug,
-started to happen in more cases in XXX 5.21.5.  It has now been fixed.
+Perl 3, when the optimisation was added.) It has now been fixed.
 L<[perl #123057]|https://rt.perl.org/Ticket/Display.html?id=123057>.
 
 =item *
 
-When an argument list fails the checks installed by subroutine
-signatures, the resulting error messages now give the file and line number
-of the caller, not of the called subroutine.
+When an argument list fails the checks specified by a subroutine
+signature (which is still an experimental feature), the resulting error
+messages now give the file and line number of the caller, not of the
+called subroutine.
 L<[perl #121374]|https://rt.perl.org/Ticket/Display.html?id=121374>.
 
 =item *
 
-Flip-flop operators (C<..> and C<...> in scalar context) used to maintain
+The flip-flop operators (C<..> and C<...> in scalar context) used to maintain
 a separate state for each recursion level (the number of times the
 enclosing sub was called recursively), contrary to the documentation.  Now
 each closure has one internal state for each flip-flop.
+L<[perl #122829]|https://rt.perl.org/Ticket/Display.html?id=122829>.
+
+=item *
+
+The flip-flop operator (C<..> in scalar context) would return the same
+scalar each time, unless the containing subroutine was called recursively.
+Now it always returns a new scalar.
 L<[perl #122829]|https://rt.perl.org/Ticket/Display.html?id=122829>.
 
 =item *
@@ -2648,13 +2615,14 @@ L<[perl #121827]|https://rt.perl.org/Ticket/Display.html?id=121827>.
 
 =item *
 
-Assignment to a lexical scalar is often optimised away (as mentioned under
-L</Performance Enhancements>).  Various bugs related to this optimisation
-have been fixed.  Certain operators on the right-hand side would sometimes
-fail to assign the value at all or assign the wrong value, or would call
-STORE twice or not at all on tied variables.  The operators affected were
-C<$foo++>, C<$foo-->, and C<-$foo> under C<use integer>, C<chomp>, C<chr>
-and C<setpgrp>.
+Assignment to a lexical scalar is often optimised away; for example in
+C<my $x; $x = $y + $z>, the assign operator is optimised away and the add
+operator writes its result directly to C<$x>.  Various bugs related to
+this optimisation have been fixed.  Certain operators on the right-hand
+side would sometimes fail to assign the value at all or assign the wrong
+value, or would call STORE twice or not at all on tied variables.  The
+operators affected were C<$foo++>, C<$foo-->, and C<-$foo> under C<use
+integer>, C<chomp>, C<chr> and C<setpgrp>.
 
 =item *
 
@@ -2716,12 +2684,6 @@ C<crypt> no longer calls C<FETCH> twice on a tied first argument.
 An unterminated here-doc on the last line of a quote-like operator
 (C<qq[${ <<END }]>, C</(?{ <<END })/>) no longer causes a double free.  It
 started doing so in 5.18.
-
-=item *
-
-Fixed two assertion failures introduced into C<-DPERL_OP_PARENT>
-builds.
-L<[perl #108276]|https://rt.perl.org/Ticket/Display.html?id=108276>.
 
 =item *
 
@@ -2893,7 +2855,9 @@ of the same name declared by C<use constant>.  This bug was introduced in Perl
 
 =item *
 
-C<qr/[\N{named sequence}]/> now works properly in many instances.  Some names
+C<qr/[\N{named sequence}]/> now works properly in many instances.
+
+Some names
 known to C<\N{...}> refer to a sequence of multiple characters, instead of the
 usual single character.  Bracketed character classes generally only match
 single characters, but now special handling has been added so that they can
@@ -2912,8 +2876,9 @@ L<[perl #122669]|https://rt.perl.org/Ticket/Display.html?id=122669>
 
 =item *
 
-S<C<open $$fh, ...>>, which vivifies a handle with a name like C<"main::_GEN_0">, was
-not giving the handle the right reference count, so a double free could happen.
+S<C<open $$fh, ...>>, which vivifies a handle with a name like
+C<"main::_GEN_0">, was not giving the handle the right reference count, so
+a double free could happen.
 
 =item *
 
@@ -2950,9 +2915,9 @@ L<[perl #122655]|https://rt.perl.org/Ticket/Display.html?id=122655>
 
 =item *
 
-Constant folding could incorrectly suppress warnings if lexical warnings (C<use
-warnings> or C<no warnings>) were not in effect and C<$^W> were false at
-compile time and true at run time.
+Constant folding could incorrectly suppress warnings if lexical warnings
+(C<use warnings> or C<no warnings>) were not in effect and C<$^W> were
+false at compile time and true at run time.
 
 =item *
 
@@ -2975,8 +2940,8 @@ fixed.
 
 =item *
 
-S<C<(caller $n)[3]>> now reports names of lexical subs, instead of treating them
-as C<"(unknown)">.
+S<C<(caller $n)[3]>> now reports names of lexical subs, instead of
+treating them as C<"(unknown)">.
 
 =item *
 
@@ -3015,16 +2980,9 @@ whose value contained Latin-1 characters.
 =item *
 
 Locking and unlocking values via L<Hash::Util> or C<Internals::SvREADONLY>
-no longer has any effect on values that are read-only to begin.
+no longer has any effect on values that were read-only to begin with.
 Previously, unlocking such values could result in crashes, hangs or
 other erratic behaviour.
-
-=item *
-
-The flip-flop operator (C<..> in scalar context) would return the same
-scalar each time, unless the containing subroutine was called recursively.
-Now it always returns a new scalar.
-L<[perl #122829]|https://rt.perl.org/Ticket/Display.html?id=122829>.
 
 =item *
 
@@ -3089,15 +3047,16 @@ L<[cpan #85570]|https://rt.cpan.org/Ticket/Display.html?id=85570>.
 
 =item *
 
-During the pattern optimization phase, we no longer recurse into
-C<GOSUB>/C<GOSTART> when the C<SCF_DO_SUBSTR> flag is false. This prevents
-the optimizer from running "forever" and exhausting all memory.
+During the optimization phase of a regexp compilation, we no longer
+recurse into C<GOSUB>/C<GOSTART> when the internal C<SCF_DO_SUBSTR> flag
+is false. This prevents the optimizer from running "forever" and
+exhausting all memory.
 L<[perl #122283]|https://rt.perl.org/Ticket/Display.html?id=122283>.
 
 =item *
 
-F<< t/op/crypt.t >> now uses the SHA-256 algorithm if the default one
-is disabled.
+The test script F<< t/op/crypt.t >> now uses the SHA-256 algorithm if the
+default one is disabled, rather than giving failures.
 L<[perl #121591]|https://rt.perl.org/Ticket/Display.html?id=121591>.
 
 =item *
@@ -3108,7 +3067,11 @@ L<[perl #122950]|https://rt.perl.org/Ticket/Display.html?id=122950>.
 =item *
 
 Fixed a bug that could cause perl to enter an infinite loop during
-compilation.
+compilation. In particular, for a C<while(1)> within a sublist, e.g.
+
+    sub foo { () = ($a, my $b, ($c, do { while(1) {} })) }
+
+The bug was introduced in 5.20.0
 L<[perl #122995]|https://rt.perl.org/Ticket/Display.html?id=122995>.
 
 =item *
@@ -3164,7 +3127,7 @@ global variable even with a lexical variable in scope.
 =item *
 
 In perl 5.20.0, C<sort CORE::fake> where 'fake' is anything other than a
-keyword started chopping off the last 6 characters and treating the result
+keyword, started chopping off the last 6 characters and treating the result
 as a sort sub name.  The previous behaviour of treating "CORE::fake" as a
 sort sub name has been restored.
 L<[perl #123410]|https://rt.perl.org/Ticket/Display.html?id=123410>.
@@ -3183,7 +3146,7 @@ C<${^LAST_FH}> ends up undefined.
 
 =item *
 
-C<(...)x...> in void context now applies scalar context to the left-hand
+C<(...) x ...> in void context now applies scalar context to the left-hand
 argument, instead of the context the current sub was called in.
 L<[perl #123020]|https://rt.perl.org/Ticket/Display.html?id=123020>.
 
