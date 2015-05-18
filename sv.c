@@ -5950,14 +5950,13 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
 /*
 =for apidoc sv_get_backrefs
 
-If the sv is the target of a weakrefence then return
-the backrefs structure associated with the sv, otherwise
-return NULL.
+If the sv is the target of a weak reference then it returns the back
+references structure associated with the sv; otherwise return NULL.
 
-When returning a non-null result the type of the return
-is relevant. If it is an AV then the contents of the AV
-are the weakrefs which point at this item. If it is any
-other type then the item itself is the weakref.
+When returning a non-null result the type of the return is relevant. If it
+is an AV then the elements of the AV are the weak reference RVs which
+point at this item. If it is any other type then the item itself is the
+weak reference.
 
 See also Perl_sv_add_backref(), Perl_sv_del_backref(),
 Perl_sv_kill_backrefs()
