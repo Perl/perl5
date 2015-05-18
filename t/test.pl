@@ -1589,10 +1589,27 @@ sub watchdog ($;$)
                     _diag("Watchdog warning: $_[0]");
                 };
                 my $sig = $is_vms ? 'TERM' : 'KILL';
-                my $cmd = _create_runperl( prog =>  "sleep($timeout);" .
-                                                    "warn qq/# $timeout_msg" . '\n/;' .
-                                                    "kill(q/$sig/, $pid_to_kill);");
-                $watchdog = system(1, $cmd);
+                my $prog = "sleep($timeout);" .
+                           "warn qq/# $timeout_msg" . '\n/;' .
+                           "kill(q/$sig/, $pid_to_kill);";
+
+                # On Windows use the indirect object plus LIST form to guarantee
+                # that perl is launched directly rather than via the shell (see
+                # perlfunc.pod), and ensure that the LIST has multiple elements
+                # since the indirect object plus COMMANDSTRING form seems to
+                # hang (see perl #121283). Don't do this on VMS, which doesn't
+                # support the LIST form at all.
+                if ($is_mswin) {
+                    my $runperl = which_perl();
+                    if ($runperl =~ m/\s/) {
+                        $runperl = qq{"$runperl"};
+                    }
+                    $watchdog = system({ $runperl } 1, $runperl, '-e', $prog);
+                }
+                else {
+                    my $cmd = _create_runperl(prog => $prog);
+                    $watchdog = system(1, $cmd);
+                }
             };
             if ($@ || ($watchdog <= 0)) {
                 _diag('Failed to start watchdog');
@@ -1603,13 +1620,7 @@ sub watchdog ($;$)
 
             # Add END block to parent to terminate and
             #   clean up watchdog process
-            # Win32 watchdog is launched by cmd.exe shell, so use process group
-            # kill, otherwise the watchdog is never killed and harness waits
-            # every time for the timeout, #121395
-            eval( $is_mswin ?
-            "END { local \$! = 0; local \$? = 0;
-                        wait() if kill('-KILL', $watchdog); };"
-            : "END { local \$! = 0; local \$? = 0;
+            eval("END { local \$! = 0; local \$? = 0;
                         wait() if kill('KILL', $watchdog); };");
             return;
         }
