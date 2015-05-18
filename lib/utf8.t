@@ -336,15 +336,21 @@ SKIP: {
 {
     my $a = "A";
     my $b = chr(0x0FF);
-    my $c = chr(0x100);
+    my $c = chr(0x0DF);  # FF is invariant in many EBCDIC pages, so is not a
+                         # fair test of 'beyond'; but DF is variant (in all
+                         # supported EBCDIC pages so far), so make 2 'beyond'
+                         # tests
+    my $d = chr(0x100);
 
     ok( utf8::valid($a), "utf8::valid basic");
     ok( utf8::valid($b), "utf8::valid beyond");
-    ok( utf8::valid($c), "utf8::valid unicode");
+    ok( utf8::valid($c), "utf8::valid beyond");
+    ok( utf8::valid($d), "utf8::valid unicode");
 
     ok(!utf8::is_utf8($a), "!utf8::is_utf8 basic");
     ok(!utf8::is_utf8($b), "!utf8::is_utf8 beyond");
-    ok( utf8::is_utf8($c), "utf8::is_utf8 unicode");
+    ok(!utf8::is_utf8($c), "!utf8::is_utf8 beyond");
+    ok( utf8::is_utf8($d), "utf8::is_utf8 unicode");
 
     is(utf8::upgrade($a), 1, "utf8::upgrade basic");
     if ($::IS_EBCDIC) { # EBCDIC.
@@ -352,35 +358,44 @@ SKIP: {
     } else {
 	is(utf8::upgrade($b), 2, "utf8::upgrade beyond");
     }
-    is(utf8::upgrade($c), 2, "utf8::upgrade unicode");
+    is(utf8::upgrade($c), 2, "utf8::upgrade beyond");
+    is(utf8::upgrade($d), 2, "utf8::upgrade unicode");
 
     is($a, "A",       "basic");
     is($b, "\xFF",    "beyond");
-    is($c, "\x{100}", "unicode");
+    is($c, "\xDF",    "beyond");
+    is($d, "\x{100}", "unicode");
 
     ok( utf8::valid($a), "utf8::valid basic");
     ok( utf8::valid($b), "utf8::valid beyond");
-    ok( utf8::valid($c), "utf8::valid unicode");
+    ok( utf8::valid($c), "utf8::valid beyond");
+    ok( utf8::valid($d), "utf8::valid unicode");
 
     ok( utf8::is_utf8($a), "utf8::is_utf8 basic");
     ok( utf8::is_utf8($b), "utf8::is_utf8 beyond");
-    ok( utf8::is_utf8($c), "utf8::is_utf8 unicode");
+    ok( utf8::is_utf8($c), "utf8::is_utf8 beyond");
+    ok( utf8::is_utf8($d), "utf8::is_utf8 unicode");
 
     is(utf8::downgrade($a), 1, "utf8::downgrade basic");
     is(utf8::downgrade($b), 1, "utf8::downgrade beyond");
+    is(utf8::downgrade($c), 1, "utf8::downgrade beyond");
 
     is($a, "A",       "basic");
     is($b, "\xFF",    "beyond");
+    is($c, "\xDF",    "beyond");
 
     ok( utf8::valid($a), "utf8::valid basic");
     ok( utf8::valid($b), "utf8::valid beyond");
+    ok( utf8::valid($c), "utf8::valid beyond");
 
     ok(!utf8::is_utf8($a), "!utf8::is_utf8 basic");
     ok(!utf8::is_utf8($b), "!utf8::is_utf8 beyond");
+    ok(!utf8::is_utf8($c), "!utf8::is_utf8 beyond");
 
     utf8::encode($a);
     utf8::encode($b);
     utf8::encode($c);
+    utf8::encode($d);
 
     is($a, "A",       "basic");
     if ($::IS_EBCDIC) { # EBCDIC.
@@ -388,28 +403,34 @@ SKIP: {
     } else {
 	is(length($b), 2, "beyond length");
     }
-    is(length($c), 2, "unicode length");
+    is(length($c), 2, "beyond length");
+    is(length($d), 2, "unicode length");
 
     ok(utf8::valid($a), "utf8::valid basic");
     ok(utf8::valid($b), "utf8::valid beyond");
-    ok(utf8::valid($c), "utf8::valid unicode");
+    ok(utf8::valid($c), "utf8::valid beyond");
+    ok(utf8::valid($d), "utf8::valid unicode");
 
     # encode() clears the UTF-8 flag (unlike upgrade()).
     ok(!utf8::is_utf8($a), "!utf8::is_utf8 basic");
     ok(!utf8::is_utf8($b), "!utf8::is_utf8 beyond");
-    ok(!utf8::is_utf8($c), "!utf8::is_utf8 unicode");
+    ok(!utf8::is_utf8($c), "!utf8::is_utf8 beyond");
+    ok(!utf8::is_utf8($d), "!utf8::is_utf8 unicode");
 
     utf8::decode($a);
     utf8::decode($b);
     utf8::decode($c);
+    utf8::decode($d);
 
     is($a, "A",       "basic");
     is($b, "\xFF",    "beyond");
-    is($c, "\x{100}", "unicode");
+    is($c, "\xDF",    "beyond");
+    is($d, "\x{100}", "unicode");
 
     ok(utf8::valid($a), "!utf8::valid basic");
     ok(utf8::valid($b), "!utf8::valid beyond");
-    ok(utf8::valid($c), " utf8::valid unicode");
+    ok(utf8::valid($c), "!utf8::valid beyond");
+    ok(utf8::valid($d), " utf8::valid unicode");
 
     ok(!utf8::is_utf8($a), "!utf8::is_utf8 basic");
     if ($::IS_EBCDIC) { # EBCDIC.
@@ -417,7 +438,8 @@ SKIP: {
     } else {
 	ok( utf8::is_utf8($b), " utf8::is_utf8 beyond"); # $b stays in UTF-8.
     }
-    ok( utf8::is_utf8($c), " utf8::is_utf8 unicode");
+    ok( utf8::is_utf8($c), " utf8::is_utf8 beyond"); # $c stays in UTF-8.
+    ok( utf8::is_utf8($d), " utf8::is_utf8 unicode");
 }
 
 {
