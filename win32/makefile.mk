@@ -474,7 +474,6 @@ DEFINES		= -DWIN32
 DEFINES		+= -DWIN64 -DCONSERVATIVE
 .ENDIF
 LOCDEFS		= -DPERLDLL -DPERL_CORE
-SUBSYS		= console
 CXX_FLAG	= -xc++
 
 # Current releases of MinGW 5.1.4 (as of 11-Aug-2009) will fail to link
@@ -560,7 +559,6 @@ INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
-SUBSYS		= console
 CXX_FLAG	= -TP -EHsc
 
 LIBC		= msvcrt.lib
@@ -673,10 +671,23 @@ RSC_FLAGS	= -DINCLUDE_MANIFEST
 .ENDIF
 
 
-# used to allow local linking flags that are not propogated into Config.pm,
-# currently unused
-#   -- BKS, 12-12-1999
-PRIV_LINK_FLAGS	*=
+# For XP support in >= 2013, subsystem is always in Config.pm LINK_FLAGS
+# else subsystem is only needed for EXE building, not XS DLL building
+# Console vs GUI makes no difference for DLLs, so use default for cleaner
+# building cmd lines
+.IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC120FREE" \
+    || "$(CCTYPE)" == "MSVC150" || "$(CCTYPE)" == "MSVC150FREE"
+.IF "$(WIN64)" == "define"
+LINK_FLAGS	+= -subsystem:console,"5.02"
+.ELSE
+LINK_FLAGS	+= -subsystem:console,"5.01"
+.ENDIF
+PRIV_LINK_FLAGS	=
+
+.ELSE
+PRIV_LINK_FLAGS	= -subsystem:console
+.ENDIF
+
 BLINK_FLAGS	= $(PRIV_LINK_FLAGS) $(LINK_FLAGS)
 
 #################### do not edit below this line #######################
@@ -719,7 +730,7 @@ $(o).dll:
 	$(LINK32) -o $@ $(BLINK_FLAGS) $< $(LIBFILES)
 	$(IMPLIB) --input-def $(*B).def --output-lib $(*B).a $@
 .ELSE
-	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
+	$(LINK32) -dll -implib:$(*B).lib -def:$(*B).def \
 	    -out:$@ $(BLINK_FLAGS) $(LIBFILES) $< $(LIBPERL)
 	$(EMBED_DLL_MANI)
 .ENDIF
@@ -1037,8 +1048,7 @@ $(GLOBEXE) : perlglob$(o)
 .IF "$(CCTYPE)" == "GCC"
 	$(LINK32) $(BLINK_FLAGS) -mconsole -o $@ perlglob$(o) $(LIBFILES)
 .ELSE
-	$(LINK32) $(BLINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
-	    perlglob$(o) setargv$(o)
+	$(LINK32) $(BLINK_FLAGS) $(LIBFILES) -out:$@ perlglob$(o) setargv$(o)
 	$(EMBED_EXE_MANI)
 .ENDIF
 
@@ -1250,7 +1260,7 @@ $(MINIPERL) : ..\lib\buildcustomize.pl
 	$(LINK32) -v -mconsole -o $(MINIPERL) $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(MINI_OBJ) $(LIBFILES) $(LKPOST))
 .ELSE
-	$(LINK32) -subsystem:console -out:$(MINIPERL) $(BLINK_FLAGS) \
+	$(LINK32) -out:$(MINIPERL) $(BLINK_FLAGS) \
 	    @$(mktmp $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ))
 	$(EMBED_EXE_MANI:s/$@/$(MINIPERL)/)
 .ENDIF
@@ -1348,8 +1358,7 @@ $(GENUUDMAP) : $(GENUUDMAP_OBJ)
 	$(LINK32) -v -o $@ $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(GENUUDMAP_OBJ) $(LIBFILES) $(LKPOST))
 .ELSE
-	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) \
-	    @$(mktmp $(LIBFILES) $(GENUUDMAP_OBJ))
+	$(LINK32) -out:$@ $(BLINK_FLAGS) @$(mktmp $(LIBFILES) $(GENUUDMAP_OBJ))
 	$(EMBED_EXE_MANI)
 .ENDIF
 
@@ -1370,7 +1379,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS)  \
 	    $(PERLEXE_OBJ) $(PERLEXE_RES) $(PERLIMPLIB) $(LIBFILES)
 .ELSE
-	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) \
+	$(LINK32) -out:$@ $(BLINK_FLAGS) \
 	    $(PERLEXE_OBJ) $(PERLEXE_RES) $(PERLIMPLIB) $(LIBFILES) $(SETARGV_OBJ)
 	$(EMBED_EXE_MANI)
 .ENDIF
@@ -1382,7 +1391,7 @@ $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS) \
 	    $(PERLEXEST_OBJ) $(PERLEXE_RES) $(PERLSTATICLIB) $(LIBFILES)
 .ELSE
-	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) \
+	$(LINK32) -out:$@ $(BLINK_FLAGS) \
 	    $(PERLEXEST_OBJ) $(PERLEXE_RES) $(PERLSTATICLIB) $(LIBFILES) $(SETARGV_OBJ)
 	$(EMBED_EXE_MANI)
 .ENDIF

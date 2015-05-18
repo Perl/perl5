@@ -316,9 +316,16 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Win32
 
-XXX
+=over
+
+=item *
+
+Visual C++ 2013 builds will now execute on XP and higher. Previously they would
+only execute on Vista and higher.
+
+=back
 
 =back
 
