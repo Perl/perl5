@@ -124,10 +124,10 @@ no utf8; # Ironic, no?
     my $progfile = 'utf' . $$;
     END {unlink_all $progfile}
 
-    # If I'm right 60 is '>' in ASCII, ' ' in EBCDIC
-    # 173 is not punctuation in either ASCII or EBCDIC
+    # 64 is '@' in ASCII, ' ' in EBCDIC
+    # 193 is not punctuation in either ASCII nor EBCDIC
     my (@char);
-    foreach (60, 173, 257, 65532) {
+    foreach (64, 193, 257, 65532) {
       my $char = chr $_;
       utf8::encode($char);
       # I don't want to use map {ord} and I've no need to hardcode the UTF
@@ -143,11 +143,11 @@ no utf8; # Ironic, no?
     # Now we've done all the UTF8 munching hopefully we're safe
     my @tests = (
              ['check our detection program works',
-              'my @a = ("'.chr(60).'\x2A", ""); $b = show @a', qr/^>60,42<><$/],
+              'my @a = ("'.chr(64).'\x2A", ""); $b = show @a', qr/^>64,42<><$/],
              ['check literal 8 bit input',
-              '$a = "' . chr (173) . '"; $b = show $a', qr/^>173<$/],
+              '$a = "' . chr (193) . '"; $b = show $a', qr/^>193<$/],
              ['check no utf8; makes no change',
-              'no utf8; $a = "' . chr (173) . '"; $b = show $a', qr/^>173<$/],
+              'no utf8; $a = "' . chr (193) . '"; $b = show $a', qr/^>193<$/],
              # Now we do the real byte sequences that are valid UTF8
              (map {
                ["the utf8 sequence for chr $_->[0]",
@@ -270,15 +270,28 @@ BANG
 #   "my" variable $strict::VERSION can't be in a package
 #
 SKIP: {
-    skip("Embedded UTF-8 does not work in EBCDIC", 1) if $::IS_EBCDIC;
-    ok('' eq runperl(prog => <<'CODE'), "change #17928");
-	my $code = qq{ my \$\xe3\x83\x95\xe3\x83\xbc = 5; };
-    {
-	use utf8;
-	eval $code;
-	print $@ if $@;
-    }
+    skip("Haven't bothered to port this to EBCDIC non-1047", 1) if $::IS_EBCDIC
+                                                                && ord '^' != 95;
+    if ($::IS_ASCII) {
+        ok('' eq runperl(prog => <<'CODE'), "change #17928");
+            my $code = qq{ my \$\xe3\x83\x95\xe3\x83\xbc = 5; };
+        {
+            use utf8;
+            eval $code;
+            print $@ if $@;
+        }
 CODE
+    }
+    else {
+        ok('' eq runperl(prog => <<'CODE'), "change #17928");
+            my $code = qq{ my \$\xCE\x47\x64\xCE\x48\x70 = 5; };
+        {
+            use utf8;
+            eval $code;
+            print $@ if $@;
+        }
+CODE
+    }
 }
 
 {
@@ -324,11 +337,19 @@ END
 }
 
 SKIP: {
-    skip("Embedded UTF-8 does not work in EBCDIC", 1) if $::IS_EBCDIC;
+    skip("Haven't bothered to port this to EBCDIC non-1047", 1) if $::IS_EBCDIC
+                                                                && ord '^' != 95;
     use utf8;
-    is eval qq{q \xc3\xbc test \xc3\xbc . qq\xc2\xb7 test \xc2\xb7},
-      ' test  test ',
-      "utf8 quote delimiters [perl #16823]";
+    if ($::IS_ASCII) {
+        is eval qq{q \xc3\xbc test \xc3\xbc . qq\xc2\xb7 test \xc2\xb7},
+        ' test  test ',
+        "utf8 quote delimiters [perl #16823]";
+    }
+    else {
+        is eval qq{q \x8B\x70 test \x8B\x70 . qq\x80\x66 test \x80\x66},
+        ' test  test ',
+        "utf8 quote delimiters [perl #16823]";
+    }
 }
 
 # Test the "internals".
