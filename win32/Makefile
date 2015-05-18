@@ -441,7 +441,6 @@ INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
-SUBSYS		= console
 CXX_FLAG	= -TP -EHsc
 
 LIBC		= msvcrt.lib
@@ -553,6 +552,24 @@ LINK_FLAGS	= $(LINK_FLAGS) "/manifestdependency:type='Win32' name='Microsoft.Win
 RSC_FLAGS	= -DINCLUDE_MANIFEST
 !ENDIF
 
+# For XP support in >= 2013, subsystem is always in Config.pm LINK_FLAGS
+# else subsystem is only needed for EXE building, not XS DLL building
+# Console vs GUI makes no difference for DLLs, so use default for cleaner
+# building cmd lines
+!IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC120FREE" \
+    || "$(CCTYPE)" == "MSVC150" || "$(CCTYPE)" == "MSVC150FREE"
+!  IF "$(WIN64)" == "define"
+LINK_FLAGS	= $(LINK_FLAGS) -subsystem:console,"5.02"
+!  ELSE
+LINK_FLAGS	= $(LINK_FLAGS) -subsystem:console,"5.01"
+!  ENDIF
+PRIV_LINK_FLAGS	=
+
+!ELSE
+PRIV_LINK_FLAGS	= -subsystem:console
+!ENDIF
+
+BLINK_FLAGS	= $(PRIV_LINK_FLAGS) $(LINK_FLAGS)
 
 #################### do not edit below this line #######################
 ############# NO USER-SERVICEABLE PARTS BEYOND THIS POINT ##############
@@ -578,8 +595,8 @@ o = .obj
 	$(NOOP)
 
 $(o).dll:
-	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
-	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)
+	$(LINK32) -dll -implib:$(*B).lib -def:$(*B).def \
+	    -out:$@ $(BLINK_FLAGS) $(LIBFILES) $< $(LIBPERL)
 	$(EMBED_DLL_MANI)
 
 .rc.res:
@@ -867,7 +884,7 @@ static: $(PERLEXESTATIC)
 #------------------------------------------------------------
 
 $(GLOBEXE) : perlglob$(o)
-	$(LINK32) $(LINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
+	$(LINK32) $(BLINK_FLAGS) $(LIBFILES) -out:$@ \
 	    perlglob$(o) setargv$(o)
 	$(EMBED_EXE_MANI)
 
@@ -1003,8 +1020,8 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL
 $(MINIPERL) : ..\lib\buildcustomize.pl 
 
 ..\lib\buildcustomize.pl : $(MINIDIR) $(MINI_OBJ) ..\write_buildcustomize.pl
-	$(LINK32) -subsystem:console -out:$(MINIPERL) @<<
-	$(LINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ)
+	$(LINK32) -out:$(MINIPERL) @<<
+	$(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ)
 <<
 	$(EMBED_EXE_MANI:..\lib\buildcustomize.pl=..\miniperl.exe)
 	$(MINIPERL) -I..\lib -f ..\write_buildcustomize.pl ..
@@ -1041,7 +1058,7 @@ perldll.def : $(MINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl create_perllibs
 
 $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 	$(LINK32) -dll -def:perldll.def -base:0x28000000 -out:$@ @Extensions_static @<<
-		$(LINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(PERLDLL_OBJ) $(PERLDLL_RES)
+		$(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(PERLDLL_OBJ) $(PERLDLL_RES)
 <<
 	$(EMBED_DLL_MANI)
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
@@ -1064,8 +1081,8 @@ $(BITCOUNT_H) : $(GENUUDMAP)
 $(GENUUDMAP_OBJ) : ..\mg_raw.h
 
 $(GENUUDMAP) : $(GENUUDMAP_OBJ)
-	$(LINK32) -subsystem:console -out:$@ @<<
-		$(LINK_FLAGS) $(LIBFILES) $(GENUUDMAP_OBJ)
+	$(LINK32) -out:$@ @<<
+		$(BLINK_FLAGS) $(LIBFILES) $(GENUUDMAP_OBJ)
 <<
 	$(EMBED_EXE_MANI)
 
@@ -1082,14 +1099,14 @@ perlmainst$(o) : perlmainst.c
 	$(CC) $(CFLAGS_O) $(OBJOUT_FLAG)$@ -c perlmainst.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
-	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) \
+	$(LINK32) -out:$@ $(BLINK_FLAGS) \
 	    $(PERLEXE_OBJ) $(PERLEXE_RES) $(PERLIMPLIB) $(LIBFILES) $(SETARGV_OBJ)
 	$(EMBED_EXE_MANI)
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
 
 $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
-	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) \
+	$(LINK32) -out:$@ $(BLINK_FLAGS) \
 	    $(PERLEXEST_OBJ) $(PERLEXE_RES) $(PERLSTATICLIB) $(LIBFILES) $(SETARGV_OBJ)
 	$(EMBED_EXE_MANI)
 

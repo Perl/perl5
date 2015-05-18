@@ -1990,6 +1990,11 @@ a fix for legacy feature checking status.
 
 =item *
 
+Visual C++ 2013 builds will now execute on XP and higher. Previously they would
+only execute on Vista and higher.
+
+=item *
+
 F<miniperl.exe> is now built with C<-fno-strict-aliasing>, allowing 64-bit
 builds to complete on GCC 4.8.
 L<[perl #123976]|https://rt.perl.org/Ticket/Display.html?id=123976>
