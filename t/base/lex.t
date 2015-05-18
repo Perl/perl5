@@ -386,7 +386,7 @@ print "ok $test - call a function in package v10::foo\n"; $test++;
 
 print "not " unless (1?v65:"bar") eq chr(65);
 print "ok $test - colon detection after vstring does not break ? vstring :\n"; $test++;
-if (ord("\t") == 9) {
+if (ord("A") == 65) {
     print v35;
     print "not ";
     print v10;
