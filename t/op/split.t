@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    require './charset_tools.pl';
     set_up_inc('../lib');
 }
 
@@ -264,15 +265,11 @@ is($cnt, scalar(@ary));
 {
     my $s = "\x20\x40\x{80}\x{100}\x{80}\x40\x20";
 
-  SKIP: {
-    if ($::IS_EBCDIC) {
-	skip("EBCDIC", 1);
-    } else {
+  {
 	# bug id 20000426.003
 
 	my ($a, $b, $c) = split(/\x40/, $s);
 	ok($a eq "\x20" && $b eq "\x{80}\x{100}\x{80}" && $c eq $a);
-    }
   }
 
     my ($a, $b) = split(/\x{100}/, $s);
@@ -281,13 +278,9 @@ is($cnt, scalar(@ary));
     my ($a, $b) = split(/\x{80}\x{100}\x{80}/, $s);
     ok($a eq "\x20\x40" && $b eq "\x40\x20");
 
-  SKIP: {
-    if ($::IS_EBCDIC) {
-	skip("EBCDIC", 1);
-    }  else {
+  {
 	my ($a, $b) = split(/\x40\x{80}/, $s);
 	ok($a eq "\x20" && $b eq "\x{100}\x{80}\x40\x20");
-    }
   }
 
     my ($a, $b, $c) = split(/[\x40\x{80}]+/, $s);
@@ -492,16 +485,14 @@ is($cnt, scalar(@ary));
     my @results;
     my $expr;
     $expr = ' a b c ';
-    @results = split "\x20", $expr if $::IS_ASCII;
-    @results = split "\x40", $expr if $::IS_EBCDIC;
+    @results = split uni_to_native("\x20"), $expr;
     is @results, 3,
         "RT #116086: split on string of single hex-20: captured 3 elements";
     is $results[0], 'a',
         "RT #116086: split on string of single hex-20: first element is non-empty";
 
     $expr = " a \tb c ";
-    @results = split "\x20", $expr if $::IS_ASCII;
-    @results = split "\x40", $expr if $::IS_EBCDIC;
+    @results = split uni_to_native("\x20"), $expr;
     is @results, 3,
         "RT #116086: split on string of single hex-20: captured 3 elements";
     is $results[0], 'a',
