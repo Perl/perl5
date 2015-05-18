@@ -11,7 +11,7 @@ BEGIN {
     use bytes;
     my $ordwide = ord($wide);
     printf "# under use bytes ord(v256) = 0x%02x\n", $ordwide;
-    skip_all('UTF-EBCDIC (not UTF-8) used here') if $ordwide == 140;
+    skip_all('UTF-8-centric tests (not valid for UTF-EBCDIC)') if $ordwide == 140;
 
     if ($ordwide != 196) {
 	printf "# v256 starts with 0x%02x\n", $ordwide;
