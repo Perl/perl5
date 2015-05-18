@@ -1445,6 +1445,10 @@ example,
 
 L<Use of literal non-graphic characters in variable names is deprecated|perldiag/"Use of literal non-graphic characters in variable names is deprecated">
 
+(D deprecated) Using literal non-graphic (including control)
+characters in the source to refer to the ^FOO variables, like C<$^X> and
+C<${^GLOBAL_PHASE}> is now deprecated.
+
 =item *
 
 L<Useless use of attribute "const"|perldiag/Useless use of attribute "const">
@@ -1470,8 +1474,20 @@ L<Warning: unable to close filehandle properly: %s|perldiag/"Warning: unable to 
 
 L<Warning: unable to close filehandle %s properly: %s|perldiag/"Warning: unable to close filehandle %s properly: %s">
 
-(S io) An error occurred when Perl implicitly closed a filehandle.  This
-usually indicates your file system ran out of disk space.
+(S io) Previously perl silently ignored any errors when doing an implicit
+close of a filehandle, i.e. where the reference count of the filehandle
+reached zero and the user's code hadn't already called C<close()>; e.g.
+
+    {
+        open my $fh, '>', $file  or die "open: '$file': $!\n";
+        print $fh, $data  or die;
+    } # implicit close here
+
+In a situation such as disk full, due to buffering the error may only be
+detected during the final close, so not checking the result of the close is
+dangerous.
+
+So perl now warns in such situations.
 
 =item *
 
@@ -1510,11 +1526,30 @@ messages currently in it:
 
 L<Locale '%s' may not work well.%s|perldiag/Locale '%s' may not work well.%s>
 
+(W locale) You are using the named locale, which is a non-UTF-8 one, and
+which Perl has determined is not fully compatible with Perl.  The second
+C<%s> gives a reason.
+
 =item *
 
 L<Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".|perldiag/Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".>
 
+(W locale) You are 1) running under "C<use locale>"; 2) the current
+locale is not a UTF-8 one; 3) you tried to do the designated case-change
+operation on the specified Unicode character; and 4) the result of this
+operation would mix Unicode and locale rules, which likely conflict.
+
 =back
+
+=item *
+
+L<Missing or undefined argument to require|perldiag/Missing or undefined argument to require>
+
+(F) You tried to call require with no argument or with an undefined
+value as an argument.  Require expects either a package name or a
+file-specification as an argument.  See L<perlfunc/require>.
+
+Formerly, C<require> with no argument or undef warned about a Null filename.
 
 =back
 
@@ -1533,7 +1568,8 @@ to make the issue more identifiable.
 =item *
 
 L<Argument "%s" isn't numeric%s|perldiag/"Argument "%s" isn't numeric%s">
-now adds the following note:
+
+The L<perldiag> entry for this warning has added this clarifying note:
 
  Note that for the Inf and NaN (infinity and not-a-number) the
  definition of "numeric" is somewhat unusual: the strings themselves
@@ -1555,28 +1591,26 @@ L<[perl #121638]|https://rt.perl.org/Ticket/Display.html?id=121638>
 
 =item *
 
-L<\N{} in character class restricted to one character in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"\N{} in inverted character class or as a range end-point is restricted to one character in regex; marked by <-- HERE in m/%s/">
+L<<< \N{} in character class restricted to one character in regex; marked by
+S<< <-- HERE >> in mE<sol>%sE<sol>|perldiag/"\N{} in inverted character
+class or as a range end-point is restricted to one character in regex;
+marked by <-- HERE in m/%s/" >>>
 
-This message has had 'character class' changed to 'inverted character class or
-as a range end-point is' to reflect improvements in C<qr/[\N{named sequence}]/>
-(see under L</Selected Bug Fixes>).
+This message has had I<character class> changed to I<inverted character
+class or as a range end-point is> to reflect improvements in
+C<qr/[\N{named sequence}]/> (see under L</Selected Bug Fixes>).
 
 =item *
 
 L<panic: frexp|perldiag/"panic: frexp: %f">
 
-This message has had ': C<%f>' appended to it, to show what the offending floating
-point number is.
+This message has had ': C<%f>' appended to it, to show what the offending
+floating point number is.
 
 =item *
 
-B<Possible precedence problem on bitwise %c operator> reworded as
+I<Possible precedence problem on bitwise %c operator> reworded as
 L<Possible precedence problem on bitwise %s operator|perldiag/"Possible precedence problem on bitwise %s operator">.
-
-=item *
-
-C<require> with no argument or undef used to warn about a Null filename; now
-it dies with C<Missing or undefined argument to require>.
 
 =item *
 
@@ -1594,7 +1628,8 @@ when it is actually a lexical sub that will not stay shared.
 
 L<Variable length lookbehind not implemented in regex mE<sol>%sE<sol>|perldiag/"Variable length lookbehind not implemented in regex m/%s/">
 
-Information about Unicode behaviour has been added.
+The L<perldiag> entry for this warning has had information about Unicode
+behaviour added.
 
 =back
 
@@ -1622,7 +1657,7 @@ L<[perl #122607]|https://rt.perl.org/Ticket/Display.html?id=122607>
 
 =head1 Utility Changes
 
-=head2 F<x2p/>
+=head2 F<find2perl>, F<s2p> and F<a2p> removal
 
 =over 4
 
@@ -1663,7 +1698,8 @@ No longer depends on non-core modules.
 
 =item *
 
-F<Configure> now checks for F<lrintl>, F<lroundl>, F<llrintl>, and F<llroundl>.
+F<Configure> now checks for C<lrintl()>, C<lroundl()>, C<llrintl()>, and
+C<llroundl()>.
 
 =item *
 
@@ -1672,9 +1708,10 @@ L<[perl #122002]|https://rt.perl.org/Ticket/Display.html?id=122002>.
 
 =item *
 
-pthreads and lcl will be linked by default if present. This allows XS modules
-that require threading to work on non-threaded perls. Note that you must still
-pass C<-Dusethreads> if you want a threaded perl.
+The C<pthreads> and C<cl> libraries will be linked by default if present.
+This allows XS modules that require threading to work on non-threaded
+perls. Note that you must still pass C<-Dusethreads> if you want a
+threaded perl.
 
 =item *
 
@@ -1721,7 +1758,6 @@ see the discussion below at L<< /Internal Changes >>.
 Pathtools no longer tries to load XS on miniperl. This speeds up building perl
 slightly.
 
-
 =back
 
 =head1 Testing
@@ -1732,8 +1768,8 @@ slightly.
 
 F<t/porting/re_context.t> has been added to test that L<utf8> and its
 dependencies only use the subset of the C<$1..$n> capture vars that
-C<Perl_save_re_context()> is hard-coded to localize, because that function has no
-efficient way of determining at runtime what vars to localize.
+C<Perl_save_re_context()> is hard-coded to localize, because that function
+has no efficient way of determining at runtime what vars to localize.
 
 =item *
 
@@ -1874,12 +1910,8 @@ Windows makefiles.
 
 =item *
 
-L<B> now compiles again on Windows.
-
-=item *
-
 Previously compiling XS modules (including CPAN ones) using Visual C++ for
-Win64 resulted in around a dozen warnings per file from hv_func.h.  These
+Win64 resulted in around a dozen warnings per file from F<hv_func.h>.  These
 warnings have been silenced.
 
 =item *
@@ -1960,15 +1992,15 @@ as well as C<SUNWspro>; and support for native C<setenv> has been added.
 Experimental support has been added to allow ops in the optree to locate
 their parent, if any. This is enabled by the non-default build option
 C<-DPERL_OP_PARENT>. It is envisaged that this will eventually become
-enabled by default, so XS code which directly accesses the C<op_silbing>
+enabled by default, so XS code which directly accesses the C<op_sibling>
 field of ops should be updated to be future-proofed.
 
 On C<PERL_OP_PARENT> builds, the C<op_sibling> field has been renamed
 C<op_sibparent> and a new flag, C<op_moresib>, added. On the last op in a
 sibling chain, C<op_moresib> is false and C<op_sibparent> points to the
-parent (if any) rather than to being C<NULL>.
+parent (if any) rather than being C<NULL>.
 
-To make existing code work transparently whether using C<-DPERL_OP_PARENT>
+To make existing code work transparently whether using C<PERL_OP_PARENT>
 or not, a number of new macros and functions have been added that should
 be used, rather than directly manipulating C<op_sibling>.
 
@@ -1976,11 +2008,11 @@ For the case of just reading C<op_sibling> to determine the next sibling,
 two new macros have been added. A simple scan through a sibling chain
 like this:
 
-    for (; kid->op_sibling; kid = kid->op_sibling) { ...  }
+    for (; kid->op_sibling; kid = kid->op_sibling) { ... }
 
 should now be written as:
 
-    for (; OpHAS_SIBLING(kid); kid = OpSIBLING(kid)) { ...  }
+    for (; OpHAS_SIBLING(kid); kid = OpSIBLING(kid)) { ... }
 
 For altering optrees, a general-purpose function C<op_sibling_splice()>
 has been added, which allows for manipulation of a chain of sibling ops.
@@ -2001,13 +2033,13 @@ appropriate).
 
 A C-level C<Perl_op_parent()> function and a Perl-level C<B::OP::parent()>
 method have been added. The C function only exists under
-C<-DPERL_OP_PARENT> builds (using it is build-time error on vanilla
+C<PERL_OP_PARENT> builds (using it is build-time error on vanilla
 perls).  C<B::OP::parent()> exists always, but on a vanilla build it
-always returns C<NULL>. Under C<-DPERL_OP_PARENT>, they return the parent
+always returns C<NULL>. Under C<PERL_OP_PARENT>, they return the parent
 of the current op, if any. The variable C<$B::OP::does_parent> allows you
 to determine whether C<B> supports retrieving an op's parent.
 
-XXX C<-DPERL_OP_PARENT> was introduced in 5.21.2, but the interface was
+C<PERL_OP_PARENT> was introduced in 5.21.2, but the interface was
 changed considerably in 5.21.11. If you updated your code before the
 5.21.11 changes, it may require further revision. The main changes after
 5.21.2 were:
@@ -2050,22 +2082,19 @@ superseded by C<grok_atoUV>.  See L<perlclib> for details.
 
 =item *
 
-Added C<Perl_sv_get_backrefs()> to determine if an SV is a weak-referent.
-
-Function either returns an SV * of type AV, which contains the set of
-weakreferences which reference the passed in SV, or a simple RV * which
-is the only weakref to this item.
+A new function, C<Perl_sv_get_backrefs()>, has been added which allows you
+retrieve the weak references, if any, which point at an SV.
 
 =item *
 
-The C<screaminstr> perl function has been removed. Although marked as
+The C<screaminstr()> function has been removed. Although marked as
 public API, it was undocumented and had no usage in CPAN modules. Calling
 it has been fatal since 5.17.0.
 
 =item *
 
-C<newDEFSVOP>, C<block_start>, C<block_end> and C<intro_my> have been added
-to the API.
+The C<newDEFSVOP()>, C<block_start()>, C<block_end()> and C<intro_my()>
+functions have been added to the API.
 
 =item *
 
@@ -2074,8 +2103,9 @@ C<op_convert_list> and added to the API.
 
 =item *
 
-C<sv_magic> no longer forbids "ext" magic on read-only values.  After all,
-perl can't know whether the custom magic will modify the SV or not.
+The C<sv_magic()> function no longer forbids "ext" magic on read-only
+values.  After all, perl can't know whether the custom magic will modify
+the SV or not.
 L<[perl #123103]|https://rt.perl.org/Ticket/Display.html?id=123103>.
 
 =item *
@@ -2086,48 +2116,41 @@ The C<CvPADLIST> field has been reused for a different internal purpose
 for XSUBs. So in particular, you can no longer rely on it being NULL as a
 test of whether a CV is an XSUB. Use C<CvISXSUB()> instead.
 
-
 =item *
 
-SVs of type C<SVt_NV> are now sometimes bodyless when the build
+SVs of type C<SVt_NV> are now sometimes bodiless when the build
 configuration and platform allow it: specifically, when C<< sizeof(NV) <=
-sizeof(IV) >>. "Bodyless" means that the NV value is stored directly in
+sizeof(IV) >>. "Bodiless" means that the NV value is stored directly in
 the head of an SV, without requiring a separate body to be allocated. This
 trick has already been used for IVs since 5.9.2 (though in the case of
 IVs, it is always used, regardless of platform and build configuration).
 
 =item *
 
-The C<$DB::single>, C<$DB::signal> and C<$DB::trace> now have set- and
+The C<$DB::single>, C<$DB::signal> and C<$DB::trace> variables now have set- and
 get-magic that stores their values as IVs, and those IVs are used when
-testing their values in C<pp_dbstate>.  This prevents perl from
+testing their values in C<pp_dbstate()>.  This prevents perl from
 recursing infinitely if an overloaded object is assigned to any of those
 variables.
 L<[perl #122445]|https://rt.perl.org/Ticket/Display.html?id=122445>.
 
 =item *
 
-C<Perl_tmps_grow>, which is marked as public API but is undocumented, has
+C<Perl_tmps_grow()>, which is marked as public API but is undocumented, has
 been removed from the public API. This change does not affect XS code that
-uses the C<EXTEND_MORTAL> macro to preextend the mortal stack.
+uses the C<EXTEND_MORTAL> macro to pre-extend the mortal stack.
 
 =item *
 
-XXX C<cv_name>, which was introduced in 5.21.4, has been changed incompatibly.
-It now has a flags field that allows the caller to specify whether the name
-should be fully qualified.  See L<perlapi/cv_name>.
-
-=item *
-
-Perl's internals no longer uses the C<SVs_PADMY> flag.  C<SvPADMY()> now
-returns a true value for anything not marked C<PADTMP>.  C<SVs_PADMY> is now
-defined as 0.
+Perl's internals no longer sets or uses the C<SVs_PADMY> flag.
+C<SvPADMY()> now returns a true value for anything not marked C<PADTMP>
+and C<SVs_PADMY> is now defined as 0.
 
 =item *
 
 The macros C<SETsv> and C<SETsvUN> have been removed. They were no longer used
-in the core since commit 6f1401dc2a, and have not been found present on
-CPAN.
+in the core since commit 6f1401dc2a five years ago, and have not been
+found present on CPAN.
 
 =item *
 
@@ -2136,9 +2159,10 @@ David Mitchell for future work on vtables.
 
 =item *
 
-The C<sv_catpvn_flags> function accepts C<SV_CATBYTES> and C<SV_CATUTF8>
+The C<sv_catpvn_flags()> function accepts C<SV_CATBYTES> and C<SV_CATUTF8>
 flags, which specify whether the appended string is bytes or utf8,
-respectively.
+respectively. (These flags have in fact been present since 5.16.0, but
+were formerly not regarded as part of the API.)
 
 =item *
 
@@ -2151,29 +2175,32 @@ C<< UNOP/SVOP >> to being C<< METHOP >>.
 
 =item *
 
-C<save_re_context> no longer does anything and has been moved to F<mathoms.c>.
+C<cv_name()> is a new API function that can be passed a CV or GV.  It
+returns an SV containing the name of the subroutine, for use in
+diagnostics.
 
-=item *
+Note that after C<cv_name> was introduced in 5.21.4, it had a C<flags>
+field added in 5.21.5 which allows the caller to specify whether the name
+should be fully qualified.  See L<perlapi/cv_name>.
 
-C<cv_name> is a new API function that can be passed a CV or GV.  It returns an
-SV containing the name of the subroutine for use in diagnostics.
 L<[perl #116735]|https://rt.perl.org/Ticket/Display.html?id=116735>
 L<[perl #120441]|https://rt.perl.org/Ticket/Display.html?id=120441>
 
 =item *
 
-C<cv_set_call_checker_flags> is a new API function that works like
-C<cv_set_call_checker>, except that it allows the caller to specify whether the
-call checker requires a full GV for reporting the subroutine's name, or whether
-it could be passed a CV instead.  Whatever value is passed will be acceptable
-to C<cv_name>.  C<cv_set_call_checker> guarantees there will be a GV, but it
-may have to create one on the fly, which is inefficient.
+C<cv_set_call_checker_flags()> is a new API function that works like
+C<cv_set_call_checker()>, except that it allows the caller to specify
+whether the call checker requires a full GV for reporting the subroutine's
+name, or whether it could be passed a CV instead.  Whatever value is
+passed will be acceptable to C<cv_name()>.  C<cv_set_call_checker()>
+guarantees there will be a GV, but it may have to create one on the fly,
+which is inefficient.
 L<[perl #116735]|https://rt.perl.org/Ticket/Display.html?id=116735>
 
 =item *
 
 C<CvGV> (which is not part of the API) is now a more complex macro, which may
-call a function and reify a GV.  For those cases where is has been used as a
+call a function and reify a GV.  For those cases where it has been used as a
 boolean, C<CvHASGV> has been added, which will return true for CVs that
 notionally have GVs, but without reifying the GV.  C<CvGV> also returns a GV
 now for lexical subs.
@@ -2224,7 +2251,7 @@ with a well-formed UTF-8 encoded character.
 
 =item *
 
-The following private API functions had their context parameter removed,
+The following private API functions had their context parameter removed:
 C<Perl_cast_ulong>,  C<Perl_cast_i32>, C<Perl_cast_iv>,    C<Perl_cast_uv>,
 C<Perl_cv_const_sv>, C<Perl_mg_find>,  C<Perl_mg_findext>, C<Perl_mg_magical>,
 C<Perl_mini_mktime>, C<Perl_my_dirfd>, C<Perl_sv_backoff>, C<Perl_utf8_hop>.
@@ -2234,8 +2261,8 @@ public API, such as C<cast_i32()>, remain unaffected.
 
 =item *
 
-The PADNAME and PADNAMELIST types are now separate types, and no longer
-simply aliases for SV and AV.
+The C<PADNAME> and C<PADNAMELIST> types are now separate types, and no
+longer simply aliases for SV and AV.
 L<[perl #123223]|https://rt.perl.org/Ticket/Display.html?id=123223>.
 
 =item *
