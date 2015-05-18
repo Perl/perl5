@@ -908,15 +908,8 @@ use File::Glob qw(:case);
     },
 
     'PerlIO::via::QuotedPrint' => {
-        'DISTRIBUTION' => 'ELIZABETH/PerlIO-via-QuotedPrint-0.07.tar.gz',
+        'DISTRIBUTION' => 'SHAY/PerlIO-via-QuotedPrint-0.08.tar.gz',
         'FILES'        => q[cpan/PerlIO-via-QuotedPrint],
-
-        # Waiting to be merged upstream: see CPAN RT#54047
-        'CUSTOMIZED'   => [
-            qw( t/QuotedPrint.t
-                ),
-        ],
-
     },
 
     'Pod::Checker' => {
