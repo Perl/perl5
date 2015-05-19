@@ -162,7 +162,7 @@ Perl_set_padlist(CV * cv, PADLIST *padlist){
 #  if PTRSIZE == 8
     assert((Size_t)padlist != UINT64_C(0xEFEFEFEFEFEFEFEF));
 #  elif PTRSIZE == 4
-    assert((Size_t)padlist != UINT64_C(0xEFEFEFEF));
+    assert((Size_t)padlist != 0xEFEFEFEF);
 #  else
 #    error unknown pointer size
 #  endif
