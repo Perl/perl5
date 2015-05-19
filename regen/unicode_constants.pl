@@ -188,7 +188,7 @@ U+0300 string
 U+0399 string
 U+03BC string
 
-U+1E9E string
+U+1E9E string_skip_if_undef
 
 U+FB05 string
 U+FB06 string
