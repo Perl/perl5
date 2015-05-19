@@ -3029,10 +3029,8 @@ L<[cpan #85570]|https://rt.cpan.org/Ticket/Display.html?id=85570>.
 
 =item *
 
-During the optimization phase of a regexp compilation, we no longer
-recurse into C<GOSUB>/C<GOSTART> when the internal C<SCF_DO_SUBSTR> flag
-is false. This prevents the optimizer from running "forever" and
-exhausting all memory.
+The optimization phase of a regexp compilation could run "forever" and
+exhaust all memory under certain circumstances; now fixed.
 L<[perl #122283]|https://rt.perl.org/Ticket/Display.html?id=122283>.
 
 =item *
