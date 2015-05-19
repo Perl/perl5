@@ -3140,6 +3140,12 @@ L<[perl #123020]|https://rt.perl.org/Ticket/Display.html?id=123020>.
 
 =item *
 
+C<pack>-ing a NaN on a perl compiled with Visual C 6 does not behave properly,
+leading to a test failure in F<t/op/infnan.t>.
+L<[perl 125203]|https://rt.perl.org/Ticket/Display.html?id=125203>
+
+=item *
+
 A goal is for Perl to be able to be recompiled to work reasonably well on any
 Unicode version.  In Perl 5.22, though, the earliest such version is Unicode
 5.1 (current is 7.0).
