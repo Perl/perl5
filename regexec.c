@@ -192,7 +192,7 @@ static const char* const non_utf8_target_but_utf8_required
                                         PL_utf8_swash_ptrs[_CC_WORDCHAR],     \
                                         "",                                   \
                                         PL_XPosix_ptrs[_CC_WORDCHAR],         \
-                                        LATIN_CAPITAL_LETTER_SHARP_S_UTF8);
+                                        LATIN_SMALL_LIGATURE_LONG_S_T_UTF8);
 
 #define PLACEHOLDER	/* Something for the preprocessor to grab onto */
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */

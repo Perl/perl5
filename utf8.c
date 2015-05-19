@@ -2200,11 +2200,13 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 
 	if (flags & FOLD_FLAGS_LOCALE) {
 
-#           define CAP_SHARP_S   LATIN_CAPITAL_LETTER_SHARP_S_UTF8
 #           define LONG_S_T      LATIN_SMALL_LIGATURE_LONG_S_T_UTF8
+            const unsigned int long_s_t_len    = sizeof(LONG_S_T) - 1;
+
+#         ifdef LATIN_CAPITAL_LETTER_SHARP_S_UTF8
+#           define CAP_SHARP_S   LATIN_CAPITAL_LETTER_SHARP_S_UTF8
 
             const unsigned int cap_sharp_s_len = sizeof(CAP_SHARP_S) - 1;
-            const unsigned int long_s_t_len    = sizeof(LONG_S_T) - 1;
 
             /* Special case these two characters, as what normally gets
              * returned under locale doesn't work */
@@ -2217,7 +2219,9 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
                               "resolved to \"\\x{17F}\\x{17F}\".");
                 goto return_long_s;
             }
-            else if (UTF8SKIP(p) == long_s_t_len
+            else
+#endif
+                 if (UTF8SKIP(p) == long_s_t_len
                      && memEQ((char *) p, LONG_S_T, long_s_t_len))
             {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
@@ -2249,9 +2253,11 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 
                     /* But in these instances, there is an alternative we can
                      * return that is valid */
-                    if (original == LATIN_CAPITAL_LETTER_SHARP_S
-                        || original == LATIN_SMALL_LETTER_SHARP_S)
-                    {
+                    if (original == LATIN_SMALL_LETTER_SHARP_S
+#ifdef LATIN_CAPITAL_LETTER_SHARP_S /* not defined in early Unicode releases */
+                        || original == LATIN_CAPITAL_LETTER_SHARP_S
+#endif
+                    ) {
                         goto return_long_s;
                     }
                     else if (original == LATIN_SMALL_LIGATURE_LONG_S_T) {

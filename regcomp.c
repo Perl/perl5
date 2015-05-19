@@ -14014,9 +14014,15 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
           *invlist = add_cp_to_invlist(*invlist,
                                         LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);
             break;
+
+#ifdef LATIN_CAPITAL_LETTER_SHARP_S /* not defined in early Unicode releases */
+
         case LATIN_SMALL_LETTER_SHARP_S:
           *invlist = add_cp_to_invlist(*invlist, LATIN_CAPITAL_LETTER_SHARP_S);
             break;
+
+#endif
+
         default:
             /* Use deprecated warning to increase the chances of this being
              * output */
