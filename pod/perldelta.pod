@@ -653,45 +653,27 @@ between processes from the same perl binary.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
+Many of the libraries distributed with perl have been upgraded since v5.20.0.
+For a complete list of changes, run:
 
-[ Within each section, list entries as a =item entry ]
+  corelist --diff 5.20.0 5.22.0
 
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head2 Updated Modules and Pragmata
-
-=over 4
-
-=item *
-
-L<ExtUtils::MakeMaker> has been upgraded from version 6.98 to 7.04_01.
-
-Some changes from github have been backported to prevent failures and
-noise on Win32 when C<chcp> is missing or unavailable.
-L<[perl #123998]|https://rt.perl.org/Ticket/Display.html?id=123998>
-
-=back
+You can substitute your favorite version in place of 5.20.0, too.
 
 =head2 Removed Modules and Pragmata
 
+The following modules (and associated modules) have been removed from the core
+perl distribution:
+
 =over 4
 
 =item *
 
-XXX
+L<CGI>
+
+=item *
+
+L<Module::Build>
 
 =back
 
