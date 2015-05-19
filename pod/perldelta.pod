@@ -1873,7 +1873,7 @@ C<USE_CPLUSPLUS> to the value "define".
 =item *
 
 The list form of piped open has been implemented for Win32.  Note: unlike
-C< system LIST >> this does not fall back to the shell.
+C<system LIST> this does not fall back to the shell.
 L<[perl #121159]|https://rt.perl.org/Ticket/Display.html?id=121159>
 
 =item *
