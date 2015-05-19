@@ -3253,9 +3253,48 @@ missed.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.22.0 represents approximately 12 months of development since Perl 5.20.0
+and contains approximately 590,000 lines of changes across 2,400 files from 94
+authors.
 
-  perl Porting/acknowledgements.pl v5.20.0..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 370,000 lines of changes to 1,500 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.22.0:
+
+Aaron Crane, Abhijit Menon-Sen, Abigail, Alberto Simões, Alex Solovey, Alex
+Vandiver, Alexandr Ciornii, Alexandre (Midnite) Jousset, Andreas König,
+Andreas Voegele, Andrew Fresh, Andy Dougherty, Anthony Heading, Aristotle
+Pagaltzis, brian d foy, Brian Fraser, Chad Granum, Chris 'BinGOs' Williams,
+Craig A. Berry, Dagfinn Ilmari Mannsåker, Daniel Dragan, Darin McBride, Dave
+Rolsky, David Golden, David Mitchell, David Wheeler, Dmitri Tikhonov, Doug
+Bell, E. Choroba, Ed J, Eric Herman, Father Chrysostomos, George Greer, Glenn
+D. Golden, Graham Knop, H.Merijn Brand, Herbert Breunung, Hugo van der Sanden,
+James E Keenan, James McCoy, James Raspass, Jan Dubois, Jarkko Hietaniemi,
+Jasmine Ngan, Jerry D. Hedden, Jim Cromie, John Goodyear, kafka, Karen
+Etheridge, Karl Williamson, Kent Fredric, kmx, Lajos Veres, Leon Timmermans,
+Lukas Mai, Mathieu Arnold, Matthew Horsfall, Max Maischein, Michael Bunk,
+Nicholas Clark, Niels Thykier, Niko Tyni, Norman Koch, Olivier Mengué, Peter
+John Acklam, Peter Martini, Petr Písař, Philippe Bruhat (BooK), Pierre
+Bogossian, Rafael Garcia-Suarez, Randy Stauner, Reini Urban, Ricardo Signes,
+Rob Hoelz, Rostislav Skudnov, Sawyer X, Shirakata Kentaro, Shlomi Fish,
+Sisyphus, Slaven Rezic, Smylers, Steffen Müller, Steve Hay, Sullivan Beck,
+syber, Tadeusz Sośnierz, Thomas Sibley, Todd Rinaldo, Tony Cook, Vincent Pit,
+Vladimir Marek, Yaroslav Kuzmin, Yves Orton, Ævar Arnfjörð Bjarmason.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
