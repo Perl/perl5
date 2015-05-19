@@ -4734,7 +4734,6 @@ Porting/manicheck		Check against MANIFEST
 Porting/manisort		Sort the MANIFEST
 Porting/new-perldelta.pl	Generate a new perldelta
 Porting/newtests-perldelta.pl	Generate Perldelta stub for newly added tests
-Porting/perl5220delta.pod	Perl changes in version 5.22.0
 Porting/perldelta_template.pod	Template for creating new perldelta.pod files
 Porting/perlhist_calculate.pl		Perform calculations to update perlhist
 Porting/pod_lib.pl		Code for handling generated pods

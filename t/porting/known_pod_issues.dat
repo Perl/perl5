@@ -93,10 +93,10 @@ HTTP::Lite
 iconv(1)
 iconv(3)
 inetd(8)
+invoker
 IO::Socket::IP
 IPC::Run
 IPC::Signal
-invoker
 kill(3)
 langinfo(3)
 LaTeX::Encode
@@ -276,7 +276,6 @@ pod/perlcygwin.pod	Verbatim line length including indents exceeds 79 by	24
 pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	34
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	22
 pod/perldebug.pod	Verbatim line length including indents exceeds 79 by	3
-pod/perldelta.pod	Pod NAME already used	1
 pod/perldtrace.pod	Verbatim line length including indents exceeds 79 by	26
 pod/perlfunc.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlgit.pod	Verbatim line length including indents exceeds 79 by	12
@@ -328,4 +327,3 @@ lib/config.pod	? Should you be using L<...> instead of	-1
 lib/extutils/embed.pm	Verbatim line length including indents exceeds 79 by	2
 lib/perl5db.pl	? Should you be using L<...> instead of	1
 lib/pod/text/overstrike.pm	Verbatim line length including indents exceeds 79 by	1
-porting/perl5220delta.pod	Pod NAME already used	1
