@@ -2672,6 +2672,11 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    afloat = -FLT_MAX;
 		else afloat = (float)anv;
 # else
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+		if(Perl_isnan(anv))
+		    afloat = (float)NV_NAN;
+		else
+#endif
                 /* a simple cast to float is undefined if outside
                  * the range of values that can be represented */
 		afloat = (float)(anv >  FLT_MAX ?  NV_INF :
