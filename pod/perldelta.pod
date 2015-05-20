@@ -2285,10 +2285,6 @@ C<cv_name()> is a new API function that can be passed a CV or GV.  It
 returns an SV containing the name of the subroutine, for use in
 diagnostics.
 
-Note that after C<cv_name> was introduced in 5.21.4, it had a C<flags>
-field added in 5.21.5 which allows the caller to specify whether the name
-should be fully qualified.  See L<perlapi/cv_name>.
-
 L<[perl #116735]|https://rt.perl.org/Ticket/Display.html?id=116735>
 L<[perl #120441]|https://rt.perl.org/Ticket/Display.html?id=120441>
 
