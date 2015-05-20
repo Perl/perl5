@@ -310,8 +310,7 @@ allowed.
 
 In prior releases, failure to do this raised a deprecation warning.
 
-=head2 Splitting the tokens C<(?> and C<(*> in regular expressions is
-now a fatal compilation error.
+=head2 Splitting the tokens C<(?> and C<(*> in regular expressions is now a fatal compilation error.
 
 These had been deprecated since v5.18.
 
@@ -497,8 +496,7 @@ Perl release having C</xx> permit white-space for readability in
 bracketed character classes (those enclosed in square brackets:
 C<[...]>).
 
-=head2 Using a NO-BREAK space in a character alias for C<\N{...}> is now
-deprecated
+=head2 Using a NO-BREAK space in a character alias for C<\N{...}> is now deprecated
 
 This non-graphic character is essentially indistinguishable from a
 regular space, and so should not be allowed.  See
