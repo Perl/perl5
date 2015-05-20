@@ -116,10 +116,10 @@ C<int_p_sep_by_space>,
 and
 C<int_p_sign_posn>.
 
-=head2 Better heuristics on older platforms for determining locale UTF8ness
+=head2 Better heuristics on older platforms for determining locale UTF-8ness
 
 On platforms that implement neither the C99 standard nor the POSIX 2001
-standard, determining if the current locale is UTF8 or not depends on
+standard, determining if the current locale is UTF-8 or not depends on
 heuristics.  These are improved in this release.
 
 =head2 Aliasing via reference
@@ -1174,7 +1174,7 @@ L<\C is deprecated in regex|perldiag/"\C is deprecated in regex; marked by <-- H
 (D deprecated) The C<< /\C/ >> character class was deprecated in v5.20, and
 now emits a warning. It is intended that it will become an error in v5.24.
 This character class matches a single byte even if it appears within a
-multi-byte character, breaks encapsulation, and can corrupt utf8
+multi-byte character, breaks encapsulation, and can corrupt UTF-8
 strings.
 
 =item *
@@ -1468,7 +1468,7 @@ L<Wide character (U+%X) in %s|perldiag/"Wide character (U+%X) in %s">
 
 (W locale) While in a single-byte locale (I<i.e.>, a non-UTF-8
 one), a multi-byte character was encountered.   Perl considers this
-character to be the specified Unicode code point.  Combining non-UTF8
+character to be the specified Unicode code point.  Combining non-UTF-8
 locales and Unicode is dangerous.  Almost certainly some characters
 will have two different representations.  For example, in the ISO 8859-7
 (Greek) locale, the code point 0xC3 represents a Capital Gamma.  But so
@@ -2133,7 +2133,7 @@ David Mitchell for future work on vtables.
 =item *
 
 The C<sv_catpvn_flags()> function accepts C<SV_CATBYTES> and C<SV_CATUTF8>
-flags, which specify whether the appended string is bytes or utf8,
+flags, which specify whether the appended string is bytes or UTF-8,
 respectively. (These flags have in fact been present since 5.16.0, but
 were formerly not regarded as part of the API.)
 
@@ -2240,7 +2240,7 @@ L<[perl #123223]|https://rt.perl.org/Ticket/Display.html?id=123223>.
 
 =item *
 
-Pad names are now always UTF8.  The C<PadnameUTF8> macro always returns
+Pad names are now always UTF-8.  The C<PadnameUTF8> macro always returns
 true.  Previously, this was effectively the case already, but any support
 for two different internal representations of pad names has now been
 removed.
@@ -2525,9 +2525,9 @@ L<[perl #108276]|https://rt.perl.org/Ticket/Display.html?id=108276>.
 
 =item *
 
-In Perl 5.20.0, C<$^N> accidentally had the internal UTF8 flag turned off
+In Perl 5.20.0, C<$^N> accidentally had the internal UTF-8 flag turned off
 if accessed from a code block within a regular expression, effectively
-UTF8-encoding the value.  This has been fixed.
+UTF-8-encoding the value.  This has been fixed.
 L<[perl #123135]|https://rt.perl.org/Ticket/Display.html?id=123135>.
 
 =item *
@@ -2653,8 +2653,8 @@ contrary to the documentation,  Now C<return> always prevents inlining.
 =item *
 
 On some systems, such as VMS, C<crypt> can return a non-ASCII string.  If a
-scalar assigned to had contained a UTF8 string previously, then C<crypt>
-would not turn off the UTF8 flag, thus corrupting the return value.  This
+scalar assigned to had contained a UTF-8 string previously, then C<crypt>
+would not turn off the UTF-8 flag, thus corrupting the return value.  This
 would happen with C<$lexical = crypt ...>.
 
 =item *
@@ -2749,7 +2749,7 @@ mirror character.
 
 =item *
 
-C<< s///e >> on tainted utf8 strings corrupted C<< pos() >>. This bug,
+C<< s///e >> on tainted UTF-8 strings corrupted C<< pos() >>. This bug,
 introduced in 5.20, is now fixed.
 L<[perl #122148]|https://rt.perl.org/Ticket/Display.html?id=122148>.
 
@@ -2903,7 +2903,7 @@ false at compile time and true at run time.
 
 =item *
 
-Loading UTF8 tables during a regular expression match could cause assertion
+Loading UTF-8 tables during a regular expression match could cause assertion
 failures under debugging builds if the previous match used the very same
 regular expression.
 L<[perl #122747]|https://rt.perl.org/Ticket/Display.html?id=122747>

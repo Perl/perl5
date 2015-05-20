@@ -7105,7 +7105,7 @@ filehandle with an encoding, see L<open> and L<perlfunc/binmode>.
 
 (W locale) While in a single-byte locale (I<i.e.>, a non-UTF-8
 one), a multi-byte character was encountered.   Perl considers this
-character to be the specified Unicode code point.  Combining non-UTF8
+character to be the specified Unicode code point.  Combining non-UTF-8
 locales and Unicode is dangerous.  Almost certainly some characters
 will have two different representations.  For example, in the ISO 8859-7
 (Greek) locale, the code point 0xC3 represents a Capital Gamma.  But so
