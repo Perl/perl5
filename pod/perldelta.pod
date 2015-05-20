@@ -373,8 +373,8 @@ when the text is actually non-ASCII UTF-8.  This will enable programs
 that are set up to be locale-aware to properly output messages in the
 user's native language.  Code that needs to continue the 5.20 and
 earlier behavior can do the stringification within the scopes of both
-S<C<use bytes>> and S<C<use locale ":messages">>.  No other Perl
-operations will
+S<C<use bytes>> and S<C<use locale ":messages">>.  Within these two
+scopes, no other Perl operations will
 be affected by locale; only C<$!> and C<$^E> stringification.  The
 C<bytes> pragma causes the UTF-8 flag to not be set, just as in previous
 Perl releases.  This resolves
@@ -723,12 +723,13 @@ now included.
 
 =item *
 
-Entries are now organized into groups rather than by file where they are found.
+Entries are now organized into groups rather than by the file where they
+are found.
 
 =item *
 
-Alphabetical sorting of entries is now handled by the POD generator to make
-entries easier to find when scanning.
+Alphabetical sorting of entries is now done consistently (automatically
+by the POD generator) to make entries easier to find when scanning.
 
 =back
 
@@ -1004,7 +1005,7 @@ Added documentation of C<\b{sb}>, C<\b{wb}>, C<\b{gcb}>, and C<\b{g}>.
 =item *
 
 Clarifications have been added to L<perlrecharclass/Character Ranges>
-to the effect that Perl guarantees that C<[A-Z]>, C<[a-z]>, C<[0-9]> and
+to the effect C<[A-Z]>, C<[a-z]>, C<[0-9]> and
 any subranges thereof in regular expression bracketed character classes
 are guaranteed to match exactly what a naive English speaker would
 expect them to match, even on platforms (such as EBCDIC) where special
@@ -1570,9 +1571,10 @@ L<E<quot>use re 'strict'E<quot> is experimental|perldiag/"use re 'strict'" is ex
 
 (S experimental::re_strict) The things that are different when a regular
 expression pattern is compiled under C<'strict'> are subject to change
-in future Perl releases in incompatible ways.  This means that a pattern
-that compiles today may not in a future Perl release.  This warning is
-to alert you to that risk.
+in future Perl releases in incompatible ways; there are also proposals
+to change how to enable strict checking instead of using this subpragma.
+This means that a pattern that compiles today may not in a future Perl
+release.  This warning is to alert you to that risk.
 
 =item *
 
@@ -1580,7 +1582,7 @@ L<Warning: unable to close filehandle properly: %s|perldiag/"Warning: unable to 
 
 L<Warning: unable to close filehandle %s properly: %s|perldiag/"Warning: unable to close filehandle %s properly: %s">
 
-(S io) Previously perl silently ignored any errors when doing an implicit
+(S io) Previously, perl silently ignored any errors when doing an implicit
 close of a filehandle, i.e. where the reference count of the filehandle
 reached zero and the user's code hadn't already called C<close()>; e.g.
 
@@ -1589,7 +1591,7 @@ reached zero and the user's code hadn't already called C<close()>; e.g.
         print $fh, $data  or die;
     } # implicit close here
 
-In a situation such as disk full, due to buffering the error may only be
+In a situation such as disk full, due to buffering, the error may only be
 detected during the final close, so not checking the result of the close is
 dangerous.
 
@@ -1895,7 +1897,7 @@ more compatible with C<< Test::More >>.
 
 =item *
 
-A new test script, F<op/infnan.t>, has been added to test if Inf and NaN are
+A new test script, F<op/infnan.t>, has been added to test if infinity and NaN are
 working correctly.  See L</Infinity and NaN (not-a-number) handling improved>.
 
 =back
@@ -1943,8 +1945,9 @@ are now long dead, so support for building Perl on them has been removed.
 
 =item EBCDIC
 
-Special handling is required on EBCDIC platforms to get C<qr/[i-j]/> to
-match only C<"i"> and C<"j">, since there are 7 characters between the
+Special handling is required of the perl interpreter on EBCDIC platforms
+to get C<qr/[i-j]/> to match only C<"i"> and C<"j">, since there are 7
+characters between the
 code points for C<"i"> and C<"j">.  This special handling had only been
 invoked when both ends of the range are literals.  Now it is also
 invoked if any of the C<\N{...}> forms for specifying a character by
@@ -2554,8 +2557,8 @@ Fixed infinite loop in parsing backrefs in regexp patterns.
 
 =item *
 
-Several minor bug fixes in behavior of Inf and NaN, including
-warnings when stringifying Inf-like or NaN-like strings. For example,
+Several minor bug fixes in behavior of Infinity and NaN, including
+warnings when stringifying Infinity-like or NaN-like strings. For example,
 "NaNcy" doesn't numify to NaN anymore.
 
 =item *
@@ -2924,7 +2927,7 @@ L<[perl #122460]|https://rt.perl.org/Ticket/Display.html?id=122460>.
 
 =item *
 
-Constant dereferencing now works correctly for typeglob constants.  Previously
+Dereferencing of constants now works correctly for typeglob constants.  Previously
 the glob was stringified and its name looked up.  Now the glob itself is used.
 L<[perl #69456]|https://rt.perl.org/Ticket/Display.html?id=69456>
 
@@ -3176,7 +3179,7 @@ L<[perl #122950]|https://rt.perl.org/Ticket/Display.html?id=122950>.
 =item *
 
 Fixed a bug that could cause perl to enter an infinite loop during
-compilation. In particular, for a C<while(1)> within a sublist, e.g.
+compilation. In particular, a C<while(1)> within a sublist, e.g.
 
     sub foo { () = ($a, my $b, ($c, do { while(1) {} })) }
 
