@@ -698,7 +698,7 @@ Note that C<SvSetSV> doesn't do set magic.
 
 =item *
 
-C<sv_usepvn_flags> - fix documentation to mention the use of C<NewX> instead of
+C<sv_usepvn_flags> - fix documentation to mention the use of C<Newx> instead of
 C<malloc>.
 
 L<[perl #121869]|https://rt.perl.org/Ticket/Display.html?id=121869>
