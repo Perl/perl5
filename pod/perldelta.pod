@@ -688,6 +688,17 @@ Perl.
 
 =head2 Changes to Existing Documentation
 
+=head3 L<perlaix>
+
+=over 4
+
+=item *
+
+A note on long doubles has been added.
+
+=back
+
+
 =head3 L<perlapi>
 
 =over 4
@@ -732,6 +743,11 @@ entries easier to find when scanning.
 The syntax of single-character variable names has been brought
 up-to-date and more fully explained.
 
+=item *
+
+Hexadecimal floating point numbers are described, as are infinity and
+NaN.
+
 =back
 
 =head3 L<perlebcdic>
@@ -744,6 +760,17 @@ This document has been significantly updated in the light of recent
 improvements to EBCDIC support.
 
 =back
+
+=head3 L<perlfilter>
+
+=over 4
+
+=item *
+
+Added a L<LIMITATIONS|perlfilter/LIMITATIONS> section.
+
+=back
+
 
 =head3 L<perlfunc>
 
@@ -804,6 +831,21 @@ Information on EBCDIC handling has been added
 
 =back
 
+=head3 L<perlhack>
+
+=over 4
+
+=item *
+
+A note has been added about running on platforms with non-ASCII
+character sets
+
+=item *
+
+A note has been added about performance testing
+
+=back
+
 =head3 L<perlhacktips>
 
 =over 4
@@ -825,6 +867,36 @@ Updated documentation for the C<test.valgrind> C<make> target.
 
 L<[perl #121431]|https://rt.perl.org/Ticket/Display.html?id=121431>
 
+=item *
+
+Information is given about writing test files portably to non-ASCII
+platforms.
+
+=item *
+
+A note has been added about how to get a C language stack backtrace.
+
+=back
+
+=head3 L<perlhpux>
+
+=over 4
+
+=item *
+
+Note that the message "Redeclaration of "sendpath" with a different
+storage class specifier" is harmless.
+
+=back
+
+=head3 L<perllocale>
+
+=over 4
+
+=item *
+
+Updated for the enhancements in v5.22, along with some clarifications.
+
 =back
 
 =head3 L<perlmodstyle>
@@ -835,6 +907,28 @@ L<[perl #121431]|https://rt.perl.org/Ticket/Display.html?id=121431>
 
 Instead of pointing to the module list, we are now pointing to
 L<PrePAN|http://prepan.org/>.
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+Updated for the enhancements in v5.22, along with some clarifications.
+
+=back
+
+=head3 L<perlpodspec>
+
+=over 4
+
+=item *
+
+The specification of the pod language is changing so that the default
+encoding of pods that aren't in UTF-8 (unless otherwise indicated) is
+CP1252 instead of ISO 8859-1 (Latin1).
 
 =back
 
@@ -851,6 +945,11 @@ in L<< perlpolicy/STANDARDS OF CONDUCT >>.
 
 The conditions for marking an experimental feature as non-experimental are now
 set out.
+
+=item *
+
+Clarification has been made as to what sorts of changes are permissible in
+maintenance releases.
 
 =back
 
@@ -875,7 +974,18 @@ Notes about EBCDIC have been added.
 =item *
 
 The description of the C</x> modifier has been clarified to note that
-comments cannot be continued onto the next line by escaping them.
+comments cannot be continued onto the next line by escaping them; and
+there is now a list of all the characters that are considered whitespace
+by this modifier.
+
+=item *
+
+The new C</n> modifier is described.
+
+=item *
+
+A note has been added on how to make bracketed character class ranges
+portable to non-ASCII machines.
 
 =back
 
@@ -906,6 +1016,17 @@ handling is required to accomplish this.
 
 The documentation of Bracketed Character Classes has been expanded to cover the
 improvements in C<qr/[\N{named sequence}]/> (see under L</Selected Bug Fixes>).
+
+=back
+
+=head3 L<perlref>
+
+=over 4
+
+=item *
+
+A new section has been added
+L<Assigning to References|perlref/Assigning to References>
 
 =back
 
@@ -942,7 +1063,10 @@ in L<< perlsyn >>.
 =item *
 
 This has had extensive revisions to bring it up-to-date with current
-Unicode support and to make it more readable.
+Unicode support and to make it more readable.  Notable is that Unicode
+7.0 changed what it should do with non-characters.  Perl retains the old
+way of handling for reasons of backward compatibility.  See
+L<perlunicode/Noncharacter code points>.
 
 =back
 
@@ -963,7 +1087,18 @@ interpreted as Unicode has been updated.
 
 =item *
 
-Further clarify version number representations and usage.
+C<$]> is no longer listed as being deprecated.  Instead, discussion has
+been added on the advantages and disadvantages of using it versus
+C<$^V>.
+
+=item *
+
+C<${^ENCODING}> is now marked as deprecated.
+
+=item *
+
+The entry for C<%^H> has been clarified to indicate it can only handle
+simple values.
 
 =back
 
