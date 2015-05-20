@@ -424,7 +424,7 @@ This variable allows Perl scripts to be written in an encoding other than
 ASCII or UTF-8.  However, it affects all modules globally, leading
 to wrong answers and segmentation faults.  New scripts should be written
 in UTF-8; old scripts should be converted to UTF-8, which is easily done
-with the L<encoding> pragma.
+with the L<piconv> utility.
 
 =head2 Use of non-graphic characters in single-character variable names
 
