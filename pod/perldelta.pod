@@ -3035,7 +3035,7 @@ false at compile time and true at run time.
 
 =item *
 
-Loading UTF-8 tables during a regular expression match could cause assertion
+Loading Unicode tables during a regular expression match could cause assertion
 failures under debugging builds if the previous match used the very same
 regular expression.
 L<[perl #122747]|https://rt.perl.org/Ticket/Display.html?id=122747>
