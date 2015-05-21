@@ -60,9 +60,6 @@
 #  ifdef PERL_GLOBAL_STRUCT
 #    error PERL_GLOBAL_STRUCT cannot be defined with PERL_IMPLICIT_SYS
 #  endif
-#  define win32_get_privlib PerlEnv_lib_path
-#  define win32_get_sitelib PerlEnv_sitelib_path
-#  define win32_get_vendorlib PerlEnv_vendorlib_path
 #endif
 
 #ifdef __GNUC__

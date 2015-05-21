@@ -26,9 +26,6 @@
 #endif
 
 START_EXTERN_C
-extern char *	g_win32_get_privlib(const char *pl, STRLEN *const len);
-extern char *	g_win32_get_sitelib(const char *pl, STRLEN *const len);
-extern char *	g_win32_get_vendorlib(const char *pl, STRLEN *const len);
 extern char *	g_getlogin(void);
 END_EXTERN_C
 
@@ -519,20 +516,20 @@ PerlEnvOsId(struct IPerlEnv* piPerl)
 char*
 PerlEnvLibPath(struct IPerlEnv* piPerl, const char *pl, STRLEN *const len)
 {
-    return g_win32_get_privlib(pl, len);
+    return win32_get_privlib(pl, len);
 }
 
 char*
 PerlEnvSiteLibPath(struct IPerlEnv* piPerl, const char *pl, STRLEN *const len)
 {
-    return g_win32_get_sitelib(pl, len);
+    return win32_get_sitelib(pl, len);
 }
 
 char*
 PerlEnvVendorLibPath(struct IPerlEnv* piPerl, const char *pl,
 		     STRLEN *const len)
 {
-    return g_win32_get_vendorlib(pl, len);
+    return win32_get_vendorlib(pl, len);
 }
 
 void

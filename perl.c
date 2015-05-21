@@ -4385,7 +4385,7 @@ S_init_perllib(pTHX)
 #ifdef SITELIB_EXP
 #  if defined(WIN32)
     /* this picks up sitearch as well */
-	s = win32_get_sitelib(PERL_FS_VERSION, &len);
+	s = PerlEnv_sitelib_path(PERL_FS_VERSION, &len);
 	if (s)
 	    incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #  else
@@ -4405,7 +4405,7 @@ S_init_perllib(pTHX)
 #ifdef PERL_VENDORLIB_EXP
 #  if defined(WIN32)
     /* this picks up vendorarch as well */
-	s = win32_get_vendorlib(PERL_FS_VERSION, &len);
+	s = PerlEnv_vendorlib_path(PERL_FS_VERSION, &len);
 	if (s)
 	    incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #  else
@@ -4423,7 +4423,7 @@ S_init_perllib(pTHX)
 #endif
 
 #if defined(WIN32)
-    s = win32_get_privlib(PERL_FS_VERSION, &len);
+    s = PerlEnv_lib_path(PERL_FS_VERSION, &len);
     if (s)
 	incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #else

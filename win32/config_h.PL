@@ -63,7 +63,12 @@ while (<SH>)
   s#(.)/\*\*/#$1/ **/# if(/^\/\*/); #avoid "/*" inside comments
   if (/^\s*#define\s+(PRIVLIB|SITELIB|VENDORLIB)_EXP/)
    {
-     $_ = "#define ". $1 . "_EXP (win32_get_". lc($1) . "(PERL_VERSION_STRING, NULL))\t/**/\n";
+     $_ = '#define '. $1 . '_EXP ('.(
+       $1 eq 'PRIVLIB' ? 'PerlEnv_lib_path' :
+       $1 eq 'SITELIB' ? 'PerlEnv_sitelib_path' :
+       $1 eq 'VENDORLIB' ? 'PerlEnv_vendorlib_path' :
+       die "unknown *LIB_EXP define \"$1\""
+       ). "(PERL_VERSION_STRING, NULL))\t/**/\n";
    }
   # incpush() handles archlibs, so disable them
   elsif (/^\s*#define\s+(ARCHLIB|SITEARCH|VENDORARCH)_EXP/)
