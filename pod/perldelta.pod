@@ -194,8 +194,8 @@ as the left-hand side is a valid lvalue.  This allows S<C<(undef,undef,$foo)
 
 Floating point values are able to hold the special values infinity, negative
 infinity, and NaN (not-a-number).  Now we more robustly recognize and
-propagate the value in computations, and on output normalize them to
-an infinite value or not-a-number.
+propagate the value in computations, and on output normalize them to the strings
+C<Inf>, C<-Inf>, and C<NaN>.
 
 See also the L<POSIX> enhancements.
 
