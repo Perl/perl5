@@ -731,7 +731,7 @@ $   WRITE CONFIG -
 $   CLOSE CONFIG
 $ ENDIF
 $!
-$ IF F$TYPE(usedevel) .EQS. "" THEN usedevel := n
+$ IF F$TYPE(usedevel) .EQS. "" THEN usedevel = "undef"
 $ patchlevel_h = F$SEARCH("[-]patchlevel.h")
 $ IF (patchlevel_h.NES."")
 $ THEN
