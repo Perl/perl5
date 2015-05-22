@@ -8,6 +8,9 @@
 <commit votes="" id="c0388966161bb22622ebac402bb1ebe081ad0b39" ticket="123976" desc="[Win32] Unable to build 64-bit blead using gcc-4.8.2"/>
 <commit votes="" id="3553f4fa11fd9e8bb0797ace43605cc33ebf32fa" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
 <commit votes="" id="4e0341d2ce817c9956f7f78e36bcaf8b764e18fc" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
+<commit votes="" id="816b056ffb99ae54642320e20dc30a59fd1effef" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
+<commit votes="" id="3bea78d24634e630b610f59957e7a019205a67b2" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
+<commit votes="" id="33593911f214382b592d05aa902655301915e666" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
 
 </div>
 
