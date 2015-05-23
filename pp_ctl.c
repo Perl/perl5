@@ -2595,42 +2595,23 @@ S_unwind_loop(pTHX_ const char * const opname)
 PP(pp_last)
 {
     PERL_CONTEXT *cx;
-    I32 pop2 = 0;
     I32 gimme;
-    I32 optype;
     OP *nextop = NULL;
     SV **newsp;
     PMOP *newpm;
-    SV *sv = NULL;
 
     S_unwind_loop(aTHX_ "last");
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */
-    switch (CxTYPE(cx)) {
-    case CXt_LOOP_LAZYIV:
-    case CXt_LOOP_LAZYSV:
-    case CXt_LOOP_FOR:
-    case CXt_LOOP_PLAIN:
-	pop2 = CxTYPE(cx);
-	newsp = PL_stack_base + cx->blk_loop.resetsp;
-	nextop = cx->blk_loop.my_op->op_lastop->op_next;
-	break;
-    case CXt_SUB:
-	pop2 = CXt_SUB;
-	nextop = cx->blk_sub.retop;
-	break;
-    case CXt_EVAL:
-	POPEVAL(cx);
-	nextop = cx->blk_eval.retop;
-	break;
-    case CXt_FORMAT:
-	POPFORMAT(cx);
-	nextop = cx->blk_sub.retop;
-	break;
-    default:
-	DIE(aTHX_ "panic: last, type=%u", (unsigned) CxTYPE(cx));
-    }
+    assert(
+           CxTYPE(cx) == CXt_LOOP_LAZYIV
+        || CxTYPE(cx) == CXt_LOOP_LAZYSV
+        || CxTYPE(cx) == CXt_LOOP_FOR
+        || CxTYPE(cx) == CXt_LOOP_PLAIN
+    );
+    newsp = PL_stack_base + cx->blk_loop.resetsp;
+    nextop = cx->blk_loop.my_op->op_lastop->op_next;
 
     TAINT_NOT;
     PL_stack_sp = newsp;
@@ -2638,22 +2619,10 @@ PP(pp_last)
     LEAVE;
     cxstack_ix--;
     /* Stack values are safe: */
-    switch (pop2) {
-    case CXt_LOOP_LAZYIV:
-    case CXt_LOOP_PLAIN:
-    case CXt_LOOP_LAZYSV:
-    case CXt_LOOP_FOR:
-	POPLOOP(cx);	/* release loop vars ... */
-	LEAVE;
-	break;
-    case CXt_SUB:
-	POPSUB(cx,sv);	/* release CV and @_ ... */
-	break;
-    }
+    POPLOOP(cx);	/* release loop vars ... */
+    LEAVE;
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
-    LEAVESUB(sv);
-    PERL_UNUSED_VAR(optype);
     PERL_UNUSED_VAR(gimme);
     return nextop;
 }
