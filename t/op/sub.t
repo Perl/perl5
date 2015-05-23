@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 39);
+plan(tests => 55);
 
 sub empty_sub {}
 
@@ -295,3 +295,39 @@ inside_predeclared(); # run test
     ::is($@, "outer\n", "RT124156 depth");
     ::is($destroyed, 1, "RT124156 freed cv");
 }
+
+
+# check that return pops extraneous stuff from the stack
+
+sub check_ret {
+    # the extra scopes push contexts and extra SVs on the stack
+    {
+        my @a = map $_ + 20, @_;
+        for ('x') {
+            return if defined $_[0] && $_[0] < 0;
+        }
+        for ('y') {
+            check_ret(1, do { (2,3,4, return @a ? @a[0..$#a] : ()) }, 4.5);
+        }
+    }
+}
+
+is(scalar check_ret(),          undef, "check_ret() scalar");
+is(scalar check_ret(5),         25,    "check_ret(5) scalar");
+is(scalar check_ret(5,6),       26,    "check_ret(5,6) scalar");
+is(scalar check_ret(5,6,7),     27,    "check_ret(5,6,7) scalar");
+is(scalar check_ret(5,6,7,8),   28,    "check_ret(5,6,7,8) scalar");
+is(scalar check_ret(5,6,7,8,9), 29,    "check_ret(5,6,7,8,9) scalar");
+
+is(scalar check_ret(-1),        undef, "check_ret(-1) scalar");
+is(scalar check_ret(-1,5),      undef, "check_ret(-1,5) scalar");
+
+is(join('-', 10, check_ret()),          "10",                "check_ret() list");
+is(join('-', 10, check_ret(5)),         "10-25",             "check_ret(5) list");
+is(join('-', 10, check_ret(5,6)),       "10-25-26",          "check_ret(5,6) list");
+is(join('-', 10, check_ret(5,6,7)),     "10-25-26-27",       "check_ret(5,6,7) list");
+is(join('-', 10, check_ret(5,6,7,8)),   "10-25-26-27-28",    "check_ret(5,6,7,8) list");
+is(join('-', 10, check_ret(5,6,7,8,9)), "10-25-26-27-28-29", "check_ret(5,6,7,8,9) list");
+
+is(join('-', 10, check_ret(-1)),        "10",  "check_ret(-1) list");
+is(join('-', 10, check_ret(-1,5)),      "10",  "check_ret(-1,5) list");

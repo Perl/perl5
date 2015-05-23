@@ -2416,8 +2416,9 @@ PP(pp_return)
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
-    if (CxMULTICALL(&cxstack[cxix])) {
-	gimme = cxstack[cxix].blk_gimme;
+    cx = &cxstack[cxix];
+    if (CxMULTICALL(cx)) {
+	gimme = cx->blk_gimme;
 	if (gimme == G_VOID)
 	    PL_stack_sp = PL_stack_base;
 	else if (gimme == G_SCALAR) {
@@ -2427,11 +2428,29 @@ PP(pp_return)
 	return 0;
     }
 
+    if (CxTYPE(cx) == CXt_SUB && !CvLVALUE(cx->blk_sub.cv)) {
+        SV **oldsp = PL_stack_base + cx->blk_oldsp;
+        if (oldsp != MARK) {
+            /* shift return args to base of call stack frame */
+            SSize_t nargs = SP - MARK;
+            if (nargs) {
+                if (cx->blk_gimme == G_ARRAY)
+                    Move(MARK + 1, oldsp + 1, nargs, SV**);
+                else if (cx->blk_gimme == G_SCALAR)
+                    oldsp[1] = *SP;
+            }
+            PL_stack_sp  = oldsp + nargs;
+        }
+        /* fall through to a normal sub exit */
+        return Perl_pp_leavesub(aTHX);
+    }
+
     POPBLOCK(cx,newpm);
     switch (CxTYPE(cx)) {
     case CXt_SUB:
 	popsub2 = TRUE;
-	lval = !!CvLVALUE(cx->blk_sub.cv);
+	assert(CvLVALUE(cx->blk_sub.cv));
+	lval = TRUE;
 	retop = cx->blk_sub.retop;
 	cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
 	break;
@@ -2465,45 +2484,15 @@ PP(pp_return)
     TAINT_NOT;
     if (lval) S_return_lvalues(aTHX_ MARK, SP, newsp, gimme, cx, newpm);
     else {
-      if (gimme == G_SCALAR) {
-	if (MARK < SP) {
-	    if (popsub2) {
-		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
-		    if (SvTEMP(TOPs) && SvREFCNT(TOPs) == 1
-			 && !SvMAGICAL(TOPs)) {
-			*++newsp = SvREFCNT_inc(*SP);
-			FREETMPS;
-			sv_2mortal(*newsp);
-		    }
-		    else {
-			sv = SvREFCNT_inc(*SP);	/* FREETMPS could clobber it */
-			FREETMPS;
-			*++newsp = sv_mortalcopy(sv);
-			SvREFCNT_dec(sv);
-		    }
-		}
-		else if (SvTEMP(*SP) && SvREFCNT(*SP) == 1
-			  && !SvMAGICAL(*SP)) {
-		    *++newsp = *SP;
-		}
-		else
-		    *++newsp = sv_mortalcopy(*SP);
+        if (gimme == G_SCALAR)
+            *++newsp = (MARK < SP) ? sv_mortalcopy(*SP) : &PL_sv_undef;
+        else if (gimme == G_ARRAY) {
+	    while (++MARK <= SP) {
+	        *++newsp = sv_mortalcopy(*MARK);
+	        TAINT_NOT;		/* Each item is independent */
 	    }
-	    else
-		*++newsp = sv_mortalcopy(*SP);
-	}
-	else
-	    *++newsp = &PL_sv_undef;
-      }
-      else if (gimme == G_ARRAY) {
-	while (++MARK <= SP) {
-	    *++newsp = popsub2 && SvTEMP(*MARK) && SvREFCNT(*MARK) == 1
-			       && !SvGMAGICAL(*MARK)
-			? *MARK : sv_mortalcopy(*MARK);
-	    TAINT_NOT;		/* Each item is independent */
-	}
-      }
-      PL_stack_sp = newsp;
+        }
+        PL_stack_sp = newsp;
     }
 
     LEAVE;
