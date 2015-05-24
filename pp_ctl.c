@@ -2323,8 +2323,8 @@ S_return_lvalues(pTHX_ SV **base)
 		what = "undef";
 	    }
 	    LEAVE;
-	    cxstack_ix--;
 	    POPSUB(cx,sv);
+	    cxstack_ix--;
 	    PL_curpm = newpm;
 	    LEAVESUB(sv);
 	    Perl_croak(aTHX_
@@ -2385,8 +2385,8 @@ S_return_lvalues(pTHX_ SV **base)
 		    /* Might be flattened array after $#array =  */
 		    PUTBACK;
 		    LEAVE;
-		    cxstack_ix--;
 		    POPSUB(cx,sv);
+		    cxstack_ix--;
 		    PL_curpm = newpm;
 		    LEAVESUB(sv);
 	       /* diag_listed_as: Can't return %s from lvalue subroutine */
@@ -2404,15 +2404,8 @@ S_return_lvalues(pTHX_ SV **base)
     PL_stack_sp = newsp;
 
     LEAVE;
-    /* Stack values are safe: */
-    if (base) {
-        cxstack_ix--;
-        POPSUB(cx,sv);	/* release CV and @_ ... */
-    }
-    else {
-        POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
-        cxstack_ix--;
-    }
+    POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
+    cxstack_ix--;
     PL_curpm = newpm;	/* ... and pop $1 et al */
     LEAVESUB(sv);
 
