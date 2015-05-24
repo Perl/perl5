@@ -2296,6 +2296,7 @@ S_return_lvalues(pTHX_ SV **base)
     PERL_CONTEXT *cx;
     SV *sv;
     bool ref;
+    const char *what = NULL;
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
@@ -2307,7 +2308,6 @@ S_return_lvalues(pTHX_ SV **base)
     if (gimme == G_SCALAR) {
 	if (CxLVAL(cx) && !ref) {     /* Leave it as it is if we can. */
 	    SV *sv;
-	    const char *what = NULL;
 	    if (MARK < SP) {
 		assert(MARK+1 == SP);
 		if ((SvPADTMP(TOPs) || SvREADONLY(TOPs)) &&
@@ -2322,6 +2322,7 @@ S_return_lvalues(pTHX_ SV **base)
 		/* sub:lvalue{} will take us here. */
 		what = "undef";
 	    }
+          croak:
 	    LEAVE;
 	    POPSUB(cx,sv);
 	    cxstack_ix--;
@@ -2380,19 +2381,10 @@ S_return_lvalues(pTHX_ SV **base)
 	    if (*MARK != &PL_sv_undef
 		    && (SvPADTMP(*MARK) || SvREADONLY(*MARK))
 	    ) {
-		    const bool ro = cBOOL( SvREADONLY(*MARK) );
-		    SV *sv;
 		    /* Might be flattened array after $#array =  */
-		    PUTBACK;
-		    LEAVE;
-		    POPSUB(cx,sv);
-		    cxstack_ix--;
-		    PL_curpm = newpm;
-		    LEAVESUB(sv);
-	       /* diag_listed_as: Can't return %s from lvalue subroutine */
-		    Perl_croak(aTHX_
-			"Can't return a %s from lvalue subroutine",
-			 ro ? "readonly value" : "temporary");
+                    what = SvREADONLY(*MARK)
+                            ? "a readonly value" : "a temporary";
+                    goto croak;
 	    }
 	    else
 		*++newsp =
