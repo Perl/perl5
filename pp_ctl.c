@@ -2465,20 +2465,20 @@ PP(pp_return)
         if (CvLVALUE(cx->blk_sub.cv))
             return S_return_lvalues(aTHX_ MARK);
         else {
-        SV **oldsp = PL_stack_base + cx->blk_oldsp;
-        if (oldsp != MARK) {
-            /* shift return args to base of call stack frame */
-            SSize_t nargs = SP - MARK;
-            if (nargs) {
-                if (cx->blk_gimme == G_ARRAY)
-                    Move(MARK + 1, oldsp + 1, nargs, SV**);
-                else if (cx->blk_gimme == G_SCALAR)
-                    oldsp[1] = *SP;
+            SV **oldsp = PL_stack_base + cx->blk_oldsp;
+            if (oldsp != MARK) {
+                /* shift return args to base of call stack frame */
+                SSize_t nargs = SP - MARK;
+                if (nargs) {
+                    if (cx->blk_gimme == G_ARRAY)
+                        Move(MARK + 1, oldsp + 1, nargs, SV**);
+                    else if (cx->blk_gimme == G_SCALAR)
+                        oldsp[1] = *SP;
+                }
+                PL_stack_sp  = oldsp + nargs;
             }
-            PL_stack_sp  = oldsp + nargs;
-        }
-        /* fall through to a normal sub exit */
-        return Perl_pp_leavesub(aTHX);
+            /* fall through to a normal sub exit */
+            return Perl_pp_leavesub(aTHX);
         }
     }
 
@@ -2512,15 +2512,15 @@ PP(pp_return)
     }
 
     TAINT_NOT;
-        if (gimme == G_SCALAR)
-            *++newsp = (MARK < SP) ? sv_mortalcopy(*SP) : &PL_sv_undef;
-        else if (gimme == G_ARRAY) {
-	    while (++MARK <= SP) {
-	        *++newsp = sv_mortalcopy(*MARK);
-	        TAINT_NOT;		/* Each item is independent */
-	    }
+    if (gimme == G_SCALAR)
+        *++newsp = (MARK < SP) ? sv_mortalcopy(*SP) : &PL_sv_undef;
+    else if (gimme == G_ARRAY) {
+        while (++MARK <= SP) {
+            *++newsp = sv_mortalcopy(*MARK);
+            TAINT_NOT;		/* Each item is independent */
         }
-        PL_stack_sp = newsp;
+    }
+    PL_stack_sp = newsp;
 
     LEAVE;
     PL_curpm = newpm;	/* ... and pop $1 et al */
