@@ -2279,11 +2279,31 @@ PP(pp_leaveloop)
     return NORMAL;
 }
 
-STATIC void
-S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
-                       PERL_CONTEXT *cx, PMOP *newpm)
+/* handle most of the activity of returning from an lvalue sub.
+ * Called by pp_leavesublv and pp_return.
+ * For pp_leavesublv, base is null; for pp_return, its the base
+ * of the args to be returned (i.e. the mark on entry to pp_return)
+ */
+
+STATIC OP*
+S_return_lvalues(pTHX_ SV **base)
 {
-    const bool ref = !!(CxLVAL(cx) & OPpENTERSUB_INARGS);
+    dSP;
+    SV **newsp;
+    SV **mark;
+    PMOP *newpm;
+    I32 gimme;
+    PERL_CONTEXT *cx;
+    SV *sv;
+    bool ref;
+
+    POPBLOCK(cx,newpm);
+    cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
+    TAINT_NOT;
+
+    mark = base ? base : newsp;
+
+    ref = !!(CxLVAL(cx) & OPpENTERSUB_INARGS);
     if (gimme == G_SCALAR) {
 	if (CxLVAL(cx) && !ref) {     /* Leave it as it is if we can. */
 	    SV *sv;
@@ -2382,21 +2402,34 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 	}
     }
     PL_stack_sp = newsp;
+
+    LEAVE;
+    /* Stack values are safe: */
+    if (base) {
+        cxstack_ix--;
+        POPSUB(cx,sv);	/* release CV and @_ ... */
+    }
+    else {
+        POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
+        cxstack_ix--;
+    }
+    PL_curpm = newpm;	/* ... and pop $1 et al */
+    LEAVESUB(sv);
+
+    return cx->blk_sub.retop;
 }
+
 
 PP(pp_return)
 {
     dSP; dMARK;
     PERL_CONTEXT *cx;
-    bool popsub2 = FALSE;
     bool clear_errsv = FALSE;
-    bool lval = FALSE;
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
     I32 optype = 0;
     SV *namesv;
-    SV *sv;
     OP *retop = NULL;
 
     const I32 cxix = dopoptosub(cxstack_ix);
@@ -2428,7 +2461,10 @@ PP(pp_return)
 	return 0;
     }
 
-    if (CxTYPE(cx) == CXt_SUB && !CvLVALUE(cx->blk_sub.cv)) {
+    if (CxTYPE(cx) == CXt_SUB) {
+        if (CvLVALUE(cx->blk_sub.cv))
+            return S_return_lvalues(aTHX_ MARK);
+        else {
         SV **oldsp = PL_stack_base + cx->blk_oldsp;
         if (oldsp != MARK) {
             /* shift return args to base of call stack frame */
@@ -2443,17 +2479,11 @@ PP(pp_return)
         }
         /* fall through to a normal sub exit */
         return Perl_pp_leavesub(aTHX);
+        }
     }
 
     POPBLOCK(cx,newpm);
     switch (CxTYPE(cx)) {
-    case CXt_SUB:
-	popsub2 = TRUE;
-	assert(CvLVALUE(cx->blk_sub.cv));
-	lval = TRUE;
-	retop = cx->blk_sub.retop;
-	cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
-	break;
     case CXt_EVAL:
 	if (!(PL_in_eval & EVAL_KEEPERR))
 	    clear_errsv = TRUE;
@@ -2482,8 +2512,6 @@ PP(pp_return)
     }
 
     TAINT_NOT;
-    if (lval) S_return_lvalues(aTHX_ MARK, SP, newsp, gimme, cx, newpm);
-    else {
         if (gimme == G_SCALAR)
             *++newsp = (MARK < SP) ? sv_mortalcopy(*SP) : &PL_sv_undef;
         else if (gimme == G_ARRAY) {
@@ -2493,19 +2521,10 @@ PP(pp_return)
 	    }
         }
         PL_stack_sp = newsp;
-    }
 
     LEAVE;
-    /* Stack values are safe: */
-    if (popsub2) {
-	cxstack_ix--;
-	POPSUB(cx,sv);	/* release CV and @_ ... */
-    }
-    else
-	sv = NULL;
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
-    LEAVESUB(sv);
     if (clear_errsv) {
 	CLEAR_ERRSV();
     }
@@ -2516,30 +2535,11 @@ PP(pp_return)
  * pp_return */
 PP(pp_leavesublv)
 {
-    dSP;
-    SV **newsp;
-    PMOP *newpm;
-    I32 gimme;
-    PERL_CONTEXT *cx;
-    SV *sv;
-
     if (CxMULTICALL(&cxstack[cxstack_ix]))
 	return 0;
+    return S_return_lvalues(aTHX_ NULL);
 
-    POPBLOCK(cx,newpm);
-    cxstack_ix++; /* temporarily protect top context */
 
-    TAINT_NOT;
-
-    S_return_lvalues(aTHX_ newsp, SP, newsp, gimme, cx, newpm);
-
-    LEAVE;
-    POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
-    cxstack_ix--;
-    PL_curpm = newpm;	/* ... and pop $1 et al */
-
-    LEAVESUB(sv);
-    return cx->blk_sub.retop;
 }
 
 static I32
