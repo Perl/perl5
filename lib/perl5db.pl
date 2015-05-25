@@ -528,7 +528,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.49';
+$VERSION = '1.49_01';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -3319,6 +3319,9 @@ B<h q>, B<h R> or B<h o> to get additional info.
 EOP
 
         # Set the DB::eval context appropriately.
+        # At program termination disable any user actions.
+        $DB::action = undef;
+
         $DB::package     = 'main';
         $DB::usercontext = DB::_calc_usercontext($DB::package);
     } ## end elsif ($package eq 'DB::fake')

@@ -29,7 +29,7 @@ BEGIN {
     $ENV{PERL_RL} = 'Perl'; # Suppress system Term::ReadLine::Gnu
 }
 
-plan(120);
+plan(121);
 
 my $rc_filename = '.perldb';
 
@@ -2771,6 +2771,31 @@ SKIP:
     $wrapper->output_like(
         qr/No manual entry for perlrules/,
         'perldoc command works fine',
+    );
+}
+
+# [perl #71678] debugger bug in evaluation of user actions ('a' command)
+# Still evaluated after the script finishes.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                q#a 9 print " \$arg = $arg\n"#,
+                'c 9',
+                's',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-a-statement-2',
+            switches => [ '-dw', ],
+            stderr => 1,
+        }
+    );
+
+    $wrapper->contents_unlike(qr/
+        Use\ of\ uninitialized\ value\ \$arg\ in\ concatenation\ [\S ]+\ or\ string\ at
+        /msx,
+        'Test that the a command does not emit warnings on program exit.',
     );
 }
 
