@@ -438,8 +438,11 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
 			    else if (IoTYPE(thatio) == IoTYPE_SOCKET)
 				IoTYPE(io) = IoTYPE_SOCKET;
 			}
-			else
-			    wanted_fd = -1;
+                        else {
+                            SETERRNO(EBADF, RMS_IFI);
+                            fp = NULL;
+                            goto say_false;
+                        }
 		    }
 		    if (!num_svs)
 			type = NULL;
