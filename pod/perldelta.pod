@@ -666,216 +666,9 @@ Some notable changes include:
 
 =item *
 
-L<CPAN> has been upgraded to version 2.10.
-
-Add support for C<Cwd::getdcwd()> and introduce workaround for a misbehaviour
-seen on Strawberry Perl 5.20.1.
-
-Fix C<chdir()> after building dependencies bug.
-
-Introduce experimental support for plugins/hooks.
-
-Integrate the App::Cpan sources.
-
-Do not check recursion on optional dependencies.
-
-Sanity check F<META.yml> to contain a hash.
-L<[cpan #95271]|https://rt.cpan.org/Ticket/Display.html?id=95271>
-
-=item *
-
-L<utf8> has been upgraded to version 1.17
-
-A mismatch between the documentation and the code in utf8::downgrade()
-was fixed in favour of the documentation. The optional second argument
-is now correctly treated as a perl boolean (true/false semantics) and
-not as an integer.
-
-=item *
-
-L<Module::Metadata> has been upgraded to version 1.000024.
-
-Support installations on older perls with an L<ExtUtils::MakeMaker> earlier
-than 6.63_03
-
-=item *
-
-L<perl5db.pl> has been upgraded to version 1.49.
-
-The debugger would cause an assertion failure.
-L<[perl #124127]|https://rt.perl.org/Ticket/Display.html?id=124127>
-
-C<fork()> in the debugger under C<tmux> will now create a new window for
-the forked process. L<[perl
-#121333]|https://rt.perl.org/Ticket/Display.html?id=121333>
-
-The debugger now saves the current working directory on startup and
-restores it when you restart your program with C<R> or C<rerun>. L<[perl
-#121509]|https://rt.perl.org/Ticket/Display.html?id=121509>
-
-=item *
-
-L<Unicode::Collate> has been upgraded to version 1.07.
-
-Version 0.67's improved discontiguous contractions is invalidated by default
-and is supported as a parameter 'long_contraction'.
-
-=item *
-
-L<Unicode::Normalize> has been upgraded to version 1.18.
-
-The XSUB implementation has been removed in favour of pure Perl.
-
-=item *
-
-L<Math::BigInt> has been upgraded to version 1.9996.
-
-Synchronize POD changes from the CPAN release.
-C<< Math::BigFloat->blog(x) >> would sometimes return blog(2*x) when
-the accuracy was greater than 70 digits.
-The result of C<< Math::BigFloat->bdiv() >> in list context now
-satisfies C<< x = quotient * divisor + remainder >>.
-
-Correct handling of subclasses.
-L<[cpan #96254]|https://rt.cpan.org/Ticket/Display.html?id=96254>
-L<[cpan #96329]|https://rt.cpan.org/Ticket/Display.html?id=96329>
-
-=item *
-
-L<UNIVERSAL> has been upgraded to version 1.12.
-
-L<B::Op_private> provides detailed information about the flags used in the
-C<op_private> field of perl opcodes.
-
-=item *
-
 L<Archive::Tar> has been upgraded to version 2.02.
 
 Tests can now be run in parallel.
-
-=item *
-
-L<constant> has been upgraded to version 1.32.
-
-It now accepts fully-qualified constant names, allowing constants to be defined
-in packages other than the caller.
-
-=item *
-
-L<CPAN::Meta::Requirements> has been upgraded to version 2.128.
-
-Works around limitations in version::vpp detecting v-string magic and adds
-support for forthcoming L<ExtUtils::MakeMaker> bootstrap F<version.pm> for
-Perls older than 5.10.0.
-
-=item *
-
-L<Data::Dumper> has been upgraded to version 2.154.
-
-Fixes CVE-2014-4330 by adding a configuration variable/option to limit
-recursion when dumping deep data structures.
-
-Changes to resolve Coverity issues.
-XS dumps incorrectly stored the name of code references stored in a
-GLOB.
-L<[perl #122070]|https://rt.perl.org/Ticket/Display.html?id=122070>
-
-=item *
-
-L<experimental> has been upgraded to version 0.010.
-
-Hardcodes features for Perls older than 5.15.7.
-
-=item *
-
-L<ExtUtils::CBuilder> has been upgraded to version 0.280219.
-
-Fixes a regression on Android.
-L<[perl #122675]|https://rt.perl.org/Ticket/Display.html?id=122675>
-
-=item *
-
-L<ExtUtils::Manifest> has been upgraded to version 1.68.
-
-Fixes a bug with C<maniread()>'s handling of quoted filenames and improves
-C<manifind()> to follow symlinks.
-L<[perl #122415]|https://rt.perl.org/Ticket/Display.html?id=122415>
-
-=item *
-
-L<File::Find> has been upgraded to version 1.28.
-
-C<find()> and C<finddepth()> will now warn if passed inappropriate or
-misspelled options.
-
-=item *
-
-L<HTTP::Tiny> has been upgraded to version 0.049.
-
-C<keep_alive> is now fork-safe and thread-safe.
-
-=item *
-
-L<IO> has been upgraded to version 1.34.
-
-The XS implementation has been fixed for the sake of older Perls.
-
-=item *
-
-L<IO::Socket::IP> has been upgraded to version 0.32.
-
-A better fix for subclassing C<connect()>.
-L<[cpan #95983]|https://rt.cpan.org/Ticket/Display.html?id=95983>
-L<[cpan #97050]|https://rt.cpan.org/Ticket/Display.html?id=97050>
-
-Implements Timeout for C<connect()>.
-L<[cpan #92075]|https://rt.cpan.org/Ticket/Display.html?id=92075>
-
-=item *
-
-L<Locale::Codes> has been upgraded to version 3.32.
-
-Fixed a bug in the scripts used to extract data from spreadsheets that
-prevented the SHP currency code from being found.
-L<[cpan #94229]|https://rt.cpan.org/Ticket/Display.html?id=94229>
-
-New codes have been added.
-
-=item *
-
-L<overload> has been upgraded to version 1.23.
-
-A redundant C<ref $sub> check has been removed.
-
-=item *
-
-L<Pod::Perldoc> has been upgraded to version 3.24.
-
-Filehandles opened for reading or writing now have C<:encoding(UTF-8)> set.
-L<[cpan #98019]|https://rt.cpan.org/Ticket/Display.html?id=98019>
-
-=item *
-
-The Scalar List Utils has been upgraded to version 1.41.
-
-A new module, L<Sub::Util>, has been added, containing functions related to
-CODE refs, including C<subname> (inspired by Sub::Identity) and C<set_subname>
-(copied and renamed from Sub::Name).
-The use of C<GetMagic> in C<List::Util::reduce()> has also been fixed.
-L<[cpan #63211]|https://rt.cpan.org/Ticket/Display.html?id=63211>
-
-=item *
-
-L<Time::Piece> has been upgraded to version 1.29.
-
-When pretty printing negative Time::Seconds, the "minus" is no longer lost.
-
-=item *
-
-L<version> has been upgraded to version 0.9909.
-
-Numerous changes.  See the F<Changes> file in the CPAN distribution for
-details.
 
 =item *
 
@@ -885,82 +678,6 @@ The usage of C<memEQs> in the XS has been corrected.
 L<[perl #122701]|https://rt.perl.org/Ticket/Display.html?id=122701>
 
 Avoid reading beyond the end of a buffer. [perl #122629]
-
-=item *
-
-L<B::Concise> has been upgraded to version 0.994.
-
-Null ops that are part of the execution chain are now given sequence
-numbers.
-
-Private flags for nulled ops are now dumped with mnemonics as they would be
-for the non-nulled counterparts.
-
-=item *
-
-L<DynaLoader> has been upgraded to version 1.27.
-
-Remove C<dl_nonlazy> global if unused in Dynaloader. [perl #122926]
-
-=item *
-
-L<Fcntl> has been upgraded to version 1.13.
-
-Add support for the Linux pipe buffer size fcntl() commands.
-
-=item *
-
-The libnet collection of modules has been upgraded to version 3.02.
-
-Support for IPv6 and SSL to Net::FTP, Net::NNTP, Net::POP3 and Net::SMTP.
-Improvements in Net::SMTP authentication.
-
-=item *
-
-L<POSIX> has been upgraded to version 1.45.
-
-The C99 math functions and constants (for example C<acosh>, C<isinf>, C<isnan>, C<round>,
-C<trunc>; C<M_E>, C<M_SQRT2>, C<M_PI>) have been added.
-
-POSIX::tmpnam() now produces a deprecation warning.  [perl #122005]
-
-=item *
-
-L<XSLoader> has been upgraded to version 0.18.
-
-Allow XSLoader to load modules from a different namespace.
-[perl #122455]
-
-=item *
-
-L<B::Op_private> has been upgraded to version 5.021006.
-
-It now includes a hash named C<%ops_using>, list all op types that use a
-particular private flag.
-
-=item *
-
-L<IO::Socket> has been upgraded to version 1.38.
-
-Document the limitations of the connected() method.  [perl #123096]
-
-=item *
-
-The PathTools module collection has been upgraded to version 3.53.
-
-A warning from the B<gcc> compiler is now avoided when building the XS.
-
-Don't turn leading C<//> into C</> on Cygwin. [perl #122635]
-
-=item *
-
-L<ExtUtils::ParseXS> has been upgraded to version 3.27.
-
-Only declare C<file> unused if we actually define it.
-Improve generated C<RETVAL> code generation to avoid repeated
-references to C<ST(0)>.  [perl #123278]
-Broaden and document the C</OBJ$/> to C</REF$/> typemap optimization
-for the C<DESTROY> method.  [perl #123418]
 
 =item *
 
@@ -986,22 +703,13 @@ The C<id> and C<outid> PADLIST methods have been added.
 
 =item *
 
-L<File::Glob> has been upgraded to version 1.24.
+L<B::Concise> has been upgraded to version 0.994.
 
-Avoid SvIV() expanding to call get_sv() three times in a few
-places. [perl #123606]
+Null ops that are part of the execution chain are now given sequence
+numbers.
 
-=item *
-
-L<Safe> has been upgraded to version 2.39.
-
-C<reval> was not propagating void context properly.
-
-=item *
-
-L<SDBM_File> has been upgraded to version 1.13.
-
-Simplified the build process.  [perl #123413]
+Private flags for nulled ops are now dumped with mnemonics as they would be
+for the non-nulled counterparts.
 
 =item *
 
@@ -1122,6 +830,13 @@ this has now been fixed.
 
 =item *
 
+L<B::Op_private> has been upgraded to version 5.021006.
+
+It now includes a hash named C<%ops_using>, list all op types that use a
+particular private flag.
+
+=item *
+
 L<bigint>, L<bignum>, L<bigrat> have been upgraded to version 0.39.
 
 Document in CAVEATS that using strings as numbers won't always invoke
@@ -1138,6 +853,57 @@ L<[perl #121574]|https://rt.perl.org/Ticket/Display.html?id=121574>
 
 Carp now handles non-ASCII platforms better.
 Off-by-one error fix for Perl E<lt> 5.14.
+
+=item *
+
+L<constant> has been upgraded to version 1.32.
+
+It now accepts fully-qualified constant names, allowing constants to be defined
+in packages other than the caller.
+
+=item *
+
+L<CPAN> has been upgraded to version 2.10.
+
+Add support for C<Cwd::getdcwd()> and introduce workaround for a misbehaviour
+seen on Strawberry Perl 5.20.1.
+
+Fix C<chdir()> after building dependencies bug.
+
+Introduce experimental support for plugins/hooks.
+
+Integrate the App::Cpan sources.
+
+Do not check recursion on optional dependencies.
+
+Sanity check F<META.yml> to contain a hash.
+L<[cpan #95271]|https://rt.cpan.org/Ticket/Display.html?id=95271>
+
+=item *
+
+L<CPAN::Meta::Requirements> has been upgraded to version 2.128.
+
+Works around limitations in version::vpp detecting v-string magic and adds
+support for forthcoming L<ExtUtils::MakeMaker> bootstrap F<version.pm> for
+Perls older than 5.10.0.
+
+=item *
+
+L<Data::Dumper> has been upgraded to version 2.154.
+
+Fixes CVE-2014-4330 by adding a configuration variable/option to limit
+recursion when dumping deep data structures.
+
+Changes to resolve Coverity issues.
+XS dumps incorrectly stored the name of code references stored in a
+GLOB.
+L<[perl #122070]|https://rt.perl.org/Ticket/Display.html?id=122070>
+
+=item *
+
+L<DynaLoader> has been upgraded to version 1.27.
+
+Remove C<dl_nonlazy> global if unused in Dynaloader. [perl #122926]
 
 =item *
 
@@ -1159,6 +925,153 @@ line directives, breaking parsing of error code definitions.  [rt.perl.org
 
 =item *
 
+L<experimental> has been upgraded to version 0.010.
+
+Hardcodes features for Perls older than 5.15.7.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded to version 0.280219.
+
+Fixes a regression on Android.
+L<[perl #122675]|https://rt.perl.org/Ticket/Display.html?id=122675>
+
+=item *
+
+L<ExtUtils::Manifest> has been upgraded to version 1.68.
+
+Fixes a bug with C<maniread()>'s handling of quoted filenames and improves
+C<manifind()> to follow symlinks.
+L<[perl #122415]|https://rt.perl.org/Ticket/Display.html?id=122415>
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded to version 3.27.
+
+Only declare C<file> unused if we actually define it.
+Improve generated C<RETVAL> code generation to avoid repeated
+references to C<ST(0)>.  [perl #123278]
+Broaden and document the C</OBJ$/> to C</REF$/> typemap optimization
+for the C<DESTROY> method.  [perl #123418]
+
+=item *
+
+L<Fcntl> has been upgraded to version 1.13.
+
+Add support for the Linux pipe buffer size fcntl() commands.
+
+=item *
+
+L<File::Find> has been upgraded to version 1.28.
+
+C<find()> and C<finddepth()> will now warn if passed inappropriate or
+misspelled options.
+
+=item *
+
+L<File::Glob> has been upgraded to version 1.24.
+
+Avoid SvIV() expanding to call get_sv() three times in a few
+places. [perl #123606]
+
+=item *
+
+L<HTTP::Tiny> has been upgraded to version 0.049.
+
+C<keep_alive> is now fork-safe and thread-safe.
+
+=item *
+
+L<IO> has been upgraded to version 1.34.
+
+The XS implementation has been fixed for the sake of older Perls.
+
+=item *
+
+L<IO::Socket> has been upgraded to version 1.38.
+
+Document the limitations of the connected() method.  [perl #123096]
+
+=item *
+
+L<IO::Socket::IP> has been upgraded to version 0.32.
+
+A better fix for subclassing C<connect()>.
+L<[cpan #95983]|https://rt.cpan.org/Ticket/Display.html?id=95983>
+L<[cpan #97050]|https://rt.cpan.org/Ticket/Display.html?id=97050>
+
+Implements Timeout for C<connect()>.
+L<[cpan #92075]|https://rt.cpan.org/Ticket/Display.html?id=92075>
+
+=item *
+
+The libnet collection of modules has been upgraded to version 3.02.
+
+Support for IPv6 and SSL to Net::FTP, Net::NNTP, Net::POP3 and Net::SMTP.
+Improvements in Net::SMTP authentication.
+
+=item *
+
+L<Locale::Codes> has been upgraded to version 3.32.
+
+Fixed a bug in the scripts used to extract data from spreadsheets that
+prevented the SHP currency code from being found.
+L<[cpan #94229]|https://rt.cpan.org/Ticket/Display.html?id=94229>
+
+New codes have been added.
+
+=item *
+
+L<Math::BigInt> has been upgraded to version 1.9996.
+
+Synchronize POD changes from the CPAN release.
+C<< Math::BigFloat->blog(x) >> would sometimes return blog(2*x) when
+the accuracy was greater than 70 digits.
+The result of C<< Math::BigFloat->bdiv() >> in list context now
+satisfies C<< x = quotient * divisor + remainder >>.
+
+Correct handling of subclasses.
+L<[cpan #96254]|https://rt.cpan.org/Ticket/Display.html?id=96254>
+L<[cpan #96329]|https://rt.cpan.org/Ticket/Display.html?id=96329>
+
+=item *
+
+L<Module::Metadata> has been upgraded to version 1.000024.
+
+Support installations on older perls with an L<ExtUtils::MakeMaker> earlier
+than 6.63_03
+
+=item *
+
+L<overload> has been upgraded to version 1.23.
+
+A redundant C<ref $sub> check has been removed.
+
+=item *
+
+The PathTools module collection has been upgraded to version 3.53.
+
+A warning from the B<gcc> compiler is now avoided when building the XS.
+
+Don't turn leading C<//> into C</> on Cygwin. [perl #122635]
+
+=item *
+
+L<perl5db.pl> has been upgraded to version 1.49.
+
+The debugger would cause an assertion failure.
+L<[perl #124127]|https://rt.perl.org/Ticket/Display.html?id=124127>
+
+C<fork()> in the debugger under C<tmux> will now create a new window for
+the forked process. L<[perl
+#121333]|https://rt.perl.org/Ticket/Display.html?id=121333>
+
+The debugger now saves the current working directory on startup and
+restores it when you restart your program with C<R> or C<rerun>. L<[perl
+#121509]|https://rt.perl.org/Ticket/Display.html?id=121509>
+
+=item *
+
 L<PerlIO::scalar> has been upgraded to version 0.22.
 
 Reading from a position well past the end of the scalar now correctly
@@ -1172,6 +1085,63 @@ the file position is past the 2GB mark on 32-bit systems.
 
 Attempting to write at file positions impossible for the platform now
 fail early rather than wrapping at 4GB.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded to version 3.24.
+
+Filehandles opened for reading or writing now have C<:encoding(UTF-8)> set.
+L<[cpan #98019]|https://rt.cpan.org/Ticket/Display.html?id=98019>
+
+=item *
+
+L<POSIX> has been upgraded to version 1.45.
+
+The C99 math functions and constants (for example C<acosh>, C<isinf>, C<isnan>, C<round>,
+C<trunc>; C<M_E>, C<M_SQRT2>, C<M_PI>) have been added.
+
+POSIX::tmpnam() now produces a deprecation warning.  [perl #122005]
+
+=item *
+
+L<Safe> has been upgraded to version 2.39.
+
+C<reval> was not propagating void context properly.
+
+=item *
+
+Scalar-List-Utils has been upgraded to version 1.41.
+
+A new module, L<Sub::Util>, has been added, containing functions related to
+CODE refs, including C<subname> (inspired by Sub::Identity) and C<set_subname>
+(copied and renamed from Sub::Name).
+The use of C<GetMagic> in C<List::Util::reduce()> has also been fixed.
+L<[cpan #63211]|https://rt.cpan.org/Ticket/Display.html?id=63211>
+
+=item *
+
+L<SDBM_File> has been upgraded to version 1.13.
+
+Simplified the build process.  [perl #123413]
+
+=item *
+
+L<Time::Piece> has been upgraded to version 1.29.
+
+When pretty printing negative Time::Seconds, the "minus" is no longer lost.
+
+=item *
+
+L<Unicode::Collate> has been upgraded to version 1.07.
+
+Version 0.67's improved discontiguous contractions is invalidated by default
+and is supported as a parameter 'long_contraction'.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded to version 1.18.
+
+The XSUB implementation has been removed in favour of pure Perl.
 
 =item *
 
@@ -1201,6 +1171,29 @@ This module now works on EBCDIC platforms.
 
 =item *
 
+L<UNIVERSAL> has been upgraded to version 1.12.
+
+L<B::Op_private> provides detailed information about the flags used in the
+C<op_private> field of perl opcodes.
+
+=item *
+
+L<utf8> has been upgraded to version 1.17
+
+A mismatch between the documentation and the code in utf8::downgrade()
+was fixed in favour of the documentation. The optional second argument
+is now correctly treated as a perl boolean (true/false semantics) and
+not as an integer.
+
+=item *
+
+L<version> has been upgraded to version 0.9909.
+
+Numerous changes.  See the F<Changes> file in the CPAN distribution for
+details.
+
+=item *
+
 L<Win32> has been upgraded to version 0.51.
 
 GetOSName() now supports Windows 8.1, and building in C++ mode now works.
@@ -1210,6 +1203,13 @@ GetOSName() now supports Windows 8.1, and building in C++ mode now works.
 L<Win32API::File> has been upgraded to version 0.1202
 
 Building in C++ mode now works.
+
+=item *
+
+L<XSLoader> has been upgraded to version 0.18.
+
+Allow XSLoader to load modules from a different namespace.
+[perl #122455]
 
 =back
 
