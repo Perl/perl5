@@ -6901,14 +6901,22 @@ eliminate any C<NaN>s from the input list.
 
     @result = sort { $a <=> $b } grep { $_ == $_ } @input;
 
-=item splice ARRAY or EXPR,OFFSET,LENGTH,LIST
+=item splice ARRAY,OFFSET,LENGTH,LIST
 X<splice>
 
-=item splice ARRAY or EXPR,OFFSET,LENGTH
+=item splice ARRAY,OFFSET,LENGTH
 
-=item splice ARRAY or EXPR,OFFSET
+=item splice ARRAY,OFFSET
 
-=item splice ARRAY or EXPR
+=item splice ARRAY
+
+=item splice EXPR,OFFSET,LENGTH,LIST
+
+=item splice EXPR,OFFSET,LENGTH
+
+=item splice EXPR,OFFSET
+
+=item splice EXPR
 
 =for Pod::Functions add or remove elements anywhere in an array
 
