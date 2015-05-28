@@ -8902,13 +8902,13 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
 package main;
 
     sub display_chr {
-        # Converts an ordinal character value to a displayable string, using a
-        # NBSP to hold combining characters.
+        # Converts an ordinal printable character value to a displayable
+        # string, using a dotted circle to hold combining characters.
 
         my $ord = shift;
         my $chr = chr $ord;
         return $chr if $ccc->table(0)->contains($ord);
-        return chr(utf8::unicode_to_native(0xA0)) . $chr;
+        return "\x{25CC}$chr";
     }
 
 sub join_lines($) {
