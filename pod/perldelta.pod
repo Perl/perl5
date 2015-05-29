@@ -721,8 +721,7 @@ statement.  Without the initial C<+>, C<sub> would be a statement label.
 C<BEGIN> blocks are now emitted in the right place most of the time, but
 the change unfortunately introduced a regression, in that C<BEGIN> blocks
 occurring just before the end of the enclosing block may appear below it
-instead.  XXX So this change may need to be reverted if it cannot be fixed
-before Perl 5.22.  [perl #77452]
+instead.
 
 C<B::Deparse> no longer puts erroneous C<local> here and there, such as for
 C<LIST = tr/a//d>.  [perl #119815]
