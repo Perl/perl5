@@ -176,14 +176,6 @@ is now implemented on Win32.  It has the same limitations as C<system
 LIST> on Win32, since the Win32 API doesn't accept program arguments
 as a list.
 
-=head2 C<close> now sets C<$!>
-
-When an I/O error occurs, the fact that there has been an error is recorded
-in the handle.  C<close> returns false for such a handle.  Previously, the
-value of C<$!> would be untouched by C<close>, so the common convention of
-writing S<C<close $fh or die $!>> did not work reliably.  Now the handle
-records the value of C<$!>, too, and C<close> restores it.
-
 =head2 Assignment to list repetition
 
 C<(...) x ...> can now be used within a list that is assigned to, as long
@@ -2955,6 +2947,16 @@ index is still done using C<aelemfast>.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+C<close> now sets C<$!>
+
+When an I/O error occurs, the fact that there has been an error is recorded
+in the handle.  C<close> returns false for such a handle.  Previously, the
+value of C<$!> would be untouched by C<close>, so the common convention of
+writing S<C<close $fh or die $!>> did not work reliably.  Now the handle
+records the value of C<$!>, too, and C<close> restores it.
 
 =item *
 
