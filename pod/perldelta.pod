@@ -144,7 +144,7 @@ L<[perl #123514]|https://rt.perl.org/Ticket/Display.html?id=123514>.
 
 The C<const> attribute can be applied to an anonymous subroutine.  It
 causes the new sub to be executed immediately whenever one is created
-(i.e. when the C<sub> expression is evaluated).  Its value is captured
+(I<i.e.> when the C<sub> expression is evaluated).  Its value is captured
 and used to create a new constant subroutine that is returned.  This
 feature is experimental.  See L<perlsub/Constant Functions>.
 
@@ -614,7 +614,7 @@ Subroutines in packages no longer need to be stored in typeglobs:
 declaring a subroutine will now put a simple sub reference directly in the
 stash if possible, saving memory.  The typeglob still notionally exists,
 so accessing it will cause the stash entry to be upgraded to a typeglob
-(i.e. this is just an internal implementation detail).
+(I<i.e.> this is just an internal implementation detail).
 This optimization does not currently apply to XSUBs or exported
 subroutines, and method calls will undo it, since they cache things in
 typeglobs.
@@ -716,7 +716,7 @@ Adjacent C<use> statements are no longer accidentally nested if one
 contains a C<do> block.  [perl #115066]
 
 Parenthesised arrays in lists passed to C<\> are now correctly deparsed
-with parentheses (e.g., C<\(@a, (@b), @c)> now retains the parentheses
+with parentheses (I<e.g.>, C<\(@a, (@b), @c)> now retains the parentheses
 around @b), this preserving the flattening behaviour of referenced
 parenthesised arrays.  Formerly, it only worked for one array: C<\(@a)>.
 
@@ -769,7 +769,7 @@ Non-ASCII characters are now consistently escaped in strings, instead of
 some of the time.  (There are still outstanding problems with regular
 expressions and identifiers that have not been fixed.)
 
-When prototype sub calls are deparsed with C<&> (e.g., under the B<-P>
+When prototype sub calls are deparsed with C<&> (I<e.g.>, under the B<-P>
 option), C<scalar> is now added where appropriate, to force the scalar
 context implied by the prototype.
 
@@ -2060,9 +2060,9 @@ L<Redundant argument in %s|perldiag/Redundant argument in %s>
 
 (W redundant) You called a function with more arguments than were
 needed, as indicated by information within other arguments you supplied
-(e.g. a printf format). Currently only emitted when a printf-type format
+(I<e.g>. a printf format). Currently only emitted when a printf-type format
 required fewer arguments than were supplied, but might be used in the
-future for e.g. L<perlfunc/pack>.
+future for I<e.g.> L<perlfunc/pack>.
 
 The warnings category C<< redundant >> is new. See also
 L<[perl #121025]|https://rt.perl.org/Ticket/Display.html?id=121025>.
@@ -2171,8 +2171,8 @@ L<Warning: unable to close filehandle properly: %s|perldiag/"Warning: unable to 
 L<Warning: unable to close filehandle %s properly: %s|perldiag/"Warning: unable to close filehandle %s properly: %s">
 
 (S io) Previously, perl silently ignored any errors when doing an implicit
-close of a filehandle, i.e. where the reference count of the filehandle
-reached zero and the user's code hadn't already called C<close()>; e.g.
+close of a filehandle, I<i.e.> where the reference count of the filehandle
+reached zero and the user's code hadn't already called C<close()>; I<e.g.>
 
     {
         open my $fh, '>', $file  or die "open: '$file': $!\n";
@@ -2294,13 +2294,13 @@ behaviour added.
 "Ambiguous use of -foo resolved as -&foo()"
 
 There is actually no ambiguity here, and this impedes the use of negated
-constants; e.g., C<-Inf>.
+constants; I<e.g.>, C<-Inf>.
 
 =item *
 
 "Constant is not a FOO reference"
 
-Compile-time checking of constant dereferencing (e.g., C<< my_constant->() >>)
+Compile-time checking of constant dereferencing (I<e.g.>, C<< my_constant->() >>)
 has been removed, since it was not taking overloading into account.
 L<[perl #69456]|https://rt.perl.org/Ticket/Display.html?id=69456>
 L<[perl #122607]|https://rt.perl.org/Ticket/Display.html?id=122607>
@@ -2681,7 +2681,7 @@ also updating C<op_moresib>.  The first sets the sibling pointer to a new
 sibling, the second makes the op the last sibling, and the third
 conditionally does the first or second action.  Note that unlike
 C<op_sibling_splice()> these macros won't maintain consistency in the
-parent at the same time (e.g. by updating C<op_first> and C<op_last> where
+parent at the same time (I<e.g.> by updating C<op_first> and C<op_last> where
 appropriate).
 
 A C-level C<Perl_op_parent()> function and a Perl-level C<B::OP::parent()>
@@ -2713,7 +2713,7 @@ inverted.
 =item *
 
 The macro C<OpSIBLING_set> has been removed, and has been superseded by
-C<OpMORESIB_set> et al.
+C<OpMORESIB_set> I<et al>.
 
 =item *
 
@@ -2730,7 +2730,7 @@ category C<LC_NUMERIC>.  See L<perlapi/Locale-related functions and macros>.
 
 =item *
 
-The previous C<atoi> et al replacement function, C<grok_atou>, has now been
+The previous C<atoi> I<et al> replacement function, C<grok_atou>, has now been
 superseded by C<grok_atoUV>.  See L<perlclib> for details.
 
 =item *
@@ -3519,7 +3519,7 @@ bareword is not going to be a subroutine name.
 
 =item *
 
-Compilation of anonymous constants (e.g., C<sub () { 3 }>) no longer deletes
+Compilation of anonymous constants (I<e.g.>, C<sub () { 3 }>) no longer deletes
 any subroutine named C<__ANON__> in the current package.  Not only was
 C<*__ANON__{CODE}> cleared, but there was a memory leak, too.  This bug goes
 back to Perl 5.8.0.
@@ -3627,7 +3627,7 @@ routine.
 
 =item *
 
-Aliasing (e.g., via S<C<*x = *y>>) could confuse list assignments that mention the
+Aliasing (I<e.g.>, via S<C<*x = *y>>) could confuse list assignments that mention the
 two names for the same variable on either side, causing wrong values to be
 assigned.
 L<[perl #15667]|https://rt.perl.org/Ticket/Display.html?id=15667>
@@ -3742,7 +3742,7 @@ L<[perl #122950]|https://rt.perl.org/Ticket/Display.html?id=122950>.
 =item *
 
 Fixed a bug that could cause perl to enter an infinite loop during
-compilation. In particular, a C<while(1)> within a sublist, e.g.
+compilation. In particular, a C<while(1)> within a sublist, I<e.g.>
 
     sub foo { () = ($a, my $b, ($c, do { while(1) {} })) }
 
