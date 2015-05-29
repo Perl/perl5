@@ -112,6 +112,7 @@ Log::Message::Config
 Log::Message::Handlers
 Log::Message::Item
 Log::Message::Simple
+LWP::ConsoleLogger
 Mail::Send
 Mail::SpamAssassin
 man(5)

@@ -3874,8 +3874,8 @@ C<pack>/C<unpack> with C<"U0"> format may not work properly.
 =item *
 
 The following modules are known to have test failures with this version of
-Perl.  Patches have been submitted, so there will hopefully be new releases
-soon:
+Perl.  In many cases, patches have been submitted, so there will hopefully be
+new releases soon:
 
 =over
 
@@ -3897,6 +3897,10 @@ L<Data::Alias> version 1.18
 
 =item *
 
+L<Data::Dump::Streamer> version 2.38
+
+=item *
+
 L<Data::Util> version 0.63
 
 =item *
@@ -3910,6 +3914,10 @@ L<invoker> version 0.34
 =item *
 
 L<Lexical::Var> version 0.009
+
+=item *
+
+L<LWP::ConsoleLogger> version 0.000018
 
 =item *
 
