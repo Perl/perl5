@@ -2053,7 +2053,7 @@ L<[perl #121025]|https://rt.perl.org/Ticket/Display.html?id=121025>.
 
 L<Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale|perldiag/"Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale">
 
-You are matching a regular expression using locale rules,
+(W locale) You are matching a regular expression using locale rules,
 and a Unicode boundary is being matched, but the locale is not a Unicode
 one.  This doesn't make sense.  Perl will continue, assuming a Unicode
 (UTF-8) locale, but the results could well be wrong except if the locale
@@ -2064,7 +2064,7 @@ be ignored.
 
 L<< Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>
 
-You used a Unicode boundary (C<\b{...}> or C<\B{...}>) in a
+(W regexp) You used a Unicode boundary (C<\b{...}> or C<\B{...}>) in a
 portion of a regular expression where the character set modifiers C</a>
 or C</aa> are in effect.  These two modifiers indicate an ASCII
 interpretation, and this doesn't make sense for a Unicode definition.
@@ -2075,7 +2075,7 @@ all of Unicode.  No other portion of the regular expression is affected.
 
 L<The bitwise feature is experimental|perldiag/"The bitwise feature is experimental">
 
-This warning is emitted if you use bitwise
+(S experimental::bitwise) This warning is emitted if you use bitwise
 operators (C<& | ^ ~ &. |. ^. ~.>) with the "bitwise" feature enabled.
 Simply suppress the warning if you want to use the feature, but know
 that in doing so you are taking the risk of using an experimental
