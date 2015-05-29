@@ -1907,6 +1907,15 @@ the warning gets raised.
 
 =item *
 
+L<Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".|perldiag/Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".>
+
+(W locale) You are 1) running under "C<use locale>"; 2) the current
+locale is not a UTF-8 one; 3) you tried to do the designated case-change
+operation on the specified Unicode character; and 4) the result of this
+operation would mix Unicode and locale rules, which likely conflict.
+
+=item *
+
 L<:const is experimental|perldiag/":const is experimental">
 
 (S experimental::const_attr) The "const" attribute is experimental.
@@ -1951,6 +1960,14 @@ L<Hexadecimal float: precision loss|perldiag/"Hexadecimal float: precision loss"
 digits than could be output.  This can be caused by unsupported
 long double formats, or by 64-bit integers not being available
 (needed to retrieve the digits under some configurations).
+
+=item *
+
+L<Locale '%s' may not work well.%s|perldiag/Locale '%s' may not work well.%s>
+
+(W locale) You are using the named locale, which is a non-UTF-8 one, and
+which perl has determined is not fully compatible with what it can
+handle.  The second C<%s> gives a reason.
 
 =item *
 
@@ -2051,6 +2068,15 @@ L<[perl #121025]|https://rt.perl.org/Ticket/Display.html?id=121025>.
 
 =item *
 
+L<Replacement list is longer than search list|perldiag/Replacement list is longer than search list>
+
+This is not a new diagnostic, but in earlier releases was accidentally
+not displayed if the transliteration contained wide characters.  This is
+now fixed, so that you may see this diagnostic in places where you
+previously didn't (but should have).
+
+=item *
+
 L<Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale|perldiag/"Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale">
 
 (W locale) You are matching a regular expression using locale rules,
@@ -2117,6 +2143,15 @@ inside an attribute handler for an anonymous subroutine.
 
 =item *
 
+L<Useless use of E<sol>d modifier in transliteration operator|perldiag/"Useless use of /d modifier in transliteration operator">
+
+This is not a new diagnostic, but in earlier releases was accidentally
+not displayed if the transliteration contained wide characters.  This is
+now fixed, so that you may see this diagnostic in places where you
+previously didn't (but should have).
+
+=item *
+
 L<E<quot>use re 'strict'E<quot> is experimental|perldiag/"use re 'strict'" is experimental>
 
 (S experimental::re_strict) The things that are different when a regular
@@ -2162,42 +2197,6 @@ also does 0x393.  This will make string comparisons unreliable.
 You likely need to figure out how this multi-byte character got mixed up
 with your single-byte locale (or perhaps you thought you had a UTF-8
 locale, but Perl disagrees).
-
-=item *
-
-The following two warnings for C<tr///> used to be skipped if the
-transliteration contained wide characters, but now they occur regardless of
-whether there are wide characters or not:
-
-L<Useless use of E<sol>d modifier in transliteration operator|perldiag/"Useless use of /d modifier in transliteration operator">
-
-L<Replacement list is longer than search list|perldiag/Replacement list is longer than search list>
-
-=item *
-
-A new C<locale> warning category has been created, with the following warning
-messages currently in it:
-
-=over 4
-
-=item *
-
-L<Locale '%s' may not work well.%s|perldiag/Locale '%s' may not work well.%s>
-
-(W locale) You are using the named locale, which is a non-UTF-8 one, and
-which Perl has determined is not fully compatible with Perl.  The second
-C<%s> gives a reason.
-
-=item *
-
-L<Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".|perldiag/Can't do %s("%s") on non-UTF-8 locale; resolved to "%s".>
-
-(W locale) You are 1) running under "C<use locale>"; 2) the current
-locale is not a UTF-8 one; 3) you tried to do the designated case-change
-operation on the specified Unicode character; and 4) the result of this
-operation would mix Unicode and locale rules, which likely conflict.
-
-=back
 
 =back
 
