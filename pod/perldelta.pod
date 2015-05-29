@@ -1914,6 +1914,8 @@ locale is not a UTF-8 one; 3) you tried to do the designated case-change
 operation on the specified Unicode character; and 4) the result of this
 operation would mix Unicode and locale rules, which likely conflict.
 
+The warnings category C<locale> is new.
+
 =item *
 
 L<:const is experimental|perldiag/":const is experimental">
@@ -1968,6 +1970,8 @@ L<Locale '%s' may not work well.%s|perldiag/Locale '%s' may not work well.%s>
 (W locale) You are using the named locale, which is a non-UTF-8 one, and
 which perl has determined is not fully compatible with what it can
 handle.  The second C<%s> gives a reason.
+
+The warnings category C<locale> is new.
 
 =item *
 
@@ -2086,6 +2090,8 @@ one.  This doesn't make sense.  Perl will continue, assuming a Unicode
 happens to be ISO-8859-1 (Latin1) where this message is spurious and can
 be ignored.
 
+The warnings category C<locale> is new.
+
 =item *
 
 L<< Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|perldiag/"Using E<sol>u for '%s' instead of E<sol>%s in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>
@@ -2197,6 +2203,8 @@ also does 0x393.  This will make string comparisons unreliable.
 You likely need to figure out how this multi-byte character got mixed up
 with your single-byte locale (or perhaps you thought you had a UTF-8
 locale, but Perl disagrees).
+
+The warnings category C<locale> is new.
 
 =back
 
