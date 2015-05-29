@@ -17,6 +17,21 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.22.0-RC2 - T.S. Eliot, unpublished work
+
+L<Announced on 2015-05-21 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2015/05/msg228142.html>
+
+  And when thyself with silver foot shall pass
+  Among the theories scattered on the grass
+  Take up my good intentions with the rest
+
+=head2 v5.22.0-RC1 - Gene Wolfe, Citadel of the Autarch
+
+L<Announced on 2015-05-19 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2015/05/msg228059.html>
+
+There is no limit to stupidity. Space itself is said to be bounded by
+its own curvature, but stupidity continues beyond infinity.
+
 =head2 v5.21.11 - Algernon Charles Swinburne, "Dolores (Notre-Dame des Sept Douleurs)"
 
 L<Announced on 2015-04-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/04/msg227472.html>
