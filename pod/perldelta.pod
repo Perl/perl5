@@ -1841,6 +1841,24 @@ be parsed as a valid number - either it has leading zeroes, or it represents
 too big a number to cope with.  The S<<-- HERE> shows where in the regular
 expression the problem was discovered.  See L<perlre>.
 
+=item *
+
+L<'%s' is an unknown bound type in regex|perldiag/"'%s' is an unknown bound type in regex; marked by <-- HERE in m/%s/">
+
+(F) You used C<\b{...}> or C<\B{...}> and the C<...> is not known to
+Perl.  The current valid ones are given in
+L<perlrebackslash/\b{}, \b, \B{}, \B>.
+
+=item *
+
+L<Missing or undefined argument to require|perldiag/Missing or undefined argument to require>
+
+(F) You tried to call C<require> with no argument or with an undefined
+value as an argument.  C<require> expects either a package name or a
+file-specification as an argument.  See L<perlfunc/require>.
+
+Formerly, C<require> with no argument or C<undef> warned about a Null filename.
+
 =back
 
 =head3 New Warnings
@@ -1856,14 +1874,6 @@ now emits a warning. It is intended that it will become an error in v5.24.
 This character class matches a single byte even if it appears within a
 multi-byte character, breaks encapsulation, and can corrupt UTF-8
 strings.
-
-=item *
-
-L<'%s' is an unknown bound type in regex|perldiag/"'%s' is an unknown bound type in regex; marked by <-- HERE in m/%s/">
-
-You used C<\b{...}> or C<\B{...}> and the C<...> is not known to
-Perl.  The current valid ones are given in
-L<perlrebackslash/\b{}, \b, \B{}, \B>.
 
 =item *
 
@@ -2194,16 +2204,6 @@ operation on the specified Unicode character; and 4) the result of this
 operation would mix Unicode and locale rules, which likely conflict.
 
 =back
-
-=item *
-
-L<Missing or undefined argument to require|perldiag/Missing or undefined argument to require>
-
-(F) You tried to call C<require> with no argument or with an undefined
-value as an argument.  C<require> expects either a package name or a
-file-specification as an argument.  See L<perlfunc/require>.
-
-Formerly, C<require> with no argument or C<undef> warned about a Null filename.
 
 =back
 
