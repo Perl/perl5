@@ -58,12 +58,6 @@ C<sb> stands for Sentence Boundary.  It is a Unicode property
 to aid in parsing natural language sentences.
 See L<perlrebackslash/\b{}, \b, \B{}, \B> for details.
 
-=head2 C<no re> covers more and is lexical
-
-Previously running C<no re> would turn off only a few things. Now it
-turns off all the enabled things. For example, previously, you
-couldn't turn off debugging, once enabled, inside the same block.
-
 =head2 Non-Capturing Regular Expression Flag
 
 Regular expressions now support a C</n> flag that disables capturing
@@ -2957,6 +2951,15 @@ in the handle.  C<close> returns false for such a handle.  Previously, the
 value of C<$!> would be untouched by C<close>, so the common convention of
 writing S<C<close $fh or die $!>> did not work reliably.  Now the handle
 records the value of C<$!>, too, and C<close> restores it.
+
+=item *
+
+C<no re> now can turn off everything that C<use re> enables
+
+Previously, running C<no re> would turn off only a few things. Now it
+can turn off all the enabled things. For example, the only way to
+stop debugging, once enabled, was to exit the enclosing block; that is
+now fixed.
 
 =item *
 
