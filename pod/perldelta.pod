@@ -271,7 +271,8 @@ L<[perl #77860]|https://rt.perl.org/Ticket/Display.html?id=77860>.
 
 The L<encoding> pragma's effect is now limited to lexical scope.  This
 pragma is deprecated, but in the meantime, it could adversely affect
-unrelated modules that are included in the same program.
+unrelated modules that are included in the same program; this change
+fixes that.
 
 =head2 List slices returning empty lists
 
@@ -306,7 +307,7 @@ The C</x> regular expression modifier allows the pattern to contain
 white space and comments (both of which are ignored) for improved
 readability.  Until now, not all the white space characters that Unicode
 designates for this purpose were handled.  The additional ones now
-recognized are
+recognized are:
 
     U+0085 NEXT LINE
     U+200E LEFT-TO-RIGHT MARK
@@ -830,6 +831,7 @@ point.
 L<[perl #121574]|https://rt.perl.org/Ticket/Display.html?id=121574>
 
 Carp now handles non-ASCII platforms better.
+
 Off-by-one error fix for Perl E<lt> 5.14.
 
 =item *
@@ -1318,7 +1320,6 @@ Improve documentation of C<< our >>.
 
 C<-l> now notes that it will return false if symlinks aren't supported by the
 file system.
-
 L<[perl #121523]|https://rt.perl.org/Ticket/Display.html?id=121523>
 
 =item *
@@ -1389,7 +1390,6 @@ recommended.
 =item *
 
 Updated documentation for the C<test.valgrind> C<make> target.
-
 L<[perl #121431]|https://rt.perl.org/Ticket/Display.html?id=121431>
 
 =item *
@@ -1534,8 +1534,8 @@ Clarifications have been added to L<perlrecharclass/Character Ranges>
 to the effect C<[A-Z]>, C<[a-z]>, C<[0-9]> and
 any subranges thereof in regular expression bracketed character classes
 are guaranteed to match exactly what a naive English speaker would
-expect them to match, even on platforms (such as EBCDIC) where special
-handling is required to accomplish this.
+expect them to match, even on platforms (such as EBCDIC) where perl
+has to do extra work to accomplish this.
 
 =item *
 
@@ -1817,7 +1817,7 @@ and the C<"*">, but you separated them.
 L<Invalid quantifier in {,} in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Invalid quantifier in {,} in regex; marked by <-- HERE in m/%s/">
 
 (F) The pattern looks like a {min,max} quantifier, but the min or max could not
-be parsed as a valid number - either it has leading zeroes, or it represents
+be parsed as a valid number: either it has leading zeroes, or it represents
 too big a number to cope with.  The S<<-- HERE> shows where in the regular
 expression the problem was discovered.  See L<perlre>.
 
@@ -2552,7 +2552,7 @@ Windows makefiles.
 
 =item *
 
-Previously compiling XS modules (including CPAN ones) using Visual C++ for
+Previously, compiling XS modules (including CPAN ones) using Visual C++ for
 Win64 resulted in around a dozen warnings per file from F<hv_func.h>.  These
 warnings have been silenced.
 
@@ -2809,7 +2809,7 @@ were formerly not regarded as part of the API.)
 =item *
 
 A new opcode class, C<< METHOP >>, has been introduced. It holds
-information used at runtime for improve the performance
+information used at runtime to improve the performance
 of class/object method calls.
 
 C<< OP_METHOD >> and C<< OP_METHOD_NAMED >> have changed from being
@@ -2916,7 +2916,7 @@ A new op class, C<UNOP_AUX>, has been added. This is a subclass of
 C<UNOP> with an C<op_aux> field added, which points to an array of unions
 of UV, SV* etc. It is intended for where an op needs to store more data
 than a simple C<op_sv> or whatever. Currently the only op of this type is
-C<OP_MULTIDEREF> (see below).
+C<OP_MULTIDEREF> (see next item).
 
 =item *
 
