@@ -652,13 +652,13 @@ Some notable changes include:
 
 =item *
 
-L<Archive::Tar> has been upgraded to version 2.02.
+L<Archive::Tar> has been upgraded to version 2.04.
 
 Tests can now be run in parallel.
 
 =item *
 
-L<attributes> has been upgraded to version 0.24.
+L<attributes> has been upgraded to version 0.27.
 
 The usage of C<memEQs> in the XS has been corrected.
 L<[perl #122701]|https://rt.perl.org/Ticket/Display.html?id=122701>
@@ -667,7 +667,7 @@ Avoid reading beyond the end of a buffer. [perl #122629]
 
 =item *
 
-L<B> has been upgraded to version 1.55.
+L<B> has been upgraded to version 1.58.
 
 It provides a new C<B::safename> function, based on the existing
 C<< B::GV->SAFENAME >>, that converts "\cOPEN" to "^OPEN".
@@ -689,7 +689,7 @@ The C<id> and C<outid> PADLIST methods have been added.
 
 =item *
 
-L<B::Concise> has been upgraded to version 0.994.
+L<B::Concise> has been upgraded to version 0.996.
 
 Null ops that are part of the execution chain are now given sequence
 numbers.
@@ -815,10 +815,10 @@ this has now been fixed.
 
 =item *
 
-L<B::Op_private> has been upgraded to version 5.021006.
+L<B::Op_private> has been added.
 
-It now includes a hash named C<%ops_using>, list all op types that use a
-particular private flag.
+L<B::Op_private> provides detailed information about the flags used in the
+C<op_private> field of perl opcodes.
 
 =item *
 
@@ -829,7 +829,7 @@ the big number overloading, and how to invoke it.  [rt.perl.org #123064]
 
 =item *
 
-L<Carp> has been upgraded to version 1.35.
+L<Carp> has been upgraded to version 1.36.
 
 Carp::Heavy now ignores version mismatches with Carp if Carp is newer
 than 1.12, since Carp::Heavy's guts were merged into Carp at that
@@ -841,14 +841,14 @@ Off-by-one error fix for Perl E<lt> 5.14.
 
 =item *
 
-L<constant> has been upgraded to version 1.32.
+L<constant> has been upgraded to version 1.33.
 
 It now accepts fully-qualified constant names, allowing constants to be defined
 in packages other than the caller.
 
 =item *
 
-L<CPAN> has been upgraded to version 2.10.
+L<CPAN> has been upgraded to version 2.11.
 
 Add support for C<Cwd::getdcwd()> and introduce workaround for a misbehaviour
 seen on Strawberry Perl 5.20.1.
@@ -866,7 +866,7 @@ L<[cpan #95271]|https://rt.cpan.org/Ticket/Display.html?id=95271>
 
 =item *
 
-L<CPAN::Meta::Requirements> has been upgraded to version 2.128.
+L<CPAN::Meta::Requirements> has been upgraded to version 2.132.
 
 Works around limitations in version::vpp detecting v-string magic and adds
 support for forthcoming L<ExtUtils::MakeMaker> bootstrap F<version.pm> for
@@ -874,7 +874,7 @@ Perls older than 5.10.0.
 
 =item *
 
-L<Data::Dumper> has been upgraded to version 2.154.
+L<Data::Dumper> has been upgraded to version 2.158.
 
 Fixes CVE-2014-4330 by adding a configuration variable/option to limit
 recursion when dumping deep data structures.
@@ -886,13 +886,13 @@ L<[perl #122070]|https://rt.perl.org/Ticket/Display.html?id=122070>
 
 =item *
 
-L<DynaLoader> has been upgraded to version 1.27.
+L<DynaLoader> has been upgraded to version 1.32.
 
 Remove C<dl_nonlazy> global if unused in Dynaloader. [perl #122926]
 
 =item *
 
-L<Encode> has been upgraded to version 2.70.
+L<Encode> has been upgraded to version 2.72.
 
 C<piconv> now has better error handling when the encoding name is nonexistent,
 and a build breakage when upgrading L<Encode> in perl-5.8.2 and earlier has
@@ -910,20 +910,20 @@ line directives, breaking parsing of error code definitions.  [rt.perl.org
 
 =item *
 
-L<experimental> has been upgraded to version 0.010.
+L<experimental> has been upgraded to version 0.013.
 
 Hardcodes features for Perls older than 5.15.7.
 
 =item *
 
-L<ExtUtils::CBuilder> has been upgraded to version 0.280219.
+L<ExtUtils::CBuilder> has been upgraded to version 0.280221.
 
 Fixes a regression on Android.
 L<[perl #122675]|https://rt.perl.org/Ticket/Display.html?id=122675>
 
 =item *
 
-L<ExtUtils::Manifest> has been upgraded to version 1.68.
+L<ExtUtils::Manifest> has been upgraded to version 1.70.
 
 Fixes a bug with C<maniread()>'s handling of quoted filenames and improves
 C<manifind()> to follow symlinks.
@@ -931,7 +931,7 @@ L<[perl #122415]|https://rt.perl.org/Ticket/Display.html?id=122415>
 
 =item *
 
-L<ExtUtils::ParseXS> has been upgraded to version 3.27.
+L<ExtUtils::ParseXS> has been upgraded to version 3.28.
 
 Only declare C<file> unused if we actually define it.
 Improve generated C<RETVAL> code generation to avoid repeated
@@ -947,7 +947,7 @@ Add support for the Linux pipe buffer size fcntl() commands.
 
 =item *
 
-L<File::Find> has been upgraded to version 1.28.
+L<File::Find> has been upgraded to version 1.29.
 
 C<find()> and C<finddepth()> will now warn if passed inappropriate or
 misspelled options.
@@ -961,13 +961,13 @@ places. [perl #123606]
 
 =item *
 
-L<HTTP::Tiny> has been upgraded to version 0.049.
+L<HTTP::Tiny> has been upgraded to version 0.054.
 
 C<keep_alive> is now fork-safe and thread-safe.
 
 =item *
 
-L<IO> has been upgraded to version 1.34.
+L<IO> has been upgraded to version 1.35.
 
 The XS implementation has been fixed for the sake of older Perls.
 
@@ -979,7 +979,7 @@ Document the limitations of the connected() method.  [perl #123096]
 
 =item *
 
-L<IO::Socket::IP> has been upgraded to version 0.32.
+L<IO::Socket::IP> has been upgraded to version 0.37.
 
 A better fix for subclassing C<connect()>.
 L<[cpan #95983]|https://rt.cpan.org/Ticket/Display.html?id=95983>
@@ -990,14 +990,14 @@ L<[cpan #92075]|https://rt.cpan.org/Ticket/Display.html?id=92075>
 
 =item *
 
-The libnet collection of modules has been upgraded to version 3.02.
+The libnet collection of modules has been upgraded to version 3.05.
 
 Support for IPv6 and SSL to Net::FTP, Net::NNTP, Net::POP3 and Net::SMTP.
 Improvements in Net::SMTP authentication.
 
 =item *
 
-L<Locale::Codes> has been upgraded to version 3.32.
+L<Locale::Codes> has been upgraded to version 3.34.
 
 Fixed a bug in the scripts used to extract data from spreadsheets that
 prevented the SHP currency code from being found.
@@ -1007,7 +1007,7 @@ New codes have been added.
 
 =item *
 
-L<Math::BigInt> has been upgraded to version 1.9996.
+L<Math::BigInt> has been upgraded to version 1.9997.
 
 Synchronize POD changes from the CPAN release.
 C<< Math::BigFloat->blog(x) >> would sometimes return blog(2*x) when
@@ -1021,20 +1021,20 @@ L<[cpan #96329]|https://rt.cpan.org/Ticket/Display.html?id=96329>
 
 =item *
 
-L<Module::Metadata> has been upgraded to version 1.000024.
+L<Module::Metadata> has been upgraded to version 1.000026.
 
 Support installations on older perls with an L<ExtUtils::MakeMaker> earlier
 than 6.63_03
 
 =item *
 
-L<overload> has been upgraded to version 1.23.
+L<overload> has been upgraded to version 1.26.
 
 A redundant C<ref $sub> check has been removed.
 
 =item *
 
-The PathTools module collection has been upgraded to version 3.53.
+The PathTools module collection has been upgraded to version 3.56.
 
 A warning from the B<gcc> compiler is now avoided when building the XS.
 
@@ -1073,14 +1073,14 @@ fail early rather than wrapping at 4GB.
 
 =item *
 
-L<Pod::Perldoc> has been upgraded to version 3.24.
+L<Pod::Perldoc> has been upgraded to version 3.25.
 
 Filehandles opened for reading or writing now have C<:encoding(UTF-8)> set.
 L<[cpan #98019]|https://rt.cpan.org/Ticket/Display.html?id=98019>
 
 =item *
 
-L<POSIX> has been upgraded to version 1.45.
+L<POSIX> has been upgraded to version 1.53.
 
 The C99 math functions and constants (for example C<acosh>, C<isinf>, C<isnan>, C<round>,
 C<trunc>; C<M_E>, C<M_SQRT2>, C<M_PI>) have been added.
@@ -1117,7 +1117,7 @@ When pretty printing negative Time::Seconds, the "minus" is no longer lost.
 
 =item *
 
-L<Unicode::Collate> has been upgraded to version 1.07.
+L<Unicode::Collate> has been upgraded to version 1.12.
 
 Version 0.67's improved discontiguous contractions is invalidated by default
 and is supported as a parameter 'long_contraction'.
@@ -1158,9 +1158,6 @@ This module now works on EBCDIC platforms.
 
 L<UNIVERSAL> has been upgraded to version 1.12.
 
-L<B::Op_private> provides detailed information about the flags used in the
-C<op_private> field of perl opcodes.
-
 =item *
 
 L<utf8> has been upgraded to version 1.17
@@ -1191,7 +1188,7 @@ Building in C++ mode now works.
 
 =item *
 
-L<XSLoader> has been upgraded to version 0.18.
+L<XSLoader> has been upgraded to version 0.20.
 
 Allow XSLoader to load modules from a different namespace.
 [perl #122455]
