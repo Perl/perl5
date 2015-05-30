@@ -3049,7 +3049,7 @@ L<[perl #123743]|https://rt.perl.org/Ticket/Display.html?id=123743>.
 The original visible value of C<$/> is now preserved when it is set to
 an invalid value.  Previously if you set C<$/> to a reference to an
 array, for example, perl would produce a runtime error and not set
-C<PL_rs>, but perl code that checked C<$/> would see the array
+C<PL_rs>, but Perl code that checked C<$/> would see the array
 reference.
 L<[perl #123218]|https://rt.perl.org/Ticket/Display.html?id=123218>.
 
