@@ -1149,10 +1149,6 @@ This module now works on EBCDIC platforms.
 
 =item *
 
-L<UNIVERSAL> has been upgraded to version 1.12.
-
-=item *
-
 L<utf8> has been upgraded to version 1.17
 
 A mismatch between the documentation and the code in C<utf8::downgrade()>
