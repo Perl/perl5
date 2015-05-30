@@ -3043,8 +3043,8 @@ likely fix this error.
 =item Locale '%s' may not work well.%s
 
 (W locale) You are using the named locale, which is a non-UTF-8 one, and
-which Perl has determined is not fully compatible with Perl.  The second
-C<%s> gives a reason.
+which perl has determined is not fully compatible with what it can
+handle.  The second C<%s> gives a reason.
 
 By far the most common reason is that the locale has characters in it
 that are represented by more than one byte.  The only such locales that
