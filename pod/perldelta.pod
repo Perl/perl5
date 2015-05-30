@@ -739,8 +739,6 @@ It now deparses C<our(I<LIST>)> and typed lexical (C<my Dog $spot>) correctly.
 Deparse C<$#_> as that instead of as C<$#{_}>.
 L<[perl #123947]|https://rt.perl.org/Ticket/Display.html?id=123947>
 
-C<< <<>> >> is now correctly deparsed.
-
 BEGIN blocks at the end of the enclosing scope are now deparsed in the
 right place.  [perl #77452]
 
@@ -748,9 +746,6 @@ BEGIN blocks were sometimes deparsed as __ANON__, but are now always called
 BEGIN.
 
 Lexical subroutines are now fully deparsed.  [perl #116553]
-
-Deparsing of C<$lexical =~ //> was accidentally broken in 1.30 (perl
-5.21.6), omitting the C<$lexical =~>, but has now been fixed.
 
 C<Anything =~ y///r> with C</r> no longer omits the left-hand operand.
 
@@ -810,8 +805,6 @@ loop.  The C<(;$>) C<(_)> and C<(;_)> prototypes were given the wrong
 precedence, causing C<foo($aE<lt>$b)> to be deparsed without the parentheses.
 
 Deparse now provides a defined state sub in inner subs.
-Since version Perl 5.21.6, Deparse would croak on special constants, but
-this has now been fixed.
 
 =item *
 
