@@ -384,8 +384,8 @@ XXX Generate this with:
 
 If you find what you think is a bug, you might check the articles recently
 posted to the comp.lang.perl.misc newsgroup and the perl bug database at
-https://rt.perl.org/ .  There may also be information at
-http://www.perl.org/ , the Perl Home Page.
+L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
 
 If you believe you have an unreported bug, please run the L<perlbug> program
 included with your release.  Be sure to trim your bug down to a tiny but
