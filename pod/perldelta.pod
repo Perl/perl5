@@ -389,7 +389,7 @@ deprecation warnings since then.
 
 The C<*> character in a subroutine's prototype used to allow barewords to take
 precedence over most, but not all, subroutine names.  It was never
-consistent and exhibited buggy behaviour.
+consistent and exhibited buggy behavior.
 
 Now it has been changed, so subroutines always take precedence over barewords,
 which brings it into conformity with similarly prototyped built-in functions:
@@ -426,7 +426,7 @@ utf8>>, and affects just the C1 controls (code points 0x80 through
 
 In many cases Perl makes S<C<sub () { $var }>> into an inlinable constant
 subroutine, capturing the value of C<$var> at the time the C<sub> expression
-is evaluated.  This can break the closure behaviour in those cases where
+is evaluated.  This can break the closure behavior in those cases where
 C<$var> is subsequently modified, since the subroutine won't return the
 changed value. (Note that this all only applies to anonymous subroutines
 with an empty prototype (S<C<sub ()>>).)
@@ -463,7 +463,7 @@ declaration is enough for Perl to find it suspicious.
 This deprecation warning happens only for a simple variable for the body of
 the sub.  (A C<BEGIN> block or C<use> statement inside the sub is ignored,
 because it does not become part of the sub's body.)  For more complex
-cases, such as S<C<sub () { do_something() if 0; $var }>> the behaviour has
+cases, such as S<C<sub () { do_something() if 0; $var }>> the behavior has
 changed such that inlining does not happen if the variable is modifiable
 elsewhere.  Such cases should be rare.
 
@@ -717,7 +717,7 @@ contains a C<do> block.  [perl #115066]
 
 Parenthesised arrays in lists passed to C<\> are now correctly deparsed
 with parentheses (I<e.g.>, C<\(@a, (@b), @c)> now retains the parentheses
-around @b), this preserving the flattening behaviour of referenced
+around @b), thus preserving the flattening behavior of referenced
 parenthesised arrays.  Formerly, it only worked for one array: C<\(@a)>.
 
 C<local our> is now deparsed correctly, with the C<our> included.
@@ -843,7 +843,7 @@ in packages other than the caller.
 
 L<CPAN> has been upgraded to version 2.11.
 
-Add support for C<Cwd::getdcwd()> and introduce workaround for a misbehaviour
+Add support for C<Cwd::getdcwd()> and introduce workaround for a misbehavior
 seen on Strawberry Perl 5.20.1.
 
 Fix C<chdir()> after building dependencies bug.
@@ -1119,7 +1119,7 @@ and is supported as a parameter C<long_contraction>.
 
 L<Unicode::Normalize> has been upgraded to version 1.18.
 
-The XSUB implementation has been removed in favour of pure Perl.
+The XSUB implementation has been removed in favor of pure Perl.
 
 =item *
 
@@ -1152,7 +1152,7 @@ This module now works on EBCDIC platforms.
 L<utf8> has been upgraded to version 1.17
 
 A mismatch between the documentation and the code in C<utf8::downgrade()>
-was fixed in favour of the documentation. The optional second argument
+was fixed in favor of the documentation. The optional second argument
 is now correctly treated as a perl boolean (true/false semantics) and
 not as an integer.
 
@@ -2270,7 +2270,7 @@ when it is actually a lexical sub that will not stay shared.
 L<Variable length lookbehind not implemented in regex mE<sol>%sE<sol>|perldiag/"Variable length lookbehind not implemented in regex m/%s/">
 
 The L<perldiag> entry for this warning has had information about Unicode
-behaviour added.
+behavior added.
 
 =back
 
@@ -3276,7 +3276,7 @@ C<$_>.
 =item *
 
 C<(...) x ...> in scalar context used to corrupt the stack if one operand
-was an object with "x" overloading, causing erratic behaviour.
+was an object with "x" overloading, causing erratic behavior.
 L<[perl #121827]|https://rt.perl.org/Ticket/Display.html?id=121827>.
 
 =item *
@@ -3649,7 +3649,7 @@ whose value contained Latin-1 characters.
 Locking and unlocking values via L<Hash::Util> or C<Internals::SvREADONLY>
 no longer has any effect on values that were read-only to begin with.
 Previously, unlocking such values could result in crashes, hangs or
-other erratic behaviour.
+other erratic behavior.
 
 =item *
 
@@ -3793,7 +3793,7 @@ global variable even with a lexical variable in scope.
 
 In perl 5.20.0, C<sort CORE::fake> where 'fake' is anything other than a
 keyword, started chopping off the last 6 characters and treating the result
-as a sort sub name.  The previous behaviour of treating C<CORE::fake> as a
+as a sort sub name.  The previous behavior of treating C<CORE::fake> as a
 sort sub name has been restored.
 L<[perl #123410]|https://rt.perl.org/Ticket/Display.html?id=123410>.
 
