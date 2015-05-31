@@ -2443,7 +2443,11 @@ working correctly.  See L</Infinity and NaN (not-a-number) handling improved>.
 
 =item IRIX and Tru64 platforms are working again.
 
-(Some C<make test> failures remain.)
+Some C<make test> failures remain:
+L<[perl #123977]|https://rt.perl.org/Ticket/Display.html?id=123977>
+and L<[perl #125298]|https://rt.perl.org/Ticket/Display.html?id=125298>
+for IRIX; L<[perl #124212]|https://rt.perl.org/Ticket/Display.html?id=124212>
+for Tru64.
 
 =item z/OS running EBCDIC Code Page 1047
 
