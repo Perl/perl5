@@ -58,7 +58,7 @@ This fix has a problem with it that needs to be solved before we can backport it
 
 <div><h3>Configure and hints Fixes (Consider whether these in particular would break binary compatibility)</h3>
 
-<commit votes="arc, tux" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
+<commit votes="arc, tux, tonyc" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
 <commit votes="tux, arc" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
 
 <commit votes="tux, khw" id="237050634b19905cdd9e8e25c2a43d0b24eb59f2" ticket="" desc="Add pthread to libswanted"/>
