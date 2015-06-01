@@ -42,7 +42,7 @@ This fix has a problem with it that needs to be solved before we can backport it
 <commit votes="steveh, khw" id="f63bc603acea5e0f476f181de698958c4ddcccba" ticket="123554" desc="perldelta: Fix typo"/>
 <commit votes="steveh, hv" id="cc31571878894dd5f5af83722ca0c2a24621300c" ticket="123554" desc="[perl #123554] stop checking the message"/>
 
-<commit votes="steveh, hv" id="2f465e08eb39981706429873d24e3bcc18015bfb" ticket="123652" desc="[perl #123652] eval {label:} crash"/>
+<commit votes="steveh, hv, tonyc" id="2f465e08eb39981706429873d24e3bcc18015bfb" ticket="123652" desc="[perl #123652] eval {label:} crash"/>
 
 </div>
 
