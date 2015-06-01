@@ -53,7 +53,7 @@
 /roffitall
 
 # generated
-/perl5222delta.pod
+/perl5221delta.pod
 /perlapi.pod
 /perlintern.pod
 *.html
