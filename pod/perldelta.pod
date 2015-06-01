@@ -3892,6 +3892,10 @@ L<B::Utils> version 0.25
 
 =item *
 
+L<Coro> version 6.42
+
+=item *
+
 L<Dancer> version 1.3130
 
 =item *
