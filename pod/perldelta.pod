@@ -338,7 +338,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Perl 5.14.0 introduced a bug whereby C<eval { LABEL: }> would crash.  This
+has been fixed.  [rt.perl.org #123652]
 
 =back
 
