@@ -3,6 +3,8 @@
 
 5.20150420
   - Updated for v5.21.11
+  - fixes a fencepost error in is_core()
+  - copes with versions that do not match x.yyyzzz
 
 5.20150320
   - Updated for v5.21.10
