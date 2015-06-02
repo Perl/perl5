@@ -969,11 +969,11 @@ similar output to L<B::Debug|B::Debug>.
 
 =head2 Using gdb to look at specific parts of a program
 
-With the example above, you knew to look for C<Perl_pp_add>, but what if 
-there were multiple calls to it all over the place, or you didn't know what 
+With the example above, you knew to look for C<Perl_pp_add>, but what if
+there were multiple calls to it all over the place, or you didn't know what
 the op was you were looking for?
 
-One way to do this is to inject a rare call somewhere near what you're looking 
+One way to do this is to inject a rare call somewhere near what you're looking
 for.  For example, you could add C<study> before your method:
 
     study;
@@ -983,7 +983,7 @@ And in gdb do:
     (gdb) break Perl_pp_study
 
 And then step until you hit what you're
-looking for.  This works well in a loop 
+looking for.  This works well in a loop
 if you want to only break at certain iterations:
 
     for my $c (1..100) {
@@ -992,7 +992,7 @@ if you want to only break at certain iterations:
 
 =head2 Using gdb to look at what the parser/lexer are doing
 
-If you want to see what perl is doing when parsing/lexing your code, you can 
+If you want to see what perl is doing when parsing/lexing your code, you can
 use C<BEGIN {}>:
 
     print "Before\n";
@@ -1006,7 +1006,7 @@ And in gdb:
 If you want to see what the parser/lexer is doing inside of C<if> blocks and
 the like you need to be a little trickier:
 
-    if ($a && $b && do { BEGIN { study } 1 } && $c) { ... } 
+    if ($a && $b && do { BEGIN { study } 1 } && $c) { ... }
 
 =head1 SOURCE CODE STATIC ANALYSIS
 
@@ -1184,7 +1184,7 @@ run.  The valgrind tests support being run in parallel to help with this:
 Note that the above two invocations will be very verbose as reachable
 memory and leak-checking is enabled by default.  If you want to just see
 pure errors, try:
-    
+
     VG_OPTS='-q --leak-check=no --show-reachable=no' TEST_JOBS=9 \
         make test.valgrind
 
