@@ -116,7 +116,21 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Math::BigInt> has been upgraded from version 1.9997 to 1.999701.
+
+Correct the behaviour of bdiv() and bmod() in list context. [perl #124300]
+
+Correct C<< Math::BigInt->new() >> for non-integer input.  [perl #124325]
+
+Speed up Math::BigFloat -> blog(). [perl #124382]
+
+Fix bug in Math::BigFloat's bceil() and bint() methods. [perl #124412]
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.2608 to 0.260801.
+
+Correct the behaviour of bdiv() and bmod() in list context. [perl #124303]
 
 =back
 
