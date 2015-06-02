@@ -1771,9 +1771,7 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     const I32 oldsaveix = PL_savestack_ix;
     const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
-    SV *resultsv;
     PMOP * const pm = PL_curpm;
-    OP * const sortop = PL_op;
     COP * const cop = PL_curcop;
  
     PERL_ARGS_ASSERT_SORTCV;
@@ -1783,21 +1781,14 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     PL_stack_sp = PL_stack_base;
     PL_op = PL_sortcop;
     CALLRUNOPS(aTHX);
-    PL_op = sortop;
     PL_curcop = cop;
     if (PL_stack_sp != PL_stack_base + 1) {
 	assert(PL_stack_sp == PL_stack_base);
-	resultsv = &PL_sv_undef;
+	result = SvIV(&PL_sv_undef);
     }
-    else resultsv = *PL_stack_sp;
-    if (SvNIOK_nog(resultsv)) result = SvIV(resultsv);
-    else {
-	ENTER;
-	SAVEVPTR(PL_curpad);
-	PL_curpad = 0;
-	result = SvIV(resultsv);
-	LEAVE;
-    }
+    else
+        result = SvIV(*PL_stack_sp);
+
     while (PL_scopestack_ix > oldscopeix) {
 	LEAVE;
     }
@@ -1814,9 +1805,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     I32 result;
     AV * const av = GvAV(PL_defgv);
     PMOP * const pm = PL_curpm;
-    OP * const sortop = PL_op;
     COP * const cop = PL_curcop;
-    SV **pad;
 
     PERL_ARGS_ASSERT_SORTCV_STACKED;
 
@@ -1845,15 +1834,14 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     PL_stack_sp = PL_stack_base;
     PL_op = PL_sortcop;
     CALLRUNOPS(aTHX);
-    PL_op = sortop;
     PL_curcop = cop;
-    pad = PL_curpad; PL_curpad = 0;
     if (PL_stack_sp != PL_stack_base + 1) {
 	assert(PL_stack_sp == PL_stack_base);
 	result = SvIV(&PL_sv_undef);
     }
-    else result = SvIV(*PL_stack_sp);
-    PL_curpad = pad;
+    else
+        result = SvIV(*PL_stack_sp);
+
     while (PL_scopestack_ix > oldscopeix) {
 	LEAVE;
     }

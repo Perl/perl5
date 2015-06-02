@@ -16213,6 +16213,14 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
 		sv_insert(varname, 0, 0, " ", 1);
 	}
     }
+    else if (PL_curstackinfo->si_type == PERLSI_SORT
+             &&  CxMULTICALL(&cxstack[cxstack_ix]))
+    {
+        /* we've reached the end of a sort block or sub,
+         * and the uninit value is probably what that code returned */
+        desc = "sort";
+    }
+
     /* PL_warn_uninit_sv is constant */
     GCC_DIAG_IGNORE(-Wformat-nonliteral);
     if (desc)
