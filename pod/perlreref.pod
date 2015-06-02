@@ -159,7 +159,7 @@ POSIX character classes and their Unicode and Perl equivalents:
  [[:...:]]  \p{...}        \p{...}   sequence    Description
 
  -----------------------------------------------------------------------
- alnum   PosixAlnum       XPosixAlnum            Alpha plus Digit
+ alnum   PosixAlnum       XPosixAlnum            'alpha' plus 'digit'
  alpha   PosixAlpha       XPosixAlpha            Alphabetic characters
  ascii   ASCII                                   Any ASCII character
  blank   PosixBlank       XPosixBlank   \h       Horizontal whitespace;
@@ -169,19 +169,18 @@ POSIX character classes and their Unicode and Perl equivalents:
                                                    extension)
  cntrl   PosixCntrl       XPosixCntrl            Control characters
  digit   PosixDigit       XPosixDigit   \d       Decimal digits
- graph   PosixGraph       XPosixGraph            Alnum plus Punct
+ graph   PosixGraph       XPosixGraph            'alnum' plus 'punct'
  lower   PosixLower       XPosixLower            Lowercase characters
- print   PosixPrint       XPosixPrint            Graph plus Print, but
-                                                   not any Cntrls
+ print   PosixPrint       XPosixPrint            'graph' plus 'space',
+                                                   but not any Controls
  punct   PosixPunct       XPosixPunct            Punctuation and Symbols
                                                    in ASCII-range; just
                                                    punct outside it
- space   PosixSpace       XPosixSpace            [\s\cK]
-         PerlSpace        XPerlSpace    \s       Perl's whitespace def'n
+ space   PosixSpace       XPosixSpace   \s       Whitespace
  upper   PosixUpper       XPosixUpper            Uppercase characters
- word    PosixWord        XPosixWord    \w       Alnum + Unicode marks +
-                                                   connectors, like '_'
-                                                   (Perl extension)
+ word    PosixWord        XPosixWord    \w       'alnum' + Unicode marks
+                                                    + connectors, like
+                                                    '_' (Perl extension)
  xdigit  ASCII_Hex_Digit  XPosixDigit            Hexadecimal digit,
                                                     ASCII-range is
                                                     [0-9A-Fa-f]
