@@ -626,6 +626,17 @@ This is identical to Perl's builtin C<getlogin()> function for
 returning the user name associated with the current session, see
 L<perlfunc/getlogin>.
 
+=item C<getpayload>
+
+	use POSIX ':nan_payload';
+	getpayload($var)
+
+Returns the C<NaN> payload.
+
+Note the API instability warning in L</setpayload>.
+
+See L</nan> for more discussion about C<NaN>.
+
 =item C<getpgrp>
 
 This is identical to Perl's builtin C<getpgrp()> function for
@@ -866,6 +877,17 @@ modifier is in effect?>).
 
 The function returns C<TRUE> if the input string is empty, or if the
 corresponding C function returns C<TRUE> for every byte in the string.
+
+=item C<issignaling>
+
+	use POSIX ':nan_payload';
+	issignaling($var, $payload)
+
+Return true if the argument is a I<signaling> NaN.
+
+Note the API instability warning in L</setpayload>.
+
+See L</nan> for more discussion about C<NaN>.
 
 =item C<isspace>
 
@@ -1193,9 +1215,38 @@ See also L</round>.
 
 =item C<nan>
 
-Returns not-a-number [C99].
+   my $nan = nan();
 
-See also L</isnan>.
+Returns C<NaN>, not-a-number [C99].
+
+The returned NaN is always a I<quiet> NaN, as opposed to I<signaling>.
+
+With an argument, can be used to generate a NaN with I<payload>.
+The argument is first interpreted as a floating point number,
+but then any fractional parts are truncated (towards zero),
+and the value is interpreted as an unsigned integer.
+The bits of this integer are stored in the unused bits of the NaN.
+
+The result has a dual nature: it is a NaN, but it also carries
+the integer inside it.  The integer can be retrieved with L</getpayload>.
+Note, though, that the payload is not propagated, not even on copies,
+and definitely not in arithmetic operations.
+
+How many bits fit in the NaN depends on what kind of floating points
+are being used, but on the most common platforms (64-bit IEEE 754,
+or the x86 80-bit long doubles) there are 51 and 61 bits available,
+respectively.  (There would be 52 and 62, but the quiet/signaling
+bit of NaNs takes away one.)  However, because of the floating-point-to-
+integer-and-back conversions, please test carefully whether you get back
+what you put in.  If your integers are only 32 bits wide, you probably
+should not rely on more than 32 bits of payload.
+
+Whether a "signaling" NaN is in any way different from a "quiet" NaN,
+depends on the platform.  Also note that the payload of the default
+NaN (no argument to nan()) is not necessarily zero, use C<setpayload>
+to explicitly set the payload.
+
+See also L</isnan>, L</setpayload> and L</issignaling>.
 
 =item C<nearbyint>
 
@@ -1488,6 +1539,38 @@ your operating system. Please consult L<perllocale> for how to find
 out which locales are available in your system.
 
 	$loc = setlocale( LC_COLLATE, "es_AR.ISO8859-1" );
+
+=item C<setpayload>
+
+	use POSIX ':nan_payload';
+	setpayload($var, $payload);
+
+Sets the C<NaN> payload of var.
+
+NOTE: the NaN payload APIs are based on the latest (as of June 2015)
+proposed ISO C interfaces, but they are not yet a standard.  Things
+may change.
+
+See L</nan> for more discussion about C<NaN>.
+
+See also L</setpayloadsig>, L</isnan>, L</getpayload>, and L</issignaling>.
+
+=item C<setpayloadsig>
+
+	use POSIX ':nan_payload';
+	setpayloadsig($var, $payload);
+
+Like L</setpayload> but also makes the NaN I<signaling>.
+
+Depending on the platform the NaN may or may not behave differently.
+
+Note the API instability warning in L</setpayload>.
+
+Note that because how the floating point formats work out, on the most
+common platforms signaling payload of zero is best avoided,
+since it might end up being identical to C<+Inf>.
+
+See also L</nan>, L</isnan>, L</getpayload>, and L</issignaling>.
 
 =item C<setpgid>
 

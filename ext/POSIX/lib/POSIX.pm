@@ -403,6 +403,8 @@ my %other_export_tags = (
     )],
 
     stdlib_h_c99 => [ @{$default_export_tags{stdlib_h}}, 'strtold' ],
+
+    nan_payload => [ qw(getpayload setpayload setpayloadsig issignaling) ],
 );
 
 {

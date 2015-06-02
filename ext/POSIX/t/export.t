@@ -138,6 +138,10 @@ my %expect = (
             nearbyint nextafter nexttoward remainder remquo rint round scalbn
             signbit tgamma trunc y0 y1 yn strtold
         ),
+        # this stuff was added in 5.23
+        qw(
+            getpayload issignaling setpayload setpayloadsig
+        ),
     ],
 );
 
