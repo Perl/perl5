@@ -128,7 +128,7 @@ is a lexical $_ in scope.
 #undef XS
 #undef XS_EXTERNAL
 #undef XS_INTERNAL
-#if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
+#if (defined(__CYGWIN__) || defined(WIN32)) && defined(USE_DYNAMIC_LOADING)
 #  define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO(name)
 #  define XS_INTERNAL(name) STATIC XSPROTO(name)
 #endif
