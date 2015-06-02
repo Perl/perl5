@@ -192,6 +192,7 @@ static const char * const si_names[] = {
     "WARNHOOK",
     "DIEHOOK",
     "REQUIRE"
+    "MULTICALL"
 };
 #endif
 
