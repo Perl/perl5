@@ -42,8 +42,6 @@ This fix has a problem with it that needs to be solved before we can backport it
 <commit votes="steveh, khw" id="f63bc603acea5e0f476f181de698958c4ddcccba" ticket="123554" desc="perldelta: Fix typo"/>
 <commit votes="steveh, hv" id="cc31571878894dd5f5af83722ca0c2a24621300c" ticket="123554" desc="[perl #123554] stop checking the message"/>
 
-<commit votes="steveh, hv, tonyc" id="2f465e08eb39981706429873d24e3bcc18015bfb" ticket="123652" desc="[perl #123652] eval {label:} crash"/>
-
 </div>
 
 <div><h3>Security Fixes</h3>
@@ -58,7 +56,6 @@ This fix has a problem with it that needs to be solved before we can backport it
 
 <div><h3>Configure and hints Fixes (Consider whether these in particular would break binary compatibility)</h3>
 
-<commit votes="arc, tux, tonyc" id="c4f300c9d46ec8ace48cff0477dd2866cfe10f79" ticket="" desc="After Yosemite there's no /usr/include."/>
 <commit votes="tux, arc" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
 
 <commit votes="tux, khw" id="237050634b19905cdd9e8e25c2a43d0b24eb59f2" ticket="" desc="Add pthread to libswanted"/>
