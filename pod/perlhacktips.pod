@@ -1167,7 +1167,7 @@ C<-Accflags=-DDL_UNLOAD_ALL_AT_EXIT>.
 
 The valgrind tool can be used to find out both memory leaks and illegal
 heap memory accesses.  As of version 3.3.0, Valgrind only supports Linux
-on x86, x86-64 and PowerPC and Darwin (OS X) on x86 and x86-64).  The
+on x86, x86-64 and PowerPC and Darwin (OS X) on x86 and x86-64.  The
 special "test.valgrind" target can be used to run the tests under
 valgrind.  Found errors and memory leaks are logged in files named
 F<testfile.valgrind> and by default output is displayed inline.
