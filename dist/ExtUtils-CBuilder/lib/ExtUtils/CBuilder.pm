@@ -1,5 +1,5 @@
 package ExtUtils::CBuilder;
-$ExtUtils::CBuilder::VERSION = '0.280221';
+$ExtUtils::CBuilder::VERSION = '0.280223';
 use File::Spec ();
 use File::Path ();
 use File::Basename ();

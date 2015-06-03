@@ -1,5 +1,19 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.280223 - 2015-06-02
+
+  Fixed:
+
+  - Impose deterministic order on cpp-definition options.
+    Heretofore, ExtUtils::CBuilder put cpp-definition options
+    into the cc command line in non-deterministic order. This
+    produced noise when diffing build logs.
+    Make this order deterministic.  (RT #124106)
+    
+  Added:
+
+  - Add tests for ascii-betical order in t/04-base.t.
+
 0.280220 - 2014-09-27
 
   Fixed:

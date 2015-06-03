@@ -1,5 +1,5 @@
 package ExtUtils::CBuilder::Platform::VMS;
-$ExtUtils::CBuilder::Platform::VMS::VERSION = '0.280222';
+$ExtUtils::CBuilder::Platform::VMS::VERSION = '0.280223';
 use strict;
 use ExtUtils::CBuilder::Base;
 
