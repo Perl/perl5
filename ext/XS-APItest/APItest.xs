@@ -1443,6 +1443,61 @@ XS_APIVERSION_valid(...)
         XS_APIVERSION_BOOTCHECK;
         XSRETURN_EMPTY;
 
+void
+xsreturn( int len )
+    PPCODE:
+        int i = 0;
+        EXTEND( SP, len );
+        for ( ; i < len; i++ ) {
+            ST(i) = sv_2mortal( newSViv(i) );
+        }
+        XSRETURN( len );
+
+void
+xsreturn_iv()
+    PPCODE:
+        XSRETURN_IV( (1<<31) + 1 );
+
+void
+xsreturn_uv()
+    PPCODE:
+        XSRETURN_UV( (U32)((1<<31) + 1) );
+
+void
+xsreturn_nv()
+    PPCODE:
+        XSRETURN_NV(0.25);
+
+void
+xsreturn_pv()
+    PPCODE:
+        XSRETURN_PV("returned");
+
+void
+xsreturn_pvn()
+    PPCODE:
+        XSRETURN_PVN("returned too much",8);
+
+void
+xsreturn_no()
+    PPCODE:
+        XSRETURN_NO;
+
+void
+xsreturn_yes()
+    PPCODE:
+        XSRETURN_YES;
+
+void
+xsreturn_undef()
+    PPCODE:
+        XSRETURN_UNDEF;
+
+void
+xsreturn_empty()
+    PPCODE:
+        XSRETURN_EMPTY;
+
 MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
 
 void
