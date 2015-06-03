@@ -2550,12 +2550,14 @@ cpan/Time-Piece/Piece.pm	Time::Piece extension
 cpan/Time-Piece/Piece.xs	Time::Piece extension
 cpan/Time-Piece/Seconds.pm	Time::Piece extension
 cpan/Time-Piece/t/01base.t	Test for Time::Piece
+cpan/Time-Piece/t/02core_dst.t
 cpan/Time-Piece/t/02core.t	Test for Time::Piece
 cpan/Time-Piece/t/03compare.t	Test for Time::Piece
 cpan/Time-Piece/t/04mjd.t	Test for Time::Piece
 cpan/Time-Piece/t/05overload.t	Test for Time::Piece
 cpan/Time-Piece/t/06subclass.t	Test for Time::Piece
 cpan/Time-Piece/t/07arith.t	Test for Time::Piece
+cpan/Time-Piece/t/lib/Time/Piece/Twin.pm
 cpan/Unicode-Collate/Collate/allkeys.txt	Unicode::Collate
 cpan/Unicode-Collate/Collate/CJK/Big5.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate/CJK/GB2312.pm			Unicode::Collate
