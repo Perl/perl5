@@ -363,7 +363,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Duplicating a closed file handle for write no longer creates a
+filename of the form F<GLOB(0xXXXXXXXX)>.  [perl #125115]
 
 =back
 
