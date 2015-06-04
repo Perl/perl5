@@ -6654,11 +6654,16 @@ extern void moncontrol(int);
  *     the interpretation is application-specific.
  *
  * q = Quietness bit, the interpretation is platform-specific.
- *     most platforms have the most significant bit being one
+ *     Most platforms have the most significant bit being one
  *     meaning quiet, but some (older mips, hppa) have the msb
  *     being one meaning signaling.  Note that the above means
  *     that on most platforms there cannot be signaling nan with
- *     zero payload because that is identical with infinity.
+ *     zero payload because that is identical with infinity;
+ *     while conversely on older mips/hppa there cannot be a quiet nan
+ *     because that is identical with infinity.
+ *
+ *     Moreover, whether there is any behavioral difference
+ *     between quiet and signaling NaNs, depends on the platform.
  *
  * x86 80-bit extended precision is different, the mantissa bits:
  *
@@ -6676,7 +6681,45 @@ extern void moncontrol(int);
  * This means that in this format there are 61 bits available
  * for the nan payload.
  *
- * NVMANTBITS is the number of _real_ mantissa bits in an NV.
+ * In all platforms, the payload bytes (and bits, some of them are
+ * often in a partial byte) themselves can be either all zero (x86),
+ * all one (sparc or mips), or a mixture: in IEEE 754 128-bit double
+ * or in a double-double, the first half of the payload can follow the
+ * native double, while in the second half the payload can be all
+ * zeros.  (Therefore the mask for payload bits is not necessarily
+ * identical to bit complement of the NaN.)  Another way of putting
+ * this: the payload for the default NaN might not be zero.
+ *
+ * For the x86 80-bit long doubles, the trailing bytes (the 80 bits
+ * being 'packaged' in either 12 or 16 bytes) can be whatever random
+ * garbage.
+ *
+ * Furthermore, the semantics of the sign bit on NaNs are platform-specific.
+ * On normal floats, the sign bit being on means negative.  But this may,
+ * or may not, be reverted on NaNs: in other words, the default NaN might
+ * have the sign bit on, and therefore look like negative if you look
+ * at it at the bit level.
+ *
+ * NaN payloads are not propagated even on copies, or in arithmetics.
+ * They *might* be, according to some rules, on your particular
+ * cpu/os/compiler/libraries, but no guarantees.
+ *
+ * To summarize, on most platforms, and for 64-bit doubles
+ * (using big-endian ordering here):
+ *
+ * [7FF8000000000000..7FFFFFFFFFFFFFFF] quiet
+ * [FFF8000000000000..FFFFFFFFFFFFFFFF] quiet
+ * [7FF0000000000001..7FF7FFFFFFFFFFFF] signaling
+ * [FFF0000000000001..FFF7FFFFFFFFFFFF] signaling
+ *
+ * The C99 nan() is supposed to generate *quiet* NaNs.
+ *
+ * Note the asymmetry:
+ * The 7FF0000000000000 is positive infinity,
+ * the FFF0000000000000 is negative infinity.
+ */
+
+/* NVMANTBITS is the number of _real_ mantissa bits in an NV.
  * For the standard IEEE 754 fp this number is usually one less that
  * *DBL_MANT_DIG because of the implicit (aka hidden) bit, which isn't
  * real.  For the 80-bit extended precision formats (x86*), the number
