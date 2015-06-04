@@ -1,24 +1,22 @@
-# $Id: encoding.pm,v 2.14 2015/03/14 02:44:39 dankogai Exp dankogai $
+# $Id: encoding.pm,v 2.15 2015/04/15 23:14:01 dankogai Exp dankogai $
 package encoding;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.14 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.15 $ =~ /(\d+)/g;
 
 use Encode;
 use strict;
 use warnings;
 
-use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
+use constant {
+    DEBUG => !!$ENV{PERL_ENCODE_DEBUG},
+    HAS_PERLIO => eval { require PerlIO::encoding; PerlIO::encoding->VERSION(0.02) },
+    PERL_5_21_7 => $^V && $^V ge v5.21.7,
+};
 
 BEGIN {
     if ( ord("A") == 193 ) {
         require Carp;
         Carp::croak("encoding: pragma does not support EBCDIC platforms");
     }
-}
-
-our $HAS_PERLIO = 0;
-eval { require PerlIO::encoding };
-unless ($@) {
-    $HAS_PERLIO = ( PerlIO::encoding->VERSION >= 0.02 );
 }
 
 sub _exception {
@@ -39,64 +37,79 @@ sub in_locale { $^H & ( $locale::hint_bits || 0 ) }
 sub _get_locale_encoding {
     my $locale_encoding;
 
+    if ($^O eq 'MSWin32') {
+        my @tries = (
+            # First try to get the OutputCP. This will work only if we
+            # are attached to a console
+            'Win32.pm' => 'Win32::GetConsoleOutputCP',
+            'Win32/Console.pm' => 'Win32::Console::OutputCP',
+            # If above failed, this means that we are a GUI app
+            # Let's assume that the ANSI codepage is what matters
+            'Win32.pm' => 'Win32::GetACP',
+        );
+        while (@tries) {
+            my $cp = eval {
+                require $tries[0];
+                no strict 'refs';
+                &{$tries[1]}()
+            };
+            if ($cp) {
+                if ($cp == 65001) { # Code page for UTF-8
+                    $locale_encoding = 'UTF-8';
+                } else {
+                    $locale_encoding = 'cp' . $cp;
+                }
+                return $locale_encoding;
+            }
+            splice(@tries, 0, 2)
+        }
+    }
+
     # I18N::Langinfo isn't available everywhere
-    eval {
+    $locale_encoding = eval {
         require I18N::Langinfo;
-        I18N::Langinfo->import(qw(langinfo CODESET));
-        $locale_encoding = langinfo( CODESET() );
+        find_encoding(
+            I18N::Langinfo::langinfo( I18N::Langinfo::CODESET() )
+        )->name
     };
+    return $locale_encoding if defined $locale_encoding;
 
-    my $country_language;
-
-    no warnings 'uninitialized';
-
-    if ( (not $locale_encoding) && in_locale() ) {
-        if ( $ENV{LC_ALL} =~ /^([^.]+)\.([^.@]+)(@.*)?$/ ) {
+    eval {
+        require POSIX;
+        # Get the current locale
+        # Remember that MSVCRT impl is quite different from Unixes
+        my $locale = POSIX::setlocale(POSIX::LC_CTYPE());
+        if ( $locale =~ /^([^.]+)\.([^.@]+)(?:@.*)?$/ ) {
+            my $country_language;
             ( $country_language, $locale_encoding ) = ( $1, $2 );
-        }
-        elsif ( $ENV{LANG} =~ /^([^.]+)\.([^.@]+)(@.*)?$/ ) {
-            ( $country_language, $locale_encoding ) = ( $1, $2 );
-        }
 
-        # LANGUAGE affects only LC_MESSAGES only on glibc
-    }
-    elsif ( not $locale_encoding ) {
-        if (   $ENV{LC_ALL} =~ /\butf-?8\b/i
-            || $ENV{LANG} =~ /\butf-?8\b/i )
-        {
-            $locale_encoding = 'utf8';
+            # Could do more heuristics based on the country and language
+            # since we have Locale::Country and Locale::Language available.
+            # TODO: get a database of Language -> Encoding mappings
+            # (the Estonian database at http://www.eki.ee/letter/
+            # would be excellent!) --jhi
+            if (lc($locale_encoding) eq 'euc') {
+                if ( $country_language =~ /^ja_JP|japan(?:ese)?$/i ) {
+                    $locale_encoding = 'euc-jp';
+                }
+                elsif ( $country_language =~ /^ko_KR|korean?$/i ) {
+                    $locale_encoding = 'euc-kr';
+                }
+                elsif ( $country_language =~ /^zh_CN|chin(?:a|ese)$/i ) {
+                    $locale_encoding = 'euc-cn';
+                }
+                elsif ( $country_language =~ /^zh_TW|taiwan(?:ese)?$/i ) {
+                    $locale_encoding = 'euc-tw';
+                }
+                else {
+                    require Carp;
+                    Carp::croak(
+                        "encoding: Locale encoding '$locale_encoding' too ambiguous"
+                    );
+                }
+            }
         }
-
-        # Could do more heuristics based on the country and language
-        # parts of LC_ALL and LANG (the parts before the dot (if any)),
-        # since we have Locale::Country and Locale::Language available.
-        # TODO: get a database of Language -> Encoding mappings
-        # (the Estonian database at http://www.eki.ee/letter/
-        # would be excellent!) --jhi
-    }
-    if (   defined $locale_encoding
-        && lc($locale_encoding) eq 'euc'
-        && defined $country_language )
-    {
-        if ( $country_language =~ /^ja_JP|japan(?:ese)?$/i ) {
-            $locale_encoding = 'euc-jp';
-        }
-        elsif ( $country_language =~ /^ko_KR|korean?$/i ) {
-            $locale_encoding = 'euc-kr';
-        }
-        elsif ( $country_language =~ /^zh_CN|chin(?:a|ese)$/i ) {
-            $locale_encoding = 'euc-cn';
-        }
-        elsif ( $country_language =~ /^zh_TW|taiwan(?:ese)?$/i ) {
-            $locale_encoding = 'euc-tw';
-        }
-        else {
-            require Carp;
-            Carp::croak(
-                "encoding: Locale encoding '$locale_encoding' too ambiguous"
-            );
-        }
-    }
+    };
 
     return $locale_encoding;
 }
@@ -132,7 +145,7 @@ sub import {
     unless ( $arg{Filter} ) {
         DEBUG and warn "_exception($name) = ", _exception($name);
         if (! _exception($name)) {
-            if (!$^V || $^V lt v5.21.7) {
+            if (!PERL_5_21_7) {
                 ${^ENCODING} = $enc;
             }
             else {
@@ -143,11 +156,11 @@ sub import {
                 ${^E_NCODING} = $enc;
             }
         }
-        $HAS_PERLIO or return 1;
+        HAS_PERLIO or return 1;
     }
     else {
         defined( ${^ENCODING} ) and undef ${^ENCODING};
-        undef ${^E_NCODING} if $^V && $^V ge v5.21.7;
+        undef ${^E_NCODING} if PERL_5_21_7;
 
         # implicitly 'use utf8'
         require utf8;      # to fetch $utf8::hint_bits;
@@ -197,8 +210,8 @@ sub import {
 sub unimport {
     no warnings;
     undef ${^ENCODING};
-    undef ${^E_NCODING} if $^V && $^V ge v5.21.7;
-    if ($HAS_PERLIO) {
+    undef ${^E_NCODING} if PERL_5_21_7;
+    if (HAS_PERLIO) {
         binmode( STDIN,  ":raw" );
         binmode( STDOUT, ":raw" );
     }

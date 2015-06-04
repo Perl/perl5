@@ -861,6 +861,7 @@ cpan/Encode/t/gb2312.utf		test data
 cpan/Encode/t/grow.t			test script
 cpan/Encode/t/gsm0338.t			test script
 cpan/Encode/t/guess.t			test script
+cpan/Encode/t/isa.t
 cpan/Encode/t/jis7-fallback.t		test script
 cpan/Encode/t/jisx0201.enc		test data
 cpan/Encode/t/jisx0201.utf		test data

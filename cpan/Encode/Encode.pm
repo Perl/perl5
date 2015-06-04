@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.72 2015/03/14 02:43:24 dankogai Exp $
+# $Id: Encode.pm,v 2.73 2015/04/15 23:14:01 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.72 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.73 $ =~ /(\d+)/g;
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -311,7 +311,11 @@ sub predefine_encodings {
         $Encode::Encoding{Unicode} =
           bless { Name => "Internal" } => "Encode::Internal";
     }
-
+    {
+        # https://rt.cpan.org/Public/Bug/Display.html?id=103253
+        package Encode::XS;
+        push @Encode::XS::ISA, 'Encode::Encoding';
+    }
     {
 
         # was in Encode::utf8
