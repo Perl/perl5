@@ -1519,7 +1519,6 @@ cpan/libnet/t/time.t		libnet
 cpan/Locale-Codes/lib/Locale/Codes/API.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Codes/Changes.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Codes/Constants.pm	Locale::Codes
-cpan/Locale-Codes/lib/Locale/Codes/Constants.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Codes/Country_Codes.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Codes/Country.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Codes/Country.pod	Locale::Codes documentation

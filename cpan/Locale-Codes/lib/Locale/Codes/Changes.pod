@@ -26,7 +26,18 @@ codes, I will add them to the module and release a new version.
 
 =head1 VERSION 3.36  (planned 2015-09-01; sbeck)
 
-=head1 VERSION 3.35  (planned 2015-06-01; sbeck)
+=head1 VERSION 3.35  (2015-06-01; sbeck)
+
+NEW CODE(s)
+
+=over 4
+
+=item B<Documentation improvements>
+
+Many changes to the formatting in the documentation to improve it.  Suggested
+by Pete Houston.
+
+=back
 
 =head1 VERSION 3.34  (2015-03-01; sbeck)
 
