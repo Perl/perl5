@@ -128,6 +128,10 @@ L<Getopt::Long> has been upgraded from version 2.45 to 2.46.
 
 =item *
 
+L<HTTP::Tiny> has been upgraded from version 0.054 to 0.056.
+
+=item *
+
 L<Math::BigInt> has been upgraded from version 1.9997 to 1.999701.
 
 Correct the behaviour of bdiv() and bmod() in list context. [perl #124300]

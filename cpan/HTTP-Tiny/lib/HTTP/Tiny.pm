@@ -4,7 +4,7 @@ use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
 
-our $VERSION = '0.054';
+our $VERSION = '0.056';
 
 use Carp ();
 
@@ -28,7 +28,7 @@ use Carp ();
 #pod * C<max_redirect> —
 #pod     Maximum number of redirects allowed (defaults to 5)
 #pod * C<max_size> —
-#pod     Maximum response size (only when not using a data callback).  If defined, responses larger than this will return an exception.
+#pod     Maximum response size in bytes (only when not using a data callback).  If defined, responses larger than this will return an exception.
 #pod * C<http_proxy> —
 #pod     URL of a proxy server to use for HTTP connections (default is C<$ENV{http_proxy}> — if set)
 #pod * C<https_proxy> —
@@ -462,6 +462,55 @@ sub www_form_urlencode {
     return join("&", (ref $data eq 'ARRAY') ? (@terms) : (sort @terms) );
 }
 
+#pod =method can_ssl
+#pod
+#pod     $ok         = HTTP::Tiny->can_ssl;
+#pod     ($ok, $why) = HTTP::Tiny->can_ssl;
+#pod     ($ok, $why) = $http->can_ssl;
+#pod
+#pod Indicates if SSL support is available.  When called as a class object, it
+#pod checks for the correct version of L<Net::SSLeay> and L<IO::Socket::SSL>.
+#pod When called as an object methods, if C<SSL_verify> is true or if C<SSL_verify_mode>
+#pod is set in C<SSL_options>, it checks that a CA file is available.
+#pod
+#pod In scalar context, returns a boolean indicating if SSL is available.
+#pod In list context, returns the boolean and a (possibly multi-line) string of
+#pod errors indicating why SSL isn't available.
+#pod
+#pod =cut
+
+sub can_ssl {
+    my ($self) = @_;
+
+    my($ok, $reason) = (1, '');
+
+    # Need IO::Socket::SSL 1.42 for SSL_create_ctx_callback
+    unless (eval {require IO::Socket::SSL; IO::Socket::SSL->VERSION(1.42)}) {
+        $ok = 0;
+        $reason .= qq/IO::Socket::SSL 1.42 must be installed for https support\n/;
+    }
+
+    # Need Net::SSLeay 1.49 for MODE_AUTO_RETRY
+    unless (eval {require Net::SSLeay; Net::SSLeay->VERSION(1.49)}) {
+        $ok = 0;
+        $reason .= qq/Net::SSLeay 1.49 must be installed for https support\n/;
+    }
+
+    # If an object, check that SSL config lets us get a CA if necessary
+    if ( ref($self) && ( $self->{verify_SSL} || $self->{SSL_options}{SSL_verify_mode} ) ) {
+        my $handle = HTTP::Tiny::Handle->new(
+            SSL_options => $self->{SSL_options},
+            verify_SSL  => $self->{verify_SSL},
+        );
+        unless ( eval { $handle->_find_CA_file; 1 } ) {
+            $ok = 0;
+            $reason .= "$@";
+        }
+    }
+
+    wantarray ? ($ok, $reason) : $ok;
+}
+
 #--------------------------------------------------------------------------#
 # private methods
 #--------------------------------------------------------------------------#
@@ -766,7 +815,7 @@ sub _maybe_redirect {
     my ($self, $request, $response, $args) = @_;
     my $headers = $response->{headers};
     my ($status, $method) = ($response->{status}, $request->{method});
-    if (($status eq '303' or ($status =~ /^30[127]/ && $method =~ /^GET|HEAD$/))
+    if (($status eq '303' or ($status =~ /^30[1278]/ && $method =~ /^GET|HEAD$/))
         and $headers->{location}
         and ++$args->{redirects} <= $self->{max_redirect}
     ) {
@@ -1362,12 +1411,8 @@ sub can_write {
 }
 
 sub _assert_ssl {
-    # Need IO::Socket::SSL 1.42 for SSL_create_ctx_callback
-    die(qq/IO::Socket::SSL 1.42 must be installed for https support\n/)
-        unless eval {require IO::Socket::SSL; IO::Socket::SSL->VERSION(1.42)};
-    # Need Net::SSLeay 1.49 for MODE_AUTO_RETRY
-    die(qq/Net::SSLeay 1.49 must be installed for https support\n/)
-        unless eval {require Net::SSLeay; Net::SSLeay->VERSION(1.49)};
+    my($ok, $reason) = HTTP::Tiny->can_ssl();
+    die $reason unless $ok;
 }
 
 sub can_reuse {
@@ -1389,11 +1434,15 @@ sub can_reuse {
 sub _find_CA_file {
     my $self = shift();
 
-    return $self->{SSL_options}->{SSL_ca_file}
-        if $self->{SSL_options}->{SSL_ca_file} and -e $self->{SSL_options}->{SSL_ca_file};
+    if ( $self->{SSL_options}->{SSL_ca_file} ) {
+        unless ( -r $self->{SSL_options}->{SSL_ca_file} ) {
+            die qq/SSL_ca_file '$self->{SSL_options}->{SSL_ca_file}' not found or not readable\n/;
+        }
+        return $self->{SSL_options}->{SSL_ca_file};
+    }
 
     return Mozilla::CA::SSL_ca_file()
-        if eval { require Mozilla::CA };
+        if eval { require Mozilla::CA; 1 };
 
     # cert list copied from golang src/crypto/x509/root_unix.go
     foreach my $ca_bundle (
@@ -1463,7 +1512,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.054
+version 0.056
 
 =head1 SYNOPSIS
 
@@ -1532,7 +1581,7 @@ C<max_redirect> — Maximum number of redirects allowed (defaults to 5)
 
 =item *
 
-C<max_size> — Maximum response size (only when not using a data callback).  If defined, responses larger than this will return an exception.
+C<max_size> — Maximum response size in bytes (only when not using a data callback).  If defined, responses larger than this will return an exception.
 
 =item *
 
@@ -1738,6 +1787,21 @@ array reference, the key will be repeated with each of the values of the array
 reference.  If data is provided as a hash reference, the key/value pairs in the
 resulting string will be sorted by key and value for consistent ordering.
 
+=head2 can_ssl
+
+    $ok         = HTTP::Tiny->can_ssl;
+    ($ok, $why) = HTTP::Tiny->can_ssl;
+    ($ok, $why) = $http->can_ssl;
+
+Indicates if SSL support is available.  When called as a class object, it
+checks for the correct version of L<Net::SSLeay> and L<IO::Socket::SSL>.
+When called as an object methods, if C<SSL_verify> is true or if C<SSL_verify_mode>
+is set in C<SSL_options>, it checks that a CA file is available.
+
+In scalar context, returns a boolean indicating if SSL is available.
+In list context, returns the boolean and a (possibly multi-line) string of
+errors indicating why SSL isn't available.
+
 =for Pod::Coverage SSL_options
 agent
 cookie_jar
@@ -1758,9 +1822,12 @@ verify_SSL
 Direct C<https> connections are supported only if L<IO::Socket::SSL> 1.56 or
 greater and L<Net::SSLeay> 1.49 or greater are installed. An exception will be
 thrown if new enough versions of these modules are not installed or if the SSL
-encryption fails. An C<https> connection may be made via an C<http> proxy that
-supports the CONNECT command (i.e. RFC 2817).  You may not proxy C<https> via
-a proxy that itself requires C<https> to communicate.
+encryption fails. You can also use C<HTTP::Tiny::can_ssl()> utility function
+that returns boolean to see if the required modules are installed.
+
+An C<https> connection may be made via an C<http> proxy that supports the CONNECT
+command (i.e. RFC 2817).  You may not proxy C<https> via a proxy that itself
+requires C<https> to communicate.
 
 SSL provides two distinct capabilities:
 
@@ -1936,10 +2003,10 @@ L<URI::_punycode> and L<Net::IDN::Encode>.
 =item *
 
 Redirection is very strict against the specification.  Redirection is only
-automatic for response codes 301, 302 and 307 if the request method is 'GET' or
-'HEAD'.  Response code 303 is always converted into a 'GET' redirection, as
-mandated by the specification.  There is no automatic support for status 305
-("Use proxy") redirections.
+automatic for response codes 301, 302, 307 and 308 if the request method is
+'GET' or 'HEAD'.  Response code 303 is always converted into a 'GET'
+redirection, as mandated by the specification.  There is no automatic support
+for status 305 ("Use proxy") redirections.
 
 =item *
 
@@ -2033,7 +2100,7 @@ David Golden <dagolden@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Alan Gardner Alessandro Ghedini Brad Gilbert Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry David Mitchell Dean Pearce Edward Zborowski James Raspass Jess Robinson Lukas Eklund Martin J. Evans Martin-Louis Bright Mike Doherty Olaf Alders Petr Písař Serguei Trouchelle Sören Kornetzki Syohei YOSHIDA Tom Hukins Tony Cook
+=for stopwords Alan Gardner Alessandro Ghedini Brad Gilbert Chris Nehren Weyl Claes Jakobsson Clinton Gormley Dean Pearce Edward Zborowski James Raspass Jeremy Mates Jess Robinson Lukas Eklund Martin J. Evans Martin-Louis Bright Mike Doherty Olaf Alders Olivier Mengué Petr Písař Sören Kornetzki Syohei YOSHIDA Tatsuhiko Miyagawa Tom Hukins Tony Cook
 
 =over 4
 
@@ -2067,14 +2134,6 @@ Clinton Gormley <clint@traveljury.com>
 
 =item *
 
-Craig Berry <cberry@cpan.org>
-
-=item *
-
-David Mitchell <davem@iabyn.com>
-
-=item *
-
 Dean Pearce <pearce@pythian.com>
 
 =item *
@@ -2084,6 +2143,10 @@ Edward Zborowski <ed@rubensteintech.com>
 =item *
 
 James Raspass <jraspass@gmail.com>
+
+=item *
+
+Jeremy Mates <jmates@cpan.org>
 
 =item *
 
@@ -2111,11 +2174,11 @@ Olaf Alders <olaf@wundersolutions.com>
 
 =item *
 
-Petr Písař <ppisar@redhat.com>
+Olivier Mengué <dolmen@cpan.org>
 
 =item *
 
-Serguei Trouchelle <stro@cpan.org>
+Petr Písař <ppisar@redhat.com>
 
 =item *
 
@@ -2124,6 +2187,10 @@ Sören Kornetzki <soeren.kornetzki@delti.com>
 =item *
 
 Syohei YOSHIDA <syohex@gmail.com>
+
+=item *
+
+Tatsuhiko Miyagawa <miyagawa@bulknews.net>
 
 =item *
 
