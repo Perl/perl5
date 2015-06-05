@@ -8,7 +8,6 @@ package Scalar::Util;
 
 use strict;
 require Exporter;
-require List::Util; # List::Util loads the XS
 
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(
@@ -17,8 +16,11 @@ our @EXPORT_OK = qw(
   dualvar isdual isvstring looks_like_number openhandle readonly set_prototype
   tainted
 );
-our $VERSION    = "1.41";
+our $VERSION    = "1.42";
 $VERSION   = eval $VERSION;
+
+require List::Util; # List::Util loads the XS
+List::Util->VERSION( $VERSION ); # Ensure we got the right XS version (RT#100863)
 
 our @EXPORT_FAIL;
 

@@ -483,6 +483,123 @@ PPCODE:
 }
 
 void
+pairs(...)
+PROTOTYPE: @
+PPCODE:
+{
+    int argi = 0;
+    int reti = 0;
+    HV *pairstash = get_hv("List::Util::_Pair::", GV_ADD);
+
+    if(items % 2 && ckWARN(WARN_MISC))
+        warn("Odd number of elements in pairs");
+
+    {
+        for(; argi < items; argi += 2) {
+            SV *a = ST(argi);
+            SV *b = argi < items-1 ? ST(argi+1) : &PL_sv_undef;
+
+            AV *av = newAV();
+            av_push(av, newSVsv(a));
+            av_push(av, newSVsv(b));
+
+            ST(reti) = sv_2mortal(newRV_noinc((SV *)av));
+            sv_bless(ST(reti), pairstash);
+            reti++;
+        }
+    }
+
+    XSRETURN(reti);
+}
+
+void
+unpairs(...)
+PROTOTYPE: @
+PPCODE:
+{
+    /* Unlike pairs(), we're going to trash the input values on the stack
+     * almost as soon as we start generating output. So clone them first
+     */
+    int i;
+    SV **args_copy;
+    Newx(args_copy, items, SV *);
+    SAVEFREEPV(args_copy);
+
+    Copy(&ST(0), args_copy, items, SV *);
+
+    for(i = 0; i < items; i++) {
+        SV *pair = args_copy[i];
+        SvGETMAGIC(pair);
+
+        if(SvTYPE(pair) != SVt_RV)
+            croak("Not a reference at List::Util::unpack() argument %d", i);
+        if(SvTYPE(SvRV(pair)) != SVt_PVAV)
+            croak("Not an ARRAY reference at List::Util::unpack() argument %d", i);
+
+        // TODO: assert pair is an ARRAY ref
+        AV *pairav = (AV *)SvRV(pair);
+
+        EXTEND(SP, 2);
+
+        if(AvFILL(pairav) >= 0)
+            mPUSHs(newSVsv(AvARRAY(pairav)[0]));
+        else
+            PUSHs(&PL_sv_undef);
+
+        if(AvFILL(pairav) >= 1)
+            mPUSHs(newSVsv(AvARRAY(pairav)[1]));
+        else
+            PUSHs(&PL_sv_undef);
+    }
+
+    XSRETURN(items * 2);
+}
+
+void
+pairkeys(...)
+PROTOTYPE: @
+PPCODE:
+{
+    int argi = 0;
+    int reti = 0;
+
+    if(items % 2 && ckWARN(WARN_MISC))
+        warn("Odd number of elements in pairkeys");
+
+    {
+        for(; argi < items; argi += 2) {
+            SV *a = ST(argi);
+
+            ST(reti++) = sv_2mortal(newSVsv(a));
+        }
+    }
+
+    XSRETURN(reti);
+}
+
+void
+pairvalues(...)
+PROTOTYPE: @
+PPCODE:
+{
+    int argi = 0;
+    int reti = 0;
+
+    if(items % 2 && ckWARN(WARN_MISC))
+        warn("Odd number of elements in pairvalues");
+
+    {
+        for(; argi < items; argi += 2) {
+            SV *b = argi < items-1 ? ST(argi+1) : &PL_sv_undef;
+
+            ST(reti++) = sv_2mortal(newSVsv(b));
+        }
+    }
+
+    XSRETURN(reti);
+}
+
+void
 pairfirst(block,...)
     SV *block
 PROTOTYPE: &@
@@ -765,80 +882,6 @@ PPCODE:
 
     ST(0) = sv_2mortal(newSViv(reti));
     XSRETURN(1);
-}
-
-void
-pairs(...)
-PROTOTYPE: @
-PPCODE:
-{
-    int argi = 0;
-    int reti = 0;
-    HV *pairstash = get_hv("List::Util::_Pair::", GV_ADD);
-
-    if(items % 2 && ckWARN(WARN_MISC))
-        warn("Odd number of elements in pairs");
-
-    {
-        for(; argi < items; argi += 2) {
-            SV *a = ST(argi);
-            SV *b = argi < items-1 ? ST(argi+1) : &PL_sv_undef;
-
-            AV *av = newAV();
-            av_push(av, newSVsv(a));
-            av_push(av, newSVsv(b));
-
-            ST(reti) = sv_2mortal(newRV_noinc((SV *)av));
-            sv_bless(ST(reti), pairstash);
-            reti++;
-        }
-    }
-
-    XSRETURN(reti);
-}
-
-void
-pairkeys(...)
-PROTOTYPE: @
-PPCODE:
-{
-    int argi = 0;
-    int reti = 0;
-
-    if(items % 2 && ckWARN(WARN_MISC))
-        warn("Odd number of elements in pairkeys");
-
-    {
-        for(; argi < items; argi += 2) {
-            SV *a = ST(argi);
-
-            ST(reti++) = sv_2mortal(newSVsv(a));
-        }
-    }
-
-    XSRETURN(reti);
-}
-
-void
-pairvalues(...)
-PROTOTYPE: @
-PPCODE:
-{
-    int argi = 0;
-    int reti = 0;
-
-    if(items % 2 && ckWARN(WARN_MISC))
-        warn("Odd number of elements in pairvalues");
-
-    {
-        for(; argi < items; argi += 2) {
-            SV *b = argi < items-1 ? ST(argi+1) : &PL_sv_undef;
-
-            ST(reti++) = sv_2mortal(newSVsv(b));
-        }
-    }
-
-    XSRETURN(reti);
 }
 
 void

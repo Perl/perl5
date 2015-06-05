@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-use Test::More tests => 23;
-use List::Util qw(pairgrep pairfirst pairmap pairs pairkeys pairvalues);
+use Test::More tests => 26;
+use List::Util qw(pairgrep pairfirst pairmap pairs unpairs pairkeys pairvalues);
 
 no warnings 'misc'; # avoid "Odd number of elements" warnings most of the time
 
@@ -95,6 +95,18 @@ is_deeply( [ pairs one => 1, two => ],
   is( $p[0]->key,   "one", 'pairs ->key' );
   is( $p[0]->value, 1,     'pairs ->value' );
 }
+
+is_deeply( [ unpairs [ four => 4 ], [ five => 5 ], [ six => 6 ] ],
+           [ four => 4, five => 5, six => 6 ],
+           'unpairs' );
+
+is_deeply( [ unpairs [ four => 4 ], [ five => ] ],
+           [ four => 4, five => undef ],
+           'unpairs with short item fills in undef' );
+
+is_deeply( [ unpairs [ four => 4 ], [ five => 5, 5 ] ],
+           [ four => 4, five => 5 ],
+           'unpairs with long item truncates' );
 
 is_deeply( [ pairkeys one => 1, two => 2 ],
            [qw( one two )],

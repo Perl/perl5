@@ -12,9 +12,9 @@ require Exporter;
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce sum sum0 shuffle
-  pairmap pairgrep pairfirst pairs pairkeys pairvalues
+  pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
-our $VERSION    = "1.41";
+our $VERSION    = "1.42";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
@@ -254,7 +254,118 @@ or just a list of values. The functions will all preserve the original ordering
 of the pairs, and will not be confused by multiple pairs having the same "key"
 value - nor even do they require that the first of each pair be a plain string.
 
+B<NOTE>: At the time of writing, the following C<pair*> functions that take a
+block do not modify the value of C<$_> within the block, and instead operate
+using the C<$a> and C<$b> globals instead. This has turned out to be a poor
+design, as it precludes the ability to provide a C<pairsort> function. Better
+would be to pass pair-like objects as 2-element array references in C<$_>, in
+a style similar to the return value of the C<pairs> function. At some future
+version this behaviour may be added.
+
+Until then, users are alerted B<NOT> to rely on the value of C<$_> remaining
+unmodified between the outside and the inside of the control block. In
+particular, the following example is B<UNSAFE>:
+
+ my @kvlist = ...
+
+ foreach (qw( some keys here )) {
+    my @items = pairgrep { $a eq $_ } @kvlist;
+    ...
+ }
+
+Instead, write this using a lexical variable:
+
+ foreach my $key (qw( some keys here )) {
+    my @items = pairgrep { $a eq $key } @kvlist;
+    ...
+ }
+
 =cut
+
+=head2 pairs
+
+    my @pairs = pairs @kvlist;
+
+I<Since version 1.29.>
+
+A convenient shortcut to operating on even-sized lists of pairs, this function
+returns a list of ARRAY references, each containing two items from the given
+list. It is a more efficient version of
+
+    @pairs = pairmap { [ $a, $b ] } @kvlist
+
+It is most convenient to use in a C<foreach> loop, for example:
+
+    foreach my $pair ( pairs @KVLIST ) {
+       my ( $key, $value ) = @$pair;
+       ...
+    }
+
+Since version C<1.39> these ARRAY references are blessed objects, recognising
+the two methods C<key> and C<value>. The following code is equivalent:
+
+    foreach my $pair ( pairs @KVLIST ) {
+       my $key   = $pair->key;
+       my $value = $pair->value;
+       ...
+    }
+
+=head2 unpairs
+
+    my @kvlist = unpairs @pairs
+
+I<Since version 1.42.>
+
+The inverse function to C<pairs>; this function takes a list of ARRAY
+references containing two elements each, and returns a flattened list of the
+two values from each of the pairs, in order. This is notionally equivalent to
+
+    my @kvlist = map { @{$_}[0,1] } @pairs
+
+except that it is implemented more efficiently internally. Specifically, for
+any input item it will extract exactly two values for the output list; using
+C<undef> if the input array references are short.
+
+Between C<pairs> and C<unpairs>, a higher-order list function can be used to
+operate on the pairs as single scalars; such as the following near-equivalents
+of the other C<pair*> higher-order functions:
+
+    @kvlist = unpairs grep { FUNC } pairs @kvlist
+    # Like pairgrep, but takes $_ instead of $a and $b
+
+    @kvlist = unpairs map { FUNC } pairs @kvlist
+    # Like pairmap, but takes $_ instead of $a and $b
+
+Note however that these versions will not behave as nicely in scalar context.
+
+Finally, this technique can be used to implement a sort on a keyvalue pair
+list; e.g.:
+
+    @kvlist = unpairs sort { $a->key cmp $b->key } pairs @kvlist
+
+=head2 pairkeys
+
+    my @keys = pairkeys @kvlist;
+
+I<Since version 1.29.>
+
+A convenient shortcut to operating on even-sized lists of pairs, this function
+returns a list of the the first values of each of the pairs in the given list.
+It is a more efficient version of
+
+    @keys = pairmap { $a } @kvlist
+
+=head2 pairvalues
+
+    my @values = pairvalues @kvlist;
+
+I<Since version 1.29.>
+
+A convenient shortcut to operating on even-sized lists of pairs, this function
+returns a list of the the second values of each of the pairs in the given list.
+It is a more efficient version of
+
+    @values = pairmap { $b } @kvlist
 
 =head2 pairgrep
 
@@ -328,58 +439,6 @@ C<$b> to elements of the given list. Any modifications of it by the code block
 will be visible to the caller.
 
 See L</KNOWN BUGS> for a known-bug with C<pairmap>, and a workaround.
-
-=head2 pairs
-
-    my @pairs = pairs @kvlist;
-
-I<Since version 1.29.>
-
-A convenient shortcut to operating on even-sized lists of pairs, this function
-returns a list of ARRAY references, each containing two items from the given
-list. It is a more efficient version of
-
-    @pairs = pairmap { [ $a, $b ] } @kvlist
-
-It is most convenient to use in a C<foreach> loop, for example:
-
-    foreach my $pair ( pairs @KVLIST ) {
-       my ( $key, $value ) = @$pair;
-       ...
-    }
-
-Since version C<1.39> these ARRAY references are blessed objects, recognising
-the two methods C<key> and C<value>. The following code is equivalent:
-
-    foreach my $pair ( pairs @KVLIST ) {
-       my $key   = $pair->key;
-       my $value = $pair->value;
-       ...
-    }
-
-=head2 pairkeys
-
-    my @keys = pairkeys @kvlist;
-
-I<Since version 1.29.>
-
-A convenient shortcut to operating on even-sized lists of pairs, this function
-returns a list of the the first values of each of the pairs in the given list.
-It is a more efficient version of
-
-    @keys = pairmap { $a } @kvlist
-
-=head2 pairvalues
-
-    my @values = pairvalues @kvlist;
-
-I<Since version 1.29.>
-
-A convenient shortcut to operating on even-sized lists of pairs, this function
-returns a list of the the second values of each of the pairs in the given list.
-It is a more efficient version of
-
-    @values = pairmap { $b } @kvlist
 
 =cut
 
