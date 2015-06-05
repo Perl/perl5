@@ -116,6 +116,10 @@ XXX
 
 =item *
 
+L<CPAN::Meta::Requirements> has been upgraded from version 2.132 to 2.133.
+
+=item *
+
 L<Math::BigInt> has been upgraded from version 1.9997 to 1.999701.
 
 Correct the behaviour of bdiv() and bmod() in list context. [perl #124300]

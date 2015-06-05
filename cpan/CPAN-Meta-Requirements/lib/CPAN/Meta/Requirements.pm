@@ -3,7 +3,7 @@ use warnings;
 package CPAN::Meta::Requirements;
 # ABSTRACT: a set of version requirements for a CPAN dist
 
-our $VERSION = '2.132';
+our $VERSION = '2.133';
 
 #pod =head1 SYNOPSIS
 #pod
@@ -110,34 +110,32 @@ sub _isa_version {
 sub _version_object {
   my ($self, $module, $version) = @_;
 
-  my $vobj;
+  my ($vobj, $err);
 
-  # hack around version::vpp not handling <3 character vstring literals
-  if ( $INC{'version/vpp.pm'} || $INC{'ExtUtils/MakeMaker/version/vpp.pm'} ) {
-    my $magic = _find_magic_vstring( $version );
-    $version = $magic if length $magic;
+  if (not defined $version or (!ref($version) && $version eq '0')) {
+    return $V0;
   }
-
-  eval {
-    if (not defined $version or (!ref($version) && $version eq '0')) {
-      $vobj = $V0;
+  elsif ( ref($version) eq 'version' || _isa_version($version) ) {
+    $vobj = $version;
+  }
+  else {
+    # hack around version::vpp not handling <3 character vstring literals
+    if ( $INC{'version/vpp.pm'} || $INC{'ExtUtils/MakeMaker/version/vpp.pm'} ) {
+      my $magic = _find_magic_vstring( $version );
+      $version = $magic if length $magic;
     }
-    elsif ( ref($version) eq 'version' || _isa_version($version) ) {
-      $vobj = $version;
-    }
-    else {
+    eval {
       local $SIG{__WARN__} = sub { die "Invalid version: $_[0]" };
       $vobj = version->new($version);
-    }
-  };
-
-  if ( my $err = $@ ) {
-    my $hook = $self->{bad_version_hook};
-    $vobj = eval { $hook->($version, $module) }
-      if ref $hook eq 'CODE';
-    unless (eval { $vobj->isa("version") }) {
-      $err =~ s{ at .* line \d+.*$}{};
-      die "Can't convert '$version': $err";
+    };
+    if ( my $err = $@ ) {
+      my $hook = $self->{bad_version_hook};
+      $vobj = eval { $hook->($version, $module) }
+        if ref $hook eq 'CODE';
+      unless (eval { $vobj->isa("version") }) {
+        $err =~ s{ at .* line \d+.*$}{};
+        die "Can't convert '$version': $err";
+      }
     }
   }
 
@@ -226,10 +224,14 @@ BEGIN {
   }
 }
 
+# add_minimum is optimized compared to generated subs above because
+# it is called frequently and with "0" or equivalent input
 sub add_minimum {
   my ($self, $name, $version) = @_;
 
-  if (not defined $version or (!ref($version) && $version eq '0')) {
+  # stringify $version so that version->new("0.00")->stringify ne "0"
+  # which preserves the user's choice of "0.00" as the requirement
+  if (not defined $version or "$version" eq '0') {
     return $self if $self->__entry_for($name);
     Carp::confess("can't add new requirements to finalized requirements")
       if $self->is_finalized;
@@ -787,7 +789,7 @@ CPAN::Meta::Requirements - a set of version requirements for a CPAN dist
 
 =head1 VERSION
 
-version 2.132
+version 2.133
 
 =head1 SYNOPSIS
 
