@@ -20,9 +20,9 @@ use File::Glob qw(:case);
     .travis.yml ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
     CHANGELOG ChangeLog Changelog CHANGES Changes CONTRIBUTING CONTRIBUTING.mkdn
     COPYING Copying cpanfile CREDITS dist.ini GOALS HISTORY INSTALL INSTALL.SKIP
-    LICENSE Makefile.PL MANIFEST MANIFEST.SKIP META.json META.yml MYMETA.json
-    MYMETA.yml NEW NEWS NOTES perlcritic.rc ppport.h README README.PATCHING
-    SIGNATURE THANKS TODO Todo VERSION WHATSNEW
+    LICENCE LICENSE Makefile.PL MANIFEST MANIFEST.SKIP META.json META.yml
+    MYMETA.json MYMETA.yml NEW NEWS NOTES perlcritic.rc ppport.h README
+    README.PATCHING SIGNATURE THANKS TODO Todo VERSION WHATSNEW
 );
 
 # Each entry in the  %Modules hash roughly represents a distribution,
