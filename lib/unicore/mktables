@@ -8894,15 +8894,16 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
 
 package main;
 
-    sub display_chr {
-        # Converts an ordinal printable character value to a displayable
-        # string, using a dotted circle to hold combining characters.
 
-        my $ord = shift;
-        my $chr = chr $ord;
-        return $chr if $ccc->table(0)->contains($ord);
-        return "\x{25CC}$chr";
-    }
+sub display_chr {
+    # Converts an ordinal printable character value to a displayable string,
+    # using a dotted circle to hold combining characters.
+
+    my $ord = shift;
+    my $chr = chr $ord;
+    return $chr if $ccc->table(0)->contains($ord);
+    return "\x{25CC}$chr";
+}
 
 sub join_lines($) {
     # Returns lines of the input joined together, so that they can be folded
