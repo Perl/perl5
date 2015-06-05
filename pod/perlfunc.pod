@@ -1567,46 +1567,46 @@ See L<perlsyn> for alternative strategies.
 X<do>
 
 Uses the value of EXPR as a filename and executes the contents of the
-file as a Perl script.
+file as a Perl script. That is, these statements achieve the same overall
+purpose:
 
     do 'stat.pl';
-
-is largely like
-
     eval `cat stat.pl`;
 
-except that it's more concise, runs no external processes, keeps track of
-the current
-filename for error messages, searches the C<@INC> directories, and updates
-C<%INC> if the file is found.  See L<perlvar/@INC> and L<perlvar/%INC> for
-these variables.  It also differs in that code evaluated with C<do FILENAME>
-cannot see lexicals in the enclosing scope; C<eval STRING> does.  It's the
-same, however, in that it does reparse the file every time you call it,
-so you probably don't want to do this inside a loop.
+The difference is that C<do> searches C<@INC>, updates C<%INC> if the file
+is found, and keeps track of the current filename for error messages. It
+also hides the lexicals from its enclosing scope from the evaluated code
+(whereas C<eval> exposes them; either behaviour could be what you want).
 
-If C<do> can read the file but cannot compile it, it returns C<undef> and sets
-an error message in C<$@>.  If C<do> cannot read the file, it returns undef
-and sets C<$!> to the error.  Always check C<$@> first, as compilation
-could fail in a way that also sets C<$!>.  If the file is successfully
-compiled, C<do> returns the value of the last expression evaluated.
+There is I<no> difference in that both constructs will read, parse and run
+the code in the file every time they are encountered, so you probably don't
+want to use either of them inside a busy loop.
+
+Unfortunately, C<do> does not provide reliable error detection. Upon error
+it returns undef, setting either C<$!> (if it failed to find or read the file)
+or C<$@> (if it failed to compile the file).
+Note that sometimes a compilation failure causes C<$!> to be set as well.
+So you must create a clean slate beforehand and then check C<$@> first:
+
+   {
+      local ($!, $@);
+      my $result = do 'stat.pl';
+      if ($@)
+         { warn "Couldn't compile $file or exception thrown: $@" }
+      elsif ($! and not defined $result)
+         { warn "Couldn't read $file: $!" }
+   }
+
+However, this is still unreliable: the code in the file may be read and run
+successfully, returning undef but leaving C<$!> set to an inconsequential
+error. This is I<indistinguishable> from a file read failure to the caller.
+The same applies to C<$@> for perls prior to 5.14.
 
 Inclusion of library modules is better done with the
 C<use> and C<require> operators, which also do automatic error checking
 and raise an exception if there's a problem.
-
-You might like to use C<do> to read in a program configuration
-file.  Manual error checking can be done this way:
-
-    # read in config files: system first, then user
-    for $file ("/share/prog/defaults.rc",
-               "$ENV{HOME}/.someprogrc")
-    {
-        unless ($return = do $file) {
-            warn "couldn't parse $file: $@" if $@;
-            warn "couldn't do $file: $!"    unless defined $return;
-            warn "couldn't run $file"       unless $return;
-        }
-    }
+If you need to run code from external files at runtime but require proper
+error detection, you will need to write your own solution around C<eval>.
 
 =item dump LABEL
 X<dump> X<core> X<undump>
