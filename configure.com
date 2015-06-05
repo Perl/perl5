@@ -7002,12 +7002,12 @@ $     WRITE CONFIG "Gnu_CC:[000000]gcclib.olb/library"
 $   ENDIF
 $   WRITE CONFIG "Sys$Share:VAXCRTL/Share"
 $   CLOSE CONFIG
-$   'ld' munchconfig.obj,munchconfig.opt/opt
+$   'ld'/EXE='exe_ext' munchconfig'obj_ext',munchconfig.opt/opt
 $   DELETE/NOLOG/NOCONFIRM munchconfig.opt;
 $ ELSE
-$   'ld' munchconfig.obj
+$   'ld'/EXE='exe_ext' munchconfig'obj_ext'
 $ ENDIF
-$ IF F$SEARCH("munchconfig.obj") .NES. "" THEN DELETE/NOLOG/NOCONFIRM munchconfig.obj;
+$ IF F$SEARCH("munchconfig''obj_ext'") .NES. "" THEN DELETE/NOLOG/NOCONFIRM munchconfig'obj_ext';
 $ IF F$SEARCH("munchconfig.c") .NES. "" THEN DELETE/NOLOG/NOCONFIRM munchconfig.c;
 $ IF ccname .EQS. "CXX"
 $ THEN
@@ -7097,7 +7097,7 @@ $ echo4 "Extracting config.h (with variable substitutions)"
 $!
 $! Now build the normal config.h
 $ DEFINE/USER_MODE sys$output [-]config.main
-$ mcr []munchconfig 'config_sh' [-]config_h.sh
+$ mcr []munchconfig'exe_ext' 'config_sh' [-]config_h.sh
 $ ! Concatenate them together
 $ copy [-]config.local,[-]config.main [-]config.h
 $! Clean up
@@ -7186,9 +7186,9 @@ $ close CONFIG
 $!
 $ echo4 "Extracting ''defmakefile' (with variable substitutions)"
 $ DEFINE/USER_MODE sys$output 'UUmakefile'
-$ mcr []munchconfig 'config_sh' 'Makefile_SH' -f extra_subs.txt
+$ mcr []munchconfig'exe_ext' 'config_sh' 'Makefile_SH' -f extra_subs.txt
 $! Clean up after ourselves
-$ DELETE/NOLOG/NOCONFIRM []munchconfig.exe;
+$ DELETE/NOLOG/NOCONFIRM []munchconfig'exe_ext';
 $ DELETE/NOLOG/NOCONFIRM []extra_subs.txt;
 $!
 $! Note that the /key qualifier to search, as in:
@@ -7203,6 +7203,7 @@ $!   NOTE: This file is extracted as part of the VMS configuration process.
 $!   Any changes made to it directly will be lost.  If you need to make any
 $!   changes, please edit the template in Configure.Com instead.
 $!   Use FORCE if you've just podified a README.* file on VMS.
+$ miniperl = f$search("sys$disk:[]miniperl.%xe;") ! could have alternate extension
 $ if f$search("extra.pods") .eqs. "" .or. P1 .eqs. "FORCE" then -
     search README.* "=head"/window=0/output=extra.pods
 $ open/read/error=extra_close EXTRA extra.pods
@@ -7225,7 +7226,7 @@ $       pod_file_rdt = f$cvtime(f$file_attributes(pod_file,"RDT"))
 $       if file_rdt .GTS. pod_file_rdt then do_copy := true
 $     endif
 $     ! wacky method to preserve case on ODS-5 even when parse style is traditional
-$     if do_copy then mcr sys$disk:[]miniperl.exe -e "exit 0+$^E unless File::Copy::rmscopy(q{''file'}, q{''pod_file'});"
+$     if do_copy then mcr 'miniperl' -e "exit 0+$^E unless File::Copy::rmscopy(q{''file'}, q{''pod_file'});"
 $   endif
 $ endif
 $ goto extra_loop
