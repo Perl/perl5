@@ -55,7 +55,7 @@ sub pop3_server {
       last;
     } elsif ( $cmd eq 'CAPA' ) {
       print $cl "+OK\r\n".
-	".\r\n";
+        ".\r\n";
     } else {
       diag("received unknown command: $cmd");
       print "-ERR unknown cmd\r\n";

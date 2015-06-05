@@ -57,7 +57,7 @@ sub smtp_server {
       print $cl "250 localhost\r\n";
     } elsif ( $cmd eq 'EHLO' ) {
       print $cl "250-localhost\r\n".
-	"250 HELP\r\n";
+        "250 HELP\r\n";
     } else {
       diag("received unknown command: $cmd");
       print "500 unknown cmd\r\n";

@@ -115,8 +115,8 @@ sub nntp_server {
     } elsif ( ! $ssl and $cmd eq 'STARTTLS' ) {
       print $cl "382 Continue with TLS negotiation\r\n";
       if ( ! IO::Socket::SSL->start_SSL($cl, %sslargs)) {
-	diag("initial ssl handshake with client failed");
-	return;
+        diag("initial ssl handshake with client failed");
+        return;
       }
       $ssl = 1;
     } else {

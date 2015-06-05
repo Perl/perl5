@@ -106,13 +106,13 @@ sub pop3_server {
       last;
     } elsif ( $cmd eq 'CAPA' ) {
       print $cl "+OK\r\n".
-	( $ssl ? "" : "STLS\r\n" ).
-	".\r\n";
+        ( $ssl ? "" : "STLS\r\n" ).
+        ".\r\n";
     } elsif ( ! $ssl and $cmd eq 'STLS' ) {
       print $cl "+OK starting ssl\r\n";
       if ( ! IO::Socket::SSL->start_SSL($cl, %sslargs)) {
-	diag("initial ssl handshake with client failed");
-	return;
+        diag("initial ssl handshake with client failed");
+        return;
       }
       $ssl = 1;
     } else {

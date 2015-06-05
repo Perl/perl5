@@ -4,8 +4,9 @@
 # All rights reserved.
 # Changes in Version 2.25 onwards Copyright (C) 2013-2014 Steve Hay.  All rights
 # reserved.
-# This program is free software; you can redistribute it and/or
-# modify it under the same terms as Perl itself.
+# This module is free software; you can redistribute it and/or modify it under
+# the same terms as Perl itself, i.e. under the terms of either the GNU General
+# Public License or the Artistic License, as specified in the F<LICENCE> file.
 
 package Net::NNTP;
 
@@ -20,7 +21,7 @@ use Net::Cmd;
 use Net::Config;
 use Time::Local;
 
-our $VERSION = "3.05";
+our $VERSION = "3.06";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
@@ -756,9 +757,9 @@ sub DESTROY {
     my ($class,$nntp,%arg) = @_;
     delete @arg{ grep { !m{^SSL_} } keys %arg };
     ( $arg{SSL_verifycn_name} ||= $nntp->host )
-	=~s{(?<!:):[\w()]+$}{}; # strip port
+        =~s{(?<!:):[\w()]+$}{}; # strip port
     $arg{SSL_hostname} = $arg{SSL_verifycn_name}
-	if ! defined $arg{SSL_hostname} && $class->can_client_sni;
+        if ! defined $arg{SSL_hostname} && $class->can_client_sni;
     my $ok = $class->SUPER::start_SSL($nntp,
       SSL_verifycn_scheme => 'nntp',
       %arg
@@ -1281,7 +1282,8 @@ Versions up to 2.24_1 Copyright (c) 1995-1997 Graham Barr. All rights reserved.
 Changes in Version 2.25 onwards Copyright (C) 2013-2014 Steve Hay.  All rights
 reserved.
 
-This program is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+This module is free software; you can redistribute it and/or modify it under the
+same terms as Perl itself, i.e. under the terms of either the GNU General Public
+License or the Artistic License, as specified in the F<LICENCE> file.
 
 =cut

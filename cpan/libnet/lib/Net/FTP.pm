@@ -4,8 +4,9 @@
 # All rights reserved.
 # Changes in Version 2.77_3 onwards Copyright (C) 2013-2014 Steve Hay.  All
 # rights reserved.
-# This program is free software; you can redistribute it and/or
-# modify it under the same terms as Perl itself.
+# This module is free software; you can redistribute it and/or modify it under
+# the same terms as Perl itself, i.e. under the terms of either the GNU General
+# Public License or the Artistic License, as specified in the F<LICENCE> file.
 #
 # Documentation (at end) improved 1996 by Nathan Torkington <gnat@frii.com>.
 
@@ -24,7 +25,7 @@ use Net::Config;
 use Socket;
 use Time::Local;
 
-our $VERSION = '3.05';
+our $VERSION = '3.06';
 
 our $IOCLASS;
 BEGIN {
@@ -452,7 +453,7 @@ sub authorize {
 
   my $ok = $ftp->_AUTH($auth || "");
 
-  $ok = $ftp->_RESP($resp || "")
+  return $ftp->_RESP($resp || "")
     if ($ok == CMD_MORE);
 
   $ok == CMD_OK;
@@ -889,8 +890,8 @@ sub _eprt {
       Timeout   => $ftp->timeout,
       LocalAddr => $ftp->sockhost,
       can_ssl() ? (
-	%{ ${*$ftp}{net_ftp_tlsargs} },
-	SSL_startHandshake => 0,
+        %{ ${*$ftp}{net_ftp_tlsargs} },
+        SSL_startHandshake => 0,
       ):(),
     );
     ${*$ftp}{net_ftp_intern_port} = 1;
@@ -1036,15 +1037,15 @@ sub _dataconn {
       LocalAddr => ${*$ftp}{net_ftp_localaddr},
       Timeout   => $ftp->timeout,
       can_ssl() ? (
-	SSL_startHandshake => 0,
-	$ftp->is_SSL ? (
-	  SSL_reuse_ctx => $ftp,
-	  SSL_verifycn_name => ${*$ftp}{net_ftp_tlsargs}{SSL_verifycn_name},
-	  # This will cause the use of SNI if supported by IO::Socket::SSL.
-	  $ftp->can_client_sni ? (
-	    SSL_hostname  => ${*$ftp}{net_ftp_tlsargs}{SSL_hostname}
-	  ):(),
-	) :( %{${*$ftp}{net_ftp_tlsargs}} ),
+        SSL_startHandshake => 0,
+        $ftp->is_SSL ? (
+          SSL_reuse_ctx => $ftp,
+          SSL_verifycn_name => ${*$ftp}{net_ftp_tlsargs}{SSL_verifycn_name},
+          # This will cause the use of SNI if supported by IO::Socket::SSL.
+          $ftp->can_client_sni ? (
+            SSL_hostname  => ${*$ftp}{net_ftp_tlsargs}{SSL_hostname}
+          ):(),
+        ) :( %{${*$ftp}{net_ftp_tlsargs}} ),
       ):(),
     ) or return;
   } elsif (my $listen =  delete ${*$ftp}{net_ftp_listen}) {
@@ -1141,7 +1142,7 @@ sub _data_cmd {
     my $data = $ftp->_dataconn();
     if (CMD_INFO == $ftp->response()) {
       $data->reading
-	if $data && $cmd =~ /RETR|LIST|NLST/;
+        if $data && $cmd =~ /RETR|LIST|NLST/;
       return $data;
     }
     $data->_close if $data;
@@ -1839,6 +1840,7 @@ C<put_unique> and those that do not require data connections.
 =over 4
 
 =item port ( [ PORT ] )
+
 =item eprt ( [ PORT ] )
 
 Send a C<PORT> (IPv4) or C<EPRT> (IPv6) command to the server. If C<PORT> is
@@ -1846,6 +1848,7 @@ specified then it is sent to the server. If not, then a listen socket is created
 and the correct information sent to the server.
 
 =item pasv ()
+
 =item epsv ()
 
 Tell the server to go into passive mode (C<pasv> for IPv4, C<epsv> for IPv6).
@@ -2014,7 +2017,8 @@ Versions up to 2.77_2 Copyright (c) 1995-2004 Graham Barr. All rights reserved.
 Changes in Version 2.77_3 onwards Copyright (C) 2013-2014 Steve Hay.  All rights
 reserved.
 
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+This module is free software; you can redistribute it and/or modify it under the
+same terms as Perl itself, i.e. under the terms of either the GNU General Public
+License or the Artistic License, as specified in the F<LICENCE> file.
 
 =cut

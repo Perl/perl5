@@ -4,8 +4,9 @@
 # All rights reserved.
 # Changes in Version 1.11_01 onwards Copyright (C) 2013-2014 Steve Hay.  All
 # rights reserved.
-# This program is free software; you can redistribute it and/or
-# modify it under the same terms as Perl itself.
+# This module is free software; you can redistribute it and/or modify it under
+# the same terms as Perl itself, i.e. under the terms of either the GNU General
+# Public License or the Artistic License, as specified in the F<LICENCE> file.
 
 package Net::Config;
 
@@ -19,7 +20,7 @@ use Socket qw(inet_aton inet_ntoa);
 
 our @EXPORT  = qw(%NetConfig);
 our @ISA     = qw(Net::LocalCfg Exporter);
-our $VERSION = "3.05";
+our $VERSION = "3.06";
 
 our($CONFIGURE, $LIBNET_CFG);
 
@@ -318,5 +319,22 @@ configuration.
 If true then C<Configure> will check each hostname given that it exists
 
 =back
+
+=head1 AUTHOR
+
+Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
+
+Steve Hay E<lt>F<shay@cpan.org>E<gt> is now maintaining libnet as of version
+1.22_02
+
+=head1 COPYRIGHT
+
+Versions up to 1.11 Copyright (c) 1998-2011 Graham Barr. All rights reserved.
+Changes in Version 1.11_01 onwards Copyright (C) 2013-2014 Steve Hay.  All
+rights reserved.
+
+This module is free software; you can redistribute it and/or modify it under the
+same terms as Perl itself, i.e. under the terms of either the GNU General Public
+License or the Artistic License, as specified in the F<LICENCE> file.
 
 =cut

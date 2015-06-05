@@ -108,13 +108,13 @@ sub smtp_server {
       print $cl "250 localhost\r\n";
     } elsif ( $cmd eq 'EHLO' ) {
       print $cl "250-localhost\r\n".
-	( $ssl ? "" : "250-STARTTLS\r\n" ).
-	"250 HELP\r\n";
+        ( $ssl ? "" : "250-STARTTLS\r\n" ).
+        "250 HELP\r\n";
     } elsif ( ! $ssl and $cmd eq 'STARTTLS' ) {
       print $cl "250 starting ssl\r\n";
       if ( ! IO::Socket::SSL->start_SSL($cl, %sslargs)) {
-	diag("initial ssl handshake with client failed");
-	return;
+        diag("initial ssl handshake with client failed");
+        return;
       }
       $ssl = 1;
     } else {
