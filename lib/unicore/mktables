@@ -13521,7 +13521,7 @@ sub compile_perl() {
         ) {
             # Don't include the code point unless it is assigned in this
             # release
-            my $category = $gc->value_of(hex $code_point);
+            my $category = $gc->value_of($code_point);
             next if ! defined $category || $category eq 'Cn';
 
             $Lower += $code_point;
