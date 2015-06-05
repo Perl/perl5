@@ -296,7 +296,6 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-Requirements-2.133.tar.gz',
         'FILES'        => q[cpan/CPAN-Meta-Requirements],
         'EXCLUDED'     => [
-            qw(CONTRIBUTING.mkdn),
             qw(t/00-report-prereqs.t),
             qw(t/00-report-prereqs.dd),
             qw(t/version-cleanup.t),
