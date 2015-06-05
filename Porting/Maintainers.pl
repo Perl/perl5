@@ -979,7 +979,17 @@ use File::Glob qw(:case);
 
     'Scalar-List-Utils' => {
         'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.42.tar.gz',
-        'FILES'    => q[cpan/Scalar-List-Utils],
+        'FILES'        => q[cpan/Scalar-List-Utils],
+        # Waiting to be merged upstream:
+        # https://github.com/Scalar-List-Utils/Scalar-List-Utils/pull/24
+        'CUSTOMIZED'   => [
+            qw( ListUtil.xs
+                lib/List/Util.pm
+                lib/List/Util/XS.pm
+                lib/Scalar/Util.pm
+                lib/Sub/Util.pm
+                )
+        ],
     },
 
     'Search::Dict' => {

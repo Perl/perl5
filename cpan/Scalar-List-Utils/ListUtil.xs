@@ -529,6 +529,8 @@ PPCODE:
 
     for(i = 0; i < items; i++) {
         SV *pair = args_copy[i];
+        AV *pairav;
+
         SvGETMAGIC(pair);
 
         if(SvTYPE(pair) != SVt_RV)
@@ -537,7 +539,7 @@ PPCODE:
             croak("Not an ARRAY reference at List::Util::unpack() argument %d", i);
 
         // TODO: assert pair is an ARRAY ref
-        AV *pairav = (AV *)SvRV(pair);
+        pairav = (AV *)SvRV(pair);
 
         EXTEND(SP, 2);
 
