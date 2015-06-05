@@ -1232,6 +1232,7 @@ cpan/HTTP-Tiny/corpus/redirect-06.txt
 cpan/HTTP-Tiny/corpus/redirect-07.txt
 cpan/HTTP-Tiny/corpus/redirect-08.txt
 cpan/HTTP-Tiny/corpus/redirect-09.txt
+cpan/HTTP-Tiny/corpus/redirect-10.txt
 cpan/HTTP-Tiny/lib/HTTP/Tiny.pm
 cpan/HTTP-Tiny/t/000_load.t
 cpan/HTTP-Tiny/t/001_api.t

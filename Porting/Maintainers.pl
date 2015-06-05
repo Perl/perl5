@@ -619,7 +619,6 @@ use File::Glob qw(:case);
             't/200_live.t',
             't/200_live_local_ip.t',
             't/210_live_ssl.t',
-            qr/^corpus/,
             qr/^eg/,
             qr/^xt/
         ],
