@@ -158,6 +158,10 @@ L<Module::Metadata> has been upgraded from version 1.000026 to 1.000027.
 
 =item *
 
+L<parent> has been upgraded from version 0.232 to 0.234.
+
+=item *
+
 L<perl5db.pl> has been upgraded from version 1.49 to 1.49_01.
 
 User actions are no longer evaluated after the script under the
