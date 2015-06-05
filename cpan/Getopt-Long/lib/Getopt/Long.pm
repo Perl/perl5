@@ -4,8 +4,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Feb 23 20:29:11 2015
-# Update Count    : 1683
+# Last Modified On: Tue Jun  2 10:40:52 2015
+# Update Count    : 1685
 # Status          : Released
 
 ################ Module Preamble ################
@@ -17,10 +17,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.45;
+$VERSION        =  2.46;
 # For testing versions only.
 use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.45";
+$VERSION_STRING = "2.46";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -1312,13 +1312,13 @@ sub Configure (@) {
     my (@options) = @_;
 
     my $prevconfig =
-      [ $error, $debug, $major_version, $minor_version,
+      [ $error, $debug, $major_version, $minor_version, $caller,
 	$autoabbrev, $getopt_compat, $ignorecase, $bundling, $order,
 	$gnu_compat, $passthrough, $genprefix, $auto_version, $auto_help,
 	$longprefix, $bundling_values ];
 
     if ( ref($options[0]) eq 'ARRAY' ) {
-	( $error, $debug, $major_version, $minor_version,
+	( $error, $debug, $major_version, $minor_version, $caller,
 	  $autoabbrev, $getopt_compat, $ignorecase, $bundling, $order,
 	  $gnu_compat, $passthrough, $genprefix, $auto_version, $auto_help,
 	  $longprefix, $bundling_values ) = @{shift(@options)};
