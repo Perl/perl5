@@ -1,6 +1,6 @@
 # -*- mode: cperl; tab-width: 8; indent-tabs-mode: nil; basic-offset: 2 -*-
 # vim:ts=8:sw=2:et:sta:sts=2
-package Module::Metadata; # git description: v1.000025-7-g47ca1b2
+package Module::Metadata; # git description: v1.000026-12-g9b12bf1
 
 # Adapted from Perl-licensed code originally distributed with
 # Module-Build by Ken Williams
@@ -13,7 +13,7 @@ sub __clean_eval { eval $_[0] }
 use strict;
 use warnings;
 
-our $VERSION = '1.000026';
+our $VERSION = '1.000027';
 
 use Carp qw/croak/;
 use File::Spec;
@@ -26,7 +26,10 @@ BEGIN {
 use version 0.87;
 BEGIN {
   if ($INC{'Log/Contextual.pm'}) {
-    Log::Contextual->import('log_info');
+    require "Log/Contextual/WarnLogger.pm"; # Hide from AutoPrereqs
+    Log::Contextual->import('log_info',
+      '-default_logger' => Log::Contextual::WarnLogger->new({ env_prefix => 'MODULE_METADATA', }),
+    );
   } else {
     *log_info = sub (&) { warn $_[0]->() };
   }
@@ -814,13 +817,9 @@ This module provides a standard way to gather metadata about a .pm file through
 version of a module, the C<$VERSION> assignment is C<eval>ed, as is traditional
 in the CPAN toolchain.
 
-=head1 USAGE
+=head1 CLASS METHODS
 
-=head2 Class methods
-
-=over 4
-
-=item C<< new_from_file($filename, collect_pod => 1) >>
+=head2 C<< new_from_file($filename, collect_pod => 1) >>
 
 Constructs a C<Module::Metadata> object given the path to a file.  Returns
 undef if the filename does not exist.
@@ -833,7 +832,7 @@ If the file begins by an UTF-8, UTF-16BE or UTF-16LE byte-order mark, then
 it is skipped before processing, and the content of the file is also decoded
 appropriately starting from perl 5.8.
 
-=item C<< new_from_handle($handle, $filename, collect_pod => 1) >>
+=head2 C<< new_from_handle($handle, $filename, collect_pod => 1) >>
 
 This works just like C<new_from_file>, except that a handle can be provided
 as the first argument.
@@ -846,7 +845,7 @@ mandatory or undef will be returned.
 You are responsible for setting the decoding layers on C<$handle> if
 required.
 
-=item C<< new_from_module($module, collect_pod => 1, inc => \@dirs) >>
+=head2 C<< new_from_module($module, collect_pod => 1, inc => \@dirs) >>
 
 Constructs a C<Module::Metadata> object given a module or package name.
 Returns undef if the module cannot be found.
@@ -860,7 +859,7 @@ If the file that contains the module begins by an UTF-8, UTF-16BE or
 UTF-16LE byte-order mark, then it is skipped before processing, and the
 content of the file is also decoded appropriately starting from perl 5.8.
 
-=item C<< find_module_by_name($module, \@dirs) >>
+=head2 C<< find_module_by_name($module, \@dirs) >>
 
 Returns the path to a module given the module or package name. A list
 of directories can be passed in as an optional parameter, otherwise
@@ -868,7 +867,7 @@ of directories can be passed in as an optional parameter, otherwise
 
 Can be called as either an object or a class method.
 
-=item C<< find_module_dir_by_name($module, \@dirs) >>
+=head2 C<< find_module_dir_by_name($module, \@dirs) >>
 
 Returns the entry in C<@dirs> (or C<@INC> by default) that contains
 the module C<$module>. A list of directories can be passed in as an
@@ -876,7 +875,7 @@ optional parameter, otherwise @INC is searched.
 
 Can be called as either an object or a class method.
 
-=item C<< provides( %options ) >>
+=head2 C<< provides( %options ) >>
 
 This is a convenience wrapper around C<package_versions_from_directory>
 to generate a CPAN META C<provides> data structure.  It takes key/value
@@ -925,7 +924,7 @@ is a hashref of the form:
     'OtherPackage::Name' => ...
   }
 
-=item C<< package_versions_from_directory($dir, \@files?) >>
+=head2 C<< package_versions_from_directory($dir, \@files?) >>
 
 Scans C<$dir> for .pm files (unless C<@files> is given, in which case looks
 for those files in C<$dir> - and reads each file for packages and versions,
@@ -947,36 +946,33 @@ Note that the file path is relative to C<$dir> if that is specified.
 This B<must not> be used directly for CPAN META C<provides>.  See
 the C<provides> method instead.
 
-=item C<< log_info (internal) >>
+=head2 C<< log_info (internal) >>
 
 Used internally to perform logging; imported from Log::Contextual if
 Log::Contextual has already been loaded, otherwise simply calls warn.
 
-=back
+=head1 OBJECT METHODS
 
-=head2 Object methods
-
-=over 4
-
-=item C<< name() >>
+=head2 C<< name() >>
 
 Returns the name of the package represented by this module. If there
 is more than one package, it makes a best guess based on the
 filename. If it's a script (i.e. not a *.pm) the package name is
 'main'.
 
-=item C<< version($package) >>
+=head2 C<< version($package) >>
 
 Returns the version as defined by the $VERSION variable for the
 package as returned by the C<name> method if no arguments are
 given. If given the name of a package it will attempt to return the
 version of that package if it is specified in the file.
 
-=item C<< filename() >>
+=head2 C<< filename() >>
 
 Returns the absolute path to the file.
+Note that this file may not actually exist on disk yet, e.g. if the module was read from an in-memory filehandle.
 
-=item C<< packages_inside() >>
+=head2 C<< packages_inside() >>
 
 Returns a list of packages. Note: this is a raw list of packages
 discovered (or assumed, in the case of C<main>).  It is not
@@ -986,26 +982,24 @@ for example "Foo:Bar".  Strange but valid package names are
 returned, for example "Foo::Bar::", and are left up to the caller
 on how to handle.
 
-=item C<< pod_inside() >>
+=head2 C<< pod_inside() >>
 
 Returns a list of POD sections.
 
-=item C<< contains_pod() >>
+=head2 C<< contains_pod() >>
 
 Returns true if there is any POD in the file.
 
-=item C<< pod($section) >>
+=head2 C<< pod($section) >>
 
 Returns the POD data in the given section.
 
-=item C<< is_indexable($package) >> or C<< is_indexable() >>
+=head2 C<< is_indexable($package) >> or C<< is_indexable() >>
 
 Returns a boolean indicating whether the package (if provided) or any package
 (otherwise) is eligible for indexing by PAUSE, the Perl Authors Upload Server.
 Note This only checks for valid C<package> declarations, and does not take any
 ownership information into account.
-
-=back
 
 =head1 AUTHOR
 
@@ -1025,4 +1019,3 @@ This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 =cut
-

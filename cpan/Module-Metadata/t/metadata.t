@@ -1,4 +1,3 @@
-#!/usr/bin/perl -w
 # -*- mode: cperl; tab-width: 8; indent-tabs-mode: nil; basic-offset: 2 -*-
 # vim:ts=8:sw=2:et:sta:sts=2
 
