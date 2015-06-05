@@ -3,9 +3,3 @@
 \--- foo
 a: 1
 --- error: E_CLASSIFY
-
-=== mapping with double key
---- yaml
-foo: 1
-foo: 2
---- error: E_DUPKEY

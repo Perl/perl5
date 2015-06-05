@@ -17,6 +17,7 @@ use TestUtils;
 my %BRIDGE_MAP = (
     'tml-local/dump-error'      => \&test_dump_error,
     'tml-local/load-error'      => \&test_load_error,
+    'tml-local/load-warning'    => \&test_load_warning,
     'tml-local/perl-to-yaml'    => \&test_perl_to_yaml,
     'tml-local/yaml-roundtrip'  => \&test_yaml_roundtrip,
     'tml-spec/basic-data.tml'   => \&test_yaml_json,

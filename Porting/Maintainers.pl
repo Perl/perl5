@@ -305,12 +305,11 @@ use File::Glob qw(:case);
     },
 
     'CPAN::Meta::YAML' => {
-        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-YAML-0.012.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-YAML-0.016.tar.gz',
         'FILES'        => q[cpan/CPAN-Meta-YAML],
         'EXCLUDED'     => [
-            't/00-compile.t',
             't/00-report-prereqs.t',
-            't/04_scalar.t',    # requires YAML.pm
+            't/00-report-prereqs.dd',
             qr{^xt},
         ],
     },

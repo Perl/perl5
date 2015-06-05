@@ -1,11 +1,11 @@
 use 5.008001; # sane UTF-8 support
 use strict;
 use warnings;
-package CPAN::Meta::YAML; # git description: v1.65-6-gfa117d1
+package CPAN::Meta::YAML; # git description: v1.66-5-ge09e1ae
 # XXX-INGY is 5.8.1 too old/broken for utf8?
 # XXX-XDG Lancaster consensus was that it was sufficient until
 # proven otherwise
-$CPAN::Meta::YAML::VERSION = '0.014';
+$CPAN::Meta::YAML::VERSION = '0.016';
 ; # original $VERSION removed by Doppelgaenger
 
 #####################################################################
@@ -512,7 +512,7 @@ sub _load_hash {
         }
 
         if ( exists $hash->{$key} ) {
-            die \"CPAN::Meta::YAML found a duplicate key '$key' in line '$lines->[0]'";
+            warn "CPAN::Meta::YAML found a duplicate key '$key' in line '$lines->[0]'";
         }
 
         # Do we have a value?
@@ -878,7 +878,7 @@ CPAN::Meta::YAML - Read and write a subset of YAML for CPAN Meta files
 
 =head1 VERSION
 
-version 0.014
+version 0.016
 
 =head1 SYNOPSIS
 

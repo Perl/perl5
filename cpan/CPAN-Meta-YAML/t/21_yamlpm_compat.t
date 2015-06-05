@@ -4,7 +4,7 @@ use lib 't/lib/';
 use Test::More 0.99;
 use TestBridge;
 use File::Spec::Functions 'catfile';
-use File::Temp 0.18;
+use File::Temp 0.19; # newdir
 
 #--------------------------------------------------------------------------#
 # This file test that the YAML.pm compatible Dump/Load/DumpFile/LoadFile

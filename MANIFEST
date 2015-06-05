@@ -353,6 +353,7 @@ cpan/CPAN-Meta-YAML/t/tml-local/dump-error/circular.tml
 cpan/CPAN-Meta-YAML/t/tml-local/load-error/document.tml
 cpan/CPAN-Meta-YAML/t/tml-local/load-error/scalar.tml
 cpan/CPAN-Meta-YAML/t/tml-local/load-error/tag.tml
+cpan/CPAN-Meta-YAML/t/tml-local/load-warning/document.tml
 cpan/CPAN-Meta-YAML/t/tml-local/perl-to-yaml/quoting.tml
 cpan/CPAN-Meta-YAML/t/tml-local/yaml-roundtrip/collection.tml
 cpan/CPAN-Meta-YAML/t/tml-local/yaml-roundtrip/comment.tml
