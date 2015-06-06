@@ -248,12 +248,15 @@
 #  define c99_ilogb	ilogbq
 #  define c99_lgamma	lgammaq
 #  define c99_log1p	log1pq
-#  define c99_llrint	llrintq
 #  define c99_log2	log2q
 /* no logbq */
-#  define c99_lround	llroundq
-#  define c99_lrint	lrintq
-#  define c99_lround	lroundq
+#  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
+#    define c99_lrint	llrintq
+#    define c99_lround	llroundq
+#  else
+#    define c99_lrint	lrintq
+#    define c99_lround	lroundq
+#  endif
 #  define c99_nan	nanq
 #  define c99_nearbyint	nearbyintq
 #  define c99_nextafter	nextafterq
