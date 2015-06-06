@@ -13321,8 +13321,6 @@ END
     $gc->table('Ll')->set_caseless_equivalent($LC);
     $gc->table('Lu')->set_caseless_equivalent($LC);
 
-    my $Cs = $gc->table('Cs');
-
     # Create digit and case fold tables with the original file names for
     # backwards compatibility with applications that read them directly.
     my $Digit = Property->new("Legacy_Perl_Decimal_Digit",
