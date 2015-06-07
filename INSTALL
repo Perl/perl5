@@ -343,7 +343,7 @@ and the long double support.
 
 =head3 quadmath
 
-One option for long doubles is that gcc 4.6 and later have a library
+One option for more precision is that gcc 4.6 and later have a library
 called quadmath, which implements the IEEE 754 quadruple precision
 (128-bit, 113 bits of mantissa) floating point numbers.  The library
 works at least on x86 and ia64 platforms.  It may be part of your gcc
@@ -352,7 +352,7 @@ installation, or you may need to install it separately.
 With "Configure -Dusequadmath" you can try enabling its use, but note
 the compiler dependency, you may need to also add "-Dcc=...".
 At C level the type is called C<__float128> (note, not "long double"),
-but Perl source knows it as NV.
+but Perl source knows it as NV.  (This is not "long doubles".)
 
 =head3 Algorithmic Complexity Attacks on Hashes
 

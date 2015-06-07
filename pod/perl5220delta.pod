@@ -2356,10 +2356,10 @@ threaded perl.
 
 =item *
 
-For long doubles (to get more precision and range for floating point numbers)
-one can now use the GCC quadmath library which implements the quadruple
-precision floating point numbers on x86 and IA-64 platforms.  See
-F<INSTALL> for details.
+To get more precision and range for floating point numbers one can now
+use the GCC quadmath library which implements the quadruple precision
+floating point numbers on x86 and IA-64 platforms.  See F<INSTALL> for
+details.
 
 =item *
 
