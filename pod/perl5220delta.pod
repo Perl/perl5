@@ -2448,7 +2448,7 @@ L<[perl #123977]|https://rt.perl.org/Ticket/Display.html?id=123977>
 and L<[perl #125298]|https://rt.perl.org/Ticket/Display.html?id=125298>
 for IRIX; L<[perl #124212]|https://rt.perl.org/Ticket/Display.html?id=124212>,
 L<[cpan #99605]|https://rt.cpan.org/Public/Bug/Display.html?id=99605>, and
-L<[cpan #104836|https://rt.cpan.org/Ticket/Display.html?id=104836> for Tru64.
+L<[cpan #104836]|https://rt.cpan.org/Ticket/Display.html?id=104836> for Tru64.
 
 =item z/OS running EBCDIC Code Page 1047
 
