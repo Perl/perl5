@@ -3488,9 +3488,9 @@ typedef pthread_key_t	perl_key;
    appropriate to call return.  In either case, include the lint directive.
  */
 #ifdef HASATTRIBUTE_NORETURN
-#  define NORETURN_FUNCTION_END NOT_REACHED; /* NOTREACHED */
+#  define NORETURN_FUNCTION_END NOT_REACHED;
 #else
-#  define NORETURN_FUNCTION_END NOT_REACHED; /* NOTREACHED */ return 0
+#  define NORETURN_FUNCTION_END NOT_REACHED; return 0
 #endif
 
 /* Some OS warn on NULL format to printf */
