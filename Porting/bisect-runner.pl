@@ -66,7 +66,7 @@ unless(GetOptions(\%options,
                   'test-build', 'validate',
                   'all-fixups', 'early-fixup=s@', 'late-fixup=s@', 'valgrind',
                   'check-args', 'check-shebang!', 'usage|help|?', 'gold=s',
-                  'module=s', 'with-module=s',
+                  'module=s', 'with-module=s', 'cpan-config-dir=s',
                   'A=s@',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
@@ -167,6 +167,8 @@ bisect.pl - use git bisect to pinpoint changes
  .../Porting/bisect.pl --module=autobox,Moose
  # When did this code stop working in blead with these modules?
  .../Porting/bisect.pl --with-module=Moose,Moo -e 'use Moose; 1;'
+ # Like the above 2 but with custom CPAN::MyConfig
+ .../Porting/bisect.pl --module=Moo --cpan-config-dir=/home/blah/custom/
 
 =head1 DESCRIPTION
 
@@ -559,11 +561,12 @@ MSCHWERN/Test-Simple-1.005000_005.tar.gz.
 
 In so far, it is not such a misnomer.
 
-Note that this and B<--with-module> will both require a CPAN::MyConfig.
+Note that this and L<--with-module> will both require a CPAN::MyConfig.
 If F</home/.cpan/CPAN/MyConfig.pm> does not exist, a CPAN shell will
 be started up for you so you can configure one. Feel free to let
 CPAN pick defaults for you. Enter 'quit' when you are done, and
-then everything should be all set.
+then everything should be all set. Alternatively, you may
+specify a custom L<CPAN::MyConfig> by using L<--cpan-config-dir>.
 
 Also, if you want to bisect a module that needs a display (like
 TK) and you don't want random screens appearing and disappearing
@@ -585,12 +588,26 @@ And then:
 
 --with-module module1,module2,...
 
-Like B<--module> above, except this simply installs the requested
+Like L<--module> above, except this simply installs the requested
 modules and they can then be used in other tests.
 
 For example:
 
   .../Porting/bisect.pl --with-module=Moose -e 'use Moose; ...'
+
+=item *
+
+--cpan-config-dir /home/blah/custom
+
+If defined, this will cause L<CPAN> to look for F<CPAN/MyConfig.pm> inside of
+the specified directory, instead of using the default config of
+F<$ENV{HOME}/.cpan/>.
+
+If no default config exists, a L<CPAN> shell will be fired up for you to
+configure things. Letting L<CPAN> automatically configure things for you
+should work well enough. You probably want to choose I<manual> instead of
+I<local::lib> if it asks. When you're finished with configuration, just
+type I<q> and hit I<ENTER> and the bisect should continue.
 
 =item *
 
@@ -1466,7 +1483,8 @@ if ($options{module} || $options{'with-module'}) {
   # Make sure we load up our CPAN::MyConfig and then
   # override the build_dir so we have a fresh one
   # every build
-  my $cdir = File::Spec->catfile($ENV{HOME},".cpan");
+  my $cdir = $options{'cpan-config-dir'}
+          || File::Spec->catfile($ENV{HOME},".cpan");
 
   my @cpanshell = (
     "$prefix/bin/perl",

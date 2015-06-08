@@ -17,19 +17,28 @@ my ($start, $end, $validate, $usage, $bad, $jobs, $make, $gold,
     $module, $with_module);
 
 my $need_cpan_config;
+my $cpan_config_dir;
 
 $bad = !GetOptions('start=s' => \$start, 'end=s' => \$end,
                    'jobs|j=i' => \$jobs, 'make=s' => \$make, 'gold=s' => \$gold,
                    validate => \$validate, 'usage|help|?' => \$usage,
-                   'module=s' => \$module, 'with-module=s' => \$with_module);
+                   'module=s' => \$module, 'with-module=s' => \$with_module,
+                   'cpan-config-dir=s' => \$cpan_config_dir);
 unshift @ARGV, '--help' if $bad || $usage;
 unshift @ARGV, '--validate' if $validate;
 
 if ($module || $with_module) {
-  $need_cpan_config = 1;
-
   unshift @ARGV, '--module', $module if defined $module;
   unshift @ARGV, '--with-module', $with_module if defined $with_module;
+
+  if ($cpan_config_dir) {
+    my $c = File::Spec->catfile($cpan_config_dir, 'CPAN', 'MyConfig.pm');
+    die "--cpan-config-dir: $c does not exist\n" unless -e $c;
+
+    unshift @ARGV, '--cpan-config-dir', $cpan_config_dir;
+  } else {
+    $need_cpan_config = 1;
+  }
 }
 
 my $runner = $0;
@@ -75,7 +84,10 @@ if ($need_cpan_config) {
 I could not find a CPAN::MyConfig. We need to create one now so that
 you can bisect with --module or --with-module. I'll boot up the CPAN
 shell for you. Feel free to use defaults or change things as needed.
+We recommend using 'manual' over 'local::lib' if it asks.
+
 Type 'quit' when finished.
+
 EOF
     system("$^X -MCPAN -e shell");
   }
