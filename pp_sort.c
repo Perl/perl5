@@ -1661,10 +1661,10 @@ PP(pp_sort)
 		SAVESPTR(GvSV(PL_secondgv));
 	    }
 
+            gimme = G_SCALAR;
 	    PUSHBLOCK(cx, CXt_NULL, PL_stack_base);
 	    if (!(flags & OPf_SPECIAL)) {
 		cx->cx_type = CXt_SUB;
-		cx->blk_gimme = G_SCALAR;
 		/* If our comparison routine is already active (CvDEPTH is
 		 * is not 0),  then PUSHSUB does not increase the refcount,
 		 * so we have to do it ourselves, because the LEAVESUB fur-
@@ -1782,12 +1782,10 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     PL_op = PL_sortcop;
     CALLRUNOPS(aTHX);
     PL_curcop = cop;
-    if (PL_stack_sp != PL_stack_base + 1) {
-	assert(PL_stack_sp == PL_stack_base);
-	result = SvIV(&PL_sv_undef);
-    }
-    else
-        result = SvIV(*PL_stack_sp);
+    /* entry zero of a stack is always PL_sv_undef, which
+     * simplifies converting a '()' return into undef in scalar context */
+    assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
+    result = SvIV(*PL_stack_sp);
 
     while (PL_scopestack_ix > oldscopeix) {
 	LEAVE;
@@ -1835,12 +1833,10 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     PL_op = PL_sortcop;
     CALLRUNOPS(aTHX);
     PL_curcop = cop;
-    if (PL_stack_sp != PL_stack_base + 1) {
-	assert(PL_stack_sp == PL_stack_base);
-	result = SvIV(&PL_sv_undef);
-    }
-    else
-        result = SvIV(*PL_stack_sp);
+    /* entry zero of a stack is always PL_sv_undef, which
+     * simplifies converting a '()' return into undef in scalar context */
+    assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
+    result = SvIV(*PL_stack_sp);
 
     while (PL_scopestack_ix > oldscopeix) {
 	LEAVE;
@@ -1869,9 +1865,11 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
     *++SP = b;
     PUTBACK;
     (void)(*CvXSUB(cv))(aTHX_ cv);
-    if (PL_stack_sp != PL_stack_base + 1)
-	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
+    /* entry zero of a stack is always PL_sv_undef, which
+     * simplifies converting a '()' return into undef in scalar context */
+    assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
+
     while (PL_scopestack_ix > oldscopeix) {
 	LEAVE;
     }

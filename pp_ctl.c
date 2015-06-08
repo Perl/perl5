@@ -2424,8 +2424,12 @@ PP(pp_return)
 				     * sort block, which is a CXt_NULL
 				     * not a CXt_SUB */
 	    dounwind(0);
-	    PL_stack_base[1] = *PL_stack_sp;
-	    PL_stack_sp = PL_stack_base + 1;
+            /* if we were in list context, we would have to splice out
+             * any junk before the return args, like we do in the general
+             * pp_return case, e.g.
+             *   sub f { for (junk1, junk2) { return arg1, arg2 }}
+             */
+            assert(cxstack[0].blk_gimme == G_SCALAR);
 	    return 0;
 	}
 	else

@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan( tests => 183 );
+plan(tests => 190);
 
 # these shouldn't hang
 {
@@ -1018,3 +1018,29 @@ package deletions {
     @_=sort { delete $deletions::{a}; delete $deletions::{b}; 3 } 1..3;
 }
 pass "no crash when sort block deletes *a and *b";
+
+# make sure return args are always evaluated in scalar context
+
+{
+    package Ret;
+    no warnings 'void';
+    sub f0 { }
+    sub f1 { $b <=> $a, $a <=> $b }
+    sub f2 { return ($b <=> $a, $a <=> $b) }
+    sub f3 { for ($b <=> $a) { return ($b <=> $a, $a <=> $b) } }
+
+    {
+        no warnings 'uninitialized';
+        ::is (join('-', sort { () } 3,1,2,4), '3-1-2-4', "Ret: null blk");
+    }
+    ::is (join('-', sort { $b <=> $a, $a <=> $b } 3,1,2,4), '1-2-3-4', "Ret: blk");
+    ::is (join('-', sort { for($b <=> $a) { return ($b <=> $a, $a <=> $b) } }
+                            3,1,2,4), '1-2-3-4', "Ret: blk ret");
+    {
+        no warnings 'uninitialized';
+        ::is (join('-', sort f0 3,1,2,4), '3-1-2-4', "Ret: f0");
+    }
+    ::is (join('-', sort f1 3,1,2,4), '1-2-3-4', "Ret: f1");
+    ::is (join('-', sort f2 3,1,2,4), '1-2-3-4', "Ret: f2");
+    ::is (join('-', sort f3 3,1,2,4), '1-2-3-4', "Ret: f3");
+}
