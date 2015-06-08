@@ -364,6 +364,10 @@ L</Modules and Pragmata> section.
 Visual C++ 2013 builds will now execute on XP and higher. Previously they would
 only execute on Vista and higher.
 
+=item *
+
+You can now build perl with GNU Make and GCC.  [perl #123440]
+
 =back
 
 =back
