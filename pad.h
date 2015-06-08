@@ -295,7 +295,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 
 #define PadlistARRAY(pl)	(pl)->xpadl_alloc
 #define PadlistMAX(pl)		(pl)->xpadl_max
-#define PadlistNAMES(pl)	((PADNAMELIST *)*PadlistARRAY(pl))
+#define PadlistNAMES(pl)	*((PADNAMELIST **)PadlistARRAY(pl))
 #define PadlistNAMESARRAY(pl)	PadnamelistARRAY(PadlistNAMES(pl))
 #define PadlistNAMESMAX(pl)	PadnamelistMAX(PadlistNAMES(pl))
 #define PadlistREFCNT(pl)	1	/* reserved for future use */
