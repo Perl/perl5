@@ -78,27 +78,6 @@ shell for you. Feel free to use defaults or change things as needed.
 Type 'quit' when finished.
 EOF
     system("$^X -MCPAN -e shell");
-
-    # mkpath for older File::Spec support (5.8.8, etc)
-    eval { mkpath($cdir); };
-    die "Failed to mkdir $cdir: $@\n" if $@;
-
-    open (my $fh, '>', $cfile)
-      || die "Could not open $cfile for writing: $!\n";
-
-    my $data = `$^X -mCPAN -MData::Dumper -e 'CPAN::Config->load;
-                print Dumper(\$CPAN::Config)' 2>/dev/null`;
-
-    # Replace $VAR1 = { with $CPAN::Config = {
-    unless ($data =~ s/^.*\$VAR1\s+=\s+{/\$CPAN::Config = {/s) {
-      die "CPAN::Config does not look right, can't continue.\n",
-          "Try creating a CPAN::MyConfig manually.\n",
-          "The unrecognized output was: $data";
-    }
-
-    print $fh $data;
-    print $fh "\n1;\n";
-    close $data;
   }
 }
 
