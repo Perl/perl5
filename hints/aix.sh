@@ -649,4 +649,50 @@ EOF
   ;;
 esac
 
+# Some releases of AIX cc/xlc a broken fmodl(), but -q64 seems to help.
+case "$gccversion" in
+'') case "$uselongdouble" in
+   define)
+     case "$ccflags" in
+     *-q64*) ;;
+     *) echo "Checking if your fmodl() is broken..." >&4
+        cat > fmodl$$.c <<EOF
+#include <math.h>
+#include <stdio.h>
+int main() {
+  printf("%ld\n", (long)fmodl(powl(2, 31), (long double)4294967295));
+}
+EOF
+        $cc -qlongdouble -o fmodl$$ fmodl$$.c -lm
+        case `./fmodl$$` in
+        2147483648) echo "Your fmodl() is working correctly." >&4 ;;
+        *) echo "Your fmodl() is broken, will try with -q64..." >&4
+           $cc -q64 -qlongdouble -o fmodl$$ fmodl$$.c -lm
+           case `./fmodl$$` in
+           2147483648)
+             echo "The -q64 did the trick, will use it." >& 4
+             ccflags="`echo $ccflags | sed -e 's@-q32@@g'`"
+             ldflags="`echo $ldflags | sed -e 's@-q32@@g'`"
+             ccflags="$ccflags -q64"
+             ldflags="$ldflags -q64"
+             ;;
+           *) echo "Not even the -q64 worked.  I'm disabling long doubles." >&4
+              echo "And you should have stern talk with your IBM rep." >&4
+              uselongdouble="$undef"
+              ccflags=`echo " $ccflags " | sed -e 's/ -qlongdouble / /'`
+              libswanted=`echo " $libswanted " | sed -e 's/ c128/ /'`
+              lddlflags=`echo " $lddlflags " | sed -e 's/ -lc128 / /'`
+              ;;
+           esac  # second fmodl$$
+           ;;
+        esac # first fmodl$$
+        ;;
+     esac # Checking if ...
+     ;;
+  esac # uselongdouble
+  rm -f fmodl$$.c fmodl$$
+  ;;
+esac # not gcc
+
+
 # EOF
