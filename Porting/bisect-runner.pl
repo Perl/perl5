@@ -562,7 +562,7 @@ MSCHWERN/Test-Simple-1.005000_005.tar.gz.
 In so far, it is not such a misnomer.
 
 Note that this and L<--with-module> will both require a C<CPAN::MyConfig>.
-If F</home/.cpan/CPAN/MyConfig.pm> does not exist, a CPAN shell will
+If F<$ENV{HOME}/.cpan/CPAN/MyConfig.pm> does not exist, a CPAN shell will
 be started up for you so you can configure one. Feel free to let
 CPAN pick defaults for you. Enter 'quit' when you are done, and
 then everything should be all set. Alternatively, you may
@@ -1379,6 +1379,7 @@ push @ARGS, map {"-A$_"} @{$options{A}};
 
 my $prefix;
 
+# Testing a module? We need to install perl/cpan modules to a temp dir
 if ($options{module} || $options{'with-module'}) {
   $prefix = tempdir(CLEANUP => 1);
 
