@@ -561,12 +561,12 @@ MSCHWERN/Test-Simple-1.005000_005.tar.gz.
 
 In so far, it is not such a misnomer.
 
-Note that this and L<--with-module> will both require a C<CPAN::MyConfig>.
+Note that this and I<--with-module> will both require a C<CPAN::MyConfig>.
 If F<$ENV{HOME}/.cpan/CPAN/MyConfig.pm> does not exist, a CPAN shell will
 be started up for you so you can configure one. Feel free to let
 CPAN pick defaults for you. Enter 'quit' when you are done, and
 then everything should be all set. Alternatively, you may
-specify a custom C<CPAN::MyConfig> by using L<--cpan-config-dir>.
+specify a custom C<CPAN::MyConfig> by using I<--cpan-config-dir>.
 
 Also, if you want to bisect a module that needs a display (like
 TK) and you don't want random screens appearing and disappearing
@@ -588,7 +588,7 @@ And then:
 
 --with-module module1,module2,...
 
-Like L<--module> above, except this simply installs the requested
+Like I<--module> above, except this simply installs the requested
 modules and they can then be used in other tests.
 
 For example:
