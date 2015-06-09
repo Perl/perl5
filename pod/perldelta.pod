@@ -371,6 +371,12 @@ In perl v5.22.0, the logic changed when parsing a numeric parameter to the -C
 option, such that the successfully parsed number was not saved as the option
 value if it parsed to the end of the argument.  [perl #125381]
 
+=item *
+
+Warning fatality is now ignored when rewinding the stack.  This
+prevents infinite recursion when the now fatal error also causes
+rewinding of the stack.  [perl #123398]
+
 =back
 
 =head1 Known Problems
