@@ -7604,7 +7604,7 @@ S_ref_array_or_hash(pTHX_ OP *cond)
 
 	/* anonlist now needs a list from this op, was previously used in
 	 * scalar context */
-	cond->op_flags |= ~(OPf_WANT_SCALAR | OPf_REF);
+	cond->op_flags &= ~(OPf_WANT_SCALAR | OPf_REF);
 	cond->op_flags |= OPf_WANT_LIST;
 
 	return newANONLIST(op_lvalue(cond, OP_ANONLIST));
