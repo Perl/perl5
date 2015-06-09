@@ -684,7 +684,7 @@ LINK_FLAGS	+= -subsystem:console,"5.01"
 .ENDIF
 PRIV_LINK_FLAGS	=
 
-.ELSE
+.ELIF "$(CCTYPE)" != "GCC"
 PRIV_LINK_FLAGS	= -subsystem:console
 .ENDIF
 
