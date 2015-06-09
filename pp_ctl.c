@@ -2279,12 +2279,16 @@ PP(pp_leaveloop)
     return NORMAL;
 }
 
-/* handle most of the activity of returning from an lvalue sub.
- * Called by pp_leavesublv and pp_return.
+
+/* This duplicates most of pp_leavesub, but with additional code to handle
+ * return args in lvalue context. It was forked from pp_leavesub to
+ * avoid slowing down that function any further.
+ *
+ * Any changes made to this function may need to be copied to pp_leavesub
+ * and vice-versa.
  */
 
-STATIC OP*
-S_return_lvalues(pTHX)
+PP(pp_leavesublv)
 {
     dSP;
     SV **newsp;
@@ -2477,7 +2481,7 @@ PP(pp_return)
         }
         /* fall through to a normal sub exit */
         return CvLVALUE(cx->blk_sub.cv)
-            ? S_return_lvalues(aTHX)
+            ? Perl_pp_leavesublv(aTHX)
             : Perl_pp_leavesub(aTHX);
     }
 
@@ -2530,14 +2534,6 @@ PP(pp_return)
     return retop;
 }
 
-/* This duplicates parts of pp_leavesub, so that it can share code with
- * pp_return */
-PP(pp_leavesublv)
-{
-    return S_return_lvalues(aTHX);
-
-
-}
 
 static I32
 S_unwind_loop(pTHX_ const char * const opname)
