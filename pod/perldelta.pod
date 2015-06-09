@@ -402,6 +402,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 Duplicating a closed file handle for write no longer creates a
 filename of the form F<GLOB(0xXXXXXXXX)>.  [perl #125115]
 
+=item *
+
+Warning fatality is now ignored when rewinding the stack.  This
+prevents infinite recursion when the now fatal error also causes
+rewinding of the stack.  [perl #123398]
+
 =back
 
 =head1 Known Problems
