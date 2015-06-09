@@ -455,6 +455,12 @@ been slow since Perl 5.8, and some of the form C</.*..../i> have been slow
 since Perl 5.18. They are now all fast again.
 L<[perl #123743]|https://rt.perl.org/Ticket/Display.html?id=123743>.
 
+=item *
+
+Warning fatality is now ignored when rewinding the stack.  This
+prevents infinite recursion when the now fatal error also causes
+rewinding of the stack.  [perl #123398]
+
 =back
 
 =head1 Known Problems
