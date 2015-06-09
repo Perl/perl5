@@ -2300,8 +2300,12 @@ PP(pp_leavesublv)
     bool ref;
     const char *what = NULL;
 
-    if (CxMULTICALL(&cxstack[cxstack_ix]))
+    if (CxMULTICALL(&cxstack[cxstack_ix])) {
+        /* entry zero of a stack is always PL_sv_undef, which
+         * simplifies converting a '()' return into undef in scalar context */
+        assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
 	return 0;
+    }
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
@@ -2443,16 +2447,6 @@ PP(pp_return)
 	dounwind(cxix);
 
     cx = &cxstack[cxix];
-    if (CxMULTICALL(cx)) {
-	gimme = cx->blk_gimme;
-	if (gimme == G_VOID)
-	    PL_stack_sp = PL_stack_base;
-	else if (gimme == G_SCALAR) {
-	    PL_stack_base[1] = *PL_stack_sp;
-	    PL_stack_sp = PL_stack_base + 1;
-	}
-	return 0;
-    }
 
     if (CxTYPE(cx) == CXt_SUB) {
         SV **oldsp = PL_stack_base + cx->blk_oldsp;
