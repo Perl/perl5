@@ -350,10 +350,23 @@ INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).exists $(EXPORT_LIST) $(PERL_ARCHIVEDEP) $(INST_DYNAMIC_DEP)
 ');
     if ($GCC) {
+      my $ld_basefile = " -Wl,--base-file -Wl,dll.base";
+      my $dlltool_basefile = " --base-file dll.base";
+      # --base-file should *not* be used in 5.20.3+, 5.22.1+, or any later version
+      if ( 5.020002 < $] && $] < 5.021 || 5.022 < $] ) {
+        $ld_basefile = $dlltool_basefile = "";
+      }
+      elsif (defined &Win32::BuildNumber) { # ActivePerl
+        my $b = Win32::BuildNumber();
+        # --base-file should *not* be used in builds 1805+, 2003+, or 2200+
+        if ( 1804 < $b && $b < 2000 || 2002 < $b ) {
+          $ld_basefile = $dlltool_basefile = "";
+        }
+      }
       push(@m,
        q{	}.$DLLTOOL.q{ --def $(EXPORT_LIST) --output-exp dll.exp
-	$(LD) -o $@ -Wl,--base-file -Wl,dll.base $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) $(MYEXTLIB) "$(PERL_ARCHIVE)" $(LDLOADLIBS) dll.exp
-	}.$DLLTOOL.q{ --def $(EXPORT_LIST) --base-file dll.base --output-exp dll.exp
+	$(LD) -o $@}.$ld_basefile.q{ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) dll.exp
+	}.$DLLTOOL.q{ --def $(EXPORT_LIST)}.$dlltool_basefile.q{ --output-exp dll.exp
 	$(LD) -o $@ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) $(MYEXTLIB) "$(PERL_ARCHIVE)" $(LDLOADLIBS) dll.exp });
     } elsif ($BORLAND) {
       push(@m,
