@@ -63,10 +63,23 @@ sub format_linker_cmd {
   # split off any -arguments included in ld
   my @ld = split / (?=-)/, $spec{ld};
 
+  my $use_base_file = 1;
+  # --base-file should *not* be used in 5.20.3+, 5.22.1+, or any later version
+  if ( 5.020002 < $] && $] < 5.021 || 5.022 < $] ) {
+    $use_base_file = 0;
+  }
+  elsif (defined &Win32::BuildNumber) { # ActivePerl
+    my $b = Win32::BuildNumber();
+    # --base-file should *not* be used in builds 1805+, 2003+, or 2200+
+    if ( 1804 < $b && $b < 2000 || 2002 < $b ) {
+      $use_base_file = 0;
+    }
+  }
+
   push @cmds, [ grep {defined && length} (
     @ld                       ,
     '-o', $spec{output}       ,
-    "-Wl,--base-file,$spec{base_file}"   ,
+    ($use_base_file ? "-Wl,--base-file,$spec{base_file}" : ''),
     "-Wl,--image-base,$spec{image_base}" ,
     @{$spec{lddlflags}}       ,
     @{$spec{libpath}}         ,
@@ -79,11 +92,11 @@ sub format_linker_cmd {
     $spec{map_file} ? ('-Map', $spec{map_file}) : ''
   ) ];
 
-  push @cmds, [
+  push @cmds, [ grep {defined && length} (
     $DLLTOOL, '--def'        , $spec{def_file},
               '--output-exp' , $spec{explib},
-              '--base-file'  , $spec{base_file}
-  ];
+              ($use_base_file ? ('--base-file', $spec{base_file}) : '')
+  ) ];
 
   push @cmds, [ grep {defined && length} (
     @ld                       ,
