@@ -2451,9 +2451,6 @@ PP(pp_return)
     }
 
     if (CxTYPE(cx) == CXt_SUB) {
-        if (CvLVALUE(cx->blk_sub.cv))
-            return S_return_lvalues(aTHX_ MARK);
-        else {
             SV **oldsp = PL_stack_base + cx->blk_oldsp;
             if (oldsp != MARK) {
                 /* Handle extra junk on the stack. For example,
@@ -2479,8 +2476,9 @@ PP(pp_return)
                     PL_stack_sp  = oldsp;
             }
             /* fall through to a normal sub exit */
-            return Perl_pp_leavesub(aTHX);
-        }
+            return CvLVALUE(cx->blk_sub.cv)
+                ? S_return_lvalues(aTHX_ NULL)
+                : Perl_pp_leavesub(aTHX);
     }
 
     POPBLOCK(cx,newpm);
