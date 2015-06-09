@@ -2296,6 +2296,9 @@ S_return_lvalues(pTHX)
     bool ref;
     const char *what = NULL;
 
+    if (CxMULTICALL(&cxstack[cxstack_ix]))
+	return 0;
+
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
     TAINT_NOT;
@@ -2531,8 +2534,6 @@ PP(pp_return)
  * pp_return */
 PP(pp_leavesublv)
 {
-    if (CxMULTICALL(&cxstack[cxstack_ix]))
-	return 0;
     return S_return_lvalues(aTHX);
 
 
