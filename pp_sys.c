@@ -2304,10 +2304,22 @@ PP(pp_truncate)
 	        result = 0;
 #else
 	    {
-		const int tmpfd = PerlLIO_open(name, O_RDWR);
+                int mode = O_RDWR;
+                int tmpfd;
+
+#if defined(USE_64_BIT_RAWIO) && defined(O_LARGEFILE)
+                mode |= O_LARGEFILE;	/* Transparently largefiley. */
+#endif
+#ifdef O_BINARY
+                /* On open(), the Win32 CRT tries to seek around text
+                 * files using 32-bit offsets, which causes the open()
+                 * to fail on large files, so open in binary mode.
+                 */
+                mode |= O_BINARY;
+#endif
+                tmpfd = PerlLIO_open(name, mode);
 
 		if (tmpfd < 0) {
-                    SETERRNO(EBADF,RMS_IFI);
 		    result = 0;
 		} else {
 		    if (my_chsize(tmpfd, len) < 0)
