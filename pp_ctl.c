@@ -2281,12 +2281,10 @@ PP(pp_leaveloop)
 
 /* handle most of the activity of returning from an lvalue sub.
  * Called by pp_leavesublv and pp_return.
- * For pp_leavesublv, base is null; for pp_return, its the base
- * of the args to be returned (i.e. the mark on entry to pp_return)
  */
 
 STATIC OP*
-S_return_lvalues(pTHX_ SV **base)
+S_return_lvalues(pTHX)
 {
     dSP;
     SV **newsp;
@@ -2302,14 +2300,14 @@ S_return_lvalues(pTHX_ SV **base)
     cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
     TAINT_NOT;
 
-    mark = base ? base : newsp;
+    mark = newsp + 1;
 
     ref = !!(CxLVAL(cx) & OPpENTERSUB_INARGS);
     if (gimme == G_SCALAR) {
 	if (CxLVAL(cx) && !ref) {     /* Leave it as it is if we can. */
 	    SV *sv;
-	    if (MARK < SP) {
-		assert(MARK+1 == SP);
+	    if (MARK <= SP) {
+		assert(MARK == SP);
 		if ((SvPADTMP(TOPs) || SvREADONLY(TOPs)) &&
 		    !SvSMAGICAL(TOPs)) {
 		    what =
@@ -2332,24 +2330,24 @@ S_return_lvalues(pTHX_ SV **base)
 	              "Can't return %s from lvalue subroutine", what
 	    );
 	}
-	if (MARK < SP) {
+	if (MARK <= SP) {
 	      copy_sv:
 		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
 		    if (!SvPADTMP(*SP)) {
-			*++newsp = SvREFCNT_inc(*SP);
+			*MARK = SvREFCNT_inc(*SP);
 			FREETMPS;
-			sv_2mortal(*newsp);
+			sv_2mortal(*MARK);
 		    }
 		    else {
 			/* FREETMPS could clobber it */
 			SV *sv = SvREFCNT_inc(*SP);
 			FREETMPS;
-			*++newsp = sv_mortalcopy(sv);
+			*MARK = sv_mortalcopy(sv);
 			SvREFCNT_dec(sv);
 		    }
 		}
 		else
-		    *++newsp =
+		    *MARK =
 		      SvPADTMP(*SP)
 		       ? sv_mortalcopy(*SP)
 		       : !SvTEMP(*SP)
@@ -2357,9 +2355,11 @@ S_return_lvalues(pTHX_ SV **base)
 		          : *SP;
 	}
 	else {
-	    EXTEND(newsp,1);
-	    *++newsp = &PL_sv_undef;
+	    MEXTEND(MARK, 0);
+	    *MARK = &PL_sv_undef;
 	}
+        SP = MARK;
+
 	if (CxLVAL(cx) & OPpDEREF) {
 	    SvGETMAGIC(TOPs);
 	    if (!SvOK(TOPs)) {
@@ -2370,14 +2370,14 @@ S_return_lvalues(pTHX_ SV **base)
     else if (gimme == G_ARRAY) {
 	assert (!(CxLVAL(cx) & OPpDEREF));
 	if (ref || !CxLVAL(cx))
-	    while (++MARK <= SP)
-		*++newsp =
+	    for (; MARK <= SP; MARK++)
+		*MARK =
 		       SvFLAGS(*MARK) & SVs_PADTMP
 		           ? sv_mortalcopy(*MARK)
 		     : SvTEMP(*MARK)
 		           ? *MARK
 		           : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
-	else while (++MARK <= SP) {
+	else for (; MARK <= SP; MARK++) {
 	    if (*MARK != &PL_sv_undef
 		    && (SvPADTMP(*MARK) || SvREADONLY(*MARK))
 	    ) {
@@ -2386,14 +2386,11 @@ S_return_lvalues(pTHX_ SV **base)
                             ? "a readonly value" : "a temporary";
                     goto croak;
 	    }
-	    else
-		*++newsp =
-		    SvTEMP(*MARK)
-		       ? *MARK
-		       : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
+	    else if (!SvTEMP(*MARK))
+		*MARK = sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
 	}
     }
-    PL_stack_sp = newsp;
+    PUTBACK;
 
     LEAVE;
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
@@ -2477,7 +2474,7 @@ PP(pp_return)
             }
             /* fall through to a normal sub exit */
             return CvLVALUE(cx->blk_sub.cv)
-                ? S_return_lvalues(aTHX_ NULL)
+                ? S_return_lvalues(aTHX)
                 : Perl_pp_leavesub(aTHX);
     }
 
@@ -2536,7 +2533,7 @@ PP(pp_leavesublv)
 {
     if (CxMULTICALL(&cxstack[cxstack_ix]))
 	return 0;
-    return S_return_lvalues(aTHX_ NULL);
+    return S_return_lvalues(aTHX);
 
 
 }
