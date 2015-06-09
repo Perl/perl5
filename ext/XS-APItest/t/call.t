@@ -11,7 +11,7 @@ use strict;
 
 BEGIN {
     require '../../t/test.pl';
-    plan(437);
+    plan(455);
     use_ok('XS::APItest')
 };
 
@@ -224,6 +224,8 @@ my @bodies = (
     [ 'BEGIN { die "die in BEGIN"}', 0, 0, 1, qr/die in BEGIN/, ],
     # run-time exception
     [ 'd',                           1, 0, 0, qr/its_dead_jim/, ],
+    # success with caught exception
+    [ 'eval { die "blah" }; 99',     0, 1, 1, qr/^$/,           ],
 );
 
 

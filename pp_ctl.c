@@ -4278,10 +4278,11 @@ PP(pp_leaveeval)
     I32 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
-    const U8 save_flags = PL_op -> op_flags;
     I32 optype;
     SV *namesv;
     CV *evalcv;
+    /* grab this value before POPEVAL restores old PL_in_eval */
+    bool keep = cBOOL(PL_in_eval & EVAL_KEEPERR);
 
     PERL_ASYNC_CHECK();
     POPBLOCK(cx,newpm);
@@ -4313,9 +4314,8 @@ PP(pp_leaveeval)
     }
     else {
 	LEAVE_with_name("eval");
-	if (!(save_flags & OPf_SPECIAL)) {
+        if (!keep)
 	    CLEAR_ERRSV();
-	}
     }
 
     RETURNOP(retop);
