@@ -2448,7 +2448,9 @@ PP(pp_return)
 
     cx = &cxstack[cxix];
 
-    if (CxTYPE(cx) == CXt_SUB) {
+    if (CxTYPE(cx) == CXt_SUB
+        || (CxTYPE(cx) == CXt_EVAL && CxTRYBLOCK(cx)))
+    {
         SV **oldsp = PL_stack_base + cx->blk_oldsp;
         if (oldsp != MARK) {
             /* Handle extra junk on the stack. For example,
@@ -2473,6 +2475,8 @@ PP(pp_return)
             else
                 PL_stack_sp  = oldsp;
         }
+        if (CxTYPE(cx) == CXt_EVAL)
+            return Perl_pp_leavetry(aTHX);
         /* fall through to a normal sub exit */
         return CvLVALUE(cx->blk_sub.cv)
             ? Perl_pp_leavesublv(aTHX)
@@ -2487,8 +2491,6 @@ PP(pp_return)
 	POPEVAL(cx);
 	namesv = cx->blk_eval.old_namesv;
 	retop = cx->blk_eval.retop;
-	if (CxTRYBLOCK(cx))
-	    break;
 	if (optype == OP_REQUIRE &&
 	    (MARK == SP || (gimme == G_SCALAR && !SvTRUE(*SP))) )
 	{
@@ -4379,9 +4381,11 @@ PP(pp_leavetry)
     I32 gimme;
     PERL_CONTEXT *cx;
     I32 optype;
+    OP *retop;
 
     PERL_ASYNC_CHECK();
     POPBLOCK(cx,newpm);
+    retop = cx->blk_eval.retop;
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);
 
@@ -4391,7 +4395,7 @@ PP(pp_leavetry)
 
     LEAVE_with_name("eval_scope");
     CLEAR_ERRSV();
-    RETURN;
+    RETURNOP(retop);
 }
 
 PP(pp_entergiven)
