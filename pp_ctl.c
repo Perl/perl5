@@ -2448,34 +2448,34 @@ PP(pp_return)
     }
 
     if (CxTYPE(cx) == CXt_SUB) {
-            SV **oldsp = PL_stack_base + cx->blk_oldsp;
-            if (oldsp != MARK) {
-                /* Handle extra junk on the stack. For example,
-                 *    for (1,2) { return 3,4 }
-                 * leaves 1,2,3,4 on the stack. In list context we
-                 * have to splice out the 1,2; In scalar context for
-                 *    for (1,2) { return }
-                 * we need to set sp = oldsp so that pp_leavesub knows
-                 * to push &PL_sv_undef onto the stack.
-                 * Note that in pp_return we only do the extra processing
-                 * required to handle junk; everything else we leave to
-                 * pp_leavesub.
-                 */
-                SSize_t nargs = SP - MARK;
-                if (nargs) {
-                    if (cx->blk_gimme == G_ARRAY) {
-                        /* shift return args to base of call stack frame */
-                        Move(MARK + 1, oldsp + 1, nargs, SV**);
-                        PL_stack_sp  = oldsp + nargs;
-                    }
+        SV **oldsp = PL_stack_base + cx->blk_oldsp;
+        if (oldsp != MARK) {
+            /* Handle extra junk on the stack. For example,
+             *    for (1,2) { return 3,4 }
+             * leaves 1,2,3,4 on the stack. In list context we
+             * have to splice out the 1,2; In scalar context for
+             *    for (1,2) { return }
+             * we need to set sp = oldsp so that pp_leavesub knows
+             * to push &PL_sv_undef onto the stack.
+             * Note that in pp_return we only do the extra processing
+             * required to handle junk; everything else we leave to
+             * pp_leavesub.
+             */
+            SSize_t nargs = SP - MARK;
+            if (nargs) {
+                if (cx->blk_gimme == G_ARRAY) {
+                    /* shift return args to base of call stack frame */
+                    Move(MARK + 1, oldsp + 1, nargs, SV**);
+                    PL_stack_sp  = oldsp + nargs;
                 }
-                else
-                    PL_stack_sp  = oldsp;
             }
-            /* fall through to a normal sub exit */
-            return CvLVALUE(cx->blk_sub.cv)
-                ? S_return_lvalues(aTHX)
-                : Perl_pp_leavesub(aTHX);
+            else
+                PL_stack_sp  = oldsp;
+        }
+        /* fall through to a normal sub exit */
+        return CvLVALUE(cx->blk_sub.cv)
+            ? S_return_lvalues(aTHX)
+            : Perl_pp_leavesub(aTHX);
     }
 
     POPBLOCK(cx,newpm);
