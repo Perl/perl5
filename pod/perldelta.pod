@@ -368,6 +368,11 @@ only execute on Vista and higher.
 
 You can now build perl with GNU Make and GCC.  [perl #123440]
 
+=item *
+
+C<truncate($filename, $size)> now works for files over 4GB in size.
+[perl #125347]
+
 =back
 
 =back
