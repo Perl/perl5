@@ -2423,6 +2423,7 @@ PP(pp_return)
     PMOP *newpm;
     I32 optype = 0;
     SV *namesv;
+    CV *evalcv;
     OP *retop = NULL;
 
     const I32 cxix = dopoptosub(cxstack_ix);
@@ -2491,6 +2492,7 @@ PP(pp_return)
 	POPEVAL(cx);
 	namesv = cx->blk_eval.old_namesv;
 	retop = cx->blk_eval.retop;
+        evalcv = cx->blk_eval.cv;
 	break;
     case CXt_FORMAT:
 	retop = cx->blk_sub.retop;
@@ -2512,6 +2514,11 @@ PP(pp_return)
     PL_stack_sp = newsp;
 
     if (CxTYPE(cx) == CXt_EVAL) {
+#ifdef DEBUGGING
+        assert(CvDEPTH(evalcv) == 1);
+#endif
+        CvDEPTH(evalcv) = 0;
+
 	if (optype == OP_REQUIRE &&
             !(gimme == G_SCALAR ? SvTRUE(*PL_stack_sp) : PL_stack_sp > PL_stack_base + cx->blk_oldsp) )
 	{
