@@ -2491,16 +2491,6 @@ PP(pp_return)
 	POPEVAL(cx);
 	namesv = cx->blk_eval.old_namesv;
 	retop = cx->blk_eval.retop;
-	if (optype == OP_REQUIRE &&
-	    (MARK == SP || (gimme == G_SCALAR && !SvTRUE(*SP))) )
-	{
-	    /* Unassume the success we assumed earlier. */
-	    (void)hv_delete(GvHVn(PL_incgv),
-			    SvPVX_const(namesv),
-                            SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
-			    G_DISCARD);
-	    DIE(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
-	}
 	break;
     case CXt_FORMAT:
 	retop = cx->blk_sub.retop;
@@ -2521,7 +2511,21 @@ PP(pp_return)
     }
     PL_stack_sp = newsp;
 
+    if (CxTYPE(cx) == CXt_EVAL) {
+	if (optype == OP_REQUIRE &&
+            !(gimme == G_SCALAR ? SvTRUE(*PL_stack_sp) : PL_stack_sp > PL_stack_base + cx->blk_oldsp) )
+	{
+	    /* Unassume the success we assumed earlier. */
+	    (void)hv_delete(GvHVn(PL_incgv),
+			    SvPVX_const(namesv),
+                            SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
+			    G_DISCARD);
+	    DIE(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
+	}
+    }
+
     LEAVE;
+
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     if (clear_errsv) {
