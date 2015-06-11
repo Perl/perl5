@@ -2417,10 +2417,7 @@ PP(pp_return)
 {
     dSP; dMARK;
     PERL_CONTEXT *cx;
-    I32 gimme;
-    SV **newsp;
-    PMOP *newpm;
-    OP *retop = NULL;
+    SV **oldsp;
 
     const I32 cxix = dopoptosub(cxstack_ix);
 
@@ -2445,10 +2442,7 @@ PP(pp_return)
 
     cx = &cxstack[cxix];
 
-    if (CxTYPE(cx) == CXt_SUB
-        || (CxTYPE(cx) == CXt_EVAL))
-    {
-        SV **oldsp = PL_stack_base + cx->blk_oldsp;
+        oldsp = PL_stack_base + cx->blk_oldsp;
         if (oldsp != MARK) {
             /* Handle extra junk on the stack. For example,
              *    for (1,2) { return 3,4 }
@@ -2472,42 +2466,22 @@ PP(pp_return)
             else
                 PL_stack_sp  = oldsp;
         }
-        if (CxTYPE(cx) == CXt_EVAL)
-            return CxTRYBLOCK(cx)
-                ? Perl_pp_leavetry(aTHX)
-                : Perl_pp_leaveeval(aTHX);
-        /* fall through to a normal sub exit */
+
+    /* fall through to a normal exit */
+    switch (CxTYPE(cx)) {
+    case CXt_EVAL:
+        return CxTRYBLOCK(cx)
+            ? Perl_pp_leavetry(aTHX)
+            : Perl_pp_leaveeval(aTHX);
+    case CXt_SUB:
         return CvLVALUE(cx->blk_sub.cv)
             ? Perl_pp_leavesublv(aTHX)
             : Perl_pp_leavesub(aTHX);
-    }
-
-    POPBLOCK(cx,newpm);
-    switch (CxTYPE(cx)) {
     case CXt_FORMAT:
-	retop = cx->blk_sub.retop;
-	POPFORMAT(cx);
-	break;
+        return Perl_pp_leavewrite(aTHX);
     default:
 	DIE(aTHX_ "panic: return, type=%u", (unsigned) CxTYPE(cx));
     }
-
-    TAINT_NOT;
-    if (gimme == G_SCALAR)
-        *++newsp = (MARK < SP) ? sv_mortalcopy(*SP) : &PL_sv_undef;
-    else if (gimme == G_ARRAY) {
-        while (++MARK <= SP) {
-            *++newsp = sv_mortalcopy(*MARK);
-            TAINT_NOT;		/* Each item is independent */
-        }
-    }
-    PL_stack_sp = newsp;
-
-    LEAVE;
-
-    PL_curpm = newpm;	/* ... and pop $1 et al */
-
-    return retop;
 }
 
 
