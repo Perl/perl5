@@ -4420,16 +4420,15 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
        if (isDIGIT(*p)) {
             const char* endptr;
             UV uv;
-            if (grok_atoUV(p, &uv, &endptr)
-                && uv <= U32_MAX
-                && (p = endptr)
-                && *p && *p != '\n' && *p != '\r'
-            ) {
+            if (grok_atoUV(p, &uv, &endptr) && uv <= U32_MAX) {
                 opt = (U32)uv;
-                if (isSPACE(*p))
-                    goto the_end_of_the_opts_parser;
-                else
-                    Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
+                p = endptr;
+                if (p && *p && *p != '\n' && *p != '\r') {
+                    if (isSPACE(*p))
+                        goto the_end_of_the_opts_parser;
+                    else
+                        Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
+                }
             }
         }
         else {
