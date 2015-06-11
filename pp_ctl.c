@@ -2418,27 +2418,28 @@ PP(pp_return)
     dSP; dMARK;
     PERL_CONTEXT *cx;
     SV **oldsp;
-
     const I32 cxix = dopoptosub(cxstack_ix);
 
-    if (cxix < 0) {
-	if (CxMULTICALL(cxstack)) { /* In this case we must be in a
-				     * sort block, which is a CXt_NULL
-				     * not a CXt_SUB */
-	    dounwind(0);
-            /* if we were in list context, we would have to splice out
-             * any junk before the return args, like we do in the general
-             * pp_return case, e.g.
-             *   sub f { for (junk1, junk2) { return arg1, arg2 }}
-             */
-            assert(cxstack[0].blk_gimme == G_SCALAR);
-	    return 0;
-	}
-	else
-	    DIE(aTHX_ "Can't return outside a subroutine");
-    }
-    if (cxix < cxstack_ix)
+    assert(cxstack_ix >= 0);
+    if (cxix < cxstack_ix) {
+        if (cxix < 0) {
+            if (CxMULTICALL(cxstack)) { /* In this case we must be in a
+                                         * sort block, which is a CXt_NULL
+                                         * not a CXt_SUB */
+                dounwind(0);
+                /* if we were in list context, we would have to splice out
+                 * any junk before the return args, like we do in the general
+                 * pp_return case, e.g.
+                 *   sub f { for (junk1, junk2) { return arg1, arg2 }}
+                 */
+                assert(cxstack[0].blk_gimme == G_SCALAR);
+                return 0;
+            }
+            else
+                DIE(aTHX_ "Can't return outside a subroutine");
+        }
 	dounwind(cxix);
+    }
 
     cx = &cxstack[cxix];
 
