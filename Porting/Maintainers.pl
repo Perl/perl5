@@ -1183,7 +1183,7 @@ use File::Glob qw(:case);
     },
 
     'threads::shared' => {
-        'DISTRIBUTION' => 'JDHEDDEN/threads-shared-1.46.tar.gz',
+        'DISTRIBUTION' => 'JDHEDDEN/threads-shared-1.48.tar.gz',
         'FILES'        => q[dist/threads-shared],
         'EXCLUDED'     => [
             qw( examples/class.pl
