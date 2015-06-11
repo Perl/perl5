@@ -11,7 +11,7 @@ BEGIN {
     skip_all_if_miniperl('-C and $ENV{PERL_UNICODE} are disabled on miniperl');
 }
 
-plan(tests => 13);
+plan(tests => 14);
 
 my $r;
 
@@ -24,6 +24,11 @@ $r = runperl( switches => [ '-CO', '-w' ],
 	      prog     => 'print chr(256)',
               stderr   => 1 );
 like( $r, qr/^$b(?:\r?\n)?$/s, '-CO: no warning on UTF-8 output' );
+
+$r = runperl( switches => [ '-C2', '-w' ],
+	      prog     => 'print chr(256)',
+              stderr   => 1 );
+like( $r, qr/^$b(?:\r?\n)?$/s, '-C2: no warning on UTF-8 output' );
 
 SKIP: {
     if (exists $ENV{PERL_UNICODE} &&
