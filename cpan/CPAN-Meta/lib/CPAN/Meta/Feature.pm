@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta::Feature;
 
-our $VERSION = '2.150001';
+our $VERSION = '2.150005';
 
 use CPAN::Meta::Prereqs;
 
@@ -67,8 +67,6 @@ sub prereqs     { $_[0]{prereqs} }
 
 # ABSTRACT: an optional feature provided by a CPAN distribution
 
-__END__
-
 =pod
 
 =encoding UTF-8
@@ -79,7 +77,7 @@ CPAN::Meta::Feature - an optional feature provided by a CPAN distribution
 
 =head1 VERSION
 
-version 2.150001
+version 2.150005
 
 =head1 DESCRIPTION
 
@@ -144,3 +142,8 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+__END__
+
+
+# vim: ts=2 sts=2 sw=2 et :

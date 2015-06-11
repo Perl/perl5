@@ -1,6 +1,5 @@
 use strict;
 use warnings;
-# vim: set ts=4 sw=4 noet nolist :
 
 use Test::More;
 use CPAN::Meta;
@@ -92,8 +91,7 @@ my $fragment3 = {
 	}
 };
 
-my $result = eval { $merger->merge($meta1, $fragment3) };
-is($result, undef, 'Trying to merge optional_features with same feature name and different descriptions gives an exception');
+is( eval { $merger->merge($meta1, $fragment3) }, undef, 'Trying to merge optional_features with same feature name and different descriptions gives an exception');
 like $@, qr/^Cannot merge two optional_features named 'FeatureName' with different 'description' values/, 'Exception looks right';
 
 my $fragment4 = {
@@ -106,8 +104,7 @@ my $fragment4 = {
 	}
 };
 
-$result = eval { $merger->merge($meta1, $fragment4) };
-is($result, undef, 'Trying to merge optional_features with same feature name and differences in other keys gives an exception');
+is( eval { $merger->merge($meta1, $fragment4) }, undef, 'Trying to merge optional_features with same feature name and differences in other keys gives an exception');
 like $@, qr/^Cannot merge two optional_features named 'FeatureName' with different 'x_default' values/, 'Exception looks right';
 
 my $fragment5 = {
@@ -140,3 +137,4 @@ is_deeply(
 );
 
 done_testing;
+# vim: ts=4 sts=4 sw=4 noet :

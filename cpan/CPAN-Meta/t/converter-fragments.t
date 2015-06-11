@@ -151,8 +151,8 @@ for my $c (@cases) {
     my $got = $cmc->upgrade_fragment;
     my $exp = $c->{expect};
     is_deeply( $got, $exp, $c->{label} )
-      or diag "GOT:\n" . explain($got) . "\nEXPECTED:\n" . explain($exp);
+      or diag "GOT:\n", explain($got), "EXPECTED:\n", explain($exp);
 }
 
 done_testing;
-# vim: ts=4 sts=4 sw=4 et:
+# vim: ts=8 sts=4 sw=4 et :

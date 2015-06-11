@@ -299,6 +299,7 @@ cpan/CPAN-Meta/t/data-test/META-1_3.yml
 cpan/CPAN-Meta/t/data-test/META-1_4.yml
 cpan/CPAN-Meta/t/data-test/META-2.json
 cpan/CPAN-Meta/t/data-test/META-2.meta
+cpan/CPAN-Meta/t/data-test/preserve-release-status.yml
 cpan/CPAN-Meta/t/data-test/provides-version-missing.json
 cpan/CPAN-Meta/t/data-test/resources.yml
 cpan/CPAN-Meta/t/data-test/restricted-2.json

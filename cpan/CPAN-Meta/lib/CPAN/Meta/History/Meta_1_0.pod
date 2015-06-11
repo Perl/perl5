@@ -7,7 +7,8 @@ CPAN::Meta::History::Meta_1_0 - Version 1.0 metadata specification for META.yml
 =head1 PREFACE
 
 This is a historical copy of the version 1.0 specification for F<META.yml>
-files, copyright by Ken Williams.
+files, copyright by Ken Williams and licensed under the same terms as Perl
+itself.
 
 Modifications from the original:
 

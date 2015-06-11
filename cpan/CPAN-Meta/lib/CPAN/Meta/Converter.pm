@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta::Converter;
 
-our $VERSION = '2.150001';
+our $VERSION = '2.150005';
 
 #pod =head1 SYNOPSIS
 #pod
@@ -388,6 +388,8 @@ sub _clean_version {
 
 sub _bad_version_hook {
   my ($v) = @_;
+  $v =~ s{^\s*}{};
+  $v =~ s{\s*$}{};
   $v =~ s{[a-z]+$}{}; # strip trailing alphabetics
   my $vobj = eval { version->new($v) };
   return defined($vobj) ? $vobj : version->new(0); # or give up
@@ -803,7 +805,7 @@ my %up_convert = (
     # CHANGED TO MANDATORY
     'dynamic_config'      => \&_keep_or_one,
     # ADDED MANDATORY
-    'release_status'      => \&_release_status_from_version,
+    'release_status'      => \&_release_status,
     # PRIOR OPTIONAL
     'keywords'            => \&_keep,
     'no_index'            => \&_no_index_directory,
@@ -1497,7 +1499,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.150001
+version 2.150005
 
 =head1 SYNOPSIS
 
@@ -1634,4 +1636,4 @@ the same terms as the Perl 5 programming language system itself.
 __END__
 
 
-# vim: ts=2 sts=2 sw=2 et:
+# vim: ts=2 sts=2 sw=2 et :

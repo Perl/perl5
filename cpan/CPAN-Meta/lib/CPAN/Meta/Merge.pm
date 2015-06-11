@@ -3,15 +3,24 @@ use warnings;
 
 package CPAN::Meta::Merge;
 
-our $VERSION = '2.150001';
+our $VERSION = '2.150005';
 
 use Carp qw/croak/;
 use Scalar::Util qw/blessed/;
 use CPAN::Meta::Converter 2.141170;
 
+sub _is_identical {
+  my ($left, $right) = @_;
+  return
+    (not defined $left and not defined $right)
+    # if either of these are references, we compare the serialized value
+    || (defined $left and defined $right and $left eq $right);
+}
+
 sub _identical {
   my ($left, $right, $path) = @_;
-  croak sprintf "Can't merge attribute %s: '%s' does not equal '%s'", join('.', @{$path}), $left, $right unless $left eq $right;
+  croak sprintf "Can't merge attribute %s: '%s' does not equal '%s'", join('.', @{$path}), $left, $right
+    unless _is_identical($left, $right);
   return $left;
 }
 
@@ -49,6 +58,13 @@ sub _uniq_map {
   for my $key (keys %{$right}) {
     if (not exists $left->{$key}) {
       $left->{$key} = $right->{$key};
+    }
+    # identical strings or references are merged identically
+    elsif (_is_identical($left->{$key}, $right->{$key})) {
+      1; # do nothing - keep left
+    }
+    elsif (ref $left->{$key} eq 'HASH' and ref $right->{$key} eq 'HASH') {
+      $left->{$key} = _uniq_map($left->{$key}, $right->{$key}, [ @{$path}, $key ]);
     }
     else {
       croak 'Duplication of element ' . join '.', @{$path}, $key;
@@ -219,6 +235,9 @@ sub merge {
 
 # ABSTRACT: Merging CPAN Meta fragments
 
+
+# vim: ts=2 sts=2 sw=2 et :
+
 __END__
 
 =pod
@@ -231,7 +250,7 @@ CPAN::Meta::Merge - Merging CPAN Meta fragments
 
 =head1 VERSION
 
-version 2.150001
+version 2.150005
 
 =head1 SYNOPSIS
 

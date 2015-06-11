@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta::Prereqs;
 
-our $VERSION = '2.150001';
+our $VERSION = '2.150005';
 
 #pod =head1 DESCRIPTION
 #pod
@@ -163,7 +163,7 @@ sub with_merged_prereqs {
 #pod
 #pod     my $new_reqs = $prereqs->merged_requirements( \@phases, \@types );
 #pod     my $new_reqs = $prereqs->merged_requirements( \@phases );
-#pod     my $new_reqs = $preerqs->merged_requirements();
+#pod     my $new_reqs = $prereqs->merged_requirements();
 #pod
 #pod This method joins together all requirements across a number of phases
 #pod and types into a new L<CPAN::Meta::Requirements> object.  If arguments
@@ -275,8 +275,6 @@ sub clone {
 
 # ABSTRACT: a set of distribution prerequisites by phase and type
 
-__END__
-
 =pod
 
 =encoding UTF-8
@@ -287,7 +285,7 @@ CPAN::Meta::Prereqs - a set of distribution prerequisites by phase and type
 
 =head1 VERSION
 
-version 2.150001
+version 2.150005
 
 =head1 DESCRIPTION
 
@@ -353,7 +351,7 @@ will not alter them.
 
     my $new_reqs = $prereqs->merged_requirements( \@phases, \@types );
     my $new_reqs = $prereqs->merged_requirements( \@phases );
-    my $new_reqs = $preerqs->merged_requirements();
+    my $new_reqs = $prereqs->merged_requirements();
 
 This method joins together all requirements across a number of phases
 and types into a new L<CPAN::Meta::Requirements> object.  If arguments
@@ -417,3 +415,8 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+__END__
+
+
+# vim: ts=2 sts=2 sw=2 et :

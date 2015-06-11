@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta::Validator;
 
-our $VERSION = '2.150001';
+our $VERSION = '2.150005';
 
 #pod =head1 SYNOPSIS
 #pod
@@ -986,8 +986,6 @@ sub _error {
 
 # ABSTRACT: validate CPAN distribution metadata structures
 
-__END__
-
 =pod
 
 =encoding UTF-8
@@ -998,7 +996,7 @@ CPAN::Meta::Validator - validate CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.150001
+version 2.150005
 
 =head1 SYNOPSIS
 
@@ -1205,3 +1203,8 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+__END__
+
+
+# vim: ts=2 sts=2 sw=2 et :
