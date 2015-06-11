@@ -1047,8 +1047,6 @@ no warnings 'experimental::postderef';
 (\$_)->$*;
 "$_->$*";
 EXPECT
-Postfix dereference is experimental at - line 3.
-Postfix dereference is experimental at - line 4.
 ########
 # toke.c
 use warnings 'portable' ;

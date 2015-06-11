@@ -43,7 +43,6 @@ plan(125);
 }
 
 use feature 'postderef';
-no warnings 'experimental::postderef';
 
 {
     no strict 'refs';

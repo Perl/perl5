@@ -97,16 +97,6 @@ C<experimental::signatures>.
 The ticket for this feature is
 L<[perl #121481]|https://rt.perl.org/Ticket/Display.html?id=121481>.
 
-=item Postfix dereference syntax
-
-Introduced in Perl 5.20.0
-
-Using this feature triggers warnings in the category
-C<experimental::postderef>.
-
-The ticket for this feature is
-L<[perl #120162]|https://rt.perl.org:443/rt3/Ticket/Display.html?id=120162>.
-
 =item Aliasing via reference
 
 Introduced in Perl 5.22.0
@@ -269,6 +259,12 @@ Accepted in Perl 5.20.0
 =item C<\s> in regexp matches vertical tab
 
 Accepted in Perl 5.22.0
+
+=item Postfix dereference syntax
+
+Introduced in Perl 5.20.0
+
+Accepted in Perl 5.24.0
 
 =back
 

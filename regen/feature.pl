@@ -60,7 +60,7 @@ my %feature_bundle = (
     "5.21"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc)],
     "5.23"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc)],
+		    evalbytes current_sub fc postderef postderef_qq)],
 );
 
 # not actually used currently
@@ -367,7 +367,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.41';
+our $VERSION = '1.42';
 
 FEATURES
 
@@ -575,13 +575,6 @@ This feature is available from Perl 5.18 onwards.
 
 =head2 The 'postderef' and 'postderef_qq' features
 
-B<WARNING>: This feature is still experimental and the implementation may
-change in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the
-warning:
-
-  no warnings "experimental::postderef";
-
 The 'postderef' feature allows the use of L<postfix dereference
 syntax|perlref/Postfix Dereference Syntax>.  For example, it will make the
 following two statements equivalent:
@@ -592,7 +585,15 @@ following two statements equivalent:
 The 'postderef_qq' feature extends this, for array and scalar dereference, to
 working inside of double-quotish interpolations.
 
-This feature is available from Perl 5.20 onwards.
+These features are available from Perl 5.20 onwards. In Perl 5.20 and 5.22,
+they were classed as experimental, and Perl emitted a warning for their
+usage, except when explicitly disabled:
+
+  no warnings "experimental::postderef";
+
+As of Perl 5.24, use of these features no longer triggers a warning, though
+the C<experimental::postderef> warning category still exists (for
+compatibility with code that disables it).
 
 =head2 The 'signatures' feature
 

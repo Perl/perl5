@@ -16,6 +16,12 @@ release.
 For details on what is in this release, see
 L<http://www.unicode.org/versions/Unicode8.0.0/>.
 
+=head2 Postfix dereferencing is no longer experimental
+
+Using the C<postderef> and C<postderef_qq> features no longer emits a warning.
+Existing code that disables that warning category will continue to work. The
+C<5.24> feature bundle now includes those features.
+
 =head1 Incompatible Changes
 
 =head2 The C</\C/> character class has been removed.

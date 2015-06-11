@@ -758,9 +758,7 @@ For example:
     $r = [ 1, [ 2, 3 ], 4 ];
     $r->[1]->@*;  # equivalent to @{ $r->[1] }
 
-This syntax must be enabled with C<use feature 'postderef'>.  It is
-experimental, and will warn by default unless C<no warnings
-'experimental::postderef'> is in effect.
+This syntax must be enabled with C<use feature 'postderef'>.
 
 Postfix dereference should work in all circumstances where block
 (circumfix) dereference worked, and should be entirely equivalent.  This

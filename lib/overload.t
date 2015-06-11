@@ -2739,7 +2739,6 @@ package refsgalore {
 }
 {
     use feature 'postderef';
-    no warnings 'experimental::postderef';
     tell myio; # vivifies *myio{IO} at compile time
     use constant ioref => bless *myio{IO}, refsgalore::;
     is ioref->$*, 42, '(overloaded constant that is not a scalar ref)->$*';
