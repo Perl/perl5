@@ -2417,13 +2417,9 @@ PP(pp_return)
 {
     dSP; dMARK;
     PERL_CONTEXT *cx;
-    bool clear_errsv = FALSE;
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
-    I32 optype = 0;
-    SV *namesv;
-    CV *evalcv;
     OP *retop = NULL;
 
     const I32 cxix = dopoptosub(cxstack_ix);
@@ -2450,7 +2446,7 @@ PP(pp_return)
     cx = &cxstack[cxix];
 
     if (CxTYPE(cx) == CXt_SUB
-        || (CxTYPE(cx) == CXt_EVAL && CxTRYBLOCK(cx)))
+        || (CxTYPE(cx) == CXt_EVAL))
     {
         SV **oldsp = PL_stack_base + cx->blk_oldsp;
         if (oldsp != MARK) {
@@ -2477,7 +2473,9 @@ PP(pp_return)
                 PL_stack_sp  = oldsp;
         }
         if (CxTYPE(cx) == CXt_EVAL)
-            return Perl_pp_leavetry(aTHX);
+            return CxTRYBLOCK(cx)
+                ? Perl_pp_leavetry(aTHX)
+                : Perl_pp_leaveeval(aTHX);
         /* fall through to a normal sub exit */
         return CvLVALUE(cx->blk_sub.cv)
             ? Perl_pp_leavesublv(aTHX)
@@ -2486,14 +2484,6 @@ PP(pp_return)
 
     POPBLOCK(cx,newpm);
     switch (CxTYPE(cx)) {
-    case CXt_EVAL:
-	if (!(PL_in_eval & EVAL_KEEPERR))
-	    clear_errsv = TRUE;
-	POPEVAL(cx);
-	namesv = cx->blk_eval.old_namesv;
-	retop = cx->blk_eval.retop;
-        evalcv = cx->blk_eval.cv;
-	break;
     case CXt_FORMAT:
 	retop = cx->blk_sub.retop;
 	POPFORMAT(cx);
@@ -2513,31 +2503,10 @@ PP(pp_return)
     }
     PL_stack_sp = newsp;
 
-    if (CxTYPE(cx) == CXt_EVAL) {
-#ifdef DEBUGGING
-        assert(CvDEPTH(evalcv) == 1);
-#endif
-        CvDEPTH(evalcv) = 0;
-
-	if (optype == OP_REQUIRE &&
-            !(gimme == G_SCALAR ? SvTRUE(*PL_stack_sp) : PL_stack_sp > PL_stack_base + cx->blk_oldsp) )
-	{
-	    /* Unassume the success we assumed earlier. */
-	    (void)hv_delete(GvHVn(PL_incgv),
-			    SvPVX_const(namesv),
-                            SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
-			    G_DISCARD);
-	    DIE(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
-	}
-    }
-
     LEAVE;
 
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
-    if (clear_errsv) {
-	CLEAR_ERRSV();
-    }
     return retop;
 }
 
