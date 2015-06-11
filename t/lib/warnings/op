@@ -61,12 +61,6 @@
        format FRED =
        .
  
-     push on reference is experimental			[ck_fun]
-     pop on reference is experimental
-     shift on reference is experimental
-     unshift on reference is experimental
-     splice on reference is experimental
- 
      Statement unlikely to be reached
      	(Maybe you meant system() when you said exec()?
  	exec "true" ; my $a
@@ -81,10 +75,6 @@
      "my %s" used in sort comparison
 
      $[ used in comparison (did you mean $] ?)
-
-     each on reference is experimental			[ck_each]
-     keys on reference is experimental
-     values on reference is experimental
 
      length() used on @array (did you mean "scalar(@array)"?)
      length() used on %hash (did you mean "scalar(keys %hash)"?)
@@ -240,12 +230,6 @@ use constant phoo => 1..3;
 @h{localtime 0};
 @h{gmtime 0};
 @h{eval ""};
-{
-    no warnings 'experimental::autoderef';
-    @h{each $foo} if 0;
-    @h{keys $foo} if 0;
-    @h{values $foo} if 0;
-}
 
 # arrays
 @h[qw"a b c"] = 1..3;
@@ -283,12 +267,6 @@ use constant phoo => 1..3;
 @h[localtime 0];
 @h[gmtime 0];
 @h[eval ""];
-{
-    no warnings 'experimental::autoderef';
-    @h[each $foo] if 0;
-    @h[keys $foo] if 0;
-    @h[values $foo] if 0;
-}
 EXPECT
 ########
 # op.c
@@ -1053,26 +1031,6 @@ format FRED =
 EXPECT
 Format FRED redefined at - line 5.
 ########
-# op.c [Perl_ck_fun]
-$fred = [];
-push $fred;
-pop $fred;
-shift $fred;
-unshift $fred;
-splice $fred;
-no warnings 'experimental::autoderef' ;
-push $fred;
-pop $fred;
-shift $fred;
-unshift $fred;
-splice $fred;
-EXPECT
-push on reference is experimental at - line 3.
-pop on reference is experimental at - line 4.
-shift on reference is experimental at - line 5.
-unshift on reference is experimental at - line 6.
-splice on reference is experimental at - line 7.
-########
 # op.c
 use warnings 'exec' ;
 exec "$^X -e 1" ; 
@@ -1393,20 +1351,6 @@ $[ used in numeric lt (<) (did you mean $] ?) at - line 17.
 $[ used in numeric gt (>) (did you mean $] ?) at - line 18.
 $[ used in numeric le (<=) (did you mean $] ?) at - line 19.
 $[ used in numeric ge (>=) (did you mean $] ?) at - line 20.
-########
-# op.c [Perl_ck_each]
-$fred = {};
-keys $fred;
-values $fred;
-each $fred;
-no warnings 'experimental::autoderef' ;
-keys $fred;
-values $fred;
-each $fred;
-EXPECT
-keys on reference is experimental at - line 3.
-values on reference is experimental at - line 4.
-each on reference is experimental at - line 5.
 ########
 # op.c [Perl_ck_length]
 use warnings 'syntax' ;

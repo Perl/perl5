@@ -440,7 +440,7 @@ addbits($_, 6 => qw(OPpOUR_INTRO OURINTR)) # Variable was in an our()
 # We might be an lvalue to return
 addbits($_, 3 => qw(OPpMAYBE_LVSUB LVSUB))
     for qw(aassign rv2av rv2gv rv2hv padav padhv aelem helem aslice hslice
-           av2arylen keys rkeys kvaslice kvhslice substr pos vec multideref);
+           av2arylen keys kvaslice kvhslice substr pos vec multideref);
 
 
 

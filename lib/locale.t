@@ -29,7 +29,7 @@ BEGIN {
 }
 
 use strict;
-use feature 'fc';
+use feature 'fc', 'postderef';
 
 # =1 adds debugging output; =2 increases the verbosity somewhat
 my $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
@@ -2264,14 +2264,14 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
         if (($Okay{$test_num} || $Known_bad_locale{$test_num})
             && grep { $_ == $test_num } keys %problematical_tests)
         {
-            no warnings 'experimental::autoderef';
+            no warnings 'experimental::postderef';
 
             # Don't count the known-bad failures when calculating the
             # percentage that fail.
             my $known_failures = (exists $Known_bad_locale{$test_num})
-                                  ? scalar(keys $Known_bad_locale{$test_num})
+                                  ? scalar(keys $Known_bad_locale{$test_num}->%*)
                                   : 0;
-            my $adjusted_failures = scalar(keys $Problem{$test_num})
+            my $adjusted_failures = scalar(keys $Problem{$test_num}->%*)
                                     - $known_failures;
 
             # Specially handle failures where only known-bad locales fail.
@@ -2279,7 +2279,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
             if ($adjusted_failures <= 0) {
                 print "not ok $test_num $test_names{$test_num} # TODO fails only on ",
                                                                 "known bad locales: ",
-                      join " ", keys $Known_bad_locale{$test_num}, "\n";
+                      join " ", keys $Known_bad_locale{$test_num}->%*, "\n";
                 next TEST_NUM;
             }
 
@@ -2298,7 +2298,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
             }
             if ($debug) {
                 print "# $percent_fail% of locales (",
-                      scalar(keys $Problem{$test_num}),
+                      scalar(keys $Problem{$test_num}->%*),
                       " of ",
                       scalar(@Locale),
                       ") fail the above test (TODO cut-off is ",

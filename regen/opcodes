@@ -554,11 +554,6 @@ once		once			ck_null		|
 
 custom		unknown custom operator		ck_null		0
 
-# For smart dereference for each/keys/values
-reach		each on reference	ck_each		d%	S
-rkeys		keys on reference			ck_each		t%	S
-rvalues		values on reference	ck_each		dt%	S
-
 # For CORE:: subs
 coreargs	CORE:: subroutine	ck_null		$	
 

@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 40;
+plan tests => 39;
 
 # simple use cases
 {
@@ -184,17 +184,19 @@ plan tests => 40;
     ok( !exists $h{e}, "no autovivification" );
 }
 
-# keys/value/each treat argument as scalar
+# keys/value/each refuse to compile kvhslice
 {
     my %h = 'a'..'b';
     my %i = (foo => \%h);
-    no warnings 'syntax', 'experimental::autoderef';
-    my ($k,$v) = each %i{foo=>};
-    is $k, 'a', 'key returned by each %hash{key}';
-    is $v, 'b', 'val returned by each %hash{key}';
-    %h = 1..10;
-    is join('-', sort keys %i{foo=>}), '1-3-5-7-9', 'keys %hash{key}';
-    is join('-', sort values %i{foo=>}), '10-2-4-6-8', 'values %hash{key}';
+    eval '() = keys %i{foo=>}';
+    like($@, qr/Experimental keys on scalar is now forbidden/,
+         'keys %hash{key} forbidden');
+    eval '() = values %i{foo=>}';
+    like($@, qr/Experimental values on scalar is now forbidden/,
+         'values %hash{key} forbidden');
+    eval '() = each %i{foo=>}';
+    like($@, qr/Experimental each on scalar is now forbidden/,
+         'each %hash{key} forbidden');
 }
 
 # \% prototype expects hash deref

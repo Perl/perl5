@@ -1394,8 +1394,8 @@ using function prototyping.  This can be declared in either the PROTO
 section or with a L<prototype attribute|attributes/Built-in Attributes>.
 If you declare either of
 
-    sub mypush (+@)
-    sub mypush :prototype(+@)
+    sub mypush (\@@)
+    sub mypush :prototype(\@@)
 
 then C<mypush()> takes arguments exactly like C<push()> does.
 
@@ -1432,9 +1432,9 @@ corresponding built-in.
    sub mysyswrite ($$$;$)  mysyswrite $buf, 0, length($buf) - $off, $off
    sub myreverse (@)	   myreverse $a, $b, $c
    sub myjoin ($@)	   myjoin ":", $a, $b, $c
-   sub mypop (+)	   mypop @array
-   sub mysplice (+$$@)	   mysplice @array, 0, 2, @pushme
-   sub mykeys (+)	   mykeys %{$hashref}
+   sub mypop (\@)	   mypop @array
+   sub mysplice (\@$$@)	   mysplice @array, 0, 2, @pushme
+   sub mykeys (\[%@])	   mykeys %{$hashref}
    sub myopen (*;$)	   myopen HANDLE, $name
    sub mypipe (**)	   mypipe READHANDLE, WRITEHANDLE
    sub mygrep (&@)	   mygrep { /foo/ } $a, $b, $c

@@ -111,31 +111,27 @@ EXPECT
 exists argument is not a subroutine name at - line 1.
 ########
 # NAME push BAREWORD
-no warnings 'experimental';
 push FRED;
 EXPECT
-Type of arg 1 to push must be array (not constant item) at - line 2, near "FRED;"
+Type of arg 1 to push must be array (not constant item) at - line 1, near "FRED;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME pop BAREWORD
-no warnings 'experimental';
 pop FRED;
 EXPECT
-Type of arg 1 to pop must be array (not constant item) at - line 2, near "FRED;"
+Type of arg 1 to pop must be array (not constant item) at - line 1, near "FRED;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME shift BAREWORD
-no warnings 'experimental';
 shift FRED;
 EXPECT
-Type of arg 1 to shift must be array (not constant item) at - line 2, near "FRED;"
+Type of arg 1 to shift must be array (not constant item) at - line 1, near "FRED;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME unshift BAREWORD
-no warnings 'experimental';
 unshift FRED;
 EXPECT
-Type of arg 1 to unshift must be array (not constant item) at - line 2, near "FRED;"
+Type of arg 1 to unshift must be array (not constant item) at - line 1, near "FRED;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME keys BAREWORD

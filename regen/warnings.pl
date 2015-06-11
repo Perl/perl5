@@ -95,8 +95,6 @@ my $tree = {
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::postderef' =>
                                     [ 5.019, DEFAULT_ON ],
-                                'experimental::autoderef' =>
-                                    [ 5.019, DEFAULT_ON ],
                                 'experimental::signatures' =>
                                     [ 5.019, DEFAULT_ON ],
                                 'experimental::win32_perlio' =>
@@ -483,7 +481,7 @@ read_only_bottom_close_and_rename($pm);
 __END__
 package warnings;
 
-our $VERSION = '1.32';
+our $VERSION = '1.33';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.

@@ -1620,9 +1620,6 @@ S_scalar_slice_warning(pTHX_ const OP *o)
     case OP_LOCALTIME:
     case OP_GMTIME:
     case OP_ENTEREVAL:
-    case OP_REACH:
-    case OP_RKEYS:
-    case OP_RVALUES:
 	return;
     }
 
@@ -2998,7 +2995,6 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	break;
 
     case OP_KEYS:
-    case OP_RKEYS:
 	if (type != OP_SASSIGN && type != OP_LEAVESUBLV)
 	    goto nomod;
 	goto lvalue_func;
@@ -9974,17 +9970,14 @@ Perl_ck_fun(pTHX_ OP *o)
 		         || SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVAV  )
 		        )
 		    bad_type_pv(numargs, "array", o, kid);
-		/* Defer checks to run-time if we have a scalar arg */
-		if (kid->op_type == OP_RV2AV || kid->op_type == OP_PADAV)
-		    op_lvalue(kid, type);
-		else {
-		    scalar(kid);
-		    /* diag_listed_as: push on reference is experimental */
-		    Perl_ck_warner_d(aTHX_
-				     packWARN(WARN_EXPERIMENTAL__AUTODEREF),
-				    "%s on reference is experimental",
-				     PL_op_desc[type]);
+		else if (kid->op_type != OP_RV2AV && kid->op_type != OP_PADAV) {
+		    /* diag_listed_as: Experimental push on scalar is now forbidden */
+                    yyerror_pv(Perl_form(aTHX_ "Experimental %s on scalar is now forbidden",
+                                         PL_op_desc[type]), 0);
 		}
+                else {
+                    op_lvalue(kid, type);
+                }
 		break;
 	    case OA_HVREF:
 		if (kid->op_type != OP_RV2HV && kid->op_type != OP_PADHV)
@@ -12027,10 +12020,6 @@ Perl_ck_each(pTHX_ OP *o)
     dVAR;
     OP *kid = o->op_flags & OPf_KIDS ? cUNOPo->op_first : NULL;
     const unsigned orig_type  = o->op_type;
-    const unsigned array_type = orig_type == OP_EACH ? OP_AEACH
-	                      : orig_type == OP_KEYS ? OP_AKEYS : OP_AVALUES;
-    const unsigned ref_type   = orig_type == OP_EACH ? OP_REACH
-	                      : orig_type == OP_KEYS ? OP_RKEYS : OP_RVALUES;
 
     PERL_ARGS_ASSERT_CK_EACH;
 
@@ -12041,7 +12030,9 @@ Perl_ck_each(pTHX_ OP *o)
 		break;
 	    case OP_PADAV:
 	    case OP_RV2AV:
-		OpTYPE_set(o, array_type);
+                OpTYPE_set(o, orig_type == OP_EACH ? OP_AEACH
+                            : orig_type == OP_KEYS ? OP_AKEYS
+                            :                        OP_AVALUES);
 		break;
 	    case OP_CONST:
 		if (kid->op_private == OPpCONST_BARE
@@ -12052,16 +12043,12 @@ Perl_ck_each(pTHX_ OP *o)
 		    /* we let ck_fun handle it */
 		    break;
 	    default:
-		OpTYPE_set(o, ref_type);
-		scalar(kid);
+                /* diag_listed_as: Experimental keys on scalar is now forbidden */
+                Perl_croak_nocontext(
+                    "Experimental %s on scalar is now forbidden",
+                    PL_op_desc[orig_type]);
+                break;
 	}
-    }
-    /* if treating as a reference, defer additional checks to runtime */
-    if (o->op_type == ref_type) {
-	/* diag_listed_as: keys on reference is experimental */
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__AUTODEREF),
-			      "%s is experimental", PL_op_desc[ref_type]);
-	return o;
     }
     return ck_fun(o);
 }
@@ -14185,16 +14172,16 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
     case KEY_x     : case KEY_xor    :
 	if (!opnum) return NULL; nullret = TRUE; goto findopnum;
     case KEY_glob:    retsetpvs("_;", OP_GLOB);
-    case KEY_keys:    retsetpvs("+", OP_KEYS);
-    case KEY_values:  retsetpvs("+", OP_VALUES);
-    case KEY_each:    retsetpvs("+", OP_EACH);
-    case KEY_push:    retsetpvs("+@", OP_PUSH);
-    case KEY_unshift: retsetpvs("+@", OP_UNSHIFT);
-    case KEY_pop:     retsetpvs(";+", OP_POP);
-    case KEY_shift:   retsetpvs(";+", OP_SHIFT);
+    case KEY_keys:    retsetpvs("\\[%@]", OP_KEYS);
+    case KEY_values:  retsetpvs("\\[%@]", OP_VALUES);
+    case KEY_each:    retsetpvs("\\[%@]", OP_EACH);
+    case KEY_push:    retsetpvs("\\@@", OP_PUSH);
+    case KEY_unshift: retsetpvs("\\@@", OP_UNSHIFT);
+    case KEY_pop:     retsetpvs(";\\@", OP_POP);
+    case KEY_shift:   retsetpvs(";\\@", OP_SHIFT);
     case KEY_pos:     retsetpvs(";\\[$*]", OP_POS);
     case KEY_splice:
-	retsetpvs("+;$$@", OP_SPLICE);
+	retsetpvs("\\@;$$@", OP_SPLICE);
     case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
 	retsetpvs("", 0);
     case KEY_evalbytes:

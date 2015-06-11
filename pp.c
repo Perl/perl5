@@ -4664,47 +4664,6 @@ PP(pp_kvaslice)
 }
 
 
-/* Smart dereferencing for keys, values and each */
-
-/* also used for: pp_reach() pp_rvalues() */
-
-PP(pp_rkeys)
-{
-    dSP;
-    dPOPss;
-
-    SvGETMAGIC(sv);
-
-    if (
-         !SvROK(sv)
-      || (sv = SvRV(sv),
-            (SvTYPE(sv) != SVt_PVHV && SvTYPE(sv) != SVt_PVAV)
-          || SvOBJECT(sv)
-         )
-    ) {
-	DIE(aTHX_
-	   "Type of argument to %s must be unblessed hashref or arrayref",
-	    PL_op_desc[PL_op->op_type] );
-    }
-
-    if (PL_op->op_flags & OPf_SPECIAL && SvTYPE(sv) == SVt_PVAV)
-	DIE(aTHX_
-	   "Can't modify %s in %s",
-	    PL_op_desc[PL_op->op_type], PL_op_desc[PL_op->op_next->op_type]
-	);
-
-    /* Delegate to correct function for op type */
-    PUSHs(sv);
-    if (PL_op->op_type == OP_RKEYS || PL_op->op_type == OP_RVALUES) {
-	return (SvTYPE(sv) == SVt_PVHV) ? Perl_do_kv(aTHX) : Perl_pp_akeys(aTHX);
-    }
-    else {
-	return (SvTYPE(sv) == SVt_PVHV)
-               ? Perl_pp_each(aTHX)
-               : Perl_pp_aeach(aTHX);
-    }
-}
-
 PP(pp_aeach)
 {
     dSP;
@@ -4749,7 +4708,7 @@ PP(pp_akeys)
 
         EXTEND(SP, n + 1);
 
-	if (PL_op->op_type == OP_AKEYS || PL_op->op_type == OP_RKEYS) {
+	if (PL_op->op_type == OP_AKEYS) {
 	    for (i = 0;  i <= n;  i++) {
 		mPUSHi(i);
 	    }

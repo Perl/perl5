@@ -77,6 +77,14 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 The C<autoderef> feature has been removed
+
+The experimental C<autoderef> feature (which allowed calling C<push>,
+C<pop>, C<shift>, C<unshift>, C<splice>, C<keys>, C<values>, and C<each> on
+a scalar argument) has been deemed unsuccessful. It has now been removed;
+trying to use the feature (or to disable the C<experimental::autoderef>
+warning it previously triggered) now yields an exception.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

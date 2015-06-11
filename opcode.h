@@ -142,8 +142,6 @@
 #define Perl_pp_sgrent Perl_pp_ehostent
 #define Perl_pp_egrent Perl_pp_ehostent
 #define Perl_pp_custom Perl_unimplemented_op
-#define Perl_pp_reach Perl_pp_rkeys
-#define Perl_pp_rvalues Perl_pp_rkeys
 START_EXTERN_C
 
 #ifndef DOINIT
@@ -531,9 +529,6 @@ EXTCONST char* const PL_op_name[] = {
 	"lock",
 	"once",
 	"custom",
-	"reach",
-	"rkeys",
-	"rvalues",
 	"coreargs",
 	"runcv",
 	"fc",
@@ -935,9 +930,6 @@ EXTCONST char* const PL_op_desc[] = {
 	"lock",
 	"once",
 	"unknown custom operator",
-	"each on reference",
-	"keys on reference",
-	"values on reference",
 	"CORE:: subroutine",
 	"__SUB__",
 	"fc",
@@ -1353,9 +1345,6 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_lock,
 	Perl_pp_once,
 	Perl_pp_custom,	/* implemented by Perl_unimplemented_op */
-	Perl_pp_reach,	/* implemented by Perl_pp_rkeys */
-	Perl_pp_rkeys,
-	Perl_pp_rvalues,	/* implemented by Perl_pp_rkeys */
 	Perl_pp_coreargs,
 	Perl_pp_runcv,
 	Perl_pp_fc,
@@ -1767,9 +1756,6 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_rfun,		/* lock */
 	Perl_ck_null,		/* once */
 	Perl_ck_null,		/* custom */
-	Perl_ck_each,		/* reach */
-	Perl_ck_each,		/* rkeys */
-	Perl_ck_each,		/* rvalues */
 	Perl_ck_null,		/* coreargs */
 	Perl_ck_null,		/* runcv */
 	Perl_ck_fun,		/* fc */
@@ -2175,9 +2161,6 @@ EXTCONST U32 PL_opargs[] = {
 	0x00007b04,	/* lock */
 	0x00000300,	/* once */
 	0x00000000,	/* custom */
-	0x00001b40,	/* reach */
-	0x00001b08,	/* rkeys */
-	0x00001b48,	/* rvalues */
 	0x00000600,	/* coreargs */
 	0x00000004,	/* runcv */
 	0x00009b8e,	/* fc */
@@ -2813,9 +2796,6 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* lock */
        0, /* once */
       -1, /* custom */
-       0, /* reach */
-      40, /* rkeys */
-       0, /* rvalues */
      183, /* coreargs */
        3, /* runcv */
        0, /* fc */
@@ -2846,7 +2826,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, ref, readline, regcmaybe, regcreset, regcomp, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, akeys, avalues, each, values, pop, shift, range, and, or, dor, andassign, orassign, dorassign, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, reach, rvalues, fc, anonconst */
+    0x0003, /* scalar, prototype, refgen, srefgen, ref, readline, regcmaybe, regcreset, regcomp, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, akeys, avalues, each, values, pop, shift, range, and, or, dor, andassign, orassign, dorassign, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst */
     0x29dc, 0x3bd9, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x03b8, 0x1570, 0x3c8c, 0x3748, 0x2da5, /* const */
@@ -2859,7 +2839,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x3698, 0x3ef1, /* pushre, match, qr, subst */
     0x29dc, 0x1758, 0x0256, 0x2acc, 0x2cc8, 0x3c84, 0x0003, /* rv2gv */
     0x29dc, 0x2ef8, 0x0256, 0x3c84, 0x0003, /* rv2sv */
-    0x2acc, 0x0003, /* av2arylen, pos, keys, rkeys */
+    0x2acc, 0x0003, /* av2arylen, pos, keys */
     0x2c3c, 0x0b98, 0x08f4, 0x028c, 0x3e48, 0x3c84, 0x0003, /* rv2cv */
     0x012f, /* bless, glob, sprintf, formline, unpack, pack, join, anonlist, anonhash, splice, warn, die, reset, exit, close, pipe_op, fileno, umask, binmode, tie, dbmopen, sselect, select, getc, read, enterwrite, sysopen, sysseek, sysread, syswrite, eof, tell, seek, truncate, fcntl, ioctl, send, recv, socket, sockpair, bind, connect, listen, accept, shutdown, gsockopt, ssockopt, open_dir, seekdir, gmtime, shmget, shmctl, shmread, shmwrite, msgget, msgctl, msgsnd, msgrcv, semop, semget, semctl, ghbyaddr, gnbyaddr, gpbynumber, gsbyname, gsbyport, syscall */
     0x30dc, 0x2ff8, 0x24b4, 0x23f0, 0x0003, /* backtick */
@@ -3298,9 +3278,6 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* LOCK       */ (OPpARG1_MASK),
     /* ONCE       */ (OPpARG1_MASK),
     /* CUSTOM     */ (0xff),
-    /* REACH      */ (OPpARG1_MASK),
-    /* RKEYS      */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
-    /* RVALUES    */ (OPpARG1_MASK),
     /* COREARGS   */ (OPpCOREARGS_DEREF1|OPpCOREARGS_DEREF2|OPpCOREARGS_SCALARMOD|OPpCOREARGS_PUSHMARK),
     /* RUNCV      */ (OPpOFFBYONE),
     /* FC         */ (OPpARG1_MASK),

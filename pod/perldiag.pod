@@ -1959,14 +1959,6 @@ already been freed.
 (W unpack) You have applied the same modifier more than once after a
 type in a pack template.  See L<perlfunc/pack>.
 
-=item each on reference is experimental
-
-(S experimental::autoderef) C<each> with a scalar argument is experimental
-and may change or be removed in a future Perl version.  If you want to
-take the risk of using this feature, simply disable this warning:
-
-    no warnings "experimental::autoderef";
-
 =item elseif should be elsif
 
 (S syntax) There is no keyword "elseif" in Perl because Larry thinks
@@ -2123,6 +2115,42 @@ L<perlrecharclass/Extended Bracketed Character Classes>.
     use feature "signatures";
     sub foo ($left, $right) { ... }
 
+=item Experimental each on scalar is now forbidden
+
+(F) An experimental feature added in Perl 5.14 allowed C<each> to be called
+with a scalar argument. This experiment is considered unsuccessful, and has
+been removed. The C<postderef> feature may meet your needs better.
+
+=item Experimental keys on scalar is now forbidden
+
+(F) An experimental feature added in Perl 5.14 allowed C<keys> to be called
+with a scalar argument. This experiment is considered unsuccessful, and has
+been removed. The C<postderef> feature may meet your needs better.
+
+=item Experimental push on scalar is now forbidden
+
+(F) An experimental feature added in Perl 5.14 allowed C<push> to be called
+with a scalar argument. This experiment is considered unsuccessful, and has
+been removed. The C<postderef> feature may meet your needs better.
+
+=item Experimental pop on scalar is now forbidden
+
+(F) An experimental feature added in Perl 5.14 allowed C<pop> to be called
+with a scalar argument. This experiment is considered unsuccessful, and has
+been removed. The C<postderef> feature may meet your needs better.
+
+=item Experimental shift on scalar is now forbidden
+
+(F) An experimental feature added in Perl 5.14 allowed C<shift> to be called
+with a scalar argument. This experiment is considered unsuccessful, and has
+been removed. The C<postderef> feature may meet your needs better.
+
+=item Experimental splice on scalar is now forbidden
+
+(F) An experimental feature added in Perl 5.14 allowed C<splice> to be called
+with a scalar argument. This experiment is considered unsuccessful, and has
+been removed. The C<postderef> feature may meet your needs better.
+
 =item Experimental "%s" subs not enabled
 
 (F) To use lexical subs, you must first enable them:
@@ -2130,6 +2158,18 @@ L<perlrecharclass/Extended Bracketed Character Classes>.
     no warnings 'experimental::lexical_subs';
     use feature 'lexical_subs';
     my sub foo { ... }
+
+=item Experimental unshift on scalar is now forbidden
+
+(F) An experimental feature added in Perl 5.14 allowed C<unshift> to be called
+with a scalar argument. This experiment is considered unsuccessful, and has
+been removed. The C<postderef> feature may meet your needs better.
+
+=item Experimental values on scalar is now forbidden
+
+(F) An experimental feature added in Perl 5.14 allowed C<values> to be called
+with a scalar argument. This experiment is considered unsuccessful, and has
+been removed. The C<postderef> feature may meet your needs better.
 
 =item Explicit blessing to '' (assuming package main)
 
@@ -2960,14 +3000,6 @@ line.  See L<perlrun> for more details.
 =item Junk on end of regexp in regex m/%s/
 
 (P) The regular expression parser is confused.
-
-=item keys on reference is experimental
-
-(S experimental::autoderef) C<keys> with a scalar argument is experimental
-and may change or be removed in a future Perl version.  If you want to
-take the risk of using this feature, simply disable this warning:
-
-    no warnings "experimental::autoderef";
 
 =item Label not found for "last %s"
 
@@ -4594,14 +4626,6 @@ fine from VMS' perspective, it's probably not what you intended.
 
 (F) The unpack format P must have an explicit size, not "*".
 
-=item pop on reference is experimental
-
-(S experimental::autoderef) C<pop> with a scalar argument is experimental
-and may change or be removed in a future Perl version.  If you want to
-take the risk of using this feature, simply disable this warning:
-
-    no warnings "experimental::autoderef";
-
 =item POSIX class [:%s:] unknown in regex; marked by S<<-- HERE> in m/%s/
 
 (F) The class in the character class [: :] syntax is unknown.  The S<<-- HERE>
@@ -4820,14 +4844,6 @@ definition.
 the sub name and via the prototype attribute.  The prototype in
 parentheses is useless, since it will be replaced by the prototype
 from the attribute before it's ever used.
-
-=item push on reference is experimental
-
-(S experimental::autoderef) C<push> with a scalar argument is experimental
-and may change or be removed in a future Perl version.  If you want to
-take the risk of using this feature, simply disable this warning:
-
-    no warnings "experimental::autoderef";
 
 =item Quantifier follows nothing in regex; marked by S<<-- HERE> in m/%s/
 
@@ -5353,14 +5369,6 @@ a positive integer, where the integer was the address of the reference.
 As of Perl 5.20.0 this is a fatal error, to allow future versions of Perl
 to use non-integer refs for more interesting purposes.
 
-=item shift on reference is experimental
-
-(S experimental::autoderef) C<shift> with a scalar argument is experimental
-and may change or be removed in a future Perl version.  If you want to
-take the risk of using this feature, simply disable this warning:
-
-    no warnings "experimental::autoderef";
-
 =item shm%s not implemented
 
 (F) You don't have System V shared memory IPC on your system.
@@ -5440,15 +5448,6 @@ the array passed to splice().  Splicing will instead commence at the
 end of the array, rather than past it.  If this isn't what you want,
 try explicitly pre-extending the array by assigning $#array = $offset.
 See L<perlfunc/splice>.
-
-=item splice on reference is experimental
-
-(S experimental::autoderef) C<splice> with a scalar argument
-is experimental and may change or be removed in a future
-Perl version.  If you want to take the risk of using this
-feature, simply disable this warning:
-
-    no warnings "experimental::autoderef";
 
 =item Split loop
 
@@ -5967,11 +5966,6 @@ certain type.  Arrays must be @NAME or C<@{EXPR}>.  Hashes must be
 %NAME or C<%{EXPR}>.  No implicit dereferencing is allowed--use the
 {EXPR} forms as an explicit dereference.  See L<perlref>.
 
-=item Type of argument to %s must be unblessed hashref or arrayref
-
-(F) You called C<keys>, C<values> or C<each> with a scalar argument that
-was not a reference to an unblessed hash or array.
-
 =item umask not implemented
 
 (F) Your machine doesn't implement the umask function and you tried to
@@ -6346,15 +6340,6 @@ on your system.
 (F) You specified an illegal option to Perl.  Don't do that.  (If you
 think you didn't do that, check the #! line to see if it's supplying the
 bad switch on your behalf.)
-
-=item unshift on reference is experimental
-
-(S experimental::autoderef) C<unshift> with a scalar argument
-is experimental and may change or be removed in a future
-Perl version.  If you want to take the risk of using this
-feature, simply disable this warning:
-
-    no warnings "experimental::autoderef";
 
 =item Unsuccessful %s on filename containing newline
 
@@ -6894,15 +6879,6 @@ C<defined> operator.
 %ENV element from a CLI symbol table, and found a resultant string
 longer than 1024 characters.  The return value has been truncated to
 1024 characters.
-
-=item values on reference is experimental
-
-(S experimental::autoderef) C<values> with a scalar argument
-is experimental and may change or be removed in a future
-Perl version.  If you want to take the risk of using this
-feature, simply disable this warning:
-
-    no warnings "experimental::autoderef";
 
 =item Variable "%s" is not available
 

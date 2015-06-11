@@ -1651,8 +1651,6 @@ X<each> X<hash, iterator>
 =item each ARRAY
 X<array, iterator>
 
-=item each EXPR
-
 =for Pod::Functions retrieve the next key/value pair from a hash
 
 When called on a hash in list context, returns a 2-element list
@@ -1701,12 +1699,9 @@ but in a different order:
         print "$key=$value\n";
     }
 
-Starting with Perl 5.14, C<each> can take a scalar EXPR, which must hold a
-reference to an unblessed hash or array.  The argument will be dereferenced
-automatically.  This aspect of C<each> is considered highly experimental.
-The exact behaviour may change in a future version of Perl.
-
-    while (($key,$value) = each $hashref) { ... }
+Starting with Perl 5.14, an experimental feature allowed C<each> to take a
+scalar expression. This experiment has been deemed unsuccessful, and was
+removed as of Perl 5.24.
 
 As of Perl 5.18 you can use a bare C<each> in a C<while> loop,
 which will set C<$_> on every iteration.
@@ -1721,7 +1716,6 @@ the top of your file to signal that your code will work I<only> on Perls of
 a recent vintage:
 
     use 5.012;	# so keys/values/each work on arrays
-    use 5.014;	# so keys/values/each work on scalars (experimental)
     use 5.018;	# so each assigns to $_ in a lone while test
 
 See also C<keys>, C<values>, and C<sort>.
@@ -3156,8 +3150,6 @@ X<keys> X<key>
 
 =item keys ARRAY
 
-=item keys EXPR
-
 =for Pod::Functions retrieve list of indices from a hash
 
 Called in list context, returns a list consisting of all the keys of the
@@ -3223,13 +3215,9 @@ C<keys> in this way (but you needn't worry about doing this by accident,
 as trying has no effect).  C<keys @array> in an lvalue context is a syntax
 error.
 
-Starting with Perl 5.14, C<keys> can take a scalar EXPR, which must contain
-a reference to an unblessed hash or array.  The argument will be
-dereferenced automatically.  This aspect of C<keys> is considered highly
-experimental.  The exact behaviour may change in a future version of Perl.
-
-    for (keys $hashref) { ... }
-    for (keys $obj->get_arrayref) { ... }
+Starting with Perl 5.14, an experimental feature allowed C<keys> to take a
+scalar expression. This experiment has been deemed unsuccessful, and was
+removed as of Perl 5.24.
 
 To avoid confusing would-be users of your code who are running earlier
 versions of Perl with mysterious syntax errors, put this sort of thing at
@@ -3237,7 +3225,6 @@ the top of your file to signal that your code will work I<only> on Perls of
 a recent vintage:
 
     use 5.012;	# so keys/values/each work on arrays
-    use 5.014;	# so keys/values/each work on scalars (experimental)
 
 See also C<each>, C<values>, and C<sort>.
 
@@ -5218,8 +5205,6 @@ the current value of $^F (by default 2 for C<STDERR>).  See L<perlvar/$^F>.
 =item pop ARRAY
 X<pop> X<stack>
 
-=item pop EXPR
-
 =item pop
 
 =for Pod::Functions remove the last element from an array and return it
@@ -5231,17 +5216,9 @@ Returns the undefined value if the array is empty, although this may also
 happen at other times.  If ARRAY is omitted, pops the C<@ARGV> array in the
 main program, but the C<@_> array in subroutines, just like C<shift>.
 
-Starting with Perl 5.14, C<pop> can take a scalar EXPR, which must hold a
-reference to an unblessed array.  The argument will be dereferenced
-automatically.  This aspect of C<pop> is considered highly experimental.
-The exact behaviour may change in a future version of Perl.
-
-To avoid confusing would-be users of your code who are running earlier
-versions of Perl with mysterious syntax errors, put this sort of thing at
-the top of your file to signal that your code will work I<only> on Perls of
-a recent vintage:
-
-    use 5.014;	# so push/pop/etc work on scalars (experimental)
+Starting with Perl 5.14, an experimental feature allowed C<pop> to take a
+scalar expression. This experiment has been deemed unsuccessful, and was
+removed as of Perl 5.24.
 
 =item pos SCALAR
 X<pos> X<match, position>
@@ -5371,8 +5348,6 @@ describing the equivalent prototype is returned.
 =item push ARRAY,LIST
 X<push> X<stack>
 
-=item push EXPR,LIST
-
 =for Pod::Functions append one or more elements to an array
 
 Treats ARRAY as a stack by appending the values of LIST to the end of
@@ -5386,17 +5361,9 @@ effect as
 but is more efficient.  Returns the number of elements in the array following
 the completed C<push>.
 
-Starting with Perl 5.14, C<push> can take a scalar EXPR, which must hold a
-reference to an unblessed array.  The argument will be dereferenced
-automatically.  This aspect of C<push> is considered highly experimental.
-The exact behaviour may change in a future version of Perl.
-
-To avoid confusing would-be users of your code who are running earlier
-versions of Perl with mysterious syntax errors, put this sort of thing at
-the top of your file to signal that your code will work I<only> on Perls of
-a recent vintage:
-
-    use 5.014;	# so push/pop/etc work on scalars (experimental)
+Starting with Perl 5.14, an experimental feature allowed C<push> to take a
+scalar expression. This experiment has been deemed unsuccessful, and was
+removed as of Perl 5.24.
 
 =item q/STRING/
 
@@ -6513,8 +6480,6 @@ Portability issues: L<perlport/setsockopt>.
 =item shift ARRAY
 X<shift>
 
-=item shift EXPR
-
 =item shift
 
 =for Pod::Functions remove the first element of an array, and return it
@@ -6527,17 +6492,9 @@ C<@ARGV> array outside a subroutine and also within the lexical scopes
 established by the C<eval STRING>, C<BEGIN {}>, C<INIT {}>, C<CHECK {}>,
 C<UNITCHECK {}>, and C<END {}> constructs.
 
-Starting with Perl 5.14, C<shift> can take a scalar EXPR, which must hold a
-reference to an unblessed array.  The argument will be dereferenced
-automatically.  This aspect of C<shift> is considered highly experimental.
-The exact behaviour may change in a future version of Perl.
-
-To avoid confusing would-be users of your code who are running earlier
-versions of Perl with mysterious syntax errors, put this sort of thing at
-the top of your file to signal that your code will work I<only> on Perls of
-a recent vintage:
-
-    use 5.014;	# so push/pop/etc work on scalars (experimental)
+Starting with Perl 5.14, an experimental feature allowed C<shift> to take a
+scalar expression. This experiment has been deemed unsuccessful, and was
+removed as of Perl 5.24.
 
 See also C<unshift>, C<push>, and C<pop>.  C<shift> and C<unshift> do the
 same thing to the left end of an array that C<pop> and C<push> do to the
@@ -6910,14 +6867,6 @@ X<splice>
 
 =item splice ARRAY
 
-=item splice EXPR,OFFSET,LENGTH,LIST
-
-=item splice EXPR,OFFSET,LENGTH
-
-=item splice EXPR,OFFSET
-
-=item splice EXPR
-
 =for Pod::Functions add or remove elements anywhere in an array
 
 Removes the elements designated by OFFSET and LENGTH from an array, and
@@ -6956,17 +6905,9 @@ C<splice> can be used, for example, to implement n-ary queue processing:
     #   d -- e -- f
     #   g -- h
 
-Starting with Perl 5.14, C<splice> can take scalar EXPR, which must hold a
-reference to an unblessed array.  The argument will be dereferenced
-automatically.  This aspect of C<splice> is considered highly experimental.
-The exact behaviour may change in a future version of Perl.
-
-To avoid confusing would-be users of your code who are running earlier
-versions of Perl with mysterious syntax errors, put this sort of thing at
-the top of your file to signal that your code will work I<only> on Perls of
-a recent vintage:
-
-    use 5.014;	# so push/pop/etc work on scalars (experimental)
+Starting with Perl 5.14, an experimental feature allowed C<splice> to take a
+scalar expression. This experiment has been deemed unsuccessful, and was
+removed as of Perl 5.24.
 
 =item split /PATTERN/,EXPR,LIMIT
 X<split>
@@ -8598,8 +8539,6 @@ See L</pack> for more examples and notes.
 =item unshift ARRAY,LIST
 X<unshift>
 
-=item unshift EXPR,LIST
-
 =for Pod::Functions prepend more elements to the beginning of a list
 
 Does the opposite of a C<shift>.  Or the opposite of a C<push>,
@@ -8612,17 +8551,9 @@ Note the LIST is prepended whole, not one element at a time, so the
 prepended elements stay in the same order.  Use C<reverse> to do the
 reverse.
 
-Starting with Perl 5.14, C<unshift> can take a scalar EXPR, which must hold
-a reference to an unblessed array.  The argument will be dereferenced
-automatically.  This aspect of C<unshift> is considered highly
-experimental.  The exact behaviour may change in a future version of Perl.
-
-To avoid confusing would-be users of your code who are running earlier
-versions of Perl with mysterious syntax errors, put this sort of thing at
-the top of your file to signal that your code will work I<only> on Perls of
-a recent vintage:
-
-    use 5.014;	# so push/pop/etc work on scalars (experimental)
+Starting with Perl 5.14, an experimental feature allowed C<unshift> to take
+a scalar expression. This experiment has been deemed unsuccessful, and was
+removed as of Perl 5.24.
 
 =item untie VARIABLE
 X<untie>
@@ -8817,8 +8748,6 @@ X<values>
 
 =item values ARRAY
 
-=item values EXPR
-
 =for Pod::Functions return a list of the values in a hash
 
 In list context, returns a list consisting of all the values of the named
@@ -8854,13 +8783,9 @@ modify the contents of the hash:
     for (values %hash)      { s/foo/bar/g }  # modifies %hash values
     for (@hash{keys %hash}) { s/foo/bar/g }  # same
 
-Starting with Perl 5.14, C<values> can take a scalar EXPR, which must hold
-a reference to an unblessed hash or array.  The argument will be
-dereferenced automatically.  This aspect of C<values> is considered highly
-experimental.  The exact behaviour may change in a future version of Perl.
-
-    for (values $hashref) { ... }
-    for (values $obj->get_arrayref) { ... }
+Starting with Perl 5.14, an experimental feature allowed C<values> to take a
+scalar expression. This experiment has been deemed unsuccessful, and was
+removed as of Perl 5.24.
 
 To avoid confusing would-be users of your code who are running earlier
 versions of Perl with mysterious syntax errors, put this sort of thing at
@@ -8868,7 +8793,6 @@ the top of your file to signal that your code will work I<only> on Perls of
 a recent vintage:
 
     use 5.012;	# so keys/values/each work on arrays
-    use 5.014;	# so keys/values/each work on scalars (experimental)
 
 See also C<keys>, C<each>, and C<sort>.
 
