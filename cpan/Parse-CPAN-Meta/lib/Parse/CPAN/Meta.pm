@@ -2,7 +2,8 @@ use 5.008001;
 use strict;
 package Parse::CPAN::Meta;
 # ABSTRACT: Parse META.yml and META.json CPAN metadata files
-our $VERSION = '1.4414'; # VERSION
+
+our $VERSION = '1.4417';
 
 use Exporter;
 use Carp 'croak';
@@ -110,12 +111,12 @@ sub _can_load {
 
 # Kept for backwards compatibility only
 # Create an object from a file
-sub LoadFile ($) {
+sub LoadFile ($) { ## no critic
   return Load(_slurp(shift));
 }
 
 # Parse a document from a string.
-sub Load ($) {
+sub Load ($) { ## no critic
   require CPAN::Meta::YAML;
   my $object = eval { CPAN::Meta::YAML::Load(shift) };
   croak $@ if $@;
@@ -136,7 +137,7 @@ Parse::CPAN::Meta - Parse META.yml and META.json CPAN metadata files
 
 =head1 VERSION
 
-version 1.4414
+version 1.4417
 
 =head1 SYNOPSIS
 
@@ -283,7 +284,7 @@ will be thrown.
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-CPAN-Meta>.
+at L<https://github.com/Perl-Toolchain-Gang/Parse-CPAN-Meta/issues>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
@@ -311,6 +312,8 @@ David Golden <dagolden@cpan.org>
 
 =head1 CONTRIBUTORS
 
+=for stopwords Graham Knop Joshua ben Jore Karen Etheridge Neil Bowers Ricardo Signes Steffen Mueller
+
 =over 4
 
 =item *
@@ -320,6 +323,10 @@ Graham Knop <haarg@haarg.org>
 =item *
 
 Joshua ben Jore <jjore@cpan.org>
+
+=item *
+
+Karen Etheridge <ether@cpan.org>
 
 =item *
 
@@ -337,7 +344,7 @@ Steffen Mueller <smueller@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2014 by Adam Kennedy and Contributors.
+This software is copyright (c) 2015 by Adam Kennedy and Contributors.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

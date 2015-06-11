@@ -874,7 +874,7 @@ use File::Glob qw(:case);
     },
 
     'Parse::CPAN::Meta' => {
-        'DISTRIBUTION' => 'DAGOLDEN/Parse-CPAN-Meta-1.4414.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/Parse-CPAN-Meta-1.4417.tar.gz',
         'FILES'        => q[cpan/Parse-CPAN-Meta],
         'EXCLUDED'     => [
             qw[t/00-report-prereqs.t],
