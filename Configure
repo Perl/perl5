@@ -633,6 +633,7 @@ d_ldexpl=''
 d_longdbl=''
 longdblinfbytes=''
 longdblkind=''
+longdblmantbits=''
 longdblnanbytes=''
 longdblsize=''
 d_longlong=''
@@ -1099,6 +1100,7 @@ d_PRIgldbl=''
 d_SCNfldbl=''
 doublekind=''
 doubleinfbytes=''
+doublemantbits=''
 doublenanbytes=''
 sPRIEUldbl=''
 sPRIFUldbl=''
@@ -18757,6 +18759,79 @@ else
 fi
 set d_signbit
 eval $setvar
+$rm_try
+
+$echo "Checking how many mantissa bits your doubles have..." >&4
+$cat >try.c <<EOP
+#$i_float I_FLOAT
+#$i_sunmath I_SUNMATH
+#ifdef I_FLOAT
+# include <float.h>
+#endif
+#ifdef I_SUNMATH
+# include <sunmath.h>
+#endif
+#ifdef DBL_MANT_DIG
+# define BITS (DBL_MANT_DIG - 1) /* the implicit bit does not count */
+#endif
+#include <stdio.h>
+int main(int argc, char *argv[]) {
+#ifdef BITS
+  printf("%d\n", BITS);
+#endif
+  return 0;
+}
+EOP
+set try
+if eval $compile; then
+    doublemantbits=`$run ./try`
+else
+    doublemantbits="$undef"
+fi
+$rm_try
+
+$echo "Checking how many mantissa bits your long doubles have..." >&4
+$cat >try.c <<EOP
+#$i_float I_FLOAT
+#$i_sunmath I_SUNMATH
+#ifdef I_FLOAT
+# include <float.h>
+#endif
+#ifdef I_SUNMATH
+# include <sunmath.h>
+#endif
+#$d_longdbl HAS_LONG_DOUBLE
+#if defined(HAS_LONG_DOUBLE) && defined(LDBL_MANT_DIG)
+# if ($longdblkind == 3) || ($longdblkind == 4) /* 80-bit extended precision */
+/* This format has no implicit bit.  Beware, however, that for
+ * this format the bare LDBL_MANT_DIG is misleading for inf/nan:
+ * the top three bits are used for inf (100) / qnan (11x) / snan (101),
+ * and the top bit must have been one since 387, zero is plain invalid.
+ * For normal fp values, the LDBL_MANT_DIG is fine, though. */
+#  define BITS LDBL_MANT_DIG
+# elif ($longdblkind == 5 || $longdblkind == 6) /* double double */
+/* LDBL_MANT_DIG of 106 (twice 53) would be logical, but for some
+ * reason e.g. Irix thinks 107.  But in any case, we want only
+ * the number of real bits, the implicit bits are of no interest.  */
+#  define BITS 2 * (DBL_MANT_DIG - 1)
+# else
+#  define BITS (LDBL_MANT_DIG - 1) /* the implicit bit does not count */
+# endif
+#endif
+#include <stdio.h>
+int main(int argc, char *argv[]) {
+#ifdef BITS
+  printf("%d\n", BITS);
+#endif
+  return 0;
+}
+EOP
+set try
+if eval $compile; then
+    longdblmantbits=`$run ./try`
+else
+    longdblmantbits="$undef"
+fi
 $rm_try
 
 : see if sigprocmask exists

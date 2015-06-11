@@ -4858,6 +4858,25 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define LONGDBLINFBYTES $longdblinfbytes		/**/
 #define LONGDBLNANBYTES $longdblnanbytes		/**/
 
+/* DOUBLEMANTBITS:
+ *	This symbol, if defined, tells how many mantissa bits
+ *	there are in double precision floating point format.
+ *      Note that this is usually DBL_MANT_DIG minus one, since
+ *      with the standard IEEE 754 formats DBL_MANT_DIG includes
+ *	the implicit bit, which doesn't really exist.
+ */
+#define DOUBLEMANTBITS $doublemantbits
+
+/* LONGDBLMANTBITS:
+ *	This symbol, if defined, tells how many mantissa bits
+ *	there are in long double precision floating point format.
+ *      Note that this can be LDBL_MANT_DIG minus one,
+ *      since LDBL_MANT_DIG can include the IEEE 754 implicit bit.
+ *      The common x86-style 80-bit long double does not have
+ *	an implicit bit.
+ */
+#define LONGDBLMANTBITS $longdblmantbits
+
 /* NEED_VA_COPY:
  *	This symbol, if defined, indicates that the system stores
  *	the variable argument list datatype, va_list, in a format

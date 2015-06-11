@@ -3663,6 +3663,7 @@ $   longdblsize="0"
 $   longdblkind="0"
 $   longdblinfbytes="undef"
 $   longdblnanbytes="undef"
+$   longdblmantbits="undef"
 $   d_longdbl="undef"
 $   echo "You do not have long double."
 $ ELSE
@@ -3673,6 +3674,7 @@ $   longdblsize = tmp
 $   longdblkind = "1"
 $   longdblinfbytes="0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x7f"
 $   longdblnanbytes="0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff"
+$   longdblmantbits="112"
 $   d_longdbl = "define"
 $   echo "Your long doubles are ''longdblsize' bytes long."
 $ ENDIF
@@ -5573,6 +5575,7 @@ $   i64size="undef"
 $   u64size="undef"
 $ ENDIF
 $!
+$ doublemantbits = "52"
 $ IF uselongdouble .OR. uselongdouble .EQS. "define"
 $ THEN
 $   nvtype="long double"
@@ -6478,6 +6481,7 @@ $ WC "dlsrc='dl_vms.xs'"
 $ WC "doublekind='3'"
 $ WC "doubleinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f'"
 $ WC "doublenanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f'"
+$ WC "doublemantbits='" + doublemantbits + "'"
 $ WC "doublesize='" + doublesize + "'"
 $ WC "drand01='" + drand01 + "'"
 $ WC "dtrace='" + "'"

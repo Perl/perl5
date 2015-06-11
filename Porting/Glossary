@@ -2856,6 +2856,13 @@ doublekind (longdblfio.U):
 	8 = IEEE 754 64-bit big mixed endian be-le,
 	-1 = unknown format.
 
+doublemantbits (mantbits.U):
+	This symbol, if defined, tells how many mantissa bits
+	there are in double precision floating point format.
+	Note that this is usually DBL_MANT_DIG minus one, since
+	with the standard IEEE 754 formats DBL_MANT_DIG includes
+	the implicit bit which doesn't really exist.
+
 doublenanbytes (infnan.U):
 	This variable contains comma-separated list of hexadecimal bytes
 	for the double precision not-a-number.
@@ -4094,6 +4101,14 @@ longdblkind (d_longdbl.U):
 	2 = IEEE 754 128-bit big big endian, 3 = x86 80-bit little endian,
 	4 = x86 80-bit big endian, 5 = double-double 128-bit little endian,
 	6 = double-double 128-bit big endian, -1 = unknown format.
+
+longdblmantbits (longdblmant.U):
+	This symbol, if defined, tells how many mantissa bits
+	there are in long double precision floating point format.
+	Note that this can be LDBL_MANT_DIG minus one,
+	since LDBL_MANT_DIG can include the IEEE 754 implicit bit.
+	The common x86-style 80-bit long double does not have
+	an implicit bit.
 
 longdblnanbytes (infnan.U):
 	This variable contains comma-separated list of hexadecimal bytes
