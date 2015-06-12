@@ -2039,10 +2039,16 @@ cpan/Pod-Simple/t/xhtml-bkb.t
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
 cpan/Pod-Usage/lib/Pod/Usage.pm
 cpan/Pod-Usage/scripts/pod2usage.PL
+cpan/Pod-Usage/t/pod/headwithmarkup.pl
+cpan/Pod-Usage/t/pod/headwithmarkup.t
 cpan/Pod-Usage/t/pod/p2u_data.pl
 cpan/Pod-Usage/t/pod/pod2usage2.t
 cpan/Pod-Usage/t/pod/pod2usage.t
 cpan/Pod-Usage/t/pod/pod2usage.xr
+cpan/Pod-Usage/t/pod/selectheaders.pl
+cpan/Pod-Usage/t/pod/selectheaders.t
+cpan/Pod-Usage/t/pod/selectsections.pl
+cpan/Pod-Usage/t/pod/selectsections.t
 cpan/Pod-Usage/t/pod/testcmp.pl
 cpan/Pod-Usage/t/pod/testp2pt.pl
 cpan/Pod-Usage/t/pod/usage2.pod

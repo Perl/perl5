@@ -64,6 +64,7 @@ pod2usage - print usage messages from embedded pod docs in files
 [B<-verbose> I<level>]
 [B<-pathlist> I<dirlist>]
 [B<-formatter> I<module>]
+[B<-utf8>]
 I<file>
 
 =back
@@ -110,6 +111,11 @@ Which text formatter to use. Default is L<Pod::Text>, or for very old
 Perl versions L<Pod::PlainText>. An alternative would be e.g. 
 L<Pod::Text::Termcap>.
 
+=item B<-utf8>
+
+This option assumes that the formatter (see above) understands the option
+"utf8". It turns on generation of utf8 output.
+
 =item I<file>
 
 The pathname of a file containing pod documentation to be output in
@@ -153,6 +159,7 @@ my @opt_specs = (
     'pathlist=s',
     'formatter=s',
     'verbose=i',
+    'utf8!'
 );
 
 ## Parse options
@@ -178,6 +185,7 @@ $usage{-exitval}  = $options{'exit'}      if (defined $options{'exit'});
 $usage{-output}   = $options{'output'}    if (defined $options{'output'});
 $usage{-verbose}  = $options{'verbose'}   if (defined $options{'verbose'});
 $usage{-pathlist} = $options{'pathlist'}  if (defined $options{'pathlist'});
+$usage{-utf8}     = $options{'utf8'}      if (defined $options{'utf8'});
 
 pod2usage(\%usage);
 

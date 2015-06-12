@@ -945,7 +945,7 @@ use File::Glob qw(:case);
     },
 
     'Pod::Usage' => {
-        'DISTRIBUTION' => 'MAREKR/Pod-Usage-1.64.tar.gz',
+        'DISTRIBUTION' => 'MAREKR/Pod-Usage-1.67.tar.gz',
         'FILES'        => q[cpan/Pod-Usage],
     },
 

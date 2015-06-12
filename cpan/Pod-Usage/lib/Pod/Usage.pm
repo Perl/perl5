@@ -11,7 +11,7 @@ package Pod::Usage;
 use strict;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.64';  ## Current version of this package
+$VERSION = '1.67';  ## Current version of this package
 require  5.006;    ## requires this Perl version or later
 
 #use diagnostics;
@@ -128,7 +128,8 @@ sub pod2usage {
     }
 
     ## Check for perldoc
-    my $progpath = File::Spec->catfile($Config{scriptdirexp} 
+    my $progpath = $opts{perldoc} ? $opts{perldoc} :
+        File::Spec->catfile($Config{scriptdirexp} 
 	|| $Config{scriptdir}, 'perldoc');
 
     my $version = sprintf("%vd",$^V);
@@ -148,7 +149,9 @@ sub pod2usage {
        if(defined $opts{-input} && $opts{-input} =~ /^\s*(\S.*?)\s*$/) {
          # the perldocs back to 5.005 should all have -F
 	 # without -F there are warnings in -T scripts
-         system($progpath, '-F', $1);
+         my @perldoc_cmd = ( $progpath, '-F', $1 );
+         unshift @perldoc_cmd, $opts{'-perlcmd'} if $opts{'-perlcmd'};
+         system(@perldoc_cmd);
          if($?) {
            # RT16091: fall back to more if perldoc failed
            system(($Config{pager} || $ENV{PAGER} || '/bin/more'), $1);
@@ -263,10 +266,13 @@ sub select {
 
 # Override Pod::Text->seq_i to return just "arg", not "*arg*".
 sub seq_i { return $_[1] }
+# Override Pod::Text->cmd_i to return just "arg", not "*arg*".
+# newer version based on Pod::Simple
+sub cmd_i { return $_[2] }
 
 # This overrides the Pod::Text method to do something very akin to what
 # Pod::Select did as well as the work done below by preprocess_paragraph.
-# Note that the below is very, very specific to Pod::Text.
+# Note that the below is very, very specific to Pod::Text and Pod::Simple.
 sub _handle_element_end {
     my ($self, $element) = @_;
     if ($element eq 'head1') {
@@ -278,6 +284,8 @@ sub _handle_element_end {
         my $idx = $1 - 1;
         $self->{USAGE_HEADINGS} = [] unless($self->{USAGE_HEADINGS});
         $self->{USAGE_HEADINGS}->[$idx] = $$self{PENDING}[-1][1];
+        # we have to get rid of the lower headings
+        splice(@{$self->{USAGE_HEADINGS}},$idx+1);
     }
     if ($element =~ /^head\d+$/) {
         $$self{USAGE_SKIPPING} = 1;
@@ -312,7 +320,7 @@ sub _handle_element_end {
             $$self{PENDING}[-1][1] = $_;
         }
     }
-    if ($$self{USAGE_SKIPPING} && $element !~ m/^over-/) {
+    if ($$self{USAGE_SKIPPING} && $element !~ m/^over-|^[BCFILSZ]$/) {
         pop @{ $$self{PENDING} };
     } else {
         $self->SUPER::_handle_element_end($element);
@@ -383,10 +391,14 @@ Pod::Usage - print a usage message from embedded pod documentation
   pod2usage(   -msg     => $message_text ,
                -exitval => $exit_status  ,  
                -verbose => $verbose_level,  
-               -output  => $filehandle   );
+               -output  => $filehandle );
 
   pod2usage(   -verbose => 2,
-               -noperldoc => 1  )
+               -noperldoc => 1  );
+
+  pod2usage(   -verbose => 2,
+               -perlcmd => $path_to_perl,
+               -perldoc => $path_to_perldoc );
 
 =head1 ARGUMENTS
 
@@ -418,49 +430,73 @@ keys:
 
 =over 4
 
-=item C<-message>
+=item C<-message> I<string>
 
-=item C<-msg>
+=item C<-msg> I<string>
 
 The text of a message to print immediately prior to printing the
 program's usage message. 
 
-=item C<-exitval>
+=item C<-exitval> I<value>
 
 The desired exit status to pass to the B<exit()> function.
 This should be an integer, or else the string "NOEXIT" to
 indicate that control should simply be returned without
 terminating the invoking process.
 
-=item C<-verbose>
+=item C<-verbose> I<value>
 
-The desired level of "verboseness" to use when printing the usage
-message. If the corresponding value is 0, then only the "SYNOPSIS"
-section of the pod documentation is printed. If the corresponding value
-is 1, then the "SYNOPSIS" section, along with any section entitled
-"OPTIONS", "ARGUMENTS", or "OPTIONS AND ARGUMENTS" is printed.  If the
-corresponding value is 2 or more then the entire manpage is printed.
+The desired level of "verboseness" to use when printing the usage message.
+If the value is 0, then only the "SYNOPSIS" section of the pod documentation
+is printed. If the value is 1, then the "SYNOPSIS" section, along with any
+section entitled "OPTIONS", "ARGUMENTS", or "OPTIONS AND ARGUMENTS" is
+printed. If the corresponding value is 2 or more then the entire manpage is
+printed, using L<perldoc> if available; otherwise L<Pod::Text> is used for
+the formatting. For better readability, the all-capital headings are
+downcased, e.g. C<SYNOPSIS> =E<gt> C<Synopsis>.
 
 The special verbosity level 99 requires to also specify the -sections
 parameter; then these sections are extracted and printed.
 
-=item C<-sections>
+=item C<-sections> I<spec>
 
-A string representing a selection list for sections to be printed
-when -verbose is set to 99, e.g. C<"NAME|SYNOPSIS|DESCRIPTION|VERSION">.
+There are two ways to specify the selection. Either a string (scalar) 
+representing a selection regexp for sections to be printed when -verbose
+is set to 99, e.g.
+
+  "NAME|SYNOPSIS|DESCRIPTION|VERSION"
+
+With the above regexp all content following (and including) any of the
+given C<=head1> headings will be shown. It is possible to restrict the 
+output to particular subsections only, e.g.:
+
+  "DESCRIPTION/Algorithm"
+
+This will output only the C<=head2 Algorithm> heading and content within
+the C<=head1 DESCRIPTION> section. The regexp binding is stronger than the
+section separator, such that e.g.:
+
+  "DESCRIPTION|OPTIONS|ENVIORNMENT/Caveats"
+
+will print any C<=head2 Caveats> section (only) within any of the three
+C<=head1> sections.
 
 Alternatively, an array reference of section specifications can be used:
 
-  pod2usage(-verbose => 99, 
-            -sections => [ qw(fred fred/subsection) ] );
+  pod2usage(-verbose => 99, -sections => [
+    qw(DESCRIPTION DESCRIPTION/Introduction) ] );
 
-=item C<-output>
+This will print only the content of C<=head1 DESCRIPTION> and the 
+C<=head2 Introduction> sections, but no other C<=head2>, and no other
+C<=head1> either.
+
+=item C<-output> I<handle>
 
 A reference to a filehandle, or the pathname of a file to which the
 usage message should be written. The default is C<\*STDERR> unless the
 exit value is less than 2 (in which case the default is C<\*STDOUT>).
 
-=item C<-input>
+=item C<-input> I<handle>
 
 A reference to a filehandle, or the pathname of a file from which the
 invoking script's pod documentation should be read.  It defaults to the
@@ -472,7 +508,7 @@ that module's POD, you can use this:
   use Pod::Find qw(pod_where);
   pod2usage( -input => pod_where({-inc => 1}, __PACKAGE__) );
 
-=item C<-pathlist>
+=item C<-pathlist> I<string>
 
 A list of directory paths. If the input file does not exist, then it
 will be searched for in the given directory list (in the order the
@@ -490,16 +526,36 @@ with L<PAR>. The -noperldoc option suppresses the external call to
 L<perldoc> and uses the simple text formatter (L<Pod::Text>) to 
 output the POD.
 
+=item C<-perlcmd>
+
+By default, Pod::Usage will call L<perldoc> when -verbose >= 2 is
+specified. In case of special or unusual Perl installations,
+the -perlcmd option may be used to supply the path to a L<perl> executable
+which should run L<perldoc>.
+
+=item C<-perldoc>
+
+By default, Pod::Usage will call L<perldoc> when -verbose >= 2 is
+specified. In case L<perldoc> is not installed where the L<perl> interpreter
+thinks it is (see L<Config>), the -perldoc option may be used to supply
+the correct path to L<perldoc>.
+
 =back
 
 =head2 Formatting base class
 
-The default text formatter is L<Pod::Text>.  The base class for Pod::Usage can
+The default text formatter is L<Pod::Text>. The base class for Pod::Usage can
 be defined by pre-setting C<$Pod::Usage::Formatter> I<before>
 loading Pod::Usage, e.g.:
 
     BEGIN { $Pod::Usage::Formatter = 'Pod::Text::Termcap'; }
     use Pod::Usage qw(pod2usage);
+
+Pod::Usage uses L<Pod::Simple>'s _handle_element_end() method to implement
+the section selection, and in case of verbosity < 2 it down-cases the
+all-caps headings to first capital letter and rest lowercase, and adds
+a colon/newline at the end of the headings, for better readability. Same for
+verbosity = 99.
 
 =head2 Pass-through options
 
