@@ -1,5 +1,6 @@
 package my::pragma;
 
+require autodie;
 use Import::Into qw(into);
 
 sub import {

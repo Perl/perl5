@@ -47,8 +47,8 @@ cpan/autodie/lib/autodie/hints.pm	Hinting interface for autodie
 cpan/autodie/lib/autodie.pm		Functions succeed or die with lexical scope
 cpan/autodie/lib/autodie/Scope/Guard.pm
 cpan/autodie/lib/autodie/Scope/GuardStack.pm
-cpan/autodie/lib/autodie/ScopeUtil.pm
 cpan/autodie/lib/autodie/skip.pm
+cpan/autodie/lib/autodie/Util.pm
 cpan/autodie/lib/Fatal.pm		Make errors in functions/builtins fatal
 cpan/autodie/t/00-load.t		autodie - basic load
 cpan/autodie/t/args.t

@@ -133,7 +133,7 @@ use File::Glob qw(:case);
     },
 
     'autodie' => {
-        'DISTRIBUTION' => 'NTHYKIER/autodie-2.26.tar.gz',
+        'DISTRIBUTION' => 'PJF/autodie-2.27.tar.gz',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{benchmarks},
