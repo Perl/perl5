@@ -365,6 +365,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVp_NOK		0x00002000  /* has valid non-public numeric value */
 #define SVp_POK		0x00004000  /* has valid non-public pointer value */
 #define SVp_SCREAM	0x00008000  /* method name is DOES */
+                                    /* eval cx text is ref counted */
 #define SVphv_CLONEABLE	SVp_SCREAM  /* PVHV (stashes) clone its objects */
 #define SVpgv_GP	SVp_SCREAM  /* GV has a valid GP */
 #define SVprv_PCS_IMPORTED  SVp_SCREAM  /* RV is a proxy for a constant
