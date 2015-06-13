@@ -6859,7 +6859,13 @@ extern void moncontrol(int);
 #    define NV_NAN_PAYLOAD_MASK NV_NAN_PAYLOAD_MASK_IEEE_754_128_BE
 #    define NV_NAN_PAYLOAD_PERM NV_NAN_PAYLOAD_PERM_IEEE_754_128_BE
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
-#    if LONG_DOUBLESIZE == 12
+#    if LONG_DOUBLESIZE == 10
+#      define NV_NAN_PAYLOAD_MASK \
+         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, \
+         0x00, 0x00
+#      define NV_NAN_PAYLOAD_PERM \
+         NV_NAN_PAYLOAD_PERM_0_TO_7, 0xFF, 0xFF
+#    elif LONG_DOUBLESIZE == 12
 #      define NV_NAN_PAYLOAD_MASK \
          0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, \
          0x00, 0x00, 0x00, 0x00
@@ -6876,7 +6882,13 @@ extern void moncontrol(int);
 #      error "Unexpected x86 80-bit little-endian long double format"
 #    endif
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
-#    if LONG_DOUBLESIZE == 12
+#    if LONG_DOUBLESIZE == 10
+#      define NV_NAN_PAYLOAD_MASK \
+         0x00, 0x00, 0x1f, 0xff, 0xff, 0xff, 0xff, 0xff, \
+         0xff, 0xff
+#      define NV_NAN_PAYLOAD_PERM \
+         NV_NAN_PAYLOAD_PERM_7_TO_0, 0xFF, 0xFF
+#    elif LONG_DOUBLESIZE == 12
 #      define NV_NAN_PAYLOAD_MASK \
          0x00, 0x00, 0x1f, 0xff, 0xff, 0xff, 0xff, 0xff, \
          0xff, 0xff, 0x00, 0x00
@@ -6890,7 +6902,7 @@ extern void moncontrol(int);
          NV_NAN_PAYLOAD_PERM_7_TO_0, \
          0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 #    else
-#      error "Unexpected x86 80-bit little-endian long double format"
+#      error "Unexpected x86 80-bit big-endian long double format"
 #    endif
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
 /* For double-double we assume only the first double is used for NaN. */
