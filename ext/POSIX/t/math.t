@@ -131,9 +131,21 @@ SKIP: {
     ok(isgreater(2, 1), "isgreater 2 1");
     ok(islessequal(1, 1), "islessequal 1 1");
     ok(isunordered(1, NaN), "isunordered 1 NaN");
+
+    near(erf(0.5), 0.520499877813047, "erf 0.5", 1.5e-7);
     near(erf(1), 0.842700792949715, "erf 1", 1.5e-7);
+    near(erf(9), 1, "erf 9", 1.5e-7);
+    near(erfc(0.5), 0.479500122186953, "erfc 0.5", 1.5e-7);
     near(erfc(1), 0.157299207050285, "erfc 1", 1.5e-7);
+    near(erfc(9), 0, "erfc 9", 1.5e-7);
+
+    # tgamma(n) = (n - 1)!
+    # lgamma(n) = log(tgamma(n))
+    near(tgamma(5), 24, "tgamma 5", 1.5e-7);
+    near(tgamma(5.5), 52.3427777845535, "tgamma 5.5", 1.5e-7);
     near(tgamma(9), 40320, "tgamma 9", 1.5e-7);
+    near(lgamma(5), 3.17805383034795, "lgamma 4", 1.5e-7);
+    near(lgamma(5.5), 3.95781396761872, "lgamma 5.5", 1.5e-7);
     near(lgamma(9), 10.6046029027452, "lgamma 9", 1.5e-7);
 
     # These don't work on old mips/hppa platforms because == Inf (or == -Inf).
