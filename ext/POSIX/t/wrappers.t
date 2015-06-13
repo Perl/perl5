@@ -10,6 +10,7 @@ plan(skip_all => "POSIX is unavailable")
 require POSIX;
 require Symbol;
 require File::Temp;
+unshift @INC, "../../t";
 require 'loc_tools.pl';
 
 use constant NOT_HERE => 'this-file-should-not-exist';

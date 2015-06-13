@@ -6,6 +6,7 @@ BEGIN {
 	print "1..0\n";
 	exit 0;
     }
+    unshift @INC, "../../t";
     require 'loc_tools.pl';
 }
 
