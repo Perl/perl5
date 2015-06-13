@@ -32,6 +32,8 @@ ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MY.pm 22fe9596a0237252f
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/testlib.pm 7fbc42ca2ebc6c677b79ae5fd5647243cf069463
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/basic.t 6cdc7701b50e586bc9c4cfb1616de8eb0b1baf34
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/pm_to_blib.t 71ebcee355691ce374fcad251b12d8b2412462b3
+Pod::Simple cpan/Pod-Simple/lib/Pod/Simple/BlackBox.pm 4108633c4f40f7f63c5a0245df2b07a4a2f22fec
+Pod::Simple cpan/Pod-Simple/lib/Pod/Simple/Search.pm 7a48823f9faec6d6bbef08060e679e46ccf60bc8
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util.pm 62d2a82a811b531a3fd25cb60c4c2ef943858892
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util/XS.pm 08abbe1a707927cee53e85ba85d6bd35c1c2ae50
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/Scalar/Util.pm 7f1e6eb11105623200ef9cdcb881545ccb769ded
