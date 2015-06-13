@@ -708,7 +708,7 @@ This is Anna's "Answer" to the <q>Question</q>.
 =cut
 
 EOPOD
-my $T = $use_html_entities ? 84 : 'x54';
+my $T = $use_html_entities ? ord('T') : sprintf ("x%X", ord('T'));
 is($results, <<"EOHTML", 'HTML Entities should be only for specified characters');
 <p>&#$T;his is Anna's &quot;Answer&quot; to the &lt;q&gt;Question&lt;/q&gt;.</p>
 

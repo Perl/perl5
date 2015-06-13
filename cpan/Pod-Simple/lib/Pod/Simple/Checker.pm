@@ -9,7 +9,7 @@ use Carp ();
 use Pod::Simple::Methody ();
 use Pod::Simple ();
 use vars qw( @ISA $VERSION );
-$VERSION = '3.29';
+$VERSION = '3.30';
 @ISA = ('Pod::Simple::Methody');
 BEGIN { *DEBUG = defined(&Pod::Simple::DEBUG)
           ? \&Pod::Simple::DEBUG
@@ -91,9 +91,9 @@ sub emit_par {
   my $indent = ' ' x ( 2 * $self->{'Indent'} + ($tweak_indent||0) );
    # Yes, 'STRING' x NEGATIVE gives '', same as 'STRING' x 0
 
-  $self->{'Thispara'} =~ tr{\xAD}{}d if Pod::Simple::ASCII;
+  $self->{'Thispara'} =~ s/$Pod::Simple::shy//g;
   my $out = Text::Wrap::wrap($indent, $indent, $self->{'Thispara'} .= "\n");
-  $out =~ tr{\xA0}{ } if Pod::Simple::ASCII;
+  $out =~ s/$Pod::Simple::nbsp/ /g;
   print {$self->{'output_fh'}} $out,
     #"\n"
   ;
@@ -107,10 +107,8 @@ sub emit_par {
 sub end_Verbatim  {
   return unless $_[0]{'Errata_seen'};
   my $self = shift;
-  if(Pod::Simple::ASCII) {
-    $self->{'Thispara'} =~ tr{\xA0}{ };
-    $self->{'Thispara'} =~ tr{\xAD}{}d;
-  }
+  $self->{'Thispara'} =~ s/$Pod::Simple::nbsp/ /g;
+  $self->{'Thispara'} =~ s/$Pod::Simple::shy//g;
 
   my $i = ' ' x ( 2 * $self->{'Indent'} + 4);
   

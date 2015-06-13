@@ -78,13 +78,24 @@ $p =~ s/, +/,\n/g;
 $p =~ s/^/#  /mg;
 print $p;
 
+my $ascii_order;
+if(     -e ($ascii_order = source_path('ascii_order.pl'))) {
+  #
+} elsif(-e ($ascii_order = File::Spec->catdir($cwd, 't', 'ascii_order.pl'))) {
+  #
+} else {
+  die "Can't find ascii_order.pl";
+}
+
+require $ascii_order;
+
 {
-my $names = join "|", sort keys %$name2where;
+my $names = join "|", sort ascii_order keys %$name2where;
 ok $names, "Zonk::Pronk|hinkhonk::Glunk|perlzuk|squaa::Glunk|zikzik";
 }
 
 {
-my $names = join "|", sort values %$where2name;
+my $names = join "|", sort ascii_order values %$where2name;
 ok $names, "Zonk::Pronk|hinkhonk::Glunk|hinkhonk::Glunk|perlzuk|squaa::Glunk|zikzik";
 }
 

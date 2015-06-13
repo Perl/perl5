@@ -18,7 +18,7 @@ use vars qw(
 );
 
 @ISA = ('Pod::Simple::BlackBox');
-$VERSION = '3.29';
+$VERSION = '3.30';
 
 @Known_formatting_codes = qw(I B C L E F S X Z); 
 %Known_formatting_codes = map(($_=>1), @Known_formatting_codes);
@@ -46,6 +46,22 @@ BEGIN {
 if(DEBUG > 2) {
   print "# We are ", ASCII ? '' : 'not ', "in ASCII-land\n";
   print "# We are under a Unicode-safe Perl.\n";
+}
+
+# The NO BREAK SPACE and SOFT HYHPEN are used in several submodules.
+if ($] ge 5.007_003) {  # On sufficiently modern Perls we can handle any
+                        # character set
+  $Pod::Simple::nbsp = chr utf8::unicode_to_native(0xA0);
+  $Pod::Simple::shy  = chr utf8::unicode_to_native(0xAD);
+}
+elsif (Pod::Simple::ASCII) {  # Hard code ASCII early Perl
+  $Pod::Simple::nbsp = "\xA0";
+  $Pod::Simple::shy  = "\xAD";
+}
+else { # EBCDIC on early Perl.  We know what the values are for the code
+        # pages supported then.
+  $Pod::Simple::nbsp = "\x41";
+  $Pod::Simple::shy  = "\xCA";
 }
 
 # Design note:
@@ -317,6 +333,13 @@ sub unaccept_targets {
 #
 # And now codes (not targets or directives)
 
+# XXX Probably it is an error that the digit '9' is excluded from these re's.
+# Broken for early Perls on EBCDIC
+my $xml_name_re = eval "qr/[^-.0-8:A-Z_a-z[:^ascii:]]/";
+if (! defined $xml_name_re) {
+    $xml_name_re = qr/[\x00-\x2C\x2F\x39\x3B-\x40\x5B-\x5E\x60\x7B-\x7F]/;
+}
+
 sub accept_code { shift->accept_codes(@_) } # alias
 
 sub accept_codes {  # Add some codes
@@ -324,20 +347,17 @@ sub accept_codes {  # Add some codes
   
   foreach my $new_code (@_) {
     next unless defined $new_code and length $new_code;
-    if(ASCII) {
-      # A good-enough check that it's good as an XML Name symbol:
-      Carp::croak "\"$new_code\" isn't a valid element name"
-        if $new_code =~
-          m/[\x00-\x2C\x2F\x39\x3B-\x40\x5B-\x5E\x60\x7B-\x7F]/
-            # Characters under 0x80 that aren't legal in an XML Name.
-        or $new_code =~ m/^[-\.0-9]/s
-        or $new_code =~ m/:[-\.0-9]/s;
-            # The legal under-0x80 Name characters that 
-            #  an XML Name still can't start with.
-    }
-    
+    # A good-enough check that it's good as an XML Name symbol:
+    Carp::croak "\"$new_code\" isn't a valid element name"
+      if $new_code =~ $xml_name_re
+          # Characters under 0x80 that aren't legal in an XML Name.
+      or $new_code =~ m/^[-\.0-9]/s
+      or $new_code =~ m/:[-\.0-9]/s;
+          # The legal under-0x80 Name characters that
+          #  an XML Name still can't start with.
+
     $this->{'accept_codes'}{$new_code} = $new_code;
-    
+
     # Yes, map to itself -- just so that when we
     #  see "=extend W [whatever] thatelementname", we say that W maps
     #  to whatever $this->{accept_codes}{thatelementname} is,
@@ -359,18 +379,15 @@ sub unaccept_codes { # remove some codes
   
   foreach my $new_code (@_) {
     next unless defined $new_code and length $new_code;
-    if(ASCII) {
-      # A good-enough check that it's good as an XML Name symbol:
-      Carp::croak "\"$new_code\" isn't a valid element name"
-        if $new_code =~
-          m/[\x00-\x2C\x2F\x39\x3B-\x40\x5B-\x5E\x60\x7B-\x7F]/
-            # Characters under 0x80 that aren't legal in an XML Name.
-        or $new_code =~ m/^[-\.0-9]/s
-        or $new_code =~ m/:[-\.0-9]/s;
-            # The legal under-0x80 Name characters that 
-            #  an XML Name still can't start with.
-    }
-    
+    # A good-enough check that it's good as an XML Name symbol:
+    Carp::croak "\"$new_code\" isn't a valid element name"
+      if $new_code =~ $xml_name_re
+          # Characters under 0x80 that aren't legal in an XML Name.
+      or $new_code =~ m/^[-\.0-9]/s
+      or $new_code =~ m/:[-\.0-9]/s;
+          # The legal under-0x80 Name characters that
+          #  an XML Name still can't start with.
+
     Carp::croak "But you must accept \"$new_code\" codes -- it's a builtin!"
      if grep $new_code eq $_, @Known_formatting_codes;
 
@@ -1441,15 +1458,6 @@ sub _treat_Ss {
   return;
 }
 
-# We can get NO BREAK SPACE accurately for any platform for recent Perls; for
-# earlier ones use the ASCII value for those platforms, and assume the typical
-# EBCDIC value for any others.
-my $nbsp = ($] >= 5.007003)
-            ? chr utf8::unicode_to_native(0xA0)
-            : (ASCII)
-            ? "\xA0"
-            : "\x41";
-
 sub _change_S_to_nbsp { #  a recursive function
   # Sanely assumes that the top node in the excursion won't be an S node.
   my($treelet, $in_s) = @_;
@@ -1467,7 +1475,7 @@ sub _change_S_to_nbsp { #  a recursive function
         $i +=  @$to_pull_up - 1;   # Make $i skip the pulled-up stuff
       }
     } else {
-      $treelet->[$i] =~ s/\s/$nbsp/g if $in_s;
+      $treelet->[$i] =~ s/\s/$Pod::Simple::nbsp/g if $in_s;
        
        # Note that if you apply nbsp_for_S to text, and so turn
        # "foo S<bar baz> quux" into "foo bar&#160;faz quux", you

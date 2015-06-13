@@ -349,20 +349,14 @@ octets into Perl's internal character string representation using the value of
 the C<=encoding> declaration in the POD source.
 
 If the POD source does not include an C<=encoding> declaration, the parser will
-attempt to guess the encoding (selecting one of UTF-8 or Latin-1) by examining
+attempt to guess the encoding (selecting one of UTF-8 or CP 1252) by examining
 the first non-ASCII bytes and applying the heuristic described in
-L<perlpodspec>.
+L<perlpodspec>.  (It the POD source contains only ASCII bytes, the
+encoding is assumed to be ASCII.)
 
 If you set the C<parse_characters> option to a true value the parser will
 expect characters rather than octets; will ignore any C<=encoding>; and will
 make no attempt to decode the input.
-
-=head1 CAVEATS
-
-This is just a beta release -- there are a good number of things still
-left to do.  Notably, support for EBCDIC platforms is still half-done,
-an untested.
-
 
 =head1 SEE ALSO
 

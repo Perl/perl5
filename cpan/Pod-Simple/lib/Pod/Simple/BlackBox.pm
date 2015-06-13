@@ -22,11 +22,25 @@ use integer; # vroom!
 use strict;
 use Carp ();
 use vars qw($VERSION );
-$VERSION = '3.29';
+$VERSION = '3.30';
 #use constant DEBUG => 7;
 BEGIN {
   require Pod::Simple;
   *DEBUG = \&Pod::Simple::DEBUG unless defined &DEBUG
+}
+
+# Matches a character iff the character will have a different meaning
+# if we choose CP1252 vs UTF-8 if there is no =encoding line.
+# This is broken for early Perls on non-ASCII platforms.
+my $non_ascii_re = eval "qr/[[:^ascii:]]/";
+$non_ascii_re = qr/[\x80-\xFF]/ if ! defined $non_ascii_re;
+
+my $utf8_bom;
+if (($] ge 5.007_003)) {
+  $utf8_bom = "\x{FEFF}";
+  utf8::encode($utf8_bom);
+} else {
+  $utf8_bom = "\xEF\xBB\xBF";   # No EBCDIC BOM detection for early Perls.
 }
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -87,7 +101,7 @@ sub parse_lines {             # Usage: $parser->parse_lines(@lines)
     } else {
       DEBUG > 2 and print "First line: [$source_line]\n";
 
-      if( ($line = $source_line) =~ s/^\xEF\xBB\xBF//s ) {
+      if( ($line = $source_line) =~ s/^$utf8_bom//s ) {
         DEBUG and print "UTF-8 BOM seen.  Faking a '=encoding utf8'.\n";
         $self->_handle_encoding_line( "=encoding utf8" );
         delete $self->{'_processed_encoding'};
@@ -123,28 +137,102 @@ sub parse_lines {             # Usage: $parser->parse_lines(@lines)
       }
     }
 
-    # Try to guess encoding. Inlined for performance reasons.
     if(!$self->{'parse_characters'} && !$self->{'encoding'}
       && ($self->{'in_pod'} || $line =~ /^=/s)
-      && $line =~ /[[:^ascii:]]/
+      && $line =~ /$non_ascii_re/
     ) {
-      my $encoding;
-      if (ord("A") != 65) {
 
-        # Hard to figure out on non-ASCII platform if UTF-8 or not.  This
-        # won't work if it isn't UTF-8, so just assume it is and hope for the
-        # best.  It's not clear that the other encodings work on non-ASCII
-        # platforms anyway.
-        $encoding = 'UTF-8';
-      }
-      else {
-        $encoding = $line =~ /^[\x00-\x7f]*[\xC0-\xFD][\x80-\xBF]/ ? 'UTF-8' : 'ISO8859-1';
-      }
+      my $encoding;
+
+      # No =encoding line, and we are at the first line in the input that
+      # contains a non-ascii byte, that is one whose meaning varies depending
+      # on whether the file is encoded in UTF-8 or CP1252, which are the two
+      # possibilities permitted by the pod spec.  (ASCII is assumed if the
+      # file only contains ASCII bytes.)  In order to process this line, we
+      # need to figure out what encoding we will use for the file.
+      #
+      # Strictly speaking ISO 8859-1 (Latin 1) refers to the code points
+      # 160-255, but it is used here, as it often colloquially is, to refer to
+      # the complete set of code points 0-255, including ASCII (0-127), the C1
+      # controls (128-159), and strict Latin 1 (160-255).
+      #
+      # CP1252 is effectively a superset of Latin 1, because it differs only
+      # from colloquial 8859-1 in the C1 controls, which are very unlikely to
+      # actually be present in 8859-1 files, so can be used for other purposes
+      # without conflict.  CP 1252 uses most of them for graphic characters.
+      #
+      # Note that all ASCII-range bytes represent their corresponding code
+      # points in CP1252 and UTF-8.  In ASCII platform UTF-8 all other code
+      # points require multiple (non-ASCII) bytes to represent.  (A separate
+      # paragraph for EBCDIC is below.)  The multi-byte representation is
+      # quite structured.  If we find an isolated byte that requires multiple
+      # bytes to represent in UTF-8, we know that the encoding is not UTF-8.
+      # If we find a sequence of bytes that violates the UTF-8 structure, we
+      # also can presume the encoding isn't UTF-8, and hence must be 1252.
+      #
+      # But there are ambiguous cases where we could guess wrong.  If so, the
+      # user will end up having to supply an =encoding line.  We use all
+      # readily available information to improve our chances of guessing
+      # right.  The odds of something not being UTF-8, but still passing a
+      # UTF-8 validity test go down very rapidly with increasing length of the
+      # sequence.  Therefore we look at all the maximal length non-ascii
+      # sequences on the line.  If any of the sequences can't be UTF-8, we
+      # quit there and choose CP1252.  If all could be UTF-8, we guess UTF-8.
+      #
+      # On EBCDIC platforms, the situation is somewhat different.  In
+      # UTF-EBCDIC, not only do ASCII-range bytes represent their code points,
+      # but so do the bytes that are for the C1 controls.  Recall that these
+      # correspond to the unused portion of 8859-1 that 1252 mostly takes
+      # over.  That means that there are fewer code points that are
+      # represented by multi-bytes.  But, note that the these controls are
+      # very unlikely to be in pod text.  So if we encounter one of them, it
+      # means that it is quite likely CP1252 and not UTF-8.  The net result is
+      # the same code below is used for both platforms.
+      while ($line =~ m/($non_ascii_re+)/g) {
+        my $non_ascii_seq = $1;
+
+        if (length $non_ascii_seq == 1) {
+          $encoding = 'CP1252';
+          goto guessed;
+        } elsif ($] ge 5.007_003) {
+
+          # On Perls that have this function, we can see if the sequence is
+          # valid UTF-8 or not.
+          if (! utf8::decode($non_ascii_seq)) {
+            $encoding = 'CP1252';
+            goto guessed;
+          }
+        } elsif (ord("A") == 65) {  # An early Perl, ASCII platform
+
+          # Without utf8::decode, it's a lot harder to do a rigorous check
+          # (though some early releases had a different function that
+          # accomplished the same thing).  Since these are ancient Perls, not
+          # likely to be in use today, we take the easy way out, and look at
+          # just the first two bytes of the sequence to see if they are the
+          # start of a UTF-8 character.  In ASCII UTF-8, continuation bytes
+          # must be between 0x80 and 0xBF.  Start bytes can range from 0xC2
+          # through 0xFF, but anything above 0xF4 is not Unicode, and hence
+          # extremely unlikely to be in a pod.
+          if ($non_ascii_seq !~ /^[\xC2-\xF4][\x80-\xBF]/) {
+            $encoding = 'CP1252';
+            goto guessed;
+          }
+
+          # We don't bother doing anything special for EBCDIC on early Perls.
+          # If there is a solitary variant, CP1252 will be chosen; otherwise
+          # UTF-8.
+        }
+      } # End of loop through all variant sequences on the line
+
+      # All sequences in the line could be UTF-8.  Guess that.
+      $encoding = 'UTF-8';
+
+    guessed:
       $self->_handle_encoding_line( "=encoding $encoding" );
       delete $self->{'_processed_encoding'};
       $self->{'_transcoder'} && $self->{'_transcoder'}->($line);
 
-      my ($word) = $line =~ /(\S*[[:^ascii:]]\S*)/;
+      my ($word) = $line =~ /(\S*$non_ascii_re\S*)/;
 
       $self->whine(
         $self->{'line_count'},
@@ -155,7 +243,7 @@ sub parse_lines {             # Usage: $parser->parse_lines(@lines)
     DEBUG > 5 and print "# Parsing line: [$line]\n";
 
     if(!$self->{'in_pod'}) {
-      if($line =~ m/^=([a-zA-Z]+)/s) {
+      if($line =~ m/^=([a-zA-Z][a-zA-Z0-9]*)(?:\s|$)/s) {
         if($1 eq 'cut') {
           $self->scream(
             $self->{'line_count'},

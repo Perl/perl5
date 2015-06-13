@@ -8,7 +8,7 @@ package Pod::Simple::RTF;
 
 use strict;
 use vars qw($VERSION @ISA %Escape $WRAP %Tagmap);
-$VERSION = '3.29';
+$VERSION = '3.30';
 use Pod::Simple::PullParser ();
 BEGIN {@ISA = ('Pod::Simple::PullParser')}
 
@@ -16,6 +16,16 @@ use Carp ();
 BEGIN { *DEBUG = \&Pod::Simple::DEBUG unless defined &DEBUG }
 
 $WRAP = 1 unless defined $WRAP;
+
+# These are broken for early Perls on EBCDIC; they could be fixed to work
+# better there, but not worth it.  These are part of a larger [...] class, so
+# are just the strings to substitute into it, as opposed to compiled patterns.
+my $cntrl = '[:cntrl:]';
+$cntrl = '\x00-\x1F\x7F' unless eval "qr/[$cntrl]/";
+
+my $not_ascii = '[:^ascii:]';
+$not_ascii = '\x80-\xFF' unless eval "qr/[$not_ascii]/";
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -176,7 +186,7 @@ sub do_middle {      # the main work
        s/(?:
            ^
            |
-           (?<=[\cm\cj\t "\[\<\(])
+           (?<=[\r\n\t "\[\<\(])
          )   # start on whitespace, sequence-start, or quote
          ( # something looking like a Perl token:
           (?:
@@ -185,7 +195,7 @@ sub do_middle {      # the main work
           |
           # or starting alpha, but containing anything strange:
           (?:
-           [a-zA-Z'\x80-\xFF]+[\$\@\:_<>\(\\\*]\S+
+           [a-zA-Z'${not_ascii}]+[\$\@\:_<>\(\\\*]\S+
           )
          )
         /\cb$1\cc/xsg
@@ -194,10 +204,10 @@ sub do_middle {      # the main work
       rtf_esc($scratch);
       $scratch =~
          s/(
-            [^\cm\cj\n]{65}        # Snare 65 characters from a line
-            [^\cm\cj\n\x20]{0,50}  #  and finish any current word
+            [^\r\n]{65}        # Snare 65 characters from a line
+            [^\r\n ]{0,50}     #  and finish any current word
            )
-           (\x20{1,10})(?![\cm\cj\n]) # capture some spaces not at line-end
+           (\ {1,10})(?![\r\n]) # capture some spaces not at line-end
           /$1$2\n/gx     # and put a NL before those spaces
         if $WRAP;
         # This may wrap at well past the 65th column, but not past the 120th.
@@ -300,7 +310,7 @@ sub do_middle {      # the main work
       if ($tagname eq 'item-number') {
         print $fh $token->attr('number'), ". \n";
       } elsif ($tagname eq 'item-bullet') {
-        print $fh "\\'95 \n";
+        print $fh "\\'", ord("_"), "\n";
         #for funky testing: print $fh '', rtf_esc("\x{4E4B}\x{9053}");
       }
 
@@ -483,19 +493,19 @@ sub rtf_esc {
   my $x; # scratch
   if(!defined wantarray) { # void context: alter in-place!
     for(@_) {
-      s/([F\x00-\x1F\-\\\{\}\x7F-\xFF])/$Escape{$1}/g;  # ESCAPER
+      s/([F${cntrl}\-\\\{\}${not_ascii}])/$Escape{$1}/g;  # ESCAPER
       s/([^\x00-\xFF])/'\\uc1\\u'.((ord($1)<32768)?ord($1):(ord($1)-65536)).'?'/eg;
     }
     return;
   } elsif(wantarray) {  # return an array
     return map {; ($x = $_) =~
-      s/([F\x00-\x1F\-\\\{\}\x7F-\xFF])/$Escape{$1}/g;  # ESCAPER
+      s/([F${cntrl}\-\\\{\}${not_ascii}])/$Escape{$1}/g;  # ESCAPER
       $x =~ s/([^\x00-\xFF])/'\\uc1\\u'.((ord($1)<32768)?ord($1):(ord($1)-65536)).'?'/eg;
       $x;
     } @_;
   } else { # return a single scalar
     ($x = ((@_ == 1) ? $_[0] : join '', @_)
-    ) =~ s/([F\x00-\x1F\-\\\{\}\x7F-\xFF])/$Escape{$1}/g;  # ESCAPER
+    ) =~ s/([F${cntrl}\-\\\{\}${not_ascii}])/$Escape{$1}/g;  # ESCAPER
              # Escape \, {, }, -, control chars, and 7f-ff.
     $x =~ s/([^\x00-\xFF])/'\\uc1\\u'.((ord($1)<32768)?ord($1):(ord($1)-65536)).'?'/eg;
     return $x;
@@ -512,19 +522,19 @@ sub rtf_esc_codely {
   my $x; # scratch
   if(!defined wantarray) { # void context: alter in-place!
     for(@_) {
-      s/([F\x00-\x1F\\\{\}\x7F-\xFF])/$Escape{$1}/g;  # ESCAPER
+      s/([F${cntrl}\\\{\}${not_ascii}])/$Escape{$1}/g;  # ESCAPER
       s/([^\x00-\xFF])/'\\uc1\\u'.((ord($1)<32768)?ord($1):(ord($1)-65536)).'?'/eg;
     }
     return;
   } elsif(wantarray) {  # return an array
     return map {; ($x = $_) =~
-      s/([F\x00-\x1F\\\{\}\x7F-\xFF])/$Escape{$1}/g;  # ESCAPER
+      s/([F${cntrl}\\\{\}${not_ascii}])/$Escape{$1}/g;  # ESCAPER
       $x =~ s/([^\x00-\xFF])/'\\uc1\\u'.((ord($1)<32768)?ord($1):(ord($1)-65536)).'?'/eg;
       $x;
     } @_;
   } else { # return a single scalar
     ($x = ((@_ == 1) ? $_[0] : join '', @_)
-    ) =~ s/([F\x00-\x1F\\\{\}\x7F-\xFF])/$Escape{$1}/g;  # ESCAPER
+    ) =~ s/([F${cntrl}\\\{\}${not_ascii}])/$Escape{$1}/g;  # ESCAPER
              # Escape \, {, }, -, control chars, and 7f-ff.
     $x =~ s/([^\x00-\xFF])/'\\uc1\\u'.((ord($1)<32768)?ord($1):(ord($1)-65536)).'?'/eg;
     return $x;
@@ -532,25 +542,30 @@ sub rtf_esc_codely {
 }
 
 %Escape = (
-  map( (chr($_),chr($_)),       # things not apparently needing escaping
+  (($] lt 5.007_003) # Broken for non-ASCII on early Perls
+   ? (map( (chr($_),chr($_)), # things not apparently needing escaping
        0x20 .. 0x7E ),
-  map( (chr($_),sprintf("\\'%02x", $_)),    # apparently escapeworthy things
-       0x00 .. 0x1F, 0x5c, 0x7b, 0x7d, 0x7f .. 0xFF, 0x46),
+      map( (chr($_),sprintf("\\'%02x", $_)), # apparently escapeworthy things
+       0x00 .. 0x1F, 0x5c, 0x7b, 0x7d, 0x7f .. 0xFF, 0x46))
+   : (map( (chr(utf8::unicode_to_native($_)),chr(utf8::unicode_to_native($_))),
+       0x20 .. 0x7E ),
+      map( (chr($_),sprintf("\\'%02x", utf8::unicode_to_native($_))),
+       0x00 .. 0x1F, 0x5c, 0x7b, 0x7d, 0x7f .. 0xFF, 0x46))),
 
   # We get to escape out 'F' so that we can send RTF files thru the mail
   # without the slightest worry that paragraphs beginning with "From"
   # will get munged.
 
   # And some refinements:
-  "\cm"  => "\n",
+  "\r"  => "\n",
   "\cj"  => "\n",
   "\n"   => "\n\\line ",
 
   "\t"   => "\\tab ",     # Tabs (altho theoretically raw \t's are okay)
   "\f"   => "\n\\page\n", # Formfeed
   "-"    => "\\_",        # Turn plaintext '-' into a non-breaking hyphen
-  "\xA0" => "\\~",        # Latin-1 non-breaking space
-  "\xAD" => "\\-",        # Latin-1 soft (optional) hyphen
+  $Pod::Simple::nbsp => "\\~",        # Latin-1 non-breaking space
+  $Pod::Simple::shy => "\\-",        # Latin-1 soft (optional) hyphen
 
   # CRAZY HACKS:
   "\n" => "\\line\n",

@@ -67,15 +67,26 @@ $p =~ s/, +/,\n/g;
 $p =~ s/^/#  /mg;
 print $p;
 
+my $ascii_order;
+if(     -e ($ascii_order = source_path('ascii_order.pl'))) {
+  #
+} elsif(-e ($ascii_order = File::Spec->catdir($cwd, 't', 'ascii_order.pl'))) {
+  #
+} else {
+  die "Can't find ascii_order.pl";
+}
+
+require $ascii_order;
+
 {
-my $names = join "|", sort values %$where2name;
+my $names = join "|", sort ascii_order values %$where2name;
 skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
      $names, 
      "Blorm|Suzzle|Zonk::Pronk|hinkhonk::Glunk|hinkhonk::Vliff|perlflif|perlthng|perlzuk|squaa|squaa::Glunk|squaa::Vliff|squaa::Wowo|zikzik";
 }
 
 {
-my $names = join "|", sort keys %$name2where;
+my $names = join "|", sort ascii_order keys %$name2where;
 skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
      $names, 
      "Blorm|Suzzle|Zonk::Pronk|hinkhonk::Glunk|hinkhonk::Vliff|perlflif|perlthng|perlzuk|squaa|squaa::Glunk|squaa::Vliff|squaa::Wowo|zikzik";
@@ -99,14 +110,14 @@ $p =~ s/^/#  /mg;
 print $p;
 
 {
-my $names = join "|", sort values %$where2name;
+my $names = join "|", sort ascii_order values %$where2name;
 skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
      $names, 
      "Blorm|Suzzle|squaa|zikzik";
 }
 
 {
-my $names = join "|", sort keys %$name2where;
+my $names = join "|", sort ascii_order keys %$name2where;
 skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
      $names, 
      "Blorm|Suzzle|squaa|zikzik";

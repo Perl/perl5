@@ -5,7 +5,7 @@ use Pod::Simple::PullParserToken ();
 use strict;
 use vars qw(@ISA $VERSION);
 @ISA = ('Pod::Simple::PullParserToken');
-$VERSION = '3.29';
+$VERSION = '3.30';
 
 sub new {  # Class->new(text);
   my $class = shift;
@@ -70,6 +70,12 @@ Or, if you want to alter the value, you can even do things like this:
     }
 
     ...or however you want to alter the value...
+    (Note that starting with Perl v5.8, you can use, e.g.,
+
+        my $nbsp = chr utf8::unicode_to_native(0xA0);
+        s/$nbsp/ /g;
+
+    to handle the above regardless if it's an ASCII world or not)
   }
 
 =back

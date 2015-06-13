@@ -39,9 +39,9 @@ ok $found;
 
 # print "# Found $found items in $t seconds!\n# See...\n";
 
-my $p = pretty( $where2name, $name2where )."\n";
-$p =~ s/, +/,\n/g;
-$p =~ s/^/#  /mg;
+# my $p = pretty( $where2name, $name2where )."\n";
+# $p =~ s/, +/,\n/g;
+# $p =~ s/^/#  /mg;
 # print $p;
 
 # print "# OK, making sure strict and strict.pm were in there...\n";
@@ -64,8 +64,7 @@ SKIP: {
 # print "# Test again on a module we know is present, in case the
 # strict.pm tests were skipped...\n";
 
-# Grab the first item in $name2where, since it doesn't matter which we
-# use.
+# Search for all files in $name2where.
 while (my ($testmod, $testpath) = each %{ $name2where }) {
   unless ( $testmod ) {
     fail;  # no 'thatpath/<name>.pm' means can't test find()
@@ -74,13 +73,10 @@ while (my ($testmod, $testpath) = each %{ $name2where }) {
   my @x = ($x->find($testmod)||'(nil)', $testpath);
   # print "# Comparing \"$x[0]\" to \"$x[1]\"\n";
   for(@x) { s{[/\\]}{/}g; }
-  # If it finds a .pod, it's probably correct, as that's where the docs are.
-  # Change it to .pm so that it matches.
-  $x[0] =~ s{[.]pod$}{.pm} if $x[1] =~ m{[.]pm$};
   # print "#        => \"$x[0]\" to \"$x[1]\"\n";
   is
-       lc $x[0],
-       lc $x[1],
+       $x[0],
+       $x[1],
        " find('$testmod') should match survey's name2where{$testmod}"
            ;
 }

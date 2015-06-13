@@ -1875,6 +1875,7 @@ cpan/Pod-Simple/t/20_skip.t				Pod::Simple test file
 cpan/Pod-Simple/t/accept01.t				Pod::Simple test file
 cpan/Pod-Simple/t/accept05.t				Pod::Simple test file
 cpan/Pod-Simple/t/ac_d.t				Pod::Simple test file
+cpan/Pod-Simple/t/ascii_order.pl
 cpan/Pod-Simple/t/basic.t				Pod::Simple test file
 cpan/Pod-Simple/t/begin.t				Pod::Simple test file
 cpan/Pod-Simple/t/cbacks.t				Pod::Simple test file

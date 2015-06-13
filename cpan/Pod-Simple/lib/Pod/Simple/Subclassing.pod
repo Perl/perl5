@@ -46,7 +46,7 @@ anyone has a formatter for that format -- maybe someone cobbled one
 together but just hasn't released it.
 
 B<The first step> in writing a Pod processor is to read L<perlpodspec>,
-which contains notes information on writing a Pod parser (which has been
+which contains information on writing a Pod parser (which has been
 largely taken care of by Pod::Simple), but also a lot of requirements
 and recommendations for writing a formatter.
 
@@ -78,7 +78,7 @@ like L<HTML::TokeParser>'s interface.
 
 L<Pod::Simple::SimpleTree> provides a simple tree interface, rather like
 L<XML::Parser>'s "Tree" interface. Users familiar with XML handling will
-be comfortable with this interface. Users interested in outputting XML, 
+be comfortable with this interface. Users interested in outputting XML,
 should look into the modules that produce an XML representation of the
 Pod stream, notably L<Pod::Simple::XMLOutStream>; you can feed the output
 of such a class to whatever XML parsing system you are most at home with.
@@ -87,8 +87,8 @@ of such a class to whatever XML parsing system you are most at home with.
 
 B<The last step> is to write your code based on how the events (or tokens,
 or tree-nodes, or the XML, or however you're parsing) will map to
-constructs in the output format. Also sure to consider how to escape
-text nodes containing arbitrary text, and also what to do with text
+constructs in the output format. Also be sure to consider how to escape
+text nodes containing arbitrary text, and what to do with text
 nodes that represent preformatted text (from verbatim sections).
 
 
@@ -272,7 +272,7 @@ produces this event structure:
 	crontab(5)
   </L>
 
-In the rare cases where a man page link has a specified, that text appears
+In the rare cases where a man page link has a section specified, that text appears
 in a I<section> attribute. For example, this Pod source:
 
   L<crontab(5)/"ENVIRONMENT">
@@ -461,7 +461,7 @@ will produce this event structure:
 	 et al.
   </head1>
 
-"=head2" thru "=head4" directives are the same, except for the element
+"=head2" through "=head4" directives are the same, except for the element
 names in the event structure.
 
 =item events with an element_name of encoding
@@ -922,8 +922,8 @@ interesting, but this is included for completeness.
 
 =item C<< $parser->whine( I<linenumber>, I<complaint string> ) >>
 
-This notes a problem in the Pod, which will be reported to in the "Pod
-Errors" section of the document and/or send to STDERR, depending on the
+This notes a problem in the Pod, which will be reported in the "Pod
+Errors" section of the document and/or sent to STDERR, depending on the
 values of the attributes C<no_whining>, C<no_errata_section>, and
 C<complain_stderr>.
 
@@ -1021,7 +1021,7 @@ indented text, showing each event on its own line
 L<Pod::Simple::LinkSection> -- class for objects representing the values
 of the TODO and TODO attributes of LE<lt>...E<gt> elements
 
-L<Pod::Escapes> -- the module the Pod::Simple uses for evaluating
+L<Pod::Escapes> -- the module that Pod::Simple uses for evaluating
 EE<lt>...E<gt> content
 
 L<Pod::Simple::Text> -- a simple plaintext formatter for Pod
