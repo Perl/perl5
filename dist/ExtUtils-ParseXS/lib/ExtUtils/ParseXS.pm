@@ -1577,6 +1577,25 @@ sub QuoteArgs {
   return join (' ', ($cmd, @args));
 }
 
+# code copied from CPAN::HandleConfig::safe_quote
+#  - that has doc saying leave if start/finish with same quote, but no code
+# given text, will conditionally quote it to protect from shell
+{
+  my ($quote, $use_quote) = $^O eq 'MSWin32'
+      ? (q{"}, q{"})
+      : (q{"'}, q{'});
+  sub _safe_quote {
+      my ($self, $command) = @_;
+      # Set up quote/default quote
+      if (defined($command)
+          and $command =~ /\s/
+          and $command !~ /[$quote]/) {
+          return qq{$use_quote$command$use_quote}
+      }
+      return $command;
+  }
+}
+
 sub INCLUDE_COMMAND_handler {
   my $self = shift;
   $_ = shift;
@@ -1598,7 +1617,8 @@ sub INCLUDE_COMMAND_handler {
 
   # If $^X is used in INCLUDE_COMMAND, we know it's supposed to be
   # the same perl interpreter as we're currently running
-  s/^\s*\$\^X/$^X/;
+  my $X = $self->_safe_quote($^X); # quotes if has spaces
+  s/^\s*\$\^X/$X/;
 
   # open the new file
   open ($self->{FH}, "-|", $_)
