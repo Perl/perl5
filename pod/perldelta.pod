@@ -169,6 +169,13 @@ debugger finishes.  [perl #71678]
 
 =item *
 
+L<UNIVERSAL> has been upgraded from version 1.12 to 1.13.
+
+Don't import from L<UNIVERSAL> in its documentation, it no longer
+exports anything.  [perl #125410]
+
+=item *
+
 The Scalar-List-Utils distribution has been upgraded from version 1.41 to 1.42.
 
 =back
