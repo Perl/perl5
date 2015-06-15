@@ -8142,14 +8142,13 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		   : newUNOP(OP_LEAVESUB, 0, scalarseq(block));
 	start = LINKLIST(block);
 	block->op_next = 0;
+        if (ps && !*ps && !attrs && !CvLVALUE(compcv))
+            const_sv = S_op_const_sv(aTHX_ start, compcv, FALSE);
+        else
+            const_sv = NULL;
     }
-
-    if (!block || !ps || *ps || attrs
-	|| CvLVALUE(compcv)
-	)
-	const_sv = NULL;
     else
-	const_sv = S_op_const_sv(aTHX_ start, compcv, FALSE);
+        const_sv = NULL;
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -8547,15 +8546,14 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		   : newUNOP(OP_LEAVESUB, 0, scalarseq(block));
 	start = LINKLIST(block);
 	block->op_next = 0;
+        if (ps && !*ps && !attrs && !CvLVALUE(PL_compcv))
+            const_sv =
+                S_op_const_sv(aTHX_ start, PL_compcv, CvCLONE(PL_compcv));
+        else
+            const_sv = NULL;
     }
-
-    if (!block || !ps || *ps || attrs
-	|| CvLVALUE(PL_compcv)
-	)
-	const_sv = NULL;
     else
-	const_sv =
-	    S_op_const_sv(aTHX_ start, PL_compcv, cBOOL(CvCLONE(PL_compcv)));
+        const_sv = NULL;
 
     if (SvPOK(gv) || (SvROK(gv) && SvTYPE(SvRV(gv)) != SVt_PVCV)) {
 	assert (block);
