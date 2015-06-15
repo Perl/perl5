@@ -1,6 +1,6 @@
 package UNIVERSAL;
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 
 # UNIVERSAL should not contain any extra subs/methods beyond those
 # that it exists to define. The existence of import() below is a historical
