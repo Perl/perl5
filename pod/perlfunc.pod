@@ -6824,7 +6824,7 @@ Examples:
     # same thing, but much more efficiently;
     # we'll build auxiliary indices instead
     # for speed
-    my @nums = @caps = ();
+    my (@nums, @caps);
     for (@old) {
         push @nums, ( /=(\d+)/ ? $1 : undef );
         push @caps, fc($_);
