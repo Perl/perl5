@@ -1,5 +1,5 @@
 #!./perl -w
-
+exit; # We don't want to install man pages. Configure doesn't offer an option for this.
 BEGIN {
     @INC = qw(lib);
 
