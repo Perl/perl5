@@ -6658,16 +6658,6 @@ one.  This doesn't make sense.  Perl will continue, assuming a Unicode
 happens to be ISO-8859-1 (Latin1) where this message is spurious and can
 be ignored.
 
-=item Use of chdir('') or chdir(undef) as chdir() deprecated
-
-(D deprecated) chdir() with no arguments is documented to change to
-$ENV{HOME} or $ENV{LOGDIR}.  chdir(undef) and chdir('') share this
-behavior, but that has been deprecated.  In future versions they
-will simply fail.
-
-Be careful to check that what you pass to chdir() is defined and not
-blank, else you might find yourself in your home directory.
-
 =item Use of /c modifier is meaningless in s///
 
 (W regexp) You used the /c modifier in a substitution.  The /c

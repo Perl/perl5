@@ -10,10 +10,11 @@ BEGIN {
     # possibilities into @INC.
     unshift @INC, qw(t . lib ../lib);
     require "./test.pl";
-    plan(tests => 48);
+    plan(tests => 42);
 }
 
 use Config;
+use Errno qw(ENOENT);
 
 my $IsVMS   = $^O eq 'VMS';
 
@@ -150,29 +151,10 @@ sub check_env {
 
         my $warning = '';
         local $SIG{__WARN__} = sub { $warning .= join '', @_ };
-
-
-        # Check the deprecated chdir(undef) feature.
-#line 64
-        ok( chdir(undef),           "chdir(undef) w/ only \$ENV{$key} set" );
-        is( abs_path, $ENV{$key},   '  abs_path() agrees' );
-        is( $warning,  <<WARNING,   '  got uninit & deprecation warning' );
-Use of uninitialized value in chdir at $0 line 64.
-Use of chdir('') or chdir(undef) as chdir() is deprecated at $0 line 64.
-WARNING
-
-        chdir($Cwd);
-
-        # Ditto chdir('').
-        $warning = '';
-#line 76
-        ok( chdir(''),              "chdir('') w/ only \$ENV{$key} set" );
-        is( abs_path, $ENV{$key},   '  abs_path() agrees' );
-        is( $warning,  <<WARNING,   '  got deprecation warning' );
-Use of chdir('') or chdir(undef) as chdir() is deprecated at $0 line 76.
-WARNING
-
-        chdir($Cwd);
+        $! = 0;
+        ok(!chdir(''), "chdir('') no longer implied chdir()");
+        is($!+0, ENOENT, 'check $! set appropriately');
+        is($warning, '', 'should no longer warn about deprecation');
     }
 }
 
