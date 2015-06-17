@@ -4348,10 +4348,11 @@ S_isSB(pTHX_ SB_enum before,
         return FALSE;
     }
 
-    /* SB7.  Upper ATerm  ×  Upper */
+    /* SB7.  (Upper | Lower) ATerm  ×  Upper */
     if (before == SB_ATerm && after == SB_Upper) {
         temp_pos = lpos;
-        if (SB_Upper == backup_one_SB(strbeg, &temp_pos, utf8_target)) {
+        backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
+        if (backup == SB_Upper || backup == SB_Lower) {
             return FALSE;
         }
     }
