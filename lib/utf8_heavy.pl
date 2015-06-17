@@ -20,7 +20,7 @@ sub _loose_name ($) {
     # out blanks, underscores and dashes.  The complication stems from the
     # grandfathered-in 'L_', which retains a single trailing underscore.
 
-    my $loose = $_[0] =~ s/[-\s_]//rg;
+    (my $loose = $_[0]) =~ tr/-_ \t//d;
 
     return $loose if $loose !~ / ^ (?: is | to )? l $/x;
     return 'l_' if $_[0] =~ / l .* _ /x;    # If original had a trailing '_'
@@ -226,7 +226,7 @@ sub _loose_name ($) {
 
                     # If the rhs looks like it is a number...
                     print STDERR __LINE__, ": table=$table\n" if DEBUG;
-                    if ($table =~ qr{ ^ [ \s 0-9 _  + / . -]+ $ }x) {
+                    if ($table =~ m{ ^ [ \s 0-9 _  + / . -]+ $ }x) {
                         print STDERR __LINE__, ": table=$table\n" if DEBUG;
 
                         # Don't allow leading nor trailing slashes 
@@ -236,7 +236,7 @@ sub _loose_name ($) {
                         }
 
                         # Split on slash, in case it is a rational, like \p{1/5}
-                        my @parts = split qr{ \s* / \s* }x, $table, -1;
+                        my @parts = split m{ \s* / \s* }x, $table, -1;
                         print __LINE__, ": $type\n" if @parts > 2 && DEBUG;
 
                         # Can have maximum of one slash
