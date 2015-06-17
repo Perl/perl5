@@ -8,7 +8,7 @@ BEGIN {
 use warnings;
 use strict;
 use vars qw($foo $bar $baz $ballast);
-use Test::More tests => 213;
+use Test::More skip_all => "Test suite has known problems: RT #71512, #72668 among others.";
 
 use Benchmark qw(:all);
 
