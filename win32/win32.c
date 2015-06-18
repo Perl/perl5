@@ -3366,7 +3366,7 @@ win32_rmdir(const char *dir)
 DllExport int
 win32_chdir(const char *dir)
 {
-    if (!dir) {
+    if (!dir || !*dir) {
 	errno = ENOENT;
 	return -1;
     }
