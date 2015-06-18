@@ -156,6 +156,8 @@ use File::Glob qw(:case);
                 t/system.t
                 )
         ],
+        # CPAN RT 105344
+        'CUSTOMIZED'   => [ qw[ t/mkdir.t ] ],
     },
 
     'AutoLoader' => {

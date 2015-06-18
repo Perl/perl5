@@ -3,8 +3,8 @@ use strict;
 use Test::More;
 use FindBin qw($Bin);
 use constant TMPDIR => "$Bin/mkdir_test_delete_me";
-use constant ERROR_REGEXP => qr{Can't mkdir\('${\(TMPDIR)}', 0777\):};
-use constant SINGLE_DIGIT_ERROR_REGEXP => qr{Can't mkdir\('${\(TMPDIR)}', 0010\):};
+use constant ERROR_REGEXP => qr{Can't mkdir\('\Q${\(TMPDIR)}\E', 0777\):};
+use constant SINGLE_DIGIT_ERROR_REGEXP => qr{Can't mkdir\('\Q${\(TMPDIR)}\E', 0010\):};
 
 # Delete our directory if it's there
 rmdir TMPDIR;
