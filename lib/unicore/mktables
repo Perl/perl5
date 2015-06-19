@@ -4228,7 +4228,7 @@ sub trace { return main::trace(@_); }
             # In other words,
             #   r[$i-1]->end < $start <= r[$i]->end
             # And:
-            #   r[$i-1]->end < $start <= $end <= r[$j]->end
+            #   r[$i-1]->end < $start <= $end <= r[$j+1]->start
             #
             # Also:
             #   $clean_insert is a boolean which is set true if and only if
@@ -4237,24 +4237,18 @@ sub trace { return main::trace(@_); }
 
             # We now have enough information to decide if this call is a no-op
             # or not.  It is a no-op if this is an insertion of already
-            # existing data.
+            # existing data.  To be so, it must be contained entirely in one
+            # range.
 
             if (main::DEBUG && $to_trace && $clean_insert
-                                         && $i == $j
-                                         && $start >= $r->[$i]->start)
+                                         && $start >= $r->[$i]->start
+                                         && $end   <= $r->[$i]->end)
             {
                     trace "no-op";
             }
             return if $clean_insert
-                      && $i == $j # more than one affected range => not no-op
-
-                      # Here, r[$i-1]->end < $start <= $end <= r[$i]->end
-                      # Further, $start and/or $end is >= r[$i]->start
-                      # The test below hence guarantees that
-                      #     r[$i]->start < $start <= $end <= r[$i]->end
-                      # This means the input range is contained entirely in
-                      # the one at $i, so is a no-op
-                      && $start >= $r->[$i]->start;
+                      && $start >= $r->[$i]->start
+                      && $end   <= $r->[$i]->end;
         }
 
         # Here, we know that some action will have to be taken.  We have
