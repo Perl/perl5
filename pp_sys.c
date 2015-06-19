@@ -1437,8 +1437,9 @@ PP(pp_leavewrite)
     I32 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
+    bool is_return = cBOOL(PL_op->op_type == OP_RETURN);
 
-    if (!io || !(ofp = IoOFP(io)))
+    if (is_return || !io || !(ofp = IoOFP(io)))
         goto forget_top;
 
     DEBUG_f(PerlIO_printf(Perl_debug_log, "left=%ld, todo=%ld\n",
@@ -1516,7 +1517,13 @@ PP(pp_leavewrite)
     SP = newsp; /* ignore retval of formline */
     LEAVE;
 
-    if (!io || !(fp = IoOFP(io))) {
+    if (is_return)
+        /* XXX the semantics of doing 'return' in a format aren't documented.
+         * Currently we ignore any args to 'return' and just return
+         * a single undef in both scalar and list contexts
+         */
+	PUSHs(&PL_sv_undef);
+    else if (!io || !(fp = IoOFP(io))) {
 	if (io && IoIFP(io))
 	    report_wrongway_fh(gv, '<');
 	else

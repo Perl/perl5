@@ -1092,6 +1092,7 @@ L<perlcall>.
 #define PERLSI_WARNHOOK		7
 #define PERLSI_DIEHOOK		8
 #define PERLSI_REQUIRE		9
+#define PERLSI_MULTICALL       10
 
 struct stackinfo {
     AV *		si_stack;	/* stack for current runlevel */
@@ -1215,7 +1216,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
  	multicall_oldcatch = CATCH_GET;					\
 	SAVETMPS; SAVEVPTR(PL_op);					\
 	CATCH_SET(TRUE);						\
-	PUSHSTACKi(PERLSI_SORT);					\
+	PUSHSTACKi(PERLSI_MULTICALL);					\
 	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), PL_stack_sp);	\
 	PUSHSUB(cx);							\
         if (!(flags & CXp_SUB_RE_FAKE))                                 \

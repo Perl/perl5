@@ -2947,8 +2947,12 @@ PP(pp_leavesub)
     PERL_CONTEXT *cx;
     SV *sv;
 
-    if (CxMULTICALL(&cxstack[cxstack_ix]))
+    if (CxMULTICALL(&cxstack[cxstack_ix])) {
+        /* entry zero of a stack is always PL_sv_undef, which
+         * simplifies converting a '()' return into undef in scalar context */
+        assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
 	return 0;
+    }
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */

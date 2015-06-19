@@ -5438,11 +5438,6 @@ overhauled.
 (F) An ancient error message that almost nobody ever runs into anymore.
 But before sort was a keyword, people sometimes used it as a filehandle.
 
-=item Sort subroutine didn't return single value
-
-(F) A sort comparison subroutine written in XS must return exactly one
-item.  See L<perlfunc/sort>.
-
 =item Source filters apply only to byte streams
 
 (F) You tried to activate a source filter (usually by loading a

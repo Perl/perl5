@@ -11,7 +11,7 @@ use strict;
 
 BEGIN {
     require '../../t/test.pl';
-    plan(437);
+    plan(455);
     use_ok('XS::APItest')
 };
 
@@ -213,35 +213,45 @@ is($@, "its_dead_jim\n", "eval { eval_pv('d()', 1) } - \$@");
 
 sub f99 { 99 };
 
+my @bodies = (
+    # [ code, is_fn_name, expect_success, has_inner_die, expected_err ]
 
-for my $fn_type (0..2) { #   0:eval_pv   1:eval_sv   2:call_sv
+    # ok
+    [ 'f99',                         1, 1, 0, qr/^$/,           ],
+    # compile-time err
+    [ '$x=',                         0, 0, 0, qr/syntax error/, ],
+    # compile-time exception
+    [ 'BEGIN { die "die in BEGIN"}', 0, 0, 1, qr/die in BEGIN/, ],
+    # run-time exception
+    [ 'd',                           1, 0, 0, qr/its_dead_jim/, ],
+    # success with caught exception
+    [ 'eval { die "blah" }; 99',     0, 1, 1, qr/^$/,           ],
+);
+
+
+for my $fn_type (qw(eval_pv eval_sv call_sv)) {
 
     my $warn_msg;
     local $SIG{__WARN__} = sub { $warn_msg .= $_[0] };
 
-    for my $code_type (0..3) {
+    for my $body (@bodies) {
+        my ($code, $is_fn_name, $expect_success,
+                $has_inner_die, $expected_err_qr)  = @$body;
 
 	# call_sv can only handle function names, not code snippets
-	next if $fn_type == 2 and ($code_type == 1 or $code_type == 2);
-
-	my $code = (
-	    'f99',			    # ok
-	    '$x=',			    # compile-time err
-	    'BEGIN { die "die in BEGIN"}',  # compile-time exception
-	    'd', 			    # run-time exception
-	)[$code_type];
+	next if $fn_type eq 'call_sv' and !$is_fn_name;
 
 	for my $keep (0, G_KEEPERR) {
 	    my $keep_desc = $keep ? 'G_KEEPERR' : '0';
 
 	    my $desc;
-	    my $expect = ($code_type == 0) ? 1 : 0;
+	    my $expect = $expect_success;
 
 	    undef $warn_msg;
 	    $@ = 'pre-err';
 
 	    my @ret;
-	    if ($fn_type == 0) { # eval_pv
+	    if ($fn_type eq 'eval_pv') {
 		# eval_pv returns its result rather than a 'succeed' boolean
 		$expect = $expect ? '99' : undef;
 
@@ -258,21 +268,21 @@ for my $fn_type (0..2) { #   0:eval_pv   1:eval_sv   2:call_sv
 		    @ret = eval_pv($code, 0);
 		}
 	    }
-	    elsif ($fn_type == 1) { # eval_sv
+	    elsif ($fn_type eq 'eval_sv') {
 		$desc = "eval_sv('$code', G_ARRAY|$keep_desc)";
 		@ret = eval_sv($code, G_ARRAY|$keep);
 	    }
-	    elsif ($fn_type == 2) { # call_sv
+	    elsif ($fn_type eq 'call_sv') {
 		$desc = "call_sv('$code', G_EVAL|G_ARRAY|$keep_desc)";
 		@ret = call_sv($code, G_EVAL|G_ARRAY|$keep);
 	    }
-	    is(scalar @ret, ($code_type == 0 && $fn_type != 0) ? 2 : 1,
+	    is(scalar @ret, ($expect_success && $fn_type ne 'eval_pv') ? 2 : 1,
 			    "$desc - number of returned args");
 	    is($ret[-1], $expect, "$desc - return value");
 
-	    if ($keep && $fn_type != 0) {
+	    if ($keep && $fn_type  ne 'eval_pv') {
 		# G_KEEPERR doesn't propagate into inner evals, requires etc
-		unless ($keep && $code_type == 2) {
+		unless ($keep && $has_inner_die) {
 		    is($@, 'pre-err', "$desc - \$@ unmodified");
 		}
 		$@ = $warn_msg;
@@ -281,14 +291,7 @@ for my $fn_type (0..2) { #   0:eval_pv   1:eval_sv   2:call_sv
 		is($warn_msg, undef, "$desc - __WARN__ not called");
 		unlike($@, qr/pre-err/, "$desc - \$@ modified");
 	    }
-	    like($@,
-		(
-		    qr/^$/,
-		    qr/syntax error/,
-		    qr/die in BEGIN/,
-		    qr/its_dead_jim/,
-		)[$code_type],
-		"$desc - the correct error message");
+	    like($@, $expected_err_qr, "$desc - the correct error message");
 	}
     }
 }

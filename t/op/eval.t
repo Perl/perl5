@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 132);
+plan(tests => 133);
 
 eval 'pass();';
 
@@ -645,3 +645,11 @@ sub _117941 { package _117941; eval '$a' }
 delete $::{"_117941::"};
 _117941();
 pass("eval in freed package does not crash");
+
+# eval is supposed normally to clear $@ on success
+
+{
+    $@ = 1;
+    eval q{$@ = 2};
+    ok(!$@, 'eval clearing $@');
+}

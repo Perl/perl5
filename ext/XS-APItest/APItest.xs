@@ -3353,6 +3353,71 @@ CODE:
     XSRETURN_UNDEF;
 }
 
+=pod
+
+multicall_return(): call the passed sub once in the specificed context
+and return whatever it returns
+
+=cut
+
+void
+multicall_return(block, context)
+    SV *block
+    I32 context
+PROTOTYPE: &$
+CODE:
+{
+    dSP;
+    dMULTICALL;
+    GV *gv;
+    HV *stash;
+    I32 gimme = context;
+    CV *cv;
+    AV *av;
+    SV **p;
+    Size_t i, size;
+
+    cv = sv_2cv(block, &stash, &gv, 0);
+    if (cv == Nullcv) {
+       croak("multicall_return not a subroutine reference");
+    }
+    PUSH_MULTICALL(cv);
+
+    MULTICALL;
+
+    /* copy returned values into an array so they're not freed during
+     * POP_MULTICALL */
+
+    av = newAV();
+    SPAGAIN;
+
+    switch (context) {
+    case G_VOID:
+        break;
+
+    case G_SCALAR:
+        av_push(av, SvREFCNT_inc(TOPs));
+        break;
+
+    case G_ARRAY:
+        for (p = PL_stack_base + 1; p <= SP; p++)
+            av_push(av, SvREFCNT_inc(*p));
+        break;
+    }
+
+    POP_MULTICALL;
+
+    PERL_UNUSED_VAR(newsp);
+
+    size = AvFILLp(av) + 1;
+    EXTEND(SP, size);
+    for (i = 0; i < size; i++)
+        ST(i) = *av_fetch(av, i, FALSE);
+    sv_2mortal((SV*)av);
+    XSRETURN(size);
+}
+
+
 #ifdef USE_ITHREADS
 
 void

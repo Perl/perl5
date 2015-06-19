@@ -16200,10 +16200,10 @@ Print appropriate "Use of uninitialized variable" warning.
 void
 Perl_report_uninit(pTHX_ const SV *uninit_sv)
 {
-    if (PL_op) {
-	SV* varname = NULL;
-	const char *desc;
+    const char *desc = NULL;
+    SV* varname = NULL;
 
+    if (PL_op) {
 	desc = PL_op->op_type == OP_STRINGIFY && PL_op->op_folded
 		? "join or string"
 		: OP_DESC(PL_op);
@@ -16212,21 +16212,26 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
 	    if (varname)
 		sv_insert(varname, 0, 0, " ", 1);
 	}
-        /* PL_warn_uninit_sv is constant */
-        GCC_DIAG_IGNORE(-Wformat-nonliteral);
-	/* diag_listed_as: Use of uninitialized value%s */
-	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit_sv,
-		SVfARG(varname ? varname : &PL_sv_no),
-		" in ", desc);
-        GCC_DIAG_RESTORE;
     }
-    else {
-        /* PL_warn_uninit is constant */
-        GCC_DIAG_IGNORE(-Wformat-nonliteral);
-	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
-		    "", "", "");
-        GCC_DIAG_RESTORE;
+    else if (PL_curstackinfo->si_type == PERLSI_SORT
+             &&  CxMULTICALL(&cxstack[cxstack_ix]))
+    {
+        /* we've reached the end of a sort block or sub,
+         * and the uninit value is probably what that code returned */
+        desc = "sort";
     }
+
+    /* PL_warn_uninit_sv is constant */
+    GCC_DIAG_IGNORE(-Wformat-nonliteral);
+    if (desc)
+        /* diag_listed_as: Use of uninitialized value%s */
+        Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit_sv,
+                SVfARG(varname ? varname : &PL_sv_no),
+                " in ", desc);
+    else
+        Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
+                "", "", "");
+    GCC_DIAG_RESTORE;
 }
 
 /*
