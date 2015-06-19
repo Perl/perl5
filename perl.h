@@ -5551,13 +5551,13 @@ EXTCONST bool PL_valid_types_NV_set[];
  * falsely misoptimize that to zero (x-x is always zero, right?)
  */
 
+/* The quadmath literals are anon structs which -Wc++-compat doesn't like. */
+GCC_DIAG_IGNORE(-Wc++-compat);
+
 #  ifdef USE_QUADMATH
 /* Cannot use HUGE_VALQ for PL_inf because not a compile-time
- * constant.  Also, the quadmath literals are anon structs which
- * -Wc++-compat doesn't like. */
-GCC_DIAG_IGNORE(-Wc++-compat);
+ * constant. */
 INFNAN_NV_U8_DECL PL_inf = { 1.0Q/0.0Q };
-GCC_DIAG_RESTORE;
 #  elif NVSIZE == LONG_DOUBLESIZE && defined(LONGDBLINFBYTES)
 INFNAN_U8_NV_DECL PL_inf = { { LONGDBLINFBYTES } };
 #  elif NVSIZE == DOUBLESIZE && defined(DOUBLEINFBYTES)
@@ -5592,11 +5592,8 @@ INFNAN_NV_U8_DECL PL_inf = { 1.0/0.0 }; /* keep last */
 
 #  ifdef USE_QUADMATH
 /* Cannot use nanq("0") for PL_nan because not a compile-time
- * constant.  Also, the quadmath literals are anon structs which
- * -Wc++-compat doesn't like. */
-GCC_DIAG_IGNORE(-Wc++-compat);
+ * constant. */
 INFNAN_NV_U8_DECL PL_nan = { 0.0Q/0.0Q };
-GCC_DIAG_RESTORE;
 #  elif NVSIZE == LONG_DOUBLESIZE && defined(LONGDBLNANBYTES)
 INFNAN_U8_NV_DECL PL_nan = { { LONGDBLNANBYTES } };
 #  elif NVSIZE == DOUBLESIZE && defined(DOUBLENANBYTES)
@@ -5624,6 +5621,8 @@ INFNAN_NV_U8_DECL PL_nan = { 0.0/0.0 }; /* keep last */
 #      endif
 #    endif
 #  endif
+
+GCC_DIAG_RESTORE;
 
 #else
 
