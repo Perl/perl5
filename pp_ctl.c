@@ -1349,21 +1349,16 @@ I32
 Perl_block_gimme(pTHX)
 {
     const I32 cxix = dopoptosub(cxstack_ix);
+    U8 gimme;
     if (cxix < 0)
 	return G_VOID;
 
-    switch (cxstack[cxix].blk_gimme) {
-    case G_VOID:
-	return G_VOID;
-    case G_SCALAR:
-	return G_SCALAR;
-    case G_ARRAY:
-	return G_ARRAY;
-    default:
-	Perl_croak(aTHX_ "panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
-    }
-    NOT_REACHED; /* NOTREACHED */
+    gimme = (cxstack[cxix].blk_gimme & G_WANT);
+    if (!gimme)
+	Perl_croak(aTHX_ "panic: bad gimme: %d\n", gimme);
+    return gimme;
 }
+
 
 I32
 Perl_is_lvalue_sub(pTHX)
