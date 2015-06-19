@@ -3526,7 +3526,10 @@ typedef pthread_key_t	perl_key;
    builtin in C++11.
 */
 /* IBM XL C V11 does not support _Static_assert, no matter what <assert.h> says */
-#  define STATIC_ASSERT_GLOBAL(COND) static_assert(COND, #COND)
+#  define STATIC_ASSERT_GLOBAL(COND) \
+    GCC_DIAG_IGNORE(-Wpedantic); \
+    static_assert(COND, #COND); \
+    GCC_DIAG_RESTORE;
 #else
 /* We use a bit-field instead of an array because gcc accepts
    'typedef char x[n]' where n is not a compile-time constant.
@@ -5552,7 +5555,7 @@ EXTCONST bool PL_valid_types_NV_set[];
  */
 
 /* The quadmath literals are anon structs which -Wc++-compat doesn't like. */
-GCC_DIAG_IGNORE(-Wc++-compat);
+GCC_DIAG_IGNORE(-Wc++-compat)
 
 #  ifdef USE_QUADMATH
 /* Cannot use HUGE_VALQ for PL_inf because not a compile-time
@@ -5622,7 +5625,7 @@ INFNAN_NV_U8_DECL PL_nan = { 0.0/0.0 }; /* keep last */
 #    endif
 #  endif
 
-GCC_DIAG_RESTORE;
+GCC_DIAG_RESTORE
 
 #else
 

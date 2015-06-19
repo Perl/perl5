@@ -3279,7 +3279,7 @@ Perl_sighandler(int sig)
 	if (hek)
 	    Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL),
 				"SIG%s handler \"%"HEKf"\" not defined.\n",
-			         PL_sig_name[sig], hek);
+			         PL_sig_name[sig], HEKfARG(hek));
 	     /* diag_listed_as: SIG%s handler "%s" not defined */
 	else Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL),
 			   "SIG%s handler \"__ANON__\" not defined.\n",

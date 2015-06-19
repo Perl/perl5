@@ -2317,7 +2317,7 @@ S_append_gv_name(pTHX_ GV *gv, SV *out)
     }
     sv = newSV(0);
     gv_fullname4(sv, gv, NULL, FALSE);
-    Perl_sv_catpvf(aTHX_ out, "%c%-p", '$', sv);
+    Perl_sv_catpvf(aTHX_ out, "$%"SVf, SVfARG(sv));
     SvREFCNT_dec_NN(sv);
 }
 
@@ -2524,8 +2524,8 @@ Perl_debop(pTHX_ const OP *o)
         break;
 
     case OP_MULTIDEREF:
-        PerlIO_printf(Perl_debug_log, "(%-p)",
-            multideref_stringify(o, deb_curcv(cxstack_ix)));
+        PerlIO_printf(Perl_debug_log, "(%"SVf")",
+            SVfARG(multideref_stringify(o, deb_curcv(cxstack_ix))));
         break;
 
     default:
