@@ -1851,7 +1851,7 @@ characters.
 
 Ranges containing C<\N{...}> in the C<tr///> (and C<y///>)
 transliteration operators are treated differently than the equivalent
-ranges in regular expression pattersn.  They should, but don't, cause
+ranges in regular expression patterns.  They should, but don't, cause
 the values in the ranges to all be treated as Unicode code points, and
 not native ones.  (L<perlre/Version 8 Regular Expressions> gives
 details as to how it should work.)
