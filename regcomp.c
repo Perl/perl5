@@ -808,9 +808,6 @@ static const scan_data_t zero_scan_data =
             if (RExC_seen & REG_GPOS_SEEN)                                  \
                 PerlIO_printf(Perl_debug_log,"REG_GPOS_SEEN ");             \
                                                                             \
-            if (RExC_seen & REG_CANY_SEEN)                                  \
-                PerlIO_printf(Perl_debug_log,"REG_CANY_SEEN ");             \
-                                                                            \
             if (RExC_seen & REG_RECURSE_SEEN)                               \
                 PerlIO_printf(Perl_debug_log,"REG_RECURSE_SEEN ");          \
                                                                             \
@@ -5069,7 +5066,6 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
                    Perl_croak(aTHX_ "panic: unexpected simple REx opcode %d",
                                                                      OP(scan));
 #endif
-		case CANY:
 		case SANY:
 		    if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
 			ssc_match_all_cp(data->start_class);
@@ -7288,8 +7284,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                                 lookbehind */
     if (pRExC_state->num_code_blocks)
 	r->extflags |= RXf_EVAL_SEEN;
-    if (RExC_seen & REG_CANY_SEEN)
-        r->intflags |= PREGf_CANY_SEEN;
     if (RExC_seen & REG_VERBARG_SEEN)
     {
 	r->intflags |= PREGf_VERBARG_SEEN;
@@ -7701,13 +7695,8 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
         sv_setpvn(sv, s, i);
         TAINT_set(oldtainted);
 #endif
-        if ( (rx->intflags & PREGf_CANY_SEEN)
-            ? (RXp_MATCH_UTF8(rx)
-                        && (!i || is_utf8_string((U8*)s, i)))
-            : (RXp_MATCH_UTF8(rx)) )
-        {
+        if (RXp_MATCH_UTF8(rx))
             SvUTF8_on(sv);
-        }
         else
             SvUTF8_off(sv);
         if (TAINTING_get) {
@@ -11807,13 +11796,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    RExC_seen_zerolen++;		/* Do not optimize RE away */
 	    goto finish_meta_pat;
 	case 'C':
-	    ret = reg_node(pRExC_state, CANY);
-            RExC_seen |= REG_CANY_SEEN;
-	    *flagp |= HASWIDTH|SIMPLE;
-            if (PASS2) {
-                ckWARNdep(RExC_parse+1, "\\C is deprecated");
-            }
-	    goto finish_meta_pat;
+	    vFAIL("\\C no longer supported");
 	case 'X':
 	    ret = reg_node(pRExC_state, CLUMP);
 	    *flagp |= HASWIDTH;

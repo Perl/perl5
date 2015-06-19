@@ -144,8 +144,6 @@ and L<perlunicode> for details.
    \V      A non vertical whitespace
    \R      A generic newline           (?>\v|\x0D\x0A)
 
-   \C      Match a byte (with Unicode, '.' matches a character)
-           (Deprecated.)
    \pP     Match P-named (Unicode) property
    \p{...} Match Unicode property with name longer than 1 character
    \PP     Match non-P

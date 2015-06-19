@@ -45,7 +45,13 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs, and we request that you submit a
     report.  See L</Reporting Bugs> below.
 
-[ List each incompatible change as a =head2 entry ]
+=head2 The C</\C/> character class has been removed.
+
+This regular expression character class was deprecated in v5.20.0 and has
+produced a deprecation warning since v5.22.0. It is now a compile-time
+error. If you need to examine the individual bytes that make up a
+UTF8-encoded character, then use C<utf8::encode()> on the string (or a
+copy) first.
 
 =head1 Deprecations
 

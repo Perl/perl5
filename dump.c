@@ -1415,7 +1415,6 @@ const struct flag_to_name regexp_core_intflags_names[] = {
     {PREGf_CUTGROUP_SEEN,   "CUTGROUP_SEEN,"},
     {PREGf_USE_RE_EVAL,     "USE_RE_EVAL,"},
     {PREGf_NOSCAN,          "NOSCAN,"},
-    {PREGf_CANY_SEEN,       "CANY_SEEN,"},
     {PREGf_GPOS_SEEN,       "GPOS_SEEN,"},
     {PREGf_GPOS_FLOAT,      "GPOS_FLOAT,"},
     {PREGf_ANCH_MBOL,       "ANCH_MBOL,"},

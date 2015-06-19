@@ -69,8 +69,6 @@ as C<Not in [].>
  \b{}, \b          Boundary. (\b is a backspace in []).
  \B{}, \B          Not a boundary.  Not in [].
  \cX               Control-X.
- \C                Single octet, even under UTF-8.  Not in [].
-                   (Deprecated)
  \d                Character class for digits.
  \D                Character class for non-digits.
  \e                Escape character.
@@ -662,18 +660,6 @@ Here we document the backslash sequences that don't fall in one of the
 categories above. These are:
 
 =over 4
-
-=item \C
-
-(Deprecated.) C<\C> always matches a single octet, even if the source
-string is encoded
-in UTF-8 format, and the character to be matched is a multi-octet character.
-This is very dangerous, because it violates
-the logical character abstraction and can cause UTF-8 sequences to become malformed.
-
-Use C<utf8::encode()> instead.
-
-Mnemonic: oI<C>tet.
 
 =item \K
 

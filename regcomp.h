@@ -134,7 +134,7 @@
 #define PREGf_USE_RE_EVAL	0x00000020 /* compiled with "use re 'eval'" */
 /* these used to be extflags, but are now intflags */
 #define PREGf_NOSCAN            0x00000040
-#define PREGf_CANY_SEEN         0x00000080
+                                /* spare */
 #define PREGf_GPOS_SEEN         0x00000100
 #define PREGf_GPOS_FLOAT        0x00000200
 
@@ -597,7 +597,6 @@ struct regnode_ssc {
 #define REG_LOOKBEHIND_SEEN                 0x00000002
 #define REG_GPOS_SEEN                       0x00000004
 /* spare */
-#define REG_CANY_SEEN                       0x00000010
 #define REG_RECURSE_SEEN                    0x00000020
 #define REG_TOP_LEVEL_BRANCHES_SEEN         0x00000040
 #define REG_VERBARG_SEEN                    0x00000080

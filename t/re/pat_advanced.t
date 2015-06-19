@@ -28,57 +28,6 @@ run_tests() unless caller;
 sub run_tests {
 
     {
-        no warnings 'deprecated';
-
-        my $message = '\C matches octet';
-        $_ = "a\x{100}b";
-        ok(/(.)(\C)(\C)(.)/, $message);
-        is($1, "a", $message);
-        if ($::IS_ASCII) {     # ASCII (or equivalent), should be UTF-8
-            is($2, "\xC4", $message);
-            is($3, "\x80", $message);
-        }
-        elsif ($::IS_EBCDIC) { # EBCDIC (or equivalent), should be UTF-EBCDIC
-            is($2, "\x8C", $message);
-            is($3, "\x41", $message);
-        }
-        else {
-            SKIP: {
-                ok 0, "Unexpected platform", "ord ('A') =" . ord 'A';
-                skip "Unexpected platform";
-            }
-        }
-        is($4, "b", $message);
-    }
-
-    {
-        no warnings 'deprecated';
-
-        my $message = '\C matches octet';
-        $_ = "\x{100}";
-        ok(/(\C)/g, $message);
-        if ($::IS_ASCII) {
-            is($1, "\xC4", $message);
-        }
-        elsif ($::IS_EBCDIC) {
-            is($1, "\x8C", $message);
-        }
-        else {
-            ok 0, "Unexpected platform", "ord ('A') = " . ord 'A';
-        }
-        ok(/(\C)/g, $message);
-        if ($::IS_ASCII) {
-            is($1, "\x80", $message);
-        }
-        elsif ($::IS_EBCDIC) {
-            is($1, "\x41", $message);
-        }
-        else {
-            ok 0, "Unexpected platform", "ord ('A') = " . ord 'A';
-        }
-    }
-
-    {
         # Japhy -- added 03/03/2001
         () = (my $str = "abc") =~ /(...)/;
         $str = "def";
@@ -284,24 +233,6 @@ sub run_tests {
     }
 
     {
-        no warnings 'deprecated';
-
-        my $message = '. matches \n with /s';
-        my $str1 = "foo\nbar";
-        my $str2 = "foo\n\x{100}bar";
-        my ($a, $b) = map {chr} $::IS_ASCII ? (0xc4, 0x80) : (0x8c, 0x41);
-        my @a;
-        @a = $str1 =~ /./g;   is(@a, 6, $message); is("@a", "f o o b a r", $message);
-        @a = $str1 =~ /./gs;  is(@a, 7, $message); is("@a", "f o o \n b a r", $message);
-        @a = $str1 =~ /\C/g;  is(@a, 7, $message); is("@a", "f o o \n b a r", $message);
-        @a = $str1 =~ /\C/gs; is(@a, 7, $message); is("@a", "f o o \n b a r", $message);
-        @a = $str2 =~ /./g;   is(@a, 7, $message); is("@a", "f o o \x{100} b a r", $message);
-        @a = $str2 =~ /./gs;  is(@a, 8, $message); is("@a", "f o o \n \x{100} b a r", $message);
-        @a = $str2 =~ /\C/g;  is(@a, 9, $message); is("@a", "f o o \n $a $b b a r", $message);
-        @a = $str2 =~ /\C/gs; is(@a, 9, $message); is("@a", "f o o \n $a $b b a r", $message);
-    }
-
-    {
         no warnings 'digit';
         # Check that \x## works. 5.6.1 and 5.005_03 fail some of these.
         my $x;
@@ -492,11 +423,6 @@ sub run_tests {
                                          =~ /^(\X)!/ &&
                $1 eq "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}", $message);
 
-        no warnings 'deprecated';
-
-        $message = '\C and \X';
-        like("!abc!", qr/a\Cc/, $message);
-        like("!abc!", qr/a\Xc/, $message);
     }
 
     {
@@ -552,13 +478,6 @@ sub run_tests {
             $& eq "Francais", $message);
         ok("Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~ /Fran.ais/ &&
             $& eq "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais", $message);
-        {
-            no warnings 'deprecated';
-            ok("Fran\N{LATIN SMALL LETTER C}ais" =~ /Fran\Cais/ &&
-                $& eq "Francais", $message);
-            # COMBINING CEDILLA is two bytes when encoded
-            like("Franc\N{COMBINING CEDILLA}ais", qr/Franc\C\Cais/, $message);
-        }
         ok("Fran\N{LATIN SMALL LETTER C}ais" =~ /Fran\Xais/ &&
             $& eq "Francais", $message);
         ok("Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~ /Fran\Xais/  &&
@@ -1114,8 +1033,6 @@ sub run_tests {
         # differently
         undef $w;
         eval q [ok "\N{TOO-LONG-STR}" =~ /^\N{TOO-LONG-STR}$/, 'Verify that what once was too long a string works'];
-        eval 'q(syntax error) =~ /\N{MALFORMED}/';
-        ok $@ && $@ =~ /Malformed/, 'Verify that malformed utf8 gives an error';
         eval 'q() =~ /\N{4F}/';
         ok $@ && $@ =~ /Invalid character/, 'Verify that leading digit in name gives error';
         eval 'q() =~ /\N{COM,MA}/';

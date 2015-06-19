@@ -770,9 +770,7 @@ Perl_re_intuit_start(pTHX_
              * caller will have set strpos=pos()-4; we look for the substr
              * at position pos()-4+1, which lines up with the "a" */
 
-	    if (prog->check_offset_min == prog->check_offset_max
-                && !(prog->intflags & PREGf_CANY_SEEN))
-            {
+	    if (prog->check_offset_min == prog->check_offset_max) {
 	        /* Substring at constant offset from beg-of-str... */
 	        SSize_t slen = SvCUR(check);
                 char *s = HOP3c(strpos, prog->check_offset_min, strend);
@@ -863,17 +861,10 @@ Perl_re_intuit_start(pTHX_
                 (IV)prog->check_end_shift);
         });
         
-        if (prog->intflags & PREGf_CANY_SEEN) {
-            start_point= (U8*)(rx_origin + start_shift);
-            end_point= (U8*)(strend - end_shift);
-            if (start_point > end_point)
-                goto fail_finish;
-        } else {
-            end_point = HOP3(strend, -end_shift, strbeg);
-	    start_point = HOPMAYBE3(rx_origin, start_shift, end_point);
-            if (!start_point)
-                goto fail_finish;
-	}
+        end_point = HOP3(strend, -end_shift, strbeg);
+        start_point = HOPMAYBE3(rx_origin, start_shift, end_point);
+        if (!start_point)
+            goto fail_finish;
 
 
         /* If the regex is absolutely anchored to either the start of the
@@ -1840,14 +1831,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         else {
             REXEC_FBC_CLASS_SCAN(REGINCLASS(prog, c, (U8*)s));
         }
-        break;
-    case CANY:
-        REXEC_FBC_SCAN(
-            if (tmp && (reginfo->intuit || regtry(reginfo, &s)))
-                goto got_it;
-            else
-                tmp = doevery;
-        );
         break;
 
     case EXACTFA_NO_TRIE:   /* This node only generated for non-utf8 patterns */
@@ -3266,7 +3249,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	if (minlen) {
 	    const OPCODE op = OP(progi->regstclass);
 	    /* don't bother with what can't match */
-	    if (PL_regkind[op] != EXACT && op != CANY && PL_regkind[op] != TRIE)
+	    if (PL_regkind[op] != EXACT && PL_regkind[op] != TRIE)
 	        strend = HOPc(strend, -(minlen - 1));
 	}
 	DEBUG_EXECUTE_r({
@@ -3822,7 +3805,7 @@ S_dump_exec_pos(pTHX_ const char *locinput,
     if (pref0_len > pref_len)
 	pref0_len = pref_len;
     {
-	const int is_uni = (utf8_target && OP(scan) != CANY) ? 1 : 0;
+	const int is_uni = utf8_target ? 1 : 0;
 
 	RE_PV_COLOR_DECL(s0,len0,is_uni,PERL_DEBUG_PAD(0),
 	    (locinput - pref_len),pref0_len, 60, 4, 5);
@@ -4985,12 +4968,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    if (NEXTCHR_IS_EOS)
 		sayNO;
             goto increment_locinput;
-
-	case CANY: /*  \C  */
-	    if (NEXTCHR_IS_EOS)
-		sayNO;
-	    locinput++;
-	    break;
 
 	case REG_ANY: /*  /./  */
 	    if ((NEXTCHR_IS_EOS) || nextchr == '\n')
@@ -8104,16 +8081,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	}
 	else
 	    scan = loceol;
-	break;
-    case CANY:  /* Move <scan> forward <max> bytes, unless goes off end */
-        if (utf8_target && loceol - scan > max) {
-
-            /* <loceol> hadn't been adjusted in the UTF-8 case */
-            scan +=  max;
-        }
-        else {
-            scan = loceol;
-        }
 	break;
     case EXACTL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;

@@ -2295,10 +2295,6 @@ They evaluate true if the regexps do I<not> match:
     $x =~ /foo(?!baz)/;  # matches, 'baz' doesn't follow 'foo'
     $x =~ /(?<!\s)foo/;  # matches, there is no \s before 'foo'
 
-The C<\C> is unsupported in lookbehind, because the already
-treacherous definition of C<\C> would become even more so
-when going backwards.
-
 Here is an example where a string containing blank-separated words,
 numbers and single dashes is to be split into its components.
 Using C</\s+/> alone won't work, because spaces are not required between

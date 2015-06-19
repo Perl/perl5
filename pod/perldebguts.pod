@@ -592,7 +592,6 @@ will be lost.
  # [Special] alternatives:
  REG_ANY         no         Match any one character (except newline).
  SANY            no         Match any one character.
- CANY            no         Match any one byte.
  ANYOF           sv 1       Match character in (or not in) this class,
                             single char match only
  ANYOFL          sv 1       Like ANYOF, but /l is in effect

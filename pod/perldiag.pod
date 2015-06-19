@@ -1559,15 +1559,14 @@ defined in the C<:alias> import argument to C<use charnames>, but they
 could be defined by a translator installed into C<$^H{charnames}>.
 See L<charnames/CUSTOM ALIASES>.
 
-=item \C is deprecated in regex; marked by S<<-- HERE> in m/%s/
+=item \C no longer supported in regex; marked by S<<-- HERE> in m/%s/
 
-(D deprecated, regexp) The \C character class is deprecated, and will
-become a compile-time error in a future release of perl (tentatively
-v5.24).  This construct allows you to match a single byte of what makes
-up a multi-byte single UTF8 character, and breaks encapsulation.  It is
-currently also very buggy.  If you really need to process the individual
-bytes, you probably want to convert your string to one where each
-underlying byte is stored as a character, with utf8::encode().
+(F) The \C character class used to allow a match of single byte within a
+multi-byte utf-8 character, but was removed in v5.24 as it broke
+encapsulation and its implementation was extremely buggy. If you really
+need to process the individual bytes, you probably want to convert your
+string to one where each underlying byte is stored as a character, with
+utf8::encode().
 
 =item "\c%c" is more clearly written simply as "%s"
 

@@ -15,7 +15,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 194 + (10*13*2) + 5;
+plan tests => 192 + (10*13*2) + 5;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -430,40 +430,6 @@ SKIP: {
     is($b, chr(0x1FE) x 0x0FF . chr(0x101) x 2);
 }
 
-# update to pp_complement() via Coverity
-SKIP: {
-  # UTF-EBCDIC is limited to 0x7fffffff and can't encode ~0.
-  skip "Complements exceed maximum representable on EBCDIC ", 2 if $::IS_EBCDIC;
-
-  my $str = "\x{10000}\x{800}";
-  # U+10000 is four bytes in UTF-8/UTF-EBCDIC.
-  # U+0800 is three bytes in UTF-8/UTF-EBCDIC.
-
-  no warnings "utf8";
-  {
-    use bytes;
-    no warnings 'deprecated';
-    $str =~ s/\C\C\z//;
-  }
-
-  # it's really bogus that (~~malformed) is \0.
-  my $ref = "\x{10000}\0";
-  is(~~$str, $ref);
-
-  # same test, but this time with a longer replacement string that
-  # exercises a different branch in pp_subsr()
-
-  $str = "\x{10000}\x{800}";
-  {
-    use bytes;
-    no warnings 'deprecated';
-    $str =~ s/\C\C\z/\0\0\0/;
-  }
-
-  # it's also bogus that (~~malformed) is \0\0\0\0.
-  my $ref = "\x{10000}\0\0\0\0";
-  is(~~$str, $ref, "use bytes with long replacement");
-}
 
 # New string- and number-specific bitwise ops
 {

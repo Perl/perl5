@@ -20,7 +20,7 @@ use warnings;
 use 5.010;
 use Config;
 
-plan tests => 2532;  # Update this when adding/deleting tests.
+plan tests => 2500;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -86,13 +86,6 @@ sub run_tests {
         $x =~ s/A/B/;
         is($x, "\x{100}B", $message);
         is(length $x, 2, $message);
-    }
-
-    {
-        no warnings 'deprecated';
-        my $message = '\C and É; Bug 20001230.002';
-        ok("École" =~ /^\C\C(.)/ && $1 eq 'c', $message);
-        like("École", qr/^\C\C(c)/, $message);
     }
 
     {
@@ -232,59 +225,6 @@ sub run_tests {
         ok $ok && $ord == 0x100 && $len == 4, "No panic: end_shift [change 0e933229fa758625]";
     }
 
-    {
-        our $a = "x\x{100}";
-        chop $a;    # Leaves the UTF-8 flag
-        $a .= "y";  # 1 byte before 'y'.
-
-        no warnings 'deprecated';
-
-        like($a, qr/^\C/,        'match one \C on 1-byte UTF-8; Bug 15763');
-        like($a, qr/^\C{1}/,     'match \C{1}; Bug 15763');
-
-        like($a, qr/^\Cy/,       'match \Cy; Bug 15763');
-        like($a, qr/^\C{1}y/,    'match \C{1}y; Bug 15763');
-
-        unlike($a, qr/^\C\Cy/,     q {don't match two \Cy; Bug 15763});
-        unlike($a, qr/^\C{2}y/,    q {don't match \C{2}y; Bug 15763});
-
-        $a = "\x{100}y"; # 2 bytes before "y"
-
-        like($a, qr/^\C/,        'match one \C on 2-byte UTF-8; Bug 15763');
-        like($a, qr/^\C{1}/,     'match \C{1}; Bug 15763');
-        like($a, qr/^\C\C/,      'match two \C; Bug 15763');
-        like($a, qr/^\C{2}/,     'match \C{2}; Bug 15763');
-
-        like($a, qr/^\C\C\C/,    'match three \C on 2-byte UTF-8 and a byte; Bug 15763');
-        like($a, qr/^\C{3}/,     'match \C{3}; Bug 15763');
-
-        like($a, qr/^\C\Cy/,     'match two \C; Bug 15763');
-        like($a, qr/^\C{2}y/,    'match \C{2}; Bug 15763');
-
-        unlike($a, qr/^\C\C\Cy/,   q {don't match three \Cy; Bug 15763});
-        unlike($a, qr/^\C{2}\Cy/,  q {don't match \C{2}\Cy; Bug 15763});
-        unlike($a, qr/^\C{3}y/,    q {don't match \C{3}y; Bug 15763});
-
-        $a = "\x{1000}y"; # 3 bytes before "y"
-
-        like($a, qr/^\C/,        'match one \C on three-byte UTF-8; Bug 15763');
-        like($a, qr/^\C{1}/,     'match \C{1}; Bug 15763');
-        like($a, qr/^\C\C/,      'match two \C; Bug 15763');
-        like($a, qr/^\C{2}/,     'match \C{2}; Bug 15763');
-        like($a, qr/^\C\C\C/,    'match three \C; Bug 15763');
-        like($a, qr/^\C{3}/,     'match \C{3}; Bug 15763');
-
-        like($a, qr/^\C\C\C\C/,  'match four \C on three-byte UTF-8 and a byte; Bug 15763');
-        like($a, qr/^\C{4}/,     'match \C{4}; Bug 15763');
-
-        like($a, qr/^\C\C\Cy/,   'match three \Cy; Bug 15763');
-        like($a, qr/^\C{3}y/,    'match \C{3}y; Bug 15763');
-
-        unlike($a, qr/^\C\C\C\Cy/, q {don't match four \Cy; Bug 15763});
-        unlike($a, qr/^\C{4}y/,    q {don't match \C{4}y; Bug 15763});
-    }
-
-    
     {
         my $message = 'UTF-8 matching; Bug 15397';
         like("\x{100}", qr/\x{100}/, $message);
@@ -1173,13 +1113,6 @@ EOP
 	# in the report above that only happened in a thread.
 	my $s = "\x{1ff}" . "f" x 32;
 	ok($s =~ /\x{1ff}[[:alpha:]]+/gca, "POSIXA pointer wrap");
-
-	# this one segfaulted under the conditions above
-	# of course, CANY is evil, maybe it should crash
-        {
-            no warnings 'deprecated';
-            ok($s =~ /.\C+/, "CANY pointer wrap");
-        }
     }
 } # End of sub run_tests
 
