@@ -2461,7 +2461,7 @@ sub trace { return main::trace(@_); }
                 if (! $optional{$addr}  # File could be optional
                     && $v_version ge $first_released{$addr})
                 {
-                    print STDERR "Skipping processing input file '$file' because not found\n" if $v_version ge $first_released{$addr};
+                    print STDERR "Skipping processing input file '$file' because not found\n";
                 }
                 return;
             }
