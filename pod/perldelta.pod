@@ -249,7 +249,7 @@ approximately 55,000 lines of changes to 270 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers. The following people are known to have contributed the
-improvements that became Perl 5.22.1:
+improvements that became Perl 5.23.0:
 
 Chase Whitener, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari
 Mannsåker, Daniel Dragan, David Golden, David Mitchell, Hugo van der Sanden,
