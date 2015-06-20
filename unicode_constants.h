@@ -8,10 +8,11 @@
 #ifndef H_UNICODE_CONSTANTS   /* Guard against nested #includes */
 #define H_UNICODE_CONSTANTS   1
 
-/* This file contains #defines for various Unicode code points.  The values
- * the macros expand to are the native Unicode code point, or all or portions
- * of the UTF-8 encoding for the code point.  In the former case, the macro
- * name has the suffix "_NATIVE"; otherwise, the suffix "_UTF8".
+/* This file contains #defines for the version of Unicode being used and
+ * various Unicode code points.  The values the code point macros expand to
+ * are the native Unicode code point, or all or portions of the UTF-8 encoding
+ * for the code point.  In the former case, the macro name has the suffix
+ * "_NATIVE"; otherwise, the suffix "_UTF8".
  *
  * The macros that have the suffix "_UTF8" may have further suffixes, as
  * follows:
@@ -19,6 +20,10 @@
  *                representation; the value will be a numeric constant.
  *  "_TAIL"       if instead it represents all but the first byte.  This, and
  *                with no additional suffix are both string constants */
+
+#define UNICODE_MAJOR_VERSION   8
+#define UNICODE_DOT_VERSION     0
+#define UNICODE_DOT_DOT_VERSION 0
 
 
 #if 'A' == 65 /* ASCII/Latin1 */
