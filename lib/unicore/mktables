@@ -1494,6 +1494,7 @@ my $block;
 my $perl_charname;
 my $print;
 my $All;
+my $Assigned;   # All assigned characters in this Unicode release
 my $script;
 
 # Are there conflicting names because of beginning with 'In_', or 'Is_'
@@ -13407,6 +13408,26 @@ sub pre_3_dot_1_Nl () {
     return $Nl;
 }
 
+sub calculate_Assigned() {  # Calculate the gc != Cn code points; may be
+                            # called before the Cn's are completely filled.
+                            # Works on Unicodes earlier than ones that
+                            # explicitly specify Cn.
+    return if defined $Assigned;
+
+    if (! defined $gc || $gc->is_empty()) {
+        Carp::my_carp_bug("calculate_Assigned() called before $gc is populated");
+    }
+
+    $Assigned = $perl->add_match_table('Assigned',
+                                Description  => "All assigned code points",
+                                );
+    while (defined (my $range = $gc->each_range())) {
+        my $standard_value = standardize($range->value);
+        next if $standard_value eq 'cn' || $standard_value eq 'unassigned';
+        $Assigned->add_range($range->start, $range->end);
+    }
+}
+
 sub compile_perl() {
     # Create perl-defined tables.  Almost all are part of the pseudo-property
     # named 'perl' internally to this program.  Many of these are recommended
@@ -13450,11 +13471,7 @@ sub compile_perl() {
     $Any->add_range(0, $MAX_UNICODE_CODEPOINT);
     $Any->add_alias('Unicode');
 
-    # Assigned is the opposite of gc=unassigned
-    my $Assigned = $perl->add_match_table('Assigned',
-                                Description  => "All assigned code points",
-                                Initialize => ~ $gc->table('Unassigned'),
-                                );
+    calculate_Assigned();
 
     # Our internal-only property should be treated as more than just a
     # synonym; grandfather it in to the pod.
@@ -13500,32 +13517,27 @@ sub compile_perl() {
 
         # There are quite a few code points in Lower, that aren't in gc=lc,
         # and not all are in all releases.
-        foreach my $code_point (    utf8::unicode_to_native(0xAA),
-                                    utf8::unicode_to_native(0xBA),
-                                    0x02B0 .. 0x02B8,
-                                    0x02C0 .. 0x02C1,
-                                    0x02E0 .. 0x02E4,
-                                    0x0345,
-                                    0x037A,
-                                    0x1D2C .. 0x1D6A,
-                                    0x1D78,
-                                    0x1D9B .. 0x1DBF,
-                                    0x2071,
-                                    0x207F,
-                                    0x2090 .. 0x209C,
-                                    0x2170 .. 0x217F,
-                                    0x24D0 .. 0x24E9,
-                                    0x2C7C .. 0x2C7D,
-                                    0xA770,
-                                    0xA7F8 .. 0xA7F9,
-        ) {
-            # Don't include the code point unless it is assigned in this
-            # release
-            my $category = $gc->value_of($code_point);
-            next if ! defined $category || $category eq 'Cn';
-
-            $Lower += $code_point;
-        }
+        my $temp = Range_List->new(Initialize => [
+                                                utf8::unicode_to_native(0xAA),
+                                                utf8::unicode_to_native(0xBA),
+                                                0x02B0 .. 0x02B8,
+                                                0x02C0 .. 0x02C1,
+                                                0x02E0 .. 0x02E4,
+                                                0x0345,
+                                                0x037A,
+                                                0x1D2C .. 0x1D6A,
+                                                0x1D78,
+                                                0x1D9B .. 0x1DBF,
+                                                0x2071,
+                                                0x207F,
+                                                0x2090 .. 0x209C,
+                                                0x2170 .. 0x217F,
+                                                0x24D0 .. 0x24E9,
+                                                0x2C7C .. 0x2C7D,
+                                                0xA770,
+                                                0xA7F8 .. 0xA7F9,
+                                ]);
+        $Lower += $temp & $Assigned;
     }
     my $Posix_Lower = $perl->add_match_table("PosixLower",
                             Description => "[a-z]",
