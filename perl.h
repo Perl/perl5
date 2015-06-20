@@ -3526,10 +3526,7 @@ typedef pthread_key_t	perl_key;
    builtin in C++11.
 */
 /* IBM XL C V11 does not support _Static_assert, no matter what <assert.h> says */
-#  define STATIC_ASSERT_GLOBAL(COND) \
-    GCC_DIAG_IGNORE(-Wpedantic); \
-    static_assert(COND, #COND); \
-    GCC_DIAG_RESTORE;
+#  define STATIC_ASSERT_GLOBAL(COND) static_assert(COND, #COND)
 #else
 /* We use a bit-field instead of an array because gcc accepts
    'typedef char x[n]' where n is not a compile-time constant.
