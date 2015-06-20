@@ -12440,7 +12440,7 @@ sub filter_blocks_lines {
 
     # Change hyphens and blanks in the block name field only
     $fields[1] =~ s/[ -]/_/g;
-    $fields[1] =~ s/_ ( [a-z] ) /_\u$1/g;   # Capitalize first letter of word
+    $fields[1] =~ s/_ ( [a-z] ) /_\u$1/xg;   # Capitalize first letter of word
 
     $_ = join("; ", @fields);
     return;
