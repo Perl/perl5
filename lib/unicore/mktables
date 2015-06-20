@@ -9710,6 +9710,7 @@ sub finish_property_setup {
                                               'AL');
             $lb->set_default_map($default);
         }
+    }
 
         # If has the URS property, make sure that the standard aliases are in
         # it, since not in the input tables in some versions.
@@ -9718,7 +9719,6 @@ sub finish_property_setup {
             $urs->add_alias('cjkRSUnicode');
             $urs->add_alias('kRSUnicode');
         }
-    }
 
     # For backwards compatibility with applications that may read the mapping
     # file directly (it was documented in 5.12 and 5.14 as being thusly
