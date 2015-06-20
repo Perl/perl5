@@ -16,12 +16,6 @@ release.
 For details on what is in this release, see
 L<http://www.unicode.org/versions/Unicode8.0.0/>.
 
-=head1 Security
-
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
 =head1 Incompatible Changes
 
 =head2 The C</\C/> character class has been removed.
