@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.61';
+our $VERSION = '0.62';
 
 require Exporter;
 
@@ -775,7 +775,6 @@ sub charprop ($$) {
     }
     else {
         croak __PACKAGE__, "::charprop: Internal error: unknown format '$format'.  Please perlbug this";
-        return undef;
     }
 }
 
