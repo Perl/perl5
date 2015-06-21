@@ -167,7 +167,7 @@ X<@_> X<@ARG>
 
 Within a subroutine the array C<@_> contains the parameters passed to
 that subroutine.  Inside a subroutine, C<@_> is the default array for
-the array operators C<push>, C<pop>, C<shift>, and C<unshift>.
+the array operators C<pop> and C<shift>.
 
 See L<perlsub>.
 
