@@ -13040,6 +13040,22 @@ sub filter_early_version_name_alias_line {
     return;
 }
 
+sub filter_all_caps_script_names {
+
+    # Some early Unicode releases had the script names in all CAPS.  This
+    # converts them to just the first letter of each word being capital.
+
+    my ($range, $script, @remainder)
+        = split /\s*;\s*/, $_, -1; # -1 => retain trailing null fields
+    my @words = split "_", $script;
+    for my $word (@words) {
+        $word =
+            ucfirst(lc($word)) if $word ne 'CJK';
+    }
+    $script = join "_", @words;
+    $_ = join ";", $range, $script, @remainder;
+}
+
 sub finish_Unicode() {
     # This routine should be called after all the Unicode files have been read
     # in.  It:
@@ -18152,6 +18168,9 @@ my @input_file_objects = (
                     ),
     Input_file->new('Scripts.txt', v3.1.0,
                     Property => 'Script',
+                    Each_Line_Handler => (($v_version le v4.0.0)
+                                          ? \&filter_all_caps_script_names
+                                          : undef),
                     Has_Missings_Defaults => $NOT_IGNORED,
                     ),
     Input_file->new('DNormalizationProps.txt', v3.1.0,
