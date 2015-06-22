@@ -610,6 +610,8 @@ sub length_optree {
 
     my $else= ( $opt{else} ||= 0 );
 
+    return $else if $self->{count} == 0;
+
     my $method = $type =~ /generic/ ? 'generic_optree' : 'optree';
     if ($method eq 'optree' && scalar keys %{$self->{size}{$type}} == 1) {
 
