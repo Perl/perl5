@@ -848,7 +848,8 @@ sub disp_str ($) {
             }
             else {
                 $result .= "  " unless $prev_was_punct;
-                $result .= charnames::viacode(ord $char);
+                my $name = charnames::viacode(ord $char);
+                $result .= (defined $name) ? $name : ':unknown:';
                 $prev_was_punct = 0;
             }
         }
