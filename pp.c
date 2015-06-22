@@ -4096,6 +4096,9 @@ PP(pp_uc)
 		     * just above.  
 		     * Use the source to distinguish between the three cases */
 
+#if    UNICODE_MAJOR_VERSION > 2                                        \
+   || (UNICODE_MAJOR_VERSION == 2 && UNICODE_DOT_VERSION >= 1		\
+                                  && UNICODE_DOT_DOT_VERSION >= 8)
 		    if (*s == LATIN_SMALL_LETTER_SHARP_S) {
 
 			/* uc() of this requires 2 characters, but they are
@@ -4108,6 +4111,7 @@ PP(pp_uc)
 			*d++ = 'S'; *d = 'S'; /* upper case is 'SS' */
 			continue;   /* Back to the tight loop; still in ASCII */
 		    }
+#endif
 
 		    /* The other two special handling characters have their
 		     * upper cases outside the latin1 range, hence need to be

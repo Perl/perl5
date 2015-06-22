@@ -1413,11 +1413,15 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
 	    case MICRO_SIGN:
 		converted = GREEK_CAPITAL_LETTER_MU;
 		break;
+#if    UNICODE_MAJOR_VERSION > 2                                        \
+   || (UNICODE_MAJOR_VERSION == 2 && UNICODE_DOT_VERSION >= 1           \
+                                  && UNICODE_DOT_DOT_VERSION >= 8)
 	    case LATIN_SMALL_LETTER_SHARP_S:
 		*(p)++ = 'S';
 		*p = S_or_s;
 		*lenp = 2;
 		return 'S';
+#endif
 	    default:
 		Perl_croak(aTHX_ "panic: to_upper_title_latin1 did not expect '%c' to map to '%c'", c, LATIN_SMALL_LETTER_Y_WITH_DIAERESIS);
 		NOT_REACHED; /* NOTREACHED */
