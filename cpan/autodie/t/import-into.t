@@ -6,8 +6,8 @@ use warnings;
 use Test::More;
 
 BEGIN {
-    eval 'use Import::Into';
-    plan skip_all => 'Test needs Import::Into' if $@;
+    eval 'use Import::Into 1.002004';
+    plan skip_all => 'Test needs Import::Into >= 1.002004' if $@;
 }
 
 use FindBin;
