@@ -13264,7 +13264,7 @@ Perl_ptr_table_clear(pTHX_ PTR_TBL_t *const tbl)
     if (tbl && tbl->tbl_items) {
 	struct ptr_tbl_arena *arena = tbl->tbl_arena;
 
-	Zero(tbl->tbl_ary, tbl->tbl_max + 1, struct ptr_tbl_ent **);
+	Zero(tbl->tbl_ary, tbl->tbl_max + 1, struct ptr_tbl_ent *);
 
 	while (arena) {
 	    struct ptr_tbl_arena *next = arena->next;
