@@ -4541,18 +4541,10 @@ PP(pp_smartmatch)
 	    destroy_matcher(matcher);
 	    RETURN;
 	}
-    /* ~~ scalar */
-    else if (!SvOK(d)) {
-	/* we already know that the scalar is SvOK */
-	DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Any\n"));
-	if (!(SvPOK_nog(e) ? SvCUR(e) : sv_len(e))) RETPUSHYES;
-	RETPUSHNO;
+    else {
+        DEBUG_M(Perl_deb(aTHX_ "    no matching rule\n"));
+        Perl_croak(aTHX_ "Can only smartmatch against undef, code references and regular expressions");
     }
-    /* As a last resort, use string comparison */
-    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Any\n"));
-    PUSHs(d); PUSHs(e);
-    PUTBACK;
-    return Perl_pp_seq(aTHX);
 }
 
 PP(pp_enterwhen)
