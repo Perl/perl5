@@ -241,7 +241,7 @@ for my $ord (0..255) {
             use Carp;
             carp $@ if ! defined $re;
         }
-        #print "$ord, $name $property, $re\n";
+        #print STDERR __LINE__, ": $ord, $name $property, $re\n";
         if ($char =~ $re) {  # Add this property if matches
             $bits[$ord] .= '|' if $bits[$ord];
             $bits[$ord] .= "(1U<<_CC_$property)";
