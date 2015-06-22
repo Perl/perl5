@@ -148,10 +148,10 @@ demonstrated with this code:
   my $bar = $foo;
 
   bless $foo, 'Class';
-  print blessed( $bar );      # prints "Class"
+  print blessed( $bar ) // 'not blessed';    # prints "Class"
 
   $bar = "some other value";
-  print blessed( $bar );      # prints undef
+  print blessed( $bar ) // 'not blessed';    # prints "not blessed"
 
 When we call C<bless> on a variable, we are actually blessing the
 underlying data structure that the variable refers to. We are not
