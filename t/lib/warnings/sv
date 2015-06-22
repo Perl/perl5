@@ -363,6 +363,14 @@ EXPECT
 Argument "\x{100}\x{200}" isn't numeric in negation (-) at - line 3.
 ########
 # sv.c
+use warnings 'numeric' ;
+$a = "\x{100}\x{1000}" x 10; $b = $a < 1;
+no warnings 'numeric' ;
+$a = "\x{100}\x{1000}" x 10; $b = $a < 1;
+EXPECT
+Argument "\x{100}\x{1000}\x{100}\x{1000}\x{100}..." isn't numeric in numeric lt (<) at - line 3.
+########
+# sv.c
 use warnings 'redefine' ;
 use utf8;
 use open qw( :utf8 :std );

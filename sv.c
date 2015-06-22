@@ -1828,7 +1828,7 @@ S_sv_display(pTHX_ SV *const sv, char *tmpbuf, STRLEN tmpbuf_size) {
 
      if (DO_UTF8(sv)) {
           SV *dsv = newSVpvs_flags("", SVs_TEMP);
-          pv = sv_uni_display(dsv, sv, 10, UNI_DISPLAY_ISPRINT);
+          pv = sv_uni_display(dsv, sv, 32, UNI_DISPLAY_ISPRINT);
      } else {
 	  char *d = tmpbuf;
 	  const char * const limit = tmpbuf + tmpbuf_size - 8;

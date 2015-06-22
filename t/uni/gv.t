@@ -127,19 +127,19 @@ is (scalar %ᕘ, 0);
     foreach ($copy, *SKRÈÈÈ) {
 	$msg = '';
 	my $victim = sprintf "%d", $_;
-	like($msg, qr/Argument "\*main::(\p{ASCII}|\Q\x{\E\p{ASCII_Hex_Digit}{2}\}){3}\Q...\E" isn't numeric in sprintf/,
+	like($msg, qr/^Argument "\*main::(?:PW\\x\{d2\}MPF|SKR\\x\{c8\}\\x\{c8\}\\x\{c8\})" isn't numeric in sprintf/,
 	     "Warning on conversion to IV");
 	is($victim, 0);
 
 	$msg = '';
 	$victim = sprintf "%u", $_;
-	like($msg, qr/Argument "\*main::(\p{ASCII}|\Q\x{\E\p{ASCII_Hex_Digit}{2}\}){3}\Q...\E" isn't numeric in sprintf/,
+	like($msg, qr/^Argument "\*main::(?:PW\\x\{d2\}MPF|SKR\\x\{c8\}\\x\{c8\}\\x\{c8\})" isn't numeric in sprintf/,
 	     "Warning on conversion to UV");
 	is($victim, 0);
 
 	$msg = '';
 	$victim = sprintf "%e", $_;
-	like($msg, qr/Argument "\*main::(\p{ASCII}|\Q\x{\E\p{ASCII_Hex_Digit}{2}\}){3}\Q...\E" isn't numeric in sprintf/,
+	like($msg, qr/^Argument "\*main::(?:PW\\x\{d2\}MPF|SKR\\x\{c8\}\\x\{c8\}\\x\{c8\})" isn't numeric in sprintf/,
 	     "Warning on conversion to NV");
 	like($victim, qr/^0\.0+E\+?00/i, "Expect floating point zero");
 
