@@ -230,7 +230,7 @@ use File::Glob qw(:case);
     },
 
     'constant' => {
-        'DISTRIBUTION' => 'SAPER/constant-1.27.tar.gz',
+        'DISTRIBUTION' => 'RJBS/constant-1.33.tar.gz',
         'FILES'        => q[dist/constant],
         'EXCLUDED'     => [
             qw( t/00-load.t
@@ -821,7 +821,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20150520.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20150620.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
