@@ -4401,8 +4401,14 @@ PP(pp_fc)
     const U8 *send;
     U8 *d;
     U8 tmpbuf[UTF8_MAXBYTES_CASE + 1];
+#if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
+   || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
+                                      || UNICODE_DOT_DOT_VERSION > 0)
     const bool full_folding = TRUE; /* This variable is here so we can easily
                                        move to more generality later */
+#else
+    const bool full_folding = FALSE;
+#endif
     const U8 flags = ( full_folding      ? FOLD_FLAGS_FULL   : 0 )
 #ifdef USE_LOCALE_CTYPE
                    | ( IN_LC_RUNTIME(LC_CTYPE) ? FOLD_FLAGS_LOCALE : 0 )

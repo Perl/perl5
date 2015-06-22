@@ -13989,6 +13989,9 @@ sub compile_perl() {
          Description =>
               "Code points whose fold is a string of more than one character",
     );
+    if ($v_version lt v3.0.1) {
+        push @tables_that_may_be_empty, '_Perl_Folds_To_Multi_Char';
+    }
 
     # Look through all the known folds to populate these tables.
     foreach my $range ($cf->ranges) {

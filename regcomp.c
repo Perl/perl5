@@ -3652,6 +3652,9 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
              * this function, we need to flag any occurrences of the sharp s.
              * This character forbids trie formation (because of added
              * complexity) */
+#if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
+   || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
+                                      || UNICODE_DOT_DOT_VERSION > 0)
 	    while (s < s_end) {
                 if (*s == LATIN_SMALL_LETTER_SHARP_S) {
                     OP(scan) = EXACTFA_NO_TRIE;
@@ -3704,6 +3707,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                 *min_subtract += len - 1;
                 s += len;
 	    }
+#endif
 	}
     }
 
@@ -11504,8 +11508,13 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
             *character = (U8) code_point;
             len = 1;
         } /* Else is folded non-UTF8 */
+#if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
+   || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
+                                      || UNICODE_DOT_DOT_VERSION > 0)
         else if (LIKELY(code_point != LATIN_SMALL_LETTER_SHARP_S)) {
-
+#else
+        else if (1) {
+#endif
             /* We don't fold any non-UTF8 except possibly the Sharp s  (see
              * comments at join_exact()); */
             *character = (U8) code_point;
@@ -11549,9 +11558,13 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
     /* A single character node is SIMPLE, except for the special-cased SHARP S
      * under /di. */
     if ((len == 1 || (UTF && len == UNISKIP(code_point)))
-        && (code_point != LATIN_SMALL_LETTER_SHARP_S
-            || ! FOLD || ! DEPENDS_SEMANTICS))
-    {
+#if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
+   || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
+                                      || UNICODE_DOT_DOT_VERSION > 0)
+        && ( code_point != LATIN_SMALL_LETTER_SHARP_S
+            || ! FOLD || ! DEPENDS_SEMANTICS)
+#endif
+    ) {
         *flagp |= SIMPLE;
     }
 
@@ -12649,11 +12662,15 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }
                 else /* A regular FOLD code point */
                     if (! ( UTF
+#if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
+   || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
+                                      || UNICODE_DOT_DOT_VERSION > 0)
                         /* See comments for join_exact() as to why we fold this
                          * non-UTF at compile time */
                         || (node_type == EXACTFU
-                            && ender == LATIN_SMALL_LETTER_SHARP_S)))
-                {
+                            && ender == LATIN_SMALL_LETTER_SHARP_S)
+#endif
+                )) {
                     /* Here, are folding and are not UTF-8 encoded; therefore
                      * the character must be in the range 0-255, and is not /l
                      * (Not /l because we already handled these under /l in
@@ -12666,11 +12683,15 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                          * 'ss' */
                         if (maybe_exactfu
                             && (PL_fold[ender] != PL_fold_latin1[ender]
+#if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
+   || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
+                                      || UNICODE_DOT_DOT_VERSION > 0)
                                 || ender == LATIN_SMALL_LETTER_SHARP_S
                                 || (len > 0
                                    && isALPHA_FOLD_EQ(ender, 's')
-                                   && isALPHA_FOLD_EQ(*(s-1), 's'))))
-                        {
+                                   && isALPHA_FOLD_EQ(*(s-1), 's'))
+#endif
+                        )) {
                             maybe_exactfu = FALSE;
                         }
                     }
@@ -14213,6 +14234,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 #endif
 
     DEBUG_PARSE("clas");
+
+#if UNICODE_MAJOR_VERSION < 3 /* no multifolds in early Unicode */      \
+    || (UNICODE_MAJOR_VERSION == 3 && UNICODE_DOT_VERSION == 0          \
+                                   && UNICODE_DOT_DOT_VERSION == 0)
+    allow_multi_folds = FALSE;
+#endif
 
     /* Assume we are going to generate an ANYOF node. */
     ret = reganode(pRExC_state,

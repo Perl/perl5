@@ -1540,6 +1540,9 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const unsigned int f
     if (c == MICRO_SIGN) {
 	converted = GREEK_SMALL_LETTER_MU;
     }
+#if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
+   || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
+                                      || UNICODE_DOT_DOT_VERSION > 0)
     else if ((flags & FOLD_FLAGS_FULL) && c == LATIN_SMALL_LETTER_SHARP_S) {
 
         /* If can't cross 127/128 boundary, can't return "ss"; instead return
@@ -1558,6 +1561,7 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const unsigned int f
             return 's';
         }
     }
+#endif
     else { /* In this range the fold of all other characters is their lower
               case */
 	converted = toLOWER_LATIN1(c);
