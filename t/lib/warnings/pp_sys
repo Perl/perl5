@@ -930,3 +930,12 @@ alarm(-1);
 
 EXPECT
 alarm() with negative argument at - line 2.
+
+########
+# pp_sys.c [pp_sleep]
+sleep(-1);
+no warnings "misc";
+sleep(-1);
+
+EXPECT
+sleep() with negative argument at - line 2.

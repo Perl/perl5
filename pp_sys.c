@@ -4749,7 +4749,16 @@ PP(pp_sleep)
 	PerlProc_pause();
     else {
 	duration = POPi;
-	PerlProc_sleep((unsigned int)duration);
+        if (duration < 0) {
+          /* diag_listed_as: %s() with negative argument */
+          Perl_ck_warner_d(aTHX_ packWARN(WARN_MISC),
+                           "sleep() with negative argument");
+          SETERRNO(EINVAL, LIB_INVARG);
+          XPUSHi(0);
+          RETURN;
+        } else {
+          PerlProc_sleep((unsigned int)duration);
+        }
     }
     (void)time(&when);
     XPUSHi(when - lasttime);
