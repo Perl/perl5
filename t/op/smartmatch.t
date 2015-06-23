@@ -75,9 +75,6 @@ my @fooormore = qw(foo or more);
 my %keyandmore = map { $_ => 0 } @keyandmore;
 my %fooormore = map { $_ => 0 } @fooormore;
 
-# Load and run the tests
-plan tests => 343;
-
 while (<DATA>) {
   SKIP: {
     next if /^#/ || !/\S/;
@@ -181,6 +178,7 @@ sub NOT_DEF() { undef }
     is($bad, -1, "RT 123860: stack realloc");
 }
 
+done_testing();
 
 # Prefix character :
 #   - expected to match

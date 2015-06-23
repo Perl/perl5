@@ -10,8 +10,6 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 193;
-
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
 # the switch ops themselves.
@@ -1178,7 +1176,7 @@ GIVEN5:
 # blocks can be empty (will cause a syntax error otherwise)
 when{}{}
 
-
+done_testing();
 
 # Okay, that'll do for now. The intricacies of the smartmatch
 # semantics are tested in t/op/smartmatch.t. Taintedness of
