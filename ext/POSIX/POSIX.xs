@@ -1953,11 +1953,16 @@ setattr(termios_ref, fd = 0, optional_actions = DEF_SETATTR_ACTION)
 	int		fd
 	int		optional_actions
     CODE:
-	/* The second argument to the call is mandatory, but we'd like to give
-	   it a useful default. 0 isn't valid on all operating systems - on
-	   Solaris (at least) TCSANOW, TCSADRAIN and TCSAFLUSH have the same
-	   values as the equivalent ioctls, TCSETS, TCSETSW and TCSETSF.  */
-	RETVAL = tcsetattr(fd, optional_actions, termios_ref);
+	if (fd >= 0) {
+            /* The second argument to the call is mandatory, but we'd like to give
+               it a useful default. 0 isn't valid on all operating systems - on
+               Solaris (at least) TCSANOW, TCSADRAIN and TCSAFLUSH have the same
+               values as the equivalent ioctls, TCSETS, TCSETSW and TCSETSF.  */
+            RETVAL = tcsetattr(fd, optional_actions, termios_ref);
+        } else {
+            SETERRNO(EBADF,RMS_IFI);
+            RETVAL = -1;
+        }
     OUTPUT:
 	RETVAL
 
