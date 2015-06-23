@@ -2467,7 +2467,12 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 	SETERRNO(EFAULT,SS_ACCVIO);		/* can't do as caller requested */
 	return -1;
     }
-    shm = (char *)shmat(id, NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);
+    if (id >= 0) {
+        shm = (char *)shmat(id, NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);
+    } else {
+        SETERRNO(EINVAL,LIB_INVARG);
+        return -1;
+    }
     if (shm == (char *)-1)	/* I hate System V IPC, I really do */
 	return -1;
     if (optype == OP_SHMREAD) {
