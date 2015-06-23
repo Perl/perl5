@@ -2378,7 +2378,12 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     mbuf = SvGROW(mstr, sizeof(long)+msize+1);
 
     SETERRNO(0,0);
-    ret = msgrcv(id, (struct msgbuf *)mbuf, msize, mtype, flags);
+    if (id >= 0 && msize >= 0 && flags >= 0) {
+        ret = msgrcv(id, (struct msgbuf *)mbuf, msize, mtype, flags);
+    } else {
+        SETERRNO(EINVAL,LIB_INVARG);
+        ret = -1;
+    }
     if (ret >= 0) {
 	SvCUR_set(mstr, sizeof(long)+ret);
 	*SvEND(mstr) = '\0';
