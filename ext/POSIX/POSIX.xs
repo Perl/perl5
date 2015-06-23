@@ -3210,9 +3210,14 @@ lseek(fd, offset, whence)
 	Off_t		offset
 	int		whence
     CODE:
-	Off_t pos = PerlLIO_lseek(fd, offset, whence);
-	RETVAL = sizeof(Off_t) > sizeof(IV)
-		 ? newSVnv((NV)pos) : newSViv((IV)pos);
+	if (fd >= 0) {
+            Off_t pos = PerlLIO_lseek(fd, offset, whence);
+            RETVAL = sizeof(Off_t) > sizeof(IV)
+              ? newSVnv((NV)pos) : newSViv((IV)pos);
+        } else {
+            SETERRNO(EBADF,RMS_IFI);
+            RETVAL = newSViv(-1);
+        }
     OUTPUT:
 	RETVAL
 
