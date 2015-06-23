@@ -2340,7 +2340,12 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
     if (msize < 0)
 	Perl_croak(aTHX_ "Arg too short for msgsnd");
     SETERRNO(0,0);
-    return msgsnd(id, (struct msgbuf *)mbuf, msize, flags);
+    if (id >= 0 && flags >= 0) {
+      return msgsnd(id, (struct msgbuf *)mbuf, msize, flags);
+    } else {
+      SETERRNO(EINVAL,LIB_INVARG);
+      return -1;
+    }
 #else
     PERL_UNUSED_ARG(sp);
     PERL_UNUSED_ARG(mark);
