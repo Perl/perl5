@@ -3499,8 +3499,13 @@ tcdrain(fd)
 	close = 1
 	dup = 2
     CODE:
-	RETVAL = ix == 1 ? close(fd)
-	    : (ix < 1 ? tcdrain(fd) : dup(fd));
+	if (fd >= 0) {
+	    RETVAL = ix == 1 ? close(fd)
+	      : (ix < 1 ? tcdrain(fd) : dup(fd));
+	} else {
+	    SETERRNO(EBADF,RMS_IFI);
+	    RETVAL = -1;
+	}
     OUTPUT:
 	RETVAL
 
