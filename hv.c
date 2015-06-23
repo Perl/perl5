@@ -742,7 +742,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (flags & HVhek_FREEKEY)
 	    Safefree(key);
 	if (return_svp) {
-	    return entry ? (void *) &HeVAL(entry) : NULL;
+            return (void *) &HeVAL(entry);
 	}
 	return entry;
     }
