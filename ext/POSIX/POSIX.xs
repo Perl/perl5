@@ -3429,20 +3429,29 @@ strtol(str, base = 0)
 	long num;
 	char *unparsed;
     PPCODE:
-	num = strtol(str, &unparsed, base);
+	if (base == 0 || (base >= 2 && base <= 36)) {
+            num = strtol(str, &unparsed, base);
 #if IVSIZE <= LONGSIZE
-	if (num < IV_MIN || num > IV_MAX)
-	    PUSHs(sv_2mortal(newSVnv((double)num)));
-	else
+            if (num < IV_MIN || num > IV_MAX)
+                PUSHs(sv_2mortal(newSVnv((double)num)));
+            else
 #endif
-	    PUSHs(sv_2mortal(newSViv((IV)num)));
-	if (GIMME_V == G_ARRAY) {
-	    EXTEND(SP, 1);
-	    if (unparsed)
-		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
-	    else
-		PUSHs(&PL_sv_undef);
-	}
+                PUSHs(sv_2mortal(newSViv((IV)num)));
+            if (GIMME_V == G_ARRAY) {
+                EXTEND(SP, 1);
+                if (unparsed)
+                    PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
+                else
+                    PUSHs(&PL_sv_undef);
+            }
+        } else {
+	    SETERRNO(EINVAL, LIB_INVARG);
+            PUSHs(&PL_sv_undef);
+            if (GIMME_V == G_ARRAY) {
+               EXTEND(SP, 1);
+               PUSHs(&PL_sv_undef);
+            }
+        }
 
 void
 strtoul(str, base = 0)
@@ -3454,20 +3463,29 @@ strtoul(str, base = 0)
     PPCODE:
 	PERL_UNUSED_VAR(str);
 	PERL_UNUSED_VAR(base);
-	num = strtoul(str, &unparsed, base);
+	if (base == 0 || (base >= 2 && base <= 36)) {
+            num = strtoul(str, &unparsed, base);
 #if IVSIZE <= LONGSIZE
-	if (num > IV_MAX)
-	    PUSHs(sv_2mortal(newSVnv((double)num)));
-	else
+            if (num > IV_MAX)
+                PUSHs(sv_2mortal(newSVnv((double)num)));
+            else
 #endif
-	    PUSHs(sv_2mortal(newSViv((IV)num)));
-	if (GIMME_V == G_ARRAY) {
-	    EXTEND(SP, 1);
-	    if (unparsed)
-		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
-	    else
-		PUSHs(&PL_sv_undef);
-	}
+                PUSHs(sv_2mortal(newSViv((IV)num)));
+            if (GIMME_V == G_ARRAY) {
+                EXTEND(SP, 1);
+                if (unparsed)
+                    PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
+                else
+                  PUSHs(&PL_sv_undef);
+            }
+	} else {
+	    SETERRNO(EINVAL, LIB_INVARG);
+            PUSHs(&PL_sv_undef);
+            if (GIMME_V == G_ARRAY) {
+               EXTEND(SP, 1);
+               PUSHs(&PL_sv_undef);
+            }
+        }
 
 void
 strxfrm(src)
