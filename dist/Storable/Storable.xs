@@ -1716,6 +1716,7 @@ static int last_op_in_netorder(pTHX)
 {
 	dSTCXT;
 
+	assert(cxt);
 	return cxt->netorder;
 }
 
@@ -3845,6 +3846,7 @@ static int do_store(
 	 * free up memory for them now.
 	 */
 
+	assert(cxt);
 	if (cxt->s_dirty)
 		clean_context(aTHX_ cxt);
 
@@ -3946,6 +3948,7 @@ static SV *mbuf2sv(pTHX)
 {
 	dSTCXT;
 
+	assert(cxt);
 	return newSVpv(mbase, MBUF_SIZE());
 }
 
@@ -6263,6 +6266,7 @@ static SV *do_retrieve(
 	 * free up memory for them now.
 	 */
 
+	assert(cxt);
 	if (cxt->s_dirty)
 		clean_context(aTHX_ cxt);
 
@@ -6509,6 +6513,7 @@ static SV *dclone(pTHX_ SV *sv)
 	 * free up memory for them now.
 	 */
 
+        assert(cxt);
 	if (cxt->s_dirty)
 		clean_context(aTHX_ cxt);
 
@@ -6546,6 +6551,7 @@ static SV *dclone(pTHX_ SV *sv)
 	 * Now, 'cxt' may refer to a new context.
 	 */
 
+	assert(cxt);
 	ASSERT(!cxt->s_dirty, ("clean context"));
 	ASSERT(!cxt->entry, ("entry will not cause new context allocation"));
 
@@ -6708,6 +6714,7 @@ last_op_in_netorder()
   if (ix) {
    dSTCXT;
 
+   assert(cxt);
    result = cxt->entry && (cxt->optype & ix) ? TRUE : FALSE;
   } else {
    result = !!last_op_in_netorder(aTHX);
