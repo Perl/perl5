@@ -496,7 +496,11 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		}
 		if (flags & HVhek_FREEKEY)
 		    Safefree(key);
-		magic_existspack(svret, mg_find(sv, PERL_MAGIC_tiedelem));
+		{
+                  MAGIC * const mg = mg_find(sv, PERL_MAGIC_tiedelem);
+                  if (mg)
+                    magic_existspack(svret, mg);
+		}
 		/* This cast somewhat evil, but I'm merely using NULL/
 		   not NULL to return the boolean exists.
 		   And I know hv is not NULL.  */
