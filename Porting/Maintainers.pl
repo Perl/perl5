@@ -381,6 +381,8 @@ use File::Glob qw(:case);
     'Encode' => {
         'DISTRIBUTION' => 'DANKOGAI/Encode-2.73.tar.gz',
         'FILES'        => q[cpan/Encode],
+        # tmp hack to make blead compile under -pedantic
+        'CUSTOMIZED'   => [ qw[ bin/enc2xs ] ],
     },
 
     'encoding::warnings' => {

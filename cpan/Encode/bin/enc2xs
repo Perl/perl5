@@ -10,7 +10,7 @@ use warnings;
 use Getopt::Std;
 use Config;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.17 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.18 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -146,6 +146,52 @@ sub verbosef {
     printf STDERR @_ if $opt{v};
 }
 
+
+# ($cpp, $static, $sized) = compiler_info($declaration)
+#
+# return some information about the compiler and compile options we're using:
+#
+#   $declaration - true if we're doing a declaration rather than a definition.
+#
+#   $cpp    - we're using C++
+#   $static - ok to declare the arrays as static
+#   $sized  - the array declarations should be sized
+
+sub compiler_info {
+    my ($declaration) = @_;
+
+    my $ccflags = $Config{ccflags};
+    if (defined $Config{ccwarnflags}) {
+        $ccflags .= " " . $Config{ccwarnflags};
+    }
+    my $compat   = $ccflags =~ /\Q-Wc++-compat/;
+    my $pedantic = $ccflags =~ /-pedantic/;
+
+    my $cpp      = ($Config{d_cplusplus} || '') eq 'define';
+
+    # The encpage_t tables contain recursive and mutually recursive
+    # references. To allow them to compile under C++ and some restrictive
+    # cc options, it may be necessary to make the tables non-static/const
+    # (thus moving them from the text to the data segment) and/or not
+    # include the size in the declaration.
+
+    my $static = !(
+                        $cpp
+                     || ($compat && $pedantic)
+                     || ($^O eq 'MacOS' && $declaration)
+                  );
+
+    # -Wc++-compat on its own warns if the array declaration is sized.
+    # The easiest way to avoid this warning is simply not to include
+    # the size in the declaration.
+    # With -pedantic as well, the issue doesn't arise because $static
+    # above becomes false.
+    my $sized  = $declaration && !($compat && !$pedantic);
+
+    return ($cpp, $static, $sized);
+}
+
+
 # This really should go first, else the die here causes empty (non-erroneous)
 # output files to be written.
 my @encfiles;
@@ -279,7 +325,7 @@ if ($doC)
 
     # push(@{$encoding{$name}},outstring(\*C,$e2u->{Cname}.'_def',$erep));
    }
-  my $cpp = ($Config{d_cplusplus} || '') eq 'define';
+  my ($cpp) = compiler_info(0);
   my $ext  = $cpp ? 'extern "C"' : "extern";
   my $exta = $cpp ? 'extern "C"' : "static";
   my $extb = $cpp ? 'extern "C"' : "";
@@ -707,15 +753,10 @@ sub addstrings
   }
  if ($a->{'Forward'})
   {
-   my $cpp = ($Config{d_cplusplus} || '') eq 'define';
-   my $var = $^O eq 'MacOS' || $cpp ? 'extern' : 'static';
-   my $const = $cpp ? '' : 'const';
-   my $ccflags = $Config{ccflags};
-   if (defined $Config{ccwarnflags}) {
-       $ccflags .= " " . $Config{ccwarnflags};
-   }
-   my $count = $ccflags =~ /-Wc\+\+-compat/ ? '' : scalar(@{$a->{'Entries'}});
-   print $fh "$var $const encpage_t $name\[$count];\n";
+   my ($cpp, $static, $sized) = compiler_info(1);
+   my $var   = $static ? 'static const' : 'extern';
+   my $count = $sized ? scalar(@{$a->{'Entries'}}) : '';
+   print $fh "$var encpage_t $name\[$count];\n";
   }
  $a->{'DoneStrings'} = 1;
  foreach my $b (@{$a->{'Entries'}})
@@ -778,7 +819,7 @@ sub outbigstring
   }
 
   $strings = length $string_acc;
-  my $cpp = ($Config{d_cplusplus} || '') eq 'define';
+  my ($cpp) = compiler_info(0);
   my $var = $cpp ? '' : 'static';
   my $definition = "\n$var const U8 $name\[$strings] = { " .
     join(',',unpack "C*",$string_acc);
@@ -805,10 +846,9 @@ sub outtable
    my ($s,$e,$out,$t,$end,$l) = @$b;
    outtable($fh,$t,$bigname) unless $t->{'Done'};
   }
- my $cpp = ($Config{d_cplusplus} || '') eq 'define';
- my $var = $cpp ? '' : 'static';
- my $const = $cpp ? '' : 'const';
- print $fh "\n$var $const encpage_t $name\[",
+ my ($cpp, $static) = compiler_info(0);
+ my $var = $static ? 'static const ' : '';
+ print $fh "\n${var}encpage_t $name\[",
    scalar(@{$a->{'Entries'}}), "] = {\n";
  foreach my $b (@{$a->{'Entries'}})
   {
