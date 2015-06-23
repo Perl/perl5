@@ -59,7 +59,7 @@ ok !Internals::SvREADONLY($h{b}),
 Internals::SvREADONLY($h{b},0);
 $h{b} =~ y/ia/ao/;
 is __PACKAGE__, 'main',
-  'turning off a cow’s readonliness did not affect sharers of the same PV';
+  'turning off a cow\'s readonliness did not affect sharers of the same PV';
 
 &Internals::SvREADONLY(\!0, 0);
 eval { ${\!0} = 7 };

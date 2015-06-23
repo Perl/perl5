@@ -733,7 +733,7 @@ is $closure_test::s2->()(), '10 cubes',
 	};
     };
     $s1->();
-    undef &$s1; # frees $s2’s prototype, causing the $s3 proto to have its
+    undef &$s1; # frees $s2's prototype, causing the $s3 proto to have its
                 # CvOUTSIDE point to $s1
     ::is $s2->()(), 3, 'cloning closure proto whose CvOUTSIDE has changed';
 }

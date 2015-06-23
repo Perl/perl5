@@ -1088,7 +1088,7 @@ sub main::pakg { &CORE::__PACKAGE__ }
 package main;
 CORE::__DATA__
 I wandered lonely as a cloud
-That floats on high o’er vales and hills,
+That floats on high o'er vales and hills,
 And all at once I saw a crowd, 
 A host of golden daffodils!
 Beside the lake, beneath the trees,

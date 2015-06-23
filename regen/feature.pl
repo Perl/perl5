@@ -276,7 +276,7 @@ for (
 	map { (my $__ = uc) =~ y/.//d; $__ } @{$BundleRanges{$_}};
     my $name = $feature{$_};
     my $NAME = uc $name;
-    if ($last && $first eq 'DEFAULT') { #  ‘>= DEFAULT’ warns
+    if ($last && $first eq 'DEFAULT') { #  '>= DEFAULT' warns
 	print $h <<EOI;
 #define FEATURE_$NAME\_IS_ENABLED \\
     ( \\
