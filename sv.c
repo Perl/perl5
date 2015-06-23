@@ -2899,47 +2899,44 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
 /* Helper for sv_2pv_flags and sv_vcatpvfn_flags.  If the NV is an
  * infinity or a not-a-number, writes the appropriate strings to the
  * buffer, including a zero byte.  On success returns the written length,
- * excluding the zero byte, on failure (not an infinity, not a nan, or the
- * maxlen too small) returns zero.
+ * excluding the zero byte, on failure (not an infinity, not a nan)
+ * returns zero, assert-fails on maxlen being too short.
  *
  * XXX for "Inf", "-Inf", and "NaN", we could have three read-only
  * shared string constants we point to, instead of generating a new
  * string for each instance. */
 STATIC size_t
 S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char plus) {
+    char* s = buffer;
     assert(maxlen >= 4);
-    if (maxlen < 4) /* "Inf\0", "NaN\0" */
-        return 0;
-    else {
-        char* s = buffer;
-        if (Perl_isinf(nv)) {
-            if (nv < 0) {
-                if (maxlen < 5) /* "-Inf\0"  */
-                    return 0;
-                *s++ = '-';
-            } else if (plus) {
-                *s++ = '+';
-            }
-            *s++ = 'I';
-            *s++ = 'n';
-            *s++ = 'f';
-        } else if (Perl_isnan(nv)) {
-            *s++ = 'N';
-            *s++ = 'a';
-            *s++ = 'N';
-            /* XXX optionally output the payload mantissa bits as
-             * "(unsigned)" (to match the nan("...") C99 function,
-             * or maybe as "(0xhhh...)"  would make more sense...
-             * provide a format string so that the user can decide?
-             * NOTE: would affect the maxlen and assert() logic.*/
+    if (Perl_isinf(nv)) {
+        if (nv < 0) {
+            if (maxlen < 5) /* "-Inf\0"  */
+                return 0;
+            *s++ = '-';
+        } else if (plus) {
+            *s++ = '+';
         }
-
-        else
-            return 0;
-        assert((s == buffer + 3) || (s == buffer + 4));
-        *s++ = 0;
-        return s - buffer - 1; /* -1: excluding the zero byte */
+        *s++ = 'I';
+        *s++ = 'n';
+        *s++ = 'f';
     }
+    else if (Perl_isnan(nv)) {
+        *s++ = 'N';
+        *s++ = 'a';
+        *s++ = 'N';
+        /* XXX optionally output the payload mantissa bits as
+         * "(unsigned)" (to match the nan("...") C99 function,
+         * or maybe as "(0xhhh...)"  would make more sense...
+         * provide a format string so that the user can decide?
+         * NOTE: would affect the maxlen and assert() logic.*/
+    }
+    else {
+      return 0;
+    }
+    assert((s == buffer + 3) || (s == buffer + 4));
+    *s++ = 0;
+    return s - buffer - 1; /* -1: excluding the zero byte */
 }
 
 /*
