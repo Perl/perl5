@@ -16739,7 +16739,7 @@ Perl_regdump(pTHX_ const regexp *r)
 	    PerlIO_printf(Perl_debug_log, "(SBOL)");
         if (r->intflags & PREGf_ANCH_GPOS)
 	    PerlIO_printf(Perl_debug_log, "(GPOS)");
-	PerlIO_putc(Perl_debug_log, ' ');
+	(void)PerlIO_putc(Perl_debug_log, ' ');
     }
     if (r->intflags & PREGf_GPOS_SEEN)
 	PerlIO_printf(Perl_debug_log, "GPOS:%"UVuf" ", (UV)r->gofs);

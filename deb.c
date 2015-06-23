@@ -135,7 +135,7 @@ S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max,
 	if (markscan <= PL_markstack + mark_max && *markscan < i) {
 	    do {
 		++markscan;
-		PerlIO_putc(Perl_debug_log, '*');
+		(void)PerlIO_putc(Perl_debug_log, '*');
 	    }
 	    while (markscan <= PL_markstack + mark_max && *markscan < i);
 	    PerlIO_printf(Perl_debug_log, "  ");

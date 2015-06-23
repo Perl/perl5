@@ -1106,7 +1106,7 @@ Perl_gv_dump(pTHX_ GV *gv)
         Perl_dump_indent(aTHX_ 1, Perl_debug_log, "-> %s",
                      generic_pv_escape( tmp, name, len, SvUTF8(sv) ));
     }
-    PerlIO_putc(Perl_debug_log, '\n');
+    (void)PerlIO_putc(Perl_debug_log, '\n');
     Perl_dump_indent(aTHX_ 0, Perl_debug_log, "}\n");
 }
 
@@ -1227,7 +1227,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 		 " ???? - " __FILE__
 		 " does not know how to handle this MG_LEN"
 		);
-            PerlIO_putc(file, '\n');
+            (void)PerlIO_putc(file, '\n');
         }
 	if (mg->mg_type == PERL_MAGIC_utf8) {
 	    const STRLEN * const cache = (STRLEN *) mg->mg_ptr;
@@ -1270,7 +1270,7 @@ Perl_do_hv_dump(pTHX_ I32 level, PerlIO *file, const char *name, HV *sv)
                                    HvNAMELEN(sv), HvNAMEUTF8(sv)));
     }
     else
-	PerlIO_putc(file, '\n');
+        (void)PerlIO_putc(file, '\n');
 }
 
 void
@@ -1285,7 +1285,7 @@ Perl_do_gv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv)
                               generic_pv_escape( tmpsv, GvNAME(sv), GvNAMELEN(sv), GvNAMEUTF8(sv) ));
     }
     else
-	PerlIO_putc(file, '\n');
+        (void)PerlIO_putc(file, '\n');
 }
 
 void
@@ -1309,7 +1309,7 @@ Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv)
                               generic_pv_escape( tmp, GvNAME(sv), GvNAMELEN(sv), GvNAMEUTF8(sv)));
     }
     else
-	PerlIO_putc(file, '\n');
+        (void)PerlIO_putc(file, '\n');
 }
 
 const struct flag_to_name first_sv_flags_names[] = {
@@ -1567,7 +1567,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	else if (SvIsCOW_normal(sv))
 	    PerlIO_printf(file, "  (COW from 0x%"UVxf")", (UV)SvUVX(sv));
 #endif
-	PerlIO_putc(file, '\n');
+	(void)PerlIO_putc(file, '\n');
     }
 
     if ((type >= SVt_PVNV && type != SVt_PVAV && type != SVt_PVHV
@@ -1660,7 +1660,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    Perl_dump_indent(aTHX_ level, file, "  ALLOC = 0x%"UVxf"\n", PTR2UV(AvALLOC(sv)));
 	}
 	else
-	    PerlIO_putc(file, '\n');
+            (void)PerlIO_putc(file, '\n');
 	Perl_dump_indent(aTHX_ level, file, "  FILL = %"IVdf"\n", (IV)AvFILLp(sv));
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %"IVdf"\n", (IV)AvMAX(sv));
 	Perl_dump_indent(aTHX_ level, file, "  ARYLEN = 0x%"UVxf"\n",
@@ -1721,7 +1721,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 			PerlIO_printf(file, ", ");
 		}
             }
-	    PerlIO_putc(file, ')');
+	    (void)PerlIO_putc(file, ')');
 	    /* The "quality" of a hash is defined as the total number of
 	       comparisons needed to access every element once, relative
 	       to the expected number needed for a random hash.
@@ -1740,10 +1740,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		pow2 = pow2 << 1;
 	    theoret = usedkeys;
 	    theoret += theoret * (theoret-1)/pow2;
-	    PerlIO_putc(file, '\n');
+	    (void)PerlIO_putc(file, '\n');
 	    Perl_dump_indent(aTHX_ level, file, "  hash quality = %.1"NVff"%%", theoret/sum*100);
 	}
-	PerlIO_putc(file, '\n');
+	(void)PerlIO_putc(file, '\n');
 	Perl_dump_indent(aTHX_ level, file, "  KEYS = %"IVdf"\n", (IV)usedkeys);
         {
             STRLEN count = 0;
@@ -1779,7 +1779,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                 PerlIO_printf(file, " (LAST = 0x%"UVxf")", (UV)HvLASTRAND_get(sv));
             }
 #endif
-            PerlIO_putc(file, '\n');
+            (void)PerlIO_putc(file, '\n');
         }
 	{
 	    MAGIC * const mg = mg_find(sv, PERL_MAGIC_symtab);
