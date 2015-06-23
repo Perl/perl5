@@ -825,8 +825,8 @@ X<directory, change>
 Changes the working directory to EXPR, if possible.  If EXPR is omitted,
 changes to the directory specified by C<$ENV{HOME}>, if set; if not,
 changes to the directory specified by C<$ENV{LOGDIR}>.  (Under VMS, the
-variable C<$ENV{SYS$LOGIN}> is also checked, and used if it is set.)  If
-neither is set, C<chdir> does nothing.  It returns true on success,
+variable C<$ENV{'SYS$LOGIN'}> is also checked, and used if it is set.)  If
+neither is set, C<chdir> does nothing and fails.  It returns true on success,
 false otherwise.  See the example under C<die>.
 
 On systems that support fchdir(2), you may pass a filehandle or

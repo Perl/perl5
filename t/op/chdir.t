@@ -10,11 +10,11 @@ BEGIN {
     # possibilities into @INC.
     unshift @INC, qw(t . lib ../lib);
     require "test.pl";
-    plan(tests => 46);
+    plan(tests => 47);
 }
 
 use Config;
-use Errno qw(ENOENT EBADF);
+use Errno qw(ENOENT EBADF EINVAL);
 
 my $IsVMS   = $^O eq 'VMS';
 
@@ -204,10 +204,13 @@ foreach my $key (@magic_envs) {
 
 {
     clean_env;
-    if ($IsVMS && !$Config{'d_setenv'}) {
-        pass("Can't reset HOME, so chdir() test meaningless");
-    } else {
+  SKIP:
+    {
+        $IsVMS && !$Config{'d_setenv'}
+          and skip "Can't reset HOME, so chdir() test meaningless", 2;
+        $! = 0;
         ok( !chdir(),                   'chdir() w/o any ENV set' );
+        is( $!+0, EINVAL,               'check $! set to EINVAL');
     }
     is( abs_path, $Cwd,             '  abs_path() agrees' );
 }
