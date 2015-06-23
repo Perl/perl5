@@ -3513,8 +3513,13 @@ tcflow(fd, action)
 	tcflush = 1
 	tcsendbreak = 2
     CODE:
-	RETVAL = ix == 1 ? tcflush(fd, action)
-	    : (ix < 1 ? tcflow(fd, action) : tcsendbreak(fd, action));
+        if (fd >= 0 && action >= 0) {
+            RETVAL = ix == 1 ? tcflush(fd, action)
+              : (ix < 1 ? tcflow(fd, action) : tcsendbreak(fd, action));
+        } else {
+            SETERRNO(EBADF,RMS_IFI);
+            RETVAL = -1;
+        }
     OUTPUT:
 	RETVAL
 
