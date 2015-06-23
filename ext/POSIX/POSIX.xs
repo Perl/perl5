@@ -3193,14 +3193,20 @@ dup2(fd1, fd2)
 	int		fd1
 	int		fd2
     CODE:
+	if (fd1 >= 0 && fd2 >= 0) {
 #ifdef WIN32
-	/* RT #98912 - More Microsoft muppetry - failing to actually implemented
-	   the well known documented POSIX behaviour for a POSIX API.
-	   http://msdn.microsoft.com/en-us/library/8syseb29.aspx   */
-	RETVAL = dup2(fd1, fd2) == -1 ? -1 : fd2;
+            /* RT #98912 - More Microsoft muppetry - failing to
+               actually implemented the well known documented POSIX
+               behaviour for a POSIX API.
+               http://msdn.microsoft.com/en-us/library/8syseb29.aspx  */
+            RETVAL = dup2(fd1, fd2) == -1 ? -1 : fd2;
 #else
-	RETVAL = dup2(fd1, fd2);
+            RETVAL = dup2(fd1, fd2);
 #endif
+        } else {
+            SETERRNO(EBADF,RMS_IFI);
+            RETVAL = -1;
+        }
     OUTPUT:
 	RETVAL
 
