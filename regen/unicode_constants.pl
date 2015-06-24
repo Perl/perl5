@@ -205,6 +205,8 @@ U+1E9E string_skip_if_undef
 
 U+FB05 string
 U+FB06 string
+U+0130 string
+U+0131 string
 
 U+2010 string
 U+D800 first FIRST_SURROGATE
