@@ -19,6 +19,8 @@ sub BEGIN {
 
 use Storable qw(store retrieve store_fd nstore_fd fd_retrieve);
 
+$Storable::flags = Storable::FLAGS_COMPAT;
+
 use Test::More tests => 21;
 
 $a = 'toto';

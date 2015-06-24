@@ -1,6 +1,7 @@
 #
 #  Copyright (c) 1995-2001, Raphael Manfredi
 #  Copyright (c) 2002-2014 by the Perl 5 Porters
+#  Copyright (c) 2015-2016 cPanel Inc
 #
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
@@ -18,11 +19,12 @@ package Storable; @ISA = qw(Exporter);
 	retrieve_fd
 	lock_store lock_nstore lock_retrieve
         file_magic read_magic
+	BLESS_OK TIE_OK FLAGS_COMPAT
 );
 
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.53_02';
+$VERSION = '2.53_03';
 
 BEGIN {
     if (eval { local $SIG{__DIE__}; require Log::Agent; 1 }) {
@@ -51,14 +53,14 @@ BEGIN {
 #
 
 BEGIN {
-	if (eval { require Fcntl; 1 } && exists $Fcntl::EXPORT_TAGS{'flock'}) {
-		Fcntl->import(':flock');
-	} else {
-		eval q{
-			sub LOCK_SH ()	{1}
-			sub LOCK_EX ()	{2}
-		};
-	}
+    if (eval { require Fcntl; 1 } && exists $Fcntl::EXPORT_TAGS{'flock'}) {
+        Fcntl->import(':flock');
+    } else {
+        eval q{
+	          sub LOCK_SH () { 1 }
+		  sub LOCK_EX () { 2 }
+	      };
+    }
 }
 
 sub CLONE {
@@ -66,8 +68,21 @@ sub CLONE {
     Storable::init_perinterp();
 }
 
+sub BLESS_OK {
+    return 2;
+}
+
+sub TIE_OK {
+    return 4;
+}
+
+sub FLAGS_COMPAT {
+    return BLESS_OK | TIE_OK;
+}
+
 # By default restricted hashes are downgraded on earlier perls.
 
+$Storable::flags = 6;
 $Storable::downgrade_restricted = 1;
 $Storable::accept_future_minor = 1;
 
@@ -77,14 +92,15 @@ XSLoader::load('Storable', $Storable::VERSION);
 # Determine whether locking is possible, but only when needed.
 #
 
-sub CAN_FLOCK; my $CAN_FLOCK; sub CAN_FLOCK {
-	return $CAN_FLOCK if defined $CAN_FLOCK;
-	require Config; import Config;
-	return $CAN_FLOCK =
-		$Config{'d_flock'} ||
-		$Config{'d_fcntl_can_lock'} ||
-		$Config{'d_lockf'};
+my $CAN_FLOCK;
+BEGIN {
+    require Config;
+    $CAN_FLOCK =
+      $Config::Config{'d_flock'} ||
+      $Config::Config{'d_fcntl_can_lock'} ||
+      $Config::Config{'d_lockf'};
 }
+sub CAN_FLOCK () { $CAN_FLOCK } 
 
 sub show_file_magic {
     print <<EOM;
@@ -200,7 +216,7 @@ sub BIN_WRITE_VERSION_NV {
 # removed.
 #
 sub store {
-	return _store(\&pstore, @_, 0);
+    return _store(\&pstore, @_, 0);
 }
 
 #
@@ -209,7 +225,7 @@ sub store {
 # Same as store, but in network order.
 #
 sub nstore {
-	return _store(\&net_pstore, @_, 0);
+    return _store(\&net_pstore, @_, 0);
 }
 
 #
@@ -218,7 +234,7 @@ sub nstore {
 # Same as store, but flock the file first (advisory locking).
 #
 sub lock_store {
-	return _store(\&pstore, @_, 1);
+    return _store(\&pstore, @_, 1);
 }
 
 #
@@ -227,48 +243,48 @@ sub lock_store {
 # Same as nstore, but flock the file first (advisory locking).
 #
 sub lock_nstore {
-	return _store(\&net_pstore, @_, 1);
+    return _store(\&net_pstore, @_, 1);
 }
 
 # Internal store to file routine
 sub _store {
-	my $xsptr = shift;
-	my $self = shift;
-	my ($file, $use_locking) = @_;
-	logcroak "not a reference" unless ref($self);
-	logcroak "wrong argument number" unless @_ == 2;	# No @foo in arglist
-	local *FILE;
-	if ($use_locking) {
-		open(FILE, ">>$file") || logcroak "can't write into $file: $!";
-		unless (&CAN_FLOCK) {
-			logcarp
-				"Storable::lock_store: fcntl/flock emulation broken on $^O";
-			return undef;
-		}
-		flock(FILE, LOCK_EX) ||
-			logcroak "can't get exclusive lock on $file: $!";
-		truncate FILE, 0;
-		# Unlocking will happen when FILE is closed
-	} else {
-		open(FILE, ">$file") || logcroak "can't create $file: $!";
-	}
-	binmode FILE;				# Archaic systems...
-	my $da = $@;				# Don't mess if called from exception handler
-	my $ret;
-	# Call C routine nstore or pstore, depending on network order
-	eval { $ret = &$xsptr(*FILE, $self) };
-	# close will return true on success, so the or short-circuits, the ()
-	# expression is true, and for that case the block will only be entered
-	# if $@ is true (ie eval failed)
-	# if close fails, it returns false, $ret is altered, *that* is (also)
-	# false, so the () expression is false, !() is true, and the block is
-	# entered.
-	if (!(close(FILE) or undef $ret) || $@) {
-		unlink($file) or warn "Can't unlink $file: $!\n";
-	}
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
-	$@ = $da;
-	return $ret;
+    my $xsptr = shift;
+    my $self = shift;
+    my ($file, $use_locking) = @_;
+    logcroak "not a reference" unless ref($self);
+    logcroak "wrong argument number" unless @_ == 2;	# No @foo in arglist
+    local *FILE;
+    if ($use_locking) {
+        open(FILE, ">>", $file) || logcroak "can't write into $file: $!";
+        unless (&CAN_FLOCK) {
+            logcarp
+              "Storable::lock_store: fcntl/flock emulation broken on $^O";
+            return undef;
+        }
+        flock(FILE, LOCK_EX) ||
+          logcroak "can't get exclusive lock on $file: $!";
+        truncate FILE, 0;
+        # Unlocking will happen when FILE is closed
+    } else {
+        open(FILE, ">", $file) || logcroak "can't create $file: $!";
+    }
+    binmode FILE;	# Archaic systems...
+    my $da = $@;	# Don't mess if called from exception handler
+    my $ret;
+    # Call C routine nstore or pstore, depending on network order
+    eval { $ret = &$xsptr(*FILE, $self) };
+    # close will return true on success, so the or short-circuits, the ()
+    # expression is true, and for that case the block will only be entered
+    # if $@ is true (ie eval failed)
+    # if close fails, it returns false, $ret is altered, *that* is (also)
+    # false, so the () expression is false, !() is true, and the block is
+    # entered.
+    if (!(close(FILE) or undef $ret) || $@) {
+        unlink($file) or warn "Can't unlink $file: $!\n";
+    }
+    logcroak $@ if $@ =~ s/\.?\n$/,/;
+    $@ = $da;
+    return $ret;
 }
 
 #
@@ -278,7 +294,7 @@ sub _store {
 # Returns undef if an I/O error occurred.
 #
 sub store_fd {
-	return _store_fd(\&pstore, @_);
+    return _store_fd(\&pstore, @_);
 }
 
 #
@@ -287,27 +303,27 @@ sub store_fd {
 # Same as store_fd, but in network order.
 #
 sub nstore_fd {
-	my ($self, $file) = @_;
-	return _store_fd(\&net_pstore, @_);
+    my ($self, $file) = @_;
+    return _store_fd(\&net_pstore, @_);
 }
 
 # Internal store routine on opened file descriptor
 sub _store_fd {
-	my $xsptr = shift;
-	my $self = shift;
-	my ($file) = @_;
-	logcroak "not a reference" unless ref($self);
-	logcroak "too many arguments" unless @_ == 1;	# No @foo in arglist
-	my $fd = fileno($file);
-	logcroak "not a valid file descriptor" unless defined $fd;
-	my $da = $@;				# Don't mess if called from exception handler
-	my $ret;
-	# Call C routine nstore or pstore, depending on network order
-	eval { $ret = &$xsptr($file, $self) };
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
-	local $\; print $file '';	# Autoflush the file if wanted
-	$@ = $da;
-	return $ret;
+    my $xsptr = shift;
+    my $self = shift;
+    my ($file) = @_;
+    logcroak "not a reference" unless ref($self);
+    logcroak "too many arguments" unless @_ == 1;	# No @foo in arglist
+    my $fd = fileno($file);
+    logcroak "not a valid file descriptor" unless defined $fd;
+    my $da = $@;		# Don't mess if called from exception handler
+    my $ret;
+    # Call C routine nstore or pstore, depending on network order
+    eval { $ret = &$xsptr($file, $self) };
+    logcroak $@ if $@ =~ s/\.?\n$/,/;
+    local $\; print $file '';	# Autoflush the file if wanted
+    $@ = $da;
+    return $ret;
 }
 
 #
@@ -317,7 +333,7 @@ sub _store_fd {
 # containing the result.
 #
 sub freeze {
-	_freeze(\&mstore, @_);
+    _freeze(\&mstore, @_);
 }
 
 #
@@ -326,22 +342,22 @@ sub freeze {
 # Same as freeze but in network order.
 #
 sub nfreeze {
-	_freeze(\&net_mstore, @_);
+    _freeze(\&net_mstore, @_);
 }
 
 # Internal freeze routine
 sub _freeze {
-	my $xsptr = shift;
-	my $self = shift;
-	logcroak "not a reference" unless ref($self);
-	logcroak "too many arguments" unless @_ == 0;	# No @foo in arglist
-	my $da = $@;				# Don't mess if called from exception handler
-	my $ret;
-	# Call C routine mstore or net_mstore, depending on network order
-	eval { $ret = &$xsptr($self) };
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
-	$@ = $da;
-	return $ret ? $ret : undef;
+    my $xsptr = shift;
+    my $self = shift;
+    logcroak "not a reference" unless ref($self);
+    logcroak "too many arguments" unless @_ == 0;	# No @foo in arglist
+    my $da = $@;	        # Don't mess if called from exception handler
+    my $ret;
+    # Call C routine mstore or net_mstore, depending on network order
+    eval { $ret = &$xsptr($self) };
+    logcroak $@ if $@ =~ s/\.?\n$/,/;
+    $@ = $da;
+    return $ret ? $ret : undef;
 }
 
 #
@@ -350,8 +366,13 @@ sub _freeze {
 # Retrieve object hierarchy from disk, returning a reference to the root
 # object of that tree.
 #
+# retrieve(file, flags)
+# flags include by default BLESS_OK=2 | TIE_OK=4
+# with flags=0 or the global $Storable::flags set to 0, no resulting object
+# will be blessed nor tied.
+#
 sub retrieve {
-	_retrieve($_[0], 0);
+    _retrieve($_[0], $_[1], 0);
 }
 
 #
@@ -360,31 +381,32 @@ sub retrieve {
 # Same as retrieve, but with advisory locking.
 #
 sub lock_retrieve {
-	_retrieve($_[0], 1);
+    _retrieve($_[0], $_[1], 1);
 }
 
 # Internal retrieve routine
 sub _retrieve {
-	my ($file, $use_locking) = @_;
-	local *FILE;
-	open(FILE, $file) || logcroak "can't open $file: $!";
-	binmode FILE;							# Archaic systems...
-	my $self;
-	my $da = $@;							# Could be from exception handler
-	if ($use_locking) {
-		unless (&CAN_FLOCK) {
-			logcarp
-				"Storable::lock_store: fcntl/flock emulation broken on $^O";
-			return undef;
-		}
-		flock(FILE, LOCK_SH) || logcroak "can't get shared lock on $file: $!";
-		# Unlocking will happen when FILE is closed
-	}
-	eval { $self = pretrieve(*FILE) };		# Call C routine
-	close(FILE);
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
-	$@ = $da;
-	return $self;
+    my ($file, $flags, $use_locking) = @_;
+    $flags = $Storable::flags unless defined $flags;
+    local *FILE;
+    open(FILE, "<", $file) || logcroak "can't open $file: $!";
+    binmode FILE;			# Archaic systems...
+    my $self;
+    my $da = $@;			# Could be from exception handler
+    if ($use_locking) {
+        unless (&CAN_FLOCK) {
+            logcarp
+              "Storable::lock_store: fcntl/flock emulation broken on $^O";
+            return undef;
+        }
+        flock(FILE, LOCK_SH) || logcroak "can't get shared lock on $file: $!";
+        # Unlocking will happen when FILE is closed
+    }
+    eval { $self = pretrieve(*FILE, $flags) };		# Call C routine
+    close(FILE);
+    logcroak $@ if $@ =~ s/\.?\n$/,/;
+    $@ = $da;
+    return $self;
 }
 
 #
@@ -393,15 +415,16 @@ sub _retrieve {
 # Same as retrieve, but perform from an already opened file descriptor instead.
 #
 sub fd_retrieve {
-	my ($file) = @_;
-	my $fd = fileno($file);
-	logcroak "not a valid file descriptor" unless defined $fd;
-	my $self;
-	my $da = $@;							# Could be from exception handler
-	eval { $self = pretrieve($file) };		# Call C routine
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
-	$@ = $da;
-	return $self;
+    my ($file, $flags) = @_;
+    $flags = $Storable::flags unless defined $flags;
+    my $fd = fileno($file);
+    logcroak "not a valid file descriptor" unless defined $fd;
+    my $self;
+    my $da = $@;				# Could be from exception handler
+    eval { $self = pretrieve($file, $flags) };	# Call C routine
+    logcroak $@ if $@ =~ s/\.?\n$/,/;
+    $@ = $da;
+    return $self;
 }
 
 sub retrieve_fd { &fd_retrieve }		# Backward compatibility
@@ -412,15 +435,21 @@ sub retrieve_fd { &fd_retrieve }		# Backward compatibility
 # Recreate objects in memory from an existing frozen image created
 # by freeze.  If the frozen image passed is undef, return undef.
 #
+# thaw(frozen_obj, flags)
+# flags include by default BLESS_OK=2 | TIE_OK=4
+# with flags=0 or the global $Storable::flags set to 0, no resulting object
+# will be blessed nor tied.
+#
 sub thaw {
-	my ($frozen) = @_;
-	return undef unless defined $frozen;
-	my $self;
-	my $da = $@;							# Could be from exception handler
-	eval { $self = mretrieve($frozen) };	# Call C routine
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
-	$@ = $da;
-	return $self;
+    my ($frozen, $flags) = @_;
+    $flags = $Storable::flags unless defined $flags;
+    return undef unless defined $frozen;
+    my $self;
+    my $da = $@;			        # Could be from exception handler
+    eval { $self = mretrieve($frozen, $flags) };# Call C routine
+    logcroak $@ if $@ =~ s/\.?\n$/,/;
+    $@ = $da;
+    return $self;
 }
 
 1;

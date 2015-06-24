@@ -18,6 +18,8 @@ sub BEGIN {
 
 use Storable qw(freeze thaw);
 
+$Storable::flags = Storable::FLAGS_COMPAT;
+
 use Test::More tests => 19;
 
 package OVERLOADED;
@@ -90,6 +92,7 @@ if (ord ('A') == 193) { # EBCDIC.
 
 # see note at the end of do_retrieve in Storable.xs about why this test has to
 # use a reference to an overloaded reference, rather than just a reference.
+require HAS_OVERLOAD;
 my $t = eval {thaw $f};
 print "# $@" if $@;
 is($@, "");
