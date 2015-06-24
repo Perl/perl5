@@ -6381,6 +6381,7 @@ PP(pp_refassign)
 	SvSETMAGIC(left);
 	break;
     case SVt_PVAV:
+        assert(key);
 	if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
 	    S_localise_aelem_lval(aTHX_ (AV *)left, key,
 					SvCANEXISTDELETE(left));
@@ -6388,9 +6389,11 @@ PP(pp_refassign)
 	av_store((AV *)left, SvIV(key), SvREFCNT_inc_simple_NN(SvRV(sv)));
 	break;
     case SVt_PVHV:
-	if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO))
+        if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
+            assert(key);
 	    S_localise_helem_lval(aTHX_ (HV *)left, key,
 					SvCANEXISTDELETE(left));
+        }
 	(void)hv_store_ent((HV *)left, key, SvREFCNT_inc_simple_NN(SvRV(sv)), 0);
     }
     if (PL_op->op_flags & OPf_MOD)
