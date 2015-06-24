@@ -191,7 +191,7 @@ static const char * const si_names[] = {
     "DESTROY",
     "WARNHOOK",
     "DIEHOOK",
-    "REQUIRE"
+    "REQUIRE",
     "MULTICALL"
 };
 #endif
