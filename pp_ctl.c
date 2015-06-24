@@ -2455,7 +2455,7 @@ PP(pp_return)
         if (nargs) {
             if (cx->blk_gimme == G_ARRAY) {
                 /* shift return args to base of call stack frame */
-                Move(MARK + 1, oldsp + 1, nargs, SV**);
+                Move(MARK + 1, oldsp + 1, nargs, SV*);
                 PL_stack_sp  = oldsp + nargs;
             }
         }
