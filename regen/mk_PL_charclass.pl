@@ -51,6 +51,7 @@ my @properties = qw(
 
 # Read in the case fold mappings.
 my %folded_closure;
+my %simple_folded_closure;
 my @hex_non_final_folds;
 my @non_latin1_simple_folds;
 my @folds;
@@ -118,8 +119,14 @@ BEGIN { # Have to do this at compile time because using user-defined \p{property
         for my $i (0 .. @folded - 1) {
             my $hex_fold = $folded[$i];
             my $fold = hex $hex_fold;
-            push @{$folded_closure{$fold}}, $from if $fold < 256;
-            push @{$folded_closure{$from}}, $fold if $from < 256;
+            if ($fold < 256) {
+                push @{$folded_closure{$fold}}, $from;
+                push @{$simple_folded_closure{$fold}}, $from if $fold_type ne 'F';
+            }
+            if ($from < 256) {
+                push @{$folded_closure{$from}}, $fold;
+                push @{$simple_folded_closure{$from}}, $fold if $fold_type ne 'F';
+            }
 
             if (($fold_type eq 'C' || $fold_type eq 'S')
                 && ($fold < 256 != $from < 256))
@@ -153,11 +160,16 @@ BEGIN { # Have to do this at compile time because using user-defined \p{property
             push @{$folded_closure{$from}}, @{$folded_closure{$folded}};
         }
     }
+    foreach my $folded (keys %simple_folded_closure) {
+        foreach my $from (grep { $_ < 256 } @{$simple_folded_closure{$folded}}) {
+            push @{$simple_folded_closure{$from}}, @{$simple_folded_closure{$folded}};
+        }
+    }
 
     # We have the single-character folds that cross the 255/256, like KELVIN
     # SIGN => 'k', but we need the closure, so add like 'K' to it
     foreach my $folded (@non_latin1_simple_folds) {
-        foreach my $fold (@{$folded_closure{$folded}}) {
+        foreach my $fold (@{$simple_folded_closure{$folded}}) {
             if ($fold < 256 && ! grep { $fold == $_ } @non_latin1_simple_folds) {
                 push @non_latin1_simple_folds, $fold;
             }
