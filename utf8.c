@@ -2238,6 +2238,28 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
                               "resolved to \"\\x{FB06}\".");
                 goto return_ligature_st;
             }
+
+#if    UNICODE_MAJOR_VERSION   == 3         \
+    && UNICODE_DOT_VERSION     == 0         \
+    && UNICODE_DOT_DOT_VERSION == 1
+#           define DOTTED_I   LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8
+
+            /* And special case this on this Unicode version only, for the same
+             * reaons the other two are special cased.  They would cross the
+             * 255/256 boundary which is forbidden under /l, and so the code
+             * wouldn't catch that they are equivalent (which they are only in
+             * this release) */
+            else if (UTF8SKIP(p) == sizeof(DOTTED_I) - 1
+                     && memEQ((char *) p, DOTTED_I, sizeof(DOTTED_I) - 1))
+            {
+                /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
+                Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
+                              "Can't do fc(\"\\x{0130}\") on non-UTF-8 locale; "
+                              "resolved to \"\\x{0131}\".");
+                goto return_dotless_i;
+            }
+#endif
+
 	    return check_locale_boundary_crossing(p, result, ustrp, lenp);
 	}
 	else if (! (flags & FOLD_FLAGS_NOMIX_ASCII)) {
@@ -2271,6 +2293,14 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
                     else if (original == LATIN_SMALL_LIGATURE_LONG_S_T) {
                         goto return_ligature_st;
                     }
+#if    UNICODE_MAJOR_VERSION   == 3         \
+    && UNICODE_DOT_VERSION     == 0         \
+    && UNICODE_DOT_DOT_VERSION == 1
+
+                    else if (original == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
+                        goto return_dotless_i;
+                    }
+#endif
 		    Copy(p, ustrp, *lenp, char);
 		    return original;
 		}
@@ -2314,6 +2344,18 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
     *lenp = sizeof(LATIN_SMALL_LIGATURE_ST_UTF8) - 1;
     Copy(LATIN_SMALL_LIGATURE_ST_UTF8, ustrp, *lenp, U8);
     return LATIN_SMALL_LIGATURE_ST;
+
+#if    UNICODE_MAJOR_VERSION   == 3         \
+    && UNICODE_DOT_VERSION     == 0         \
+    && UNICODE_DOT_DOT_VERSION == 1
+
+  return_dotless_i:
+    *lenp = sizeof(LATIN_SMALL_LETTER_DOTLESS_I_UTF8) - 1;
+    Copy(LATIN_SMALL_LETTER_DOTLESS_I_UTF8, ustrp, *lenp, U8);
+    return LATIN_SMALL_LETTER_DOTLESS_I;
+
+#endif
+
 }
 
 /* Note:
@@ -3266,7 +3308,24 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     * currently handle.  But it also means that FB05 and FB06 are equivalent in
     * a 1-1 mapping which we should handle, and this relationship may not be in
     * the main table.  Therefore this function examines all the multi-char
-    * sequences and adds the 1-1 mappings that come out of that.  */
+    * sequences and adds the 1-1 mappings that come out of that.
+    *
+    * XXX This function was originally intended to be multipurpose, but its
+    * only use is quite likely to remain for constructing the inversion of
+    * the CaseFolding (//i) property.  If it were more general purpose for
+    * regex patterns, it would have to do the FB05/FB06 game for simple folds,
+    * because certain folds are prohibited under /iaa and /il.  As an example,
+    * in Unicode 3.0.1 both U+0130 and U+0131 fold to 'i', and hence are both
+    * equivalent under /i.  But under /iaa and /il, the folds to 'i' are
+    * prohibited, so we would not figure out that they fold to each other.
+    * Code could be written to automatically figure this out, similar to the
+    * code that does this for multi-character folds, but this is the only case
+    * where something like this is ever likely to happen, as all the single
+    * char folds to The 0-255 range are now quite settled.  Instead there is a
+    * little special code that is compiled only for this Unicode version.  This
+    * is smaller and didn't require much coding time to do.  But this makes
+    * this routine strongly tied to being used just for CaseFolding.  If ever
+    * it should be generalized, this would have to be fixed */
 
     U8 *l, *lend;
     STRLEN lcur;
@@ -3409,7 +3468,24 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     } /* End of specials */
 
     /* read $swash->{LIST} */
+
+#if    UNICODE_MAJOR_VERSION   == 3         \
+    && UNICODE_DOT_VERSION     == 0         \
+    && UNICODE_DOT_DOT_VERSION == 1
+
+    /* For this version only U+130 and U+131 are equivalent under qr//i.  Add a
+     * rule so that things work under /iaa and /il */
+
+    SV * mod_listsv = sv_mortalcopy(*listsvp);
+    sv_catpv(mod_listsv, "130\t130\t131\n");
+    l = (U8*)SvPV(mod_listsv, lcur);
+
+#else
+
     l = (U8*)SvPV(*listsvp, lcur);
+
+#endif
+
     lend = l + lcur;
 
     /* Go through each input line */

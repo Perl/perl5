@@ -12030,10 +12030,8 @@ sub filter_old_style_case_folding {
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     my @fields = split /\s*;\s*/;
-    if ($fields[0] =~ /^ 013 [01] $/x) { # The two turkish fields
-        $fields[1] = 'I';
-    }
-    elsif ($fields[1] eq 'L') {
+
+    if ($fields[1] eq 'L') {
         $fields[1] = 'C';             # L => C always
     }
     elsif ($fields[1] eq 'E') {

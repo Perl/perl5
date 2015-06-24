@@ -607,7 +607,29 @@ is($casefold->{turkic}, "", 'casefold native(0xDF) turkic');
 
 # Do different tests depending on if version < 3.2, or not.
 my $v_unicode_version = pack "C*", split /\./, Unicode::UCD::UnicodeVersion();
-if ($v_unicode_version lt v3.2.0) {
+if ($v_unicode_version eq v3.0.1) {
+        # In this release, there was no special Turkic values.
+        # Both 0x130 and 0x131 folded to 'i'.
+
+	$casefold = casefold(0x130);
+
+	is($casefold->{code}, '0130', 'casefold 0x130 code');
+	is($casefold->{status}, 'C' , 'casefold 0x130 status');
+	is($casefold->{mapping}, $i_code, 'casefold 0x130 mapping');
+	is($casefold->{full}, $i_code, 'casefold 0x130 full');
+	is($casefold->{simple}, $i_code, 'casefold 0x130 simple');
+	is($casefold->{turkic}, "", 'casefold 0x130 turkic');
+
+	$casefold = casefold(0x131);
+
+	is($casefold->{code}, '0131', 'casefold 0x131 code');
+	is($casefold->{status}, 'C' , 'casefold 0x131 status');
+	is($casefold->{mapping}, $i_code, 'casefold 0x131 mapping');
+	is($casefold->{full}, $i_code, 'casefold 0x131 full');
+	is($casefold->{simple}, $i_code, 'casefold 0x131 simple');
+	is($casefold->{turkic}, "", 'casefold 0x131 turkic');
+}
+elsif ($v_unicode_version lt v3.2.0) {
 	$casefold = casefold(0x130);
 
 	is($casefold->{code}, '0130', 'casefold 0x130 code');

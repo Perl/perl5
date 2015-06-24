@@ -14043,6 +14043,21 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
 
 #endif
 
+#if    UNICODE_MAJOR_VERSION < 3                                        \
+   || (UNICODE_MAJOR_VERSION == 3 && UNICODE_DOT_VERSION == 0)
+        
+        /* In 3.0 and earlier, U+0130 folded simply to 'i'; and in 3.0.1 so did
+         * U+0131.  */
+        case 'i':
+        case 'I':
+          *invlist =
+             add_cp_to_invlist(*invlist, LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
+#   if UNICODE_DOT_DOT_VERSION == 1
+          *invlist = add_cp_to_invlist(*invlist, LATIN_SMALL_LETTER_DOTLESS_I);
+#   endif
+            break;
+#endif
+
         default:
             /* Use deprecated warning to increase the chances of this being
              * output */
