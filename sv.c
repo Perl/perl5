@@ -1679,6 +1679,7 @@ Perl_sv_setiv(pTHX_ SV *const sv, const IV i)
 	/* diag_listed_as: Can't coerce %s to %s in %s */
 	Perl_croak(aTHX_ "Can't coerce %s to integer in %s", sv_reftype(sv,0),
 		   OP_DESC(PL_op));
+        break;
     default: NOOP;
     }
     (void)SvIOK_only(sv);			/* validate number */
@@ -1790,6 +1791,7 @@ Perl_sv_setnv(pTHX_ SV *const sv, const NV num)
 	/* diag_listed_as: Can't coerce %s to %s in %s */
 	Perl_croak(aTHX_ "Can't coerce %s to number in %s", sv_reftype(sv,0),
 		   OP_DESC(PL_op));
+        break;
     default: NOOP;
     }
     SvNV_set(sv, num);
