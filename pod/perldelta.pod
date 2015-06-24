@@ -375,7 +375,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A leak in the XS typemap caused one scalar to be leaked each time a C<FILE *>
+or a C<PerlIO *> was C<OUTPUT:>ed or imported to Perl, since perl 5.000. These
+particular typemap entries are thought to be extremely rarely used by XS
+modules. [perl #124181]
 
 =back
 
