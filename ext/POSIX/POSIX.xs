@@ -3431,7 +3431,7 @@ strtol(str, base = 0)
     PPCODE:
 	if (base == 0 || (base >= 2 && base <= 36)) {
             num = strtol(str, &unparsed, base);
-#if IVSIZE <= LONGSIZE
+#if IVSIZE < LONGSIZE
             if (num < IV_MIN || num > IV_MAX)
                 PUSHs(sv_2mortal(newSVnv((double)num)));
             else
