@@ -1559,6 +1559,10 @@ defined in the C<:alias> import argument to C<use charnames>, but they
 could be defined by a translator installed into C<$^H{charnames}>.
 See L<charnames/CUSTOM ALIASES>.
 
+=item chdir() on unopened filehandle %s
+
+(W unopened) You tried chdir() on a filehandle that was never opened.
+
 =item \C no longer supported in regex; marked by S<<-- HERE> in m/%s/
 
 (F) The \C character class used to allow a match of single byte within a

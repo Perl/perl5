@@ -3599,6 +3599,16 @@ PP(pp_chdir)
 	SV * const sv = POPs;
 	if (PL_op->op_flags & OPf_SPECIAL) {
 	    gv = gv_fetchsv(sv, 0, SVt_PVIO);
+            if (!gv) {
+                if (ckWARN(WARN_UNOPENED)) {
+                    Perl_warner(aTHX_ packWARN(WARN_UNOPENED),
+                                "chdir() on unopened filehandle %" SVf, sv);
+                }
+                SETERRNO(EBADF,RMS_IFI);
+                PUSHi(0);
+                TAINT_PROPER("chdir");
+                RETURN;
+            }
 	}
         else if (!(gv = MAYBE_DEREF_GV(sv)))
 		tmps = SvPV_nomg_const_nolen(sv);

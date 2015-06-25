@@ -10,11 +10,11 @@ BEGIN {
     # possibilities into @INC.
     unshift @INC, qw(t . lib ../lib);
     require "./test.pl";
-    plan(tests => 39);
+    plan(tests => 44);
 }
 
 use Config;
-use Errno qw(ENOENT);
+use Errno qw(ENOENT EBADF);
 
 my $IsVMS   = $^O eq 'VMS';
 
@@ -54,7 +54,7 @@ SKIP: {
 $Cwd = abs_path;
 
 SKIP: {
-    skip("no fchdir", 16) unless $has_fchdir;
+    skip("no fchdir", 21) unless $has_fchdir;
     my $has_dirfd = ($Config{d_dirfd} || $Config{d_dir_dd_fd} || "") eq "define";
     ok(opendir(my $dh, "."), "opendir .");
     ok(open(my $fh, "<", "op"), "open op");
@@ -107,6 +107,13 @@ SKIP: {
     ok(closedir(H), "closedir");
     ok(chdir(H), "fchdir to base");
     ok(-f "cond.t", "verify that we are in 'base'");
+    ok(close(H), "close");
+    $! = 0;
+    ok(!chdir(H), "check we can't chdir to closed handle");
+    is(0+$!, EBADF, 'check $! set appropriately');
+    $! = 0;
+    ok(!chdir(NEVEROPENED), "check we can't chdir to never opened handle");
+    is(0+$!, EBADF, 'check $! set appropriately');
     chdir ".." or die $!;
 }
 
