@@ -9971,7 +9971,6 @@ Perl_ck_fun(pTHX_ OP *o)
 		        )
 		    bad_type_pv(numargs, "array", o, kid);
 		else if (kid->op_type != OP_RV2AV && kid->op_type != OP_PADAV) {
-		    /* diag_listed_as: Experimental push on scalar is now forbidden */
                     yyerror_pv(Perl_form(aTHX_ "Experimental %s on scalar is now forbidden",
                                          PL_op_desc[type]), 0);
 		}
@@ -12043,7 +12042,6 @@ Perl_ck_each(pTHX_ OP *o)
 		    /* we let ck_fun handle it */
 		    break;
 	    default:
-                /* diag_listed_as: Experimental keys on scalar is now forbidden */
                 Perl_croak_nocontext(
                     "Experimental %s on scalar is now forbidden",
                     PL_op_desc[orig_type]);

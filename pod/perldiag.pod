@@ -2115,39 +2115,10 @@ L<perlrecharclass/Extended Bracketed Character Classes>.
     use feature "signatures";
     sub foo ($left, $right) { ... }
 
-=item Experimental each on scalar is now forbidden
+=item Experimental %s on scalar is now forbidden
 
-(F) An experimental feature added in Perl 5.14 allowed C<each> to be called
-with a scalar argument. This experiment is considered unsuccessful, and has
-been removed. The C<postderef> feature may meet your needs better.
-
-=item Experimental keys on scalar is now forbidden
-
-(F) An experimental feature added in Perl 5.14 allowed C<keys> to be called
-with a scalar argument. This experiment is considered unsuccessful, and has
-been removed. The C<postderef> feature may meet your needs better.
-
-=item Experimental push on scalar is now forbidden
-
-(F) An experimental feature added in Perl 5.14 allowed C<push> to be called
-with a scalar argument. This experiment is considered unsuccessful, and has
-been removed. The C<postderef> feature may meet your needs better.
-
-=item Experimental pop on scalar is now forbidden
-
-(F) An experimental feature added in Perl 5.14 allowed C<pop> to be called
-with a scalar argument. This experiment is considered unsuccessful, and has
-been removed. The C<postderef> feature may meet your needs better.
-
-=item Experimental shift on scalar is now forbidden
-
-(F) An experimental feature added in Perl 5.14 allowed C<shift> to be called
-with a scalar argument. This experiment is considered unsuccessful, and has
-been removed. The C<postderef> feature may meet your needs better.
-
-=item Experimental splice on scalar is now forbidden
-
-(F) An experimental feature added in Perl 5.14 allowed C<splice> to be called
+(F) An experimental feature added in Perl 5.14 allowed C<each>, C<keys>,
+C<push>, C<pop>, C<shift>, C<splice>, C<unshift>, and C<values> to be called
 with a scalar argument. This experiment is considered unsuccessful, and has
 been removed. The C<postderef> feature may meet your needs better.
 
@@ -2158,18 +2129,6 @@ been removed. The C<postderef> feature may meet your needs better.
     no warnings 'experimental::lexical_subs';
     use feature 'lexical_subs';
     my sub foo { ... }
-
-=item Experimental unshift on scalar is now forbidden
-
-(F) An experimental feature added in Perl 5.14 allowed C<unshift> to be called
-with a scalar argument. This experiment is considered unsuccessful, and has
-been removed. The C<postderef> feature may meet your needs better.
-
-=item Experimental values on scalar is now forbidden
-
-(F) An experimental feature added in Perl 5.14 allowed C<values> to be called
-with a scalar argument. This experiment is considered unsuccessful, and has
-been removed. The C<postderef> feature may meet your needs better.
 
 =item Explicit blessing to '' (assuming package main)
 
