@@ -2658,7 +2658,9 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
                             TRACEME(("(#%d) key '%s'", i, key));
                         }
                         if (flags & SHV_K_ISSV) {
-                            store(aTHX_ cxt, key_sv);
+                            int ret;
+                            if ((ret = store(aTHX_ cxt, key_sv)))
+                                goto out;
                         } else {
                             WLEN(len);
                             if (len)
