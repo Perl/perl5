@@ -215,7 +215,7 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
             /* ensure we don't try to create ridiculously large
              * SVs on small platforms
              */
-#if SSize_t_size < Off_t_size
+#if Size_t_size < Off_t_size
             if (s->posn > SSize_t_MAX) {
 #ifdef EFBIG
                 SETERRNO(EFBIG, SS_BUFFEROVF);
