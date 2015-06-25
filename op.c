@@ -8449,9 +8449,14 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	gv = gv_fetchpvs("__ANON__::__ANON__", gv_fetch_flags, SVt_PVCV);
 	has_name = FALSE;
     }
-    if (!ec)
-	move_proto_attr(&proto, &attrs,
-			isGV(gv) ? gv : (GV *)cSVOPo->op_sv);
+    if (!ec) {
+        if (isGV(gv)) {
+            move_proto_attr(&proto, &attrs, gv);
+        } else {
+            assert(cSVOPo);
+            move_proto_attr(&proto, &attrs, (GV *)cSVOPo->op_sv);
+        }
+    }
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
