@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 96;
+plan tests => 97;
 our $TODO;
 
 my $deprecated = 0;
@@ -215,6 +215,30 @@ package _99850 {
 }
 like $@, qr/^Goto undefined subroutine &_99850::reftype at /,
    'goto &foo undefining &foo on sub cleanup';
+
+# When croaking after discovering that the new CV you're about to goto is
+# undef, make sure that the old CV isn't doubly freed.
+
+package Do_undef {
+    my $count;
+
+    # creating a new closure here encourages any prematurely freed
+    # CV to be reallocated
+    sub DESTROY { undef &undef_sub; my $x = sub { $count } }
+
+    sub f {
+        $count++;
+        my $guard = bless []; # trigger DESTROY during goto
+        *undef_sub = sub {};
+        goto &undef_sub
+    }
+
+    for (1..10) {
+        eval { f() };
+    }
+    ::is($count, 10, "goto undef_sub safe");
+}
+
 
 # bug #22181 - this used to coredump or make $x undefined, due to
 # erroneous popping of the inner BLOCK context
