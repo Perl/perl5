@@ -1672,11 +1672,6 @@ PP(pp_sort)
 	    PUSHBLOCK(cx, CXt_NULL, PL_stack_base);
 	    if (!(flags & OPf_SPECIAL)) {
 		cx->cx_type = CXt_SUB;
-		/* If our comparison routine is already active (CvDEPTH is
-		 * is not 0),  then PUSHSUB does not increase the refcount,
-		 * so we have to do it ourselves, because the LEAVESUB fur-
-		 * ther down lowers it. */
-		if (CvDEPTH(cv)) SvREFCNT_inc_simple_void_NN(cv);
 		PUSHSUB(cx);
 		if (!is_xsub) {
 		    PADLIST * const padlist = CvPADLIST(cv);

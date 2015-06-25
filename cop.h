@@ -586,8 +586,7 @@ struct block_format {
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
 	cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;			\
 	cx->blk_sub.retop = NULL;					\
-	if (!CvDEPTH(cv))						\
-	    SvREFCNT_inc_simple_void_NN(cv);
+        SvREFCNT_inc_simple_void_NN(cv);
 
 #define PUSHSUB_GET_LVALUE_MASK(func) \
 	/* If the context is indeterminate, then only the lvalue */	\
@@ -619,7 +618,7 @@ struct block_format {
 	cx->blk_format.retop = (retop);					\
 	cx->blk_format.dfoutgv = PL_defoutgv;				\
 	cx->blk_u16 = 0;                                                \
-	if (!CvDEPTH(cv)) SvREFCNT_inc_simple_void_NN(cv);		\
+	SvREFCNT_inc_simple_void_NN(cv);		                \
 	CvDEPTH(cv)++;							\
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
 
@@ -668,8 +667,7 @@ struct block_format {
         }                                                               \
 	sv = MUTABLE_SV(cx->blk_sub.cv);				\
 	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
-	if (sv && (CvDEPTH((const CV*)sv) = olddepth))			\
-	    sv = NULL;						\
+        CvDEPTH((const CV*)sv) = olddepth;                              \
     } STMT_END
 
 #define LEAVESUB(sv)							\
@@ -685,8 +683,8 @@ struct block_format {
         cx->blk_u16 |= CxPOPSUB_DONE;                                   \
 	setdefout(dfuot);						\
 	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
-	if (!--CvDEPTH(cv))						\
-	    SvREFCNT_dec_NN(cx->blk_format.cv);				\
+	--CvDEPTH(cv);                                                  \
+	SvREFCNT_dec_NN(cx->blk_format.cv);				\
 	SvREFCNT_dec_NN(dfuot);						\
         }                                                               \
     } STMT_END
@@ -1243,9 +1241,8 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 #define POP_MULTICALL \
     STMT_START {							\
 	cx = &cxstack[cxstack_ix];					\
-        if (! ((CvDEPTH(multicall_cv) = cx->blk_sub.olddepth)) ) {	\
-		LEAVESUB(multicall_cv);					\
-	}								\
+        CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
+        LEAVESUB(multicall_cv);     					\
 	POPBLOCK(cx,PL_curpm);						\
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
@@ -1263,9 +1260,8 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PADLIST * const padlist = CvPADLIST(cv);			\
 	cx = &cxstack[cxstack_ix];					\
 	assert(cx->cx_type & CXp_MULTICALL);				\
-	if (! ((CvDEPTH(multicall_cv) = cx->blk_sub.olddepth)) ) {	\
-		LEAVESUB(multicall_cv);					\
-	}								\
+	CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
+        LEAVESUB(multicall_cv);					        \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
 	PUSHSUB(cx);							\
         if (!(flags & CXp_SUB_RE_FAKE))                                 \

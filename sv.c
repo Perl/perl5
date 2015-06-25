@@ -13942,9 +13942,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    ncx->blk_oldcop = (COP*)any_dup(ncx->blk_oldcop, param->proto_perl);
 	    switch (CxTYPE(ncx)) {
 	    case CXt_SUB:
-		ncx->blk_sub.cv		= (ncx->blk_sub.olddepth == 0
-					   ? cv_dup_inc(ncx->blk_sub.cv, param)
-					   : cv_dup(ncx->blk_sub.cv,param));
+		ncx->blk_sub.cv		= cv_dup_inc(ncx->blk_sub.cv, param);
 		if(CxHASARGS(ncx)){
 		    ncx->blk_sub.argarray = av_dup_inc(ncx->blk_sub.argarray,param);
 		    ncx->blk_sub.savearray = av_dup_inc(ncx->blk_sub.savearray,param);

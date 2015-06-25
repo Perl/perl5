@@ -2742,9 +2742,10 @@ PP(pp_goto)
 	    }
 	    /* We donate this refcount later to the callee’s pad. */
 	    SvREFCNT_inc_simple_void(arg);
-	    if (CxTYPE(cx) == CXt_SUB &&
-		!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))
-		SvREFCNT_dec(cx->blk_sub.cv);
+	    if (CxTYPE(cx) == CXt_SUB) {
+		CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth;
+                SvREFCNT_dec_NN(cx->blk_sub.cv);
+            }
 	    oldsave = PL_scopestack[PL_scopestack_ix - 1];
 	    LEAVE_SCOPE(oldsave);
 
@@ -2821,9 +2822,8 @@ PP(pp_goto)
 		cx->blk_sub.olddepth = CvDEPTH(cv);
 
 		CvDEPTH(cv)++;
-		if (CvDEPTH(cv) < 2)
-		    SvREFCNT_inc_simple_void_NN(cv);
-		else {
+                SvREFCNT_inc_simple_void_NN(cv);
+		if (CvDEPTH(cv) > 1) {
 		    if (CvDEPTH(cv) == PERL_SUB_DEPTH_WARN && ckWARN(WARN_RECURSION))
 			sub_crush_depth(cv);
 		    pad_push(padlist, CvDEPTH(cv));
