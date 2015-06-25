@@ -3904,7 +3904,7 @@ PP(pp_mkdir)
     STRLEN len;
     const char *tmps;
     bool copy = FALSE;
-    const int mode = (MAXARG > 1 && (TOPs||((void)POPs,0))) ? POPi : 0777;
+    const unsigned int mode = (MAXARG > 1 && (TOPs||((void)POPs,0))) ? POPu : 0777;
 
     TRIMSLASHES(tmps,len,copy);
 
