@@ -2740,15 +2740,18 @@ PP(pp_goto)
 		}
 		else CLEAR_ARGARRAY(av);
 	    }
+
 	    /* We donate this refcount later to the callee’s pad. */
 	    SvREFCNT_inc_simple_void(arg);
+
+	    assert(PL_scopestack_ix == cx->blk_oldscopesp);
+	    oldsave = PL_scopestack[cx->blk_oldscopesp - 1];
+	    LEAVE_SCOPE(oldsave);
+
 	    if (CxTYPE(cx) == CXt_SUB) {
 		CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth;
                 SvREFCNT_dec_NN(cx->blk_sub.cv);
             }
-	    assert(PL_scopestack_ix == cx->blk_oldscopesp);
-	    oldsave = PL_scopestack[cx->blk_oldscopesp - 1];
-	    LEAVE_SCOPE(oldsave);
 
 	    /* A destructor called during LEAVE_SCOPE could have undefined
 	     * our precious cv.  See bug #99850. */
