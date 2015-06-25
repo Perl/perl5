@@ -5506,7 +5506,13 @@ PP(pp_ggrent)
 	grent = (const struct group *)getgrnam(name);
     }
     else if (which == OP_GGRGID) {
+#if Gid_t_sign == 1
+	const Gid_t gid = POPu;
+#elif Gid_t_sign == -1
 	const Gid_t gid = POPi;
+#else
+#  error "Unexpected Gid_t_sign"
+#endif
 	grent = (const struct group *)getgrgid(gid);
     }
     else
