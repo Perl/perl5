@@ -6418,13 +6418,16 @@ PP(pp_lvref)
 	mg->mg_flags |= MGf_PERSIST;
     if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
       if (elem) {
-	MAGIC *mg;
-	HV *stash;
-	const bool can_preserve = SvCANEXISTDELETE(arg);
-	if (SvTYPE(arg) == SVt_PVAV)
-	    S_localise_aelem_lval(aTHX_ (AV *)arg, elem, can_preserve);
-	else
-	    S_localise_helem_lval(aTHX_ (HV *)arg, elem, can_preserve);
+        MAGIC *mg;
+        HV *stash;
+        assert(arg);
+        {
+            const bool can_preserve = SvCANEXISTDELETE(arg);
+            if (SvTYPE(arg) == SVt_PVAV)
+              S_localise_aelem_lval(aTHX_ (AV *)arg, elem, can_preserve);
+            else
+              S_localise_helem_lval(aTHX_ (HV *)arg, elem, can_preserve);
+        }
       }
       else if (arg) {
 	S_localise_gv_slot(aTHX_ (GV *)arg, 
