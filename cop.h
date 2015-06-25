@@ -571,8 +571,8 @@ struct block_format {
 };
 
 /* base for the next two macros. Don't use directly.
- * Note that the refcnt of the cv is incremented twice;  The CX one is
- * decremented by LEAVESUB, the other by LEAVE. */
+ * The context frame holds a reference to the CV so that it can't be
+ * freed while we're executing it */
 
 #define PUSHSUB_BASE(cx)						\
 	ENTRY_PROBE(CvNAMED(cv)						\
@@ -586,11 +586,8 @@ struct block_format {
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
 	cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;			\
 	cx->blk_sub.retop = NULL;					\
-	if (!CvDEPTH(cv)) {						\
-	    SvREFCNT_inc_simple_void_NN(cv);				\
-	    SvREFCNT_inc_simple_void_NN(cv);				\
-	    SAVEFREESV(cv);						\
-	}
+	if (!CvDEPTH(cv))						\
+	    SvREFCNT_inc_simple_void_NN(cv);
 
 #define PUSHSUB_GET_LVALUE_MASK(func) \
 	/* If the context is indeterminate, then only the lvalue */	\
