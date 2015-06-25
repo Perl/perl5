@@ -417,6 +417,7 @@ static MAGIC *THX_sv_magicext(pTHX_ SV *sv, SV *obj, int type,
 #define INIT_STCXT							\
 	dSTCXT;									\
 	NEW_STORABLE_CXT_OBJ(cxt);				\
+	assert(perinterp_sv);					\
 	sv_setiv(perinterp_sv, PTR2IV(cxt->my_sv))
 
 #define SET_STCXT(x)								\
