@@ -15642,9 +15642,9 @@ sub pod_alphanumeric_sort {
     # The first few character columns are filler, plus the '\p{'; and get rid
     # of all the trailing stuff, starting with the trailing '}', so as to sort
     # on just 'Name=Value'
-    (my $a = lc $a) =~ s/^ .*? { //x;
+    (my $a = lc $a) =~ s/^ .*? \{ //x;
     $a =~ s/}.*//;
-    (my $b = lc $b) =~ s/^ .*? { //x;
+    (my $b = lc $b) =~ s/^ .*? \{ //x;
     $b =~ s/}.*//;
 
     # Determine if the two operands are both internal only or both not.
