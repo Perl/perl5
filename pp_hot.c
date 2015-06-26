@@ -3351,7 +3351,6 @@ PP(pp_entersub)
             }
             if (!cv) {
                 ENTER;
-                SAVETMPS;
                 goto try_autoload;
             }
             break;
