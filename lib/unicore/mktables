@@ -14005,10 +14005,17 @@ sub compile_perl() {
             my $fold_range = $cf->containing_range($code_point);
             next unless defined $fold_range;
 
+            # Skip if folds to itself
+            next if $fold_range->value eq $CODE_POINT;
+
             my @hex_folds = split " ", $fold_range->value;
-            my $start_cp = hex $hex_folds[0];
+            my $start_cp = $hex_folds[0];
+            next if $start_cp eq $CODE_POINT;
+            $start_cp = hex $start_cp;
             foreach my $i (0 .. @hex_folds - 1) {
-                my $cp = hex $hex_folds[$i];
+                my $cp = $hex_folds[$i];
+                next if $cp eq $CODE_POINT;
+                $cp = hex $cp;
                 next unless $cp > 255;    # Already have the < 256 ones
 
                 $loc_problem_folds->add_range($cp, $cp);
@@ -14028,6 +14035,7 @@ sub compile_perl() {
 
     # Look through all the known folds to populate these tables.
     foreach my $range ($cf->ranges) {
+        next if $range->value eq $CODE_POINT;
         my $start = $range->start;
         my $end = $range->end;
         $any_folds->add_range($start, $end);
