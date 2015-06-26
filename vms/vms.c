@@ -2080,9 +2080,9 @@ Perl_my_chdir(pTHX_ const char *dir)
   STRLEN dirlen = strlen(dir);
   const char *dir1 = dir;
 
-  /* zero length string sometimes gives ACCVIO */
+  /* POSIX says we should set ENOENT for zero length string. */
   if (dirlen == 0) {
-    SETERRNO(EINVAL, SS$_BADPARAM);
+    SETERRNO(ENOENT, RMS$_DNF);
     return -1;
   }
 
