@@ -13221,7 +13221,14 @@ END
 
                 # Find the non-default table.
                 for my $table ($property->tables) {
-                    next if $table == $default_table;
+                    if ($table == $default_table) {
+                        if ($v_version le v5.0.0) {
+                            $table->add_alias($_) for qw(N No F False);
+                        }
+                        next;
+                    } elsif ($v_version le v5.0.0) {
+                        $table->add_alias($_) for qw(Y Yes T True);
+                    }
                     $non_default_table = $table;
                 }
                 $default_table->set_complement($non_default_table);
