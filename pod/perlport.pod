@@ -290,23 +290,23 @@ a directory) are the Unix ones.  The various Unix/POSIX compatibility
 layers usually try to make interfaces like C<chmod()> work, but sometimes
 there simply is no good mapping.
 
-If all this is intimidating, have no (well, maybe only a little)
-fear.  There are modules that can help.  The C<File::Spec> modules
-provide methods to do the Right Thing on whatever platform happens
-to be running the program.
+The C<File::Spec> modules provide methods to manipulate path
+specifications and return the results in native format for each
+platform.  This is often unnecessary as Unix-style paths are
+understood by Perl on every supported platform, but if you need to
+produce native paths for a native utility that does not understand
+Unix syntax, or if you are operating on paths or path components
+in unknown (and thus possibly native) syntax, C<File::Spec> is
+your friend.  Here are two brief examples:
 
     use File::Spec::Functions;
     chdir(updir());        # go up one directory
-    my $file = catfile(curdir(), 'temp', 'file.txt');
-    # on Unix and Win32, './temp/file.txt'
-    # on Mac OS Classic, ':temp:file.txt'
-    # on VMS, '[.temp]file.txt'
 
-C<File::Spec> is available in the standard distribution as of version
-5.004_05.  C<File::Spec::Functions> is only in C<File::Spec> 0.7 and later,
-and some versions of Perl come with version 0.6.  If C<File::Spec>
-is not updated to 0.7 or later, you must use the object-oriented
-interface from C<File::Spec> (or upgrade C<File::Spec>).
+    # Concatenate a path from its components
+    my $file = catfile(updir(), 'temp', 'file.txt');
+    # on Unix:    '../temp/file.txt'
+    # on Win32:   '..\temp\file.txt'
+    # on VMS:     '[-.temp]file.txt'
 
 In general, production code should not have file paths hardcoded.
 Making them user-supplied or read from a configuration file is
