@@ -1638,12 +1638,7 @@ sub populate_char_info ($) {
                                                     containing_range($i)->end);
             }
         }
-        elsif ($v_version lt v2.0.0) {  # No surrogates in earliest releases
-            $viacode[$i] = $gc->value_of($i);
-            $annotate_char_type[$i] = $UNKNOWN_TYPE;
-            $printable[$i] = 0;
-        }
-        elsif ($gc-> table('Surrogate')->contains($i)) {
+        elsif ($perl->table('_Perl_Surrogate')->contains($i)) {
             $viacode[$i] = 'Surrogate';
             $annotate_char_type[$i] = $SURROGATE_TYPE;
             $printable[$i] = 0;
@@ -13887,11 +13882,18 @@ sub compile_perl() {
                             Initialize => $Cntrl & $ASCII,
                             );
 
+    my $perl_surrogate = $perl->add_match_table('_Perl_Surrogate');
+    if (defined (my $Cs = $gc->table('Cs'))) {
+        $perl_surrogate += $Cs;
+    }
+    else {
+        push @tables_that_may_be_empty, '_Perl_Surrogate';
+    }
+
     # $controls is a temporary used to construct Graph.
     my $controls = Range_List->new(Initialize => $gc->table('Unassigned')
-                                                + $gc->table('Control'));
-    # Cs not in release 1
-    $controls += $gc->table('Surrogate') if defined $gc->table('Surrogate');
+                                                + $gc->table('Control')
+                                                + $perl_surrogate);
 
     # Graph is  ~space &  ~(Cc|Cs|Cn) = ~(space + $controls)
     my $Graph = $perl->add_match_table('Graph', Full_Name => 'XPosixGraph',
