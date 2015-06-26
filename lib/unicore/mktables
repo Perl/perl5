@@ -4,17 +4,9 @@
 # Any files created or read by this program should be listed in 'mktables.lst'
 # Use -makelist to regenerate it.
 
-# Needs 'no overloading' to run faster on miniperl.  Code commented out at the
-# subroutine objaddr can be used instead to work as far back (untested) as
-# 5.8: needs pack "U".  But almost all occurrences of objaddr have been
-# removed in favor of using 'no overloading'.  You also would have to go
-# through and replace occurrences like:
-#       my $addr = do { no overloading; pack 'J', $self; }
-# with
-#       my $addr = main::objaddr $self;
-# (or reverse commit 9b01bafde4b022706c3d6f947a0963f821b2e50b
-# that instituted the change to main::objaddr, and subsequent commits that
-# changed 0+$self to pack 'J', $self.)
+# There was an attempt when this was first rewritten to make it 5.8
+# compatible, but that has now been abandoned, and newer constructs are used
+# as convenient.
 
 my $start_time;
 BEGIN { # Get the time the script started running; do it at compilation to
@@ -292,8 +284,8 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # As mentioned earlier, some properties are given in more than one file.  In
 # particular, the files in the extracted directory are supposedly just
 # reformattings of the others.  But they contain information not easily
-# derivable from the other files, including results for Unihan, which this
-# program doesn't ordinarily look at, and for unassigned code points.  They
+# derivable from the other files, including results for Unihan (which isn't
+# usually available to this program) and for unassigned code points.  They
 # also have historically had errors or been incomplete.  In an attempt to
 # create the best possible data, this program thus processes them first to
 # glean information missing from the other files; then processes those other
@@ -437,8 +429,8 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #
 # There is a bug in the 3.2 data file in which some values for the
 # kPrimaryNumeric property have commas and an unexpected comment.  A filter
-# could be added for these; or for a particular installation, the Unihan.txt
-# file could be edited to fix them.
+# could be added to correct these; or for a particular installation, the
+# Unihan.txt file could be edited to fix them.
 #
 # HOW TO ADD A FILE TO BE PROCESSED
 #
@@ -484,13 +476,13 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # handled by Unicode::Normalize, nor will it compile when presented a version
 # that has them.  However, you can trivially get it to compile by simply
 # ignoring those decompositions, by changing the croak to a carp.  At the time
-# of this writing, the line (in cpan/Unicode-Normalize/mkheader) reads
+# of this writing, the line (in cpan/Unicode-Normalize/Normalize.pm or
+# cpan/Unicode-Normalize/mkheader) reads
 #
 #   croak("Weird Canonical Decomposition of U+$h");
 #
 # Simply comment it out.  It will compile, but will not know about any three
-# character decompositions.  If using the .pm version, there is a similar
-# line.
+# character decompositions.
 
 # The number of code points in \p{alpha=True} halved in 2.1.9.  It turns out
 # that the reason is that the CJK block starting at 4E00 was removed from
@@ -513,10 +505,13 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # name for the class, it would not have been affected, but if it used the
 # mnemonic, it would have been.
 #
-# \p{Script=Hrkt} (Katakana_Or_Hiragana) came in 4.0.1.  Before that code
+# \p{Script=Hrkt} (Katakana_Or_Hiragana) came in 4.0.1.  Before that, code
 # points which eventually came to have this script property value, instead
 # mapped to "Unknown".  But in the next release all these code points were
 # moved to \p{sc=common} instead.
+
+# The tests furnished  by Unicode for testing WordBreak and SentenceBreak
+# generate errors in 5.0 and earlier.
 #
 # The default for missing code points for BidiClass is complicated.  Starting
 # in 3.1.1, the derived file DBidiClass.txt handles this, but this program
@@ -623,10 +618,11 @@ our $to_trace = 0;
 
 # This is for a rarely used development feature that allows you to compare two
 # versions of the Unicode standard without having to deal with changes caused
-# by the code points introduced in the later version.  Change the 0 to a
-# string containing a SINGLE dotted Unicode release number (e.g. "2.1").  Only
-# code points introduced in that release and earlier will be used; later ones
-# are thrown away.  You use the version number of the earliest one you want to
+# by the code points introduced in the later version.  You probably also want
+# to use the -annotate option when using this.  Change the 0 to a string
+# containing a SINGLE dotted Unicode release number (e.g. "2.1").  Only code
+# points introduced in that release and earlier will be used; later ones are
+# thrown away.  You use the version number of the earliest one you want to
 # compare; then run this program on directory structures containing each
 # release, and compare the outputs.  These outputs will therefore include only
 # the code points common to both releases, and you can see the changes caused
@@ -887,7 +883,8 @@ if ($v_version ge v5.2.0) {
     }
 }
 
-# Enum values for to_output_map() method in the Map_Table package.
+# Enum values for to_output_map() method in the Map_Table package. (0 is don't
+# output)
 my $EXTERNAL_MAP = 1;
 my $INTERNAL_MAP = 2;
 my $OUTPUT_ADJUSTED = 3;
@@ -1381,7 +1378,7 @@ my @inline_definitions = "V0"; # Each element gives a definition of a unique
                             # its value in the hash it's in (one of the two
                             # defined just above) will include an index into
                             # this array.  The 0th element is initialized to
-                            # the definition for a zero length invwersion list
+                            # the definition for a zero length inversion list
 my %file_to_swash_name;     # Maps the file name to its corresponding key name
                             # in the hash %utf8::SwashInfo
 my %nv_floating_to_rational; # maps numeric values floating point numbers to
@@ -2129,11 +2126,11 @@ package Input_file;
 # file line is read.  This allows the EOF handler to flush buffers, for
 # example.  The difference between the two routines is that the lines inserted
 # by insert_lines() are subjected to the each_line_handler()s.  (So if you
-# called it from such a handler, you would get infinite recursion.)  Lines
-# inserted by insert_adjusted_lines() go directly to the main handler without
-# any adjustments.  If the  post-processing handler calls any of these, there
-# will be no effect.  Some error checking for these conditions could be added,
-# but it hasn't been done.
+# called it from such a handler, you would get infinite recursion without some
+# mechanism to prevent that.)  Lines inserted by insert_adjusted_lines() go
+# directly to the main handler without any adjustments.  If the
+# post-processing handler calls any of these, there will be no effect.  Some
+# error checking for these conditions could be added, but it hasn't been done.
 #
 # carp_bad_line() should be called to warn of bad input lines, which clears $_
 # to prevent further processing of the line.  This routine will output the
@@ -2235,7 +2232,8 @@ sub trace { return main::trace(@_); }
 
     my %post_handler;
     # Subroutine to call after all the lines of the file are read in and
-    # processed.  If undef, no such handler is called.
+    # processed.  If undef, no such handler is called.  Note that this cannot
+    # add lines to be processed; instead use eof_handler
     main::set_access('post_handler', \%post_handler, qw{ c });
 
     my %progress_message;
@@ -2343,9 +2341,11 @@ sub trace { return main::trace(@_); }
         }
         elsif ($properties{$addr}) {
 
-            # Add a handler for each line in the input so that it creates a
-            # separate input line for each property in those input lines, thus
-            # making them suitable for process_generic_property_file().
+            # Similarly, there may be more than one property represented on
+            # each line, with no clue but the constructor input what those
+            # might be.  Add a handler for each line in the input so that it
+            # creates a separate input line for each property in those input
+            # lines, thus making them suitable to handle generically.
 
             push @{$each_line_handler{$addr}},
                  sub {
@@ -2376,7 +2376,7 @@ sub trace { return main::trace(@_); }
                 };
         }
 
-        {   # On non-ascii platforms, we use a special handler
+        {   # On non-ascii platforms, we use a special pre-handler
             no strict;
             no warnings 'once';
             *next_line = (main::NON_ASCII_PLATFORM)
@@ -2466,11 +2466,10 @@ sub trace { return main::trace(@_); }
             }
         }
         else {
-
-            # Here, the file exists.  Some platforms may change the case of
-            # its name
             if ($seen_non_extracted_non_age) {
-                if ($file =~ /$EXTRACTED/i) {
+                if ($file =~ /$EXTRACTED/i) # Some platforms may change the
+                                            # case of the file's name
+                {
                     Carp::my_carp_bug(main::join_lines(<<END
 $file should be processed just after the 'Prop...Alias' files, and before
 anything not in the $EXTRACTED_DIR directory.  Proceeding, but the results may
@@ -2490,7 +2489,7 @@ END
                 $seen_non_extracted_non_age = 1;
             }
 
-            # And mark the file as having being processed, and warn if it
+            # Mark the file as having being processed, and warn if it
             # isn't a file we are expecting.  As we process the files,
             # they are deleted from the hash, so any that remain at the
             # end of the program are files that we didn't process.
@@ -2508,8 +2507,8 @@ END
                 return;
             }
 
-            # Open the file, converting the slashes used in this program
-            # into the proper form for the OS
+            # Here, we are going to process the file.  Open it, converting the
+            # slashes used in this program into the proper form for the OS
             my $file_handle;
             if (not open $file_handle, "<", $file) {
                 Carp::my_carp("Can't open $file.  Skipping: $!");
@@ -2518,6 +2517,11 @@ END
             $handle{$addr} = $file_handle; # Cache the open file handle
 
             if ($v_version ge v3.2.0 && lc($file) ne 'unicodedata.txt') {
+
+                # UnicodeData.txt has no version marker; the others started
+                # getting it in 3.2.  Unihan files have the version somewhere
+                # in the first comment block; the other files have it as the
+                # very first line
                 if ($file !~ /^Unihan/i) {
                     $_ = <$file_handle>;
                     if ($_ !~ / - $string_version \. /x) {
@@ -3732,7 +3736,7 @@ sub trace { return main::trace(@_); }
         #       => $MULTIPLE_BEFORE means that if this range duplicates an
         #                         existing one, but has a different value,
         #                         don't replace the existing one, but insert
-        #                         this, one so that the same range can occur
+        #                         this one so that the same range can occur
         #                         multiple times.  They are stored LIFO, so
         #                         that the final one inserted is the first one
         #                         returned in an ordered search of the table.
@@ -3747,6 +3751,7 @@ sub trace { return main::trace(@_); }
         #                         existing range, this one is discarded
         #                         (leaving the existing one in its original,
         #                         higher priority position
+        #       => $CROAK         Die with an error if is already there
         #       => anything else  is the same as => $IF_NOT_EQUIVALENT
         #
         # "same value" means identical for non-type-0 ranges, and it means
@@ -3835,7 +3840,7 @@ sub trace { return main::trace(@_); }
 
                 # Here, the new range starts just after the current highest in
                 # the range list, and they have the same type and value.
-                # Extend the current range to incorporate the new one.
+                # Extend the existing range to incorporate the new one.
                 @{$r}[-1]->set_end($end);
             }
 
@@ -4228,7 +4233,7 @@ sub trace { return main::trace(@_); }
             # In other words,
             #   r[$i-1]->end < $start <= r[$i]->end
             # And:
-            #   r[$i-1]->end < $start <= $end <= r[$j+1]->start
+            #   r[$i-1]->end < $start <= $end < r[$j+1]->start
             #
             # Also:
             #   $clean_insert is a boolean which is set true if and only if
@@ -5276,7 +5281,7 @@ END
         $status = $NORMAL unless defined $status;
 
         # An internal name does not get documented, unless overridden by the
-        # input.
+        # input; same for making tests for it.
         my $ucd = delete $args{'UCD'} // (($name =~ /^_/) ? 0 : 1);
 
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
@@ -5346,7 +5351,7 @@ END
                 $insert_position,
                 0,
                 Alias->new($name, $loose_match, $make_re_pod_entry,
-                                                $ok_as_filename, $status, $ucd);
+                           $ok_as_filename, $status, $ucd);
 
         # This name may be shorter than any existing ones, so clear the cache
         # of the shortest, so will have to be recalculated.
@@ -6888,7 +6893,7 @@ END
                 # There are tables which end up only having one element per
                 # range, but it is not worth keeping track of for making just
                 # this comment a little better.
-                $comment.= <<END;
+                $comment .= <<END;
 non-comment portions of the main body of lines of this file is:
 START\\tSTOP\\tMAPPING where START is the starting code point of the
 range, in hex; STOP is the ending point, or if omitted, the range has just one
@@ -7848,7 +7853,6 @@ END
                             main::uniques($leader, @{$equivalents{$addr}});
         my $has_unrelated = (@parents >= 2);  # boolean, ? are there unrelated
                                               # tables
-
         for my $parent (@parents) {
 
             my $property = $parent->property;
@@ -7918,8 +7922,7 @@ END
                                     ?  main::max(scalar @table_aliases,
                                                  scalar @property_aliases)
                                     : 0;
-                trace "$listed_combos, tables=", scalar @table_aliases, "; names=", scalar @property_aliases if main::DEBUG;
-
+                trace "$listed_combos, tables=", scalar @table_aliases, "; property names=", scalar @property_aliases if main::DEBUG;
 
                 my $property_had_compound_name = 0;
 
@@ -8893,7 +8896,6 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
 } # End closure
 
 package main;
-
 
 sub display_chr {
     # Converts an ordinal printable character value to a displayable string,
@@ -9942,7 +9944,6 @@ END
     # program generates for this block property value
     #$file->insert_lines('blk; n/a; Herited');
 
-
     # Process each line of the file ...
     while ($file->next_line) {
 
@@ -10557,7 +10558,8 @@ sub output_perl_charnames_line ($$) {
                                                             $line));
                     }
 
-                    # And process the first range, like any other.
+                    # And set things up so that the below will process this first
+                    # range, like any other.
                     $low = $this_range->start;
                     $high = $this_range->end;
                 }
@@ -13999,7 +14001,7 @@ sub compile_perl() {
     # 31f05a37c4e9c37a7263491f2fc0237d836e1a80 for a more complete description
     # of the MU issue.
     foreach my $range ($loc_problem_folds->ranges) {
-        foreach my $code_point($range->start .. $range->end) {
+        foreach my $code_point ($range->start .. $range->end) {
             my $fold_range = $cf->containing_range($code_point);
             next unless defined $fold_range;
 
@@ -14297,8 +14299,9 @@ order; and finally any abbreviations, again in no particular order.
 END
 
     # Now add the Unicode_1 names for the controls.  The Unicode_1 names had
-    # precedence before 6.1, so should be first in the file; the other names
-    # have precedence starting in 6.1,
+    # precedence before 6.1, including the awful ones like "LINE FEED (LF)",
+    # so should be first in the file; the other names have precedence starting
+    # in 6.1,
     my $before_or_after = ($v_version lt v6.1.0)
                           ? $MULTIPLE_BEFORE
                           : $MULTIPLE_AFTER;
@@ -14537,7 +14540,7 @@ END
     }
     else {
         $nchar->initialize([ 0xFFFE .. 0xFFFF ]);
-        if ($v_version ge v2.0) {   # First release with the other nchars
+        if ($v_version ge v2.0) {   # First release with these nchars
             for (my $i = 0x1FFFE; $i <= 0x10FFFE; $i += 0x10000) {
                 $nchar += [ $i .. $i+1 ];
             }
@@ -14863,7 +14866,7 @@ sub register_file_for_name($$$) {
     my $file = shift;            # The file name in the final directory.
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-    trace "table=$table, file=$file, directory=@$directory_ref" if main::DEBUG && $to_trace;
+    trace "table=$table, file=$file, directory=@$directory_ref, fate=", $table->fate if main::DEBUG && $to_trace;
 
     if ($table->isa('Property')) {
         $table->set_file_path(@$directory_ref, $file);
@@ -17607,7 +17610,7 @@ sub generate_tests($$$$$) {
     my @output;
     # Create a complete set of tests, with complements.
     if (defined $valid_code) {
-	push @output, <<"EOC"
+        push @output, <<"EOC"
 Expect(1, $valid_code, '\\p{$name}', $warning);
 Expect(0, $valid_code, '\\p{^$name}', $warning);
 Expect(0, $valid_code, '\\P{$name}', $warning);
@@ -17615,7 +17618,7 @@ Expect(1, $valid_code, '\\P{^$name}', $warning);
 EOC
     }
     if (defined $invalid_code) {
-	push @output, <<"EOC"
+        push @output, <<"EOC"
 Expect(0, $invalid_code, '\\p{$name}', $warning);
 Expect(1, $invalid_code, '\\p{^$name}', $warning);
 Expect(1, $invalid_code, '\\P{$name}', $warning);
@@ -18105,65 +18108,65 @@ END
 my @input_file_objects = (
     Input_file->new('PropertyAliases.txt', v0,
                     Handler => \&process_PropertyAliases,
-                    ),
+                   ),
     Input_file->new(undef, v0,  # No file associated with this
                     Progress_Message => 'Finishing property setup',
                     Handler => \&finish_property_setup,
-                    ),
+                   ),
     Input_file->new('PropValueAliases.txt', v0,
                      Handler => \&process_PropValueAliases,
                      Has_Missings_Defaults => $NOT_IGNORED,
-                     ),
+                    ),
     Input_file->new('DAge.txt', v3.2.0,
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Property => 'Age'
-                    ),
+                   ),
     Input_file->new("${EXTRACTED}DGeneralCategory.txt", v3.1.0,
                     Property => 'General_Category',
-                    ),
+                   ),
     Input_file->new("${EXTRACTED}DCombiningClass.txt", v3.1.0,
                     Property => 'Canonical_Combining_Class',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new("${EXTRACTED}DNumType.txt", v3.1.0,
                     Property => 'Numeric_Type',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new("${EXTRACTED}DEastAsianWidth.txt", v3.1.0,
                     Property => 'East_Asian_Width',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new("${EXTRACTED}DLineBreak.txt", v3.1.0,
                     Property => 'Line_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new("${EXTRACTED}DBidiClass.txt", v3.1.1,
                     Property => 'Bidi_Class',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new("${EXTRACTED}DDecompositionType.txt", v3.1.0,
                     Property => 'Decomposition_Type',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new("${EXTRACTED}DBinaryProperties.txt", v3.1.0),
     Input_file->new("${EXTRACTED}DNumValues.txt", v3.1.0,
                     Property => 'Numeric_Value',
                     Each_Line_Handler => \&filter_numeric_value_line,
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new("${EXTRACTED}DJoinGroup.txt", v3.1.0,
                     Property => 'Joining_Group',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
 
     Input_file->new("${EXTRACTED}DJoinType.txt", v3.1.0,
                     Property => 'Joining_Type',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new('Jamo.txt', v2.0.0,
                     Property => 'Jamo_Short_Name',
                     Each_Line_Handler => \&filter_jamo_line,
-                    ),
+                   ),
     Input_file->new('UnicodeData.txt', v1.1.5,
                     Pre_Handler => \&setup_UnicodeData,
 
@@ -18198,7 +18201,7 @@ my @input_file_objects = (
                                             \&filter_UnicodeData_line,
                                          ],
                     EOF_Handler => \&EOF_UnicodeData,
-                    ),
+                   ),
     Input_file->new('ArabicShaping.txt', v2.0.0,
                     Each_Line_Handler =>
                         ($v_version lt 4.1.0)
@@ -18208,29 +18211,29 @@ my @input_file_objects = (
                     # not used by Perl
                     Properties => [ '<ignored>', 'Joining_Type', 'Joining_Group' ],
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new('Blocks.txt', v2.0.0,
                     Property => 'Block',
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Each_Line_Handler => \&filter_blocks_lines
-                    ),
+                   ),
     Input_file->new('PropList.txt', v2.0.0,
                     Each_Line_Handler => (($v_version lt v3.1.0)
                                             ? \&filter_old_style_proplist
                                             : undef),
-                    ),
+                   ),
     Input_file->new('Unihan.txt', v2.0.0,
                     Pre_Handler => \&setup_unihan,
                     Optional => 1,
                     Each_Line_Handler => \&filter_unihan_line,
-                        ),
+                   ),
     Input_file->new('SpecialCasing.txt', v2.1.8,
                     Each_Line_Handler => ($v_version eq 2.1.8)
                                          ? \&filter_2_1_8_special_casing_line
                                          : \&filter_special_casing_line,
                     Pre_Handler => \&setup_special_casing,
                     Has_Missings_Defaults => $IGNORED,
-                    ),
+                   ),
     Input_file->new(
                     'LineBreak.txt', v3.0.0,
                     Has_Missings_Defaults => $NOT_IGNORED,
@@ -18239,7 +18242,7 @@ my @input_file_objects = (
                     Each_Line_Handler => (($v_version lt v3.1.0)
                                         ? \&filter_early_ea_lb
                                         : undef),
-                    ),
+                   ),
     Input_file->new('EastAsianWidth.txt', v3.0.0,
                     Property => 'East_Asian_Width',
                     Has_Missings_Defaults => $NOT_IGNORED,
@@ -18247,10 +18250,10 @@ my @input_file_objects = (
                     Each_Line_Handler => (($v_version lt v3.1.0)
                                         ? \&filter_early_ea_lb
                                         : undef),
-                    ),
+                   ),
     Input_file->new('CompositionExclusions.txt', v3.0.0,
                     Property => 'Composition_Exclusion',
-                    ),
+                   ),
     Input_file->new('BidiMirroring.txt', v3.0.1,
                     Property => 'Bidi_Mirroring_Glyph',
                     Has_Missings_Defaults => ($v_version lt v6.2.0)
@@ -18259,12 +18262,11 @@ my @input_file_objects = (
                                               # anything to us, we will use the
                                               # null string
                                               : $IGNORED,
-
-                    ),
+                   ),
     Input_file->new("NormTest.txt", v3.0.0,
                      Handler => \&process_NormalizationsTest,
                      Skip => ($make_norm_test_script) ? 0 : 'Validation Tests',
-                    ),
+                   ),
     Input_file->new('CaseFolding.txt', v3.0.1,
                     Pre_Handler => \&setup_case_folding,
                     Each_Line_Handler =>
@@ -18274,63 +18276,63 @@ my @input_file_objects = (
                            \&filter_case_folding_line
                         ],
                     Has_Missings_Defaults => $IGNORED,
-                    ),
+                   ),
     Input_file->new('DCoreProperties.txt', v3.1.0,
                     # 5.2 changed this file
                     Has_Missings_Defaults => (($v_version ge v5.2.0)
                                             ? $NOT_IGNORED
                                             : $NO_DEFAULTS),
-                    ),
+                   ),
     Input_file->new('Scripts.txt', v3.1.0,
                     Property => 'Script',
                     Each_Line_Handler => (($v_version le v4.0.0)
                                           ? \&filter_all_caps_script_names
                                           : undef),
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new('DNormalizationProps.txt', v3.1.0,
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Each_Line_Handler => (($v_version lt v4.0.1)
                                       ? \&filter_old_style_normalization_lines
                                       : undef),
-                    ),
+                   ),
     Input_file->new('HangulSyllableType.txt', v0,
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Property => 'Hangul_Syllable_Type',
                     Pre_Handler => ($v_version lt v4.0.0)
                                    ? \&generate_hst
                                    : undef,
-                    ),
+                   ),
     Input_file->new("$AUXILIARY/WordBreakProperty.txt", v4.1.0,
                     Property => 'Word_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new("$AUXILIARY/GraphemeBreakProperty.txt", v0,
                     Property => 'Grapheme_Cluster_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Pre_Handler => ($v_version lt v4.1.0)
                                    ? \&generate_GCB
                                    : undef,
-                    ),
+                   ),
     Input_file->new("$AUXILIARY/GCBTest.txt", v4.1.0,
                     Handler => \&process_GCB_test,
-                    ),
+                   ),
     Input_file->new("$AUXILIARY/LBTest.txt", v4.1.0,
                     Skip => 'Validation Tests',
-                    ),
+                   ),
     Input_file->new("$AUXILIARY/SBTest.txt", v4.1.0,
                     Handler => \&process_SB_test,
-                    ),
+                   ),
     Input_file->new("$AUXILIARY/WBTest.txt", v4.1.0,
                     Handler => \&process_WB_test,
-                    ),
+                   ),
     Input_file->new("$AUXILIARY/SentenceBreakProperty.txt", v4.1.0,
                     Property => 'Sentence_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
     Input_file->new('NamedSequences.txt', v4.1.0,
                     Handler => \&process_NamedSequences
-                    ),
+                   ),
     Input_file->new('NameAliases.txt', v0,
                     Property => 'Name_Alias',
                     Pre_Handler => ($v_version le v6.0.0)
@@ -18339,43 +18341,43 @@ my @input_file_objects = (
                     Each_Line_Handler => ($v_version le v6.0.0)
                                    ? \&filter_early_version_name_alias_line
                                    : \&filter_later_version_name_alias_line,
-                    ),
+                   ),
     Input_file->new("BidiTest.txt", v5.2.0,
                     Skip => 'Validation Tests',
-                    ),
+                   ),
     Input_file->new('UnihanIndicesDictionary.txt', v5.2.0,
                     Optional => 1,
                     Each_Line_Handler => \&filter_unihan_line,
-                    ),
+                   ),
     Input_file->new('UnihanDataDictionaryLike.txt', v5.2.0,
                     Optional => 1,
                     Each_Line_Handler => \&filter_unihan_line,
-                    ),
+                   ),
     Input_file->new('UnihanIRGSources.txt', v5.2.0,
                     Optional => 1,
                     Pre_Handler => \&setup_unihan,
                     Each_Line_Handler => \&filter_unihan_line,
-                    ),
+                   ),
     Input_file->new('UnihanNumericValues.txt', v5.2.0,
                     Optional => 1,
                     Each_Line_Handler => \&filter_unihan_line,
-                    ),
+                   ),
     Input_file->new('UnihanOtherMappings.txt', v5.2.0,
                     Optional => 1,
                     Each_Line_Handler => \&filter_unihan_line,
-                    ),
+                   ),
     Input_file->new('UnihanRadicalStrokeCounts.txt', v5.2.0,
                     Optional => 1,
                     Each_Line_Handler => \&filter_unihan_line,
-                    ),
+                   ),
     Input_file->new('UnihanReadings.txt', v5.2.0,
                     Optional => 1,
                     Each_Line_Handler => \&filter_unihan_line,
-                    ),
+                   ),
     Input_file->new('UnihanVariants.txt', v5.2.0,
                     Optional => 1,
                     Each_Line_Handler => \&filter_unihan_line,
-                    ),
+                   ),
     Input_file->new('ScriptExtensions.txt', v6.0.0,
                     Property => 'Script_Extensions',
                     Pre_Handler => \&setup_script_extensions,
@@ -18383,34 +18385,37 @@ my @input_file_objects = (
                     Has_Missings_Defaults => (($v_version le v6.0.0)
                                             ? $NO_DEFAULTS
                                             : $IGNORED),
-                    ),
-    # The two Indic files are actually available starting in v6.0.0, but their
-    # property values are missing from PropValueAliases.txt in that release,
-    # so that further work would have to be done to get them to work properly
-    # for that release.
-    Input_file->new('IndicMatraCategory.txt', v6.1.0,
+                   ),
+    # These two Indic files are actually not usable as-is until 6.1.0,
+    # because their property values are missing from PropValueAliases.txt
+    # until that release, so that further work would have to be done to get
+    # them to work properly, which isn't worth it because of them being
+    # provisional.
+    Input_file->new('IndicMatraCategory.txt', v6.0.0,
                     Property => 'Indic_Matra_Category',
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Skip => "Withdrawn by Unicode while still provisional",
-                    ),
-    Input_file->new('IndicSyllabicCategory.txt', v6.1.0,
+                   ),
+    Input_file->new('IndicSyllabicCategory.txt', v6.0.0,
                     Property => 'Indic_Syllabic_Category',
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Skip => (($v_version lt v8.0.0)
                               ? "Provisional; for the analysis and processing of Indic scripts"
                               : 0),
-                    ),
+                   ),
     Input_file->new('BidiBrackets.txt', v6.3.0,
-                    Properties => [ 'Bidi_Paired_Bracket', 'Bidi_Paired_Bracket_Type' ],
+                    Properties => [ 'Bidi_Paired_Bracket',
+                                    'Bidi_Paired_Bracket_Type'
+                                  ],
                     Has_Missings_Defaults => $NO_DEFAULTS,
-                    ),
+                   ),
     Input_file->new("BidiCharacterTest.txt", v6.3.0,
                     Skip => 'Validation Tests',
-                    ),
+                   ),
     Input_file->new('IndicPositionalCategory.txt', v8.0.0,
                     Property => 'Indic_Positional_Category',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    ),
+                   ),
 );
 
 # End of all the preliminaries.
