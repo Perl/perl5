@@ -14426,6 +14426,25 @@ END
         $unassigned->set_equivalent_to($age_default, Related => 1);
     }
 
+    my $patws = $perl->add_match_table('_Perl_PatWS',
+                                       Perl_Extension => 1,
+                                       Fate => $INTERNAL_ONLY);
+    if (defined (my $off_patws = property_ref('Pattern_White_Space'))) {
+        $patws->initialize($off_patws->table('Y'));
+    }
+    else {
+        $patws->initialize([ ord("\t"),
+                             ord("\n"),
+                             utf8::unicode_to_native(0x0B), # VT
+                             ord("\f"),
+                             ord("\r"),
+                             ord(" "),
+                             utf8::unicode_to_native(0x85), # NEL
+                             0x200E..0x200F,             # Left, Right marks
+                             0x2028..0x2029              # Line, Paragraph seps
+                           ] );
+    }
+
     # See L<perlfunc/quotemeta>
     my $quotemeta = $perl->add_match_table('_Perl_Quotemeta',
                                            Perl_Extension => 1,
