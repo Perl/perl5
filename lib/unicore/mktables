@@ -14453,22 +14453,63 @@ END
                                            # Initialize to what's common in
                                            # all Unicode releases.
                                            Initialize =>
-                                                $Space
-                                                + $gc->table('Control')
+                                                  $gc->table('Control')
+                                                + $Space
+                                                + $patws
+                                                + ((~ $Word) & $ASCII)
                            );
 
-    # In early releases without the proper Unicode properties, just set to \W.
-    if (! defined (my $patsyn = property_ref('Pattern_Syntax'))
-        || ! defined (my $patws = property_ref('Pattern_White_Space'))
-        || ! defined (my $di = property_ref('Default_Ignorable_Code_Point')))
-    {
-        $quotemeta += ~ $Word;
+    if (defined (my $patsyn = property_ref('Pattern_Syntax'))) {
+        $quotemeta += $patsyn->table('Y');
     }
     else {
-        $quotemeta += $patsyn->table('Y')
-                   + $patws->table('Y')
-                   + $di->table('Y')
-                   + ((~ $Word) & $ASCII);
+        $quotemeta += ((~ $Word) & Range->new(0, 255))
+                    - utf8::unicode_to_native(0xA8)
+                    - utf8::unicode_to_native(0xAF)
+                    - utf8::unicode_to_native(0xB2)
+                    - utf8::unicode_to_native(0xB3)
+                    - utf8::unicode_to_native(0xB4)
+                    - utf8::unicode_to_native(0xB7)
+                    - utf8::unicode_to_native(0xB8)
+                    - utf8::unicode_to_native(0xB9)
+                    - utf8::unicode_to_native(0xBC)
+                    - utf8::unicode_to_native(0xBD)
+                    - utf8::unicode_to_native(0xBE);
+        $quotemeta += [ # These are above-Latin1 patsyn; hence should be the
+                        # same in all releases
+                        0x2010 .. 0x2027,
+                        0x2030 .. 0x203E,
+                        0x2041 .. 0x2053,
+                        0x2055 .. 0x205E,
+                        0x2190 .. 0x245F,
+                        0x2500 .. 0x2775,
+                        0x2794 .. 0x2BFF,
+                        0x2E00 .. 0x2E7F,
+                        0x3001 .. 0x3003,
+                        0x3008 .. 0x3020,
+                        0x3030 .. 0x3030,
+                        0xFD3E .. 0xFD3F,
+                        0xFE45 .. 0xFE46
+                      ];
+    }
+
+    if (defined (my $di = property_ref('Default_Ignorable_Code_Point'))) {
+        $quotemeta += $di->table('Y')
+    }
+    else {
+        if ($v_version ge v2.0) {
+            $quotemeta += $gc->table('Cf')
+                       +  $gc->table('Cs');
+        }
+        $quotemeta += $gc->table('Cc')
+                    - $Space;
+        my $temp = Range_List->new(Initialize => [ 0x180B .. 0x180D,
+                                                   0x2060 .. 0x206F,
+                                                   0xFE00 .. 0xFE0F,
+                                                   0xFFF0 .. 0xFFFB,
+                                                   0xE0000 .. 0xE0FFF,
+                                                  ]);
+        $quotemeta += $temp & $Assigned;
     }
 
     # Finished creating all the perl properties.  All non-internal non-string
