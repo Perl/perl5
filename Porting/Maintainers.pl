@@ -948,9 +948,16 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Pod-Simple],
         # https://rt.cpan.org/Public/Bug/Display.html?id=103439
         # https://rt.cpan.org/Public/Bug/Display.html?id=105192
+        # https://rt.cpan.org/Public/Bug/Display.html?id=105511
         'CUSTOMIZED'   => [
             qw( cpan/Pod-Simple/lib/Pod/Simple/Search.pm
                 cpan/Pod-Simple/lib/Pod/Simple/BlackBox.pm
+                cpan/Pod-Simple/t/search10.t
+                cpan/Pod-Simple/t/search12.t
+                cpan/Pod-Simple/t/search20.t
+                cpan/Pod-Simple/t/search22.t
+                cpan/Pod-Simple/t/search26.t
+                cpan/Pod-Simple/t/search28.t
             ),
         ],
     },

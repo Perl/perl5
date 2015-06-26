@@ -33,10 +33,7 @@ print "# CWD: $cwd\n";
 sub source_path {
     my $file = shift;
     if ($ENV{PERL_CORE}) {
-        require File::Spec;
-        my $updir = File::Spec->updir;
-        my $dir = File::Spec->catdir($updir, 'lib', 'Pod', 'Simple', 't');
-        return File::Spec->catdir ($dir, $file);
+        return "../lib/Pod/Simple/t/$file";
     } else {
         return $file;
     }
@@ -69,10 +66,10 @@ print $p;
 my $ascii_order;
 if(     -e ($ascii_order = source_path('ascii_order.pl'))) {
   #
-} elsif(-e ($ascii_order = File::Spec->catdir($cwd, 't', 'ascii_order.pl'))) {
+} elsif(-e ($ascii_order = File::Spec->catfile($cwd, 't', 'ascii_order.pl'))) {
   #
 } else {
-    print STDERR __FILE__, ": ", __LINE__, ": ascii_order='$ascii_order'; curdir=", $cwd, "; ", File::Spec->catdir($cwd, 't', 'ascii_order.pl'), "\n";
+    print STDERR __FILE__, ": ", __LINE__, ": ascii_order='$ascii_order'; curdir=", $cwd, "; ", File::Spec->catfile($cwd, 't', 'ascii_order.pl'), "\n";
   die "Can't find ascii_order.pl";
 }
 
