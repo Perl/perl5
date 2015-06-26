@@ -18,20 +18,6 @@ use Errno qw(ENOENT);
 
 my $IsVMS   = $^O eq 'VMS';
 
-my $vms_unix_rpt = 0;
-my $vms_efs = 0;
-if ($IsVMS) {
-    if (eval 'require VMS::Feature') {
-        $vms_unix_rpt = VMS::Feature::current("filename_unix_report");
-        $vms_efs = VMS::Feature::current("efs_charset");
-    } else {
-        my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
-        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
-        $vms_efs = $efs_charset =~ /^[ET1]/i; 
-    }
-}
-
 # For an op regression test, I don't want to rely on "use constant" working.
 my $has_fchdir = ($Config{d_fchdir} || "") eq "define";
 
