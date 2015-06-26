@@ -14512,6 +14512,21 @@ END
         $quotemeta += $temp & $Assigned;
     }
 
+    my $nchar = $perl->add_match_table('_Perl_Nchar',
+                                       Perl_Extension => 1,
+                                       Fate => $INTERNAL_ONLY);
+    if (defined (my $off_nchar = property_ref('Nchar'))) {
+        $nchar->initialize($off_nchar->table('Y'));
+    }
+    else {
+        $nchar->initialize([ 0xFFFE .. 0xFFFF ]);
+        if ($v_version ge v2.0) {   # First release with the other nchars
+            for (my $i = 0x1FFFE; $i <= 0x10FFFE; $i += 0x10000) {
+                $nchar += [ $i .. $i+1 ];
+            }
+        }
+    }
+
     # Finished creating all the perl properties.  All non-internal non-string
     # ones have a synonym of 'Is_' prefixed.  (Internal properties begin with
     # an underscore.)  These do not get a separate entry in the pod file
