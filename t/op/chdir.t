@@ -10,7 +10,7 @@ BEGIN {
     # possibilities into @INC.
     unshift @INC, qw(t . lib ../lib);
     require "./test.pl";
-    plan(tests => 42);
+    plan(tests => 39);
 }
 
 use Config;
@@ -127,7 +127,7 @@ sub check_env {
     if( $key eq 'SYS$LOGIN' && !$IsVMS ) {
         ok( !chdir(),         "chdir() on $^O ignores only \$ENV{$key} set" );
         is( abs_path, $Cwd,   '  abs_path() did not change' );
-        pass( "  no need to test SYS\$LOGIN on $^O" ) for 1..7;
+        pass( "  no need to test SYS\$LOGIN on $^O" ) for 1..4;
     }
     else {
         ok( chdir(),              "chdir() w/ only \$ENV{$key} set" );
