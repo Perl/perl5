@@ -596,8 +596,8 @@ our $to_trace = 0;
                                     || $caller_name eq 'trace');
 
         my $output = "";
+        #print STDERR __LINE__, ": ", join ", ", @input, "\n";
         foreach my $string (@input) {
-            #print STDERR __LINE__, ": ", join ", ", @input, "\n";
             if (ref $string eq 'ARRAY' || ref $string eq 'HASH') {
                 $output .= simple_dumper($string);
             }
