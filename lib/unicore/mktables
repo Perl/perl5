@@ -16902,8 +16902,8 @@ sub make_UCD () {
     # an element for the Hangul syllables in the appropriate place, and
     # otherwise changes the name to include the "-<code point>" suffix.
     my @algorithm_names;
-    my $done_hangul = 0;
-
+    my $done_hangul = $v_version lt v2.0.0;  # Hanguls as we know them came
+                                             # along in this version
     # Copy it linearly.
     for my $i (0 .. @code_points_ending_in_code_point - 1) {
 
