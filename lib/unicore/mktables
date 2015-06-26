@@ -1375,6 +1375,7 @@ my %loose_to_file_of;       # loosely maps table names to their respective
                             # files
 my %stricter_to_file_of;    # same; but for stricter mapping.
 my %loose_property_to_file_of; # Maps a loose property name to its map file
+my %strict_property_to_file_of; # Same, but strict
 my @inline_definitions = "V0"; # Each element gives a definition of a unique
                             # inversion list.  When a definition is inlined,
                             # its value in the hash it's in (one of the two
@@ -1386,6 +1387,8 @@ my %file_to_swash_name;     # Maps the file name to its corresponding key name
 my %nv_floating_to_rational; # maps numeric values floating point numbers to
                              # their rational equivalent
 my %loose_property_name_of; # Loosely maps (non_string) property names to
+                            # standard form
+my %strict_property_name_of; # Strictly maps (non_string) property names to
                             # standard form
 my %string_property_loose_to_name; # Same, for string properties.
 my %loose_defaults;         # keys are of form "prop=value", where 'prop' is
@@ -14867,7 +14870,12 @@ sub register_file_for_name($$$) {
         # property's map table
         foreach my $alias ($table->aliases) {
             my $name = $alias->name;
-            $loose_property_to_file_of{standardize($name)} = $file;
+            if ($name =~ /^_/) {
+                $strict_property_to_file_of{lc $name} = $file;
+            }
+            else {
+                $loose_property_to_file_of{standardize($name)} = $file;
+            }
         }
 
         # And a way for utf8_heavy to find the proper key in the SwashInfo
@@ -16387,6 +16395,10 @@ sub make_Heavy () {
                            = simple_dumper(\%loose_property_name_of, ' ' x 4);
     chomp $loose_property_name_of;
 
+    my $strict_property_name_of
+                           = simple_dumper(\%strict_property_name_of, ' ' x 4);
+    chomp $strict_property_name_of;
+
     my $stricter_to_file_of = simple_dumper(\%stricter_to_file_of, ' ' x 4);
     chomp $stricter_to_file_of;
 
@@ -16425,6 +16437,10 @@ sub make_Heavy () {
                         = simple_dumper(\%loose_property_to_file_of, ' ' x 4);
     chomp $loose_property_to_file_of;
 
+    my $strict_property_to_file_of
+                        = simple_dumper(\%strict_property_to_file_of, ' ' x 4);
+    chomp $strict_property_to_file_of;
+
     my $file_to_swash_name = simple_dumper(\%file_to_swash_name, ' ' x 4);
     chomp $file_to_swash_name;
 
@@ -16438,6 +16454,11 @@ $INTERNAL_ONLY_HEADER
 # standard form to their corresponding standard names
 \%utf8::loose_property_name_of = (
 $loose_property_name_of
+);
+
+# Same, but strict names
+\%utf8::strict_property_name_of = (
+$strict_property_name_of
 );
 
 # Gives the definitions (in the form of inversion lists) for those properties
@@ -16486,6 +16507,11 @@ $caseless_equivalent_to
 # Property names to mapping files
 \%utf8::loose_property_to_file_of = (
 $loose_property_to_file_of
+);
+
+# Property names to mapping files
+\%utf8::strict_property_to_file_of = (
+$strict_property_to_file_of
 );
 
 # Files to the swash names within them.
@@ -17309,12 +17335,14 @@ sub write_all_tables() {
                         }
                     }
                     else {
-                        if (exists ($loose_property_name_of{$alias_standard}))
-                        {
-                            Carp::my_carp("There already is a property with the same standard name as $alias_name: $loose_property_name_of{$alias_standard}.  Old name is retained");
+                        my $hash_ref = ($alias_standard =~ /^_/)
+                                       ? \%strict_property_name_of
+                                       : \%loose_property_name_of;
+                        if (exists $hash_ref->{$alias_standard}) {
+                            Carp::my_carp("There already is a property with the same standard name as $alias_name: $hash_ref->{$alias_standard}.  Old name is retained");
                         }
                         else {
-                            $loose_property_name_of{$alias_standard}
+                            $hash_ref->{$alias_standard}
                                                 = $standard_property_name;
                         }
 

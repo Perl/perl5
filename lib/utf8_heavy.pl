@@ -404,7 +404,11 @@ sub _loose_name ($) {
                 # If didn't find it, try again with looser matching by editing
                 # out the applicable characters on the rhs and looking up
                 # again.
+                my $strict_property_and_table;
                 if (! defined $file) {
+
+                    # This isn't used unless the name begins with 'to'
+                    $strict_property_and_table = $property_and_table =~  s/^to//r;
                     $table = _loose_name($table);
                     $property_and_table = "$prefix$table";
                     print STDERR __LINE__, ": $property_and_table\n" if DEBUG;
@@ -444,10 +448,19 @@ sub _loose_name ($) {
                 ##
                 # Only check if caller wants non-binary
                 my $retried = 0;
-                if ($minbits != 1 && $property_and_table =~ s/^to//) {{
+                if ($minbits != 1) {
+                    if ($property_and_table =~ s/^to//) {
                     # Look input up in list of properties for which we have
-                    # mapping files.
-                    if (defined ($file =
+                    # mapping files.  First do it with the strict approach
+                        if (defined ($file =
+                            $utf8::strict_property_to_file_of{$strict_property_and_table}))
+                        {
+                            $type = $utf8::file_to_swash_name{$file};
+                            print STDERR __LINE__, ": type set to $type\n" if DEBUG;
+                            $file = "$unicore_dir/$file.pl";
+                            last GETFILE;
+                        }
+                        elsif (defined ($file =
                           $utf8::loose_property_to_file_of{$property_and_table}))
                     {
                         $type = $utf8::file_to_swash_name{$file};
@@ -497,7 +510,8 @@ sub _loose_name ($) {
                         $file = "$unicore_dir/lib/$file.pl" unless $file =~ m!^#/!;
                         last GETFILE;
                     }
-                } }
+                }
+                }
 
                 ##
                 ## If we reach this line, it's because we couldn't figure
