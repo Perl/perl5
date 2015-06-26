@@ -2290,13 +2290,18 @@ PP(pp_truncate)
                         SETERRNO(EBADF,RMS_IFI);
                         result = 0;
                     } else {
-                        PerlIO_flush(fp);
-#ifdef HAS_TRUNCATE
-                        if (ftruncate(fd, len) < 0)
-#else
-                        if (my_chsize(fd, len) < 0)
-#endif
+                        if (len < 0) {
+                            SETERRNO(EINVAL, LIB_INVARG);
                             result = 0;
+                        } else {
+                           PerlIO_flush(fp);
+#ifdef HAS_TRUNCATE
+                           if (ftruncate(fd, len) < 0)
+#else
+                           if (my_chsize(fd, len) < 0)
+#endif
+                               result = 0;
+                        }
                     }
 		}
 	    }
