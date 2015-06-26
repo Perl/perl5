@@ -9964,6 +9964,11 @@ END
         # thus shifting the former field 0 to after them.)
         splice (@data, 0, 0, splice(@data, 1, 2)) if $property eq 'ccc';
 
+        if ($v_version le v5.0.0 && $property eq 'blk' && $data[1] =~ /-/) {
+            my $new_style = $data[1] =~ s/-/_/gr;
+            splice @data, 1, 0, $new_style;
+        }
+
         # Field 0 is a short name unless "n/a"; field 1 is the full name.  If
         # there is no short name, use the full one in element 1
         if ($data[0] eq "n/a") {
