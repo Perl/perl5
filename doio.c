@@ -1206,7 +1206,10 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 
     if (io && (fp = IoIFP(io))) {
         int fd = PerlIO_fileno(fp);
-        if (fd >= 0) {
+        if (fd < 0 || (whence == SEEK_SET && pos < 0)) {
+            SETERRNO(EINVAL,LIB_INVARG);
+            return -1;
+        } else {
             return PerlLIO_lseek(fd, pos, whence);
         }
     }
