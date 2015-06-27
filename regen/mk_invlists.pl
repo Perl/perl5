@@ -503,12 +503,12 @@ for my $charset (get_supported_code_pages()) {
                                                           unless defined $count;
                 }
                 else {
-                @invlist = @$list_ref;
-                @invmap = @$map_ref;
-                $map_format = $format;
-                $map_default = $default;
-                $maps_to_code_point = $map_format =~ /x/;
-                $to_adjust = $map_format =~ /a/;
+                    @invlist = @$list_ref;
+                    @invmap = @$map_ref;
+                    $map_format = $format;
+                    $map_default = $default;
+                    $maps_to_code_point = $map_format =~ /x/;
+                    $to_adjust = $map_format =~ /a/;
                 }
             }
         }
