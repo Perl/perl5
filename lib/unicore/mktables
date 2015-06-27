@@ -1305,11 +1305,15 @@ my $OBSOLETE = 'O';
 my $a_bold_obsolete = "an 'B<$OBSOLETE>'";
 my $A_bold_obsolete = "An 'B<$OBSOLETE>'";
 
+# Aliases can also have an extra status:
+my $INTERNAL_ALIAS = 'P';
+
 my %status_past_participles = (
     $DISCOURAGED => 'discouraged',
     $STABILIZED => 'stabilized',
     $OBSOLETE => 'obsolete',
     $DEPRECATED => 'deprecated',
+    $INTERNAL_ALIAS => 'reserved for Perl core internal use only',
 );
 
 # Table fates.  These are somewhat ordered, so that fates < $MAP_PROXIED should be
@@ -5098,6 +5102,7 @@ sub trace { return main::trace(@_); }
         my $note = delete $args{'Note'};
         my $make_re_pod_entry = delete $args{'Re_Pod_Entry'};
         my $perl_extension = delete $args{'Perl_Extension'};
+        my $suppression_reason = delete $args{'Suppression_Reason'};
 
         # Shouldn't have any left over
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
@@ -5139,11 +5144,12 @@ END
         {
             $fate{$addr} = $SUPPRESSED;
         }
-        elsif ($fate{$addr} == $SUPPRESSED
-               && ! exists $why_suppressed{$property{$addr}->complete_name})
-        {
-            Carp::my_carp_bug("There is no current capability to set the reason for suppressing.");
-            # perhaps Fate => [ $SUPPRESSED, "reason" ]
+        elsif ($fate{$addr} == $SUPPRESSED) {
+            Carp::my_carp_bug("Need reason for suppressing") unless $suppression_reason;
+            # Though currently unused
+        }
+        elsif ($suppression_reason) {
+            Carp::my_carp_bug("A reason was given for suppressing, but not suppressed");
         }
 
         # If hasn't set its status already, see if it is on one of the
@@ -5271,17 +5277,18 @@ END
         my %args = @_;
         my $loose_match = delete $args{'Fuzzy'};
 
-        my $make_re_pod_entry = delete $args{'Re_Pod_Entry'};
-        $make_re_pod_entry = $YES unless defined $make_re_pod_entry;
-
         my $ok_as_filename = delete $args{'OK_as_Filename'};
         $ok_as_filename = 1 unless defined $ok_as_filename;
 
-        my $status = delete $args{'Status'};
-        $status = $NORMAL unless defined $status;
-
         # An internal name does not get documented, unless overridden by the
         # input; same for making tests for it.
+        my $status = delete $args{'Status'} || (($name =~ /^_/)
+                                                ? $INTERNAL_ALIAS
+                                                : $NORMAL);
+        my $make_re_pod_entry = delete $args{'Re_Pod_Entry'}
+                                            // (($status ne $INTERNAL_ALIAS)
+                                               ? (($name =~ /^_/) ? $NO : $YES)
+                                               : $NO);
         my $ucd = delete $args{'UCD'} // (($name =~ /^_/) ? 0 : 1);
 
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
@@ -6844,9 +6851,11 @@ END
         $comment .= "This file returns the $mapping:\n";
 
         my $ucd_accessible_name = "";
+        my $has_underscore_name = 0;
         my $full_name = $self->property->full_name;
         for my $i (0 .. @property_aliases - 1) {
             my $name = $property_aliases[$i]->name;
+            $has_underscore_name = 1 if $name =~ /^_/;
             $comment .= sprintf("%-8s%s\n", " ", $name . '(cp)');
             if ($property_aliases[$i]->ucd) {
                 if ($name eq $full_name) {
@@ -6859,7 +6868,12 @@ END
         }
         $comment .= "\nwhere 'cp' is $cp.";
         if ($ucd_accessible_name) {
-            $comment .= "  Note that $these_mappings $are accessible via the functions prop_invmap('$full_name') or charprop() in Unicode::UCD";
+            $comment .= "  Note that $these_mappings";
+            if ($has_underscore_name) {
+                $comment .= " (except for the one(s) that begin with an underscore)";
+            }
+            $comment .= " $are accessible via the functions prop_invmap('$full_name') or charprop() in Unicode::UCD";
+
         }
 
         # And append any commentary already set from the actual property.
@@ -7910,7 +7924,7 @@ END
                 # commentary that the other combinations are possible.
                 # Because regular expressions don't recognize things like
                 # \p{jsn=}, only look at non-null right-hand-sides
-                my @property_aliases = $table_property->aliases;
+                my @property_aliases = grep { $_->status ne $INTERNAL_ALIAS } $table_property->aliases;
                 my @table_aliases = grep { $_->name ne "" } $table->aliases;
 
                 # The alias lists above are already ordered in the order we
@@ -8073,8 +8087,14 @@ END
             foreach my $flag (sort keys %flags) {
                 $comment .= <<END;
 '$flag' below means that this form is $flags{$flag}.
-Consult $pod_file.pod
 END
+                if ($flag eq $INTERNAL_ALIAS) {
+                    $comment .= "DO NOT USE!!!";
+                }
+                else {
+                    $comment .= "Consult $pod_file.pod";
+                }
+                $comment .= "\n";
             }
             $comment .= "\n";
         }
@@ -8439,18 +8459,27 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
             $perl_extension
                         = $self->perl_extension if ! defined $perl_extension;
 
+            my $fate;
+            my $suppression_reason = "";
+            if ($self->name =~ /^_/) {
+                $fate = $SUPPRESSED;
+                $suppression_reason = "Parent property is internal only";
+            }
+            elsif ($self->fate == $SUPPRESSED) {
+                $fate = $SUPPRESSED;
+                $suppression_reason = $why_suppressed{$self->complete_name};
+
+            }
+            elsif ($name =~ /^_/) {
+                $fate = $INTERNAL_ONLY;
+            }
             $table = Match_Table->new(
                                 Name => $name,
                                 Perl_Extension => $perl_extension,
                                 _Alias_Hash => $table_ref{$addr},
                                 _Property => $self,
-
-                                # gets property's fate and status by default,
-                                # except if the name begind with an
-                                # underscore, default it to internal
-                                Fate => ($name =~ /^_/)
-                                         ? $INTERNAL_ONLY
-                                         : $self->fate,
+                                Fate => $fate,
+                                Suppression_Reason => $suppression_reason,
                                 Status => $self->status,
                                 _Status_Info => $self->status_info,
                                 %args);
@@ -8565,10 +8594,13 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # Swash names are used only on either
         # 1) legacy-only properties, because the formats for these are
         #    unchangeable, and they have had these lines in them; or
-        # 2) regular map tables; otherwise there should be no access to the
+        # 2) regular or internal-only map tables
+        # 3) otherwise there should be no access to the
         #    property map table from other parts of Perl.
         return if $map{$addr}->fate != $ORDINARY
-                  && $map{$addr}->fate != $LEGACY_ONLY;
+                  && $map{$addr}->fate != $LEGACY_ONLY
+                  && ! ($map{$addr}->name =~ /^_/
+                        && $map{$addr}->fate == $INTERNAL_ONLY);
 
         return $file{$addr} if defined $file{$addr};
         return $map{$addr}->external_name;
@@ -14881,7 +14913,8 @@ sub register_file_for_name($$$) {
         push @map_properties, $table;
 
         # No swash means don't do the rest of this.
-        return if $table->fate != $ORDINARY;
+        return if $table->fate != $ORDINARY
+                  && ! ($table->name =~ /^_/ && $table->fate == $INTERNAL_ONLY);
 
         # Get the path to the file
         my @path = $table->file_path;
@@ -17864,8 +17897,10 @@ sub make_property_test_script() {
             # Test each possible combination of the property's aliases with
             # the table's.  If this gets to be too many, could do what is done
             # in the set_final_comment() for Tables
-            my @table_aliases = $table->aliases;
-            my @property_aliases = $table->property->aliases;
+            my @table_aliases = grep { $_->status ne $INTERNAL_ALIAS } $table->aliases;
+            next unless @table_aliases;
+            my @property_aliases = grep { $_->status ne $INTERNAL_ALIAS } $table->property->aliases;
+            next unless @property_aliases;
 
             # Every property can be optionally be prefixed by 'Is_', so test
             # that those work, by creating such a new alias for each
