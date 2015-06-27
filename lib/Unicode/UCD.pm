@@ -3891,7 +3891,14 @@ RETRY:
         # to indicate that need to add code point to it.
         $format = 'ar';
     }
-    elsif ($format ne 'n' && $format ne 'a') {
+    elsif ($format eq 'ax') {
+
+        # Normally 'ax' properties have overrides, and will have been handled
+        # above, but if not, they still need adjustment, and the hex values
+        # have already been converted to decimal
+        $format = 'a';
+    }
+    elsif ($format ne 'n' && $format !~ / ^ a /x) {
 
         # All others are simple scalars
         $format = 's';
