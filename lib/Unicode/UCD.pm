@@ -876,6 +876,10 @@ sub _charblocks {
 	    local $_;
 	    local $/ = "\n";
 	    while (<$BLOCKSFH>) {
+
+                # Old versions used a different syntax to mark the range.
+                $_ =~ s/;\s+/../ if $v_unicode_version lt v3.1.0;
+
 		if (/^([0-9A-F]+)\.\.([0-9A-F]+);\s+(.+)/) {
 		    my ($lo, $hi) = (hex($1), hex($2));
 		    my $subrange = [ $lo, $hi, $3 ];
