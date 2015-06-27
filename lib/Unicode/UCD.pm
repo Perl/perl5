@@ -4089,6 +4089,15 @@ for its block using C<charblock>).
 Note that starting in Unicode 6.1, many of the block names have shorter
 synonyms.  These are always given in the new style.
 
+=head2 Use with older Unicode versions
+
+The functions in this module work as well as can be expected when
+used on earlier Unicode versions.  But, obviously, they use the available data
+from that Unicode version.  For example, if the Unicode version predates the
+definition of the script property (Unicode 3.1), then any function that deals
+with scripts is going to return C<undef> for the script portion of the return
+value.
+
 =head1 AUTHOR
 
 Jarkko Hietaniemi.  Now maintained by perl5 porters.
