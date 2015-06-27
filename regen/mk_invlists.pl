@@ -352,7 +352,8 @@ sub mk_invlist_from_sorted_cp_list {
 my ($cp_ref, $folds_ref, $format) = prop_invmap("Case_Folding");
 die "Could not find inversion map for Case_Folding" unless defined $format;
 die "Incorrect format '$format' for Case_Folding inversion map"
-                                                    unless $format eq 'al';
+                                                    unless $format eq 'al'
+                                                           || $format eq 'a';
 my @has_multi_char_fold;
 my @is_non_final_fold;
 
