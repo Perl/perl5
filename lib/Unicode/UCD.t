@@ -19,14 +19,22 @@ use Test::More;
 
 use Unicode::UCD qw(charinfo charprop charprops_all);
 
+my $expected_version = '8.0.0';
+my $current_version = Unicode::UCD::UnicodeVersion;
+my $v_unicode_version = pack "C*", split /\./, $current_version;
+my $unknown_script = ($v_unicode_version lt v5.0.0)
+                     ? 'Common'
+                     : 'Unknown';
 my $input_record_separator = 7; # Make sure Unicode::UCD isn't affected by
 $/ = $input_record_separator;   # setting this.
 
 my $charinfo;
 
 is(charinfo(0x110000), undef, "Verify charinfo() of non-unicode is undef");
-is(charprop(0x110000, 'age'), "Unassigned", "Verify charprop(age) of non-unicode is Unassigned");
-is(charprop(0x110000, 'in'), "Unassigned", "Verify charprop(in), a bipartite Perl extension, works");
+if ($v_unicode_version ge v3.2.0) {
+    is(lc charprop(0x110000, 'age'), lc "Unassigned", "Verify charprop(age) of non-unicode is Unassigned");
+    is(charprop(0x110000, 'in'), "Unassigned", "Verify charprop(in), a bipartite Perl extension, works");
+}
 is(charprop(0x110000, 'Any'), undef, "Verify charprop of non-bipartite Perl extension returns undef");
 
 my $cp = 0;
@@ -37,9 +45,10 @@ is($charinfo->{code},           "0000",
 is($charinfo->{name},           "<control>");
 is(charprop($cp, "name"),       "");
 
-# This gets a sl-type property returning a flattened list
-is(charprop($cp, "name_alias"), "NULL: control,NUL: abbreviation");
-
+if ($v_unicode_version ge v6.1.0) {
+    # This gets a sl-type property returning a flattened list
+    is(charprop($cp, "name_alias"), "NULL: control,NUL: abbreviation");
+}
 is($charinfo->{category},       "Cc");
 is(charprop($cp, "category"),   "Control");
 is($charinfo->{combining},      "0");
@@ -66,8 +75,8 @@ is($charinfo->{title},          "");
 is(charprop($cp, "tc"),         "\0");
 is($charinfo->{block},          "Basic Latin");
 is(charprop($cp, "block"),      "Basic_Latin");
-is($charinfo->{script},         "Common");
-is(charprop($cp, "script"),     "Common");
+is($charinfo->{script},         "Common") if $v_unicode_version gt v3.0.1;
+is(charprop($cp, "script"),     "Common") if $v_unicode_version gt v3.0.1;
 
 $cp = utf8::unicode_to_native(0x41);
 my $A_code = sprintf("%04X", ord("A"));
@@ -103,8 +112,8 @@ is($charinfo->{title},          "");
 is(charprop($cp, 'tc'),         "A");
 is($charinfo->{block},          "Basic Latin");
 is(charprop($cp, 'block'),      "Basic_Latin");
-is($charinfo->{script},         "Latin");
-is(charprop($cp, 'script'),     "Latin");
+is($charinfo->{script},         "Latin") if $v_unicode_version gt v3.0.1;
+is(charprop($cp, 'script'),     "Latin") if $v_unicode_version gt v3.0.1;
 
 $cp = 0x100;
 $charinfo = charinfo($cp);
@@ -138,8 +147,8 @@ is($charinfo->{title},          "");
 is(charprop($cp, 'tc'),         "\x{100}");
 is($charinfo->{block},          "Latin Extended-A");
 is(charprop($cp, 'block'),      "Latin_Extended_A");
-is($charinfo->{script},         "Latin");
-is(charprop($cp, 'script'),     "Latin");
+is($charinfo->{script},         "Latin") if $v_unicode_version gt v3.0.1;
+is(charprop($cp, 'script'),     "Latin") if $v_unicode_version gt v3.0.1;
 
 $cp = 0x590;               # 0x0590 is in the Hebrew block but unused.
 $charinfo = charinfo($cp);
@@ -152,7 +161,9 @@ is(charprop($cp, 'gc'),         "Unassigned");
 is($charinfo->{combining},      undef);
 is(charprop($cp, 'ccc'),        "Not_Reordered");
 is($charinfo->{bidi},           undef);
-is(charprop($cp, 'bc'),         "Right_To_Left");
+if ($v_unicode_version gt v3.2.0) {
+    is(charprop($cp, 'bc'),         "Right_To_Left");
+}
 is($charinfo->{decomposition},  undef);
 is(charprop($cp, 'dm'),         "\x{590}");
 is($charinfo->{decimal},        undef);
@@ -174,7 +185,8 @@ is(charprop($cp, 'tc'),         "\x{590}");
 is($charinfo->{block},          undef);
 is(charprop($cp, 'block'),      "Hebrew");
 is($charinfo->{script},         undef);
-is(charprop($cp, 'script'),     "Unknown");
+is(charprop($cp, 'script'),     $unknown_script) if $v_unicode_version gt
+v3.0.1;
 
 # 0x05d0 is in the Hebrew block and used.
 
@@ -210,8 +222,8 @@ is($charinfo->{title},          "");
 is(charprop($cp, 'tc'),         "\x{5d0}");
 is($charinfo->{block},          "Hebrew");
 is(charprop($cp, 'block'),      "Hebrew");
-is($charinfo->{script},         "Hebrew");
-is(charprop($cp, 'script'),     "Hebrew");
+is($charinfo->{script},         "Hebrew") if $v_unicode_version gt v3.0.1;
+is(charprop($cp, 'script'),     "Hebrew") if $v_unicode_version gt v3.0.1;
 
 # An open syllable in Hangul.
 
@@ -247,8 +259,8 @@ is($charinfo->{title},          "");
 is(charprop($cp, 'tc'),         "\x{AC00}");
 is($charinfo->{block},          "Hangul Syllables");
 is(charprop($cp, 'block'),      "Hangul_Syllables");
-is($charinfo->{script},         "Hangul");
-is(charprop($cp, 'script'),     "Hangul");
+is($charinfo->{script},         "Hangul") if $v_unicode_version gt v3.0.1;
+is(charprop($cp, 'script'),     "Hangul") if $v_unicode_version gt v3.0.1;
 
 # A closed syllable in Hangul.
 
@@ -284,9 +296,10 @@ is($charinfo->{title},          "");
 is(charprop($cp, 'tc'),         "\x{AE00}");
 is($charinfo->{block},          "Hangul Syllables");
 is(charprop($cp, 'block'),      "Hangul_Syllables");
-is($charinfo->{script},         "Hangul");
-is(charprop($cp, 'script'),     "Hangul");
+is($charinfo->{script},         "Hangul") if $v_unicode_version gt v3.0.1;
+is(charprop($cp, 'script'),     "Hangul") if $v_unicode_version gt v3.0.1;
 
+if ($v_unicode_version gt v3.0.1) {
 $cp = 0x1D400;
 $charinfo = charinfo($cp);
 
@@ -321,7 +334,9 @@ is($charinfo->{block},          "Mathematical Alphanumeric Symbols");
 is(charprop($cp, 'block'),      "Mathematical_Alphanumeric_Symbols");
 is($charinfo->{script},         "Common");
 is(charprop($cp, 'script'),     "Common");
+}
 
+if ($v_unicode_version ge v4.1.0) {
 $cp = 0x9FBA;	                #Bug 58428
 $charinfo = charinfo(0x9FBA);
 
@@ -356,13 +371,14 @@ is($charinfo->{block},          "CJK Unified Ideographs");
 is(charprop($cp, 'block'),      "CJK_Unified_Ideographs");
 is($charinfo->{script},         "Han");
 is(charprop($cp, 'script'),     "Han");
+}
 
 use Unicode::UCD qw(charblock charscript);
 
 # 0x0590 is in the Hebrew block but unused.
 
 is(charblock(0x590),          "Hebrew", "0x0590 - Hebrew unused charblock");
-is(charscript(0x590),         "Unknown",    "0x0590 - Hebrew unused charscript");
+is(charscript(0x590),         $unknown_script, "0x0590 - Hebrew unused charscript") if $v_unicode_version gt v3.0.1;
 is(charblock(0x1FFFF),        "No_Block", "0x1FFFF - unused charblock");
 
 my $fraction_3_4_code = sprintf("%04X", utf8::unicode_to_native(0xbe));
@@ -401,8 +417,8 @@ is($charinfo->{title},          "");
 is(charprop($cp, 'tc'),         chr hex $cp);
 is($charinfo->{block},          "Latin-1 Supplement");
 is(charprop($cp, 'block'),      "Latin_1_Supplement");
-is($charinfo->{script},         "Common");
-is(charprop($cp, 'script'),     "Common");
+is($charinfo->{script},         "Common") if $v_unicode_version gt v3.0.1;
+is(charprop($cp, 'script'),     "Common") if $v_unicode_version gt v3.0.1;
 
 # This is to test a case where both simple and full lowercases exist and
 # differ
@@ -435,13 +451,13 @@ is(charprop($cp, 'isc'),        "");
 is($charinfo->{upper},          "");
 is(charprop($cp, 'uc'),         "\x{130}");
 is($charinfo->{lower},          $i_code);
-is(charprop($cp, 'lc'),         "i\x{307}");
+is(charprop($cp, 'lc'),         "i\x{307}") if $v_unicode_version ge v3.2.0;
 is($charinfo->{title},          "");
 is(charprop($cp, 'tc'),         "\x{130}");
 is($charinfo->{block},          "Latin Extended-A");
 is(charprop($cp, 'block'),      "Latin_Extended_A");
-is($charinfo->{script},         "Latin");
-is(charprop($cp, 'script'),     "Latin");
+is($charinfo->{script},         "Latin") if $v_unicode_version gt v3.0.1;
+is(charprop($cp, 'script'),     "Latin") if $v_unicode_version gt v3.0.1;
 
 # This is to test a case where both simple and full uppercases exist and
 # differ
@@ -478,19 +494,23 @@ is($charinfo->{title},          "1F88");
 is(charprop($cp, "tc"),         "\x{1F88}");
 is($charinfo->{block},          "Greek Extended");
 is(charprop($cp, "block"),      "Greek_Extended");
-is($charinfo->{script},         "Greek");
-is(charprop($cp, "script"),     "Greek");
+is($charinfo->{script},         "Greek") if $v_unicode_version gt v3.0.1;
+is(charprop($cp, "script"),     "Greek") if $v_unicode_version gt v3.0.1;
 
 is(charprop(ord("A"), "foo"),    undef,
                         "Verify charprop of unknown property returns <undef>");
 
 # These were created from inspection of the code to exercise the branches
-is(charprop(ord("("), "bpb"),    ")",
+if ($v_unicode_version ge v6.3.0) {
+    is(charprop(ord("("), "bpb"),    ")",
             "Verify charprop figures out that s-type properties can be char");
+}
 is(charprop(ord("9"), "nv"),     9,
                             "Verify charprop can adjust an ar-type property");
-is(charprop(utf8::unicode_to_native(0xAD), "NFKC_Casefold"), "",
+if ($v_unicode_version ge v5.2.0) {
+    is(charprop(utf8::unicode_to_native(0xAD), "NFKC_Casefold"), "",
                     "Verify charprop can handle an \"\" in ae-type property");
+}
 
 my $mark_props_ref = charprops_all(0x300);
 is($mark_props_ref->{'Bidi_Class'}, "Nonspacing_Mark",
@@ -499,9 +519,13 @@ is($mark_props_ref->{'Bidi_Mirrored'}, "No");
 is($mark_props_ref->{'Canonical_Combining_Class'}, "Above");
 is($mark_props_ref->{'Case_Folding'}, "\x{300}");
 is($mark_props_ref->{'Decomposition_Mapping'}, "\x{300}");
-is($mark_props_ref->{'Decomposition_Type'}, "None");
+is($mark_props_ref->{'Decomposition_Type'}, ($v_unicode_version le v4.0.0)
+                                             ? "none"
+                                             : "None");
 is($mark_props_ref->{'General_Category'}, "Nonspacing_Mark");
-is($mark_props_ref->{'ISO_Comment'}, "");
+if ($v_unicode_version gt v5.1.0) {
+    is($mark_props_ref->{'ISO_Comment'}, "");
+}
 is($mark_props_ref->{'Lowercase_Mapping'}, "\x{300}");
 is($mark_props_ref->{'Name'}, "COMBINING GRAVE ACCENT");
 is($mark_props_ref->{'Numeric_Type'}, "None");
@@ -522,6 +546,7 @@ ok(exists $charblocks->{Thai}, 'Thai charblock exists');
 is($charblocks->{Thai}->[0]->[0], hex('0e00'));
 ok(!exists $charblocks->{PigLatin}, 'PigLatin charblock does not exist');
 
+if ($v_unicode_version gt v3.0.1) {
 my $charscripts = charscripts();
 
 ok(exists $charscripts->{Armenian}, 'Armenian charscript exists');
@@ -541,9 +566,11 @@ is($charscript, 'Ethiopic');
 
 my $ranges;
 
+if ($v_unicode_version gt v4.0.0) {
 $ranges = charscript('Ogham');
 is($ranges->[0]->[0], hex('1680'), 'Ogham charscript');
 is($ranges->[0]->[1], hex('169C'));
+}
 
 use Unicode::UCD qw(charinrange);
 
@@ -552,6 +579,7 @@ ok(!charinrange($ranges, "139f"), 'Cherokee charscript');
 ok( charinrange($ranges, "13a0"));
 ok( charinrange($ranges, "13f4"));
 ok(!charinrange($ranges, "13ff"));
+}
 
 use Unicode::UCD qw(general_categories);
 
@@ -571,7 +599,8 @@ is($bt->{AL}, 'Right-to-Left Arabic', 'AL is Right-to-Left Arabic');
 
 # If this fails, then maybe one should look at the Unicode changes to see
 # what else might need to be updated.
-is(Unicode::UCD::UnicodeVersion, '8.0.0', 'UnicodeVersion');
+ok($current_version le $expected_version,
+                    "Verify there isn't a new Unicode version to upgrade to");
 
 use Unicode::UCD qw(compexcl);
 
@@ -593,10 +622,13 @@ is($casefold->{full}, $a_code, 'casefold native(0x41) full');
 is($casefold->{simple}, $a_code, 'casefold native(0x41) simple');
 is($casefold->{turkic}, "", 'casefold native(0x41) turkic');
 
-$casefold = casefold(utf8::unicode_to_native(0xdf));
 my $sharp_s_code = sprintf("%04X", utf8::unicode_to_native(0xdf));
 my $S_code = sprintf("%04X", ord "S");
 my $s_code = sprintf("%04X", ord "s");
+
+if ($v_unicode_version gt v3.0.0) { # These special ones don't work on early
+                                    # perls
+$casefold = casefold(utf8::unicode_to_native(0xdf));
 
 is($casefold->{code}, $sharp_s_code, 'casefold native(0xDF) code');
 is($casefold->{status}, 'F', 'casefold native(0xDF) status');
@@ -606,7 +638,6 @@ is($casefold->{simple}, "", 'casefold native(0xDF) simple');
 is($casefold->{turkic}, "", 'casefold native(0xDF) turkic');
 
 # Do different tests depending on if version < 3.2, or not.
-my $v_unicode_version = pack "C*", split /\./, Unicode::UCD::UnicodeVersion();
 if ($v_unicode_version eq v3.0.1) {
         # In this release, there was no special Turkic values.
         # Both 0x130 and 0x131 folded to 'i'.
@@ -667,6 +698,7 @@ elsif ($v_unicode_version lt v3.2.0) {
 	is($casefold->{turkic}, $i_code, 'casefold 0x130 turkic');
 }
 
+if ($v_unicode_version gt v3.0.1) {
 $casefold = casefold(0x1F88);
 
 is($casefold->{code}, '1F88', 'casefold 0x1F88 code');
@@ -675,6 +707,8 @@ is($casefold->{mapping}, '1F80', 'casefold 0x1F88 mapping');
 is($casefold->{full}, '1F00 03B9', 'casefold 0x1F88 full');
 is($casefold->{simple}, '1F80', 'casefold 0x1F88 simple');
 is($casefold->{turkic}, "", 'casefold 0x1F88 turkic');
+}
+}
 
 ok(!casefold(utf8::unicode_to_native(0x20)));
 
@@ -694,12 +728,16 @@ ok($casespec->{code} eq $sharp_s_code &&
 
 $casespec = casespec(0x307);
 
-ok($casespec->{az}->{code} eq '0307' &&
-   !defined $casespec->{az}->{lower} &&
-   $casespec->{az}->{title} eq '0307'  &&
-   $casespec->{az}->{upper} eq '0307' &&
-   $casespec->{az}->{condition} eq 'az After_I',
-   'casespec 0x307');
+if ($v_unicode_version gt v3.1.0) {
+ok($casespec->{az}->{code} eq '0307'
+   && !defined $casespec->{az}->{lower}
+   && $casespec->{az}->{title} eq '0307'
+   && $casespec->{az}->{upper} eq '0307'
+   && $casespec->{az}->{condition} eq ($v_unicode_version le v3.2)
+                                    ? 'az After_Soft_Dotted'
+                                    : 'az After_I',
+  'casespec 0x307');
+}
 
 # perl #7305 UnicodeCD::compexcl is weird
 
@@ -721,11 +759,15 @@ is(Unicode::UCD::_getcode('x123'),    undef, "_getcode(x123)");
 is(Unicode::UCD::_getcode('0x123x'),  undef, "_getcode(x123)");
 is(Unicode::UCD::_getcode('U+123x'),  undef, "_getcode(x123)");
 
+SKIP:
 {
+    skip("Script property not in this release", 3) if $v_unicode_version lt v3.1.0;
     my $r1 = charscript('Latin');
     if (ok(defined $r1, "Found Latin script")) {
+        skip("Latin range count will be wrong when using older Unicode release",
+             2) if $v_unicode_version lt $expected_version;
         my $n1 = @$r1;
-        is($n1, 31, "number of ranges in Latin script (Unicode 7.0.0)") if $::IS_ASCII;
+        is($n1, 31, "number of ranges in Latin script (Unicode $expected_version)") if $::IS_ASCII;
         shift @$r1 while @$r1;
         my $r2 = charscript('Latin');
         is(@$r2, $n1, "modifying results should not mess up internal caches");
@@ -736,6 +778,7 @@ is(Unicode::UCD::_getcode('U+123x'),  undef, "_getcode(x123)");
 	is(charinfo(0xdeadbeef), undef, "[perl #23273] warnings in Unicode::UCD");
 }
 
+if ($v_unicode_version ge v4.1.0) {
 use Unicode::UCD qw(namedseq);
 
 is(namedseq("KATAKANA LETTER AINU P"), "\x{31F7}\x{309A}", "namedseq");
@@ -750,24 +793,57 @@ my %ns = namedseq();
 is($ns{"KATAKANA LETTER AINU P"}, "\x{31F7}\x{309A}");
 @ns = namedseq(42);
 is(@ns, 0);
+}
 
 use Unicode::UCD qw(num);
-use charnames ":full";
+use charnames ();   # Don't use \N{} on things not in original Unicode
+                    # version; else will get a compilation error when this .t
+                    # is run on an older version.
 
 is(num("0"), 0, 'Verify num("0") == 0');
 is(num("98765"), 98765, 'Verify num("98765") == 98765');
-ok(! defined num("98765\N{FULLWIDTH DIGIT FOUR}"), 'Verify num("98765\N{FULLWIDTH DIGIT FOUR}") isnt defined');
-is(num("\N{NEW TAI LUE DIGIT TWO}"), 2, 'Verify num("\N{NEW TAI LUE DIGIT TWO}") == 2');
-is(num("\N{NEW TAI LUE DIGIT ONE}"), 1, 'Verify num("\N{NEW TAI LUE DIGIT ONE}") == 1');
-is(num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}"), 21, 'Verify num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}") == 21');
-ok(! defined num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}"), 'Verify num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}") isnt defined');
-is(num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}"), 3, 'Verify num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}") == 3');
-ok(! defined num("\N{CHAM DIGIT ZERO}\N{JAVANESE DIGIT NINE}"), 'Verify num("\N{CHAM DIGIT ZERO}\N{JAVANESE DIGIT NINE}") isnt defined');
+ok(! defined num("98765\N{FULLWIDTH DIGIT FOUR}"),
+   'Verify num("98765\N{FULLWIDTH DIGIT FOUR}") isnt defined');
+my $tai_lue_2;
+if ($v_unicode_version ge v4.1.0) {
+    my $tai_lue_1 = charnames::string_vianame("NEW TAI LUE DIGIT ONE");
+    $tai_lue_2 = charnames::string_vianame("NEW TAI LUE DIGIT TWO");
+    is(num($tai_lue_2), 2, 'Verify num("\N{NEW TAI LUE DIGIT TWO}") == 2');
+    is(num($tai_lue_1), 1, 'Verify num("\N{NEW TAI LUE DIGIT ONE}") == 1');
+    is(num($tai_lue_2 . $tai_lue_1), 21,
+       'Verify num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}") == 21');
+}
+if ($v_unicode_version ge v5.2.0) {
+    ok(! defined num($tai_lue_2
+         . charnames::string_vianame("NEW TAI LUE THAM DIGIT ONE")),
+         'Verify num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}") isnt defined');
+}
+if ($v_unicode_version ge v5.1.0) {
+    my $cham_0 = charnames::string_vianame("CHAM DIGIT ZERO");
+    is(num($cham_0 . charnames::string_vianame("CHAM DIGIT THREE")), 3,
+       'Verify num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}") == 3');
+    if ($v_unicode_version ge v5.2.0) {
+        ok(! defined num(  $cham_0
+                         . charnames::string_vianame("JAVANESE DIGIT NINE")),
+        'Verify num("\N{CHAM DIGIT ZERO}\N{JAVANESE DIGIT NINE}") isnt defined');
+    }
+}
 is(num("\N{SUPERSCRIPT TWO}"), 2, 'Verify num("\N{SUPERSCRIPT TWO} == 2');
-is(num("\N{ETHIOPIC NUMBER TEN THOUSAND}"), 10000, 'Verify num("\N{ETHIOPIC NUMBER TEN THOUSAND}") == 10000');
-is(num("\N{NORTH INDIC FRACTION ONE HALF}"), .5, 'Verify num("\N{NORTH INDIC FRACTION ONE HALF}") == .5');
-is(num("\N{U+12448}"), 9, 'Verify num("\N{U+12448}") == 9');
-is(num("\N{U+5146}"), 1000000000000, 'Verify num("\N{U+5146}") == 1000000000000');
+if ($v_unicode_version ge v3.0.0) {
+    is(num(charnames::string_vianame("ETHIOPIC NUMBER TEN THOUSAND")), 10000,
+       'Verify num("\N{ETHIOPIC NUMBER TEN THOUSAND}") == 10000');
+}
+if ($v_unicode_version ge v5.2.0) {
+    is(num(charnames::string_vianame("NORTH INDIC FRACTION ONE HALF")),
+       .5,
+       'Verify num("\N{NORTH INDIC FRACTION ONE HALF}") == .5');
+    is(num("\N{U+12448}"), 9, 'Verify num("\N{U+12448}") == 9');
+}
+if ($v_unicode_version gt v3.2.0) { # Is missing from non-Unihan files before
+                                    # this
+    is(num("\N{U+5146}"), 1000000000000,
+                                'Verify num("\N{U+5146}") == 1000000000000');
+}
 
 # Create a user-defined property
 sub InKana {<<'END'}
@@ -1001,12 +1077,23 @@ while (<$propvalues>) {
     my @fields = split /\s*;\s*/; # Fields are separated by semi-colons
     my $prop = shift @fields;   # 0th field is the property,
 
+    # 'qc' is short in early versions of the file for any of the quick check
+    # properties.  Choose one of them.
+    if ($prop eq 'qc' && $v_unicode_version le v4.0.0) {
+        $prop = "NFKC_QC";
+    }
+
     # When changing properties, we examine the accumulated values for the old
     # one to see if our function that returns them matches.
     if ($prev_prop ne $prop) {
         if ($prev_prop ne "") { # Skip for the first time through
             my @ucd_function_values = prop_values($prev_prop);
             @ucd_function_values = () unless @ucd_function_values;
+
+            # The file didn't include strictly numeric values until after this
+            if ($prev_prop eq 'ccc' && $v_unicode_version le v6.0.0) {
+                @ucd_function_values = grep { /\D/ } @ucd_function_values;
+            }
 
             # This perl extension doesn't appear in the official file
             push @this_prop_values, "Non_Canon" if $prev_prop eq 'dt';
@@ -1029,6 +1116,12 @@ while (<$propvalues>) {
     # The property on the lhs of the = is always loosely matched.  Add in
     # characters that are ignored under loose matching to test that
     my $mod_prop = "$extra_chars$prop";
+
+    if ($prop eq 'blk' && $v_unicode_version le v5.0.0) {
+        foreach my $element (@fields) {
+            $element =~ s/-/_/g;
+        }
+    }
 
     if ($fields[0] eq 'n/a') {  # See comments in input file, essentially
                                 # means full name and short name are identical
@@ -1212,13 +1305,15 @@ if ($::IS_ASCII) { # On EBCDIC, other things will come first, and can vary
 
     $prop = "lc";
     ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
-    is($format, 'al', "prop_invmap() format of '$prop' is 'al'");
+    my $lc_format = ($v_unicode_version ge v3.2.0) ? 'al' : 'a';
+    is($format, $lc_format, "prop_invmap() format of '$prop' is '$lc_format");
     is($missing, '0', "prop_invmap() missing of '$prop' is '0'");
     is($invlist_ref->[1], 0x41, "prop_invmap('$prop') list[1] is 0x41");
     is($invmap_ref->[1], 0x61, "prop_invmap('$prop') map[1] is 0x61");
 }
 
 # This property is stable and small, so can test all of it
+if ($v_unicode_version gt v3.1.0) {
 $prop = "ASCII_Hex_Digit";
 ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
 is($format, 's', "prop_invmap() format of '$prop' is 's'");
@@ -1242,6 +1337,7 @@ elsif ($::IS_EBCDIC) {
 }
 is_deeply($invmap_ref, [ 'N', 'Y', 'N', 'Y', 'N', 'Y', 'N', 'N' ] ,
           "prop_invmap('$prop') map list is correct");
+}
 
 is(prop_invlist("Unknown property"), undef, "prop_invlist(<Unknown property>) returns undef");
 is(prop_invlist(undef), undef, "prop_invlist(undef) returns undef");
@@ -1262,6 +1358,7 @@ is(prop_invlist("InKana"), undef, "prop_invlist(<user-defined property returns u
 # are there in the files.  As a small hedge against that, test some
 # prop_invlist() tables fully with the known correct result.  We choose
 # ASCII_Hex_Digit again, as it is stable.
+if ($v_unicode_version gt v3.1.0) {
 if ($::IS_ASCII) {
     @invlist = prop_invlist("AHex");
     is_deeply(\@invlist, [ 0x0030, 0x003A, 0x0041,
@@ -1292,6 +1389,7 @@ elsif ($::IS_EBCDIC) { # Relies on the ranges 0-9, a-f, and A-F each being
             utf8::unicode_to_native(0x0039) + 1,
        ],
        "prop_invlist('AHex=f') is exactly the expected set of points");
+}
 }
 
 sub fail_with_diff ($$$$) {
@@ -2556,11 +2654,13 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
 # A few tests of search_invlist
 use Unicode::UCD qw(search_invlist);
 
+if ($v_unicode_version ge v3.1.0) { # No Script property before this
 my ($scripts_ranges_ref, $scripts_map_ref) = prop_invmap("Script");
 my $index = search_invlist($scripts_ranges_ref, 0x390);
 is($scripts_map_ref->[$index], "Greek", "U+0390 is Greek");
 my @alpha_invlist = prop_invlist("Alpha");
 is(search_invlist(\@alpha_invlist, ord("\t")), undef, "search_invlist returns undef for code points before first one on the list");
+}
 
 ok($/ eq $input_record_separator,  "The record separator didn't get overridden");
 
