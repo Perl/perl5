@@ -229,12 +229,18 @@ for my $ord (0..255) {
         } elsif ($name eq 'SPACE') {;
             $re = qr/\p{XPerlSpace}/;
         } elsif ($name eq 'IDFIRST') {
-            $re = qr/[_\p{Alpha}]/;
+            $re = qr/[_\p{XPosixAlpha}]/;
         } elsif ($name eq 'WORDCHAR') {
             $re = qr/\p{XPosixWord}/;
+        } elsif ($name eq 'LOWER') {
+            $re = qr/\p{XPosixLower}/;
+        } elsif ($name eq 'UPPER') {
+            $re = qr/\p{XPosixUpper}/;
         } elsif ($name eq 'ALPHANUMERIC') {
             # Like \w, but no underscore
             $re = qr/\p{Alnum}/;
+        } elsif ($name eq 'ALPHA') {
+            $re = qr/\p{XPosixAlpha}/;
         } elsif ($name eq 'QUOTEMETA') {
             $re = qr/\p{_Perl_Quotemeta}/;
         } elsif ($name eq 'NONLATIN1_FOLD') {
