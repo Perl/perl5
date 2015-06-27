@@ -575,8 +575,9 @@ this:
 
 In a terminal:
 
-  $ while true; do date ; if ! ps auxww | grep -v grep | grep -q Xvfb;\
-    then Xvfb :121 & fi; echo -n 'sleeping 60 '; sleep 60; done
+ $ while true; do date ; if ! ps auxww | grep -v grep \
+   | grep -q Xvfb; then Xvfb :121 & fi; echo -n 'sleeping 60 '; \
+   sleep 60; done
 
 And then:
 
