@@ -176,15 +176,14 @@ sub output_invlist ($$;$) {
     my $charset = shift // "";  # name of character set for comment
 
     die "No inversion list for $name" unless defined $invlist
-                                             && ref $invlist eq 'ARRAY'
-                                             && @$invlist;
+                                             && ref $invlist eq 'ARRAY';
 
     # Output the inversion list $invlist using the name $name for it.
     # It is output in the exact internal form for inversion lists.
 
     # Is the last element of the header 0, or 1 ?
     my $zero_or_one = 0;
-    if ($invlist->[0] != 0) {
+    if (@$invlist && $invlist->[0] != 0) {
         unshift @$invlist, 0;
         $zero_or_one = 1;
     }
@@ -489,20 +488,37 @@ for my $charset (get_supported_code_pages()) {
         else {
             @invlist = prop_invlist($lookup_prop, '_perl_core_internal_ok');
             if (! @invlist) {
-                my ($list_ref, $map_ref, $format, $default);
 
-                ($list_ref, $map_ref, $format, $default)
+                # If couldn't find a non-empty inversion list, see if it is
+                # instead an inversion map
+                my ($list_ref, $map_ref, $format, $default)
                           = prop_invmap($lookup_prop, '_perl_core_internal_ok');
-                die "Could not find inversion list for '$lookup_prop'" unless $list_ref;
+                if (! $list_ref) {
+                    # An empty return here could mean an unknown property, or
+                    # merely that the original inversion list is empty.  Call
+                    # in scalar context to differentiate
+                    my $count = prop_invlist($lookup_prop,
+                                             '_perl_core_internal_ok');
+                    die "Could not find inversion list for '$lookup_prop'"
+                                                          unless defined $count;
+                }
+                else {
                 @invlist = @$list_ref;
                 @invmap = @$map_ref;
                 $map_format = $format;
                 $map_default = $default;
                 $maps_to_code_point = $map_format =~ /x/;
                 $to_adjust = $map_format =~ /a/;
+                }
             }
         }
-        die "Could not find inversion list for '$lookup_prop'" unless @invlist;
+
+
+        # Short-circuit an empty inversion list.
+        if (! @invlist) {
+            output_invlist($prop_name, \@invlist, $charset);
+            next;
+        }
 
         # Re-order the Unicode code points to native ones for this platform.
         # This is only needed for code points below 256, because native code
