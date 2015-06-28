@@ -64,7 +64,6 @@
 /* Set the maximum filespec size here as it is larger for EFS file
  * specifications.
  */
-#ifndef __VAX
 #ifndef VMS_MAXRSS
 #ifdef NAML$C_MAXRSS
 #define VMS_MAXRSS (NAML$C_MAXRSS+1)
@@ -73,7 +72,6 @@
 #endif /* VMS_LONGNAME_SUPPORT */
 #endif /* NAML$C_MAXRSS */
 #endif /* VMS_MAXRSS */
-#endif
 
 #ifndef VMS_MAXRSS
 #define VMS_MAXRSS (NAM$C_MAXRSS + 1)
@@ -365,11 +363,7 @@ struct interp_intern {
  *	getgrgid() routines are available to get group entries.
  *	The getgrent() has a separate definition, HAS_GETGRENT.
  */
-#if __CRTL_VER >= 70302000
 #define HAS_GROUP		/**/
-#else
-#undef HAS_GROUP		/**/
-#endif
 
 /* HAS_PASSWD
  *	This symbol, if defined, indicates that the getpwnam() and

@@ -397,8 +397,7 @@ generate_uudmap$(O) : generate_uudmap.c mg_raw.h
         $(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
 # The following files are built in one go by gen_shrfls.pl:
-#  perlshr_attr.opt, $(DBG)perlshr_bld.opt - VAX and AXP
-#  perlshr_gbl*.mar, perlshr_gbl*$(O) - VAX only
+#  perlshr_attr.opt, $(DBG)perlshr_bld.opt - AXP and IA64
 # The song and dance with gen_shrfls.opt accommodates DCL's line length limit.
 $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(MINIPERL_EXE) $(MAKEFILE) $(CRTL)
 	@ $(MINIPERL) makedef.pl "PLATFORM=vms" > makedef.lis

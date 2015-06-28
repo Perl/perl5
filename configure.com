@@ -144,7 +144,7 @@ $ silent=""
 $ extractsh=""
 $ override=""
 $ knowitall=""
-$ ccname="VAX"
+$ ccname="DECC"
 $ Dec_C_Version = ""
 $ cxxversion = ""
 $ use_threads = "F"
@@ -978,7 +978,6 @@ $!
 $!First time through, eh?  I have some defaults handy for the following systems:
 $!
 $!     EOD
-$!     echo "     ","VMS_VAX"
 $!     echo "     ","VMS_AXP"
 $!     echo "     ","VMS_IA64"
 $!        : Now look for a hint file osname_osvers, unless one has been
@@ -1161,25 +1160,24 @@ $! appendages later depending on configuration options.  But we need the
 $! base name early because not all questions are worth asking on all
 $! platforms.
 $!
-$! Please use F$ELEMENT(0,"-",archname) .EQS. "VMS_VAX" (or "VMS_AXP" or
+$! Please use F$ELEMENT(0,"-",archname) .EQS. "VMS_AXP" (or
 $! "VMS_IA64") from here on to allow cross-platform configuration (e.g.
-$! configure a VAX build on an Alpha).
+$! configure a IA64 build on an Alpha).
 $!
 $ IF (F$GETSYI("HW_MODEL") .LT. 1024 .AND. F$GETSYI("HW_MODEL") .GT. 0)
 $ THEN 
-$   archname = "VMS_VAX"
-$   otherarch = "an Alpha or IA64"
-$   alignbytes="8"
-$   arch_type = "ARCH-TYPE=__VAX__"
+$   echo "Sorry, VAX is  no longer supported by this Perl version."
+$   echo "Please try Perl 5.22 or earlier"
+$   exit 44
 $ ELSE
 $   IF (F$GETSYI("ARCH_TYPE") .EQ. 2)
 $   THEN
 $       archname = "VMS_AXP"
-$       otherarch = "a VAX or IA64"
+$       otherarch = "IA64"
 $       arch_type = "ARCH-TYPE=__AXP__"
 $   ELSE
 $       archname = "VMS_IA64"
-$       otherarch = "a VAX or Alpha"
+$       otherarch = "Alpha"
 $       arch_type = "ARCH-TYPE=__IA64__"
 $   ENDIF
 $   alignbytes="8"
@@ -1583,11 +1581,8 @@ $   CLOSE CONFIG
 $   echo "You are using Dec C ''line'"
 $   ccversion = line
 $   Dec_C_Version = F$INTEGER(line)
-$   IF Dec_C_Version .GE. 60200000 .AND. F$ELEMENT(0, "-", archname) .NES. "VMS_VAX"
-$   THEN
-$     echo4 "adding /NOANSI_ALIAS qualifier to ccflags."
-$     ccflags = ccflags + "/NOANSI_ALIAS"
-$   ENDIF
+$   echo4 "adding /NOANSI_ALIAS qualifier to ccflags."
+$   ccflags = ccflags + "/NOANSI_ALIAS"
 $   DELETE/NOLOG/NOCONFIRM deccvers.*;
 $ ENDIF
 $Gcc_check:
@@ -1780,17 +1775,11 @@ $!
 $List_Parse:
 $ OPEN/READ CONFIG ccvms.lis
 $ READ CONFIG line
-$ IF F$ELEMENT(0, "-", archname) .EQS. "VMS_VAX"
+$ IF F$ELEMENT(0, "-", archname) .EQS. "VMS_AXP"
 $ THEN
-$   read CONFIG line
-$   archsufx = "VAX"
+$     archsufx = "AXP"
 $ ELSE
-$   IF F$ELEMENT(0, "-", archname) .EQS. "VMS_AXP"
-$   THEN
-$       archsufx = "AXP"
-$   ELSE
-$       archsufx = "IA64"
-$   ENDIF
+$     archsufx = "IA64"
 $ ENDIF
 $ CLOSE CONFIG
 $ line = F$EDIT(line,"TRIM,COMPRESS")
@@ -2064,7 +2053,7 @@ $       THEN
 $           thread_upcalls = "MTU=MTU=1"
 $	    usethreadupcalls = "define"
 $     	    ! Are they on alpha or itanium?
-$	    IF (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX") .AND. ("''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.2")
+$	    IF ("''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.2")
 $     	    THEN
 $       	echo ""
 $       	echo "Threaded Perl can be linked to use multiple kernel threads on your system."
@@ -2117,106 +2106,103 @@ $   ENDIF
 $ ENDIF
 $!
 $! Ask if they want to build with 64-bit support
-$ IF (F$ELEMENT(0, "-", archname).NES."VMS_VAX").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
+$ bool_dflt = "n"
+$ IF F$TYPE(use64bitint) .NES. ""
 $ THEN
-$   bool_dflt = "n"
-$   IF F$TYPE(use64bitint) .NES. "" 
-$   THEN
-$       IF use64bitint .OR. use64bitint .eqs. "define" THEN bool_dflt = "y"
-$   ENDIF
-$   echo ""
-$   echo "You have natively 64-bit long integers."
-$   echo ""
-$   echo "Perl can be built to take advantage of 64-bit integer types"
-$   echo "on some systems, To do so, Configure can be run with -Duse64bitint."
-$   echo "Choosing this option will most probably introduce binary incompatibilities."
-$   echo ""
-$   echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
-$   rp = "Try to use 64-bit integers, if available? [''bool_dflt'] "
-$   GOSUB myread
-$   use64bitint = ans
+$   IF use64bitint .OR. use64bitint .eqs. "define" THEN bool_dflt = "y"
+$ ENDIF
+$ echo ""
+$ echo "You have natively 64-bit long integers."
+$ echo ""
+$ echo "Perl can be built to take advantage of 64-bit integer types"
+$ echo "on some systems, To do so, Configure can be run with -Duse64bitint."
+$ echo "Choosing this option will most probably introduce binary incompatibilities."
+$ echo ""
+$ echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
+$ rp = "Try to use 64-bit integers, if available? [''bool_dflt'] "
+$ GOSUB myread
+$ use64bitint = ans
 $!
-$   bool_dflt = "n"
-$   IF F$TYPE(use64bitall) .NES. "" 
-$   THEN
-$       IF use64bitall .OR. use64bitall .eqs. "define" THEN bool_dflt = "y"
-$   ENDIF
+$ bool_dflt = "n"
+$ IF F$TYPE(use64bitall) .NES. ""
+$ THEN
+$   IF use64bitall .OR. use64bitall .eqs. "define" THEN bool_dflt = "y"
+$ ENDIF
+$ echo ""
+$ echo "You may also choose to try maximal 64-bitness.  It means using as much"
+$ echo "64-bitness as possible on the platform.  This in turn means even more"
+$ echo "binary incompatibilities.  On the other hand, your platform may not"
+$ echo "have any more 64-bitness available than what you already have chosen."
+$ echo ""
+$ echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
+$ rp = "Try to use maximal 64-bit support, if available? [''bool_dflt'] "
+$ GOSUB myread
+$ use64bitall=ans
+$ IF use64bitall .AND. .NOT. use64bitint
+$ THEN
 $   echo ""
-$   echo "You may also choose to try maximal 64-bitness.  It means using as much"
-$   echo "64-bitness as possible on the platform.  This in turn means even more"
-$   echo "binary incompatibilities.  On the other hand, your platform may not"
-$   echo "have any more 64-bitness available than what you already have chosen."
-$   echo ""
-$   echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
-$   rp = "Try to use maximal 64-bit support, if available? [''bool_dflt'] "
-$   GOSUB myread
-$   use64bitall=ans
-$   IF use64bitall .AND. .NOT. use64bitint
-$   THEN
-$     echo ""
-$     echo "Since you have chosen a maximally 64-bit build, I'm also turning on"
-$     echo "the use of 64-bit integers."
-$     use64bitint="Y"
-$   ENDIF
+$   echo "Since you have chosen a maximally 64-bit build, I'm also turning on"
+$   echo "the use of 64-bit integers."
+$   use64bitint="Y"
+$ ENDIF
 $!
-$   bool_dflt = use64bitall
-$   IF F$TYPE(uselargefiles) .NES. "" 
-$   THEN
-$       IF uselargefiles .OR. uselargefiles .eqs. "define" THEN bool_dflt = "y"
-$   ENDIF
-$   echo ""
-$   echo "Perl can be built to understand large files (files larger than 2 gigabytes)"
-$   echo "on some systems.  To do so, Configure can be run with -Duselargefiles."
-$   echo ""
-$   echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
-$   rp = "Try to understand large files, if available? [''bool_dflt'] "
-$   GOSUB myread
-$   uselargefiles=ans
+$ bool_dflt = use64bitall
+$ IF F$TYPE(uselargefiles) .NES. "" 
+$ THEN
+$   IF uselargefiles .OR. uselargefiles .eqs. "define" THEN bool_dflt = "y"
+$ ENDIF
+$ echo ""
+$ echo "Perl can be built to understand large files (files larger than 2 gigabytes)"
+$ echo "on some systems.  To do so, Configure can be run with -Duselargefiles."
+$ echo ""
+$ echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
+$ rp = "Try to understand large files, if available? [''bool_dflt'] "
+$ GOSUB myread
+$ uselargefiles=ans
 $!
-$   bool_dflt = "n"
-$   IF F$TYPE(uselongdouble) .NES. "" 
-$   THEN
-$       IF uselongdouble .OR. uselongdouble .eqs. "define" THEN bool_dflt = "y"
-$   ENDIF
-$   echo ""
-$   echo "Perl can be built to take advantage of long doubles which"
-$   echo "(if available) may give more accuracy and range for floating point numbers."
-$   echo ""
-$   echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
-$   rp = "Try to use long doubles, if available? [''bool_dflt'] "
-$   GOSUB myread
-$   uselongdouble = ans
+$ bool_dflt = "n"
+$ IF F$TYPE(uselongdouble) .NES. ""
+$ THEN
+$   IF uselongdouble .OR. uselongdouble .eqs. "define" THEN bool_dflt = "y"
+$ ENDIF
+$ echo ""
+$ echo "Perl can be built to take advantage of long doubles which"
+$ echo "(if available) may give more accuracy and range for floating point numbers."
+$ echo ""
+$ echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
+$ rp = "Try to use long doubles, if available? [''bool_dflt'] "
+$ GOSUB myread
+$ uselongdouble = ans
 $!
-$ ENDIF ! not VAX && >= 7.1
 $!
 $ IF usesitecustomize .OR. usesitecustomize .eqs. "define" 
 $ THEN 
-$       usesitecustomize = "define"
+$   usesitecustomize = "define"
 $ ELSE
-$       usesitecustomize = "undef"
+$   usesitecustomize = "undef"
 $ ENDIF
 $!
 $! Case sensitive?
-$   echo ""
-$   echo "By default, perl (and pretty much everything else on VMS) uses"
-$   echo "case-insensitive linker symbols. Which is to say, when the"
-$   echo "underlying C code makes a call to a routine called Perl_foo in"
-$   echo "the source, the name in the object modules or shareable images"
-$   echo "is really PERL_FOO. There are some packages that use an"
-$   echo "embedded perl interpreter that instead require case-sensitive"
-$   echo "linker symbols."
-$   echo ""
-$   echo "If you have no idea what this means, and do not have"
-$   echo "any program requiring anything, choose the default."
-$   bool_dflt = be_case_sensitive
-$   if f$type(usecasesensitive) .nes. ""
-$   then
-$       if usecasesensitive .or. usecasesensitive .eqs. "define" then bool_dflt = "y"
-$       if f$extract(0,1,f$edit(usecasesensitive,"collapse,upcase")).eqs."N" .or. usecasesensitive .eqs. "undef"  then bool_dflt = "n"
-$   endif
-$   rp = "Build with case-sensitive symbols? [''bool_dflt'] "
-$   GOSUB myread
-$   be_case_sensitive = ans
+$ echo ""
+$ echo "By default, perl (and pretty much everything else on VMS) uses"
+$ echo "case-insensitive linker symbols. Which is to say, when the"
+$ echo "underlying C code makes a call to a routine called Perl_foo in"
+$ echo "the source, the name in the object modules or shareable images"
+$ echo "is really PERL_FOO. There are some packages that use an"
+$ echo "embedded perl interpreter that instead require case-sensitive"
+$ echo "linker symbols."
+$ echo ""
+$ echo "If you have no idea what this means, and do not have"
+$ echo "any program requiring anything, choose the default."
+$ bool_dflt = be_case_sensitive
+$ if f$type(usecasesensitive) .nes. ""
+$ then
+$   if usecasesensitive .or. usecasesensitive .eqs. "define" then bool_dflt = "y"
+$   if f$extract(0,1,f$edit(usecasesensitive,"collapse,upcase")).eqs."N" .or. usecasesensitive .eqs. "undef"  then bool_dflt = "n"
+$ endif
+$ rp = "Build with case-sensitive symbols? [''bool_dflt'] "
+$ GOSUB myread
+$ be_case_sensitive = ans
 $!
 $! Shortened symbols?
 $   echo ""
@@ -2231,30 +2217,25 @@ $   endif
 $   rp = "Build with long symbols shortened? [''bool_dflt'] "
 $   GOSUB myread
 $   shorten_long_symbols = ans
-$ IF F$ELEMENT(0, "-", archname) .NES. "VMS_VAX"
-$ THEN
 $! IEEE math?
-$   echo ""
-$   echo "Perl normally uses IEEE format (T_FLOAT) floating point numbers on"
-$   echo "Alpha and Itanium, but if you need G_FLOAT for binary compatibility"
-$   echo "with an external library or existing data, you may wish to disable"
-$   echo "the IEEE math option."
-$   bool_dflt = use_ieee_math
-$   if f$type(useieee) .nes. "" 
+$ echo ""
+$ echo "Perl normally uses IEEE format (T_FLOAT) floating point numbers on"
+$ echo "Alpha and Itanium, but if you need G_FLOAT for binary compatibility"
+$ echo "with an external library or existing data, you may wish to disable"
+$ echo "the IEEE math option."
+$ bool_dflt = use_ieee_math
+$ if f$type(useieee) .nes. ""
+$ then
+$   if useieee .or. useieee .eqs. "define"
 $   then
-$       if useieee .or. useieee .eqs. "define" 
-$       then 
-$         bool_dflt="y"
-$       else
-$         bool_dflt="n"
-$       endif
+$     bool_dflt="y"
+$   else
+$     bool_dflt="n"
 $   endif
-$   rp = "Use IEEE math? [''bool_dflt'] "
-$   GOSUB myread
-$   use_ieee_math = ans
-$ ELSE
-$   use_ieee_math = "n"
-$ ENDIF
+$ endif
+$ rp = "Use IEEE math? [''bool_dflt'] "
+$ GOSUB myread
+$ use_ieee_math = ans
 $ useieee = "undef"
 $ usecasesensitive = "undef"
 $ useshortenedsymbols = "undef"
@@ -3325,52 +3306,27 @@ $!
 $ perllibs=libs
 $!
 $!
-$ IF F$ELEMENT(0, "-", archname) .NES. "VMS_VAX"
-$ THEN
-$   d_PRId64 = "define"
-$   d_PRIi64 = "define"
-$   d_PRIu64 = "define"
-$   d_PRIo64 = "define"
-$   d_PRIx64 = "define"
-$   d_PRIXU64 = "define"
-$   sPRId64 = """Ld"""
-$   sPRIXU64 = """LX"""
-$   sPRIi64 = """Li"""
-$   sPRIo64 = """Lo"""
-$   sPRIu64 = """Lu"""
-$   sPRIx64 = """Lx"""
-$   d_quad = "define"
-$   quadtype = "long long"
-$   uquadtype = "unsigned long long"
-$   quadkind  = "3"
+$ d_PRId64 = "define"
+$ d_PRIi64 = "define"
+$ d_PRIu64 = "define"
+$ d_PRIo64 = "define"
+$ d_PRIx64 = "define"
+$ d_PRIXU64 = "define"
+$ sPRId64 = """Ld"""
+$ sPRIXU64 = """LX"""
+$ sPRIi64 = """Li"""
+$ sPRIo64 = """Lo"""
+$ sPRIu64 = """Lu"""
+$ sPRIx64 = """Lx"""
+$ d_quad = "define"
+$ quadtype = "long long"
+$ uquadtype = "unsigned long long"
+$ quadkind  = "3"
 $!
-$   d_frexpl = "define"
-$   d_ldexpl = "define"
-$   d_modfl = "define"
-$   d_modflproto = "define"
-$ ELSE
-$   d_PRId64 = "undef"
-$   d_PRIi64 = "undef"
-$   d_PRIXU64 = "undef"
-$   d_PRIu64 = "undef"
-$   d_PRIo64 = "undef"
-$   d_PRIx64 = "undef"
-$   sPRId64 = ""
-$   sPRIXU64 = """lX"""
-$   sPRIi64 = ""
-$   sPRIo64 = ""
-$   sPRIu64 = ""
-$   sPRIx64 = ""
-$   d_quad = "undef"
-$   quadtype = "undef"
-$   uquadtype = "undef"
-$   quadkind  = "undef"
-$!
-$   d_frexpl = "undef"
-$   d_ldexpl = "undef"
-$   d_modfl = "undef"
-$   d_modflproto = "undef"
-$ ENDIF
+$ d_frexpl = "define"
+$ d_ldexpl = "define"
+$ d_modfl = "define"
+$ d_modflproto = "define"
 $!
 $ IF useieee .OR. useieee .EQS. "define"
 $ THEN
@@ -5184,7 +5140,7 @@ $! easy to use DCL test to see if hardlinks are enabled on the build
 $! disk.  That would require more work to test, and I am only testing
 $! this on 8.2, so that is why the 8.2 test.
 $!
-$  IF (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
+$  IF (vms_ver .GES. "8.2")
 $  THEN
 $   IF f$getdvi("SYS$DISK","HARDLINKS_SUPPORTED")
 $   THEN
@@ -5202,7 +5158,7 @@ $  ENDIF
 $!
 $  IF uselargefiles .OR. uselargefiles .eqs. "define"
 $  THEN
-$    IF (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
+$    IF (vms_ver .GES. "8.2")
 $    THEN
 $      echo4 "Largefile support enabled, so enabling standard stat support too."
 $      usestdstat = "y"
@@ -5243,7 +5199,7 @@ $       echo4 "Your system does not support symbolic links."
 $       echo4 "I am disabling symbolic link support."
 $    ENDIF
 $  ELSE
-$    IF (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
+$    IF (vms_ver .GES. "8.2")
 $    THEN
 $       echo4 "-Duselargefiles is required for symbolic link support."
 $       echo4 "You did not specify that, so I am disabling symbolic link support."
@@ -5277,25 +5233,22 @@ $  d_ttyname_r = "undef"
 $  ttyname_r_proto = "0"
 $  d_snprintf = "undef"
 $  d_vsnprintf = "undef"
-$  if (vms_ver .GES. "7.3-2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
+$  echo "Asumming 64-bit OpenVMS ''vms_ver' -- will build with V7.3-2 routines"
+$  d_getgrgid_r = "define"
+$  getgrgid_r_proto = "1"
+$  d_getgrnam_r = "define"
+$  getgrnam_r_proto = "1"
+$  if d_symlink .or. d_symlink .EQS. "define"
 $  then
-$    echo "Found 64 bit OpenVMS ''vms_ver' -- will build with V7.3-2 routines"
-$    d_getgrgid_r = "define"
-$    getgrgid_r_proto = "1"
-$    d_getgrnam_r = "define"
-$    getgrnam_r_proto = "1"
-$    if d_symlink .or. d_symlink .EQS. "define"
-$    then
 $!	 FIXME: Need to find how to activate this.
 $!       d_getpgid = "define"
 $!       d_getpgrp = "define"
-$    endif
-$    d_setgrent = "define"
-$    d_ttyname_r = "define"
-$    ttyname_r_proto = "1"
-$    d_snprintf = "define"
-$    d_vsnprintf = "define"
 $  endif
+$  d_setgrent = "define"
+$  d_ttyname_r = "define"
+$  ttyname_r_proto = "1"
+$  d_snprintf = "define"
+$  d_vsnprintf = "define"
 $!
 $! VMS V7.3-2 powered options
 $! We know that it is only available for V7.3-2 and later on 64 bit platforms.
@@ -5311,7 +5264,7 @@ $  d_setregid = "undef"
 $  d_setreuid = "undef"
 $  d_setsid = "undef"
 $  ! Disable this section for now.
-$!$  if (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
+$!$  if (vms_ver .GES. "8.2")
 $  if .NOT. 1
 $  then
 $    echo "Found 64 bit OpenVMS ''vms_ver' -- will build with V7.3-2 UID setting routines"
@@ -5329,7 +5282,7 @@ $!
 $  d_fstatvfs = "undef"
 $  d_statvfs = "undef"
 $  i_sysstatvfs = "undef"
-$  if (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
+$  if (vms_ver .GES. "8.2")
 $  then
 $    echo "Found 64 bit OpenVMS ''vms_ver' -- will build with 8.2 routines"
 $    d_fstatvfs = "define"
@@ -5398,10 +5351,7 @@ $ d_index="define"
 $ pidtype="pid_t"
 $ sig_name1="ZERO HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE"
 $ sig_name2=" ALRM TERM USR1 USR2 NUM18 NUM19 CHLD CONT STOP TSTP TTIN TTOU DEBUG"
-$ IF (vms_ver .GES. "7.3")
-$ THEN
-$     sig_name2 = sig_name2 + " NUM27 WINCH"
-$ ENDIF
+$ sig_name2 = sig_name2 + " NUM27 WINCH"
 $!* signal.h defines SIGRTMIN as 33 and SIGRTMAX as 64, but there is no 
 $!* sigqueue function or other apparent means to do realtime signalling,
 $!* so let's not try to include the realtime range for now.
@@ -5493,7 +5443,7 @@ $   d_vms_do_sockets="define"
 $   d_htonl="define"
 $   d_socket="define"
 $   d_sockpair = "undef"
-$   if (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
+$   if (vms_ver .GES. "8.2")
 $   then
 $     echo "Found 64 bit OpenVMS 8.2, will build with socketpair support"
 $     d_sockpair = "define"
@@ -6061,7 +6011,7 @@ $ WC "d_fdim='" + d_fdim + "'"
 $ WC "d_fds_bits='define'"
 $ WC "d_fegetround='undef'"
 $ WC "d_fgetpos='define'"
-$ IF F$ELEMENT(0, "-", archname) .NES. "VMS_VAX" .AND. use_ieee_math
+$ IF use_ieee_math
 $ THEN
 $   WC "d_finite='define'"
 $   WC "d_finitel='define'"
@@ -6098,12 +6048,7 @@ $ WC "d_ftime='define'"
 $ WC "d_futimes='undef'"
 $ WC "d_gdbmndbm_h_uses_prototypes='undef'"
 $ WC "d_gdbm_ndbm_h_uses_prototypes='undef'"
-$ IF vms_ver .GES. "7.3"
-$ THEN
-$   WC "d_getaddrinfo='define'"
-$ ELSE
-$   WC "d_getaddrinfo='undef'"
-$ ENDIF
+$ WC "d_getaddrinfo='define'"
 $ WC "d_getcwd='define'"
 $ WC "d_getespwnam='undef'"
 $ WC "d_getfsstat='undef'"
@@ -6118,12 +6063,7 @@ $ WC "d_getitimer='" + d_getitimer + "'"
 $ WC "d_getlogin='define'"
 $ WC "d_getmnt='undef'"
 $ WC "d_getmntent='undef'"
-$ IF vms_ver .GES. "7.3"
-$ THEN
-$   WC "d_getnameinfo='define'"
-$ ELSE
-$   WC "d_getnameinfo='undef'"
-$ ENDIF
+$ WC "d_getnameinfo='define'"
 $ WC "d_getnbyaddr='" + d_getnbyaddr + "'"
 $ WC "d_getnbyname='" + d_getnbyname + "'"
 $ WC "d_getnent='" + d_getnent + "'"
@@ -6894,7 +6834,7 @@ $! ## The UNIXy POSIXy reentrantey thingys ##
 $! See "Appendix B, Version-Dependency Tables" in the C RTL
 $! manual for when assorted _r functions became available.
 $!
-$ IF use_threads .AND. vms_ver .GES. "7.2"
+$ IF use_threads
 $ THEN
 $   WC "asctime_r_proto='REENTRANT_PROTO_B_SB'"
 $   WC "d_asctime_r='define'"
