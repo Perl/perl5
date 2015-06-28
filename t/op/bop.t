@@ -119,14 +119,18 @@ is (sprintf("%vd", v120.300 & v200.400), '72.256');
 is (sprintf("%vd", v120.300 | v200.400), '248.444');
 is (sprintf("%vd", v120.300 ^ v200.400), '176.188');
 #
-my $a = v120.300;
-my $b = v200.400;
-$a ^= $b;
-is (sprintf("%vd", $a), '176.188');
-my $a = v120.300;
-my $b = v200.400;
-$a |= $b;
-is (sprintf("%vd", $a), '248.444');
+{
+    my $a = v120.300;
+    my $b = v200.400;
+    $a ^= $b;
+    is (sprintf("%vd", $a), '176.188');
+}
+{
+    my $a = v120.300;
+    my $b = v200.400;
+    $a |= $b;
+    is (sprintf("%vd", $a), '248.444');
+}
 
 #
 # UTF8 ~ behaviour
@@ -497,7 +501,7 @@ for my $str ("x", "\x{100}") {
 }
 
 sub PVBM () { "X" }
-index "foo", PVBM;
+1 if index "foo", PVBM;
 
 my $warn = 0;
 local $^W = 1;
@@ -571,7 +575,7 @@ my $strval;
     use overload q/|/ => sub { "y" };
 }
 
-ok(!eval { bless([], "Bar") | "x"; 1 },     "string overload can't use |");
+ok(!eval { 1 if bless([], "Bar") | "x"; 1 },"string overload can't use |");
 like($@, qr/no method found/,               "correct error");
 is(eval { bless([], "Baz") | "x" }, "y",    "| overload works");
 
