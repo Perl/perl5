@@ -379,7 +379,7 @@ be integers.  (See also L<Integer Arithmetic>.)
 Note that both C<<< << >>> and C<<< >> >>> in Perl are implemented directly using
 C<<< << >>> and C<<< >> >>>  in C.  If S<C<use integer>> (see L<Integer Arithmetic>) is
 in force then signed C integers are used, else unsigned C integers are
-used.  Either way, the implementation isn't going to generate results
+used, even for negative shiftees.  Either way, the implementation isn't going to generate results
 larger than the size of the integer type Perl was built with (32 bits
 or 64 bits).
 
