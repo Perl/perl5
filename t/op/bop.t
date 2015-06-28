@@ -15,7 +15,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 192 + (10*13*2) + 5;
+plan tests => 192 + (10*13*2) + 5 + 25;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -586,3 +586,65 @@ $^A .= new version ~$_ for eval sprintf('"\\x%02x"', 0xff - ord("1")),
                            $::IS_EBCDIC ? v13 : v205, # 255 - ord('2')
                            eval sprintf('"\\x%02x"', 0xff - ord("3"));
 is $^A, "123", '~v0 clears vstring magic on retval';
+
+{
+    my $w = $Config::Config{ivsize} * 8;
+
+    fail("unexpected w $w") unless $w == 32 || $w == 64;
+
+    is(1 << 1, 2, "UV 1 left shift 1");
+    is(1 >> 1, 0, "UV 1 right shift 1");
+
+    is(0x7b << -4, 0x007, "UV left negative shift == right shift");
+    is(0x7b >> -4, 0x7b0, "UV right negative shift == left shift");
+
+    is(0x7b <<  0, 0x07b, "UV left  zero shift == identity");
+    is(0x7b >>  0, 0x07b, "UV right zero shift == identity");
+
+    is(0x0 << -1, 0x0, "zero left  negative shift == zero");
+    is(0x0 >> -1, 0x0, "zero right negative shift == zero");
+
+    cmp_ok(1 << $w - 1, '==', 2 ** ($w - 1), # not is() because NV stringify.
+       "UV left $w - 1 shift == 2 ** ($w - 1)");
+    is(1 << $w,     0, "UV left shift $w     == zero");
+    is(1 << $w + 1, 0, "UV left shift $w + 1 == zero");
+
+    is(1 >> $w - 1, 0, "UV right shift $w - 1 == zero");
+    is(1 >> $w,     0, "UV right shift $w     == zero");
+    is(1 >> $w + 1, 0, "UV right shift $w + 1 == zero");
+
+    # Negative shiftees get promoted to UVs before shifting.  This is
+    # not necessarily the ideal behavior, but that is what is happening.
+    if ($w == 64) {
+        no warnings "portable";
+        is(-1 << 1, 0xFFFF_FFFF_FFFF_FFFE, "neg UV (sic) left shift");
+        is(-1 >> 1, 0x7FFF_FFFF_FFFF_FFFF, "neg UV (sic) right right");
+    } elsif ($w == 32) {
+        no warnings "portable";
+        is(-1 << 1, 0xFFFF_FFFE, "neg left shift");
+        is(-1 >> 1, 0x7FFF_FFFF, "neg right right");
+    }
+
+    {
+        # 'use integer' means use IVs instead of UVs.
+        use integer;
+
+        is(1 << 1, 2, "IV 1 left shift 1");
+        is(1 >> 1, 0, "IV 1 right shift 1");
+
+        # Even for negative for IVs, left shift is multiplication.
+        is(-1 <<      1, -2, "IV -1 left shift       1 == -2");
+
+        # But right shift displays the stuckiness to -1.
+        is(-1 >>      1, -1, "IV -1 right shift      1 == -1");
+
+        # As for UVs, negative shifting means the reverse shift.
+        is(-1 <<     -1, -1, "IV -1 left shift      -1 == -1");
+        is(-1 >>     -1, -2, "IV -1 right shift     -1 == -2");
+
+        # Test also at and around wordsize, expect stuckiness to -1.
+        is(-1 >> $w - 1, -1, "IV -1 right shift $w - 1 == -1");
+        is(-1 >> $w,     -1, "IV -1 right shift $w     == -1");
+        is(-1 >> $w + 1, -1, "IV -1 right shift $w + 1 == -1");
+    }
+}

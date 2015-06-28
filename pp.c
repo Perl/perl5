@@ -1905,6 +1905,37 @@ PP(pp_subtract)
     }
 }
 
+#define IV_BITS (IVSIZE * 8)
+
+static UV S_uv_shift(UV uv, int shift, bool left)
+{
+   if (shift < 0) {
+       shift = -shift;
+       left = !left;
+   }
+   if (shift >= IV_BITS) {
+       return 0;
+   }
+   return left ? uv << shift : uv >> shift;
+}
+
+static IV S_iv_shift(IV iv, int shift, bool left)
+{
+   if (shift < 0) {
+       shift = -shift;
+       left = !left;
+   }
+   if (shift >= IV_BITS) {
+       return iv < 0 ? -1 : 0;
+   }
+   return left ? iv << shift : iv >> shift;
+}
+
+#define UV_LEFT_SHIFT(uv, shift) S_uv_shift(uv, shift, TRUE)
+#define UV_RIGHT_SHIFT(uv, shift) S_uv_shift(uv, shift, FALSE)
+#define IV_LEFT_SHIFT(iv, shift) S_iv_shift(iv, shift, TRUE)
+#define IV_RIGHT_SHIFT(iv, shift) S_iv_shift(iv, shift, FALSE)
+
 PP(pp_left_shift)
 {
     dSP; dATARGET; SV *svl, *svr;
@@ -1914,12 +1945,10 @@ PP(pp_left_shift)
     {
       const IV shift = SvIV_nomg(svr);
       if (PL_op->op_private & HINT_INTEGER) {
-	const IV i = SvIV_nomg(svl);
-	SETi(i << shift);
+          SETi(IV_LEFT_SHIFT(SvIV_nomg(svl), shift));
       }
       else {
-	const UV u = SvUV_nomg(svl);
-	SETu(u << shift);
+	  SETu(UV_LEFT_SHIFT(SvUV_nomg(svl), shift));
       }
       RETURN;
     }
@@ -1934,12 +1963,10 @@ PP(pp_right_shift)
     {
       const IV shift = SvIV_nomg(svr);
       if (PL_op->op_private & HINT_INTEGER) {
-	const IV i = SvIV_nomg(svl);
-	SETi(i >> shift);
+	  SETi(IV_RIGHT_SHIFT(SvIV_nomg(svl), shift));
       }
       else {
-	const UV u = SvUV_nomg(svl);
-	SETu(u >> shift);
+          SETu(UV_RIGHT_SHIFT(SvUV_nomg(svl), shift));
       }
       RETURN;
     }
