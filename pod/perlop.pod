@@ -376,17 +376,28 @@ Binary C<<< ">>" >>> returns the value of its left argument shifted right by
 the number of bits specified by the right argument.  Arguments should
 be integers.  (See also L<Integer Arithmetic>.)
 
-Note that both C<<< << >>> and C<<< >> >>> in Perl are implemented directly using
-C<<< << >>> and C<<< >> >>>  in C.  If S<C<use integer>> (see L<Integer Arithmetic>) is
-in force then signed C integers are used, else unsigned C integers are
-used, even for negative shiftees.  Either way, the implementation isn't going to generate results
-larger than the size of the integer type Perl was built with (32 bits
-or 64 bits).
+If S<C<use integer>> (see L<Integer Arithmetic>) is in force then
+signed C integers are used (I<arithmetic shift>), otherwise unsigned C
+integers are used (I<logical shift>), even for negative shiftees.
+In arithmetic right shift the sign bit is replicated on the left,
+in logical shift zero bits come in from the left.
 
-The result of overflowing the range of the integers is undefined
-because it is undefined also in C.  In other words, using 32-bit
-integers, S<C<< 1 << 32 >>> is undefined.  Shifting by a negative number
-of bits is also undefined.
+Either way, the implementation isn't going to generate results larger
+than the size of the integer type Perl was built with (32 bits or 64 bits).
+
+Shifting by negative number of bits means the reverse shift: left
+shift becomes right shift, right shift becomes left shift.  This is
+unlike in C, where negative shift is undefined.
+
+Shifting by more bits than the size of the integers means most of the
+time zero (all bits fall off), except that under S<C<use integer>>
+right overshifting a negative shiftee results in -1.  This is unlike
+in C, where shifting by too many bits is undefined.  A common C
+behavior is "shift by modulo wordbits", so that for example
+
+    1 >> 64 == 1 >> (64 % 64) == 1 >> 0 == 1  # Common C behavior.
+
+but that is completely accidental.
 
 If you get tired of being subject to your platform's native integers,
 the S<C<use bigint>> pragma neatly sidesteps the issue altogether:
