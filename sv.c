@@ -11526,9 +11526,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
       tryasterisk:
 	if (*q == '*') {
 	    q++;
-	    if ( (ewix = expect_number(&q)) )
-		if (*q++ != '$')
+	    if ( (ewix = expect_number(&q)) ) {
+		if (*q++ == '$')
+                    no_redundant_warning = TRUE;
+                else
 		    goto unknown;
+            }
 	    asterisk = TRUE;
 	}
 	if (*q == 'v') {

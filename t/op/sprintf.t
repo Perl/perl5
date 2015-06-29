@@ -647,19 +647,20 @@ __END__
 >%y<        >''<          >%y INVALID REDUNDANT<
 >%z<        >''<          >%z INVALID REDUNDANT<
 >%2$d %1$d<	>[12, 34]<	>34 12<
->%*2$d<		>[12, 3]<	> 12 REDUNDANT<
+>%*2$d<		>[12, 3]<	> 12<             >RT#125469<
+>%*3$d<		>[12, 9, 3]<	> 12<             >related to RT#125469<
 >%2$d %d<	>[12, 34]<	>34 12<
 >%2$d %d %d<	>[12, 34]<	>34 12 34<
 >%3$d %d %d<	>[12, 34, 56]<	>56 12 34<
 >%2$*3$d %d<	>[12, 34, 3]<	> 34 12<
->%*3$2$d %d<	>[12, 34, 3]<	>%*3$2$d 12 INVALID REDUNDANT<
+>%*3$2$d %d<	>[12, 34, 3]<	>%*3$2$d 12 INVALID<
 >%2$d<		>12<	>0 MISSING<
 >%0$d<		>12<	>%0$d INVALID REDUNDANT<
 >%1$$d<		>12<	>%1$$d INVALID<
 >%1$1$d<	>12<	>%1$1$d INVALID<
->%*2$*2$d<	>[12, 3]<	>%*2$*2$d INVALID REDUNDANT<
+>%*2$*2$d<	>[12, 3]<	>%*2$*2$d INVALID<
 >%*2*2$d<	>[12, 3]<	>%*2*2$d INVALID REDUNDANT<
->%*2$1d<	>[12, 3]<	>%*2$1d INVALID REDUNDANT<
+>%*2$1d<	>[12, 3]<	>%*2$1d INVALID<
 >%0v2.2d<	>''<	><
 >%vc,%d<	>[63, 64, 65]<	>%vc,63 INVALID REDUNDANT<
 >%v%,%d<	>[63, 64, 65]<	>%v%,63 INVALID REDUNDANT<
