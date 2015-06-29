@@ -7708,15 +7708,6 @@ STATIC I32	S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 #define PERL_ARGS_ASSERT_VISIT	\
 	assert(f)
 
-#  if defined(PERL_OLD_COPY_ON_WRITE)
-STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, SV *after)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_SV_RELEASE_COW	\
-	assert(sv); assert(pvx); assert(after)
-
-#  endif
 #  if defined(USE_ITHREADS)
 STATIC SV*	S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			__attribute__warn_unused_result__

@@ -2381,9 +2381,6 @@ s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *const s|NN const U8 *const target \
 s	|void	|assert_uft8_cache_coherent|NN const char *const func \
 		|STRLEN from_cache|STRLEN real|NN SV *const sv
 sn	|char *	|F0convert	|NV nv|NN char *const endbuf|NN STRLEN *const len
-#  if defined(PERL_OLD_COPY_ON_WRITE)
-sM	|void	|sv_release_COW	|NN SV *sv|NN const char *pvx|NN SV *after
-#  endif
 s	|SV *	|more_sv
 s	|bool	|sv_2iuv_common	|NN SV *const sv
 s	|void	|glob_assign_glob|NN SV *const dstr|NN SV *const sstr \

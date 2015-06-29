@@ -3395,12 +3395,6 @@ S_restore_magic(pTHX_ const void *p)
 
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	SvTEMP_off(sv); /* if it's still magical, this value isn't temporary */
-#ifdef PERL_OLD_COPY_ON_WRITE
-	/* While magic was saved (and off) sv_setsv may well have seen
-	   this SV as a prime candidate for COW.  */
-	if (SvIsCOW(sv))
-	    sv_force_normal_flags(sv, 0);
-#endif
 	if (mgs->mgs_flags)
 	    SvFLAGS(sv) |= mgs->mgs_flags;
 	else

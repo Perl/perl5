@@ -1697,9 +1697,6 @@
 #define utf8_mg_len_cache_update(a,b,c)	S_utf8_mg_len_cache_update(aTHX_ a,b,c)
 #define utf8_mg_pos_cache_update(a,b,c,d,e)	S_utf8_mg_pos_cache_update(aTHX_ a,b,c,d,e)
 #define visit(a,b,c)		S_visit(aTHX_ a,b,c)
-#    if defined(PERL_OLD_COPY_ON_WRITE)
-#define sv_release_COW(a,b,c)	S_sv_release_COW(aTHX_ a,b,c)
-#    endif
 #    if defined(USE_ITHREADS)
 #define sv_dup_common(a,b)	S_sv_dup_common(aTHX_ a,b)
 #define sv_dup_inc_multiple(a,b,c,d)	S_sv_dup_inc_multiple(aTHX_ a,b,c,d)

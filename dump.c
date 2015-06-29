@@ -1554,19 +1554,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	 && type != SVt_REGEXP && !isGV_with_GP(sv) && !SvVALID(sv))
 	|| (type == SVt_IV && !SvROK(sv))) {
 	if (SvIsUV(sv)
-#ifdef PERL_OLD_COPY_ON_WRITE
-	               || SvIsCOW(sv)
-#endif
 	                             )
 	    Perl_dump_indent(aTHX_ level, file, "  UV = %"UVuf, (UV)SvUVX(sv));
 	else
 	    Perl_dump_indent(aTHX_ level, file, "  IV = %"IVdf, (IV)SvIVX(sv));
-#ifdef PERL_OLD_COPY_ON_WRITE
-	if (SvIsCOW_shared_hash(sv))
-	    PerlIO_printf(file, "  (HASH)");
-	else if (SvIsCOW_normal(sv))
-	    PerlIO_printf(file, "  (COW from 0x%"UVxf")", (UV)SvUVX(sv));
-#endif
 	(void)PerlIO_putc(file, '\n');
     }
 

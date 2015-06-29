@@ -125,11 +125,6 @@
 #   define ASSERT_UTF8_CACHE(cache) NOOP
 #endif
 
-#ifdef PERL_OLD_COPY_ON_WRITE
-#define SV_COW_NEXT_SV(sv)	INT2PTR(SV *,SvUVX(sv))
-#define SV_COW_NEXT_SV_SET(current,next)	SvUV_set(current, PTR2UV(next))
-#endif
-
 /* ============================================================================
 
 =head1 Allocation and deallocation of SVs.
@@ -2500,11 +2495,6 @@ Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags)
     }
 
     if (SvTHINKFIRST(sv)) {
-#ifdef PERL_OLD_COPY_ON_WRITE
-	if (SvIsCOW(sv)) {
-	    sv_force_normal_flags(sv, 0);
-	}
-#endif
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
 		report_uninit(sv);
@@ -2588,11 +2578,6 @@ Perl_sv_2uv_flags(pTHX_ SV *const sv, const I32 flags)
     }
 
     if (SvTHINKFIRST(sv)) {
-#ifdef PERL_OLD_COPY_ON_WRITE
-	if (SvIsCOW(sv)) {
-	    sv_force_normal_flags(sv, 0);
-	}
-#endif
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
 		report_uninit(sv);
@@ -2674,11 +2659,6 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	    }
 	    return PTR2NV(SvRV(sv));
 	}
-#ifdef PERL_OLD_COPY_ON_WRITE
-	if (SvIsCOW(sv)) {
-	    sv_force_normal_flags(sv, 0);
-	}
-#endif
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
 		report_uninit(sv);
@@ -4641,14 +4621,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
         }
 	else if (flags & SV_COW_SHARED_HASH_KEYS
 	      &&
-#ifdef PERL_OLD_COPY_ON_WRITE
-		 (  sflags & SVf_IsCOW
-		 || (   (sflags & CAN_COW_MASK) == CAN_COW_FLAGS
-		     && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
-		     && SvTYPE(sstr) >= SVt_PVIV && len
-		    )
-		 )
-#elif defined(PERL_NEW_COPY_ON_WRITE)
+#ifdef PERL_NEW_COPY_ON_WRITE
 		 (sflags & SVf_IsCOW
 		   ? (!len ||
                        (  (CHECK_COWBUF_THRESHOLD(cur,len) || SvLEN(dstr) < cur+1)
@@ -4675,13 +4648,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 #ifdef PERL_ANY_COW
             if (!(sflags & SVf_IsCOW)) {
                     SvIsCOW_on(sstr);
-# ifdef PERL_OLD_COPY_ON_WRITE
-                    /* Make the source SV into a loop of 1.
-                       (about to become 2) */
-                    SV_COW_NEXT_SV_SET(sstr, sstr);
-# else
 		    CowREFCNT(sstr) = 0;
-# endif
             }
 #endif
 	    if (SvPVX_const(dstr)) {	/* we know that dtype >= SVt_PV */
@@ -4690,18 +4657,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 
 #ifdef PERL_ANY_COW
 	    if (len) {
-# ifdef PERL_OLD_COPY_ON_WRITE
-		    assert (SvTYPE(dstr) >= SVt_PVIV);
-                    /* SvIsCOW_normal */
-                    /* splice us in between source and next-after-source.  */
-                    SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
-                    SV_COW_NEXT_SV_SET(sstr, dstr);
-# else
 		    if (sflags & SVf_IsCOW) {
 			sv_buf_to_rw(sstr);
 		    }
 		    CowREFCNT(sstr)++;
-# endif
                     SvPV_set(dstr, SvPVX_mutable(sstr));
                     sv_buf_to_ro(sstr);
             } else
@@ -4786,11 +4745,7 @@ Perl_sv_setsv_mg(pTHX_ SV *const dstr, SV *const sstr)
 }
 
 #ifdef PERL_ANY_COW
-# ifdef PERL_OLD_COPY_ON_WRITE
-#  define SVt_COW SVt_PVIV
-# else
 #  define SVt_COW SVt_PV
-# endif
 SV *
 Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 {
@@ -4823,12 +4778,6 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 
     assert (SvPOK(sstr));
     assert (SvPOKp(sstr));
-# ifdef PERL_OLD_COPY_ON_WRITE
-    assert (!SvIOK(sstr));
-    assert (!SvIOKp(sstr));
-    assert (!SvNOK(sstr));
-    assert (!SvNOKp(sstr));
-# endif
 
     if (SvIsCOW(sstr)) {
 
@@ -4839,32 +4788,20 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 	    new_pv = HEK_KEY(share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr))));
 	    goto common_exit;
 	}
-# ifdef PERL_OLD_COPY_ON_WRITE
-	SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
-# else
 	assert(SvCUR(sstr)+1 < SvLEN(sstr));
 	assert(CowREFCNT(sstr) < SV_COW_REFCNT_MAX);
-# endif
     } else {
 	assert ((SvFLAGS(sstr) & CAN_COW_MASK) == CAN_COW_FLAGS);
 	SvUPGRADE(sstr, SVt_COW);
 	SvIsCOW_on(sstr);
 	DEBUG_C(PerlIO_printf(Perl_debug_log,
 			      "Fast copy on write: Converting sstr to COW\n"));
-# ifdef PERL_OLD_COPY_ON_WRITE
-	SV_COW_NEXT_SV_SET(dstr, sstr);
-# else
 	CowREFCNT(sstr) = 0;	
-# endif
     }
-# ifdef PERL_OLD_COPY_ON_WRITE
-    SV_COW_NEXT_SV_SET(sstr, dstr);
-# else
 #  ifdef PERL_DEBUG_READONLY_COW
     if (already) sv_buf_to_rw(sstr);
 #  endif
     CowREFCNT(sstr)++;	
-# endif
     new_pv = SvPVX_mutable(sstr);
     sv_buf_to_ro(sstr);
 
@@ -5120,44 +5057,6 @@ Perl_sv_usepvn_flags(pTHX_ SV *const sv, char *ptr, const STRLEN len, const U32 
 	SvSETMAGIC(sv);
 }
 
-#ifdef PERL_OLD_COPY_ON_WRITE
-/* Need to do this *after* making the SV normal, as we need the buffer
-   pointer to remain valid until after we've copied it.  If we let go too early,
-   another thread could invalidate it by unsharing last of the same hash key
-   (which it can do by means other than releasing copy-on-write Svs)
-   or by changing the other copy-on-write SVs in the loop.  */
-STATIC void
-S_sv_release_COW(pTHX_ SV *sv, const char *pvx, SV *after)
-{
-    PERL_ARGS_ASSERT_SV_RELEASE_COW;
-
-    { /* this SV was SvIsCOW_normal(sv) */
-         /* we need to find the SV pointing to us.  */
-        SV *current = SV_COW_NEXT_SV(after);
-
-        if (current == sv) {
-            /* The SV we point to points back to us (there were only two of us
-               in the loop.)
-               Hence other SV is no longer copy on write either.  */
-            SvIsCOW_off(after);
-            sv_buf_to_rw(after);
-        } else {
-            /* We need to follow the pointers around the loop.  */
-            SV *next;
-            while ((next = SV_COW_NEXT_SV(current)) != sv) {
-                assert (next);
-                current = next;
-                 /* don't loop forever if the structure is bust, and we have
-                    a pointer into a closed loop.  */
-                assert (current != after);
-                assert (SvPVX_const(current) == pvx);
-            }
-            /* Make the SV before us point to the SV after us.  */
-            SV_COW_NEXT_SV_SET(current, after);
-        }
-    }
-}
-#endif
 /*
 =for apidoc sv_force_normal_flags
 
@@ -5190,12 +5089,6 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
 	const char * const pvx = SvPVX_const(sv);
 	const STRLEN len = SvLEN(sv);
 	const STRLEN cur = SvCUR(sv);
-# ifdef PERL_OLD_COPY_ON_WRITE
-	/* next COW sv in the loop.  If len is 0 then this is a shared-hash
-	   key scalar, so we mustn't attempt to call SV_COW_NEXT_SV(), as
-	   we'll fail an assertion.  */
-	SV * const next = len ? SV_COW_NEXT_SV(sv) : 0;
-# endif
 
         if (DEBUG_C_TEST) {
                 PerlIO_printf(Perl_debug_log,
@@ -5239,9 +5132,6 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
                 *SvEND(sv) = '\0';
             }
 	    if (len) {
-# ifdef PERL_OLD_COPY_ON_WRITE
-		sv_release_COW(sv, pvx, next);
-# endif
 	    } else {
 		unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
 	    }
@@ -5742,10 +5632,6 @@ Perl_sv_magicext_mglob(pTHX_ SV *sv)
 	vivify_defelem(sv);
 	sv = LvTARG(sv);
     }
-#ifdef PERL_OLD_COPY_ON_WRITE
-    if (SvIsCOW(sv))
-	sv_force_normal_flags(sv, 0);
-#endif
     return sv_magicext(sv, NULL, PERL_MAGIC_regex_global,
 		       &PL_vtbl_mglob, 0, 0);
 }
@@ -5791,10 +5677,6 @@ Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
     vtable = (vtable_index == magic_vtable_max)
 	? NULL : PL_magic_vtables + vtable_index;
 
-#ifdef PERL_OLD_COPY_ON_WRITE
-    if (SvIsCOW(sv))
-        sv_force_normal_flags(sv, 0);
-#endif
     if (SvREADONLY(sv)) {
 	if (
 	    !PERL_MAGIC_TYPE_READONLY_ACCEPTABLE(how)
@@ -6426,28 +6308,6 @@ Perl_sv_replace(pTHX_ SV *const sv, SV *const nsv)
     }
 	
 
-#ifdef PERL_OLD_COPY_ON_WRITE
-    if (SvIsCOW_normal(nsv)) {
-	/* We need to follow the pointers around the loop to make the
-	   previous SV point to sv, rather than nsv.  */
-	SV *next;
-	SV *current = nsv;
-	while ((next = SV_COW_NEXT_SV(current)) != nsv) {
-	    assert(next);
-	    current = next;
-	    assert(SvPVX_const(current) == SvPVX_const(nsv));
-	}
-	/* Make the SV before us point to the SV after us.  */
-	if (DEBUG_C_TEST) {
-	    PerlIO_printf(Perl_debug_log, "previous is\n");
-	    sv_dump(current);
-	    PerlIO_printf(Perl_debug_log,
-                          "move it from 0x%"UVxf" to 0x%"UVxf"\n",
-			  (UV) SV_COW_NEXT_SV(current), (UV) sv);
-	}
-	SV_COW_NEXT_SV_SET(current, sv);
-    }
-#endif
     SvREFCNT(sv) = refcnt;
     SvFLAGS(nsv) |= SVTYPEMASK;		/* Mark as freed */
     SvREFCNT(nsv) = 0;
@@ -6734,24 +6594,17 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 			sv_dump(sv);
 		    }
 		    if (SvLEN(sv)) {
-# ifdef PERL_OLD_COPY_ON_WRITE
-			sv_release_COW(sv, SvPVX_const(sv), SV_COW_NEXT_SV(sv));
-# else
 			if (CowREFCNT(sv)) {
 			    sv_buf_to_rw(sv);
 			    CowREFCNT(sv)--;
 			    sv_buf_to_ro(sv);
 			    SvLEN_set(sv, 0);
 			}
-# endif
 		    } else {
 			unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
 		    }
 
 		}
-# ifdef PERL_OLD_COPY_ON_WRITE
-		else
-# endif
 		if (SvLEN(sv)) {
 		    Safefree(SvPVX_mutable(sv));
 		}
@@ -8078,10 +7931,6 @@ Perl_sv_collxfrm_flags(pTHX_ SV *const sv, STRLEN *const nxp, const I32 flags)
 	s = SvPV_flags_const(sv, len, flags);
 	if ((xf = mem_collxfrm(s, len, &xlen))) {
 	    if (! mg) {
-#ifdef PERL_OLD_COPY_ON_WRITE
-		if (SvIsCOW(sv))
-		    sv_force_normal_flags(sv, 0);
-#endif
 		mg = sv_magicext(sv, 0, PERL_MAGIC_collxfrm, &PL_vtbl_collxfrm,
 				 0, 0);
 		assert(mg);

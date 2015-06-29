@@ -2644,16 +2644,12 @@ typedef struct padnamelist PADNAMELIST;
 typedef struct padname PADNAME;
 
 /* enable PERL_NEW_COPY_ON_WRITE by default */
-#if !defined(PERL_OLD_COPY_ON_WRITE) && !defined(PERL_NEW_COPY_ON_WRITE) && !defined(PERL_NO_COW)
+#if !defined(PERL_NEW_COPY_ON_WRITE) && !defined(PERL_NO_COW)
 #  define PERL_NEW_COPY_ON_WRITE
 #endif
 
-#if defined(PERL_OLD_COPY_ON_WRITE) || defined(PERL_NEW_COPY_ON_WRITE)
-# if defined(PERL_OLD_COPY_ON_WRITE) && defined(PERL_NEW_COPY_ON_WRITE)
-#  error PERL_OLD_COPY_ON_WRITE and PERL_NEW_COPY_ON_WRITE are exclusive
-# else
+#ifdef PERL_NEW_COPY_ON_WRITE
 #  define PERL_ANY_COW
-# endif
 #else
 # define PERL_SAWAMPERSAND
 #endif
@@ -4995,9 +4991,6 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef PERL_NEED_TIMESBASE
 			     " PERL_NEED_TIMESBASE"
-#  endif
-#  ifdef PERL_OLD_COPY_ON_WRITE
-			     " PERL_OLD_COPY_ON_WRITE"
 #  endif
 #  ifdef PERL_POISON
 			     " PERL_POISON"
