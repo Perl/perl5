@@ -5,7 +5,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(109);
+plan(110);
 
 # A lot of tests to check that reversed for works.
 
@@ -597,3 +597,15 @@ for my $x (my $y) {
 @_ = (1,2,3,scalar do{for(@_){}} + 1, 4, 5, 6);
 is "@_", "1 2 3 1 4 5 6",
    '[perl #124004] scalar for(@empty_array) stack bug';
+
+# DAPM: while messing with the scope code, I broke some cpan/ code,
+# but surprisingly didn't break any dedicated tests. So test it:
+
+sub fscope {
+    for my $y (1,2) {
+	my $a = $y;
+	return $a;
+    }
+}
+
+is(fscope(), 1, 'return via loop in sub');

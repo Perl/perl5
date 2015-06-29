@@ -746,9 +746,8 @@ struct block_loop {
     I32		resetsp;
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
     union {	/* different ways of locating the iteration variable */
-	SV      **svp;
-	GV      *gv;
-	PAD     *oldcomppad; /* only used in ITHREADS */
+	SV      **svp; /* for lexicals: address of pad slot */
+	GV      *gv;   /* for package vars */
     } itervar_u;
     union {
 	struct { /* valid if type is LOOP_FOR or LOOP_PLAIN (but {NULL,0})*/
@@ -764,23 +763,19 @@ struct block_loop {
 	    SV * end; /* maxiumum value (or minimum in reverse) */
 	} lazysv;
     } state_u;
+#ifdef USE_ITHREADS
+    PAD *oldcomppad; /* needed to map itervar_u.svp during thread clone */
+#endif
 };
 
-#ifdef USE_ITHREADS
-#  define CxITERVAR_PADSV(c) \
-	&CX_CURPAD_SV( (c)->blk_loop.itervar_u, (c)->blk_loop.my_op->op_targ)
-#else
-#  define CxITERVAR_PADSV(c) ((c)->blk_loop.itervar_u.svp)
-#endif
-
 #define CxITERVAR(c)							\
-	((c)->blk_loop.itervar_u.oldcomppad				\
-	 ? (CxPADLOOP(c) 						\
-	    ? CxITERVAR_PADSV(c)					\
-	    : isGV((c)->blk_loop.itervar_u.gv)				\
-		? &GvSV((c)->blk_loop.itervar_u.gv)			\
-		: (SV **)&(c)->blk_loop.itervar_u.gv)			\
-	 : (SV**)NULL)
+        (CxPADLOOP(c)     						\
+            ? (c)->blk_loop.itervar_u.svp        			\
+            : (c)->blk_loop.itervar_u.svp       			\
+                ? isGV((c)->blk_loop.itervar_u.gv)			\
+                    ? &GvSV((c)->blk_loop.itervar_u.gv)			\
+                    : (SV **)&(c)->blk_loop.itervar_u.gv		\
+                : (SV**)NULL)
 
 #define CxLABEL(c)	(0 + CopLABEL((c)->blk_oldcop))
 #define CxLABEL_len(c,len)	(0 + CopLABEL_len((c)->blk_oldcop, len))
@@ -798,12 +793,19 @@ struct block_loop {
 	cx->blk_loop.state_u.ary.ix = 0;				\
 	cx->blk_loop.itervar_u.svp = NULL;
 
+#ifdef USE_ITHREADS
+#  define PUSHLOOP_FOR_setpad(c) (c)->blk_loop.oldcomppad = PL_comppad
+#else
+#  define PUSHLOOP_FOR_setpad(c) NOOP
+#endif
+
 #define PUSHLOOP_FOR(cx, ivar, s)					\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
-	cx->blk_loop.itervar_u.svp = (SV**)(ivar);
+	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
+        PUSHLOOP_FOR_setpad(cx);
 
 #define POPLOOP(cx)							\
 	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\

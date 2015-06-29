@@ -827,7 +827,13 @@
         desc    => '$x--',
         setup   => 'my $x = 1; my $y',
         code    => '$y = $x--', # scalar context so not optimised to --$x
+    },
 
+
+    'loop::for_my_range' => {
+        desc    => 'empty for loop with my var and integer range',
+        setup   => '',
+        code    => 'for my $x (1..10) {}',
     },
 
 ];

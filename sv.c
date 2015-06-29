@@ -13979,10 +13979,16 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    case CXt_LOOP_PLAIN:
                 /* code common to all CXt_LOOP_* types */
 		if (CxPADLOOP(ncx)) {
-		    ncx->blk_loop.itervar_u.oldcomppad
-			= (PAD*)ptr_table_fetch(PL_ptr_table,
-					ncx->blk_loop.itervar_u.oldcomppad);
-		} else {
+                    PADOFFSET off = ncx->blk_loop.itervar_u.svp
+                                    - &CX_CURPAD_SV(ncx->blk_loop, 0);
+                    ncx->blk_loop.oldcomppad =
+                                    (PAD*)ptr_table_fetch(PL_ptr_table,
+                                                ncx->blk_loop.oldcomppad);
+		    ncx->blk_loop.itervar_u.svp =
+                                    &CX_CURPAD_SV(ncx->blk_loop, off);
+
+                }
+		else {
 		    ncx->blk_loop.itervar_u.gv
 			= gv_dup((const GV *)ncx->blk_loop.itervar_u.gv,
 				    param);

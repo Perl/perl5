@@ -2121,11 +2121,7 @@ PP(pp_enteriter)
 		    SVs_PADSTALE, SVs_PADSTALE);
 	}
 	SAVEPADSVANDMORTALIZE(PL_op->op_targ);
-#ifdef USE_ITHREADS
-	itervar = PL_comppad;
-#else
 	itervar = &PAD_SVl(PL_op->op_targ);
-#endif
     }
     else if (LIKELY(isGV(TOPs))) {		/* symbol table variable */
 	GV * const gv = MUTABLE_GV(POPs);
