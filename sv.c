@@ -10594,16 +10594,16 @@ Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 
 
 /*
- * Warn of missing argument to sprintf, and then return a defined value
- * to avoid inappropriate "use of uninit" warnings [perl #71000].
+ * Warn of missing argument to sprintf. The value used in place of such
+ * arguments should be &PL_sv_no; an undefined value would yield
+ * inappropriate "use of uninit" warnings [perl #71000].
  */
-STATIC SV*
-S_vcatpvfn_missing_argument(pTHX) {
+STATIC void
+S_warn_vcatpvfn_missing_argument(pTHX) {
     if (ckWARN(WARN_MISSING)) {
 	Perl_warner(aTHX_ packWARN(WARN_MISSING), "Missing argument in %s",
 		PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
     }
-    return &PL_sv_no;
 }
 
 
@@ -11032,6 +11032,17 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     return v;
 }
 
+/* Helper for sv_vcatpvfn_flags().  */
+#define FETCH_VCATPVFN_ARGUMENT(var, in_range, expr)   \
+    STMT_START {                                       \
+        if (in_range)                                  \
+            (var) = (expr);                            \
+        else {                                         \
+            (var) = &PL_sv_no; /* [perl #71000] */     \
+            arg_missing = TRUE;                        \
+        }                                              \
+    } STMT_END
+
 void
 Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
                        va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted,
@@ -11087,7 +11098,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    sv_catsv_nomg(sv, *svargs);
 	}
 	else
-	    S_vcatpvfn_missing_argument(aTHX);
+	    S_warn_vcatpvfn_missing_argument(aTHX);
 	return;
     }
     if (args && patlen == 3 && pat[0] == '%' &&
@@ -11161,6 +11172,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	STRLEN precis = 0;
 	const I32 osvix = svix;
 	bool is_utf8 = FALSE;  /* is this item utf8?   */
+        bool used_explicit_ix = FALSE;
+        bool arg_missing = FALSE;
 #ifdef HAS_LDBL_SPRINTF_BUG
 	/* This is to try to fix a bug with irix/nonstop-ux/powerux and
 	   with sfio - Allen <allens@cpan.org> */
@@ -11326,11 +11339,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (*q == '$') {
 		++q;
 		efix = width;
-		if (!no_redundant_warning)
-		    /* I've forgotten if it's a better
-		       micro-optimization to always set this or to
-		       only set it if it's unset */
-		    no_redundant_warning = TRUE;
+                used_explicit_ix = TRUE;
 	    } else {
 		goto gotwidth;
 	    }
@@ -11371,9 +11380,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
       tryasterisk:
 	if (*q == '*') {
 	    q++;
-	    if ( (ewix = expect_number(&q)) )
-		if (*q++ != '$')
+	    if ( (ewix = expect_number(&q)) ) {
+		if (*q++ == '$')
+                    used_explicit_ix = TRUE;
+                else
 		    goto unknown;
+            }
 	    asterisk = TRUE;
 	}
 	if (*q == 'v') {
@@ -11401,11 +11413,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (args)
 		vecsv = va_arg(*args, SV*);
 	    else if (evix) {
-		vecsv = (evix > 0 && evix <= svmax)
-		    ? svargs[evix-1] : S_vcatpvfn_missing_argument(aTHX);
+                FETCH_VCATPVFN_ARGUMENT(
+                    vecsv, evix > 0 && evix <= svmax, svargs[evix-1]);
 	    } else {
-		vecsv = svix < svmax
-		    ? svargs[svix++] : S_vcatpvfn_missing_argument(aTHX);
+                FETCH_VCATPVFN_ARGUMENT(
+                    vecsv, svix < svmax, svargs[svix++]);
 	    }
 	    dotstr = SvPV_const(vecsv, dotstrlen);
 	    /* Keep the DO_UTF8 test *after* the SvPV call, else things go
@@ -11573,11 +11585,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	if (!vectorize && !args) {
 	    if (efix) {
 		const I32 i = efix-1;
-		argsv = (i >= 0 && i < svmax)
-		    ? svargs[i] : S_vcatpvfn_missing_argument(aTHX);
+                FETCH_VCATPVFN_ARGUMENT(argsv, i >= 0 && i < svmax, svargs[i]);
 	    } else {
-		argsv = (svix >= 0 && svix < svmax)
-		    ? svargs[svix++] : S_vcatpvfn_missing_argument(aTHX);
+                FETCH_VCATPVFN_ARGUMENT(argsv, svix >= 0 && svix < svmax,
+                                        svargs[svix++]);
 	    }
 	}
 
@@ -11680,7 +11691,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (vectorize) {
 		STRLEN ulen;
 		if (!veclen)
-		    continue;
+                    goto donevalidconversion;
 		if (vec_utf8)
 		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen,
 					UTF8_ALLOW_ANYUV);
@@ -11785,7 +11796,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		STRLEN ulen;
 	vector:
 		if (!veclen)
-		    continue;
+                    goto donevalidconversion;
 		if (vec_utf8)
 		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen,
 					UTF8_ALLOW_ANYUV);
@@ -12447,7 +12458,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 	    else
 		sv_setuv_mg(argsv, has_utf8 ? (UV)sv_len_utf8(sv) : (UV)i);
-	    continue;	/* not "break" */
+            goto donevalidconversion;
 
 	    /* UNKNOWN */
 
@@ -12572,6 +12583,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    esignlen = 0;
 	    goto vector;
 	}
+
+      donevalidconversion:
+        if (used_explicit_ix)
+            no_redundant_warning = TRUE;
+        if (arg_missing)
+            S_warn_vcatpvfn_missing_argument(aTHX);
     }
 
     /* Now that we've consumed all our printf format arguments (svix)
