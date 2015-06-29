@@ -2844,8 +2844,6 @@ PP(pp_goto)
 		PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 		if (CxHASARGS(cx))
 		{
-		    CX_CURPAD_SAVE(cx->blk_sub);
-
 		    /* cx->blk_sub.argarray has no reference count, so we
 		       need something to hang on to our argument array so
 		       that cx->blk_sub.argarray does not end up pointing

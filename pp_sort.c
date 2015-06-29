@@ -1688,7 +1688,6 @@ PP(pp_sort)
 
 			cx->blk_sub.savearray = GvAV(PL_defgv);
 			GvAV(PL_defgv) = MUTABLE_AV(SvREFCNT_inc_simple(av));
-			CX_CURPAD_SAVE(cx->blk_sub);
 			cx->blk_sub.argarray = av;
 		    }
 

@@ -556,7 +556,6 @@ struct block_sub {
     AV *	savearray;
     AV *	argarray;
     I32		olddepth;
-    PAD		*oldcomppad; /* the *current* PL_comppad */
     PAD		*prevcomppad; /* the caller's PL_comppad */
 };
 
@@ -662,7 +661,10 @@ struct block_format {
 		cx->blk_sub.argarray = newAV();				\
 		av_extend(cx->blk_sub.argarray, fill);			\
 		AvREIFY_only(cx->blk_sub.argarray);			\
-		CX_CURPAD_SV(cx->blk_sub, 0) = MUTABLE_SV(cx->blk_sub.argarray); \
+                (AvARRAY(MUTABLE_AV(                                    \
+                    PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[            \
+                            CvDEPTH(cx->blk_sub.cv)])))[0] =            \
+                    MUTABLE_SV(cx->blk_sub.argarray);                   \
 	    }								\
 	    else {							\
 		CLEAR_ARGARRAY(cx->blk_sub.argarray);			\

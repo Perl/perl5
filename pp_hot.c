@@ -3490,7 +3490,6 @@ PP(pp_entersub)
 	    defavp = &GvAV(PL_defgv);
 	    cx->blk_sub.savearray = *defavp;
 	    *defavp = MUTABLE_AV(SvREFCNT_inc_simple_NN(av));
-	    CX_CURPAD_SAVE(cx->blk_sub);
 	    cx->blk_sub.argarray = av;
             items = SP - MARK;
 
