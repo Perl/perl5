@@ -857,7 +857,7 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
 #define SvIOKp(sv)		(SvFLAGS(sv) & SVp_IOK)
-#define SvIOKp_on(sv)		(assert_not_glob(sv) SvRELEASE_IVX_(sv)	\
+#define SvIOKp_on(sv)		(assert_not_glob(sv)	\
 				    SvFLAGS(sv) |= SVp_IOK)
 #define SvNOKp(sv)		(SvFLAGS(sv) & SVp_NOK)
 #define SvNOKp_on(sv)		(assert_not_glob(sv) SvFLAGS(sv) |= SVp_NOK)
@@ -866,7 +866,7 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 				 SvFLAGS(sv) |= SVp_POK)
 
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
-#define SvIOK_on(sv)		(assert_not_glob(sv) SvRELEASE_IVX_(sv)	\
+#define SvIOK_on(sv)		(assert_not_glob(sv)	\
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV))
 #define SvIOK_only(sv)		(SvOK_off(sv), \
@@ -1864,12 +1864,6 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #define SV_CHECK_THINKFIRST_COW_DROP(sv) if (SvTHINKFIRST(sv)) \
 				    sv_force_normal_flags(sv, SV_COW_DROP_PV)
 
-#define SvRELEASE_IVX(sv)   0
-/* This little game brought to you by the need to shut this warning up:
-mg.c: In function 'Perl_magic_get':
-mg.c:1024: warning: left-hand operand of comma expression has no effect
-*/
-#define SvRELEASE_IVX_(sv)  /**/
 #ifdef PERL_NEW_COPY_ON_WRITE
 #   define SvCANCOW(sv)					    \
 	(SvIsCOW(sv)					     \
