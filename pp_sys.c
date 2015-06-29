@@ -1395,7 +1395,6 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 	PERL_STACK_OVERFLOW_CHECK();
 	pad_push(CvPADLIST(cv), CvDEPTH(cv));
     }
-    SAVECOMPPAD();
     PAD_SET_CUR_NOSAVE(CvPADLIST(cv), CvDEPTH(cv));
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */

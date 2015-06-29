@@ -6590,6 +6590,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     U8 flags = (CXp_SUB_RE |
                                 ((newcv == caller_cv) ? CXp_SUB_RE_FAKE : 0));
 		    if (last_pushed_cv) {
+                        /* PUSH/POP_MULTICALL save and restore the
+                         * caller's PL_comppad; if we call multiple subs
+                         * using the same CX block, we have to save and
+                         * unwind the varying PL_comppad's ourselves,
+                         * especially restoring the right PL_comppad on
+                         * backtrack - so save it on the save stack */
+                        SAVECOMPPAD();
 			CHANGE_MULTICALL_FLAGS(newcv, flags);
 		    }
 		    else {

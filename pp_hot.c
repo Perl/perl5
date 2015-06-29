@@ -3474,7 +3474,6 @@ PP(pp_entersub)
 	    PERL_STACK_OVERFLOW_CHECK();
 	    pad_push(padlist, depth);
 	}
-	SAVECOMPPAD();
 	PAD_SET_CUR_NOSAVE(padlist, depth);
 	if (LIKELY(hasargs)) {
 	    AV *const av = MUTABLE_AV(PAD_SVl(0));

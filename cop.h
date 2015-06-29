@@ -556,7 +556,8 @@ struct block_sub {
     AV *	savearray;
     AV *	argarray;
     I32		olddepth;
-    PAD		*oldcomppad;
+    PAD		*oldcomppad; /* the *current* PL_comppad */
+    PAD		*prevcomppad; /* the caller's PL_comppad */
 };
 
 
@@ -568,6 +569,7 @@ struct block_format {
     /* Above here is the same for sub and format.  */
     GV *	gv;
     GV *	dfoutgv;
+    PAD		*prevcomppad; /* the caller's PL_comppad */
 };
 
 /* base for the next two macros. Don't use directly.
@@ -584,6 +586,7 @@ struct block_format {
 									\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
+	cx->blk_sub.prevcomppad = PL_comppad;				\
 	cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;			\
 	cx->blk_sub.retop = NULL;					\
         SvREFCNT_inc_simple_void_NN(cv);
@@ -617,6 +620,7 @@ struct block_format {
 	cx->blk_format.gv = gv;						\
 	cx->blk_format.retop = (retop);					\
 	cx->blk_format.dfoutgv = PL_defoutgv;				\
+	cx->blk_format.prevcomppad = PL_comppad;			\
 	cx->blk_u16 = 0;                                                \
 	SvREFCNT_inc_simple_void_NN(cv);		                \
 	CvDEPTH(cv)++;							\
@@ -667,6 +671,8 @@ struct block_format {
         }                                                               \
 	sv = MUTABLE_SV(cx->blk_sub.cv);				\
 	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
+        PL_comppad = cx->blk_sub.prevcomppad;                           \
+        PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
         CvDEPTH((const CV*)sv) = olddepth;                              \
     } STMT_END
 
@@ -683,6 +689,8 @@ struct block_format {
         cx->blk_u16 |= CxPOPSUB_DONE;                                   \
 	setdefout(dfuot);						\
 	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
+        PL_comppad = cx->blk_format.prevcomppad;                        \
+        PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
 	--CvDEPTH(cv);                                                  \
 	SvREFCNT_dec_NN(cx->blk_format.cv);				\
 	SvREFCNT_dec_NN(dfuot);						\
@@ -1226,7 +1234,6 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	    PERL_STACK_OVERFLOW_CHECK();				\
 	    Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
 	}								\
-	SAVECOMPPAD();							\
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
 	multicall_cv = cv;						\
 	multicall_cop = CvSTART(cv);					\
@@ -1244,6 +1251,9 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
         LEAVESUB(multicall_cv);     					\
 	POPBLOCK(cx,PL_curpm);						\
+	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
+        PL_comppad = cx->blk_sub.prevcomppad;                           \
+        PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
 	LEAVE;								\
@@ -1258,19 +1268,20 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	CV * const _nOnclAshIngNamE_ = the_cv;				\
 	CV * const cv = _nOnclAshIngNamE_;				\
 	PADLIST * const padlist = CvPADLIST(cv);			\
+        PAD * const prevcomppad = cx->blk_sub.prevcomppad;              \
 	cx = &cxstack[cxstack_ix];					\
 	assert(cx->cx_type & CXp_MULTICALL);				\
 	CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
         LEAVESUB(multicall_cv);					        \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
 	PUSHSUB(cx);							\
+        cx->blk_sub.prevcomppad = prevcomppad ; /* undo PUSHSUB */      \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2) {						\
 	    PERL_STACK_OVERFLOW_CHECK();				\
 	    Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
 	}								\
-	SAVECOMPPAD();							\
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
 	multicall_cv = cv;						\
 	multicall_cop = CvSTART(cv);					\
