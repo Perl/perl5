@@ -126,7 +126,7 @@ for (@tests) {
     }
 
     if ($x eq ">$result<") {
-        ok(1, ">$result<");
+        ok(1, join ' ', grep length, ">$result<", $comment);
     }
     elsif ($skip) {
         ok(1, "skip $comment");
