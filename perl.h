@@ -2643,12 +2643,12 @@ typedef AV PAD;
 typedef struct padnamelist PADNAMELIST;
 typedef struct padname PADNAME;
 
-/* enable PERL_NEW_COPY_ON_WRITE by default */
-#if !defined(PERL_NEW_COPY_ON_WRITE) && !defined(PERL_NO_COW)
-#  define PERL_NEW_COPY_ON_WRITE
+/* enable PERL_COPY_ON_WRITE by default */
+#if !defined(PERL_COPY_ON_WRITE) && !defined(PERL_NO_COW)
+#  define PERL_COPY_ON_WRITE
 #endif
 
-#ifdef PERL_NEW_COPY_ON_WRITE
+#ifdef PERL_COPY_ON_WRITE
 #  define PERL_ANY_COW
 #else
 # define PERL_SAWAMPERSAND

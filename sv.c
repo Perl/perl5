@@ -1583,7 +1583,7 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 	s = SvPVX_mutable(sv);
     }
 
-#ifdef PERL_NEW_COPY_ON_WRITE
+#ifdef PERL_COPY_ON_WRITE
     /* the new COW scheme uses SvPVX(sv)[SvLEN(sv)-1] (if spare)
      * to store the COW count. So in general, allocate one more byte than
      * asked for, to make it likely this byte is always spare: and thus
@@ -4621,7 +4621,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
         }
 	else if (flags & SV_COW_SHARED_HASH_KEYS
 	      &&
-#ifdef PERL_NEW_COPY_ON_WRITE
+#ifdef PERL_COPY_ON_WRITE
 		 (sflags & SVf_IsCOW
 		   ? (!len ||
                        (  (CHECK_COWBUF_THRESHOLD(cur,len) || SvLEN(dstr) < cur+1)
@@ -4752,7 +4752,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
     STRLEN cur = SvCUR(sstr);
     STRLEN len = SvLEN(sstr);
     char *new_pv;
-#if defined(PERL_DEBUG_READONLY_COW) && defined(PERL_NEW_COPY_ON_WRITE)
+#if defined(PERL_DEBUG_READONLY_COW) && defined(PERL_COPY_ON_WRITE)
     const bool already = cBOOL(SvIsCOW(sstr));
 #endif
 
@@ -5097,7 +5097,7 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
                 sv_dump(sv);
         }
         SvIsCOW_off(sv);
-# ifdef PERL_NEW_COPY_ON_WRITE
+# ifdef PERL_COPY_ON_WRITE
 	if (len) {
 	    /* Must do this first, since the CowREFCNT uses SvPVX and
 	    we need to write to CowREFCNT, or de-RO the whole buffer if we are
@@ -8158,7 +8158,7 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 	if (fd >= 0 && (PerlLIO_fstat(fd, &st) == 0) && S_ISREG(st.st_mode))  {
 	    const Off_t offset = PerlIO_tell(fp);
 	    if (offset != (Off_t) -1 && st.st_size + append > offset) {
-#ifdef PERL_NEW_COPY_ON_WRITE
+#ifdef PERL_COPY_ON_WRITE
                 /* Add an extra byte for the sake of copy-on-write's
                  * buffer reference count. */
 		(void) SvGROW(sv, (STRLEN)((st.st_size - offset) + append + 2));

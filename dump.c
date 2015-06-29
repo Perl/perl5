@@ -1620,7 +1620,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    if (!re)
 		Perl_dump_indent(aTHX_ level, file, "  LEN = %"IVdf"\n",
 				       (IV)SvLEN(sv));
-#ifdef PERL_NEW_COPY_ON_WRITE
+#ifdef PERL_COPY_ON_WRITE
 	    if (SvIsCOW(sv) && SvLEN(sv))
 		Perl_dump_indent(aTHX_ level, file, "  COW_REFCNT = %d\n",
 				       CowREFCNT(sv));

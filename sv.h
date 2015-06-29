@@ -1864,7 +1864,7 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #define SV_CHECK_THINKFIRST_COW_DROP(sv) if (SvTHINKFIRST(sv)) \
 				    sv_force_normal_flags(sv, SV_COW_DROP_PV)
 
-#ifdef PERL_NEW_COPY_ON_WRITE
+#ifdef PERL_COPY_ON_WRITE
 #   define SvCANCOW(sv)					    \
 	(SvIsCOW(sv)					     \
 	 ? SvLEN(sv) ? CowREFCNT(sv) != SV_COW_REFCNT_MAX : 1 \
