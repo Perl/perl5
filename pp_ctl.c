@@ -2726,6 +2726,9 @@ PP(pp_goto)
 		SvREFCNT_dec(cv);
 		DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
 	    }
+
+            /* partial unrolled POPSUB(): */
+
 	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		AV* av = cx->blk_sub.argarray;
 
@@ -2823,6 +2826,9 @@ PP(pp_goto)
 	    }
 	    else {
 		PADLIST * const padlist = CvPADLIST(cv);
+
+                /* partial unrolled PUSHSUB(): */
+
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);
 

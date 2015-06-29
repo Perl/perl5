@@ -1251,6 +1251,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
         LEAVESUB(multicall_cv);     					\
 	POPBLOCK(cx,PL_curpm);						\
+        /* includes partial unrolled POPSUB(): */                       \
 	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
