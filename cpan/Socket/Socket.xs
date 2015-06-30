@@ -149,6 +149,14 @@ NETINET_DEFINE_CONTEXT
 # define Newx(v,n,t) New(0,v,n,t)
 #endif /* !Newx */
 
+#ifndef SvPVx_nolen
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define SvPVx_nolen(sv) ({SV *_sv = (sv); SvPV_nolen(_sv); })
+#else /* __GNUC__ */
+#  define SvPVx_nolen(sv) ((PL_Sv = (sv)), SvPV_nolen(PL_Sv))
+#endif /* __GNU__ */
+#endif /* !SvPVx_nolen */
+
 #ifndef croak_sv
 # define croak_sv(sv)	croak(SvPVx_nolen(sv))
 #endif

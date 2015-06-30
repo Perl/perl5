@@ -161,7 +161,7 @@ L<Scalar::Util> has been upgraded from version 1.41 to 1.42_01.
 
 =item *
 
-L<Socket> has been upgraded from version 2.018 to 2.019.
+L<Socket> has been upgraded from version 2.018 to 2.020.
 
 =item *
 
