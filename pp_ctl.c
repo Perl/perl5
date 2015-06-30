@@ -2848,8 +2848,9 @@ PP(pp_goto)
 		       ence count. */
 		    if (arg) {
 			SvREFCNT_dec(PAD_SVl(0));
-			PAD_SVl(0) = (SV *)(cx->blk_sub.argarray = arg);
+			PAD_SVl(0) = (SV *)arg;
 		    }
+                    cx->blk_sub.argarray = (AV*)PAD_SVl(0);
 
 		    /* GvAV(PL_defgv) might have been modified on scope
 		       exit, so restore it. */
