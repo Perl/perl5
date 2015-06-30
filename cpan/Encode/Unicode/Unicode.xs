@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 2.11 2014/04/29 16:25:06 dankogai Exp $
+ $Id: Unicode.xs,v 2.12 2015/06/25 00:49:23 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -125,6 +125,8 @@ PROTOTYPES: DISABLE
 
 #define attr(k, l)  (hv_exists((HV *)SvRV(obj),k,l) ? \
     *hv_fetch((HV *)SvRV(obj),k,l,0) : &PL_sv_undef)
+#define attr_true(k, l)  (hv_exists((HV *)SvRV(obj),k,l) ? \
+    SvTRUE(*hv_fetch((HV *)SvRV(obj),k,l,0)) : FALSE)
 
 void
 decode_xs(obj, str, check = 0)
@@ -171,7 +173,7 @@ CODE:
 	}
 #if 1
 	/* Update endian for next sequence */
-	if (SvTRUE(attr("renewed", 7))) {
+	if (attr_true("renewed", 7)) {
 	    hv_store((HV *)SvRV(obj),"endian",6,newSVpv((char *)&endian,1),0);
 	}
 #endif
@@ -190,7 +192,7 @@ CODE:
 	U8 *d;
 	if (issurrogate(ord)) {
 	    if (ucs2 == -1) {
-		ucs2 = SvTRUE(attr("ucs2", 4));
+		ucs2 = attr_true("ucs2", 4);
 	    }
 	    if (ucs2 || size == 4) {
 		if (check) {
@@ -336,7 +338,7 @@ CODE:
 	enc_pack(aTHX_ result,size,endian,BOM_BE);
 #if 1
 	/* Update endian for next sequence */
-	if (SvTRUE(attr("renewed", 7))) {
+	if (attr_true("renewed", 7)) {
 	    hv_store((HV *)SvRV(obj),"endian",6,newSVpv((char *)&endian,1),0);
 	}
 #endif
@@ -352,7 +354,7 @@ CODE:
 	if (size != 4 && invalid_ucs2(ord)) {
 	    if (!issurrogate(ord)) {
 		if (ucs2 == -1) {
-		    ucs2 = SvTRUE(attr("ucs2", 4));
+		    ucs2 = attr_true("ucs2", 4);
 		}
 		if (ucs2 || ord > 0x10FFFF) {
 		    if (check) {

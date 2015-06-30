@@ -69,7 +69,7 @@ L<CPAN::Meta::YAML> has been upgraded from version 0.012 to 0.016.
 
 =item *
 
-L<Encode> has been upgraded from version 2.72 to 2.73.
+L<Encode> has been upgraded from version 2.72 to 2.75.
 
 =item *
 
