@@ -2735,9 +2735,13 @@ PP(pp_goto)
                     PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
                             CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);
 
-		/* abandon the original @_ if it got reified or if it is
-		   the same as the current @_ */
-		if (AvREAL(av) || av == arg) {
+                /* we are going to donate the current @_ from the old sub
+                 * to the new sub. This first part of the donation puts a
+                 * new empty AV in the pad[0] slot of the old sub,
+                 * unless pad[0] and @_ differ (e.g. if the old sub did
+                 * local *_ = []); in which case clear the old pad[0]
+                 * array in the usual way */
+		if (av == arg || AvREAL(av)) {
 		    SvREFCNT_dec(av);
 		    av = newAV();
 		    AvREIFY_only(av);
@@ -2746,7 +2750,9 @@ PP(pp_goto)
 		else CLEAR_ARGARRAY(av);
 	    }
 
-	    /* We donate this refcount later to the callee’s pad. */
+            /* protect @_ during save stack unwind. We donate this
+             * refcount later to the callee’s pad for the non-XS case;
+             * otherwise we decrement it later. */
 	    SvREFCNT_inc_simple_void(arg);
 
 	    assert(PL_scopestack_ix == cx->blk_oldscopesp);
@@ -2852,20 +2858,18 @@ PP(pp_goto)
 		PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 		if (CxHASARGS(cx))
 		{
-		    /* XXX
-                       cx->blk_sub.argarray has no reference count, so we
-		       need something to hang on to our argument array so
-		       that cx->blk_sub.argarray does not end up pointing
-		       to freed memory as the result of undef *_.  So put
-		       it in the callee’s pad, donating our refer-
-		       ence count. */
+                    /* second half of donating @_ from the old sub to the
+                     * new sub: abandon the original pad[0] AV in the
+                     * new sub, and replace it with the donated @_.
+                     * pad[0] takes ownership of the extra refcount
+                     * we gave arg earlier */
 		    if (arg) {
 			SvREFCNT_dec(PAD_SVl(0));
 			PAD_SVl(0) = (SV *)arg;
 		    }
 
 		    /* GvAV(PL_defgv) might have been modified on scope
-		       exit, so restore it. */
+		       exit, so point it at arg again. */
 		    if (arg != GvAV(PL_defgv)) {
 			AV * const av = GvAV(PL_defgv);
 			GvAV(PL_defgv) = (AV *)SvREFCNT_inc_simple(arg);
