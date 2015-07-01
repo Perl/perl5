@@ -1868,6 +1868,10 @@ PP(pp_caller)
 	AV * const ary = cx->blk_sub.argarray;
 	const SSize_t off = AvARRAY(ary) - AvALLOC(ary);
 
+        assert((AV*)((AvARRAY(MUTABLE_AV(
+            PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
+                cx->blk_sub.olddepth+1])))[0]) == cx->blk_sub.argarray);
+
 	Perl_init_dbargs(aTHX);
 
 	if (AvMAX(PL_dbargs) < AvFILLp(ary) + off)
@@ -2728,6 +2732,11 @@ PP(pp_goto)
 
 	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		AV* av = cx->blk_sub.argarray;
+
+                assert(cx->blk_sub.argarray == (AV*)PL_curpad[0]);
+                assert(AvARRAY(MUTABLE_AV(
+                    PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
+                            CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);
 
 		/* abandon the original @_ if it got reified or if it is
 		   the same as the current @_ */

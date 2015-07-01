@@ -653,6 +653,10 @@ struct block_format {
 		CopSTASHPV((COP*)CvSTART((const CV*)cx->blk_sub.cv)));	\
 									\
 	if (CxHASARGS(cx)) {						\
+            assert(cx->blk_sub.argarray == (AV*)PL_curpad[0]);          \
+            assert(AvARRAY(MUTABLE_AV(                                  \
+                PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[                \
+                        CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);       \
 	    POP_SAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
 	    if (AvREAL(cx->blk_sub.argarray)) {				\

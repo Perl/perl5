@@ -6444,6 +6444,11 @@ PP(pp_coreargs)
 		PERL_CONTEXT *cx = &cxstack[cxstack_ix];
 		POP_SAVEARRAY();
 		cx->cx_type &= ~ CXp_HASARGS;
+                assert(cx->blk_sub.argarray == (AV*)PL_curpad[0]);
+                assert(AvARRAY(MUTABLE_AV(
+                    PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
+                            CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);
+
 		assert(!AvREAL(cx->blk_sub.argarray));
 	    }
 	  }
