@@ -2745,8 +2745,12 @@ PP(pp_goto)
 	    assert(PL_scopestack_ix == cx->blk_oldscopesp);
 	    oldsave = PL_scopestack[cx->blk_oldscopesp - 1];
 	    LEAVE_SCOPE(oldsave);
-            PL_comppad = cx->blk_sub.prevcomppad;
-            PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
+
+            /* don't restore PL_comppad here. It won't be needed if the
+             * sub we're going to is non-XS, but restoring it early then
+             * croaking (e.g. the "Goto undefined subroutine" below)
+             * means the CX block gets processed again in dounwind,
+             * but this time with the wrong PL_comppad */
 
 	    /* A destructor called during LEAVE_SCOPE could have undefined
 	     * our precious cv.  See bug #99850. */
@@ -2811,6 +2815,8 @@ PP(pp_goto)
 		}
 
 		retop = cx->blk_sub.retop;
+                PL_comppad = cx->blk_sub.prevcomppad;
+                PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
 		/* XS subs don't have a CxSUB, so pop it */
 		POPBLOCK(cx, PL_curpm);
 		/* Push a mark for the start of arglist */
@@ -2836,7 +2842,6 @@ PP(pp_goto)
 		    pad_push(padlist, CvDEPTH(cv));
 		}
 		PL_curcop = cx->blk_oldcop;
-                cx->blk_sub.prevcomppad = PL_comppad;
 		PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 		if (CxHASARGS(cx))
 		{
