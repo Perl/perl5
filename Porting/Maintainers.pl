@@ -278,6 +278,8 @@ use File::Glob qw(:case);
                 t/yaml_code.yml
                 ),
         ],
+        # See commit 3198fda65dbcd975c56916e4b98f515fab7f02e5
+        'CUSTOMIZED'   => [ qw[ lib/CPAN.pm ] ],
     },
 
     # Note: When updating CPAN-Meta the META.* files will need to be regenerated
@@ -286,9 +288,11 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-2.150005.tar.gz',
         'FILES'        => q[cpan/CPAN-Meta],
         'EXCLUDED'     => [
-            qw[t/00-report-prereqs.t],
-            qw[t/00-report-prereqs.dd],
-            qr{t/README-data.txt},
+            qw[t/00-report-prereqs.t
+               t/00-report-prereqs.dd
+               t/data-test/x_deprecated-META.json
+               t/data-valid/x_deprecated-META.yml
+               t/README-data.txt],
             qr{^xt},
             qr{^history},
         ],
@@ -879,6 +883,7 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'DAGOLDEN/Parse-CPAN-Meta-1.4417.tar.gz',
         'FILES'        => q[cpan/Parse-CPAN-Meta],
         'EXCLUDED'     => [
+            qw[t/00-report-prereqs.dd],
             qw[t/00-report-prereqs.t],
             qr{^xt},
         ],
@@ -948,14 +953,14 @@ use File::Glob qw(:case);
         # https://rt.cpan.org/Public/Bug/Display.html?id=105192
         # https://rt.cpan.org/Public/Bug/Display.html?id=105511
         'CUSTOMIZED'   => [
-            qw( cpan/Pod-Simple/lib/Pod/Simple/Search.pm
-                cpan/Pod-Simple/lib/Pod/Simple/BlackBox.pm
-                cpan/Pod-Simple/t/search10.t
-                cpan/Pod-Simple/t/search12.t
-                cpan/Pod-Simple/t/search20.t
-                cpan/Pod-Simple/t/search22.t
-                cpan/Pod-Simple/t/search26.t
-                cpan/Pod-Simple/t/search28.t
+            qw( lib/Pod/Simple/Search.pm
+                lib/Pod/Simple/BlackBox.pm
+                t/search10.t
+                t/search12.t
+                t/search20.t
+                t/search22.t
+                t/search26.t
+                t/search28.t
             ),
         ],
     },
