@@ -1865,12 +1865,11 @@ PP(pp_caller)
     if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)
 	&& CopSTASH_eq(PL_curcop, PL_debstash))
     {
-	AV * const ary = cx->blk_sub.argarray;
+        /* slot 0 of the pad contains the original @_ */
+	AV * const ary = MUTABLE_AV(AvARRAY(MUTABLE_AV(
+                            PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
+                                cx->blk_sub.olddepth+1]))[0]);
 	const SSize_t off = AvARRAY(ary) - AvALLOC(ary);
-
-        assert((AV*)((AvARRAY(MUTABLE_AV(
-            PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
-                cx->blk_sub.olddepth+1])))[0]) == cx->blk_sub.argarray);
 
 	Perl_init_dbargs(aTHX);
 
@@ -2731,9 +2730,7 @@ PP(pp_goto)
             /* partial unrolled POPSUB(): */
 
 	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
-		AV* av = cx->blk_sub.argarray;
-
-                assert(cx->blk_sub.argarray == (AV*)PL_curpad[0]);
+		AV* av = MUTABLE_AV(PAD_SVl(0));
                 assert(AvARRAY(MUTABLE_AV(
                     PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
                             CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);
@@ -2744,7 +2741,7 @@ PP(pp_goto)
 		    SvREFCNT_dec(av);
 		    av = newAV();
 		    AvREIFY_only(av);
-		    PAD_SVl(0) = MUTABLE_SV(cx->blk_sub.argarray = av);
+		    PAD_SVl(0) = (SV*)av;
 		}
 		else CLEAR_ARGARRAY(av);
 	    }
@@ -2855,7 +2852,8 @@ PP(pp_goto)
 		PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 		if (CxHASARGS(cx))
 		{
-		    /* cx->blk_sub.argarray has no reference count, so we
+		    /* XXX
+                       cx->blk_sub.argarray has no reference count, so we
 		       need something to hang on to our argument array so
 		       that cx->blk_sub.argarray does not end up pointing
 		       to freed memory as the result of undef *_.  So put
@@ -2865,7 +2863,6 @@ PP(pp_goto)
 			SvREFCNT_dec(PAD_SVl(0));
 			PAD_SVl(0) = (SV *)arg;
 		    }
-                    cx->blk_sub.argarray = (AV*)PAD_SVl(0);
 
 		    /* GvAV(PL_defgv) might have been modified on scope
 		       exit, so restore it. */

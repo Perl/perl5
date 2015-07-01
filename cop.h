@@ -554,7 +554,6 @@ struct block_sub {
     CV *	cv;
     /* Above here is the same for sub and format.  */
     AV *	savearray;
-    AV *	argarray;
     I32		olddepth;
     PAD		*prevcomppad; /* the caller's PL_comppad */
 };
@@ -653,25 +652,22 @@ struct block_format {
 		CopSTASHPV((COP*)CvSTART((const CV*)cx->blk_sub.cv)));	\
 									\
 	if (CxHASARGS(cx)) {						\
-            assert(cx->blk_sub.argarray == (AV*)PL_curpad[0]);          \
+            AV *av = MUTABLE_AV(PAD_SVl(0));                            \
             assert(AvARRAY(MUTABLE_AV(                                  \
                 PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[                \
                         CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);       \
 	    POP_SAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
-	    if (AvREAL(cx->blk_sub.argarray)) {				\
-		const SSize_t fill = AvFILLp(cx->blk_sub.argarray);	\
-		SvREFCNT_dec_NN(cx->blk_sub.argarray);			\
-		cx->blk_sub.argarray = newAV();				\
-		av_extend(cx->blk_sub.argarray, fill);			\
-		AvREIFY_only(cx->blk_sub.argarray);			\
-                (AvARRAY(MUTABLE_AV(                                    \
-                    PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[            \
-                            CvDEPTH(cx->blk_sub.cv)])))[0] =            \
-                    MUTABLE_SV(cx->blk_sub.argarray);                   \
+	    if (AvREAL(av)) {				                \
+		const SSize_t fill = AvFILLp(av);	                \
+		SvREFCNT_dec_NN(av);			                \
+                av = newAV();                                           \
+		av_extend(av, fill);			                \
+		AvREIFY_only(av);			                \
+                PAD_SVl(0) = MUTABLE_SV(av);                            \
 	    }								\
 	    else {							\
-		CLEAR_ARGARRAY(cx->blk_sub.argarray);			\
+		CLEAR_ARGARRAY(av);			                \
 	    }								\
 	}								\
         }                                                               \

@@ -13944,10 +13944,8 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    case CXt_SUB:
 		ncx->blk_sub.cv		= cv_dup_inc(ncx->blk_sub.cv, param);
 		if(CxHASARGS(ncx)){
-		    ncx->blk_sub.argarray = av_dup_inc(ncx->blk_sub.argarray,param);
 		    ncx->blk_sub.savearray = av_dup_inc(ncx->blk_sub.savearray,param);
 		} else {
-		    ncx->blk_sub.argarray = NULL;
 		    ncx->blk_sub.savearray = NULL;
 		}
 		ncx->blk_sub.prevcomppad = (PAD*)ptr_table_fetch(PL_ptr_table,
