@@ -1519,6 +1519,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    break;
 	case CXt_EVAL:
 	    POPEVAL(cx);
+            LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);
 	    break;
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
@@ -4257,6 +4258,7 @@ PP(pp_leaveeval)
 			SvPVX_const(namesv),
                         SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
 			G_DISCARD);
+	LEAVE_with_name("eval");
 	Perl_die(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
         NOT_REACHED; /* NOTREACHED */
 	/* die_unwind() did LEAVE, or we won't be here */
