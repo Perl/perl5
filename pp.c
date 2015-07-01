@@ -6440,15 +6440,19 @@ PP(pp_coreargs)
 	    if (opnum == OP_UNDEF && SvRV(*svp) == (SV *)PL_defgv
 	     && cxstack[cxstack_ix].cx_type & CXp_HASARGS) {
 		/* Undo @_ localisation, so that sub exit does not undo
-		   part of our undeffing. */
+		   part of our undeffing.
+                   this corresponds to the part of POPSUB that
+                   does @_ cleanup */
 		PERL_CONTEXT *cx = &cxstack[cxstack_ix];
+                AV *av = MUTABLE_AV(PAD_SVl(0));
 		POP_SAVEARRAY();
 		cx->cx_type &= ~ CXp_HASARGS;
                 assert(AvARRAY(MUTABLE_AV(
                     PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
                             CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);
 
-		assert(!AvREAL(MUTABLE_AV(PAD_SVl(0))));
+		assert(!AvREAL(av));
+                CLEAR_ARGARRAY(av);
 	    }
 	  }
 	  break;

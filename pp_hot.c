@@ -3480,18 +3480,16 @@ PP(pp_entersub)
             SSize_t items;
             AV **defavp;
 
-	    if (UNLIKELY(AvREAL(av))) {
-		/* @_ is normally not REAL--this should only ever
-		 * happen when DB::sub() calls things that modify @_ */
-		av_clear(av);
-		AvREAL_off(av);
-		AvREIFY_on(av);
-	    }
 	    defavp = &GvAV(PL_defgv);
 	    cx->blk_sub.savearray = *defavp;
 	    *defavp = MUTABLE_AV(SvREFCNT_inc_simple_NN(av));
-            items = SP - MARK;
 
+            /* it's the responsibility of whoever leaves a sub to ensure
+             * that a clean, empty AV is left in pad[0]. This is normally
+             * done by POPSUB() */
+            assert(!AvREAL(av) && AvFILLp(av) == -1);
+
+            items = SP - MARK;
 	    if (UNLIKELY(items - 1 > AvMAX(av))) {
                 SV **ary = AvALLOC(av);
                 AvMAX(av) = items - 1;
