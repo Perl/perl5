@@ -300,77 +300,77 @@ is($charinfo->{script},         "Hangul") if $v_unicode_version gt v3.0.1;
 is(charprop($cp, 'script'),     "Hangul") if $v_unicode_version gt v3.0.1;
 
 if ($v_unicode_version gt v3.0.1) {
-$cp = 0x1D400;
-$charinfo = charinfo($cp);
+    $cp = 0x1D400;
+    $charinfo = charinfo($cp);
 
-is($charinfo->{code},           "1D400", "MATHEMATICAL BOLD CAPITAL A");
-is($charinfo->{name},           "MATHEMATICAL BOLD CAPITAL A");
-is(charprop($cp, 'name'),       "MATHEMATICAL BOLD CAPITAL A");
-is($charinfo->{category},       "Lu");
-is(charprop($cp, 'gc'),         "Uppercase_Letter");
-is($charinfo->{combining},      "0");
-is(charprop($cp, 'ccc'),        "Not_Reordered");
-is($charinfo->{bidi},           "L");
-is(charprop($cp, 'bc'),         "Left_To_Right");
-is($charinfo->{decomposition},  "<font> $A_code");
-is(charprop($cp, 'dm'),         "A");
-is($charinfo->{decimal},        "");
-is($charinfo->{digit},          "");
-is($charinfo->{numeric},        "");
-is(charprop($cp, 'nv'),         "NaN");
-is($charinfo->{mirrored},       "N");
-is(charprop($cp, 'bidim'),      "No");
-is($charinfo->{unicode10},      "");
-is(charprop($cp, 'na1'),        "");
-is($charinfo->{comment},        "");
-is(charprop($cp, 'isc'),        "");
-is($charinfo->{upper},          "");
-is(charprop($cp, 'uc'),         "\x{1D400}");
-is($charinfo->{lower},          "");
-is(charprop($cp, 'lc'),         "\x{1D400}");
-is($charinfo->{title},          "");
-is(charprop($cp, 'tc'),         "\x{1D400}");
-is($charinfo->{block},          "Mathematical Alphanumeric Symbols");
-is(charprop($cp, 'block'),      "Mathematical_Alphanumeric_Symbols");
-is($charinfo->{script},         "Common");
-is(charprop($cp, 'script'),     "Common");
+    is($charinfo->{code},           "1D400", "MATHEMATICAL BOLD CAPITAL A");
+    is($charinfo->{name},           "MATHEMATICAL BOLD CAPITAL A");
+    is(charprop($cp, 'name'),       "MATHEMATICAL BOLD CAPITAL A");
+    is($charinfo->{category},       "Lu");
+    is(charprop($cp, 'gc'),         "Uppercase_Letter");
+    is($charinfo->{combining},      "0");
+    is(charprop($cp, 'ccc'),        "Not_Reordered");
+    is($charinfo->{bidi},           "L");
+    is(charprop($cp, 'bc'),         "Left_To_Right");
+    is($charinfo->{decomposition},  "<font> $A_code");
+    is(charprop($cp, 'dm'),         "A");
+    is($charinfo->{decimal},        "");
+    is($charinfo->{digit},          "");
+    is($charinfo->{numeric},        "");
+    is(charprop($cp, 'nv'),         "NaN");
+    is($charinfo->{mirrored},       "N");
+    is(charprop($cp, 'bidim'),      "No");
+    is($charinfo->{unicode10},      "");
+    is(charprop($cp, 'na1'),        "");
+    is($charinfo->{comment},        "");
+    is(charprop($cp, 'isc'),        "");
+    is($charinfo->{upper},          "");
+    is(charprop($cp, 'uc'),         "\x{1D400}");
+    is($charinfo->{lower},          "");
+    is(charprop($cp, 'lc'),         "\x{1D400}");
+    is($charinfo->{title},          "");
+    is(charprop($cp, 'tc'),         "\x{1D400}");
+    is($charinfo->{block},          "Mathematical Alphanumeric Symbols");
+    is(charprop($cp, 'block'),      "Mathematical_Alphanumeric_Symbols");
+    is($charinfo->{script},         "Common");
+    is(charprop($cp, 'script'),     "Common");
 }
 
 if ($v_unicode_version ge v4.1.0) {
-$cp = 0x9FBA;	                #Bug 58428
-$charinfo = charinfo(0x9FBA);
+    $cp = 0x9FBA;	                #Bug 58428
+    $charinfo = charinfo(0x9FBA);
 
-is($charinfo->{code},           "9FBA", "U+9FBA");
-is($charinfo->{name},           "CJK UNIFIED IDEOGRAPH-9FBA");
-is(charprop($cp, 'name'),       "CJK UNIFIED IDEOGRAPH-9FBA");
-is($charinfo->{category},       "Lo");
-is(charprop($cp, 'gc'),         "Other_Letter");
-is($charinfo->{combining},      "0");
-is(charprop($cp, 'ccc'),        "Not_Reordered");
-is($charinfo->{bidi},           "L");
-is(charprop($cp, 'bc'),         "Left_To_Right");
-is($charinfo->{decomposition},  "");
-is(charprop($cp, 'dm'),         "\x{9FBA}");
-is($charinfo->{decimal},        "");
-is($charinfo->{digit},          "");
-is($charinfo->{numeric},        "");
-is(charprop($cp, 'nv'),         "NaN");
-is($charinfo->{mirrored},       "N");
-is(charprop($cp, 'bidim'),      "No");
-is($charinfo->{unicode10},      "");
-is(charprop($cp, 'na1'),        "");
-is($charinfo->{comment},        "");
-is(charprop($cp, 'isc'),        "");
-is($charinfo->{upper},          "");
-is(charprop($cp, 'uc'),         "\x{9FBA}");
-is($charinfo->{lower},          "");
-is(charprop($cp, 'lc'),         "\x{9FBA}");
-is($charinfo->{title},          "");
-is(charprop($cp, 'tc'),         "\x{9FBA}");
-is($charinfo->{block},          "CJK Unified Ideographs");
-is(charprop($cp, 'block'),      "CJK_Unified_Ideographs");
-is($charinfo->{script},         "Han");
-is(charprop($cp, 'script'),     "Han");
+    is($charinfo->{code},           "9FBA", "U+9FBA");
+    is($charinfo->{name},           "CJK UNIFIED IDEOGRAPH-9FBA");
+    is(charprop($cp, 'name'),       "CJK UNIFIED IDEOGRAPH-9FBA");
+    is($charinfo->{category},       "Lo");
+    is(charprop($cp, 'gc'),         "Other_Letter");
+    is($charinfo->{combining},      "0");
+    is(charprop($cp, 'ccc'),        "Not_Reordered");
+    is($charinfo->{bidi},           "L");
+    is(charprop($cp, 'bc'),         "Left_To_Right");
+    is($charinfo->{decomposition},  "");
+    is(charprop($cp, 'dm'),         "\x{9FBA}");
+    is($charinfo->{decimal},        "");
+    is($charinfo->{digit},          "");
+    is($charinfo->{numeric},        "");
+    is(charprop($cp, 'nv'),         "NaN");
+    is($charinfo->{mirrored},       "N");
+    is(charprop($cp, 'bidim'),      "No");
+    is($charinfo->{unicode10},      "");
+    is(charprop($cp, 'na1'),        "");
+    is($charinfo->{comment},        "");
+    is(charprop($cp, 'isc'),        "");
+    is($charinfo->{upper},          "");
+    is(charprop($cp, 'uc'),         "\x{9FBA}");
+    is($charinfo->{lower},          "");
+    is(charprop($cp, 'lc'),         "\x{9FBA}");
+    is($charinfo->{title},          "");
+    is(charprop($cp, 'tc'),         "\x{9FBA}");
+    is($charinfo->{block},          "CJK Unified Ideographs");
+    is(charprop($cp, 'block'),      "CJK_Unified_Ideographs");
+    is($charinfo->{script},         "Han");
+    is(charprop($cp, 'script'),     "Han");
 }
 
 use Unicode::UCD qw(charblock charscript);
@@ -547,38 +547,38 @@ is($charblocks->{Thai}->[0]->[0], hex('0e00'));
 ok(!exists $charblocks->{PigLatin}, 'PigLatin charblock does not exist');
 
 if ($v_unicode_version gt v3.0.1) {
-my $charscripts = charscripts();
+    my $charscripts = charscripts();
 
-ok(exists $charscripts->{Armenian}, 'Armenian charscript exists');
-is($charscripts->{Armenian}->[0]->[0], hex('0531'));
-ok(!exists $charscripts->{PigLatin}, 'PigLatin charscript does not exist');
+    ok(exists $charscripts->{Armenian}, 'Armenian charscript exists');
+    is($charscripts->{Armenian}->[0]->[0], hex('0531'));
+    ok(!exists $charscripts->{PigLatin}, 'PigLatin charscript does not exist');
 
-my $charscript;
+    my $charscript;
 
-$charscript = charscript("12ab");
-is($charscript, 'Ethiopic', 'Ethiopic charscript');
+    $charscript = charscript("12ab");
+    is($charscript, 'Ethiopic', 'Ethiopic charscript');
 
-$charscript = charscript("0x12ab");
-is($charscript, 'Ethiopic');
+    $charscript = charscript("0x12ab");
+    is($charscript, 'Ethiopic');
 
-$charscript = charscript("U+12ab");
-is($charscript, 'Ethiopic');
+    $charscript = charscript("U+12ab");
+    is($charscript, 'Ethiopic');
 
-my $ranges;
+    my $ranges;
 
-if ($v_unicode_version gt v4.0.0) {
-$ranges = charscript('Ogham');
-is($ranges->[0]->[0], hex('1680'), 'Ogham charscript');
-is($ranges->[0]->[1], hex('169C'));
-}
+    if ($v_unicode_version gt v4.0.0) {
+        $ranges = charscript('Ogham');
+        is($ranges->[0]->[0], hex('1680'), 'Ogham charscript');
+        is($ranges->[0]->[1], hex('169C'));
+    }
 
-use Unicode::UCD qw(charinrange);
+    use Unicode::UCD qw(charinrange);
 
-$ranges = charscript('Cherokee');
-ok(!charinrange($ranges, "139f"), 'Cherokee charscript');
-ok( charinrange($ranges, "13a0"));
-ok( charinrange($ranges, "13f4"));
-ok(!charinrange($ranges, "13ff"));
+    $ranges = charscript('Cherokee');
+    ok(!charinrange($ranges, "139f"), 'Cherokee charscript');
+    ok( charinrange($ranges, "13a0"));
+    ok( charinrange($ranges, "13f4"));
+    ok(!charinrange($ranges, "13ff"));
 }
 
 use Unicode::UCD qw(general_categories);
@@ -628,86 +628,86 @@ my $s_code = sprintf("%04X", ord "s");
 
 if ($v_unicode_version gt v3.0.0) { # These special ones don't work on early
                                     # perls
-$casefold = casefold(utf8::unicode_to_native(0xdf));
+    $casefold = casefold(utf8::unicode_to_native(0xdf));
 
-is($casefold->{code}, $sharp_s_code, 'casefold native(0xDF) code');
-is($casefold->{status}, 'F', 'casefold native(0xDF) status');
-is($casefold->{mapping}, "$s_code $s_code", 'casefold native(0xDF) mapping');
-is($casefold->{full}, "$s_code $s_code", 'casefold native(0xDF) full');
-is($casefold->{simple}, "", 'casefold native(0xDF) simple');
-is($casefold->{turkic}, "", 'casefold native(0xDF) turkic');
+    is($casefold->{code}, $sharp_s_code, 'casefold native(0xDF) code');
+    is($casefold->{status}, 'F', 'casefold native(0xDF) status');
+    is($casefold->{mapping}, "$s_code $s_code", 'casefold native(0xDF) mapping');
+    is($casefold->{full}, "$s_code $s_code", 'casefold native(0xDF) full');
+    is($casefold->{simple}, "", 'casefold native(0xDF) simple');
+    is($casefold->{turkic}, "", 'casefold native(0xDF) turkic');
 
-# Do different tests depending on if version < 3.2, or not.
-if ($v_unicode_version eq v3.0.1) {
-        # In this release, there was no special Turkic values.
-        # Both 0x130 and 0x131 folded to 'i'.
+    # Do different tests depending on if version < 3.2, or not.
+    if ($v_unicode_version eq v3.0.1) {
+            # In this release, there was no special Turkic values.
+            # Both 0x130 and 0x131 folded to 'i'.
 
-	$casefold = casefold(0x130);
+            $casefold = casefold(0x130);
 
-	is($casefold->{code}, '0130', 'casefold 0x130 code');
-	is($casefold->{status}, 'C' , 'casefold 0x130 status');
-	is($casefold->{mapping}, $i_code, 'casefold 0x130 mapping');
-	is($casefold->{full}, $i_code, 'casefold 0x130 full');
-	is($casefold->{simple}, $i_code, 'casefold 0x130 simple');
-	is($casefold->{turkic}, "", 'casefold 0x130 turkic');
+            is($casefold->{code}, '0130', 'casefold 0x130 code');
+            is($casefold->{status}, 'C' , 'casefold 0x130 status');
+            is($casefold->{mapping}, $i_code, 'casefold 0x130 mapping');
+            is($casefold->{full}, $i_code, 'casefold 0x130 full');
+            is($casefold->{simple}, $i_code, 'casefold 0x130 simple');
+            is($casefold->{turkic}, "", 'casefold 0x130 turkic');
 
-	$casefold = casefold(0x131);
+            $casefold = casefold(0x131);
 
-	is($casefold->{code}, '0131', 'casefold 0x131 code');
-	is($casefold->{status}, 'C' , 'casefold 0x131 status');
-	is($casefold->{mapping}, $i_code, 'casefold 0x131 mapping');
-	is($casefold->{full}, $i_code, 'casefold 0x131 full');
-	is($casefold->{simple}, $i_code, 'casefold 0x131 simple');
-	is($casefold->{turkic}, "", 'casefold 0x131 turkic');
-}
-elsif ($v_unicode_version lt v3.2.0) {
-	$casefold = casefold(0x130);
+            is($casefold->{code}, '0131', 'casefold 0x131 code');
+            is($casefold->{status}, 'C' , 'casefold 0x131 status');
+            is($casefold->{mapping}, $i_code, 'casefold 0x131 mapping');
+            is($casefold->{full}, $i_code, 'casefold 0x131 full');
+            is($casefold->{simple}, $i_code, 'casefold 0x131 simple');
+            is($casefold->{turkic}, "", 'casefold 0x131 turkic');
+    }
+    elsif ($v_unicode_version lt v3.2.0) {
+            $casefold = casefold(0x130);
 
-	is($casefold->{code}, '0130', 'casefold 0x130 code');
-	is($casefold->{status}, 'I' , 'casefold 0x130 status');
-	is($casefold->{mapping}, $i_code, 'casefold 0x130 mapping');
-	is($casefold->{full}, $i_code, 'casefold 0x130 full');
-	is($casefold->{simple}, $i_code, 'casefold 0x130 simple');
-	is($casefold->{turkic}, $i_code, 'casefold 0x130 turkic');
+            is($casefold->{code}, '0130', 'casefold 0x130 code');
+            is($casefold->{status}, 'I' , 'casefold 0x130 status');
+            is($casefold->{mapping}, $i_code, 'casefold 0x130 mapping');
+            is($casefold->{full}, $i_code, 'casefold 0x130 full');
+            is($casefold->{simple}, $i_code, 'casefold 0x130 simple');
+            is($casefold->{turkic}, $i_code, 'casefold 0x130 turkic');
 
-	$casefold = casefold(0x131);
+            $casefold = casefold(0x131);
 
-	is($casefold->{code}, '0131', 'casefold 0x131 code');
-	is($casefold->{status}, 'I' , 'casefold 0x131 status');
-	is($casefold->{mapping}, $i_code, 'casefold 0x131 mapping');
-	is($casefold->{full}, $i_code, 'casefold 0x131 full');
-	is($casefold->{simple}, $i_code, 'casefold 0x131 simple');
-	is($casefold->{turkic}, $i_code, 'casefold 0x131 turkic');
-} else {
-	$casefold = casefold(utf8::unicode_to_native(0x49));
+            is($casefold->{code}, '0131', 'casefold 0x131 code');
+            is($casefold->{status}, 'I' , 'casefold 0x131 status');
+            is($casefold->{mapping}, $i_code, 'casefold 0x131 mapping');
+            is($casefold->{full}, $i_code, 'casefold 0x131 full');
+            is($casefold->{simple}, $i_code, 'casefold 0x131 simple');
+            is($casefold->{turkic}, $i_code, 'casefold 0x131 turkic');
+    } else {
+            $casefold = casefold(utf8::unicode_to_native(0x49));
 
-	is($casefold->{code}, $I_code, 'casefold native(0x49) code');
-	is($casefold->{status}, 'C' , 'casefold native(0x49) status');
-	is($casefold->{mapping}, $i_code, 'casefold native(0x49) mapping');
-	is($casefold->{full}, $i_code, 'casefold native(0x49) full');
-	is($casefold->{simple}, $i_code, 'casefold native(0x49) simple');
-	is($casefold->{turkic}, "0131", 'casefold native(0x49) turkic');
+            is($casefold->{code}, $I_code, 'casefold native(0x49) code');
+            is($casefold->{status}, 'C' , 'casefold native(0x49) status');
+            is($casefold->{mapping}, $i_code, 'casefold native(0x49) mapping');
+            is($casefold->{full}, $i_code, 'casefold native(0x49) full');
+            is($casefold->{simple}, $i_code, 'casefold native(0x49) simple');
+            is($casefold->{turkic}, "0131", 'casefold native(0x49) turkic');
 
-	$casefold = casefold(0x130);
+            $casefold = casefold(0x130);
 
-	is($casefold->{code}, '0130', 'casefold 0x130 code');
-	is($casefold->{status}, 'F' , 'casefold 0x130 status');
-	is($casefold->{mapping}, "$i_code 0307", 'casefold 0x130 mapping');
-	is($casefold->{full}, "$i_code 0307", 'casefold 0x130 full');
-	is($casefold->{simple}, "", 'casefold 0x130 simple');
-	is($casefold->{turkic}, $i_code, 'casefold 0x130 turkic');
-}
+            is($casefold->{code}, '0130', 'casefold 0x130 code');
+            is($casefold->{status}, 'F' , 'casefold 0x130 status');
+            is($casefold->{mapping}, "$i_code 0307", 'casefold 0x130 mapping');
+            is($casefold->{full}, "$i_code 0307", 'casefold 0x130 full');
+            is($casefold->{simple}, "", 'casefold 0x130 simple');
+            is($casefold->{turkic}, $i_code, 'casefold 0x130 turkic');
+    }
 
-if ($v_unicode_version gt v3.0.1) {
-$casefold = casefold(0x1F88);
+    if ($v_unicode_version gt v3.0.1) {
+        $casefold = casefold(0x1F88);
 
-is($casefold->{code}, '1F88', 'casefold 0x1F88 code');
-is($casefold->{status}, 'S' , 'casefold 0x1F88 status');
-is($casefold->{mapping}, '1F80', 'casefold 0x1F88 mapping');
-is($casefold->{full}, '1F00 03B9', 'casefold 0x1F88 full');
-is($casefold->{simple}, '1F80', 'casefold 0x1F88 simple');
-is($casefold->{turkic}, "", 'casefold 0x1F88 turkic');
-}
+        is($casefold->{code}, '1F88', 'casefold 0x1F88 code');
+        is($casefold->{status}, 'S' , 'casefold 0x1F88 status');
+        is($casefold->{mapping}, '1F80', 'casefold 0x1F88 mapping');
+        is($casefold->{full}, '1F00 03B9', 'casefold 0x1F88 full');
+        is($casefold->{simple}, '1F80', 'casefold 0x1F88 simple');
+        is($casefold->{turkic}, "", 'casefold 0x1F88 turkic');
+    }
 }
 
 ok(!casefold(utf8::unicode_to_native(0x20)));
@@ -729,14 +729,14 @@ ok($casespec->{code} eq $sharp_s_code &&
 $casespec = casespec(0x307);
 
 if ($v_unicode_version gt v3.1.0) {
-ok($casespec->{az}->{code} eq '0307'
-   && !defined $casespec->{az}->{lower}
-   && $casespec->{az}->{title} eq '0307'
-   && $casespec->{az}->{upper} eq '0307'
-   && $casespec->{az}->{condition} eq ($v_unicode_version le v3.2)
-                                    ? 'az After_Soft_Dotted'
-                                    : 'az After_I',
-  'casespec 0x307');
+    ok($casespec->{az}->{code} eq '0307'
+    && !defined $casespec->{az}->{lower}
+    && $casespec->{az}->{title} eq '0307'
+    && $casespec->{az}->{upper} eq '0307'
+    && $casespec->{az}->{condition} eq ($v_unicode_version le v3.2)
+                                        ? 'az After_Soft_Dotted'
+                                        : 'az After_I',
+    'casespec 0x307');
 }
 
 # perl #7305 UnicodeCD::compexcl is weird
@@ -779,20 +779,20 @@ SKIP:
 }
 
 if ($v_unicode_version ge v4.1.0) {
-use Unicode::UCD qw(namedseq);
+    use Unicode::UCD qw(namedseq);
 
-is(namedseq("KATAKANA LETTER AINU P"), "\x{31F7}\x{309A}", "namedseq");
-is(namedseq("KATAKANA LETTER AINU Q"), undef);
-is(namedseq(), undef);
-is(namedseq(qw(foo bar)), undef);
-my @ns = namedseq("KATAKANA LETTER AINU P");
-is(scalar @ns, 2);
-is($ns[0], 0x31F7);
-is($ns[1], 0x309A);
-my %ns = namedseq();
-is($ns{"KATAKANA LETTER AINU P"}, "\x{31F7}\x{309A}");
-@ns = namedseq(42);
-is(@ns, 0);
+    is(namedseq("KATAKANA LETTER AINU P"), "\x{31F7}\x{309A}", "namedseq");
+    is(namedseq("KATAKANA LETTER AINU Q"), undef);
+    is(namedseq(), undef);
+    is(namedseq(qw(foo bar)), undef);
+    my @ns = namedseq("KATAKANA LETTER AINU P");
+    is(scalar @ns, 2);
+    is($ns[0], 0x31F7);
+    is($ns[1], 0x309A);
+    my %ns = namedseq();
+    is($ns{"KATAKANA LETTER AINU P"}, "\x{31F7}\x{309A}");
+    @ns = namedseq(42);
+    is(@ns, 0);
 }
 
 use Unicode::UCD qw(num);
@@ -1314,29 +1314,29 @@ if ($::IS_ASCII) { # On EBCDIC, other things will come first, and can vary
 
 # This property is stable and small, so can test all of it
 if ($v_unicode_version gt v3.1.0) {
-$prop = "ASCII_Hex_Digit";
-($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
-is($format, 's', "prop_invmap() format of '$prop' is 's'");
-is($missing, 'N', "prop_invmap() missing of '$prop' is 'N'");
-if ($::IS_ASCII) {
-    is_deeply($invlist_ref, [ 0x0000, 0x0030, 0x003A,
-                              0x0041, 0x0047,
-                              0x0061, 0x0067, 0x110000
-                            ],
-          "prop_invmap('$prop') code point list is correct");
-}
-elsif ($::IS_EBCDIC) {
-    is_deeply($invlist_ref, [
-            utf8::unicode_to_native(0x0000),
-            utf8::unicode_to_native(0x0061), utf8::unicode_to_native(0x0066) + 1,
-            utf8::unicode_to_native(0x0041), utf8::unicode_to_native(0x0046) + 1,
-            utf8::unicode_to_native(0x0030), utf8::unicode_to_native(0x0039) + 1,
-            utf8::unicode_to_native(0x110000)
-          ],
-          "prop_invmap('$prop') code point list is correct");
-}
-is_deeply($invmap_ref, [ 'N', 'Y', 'N', 'Y', 'N', 'Y', 'N', 'N' ] ,
-          "prop_invmap('$prop') map list is correct");
+    $prop = "ASCII_Hex_Digit";
+    ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
+    is($format, 's', "prop_invmap() format of '$prop' is 's'");
+    is($missing, 'N', "prop_invmap() missing of '$prop' is 'N'");
+    if ($::IS_ASCII) {
+        is_deeply($invlist_ref, [ 0x0000, 0x0030, 0x003A,
+                                0x0041, 0x0047,
+                                0x0061, 0x0067, 0x110000
+                                ],
+            "prop_invmap('$prop') code point list is correct");
+    }
+    elsif ($::IS_EBCDIC) {
+        is_deeply($invlist_ref, [
+                utf8::unicode_to_native(0x0000),
+                utf8::unicode_to_native(0x0061), utf8::unicode_to_native(0x0066) + 1,
+                utf8::unicode_to_native(0x0041), utf8::unicode_to_native(0x0046) + 1,
+                utf8::unicode_to_native(0x0030), utf8::unicode_to_native(0x0039) + 1,
+                utf8::unicode_to_native(0x110000)
+            ],
+            "prop_invmap('$prop') code point list is correct");
+    }
+    is_deeply($invmap_ref, [ 'N', 'Y', 'N', 'Y', 'N', 'Y', 'N', 'N' ] ,
+            "prop_invmap('$prop') map list is correct");
 }
 
 is(prop_invlist("Unknown property"), undef, "prop_invlist(<Unknown property>) returns undef");
@@ -1359,37 +1359,37 @@ is(prop_invlist("InKana"), undef, "prop_invlist(<user-defined property returns u
 # prop_invlist() tables fully with the known correct result.  We choose
 # ASCII_Hex_Digit again, as it is stable.
 if ($v_unicode_version gt v3.1.0) {
-if ($::IS_ASCII) {
-    @invlist = prop_invlist("AHex");
-    is_deeply(\@invlist, [ 0x0030, 0x003A, 0x0041,
-                                 0x0047, 0x0061, 0x0067 ],
-          "prop_invlist('AHex') is exactly the expected set of points");
-    @invlist = prop_invlist("AHex=f");
-    is_deeply(\@invlist, [ 0x0000, 0x0030, 0x003A, 0x0041,
-                                 0x0047, 0x0061, 0x0067 ],
-          "prop_invlist('AHex=f') is exactly the expected set of points");
-}
-elsif ($::IS_EBCDIC) { # Relies on the ranges 0-9, a-f, and A-F each being
-                    # contiguous
-    @invlist = prop_invlist("AHex");
-    is_deeply(\@invlist, [
-            utf8::unicode_to_native(0x0061), utf8::unicode_to_native(0x0066) + 1,
-            utf8::unicode_to_native(0x0041), utf8::unicode_to_native(0x0046) + 1,
-            utf8::unicode_to_native(0x0030), utf8::unicode_to_native(0x0039) + 1,
-       ],
-       "prop_invlist('AHex') is exactly the expected set of points");
-    @invlist = prop_invlist("AHex=f");
-    is_deeply(\@invlist, [
-            utf8::unicode_to_native(0x0000),
-            utf8::unicode_to_native(0x0061),
-            utf8::unicode_to_native(0x0066) + 1,
-            utf8::unicode_to_native(0x0041),
-            utf8::unicode_to_native(0x0046) + 1,
-            utf8::unicode_to_native(0x0030),
-            utf8::unicode_to_native(0x0039) + 1,
-       ],
-       "prop_invlist('AHex=f') is exactly the expected set of points");
-}
+    if ($::IS_ASCII) {
+        @invlist = prop_invlist("AHex");
+        is_deeply(\@invlist, [ 0x0030, 0x003A, 0x0041,
+                                    0x0047, 0x0061, 0x0067 ],
+            "prop_invlist('AHex') is exactly the expected set of points");
+        @invlist = prop_invlist("AHex=f");
+        is_deeply(\@invlist, [ 0x0000, 0x0030, 0x003A, 0x0041,
+                                    0x0047, 0x0061, 0x0067 ],
+            "prop_invlist('AHex=f') is exactly the expected set of points");
+    }
+    elsif ($::IS_EBCDIC) { # Relies on the ranges 0-9, a-f, and A-F each being
+                        # contiguous
+        @invlist = prop_invlist("AHex");
+        is_deeply(\@invlist, [
+                utf8::unicode_to_native(0x0061), utf8::unicode_to_native(0x0066) + 1,
+                utf8::unicode_to_native(0x0041), utf8::unicode_to_native(0x0046) + 1,
+                utf8::unicode_to_native(0x0030), utf8::unicode_to_native(0x0039) + 1,
+        ],
+        "prop_invlist('AHex') is exactly the expected set of points");
+        @invlist = prop_invlist("AHex=f");
+        is_deeply(\@invlist, [
+                utf8::unicode_to_native(0x0000),
+                utf8::unicode_to_native(0x0061),
+                utf8::unicode_to_native(0x0066) + 1,
+                utf8::unicode_to_native(0x0041),
+                utf8::unicode_to_native(0x0046) + 1,
+                utf8::unicode_to_native(0x0030),
+                utf8::unicode_to_native(0x0039) + 1,
+        ],
+        "prop_invlist('AHex=f') is exactly the expected set of points");
+    }
 }
 
 sub fail_with_diff ($$$$) {
@@ -1667,7 +1667,7 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
                 fail("prop_invmap('$prop')");
                 diag("is unknown to prop_aliases(), and we need it in order to test prop_invmap");
             }
-        next PROPERTY;
+            next PROPERTY;
         }
     }
 
@@ -2655,11 +2655,11 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
 use Unicode::UCD qw(search_invlist);
 
 if ($v_unicode_version ge v3.1.0) { # No Script property before this
-my ($scripts_ranges_ref, $scripts_map_ref) = prop_invmap("Script");
-my $index = search_invlist($scripts_ranges_ref, 0x390);
-is($scripts_map_ref->[$index], "Greek", "U+0390 is Greek");
-my @alpha_invlist = prop_invlist("Alpha");
-is(search_invlist(\@alpha_invlist, ord("\t")), undef, "search_invlist returns undef for code points before first one on the list");
+    my ($scripts_ranges_ref, $scripts_map_ref) = prop_invmap("Script");
+    my $index = search_invlist($scripts_ranges_ref, 0x390);
+    is($scripts_map_ref->[$index], "Greek", "U+0390 is Greek");
+    my @alpha_invlist = prop_invlist("Alpha");
+    is(search_invlist(\@alpha_invlist, ord("\t")), undef, "search_invlist returns undef for code points before first one on the list");
 }
 
 ok($/ eq $input_record_separator,  "The record separator didn't get overridden");
