@@ -4542,10 +4542,23 @@ PP(pp_smartmatch)
 	    destroy_matcher(matcher);
 	    RETURN;
 	}
-    else {
-        DEBUG_M(Perl_deb(aTHX_ "    no matching rule\n"));
-        Perl_croak(aTHX_ "Can only smartmatch against undef, code references and regular expressions");
+
+    if (SvAMAGIC(d)) {
+	SV * tmpsv;
+	DEBUG_M(Perl_deb(aTHX_ "    applying rule over-Any\n"));
+	DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
+
+	tmpsv = amagic_call(d, e, smart_amg, AMGf_noright);
+	if (tmpsv) {
+	    SPAGAIN;
+	    PUSHs(tmpsv);
+	    RETURN;
+	}
+	DEBUG_M(Perl_deb(aTHX_ "        failed to run overload method; continuing...\n"));
     }
+
+    DEBUG_M(Perl_deb(aTHX_ "    no matching rule\n"));
+    Perl_croak(aTHX_ "Can only smartmatch against undef, code references and regular expressions");
 }
 
 PP(pp_enterwhen)

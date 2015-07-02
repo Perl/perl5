@@ -236,7 +236,7 @@ __DATA__
 
 # regular object
 @	$obj		$obj
-@	$ov_obj		$obj
+!	$ov_obj		$obj
 @	\&fatal		$obj
 @	\&FALSE		$obj
 @	\&foo		$obj
@@ -273,10 +273,10 @@ __DATA__
 	$ov_obj		qr/^stringified$/
 @	"$ov_obj"	"stringified"
 @	"$str_obj"	"object"
-@	$ov_obj		"stringified"
+!	$ov_obj		"stringified"
 @	$str_obj	"object"
-@	$ov_obj		'magic'
-@	$ov_obj		'not magic'
+	$ov_obj		'magic'
+!	$ov_obj		'not magic'
 
 # ~~ Coderef
 	sub{0}		sub { ref $_[0] eq "CODE" }
@@ -348,7 +348,7 @@ __DATA__
 @	%hash		%tied_hash
 @	%tied_hash	%tied_hash
 @	{"a"=>"b"}	%tied_hash
-@	$ov_obj		%refh		MINISKIP
+!	$ov_obj		%refh		MINISKIP
 @	"$ov_obj"	%refh		MINISKIP
 @	[$ov_obj]	%refh		MINISKIP
 @	["$ov_obj"]	%refh		MINISKIP
