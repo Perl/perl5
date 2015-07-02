@@ -212,20 +212,24 @@ typedef struct hek HEK;
 	HE**	svu_hash;		\
 	GP*	svu_gp;			\
 	PerlIO *svu_fp;			\
-    }	sv_u
+    }	sv_u				\
+    _SV_HEAD_DEBUG
 
+#ifdef DEBUG_LEAKING_SCALARS
+#define _SV_HEAD_DEBUG ;\
+    PERL_BITFIELD32 sv_debug_optype:9;	/* the type of OP that allocated us */ \
+    PERL_BITFIELD32 sv_debug_inpad:1;	/* was allocated in a pad for an OP */ \
+    PERL_BITFIELD32 sv_debug_line:16;	/* the line where we were allocated */ \
+    UV		    sv_debug_serial;	/* serial number of sv allocation   */ \
+    char *	    sv_debug_file;	/* the file where we were allocated */ \
+    SV *	    sv_debug_parent	/* what we were cloned from (ithreads)*/
+#else
+#define _SV_HEAD_DEBUG
+#endif
 
 struct STRUCT_SV {		/* struct sv { */
     _SV_HEAD(void*);
     _SV_HEAD_UNION;
-#ifdef DEBUG_LEAKING_SCALARS
-    PERL_BITFIELD32 sv_debug_optype:9;	/* the type of OP that allocated us */
-    PERL_BITFIELD32 sv_debug_inpad:1;	/* was allocated in a pad for an OP */
-    PERL_BITFIELD32 sv_debug_line:16;	/* the line where we were allocated */
-    UV		    sv_debug_serial;	/* serial number of sv allocation   */
-    char *	    sv_debug_file;	/* the file where we were allocated */
-    SV *	    sv_debug_parent;	/* what we were cloned from (ithreads)*/
-#endif
 };
 
 struct gv {
