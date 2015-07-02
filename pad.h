@@ -33,7 +33,15 @@ typedef U64TYPE PADOFFSET;
 
 struct padlist {
     SSize_t	xpadl_max;	/* max index for which array has space */
-    PAD **	xpadl_alloc;	/* pointer to beginning of array of AVs */
+    union {
+	PAD **	xpadlarr_alloc; /* Pointer to beginning of array of AVs.
+				   index 0 is a padnamelist *          */
+	struct {
+	    PADNAMELIST * padnl;
+	    PAD * pad_1;        /* this slice of PAD * array always alloced */
+	    PAD * pad_2;        /* maybe unalloced */
+	} * xpadlarr_dbg;       /* for use with a C debugger only */
+    } xpadl_arr;
     U32		xpadl_id;	/* Semi-unique ID, shared between clones */
     U32		xpadl_outid;	/* ID of outer pad */
 };
@@ -293,7 +301,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 =cut
 */
 
-#define PadlistARRAY(pl)	(pl)->xpadl_alloc
+#define PadlistARRAY(pl)	(pl)->xpadl_arr.xpadlarr_alloc
 #define PadlistMAX(pl)		(pl)->xpadl_max
 #define PadlistNAMES(pl)	*((PADNAMELIST **)PadlistARRAY(pl))
 #define PadlistNAMESARRAY(pl)	PadnamelistARRAY(PadlistNAMES(pl))
