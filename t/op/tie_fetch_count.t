@@ -155,7 +155,7 @@ $dummy  =  $var =~ m/ / ; check_count 'm//';
 $dummy  =  $var =~ s/ //; check_count 's///';
 {
     no warnings 'experimental::smartmatch';
-    $dummy  =  $var ~~    1 ; check_count '~~';
+    $dummy  =  $var ~~ qr/1/ ; check_count '~~';
 }
 $dummy  =  $var =~ y/ //; check_count 'y///';
            $var = \1;
