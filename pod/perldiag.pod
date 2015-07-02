@@ -602,6 +602,12 @@ the warning.  See L<perlsub>.
 (D deprecated) You called a function whose use is deprecated.  See
 the function's name in L<POSIX> for details.
 
+=item Can only smartmatch against undef, code references and regular expressions
+
+(F) You used the smartmatch operator (C<~~>) or the when() operator
+against a scalar that wasn't C<undef>, a code reference, a regular
+expression, or an object with smartmatch overloading.
+
 =item Cannot chr %f
 
 (F) You passed an invalid number (like an infinity or not-a-number) to C<chr>.

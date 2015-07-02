@@ -333,7 +333,7 @@ test_proto 'break';
 { $tests ++;
   my $tmp;
   CORE::given(1) {
-    CORE::when(1) {
+    CORE::when(qr/1/) {
       &mybreak;
       $tmp = 'bad';
     }
@@ -421,7 +421,7 @@ SKIP:
 test_proto 'continue';
 $tests ++;
 CORE::given(1) {
-  CORE::when(1) {
+  CORE::when(qr/1/) {
     &mycontinue();
   }
   pass "&continue";
