@@ -186,6 +186,16 @@ exports anything.  [perl #125410]
 
 =over 4
 
+=item VMS
+
+=over
+
+The minimum supported version of VMS is now v7.3-2, released in 2003.  As a
+side effect of this change, VAX is no longer supported as the terminal
+release of OpenVMS VAX was v7.3 in 2001.
+
+=back
+
 =item Win32
 
 =over
