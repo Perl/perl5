@@ -4515,16 +4515,10 @@ Perl_seed(pTHX)
     int fd;
 #endif
     U32 u;
-#ifdef VMS
-    /* when[] = (low 32 bits, high 32 bits) of time since epoch
-     * in 100-ns units, typically incremented ever 10 ms.        */
-    unsigned int when[2];
-#else
-#  ifdef HAS_GETTIMEOFDAY
+#ifdef HAS_GETTIMEOFDAY
     struct timeval when;
-#  else
+#else
     Time_t when;
-#  endif
 #endif
 
 /* This test is an escape hatch, this symbol isn't set by Configure. */
@@ -4546,17 +4540,12 @@ Perl_seed(pTHX)
     }
 #endif
 
-#ifdef VMS
-    _ckvmssts(sys$gettim(when));
-    u = (U32)SEED_C1 * when[0] + (U32)SEED_C2 * when[1];
-#else
-#  ifdef HAS_GETTIMEOFDAY
+#ifdef HAS_GETTIMEOFDAY
     PerlProc_gettimeofday(&when,NULL);
     u = (U32)SEED_C1 * when.tv_sec + (U32)SEED_C2 * when.tv_usec;
-#  else
+#else
     (void)time(&when);
     u = (U32)SEED_C1 * when;
-#  endif
 #endif
     u += SEED_C3 * (U32)PerlProc_getpid();
     u += SEED_C4 * (U32)PTR2UV(PL_stack_sp);
