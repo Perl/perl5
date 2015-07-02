@@ -53,9 +53,30 @@
 
 
 [
-    'call::sub::3_args' => {
+    'call::sub::empty' => {
+        desc    => 'function call with no args or body',
+        setup   => 'sub f { }',
+        code    => 'f()',
+    },
+    'call::sub::args3' => {
         desc    => 'function call with 3 local lexical vars',
-        setup   => 'sub f { my ($a, $b, $c) = @_ }',
+        setup   => 'sub f { my ($a, $b, $c) = @_; 1 }',
+        code    => 'f(1,2,3)',
+    },
+    'call::sub::args3_ret3' => {
+        desc    => 'function call with 3 local lex vars and 3 return values',
+        setup   => 'my @a; sub f { my ($a, $b, $c) = @_; $a+$b, $c, 1 }',
+        code    => '@a = f(1,2,3)',
+    },
+
+    'call::goto::empty' => {
+        desc    => 'goto &funtion with no args or body',
+        setup   => 'sub f { goto &g } sub g {}',
+        code    => 'f()',
+    },
+    'call::goto::args3' => {
+        desc    => 'goto &funtion with 3 local lexical vars',
+        setup   => 'sub f { goto &g } sub g { my ($a, $b, $c) = @_ }',
         code    => 'f(1,2,3)',
     },
 
