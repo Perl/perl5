@@ -18592,6 +18592,16 @@ use warnings;
 my $Tests = 0;
 my $Fails = 0;
 
+# loc_tools.pl requires this function to be defined
+sub ok($@) {
+    my ($pass, @msg) = @_;
+    print "not " unless $pass;
+    print "ok ";
+    print ++$Tests;
+    print " - ", join "", @msg if @msg;
+    print "\n";
+}
+
 sub Expect($$$$) {
     my $expected = shift;
     my $ord = shift;
