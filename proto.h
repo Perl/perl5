@@ -473,6 +473,11 @@ PERL_CALLCONV OP *	Perl_ck_shift(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_SHIFT	\
 	assert(o)
 
+PERL_CALLCONV OP *	Perl_ck_smartmatch(pTHX_ OP *o)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_CK_SMARTMATCH	\
+	assert(o)
+
 PERL_CALLCONV OP *	Perl_ck_sort(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_CK_SORT	\
