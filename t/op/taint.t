@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 807;
+plan tests => 805;
 
 $| = 1;
 
@@ -2253,8 +2253,8 @@ end
 
 	my $res = do {
 	    given ($_) {
-		when ('x') { $letter }
-		when ('y') { goto leavegiven }
+		when { $_ eq 'x' } { $letter }
+		when { $_ eq 'y' } { goto leavegiven }
 		default    { $letter }
 		leavegiven:  $letter
 	    }
