@@ -10132,6 +10132,26 @@ S_maybe_targlex(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_smartmatch(pTHX_ OP *o)
+{
+    dVAR;
+    PERL_ARGS_ASSERT_CK_SMARTMATCH;
+
+    if (0 == (o->op_flags & OPf_SPECIAL)) {
+        OP *first  = cBINOPo->op_first;
+        OP *second = OpSIBLING(first);
+
+        /* Implicitly take a reference to a regular expression on the right*/
+        if (second->op_type == OP_MATCH) {
+            second->op_type = OP_QR;
+            second->op_ppaddr = PL_ppaddr[OP_QR];
+        }
+    }
+
+    return o;
+}
+
+OP *
 Perl_ck_sassign(pTHX_ OP *o)
 {
     dVAR;
