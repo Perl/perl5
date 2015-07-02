@@ -438,9 +438,9 @@ __DATA__
 @	/x/		[qw(foo bar baz quux)]
 @	/y/		[qw(foo bar baz quux)]
 @	/FOO/i		@fooormore
-@	@fooormore	/FOO/i
+!	@fooormore	/FOO/i
 @	/bar/		@fooormore
-@	@fooormore	/bar/
+!	@fooormore	/bar/
 
 # - a number
 @	2		[qw(1.00 2.00)]

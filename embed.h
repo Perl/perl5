@@ -1131,6 +1131,7 @@
 #define ck_sassign(a)		Perl_ck_sassign(aTHX_ a)
 #define ck_select(a)		Perl_ck_select(aTHX_ a)
 #define ck_shift(a)		Perl_ck_shift(aTHX_ a)
+#define ck_smartmatch(a)	Perl_ck_smartmatch(aTHX_ a)
 #define ck_sort(a)		Perl_ck_sort(aTHX_ a)
 #define ck_spair(a)		Perl_ck_spair(aTHX_ a)
 #define ck_split(a)		Perl_ck_split(aTHX_ a)
