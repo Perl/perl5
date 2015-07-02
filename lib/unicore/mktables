@@ -1199,7 +1199,9 @@ my $DEVELOPMENT_ONLY=<<"EOF";
 
 EOF
 
-my $MAX_UNICODE_CODEPOINT_STRING = "10FFFF";
+my $MAX_UNICODE_CODEPOINT_STRING = ($v_version ge v2.0.0)
+                                   ? "10FFFF"
+                                   : "FFFF";
 my $MAX_UNICODE_CODEPOINT = hex $MAX_UNICODE_CODEPOINT_STRING;
 my $MAX_UNICODE_CODEPOINTS = $MAX_UNICODE_CODEPOINT + 1;
 
@@ -1229,8 +1231,7 @@ my $code_point_re = qr/\b$run_on_code_point_re/;
 # defaults for code points not listed (i.e., missing) in the file.  The code
 # depends on this ending with a semi-colon, so it can assume it is a valid
 # field when the line is split() by semi-colons
-my $missing_defaults_prefix =
-            qr/^#\s+\@missing:\s+0000\.\.$MAX_UNICODE_CODEPOINT_STRING\s*;/;
+my $missing_defaults_prefix = qr/^#\s+\@missing:\s+0000\.\.10FFFF\s*;/;
 
 # Property types.  Unicode has more types, but these are sufficient for our
 # purposes.
@@ -13444,9 +13445,9 @@ sub compile_perl() {
     }
 
     my $Any = $perl->add_match_table('Any',
-                                     Description  => "All Unicode code points: [\\x{0000}-\\x{10FFFF}]",
+                                     Description  => "All Unicode code points: [\\x{0000}-\\x{$MAX_UNICODE_CODEPOINT_STRING}]",
                                      );
-    $Any->add_range(0, 0x10FFFF);
+    $Any->add_range(0, $MAX_UNICODE_CODEPOINT);
     $Any->add_alias('Unicode');
 
     # Assigned is the opposite of gc=unassigned
