@@ -2669,15 +2669,15 @@ PP(pp_goto)
 	SV * const sv = POPs;
 	SvGETMAGIC(sv);
 
-	/* This egregious kludge implements goto &subroutine */
 	if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV) {
+            /* This egregious kludge implements goto &subroutine */
 	    I32 cxix;
 	    PERL_CONTEXT *cx;
 	    CV *cv = MUTABLE_CV(SvRV(sv));
 	    AV *arg = GvAV(PL_defgv);
 	    I32 oldsave;
 
-	retry:
+	  retry:
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
 		const GV * const gv = CvGV(cv);
 		if (gv) {
