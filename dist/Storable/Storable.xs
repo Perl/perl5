@@ -6668,6 +6668,7 @@ SV *	obj
  ALIAS:
   net_mstore = 1
  CODE:
+  RETVAL = &PL_sv_undef;
   if (!do_store(aTHX_ (PerlIO*) 0, obj, 0, ix, &RETVAL))
     RETVAL = &PL_sv_undef;
  OUTPUT:
