@@ -624,10 +624,12 @@ struct block_format {
 	CvDEPTH(cv)++;							\
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
 
+/* Restore old @_ */
 #define POP_SAVEARRAY()						\
     STMT_START {							\
-	SvREFCNT_dec(GvAV(PL_defgv));					\
+        AV *av = GvAV(PL_defgv);                                        \
 	GvAV(PL_defgv) = cx->blk_sub.savearray;				\
+        SvREFCNT_dec(av);	        				\
     } STMT_END
 
 /* junk in @_ spells trouble when cloning CVs and in pp_caller(), so don't

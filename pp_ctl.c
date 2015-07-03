@@ -2822,9 +2822,7 @@ PP(pp_goto)
 		SvREFCNT_dec(arg);
 		if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		    /* Restore old @_ */
-		    arg = GvAV(PL_defgv);
-		    GvAV(PL_defgv) = cx->blk_sub.savearray;
-		    SvREFCNT_dec(arg);
+                    POP_SAVEARRAY();
 		}
 
 		retop = cx->blk_sub.retop;
