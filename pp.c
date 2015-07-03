@@ -1926,7 +1926,7 @@ static IV S_iv_shift(IV iv, int shift, bool left)
        left = !left;
    }
    if (shift >= IV_BITS) {
-       return iv < 0 ? -1 : 0;
+       return iv < 0 && !left ? -1 : 0;
    }
    return left ? iv << shift : iv >> shift;
 }

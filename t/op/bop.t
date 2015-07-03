@@ -15,7 +15,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 192 + (10*13*2) + 5 + 25;
+plan tests => 192 + (10*13*2) + 5 + 29;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -621,25 +621,34 @@ is $^A, "123", '~v0 clears vstring magic on retval';
     # not necessarily the ideal behavior, but that is what is happening.
     if ($w == 64) {
         no warnings "portable";
-        is(-1 << 1, 0xFFFF_FFFF_FFFF_FFFE, "neg UV (sic) left shift");
-        is(-1 >> 1, 0x7FFF_FFFF_FFFF_FFFF, "neg UV (sic) right right");
+        is(-1 << 1, 0xFFFF_FFFF_FFFF_FFFE,
+           "neg UV (sic) left shift  = 0xFF..E");
+        is(-1 >> 1, 0x7FFF_FFFF_FFFF_FFFF,
+           "neg UV (sic) right right = 0x7F..F");
     } elsif ($w == 32) {
         no warnings "portable";
-        is(-1 << 1, 0xFFFF_FFFE, "neg left shift");
-        is(-1 >> 1, 0x7FFF_FFFF, "neg right right");
+        is(-1 << 1, 0xFFFF_FFFE, "neg left shift  == 0xFF..E");
+        is(-1 >> 1, 0x7FFF_FFFF, "neg right right == 0x7F..F");
     }
 
     {
         # 'use integer' means use IVs instead of UVs.
         use integer;
 
-        is(1 << 1, 2, "IV 1 left shift 1");
-        is(1 >> 1, 0, "IV 1 right shift 1");
+        # No surprises here.
+        is(1 << 1, 2, "IV 1 left shift 1  == 2");
+        is(1 >> 1, 0, "IV 1 right shift 1 == 0");
 
-        # Even for negative for IVs, left shift is multiplication.
+        # The left overshift should behave like without 'use integer',
+        # that is, return zero.
+        is(1 << $w,     0, "IV 1 left shift $w     == 0");
+        is(1 << $w + 1, 0, "IV 1 left shift $w + 1 == 0");
+        is(-1 << $w,     0, "IV -1 left shift $w     == 0");
+        is(-1 << $w + 1, 0, "IV -1 left shift $w + 1 == 0");
+
+        # Even for negative IVs, left shift is multiplication.
+        # But right shift should display the stuckiness to -1.
         is(-1 <<      1, -2, "IV -1 left shift       1 == -2");
-
-        # But right shift displays the stuckiness to -1.
         is(-1 >>      1, -1, "IV -1 right shift      1 == -1");
 
         # As for UVs, negative shifting means the reverse shift.
