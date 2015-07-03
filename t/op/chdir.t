@@ -9,8 +9,8 @@ BEGIN {
     # chdir() works!  Instead, we'll hedge our bets and put both
     # possibilities into @INC.
     unshift @INC, qw(t . lib ../lib);
-    require "./test.pl";
-    plan(tests => 44);
+    require "test.pl";
+    plan(tests => 46);
 }
 
 use Config;
@@ -109,12 +109,22 @@ SKIP: {
     ok(-f "cond.t", "verify that we are in 'base'");
     ok(close(H), "close");
     $! = 0;
-    ok(!chdir(H), "check we can't chdir to closed handle");
-    is(0+$!, EBADF, 'check $! set appropriately');
-    $! = 0;
-    ok(!chdir(NEVEROPENED), "check we can't chdir to never opened handle");
-    is(0+$!, EBADF, 'check $! set appropriately');
-    chdir ".." or die $!;
+    {
+        my $warn;
+        local $SIG{__WARN__} = sub { $warn = shift };
+        ok(!chdir(H), "check we can't chdir to closed handle");
+        is(0+$!, EBADF, 'check $! set appropriately');
+        like($warn, qr/on closed filehandle H/, 'like closed');
+        $! = 0;
+    }
+    {
+        my $warn;
+        local $SIG{__WARN__} = sub { $warn = shift };
+        ok(!chdir(NEVEROPENED), "check we can't chdir to never opened handle");
+        is(0+$!, EBADF, 'check $! set appropriately');
+        like($warn, qr/on unopened filehandle NEVEROPENED/, 'like never opened');
+        chdir ".." or die $!;
+    }
 }
 
 SKIP: {
