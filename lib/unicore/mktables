@@ -15660,9 +15660,9 @@ sub make_ucd_table_pod_entries {
             $$info_ref .= $full_name;
         }
 
-        # And the full-name entry includes the short name, if different
+        # And the full-name entry includes the short name, if shorter
         if ($info_ref == \$full_info
-            && $standard_short_name ne $standard_full_name)
+            && length $standard_short_name < length $standard_full_name)
         {
             $full_info =~ s/\.\Z//;
             $full_info .= "  " if $full_info;
