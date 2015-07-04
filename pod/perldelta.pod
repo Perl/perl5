@@ -27,6 +27,12 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Postfix dereferencing is no longer experimental
+
+Using the C<postderef> and C<postderef_qq> features no longer emits a warning.
+Existing code that disables that warning category will continue to work. The
+C<5.24> feature bundle now includes those features.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -305,9 +311,17 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+=over
+
+=item *
+
+The minimum supported version of VMS is now v7.3-2, released in 2003.  As a
+side effect of this change, VAX is no longer supported as the terminal
+release of OpenVMS VAX was v7.3 in 2001.
+
+=back
 
 =back
 
