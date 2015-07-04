@@ -27,6 +27,29 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Integer shift (C<< << >> and C<< >> >>) now explicitly defined
+
+Negative shifts are reverse shifts: left shift becomes right shift,
+and right shift becomes left shift.
+
+Shifting by the number of bits in a native integer (or more) is zero,
+except when the "overshift" is right shifting a negative value under
+C<use integer>, in which case the result is -1 (arithmetic shift).
+
+Until now negative shifting and overshifting have been undefined
+because they have relied on whatever the C implementation happens
+to do.  For example, for the "overshift" a common behavior C is
+"modulo shift":
+
+  1 >> 64 == 1 >> (64 % 64) == 1 >> 0 == 1  # Common C behavior.
+
+  # And the same for <<, while Perl now produces 0 for both.
+
+Now these behaviors are well-defined under Perl, regardless of what
+the underlying C implementation does.  Note, however, that you cannot
+escape the native integer width.  If you need more bits on the left shift,
+you could use the C<bigint> pragma.
+
 =head2 Postfix dereferencing is no longer experimental
 
 Using the C<postderef> and C<postderef_qq> features no longer emits a warning.
