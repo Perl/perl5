@@ -16,12 +16,6 @@ release.
 For details on what is in this release, see
 L<http://www.unicode.org/versions/Unicode8.0.0/>.
 
-=head2 Postfix dereferencing is no longer experimental
-
-Using the C<postderef> and C<postderef_qq> features no longer emits a warning.
-Existing code that disables that warning category will continue to work. The
-C<5.24> feature bundle now includes those features.
-
 =head1 Incompatible Changes
 
 =head2 The C</\C/> character class has been removed.
@@ -69,7 +63,7 @@ L<CPAN::Meta::YAML> has been upgraded from version 0.012 to 0.016.
 
 =item *
 
-L<Encode> has been upgraded from version 2.72 to 2.75.
+L<Encode> has been upgraded from version 2.72 to 2.73.
 
 =item *
 
@@ -161,7 +155,7 @@ L<Scalar::Util> has been upgraded from version 1.41 to 1.42_01.
 
 =item *
 
-L<Socket> has been upgraded from version 2.018 to 2.020.
+L<Socket> has been upgraded from version 2.018 to 2.019.
 
 =item *
 
@@ -185,16 +179,6 @@ exports anything.  [perl #125410]
 =head2 Platform-Specific Notes
 
 =over 4
-
-=item VMS
-
-=over
-
-The minimum supported version of VMS is now v7.3-2, released in 2003.  As a
-side effect of this change, VAX is no longer supported as the terminal
-release of OpenVMS VAX was v7.3 in 2001.
-
-=back
 
 =item Win32
 
