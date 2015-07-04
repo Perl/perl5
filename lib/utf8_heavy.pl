@@ -447,7 +447,6 @@ sub _loose_name ($) {
                 ## is to use Unicode::UCD.
                 ##
                 # Only check if caller wants non-binary
-                my $retried = 0;
                 if ($minbits != 1) {
                     if ($property_and_table =~ s/^to//) {
                     # Look input up in list of properties for which we have
@@ -478,35 +477,11 @@ sub _loose_name ($) {
                             # Here, there is no map file for the property we
                             # are trying to get the map of, but this is a
                             # binary property, and there is a file for it that
-                            # can easily be translated to a mapping.
-
-                            # In the case of properties that are forced to
-                            # binary, they are a combination.  We return the
-                            # actual mapping instead of the binary.  If the
-                            # input is something like 'Tocjkkiicore', it will
-                            # be found in %loose_property_to_file_of above as
-                            # => 'To/kIICore'.  But the form like ToIskiicore
-                            # won't be.  To fix this, it was easiest to do it
-                            # here.  These properties are the complements of
-                            # the default property, so there is an entry in
-                            # %loose_to_file_of that is 'iskiicore' =>
-                            # '!kIICore/N', If we find such an entry, strip
-                            # off things and try again, which should find the
-                            # entry in %loose_property_to_file_of.  Actual
-                            # binary properties that are of this form, such as
-                            # this entry: 'ishrkt' => '!Perl/Any' will also be
-                            # retried, but won't be in
-                            # %loose_property_to_file_of, and instead the next
-                            # time through, it will find 'hrkt' => '!Perl/Any'
-                            # and proceed.
-                            redo if ! $retried
-                                    && $file =~ /^!/
-                                    && $property_and_table =~ s/^is//;
-
-                            # This is a binary property.  Setting this here
-                            # causes it to be stored as such in the cache, so
-                            # if someone comes along later looking for just a
-                            # binary, they get it.
+                            # can easily be translated to a mapping, so use
+                            # that, treating this as a binary property.
+                            # Setting 'minbits' here causes it to be stored as
+                            # such in the cache, so if someone comes along
+                            # later looking for just a binary, they get it.
                             $minbits = 1;
 
                             # The 0+ makes sure is numeric

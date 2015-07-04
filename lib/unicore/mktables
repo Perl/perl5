@@ -1400,6 +1400,9 @@ my %loose_to_standard_value; # loosely maps table names to the canonical
                             # alias for them
 my %ambiguous_names;        # keys are alias names (in standard form) that
                             # have more than one possible meaning.
+my %combination_property;   # keys are alias names (in standard form) that
+                            # have both a map table, and a binary one that
+                            # yields true for all non-null maps.
 my %prop_aliases;           # Keys are standard property name; values are each
                             # one's aliases
 my %prop_value_aliases;     # Keys of top level are standard property name;
@@ -6775,7 +6778,7 @@ END
         # The ranges that map to the default aren't output, so subtract that
         # to get those actually output.  A property with matching tables
         # already has the information calculated.
-        if ($property->type != $STRING) {
+        if ($property->type != $STRING && $property->type != $FORCED_BINARY) {
             $count -= $property->table($default_map)->count;
         }
         elsif (defined $default_map) {
@@ -12388,16 +12391,16 @@ sub filter_numeric_value_line {
         my $iicore = property_ref('kIICore');
         if (defined $iicore) {
             $iicore->set_type($FORCED_BINARY);
-            $iicore->table("Y")->add_note("Forced to a binary property as per unicode.org UAX #38.");
+            $iicore->table("Y")->add_note("Matches any code point which has a non-null value for this property; see unicode.org UAX #38.");
 
             # Unicode doesn't include the maps for this property, so don't
             # warn that they are missing.
             $iicore->set_pre_declared_maps(0);
             $iicore->add_comment(join_lines( <<END
-This property contains enum values, but Unicode UAX #38 says it should be
-interpreted as binary, so Perl creates tables for both 1) its enum values,
-plus 2) true/false tables in which it is considered true for all code points
-that have a non-null value
+This property contains string values, but any non-empty ones are considered to
+be 'core', so Perl creates tables for both: 1) its string values, plus 2)
+tables so that \\p{kIICore} matches any code point which has a non-empty
+value for this property.
 END
             ));
         }
@@ -13241,7 +13244,23 @@ END
         # Add any remaining code points to the mapping, using the default for
         # missing code points.
         my $default_table;
-        if (defined (my $default_map = $property->default_map)) {
+        my $default_map = $property->default_map;
+        if ($property_type == $FORCED_BINARY) {
+
+            # A forced binary property creates a 'Y' table that matches all
+            # non-default values.  The actual string values are also written out
+            # as a map table.  (The default value will almost certainly be the
+            # empty string, so the pod glosses over the distinction, and just
+            # talks about empty vs non-empty.)
+            my $yes = $property->table("Y");
+            foreach my $range ($property->ranges) {
+                next if $range->value eq $default_map;
+                $yes->add_range($range->start, $range->end);
+            }
+            $property->table("N")->set_complement($yes);
+        }
+        else {
+        if (defined $default_map) {
 
             # Make sure there is a match table for the default
             if (! defined ($default_table = $property->table($default_map))) {
@@ -13298,22 +13317,6 @@ END
             next if $table->complement != 0;    # Don't need to populate these
             $table->add_range($range->start, $range->end);
         }
-
-        # A forced binary property has additional true/false tables which
-        # should have been set up when it was forced into binary.  The false
-        # table matches exactly the same set as the property's default table.
-        # The true table matches the complement of that.  The false table is
-        # not the same as an additional set of aliases on top of the default
-        # table, so use 'set_equivalent_to'.  If it were implemented as
-        # additional aliases, various things would have to be adjusted, but
-        # especially, if the user wants to get a list of names for the table
-        # using Unicode::UCD::prop_value_aliases(), s/he should get a
-        # different set depending on whether they want the default table or
-        # the false table.
-        if ($property_type == $FORCED_BINARY) {
-            $property->table('N')->set_equivalent_to($default_table,
-                                                     Related => 1);
-            $property->table('Y')->set_complement($default_table);
         }
 
         # For Perl 5.6 compatibility, all properties matchable in regexes can
@@ -15686,6 +15689,17 @@ sub make_ucd_table_pod_entries {
         $full_info .= ".  " if $full_info;
         $full_info .= $more_info;
     }
+    if ($table->property->type == $FORCED_BINARY) {
+        if ($full_info) {
+            $full_info =~ s/\.\Z//;
+            $full_info .= ".  ";
+        }
+        $full_info .= "This is a combination property which has both:"
+                    . " 1) a map to various string values; and"
+                    . " 2) a map to boolean Y/N, where 'Y' means the"
+                    . " string value is non-empty.  Add the prefix 'is'"
+                    . " to the prop_invmap() call to get the latter";
+    }
 
     # These keep track if have created full and short name pod entries for the
     # property
@@ -15716,6 +15730,9 @@ sub make_ucd_table_pod_entries {
         else {
             $info = $other_info;
         }
+
+        $combination_property{$standard} = 1
+                                  if $table->property->type == $FORCED_BINARY;
 
         # Here, we have set up the two columns for this entry.  But if an
         # entry already exists for this name, we have to decide which one
@@ -16995,6 +17012,9 @@ sub make_UCD () {
     my $ambiguous_names = simple_dumper(\%ambiguous_names, ' ' x 4);
     chomp $ambiguous_names;
 
+    my $combination_property = simple_dumper(\%combination_property, ' ' x 4);
+    chomp $combination_property;
+
     my $loose_defaults = simple_dumper(\%loose_defaults, ' ' x 4);
     chomp $loose_defaults;
 
@@ -17057,6 +17077,13 @@ $ambiguous_names
 # given property, expressed in standard loose form
 \%Unicode::UCD::loose_defaults = (
 $loose_defaults
+);
+
+# The properties that are combinations, in that they have both a map table and
+# a match table.  This is actually for UCD.t, so it knows how to test for
+# these.
+\%Unicode::UCD::combination_property = (
+$combination_property
 );
 
 # All combinations of names that are suppressed.
@@ -17232,7 +17259,7 @@ sub write_all_tables() {
                 : ($is_property)
                   ? # All these types of map tables will be full because
                     # they will have been populated with defaults
-                    ($type == $ENUM || $type == $FORCED_BINARY)
+                    ($type == $ENUM)
 
                   : # A match table should match everything if its method
                     # shows it should

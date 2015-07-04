@@ -2655,9 +2655,11 @@ or even better, C<"Gc=LC">).
 
 Many Unicode properties have more than one name (or alias).  C<prop_invmap>
 understands all of these, including Perl extensions to them.  Ambiguities are
-resolved as described above for L</prop_aliases()>.  The Perl internal
-property "Perl_Decimal_Digit, described below, is also accepted.  An empty
-list is returned if the property name is unknown.
+resolved as described above for L</prop_aliases()> (except if a property has
+both a complete mapping, and a binary C<Y>/C<N> mapping, then specifying the
+property name prefixed by C<"is"> causes the binary one to be returned).  The
+Perl internal property "Perl_Decimal_Digit, described below, is also accepted.
+An empty list is returned if the property name is unknown.
 See L<perluniprops/Properties accessible through Unicode::UCD> for the
 properties acceptable as inputs to this function.
 

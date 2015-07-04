@@ -1675,6 +1675,14 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
     # normalized version.
     $name = &utf8::_loose_name(lc $name);
 
+    # In the case of a combination property, both a map table and a match
+    # table are generated.  For all the tests except prop_invmap(), this is
+    # irrelevant, but for prop_invmap, having an 'is' prefix forces it to
+    # return the match table; otherwise the map.  We thus need to distinguish
+    # between the two forms.  The property name is what has this information.
+    $name = &utf8::_loose_name(lc $prop)
+                         if exists $Unicode::UCD::combination_property{$name};
+
     # Add in the characters that are supposed to be ignored to test loose
     # matching, which the tested function applies to all properties
     $display_prop = "$extra_chars$prop" unless $display_prop;
