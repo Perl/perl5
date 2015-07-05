@@ -3548,7 +3548,19 @@ RETRY:
 
     if ($swash->{'LIST'} =~ /^V/) {
         @invlist = split "\n", $swash->{'LIST'} =~ s/ \s* (?: \# .* )? $ //xmgr;
-        shift @invlist;
+
+        shift @invlist;     # Get rid of 'V';
+
+        # Could need to be inverted: add or subtract a 0 at the beginning of
+        # the list.
+        if ($swash->{'INVERT_IT'}) {
+            if (@invlist && $invlist[0] == 0) {
+                shift @invlist;
+            }
+            else {
+                unshift @invlist, 0;
+            }
+        }
         foreach my $i (0 .. @invlist - 1) {
             $invmap[$i] = ($i % 2 == 0) ? 'Y' : 'N'
         }
@@ -3561,6 +3573,10 @@ RETRY:
         }
     }
     else {
+        if ($swash->{'INVERT_IT'}) {
+            croak __PACKAGE__, ":prop_invmap: Don't know how to deal with inverted";
+        }
+
         # The LIST input lines look like:
         # ...
         # 0374\t\tCommon
