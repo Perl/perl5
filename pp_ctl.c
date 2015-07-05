@@ -2697,22 +2697,13 @@ PP(pp_goto)
 		DIE(aTHX_ "Goto undefined subroutine");
 	    }
 
-	    /* First do some returnish stuff. */
-	    SvREFCNT_inc_simple_void(cv); /* avoid premature free during unwind */
-	    FREETMPS;
 	    cxix = dopoptosub(cxstack_ix);
-	    if (cxix < cxstack_ix) {
-                if (cxix < 0) {
-                    SvREFCNT_dec(cv);
-                    DIE(aTHX_ "Can't goto subroutine outside a subroutine");
-                }
-		dounwind(cxix);
+            if (cxix < 0) {
+                DIE(aTHX_ "Can't goto subroutine outside a subroutine");
             }
-	    TOPBLOCK(cx);
-	    SPAGAIN;
+            cx  = &cxstack[cxix];
 	    /* ban goto in eval: see <20050521150056.GC20213@iabyn.com> */
 	    if (CxTYPE(cx) == CXt_EVAL) {
-		SvREFCNT_dec(cv);
 		if (CxREALEVAL(cx))
 		/* diag_listed_as: Can't goto subroutine from an eval-%s */
 		    DIE(aTHX_ "Can't goto subroutine from an eval-string");
@@ -2721,10 +2712,17 @@ PP(pp_goto)
 		    DIE(aTHX_ "Can't goto subroutine from an eval-block");
 	    }
 	    else if (CxMULTICALL(cx))
-	    {
-		SvREFCNT_dec(cv);
 		DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
-	    }
+
+	    /* First do some returnish stuff. */
+
+	    SvREFCNT_inc_simple_void(cv); /* avoid premature free during unwind */
+	    FREETMPS;
+	    if (cxix < cxstack_ix) {
+		dounwind(cxix);
+            }
+	    TOPBLOCK(cx);
+	    SPAGAIN;
 
             /* partial unrolled POPSUB(): */
 
