@@ -2677,20 +2677,19 @@ PP(pp_goto)
 	    AV *arg = GvAV(PL_defgv);
 	    I32 oldsave;
 
-	  retry:
-	    if (!CvROOT(cv) && !CvXSUB(cv)) {
+	    while (!CvROOT(cv) && !CvXSUB(cv)) {
 		const GV * const gv = CvGV(cv);
 		if (gv) {
 		    GV *autogv;
 		    SV *tmpstr;
 		    /* autoloaded stub? */
 		    if (cv != GvCV(gv) && (cv = GvCV(gv)))
-			goto retry;
+			continue;
 		    autogv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv),
 					  GvNAMELEN(gv),
                                           GvNAMEUTF8(gv) ? SVf_UTF8 : 0);
 		    if (autogv && (cv = GvCV(autogv)))
-			goto retry;
+			continue;
 		    tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, NULL);
 		    DIE(aTHX_ "Goto undefined subroutine &%"SVf"", SVfARG(tmpstr));
