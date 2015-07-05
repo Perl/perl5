@@ -859,7 +859,7 @@ if ($v_version gt v3.2.0) {
 
 # These are listed in the Property aliases file in 6.0, but Unihan is ignored
 # unless explicitly added.
-if ($v_version ge v5.2.0) {
+if ($v_version ge v5.2.0 && ! $write_Unicode_deprecated_tables) {
     my $unihan = 'Unihan; remove from list if using Unihan';
     foreach my $table (qw (
                            kAccountingNumeric
