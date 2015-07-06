@@ -631,10 +631,7 @@ d_log2=''
 d_logb=''
 d_ldexpl=''
 d_longdbl=''
-longdblinfbytes=''
 longdblkind=''
-longdblmantbits=''
-longdblnanbytes=''
 longdblsize=''
 d_longlong=''
 longlongsize=''
@@ -1065,6 +1062,10 @@ i_vfork=''
 d_inc_version_list=''
 inc_version_list=''
 inc_version_list_init=''
+doubleinfbytes=''
+doublenanbytes=''
+longdblinfbytes=''
+longdblnanbytes=''
 installprefix=''
 installprefixexp=''
 installstyle=''
@@ -1099,9 +1100,6 @@ d_PRIfldbl=''
 d_PRIgldbl=''
 d_SCNfldbl=''
 doublekind=''
-doubleinfbytes=''
-doublemantbits=''
-doublenanbytes=''
 sPRIEUldbl=''
 sPRIFUldbl=''
 sPRIGUldbl=''
@@ -1127,6 +1125,9 @@ installman3dir=''
 man3dir=''
 man3direxp=''
 man3ext=''
+doublemantbits=''
+longdblmantbits=''
+nvmantbits=''
 modetype=''
 multiarch=''
 mydomain=''
@@ -1180,7 +1181,6 @@ ivsize=''
 ivtype=''
 nv_overflows_integers_at=''
 nv_preserves_uv_bits=''
-nvmantbits=''
 nvsize=''
 nvtype=''
 u16size=''
@@ -1862,6 +1862,11 @@ esac
 
 : run the defines and the undefines, if any, but leave the file out there...
 touch optdef.sh
+grep -q '\\' optdef.sh
+if test $? = 0; then
+    echo "Configure does not support \\ in -D arguments"
+    exit 1
+fi
 . ./optdef.sh
 : create the posthint manipulation script and leave the file out there...
 touch posthint.sh
@@ -10119,174 +10124,6 @@ case "$doublekind" in
 8) echo "You have IEEE 754 64-bit mixed endian doubles (32-bit BEs in LE)." >&4 ;;
 *) echo "Cannot figure out your double.  You VAX, or something?" >&4 ;;
 esac
-$rm_try
-
-: see if this is a math.h system
-set math.h i_math
-eval $inhdr
-
-: Check what kind of inf/nan your system has
-$echo "Checking the kind of infinities and nans you have..." >&4
-$cat >try.c <<EOP
-#define DOUBLESIZE $doublesize
-#$d_longdbl HAS_LONG_DOUBLE
-#ifdef HAS_LONG_DOUBLE
-#define LONGDBLSIZE $longdblsize
-#define LONGDBLKIND $longdblkind
-#endif
-#$i_math I_MATH
-#ifdef I_MATH
-#include <math.h>
-#endif
-#include <stdio.h>
-/* Note that whether the sign bit is on or off
- * for NaN depends on the CPU/FPU, and possibly
- * can be affected by the build toolchain.
- *
- * For example for older MIPS and HP-PA 2.0 the quiet NaN is:
- * 0x7f, 0xf7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
- * 0x7f, 0xf4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
- * (respectively) as opposed to the more usual
- * 0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
- */
-static void bytes(unsigned char *p, unsigned int n) {
-  int i;
-  for (i = 0; i < n; i++) {
-    printf("0x%02x%s", p[i], i < n - 1 ? ", " : "\n");
-  }
-}
-int main(int argc, char *argv[]) {
-   /* We cannot use 1.0/0.0 and 0.0/0.0 (with L suffixes for long double)
-    * because some compilers are 'smart' and not only warn but refuse to
-    * compile such 'illegal' values. */
-   double dinf = exp(1e9);
-   double dnan = sqrt(-1.0);
-#ifdef HAS_LONG_DOUBLE
-   long double ldinf = (long double)exp(1e9);
-   long double ldnan = (long double)sqrt(-1.0);
-#endif
-  if (argc == 2) {
-    switch (argv[1][0]) {
-    case '1': bytes(&dinf, sizeof(dinf)); break;
-    case '2': bytes(&dnan, sizeof(dnan)); break;
-#ifdef HAS_LONG_DOUBLE
-# if LONG_DOUBLEKIND == 3 || LONG_DOUBLEKIND == 4
-/* the 80-bit long doubles might have garbage in their excess bytes */
-    memset((char *)&ldinf + 10, '\0', LONG_DOUBLESIZE - 10);
-# endif
-    case '3': bytes(&ldinf, sizeof(ldinf)); break;
-    case '4': bytes(&ldnan, sizeof(ldnan)); break;
-#endif
-    }
-  }
-  return 0;
-}
-EOP
-set try
-if eval $compile; then
-    doubleinfbytes=`$run ./try 1`
-    doublenanbytes=`$run ./try 2`
-    case "$d_longdbl" in
-    $define)
-      longdblinfbytes=`$run ./try 3`
-      longdblnanbytes=`$run ./try 4`
-      ;;
-    esac
-else
-    # Defaults in case the above test program failed.
-    case "$doublekind" in
-    1) # IEEE 754 32-bit LE
-       doubleinfbytes='0x00, 0x00, 0xf0, 0x7f'
-       doublenanbytes='0x00, 0x00, 0xf8, 0x7f'
-       ;;
-    2) # IEEE 754 32-bit BE
-       doubleinfbytes='0x7f, 0xf0, 0x00, 0x00'
-       doublenanbytes='0x7f, 0xf8, 0x00, 0x00'
-       ;;
-    3) # IEEE 754 64-bit LE
-       doubleinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f'
-       doublenanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f'
-       ;;
-    4) # IEEE 754 64-bit BE
-       doubleinfbytes='0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-       doublenanbytes='0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-       ;;
-    5) # IEEE 754 128-bit LE
-       doubleinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f'
-       doublenanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f'
-       ;;
-    6) # IEEE 754 128-bit BE
-       doubleinfbytes='0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-       doublenanbytes='0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-       ;;
-    7) # IEEE 754 64-bit mixed: 32-bit LEs in BE
-       doubleinfbytes='0x00, 0x00, 0xf0, 0x7f, 0x00, 0x00, 0x00, 0x00'
-       doublenanbytes='0x00, 0x00, 0xf8, 0x7f, 0x00, 0x00, 0x00, 0x00'
-       ;;
-    8) # IEEE 754 64-bit mixed: 32-bit BEs in LE
-       doubleinfbytes='0x00, 0x00, 0x00, 0x00, 0x7f, 0xf0, 0x00, 0x00'
-       doublenanbytes='0x00, 0x00, 0x00, 0x00, 0x7f, 0xf8, 0x00, 0x00'
-       ;;
-    *) # No idea.
-       doubleinfbytes=$undef
-       doublenanbytes=$undef
-       ;;
-    esac
-    case "$longdblkind" in
-    1) # IEEE 754 128-bit LE
-       longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x7f'
-       longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x7f'
-       ;;
-    2) # IEEE 754 128-bit BE
-       longdblinfbytes='0x7f, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-       longdblnanbytes='0x7f, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-       ;;
-    3) # IEEE 754 80-bit LE, 12 or 16 bytes (x86)
-       case "$longdblsize" in
-       12) # x86 32-bit (96 bits, or 4 x 32, or 12 x 8)
-           longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x7f, 0x00, 0x00'
-           longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0x7f, 0x00, 0x00'
-           ;;
-       16) # x86_64
-           longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-           longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-           ;;
-       *)  # No idea.
-           longdblinfbytes=$undef
-           longdblnanbytes=$undef
-       ;;
-       esac
-       ;;
-    4) # IEEE 754 80-bit BE, 12 or 16 bytes
-       case "$longdblsize" in
-       12) # 32-bit system
-           longdblinfbytes='0x7f, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-           longdblnanbytes='0x7f, 0xff, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-           ;;
-       16) # 64-bit system
-           longdblinfbytes='0x7f, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-           longdblnanbytes='0x7f, 0xff, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-           ;;
-       *)  # No idea.
-           longdblinfbytes=$undef
-           longdblnanbytes=$undef
-       ;;
-       esac
-       ;;
-    5) # 128-bit LE "double double"
-       longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f'
-       longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f'
-       ;;
-    6) # 128-bit BE "double double"
-       longdblinfbytes='0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-       longdblnanbytes='0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
-       ;;
-    *) # No idea.
-       longdblinfbytes=$undef
-       longdblnanbytes=$undef
-       ;;
-    esac
-fi
 $rm_try
 
 : Check print/scan long double stuff
@@ -18762,94 +18599,6 @@ set d_signbit
 eval $setvar
 $rm_try
 
-$echo "Checking how many mantissa bits your doubles have..." >&4
-$cat >try.c <<EOP
-#$i_float I_FLOAT
-#$i_sunmath I_SUNMATH
-#ifdef I_FLOAT
-# include <float.h>
-#endif
-#ifdef I_SUNMATH
-# include <sunmath.h>
-#endif
-#ifdef DBL_MANT_DIG
-# define BITS (DBL_MANT_DIG - 1) /* the implicit bit does not count */
-#endif
-#include <stdio.h>
-int main(int argc, char *argv[]) {
-#ifdef BITS
-  printf("%d\n", BITS);
-#endif
-  return 0;
-}
-EOP
-set try
-if eval $compile; then
-    doublemantbits=`$run ./try`
-else
-    doublemantbits="$undef"
-fi
-$rm_try
-
-$echo "Checking how many mantissa bits your long doubles have..." >&4
-$cat >try.c <<EOP
-#$i_float I_FLOAT
-#$i_sunmath I_SUNMATH
-#ifdef I_FLOAT
-# include <float.h>
-#endif
-#ifdef I_SUNMATH
-# include <sunmath.h>
-#endif
-#$d_longdbl HAS_LONG_DOUBLE
-#if defined(HAS_LONG_DOUBLE) && defined(LDBL_MANT_DIG)
-# if ($longdblkind == 3) || ($longdblkind == 4) /* 80-bit extended precision */
-/* This format has no implicit bit.  Beware, however, that for
- * this format the bare LDBL_MANT_DIG is misleading for inf/nan:
- * the top three bits are used for inf (100) / qnan (11x) / snan (101),
- * and the top bit must have been one since 387, zero is plain invalid.
- * For normal fp values, the LDBL_MANT_DIG is fine, though. */
-#  define BITS LDBL_MANT_DIG
-# elif ($longdblkind == 5 || $longdblkind == 6) /* double double */
-/* LDBL_MANT_DIG of 106 (twice 53) would be logical, but for some
- * reason e.g. Irix thinks 107.  But in any case, we want only
- * the number of real bits, the implicit bits are of no interest.  */
-#  define BITS 2 * (DBL_MANT_DIG - 1)
-# else
-#  define BITS (LDBL_MANT_DIG - 1) /* the implicit bit does not count */
-# endif
-#endif
-#include <stdio.h>
-int main(int argc, char *argv[]) {
-#ifdef BITS
-  printf("%d\n", BITS);
-#endif
-  return 0;
-}
-EOP
-set try
-if eval $compile; then
-    longdblmantbits=`$run ./try`
-else
-    longdblmantbits="$undef"
-fi
-$rm_try
-
-$echo "Checking how many mantissa bits your NVs have..." >&4
-if test "X$usequadmath" = "X$define"; then
-  nvmantbits=112 # 128-1-15
-else
-  if test "X$nvsize" = "X$doublesize"; then
-    nvmantbits="$doublemantbits"
-  else
-     if test "X$nvsize" = "X$longdblsize"; then
-       nvmantbits="$longdblmantbits"
-     else
-       nvmantbits="$undef"
-     fi
-  fi
-fi
-
 : see if sigprocmask exists
 set sigprocmask d_sigprocmask
 eval $inlibc
@@ -20594,6 +20343,261 @@ EOCP
 *)	db_prefixtype='size_t'
 	;;
 esac
+
+: Check what kind of inf/nan your system has
+$echo "Checking the kind of infinities and nans you have..." >&4
+$cat >try.c <<EOP
+#define DOUBLESIZE $doublesize
+#$d_longdbl HAS_LONG_DOUBLE
+#ifdef HAS_LONG_DOUBLE
+#define LONGDBLSIZE $longdblsize
+#define LONGDBLKIND $longdblkind
+#endif
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+#include <stdio.h>
+/* Note that whether the sign bit is on or off
+ * for NaN depends on the CPU/FPU, and possibly
+ * can be affected by the build toolchain.
+ *
+ * For example for older MIPS and HP-PA 2.0 the quiet NaN is:
+ * 0x7f, 0xf7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+ * 0x7f, 0xf4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+ * (respectively) as opposed to the more usual
+ * 0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+ */
+static void bytes(unsigned char *p, unsigned int n) {
+  int i;
+  for (i = 0; i < n; i++) {
+    printf("0x%02x%s", p[i], i < n - 1 ? ", " : "\n");
+  }
+}
+int main(int argc, char *argv[]) {
+   /* We cannot use 1.0/0.0 and 0.0/0.0 (with L suffixes for long double)
+    * because some compilers are 'smart' and not only warn but refuse to
+    * compile such 'illegal' values. */
+   double dinf = exp(1e9);
+   double dnan = sqrt(-1.0);
+#ifdef HAS_LONG_DOUBLE
+   long double ldinf = (long double)exp(1e9);
+   long double ldnan = (long double)sqrt(-1.0);
+#endif
+  if (argc == 2) {
+    switch (argv[1][0]) {
+    case '1': bytes(&dinf, sizeof(dinf)); break;
+    case '2': bytes(&dnan, sizeof(dnan)); break;
+#ifdef HAS_LONG_DOUBLE
+# if LONG_DOUBLEKIND == 3 || LONG_DOUBLEKIND == 4
+/* the 80-bit long doubles might have garbage in their excess bytes */
+    memset((char *)&ldinf + 10, '\0', LONG_DOUBLESIZE - 10);
+# endif
+    case '3': bytes(&ldinf, sizeof(ldinf)); break;
+    case '4': bytes(&ldnan, sizeof(ldnan)); break;
+#endif
+    }
+  }
+  return 0;
+}
+EOP
+set try
+if eval $compile; then
+    doubleinfbytes=`$run ./try 1`
+    doublenanbytes=`$run ./try 2`
+    case "$d_longdbl" in
+    $define)
+      longdblinfbytes=`$run ./try 3`
+      longdblnanbytes=`$run ./try 4`
+      ;;
+    esac
+else
+    # Defaults in case the above test program failed.
+    case "$doublekind" in
+    1) # IEEE 754 32-bit LE
+       doubleinfbytes='0x00, 0x00, 0xf0, 0x7f'
+       doublenanbytes='0x00, 0x00, 0xf8, 0x7f'
+       ;;
+    2) # IEEE 754 32-bit BE
+       doubleinfbytes='0x7f, 0xf0, 0x00, 0x00'
+       doublenanbytes='0x7f, 0xf8, 0x00, 0x00'
+       ;;
+    3) # IEEE 754 64-bit LE
+       doubleinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f'
+       doublenanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f'
+       ;;
+    4) # IEEE 754 64-bit BE
+       doubleinfbytes='0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       doublenanbytes='0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       ;;
+    5) # IEEE 754 128-bit LE
+       doubleinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f'
+       doublenanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f'
+       ;;
+    6) # IEEE 754 128-bit BE
+       doubleinfbytes='0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       doublenanbytes='0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       ;;
+    7) # IEEE 754 64-bit mixed: 32-bit LEs in BE
+       doubleinfbytes='0x00, 0x00, 0xf0, 0x7f, 0x00, 0x00, 0x00, 0x00'
+       doublenanbytes='0x00, 0x00, 0xf8, 0x7f, 0x00, 0x00, 0x00, 0x00'
+       ;;
+    8) # IEEE 754 64-bit mixed: 32-bit BEs in LE
+       doubleinfbytes='0x00, 0x00, 0x00, 0x00, 0x7f, 0xf0, 0x00, 0x00'
+       doublenanbytes='0x00, 0x00, 0x00, 0x00, 0x7f, 0xf8, 0x00, 0x00'
+       ;;
+    *) # No idea.
+       doubleinfbytes=$undef
+       doublenanbytes=$undef
+       ;;
+    esac
+    case "$longdblkind" in
+    1) # IEEE 754 128-bit LE
+       longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x7f'
+       longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x7f'
+       ;;
+    2) # IEEE 754 128-bit BE
+       longdblinfbytes='0x7f, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       longdblnanbytes='0x7f, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       ;;
+    3) # IEEE 754 80-bit LE, 12 or 16 bytes (x86)
+       case "$longdblsize" in
+       12) # x86 32-bit (96 bits, or 4 x 32, or 12 x 8)
+           longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x7f, 0x00, 0x00'
+           longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0x7f, 0x00, 0x00'
+           ;;
+       16) # x86_64
+           longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+           longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+           ;;
+       *)  # No idea.
+           longdblinfbytes=$undef
+           longdblnanbytes=$undef
+       ;;
+       esac
+       ;;
+    4) # IEEE 754 80-bit BE, 12 or 16 bytes
+       case "$longdblsize" in
+       12) # 32-bit system
+           longdblinfbytes='0x7f, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+           longdblnanbytes='0x7f, 0xff, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+           ;;
+       16) # 64-bit system
+           longdblinfbytes='0x7f, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+           longdblnanbytes='0x7f, 0xff, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+           ;;
+       *)  # No idea.
+           longdblinfbytes=$undef
+           longdblnanbytes=$undef
+       ;;
+       esac
+       ;;
+    5) # 128-bit LE "double double"
+       longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f'
+       longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f'
+       ;;
+    6) # 128-bit BE "double double"
+       longdblinfbytes='0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       longdblnanbytes='0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       ;;
+    *) # No idea.
+       longdblinfbytes=$undef
+       longdblnanbytes=$undef
+       ;;
+    esac
+fi
+$rm_try
+
+: Check the length of the double mantissa
+$echo "Checking how many mantissa bits your doubles have..." >&4
+$cat >try.c <<EOP
+#$i_float I_FLOAT
+#$i_sunmath I_SUNMATH
+#ifdef I_FLOAT
+# include <float.h>
+#endif
+#ifdef I_SUNMATH
+# include <sunmath.h>
+#endif
+#ifdef DBL_MANT_DIG
+# define BITS (DBL_MANT_DIG - 1) /* the implicit bit does not count */
+#endif
+#include <stdio.h>
+int main(int argc, char *argv[]) {
+#ifdef BITS
+  printf("%d\n", BITS);
+#endif
+  return 0;
+}
+EOP
+set try
+if eval $compile; then
+    doublemantbits=`$run ./try`
+else
+    doublemantbits="$undef"
+fi
+$rm_try
+
+: Check the length of the longdouble mantissa
+$echo "Checking how many mantissa bits your long doubles have..." >&4
+$cat >try.c <<EOP
+#$i_float I_FLOAT
+#$i_sunmath I_SUNMATH
+#ifdef I_FLOAT
+# include <float.h>
+#endif
+#ifdef I_SUNMATH
+# include <sunmath.h>
+#endif
+#$d_longdbl HAS_LONG_DOUBLE
+#if defined(HAS_LONG_DOUBLE) && defined(LDBL_MANT_DIG)
+# if ($longdblkind == 3) || ($longdblkind == 4) /* 80-bit extended precision */
+/* This format has no implicit bit.  Beware, however, that for
+ * this format the bare LDBL_MANT_DIG is misleading for inf/nan:
+ * the top three bits are used for inf (100) / qnan (11x) / snan (101),
+ * and the top bit must have been one since 387, zero is plain invalid.
+ * For normal fp values, the LDBL_MANT_DIG is fine, though. */
+#  define BITS LDBL_MANT_DIG
+# elif ($longdblkind == 5 || $longdblkind == 6) /* double double */
+/* LDBL_MANT_DIG of 106 (twice 53) would be logical, but for some
+ * reason e.g. Irix thinks 107.  But in any case, we want only
+ * the number of real bits, the implicit bits are of no interest.  */
+#  define BITS 2 * (DBL_MANT_DIG - 1)
+# else
+#  define BITS (LDBL_MANT_DIG - 1) /* the implicit bit does not count */
+# endif
+#endif
+#include <stdio.h>
+int main(int argc, char *argv[]) {
+#ifdef BITS
+  printf("%d\n", BITS);
+#endif
+  return 0;
+}
+EOP
+set try
+if eval $compile; then
+    longdblmantbits=`$run ./try`
+else
+    longdblmantbits="$undef"
+fi
+$rm_try
+
+: Check the length of the NV mantissa
+$echo "Checking how many mantissa bits your NVs have..." >&4
+if test "X$usequadmath" = "X$define"; then
+  nvmantbits=112 # 128-1-15
+else
+  if test "X$nvsize" = "X$doublesize"; then
+    nvmantbits="$doublemantbits"
+  else
+     if test "X$nvsize" = "X$longdblsize"; then
+       nvmantbits="$longdblmantbits"
+     else
+       nvmantbits="$undef"
+     fi
+  fi
+fi
 
 : How can we generate normalized random numbers ?
 echo " "

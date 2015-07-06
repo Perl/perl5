@@ -1952,7 +1952,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* LONG_DOUBLESIZE:
  *	This symbol contains the size of a long double, so that the
  *	C preprocessor can make decisions based on it.  It is only
- *	defined if the system supports long doubles.   Note that this
+ *	defined if the system supports long doubles.  Note that this
  *	is sizeof(long double), which may include unused bytes.
  */
 /* HAS_LDEXPL:
@@ -4794,6 +4794,27 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_ustat	I_USTAT		/**/
 
+/* DOUBLEINFBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes for the double precision infinity.
+ */
+/* DOUBLENANBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes (0xHH) for the double precision not-a-number.
+ */
+/* LONGDBLINFBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes for the long double precision infinity.
+ */
+/* LONGDBLNANBYTES:
+ *	This symbol, if defined, is a comma-separated list of
+ *	hexadecimal bytes (0xHH) for the long double precision not-a-number.
+ */
+#define DOUBLEINFBYTES  $doubleinfbytes		/**/
+#define DOUBLENANBYTES  $doublenanbytes		/**/
+#define LONGDBLINFBYTES $longdblinfbytes		/**/
+#define LONGDBLNANBYTES $longdblnanbytes		/**/
+
 /* PERL_PRIfldbl:
  *	This symbol, if defined, contains the string used by stdio to
  *	format long doubles (format 'f') for output.
@@ -4837,52 +4858,29 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_PRIeldbl PERL_PRIeldbl	$sPRIeldbl	/**/
 #$d_SCNfldbl PERL_SCNfldbl	$sSCNfldbl	/**/
 
-/* DOUBLEINFBYTES:
- *	This symbol, if defined, is a comma-separated list of
- *	hexadecimal bytes for the double precision infinity.
- */
-/* DOUBLENANBYTES:
- *	This symbol, if defined, is a comma-separated list of
- *	hexadecimal bytes (0xHH) for the double precision not-a-number.
- */
-/* LONGDBLINFBYTES:
- *	This symbol, if defined, is a comma-separated list of
- *	hexadecimal bytes for the long double precision infinity.
- */
-/* LONGDBLNANBYTES:
- *	This symbol, if defined, is a comma-separated list of
- *	hexadecimal bytes (0xHH) for the long double precision not-a-number.
- */
-#define DOUBLEINFBYTES $doubleinfbytes		/**/
-#define DOUBLENANBYTES $doublenanbytes		/**/
-#define LONGDBLINFBYTES $longdblinfbytes		/**/
-#define LONGDBLNANBYTES $longdblnanbytes		/**/
-
 /* DOUBLEMANTBITS:
  *	This symbol, if defined, tells how many mantissa bits
  *	there are in double precision floating point format.
- *      Note that this is usually DBL_MANT_DIG minus one, since
- *      with the standard IEEE 754 formats DBL_MANT_DIG includes
+ *	Note that this is usually DBL_MANT_DIG minus one, since
+ *	with the standard IEEE 754 formats DBL_MANT_DIG includes
  *	the implicit bit, which doesn't really exist.
  */
-#define DOUBLEMANTBITS $doublemantbits
-
 /* LONGDBLMANTBITS:
  *	This symbol, if defined, tells how many mantissa bits
  *	there are in long double precision floating point format.
- *      Note that this can be LDBL_MANT_DIG minus one,
- *      since LDBL_MANT_DIG can include the IEEE 754 implicit bit.
- *      The common x86-style 80-bit long double does not have
+ *	Note that this can be LDBL_MANT_DIG minus one,
+ *	since LDBL_MANT_DIG can include the IEEE 754 implicit bit.
+ *	The common x86-style 80-bit long double does not have
  *	an implicit bit.
  */
-#define LONGDBLMANTBITS $longdblmantbits
-
 /* NVMANTBITS:
  *	This symbol, if defined, tells how many mantissa bits
  *	(not including implicit bit) there are in a Perl NV.
  *	This depends on which floating point type was chosen.
  */
-#define NVMANTBITS $nvmantbits		/**/
+#define DOUBLEMANTBITS  $doublemantbits
+#define LONGDBLMANTBITS $longdblmantbits
+#define NVMANTBITS      $nvmantbits
 
 /* NEED_VA_COPY:
  *	This symbol, if defined, indicates that the system stores
