@@ -7638,7 +7638,7 @@ echo " "
 case "$ptrsize" in
 '')
 	echo "Checking to see how big your pointers are..." >&4
-	$cat >>try.c <<EOCP
+	$cat >try.c <<EOCP
 #include <stdio.h>
 #$i_stdlib I_STDLIB
 #ifdef I_STDLIB
