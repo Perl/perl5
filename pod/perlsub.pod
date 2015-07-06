@@ -258,11 +258,11 @@ C<AUTOLOAD>
 
 =item documented in L<perlmod>
 
-C<CLONE>, C<CLONE_SKIP>, 
+C<CLONE>, C<CLONE_SKIP>
 
 =item documented in L<perlobj>
 
-C<DESTROY>
+C<DESTROY>, C<DOES>
 
 =item documented in L<perltie>
 
@@ -1289,7 +1289,7 @@ of all their former last elements:
 
     sub popmany {
 	my $aref;
-	my @retlist = ();
+	my @retlist;
 	foreach $aref ( @_ ) {
 	    push @retlist, pop @$aref;
 	}
