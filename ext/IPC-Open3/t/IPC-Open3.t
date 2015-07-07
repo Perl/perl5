@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 44;
+use Test::More tests => 45;
 
 use IO::Handle;
 use IPC::Open3;
@@ -164,6 +164,46 @@ $TB->current_test($test);
 $pid = eval { open3 'WRITE', '', 'ERROR', '/non/existent/program'; };
 like($@, qr/^open3: Modification of a read-only value attempted at /,
      'open3 faults read-only parameters correctly') or do {waitpid $pid, 0};
+
+package NoFetch;
+
+my $fetchcount = 1;
+
+sub TIESCALAR {
+  my $class = shift;
+  my $instance = shift || undef;
+  return bless \$instance => $class;
+}
+
+sub FETCH {
+    my $cmd; #dont let "@args = @DB::args;" in Carp::caller_info fire this die
+    #fetchcount may need to be increased to 2 if this code is being stepped with
+    #a perl debugger
+    if($fetchcount == 1 && (caller(1))[3] ne 'Carp::caller_info') {
+	#Carp croak reports the errors as being in IPC-Open3.t, so it is
+	#unacceptable for testing where the FETCH failure occured, we dont want
+	#it failing in a $foo = $_[0]; #later# system($foo), where the failure
+	#is supposed to be triggered in the inner most syscall, aka system()
+	my ($package, $filename, $line, $subroutine) = caller(2);
+
+	die("FETCH not allowed in ".((caller(1))[3])." in ".((caller(2))[3])."\n");
+    } else {
+	$fetchcount++;
+	return tie($cmd, 'NoFetch');
+    }
+}
+
+package main;
+
+{
+    my $cmd;
+    tie($cmd, 'NoFetch');
+
+    $pid = eval { open3 'WRITE', 'READ', 'ERROR', $cmd; };
+    like($@, qr/^(?:open3: IO::Pipe: Can't spawn-NOWAIT: FETCH not allowed in \(eval\) (?x:
+         )in IPC::Open3::spawn_with_handles|FETCH not allowed in \(eval\) in IPC::Open3::_open3)/,
+     'dieing inside Tied arg propagates correctly') or do {waitpid $pid, 0};
+}
 
 foreach my $handle (qw (DUMMY STDIN STDOUT STDERR)) {
     local $::{$handle};

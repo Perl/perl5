@@ -9,7 +9,7 @@ require Exporter;
 use Carp;
 use Symbol qw(gensym qualify);
 
-$VERSION	= '1.18';
+$VERSION	= '1.19';
 @ISA		= qw(Exporter);
 @EXPORT		= qw(open3);
 
@@ -412,7 +412,11 @@ sub spawn_with_handles {
 	} else {
 	    $pid = eval { system 1, @_ }; # 1 == P_NOWAIT
 	}
-	push @errs, "IO::Pipe: Can't spawn-NOWAIT: $!" if !$pid || $pid < 0;
+	if($@) {
+	    push @errs, "IO::Pipe: Can't spawn-NOWAIT: $@";
+	} elsif(!$pid || $pid < 0) {
+	    push @errs, "IO::Pipe: Can't spawn-NOWAIT: $!";
+	}
     }
 
     # Do this in reverse, so that STDERR is restored first:
