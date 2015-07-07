@@ -9193,7 +9193,7 @@ Perl_newSVpvf_nocontext(const char *const pat, ...)
 =for apidoc newSVpvf
 
 Creates a new SV and initializes it with the string formatted like
-C<sprintf>.
+C<sv_catpvf>.
 
 =cut
 */
@@ -10490,8 +10490,10 @@ Perl_sv_catpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
 /*
 =for apidoc sv_catpvf
 
-Processes its arguments like C<sprintf> and appends the formatted
-output to an SV.  If the appended data contains "wide" characters
+Processes its arguments like C<sv_catpvfn>, and appends the formatted
+output to an SV.  As with C<sv_catpvfn> called with a non-null C-style
+variable argument list, argument reordering is not supported.
+If the appended data contains "wide" characters
 (including, but not limited to, SVs with a UTF-8 PV formatted with %s,
 and characters >255 formatted with %c), the original SV might get
 upgraded to UTF-8.  Handles 'get' magic, but not 'set' magic.  See
@@ -10515,7 +10517,8 @@ Perl_sv_catpvf(pTHX_ SV *const sv, const char *const pat, ...)
 /*
 =for apidoc sv_vcatpvf
 
-Processes its arguments like C<vsprintf> and appends the formatted output
+Processes its arguments like C<sv_catpvfn> called with a non-null C-style
+variable argument list, and appends the formatted
 to an SV.  Does not handle 'set' magic.  See C<sv_vcatpvf_mg>.
 
 Usually used via its frontend C<sv_catpvf>.
@@ -10669,8 +10672,13 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 =for apidoc sv_vcatpvfn_flags
 
 Processes its arguments like C<vsprintf> and appends the formatted output
-to an SV.  Uses an array of SVs if the C style variable argument list is
-missing (NULL).  When running with taint checks enabled, indicates via
+to an SV.  Uses an array of SVs if the C-style variable argument list is
+missing (NULL). Argument reordering (using format specifiers like C<%2$d>
+or C<%*2$d>) is supported only when using an array of SVs; using a C-style
+C<va_list> argument list with a format string that uses argument reordering
+will yield an exception.
+
+When running with taint checks enabled, indicates via
 C<maybe_tainted> if results are untrustworthy (often due to the use of
 locales).
 
@@ -11337,6 +11345,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	if ( (width = expect_number(&q)) ) {
 	    if (*q == '$') {
+                if (args)
+                    Perl_croak_nocontext(
+                        "Cannot yet reorder sv_catpvfn() arguments from va_list");
 		++q;
 		efix = width;
                 used_explicit_ix = TRUE;
@@ -11381,9 +11392,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	if (*q == '*') {
 	    q++;
 	    if ( (ewix = expect_number(&q)) ) {
-		if (*q++ == '$')
+		if (*q++ == '$') {
+                    if (args)
+                        Perl_croak_nocontext(
+                            "Cannot yet reorder sv_catpvfn() arguments from va_list");
                     used_explicit_ix = TRUE;
-                else
+                } else
 		    goto unknown;
             }
 	    asterisk = TRUE;
@@ -11450,9 +11464,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (*q == '*') {
 		q++;
                 if ( (epix = expect_number(&q)) ) {
-                    if (*q++ == '$')
+                    if (*q++ == '$') {
+                        if (args)
+                            Perl_croak_nocontext(
+                                "Cannot yet reorder sv_catpvfn() arguments from va_list");
                         used_explicit_ix = TRUE;
-                    else
+                    } else
                         goto unknown;
                 }
 		if (args)

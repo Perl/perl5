@@ -3884,6 +3884,16 @@ test_newOP_CUSTOM()
     OUTPUT:
 	RETVAL
 
+void
+test_sv_catpvf(SV *fmtsv)
+    PREINIT:
+        SV *sv;
+        char *fmt;
+    CODE:
+        fmt = SvPV_nolen(fmtsv);
+        sv = sv_2mortal(newSVpvn("", 0));
+        sv_catpvf(sv, fmt, 5, 6, 7, 8);
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
