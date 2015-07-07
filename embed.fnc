@@ -1965,6 +1965,7 @@ s	|bool	|process_special_blocks	|I32 floor \
 					|NN GV *const gv|NN CV *const cv
 s	|void	|clear_special_blocks	|NN const char *const fullname\
 					|NN GV *const gv|NN CV *const cv
+s	|void	|moan_not_so_smart	|NN OP *o|bool right_side
 #endif
 Xpa	|void*	|Slab_Alloc	|size_t sz
 Xp	|void	|Slab_Free	|NN void *op

@@ -10131,6 +10131,69 @@ S_maybe_targlex(pTHX_ OP *o)
     return o;
 }
 
+static void
+S_moan_not_so_smart(pTHX_ OP *o, bool right_side) {
+    dVAR;
+    const char *what = NULL;
+
+    PERL_ARGS_ASSERT_MOAN_NOT_SO_SMART;
+
+    switch (o->op_type) {
+    case OP_RV2AV:
+    case OP_PADAV:
+        what = "array";
+        break;
+
+    case OP_RV2HV:
+    case OP_PADHV:
+        what = "hash";
+        break;
+
+    case OP_ASLICE:
+    case OP_KVASLICE:
+    case OP_HSLICE:
+    case OP_KVHSLICE:
+        what = "slice";
+        break;
+
+    case OP_CONST:
+        if (right_side) {
+            SV *sv = cSVOPx_sv(o);
+
+            if (SvROK(sv)) {
+                if (!SvAMAGIC(sv)) {
+                    svtype type = SvTYPE(SvRV(sv));
+                    if (type ==  SVt_PVAV) {
+                        what = "array reference";
+                        break;
+                    }
+                    else if (type == SVt_PVHV) {
+                        what = "hash reference";
+                        break;
+                    }
+                    else if (type <= SVt_PVMG) {
+                        what = "scalar reference";
+                        break;
+                    }
+                }
+            }
+            else {
+                what = SvPOK(sv) ? "string constant" : "numeric constant";
+                break;
+            }
+        }
+        return;
+
+        /* what else can we pick up here? */
+
+    default:
+        return;
+    }
+
+    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Behaviour of %s on %s side of smartmatch has changed",
+                what, right_side ? "right" : "left");
+}
+
 OP *
 Perl_ck_smartmatch(pTHX_ OP *o)
 {
@@ -10145,6 +10208,11 @@ Perl_ck_smartmatch(pTHX_ OP *o)
         if (second->op_type == OP_MATCH) {
             second->op_type = OP_QR;
             second->op_ppaddr = PL_ppaddr[OP_QR];
+        }
+
+        if (ckWARN(WARN_SYNTAX)) {
+            moan_not_so_smart(first, false);
+            moan_not_so_smart(second, true);
         }
     }
 

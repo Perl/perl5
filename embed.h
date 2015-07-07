@@ -1548,6 +1548,7 @@
 #define inplace_aassign(a)	S_inplace_aassign(aTHX_ a)
 #define is_handle_constructor	S_is_handle_constructor
 #define listkids(a)		S_listkids(aTHX_ a)
+#define moan_not_so_smart(a,b)	S_moan_not_so_smart(aTHX_ a,b)
 #define modkids(a,b)		S_modkids(aTHX_ a,b)
 #define move_proto_attr(a,b,c)	S_move_proto_attr(aTHX_ a,b,c)
 #define my_kid(a,b,c)		S_my_kid(aTHX_ a,b,c)
