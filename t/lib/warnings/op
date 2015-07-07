@@ -2095,3 +2095,35 @@ EXPECT
 Non-finite repeat count does nothing at - line 5.
 Non-finite repeat count does nothing at - line 6.
 Non-finite repeat count does nothing at - line 7.
+########
+use warnings;
+no warnings 'experimental::smartmatch';
+my @x = 1 .. 3;
+my %x = qw(a 1 b 2);
+my $x;
+use constant AREF => \@x;
+use constant HREF => \%x;
+use constant SREF => \$x;
+$x = @x ~~ qr/a/;
+$x = @x[1,2] ~~ qr/a/;
+$x = %x ~~ qr/1/;
+$x = @x{qw(a b)} ~~ qr/1/;
+sub a { $x ~~ @x }
+sub b { $x ~~ @x[1,2] }
+sub c { $x ~~ %x }
+sub d { $x ~~ @x{qw(a b)} }
+sub e { $x ~~ AREF }
+sub f { $x ~~ HREF }
+sub g { $x ~~ SREF }
+EXPECT
+Behaviour of array on left side of smartmatch has changed at - line 9.
+Behaviour of slice on left side of smartmatch has changed at - line 10.
+Behaviour of hash on left side of smartmatch has changed at - line 11.
+Behaviour of slice on left side of smartmatch has changed at - line 12.
+Behaviour of array on right side of smartmatch has changed at - line 13.
+Behaviour of slice on right side of smartmatch has changed at - line 14.
+Behaviour of hash on right side of smartmatch has changed at - line 15.
+Behaviour of slice on right side of smartmatch has changed at - line 16.
+Behaviour of array reference on right side of smartmatch has changed at - line 17.
+Behaviour of hash reference on right side of smartmatch has changed at - line 18.
+Behaviour of scalar reference on right side of smartmatch has changed at - line 19.

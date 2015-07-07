@@ -6351,6 +6351,11 @@ STATIC bool	S_is_handle_constructor(const OP *o, I32 numargs)
 	assert(o)
 
 STATIC OP*	S_listkids(pTHX_ OP* o);
+STATIC void	S_moan_not_so_smart(pTHX_ OP *o, bool right_side)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_MOAN_NOT_SO_SMART	\
+	assert(o)
+
 STATIC OP*	S_modkids(pTHX_ OP *o, I32 type);
 STATIC void	S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV *name)
 			__attribute__nonnull__(pTHX_1)

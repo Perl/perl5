@@ -521,6 +521,14 @@ occurred.  Since the intended environment for the C<BEGIN {}> could not
 be guaranteed (due to the errors), and since subsequent code likely
 depends on its correct operation, Perl just gave up.
 
+=item Behaviour of %s on %s side of smartmatch has changed
+
+(W syntax) The smartmatch operator now evaluates both of it's
+arguments in scalar context, with no special handling for arrays,
+hashes or slices.
+
+This will also usually result in a runtime error on the same line.
+
 =item \%d better written as $%d
 
 (W syntax) Outside of patterns, backreferences live on as variables.
