@@ -11449,16 +11449,24 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    q++;
 	    if (*q == '*') {
 		q++;
-		if ( ((epix = expect_number(&q))) && (*q++ != '$') )
-		    goto unknown;
-		/* XXX: todo, support specified precision parameter */
-		if (epix)
-		    goto unknown;
+                if ( (epix = expect_number(&q)) ) {
+                    if (*q++ == '$')
+                        used_explicit_ix = TRUE;
+                    else
+                        goto unknown;
+                }
 		if (args)
-		    i = va_arg(*args, int);
-		else
-		    i = (ewix ? ewix <= svmax : svix < svmax)
-			? SvIVx(svargs[ewix ? ewix-1 : svix++]) : 0;
+                    i = va_arg(*args, int);
+		else {
+                    SV *precsv;
+                    if (epix)
+                        FETCH_VCATPVFN_ARGUMENT(
+                            precsv, epix > 0 && epix <= svmax, svargs[epix-1]);
+                    else
+                        FETCH_VCATPVFN_ARGUMENT(
+                            precsv, svix < svmax, svargs[svix++]);
+                    i = precsv == &PL_sv_no ? 0 : SvIVx(precsv);
+                }
 		precis = i;
 		has_precis = !(i < 0);
 	    }

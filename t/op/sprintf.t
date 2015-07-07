@@ -308,6 +308,10 @@ __END__
 >%+.*d<     >[-2,0]<      >+0<
 >% .*d<     >[-2,0]<      > 0<
 >%0.*d<     >[-2,0]<      >0<
+>%.*2$d<    >[5,3]<       >005<           >reordered precision arg<
+>%4.*2$d<   >[5,3]<       > 005<          >width with reordered precision<
+>%*3$.*2$d< >[5,3,4]<     > 005<          >reordered width with reordered precision<
+>%3$*2$.*1$d< >[3,4,5]<   > 005<          >reordered param, width, precision<
 >%d<        >-1<          >-1<
 >%-d<       >-1<          >-1<
 >%+d<       >-1<          >-1<
@@ -738,3 +742,4 @@ a>%*v.*X<	>[':', 3, '012']<	>030:031:032<	>perl #83194: vector flag + custom sep
 e>%*v.*X<	>[':', 3, '012']<	>0F0:0F1:0F2<	>perl #83194: vector flag + custom separator + dynamic precision<
 a>%vd<	>"version"<	>118.101.114.115.105.111.110<	>perl #102586: vector flag + "version"<
 e>%vd<   >"version"<    >165.133.153.162.137.150.149<   >perl #102586: vector flag + "version"<
+>%3$*4$v*2$.*1$x<  >[3, 4, "\x11\x22\x33", "/"]< > 011/ 022/ 033< >four reordered args<

@@ -7289,10 +7289,15 @@ to fit the specified width:
   printf '<%.5s>', "truncated";   # prints "<trunc>"
   printf '<%10.5s>', "truncated"; # prints "<     trunc>"
 
-You can also get the precision from the next argument using C<.*>:
+You can also get the precision from the next argument using C<.*>, or from a
+specified argument (e.g., with C<.*2$>):
 
   printf '<%.6x>', 1;       # prints "<000001>"
   printf '<%.*x>', 6, 1;    # prints "<000001>"
+
+  printf '<%.*2$x>', 1, 6;  # prints "<000001>"
+
+  printf '<%6.*2$x>', 1, 4; # prints "<  0001>"
 
 If a precision obtained through C<*> is negative, it counts
 as having no precision at all.
@@ -7305,13 +7310,6 @@ as having no precision at all.
   printf '<%.*d>',  1, 0;   # prints "<0>"
   printf '<%.*d>',  0, 0;   # prints "<>"
   printf '<%.*d>', -1, 0;   # prints "<0>"
-
-You cannot currently get the precision from a specified number,
-but it is intended that this will be possible in the future, for
-example using C<.*2$>:
-
-  printf '<%.*2$x>', 1, 6;   # INVALID, but in future will print
-                             # "<000001>"
 
 =item size
 
