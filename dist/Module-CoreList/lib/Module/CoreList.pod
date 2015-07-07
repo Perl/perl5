@@ -100,7 +100,7 @@ omitted, it defaults to the current version of Perl.
 
 Available in version 2.77 and above.
 
-Returns the first PERL_VERSION where the MODULE was marked as deprecated. Returns C<undef>
+Returns the first perl version where the MODULE was marked as deprecated. Returns C<undef>
 if the MODULE has not been marked as deprecated.
 
 =item C<removed_from( MODULE )>
