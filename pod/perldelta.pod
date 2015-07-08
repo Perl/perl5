@@ -151,7 +151,7 @@ XXX
 L<IPC::Open3> has been upgraded from version 1.18 to 1.19.
 
 If a Perl exception was thrown from inside this module, the exception
-C<IPC::Open3> threw to the callers of C<open3> would have an irrelavent
+C<IPC::Open3> threw to the callers of C<open3> would have an irrelevant
 message derived from C<$!> which was in an undefined state, instead of the
 C<$@> message which triggers the failure path inside C<open3>.
 
