@@ -74,9 +74,12 @@ sub find_modules {
 
 sub find_version {
     my $v = shift;
-    $v = shift if eval { $v->isa(__PACKAGE__) };
+    if ($v->isa(__PACKAGE__)) {
+        $v = shift;
+        return if not defined $v;
+    }
     return $version{$v} if defined $version{$v};
-    return undef;
+    return;
 }
 
 sub is_deprecated {

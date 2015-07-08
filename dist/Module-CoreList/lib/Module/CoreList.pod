@@ -73,8 +73,11 @@ you may provide a list of perl versions to limit the regex search.
 
 =item C<find_version( PERL_VERSION )>
 
-Takes a perl version as an argument. Returns that perl version if it exists or C<undef>
-otherwise.
+Takes a perl version as an argument. Upon successful completion, returns a
+reference to a hash.  Each element of that hash has a key which is the name of
+a module (I<e.g.,> 'File::Path') shipped with that version of perl and a value
+which is the version number (I<e.g.,> '2.09') of that module which shipped
+with that version of perl .  Returns C<undef> otherwise.
 
 =item C<is_core( MODULE, [ MODULE_VERSION, [ PERL_VERSION ] ] )>
 
