@@ -1614,7 +1614,8 @@ interpreted as Unicode has been updated.
 
 C<$]> is no longer listed as being deprecated.  Instead, discussion has
 been added on the advantages and disadvantages of using it versus
-C<$^V>.
+C<$^V>.  C<$OLD_PERL_VERSION> was re-added to the documentation as the long
+form of C<$]>.
 
 =item *
 

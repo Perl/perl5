@@ -468,6 +468,8 @@ that hasn't been sanity-checked.
 
 Mnemonic: Is this version of perl in the right bracket?
 
+The C<$OLD_PERL_VERSION> form was added in Perl v5.20.0.
+
 =item $SYSTEM_FD_MAX
 
 =item $^F
