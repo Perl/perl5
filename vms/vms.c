@@ -118,18 +118,6 @@ static int (*decw_term_port)
     void * char_buffer,
     void * char_change_buffer) = 0;
 
-/* gcc's header files don't #define direct access macros
- * corresponding to VAXC's variant structs */
-#ifdef __GNUC__
-#  define uic$v_format uic$r_uic_form.uic$v_format
-#  define uic$v_group uic$r_uic_form.uic$v_group
-#  define uic$v_member uic$r_uic_form.uic$v_member
-#  define prv$v_bypass  prv$r_prvdef_bits0.prv$v_bypass
-#  define prv$v_grpprv  prv$r_prvdef_bits0.prv$v_grpprv
-#  define prv$v_readall prv$r_prvdef_bits0.prv$v_readall
-#  define prv$v_sysprv  prv$r_prvdef_bits0.prv$v_sysprv
-#endif
-
 #if defined(NEED_AN_H_ERRNO)
 dEXT int h_errno;
 #endif
@@ -12395,13 +12383,7 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
     if (preserve_dates & 2) {
       /* sys$close() will process xabrdt, not xabdat */
       xabrdt = cc$rms_xabrdt;
-#ifndef __GNUC__
       xabrdt.xab$q_rdt = xabdat.xab$q_rdt;
-#else
-      /* gcc doesn't like the assignment, since its prototype for xab$q_rdt
-       * is unsigned long[2], while DECC & VAXC use a struct */
-      memcpy(xabrdt.xab$q_rdt,xabdat.xab$q_rdt,sizeof xabrdt.xab$q_rdt);
-#endif
       fab_out.fab$l_xab = (void *) &xabrdt;
     }
 

@@ -42,11 +42,6 @@
 #define _tolower(c) (((c) < 'A' || (c) > 'Z') ? (c) : (c) | 040)
 
 /* Assorted things to look like Unix */
-#ifdef __GNUC__
-#ifndef _IOLBF /* gcc's stdio.h doesn't define this */
-#define _IOLBF 1
-#endif
-#endif
 #include <processes.h> /* for vfork() */
 #include <unixio.h>
 #include <unixlib.h>
