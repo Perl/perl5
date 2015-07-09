@@ -361,6 +361,8 @@ note("T_STDIO");
 
 # open a file in XS for write
 my $testfile= "stdio.tmp";
+# not everything below cleans up
+END { 1 while unlink $testfile; }
 my $fh = T_STDIO_open( $testfile );
 ok( $fh );
 
@@ -402,7 +404,8 @@ ok( print($fh "first line\n"), 'can print to return io in arg');
 ok( close($fh), 'can close return io in arg');
 $fh = "FOO";
 #now with a bad file name to make sure $fh is written to on failure
-T_STDIO_open_ret_in_arg( "", $fh);
+my $badfile = $^O eq 'VMS' ? '?' : '';
+T_STDIO_open_ret_in_arg( $badfile, $fh);
 ok( !defined$fh, 'return io in arg open failed successfully');
 
 # T_INOUT
