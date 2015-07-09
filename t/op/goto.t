@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 97;
+plan tests => 98;
 our $TODO;
 
 my $deprecated = 0;
@@ -237,6 +237,22 @@ package Do_undef {
         eval { f() };
     }
     ::is($count, 10, "goto undef_sub safe");
+}
+
+# make sure that nothing nasty happens if the old CV is freed while
+# goto'ing
+
+package Free_cv {
+    my $results;
+    sub f {
+        no warnings 'redefine';
+        *f = sub {};
+        goto &g;
+    }
+    sub g { $results = "(@_)" }
+
+    f(1,2,3);
+    ::is($results, "(1 2 3)", "Free_cv");
 }
 
 
