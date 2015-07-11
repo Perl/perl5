@@ -136,6 +136,11 @@ for ( 0x0 .. 0xff ) {
             like($@, qr/ syntax\ error | Unrecognized\ character /x,
                      "$name as a length-1 variable generates a syntax error");
             $tests++;
+            utf8::upgrade($chr);
+            evalbytes "no strict; use utf8; \$$chr = 4;",
+            like($@, qr/ syntax\ error | Unrecognized\ character /x,
+                     "  ... and the same under 'use utf8'");
+            $tests++;
         }
         elsif ($ord < 32 || $chr =~ /[[:punct:][:digit:]]/a) {
 
@@ -243,7 +248,11 @@ for ( 0x0 .. 0xff ) {
                 splice @warnings, $i, 1 if $warnings[$i] =~ /is no longer supported/;
             }
         }
-        if (! ok(@warnings == 0, "  ... and doesn't generate any warnings")) {
+        my $message = "  ... and doesn't generate any warnings";
+        $message = "  TODO $message" if    $ord == 0
+                                        || $chr =~ /\s/a;
+
+        if (! ok(@warnings == 0, $message)) {
             note join "\n", @warnings;
         }
         $tests++;
