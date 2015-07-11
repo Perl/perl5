@@ -3282,7 +3282,14 @@ PP(pp_leavesub)
     if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
 	if (LIKELY(MARK <= SP)) {
-	    if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
+            /* if we are recursing, then free the current tmps.
+             * Normally we don't bother and rely on the caller to do this,
+             * because early tmp freeing tends to free the args we're
+             * returning.
+             * Doing it for recursion ensures the things like the
+             * fibonacci benchmark don't fill up the tmps stack because
+             * it never reaches an outer nextstate */
+	    if (cx->blk_sub.olddepth) {
 		if (SvTEMP(TOPs) && SvREFCNT(TOPs) == 1
 		     && !SvMAGICAL(TOPs)) {
 		    *MARK = SvREFCNT_inc(TOPs);
