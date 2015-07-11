@@ -1672,7 +1672,6 @@ PP(pp_sort)
 	    if (!(flags & OPf_SPECIAL)) {
 		cx->cx_type = CXt_SUB;
 		PUSHSUB(cx);
-                SAVETMPS;
 		if (!is_xsub) {
 		    PADLIST * const padlist = CvPADLIST(cv);
 
@@ -1692,8 +1691,12 @@ PP(pp_sort)
 
 		}
 	    }
-            else
-                SAVETMPS;
+            else {
+                /* mimic PUSHSUB. Note that we're cheating and using a
+                 * CXt_NULL block as a CXt_SUB block */
+                cx->blk_sub.old_tmpsfloor = PL_tmps_floor;
+                PL_tmps_floor = PL_tmps_ix;
+            }
 
 	    cx->cx_type |= CXp_MULTICALL;
 	    
@@ -1710,6 +1713,10 @@ PP(pp_sort)
 		POPSUB(cx, sv);
 		LEAVESUB(sv);
 	    }
+            else
+                /* mimic POPSUB */
+                PL_tmps_floor = cx->blk_sub.old_tmpsfloor;
+
 	    POPBLOCK(cx,PL_curpm);
 	    PL_stack_sp = newsp;
 	    POPSTACK;

@@ -556,6 +556,7 @@ struct block_sub {
     AV *	savearray;
     I32		olddepth;
     PAD		*prevcomppad; /* the caller's PL_comppad */
+    SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
 };
 
 
@@ -587,7 +588,9 @@ struct block_format {
 	cx->blk_sub.prevcomppad = PL_comppad;				\
 	cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;			\
 	cx->blk_sub.retop = NULL;					\
-        SvREFCNT_inc_simple_void_NN(cv);
+        SvREFCNT_inc_simple_void_NN(cv);                                \
+        cx->blk_sub.old_tmpsfloor = PL_tmps_floor;                      \
+        PL_tmps_floor = PL_tmps_ix;
 
 #define PUSHSUB_GET_LVALUE_MASK(func) \
 	/* If the context is indeterminate, then only the lvalue */	\
@@ -669,6 +672,7 @@ struct block_format {
         }                                                               \
 	sv = MUTABLE_SV(cx->blk_sub.cv);				\
 	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
+        PL_tmps_floor = cx->blk_sub.old_tmpsfloor;                      \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
         CvDEPTH((const CV*)sv) = olddepth;                              \
@@ -1228,7 +1232,6 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PUSHSTACKi(PERLSI_MULTICALL);					\
 	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), PL_stack_sp);	\
 	PUSHSUB(cx);							\
-        SAVETMPS;                                                       \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2) {						\
@@ -1270,14 +1273,22 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	CV * const _nOnclAshIngNamE_ = the_cv;				\
 	CV * const cv = _nOnclAshIngNamE_;				\
 	PADLIST * const padlist = CvPADLIST(cv);			\
-        PAD * const prevcomppad = cx->blk_sub.prevcomppad;              \
 	cx = &cxstack[cxstack_ix];					\
 	assert(cx->cx_type & CXp_MULTICALL);				\
 	CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
         LEAVESUB(multicall_cv);					        \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
-	PUSHSUB(cx);							\
-        cx->blk_sub.prevcomppad = prevcomppad ; /* undo PUSHSUB */      \
+        {                                                               \
+            /* save a few things that we don't want PUSHSUB to zap */   \
+            PAD * const prevcomppad = cx->blk_sub.prevcomppad;          \
+            SSize_t old_floor = cx->blk_sub.old_tmpsfloor;              \
+            SSize_t floor = PL_tmps_floor;                              \
+	    PUSHSUB(cx);						\
+            /* undo the stuff that PUSHSUB zapped */                    \
+            cx->blk_sub.prevcomppad = prevcomppad ;                     \
+            cx->blk_sub.old_tmpsfloor = old_floor;                      \
+            PL_tmps_floor = floor;                                      \
+        }                                                               \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2) {						\
