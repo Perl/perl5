@@ -243,7 +243,9 @@ for ( 0x0 .. 0xff ) {
                 splice @warnings, $i, 1 if $warnings[$i] =~ /is no longer supported/;
             }
         }
-        ok(@warnings == 0, "  ... and doesn't generate any warnings");
+        if (! ok(@warnings == 0, "  ... and doesn't generate any warnings")) {
+            note join "\n", @warnings;
+        }
         $tests++;
     }
     elsif (! @warnings) {
