@@ -2747,10 +2747,9 @@ PP(pp_goto)
 		else CLEAR_ARGARRAY(av);
 	    }
 
-            /* protect @_ during save stack unwind. We donate this
-             * refcount later to the callee’s pad for the non-XS case;
-             * otherwise we decrement it later. */
-	    SvREFCNT_inc_simple_void(arg);
+            /* protect @_ during save stack unwind. */
+            if (arg)
+                SvREFCNT_inc_NN(sv_2mortal(MUTABLE_SV(arg)));
 
 	    assert(PL_scopestack_ix == cx->blk_oldscopesp);
 	    oldsave = PL_scopestack[cx->blk_oldscopesp - 1];
@@ -2766,7 +2765,6 @@ PP(pp_goto)
 	     * our precious cv.  See bug #99850. */
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
 		const GV * const gv = CvGV(cv);
-		SvREFCNT_dec(arg);
 		if (gv) {
 		    SV * const tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, NULL);
@@ -2816,7 +2814,6 @@ PP(pp_goto)
 		    }
 		}
 		SP += items;
-		SvREFCNT_dec(arg);
 		if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		    /* Restore old @_ */
                     POP_SAVEARRAY();
@@ -2861,6 +2858,7 @@ PP(pp_goto)
 		    if (arg) {
 			SvREFCNT_dec(PAD_SVl(0));
 			PAD_SVl(0) = (SV *)arg;
+                        SvREFCNT_inc_simple_void_NN(arg);
 		    }
 
 		    /* GvAV(PL_defgv) might have been modified on scope
@@ -2871,7 +2869,7 @@ PP(pp_goto)
 			SvREFCNT_dec(av);
 		    }
 		}
-		else SvREFCNT_dec(arg);
+
 		if (PERLDB_SUB) {	/* Checking curstash breaks DProf. */
 		    Perl_get_db_sub(aTHX_ NULL, cv);
 		    if (PERLDB_GOTO) {

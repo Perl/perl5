@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 130;
+plan tests => 131;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -516,4 +516,24 @@ EOF
     }
 
     ::leak(5,0, \&g, "MG_SET");
+}
+
+# check that @_ isn't leaked when dieing while goto'ing a new sub
+
+{
+    package my_goto;
+    sub TIEARRAY { bless [] }
+    sub FETCH { 1 }
+    sub STORE { die if $_[0][0]; $_[0][0] = 1 }
+
+    sub f { eval { g() } }
+    sub g {
+        my @a;
+        tie @a, "my_goto";
+        local $a[0];
+        goto &h;
+    }
+    sub h {}
+
+    ::leak(5, 0, \&f, q{goto shouldn't leak @_});
 }
