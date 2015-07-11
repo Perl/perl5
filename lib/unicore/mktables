@@ -18669,7 +18669,6 @@ foreach my $in (@input_files) {
         my ($volume, $directories, $file ) = File::Spec->splitpath($in);
         $directories =~ s;/$;;;     # Can have extraneous trailing '/'
         my @directories = File::Spec->splitdir($directories);
-        my $base = $file =~ s/\.txt$//;
         construct_filename($file, 'mutable', \@directories);
     }
 }
