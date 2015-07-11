@@ -15,7 +15,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 66900);
+plan (tests => 66894);
 
 # ${single:colon} should not be treated as a simple variable, but as a
 # block with a label inside.
@@ -96,15 +96,8 @@ for ( 0x0 .. 0xff ) {
         $syntax_error = 1;
     }
     elsif ($chr =~ /[[:cntrl:]]/a) {
-        if ($chr eq "\N{NULL}") {
-            $name = sprintf "\\x%02x, NUL", $ord;
-            $syntax_error = 1;
-        }
-        else {
-            $name = sprintf "\\x%02x, an ASCII control", $ord;
-            $syntax_error = $::IS_EBCDIC;
-            $deprecated = ! $syntax_error;
-        }
+        $name = sprintf "\\x%02x, an ASCII control", $ord;
+        $syntax_error = 1;
     }
     elsif ($chr =~ /\pC/) {
         if ($chr eq "\N{SHY}") {
@@ -142,18 +135,14 @@ for ( 0x0 .. 0xff ) {
                      "  ... and the same under 'use utf8'");
             $tests++;
         }
-        elsif ($ord < 32 || $chr =~ /[[:punct:][:digit:]]/a) {
+        elsif ($chr =~ /[[:punct:][:digit:]]/a) {
 
             # Unlike other variables, we dare not try setting the length-1
-            # variables that are \cX (for all valid X) nor ASCII ones that are
-            # punctuation nor digits.  This is because many of these variables
-            # have meaning to the system, and setting them could have side
-            # effects or not work as expected (And using fresh_perl() doesn't
-            # always help.) For example, setting $^D (to use a visible
-            # representation of code point 0x04) turns on tracing, and setting
-            # $^E sets an error number, but what gets printed is instead a
-            # string associated with that number.  For all these we just
-            # verify that they don't generate a syntax error.
+            # variables that are ASCII punctuation and digits.  This is
+            # because many of these variables have meaning to the system, and
+            # setting them could have side effects or not work as expected
+            # (And using fresh_perl() doesn't always help.) For all these we
+            # just verify that they don't generate a syntax error.
             local $@;
             evalbytes "\$$chr;";
             is $@, '', "$name as a length-1 variable doesn't generate a syntax error";
@@ -361,21 +350,25 @@ EOP
 
     {
         no strict;
-        # Silence the deprecation warning for literal controls
-        no warnings 'deprecated';
 
-        for my $var ( '$', "\7LOBAL_PHASE", "^GLOBAL_PHASE", "^V" ) {
-          SKIP: {
-            skip("Literal control characters in variable names forbidden on EBCDIC", 3)
-                             if ($::IS_EBCDIC && ord substr($var, 0, 1) < 32);
+        for my $var ( '$', "^GLOBAL_PHASE", "^V" ) {
             eval "\${ $var}";
             is($@, '', "\${ $var} works" );
             eval "\${$var }";
             is($@, '', "\${$var } works" );
             eval "\${ $var }";
             is($@, '', "\${ $var } works" );
-          }
         }
+        my $var = "\7LOBAL_PHASE";
+        eval "\${ $var}";
+        like($@, qr/Unrecognized character \\x07/,
+             "\${ $var} generates 'Unrecognized character' error" );
+        eval "\${$var }";
+        like($@, qr/Unrecognized character \\x07/,
+             "\${$var } generates 'Unrecognized character' error" );
+        eval "\${ $var }";
+        like($@, qr/Unrecognized character \\x07/,
+             "\${ $var } generates 'Unrecognized character' error" );
     }
 }
 
@@ -397,40 +390,8 @@ EOP
         );
     }
     
-  SKIP: {
-    skip("Literal control characters in variable names forbidden on EBCDIC", 2)
-                                                                if $::IS_EBCDIC;
-    no warnings 'deprecated';
     my $ret = eval "\${\cT\n}";
-    is($@, "", 'No errors from using ${\n\cT\n}');
-    is($ret, $^T, "  ... and we got the right value");
-  }
-}
-
-SKIP: {
-    skip("Literal control characters in variable names forbidden on EBCDIC", 5)
-                                                                if $::IS_EBCDIC;
-
-    # Originally from t/base/lex.t, moved here since we can't
-    # turn deprecation warnings off in that file.
-    no strict;
-    no warnings 'deprecated';
-    
-    my $CX  = "\cX";
-    $ {$CX} = 17;
-    
-    # Does the syntax where we use the literal control character still work?
-    is(
-       eval "\$ {\cX}",
-       17,
-       "Literal control character variables work"
-    );
-
-    eval "\$\cQ = 24";                 # Literal control character
-    is($@, "", "  ... and they can be assigned to without error");
-    is(${"\cQ"}, 24, "  ... and the assignment works");
-    is($^Q, 24, "  ... even if we access the variable through the caret name");
-    is(\${"\cQ"}, \$^Q, '\${\cQ} == \$^Q');
+    like($@, qr/\QUnrecognized character/, '${\n\cT\n} gives an error message');
 }
 
 {

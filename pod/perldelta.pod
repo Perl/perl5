@@ -69,13 +69,22 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 ASCII characters in variable names must now be all visible
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
+It was legal until now on ASCII platforms for variable names to contain
+non-graphical ASCII control characters (ordinals 0 through 31, and 127,
+which are the C0 controls and C<DELETE>).  This usage has been
+deprecated since v5.20, and as of now causes a syntax error.  The
+variables these names referred to are special, reserved by Perl for
+whatever use it may choose, now, or in the future.  Each such variable
+has an alternative way of spelling it.  Instead of the single
+non-graphic control character, a two character sequence beginning with a
+caret is used, like C<$^]> and C<${^GLOBAL_PHASE}>.  Details are at
+L<perlvar>.   It remains legal, though unwise and deprecated (raising a
+deprecation warning), to use certain non-graphic non-ASCII characters in
+variables names when not under S<C<use utf8>>.  No code should do this,
+as all such variables are reserved by Perl, and Perl doesn't currently
+define any of them (but could at any time, without notice).
 
 =head2 The C<autoderef> feature has been removed
 

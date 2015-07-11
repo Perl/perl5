@@ -150,38 +150,6 @@ EXPECT
 Use of bare << to mean <<"" is deprecated at - line 2.
 ########
 # toke.c
-BEGIN {
-    if (ord('A') == 193) {
-        print "SKIPPED\n# Literal control characters in variable names forbidden on EBCDIC";
-        exit 0;
-    }
-}
-eval "\$\cT";
-eval "\${\7LOBAL_PHASE}";
-eval "\${\cT}";
-eval "\${\n\cT}";
-eval "\${\cT\n}";
-my $ret = eval "\${\n\cT\n}";
-print "ok\n" if $ret == $^T;
-
-no warnings 'deprecated' ;
-eval "\$\cT";
-eval "\${\7LOBAL_PHASE}";
-eval "\${\cT}";
-eval "\${\n\cT}";
-eval "\${\cT\n}";
-eval "\${\n\cT\n}";
-
-EXPECT
-Use of literal control characters in variable names is deprecated at (eval 1) line 1.
-Use of literal control characters in variable names is deprecated at (eval 2) line 1.
-Use of literal control characters in variable names is deprecated at (eval 3) line 1.
-Use of literal control characters in variable names is deprecated at (eval 4) line 2.
-Use of literal control characters in variable names is deprecated at (eval 5) line 1.
-Use of literal control characters in variable names is deprecated at (eval 6) line 2.
-ok
-########
-# toke.c
 $a =~ m/$foo/eq;
 $a =~ s/$foo/fool/seq;
 
@@ -1497,20 +1465,10 @@ I
 ########
 # toke.c
 #[perl #119123] disallow literal control character variables
-BEGIN {
-    if (ord('A') == 193) {
-        print "SKIPPED\n# Literal control characters in variable names forbidden on EBCDIC";
-        exit 0;
-    }
-}
-eval "\$\cQ = 25";
-eval "\${ \cX } = 24";
 *{
     Foo
 }; # shouldn't warn on {\n, even though \n is a control character
 EXPECT
-Use of literal control characters in variable names is deprecated at (eval 1) line 1.
-Use of literal control characters in variable names is deprecated at (eval 2) line 1.
 ########
 # toke.c
 # [perl #120288] -X at start of line gave spurious warning, where X is not

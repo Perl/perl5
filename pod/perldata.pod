@@ -37,8 +37,8 @@ collide with one of your normal variables.  Strings that match
 parenthesized parts of a regular expression are saved under names
 containing only digits after the C<$> (see L<perlop> and L<perlre>).
 In addition, several special variables that provide windows into
-the inner working of Perl have names containing punctuation characters
-and control characters.  These are documented in L<perlvar>.
+the inner working of Perl have names containing punctuation characters.
+These are documented in L<perlvar>.
 X<variable, built-in>
 
 Scalar values are always named with '$', even when referring to a
@@ -99,11 +99,11 @@ that returns a reference to the appropriate type.  For a description
 of this, see L<perlref>.
 
 Names that start with a digit may contain only more digits.  Names
-that do not start with a letter, underscore, digit or a caret (i.e.
-a control character) are limited to one character, e.g.,  C<$%> or
+that do not start with a letter, underscore, digit or a caret are
+limited to one character, e.g.,  C<$%> or
 C<$$>.  (Most of these one character names have a predefined
 significance to Perl.  For instance, C<$$> is the current process
-id.)
+id.  And all such names are reserved for Perl's possible use.)
 
 =head2 Identifier parsing
 X<identifiers>
@@ -129,7 +129,7 @@ match C<\w> (this prevents some problematic cases); and Perl
 additionally accepts identfier names beginning with an underscore.
 
 If not under C<use utf8>, the source is treated as ASCII + 128 extra
-controls, and identifiers should match
+generic characters, and identifiers should match
 
     / (?aa) (?!\d) \w+ /x
 
@@ -184,54 +184,66 @@ Put together, a grammar to match a basic identifier becomes
 Meanwhile, special identifiers don't follow the above rules; For the most
 part, all of the identifiers in this category have a special meaning given
 by Perl.  Because they have special parsing rules, these generally can't be
-fully-qualified.  They come in four forms:
+fully-qualified.  They come in six forms (but don't use forms 5 and 6):
 
 =over
 
-=item *
+=item 1.
 
 A sigil, followed solely by digits matching C<\p{POSIX_Digit}>, like
 C<$0>, C<$1>, or C<$10000>.
 
-=item *
-
-A sigil, followed by a caret and any one of the characters
-C<[][A-Z^_?\]>, like C<$^V> or C<$^]>, or a sigil followed by a literal non-space,
-non-C<NUL> control character matching the C<\p{POSIX_Cntrl}> property.
-Due to a historical oddity, if not running under C<use utf8>, the 128
-characters in the C<[0x80-0xff]> range are considered to be controls,
-and may also be used in length-one variables.  However, the use of
-non-graphical characters is deprecated as of v5.22, and support for them
-will be removed in a future version of perl.  ASCII space characters and
-C<NUL> already aren't allowed, so this means that a single-character
-variable name with that name being any other C0 control C<[0x01-0x1F]>,
-or C<DEL> will generate a deprecated warning.  Already, under C<"use
-utf8">, non-ASCII characters must match C<Perl_XIDS>.  As of v5.22, when
-not under C<"use utf8"> C1 controls C<[0x80-0x9F]>, NO BREAK SPACE, and
-SOFT HYPHEN (C<SHY>)) generate a deprecated warning.
-
-=item *
-
-Similar to the above, a sigil, followed by bareword text in braces,
-where the first character is either a caret followed by any one of
-the characters C<[][A-Z^_?\]>, like C<${^GLOBAL_PHASE}>, or a non-C<NUL>,
-non-space literal
-control like C<${\7LOBAL_PHASE}>.  Like the above, when not under
-C<"use utf8">, the characters in C<[0x80-0xFF]> are considered controls, but as
-of v5.22, the use of any that are non-graphical are deprecated, and as
-of v5.20 the use of any ASCII-range literal control is deprecated.
-Support for these will be removed in a future version of perl.
-
-=item *
+=item 2.
 
 A sigil followed by a single character matching the C<\p{POSIX_Punct}>
 property, like C<$!> or C<%+>, except the character C<"{"> doesn't work.
 
+=item 3.
+
+A sigil, followed by a caret and any one of the characters
+C<[][A-Z^_?\]>, like C<$^V> or C<$^]>.
+
+=item 4.
+
+Similar to the above, a sigil, followed by bareword text in braces,
+where the first character is a caret.  The next character is any one of
+the characters C<[][A-Z^_?\]>, followed by ASCII word characters.  An
+example is C<${^GLOBAL_PHASE}>.
+
+=item 5.
+
+A sigil, followed by any single character in the range C<[\x80-\xFF]>
+when not under C<S<"use utf8">>.  (Under C<S<"use utf8">>, the normal
+identifier rules given earlier in this section apply.)  Use of
+non-graphic characters (the C1 controls, the NO-BREAK SPACE, and the
+SOFT HYPHEN) is deprecated and will be forbidden in a future Perl
+version.  The use of the other characters is unwise, as these are all
+reserved to have special meaning to Perl, and none of them currently
+do have special meaning, though this could change without notice.
+
+Note that an implication of this form is that there are identifiers only
+legal under C<S<"use utf8">>, and vice-versa, for example the identifier
+C<$E<233>tat> is legal under C<S<"use utf8">>, but is otherwise
+considered to be the single character variable C<$E<233>> followed by
+the bareword C<"tat">, the combination of which is a syntax error.
+
+=item 6.
+
+This is a combination of the previous two forms.  It is valid only when
+not under S<C<"use utf8">> (normal identifier rules apply when under
+S<C<"use utf8">>).  The form is a sigil, followed by text in braces,
+where the first character is any one of the characters in the range
+C<[\x80-\xFF]> followed by ASCII word characters up to the trailing
+brace.
+
+The same caveats as the previous form apply:  The non-graphic characters
+are deprecated, it is unwise to use this form at all, and utf8ness makes
+a big difference.
+
 =back
 
-Note that as of Perl 5.20, literal control characters in variable names
-are deprecated; and as of Perl 5.22, any other non-graphic characters
-are also deprecated.
+Prior to Perl v5.24, non-graphical ASCII control characters were also
+allowed in some situations; this had been deprecated since v5.20.
 
 =head2 Context
 X<context> X<scalar context> X<list context>

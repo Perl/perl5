@@ -12,32 +12,30 @@ arbitrarily long (up to an internal limit of 251 characters) and
 may contain letters, digits, underscores, or the special sequence
 C<::> or C<'>.  In this case, the part before the last C<::> or
 C<'> is taken to be a I<package qualifier>; see L<perlmod>.
+A Unicode letter that is not ASCII is not considered to be a letter
+unless S<C<"use utf8">> is in effect, and somewhat more complicated
+rules apply; see L<perldata/Identifier parsing> for details.
 
-Perl variable names may also be a sequence of digits or a single
-punctuation or control character (with the literal control character
-form deprecated).  These names are all reserved for
+Perl variable names may also be a sequence of digits, a single
+punctuation character, or the two-character sequence: C<^> (caret or
+CIRCUMFLEX ACCENT) followed by any one of the characters C<[][A-Z^_?\]>.
+These names are all reserved for
 special uses by Perl; for example, the all-digits names are used
 to hold data captured by backreferences after a regular expression
-match.  Perl has a special syntax for the single-control-character
-names: It understands C<^X> (caret C<X>) to mean the control-C<X>
-character.  For example, the notation C<$^W> (dollar-sign caret
-C<W>) is the scalar variable whose name is the single character
-control-C<W>.  This is better than typing a literal control-C<W>
-into your program.
+match.
 
-Since Perl v5.6.0, Perl variable names may be alphanumeric strings that
-begin with a caret (or a control character, but this form is
-deprecated).
-These variables must be written in the form C<${^Foo}>; the braces
-are not optional.  C<${^Foo}> denotes the scalar variable whose
-name is a control-C<F> followed by two C<o>'s.  These variables are
+Since Perl v5.6.0, Perl variable names may also be alphanumeric strings
+preceded by a caret.  These must all be written in the form C<${^Foo}>;
+the braces are not optional.  C<${^Foo}> denotes the scalar variable
+whose name is considered to be a control-C<F> followed by two C<o>'s.
+These variables are
 reserved for future special uses by Perl, except for the ones that
-begin with C<^_> (control-underscore or caret-underscore).  No
-control-character name that begins with C<^_> will acquire a special
+begin with C<^_> (caret-underscore).  No
+name that begins with C<^_> will acquire a special
 meaning in any future version of Perl; such names may therefore be
 used safely in programs.  C<$^_> itself, however, I<is> reserved.
 
-Perl identifiers that begin with digits, control characters, or
+Perl identifiers that begin with digits or
 punctuation characters are exempt from the effects of the C<package>
 declaration and are always forced to be in package C<main>; they are
 also exempt from C<strict 'vars'> errors.  A few other names are also
