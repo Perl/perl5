@@ -237,7 +237,7 @@ for ( 0x0 .. 0xff ) {
         if ($chr =~ /[#*]/) {
 
             # Length-1 variables with these two characters used to be used by
-            # Perl, but now their generates a warning that they're gone.
+            # Perl, but now it generates a warning that they're gone.
             # Ignore such warnings.
             for (my $i = @warnings - 1; $i >= 0; $i--) {
                 splice @warnings, $i, 1 if $warnings[$i] =~ /is no longer supported/;
