@@ -3502,7 +3502,7 @@ PP(pp_entersub)
          * in the caller's tmps frame, so they won't be freed until after
          * we return from the sub.
          */
-	if (LIKELY(hasargs)) {
+	{
             SV **svp = MARK;
             while (svp < SP) {
                 SV *sv = *++svp;
