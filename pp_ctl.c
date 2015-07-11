@@ -2738,12 +2738,8 @@ PP(pp_goto)
                  * unless pad[0] and @_ differ (e.g. if the old sub did
                  * local *_ = []); in which case clear the old pad[0]
                  * array in the usual way */
-		if (av == arg || AvREAL(av)) {
-		    SvREFCNT_dec(av);
-		    av = newAV();
-		    AvREIFY_only(av);
-		    PAD_SVl(0) = (SV*)av;
-		}
+		if (av == arg || AvREAL(av))
+                    clear_defarray(av, av == arg);
 		else CLEAR_ARGARRAY(av);
 	    }
 
