@@ -3450,20 +3450,15 @@ PP(pp_entersub)
 	/* should call AUTOLOAD now? */
 	else {
           try_autoload:
-	    if ((autogv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
-				   GvNAMEUTF8(gv) ? SVf_UTF8 : 0)))
-	    {
-		cv = GvCV(autogv);
-	    }
-	    else {
-	       sorry:
-		sub_name = sv_newmortal();
-		gv_efullname3(sub_name, gv, NULL);
-		DIE(aTHX_ "Undefined subroutine &%"SVf" called", SVfARG(sub_name));
-	    }
+	    autogv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
+				   GvNAMEUTF8(gv) ? SVf_UTF8 : 0);
+            cv = autogv ? GvCV(autogv) : NULL;
 	}
-	if (!cv)
-	    goto sorry;
+	if (!cv) {
+            sub_name = sv_newmortal();
+            gv_efullname3(sub_name, gv, NULL);
+            DIE(aTHX_ "Undefined subroutine &%"SVf" called", SVfARG(sub_name));
+        }
     }
 
     if (UNLIKELY(CvCLONE(cv) && ! CvCLONED(cv)))
