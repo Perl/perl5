@@ -1223,11 +1223,12 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PADLIST * const padlist = CvPADLIST(cv);			\
 	ENTER;								\
  	multicall_oldcatch = CATCH_GET;					\
-	SAVETMPS; SAVEVPTR(PL_op);					\
+	SAVEVPTR(PL_op);					        \
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_MULTICALL);					\
 	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), PL_stack_sp);	\
 	PUSHSUB(cx);							\
+        SAVETMPS;                                                       \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2) {						\
