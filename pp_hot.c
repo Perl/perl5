@@ -3329,6 +3329,25 @@ PP(pp_leavesub)
     return cx->blk_sub.retop;
 }
 
+
+/* clear (if possible) or abandon the current @_. If 'abandon' is true,
+ * forces an abandon */
+
+void
+Perl_clear_defarray(pTHX_ AV* av, bool abandon)
+{
+    const SSize_t fill = AvFILLp(av);
+
+    PERL_ARGS_ASSERT_CLEAR_DEFARRAY;
+
+    SvREFCNT_dec_NN(av);
+    av = newAV();
+    av_extend(av, fill);
+    AvREIFY_only(av);
+    PAD_SVl(0) = MUTABLE_SV(av);
+}
+
+
 PP(pp_entersub)
 {
     dSP; dPOPss;

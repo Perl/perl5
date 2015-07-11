@@ -660,14 +660,8 @@ struct block_format {
                         CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);       \
 	    POP_SAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
-	    if (AvREAL(av)) {				                \
-		const SSize_t fill = AvFILLp(av);	                \
-		SvREFCNT_dec_NN(av);			                \
-                av = newAV();                                           \
-		av_extend(av, fill);			                \
-		AvREIFY_only(av);			                \
-                PAD_SVl(0) = MUTABLE_SV(av);                            \
-	    }								\
+	    if (UNLIKELY(AvREAL(av))) 			                \
+                clear_defarray(av, 0);                                  \
 	    else {							\
 		CLEAR_ARGARRAY(av);			                \
 	    }								\

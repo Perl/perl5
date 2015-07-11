@@ -2877,5 +2877,6 @@ Ei	|STRLEN	|sv_or_pv_pos_u2b|NN SV *sv|NN const char *pv|STRLEN pos \
 #endif
 
 EMpPX	|SV*	|_get_encoding
+Xp	|void	|clear_defarray	|NN AV* av|bool abandon
 
 : ex: set ts=8 sts=4 sw=4 noet:
