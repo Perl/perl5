@@ -3431,7 +3431,10 @@ PP(pp_entersub)
 
     ENTER;
 
-    while (UNLIKELY(!CvROOT(cv) && !CvXSUB(cv))) {
+    /* these two fields are in a union. If they ever become separate,
+     * we have to test for both of them being null below */
+    assert((void*)&CvROOT(cv) == (void*)&CvXSUB(cv));
+    while (UNLIKELY(!CvROOT(cv))) {
 	GV* autogv;
 	SV* sub_name;
 
