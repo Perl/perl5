@@ -3497,6 +3497,23 @@ PP(pp_entersub)
 	PADLIST * const padlist = CvPADLIST(cv);
         I32 depth;
 
+        /* keep PADTMP args alive throughout the call (we need to do this
+         * because @_ isn't refcounted). Note that we create the mortals
+         * in the caller's tmps frame, so they won't be freed until after
+         * we return from the sub.
+         */
+	if (LIKELY(hasargs)) {
+            SV **svp = MARK;
+            while (svp < SP) {
+                SV *sv = *++svp;
+                if (!sv)
+                    continue;
+                if (SvPADTMP(sv))
+                    *svp = sv = sv_mortalcopy(sv);
+                SvTEMP_off(sv);
+	    }
+        }
+
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
 	cx->blk_sub.retop = PL_op->op_next;
@@ -3530,18 +3547,6 @@ PP(pp_entersub)
 
 	    Copy(MARK+1,AvARRAY(av),items,SV*);
 	    AvFILLp(av) = items - 1;
-	
-	    MARK = AvARRAY(av);
-	    while (items--) {
-		if (*MARK)
-		{
-		    if (SvPADTMP(*MARK)) {
-			*MARK = sv_mortalcopy(*MARK);
-                    }
-		    SvTEMP_off(*MARK);
-		}
-		MARK++;
-	    }
 	}
 	SAVETMPS;
 	if (UNLIKELY((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
