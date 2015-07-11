@@ -555,6 +555,7 @@ struct block_sub {
     /* Above here is the same for sub and format.  */
     AV *	savearray;
     I32		olddepth;
+    I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
     PAD		*prevcomppad; /* the caller's PL_comppad */
     SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
 };
@@ -647,6 +648,7 @@ struct block_format {
 #define POPSUB(cx,sv)							\
     STMT_START {							\
 	const I32 olddepth = cx->blk_sub.olddepth;			\
+	LEAVE_SCOPE(cx->blk_sub.old_savestack_ix);      		\
         if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
         cx->blk_u16 |= CxPOPSUB_DONE;                                   \
 	RETURN_PROBE(CvNAMED(cx->blk_sub.cv)				\
@@ -671,7 +673,6 @@ struct block_format {
 	}								\
         }                                                               \
 	sv = MUTABLE_SV(cx->blk_sub.cv);				\
-	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
         PL_tmps_floor = cx->blk_sub.old_tmpsfloor;                      \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
@@ -1225,13 +1226,13 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	CV * const _nOnclAshIngNamE_ = the_cv;				\
 	CV * const cv = _nOnclAshIngNamE_;				\
 	PADLIST * const padlist = CvPADLIST(cv);			\
-	ENTER;								\
  	multicall_oldcatch = CATCH_GET;					\
-	SAVEVPTR(PL_op);					        \
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_MULTICALL);					\
 	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), PL_stack_sp);	\
 	PUSHSUB(cx);							\
+        cx->blk_sub.old_savestack_ix = PL_savestack_ix;                  \
+	SAVEVPTR(PL_op);					        \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2) {						\
@@ -1256,12 +1257,11 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         LEAVESUB(multicall_cv);     					\
 	POPBLOCK(cx,PL_curpm);						\
         /* includes partial unrolled POPSUB(): */                       \
-	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
+	LEAVE_SCOPE(cx->blk_sub.old_savestack_ix);      		\
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
-	LEAVE;								\
 	SPAGAIN;							\
     } STMT_END
 

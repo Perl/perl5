@@ -326,7 +326,6 @@ pass("RT #126845: stub with prototype, then definition with attribute");
     }
 
     f();
-    local $::TODO = "sub unwinding not safe yet";
     ::is($y, 7, "tie_exception");
 }
 

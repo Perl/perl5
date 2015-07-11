@@ -3327,7 +3327,6 @@ PP(pp_leavesub)
     }
     PUTBACK;
 
-    LEAVE;
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     cxstack_ix--;
     PL_curpm = newpm;	/* ... and pop $1 et al */
@@ -3367,6 +3366,7 @@ PP(pp_entersub)
     PERL_CONTEXT *cx;
     I32 gimme;
     const bool hasargs = (PL_op->op_flags & OPf_STACKED) != 0;
+    I32 old_savestack_ix;
 
     if (UNLIKELY(!sv))
 	DIE(aTHX_ "Not a CODE reference");
@@ -3380,7 +3380,7 @@ PP(pp_entersub)
                 cv = sv_2cv(sv, &stash, &gv, 0);
             }
             if (!cv) {
-                ENTER;
+                old_savestack_ix = PL_savestack_ix;
                 goto try_autoload;
             }
             break;
@@ -3429,7 +3429,13 @@ PP(pp_entersub)
         }
     }
 
-    ENTER;
+    /* At this point we want to save PL_savestack_ix, either by doing a
+     * PUSHSUB, or for XS, doing an ENTER. But we don't yet know the final
+     * CV we will be using (so we don't know whether its XS, so we can't
+     * PUSHSUB or ENTER yet), and determining cv may itself push stuff on
+     * the save stack. So remember where we are currently on the save
+     * stack, and later update the CX or scopestack entry accordingly. */
+    old_savestack_ix = PL_savestack_ix;
 
     /* these two fields are in a union. If they ever become separate,
      * we have to test for both of them being null below */
@@ -3513,8 +3519,9 @@ PP(pp_entersub)
 
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
-
 	cx->blk_sub.retop = PL_op->op_next;
+        cx->blk_sub.old_savestack_ix = old_savestack_ix;
+
 	if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2)) {
 	    PERL_STACK_OVERFLOW_CHECK();
 	    pad_push(padlist, depth);
@@ -3562,6 +3569,10 @@ PP(pp_entersub)
     }
     else {
 	SSize_t markix = TOPMARK;
+
+        ENTER;
+        /* pretend we did the ENTER earlier */
+	PL_scopestack[PL_scopestack_ix - 1] = old_savestack_ix;
 
 	SAVETMPS;
 	PUTBACK;

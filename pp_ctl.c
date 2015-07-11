@@ -1942,7 +1942,6 @@ PP(pp_dbstate)
 	dSP;
 	PERL_CONTEXT *cx;
 	const I32 gimme = G_ARRAY;
-	U8 hasargs;
 	GV * const gv = PL_DBgv;
 	CV * cv = NULL;
 
@@ -1956,15 +1955,11 @@ PP(pp_dbstate)
 	    /* don't do recursive DB::DB call */
 	    return NORMAL;
 
-	ENTER;
-
-	SAVEI32(PL_debug);
-	SAVESTACK_POS();
-	PL_debug = 0;
-	hasargs = 0;
-	SPAGAIN;
-
 	if (CvISXSUB(cv)) {
+            ENTER;
+            SAVEI32(PL_debug);
+            PL_debug = 0;
+            SAVESTACK_POS();
             SAVETMPS;
 	    PUSHMARK(SP);
 	    (void)(*CvXSUB(cv))(aTHX_ cv);
@@ -1973,9 +1968,15 @@ PP(pp_dbstate)
 	    return NORMAL;
 	}
 	else {
+            U8 hasargs = 0;
 	    PUSHBLOCK(cx, CXt_SUB, SP);
 	    PUSHSUB_DB(cx);
 	    cx->blk_sub.retop = PL_op->op_next;
+            cx->blk_sub.old_savestack_ix = PL_savestack_ix;
+
+            SAVEI32(PL_debug);
+            PL_debug = 0;
+            SAVESTACK_POS();
 	    CvDEPTH(cv)++;
 	    if (CvDEPTH(cv) >= 2) {
 		PERL_STACK_OVERFLOW_CHECK();
@@ -2314,7 +2315,6 @@ PP(pp_leavesublv)
 		what = "undef";
 	    }
           croak:
-	    LEAVE;
 	    POPSUB(cx,sv);
 	    cxstack_ix--;
 	    PL_curpm = newpm;
@@ -2385,7 +2385,6 @@ PP(pp_leavesublv)
     }
     PUTBACK;
 
-    LEAVE;
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     cxstack_ix--;
     PL_curpm = newpm;	/* ... and pop $1 et al */
@@ -2675,7 +2674,6 @@ PP(pp_goto)
 	    PERL_CONTEXT *cx;
 	    CV *cv = MUTABLE_CV(SvRV(sv));
 	    AV *arg = GvAV(PL_defgv);
-	    I32 oldsave;
 
 	    while (!CvROOT(cv) && !CvXSUB(cv)) {
 		const GV * const gv = CvGV(cv);
@@ -2726,6 +2724,13 @@ PP(pp_goto)
 
             /* partial unrolled POPSUB(): */
 
+            /* protect @_ during save stack unwind. */
+            if (arg)
+                SvREFCNT_inc_NN(sv_2mortal(MUTABLE_SV(arg)));
+
+	    assert(PL_scopestack_ix == cx->blk_oldscopesp);
+            LEAVE_SCOPE(cx->blk_sub.old_savestack_ix);
+
 	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		AV* av = MUTABLE_AV(PAD_SVl(0));
                 assert(AvARRAY(MUTABLE_AV(
@@ -2742,14 +2747,6 @@ PP(pp_goto)
                     clear_defarray(av, av == arg);
 		else CLEAR_ARGARRAY(av);
 	    }
-
-            /* protect @_ during save stack unwind. */
-            if (arg)
-                SvREFCNT_inc_NN(sv_2mortal(MUTABLE_SV(arg)));
-
-	    assert(PL_scopestack_ix == cx->blk_oldscopesp);
-	    oldsave = PL_scopestack[cx->blk_oldscopesp - 1];
-	    LEAVE_SCOPE(oldsave);
 
             /* don't restore PL_comppad here. It won't be needed if the
              * sub we're going to is non-XS, but restoring it early then
@@ -2786,6 +2783,7 @@ PP(pp_goto)
                 PERL_UNUSED_VAR(newsp);
                 PERL_UNUSED_VAR(gimme);
 
+                ENTER;
                 SAVETMPS;
                 SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 
@@ -2819,8 +2817,13 @@ PP(pp_goto)
 		retop = cx->blk_sub.retop;
                 PL_comppad = cx->blk_sub.prevcomppad;
                 PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
-		/* XS subs don't have a CxSUB, so pop it */
-		POPBLOCK(cx, PL_curpm);
+
+		/* XS subs don't have a CXt_SUB, so pop it;
+                 * this is a POPBLOCK(), less all the stuff we already did
+                 * for TOPBLOCK() earlier */
+                PL_curcop = cx->blk_oldcop;
+		cxstack_ix--;
+
 		/* Push a mark for the start of arglist */
 		PUSHMARK(mark);
 		PUTBACK;

@@ -1642,6 +1642,7 @@ PP(pp_sort)
 	    PERL_CONTEXT *cx;
 	    SV** newsp;
 	    const bool oldcatch = CATCH_GET;
+            I32 old_savestack_ix = PL_savestack_ix;
 
 	    SAVEOP();
 
@@ -1697,6 +1698,7 @@ PP(pp_sort)
                 cx->blk_sub.old_tmpsfloor = PL_tmps_floor;
                 PL_tmps_floor = PL_tmps_ix;
             }
+            cx->blk_sub.old_savestack_ix = old_savestack_ix;
 
 	    cx->cx_type |= CXp_MULTICALL;
 	    
