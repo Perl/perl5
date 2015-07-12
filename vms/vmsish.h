@@ -150,7 +150,6 @@
 #define my_gconvert(a,b,c,d)		Perl_my_gconvert(a,b,c,d)
 #define my_getenv(a,b)			Perl_my_getenv(aTHX_ a,b)
 #define my_getenv_len(a,b,c)		Perl_my_getenv_len(aTHX_ a,b,c)
-#define my_getlogin			Perl_my_getlogin
 #define my_getpwent()			Perl_my_getpwent(aTHX)
 #define my_getpwnam(a)			Perl_my_getpwnam(aTHX_ a)
 #define my_getpwuid(a)			Perl_my_getpwuid(aTHX_ a)
@@ -493,9 +492,6 @@ struct utimbuf {
 #define ENVgetenv_len(v,l) my_getenv_len(v,l,FALSE)
 
 
-/* Thin jacket around cuserid() to match Unix' calling sequence */
-#define getlogin my_getlogin
-
 /* Ditto for sys$hash_password() . . . */
 #define crypt(a,b)  Perl_my_crypt(aTHX_ a,b)
 
@@ -748,7 +744,6 @@ int	Perl_my_flush (pTHX_ FILE *);
 struct passwd *	Perl_my_getpwnam (pTHX_ const char *name);
 struct passwd *	Perl_my_getpwuid (pTHX_ Uid_t uid);
 void	Perl_my_endpwent (pTHX);
-char *	my_getlogin (void);
 
 #ifdef __cplusplus
 }

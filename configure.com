@@ -6861,7 +6861,7 @@ $ WC "d_getgrnam_r='" + d_getgrnam_r + "'"
 $ WC "d_gethostbyaddr_r='undef'"
 $ WC "d_gethostbyname_r='undef'"
 $ WC "d_gethostent_r='undef'"
-$ WC "d_getlogin_r='undef'"
+$ WC "d_getlogin_r='define'"
 $ WC "d_getnetbyaddr_r='undef'"
 $ WC "d_getnetbyname_r='undef'"
 $ WC "d_getnetent_r='undef'"
@@ -6910,7 +6910,12 @@ $ WC "getgrnam_r_proto='" + getgrnam_r_proto + "'"
 $ WC "gethostbyaddr_r_proto='0'"
 $ WC "gethostbyname_r_proto='0'"
 $ WC "gethostent_r_proto='0'"
-$ WC "getlogin_r_proto='0'"
+$ IF use_threads
+$ THEN
+$   WC "getlogin_r_proto='REENTRANT_PROTO_I_BW'"
+$ ELSE
+$   WC "getlogin_r_proto='0'"
+$ ENDIF
 $ WC "getnetbyaddr_r_proto='0'"
 $ WC "getnetbyname_r_proto='0'"
 $ WC "getnetent_r_proto='0'"

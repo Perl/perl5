@@ -12160,17 +12160,6 @@ Perl_flex_lstat(pTHX_ const char *fspec, Stat_t *statbufp)
 /*}}}*/
 
 
-/*{{{char *my_getlogin()*/
-/* VMS cuserid == Unix getlogin, except calling sequence */
-char *
-my_getlogin(void)
-{
-    static char user[L_cuserid];
-    return cuserid(user);
-}
-/*}}}*/
-
-
 /*  rmscopy - copy a file using VMS RMS routines
  *
  *  Copies contents and attributes of spec_in to spec_out, except owner
