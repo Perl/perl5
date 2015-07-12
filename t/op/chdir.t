@@ -168,7 +168,6 @@ sub clean_env {
 
         # Can't actually delete SYS$ stuff on VMS.
         next if $IsVMS && $env eq 'SYS$LOGIN';
-        next if $IsVMS && $env eq 'HOME' && !$Config{'d_setenv'};
 
 	# On VMS, %ENV is many layered.
 	delete $ENV{$env} while exists $ENV{$env};
@@ -197,7 +196,7 @@ foreach my $key (@magic_envs) {
     no warnings 'uninitialized';
 
     clean_env;
-    $ENV{$key} = catdir $Cwd, ($IsVMS ? 'OP' : 'op');
+    $ENV{$key} = catdir $Cwd, 'op';
 
     check_env($key);
 }
@@ -206,8 +205,8 @@ foreach my $key (@magic_envs) {
     clean_env;
   SKIP:
     {
-        $IsVMS && !$Config{'d_setenv'}
-          and skip "Can't reset HOME, so chdir() test meaningless", 2;
+        $IsVMS
+          and skip "Can't delete SYS\$LOGIN, so chdir() test meaningless", 2;
         $! = 0;
         ok( !chdir(),                   'chdir() w/o any ENV set' );
         is( $!+0, EINVAL,               'check $! set to EINVAL');
