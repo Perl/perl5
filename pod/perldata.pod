@@ -195,8 +195,8 @@ C<$0>, C<$1>, or C<$10000>.
 
 =item *
 
-A sigil, followed by either a caret and a single POSIX uppercase letter,
-like C<$^V> or C<$^W>, or a sigil followed by a literal non-space,
+A sigil, followed by a caret and any one of the characters
+C<[][A-Z^_?\]>, like C<$^V> or C<$^]>, or a sigil followed by a literal non-space,
 non-C<NUL> control character matching the C<\p{POSIX_Cntrl}> property.
 Due to a historical oddity, if not running under C<use utf8>, the 128
 characters in the C<[0x80-0xff]> range are considered to be controls,
@@ -212,9 +212,10 @@ SOFT HYPHEN (C<SHY>)) generate a deprecated warning.
 
 =item *
 
-Similar to the above, a sigil, followed by bareword text in brackets,
-where the first character is either a caret followed by an uppercase
-letter, like C<${^GLOBAL_PHASE}> or a non-C<NUL>, non-space literal
+Similar to the above, a sigil, followed by bareword text in braces,
+where the first character is either a caret followed by any one of
+the characters C<[][A-Z^_?\]>, like C<${^GLOBAL_PHASE}>, or a non-C<NUL>,
+non-space literal
 control like C<${\7LOBAL_PHASE}>.  Like the above, when not under
 C<"use utf8">, the characters in C<[0x80-0xFF]> are considered controls, but as
 of v5.22, the use of any that are non-graphical are deprecated, and as
