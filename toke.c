@@ -8631,7 +8631,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 	    *d++ = *s++;
 	}
     }
-    else {
+    else {  /* See if it is a "normal" identifier */
         parse_ident(&s, &d, e, 1, is_utf8);
     }
     *d = '\0';
@@ -8643,6 +8643,9 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 	    PL_lex_state = LEX_INTERPENDMAYBE;
 	return s;
     }
+
+    /* Here, it is not a run-of-the-mill identifier name */
+
     if (*s == '$' && s[1] &&
       (isIDFIRST_lazy_if(s+1,is_utf8)
          || isDIGIT_A((U8)s[1])
@@ -8745,8 +8748,8 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
             /* if it starts as a valid identifier, assume that it is one.
                (the later check for } being at the expected point will trap
                cases where this doesn't pan out.)  */
-        d += is_utf8 ? UTF8SKIP(d) : 1;
-        parse_ident(&s, &d, e, 1, is_utf8);
+            d += is_utf8 ? UTF8SKIP(d) : 1;
+            parse_ident(&s, &d, e, 1, is_utf8);
 	    *d = '\0';
             tmp_copline = CopLINE(PL_curcop);
             if (s < PL_bufend && isSPACE(*s)) {
