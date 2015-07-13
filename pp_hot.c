@@ -3515,7 +3515,7 @@ PP(pp_entersub)
     if (!(CvISXSUB(cv))) {
 	/* This path taken at least 75% of the time   */
 	dMARK;
-	PADLIST * const padlist = CvPADLIST(cv);
+	PADLIST *padlist;
         I32 depth;
         bool hasargs;
         I32 gimme;
@@ -3544,6 +3544,7 @@ PP(pp_entersub)
 	cx->blk_sub.retop = PL_op->op_next;
         cx->blk_sub.old_savestack_ix = old_savestack_ix;
 
+	padlist = CvPADLIST(cv);
 	if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2)) {
 	    PERL_STACK_OVERFLOW_CHECK();
 	    pad_push(padlist, depth);
