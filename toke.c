@@ -8609,6 +8609,34 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
     return s;
 }
 
+/* Is the byte 'd' a legal single character identifier name?  'u' is true
+ * iff Unicode semantics are to be used.  The legal ones are any of:
+ *  a) all ASCII characters except:
+ *          1) control and space-type ones, like NUL, SOH, \t, and SPACE;
+ *          2) '{'
+ *     The final case currently doesn't get this far in the program, so we
+ *     don't test for it.  If that were to change, it would be ok to allow it.
+ *  c) When not under Unicode rules, any upper Latin1 character
+ *  d) Otherwise, when unicode rules are used, all XIDS characters.
+ *
+ *      Because all ASCII characters have the same representation whether
+ *      encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
+ *      '{' without knowing if is UTF-8 or not.
+ * EBCDIC already uses the rules that ASCII platforms will use after the
+ * deprecation cycle; see comment below about the deprecation. */
+#ifdef EBCDIC
+#   define VALID_LEN_ONE_IDENT(s, is_utf8)                                    \
+    (isGRAPH_A(*(s)) || ((is_utf8)                                            \
+                         ? isIDFIRST_utf8((U8*) (s))                          \
+                         : (isGRAPH_L1(*s)                                    \
+                            && LIKELY((U8) *(s) != LATIN1_TO_NATIVE(0xAD)))))
+#else
+#   define VALID_LEN_ONE_IDENT(s, is_utf8)                                    \
+    (isGRAPH_A(*(s)) || ((is_utf8)                                            \
+                         ? isIDFIRST_utf8((U8*) (s))                          \
+                         : ! isASCII_utf8((U8*) (s))))
+#endif
+
 STATIC char *
 S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 {
@@ -8667,34 +8695,6 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
             s = skipspace(s);
         }
     }
-
-/* Is the byte 'd' a legal single character identifier name?  'u' is true
- * iff Unicode semantics are to be used.  The legal ones are any of:
- *  a) all ASCII characters except:
- *          1) control and space-type ones, like NUL, SOH, \t, and SPACE;
- *          2) '{'
- *     The final case currently doesn't get this far in the program, so we
- *     don't test for it.  If that were to change, it would be ok to allow it.
- *  c) When not under Unicode rules, any upper Latin1 character
- *  d) Otherwise, when unicode rules are used, all XIDS characters.
- *
- *      Because all ASCII characters have the same representation whether
- *      encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
- *      '{' without knowing if is UTF-8 or not.
- * EBCDIC already uses the rules that ASCII platforms will use after the
- * deprecation cycle; see comment below about the deprecation. */
-#ifdef EBCDIC
-#   define VALID_LEN_ONE_IDENT(s, is_utf8)                                    \
-    (isGRAPH_A(*(s)) || ((is_utf8)                                            \
-                         ? isIDFIRST_utf8((U8*) (s))                          \
-                         : (isGRAPH_L1(*s)                                    \
-                            && LIKELY((U8) *(s) != LATIN1_TO_NATIVE(0xAD)))))
-#else
-#   define VALID_LEN_ONE_IDENT(s, is_utf8)                                    \
-    (isGRAPH_A(*(s)) || ((is_utf8)                                            \
-                         ? isIDFIRST_utf8((U8*) (s))                          \
-                         : ! isASCII_utf8((U8*) (s))))
-#endif
     if ((s <= PL_bufend - (is_utf8)
                           ? UTF8SKIP(s)
                           : 1)
