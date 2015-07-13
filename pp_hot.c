@@ -3489,7 +3489,8 @@ PP(pp_entersub)
         }
     }
 
-    if (UNLIKELY(CvCLONE(cv) && ! CvCLONED(cv)))
+    /* unrolled "CvCLONE(cv) && ! CvCLONED(cv)" */
+    if (UNLIKELY((CvFLAGS(cv) & (CVf_CLONE|CVf_CLONED)) == CVf_CLONE))
 	DIE(aTHX_ "Closure prototype called");
 
     if (UNLIKELY((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub)
