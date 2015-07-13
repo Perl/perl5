@@ -580,12 +580,11 @@ Otherwise die.
 
 =head3 Smartmatching of Objects
 
-To avoid relying on an object's underlying representation, if the
-smartmatch's right operand is an object that doesn't overload C<~~>,
-it raises the exception "C<Smartmatching a non-overloaded object
-breaks encapsulation>".  That's because one has no business digging
-around to see whether something is "in" an object.  These are all
-illegal on objects without a C<~~> overload:
+If the object, either to the right or left of the operator, doesn't
+overload C<~~> then that row of the smart match table is skipped.
+That's because one has no business digging around to see whether
+something is "in" an object.  These are all illegal on objects without
+a C<~~> overload:
 
     %hash ~~ $object
        42 ~~ $object
