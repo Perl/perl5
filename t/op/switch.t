@@ -193,6 +193,21 @@ SKIP:
     is($ok, "thirty", $test);
 }
 
+# postfix when block
+{
+    my $test = "explicit numeric comparison (<) inside postfix when block";
+    my $twenty_five = 25;
+    my $ok;
+    given($twenty_five) {
+	$ok = "ten"    when {$_ < 10};
+	$ok = "twenty" when {$_ < 20};
+	$ok = "thirty" when {$_ < 30};
+	$ok = "forty"  when {$_ < 40};
+	default        { $ok = "default" }
+    }
+    is($ok, "thirty", $test);
+}
+
 {
     my $test = "blockblock scope";
     my $x;
