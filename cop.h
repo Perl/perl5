@@ -553,11 +553,11 @@ struct block_sub {
     /* Above here is the same for sub, format and eval.  */
     CV *	cv;
     /* Above here is the same for sub and format.  */
-    AV *	savearray;
     I32		olddepth;
     I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
-    PAD		*prevcomppad; /* the caller's PL_comppad */
+    AV  	*savearray;
     SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
+    PAD		*prevcomppad; /* the caller's PL_comppad */
 };
 
 
@@ -647,7 +647,6 @@ struct block_format {
 
 #define POPSUB(cx,sv)							\
     STMT_START {							\
-	const I32 olddepth = cx->blk_sub.olddepth;			\
 	LEAVE_SCOPE(cx->blk_sub.old_savestack_ix);      		\
         if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
         cx->blk_u16 |= CxPOPSUB_DONE;                                   \
@@ -659,12 +658,13 @@ struct block_format {
 		CopSTASHPV((COP*)CvSTART((const CV*)cx->blk_sub.cv)));	\
 									\
 	if (CxHASARGS(cx)) {						\
-            AV *av = MUTABLE_AV(PAD_SVl(0));                            \
+            AV *av;                                                     \
             assert(AvARRAY(MUTABLE_AV(                                  \
                 PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[                \
                         CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);       \
 	    POP_SAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
+            av = MUTABLE_AV(PAD_SVl(0));                                \
 	    if (UNLIKELY(AvREAL(av))) 			                \
                 clear_defarray(av, 0);                                  \
 	    else {							\
@@ -672,11 +672,11 @@ struct block_format {
 	    }								\
 	}								\
         }                                                               \
-	sv = MUTABLE_SV(cx->blk_sub.cv);				\
         PL_tmps_floor = cx->blk_sub.old_tmpsfloor;                      \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
-        CvDEPTH((const CV*)sv) = olddepth;                              \
+	sv = MUTABLE_SV(cx->blk_sub.cv);				\
+        CvDEPTH((const CV*)sv) = cx->blk_sub.olddepth;                  \
     } STMT_END
 
 #define LEAVESUB(sv)							\
