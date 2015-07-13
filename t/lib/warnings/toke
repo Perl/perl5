@@ -1040,10 +1040,9 @@ EXPECT
 Useless use of \E at - line 3.
 ########
 # toke.c
-use feature 'postderef', 'postderef_qq';
+use feature 'postderef_qq';
 (\$_)->$*;
 "$_->$*";
-no warnings 'experimental::postderef';
 (\$_)->$*;
 "$_->$*";
 EXPECT

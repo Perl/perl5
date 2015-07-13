@@ -758,7 +758,9 @@ For example:
     $r = [ 1, [ 2, 3 ], 4 ];
     $r->[1]->@*;  # equivalent to @{ $r->[1] }
 
-This syntax must be enabled with C<use feature 'postderef'>.
+In Perl 5.20 and 5.22, this syntax must be enabled with C<use feature
+'postderef'>. As of Perl 5.24, no feature declarations are required to make
+it available.
 
 Postfix dereference should work in all circumstances where block
 (circumfix) dereference worked, and should be entirely equivalent.  This
@@ -781,7 +783,7 @@ Glob elements can be extracted through the postfix dereferencing feature:
 
 Postfix array and scalar dereferencing I<can> be used in interpolating
 strings (double quotes or the C<qq> operator), but only if the
-additional C<postderef_qq> feature is enabled.
+C<postderef_qq> feature is enabled.
 
 =head2 Postfix Reference Slicing
 
@@ -800,7 +802,7 @@ Slices">, also behaves as expected:
 
 As with postfix array, postfix value slice dereferencing I<can> be used
 in interpolating strings (double quotes or the C<qq> operator), but only
-if the additional C<postderef_qq> L<feature> is enabled.
+if the C<postderef_qq> L<feature> is enabled.
 
 =head1 Assigning to References
 

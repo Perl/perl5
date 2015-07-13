@@ -60,7 +60,7 @@ my %feature_bundle = (
     "5.21"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc)],
     "5.23"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef postderef_qq)],
+		    evalbytes current_sub fc postderef_qq)],
 );
 
 # not actually used currently
@@ -575,25 +575,30 @@ This feature is available from Perl 5.18 onwards.
 
 =head2 The 'postderef' and 'postderef_qq' features
 
-The 'postderef' feature allows the use of L<postfix dereference
-syntax|perlref/Postfix Dereference Syntax>.  For example, it will make the
-following two statements equivalent:
+The 'postderef_qq' feature extends the applicability of L<postfix
+dereference syntax|perlref/Postfix Dereference Syntax> so that postfix array
+and scalar dereference are available in double-quotish interpolations. For
+example, it makes the following two statements equivalent:
 
-  my @x = @{ $h->{a} };
-  my @x = $h->{a}->@*;
+  my $s = "[@{ $h->{a} }]";
+  my $s = "[$h->{a}->@*]";
 
-The 'postderef_qq' feature extends this, for array and scalar dereference, to
-working inside of double-quotish interpolations.
-
-These features are available from Perl 5.20 onwards. In Perl 5.20 and 5.22,
-they were classed as experimental, and Perl emitted a warning for their
+This feature is available from Perl 5.20 onwards. In Perl 5.20 and 5.22, it
+was classed as experimental, and Perl emitted a warning for its
 usage, except when explicitly disabled:
 
   no warnings "experimental::postderef";
 
-As of Perl 5.24, use of these features no longer triggers a warning, though
+As of Perl 5.24, use of this feature no longer triggers a warning, though
 the C<experimental::postderef> warning category still exists (for
 compatibility with code that disables it).
+
+The 'postderef' feature was used in Perl 5.20 and Perl 5.22 to enable
+postfix dereference syntax outside double-quotish interpolations. In those
+versions, using it triggered the C<experimental::postderef> warning in the
+same way as the 'postderef_qq' feature did. As of Perl 5.24, this syntax is
+not only no longer experimental, but it is enabled for all Perl code,
+regardless of what feature declarations are in scope.
 
 =head2 The 'signatures' feature
 

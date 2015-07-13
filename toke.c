@@ -5133,12 +5133,11 @@ Perl_yylex(pTHX)
 	    else if (*s == '>') {
 		s++;
 		s = skipspace(s);
-		if (FEATURE_POSTDEREF_IS_ENABLED && (
-		    ((*s == '$' || *s == '&') && s[1] == '*')
+		if (((*s == '$' || *s == '&') && s[1] == '*')
 		  ||(*s == '$' && s[1] == '#' && s[2] == '*')
 		  ||((*s == '@' || *s == '%') && strchr("*[{", s[1]))
 		  ||(*s == '*' && (s[1] == '*' || s[1] == '{'))
-		 ))
+		 )
 		{
 		    PL_expect = XPOSTDEREF;
 		    TOKEN(ARROW);
