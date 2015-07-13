@@ -141,6 +141,7 @@ modifiers are:
     for LIST
     foreach LIST
     when EXPR
+    when BLOCK
 
 The C<EXPR> following the modifier is referred to as the "condition".
 Its truth or falsehood determines how the modifier will behave.
@@ -216,6 +217,10 @@ was not available before 5.14.)  Operative only from within a C<foreach>
 loop or a C<given> block, it executes the statement only if the smartmatch
 C<< $_ ~~ I<EXPR> >> is true.  If the statement executes, it is followed by
 a C<next> from inside a C<foreach> and C<break> from inside a C<given>.
+
+The C<when> modifier, if followed by a block instead of an expression,
+evaluates the content of the block as the condition, and does not
+perform a smart match.
 
 Under the current implementation, the C<foreach> loop can be
 anywhere within the C<when> modifier's dynamic scope, but must be
@@ -667,6 +672,27 @@ Or if you don't care to play it safe, like this:
         $def = 1 when /^def/;
         $xyz = 1 when /^xyz/;
         default { $nothing = 1 }
+    }
+
+If you don't watch your expression to be smartmatched, from perl 5.24
+you can provide a block to C<when> instead:
+
+    use v5.24;
+    given ($var) {
+        when { $_ == 1 } { $one = 1 };
+        when { $_ == 2 } { $two = 1 };
+        when { $_ == 3 } { $three = 1 };
+        default { $none = 1 };
+    }
+
+or using postfix when:
+
+    use v5.24;
+    given ($var) {
+        $one = 1   when { $_ == 1 };
+        $two = 1   when { $_ == 2 };
+        $three = 1 when { $_ == 3 };
+        default { $none = 1 };
     }
 
 The arguments to C<given> and C<when> are in scalar context,
