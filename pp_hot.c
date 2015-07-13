@@ -3369,37 +3369,50 @@ PP(pp_entersub)
     I32 old_savestack_ix;
 
     if (UNLIKELY(!sv))
-	DIE(aTHX_ "Not a CODE reference");
-    /* This is overwhelmingly the most common case:  */
-    if (!LIKELY(SvTYPE(sv) == SVt_PVGV && (cv = GvCVu((const GV *)sv)))) {
+	goto do_die;
+
+    /* Locate the CV to call:
+     * - most common case: RV->CV: f(), $ref->():
+     *   note that if a sub is compiled before its caller is compiled,
+     *   the stash entry will be a ref to a CV, rather than being a GV.
+     * - second most common case: CV: $ref->method()
+     */
+
+    /* a non-magic-RV -> CV ? */
+    if (LIKELY( (SvFLAGS(sv) & (SVf_ROK|SVs_GMG)) == SVf_ROK)) {
+        cv = MUTABLE_CV(SvRV(sv));
+        if (UNLIKELY(SvOBJECT(cv))) /* might be overloaded */
+            goto do_ref;
+    }
+    else
+        cv = MUTABLE_CV(sv);
+
+    /* a CV ? */
+    if (UNLIKELY(SvTYPE(cv) != SVt_PVCV)) {
+        /* handle all the weird cases */
         switch (SvTYPE(sv)) {
+        case SVt_PVLV:
+            if (!isGV_with_GP(sv))
+                goto do_default;
+            /* FALLTHROUGH */
         case SVt_PVGV:
-          we_have_a_glob:
-            if (!(cv = GvCVu((const GV *)sv))) {
+            cv = GvCVu((const GV *)sv);
+            if (UNLIKELY(!cv)) {
                 HV *stash;
                 cv = sv_2cv(sv, &stash, &gv, 0);
-            }
-            if (!cv) {
-                old_savestack_ix = PL_savestack_ix;
-                goto try_autoload;
+                if (!cv) {
+                    old_savestack_ix = PL_savestack_ix;
+                    goto try_autoload;
+                }
             }
             break;
-        case SVt_PVLV:
-            if(isGV_with_GP(sv)) goto we_have_a_glob;
-            /* FALLTHROUGH */
+
         default:
-            if (sv == &PL_sv_yes) {		/* unfound import, ignore */
-                if (hasargs)
-                    SP = PL_stack_base + POPMARK;
-                else
-                    (void)POPMARK;
-                if (GIMME_V == G_SCALAR)
-                    PUSHs(&PL_sv_undef);
-                RETURN;
-            }
+          do_default:
             SvGETMAGIC(sv);
             if (SvROK(sv)) {
-                if (SvAMAGIC(sv)) {
+              do_ref:
+                if (UNLIKELY(SvAMAGIC(sv))) {
                     sv = amagic_deref_call(sv, to_cv_amg);
                     /* Don't SPAGAIN here.  */
                 }
@@ -3407,8 +3420,19 @@ PP(pp_entersub)
             else {
                 const char *sym;
                 STRLEN len;
-                if (!SvOK(sv))
+                if (UNLIKELY(!SvOK(sv)))
                     DIE(aTHX_ PL_no_usym, "a subroutine");
+
+                if (UNLIKELY(sv == &PL_sv_yes)) { /* unfound import, ignore */
+                    if (hasargs)
+                        SP = PL_stack_base + POPMARK;
+                    else
+                        (void)POPMARK;
+                    if (GIMME_V == G_SCALAR)
+                        PUSHs(&PL_sv_undef);
+                    RETURN;
+                }
+
                 sym = SvPV_nomg_const(sv, len);
                 if (PL_op->op_private & HINT_STRICT_REFS)
                     DIE(aTHX_ "Can't use string (\"%" SVf32 "\"%s) as a subroutine ref while \"strict refs\" in use", sv, len>32 ? "..." : "");
@@ -3416,16 +3440,13 @@ PP(pp_entersub)
                 break;
             }
             cv = MUTABLE_CV(SvRV(sv));
-            if (SvTYPE(cv) == SVt_PVCV)
+            if (LIKELY(SvTYPE(cv) == SVt_PVCV))
                 break;
             /* FALLTHROUGH */
         case SVt_PVHV:
         case SVt_PVAV:
+          do_die:
             DIE(aTHX_ "Not a CODE reference");
-            /* This is the second most common case:  */
-        case SVt_PVCV:
-            cv = MUTABLE_CV(sv);
-            break;
         }
     }
 
