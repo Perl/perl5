@@ -526,6 +526,10 @@ sideff	:	error
 	|	expr FOR expr
 			{ $$ = newFOROP(0, (OP*)NULL, $3, $1, (OP*)NULL);
 			  parser->copline = (line_t)$2; }
+	|	expr WHEN block
+                        { $$ = newWHENOP(newUNOP(OP_NULL, OPf_SPECIAL, $3),
+                                         op_scope($1));
+			}
 	|	expr WHEN expr
 			{ $3->op_flags |= OPf_PARENS;
 			  $$ = newWHENOP($3, op_scope($1));
