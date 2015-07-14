@@ -183,6 +183,10 @@ C<$@> message which triggers the failure path inside C<open3>.
 
 L<Unicode::Collate> has been upgraded from version 1.12 to 1.14.
 
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.18 to 1.19.
+
 =back
 
 =head2 Removed Modules and Pragmata

@@ -10,11 +10,9 @@ WriteMakefile(
     'NAME'              => 'Unicode::Normalize',
     'VERSION_FROM'      => 'Normalize.pm', # finds $VERSION
     'PREREQ_PM'         => {
-        bytes           => 0,
         Carp            => 0,
         constant        => 0,
         Exporter        => 0,
-        File::Copy      => 0,
         File::Spec      => 0,
         strict          => 0,
         warnings        => 0,
