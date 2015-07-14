@@ -11,6 +11,8 @@
 <commit votes="" id="816b056ffb99ae54642320e20dc30a59fd1effef" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
 <commit votes="" id="3bea78d24634e630b610f59957e7a019205a67b2" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
 <commit votes="" id="33593911f214382b592d05aa902655301915e666" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
+<commit votes="" id="41ef2c66e0da6dfb04ded81b979f7081007a1add" ticket="124127" desc="Restore ability to debug threaded scripts"/>
+<commit votes="" id="902d16915db2735c3a41f15ef8d95cf300c31801" ticket="124127" desc="Restore ability to debug threaded scripts"/>
 
 </div>
 
