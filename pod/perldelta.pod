@@ -179,6 +179,10 @@ C<IPC::Open3> threw to the callers of C<open3> would have an irrelevant
 message derived from C<$!> which was in an undefined state, instead of the
 C<$@> message which triggers the failure path inside C<open3>.
 
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.12 to 1.14.
+
 =back
 
 =head2 Removed Modules and Pragmata

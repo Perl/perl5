@@ -1,6 +1,6 @@
 use Unicode::Collate::CJK::Pinyin;
 +{
-   locale_version => 1.12,
+   locale_version => 1.14,
    overrideCJK => \&Unicode::Collate::CJK::Pinyin::weightPinyin,
    entry => <<'ENTRY', # for DUCET v7.0.0
 0101      ; [.190C.001C.0002] # LATIN SMALL LETTER A WITH MACRON

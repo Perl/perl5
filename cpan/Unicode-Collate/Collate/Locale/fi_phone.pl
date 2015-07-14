@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.12,
+   locale_version => 1.14,
 # in cldr test/fi.xml why x{110}x < xdx though xd < x{110} ?
    entry => <<'ENTRY', # for DUCET v7.0.0
 0111      ; [.1953.0021.0002][.0000.0039.0002] # LATIN SMALL LETTER D WITH STROKE

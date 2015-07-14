@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.12,
+   locale_version => 1.14,
    entry => <<'ENTRY', # for DUCET v7.0.0
 0650      ; [.0000.0077.0002] # ARABIC KASRA
 064B      ; [.0000.007B.0002] # ARABIC FATHATAN
