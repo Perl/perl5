@@ -133,7 +133,7 @@ use File::Glob qw(:case);
     },
 
     'autodie' => {
-        'DISTRIBUTION' => 'PJF/autodie-2.28.tar.gz',
+        'DISTRIBUTION' => 'PJF/autodie-2.29.tar.gz',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{benchmarks},
@@ -143,7 +143,6 @@ use File::Glob qw(:case);
             # building the core.  Hence, they can
             # never run, and should not be merged.
             qw( t/author-critic.t
-                t/boilerplate.t
                 t/critic.t
                 t/fork.t
                 t/kwalitee.t
