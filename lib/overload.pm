@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.26';
+our $VERSION = '1.27';
 
 %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -21,9 +21,7 @@ our $VERSION = '1.26';
 );
 
 my %ops_seen;
-for $category (keys %ops) {
-    $ops_seen{$_}++ for (split /\s+/, $ops{$category});
-}
+@ops_seen{ map split(/ /), values %ops } = ();
 
 sub nil {}
 
@@ -40,7 +38,7 @@ sub OVERLOAD {
       }
     } else {
       warnings::warnif("overload arg '$_' is invalid")
-        unless $ops_seen{$_};
+        unless exists $ops_seen{$_};
       $sub = $arg{$_};
       if (not ref $sub) {
 	$ {$package . "::(" . $_} = $sub;
