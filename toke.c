@@ -1338,7 +1338,7 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
 	CopLINE_set(PL_curcop, PL_parser->preambling + 1);
 	PL_parser->preambling = NOLINE;
     }
-    if (got_some_for_debugger && (PERLDB_LINE || PERLDB_SAVESRC) &&
+    if (got_some_for_debugger && PERLDB_LINE_OR_SAVESRC &&
 	    PL_curstash != PL_debstash) {
 	/* debugger active and we're not compiling the debugger code,
 	 * so store the line into the debugger's array of lines
@@ -4735,7 +4735,7 @@ Perl_yylex(pTHX)
 	    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	    PL_last_lop = PL_last_uni = NULL;
-	    if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
+	    if (PERLDB_LINE_OR_SAVESRC && PL_curstash != PL_debstash)
 		update_debugger_info(PL_linestr, NULL, 0);
 	    goto retry;
 	}
@@ -4969,7 +4969,7 @@ Perl_yylex(pTHX)
 			    } while (argc && argv[0][0] == '-' && argv[0][1]);
 			    init_argv_symbols(argc,argv);
 			}
-			if (((PERLDB_LINE || PERLDB_SAVESRC) && !oldpdb) ||
+			if ((PERLDB_LINE_OR_SAVESRC && !oldpdb) ||
 			    ((PL_minus_n || PL_minus_p) && !(oldn || oldp)))
 			      /* if we have already added "LINE: while (<>) {",
 			         we must not do it again */
@@ -4979,7 +4979,7 @@ Perl_yylex(pTHX)
 			    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 			    PL_last_lop = PL_last_uni = NULL;
 			    PL_preambled = FALSE;
-			    if (PERLDB_LINE || PERLDB_SAVESRC)
+			    if (PERLDB_LINE_OR_SAVESRC)
 				(void)gv_fetchfile(PL_origfilename);
 			    goto retry;
 			}

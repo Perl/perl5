@@ -5767,6 +5767,8 @@ typedef struct am_table_short AMTS;
 #define PERLDB_SAVESRC_NOSUBS	(PL_perldb & PERLDBf_SAVESRC_NOSUBS)
 #define PERLDB_SAVESRC_INVALID	(PL_perldb & PERLDBf_SAVESRC_INVALID)
 
+#define PERLDB_LINE_OR_SAVESRC (PL_perldb & (PERLDBf_LINE | PERLDBf_SAVESRC))
+
 #ifdef USE_LOCALE
 /* These locale things are all subject to change */
 /* Returns TRUE if the plain locale pragma without a parameter is in effect

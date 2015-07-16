@@ -129,7 +129,7 @@ Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN namelen,
 	sv_setpvn(GvSV(gv), name, namelen);
 #endif
     }
-    if ((PERLDB_LINE || PERLDB_SAVESRC) && !GvAV(gv))
+    if (PERLDB_LINE_OR_SAVESRC && !GvAV(gv))
 	    hv_magic(GvHVn(gv), GvAVn(gv), PERL_MAGIC_dbfile);
     if (tmpbuf != smallbuf)
 	Safefree(tmpbuf);
