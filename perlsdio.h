@@ -47,10 +47,9 @@ END_EXTERN_C
             ((*(f))->_ptr > (*(f))->_base)) ? \
             ((*(f))->_cnt++, *(--(*(f))->_ptr) = (c)) : decc$ungetc(c,f)))
 #else
-#    define PerlIO_ungetc(f,c)		ungetc(c,f)
+#    define PerlIO_ungetc(f,c)		PerlSIO_ungetc(c,f)
 #endif
 #define PerlIO_getc(f)		PerlSIO_fgetc(f)
-#define PerlIO_ungetc(f,c)		PerlSIO_ungetc(c,f)
 #define PerlIO_read(f,buf,count)	(SSize_t)PerlSIO_fread(buf,1,count,f)
 #define PerlIO_tell(f)		PerlSIO_ftell(f)
 #define PerlIO_eof(f)			PerlSIO_feof(f)
