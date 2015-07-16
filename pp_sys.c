@@ -1386,9 +1386,6 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
     if (CvCLONE(cv))
 	cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
 
-    ENTER;
-    SAVETMPS;
-
     PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
     PUSHFORMAT(cx, retop);
     if (CvDEPTH(cv) >= 2) {
@@ -1529,7 +1526,6 @@ PP(pp_leavewrite)
     retop = cx->blk_sub.retop;
     POPFORMAT(cx);
     SP = newsp; /* ignore retval of formline */
-    LEAVE;
 
     if (is_return)
         /* XXX the semantics of doing 'return' in a format aren't documented.

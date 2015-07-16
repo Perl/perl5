@@ -551,13 +551,13 @@ be zero.
 struct block_sub {
     OP *	retop;	/* op to execute on exit from sub */
     /* Above here is the same for sub, format and eval.  */
+    I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
+    SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
+    PAD		*prevcomppad; /* the caller's PL_comppad */
     CV *	cv;
     /* Above here is the same for sub and format.  */
     I32		olddepth;
-    I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
     AV  	*savearray;
-    SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
-    PAD		*prevcomppad; /* the caller's PL_comppad */
 };
 
 
@@ -565,11 +565,13 @@ struct block_sub {
 struct block_format {
     OP *	retop;	/* op to execute on exit from sub */
     /* Above here is the same for sub, format and eval.  */
+    I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
+    SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
+    PAD		*prevcomppad; /* the caller's PL_comppad */
     CV *	cv;
     /* Above here is the same for sub and format.  */
     GV *	gv;
     GV *	dfoutgv;
-    PAD		*prevcomppad; /* the caller's PL_comppad */
 };
 
 /* base for the next two macros. Don't use directly.
@@ -624,6 +626,9 @@ struct block_format {
 	cx->blk_format.dfoutgv = PL_defoutgv;				\
 	cx->blk_format.prevcomppad = PL_comppad;			\
 	cx->blk_u16 = 0;                                                \
+        cx->blk_format.old_savestack_ix = PL_savestack_ix;                 \
+        cx->blk_format.old_tmpsfloor = PL_tmps_floor;                      \
+        PL_tmps_floor = PL_tmps_ix;                                     \
 	SvREFCNT_inc_simple_void_NN(cv);		                \
 	CvDEPTH(cv)++;							\
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
@@ -686,12 +691,13 @@ struct block_format {
 
 #define POPFORMAT(cx)							\
     STMT_START {							\
+	LEAVE_SCOPE(cx->blk_format.old_savestack_ix);      		\
         if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
 	CV * const cv = cx->blk_format.cv;				\
 	GV * const dfuot = cx->blk_format.dfoutgv;			\
         cx->blk_u16 |= CxPOPSUB_DONE;                                   \
+        PL_tmps_floor = cx->blk_format.old_tmpsfloor;                      \
 	setdefout(dfuot);						\
-	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
         PL_comppad = cx->blk_format.prevcomppad;                        \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
 	--CvDEPTH(cv);                                                  \
