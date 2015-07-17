@@ -4258,12 +4258,12 @@ S_fold_constants(pTHX_ OP *o)
     bool is_stringify;
     SV * VOL sv = NULL;
     int ret = 0;
-    I32 oldscope;
     OP *old_next;
     SV * const oldwarnhook = PL_warnhook;
     SV * const olddiehook  = PL_diehook;
     COP not_compiling;
     U8 oldwarn = PL_dowarn;
+    I32 old_cxix;
     dJMPENV;
 
     PERL_ARGS_ASSERT_FOLD_CONSTANTS;
@@ -4344,7 +4344,7 @@ S_fold_constants(pTHX_ OP *o)
     o->op_next = 0;
     PL_op = curop;
 
-    oldscope = PL_scopestack_ix;
+    old_cxix = cxstack_ix;
     create_eval_scope(G_FAKINGEVAL);
 
     /* Verify that we don't need to save it:  */
@@ -4396,9 +4396,13 @@ S_fold_constants(pTHX_ OP *o)
     PL_diehook  = olddiehook;
     PL_curcop = &PL_compiling;
 
-    if (PL_scopestack_ix > oldscope)
-	delete_eval_scope();
-
+    /* if we croaked, depending on how we croaked the eval scope
+     * may or may not have already been popped */
+    if (cxstack_ix > old_cxix) {
+        assert(cxstack_ix == old_cxix + 1);
+        assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
+        delete_eval_scope();
+    }
     if (ret)
 	goto nope;
 
