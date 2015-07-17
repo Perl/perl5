@@ -4046,7 +4046,6 @@ PP(pp_require)
     }
 
     ENTER_with_name("eval");
-    SAVETMPS;
     SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tryname);
     lex_start(NULL, tryrsfp, 0);
@@ -4068,6 +4067,7 @@ PP(pp_require)
     /* switch to eval mode */
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, name);
+    SAVETMPS;
     cx->blk_eval.retop = PL_op->op_next;
 
     SAVECOPLINE(&PL_compiling);
@@ -4155,7 +4155,6 @@ PP(pp_entereval)
 			   : bytes ? LEX_EVALBYTES : LEX_START_SAME_FILTER
 			)
 	     );
-    SAVETMPS;
 
     /* switch to eval mode */
 
@@ -4182,6 +4181,7 @@ PP(pp_entereval)
 
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
     PUSHEVAL(cx, 0);
+    SAVETMPS;
     cx->blk_eval.retop = PL_op->op_next;
 
     /* prepare to compile string */
@@ -4306,10 +4306,10 @@ Perl_create_eval_scope(pTHX_ U32 flags)
     const I32 gimme = GIMME_V;
 	
     ENTER_with_name("eval_scope");
-    SAVETMPS;
 
     PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
     PUSHEVAL(cx, 0);
+    SAVETMPS;
 
     PL_in_eval = EVAL_INEVAL;
     if (flags & G_KEEPERR)
