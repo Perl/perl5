@@ -13,41 +13,23 @@
 /*
   Interface for perl to IO functions.
   There is a hierarchy of Configure determined #define controls:
-   USE_STDIO   - forces PerlIO_xxx() to be #define-d onto stdio functions.
-                 This is used for conservative
-                 builds - "just like perl5.00X used to be".
-                 This dominates over the others.
+   USE_STDIO   - No longer available via Configure.  Formerly forced
+                 PerlIO_xxx() to be #define-d onto stdio functions.
+                 Now generates compile-time error.
 
    USE_PERLIO  - The primary Configure variable that enables PerlIO.
-                 If USE_PERLIO is _NOT_ set
-                   then USE_STDIO above will be set to be conservative.
                  PerlIO_xxx() are real functions
                  defined in perlio.c which implement extra functionality
                  required for utf8 support.
 
-   One further note - the table-of-functions scheme controlled
-   by PERL_IMPLICIT_SYS turns on USE_PERLIO so that iperlsys.h can
-   #define PerlIO_xxx() to go via the function table, without having
-   to #undef them from (say) stdio forms.
-
 */
-
-#if defined(PERL_IMPLICIT_SYS)
-#ifndef USE_PERLIO
-#ifndef NETWARE
-/* # define USE_PERLIO */
-#endif
-#endif
-#endif
 
 #ifndef USE_PERLIO
 # define USE_STDIO
 #endif
 
 #ifdef USE_STDIO
-#  ifndef PERLIO_IS_STDIO
-#      define PERLIO_IS_STDIO
-#  endif
+#  error "stdio is no longer supported as the default base layer -- use perlio."
 #endif
 
 /* --------------------  End of Configure controls ---------------------------- */
@@ -70,11 +52,6 @@
 #if defined(POSIX_BC) && defined(O_BINARY) && !defined(O_TEXT)
 #undef O_BINARY
 #endif
-
-#ifdef PERLIO_IS_STDIO
-/* #define PerlIO_xxxx() as equivalent stdio function */
-#include "perlsdio.h"
-#endif				/* PERLIO_IS_STDIO */
 
 #ifndef PerlIO
 /* ----------- PerlIO implementation ---------- */
@@ -111,27 +88,24 @@ PERL_CALLCONV void PerlIO_clone(pTHX_ PerlInterpreter *proto,
 
 /* ----------- End of implementation choices  ---------- */
 
-#ifndef PERLIO_IS_STDIO
-/* Not using stdio _directly_ as PerlIO */
-
 /* We now need to determine  what happens if source trys to use stdio.
  * There are three cases based on PERLIO_NOT_STDIO which XS code
  * can set how it wants.
  */
 
-#   ifdef PERL_CORE
+#ifdef PERL_CORE
 /* Make a choice for perl core code
    - currently this is set to try and catch lingering raw stdio calls.
      This is a known issue with some non UNIX ports which still use
      "native" stdio features.
 */
-#       ifndef PERLIO_NOT_STDIO
-#           define PERLIO_NOT_STDIO 1
-#       endif
-    #else
-#   ifndef PERLIO_NOT_STDIO
-#       define PERLIO_NOT_STDIO 0
-#   endif
+#  ifndef PERLIO_NOT_STDIO
+#    define PERLIO_NOT_STDIO 1
+#  endif
+#else
+#  ifndef PERLIO_NOT_STDIO
+#    define PERLIO_NOT_STDIO 0
+#  endif
 #endif
 
 #ifdef PERLIO_NOT_STDIO
@@ -154,7 +128,6 @@ PERL_CALLCONV void PerlIO_clone(pTHX_ PerlInterpreter *proto,
  */
 #include "fakesdio.h"
 #endif				/* ifndef PERLIO_NOT_STDIO */
-#endif				/* PERLIO_IS_STDIO */
 
 /* ----------- fill in things that have not got #define'd  ---------- */
 
@@ -331,7 +304,7 @@ PERL_CALLCONV int PerlIO_setpos(PerlIO *, SV *);
 #ifndef PerlIO_fdupopen
 PERL_CALLCONV PerlIO *PerlIO_fdupopen(pTHX_ PerlIO *, CLONE_PARAMS *, int);
 #endif
-#if !defined(PerlIO_modestr) && !defined(PERLIO_IS_STDIO)
+#if !defined(PerlIO_modestr)
 PERL_CALLCONV char *PerlIO_modestr(PerlIO *, char *buf);
 #endif
 #ifndef PerlIO_isutf8
@@ -359,7 +332,6 @@ PERL_CALLCONV void PerlIO_cleanup(pTHX);
 PERL_CALLCONV void PerlIO_debug(const char *fmt, ...)
     __attribute__format__(__printf__, 1, 2);
 typedef struct PerlIO_list_s PerlIO_list_t;
-
 
 #endif
 

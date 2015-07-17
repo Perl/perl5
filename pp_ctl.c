@@ -3517,11 +3517,7 @@ S_check_type_and_open(pTHX_ SV *name)
     }
 #endif
 
-#if !defined(PERLIO_IS_STDIO)
     retio = PerlIO_openn(aTHX_ ":", PERL_SCRIPT_MODE, -1, 0, 0, NULL, 1, &name);
-#else
-    retio = PerlIO_open(p, PERL_SCRIPT_MODE);
-#endif
 #ifdef WIN32
     /* EACCES stops the INC search early in pp_require to implement
        feature RT #113422 */

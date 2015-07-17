@@ -8245,16 +8245,6 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
                            amount left, otherwise this is the amount it
                            can hold. */
 
-#if defined(__VMS) && defined(PERLIO_IS_STDIO)
-    /* An ungetc()d char is handled separately from the regular
-     * buffer, so we getc() it back out and stuff it in the buffer.
-     */
-    i = PerlIO_getc(fp);
-    if (i == EOF) return 0;
-    *(--((*fp)->_ptr)) = (unsigned char) i;
-    (*fp)->_cnt++;
-#endif
-
     /* Here is some breathtakingly efficient cheating */
 
     /* When you read the following logic resist the urge to think

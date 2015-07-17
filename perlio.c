@@ -338,29 +338,6 @@ Perl_boot_core_PerlIO(pTHX)
 #endif
 
 
-#ifdef PERLIO_IS_STDIO
-
-void
-PerlIO_init(pTHX)
-{
-    PERL_UNUSED_CONTEXT;
-    /*
-     * Does nothing (yet) except force this file to be included in perl
-     * binary. That allows this file to force inclusion of other functions
-     * that may be required by loadable extensions e.g. for
-     * FileHandle::tmpfile
-     */
-}
-
-#undef PerlIO_tmpfile
-PerlIO *
-PerlIO_tmpfile(void)
-{
-    return tmpfile();
-}
-
-#else                           /* PERLIO_IS_STDIO */
-
 /*======================================================================================*/
 /*
  * Implement all the PerlIO interface ourselves.
@@ -5093,7 +5070,6 @@ Perl_PerlIO_restore_errno(pTHX_ PerlIO *f)
 #undef HAS_FSETPOS
 #undef HAS_FGETPOS
 
-#endif                          /* PERLIO_IS_STDIO */
 
 /*======================================================================================*/
 /*
