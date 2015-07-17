@@ -1519,7 +1519,8 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    break;
 	case CXt_EVAL:
 	    POPEVAL(cx);
-            LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);
+            LEAVE_SCOPE(cx->blk_eval.old_savestack_ix);
+            PL_tmps_floor = cx->blk_eval.old_tmpsfloor;
 	    break;
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
@@ -1650,7 +1651,8 @@ Perl_die_unwind(pTHX_ SV *msv)
 		*++newsp = &PL_sv_undef;
 	    PL_stack_sp = newsp;
 
-	    LEAVE;
+            LEAVE_SCOPE(cx->blk_eval.old_savestack_ix);
+            PL_tmps_floor = cx->blk_eval.old_tmpsfloor;
 
 	    if (optype == OP_REQUIRE) {
                 assert (PL_curcop == oldcop);
@@ -3416,8 +3418,9 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	    POPBLOCK(cx,PL_curpm);
 	    POPEVAL(cx);
 	    namesv = cx->blk_eval.old_namesv;
-	    /* POPBLOCK renders LEAVE_with_name("evalcomp") unnecessary. */
-	    LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
+	    /* POPBLOCK has rendered LEAVE_with_name("evalcomp") unnecessary */
+            LEAVE_SCOPE(cx->blk_eval.old_savestack_ix);
+            PL_tmps_floor = cx->blk_eval.old_tmpsfloor;
 	}
 
 	errsv = ERRSV;
@@ -3631,6 +3634,7 @@ PP(pp_require)
     OP *op;
     int saved_errno;
     bool path_searchable;
+    I32 old_savestack_ix;
 
     sv = POPs;
     SvGETMAGIC(sv);
@@ -4045,7 +4049,7 @@ PP(pp_require)
 			   unixname, unixlen, SvREFCNT_inc_simple(hook_sv), 0 );
     }
 
-    ENTER_with_name("eval");
+    old_savestack_ix = PL_savestack_ix;
     SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tryname);
     lex_start(NULL, tryrsfp, 0);
@@ -4067,7 +4071,7 @@ PP(pp_require)
     /* switch to eval mode */
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, name);
-    SAVETMPS;
+    cx->blk_eval.old_savestack_ix = old_savestack_ix;
     cx->blk_eval.retop = PL_op->op_next;
 
     SAVECOPLINE(&PL_compiling);
@@ -4112,6 +4116,7 @@ PP(pp_entereval)
     U32 seq, lex_flags = 0;
     HV *saved_hh = NULL;
     const bool bytes = PL_op->op_private & OPpEVAL_BYTES;
+    I32 old_savestack_ix;
 
     if (PL_op->op_private & OPpEVAL_HAS_HH) {
 	saved_hh = MUTABLE_HV(SvREFCNT_inc(POPs));
@@ -4149,7 +4154,8 @@ PP(pp_entereval)
     TAINT_IF(SvTAINTED(sv));
     TAINT_PROPER("eval");
 
-    ENTER_with_name("eval");
+    old_savestack_ix = PL_savestack_ix;
+
     lex_start(sv, NULL, lex_flags | (PL_op->op_private & OPpEVAL_UNICODE
 			   ? LEX_IGNORE_UTF8_HINTS
 			   : bytes ? LEX_EVALBYTES : LEX_START_SAME_FILTER
@@ -4181,7 +4187,7 @@ PP(pp_entereval)
 
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
     PUSHEVAL(cx, 0);
-    SAVETMPS;
+    cx->blk_eval.old_savestack_ix = old_savestack_ix;
     cx->blk_eval.retop = PL_op->op_next;
 
     /* prepare to compile string */
@@ -4263,13 +4269,15 @@ PP(pp_leaveeval)
 			SvPVX_const(namesv),
                         SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
 			G_DISCARD);
-	LEAVE_with_name("eval");
+        LEAVE_SCOPE(cx->blk_eval.old_savestack_ix);
+        PL_tmps_floor = cx->blk_eval.old_tmpsfloor;
 	Perl_die(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
         NOT_REACHED; /* NOTREACHED */
 	/* die_unwind() did LEAVE, or we won't be here */
     }
     else {
-	LEAVE_with_name("eval");
+        LEAVE_SCOPE(cx->blk_eval.old_savestack_ix);
+        PL_tmps_floor = cx->blk_eval.old_tmpsfloor;
         if (!keep)
 	    CLEAR_ERRSV();
     }
@@ -4291,7 +4299,8 @@ Perl_delete_eval_scope(pTHX)
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
     PL_curpm = newpm;
-    LEAVE_with_name("eval_scope");
+    LEAVE_SCOPE(cx->blk_eval.old_savestack_ix);
+    PL_tmps_floor = cx->blk_eval.old_tmpsfloor;
     PERL_UNUSED_VAR(newsp);
     PERL_UNUSED_VAR(gimme);
     PERL_UNUSED_VAR(optype);
@@ -4305,11 +4314,9 @@ Perl_create_eval_scope(pTHX_ U32 flags)
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 	
-    ENTER_with_name("eval_scope");
-
     PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
     PUSHEVAL(cx, 0);
-    SAVETMPS;
+    cx->blk_eval.old_savestack_ix = PL_savestack_ix;
 
     PL_in_eval = EVAL_INEVAL;
     if (flags & G_KEEPERR)
@@ -4349,7 +4356,9 @@ PP(pp_leavetry)
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
-    LEAVE_with_name("eval_scope");
+    LEAVE_SCOPE(cx->blk_eval.old_savestack_ix);
+    PL_tmps_floor = cx->blk_eval.old_tmpsfloor;
+
     CLEAR_ERRSV();
     RETURNOP(retop);
 }

@@ -550,9 +550,9 @@ be zero.
 /* subroutine context */
 struct block_sub {
     OP *	retop;	/* op to execute on exit from sub */
-    /* Above here is the same for sub, format and eval.  */
     I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
     SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
+    /* Above here is the same for sub, format and eval.  */
     PAD		*prevcomppad; /* the caller's PL_comppad */
     CV *	cv;
     /* Above here is the same for sub and format.  */
@@ -564,9 +564,9 @@ struct block_sub {
 /* format context */
 struct block_format {
     OP *	retop;	/* op to execute on exit from sub */
-    /* Above here is the same for sub, format and eval.  */
     I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
     SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
+    /* Above here is the same for sub, format and eval.  */
     PAD		*prevcomppad; /* the caller's PL_comppad */
     CV *	cv;
     /* Above here is the same for sub and format.  */
@@ -709,6 +709,8 @@ struct block_format {
 /* eval context */
 struct block_eval {
     OP *	retop;	/* op to execute on exit from eval */
+    I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
+    SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
     /* Above here is the same for sub, format and eval.  */
     SV *	old_namesv;
     OP *	old_eval_root;
@@ -729,6 +731,8 @@ struct block_eval {
 	assert(!(PL_in_eval & ~0x7F));					\
 	assert(!(PL_op->op_type & ~0x1FF));				\
 	cx->blk_u16 = (PL_in_eval & 0x7F) | ((U16)PL_op->op_type << 7);	\
+        cx->blk_eval.old_tmpsfloor = PL_tmps_floor;                     \
+        PL_tmps_floor = PL_tmps_ix;                                     \
 	cx->blk_eval.old_namesv = (n ? newSVpv(n,0) : NULL);		\
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_parser ? PL_parser->linestr : NULL;	\
