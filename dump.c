@@ -1116,7 +1116,7 @@ Perl_gv_dump(pTHX_ GV *gv)
  */
 
 static const struct { const char type; const char *name; } magic_names[] = {
-#include "mg_names.c"
+#include "mg_names.inc"
 	/* this null string terminates the list */
 	{ 0,                         NULL },
 };

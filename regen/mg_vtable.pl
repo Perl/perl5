@@ -2,7 +2,7 @@
 #
 # Regenerate (overwriting only if changed):
 #
-#    mg_names.c
+#    mg_names.inc
 #    mg_raw.h
 #    mg_vtable.h
 #    pod/perlguts.pod
@@ -155,7 +155,7 @@ my %sig =
 my ($vt, $raw, $names) = map {
     open_new($_, '>',
 	     { by => 'regen/mg_vtable.pl', file => $_, style => '*' });
-} 'mg_vtable.h', 'mg_raw.h', 'mg_names.c';
+} 'mg_vtable.h', 'mg_raw.h', 'mg_names.inc';
 my $guts = open_new("pod/perlguts.pod", ">");
 
 print $vt <<'EOH';

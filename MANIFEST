@@ -4385,7 +4385,7 @@ META.json			Distribution meta-data in JSON
 META.yml			Distribution meta-data in YAML
 mg.c				Magic code
 mg.h				Magic header
-mg_names.c			Generated magic names used by dump.c
+mg_names.inc			Generated magic names used by dump.c
 mg_raw.h			Generated magic data used by generate_uudmap.c
 mg_vtable.h			Generated magic vtable data
 miniperlmain.c			Basic perl w/o dynamic loading or extensions
