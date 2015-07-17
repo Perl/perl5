@@ -2536,11 +2536,11 @@ PP(pp_last)
     TAINT_NOT;
     PL_stack_sp = newsp;
 
-    LEAVE;
+    LEAVE_with_name("loop2");
     cxstack_ix--;
     /* Stack values are safe: */
     POPLOOP(cx);	/* release loop vars ... */
-    LEAVE;
+    LEAVE_with_name("loop1");
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     PERL_UNUSED_VAR(gimme);
