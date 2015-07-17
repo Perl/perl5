@@ -37,7 +37,7 @@ sub open_new {
     my ($final_name, $mode, $header, $force) = @_;
     my $name = $final_name . '-new';
     my $lang = $final_name =~ /\.pod$/ ? 'Pod' :
-	$final_name =~ /\.(?:c|h|tab|act)$/ ? 'C' : 'Perl';
+	$final_name =~ /\.(?:c|h|inc|tab|act)$/ ? 'C' : 'Perl';
     if ($force && -e $final_name) {
         chmod 0777, $name if $Needs_Write;
         CORE::unlink $final_name
