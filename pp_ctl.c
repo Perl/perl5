@@ -2079,8 +2079,10 @@ PP(pp_leave)
 
     gimme = OP_GIMME(PL_op, (cxstack_ix >= 0) ? gimme : G_SCALAR);
 
-    SP = leave_common(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP,
-			       PL_op->op_private & OPpLVALUE);
+    SP = (gimme == G_VOID)
+        ? newsp
+        : leave_common(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP,
+                               PL_op->op_private & OPpLVALUE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE_with_name("block");
@@ -2251,7 +2253,9 @@ PP(pp_leaveloop)
     mark = newsp;
     newsp = PL_stack_base + cx->blk_loop.resetsp;
 
-    SP = leave_common(newsp, SP, MARK, gimme, 0,
+    SP = (gimme == G_VOID)
+        ? newsp
+        : leave_common(newsp, SP, MARK, gimme, 0,
 			       PL_op->op_private & OPpLVALUE);
     PUTBACK;
 
@@ -4252,8 +4256,8 @@ PP(pp_leaveeval)
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
 
-    SP = leave_common((gimme == G_VOID) ? SP : newsp, SP, newsp,
-				gimme, SVs_TEMP, FALSE);
+    if (gimme != G_VOID)
+        SP = leave_common(newsp, SP, newsp, gimme, SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
 #ifdef DEBUGGING
@@ -4352,7 +4356,9 @@ PP(pp_leavetry)
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);
 
-    SP = leave_common(newsp, SP, newsp, gimme,
+    SP = (gimme == G_VOID)
+        ? newsp
+        : leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
@@ -4394,7 +4400,9 @@ PP(pp_leavegiven)
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_GIVEN);
 
-    SP = leave_common(newsp, SP, newsp, gimme,
+    SP = (gimme == G_VOID)
+        ? newsp
+        : leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
@@ -4978,7 +4986,9 @@ PP(pp_leavewhen)
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
 
-    SP = leave_common(newsp, SP, newsp, gimme,
+    SP = (gimme == G_VOID)
+        ? newsp
+        : leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;   /* pop $1 et al */
 
