@@ -657,33 +657,13 @@ if ($ARGS{PLATFORM} eq 'netware') {
     push(@layer_syms,'PL_def_layerlist','PL_known_layers','PL_perlio');
 }
 
-if ($define{'USE_PERLIO'}) {
-    # Export the symbols that make up the PerlIO abstraction, regardless
-    # of its implementation - read from a file
-    push @syms, 'perlio.sym';
+# Export the symbols that make up the PerlIO abstraction, regardless
+# of its implementation - read from a file
+push @syms, 'perlio.sym';
 
-    # PerlIO with layers - export implementation
-    try_symbols(@layer_syms, 'perlsio_binmode');
-} else {
-	# -Uuseperlio
-	# Skip the PerlIO layer symbols - although
-	# nothing should have exported them anyway.
-	++$skip{$_} foreach @layer_syms;
-	++$skip{$_} foreach qw(
-			perlsio_binmode
-			PL_def_layerlist
-			PL_known_layers
-			PL_perlio
-			PL_perlio_debug_fd
-			PL_perlio_fd_refcnt
-			PL_perlio_fd_refcnt_size
-			PL_perlio_mutex
-			     );
+# PerlIO with layers - export implementation
+try_symbols(@layer_syms, 'perlsio_binmode');
 
-	# Also do NOT add abstraction symbols from $perlio_sym
-	# abstraction is done as #define to stdio
-	# Remaining remnants that _may_ be functions are handled below.
-}
 
 unless ($define{'USE_QUADMATH'}) {
   ++$skip{Perl_quadmath_format_needed};
