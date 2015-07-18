@@ -42,9 +42,8 @@
 
 /* #include "config.h" */
 
-#if !defined(PERLIO_IS_STDIO)
-#  define PerlIO FILE
-#endif
+
+#define PerlIO FILE
 
 #include <sys/stat.h>
 #include "EXTERN.h"

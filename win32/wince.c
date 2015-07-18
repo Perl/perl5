@@ -13,9 +13,7 @@
 
 #define PERLIO_NOT_STDIO 0
 
-#if !defined(PERLIO_IS_STDIO)
 #define PerlIO FILE
-#endif
 
 #define wince_private
 #include "errno.h"
