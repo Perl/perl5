@@ -237,7 +237,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #define PACK_SIZE_UNPREDICTABLE		0x40	/* Not a fixed size element */
 #define PACK_SIZE_MASK			0x3F
 
-#include "packsizetables.c"
+#include "packsizetables.inc"
 
 static void
 S_reverse_copy(const char *src, char *dest, STRLEN len)
