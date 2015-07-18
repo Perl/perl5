@@ -83,7 +83,7 @@
 #  include "regcomp.h"
 #endif
 
-#include "inline_invlist.c"
+#include "invlist_inline.h"
 #include "unicode_constants.h"
 
 #ifdef DEBUGGING

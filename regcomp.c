@@ -87,7 +87,7 @@ EXTERN_C const struct regexp_engine my_reg_engine;
 #endif
 
 #include "dquote_static.c"
-#include "inline_invlist.c"
+#include "invlist_inline.h"
 #include "unicode_constants.h"
 
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) \
@@ -7981,7 +7981,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * Some of the methods should always be private to the implementation, and some
  * should eventually be made public */
 
-/* The header definitions are in F<inline_invlist.c> */
+/* The header definitions are in F<invlist_inline.h> */
 
 PERL_STATIC_INLINE UV*
 S__invlist_array_init(SV* const invlist, const bool will_have_0)

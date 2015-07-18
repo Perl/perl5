@@ -1,4 +1,4 @@
-/*    inline_invlist.c
+/*    invlist_inline.h
  *
  *    Copyright (C) 2012 by Larry Wall and others
  *
