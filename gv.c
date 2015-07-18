@@ -34,7 +34,7 @@ Perl stores its global variables.
 #include "EXTERN.h"
 #define PERL_IN_GV_C
 #include "perl.h"
-#include "overload.c"
+#include "overload.inc"
 #include "keywords.h"
 #include "feature.h"
 
