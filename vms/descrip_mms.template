@@ -226,14 +226,14 @@ FULLLIBS2 = $(LIBS2)|$(THRLIBS1)|$(THRLIBS2)
 
 #### End of system configuration section. ####
 
-c0 = $(MALLOC_C) av.c caretx.c deb.c doio.c doop.c dump.c globals.c gv.c hv.c mro_core.c
+c0 = $(MALLOC_C) av.c caretx.c deb.c doio.c doop.c dquote.c dump.c globals.c gv.c hv.c mro_core.c
 c1 = mg.c locale.c mathoms.c miniperlmain.c numeric.c op.c pad.c perl.c perlapi.c perlio.c
 c2 = perly.c pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c regcomp.c regexec.c reentr.c
 c3 = run.c scope.c sv.c taint.c toke.c universal.c utf8.c util.c vms.c keywords.c
 c = $(c0) $(c1) $(c2) $(c3)
 
 obj0 = perl$(O)
-obj1 = $(MALLOC_O) av$(O) caretx$(O) deb$(O) doio$(O) doop$(O) dump$(O) mro_core$(O) globals$(O) gv$(O) hv$(O)
+obj1 = $(MALLOC_O) av$(O) caretx$(O) deb$(O) doio$(O) doop$(O) dquote(O) dump$(O) mro_core$(O) globals$(O) gv$(O) hv$(O)
 obj2 = keywords$(O) locale$(O) mathoms$(O) mg$(O) miniperlmain$(O) numeric$(O) op$(O) pad$(O) perlapi$(O) perlio$(O) 
 obj3 = perly$(O) pp$(O) pp_ctl$(O) pp_hot$(O) reentr$(O) pp_pack$(O) pp_sort$(O) pp_sys$(O) regcomp$(O) 
 obj4 = regexec$(O) run$(O) scope$(O) sv$(O) taint$(O) toke$(O) universal$(O) utf8$(O) util$(O) vms$(O)
@@ -624,6 +624,8 @@ deb$(O) : deb.c $(h)
 doio$(O) : doio.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 doop$(O) : doop.c $(h)
+	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
+dquote$(O) : dquote.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 dump$(O) : dump.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)

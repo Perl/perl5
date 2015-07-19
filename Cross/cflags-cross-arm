@@ -73,6 +73,7 @@ for file do
     dl) ;;
     doio) ;;
     doop) ;;
+    dquote) ;;
     dump) ;;
     globals) ;;
     gv) ;;

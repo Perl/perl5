@@ -1264,6 +1264,13 @@ PERL_CALLCONV char*	Perl_form(pTHX_ const char* pat, ...)
 #define PERL_ARGS_ASSERT_FORM	\
 	assert(pat)
 
+PERL_CALLCONV char*	Perl_form_short_octal_warning(pTHX_ const char * const s, const STRLEN len)
+			__attribute__warn_unused_result__
+			__attribute__pure__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_FORM_SHORT_OCTAL_WARNING	\
+	assert(s)
+
 PERL_CALLCONV void	Perl_free_tied_hv_pool(pTHX);
 PERL_CALLCONV void	Perl_free_tmps(pTHX);
 PERL_CALLCONV AV*	Perl_get_av(pTHX_ const char *name, I32 flags)
@@ -1347,6 +1354,17 @@ PERL_CALLCONV UV	Perl_grok_bin(pTHX_ const char* start, STRLEN* len_p, I32* flag
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_GROK_BIN	\
 	assert(start); assert(len_p); assert(flags)
+
+PERL_CALLCONV char	Perl_grok_bslash_c(pTHX_ const char source, const bool output_warning)
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV bool	Perl_grok_bslash_o(pTHX_ char** s, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool silence_non_portable, const bool utf8)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_GROK_BSLASH_O	\
+	assert(s); assert(uv); assert(error_msg)
 
 PERL_CALLCONV UV	Perl_grok_hex(pTHX_ const char* start, STRLEN* len_p, I32* flags, NV *result)
 			__attribute__nonnull__(pTHX_1)
@@ -7312,24 +7330,6 @@ PERL_CALLCONV SV*	Perl__core_swash_init(pTHX_ const char* pkg, const char* name,
 
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-STATIC char*	S_form_short_octal_warning(pTHX_ const char * const s, const STRLEN len)
-			__attribute__warn_unused_result__
-			__attribute__pure__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_FORM_SHORT_OCTAL_WARNING	\
-	assert(s)
-
-STATIC char	S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
-			__attribute__warn_unused_result__;
-
-STATIC bool	S_grok_bslash_o(pTHX_ char** s, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool silence_non_portable, const bool utf8)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_GROK_BSLASH_O	\
-	assert(s); assert(uv); assert(error_msg)
-
 PERL_STATIC_INLINE bool	S_grok_bslash_x(pTHX_ char** s, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool silence_non_portable, const bool utf8)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)

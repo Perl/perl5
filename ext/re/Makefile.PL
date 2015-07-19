@@ -24,7 +24,7 @@ sub upupfile {
 sub postamble {
     my $regcomp_c = upupfile('regcomp.c');
     my $regexec_c = upupfile('regexec.c');
-    my $dquote_static_c = upupfile('dquote_static.c');
+    my $dquote_c = upupfile('dquote.c');
     my $invlist_inline_h = upupfile('invlist_inline.h');
 
     <<EOF;
@@ -32,7 +32,7 @@ re_comp.c : $regcomp_c
 	- \$(RM_F) re_comp.c
 	\$(CP) $regcomp_c re_comp.c
 
-re_comp\$(OBJ_EXT) : re_comp.c dquote_static.c invlist_inline_h
+re_comp\$(OBJ_EXT) : re_comp.c dquote.c invlist_inline_h
 
 re_exec.c : $regexec_c
 	- \$(RM_F) re_exec.c
@@ -40,9 +40,9 @@ re_exec.c : $regexec_c
 
 re_exec\$(OBJ_EXT) : re_exec.c invlist_inline_h
 
-dquote_static.c : $dquote_static_c
-	- \$(RM_F) dquote_static.c
-	\$(CP) $dquote_static_c dquote_static.c
+dquote.c : $dquote_c
+	- \$(RM_F) dquote.c
+	\$(CP) $dquote_c dquote.c
 
 invlist_inline_h : $inline_invlist_c
 	- \$(RM_F) invlist_inline_h

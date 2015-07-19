@@ -38,7 +38,6 @@ Individual members of C<PL_parser> have their own documentation.
 #include "EXTERN.h"
 #define PERL_IN_TOKE_C
 #include "perl.h"
-#include "dquote_static.c"
 #include "dquote_inline.h"
 
 #define new_constant(a,b,c,d,e,f,g)	\

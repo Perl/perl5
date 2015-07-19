@@ -902,7 +902,10 @@
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
+#define form_short_octal_warning(a,b)	Perl_form_short_octal_warning(aTHX_ a,b)
 #define grok_atoUV		Perl_grok_atoUV
+#define grok_bslash_c(a,b)	Perl_grok_bslash_c(aTHX_ a,b)
+#define grok_bslash_o(a,b,c,d,e,f,g)	Perl_grok_bslash_o(aTHX_ a,b,c,d,e,f,g)
 #define mg_find_mglob(a)	Perl_mg_find_mglob(aTHX_ a)
 #define multideref_stringify(a,b)	Perl_multideref_stringify(aTHX_ a,b)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)
@@ -1038,9 +1041,6 @@
 #define _core_swash_init(a,b,c,d,e,f,g)	Perl__core_swash_init(aTHX_ a,b,c,d,e,f,g)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-#define form_short_octal_warning(a,b)	S_form_short_octal_warning(aTHX_ a,b)
-#define grok_bslash_c(a,b)	S_grok_bslash_c(aTHX_ a,b)
-#define grok_bslash_o(a,b,c,d,e,f,g)	S_grok_bslash_o(aTHX_ a,b,c,d,e,f,g)
 #define grok_bslash_x(a,b,c,d,e,f,g)	S_grok_bslash_x(aTHX_ a,b,c,d,e,f,g)
 #define regcurly		S_regcurly
 #  endif

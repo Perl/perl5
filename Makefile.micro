@@ -14,7 +14,7 @@ RUN =
 
 all:	microperl
 
-O = uav$(_O) udeb$(_O) udoio$(_O) udoop$(_O) udump$(_O) \
+O = uav$(_O) udeb$(_O) udoio$(_O) udoop$(_O) udquote$(_O) udump$(_O) \
 	uglobals$(_O) ugv$(_O) uhv$(_O) umro$(_O)\
 	umg$(_O) uperlmain$(_O) uop$(_O) ureentr$(_O) \
 	upad$(_O) uperl$(_O) uperlio$(_O) uperly$(_O) upp$(_O) \
@@ -75,6 +75,9 @@ udoio$(_O):	$(HE) doio.c
 
 udoop$(_O):	$(HE) doop.c
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) doop.c
+
+udquote$(_O):	$(HE) dquote.c regcomp.h regnodes.h
+	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) dquote.c
 
 udump$(_O):	$(HE) dump.c regcomp.h regnodes.h
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) dump.c

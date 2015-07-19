@@ -1,22 +1,21 @@
-/*    dquote_static.c
+/*    dquote.c
  *
- * This file contains static functions that are related to
- * parsing double-quotish expressions, but are used in more than
- * one file.
+ * This file contains functions that are related to
+ * parsing double-quotish expressions.
  *
- * It is currently #included by regcomp.c and toke.c.
 */
 
-#define PERL_IN_DQUOTE_STATIC_C
-#include "embed.h"
+#include "EXTERN.h"
+#define PERL_IN_DQUOTE_C
+#include "perl.h"
 
 /* XXX Add documentation after final interface and behavior is decided */
 /* May want to show context for error, so would pass S_grok_bslash_c(pTHX_ const char* current, const char* start, const bool output_warning)
     U8 source = *current;
 */
 
-STATIC char
-S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
+char
+Perl_grok_bslash_c(pTHX_ const char source, const bool output_warning)
 {
 
     U8 result;
@@ -55,8 +54,8 @@ S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
     return result;
 }
 
-STATIC bool
-S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
+bool
+Perl_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
                       const bool output_warning, const bool strict,
                       const bool silence_non_portable,
                       const bool UTF)
@@ -166,8 +165,8 @@ S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
     return TRUE;
 }
 
-STATIC char*
-S_form_short_octal_warning(pTHX_
+char*
+Perl_form_short_octal_warning(pTHX_
                            const char * const s, /* Points to first non-octal */
                            const STRLEN len      /* Length of octals string, so
                                                     (s-len) points to first

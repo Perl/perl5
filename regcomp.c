@@ -86,7 +86,6 @@ EXTERN_C const struct regexp_engine my_reg_engine;
 #  include "regcomp.h"
 #endif
 
-#include "dquote_static.c"
 #include "dquote_inline.h"
 #include "invlist_inline.h"
 #include "unicode_constants.h"
