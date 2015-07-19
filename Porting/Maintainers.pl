@@ -533,11 +533,13 @@ use File::Glob qw(:case);
     },
 
     'File::Path' => {
-        'DISTRIBUTION' => 'DLAND/File-Path-2.09.tar.gz',
+        'DISTRIBUTION' => 'RICHE/File-Path-2.11.tar.gz',
         'FILES'        => q[cpan/File-Path],
         'EXCLUDED'     => [
             qw( eg/setup-extra-tests
                 t/pod.t
+                t/Path-Class.t
+                README.md
                 )
         ],
         'MAP' => {
