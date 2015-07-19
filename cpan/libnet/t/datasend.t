@@ -44,7 +44,7 @@ BEGIN {
 (my $libnet_t = __FILE__) =~ s/datasend.t/libnet_t.pl/;
 require $libnet_t or die;
 
-print "1..51\n";
+print "1..54\n";
 
 sub check {
   my $expect = pop;
@@ -158,3 +158,10 @@ check(
   "a\015\012..\015\012.\015\012",
 );
 
+# Test that datasend() plays nicely with bytes in an upgraded string,
+# even though the input should really be encode()d already.
+check(
+  substr("\x{100}", 0, 0) . "\x{e9}",
+
+  "\x{e9}\015\012.\015\012"
+);

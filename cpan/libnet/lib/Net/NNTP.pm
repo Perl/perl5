@@ -2,7 +2,7 @@
 #
 # Versions up to 2.24_1 Copyright (c) 1995-1997 Graham Barr <gbarr@pobox.com>.
 # All rights reserved.
-# Changes in Version 2.25 onwards Copyright (C) 2013-2014 Steve Hay.  All rights
+# Changes in Version 2.25 onwards Copyright (C) 2013-2015 Steve Hay.  All rights
 # reserved.
 # This module is free software; you can redistribute it and/or modify it under
 # the same terms as Perl itself, i.e. under the terms of either the GNU General
@@ -21,7 +21,7 @@ use Net::Cmd;
 use Net::Config;
 use Time::Local;
 
-our $VERSION = "3.06";
+our $VERSION = "3.07";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
@@ -35,15 +35,18 @@ my $nossl_warn = !$ssl_class &&
   'To use SSL please install IO::Socket::SSL with version>=2.007';
 
 # Code for detecting if we can use IPv6
+my $family_key = 'Domain';
 my $inet6_class = eval {
   require IO::Socket::IP;
   no warnings 'numeric';
-  IO::Socket::IP->VERSION(0.20);
+  IO::Socket::IP->VERSION(0.20) || die;
+  $family_key = 'Family';
 } && 'IO::Socket::IP' || eval {
   require IO::Socket::INET6;
   no warnings 'numeric';
   IO::Socket::INET6->VERSION(2.62);
 } && 'IO::Socket::INET6';
+
 
 sub can_ssl   { $ssl_class };
 sub can_inet6 { $inet6_class };
@@ -81,9 +84,10 @@ sub new {
     $connect{$_} = $arg{$_} for(grep { m{^SSL_} } keys %arg);
   }
 
-  foreach my $o (qw(LocalAddr Timeout)) {
+  foreach my $o (qw(LocalAddr LocalPort Timeout)) {
     $connect{$o} = $arg{$o} if exists $arg{$o};
   }
+  $connect{$family_key} = $arg{Domain} || $arg{Family};
   $connect{Timeout} = 120 unless defined $connect{Timeout};
   $connect{PeerPort} = $arg{Port} || 'nntp(119)';
   foreach my $h (@{$hosts}) {
@@ -799,8 +803,11 @@ Net::NNTP - NNTP Client class
 
 C<Net::NNTP> is a class implementing a simple NNTP client in Perl as described
 in RFC977 and RFC4642.
+With L<IO::Socket::SSL> installed it also provides support for implicit and
+explicit TLS encryption, i.e. NNTPS or NNTP+STARTTLS.
 
-The Net::NNTP class is a subclass of Net::Cmd and IO::Socket::INET.
+The Net::NNTP class is a subclass of Net::Cmd and (depending on avaibility) of
+IO::Socket::IP, IO::Socket::INET6 or IO::Socket::INET.
 
 =head1 CONSTRUCTOR
 
@@ -843,10 +850,12 @@ so that the remote server becomes innd. If the C<Reader> option is given
 with a value of zero, then this command will not be sent and the
 connection will be left talking to nnrpd.
 
-B<LocalAddr> - If multiple IP addresses are present on the client host
-with a valid route to the destination, you can specify the address your
-C<Net::NNTP> connects from and this way override the operating system's
-pick.
+B<LocalAddr> and B<LocalPort> - These parameters are passed directly
+to IO::Socket to allow binding the socket to a specific local address and port.
+
+B<Domain> - This parameter is passed directly to IO::Socket and makes it
+possible to enforce IPv4 connections even if L<IO::Socket::IP> is used as super
+class. Alternatively B<Family> can be used.
 
 =back
 
@@ -947,15 +956,17 @@ implementation) from the server. Returns the text or undef upon failure.
 
 The C<ihave> command informs the server that the client has an article
 whose id is C<MSGID>.  If the server desires a copy of that
-article, and C<MESSAGE> has been given the it will be sent.
+article and C<MESSAGE> has been given then it will be sent.
 
 Returns I<true> if the server desires the article and C<MESSAGE> was
-successfully sent,if specified.
+successfully sent, if specified.
 
 If C<MESSAGE> is not specified then the message must be sent using the
 C<datasend> and C<dataend> methods from L<Net::Cmd>
 
-C<MESSAGE> can be either an array of lines or a reference to an array.
+C<MESSAGE> can be either an array of lines or a reference to an array
+and must be encoded by the caller to octets of whatever encoding is required,
+e.g. by using the Encode module's C<encode()> function.
 
 =item last ()
 
@@ -1028,7 +1039,9 @@ is allowed then the message will be sent.
 If C<MESSAGE> is not specified then the message must be sent using the
 C<datasend> and C<dataend> methods from L<Net::Cmd>
 
-C<MESSAGE> can be either an array of lines or a reference to an array.
+C<MESSAGE> can be either an array of lines or a reference to an array
+and must be encoded by the caller to octets of whatever encoding is required,
+e.g. by using the Encode module's C<encode()> function.
 
 The message, either sent via C<datasend> or as the C<MESSAGE>
 parameter, must be in the format as described by RFC822 and must
@@ -1279,7 +1292,7 @@ Steve Hay E<lt>F<shay@cpan.org>E<gt> is now maintaining libnet as of version
 =head1 COPYRIGHT
 
 Versions up to 2.24_1 Copyright (c) 1995-1997 Graham Barr. All rights reserved.
-Changes in Version 2.25 onwards Copyright (C) 2013-2014 Steve Hay.  All rights
+Changes in Version 2.25 onwards Copyright (C) 2013-2015 Steve Hay.  All rights
 reserved.
 
 This module is free software; you can redistribute it and/or modify it under the

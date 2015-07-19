@@ -2,7 +2,7 @@
 #
 # Versions up to 2.29_1 Copyright (c) 1995-2006 Graham Barr <gbarr@pobox.com>.
 # All rights reserved.
-# Changes in Version 2.29_2 onwards Copyright (C) 2013-2014 Steve Hay.  All
+# Changes in Version 2.29_2 onwards Copyright (C) 2013-2015 Steve Hay.  All
 # rights reserved.
 # This module is free software; you can redistribute it and/or modify it under
 # the same terms as Perl itself, i.e. under the terms of either the GNU General
@@ -27,22 +27,7 @@ BEGIN {
   }
 }
 
-BEGIN {
-  if (!eval { require utf8 }) {
-    *is_utf8 = sub { 0 };
-  }
-  elsif (eval { utf8::is_utf8(undef); 1 }) {
-    *is_utf8 = \&utf8::is_utf8;
-  }
-  elsif (eval { require Encode; Encode::is_utf8(undef); 1 }) {
-    *is_utf8 = \&Encode::is_utf8;
-  }
-  else {
-    *is_utf8 = sub { $_[0] =~ /[^\x00-\xff]/ };
-  }
-}
-
-our $VERSION = "3.06";
+our $VERSION = "3.07";
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(CMD_INFO CMD_OK CMD_MORE CMD_REJECT CMD_ERROR CMD_PENDING);
 
@@ -429,9 +414,17 @@ sub datasend {
   my $arr  = @_ == 1 && ref($_[0]) ? $_[0] : \@_;
   my $line = join("", @$arr);
 
-  # encode to individual utf8 bytes if
-  # $line is a string (in internal UTF-8)
-  utf8::encode($line) if is_utf8($line);
+  # Perls < 5.10.1 (with the exception of 5.8.9) have a performance problem with
+  # the substitutions below when dealing with strings stored internally in
+  # UTF-8, so downgrade them (if possible).
+  # Data passed to datasend() should be encoded to octets upstream already so
+  # shouldn't even have the UTF-8 flag on to start with, but if it so happens
+  # that the octets are stored in an upgraded string (as can sometimes occur)
+  # then they would still downgrade without fail anyway.
+  # Only Unicode codepoints > 0xFF stored in an upgraded string will fail to
+  # downgrade. We fail silently in that case, and a "Wide character in print"
+  # warning will be emitted later by syswrite().
+  utf8::downgrade($line, 1) if $] < 5.010001 && $] != 5.008009;
 
   return 0
     if $cmd->_is_closed;
@@ -722,6 +715,8 @@ is pending then C<CMD_PENDING> is returned.
 Send data to the remote server, converting LF to CRLF. Any line starting
 with a '.' will be prefixed with another '.'.
 C<DATA> may be an array or a reference to an array.
+The C<DATA> passed in must be encoded by the caller to octets of whatever
+encoding is required, e.g. by using the Encode module's C<encode()> function.
 
 =item dataend ()
 
@@ -794,6 +789,9 @@ Unget a line of text from the server.
 
 Send data to the remote server without performing any conversions. C<DATA>
 is a scalar.
+As with C<datasend()>, the C<DATA> passed in must be encoded by the caller
+to octets of whatever encoding is required, e.g. by using the Encode module's
+C<encode()> function.
 
 =item read_until_dot ()
 

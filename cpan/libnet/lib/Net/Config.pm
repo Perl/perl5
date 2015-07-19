@@ -20,7 +20,7 @@ use Socket qw(inet_aton inet_ntoa);
 
 our @EXPORT  = qw(%NetConfig);
 our @ISA     = qw(Net::LocalCfg Exporter);
-our $VERSION = "3.06";
+our $VERSION = "3.07";
 
 our($CONFIGURE, $LIBNET_CFG);
 
@@ -134,7 +134,7 @@ __END__
 
 Net::Config - Local configuration data for libnet
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     use Net::Config qw(%NetConfig);
 
