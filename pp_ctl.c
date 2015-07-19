@@ -2125,9 +2125,10 @@ PP(pp_enteriter)
 
     if (PL_op->op_targ) {			 /* "my" variable */
 	if (PL_op->op_private & OPpLVAL_INTRO) {        /* for my $x (...) */
-	    SvPADSTALE_off(PAD_SVl(PL_op->op_targ));
-	    SAVESETSVFLAGS(PAD_SVl(PL_op->op_targ),
-		    SVs_PADSTALE, SVs_PADSTALE);
+            /* the SV currently in the pad slot is never live during
+             * iteration (the slot is always aliased to one of the items)
+             * so it's always stale */
+	    SvPADSTALE_on(PAD_SVl(PL_op->op_targ));
 	}
 	SAVEPADSVANDMORTALIZE(PL_op->op_targ);
 	itervar = &PAD_SVl(PL_op->op_targ);
