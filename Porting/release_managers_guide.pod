@@ -552,7 +552,7 @@ For each Perl release since the previous release of the current branch, check
 for modules that have identical version numbers but different contents by
 running:
 
-    $ ./perl Porting/cmpVERSION.pl --tag=v5.X.YY
+    $ ./perl -Ilib Porting/cmpVERSION.pl --tag=v5.X.YY
 
 (This is done automatically by F<t/porting/cmp_version.t> for the previous
 release of the current branch, but not for any releases from other branches.)
