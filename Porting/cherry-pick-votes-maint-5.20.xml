@@ -18,7 +18,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 2a403855670ae8592c5a3ca4396e6e909a4fc593 (perlunicook: Note that autodie &gt;= 2.26 should be okay with "use open".)
+Blead changes have been examined up to and including 6f94e846cb666949e6a593495d6de3144276a3d6 (t/run/locale.t: Remove obsolete comments)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -48,6 +48,25 @@ This fix has a problem with it that needs to be solved before we can backport it
 <commit votes="steveh, khw" id="f63bc603acea5e0f476f181de698958c4ddcccba" ticket="123554" desc="perldelta: Fix typo"/>
 <commit votes="steveh, hv" id="cc31571878894dd5f5af83722ca0c2a24621300c" ticket="123554" desc="[perl #123554] stop checking the message"/>
 
+<commit votes="steveh" id="83a85f49e265a458a481a9dc402dd3bdd30ae457" ticket="123711" desc="[perl #123711] Fix crash with 0-5x-l{0}"/>
+<commit votes="steveh" id="5fe499a8e26270679c0c6d48431f3a328a8ffeba" ticket="123218" desc="[perl #123218] 'preserve' $/ if set to a bad value"/>
+
+Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
+<commit votes="steveh" id="67c71cbbd62a75ff2b913421806f6ea0f0b33558" ticket="" desc="Fix double free with const overload after errors"/>
+
+<commit votes="steveh" id="eabab8bccf871f8e85dfa4a3825827825fb86cd9" ticket="123617" desc="Localise PL_lex_stuff (crash fix)"/>
+
+<commit votes="steveh" id="8d28fc8f69270cc75d9564b369ac6008c5b5d617" ticket="123748" desc="[perl #123748] - Add test case for possible getenv/putenv/setenv stomping in perl.c"/>
+<commit votes="steveh" id="175c4cf98f8ca99cd4f626369ef0beb1d69f8ce5" ticket="123748" desc="locale.c: savepv() of getenv()"/>
+<commit votes="steveh" id="9e0b0d62ba5a660ab4b6f498912cfaead79014a0" ticket="123748" desc="perl.c: Don't read possibly zapped memory"/>
+
+<commit votes="steveh" id="488bc5795891132d29daec7a860cab2a6266230c" ticket="123737" desc="[perl #123737] Fix assertion failure with 0${"/>
+<commit votes="steveh" id="310a0d0a370ea21c004bfea4bbdd2cf15da94547" ticket="123737" desc="[perl #123737] Fix assertion failure with 0$#{"/>
+
+<commit votes="steveh" id="fb0c7c3c47fb17bb0b685b957af9a0cc581c8996" ticket="123753" desc="[perl #123753] Fix assertion failure with map+map"/>
+<commit votes="steveh" id="3c47da3c2ebf51f08bb927dfa456939cc6c8c30f" ticket="123753" desc="[perl #123753] &amp;\0foo parsing"/>
+<commit votes="steveh" id="eea89386b3fb948a8b1eb5ea860ec0a970c9e559" ticket="123753" desc="[perl #123753] Assert fail with &amp;{+foo} and errors"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
@@ -59,6 +78,9 @@ This fix has a problem with it that needs to be solved before we can backport it
 <div><h3>Build and Installation Fixes</h3>
 
 <commit votes="steveh, khw" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
+
+<commit votes="" id="7ea096df5f40b4bb14879699f74bf1f11a856b55" ticket="" desc="static_assert workaround for AIX/xlc"/>
+<commit votes="" id="84ad9c6c2d2072cd602e0f4ee76fd4ac5107dc3d" ticket="" desc="Lukas Mai has two email addresses."/>
 
 </div>
 
@@ -85,6 +107,7 @@ This fix has a problem with it that needs to be solved before we can backport it
 <commit votes="steveh, khw" id="f2979eac0a03fcba1cd431ef3d46f697176ebcc8" ticket="" desc="improve SvPV_set's docs, it really shouldn't be public API"/>
 <commit votes="steveh" id="730d89736d0ae5dfc7580108c451efe91b5102fc" ticket="" desc="Fix warning message regarding 'use autodie' and 'use open'."/>
 <commit votes="steveh" id="2a403855670ae8592c5a3ca4396e6e909a4fc593" ticket="" desc="perlunicook: Note that autodie &gt;= 2.26 should be okay with 'use open'."/>
+<commit votes="steveh" id="7ad03f5069e771fe44e92b694a23f10354c548d1" ticket="" desc="Fix setenv() replacement documentation in perlclib"/>
 
 </div>
 
