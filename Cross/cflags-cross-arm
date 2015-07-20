@@ -103,6 +103,7 @@ for file do
     scope) ;;
     sv) ;;
     taint) ;;
+    time64) ;;
     toke) ;;
     universal) ;;
     usersub) ;;

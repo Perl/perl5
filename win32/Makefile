@@ -731,6 +731,7 @@ MICROCORE_SRC	=		\
 		..\scope.c	\
 		..\sv.c		\
 		..\taint.c	\
+		..\time64.c	\
 		..\toke.c	\
 		..\universal.c	\
 		..\utf8.c	\

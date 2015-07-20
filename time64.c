@@ -33,12 +33,15 @@ long' type can use localtime64_r() and gmtime64_r() which correctly
 converts the time even on 32-bit systems. Whether you have 64-bit time
 values will depend on the operating system.
 
-S_localtime64_r() is a 64-bit equivalent of localtime_r().
+Perl_localtime64_r() is a 64-bit equivalent of localtime_r().
 
-S_gmtime64_r() is a 64-bit equivalent of gmtime_r().
+Perl_gmtime64_r() is a 64-bit equivalent of gmtime_r().
 
 */
 
+#include "EXTERN.h"
+#define PERL_IN_TIME64_C
+#include "perl.h"
 #include "time64.h"
 
 static const char days_in_month[2][12] = {
@@ -340,7 +343,7 @@ static struct tm * S_gmtime_r(const time_t *clock, struct tm *result) {
 }
 #endif
 
-static struct TM *S_gmtime64_r (const Time64_T *in_time, struct TM *p)
+struct TM *Perl_gmtime64_r (const Time64_T *in_time, struct TM *p)
 {
     int v_tm_sec, v_tm_min, v_tm_hour, v_tm_mon, v_tm_wday;
     Time64_T v_tm_tday;
@@ -467,7 +470,7 @@ static struct TM *S_gmtime64_r (const Time64_T *in_time, struct TM *p)
 }
 
 
-static struct TM *S_localtime64_r (const Time64_T *time, struct TM *local_tm)
+struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
 {
     time_t safe_time;
     struct tm safe_date;
@@ -491,7 +494,7 @@ static struct TM *S_localtime64_r (const Time64_T *time, struct TM *local_tm)
         return local_tm;
     }
 
-    if( S_gmtime64_r(time, &gm_tm) == NULL ) {
+    if( Perl_gmtime64_r(time, &gm_tm) == NULL ) {
         TIME64_TRACE1("gmtime64_r returned null for %lld\n", *time);
         return NULL;
     }
