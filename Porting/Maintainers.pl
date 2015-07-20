@@ -22,7 +22,7 @@ use File::Glob qw(:case);
     COPYING Copying cpanfile CREDITS dist.ini GOALS HISTORY INSTALL INSTALL.SKIP
     LICENCE LICENSE Makefile.PL MANIFEST MANIFEST.SKIP META.json META.yml
     MYMETA.json MYMETA.yml NEW NEWS NOTES perlcritic.rc ppport.h README
-    README.PATCHING SIGNATURE THANKS TODO Todo VERSION WHATSNEW
+    README.md README.PATCHING SIGNATURE THANKS TODO Todo VERSION WHATSNEW
 );
 
 # Each entry in the  %Modules hash roughly represents a distribution,
@@ -342,7 +342,6 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Devel-PPPort],
         'EXCLUDED'     => [
             'PPPort.pm',    # we use PPPort_pm.PL instead
-            'README.md',
         ]
     },
 
@@ -539,7 +538,6 @@ use File::Glob qw(:case);
             qw( eg/setup-extra-tests
                 t/pod.t
                 t/Path-Class.t
-                README.md
                 )
         ],
         'MAP' => {
@@ -849,7 +847,6 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'ETHER/Module-Metadata-1.000027.tar.gz',
         'FILES'        => q[cpan/Module-Metadata],
         'EXCLUDED'     => [
-            qw(README.md),
             qw(t/00-report-prereqs.t),
             qw(t/00-report-prereqs.dd),
             qr{^xt},
@@ -859,9 +856,6 @@ use File::Glob qw(:case);
     'Net::Ping' => {
         'DISTRIBUTION' => 'SMPETERS/Net-Ping-2.41.tar.gz',
         'FILES'        => q[dist/Net-Ping],
-        'EXCLUDED'     => [
-            qr{^README.md},
-        ],
     },
 
     'NEXT' => {
