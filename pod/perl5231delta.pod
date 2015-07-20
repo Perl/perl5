@@ -1,0 +1,317 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5231delta - what is new for perl v5.23.1
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.23.0 release and the 5.23.1
+release.
+
+If you are upgrading from an earlier release such as 5.22.0, first read
+L<perl5230delta>, which describes differences between 5.22.0 and 5.23.0.
+
+=head1 Core Enhancements
+
+=head2 Integer shift (C<< << >> and C<< >> >>) now more explicitly defined
+
+Negative shifts are reverse shifts: left shift becomes right shift,
+and right shift becomes left shift.
+
+Shifting by the number of bits in a native integer (or more) is zero,
+except when the "overshift" is right shifting a negative value under
+C<use integer>, in which case the result is -1 (arithmetic shift).
+
+Until now negative shifting and overshifting have been undefined
+because they have relied on whatever the C implementation happens
+to do.  For example, for the overshift a common C behavior is
+"modulo shift":
+
+  1 >> 64 == 1 >> (64 % 64) == 1 >> 0 == 1  # Common C behavior.
+
+  # And the same for <<, while Perl now produces 0 for both.
+
+Now these behaviors are well-defined under Perl, regardless of what
+the underlying C implementation does.  Note, however, that you cannot
+escape the native integer width, you need to know how far left you
+can go.  You can use for example:
+
+  use Config;
+  my $wordbits = $Config{uvsize} * 8;  # Or $Config{uvsize} << 3.
+
+If you need a more bits on the left shift, you can use for example
+the C<bigint> pragma, or the C<Bit::Vector> module from CPAN.
+
+=head2 Postfix dereferencing is no longer experimental
+
+Using the C<postderef> and C<postderef_qq> features no longer emits a
+warning. Existing code that disables the C<experimental::postderef> warning
+category that they previously used will continue to work. The C<postderef>
+feature has no effect; all Perl code can use postfix dereferencing,
+regardless of what feature declarations are in scope. The C<5.24> feature
+bundle now includes the C<postderef_qq> feature.
+
+=head2 printf and sprintf now allow reordered precision arguments
+
+That is, C<< sprintf '|%.*2$|', 2, 3 >> now returns C<|002|>. This extends
+the existing reordering mechanism (which allows reordering for arguments
+that are used as format fields, widths, and vector separators).
+
+=head1 Incompatible Changes
+
+=head2 ASCII characters in variable names must now be all visible
+
+It was legal until now on ASCII platforms for variable names to contain
+non-graphical ASCII control characters (ordinals 0 through 31, and 127,
+which are the C0 controls and C<DELETE>).  This usage has been
+deprecated since v5.20, and as of now causes a syntax error.  The
+variables these names referred to are special, reserved by Perl for
+whatever use it may choose, now, or in the future.  Each such variable
+has an alternative way of spelling it.  Instead of the single
+non-graphic control character, a two character sequence beginning with a
+caret is used, like C<$^]> and C<${^GLOBAL_PHASE}>.  Details are at
+L<perlvar>.   It remains legal, though unwise and deprecated (raising a
+deprecation warning), to use certain non-graphic non-ASCII characters in
+variables names when not under S<C<use utf8>>.  No code should do this,
+as all such variables are reserved by Perl, and Perl doesn't currently
+define any of them (but could at any time, without notice).
+
+=head2 The C<autoderef> feature has been removed
+
+The experimental C<autoderef> feature (which allowed calling C<push>,
+C<pop>, C<shift>, C<unshift>, C<splice>, C<keys>, C<values>, and C<each> on
+a scalar argument) has been deemed unsuccessful. It has now been removed;
+trying to use the feature (or to disable the C<experimental::autoderef>
+warning it previously triggered) now yields an exception.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+The libnet distribution has been upgraded from version 3.06 to 3.07.
+
+=item *
+
+L<autodie> has been upgraded from version 2.27 to 2.29.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<Encode> has been upgraded from version 2.73 to 2.75.
+
+=item *
+
+L<encoding> has been upgraded from version 2.15 to 2.16.
+
+=item *
+
+L<feature> has been upgraded from version 1.41 to 1.42.
+
+=item *
+
+L<File::Path> has been upgraded from version 2.09 to 2.11.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.46 to 2.47.
+
+=item *
+
+L<I18N::Langinfo> has been upgraded from version 0.12 to 0.13.
+
+=item *
+
+L<IPC::Open3> has been upgraded from version 1.18 to 1.19.
+
+If a Perl exception was thrown from inside this module, the exception
+C<IPC::Open3> threw to the callers of C<open3> would have an irrelevant
+message derived from C<$!> which was in an undefined state, instead of the
+C<$@> message which triggers the failure path inside C<open3>.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20150620 to 5.20150720.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.22 to 0.23.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.54 to 1.55.
+
+=item *
+
+L<Socket> has been upgraded from version 2.019 to 2.020.
+
+=item *
+
+L<Storable> has been upgraded from version 2.53 to 2.54.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.12 to 1.14.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.18 to 1.19.
+
+=item *
+
+L<warnings> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<XS::Typemap> has been upgraded from version 0.13 to 0.14.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+The C<printf> and C<sprintf> builtins are now more careful about the
+warnings they emit: argument reordering now disables the "redundant
+argument" warning in all cases; and invalid format strings are no longer
+treated as absorbing arguments (so "redundant argument" warnings can
+correctly be emitted by such code).
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item VMS
+
+=over
+
+=item *
+
+The minimum supported version of VMS is now v7.3-2, released in 2003.  As a
+side effect of this change, VAX is no longer supported as the terminal
+release of OpenVMS VAX was v7.3 in 2001.
+
+=back
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+C<sv_catpvf> and related functions (including C<sv_vcatpvfn_flags> when
+called with a C<va_list> rather than an array of SV pointers) have never
+handled argument reordering. Attempts to reorder arguments now yield an
+exception, rather than being silently ignored.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+A leak in the XS typemap caused one scalar to be leaked each time a C<FILE *>
+or a C<PerlIO *> was C<OUTPUT:>ed or imported to Perl, since perl 5.000. These
+particular typemap entries are thought to be extremely rarely used by XS
+modules. [perl #124181]
+
+=item *
+
+C<alarm()> and C<sleep()> will now warn if the argument is a negative number
+and return undef. Previously they would pass the negative value to the
+underlying C function which may have set up a timer with a surprising value.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.23.1 represents approximately 4 weeks of development since Perl 5.23.0
+and contains approximately 8,400 lines of changes across 320 files from 22
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 5,000 lines of changes to 140 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.23.1:
+
+Aaron Crane, Aristotle Pagaltzis, Chas. Owens, Chris 'BinGOs' Williams, Craig
+A. Berry, Daniel Dragan, David Mitchell, Father Chrysostomos, Herbert Breunung,
+H.Merijn Brand, James E Keenan, Jarkko Hietaniemi, Karen Etheridge, Karl
+Williamson, Leon Timmermans, Matthew Horsfall, Max Maischein, Rafael
+Garcia-Suarez, Ricardo Signes, Stanislaw Pusep, Steve Hay, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
