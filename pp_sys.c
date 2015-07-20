@@ -30,7 +30,6 @@
 #define PERL_IN_PP_SYS_C
 #include "perl.h"
 #include "time64.h"
-#include "time64.c"
 
 #ifdef I_SHADOW
 /* Shadow password support for solaris - pdo@cs.umd.edu
@@ -4671,9 +4670,9 @@ PP(pp_gmtime)
     }
     else {
 	if (PL_op->op_type == OP_LOCALTIME)
-	    err = S_localtime64_r(&when, &tmbuf);
+	    err = Perl_localtime64_r(&when, &tmbuf);
 	else
-	    err = S_gmtime64_r(&when, &tmbuf);
+	    err = Perl_gmtime64_r(&when, &tmbuf);
     }
 
     if (err == NULL) {
