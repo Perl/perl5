@@ -33,6 +33,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 </div>
 
+<div><h3>Security Fixes</h3>
+
+</div>
+
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
@@ -46,17 +50,19 @@ This fix has a problem with it that needs to be solved before we can backport it
 
 </div>
 
-<div><h3>Security Fixes</h3>
-
-</div>
-
-<div><h3>Other Regression Fixes</h3>
+<div><h3>Regression Fixes</h3>
 
 <commit votes="tonyc" id="bae8cfc6926f9b04d8adac6a9ee6d563cc18263f" ticket="125121" desc="Don’t treat setpgrp($nonzero) as setpgrp(1)"/>
 
 </div>
 
-<div><h3>Configure and hints Fixes (Consider whether these in particular would break binary compatibility)</h3>
+<div><h3>Build and Installation Fixes</h3>
+
+<commit votes="steveh, khw" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
+
+</div>
+
+<div><h3>Portability Fixes</h3>
 
 <commit votes="tux, arc" id="a4c2c75af551764534f9f8cb6afd4ef6ba514f45" ticket="" desc="Change os390 custom cppstdin script to use fgrep."/>
 
@@ -67,9 +73,7 @@ This fix has a problem with it that needs to be solved before we can backport it
 
 </div>
 
-<div><h3>Platform-Specific Build/Test/Installation Fixes</h3>
-
-<commit votes="steveh, khw" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
+<div><h3>Platform-Specific Test Fixes</h3>
 
 </div>
 
@@ -81,13 +85,6 @@ This fix has a problem with it that needs to be solved before we can backport it
 <commit votes="steveh, khw" id="f2979eac0a03fcba1cd431ef3d46f697176ebcc8" ticket="" desc="improve SvPV_set's docs, it really shouldn't be public API"/>
 <commit votes="steveh" id="730d89736d0ae5dfc7580108c451efe91b5102fc" ticket="" desc="Fix warning message regarding 'use autodie' and 'use open'."/>
 <commit votes="steveh" id="2a403855670ae8592c5a3ca4396e6e909a4fc593" ticket="" desc="perlunicook: Note that autodie &gt;= 2.26 should be okay with 'use open'."/>
-
-</div>
-
-<div><h3>Other</h3>
-
-Bugfix in Safe (Opcode) still needs backporting to maint-5.20:
-http://code.activestate.com/lists/perl5-porters/210398/
 
 </div>
 
