@@ -85,7 +85,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.32';
+    $VERSION = '1.33';
 }
 
 use Config;
