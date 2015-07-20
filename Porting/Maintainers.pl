@@ -536,14 +536,9 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/File-Path],
         'EXCLUDED'     => [
             qw( eg/setup-extra-tests
-                t/pod.t
                 t/Path-Class.t
                 )
         ],
-        'MAP' => {
-            ''   => 'cpan/File-Path/lib/File/',
-            't/' => 'cpan/File-Path/t/',
-        },
     },
 
     'File::Temp' => {
