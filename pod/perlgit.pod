@@ -544,12 +544,12 @@ producing an error like this:
 As a matter of policy we do B<not> edit the history of the blead and
 maint-* branches. If a typo (or worse) sneaks into a commit to blead or
 maint-*, we'll fix it in another commit. The only types of updates
-allowed on these branches are "fast-forward's", where all history is
+allowed on these branches are "fast-forwards", where all history is
 preserved.
 
 Annotated tags in the canonical perl.git repository will never be
 deleted or modified. Think long and hard about whether you want to push
-a local tag to perl.git before doing so. (Pushing unannotated tags is
+a local tag to perl.git before doing so. (Pushing simple tags is
 not allowed.)
 
 =head2 Grafts
