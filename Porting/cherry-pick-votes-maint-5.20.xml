@@ -18,7 +18,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 6f94e846cb666949e6a593495d6de3144276a3d6 (t/run/locale.t: Remove obsolete comments)
+Blead changes have been examined up to and including e2f82642278e79d2e767a1c1f4215bd7f0f52152 (add a comment so people looking for "sub run_perl" find the right thing)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -49,7 +49,9 @@ This fix has a problem with it that needs to be solved before we can backport it
 <commit votes="steveh, hv" id="cc31571878894dd5f5af83722ca0c2a24621300c" ticket="123554" desc="[perl #123554] stop checking the message"/>
 
 <commit votes="steveh" id="83a85f49e265a458a481a9dc402dd3bdd30ae457" ticket="123711" desc="[perl #123711] Fix crash with 0-5x-l{0}"/>
+
 <commit votes="steveh" id="5fe499a8e26270679c0c6d48431f3a328a8ffeba" ticket="123218" desc="[perl #123218] 'preserve' $/ if set to a bad value"/>
+<commit votes="steveh" id="ddce084af02764d4f30ef6089ae67a7983fcc690" ticket="123739" desc="Remove get-magic from $/"/>
 
 Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="67c71cbbd62a75ff2b913421806f6ea0f0b33558" ticket="" desc="Fix double free with const overload after errors"/>
@@ -59,6 +61,7 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="8d28fc8f69270cc75d9564b369ac6008c5b5d617" ticket="123748" desc="[perl #123748] - Add test case for possible getenv/putenv/setenv stomping in perl.c"/>
 <commit votes="steveh" id="175c4cf98f8ca99cd4f626369ef0beb1d69f8ce5" ticket="123748" desc="locale.c: savepv() of getenv()"/>
 <commit votes="steveh" id="9e0b0d62ba5a660ab4b6f498912cfaead79014a0" ticket="123748" desc="perl.c: Don't read possibly zapped memory"/>
+<commit votes="steveh" id="7f8f1c2613d1d5df0b1071bd5fe3eec808c4a69e" ticket="123748" desc="Fix quoting in new switchd.t test."/>
 
 <commit votes="steveh" id="488bc5795891132d29daec7a860cab2a6266230c" ticket="123737" desc="[perl #123737] Fix assertion failure with 0${"/>
 <commit votes="steveh" id="310a0d0a370ea21c004bfea4bbdd2cf15da94547" ticket="123737" desc="[perl #123737] Fix assertion failure with 0$#{"/>
@@ -67,11 +70,26 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="3c47da3c2ebf51f08bb927dfa456939cc6c8c30f" ticket="123753" desc="[perl #123753] &amp;\0foo parsing"/>
 <commit votes="steveh" id="eea89386b3fb948a8b1eb5ea860ec0a970c9e559" ticket="123753" desc="[perl #123753] Assert fail with &amp;{+foo} and errors"/>
 
+<commit votes="steveh" id="7aa8cb0dec173dcfca4157e60634c74b97429a05" ticket="123677" desc="[perl #123677] Crash with token stack overflow"/>
+<commit votes="steveh" id="a53bfdae91fb2d719e69761f2d2f84c5d8a47753" ticket="123759" desc="[perl #123759] always count on OPpTRANS_IDENTICAL"/>
+
+<commit votes="steveh" id="8a6d8ec6fe627c401c6c759edd38bbb10e4b56e9" ticket="123755" desc="[perl #123755] including unknown char in error requires care"/>
+<commit votes="steveh" id="7082c44063b6e00b0bad96f3d8adec0946f1938c" ticket="123755" desc="regcomp can read past end of string after parsing flags"/>
+
+Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a788571f7141bd in 5.20.2 -- steveh
+<commit votes="steveh" id="9efda33a86bb90e4838144d230a4fc3ae4d63d7d" ticket="123554" desc="[perl #123554] catch a couple of other size overflows"/>
+<commit votes="steveh" id="296f0d566b9f3ad1885ae7493caaffbd0cf2eada" ticket="123554" desc="[perl #123554] fix threaded builds and prevent a warning"/>
+
+<commit votes="steveh" id="b3725d49f914ef2bed63d7eb92a72ef6e886b489" ticket="123782" desc="[perl #123782] regcomp: check for overflow on /(?123)/"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
 
 <commit votes="tonyc" id="bae8cfc6926f9b04d8adac6a9ee6d563cc18263f" ticket="125121" desc="Don’t treat setpgrp($nonzero) as setpgrp(1)"/>
+
+<commit votes="steveh" id="0fa70a06a98fc8fa9840d4dbaa31fc2d3b28b99b" ticket="123743" desc="simpify and speed up /.*.../ handling"/>
+<commit votes="steveh" id="3e33f67a69740d3a232ef7e31d7dbcb6793ef0aa" ticket="123743" desc="add some more tests for RT #123743"/>
 
 </div>
 
@@ -81,6 +99,7 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 
 <commit votes="" id="7ea096df5f40b4bb14879699f74bf1f11a856b55" ticket="" desc="static_assert workaround for AIX/xlc"/>
 <commit votes="" id="84ad9c6c2d2072cd602e0f4ee76fd4ac5107dc3d" ticket="" desc="Lukas Mai has two email addresses."/>
+<commit votes="" id="5074d4c567c632ecf22733b0a13d7fcec4a73037" ticket="" desc="add a comment documenting STATIC_ASSERT_GLOBAL/STATIC_ASSERT_STMT"/>
 
 </div>
 
