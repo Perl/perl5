@@ -288,7 +288,7 @@ If you want to delete your temporary branch, you may do so with:
 Assuming that you'd like to commit all the changes you've made as a
 single atomic unit, run this command:
 
-   % git commit -a
+  % git commit -a
 
 (That C<-a> tells git to add every file you've changed to this commit.
 New files aren't automatically added to your commit when you use
@@ -519,27 +519,27 @@ this via the following formula (see the explanation about C<refspec>'s
 in the git push documentation for details) after you have rebased your
 branch:
 
-   # first rebase
-   $ git checkout $user/$topic
-   $ git fetch
-   $ git rebase origin/blead
+  # first rebase
+  $ git checkout $user/$topic
+  $ git fetch
+  $ git rebase origin/blead
 
-   # then "delete-and-push"
-   $ git push origin :$user/$topic
-   $ git push origin $user/$topic
+  # then "delete-and-push"
+  $ git push origin :$user/$topic
+  $ git push origin $user/$topic
 
 B<NOTE:> it is forbidden at the repository level to delete any of the
 "primary" branches. That is any branch matching
 C<m!^(blead|maint|perl)!>. Any attempt to do so will result in git
 producing an error like this:
 
-    $ git push origin :blead
-    *** It is forbidden to delete blead/maint branches in this repository
-    error: hooks/update exited with error code 1
-    error: hook declined to update refs/heads/blead
-    To ssh://perl5.git.perl.org/perl
-     ! [remote rejected] blead (hook declined)
-     error: failed to push some refs to 'ssh://perl5.git.perl.org/perl'
+  $ git push origin :blead
+  *** It is forbidden to delete blead/maint branches in this repository
+  error: hooks/update exited with error code 1
+  error: hook declined to update refs/heads/blead
+  To ssh://perl5.git.perl.org/perl
+   ! [remote rejected] blead (hook declined)
+   error: failed to push some refs to 'ssh://perl5.git.perl.org/perl'
 
 As a matter of policy we do B<not> edit the history of the blead and
 maint-* branches. If a typo (or worse) sneaks into a commit to blead or
