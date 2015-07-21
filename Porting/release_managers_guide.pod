@@ -637,7 +637,10 @@ Also edit Module::CoreList's new version number in its F<Changes> file.
 
 =head4 Add Module::CoreList version bump to perldelta
 
-Add a perldelta entry for the new Module::CoreList version.
+Add a perldelta entry for the new Module::CoreList version. You only
+need to do this if you want to add notes about the changes included
+with this version of Module::CoreList. Otherwise, its version bump
+will be automatically filled in below in L<finalize perldelta>.
 
 =for checklist skip RC
 
