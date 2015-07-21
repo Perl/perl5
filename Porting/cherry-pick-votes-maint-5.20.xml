@@ -18,7 +18,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including e2f82642278e79d2e767a1c1f4215bd7f0f52152 (add a comment so people looking for "sub run_perl" find the right thing)
+Blead changes have been examined up to and including 1b9db2fb33d1c276cb7b213383cbaa41cbfddec1 (Merge branch 'maintpolicy' into blead)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -57,6 +57,7 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="67c71cbbd62a75ff2b913421806f6ea0f0b33558" ticket="" desc="Fix double free with const overload after errors"/>
 
 <commit votes="steveh" id="eabab8bccf871f8e85dfa4a3825827825fb86cd9" ticket="123617" desc="Localise PL_lex_stuff (crash fix)"/>
+<commit votes="steveh" id="ce7c414ee71d82955c799dca38981337cdf77b42" ticket="123955" desc="[perl #123955] Fix assert fail with 0 s/// in quotes"/>
 
 <commit votes="steveh" id="8d28fc8f69270cc75d9564b369ac6008c5b5d617" ticket="123748" desc="[perl #123748] - Add test case for possible getenv/putenv/setenv stomping in perl.c"/>
 <commit votes="steveh" id="175c4cf98f8ca99cd4f626369ef0beb1d69f8ce5" ticket="123748" desc="locale.c: savepv() of getenv()"/>
@@ -82,6 +83,30 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 
 <commit votes="steveh" id="b3725d49f914ef2bed63d7eb92a72ef6e886b489" ticket="123782" desc="[perl #123782] regcomp: check for overflow on /(?123)/"/>
 
+<commit votes="steveh" id="4a0c7558cb3dad795591b57e712bedba39bc1c84" ticket="123843" desc="[perl #123843] fix SEGV reading data->flags"/>
+
+<commit votes="steveh" id="e47d32dcd59a578274f445fac79e977d83055c8c" ticket="123712" desc="[perl #123712] Fix /$a[/ parsing"/>
+<commit votes="steveh" id="d27f4b916ce5819f564bdd4a135137c457156333" ticket="123712" desc="[perl #123712] Don’t check sub_inwhat"/>
+
+<commit votes="steveh" id="87ebf1e3df9537a204b21f0405c6e60f2acdcc47" ticket="123816" desc="[perl #123816] fix stat stacking"/>
+<commit votes="steveh" id="e92b41c6ac6bcd8786b0448c8337c4151e4f9a63" ticket="123852" desc="[perl #123852] avoid capture side-effects under noncapture flag"/>
+<commit votes="steveh" id="d0bec20370cb0ec3e757fde65d8f1d13693e913f" ticket="123870" desc="[perl #123870] fixup trie runtime debug output"/>
+<commit votes="steveh" id="fc1bb3f2dcaaac9f305b27acb4800babdc8a06f3" ticket="123874" desc="[perl #123874] fix argument underflow for pack()"/>
+
+<commit votes="steveh" id="f4460c6f7a0de152ddaed69a0ba0efe653258f81" ticket="123801" desc="[perl #123801] Stop s##[}#e from crashing"/>
+<commit votes="steveh" id="479ae48e22f1160cf86508685822bf7e53e5816b" ticket="123802" desc="[perl #123802] Assertion failure with /$0{}/"/>
+<commit votes="steveh" id="66edcf79f81d47833f2be442966a5e90a223365f" ticket="123802" desc="[perl #123802] Assertion failure with "\L\L""/>
+
+<commit votes="steveh" id="26f4cc19a2cf5dc32334b22cd7f719a3bb577497" ticket="123763" desc="[perl #123763] pushre needs to permit OPpTARGET_MY"/>
+<commit votes="steveh" id="179b3fadcd608f8420b9976426de4456289a8bc5" ticket="123763" desc="Test for split after my $_ [perl #123763]"/>
+<commit votes="steveh" id="55b3980349c58171a77894903fd928262fb081f2" ticket="123763" desc="[perl #123763] Clear target on my $_; split"/>
+
+<commit votes="steveh" id="6b2b48acae2d74dcbde18f956f6951b5b9aa468b" ticket="123817" desc="[perl #123817] Assert fail with attr in anon hash"/>
+<commit votes="steveh" id="71488339f94f1083d9e4d8f9014f5c979ba1a6d6" ticket="123821" desc="[perl #123821] Fix assert fail with \(&$0)=0"/>
+<commit votes="steveh" id="57db463f603fcd67bf53a35aa482bb24aa2c6950" ticket="123848" desc="[perl #123848] Allow OPpTARGET_MY on qr"/>
+<commit votes="steveh" id="813d2eb17164751c312a69e7c7c56dc71aad1ff1" ticket="123849" desc="[perl #123849] sv.c: Fix sv_clear -Do output"/>
+<commit votes="steveh" id="923ed5809c063091fb0f77dc6f1b8231d587d13e" ticket="123960" desc="[perl #123960] sv.c: Fix gp_free -Do output"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
@@ -90,6 +115,8 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 
 <commit votes="steveh" id="0fa70a06a98fc8fa9840d4dbaa31fc2d3b28b99b" ticket="123743" desc="simpify and speed up /.*.../ handling"/>
 <commit votes="steveh" id="3e33f67a69740d3a232ef7e31d7dbcb6793ef0aa" ticket="123743" desc="add some more tests for RT #123743"/>
+
+<commit votes="steveh" id="ed38223246c041b4e9ce5687cadf6f6b903050ca" ticket="123202" desc="[perl #123202] speed up scalar //g against tainted strings"/>
 
 </div>
 
@@ -100,6 +127,8 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 <commit votes="" id="7ea096df5f40b4bb14879699f74bf1f11a856b55" ticket="" desc="static_assert workaround for AIX/xlc"/>
 <commit votes="" id="84ad9c6c2d2072cd602e0f4ee76fd4ac5107dc3d" ticket="" desc="Lukas Mai has two email addresses."/>
 <commit votes="" id="5074d4c567c632ecf22733b0a13d7fcec4a73037" ticket="" desc="add a comment documenting STATIC_ASSERT_GLOBAL/STATIC_ASSERT_STMT"/>
+
+<commit votes="" id="816b056ffb99ae54642320e20dc30a59fd1effef" ticket="" desc="Fix Errno.pm generation for gcc-5.0"/>
 
 </div>
 
@@ -127,6 +156,9 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 <commit votes="steveh" id="730d89736d0ae5dfc7580108c451efe91b5102fc" ticket="" desc="Fix warning message regarding 'use autodie' and 'use open'."/>
 <commit votes="steveh" id="2a403855670ae8592c5a3ca4396e6e909a4fc593" ticket="" desc="perlunicook: Note that autodie &gt;= 2.26 should be okay with 'use open'."/>
 <commit votes="steveh" id="7ad03f5069e771fe44e92b694a23f10354c548d1" ticket="" desc="Fix setenv() replacement documentation in perlclib"/>
+
+<commit votes="steveh" id="7b237c8f3da9b9cd57a5cbd035ff4d3e70dcbb7b" ticket="" desc="Fix minor code typos in perlunicook"/>
+<commit votes="steveh" id="616b344493d526c505a241bee3571ae735408885" ticket="" desc="Randy Stauneris now a perl author"/>
 
 </div>
 
