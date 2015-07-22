@@ -6,11 +6,14 @@
 
 <commit votes="" id="" ticket="123786" desc="'use utf8;' leaks memory"/>
 <commit votes="" id="c0388966161bb22622ebac402bb1ebe081ad0b39" ticket="123976" desc="[Win32] Unable to build 64-bit blead using gcc-4.8.2"/>
+
 <commit votes="" id="3553f4fa11fd9e8bb0797ace43605cc33ebf32fa" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
 <commit votes="" id="4e0341d2ce817c9956f7f78e36bcaf8b764e18fc" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
+
 <commit votes="" id="816b056ffb99ae54642320e20dc30a59fd1effef" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
 <commit votes="" id="3bea78d24634e630b610f59957e7a019205a67b2" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
 <commit votes="" id="33593911f214382b592d05aa902655301915e666" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
+
 <commit votes="" id="41ef2c66e0da6dfb04ded81b979f7081007a1add" ticket="124127" desc="Restore ability to debug threaded scripts"/>
 <commit votes="" id="902d16915db2735c3a41f15ef8d95cf300c31801" ticket="124127" desc="Restore ability to debug threaded scripts"/>
 
@@ -18,7 +21,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 1b9db2fb33d1c276cb7b213383cbaa41cbfddec1 (Merge branch 'maintpolicy' into blead)
+Blead changes have been examined up to and including 2a7a05b47b7fc50a963c330eb7ba44292f28faac (Finalize perldelta)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -86,7 +89,7 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 <commit votes="steveh" id="4a0c7558cb3dad795591b57e712bedba39bc1c84" ticket="123843" desc="[perl #123843] fix SEGV reading data->flags"/>
 
 <commit votes="steveh" id="e47d32dcd59a578274f445fac79e977d83055c8c" ticket="123712" desc="[perl #123712] Fix /$a[/ parsing"/>
-<commit votes="steveh" id="d27f4b916ce5819f564bdd4a135137c457156333" ticket="123712" desc="[perl #123712] Don’t check sub_inwhat"/>
+<commit votes="steveh" id="d27f4b916ce5819f564bdd4a135137c457156333" ticket="123712" desc="[perl #123712] Don't check sub_inwhat"/>
 
 <commit votes="steveh" id="87ebf1e3df9537a204b21f0405c6e60f2acdcc47" ticket="123816" desc="[perl #123816] fix stat stacking"/>
 <commit votes="steveh" id="e92b41c6ac6bcd8786b0448c8337c4151e4f9a63" ticket="123852" desc="[perl #123852] avoid capture side-effects under noncapture flag"/>
@@ -95,17 +98,23 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 
 <commit votes="steveh" id="f4460c6f7a0de152ddaed69a0ba0efe653258f81" ticket="123801" desc="[perl #123801] Stop s##[}#e from crashing"/>
 <commit votes="steveh" id="479ae48e22f1160cf86508685822bf7e53e5816b" ticket="123802" desc="[perl #123802] Assertion failure with /$0{}/"/>
-<commit votes="steveh" id="66edcf79f81d47833f2be442966a5e90a223365f" ticket="123802" desc="[perl #123802] Assertion failure with "\L\L""/>
+<commit votes="steveh" id="66edcf79f81d47833f2be442966a5e90a223365f" ticket="123802" desc="[perl #123802] Assertion failure with qq[\L\L]"/>
 
 <commit votes="steveh" id="26f4cc19a2cf5dc32334b22cd7f719a3bb577497" ticket="123763" desc="[perl #123763] pushre needs to permit OPpTARGET_MY"/>
 <commit votes="steveh" id="179b3fadcd608f8420b9976426de4456289a8bc5" ticket="123763" desc="Test for split after my $_ [perl #123763]"/>
 <commit votes="steveh" id="55b3980349c58171a77894903fd928262fb081f2" ticket="123763" desc="[perl #123763] Clear target on my $_; split"/>
 
 <commit votes="steveh" id="6b2b48acae2d74dcbde18f956f6951b5b9aa468b" ticket="123817" desc="[perl #123817] Assert fail with attr in anon hash"/>
-<commit votes="steveh" id="71488339f94f1083d9e4d8f9014f5c979ba1a6d6" ticket="123821" desc="[perl #123821] Fix assert fail with \(&$0)=0"/>
+<commit votes="steveh" id="71488339f94f1083d9e4d8f9014f5c979ba1a6d6" ticket="123821" desc="[perl #123821] Fix assert fail with \(&amp;$0)=0"/>
 <commit votes="steveh" id="57db463f603fcd67bf53a35aa482bb24aa2c6950" ticket="123848" desc="[perl #123848] Allow OPpTARGET_MY on qr"/>
 <commit votes="steveh" id="813d2eb17164751c312a69e7c7c56dc71aad1ff1" ticket="123849" desc="[perl #123849] sv.c: Fix sv_clear -Do output"/>
 <commit votes="steveh" id="923ed5809c063091fb0f77dc6f1b8231d587d13e" ticket="123960" desc="[perl #123960] sv.c: Fix gp_free -Do output"/>
+<commit votes="steveh" id="9d58dbc453a86c9cbb3a131adcd1559fe0445a08" ticket="123963" desc="[perl #123963] qq[@&lt;fullwidth digit&gt;]"/>
+<commit votes="steveh" id="3d50185de85a756293c9c3954114bd5c2d08a460" ticket="123847" desc="[perl #123847] crash with *foo::=*bar::=*with_hash"/>
+<commit votes="steveh" id="c5f78d08dab9b915400428ab360f007c1db176a2" ticket="124004" desc="[perl #124004] Fix stack bug with foreach(@empty)"/>
+<commit votes="steveh" id="b24768f02e4adcd11668f94274f5617c4a3f5379" ticket="123995" desc="[perl #123995] Assert fail with s;@{&lt;&lt;;"/>
+<commit votes="steveh" id="aab1202a8d4b691b16384fb41d2e2a06abf664e2" ticket="123790" desc="[perl #123790] Assert fail with *x=&lt;y&gt;"/>
+<commit votes="steveh" id="d655d9a2c4d4884d0edf5364a3aafbc8b0b8de38" ticket="124099" desc="[perl #124099] Wrong CvOUTSIDE in find_lexical_cv"/>
 
 </div>
 
@@ -117,6 +126,15 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 <commit votes="steveh" id="3e33f67a69740d3a232ef7e31d7dbcb6793ef0aa" ticket="123743" desc="add some more tests for RT #123743"/>
 
 <commit votes="steveh" id="ed38223246c041b4e9ce5687cadf6f6b903050ca" ticket="123202" desc="[perl #123202] speed up scalar //g against tainted strings"/>
+<commit votes="steveh" id="71622e40793536aa4f2ace7ffc704cc78151fd26" ticket="" desc="Stop $^H |= 0x1c020000 from enabling all features"/>
+
+<commit votes="steveh" id="b3089e964c0afaf7eb8d54aa5a912e4eb2e6c176" ticket="124113" desc="[perl #124113] Make check for multi-dimensional arrays be UTF8-aware"/>
+<commit votes="steveh" id="6e59c8626d31f697a2b7b36cf8a200b36d93eac2" ticket="124113" desc="Allow unquoted UTF-8 HERE-document terminators"/>
+<commit votes="steveh" id="8ce2ba821761a7ada1e1def512c0374977759cf7" ticket="124113" desc="Fix '...without parentheses is ambuguous' warning for UTF-8 function names"/>
+
+<commit votes="steveh" id="41ef2c66e0da6dfb04ded81b979f7081007a1add" ticket="" desc="lib/perl5db.pl: Restore noop lock prototype"/>
+<commit votes="steveh" id="f80262130b14af7d62281372d55e93f84e2a16b7" ticket="" desc="James McCoy is now a perl AUTHOR"/>
+<commit votes="steveh" id="67a38f64602c1e8bbf6b6e5d21455c3f5df90f01" ticket="" desc="bump perl5db.pl's $VERSION"/>
 
 </div>
 
@@ -155,10 +173,16 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 <commit votes="steveh, khw" id="f2979eac0a03fcba1cd431ef3d46f697176ebcc8" ticket="" desc="improve SvPV_set's docs, it really shouldn't be public API"/>
 <commit votes="steveh" id="730d89736d0ae5dfc7580108c451efe91b5102fc" ticket="" desc="Fix warning message regarding 'use autodie' and 'use open'."/>
 <commit votes="steveh" id="2a403855670ae8592c5a3ca4396e6e909a4fc593" ticket="" desc="perlunicook: Note that autodie &gt;= 2.26 should be okay with 'use open'."/>
+
 <commit votes="steveh" id="7ad03f5069e771fe44e92b694a23f10354c548d1" ticket="" desc="Fix setenv() replacement documentation in perlclib"/>
+<commit votes="steveh" id="38f18a308b948c6eaf187519a16d060e1ec7cc20" ticket="" desc="perlhacktips: Add caution about clib ptr returns to static memory"/>
 
 <commit votes="steveh" id="7b237c8f3da9b9cd57a5cbd035ff4d3e70dcbb7b" ticket="" desc="Fix minor code typos in perlunicook"/>
 <commit votes="steveh" id="616b344493d526c505a241bee3571ae735408885" ticket="" desc="Randy Stauneris now a perl author"/>
+
+<commit votes="steveh" id="f942a0dfa923e36f91c00b44e21563cd50dc750b" ticket="122322" desc="[perl #122322] Update OOK example in perlguts"/>
+<commit votes="steveh" id="d8c1af4e0d4774b60bd59dc0039c7e101f292a4a" ticket="" desc="perlfunc: mention that study() is currently a noop"/>
+<commit votes="steveh" id="965d3000a316a5ed367c2ce65d040e1125d5e31d" ticket="" desc="Update supported versions in perlpolicy.pod"/>
 
 </div>
 
