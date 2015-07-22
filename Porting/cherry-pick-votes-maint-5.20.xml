@@ -21,7 +21,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 2a7a05b47b7fc50a963c330eb7ba44292f28faac (Finalize perldelta)
+Blead changes have been examined up to and including 70f63a4c7dba89e8e48b44de7978faae4319e693 (Coro is known broken on blead)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -115,12 +115,15 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 <commit votes="steveh" id="b24768f02e4adcd11668f94274f5617c4a3f5379" ticket="123995" desc="[perl #123995] Assert fail with s;@{&lt;&lt;;"/>
 <commit votes="steveh" id="aab1202a8d4b691b16384fb41d2e2a06abf664e2" ticket="123790" desc="[perl #123790] Assert fail with *x=&lt;y&gt;"/>
 <commit votes="steveh" id="d655d9a2c4d4884d0edf5364a3aafbc8b0b8de38" ticket="124099" desc="[perl #124099] Wrong CvOUTSIDE in find_lexical_cv"/>
+<commit votes="steveh" id="b12396ac84cef7e23e1aac516fa676165ddfc790" ticket="124187" desc="[perl #124187] don't call pad_findlex() on a NULL CV"/>
+<commit votes="steveh" id="de0885da327045eed274d7f8913a58e6de0e0f30" ticket="124385" desc="null ptr deref in Perl_cv_forget_slab"/>
+<commit votes="steveh" id="1956db7ee60460e5b4a25c19fda4999666c8cbd1" ticket="124156" desc="RT #124156: death during unwinding causes crash"/>
 
 </div>
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="tonyc" id="bae8cfc6926f9b04d8adac6a9ee6d563cc18263f" ticket="125121" desc="Don’t treat setpgrp($nonzero) as setpgrp(1)"/>
+<commit votes="tonyc" id="bae8cfc6926f9b04d8adac6a9ee6d563cc18263f" ticket="125121" desc="Don't treat setpgrp($nonzero) as setpgrp(1)"/>
 
 <commit votes="steveh" id="0fa70a06a98fc8fa9840d4dbaa31fc2d3b28b99b" ticket="123743" desc="simpify and speed up /.*.../ handling"/>
 <commit votes="steveh" id="3e33f67a69740d3a232ef7e31d7dbcb6793ef0aa" ticket="123743" desc="add some more tests for RT #123743"/>
@@ -147,6 +150,9 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 <commit votes="" id="5074d4c567c632ecf22733b0a13d7fcec4a73037" ticket="" desc="add a comment documenting STATIC_ASSERT_GLOBAL/STATIC_ASSERT_STMT"/>
 
 <commit votes="" id="816b056ffb99ae54642320e20dc30a59fd1effef" ticket="" desc="Fix Errno.pm generation for gcc-5.0"/>
+
+<commit votes="steveh" id="f33b2f585292653a3c50ea39cbdab734c3473fcb" ticket="" desc="handle existing mkstemp() in mingw-w64-v4"/>
+<commit votes="steveh" id="6378109479f5b474e8205c8478f484b209078772" ticket="" desc="add new address for kmx"/>
 
 </div>
 
