@@ -43,9 +43,9 @@ if (!@ARGV) {
     while (<$fh>) {
 	# *.c or */*.c
 	push @ARGV, $prefix . $1 if m!^((?:[^/]+/)?[^/]+\.c)\t!;
+        # Special case the *inline.h since they behave like *.c
+	push @ARGV, $prefix . $1 if m!^(([^/]+)?inline\.h)\t!;
     }
-    # Special case the *inline.h since they behave like *.c
-    push @ARGV, glob "$prefix/*inline.h";
 }
 
 while (<>) {
