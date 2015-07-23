@@ -92,8 +92,6 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="9efda33a86bb90e4838144d230a4fc3ae4d63d7d" ticket="123554" desc="[perl #123554] catch a couple of other size overflows"/>
 <commit votes="steveh" id="296f0d566b9f3ad1885ae7493caaffbd0cf2eada" ticket="123554" desc="[perl #123554] fix threaded builds and prevent a warning"/>
 
-<commit votes="steveh" id="b3725d49f914ef2bed63d7eb92a72ef6e886b489" ticket="123782" desc="[perl #123782] regcomp: check for overflow on /(?123)/"/>
-
 <commit votes="steveh" id="4a0c7558cb3dad795591b57e712bedba39bc1c84" ticket="123843" desc="[perl #123843] fix SEGV reading data->flags"/>
 
 <commit votes="steveh" id="87ebf1e3df9537a204b21f0405c6e60f2acdcc47" ticket="123816" desc="[perl #123816] fix stat stacking"/>
