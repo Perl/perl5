@@ -10,7 +10,7 @@ plan tests => 22;
 
 unless (eval {
     require File::Path;
-    File::Path::rmtree('blurfl');
+    File::Path::rmtree('blurfl') if -d 'blurfl';
     1
 }) {
     diag("$0 may fail if its temporary directory remains from a previous run");
