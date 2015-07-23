@@ -21,7 +21,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 70f63a4c7dba89e8e48b44de7978faae4319e693 (Coro is known broken on blead)
+Blead changes have been examined up to and including 64821df16a716bfc005acb06c7dc5b72afabe38d ([perl #123961] handle a missing closing ` for -DT output)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -45,27 +45,36 @@ The same criteria apply to code in dual-life modules as to core code.)
 I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
 
+<commit votes="steveh" id="83a85f49e265a458a481a9dc402dd3bdd30ae457" ticket="123711" desc="[perl #123711] Fix crash with 0-5x-l{0}"/>
+<commit votes="steveh" id="5fe499a8e26270679c0c6d48431f3a328a8ffeba" ticket="123218" desc="[perl #123218] 'preserve' $/ if set to a bad value"/>
+<commit votes="steveh" id="ddce084af02764d4f30ef6089ae67a7983fcc690" ticket="123739" desc="Remove get-magic from $/"/>
+
+<commit votes="steveh" id="8d28fc8f69270cc75d9564b369ac6008c5b5d617" ticket="123748" desc="[perl #123748] - Add test case for possible getenv/putenv/setenv stomping in perl.c"/>
+<commit votes="steveh" id="175c4cf98f8ca99cd4f626369ef0beb1d69f8ce5" ticket="123748" desc="locale.c: savepv() of getenv()"/>
+<commit votes="steveh" id="9e0b0d62ba5a660ab4b6f498912cfaead79014a0" ticket="123748" desc="perl.c: Don't read possibly zapped memory"/>
+<commit votes="steveh" id="7f8f1c2613d1d5df0b1071bd5fe3eec808c4a69e" ticket="123748" desc="Fix quoting in new switchd.t test."/>
+
+<commit votes="steveh" id="e47d32dcd59a578274f445fac79e977d83055c8c" ticket="123712" desc="[perl #123712] Fix /$a[/ parsing"/>
+<commit votes="steveh" id="d27f4b916ce5819f564bdd4a135137c457156333" ticket="123712" desc="[perl #123712] Don't check sub_inwhat"/>
+
+<commit votes="steveh" id="1956db7ee60460e5b4a25c19fda4999666c8cbd1" ticket="124156" desc="RT #124156: death during unwinding causes crash"/>
+<commit votes="steveh" id="46b27d2f2c37f40dde845f9b4743975c69f2cc27" ticket="123398" desc="don't fatalize warnings during unwinding (#123398)"/>
+
+</div>
+
+<div><h3>AFL Crash / Assertion / Memory Corruption Fixes</h3>
+
 This fix has a problem with it that needs to be solved before we can backport it.  See http://www.nntp.perl.org/group/perl.perl5.porters/;msgid=20150120104834.32035.qmail@lists-nntp.develooper.com
 <commit votes="sprout, steveh, hv" id="fa8f4f85ec35b0f047603e5b90a788571f7141bd" ticket="123554" desc="[perl #123554] avoid a crash from SvGROW(MEM_SIZE_MAX)"/>
 <commit votes="sprout, steveh" id="e3e8f263bd1cf5bb33710bdece3b572dd9785f75" ticket="123554" desc="perldelta for fa8f4f85ec35"/>
 <commit votes="steveh, khw" id="f63bc603acea5e0f476f181de698958c4ddcccba" ticket="123554" desc="perldelta: Fix typo"/>
 <commit votes="steveh, hv" id="cc31571878894dd5f5af83722ca0c2a24621300c" ticket="123554" desc="[perl #123554] stop checking the message"/>
 
-<commit votes="steveh" id="83a85f49e265a458a481a9dc402dd3bdd30ae457" ticket="123711" desc="[perl #123711] Fix crash with 0-5x-l{0}"/>
-
-<commit votes="steveh" id="5fe499a8e26270679c0c6d48431f3a328a8ffeba" ticket="123218" desc="[perl #123218] 'preserve' $/ if set to a bad value"/>
-<commit votes="steveh" id="ddce084af02764d4f30ef6089ae67a7983fcc690" ticket="123739" desc="Remove get-magic from $/"/>
-
 Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="67c71cbbd62a75ff2b913421806f6ea0f0b33558" ticket="" desc="Fix double free with const overload after errors"/>
 
 <commit votes="steveh" id="eabab8bccf871f8e85dfa4a3825827825fb86cd9" ticket="123617" desc="Localise PL_lex_stuff (crash fix)"/>
 <commit votes="steveh" id="ce7c414ee71d82955c799dca38981337cdf77b42" ticket="123955" desc="[perl #123955] Fix assert fail with 0 s/// in quotes"/>
-
-<commit votes="steveh" id="8d28fc8f69270cc75d9564b369ac6008c5b5d617" ticket="123748" desc="[perl #123748] - Add test case for possible getenv/putenv/setenv stomping in perl.c"/>
-<commit votes="steveh" id="175c4cf98f8ca99cd4f626369ef0beb1d69f8ce5" ticket="123748" desc="locale.c: savepv() of getenv()"/>
-<commit votes="steveh" id="9e0b0d62ba5a660ab4b6f498912cfaead79014a0" ticket="123748" desc="perl.c: Don't read possibly zapped memory"/>
-<commit votes="steveh" id="7f8f1c2613d1d5df0b1071bd5fe3eec808c4a69e" ticket="123748" desc="Fix quoting in new switchd.t test."/>
 
 <commit votes="steveh" id="488bc5795891132d29daec7a860cab2a6266230c" ticket="123737" desc="[perl #123737] Fix assertion failure with 0${"/>
 <commit votes="steveh" id="310a0d0a370ea21c004bfea4bbdd2cf15da94547" ticket="123737" desc="[perl #123737] Fix assertion failure with 0$#{"/>
@@ -87,9 +96,6 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 <commit votes="steveh" id="b3725d49f914ef2bed63d7eb92a72ef6e886b489" ticket="123782" desc="[perl #123782] regcomp: check for overflow on /(?123)/"/>
 
 <commit votes="steveh" id="4a0c7558cb3dad795591b57e712bedba39bc1c84" ticket="123843" desc="[perl #123843] fix SEGV reading data->flags"/>
-
-<commit votes="steveh" id="e47d32dcd59a578274f445fac79e977d83055c8c" ticket="123712" desc="[perl #123712] Fix /$a[/ parsing"/>
-<commit votes="steveh" id="d27f4b916ce5819f564bdd4a135137c457156333" ticket="123712" desc="[perl #123712] Don't check sub_inwhat"/>
 
 <commit votes="steveh" id="87ebf1e3df9537a204b21f0405c6e60f2acdcc47" ticket="123816" desc="[perl #123816] fix stat stacking"/>
 <commit votes="steveh" id="e92b41c6ac6bcd8786b0448c8337c4151e4f9a63" ticket="123852" desc="[perl #123852] avoid capture side-effects under noncapture flag"/>
@@ -117,7 +123,6 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 <commit votes="steveh" id="d655d9a2c4d4884d0edf5364a3aafbc8b0b8de38" ticket="124099" desc="[perl #124099] Wrong CvOUTSIDE in find_lexical_cv"/>
 <commit votes="steveh" id="b12396ac84cef7e23e1aac516fa676165ddfc790" ticket="124187" desc="[perl #124187] don't call pad_findlex() on a NULL CV"/>
 <commit votes="steveh" id="de0885da327045eed274d7f8913a58e6de0e0f30" ticket="124385" desc="null ptr deref in Perl_cv_forget_slab"/>
-<commit votes="steveh" id="1956db7ee60460e5b4a25c19fda4999666c8cbd1" ticket="124156" desc="RT #124156: death during unwinding causes crash"/>
 
 </div>
 
