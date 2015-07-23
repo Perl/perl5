@@ -66,8 +66,6 @@ I feel a bit leery about this next one.  The code is a bit fragile, so I would f
 
 This fix has a problem with it that needs to be solved before we can backport it.  See http://www.nntp.perl.org/group/perl.perl5.porters/;msgid=20150120104834.32035.qmail@lists-nntp.develooper.com
 <commit votes="sprout, steveh, hv" id="fa8f4f85ec35b0f047603e5b90a788571f7141bd" ticket="123554" desc="[perl #123554] avoid a crash from SvGROW(MEM_SIZE_MAX)"/>
-<commit votes="sprout, steveh" id="e3e8f263bd1cf5bb33710bdece3b572dd9785f75" ticket="123554" desc="perldelta for fa8f4f85ec35"/>
-<commit votes="steveh, khw" id="f63bc603acea5e0f476f181de698958c4ddcccba" ticket="123554" desc="perldelta: Fix typo"/>
 <commit votes="steveh, hv" id="cc31571878894dd5f5af83722ca0c2a24621300c" ticket="123554" desc="[perl #123554] stop checking the message"/>
 
 Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
