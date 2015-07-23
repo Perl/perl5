@@ -6310,7 +6310,13 @@ Perl_yylex(pTHX)
 
     case '`':
 	s = scan_str(s,FALSE,FALSE,FALSE,NULL);
-	DEBUG_T( { printbuf("### Saw backtick string before %s\n", s); } );
+	DEBUG_T( {
+            if (s)
+                printbuf("### Saw backtick string before %s\n", s);
+            else
+		PerlIO_printf(Perl_debug_log,
+			     "### Saw unterminated backtick string\n");
+        } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Backticks",s);
 	if (!s)
