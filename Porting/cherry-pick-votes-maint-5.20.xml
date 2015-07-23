@@ -89,7 +89,6 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="8a6d8ec6fe627c401c6c759edd38bbb10e4b56e9" ticket="123755" desc="[perl #123755] including unknown char in error requires care"/>
 <commit votes="steveh" id="7082c44063b6e00b0bad96f3d8adec0946f1938c" ticket="123755" desc="regcomp can read past end of string after parsing flags"/>
 
-Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a788571f7141bd in 5.20.2 -- steveh
 <commit votes="steveh" id="9efda33a86bb90e4838144d230a4fc3ae4d63d7d" ticket="123554" desc="[perl #123554] catch a couple of other size overflows"/>
 <commit votes="steveh" id="296f0d566b9f3ad1885ae7493caaffbd0cf2eada" ticket="123554" desc="[perl #123554] fix threaded builds and prevent a warning"/>
 
