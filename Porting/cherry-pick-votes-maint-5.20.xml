@@ -14,8 +14,10 @@
 <commit votes="" id="3bea78d24634e630b610f59957e7a019205a67b2" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
 <commit votes="" id="33593911f214382b592d05aa902655301915e666" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
 
-<commit votes="" id="41ef2c66e0da6dfb04ded81b979f7081007a1add" ticket="124127" desc="Restore ability to debug threaded scripts"/>
-<commit votes="" id="902d16915db2735c3a41f15ef8d95cf300c31801" ticket="124127" desc="Restore ability to debug threaded scripts"/>
+<commit votes="steveh" id="41ef2c66e0da6dfb04ded81b979f7081007a1add" ticket="124127" desc="Restore ability to debug threaded scripts"/>
+<commit votes="steveh" id="f80262130b14af7d62281372d55e93f84e2a16b7" ticket="124127" desc="James McCoy is now a perl AUTHOR"/>
+<commit votes="steveh" id="67a38f64602c1e8bbf6b6e5d21455c3f5df90f01" ticket="124127" desc="bump perl5db.pl's $VERSION"/>
+<commit votes="steveh" id="902d16915db2735c3a41f15ef8d95cf300c31801" ticket="124127" desc="Restore ability to debug threaded scripts"/>
 
 </div>
 
@@ -137,10 +139,6 @@ Maybe not these two since (I think?) we don't have fa8f4f85ec35b0f047603e5b90a78
 <commit votes="steveh" id="b3089e964c0afaf7eb8d54aa5a912e4eb2e6c176" ticket="124113" desc="[perl #124113] Make check for multi-dimensional arrays be UTF8-aware"/>
 <commit votes="steveh" id="6e59c8626d31f697a2b7b36cf8a200b36d93eac2" ticket="124113" desc="Allow unquoted UTF-8 HERE-document terminators"/>
 <commit votes="steveh" id="8ce2ba821761a7ada1e1def512c0374977759cf7" ticket="124113" desc="Fix '...without parentheses is ambuguous' warning for UTF-8 function names"/>
-
-<commit votes="steveh" id="41ef2c66e0da6dfb04ded81b979f7081007a1add" ticket="" desc="lib/perl5db.pl: Restore noop lock prototype"/>
-<commit votes="steveh" id="f80262130b14af7d62281372d55e93f84e2a16b7" ticket="" desc="James McCoy is now a perl AUTHOR"/>
-<commit votes="steveh" id="67a38f64602c1e8bbf6b6e5d21455c3f5df90f01" ticket="" desc="bump perl5db.pl's $VERSION"/>
 
 </div>
 
