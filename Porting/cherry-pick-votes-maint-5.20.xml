@@ -80,7 +80,6 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="488bc5795891132d29daec7a860cab2a6266230c" ticket="123737" desc="[perl #123737] Fix assertion failure with 0${"/>
 <commit votes="steveh" id="310a0d0a370ea21c004bfea4bbdd2cf15da94547" ticket="123737" desc="[perl #123737] Fix assertion failure with 0$#{"/>
 
-<commit votes="steveh" id="fb0c7c3c47fb17bb0b685b957af9a0cc581c8996" ticket="123753" desc="[perl #123753] Fix assertion failure with map+map"/>
 <commit votes="steveh" id="3c47da3c2ebf51f08bb927dfa456939cc6c8c30f" ticket="123753" desc="[perl #123753] &amp;\0foo parsing"/>
 <commit votes="steveh" id="eea89386b3fb948a8b1eb5ea860ec0a970c9e559" ticket="123753" desc="[perl #123753] Assert fail with &amp;{+foo} and errors"/>
 
