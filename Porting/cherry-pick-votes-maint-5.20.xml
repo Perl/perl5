@@ -57,6 +57,7 @@ I feel a bit leery about this next one.  The code is a bit fragile, so I would f
 <commit votes="steveh" id="7f8f1c2613d1d5df0b1071bd5fe3eec808c4a69e" ticket="123748" desc="Fix quoting in new switchd.t test."/>
 
 <commit votes="steveh" id="e47d32dcd59a578274f445fac79e977d83055c8c" ticket="123712" desc="[perl #123712] Fix /$a[/ parsing"/>
+This commit (d27f4)'s new test is failing in a dry-run of cherry-picking into maint -- steveh:
 <commit votes="steveh" id="d27f4b916ce5819f564bdd4a135137c457156333" ticket="123712" desc="[perl #123712] Don't check sub_inwhat"/>
 
 <commit votes="steveh" id="1956db7ee60460e5b4a25c19fda4999666c8cbd1" ticket="124156" desc="RT #124156: death during unwinding causes crash"/>
