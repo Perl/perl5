@@ -76,53 +76,51 @@ This fix has a problem with it that needs to be solved before we can backport it
 Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="67c71cbbd62a75ff2b913421806f6ea0f0b33558" ticket="" desc="Fix double free with const overload after errors"/>
 
-<commit votes="steveh" id="eabab8bccf871f8e85dfa4a3825827825fb86cd9" ticket="123617" desc="Localise PL_lex_stuff (crash fix)"/>
-<commit votes="steveh" id="ce7c414ee71d82955c799dca38981337cdf77b42" ticket="123955" desc="[perl #123955] Fix assert fail with 0 s/// in quotes"/>
+<commit votes="" id="eabab8bccf871f8e85dfa4a3825827825fb86cd9" ticket="123617" desc="Localise PL_lex_stuff (crash fix)"/>
+<commit votes="" id="ce7c414ee71d82955c799dca38981337cdf77b42" ticket="123955" desc="[perl #123955] Fix assert fail with 0 s/// in quotes"/>
 
-<commit votes="steveh" id="488bc5795891132d29daec7a860cab2a6266230c" ticket="123737" desc="[perl #123737] Fix assertion failure with 0${"/>
-<commit votes="steveh" id="310a0d0a370ea21c004bfea4bbdd2cf15da94547" ticket="123737" desc="[perl #123737] Fix assertion failure with 0$#{"/>
+<commit votes="" id="488bc5795891132d29daec7a860cab2a6266230c" ticket="123737" desc="[perl #123737] Fix assertion failure with 0${"/>
+<commit votes="" id="310a0d0a370ea21c004bfea4bbdd2cf15da94547" ticket="123737" desc="[perl #123737] Fix assertion failure with 0$#{"/>
 
-<commit votes="steveh" id="3c47da3c2ebf51f08bb927dfa456939cc6c8c30f" ticket="123753" desc="[perl #123753] &amp;\0foo parsing"/>
-<commit votes="steveh" id="eea89386b3fb948a8b1eb5ea860ec0a970c9e559" ticket="123753" desc="[perl #123753] Assert fail with &amp;{+foo} and errors"/>
+<commit votes="" id="3c47da3c2ebf51f08bb927dfa456939cc6c8c30f" ticket="123753" desc="[perl #123753] &amp;\0foo parsing"/>
+<commit votes="" id="eea89386b3fb948a8b1eb5ea860ec0a970c9e559" ticket="123753" desc="[perl #123753] Assert fail with &amp;{+foo} and errors"/>
 
-<commit votes="steveh" id="7aa8cb0dec173dcfca4157e60634c74b97429a05" ticket="123677" desc="[perl #123677] Crash with token stack overflow"/>
-<commit votes="steveh" id="a53bfdae91fb2d719e69761f2d2f84c5d8a47753" ticket="123759" desc="[perl #123759] always count on OPpTRANS_IDENTICAL"/>
+<commit votes="" id="7aa8cb0dec173dcfca4157e60634c74b97429a05" ticket="123677" desc="[perl #123677] Crash with token stack overflow"/>
+<commit votes="" id="a53bfdae91fb2d719e69761f2d2f84c5d8a47753" ticket="123759" desc="[perl #123759] always count on OPpTRANS_IDENTICAL"/>
 
-<commit votes="steveh" id="8a6d8ec6fe627c401c6c759edd38bbb10e4b56e9" ticket="123755" desc="[perl #123755] including unknown char in error requires care"/>
-<commit votes="steveh" id="7082c44063b6e00b0bad96f3d8adec0946f1938c" ticket="123755" desc="regcomp can read past end of string after parsing flags"/>
+<commit votes="" id="8a6d8ec6fe627c401c6c759edd38bbb10e4b56e9" ticket="123755" desc="[perl #123755] including unknown char in error requires care"/>
+<commit votes="" id="7082c44063b6e00b0bad96f3d8adec0946f1938c" ticket="123755" desc="regcomp can read past end of string after parsing flags"/>
 
-<commit votes="steveh" id="9efda33a86bb90e4838144d230a4fc3ae4d63d7d" ticket="123554" desc="[perl #123554] catch a couple of other size overflows"/>
-<commit votes="steveh" id="296f0d566b9f3ad1885ae7493caaffbd0cf2eada" ticket="123554" desc="[perl #123554] fix threaded builds and prevent a warning"/>
+<commit votes="" id="9efda33a86bb90e4838144d230a4fc3ae4d63d7d" ticket="123554" desc="[perl #123554] catch a couple of other size overflows"/>
+<commit votes="" id="296f0d566b9f3ad1885ae7493caaffbd0cf2eada" ticket="123554" desc="[perl #123554] fix threaded builds and prevent a warning"/>
 
-<commit votes="steveh" id="87ebf1e3df9537a204b21f0405c6e60f2acdcc47" ticket="123816" desc="[perl #123816] fix stat stacking"/>
-<commit votes="steveh" id="d0bec20370cb0ec3e757fde65d8f1d13693e913f" ticket="123870" desc="[perl #123870] fixup trie runtime debug output"/>
-<commit votes="steveh" id="fc1bb3f2dcaaac9f305b27acb4800babdc8a06f3" ticket="123874" desc="[perl #123874] fix argument underflow for pack()"/>
+<commit votes="" id="87ebf1e3df9537a204b21f0405c6e60f2acdcc47" ticket="123816" desc="[perl #123816] fix stat stacking"/>
+<commit votes="" id="d0bec20370cb0ec3e757fde65d8f1d13693e913f" ticket="123870" desc="[perl #123870] fixup trie runtime debug output"/>
+<commit votes="" id="fc1bb3f2dcaaac9f305b27acb4800babdc8a06f3" ticket="123874" desc="[perl #123874] fix argument underflow for pack()"/>
 
-<commit votes="steveh" id="f4460c6f7a0de152ddaed69a0ba0efe653258f81" ticket="123801" desc="[perl #123801] Stop s##[}#e from crashing"/>
-<commit votes="steveh" id="479ae48e22f1160cf86508685822bf7e53e5816b" ticket="123802" desc="[perl #123802] Assertion failure with /$0{}/"/>
-<commit votes="steveh" id="66edcf79f81d47833f2be442966a5e90a223365f" ticket="123802" desc="[perl #123802] Assertion failure with qq[\L\L]"/>
+<commit votes="" id="f4460c6f7a0de152ddaed69a0ba0efe653258f81" ticket="123801" desc="[perl #123801] Stop s##[}#e from crashing"/>
+<commit votes="" id="479ae48e22f1160cf86508685822bf7e53e5816b" ticket="123802" desc="[perl #123802] Assertion failure with /$0{}/"/>
+<commit votes="" id="66edcf79f81d47833f2be442966a5e90a223365f" ticket="123802" desc="[perl #123802] Assertion failure with qq[\L\L]"/>
 
-<commit votes="steveh" id="55b3980349c58171a77894903fd928262fb081f2" ticket="123763" desc="[perl #123763] Clear target on my $_; split"/>
+<commit votes="" id="55b3980349c58171a77894903fd928262fb081f2" ticket="123763" desc="[perl #123763] Clear target on my $_; split"/>
 
-<commit votes="steveh" id="6b2b48acae2d74dcbde18f956f6951b5b9aa468b" ticket="123817" desc="[perl #123817] Assert fail with attr in anon hash"/>
-<commit votes="steveh" id="813d2eb17164751c312a69e7c7c56dc71aad1ff1" ticket="123849" desc="[perl #123849] sv.c: Fix sv_clear -Do output"/>
-<commit votes="steveh" id="923ed5809c063091fb0f77dc6f1b8231d587d13e" ticket="123960" desc="[perl #123960] sv.c: Fix gp_free -Do output"/>
-<commit votes="steveh" id="9d58dbc453a86c9cbb3a131adcd1559fe0445a08" ticket="123963" desc="[perl #123963] qq[@&lt;fullwidth digit&gt;]"/>
-<commit votes="steveh" id="3d50185de85a756293c9c3954114bd5c2d08a460" ticket="123847" desc="[perl #123847] crash with *foo::=*bar::=*with_hash"/>
-<commit votes="steveh" id="b24768f02e4adcd11668f94274f5617c4a3f5379" ticket="123995" desc="[perl #123995] Assert fail with s;@{&lt;&lt;;"/>
-<commit votes="steveh" id="aab1202a8d4b691b16384fb41d2e2a06abf664e2" ticket="123790" desc="[perl #123790] Assert fail with *x=&lt;y&gt;"/>
-<commit votes="steveh" id="d655d9a2c4d4884d0edf5364a3aafbc8b0b8de38" ticket="124099" desc="[perl #124099] Wrong CvOUTSIDE in find_lexical_cv"/>
-<commit votes="steveh" id="b12396ac84cef7e23e1aac516fa676165ddfc790" ticket="124187" desc="[perl #124187] don't call pad_findlex() on a NULL CV"/>
-<commit votes="steveh" id="de0885da327045eed274d7f8913a58e6de0e0f30" ticket="124385" desc="null ptr deref in Perl_cv_forget_slab"/>
+<commit votes="" id="6b2b48acae2d74dcbde18f956f6951b5b9aa468b" ticket="123817" desc="[perl #123817] Assert fail with attr in anon hash"/>
+<commit votes="" id="813d2eb17164751c312a69e7c7c56dc71aad1ff1" ticket="123849" desc="[perl #123849] sv.c: Fix sv_clear -Do output"/>
+<commit votes="" id="923ed5809c063091fb0f77dc6f1b8231d587d13e" ticket="123960" desc="[perl #123960] sv.c: Fix gp_free -Do output"/>
+<commit votes="" id="9d58dbc453a86c9cbb3a131adcd1559fe0445a08" ticket="123963" desc="[perl #123963] qq[@&lt;fullwidth digit&gt;]"/>
+<commit votes="" id="3d50185de85a756293c9c3954114bd5c2d08a460" ticket="123847" desc="[perl #123847] crash with *foo::=*bar::=*with_hash"/>
+<commit votes="" id="b24768f02e4adcd11668f94274f5617c4a3f5379" ticket="123995" desc="[perl #123995] Assert fail with s;@{&lt;&lt;;"/>
+<commit votes="" id="aab1202a8d4b691b16384fb41d2e2a06abf664e2" ticket="123790" desc="[perl #123790] Assert fail with *x=&lt;y&gt;"/>
+<commit votes="" id="d655d9a2c4d4884d0edf5364a3aafbc8b0b8de38" ticket="124099" desc="[perl #124099] Wrong CvOUTSIDE in find_lexical_cv"/>
+<commit votes="" id="b12396ac84cef7e23e1aac516fa676165ddfc790" ticket="124187" desc="[perl #124187] don't call pad_findlex() on a NULL CV"/>
+<commit votes="" id="de0885da327045eed274d7f8913a58e6de0e0f30" ticket="124385" desc="null ptr deref in Perl_cv_forget_slab"/>
 
 </div>
 
 <div><h3>Regression Fixes</h3>
 
 <commit votes="tonyc" id="bae8cfc6926f9b04d8adac6a9ee6d563cc18263f" ticket="125121" desc="Don't treat setpgrp($nonzero) as setpgrp(1)"/>
-
 <commit votes="steveh" id="0fa70a06a98fc8fa9840d4dbaa31fc2d3b28b99b" ticket="123743" desc="simpify and speed up /.*.../ handling"/>
-
 <commit votes="steveh" id="ed38223246c041b4e9ce5687cadf6f6b903050ca" ticket="123202" desc="[perl #123202] speed up scalar //g against tainted strings"/>
 <commit votes="steveh" id="71622e40793536aa4f2ace7ffc704cc78151fd26" ticket="" desc="Stop $^H |= 0x1c020000 from enabling all features"/>
 
