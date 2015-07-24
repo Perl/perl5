@@ -374,7 +374,7 @@ our $rl_term_set = ',,,';
 our $terminal;
 sub LoadTermCap {
   return if defined $terminal;
-  
+  return unless $ENV{'TERM'};
   require Term::Cap;
   $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
 }
@@ -388,7 +388,7 @@ sub ornaments {
   my @ts = split /,/, $rl_term_set, 4;
   eval { LoadTermCap };
   unless (defined $terminal) {
-    warn("Cannot find termcap: $@\n") unless $Term::ReadLine::termcap_nowarn;
+    warn("Cannot find termcap: $@\n") if $ENV{'TERM'} && ! $Term::ReadLine::termcap_nowarn;
     $rl_term_set = ',,,';
     return;
   }
