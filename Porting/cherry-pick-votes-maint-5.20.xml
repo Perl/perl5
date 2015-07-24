@@ -107,7 +107,6 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="923ed5809c063091fb0f77dc6f1b8231d587d13e" ticket="123960" desc="[perl #123960] sv.c: Fix gp_free -Do output"/>
 <commit votes="steveh" id="9d58dbc453a86c9cbb3a131adcd1559fe0445a08" ticket="123963" desc="[perl #123963] qq[@&lt;fullwidth digit&gt;]"/>
 <commit votes="steveh" id="3d50185de85a756293c9c3954114bd5c2d08a460" ticket="123847" desc="[perl #123847] crash with *foo::=*bar::=*with_hash"/>
-<commit votes="steveh" id="c5f78d08dab9b915400428ab360f007c1db176a2" ticket="124004" desc="[perl #124004] Fix stack bug with foreach(@empty)"/>
 <commit votes="steveh" id="b24768f02e4adcd11668f94274f5617c4a3f5379" ticket="123995" desc="[perl #123995] Assert fail with s;@{&lt;&lt;;"/>
 <commit votes="steveh" id="aab1202a8d4b691b16384fb41d2e2a06abf664e2" ticket="123790" desc="[perl #123790] Assert fail with *x=&lt;y&gt;"/>
 <commit votes="steveh" id="d655d9a2c4d4884d0edf5364a3aafbc8b0b8de38" ticket="124099" desc="[perl #124099] Wrong CvOUTSIDE in find_lexical_cv"/>
