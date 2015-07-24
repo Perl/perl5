@@ -172,3 +172,6 @@ t Revision history for Perl extension Attribute-Handlers
 
 0.97	Sun Jun  1 12:00:00 GMT 2015
 	- fixes to deal with CVs without GVs
+
+0.99 Fri Jul 24 18:44:48 EDT 2015
+  - CPAN release of v0.97 code
