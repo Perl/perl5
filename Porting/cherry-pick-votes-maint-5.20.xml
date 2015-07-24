@@ -103,7 +103,6 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="55b3980349c58171a77894903fd928262fb081f2" ticket="123763" desc="[perl #123763] Clear target on my $_; split"/>
 
 <commit votes="steveh" id="6b2b48acae2d74dcbde18f956f6951b5b9aa468b" ticket="123817" desc="[perl #123817] Assert fail with attr in anon hash"/>
-<commit votes="steveh" id="57db463f603fcd67bf53a35aa482bb24aa2c6950" ticket="123848" desc="[perl #123848] Allow OPpTARGET_MY on qr"/>
 <commit votes="steveh" id="813d2eb17164751c312a69e7c7c56dc71aad1ff1" ticket="123849" desc="[perl #123849] sv.c: Fix sv_clear -Do output"/>
 <commit votes="steveh" id="923ed5809c063091fb0f77dc6f1b8231d587d13e" ticket="123960" desc="[perl #123960] sv.c: Fix gp_free -Do output"/>
 <commit votes="steveh" id="9d58dbc453a86c9cbb3a131adcd1559fe0445a08" ticket="123963" desc="[perl #123963] qq[@&lt;fullwidth digit&gt;]"/>
