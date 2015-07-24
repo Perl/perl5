@@ -134,10 +134,6 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 
 <commit votes="steveh, khw" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
 
-<commit votes="" id="7ea096df5f40b4bb14879699f74bf1f11a856b55" ticket="" desc="static_assert workaround for AIX/xlc"/>
-<commit votes="" id="84ad9c6c2d2072cd602e0f4ee76fd4ac5107dc3d" ticket="" desc="Lukas Mai has two email addresses."/>
-<commit votes="" id="5074d4c567c632ecf22733b0a13d7fcec4a73037" ticket="" desc="add a comment documenting STATIC_ASSERT_GLOBAL/STATIC_ASSERT_STMT"/>
-
 <commit votes="" id="816b056ffb99ae54642320e20dc30a59fd1effef" ticket="" desc="Fix Errno.pm generation for gcc-5.0"/>
 
 <commit votes="steveh" id="f33b2f585292653a3c50ea39cbdab734c3473fcb" ticket="" desc="handle existing mkstemp() in mingw-w64-v4"/>
