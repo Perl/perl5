@@ -120,7 +120,6 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="tonyc" id="bae8cfc6926f9b04d8adac6a9ee6d563cc18263f" ticket="125121" desc="Don't treat setpgrp($nonzero) as setpgrp(1)"/>
 
 <commit votes="steveh" id="0fa70a06a98fc8fa9840d4dbaa31fc2d3b28b99b" ticket="123743" desc="simpify and speed up /.*.../ handling"/>
-<commit votes="steveh" id="3e33f67a69740d3a232ef7e31d7dbcb6793ef0aa" ticket="123743" desc="add some more tests for RT #123743"/>
 
 <commit votes="steveh" id="ed38223246c041b4e9ce5687cadf6f6b903050ca" ticket="123202" desc="[perl #123202] speed up scalar //g against tainted strings"/>
 <commit votes="steveh" id="71622e40793536aa4f2ace7ffc704cc78151fd26" ticket="" desc="Stop $^H |= 0x1c020000 from enabling all features"/>
