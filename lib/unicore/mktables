@@ -18160,6 +18160,12 @@ END
     return;
 }
 
+# Skip reasons, so will be exact same text and hence the files with each
+# reason will get grouped together in perluniprops.
+my $Indic_Skip
+            = "Provisional; for the analysis and processing of Indic scripts";
+my $Validation = "Validation Tests";
+
 # This is a list of the input files and how to handle them.  The files are
 # processed in their order in this list.  Some reordering is possible if
 # desired, but the v0 files should be first, and the extracted before the
@@ -18336,7 +18342,7 @@ my @input_file_objects = (
                    ),
     Input_file->new("NormTest.txt", v3.0.0,
                      Handler => \&process_NormalizationsTest,
-                     Skip => ($make_norm_test_script) ? 0 : 'Validation Tests',
+                     Skip => ($make_norm_test_script) ? 0 : $Validation,
                    ),
     Input_file->new('CaseFolding.txt', v3.0.1,
                     Pre_Handler => \&setup_case_folding,
@@ -18389,7 +18395,7 @@ my @input_file_objects = (
                     Handler => \&process_GCB_test,
                    ),
     Input_file->new("$AUXILIARY/LBTest.txt", v4.1.0,
-                    Skip => 'Validation Tests',
+                    Skip => $Validation,
                    ),
     Input_file->new("$AUXILIARY/SBTest.txt", v4.1.0,
                     Handler => \&process_SB_test,
@@ -18414,7 +18420,7 @@ my @input_file_objects = (
                                    : \&filter_later_version_name_alias_line,
                    ),
     Input_file->new("BidiTest.txt", v5.2.0,
-                    Skip => 'Validation Tests',
+                    Skip => $Validation,
                    ),
     Input_file->new('UnihanIndicesDictionary.txt', v5.2.0,
                     Optional => 1,
@@ -18465,13 +18471,13 @@ my @input_file_objects = (
     Input_file->new('IndicMatraCategory.txt', v6.0.0,
                     Property => 'Indic_Matra_Category',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    Skip => "Withdrawn by Unicode while still provisional",
+                    Skip => $Indic_Skip,
                    ),
     Input_file->new('IndicSyllabicCategory.txt', v6.0.0,
                     Property => 'Indic_Syllabic_Category',
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Skip => (($v_version lt v8.0.0)
-                              ? "Provisional; for the analysis and processing of Indic scripts"
+                              ? $Indic_Skip
                               : 0),
                    ),
     Input_file->new('BidiBrackets.txt', v6.3.0,
@@ -18481,7 +18487,7 @@ my @input_file_objects = (
                     Has_Missings_Defaults => $NO_DEFAULTS,
                    ),
     Input_file->new("BidiCharacterTest.txt", v6.3.0,
-                    Skip => 'Validation Tests',
+                    Skip => $Validation,
                    ),
     Input_file->new('IndicPositionalCategory.txt', v8.0.0,
                     Property => 'Indic_Positional_Category',
