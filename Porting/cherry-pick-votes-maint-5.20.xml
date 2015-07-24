@@ -93,7 +93,6 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <commit votes="steveh" id="296f0d566b9f3ad1885ae7493caaffbd0cf2eada" ticket="123554" desc="[perl #123554] fix threaded builds and prevent a warning"/>
 
 <commit votes="steveh" id="87ebf1e3df9537a204b21f0405c6e60f2acdcc47" ticket="123816" desc="[perl #123816] fix stat stacking"/>
-<commit votes="steveh" id="e92b41c6ac6bcd8786b0448c8337c4151e4f9a63" ticket="123852" desc="[perl #123852] avoid capture side-effects under noncapture flag"/>
 <commit votes="steveh" id="d0bec20370cb0ec3e757fde65d8f1d13693e913f" ticket="123870" desc="[perl #123870] fixup trie runtime debug output"/>
 <commit votes="steveh" id="fc1bb3f2dcaaac9f305b27acb4800babdc8a06f3" ticket="123874" desc="[perl #123874] fix argument underflow for pack()"/>
 
