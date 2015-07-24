@@ -12752,7 +12752,6 @@ sub generate_GCB {
 
     # Also from http://www.unicode.org/reports/tr29/tr29-3.html.
     foreach my $code_point ( qw{
-                                40000
                                 09BE 09D7 0B3E 0B57 0BBE 0BD7 0CC2 0CD5 0CD6
                                 0D3E 0D57 0DCF 0DDF FF9E FF9F 1D165 1D16E 1D16F
                                 }
