@@ -570,7 +570,7 @@ S_perl_hash_old_one_at_a_time(const unsigned char * const seed, const unsigned c
    return a 32 bit hash.
 
    Note uses unaligned 64 bit loads - will NOT work on machines with
-   strict alginment requirements.
+   strict alignment requirements.
 
    Also this code may not be suitable for big-endian machines.
 */
@@ -628,7 +628,7 @@ S_perl_hash_murmur_hash_64a (const unsigned char * const seed, const unsigned ch
    a 32 bit value
 
    Note uses unaligned 32 bit loads - will NOT work on machines with
-   strict alginment requirements.
+   strict alignment requirements.
 
    Also this code may not be suitable for big-endian machines.
 */
