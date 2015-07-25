@@ -110,33 +110,33 @@ USE_LARGE_FILES	*= define
 #
 # uncomment exactly one of the following
 #
-# Visual C++ 6.x (aka Visual C++ 98)
+# Visual C++ 6.0 (aka Visual C++ 98)
 #CCTYPE		*= MSVC60
-# Visual C++ .NET 2002/2003 (aka Visual C++ 7.x) (full version)
+# Visual C++ .NET 2002/2003 (aka Visual C++ 7.0/7.1) (full version)
 #CCTYPE		*= MSVC70
-# Visual C++ Toolkit 2003 (aka Visual C++ 7.x) (free command-line tools)
+# Visual C++ Toolkit 2003 (aka Visual C++ 7.1) (free command-line tools)
 #CCTYPE		*= MSVC70FREE
 # Windows Server 2003 SP1 Platform SDK (April 2005)
 #CCTYPE		= SDK2003SP1
-# Visual C++ 2005 (aka Visual C++ 8.x) (full version)
+# Visual C++ 2005 (aka Visual C++ 8.0) (full version)
 #CCTYPE		*= MSVC80
-# Visual C++ 2005 Express Edition (aka Visual C++ 8.x) (free version)
+# Visual C++ 2005 Express Edition (aka Visual C++ 8.0) (free version)
 #CCTYPE		*= MSVC80FREE
-# Visual C++ 2008 (aka Visual C++ 9.x) (full version)
+# Visual C++ 2008 (aka Visual C++ 9.0) (full version)
 #CCTYPE		*= MSVC90
-# Visual C++ 2008 Express Edition (aka Visual C++ 9.x) (free version)
+# Visual C++ 2008 Express Edition (aka Visual C++ 9.0) (free version)
 #CCTYPE		*= MSVC90FREE
-# Visual C++ 2010 (aka Visual C++ 10.x) (full version)
+# Visual C++ 2010 (aka Visual C++ 10.0) (full version)
 #CCTYPE		= MSVC100
-# Visual C++ 2010 Express Edition (aka Visual C++ 10.x) (free version)
+# Visual C++ 2010 Express Edition (aka Visual C++ 10.0) (free version)
 #CCTYPE		= MSVC100FREE
-# Visual C++ 2012 (aka Visual C++ 11.x) (full version)
+# Visual C++ 2012 (aka Visual C++ 11.0) (full version)
 #CCTYPE		= MSVC110
-# Visual C++ 2012 Express Edition (aka Visual C++ 11.x) (free version)
+# Visual C++ 2012 Express Edition (aka Visual C++ 11.0) (free version)
 #CCTYPE		= MSVC110FREE
-# Visual C++ 2013 (aka Visual C++ 12.x) (full version)
+# Visual C++ 2013 (aka Visual C++ 12.0) (full version)
 #CCTYPE		= MSVC120
-# Visual C++ 2013 Express Edition (aka Visual C++ 12.x) (free version)
+# Visual C++ 2013 Express Edition (aka Visual C++ 12.0) (free version)
 #CCTYPE		= MSVC120FREE
 # MinGW or mingw-w64 with gcc-3.4.5 or later
 CCTYPE		*= GCC
@@ -516,13 +516,13 @@ TESTPREPGCC	= test-prep-gcc
 
 .ELSE
 
-# All but the free version of VC++ 7.x can load DLLs on demand.  Makes the test
+# All but the free version of VC++ 7.1 can load DLLs on demand.  Makes the test
 # suite run in about 10% less time.
 .IF "$(CCTYPE)" != "MSVC70FREE"
 DELAYLOAD	= -DELAYLOAD:ws2_32.dll delayimp.lib
 .ENDIF
 
-# Visual C++ 2005 and 2008 (VC++ 8.x and 9.x) create manifest files for EXEs and
+# Visual C++ 2005 and 2008 (VC++ 8.0 and 9.0) create manifest files for EXEs and
 # DLLs. These either need copying everywhere with the binaries, or else need
 # embedding in them otherwise MSVCR80.dll or MSVCR90.dll won't be found. For
 # simplicity, embed them if they exist (and delete them afterwards so that they
@@ -597,7 +597,7 @@ DEFINES		+= -DWIN64 -DCONSERVATIVE
 OPTIMIZE	+= -fp:precise
 .ENDIF
 
-# For now, silence warnings from VC++ 8.x onwards about "unsafe" CRT functions
+# For now, silence warnings from VC++ 8.0 onwards about "unsafe" CRT functions
 # and POSIX CRT function names being deprecated.
 .IF "$(PREMSVC80)" == "undef"
 DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
@@ -671,12 +671,12 @@ RSC_FLAGS	= -DINCLUDE_MANIFEST
 .ENDIF
 
 
-# For XP support in >= 2013, subsystem is always in Config.pm LINK_FLAGS
-# else subsystem is only needed for EXE building, not XS DLL building
+# For XP support in >= VS 2013 (VC++ 12.0), subsystem is always in Config.pm
+# LINK_FLAGS else subsystem is only needed for EXE building, not XS DLL building
 # Console vs GUI makes no difference for DLLs, so use default for cleaner
 # building cmd lines
 .IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC120FREE" \
-    || "$(CCTYPE)" == "MSVC150" || "$(CCTYPE)" == "MSVC150FREE"
+    || "$(CCTYPE)" == "MSVC140" || "$(CCTYPE)" == "MSVC140FREE"
 .IF "$(WIN64)" == "define"
 LINK_FLAGS	+= -subsystem:console,"5.02"
 .ELSE
