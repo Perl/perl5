@@ -18340,10 +18340,6 @@ my @input_file_objects = (
                                               # null string
                                               : $IGNORED,
                    ),
-    Input_file->new("NormTest.txt", v3.0.0,
-                     Handler => \&process_NormalizationsTest,
-                     Skip => ($make_norm_test_script) ? 0 : $Validation,
-                   ),
     Input_file->new('CaseFolding.txt', v3.0.1,
                     Pre_Handler => \&setup_case_folding,
                     Each_Line_Handler =>
@@ -18353,6 +18349,10 @@ my @input_file_objects = (
                            \&filter_case_folding_line
                         ],
                     Has_Missings_Defaults => $IGNORED,
+                   ),
+    Input_file->new("NormTest.txt", v3.0.1,
+                     Handler => \&process_NormalizationsTest,
+                     Skip => ($make_norm_test_script) ? 0 : $Validation,
                    ),
     Input_file->new('DCoreProperties.txt', v3.1.0,
                     # 5.2 changed this file
@@ -18394,9 +18394,6 @@ my @input_file_objects = (
     Input_file->new("$AUXILIARY/GCBTest.txt", v4.1.0,
                     Handler => \&process_GCB_test,
                    ),
-    Input_file->new("$AUXILIARY/LBTest.txt", v4.1.0,
-                    Skip => $Validation,
-                   ),
     Input_file->new("$AUXILIARY/SBTest.txt", v4.1.0,
                     Handler => \&process_SB_test,
                    ),
@@ -18418,6 +18415,9 @@ my @input_file_objects = (
                     Each_Line_Handler => ($v_version le v6.0.0)
                                    ? \&filter_early_version_name_alias_line
                                    : \&filter_later_version_name_alias_line,
+                   ),
+    Input_file->new("$AUXILIARY/LBTest.txt", v5.1.0,
+                    Skip => $Validation,
                    ),
     Input_file->new("BidiTest.txt", v5.2.0,
                     Skip => $Validation,
