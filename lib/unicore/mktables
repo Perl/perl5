@@ -2176,10 +2176,16 @@ sub trace { return main::trace(@_); }
     main::set_access('property', \%property, qw{ c r });
 
     my %optional;
-    # If this is true, the file is optional.  If not present, no warning is
-    # output.  If it is present, the string given by this parameter is
-    # evaluated, and if false the file is not processed.
-    main::set_access('optional', \%optional, 'c', 'r');
+    # This is either an unsigned number, or a list of property names.  In the
+    # former case, if it is non-zero, it means the file is optional, so if the
+    # file is absent, no warning about that is output.  In the latter case, it
+    # is a list of properties that the file (exclusively) defines.  If the
+    # file is present, tables for those properties will be produced; if
+    # absent, none will, even if they are listed elsewhere (namely
+    # PropertyAliases.txt and PropValueAliases.txt) as being in this release,
+    # and no warnings will be raised about them not being available.  (And no
+    # warning about the file itself will be raised.)
+    main::set_access('optional', \%optional, qw{ c readable_array } );
 
     my %non_skip;
     # This is used for debugging, to skip processing of all but a few input
@@ -2320,6 +2326,7 @@ sub trace { return main::trace(@_); }
         $eof_handler{$addr} = [ ];
         $errors{$addr} = { };
         $missings{$addr} = [ ];
+        $optional{$addr} = [ ];
 
         # Two positional parameters.
         return Carp::carp_too_few_args(\@_, 2) if main::DEBUG && @_ < 2;
@@ -2362,6 +2369,29 @@ sub trace { return main::trace(@_); }
         # Convert 0 (meaning don't skip) to undef
         undef $skip{$addr} unless $skip{$addr};
 
+        # Handle the case where this file is optional
+        my $pod_message_for_non_existent_optional = "";
+        if ($optional{$addr}->@*) {
+
+            # First element is the pod message
+            $pod_message_for_non_existent_optional
+                                                = shift $optional{$addr}->@*;
+            # Convert a 0 'Optional' argument to an empty list to make later
+            # code more concise.
+            if (   $optional{$addr}->@*
+                && $optional{$addr}->@* == 1
+                && $optional{$addr}[0] ne ""
+                && $optional{$addr}[0] !~ /\D/
+                && $optional{$addr}[0] == 0)
+            {
+                $optional{$addr} = [ ];
+            }
+            else {  # But if the only element doesn't evaluate to 0, make sure
+                    # that this file is indeed considered optional below.
+                unshift $optional{$addr}->@*, 1;
+            }
+        }
+
         my $progress;
 
         if ($first_released{$addr} le $v_version) {
@@ -2390,10 +2420,11 @@ sub trace { return main::trace(@_); }
                     $skip{$addr} = "";  # Don't remark since we expected
                                         # nothing and got nothing
                 }
-                elsif ($optional{$addr}) {
+                elsif ($optional{$addr}->@*) {
 
-                    # Here the file is optional in this release.
-                    $skip{$addr} = "";
+                    # Here the file is optional in this release; Use the
+                    # passed in text to document this case in the pod.
+                    $skip{$addr} = $pod_message_for_non_existent_optional;
                 }
                 elsif (   $in_this_release{$addr}
                        && ! defined $skip{$addr}
@@ -2422,8 +2453,13 @@ sub trace { return main::trace(@_); }
         }
 
         # Here, we have figured out if we will be skipping this file or not.
+        # If so, we add any single property it defines to any passed in
+        # optional property list.  These will be dealt with at run time.
         if (defined $skip{$addr}) {
-        }
+            if ($property{$addr}) {
+                push $optional{$addr}->@*, $property{$addr};
+            }
+        } # Otherwise, are going to process the file.
         elsif ($property{$addr}) {
 
             # If the file has a property defined in the constructor for it, it
@@ -2569,6 +2605,17 @@ END
                     # And add it to the list of skipped files, which is later
                     # used to make the pod
                     $skipped_files{$file} = $skip{$addr};
+
+                    # The 'optional' list contains properties that are also to
+                    # be skipped along with the file.  (There may also be
+                    # digits which are just placeholders to make sure it isn't
+                    # an empty list
+                    foreach my $property ($optional{$addr}->@*) {
+                        next unless $property =~ /\D/;
+                        my $prop_object = main::property_ref($property);
+                        next unless defined $prop_object;
+                        $prop_object->set_fate($SUPPRESSED, $skip{$addr});
+                    }
                 }
 
                 return;
@@ -9659,6 +9706,9 @@ sub process_PropertyAliases($) {
 
         my $this = Property->new($data[0], Full_Name => $full);
 
+        $this->set_fate($SUPPRESSED, $why_suppressed{$full})
+                                                    if $why_suppressed{$full};
+
         # Start looking for more aliases after these two.
         for my $i (2 .. @data - 1) {
             $this->add_alias($data[$i]);
@@ -16032,6 +16082,7 @@ END
     # The sort will cause the alphabetically first properties to be added to
     # each list first, so each list will be sorted.
     foreach my $property (sort keys %why_suppressed) {
+        next unless $why_suppressed{$property};
         push @{$why_list{$why_suppressed{$property}}}, $property;
     }
 
@@ -16094,13 +16145,12 @@ END
     }
 
     # Similiarly, generate a list of files that we don't use, grouped by the
-    # reasons why.  First, create a hash whose keys are the reasons, and whose
-    # values are anonymous arrays of all the files that share that reason.
+    # reasons why (Don't output if the reason is empty).  First, create a hash
+    # whose keys are the reasons, and whose values are anonymous arrays of all
+    # the files that share that reason.
     my %grouped_by_reason;
-    foreach my $file (keys %ignored_files) {
-        push @{$grouped_by_reason{$ignored_files{$file}}}, $file;
-    }
     foreach my $file (keys %skipped_files) {
+        next unless $skipped_files{$file};
         push @{$grouped_by_reason{$skipped_files{$file}}}, $file;
     }
 
