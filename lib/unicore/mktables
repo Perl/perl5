@@ -6282,7 +6282,8 @@ END
         }
 
         # Save the reason for suppression for output
-        if ($fate == $SUPPRESSED && defined $reason) {
+        if ($fate >= $SUPPRESSED) {
+            $reason = "" unless defined $reason;
             $why_suppressed{$complete_name{$addr}} = $reason;
         }
 
@@ -8468,8 +8469,8 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                 $fate = $SUPPRESSED;
                 $suppression_reason = "Parent property is internal only";
             }
-            elsif ($self->fate == $SUPPRESSED) {
-                $fate = $SUPPRESSED;
+            elsif ($self->fate >= $SUPPRESSED) {
+                $fate = $self->fate;
                 $suppression_reason = $why_suppressed{$self->complete_name};
 
             }
@@ -8846,7 +8847,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
-        if ($fate == $SUPPRESSED) {
+        if ($fate >= $SUPPRESSED) {
             $why_suppressed{$self->complete_name} = $reason;
         }
 
