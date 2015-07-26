@@ -24,6 +24,7 @@ use File::Path;
 use File::Spec;
 use Text::Tabs;
 use re "/aa";
+use feature 'state';
 
 sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
 my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
@@ -2186,16 +2187,19 @@ sub trace { return main::trace(@_); }
     main::set_access('non_skip', \%non_skip, 'c');
 
     my %skip;
-    # This is used to skip processing of this input file semi-permanently,
-    # when it evaluates to true.  The value should be the reason the file is
-    # being skipped.  It is used for files that we aren't planning to process
-    # anytime soon, but want to allow to be in the directory and not raise a
-    # message that we are not handling.  Mostly for test files.  This is in
-    # contrast to the non_skip element, which is supposed to be used very
-    # temporarily for debugging.  Sets 'optional' to 1.  Also, files that we
-    # pretty much will never look at can be placed in the global
-    # %ignored_files instead.  Ones used here will be added to %skipped files
-    main::set_access('skip', \%skip, 'c');
+    # This is used to skip processing of this input file (semi-) permanently.
+    # The value should be the reason the file is being skipped.  It is used
+    # for files that we aren't planning to process anytime soon, but want to
+    # allow to be in the directory and be checked for their names not
+    # conflicting with any other files on a DOS 8.3 name filesystem, but to
+    # not otherwise be processed, and to not raise a warning about not being
+    # handled.  In the constructor call, any value that evaluates to a numeric
+    # 0 or undef means don't skip.  Any other value is a string giving the
+    # reason it is being skippped, and this will appear in generated pod.
+    # However, an empty string reason will suppress the pod entry.
+    # Internally, calls that evaluate to numeric 0 are changed into undef to
+    # distinguish them from an empty string call.
+    main::set_access('skip', \%skip, 'c', 'r');
 
     my %each_line_handler;
     # list of subroutines to look at and filter each non-comment line in the
@@ -2269,6 +2273,20 @@ sub trace { return main::trace(@_); }
     # storage of '@missing' defaults lines
     main::set_access('missings', \%missings);
 
+    my %required_even_in_debug_skip;
+    # debug_skip is used to speed up compilation during debugging by skipping
+    # processing files that are not needed for the task at hand.  However,
+    # some files pretty much can never be skipped, and this is used to specify
+    # that this is one of them.  In order to skip this file, the call to the
+    # constructor must be edited to comment out this parameter.
+    main::set_access('required_even_in_debug_skip',
+                     \%required_even_in_debug_skip, 'c');
+
+    my %in_this_release;
+    # Calculated value from %first_released and %withdrawn.  Are we compiling
+    # a Unicode release which includes this file?
+    main::set_access('in_this_release', \%in_this_release);
+
     sub _next_line;
     sub _next_line_with_remapped_range;
 
@@ -2281,7 +2299,7 @@ sub trace { return main::trace(@_); }
         # Set defaults
         $handler{$addr} = \&main::process_generic_property_file;
         $non_skip{$addr} = 0;
-        $skip{$addr} = 0;
+        $skip{$addr} = undef;
         $has_missings_defaults{$addr} = $NO_DEFAULTS;
         $handle{$addr} = undef;
         $added_lines{$addr} = [ ];
@@ -2295,8 +2313,6 @@ sub trace { return main::trace(@_); }
         return Carp::carp_too_few_args(\@_, 2) if main::DEBUG && @_ < 2;
         $file{$addr} = main::internal_file_to_platform(shift);
         $first_released{$addr} = shift;
-
-        undef $file{$addr} if $first_released{$addr} gt $v_version;
 
         # The rest of the arguments are key => value pairs
         # %constructor_fields has been set up earlier to list all possible
@@ -2329,24 +2345,73 @@ sub trace { return main::trace(@_); }
             delete $args{$key};
         };
 
-        # If the file has a property for it, it means that the property is not
-        # listed in the file's entries.  So add a handler to the list of line
-        # handlers to insert the property name into the lines, to provide a
-        # uniform interface to the final processing subroutine.
-        # the final code doesn't have to worry about that.
-        if ($property{$addr}) {
+        $non_skip{$addr} = 1 if $required_even_in_debug_skip{$addr};
+
+        # Convert 0 (meaning don't skip) to undef
+        undef $skip{$addr} unless $skip{$addr};
+
+        my $progress;
+
+        if ($first_released{$addr} le $v_version) {
+            $progress = $file{$addr};
+        }
+
+        my $file = $file{$addr};
+        $progress_message{$addr} = "Processing $progress"
+                                            unless $progress_message{$addr};
+
+            $in_this_release{$addr} = $first_released{$addr} le $v_version;
+
+            # Check that the file for this object exists
+            if (! main::file_exists($file))
+            {
+                # Here there is nothing available for this release.  This is
+                # fine if we aren't expecting anything in this release.
+                if (! $in_this_release{$addr}) {
+                    $skip{$addr} = "";  # Don't remark since we expected
+                                        # nothing and got nothing
+                }
+                elsif ($optional{$addr}) {
+
+                    # Here the file is optional in this release.
+                    $skip{$addr} = "";
+                }
+                elsif (   $in_this_release{$addr}
+                       && ! defined $skip{$addr}
+                       && defined $file)
+                { # Doesn't exist but should.
+                    $skip{$addr} = "'$file' not found.  Possibly Big problems";
+                    Carp::my_carp($skip{$addr});
+                }
+            }
+            elsif ($debug_skip && ! defined $skip{$addr} && ! $non_skip{$addr})
+            {
+
+                # The file exists; if not skipped for another reason, and we are
+                # skipping most everything during debugging builds, use that as
+                # the skip reason.
+                $skip{$addr} = '$debug_skip is on'
+            }
+
+        if (   ! $debug_skip
+            && $non_skip{$addr}
+            && ! $required_even_in_debug_skip{$addr}
+            && $verbosity)
+        {
+            print "Warning: " . __PACKAGE__ . " constructor for $file has useless 'non_skip' in it\n";
+        }
+
+        # Here, we have figured out if we will be skipping this file or not.
+        if (defined $skip{$addr}) {
+        }
+        elsif ($property{$addr}) {
+
+            # If the file has a property defined in the constructor for it, it
+            # means that the property is not listed in the file's entries.  So
+            # add a handler (to the list of line handlers) to insert the
+            # property name into the lines, to provide a uniform interface to
+            # the final processing subroutine.
             push @{$each_line_handler{$addr}}, \&_insert_property_into_line;
-        }
-
-        if ($non_skip{$addr} && ! $debug_skip && $verbosity) {
-            print "Warning: " . __PACKAGE__ . " constructor for $file{$addr} has useless 'non_skip' in it\n";
-        }
-
-        # If skipping, set to optional, and add to list of ignored files,
-        # including its reason
-        if ($skip{$addr}) {
-            $optional{$addr} = 1;
-            $skipped_files{$file{$addr}} = $skip{$addr} if $file{$addr};
         }
         elsif ($properties{$addr}) {
 
@@ -2410,13 +2475,13 @@ sub trace { return main::trace(@_); }
         return __PACKAGE__ . " object for " . $self->file;
     }
 
-    # flag to make sure extracted files are processed early
-    my $seen_non_extracted_non_age = 0;
-
     sub run {
         # Process the input object $self.  This opens and closes the file and
         # calls all the handlers for it.  Currently,  this can only be called
         # once per file, as it destroy's the EOF handlers
+
+        # flag to make sure extracted files are processed early
+        state $seen_non_extracted_non_age = 0;
 
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -2425,54 +2490,8 @@ sub trace { return main::trace(@_); }
 
         my $file = $file{$addr};
 
-        # Don't process if not expecting this file (because released later
-        # than this Unicode version), and isn't there.  This means if someone
-        # copies it into an earlier version's directory, we will go ahead and
-        # process it.
-        return if $first_released{$addr} gt $v_version
-                  && (! defined $file || ! -e $file);
-
-        # If in debugging mode and this file doesn't have the non-skip
-        # flag set, and isn't one of the critical files, skip it.
-        if ($debug_skip
-            && $first_released{$addr} ne v0
-            && ! $non_skip{$addr})
-        {
-            print "Skipping $file in debugging\n" if $verbosity;
-            return;
-        }
-
-        # File could be optional
-        if ($optional{$addr}) {
-            return unless -e $file;
-            my $result = eval $optional{$addr};
-            if (! defined $result) {
-                Carp::my_carp_bug("Got '$@' when tried to eval $optional{$addr}.  $file Skipped.");
-                return;
-            }
-            if (! $result) {
-                if ($verbosity) {
-                    print STDERR "Skipping processing input file '$file' because '$optional{$addr}' is not true\n";
-                }
-                return;
-            }
-        }
-
-        if (! defined $file || ! -e $file) {
-
-            # If the file doesn't exist, see if have internal data for it
-            # (based on first_released being 0).
-            if ($first_released{$addr} eq v0) {
-                $handle{$addr} = 'pretend_is_open';
-            }
-            else {
-                if (! $optional{$addr}  # File could be optional
-                    && $v_version ge $first_released{$addr})
-                {
-                    print STDERR "Skipping processing input file '$file' because not found\n";
-                }
-                return;
-            }
+        if (! $file) {
+            $handle{$addr} = 'pretend_is_open';
         }
         else {
             if ($seen_non_extracted_non_age) {
@@ -2488,7 +2507,10 @@ END
                 }
             }
             elsif ($EXTRACTED_DIR
-                    && $first_released{$addr} ne v0
+
+                    # We only do this check for generic property files
+                    && $handler{$addr} == \&main::process_generic_property_file
+
                     && $file !~ /$EXTRACTED/i
                     && lc($file) ne 'dage.txt')
             {
@@ -2503,16 +2525,29 @@ END
             # they are deleted from the hash, so any that remain at the
             # end of the program are files that we didn't process.
             my $fkey = File::Spec->rel2abs($file);
-            my $expecting = delete $potential_files{lc($fkey)};
+            my $exists = delete $potential_files{lc($fkey)};
 
-            Carp::my_carp("Was not expecting '$file'.") if
-                    ! $expecting
-                    && ! defined $handle{$addr};
+            Carp::my_carp("Was not expecting '$file'.")
+                                    if $exists && ! $in_this_release{$addr};
 
-            # Having deleted from expected files, we can quit if not to do
-            # anything.  Don't print progress unless really want verbosity
-            if ($skip{$addr}) {
-                print "Skipping $file.\n" if $verbosity >= $VERBOSE;
+            # We may be skipping this file ...
+            if (defined $skip{$addr}) {
+
+                # If the file isn't supposed to be in this release, there is
+                # nothing to do
+                if ($in_this_release{$addr}) {
+
+                    # But otherwise, we may print a message
+                    if ($debug_skip) {
+                        print STDERR "Skipping input file '$file'",
+                                     " because '$skip{$addr}'\n";
+                    }
+
+                    # And add it to the list of skipped files, which is later
+                    # used to make the pod
+                    $skipped_files{$file} = $skip{$addr};
+                }
+
                 return;
             }
 
@@ -2525,49 +2560,62 @@ END
             }
             $handle{$addr} = $file_handle; # Cache the open file handle
 
-            if ($v_version ge v3.2.0 && lc($file) ne 'unicodedata.txt') {
-
-                # UnicodeData.txt has no version marker; the others started
-                # getting it in 3.2.  Unihan files have the version somewhere
-                # in the first comment block; the other files have it as the
-                # very first line
+            # If possible, make sure that the file is the correct version.
+            # (This data isn't available on early Unicode releases or in
+            # UnicodeData.txt.)  We don't do this check if we are using a
+            # substitute file instead of the official one (though the code
+            # could be extended to do so).
+            if ($in_this_release{$addr}
+                && lc($file) ne 'unicodedata.txt')
+            {
                 if ($file !~ /^Unihan/i) {
-                    $_ = <$file_handle>;
-                    if ($_ !~ / - $string_version \. /x) {
-                        chomp;
-                        $_ =~ s/^#\s*//;
-                        die Carp::my_carp("File '$file' is version '$_'.  It should be version $string_version");
+
+                    # The non-Unihan files started getting version numbers in
+                    # 3.2, but some files in 4.0 are unchanged from 3.2, and
+                    # marked as 3.2.  4.0.1 is the first version where there
+                    # are no files marked as being from less than 4.0, though
+                    # some are marked as 4.0.  In versions after that, the
+                    # numbers are correct.
+                    if ($v_version ge v4.0.1) {
+                        $_ = <$file_handle>;    # The version number is in the
+                                                # very first line
+                        if ($_ !~ / - $string_version \. /x) {
+                            chomp;
+                            $_ =~ s/^#\s*//;
+
+                            # 4.0.1 had some valid files that weren't updated.
+                            if (! ($v_version eq v4.0.1 && $_ =~ /4\.0\.0/)) {
+                                die Carp::my_carp("File '$file' is version "
+                                                . "'$_'.  It should be "
+                                                . "version $string_version");
+                            }
+                        }
                     }
                 }
-                else {
+                elsif ($v_version ge v6.0.0) { # Unihan
+
+                    # Unihan files didn't get accurate version numbers until
+                    # 6.0.  The version is somewhere in the first comment
+                    # block
                     while (<$file_handle>) {
                         if ($_ !~ /^#/) {
-                            Carp::my_carp_bug("Could not find the expected version info in file '$file'");
+                            Carp::my_carp_bug("Could not find the expected "
+                                            . "version info in file '$file'");
                             last;
                         }
                         chomp;
                         $_ =~ s/^#\s*//;
                         next if $_ !~ / version: /x;
                         last if $_ =~ /$string_version/;
-                        die Carp::my_carp("File '$file' is '$_'.  It should be version $string_version");
+                        die Carp::my_carp("File '$file' is version "
+                                        . "'$_'.  It should be "
+                                        . "version $string_version");
                     }
                 }
             }
         }
 
-        if ($verbosity >= $PROGRESS) {
-            if ($progress_message{$addr}) {
-                print "$progress_message{$addr}\n";
-            }
-            else {
-                # If using a virtual file, say so.
-                print "Processing ", (-e $file)
-                                       ? $file
-                                       : "substitute $file",
-                                     "\n";
-            }
-        }
-
+        print "$progress_message{$addr}\n" if $verbosity >= $PROGRESS;
 
         # Call any special handler for before the file.
         &{$pre_handler{$addr}}($self) if $pre_handler{$addr};
@@ -18198,6 +18246,7 @@ my $Validation = "Validation Tests";
 my @input_file_objects = (
     Input_file->new('PropertyAliases.txt', v0,
                     Handler => \&process_PropertyAliases,
+                    Required_Even_in_Debug_Skip => 1,
                    ),
     Input_file->new(undef, v0,  # No file associated with this
                     Progress_Message => 'Finishing property setup',
@@ -18206,6 +18255,7 @@ my @input_file_objects = (
     Input_file->new('PropValueAliases.txt', v0,
                      Handler => \&process_PropValueAliases,
                      Has_Missings_Defaults => $NOT_IGNORED,
+                     Required_Even_in_Debug_Skip => 1,
                     ),
     Input_file->new('DAge.txt', v3.2.0,
                     Has_Missings_Defaults => $NOT_IGNORED,
@@ -18665,7 +18715,7 @@ my @input_files = qw(version Makefile);
 foreach my $object (@input_file_objects) {
     my $file = $object->file;
     next if ! defined $file;    # Not all objects have files
-    next if $object->optional && ! -e $file;
+    next if defined $object->skip;;
     push @input_files,  $file;
 }
 
