@@ -12697,12 +12697,22 @@ sub generate_hst {
 END
 );
 
-    # The Hangul syllables in version 1 are completely different than what came
-    # after, so just ignore them there.
+    # The Hangul syllables in version 1 are at different code points than
+    # those that came along starting in version 2, and have different names;
+    # they comprise about 60% of the code points of the later version.
+    # From my (khw) research on them (see <558493EB.4000807@att.net>), the
+    # initial set is a subset of the later version, with different English
+    # transliterations.  I did not see an easy mapping between them.  The
+    # later set includes essentially all possibilities, even ones that aren't
+    # in modern use (if they ever were), and over 96% of the new ones are type
+    # LVT.  Mathematically, the early set must also contain a preponderance of
+    # LVT values.  In lieu of doing nothing, we just set them all to LVT, and
+    # expect that this will be right most of the time, which is better than
+    # not being right at all.
     if ($v_version lt v2.0.0) {
         my $property = property_ref($file->property);
+        $file->insert_lines("3400..4DFF; LVT\n");
         push @tables_that_may_be_empty, $property->table('LV')->complete_name;
-        push @tables_that_may_be_empty, $property->table('LVT')->complete_name;
         return;
     }
 
