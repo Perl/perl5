@@ -2282,6 +2282,11 @@ sub trace { return main::trace(@_); }
     main::set_access('required_even_in_debug_skip',
                      \%required_even_in_debug_skip, 'c');
 
+    my %withdrawn;
+    # Some files get removed from the Unicode DB.  This is a version object
+    # giving the first release without this file.
+    main::set_access('withdrawn', \%withdrawn, 'c');
+
     my %in_this_release;
     # Calculated value from %first_released and %withdrawn.  Are we compiling
     # a Unicode release which includes this file?
@@ -2360,6 +2365,13 @@ sub trace { return main::trace(@_); }
         $progress_message{$addr} = "Processing $progress"
                                             unless $progress_message{$addr};
 
+        # A file should be there if it is within the window of versions for
+        # which Unicode supplies it
+        if ($withdrawn{$addr} && $withdrawn{$addr} le $v_version) {
+            $in_this_release{$addr} = 0;
+            $skip{$addr} = "";
+        }
+        else {
             $in_this_release{$addr} = $first_released{$addr} le $v_version;
 
             # Check that the file for this object exists
@@ -2392,6 +2404,7 @@ sub trace { return main::trace(@_); }
                 # the skip reason.
                 $skip{$addr} = '$debug_skip is on'
             }
+        }
 
         if (   ! $debug_skip
             && $non_skip{$addr}
@@ -18363,6 +18376,7 @@ my @input_file_objects = (
                                             : undef),
                    ),
     Input_file->new('Unihan.txt', v2.0.0,
+                    Withdrawn => v5.2.0,
                     Pre_Handler => \&setup_unihan,
                     Optional => 1,
                     Each_Line_Handler => \&filter_unihan_line,
@@ -18532,6 +18546,7 @@ my @input_file_objects = (
     # them to work properly, which isn't worth it because of them being
     # provisional.
     Input_file->new('IndicMatraCategory.txt', v6.0.0,
+                    Withdrawn => v8.0.0,
                     Property => 'Indic_Matra_Category',
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Skip => $Indic_Skip,
