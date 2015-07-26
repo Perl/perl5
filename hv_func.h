@@ -577,7 +577,7 @@ S_perl_hash_old_one_at_a_time(const unsigned char * const seed, const unsigned c
 PERL_STATIC_INLINE U32
 S_perl_hash_murmur_hash_64a (const unsigned char * const seed, const unsigned char *str, const STRLEN len)
 {
-        const U64 m = UINT64_C(0xc6a4a7935bd1e995);
+        const U64TYPE m = UINT64_C(0xc6a4a7935bd1e995);
         const int r = 47;
         U64TYPE h = *((U64TYPE*)seed) ^ len;
         const U64TYPE * data = (const U64TYPE *)str;
