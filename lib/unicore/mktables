@@ -2125,12 +2125,13 @@ package Input_file;
 # each_line_handler()s.  So, if the format of the line is not in the desired
 # format for the main handler, these are used to do that adjusting.  They can
 # be stacked (by enclosing them in an [ anonymous array ] in the constructor,
-# so the $_ output of one is used as the input to the next.  None of the other
-# handlers are stackable, but could easily be changed to be so.
+# so the $_ output of one is used as the input to the next.  The eof handler
+# is also stackable, but none of the others are, but could easily be changed
+# to be so.
 #
 # Most of the handlers can call insert_lines() or insert_adjusted_lines()
 # which insert the parameters as lines to be processed before the next input
-# file line is read.  This allows the EOF handler to flush buffers, for
+# file line is read.  This allows the EOF handler(s) to flush buffers, for
 # example.  The difference between the two routines is that the lines inserted
 # by insert_lines() are subjected to the each_line_handler()s.  (So if you
 # called it from such a handler, you would get infinite recursion without some
@@ -2231,11 +2232,11 @@ sub trace { return main::trace(@_); }
     main::set_access('pre_handler', \%pre_handler, qw{ c });
 
     my %eof_handler;
-    # Subroutine to call upon getting an EOF on the input file, but before
+    # Subroutines to call upon getting an EOF on the input file, but before
     # that is returned to the main handler.  This is to allow buffers to be
     # flushed.  The handler is expected to call insert_lines() or
     # insert_adjusted() with the buffered material
-    main::set_access('eof_handler', \%eof_handler, qw{ c r });
+    main::set_access('eof_handler', \%eof_handler, qw{ c });
 
     my %post_handler;
     # Subroutine to call after all the lines of the file are read in and
@@ -2286,6 +2287,7 @@ sub trace { return main::trace(@_); }
         $added_lines{$addr} = [ ];
         $remapped_lines{$addr} = [ ];
         $each_line_handler{$addr} = [ ];
+        $eof_handler{$addr} = [ ];
         $errors{$addr} = { };
         $missings{$addr} = [ ];
 
@@ -2414,7 +2416,7 @@ sub trace { return main::trace(@_); }
     sub run {
         # Process the input object $self.  This opens and closes the file and
         # calls all the handlers for it.  Currently,  this can only be called
-        # once per file, as it destroy's the EOF handler
+        # once per file, as it destroy's the EOF handlers
 
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -2753,11 +2755,11 @@ END
             return 1;
         } # End of looping through lines.
 
-        # If there is an EOF handler, call it (only once) and if it generates
+        # If there are EOF handlers, call each (only once) and if it generates
         # more lines to process go back in the loop to handle them.
-        if ($eof_handler{$addr}) {
-            &{$eof_handler{$addr}}($self);
-            $eof_handler{$addr} = "";   # Currently only get one shot at it.
+        while ($eof_handler{$addr}->@*) {
+            &{$eof_handler{$addr}[0]}($self);
+            shift $eof_handler{$addr}->@*;   # Currently only get one shot at it.
             goto LINE if $added_lines{$addr};
         }
 
