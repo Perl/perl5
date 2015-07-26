@@ -2519,7 +2519,7 @@ END
             my $file_handle;
             if (not open $file_handle, "<", $file) {
                 Carp::my_carp("Can't open $file.  Skipping: $!");
-                return 0;
+                return;
             }
             $handle{$addr} = $file_handle; # Cache the open file handle
 
