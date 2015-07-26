@@ -404,24 +404,19 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #
 # A NOTE ON UNIHAN
 #
-# This program can generate tables from the Unihan database.  But it doesn't
-# by default, letting the CPAN module Unicode::Unihan handle them.  Prior to
-# version 5.2, this database was in a single file, Unihan.txt.  In 5.2 the
-# database was split into 8 different files, all beginning with the letters
-# 'Unihan'.  This program will read those file(s) if present, but it needs to
-# know which of the many properties in the file(s) should have tables created
-# for them.  It will create tables for any properties listed in
-# PropertyAliases.txt and PropValueAliases.txt, plus any listed in the
-# @cjk_properties array and the @cjk_property_values array.  Thus, if a
-# property you want is not in those files of the release you are building
-# against, you must add it to those two arrays.  Starting in 4.0, the
-# Unicode_Radical_Stroke was listed in those files, so if the Unihan database
-# is present in the directory, a table will be generated for that property.
-# In 5.2, several more properties were added.  For your convenience, the two
-# arrays are initialized with all the 6.0 listed properties that are also in
-# earlier releases.  But these are commented out.  You can just uncomment the
-# ones you want, or use them as a template for adding entries for other
-# properties.
+# This program can generate tables from the Unihan database.  But that db
+# isn't normally available, so it is marked as optional.  Prior to version
+# 5.2, this database was in a single file, Unihan.txt.  In 5.2 the database
+# was split into 8 different files, all beginning with the letters 'Unihan'.
+# If you plunk those files down into the directory mktables ($0) is in, this
+# program will read them and automatically create tables for the properties
+# from it that are listed in PropertyAliases.txt and PropValueAliases.txt,
+# plus any you add to the @cjk_properties array and the @cjk_property_values
+# array, being sure to add necessary '# @missings' lines to the latter.  For
+# Unicode versions earlier than 5.2, most of the Unihan properties are not
+# listed at all in PropertyAliases nor PropValueAliases.  This program assumes
+# for these early releases that you want the properties that are specified in
+# the 5.2 release.
 #
 # You may need to adjust the entries to suit your purposes.  setup_unihan(),
 # and filter_unihan_line() are the functions where this is done.  This program
@@ -858,32 +853,6 @@ if ($v_version gt v3.2.0) {
                                 'Canonical_Combining_Class=Attached_Below_Left'
 }
 
-# These are listed in the Property aliases file in 6.0, but Unihan is ignored
-# unless explicitly added.
-if ($v_version ge v5.2.0 && ! $write_Unicode_deprecated_tables) {
-    my $unihan = 'Unihan; remove from list if using Unihan';
-    foreach my $table (qw (
-                           kAccountingNumeric
-                           kOtherNumeric
-                           kPrimaryNumeric
-                           kCompatibilityVariant
-                           kIICore
-                           kIRG_GSource
-                           kIRG_HSource
-                           kIRG_JSource
-                           kIRG_KPSource
-                           kIRG_MSource
-                           kIRG_KSource
-                           kIRG_TSource
-                           kIRG_USource
-                           kIRG_VSource
-                           kRSUnicode
-                        ))
-    {
-        $why_suppress_if_empty_warn_if_not{$table} = $unihan;
-    }
-}
-
 # Enum values for to_output_map() method in the Map_Table package. (0 is don't
 # output)
 my $EXTERNAL_MAP = 1;
@@ -910,13 +879,6 @@ my %global_to_output_map = (
     # Perl_Decomposition_Mapping file
     Decomposition_Type => 0,
 );
-
-# Properties that this program ignores.
-my @unimplemented_properties;
-
-# With this release, it is automatically handled if the Unihan db is
-# downloaded
-push @unimplemented_properties, 'Unicode_Radical_Stroke' if $v_version lt v5.2.0;
 
 # There are several types of obsolete properties defined by Unicode.  These
 # must be hand-edited for every new Unicode release.
@@ -1044,45 +1006,13 @@ if ($v_version ge v6.0.0) {
 my @output_mapped_properties = split "\n", <<END;
 END
 
-# If you are using the Unihan database in a Unicode version before 5.2, you
-# need to add the properties that you want to extract from it to this table.
-# For your convenience, the properties in the 6.0 PropertyAliases.txt file are
-# listed, commented out
+# If you want more Unihan properties than the default, you need to add them to
+# these arrays.  Depending on the property type, @missing lines might have to
+# be added to the second array.  A sample entry would be (including the '#'):
+# @missing: 0000..10FFFF; cjkAccountingNumeric; NaN
 my @cjk_properties = split "\n", <<'END';
-#cjkAccountingNumeric; kAccountingNumeric
-#cjkOtherNumeric; kOtherNumeric
-#cjkPrimaryNumeric; kPrimaryNumeric
-#cjkCompatibilityVariant; kCompatibilityVariant
-#cjkIICore ; kIICore
-#cjkIRG_GSource; kIRG_GSource
-#cjkIRG_HSource; kIRG_HSource
-#cjkIRG_JSource; kIRG_JSource
-#cjkIRG_KPSource; kIRG_KPSource
-#cjkIRG_KSource; kIRG_KSource
-#cjkIRG_TSource; kIRG_TSource
-#cjkIRG_USource; kIRG_USource
-#cjkIRG_VSource; kIRG_VSource
-#cjkRSUnicode; kRSUnicode                ; Unicode_Radical_Stroke; URS
 END
-
-# Similarly for the property values.  For your convenience, the lines in the
-# 6.0 PropertyAliases.txt file are listed.  Just remove the first BUT NOT both
-# '#' marks (for Unicode versions before 5.2)
 my @cjk_property_values = split "\n", <<'END';
-## @missing: 0000..10FFFF; cjkAccountingNumeric; NaN
-## @missing: 0000..10FFFF; cjkCompatibilityVariant; <code point>
-## @missing: 0000..10FFFF; cjkIICore; <none>
-## @missing: 0000..10FFFF; cjkIRG_GSource; <none>
-## @missing: 0000..10FFFF; cjkIRG_HSource; <none>
-## @missing: 0000..10FFFF; cjkIRG_JSource; <none>
-## @missing: 0000..10FFFF; cjkIRG_KPSource; <none>
-## @missing: 0000..10FFFF; cjkIRG_KSource; <none>
-## @missing: 0000..10FFFF; cjkIRG_TSource; <none>
-## @missing: 0000..10FFFF; cjkIRG_USource; <none>
-## @missing: 0000..10FFFF; cjkIRG_VSource; <none>
-## @missing: 0000..10FFFF; cjkOtherNumeric; NaN
-## @missing: 0000..10FFFF; cjkPrimaryNumeric; NaN
-## @missing: 0000..10FFFF; cjkRSUnicode; <none>
 END
 
 # The input files don't list every code point.  Those not listed are to be
@@ -1168,9 +1098,6 @@ my %ignored_files = (
     'auxiliary/GraphemeBreakTest.html' => 'Documentation of validation tests',
     'auxiliary/LineBreakTest.html' => 'Documentation of validation tests',
 );
-
-my %skipped_files;  # List of files that we skip
-
 ### End of externally interesting definitions, except for @input_file_objects
 
 my $HEADER=<<"EOF";
@@ -1410,6 +1337,7 @@ my %prop_value_aliases;     # Keys of top level are standard property name;
                             # values are keys to another hash,  Each one is
                             # one of the property's values, in standard form.
                             # The values are that prop-val's aliases.
+my %skipped_files;          # List of files that we skip
 my %ucd_pod;    # Holds entries that will go into the UCD section of the pod
 
 # Most properties are immune to caseless matching, otherwise you would get
@@ -8748,9 +8676,6 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # to it.
         return 0 if $type{$addr} == $STRING;
 
-        # Don't generate anything for unimplemented properties.
-        return 0 if grep { $self->complete_name eq $_ }
-                                                    @unimplemented_properties;
         # Otherwise, do.
         return 1;
     }
@@ -9704,6 +9629,12 @@ sub process_PropertyAliases($) {
 
         my $full = $data[1];
 
+        # This line is defective in early Perls.  The property in Unihan.txt
+        # is kRSUnicode.
+        if ($v_version lt v5.2.0 && $full eq 'Unicode_Radical_Stroke') {
+            push @data, qw(cjkRSUnicode kRSUnicode);
+        }
+
         my $this = Property->new($data[0], Full_Name => $full);
 
         $this->set_fate($SUPPRESSED, $why_suppressed{$full})
@@ -9870,14 +9801,6 @@ sub finish_property_setup {
                                               'AL');
             $lb->set_default_map($default);
         }
-    }
-
-    # If has the URS property, make sure that the standard aliases are in
-    # it, since not in the input tables in some versions.
-    my $urs = property_ref('Unicode_Radical_Stroke');
-    if (defined $urs) {
-        $urs->add_alias('cjkRSUnicode');
-        $urs->add_alias('kRSUnicode');
     }
 
     # For backwards compatibility with applications that may read the mapping
@@ -12502,6 +12425,68 @@ sub filter_numeric_value_line {
 
 { # Closure
     my %unihan_properties;
+
+    sub construct_unihan {
+
+        my $file_object = shift;
+
+        return unless file_exists($file_object->file);
+
+        if ($v_version lt v4.0.0) {
+            push @cjk_properties, 'URS ; Unicode_Radical_Stroke';
+            push @cjk_property_values, split "\n", <<'END';
+# @missing: 0000..10FFFF; Unicode_Radical_Stroke; <none>
+END
+        }
+
+        if ($v_version ge v3.0.0) {
+            push @cjk_properties, split "\n", <<'END';
+cjkIRG_GSource; kIRG_GSource
+cjkIRG_JSource; kIRG_JSource
+cjkIRG_KSource; kIRG_KSource
+cjkIRG_TSource; kIRG_TSource
+cjkIRG_VSource; kIRG_VSource
+END
+        push @cjk_property_values, split "\n", <<'END';
+# @missing: 0000..10FFFF; cjkIRG_GSource; <none>
+# @missing: 0000..10FFFF; cjkIRG_JSource; <none>
+# @missing: 0000..10FFFF; cjkIRG_KSource; <none>
+# @missing: 0000..10FFFF; cjkIRG_TSource; <none>
+# @missing: 0000..10FFFF; cjkIRG_VSource; <none>
+END
+        }
+        if ($v_version ge v3.1.0) {
+            push @cjk_properties, 'cjkIRG_HSource; kIRG_HSource';
+            push @cjk_property_values, '# @missing: 0000..10FFFF; cjkIRG_HSource; <none>';
+        }
+        if ($v_version ge v3.1.1) {
+            push @cjk_properties, 'cjkIRG_KPSource; kIRG_KPSource';
+            push @cjk_property_values, '# @missing: 0000..10FFFF; cjkIRG_KPSource; <none>';
+        }
+        if ($v_version ge v3.2.0) {
+            push @cjk_properties, split "\n", <<'END';
+cjkAccountingNumeric; kAccountingNumeric
+cjkCompatibilityVariant; kCompatibilityVariant
+cjkOtherNumeric; kOtherNumeric
+cjkPrimaryNumeric; kPrimaryNumeric
+END
+            push @cjk_property_values, split "\n", <<'END';
+# @missing: 0000..10FFFF; cjkAccountingNumeric; NaN
+# @missing: 0000..10FFFF; cjkCompatibilityVariant; <code point>
+# @missing: 0000..10FFFF; cjkOtherNumeric; NaN
+# @missing: 0000..10FFFF; cjkPrimaryNumeric; NaN
+END
+        }
+        if ($v_version gt v4.0.0) {
+            push @cjk_properties, 'cjkIRG_USource; kIRG_USource';
+            push @cjk_property_values, '# @missing: 0000..10FFFF; cjkIRG_USource; <none>';
+        }
+
+        if ($v_version ge v4.1.0) {
+            push @cjk_properties, 'cjkIICore ; kIICore';
+            push @cjk_property_values, '# @missing: 0000..10FFFF; cjkIICore; <none>';
+        }
+    }
 
     sub setup_unihan {
         # Do any special setup for Unihan properties.
@@ -17321,14 +17306,8 @@ sub write_all_tables() {
             # with it or not.
             my $expected_empty =
 
-                # $perl should be empty, as well as properties that we just
-                # don't do anything with
-                ($is_property
-                    && ($table == $perl
-                        || grep { $complete_name eq $_ }
-                                                    @unimplemented_properties
-                    )
-                )
+                # $perl should be empty
+                ($is_property && ($table == $perl))
 
                 # Match tables in properties we skipped populating should be
                 # empty
@@ -18437,8 +18416,11 @@ my @input_file_objects = (
                    ),
     Input_file->new('Unihan.txt', v2.0.0,
                     Withdrawn => v5.2.0,
+                    Construction_Time_Handler => \&construct_unihan,
                     Pre_Handler => \&setup_unihan,
-                    Optional => 1,
+                    Optional => [ "",
+                                  'Unicode_Radical_Stroke'
+                                ],
                     Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('SpecialCasing.txt', v2.1.8,
@@ -18560,36 +18542,54 @@ my @input_file_objects = (
                     Skip => $Validation,
                    ),
     Input_file->new('UnihanIndicesDictionary.txt', v5.2.0,
-                    Optional => 1,
+                    Optional => "",
                     Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('UnihanDataDictionaryLike.txt', v5.2.0,
-                    Optional => 1,
+                    Optional => "",
                     Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('UnihanIRGSources.txt', v5.2.0,
-                    Optional => 1,
+                    Optional => [ "",
+                                  'kCompatibilityVariant',
+                                  'kIICore',
+                                  'kIRG_GSource',
+                                  'kIRG_HSource',
+                                  'kIRG_JSource',
+                                  'kIRG_KPSource',
+                                  'kIRG_MSource',
+                                  'kIRG_KSource',
+                                  'kIRG_TSource',
+                                  'kIRG_USource',
+                                  'kIRG_VSource',
+                               ],
                     Pre_Handler => \&setup_unihan,
                     Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('UnihanNumericValues.txt', v5.2.0,
-                    Optional => 1,
+                    Optional => [ "",
+                                  'kAccountingNumeric',
+                                  'kOtherNumeric',
+                                  'kPrimaryNumeric',
+                                ],
                     Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('UnihanOtherMappings.txt', v5.2.0,
-                    Optional => 1,
+                    Optional => "",
                     Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('UnihanRadicalStrokeCounts.txt', v5.2.0,
-                    Optional => 1,
+                    Optional => [ "",
+                                  'Unicode_Radical_Stroke'
+                                ],
                     Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('UnihanReadings.txt', v5.2.0,
-                    Optional => 1,
+                    Optional => "",
                     Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('UnihanVariants.txt', v5.2.0,
-                    Optional => 1,
+                    Optional => "",
                     Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('ScriptExtensions.txt', v6.0.0,
