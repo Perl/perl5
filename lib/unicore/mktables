@@ -9878,18 +9878,13 @@ sub finish_property_setup {
         Property->new('JSN', Full_Name => 'Jamo_Short_Name');
     }
 
-    # These two properties must be defined in all releases so we can generate
-    # the tables from them to make regex \X work, but suppress their output so
-    # aren't application visible prior to releases where they should be
+    # This property must be defined in all releases so we can generate
+    # the tables from it to make regex \X work, but suppress its output so
+    # isn't application visible prior to releases where it should be
     if (! defined property_ref('GCB')) {
         Property->new('GCB', Full_Name => 'Grapheme_Cluster_Break',
                       Fate => $PLACEHOLDER);
     }
-    if (! defined property_ref('hst')) {
-        Property->new('hst', Full_Name => 'Hangul_Syllable_Type',
-                      Fate => $PLACEHOLDER);
-    }
-
     # These are used so much, that we set globals for them.
     $gc = property_ref('General_Category');
     $block = property_ref('Block');
@@ -10208,12 +10203,12 @@ sub process_PropValueAliases {
 
     if ($v_version lt 4.0.0) {
         $file->insert_lines(split /\n/, <<'END'
-hst; L                                ; Leading_Jamo
-hst; LV                               ; LV_Syllable
-hst; LVT                              ; LVT_Syllable
-hst; NA                               ; Not_Applicable
-hst; T                                ; Trailing_Jamo
-hst; V                                ; Vowel_Jamo
+Hangul_Syllable_Type; L                                ; Leading_Jamo
+Hangul_Syllable_Type; LV                               ; LV_Syllable
+Hangul_Syllable_Type; LVT                              ; LVT_Syllable
+Hangul_Syllable_Type; NA                               ; Not_Applicable
+Hangul_Syllable_Type; T                                ; Trailing_Jamo
+Hangul_Syllable_Type; V                                ; Vowel_Jamo
 END
         );
     }
@@ -18771,12 +18766,10 @@ my @input_file_objects = (
                     Withdrawn => v5.1,
                     Skip => $Documentation,
                    ),
-    Input_file->new('HangulSyllableType.txt', v0,
+    Input_file->new('HangulSyllableType.txt', v4.0,
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    Property => 'Hangul_Syllable_Type',
-                    Pre_Handler => ($v_version lt v4.0.0)
-                                   ? \&generate_hst
-                                   : undef,
+                    Early => [ \&generate_hst, 'Hangul_Syllable_Type' ],
+                    Property => 'Hangul_Syllable_Type'
                    ),
     Input_file->new('NormalizationCorrections.txt', v3.2.0,
                      # This documents the cumulative fixes to erroneous
