@@ -919,8 +919,6 @@ my %why_obsolete;    # Documentation only
         # existence is not noted in the comment.
         'Decomposition_Mapping' => 'Accessible via Unicode::Normalize or prop_invmap() or charprop() in Unicode::UCD::',
 
-        'Indic_Matra_Category' => "Withdrawn by Unicode while still provisional",
-
         # Don't suppress ISO_Comment, as otherwise special handling is needed
         # to differentiate between it and gc=c, which can be written as 'isc',
         # which is the same characters as ISO_Comment's short name.
@@ -1068,36 +1066,6 @@ my %default_mapping = (
     Word_Break => 'Other',
 );
 
-# Below are files that Unicode furnishes, but this program ignores, and why.
-# NormalizationCorrections.txt requires some more explanation.  It documents
-# the cumulative fixes to erroneous normalizations in earlier Unicode
-# versions.  Its main purpose is so that someone running on an earlier version
-# can use this file to override what got published in that earlier release.
-# It would be easy for mktables to read and handle this file.  But all the
-# corrections in it should already be in the other files for the release it
-# is.  To get it to actually mean something useful, someone would have to be
-# using an earlier Unicode release, and copy it to the files for that release
-# and recomplile.  So far there has been no demand to do that, so this hasn't
-# been implemented.
-my %ignored_files = (
-    'CJKRadicals.txt' => 'Maps the kRSUnicode property values to corresponding code points',
-    'Index.txt' => 'Alphabetical index of Unicode characters',
-    'NamedSqProv.txt' => 'Named sequences proposed for inclusion in a later version of the Unicode Standard; if you need them now, you can append this file to F<NamedSequences.txt> and recompile perl',
-    'NamesList.txt' => 'Annotated list of characters',
-    'NamesList.html' => 'Describes the format and contents of F<NamesList.txt>',
-    'NormalizationCorrections.txt' => 'Documentation of corrections already incorporated into the Unicode data base',
-    'Props.txt' => 'Only in very early releases; is a subset of F<PropList.txt> (which is used instead)',
-    'ReadMe.txt' => 'Documentation',
-    'StandardizedVariants.txt' => 'Certain glyph variations for character display are standardized.  This lists the non-Unihan ones; the Unihan ones are also not used by Perl, and are in a separate Unicode data base L<http://www.unicode.org/ivd>',
-    'StandardizedVariants.html' => 'Provides a visual display of the standard variant sequences derived from F<StandardizedVariants.txt>.',
-    'EmojiSources.txt' => 'Maps certain Unicode code points to their legacy Japanese cell-phone values',
-    'USourceData.txt' => 'Documentation of status and cross reference of proposals for encoding by Unicode of Unihan characters',
-    'USourceGlyphs.pdf' => 'Pictures of the characters in F<USourceData.txt>',
-    'auxiliary/WordBreakTest.html' => 'Documentation of validation tests',
-    'auxiliary/SentenceBreakTest.html' => 'Documentation of validation tests',
-    'auxiliary/GraphemeBreakTest.html' => 'Documentation of validation tests',
-    'auxiliary/LineBreakTest.html' => 'Documentation of validation tests',
-);
 ### End of externally interesting definitions, except for @input_file_objects
 
 my $HEADER=<<"EOF";
@@ -18290,21 +18258,24 @@ END
 
 # Skip reasons, so will be exact same text and hence the files with each
 # reason will get grouped together in perluniprops.
+my $Documentation = "Documentation";
 my $Indic_Skip
             = "Provisional; for the analysis and processing of Indic scripts";
 my $Validation = "Validation Tests";
+my $Validation_Documentation = "Documentation of validation Tests";
 
 # This is a list of the input files and how to handle them.  The files are
 # processed in their order in this list.  Some reordering is possible if
-# desired, but the v0 files should be first, and the extracted before the
-# others except DAge.txt (as data in an extracted file can be over-ridden by
-# the non-extracted.  Some other files depend on data derived from an earlier
-# file, like UnicodeData requires data from Jamo, and the case changing and
-# folding requires data from Unicode.  Mostly, it is safest to order by first
-# version releases in (except the Jamo).  DAge.txt is read before the
-# extracted ones because of the rarely used feature $compare_versions.  In the
-# unlikely event that there were ever an extracted file that contained the Age
-# property information, it would have to go in front of DAge.
+# desired, but the PropertyAliases and PropValueAliases files should be first,
+# and the extracted before the others except DAge.txt (as data in an extracted
+# file can be over-ridden by the non-extracted.  Some other files depend on
+# data derived from an earlier file, like UnicodeData requires data from Jamo,
+# and the case changing and folding requires data from Unicode.  Mostly, it is
+# safest to order by first version releases in (except the Jamo).  DAge.txt is
+# read before the extracted ones because of the rarely used feature
+# $compare_versions.  In the unlikely event that there were ever an extracted
+# file that contained the Age property information, it would have to go in
+# front of DAge.
 #
 # The version strings allow the program to know whether to expect a file or
 # not, but if a file exists in the directory, it will be processed, even if it
@@ -18409,6 +18380,11 @@ my @input_file_objects = (
                                          ],
                     EOF_Handler => \&EOF_UnicodeData,
                    ),
+    Input_file->new('CJKXREF.TXT', v1.1.5,
+                    Withdrawn => v2.0.0,
+                    Skip => 'Gives the mapping of CJK code points '
+                          . 'between Unicode and various other standards',
+                   ),
     Input_file->new('ArabicShaping.txt', v2.0.0,
                     Each_Line_Handler =>
                         ($v_version lt 4.1.0)
@@ -18424,10 +18400,23 @@ my @input_file_objects = (
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Each_Line_Handler => \&filter_blocks_lines
                    ),
+    Input_file->new('Index.txt', v2.0.0,
+                    Skip => 'Alphabetical index of Unicode characters',
+                   ),
+    Input_file->new('NamesList.txt', v2.0.0,
+                    Skip => 'Annotated list of characters',
+                   ),
     Input_file->new('PropList.txt', v2.0.0,
                     Each_Line_Handler => (($v_version lt v3.1.0)
                                             ? \&filter_old_style_proplist
                                             : undef),
+                   ),
+    Input_file->new('Props.txt', v2.0.0,
+                    Withdrawn => v3.0.0,
+                    Skip => 'A subset of F<PropList.txt> (which is used instead)',
+                   ),
+    Input_file->new('ReadMe.txt', v2.0.0,
+                    Skip => $Documentation,
                    ),
     Input_file->new('Unihan.txt', v2.0.0,
                     Withdrawn => v5.2.0,
@@ -18465,6 +18454,10 @@ my @input_file_objects = (
     Input_file->new('CompositionExclusions.txt', v3.0.0,
                     Property => 'Composition_Exclusion',
                    ),
+    Input_file->new('UnicodeData.html', v3.0.0,
+                    Withdrawn => v4.0.1,
+                    Skip => $Documentation,
+                   ),
     Input_file->new('BidiMirroring.txt', v3.0.1,
                     Property => 'Bidi_Mirroring_Glyph',
                     Has_Missings_Defaults => ($v_version lt v6.2.0)
@@ -18473,6 +18466,14 @@ my @input_file_objects = (
                                               # anything to us, we will use the
                                               # null string
                                               : $IGNORED,
+                   ),
+    Input_file->new('NamesList.html', v3.0.0,
+                    Skip => 'Describes the format and contents of '
+                          . 'F<NamesList.txt>',
+                   ),
+    Input_file->new('UnicodeCharacterDatabase.html', v3.0.0,
+                    Withdrawn => v5.1,
+                    Skip => $Documentation,
                    ),
     Input_file->new('CaseFolding.txt', v3.0.1,
                     Pre_Handler => \&setup_case_folding,
@@ -18494,6 +18495,14 @@ my @input_file_objects = (
                                             ? $NOT_IGNORED
                                             : $NO_DEFAULTS),
                    ),
+    Input_file->new('DProperties.html', v3.1.0,
+                    Withdrawn => v3.2.0,
+                    Skip => $Documentation,
+                   ),
+    Input_file->new('PropList.html', v3.1.0,
+                    Withdrawn => v5.1,
+                    Skip => $Documentation,
+                   ),
     Input_file->new('Scripts.txt', v3.1.0,
                     Property => 'Script',
                     Each_Line_Handler => (($v_version le v4.0.0)
@@ -18507,12 +18516,51 @@ my @input_file_objects = (
                                       ? \&filter_old_style_normalization_lines
                                       : undef),
                    ),
+    Input_file->new('DerivedProperties.html', v3.1.1,
+                    Withdrawn => v5.1,
+                    Skip => $Documentation,
+                   ),
     Input_file->new('HangulSyllableType.txt', v0,
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Property => 'Hangul_Syllable_Type',
                     Pre_Handler => ($v_version lt v4.0.0)
                                    ? \&generate_hst
                                    : undef,
+                   ),
+    Input_file->new('NormalizationCorrections.txt', v3.2.0,
+                     # This documents the cumulative fixes to erroneous
+                     # normalizations in earlier Unicode versions.  Its main
+                     # purpose is so that someone running on an earlier
+                     # version can use this file to override what got
+                     # published in that earlier release.  It would be easy
+                     # for mktables to handle this file.  But all the
+                     # corrections in it should already be in the other files
+                     # for the release it is.  To get it to actually mean
+                     # something useful, someone would have to be using an
+                     # earlier Unicode release, and copy it into the directory
+                     # for that release and recomplile.  So far there has been
+                     # no demand to do that, so this hasn't been implemented.
+                    Skip => 'Documentation of corrections already '
+                          . 'incorporated into the Unicode data base',
+                   ),
+    Input_file->new('StandardizedVariants.html', v3.2.0,
+                    Skip => 'Provides a visual display of the standard '
+                          . 'variant sequences derived from '
+                          . 'F<StandardizedVariants.txt>.',
+                        # I don't know why the html came earlier than the
+                        # .txt, but both are skipped anyway, so it doesn't
+                        # matter.
+                   ),
+    Input_file->new('StandardizedVariants.txt', v4.0.0,
+                    Skip => 'Certain glyph variations for character display '
+                          . 'are standardized.  This lists the non-Unihan '
+                          . 'ones; the Unihan ones are also not used by '
+                          . 'Perl, and are in a separate Unicode data base '
+                          . 'L<http://www.unicode.org/ivd>',
+                   ),
+    Input_file->new('UCD.html', v4.0.0,
+                    Withdrawn => v5.2,
+                    Skip => $Documentation,
                    ),
     Input_file->new("$AUXILIARY/WordBreakProperty.txt", v4.1.0,
                     Property => 'Word_Break',
@@ -18528,11 +18576,20 @@ my @input_file_objects = (
     Input_file->new("$AUXILIARY/GCBTest.txt", v4.1.0,
                     Handler => \&process_GCB_test,
                    ),
+    Input_file->new("$AUXILIARY/GraphemeBreakTest.html", v4.1.0,
+                    Skip => $Validation_Documentation,
+                   ),
     Input_file->new("$AUXILIARY/SBTest.txt", v4.1.0,
                     Handler => \&process_SB_test,
                    ),
+    Input_file->new("$AUXILIARY/SentenceBreakTest.html", v4.1.0,
+                    Skip => $Validation_Documentation,
+                   ),
     Input_file->new("$AUXILIARY/WBTest.txt", v4.1.0,
                     Handler => \&process_WB_test,
+                   ),
+    Input_file->new("$AUXILIARY/WordBreakTest.html", v4.1.0,
+                    Skip => $Validation_Documentation,
                    ),
     Input_file->new("$AUXILIARY/SentenceBreakProperty.txt", v4.1.0,
                     Property => 'Sentence_Break',
@@ -18540,6 +18597,10 @@ my @input_file_objects = (
                    ),
     Input_file->new('NamedSequences.txt', v4.1.0,
                     Handler => \&process_NamedSequences
+                   ),
+    Input_file->new('Unihan.html', v4.1.0,
+                    Withdrawn => v5.2,
+                    Skip => $Documentation,
                    ),
     Input_file->new('NameAliases.txt', v0,
                     Property => 'Name_Alias',
@@ -18550,8 +18611,17 @@ my @input_file_objects = (
                                    ? \&filter_early_version_name_alias_line
                                    : \&filter_later_version_name_alias_line,
                    ),
+    Input_file->new('NamedSqProv.txt', v5.0.0,
+                    Skip => 'Named sequences proposed for inclusion in a '
+                          . 'later version of the Unicode Standard; if you '
+                          . 'need them now, you can append this file to '
+                          . 'F<NamedSequences.txt> and recompile perl',
+                   ),
     Input_file->new("$AUXILIARY/LBTest.txt", v5.1.0,
                     Skip => $Validation,
+                   ),
+    Input_file->new("$AUXILIARY/LineBreakTest.html", v5.1.0,
+                    Skip => $Validation_Documentation,
                    ),
     Input_file->new("BidiTest.txt", v5.2.0,
                     Skip => $Validation,
@@ -18607,6 +18677,14 @@ my @input_file_objects = (
                     Optional => "",
                     Each_Line_Handler => \&filter_unihan_line,
                    ),
+    Input_file->new('CJKRadicals.txt', v5.2.0,
+                    Skip => 'Maps the kRSUnicode property values to '
+                          . 'corresponding code points',
+                   ),
+    Input_file->new('EmojiSources.txt', v6.0.0,
+                    Skip => 'Maps certain Unicode code points to their '
+                          . 'legacy Japanese cell-phone values',
+                   ),
     Input_file->new('ScriptExtensions.txt', v6.0.0,
                     Property => 'Script_Extensions',
                     Pre_Handler => \&setup_script_extensions,
@@ -18632,6 +18710,14 @@ my @input_file_objects = (
                     Skip => (($v_version lt v8.0.0)
                               ? $Indic_Skip
                               : 0),
+                   ),
+    Input_file->new('USourceData.txt', v6.2.0,
+                    Skip => 'Documentation of status and cross reference of '
+                          . 'proposals for encoding by Unicode of Unihan '
+                          . 'characters',
+                   ),
+    Input_file->new('USourceGlyphs.pdf', v6.2.0,
+                    Skip => 'Pictures of the characters in F<USourceData.txt>',
                    ),
     Input_file->new('BidiBrackets.txt', v6.3.0,
                     Properties => [ 'Bidi_Paired_Bracket',
@@ -18659,17 +18745,13 @@ END
 }
 
 # Put into %potential_files a list of all the files in the directory structure
-# that could be inputs to this program, excluding those that we should ignore.
-# Use absolute file names because it makes it easier across machine types.
-my @ignored_files_full_names = map { File::Spec->rel2abs(
-                                     internal_file_to_platform($_))
-                                } keys %ignored_files;
+# that could be inputs to this program
 File::Find::find({
     wanted=>sub {
-        return unless /\.txt$/i;  # Some platforms change the name's case
+        return unless / \. ( txt | htm l? ) $ /xi;  # Some platforms change the
+                                                    # name's case
         my $full = lc(File::Spec->rel2abs($_));
-        $potential_files{$full} = 1
-                    if ! grep { $full eq lc($_) } @ignored_files_full_names;
+        $potential_files{$full} = 1;
         return;
     }
 }, File::Spec->curdir());
@@ -18727,8 +18809,7 @@ else {
             # The paths are stored with relative names, and with '/' as the
             # delimiter; convert to absolute on this machine
             my $full = lc(File::Spec->rel2abs(internal_file_to_platform($input)));
-            $potential_files{lc $full} = 1
-                if ! grep { lc($full) eq lc($_) } @ignored_files_full_names;
+            $potential_files{lc $full} = 1;
         }
     }
 
