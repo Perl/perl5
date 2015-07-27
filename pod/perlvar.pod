@@ -466,9 +466,12 @@ version objects) and numeric comparisons can occasionally fail; it's good
 for string literal version checks and bad for comparing to a variable
 that hasn't been sanity-checked.
 
-Mnemonic: Is this version of perl in the right bracket?
+The C<$OLD_PERL_VERSION> form was added in Perl v5.20.0 for historical
+reasons but its use is discouraged. (If your reason to use C<$]> is to
+run code on old perls then referring to it as C<$OLD_PERL_VERSION> would
+be self-defeating.)
 
-The C<$OLD_PERL_VERSION> form was added in Perl v5.20.0.
+Mnemonic: Is this version of perl in the right bracket?
 
 =item $SYSTEM_FD_MAX
 
