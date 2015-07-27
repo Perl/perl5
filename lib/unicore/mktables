@@ -15264,7 +15264,22 @@ sub register_file_for_name($$$) {
         # Remove interior underscores.
         (my $filename = $name) =~ s/ (?<=.) _ (?=.) //xg;
 
-        # Change any non-word character into an underscore, and truncate to 8.
+        # Convert the dot in floating point numbers to an underscore
+        $filename =~ s/\./_/ if $filename =~ / ^ \d+ \. \d+ $ /x;
+
+        my $suffix = "";
+
+        # Extract any suffix, delete any non-word character, and truncate to 3
+        # after the dot
+        if ($filename =~ m/ ( .*? ) ( \. .* ) /x) {
+            $filename = $1;
+            $suffix = $2;
+            $suffix =~ s/\W+//g;
+            substr($suffix, 4) = "" if length($suffix) > 4;
+        }
+
+        # Change any non-word character outside the suffix into an underscore,
+        # and truncate to 8.
         $filename =~ s/\W+/_/g;   # eg., "L&" -> "L_"
         substr($filename, 8) = "" if length($filename) > 8;
 
@@ -15276,7 +15291,7 @@ sub register_file_for_name($$$) {
         #     InGreekE
         #     InGreek2
         my $warned = 0;
-        while (my $num = $base_names{$path}{lc $filename}++) {
+        while (my $num = $base_names{$path}{lc "$filename$suffix"}++) {
             $num++; # so basenames with numbers start with '2', which
                     # just looks more natural.
 
