@@ -13260,63 +13260,65 @@ END
             $property->table("N")->set_complement($yes);
         }
         else {
-        if (defined $default_map) {
+            if (defined $default_map) {
 
-            # Make sure there is a match table for the default
-            if (! defined ($default_table = $property->table($default_map))) {
-                $default_table = $property->add_match_table($default_map);
-            }
-
-            # And, if the property is binary, the default table will just
-            # be the complement of the other table.
-            if ($property_type == $BINARY) {
-                my $non_default_table;
-
-                # Find the non-default table.
-                for my $table ($property->tables) {
-                    if ($table == $default_table) {
-                        if ($v_version le v5.0.0) {
-                            $table->add_alias($_) for qw(N No F False);
-                        }
-                        next;
-                    } elsif ($v_version le v5.0.0) {
-                        $table->add_alias($_) for qw(Y Yes T True);
-                    }
-                    $non_default_table = $table;
-                }
-                $default_table->set_complement($non_default_table);
-            }
-            else {
-
-                # This fills in any missing values with the default.  It's not
-                # necessary to do this with binary properties, as the default
-                # is defined completely in terms of the Y table.
-                $property->add_map(0, $MAX_WORKING_CODEPOINT,
-                                   $default_map, Replace => $NO);
-            }
-        }
-
-        # Have all we need to populate the match tables.
-        my $maps_should_be_defined = $property->pre_declared_maps;
-        foreach my $range ($property->ranges) {
-            my $map = $range->value;
-            my $table = $property->table($map);
-            if (! defined $table) {
-
-                # Integral and rational property values are not necessarily
-                # defined in PropValueAliases, but whether all the other ones
-                # should be depends on the property.
-                if ($maps_should_be_defined
-                    && $map !~ /^ -? \d+ ( \/ \d+ )? $/x)
+                # Make sure there is a match table for the default
+                if (! defined ($default_table = $property->table($default_map)))
                 {
-                    Carp::my_carp("Table '$property_name=$map' should have been defined.  Defining it now.")
+                    $default_table = $property->add_match_table($default_map);
                 }
-                $table = $property->add_match_table($map);
+
+                # And, if the property is binary, the default table will just
+                # be the complement of the other table.
+                if ($property_type == $BINARY) {
+                    my $non_default_table;
+
+                    # Find the non-default table.
+                    for my $table ($property->tables) {
+                        if ($table == $default_table) {
+                            if ($v_version le v5.0.0) {
+                                $table->add_alias($_) for qw(N No F False);
+                            }
+                            next;
+                        } elsif ($v_version le v5.0.0) {
+                            $table->add_alias($_) for qw(Y Yes T True);
+                        }
+                        $non_default_table = $table;
+                    }
+                    $default_table->set_complement($non_default_table);
+                }
+                else {
+
+                    # This fills in any missing values with the default.  It's
+                    # not necessary to do this with binary properties, as the
+                    # default is defined completely in terms of the Y table.
+                    $property->add_map(0, $MAX_WORKING_CODEPOINT,
+                                    $default_map, Replace => $NO);
+                }
             }
 
-            next if $table->complement != 0;    # Don't need to populate these
-            $table->add_range($range->start, $range->end);
-        }
+            # Have all we need to populate the match tables.
+            my $maps_should_be_defined = $property->pre_declared_maps;
+            foreach my $range ($property->ranges) {
+                my $map = $range->value;
+                my $table = $property->table($map);
+                if (! defined $table) {
+
+                    # Integral and rational property values are not
+                    # necessarily defined in PropValueAliases, but whether all
+                    # the other ones should be depends on the property.
+                    if ($maps_should_be_defined
+                        && $map !~ /^ -? \d+ ( \/ \d+ )? $/x)
+                    {
+                        Carp::my_carp("Table '$property_name=$map' should "
+                                    . "have been defined.  Defining it now.")
+                    }
+                    $table = $property->add_match_table($map);
+                }
+
+                next if $table->complement != 0; # Don't need to populate these
+                $table->add_range($range->start, $range->end);
+            }
         }
 
         # For Perl 5.6 compatibility, all properties matchable in regexes can
