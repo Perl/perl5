@@ -10171,6 +10171,16 @@ END
     return @return;
 }
 
+sub substitute_PropValueAliases($) {
+    # Deal with early releases that don't have the crucial
+    # PropValueAliases.txt file.
+
+    my $file_object = shift;
+    $file_object->insert_lines(get_old_property_value_aliases());
+
+    process_PropValueAliases($file_object);
+}
+
 sub process_PropValueAliases {
     # This file contains values that properties look like:
     # bc ; AL        ; Arabic_Letter
@@ -10195,12 +10205,6 @@ sub process_PropValueAliases {
 
     my $file= shift;
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
-    # This whole file was non-existent in early releases, so use our own
-    # internal one if necessary.
-    if (! -e 'PropValueAliases.txt') {
-        $file->insert_lines(get_old_property_value_aliases());
-    }
 
     if ($v_version lt 4.0.0) {
         $file->insert_lines(split /\n/, <<'END'
@@ -18536,8 +18540,9 @@ my @input_file_objects = (
                     Progress_Message => 'Finishing property setup',
                     Handler => \&finish_property_setup,
                    ),
-    Input_file->new('PropValueAliases.txt', v0,
+    Input_file->new('PropValueAliases.txt', v3.2,
                      Handler => \&process_PropValueAliases,
+                     Early => [ \&substitute_PropValueAliases ],
                      Has_Missings_Defaults => $NOT_IGNORED,
                      Required_Even_in_Debug_Skip => 1,
                     ),
