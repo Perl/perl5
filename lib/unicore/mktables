@@ -2115,6 +2115,7 @@ package Input_file;
 # while(next_line()) {...} loop.
 #
 # You can also set up handlers to
+#   0) call during object construction time, after everything else is done
 #   1) call before the first line is read, for pre processing
 #   2) call to adjust each line of the input before the main handler gets
 #      them.  This can be automatically generated, if appropriately simple
@@ -2229,6 +2230,12 @@ sub trace { return main::trace(@_); }
     # specify the syntax for such lines, like %properties above.
     main::set_access('has_missings_defaults',
                                         \%has_missings_defaults, qw{ c r });
+
+    my %construction_time_handler;
+    # Subroutine to call at the end of the new method.  If undef, no such
+    # handler is called.
+    main::set_access('construction_time_handler',
+                                        \%construction_time_handler, qw{ c });
 
     my %pre_handler;
     # Subroutine to call before doing anything else in the file.  If undef, no
@@ -2470,6 +2477,9 @@ sub trace { return main::trace(@_); }
                          ? *_next_line_with_remapped_range
                          : *_next_line;
         }
+
+        &{$construction_time_handler{$addr}}($self)
+                                        if $construction_time_handler{$addr};
 
         return $self;
     }
