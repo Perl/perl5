@@ -9810,6 +9810,17 @@ sub _operator_not_equal {
     return ! _operator_equal($self, $other);
 }
 
+sub substitute_PropertyAliases($) {
+    # Deal with early releases that don't have the crucial PropertyAliases.txt
+    # file.
+
+    my $file_object = shift;
+    $file_object->insert_lines(get_old_property_aliases());
+
+    process_PropertyAliases($file_object);
+}
+
+
 sub process_PropertyAliases($) {
     # This reads in the PropertyAliases.txt file, which contains almost all
     # the character properties in Unicode and their equivalent aliases:
@@ -9821,11 +9832,6 @@ sub process_PropertyAliases($) {
 
     my $file= shift;
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
-    # This whole file was non-existent in early releases, so use our own
-    # internal one.
-    $file->insert_lines(get_old_property_aliases())
-                                                if ! -e 'PropertyAliases.txt';
 
     # Add any cjk properties that may have been defined.
     $file->insert_lines(@cjk_properties);
@@ -18521,8 +18527,9 @@ my $Validation_Documentation = "Documentation of validation Tests";
 # is in a version earlier than expected, so you can copy files from a later
 # release into an earlier release's directory.
 my @input_file_objects = (
-    Input_file->new('PropertyAliases.txt', v0,
+    Input_file->new('PropertyAliases.txt', v3.2,
                     Handler => \&process_PropertyAliases,
+                    Early => [ \&substitute_PropertyAliases ],
                     Required_Even_in_Debug_Skip => 1,
                    ),
     Input_file->new(undef, v0,  # No file associated with this
