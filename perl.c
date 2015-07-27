@@ -389,7 +389,7 @@ perl_construct(pTHXx)
     PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(VertSpace_invlist);
     PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(XPosixWord_invlist);
     PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(XPosixXDigit_invlist);
-    PL_GCB_invlist = _new_invlist_C_array(Grapheme_Cluster_Break_invlist);
+    PL_GCB_invlist = _new_invlist_C_array(_Perl_GCB_invlist);
     PL_SB_invlist = _new_invlist_C_array(Sentence_Break_invlist);
     PL_WB_invlist = _new_invlist_C_array(Word_Break_invlist);
 

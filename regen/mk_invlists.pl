@@ -234,8 +234,8 @@ sub output_invmap ($$$$$$$) {
     my $name_prefix;
 
     if ($input_format eq 's') {
-        $prop_name = (prop_aliases($prop_name))[1]; # Get full name
-        my $short_name = (prop_aliases($prop_name))[0];
+        $prop_name = (prop_aliases($prop_name))[1] // $prop_name =~ s/^_Perl_//r; # Get full name
+        my $short_name = (prop_aliases($prop_name))[0] // $prop_name;
             my @enums = prop_values($prop_name);
             if (! @enums) {
                 die "Only enum properties are currently handled; '$prop_name' isn't one";
@@ -266,7 +266,8 @@ sub output_invmap ($$$$$$$) {
                 # Assign a value to each element of the enum.  The default
                 # value always gets 0; the others are arbitrarily assigned.
                 my $enum_val = 0;
-                $default = prop_value_aliases($prop_name, $default);
+                my $canonical_default = prop_value_aliases($prop_name, $default);
+                $default = $canonical_default if defined $canonical_default;
                 $enums{$default} = $enum_val++;
                 for my $enum (@enums) {
                     $enums{$enum} = $enum_val++ unless exists $enums{$enum};
@@ -314,7 +315,9 @@ sub output_invmap ($$$$$$$) {
     # The main body are the scalars passed in to this routine.
     for my $i (0 .. $count - 1) {
         my $element = $invmap->[$i];
-        $element = $name_prefix . prop_value_aliases($prop_name, $element);
+        my $full_element_name = prop_value_aliases($prop_name, $element);
+        $element = $full_element_name if defined $full_element_name;
+        $element = $name_prefix . $element;
         print $out_fh "\t$element";
         print $out_fh "," if $i < $count - 1;
         print $out_fh  "\n";
@@ -447,7 +450,7 @@ for my $charset (get_supported_code_pages()) {
                              &UpperLatin1
                              _Perl_IDStart
                              _Perl_IDCont
-                             Grapheme_Cluster_Break,EDGE
+                             _Perl_GCB,EDGE
                              Word_Break,EDGE,UNKNOWN
                              Sentence_Break,EDGE
                            )

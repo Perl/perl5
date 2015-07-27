@@ -9878,13 +9878,6 @@ sub finish_property_setup {
         Property->new('JSN', Full_Name => 'Jamo_Short_Name');
     }
 
-    # This property must be defined in all releases so we can generate
-    # the tables from it to make regex \X work, but suppress its output so
-    # isn't application visible prior to releases where it should be
-    if (! defined property_ref('GCB')) {
-        Property->new('GCB', Full_Name => 'Grapheme_Cluster_Break',
-                      Fate => $PLACEHOLDER);
-    }
     # These are used so much, that we set globals for them.
     $gc = property_ref('General_Category');
     $block = property_ref('Block');
@@ -10214,16 +10207,16 @@ END
     }
     if ($v_version lt 4.1.0) {
         $file->insert_lines(split /\n/, <<'END'
-GCB; CN                               ; Control
-GCB; CR                               ; CR
-GCB; EX                               ; Extend
-GCB; L                                ; L
-GCB; LF                               ; LF
-GCB; LV                               ; LV
-GCB; LVT                              ; LVT
-GCB; T                                ; T
-GCB; V                                ; V
-GCB; XX                               ; Other
+_Perl_GCB; CN                               ; Control
+_Perl_GCB; CR                               ; CR
+_Perl_GCB; EX                               ; Extend
+_Perl_GCB; L                                ; L
+_Perl_GCB; LF                               ; LF
+_Perl_GCB; LV                               ; LV
+_Perl_GCB; LVT                              ; LVT
+_Perl_GCB; T                                ; T
+_Perl_GCB; V                                ; V
+_Perl_GCB; XX                               ; Other
 END
         );
     }
@@ -13105,7 +13098,7 @@ sub generate_GCB {
         generate_hst($file);
     }
 
-    return;
+    main::process_generic_property_file($file);
 }
 
 sub setup_early_name_alias {
@@ -18810,12 +18803,10 @@ my @input_file_objects = (
                     Property => 'Word_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
                    ),
-    Input_file->new("$AUXILIARY/GraphemeBreakProperty.txt", v0,
+    Input_file->new("$AUXILIARY/GraphemeBreakProperty.txt", v4.1,
+                    Early => [ \&generate_GCB, '_Perl_GCB' ],
                     Property => 'Grapheme_Cluster_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    Pre_Handler => ($v_version lt v4.1.0)
-                                   ? \&generate_GCB
-                                   : undef,
                    ),
     Input_file->new("$AUXILIARY/GCBTest.txt", v4.1.0,
                     Handler => \&process_GCB_test,

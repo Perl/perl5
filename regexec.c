@@ -1753,7 +1753,7 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
 #define getGCB_VAL_CP(cp)                                                      \
           _generic_GET_BREAK_VAL_CP(                                           \
                                     PL_GCB_invlist,                            \
-                                    Grapheme_Cluster_Break_invmap,             \
+                                    _Perl_GCB_invmap,                          \
                                     (cp))
 
 /* Returns the GCB value for the first code point in the UTF-8 encoded string
