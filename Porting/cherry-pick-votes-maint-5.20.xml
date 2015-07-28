@@ -136,7 +136,9 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh, khw" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
+The following allows the other hv_func.h patch below to apply cleanly and fixes a real bug. I've voted for the second, but the conflict resolution for that will effectively apply the first, so not applying for now.
+<commit votes="tonyc" id="54e07e2b21cb1f58c04d67bca2a311715ba8815e" ticket="" desc="hv_func.h - fix seed initialization in sdbm and djb2 hashing algorithms."/>
+<commit votes="steveh, khw, tonyc" id="b404539126a567987b4748a67c06be2d23b471d5" ticket="123483" desc="silence VC Win64 perl warnings in hv_func.h"/>
 
 <commit votes="steveh" id="f33b2f585292653a3c50ea39cbdab734c3473fcb" ticket="" desc="handle existing mkstemp() in mingw-w64-v4"/>
 <commit votes="steveh" id="6378109479f5b474e8205c8478f484b209078772" ticket="" desc="add new address for kmx"/>
