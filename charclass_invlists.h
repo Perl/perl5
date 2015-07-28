@@ -99495,7 +99495,7 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC POSIX-BC */
 #endif	/* EBCDIC POSIX-BC */
 
 /* Generated from:
- * 9413b2f44cb8098df19959a5bf642f7ed131c17b4b947943e7be3bd1bf277599 lib/Unicode/UCD.pm
+ * 0bca60a25eb4ccf2e04f50446db5f882322f50a9c61dc57bb806ccfc9b2e26a4 lib/Unicode/UCD.pm
  * ae98bec7e4f0564758eed81eca5015481ba32581f8a735a825b71b3bba714450 lib/unicore/ArabicShaping.txt
  * 1687fe5994eb7e5c0dab8503fc2a1b3b479d91af9d3b8055941c9bd791f7d0b5 lib/unicore/BidiBrackets.txt
  * 350d1302116194b0b21def287434b55c5088098fbc726e879f7420a391965643 lib/unicore/BidiMirroring.txt
@@ -99537,7 +99537,7 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC POSIX-BC */
  * 1a0687fb9c6c4567e853913549df0944fe40821279a3e9cdaa6ab8679bc286fd lib/unicore/extracted/DLineBreak.txt
  * 40bcfed3ca727c19e1331f6c33806231d5f7eeeabd2e6a9e06a3740c85d0c250 lib/unicore/extracted/DNumType.txt
  * a18d502bad39d527ac5586d7bc93e29f565859e3bcc24ada627eff606d6f5fed lib/unicore/extracted/DNumValues.txt
- * c100ce950a57402082e002b59186cb4e63553d28e46ae8c56851acfd55bd0bf2 lib/unicore/mktables
+ * 5dddf8c20e3cb7b0d84de105bb5998b2c343ebdfa3dc46128ba92569f384a5e7 lib/unicore/mktables
  * 462c9aaa608fb2014cd9649af1c5c009485c60b9c8b15b89401fdc10cf6161c6 lib/unicore/version
  * c6884f4d629f04d1316f3476cb1050b6a1b98ca30c903262955d4eae337c6b1e regen/charset_translations.pl
  * 8a097f8f726bb1619af2f27f149ab87e60a1602f790147e3a561358be16abd27 regen/mk_invlists.pl

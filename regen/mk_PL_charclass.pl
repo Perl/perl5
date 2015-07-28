@@ -313,10 +313,11 @@ foreach my $charset (get_supported_code_pages()) {
         }
         else {
             use Unicode::UCD qw(prop_invmap);
-            my ($list_ref, $map_ref, $format) = prop_invmap("Name_Alias");
+            my ($list_ref, $map_ref, $format)
+                   = prop_invmap("_Perl_Name_Alias", '_perl_core_internal_ok');
             if ($format !~ /^s/) {
                 use Carp;
-                carp "Unexpected format '$format' for 'Name_Alias";
+                carp "Unexpected format '$format' for '_Perl_Name_Alias";
                 last;
             }
             my $which = Unicode::UCD::search_invlist($list_ref, $ord);

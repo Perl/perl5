@@ -2437,7 +2437,7 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
         # And remove the aliases.  We read in the Name_Alias property, and go
         # through them one by one.
         my ($aliases_code_points, $aliases_maps, undef, undef)
-                                                = &prop_invmap('Name_Alias');
+                = &prop_invmap('_Perl_Name_Alias', '_perl_core_internal_ok');
         for (my $i = 0; $i < @$aliases_code_points; $i++) {
             my $code_point = $aliases_code_points->[$i];
 

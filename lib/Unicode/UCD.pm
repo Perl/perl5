@@ -3258,8 +3258,8 @@ RETRY:
             # we need to also read in that table.  Create a hash with the keys
             # being the code points, and the values being a list of the
             # aliases for the code point key.
-            my ($aliases_code_points, $aliases_maps, undef, undef) =
-                                                &prop_invmap('Name_Alias');
+            my ($aliases_code_points, $aliases_maps, undef, undef)
+                  = &prop_invmap("_Perl_Name_Alias", '_perl_core_internal_ok');
             my %aliases;
             for (my $i = 0; $i < @$aliases_code_points; $i++) {
                 my $code_point = $aliases_code_points->[$i];
@@ -3894,7 +3894,7 @@ RETRY:
         map { $_ = [ split " ", $_  ] if $_ =~ / / } @invmap;
         $format = 'sl';
     }
-    elsif ($returned_prop eq 'ToNameAlias') {
+    elsif ($returned_prop =~ / To ( _Perl )? NameAlias/x) {
 
         # This property currently doesn't have any lists, but theoretically
         # could
