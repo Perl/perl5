@@ -6197,7 +6197,7 @@ static const UV _Perl_IDStart_invlist[] = { /* for ASCII/Latin1 */
 
 #if defined(PERL_IN_PERL_C)
 
-static const UV Sentence_Break_invlist[] = { /* for ASCII/Latin1 */
+static const UV _Perl_SB_invlist[] = { /* for ASCII/Latin1 */
 	2896,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -9125,7 +9125,7 @@ typedef enum {
 	SB_Upper = 15
 } SB_enum;
 
-static const SB_enum Sentence_Break_invmap[] = { /* for ASCII/Latin1 */
+static const SB_enum _Perl_SB_invmap[] = { /* for ASCII/Latin1 */
 	SB_Other,
 	SB_Sp,
 	SB_LF,
@@ -12026,37 +12026,9 @@ static const SB_enum Sentence_Break_invmap[] = { /* for ASCII/Latin1 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_REGCOMP_C)
-
-static const UV UpperLatin1_invlist[] = { /* for ASCII/Latin1 */
-	3,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x80,
-	0x100
-};
-
-#endif	/* defined(PERL_IN_REGCOMP_C) */
-
 #if defined(PERL_IN_PERL_C)
 
-static const UV VertSpace_invlist[] = { /* for ASCII/Latin1 */
-	7,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0xA,
-	0xE,
-	0x85,
-	0x86,
-	0x2028,
-	0x202A
-};
-
-static const UV Word_Break_invlist[] = { /* for ASCII/Latin1 */
+static const UV _Perl_WB_invlist[] = { /* for ASCII/Latin1 */
 	1524,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -13615,7 +13587,7 @@ typedef enum {
 	WB_UNKNOWN = 18
 } WB_enum;
 
-static const WB_enum Word_Break_invmap[] = { /* for ASCII/Latin1 */
+static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
 	WB_Other,
 	WB_LF,
 	WB_Newline,
@@ -15144,7 +15116,35 @@ static const WB_enum Word_Break_invmap[] = { /* for ASCII/Latin1 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
+#if defined(PERL_IN_REGCOMP_C)
+
+static const UV UpperLatin1_invlist[] = { /* for ASCII/Latin1 */
+	3,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x80,
+	0x100
+};
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
 #if defined(PERL_IN_PERL_C)
+
+static const UV VertSpace_invlist[] = { /* for ASCII/Latin1 */
+	7,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0xA,
+	0xE,
+	0x85,
+	0x86,
+	0x2028,
+	0x202A
+};
 
 static const UV XPerlSpace_invlist[] = { /* for ASCII/Latin1 */
 	21,	/* Number of elements */
@@ -30918,7 +30918,7 @@ static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC 1047 */
 
 #if defined(PERL_IN_PERL_C)
 
-static const UV Sentence_Break_invlist[] = { /* for EBCDIC 1047 */
+static const UV _Perl_SB_invlist[] = { /* for EBCDIC 1047 */
 	2920,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -33870,7 +33870,7 @@ typedef enum {
 	SB_Upper = 15
 } SB_enum;
 
-static const SB_enum Sentence_Break_invmap[] = { /* for EBCDIC 1047 */
+static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 1047 */
 	SB_Other,
 	SB_Sp,
 	SB_Other,
@@ -36795,91 +36795,9 @@ static const SB_enum Sentence_Break_invmap[] = { /* for EBCDIC 1047 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_REGCOMP_C)
-
-static const UV UpperLatin1_invlist[] = { /* for EBCDIC 1047 */
-	55,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x4,
-	0x5,
-	0x6,
-	0x7,
-	0x8,
-	0xB,
-	0x14,
-	0x15,
-	0x17,
-	0x18,
-	0x1A,
-	0x1C,
-	0x20,
-	0x26,
-	0x28,
-	0x2D,
-	0x30,
-	0x32,
-	0x33,
-	0x37,
-	0x38,
-	0x3C,
-	0x3E,
-	0x3F,
-	0x41,
-	0x4B,
-	0x51,
-	0x5A,
-	0x62,
-	0x6B,
-	0x70,
-	0x79,
-	0x80,
-	0x81,
-	0x8A,
-	0x91,
-	0x9A,
-	0xA1,
-	0xAA,
-	0xAD,
-	0xAE,
-	0xBD,
-	0xBE,
-	0xC0,
-	0xCA,
-	0xD0,
-	0xDA,
-	0xE0,
-	0xE1,
-	0xE2,
-	0xEA,
-	0xF0,
-	0xFA,
-	0x100
-};
-
-#endif	/* defined(PERL_IN_REGCOMP_C) */
-
 #if defined(PERL_IN_PERL_C)
 
-static const UV VertSpace_invlist[] = { /* for EBCDIC 1047 */
-	9,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0xB,
-	0xE,
-	0x15,
-	0x16,
-	0x25,
-	0x26,
-	0x2028,
-	0x202A
-};
-
-static const UV Word_Break_invlist[] = { /* for EBCDIC 1047 */
+static const UV _Perl_WB_invlist[] = { /* for EBCDIC 1047 */
 	1549,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -38463,7 +38381,7 @@ typedef enum {
 	WB_UNKNOWN = 18
 } WB_enum;
 
-static const WB_enum Word_Break_invmap[] = { /* for EBCDIC 1047 */
+static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
 	WB_Other,
 	WB_Newline,
 	WB_CR,
@@ -40017,7 +39935,89 @@ static const WB_enum Word_Break_invmap[] = { /* for EBCDIC 1047 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
+#if defined(PERL_IN_REGCOMP_C)
+
+static const UV UpperLatin1_invlist[] = { /* for EBCDIC 1047 */
+	55,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x4,
+	0x5,
+	0x6,
+	0x7,
+	0x8,
+	0xB,
+	0x14,
+	0x15,
+	0x17,
+	0x18,
+	0x1A,
+	0x1C,
+	0x20,
+	0x26,
+	0x28,
+	0x2D,
+	0x30,
+	0x32,
+	0x33,
+	0x37,
+	0x38,
+	0x3C,
+	0x3E,
+	0x3F,
+	0x41,
+	0x4B,
+	0x51,
+	0x5A,
+	0x62,
+	0x6B,
+	0x70,
+	0x79,
+	0x80,
+	0x81,
+	0x8A,
+	0x91,
+	0x9A,
+	0xA1,
+	0xAA,
+	0xAD,
+	0xAE,
+	0xBD,
+	0xBE,
+	0xC0,
+	0xCA,
+	0xD0,
+	0xDA,
+	0xE0,
+	0xE1,
+	0xE2,
+	0xEA,
+	0xF0,
+	0xFA,
+	0x100
+};
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
 #if defined(PERL_IN_PERL_C)
+
+static const UV VertSpace_invlist[] = { /* for EBCDIC 1047 */
+	9,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0xB,
+	0xE,
+	0x15,
+	0x16,
+	0x25,
+	0x26,
+	0x2028,
+	0x202A
+};
 
 static const UV XPerlSpace_invlist[] = { /* for EBCDIC 1047 */
 	23,	/* Number of elements */
@@ -55887,7 +55887,7 @@ static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC 037 */
 
 #if defined(PERL_IN_PERL_C)
 
-static const UV Sentence_Break_invlist[] = { /* for EBCDIC 037 */
+static const UV _Perl_SB_invlist[] = { /* for EBCDIC 037 */
 	2916,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -58835,7 +58835,7 @@ typedef enum {
 	SB_Upper = 15
 } SB_enum;
 
-static const SB_enum Sentence_Break_invmap[] = { /* for EBCDIC 037 */
+static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 037 */
 	SB_Other,
 	SB_Sp,
 	SB_Other,
@@ -61756,93 +61756,9 @@ static const SB_enum Sentence_Break_invmap[] = { /* for EBCDIC 037 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_REGCOMP_C)
-
-static const UV UpperLatin1_invlist[] = { /* for EBCDIC 037 */
-	57,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x4,
-	0x5,
-	0x6,
-	0x7,
-	0x8,
-	0xB,
-	0x14,
-	0x16,
-	0x17,
-	0x18,
-	0x1A,
-	0x1C,
-	0x20,
-	0x25,
-	0x28,
-	0x2D,
-	0x30,
-	0x32,
-	0x33,
-	0x37,
-	0x38,
-	0x3C,
-	0x3E,
-	0x3F,
-	0x41,
-	0x4B,
-	0x51,
-	0x5A,
-	0x5F,
-	0x60,
-	0x62,
-	0x6B,
-	0x70,
-	0x79,
-	0x80,
-	0x81,
-	0x8A,
-	0x91,
-	0x9A,
-	0xA1,
-	0xAA,
-	0xB0,
-	0xB1,
-	0xBA,
-	0xBC,
-	0xC0,
-	0xCA,
-	0xD0,
-	0xDA,
-	0xE0,
-	0xE1,
-	0xE2,
-	0xEA,
-	0xF0,
-	0xFA,
-	0x100
-};
-
-#endif	/* defined(PERL_IN_REGCOMP_C) */
-
 #if defined(PERL_IN_PERL_C)
 
-static const UV VertSpace_invlist[] = { /* for EBCDIC 037 */
-	9,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0xB,
-	0xE,
-	0x15,
-	0x16,
-	0x25,
-	0x26,
-	0x2028,
-	0x202A
-};
-
-static const UV Word_Break_invlist[] = { /* for EBCDIC 037 */
+static const UV _Perl_WB_invlist[] = { /* for EBCDIC 037 */
 	1545,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -63422,7 +63338,7 @@ typedef enum {
 	WB_UNKNOWN = 18
 } WB_enum;
 
-static const WB_enum Word_Break_invmap[] = { /* for EBCDIC 037 */
+static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
 	WB_Other,
 	WB_Newline,
 	WB_CR,
@@ -64972,7 +64888,91 @@ static const WB_enum Word_Break_invmap[] = { /* for EBCDIC 037 */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
+#if defined(PERL_IN_REGCOMP_C)
+
+static const UV UpperLatin1_invlist[] = { /* for EBCDIC 037 */
+	57,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x4,
+	0x5,
+	0x6,
+	0x7,
+	0x8,
+	0xB,
+	0x14,
+	0x16,
+	0x17,
+	0x18,
+	0x1A,
+	0x1C,
+	0x20,
+	0x25,
+	0x28,
+	0x2D,
+	0x30,
+	0x32,
+	0x33,
+	0x37,
+	0x38,
+	0x3C,
+	0x3E,
+	0x3F,
+	0x41,
+	0x4B,
+	0x51,
+	0x5A,
+	0x5F,
+	0x60,
+	0x62,
+	0x6B,
+	0x70,
+	0x79,
+	0x80,
+	0x81,
+	0x8A,
+	0x91,
+	0x9A,
+	0xA1,
+	0xAA,
+	0xB0,
+	0xB1,
+	0xBA,
+	0xBC,
+	0xC0,
+	0xCA,
+	0xD0,
+	0xDA,
+	0xE0,
+	0xE1,
+	0xE2,
+	0xEA,
+	0xF0,
+	0xFA,
+	0x100
+};
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
 #if defined(PERL_IN_PERL_C)
+
+static const UV VertSpace_invlist[] = { /* for EBCDIC 037 */
+	9,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0xB,
+	0xE,
+	0x15,
+	0x16,
+	0x25,
+	0x26,
+	0x2028,
+	0x202A
+};
 
 static const UV XPerlSpace_invlist[] = { /* for EBCDIC 037 */
 	23,	/* Number of elements */
@@ -80838,7 +80838,7 @@ static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC POSIX-BC */
 
 #if defined(PERL_IN_PERL_C)
 
-static const UV Sentence_Break_invlist[] = { /* for EBCDIC POSIX-BC */
+static const UV _Perl_SB_invlist[] = { /* for EBCDIC POSIX-BC */
 	2924,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -83794,7 +83794,7 @@ typedef enum {
 	SB_Upper = 15
 } SB_enum;
 
-static const SB_enum Sentence_Break_invmap[] = { /* for EBCDIC POSIX-BC */
+static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC POSIX-BC */
 	SB_Other,
 	SB_Sp,
 	SB_Other,
@@ -86723,93 +86723,9 @@ static const SB_enum Sentence_Break_invmap[] = { /* for EBCDIC POSIX-BC */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-#if defined(PERL_IN_REGCOMP_C)
-
-static const UV UpperLatin1_invlist[] = { /* for EBCDIC POSIX-BC */
-	57,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0x4,
-	0x5,
-	0x6,
-	0x7,
-	0x8,
-	0xB,
-	0x14,
-	0x15,
-	0x17,
-	0x18,
-	0x1A,
-	0x1C,
-	0x20,
-	0x26,
-	0x28,
-	0x2D,
-	0x30,
-	0x32,
-	0x33,
-	0x37,
-	0x38,
-	0x3C,
-	0x3E,
-	0x3F,
-	0x41,
-	0x4A,
-	0x51,
-	0x5A,
-	0x5F,
-	0x60,
-	0x62,
-	0x6A,
-	0x70,
-	0x7A,
-	0x80,
-	0x81,
-	0x8A,
-	0x91,
-	0x9A,
-	0xA2,
-	0xAA,
-	0xBB,
-	0xBE,
-	0xC1,
-	0xCA,
-	0xD1,
-	0xDA,
-	0xE2,
-	0xEA,
-	0xF0,
-	0xFA,
-	0xFB,
-	0xFC,
-	0xFD,
-	0xFE,
-	0xFF
-};
-
-#endif	/* defined(PERL_IN_REGCOMP_C) */
-
 #if defined(PERL_IN_PERL_C)
 
-static const UV VertSpace_invlist[] = { /* for EBCDIC POSIX-BC */
-	9,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0x0,
-	0xB,
-	0xE,
-	0x15,
-	0x16,
-	0x25,
-	0x26,
-	0x2028,
-	0x202A
-};
-
-static const UV Word_Break_invlist[] = { /* for EBCDIC POSIX-BC */
+static const UV _Perl_WB_invlist[] = { /* for EBCDIC POSIX-BC */
 	1547,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
@@ -88391,7 +88307,7 @@ typedef enum {
 	WB_UNKNOWN = 18
 } WB_enum;
 
-static const WB_enum Word_Break_invmap[] = { /* for EBCDIC POSIX-BC */
+static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC POSIX-BC */
 	WB_Other,
 	WB_Newline,
 	WB_CR,
@@ -89943,7 +89859,91 @@ static const WB_enum Word_Break_invmap[] = { /* for EBCDIC POSIX-BC */
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
+#if defined(PERL_IN_REGCOMP_C)
+
+static const UV UpperLatin1_invlist[] = { /* for EBCDIC POSIX-BC */
+	57,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x4,
+	0x5,
+	0x6,
+	0x7,
+	0x8,
+	0xB,
+	0x14,
+	0x15,
+	0x17,
+	0x18,
+	0x1A,
+	0x1C,
+	0x20,
+	0x26,
+	0x28,
+	0x2D,
+	0x30,
+	0x32,
+	0x33,
+	0x37,
+	0x38,
+	0x3C,
+	0x3E,
+	0x3F,
+	0x41,
+	0x4A,
+	0x51,
+	0x5A,
+	0x5F,
+	0x60,
+	0x62,
+	0x6A,
+	0x70,
+	0x7A,
+	0x80,
+	0x81,
+	0x8A,
+	0x91,
+	0x9A,
+	0xA2,
+	0xAA,
+	0xBB,
+	0xBE,
+	0xC1,
+	0xCA,
+	0xD1,
+	0xDA,
+	0xE2,
+	0xEA,
+	0xF0,
+	0xFA,
+	0xFB,
+	0xFC,
+	0xFD,
+	0xFE,
+	0xFF
+};
+
+#endif	/* defined(PERL_IN_REGCOMP_C) */
+
 #if defined(PERL_IN_PERL_C)
+
+static const UV VertSpace_invlist[] = { /* for EBCDIC POSIX-BC */
+	9,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0xB,
+	0xE,
+	0x15,
+	0x16,
+	0x25,
+	0x26,
+	0x2028,
+	0x202A
+};
 
 static const UV XPerlSpace_invlist[] = { /* for EBCDIC POSIX-BC */
 	23,	/* Number of elements */
@@ -99537,8 +99537,8 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC POSIX-BC */
  * 1a0687fb9c6c4567e853913549df0944fe40821279a3e9cdaa6ab8679bc286fd lib/unicore/extracted/DLineBreak.txt
  * 40bcfed3ca727c19e1331f6c33806231d5f7eeeabd2e6a9e06a3740c85d0c250 lib/unicore/extracted/DNumType.txt
  * a18d502bad39d527ac5586d7bc93e29f565859e3bcc24ada627eff606d6f5fed lib/unicore/extracted/DNumValues.txt
- * 96205213df4d25074497ca2449802bd4fb51e2a31cfff389fd5197a933bef455 lib/unicore/mktables
+ * c100ce950a57402082e002b59186cb4e63553d28e46ae8c56851acfd55bd0bf2 lib/unicore/mktables
  * 462c9aaa608fb2014cd9649af1c5c009485c60b9c8b15b89401fdc10cf6161c6 lib/unicore/version
  * c6884f4d629f04d1316f3476cb1050b6a1b98ca30c903262955d4eae337c6b1e regen/charset_translations.pl
- * 95c35beb704819594c061545c9fac9868baaf44dbf01d648657395ab846cd14f regen/mk_invlists.pl
+ * 8a097f8f726bb1619af2f27f149ab87e60a1602f790147e3a561358be16abd27 regen/mk_invlists.pl
  * ex: set ro: */

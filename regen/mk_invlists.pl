@@ -451,8 +451,8 @@ for my $charset (get_supported_code_pages()) {
                              _Perl_IDStart
                              _Perl_IDCont
                              _Perl_GCB,EDGE
-                             Word_Break,EDGE,UNKNOWN
-                             Sentence_Break,EDGE
+                             _Perl_WB,EDGE,UNKNOWN
+                             _Perl_SB,EDGE
                            )
     ) {
 
