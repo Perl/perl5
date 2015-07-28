@@ -14,7 +14,7 @@ WriteMakefile(
 		"IPC::Open3" => "1.0103",
 		"Test::More" => 0,
 		"overload" => 0,
-		"parent" => 0,
+		"parent" => 0.217,
 		"strict" => 0,
 		"warnings" => 0,
 	},
