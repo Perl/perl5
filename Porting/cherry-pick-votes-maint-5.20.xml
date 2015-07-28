@@ -160,7 +160,6 @@ The following allows the other hv_func.h patch below to apply cleanly and fixes 
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh, khw" id="5bfb0af0b8971c7f063804d149384ca17bfc0ae2" ticket="" desc="Fix apidocs for OP_TYPE_IS(_OR_WAS) - arguments separated by |, not ,."/>
 <commit votes="steveh, khw" id="9a5b9407081290adfb965563aed854ccd8560db6" ticket="" desc="perlpodspec: Corrections/adds to detecting =encoding"/>
 <commit votes="steveh, khw" id="f2979eac0a03fcba1cd431ef3d46f697176ebcc8" ticket="" desc="improve SvPV_set's docs, it really shouldn't be public API"/>
 <commit votes="steveh,tonyc" id="730d89736d0ae5dfc7580108c451efe91b5102fc" ticket="" desc="Fix warning message regarding 'use autodie' and 'use open'."/>
