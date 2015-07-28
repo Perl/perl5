@@ -204,8 +204,8 @@ typedef U64TYPE U64;
 #    define PeRl_UINT64_C(c)	CAT2(c,UI64)
 #  endif
 #  ifndef PeRl_INT64_C
-#    define PeRl_INT64_C(c)	((I64TYPE)(c)) /* last resort */
-#    define PeRl_UINT64_C(c)	((U64TYPE)(c))
+#    define PeRl_INT64_C(c)	((I64)(c)) /* last resort */
+#    define PeRl_UINT64_C(c)	((U64)(c))
 #  endif
 /* In OS X the INT64_C/UINT64_C are defined with LL/ULL, which will
  * not fly with C89-pedantic gcc, so let's undefine them first so that

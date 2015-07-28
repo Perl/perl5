@@ -137,7 +137,7 @@
 #ifndef U64TYPE
 /* This probably isn't going to work, but failing with a compiler error due to
    lack of uint64_t is no worse than failing right now with an #error.  */
-#define U64TYPE uint64_t
+#define U64 uint64_t
 #endif
 #endif
 
@@ -152,7 +152,7 @@
   /* gcc recognises this code and generates a rotate instruction for CPUs with one */
   #define ROTL32(x,r)  (((U32)x << r) | ((U32)x >> (32 - r)))
   #ifdef HAS_QUAD
-    #define ROTL64(x,r)  (((U64TYPE)x << r) | ((U64TYPE)x >> (64 - r)))
+    #define ROTL64(x,r)  (((U64)x << r) | ((U64)x >> (64 - r)))
   #endif
 #endif
 
@@ -180,14 +180,14 @@
 #ifdef HAS_QUAD
 
 #define U8TO64_LE(p) \
-  (((U64TYPE)((p)[0])      ) | \
-   ((U64TYPE)((p)[1]) <<  8) | \
-   ((U64TYPE)((p)[2]) << 16) | \
-   ((U64TYPE)((p)[3]) << 24) | \
-   ((U64TYPE)((p)[4]) << 32) | \
-   ((U64TYPE)((p)[5]) << 40) | \
-   ((U64TYPE)((p)[6]) << 48) | \
-   ((U64TYPE)((p)[7]) << 56))
+  (((U64)((p)[0])      ) | \
+   ((U64)((p)[1]) <<  8) | \
+   ((U64)((p)[2]) << 16) | \
+   ((U64)((p)[3]) << 24) | \
+   ((U64)((p)[4]) << 32) | \
+   ((U64)((p)[5]) << 40) | \
+   ((U64)((p)[6]) << 48) | \
+   ((U64)((p)[7]) << 56))
 
 #define SIPROUND            \
   do {              \
@@ -202,19 +202,19 @@
 PERL_STATIC_INLINE U32
 S_perl_hash_siphash_2_4(const unsigned char * const seed, const unsigned char *in, const STRLEN inlen) {
   /* "somepseudorandomlygeneratedbytes" */
-  U64TYPE v0 = UINT64_C(0x736f6d6570736575);
-  U64TYPE v1 = UINT64_C(0x646f72616e646f6d);
-  U64TYPE v2 = UINT64_C(0x6c7967656e657261);
-  U64TYPE v3 = UINT64_C(0x7465646279746573);
+  U64 v0 = UINT64_C(0x736f6d6570736575);
+  U64 v1 = UINT64_C(0x646f72616e646f6d);
+  U64 v2 = UINT64_C(0x6c7967656e657261);
+  U64 v3 = UINT64_C(0x7465646279746573);
 
-  U64TYPE b;
-  U64TYPE k0 = ((U64TYPE*)seed)[0];
-  U64TYPE k1 = ((U64TYPE*)seed)[1];
-  U64TYPE m;
+  U64 b;
+  U64 k0 = ((U64*)seed)[0];
+  U64 k1 = ((U64*)seed)[1];
+  U64 m;
   const int left = inlen & 7;
   const U8 *end = in + inlen - left;
 
-  b = ( ( U64TYPE )(inlen) ) << 56;
+  b = ( ( U64 )(inlen) ) << 56;
   v3 ^= k1;
   v2 ^= k0;
   v1 ^= k1;
@@ -231,13 +231,13 @@ S_perl_hash_siphash_2_4(const unsigned char * const seed, const unsigned char *i
 
   switch( left )
   {
-  case 7: b |= ( ( U64TYPE )in[ 6] )  << 48;
-  case 6: b |= ( ( U64TYPE )in[ 5] )  << 40;
-  case 5: b |= ( ( U64TYPE )in[ 4] )  << 32;
-  case 4: b |= ( ( U64TYPE )in[ 3] )  << 24;
-  case 3: b |= ( ( U64TYPE )in[ 2] )  << 16;
-  case 2: b |= ( ( U64TYPE )in[ 1] )  <<  8;
-  case 1: b |= ( ( U64TYPE )in[ 0] ); break;
+  case 7: b |= ( ( U64 )in[ 6] )  << 48;
+  case 6: b |= ( ( U64 )in[ 5] )  << 40;
+  case 5: b |= ( ( U64 )in[ 4] )  << 32;
+  case 4: b |= ( ( U64 )in[ 3] )  << 24;
+  case 3: b |= ( ( U64 )in[ 2] )  << 16;
+  case 2: b |= ( ( U64 )in[ 1] )  <<  8;
+  case 1: b |= ( ( U64 )in[ 0] ); break;
   case 0: break;
   }
 
@@ -577,16 +577,16 @@ S_perl_hash_old_one_at_a_time(const unsigned char * const seed, const unsigned c
 PERL_STATIC_INLINE U32
 S_perl_hash_murmur_hash_64a (const unsigned char * const seed, const unsigned char *str, const STRLEN len)
 {
-        const U64TYPE m = UINT64_C(0xc6a4a7935bd1e995);
+        const U64 m = UINT64_C(0xc6a4a7935bd1e995);
         const int r = 47;
-        U64TYPE h = *((U64TYPE*)seed) ^ len;
-        const U64TYPE * data = (const U64TYPE *)str;
-        const U64TYPE * end = data + (len/8);
+        U64 h = *((U64*)seed) ^ len;
+        const U64 * data = (const U64 *)str;
+        const U64 * end = data + (len/8);
         const unsigned char * data2;
 
         while(data != end)
         {
-            U64TYPE k = *data++;
+            U64 k = *data++;
 
             k *= m;
             k ^= k >> r;
@@ -600,13 +600,13 @@ S_perl_hash_murmur_hash_64a (const unsigned char * const seed, const unsigned ch
 
         switch(len & 7)
         {
-            case 7: h ^= (U64TYPE)(data2[6]) << 48; /* fallthrough */
-            case 6: h ^= (U64TYPE)(data2[5]) << 40; /* fallthrough */
-            case 5: h ^= (U64TYPE)(data2[4]) << 32; /* fallthrough */
-            case 4: h ^= (U64TYPE)(data2[3]) << 24; /* fallthrough */
-            case 3: h ^= (U64TYPE)(data2[2]) << 16; /* fallthrough */
-            case 2: h ^= (U64TYPE)(data2[1]) << 8;  /* fallthrough */
-            case 1: h ^= (U64TYPE)(data2[0]);       /* fallthrough */
+            case 7: h ^= (U64)(data2[6]) << 48; /* fallthrough */
+            case 6: h ^= (U64)(data2[5]) << 40; /* fallthrough */
+            case 5: h ^= (U64)(data2[4]) << 32; /* fallthrough */
+            case 4: h ^= (U64)(data2[3]) << 24; /* fallthrough */
+            case 3: h ^= (U64)(data2[2]) << 16; /* fallthrough */
+            case 2: h ^= (U64)(data2[1]) << 8;  /* fallthrough */
+            case 1: h ^= (U64)(data2[0]);       /* fallthrough */
                     h *= m;
         };
 
@@ -681,7 +681,7 @@ S_perl_hash_murmur_hash_64b (const unsigned char * const seed, const unsigned ch
 
         h1 ^= h2 >> 17; h1 *= m;
 
-        U64TYPE h = h1;
+        U64 h = h1;
 
         h = (h << 32) | h2;
         */

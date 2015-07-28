@@ -5767,7 +5767,7 @@ Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed)
     PERL_ARGS_ASSERT_DRAND48_INIT_R;
 
 #ifdef PERL_DRAND48_QUAD
-    *random_state = FREEBSD_DRAND48_SEED_0 + ((U64TYPE)seed << 16);
+    *random_state = FREEBSD_DRAND48_SEED_0 + ((U64)seed << 16);
 #else
     random_state->seed[0] = FREEBSD_DRAND48_SEED_0;
     random_state->seed[1] = (U16) seed;
