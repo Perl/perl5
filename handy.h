@@ -173,12 +173,11 @@ typedef I16TYPE I16;
 typedef U16TYPE U16;
 typedef I32TYPE I32;
 typedef U32TYPE U32;
-#ifdef PERL_CORE
-#   ifdef HAS_QUAD
+
+#ifdef HAS_QUAD
 typedef I64TYPE I64;
 typedef U64TYPE U64;
-#   endif
-#endif /* PERL_CORE */
+#endif
 
 /* INT64_C/UINT64_C are C99 from <stdint.h> (so they will not be
  * available in strict C89 mode), but they are nice, so let's define
