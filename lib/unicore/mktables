@@ -14009,6 +14009,7 @@ sub compile_perl() {
     );
     $Space->add_alias('XPerlSpace');    # Pre-existing synonyms
     $Space->add_alias('SpacePerl');
+    $Space->add_alias('Space') if $v_version lt v4.1.0;
 
     my $Posix_space = $perl->add_match_table("PosixSpace",
                             Description => "\\t, \\n, \\cK, \\f, \\r, and ' '.  (\\cK is vertical tab)",
