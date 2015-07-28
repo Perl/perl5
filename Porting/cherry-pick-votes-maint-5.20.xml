@@ -160,7 +160,6 @@ The following allows the other hv_func.h patch below to apply cleanly and fixes 
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh, khw" id="f2979eac0a03fcba1cd431ef3d46f697176ebcc8" ticket="" desc="improve SvPV_set's docs, it really shouldn't be public API"/>
 <commit votes="steveh,tonyc" id="730d89736d0ae5dfc7580108c451efe91b5102fc" ticket="" desc="Fix warning message regarding 'use autodie' and 'use open'."/>
 <commit votes="steveh,tonyc" id="2a403855670ae8592c5a3ca4396e6e909a4fc593" ticket="" desc="perlunicook: Note that autodie &gt;= 2.26 should be okay with 'use open'."/>
 
