@@ -4,7 +4,7 @@ perlfaq8 - System Interaction
 
 =head1 VERSION
 
-version 5.021009
+version 5.021010
 
 =head1 DESCRIPTION
 
@@ -204,7 +204,7 @@ method returns the string for the given capability:
     use Term::Cap;
 
     my $terminal = Term::Cap->Tgetent( { OSPEED => 9600 } );
-    my $clear_string = $terminal->Tputs('cl');
+    my $clear_screen = $terminal->Tputs('cl');
 
     print $clear_screen;
 

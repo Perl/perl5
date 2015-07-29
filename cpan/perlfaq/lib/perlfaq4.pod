@@ -4,7 +4,7 @@ perlfaq4 - Data Manipulation
 
 =head1 VERSION
 
-version 5.021009
+version 5.021010
 
 =head1 DESCRIPTION
 
@@ -490,7 +490,7 @@ operators so you can compare them directly:
 You can also get differences with a subtraction, which returns a
 L<Time::Seconds> object:
 
-    my $diff = $date1 - $date2;
+    my $date_diff = $date1 - $date2;
     print "The difference is ", $date_diff->days, " days\n";
 
 If you want to work with formatted dates, the L<Date::Manip>,
