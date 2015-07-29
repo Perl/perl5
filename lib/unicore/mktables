@@ -1524,7 +1524,7 @@ sub populate_char_info ($) {
         elsif ($gc-> table('Unassigned')->contains($i)) {
             $annotate_char_type[$i] = $UNASSIGNED_TYPE;
             $printable[$i] = 0;
-            if ($v_version lt v2.0.0) { # No blocks in earliest releases
+            if (defined $block) { # No blocks in earliest releases
                 $viacode[$i] = 'Unassigned';
                 $end = $gc-> table('Unassigned')->containing_range($i)->end;
             }
@@ -9851,7 +9851,7 @@ sub process_PropertyAliases($) {
 
         # This line is defective in early Perls.  The property in Unihan.txt
         # is kRSUnicode.
-        if ($v_version lt v5.2.0 && $full eq 'Unicode_Radical_Stroke') {
+        if ($full eq 'Unicode_Radical_Stroke' && @data < 3) {
             push @data, qw(cjkRSUnicode kRSUnicode);
         }
 
@@ -10001,7 +10001,7 @@ sub finish_property_setup {
     # for non-assigned code points; 'AL' for assigned.
     if (file_exists("${EXTRACTED}DLineBreak.txt") || -e 'LineBreak.txt') {
         my $lb = property_ref('Line_Break');
-        if ($v_version gt 3.2.0) {
+        if (file_exists("${EXTRACTED}DLineBreak.txt")) {
             $lb->set_default_map('Unknown');
         }
         else {
