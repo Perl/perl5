@@ -6757,7 +6757,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	for (n = 0; n < pRExC_state->num_code_blocks; n++)
 	    if (pRExC_state->code_blocks[n].src_regex)
 		SAVEFREESV(pRExC_state->code_blocks[n].src_regex);
-	SAVEFREEPV(pRExC_state->code_blocks);
+	if(pRExC_state->code_blocks)
+	    SAVEFREEPV(pRExC_state->code_blocks); /* often null */
     }
 
     {

@@ -817,14 +817,13 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 
     s = SvPV(sv, len);
     if (chomping) {
-	char *temp_buffer = NULL;
-	SV *svrecode = NULL;
-
 	if (s && len) {
+	    char *temp_buffer = NULL;
+	    SV *svrecode = NULL;
 	    s += --len;
 	    if (RsPARA(PL_rs)) {
 		if (*s != '\n')
-		    goto nope;
+		    goto nope_free_nothing;
 		++count;
 		while (len && s[-1] == '\n') {
 		    --len;
@@ -848,11 +847,12 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 			temp_buffer = (char*)bytes_from_utf8((U8*)rsptr,
 							     &rslen, &is_utf8);
 			if (is_utf8) {
-			    /* Cannot downgrade, therefore cannot possibly match
+			    /* Cannot downgrade, therefore cannot possibly match.
+			       At this point, temp_buffer is not alloced, and
+			       is the buffer inside PL_rs, so dont free it.
 			     */
 			    assert (temp_buffer == rsptr);
-			    temp_buffer = NULL;
-			    goto nope;
+			    goto nope_free_sv;
 			}
 			rsptr = temp_buffer;
 		    }
@@ -872,16 +872,16 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 		}
 		if (rslen == 1) {
 		    if (*s != *rsptr)
-			goto nope;
+			goto nope_free_all;
 		    ++count;
 		}
 		else {
 		    if (len < rslen - 1)
-			goto nope;
+			goto nope_free_all;
 		    len -= rslen - 1;
 		    s -= rslen - 1;
 		    if (memNE(s, rsptr, rslen))
-			goto nope;
+			goto nope_free_all;
 		    count += rs_charlen;
 		}
 	    }
@@ -890,12 +890,13 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 	    *SvEND(sv) = '\0';
 	    SvNIOK_off(sv);
 	    SvSETMAGIC(sv);
+
+	    nope_free_all:
+	    Safefree(temp_buffer);
+	    nope_free_sv:
+	    SvREFCNT_dec(svrecode);
+	    nope_free_nothing: ;
 	}
-    nope:
-
-	SvREFCNT_dec(svrecode);
-
-	Safefree(temp_buffer);
     } else {
 	if (len && (!SvPOK(sv) || SvIsCOW(sv)))
 	    s = SvPV_force_nomg(sv, len);
