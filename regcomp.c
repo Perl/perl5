@@ -14045,7 +14045,7 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
 
 #if    UNICODE_MAJOR_VERSION < 3                                        \
    || (UNICODE_MAJOR_VERSION == 3 && UNICODE_DOT_VERSION == 0)
-        
+
         /* In 3.0 and earlier, U+0130 folded simply to 'i'; and in 3.0.1 so did
          * U+0131.  */
         case 'i':
