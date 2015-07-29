@@ -610,6 +610,8 @@ sub length_optree {
 
     my $else= ( $opt{else} ||= 0 );
 
+    return $else if $self->{count} == 0;
+
     my $method = $type =~ /generic/ ? 'generic_optree' : 'optree';
     if ($method eq 'optree' && scalar keys %{$self->{size}{$type}} == 1) {
 
@@ -1629,11 +1631,11 @@ REPLACEMENT: Unicode REPLACEMENT CHARACTER
 
 NONCHAR: Non character code points
 => UTF8 :fast
-\p{Nchar}
+\p{_Perl_Nchar}
 
 SURROGATE: Surrogate characters
 => UTF8 :fast
-\p{Gc=Cs}
+\p{_Perl_Surrogate}
 
 # This program was run with this enabled, and the results copied to utf8.h;
 # then this was commented out because it takes so long to figure out these 2
@@ -1695,4 +1697,4 @@ PROBLEMATIC_LOCALE_FOLDEDS_START : The first folded character of folds which are
 
 PATWS: pattern white space
 => generic cp : safe
-\p{PatWS}
+\p{_Perl_PatWS}

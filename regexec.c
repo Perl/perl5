@@ -192,7 +192,7 @@ static const char* const non_utf8_target_but_utf8_required
                                         PL_utf8_swash_ptrs[_CC_WORDCHAR],     \
                                         "",                                   \
                                         PL_XPosix_ptrs[_CC_WORDCHAR],         \
-                                        LATIN_CAPITAL_LETTER_SHARP_S_UTF8);
+                                        LATIN_SMALL_LIGATURE_LONG_S_T_UTF8);
 
 #define PLACEHOLDER	/* Something for the preprocessor to grab onto */
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
@@ -1753,7 +1753,7 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
 #define getGCB_VAL_CP(cp)                                                      \
           _generic_GET_BREAK_VAL_CP(                                           \
                                     PL_GCB_invlist,                            \
-                                    Grapheme_Cluster_Break_invmap,             \
+                                    _Perl_GCB_invmap,                          \
                                     (cp))
 
 /* Returns the GCB value for the first code point in the UTF-8 encoded string
@@ -1766,7 +1766,7 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
 #define getSB_VAL_CP(cp)                                                       \
           _generic_GET_BREAK_VAL_CP(                                           \
                                     PL_SB_invlist,                             \
-                                    Sentence_Break_invmap,                     \
+                                    _Perl_SB_invmap,                     \
                                     (cp))
 
 /* Returns the SB value for the first code point in the UTF-8 encoded string
@@ -1778,7 +1778,7 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
 #define getWB_VAL_CP(cp)                                                       \
           _generic_GET_BREAK_VAL_CP(                                           \
                                     PL_WB_invlist,                             \
-                                    Word_Break_invmap,                         \
+                                    _Perl_WB_invmap,                         \
                                     (cp))
 
 /* Returns the WB value for the first code point in the UTF-8 encoded string

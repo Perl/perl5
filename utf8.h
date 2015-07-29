@@ -611,7 +611,11 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define GREEK_CAPITAL_LETTER_MU                 0x039C	/* Upper and title case
                                                            of MICRON */
 #define LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS   0x0178	/* Also is title case */
-#define LATIN_CAPITAL_LETTER_SHARP_S	        0x1E9E
+#ifdef LATIN_CAPITAL_LETTER_SHARP_S_UTF8
+#   define LATIN_CAPITAL_LETTER_SHARP_S	        0x1E9E
+#endif
+#define LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE   0x130
+#define LATIN_SMALL_LETTER_DOTLESS_I            0x131
 #define LATIN_SMALL_LETTER_LONG_S               0x017F
 #define LATIN_SMALL_LIGATURE_LONG_S_T           0xFB05
 #define LATIN_SMALL_LIGATURE_ST                 0xFB06

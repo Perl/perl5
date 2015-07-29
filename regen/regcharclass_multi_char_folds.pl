@@ -63,6 +63,8 @@ sub multi_char_folds ($) {
                             # multi-char folds; false if just the ones that
                             # are all ascii
 
+    return () if pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) lt v3.0.1;
+
     my ($cp_ref, $folds_ref, $format) = prop_invmap("Case_Folding");
     die "Could not find inversion map for Case_Folding" unless defined $format;
     die "Incorrect format '$format' for Case_Folding inversion map"

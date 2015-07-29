@@ -338,7 +338,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Perl can again be compiled with any Unicode version.  This used to
+(mostly) work, but was lost in v5.18 through v5.20.  The property
+C<Name_Alias> did not exist prior to Unicode 5.0.  L<Unicode::UCD>
+incorrectly said it did.  This has been fixed.
 
 =back
 

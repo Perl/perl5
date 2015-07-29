@@ -51,6 +51,7 @@ my @properties = qw(
 
 # Read in the case fold mappings.
 my %folded_closure;
+my %simple_folded_closure;
 my @hex_non_final_folds;
 my @non_latin1_simple_folds;
 my @folds;
@@ -118,8 +119,14 @@ BEGIN { # Have to do this at compile time because using user-defined \p{property
         for my $i (0 .. @folded - 1) {
             my $hex_fold = $folded[$i];
             my $fold = hex $hex_fold;
-            push @{$folded_closure{$fold}}, $from if $fold < 256;
-            push @{$folded_closure{$from}}, $fold if $from < 256;
+            if ($fold < 256) {
+                push @{$folded_closure{$fold}}, $from;
+                push @{$simple_folded_closure{$fold}}, $from if $fold_type ne 'F';
+            }
+            if ($from < 256) {
+                push @{$folded_closure{$from}}, $fold;
+                push @{$simple_folded_closure{$from}}, $fold if $fold_type ne 'F';
+            }
 
             if (($fold_type eq 'C' || $fold_type eq 'S')
                 && ($fold < 256 != $from < 256))
@@ -153,11 +160,16 @@ BEGIN { # Have to do this at compile time because using user-defined \p{property
             push @{$folded_closure{$from}}, @{$folded_closure{$folded}};
         }
     }
+    foreach my $folded (keys %simple_folded_closure) {
+        foreach my $from (grep { $_ < 256 } @{$simple_folded_closure{$folded}}) {
+            push @{$simple_folded_closure{$from}}, @{$simple_folded_closure{$folded}};
+        }
+    }
 
     # We have the single-character folds that cross the 255/256, like KELVIN
     # SIGN => 'k', but we need the closure, so add like 'K' to it
     foreach my $folded (@non_latin1_simple_folds) {
-        foreach my $fold (@{$folded_closure{$folded}}) {
+        foreach my $fold (@{$simple_folded_closure{$folded}}) {
             if ($fold < 256 && ! grep { $fold == $_ } @non_latin1_simple_folds) {
                 push @non_latin1_simple_folds, $fold;
             }
@@ -217,12 +229,18 @@ for my $ord (0..255) {
         } elsif ($name eq 'SPACE') {;
             $re = qr/\p{XPerlSpace}/;
         } elsif ($name eq 'IDFIRST') {
-            $re = qr/[_\p{Alpha}]/;
+            $re = qr/[_\p{XPosixAlpha}]/;
         } elsif ($name eq 'WORDCHAR') {
             $re = qr/\p{XPosixWord}/;
+        } elsif ($name eq 'LOWER') {
+            $re = qr/\p{XPosixLower}/;
+        } elsif ($name eq 'UPPER') {
+            $re = qr/\p{XPosixUpper}/;
         } elsif ($name eq 'ALPHANUMERIC') {
             # Like \w, but no underscore
             $re = qr/\p{Alnum}/;
+        } elsif ($name eq 'ALPHA') {
+            $re = qr/\p{XPosixAlpha}/;
         } elsif ($name eq 'QUOTEMETA') {
             $re = qr/\p{_Perl_Quotemeta}/;
         } elsif ($name eq 'NONLATIN1_FOLD') {
@@ -241,7 +259,7 @@ for my $ord (0..255) {
             use Carp;
             carp $@ if ! defined $re;
         }
-        #print "$ord, $name $property, $re\n";
+        #print STDERR __LINE__, ": $ord, $name $property, $re\n";
         if ($char =~ $re) {  # Add this property if matches
             $bits[$ord] .= '|' if $bits[$ord];
             $bits[$ord] .= "(1U<<_CC_$property)";
@@ -295,10 +313,11 @@ foreach my $charset (get_supported_code_pages()) {
         }
         else {
             use Unicode::UCD qw(prop_invmap);
-            my ($list_ref, $map_ref, $format) = prop_invmap("Name_Alias");
+            my ($list_ref, $map_ref, $format)
+                   = prop_invmap("_Perl_Name_Alias", '_perl_core_internal_ok');
             if ($format !~ /^s/) {
                 use Carp;
-                carp "Unexpected format '$format' for 'Name_Alias";
+                carp "Unexpected format '$format' for '_Perl_Name_Alias";
                 last;
             }
             my $which = Unicode::UCD::search_invlist($list_ref, $ord);

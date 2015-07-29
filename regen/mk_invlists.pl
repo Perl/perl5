@@ -176,15 +176,14 @@ sub output_invlist ($$;$) {
     my $charset = shift // "";  # name of character set for comment
 
     die "No inversion list for $name" unless defined $invlist
-                                             && ref $invlist eq 'ARRAY'
-                                             && @$invlist;
+                                             && ref $invlist eq 'ARRAY';
 
     # Output the inversion list $invlist using the name $name for it.
     # It is output in the exact internal form for inversion lists.
 
     # Is the last element of the header 0, or 1 ?
     my $zero_or_one = 0;
-    if ($invlist->[0] != 0) {
+    if (@$invlist && $invlist->[0] != 0) {
         unshift @$invlist, 0;
         $zero_or_one = 1;
     }
@@ -235,8 +234,8 @@ sub output_invmap ($$$$$$$) {
     my $name_prefix;
 
     if ($input_format eq 's') {
-        $prop_name = (prop_aliases($prop_name))[1]; # Get full name
-        my $short_name = (prop_aliases($prop_name))[0];
+        $prop_name = (prop_aliases($prop_name))[1] // $prop_name =~ s/^_Perl_//r; # Get full name
+        my $short_name = (prop_aliases($prop_name))[0] // $prop_name;
             my @enums = prop_values($prop_name);
             if (! @enums) {
                 die "Only enum properties are currently handled; '$prop_name' isn't one";
@@ -267,7 +266,8 @@ sub output_invmap ($$$$$$$) {
                 # Assign a value to each element of the enum.  The default
                 # value always gets 0; the others are arbitrarily assigned.
                 my $enum_val = 0;
-                $default = prop_value_aliases($prop_name, $default);
+                my $canonical_default = prop_value_aliases($prop_name, $default);
+                $default = $canonical_default if defined $canonical_default;
                 $enums{$default} = $enum_val++;
                 for my $enum (@enums) {
                     $enums{$enum} = $enum_val++ unless exists $enums{$enum};
@@ -315,7 +315,9 @@ sub output_invmap ($$$$$$$) {
     # The main body are the scalars passed in to this routine.
     for my $i (0 .. $count - 1) {
         my $element = $invmap->[$i];
-        $element = $name_prefix . prop_value_aliases($prop_name, $element);
+        my $full_element_name = prop_value_aliases($prop_name, $element);
+        $element = $full_element_name if defined $full_element_name;
+        $element = $name_prefix . $element;
         print $out_fh "\t$element";
         print $out_fh "," if $i < $count - 1;
         print $out_fh  "\n";
@@ -353,7 +355,8 @@ sub mk_invlist_from_sorted_cp_list {
 my ($cp_ref, $folds_ref, $format) = prop_invmap("Case_Folding");
 die "Could not find inversion map for Case_Folding" unless defined $format;
 die "Incorrect format '$format' for Case_Folding inversion map"
-                                                    unless $format eq 'al';
+                                                    unless $format eq 'al'
+                                                           || $format eq 'a';
 my @has_multi_char_fold;
 my @is_non_final_fold;
 
@@ -447,9 +450,9 @@ for my $charset (get_supported_code_pages()) {
                              &UpperLatin1
                              _Perl_IDStart
                              _Perl_IDCont
-                             Grapheme_Cluster_Break,EDGE
-                             Word_Break,EDGE,UNKNOWN
-                             Sentence_Break,EDGE
+                             _Perl_GCB,EDGE
+                             _Perl_WB,EDGE,UNKNOWN
+                             _Perl_SB,EDGE
                            )
     ) {
 
@@ -489,20 +492,37 @@ for my $charset (get_supported_code_pages()) {
         else {
             @invlist = prop_invlist($lookup_prop, '_perl_core_internal_ok');
             if (! @invlist) {
-                my ($list_ref, $map_ref, $format, $default);
 
-                ($list_ref, $map_ref, $format, $default)
+                # If couldn't find a non-empty inversion list, see if it is
+                # instead an inversion map
+                my ($list_ref, $map_ref, $format, $default)
                           = prop_invmap($lookup_prop, '_perl_core_internal_ok');
-                die "Could not find inversion list for '$lookup_prop'" unless $list_ref;
-                @invlist = @$list_ref;
-                @invmap = @$map_ref;
-                $map_format = $format;
-                $map_default = $default;
-                $maps_to_code_point = $map_format =~ /x/;
-                $to_adjust = $map_format =~ /a/;
+                if (! $list_ref) {
+                    # An empty return here could mean an unknown property, or
+                    # merely that the original inversion list is empty.  Call
+                    # in scalar context to differentiate
+                    my $count = prop_invlist($lookup_prop,
+                                             '_perl_core_internal_ok');
+                    die "Could not find inversion list for '$lookup_prop'"
+                                                          unless defined $count;
+                }
+                else {
+                    @invlist = @$list_ref;
+                    @invmap = @$map_ref;
+                    $map_format = $format;
+                    $map_default = $default;
+                    $maps_to_code_point = $map_format =~ /x/;
+                    $to_adjust = $map_format =~ /a/;
+                }
             }
         }
-        die "Could not find inversion list for '$lookup_prop'" unless @invlist;
+
+
+        # Short-circuit an empty inversion list.
+        if (! @invlist) {
+            output_invlist($prop_name, \@invlist, $charset);
+            next;
+        }
 
         # Re-order the Unicode code points to native ones for this platform.
         # This is only needed for code points below 256, because native code

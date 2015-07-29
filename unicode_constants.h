@@ -8,10 +8,11 @@
 #ifndef H_UNICODE_CONSTANTS   /* Guard against nested #includes */
 #define H_UNICODE_CONSTANTS   1
 
-/* This file contains #defines for various Unicode code points.  The values
- * the macros expand to are the native Unicode code point, or all or portions
- * of the UTF-8 encoding for the code point.  In the former case, the macro
- * name has the suffix "_NATIVE"; otherwise, the suffix "_UTF8".
+/* This file contains #defines for the version of Unicode being used and
+ * various Unicode code points.  The values the code point macros expand to
+ * are the native Unicode code point, or all or portions of the UTF-8 encoding
+ * for the code point.  In the former case, the macro name has the suffix
+ * "_NATIVE"; otherwise, the suffix "_UTF8".
  *
  * The macros that have the suffix "_UTF8" may have further suffixes, as
  * follows:
@@ -19,6 +20,10 @@
  *                representation; the value will be a numeric constant.
  *  "_TAIL"       if instead it represents all but the first byte.  This, and
  *                with no additional suffix are both string constants */
+
+#define UNICODE_MAJOR_VERSION   8
+#define UNICODE_DOT_VERSION     0
+#define UNICODE_DOT_DOT_VERSION 0
 
 
 #if 'A' == 65 /* ASCII/Latin1 */
@@ -33,6 +38,8 @@
 
 #   define LATIN_SMALL_LIGATURE_LONG_S_T_UTF8  "\xEF\xAC\x85"    /* U+FB05 */
 #   define LATIN_SMALL_LIGATURE_ST_UTF8  "\xEF\xAC\x86"    /* U+FB06 */
+#   define LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8  "\xC4\xB0"    /* U+0130 */
+#   define LATIN_SMALL_LETTER_DOTLESS_I_UTF8  "\xC4\xB1"    /* U+0131 */
 
 #   define HYPHEN_UTF8  "\xE2\x80\x90"    /* U+2010 */
 #   define FIRST_SURROGATE_UTF8_FIRST_BYTE  0xED    /* U+D800 */
@@ -71,6 +78,8 @@
 
 #   define LATIN_SMALL_LIGATURE_LONG_S_T_UTF8  "\xDD\x72\x67\x46"    /* U+FB05 */
 #   define LATIN_SMALL_LIGATURE_ST_UTF8  "\xDD\x72\x67\x47"    /* U+FB06 */
+#   define LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8  "\x8D\x57"    /* U+0130 */
+#   define LATIN_SMALL_LETTER_DOTLESS_I_UTF8  "\x8D\x58"    /* U+0131 */
 
 #   define HYPHEN_UTF8  "\xCA\x41\x57"    /* U+2010 */
 #   define FIRST_SURROGATE_UTF8_FIRST_BYTE  0xDD    /* U+D800 */
@@ -109,6 +118,8 @@
 
 #   define LATIN_SMALL_LIGATURE_LONG_S_T_UTF8  "\xDD\x71\x66\x46"    /* U+FB05 */
 #   define LATIN_SMALL_LIGATURE_ST_UTF8  "\xDD\x71\x66\x47"    /* U+FB06 */
+#   define LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8  "\x8C\x57"    /* U+0130 */
+#   define LATIN_SMALL_LETTER_DOTLESS_I_UTF8  "\x8C\x58"    /* U+0131 */
 
 #   define HYPHEN_UTF8  "\xCA\x41\x57"    /* U+2010 */
 #   define FIRST_SURROGATE_UTF8_FIRST_BYTE  0xDD    /* U+D800 */
@@ -147,6 +158,8 @@
 
 #   define LATIN_SMALL_LIGATURE_LONG_S_T_UTF8  "\xDC\x74\x68\x46"    /* U+FB05 */
 #   define LATIN_SMALL_LIGATURE_ST_UTF8  "\xDC\x74\x68\x47"    /* U+FB06 */
+#   define LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8  "\x8E\x58"    /* U+0130 */
+#   define LATIN_SMALL_LETTER_DOTLESS_I_UTF8  "\x8E\x59"    /* U+0131 */
 
 #   define HYPHEN_UTF8  "\xCA\x41\x58"    /* U+2010 */
 #   define FIRST_SURROGATE_UTF8_FIRST_BYTE  0xDC    /* U+D800 */

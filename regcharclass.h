@@ -168,7 +168,7 @@
 /*
 	NONCHAR: Non character code points
 
-	\p{Nchar}
+	\p{_Perl_Nchar}
 */
 /*** GENERATED CODE ***/
 #define is_NONCHAR_utf8(s)                                                  \
@@ -185,7 +185,7 @@
 /*
 	SURROGATE: Surrogate characters
 
-	\p{Gc=Cs}
+	\p{_Perl_Surrogate}
 */
 /*** GENERATED CODE ***/
 #define is_SURROGATE_utf8(s)                                                \
@@ -591,7 +591,7 @@
 /*
 	PATWS: pattern white space
 
-	\p{PatWS}
+	\p{_Perl_PatWS}
 */
 /*** GENERATED CODE ***/
 #define is_PATWS_safe(s,e,is_utf8)                                          \
@@ -761,7 +761,7 @@
 /*
 	NONCHAR: Non character code points
 
-	\p{Nchar}
+	\p{_Perl_Nchar}
 */
 /*** GENERATED CODE ***/
 #define is_NONCHAR_utf8(s)                                                  \
@@ -782,7 +782,7 @@
 /*
 	SURROGATE: Surrogate characters
 
-	\p{Gc=Cs}
+	\p{_Perl_Surrogate}
 */
 /*** GENERATED CODE ***/
 #define is_SURROGATE_utf8(s)                                                \
@@ -1205,7 +1205,7 @@
 /*
 	PATWS: pattern white space
 
-	\p{PatWS}
+	\p{_Perl_PatWS}
 */
 /*** GENERATED CODE ***/
 #define is_PATWS_safe(s,e,is_utf8)                                          \
@@ -1373,7 +1373,7 @@
 /*
 	NONCHAR: Non character code points
 
-	\p{Nchar}
+	\p{_Perl_Nchar}
 */
 /*** GENERATED CODE ***/
 #define is_NONCHAR_utf8(s)                                                  \
@@ -1394,7 +1394,7 @@
 /*
 	SURROGATE: Surrogate characters
 
-	\p{Gc=Cs}
+	\p{_Perl_Surrogate}
 */
 /*** GENERATED CODE ***/
 #define is_SURROGATE_utf8(s)                                                \
@@ -1825,7 +1825,7 @@
 /*
 	PATWS: pattern white space
 
-	\p{PatWS}
+	\p{_Perl_PatWS}
 */
 /*** GENERATED CODE ***/
 #define is_PATWS_safe(s,e,is_utf8)                                          \
@@ -1993,7 +1993,7 @@
 /*
 	NONCHAR: Non character code points
 
-	\p{Nchar}
+	\p{_Perl_Nchar}
 */
 /*** GENERATED CODE ***/
 #define is_NONCHAR_utf8(s)                                                  \
@@ -2014,7 +2014,7 @@
 /*
 	SURROGATE: Surrogate characters
 
-	\p{Gc=Cs}
+	\p{_Perl_Surrogate}
 */
 /*** GENERATED CODE ***/
 #define is_SURROGATE_utf8(s)                                                \
@@ -2445,7 +2445,7 @@
 /*
 	PATWS: pattern white space
 
-	\p{PatWS}
+	\p{_Perl_PatWS}
 */
 /*** GENERATED CODE ***/
 #define is_PATWS_safe(s,e,is_utf8)                                          \
@@ -2472,7 +2472,7 @@
 #endif /* H_REGCHARCLASS */
 
 /* Generated from:
- * 083180df694deb1fc173361406c1a75619fb8376403db3a76dc585c1e3951eca lib/Unicode/UCD.pm
+ * 0bca60a25eb4ccf2e04f50446db5f882322f50a9c61dc57bb806ccfc9b2e26a4 lib/Unicode/UCD.pm
  * ae98bec7e4f0564758eed81eca5015481ba32581f8a735a825b71b3bba714450 lib/unicore/ArabicShaping.txt
  * 1687fe5994eb7e5c0dab8503fc2a1b3b479d91af9d3b8055941c9bd791f7d0b5 lib/unicore/BidiBrackets.txt
  * 350d1302116194b0b21def287434b55c5088098fbc726e879f7420a391965643 lib/unicore/BidiMirroring.txt
@@ -2514,9 +2514,9 @@
  * 1a0687fb9c6c4567e853913549df0944fe40821279a3e9cdaa6ab8679bc286fd lib/unicore/extracted/DLineBreak.txt
  * 40bcfed3ca727c19e1331f6c33806231d5f7eeeabd2e6a9e06a3740c85d0c250 lib/unicore/extracted/DNumType.txt
  * a18d502bad39d527ac5586d7bc93e29f565859e3bcc24ada627eff606d6f5fed lib/unicore/extracted/DNumValues.txt
- * c9326eab8d7861c3543963e555d5b927348f4467c93071db23154dece7619654 lib/unicore/mktables
+ * 46f739fb5c9daf6fb457ed67f821d88d9eadd2df17b098f385b3b50f99c01acf lib/unicore/mktables
  * 462c9aaa608fb2014cd9649af1c5c009485c60b9c8b15b89401fdc10cf6161c6 lib/unicore/version
  * c6884f4d629f04d1316f3476cb1050b6a1b98ca30c903262955d4eae337c6b1e regen/charset_translations.pl
- * 5e47f645eac3a918246254e19c06b604c8ea088cf62da5be84dcb953ef2bf16c regen/regcharclass.pl
- * 206b60035ff0cec9f7d1701937ecf9226a943faa42dfc4827c37306be64ff18e regen/regcharclass_multi_char_folds.pl
+ * d9c04ac46bdd81bb3e26519f2b8eb6242cb12337205add3f7cf092b0c58dccc4 regen/regcharclass.pl
+ * 393f8d882713a3ba227351ad0f00ea4839fda74fcf77dcd1cdf31519925adba5 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */
