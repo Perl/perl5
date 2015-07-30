@@ -8413,7 +8413,7 @@ int main() {
     exit(1); /* fail */
 }
 EOM
-	if $cc $ccflags $ldflags try.c >/dev/null 2>&1 && $run ./a.out; then
+	if $cc $ccflags $ldflags -o a.out try.c >/dev/null 2>&1 && $run ./a.out; then
 	    bin_ELF="$define"
 	fi
 	$rm_try
