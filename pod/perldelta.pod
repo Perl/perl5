@@ -119,7 +119,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+The PathTools module collection has been upgraded from version 3.55 to
+3.56.
+
+Minor optimizations. [perl #125712]
 
 =back
 
