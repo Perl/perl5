@@ -45,7 +45,7 @@ BEGIN {
                      hv_store
                      lock_hash_recurse unlock_hash_recurse
                     );
-    plan tests => 236 + @Exported_Funcs;
+    plan tests => 244 + @Exported_Funcs;
     use_ok 'Hash::Util', @Exported_Funcs;
 }
 foreach my $func (@Exported_Funcs) {
@@ -530,6 +530,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 }
 
 {
+    # lock_hash_recurse / unlock_hash_recurse
     my %hash = (
         a   => 'alpha',
         b   => [ qw( beta gamma delta ) ],
@@ -549,6 +550,43 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
         "unlock_hash_recurse(): top-level hash unlocked" );
     ok( hash_unlocked(%{$hash{d}}),
         "unlock_hash_recurse(): element which is hashref unlocked" );
+    {
+        local $@;
+        eval { $hash{d} = { theta => 'kappa' }; };
+        ok(! $@, "No error; can assign to unlocked hash")
+            or diag($@);
+    }
+    ok( hash_unlocked(%{$hash{c}[1]}),
+        "unlock_hash_recurse(): element which is hashref in array ref not locked" );
+}
+
+{
+    # lock_hashref_recurse / unlock_hashref_recurse
+    my %hash = (
+        a   => 'alpha',
+        b   => [ qw( beta gamma delta ) ],
+        c   => [ 'epsilon', { zeta => 'eta' }, ],
+        d   => { theta => 'iota' },
+    );
+    Hash::Util::lock_hashref_recurse(\%hash);
+    ok( hash_locked(%hash),
+        "lock_hash_recurse(): top-level hash locked" );
+    ok( hash_locked(%{$hash{d}}),
+        "lock_hash_recurse(): element which is hashref locked" );
+    ok( ! hash_locked(%{$hash{c}[1]}),
+        "lock_hash_recurse(): element which is hashref in array ref not locked" );
+
+    Hash::Util::unlock_hashref_recurse(\%hash);
+    ok( hash_unlocked(%hash),
+        "unlock_hash_recurse(): top-level hash unlocked" );
+    ok( hash_unlocked(%{$hash{d}}),
+        "unlock_hash_recurse(): element which is hashref unlocked" );
+    {
+        local $@;
+        eval { $hash{d} = { theta => 'kappa' }; };
+        ok(! $@, "No error; can assign to unlocked hash")
+            or diag($@);
+    }
     ok( hash_unlocked(%{$hash{c}[1]}),
         "unlock_hash_recurse(): element which is hashref in array ref not locked" );
 }

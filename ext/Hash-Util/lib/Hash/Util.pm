@@ -34,7 +34,7 @@ our @EXPORT_OK  = qw(
 
                      hash_traversal_mask
                     );
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 require XSLoader;
 XSLoader::load();
 
@@ -364,7 +364,7 @@ sub unlock_hashref_recurse {
         if (defined($type) and $type eq 'HASH') {
             unlock_hashref_recurse($value);
         }
-        Internals::SvREADONLY($value,1);
+        Internals::SvREADONLY($value,0);
     }
     unlock_ref_keys($hash);
     return $hash;
