@@ -8040,7 +8040,7 @@ cat <<EOM
 Perl can be built to support DTrace on platforms that support it.
 DTrace is a diagnosis and performance analysis tool from Sun.
 
-If this doesn't make any sense to you, just accept the default '$dflt'.
+If this doesn't make any sense to you, just accept the default.
 EOM
 
 while $test 1 ; do
