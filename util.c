@@ -5452,7 +5452,9 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
 	SAVEPPTR(PL_xsubfilename);/* which was require'd from a XSUB BEGIN */
 	PL_xsubfilename = file;   /* so the old name must be restored for
 				     additional XSUBs to register themselves */
-	(void)gv_fetchfile(file);
+	/* XSUBs can't be perl lang/perl5db.pl debugged
+	if (PERLDB_LINE_OR_SAVESRC)
+	    (void)gv_fetchfile(file); */
     }
 
     if(key & HSf_POPMARK) {
