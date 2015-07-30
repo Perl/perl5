@@ -23459,13 +23459,13 @@ find_extensions='
 	case "$xxx" in
 	    DynaLoader|dynaload) ;;
 	    *)
-	    this_ext=`echo $xxx | $sed -e s/-/\\\//g`;
+	    this_ext=`echo "$xxx" | $sed -e s/-/\\\//g`;
 	    case "$this_ext" in
 		Scalar/List/Utils) this_ext="List/Util"	;;
 		PathTools)         this_ext="Cwd"	;;
 	    esac;
-	    echo " $xs_extensions $nonxs_extensions" > $tdir/$$.tmp;
-	    if $contains " $this_ext " $tdir/$$.tmp; then
+	    echo " $xs_extensions $nonxs_extensions" > "$tdir/$$.tmp";
+	    if $contains " $this_ext " "$tdir/$$.tmp"; then
 		echo >&4;
 		echo "Duplicate directories detected for extension $xxx" >&4;
 		echo "Configure cannot correctly recover from this - shall I abort?" >&4;
@@ -23483,15 +23483,15 @@ find_extensions='
 		esac;
 		echo "Ok.  You will need to correct config.sh before running make." >&4;
 	    fi;
-	    $ls -1 $xxx > $tdir/$$.tmp;
-	    if   $contains "\.xs$" $tdir/$$.tmp > /dev/null 2>&1; then
+	    $ls -1 "$xxx" > "$tdir/$$.tmp";
+	    if   $contains "\.xs$" "$tdir/$$.tmp" > /dev/null 2>&1; then
 		xs_extensions="$xs_extensions $this_ext";
-	    elif $contains "\.c$"  $tdir/$$.tmp > /dev/null 2>&1; then
+	    elif $contains "\.c$"  "$tdir/$$.tmp" > /dev/null 2>&1; then
 		xs_extensions="$xs_extensions $this_ext";
-	    elif $test -d $xxx; then
+	    elif $test -d "$xxx"; then
 		nonxs_extensions="$nonxs_extensions $this_ext";
 	    fi;
-	    $rm -f $tdir/$$.tmp;
+	    $rm -f "$tdir/$$.tmp";
 	    ;;
 	esac;
     done'
