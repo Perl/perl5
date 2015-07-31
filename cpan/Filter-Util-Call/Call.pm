@@ -1,7 +1,7 @@
-
 # Call.pm
 #
 # Copyright (c) 1995-2011 Paul Marquess. All rights reserved.
+# Copyright (c) 2011-2014 Reini Urban. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA @EXPORT) ;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw( filter_add filter_del filter_read filter_read_exact) ;
-$VERSION = "1.54" ;
+$VERSION = "1.55" ;
 
 sub filter_read_exact($)
 {
@@ -291,6 +291,29 @@ See L<Example 4: Using filter_del> for details.
 
 Internal function which adds the filter, based on the L<filter_add>
 argument type.
+
+=item I<unimport()>
+
+May be used to disable a filter, but is rarely needed. See L<filter_del>.
+
+=back
+
+=head1 LIMITATIONS
+
+See L<perlfilter/LIMITATIONS> for an overview of the general problems
+filtering code in a textual line-level only.
+
+=over
+
+=item __DATA__ is ignored
+
+The content from the __DATA__ block is not filtered.
+This is a serious limitation, e.g. for the L<Switch> module.
+See L<http://search.cpan.org/perldoc?Switch#LIMITATIONS> for more.
+
+=item Max. codesize limited to 32-bit
+
+Currently internal buffer lengths are limited to 32-bit only.
 
 =back
 

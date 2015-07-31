@@ -1160,6 +1160,8 @@ cpan/Filter-Util-Call/Call.pm	Filter::Util::Call extension module
 cpan/Filter-Util-Call/Call.xs	Filter::Util::Call extension external subroutines
 cpan/Filter-Util-Call/filter-util.pl		See if Filter::Util::Call works
 cpan/Filter-Util-Call/t/call.t	See if Filter::Util::Call works
+cpan/Filter-Util-Call/t/rt_101033.pm
+cpan/Filter-Util-Call/t/rt_101033.t
 cpan/Filter-Util-Call/t/rt_54452-rebless.t
 cpan/Getopt-Long/lib/Getopt/Long.pm	Fetch command options (GetOptions)
 cpan/Getopt-Long/t/gol-basic.t		See if Getopt::Long works

@@ -123,6 +123,10 @@ L<Encode> has been upgraded from version 2.75 to 2.76.
 
 =item *
 
+L<Filter::Util::Call> has been upgraded from version 1.54 to 1.55.
+
+=item *
+
 The PathTools module collection has been upgraded from version 3.55 to
 3.56.
 
