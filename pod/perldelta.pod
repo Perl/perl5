@@ -119,6 +119,10 @@ XXX
 
 =item *
 
+L<Encode> has been upgraded from version 2.75 to 2.76.
+
+=item *
+
 The PathTools module collection has been upgraded from version 3.55 to
 3.56.
 
