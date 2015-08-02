@@ -332,9 +332,6 @@ this support (if it is available).
 Note that the exact format and range of long doubles varies:
 the most common is the x86 80-bit (64 bits of mantissa) format,
 but there are others, with different mantissa and exponent ranges.
-In fact, the type may not be called "long double" at C level, and
-therefore the C<uselongdouble> means "using floating point larger
-than double".
 
 =head3 "more bits"
 
