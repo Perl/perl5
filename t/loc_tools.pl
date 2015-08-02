@@ -11,6 +11,9 @@
 # Functions whose names begin with underscore are internal helper functions
 # for this file, and are not to be used by outside callers.
 
+eval { require POSIX; import POSIX 'locale_h'; };
+my $has_posix_locales = defined &POSIX::LC_CTYPE;
+
 sub _trylocale ($$$$) { # For use only by other functions in this file!
 
     # Adds the locale given by the first parameter to the list given by the
@@ -112,12 +115,13 @@ sub locales_enabled(;$) {
     # category, like 'LC_TIME'.  The initial 'LC_' is optional.  It is a fatal
     # error to call this with something that isn't a known category
 
-    use Config;;
+    use Config;
 
     return 0 unless    $Config{d_setlocale}
                         # I (khw) cargo-culted the '?' in the pattern on the
                         # next line.
-                    && $Config{ccflags} !~ /\bD?NO_LOCALE\b/;
+                    && $Config{ccflags} !~ /\bD?NO_LOCALE\b/
+                    && $has_posix_locales;
 
     # Done with the global possibilities.  Now check if any passed in category
     # is disabled.
@@ -172,10 +176,7 @@ sub find_locales ($;$) {  # Returns an array of all the locales we found on the
 
     # Done this way in case this is 'required' in the caller before seeing if
     # this is miniperl.
-    eval { require POSIX; import POSIX 'locale_h'; };
-    unless (defined &POSIX::LC_CTYPE) {
-      return;
-    }
+    return unless $has_posix_locales;
 
     _trylocale("C", $categories, \@Locale, $only_plays_well);
     _trylocale("POSIX", $categories, \@Locale, $only_plays_well);
@@ -296,8 +297,7 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
     # On z/OS, even locales marked as UTF-8 aren't.
     return 0 if ord "A" != 65;
 
-    eval { require POSIX; import POSIX 'locale_h'; };
-    return 0 if ! defined &POSIX::LC_CTYPE;
+    return 0 if ! $has_posix_locales;
     return 0 if ! locales_enabled('LC_CTYPE');
 
     my $locale = shift;
@@ -347,8 +347,7 @@ sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
     my $locales_ref = shift;
 
     if (! defined $locales_ref) {
-        eval { require POSIX; import POSIX 'locale_h'; };
-        return if ! defined &POSIX::LC_CTYPE;
+        return if ! $has_posix_locales;
 
         my @locales = find_locales(&POSIX::LC_CTYPE(),
                                    1 # Reject iffy locales.
