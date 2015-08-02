@@ -298,6 +298,17 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 #define UTF8_MAXBYTES_CASE	UTF8_MAXBYTES
 
+/*
+
+=for apidoc Am|STRLEN|UVCHR_SKIP|UV cp
+returns the number of bytes required to represent the code point C<cp> when
+encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
+255; a Unicode code point otherwise.
+
+=cut
+ */
+#define UVCHR_SKIP(uv) OFFUNISKIP(uv)
+
 #endif /* EBCDIC vs ASCII */
 
 /* Rest of these are attributes of Unicode and perl's internals rather than the
@@ -333,24 +344,13 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
                                                && UTF8_IS_CONTINUATION(*((s)+1)))
 
 /* Number of bytes a code point occupies in UTF-8. */
-#define NATIVE_SKIP(uv) OFFUNISKIP(NATIVE_TO_UNI(uv))
-
-/*
-
-=for apidoc Am|STRLEN|UVCHR_SKIP|UV cp
-returns the number of bytes required to represent the code point C<cp> when
-encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
-255; a Unicode code point otherwise.
-
-=cut
- */
+#define NATIVE_SKIP(uv) UVCHR_SKIP(uv)
 
 /* Most code which says UNISKIP is really thinking in terms of native code
  * points (0-255) plus all those beyond.  This is an imprecise term, but having
  * it means existing code continues to work.  For precision, use UVCHR_SKIP,
- * NATIVE_SKIP, and OFFUNISKIP */
-#define UNISKIP(uv)   NATIVE_SKIP(uv)
-#define UVCHR_SKIP(uv) NATIVE_SKIP(uv)
+ * NATIVE_SKIP, or OFFUNISKIP */
+#define UNISKIP(uv)   UVCHR_SKIP(uv)
 
 /* Longer, but more accurate name */
 #define UTF8_IS_ABOVE_LATIN1_START(c)     UTF8_IS_ABOVE_LATIN1(c)

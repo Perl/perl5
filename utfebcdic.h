@@ -179,6 +179,12 @@ END_EXTERN_C
 #define UVCHR_IS_INVARIANT(uv) cBOOL(FITS_IN_8_BITS(uv)                        \
    && (PL_charclass[(U8) (uv)] & (_CC_mask(_CC_ASCII) | _CC_mask(_CC_CNTRL))))
 
+#define UVCHR_SKIP(uv) (UVCHR_IS_INVARIANT(uv)  ? 1 :                       \
+                        (uv) < 0x400            ? 2 :                       \
+		        (uv) < 0x4000           ? 3 :                       \
+		        (uv) < 0x40000          ? 4 :                       \
+		        (uv) < 0x400000         ? 5 :                       \
+		        (uv) < 0x4000000        ? 6 : 7 )
 
 /* UTF-EBCDIC semantic macros - We used to transform back into I8 and then
  * compare, but now only have to do a single lookup by using a bit in
