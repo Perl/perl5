@@ -209,6 +209,9 @@ END_EXTERN_C
                                  |_CC_mask(_CC_UTF8_IS_DOWNGRADEABLE_START)))   \
                         == _CC_mask(_CC_UTF8_IS_START)))
 
+#define isUTF8_POSSIBLY_PROBLEMATIC(c)                                          \
+                _generic_isCC(c, _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)
+
 /* Can't exceed 7 on EBCDIC platforms */
 #define UTF_START_MARK(len) (0xFF & (0xFE << (7-(len))))
 

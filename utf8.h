@@ -309,6 +309,12 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  */
 #define UVCHR_SKIP(uv) OFFUNISKIP(uv)
 
+/* Surrogates, non-character code points and above-Unicode code points are
+ * problematic in some contexts.  This allows code that needs to check for
+ * those to to quickly exclude the vast majority of code points it will
+ * encounter */
+#define isUTF8_POSSIBLY_PROBLEMATIC(c) ((U8) c >= 0xED)
+
 #endif /* EBCDIC vs ASCII */
 
 /* Rest of these are attributes of Unicode and perl's internals rather than the
@@ -548,16 +554,6 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 	  & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE|UTF8_WARN_ILLEGAL_INTERCHANGE))
 #define UTF8_ALLOW_DEFAULT		(ckWARN(WARN_UTF8) ? 0 : \
 					 UTF8_ALLOW_ANYUV)
-
-/* Surrogates, non-character code points and above-Unicode code points are
- * problematic in some contexts.  This allows code that needs to check for
- * those to to quickly exclude the vast majority of code points it will
- * encounter */
-#ifdef EBCDIC
-#   define isUTF8_POSSIBLY_PROBLEMATIC(c) (NATIVE_UTF8_TO_I8(c) >= 0xF1)
-#else
-#   define isUTF8_POSSIBLY_PROBLEMATIC(c) ((U8) c >= 0xED)
-#endif
 
 /* Several of the macros below have a second parameter that is currently
  * unused; but could be used in the future to make sure that the input is

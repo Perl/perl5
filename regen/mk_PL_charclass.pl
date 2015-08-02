@@ -376,6 +376,10 @@ foreach my $charset (get_supported_code_pages()) {
             if (($i8 & 0xE0) == 0xA0) {
                 $out[$index] .= '|(1U<<_CC_UTF8_IS_CONTINUATION)';
             }
+            if ($i8 >= 0xF1) {
+                $out[$index] .=
+                          '|(1U<<_CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)';
+            }
         }
 
         $out[$index] .= ",\n";
