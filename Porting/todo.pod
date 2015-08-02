@@ -71,8 +71,8 @@ instead there is an intentionally simpler library, F<t/test.pl>. However,
 quite a few tests in F<t/> have not been refactored to use it. Refactoring
 any of these tests, one at a time, is a useful thing TODO.
 
-The subdirectories F<base>, F<cmd> and F<comp>, that contain the most
-basic tests, should be excluded from this task.
+The subdirectories F<base>, F<cmd>, F<comp> and F<opbasic>, that contain the
+most basic tests, should be excluded from this task.
 
 =head2 Automate perldelta generation
 
