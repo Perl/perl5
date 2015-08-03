@@ -403,11 +403,14 @@ only) byte is pointed to by C<s>.
 
 /* Is the byte 'c' the same character when encoded in UTF-8 as when not.  This
  * works on both UTF-8 encoded strings and non-encoded, as it returns TRUE in
- * each for the exact same set of bit patterns.  (And it works on any byte in a
- * UTF-8 encoded string) */
-#define UTF8_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_UTF8_TO_I8(c))
+ * each for the exact same set of bit patterns.  It is valid on a subset of
+ * what UVCHR_IS_INVARIANT is valid on, so can just use that; and the compiler
+ * should optimize out anything extraneous given the implementation of the
+ * latter */
+#define UTF8_IS_INVARIANT(c)	UVCHR_IS_INVARIANT(c)
 
-/* Like the above, but its name implies a non-UTF8 input */
+/* Like the above, but its name implies a non-UTF8 input, which as the comments
+ * above show, doesn't matter as to its implementation */
 #define NATIVE_BYTE_IS_INVARIANT(c)	UVCHR_IS_INVARIANT(c)
 
 #define MAX_PORTABLE_UTF8_TWO_BYTE 0x3FF    /* constrained by EBCDIC */
