@@ -194,7 +194,7 @@ SKIP: {
 	skip "Can't test if an admin user in miniperl", 2,
 	  if $Is_Cygwin && is_miniperl();
         skip "Can't test -r or -w meaningfully if you're superuser", 2
-          if ($Is_Cygwin ? Win32::IsAdminUser : $> == 0);
+          if ($> == 0);
 
         SKIP: {
             skip "Can't test -r meaningfully?", 1 if $Is_Dos;
