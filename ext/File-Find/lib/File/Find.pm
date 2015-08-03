@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 require Exporter;
 require Cwd;
 
@@ -1051,7 +1051,8 @@ following globals available: C<$File::Find::topdir>,
 C<$File::Find::topdev>, C<$File::Find::topino>,
 C<$File::Find::topmode> and C<$File::Find::topnlink>.
 
-This library is useful for the C<find2perl> tool, which when fed,
+This library is useful for the C<find2perl> tool (distribued as part of the
+App-find2perl CPAN distribution), which when fed,
 
     find2perl / -name .nfs\* -mtime +7 \
         -exec rm -f {} \; -o -fstype nfs -prune
