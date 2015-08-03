@@ -171,8 +171,7 @@ END_EXTERN_C
 		         (uv) < 0x400000    ? 5 : \
 		         (uv) < 0x4000000   ? 6 : 7 )
 
-
-#define UNI_IS_INVARIANT(c)		(((UV)(c)) <  0xA0)
+#define OFFUNI_IS_INVARIANT(c) (((UV)(c)) <  0xA0)
 
 /* It turns out that on EBCDIC platforms, the invariants are the characters
  * that have ASCII equivalents, plus the C1 controls.  Since the C0 controls

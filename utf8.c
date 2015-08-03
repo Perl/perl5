@@ -104,7 +104,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
     PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS;
 
-    if (UNI_IS_INVARIANT(uv)) {
+    if (OFFUNI_IS_INVARIANT(uv)) {
 	*d++ = (U8) LATIN1_TO_NATIVE(uv);
 	return d;
     }
@@ -1265,7 +1265,7 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
     while (p < pend) {
 	UV uv = (p[0] << 8) + p[1]; /* UTF-16BE */
 	p += 2;
-	if (UNI_IS_INVARIANT(uv)) {
+	if (OFFUNI_IS_INVARIANT(uv)) {
 	    *d++ = LATIN1_TO_NATIVE((U8) uv);
 	    continue;
 	}
