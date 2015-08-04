@@ -1,0 +1,98 @@
+Revision history for CPAN-Meta-YAML
+
+0.017     2015-08-04 06:02:12-04:00 America/New_York (TRIAL RELEASE)
+
+  - Generated from ETHER/YAML-Tiny-1.69.tar.gz
+
+0.016     2015-05-19 05:34:02-04:00 America/New_York
+
+  - Generated from ETHER/YAML-Tiny-1.67.tar.gz
+
+0.015     2015-05-11 22:01:58-04:00 America/New_York (TRIAL RELEASE)
+
+  - Generated from ETHER/YAML-Tiny-1.67.tar.gz
+
+0.014     2015-03-16 19:22:12-04:00 America/New_York
+
+  - Generated from ETHER/YAML-Tiny-1.66.tar.gz
+
+0.013     2015-03-16 11:32:04-04:00 America/New_York
+
+  - Generated from ETHER/YAML-Tiny-1.65.tar.gz
+
+0.012     2014-02-24 13:07:18-05:00 America/New_York
+
+  - Generated from ETHER/YAML-Tiny-1.61.tar.gz
+
+0.011     2014-02-13 20:30:30-05:00 America/New_York
+
+  - Generated from ETHER/YAML-Tiny-1.60.tar.gz
+
+0.010     2013-09-23 13:11:20 America/New_York
+
+  - Generated from ETHER/YAML-Tiny-1.55.tar.gz
+
+  - Fix broken test when copying from YAML-Tiny
+
+  - updated Makefile.PL logic to support PERL_NO_HIGHLANDER
+
+0.009     2013-09-23 10:16:19 America/New_York
+
+  - Generated from ETHER/YAML-Tiny-1.55.tar.gz
+
+  - Makefile.PL will use UNINST=1 on old perls that might have
+    an old version incorrectly installed into the core library path
+
+0.008     2012-03-14 17:13:24 EST5EDT
+
+  - Generated from ADAMK/YAML-Tiny-1.51.tar.gz
+
+  - Updated from YAML-Tiny to fix compatibility with older Scalar::Utils
+
+0.007     2012-02-07 22:42:42 EST5EDT
+
+  - Generated from ADAMK/YAML-Tiny-1.50.tar.gz
+
+  - Documentation fix to replace missing abstract
+
+0.006     2012-02-06 20:51:47 EST5EDT
+
+  - Generated from ADAMK/YAML-Tiny-1.50.tar.gz
+
+  - Set back configure_requires prerequisite for ExtUtils::MakeMaker
+    from 6.30 to 6.17 (per request from Andreas Koenig)
+
+0.005     2011-12-13 12:57:24 EST5EDT
+
+  - Generated from ADAMK/YAML-Tiny-1.50.tar.gz
+
+  - Fix documentation to clarify that users are responsible for
+    UTF-8 encoding/decoding
+
+0.004     2011-09-06 09:42:52 America/New_York
+
+  - Generated from ADAMK/YAML-Tiny-1.50.tar.gz
+
+0.003     2011-01-02 17:32:05 EST5EDT
+
+  - Generated from ADAMK/YAML-Tiny-1.46.tar.gz
+
+  - Updated SEE ALSO documentation at Ingy's request
+
+  - Remove CompileTests plugin from dist.ini
+
+0.002     2010-12-17 12:31:12 EST5EDT
+
+  - Generated from ADAMK/YAML-Tiny-1.46.tar.gz
+
+  - Removed source $VERSION and replaced with our own
+
+  - Added a SYNOPSIS to the generated Pod
+
+  - Omits the dist.ini from the distribution
+
+0.001     2010-12-17 08:53:42 EST5EDT
+
+  - Generated from ADAMK/YAML-Tiny-1.46.tar.gz
+
+# vim: ts=2 sts=2 sw=2 et:

@@ -2,8 +2,9 @@ package TestBridge;
 
 use strict;
 use warnings;
-
-use Test::More 0.99;
+use lib 't/lib';
+use Test::More 0.88;
+use SubtestCompat;
 use TestUtils;
 use TestML::Tiny;
 
@@ -51,8 +52,7 @@ my %WARN = (
 # run_all_testml_files
 #
 # Iterate over all .tml files in a directory using a particular test bridge
-# code # reference.  Each file is wrapped in a subtest with a test plan
-# equal to the number of blocks.
+# code # reference.  Each file is wrapped in a subtest.
 #--------------------------------------------------------------------------#
 
 sub run_all_testml_files {
@@ -61,7 +61,6 @@ sub run_all_testml_files {
     my $code = sub {
         my ($file, $blocks) = @_;
         subtest "$label: $file" => sub {
-            plan tests => scalar @$blocks;
             $bridge->($_, @args) for @$blocks;
         };
     };

@@ -2,7 +2,8 @@ use strict;
 use warnings;
 use utf8;
 use lib 't/lib/';
-use Test::More 0.99;
+use Test::More 0.88;
+use SubtestCompat;
 use TestUtils;
 use TestBridge;
 
