@@ -42,7 +42,7 @@ following compilers on the Intel x86 architecture:
       Microsoft Visual C++    version 6.0 or later
       Intel C++ Compiler      (experimental)
       Gcc by mingw.org        gcc version 3.4.5 or later
-      Gcc by mingw-w64.sf.net gcc version 4.4.3 or later
+      Gcc by mingw-w64.org    gcc version 4.4.3 or later
 
 Note that the last two of these are actually competing projects both
 delivering complete gcc toolchain for MS Windows:
@@ -53,7 +53,7 @@ delivering complete gcc toolchain for MS Windows:
 
 Delivers gcc toolchain targeting 32-bit Windows platform.
 
-=item L<http://mingw-w64.sf.net>
+=item L<http://mingw-w64.org>
 
 Delivers gcc toolchain targeting both 64-bit Windows and 32-bit Windows
 platforms (despite the project name "mingw-w64" they are not only 64-bit
@@ -74,7 +74,7 @@ This port can also be built on IA64/AMD64 using:
       MinGW64 compiler (gcc version 4.4.3 or later)
 
 The Windows SDK can be downloaded from L<http://www.microsoft.com/>.
-The MinGW64 compiler is available at L<http://sourceforge.net/projects/mingw-w64>.
+The MinGW64 compiler is available at L<http://mingw-w64.org>.
 The latter is actually a cross-compiler targeting Win64. There's also a trimmed
 down compiler (no java, or gfortran) suitable for building perl available at:
 L<http://strawberryperl.com/package/kmx/64_gcctoolchain/>
@@ -369,7 +369,7 @@ You will have to make sure that CCTYPE is set correctly and that
 CCHOME points to wherever you installed your compiler.
 
 If building with the cross-compiler provided by
-mingw-w64.sourceforge.net you'll need to uncomment the line that sets
+mingw-w64.org you'll need to uncomment the line that sets
 GCCCROSS in the makefile.mk. Do this only if it's the cross-compiler - ie
 only if the bin folder doesn't contain a gcc.exe. (The cross-compiler
 does not provide a gcc.exe, g++.exe, ar.exe, etc. Instead, all of these
