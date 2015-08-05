@@ -1229,7 +1229,9 @@ static void S_setpayload(NV* nvp, NV_PAYLOAD_TYPE payload, bool signaling)
   }
 #ifdef USE_LONG_DOUBLE
 # if LONG_DOUBLEKIND == 3 || LONG_DOUBLEKIND == 4
+#  if LONG_DOUBLESIZE > 10
   memset((char *)nvp + 10, '\0', LONG_DOUBLESIZE - 10); /* x86 long double */
+#  endif
 # endif
 #endif
   for (i = 0; i < (int)C_ARRAY_LENGTH(a); i++) {
