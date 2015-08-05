@@ -44,6 +44,7 @@ BEGIN {
                      hash_seed hash_value bucket_stats bucket_info bucket_array
                      hv_store
                      lock_hash_recurse unlock_hash_recurse
+                     lock_hashref_recurse unlock_hashref_recurse
                     );
     plan tests => 244 + @Exported_Funcs;
     use_ok 'Hash::Util', @Exported_Funcs;
