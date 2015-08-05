@@ -6797,9 +6797,9 @@ extern void moncontrol(int);
  * for the quiet/signaling */
 #define NV_NAN_QS_BIT_OFFSET \
     (8 * (NV_NAN_QS_BYTE_OFFSET) + (NV_NAN_QS_BIT_SHIFT))
-/* NV_NAN_QS_QUIET (always defined) is one if the NV_NAN_QS_QS_BIT being
- * on/one indicates quiet NaN. NV_NAN_QS_SIGNALING (also always defined)
- * is on/one if the NV_NAN_QS_BIT being one indicates signaling NaN. */
+/* NV_NAN_QS_QUIET (always defined) is true if the NV_NAN_QS_QS_BIT being
+ * on indicates quiet NaN.  NV_NAN_QS_SIGNALING (also always defined)
+ * is true if the NV_NAN_QS_BIT being on indicates signaling NaN. */
 #define NV_NAN_QS_QUIET \
     ((NV_NAN_QS_BYTE(PL_nan.u8) & NV_NAN_QS_BIT) == NV_NAN_QS_BIT)
 #define NV_NAN_QS_SIGNALING (!(NV_NAN_QS_QUIET))
