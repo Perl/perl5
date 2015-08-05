@@ -326,8 +326,8 @@ cpan/CPAN-Meta/t/prereqs.t
 cpan/CPAN-Meta/t/repository.t
 cpan/CPAN-Meta/t/save-load.t
 cpan/CPAN-Meta/t/validator.t
+cpan/CPAN-Meta-YAML/Changes
 cpan/CPAN-Meta-YAML/lib/CPAN/Meta/YAML.pm		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/00-report-prereqs.dd
 cpan/CPAN-Meta-YAML/t/01_api.t
 cpan/CPAN-Meta-YAML/t/01_compile.t		CPAN-Meta-YAML files
 cpan/CPAN-Meta-YAML/t/10_read.t
@@ -345,6 +345,7 @@ cpan/CPAN-Meta-YAML/t/data/latin1.yml
 cpan/CPAN-Meta-YAML/t/data/multibyte.yml		CPAN-Meta-YAML files
 cpan/CPAN-Meta-YAML/t/data/utf_16_le_bom.yml		CPAN-Meta-YAML files
 cpan/CPAN-Meta-YAML/t/data/utf_8_bom.yml
+cpan/CPAN-Meta-YAML/t/lib/SubtestCompat.pm
 cpan/CPAN-Meta-YAML/t/lib/TestBridge.pm
 cpan/CPAN-Meta-YAML/t/lib/TestML/Tiny.pm
 cpan/CPAN-Meta-YAML/t/lib/TestUtils.pm

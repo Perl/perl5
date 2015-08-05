@@ -113,4 +113,4 @@ resources:
   license: http://dev.perl.org/licenses/
   repository: http://perl5.git.perl.org/
 version: '5.023002'
-x_serialization_backend: 'CPAN::Meta::YAML version 0.016'
+x_serialization_backend: 'CPAN::Meta::YAML version 0.017'
