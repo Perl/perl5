@@ -172,7 +172,7 @@ SKIP: {
     # (3) and is signaling
     setpayloadsig($x, 0x12345);
     ok(isnan($x), "setpayloadsig + isnan");
-    is(getpayload($x), 0x12345, "setpayload + getpayload");
+    is(getpayload($x), 0x12345, "setpayloadsig + getpayload");
     ok(issignaling($x), "setpayloadsig + issignaling");
 
     # Try a payload more than one byte.
