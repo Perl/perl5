@@ -326,7 +326,6 @@ cpan/CPAN-Meta/t/prereqs.t
 cpan/CPAN-Meta/t/repository.t
 cpan/CPAN-Meta/t/save-load.t
 cpan/CPAN-Meta/t/validator.t
-cpan/CPAN-Meta-YAML/Changes
 cpan/CPAN-Meta-YAML/lib/CPAN/Meta/YAML.pm		CPAN-Meta-YAML files
 cpan/CPAN-Meta-YAML/t/01_api.t
 cpan/CPAN-Meta-YAML/t/01_compile.t		CPAN-Meta-YAML files
