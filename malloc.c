@@ -253,6 +253,10 @@
 #     define PERL_MAYBE_ALIVE	1
 #endif
 
+#ifndef MYMALLOC
+#  error "MYMALLOC is not defined"
+#endif
+
 #ifndef MUTEX_LOCK
 #  define MUTEX_LOCK(l)
 #endif 
