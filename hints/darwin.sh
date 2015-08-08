@@ -301,6 +301,11 @@ case "$usemymalloc" in
 esac
 # However sbrk() returns -1 (failure) somewhere in lib/unicore/mktables at
 # around 14M, so we need to use system malloc() as our sbrk()
+#
+# sbrk() in Darwin deprecated since Mavericks (10.9), it still exists
+# in Yosemite (10.10) but that is just an emulation, and fails for
+# allocations beyond 4MB.  One should use e.g. mmap instead (or system
+# malloc, as suggested above, that but is kind of backward).
 malloc_cflags='ccflags="-DUSE_PERL_SBRK -DPERL_SBRK_VIA_MALLOC $ccflags"'
 
 # Locales aren't feeling well.
