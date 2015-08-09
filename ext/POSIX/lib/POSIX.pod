@@ -1244,7 +1244,9 @@ should not rely on more than 32 bits of payload.
 Whether a "signaling" NaN is in any way different from a "quiet" NaN,
 depends on the platform.  Also note that the payload of the default
 NaN (no argument to nan()) is not necessarily zero, use C<setpayload>
-to explicitly set the payload.
+to explicitly set the payload.  On some platforms like the 32-bit x86,
+(unless using the 80-bit long doubles) the signaling bit is not supported
+at all.
 
 See also L</isnan>, L</setpayload> and L</issignaling>.
 
