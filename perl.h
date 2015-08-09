@@ -6682,6 +6682,10 @@ extern void moncontrol(int);
  * This means that in this format there are 61 bits available
  * for the nan payload.
  *
+ * Note that the 32-bit x86 ABI cannot do signaling nans: the x87
+ * simply cannot preserve the bit.  You can either use the 80-bit
+ * extended precision (long double, -Duselongdouble), or use x86-64.
+ *
  * In all platforms, the payload bytes (and bits, some of them are
  * often in a partial byte) themselves can be either all zero (x86),
  * all one (sparc or mips), or a mixture: in IEEE 754 128-bit double
