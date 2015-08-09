@@ -173,7 +173,25 @@ SKIP: {
     setpayloadsig($x, 0x12345);
     ok(isnan($x), "setpayloadsig + isnan");
     is(getpayload($x), 0x12345, "setpayloadsig + getpayload");
-    ok(issignaling($x), "setpayloadsig + issignaling");
+  SKIP: {
+      # https://rt.perl.org/Ticket/Display.html?id=125710
+      # In the 32-bit x86 ABI cannot preserve the signaling bit
+      # (the x87 simply does not preserve that).  But using the
+      # 80-bit extended format aka long double, the bit is preserved.
+      # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=57484
+      my $could_be_x86_32 =
+          # This is a really weak test: there are other 32-bit
+          # little-endian platforms than just Intel (some embedded
+          # processors, for example), but we use this just for not
+          # bothering with the test if things look iffy.
+          # We could, say, $Config{ccsymbols} =~ /\b__[xi][3-7]86=1\b/,
+          # but that feels quite shaky.
+          $Config{byteorder} eq '1234' &&
+          $Config{ivsize} == 4 &&  # Really redundant with the 'byteorder'.
+          $Config{ptrsize} == 4;
+      skip($^O, 1) if $could_be_x86_32 && !$Config{uselongdouble};
+      ok(issignaling($x), "setpayloadsig + issignaling");
+    }
 
     # Try a payload more than one byte.
     is(getpayload(nan(0x12345)), 0x12345, "nan + getpayload");
