@@ -8,8 +8,6 @@ The leak isn't in blead so there is no blead commit to cherry-pick. The voting h
 AFAICT, the second patch on its own is both necessary and sufficient to fix the leak; valgrind reports an invalid free when both patches are applied. -- arc
 <commit votes="steveh,tonyc,arc" id="" ticket="123786" desc="'use utf8;' leaks memory"/>
 
-<commit votes="steveh,tonyc,arc" id="c0388966161bb22622ebac402bb1ebe081ad0b39" ticket="123976" desc="[Win32] Unable to build 64-bit blead using gcc-4.8.2"/>
-
 I believe DaveM has expressed a vote for these, in https://rt.perl.org/Public/Bug/Display.html?id=124109#txn-1338401 -- arc
 <commit votes="arc" id="3553f4fa11fd9e8bb0797ace43605cc33ebf32fa" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
 <commit votes="arc" id="4e0341d2ce817c9956f7f78e36bcaf8b764e18fc" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
@@ -17,11 +15,6 @@ I believe DaveM has expressed a vote for these, in https://rt.perl.org/Public/Bu
 <commit votes="tonyc, arc" id="816b056ffb99ae54642320e20dc30a59fd1effef" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
 <commit votes="tonyc, arc" id="3bea78d24634e630b610f59957e7a019205a67b2" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
 <commit votes="tonyc, arc" id="33593911f214382b592d05aa902655301915e666" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
-
-<commit votes="steveh,tonyc,arc" id="41ef2c66e0da6dfb04ded81b979f7081007a1add" ticket="124127" desc="Restore ability to debug threaded scripts"/>
-<commit votes="steveh,tonyc,arc" id="f80262130b14af7d62281372d55e93f84e2a16b7" ticket="124127" desc="James McCoy is now a perl AUTHOR"/>
-<commit votes="steveh,tonyc,arc" id="67a38f64602c1e8bbf6b6e5d21455c3f5df90f01" ticket="124127" desc="bump perl5db.pl's $VERSION"/>
-<commit votes="steveh,tonyc,arc" id="902d16915db2735c3a41f15ef8d95cf300c31801" ticket="124127" desc="Restore ability to debug threaded scripts"/>
 
 </div>
 
@@ -52,17 +45,6 @@ I feel a bit leery about this next one.  The code is a bit fragile, so I would f
 <commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
 
 <commit votes="steveh, arc" id="83a85f49e265a458a481a9dc402dd3bdd30ae457" ticket="123711" desc="[perl #123711] Fix crash with 0-5x-l{0}"/>
-
-Both of the following should be applied, or neither -- tonyc.
-<commit votes="steveh,tonyc,arc" id="5fe499a8e26270679c0c6d48431f3a328a8ffeba" ticket="123218" desc="[perl #123218] 'preserve' $/ if set to a bad value"/>
-<commit votes="steveh,tonyc,arc" id="ddce084af02764d4f30ef6089ae67a7983fcc690" ticket="123739" desc="Remove get-magic from $/"/>
-
-The second of the following 2 depends on the first being applied -- tonyc.
-<commit votes="steveh,tonyc,arc" id="8d28fc8f69270cc75d9564b369ac6008c5b5d617" ticket="123748" desc="[perl #123748] - Add test case for possible getenv/putenv/setenv stomping in perl.c"/>
-<commit votes="steveh,tonyc,arc" id="7f8f1c2613d1d5df0b1071bd5fe3eec808c4a69e" ticket="123748" desc="Fix quoting in new switchd.t test."/>
-
-<commit votes="steveh,tonyc,arc" id="175c4cf98f8ca99cd4f626369ef0beb1d69f8ce5" ticket="123748" desc="locale.c: savepv() of getenv()"/>
-<commit votes="steveh,tonyc,arc" id="9e0b0d62ba5a660ab4b6f498912cfaead79014a0" ticket="123748" desc="perl.c: Don't read possibly zapped memory"/>
 
 If a reasonable way is found to make the new test in d27f4 pass in maint, I'll be +1 on these. But I'm not convinced that it's worth making this change to maint to fix a compile-time-only bug if we know that it doesn't fix all the cases. -- arc.
 <commit votes="steveh" id="e47d32dcd59a578274f445fac79e977d83055c8c" ticket="123712" desc="[perl #123712] Fix /$a[/ parsing"/>
@@ -128,12 +110,6 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 
 <commit votes="tonyc, arc" id="bae8cfc6926f9b04d8adac6a9ee6d563cc18263f" ticket="125121" desc="Don't treat setpgrp($nonzero) as setpgrp(1)"/>
 <commit votes="steveh, arc" id="0fa70a06a98fc8fa9840d4dbaa31fc2d3b28b99b" ticket="123743" desc="simpify and speed up /.*.../ handling"/>
-<commit votes="steveh,tonyc,arc" id="ed38223246c041b4e9ce5687cadf6f6b903050ca" ticket="123202" desc="[perl #123202] speed up scalar //g against tainted strings"/>
-<commit votes="steveh,tonyc,arc" id="71622e40793536aa4f2ace7ffc704cc78151fd26" ticket="" desc="Stop $^H |= 0x1c020000 from enabling all features"/>
-
-<commit votes="steveh,tonyc,arc" id="b3089e964c0afaf7eb8d54aa5a912e4eb2e6c176" ticket="124113" desc="[perl #124113] Make check for multi-dimensional arrays be UTF8-aware"/>
-<commit votes="steveh,tonyc,arc" id="6e59c8626d31f697a2b7b36cf8a200b36d93eac2" ticket="124113" desc="Allow unquoted UTF-8 HERE-document terminators"/>
-<commit votes="steveh,tonyc,arc" id="8ce2ba821761a7ada1e1def512c0374977759cf7" ticket="124113" desc="Fix '...without parentheses is ambuguous' warning for UTF-8 function names"/>
 
 </div>
 
@@ -151,9 +127,6 @@ On the mailing list (http://www.nntp.perl.org/group/perl.perl5.porters/2015/05/m
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="tux, khw, arc" id="237050634b19905cdd9e8e25c2a43d0b24eb59f2" ticket="" desc="Add pthread to libswanted"/>
-<commit votes="tux, khw, arc" id="90207ba1bd77fb10e2c39594d954b43a9e8ee948" ticket="" desc="Put pthread in front of libswanted and add cl"/>
-
 <commit votes="tonyc, arc" id="0cf583b0808e2fb2ac90751d506f2b8ff75aed86" ticket="" desc="uname -r works on MINIX as well"/>
 
 </div>
@@ -164,17 +137,6 @@ On the mailing list (http://www.nntp.perl.org/group/perl.perl5.porters/2015/05/m
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh,tonyc,arc" id="730d89736d0ae5dfc7580108c451efe91b5102fc" ticket="" desc="Fix warning message regarding 'use autodie' and 'use open'."/>
-<commit votes="steveh,tonyc,arc" id="2a403855670ae8592c5a3ca4396e6e909a4fc593" ticket="" desc="perlunicook: Note that autodie &gt;= 2.26 should be okay with 'use open'."/>
-
-<commit votes="steveh,tonyc,arc" id="7ad03f5069e771fe44e92b694a23f10354c548d1" ticket="" desc="Fix setenv() replacement documentation in perlclib"/>
-<commit votes="steveh,tonyc,arc" id="38f18a308b948c6eaf187519a16d060e1ec7cc20" ticket="" desc="perlhacktips: Add caution about clib ptr returns to static memory"/>
-
-<commit votes="steveh,tonyc,arc" id="7b237c8f3da9b9cd57a5cbd035ff4d3e70dcbb7b" ticket="" desc="Fix minor code typos in perlunicook"/>
-<commit votes="steveh,tonyc,arc" id="616b344493d526c505a241bee3571ae735408885" ticket="" desc="Randy Stauneris now a perl author"/>
-
-<commit votes="steveh,tonyc,arc" id="f942a0dfa923e36f91c00b44e21563cd50dc750b" ticket="122322" desc="[perl #122322] Update OOK example in perlguts"/>
-<commit votes="steveh,tonyc,arc" id="d8c1af4e0d4774b60bd59dc0039c7e101f292a4a" ticket="" desc="perlfunc: mention that study() is currently a noop"/>
 <commit votes="steveh" id="965d3000a316a5ed367c2ce65d040e1125d5e31d" ticket="" desc="Update supported versions in perlpolicy.pod"/>
 
 </div>
