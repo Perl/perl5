@@ -127,7 +127,7 @@ $/ = "\n";
  # binary-incompatible previously-installed version. The eval won’t help in
  # intercepting a SIGTRAP.
  local @INC = ("../lib", "lib", @INC);
- if (not eval q/use PerelIO::scalar; 1/) {
+ if (not eval q/use PerlIO::scalar; 1/) {
   # In-memory files necessitate PerlIO::scalar, thus a perl with
   # perlio and dynaloading enabled. miniperl won't be able to run this
   # test, so skip it
