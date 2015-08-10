@@ -1,7 +1,7 @@
 #!./perl
 # Test $/
 
-print "1..49\n";
+print "1..39\n";
 
 $test_count = 1;
 $teststring = "1\n12\n123\n1234\n1234\n12345\n\n123456\n1234567\n";
@@ -32,7 +32,6 @@ open TESTFILE, "<./foo";
 binmode TESTFILE;
 test_record(*TESTFILE);
 close TESTFILE;
-test_bad_setting();
 $test_count_end = $test_count;  # Needed to know how many tests to skip
 
 $/ = "\n";
