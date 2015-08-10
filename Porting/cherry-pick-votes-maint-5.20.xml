@@ -37,9 +37,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-I feel a bit leery about this next one.  The code is a bit fragile, so I would feel more comfortable with a couple months’ blead smoking. But the blead implementation changed shortly after that commit. --sprout
-<commit votes="steveh" id="db5cc3ee5bdb14c8d59302b6c3ef8ff4bca660bb" ticket="" desc="Fix crash in leave_scope when my sub has CvGV"/>
-
 <commit votes="steveh, arc" id="83a85f49e265a458a481a9dc402dd3bdd30ae457" ticket="123711" desc="[perl #123711] Fix crash with 0-5x-l{0}"/>
 
 If a reasonable way is found to make the new test in d27f4 pass in maint, I'll be +1 on these. But I'm not convinced that it's worth making this change to maint to fix a compile-time-only bug if we know that it doesn't fix all the cases. -- arc.
