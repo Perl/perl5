@@ -1388,7 +1388,7 @@ libswanted_uselargefiles=''
 : List of libraries we want.
 : If anyone needs extra -lxxx, put those in a hint file.
 libswanted="socket bind inet nsl nm ndbm gdbm dbm db malloc dl ld sun"
-libswanted="$libswanted m crypt sec util c cposix posix ucb bsd BSD"
+libswanted="$libswanted m crypt sec util c cposix posix pthread ucb bsd BSD"
 : We probably want to search /usr/shlib before most other libraries.
 : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
 glibpth=`echo " $glibpth " | sed -e 's! /usr/shlib ! !'`
@@ -20702,7 +20702,7 @@ int check_min ()
 
 int main (int argc, char *argv[])
 {
-    fprintf (stderr, "Sizeof time_t = %ld\n", sizeof (time_t));
+    /* fprintf (stderr, "Sizeof time_t = %ld\n", sizeof (time_t)); */
     check_max ();
     check_min ();
     return (0);
