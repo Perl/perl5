@@ -4,10 +4,6 @@
 
 <div><h2>Tickets Listed in #123921: 5.20.3 blockers</h2>
 
-The leak isn't in blead so there is no blead commit to cherry-pick. The voting here relates to the two patches by Tony C on the ticket. -- steveh
-AFAICT, the second patch on its own is both necessary and sufficient to fix the leak; valgrind reports an invalid free when both patches are applied. -- arc
-<commit votes="steveh,tonyc,arc" id="" ticket="123786" desc="'use utf8;' leaks memory"/>
-
 I believe DaveM has expressed a vote for these, in https://rt.perl.org/Public/Bug/Display.html?id=124109#txn-1338401 -- arc
 <commit votes="arc" id="3553f4fa11fd9e8bb0797ace43605cc33ebf32fa" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
 <commit votes="arc" id="4e0341d2ce817c9956f7f78e36bcaf8b764e18fc" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
