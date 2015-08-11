@@ -1206,7 +1206,11 @@ PP(pp_flop)
                     /* The wraparound of signed integers is undefined
                      * behavior, but here we aim for count >=1, and
                      * negative count is just wrong. */
-                    if (n < 1)
+                    if (n < 1
+#if IVSIZE > Size_t_size
+                        || n > SSize_t_MAX
+#endif
+                        )
                         overflow = TRUE;
                 }
                 if (overflow)
