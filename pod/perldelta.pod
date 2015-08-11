@@ -119,7 +119,9 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<perl5db.pl> has been upgraded from 1.48 to 1.49.
+
+The debugger would cause an assertion failure.  [perl #124127]
 
 =back
 
@@ -364,6 +366,12 @@ reference.  [perl #123218]
 
 Perl 5.14.0 introduced a bug whereby C<eval { LABEL: }> would crash.  This
 has been fixed.  [rt.perl.org #123652]
+
+=item *
+
+Extending an array cloned from a parent thread could result in
+"Modification of a read-only value attempted" errors when attempting
+to modify the new elements. [perl #124127]
 
 =back
 
