@@ -338,13 +338,14 @@ XXX Changes which affect the interface available to C<XS> code go here.  Other
 significant internal changes for future core maintainers should be noted as
 well.
 
-[ List each change as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+The obscure C<PL_timesbuf> variable, effectively a vestige of Perl 1, has
+been removed. It was documented as deprecated in Perl 5.20, with a statement
+that it would be removed early in the 5.21.x series; that has now finally
+happened.  [perl #121351]
 
 =back
 

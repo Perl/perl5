@@ -212,7 +212,6 @@ if ($ARGS{PLATFORM} ne 'os2') {
 				PL_generation
 				PL_lastgotoprobe
 				PL_modcount
-				PL_timesbuf
 				main
 				 );
 	}
