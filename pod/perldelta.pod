@@ -319,6 +319,11 @@ would uncondtionally have around a dozen warnings from hv_func.h.  These
 warnings have been silenced.  GCC all bitness and Visual C++ for Win32 were
 not affected.
 
+=item *
+
+F<miniperl.exe> is now built with C<-fno-strict-aliasing>, allowing
+64-bit builds to complete on GCC 4.8. [perl #123976]
+
 =back
 
 =back
