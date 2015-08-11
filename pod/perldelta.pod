@@ -407,6 +407,16 @@ Several cases of data used to store environment variable contents in core C
 code being potentailly overwritten before being used have been fixed.
 L<[perl #123748]|https://rt.perl.org/Ticket/Display.html?id=123748>
 
+=item *
+
+New bitwise ops added in Perl 5.21.9 accidentally caused C<$^H |= 0x1c020000>
+to enable all features.  This has now been fixed.
+
+=item *
+
+UTF-8 variable names used in array indexes, unquoted UTF-8 HERE-document
+terminators and UTF-8 function names all now work correctly. [perl #124113]
+
 =back
 
 =head1 Known Problems
