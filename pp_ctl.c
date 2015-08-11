@@ -2145,7 +2145,6 @@ PP(pp_enteriter)
 	save_pushptrptr(gv, SvREFCNT_inc(*svp), SAVEt_GVSV);
 	*svp = newSV(0);
 	itervar = (void *)gv;
-	save_aliased_sv(gv);
     }
     else {
 	SV * const sv = POPs;

@@ -4119,18 +4119,7 @@ Perl_gv_setref(pTHX_ SV *const dstr, SV *const sstr)
 	    && CopSTASH_ne(PL_curcop, GvSTASH(dstr))) {
 	    GvFLAGS(dstr) |= import_flag;
 	}
-	if (import_flag == GVf_IMPORTED_SV) {
-	    if (intro) {
-		save_aliased_sv((GV *)dstr);
-	    }
-	    /* Turn off the flag if sref is not referenced elsewhere,
-	       even by weak refs.  (SvRMAGICAL is a pessimistic check for
-	       back refs.)  */
-	    if (SvREFCNT(sref) <= 2 && !SvRMAGICAL(sref))
-		GvALIASED_SV_off(dstr);
-	    else
-		GvALIASED_SV_on(dstr);
-	}
+
 	if (stype == SVt_PVHV) {
 	    const char * const name = GvNAME((GV*)dstr);
 	    const STRLEN len = GvNAMELEN(dstr);
@@ -14163,13 +14152,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = parser_dup((const yy_parser*)ptr, param);
 	    break;
-	case SAVEt_GP_ALIASED_SV: {
-	    GP * gp_ptr = (GP *)POPPTR(ss,ix);
-	    GP * new_gp_ptr = gp_dup(gp_ptr, param);
-	    TOPPTR(nss,ix) = new_gp_ptr;
-	    new_gp_ptr->gp_refcnt++;
-	    break;
-	}
 	default:
 	    Perl_croak(aTHX_
 		       "panic: ss_dup inconsistency (%"IVdf")", (IV) type);
@@ -14404,7 +14386,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_minus_F		= proto_perl->Iminus_F;
     PL_doswitches	= proto_perl->Idoswitches;
     PL_dowarn		= proto_perl->Idowarn;
-    PL_sawalias		= proto_perl->Isawalias;
 #ifdef PERL_SAWAMPERSAND
     PL_sawampersand	= proto_perl->Isawampersand;
 #endif

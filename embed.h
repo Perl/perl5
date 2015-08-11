@@ -1304,7 +1304,6 @@
 #define rsignal_restore(a,b)	Perl_rsignal_restore(aTHX_ a,b)
 #define rsignal_save(a,b,c)	Perl_rsignal_save(aTHX_ a,b,c)
 #define rxres_save(a,b)		Perl_rxres_save(aTHX_ a,b)
-#define save_aliased_sv(a)	Perl_save_aliased_sv(aTHX_ a)
 #define save_strlen(a)		Perl_save_strlen(aTHX_ a)
 #define sawparens(a)		Perl_sawparens(aTHX_ a)
 #define scalar(a)		Perl_scalar(aTHX_ a)

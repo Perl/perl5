@@ -21,7 +21,7 @@
 
 /* one arg */
 
-#define SAVEt_GP_ALIASED_SV	4
+/*** SPARE      	        4 ***/
 #define SAVEt_BOOL		5
 #define SAVEt_COMPILE_WARNINGS	6
 #define SAVEt_COMPPAD		7

@@ -198,12 +198,6 @@ Return the CV from the GV.
 #define GvIMPORTED_CV_on(gv)	(GvFLAGS(gv) |= GVf_IMPORTED_CV)
 #define GvIMPORTED_CV_off(gv)	(GvFLAGS(gv) &= ~GVf_IMPORTED_CV)
 
-#define GPf_ALIASED_SV	1
-
-#define GvALIASED_SV(gv)	(GvGPFLAGS(gv) & GPf_ALIASED_SV)
-#define GvALIASED_SV_on(gv)	(GvGPFLAGS(gv) |= GPf_ALIASED_SV)
-#define GvALIASED_SV_off(gv)	(GvGPFLAGS(gv) &= ~GPf_ALIASED_SV)
-
 #ifndef PERL_CORE
 #  define GvIN_PAD(gv)		0
 #  define GvIN_PAD_on(gv)	NOOP

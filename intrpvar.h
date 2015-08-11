@@ -60,9 +60,6 @@ PERLVAR(I, markstack,	I32 *)		/* stack_sp locations we're
 PERLVAR(I, markstack_ptr, I32 *)
 PERLVAR(I, markstack_max, I32 *)
 
-PERLVARI(I, sawalias,	bool,	FALSE)	/* must enable common-vars
-					   pessimisation */
-
 #ifdef PERL_HASH_RANDOMIZE_KEYS
 #ifdef USE_PERL_PERTURB_KEYS
 PERLVARI(I, hash_rand_bits_enabled, U8, 1) /* used to randomize hash stuff 0 == no-random, 1 == random, 2 == determinsitic */
