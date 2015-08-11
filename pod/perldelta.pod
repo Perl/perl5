@@ -175,6 +175,18 @@ storage of the offset.
 
 =back
 
+=head3 L<perlhacktips>
+
+=over 4
+
+=item *
+
+Documentation has been added illustrating the perils of assuming the contents of
+static memory pointed to by the return values of Perl wrappers for C library
+functions doesn't change.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
