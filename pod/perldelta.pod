@@ -187,6 +187,18 @@ functions doesn't change.
 
 =back
 
+=head3 L<perlpodspec>
+
+=over 4
+
+=item *
+
+The specification of the pod language is changing so that the default
+encoding of pods that aren't in UTF-8 (unless otherwise indicated) is
+CP1252 instead of ISO 8859-1 (Latin1).
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
