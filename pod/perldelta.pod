@@ -119,7 +119,7 @@ XXX
 
 =item *
 
-L<perl5db.pl> has been upgraded from 1.48 to 1.49.
+L<perl5db.pl> has been upgraded from 1.44 to 1.44_01.
 
 The debugger would cause an assertion failure.  [perl #124127]
 
