@@ -4,13 +4,6 @@
 
 <div><h2>Tickets Listed in #123921: 5.20.3 blockers</h2>
 
-<commit votes="arc, davem" id="3553f4fa11fd9e8bb0797ace43605cc33ebf32fa" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
-<commit votes="arc, davem" id="4e0341d2ce817c9956f7f78e36bcaf8b764e18fc" ticket="124109" desc="panic: swash_fetch got swatch of unexpected bit width"/>
-
-<commit votes="tonyc, arc" id="816b056ffb99ae54642320e20dc30a59fd1effef" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
-<commit votes="tonyc, arc" id="3bea78d24634e630b610f59957e7a019205a67b2" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
-<commit votes="tonyc, arc" id="33593911f214382b592d05aa902655301915e666" ticket="123784" desc="Tests fail with GCC 5.0 because Errno cannot obtain errno constants"/>
-
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
@@ -114,8 +107,6 @@ On the mailing list (http://www.nntp.perl.org/group/perl.perl5.porters/2015/05/m
 </div>
 
 <div><h3>Portability Fixes</h3>
-
-<commit votes="tonyc, arc" id="0cf583b0808e2fb2ac90751d506f2b8ff75aed86" ticket="" desc="uname -r works on MINIX as well"/>
 
 </div>
 
