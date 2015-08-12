@@ -432,6 +432,12 @@ to enable all features.  This has now been fixed.
 UTF-8 variable names used in array indexes, unquoted UTF-8 HERE-document
 terminators and UTF-8 function names all now work correctly. [perl #124113]
 
+=item *
+
+A subtle bug introduced in Perl 5.20.2 involving UTF-8 in regular expressions
+and sometimes causing a crash has been fixed. A new test script has been added
+to test this fix; see under L</Testing>. [perl #124109]
+
 =back
 
 =head1 Known Problems
