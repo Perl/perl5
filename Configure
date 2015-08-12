@@ -1662,7 +1662,6 @@ alldone=''
 error=''
 silent=''
 extractsh=''
-override=''
 knowitall=''
 rm -f optdef.sh posthint.sh
 cat >optdef.sh <<EOS
@@ -1692,7 +1691,7 @@ while test $# -gt 0; do
 	-s) shift; silent=true; realsilent=true;;
 	-E) shift; alldone=exit;;
 	-K) shift; knowitall=true;;
-	-O) shift; override=true;;
+	-O) shift;;
 	-S) shift; silent=true; extractsh=true;;
 	-D)
 		shift
@@ -1801,7 +1800,7 @@ Usage: $me [-dehrsEKOSV] [-f config.sh] [-D symbol] [-D symbol=value]
          -Dprefix=/opt/perl5      choose your destination
   -E : stop at the end of questions, after having produced config.sh.
   -K : do not use unless you know what you are doing.
-  -O : let -D and -U override definitions from loaded configuration file.
+  -O : ignored for backward compatibility
   -S : perform variable substitutions on all .SH files (can mix with -f)
   -U : undefine symbol:
          -U symbol    symbol gets the value 'undef'
@@ -2023,7 +2022,7 @@ true)
 	echo "Fetching answers from $config_sh..."
 	cd ..
 	. $config_sh
-	test "$override" && . ./optdef.sh
+	. ./optdef.sh
 	echo " "
 	. UU/extract
 	rm -rf UU
@@ -3776,7 +3775,7 @@ cd UU
 	hint=previous
 	;;
 esac
-test "$override" && . ./optdef.sh
+. ./optdef.sh
 
 : Restore computed paths
 for file in $loclist $trylist; do
