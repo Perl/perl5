@@ -123,6 +123,14 @@ L<perl5db.pl> has been upgraded from 1.44 to 1.44_01.
 
 The debugger would cause an assertion failure.  [perl #124127]
 
+=item *
+
+L<Errno> has been upgraded from version 1.20_05 to 1.20_06.
+
+Add C<-P> to the preprocessor command-line on GCC 5.  GCC added extra
+line directives, breaking parsing of error code definitions.  [perl
+#123784]
+
 =back
 
 =head2 Removed Modules and Pragmata
@@ -260,7 +268,9 @@ Use L<XXX> with program names to get proper documentation linking. ]
 
 =item *
 
-XXX
+F<h2ph> now handles hexadecimal constants in the compiler's predefined
+macro definitions, as visible in C<$Config{cppsymbols}>.  [perl
+#123784]
 
 =back
 
