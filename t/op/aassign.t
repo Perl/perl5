@@ -262,4 +262,27 @@ sub sh {
     is("$a16:$b16", "1:3", "surplus RHS junk");
 }
 
+# my ($scalar,....) = @_
+#
+# technically this is an unsafe usage commonality-wise, but
+# a) you have to try really hard to break it, as this test shows;
+# b) it's such an important usage that for performance reasons we
+#    mark it as safe even though it isn't really. Hence it's a TODO.
+
+{
+    local $::TODO = 'cheat and optimise my (....) = @_';
+    local @_ = 1..3;
+    &f17;
+    my ($a, @b) = @_;
+    is("($a)(@b)", "(3)(2 1)", 'my (....) = @_');
+
+    sub f17 {
+        use feature 'refaliasing';
+        no warnings 'experimental';
+        ($a, @b) = @_;
+        \($_[2], $_[1], $_[0]) = \($a, $b[0], $b[1]);
+    }
+}
+
+
 done_testing();

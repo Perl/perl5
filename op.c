@@ -12185,6 +12185,7 @@ enum {
                                          that's flagged OA_DANGEROUS */
     AAS_SAFE_SCALAR     = 0x100, /* produces at least one scalar SV that's
                                         not in any of the categories above */
+    AAS_DEFAV           = 0x200, /* contains just a single '@_' on RHS */
 };
 
 
@@ -12224,6 +12225,28 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top)
 {
     int flags = 0;
     bool kid_top = FALSE;
+
+    /* first, look for a solitary @_ on the RHS */
+    if (   rhs
+        && top
+        && (o->op_flags & OPf_KIDS)
+        && OP_TYPE_IS_OR_WAS(o, OP_LIST)
+    ) {
+        OP *kid = cUNOPo->op_first;
+        if (   (   kid->op_type == OP_PUSHMARK
+                || kid->op_type == OP_PADRANGE) /* ex-pushmark */
+            && ((kid = OpSIBLING(kid)))
+            && !OpHAS_SIBLING(kid)
+            && kid->op_type == OP_RV2AV
+            && !(kid->op_flags & OPf_REF)
+            && !(kid->op_private & (OPpLVAL_INTRO|OPpMAYBE_LVSUB))
+            && ((kid->op_flags & OPf_WANT) == OPf_WANT_LIST)
+            && ((kid = cUNOPx(kid)->op_first))
+            && kid->op_type == OP_GV
+            && cGVOPx_gv(kid) == PL_defgv
+        )
+            flags |= AAS_DEFAV;
+    }
 
     switch (o->op_type) {
     case OP_GVSV:
@@ -14225,6 +14248,15 @@ Perl_rpeep(pTHX_ OP *o)
                 if (l & (AAS_MY_SCALAR|AAS_LEX_SCALAR)) {
                     if (lr & AAS_LEX_SCALAR_COMM)
                         o->op_private |= OPpASSIGN_COMMON_SCALAR;
+                    else if (   !(l & AAS_LEX_SCALAR)
+                             && (r & AAS_DEFAV))
+                    {
+                        /* falsely mark
+                         *    my (...) = @_
+                         * as scalar-safe for performance reasons.
+                         * (it will still have been marked _AGG if necessary */
+                        NOOP;
+                    }
                     else if (r  & (AAS_PKG_SCALAR|AAS_PKG_AGG|AAS_DANGEROUS))
                         o->op_private |= OPpASSIGN_COMMON_RC1;
                 }
