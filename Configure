@@ -23544,6 +23544,11 @@ known_extensions=`echo $nonxs_extensions $xs_extensions  | tr ' ' $trnl | $sort 
 avail_ext=''
 for xxx in $xs_extensions ; do
 	case "$xxx" in
+	Amiga*)
+		case "$osname" in
+		amigaos) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
 	DB_File|db_file)
 		case "$i_db" in
 		$define) avail_ext="$avail_ext $xxx" ;;
