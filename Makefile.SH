@@ -953,6 +953,12 @@ $(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPOR
 !NO!SUBS!
 
         case $osname in
+	# In AmigaOS the Perl executable needs to be linked with -ldl,
+	# but none of the other executables should be.
+        amigaos) $spitshell >>$Makefile <<'!NO!SUBS!'
+	$(SHRPENV) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(LLIBPERL) $(static_ext) `cat ext.libs` $(libs) -ldl
+!NO!SUBS!
+        ;;
         os390) $spitshell >>$Makefile <<'!NO!SUBS!'
 	$(SHRPENV) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(LLIBPERL) $(static_ext) `cat ext.libs` $(libs)
 !NO!SUBS!
