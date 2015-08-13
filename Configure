@@ -4340,15 +4340,15 @@ case "$osname" in
 dos|vms)
 	: XXX Should be a Configure test for double-dots in filenames.
 	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
+		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
 	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
+		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
 	;;
 *)
 	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
+		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
 	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
+		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
 	;;
 esac
 : Special case the 5.005_xx maintenance series, which used 5.005
