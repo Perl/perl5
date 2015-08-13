@@ -489,7 +489,8 @@ PERLVAR(I, sys_intern,	struct interp_intern)
 
 /* more statics moved here */
 PERLVAR(I, DBcv,	CV *)		/* from perl.c */
-PERLVARI(I, generation,	int,	100)	/* from op.c */
+PERLVARI(I, generation,	int,	100)	/* scan sequence# for OP_AASSIGN
+                                           compile-time common elem detection */
 
 PERLVAR(I, unicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
