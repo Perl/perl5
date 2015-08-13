@@ -22008,6 +22008,8 @@ EOM
 esac
 
 : Trace out the files included by signal.h, then look for SIGxxx names.
+case "$sig_num_init" in
+'')
 if [ "X$fieldn" = X ]; then
 	: Just make some guesses.  We check them later.
 	xxx="$sysroot/usr/include/signal.h $sysroot/usr/include/sys/signal.h"
@@ -22271,6 +22273,8 @@ echo $sig_name | $awk \
 }'
 sig_size=`echo $sig_name | awk '{print NF}'`
 $rm -f signal signal.c signal.awk signal.lst signal_cmd
+;;
+esac
 
 : Check size of size
 echo " "
