@@ -610,6 +610,16 @@
         setup   => '@_ = 1..20',
         code    => 'my ($a,$b,$c,$d,$e,@rest) = @_',
     },
+    'expr::aassign::1l_2l' => {
+        desc    => 'single lexical LHS',
+        setup   => 'my $x = 1;',
+        code    => '(undef,$x) = ($x,$x)',
+    },
+    'expr::aassign::2l_1l' => {
+        desc    => 'single lexical RHS',
+        setup   => 'my $x = 1;',
+        code    => '($x,$x) = (undef, $x)',
+    },
 
 
 ];

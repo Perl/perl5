@@ -12218,10 +12218,15 @@ S_aassign_padcheck(pTHX_ OP* o, bool rhs)
   set PL_generation on lexical vars; if the latter, we see if
   PL_generation matches.
   'top' indicates whether we're recursing or at the top level.
+  'scalars_p' is a pointer to a counter of the number of scalar SVs seen.
+  This fn will increment it by the number seen. It's not intended to
+  be an accurate count (especially as many ops can push a variable
+  number of SVs onto the stack); rather it's used as to test whether there
+  can be at most 1 SV pushed; so it's only meanings are "0, 1, many".
 */
 
 static int
-S_aassign_scan(pTHX_ OP* o, bool rhs, bool top)
+S_aassign_scan(pTHX_ OP* o, bool rhs, bool top, int *scalars_p)
 {
     int flags = 0;
     bool kid_top = FALSE;
@@ -12250,10 +12255,12 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top)
 
     switch (o->op_type) {
     case OP_GVSV:
+        (*scalars_p)++;
         return AAS_PKG_SCALAR;
 
     case OP_PADAV:
     case OP_PADHV:
+        (*scalars_p) += 2;
         if (top && (o->op_flags & OPf_REF))
             return (o->op_private & OPpLVAL_INTRO)
                 ? AAS_MY_AGG : AAS_LEX_AGG;
@@ -12263,12 +12270,14 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top)
         {
             int comm = S_aassign_padcheck(aTHX_ o, rhs)
                         ?  AAS_LEX_SCALAR_COMM : 0;
+            (*scalars_p)++;
             return (o->op_private & OPpLVAL_INTRO)
                 ? (AAS_MY_SCALAR|comm) : (AAS_LEX_SCALAR|comm);
         }
 
     case OP_RV2AV:
     case OP_RV2HV:
+        (*scalars_p) += 2;
         if (cUNOPx(o)->op_first->op_type != OP_GV)
             return AAS_DANGEROUS; /* @{expr}, %{expr} */
         /* @pkg, %pkg */
@@ -12277,17 +12286,22 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top)
         return AAS_DANGEROUS;
 
     case OP_RV2SV:
-        if (cUNOPx(o)->op_first->op_type != OP_GV)
+        (*scalars_p)++;
+        if (cUNOPx(o)->op_first->op_type != OP_GV) {
+            (*scalars_p) += 2;
             return AAS_DANGEROUS; /* ${expr} */
+        }
         return AAS_PKG_SCALAR; /* $pkg */
 
     case OP_SPLIT:
-        if (cLISTOPo->op_first->op_type == OP_PUSHRE)
+        if (cLISTOPo->op_first->op_type == OP_PUSHRE) {
             /* "@foo = split... " optimises away the aassign and stores its
              * destination array in the OP_PUSHRE that precedes it.
              * A flattened array is always dangerous.
              */
+            (*scalars_p) += 2;
             return AAS_DANGEROUS;
+        }
         break;
 
     case OP_UNDEF:
@@ -12309,18 +12323,22 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top)
         break;
 
     default:
-        if (PL_opargs[o->op_type] & OA_DANGEROUS)
+        if (PL_opargs[o->op_type] & OA_DANGEROUS) {
+            (*scalars_p) += 2;
             return AAS_DANGEROUS;
+        }
 
         if (   (PL_opargs[o->op_type] & OA_TARGLEX)
             && (o->op_private & OPpTARGET_MY))
         {
+            (*scalars_p)++;
             return S_aassign_padcheck(aTHX_ o, rhs)
                 ? AAS_LEX_SCALAR_COMM : AAS_LEX_SCALAR;
         }
 
         /* if its an unrecognised, non-dangerous op, assume that it
          * it the cause of at least one safe scalar */
+        (*scalars_p)++;
         flags = AAS_SAFE_SCALAR;
         break;
     }
@@ -12328,7 +12346,7 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top)
     if (o->op_flags & OPf_KIDS) {
         OP *kid;
         for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid))
-            flags |= S_aassign_scan(aTHX_ kid, rhs, kid_top);
+            flags |= S_aassign_scan(aTHX_ kid, rhs, kid_top, scalars_p);
     }
     return flags;
 }
@@ -14179,7 +14197,7 @@ Perl_rpeep(pTHX_ OP *o)
 	    break;
 
 	case OP_AASSIGN: {
-            int l, r, lr;
+            int l, r, lr, lscalars, rscalars;
 
             /* handle common vars detection, e.g. ($a,$b) = ($b,$a).
                Note that we do this now rather than in newASSIGNOP(),
@@ -14202,8 +14220,12 @@ Perl_rpeep(pTHX_ OP *o)
              */
 
             PL_generation++;
-            l = S_aassign_scan(aTHX_ cLISTOPo->op_last,  FALSE, 1);/* scan LHS */
-            r = S_aassign_scan(aTHX_ cLISTOPo->op_first, TRUE, 1); /* scan RHS */
+            /* scan LHS */
+            lscalars = 0;
+            l = S_aassign_scan(aTHX_ cLISTOPo->op_last,  FALSE, 1, &lscalars);
+            /* scan RHS */
+            rscalars = 0;
+            r = S_aassign_scan(aTHX_ cLISTOPo->op_first, TRUE, 1, &rscalars);
             lr = (l|r);
 
 
@@ -14212,16 +14234,12 @@ Perl_rpeep(pTHX_ OP *o)
              * LHS, gradually working its way down from the more dangerous
              * to the more restrictive and thus safer cases */
 
-            if (   !l                          /* () = ....; */
-                || !r                          /* .... = (); */
+            if (   !l                      /* () = ....; */
+                || !r                      /* .... = (); */
                 || !(l & ~AAS_SAFE_SCALAR) /* (undef, pos()) = ...; */
                 || !(r & ~AAS_SAFE_SCALAR) /* ... = (1,2,length,undef); */
-                /*XXX we could also test for:
-                 *   LHS contains a single scalar element
-                 *   RHS contains a single element with no aggregate on LHS
-                 */
-                )
-            {
+                || (lscalars < 2)          /* ($x) = ... */
+            ) {
                 NOOP; /* always safe */
             }
             else if (l & AAS_DANGEROUS) {
@@ -14261,6 +14279,14 @@ Perl_rpeep(pTHX_ OP *o)
                         o->op_private |= OPpASSIGN_COMMON_RC1;
                 }
             }
+
+            /* ... = ($x)
+             * may have to handle aggregate on LHS, but we can't
+             * have common scalars*/
+            if (rscalars < 2)
+                o->op_private &=
+                        ~(OPpASSIGN_COMMON_SCALAR|OPpASSIGN_COMMON_RC1);
+
 	    break;
         }
 

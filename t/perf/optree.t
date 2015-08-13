@@ -10,7 +10,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 51;
+plan 54;
 
 use v5.10; # state
 use B qw(svref_2object
@@ -71,6 +71,9 @@ for my $test (
     [ "--A", 'my (@a,@b); @a = ($b[0])', 'lex ary and elem' ],
     [ "S-A", 'my @a; ($a[1],$a[0]) = @a', 'lex ary and elem' ],
     [ "--A", 'my @x; @y = $x[0]', 'pkg ary from lex elem' ],
+    [ "---", '(undef,$x) = f()', 'single scalar on LHS' ],
+    [ "---", '($x,$y) = ($x)', 'single scalar on RHS, no AGG' ],
+    [ "--A", '($x,@b) = ($x)', 'single scalar on RHS' ],
 ) {
     my ($exp, $code, $desc) = @$test;
     my $sub = eval "sub { $code }"

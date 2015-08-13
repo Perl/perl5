@@ -284,5 +284,15 @@ sub sh {
     }
 }
 
+# single scalar on RHS that's in an aggregate on LHS
+
+{
+    my @a = 1..3;
+    for my $x ($a[0]) {
+        (@a) = ($x);
+        is ("(@a)", "(1)", 'single scalar on RHS, agg');
+    }
+}
+
 
 done_testing();
