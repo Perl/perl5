@@ -72,11 +72,6 @@ struct gp {
 #define GvNAME(gv)	GvNAME_get(gv)
 #define GvNAMELEN(gv)	GvNAMELEN_get(gv)
 
-#define	GvASSIGN_GENERATION(gv)		(0 + ((XPV*) SvANY(gv))->xpv_len)
-#define	GvASSIGN_GENERATION_set(gv,val)			\
-	STMT_START { assert(SvTYPE(gv) == SVt_PVGV);	\
-		(((XPV*) SvANY(gv))->xpv_len = (val)); } STMT_END
-
 /*
 =head1 GV Functions
 
