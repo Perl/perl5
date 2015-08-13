@@ -69,7 +69,10 @@ EOF
 	exit 1
 fi
 
-if test ! -c /dev/null ; then
+if test -f /sys/utilities/MultiView ; then
+	# AmigaOS, test -c for /dev/null is not useful
+	:
+elif test ! -c /dev/null ; then
 	cat <<EOF
 ***
 *** I'm sorry, but /dev/null appears to be a file rather than a device.
