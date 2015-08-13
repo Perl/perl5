@@ -17163,6 +17163,8 @@ eval $inlibc
 echo " "
 procselfexe=''
 val="$undef"
+case "$d_procselfexe" in
+'')
 case "$d_readlink" in
     "$define")
 	: NetBSD first as /proc/self is a symlink to /proc/curproc, and it feels
@@ -17187,6 +17189,8 @@ esac
 $rm -f reflect
 set d_procselfexe
 eval $setvar
+;;
+esac
 
 : backward compatibility for d_hvfork
 if test X$d_hvfork != X; then
