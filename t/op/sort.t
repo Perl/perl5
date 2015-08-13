@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 190);
+plan(tests => 189);
 
 # these shouldn't hang
 {
@@ -778,12 +778,16 @@ cmp_ok($answer,'eq','good','sort subr called from other package');
     is $@, "", 'abrupt scope exit turns off readonliness';
 }
 
-{
-    local $TODO = "sort should make sure elements are not freed in the sort block";
-    eval { @nomodify_x=(1..8);
-	   our @copy = sort { undef @nomodify_x; 1 } (@nomodify_x, 3); };
-    is($@, "");
-}
+# I commented out this TODO test because messing with FREEd scalars on the
+# stack can have all sorts of strange side-effects, not made safe by eval
+# - DAPM.
+#
+#{
+#    local $TODO = "sort should make sure elements are not freed in the sort block";
+#    eval { @nomodify_x=(1..8);
+#	   our @copy = sort { undef @nomodify_x; 1 } (@nomodify_x, 3); };
+#    is($@, "");
+#}
 
 
 # Sorting shouldn't increase the refcount of a sub

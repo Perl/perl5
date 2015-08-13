@@ -228,7 +228,7 @@ my @bf = (
     },
 );
 
-@{$bits{aassign}}{6,1,0} = ('OPpASSIGN_COMMON', $bf[1], $bf[1]);
+@{$bits{aassign}}{6,5,4,1,0} = ('OPpASSIGN_COMMON_SCALAR', 'OPpASSIGN_COMMON_RC1', 'OPpASSIGN_COMMON_AGG', $bf[1], $bf[1]);
 $bits{abs}{0} = $bf[0];
 @{$bits{accept}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);
 @{$bits{add}}{1,0} = ($bf[1], $bf[1]);
@@ -567,7 +567,9 @@ our %defines = (
     OPpARG3_MASK             =>   7,
     OPpARG4_MASK             =>  15,
     OPpASSIGN_BACKWARDS      =>  64,
-    OPpASSIGN_COMMON         =>  64,
+    OPpASSIGN_COMMON_AGG     =>  16,
+    OPpASSIGN_COMMON_RC1     =>  32,
+    OPpASSIGN_COMMON_SCALAR  =>  64,
     OPpASSIGN_CV_TO_GV       => 128,
     OPpCONST_BARE            =>  64,
     OPpCONST_ENTERED         =>  16,
@@ -660,7 +662,9 @@ our %defines = (
 our %labels = (
     OPpALLOW_FAKE            => 'FAKE',
     OPpASSIGN_BACKWARDS      => 'BKWARD',
-    OPpASSIGN_COMMON         => 'COMMON',
+    OPpASSIGN_COMMON_AGG     => 'COM_AGG',
+    OPpASSIGN_COMMON_RC1     => 'COM_RC1',
+    OPpASSIGN_COMMON_SCALAR  => 'COM_SCALAR',
     OPpASSIGN_CV_TO_GV       => 'CV2GV',
     OPpCONST_BARE            => 'BARE',
     OPpCONST_ENTERED         => 'ENTERED',
@@ -750,7 +754,7 @@ our %labels = (
 our %ops_using = (
     OPpALLOW_FAKE            => [qw(rv2gv)],
     OPpASSIGN_BACKWARDS      => [qw(sassign)],
-    OPpASSIGN_COMMON         => [qw(aassign)],
+    OPpASSIGN_COMMON_AGG     => [qw(aassign)],
     OPpCONST_BARE            => [qw(const)],
     OPpCOREARGS_DEREF1       => [qw(coreargs)],
     OPpEARLY_CV              => [qw(gv)],
@@ -793,6 +797,8 @@ our %ops_using = (
     OPpTRANS_COMPLEMENT      => [qw(trans transr)],
 );
 
+$ops_using{OPpASSIGN_COMMON_RC1} = $ops_using{OPpASSIGN_COMMON_AGG};
+$ops_using{OPpASSIGN_COMMON_SCALAR} = $ops_using{OPpASSIGN_COMMON_AGG};
 $ops_using{OPpASSIGN_CV_TO_GV} = $ops_using{OPpASSIGN_BACKWARDS};
 $ops_using{OPpCONST_ENTERED} = $ops_using{OPpCONST_BARE};
 $ops_using{OPpCONST_NOVER} = $ops_using{OPpCONST_BARE};

@@ -6303,132 +6303,6 @@ S_assignment_type(pTHX_ const OP *o)
     return ret;
 }
 
-/*
-  Helper function for newASSIGNOP to detect commonality between the
-  lhs and the rhs.  (It is actually called very indirectly.  newASSIGNOP
-  flags the op and the peephole optimizer calls this helper function
-  if the flag is set.)  Marks all variables with PL_generation.  If it
-  returns TRUE the assignment must be able to handle common variables.
-
-  PL_generation sorcery:
-  An assignment like ($a,$b) = ($c,$d) is easier than
-  ($a,$b) = ($c,$a), since there is no need for temporary vars.
-  To detect whether there are common vars, the global var
-  PL_generation is incremented for each assign op we compile.
-  Then, while compiling the assign op, we run through all the
-  variables on both sides of the assignment, setting a spare slot
-  in each of them to PL_generation.  If any of them already have
-  that value, we know we've got commonality.  Also, if the
-  generation number is already set to PERL_INT_MAX, then
-  the variable is involved in aliasing, so we also have
-  potential commonality in that case.  We could use a
-  single bit marker, but then we'd have to make 2 passes, first
-  to clear the flag, then to test and set it.  And that
-  wouldn't help with aliasing, either.  To find somewhere
-  to store these values, evil chicanery is done with SvUVX().
-*/
-PERL_STATIC_INLINE bool
-S_aassign_common_vars(pTHX_ OP* o)
-{
-    OP *curop;
-    for (curop = cUNOPo->op_first; curop; curop = OpSIBLING(curop)) {
-	if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
-	    if (curop->op_type == OP_GV || curop->op_type == OP_GVSV
-	     || curop->op_type == OP_AELEMFAST) {
-		GV *gv = cGVOPx_gv(curop);
-		if (gv == PL_defgv
-		    || (int)GvASSIGN_GENERATION(gv) == PL_generation)
-		    return TRUE;
-		GvASSIGN_GENERATION_set(gv, PL_generation);
-	    }
-	    else if (curop->op_type == OP_PADSV ||
-		curop->op_type == OP_PADAV ||
-		curop->op_type == OP_PADHV ||
-		curop->op_type == OP_AELEMFAST_LEX ||
-		curop->op_type == OP_PADANY)
-		{
-		  padcheck:
-		    if (PAD_COMPNAME_GEN(curop->op_targ)
-			== (STRLEN)PL_generation
-		     || PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
-			return TRUE;
-		    PAD_COMPNAME_GEN_set(curop->op_targ, PL_generation);
-
-		}
-	    else if (curop->op_type == OP_RV2CV)
-		return TRUE;
-	    else if (curop->op_type == OP_RV2SV ||
-		curop->op_type == OP_RV2AV ||
-		curop->op_type == OP_RV2HV ||
-		curop->op_type == OP_RV2GV) {
-		if (cUNOPx(curop)->op_first->op_type != OP_GV)	/* funny deref? */
-		    return TRUE;
-	    }
-	    else if (curop->op_type == OP_PUSHRE) {
-		GV *const gv =
-#ifdef USE_ITHREADS
-		    ((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff
-			? MUTABLE_GV(PAD_SVl(((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff))
-			: NULL;
-#else
-		    ((PMOP*)curop)->op_pmreplrootu.op_pmtargetgv;
-#endif
-		if (gv) {
-		    if (gv == PL_defgv
-			|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
-			return TRUE;
-		    GvASSIGN_GENERATION_set(gv, PL_generation);
-		}
-		else if (curop->op_targ)
-		    goto padcheck;
-	    }
-	    else if (curop->op_type == OP_PADRANGE)
-		/* Ignore padrange; checking its siblings is sufficient. */
-		continue;
-	    else
-		return TRUE;
-	}
-	else if (PL_opargs[curop->op_type] & OA_TARGLEX
-	      && curop->op_private & OPpTARGET_MY)
-	    goto padcheck;
-
-	if (curop->op_flags & OPf_KIDS) {
-	    if (aassign_common_vars(curop))
-		return TRUE;
-	}
-    }
-    return FALSE;
-}
-
-/* This variant only handles lexical aliases.  It is called when
-   newASSIGNOP decides that we don’t have any common vars, as lexical ali-
-   ases trump that decision.  */
-PERL_STATIC_INLINE bool
-S_aassign_common_vars_aliases_only(pTHX_ OP *o)
-{
-    OP *curop;
-    for (curop = cUNOPo->op_first; curop; curop = OpSIBLING(curop)) {
-	if ((curop->op_type == OP_PADSV ||
-	     curop->op_type == OP_PADAV ||
-	     curop->op_type == OP_PADHV ||
-	     curop->op_type == OP_AELEMFAST_LEX ||
-	     curop->op_type == OP_PADANY ||
-	     (  PL_opargs[curop->op_type] & OA_TARGLEX
-	     && curop->op_private & OPpTARGET_MY  ))
-	   && PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
-	    return TRUE;
-
-	if (curop->op_type == OP_PUSHRE && curop->op_targ
-	 && PAD_COMPNAME_GEN(curop->op_targ) == PERL_INT_MAX)
-	    return TRUE;
-
-	if (curop->op_flags & OPf_KIDS) {
-	    if (S_aassign_common_vars_aliases_only(aTHX_ curop))
-		return TRUE;
-	}
-    }
-    return FALSE;
-}
 
 /*
 =for apidoc Am|OP *|newASSIGNOP|I32 flags|OP *left|I32 optype|OP *right
@@ -6475,7 +6349,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	static const char no_list_state[] = "Initialization of state variables"
 	    " in list context currently forbidden";
 	OP *curop;
-	bool maybe_common_vars = TRUE;
 
 	if (left->op_type == OP_ASLICE || left->op_type == OP_HSLICE)
 	    left->op_private &= ~ OPpSLICEWARNING;
@@ -6489,47 +6362,24 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	if (OP_TYPE_IS_OR_WAS(left, OP_LIST))
 	{
 	    OP* lop = ((LISTOP*)left)->op_first;
-	    maybe_common_vars = FALSE;
 	    while (lop) {
-		if (lop->op_type == OP_PADSV ||
-		    lop->op_type == OP_PADAV ||
-		    lop->op_type == OP_PADHV ||
-		    lop->op_type == OP_PADANY) {
-		    if (!(lop->op_private & OPpLVAL_INTRO))
-			maybe_common_vars = TRUE;
-
-		    if (lop->op_private & OPpPAD_STATE) {
-			if (left->op_private & OPpLVAL_INTRO) {
-			    /* Each variable in state($a, $b, $c) = ... */
-			}
-			else {
-			    /* Each state variable in
-			       (state $a, my $b, our $c, $d, undef) = ... */
-			}
-			yyerror(no_list_state);
-		    } else {
-			/* Each my variable in
-			   (state $a, my $b, our $c, $d, undef) = ... */
-		    }
-		} else if (lop->op_type == OP_UNDEF ||
-                           OP_TYPE_IS_OR_WAS(lop, OP_PUSHMARK)) {
-		    /* undef may be interesting in
-		       (state $a, undef, state $c) */
-		} else {
-		    /* Other ops in the list. */
-		    maybe_common_vars = TRUE;
-		}
+		if ((lop->op_type == OP_PADSV ||
+		     lop->op_type == OP_PADAV ||
+		     lop->op_type == OP_PADHV ||
+		     lop->op_type == OP_PADANY)
+		  && (lop->op_private & OPpPAD_STATE)
+                )
+                    yyerror(no_list_state);
 		lop = OpSIBLING(lop);
 	    }
 	}
-	else if ((left->op_private & OPpLVAL_INTRO)
+	else if (  (left->op_private & OPpLVAL_INTRO)
+                && (left->op_private & OPpPAD_STATE)
 		&& (   left->op_type == OP_PADSV
 		    || left->op_type == OP_PADAV
 		    || left->op_type == OP_PADHV
-		    || left->op_type == OP_PADANY))
-	{
-	    if (left->op_type == OP_PADSV) maybe_common_vars = FALSE;
-	    if (left->op_private & OPpPAD_STATE) {
+		    || left->op_type == OP_PADANY)
+        ) {
 		/* All single variable list context state assignments, hence
 		   state ($a) = ...
 		   (state $a) = ...
@@ -6541,13 +6391,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		   (state %a) = ...
 		*/
 		yyerror(no_list_state);
-	    }
-	}
-
-	if (maybe_common_vars) {
-		/* The peephole optimizer will do the full check and pos-
-		   sibly turn this off.  */
-		o->op_private |= OPpASSIGN_COMMON;
 	}
 
 	if (right && right->op_type == OP_SPLIT
@@ -12097,6 +11940,377 @@ Perl_ck_length(pTHX_ OP *o)
     return o;
 }
 
+
+
+/* 
+   ---------------------------------------------------------
+ 
+   Common vars in list assignment
+
+   There now follows some enums and static functions for detecting
+   common variables in list assignments. Here is a little essay I wrote
+   for myself when trying to get my head around this. DAPM.
+
+   ----
+
+   First some random observations:
+   
+   * If a lexical var is an alias of something else, e.g.
+       for my $x ($lex, $pkg, $a[0]) {...}
+     then the act of aliasing will increase the reference count of the SV
+   
+   * If a package var is an alias of something else, it may still have a
+     reference count of 1, depending on how the alias was created, e.g.
+     in *a = *b, $a may have a refcount of 1 since the GP is shared
+     with a single GvSV pointer to the SV. So If it's an alias of another
+     package var, then RC may be 1; if it's an alias of another scalar, e.g.
+     a lexical var or an array element, then it will have RC > 1.
+   
+   * There are many ways to create a package alias; ultimately, XS code
+     may quite legally do GvSV(gv) = SvREFCNT_inc(sv) for example, so
+     run-time tracing mechanisms are unlikely to be able to catch all cases.
+   
+   * When the LHS is all my declarations, the same vars can't appear directly
+     on the RHS, but they can indirectly via closures, aliasing and lvalue
+     subs. But those techniques all involve an increase in the lexical
+     scalar's ref count.
+   
+   * When the LHS is all lexical vars (but not necessarily my declarations),
+     it is possible for the same lexicals to appear directly on the RHS, and
+     without an increased ref count, since the stack isn't refcounted.
+     This case can be detected at compile time by scanning for common lex
+     vars with PL_generation.
+   
+   * lvalue subs defeat common var detection, but they do at least
+     return vars with a temporary ref count increment. Also, you can't
+     tell at compile time whether a sub call is lvalue.
+   
+    
+   So...
+         
+   A: There are a few circumstances where there definitely can't be any
+     commonality:
+   
+       LHS empty:  () = (...);
+       RHS empty:  (....) = ();
+       RHS contains only constants or other 'can't possibly be shared'
+           elements (e.g. ops that return PADTMPs):  (...) = (1,2, length)
+           i.e. they only contain ops not marked as dangerous, whose children
+           are also not dangerous;
+       LHS ditto;
+       LHS contains a single scalar element: e.g. ($x) = (....); because
+           after $x has been modified, it won't be used again on the RHS;
+       RHS contains a single element with no aggregate on LHS: e.g.
+           ($a,$b,$c)  = ($x); again, once $a has been modified, its value
+           won't be used again.
+   
+   B: If LHS are all 'my' lexical var declarations (or safe ops, which
+     we can ignore):
+   
+       my ($a, $b, @c) = ...;
+   
+       Due to closure and goto tricks, these vars may already have content.
+       For the same reason, an element on the RHS may be a lexical or package
+       alias of one of the vars on the left, or share common elements, for
+       example:
+   
+           my ($x,$y) = f(); # $x and $y on both sides
+           sub f : lvalue { ($x,$y) = (1,2); $y, $x }
+   
+       and
+   
+           my $ra = f();
+           my @a = @$ra;  # elements of @a on both sides
+           sub f { @a = 1..4; \@a }
+   
+   
+       First, just consider scalar vars on LHS:
+   
+           RHS is safe only if (A), or in addition,
+               * contains only lexical *scalar* vars, where neither side's
+                 lexicals have been flagged as aliases 
+   
+           If RHS is not safe, then it's always legal to check LHS vars for
+           RC==1, since the only RHS aliases will always be associated
+           with an RC bump.
+   
+           Note that in particular, RHS is not safe if:
+   
+               * it contains package scalar vars; e.g.:
+   
+                   f();
+                   my ($x, $y) = (2, $x_alias);
+                   sub f { $x = 1; *x_alias = \$x; }
+   
+               * It contains other general elements, such as flattened or
+               * spliced or single array or hash elements, e.g.
+   
+                   f();
+                   my ($x,$y) = @a; # or $a[0] or @a{@b} etc 
+   
+                   sub f {
+                       ($x, $y) = (1,2);
+                       use feature 'refaliasing';
+                       \($a[0], $a[1]) = \($y,$x);
+                   }
+   
+                 It doesn't matter if the array/hash is lexical or package.
+   
+               * it contains a function call that happens to be an lvalue
+                 sub which returns one or more of the above, e.g.
+   
+                   f();
+                   my ($x,$y) = f();
+   
+                   sub f : lvalue {
+                       ($x, $y) = (1,2);
+                       *x1 = \$x;
+                       $y, $x1;
+                   }
+   
+                   (so a sub call on the RHS should be treated the same
+                   as having a package var on the RHS).
+   
+               * any other "dangerous" thing, such an op or built-in that
+                 returns one of the above, e.g. pp_preinc
+   
+   
+           If RHS is not safe, what we can do however is at compile time flag
+           that the LHS are all my declarations, and at run time check whether
+           all the LHS have RC == 1, and if so skip the full scan.
+   
+       Now consider array and hash vars on LHS: e.g. my (...,@a) = ...;
+   
+           Here the issue is whether there can be elements of @a on the RHS
+           which will get prematurely freed when @a is cleared prior to
+           assignment. This is only a problem if the aliasing mechanism
+           is one which doesn't increase the refcount - only if RC == 1
+           will the RHS element be prematurely freed.
+   
+           Because the array/hash is being INTROed, it or its elements
+           can't directly appear on the RHS:
+   
+               my (@a) = ($a[0], @a, etc) # NOT POSSIBLE
+   
+           but can indirectly, e.g.:
+   
+               my $r = f();
+               my (@a) = @$r;
+               sub f { @a = 1..3; \@a }
+   
+           So if the RHS isn't safe as defined by (A), we must always
+           mortalise and bump the ref count of any remaining RHS elements
+           when assigning to a non-empty LHS aggregate.
+   
+           Lexical scalars on the RHS aren't safe if they've been involved in
+           aliasing, e.g.
+   
+               use feature 'refaliasing';
+   
+               f();
+               \(my $lex) = \$pkg;
+               my @a = ($lex,3); # equivalent to ($a[0],3)
+   
+               sub f {
+                   @a = (1,2);
+                   \$pkg = \$a[0];
+               }
+   
+           Similarly with lexical arrays and hashes on the RHS:
+   
+               f();
+               my @b;
+               my @a = (@b);
+   
+               sub f {
+                   @a = (1,2);
+                   \$b[0] = \$a[1];
+                   \$b[1] = \$a[0];
+               }
+   
+   
+   
+   C: As (B), but in addition the LHS may contain non-intro lexicals, e.g.
+       my $a; ($a, my $b) = (....);
+   
+       The difference between (B) and (C) is that it is now physically
+       possible for the LHS vars to appear on the RHS too, where they
+       are not reference counted; but in this case, the compile-time
+       PL_generation sweep will detect such common vars.
+   
+       So the rules for (C) differ from (B) in that if common vars are
+       detected, the runtime "test RC==1" optimisation can no longer be used,
+       and a full mark and sweep is required
+   
+   D: As (C), but in addition the LHS may contain package vars.
+   
+       Since package vars can be aliased without a corresponding refcount
+       increase, all bets are off. It's only safe if (A). E.g.
+   
+           my ($x, $y) = (1,2);
+   
+           for $x_alias ($x) {
+               ($x_alias, $y) = (3, $x); # whoops
+           }
+   
+       Ditto for LHS aggregate package vars.
+   
+   E: Any other dangerous ops on LHS, e.g.
+           (f(), $a[0], @$r) = (...);
+   
+       this is similar to (E) in that all bets are off. In addition, it's
+       impossible to determine at compile time whether the LHS
+       contains a scalar or an aggregate, e.g.
+   
+           sub f : lvalue { @a }
+           (f()) = 1..3;
+
+* ---------------------------------------------------------
+*/
+
+
+/* A set of bit flags returned by S_aassign_scan(). Each flag indicates
+ * that at least one of the things flagged was seen.
+ */
+
+enum {
+    AAS_MY_SCALAR       = 0x001, /* my $scalar */
+    AAS_MY_AGG          = 0x002, /* aggregate: my @array or my %hash */
+    AAS_LEX_SCALAR      = 0x004, /* $lexical */
+    AAS_LEX_AGG         = 0x008, /* @lexical or %lexical aggregate */
+    AAS_LEX_SCALAR_COMM = 0x010, /* $lexical seen on both sides */
+    AAS_PKG_SCALAR      = 0x020, /* $scalar (where $scalar is pkg var) */
+    AAS_PKG_AGG         = 0x040, /* package @array or %hash aggregate */
+    AAS_DANGEROUS       = 0x080, /* an op (other than the above)
+                                         that's flagged OA_DANGEROUS */
+    AAS_SAFE_SCALAR     = 0x100, /* produces at least one scalar SV that's
+                                        not in any of the categories above */
+};
+
+
+
+/* helper function for S_aassign_scan().
+ * check a PAD-related op for commonality and/or set its generation number.
+ * Returns a boolean indicating whether its shared */
+
+static bool
+S_aassign_padcheck(pTHX_ OP* o, bool rhs)
+{
+    if (PAD_COMPNAME_GEN(o->op_targ) == PERL_INT_MAX)
+        /* lexical used in aliasing */
+        return TRUE;
+
+    if (rhs)
+        return cBOOL(PAD_COMPNAME_GEN(o->op_targ) == (STRLEN)PL_generation);
+    else
+        PAD_COMPNAME_GEN_set(o->op_targ, PL_generation);
+
+    return FALSE;
+}
+
+
+/*
+  Helper function for OPpASSIGN_COMMON* detection in rpeep().
+  It scans the left or right hand subtree of the aassign op, and returns a
+  set of flags indicating what sorts of things it found there.
+  'rhs' indicates whether we're scanning the LHS or RHS. If the former, we
+  set PL_generation on lexical vars; if the latter, we see if
+  PL_generation matches.
+  'top' indicates whether we're recursing or at the top level.
+*/
+
+static int
+S_aassign_scan(pTHX_ OP* o, bool rhs, bool top)
+{
+    int flags = 0;
+    bool kid_top = FALSE;
+
+    switch (o->op_type) {
+    case OP_GVSV:
+        return AAS_PKG_SCALAR;
+
+    case OP_PADAV:
+    case OP_PADHV:
+        if (top && (o->op_flags & OPf_REF))
+            return (o->op_private & OPpLVAL_INTRO)
+                ? AAS_MY_AGG : AAS_LEX_AGG;
+        return AAS_DANGEROUS;
+
+    case OP_PADSV:
+        {
+            int comm = S_aassign_padcheck(aTHX_ o, rhs)
+                        ?  AAS_LEX_SCALAR_COMM : 0;
+            return (o->op_private & OPpLVAL_INTRO)
+                ? (AAS_MY_SCALAR|comm) : (AAS_LEX_SCALAR|comm);
+        }
+
+    case OP_RV2AV:
+    case OP_RV2HV:
+        if (cUNOPx(o)->op_first->op_type != OP_GV)
+            return AAS_DANGEROUS; /* @{expr}, %{expr} */
+        /* @pkg, %pkg */
+        if (top && (o->op_flags & OPf_REF))
+            return AAS_PKG_AGG;
+        return AAS_DANGEROUS;
+
+    case OP_RV2SV:
+        if (cUNOPx(o)->op_first->op_type != OP_GV)
+            return AAS_DANGEROUS; /* ${expr} */
+        return AAS_PKG_SCALAR; /* $pkg */
+
+    case OP_SPLIT:
+        if (cLISTOPo->op_first->op_type == OP_PUSHRE)
+            /* "@foo = split... " optimises away the aassign and stores its
+             * destination array in the OP_PUSHRE that precedes it.
+             * A flattened array is always dangerous.
+             */
+            return AAS_DANGEROUS;
+        break;
+
+    case OP_UNDEF:
+    case OP_PUSHMARK:
+    case OP_STUB:
+        /* these are all no-ops; they don't push a potentially common SV
+         * onto the stack, so they are neither AAS_DANGEROUS nor
+         * AAS_SAFE_SCALAR */
+        return 0;
+
+    case OP_PADRANGE: /* Ignore padrange; checking its siblings is enough */
+        break;
+
+    case OP_NULL:
+    case OP_LIST:
+        /* these do nothing but may have children; but their children
+         * should also be treated as top-level */
+        kid_top = top;
+        break;
+
+    default:
+        if (PL_opargs[o->op_type] & OA_DANGEROUS)
+            return AAS_DANGEROUS;
+
+        if (   (PL_opargs[o->op_type] & OA_TARGLEX)
+            && (o->op_private & OPpTARGET_MY))
+        {
+            return S_aassign_padcheck(aTHX_ o, rhs)
+                ? AAS_LEX_SCALAR_COMM : AAS_LEX_SCALAR;
+        }
+
+        /* if its an unrecognised, non-dangerous op, assume that it
+         * it the cause of at least one safe scalar */
+        flags = AAS_SAFE_SCALAR;
+        break;
+    }
+
+    if (o->op_flags & OPf_KIDS) {
+        OP *kid;
+        for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid))
+            flags |= S_aassign_scan(aTHX_ kid, rhs, kid_top);
+    }
+    return flags;
+}
+
+
 /* Check for in place reverse and sort assignments like "@a = reverse @a"
    and modify the optree to make them work inplace */
 
@@ -13941,28 +14155,82 @@ Perl_rpeep(pTHX_ OP *o)
 	    }
 	    break;
 
-	case OP_AASSIGN:
-	    /* We do the common-vars check here, rather than in newASSIGNOP
-	       (as formerly), so that all lexical vars that get aliased are
-	       marked as such before we do the check.  */
-	    /* There can’t be common vars if the lhs is a stub.  */
-	    if (OpSIBLING(cLISTOPx(cBINOPo->op_last)->op_first)
-		    == cLISTOPx(cBINOPo->op_last)->op_last
-	     && cLISTOPx(cBINOPo->op_last)->op_last->op_type == OP_STUB)
-	    {
-		o->op_private &=~ OPpASSIGN_COMMON;
-		break;
-	    }
-	    if (o->op_private & OPpASSIGN_COMMON) {
-		 /* See the comment before S_aassign_common_vars concerning
-		    PL_generation sorcery.  */
-		PL_generation++;
-		if (!aassign_common_vars(o))
-		    o->op_private &=~ OPpASSIGN_COMMON;
-	    }
-	    else if (S_aassign_common_vars_aliases_only(aTHX_ o))
-		o->op_private |= OPpASSIGN_COMMON;
+	case OP_AASSIGN: {
+            int l, r, lr;
+
+            /* handle common vars detection, e.g. ($a,$b) = ($b,$a).
+               Note that we do this now rather than in newASSIGNOP(),
+               since only by now are aliased lexicals flagged as such
+
+               See the essay "Common vars in list assignment" above for
+               the full details of the rationale behind all the conditions
+               below.
+
+               PL_generation sorcery:
+               To detect whether there are common vars, the global var
+               PL_generation is incremented for each assign op we scan.
+               Then we run through all the lexical variables on the LHS,
+               of the assignment, setting a spare slot in each of them to
+               PL_generation.  Then we scan the RHS, and if any lexicals
+               already have that value, we know we've got commonality.
+               Also, if the generation number is already set to
+               PERL_INT_MAX, then the variable is involved in aliasing, so
+               we also have potential commonality in that case.
+             */
+
+            PL_generation++;
+            l = S_aassign_scan(aTHX_ cLISTOPo->op_last,  FALSE, 1);/* scan LHS */
+            r = S_aassign_scan(aTHX_ cLISTOPo->op_first, TRUE, 1); /* scan RHS */
+            lr = (l|r);
+
+
+            /* After looking for things which are *always* safe, this main
+             * if/else chain selects primarily based on the type of the
+             * LHS, gradually working its way down from the more dangerous
+             * to the more restrictive and thus safer cases */
+
+            if (   !l                          /* () = ....; */
+                || !r                          /* .... = (); */
+                || !(l & ~AAS_SAFE_SCALAR) /* (undef, pos()) = ...; */
+                || !(r & ~AAS_SAFE_SCALAR) /* ... = (1,2,length,undef); */
+                /*XXX we could also test for:
+                 *   LHS contains a single scalar element
+                 *   RHS contains a single element with no aggregate on LHS
+                 */
+                )
+            {
+                NOOP; /* always safe */
+            }
+            else if (l & AAS_DANGEROUS) {
+                /* always dangerous */
+                o->op_private |= OPpASSIGN_COMMON_SCALAR;
+                o->op_private |= OPpASSIGN_COMMON_AGG;
+            }
+            else if (l & (AAS_PKG_SCALAR|AAS_PKG_AGG)) {
+                /* package vars are always dangerous - too many
+                 * aliasing possibilities */
+                if (l & AAS_PKG_SCALAR)
+                    o->op_private |= OPpASSIGN_COMMON_SCALAR;
+                if (l & AAS_PKG_AGG)
+                    o->op_private |= OPpASSIGN_COMMON_AGG;
+            }
+            else if (l & ( AAS_MY_SCALAR|AAS_MY_AGG
+                          |AAS_LEX_SCALAR|AAS_LEX_AGG))
+            {
+                /* LHS contains only lexicals and safe ops */
+
+                if (l & (AAS_MY_AGG|AAS_LEX_AGG))
+                    o->op_private |= OPpASSIGN_COMMON_AGG;
+
+                if (l & (AAS_MY_SCALAR|AAS_LEX_SCALAR)) {
+                    if (lr & AAS_LEX_SCALAR_COMM)
+                        o->op_private |= OPpASSIGN_COMMON_SCALAR;
+                    else if (r  & (AAS_PKG_SCALAR|AAS_PKG_AGG|AAS_DANGEROUS))
+                        o->op_private |= OPpASSIGN_COMMON_RC1;
+                }
+            }
 	    break;
+        }
 
 	case OP_CUSTOM: {
 	    Perl_cpeep_t cpeep = 

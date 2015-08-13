@@ -437,7 +437,7 @@ checkOptree ( name	=> '@foo = grep(!/^\#/, @bar)',
 # a  <0> pushmark s
 # b  <#> gv[*foo] s
 # c  <1> rv2av[t2] lKRM*/1
-# d  <2> aassign[t6] KS
+# d  <2> aassign[t6] KS/COM_AGG
 # e  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 496 (eval 20):1) v:{
@@ -453,7 +453,7 @@ EOT_EOT
 # a  <0> pushmark s
 # b  <$> gv(*foo) s
 # c  <1> rv2av[t1] lKRM*/1
-# d  <2> aassign[t4] KS
+# d  <2> aassign[t4] KS/COM_AGG
 # e  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
@@ -485,7 +485,7 @@ checkOptree ( name	=> '%h = map { getkey($_) => $_ } @a',
 # h  <#> gv[*h] s
 # i  <1> rv2hv[t2] lKRM*/1         < 5.019006
 # i  <1> rv2hv lKRM*/1             >=5.019006
-# j  <2> aassign[t10] KS/COMMON
+# j  <2> aassign[t10] KS/COM_AGG
 # k  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 501 (eval 22):1) v:{
@@ -509,7 +509,7 @@ EOT_EOT
 # h  <$> gv(*h) s
 # i  <1> rv2hv[t1] lKRM*/1         < 5.019006
 # i  <1> rv2hv lKRM*/1             >=5.019006
-# j  <2> aassign[t5] KS/COMMON
+# j  <2> aassign[t5] KS/COM_AGG
 # k  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 

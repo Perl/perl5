@@ -4260,7 +4260,6 @@ STATIC AV*	S_mro_get_linear_isa_dfs(pTHX_ HV* stash, U32 level);
 	assert(stash)
 #endif
 #if defined(PERL_IN_OP_C)
-PERL_STATIC_INLINE bool	S_aassign_common_vars(pTHX_ OP* o);
 STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs);
 #define PERL_ARGS_ASSERT_APPLY_ATTRS	\
 	assert(stash); assert(target)

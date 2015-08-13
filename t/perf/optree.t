@@ -10,26 +10,84 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 24;
+plan 51;
 
 use v5.10; # state
-use B qw 'svref_2object OPpASSIGN_COMMON';
+use B qw(svref_2object
+         OPpASSIGN_COMMON_SCALAR
+         OPpASSIGN_COMMON_RC1
+         OPpASSIGN_COMMON_AGG
+      );
 
 
-# aassign with no common vars
-for ('my ($self) = @_',
-     'my @x; @y = $x[0]', # aelemfast_lex
-    )
-{
-    my $sub = eval "sub { $_ }";
-    my $last_expr =
-      svref_2object($sub)->ROOT->first->last;
+# Test that OP_AASSIGN gets the appropriate
+# OPpASSIGN_COMMON* flags set.
+#
+# Too few flags set is likely to cause code to misbehave;
+# too many flags set unnecessarily slows things down.
+# See also the tests in t/op/aassign.t
+
+for my $test (
+    # Each anon array contains:
+    # [
+    #   expected flags:
+    #      a 3 char string, each char showing whether we expect a
+    #      particular flag to be set:
+    #           '-' indicates any char not set, while
+    #           'S':  char 0: OPpASSIGN_COMMON_SCALAR,
+    #           'R':  char 1: OPpASSIGN_COMMON_RC1,
+    #           'A'   char 2: OPpASSIGN_COMMON_AGG,
+    #   code to eval,
+    #   description,
+    # ]
+
+    [ "---", '() = (1, $x, my $y, @z, f($p))', 'no LHS' ],
+    [ "---", '(undef, $x, my $y, @z, ($a ? $b : $c)) = ()', 'no RHS' ],
+    [ "---", '(undef, $x, my $y, @z, ($a ? $b : $c)) = (1,2)', 'safe RHS' ],
+    [ "---", 'my @a = (1,2)', 'safe RHS: my array' ],
+    [ "---", 'my %h = (1,2)', 'safe RHS: my hash' ],
+    [ "---", 'my ($a,$b,$c,$d) = 1..6; ($a,$b) = ($c,$d);', 'non-common lex' ],
+    [ "---", '($x,$y) = (1,2)', 'pkg var LHS only' ],
+    [ "---", 'my $p; my ($x,$y) = ($p, $p)', 'my; dup lex var on RHS' ],
+    [ "---", 'my $p; my ($x,$y); ($x,$y) = ($p, $p)', 'dup lex var on RHS' ],
+    [ "-R-", 'my ($self) = @_', 'LHS lex scalar only' ],
+    [ "-RA", 'my ($self, @rest) = @_', 'LHS lex mixed' ],
+    [ "-R-", 'my ($x,$y) = ($p, $q)', 'pkg var RHS only' ],
+    [ "S--", '($x,$y) = ($p, $q)', 'pkg scalar both sides' ],
+    [ "--A", 'my (@a, @b); @a = @b', 'lex ary both sides' ],
+    [ "-R-", 'my ($x,$y,$z,@a); ($x,$y,$z) = @a ', 'lex vars to lex ary' ],
+    [ "--A", '@a = @b', 'pkg ary both sides' ],
+    [ "--A", 'my (%a,%b); %a = %b', 'lex hash both sides' ],
+    [ "--A", '%a = %b', 'pkg hash both sides' ],
+    [ "--A", 'my $x; @a = ($a[0], $a[$x])', 'common ary' ],
+    [ "--A", 'my ($x,@a); @a = ($a[0], $a[$x])', 'common lex ary' ],
+    [ "S-A", 'my $x; ($a[$x], $a[0]) = ($a[0], $a[$x])', 'common ary elems' ],
+    [ "S-A", 'my ($x,@a); ($a[$x], $a[0]) = ($a[0], $a[$x])',
+                                                    'common lex ary elems' ],
+    [ "--A", 'my $x; my @a = @$x', 'lex ary may have stuff' ],
+    [ "-RA", 'my $x; my ($b, @a) = @$x', 'lex ary may have stuff' ],
+    [ "--A", 'my $x; my %a = @$x', 'lex hash may have stuff' ],
+    [ "-RA", 'my $x; my ($b, %a) = @$x', 'lex hash may have stuff' ],
+    [ "--A", 'my (@a,@b); @a = ($b[0])', 'lex ary and elem' ],
+    [ "S-A", 'my @a; ($a[1],$a[0]) = @a', 'lex ary and elem' ],
+    [ "--A", 'my @x; @y = $x[0]', 'pkg ary from lex elem' ],
+) {
+    my ($exp, $code, $desc) = @$test;
+    my $sub = eval "sub { $code }"
+        or die
+            "aassign eval('$code') failed: this test needs to be rewritten:\n"
+            . $@;
+
+    my $last_expr = svref_2object($sub)->ROOT->first->last;
     if ($last_expr->name ne 'aassign') {
         die "Expected aassign but found ", $last_expr->name,
             "; this test needs to be rewritten" 
     }
-    is $last_expr->private & OPpASSIGN_COMMON, 0,
-      "no ASSIGN_COMMON for $_";
+    my $got =
+        (($last_expr->private & OPpASSIGN_COMMON_SCALAR) ? 'S' : '-')
+      . (($last_expr->private & OPpASSIGN_COMMON_RC1)    ? 'R' : '-')
+      . (($last_expr->private & OPpASSIGN_COMMON_AGG)    ? 'A' : '-');
+    is $got, $exp,  "OPpASSIGN_COMMON: $desc: '$code'";
 }    
 
 

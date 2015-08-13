@@ -1526,7 +1526,6 @@
 #define mro_get_linear_isa_dfs(a,b)	S_mro_get_linear_isa_dfs(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_OP_C)
-#define aassign_common_vars(a)	S_aassign_common_vars(aTHX_ a)
 #define apply_attrs(a,b,c)	S_apply_attrs(aTHX_ a,b,c)
 #define apply_attrs_my(a,b,c,d)	S_apply_attrs_my(aTHX_ a,b,c,d)
 #define assignment_type(a)	S_assignment_type(aTHX_ a)
