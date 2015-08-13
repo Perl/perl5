@@ -13326,7 +13326,7 @@ echo " "
 echo "Let's see what value errno gets from read() on a $o_nonblock file..." >&4
 case "$eagain" in
 '')
-	case "$d_fork:$d_pipe" in
+	case "$d_fork:$d_pipe:$d_alarm" in
 	define:define)
 	$cat head.c > try.c
 	$cat >>try.c <<EOCP
