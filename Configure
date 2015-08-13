@@ -5750,6 +5750,11 @@ $cc -o ${mc_file} $optimize $ccflags $ldflags $* ${mc_file}.c $libs;'
 echo " "
 echo "Computing filename position in cpp output for #include directives..." >&4
 case "$osname" in
+amigaos) fieldn=3 ;;  # Workaround for a bug in abc (pdksh).
+esac
+case "$fieldn" in
+'')
+case "$osname" in
 vos) testaccess=-e ;;
 *)   testaccess=-r ;;
 esac
@@ -5774,6 +5779,8 @@ EOF
 chmod +x fieldn
 fieldn=`./fieldn`
 $rm -f foo.c fieldn
+;;
+esac
 case $fieldn in
 '') pos='???';;
 1) pos=first;;
