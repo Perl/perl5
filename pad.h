@@ -441,12 +441,11 @@ Assumes the slot entry is a valid C<our> lexical.
 
 =for apidoc m|STRLEN|PAD_COMPNAME_GEN|PADOFFSET po
 The generation number of the name at offset C<po> in the current
-compiling pad (lvalue).  Note that C<SvUVX> is hijacked for this purpose.
+compiling pad (lvalue).
 
 =for apidoc m|STRLEN|PAD_COMPNAME_GEN_set|PADOFFSET po|int gen
 Sets the generation number of the name at offset C<po> in the current
-ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose.
-
+ling pad (lvalue) to C<gen>.
 =cut
 
 */
