@@ -4,7 +4,7 @@
 # Probably installhtml needs to join the club.
 
 use strict;
-use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
+use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare $Is_AmigaOS
 	    %opts $packlist);
 use subs qw(unlink link chmod);
 require File::Path;
@@ -49,6 +49,7 @@ $Is_OS2 = $^O eq 'os2';
 $Is_Cygwin = $^O eq 'cygwin';
 $Is_Darwin = $^O eq 'darwin';
 $Is_NetWare = $Config{osname} eq 'NetWare';
+$Is_AmigaOS = $^O eq 'amigaos';
 
 sub unlink {
     my(@names) = @_;
@@ -58,7 +59,7 @@ sub unlink {
 
     foreach my $name (@names) {
 	next unless -e $name;
-	chmod 0777, $name if ($Is_OS2 || $Is_W32 || $Is_Cygwin || $Is_NetWare);
+	chmod 0777, $name if ($Is_OS2 || $Is_W32 || $Is_Cygwin || $Is_NetWare || $Is_AmigaOS);
 	print "  unlink $name\n" if $opts{verbose};
 	( CORE::unlink($name) and ++$cnt
 	  or warn "Couldn't unlink $name: $!\n" ) unless $opts{notify};
@@ -76,15 +77,16 @@ sub link {
     $xto =~ s/^\Q$opts{destdir}\E// if $opts{destdir};
     print $opts{verbose} ? "  ln $xfrom $xto\n" : "  $xto\n"
 	unless $opts{silent};
+    my $link = $Is_AmigaOS ? \&CORE::symlink : \&CORE::link;
     eval {
-	CORE::link($from, $to)
-	    ? $success++
-	    : ($from =~ m#^/afs/# || $to =~ m#^/afs/#)
-	      ? die "AFS"  # okay inside eval {}
-	      : die "Couldn't link $from to $to: $!\n"
-	  unless $opts{notify};
-	$packlist->{$xto} = { from => $xfrom, type => 'link' };
-    };
+      $link->($from, $to)
+        ? $success++
+          : ($from =~ m#^/afs/# || $to =~ m#^/afs/#)
+            ? die "AFS"  # okay inside eval {}
+              : die "Couldn't link $from to $to: $!\n"
+                unless $opts{notify};
+      $packlist->{$xto} = { from => $xfrom, type => 'link' };
+     };
     if ($@) {
 	warn "Replacing link() with File::Copy::copy(): $@";
 	print $opts{verbose} ? "  cp $from $xto\n" : "  $xto\n"
@@ -144,6 +146,60 @@ sub safe_rename {
 
 sub mkpath {
     File::Path::mkpath(shift , $opts{verbose}, 0777) unless $opts{notify};
+}
+
+sub unixtoamiga
+{
+	my $unixpath = shift;
+
+	my @parts = split("/",$unixpath);
+	my $isdir = 0;
+	$isdir = 1 if substr($unixpath,-1) eq "/";
+
+	my $first = 1;
+	my $amigapath = "";
+
+	my $i = 0;
+
+	for($i = 0; $i <= $#parts;$i++)
+	{
+		next if $parts[$i] eq ".";
+		if($parts[$i] eq "..")
+		{
+			$parts[$i] = "/";
+		}
+		if($i == 0)
+		{
+			if($parts[$i] eq "")
+			{
+				$amigapath .= $parts[$i + 1] . ":";
+				$i++;
+				next;
+			}
+		}
+		$amigapath .= $parts[$i];
+		if($i != $#parts)
+		{
+			$amigapath .= "/" unless $parts[$i] eq "/" ;
+		}
+		else
+		{
+			if($isdir)
+			{
+				$amigapath .= "/" unless $parts[$i] eq "/" ;
+			}
+		}
+	}
+
+	return $amigapath;
+}
+
+sub amigaprotect
+{
+	my ($file,$bits) = @_;
+	print "PROTECT: File $file\n";
+	system("PROTECT $file $bits")
+	      unless $opts{notify};
 }
 
 1;
