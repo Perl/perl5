@@ -3536,6 +3536,20 @@ ebcdic_tables.h		Generated tables included in utfebcdic.h
 embed.fnc		Database used by embed.pl
 embed.h			Maps symbols to safer names
 embedvar.h		C namespace management
+ext/Amiga-ARexx/ARexx.pm	Amiga::ARexx extension
+ext/Amiga-ARexx/ARexx.xs	Amiga::ARexx extension
+ext/Amiga-ARexx/__examples/simplecommand.pl	Amiga::ARexx extension
+ext/Amiga-ARexx/__examples/simplehost.pl	Amiga::ARexx extension
+ext/Amiga-ARexx/Makefile.PL	Amiga::ARexx extension
+ext/Amiga-ARexx/tagtypes.h			Amiga::ARexx extension
+ext/Amiga-ARexx/typemap	Amiga::ARexx extension
+ext/Amiga-Exec/__examples/simplecommand.pl	Amiga::Exec extension
+ext/Amiga-Exec/__examples/simplehost.pl		Amiga::Exec extension
+ext/Amiga-Exec/Exec.pm	Amiga::Exec extension
+ext/Amiga-Exec/Exec.xs	Amiga::Exec extension
+ext/Amiga-Exec/Makefile.PL			Amiga::Exec extension
+ext/Amiga-Exec/tagtypes.h	Amiga::Exec extension
+ext/Amiga-Exec/typemap		Amiga::Exec extension
 ext/arybase/arybase.pm		For $[
 ext/arybase/arybase.xs		For $[
 ext/arybase/ptable.h		For $[
