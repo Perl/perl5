@@ -94,7 +94,6 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <div><h3>Regression Fixes</h3>
 
 <commit votes="tonyc, arc" id="bae8cfc6926f9b04d8adac6a9ee6d563cc18263f" ticket="125121" desc="Don't treat setpgrp($nonzero) as setpgrp(1)"/>
-<commit votes="steveh, arc, davem" id="0fa70a06a98fc8fa9840d4dbaa31fc2d3b28b99b" ticket="123743" desc="simpify and speed up /.*.../ handling"/>
 
 </div>
 
