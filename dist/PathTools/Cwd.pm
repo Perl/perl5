@@ -158,6 +158,14 @@ my %METHOD_MAP =
     fastcwd		=> 'cwd',
     abs_path		=> 'fast_abs_path',
    },
+
+   amigaos =>
+   {
+    getcwd              => '_backtick_pwd',
+    fastgetcwd          => '_backtick_pwd',
+    fastcwd             => '_backtick_pwd',
+    abs_path            => 'fast_abs_path',
+   }
   );
 
 $METHOD_MAP{NT} = $METHOD_MAP{MSWin32};
@@ -210,9 +218,12 @@ sub _croak { require Carp; Carp::croak(@_) }
 
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
 sub _backtick_pwd {
-    # Localize %ENV entries in a way that won't create new hash keys
-    my @localize = grep exists $ENV{$_}, qw(PATH IFS CDPATH ENV BASH_ENV);
-    local @ENV{@localize};
+
+    # Localize %ENV entries in a way that won't create new hash keys.
+    # Under AmigaOS we don't want to localize as it stops perl from
+    # finding 'sh' in the PATH.
+    my @localize = grep exists $ENV{$_}, qw(PATH IFS CDPATH ENV BASH_ENV) if $^O ne "amigaos";
+    local @ENV{@localize} if @localize;
     
     my $cwd = `$pwd_cmd`;
     # Belt-and-suspenders in case someone said "undef $/".
