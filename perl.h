@@ -6555,7 +6555,7 @@ extern void moncontrol(int);
 
 #define IS_SAFE_PATHNAME(p, len, op_name) IS_SAFE_SYSCALL((p), (len), "pathname", (op_name))
 
-#if defined(OEMVS)
+#if defined(OEMVS) || defined(__amigaos4__)
 #define NO_ENV_ARRAY_IN_MAIN
 #endif
 
