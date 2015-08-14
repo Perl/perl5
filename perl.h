@@ -777,6 +777,11 @@
 
 /* If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
+#    if defined(__amigaos4__)
+#        ifdef I_NETINET_IN
+#            include <netinet/in.h>
+#        endif
+#   endif
 #   include <unistd.h>
 #   if defined(__amigaos4__)
 /* Under AmigaOS 4 newlib.library provides an environ.  However using
