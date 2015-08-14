@@ -294,5 +294,42 @@ sub sh {
     }
 }
 
+# TEMP buffer stealing.
+# In something like
+#    (...) = (f())[0,0]
+# the same TEMP RHS element may be used more than once, so when copying
+# it, we mustn't steal its buffer.
+
+{
+    # a string long enough for COW and buffer stealing to be enabled
+    my $long = 'def' . ('x' x 2000);
+
+    # a sub that is intended to return a TEMP string that isn't COW
+    # the concat returns a non-COW PADTMP; pp_leavesub sees a long
+    # stealable string, so creates a TEMP with the stolen buffer from the
+    # PADTMP - hence it returns a non-COW string
+    sub f18 {
+        my $x = "abc";
+        $x . $long;
+    }
+
+    my @a;
+
+    # with @a initially empty,the code path creates a new copy of each
+    # RHS element to store in the array
+
+    @a = (f18())[0,0];
+    is (substr($a[0], 0, 7), "abcdefx", 'NOSTEAL empty $a[0]');
+    is (substr($a[1], 0, 7), "abcdefx", 'NOSTEAL empty $a[1]');
+
+    # with @a initially non-empty, it takes a different code path that
+    # makes a mortal copy of each RHS element
+    @a = 1..3;
+    @a = (f18())[0,0];
+    is (substr($a[0], 0, 7), "abcdefx", 'NOSTEAL non-empty $a[0]');
+    is (substr($a[1], 0, 7), "abcdefx", 'NOSTEAL non-empty $a[1]');
+
+}
+
 
 done_testing();

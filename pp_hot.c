@@ -1106,8 +1106,13 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
              * disabled... */
             SvFLAGS(svr) &= ~SVf_BREAK;
             /* Not newSVsv(), as it does not allow copy-on-write,
-               resulting in wasteful copies.  We need a second copy of
-               a temp here, hence the SV_NOSTEAL.  */
+               resulting in wasteful copies.
+               Also, we use SV_NOSTEAL in case the SV is used more than
+               once, e.g.  (...) = (f())[0,0]
+               Where the same SV appears twice on the RHS without a ref
+               count bump.  (Although I suspect that the SV won't be
+               stealable here anyway - DAPM).
+               */
             *relem = sv_mortalcopy_flags(svr,
                                 SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
             /* ... but restore afterwards in case it's needed again,
@@ -1227,6 +1232,7 @@ PP(pp_aassign)
                 SV **svp;
                 EXTEND_MORTAL(lastrelem - relem + 1);
                 for (svp = relem; svp <= lastrelem; svp++) {
+                    /* see comment in S_aassign_copy_common about SV_NOSTEAL */
                     *svp = sv_mortalcopy_flags(*svp,
                             SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
                     TAINT_NOT;
@@ -1247,7 +1253,10 @@ PP(pp_aassign)
                             /* before newSV, in case it dies */
                             SvGETMAGIC(*relem);
                         sv = newSV(0);
-                        sv_setsv_nomg(sv, *relem);
+                        /* see comment in S_aassign_copy_common about
+                         * SV_NOSTEAL */
+                        sv_setsv_flags(sv, *relem,
+                                    (SV_DO_COW_SVSETSV|SV_NOSTEAL));
                         *relem = sv;
                     }
 		}
