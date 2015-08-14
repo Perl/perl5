@@ -3726,17 +3726,20 @@ PP(pp_rename)
 {
     dSP; dTARGET;
     int anum;
+#ifndef HAS_RENAME
+    Stat_t statbuf;
+#endif
     const char * const tmps2 = POPpconstx;
     const char * const tmps = SvPV_nolen_const(TOPs);
     TAINT_PROPER("rename");
 #ifdef HAS_RENAME
     anum = PerlLIO_rename(tmps, tmps2);
 #else
-    if (!(anum = PerlLIO_stat(tmps, &PL_statbuf))) {
+    if (!(anum = PerlLIO_stat(tmps, &statbuf))) {
 	if (same_dirent(tmps2, tmps))	/* can always rename to same name */
 	    anum = 1;
 	else {
-	    if (PerlProc_geteuid() || PerlLIO_stat(tmps2, &PL_statbuf) < 0 || !S_ISDIR(PL_statbuf.st_mode))
+	    if (PerlProc_geteuid() || PerlLIO_stat(tmps2, &statbuf) < 0 || !S_ISDIR(statbuf.st_mode))
 		(void)UNLINK(tmps2);
 	    if (!(anum = link(tmps, tmps2)))
 		anum = UNLINK(tmps);
@@ -3898,7 +3901,8 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
 	    return 0;
 	}
 	else {	/* some mkdirs return no failure indication */
-	    anum = (PerlLIO_stat(save_filename, &PL_statbuf) >= 0);
+	    Stat_t statbuf;
+	    anum = (PerlLIO_stat(save_filename, &statbuf) >= 0);
 	    if (PL_op->op_type == OP_RMDIR)
 		anum = !anum;
 	    if (anum)

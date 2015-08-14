@@ -835,6 +835,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
     if (!GvAV(gv))
 	return NULL;
     while (av_tindex(GvAV(gv)) >= 0) {
+	Stat_t statbuf;
 	STRLEN oldlen;
         SV *const sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
@@ -976,13 +977,13 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 		setdefout(PL_argvoutgv);
 		PL_lastfd = PerlIO_fileno(IoIFP(GvIOp(PL_argvoutgv)));
                 if (PL_lastfd >= 0) {
-                    (void)PerlLIO_fstat(PL_lastfd,&PL_statbuf);
+                    (void)PerlLIO_fstat(PL_lastfd,&statbuf);
 #ifdef HAS_FCHMOD
                     (void)fchmod(PL_lastfd,PL_filemode);
 #else
                     (void)PerlLIO_chmod(PL_oldname,PL_filemode);
 #endif
-                    if (fileuid != PL_statbuf.st_uid || filegid != PL_statbuf.st_gid) {
+                    if (fileuid != statbuf.st_uid || filegid != statbuf.st_gid) {
                         /* XXX silently ignore failures */
 #ifdef HAS_FCHOWN
                         PERL_UNUSED_RESULT(fchown(PL_lastfd,fileuid,filegid));
@@ -999,8 +1000,8 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 
         if (ckWARN_d(WARN_INPLACE)) {
             const int eno = errno;
-            if (PerlLIO_stat(PL_oldname, &PL_statbuf) >= 0
-                && !S_ISREG(PL_statbuf.st_mode)) {
+            if (PerlLIO_stat(PL_oldname, &statbuf) >= 0
+                && !S_ISREG(statbuf.st_mode)) {
                 Perl_warner(aTHX_ packWARN(WARN_INPLACE),
                             "Can't do inplace edit: %s is not a regular file",
                             PL_oldname);
@@ -1934,11 +1935,12 @@ nothing in the core.
 #endif
 	    }
 	    else {	/* don't let root wipe out directories without -U */
-		if (PerlLIO_lstat(s,&PL_statbuf) < 0)
+		Stat_t statbuf;
+		if (PerlLIO_lstat(s, &statbuf) < 0)
 		    tot--;
-		else if (S_ISDIR(PL_statbuf.st_mode)) {
-		    tot--;
+		else if (S_ISDIR(statbuf.st_mode)) {
 		    SETERRNO(EISDIR, SS_NOPRIV);
+		    tot--;
 		}
 		else {
 		    if (UNLINK(s))

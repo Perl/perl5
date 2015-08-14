@@ -3840,16 +3840,13 @@ S_validate_suid(pTHX_ PerlIO *rsfp)
     if (my_euid != my_uid || my_egid != my_gid) {	/* (suidperl doesn't exist, in fact) */
 	dVAR;
         int fd = PerlIO_fileno(rsfp);
-        if (fd < 0) {
-            Perl_croak(aTHX_ "Illegal suidscript");
-        } else {
-            if (PerlLIO_fstat(fd, &PL_statbuf) < 0) {	/* may be either wrapped or real suid */
-                Perl_croak(aTHX_ "Illegal suidscript");
-            }
+        Stat_t statbuf;
+        if (fd < 0 || PerlLIO_fstat(fd, &statbuf) < 0) { /* may be either wrapped or real suid */
+            Perl_croak_nocontext( "Illegal suidscript");
         }
-        if ((my_euid != my_uid && my_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
+        if ((my_euid != my_uid && my_euid == statbuf.st_uid && statbuf.st_mode & S_ISUID)
             ||
-            (my_egid != my_gid && my_egid == PL_statbuf.st_gid && PL_statbuf.st_mode & S_ISGID)
+            (my_egid != my_gid && my_egid == statbuf.st_gid && statbuf.st_mode & S_ISGID)
             )
 	    if (!PL_do_undump)
 		Perl_croak(aTHX_ "YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\

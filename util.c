@@ -3281,13 +3281,16 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 #endif
 	    DEBUG_p(PerlIO_printf(Perl_debug_log,
 				  "Looking for %s\n",cur));
-	    if (PerlLIO_stat(cur,&PL_statbuf) >= 0
-		&& !S_ISDIR(PL_statbuf.st_mode)) {
-		dosearch = 0;
-		scriptname = cur;
+	    {
+		Stat_t statbuf;
+		if (PerlLIO_stat(cur,&statbuf) >= 0
+		    && !S_ISDIR(statbuf.st_mode)) {
+		    dosearch = 0;
+		    scriptname = cur;
 #ifdef SEARCH_EXTS
-		break;
+		    break;
 #endif
+		}
 	    }
 #ifdef SEARCH_EXTS
 	    if (cur == scriptname) {
@@ -3313,6 +3316,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 
 	bufend = s + strlen(s);
 	while (s < bufend) {
+	    Stat_t statbuf;
 #  ifdef DOSISH
 	    for (len = 0; *s
 		    && *s != ';'; len++, s++) {
@@ -3349,8 +3353,8 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 	    do {
 #endif
 	    	DEBUG_p(PerlIO_printf(Perl_debug_log, "Looking for %s\n",tmpbuf));
-		retval = PerlLIO_stat(tmpbuf,&PL_statbuf);
-		if (S_ISDIR(PL_statbuf.st_mode)) {
+		retval = PerlLIO_stat(tmpbuf,&statbuf);
+		if (S_ISDIR(statbuf.st_mode)) {
 		    retval = -1;
 		}
 #ifdef SEARCH_EXTS
@@ -3361,10 +3365,10 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 #endif
 	    if (retval < 0)
 		continue;
-	    if (S_ISREG(PL_statbuf.st_mode)
-		&& cando(S_IRUSR,TRUE,&PL_statbuf)
+	    if (S_ISREG(statbuf.st_mode)
+		&& cando(S_IRUSR,TRUE,&statbuf)
 #if !defined(DOSISH)
-		&& cando(S_IXUSR,TRUE,&PL_statbuf)
+		&& cando(S_IXUSR,TRUE,&statbuf)
 #endif
 		)
 	    {
@@ -3375,11 +3379,16 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 		xfailed = savepv(tmpbuf);
 	}
 #ifndef DOSISH
-	if (!xfound && !seen_dot && !xfailed &&
-	    (PerlLIO_stat(scriptname,&PL_statbuf) < 0
-	     || S_ISDIR(PL_statbuf.st_mode)))
+	{
+	    Stat_t statbuf;
+	    if (!xfound && !seen_dot && !xfailed &&
+		(PerlLIO_stat(scriptname,&statbuf) < 0
+		 || S_ISDIR(statbuf.st_mode)))
 #endif
-	    seen_dot = 1;			/* Disable message. */
+		seen_dot = 1;			/* Disable message. */
+#ifndef DOSISH
+	}
+#endif
 	if (!xfound) {
 	    if (flags & 1) {			/* do or die? */
 		/* diag_listed_as: Can't execute %s */

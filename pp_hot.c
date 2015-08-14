@@ -1964,6 +1964,7 @@ Perl_do_readline(pTHX)
 	XPUSHs(sv);
 	if (type == OP_GLOB) {
 	    const char *t1;
+	    Stat_t statbuf;
 
 	    if (SvCUR(sv) > 0 && SvCUR(PL_rs) > 0) {
 		char * const tmps = SvEND(sv) - 1;
@@ -1979,7 +1980,7 @@ Perl_do_readline(pTHX)
 		if (strchr("$&*(){}[]'\";\\|?<>~`", *t1))
 #endif
 			break;
-	    if (*t1 && PerlLIO_lstat(SvPVX_const(sv), &PL_statbuf) < 0) {
+	    if (*t1 && PerlLIO_lstat(SvPVX_const(sv), &statbuf) < 0) {
 		(void)POPs;		/* Unmatched wildcard?  Chuck it... */
 		continue;
 	    }
