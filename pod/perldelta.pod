@@ -448,6 +448,13 @@ A subtle bug introduced in Perl 5.20.2 involving UTF-8 in regular expressions
 and sometimes causing a crash has been fixed. A new test script has been added
 to test this fix; see under L</Testing>. [perl #124109]
 
+=item *
+
+Some patterns starting with C</.*..../> matched against long strings have
+been slow since Perl 5.8, and some of the form C</.*..../i> have been slow
+since Perl 5.18. They are now all fast again.
+L<[perl #123743]|https://rt.perl.org/Ticket/Display.html?id=123743>.
+
 =back
 
 =head1 Known Problems
