@@ -199,8 +199,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * */
 #define UVCHR_IS_INVARIANT(uv)      UNI_IS_INVARIANT(uv)
 
-/* Is the UTF8-encoded byte 'c' part of a variant sequence in UTF-8?  This is
- * the inverse of UTF8_IS_INVARIANT */
+/* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
+ * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT */
 #define UTF8_IS_CONTINUED(c)        (((U8)c) &  0x80)
 
 /* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
@@ -547,7 +547,9 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_ALLOW_FFFF 0
 #define UTF8_ALLOW_SURROGATE 0
 
-#define UTF8_DISALLOW_ILLEGAL_INTERCHANGE (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_NONCHAR|UTF8_DISALLOW_SURROGATE|UTF8_DISALLOW_FE_FF)
+#define UTF8_DISALLOW_ILLEGAL_INTERCHANGE                                      \
+                                (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_NONCHAR     \
+                                 |UTF8_DISALLOW_SURROGATE|UTF8_DISALLOW_FE_FF)
 #define UTF8_WARN_ILLEGAL_INTERCHANGE \
 	(UTF8_WARN_SUPER|UTF8_WARN_NONCHAR|UTF8_WARN_SURROGATE|UTF8_WARN_FE_FF)
 #define UTF8_ALLOW_ANY \
