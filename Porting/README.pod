@@ -42,6 +42,11 @@ Check source code for ANSI-C violations.
 
 Used by F<t/porting/authors.t> to ensure the F<AUTHORS> list is up to date.
 
+=head2 F<checkcfguse.pl>
+
+Check where the symbols defined in the various F<config.sh>-clones
+are being used.  VMS is probably not handled properly here.
+
 =head2 F<checkcfgvar.pl>
 
 Check that the various F<config.sh>-clones have (at least) all the same
