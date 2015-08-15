@@ -345,6 +345,10 @@ BUILDOPT	+= -DPERL_IMPLICIT_SYS
 
 PROCESSOR_ARCHITECTURE *= x86
 
+.IF "$(WIN64)" == "undef"
+PROCESSOR_ARCHITECTURE	= x86
+.ENDIF
+
 .IF "$(WIN64)" == ""
 # When we are running from a 32bit cmd.exe on AMD64 then
 # PROCESSOR_ARCHITECTURE is set to x86 and PROCESSOR_ARCHITEW6432
@@ -508,6 +512,7 @@ LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
 LIBOUT_FLAG	=
+PDBOUT		=
 
 BUILDOPT	+= -fno-strict-aliasing -mms-bitfields
 MINIBUILDOPT	+= -fno-strict-aliasing
@@ -653,11 +658,11 @@ CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \
 		-libpath:"$(INST_COREDIR)" \
 		-machine:$(PROCESSOR_ARCHITECTURE)
-LIB_FLAGS	= $(LIB_FLAGS) -nologo
+LIB_FLAGS	+= -nologo
 OBJOUT_FLAG	= -Fo
 EXEOUT_FLAG	= -Fe
 LIBOUT_FLAG	= /out:
-
+PDBOUT		= -Fd$*.pdb
 TESTPREPGCC	=
 
 .ENDIF
@@ -717,7 +722,7 @@ LKPOST		= )
 .SUFFIXES : .c .i $(o) .dll $(a) .exe .rc .res
 
 .c$(o):
-	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
+	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $(PDBOUT) $<
 
 .c.i:
 	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) -E $< >$@
@@ -744,14 +749,19 @@ $(o).dll:
 
 #
 # various targets
+
+#do not put $(MINIPERL) as a dep/prereq in a rule, instead put $(HAVEMINIPERL)
+#$(MINIPERL) is not a buildable target, use "dmake mp" if you want to just build
+#miniperl alone
 MINIPERL	= ..\miniperl.exe
+HAVEMINIPERL	= ..\lib\buildcustomize.pl
 MINIDIR		= .\mini
 PERLEXE		= ..\perl.exe
 WPERLEXE	= ..\wperl.exe
 PERLEXESTATIC	= ..\perl-static.exe
 STATICDIR	= .\static.tmp
 GLOBEXE		= ..\perlglob.exe
-CONFIGPM	= ..\lib\Config.pm ..\lib\Config_heavy.pl
+CONFIGPM	= ..\lib\Config.pm
 GENUUDMAP	= ..\generate_uudmap.exe
 .IF "$(BUILD_STATIC)" == "define" || "$(ALL_STATIC)" == "define"
 PERLSTATIC	= static
@@ -778,7 +788,7 @@ PERLDLL_RES	=
 # This used to be $(PERLEXE), but at worst it is the .dll that they depend
 # on and really only the interface - i.e. the .def file used to export symbols
 # from the .dll
-PERLDEP = perldll.def
+PERLDEP = $(PERLIMPLIB)
 
 
 PL2BAT		= bin\pl2bat.pl
@@ -834,8 +844,20 @@ INT64		= __int64
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
 PERLIMPLIB	*= ..\perl523$(a)
+PERLEXPLIB	*= ..\perl523.exp
 PERLSTATICLIB	*= ..\perl523s$(a)
 PERLDLL		= ..\perl523.dll
+
+#EUMM on Win32 isn't ready for parallel make, so only allow this file to be parallel
+#$(MAKE) will contain the -P that this makefile was called with, which is bad for
+#make_ext.pl since upto jobs*jobs processes will run instead of jobs
+#also any recipie containing $(MAKE) is special cased by dmake to execute recipes
+#containing $(MAKE) when "dmake -n" is executed, which causes recursive calls
+#to dmake, which means "dmake -n" is then broken as a diagnostic tool since
+#"dmake -n" will invoke all the make_ext.pl scripts build things instead of
+#showing what to build since $(MAKE) is an arg to make_ext.pl, not an invocation
+#of the dmake process
+PLMAKE		= dmake
 
 XCOPY		= xcopy /f /r /i /d /y
 RCOPY		= xcopy /f /r /i /e /d /y
@@ -997,7 +1019,7 @@ CFG_VARS	=					\
 		libperl=$(PERLIMPLIB:f)		~	\
 		libpth=$(CCLIBDIR);$(EXTRALIBDIRS)	~	\
 		libc=$(LIBC)			~	\
-		make=dmake			~	\
+		make=$(PLMAKE)			~	\
 		_o=$(o)				~	\
 		obj_ext=$(o)			~	\
 		_a=$(a)				~	\
@@ -1019,9 +1041,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : CHECKDMAKE .\config.h ..\git_version.h $(GLOBEXE) $(MINIPERL)	\
-	$(CONFIGPM) $(UNIDATAFILES) MakePPPort				\
-	$(PERLEXE) Extensions Extensions_nonxs $(PERLSTATIC)
+all : CHECKDMAKE  rebasePE $(UNIDATAFILES) Extensions_nonxs $(PERLSTATIC)
 
 regnodes : ..\regnodes.h
 
@@ -1059,178 +1079,13 @@ perlglob$(o)  : perlglob.c
 config.w32 : $(CFGSH_TMPL)
 	copy $(CFGSH_TMPL) config.w32
 
-#
-# Copy the template config.h and set configurables at the end of it
-# as per the options chosen and compiler used.
-# Note: This config.h is only used to build miniperl.exe anyway, but
-# it's as well to have its options correct to be sure that it builds
-# and so that it's "-V" options are correct for use by makedef.pl. The
-# real config.h used to build perl.exe is generated from the top-level
-# config_h.SH by config_h.PL (run by miniperl.exe).
-#
-.\config.h : $(CFGH_TMPL) $(CORE_NOCFG_H)
-	-del /f config.h
-	copy $(CFGH_TMPL) config.h
-	@echo.>>$@
-	@echo #ifndef _config_h_footer_>>$@
-	@echo #define _config_h_footer_>>$@
-	@echo #undef Off_t>>$@
-	@echo #undef LSEEKSIZE>>$@
-	@echo #undef Off_t_size>>$@
-	@echo #undef PTRSIZE>>$@
-	@echo #undef SSize_t>>$@
-	@echo #undef HAS_ATOLL>>$@
-	@echo #undef HAS_STRTOLL>>$@
-	@echo #undef HAS_STRTOULL>>$@
-	@echo #undef Size_t_size>>$@
-	@echo #undef IVTYPE>>$@
-	@echo #undef UVTYPE>>$@
-	@echo #undef IVSIZE>>$@
-	@echo #undef UVSIZE>>$@
-	@echo #undef NV_PRESERVES_UV>>$@
-	@echo #undef NV_PRESERVES_UV_BITS>>$@
-	@echo #undef IVdf>>$@
-	@echo #undef UVuf>>$@
-	@echo #undef UVof>>$@
-	@echo #undef UVxf>>$@
-	@echo #undef UVXf>>$@
-	@echo #undef USE_64_BIT_INT>>$@
-	@echo #undef Gconvert>>$@
-	@echo #undef HAS_FREXPL>>$@
-	@echo #undef HAS_ISNANL>>$@
-	@echo #undef HAS_MODFL>>$@
-	@echo #undef HAS_MODFL_PROTO>>$@
-	@echo #undef HAS_SQRTL>>$@
-	@echo #undef HAS_STRTOLD>>$@
-	@echo #undef PERL_PRIfldbl>>$@
-	@echo #undef PERL_PRIgldbl>>$@
-	@echo #undef PERL_PRIeldbl>>$@
-	@echo #undef PERL_SCNfldbl>>$@
-	@echo #undef NVTYPE>>$@
-	@echo #undef NVSIZE>>$@
-	@echo #undef LONG_DOUBLESIZE>>$@
-	@echo #undef NV_OVERFLOWS_INTEGERS_AT>>$@
-	@echo #undef NVef>>$@
-	@echo #undef NVff>>$@
-	@echo #undef NVgf>>$@
-	@echo #undef USE_LONG_DOUBLE>>$@
-	@echo #undef USE_CPLUSPLUS>>$@
-.IF "$(USE_LARGE_FILES)"=="define"
-	@echo #define Off_t $(INT64)>>$@
-	@echo #define LSEEKSIZE ^8>>$@
-	@echo #define Off_t_size ^8>>$@
-.ELSE
-	@echo #define Off_t long>>$@
-	@echo #define LSEEKSIZE ^4>>$@
-	@echo #define Off_t_size ^4>>$@
-.ENDIF
-.IF "$(WIN64)"=="define"
-	@echo #define PTRSIZE ^8>>$@
-	@echo #define SSize_t $(INT64)>>$@
-	@echo #define HAS_ATOLL>>$@
-	@echo #define HAS_STRTOLL>>$@
-	@echo #define HAS_STRTOULL>>$@
-	@echo #define Size_t_size ^8>>$@
-.ELSE
-	@echo #define PTRSIZE ^4>>$@
-	@echo #define SSize_t int>>$@
-	@echo #undef HAS_ATOLL>>$@
-	@echo #undef HAS_STRTOLL>>$@
-	@echo #undef HAS_STRTOULL>>$@
-	@echo #define Size_t_size ^4>>$@
-.ENDIF
-.IF "$(USE_64_BIT_INT)"=="define"
-	@echo #define IVTYPE $(INT64)>>$@
-	@echo #define UVTYPE unsigned $(INT64)>>$@
-	@echo #define IVSIZE ^8>>$@
-	@echo #define UVSIZE ^8>>$@
-.IF "$(USE_LONG_DOUBLE)"=="define"
-	@echo #define NV_PRESERVES_UV>>$@
-	@echo #define NV_PRESERVES_UV_BITS 64>>$@
-.ELSE
-	@echo #undef NV_PRESERVES_UV>>$@
-	@echo #define NV_PRESERVES_UV_BITS 53>>$@
-.ENDIF
-	@echo #define IVdf "I64d">>$@
-	@echo #define UVuf "I64u">>$@
-	@echo #define UVof "I64o">>$@
-	@echo #define UVxf "I64x">>$@
-	@echo #define UVXf "I64X">>$@
-	@echo #define USE_64_BIT_INT>>$@
-.ELSE
-	@echo #define IVTYPE long>>$@
-	@echo #define UVTYPE unsigned long>>$@
-	@echo #define IVSIZE ^4>>$@
-	@echo #define UVSIZE ^4>>$@
-	@echo #define NV_PRESERVES_UV>>$@
-	@echo #define NV_PRESERVES_UV_BITS 32>>$@
-	@echo #define IVdf "ld">>$@
-	@echo #define UVuf "lu">>$@
-	@echo #define UVof "lo">>$@
-	@echo #define UVxf "lx">>$@
-	@echo #define UVXf "lX">>$@
-	@echo #undef USE_64_BIT_INT>>$@
-.ENDIF
-.IF "$(USE_LONG_DOUBLE)"=="define"
-	@echo #define Gconvert(x,n,t,b) sprintf((b),"%.*""Lg",(n),(x))>>$@
-	@echo #define HAS_FREXPL>>$@
-	@echo #define HAS_ISNANL>>$@
-	@echo #define HAS_MODFL>>$@
-	@echo #define HAS_MODFL_PROTO>>$@
-	@echo #define HAS_SQRTL>>$@
-	@echo #define HAS_STRTOLD>>$@
-	@echo #define PERL_PRIfldbl "Lf">>$@
-	@echo #define PERL_PRIgldbl "Lg">>$@
-	@echo #define PERL_PRIeldbl "Le">>$@
-	@echo #define PERL_SCNfldbl "Lf">>$@
-	@echo #define NVTYPE long double>>$@
-.IF "$(WIN64)"=="define"
-	@echo #define NVSIZE ^16>>$@
-	@echo #define LONG_DOUBLESIZE ^16>>$@
-.ELSE
-	@echo #define NVSIZE ^12>>$@
-	@echo #define LONG_DOUBLESIZE ^12>>$@
-.ENDIF
-	@echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0>>$@
-	@echo #define NVef "Le">>$@
-	@echo #define NVff "Lf">>$@
-	@echo #define NVgf "Lg">>$@
-	@echo #define USE_LONG_DOUBLE>>$@
-.ELSE
-	@echo #define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))>>$@
-	@echo #undef HAS_FREXPL>>$@
-	@echo #undef HAS_ISNANL>>$@
-	@echo #undef HAS_MODFL>>$@
-	@echo #undef HAS_MODFL_PROTO>>$@
-	@echo #undef HAS_SQRTL>>$@
-	@echo #undef HAS_STRTOLD>>$@
-	@echo #undef PERL_PRIfldbl>>$@
-	@echo #undef PERL_PRIgldbl>>$@
-	@echo #undef PERL_PRIeldbl>>$@
-	@echo #undef PERL_SCNfldbl>>$@
-	@echo #define NVTYPE double>>$@
-	@echo #define NVSIZE ^8>>$@
-	@echo #define LONG_DOUBLESIZE ^8>>$@
-	@echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0>>$@
-	@echo #define NVef "e">>$@
-	@echo #define NVff "f">>$@
-	@echo #define NVgf "g">>$@
-	@echo #undef USE_LONG_DOUBLE>>$@
-.ENDIF
-.IF "$(USE_CPLUSPLUS)"=="define"
-	@echo #define USE_CPLUSPLUS>>$@
-.ELSE
-	@echo #undef USE_CPLUSPLUS>>$@
-.ENDIF
-	@echo #endif>>$@
-
-..\git_version.h : $(MINIPERL) ..\make_patchnum.pl
+..\git_version.h : $(HAVEMINIPERL) ..\make_patchnum.pl
 	cd .. && miniperl -Ilib make_patchnum.pl
 
 # make sure that we recompile perl.c if the git version changes
 ..\perl$(o) : ..\git_version.h
 
-..\config.sh : config.w32 $(MINIPERL) config_sh.PL FindExt.pm
+..\config.sh : config.w32 $(HAVEMINIPERL) config_sh.PL FindExt.pm
 	$(MINIPERL) -I..\lib config_sh.PL --cfgsh-option-file \
 	    $(mktmp $(CFG_VARS)) config.w32 > ..\config.sh
 
@@ -1246,18 +1101,18 @@ regen_config_h:
 	-$(MINIPERL) -I..\lib config_h.PL "ARCHPREFIX=$(ARCHPREFIX)"
 	rename config.h $(CFGH_TMPL)
 
-$(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL
+$(CONFIGPM): ..\config.sh config_h.PL
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib config_h.PL "ARCHPREFIX=$(ARCHPREFIX)" \
-	    || $(MAKE) $(MAKEMACROS) $(CONFIGPM) $(MAKEFILE)
+	    || $(PLMAKE) $(MAKEMACROS) $(CONFIGPM) $(MAKEFILE)
+
+.\config.h : $(CONFIGPM)
 
 # See the comment in Makefile.SH explaining this seemingly cranky ordering
-$(MINIPERL) : ..\lib\buildcustomize.pl
-
-..\lib\buildcustomize.pl : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS) ..\write_buildcustomize.pl
+..\lib\buildcustomize.pl : $(MINI_OBJ) ..\write_buildcustomize.pl
 .IF "$(CCTYPE)" == "GCC"
 	$(LINK32) -v -mconsole -o $(MINIPERL) $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(MINI_OBJ) $(LIBFILES) $(LKPOST))
@@ -1268,31 +1123,202 @@ $(MINIPERL) : ..\lib\buildcustomize.pl
 .ENDIF
 	$(MINIPERL) -I..\lib -f ..\write_buildcustomize.pl ..
 
-$(MINIDIR) :
+#convinence target, get a working miniperl
+mp : $(CONFIGPM)
+
+$(MINIDIR)\.exists : $(CFGH_TMPL)
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"
+#
+# Copy the template config.h and set configurables at the end of it
+# as per the options chosen and compiler used.
+# Note: This config.h is only used to build miniperl.exe anyway, but
+# it's as well to have its options correct to be sure that it builds
+# and so that it's "-V" options are correct for use by makedef.pl. The
+# real config.h used to build perl.exe is generated from the top-level
+# config_h.SH by config_h.PL (run by miniperl.exe).
+#
+# MINIDIR generates config.h so miniperl.exe is not rebuilt when the 2nd
+# config.h is generated in CONFIGPM target, see also the comments for $(MINI_OBJ).
+	-if exist config.h del /f config.h
+	copy $(CFGH_TMPL) config.h
+	@(echo.&& \
+	echo #ifndef _config_h_footer_&& \
+	echo #define _config_h_footer_&& \
+	echo #undef Off_t&& \
+	echo #undef LSEEKSIZE&& \
+	echo #undef Off_t_size&& \
+	echo #undef PTRSIZE&& \
+	echo #undef SSize_t&& \
+	echo #undef HAS_ATOLL&& \
+	echo #undef HAS_STRTOLL&& \
+	echo #undef HAS_STRTOULL&& \
+	echo #undef Size_t_size&& \
+	echo #undef IVTYPE&& \
+	echo #undef UVTYPE&& \
+	echo #undef IVSIZE&& \
+	echo #undef UVSIZE&& \
+	echo #undef NV_PRESERVES_UV&& \
+	echo #undef NV_PRESERVES_UV_BITS&& \
+	echo #undef IVdf&& \
+	echo #undef UVuf&& \
+	echo #undef UVof&& \
+	echo #undef UVxf&& \
+	echo #undef UVXf&& \
+	echo #undef USE_64_BIT_INT&& \
+	echo #undef Gconvert&& \
+	echo #undef HAS_FREXPL&& \
+	echo #undef HAS_ISNANL&& \
+	echo #undef HAS_MODFL&& \
+	echo #undef HAS_MODFL_PROTO&& \
+	echo #undef HAS_SQRTL&& \
+	echo #undef HAS_STRTOLD&& \
+	echo #undef PERL_PRIfldbl&& \
+	echo #undef PERL_PRIgldbl&& \
+	echo #undef PERL_PRIeldbl&& \
+	echo #undef PERL_SCNfldbl&& \
+	echo #undef NVTYPE&& \
+	echo #undef NVSIZE&& \
+	echo #undef LONG_DOUBLESIZE&& \
+	echo #undef NV_OVERFLOWS_INTEGERS_AT&& \
+	echo #undef NVef&& \
+	echo #undef NVff&& \
+	echo #undef NVgf&& \
+	echo #undef USE_LONG_DOUBLE&& \
+	echo #undef USE_CPLUSPLUS)>> config.h
+.IF "$(USE_LARGE_FILES)"=="define"
+	@(echo #define Off_t $(INT64)&& \
+	echo #define LSEEKSIZE ^8&& \
+	echo #define Off_t_size ^8)>> config.h
+.ELSE
+	@(echo #define Off_t long&& \
+	echo #define LSEEKSIZE ^4&& \
+	echo #define Off_t_size ^4)>> config.h
+.ENDIF
+.IF "$(WIN64)"=="define"
+	@(echo #define PTRSIZE ^8&& \
+	echo #define SSize_t $(INT64)&& \
+	echo #define HAS_ATOLL&& \
+	echo #define HAS_STRTOLL&& \
+	echo #define HAS_STRTOULL&& \
+	echo #define Size_t_size ^8)>> config.h
+.ELSE
+	@(echo #define PTRSIZE ^4&& \
+	echo #define SSize_t int&& \
+	echo #undef HAS_ATOLL&& \
+	echo #undef HAS_STRTOLL&& \
+	echo #undef HAS_STRTOULL&& \
+	echo #define Size_t_size ^4)>> config.h
+.ENDIF
+.IF "$(USE_64_BIT_INT)"=="define"
+	@(echo #define IVTYPE $(INT64)&& \
+	echo #define UVTYPE unsigned $(INT64)&& \
+	echo #define IVSIZE ^8&& \
+	echo #define UVSIZE ^8)>> config.h
+.IF "$(USE_LONG_DOUBLE)"=="define"
+	@(echo #define NV_PRESERVES_UV&& \
+	echo #define NV_PRESERVES_UV_BITS 64)>> config.h
+.ELSE
+	@(echo #undef NV_PRESERVES_UV&& \
+	echo #define NV_PRESERVES_UV_BITS 53)>> config.h
+.ENDIF
+	@(echo #define IVdf "I64d"&& \
+	echo #define UVuf "I64u"&& \
+	echo #define UVof "I64o"&& \
+	echo #define UVxf "I64x"&& \
+	echo #define UVXf "I64X"&& \
+	echo #define USE_64_BIT_INT)>> config.h
+.ELSE
+	@(echo #define IVTYPE long&& \
+	echo #define UVTYPE unsigned long&& \
+	echo #define IVSIZE ^4&& \
+	echo #define UVSIZE ^4&& \
+	echo #define NV_PRESERVES_UV&& \
+	echo #define NV_PRESERVES_UV_BITS 32&& \
+	echo #define IVdf "ld"&& \
+	echo #define UVuf "lu"&& \
+	echo #define UVof "lo"&& \
+	echo #define UVxf "lx"&& \
+	echo #define UVXf "lX"&& \
+	echo #undef USE_64_BIT_INT)>> config.h
+.ENDIF
+.IF "$(USE_LONG_DOUBLE)"=="define"
+	@(echo #define Gconvert^(x,n,t,b^) sprintf^(^(b^),"%.*""Lg",^(n^),^(x^)^)&& \
+	echo #define HAS_FREXPL&& \
+	echo #define HAS_ISNANL&& \
+	echo #define HAS_MODFL&& \
+	echo #define HAS_MODFL_PROTO&& \
+	echo #define HAS_SQRTL&& \
+	echo #define HAS_STRTOLD&& \
+	echo #define PERL_PRIfldbl "Lf"&& \
+	echo #define PERL_PRIgldbl "Lg"&& \
+	echo #define PERL_PRIeldbl "Le"&& \
+	echo #define PERL_SCNfldbl "Lf"&& \
+	echo #define NVTYPE long double)>> config.h
+.IF "$(WIN64)"=="define"
+	@(echo #define NVSIZE ^16&& \
+	echo #define LONG_DOUBLESIZE ^16)>> config.h
+.ELSE
+	@(echo #define NVSIZE ^12&& \
+	echo #define LONG_DOUBLESIZE ^12)>> config.h
+.ENDIF
+	@(echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0&& \
+	echo #define NVef "Le"&& \
+	echo #define NVff "Lf"&& \
+	echo #define NVgf "Lg"&& \
+	echo #define USE_LONG_DOUBLE)>> config.h
+.ELSE
+	@(echo #define Gconvert^(x,n,t,b^) sprintf^(^(b^),"%.*g",^(n^),^(x^)^)&& \
+	echo #undef HAS_FREXPL&& \
+	echo #undef HAS_ISNANL&& \
+	echo #undef HAS_MODFL&& \
+	echo #undef HAS_MODFL_PROTO&& \
+	echo #undef HAS_SQRTL&& \
+	echo #undef HAS_STRTOLD&& \
+	echo #undef PERL_PRIfldbl&& \
+	echo #undef PERL_PRIgldbl&& \
+	echo #undef PERL_PRIeldbl&& \
+	echo #undef PERL_SCNfldbl&& \
+	echo #define NVTYPE double&& \
+	echo #define NVSIZE ^8&& \
+	echo #define LONG_DOUBLESIZE ^8&& \
+	echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0&& \
+	echo #define NVef "e"&& \
+	echo #define NVff "f"&& \
+	echo #define NVgf "g"&& \
+	echo #undef USE_LONG_DOUBLE)>> config.h
+.ENDIF
+.IF "$(USE_CPLUSPLUS)"=="define"
+	@(echo #define USE_CPLUSPLUS&& \
+	echo #endif)>> config.h
+.ELSE
+	@(echo #undef USE_CPLUSPLUS&& \
+	echo #endif)>> config.h
+.ENDIF
+#separate line since this is sentinal that this target is done
+	rem. > $(MINIDIR)\.exists
 
 $(MINICORE_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) $(MINIBUILDOPT) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ ..\$(*B).c
+	$(CC) -c $(CFLAGS) $(MINIBUILDOPT) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) ..\$(*B).c
 
 $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) $(MINIBUILDOPT) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(*B).c
+	$(CC) -c $(CFLAGS) $(MINIBUILDOPT) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) $(*B).c
 
 # -DPERL_IMPLICIT_SYS needs C++ for perllib.c
 # rules wrapped in .IFs break Win9X build (we end up with unbalanced []s unless
 # unless the .IF is true), so instead we use a .ELSE with the default.
 # This is the only file that depends on perlhost.h, vmem.h, and vdir.h
 
-perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
+perllib$(o)	: perllib.c perllibst.h .\perlhost.h .\vdir.h .\vmem.h
 .IF "$(USE_IMP_SYS)" == "define"
-	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
+	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ $(PDBOUT) perllib.c
 .ELSE
-	$(CC) -c -I. $(CFLAGS_O) $(OBJOUT_FLAG)$@ perllib.c
+	$(CC) -c -I. $(CFLAGS_O) $(OBJOUT_FLAG)$@ $(PDBOUT) perllib.c
 .ENDIF
 
 # 1. we don't want to rebuild miniperl.exe when config.h changes
 # 2. we don't want to rebuild miniperl.exe with non-default config.h
 # 3. we can't have miniperl.exe depend on git_version.h, as miniperl creates it
-$(MINI_OBJ)	: $(CORE_NOCFG_H)
+$(MINI_OBJ)	: $(MINIDIR)\.exists $(CORE_NOCFG_H)
 
 $(WIN32_OBJ)	: $(CORE_H)
 
@@ -1300,12 +1326,26 @@ $(CORE_OBJ)	: $(CORE_H)
 
 $(DLL_OBJ)	: $(CORE_H)
 
-perldll.def : $(MINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl create_perllibst_h.pl
+
+perllibst.h : $(HAVEMINIPERL) $(CONFIGPM) create_perllibst_h.pl
 	$(MINIPERL) -I..\lib create_perllibst_h.pl
+
+perldll.def : $(HAVEMINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl
 	$(MINIPERL) -I..\lib -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) \
 	$(BUILDOPT) CCTYPE=$(CCTYPE) TARG_DIR=..\ > perldll.def
 
-$(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
+$(PERLIMPLIB) : perldll.def
+.IF "$(CCTYPE)" == "GCC"
+	$(IMPLIB) -k -d perldll.def -l $(PERLIMPLIB)
+.ELSE #VC family
+	lib -def:perldll.def -machine:$(ARCHITECTURE) /OUT:$(PERLIMPLIB)
+.ENDIF
+	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
+
+#PERLEXPLIB is built in PERLIMPLIB
+$(PERLEXPLIB): $(PERLIMPLIB)
+
+$(PERLDLL): $(PERLEXPLIB) $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 .IF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(PERLDLL_OBJ) \
@@ -1321,13 +1361,12 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 		$(shell @type Extensions_static) \
 		$(LIBFILES) perl.exp $(LKPOST))
 .ELSE
-	$(LINK32) -dll -def:perldll.def -out:$@ $(BLINK_FLAGS) \
+	$(LINK32) -dll -out:$@ $(BLINK_FLAGS) \
 	    @Extensions_static \
 	    @$(mktmp -base:0x28000000 $(DELAYLOAD) $(LIBFILES) \
-		$(PERLDLL_RES) $(PERLDLL_OBJ))
+		$(PERLDLL_RES) $(PERLDLL_OBJ) $(PERLEXPLIB))
 	$(EMBED_DLL_MANI)
 .ENDIF
-	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
 $(PERLSTATICLIB): $(PERLDLL_OBJ) Extensions_static
 .IF "$(CCTYPE)" == "GCC"
@@ -1367,16 +1406,16 @@ $(GENUUDMAP) : $(GENUUDMAP_OBJ)
 perlmain.c : runperl.c
 	copy runperl.c perlmain.c
 
-perlmain$(o) : perlmain.c
-	$(CC) $(CFLAGS_O:s,-DPERLDLL,-UPERLDLL,) $(OBJOUT_FLAG)$@ -c perlmain.c
+perlmain$(o) : $(CONFIGPM) perlmain.c
+	$(CC) $(CFLAGS_O:s,-DPERLDLL,-UPERLDLL,) $(OBJOUT_FLAG)$@ $(PDBOUT) -c perlmain.c
 
 perlmainst.c : runperl.c
 	copy runperl.c perlmainst.c
 
-perlmainst$(o) : perlmainst.c
-	$(CC) $(CFLAGS_O) $(OBJOUT_FLAG)$@ -c perlmainst.c
+perlmainst$(o) : $(CONFIGPM) perlmainst.c
+	$(CC) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $(PDBOUT) -c perlmainst.c
 
-$(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
+$(PERLEXE): $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES) $(PERLIMPLIB)
 .IF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS)  \
 	    $(PERLEXE_OBJ) $(PERLEXE_RES) $(PERLIMPLIB) $(LIBFILES)
@@ -1398,43 +1437,52 @@ $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 	$(EMBED_EXE_MANI)
 .ENDIF
 
-MakePPPort: $(MINIPERL) $(CONFIGPM) Extensions_nonxs
-	$(MINIPERL) -I..\lib ..\mkppport
-
 #-------------------------------------------------------------------------------
 # There's no direct way to mark a dependency on
 # DynaLoader.pm, so this will have to do
 Extensions : ..\make_ext.pl ..\lib\buildcustomize.pl $(PERLDEP) $(CONFIGPM) $(DYNALOADER)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --dynamic
+	if not exist $(COREDIR)\ppport.h rem. > $(COREDIR)\ppport.h
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --dynamic
 
 Extensions_reonly : ..\make_ext.pl ..\lib\buildcustomize.pl $(PERLDEP) $(CONFIGPM) $(DYNALOADER)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --dynamic +re
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --dynamic +re
 
-Extensions_static : ..\make_ext.pl ..\lib\buildcustomize.pl list_static_libs.pl $(PERLDEP) $(CONFIGPM) Extensions_nonxs
+Extensions_static : ..\make_ext.pl ..\lib\buildcustomize.pl list_static_libs.pl $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --static
+	if not exist $(COREDIR)\ppport.h rem. > $(COREDIR)\ppport.h
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --static
 	$(MINIPERL) -I..\lib list_static_libs.pl > Extensions_static
 
-Extensions_nonxs : ..\make_ext.pl ..\lib\buildcustomize.pl $(PERLDEP) $(CONFIGPM) ..\pod\perlfunc.pod
-	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --nonxs
+Extensions_nonxs : ..\make_ext.pl ..\lib\buildcustomize.pl $(CONFIGPM) ..\pod\perlfunc.pod
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --nonxs !libs
 
-$(DYNALOADER) : ..\make_ext.pl ..\lib\buildcustomize.pl $(PERLDEP) $(CONFIGPM) Extensions_nonxs
+#lib must be built, it can't be buildcustomize.pl-ed, and is required for XS building
+$(DYNALOADER) : ..\make_ext.pl ..\lib\buildcustomize.pl $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(EXTDIR) --dynaloader
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(EXTDIR) --dir=$(DISTDIR) --dynaloader lib
 
 Extensions_clean :
-	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=clean
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=clean
 
 Extensions_realclean :
-	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=realclean
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=realclean
+
+# all PE files need to be built by the time this target runs, PP files can still
+# be running in parallel like UNIDATAFILES, this target a placeholder for the
+# future
+.IF "$(BUILD_STATIC)"=="define"
+rebasePE : Extensions $(PERLDLL) $(PERLEXE) $(GLOBEXE) $(PERLEXESTATIC)
+.ELSE
+rebasePE : Extensions $(PERLDLL) $(PERLEXE) $(GLOBEXE)
+.ENDIF
+	$(NOOP)
 
 #-------------------------------------------------------------------------------
 
 
-doc: $(PERLEXE) ..\pod\perltoc.pod
+doc: $(PERLEXE) $(PERLDLL) ..\pod\perltoc.pod
 	$(PERLEXE) ..\installhtml --podroot=.. --htmldir=$(HTMLDIR) \
 	    --podpath=pod:lib:utils --htmlroot="file://$(INST_HTML:s,:,|,)"\
 	    --recurse
@@ -1444,8 +1492,8 @@ doc: $(PERLEXE) ..\pod\perltoc.pod
 
 # Note that this next section is parsed (and regenerated) by pod/buildtoc
 # so please check that script before making structural changes here
-utils: $(PERLEXE) ..\utils\Makefile
-	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
+utils: $(HAVEMINIPERL) ..\utils\Makefile
+	cd ..\utils && $(PLMAKE) PERL=$(MINIPERL)
 	copy ..\README.aix      ..\pod\perlaix.pod
 	copy ..\README.amiga    ..\pod\perlamiga.pod
 	copy ..\README.android  ..\pod\perlandroid.pod
@@ -1480,11 +1528,11 @@ utils: $(PERLEXE) ..\utils\Makefile
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
 	copy ..\pod\perldelta.pod ..\pod\perl5233delta.pod
-	$(PERLEXE) $(PL2BAT) $(UTILS)
+	$(MINIPERL) -I..\lib $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
 
-..\pod\perltoc.pod: $(PERLEXE) Extensions Extensions_nonxs
+..\pod\perltoc.pod: $(PERLEXE) $(PERLDLL) Extensions Extensions_nonxs ..\pod\perluniprops.pod utils
 	$(PERLEXE) -f ..\pod\buildtoc -q
 
 # Note that the pod cleanup in this next section is parsed (and regenerated
@@ -1610,6 +1658,7 @@ install : all installbare installhtml
 
 installbare : utils ..\pod\perltoc.pod
 	$(PERLEXE) ..\installperl
+	attrib -r $(INST_COREDIR)\ppport.h && del $(INST_COREDIR)\ppport.h
 	if exist $(WPERLEXE) $(XCOPY) $(WPERLEXE) $(INST_BIN)\*.*
 	if exist $(PERLEXESTATIC) $(XCOPY) $(PERLEXESTATIC) $(INST_BIN)\*.*
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
@@ -1622,11 +1671,11 @@ installhtml : doc
 inst_lib : $(CONFIGPM)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
-$(UNIDATAFILES) ..\pod\perluniprops.pod .UPDATEALL : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables Extensions_nonxs
+$(UNIDATAFILES) ..\pod\perluniprops.pod .UPDATEALL : $(CONFIGPM) ..\lib\unicore\mktables
 	cd ..\lib\unicore && \
 	..\$(MINIPERL) -I.. mktables -P ..\..\pod -maketest -makelist -p
 
-minitest : .\config.h $(MINIPERL) ..\git_version.h $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES) $(TESTPREPGCC)
+minitest : .\config.h $(HAVEMINIPERL) ..\git_version.h $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES) $(TESTPREPGCC)
 	$(XCOPY) $(MINIPERL) ..\t\$(NULL)
 	if exist ..\t\perl.exe del /f ..\t\perl.exe
 	rename ..\t\miniperl.exe perl.exe
