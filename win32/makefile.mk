@@ -980,7 +980,6 @@ MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) perlio$(o)}
 MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 DLL_OBJ		= $(DYNALOADER)
-GENUUDMAP_OBJ	= $(GENUUDMAP:db:+$(o))
 
 PERLDLL_OBJ	= $(CORE_OBJ)
 PERLEXE_OBJ	= perlmain$(o)
@@ -1110,8 +1109,7 @@ regen_config_h:
 $(CONFIGPM): ..\config.sh config_h.PL
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	$(XCOPY) config.h $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib config_h.PL "ARCHPREFIX=$(ARCHPREFIX)" \
-	    || $(PLMAKE) $(MAKEMACROS) $(CONFIGPM) $(MAKEFILE)
+	-$(MINIPERL) -I..\lib config_h.PL "ARCHPREFIX=$(ARCHPREFIX)"
 
 .\config.h : $(CONFIGPM)
 
@@ -1391,9 +1389,14 @@ $(PERLEXE_RES): perlexe.rc $(PERLEXE_MANIFEST) $(PERLEXE_ICO)
 
 $(MINIDIR)\globals$(o) : $(GENERATED_HEADERS)
 
-$(UUDMAP_H) $(MG_DATA_H) : $(BITCOUNT_H)
-
-$(BITCOUNT_H) : $(GENUUDMAP)
+$(GENUUDMAP) $(GENERATED_HEADERS) .UPDATEALL : ..\mg_raw.h
+.IF "$(CCTYPE)" == "GCC"
+	$(LINK32) $(CFLAGS_O) -o..\generate_uudmap.exe ..\generate_uudmap.c $(BLINK_FLAGS) \
+	    $(mktmp $(LKPRE) $(LIBFILES) $(LKPOST))
+.ELSE
+	$(CC) $(CFLAGS_O) -Fe..\generate_uudmap.exe ..\generate_uudmap.c @$(mktmp -link $(LIBFILES)) -link $(BLINK_FLAGS) 
+	$(EMBED_EXE_MANI:s/$@/..\generate_uudmap.exe/)
+.ENDIF
 	$(GENUUDMAP) $(GENERATED_HEADERS)
 
 #This generates a stub ppport.h & creates & fills /lib/CORE to allow for XS
@@ -1402,17 +1405,6 @@ $(BITCOUNT_H) : $(GENUUDMAP)
 $(COREDIR)\ppport.h : $(CORE_H)
 	$(XCOPY) *.h $(COREDIR)\*.* && $(RCOPY) include $(COREDIR)\*.* && $(XCOPY) ..\*.h $(COREDIR)\*.*
 	rem. > $@
-
-$(GENUUDMAP_OBJ) : ..\mg_raw.h
-
-$(GENUUDMAP) : $(GENUUDMAP_OBJ)
-.IF "$(CCTYPE)" == "GCC"
-	$(LINK32) -v -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(GENUUDMAP_OBJ) $(LIBFILES) $(LKPOST))
-.ELSE
-	$(LINK32) -out:$@ $(BLINK_FLAGS) @$(mktmp $(LIBFILES) $(GENUUDMAP_OBJ))
-	$(EMBED_EXE_MANI)
-.ENDIF
 
 perlmain.c : runperl.c
 	copy runperl.c perlmain.c
@@ -1691,9 +1683,8 @@ minitest : .\config.h $(HAVEMINIPERL) ..\git_version.h $(GLOBEXE) $(CONFIGPM) $(
 	cd ..\t && perl.exe TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t opbasic/*.t op/*.t uni/*.t perf/*.t pragma/*.t
 
 test-prep : all utils ..\pod\perltoc.pod $(TESTPREPGCC)
-	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
-	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
-	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
+	$(XCOPY) $(PERLEXE) ..\t\$(NULL) && $(XCOPY) $(PERLDLL) ..\t\$(NULL) \
+	&& $(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 
 # If building with gcc versions 4.x.x or greater, then
 # the GCC helper DLL will also need copied to the test directory.
