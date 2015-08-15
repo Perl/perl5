@@ -38,6 +38,7 @@ Porting/checkAUTHORS.pl
 Porting/checkURL.pl
 Porting/checkVERSION.pl
 Porting/checkansi.pl
+Porting/checkcfguse.pl
 Porting/checkcfgvar.pl
 Porting/checkpodencoding.pl
 Porting/cmpVERSION.pl
