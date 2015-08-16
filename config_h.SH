@@ -4066,16 +4066,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	a prototype for the modfl() function.  Otherwise, it is up
  *	to the program to supply one.
  */
-/* HAS_MODFL_POW32_BUG:
- *	This symbol, if defined, indicates that the modfl routine is
- *	broken for long doubles >= pow(2, 32).
- *	For example from 4294967303.150000 one would get 4294967302.000000
- *	and 1.150000.  The bug has been seen in certain versions of glibc,
- *	release 2.2.2 is known to be okay.
- */
 #$d_modfl HAS_MODFL		/**/
 #$d_modflproto HAS_MODFL_PROTO		/**/
-#$d_modfl_pow32_bug HAS_MODFL_POW32_BUG		/**/
 
 /* HAS_MPROTECT:
  *	This symbol, if defined, indicates that the mprotect system call is
