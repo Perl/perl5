@@ -558,6 +558,11 @@ operator.  [perl #132245]
 Fixed a leaked SV when parsing an empty C<\N{}> at compile-time.
 [perl #132245]
 
+=item *
+
+Calling C<do $path> on a directory or block device now yields a meaningful
+error code in C<$!>.  [perl #125774]
+
 =back
 
 =head1 Known Problems

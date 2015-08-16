@@ -7,6 +7,7 @@ BEGIN {
 }
 use strict;
 no warnings 'void';
+use Errno qw(ENOENT EISDIR);
 
 my $called;
 my $result = do{ ++$called; 'value';};
@@ -247,7 +248,7 @@ SKIP: {
     my $saved_errno = $!;
     ok(!$rv,          "do returns false on io errror");
     ok(!$saved_error, "\$\@ not set on io error");
-    ok($saved_errno,  "\$! set on io error");
+    ok($saved_errno == ENOENT, "\$! is ENOENT for nonexistent file");
 }
 
 # do subname should not be do "subname"
@@ -304,5 +305,16 @@ SKIP: {
     f(do { 1; !!(my $x = bless []); });
 }
 
+
+# do file $!s must be correct
+{
+    local @INC = ('.'); #want EISDIR not ENOENT
+    my $rv = do 'op'; # /t/op dir
+    my $saved_error = $@;
+    my $saved_errno = $!+0;
+    ok(!$rv,                    "do dir returns false");
+    ok(!$saved_error,           "\$\@ is false on do dir");
+    ok($saved_errno == EISDIR,  "\$! is EISDIR on do dir");
+}
 
 done_testing();

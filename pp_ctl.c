@@ -3562,15 +3562,22 @@ S_check_type_and_open(pTHX_ SV *name)
        errno EACCES, so only do a stat to separate a dir from a real EACCES
        caused by user perms */
 #ifndef WIN32
-    /* we use the value of errno later to see how stat() or open() failed.
-     * We don't want it set if the stat succeeded but we still failed,
-     * such as if the name exists, but is a directory */
-    errno = 0;
-
     st_rc = PerlLIO_stat(p, &st);
 
-    if (st_rc < 0 || S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode)) {
+    if (st_rc < 0)
 	return NULL;
+    else {
+	int eno;
+	if(S_ISBLK(st.st_mode)) {
+	    eno = EINVAL;
+	    goto not_file;
+	}
+	else if(S_ISDIR(st.st_mode)) {
+	    eno = EISDIR;
+	    not_file:
+	    errno = eno;
+	    return NULL;
+	}
     }
 #endif
 
@@ -3582,8 +3589,10 @@ S_check_type_and_open(pTHX_ SV *name)
 	int eno;
 	st_rc = PerlLIO_stat(p, &st);
 	if (st_rc >= 0) {
-	    if(S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode))
-		eno = 0;
+	    if(S_ISDIR(st.st_mode))
+		eno = EISDIR;
+	    else if(S_ISBLK(st.st_mode))
+		eno = EINVAL;
 	    else
 		eno = EACCES;
 	    errno = eno;
