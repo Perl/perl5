@@ -1,3 +1,4 @@
+amigaos4/config.sh	AmigaOS4 config
 Artistic		The "Artistic License"
 asan_ignore		Errors to skip under clang's Addresss Sanitizer
 AUTHORS			Contact info for contributors
