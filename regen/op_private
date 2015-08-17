@@ -480,11 +480,24 @@ addbits($_, 7 => qw(OPpPV_IS_UTF8 UTF)) for qw(last redo next goto dump);
 addbits($_, 6 => qw(OPpPAD_STATE STATE))  for qw(padav padhv padsv lvavref
                                                  lvref refassign pushmark);
 
+# NB: both sassign and aassign use the 'OPpASSIGN' naming convention
+# for their private flags
+
+# there *may* be common scalar items on both sides of a list assign:
+# run-time checking will be needed.
+addbits('aassign', 6 => qw(OPpASSIGN_COMMON_SCALAR COM_SCALAR));
+#
+# as above, but it's possible to check for non-commonality with just
+# a SvREFCNT(lhs) == 1 test for each lhs element
+addbits('aassign', 5 => qw(OPpASSIGN_COMMON_RC1 COM_RC1));
+
+# run-time checking is required for an aggregate on the LHS
+addbits('aassign', 4 => qw(OPpASSIGN_COMMON_AGG COM_AGG));
 
 
-addbits('aassign', 6 => qw(OPpASSIGN_COMMON COMMON));
 
-
+# NB: both sassign and aassign use the 'OPpASSIGN' naming convention
+# for their private flags
 
 addbits('sassign',
     6 => qw(OPpASSIGN_BACKWARDS BKWARD), # Left & right switched

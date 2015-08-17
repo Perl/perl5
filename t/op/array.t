@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (172);
+plan (173);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -548,5 +548,11 @@ is "@ary", 'b a',
 
 for(scalar $#foo) { $_ = 3 }
 is $#foo, 3, 'assigning to arylen aliased in foreach(scalar $#arylen)';
+
+{
+    my @a = qw(a b c);
+    @a = @a;
+    is "@a", 'a b c', 'assigning to itself';
+}
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";

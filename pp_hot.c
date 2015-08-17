@@ -47,7 +47,6 @@ PP(pp_const)
 PP(pp_nextstate)
 {
     PL_curcop = (COP*)PL_op;
-    PL_sawalias = 0;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
@@ -63,8 +62,6 @@ PP(pp_gvsv)
 	PUSHs(save_scalar(cGVOP_gv));
     else
 	PUSHs(GvSVn(cGVOP_gv));
-    if (GvREFCNT(cGVOP_gv) > 1 || GvALIASED_SV(cGVOP_gv))
-	PL_sawalias = TRUE;
     RETURN;
 }
 
@@ -99,9 +96,6 @@ PP(pp_gv)
 {
     dSP;
     XPUSHs(MUTABLE_SV(cGVOP_gv));
-    if (isGV(cGVOP_gv)
-     && (GvREFCNT(cGVOP_gv) > 1 || GvALIASED_SV(cGVOP_gv)))
-	PL_sawalias = TRUE;
     RETURN;
 }
 
@@ -1003,6 +997,148 @@ S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
     }
 }
 
+
+/* Do a mark and sweep with the SVf_BREAK flag to detect elements which
+ * are common to both the LHS and RHS of an aassign, and replace them
+ * with copies. All these copies are made before the actual list assign is
+ * done.
+ *
+ * For example in ($a,$b) = ($b,$a), assigning the value of the first RHS
+ * element ($b) to the first LH element ($a), modifies $a; when the
+ * second assignment is done, the second RH element now has the wrong
+ * value. So we initially replace the RHS with ($b, mortalcopy($a)).
+ * Note that we don't need to make a mortal copy of $b.
+ *
+ * The algorithm below works by, for every RHS element, mark the
+ * corresponding LHS target element with SVf_BREAK. Then if the RHS
+ * element is found with SVf_BREAK set, it means it would have been
+ * modified, so make a copy.
+ * Note that by scanning both LHS and RHS in lockstep, we avoid
+ * unnecessary copies (like $b above) compared with a naive
+ * "mark all LHS; copy all marked RHS; unmark all LHS".
+ *
+ * If the LHS element is a 'my' declaration' and has a refcount of 1, then
+ * it can't be common and can be skipped.
+ */
+
+PERL_STATIC_INLINE void
+S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
+        SV **firstrelem, SV **lastrelem)
+{
+    dVAR;
+    SV **relem;
+    SV **lelem;
+    SSize_t lcount = lastlelem - firstlelem + 1;
+    bool marked = FALSE; /* have we marked any LHS with SVf_BREAK ? */
+    bool const do_rc1 = cBOOL(PL_op->op_private & OPpASSIGN_COMMON_RC1);
+
+    assert(!PL_in_clean_all); /* SVf_BREAK not already in use */
+    assert(firstlelem < lastlelem); /* at least 2 LH elements */
+    assert(firstrelem < lastrelem); /* at least 2 RH elements */
+
+    /* we never have to copy the first RH element; it can't be corrupted
+     * by assigning something to the corresponding first LH element.
+     * So this scan does in a loop: mark LHS[N]; test RHS[N+1]
+     */
+    firstrelem++;
+
+    lelem = firstlelem;
+    relem = firstrelem;
+
+    for (; relem <= lastrelem; relem++) {
+        SV *svr;
+
+        /* mark next LH element */
+
+        if (--lcount >= 0) {
+            SV *svl = *lelem++;
+
+            if (UNLIKELY(!svl)) {/* skip AV alias marker */
+                assert (lelem <= lastlelem);
+                svl = *lelem++;
+                lcount--;
+            }
+
+            assert(svl);
+            if (SvTYPE(svl) == SVt_PVAV || SvTYPE(svl) == SVt_PVHV) {
+                if (!marked)
+                    return;
+                /* this LH element will consume all further args;
+                 * no need to mark any further LH elements (if any).
+                 * But we still need to scan any remaining RHS elements;
+                 * set lcount negative to distinguish from  lcount == 0,
+                 * so the loop condition continues being true
+                 */
+                lcount = -1;
+                lelem--; /* no need to unmark this element */
+            }
+            else if (!(do_rc1 && SvREFCNT(svl) == 1) && svl != &PL_sv_undef) {
+                assert(!SvIMMORTAL(svl));
+                SvFLAGS(svl) |= SVf_BREAK;
+                marked = TRUE;
+            }
+            else if (!marked) {
+                /* don't check RH element if no SVf_BREAK flags set yet */
+                if (!lcount)
+                    break;
+                continue;
+            }
+        }
+
+        /* see if corresponding RH element needs copying */
+
+        assert(marked);
+        svr = *relem;
+        assert(svr);
+
+        if (UNLIKELY(SvFLAGS(svr) & SVf_BREAK)) {
+
+            TAINT_NOT;	/* Each item is independent */
+
+            /* Dear TODO test in t/op/sort.t, I love you.
+               (It's relying on a panic, not a "semi-panic" from newSVsv()
+               and then an assertion failure below.)  */
+            if (UNLIKELY(SvIS_FREED(svr))) {
+                Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p",
+                           (void*)svr);
+            }
+            /* avoid break flag while copying; otherwise COW etc
+             * disabled... */
+            SvFLAGS(svr) &= ~SVf_BREAK;
+            /* Not newSVsv(), as it does not allow copy-on-write,
+               resulting in wasteful copies.
+               Also, we use SV_NOSTEAL in case the SV is used more than
+               once, e.g.  (...) = (f())[0,0]
+               Where the same SV appears twice on the RHS without a ref
+               count bump.  (Although I suspect that the SV won't be
+               stealable here anyway - DAPM).
+               */
+            *relem = sv_mortalcopy_flags(svr,
+                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+            /* ... but restore afterwards in case it's needed again,
+             * e.g. ($a,$b,$c) = (1,$a,$a)
+             */
+            SvFLAGS(svr) |= SVf_BREAK;
+        }
+
+        if (!lcount)
+            break;
+    }
+
+    if (!marked)
+        return;
+
+    /*unmark LHS */
+
+    while (lelem > firstlelem) {
+        SV * const svl = *(--lelem);
+        if (svl)
+            SvFLAGS(svl) &= ~SVf_BREAK;
+    }
+}
+
+
+
 PP(pp_aassign)
 {
     dVAR; dSP;
@@ -1021,49 +1157,39 @@ PP(pp_aassign)
     HV *hash;
     SSize_t i;
     int magic;
-    U32 lval = 0;
+    U32 lval;
 
     PL_delaymagic = DM_DELAY;		/* catch simultaneous items */
-    gimme = GIMME_V;
-    if (gimme == G_ARRAY)
-        lval = PL_op->op_flags & OPf_MOD || LVRET;
 
     /* If there's a common identifier on both sides we have to take
      * special care that assigning the identifier on the left doesn't
      * clobber a value on the right that's used later in the list.
-     * Don't bother if LHS is just an empty hash or array.
      */
 
-    if (    (PL_op->op_private & OPpASSIGN_COMMON || PL_sawalias)
-	&&  (
-	       firstlelem != lastlelem
-	    || ! ((sv = *firstlelem))
-	    || SvMAGICAL(sv)
-	    || ! (SvTYPE(sv) == SVt_PVAV || SvTYPE(sv) == SVt_PVHV)
-	    || (SvTYPE(sv) == SVt_PVAV && AvFILL((AV*)sv) != -1)
-	    || (SvTYPE(sv) == SVt_PVHV && HvUSEDKEYS((HV*)sv) != 0)
-	    )
+    if ( (PL_op->op_private & (OPpASSIGN_COMMON_SCALAR|OPpASSIGN_COMMON_RC1))
+        /* at least 2 LH and RH elements, or commonality isn't an issue */
+        && (firstlelem < lastlelem && firstrelem < lastrelem)
     ) {
-	EXTEND_MORTAL(lastrelem - firstrelem + 1);
-	for (relem = firstrelem; relem <= lastrelem; relem++) {
-	    if (LIKELY((sv = *relem))) {
-		TAINT_NOT;	/* Each item is independent */
-
-		/* Dear TODO test in t/op/sort.t, I love you.
-		   (It's relying on a panic, not a "semi-panic" from newSVsv()
-		   and then an assertion failure below.)  */
-		if (UNLIKELY(SvIS_FREED(sv))) {
-		    Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p",
-			       (void*)sv);
-		}
-		/* Not newSVsv(), as it does not allow copy-on-write,
-		   resulting in wasteful copies.  We need a second copy of
-		   a temp here, hence the SV_NOSTEAL.  */
-		*relem = sv_mortalcopy_flags(sv,SV_GMAGIC|SV_DO_COW_SVSETSV
-					       |SV_NOSTEAL);
-	    }
-	}
+        if (PL_op->op_private & OPpASSIGN_COMMON_RC1) {
+            /* skip the scan if all scalars have a ref count of 1 */
+            for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
+                sv = *lelem;
+                if (!sv || SvREFCNT(sv) == 1)
+                    continue;
+                if (SvTYPE(sv) != SVt_PVAV && SvTYPE(sv) != SVt_PVAV)
+                    goto do_scan;
+                break;
+            }
+        }
+        else {
+          do_scan:
+            S_aassign_copy_common(aTHX_
+                        firstlelem, lastlelem, firstrelem, lastrelem);
+        }
     }
+
+    gimme = GIMME_V;
+    lval = (gimme == G_ARRAY) ? (PL_op->op_flags & OPf_MOD || LVRET) : 0;
 
     relem = firstrelem;
     lelem = firstlelem;
@@ -1080,36 +1206,77 @@ PP(pp_aassign)
 	    ASSUME(SvTYPE(sv) == SVt_PVAV);
 	}
 	switch (SvTYPE(sv)) {
-	case SVt_PVAV:
+	case SVt_PVAV: {
+            bool already_copied = FALSE;
 	    ary = MUTABLE_AV(sv);
 	    magic = SvMAGICAL(ary) != 0;
 	    ENTER;
 	    SAVEFREESV(SvREFCNT_inc_simple_NN(sv));
-	    av_clear(ary);
+
+            /* We need to clear ary. The is a danger that if we do this,
+             * elements on the RHS may be prematurely freed, e.g.
+             *   @a = ($a[0]);
+             * In the case of possible commonality, make a copy of each
+             * RHS SV *before* clearing the array, and add a reference
+             * from the tmps stack, so that it doesn't leak on death.
+             * Otherwise, make a copy of each RHS SV only as we're storing
+             * it into the array - that way we don't have to worry about
+             * it being leaked if we die, but don't incur the cost of
+             * mortalising everything.
+             */
+
+            if (   (PL_op->op_private & OPpASSIGN_COMMON_AGG)
+                && (relem <= lastrelem)
+                && (magic || AvFILL(ary) != -1))
+            {
+                SV **svp;
+                EXTEND_MORTAL(lastrelem - relem + 1);
+                for (svp = relem; svp <= lastrelem; svp++) {
+                    /* see comment in S_aassign_copy_common about SV_NOSTEAL */
+                    *svp = sv_mortalcopy_flags(*svp,
+                            SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+                    TAINT_NOT;
+                }
+                already_copied = TRUE;
+            }
+
+            av_clear(ary);
 	    av_extend(ary, lastrelem - relem);
 	    i = 0;
 	    while (relem <= lastrelem) {	/* gobble up all the rest */
 		SV **didstore;
-		if (LIKELY(*relem))
-		    SvGETMAGIC(*relem); /* before newSV, in case it dies */
 		if (LIKELY(!alias)) {
-		    sv = newSV(0);
-		    sv_setsv_nomg(sv, *relem);
-		    *relem = sv;
+                    if (already_copied)
+                        sv = *relem;
+                    else {
+                        if (LIKELY(*relem))
+                            /* before newSV, in case it dies */
+                            SvGETMAGIC(*relem);
+                        sv = newSV(0);
+                        /* see comment in S_aassign_copy_common about
+                         * SV_NOSTEAL */
+                        sv_setsv_flags(sv, *relem,
+                                    (SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                        *relem = sv;
+                    }
 		}
 		else {
+                    if (!already_copied)
+                        SvGETMAGIC(*relem);
 		    if (!SvROK(*relem))
 			DIE(aTHX_ "Assigned value is not a reference");
 		    if (SvTYPE(SvRV(*relem)) > SVt_PVLV)
 		   /* diag_listed_as: Assigned value is not %s reference */
 			DIE(aTHX_
 			   "Assigned value is not a SCALAR reference");
-		    if (lval)
+		    if (lval && !already_copied)
 			*relem = sv_mortalcopy(*relem);
 		    /* XXX else check for weak refs?  */
 		    sv = SvREFCNT_inc_simple_NN(SvRV(*relem));
 		}
 		relem++;
+                if (already_copied)
+                    SvREFCNT_inc_simple_NN(sv); /* undo mortal free */
 		didstore = av_store(ary,i++,sv);
 		if (magic) {
 		    if (!didstore)
@@ -1123,12 +1290,15 @@ PP(pp_aassign)
 		SvSETMAGIC(MUTABLE_SV(ary));
 	    LEAVE;
 	    break;
+        }
+
 	case SVt_PVHV: {				/* normal hash */
 		SV *tmpstr;
                 int odd;
                 int duplicates = 0;
 		SV** topelem = relem;
                 SV **firsthashrelem = relem;
+                bool already_copied = FALSE;
 
 		hash = MUTABLE_HV(sv);
 		magic = SvMAGICAL(hash) != 0;
@@ -1143,7 +1313,31 @@ PP(pp_aassign)
 
 		ENTER;
 		SAVEFREESV(SvREFCNT_inc_simple_NN(sv));
+
+                /* We need to clear hash. The is a danger that if we do this,
+                 * elements on the RHS may be prematurely freed, e.g.
+                 *   %h = (foo => $h{bar});
+                 * In the case of possible commonality, make a copy of each
+                 * RHS SV *before* clearing the hash, and add a reference
+                 * from the tmps stack, so that it doesn't leak on death.
+                 */
+
+                if (   (PL_op->op_private & OPpASSIGN_COMMON_AGG)
+                    && (relem <= lastrelem)
+                    && (magic || HvUSEDKEYS(hash)))
+                {
+                    SV **svp;
+                    EXTEND_MORTAL(lastrelem - relem + 1);
+                    for (svp = relem; svp <= lastrelem; svp++) {
+                        *svp = sv_mortalcopy_flags(*svp,
+                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+                        TAINT_NOT;
+                    }
+                    already_copied = TRUE;
+                }
+
 		hv_clear(hash);
+
 		while (LIKELY(relem < lastrelem+odd)) {	/* gobble up all the rest */
 		    HE *didstore;
                     assert(*relem);
@@ -1151,14 +1345,19 @@ PP(pp_aassign)
 		       to avoid having the next op modify our rhs.  Copy
 		       it also if it is gmagical, lest it make the
 		       hv_store_ent call below croak, leaking the value. */
-		    sv = lval || SvGMAGICAL(*relem)
+		    sv = (lval || SvGMAGICAL(*relem)) && !already_copied
 			 ? sv_mortalcopy(*relem)
 			 : *relem;
 		    relem++;
                     assert(*relem);
-		    SvGETMAGIC(*relem);
-                    tmpstr = newSV(0);
-		    sv_setsv_nomg(tmpstr,*relem++);	/* value */
+                    if (already_copied)
+                        tmpstr = *relem++;
+                    else {
+                        SvGETMAGIC(*relem);
+                        tmpstr = newSV(0);
+                        sv_setsv_nomg(tmpstr,*relem++);	/* value */
+                    }
+
 		    if (gimme == G_ARRAY) {
 			if (hv_exists_ent(hash, sv, 0))
 			    /* key overwrites an existing entry */
@@ -1171,6 +1370,8 @@ PP(pp_aassign)
 			    *topelem++ = tmpstr;
 			}
 		    }
+                    if (already_copied)
+                        SvREFCNT_inc_simple_NN(tmpstr); /* undo mortal free */
 		    didstore = hv_store_ent(hash,sv,tmpstr,0);
 		    if (magic) {
 			if (!didstore) sv_2mortal(tmpstr);

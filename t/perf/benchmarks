@@ -242,4 +242,384 @@
         code    => 'index $x, "b"',
     },
 
+
+    # list assign, OP_AASSIGN
+
+
+    # (....) = ()
+
+    'expr::aassign::ma_empty' => {
+        desc    => 'my array assigned empty',
+        setup   => '',
+        code    => 'my @a = ()',
+    },
+    'expr::aassign::lax_empty' => {
+        desc    => 'non-empty lexical array assigned empty',
+        setup   => 'my @a = 1..3;',
+        code    => '@a = ()',
+    },
+    'expr::aassign::llax_empty' => {
+        desc    => 'non-empty lexical var and array assigned empty',
+        setup   => 'my ($x, @a) = 1..4;',
+        code    => '($x, @a) = ()',
+    },
+    'expr::aassign::3m_empty' => {
+        desc    => 'three my vars assigned empty',
+        setup   => '',
+        code    => 'my ($x,$y,$z) = ()',
+    },
+    'expr::aassign::3l_empty' => {
+        desc    => 'three lexical vars assigned empty',
+        setup   => 'my ($x,$y,$z)',
+        code    => '($x,$y,$z) = ()',
+    },
+    'expr::aassign::pa_empty' => {
+        desc    => 'package array assigned empty',
+        setup   => '',
+        code    => '@a = ()',
+    },
+    'expr::aassign::pax_empty' => {
+        desc    => 'non-empty package array assigned empty',
+        setup   => '@a = (1,2,3)',
+        code    => '@a = ()',
+    },
+    'expr::aassign::3p_empty' => {
+        desc    => 'three package vars assigned empty',
+        setup   => '($x,$y,$z) = 1..3;',
+        code    => '($x,$y,$z) = ()',
+    },
+
+    # (....) = (1,2,3)
+
+    'expr::aassign::ma_3c' => {
+        desc    => 'my array assigned 3 consts',
+        setup   => '',
+        code    => 'my @a = (1,2,3)',
+    },
+    'expr::aassign::lax_3c' => {
+        desc    => 'non-empty lexical array assigned 3 consts',
+        setup   => 'my @a = 1..3;',
+        code    => '@a = (1,2,3)',
+    },
+    'expr::aassign::llax_3c' => {
+        desc    => 'non-empty lexical var and array assigned 3 consts',
+        setup   => 'my ($x, @a) = 1..4;',
+        code    => '($x, @a) = (1,2,3)',
+    },
+    'expr::aassign::3m_3c' => {
+        desc    => 'three my vars assigned 3 consts',
+        setup   => '',
+        code    => 'my ($x,$y,$z) = (1,2,3)',
+    },
+    'expr::aassign::3l_3c' => {
+        desc    => 'three lexical vars assigned 3 consts',
+        setup   => 'my ($x,$y,$z)',
+        code    => '($x,$y,$z) = (1,2,3)',
+    },
+    'expr::aassign::pa_3c' => {
+        desc    => 'package array assigned 3 consts',
+        setup   => '',
+        code    => '@a = (1,2,3)',
+    },
+    'expr::aassign::pax_3c' => {
+        desc    => 'non-empty package array assigned 3 consts',
+        setup   => '@a = (1,2,3)',
+        code    => '@a = (1,2,3)',
+    },
+    'expr::aassign::3p_3c' => {
+        desc    => 'three package vars assigned 3 consts',
+        setup   => '($x,$y,$z) = 1..3;',
+        code    => '($x,$y,$z) = (1,2,3)',
+    },
+
+    # (....) = @lexical
+
+    'expr::aassign::ma_la' => {
+        desc    => 'my array assigned lexical array',
+        setup   => 'my @init = 1..3;',
+        code    => 'my @a = @init',
+    },
+    'expr::aassign::lax_la' => {
+        desc    => 'non-empty lexical array assigned lexical array',
+        setup   => 'my @init = 1..3; my @a = 1..3;',
+        code    => '@a = @init',
+    },
+    'expr::aassign::llax_la' => {
+        desc    => 'non-empty lexical var and array assigned lexical array',
+        setup   => 'my @init = 1..3; my ($x, @a) = 1..4;',
+        code    => '($x, @a) = @init',
+    },
+    'expr::aassign::3m_la' => {
+        desc    => 'three my vars assigned lexical array',
+        setup   => 'my @init = 1..3;',
+        code    => 'my ($x,$y,$z) = @init',
+    },
+    'expr::aassign::3l_la' => {
+        desc    => 'three lexical vars assigned lexical array',
+        setup   => 'my @init = 1..3; my ($x,$y,$z)',
+        code    => '($x,$y,$z) = @init',
+    },
+    'expr::aassign::pa_la' => {
+        desc    => 'package array assigned lexical array',
+        setup   => 'my @init = 1..3;',
+        code    => '@a = @init',
+    },
+    'expr::aassign::pax_la' => {
+        desc    => 'non-empty package array assigned lexical array',
+        setup   => 'my @init = 1..3; @a = @init',
+        code    => '@a = @init',
+    },
+    'expr::aassign::3p_la' => {
+        desc    => 'three package vars assigned lexical array',
+        setup   => 'my @init = 1..3; ($x,$y,$z) = 1..3;',
+        code    => '($x,$y,$z) = @init',
+    },
+
+    # (....) = @package
+
+    'expr::aassign::ma_pa' => {
+        desc    => 'my array assigned package array',
+        setup   => '@init = 1..3;',
+        code    => 'my @a = @init',
+    },
+    'expr::aassign::lax_pa' => {
+        desc    => 'non-empty lexical array assigned package array',
+        setup   => '@init = 1..3; my @a = 1..3;',
+        code    => '@a = @init',
+    },
+    'expr::aassign::llax_pa' => {
+        desc    => 'non-empty lexical var and array assigned package array',
+        setup   => '@init = 1..3; my ($x, @a) = 1..4;',
+        code    => '($x, @a) = @init',
+    },
+    'expr::aassign::3m_pa' => {
+        desc    => 'three my vars assigned package array',
+        setup   => '@init = 1..3;',
+        code    => 'my ($x,$y,$z) = @init',
+    },
+    'expr::aassign::3l_pa' => {
+        desc    => 'three lexical vars assigned package array',
+        setup   => '@init = 1..3; my ($x,$y,$z)',
+        code    => '($x,$y,$z) = @init',
+    },
+    'expr::aassign::pa_pa' => {
+        desc    => 'package array assigned package array',
+        setup   => '@init = 1..3;',
+        code    => '@a = @init',
+    },
+    'expr::aassign::pax_pa' => {
+        desc    => 'non-empty package array assigned package array',
+        setup   => '@init = 1..3; @a = @init',
+        code    => '@a = @init',
+    },
+    'expr::aassign::3p_pa' => {
+        desc    => 'three package vars assigned package array',
+        setup   => '@init = 1..3; ($x,$y,$z) = 1..3;',
+        code    => '($x,$y,$z) = @init',
+    },
+
+    # (....) = @_;
+
+    'expr::aassign::ma_defary' => {
+        desc    => 'my array assigned @_',
+        setup   => '@_ = 1..3;',
+        code    => 'my @a = @_',
+    },
+    'expr::aassign::lax_defary' => {
+        desc    => 'non-empty lexical array assigned @_',
+        setup   => '@_ = 1..3; my @a = 1..3;',
+        code    => '@a = @_',
+    },
+    'expr::aassign::llax_defary' => {
+        desc    => 'non-empty lexical var and array assigned @_',
+        setup   => '@_ = 1..3; my ($x, @a) = 1..4;',
+        code    => '($x, @a) = @_',
+    },
+    'expr::aassign::3m_defary' => {
+        desc    => 'three my vars assigned @_',
+        setup   => '@_ = 1..3;',
+        code    => 'my ($x,$y,$z) = @_',
+    },
+    'expr::aassign::3l_defary' => {
+        desc    => 'three lexical vars assigned @_',
+        setup   => '@_ = 1..3; my ($x,$y,$z)',
+        code    => '($x,$y,$z) = @_',
+    },
+    'expr::aassign::pa_defary' => {
+        desc    => 'package array assigned @_',
+        setup   => '@_ = 1..3;',
+        code    => '@a = @_',
+    },
+    'expr::aassign::pax_defary' => {
+        desc    => 'non-empty package array assigned @_',
+        setup   => '@_ = 1..3; @a = @_',
+        code    => '@a = @_',
+    },
+    'expr::aassign::3p_defary' => {
+        desc    => 'three package vars assigned @_',
+        setup   => '@_ = 1..3; ($x,$y,$z) = 1..3;',
+        code    => '($x,$y,$z) = @_',
+    },
+
+
+    # (....) = ($lex1,$lex2,$lex3);
+
+    'expr::aassign::ma_3l' => {
+        desc    => 'my array assigned lexicals',
+        setup   => 'my ($v1,$v2,$v3) = 1..3;',
+        code    => 'my @a = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::lax_3l' => {
+        desc    => 'non-empty lexical array assigned lexicals',
+        setup   => 'my ($v1,$v2,$v3) = 1..3; my @a = 1..3;',
+        code    => '@a = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::llax_3l' => {
+        desc    => 'non-empty lexical var and array assigned lexicals',
+        setup   => 'my ($v1,$v2,$v3) = 1..3; my ($x, @a) = 1..4;',
+        code    => '($x, @a) = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::3m_3l' => {
+        desc    => 'three my vars assigned lexicals',
+        setup   => 'my ($v1,$v2,$v3) = 1..3;',
+        code    => 'my ($x,$y,$z) = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::3l_3l' => {
+        desc    => 'three lexical vars assigned lexicals',
+        setup   => 'my ($v1,$v2,$v3) = 1..3; my ($x,$y,$z)',
+        code    => '($x,$y,$z) = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::pa_3l' => {
+        desc    => 'package array assigned lexicals',
+        setup   => 'my ($v1,$v2,$v3) = 1..3;',
+        code    => '@a = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::pax_3l' => {
+        desc    => 'non-empty package array assigned lexicals',
+        setup   => 'my ($v1,$v2,$v3) = 1..3; @a = @_',
+        code    => '@a = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::3p_3l' => {
+        desc    => 'three package vars assigned lexicals',
+        setup   => 'my ($v1,$v2,$v3) = 1..3; ($x,$y,$z) = 1..3;',
+        code    => '($x,$y,$z) = ($v1,$v2,$v3)',
+    },
+
+
+    # (....) = ($pkg1,$pkg2,$pkg3);
+
+    'expr::aassign::ma_3p' => {
+        desc    => 'my array assigned 3 package vars',
+        setup   => '($v1,$v2,$v3) = 1..3;',
+        code    => 'my @a = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::lax_3p' => {
+        desc    => 'non-empty lexical array assigned 3 package vars',
+        setup   => '($v1,$v2,$v3) = 1..3; my @a = 1..3;',
+        code    => '@a = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::llax_3p' => {
+        desc    => 'non-empty lexical var and array assigned 3 package vars',
+        setup   => '($v1,$v2,$v3) = 1..3; my ($x, @a) = 1..4;',
+        code    => '($x, @a) = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::3m_3p' => {
+        desc    => 'three my vars assigned 3 package vars',
+        setup   => '($v1,$v2,$v3) = 1..3;',
+        code    => 'my ($x,$y,$z) = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::3l_3p' => {
+        desc    => 'three lexical vars assigned 3 package vars',
+        setup   => '($v1,$v2,$v3) = 1..3; my ($x,$y,$z)',
+        code    => '($x,$y,$z) = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::pa_3p' => {
+        desc    => 'package array assigned 3 package vars',
+        setup   => '($v1,$v2,$v3) = 1..3;',
+        code    => '@a = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::pax_3p' => {
+        desc    => 'non-empty package array assigned 3 package vars',
+        setup   => '($v1,$v2,$v3) = 1..3; @a = @_',
+        code    => '@a = ($v1,$v2,$v3)',
+    },
+    'expr::aassign::3p_3p' => {
+        desc    => 'three package vars assigned 3 package vars',
+        setup   => '($v1,$v2,$v3) = 1..3; ($x,$y,$z) = 1..3;',
+        code    => '($x,$y,$z) = ($v1,$v2,$v3)',
+    },
+
+
+    # (....) = (1,2,$shared);
+
+    'expr::aassign::llax_2c1s' => {
+        desc    => 'non-empty lexical var and array assigned 2 consts and 1 shared var',
+        setup   => 'my ($x, @a) = 1..4;',
+        code    => '($x, @a) = (1,2,$x)',
+    },
+    'expr::aassign::3l_2c1s' => {
+        desc    => 'three lexical vars assigned 2 consts and 1 shared var',
+        setup   => 'my ($x,$y,$z) = 1..3;',
+        code    => '($x,$y,$z) = (1,2,$x)',
+    },
+    'expr::aassign::3p_2c1s' => {
+        desc    => 'three package vars assigned 2 consts and 1 shared var',
+        setup   => '($x,$y,$z) = 1..3;',
+        code    => '($x,$y,$z) = (1,2,$x)',
+    },
+
+
+    # ($a,$b) = ($b,$a);
+
+    'expr::aassign::2l_swap' => {
+        desc    => 'swap two lexical vars',
+        setup   => 'my ($a,$b) = (1,2)',
+        code    => '($a,$b) = ($b,$a)',
+    },
+    'expr::aassign::2p_swap' => {
+        desc    => 'swap two package vars',
+        setup   => '($a,$b) = (1,2)',
+        code    => '($a,$b) = ($b,$a)',
+    },
+    'expr::aassign::2laelem_swap' => {
+        desc    => 'swap two lexical vars',
+        setup   => 'my @a = (1,2)',
+        code    => '($a[0],$a[1]) = ($a[1],$a[0])',
+    },
+
+    # misc list assign
+
+    'expr::aassign::5l_4l1s' => {
+        desc    => 'long list of lexical vars, 1 shared',
+        setup   => 'my ($a,$b,$c,$d,$e) = 1..5',
+        code    => '($a,$b,$c,$d,$e) = ($a,$a,$c,$d,$e)',
+    },
+
+    'expr::aassign::5p_4p1s' => {
+        desc    => 'long list of package vars, 1 shared',
+        setup   => '($a,$b,$c,$d,$e) = 1..5',
+        code    => '($a,$b,$c,$d,$e) = ($a,$a,$c,$d,$e)',
+    },
+    'expr::aassign::5l_defary' => {
+        desc    => 'long list of lexical vars to assign @_ to',
+        setup   => '@_ = 1..5',
+        code    => 'my ($a,$b,$c,$d,$e) = @_',
+    },
+    'expr::aassign::5l1la_defary' => {
+        desc    => 'long list of lexical vars plus long slurp to assign @_ to',
+        setup   => '@_ = 1..20',
+        code    => 'my ($a,$b,$c,$d,$e,@rest) = @_',
+    },
+    'expr::aassign::1l_2l' => {
+        desc    => 'single lexical LHS',
+        setup   => 'my $x = 1;',
+        code    => '(undef,$x) = ($x,$x)',
+    },
+    'expr::aassign::2l_1l' => {
+        desc    => 'single lexical RHS',
+        setup   => 'my $x = 1;',
+        code    => '($x,$x) = (undef, $x)',
+    },
+
+
 ];

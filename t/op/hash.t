@@ -207,4 +207,11 @@ torture_hash('a .. zz', 'a' .. 'zz');
 torture_hash('0 .. 9', 0 .. 9);
 torture_hash("'Perl'", 'Rules');
 
+{
+    my %h = qw(a x b y c z);
+    no warnings qw(misc uninitialized);
+    %h = $h{a};
+    is(join(':', %h), 'x:', 'hash self-assign');
+}
+
 done_testing();

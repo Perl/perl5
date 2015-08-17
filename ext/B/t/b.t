@@ -209,12 +209,6 @@ is($gv_ref->SAFENAME(), "gv", "Test SAFENAME()");
 like($gv_ref->FILE(), qr/b\.t$/, "Testing FILE()");
 is($gv_ref->SvTYPE(), B::SVt_PVGV, "Test SvTYPE()");
 is($gv_ref->FLAGS() & B::SVTYPEMASK, B::SVt_PVGV, "Test SVTYPEMASK");
-is($gv_ref->GPFLAGS & B::GPf_ALIASED_SV, 0, 'GPFLAGS are unset');
-{
-    local *gv = \my $x;
-    is($gv_ref->GPFLAGS & B::GPf_ALIASED_SV, B::GPf_ALIASED_SV,
-        'GPFLAGS gets GPf_ALIASED_SV set');
-}    
 
 # The following return B::SPECIALs.
 is(ref B::sv_yes(), "B::SPECIAL", "B::sv_yes()");

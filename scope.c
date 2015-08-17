@@ -720,16 +720,6 @@ Perl_save_alloc(pTHX_ I32 size, I32 pad)
     return start;
 }
 
-void
-Perl_save_aliased_sv(pTHX_ GV *gv)
-{
-    dSS_ADD;
-    PERL_ARGS_ASSERT_SAVE_ALIASED_SV;
-    SS_ADD_PTR(gp_ref(GvGP(gv)));
-    SS_ADD_UV(SAVEt_GP_ALIASED_SV | cBOOL(GvALIASED_SV(gv)) << 8);
-    SS_ADD_END(2);
-}
-
 
 
 #define ARG0_SV  MUTABLE_SV(arg0.any_ptr)
@@ -1252,24 +1242,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_READONLY_OFF:
 	    SvREADONLY_off(ARG0_SV);
 	    break;
-	case SAVEt_GP_ALIASED_SV: {
-	    /* The GP may have been abandoned, leaving the savestack with
-	       the only remaining reference to it.  */
-	    GP * const gp = (GP *)ARG0_PTR;
-	    if (gp->gp_refcnt == 1) {
-		GV * const gv = (GV *)sv_2mortal(newSV_type(SVt_PVGV));
-		isGV_with_GP_on(gv);
-		GvGP_set(gv,gp);
-		gp_free(gv);
-		isGV_with_GP_off(gv);
-	    }
-	    else {
-		gp->gp_refcnt--;
-		if (uv >> 8) gp->gp_flags |=  GPf_ALIASED_SV;
-		else	     gp->gp_flags &= ~GPf_ALIASED_SV;
-	    }
-	    break;
-	}
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency %u", type);
 	}

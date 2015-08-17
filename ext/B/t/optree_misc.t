@@ -205,7 +205,7 @@ checkOptree ( name      => 'padrange',
 # -           <0> padsv[$x:1,2] vM/LVINTRO ->-
 # -           <0> padsv[$y:1,2] vM/LVINTRO ->-
 # 3        <;> nextstate(main 2 -e:1) v:>,<,% ->4
-# 8        <2> aassign[t4] vKS ->9
+# 8        <2> aassign[t4] vKS/COM_AGG ->9
 # -           <1> ex-list lKP ->5
 # 4              <0> padrange[$x:1,2; $y:1,2] /2 ->5
 # -              <0> padsv[$x:1,2] s ->-
@@ -215,7 +215,7 @@ checkOptree ( name      => 'padrange',
 # 7              <1> rv2av[t3] lKRM*/1 ->8
 # 6                 <#> gv[*a] s ->7
 # 9        <;> nextstate(main 2 -e:1) v:>,<,%,{ ->a
-# e        <2> aassign[t6] KS ->f
+# e        <2> aassign[t6] KS/COM_RC1 ->f
 # -           <1> ex-list lK ->d
 # a              <0> pushmark s ->b
 # c              <1> rv2av[t5] lK/1 ->d
@@ -233,7 +233,7 @@ EOT_EOT
 # -           <0> padsv[$x:1,2] vM/LVINTRO ->-
 # -           <0> padsv[$y:1,2] vM/LVINTRO ->-
 # 3        <;> nextstate(main 2 -e:1) v:>,<,% ->4
-# 8        <2> aassign[t4] vKS ->9
+# 8        <2> aassign[t4] vKS/COM_AGG ->9
 # -           <1> ex-list lKP ->5
 # 4              <0> padrange[$x:1,2; $y:1,2] /2 ->5
 # -              <0> padsv[$x:1,2] s ->-
@@ -243,7 +243,7 @@ EOT_EOT
 # 7              <1> rv2av[t3] lKRM*/1 ->8
 # 6                 <$> gv(*a) s ->7
 # 9        <;> nextstate(main 2 -e:1) v:>,<,%,{ ->a
-# e        <2> aassign[t6] KS ->f
+# e        <2> aassign[t6] KS/COM_RC1 ->f
 # -           <1> ex-list lK ->d
 # a              <0> pushmark s ->b
 # c              <1> rv2av[t5] lK/1 ->d
@@ -276,7 +276,7 @@ checkOptree ( name      => 'padrange and @_',
 # -              <0> padsv[$a:1,4] sRM*/LVINTRO ->-
 # -              <0> padsv[$b:1,4] sRM*/LVINTRO ->-
 # 4        <;> nextstate(main 2 p3:2) v:>,<,% ->5
-# 9        <2> aassign[t10] vKS ->a
+# 9        <2> aassign[t10] vKS/COM_RC1 ->a
 # -           <1> ex-list lK ->8
 # 5              <0> pushmark s ->6
 # 7              <1> rv2av[t9] lK/1 ->8
@@ -309,7 +309,7 @@ EOT_EOT
 # -              <0> padsv[$a:1,4] sRM*/LVINTRO ->-
 # -              <0> padsv[$b:1,4] sRM*/LVINTRO ->-
 # 4        <;> nextstate(main 2 p3:2) v:>,<,% ->5
-# 9        <2> aassign[t10] vKS ->a
+# 9        <2> aassign[t10] vKS/COM_RC1 ->a
 # -           <1> ex-list lK ->8
 # 5              <0> pushmark s ->6
 # 7              <1> rv2av[t9] lK/1 ->8

@@ -1304,7 +1304,6 @@
 #define rsignal_restore(a,b)	Perl_rsignal_restore(aTHX_ a,b)
 #define rsignal_save(a,b,c)	Perl_rsignal_save(aTHX_ a,b,c)
 #define rxres_save(a,b)		Perl_rxres_save(aTHX_ a,b)
-#define save_aliased_sv(a)	Perl_save_aliased_sv(aTHX_ a)
 #define save_strlen(a)		Perl_save_strlen(aTHX_ a)
 #define sawparens(a)		Perl_sawparens(aTHX_ a)
 #define scalar(a)		Perl_scalar(aTHX_ a)
@@ -1526,7 +1525,6 @@
 #define mro_get_linear_isa_dfs(a,b)	S_mro_get_linear_isa_dfs(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_OP_C)
-#define aassign_common_vars(a)	S_aassign_common_vars(aTHX_ a)
 #define apply_attrs(a,b,c)	S_apply_attrs(aTHX_ a,b,c)
 #define apply_attrs_my(a,b,c,d)	S_apply_attrs_my(aTHX_ a,b,c,d)
 #define assignment_type(a)	S_assignment_type(aTHX_ a)

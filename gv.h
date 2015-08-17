@@ -72,11 +72,6 @@ struct gp {
 #define GvNAME(gv)	GvNAME_get(gv)
 #define GvNAMELEN(gv)	GvNAMELEN_get(gv)
 
-#define	GvASSIGN_GENERATION(gv)		(0 + ((XPV*) SvANY(gv))->xpv_len)
-#define	GvASSIGN_GENERATION_set(gv,val)			\
-	STMT_START { assert(SvTYPE(gv) == SVt_PVGV);	\
-		(((XPV*) SvANY(gv))->xpv_len = (val)); } STMT_END
-
 /*
 =head1 GV Functions
 
@@ -197,12 +192,6 @@ Return the CV from the GV.
 #define GvIMPORTED_CV(gv)	(GvFLAGS(gv) & GVf_IMPORTED_CV)
 #define GvIMPORTED_CV_on(gv)	(GvFLAGS(gv) |= GVf_IMPORTED_CV)
 #define GvIMPORTED_CV_off(gv)	(GvFLAGS(gv) &= ~GVf_IMPORTED_CV)
-
-#define GPf_ALIASED_SV	1
-
-#define GvALIASED_SV(gv)	(GvGPFLAGS(gv) & GPf_ALIASED_SV)
-#define GvALIASED_SV_on(gv)	(GvGPFLAGS(gv) |= GPf_ALIASED_SV)
-#define GvALIASED_SV_off(gv)	(GvGPFLAGS(gv) &= ~GPf_ALIASED_SV)
 
 #ifndef PERL_CORE
 #  define GvIN_PAD(gv)		0
