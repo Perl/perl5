@@ -10466,7 +10466,11 @@ Perl_ck_refassign(pTHX_ OP *o)
     assert (left);
     assert (left->op_type == OP_SREFGEN);
 
-    o->op_private = varop->op_private & (OPpLVAL_INTRO|OPpPAD_STATE);
+    o->op_private = 0;
+    /* we use OPpPAD_STATE in refassign to mean either of those things,
+     * and the code assumes the two flags occupy the same bit position
+     * in the various ops below */
+    assert(OPpPAD_STATE == OPpOUR_INTRO);
 
     switch (varop->op_type) {
     case OP_PADAV:
@@ -10474,12 +10478,15 @@ Perl_ck_refassign(pTHX_ OP *o)
 	goto settarg;
     case OP_PADHV:
 	o->op_private |= OPpLVREF_HV;
+        /* FALLTHROUGH */
     case OP_PADSV:
       settarg:
+        o->op_private |= (varop->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
 	o->op_targ = varop->op_targ;
 	varop->op_targ = 0;
 	PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
 	break;
+
     case OP_RV2AV:
 	o->op_private |= OPpLVREF_AV;
 	goto checkgv;
@@ -10489,6 +10496,7 @@ Perl_ck_refassign(pTHX_ OP *o)
         /* FALLTHROUGH */
     case OP_RV2SV:
       checkgv:
+        o->op_private |= (varop->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO));
 	if (cUNOPx(varop)->op_first->op_type != OP_GV) goto bad;
       detach_and_stack:
 	/* Point varop to its GV kid, detached.  */
@@ -10511,6 +10519,7 @@ Perl_ck_refassign(pTHX_ OP *o)
     }
     case OP_AELEM:
     case OP_HELEM:
+        o->op_private |= (varop->op_private & OPpLVAL_INTRO);
 	o->op_private |= OPpLVREF_ELEM;
 	op_null(varop);
 	stacked = TRUE;

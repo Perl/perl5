@@ -477,6 +477,11 @@ addbits($_, 7 => qw(OPpPV_IS_UTF8 UTF)) for qw(last redo next goto dump);
 
 
 
+# note that for refassign, this bit can mean either OPpPAD_STATE or
+# OPpOUR_INTRO depending on the type of the LH child, .e.g.
+#   \our   $foo = ...
+#   \state $foo = ...
+
 addbits($_, 6 => qw(OPpPAD_STATE STATE))  for qw(padav padhv padsv lvavref
                                                  lvref refassign pushmark);
 
@@ -748,6 +753,7 @@ addbits($_,
                              3   OPpLVREF_CV   CV
                          )],
          },
+   #6 => qw(OPpPAD_STATE STATE),
    #7 => qw(OPpLVAL_INTRO LVINTRO),
 ) for 'refassign', 'lvref';
 
