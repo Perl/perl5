@@ -4763,9 +4763,19 @@ PerlIOCrlf_binmode(pTHX_ PerlIO *f)
     return 0;
 }
 
-PERLIO_FUNCS_DECL(PerlIO_crlf) = {
+#define PERLIO_USING_CRLF
+
+#ifdef PERLIO_USING_CRLF
+#define crlf_symbol PerlIO_crlf_fallback
+#define crlf_name "crlf_fallback"
+#else
+#define crlf_symbol PerlIO_crlf
+#define crlf_name "crlf"
+#endif
+
+PERLIO_FUNCS_DECL(crlf_symbol) = {
     sizeof(PerlIO_funcs),
-    "crlf",
+    crlf_name,
     sizeof(PerlIOCrlf),
     PERLIO_K_BUFFERED | PERLIO_K_CANCRLF | PERLIO_K_RAW,
     PerlIOCrlf_pushed,
@@ -4793,6 +4803,80 @@ PERLIO_FUNCS_DECL(PerlIO_crlf) = {
     PerlIOCrlf_get_cnt,
     PerlIOCrlf_set_ptrcnt,
 };
+
+#ifdef PERLIO_USING_CRLF
+IV
+PerlIOCrlf2_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
+{
+    IV code;
+    int fd = PerlIO_fileno(PerlIONext(f));
+    if (fd < 0)
+	return PerlIO_push(f, &PerlIO_crlf_fallback, mode, arg) ? 0 : -1;
+    code = PerlIOBuf_pushed(aTHX_ f, mode, arg, tab);
+    _setmode(fd, O_TEXT);
+#if 0
+    PerlIO_debug("PerlIOCrlf2_pushed f=%p %s %s fl=%08" UVxf "\n",
+		 (void*)f, PerlIOBase(f)->tab->name, (mode) ? mode : "(Null)",
+		 PerlIOBase(f)->flags);
+#endif
+    {
+      /* If the old top layer is a CRLF layer, reactivate it (if
+       * necessary) and remove this new layer from the stack */
+	PerlIO *g = PerlIONext(f);
+	if (PerlIOValid(g)) {
+	    PerlIOl *b = PerlIOBase(g);
+	    if (b && b->tab == &PerlIO_crlf) {
+		S_inherit_utf8_flag(g);
+		PerlIO_pop(aTHX_ f);
+		return code;
+	    }
+	}
+    }
+    S_inherit_utf8_flag(f);
+    return code;
+}
+
+IV
+PerlIOCrlf2_binmode(pTHX_ PerlIO *f)
+{
+    int fd = PerlIO_fileno(PerlIONext(f));
+    if (fd < 0)
+	return -1;
+    _setmode(fd, O_BINARY);
+    return 0;
+}
+
+PERLIO_FUNCS_DECL(PerlIO_crlf) = {
+    sizeof(PerlIO_funcs),
+    "crlf",
+    sizeof(PerlIOBuf),
+    PERLIO_K_BUFFERED|PERLIO_K_RAW,
+    PerlIOCrlf2_pushed,
+    PerlIOBuf_popped,
+    PerlIOBuf_open,
+    PerlIOCrlf2_binmode,         /* binmode */
+    NULL,
+    PerlIOBase_fileno,
+    PerlIOBuf_dup,
+    PerlIOBuf_read,
+    PerlIOBuf_unread,
+    PerlIOBuf_write,
+    PerlIOBuf_seek,
+    PerlIOBuf_tell,
+    PerlIOBuf_close,
+    PerlIOBuf_flush,
+    PerlIOBuf_fill,
+    PerlIOBase_eof,
+    PerlIOBase_error,
+    PerlIOBase_clearerr,
+    PerlIOBase_setlinebuf,
+    PerlIOBuf_get_base,
+    PerlIOBuf_bufsiz,
+    PerlIOBuf_get_ptr,
+    PerlIOBuf_get_cnt,
+    PerlIOBuf_set_ptrcnt,
+};
+#endif
 
 PerlIO *
 Perl_PerlIO_stdin(pTHX)
