@@ -93,44 +93,44 @@
     'expr::array::ref_expr_lex_3const' => {
         desc    => '(lexical expr)->[const][const][const]',
         setup   => 'my $r = [[[1,2]]]',
-        code    => '($r//0)->[0][0][0]',
+        code    => '($r||0)->[0][0][0]',
     },
 
 
     'expr::array::pkg_1const_0' => {
         desc    => 'package $array[0]',
-        setup   => 'our @a = (1)',
+        setup   => '@a = (1)',
         code    => '$a[0]',
     },
     'expr::array::pkg_1const_m1' => {
         desc    => 'package $array[-1]',
-        setup   => 'our @a = (1)',
+        setup   => '@a = (1)',
         code    => '$a[-1]',
     },
     'expr::array::pkg_2const' => {
         desc    => 'package $array[const][const]',
-        setup   => 'our @a = ([1,2])',
+        setup   => '@a = ([1,2])',
         code    => '$a[0][1]',
     },
     'expr::array::pkg_2var' => {
         desc    => 'package $array[$i1][$i2]',
-        setup   => 'our ($i1,$i2) = (0,1); our @a = ([1,2])',
+        setup   => '($i1,$i2) = (0,1); @a = ([1,2])',
         code    => '$a[$i1][$i2]',
     },
     'expr::array::ref_pkg_2var' => {
         desc    => 'package $arrayref->[$i1][$i2]',
-        setup   => 'our ($i1,$i2) = (0,1); our $r = [[1,2]]',
+        setup   => '($i1,$i2) = (0,1); $r = [[1,2]]',
         code    => '$r->[$i1][$i2]',
     },
     'expr::array::ref_pkg_3const' => {
         desc    => 'package $arrayref->[const][const][const]',
-        setup   => 'our $r = [[[1,2]]]',
+        setup   => '$r = [[[1,2]]]',
         code    => '$r->[0][0][0]',
     },
     'expr::array::ref_expr_pkg_3const' => {
         desc    => '(package expr)->[const][const][const]',
-        setup   => 'our $r = [[[1,2]]]',
-        code    => '($r//0)->[0][0][0]',
+        setup   => '$r = [[[1,2]]]',
+        code    => '($r||0)->[0][0][0]',
     },
 
 
@@ -142,8 +142,8 @@
     },
     'expr::arrayhash::pkg_3var' => {
         desc    => 'package $h{$k1}[$i]{$k2}',
-        setup   => 'our ($i, $k1, $k2) = (0,"foo","bar");'
-                    . 'our %h = (foo => [ { bar => 1 } ])',
+        setup   => '($i, $k1, $k2) = (0,"foo","bar");'
+                    . '%h = (foo => [ { bar => 1 } ])',
         code    => '$h{$k1}[$i]{$k2}',
     },
 
@@ -188,39 +188,39 @@
     'expr::hash::ref_expr_lex_3const' => {
         desc    => '(lexical expr)->{const}{const}{const}',
         setup   => 'my $r = {foo => { bar => { baz => 1 }}}',
-        code    => '($r//0)->{foo}{bar}{baz}',
+        code    => '($r||0)->{foo}{bar}{baz}',
     },
 
 
     'expr::hash::pkg_1const' => {
         desc    => 'package $hash{const}',
-        setup   => 'our %h = ("foo" => 1)',
+        setup   => '%h = ("foo" => 1)',
         code    => '$h{foo}',
     },
     'expr::hash::pkg_2const' => {
         desc    => 'package $hash{const}{const}',
-        setup   => 'our %h = (foo => { bar => 1 })',
+        setup   => '%h = (foo => { bar => 1 })',
         code    => '$h{foo}{bar}',
     },
     'expr::hash::pkg_2var' => {
         desc    => 'package $hash{$k1}{$k2}',
-        setup   => 'our ($k1,$k2) = qw(foo bar); our %h = ($k1 => { $k2 => 1 })',
+        setup   => '($k1,$k2) = qw(foo bar); %h = ($k1 => { $k2 => 1 })',
         code    => '$h{$k1}{$k2}',
     },
     'expr::hash::ref_pkg_2var' => {
         desc    => 'package $hashref->{$k1}{$k2}',
-        setup   => 'our ($k1,$k2) = qw(foo bar); our $r = {$k1 => { $k2 => 1 }}',
+        setup   => '($k1,$k2) = qw(foo bar); $r = {$k1 => { $k2 => 1 }}',
         code    => '$r->{$k1}{$k2}',
     },
     'expr::hash::ref_pkg_3const' => {
         desc    => 'package $hashref->{const}{const}{const}',
-        setup   => 'our $r = {foo => { bar => { baz => 1 }}}',
+        setup   => '$r = {foo => { bar => { baz => 1 }}}',
         code    => '$r->{foo}{bar}{baz}',
     },
     'expr::hash::ref_expr_pkg_3const' => {
         desc    => '(package expr)->{const}{const}{const}',
-        setup   => 'our $r = {foo => { bar => { baz => 1 }}}',
-        code    => '($r//0)->{foo}{bar}{baz}',
+        setup   => '$r = {foo => { bar => { baz => 1 }}}',
+        code    => '($r||0)->{foo}{bar}{baz}',
     },
 
 
@@ -238,7 +238,7 @@
 
     'expr::index::utf8_position_1' => {
         desc    => 'index of a utf8 string, matching at position 1',
-        setup   => 'utf8::upgrade my $x = "abc"',
+        setup   => 'my $x = "abc". chr(0x100); chop $x',
         code    => 'index $x, "b"',
     },
 
