@@ -1217,6 +1217,11 @@ missing.  You need to figure out where your CRTL misplaced its environ
 or define F<PERL_ENV_TABLES> (see L<perlvms>) so that environ is not
 searched.
 
+=item Can't redeclare "%s" in "%s"
+
+(F) A "my", "our" or "state" declaration was found within another declaration,
+such as C<my ($x, my($y), $z)> or C<our (my $x)>.
+
 =item Can't "redo" outside a loop block
 
 (F) A "redo" statement was executed to restart the current block, but

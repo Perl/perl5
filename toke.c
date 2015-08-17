@@ -7605,6 +7605,14 @@ Perl_yylex(pTHX)
 	case KEY_our:
 	case KEY_my:
 	case KEY_state:
+	    if (PL_in_my) {
+	        yyerror(Perl_form(aTHX_
+	                          "Can't redeclare \"%s\" in \"%s\"",
+	                           tmp      == KEY_my    ? "my" :
+	                           tmp      == KEY_state ? "state" : "our",
+	                           PL_in_my == KEY_my    ? "my" :
+	                           PL_in_my == KEY_state ? "state" : "our"));
+	    }
 	    PL_in_my = (U16)tmp;
 	    s = skipspace(s);
 	    if (isIDFIRST_lazy_if(s,UTF)) {

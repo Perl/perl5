@@ -234,3 +234,48 @@ Constant(q) unknown at - line 12, near ""a""
 <<"foo
 EXPECT
 Unterminated delimiter for here document at - line 1.
+########
+# NAME my (our $x) errors
+my (our $x);
+EXPECT
+Can't redeclare "our" in "my" at - line 1, at end of line
+Execution of - aborted due to compilation errors.
+########
+# NAME our (my $x) errors
+our (my $x);
+EXPECT
+Can't redeclare "my" in "our" at - line 1, at end of line
+Execution of - aborted due to compilation errors.
+########
+# NAME state (my $x) errors
+use feature 'state';
+state (my $x);
+EXPECT
+Can't redeclare "my" in "state" at - line 2, at end of line
+Execution of - aborted due to compilation errors.
+########
+# NAME our (state $x) errors
+use feature 'state';
+our (state $x);
+EXPECT
+Can't redeclare "state" in "our" at - line 2, at end of line
+Execution of - aborted due to compilation errors.
+########
+# NAME my (my $x) errors
+my (my $x, $y, $z);
+EXPECT
+Can't redeclare "my" in "my" at - line 1, at end of line
+Execution of - aborted due to compilation errors.
+########
+# NAME our (our $x) errors
+our ($x, our($y), $z);
+EXPECT
+Can't redeclare "our" in "our" at - line 1, near ", "
+Execution of - aborted due to compilation errors.
+########
+# NAME state (state $x) errors
+use feature 'state';
+state ($x, $y, state $z);
+EXPECT
+Can't redeclare "state" in "state" at - line 2, near ", "
+Execution of - aborted due to compilation errors.

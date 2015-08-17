@@ -859,12 +859,12 @@ is("@b", "1 2 3 3 4 5 7", "comparison result as string");
     is($cs, 2, 'overload string called twice');
 }
 
-fresh_perl_is('sub w ($$) {my ($l, my $r) = @_; my $v = \@_; undef @_; $l <=> $r}; print join q{ }, sort w 3, 1, 2, 0',
+fresh_perl_is('sub w ($$) {my ($l, $r) = @_; my $v = \@_; undef @_; $l <=> $r}; print join q{ }, sort w 3, 1, 2, 0',
              '0 1 2 3',
              {stderr => 1, switches => ['-w']},
              'RT #72334');
 
-fresh_perl_is('sub w ($$) {my ($l, my $r) = @_; my $v = \@_; undef @_; @_ = 0..2; $l <=> $r}; print join q{ }, sort w 3, 1, 2, 0',
+fresh_perl_is('sub w ($$) {my ($l, $r) = @_; my $v = \@_; undef @_; @_ = 0..2; $l <=> $r}; print join q{ }, sort w 3, 1, 2, 0',
              '0 1 2 3',
              {stderr => 1, switches => ['-w']},
              'RT #72334');
