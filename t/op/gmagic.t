@@ -77,6 +77,7 @@ expected_tie_calls(tied $c, 1, 2, 'chomping a ref');
  # Do this again, with a utf8 handle
     $c = *foo;                                         # 1 write
     open $h, "<:utf8", $outfile;
+    no warnings 'deprecated';
     sysread $h, $c, 3, 7;                              # 1 read; 1 write
     is $c, "*main::bar", 'what sysread wrote';         # 1 read
     expected_tie_calls(tied $c, 2, 2, 'calling sysread with tied buf');

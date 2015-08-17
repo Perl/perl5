@@ -169,6 +169,7 @@ foreach my $operator ('print', 'syswrite', 'syswrite len', 'syswrite off',
 	my $trail = $operator =~ /\blen\b/ ? "!" : "";
 	my $u = UTF8Toggle->new("$pad$E_acute\n$trail");
 	my $l = UTF8Toggle->new("$pad$e_acute\n$trail", 1);
+        no warnings 'deprecated';
 	if ($operator eq 'print') {
 	    no warnings 'utf8';
 	    print $fh $u;
