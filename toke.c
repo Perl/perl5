@@ -6107,6 +6107,7 @@ Perl_yylex(pTHX)
 	}
 	switch (PL_expect) {
 	case XTERM:
+	case XTERMORDORDOR:
 	    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
 	    PL_lex_allbrackets++;
 	    OPERATOR(HASHBRACK);
