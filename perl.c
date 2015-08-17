@@ -2666,7 +2666,7 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
 
 Performs a callback to the Perl sub specified by the SV.
 
-If neither the C<G_METHOD> or C<G_METHOD_NAMED> flag is supplied, the
+If neither the C<G_METHOD> nor C<G_METHOD_NAMED> flag is supplied, the
 SV may be any of a CV, a GV, a reference to a CV, a reference to a GV
 or C<SvPV(sv)> will be used as the name of the sub to call.
 
