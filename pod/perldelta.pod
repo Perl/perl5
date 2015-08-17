@@ -49,6 +49,28 @@ XXX For a release on a stable branch, this section aspires to be:
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
 
+=head2 sysread(), syswrite(), recv() and send() are deprecated on
+:utf8 handles
+
+The sysread(), recv(), syswrite() and send() operators
+are deprecated on handles that have the C<:utf8> layer, either
+explicitly, or implicitly, eg., with the C<:encoding(UTF-16LE)> layer.
+
+Both sysread() and recv() currently use only the C<:utf8> flag for the
+stream, ignoring the actual layers.  Since sysread() and recv() do no
+UTF-8 validation they can end up creating invalidly encoded scalars.
+
+Similarly, syswrite() and send() use only the C<:utf8> flag, otherwise
+ignoring any layers.  If the flag is set, both write the value UTF-8
+encoded, even if the layer is some different encoding, such as the
+example above.
+
+Ideally, all of these operators would completely ignore the C<:utf8>
+state, working only with bytes, but this would result in silently
+breaking existing code.  To avoid this a future version of perl will
+throw an exception when any of sysread(), recv(), syswrite() or send()
+are called on handle with the C<:utf8> layer.
+
 =head2 Module removals
 
 XXX Remove this section if inapplicable.
