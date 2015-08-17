@@ -1643,31 +1643,6 @@ d_msg (d_msg.U):
 	This variable conditionally defines the HAS_MSG symbol, which
 	indicates that the entire msg*(2) library is present.
 
-d_msg_ctrunc (d_socket.U):
-	This variable conditionally defines the HAS_MSG_CTRUNC symbol,
-	which indicates that the MSG_CTRUNC is available.  #ifdef is
-	not enough because it may be an enum, glibc has been known to do this.
-
-d_msg_dontroute (d_socket.U):
-	This variable conditionally defines the HAS_MSG_DONTROUTE symbol,
-	which indicates that the MSG_DONTROUTE is available.  #ifdef is
-	not enough because it may be an enum, glibc has been known to do this.
-
-d_msg_oob (d_socket.U):
-	This variable conditionally defines the HAS_MSG_OOB symbol,
-	which indicates that the MSG_OOB is available.  #ifdef is
-	not enough because it may be an enum, glibc has been known to do this.
-
-d_msg_peek (d_socket.U):
-	This variable conditionally defines the HAS_MSG_PEEK symbol,
-	which indicates that the MSG_PEEK is available.  #ifdef is
-	not enough because it may be an enum, glibc has been known to do this.
-
-d_msg_proxy (d_socket.U):
-	This variable conditionally defines the HAS_MSG_PROXY symbol,
-	which indicates that the MSG_PROXY is available.  #ifdef is
-	not enough because it may be an enum, glibc has been known to do this.
-
 d_msgctl (d_msgctl.U):
 	This variable conditionally defines the HAS_MSGCTL symbol, which
 	indicates to the C program that the msgctl() routine is available.
@@ -2060,11 +2035,6 @@ d_sched_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_SCHED_YIELD
 	symbol if the sched_yield routine is available to yield
 	the execution of the current thread.
-
-d_scm_rights (d_socket.U):
-	This variable conditionally defines the HAS_SCM_RIGHTS symbol,
-	which indicates that the SCM_RIGHTS is available.  #ifdef is
-	not enough because it may be an enum, glibc has been known to do this.
 
 d_SCNfldbl (longdblfio.U):
 	This variable conditionally defines the PERL_PRIfldbl symbol, which

@@ -2726,36 +2726,6 @@
  *	This symbol, if defined, indicates that the BSD socketpair() call is
  *	supported.
  */
-/* HAS_MSG_CTRUNC:
- *	This symbol, if defined, indicates that the MSG_CTRUNC is supported.
- *	Checking just with #ifdef might not be enough because this symbol
- *	has been known to be an enum.
- */
-/* HAS_MSG_DONTROUTE:
- *	This symbol, if defined, indicates that the MSG_DONTROUTE is supported.
- *	Checking just with #ifdef might not be enough because this symbol
- *	has been known to be an enum.
- */
-/* HAS_MSG_OOB:
- *	This symbol, if defined, indicates that the MSG_OOB is supported.
- *	Checking just with #ifdef might not be enough because this symbol
- *	has been known to be an enum.
- */
-/* HAS_MSG_PEEK:
- *	This symbol, if defined, indicates that the MSG_PEEK is supported.
- *	Checking just with #ifdef might not be enough because this symbol
- *	has been known to be an enum.
- */
-/* HAS_MSG_PROXY:
- *	This symbol, if defined, indicates that the MSG_PROXY is supported.
- *	Checking just with #ifdef might not be enough because this symbol
- *	has been known to be an enum.
- */
-/* HAS_SCM_RIGHTS:
- *	This symbol, if defined, indicates that the SCM_RIGHTS is supported.
- *	Checking just with #ifdef might not be enough because this symbol
- *	has been known to be an enum.
- */
 /* HAS_SOCKADDR_SA_LEN:
  *	This symbol, if defined, indicates that the struct sockaddr
  *	structure has a member called sa_len, indicating the length of
@@ -2768,12 +2738,6 @@
 #define	HAS_SOCKET		/**/
 #define	HAS_SOCKETPAIR	/**/
 /*#define	HAS_SOCKADDR_SA_LEN	/ **/
-#define	HAS_MSG_CTRUNC	/**/
-#define	HAS_MSG_DONTROUTE	/**/
-#define	HAS_MSG_OOB	/**/
-#define	HAS_MSG_PEEK	/**/
-#define	HAS_MSG_PROXY	/**/
-#define	HAS_SCM_RIGHTS	/**/
 #define	HAS_SIN6_SCOPE_ID	/**/
 
 /* USE_STAT_BLOCKS:
