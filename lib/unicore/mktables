@@ -1441,6 +1441,7 @@ sub objaddr($) {
 # after all the input has been processed.  But most can be skipped, as they
 # have the same descriptive phrases, such as being unassigned
 my @viacode;            # Contains the 1 million character names
+my @age;                # And their ages ("" if none)
 my @printable;          # boolean: And are those characters printable?
 my @annotate_char_type; # Contains a type of those characters, specifically
                         # for the purposes of annotation.
@@ -1499,12 +1500,14 @@ sub populate_char_info ($) {
             $annotate_char_type[$i] = $ABOVE_UNICODE_TYPE;
             $printable[$i] = 0;
             $end = $MAX_WORKING_CODEPOINT;
+            $age[$i] = "";
         }
         elsif ($gc-> table('Private_use')->contains($i)) {
             $viacode[$i] = 'Private Use';
             $annotate_char_type[$i] = $PRIVATE_USE_TYPE;
             $printable[$i] = 0;
             $end = $gc->table('Private_Use')->containing_range($i)->end;
+            $age[$i] = property_ref("Age")->value_of($i);
         }
         elsif ((defined ($nonchar =
                             Property::property_ref('Noncharacter_Code_Point'))
@@ -1515,11 +1518,13 @@ sub populate_char_info ($) {
             $printable[$i] = 0;
             $end = property_ref('Noncharacter_Code_Point')->table('Y')->
                                                     containing_range($i)->end;
+            $age[$i] = property_ref("Age")->value_of($i);
         }
         elsif ($gc-> table('Control')->contains($i)) {
             $viacode[$i] = property_ref('Name_Alias')->value_of($i) || 'Control';
             $annotate_char_type[$i] = $CONTROL_TYPE;
             $printable[$i] = 0;
+            $age[$i] = property_ref("Age")->value_of($i);
         }
         elsif ($gc-> table('Unassigned')->contains($i)) {
             $annotate_char_type[$i] = $UNASSIGNED_TYPE;
@@ -1540,12 +1545,14 @@ sub populate_char_info ($) {
                            $unassigned_sans_noncharacters->
                                                     containing_range($i)->end);
             }
+            $age[$i] = property_ref("Age")->value_of($i);
         }
         elsif ($perl->table('_Perl_Surrogate')->contains($i)) {
             $viacode[$i] = 'Surrogate';
             $annotate_char_type[$i] = $SURROGATE_TYPE;
             $printable[$i] = 0;
             $end = $gc->table('Surrogate')->containing_range($i)->end;
+            $age[$i] = property_ref("Age")->value_of($i);
         }
         else {
             Carp::my_carp_bug("Can't figure out how to annotate "
@@ -1561,7 +1568,18 @@ sub populate_char_info ($) {
     # appended to the name, do that.
     elsif ($annotate_char_type[$i] == $CP_IN_NAME) {
         $viacode[$i] .= sprintf("-%04X", $i);
-        $end = $perl_charname->containing_range($i)->end;
+
+        # Do all these as groups of the same age, instead of individually,
+        # because their names are so meaningless, and there are typically
+        # large quantities of them.
+        my $Age = property_ref("Age");
+        $age[$i] = $Age->value_of($i);
+        my $limit = $perl_charname->containing_range($i)->end;
+        $end = $i + 1;
+        while ($end <= $limit && $Age->value_of($end) == $age[$i]) {
+            $end++;
+        }
+        $end--;
     }
 
     # And here, has a name, but if it's a hangul syllable one, replace it with
@@ -1574,7 +1592,11 @@ sub populate_char_info ($) {
         my $T = $TBase + $SIndex % $TCount;
         $viacode[$i] = "HANGUL SYLLABLE $Jamo{$L}$Jamo{$V}";
         $viacode[$i] .= $Jamo{$T} if $T != $TBase;
+        $age[$i] = property_ref("Age")->value_of($i);
         $end = $perl_charname->containing_range($i)->end;
+    }
+    else {
+        $age[$i] = property_ref("Age")->value_of($i);
     }
 
     return if ! defined wantarray;
@@ -6341,7 +6363,10 @@ END
                                 else { # Indent if not displaying code points
                                     $annotation = " " x 4;
                                 }
-                                $annotation .= " $range_name" if $range_name;
+                                if ($range_name) {
+                                    $annotation .= " $age[$i]" if $age[$i];
+                                    $annotation .= " $range_name";
+                                }
 
                                 # Include the number of code points in the
                                 # range
@@ -6418,7 +6443,7 @@ END
                                 }
 
                                 if ($include_cp) {
-                                    $annotation = sprintf "%04X", $i;
+                                    $annotation = sprintf "%04X %s", $i, $age[$i];
                                     if ($use_adjustments) {
                                         $annotation .= " => $output_value";
                                     }
