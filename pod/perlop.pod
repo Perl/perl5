@@ -924,9 +924,9 @@ portable way to find out the home directory might be:
 In particular, this means that you shouldn't use this
 for selecting between two aggregates for assignment:
 
-    @a = @b || @c;		# this is wrong
-    @a = scalar(@b) || @c;	# really meant this
-    @a = @b ? @b : @c;		# this works fine, though
+    @a = @b || @c;            # This doesn't do the right thing
+    @a = scalar(@b) || @c;    # because it really means this.
+    @a = @b ? @b : @c;        # This works fine, though.
 
 As alternatives to C<&&> and C<||> when used for
 control flow, Perl provides the C<and> and C<or> operators (see below).
