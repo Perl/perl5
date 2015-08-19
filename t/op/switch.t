@@ -1295,7 +1295,6 @@ unreified_check(undef,"");
     sub DESTROY { $d++ };
 
     sub f2 {
-	no warnings 'experimental::lexical_topic';
 	local $_ = 5;
 	given(bless [7]) {
 	    ::is($_->[0], 7, "is [7]");
