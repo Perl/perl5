@@ -1680,7 +1680,6 @@ sub run_tests {
 
     {
         # length() on captures, the numbered ones end up in Perl_magic_len
-        no warnings 'deprecated', 'experimental::lexical_topic';
         local $_ = "aoeu " . uni_to_native("\xe6") . "var ook";
         /^ \w+ \s (?<eek>\S+)/x;
 
