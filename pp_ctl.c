@@ -940,10 +940,7 @@ PP(pp_grepstart)
     ENTER_with_name("grep");					/* enter outer scope */
 
     SAVETMPS;
-    if (PL_op->op_private & OPpGREP_LEX)
-	SAVESPTR(PAD_SVl(PL_op->op_targ));
-    else
-	SAVE_DEFSV;
+    SAVE_DEFSV;
     ENTER_with_name("grep_item");					/* enter inner scope */
     SAVEVPTR(PL_curpm);
 
@@ -953,10 +950,7 @@ PP(pp_grepstart)
 	PL_tmps_floor++;
     }
     SvTEMP_off(src);
-    if (PL_op->op_private & OPpGREP_LEX)
-	PAD_SVl(PL_op->op_targ) = src;
-    else
-	DEFSV_set(src);
+    DEFSV_set(src);
 
     PUTBACK;
     if (PL_op->op_type == OP_MAPSTART)
@@ -1078,15 +1072,8 @@ PP(pp_mapwhile)
 	(void)POPMARK;				/* pop dst */
 	SP = PL_stack_base + POPMARK;		/* pop original mark */
 	if (gimme == G_SCALAR) {
-	    if (PL_op->op_private & OPpGREP_LEX) {
-		SV* sv = sv_newmortal();
-		sv_setiv(sv, items);
-		PUSHs(sv);
-	    }
-	    else {
 		dTARGET;
 		XPUSHi(items);
-	    }
 	}
 	else if (gimme == G_ARRAY)
 	    SP += items;
@@ -1104,10 +1091,7 @@ PP(pp_mapwhile)
             src = sv_mortalcopy(src);
         }
 	SvTEMP_off(src);
-	if (PL_op->op_private & OPpGREP_LEX)
-	    PAD_SVl(PL_op->op_targ) = src;
-	else
-	    DEFSV_set(src);
+	DEFSV_set(src);
 
 	RETURNOP(cLOGOP->op_other);
     }
