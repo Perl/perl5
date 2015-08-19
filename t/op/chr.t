@@ -49,7 +49,9 @@ is chr "-2.2", chr -2.2, 'chr "-2.2" eq chr -2.2';
 
 # Check UTF-8 (not UTF-EBCDIC).
 SKIP: {
-    skip "no UTF-8 on EBCDIC", 21 if $::IS_EBCDIC;
+    skip "ASCII centric tests", 21 if $::IS_EBCDIC;
+    # Too hard to convert these tests generically to EBCDIC code pages without
+    # using chr(), which is what we're testing.
 
 sub hexes {
     no warnings 'utf8'; # avoid surrogate and beyond Unicode warnings
