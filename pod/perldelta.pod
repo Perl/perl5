@@ -127,6 +127,12 @@ line directives, breaking parsing of error code definitions.  [perl
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 5.20150214 to 5.20150420.
+
+Updated to cover the latest releases of Perl.
+
+=item *
+
 L<perl5db.pl> has been upgraded from 1.44 to 1.44_01.
 
 The debugger would cause an assertion failure.  [perl #124127]
