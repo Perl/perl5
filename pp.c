@@ -5596,7 +5596,7 @@ PP(pp_reverse)
 	if (SP - MARK > 1)
 	    do_join(TARG, &PL_sv_no, MARK, SP);
 	else {
-	    sv_setsv(TARG, SP > MARK ? *SP : find_rundefsv());
+	    sv_setsv(TARG, SP > MARK ? *SP : DEFSV);
 	}
 
 	up = SvPV_force(TARG, len);
