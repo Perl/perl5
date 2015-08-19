@@ -3702,11 +3702,10 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #  define USE_HASH_SEED
 #endif
 
-/* Win32 defines a type 'WORD' in windef.h. This conflicts with the enumerator
- * 'WORD' defined in perly.h. The yytokentype enum is only a debugging aid, so
- * it's not really needed.
- */
-#if defined(WIN32)
+/* Win32 defines a type 'WORD' in windef.h, and AmigaOS in exec/types.h.
+ * This conflicts with the enumerator 'WORD' defined in perly.h.
+ * The yytokentype enum is only a debugging aid, so it's not really needed. */
+#if defined(WIN32) || defined(__amigaos4__)
 #  define YYTOKENTYPE
 #endif
 #include "perly.h"
