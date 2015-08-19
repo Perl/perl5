@@ -761,6 +761,7 @@ struct block_loop {
 	SV      **svp; /* for lexicals: address of pad slot */
 	GV      *gv;   /* for package vars */
     } itervar_u;
+    SV          *itersave; /* the original iteration var */
     union {
 	struct { /* valid if type is LOOP_FOR or LOOP_PLAIN (but {NULL,0})*/
 	    AV * ary; /* use the stack if this is NULL */
@@ -804,7 +805,8 @@ struct block_loop {
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
         cx->blk_loop.old_savestack_ix = PL_savestack_ix;                \
-	cx->blk_loop.itervar_u.svp = NULL;
+	cx->blk_loop.itervar_u.svp = NULL;                              \
+	cx->blk_loop.itersave = NULL;
 
 #ifdef USE_ITHREADS
 #  define PUSHLOOP_FOR_setpad(c) (c)->blk_loop.oldcomppad = PL_comppad
@@ -812,13 +814,14 @@ struct block_loop {
 #  define PUSHLOOP_FOR_setpad(c) NOOP
 #endif
 
-#define PUSHLOOP_FOR(cx, ivar, s)					\
+#define PUSHLOOP_FOR(cx, ivar, isave, s)				\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
         cx->blk_loop.old_savestack_ix = PL_savestack_ix;                \
+        cx->blk_loop.itersave = isave;                                  \
         PUSHLOOP_FOR_setpad(cx);
 
 #define POPLOOP(cx)							\
@@ -827,8 +830,24 @@ struct block_loop {
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.cur);		\
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.end);		\
 	}								\
-	if (CxTYPE(cx) == CXt_LOOP_FOR)					\
-	    SvREFCNT_dec(cx->blk_loop.state_u.ary.ary);
+	else if (CxTYPE(cx) == CXt_LOOP_FOR)  				\
+	    SvREFCNT_dec(cx->blk_loop.state_u.ary.ary);                 \
+        if (cx->blk_loop.itersave) {                                    \
+            SV **svp = (cx)->blk_loop.itervar_u.svp;                    \
+            SV *cursv;                                                  \
+            if (isGV((GV*)svp)) {                                       \
+                svp = &GvSV((GV*)svp);                                  \
+                cursv = *svp;                                           \
+                *svp = cx->blk_loop.itersave;                           \
+                SvREFCNT_dec_NN(cx->blk_loop.itersave);                 \
+            }                                                           \
+            else {                                                      \
+                cursv = *svp;                                           \
+                *svp = cx->blk_loop.itersave;                           \
+            }                                                           \
+            /* delayed rc-- in case of "for $x (...) { return $x }" */  \
+            sv_2mortal(cursv);                                          \
+        }                                                               \
 
 /* given/when context */
 struct block_givwhen {
