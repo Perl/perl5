@@ -1055,7 +1055,7 @@ use File::Glob qw(:case);
     },
 
     'Term::Cap' => {
-        'DISTRIBUTION' => 'JSTOWE/Term-Cap-1.15.tar.gz',
+        'DISTRIBUTION' => 'JSTOWE/Term-Cap-1.17.tar.gz',
         'FILES'        => q[cpan/Term-Cap],
     },
 
