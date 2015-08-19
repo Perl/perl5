@@ -1528,9 +1528,14 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
 {
     const int e = errno;
     PERL_ARGS_ASSERT_EXEC_FAILED;
-    if (ckWARN(WARN_EXEC))
-	Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
-		    cmd, Strerror(e));
+#ifdef __amigaos4__
+    if (e)
+#endif
+    {
+	if (ckWARN(WARN_EXEC))
+	    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
+			cmd, Strerror(e));
+    }
     if (do_report) {
         /* XXX silently ignore failures */
         PERL_UNUSED_RESULT(PerlLIO_write(fd, (void*)&e, sizeof(int)));
