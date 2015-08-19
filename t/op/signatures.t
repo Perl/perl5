@@ -1091,24 +1091,6 @@ like $@, qr/\AParse error at foo line 8\.\n/;
 eval "#line 8 foo\nsub t099 (\$\$) { }";
 like $@, qr/\AParse error at foo line 8\.\n/;
 
-no warnings "experimental::lexical_topic";
-sub t100 ($_) { "$::_/$_" }
-is prototype(\&t100), undef;
-$_ = "___";
-is eval("t100()"), undef;
-like $@, qr/\AToo few arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
-$_ = "___";
-is eval("t100(0)"), "___/0";
-$_ = "___";
-is eval("t100(456)"), "___/456";
-$_ = "___";
-is eval("t100(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
-$_ = "___";
-is eval("t100(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
-is $a, 123;
-
 eval "#line 8 foo\nsub t101 (\@_) { }";
 like $@, qr/\ACan't use global \@_ in "my" at foo line 8/;
 
