@@ -2001,7 +2001,7 @@ is the recommended Unicode-aware way of saying
 #define TRIE_STORE_REVCHAR(val)                                            \
     STMT_START {                                                           \
 	if (UTF) {							   \
-            SV *zlopp = newSV(7); /* XXX: optimize me */                   \
+            SV *zlopp = newSV(UTF8_MAXBYTES);				   \
 	    unsigned char *flrbbbbb = (unsigned char *) SvPVX(zlopp);	   \
             unsigned const char *const kapow = uvchr_to_utf8(flrbbbbb, val); \
 	    SvCUR_set(zlopp, kapow - flrbbbbb);				   \

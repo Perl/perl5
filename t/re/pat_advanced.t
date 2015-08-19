@@ -2419,6 +2419,15 @@ EOF
                         'No segfault on qr{(?&foo){0}abc(?<foo>)}');
     }
 
+    SKIP:
+    {   # [perl #125826] buffer overflow in TRIE_STORE_REVCHAR
+        # (during compilation, so use a fresh perl)
+        $Config{uvsize} == 8
+	  or skip("need large code-points for this test", 1);
+	fresh_perl_is('/\x{E000000000}|/ and print qq(ok\n)', "ok\n", {},
+		      "buffer overflow in TRIE_STORE_REVCHAR");
+    }
+
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.
 
