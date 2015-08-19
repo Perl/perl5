@@ -71,7 +71,7 @@ sub test_proto {
 
     if (!@_) { return }
 
-    $tests += 6;
+    $tests += 3;
 
     my($in,$out) = @_; # for testing implied $_
 
@@ -83,34 +83,6 @@ sub test_proto {
 
     $_ = $in;
     is &{"CORE::$o"}(), $out, "&$o with no args";
-
-    # Since there is special code to deal with lexical $_, make sure it
-    # works in all cases.
-    undef $_;
-    {
-      no warnings 'experimental::lexical_topic';
-      my $_ = $in;
-      is &{"CORE::$o"}(), $out, "&$o with no args uses lexical \$_";
-    }
-    # Make sure we get the right pad under recursion
-    my $r;
-    $r = sub {
-      if($_[0]) {
-        no warnings 'experimental::lexical_topic';
-        my $_ = $in;
-        is &{"CORE::$o"}(), $out,
-           "&$o with no args uses the right lexical \$_ under recursion";
-      }
-      else {
-        &$r(1)
-      }
-    };
-    &$r(0);
-    no warnings 'experimental::lexical_topic';
-    my $_ = $in;
-    eval {
-       is "CORE::$o"->(), $out, "&$o with the right lexical \$_ in an eval"
-    };   
   }
   elsif ($p =~ '^;([$*]+)\z') { # ;$ ;* ;$$ etc.
     my $maxargs = length $1;
@@ -1062,8 +1034,7 @@ like $@, qr'^Undefined format "STDOUT" called',
   my $warnings;
   local $SIG{__WARN__} = sub { ++$warnings };
 
-  no warnings 'experimental::lexical_topic';
-  my $_ = 'Phoo';
+  local $_ = 'Phoo';
   ok &mymkdir(), '&mkdir';
   like <*>, qr/^phoo(.DIR)?\z/i, 'mkdir works with implicit $_';
 
