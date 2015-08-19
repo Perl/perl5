@@ -107,7 +107,7 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 <div><h3>Documentation Fixes</h3>
 
 <commit votes="steveh, khw" id="965d3000a316a5ed367c2ce65d040e1125d5e31d" ticket="" desc="Update supported versions in perlpolicy.pod"/>
-<commit votes="steveh" id="8764ee632ebcddc73e4e8d0f1cf1a48ac82ec87c" ticket="" desc="Require civility; aspire to kindness."/>
+<commit votes="steveh, khw" id="8764ee632ebcddc73e4e8d0f1cf1a48ac82ec87c" ticket="" desc="Require civility; aspire to kindness."/>
 
 </div>
 
