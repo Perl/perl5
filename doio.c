@@ -1543,12 +1543,14 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
     }
 }
 
-bool
+DO_EXEC_TYPE
 Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 	       int fd, int do_report)
 {
     dVAR;
+    DO_EXEC_TYPE result = DO_EXEC_FAILURE;
     PERL_ARGS_ASSERT_DO_AEXEC5;
+    PERL_UNUSED_VAR(result); /* if DO_EXEC_TYPE is bool */
 #if defined(__SYMBIAN32__) || defined(__LIBCATAMOUNT__)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
@@ -1571,16 +1573,21 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 	    (really && *tmps != '/'))		/* will execvp use PATH? */
 	    TAINT_ENV();		/* testing IFS here is overkill, probably */
 	PERL_FPU_PRE_EXEC
-	if (really && *tmps)
-	    PerlProc_execvp(tmps,EXEC_ARGV_CAST(PL_Argv));
-	else
-	    PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
+	if (really && *tmps) {
+            result =
+              (DO_EXEC_TYPE)
+              PerlProc_execvp(tmps,EXEC_ARGV_CAST(PL_Argv));
+	} else {
+	    result =
+              (DO_EXEC_TYPE)
+              PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
+	}
 	PERL_FPU_POST_EXEC
  	S_exec_failed(aTHX_ (really ? tmps : PL_Argv[0]), fd, do_report);
     }
     do_execfree();
 #endif
-    return FALSE;
+    return DO_EXEC_RETVAL(result);
 }
 
 void
@@ -1594,7 +1601,7 @@ Perl_do_execfree(pTHX)
 
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 
-bool
+DO_EXEC_TYPE
 Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 {
     dVAR;
@@ -1604,6 +1611,8 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     char *cmd;
     /* Make a copy so we can change it */
     const Size_t cmdlen = strlen(incmd) + 1;
+    DO_EXEC_TYPE result = DO_EXEC_FAILURE;
+    PERL_UNUSED_VAR(result); /* if DO_EXEC_TYPE is bool */
 
     PERL_ARGS_ASSERT_DO_EXEC3;
 
@@ -1639,12 +1648,14 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	      if (s[-1] == '\'') {
 		  *--s = '\0';
 		  PERL_FPU_PRE_EXEC
-		  PerlProc_execl(PL_cshname, "csh", flags, ncmd, (char*)NULL);
+		  result =
+                    (DO_EXEC_TYPE)
+                    PerlProc_execl(PL_cshname, "csh", flags, ncmd, (char*)NULL);
 		  PERL_FPU_POST_EXEC
 		  *s = '\'';
  		  S_exec_failed(aTHX_ PL_cshname, fd, do_report);
 		  Safefree(buf);
-		  return FALSE;
+		  return DO_EXEC_RETVAL(result);
 	      }
 	  }
 	}
@@ -1688,11 +1699,25 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	    }
 	  doshell:
 	    PERL_FPU_PRE_EXEC
-	    PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char *)NULL);
+	    result =
+              (DO_EXEC_TYPE)
+              PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char *)NULL);
 	    PERL_FPU_POST_EXEC
  	    S_exec_failed(aTHX_ PL_sh_path, fd, do_report);
+#if defined (__amigaos4__)
+	    /* We *must* write something to our pipe or else
+	     * the other end hangs */
+	    {
+		int e = errno;
+
+		if (do_report) {
+		    PerlLIO_write(fd, (void*)&e, sizeof(int));
+		    PerlLIO_close(fd);
+		}
+	    }
+#endif
 	    Safefree(buf);
-	    return FALSE;
+	    return DO_EXEC_RETVAL(result);
 	}
     }
 
@@ -1712,7 +1737,9 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     *a = NULL;
     if (PL_Argv[0]) {
 	PERL_FPU_PRE_EXEC
-	PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
+	result =
+          (DO_EXEC_TYPE)
+          PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
 	PERL_FPU_POST_EXEC
 	if (errno == ENOEXEC) {		/* for system V NIH syndrome */
 	    do_execfree();
@@ -1722,7 +1749,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     }
     do_execfree();
     Safefree(buf);
-    return FALSE;
+    return DO_EXEC_RETVAL(result);
 }
 
 #endif /* OS2 || WIN32 */

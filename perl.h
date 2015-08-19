@@ -5399,6 +5399,21 @@ struct tempsym; /* defined in pp_pack.c */
 #  include "win32iop.h"
 #endif
 
+/* DO_EXEC_TYPE is the return type of the do_*exec*() functions.
+ * For UNIXish platforms where the exec functions by definition
+ * return only failure, it can be bool (for success, they do not
+ * return).  For other platforms, where the calling entity may
+ * return, the return value may be more complex. */
+#if defined(__amigaos4__)
+#  define DO_EXEC_TYPE I32
+#  define DO_EXEC_FAILURE -1
+#  define DO_EXEC_RETVAL(val) (val)
+#else
+#  define DO_EXEC_TYPE bool
+#  define DO_EXEC_FAILURE FALSE
+#  define DO_EXEC_RETVAL(val) FALSE
+#endif
+
 #include "proto.h"
 
 /* this has structure inits, so it cannot be included before here */
