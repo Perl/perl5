@@ -709,11 +709,6 @@ for (grep { $_ !~ /^l?stat$/ } ops_with_flag('-')) {
 
 
 
-addbits($_, 1 => qw(OPpGREP_LEX GREPLEX)) # iterate over lexical $_
-    for qw(mapwhile mapstart grepwhile grepstart);
-
-
-
 addbits('entereval',
     1 => qw(OPpEVAL_HAS_HH       HAS_HH ), # Does it have a copy of %^H ?
     2 => qw(OPpEVAL_UNICODE      UNI    ),
