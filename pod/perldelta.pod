@@ -127,7 +127,7 @@ line directives, breaking parsing of error code definitions.  [perl
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20150214 to 5.20150420.
+L<Module::CoreList> has been upgraded from version 5.20150214 to 5.20150520.
 
 Updated to cover the latest releases of Perl.
 
