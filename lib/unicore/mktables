@@ -1407,6 +1407,8 @@ my $perl_charname;
 my $print;
 my $All;
 my $Assigned;   # All assigned characters in this Unicode release
+my $DI;         # Default_Ignorable_Code_Point property
+my $NChar;      # Noncharacter_Code_Point property
 my $script;
 
 # Are there conflicting names because of beginning with 'In_', or 'Is_'
@@ -1500,7 +1502,6 @@ sub populate_char_info ($) {
     # point of the range.
     my $end;
     if (! $viacode[$i]) {
-        my $nonchar;
         if ($i > $MAX_UNICODE_CODEPOINT) {
             $viacode[$i] = 'Above-Unicode';
             $annotate_char_type[$i] = $ABOVE_UNICODE_TYPE;
@@ -1515,15 +1516,11 @@ sub populate_char_info ($) {
             $end = $gc->table('Private_Use')->containing_range($i)->end;
             $age[$i] = property_ref("Age")->value_of($i);
         }
-        elsif ((defined ($nonchar =
-                            Property::property_ref('Noncharacter_Code_Point'))
-               && $nonchar->table('Y')->contains($i)))
-        {
+        elsif ($NChar->contains($i)) {
             $viacode[$i] = 'Noncharacter';
             $annotate_char_type[$i] = $NONCHARACTER_TYPE;
             $printable[$i] = 0;
-            $end = property_ref('Noncharacter_Code_Point')->table('Y')->
-                                                    containing_range($i)->end;
+            $end = $NChar->containing_range($i)->end;
             $age[$i] = property_ref("Age")->value_of($i);
         }
         elsif ($gc-> table('Control')->contains($i)) {
@@ -13631,6 +13628,60 @@ sub calculate_Assigned() {  # Calculate the gc != Cn code points; may be
     }
 }
 
+sub calculate_DI() {    # Set $DI to a Range_List equivalent to the
+                        # Default_Ignorable_Code_Point property.  Works on
+                        # Unicodes earlier than ones that explicitly specify
+                        # DI.
+    return if defined $DI;
+
+    if (defined (my $di = property_ref('Default_Ignorable_Code_Point'))) {
+        $DI = $di->table('Y');
+    }
+    else {
+        $DI = Range_List->new(Initialize => [ 0x180B .. 0x180D,
+                                              0x2060 .. 0x206F,
+                                              0xFE00 .. 0xFE0F,
+                                              0xFFF0 .. 0xFFFB,
+                                            ]);
+        if ($v_version ge v2.0) {
+            $DI += $gc->table('Cf')
+                +  $gc->table('Cs');
+
+            # These are above the Unicode version 1 max
+            $DI->add_range(0xE0000, 0xE0FFF);
+        }
+        $DI += $gc->table('Cc')
+             - ord("\t")
+             - utf8::unicode_to_native(0x0A)  # LINE FEED
+             - utf8::unicode_to_native(0x0B)  # VERTICAL TAB
+             - ord("\f")
+             - utf8::unicode_to_native(0x0D)  # CARRIAGE RETURN
+             - utf8::unicode_to_native(0x85); # NEL
+    }
+}
+
+sub calculate_NChar() {  # Create a Perl extension match table which is the
+                         # same as the Noncharacter_Code_Point property, and
+                         # set $NChar to point to it.  Works on Unicodes
+                         # earlier than ones that explicitly specify NChar
+    return if defined $NChar;
+
+    $NChar = $perl->add_match_table('_Perl_Nchar',
+                                    Perl_Extension => 1,
+                                    Fate => $INTERNAL_ONLY);
+    if (defined (my $off_nchar = property_ref('NChar'))) {
+        $NChar->initialize($off_nchar->table('Y'));
+    }
+    else {
+        $NChar->initialize([ 0xFFFE .. 0xFFFF ]);
+        if ($v_version ge v2.0) {   # First release with these nchars
+            for (my $i = 0x1FFFE; $i <= 0x10FFFE; $i += 0x10000) {
+                $NChar += [ $i .. $i+1 ];
+            }
+        }
+    }
+}
+
 sub compile_perl() {
     # Create perl-defined tables.  Almost all are part of the pseudo-property
     # named 'perl' internally to this program.  Many of these are recommended
@@ -14714,21 +14765,10 @@ END
                                                   ]);
         $quotemeta += $temp;
     }
+    calculate_DI();
+    $quotemeta += $DI;
 
-    my $nchar = $perl->add_match_table('_Perl_Nchar',
-                                       Perl_Extension => 1,
-                                       Fate => $INTERNAL_ONLY);
-    if (defined (my $off_nchar = property_ref('Nchar'))) {
-        $nchar->initialize($off_nchar->table('Y'));
-    }
-    else {
-        $nchar->initialize([ 0xFFFE .. 0xFFFF ]);
-        if ($v_version ge v2.0) {   # First release with these nchars
-            for (my $i = 0x1FFFE; $i <= 0x10FFFE; $i += 0x10000) {
-                $nchar += [ $i .. $i+1 ];
-            }
-        }
-    }
+    calculate_NChar();
 
     # Finished creating all the perl properties.  All non-internal non-string
     # ones have a synonym of 'Is_' prefixed.  (Internal properties begin with
@@ -14755,9 +14795,7 @@ END
         # can give different annotations for each.
         $unassigned_sans_noncharacters = Range_List->new(
                                     Initialize => $gc->table('Unassigned'));
-        if (defined (my $nonchars = property_ref('Noncharacter_Code_Point'))) {
-            $unassigned_sans_noncharacters &= $nonchars->table('N');
-        }
+        $unassigned_sans_noncharacters &= (~ $NChar);
 
         for (my $i = 0; $i <= $MAX_UNICODE_CODEPOINT + 1; $i++ ) {
             $i = populate_char_info($i);    # Note sets $i so may cause skips
