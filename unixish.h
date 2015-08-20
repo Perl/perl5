@@ -122,7 +122,16 @@
 #define fwrite1 fwrite
 
 #define Stat(fname,bufptr) stat((fname),(bufptr))
-#define Fstat(fd,bufptr)   fstat((fd),(bufptr))
+
+#if defined(__amigaos4__)
+int afstat(int fd, struct stat *statb);
+#    define Fstat(fd,bufptr) afstat((fd),(bufptr))
+#endif
+
+#ifndef Fstat
+#    define Fstat(fd,bufptr)   fstat((fd),(bufptr))
+#endif
+
 #define Fflush(fp)         fflush(fp)
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
