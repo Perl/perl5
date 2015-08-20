@@ -1399,6 +1399,7 @@ my $MIN_FRACTION_LENGTH = 3; # How many digits of a floating point number at
 my $MAX_FLOATING_SLOP = 10 ** - $MIN_FRACTION_LENGTH; # And in floating terms
 
 # These store references to certain commonly used property objects
+my $age;
 my $ccc;
 my $gc;
 my $perl;
@@ -1484,11 +1485,27 @@ sub populate_char_info ($) {
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     $viacode[$i] = $perl_charname->value_of($i) || "";
+    $age[$i] = (defined $age)
+               ? (($age->value_of($i) =~ / ^ \d \. \d $ /x)
+                  ? $age->value_of($i)
+                  : "")
+               : "";
 
     # A character is generally printable if Unicode says it is,
     # but below we make sure that most Unicode general category 'C' types
     # aren't.
     $printable[$i] = $print->contains($i);
+
+    # But the characters in this range were removed in v2.0 and replaced by
+    # different ones later.  Modern fonts will be for the replacement
+    # characters, so suppress printing them.
+    if (($v_version lt v2.0
+         || ($compare_versions && $compare_versions lt v2.0))
+        && (   $i >= $FIRST_REMOVED_HANGUL_SYLLABLE
+            && $i <= $FINAL_REMOVED_HANGUL_SYLLABLE))
+    {
+        $printable[$i] = 0;
+    }
 
     $annotate_char_type[$i] = $perl_charname->type_of($i) || 0;
 
@@ -1507,37 +1524,36 @@ sub populate_char_info ($) {
             $annotate_char_type[$i] = $ABOVE_UNICODE_TYPE;
             $printable[$i] = 0;
             $end = $MAX_WORKING_CODEPOINT;
-            $age[$i] = "";
         }
         elsif ($gc-> table('Private_use')->contains($i)) {
             $viacode[$i] = 'Private Use';
             $annotate_char_type[$i] = $PRIVATE_USE_TYPE;
             $printable[$i] = 0;
             $end = $gc->table('Private_Use')->containing_range($i)->end;
-            $age[$i] = property_ref("Age")->value_of($i);
         }
         elsif ($NChar->contains($i)) {
             $viacode[$i] = 'Noncharacter';
             $annotate_char_type[$i] = $NONCHARACTER_TYPE;
             $printable[$i] = 0;
             $end = $NChar->containing_range($i)->end;
-            $age[$i] = property_ref("Age")->value_of($i);
         }
         elsif ($gc-> table('Control')->contains($i)) {
-            $viacode[$i] = property_ref('Name_Alias')->value_of($i) || 'Control';
+            my $name_ref = property_ref('Name_Alias');
+            $name_ref = property_ref('Unicode_1_Name') if ! defined $name_ref;
+            $viacode[$i] = (defined $name_ref)
+                           ? $name_ref->value_of($i)
+                           : 'Control';
             $annotate_char_type[$i] = $CONTROL_TYPE;
             $printable[$i] = 0;
-            $age[$i] = property_ref("Age")->value_of($i);
         }
         elsif ($gc-> table('Unassigned')->contains($i)) {
             $annotate_char_type[$i] = $UNASSIGNED_TYPE;
             $printable[$i] = 0;
+            $viacode[$i] = 'Unassigned';
+
             if (defined $block) { # No blocks in earliest releases
-                $viacode[$i] = 'Unassigned';
+                $viacode[$i] .= ', block=' . $block-> value_of($i);
                 $end = $gc-> table('Unassigned')->containing_range($i)->end;
-            }
-            else {
-                $viacode[$i] = 'Unassigned, block=' . $block-> value_of($i);
 
                 # Because we name the unassigned by the blocks they are in, it
                 # can't go past the end of that block, and it also can't go
@@ -1548,14 +1564,19 @@ sub populate_char_info ($) {
                            $unassigned_sans_noncharacters->
                                                     containing_range($i)->end);
             }
-            $age[$i] = property_ref("Age")->value_of($i);
+            else {
+                $end = $i + 1;
+                while ($unassigned_sans_noncharacters->contains($end)) {
+                    $end++;
+                }
+                $end--;
+            }
         }
         elsif ($perl->table('_Perl_Surrogate')->contains($i)) {
             $viacode[$i] = 'Surrogate';
             $annotate_char_type[$i] = $SURROGATE_TYPE;
             $printable[$i] = 0;
             $end = $gc->table('Surrogate')->containing_range($i)->end;
-            $age[$i] = property_ref("Age")->value_of($i);
         }
         else {
             Carp::my_carp_bug("Can't figure out how to annotate "
@@ -1572,17 +1593,20 @@ sub populate_char_info ($) {
     elsif ($annotate_char_type[$i] == $CP_IN_NAME) {
         $viacode[$i] .= sprintf("-%04X", $i);
 
-        # Do all these as groups of the same age, instead of individually,
-        # because their names are so meaningless, and there are typically
-        # large quantities of them.
-        my $Age = property_ref("Age");
-        $age[$i] = $Age->value_of($i);
         my $limit = $perl_charname->containing_range($i)->end;
-        $end = $i + 1;
-        while ($end <= $limit && $Age->value_of($end) == $age[$i]) {
-            $end++;
+        if (defined $age) {
+            # Do all these as groups of the same age, instead of individually,
+            # because their names are so meaningless, and there are typically
+            # large quantities of them.
+            $end = $i + 1;
+            while ($end <= $limit && $age->value_of($end) == $age[$i]) {
+                $end++;
+            }
+            $end--;
         }
-        $end--;
+        else {
+            $end = $limit;
+        }
     }
 
     # And here, has a name, but if it's a hangul syllable one, replace it with
@@ -1595,11 +1619,7 @@ sub populate_char_info ($) {
         my $T = $TBase + $SIndex % $TCount;
         $viacode[$i] = "HANGUL SYLLABLE $Jamo{$L}$Jamo{$V}";
         $viacode[$i] .= $Jamo{$T} if $T != $TBase;
-        $age[$i] = property_ref("Age")->value_of($i);
         $end = $perl_charname->containing_range($i)->end;
-    }
-    else {
-        $age[$i] = property_ref("Age")->value_of($i);
     }
 
     return if ! defined wantarray;
@@ -9918,6 +9938,7 @@ sub finish_property_setup {
     $gc = property_ref('General_Category');
     $block = property_ref('Block');
     $script = property_ref('Script');
+    $age = property_ref('Age');
 
     # Perl adds this alias.
     $gc->add_alias('Category');
@@ -10348,7 +10369,6 @@ END
     # As noted in the comments early in the program, it generates tables for
     # the default values for all releases, even those for which the concept
     # didn't exist at the time.  Here we add those if missing.
-    my $age = property_ref('age');
     if (defined $age && ! defined $age->table('Unassigned')) {
         $age->add_match_table('Unassigned');
     }
@@ -14114,7 +14134,8 @@ sub compile_perl() {
                             );
 
     my $perl_surrogate = $perl->add_match_table('_Perl_Surrogate');
-    if (defined (my $Cs = $gc->table('Cs'))) {
+    my $Cs = $gc->table('Cs');
+    if (defined $Cs && ! $Cs->is_empty) {
         $perl_surrogate += $Cs;
     }
     else {
@@ -14601,7 +14622,7 @@ END
     ));
 
     # Construct the Present_In property from the Age property.
-    if (-e 'DAge.txt' && defined (my $age = property_ref('Age'))) {
+    if (-e 'DAge.txt' && defined $age) {
         my $default_map = $age->default_map;
         my $in = Property->new('In',
                                 Default_Map => $default_map,
