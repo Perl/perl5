@@ -382,6 +382,19 @@ Perl can again be compiled with any Unicode version.  This used to
 C<Name_Alias> did not exist prior to Unicode 5.0.  L<Unicode::UCD>
 incorrectly said it did.  This has been fixed.
 
+=item *
+
+Very large code-points (beyond Unicode) in regular expressions no
+longer cause a buffer overflow in some cases when converted to UTF-8.
+[perl #125826]
+
+=item *
+
+The integer overflow check for the range operator (...) in list
+context now correctly handles the case where the size of the range is
+larger than the address space.  This could happen on 32-bits with
+-Duse64bitint.  [perl #125781]
+
 =back
 
 =head1 Known Problems
