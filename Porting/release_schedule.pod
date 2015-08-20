@@ -53,7 +53,7 @@ you should reset the version numbers to the next blead series.
 
   2015-06-20  5.23.0 ✓        Ricardo Signes
   2015-07-20  5.23.1 ✓        Matthew Horsfall
-  2015-08-20  5.23.2          ?
+  2015-08-20  5.23.2 ✓        Matthew Horsfall
   2015-09-20  5.23.3          ?
   2015-10-20  5.23.4          Steve Hay
   2015-11-20  5.23.5          Abigail
