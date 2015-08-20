@@ -14700,6 +14700,9 @@ END
         if ($v_version ge v2.0) {
             $quotemeta += $gc->table('Cf')
                        +  $gc->table('Cs');
+
+            # These are above the Unicode version 1 max
+            $quotemeta->add_range(0xE0000, 0xE0FFF);
         }
         $quotemeta += $gc->table('Cc')
                     - $Space;
@@ -14709,7 +14712,7 @@ END
                                                    0xFFF0 .. 0xFFFB,
                                                    0xE0000 .. 0xE0FFF,
                                                   ]);
-        $quotemeta += $temp & $Assigned;
+        $quotemeta += $temp;
     }
 
     my $nchar = $perl->add_match_table('_Perl_Nchar',
