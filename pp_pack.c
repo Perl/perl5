@@ -1766,7 +1766,18 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		}
 		while (cdouble < 0.0)
 		    cdouble += anv;
-		cdouble = Perl_modf(cdouble / anv, &trouble) * anv;
+		cdouble = Perl_modf(cdouble / anv, &trouble);
+#ifdef LONGDOUBLE_DOUBLEDOUBLE
+                /* Workaround for powerpc doubledouble modfl bug:
+                 * close to 1.0L and -1.0L cdouble is 0, and trouble
+                 * is cdouble / anv. */
+                if (trouble != Perl_ceil(trouble)) {
+                  cdouble = trouble;
+                  if (cdouble >  1.0L) cdouble -= 1.0L;
+                  if (cdouble < -1.0L) cdouble += 1.0L;
+                }
+#endif
+                cdouble *= anv;
 		sv = newSVnv(cdouble);
 	    }
 	    else {
