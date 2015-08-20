@@ -13252,9 +13252,9 @@ END
 
     # For each property, fill in any missing mappings, and calculate the re
     # match tables.  If a property has more than one missing mapping, the
-    # default is a reference to a data structure, and requires data from other
-    # properties to resolve.  The sort is used to cause these to be processed
-    # last, after all the other properties have been calculated.
+    # default is a reference to a data structure, and may require data from
+    # other properties to resolve.  The sort is used to cause these to be
+    # processed last, after all the other properties have been calculated.
     # (Fortunately, the missing properties so far don't depend on each other.)
     foreach my $property
         (sort { (defined $a->default_map && ref $a->default_map) ? 1 : -1 }
@@ -13564,7 +13564,7 @@ sub pre_3_dot_1_Nl () {
     return $Nl;
 }
 
-sub calculate_Assigned() {  # Calculate the gc != Cn code points; may be
+sub calculate_Assigned() {  # Set $Assigned to the gc != Cn code points; may be
                             # called before the Cn's are completely filled.
                             # Works on Unicodes earlier than ones that
                             # explicitly specify Cn.
