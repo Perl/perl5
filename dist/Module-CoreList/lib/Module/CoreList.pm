@@ -281,7 +281,7 @@ sub changes_between {
     5.022000 => '2015-06-01',
     5.023000 => '2015-06-20',
     5.023001 => '2015-07-20',
-    5.023002 => '????-??-??',
+    5.023002 => '2015-08-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -11655,11 +11655,37 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.023002 => {
         delta_from => 5.023001,
         changed => {
+            'Attribute::Handlers'   => '0.99',
             'B::Op_private'         => '5.023002',
+            'CPAN::Meta::YAML'      => '0.017',
             'Config'                => '5.023002',
+            'Cwd'                   => '3.57',
+            'Encode'                => '2.76',
+            'ExtUtils::ParseXS'     => '3.29',
+            'ExtUtils::ParseXS::Constants'=> '3.29',
+            'ExtUtils::ParseXS::CountLines'=> '3.29',
+            'ExtUtils::ParseXS::Eval'=> '3.29',
+            'ExtUtils::ParseXS::Utilities'=> '3.29',
+            'ExtUtils::Typemaps'    => '3.29',
+            'File::Find'            => '1.30',
+            'File::Spec'            => '3.57',
+            'File::Spec::Cygwin'    => '3.57',
+            'File::Spec::Epoc'      => '3.57',
+            'File::Spec::Functions' => '3.57',
+            'File::Spec::Mac'       => '3.57',
+            'File::Spec::OS2'       => '3.57',
+            'File::Spec::Unix'      => '3.57',
+            'File::Spec::VMS'       => '3.57',
+            'File::Spec::Win32'     => '3.57',
+            'Filter::Util::Call'    => '1.55',
+            'Hash::Util'            => '0.19',
             'Module::CoreList'      => '5.20150820',
             'Module::CoreList::TieHashDelta'=> '5.20150820',
             'Module::CoreList::Utils'=> '5.20150820',
+            'POSIX'                 => '1.56',
+            'Term::Cap'             => '1.17',
+            'Unicode::UCD'          => '0.62',
+            'perlfaq'               => '5.021010',
         },
         removed => {
         }
