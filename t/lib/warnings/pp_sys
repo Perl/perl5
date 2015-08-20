@@ -633,6 +633,7 @@ EOM
 }
 my $file = "./xcv" ;
 open(F, ">$file") ; 
+binmode F;
 my $a = sysread(F, $a,10) ;
 no warnings 'io' ;
 my $a = sysread(F, $a,10) ;
@@ -644,11 +645,11 @@ sysread(NONEXISTENT, $a, 10);
 read(NONEXISTENT, $a, 10);
 unlink $file ;
 EXPECT
-Filehandle F opened only for output at - line 12.
-sysread() on closed filehandle F at - line 17.
-read() on closed filehandle F at - line 18.
-sysread() on unopened filehandle NONEXISTENT at - line 19.
-read() on unopened filehandle NONEXISTENT at - line 20.
+Filehandle F opened only for output at - line 13.
+sysread() on closed filehandle F at - line 18.
+read() on closed filehandle F at - line 19.
+sysread() on unopened filehandle NONEXISTENT at - line 20.
+read() on unopened filehandle NONEXISTENT at - line 21.
 ########
 # pp_sys.c [pp_binmode]
 use warnings 'unopened' ;
@@ -942,7 +943,7 @@ sleep() with negative argument at - line 2.
 ########
 # NAME sysread() deprecated on :utf8
 use warnings 'deprecated';
-open my $fh, "<", "../harness" or die "# $!";
+open my $fh, "<:raw", "../harness" or die "# $!";
 my $buf;
 sysread $fh, $buf, 10;
 binmode $fh, ':utf8';
@@ -953,7 +954,7 @@ sysread() is deprecated on :utf8 handles at - line 6.
 # NAME syswrite() deprecated on :utf8
 my $file = "syswwarn.tmp";
 use warnings 'deprecated';
-open my $fh, ">", $file or die "# $!";
+open my $fh, ">:raw", $file or die "# $!";
 syswrite $fh, 'ABC';
 binmode $fh, ':utf8';
 syswrite $fh, 'ABC';
