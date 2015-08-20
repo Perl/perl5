@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.20150920';
+$VERSION = '5.20150822';
 
 sub _released_order {   # Sort helper, to make '?' sort after everything else
     (substr($released{$a}, 0, 1) eq "?")
@@ -283,6 +283,7 @@ sub changes_between {
     5.023001 => '2015-07-20',
     5.023002 => '2015-08-20',
     5.023003 => '????-??-??',
+    5.020003 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -11700,6 +11701,18 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.020003 => {
+        delta_from => 5.020002,
+        changed => {
+            'Config'                => '5.020003',
+            'Errno'                 => '1.20_06',
+            'Module::CoreList'      => '5.20150920',
+            'Module::CoreList::TieHashDelta'=> '5.20150920',
+            'Module::CoreList::Utils'=> '5.20150920',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -12284,6 +12297,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
         removed => {
         }
     },
+    5.020003 => {
+        delta_from => 5.020002,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 for my $version (sort { $a <=> $b } keys %deprecated) {
@@ -12351,8 +12371,6 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'CPAN::Mirrors'         => 'cpan',
     'CPAN::Module'          => 'cpan',
     'CPAN::Nox'             => 'cpan',
-    'CPAN::Plugin'          => 'cpan',
-    'CPAN::Plugin::Specfile'=> 'cpan',
     'CPAN::Prompt'          => 'cpan',
     'CPAN::Queue'           => 'cpan',
     'CPAN::Shell'           => 'cpan',
@@ -12663,7 +12681,6 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Term::Cap'             => 'cpan',
     'Test'                  => 'cpan',
     'Test::Builder'         => 'cpan',
-    'Test::Builder::IO::Scalar'=> 'cpan',
     'Test::Builder::Module' => 'cpan',
     'Test::Builder::Tester' => 'cpan',
     'Test::Builder::Tester::Color'=> 'cpan',
@@ -12763,8 +12780,6 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'CPAN::Mirrors'         => undef,
     'CPAN::Module'          => undef,
     'CPAN::Nox'             => undef,
-    'CPAN::Plugin'          => undef,
-    'CPAN::Plugin::Specfile'=> undef,
     'CPAN::Prompt'          => undef,
     'CPAN::Queue'           => undef,
     'CPAN::Shell'           => undef,
@@ -13075,7 +13090,6 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Term::Cap'             => undef,
     'Test'                  => undef,
     'Test::Builder'         => 'http://github.com/Test-More/test-more/issues/',
-    'Test::Builder::IO::Scalar'=> 'http://github.com/Test-More/test-more/issues/',
     'Test::Builder::Module' => 'http://github.com/Test-More/test-more/issues/',
     'Test::Builder::Tester' => 'http://github.com/Test-More/test-more/issues/',
     'Test::Builder::Tester::Color'=> 'http://github.com/Test-More/test-more/issues/',
