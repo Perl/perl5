@@ -32,21 +32,21 @@ re_comp.c : $regcomp_c
 	- \$(RM_F) re_comp.c
 	\$(CP) $regcomp_c re_comp.c
 
-re_comp\$(OBJ_EXT) : re_comp.c dquote.c invlist_inline_h
+re_comp\$(OBJ_EXT) : re_comp.c dquote.c invlist_inline.h
 
 re_exec.c : $regexec_c
 	- \$(RM_F) re_exec.c
 	\$(CP) $regexec_c re_exec.c
 
-re_exec\$(OBJ_EXT) : re_exec.c invlist_inline_h
+re_exec\$(OBJ_EXT) : re_exec.c invlist_inline.h
 
 dquote.c : $dquote_c
 	- \$(RM_F) dquote.c
 	\$(CP) $dquote_c dquote.c
 
-invlist_inline_h : $inline_invlist_c
-	- \$(RM_F) invlist_inline_h
-	\$(CP) $invlist_inline_h inline_invlist.c
+invlist_inline.h : $invlist_inline_h
+	- \$(RM_F) invlist_inline.h
+	\$(CP) $invlist_inline_h invlist_inline.h
 
 EOF
 }
