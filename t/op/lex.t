@@ -4,7 +4,7 @@ use warnings;
 
 BEGIN { chdir 't'; require './test.pl'; }
 
-plan(tests => 9);
+plan(tests => 10);
 
 {
     no warnings 'deprecated';
@@ -95,4 +95,11 @@ fresh_perl_is(
   "Can't find string terminator \"a\" anywhere before EOF at - line 1.\n",
    { stderr => 1 },
   '/$a[/<<a with no newline [perl #123712]'
+);
+fresh_perl_is(
+  '/$a[m||/<<a',
+  "syntax error at - line 1, next char ;\n" .
+  "Execution of - aborted due to compilation errors.\n",
+   { stderr => 1 },
+  '/$a[m||/<<a with no newline [perl #123712]'
 );
