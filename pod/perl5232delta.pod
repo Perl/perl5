@@ -1,0 +1,375 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5232delta - what is new for perl v5.23.2
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.23.1 release and the 5.23.2
+release.
+
+If you are upgrading from an earlier release such as 5.23.0, first read
+L<perl5231delta>, which describes differences between 5.23.0 and 5.23.1.
+
+=head1 Incompatible Changes
+
+=head2 Nested declarations are now disallowed
+
+A C<my>, C<our>, or C<state> declaration is no longer allowed inside
+of another C<my>, C<our>, or C<state> declaration.
+
+For example, these are now fatal:
+
+   my ($x, my($y));
+   our (my $x);
+
+L<[perl #125587]|https://rt.perl.org/Ticket/Display.html?id=125587>
+
+L<[perl #121058]|https://rt.perl.org/Ticket/Display.html?id=121058>
+
+=head1 Deprecations
+
+=head2 sysread(), syswrite(), recv() and send() are deprecated on
+:utf8 handles
+
+The sysread(), recv(), syswrite() and send() operators
+are deprecated on handles that have the C<:utf8> layer, either
+explicitly, or implicitly, eg., with the C<:encoding(UTF-16LE)> layer.
+
+Both sysread() and recv() currently use only the C<:utf8> flag for the
+stream, ignoring the actual layers.  Since sysread() and recv() do no
+UTF-8 validation they can end up creating invalidly encoded scalars.
+
+Similarly, syswrite() and send() use only the C<:utf8> flag, otherwise
+ignoring any layers.  If the flag is set, both write the value UTF-8
+encoded, even if the layer is some different encoding, such as the
+example above.
+
+Ideally, all of these operators would completely ignore the C<:utf8>
+state, working only with bytes, but this would result in silently
+breaking existing code.  To avoid this a future version of perl will
+throw an exception when any of sysread(), recv(), syswrite() or send()
+are called on handle with the C<:utf8> layer.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Creating Perl debugger data structures (see L<perldebguts/"Debugger Internals">)
+for XSUBs and const subs has been removed.  This removed one glob/scalar combo
+for each unique C<.c> file that XSUBs and const subs came from.  On startup
+(C<perl -e"0">) about half a dozen glob/scalar debugger combos were created.
+Loading XS modules created more glob/scalar combos.  These things were created
+regardless if the perl debugger was being used or not, unlike for pure perl
+subs, and ignores that the perl debugger can not debug C code.
+
+=item *
+
+Single arguments in list assign are now slightly faster:
+
+  ($x) = (...);
+  (...) = ($x);
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+The PathTools module collection has been upgraded from version 3.55 to
+3.56.
+
+Minor optimizations.
+L<[perl #125712]|https://rt.perl.org/Ticket/Display.html?id=125712>
+
+=item *
+
+L<Attribute::Handlers> has been upgraded from version 0.97 to 0.99.
+
+=item *
+
+L<CPAN::Meta::YAML> has been upgraded from version 0.016 to 0.017.
+
+=item *
+
+L<Encode> has been upgraded from version 2.75 to 2.76.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.28 to 3.29.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.28 to 3.29.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.29 to 1.30.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.56 to 3.57.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.54 to 1.55.
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.18 to 0.19.
+
+C<unlock_hashref_recurse> and C<unlock_hash_recurse> didn't
+actually unlock parts of the data structures...
+
+...now they do.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20150720 to 5.20150820.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.021009 to 5.021010.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.55 to 1.56.
+
+=item *
+
+L<Term::Cap> has been upgraded from version 1.15 to 1.17.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.61 to 0.62.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlpolicy>
+
+=over 4
+
+=item *
+
+This note has been added to perlpolicy:
+
+  While civility is required, kindness is encouraged; if you have any doubt
+  about whether you are being civil, simply ask yourself, "Am I being kind?"
+  and aspire to that.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Use of C<$OLD_PERL_VERSION> is now discouraged.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Can't redeclare "%s" in "%s"|perldiag/"Can't redeclare "%s" in "%s"">
+
+(F) A "my", "our" or "state" declaration was found within another declaration,
+such as C<my ($x, my($y), $z)> or C<our (my $x)>.
+
+=back
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<%s() is deprecated on :utf8 handles|perldiag/"%s() is deprecated on :utf8 handles">
+
+(W deprecated) The sysread(), recv(), syswrite() and send() operators
+are deprecated on handles that have the C<:utf8> layer, either
+explicitly, or implicitly, eg., with the C<:encoding(UTF-16LE)> layer.
+
+Both sysread() and recv() currently use only the C<:utf8> flag for the
+stream, ignoring the actual layers.  Since sysread() and recv() do no
+UTF-8 validation they can end up creating invalidly encoded scalars.
+
+Similarly, syswrite() and send() use only the C<:utf8> flag, otherwise
+ignoring any layers.  If the flag is set, both write the value UTF-8
+encoded, even if the layer is some different encoding, such as the
+example above.
+
+Ideally, all of these operators would completely ignore the C<:utf8>
+state, working only with bytes, but this would result in silently
+breaking existing code.  To avoid this a future version of perl will
+throw an exception when any of sysread(), recv(), syswrite() or send()
+are called on handle with the C<:utf8> layer.
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+The diagnostic C<< Hexadecimal float: internal error >> has been changed to
+C<< Hexadecimal float: internal error (%s) >> to include more information.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+F<Configure> should handle spaces in paths a little better.
+
+=back
+
+=head1 Testing
+
+=over 4
+
+=item *
+
+A new test (F<t/op/aassign.t>) has been added to test the list assignment operator
+C<OP_AASSIGN>.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+C<PL_sawalias> and C<GPf_ALIASED_SV> have been removed.
+
+=item *
+
+C<GvASSIGN_GENERATION> and C<GvASSIGN_GENERATION_set> have been removed.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Perl can again be compiled with any Unicode version.  This used to
+(mostly) work, but was lost in v5.18 through v5.20.  The property
+C<Name_Alias> did not exist prior to Unicode 5.0.  L<Unicode::UCD>
+incorrectly said it did.  This has been fixed.
+
+=item *
+
+Very large code-points (beyond Unicode) in regular expressions no
+longer cause a buffer overflow in some cases when converted to UTF-8.
+L<[perl #125826]|https://rt.perl.org/Ticket/Display.html?id=125826>
+
+=item *
+
+The integer overflow check for the range operator (...) in list
+context now correctly handles the case where the size of the range is
+larger than the address space.  This could happen on 32-bits with
+-Duse64bitint.
+L<[perl #125781]|https://rt.perl.org/Ticket/Display.html?id=125781>
+
+=item *
+
+A crash with C<< %::=(); J->${\"::"} >> has been fixed.
+L<[perl #125541]|https://rt.perl.org/Ticket/Display.html?id=125541>
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.23.2 represents approximately 4 weeks of development since Perl 5.23.1
+and contains approximately 22,000 lines of changes across 240 files from 23
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 17,000 lines of changes to 140 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.23.2:
+
+Aaron Priven, Aristotle Pagaltzis, Chris 'BinGOs' Williams, Craig A. Berry,
+Dagfinn Ilmari Mannsåker, Daniel Dragan, David Mitchell, Ed J, Father
+Chrysostomos, H.Merijn Brand, Ivan Pozdeev, James E Keenan, Jarkko Hietaniemi,
+Karen Etheridge, Karl Williamson, Ludovic E. R. Tolhurst-Cleaver, Lukas Mai,
+Matthew Horsfall, Reini Urban, Ricardo Signes, Sisyphus, Steve Hay, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
