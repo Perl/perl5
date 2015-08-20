@@ -52,35 +52,6 @@ breaking existing code.  To avoid this a future version of perl will
 throw an exception when any of sysread(), recv(), syswrite() or send()
 are called on handle with the C<:utf8> layer.
 
-=head2 Module removals
-
-XXX Remove this section if inapplicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
-
 =head1 Performance Enhancements
 
 =over 4
@@ -106,42 +77,9 @@ Single arguments in list assign are now slightly faster:
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
-
-=item *
-
-L<Hash::Util>'s C<unlock_hashref_recurse> and C<unlock_hash_recurse>
-didn't actually unlock parts of the data structures...
-
-...now they do.
-
-=item *
-
-L<Encode> has been upgraded from version 2.75 to 2.76.
-
-=item *
-
-L<Filter::Util::Call> has been upgraded from version 1.54 to 1.55.
 
 =item *
 
@@ -151,15 +89,66 @@ The PathTools module collection has been upgraded from version 3.55 to
 Minor optimizations.
 L<[perl #125712]|https://rt.perl.org/Ticket/Display.html?id=125712>
 
-=back
+=item *
 
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<Attribute::Handlers> has been upgraded from version 0.97 to 0.99.
 
 =item *
 
-XXX
+L<CPAN::Meta::YAML> has been upgraded from version 0.016 to 0.017.
+
+=item *
+
+L<Encode> has been upgraded from version 2.75 to 2.76.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.28 to 3.29.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.28 to 3.29.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.29 to 1.30.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.56 to 3.57.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.54 to 1.55.
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.18 to 0.19.
+
+C<unlock_hashref_recurse> and C<unlock_hash_recurse> didn't
+actually unlock parts of the data structures...
+
+...now they do.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20150720 to 5.20150820.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.021009 to 5.021010.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.55 to 1.56.
+
+=item *
+
+L<Term::Cap> has been upgraded from version 1.15 to 1.17.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.61 to 0.62.
 
 =back
 
@@ -321,9 +310,34 @@ L<[perl #125541]|https://rt.perl.org/Ticket/Display.html?id=125541>
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.23.2 represents approximately 4 weeks of development since Perl 5.23.1
+and contains approximately 22,000 lines of changes across 240 files from 23
+authors.
 
-  perl Porting/acknowledgements.pl v5.23.1..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 17,000 lines of changes to 140 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.23.2:
+
+Aaron Priven, Aristotle Pagaltzis, Chris 'BinGOs' Williams, Craig A. Berry,
+Dagfinn Ilmari Mannsåker, Daniel Dragan, David Mitchell, Ed J, Father
+Chrysostomos, H.Merijn Brand, Ivan Pozdeev, James E Keenan, Jarkko Hietaniemi,
+Karen Etheridge, Karl Williamson, Ludovic E. R. Tolhurst-Cleaver, Lukas Mai,
+Matthew Horsfall, Reini Urban, Ricardo Signes, Sisyphus, Steve Hay, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
