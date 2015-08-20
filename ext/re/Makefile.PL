@@ -12,7 +12,7 @@ WriteMakefile(
     XSPROTOARG		=> '-noprototypes',
     OBJECT		=> $object,
     DEFINE             => $defines,
-    clean		=> { FILES => '*$(OBJ_EXT) *.c ../../lib/re.pm' },
+    clean		=> { FILES => '*$(OBJ_EXT) invlist_inline.h *.c ../../lib/re.pm' },
 );
 
 package MY;
