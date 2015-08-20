@@ -141,7 +141,7 @@ my @writables = qw(
     proto.h
     embed.h
     embedvar.h
-    overload.c
+    overload.inc
     overload.h
     mg_vtable.h
     perlapi.h
