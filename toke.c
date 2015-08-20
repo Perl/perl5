@@ -1301,7 +1301,7 @@ buffer has reached the end of the input text.
 */
 
 #define LEX_FAKE_EOF 0x80000000
-#define LEX_NO_TERM  0x40000000
+#define LEX_NO_TERM  0x40000000 /* here-doc */
 
 bool
 Perl_lex_next_chunk(pTHX_ U32 flags)
@@ -1315,6 +1315,8 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     bool got_some;
     if (flags & ~(LEX_KEEP_PREVIOUS|LEX_FAKE_EOF|LEX_NO_TERM))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_next_chunk");
+    if (!(flags & LEX_NO_TERM) && PL_sublex_info.sub_inwhat)
+	return FALSE;
     linestr = PL_parser->linestr;
     buf = SvPVX(linestr);
     if (!(flags & LEX_KEEP_PREVIOUS) &&

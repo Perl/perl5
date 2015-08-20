@@ -4,7 +4,7 @@ use warnings;
 
 BEGIN { chdir 't'; require './test.pl'; }
 
-plan(tests => 8);
+plan(tests => 9);
 
 {
     no warnings 'deprecated';
@@ -88,3 +88,11 @@ is runperl(
  ."2.\n",
   'no buffer corruption with multiline *{...expr...}'
 ;
+
+fresh_perl_is(
+  '/$a[/<<a',
+  "syntax error at - line 1, next char ;\n" .
+  "Can't find string terminator \"a\" anywhere before EOF at - line 1.\n",
+   { stderr => 1 },
+  '/$a[/<<a with no newline [perl #123712]'
+);
