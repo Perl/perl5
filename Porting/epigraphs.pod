@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.23.2 - Blind Guardian, "Skalds and Shadows"
 
-L<Announced on 2015-08-20 by Matthew Horsfall|TBD>
+L<Announced on 2015-08-20 by Matthew Horsfall|http://TBD>
 
   Would you believe in a night like this
   A night like this, when visions come true
