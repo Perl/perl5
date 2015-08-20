@@ -2632,7 +2632,7 @@ END
         # once per file, as it destroy's the EOF handlers
 
         # flag to make sure extracted files are processed early
-        state $seen_non_extracted_non_age = 0;
+        state $seen_non_extracted = 0;
 
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -2645,7 +2645,7 @@ END
             $handle{$addr} = 'pretend_is_open';
         }
         else {
-            if ($seen_non_extracted_non_age) {
+            if ($seen_non_extracted) {
                 if ($file =~ /$EXTRACTED/i) # Some platforms may change the
                                             # case of the file's name
                 {
@@ -2662,13 +2662,12 @@ END
                     # We only do this check for generic property files
                     && $handler{$addr} == \&main::process_generic_property_file
 
-                    && $file !~ /$EXTRACTED/i
-                    && lc($file) ne 'dage.txt')
+                    && $file !~ /$EXTRACTED/i)
             {
                 # We don't set this (by the 'if' above) if we have no
                 # extracted directory, so if running on an early version,
                 # this test won't work.  Not worth worrying about.
-                $seen_non_extracted_non_age = 1;
+                $seen_non_extracted = 1;
             }
 
             # Mark the file as having being processed, and warn if it
@@ -18594,15 +18593,11 @@ my $Validation_Documentation = "Documentation of validation Tests";
 # This is a list of the input files and how to handle them.  The files are
 # processed in their order in this list.  Some reordering is possible if
 # desired, but the PropertyAliases and PropValueAliases files should be first,
-# and the extracted before the others except DAge.txt (as data in an extracted
-# file can be over-ridden by the non-extracted.  Some other files depend on
-# data derived from an earlier file, like UnicodeData requires data from Jamo,
-# and the case changing and folding requires data from Unicode.  Mostly, it is
-# safest to order by first version releases in (except the Jamo).  DAge.txt is
-# read before the extracted ones because of the rarely used feature
-# $compare_versions.  In the unlikely event that there were ever an extracted
-# file that contained the Age property information, it would have to go in
-# front of DAge.
+# and the extracted before the others (as data in an extracted file can be
+# over-ridden by the non-extracted.  Some other files depend on data derived
+# from an earlier file, like UnicodeData requires data from Jamo, and the case
+# changing and folding requires data from Unicode.  Mostly, it is safest to
+# order by first version releases in (except the Jamo).
 #
 # The version strings allow the program to know whether to expect a file or
 # not, but if a file exists in the directory, it will be processed, even if it
@@ -18624,10 +18619,6 @@ my @input_file_objects = (
                      Has_Missings_Defaults => $NOT_IGNORED,
                      Required_Even_in_Debug_Skip => 1,
                     ),
-    Input_file->new('DAge.txt', v3.2.0,
-                    Has_Missings_Defaults => $NOT_IGNORED,
-                    Property => 'Age'
-                   ),
     Input_file->new("${EXTRACTED}DGeneralCategory.txt", v3.1.0,
                     Property => 'General_Category',
                    ),
@@ -18848,6 +18839,10 @@ my @input_file_objects = (
     Input_file->new('DerivedProperties.html', v3.1.1,
                     Withdrawn => v5.1,
                     Skip => $Documentation,
+                   ),
+    Input_file->new('DAge.txt', v3.2.0,
+                    Has_Missings_Defaults => $NOT_IGNORED,
+                    Property => 'Age'
                    ),
     Input_file->new('HangulSyllableType.txt', v4.0,
                     Has_Missings_Defaults => $NOT_IGNORED,
