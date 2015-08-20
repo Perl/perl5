@@ -1320,6 +1320,12 @@ my %ucd_pod;    # Holds entries that will go into the UCD section of the pod
 # unlikely that they will ever change.
 my %caseless_equivalent_to;
 
+# This is the range of characters that were in Release 1 of Unicode, and
+# removed in Release 2 (replaced with the current Hangul syllables starting at
+# U+AC00).  The range was reused starting in Release 3 for other purposes.
+my $FIRST_REMOVED_HANGUL_SYLLABLE = 0x3400;
+my $FINAL_REMOVED_HANGUL_SYLLABLE = 0x4DFF;
+
 # These constants names and values were taken from the Unicode standard,
 # version 5.1, section 3.12.  They are used in conjunction with Hangul
 # syllables.  The '_string' versions are so generated tables can retain the
@@ -3231,7 +3237,8 @@ END
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $object = main::property_ref($property{$addr});
-        $object->add_map(0x3400, 0x4DFF,
+        $object->add_map($FIRST_REMOVED_HANGUL_SYLLABLE,
+                         $FINAL_REMOVED_HANGUL_SYLLABLE,
                          $early{$addr}[3],  # Passed-in value for these
                          Replace => $UNCONDITIONALLY);
     }
@@ -13059,7 +13066,9 @@ END
     # not being right at all.
     if ($v_version lt v2.0.0) {
         my $property = property_ref($file->property);
-        $file->insert_lines("3400..4DFF; LVT\n");
+        $file->insert_lines(sprintf("%04X..%04X; LVT\n",
+                                    $FIRST_REMOVED_HANGUL_SYLLABLE,
+                                    $FINAL_REMOVED_HANGUL_SYLLABLE));
         push @tables_that_may_be_empty, $property->table('LV')->complete_name;
         return;
     }
