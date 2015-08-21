@@ -30,11 +30,11 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
 If a reasonable way is found to make the new test in d27f4 pass in maint, I'll be +1 on these. But I'm not convinced that it's worth making this change to maint to fix a compile-time-only bug if we know that it doesn't fix all the cases. -- arc.
-<commit votes="steveh" id="e47d32dcd59a578274f445fac79e977d83055c8c" ticket="123712" desc="[perl #123712] Fix /$a[/ parsing"/>
+<commit votes="steveh, sprout" id="e47d32dcd59a578274f445fac79e977d83055c8c" ticket="123712" desc="[perl #123712] Fix /$a[/ parsing"/>
 This commit (d27f4)'s new test is failing in a dry-run of cherry-picking into maint -- steveh:
-<commit votes="steveh" id="d27f4b916ce5819f564bdd4a135137c457156333" ticket="123712" desc="[perl #123712] Don't check sub_inwhat"/>
+<commit votes="steveh, sprout" id="d27f4b916ce5819f564bdd4a135137c457156333" ticket="123712" desc="[perl #123712] Don't check sub_inwhat"/>
 
-<commit votes="steveh" id="d2fcb1d6773910aef058d59681ff6ae649f68352" ticket="125541" desc="[perl #125541] Fix crash with %::=(); J-&gt;${\&quot;::&quot;}"/>
+<commit votes="steveh, sprout" id="d2fcb1d6773910aef058d59681ff6ae649f68352" ticket="125541" desc="[perl #125541] Fix crash with %::=(); J-&gt;${\&quot;::&quot;}"/>
 
 </div>
 
