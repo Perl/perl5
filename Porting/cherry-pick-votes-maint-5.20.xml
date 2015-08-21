@@ -34,8 +34,6 @@ If a reasonable way is found to make the new test in d27f4 pass in maint, I'll b
 This commit (d27f4)'s new test is failing in a dry-run of cherry-picking into maint -- steveh:
 <commit votes="steveh, sprout" id="d27f4b916ce5819f564bdd4a135137c457156333" ticket="123712" desc="[perl #123712] Don't check sub_inwhat"/>
 
-<commit votes="steveh, sprout" id="d2fcb1d6773910aef058d59681ff6ae649f68352" ticket="125541" desc="[perl #125541] Fix crash with %::=(); J-&gt;${\&quot;::&quot;}"/>
-
 </div>
 
 <div><h3>AFL Crash / Assertion / Memory Corruption Fixes</h3>
