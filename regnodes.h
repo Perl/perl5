@@ -42,7 +42,7 @@
 #define	CLUMP                 	28	/* 0x1c Match any extended grapheme cluster sequence */
 #define	BRANCH                	29	/* 0x1d Match this alternative, or the next... */
 #define	EXACT                 	30	/* 0x1e Match this string (preceded by length). */
-#define	EXACTL                	31	/* 0x1f Like EXACT, but /l is in effect. */
+#define	EXACTL                	31	/* 0x1f Like EXACT, but /l is in effect (used so locale-related warnings can be checked for). */
 #define	EXACTF                	32	/* 0x20 Match this non-UTF-8 string (not guaranteed to be folded) using /id rules (w/len). */
 #define	EXACTFL               	33	/* 0x21 Match this string (not guaranteed to be folded) using /il rules (w/len). */
 #define	EXACTFU               	34	/* 0x22 Match this string (folded iff in UTF-8, length in folding doesn't change if not in UTF-8) using /iu rules (w/len). */

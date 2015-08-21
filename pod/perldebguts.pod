@@ -628,7 +628,8 @@ will be lost.
  # Literals
 
  EXACT           str        Match this string (preceded by length).
- EXACTL          str        Like EXACT, but /l is in effect.
+ EXACTL          str        Like EXACT, but /l is in effect (used so
+                            locale-related warnings can be checked for).
  EXACTF          str        Match this non-UTF-8 string (not guaranteed
                             to be folded) using /id rules (w/len).
  EXACTFL         str        Match this string (not guaranteed to be

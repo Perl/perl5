@@ -90,7 +90,7 @@ BRANCH      BRANCH,     node 0 V  ; Match this alternative, or the next...
 # NOTE: the relative ordering of these types is important do not change it
 
 EXACT       EXACT,      str       ; Match this string (preceded by length).
-EXACTL      EXACT,      str       ; Like EXACT, but /l is in effect.
+EXACTL      EXACT,      str       ; Like EXACT, but /l is in effect (used so locale-related warnings can be checked for).
 EXACTF      EXACT,      str       ; Match this non-UTF-8 string (not guaranteed to be folded) using /id rules (w/len).
 EXACTFL     EXACT,      str       ; Match this string (not guaranteed to be folded) using /il rules (w/len).
 EXACTFU     EXACT,      str	  ; Match this string (folded iff in UTF-8, length in folding doesn't change if not in UTF-8) using /iu rules (w/len).
