@@ -34,7 +34,7 @@ L<[perl #123784]|https://rt.perl.org/Ticket/Display.html?id=123784>
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20150214 to 5.20150520.
+L<Module::CoreList> has been upgraded from version 5.20150214 to 5.20150822.
 
 Updated to cover the latest releases of Perl.
 
