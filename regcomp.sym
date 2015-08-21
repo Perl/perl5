@@ -57,6 +57,7 @@ NBOUNDA     NBOUND,     no        ; Match "" betweeen any \w\w or \W\W, where \w
 REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).
 SANY        REG_ANY,    no 0 S    ; Match any one character.
 ANYOF       ANYOF,      sv 1 S    ; Match character in (or not in) this class, single char match only
+ANYOFD      ANYOF,      sv 1 S    ; Like ANYOF, but /d is in effect
 ANYOFL      ANYOF,      sv 1 S    ; Like ANYOF, but /l is in effect
 
 #* POSIX Character Classes:

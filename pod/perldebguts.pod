@@ -594,6 +594,7 @@ will be lost.
  SANY            no         Match any one character.
  ANYOF           sv 1       Match character in (or not in) this class,
                             single char match only
+ ANYOFD          sv 1       Like ANYOF, but /d is in effect
  ANYOFL          sv 1       Like ANYOF, but /l is in effect
 
  # POSIX Character Classes:
