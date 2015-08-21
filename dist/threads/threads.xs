@@ -38,6 +38,10 @@
 
 #ifdef USE_ITHREADS
 
+#if defined(__amigaos4__)
+#  undef YIELD
+#  define YIELD sleep(0)
+#endif
 #ifdef WIN32
 #  include <windows.h>
    /* Supposed to be in Winbase.h */
