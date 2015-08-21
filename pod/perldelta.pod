@@ -216,6 +216,11 @@ L<[perl #123398]|https://rt.perl.org/Ticket/Display.html?id=123398>
 C<setpgrp($nonzero)> (with one argument) was accidentally changed in Perl 5.16
 to mean C<setpgrp(0)>.  This has been fixed.
 
+=item *
+
+A crash with C<< %::=(); J->${\"::"} >> has been fixed.
+L<[perl #125541]|https://rt.perl.org/Ticket/Display.html?id=125541>
+
 =back
 
 =head1 Acknowledgements
