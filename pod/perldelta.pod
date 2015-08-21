@@ -12,6 +12,12 @@ release.
 If you are upgrading from an earlier release such as 5.20.1, first read
 L<perl5202delta>, which describes differences between 5.20.1 and 5.20.2.
 
+=head1 Incompatible Changes
+
+There are no changes intentionally incompatible with 5.20.2.  If any exist,
+they are bugs, and we request that you submit a report.  See L</Reporting Bugs>
+below.
+
 =head1 Modules and Pragmata
 
 =head2 Updated Modules and Pragmata
