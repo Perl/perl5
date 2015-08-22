@@ -1177,7 +1177,9 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     /* If this can match all upper Latin1 code points, have to add them
      * as well */
-    if (ANYOF_FLAGS(node) & ANYOF_MATCHES_ALL_NON_UTF8_NON_ASCII) {
+    if (OP(node) == ANYOFD
+        && (ANYOF_FLAGS(node) & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
+    {
         _invlist_union(invlist, PL_UpperLatin1, &invlist);
     }
 
@@ -1255,12 +1257,19 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
          * that should be; while the consequences for having /l bugs is
          * incorrect matches */
         if (ssc_is_anything((regnode_ssc *)and_with)) {
-            anded_flags |= ANYOF_WARN_SUPER;
+            anded_flags |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
         }
     }
     else {
         anded_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state, and_with);
-        anded_flags = ANYOF_FLAGS(and_with) & ANYOF_COMMON_FLAGS;
+        if (OP(and_with) == ANYOFD) {
+            anded_flags = ANYOF_FLAGS(and_with) & ANYOF_COMMON_FLAGS;
+        }
+        else {
+            anded_flags = ANYOF_FLAGS(and_with)
+            &( ANYOF_COMMON_FLAGS
+              |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER);
+        }
     }
 
     ANYOF_FLAGS(ssc) &= anded_flags;
@@ -1411,6 +1420,11 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     else {
         ored_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state, or_with);
         ored_flags = ANYOF_FLAGS(or_with) & ANYOF_COMMON_FLAGS;
+        if (OP(or_with) != ANYOFD) {
+            ored_flags
+            |= ANYOF_FLAGS(or_with)
+             & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+        }
     }
 
     ANYOF_FLAGS(ssc) |= ored_flags;
@@ -1609,7 +1623,9 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
     /* The code in this file assumes that all but these flags aren't relevant
      * to the SSC, except SSC_MATCHES_EMPTY_STRING, which should be cleared
      * by the time we reach here */
-    assert(! (ANYOF_FLAGS(ssc) & ~ANYOF_COMMON_FLAGS));
+    assert(! (ANYOF_FLAGS(ssc)
+        & ~( ANYOF_COMMON_FLAGS
+            |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)));
 
     populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
 
@@ -15684,7 +15700,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             if (DEPENDS_SEMANTICS) {
                 /* Under /d, everything in the upper half of the Latin1 range
                  * matches these complements */
-                ANYOF_FLAGS(ret) |= ANYOF_MATCHES_ALL_NON_UTF8_NON_ASCII;
+                ANYOF_FLAGS(ret) |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
             }
             else if (AT_LEAST_ASCII_RESTRICTED) {
                 /* Under /a and /aa, everything above ASCII matches these
@@ -15771,7 +15787,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
 
         if (warn_super) {
-            ANYOF_FLAGS(ret) |= ANYOF_WARN_SUPER;
+            ANYOF_FLAGS(ret)
+            |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
         }
     }
 
@@ -15866,7 +15883,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
            /* We don't optimize if we are supposed to make sure all non-Unicode
             * code points raise a warning, as only ANYOF nodes have this check.
             * */
-        && ! ((ANYOF_FLAGS(ret) & ANYOF_WARN_SUPER) && ALWAYS_WARN_SUPER))
+        && ! ((ANYOF_FLAGS(ret) & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
+              && OP(ret) != ANYOFD
+              && ALWAYS_WARN_SUPER))
     {
         UV start, end;
         U8 op = END;  /* The optimzation node-type */
@@ -17052,7 +17071,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                     sv_catpvs(sv, "^");
             }
 
-            if (flags & ANYOF_MATCHES_ALL_NON_UTF8_NON_ASCII) {
+            if (OP(o) == ANYOFD
+                && (flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
+            {
                 sv_catpvs(sv, "{non-utf8-latin1-all}");
             }
 

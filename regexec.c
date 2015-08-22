@@ -8598,7 +8598,9 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     if (c < NUM_ANYOF_CODE_POINTS) {
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
-	else if ((flags & ANYOF_MATCHES_ALL_NON_UTF8_NON_ASCII)
+	else if ((flags
+                & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
+                  && OP(n) == ANYOFD
 		  && ! utf8_target
 		  && ! isASCII(c))
 	{
@@ -8701,7 +8703,9 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	}
 
         if (UNICODE_IS_SUPER(c)
-            && (flags & ANYOF_WARN_SUPER)
+            && (flags
+               & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
+            && OP(n) != ANYOFD
             && ckWARN_d(WARN_NON_UNICODE))
         {
             Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),

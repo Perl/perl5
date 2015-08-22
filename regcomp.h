@@ -378,7 +378,7 @@ struct regnode_ssc {
  * reach this high). */
 #define ANYOF_ONLY_HAS_BITMAP	((U32) -1)
 
-/* Flags for node->flags of ANYOF.  These are in short supply, with none
+/* Flags for node->flags of ANYOF.  These are in short supply, with one
  * currently available.  The ABOVE_BITMAP_ALL bit could be freed up
  * by resorting to creating a swash containing everything above 255.  This
  * introduces a performance penalty.  An option that wouldn't slow things down
@@ -426,9 +426,6 @@ struct regnode_ssc {
  * at compile-time */
 #define ANYOF_MATCHES_POSIXL                    0x08
 
-/* Should we raise a warning if matching against an above-Unicode code point?
- * */
-#define ANYOF_WARN_SUPER                        0x10
 
 /* Can match something outside the bitmap that isn't in utf8 */
 #define ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES    0x20
@@ -436,9 +433,17 @@ struct regnode_ssc {
 /* Matches every code point NUM_ANYOF_CODE_POINTS and above*/
 #define ANYOF_MATCHES_ALL_ABOVE_BITMAP          0x40
 
-/* Match all Latin1 characters that aren't ASCII when the target string is not
- * in utf8. */
-#define ANYOF_MATCHES_ALL_NON_UTF8_NON_ASCII    0x80
+
+/* Shared bit:
+ *      Under /d it means the ANYOF node matches all non-ASCII Latin1
+ *          characters when the target string is not in utf8.
+ *      When not under /d, it means the ANYOF node should raise a warning if
+ *          matching against an above-Unicode code point.
+ * (These uses are mutually exclusive because the warning requires a \p{}, and
+ * \p{} implies /u which deselects /d).  An SSC node only has this bit set if
+ * what is meant is the warning.  The long macro name is to make sure that you
+ * are cautioned about its shared nature */
+#define ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER 0x80
 
 #define ANYOF_FLAGS_ALL		(0xff)
 
@@ -447,7 +452,7 @@ struct regnode_ssc {
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
  * start class nodes during construction of the SSC.  During finalization of
  * the SSC, other of the flags could be added to it */
-#define ANYOF_COMMON_FLAGS    (ANYOF_WARN_SUPER|ANYOF_HAS_UTF8_NONBITMAP_MATCHES)
+#define ANYOF_COMMON_FLAGS    (ANYOF_HAS_UTF8_NONBITMAP_MATCHES)
 
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */
