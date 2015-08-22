@@ -183,7 +183,7 @@ typedef di_stream * Compress__Raw__Zlib__inflateScanStream ;
 #  define OS_CODE  0x00
 #endif
 
-#if defined(AMIGA) || defined(AMIGAOS) 
+#if defined(AMIGA) || defined(AMIGAOS) || defined(__amigaos4__)
 #  define OS_CODE  0x01
 #endif
  
