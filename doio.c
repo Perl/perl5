@@ -943,7 +943,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 #endif
 		}
 		else {
-#if !defined(DOSISH) && !defined(AMIGAOS)
+#if !defined(DOSISH) && !defined(__amigaos4__)
 #  ifndef VMS  /* Don't delete; use automatic file versioning */
 		    if (UNLINK(PL_oldname) < 0) {
 			Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
