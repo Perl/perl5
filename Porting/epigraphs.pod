@@ -437,6 +437,39 @@ L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   Till the work its master honour.
   Blessing comes from Heaven’s Donor.
 
+=head2 v5.20.3-RC1 - Anon., trans. Malcolm C. Lyons, "The Story of Abu Muhammad the Idle and the Marvels He Encountered with the Ape As Well As the Marvels of the Seas and Islands", from "Tales of the Marvellous and News of the Strange"
+
+L<Announced on 2015-08-22 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/08/msg230359.html>
+
+'On the night of the wedding the ape came to sit in front of me and
+asked me what I intended to do.  "Whatever you tell me," I replied,
+and he said: "Take care not to covet the girl, or I shall come back
+and burn you up and leave you as a lesson for those who can learn."
+I agreed to this and when evening came I found the world full of
+candles and torches burning in holders of gold and silver.  There
+were servants and serving girls, and everyone who saw me
+congratulated me on my good fortune, as there was no girl on the
+face of the earth more beautiful than my bride.
+[...]
+'Next morning I went out to the market, and people went in and asked
+her how the night had been.  "He never looked up at me," she told
+them.  Then, when it was afternoon, I went to my house, where the
+ape was sitting by the door.  "Tell me what you did," it said, and I
+told it: "By God, I did not learn and do not know whether this was a
+man or a girl."  "That's what I want," it said.
+[...]
+'On the second night my bride was brought to me, after which the
+servants left her and went away.  She fell asleep, and, while she
+was sleeping, I killed the cock, wrapped it in the cloth and put the
+four poles from the couch over it.  Suddenly there was a huge crash
+like a peal of thunder and a fiery 'ifrit swooped on the girl.  I
+fainted at the sight and when I recovered I heard a voice saying:
+"By the Lord of the Ka'ba, the girl has been carried off!" and there
+was a sound like the rustling of wind and bitter weeping.  At this I
+shed tears, struck my head and was filled with regret when it was no
+longer of any use, for to me the whole world was worth no more than
+a bean.
+
 =head2 v5.20.2 - Jonathan "Jonti" Picking, L<"Magical Trevor"|http://www.weebls-stuff.com/other-toons/video/magical-trevor.html>
 
 L<Announced on 2015-02-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/02/msg225777.html>
