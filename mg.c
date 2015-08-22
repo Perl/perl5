@@ -1210,7 +1210,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     }
 #endif
 
-#if !defined(OS2) && !defined(AMIGAOS) && !defined(WIN32) && !defined(MSDOS)
+#if !defined(OS2) && !defined(WIN32) && !defined(MSDOS)
 			    /* And you'll never guess what the dog had */
 			    /*   in its mouth... */
     if (TAINTING_get) {
@@ -1270,7 +1270,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	}
     }
-#endif /* neither OS2 nor AMIGAOS nor WIN32 nor MSDOS */
+#endif /* neither OS2 nor WIN32 nor MSDOS */
 
     return 0;
 }
