@@ -17,6 +17,25 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.9 - Emily Dickinson, "There is Another Sky"
+
+B<Announced on 2015-02-20 by Sawyer X>
+
+There is another sky,
+Ever serene and fair,
+And there is another sunshine,
+Though it be darkness there;
+Never mind faded forests, Austin,
+Never mind silent fields -
+Here is a little forest,
+Whose leaf is ever green;
+Here is a brighter garden,
+Where not a frost has been;
+In its unfading flowers
+I hear the bright bee hum:
+Prithee, my brother,
+Into my garden come!
+
 =head2 v5.20.2 - Jonathan "Jonti" Picking, L<"Magical Trevor"|http://www.weebls-stuff.com/other-toons/video/magical-trevor.html>
 
 L<Announced on 2015-02-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/02/msg225777.html>
