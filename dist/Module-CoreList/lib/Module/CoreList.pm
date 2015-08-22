@@ -11706,9 +11706,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'Config'                => '5.020003',
             'Errno'                 => '1.20_06',
-            'Module::CoreList'      => '5.20150920',
-            'Module::CoreList::TieHashDelta'=> '5.20150920',
-            'Module::CoreList::Utils'=> '5.20150920',
+            'Module::CoreList'      => '5.20150822',
+            'Module::CoreList::TieHashDelta'=> '5.20150822',
+            'Module::CoreList::Utils'=> '5.20150822',
         },
         removed => {
         }
