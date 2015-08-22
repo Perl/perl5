@@ -3,7 +3,7 @@ package Thread::Queue;
 use strict;
 use warnings;
 
-our $VERSION = '3.05';
+our $VERSION = '3.06';
 $VERSION = eval $VERSION;
 
 use threads::shared 1.21;
@@ -26,12 +26,27 @@ sub enqueue
 {
     my $self = shift;
     lock(%$self);
+
     if ($$self{'ENDED'}) {
         require Carp;
         Carp::croak("'enqueue' method called on queue that has been 'end'ed");
     }
-    push(@{$$self{'queue'}}, map { shared_clone($_) } @_)
+
+    # Block if queue size exceeds any specified limit
+    my $queue = $$self{'queue'};
+    cond_wait(%$self) while ($$self{'LIMIT'} && (@$queue >= $$self{'LIMIT'}));
+
+    # Add items to queue, and then signal other threads
+    push(@$queue, map { shared_clone($_) } @_)
         and cond_signal(%$self);
+}
+
+# Set or return the max. size for a queue
+sub limit : lvalue
+{
+    my $self = shift;
+    lock(%$self);
+    $$self{'LIMIT'};
 }
 
 # Return a count of the number of items on a queue
@@ -47,7 +62,7 @@ sub pending
 sub end
 {
     my $self = shift;
-    lock $self;
+    lock(%$self);
     # No more data is coming
     $$self{'ENDED'} = 1;
     # Try to release at least one blocked thread
@@ -289,7 +304,7 @@ Thread::Queue - Thread-safe queues
 
 =head1 VERSION
 
-This document describes Thread::Queue version 3.05
+This document describes Thread::Queue version 3.06
 
 =head1 SYNOPSIS
 
@@ -333,6 +348,9 @@ This document describes Thread::Queue version 3.05
     if (defined(my $item = $q->dequeue_timed(5))) {
         # Work on $item
     }
+
+    # Set a size for a queue
+    $q->limit = 5;
 
     # Get the second item in the queue without dequeuing anything
     my $item = $q->peek(1);
@@ -423,7 +441,7 @@ Adds a list of items onto the end of the queue.
 Removes the requested number of items (default is 1) from the head of the
 queue, and returns them.  If the queue contains fewer than the requested
 number of items, then the thread will be blocked until the requisite number
-of items are available (i.e., until other threads <enqueue> more items).
+of items are available (i.e., until other threads C<enqueue> more items).
 
 =item ->dequeue_nb()
 
@@ -460,6 +478,20 @@ behaves the same as C<dequeue_nb>.
 
 Returns the number of items still in the queue.  Returns C<undef> if the queue
 has been ended (see below), and there are no more items in the queue.
+
+=item ->limit
+
+Sets the size of the queue.  If set, calls to C<enqueue()> will block until
+the number of pending items in the queue drops below the C<limit>.  The
+C<limit> does not prevent enqueuing items beyond that count:
+
+    my $q = Thread::Queue->new(1, 2);
+    $q->limit = 4;
+    $q->enqueue(3, 4, 5);   # Does not block
+    $q->enqueue(6);         # Blocks until at least 2 items are dequeued
+
+    my $size = $q->limit;   # Returns the current limit (may return 'undef')
+    $q->limit = 0;          # Queue size is now unlimited
 
 =item ->end()
 

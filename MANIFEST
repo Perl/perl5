@@ -3423,6 +3423,7 @@ dist/Thread-Queue/t/07_lock.t		Thread::Queue tests
 dist/Thread-Queue/t/08_nothreads.t	Thread::Queue tests
 dist/Thread-Queue/t/09_ended.t		Thread::Queue tests
 dist/Thread-Queue/t/10_timed.t	Thread::Queue tests
+dist/Thread-Queue/t/11_limit.t	Thread::Queue tests
 dist/Thread-Semaphore/lib/Thread/Semaphore.pm	Thread-safe semaphores
 dist/Thread-Semaphore/t/01_basic.t		Thread::Semaphore tests
 dist/Thread-Semaphore/t/02_errs.t		Thread::Semaphore tests
