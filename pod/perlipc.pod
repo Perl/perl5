@@ -978,8 +978,6 @@ or firewall machine), fill this in with your real address instead.
 
     my $paddr;
 
-    $SIG{CHLD} = \&REAPER;
-
     for ( ; $paddr = accept(Client, Server); close Client) {
         my($port, $iaddr) = sockaddr_in($paddr);
         my $name = gethostbyaddr($iaddr, AF_INET);
