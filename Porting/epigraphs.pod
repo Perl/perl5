@@ -17,6 +17,30 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.20.2 - Jonathan "Jonti" Picking, L<"Magical Trevor"|http://www.weebls-stuff.com/other-toons/video/magical-trevor.html>
+
+L<Announced on 2015-02-14 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/02/msg225777.html>
+
+  Everyone loves Magical Trevor,
+  'Cos the tricks that he does are ever so clever;
+  Look at him now, disappearin' the cow,
+  Where is the cow hidden right now?
+
+  Taking a bow, it's Magical Trevor,
+  Everybody's seen that the trick is clever;
+  Look at him there with his leathery, leathery whip!
+  It's made of magic, and with a little flip--
+
+  Yeah, yeah, yeah, the cow is back,
+  Yeah, yeah, yeah, the cow is back;
+  Back, back, back from his magical journey,
+  Yeah!
+
+  What did he see in the parallel dimension?
+  He saw beans, lots of beans, lots of beans, lots of beans;
+  Oh, beans, lots of beans, lots of beans, lots of beans,
+  Yeah, yeah!
+
 =head2 v5.20.2-RC1 - Jonathan "Jonti" Picking, L<"Scampi"|http://www.weebls-stuff.com/other-toons/video/scampi.html>
 
 L<Announced on 2015-02-01 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/02/msg225273.html>
