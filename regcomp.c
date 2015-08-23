@@ -1639,6 +1639,10 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
         ANYOF_FLAGS(ssc) |= ANYOF_MATCHES_POSIXL;
     }
 
+    if (RExC_contains_locale) {
+        OP(ssc) = ANYOFL;
+    }
+
     assert(! (ANYOF_FLAGS(ssc) & ANYOF_LOCALE_FLAGS) || RExC_contains_locale);
 }
 
