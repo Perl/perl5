@@ -37,9 +37,6 @@
 #include "re_top.h"
 #endif
 
-#define B_ON_NON_UTF8_LOCALE_IS_WRONG            \
-      "Use of \\b{} or \\B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale"
-
 /*
  * pregcomp and pregexec -- regsub and regerror are not used in perl
  *
@@ -85,6 +82,9 @@
 
 #include "invlist_inline.h"
 #include "unicode_constants.h"
+
+#define B_ON_NON_UTF8_LOCALE_IS_WRONG            \
+ "Use of \\b{} or \\B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale"
 
 static const char utf8_locale_required[] =
       "Use of (?[ ]) for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale";
