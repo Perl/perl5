@@ -1106,8 +1106,12 @@ just three limitations:
 
 =item 1
 
-This construct cannot be used within the scope of
-C<use locale> (or the C<E<sol>l> regex modifier).
+When compiled within the scope of C<use locale> (or the C<E<sol>l> regex
+modifier), this construct assumes that the execution-time locale will be
+a UTF-8 one, and the generated pattern always uses Unicode rules.  What
+gets matched or not thus isn't dependent on the actual runtime locale, so
+tainting is not enabled.  But a C<locale> category warning is raised
+if the runtime locale turns out to not be UTF-8.
 
 =item 2
 

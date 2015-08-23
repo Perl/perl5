@@ -378,7 +378,7 @@ struct regnode_ssc {
  * reach this high). */
 #define ANYOF_ONLY_HAS_BITMAP	((U32) -1)
 
-/* Flags for node->flags of ANYOF.  These are in short supply, with one
+/* Flags for node->flags of ANYOF.  These are in short supply, with none
  * currently available.  The ABOVE_BITMAP_ALL bit could be freed up
  * by resorting to creating a swash containing everything above 255.  This
  * introduces a performance penalty.  An option that wouldn't slow things down
@@ -426,6 +426,9 @@ struct regnode_ssc {
  * at compile-time */
 #define ANYOF_MATCHES_POSIXL                    0x08
 
+/* Only under /l. If set, none of INVERT, LOC_FOLD, POSIXL,
+ * HAS_NONBITMAP_NON_UTF8_MATCHES can be set */
+#define ANYOF_LOC_REQ_UTF8                      0x10
 
 /* Can match something outside the bitmap that isn't in utf8 */
 #define ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES    0x20
@@ -452,7 +455,8 @@ struct regnode_ssc {
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
  * start class nodes during construction of the SSC.  During finalization of
  * the SSC, other of the flags could be added to it */
-#define ANYOF_COMMON_FLAGS    (ANYOF_HAS_UTF8_NONBITMAP_MATCHES)
+#define ANYOF_COMMON_FLAGS    ( ANYOF_HAS_UTF8_NONBITMAP_MATCHES    \
+                               |ANYOF_LOC_REQ_UTF8)
 
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */

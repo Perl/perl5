@@ -13349,14 +13349,16 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                                        this function */
     const bool save_fold = FOLD;    /* Temporary */
     char *save_end, *save_parse;    /* Temporaries */
+    const bool in_locale = LOC;     /* we turn off /l during processing */
 
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_HANDLE_REGEX_SETS;
 
-    if (LOC) {  /* XXX could make valid in UTF-8 locales */
-        vFAIL("(?[...]) not valid in locale");
+    if (in_locale) {
+        set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);
     }
+
     RExC_uni_semantics = 1;     /* The use of this operator implies /u.  This
                                    is required so that the compile time values
                                    are valid in all runtime cases */
@@ -13439,6 +13441,10 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                         nextchar(pRExC_state);
                         Set_Node_Length(node,
                                 RExC_parse - oregcomp_parse + 1); /* MJD */
+                        if (in_locale) {
+                            set_regex_charset(&RExC_flags, REGEX_LOCALE_CHARSET);
+                        }
+
                         return node;
                     }
                     goto no_close;
@@ -14001,9 +14007,36 @@ redo_curchar:
     if (!node)
         FAIL2("panic: regclass returned NULL to handle_sets, flags=%#"UVxf,
                     PTR2UV(flagp));
+
+    /* Fix up the node type if we are in locale.  (We have pretended we are
+     * under /u for the purposes of regclass(), as this construct will only
+     * work under UTF-8 locales.  But now we change the opcode to be ANYOFL (so
+     * as to cause any warnings about bad locales to be output in regexec.c),
+     * and add the flag that indicates to check if not in a UTF-8 locale.  The
+     * reason we above forbid optimization into something other than an ANYOF
+     * node is simply to minimize the number of code changes in regexec.c.
+     * Otherwise we would have to create new EXACTish node types and deal with
+     * them.  This decision could be revisited should this construct become
+     * popular.
+     *
+     * (One might think we could look at the resulting ANYOF node and suppress
+     * the flag if everything is above 255, as those would be UTF-8 only,
+     * but this isn't true, as the components that led to that result could
+     * have been locale-affected, and just happen to cancel each other out
+     * under UTF-8 locales.) */
+    if (in_locale) {
+        set_regex_charset(&RExC_flags, REGEX_LOCALE_CHARSET);
+
+        assert(OP(node) == ANYOF);
+
+        OP(node) = ANYOFL;
+        ANYOF_FLAGS(node) |= ANYOF_LOC_REQ_UTF8;
+    }
+
     if (save_fold) {
         RExC_flags |= RXf_PMf_FOLD;
     }
+
     RExC_parse = save_parse + 1;
     RExC_end = save_end;
     SvREFCNT_dec_NN(final);
@@ -17044,8 +17077,14 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         SV* bitmap_invlist;  /* Will hold what the bit map contains */
 
 
-	if (OP(o) == ANYOFL)
-	    sv_catpvs(sv, "{loc}");
+	if (OP(o) == ANYOFL) {
+            if (flags & ANYOF_LOC_REQ_UTF8) {
+                sv_catpvs(sv, "{utf8-loc}");
+            }
+            else {
+                sv_catpvs(sv, "{loc}");
+            }
+        }
 	if (flags & ANYOF_LOC_FOLD)
 	    sv_catpvs(sv, "{i}");
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);

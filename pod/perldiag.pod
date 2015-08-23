@@ -6610,14 +6610,13 @@ is deprecated.  See L<perlvar/"$[">.
 form if you wish to use an empty line as the terminator of the
 here-document.
 
-=item Use of \b{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale
+=item Use of %s for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale
 
 (W locale)  You are matching a regular expression using locale rules,
-and a Unicode boundary is being matched, but the locale is not a Unicode
-one.  This doesn't make sense.  Perl will continue, assuming a Unicode
-(UTF-8) locale, but the results could well be wrong except if the locale
-happens to be ISO-8859-1 (Latin1) where this message is spurious and can
-be ignored.
+and the specified construct was encountered.  This construct is only
+valid for UTF-8 locales, which the current locale isn't.  This doesn't
+make sense.  Perl will continue, assuming a Unicode (UTF-8) locale, but
+the results are likely to be wrong.
 
 =item Use of /c modifier is meaningless in s///
 

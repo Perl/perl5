@@ -9,7 +9,8 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = ('../lib','.','../ext/re');
     require './test.pl';
-    require './test.pl'; require './charset_tools.pl';
+    require './charset_tools.pl';
+    require './loc_tools.pl';
     skip_all_without_unicode_tables();
 }
 
@@ -95,6 +96,44 @@ like("k", $still_fold, "/i on interpolated (?[ ]) is retained in outer without /
 
 eval 'my $x = qr/(?[ [a] ])/; qr/(?[ $x ])/';
 is($@, "", 'qr/(?[ [a] ])/ can be interpolated');
+
+if (! is_miniperl() && locales_enabled('LC_CTYPE')) {
+    my $utf8_locale = find_utf8_ctype_locale;
+    SKIP: {
+        skip("No utf8 locale available on this platform", 8) unless $utf8_locale;
+
+        setlocale(&POSIX::LC_ALL, "C");
+        use locale;
+
+        $kelvin_fold = qr/(?[ \N{KELVIN SIGN} ])/i;
+        my $single_char_class = qr/(?[ \: ])/;
+
+        setlocale(&POSIX::LC_ALL, $utf8_locale);
+
+        like("\N{KELVIN SIGN}", $kelvin_fold,
+             '(?[ \N{KELVIN SIGN} ]) matches itself under /i in UTF8-locale');
+        like("K", $kelvin_fold,
+                '(?[ \N{KELVIN SIGN} ]) matches "K" under /i in UTF8-locale');
+        like("k", $kelvin_fold,
+                '(?[ \N{KELVIN SIGN} ]) matches "k" under /i in UTF8-locale');
+        like(":", $single_char_class,
+             '(?[ : ]) matches itself in UTF8-locale (a single character class)');
+
+        setlocale(&POSIX::LC_ALL, "C");
+
+        # These should generate warnings (the above 4 shouldn't), but like()
+        # suppresses them, so the warnings tests are in t/lib/warnings/regexec
+        like("\N{KELVIN SIGN}", $kelvin_fold,
+             '(?[ \N{KELVIN SIGN} ]) matches itself under /i in C locale');
+        like("K", $kelvin_fold,
+                '(?[ \N{KELVIN SIGN} ]) matches "K" under /i in C locale');
+        like("k", $kelvin_fold,
+                '(?[ \N{KELVIN SIGN} ]) matches "k" under /i in C locale');
+        like(":", $single_char_class,
+             '(?[ : ]) matches itself in C locale (a single character class)');
+    }
+}
+
 
 done_testing();
 

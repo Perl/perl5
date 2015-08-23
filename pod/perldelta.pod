@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<qr/(?[ ])/> now works in UTF-8 locales
+
+L<Extended Bracketed Character Classes|perlrecharclass/Extended Bracketed Character Classes>
+now will successfully compile when S<C<use locale>> is in effect.  The compiled
+pattern will use standard Unicode rules.  If the runtime locale is not a
+UTF-8 one, a warning is raised and standard Unicode rules are used
+anyway.  No tainting is done since the outcome does not actually depend
+on the locale.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

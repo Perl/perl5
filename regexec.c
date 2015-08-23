@@ -86,6 +86,9 @@
 #include "invlist_inline.h"
 #include "unicode_constants.h"
 
+static const char utf8_locale_required[] =
+      "Use of (?[ ]) for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale";
+
 #ifdef DEBUGGING
 /* At least one required character in the target string is expressible only in
  * UTF-8. */
@@ -1822,6 +1825,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     switch (OP(c)) {
     case ANYOFL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+
+        if ((FLAGS(c) & ANYOF_LOC_REQ_UTF8) && ! IN_UTF8_CTYPE_LOCALE) {
+            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE), utf8_locale_required);
+        }
+
         /* FALLTHROUGH */
     case ANYOFD:
     case ANYOF:
@@ -5730,6 +5738,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case ANYOFL:  /*  /[abc]/l      */
             _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+
+            if ((FLAGS(scan) & ANYOF_LOC_REQ_UTF8) && ! IN_UTF8_CTYPE_LOCALE)
+            {
+              Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE), utf8_locale_required);
+            }
             /* FALLTHROUGH */
 	case ANYOFD:  /*   /[abc]/d       */
 	case ANYOF:  /*   /[abc]/       */
@@ -8245,6 +8258,10 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     }
     case ANYOFL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+
+        if ((FLAGS(p) & ANYOF_LOC_REQ_UTF8) && ! IN_UTF8_CTYPE_LOCALE) {
+            Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE), utf8_locale_required);
+        }
         /* FALLTHROUGH */
     case ANYOFD:
     case ANYOF:
@@ -8589,7 +8606,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 		 * UTF8_ALLOW_FFFF */
 	if (c_len == (STRLEN)-1)
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
-        if (c > 255 && OP(n) == ANYOFL && ! is_ANYOF_SYNTHETIC(n)) {
+        if (c > 255 && OP(n) == ANYOFL && ! (flags & ANYOF_LOC_REQ_UTF8)) {
             _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c);
         }
     }
