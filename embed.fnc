@@ -2130,6 +2130,7 @@ Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state                 \
 				|bool allow_multi_fold                        \
 				|const bool silence_non_portable              \
 				|const bool strict                            \
+				|const bool optimizable                       \
 				|NULLOK SV** ret_invlist
 Es	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
