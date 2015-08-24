@@ -13915,6 +13915,7 @@ redo_curchar:
     if (av_tindex(stack) < 0   /* Was empty */
         || ((final = av_pop(stack)) == NULL)
         || ! IS_OPERAND(final)
+        || SvTYPE(final) != SVt_INVLIST
         || av_tindex(stack) >= 0)  /* More left on stack */
     {
         SvREFCNT_dec(final);
