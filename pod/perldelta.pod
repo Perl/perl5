@@ -347,7 +347,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-C<(?[ () ])> no longer segfaults, giving a syntax error message instead.
+C<qr/(?[ () ])/> no longer segfaults, giving a syntax error message instead.
 [perl #125805]
 
 =back
