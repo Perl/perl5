@@ -10912,6 +10912,20 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 	  do_curly:
 	    if ((flags&SIMPLE)) {
+                if (min == 0 && max == REG_INFTY) {
+                    reginsert(pRExC_state, STAR, ret, depth+1);
+                    ret->flags = 0;
+                    MARK_NAUGHTY(4);
+                    RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
+                    goto nest_check;
+                }
+                if (min == 1 && max == REG_INFTY) {
+                    reginsert(pRExC_state, PLUS, ret, depth+1);
+                    ret->flags = 0;
+                    MARK_NAUGHTY(3);
+                    RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
+                    goto nest_check;
+                }
                 MARK_NAUGHTY_EXP(2, 2);
 		reginsert(pRExC_state, CURLY, ret, depth+1);
                 Set_Node_Offset(ret, parse_start+1); /* MJD */
@@ -10985,21 +10999,9 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     *flagp = (op != '+') ? (WORST|SPSTART|HASWIDTH) : (WORST|HASWIDTH);
 
-    if (op == '*' && (flags&SIMPLE)) {
-	reginsert(pRExC_state, STAR, ret, depth+1);
-	ret->flags = 0;
-	MARK_NAUGHTY(4);
-        RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
-    }
-    else if (op == '*') {
+    if (op == '*') {
 	min = 0;
 	goto do_curly;
-    }
-    else if (op == '+' && (flags&SIMPLE)) {
-	reginsert(pRExC_state, PLUS, ret, depth+1);
-	ret->flags = 0;
-	MARK_NAUGHTY(3);
-        RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
     }
     else if (op == '+') {
 	min = 1;
