@@ -10894,9 +10894,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 ret = reg_node(pRExC_state, OPFAIL);
                 return ret;
             }
-            else if (min == max
-                     && RExC_parse < RExC_end
-                     && (*RExC_parse == '?' || *RExC_parse == '+'))
+            else if (min == max && RExC_parse < RExC_end && *RExC_parse == '?')
             {
                 if (PASS2) {
                     ckWARN2reg(RExC_parse + 1,
