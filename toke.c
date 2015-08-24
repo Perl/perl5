@@ -8102,7 +8102,13 @@ Perl_yylex(pTHX)
 
 		if (*s == ':' && s[1] != ':')
 		    PL_expect = attrful;
-		else if ((*s != '{' && *s != '(') && key == KEY_sub) {
+		else if ((*s != '{' && *s != '(') && key != KEY_format) {
+                    assert(key == KEY_sub || key == KEY_AUTOLOAD ||
+                           key == KEY_DESTROY || key == KEY_BEGIN ||
+                           key == KEY_UNITCHECK || key == KEY_CHECK ||
+                           key == KEY_INIT || key == KEY_END ||
+                           key == KEY_my || key == KEY_state ||
+                           key == KEY_our);
 		    if (!have_name)
 			Perl_croak(aTHX_ "Illegal declaration of anonymous subroutine");
 		    else if (*s != ';' && *s != '}')

@@ -279,3 +279,8 @@ state ($x, $y, state $z);
 EXPECT
 Can't redeclare "state" in "state" at - line 2, near ", "
 Execution of - aborted due to compilation errors.
+########
+# NAME BEGIN <> [perl #125341]
+BEGIN <>
+EXPECT
+Illegal declaration of subroutine BEGIN at - line 1.
