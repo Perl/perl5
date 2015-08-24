@@ -23,7 +23,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 25;  # Update this when adding/deleting tests.
+plan tests => 57;  # Update this when adding/deleting tests.
 
 use strict;
 use warnings;
@@ -118,6 +118,22 @@ sub run_tests {
         ok ($s !~ /.*?:::\s*ab/si, 'PREGf_IMPLICIT/si');
         ok ($s !~ /.*?:::\s*ab/ms, 'PREGf_IMPLICIT/ms');
         ok ($s !~ /.*?:::\s*ab/msi,'PREGf_IMPLICIT/msi');
+
+        for my $star ('*', '{0,}') {
+            for my $greedy ('', '?') {
+                for my $flags ('', 'i', 'm', 'mi') {
+                    for my $s ('', 's') {
+                        my $XBOL = $s ? 'SBOL' : 'MBOL';
+                        my $text = "anchored($XBOL) implicit";
+                        fresh_perl_like(<<"PROG", qr/\b\Q$text\E\b/, {}, "/.${star}${greedy}X/${flags}${s} anchors implicitly");
+BEGIN { \@INC = ('../lib', '.', '../ext/re'); }
+use re 'debug';
+qr/.${star}${greedy}:::\\s*ab/${flags}${s}
+PROG
+                    }
+                }
+            }
+        }
     }
 
 } # End of sub run_tests
