@@ -13710,13 +13710,14 @@ redo_curchar:
                     /* If the top entry on the stack is an operator, it had
                      * better be a '!', otherwise the entry below the top
                      * operand should be an operator */
-                    if ( ! (top_ptr = av_fetch(stack, top_index, FALSE))
+                    if (   ! (top_ptr = av_fetch(stack, top_index, FALSE))
                         || (IS_OPERATOR(*top_ptr) && SvUV(*top_ptr) != '!')
-                        || top_index - fence < 1
-                        || ! (stacked_ptr = av_fetch(stack,
-                                                     top_index - 1,
-                                                     FALSE))
-                        || ! IS_OPERATOR(*stacked_ptr))
+                        || (   IS_OPERAND(*top_ptr)
+                            && (   top_index - fence < 1
+                                || ! (stacked_ptr = av_fetch(stack,
+                                                             top_index - 1,
+                                                             FALSE))
+                                || ! IS_OPERATOR(*stacked_ptr))))
                     {
                         RExC_parse++;
                         vFAIL("Unexpected '(' with no preceding operator");

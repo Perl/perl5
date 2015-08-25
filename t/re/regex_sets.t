@@ -97,6 +97,8 @@ like("k", $still_fold, "/i on interpolated (?[ ]) is retained in outer without /
 eval 'my $x = qr/(?[ [a] ])/; qr/(?[ $x ])/';
 is($@, "", 'qr/(?[ [a] ])/ can be interpolated');
 
+like("B", qr/(?[ [B] | ! ( [^B] ) ])/, "[perl #125892]");
+
 if (! is_miniperl() && locales_enabled('LC_CTYPE')) {
     my $utf8_locale = find_utf8_ctype_locale;
     SKIP: {
