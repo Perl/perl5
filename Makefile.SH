@@ -20,6 +20,15 @@ case $PERL_CONFIG_SH in
 	;;
 esac
 
+case "$osname" in
+amigaos)
+	devtty=CONSOLE:
+	;;
+*)
+	devtty=/dev/tty
+	;;
+esac
+
 Makefile=Makefile
 
 : This forces SH files to create target in same directory as SH file.
@@ -349,6 +358,9 @@ libs = $perllibs $cryptlib
 public = \$(PERL_EXE) utilities
 
 shellflags = $shellflags
+
+# The /dev/tty or the moral equivalent.
+devtty = $devtty
 
 # This is set to  MAKE=$make if your $make command doesn't
 # do it for you.
@@ -1527,7 +1539,7 @@ minitest_prep:
 MINITEST_TESTS = base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t opbasic/*.t op/*.t uni/*.t perf/*.t
 
 minitest: $(MINIPERL_EXE) minitest_prep
-	- cd t && $(RUN_PERL) TEST $(MINITEST_TESTS) </dev/tty
+	- cd t && $(RUN_PERL) TEST $(MINITEST_TESTS) <$(devtty)
 
 minitest-notty minitest_notty: $(MINIPERL_EXE) minitest_prep
 	- cd t && PERL_SKIP_TTY_TEST=1 $(RUN_PERL) TEST $(MINITEST_TESTS)
