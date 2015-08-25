@@ -13482,8 +13482,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
 
     /* The stack is kept in Łukasiewicz order.  (That's pronounced similar
      * to luke-a-shave-itch (or -itz), but people who didn't want to bother
-     * with prounouncing it called it Reverse Polish instead, but now that YOU
-     * know how to prounounce it you can use the correct term, thus giving due
+     * with pronouncing it called it Reverse Polish instead, but now that YOU
+     * know how to pronounce it you can use the correct term, thus giving due
      * credit to the person who invented it, and impressing your geek friends.
      * Wikipedia says that the pronounciation of "Ł" has been changing so that
      * it is now more like an English initial W (as in wonk) than an L.)

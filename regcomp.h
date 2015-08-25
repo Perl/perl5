@@ -378,31 +378,53 @@ struct regnode_ssc {
  * reach this high). */
 #define ANYOF_ONLY_HAS_BITMAP	((U32) -1)
 
-/* Flags for node->flags of ANYOF.  These are in short supply, with none
- * currently available.  The ABOVE_BITMAP_ALL bit could be freed up
+/* Below are the flags for node->flags of ANYOF.  These are in short supply,
+ * with none currently available.  The ABOVE_BITMAP_ALL bit could be freed up
  * by resorting to creating a swash containing everything above 255.  This
- * introduces a performance penalty.  An option that wouldn't slow things down
- * would be to split one of the two LOC flags out into a separate
- * node, like what was done with ANYOF_NON_UTF8_NON_ASCII_ALL in commit
- * 34fdef848b1687b91892ba55e9e0c3430e0770f6 (but which was reverted because it
- * wasn't the best option available at the time), and using a LOC flag is
- * probably better than that commit anyway.  But it could be reinstated if we
- * need a bit.  The LOC flags are only for /l nodes; the reverted commit was
- * only for /d, so there are no combinatorial issues.  The LOC flag to use is
- * probably the POSIXL one.  Now that there is an ANYOFL (locale) node, another
- * option would be to make all of those include the POSIXL data structure,
- * which would get rid of needing a separate POSIXL flag.  But it would
- * increase the size of all such nodes, so it's probably not as atractive as
- * having an ANYOF_POSIXL node type.  But if we did do it, note that not all 32
- * bits of that extra space are used, one bit of that could be set aside for
- * the LOC_FOLD flag, yielding yet another bit.  This would require extra code
- * for masking, so again not the most attractive solution.
+ * seems likely to introduce a performance penalty (but actual numbers haven't
+ * been done), so its probably better do some of the other possibilities below
+ * in preference to this.
+ *
+ * If just one bit is required, it seems to me (khw) that the best option would
+ * be to turn the ANYOF_LOC_REQ_UTF8 bit into a separate node type: a
+ * specialization of the ANYOFL type, freeing up the currently occupied bit.
+ * When turning a bit into a node type, one has to take into consideration that
+ * a SSC may use that bit -- not just a regular ANYOF[DL]?.  In the case of
+ * ANYOF_LOC_REQ_UTF8, the only likely problem is accurately settting the SSC
+ * node-type to the new one, which would likely involve S_ssc_or and S_ssc_and,
+ * and not how the SSC currently gets set to ANYOFL.  This bit is a natural
+ * candidate for being a separate node type because it is a specialization of
+ * the current ANYOFL, and because no other ANYOFL-only bits are set when it
+ * is; also most of its uses are actually outside the reginclass() function, so
+ * this could be done with no performance penalty.  The other potential bits
+ * seem to me to have a potential issue with a combinatorial explosion of node
+ * types, because of not having that mutual exclusivity, where you may end up
+ * having to have a node type for bitX being set, one for bitY, and one for
+ * both bitXY.
+ *
+ * If you don't want to do this, or two bits are required, one could instead
+ * rename the ANYOF_POSIXL bit to be ANYOFL_LARGE, to mean that the ANYOF node
+ * has an extra 32 bits beyond what a regular one does.  That's what it
+ * effectively means now, with the extra space all for the POSIX class bits.
+ * But those classes actually only occupy 30 bits, so the ANYOF_LOC_REQ_BIT (if
+ * an extra node type for it hasn't been created) and/or the ANYOF_LOC_FOLD
+ * bits could be moved there.  The downside of this is that ANYOFL nodes with
+ * whichever of the bits get moved would have to have the extra space always
+ * allocated.
+ *
+ * If three bits are required, one could additionally make a node type for
+ * ANYOFL_LARGE, removing that as a bit, and move both the above bits to that
+ * extra word.  There isn't an SSC problem as all SSCs are this large anyway,
+ * and the SSC could be set to this node type.   REGINCLASS would have to be
+ * modified so that if the node type were this, it would call reginclass().
+ * as the flag bit that does this now would be gone.
  *
  * Several flags are not used in synthetic start class (SSC) nodes, so could be
  * shared should new flags be needed for SSCs, like SSC_MATCHES_EMPTY_STRING
  * now. */
 
-/* regexec.c is expecting this to be in the low bit */
+/* If this is set, the result of the match should be complemented.  regexec.c
+ * is expecting this to be in the low bit.  Never in an SSC */
 #define ANYOF_INVERT		                0x01
 
 /* For the SSC node only, which cannot be inverted, so is shared with that bit.
@@ -418,7 +440,7 @@ struct regnode_ssc {
 /* The fold is calculated and stored in the bitmap where possible at compile
  * time.  However under locale, the actual folding varies depending on
  * what the locale is at the time of execution, so it has to be deferred until
- * then */
+ * then.  Only set under /l; never in an SSC  */
 #define ANYOF_LOC_FOLD                          0x04
 
 /* If set, means to warn if runtime locale isn't a UTF-8 one.  Only under /l.
@@ -430,7 +452,8 @@ struct regnode_ssc {
  * Can be in an SSC */
 #define ANYOF_MATCHES_ALL_ABOVE_BITMAP          0x10
 
-/* Can match something outside the bitmap that isn't in utf8 */
+/* If set, the node can match something outside the bitmap that isn't in utf8;
+ * never set under /d nor in an SSC */
 #define ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES    0x20
 
 /* Are there things outside the bitmap that will match only if the target
@@ -439,7 +462,7 @@ struct regnode_ssc {
 #define ANYOF_HAS_UTF8_NONBITMAP_MATCHES        0x40
 
 /* Shared bit:
- *      Under /d it means the ANYOF node matches all non-ASCII Latin1
+ *      Under /d it means the ANYOFD node matches all non-ASCII Latin1
  *          characters when the target string is not in utf8.
  *      When not under /d, it means the ANYOF node should raise a warning if
  *          matching against an above-Unicode code point.
@@ -455,7 +478,7 @@ struct regnode_ssc {
 
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
  * start class nodes during construction of the SSC.  During finalization of
- * the SSC, other of the flags could be added to it */
+ * the SSC, other of the flags may get added to it */
 #define ANYOF_COMMON_FLAGS    ( ANYOF_HAS_UTF8_NONBITMAP_MATCHES    \
                                |ANYOF_LOC_REQ_UTF8)
 
