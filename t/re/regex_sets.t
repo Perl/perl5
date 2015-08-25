@@ -123,6 +123,8 @@ if (! is_miniperl() && locales_enabled('LC_CTYPE')) {
 
         # These should generate warnings (the above 4 shouldn't), but like()
         # suppresses them, so the warnings tests are in t/lib/warnings/regexec
+        $^W = 0;   # Suppress the warnings that occur when run by hand with
+                   # the -w option
         like("\N{KELVIN SIGN}", $kelvin_fold,
              '(?[ \N{KELVIN SIGN} ]) matches itself under /i in C locale');
         like("K", $kelvin_fold,
