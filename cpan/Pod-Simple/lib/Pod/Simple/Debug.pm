@@ -2,7 +2,7 @@ require 5;
 package Pod::Simple::Debug;
 use strict;
 use vars qw($VERSION );
-$VERSION = '3.31';
+$VERSION = '3.30';
 
 sub import {
   my($value,$variable);
@@ -140,8 +140,8 @@ pod-people@perl.org mail list. Send an empty email to
 pod-people-subscribe@perl.org to subscribe.
 
 This module is managed in an open GitHub repository,
-L<https://github.com/perl-pod/pod-simple/>. Feel free to fork and contribute, or
-to clone L<git://github.com/perl-pod/pod-simple.git> and send patches!
+L<https://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/theory/pod-simple.git> and send patches!
 
 Patches against Pod::Simple are welcome. Please send bug reports to
 <bug-pod-simple@rt.cpan.org>.

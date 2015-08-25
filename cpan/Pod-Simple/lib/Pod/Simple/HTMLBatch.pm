@@ -5,7 +5,7 @@ use strict;
 use vars qw( $VERSION $HTML_RENDER_CLASS $HTML_EXTENSION
  $CSS $JAVASCRIPT $SLEEPY $SEARCH_CLASS @ISA
 );
-$VERSION = '3.31';
+$VERSION = '3.30';
 @ISA = ();  # Yup, we're NOT a subclass of Pod::Simple::HTML!
 
 # TODO: nocontents stylesheets. Strike some of the color variations?
@@ -1321,8 +1321,8 @@ pod-people@perl.org mail list. Send an empty email to
 pod-people-subscribe@perl.org to subscribe.
 
 This module is managed in an open GitHub repository,
-L<https://github.com/perl-pod/pod-simple/>. Feel free to fork and contribute, or
-to clone L<git://github.com/perl-pod/pod-simple.git> and send patches!
+L<https://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/theory/pod-simple.git> and send patches!
 
 Patches against Pod::Simple are welcome. Please send bug reports to
 <bug-pod-simple@rt.cpan.org>.
