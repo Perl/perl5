@@ -4440,6 +4440,9 @@ PP(pp_exec)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
+#if defined(__amigaos4__)
+    amigaos_stdio_store store;
+#endif
 
     if (TAINTING_get) {
 	TAINT_ENV();
@@ -4451,6 +4454,12 @@ PP(pp_exec)
 	MARK = ORIGMARK;
 	TAINT_PROPER("exec");
     }
+#if defined(__amigaos4__)
+    /* Make sure redirection behaves after exec.  Yes, in AmigaOS the
+     * original process continues after exec, since processes are more
+     * like threads. */
+    amigaos_stdio_save(aTHX_ &store);
+#endif
     PERL_FLUSHALL_FOR_CHILD;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV * const really = *++MARK;
@@ -4470,6 +4479,12 @@ PP(pp_exec)
 #endif
     }
 
+#if defined(__amigaos4__)
+    amigaos_stdio_restore(aTHX_ &store);
+    STATUS_NATIVE_CHILD_SET(value);
+    PL_exit_flags |= PERL_EXIT_EXPECTED;
+    if (value != -1) my_exit(value);
+#endif
     SP = ORIGMARK;
     XPUSHi(value);
     RETURN;
