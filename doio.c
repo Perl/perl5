@@ -1705,16 +1705,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	    PERL_FPU_POST_EXEC
  	    S_exec_failed(aTHX_ PL_sh_path, fd, do_report);
 #if defined (__amigaos4__)
-	    /* We *must* write something to our pipe or else
-	     * the other end hangs */
-	    {
-		int e = errno;
-
-		if (do_report) {
-		    PerlLIO_write(fd, (void*)&e, sizeof(int));
-		    PerlLIO_close(fd);
-		}
-	    }
+            amigaos_post_exec(fd, do_report);
 #endif
 	    Safefree(buf);
 	    return DO_EXEC_RETVAL(result);
