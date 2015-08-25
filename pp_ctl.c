@@ -1995,8 +1995,9 @@ PP(pp_dbstate)
 /* S_leave_common: Common code that many functions in this file use on
 		   scope exit.
 
-   Process the return args on the stack in the range (mark..sp) based on
-   context, with any final args starting at newsp.
+   Process the return args on the stack in the range (mark+1..sp) based on
+   context, with any final args starting at newsp+1. Returns the new
+   top-of-stack position
    Args are mortal copied (or mortalied if lvalue) unless its safe to use
    as-is, based on whether it has the specified flags. Note that most
    callers specify flags as (SVs_PADTMP|SVs_TEMP), while leaveeval skips
@@ -2307,7 +2308,6 @@ PP(pp_leavesublv)
 	if (CxLVAL(cx) && !ref) {     /* Leave it as it is if we can. */
 	    SV *sv;
 	    if (MARK <= SP) {
-		assert(MARK == SP);
 		if ((SvPADTMP(TOPs) || SvREADONLY(TOPs)) &&
 		    !SvSMAGICAL(TOPs)) {
 		    what =
@@ -2404,45 +2404,70 @@ PP(pp_return)
 {
     dSP; dMARK;
     PERL_CONTEXT *cx;
-    SV **oldsp;
     const I32 cxix = dopoptosub(cxstack_ix);
 
     assert(cxstack_ix >= 0);
     if (cxix < cxstack_ix) {
         if (cxix < 0) {
-            if (CxMULTICALL(cxstack)) { /* In this case we must be in a
-                                         * sort block, which is a CXt_NULL
-                                         * not a CXt_SUB */
-                dounwind(0);
-                /* if we were in list context, we would have to splice out
-                 * any junk before the return args, like we do in the general
-                 * pp_return case, e.g.
-                 *   sub f { for (junk1, junk2) { return arg1, arg2 }}
-                 */
-                assert(cxstack[0].blk_gimme == G_SCALAR);
-                return 0;
-            }
-            else
+            if (!CxMULTICALL(cxstack))
                 DIE(aTHX_ "Can't return outside a subroutine");
+            /* We must be in a sort block, which is a CXt_NULL not a
+             * CXt_SUB. Handle specially. */
+            if (cxstack_ix > 0) {
+                /* See comment below about context popping. Since we know
+                 * we're scalar and not lvalue, we can preserve the return
+                 * value in a simpler fashion than there. */
+                SV *sv = *SP;
+                assert(cxstack[0].blk_gimme == G_SCALAR);
+                if (   (sp != PL_stack_base)
+                    && !(SvFLAGS(sv) & (SVs_TEMP|SVs_PADTMP))
+                )
+                    *SP = sv_mortalcopy(sv);
+                dounwind(0);
+            }
+            /* caller responsible for popping cxstack[0] */
+            return 0;
         }
+
+        /* There are contexts that need popping. Doing this may free the
+         * return value(s), so preserve them first, e.g. popping the plain
+         * loop here would free $x:
+         *     sub f {  { my $x = 1; return $x } }
+         * We may also need to shift the args down; for example,
+         *    for (1,2) { return 3,4 }
+         * leaves 1,2,3,4 on the stack. Both these actions can be done by
+         * leave_common().  By calling it with lvalue=TRUE, we just bump
+         * the ref count and mortalise the args that need it.  The "scan
+         * the args and maybe copy them" process will be repeated by
+         * whoever we tail-call (e.g. pp_leaveeval), where any copying etc
+         * will be done. That is to say, in this code path two scans of
+         * the args will be done; the first just shifts and preserves; the
+         * second is the "real" arg processing, based on the type of
+         * return.
+         */
+        cx = &cxstack[cxix];
+        SP = leave_common(PL_stack_base + cx->blk_oldsp, SP, MARK,
+                            cx->blk_gimme, SVs_TEMP|SVs_PADTMP, TRUE);
+        PUTBACK;
 	dounwind(cxix);
     }
-
+    else {
+        /* Like in the branch above, we need to handle any extra junk on
+         * the stack. But because we're not also popping extra contexts, we
+         * don't have to worry about prematurely freeing args. So we just
+         * need to do the bare minimum to handle junk, and leave the main
+         * arg processing in the function we tail call, e.g. pp_leavesub.
+         * In list context we have to splice out the junk; in scalar
+         * context we can leave as-is (pp_leavesub will later return the
+         * top stack element). But for an  empty arg list, e.g.
+         *    for (1,2) { return }
+         * we need to set sp = oldsp so that pp_leavesub knows to push
+         * &PL_sv_undef onto the stack.
+         */
+    SV **oldsp;
     cx = &cxstack[cxix];
-
     oldsp = PL_stack_base + cx->blk_oldsp;
     if (oldsp != MARK) {
-        /* Handle extra junk on the stack. For example,
-         *    for (1,2) { return 3,4 }
-         * leaves 1,2,3,4 on the stack. In list context we
-         * have to splice out the 1,2; In scalar context for
-         *    for (1,2) { return }
-         * we need to set sp = oldsp so that pp_leavesub knows
-         * to push &PL_sv_undef onto the stack.
-         * Note that in pp_return we only do the extra processing
-         * required to handle junk; everything else we leave to
-         * pp_leavesub.
-         */
         SSize_t nargs = SP - MARK;
         if (nargs) {
             if (cx->blk_gimme == G_ARRAY) {
@@ -2453,6 +2478,7 @@ PP(pp_return)
         }
         else
             PL_stack_sp  = oldsp;
+    }
     }
 
     /* fall through to a normal exit */

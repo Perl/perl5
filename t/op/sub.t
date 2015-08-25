@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 58);
+plan(tests => 59);
 
 sub empty_sub {}
 
@@ -364,3 +364,15 @@ is(join('-', 10, check_ret(5,6,7,8,9)), "10-25-26-27-28-29", "check_ret(5,6,7,8,
 
 is(join('-', 10, check_ret(-1)),        "10",  "check_ret(-1) list");
 is(join('-', 10, check_ret(-1,5)),      "10",  "check_ret(-1,5) list");
+
+# a sub without nested scopes that still leaves rubbish on the stack
+# which needs popping
+{
+    my @res = sub {
+        my $false;
+        # conditional leaves rubbish on stack
+        return @_ unless $false and $false;
+        1;
+    }->('a','b');
+    is(join('-', @res), "a-b", "unnested rubbish");
+}
