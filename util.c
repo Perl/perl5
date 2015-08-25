@@ -45,6 +45,10 @@
 int putenv(char *);
 #endif
 
+#ifdef __amigaos__
+# include "amigaos4/amigaio.h"
+#endif
+
 #ifdef HAS_SELECT
 # ifdef I_SYS_SELECT
 #  include <sys/select.h>
@@ -2690,6 +2694,8 @@ Perl_my_fork(void)
     pid = fork();
 #endif
     return pid;
+#elif defined(__amigaos4__)
+    return amigaos_fork();
 #else
     /* this "canna happen" since nothing should be calling here if !HAS_FORK */
     Perl_croak_nocontext("fork() not available");
