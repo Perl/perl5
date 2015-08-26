@@ -1998,7 +1998,10 @@ PP(pp_dbstate)
    Process the return args on the stack in the range (mark..sp) based on
    context, with any final args starting at newsp.
    Args are mortal copied (or mortalied if lvalue) unless its safe to use
-   as-is, based on whether it the specified flags
+   as-is, based on whether it has the specified flags. Note that most
+   callers specify flags as (SVs_PADTMP|SVs_TEMP), while leaveeval skips
+   SVs_PADTMP since its optree gets immediately freed, freeing its padtmps
+   at the same time.
 
    Also, taintedness is cleared.
 */
@@ -2252,7 +2255,7 @@ PP(pp_leaveloop)
 
     SP = (gimme == G_VOID)
         ? newsp
-        : leave_common(newsp, SP, MARK, gimme, 0,
+        : leave_common(newsp, SP, MARK, gimme, SVs_PADTMP|SVs_TEMP,
 			       PL_op->op_private & OPpLVALUE);
     PUTBACK;
 
