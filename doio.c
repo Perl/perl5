@@ -771,12 +771,10 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 	PerlIO_clearerr(fp);
 	fd = PerlIO_fileno(fp);
     }
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-    if (fd >= 0) {
-        if (fcntl(fd, F_SETFD, fd > PL_maxsysfd) < 0) {
-            PerlLIO_close(fd);
-            goto say_false;
-        }
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
+    if (fd > PL_maxsysfd && fcntl(fd, F_SETFD, FD_CLOEXEC) < 0) {
+        PerlLIO_close(fd);
+        goto say_false;
     }
 #endif
     IoIFP(io) = fp;
