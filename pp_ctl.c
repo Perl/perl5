@@ -1993,11 +1993,12 @@ PP(pp_dbstate)
 }
 
 /* S_leave_common: Common code that many functions in this file use on
-		   scope exit.  */
+		   scope exit.
 
-/* SVs on the stack that have any of the flags passed in are left as is.
-   Other SVs are protected via the mortals stack if lvalue is true, and
-   copied otherwise.
+   Process the return args on the stack in the range (mark..sp) based on
+   context, with any final args starting at newsp.
+   Args are mortal copied (or mortalied if lvalue) unless its safe to use
+   as-is, based on whether it the specified flags
 
    Also, taintedness is cleared.
 */
@@ -2006,17 +2007,12 @@ STATIC SV **
 S_leave_common(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme,
 			      U32 flags, bool lvalue)
 {
-    bool padtmp = 0;
     PERL_ARGS_ASSERT_LEAVE_COMMON;
 
     TAINT_NOT;
-    if (flags & SVs_PADTMP) {
-	flags &= ~SVs_PADTMP;
-	padtmp = 1;
-    }
     if (gimme == G_SCALAR) {
 	if (MARK < SP)
-	    *++newsp = ((SvFLAGS(*SP) & flags) || (padtmp && SvPADTMP(*SP)))
+	    *++newsp = (SvFLAGS(*SP) & flags)
 			    ? *SP
 			    : lvalue
 				? sv_2mortal(SvREFCNT_inc_simple_NN(*SP))
@@ -2032,7 +2028,7 @@ S_leave_common(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme,
     else if (gimme == G_ARRAY) {
 	/* in case LEAVE wipes old return values */
 	while (++MARK <= SP) {
-	    if ((SvFLAGS(*MARK) & flags) || (padtmp && SvPADTMP(*MARK)))
+	    if (SvFLAGS(*MARK) & flags)
 		*++newsp = *MARK;
 	    else {
 		*++newsp = lvalue
