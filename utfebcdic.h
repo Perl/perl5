@@ -133,11 +133,13 @@ END_EXTERN_C
 
 /* EBCDIC-happy ways of converting native code to UTF-8 */
 
-#define NATIVE_TO_LATIN1(ch)            PL_e2a[(U8)(ch)]
-#define LATIN1_TO_NATIVE(ch)            PL_a2e[(U8)(ch)]
+/* Use these when ch is known to be < 256 */
+#define NATIVE_TO_LATIN1(ch)            (__ASSERT_(FITS_IN_8_BITS(ch)) PL_e2a[(U8)(ch)])
+#define LATIN1_TO_NATIVE(ch)            (__ASSERT_(FITS_IN_8_BITS(ch)) PL_a2e[(U8)(ch)])
 
-#define NATIVE_UTF8_TO_I8(ch)           PL_e2utf[(U8)(ch)]
-#define I8_TO_NATIVE_UTF8(ch)           PL_utf2e[(U8)(ch)]
+/* Use these on bytes */
+#define NATIVE_UTF8_TO_I8(b)           (__ASSERT_(FITS_IN_8_BITS(b)) PL_e2utf[(U8)(b)])
+#define I8_TO_NATIVE_UTF8(b)           (__ASSERT_(FITS_IN_8_BITS(b)) PL_utf2e[(U8)(b)])
 
 /* Transforms in wide UV chars */
 #define NATIVE_TO_UNI(ch)        (((ch) > 255) ? (ch) : NATIVE_TO_LATIN1(ch))
