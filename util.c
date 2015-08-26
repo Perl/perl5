@@ -2373,7 +2373,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 	/* Close parent's end of error status pipe (if any) */
 	if (did_pipes) {
 	    PerlLIO_close(pp[0]);
-#if defined(HAS_FCNTL) && defined(F_SETFD)
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
 	    /* Close error pipe automatically if exec works */
 	    if (fcntl(pp[1], F_SETFD, FD_CLOEXEC) < 0)
                 return NULL;

@@ -708,10 +708,10 @@ PP(pp_pipe_op)
 	    PerlLIO_close(fd[1]);
 	goto badexit;
     }
-#if defined(HAS_FCNTL) && defined(F_SETFD)
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
     /* ensure close-on-exec */
-    if ((fcntl(fd[0], F_SETFD,fd[0] > PL_maxsysfd) < 0) ||
-        (fcntl(fd[1], F_SETFD,fd[1] > PL_maxsysfd) < 0))
+    if ((fd[0] > PL_maxsysfd && fcntl(fd[0], F_SETFD, FD_CLOEXEC) < 0) ||
+        (fd[1] > PL_maxsysfd && fcntl(fd[1], F_SETFD, FD_CLOEXEC) < 0))
         goto badexit;
 #endif
     RETPUSHYES;
@@ -2496,8 +2496,9 @@ PP(pp_socket)
 	if (!IoIFP(io) && !IoOFP(io)) PerlLIO_close(fd);
 	RETPUSHUNDEF;
     }
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-    if (fcntl(fd, F_SETFD, fd > PL_maxsysfd) < 0)	/* ensure close-on-exec */
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
+    /* ensure close-on-exec */
+    if (fd > PL_maxsysfd && fcntl(fd, F_SETFD, FD_CLOEXEC) < 0)
 	RETPUSHUNDEF;
 #endif
 
@@ -2542,10 +2543,10 @@ PP(pp_sockpair)
 	if (!IoIFP(io2) && !IoOFP(io2)) PerlLIO_close(fd[1]);
 	RETPUSHUNDEF;
     }
-#if defined(HAS_FCNTL) && defined(F_SETFD)
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
     /* ensure close-on-exec */
-    if ((fcntl(fd[0],F_SETFD,fd[0] > PL_maxsysfd) < 0) ||
-        (fcntl(fd[1],F_SETFD,fd[1] > PL_maxsysfd) < 0))
+    if ((fd[0] > PL_maxsysfd && fcntl(fd[0], F_SETFD, FD_CLOEXEC) < 0) ||
+        (fd[1] > PL_maxsysfd && fcntl(fd[1], F_SETFD, FD_CLOEXEC) < 0))
 	RETPUSHUNDEF;
 #endif
 
@@ -2659,8 +2660,9 @@ PP(pp_accept)
 	if (!IoIFP(nstio) && !IoOFP(nstio)) PerlLIO_close(fd);
 	goto badexit;
     }
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-    if (fcntl(fd, F_SETFD, fd > PL_maxsysfd) < 0)	/* ensure close-on-exec */
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
+    /* ensure close-on-exec */
+    if (fd > PL_maxsysfd && fcntl(fd, F_SETFD, FD_CLOEXEC) < 0)
         goto badexit;
 #endif
 
@@ -4386,7 +4388,7 @@ PP(pp_system)
 #endif
 	if (did_pipes) {
 	    PerlLIO_close(pp[0]);
-#if defined(HAS_FCNTL) && defined(F_SETFD)
+#if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
 	    if (fcntl(pp[1], F_SETFD, FD_CLOEXEC) < 0)
                 RETPUSHUNDEF;
 #endif
