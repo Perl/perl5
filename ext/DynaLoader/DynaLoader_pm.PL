@@ -85,10 +85,16 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.33';
+    $VERSION = '1.34';
 }
 
-use Config;
+EOT
+
+if (!$ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
+    print OUT "use Config;\n";
+}
+
+print OUT <<'EOT';
 
 # enable debug/trace messages from DynaLoader perl code
 $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
