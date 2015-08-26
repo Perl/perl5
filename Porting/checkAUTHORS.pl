@@ -644,7 +644,8 @@ ian.goodacre\100xtra.co.nz              ian\100debian.lan
 ingo_weinhold\100gmx.de                 bonefish\100cs.tu-berlin.de
 
 james\100mastros.biz                    theorb\100desert-island.me.uk
-jand\100activestate.com                 jan.dubois\100ibm.net
+jan\100jandubois.com                    jand\100activestate.com
++                                       jan.dubois\100ibm.net
 japhy\100pobox.com                      japhy\100pobox.org
 +                                       japhy\100perlmonk.org
 +                                       japhy\100cpan.org
