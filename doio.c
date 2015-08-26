@@ -741,9 +741,10 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
                 int ofd = PerlIO_fileno(fp);
                 int dupfd = ofd >= 0 ? PerlLIO_dup(ofd) : -1;
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-		/* Assume if we have F_SETFD we have F_GETFD */
-                int coe = ofd >= 0 ? fcntl(ofd, F_GETFD) : -1;
-                if (coe < 0) {
+		/* Assume if we have F_SETFD we have F_GETFD. */
+                /* Get a copy of all the fd flags. */
+                int fd_flags = ofd >= 0 ? fcntl(ofd, F_GETFD) : -1;
+                if (fd_flags < 0) {
                     if (dupfd >= 0)
                         PerlLIO_close(dupfd);
                     goto say_false;
@@ -757,8 +758,9 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
                 PerlIO_close(fp);
                 PerlLIO_dup2(dupfd, ofd);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-		/* The dup trick has lost close-on-exec on ofd */
-		fcntl(ofd,F_SETFD, coe);
+		/* The dup trick has lost close-on-exec on ofd,
+                 * and possibly any other flags, so restore them. */
+		fcntl(ofd,F_SETFD, fd_flags);
 #endif
                 PerlLIO_close(dupfd);
 	    }
