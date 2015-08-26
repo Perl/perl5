@@ -2789,6 +2789,11 @@ typedef struct padname PADNAME;
 #   include "unixish.h"
 #endif
 
+#if defined(__amigaos4__)
+#    include "amigaos.h"
+#    undef FD_CLOEXEC /* a lie in AmigaOS */
+#endif
+
 /* NSIG logic from Configure --> */
 /* Strange style to avoid deeply-nested #if/#else/#endif */
 #ifndef NSIG
@@ -6339,6 +6344,10 @@ expression, but with an empty argument list, like this:
 
 #ifdef __Lynx__
 #  include <fcntl.h>
+#endif
+
+#ifdef __amigaos4__
+#  undef FD_CLOEXEC /* a lie in AmigaOS */
 #endif
 
 #ifdef I_SYS_FILE
