@@ -755,6 +755,7 @@ struct block_eval {
 /* loop context */
 struct block_loop {
     I32		resetsp;
+    I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
     union {	/* different ways of locating the iteration variable */
 	SV      **svp; /* for lexicals: address of pad slot */
@@ -802,6 +803,7 @@ struct block_loop {
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
+        cx->blk_loop.old_savestack_ix = PL_savestack_ix;                \
 	cx->blk_loop.itervar_u.svp = NULL;
 
 #ifdef USE_ITHREADS
@@ -816,9 +818,11 @@ struct block_loop {
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
+        cx->blk_loop.old_savestack_ix = PL_savestack_ix;                \
         PUSHLOOP_FOR_setpad(cx);
 
 #define POPLOOP(cx)							\
+	LEAVE_SCOPE(cx->blk_loop.old_savestack_ix);      		\
 	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.cur);		\
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.end);		\
