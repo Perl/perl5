@@ -2117,7 +2117,7 @@ PP(pp_enteriter)
     dSP; dMARK;
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
-    void *itervar; /* location of the iteration variable */
+    void *itervarp; /* GV or pad slot of the iteration variable */
     SV   *itersave; /* the old var in the iterator var slot */
     U8 cxtype = CXt_LOOP_FOR;
 
@@ -2125,29 +2125,30 @@ PP(pp_enteriter)
     SAVETMPS;
 
     if (PL_op->op_targ) {			 /* "my" variable */
-	itervar = &PAD_SVl(PL_op->op_targ);
+	itervarp = &PAD_SVl(PL_op->op_targ);
+        itersave = *(SV**)itervarp;
+        assert(itersave);
 	if (PL_op->op_private & OPpLVAL_INTRO) {        /* for my $x (...) */
             /* the SV currently in the pad slot is never live during
              * iteration (the slot is always aliased to one of the items)
              * so it's always stale */
-	    SvPADSTALE_on(*(SV**)itervar);
+	    SvPADSTALE_on(itersave);
 	}
-        itersave = SvREFCNT_inc(*(SV**)itervar);
-        assert(itersave);
+        SvREFCNT_inc_simple_void_NN(itersave);
     }
     else if (LIKELY(isGV(TOPs))) {		/* symbol table variable */
 	GV * const gv = MUTABLE_GV(POPs);
 	SV** svp = &GvSV(gv);
+	itervarp = (void *)gv;
         itersave = *svp;
 	*svp = newSV(0);
-	itervar = (void *)gv;
     }
     else {
 	SV * const sv = POPs;
 	assert(SvTYPE(sv) == SVt_PVMG);
 	assert(SvMAGIC(sv));
 	assert(SvMAGIC(sv)->mg_type == PERL_MAGIC_lvref);
-	itervar = (void *)sv;
+	itervarp = (void *)sv;
 	cxtype |= CXp_FOR_LVREF;
         itersave = NULL;
     }
@@ -2158,7 +2159,7 @@ PP(pp_enteriter)
     ENTER_with_name("loop2");
 
     PUSHBLOCK(cx, cxtype, SP);
-    PUSHLOOP_FOR(cx, itervar, itersave, MARK);
+    PUSHLOOP_FOR(cx, itervarp, itersave, MARK);
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *maybe_ary = POPs;
 	if (SvTYPE(maybe_ary) != SVt_PVAV) {
