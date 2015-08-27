@@ -778,6 +778,15 @@
 /* If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
 #   include <unistd.h>
+#   if defined(__amigaos4__)
+/* Under AmigaOS 4 newlib.library provides an environ.  However using
+ * it doesn't give us enough control over inheritance of variables by
+ * subshells etc. so replace with custom version based on abc-shell
+ * code. */
+extern char **myenviron;
+#       undef environ
+#       define environ myenviron
+#   endif
 #endif
 
 /* for WCOREDUMP */

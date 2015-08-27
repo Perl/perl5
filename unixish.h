@@ -129,11 +129,12 @@
 #if defined(__amigaos4__)
 void amigaos4_init_fork_array();
 void amigaos4_dispose_fork_array();
+void amigaos4_init_environ_sema();
 #  define PERL_SYS_INIT_BODY(c,v)					\
-	MALLOC_CHECK_TAINT2(*c,*v) PERL_FPU_INIT; PERLIO_INIT; MALLOC_INIT; amigaos4_init_fork_array();
+	MALLOC_CHECK_TAINT2(*c,*v) PERL_FPU_INIT; PERLIO_INIT; MALLOC_INIT; amigaos4_init_fork_array(); amigaos4_init_environ_sema();
 #  define PERL_SYS_TERM_BODY() \
     HINTS_REFCNT_TERM; OP_CHECK_MUTEX_TERM; \
-    OP_REFCNT_TERM; PERLIO_TERM; MALLOC_TERM; amigaos4_dispose_fork_array();
+    OP_REFCNT_TERM; PERLIO_TERM; MALLOC_TERM; amigaos4_dispose_fork_array(); 
 #endif
 
 #ifndef PERL_SYS_INIT_BODY
