@@ -781,14 +781,12 @@ struct block_loop {
 #endif
 };
 
-#define CxITERVAR(c)							\
-        (CxPADLOOP(c)     						\
-            ? (c)->blk_loop.itervar_u.svp        			\
-            : (c)->blk_loop.itervar_u.svp       			\
-                ? isGV((c)->blk_loop.itervar_u.gv)			\
-                    ? &GvSV((c)->blk_loop.itervar_u.gv)			\
-                    : (SV **)&(c)->blk_loop.itervar_u.gv		\
-                : (SV**)NULL)
+#define CxITERVAR(c)                                    \
+        (CxPADLOOP(c)                                   \
+            ? (c)->blk_loop.itervar_u.svp               \
+            : ((c)->cx_type & CXp_FOR_GV)               \
+                ? &GvSV((c)->blk_loop.itervar_u.gv)     \
+                : (SV **)&(c)->blk_loop.itervar_u.gv)
 
 #define CxLABEL(c)	(0 + CopLABEL((c)->blk_oldcop))
 #define CxLABEL_len(c,len)	(0 + CopLABEL_len((c)->blk_oldcop, len))
@@ -832,10 +830,10 @@ struct block_loop {
 	}								\
 	else if (CxTYPE(cx) == CXt_LOOP_FOR)  				\
 	    SvREFCNT_dec(cx->blk_loop.state_u.ary.ary);                 \
-        if (cx->blk_loop.itersave) {                                    \
+        if (cx->cx_type & (CXp_FOR_PAD|CXp_FOR_GV)) {                   \
             SV **svp = (cx)->blk_loop.itervar_u.svp;                    \
             SV *cursv;                                                  \
-            if (isGV((GV*)svp)) {                                       \
+            if ((cx->cx_type & CXp_FOR_GV)) {                           \
                 svp = &GvSV((GV*)svp);                                  \
                 cursv = *svp;                                           \
                 *svp = cx->blk_loop.itersave;                           \
@@ -845,7 +843,7 @@ struct block_loop {
                 *svp = cx->blk_loop.itersave;                           \
             }                                                           \
             SvREFCNT_dec(cursv);                                        \
-        }                                                               \
+        }
 
 /* given/when context */
 struct block_givwhen {
@@ -1038,7 +1036,9 @@ struct context {
 /* private flags for CXt_LOOP */
 #define CXp_FOR_DEF	0x10	/* foreach using $_ */
 #define CXp_FOR_LVREF	0x20	/* foreach using \$var */
-#define CxPADLOOP(c)	((c)->blk_loop.my_op->op_targ)
+#define CXp_FOR_GV	0x40	/* foreach using package var */
+#define CXp_FOR_PAD	0x80	/* foreach using lexical var */
+#define CxPADLOOP(c)	((c)->cx_type & CXp_FOR_PAD)
 
 /* private flags for CXt_SUBST */
 #define CXp_ONCE	0x10	/* What was sbu_once in struct subst */
