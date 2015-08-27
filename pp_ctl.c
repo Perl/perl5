@@ -2464,21 +2464,21 @@ PP(pp_return)
          * we need to set sp = oldsp so that pp_leavesub knows to push
          * &PL_sv_undef onto the stack.
          */
-    SV **oldsp;
-    cx = &cxstack[cxix];
-    oldsp = PL_stack_base + cx->blk_oldsp;
-    if (oldsp != MARK) {
-        SSize_t nargs = SP - MARK;
-        if (nargs) {
-            if (cx->blk_gimme == G_ARRAY) {
-                /* shift return args to base of call stack frame */
-                Move(MARK + 1, oldsp + 1, nargs, SV*);
-                PL_stack_sp  = oldsp + nargs;
+        SV **oldsp;
+        cx = &cxstack[cxix];
+        oldsp = PL_stack_base + cx->blk_oldsp;
+        if (oldsp != MARK) {
+            SSize_t nargs = SP - MARK;
+            if (nargs) {
+                if (cx->blk_gimme == G_ARRAY) {
+                    /* shift return args to base of call stack frame */
+                    Move(MARK + 1, oldsp + 1, nargs, SV*);
+                    PL_stack_sp  = oldsp + nargs;
+                }
             }
+            else
+                PL_stack_sp  = oldsp;
         }
-        else
-            PL_stack_sp  = oldsp;
-    }
     }
 
     /* fall through to a normal exit */
