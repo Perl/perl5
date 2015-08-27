@@ -4886,6 +4886,90 @@ test_isQUOTEMETA(UV ord)
         RETVAL
 
 UV
+test_OFFUNISKIP(UV ord)
+    CODE:
+        RETVAL = OFFUNISKIP(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_OFFUNI_IS_INVARIANT(UV ord)
+    CODE:
+        RETVAL = OFFUNI_IS_INVARIANT(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_UVCHR_IS_INVARIANT(UV ord)
+    CODE:
+        RETVAL = UVCHR_IS_INVARIANT(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_UTF8_IS_INVARIANT(char ch)
+    CODE:
+        RETVAL = UTF8_IS_INVARIANT(ch);
+    OUTPUT:
+        RETVAL
+
+UV
+test_UVCHR_SKIP(UV ord)
+    CODE:
+        RETVAL = UVCHR_SKIP(ord);
+    OUTPUT:
+        RETVAL
+
+UV
+test_UTF8_SKIP(char * ch)
+    CODE:
+        RETVAL = UTF8_SKIP(ch);
+    OUTPUT:
+        RETVAL
+
+bool
+test_UTF8_IS_START(char ch)
+    CODE:
+        RETVAL = UTF8_IS_START(ch);
+    OUTPUT:
+        RETVAL
+
+bool
+test_UTF8_IS_CONTINUATION(char ch)
+    CODE:
+        RETVAL = UTF8_IS_CONTINUATION(ch);
+    OUTPUT:
+        RETVAL
+
+bool
+test_UTF8_IS_CONTINUED(char ch)
+    CODE:
+        RETVAL = UTF8_IS_CONTINUED(ch);
+    OUTPUT:
+        RETVAL
+
+bool
+test_UTF8_IS_DOWNGRADEABLE_START(char ch)
+    CODE:
+        RETVAL = UTF8_IS_DOWNGRADEABLE_START(ch);
+    OUTPUT:
+        RETVAL
+
+bool
+test_UTF8_IS_ABOVE_LATIN1(char ch)
+    CODE:
+        RETVAL = UTF8_IS_ABOVE_LATIN1(ch);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isUTF8_POSSIBLY_PROBLEMATIC(char ch)
+    CODE:
+        RETVAL = isUTF8_POSSIBLY_PROBLEMATIC(ch);
+    OUTPUT:
+        RETVAL
+
+UV
 test_toLOWER(UV ord)
     CODE:
         RETVAL = toLOWER(ord);

@@ -26,7 +26,8 @@ foreach ([0, '', '', 'empty'],
     is(bytes_cmp_utf8($right, $left), -$expect, "$desc reversed");
 }
 
-if (ord("A") == 65) { # EBCDIC is too hard to test for malformations
+my $isASCII = (ord("A") == 65);
+if ($isASCII) { # EBCDIC is too hard to test for malformations
 
 # Test uft8n_to_uvchr().  These provide essentially complete code coverage.
 
@@ -323,6 +324,124 @@ foreach my $test (@tests) {
         }
     }
 }
+}
+
+
+# The numbers in this array are chosen because they are "interesting" on
+# either ASCII or EBCDIC platforms. 0-255 require special handling on EBCDIC;
+# others are the boundaries where the number of bytes required to represent
+# them increase.
+my @code_points = (0 .. 256,
+                   0x400 - 1, 0x400,
+                   0x800 - 1, 0x800,
+                   0x4000 - 1, 0x4000,
+                   0x8000 - 1, 0x8000,
+                   0xD000 - 1, 0xD000,  # First code point considered
+                                        # problematic on ASCII.
+                   0x10000 - 1, 0x1000,
+                   0x200000 - 1, 0x20000,
+                   0x40000 - 1, 0x40000,
+                   0x400000 - 1, 0x400000,
+                   0x4000000 - 1, 0x4000000,
+                   0x80000000 - 1   # Highest legal on EBCDIC machines
+                  );
+for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
+          @code_points)
+{
+    my $hex_u = sprintf("0x%02X", $u);
+    my $n = utf8::unicode_to_native($u);
+    my $hex_n = sprintf("0x%02X", $n);
+
+    my $offskip_should_be = (ord ("A") == 65)
+        ? ( $u < 0x80           ? 1 :
+            $u < 0x800          ? 2 :
+            $u < 0x10000        ? 3 :
+            $u < 0x200000       ? 4 :
+            $u < 0x4000000      ? 5 :
+            $u < 0x80000000     ? 6 : 7 # 13 for 64 bit words
+          )
+        : ($u < 0xA0        ? 1 :
+           $u < 0x400       ? 2 :
+           $u < 0x4000      ? 3 :
+           $u < 0x40000     ? 4 :
+           $u < 0x400000    ? 5 :
+           $u < 0x4000000   ? 6 : 7
+          );
+
+    # If this test fails, subsequent ones are meaningless.
+    next unless is(test_OFFUNISKIP($u), $offskip_should_be,
+                   "Verify OFFUNISKIP($hex_u) is $offskip_should_be");
+    my $invariant = $offskip_should_be == 1;
+    my $display_invariant = $invariant || 0;
+    is(test_OFFUNI_IS_INVARIANT($u), $invariant,
+       "Verify OFFUNI_IS_INVARIANT($hex_u) is $display_invariant");
+
+    my $uvchr_skip_should_be = $offskip_should_be;
+    next unless is(test_UVCHR_SKIP($n), $uvchr_skip_should_be,
+                   "Verify UVCHR_SKIP($hex_n) is $uvchr_skip_should_be");
+    is(test_UVCHR_IS_INVARIANT($n), $offskip_should_be == 1,
+       "Verify UVCHR_IS_INVARIANT($hex_n) is $display_invariant");
+
+    my $n_chr = chr $n;
+    utf8::upgrade $n_chr;
+
+    is(test_UTF8_SKIP($n_chr), $uvchr_skip_should_be,
+        "Verify UTF8_SKIP(chr $hex_n) is $uvchr_skip_should_be");
+
+    use bytes;
+    for (my $j = 0; $j < length $n_chr; $j++) {
+        my $b = substr($n_chr, $j, 1);
+        my $hex_b = sprintf("\"\\x%02x\"", ord $b);
+
+        my $byte_invariant = $j == 0 && $uvchr_skip_should_be == 1;
+        my $display_byte_invariant = $byte_invariant || 0;
+        next unless is(test_UTF8_IS_INVARIANT($b), $byte_invariant,
+                       "   Verify UTF8_IS_INVARIANT($hex_b) for byte $j "
+                     . "is $display_byte_invariant");
+
+        my $is_start = $j == 0 && $uvchr_skip_should_be > 1;
+        my $display_is_start = $is_start || 0;
+        next unless is(test_UTF8_IS_START($b), $is_start,
+                    "      Verify UTF8_IS_START($hex_b) is $display_is_start");
+
+        my $is_continuation = $j != 0 && $uvchr_skip_should_be > 1;
+        my $display_is_continuation = $is_continuation || 0;
+        next unless is(test_UTF8_IS_CONTINUATION($b), $is_continuation,
+                       "      Verify UTF8_IS_CONTINUATION($hex_b) is "
+                     . "$display_is_continuation");
+
+        my $is_continued = $uvchr_skip_should_be > 1;
+        my $display_is_continued = $is_continued || 0;
+        next unless is(test_UTF8_IS_CONTINUED($b), $is_continued,
+                       "      Verify UTF8_IS_CONTINUED($hex_b) is "
+                     . "$display_is_continued");
+
+        my $is_downgradeable_start =    $n < 256
+                                     && $uvchr_skip_should_be > 1
+                                     && $j == 0;
+        my $display_is_downgradeable_start = $is_downgradeable_start || 0;
+        next unless is(test_UTF8_IS_DOWNGRADEABLE_START($b),
+                       $is_downgradeable_start,
+                       "      Verify UTF8_IS_DOWNGRADEABLE_START($hex_b) is "
+                     . "$display_is_downgradeable_start");
+
+        my $is_above_latin1 =  $n > 255 && $j == 0;
+        my $display_is_above_latin1 = $is_above_latin1 || 0;
+        next unless is(test_UTF8_IS_ABOVE_LATIN1($b),
+                       $is_above_latin1,
+                       "      Verify UTF8_IS_ABOVE_LATIN1($hex_b) is "
+                     . "$display_is_above_latin1");
+
+        my $is_possibly_problematic =  $j == 0
+                                    && $n >= (($isASCII)
+                                              ? 0xD000
+                                              : 0x8000);
+        my $display_is_possibly_problematic = $is_possibly_problematic || 0;
+        next unless is(test_isUTF8_POSSIBLY_PROBLEMATIC($b),
+                       $is_possibly_problematic,
+                       "      Verify isUTF8_POSSIBLY_PROBLEMATIC($hex_b) is "
+                     . "$display_is_above_latin1");
+    }
 }
 
 done_testing;
