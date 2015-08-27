@@ -8279,6 +8279,7 @@ runnm=false
 : with g++ one needs -shared to get is-in-libc to work for dlopen
 case "$gccversion" in
 '')	;;
+*Clang*)	;;
 *)	case "$d_cplusplus" in
 	"$define") ccflags="$ccflags -shared" ;;
 	esac
