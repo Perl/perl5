@@ -845,8 +845,7 @@ struct block_loop {
                 cursv = *svp;                                           \
                 *svp = cx->blk_loop.itersave;                           \
             }                                                           \
-            /* delayed rc-- in case of "for $x (...) { return $x }" */  \
-            sv_2mortal(cursv);                                          \
+            SvREFCNT_dec(cursv);                                        \
         }                                                               \
 
 /* given/when context */
