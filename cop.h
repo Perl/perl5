@@ -839,7 +839,6 @@ struct block_loop {
                 svp = &GvSV((GV*)svp);                                  \
                 cursv = *svp;                                           \
                 *svp = cx->blk_loop.itersave;                           \
-                SvREFCNT_dec_NN(cx->blk_loop.itersave);                 \
             }                                                           \
             else {                                                      \
                 cursv = *svp;                                           \

@@ -2138,7 +2138,7 @@ PP(pp_enteriter)
     else if (LIKELY(isGV(TOPs))) {		/* symbol table variable */
 	GV * const gv = MUTABLE_GV(POPs);
 	SV** svp = &GvSV(gv);
-        itersave = SvREFCNT_inc(*svp);
+        itersave = *svp;
 	*svp = newSV(0);
 	itervar = (void *)gv;
     }
