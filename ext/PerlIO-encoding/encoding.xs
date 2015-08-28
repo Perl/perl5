@@ -49,13 +49,23 @@ typedef struct {
 
 #define NEEDS_LINES	1
 
+static const MGVTBL PerlIOEncode_tag = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
 SV *
 PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
-    SV *sv = &PL_sv_undef;
-    PERL_UNUSED_ARG(param);
+    SV *sv;
     PERL_UNUSED_ARG(flags);
+    /* During cloning, return an undef token object so that _pushed() knows
+     * that it should not call methods and wait for _dup() to actually dup the
+     * encoding object. */
+    if (param) {
+	sv = newSV(0);
+	sv_magicext(sv, NULL, PERL_MAGIC_ext, &PerlIOEncode_tag, 0, 0);
+	return sv;
+    }
+    sv = &PL_sv_undef;
     if (e->enc) {
 	dSP;
 	/* Not 100% sure stack swap is right thing to do during dup ... */
@@ -84,6 +94,14 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *
     dSP;
     IV  code = PerlIOBuf_pushed(aTHX_ f, mode, Nullsv,tab);
     SV *result = Nullsv;
+
+    if (SvTYPE(arg) >= SVt_PVMG
+		&& mg_findext(arg, PERL_MAGIC_ext, &PerlIOEncode_tag)) {
+	e->enc = NULL;
+	e->chk = NULL;
+	e->inEncodeCall = 0;
+	return code;
+    }
 
     PUSHSTACKi(PERLSI_MAGIC);
     ENTER;
@@ -565,6 +583,9 @@ PerlIOEncode_dup(pTHX_ PerlIO * f, PerlIO * o,
 	PerlIOEncode *oe = PerlIOSelf(o, PerlIOEncode);
 	if (oe->enc) {
 	    fe->enc = PerlIO_sv_dup(aTHX_ oe->enc, params);
+	}
+	if (oe->chk) {
+	    fe->chk = PerlIO_sv_dup(aTHX_ oe->chk, params);
 	}
     }
     return f;
