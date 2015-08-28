@@ -88,8 +88,6 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="steveh, khw" id="9a7bb2f73a8a1b561890191974201d576371e7f9" ticket="125825" desc="PATCH: [perl 125825] {n}+ possessive quantifier broken"/>
-
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
