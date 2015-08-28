@@ -5198,7 +5198,8 @@ Perl_yylex(pTHX)
 	if (PL_madskills)
 	    PL_faketokens = 0;
 #endif
-	if (!PL_rsfp && (!PL_parser->filtered || s+1 < PL_bufend)) {
+	if ((!PL_rsfp || PL_lex_inwhat)
+	 && (!PL_parser->filtered || s+1 < PL_bufend)) {
 	    PL_last_uni = 0;
 	    PL_last_lop = 0;
 	    if (PL_lex_brackets &&
