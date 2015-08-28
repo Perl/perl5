@@ -2137,25 +2137,25 @@ PP(pp_enteriter)
         SvREFCNT_inc_simple_void_NN(itersave);
 	cxtype |= CXp_FOR_PAD;
     }
-    else if (LIKELY(isGV(TOPs))) {		/* symbol table variable */
-	GV * const gv = MUTABLE_GV(POPs);
-	SV** svp = &GvSV(gv);
-	itervarp = (void *)gv;
-        itersave = *svp;
-        if (LIKELY(itersave))
-            SvREFCNT_inc_simple_void_NN(itersave);
-        else
-            *svp = newSV(0);
-	cxtype |= CXp_FOR_GV;
-    }
     else {
 	SV * const sv = POPs;
-	assert(SvTYPE(sv) == SVt_PVMG);
-	assert(SvMAGIC(sv));
-	assert(SvMAGIC(sv)->mg_type == PERL_MAGIC_lvref);
 	itervarp = (void *)sv;
-	cxtype |= CXp_FOR_LVREF;
-        itersave = NULL;
+        if (LIKELY(isGV(sv))) {		/* symbol table variable */
+            SV** svp = &GvSV(sv);
+            itersave = *svp;
+            if (LIKELY(itersave))
+                SvREFCNT_inc_simple_void_NN(itersave);
+            else
+                *svp = newSV(0);
+            cxtype |= CXp_FOR_GV;
+        }
+        else {                          /* LV ref: for \$foo (...) */
+            assert(SvTYPE(sv) == SVt_PVMG);
+            assert(SvMAGIC(sv));
+            assert(SvMAGIC(sv)->mg_type == PERL_MAGIC_lvref);
+            itersave = NULL;
+            cxtype |= CXp_FOR_LVREF;
+        }
     }
 
     if (PL_op->op_private & OPpITER_DEF)

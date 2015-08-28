@@ -831,17 +831,12 @@ struct block_loop {
 	else if (CxTYPE(cx) == CXt_LOOP_FOR)  				\
 	    SvREFCNT_dec(cx->blk_loop.state_u.ary.ary);                 \
         if (cx->cx_type & (CXp_FOR_PAD|CXp_FOR_GV)) {                   \
-            SV **svp = (cx)->blk_loop.itervar_u.svp;                    \
             SV *cursv;                                                  \
-            if ((cx->cx_type & CXp_FOR_GV)) {                           \
+            SV **svp = (cx)->blk_loop.itervar_u.svp;                    \
+            if ((cx->cx_type & CXp_FOR_GV))                             \
                 svp = &GvSV((GV*)svp);                                  \
-                cursv = *svp;                                           \
-                *svp = cx->blk_loop.itersave;                           \
-            }                                                           \
-            else {                                                      \
-                cursv = *svp;                                           \
-                *svp = cx->blk_loop.itersave;                           \
-            }                                                           \
+            cursv = *svp;                                               \
+            *svp = cx->blk_loop.itersave;                               \
             SvREFCNT_dec(cursv);                                        \
         }
 
