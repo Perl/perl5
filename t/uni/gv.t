@@ -121,26 +121,33 @@ is (scalar %ᕘ, 0);
     *ᕘ = undef;
     like($msg, qr/Undefined value assigned to typeglob/);
 
+    my $O_grave = utf8::unicode_to_native(0xd2);
+    my $E_grave = utf8::unicode_to_native(0xc8);
+    my $pat = sprintf(
+        # It took a lot of experimentation to get the backslashes right (khw)
+        "Argument \"\\*main::(?:PW\\\\x\\{%x}MPF"
+                            . "|SKR\\\\x\\{%x}\\\\x\\{%x}\\\\x\\{%x})\" "
+                            . "isn't numeric in sprintf",
+                              $O_grave, $E_grave, $E_grave, $E_grave);
+    $pat = qr/$pat/;
+
     no warnings 'once';
     # test warnings for converting globs to other forms
     my $copy = *PWÒMPF;
     foreach ($copy, *SKRÈÈÈ) {
 	$msg = '';
 	my $victim = sprintf "%d", $_;
-	like($msg, qr/^Argument "\*main::(?:PW\\x\{d2\}MPF|SKR\\x\{c8\}\\x\{c8\}\\x\{c8\})" isn't numeric in sprintf/,
-	     "Warning on conversion to IV");
+	like($msg, $pat, "Warning on conversion to IV");
 	is($victim, 0);
 
 	$msg = '';
 	$victim = sprintf "%u", $_;
-	like($msg, qr/^Argument "\*main::(?:PW\\x\{d2\}MPF|SKR\\x\{c8\}\\x\{c8\}\\x\{c8\})" isn't numeric in sprintf/,
-	     "Warning on conversion to UV");
+	like($msg, $pat, "Warning on conversion to UV");
 	is($victim, 0);
 
 	$msg = '';
 	$victim = sprintf "%e", $_;
-	like($msg, qr/^Argument "\*main::(?:PW\\x\{d2\}MPF|SKR\\x\{c8\}\\x\{c8\}\\x\{c8\})" isn't numeric in sprintf/,
-	     "Warning on conversion to NV");
+	like($msg, $pat, "Warning on conversion to NV");
 	like($victim, qr/^0\.0+E\+?00/i, "Expect floating point zero");
 
 	$msg = '';
