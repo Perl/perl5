@@ -5,7 +5,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(111);
+plan(112);
 
 # A lot of tests to check that reversed for works.
 
@@ -618,5 +618,16 @@ is(fscope(), 1, 'return via loop in sub');
         local *foo;
         for $foo (1,2) {}
         ok(!defined $foo, "NULL GvSV");
+    }
+}
+
+# make sure storing an int in a NULL GvSV is ok
+
+{
+    local $foo = "boo";
+    {
+        local *foo;
+        for $foo (1..2) {}
+        ok(!defined $foo, "NULL GvSV int iterator");
     }
 }
