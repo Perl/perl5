@@ -1197,7 +1197,7 @@ See L<perldebguts/"Debugging Perl Memory Usage"> for the details.
 
 =head1 SEE ALSO
 
-You did try the B<-w> switch, didn't you?
+You do have C<use warnings> enabled, don't you?
 
 L<perldebtut>,
 L<perldebguts>,
