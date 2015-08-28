@@ -11,3 +11,5 @@ cpan/Scalar-List-Utils
 cpan/Time-HiRes
 cpan/Win32API-File
 dist/PathTools
+ext/Amiga-ARexx
+ext/Amiga-Exec
