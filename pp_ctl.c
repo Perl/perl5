@@ -1519,6 +1519,8 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    break;
 	case CXt_EVAL:
 	    POPEVAL(cx);
+            /* FALLTHROUGH */
+	case CXt_BLOCK:
             LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
             PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 	    break;
@@ -2060,10 +2062,10 @@ PP(pp_enter)
     PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
-    ENTER_with_name("block");
-
-    SAVETMPS;
     PUSHBLOCK(cx, CXt_BLOCK, SP);
+    cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;
+    cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;
+    PL_tmps_floor = PL_tmps_ix;
 
     RETURN;
 }
@@ -2090,9 +2092,10 @@ PP(pp_leave)
         : leave_common(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP,
                                PL_op->op_private & OPpLVALUE);
 
-    PL_curpm = newpm;	/* Don't pop $1 et al till now */
+    LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
+    PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
-    LEAVE_with_name("block");
+    PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     RETURN;
 }
@@ -2127,9 +2130,6 @@ PP(pp_enteriter)
     void *itervarp; /* GV or pad slot of the iteration variable */
     SV   *itersave; /* the old var in the iterator var slot */
     U8 cxtype = CXt_LOOP_FOR;
-
-    ENTER_with_name("loop1");
-    SAVETMPS;
 
     if (PL_op->op_targ) {			 /* "my" variable */
 	itervarp = &PAD_SVl(PL_op->op_targ);
@@ -2167,8 +2167,6 @@ PP(pp_enteriter)
 
     if (PL_op->op_private & OPpITER_DEF)
 	cxtype |= CXp_FOR_DEF;
-
-    ENTER_with_name("loop2");
 
     PUSHBLOCK(cx, cxtype, SP);
     PUSHLOOP_FOR(cx, itervarp, itersave, MARK);
@@ -2246,10 +2244,6 @@ PP(pp_enterloop)
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 
-    ENTER_with_name("loop1");
-    SAVETMPS;
-    ENTER_with_name("loop2");
-
     PUSHBLOCK(cx, CXt_LOOP_PLAIN, SP);
     PUSHLOOP_PLAIN(cx, SP);
 
@@ -2278,9 +2272,6 @@ PP(pp_leaveloop)
 
     POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
-
-    LEAVE_with_name("loop2");
-    LEAVE_with_name("loop1");
 
     return NORMAL;
 }
@@ -2578,11 +2569,9 @@ PP(pp_last)
     TAINT_NOT;
     PL_stack_sp = newsp;
 
-    LEAVE_with_name("loop2");
     cxstack_ix--;
     /* Stack values are safe: */
     POPLOOP(cx);	/* release loop vars ... */
-    LEAVE_with_name("loop1");
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     PERL_UNUSED_VAR(gimme);
@@ -2592,15 +2581,10 @@ PP(pp_last)
 PP(pp_next)
 {
     PERL_CONTEXT *cx;
-    const I32 inner = PL_scopestack_ix;
 
     S_unwind_loop(aTHX_ "next");
 
-    /* clear off anything above the scope we're re-entering, but
-     * save the rest until after a possible continue block */
     TOPBLOCK(cx);
-    if (PL_scopestack_ix < inner)
-	leave_scope(PL_scopestack[PL_scopestack_ix]);
     PL_curcop = cx->blk_oldcop;
     PERL_ASYNC_CHECK();
     return (cx)->blk_loop.my_op->op_nextop;
@@ -2610,7 +2594,6 @@ PP(pp_redo)
 {
     const I32 cxix = S_unwind_loop(aTHX_ "redo");
     PERL_CONTEXT *cx;
-    I32 oldsave;
     OP* redo_op = cxstack[cxix].blk_loop.my_op->op_redoop;
 
     if (redo_op->op_type == OP_ENTER) {
@@ -2621,8 +2604,7 @@ PP(pp_redo)
     }
 
     TOPBLOCK(cx);
-    oldsave = PL_scopestack[PL_scopestack_ix - 1];
-    LEAVE_SCOPE(oldsave);
+    LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
     FREETMPS;
     PL_curcop = cx->blk_oldcop;
     PERL_ASYNC_CHECK();
@@ -3051,14 +3033,10 @@ PP(pp_goto)
 	/* pop unwanted frames */
 
 	if (ix < cxstack_ix) {
-	    I32 oldsave;
-
 	    if (ix < 0)
 		DIE(aTHX_ "panic: docatch: illegal ix=%ld", (long)ix);
 	    dounwind(ix);
 	    TOPBLOCK(cx);
-	    oldsave = PL_scopestack[PL_scopestack_ix];
-	    LEAVE_SCOPE(oldsave);
 	}
 
 	/* push wanted frames */
@@ -4419,9 +4397,6 @@ PP(pp_entergiven)
     SV *origsv = DEFSV;
     SV *newsv = POPs;
     
-    ENTER_with_name("given");
-    SAVETMPS;
-
     assert(!PL_op->op_targ); /* used to be set for lexical $_ */
     GvSV(PL_defgv) = SvREFCNT_inc(newsv);
 
@@ -4450,7 +4425,6 @@ PP(pp_leavegiven)
 
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
-    LEAVE_with_name("given");
     RETURN;
 }
 
@@ -5003,9 +4977,6 @@ PP(pp_enterwhen)
     if ((0 == (PL_op->op_flags & OPf_SPECIAL)) && !SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other->op_next);
 
-    ENTER_with_name("when");
-    SAVETMPS;
-
     PUSHBLOCK(cx, CXt_WHEN, SP);
     PUSHWHEN(cx);
 
@@ -5036,8 +5007,6 @@ PP(pp_leavewhen)
     POPWHEN(cx);
 
     PL_curpm = newpm;   /* pop $1 et al */
-
-    LEAVE_with_name("when");
 
     if (cxix < cxstack_ix)
         dounwind(cxix);
@@ -5082,11 +5051,11 @@ PP(pp_continue)
     
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
+    POPWHEN(cx);
 
     SP = newsp;
     PL_curpm = newpm;   /* pop $1 et al */
 
-    LEAVE_with_name("when");
     RETURNOP(cx->blk_givwhen.leave_op->op_next);
 }
 

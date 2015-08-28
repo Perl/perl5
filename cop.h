@@ -796,6 +796,8 @@ struct block_loop {
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
         cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
+        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
+        PL_tmps_floor = PL_tmps_ix;                                     \
 	cx->blk_loop.itervar_u.svp = NULL;                              \
 	cx->blk_loop.itersave = NULL;
 
@@ -812,6 +814,8 @@ struct block_loop {
 	cx->blk_loop.state_u.ary.ix = 0;				\
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
         cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
+        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
+        PL_tmps_floor = PL_tmps_ix;                                     \
         cx->blk_loop.itersave = isave;                                  \
         PUSHLOOP_FOR_setpad(cx);
 
@@ -831,7 +835,8 @@ struct block_loop {
             cursv = *svp;                                               \
             *svp = cx->blk_loop.itersave;                               \
             SvREFCNT_dec(cursv);                                        \
-        }
+        }                                                               \
+        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 /* given/when context */
 struct block_givwhen {
@@ -840,6 +845,9 @@ struct block_givwhen {
 };
 
 #define PUSHWHEN(cx)    						\
+        cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
+        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
+        PL_tmps_floor = PL_tmps_ix;                                     \
 	cx->blk_givwhen.leave_op = cLOGOP->op_other;
 
 #define PUSHGIVEN(cx, orig_var)                                         \
@@ -847,11 +855,14 @@ struct block_givwhen {
         cx->blk_givwhen.defsv_save = orig_var;
 
 #define POPWHEN(cx)                                                     \
-        NOOP;
+        LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);             \
+        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 #define POPGIVEN(cx)                                                    \
+        LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);             \
         SvREFCNT_dec(GvSV(PL_defgv));                                   \
-        GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;
+        GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;                    \
+        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 
 /* context common to subroutines, evals and loops */

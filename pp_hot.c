@@ -240,13 +240,21 @@ PP(pp_cond_expr)
 
 PP(pp_unstack)
 {
+    PERL_CONTEXT *cx;
     PERL_ASYNC_CHECK();
     TAINT_NOT;		/* Each statement is presumed innocent */
-    PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
+    cx  = &cxstack[cxstack_ix];
+    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
     FREETMPS;
     if (!(PL_op->op_flags & OPf_SPECIAL)) {
-	I32 oldsave = PL_scopestack[PL_scopestack_ix - 1];
-	LEAVE_SCOPE(oldsave);
+        assert(
+               CxTYPE(cx) == CXt_BLOCK
+            || CxTYPE(cx) == CXt_LOOP_FOR
+            || CxTYPE(cx) == CXt_LOOP_PLAIN
+            || CxTYPE(cx) == CXt_LOOP_LAZYSV
+            || CxTYPE(cx) == CXt_LOOP_LAZYIV
+        );
+        LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
     }
     return NORMAL;
 }
