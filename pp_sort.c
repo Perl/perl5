@@ -1695,10 +1695,10 @@ PP(pp_sort)
             else {
                 /* mimic PUSHSUB. Note that we're cheating and using a
                  * CXt_NULL block as a CXt_SUB block */
-                cx->blk_sub.old_tmpsfloor = PL_tmps_floor;
+                cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;
                 PL_tmps_floor = PL_tmps_ix;
             }
-            cx->blk_sub.old_savestack_ix = old_savestack_ix;
+            cx->cx_u.cx_blk.blku_old_savestack_ix = old_savestack_ix;
 
 	    cx->cx_type |= CXp_MULTICALL;
 	    
@@ -1717,7 +1717,7 @@ PP(pp_sort)
 	    }
             else
                 /* mimic POPSUB */
-                PL_tmps_floor = cx->blk_sub.old_tmpsfloor;
+                PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 	    POPBLOCK(cx,PL_curpm);
 	    PL_stack_sp = newsp;

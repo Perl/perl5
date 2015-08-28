@@ -550,8 +550,6 @@ be zero.
 /* subroutine context */
 struct block_sub {
     OP *	retop;	/* op to execute on exit from sub */
-    I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
-    SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
     /* Above here is the same for sub, format and eval.  */
     PAD		*prevcomppad; /* the caller's PL_comppad */
     CV *	cv;
@@ -564,8 +562,6 @@ struct block_sub {
 /* format context */
 struct block_format {
     OP *	retop;	/* op to execute on exit from sub */
-    I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
-    SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
     /* Above here is the same for sub, format and eval.  */
     PAD		*prevcomppad; /* the caller's PL_comppad */
     CV *	cv;
@@ -592,7 +588,7 @@ struct block_format {
 	cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;			\
 	cx->blk_sub.retop = NULL;					\
         SvREFCNT_inc_simple_void_NN(cv);                                \
-        cx->blk_sub.old_tmpsfloor = PL_tmps_floor;                      \
+        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
         PL_tmps_floor = PL_tmps_ix;
 
 #define PUSHSUB_GET_LVALUE_MASK(func) \
@@ -626,8 +622,8 @@ struct block_format {
 	cx->blk_format.dfoutgv = PL_defoutgv;				\
 	cx->blk_format.prevcomppad = PL_comppad;			\
 	cx->blk_u16 = 0;                                                \
-        cx->blk_format.old_savestack_ix = PL_savestack_ix;                 \
-        cx->blk_format.old_tmpsfloor = PL_tmps_floor;                      \
+        cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
+        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
         PL_tmps_floor = PL_tmps_ix;                                     \
 	SvREFCNT_inc_simple_void_NN(cv);		                \
 	CvDEPTH(cv)++;							\
@@ -652,7 +648,7 @@ struct block_format {
 
 #define POPSUB(cx,sv)							\
     STMT_START {							\
-	LEAVE_SCOPE(cx->blk_sub.old_savestack_ix);      		\
+	LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);  		\
         if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
         cx->blk_u16 |= CxPOPSUB_DONE;                                   \
 	RETURN_PROBE(CvNAMED(cx->blk_sub.cv)				\
@@ -677,7 +673,7 @@ struct block_format {
 	    }								\
 	}								\
         }                                                               \
-        PL_tmps_floor = cx->blk_sub.old_tmpsfloor;                      \
+        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
 	sv = MUTABLE_SV(cx->blk_sub.cv);				\
@@ -691,12 +687,12 @@ struct block_format {
 
 #define POPFORMAT(cx)							\
     STMT_START {							\
-	LEAVE_SCOPE(cx->blk_format.old_savestack_ix);      		\
+	LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);   		\
         if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
 	CV * const cv = cx->blk_format.cv;				\
 	GV * const dfuot = cx->blk_format.dfoutgv;			\
         cx->blk_u16 |= CxPOPSUB_DONE;                                   \
-        PL_tmps_floor = cx->blk_format.old_tmpsfloor;                      \
+        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
 	setdefout(dfuot);						\
         PL_comppad = cx->blk_format.prevcomppad;                        \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
@@ -709,8 +705,6 @@ struct block_format {
 /* eval context */
 struct block_eval {
     OP *	retop;	/* op to execute on exit from eval */
-    I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
-    SSize_t     old_tmpsfloor; /* also used in CXt_NULL sort block */
     /* Above here is the same for sub, format and eval.  */
     SV *	old_namesv;
     OP *	old_eval_root;
@@ -731,7 +725,7 @@ struct block_eval {
 	assert(!(PL_in_eval & ~0x7F));					\
 	assert(!(PL_op->op_type & ~0x1FF));				\
 	cx->blk_u16 = (PL_in_eval & 0x7F) | ((U16)PL_op->op_type << 7);	\
-        cx->blk_eval.old_tmpsfloor = PL_tmps_floor;                     \
+        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
         PL_tmps_floor = PL_tmps_ix;                                     \
 	cx->blk_eval.old_namesv = (n ? newSVpv(n,0) : NULL);		\
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
@@ -755,7 +749,6 @@ struct block_eval {
 /* loop context */
 struct block_loop {
     I32		resetsp;
-    I32         old_savestack_ix; /* saved PL_savestack_ix (also CXt_NULL) */
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
     union {	/* different ways of locating the iteration variable */
 	SV      **svp; /* for lexicals: address of pad slot */
@@ -802,7 +795,7 @@ struct block_loop {
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
-        cx->blk_loop.old_savestack_ix = PL_savestack_ix;                \
+        cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
 	cx->blk_loop.itervar_u.svp = NULL;                              \
 	cx->blk_loop.itersave = NULL;
 
@@ -818,12 +811,12 @@ struct block_loop {
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
-        cx->blk_loop.old_savestack_ix = PL_savestack_ix;                \
+        cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
         cx->blk_loop.itersave = isave;                                  \
         PUSHLOOP_FOR_setpad(cx);
 
 #define POPLOOP(cx)							\
-	LEAVE_SCOPE(cx->blk_loop.old_savestack_ix);      		\
+	LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);    		\
 	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.cur);		\
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.end);		\
@@ -860,6 +853,8 @@ struct block {
     I32		blku_oldmarksp;	/* mark stack index */
     I32		blku_oldscopesp;	/* scope stack index */
     PMOP *	blku_oldpm;	/* values of pattern match vars */
+    SSize_t     blku_old_tmpsfloor;     /* saved PL_tmps_floor */
+    I32         blku_old_savestack_ix;  /* saved PL_savestack_ix */
 
     union {
 	struct block_sub	blku_sub;
@@ -884,12 +879,14 @@ struct block {
 
 #define DEBUG_CX(action)						\
     DEBUG_l(								\
-	Perl_deb(aTHX_ "CX %ld %s %s (scope %ld,%ld) at %s:%d\n",	\
+	Perl_deb(aTHX_ "CX %ld %s %s (scope %ld,%ld) (save %ld,%ld) at %s:%d\n",\
 		    (long)cxstack_ix,					\
 		    action,						\
 		    PL_block_type[CxTYPE(&cxstack[cxstack_ix])],	\
 		    (long)PL_scopestack_ix,				\
 		    (long)(cxstack[cxstack_ix].blk_oldscopesp),		\
+		    (long)PL_savestack_ix,				\
+		    (long)(cxstack[cxstack_ix].cx_u.cx_blk.blku_old_savestack_ix),\
 		    __FILE__, __LINE__));
 
 /* Enter a block. */
@@ -1257,7 +1254,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PUSHSTACKi(PERLSI_MULTICALL);					\
 	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), PL_stack_sp);	\
 	PUSHSUB(cx);							\
-        cx->blk_sub.old_savestack_ix = PL_savestack_ix;                  \
+        cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
 	SAVEVPTR(PL_op);					        \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
@@ -1283,7 +1280,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         LEAVESUB(multicall_cv);     					\
 	POPBLOCK(cx,PL_curpm);						\
         /* includes partial unrolled POPSUB(): */                       \
-	LEAVE_SCOPE(cx->blk_sub.old_savestack_ix);      		\
+	LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);   		\
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
 	POPSTACK;							\
@@ -1307,12 +1304,12 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         {                                                               \
             /* save a few things that we don't want PUSHSUB to zap */   \
             PAD * const prevcomppad = cx->blk_sub.prevcomppad;          \
-            SSize_t old_floor = cx->blk_sub.old_tmpsfloor;              \
+            SSize_t old_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;     \
             SSize_t floor = PL_tmps_floor;                              \
 	    PUSHSUB(cx);						\
             /* undo the stuff that PUSHSUB zapped */                    \
             cx->blk_sub.prevcomppad = prevcomppad ;                     \
-            cx->blk_sub.old_tmpsfloor = old_floor;                      \
+            cx->cx_u.cx_blk.blku_old_tmpsfloor = old_floor;             \
             PL_tmps_floor = floor;                                      \
         }                                                               \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
