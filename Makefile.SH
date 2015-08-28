@@ -1354,7 +1354,7 @@ _cleaner2:
 	-rmdir lib/CPAN/Kwalify lib/CPAN/HTTP lib/CPAN/FTP lib/CPAN/Exception
 	-rmdir lib/CPAN/API lib/CPAN lib/Attribute lib/Archive/Tar lib/Archive
 	-rmdir lib/App/Prove/State/Result lib/App/Prove/State lib/App/Prove
-	-rmdir lib/App
+	-rmdir lib/App lib/Amiga
 
 _realcleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=distclean
