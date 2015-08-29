@@ -252,11 +252,11 @@ L<[perl #123712]|https://rt.perl.org/Ticket/Display.html?id=123712>
 =head1 Acknowledgements
 
 Perl 5.20.3 represents approximately 6 months of development since Perl 5.20.2
-and contains approximately 2,800 lines of changes across 94 files from 26
+and contains approximately 3,100 lines of changes across 99 files from 26
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 1,500 lines of changes to 41 .pm, .t, .c and .h files.
+approximately 1,500 lines of changes to 43 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers.  The following people are known to have contributed
