@@ -437,6 +437,41 @@ L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   Till the work its master honour.
   Blessing comes from Heaven’s Donor.
 
+=head2 v5.20.3-RC2 - Anon., trans. Malcolm C. Lyons, "The Story of Abu Muhammad the Idle and the Marvels He Encountered with the Ape As Well As the Marvels of the Seas and Islands", from "Tales of the Marvellous and News of the Strange"
+
+L<Announced on 2015-08-29 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/08/msg230544.html>
+
+'I fled from Basra, sad and tearful, with no idea where I was going,
+and I was reciting these lines:
+
+  The pain of parting makes me melt away,
+  As lovers do when those they love are harsh.
+  I wonder at the patience that I showed
+  When I had lost my love, for that was wonderful.
+  Beloved, do you know that since you left,
+  I have remained confused in misery.
+
+I then heard a voice that said: "Damn you, have you no fear of
+Almighty God that you hand over a girl to an unbelieving 'ifrit?"  I
+walked for a time amongst the palm-trees until I caught sight of a
+person, whom I approached.  When I asked him who he was he said: "I
+am one of the jinn who were converted to Islam at the hands of 'Ali
+ibn Abi Talib, may God ennoble him."  "How can I get to my wife?" I
+asked him, and he said: "Wretched fellow, you had a bird which you
+allowed to fly away and now you want to fly after it."  But he
+added: "Follow this road with God's blessing all night until dawn
+and then by the shore you will see a huge cave in which there is an
+idol made of white stone.  You must drink of the water that there is
+coming out of the cave and smear your face with its mud.  Stay there
+and a barge will pass you as you stand opposite the statue.  Various
+different creatures will emerge, heads without bodies and bodies
+without heads, and they will prostrate themselves in adoration to
+the idol rather than to Almighty God.  When you see that, embark on
+the barge and cross to the other bank and walk along it until
+sunset.  On a high point you will see a castle built of bricks of
+gold and silver.  That is where your 'ifrit will be.  I have now
+told you about this, so goodbye."
+
 =head2 v5.20.3-RC1 - Anon., trans. Malcolm C. Lyons, "The Story of Abu Muhammad the Idle and the Marvels He Encountered with the Ape As Well As the Marvels of the Seas and Islands", from "Tales of the Marvellous and News of the Strange"
 
 L<Announced on 2015-08-22 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/08/msg230359.html>
