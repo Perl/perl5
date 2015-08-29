@@ -31,7 +31,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, sprout" id="e47d32dcd59a578274f445fac79e977d83055c8c" ticket="123712" desc="[perl #123712] Fix /$a[/ parsing"/>
 <commit votes="steveh, sprout" id="d27f4b916ce5819f564bdd4a135137c457156333" ticket="123712" desc="[perl #123712] Don't check sub_inwhat"/>
-<commit votes="steveh" id="0f9d53bbcafba2b30e50a1ad22c7759be170e14a" ticket="123893" desc="[perl #123893] Fix hang with "@{""/>
+<commit votes="steveh, sprout" id="0f9d53bbcafba2b30e50a1ad22c7759be170e14a" ticket="123893" desc="[perl #123893] Fix hang with "@{""/>
 
 </div>
 
