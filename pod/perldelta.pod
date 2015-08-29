@@ -234,17 +234,18 @@ L<[perl #125541]|https://rt.perl.org/Ticket/Display.html?id=125541>
 
 =item *
 
-Regular expression possessive quantifier v5.20 regression now fixed.
-C<qr/>I<PAT>C<{>I<min>,I<max>C<}+>C</> is supposed to behave identically
-to C<qr/(?E<gt>>I<PAT>C<{>I<min>,I<max>C<})/>.  Since v5.20, this didn't
-work if I<min> and I<max> were equal.  [perl #125825]
+Regular expression possessive quantifier Perl 5.20 regression now fixed.
+C<qr/>I<PAT>C<{>I<min>,I<max>C<}+>C</> is supposed to behave identically to
+C<qr/(?E<gt>>I<PAT>C<{>I<min>,I<max>C<})/>.  Since Perl 5.20, this didn't work
+if I<min> and I<max> were equal.
+L<[perl #125825]|https://rt.perl.org/Ticket/Display.html?id=125825>
 
 =item *
 
-Code like C</$a[/> used to read the next line of input and treat it as
-though it came immediately after the opening bracket.  Some invalid code
-consequently would parse and run, but some code caused crashes, so this is
-now disallowed.  [perl #123712]
+Code like C</$a[/> used to read the next line of input and treat it as though
+it came immediately after the opening bracket.  Some invalid code consequently
+would parse and run, but some code caused crashes, so this is now disallowed.
+L<[perl #123712]|https://rt.perl.org/Ticket/Display.html?id=123712>
 
 =back
 
