@@ -239,6 +239,13 @@ C<qr/>I<PAT>C<{>I<min>,I<max>C<}+>C</> is supposed to behave identically
 to C<qr/(?E<gt>>I<PAT>C<{>I<min>,I<max>C<})/>.  Since v5.20, this didn't
 work if I<min> and I<max> were equal.  [perl #125825]
 
+=item *
+
+Code like C</$a[/> used to read the next line of input and treat it as
+though it came immediately after the opening bracket.  Some invalid code
+consequently would parse and run, but some code caused crashes, so this is
+now disallowed.  [perl #123712]
+
 =back
 
 =head1 Acknowledgements
