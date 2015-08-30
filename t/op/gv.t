@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 273 );
+plan(tests => 276 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -1130,6 +1130,24 @@ pass "No crash due to CvGV pointing to glob copy in the stash";
     $x = 3;
     ($x, my $z) = (1, $y);
     is $z, 3, 'list assignment after aliasing [perl #89646]';
+}
+
+# RT #125840: make sure *x = $x doesn't do bad things by freeing $x before
+# it's assigned.
+
+{
+    $a_125840 = 1;
+    $b_125840 = 2;
+    $a_125840 = *b_125840;
+    *a_125840 = $a_125840;
+    is($a_125840, 2, 'RT #125840: *a = $a');
+
+    $c_125840 = 1;
+    $d_125840 = 2;
+    *d_125840 = $d_125840 = *c_125840;
+    is($d_125840, 1, 'RT #125840: *d=$d=*c');
+    $c_125840 = $d_125840;
+    is($c_125840, 1, 'RT #125840: $c=$d');
 }
 
 

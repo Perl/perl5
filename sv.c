@@ -3974,9 +3974,15 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
         SvREFCNT_inc_simple_void_NN(sv_2mortal(dstr));
     }
 
+    /* freeing dstr's GP might free sstr (e.g. *x = $x),
+     * so temporarily protect it */
+    ENTER;
+    SAVEFREESV(SvREFCNT_inc_simple_NN(sstr));
     gp_free(MUTABLE_GV(dstr));
     GvINTRO_off(dstr);		/* one-shot flag */
     GvGP_set(dstr, gp_ref(GvGP(sstr)));
+    LEAVE;
+
     if (SvTAINTED(sstr))
 	SvTAINT(dstr);
     if (GvIMPORTED(dstr) != GVf_IMPORTED
