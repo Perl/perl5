@@ -3,7 +3,7 @@ Locale::Codes::LangVar_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Mon Jun  1 13:32:51 EDT 2015
+#    Generated on: Tue Sep  1 09:17:43 EDT 2015
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.35';
+$VERSION='3.36';
 
 $Locale::Codes::Data{'langvar'}{'id'} = '0072';
 
@@ -45,7 +45,7 @@ $Locale::Codes::Data{'langvar'}{'id2names'} = {
       q(Boni dialect),
       ],
    q(0010) => [
-      q(Portugese Language Orthographic Agreement of 1990 (Acordo Ortografico da Lingua Portuguesa de 1990)),
+      q(Portuguese Language Orthographic Agreement of 1990 (Acordo Ortografico da Lingua Portuguesa de 1990)),
       ],
    q(0011) => [
       q(Eastern Armenian),
@@ -404,7 +404,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0051),
       q(0),
       ],
-   q(portugese language orthographic agreement of 1990 (acordo ortografico da lingua portuguesa de 1990)) => [
+   q(portuguese language orthographic agreement of 1990 (acordo ortografico da lingua portuguesa de 1990)) => [
       q(0010),
       q(0),
       ],

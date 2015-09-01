@@ -3,7 +3,7 @@ Locale::Codes::Language_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Mon Jun  1 13:35:17 EDT 2015
+#    Generated on: Tue Sep  1 09:20:52 EDT 2015
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.35';
+$VERSION='3.36';
 
 $Locale::Codes::Retired{'language'}{'alpha-2'}{'code'} = {
    q(in) => q(Indonesian),
@@ -185,6 +185,7 @@ $Locale::Codes::Retired{'language'}{'alpha-3'}{'name'} = {
    q(apalik) => [ q(apo), q(Apalik) ],
    q(aramanik) => [ q(aam), q(Aramanik) ],
    q(aromanian) => [ q(rup), q(Aromanian) ],
+   q(atong) => [ q(ato), q(Atong) ],
    q(ayi (china)) => [ q(ayx), q(Ayi (China)) ],
    q(bandjigali) => [ q(bjd), q(Bandjigali) ],
    q(bangi me) => [ q(dba), q(Bangi Me) ],

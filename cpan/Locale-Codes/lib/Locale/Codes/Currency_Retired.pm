@@ -3,7 +3,7 @@ Locale::Codes::Currency_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Mon Jun  1 13:35:17 EDT 2015
+#    Generated on: Tue Sep  1 09:20:52 EDT 2015
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.35';
+$VERSION='3.36';
 
 $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(ADP) => q(Andorran Peseta),
@@ -87,6 +87,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(cape verde escudo) => [ q(CVE), q(Cape Verde Escudo) ],
    q(cedi) => [ q(GHS), q(Cedi) ],
    q(convertible marks) => [ q(BAM), q(Convertible Marks) ],
+   q(croatian kuna) => [ q(HRK), q(Croatian Kuna) ],
    q(cyprus pound) => [ q(CYP), q(Cyprus Pound) ],
    q(dinar) => [ q(BHD), q(Dinar) ],
    q(drachma) => [ q(GRD), q(Drachma) ],
@@ -127,6 +128,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(new kwanza) => [ q(AON), q(New Kwanza) ],
    q(new leu) => [ q(RON), q(New Leu) ],
    q(new manat) => [ q(TMT), q(New Manat) ],
+   q(new romanian leu) => [ q(RON), q(New Romanian Leu) ],
    q(new zaire) => [ q(ZRN), q(New Zaire) ],
    q(portuguese escudo) => [ q(PTE), q(Portuguese Escudo) ],
    q(saint helena pound) => [ q(SHP), q(Saint Helena Pound) ],
@@ -154,11 +156,13 @@ $Locale::Codes::Retired{'currency'}{'num'}{'name'} = {
    q(bolivar fuerte) => [ q(937), q(Bolivar Fuerte) ],
    q(cape verde escudo) => [ q(132), q(Cape Verde Escudo) ],
    q(cedi) => [ q(936), q(Cedi) ],
+   q(croatian kuna) => [ q(191), q(Croatian Kuna) ],
    q(latvian lats) => [ q(428), q(Latvian Lats) ],
    q(leu) => [ q(946), q(Leu) ],
    q(lithuanian litas) => [ q(440), q(Lithuanian Litas) ],
    q(metical) => [ q(943), q(Metical) ],
    q(new manat) => [ q(934), q(New Manat) ],
+   q(new romanian leu) => [ q(946), q(New Romanian Leu) ],
    q(saint helena pound) => [ q(654), q(Saint Helena Pound) ],
    q(unidades de fomento) => [ q(990), q(Unidades de fomento) ],
    q(us dollar (same day)) => [ q(998), q(US Dollar (Same day)) ],

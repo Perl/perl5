@@ -716,7 +716,7 @@ use File::Glob qw(:case);
     },
 
     'Locale-Codes' => {
-        'DISTRIBUTION' => 'SBECK/Locale-Codes-3.35.tar.gz',
+        'DISTRIBUTION' => 'SBECK/Locale-Codes-3.36.tar.gz',
         'FILES'        => q[cpan/Locale-Codes],
         'EXCLUDED'     => [
             qw( README.first

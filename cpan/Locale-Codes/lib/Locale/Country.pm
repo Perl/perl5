@@ -10,7 +10,7 @@ use warnings;
 use Exporter;
 
 our $VERSION;
-$VERSION='3.35';
+$VERSION='3.36';
 
 our (@ISA,@EXPORT);
 
@@ -25,8 +25,6 @@ eval "require $backend; $backend->import(); return 1;";
 }
 
 unshift (@ISA, $backend);
-
-sub alias_code                { Locale::Codes::Country::alias_code(@_) }
 
 sub rename_country            { Locale::Codes::Country::rename_country(@_) }
 sub add_country               { Locale::Codes::Country::add_country(@_) }
