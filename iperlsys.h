@@ -600,6 +600,8 @@ struct IPerlEnvInfo
 
 #if defined(PERL_IMPLICIT_SYS)
 
+struct utimbuf; /* prevent gcc warning about the use below */
+
 /* IPerlLIO		*/
 struct IPerlLIO;
 struct IPerlLIOInfo;
