@@ -3558,7 +3558,8 @@ PP(pp_chr)
             && ((SvIOKp(top) && !SvIsUV(top) && SvIV_nomg(top) < 0)
                 ||
                 ((SvNOKp(top) || (SvOK(top) && !SvIsUV(top)))
-                 && SvNV_nomg(top) < 0.0))) {
+                 && SvNV_nomg(top) < 0.0)))
+        {
 	    if (ckWARN(WARN_UTF8)) {
 		if (SvGMAGICAL(top)) {
 		    SV *top2 = sv_newmortal();
