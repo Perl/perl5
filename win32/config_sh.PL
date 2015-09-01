@@ -198,6 +198,19 @@ else {
     $opt{uvxformat} = '"lx"';
 }
 
+unless ($opt{cc} =~ /\bcl/) {
+    if ($opt{WIN64} eq 'define') {
+        $opt{longdblsize} = 16;
+        $opt{longdblinfbytes} = '0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00';
+        $opt{longdblnanbytes} = '0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00';
+    }
+    else {
+        $opt{longdblsize} = 12;
+        $opt{longdblinfbytes} = '0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x7f, 0x00, 0x00';
+        $opt{longdblnanbytes} = '0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0x00, 0x00';
+    }
+}
+
 # set long double options
 if ($opt{uselongdouble} eq 'define') {
     $opt{d_Gconvert} = 'sprintf((b),"%.*""Lg",(n),(x))';
@@ -214,14 +227,7 @@ if ($opt{uselongdouble} eq 'define') {
     $opt{d_PRIfldbl} = 'define';
     $opt{d_PRIgldbl} = 'define';
     $opt{d_SCNfldbl} = 'define';
-    if ($opt{WIN64} eq 'define') {
-        $opt{longdblsize} = 16;
-        $opt{nvsize} = 16;
-    }
-    else {
-        $opt{longdblsize} = 12;
-        $opt{nvsize} = 12;
-    }
+    $opt{nvsize} = $opt{longdblsize};
     $opt{nvtype} = 'long double';
     $opt{nv_overflows_integers_at} = '256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0';
     $opt{nvEUformat} = '"LE"';
@@ -230,6 +236,8 @@ if ($opt{uselongdouble} eq 'define') {
     $opt{nveformat} = '"Le"';
     $opt{nvfformat} = '"Lf"';
     $opt{nvgformat} = '"Lg"';
+    $opt{longdblkind} = 3;
+    $opt{longdblmantbits} = 64;
 }
 else {
     $opt{d_Gconvert} = 'sprintf((b),"%.*g",(n),(x))';
@@ -246,7 +254,6 @@ else {
     $opt{d_PRIfldbl} = 'undef';
     $opt{d_PRIgldbl} = 'undef';
     $opt{d_SCNfldbl} = 'undef';
-    $opt{longdblsize} = 8;
     $opt{nvsize} = 8;
     $opt{nvtype} = 'double';
     $opt{nv_overflows_integers_at} = '256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0';
