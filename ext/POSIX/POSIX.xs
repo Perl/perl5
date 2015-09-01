@@ -1382,7 +1382,9 @@ char *tzname[] = { "" , "" };
 #  ifdef HAS_UNAME
 #    include <sys/utsname.h>
 #  endif
+#if !defined(__amigaos4__)
 #  include <sys/wait.h>
+#endif
 #  ifdef I_UTIME
 #    include <utime.h>
 #  endif
@@ -1648,8 +1650,10 @@ restore_sigmask(pTHX_ SV *osset_sv)
       * supposed to return -1 from sigaction unless the disposition
       * was unaffected.
       */
+#if !(defined(__amigaos4__) && defined(__NEWLIB__))
      sigset_t *ossetp = (sigset_t *) SvPV_nolen( osset_sv );
      (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
+#endif
 }
 
 static void *
@@ -2978,7 +2982,7 @@ sigaction(sig, optaction, oldaction = 0)
 	SV *			optaction
 	POSIX::SigAction	oldaction
     CODE:
-#if defined(WIN32) || defined(NETWARE)
+#if defined(WIN32) || defined(NETWARE) || (defined(__amigaos4__) && defined(__NEWLIB__))
 	RETVAL = not_here("sigaction");
 #else
 # This code is really grody because we're trying to make the signal
@@ -3168,7 +3172,11 @@ sigpending(sigset)
     ALIAS:
 	sigsuspend = 1
     CODE:
+#if defined(__amigaos4__)
+	RETVAL = not_here("sigpending");
+#else
 	RETVAL = ix ? sigsuspend(sigset) : sigpending(sigset);
+#endif;
     OUTPUT:
 	RETVAL
     CLEANUP:
