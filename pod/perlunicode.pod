@@ -592,7 +592,7 @@ C<L</General_Category>> property, this
 property can have more values added in a future Unicode release.  Those
 listed above comprised the complete set for many Unicode releases, but
 others were added in Unicode 6.3; you can always find what the
-current ones are in in L<perluniprops>.  And
+current ones are in L<perluniprops>.  And
 L<http://www.unicode.org/reports/tr9/> describes how to use them.
 
 =head3 B<Scripts>
