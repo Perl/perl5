@@ -524,7 +524,7 @@ XS(XS_utf8_native_to_unicode)
  if (items > 1)
      croak_xs_usage(cv, "sv");
 
- ST(0) = sv_2mortal(newSViv(NATIVE_TO_UNI(uv)));
+ ST(0) = sv_2mortal(newSVuv(NATIVE_TO_UNI(uv)));
  XSRETURN(1);
 }
 
@@ -537,7 +537,7 @@ XS(XS_utf8_unicode_to_native)
  if (items > 1)
      croak_xs_usage(cv, "sv");
 
- ST(0) = sv_2mortal(newSViv(UNI_TO_NATIVE(uv)));
+ ST(0) = sv_2mortal(newSVuv(UNI_TO_NATIVE(uv)));
  XSRETURN(1);
 }
 
