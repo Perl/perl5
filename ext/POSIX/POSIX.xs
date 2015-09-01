@@ -1366,7 +1366,7 @@ char *tzname[] = { "" , "" };
 #else
 
 #  ifndef HAS_MKFIFO
-#    if defined(OS2)
+#    if defined(OS2) || defined(__amigaos4__)
 #      define mkfifo(a,b) not_here("mkfifo")
 #    else	/* !( defined OS2 ) */
 #      ifndef mkfifo
