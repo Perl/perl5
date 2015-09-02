@@ -1102,6 +1102,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
 
 #ifdef DEBUGGING
             if (fake) {
+                /* op_dump(PL_op); */
                 Perl_croak(aTHX_
                     "panic: aassign skipped needed copy of common RH elem %"
                         UVuf, (UV)(relem - firstrelem));

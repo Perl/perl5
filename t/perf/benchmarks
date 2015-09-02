@@ -618,6 +618,11 @@
     'expr::aassign::2l_1l' => {
         desc    => 'single lexical RHS',
         setup   => 'my $x = 1;',
+        code    => '($x,$x) = ($x)',
+    },
+    'expr::aassign::2l_1ul' => {
+        desc    => 'undef and single lexical RHS',
+        setup   => 'my $x = 1;',
         code    => '($x,$x) = (undef, $x)',
     },
 

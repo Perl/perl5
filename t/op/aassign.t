@@ -334,5 +334,13 @@ SKIP: {
 
 }
 
+{
+    my $x = 1;
+    my $y = 2;
+    ($x,$y) = (undef, $x);
+    is($x, undef, 'single scalar on RHS, but two on LHS: x');
+    is($y, 1, 'single scalar on RHS, but two on LHS: y');
+}
+
 
 done_testing();
