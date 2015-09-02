@@ -269,7 +269,10 @@ sub sh {
 # b) it's such an important usage that for performance reasons we
 #    mark it as safe even though it isn't really. Hence it's a TODO.
 
-{
+SKIP: {
+    use Config;
+    # debugging builds will detect this failure and panic
+    skip "DEBUGGING build" if $::Config{config_args} =~ /DEBUGGING/;
     local $::TODO = 'cheat and optimise my (....) = @_';
     local @_ = 1..3;
     &f17;

@@ -1019,11 +1019,19 @@ S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
  *
  * If the LHS element is a 'my' declaration' and has a refcount of 1, then
  * it can't be common and can be skipped.
+ *
+ * On DEBUGGING builds it takes an extra boolean, fake. If true, it means
+ * that we thought we didn't need to call S_aassign_copy_common(), but we
+ * have anyway for sanity checking. If we find we need to copy, then panic.
  */
 
 PERL_STATIC_INLINE void
 S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
-        SV **firstrelem, SV **lastrelem)
+        SV **firstrelem, SV **lastrelem
+#ifdef DEBUGGING
+        , bool fake
+#endif
+)
 {
     dVAR;
     SV **relem;
@@ -1036,14 +1044,13 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
     assert(firstlelem < lastlelem); /* at least 2 LH elements */
     assert(firstrelem < lastrelem); /* at least 2 RH elements */
 
+
+    lelem = firstlelem;
     /* we never have to copy the first RH element; it can't be corrupted
      * by assigning something to the corresponding first LH element.
      * So this scan does in a loop: mark LHS[N]; test RHS[N+1]
      */
-    firstrelem++;
-
-    lelem = firstlelem;
-    relem = firstrelem;
+    relem = firstrelem + 1;
 
     for (; relem <= lastrelem; relem++) {
         SV *svr;
@@ -1092,6 +1099,14 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
         assert(svr);
 
         if (UNLIKELY(SvFLAGS(svr) & SVf_BREAK)) {
+
+#ifdef DEBUGGING
+            if (fake) {
+                Perl_croak(aTHX_
+                    "panic: aassign skipped needed copy of common RH elem %"
+                        UVuf, (UV)(relem - firstrelem));
+            }
+#endif
 
             TAINT_NOT;	/* Each item is independent */
 
@@ -1158,6 +1173,9 @@ PP(pp_aassign)
     SSize_t i;
     int magic;
     U32 lval;
+#ifdef DEBUGGING
+    bool fake = 0;
+#endif
 
     PL_delaymagic = DM_DELAY;		/* catch simultaneous items */
 
@@ -1184,9 +1202,24 @@ PP(pp_aassign)
         else {
           do_scan:
             S_aassign_copy_common(aTHX_
-                        firstlelem, lastlelem, firstrelem, lastrelem);
+                        firstlelem, lastlelem, firstrelem, lastrelem
+#ifdef DEBUGGING
+                        , fake
+#endif
+            );
         }
     }
+#ifdef DEBUGGING
+    else {
+        /* on debugging builds, do the scan even if we've concluded we
+         * don't need to, then panic if we find commonality. Note that the
+         * scanner assumes at least 2 elements */
+        if (firstlelem < lastlelem && firstrelem < lastrelem) {
+            fake = 1;
+            goto do_scan;
+        }
+    }
+#endif
 
     gimme = GIMME_V;
     lval = (gimme == G_ARRAY) ? (PL_op->op_flags & OPf_MOD || LVRET) : 0;
