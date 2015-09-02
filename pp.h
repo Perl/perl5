@@ -113,8 +113,14 @@ Pops a double off the stack.
 =for apidoc Amn|IV|POPi
 Pops an integer off the stack.
 
+=for apidoc Amn|UV|POPu
+Pops an unsigned integer off the stack.
+
 =for apidoc Amn|long|POPl
 Pops a long off the stack.
+
+=for apidoc Amn|long|POPul
+Pops an unsigned long off the stack.
 
 =cut
 */
