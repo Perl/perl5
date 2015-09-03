@@ -989,7 +989,7 @@ is the direct equivalent of this bit of Perl
 
 C<PL_errgv> is a perl global of type C<GV *> that points to the symbol
 table entry containing the error.  C<ERRSV> therefore refers to the C
-equivalent of C<$@>.  We use an local temporary, C<err_tmp>, since
+equivalent of C<$@>.  We use a local temporary, C<err_tmp>, since
 C<ERRSV> is a macro that calls a function, and C<SvTRUE(ERRSV)> would
 end up calling that function multiple times.
 
