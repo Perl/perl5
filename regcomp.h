@@ -261,7 +261,7 @@ struct regnode_ssc {
 #define set_ANYOF_SYNTHETIC(n) STMT_START{ OP(n) = ANYOF;              \
                                            NEXT_OFF(n) = 1;            \
                                } STMT_END
-#define is_ANYOF_SYNTHETIC(n) (OP(n) == ANYOF && NEXT_OFF(n) == 1)
+#define is_ANYOF_SYNTHETIC(n) (PL_regkind[OP(n)] == ANYOF && NEXT_OFF(n) == 1)
 
 /* XXX fix this description.
    Impose a limit of REG_INFTY on various pattern matching operations
