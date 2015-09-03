@@ -409,10 +409,11 @@ struct regnode_ssc {
  * This is used only during regex compilation. */
 #define SSC_MATCHES_EMPTY_STRING                ANYOF_INVERT
 
-/* Are there things outside the bitmap that will match only if the target
- * string is encoded in UTF-8?  (This is not set if ANYOF_ABOVE_BITMAP_ALL is
- * set) */
-#define ANYOF_HAS_UTF8_NONBITMAP_MATCHES        0x02
+/* Set if this is a regnode_charclass_posixl vs a regnode_charclass.  This
+ * is used for runtime \d, \w, [:posix:], ..., which are used only in locale
+ * and the optimizer's synthetic start class.  Non-locale \d, etc are resolved
+ * at compile-time.  Only set under /l; can be in SSC */
+#define ANYOF_MATCHES_POSIXL                    0x02
 
 /* The fold is calculated and stored in the bitmap where possible at compile
  * time.  However under locale, the actual folding varies depending on
@@ -420,22 +421,22 @@ struct regnode_ssc {
  * then */
 #define ANYOF_LOC_FOLD                          0x04
 
-/* Set if this is a regnode_charclass_posixl vs a regnode_charclass.  This
- * is used for runtime \d, \w, [:posix:], ..., which are used only in locale
- * and the optimizer's synthetic start class.  Non-locale \d, etc are resolved
- * at compile-time */
-#define ANYOF_MATCHES_POSIXL                    0x08
+/* If set, means to warn if runtime locale isn't a UTF-8 one.  Only under /l.
+ * If set, none of INVERT, LOC_FOLD, POSIXL, HAS_NONBITMAP_NON_UTF8_MATCHES can
+ * be set.  Can be in an SSC */
+#define ANYOF_LOC_REQ_UTF8                      0x08
 
-/* Only under /l. If set, none of INVERT, LOC_FOLD, POSIXL,
- * HAS_NONBITMAP_NON_UTF8_MATCHES can be set */
-#define ANYOF_LOC_REQ_UTF8                      0x10
+/* If set, the node matches every code point NUM_ANYOF_CODE_POINTS and above.
+ * Can be in an SSC */
+#define ANYOF_MATCHES_ALL_ABOVE_BITMAP          0x10
 
 /* Can match something outside the bitmap that isn't in utf8 */
 #define ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES    0x20
 
-/* Matches every code point NUM_ANYOF_CODE_POINTS and above*/
-#define ANYOF_MATCHES_ALL_ABOVE_BITMAP          0x40
-
+/* Are there things outside the bitmap that will match only if the target
+ * string is encoded in UTF-8?  (This is not set if ANYOF_ABOVE_BITMAP_ALL is
+ * set).  Can be in SSC */
+#define ANYOF_HAS_UTF8_NONBITMAP_MATCHES        0x40
 
 /* Shared bit:
  *      Under /d it means the ANYOF node matches all non-ASCII Latin1
