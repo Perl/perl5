@@ -11,10 +11,12 @@
  *  http://www.unicode.org/unicode/reports/tr16
  *
  * To summarize, the way it works is:
- * To convert an EBCDIC character to UTF-EBCDIC:
- *  1)	convert to Unicode.  The table in the generated file 'ebcdic_tables.h'
- *      that does this for EBCDIC bytes is PL_e2a (with inverse PL_a2e).  The
- *      'a' stands for ASCII platform, meaning latin1.
+ * To convert an EBCDIC code point to UTF-EBCDIC:
+ *  1)	convert to Unicode.  No conversion is necesary for code points above
+ *      255, as Unicode and EBCDIC are identical in this range.  For smaller
+ *      code points, the conversion is done by lookup in the PL_e2a table (with
+ *      inverse PL_a2e) in the generated file 'ebcdic_tables.h'.  The 'a'
+ *      stands for ASCII platform, meaning 0-255 Unicode.
  *  2)	convert that to a utf8-like string called I8 ('I' stands for
  *	intermediate) with variant characters occupying multiple bytes.  This
  *	step is similar to the utf8-creating step from Unicode, but the details
