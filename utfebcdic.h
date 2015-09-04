@@ -172,23 +172,28 @@ END_EXTERN_C
 
 #define UNI_IS_INVARIANT(c)		(((UV)(c)) <  0xA0)
 
-/* UTF-EBCDIC semantic macros - transform back into I8 and then compare
+/* UTF-EBCDIC semantic macros - We used to transform back into I8 and then
+ * compare, but now only have to do a single lookup by using a bit in
+ * l1_char_class_tab.h.
  * Comments as to the meaning of each are given at their corresponding utf8.h
  * definitions. */
 
-#define UTF8_IS_START(c)		(NATIVE_UTF8_TO_I8(c) >= 0xC5     \
-                                         && NATIVE_UTF8_TO_I8(c) != 0xE0)
-#define UTF8_IS_CONTINUATION(c)		((NATIVE_UTF8_TO_I8(c) & 0xE0) == 0xA0)
-#define UTF8_IS_CONTINUED(c) 		(NATIVE_UTF8_TO_I8(c) >= 0xA0)
+#define UTF8_IS_START(c)		_generic_isCC(c, _CC_UTF8_IS_START)
+#define UTF8_IS_CONTINUATION(c)		_generic_isCC(c, _CC_UTF8_IS_CONTINUATION)
 
-#define UTF8_IS_DOWNGRADEABLE_START(c)	(NATIVE_UTF8_TO_I8(c) >= 0xC5     \
-                                         && NATIVE_UTF8_TO_I8(c) <= 0xC7)
-/* Saying it this way adds a runtime test, but removes 2 run-time lookups */
-/*#define UTF8_IS_DOWNGRADEABLE_START(c)  ((c) == I8_TO_NATIVE_UTF8(0xC5)     \
-                                         || (c) == I8_TO_NATIVE_UTF8(0xC6)  \
-                                         || (c) == I8_TO_NATIVE_UTF8(0xC7))
-*/
-#define UTF8_IS_ABOVE_LATIN1(c)	(NATIVE_UTF8_TO_I8(c) >= 0xC8)
+/* Equivalent to ! UVCHR_IS_INVARIANT(c) */
+#define UTF8_IS_CONTINUED(c) 		cBOOL(FITS_IN_8_BITS(c)                 \
+   && ! (PL_charclass[(U8) (c)] & (_CC_mask(_CC_ASCII) | _CC_mask(_CC_CNTRL))))
+
+#define UTF8_IS_DOWNGRADEABLE_START(c)   _generic_isCC(c,                       \
+                                              _CC_UTF8_IS_DOWNGRADEABLE_START)
+
+/* Equivalent to (UTF8_IS_START(c) && ! UTF8_IS_DOWNGRADEABLE_START(c))
+ * Makes sure that the START bit is set and the DOWNGRADEABLE bit isn't */
+#define UTF8_IS_ABOVE_LATIN1(c) cBOOL(FITS_IN_8_BITS(c)                         \
+  && ((PL_charclass[(U8) (c)] & ( _CC_mask(_CC_UTF8_IS_START)                   \
+                                 |_CC_mask(_CC_UTF8_IS_DOWNGRADEABLE_START)))   \
+                        == _CC_mask(_CC_UTF8_IS_START)))
 
 /* Can't exceed 7 on EBCDIC platforms */
 #define UTF_START_MARK(len) (0xFF & (0xFE << (7-(len))))
