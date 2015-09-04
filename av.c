@@ -649,7 +649,7 @@ Unshift the given number of C<undef> values onto the beginning of the
 array.  The array will grow automatically to accommodate the addition.  You
 must then use C<av_store> to assign values to these new elements.
 
-Perl equivalent: C<unshift @myarray, ( (undef) x $n );>
+Perl equivalent: S<C<unshift @myarray, ( (undef) x $n );>>
 
 =cut
 */
@@ -752,7 +752,7 @@ Perl_av_shift(pTHX_ AV *av)
 =for apidoc av_top_index
 
 Returns the highest index in the array.  The number of elements in the
-array is C<av_top_index(av) + 1>.  Returns -1 if the array is empty.
+array is S<C<av_top_index(av) + 1>>.  Returns -1 if the array is empty.
 
 The Perl equivalent for this is C<$#myarray>.
 
@@ -780,12 +780,12 @@ Perl_av_len(pTHX_ AV *av)
 =for apidoc av_fill
 
 Set the highest index in the array to the given number, equivalent to
-Perl's C<$#array = $fill;>.
+Perl's S<C<$#array = $fill;>>.
 
-The number of elements in the array will be C<fill + 1> after
+The number of elements in the array will be S<C<fill + 1>> after
 C<av_fill()> returns.  If the array was previously shorter, then the
 additional elements appended are set to NULL.  If the array
-was longer, then the excess elements are freed.  C<av_fill(av, -1)> is
+was longer, then the excess elements are freed.  S<C<av_fill(av, -1)>> is
 the same as C<av_clear(av)>.
 
 =cut
@@ -835,8 +835,8 @@ Perl_av_fill(pTHX_ AV *av, SSize_t fill)
 
 Deletes the element indexed by C<key> from the array, makes the element mortal,
 and returns it.  If C<flags> equals C<G_DISCARD>, the element is freed and null
-is returned.  Perl equivalent: C<my $elem = delete($myarray[$idx]);> for the
-non-C<G_DISCARD> version and a void-context C<delete($myarray[$idx]);> for the
+is returned.  Perl equivalent: S<C<my $elem = delete($myarray[$idx]);>> for the
+non-C<G_DISCARD> version and a void-context S<C<delete($myarray[$idx]);>> for the
 C<G_DISCARD> version.
 
 =cut

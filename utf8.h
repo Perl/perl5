@@ -697,9 +697,9 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 =for apidoc Am|STRLEN|isUTF8_CHAR|const U8 *s|const U8 *e
 
 Returns the number of bytes beginning at C<s> which form a legal UTF-8 (or
-UTF-EBCDIC) encoded character, looking no further than C<e - s> bytes into
-C<s>.  Returns 0 if the sequence starting at C<s> through C<e - 1> is not
-well-formed UTF-8
+UTF-EBCDIC) encoded character, looking no further than S<C<e - s>> bytes into
+C<s>.  Returns 0 if the sequence starting at C<s> through S<C<e - 1>> is not
+well-formed UTF-8.
 
 Note that an INVARIANT character (i.e. ASCII on non-EBCDIC
 machines) is a valid UTF-8 character.

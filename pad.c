@@ -64,7 +64,7 @@ have C<&PL_padname_const> "names" (see C<L</pad_alloc>>).  That
 C<&PL_padname_undef>
 and C<&PL_padname_const> are used is an implementation detail subject to
 change.  To test for them, use C<!PadnamePV(name)> and
-C<PadnamePV(name) && !PadnameLEN(name)>, respectively.
+S<C<PadnamePV(name) && !PadnameLEN(name)>>, respectively.
 
 Only C<my>/C<our> variable slots get valid names.
 The rest are op targets/GVs/constants which are statically allocated

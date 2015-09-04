@@ -491,7 +491,7 @@ gets copied, value magic doesn't (eg
 C<taint>, C<pos>).
 
 If C<setmagic> is false then no set magic will be called on the new (empty) SV.
-This typically means that assignment will soon follow (e.g. C<'local $x = $y'>),
+This typically means that assignment will soon follow (e.g. S<C<'local $x = $y'>>),
 and that will handle the magic.
 
 =cut

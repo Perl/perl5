@@ -43,11 +43,11 @@
 
 =for apidoc ibcmp
 
-This is a synonym for (! foldEQ())
+This is a synonym for S<C<(! foldEQ())>>
 
 =for apidoc ibcmp_locale
 
-This is a synonym for (! foldEQ_locale())
+This is a synonym for S<C<(! foldEQ_locale())>>
 
 =cut
 */

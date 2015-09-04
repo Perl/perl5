@@ -4983,8 +4983,8 @@ so that pointer should not be freed or used by the programmer after
 giving it to C<sv_usepvn>, and neither should any pointers from "behind"
 that pointer (e.g. ptr + 1) be used.
 
-If C<flags & SV_SMAGIC> is true, will call C<SvSETMAGIC>.  If
-C<flags & SV_HAS_TRAILING_NUL> is true, then C<ptr[len]> must be C<NUL>,
+If S<C<flags & SV_SMAGIC>> is true, will call C<SvSETMAGIC>.  If
+S<C<flags> & SV_HAS_TRAILING_NUL>> is true, then C<ptr[len]> must be C<NUL>,
 and the realloc
 will be skipped (i.e. the buffer is actually at least 1 byte longer than
 C<len>, and already meets the requirements for storing in C<SvPVX>).
@@ -7630,7 +7630,7 @@ S_assert_uft8_cache_coherent(pTHX_ const char *const func, STRLEN from_cache,
 =for apidoc sv_eq
 
 Returns a boolean indicating whether the strings in the two SVs are
-identical.  Is UTF-8 and C<'use bytes'> aware, handles get magic, and will
+identical.  Is UTF-8 and S<C<'use bytes'>> aware, handles get magic, and will
 coerce its args to strings if necessary.
 
 =for apidoc sv_eq_flags

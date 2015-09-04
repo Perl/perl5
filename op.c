@@ -8800,7 +8800,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 /*
 =for apidoc newCONSTSUB_flags
 
-Creates a constant sub equivalent to Perl C<sub FOO () { 123 }> which is
+Creates a constant sub equivalent to Perl S<C<sub FOO () { 123 }>> which is
 eligible for inlining at compile-time.
 
 Currently, the only useful value for C<flags> is C<SVf_UTF8>.
@@ -8808,7 +8808,7 @@ Currently, the only useful value for C<flags> is C<SVf_UTF8>.
 The newly created subroutine takes ownership of a reference to the passed in
 SV.
 
-Passing C<NULL> for SV creates a constant sub equivalent to C<sub BAR () {}>,
+Passing C<NULL> for SV creates a constant sub equivalent to S<C<sub BAR () {}>>,
 which won't be called if used as a destructor, but will suppress the overhead
 of a call to C<AUTOLOAD>.  (This form, however, isn't eligible for inlining at
 compile time.)
