@@ -3532,6 +3532,13 @@ They're written like C<$foo[1][2][3]>, as in C.
 follow some unpack specification producing a numeric value.
 See L<perlfunc/pack>.
 
+=item %s must not be a named sequence in transliteration operator",
+
+(F) Transliteration (C<tr///> and C<y///>) transliterates individual
+characters.  But a named sequence by definition is more than an
+individual charater, and hence doing this operation on it doesn't make
+sense.
+
 =item "my sub" not yet implemented
 
 (F) Lexically scoped subroutines are not yet implemented.  Don't try

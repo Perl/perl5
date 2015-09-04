@@ -2833,6 +2833,8 @@ S_scan_const(pTHX_ char *start)
                                            example when it is entirely composed
                                            of hex constants */
     SV *res;		                /* result from charnames */
+    STRLEN offset_to_max;   /* The offset in the output to where the range
+                               high-end character is temporarily placed */
 
     /* Note on sizing:  The scanned constant is placed into sv, which is
      * initialized by newSV() assuming one byte of output for every byte of
@@ -2849,8 +2851,9 @@ S_scan_const(pTHX_ char *start)
     UV uv = UV_MAX; /* Initialize to weird value to try to catch any uses
                        before set */
 #ifdef EBCDIC
-    UV literal_endpoint = 0;
-    bool native_range = TRUE; /* turned to FALSE if the first endpoint is Unicode. */
+    int backslash_N = 0;            /* ? was the character from \N{} */
+    int non_portable_endpoint = 0;  /* ? In a range is an endpoint
+                                       platform-specific like \x65 */
 #endif
 
     PERL_ARGS_ASSERT_SCAN_CONST;
@@ -2866,152 +2869,304 @@ S_scan_const(pTHX_ char *start)
     ENTER_with_name("scan_const");
     SAVEFREESV(sv);
 
-    while (s < send || dorange) {
+    while (s < send
+           || dorange   /* Handle tr/// range at right edge of input */
+    ) {
 
         /* get transliterations out of the way (they're most literal) */
 	if (PL_lex_inwhat == OP_TRANS) {
-	    /* expand a range A-Z to the full set of characters.  AIE! */
-	    if (dorange) {
-		I32 i;				/* current expanded character */
-		I32 min;			/* first character in range */
-		I32 max;			/* last character in range */
 
+            /* But there isn't any special handling necessary unless there is a
+             * range, so for most cases we just drop down and handle the value
+             * as any other.  There are two exceptions.
+             *
+             * 1.  A minus sign indicates that we are actually going to have
+             *     a range.  In this case, skip the '-', set a flag, then drop
+             *     down to handle what should be the end range value.
+             * 2.  After we've handled that value, the next time through, that
+             *     flag is set and we fix up the range.
+             *
+             * Ranges entirely within Latin1 are expanded out entirely, in
+             * order to avoid the significant overhead of making a swash.
+             * Ranges that extend above Latin1 have to have a swash, so there
+             * is no advantage to abbreviate them here, so they are stored here
+             * as Min, ILLEGAL_UTF8_BYTE, Max.  The illegal byte signifies a
+             * hyphen without any possible ambiguity.  On EBCDIC machines, if
+             * the range is expressed as Unicode, the Latin1 portion is
+             * expanded out even if the entire range extends above Latin1.
+             * This is because each code point in it has to be processed here
+             * individually to get its native translation */
+
+	    if (! dorange) {
+
+                /* Here, we don't think we're in a range.  If we've processed
+                 * at least one character, then see if this next one is a '-',
+                 * indicating the previous one was the start of a range.  But
+                 * don't bother if we're too close to the end for the minus to
+                 * mean that. */
+                if (*s != '-' || s >= send - 1 || s == start) {
+
+                    /* A regular character.  Process like any other, but first
+                     * clear any flags */
+                    didrange = FALSE;
+                    dorange = FALSE;
 #ifdef EBCDIC
-		UV uvmax = 0;
+                    non_portable_endpoint = 0;
+                    backslash_N = 0;
+#endif
+                    /* Drops down to generic code to process current byte */
+                }
+                else {
+                    if (didrange) { /* Something like y/A-C-Z// */
+                        Perl_croak(aTHX_ "Ambiguous range in transliteration operator");
+                    }
+
+                    dorange = TRUE;
+
+                    s++;    /* Skip past the minus */
+
+                    /* d now points to where the end-range character will be
+                     * placed.  Save it so won't have to go finding it later,
+                     * and drop down to get that character.  (Actually we
+                     * instead save the offset, to handle the case where a
+                     * realloc in the meantime could change the actual
+                     * pointer).  We'll finish processing the range the next
+                     * time through the loop */
+                    offset_to_max = d - SvPVX_const(sv);
+                }
+            }  /* End of not a range */
+            else {
+                /* Here we have parsed a range.  Now must handle it.  At this
+                 * point:
+                 * 'sv' is a SV* that contains the output string we are
+                 *      constructing.  The final two characters in that string
+                 *      are the range start and range end, in order.
+                 * 'd'  points to just beyond the range end in the 'sv' string,
+                 *      where we would next place something
+                 * 'offset_to_max' is the offset in 'sv' at which the character
+                 *      before 'd' begins.
+                 */
+                const char * max_ptr = SvPVX_const(sv) + offset_to_max;
+                const char * min_ptr;
+                IV range_min;
+		IV range_max;	/* last character in range */
+                STRLEN save_offset;
+                STRLEN grow;
+#ifndef EBCDIC  /* Not meaningful except in EBCDIC, so initialize to false */
+                const bool convert_unicode = FALSE;
+                const IV real_range_max = 0;
+#else
+                bool convert_unicode;
+                IV real_range_max = 0;
 #endif
 
-		if (has_utf8
+                /* Get the range-ends code point values. */
+                if (has_utf8) {
+                    /* We know the utf8 is valid, because we just constructed
+                     * it ourselves in previous loop iterations */
+                    min_ptr = (char*) utf8_hop( (U8*) max_ptr, -1);
+                    range_min = valid_utf8_to_uvchr( (U8*) min_ptr, NULL);
+                    range_max = valid_utf8_to_uvchr( (U8*) max_ptr, NULL);
+                }
+                else {
+                    min_ptr = max_ptr - 1;
+                    range_min = * (U8*) min_ptr;
+                    range_max = * (U8*) max_ptr;
+                }
+
 #ifdef EBCDIC
-		    && !native_range
+                /* On EBCDIC platforms, we may have to deal with portable
+                 * ranges.  These happen if at least one range endpoint is a
+                 * Unicode value (\N{...}), or if the range is a subset of
+                 * [A-Z] or [a-z], and both ends are literal characters,
+                 * like 'A', and not like \x{C1} */
+                if ((convert_unicode
+                     = cBOOL(backslash_N)   /* \N{} forces Unicode, hence
+                                               portable range */
+                      || (   ! non_portable_endpoint
+                          && ((  isLOWER_A(range_min) && isLOWER_A(range_max))
+                             || (isUPPER_A(range_min) && isUPPER_A(range_max))))
+                )) {
+
+                    /* Special handling is needed for these portable ranges.
+                     * They are defined to all be in Unicode terms, which
+                     * include all Unicode code points between the end points.
+                     * Convert to Unicode to get the Unicode range.  Later we
+                     * will convert each code point in the range back to
+                     * native.  */
+                    range_min = NATIVE_TO_UNI(range_min);
+                    range_max = NATIVE_TO_UNI(range_max);
+                }
 #endif
-                ) {
-		    char * const c = (char*)utf8_hop((U8*)d, -1);
-		    char *e = d++;
-		    while (e-- > c)
-			*(e + 1) = *e;
-		    *c = (char) ILLEGAL_UTF8_BYTE;
-		    /* mark the range as done, and continue */
-		    dorange = FALSE;
-		    didrange = TRUE;
-		    continue;
+
+                if (range_min > range_max) {
+                    if (convert_unicode) {
+                        /* Need to convert back to native for meaningful
+                         * messages for this platform */
+                        range_min = UNI_TO_NATIVE(range_min);
+                        range_max = UNI_TO_NATIVE(range_max);
+                    }
+
+                    /* Use the characters themselves for the error message if
+                     * ASCII printables; otherwise some visible representation
+                     * of them */
+                    if (isPRINT_A(range_min) && isPRINT_A(range_max)) {
+                        Perl_croak(aTHX_
+			 "Invalid range \"%c-%c\" in transliteration operator",
+			 (char)range_min, (char)range_max);
+                    }
+                    else if (convert_unicode) {
+                        /* diag_listed_as: Invalid range "%s" in transliteration operator */
+                        Perl_croak(aTHX_
+			       "Invalid range \"\\N{U+%04X}-\\N{U+%04X}\""
+                               " in transliteration operator",
+			       range_min, range_max);
+                    }
+                    else {
+                        /* diag_listed_as: Invalid range "%s" in transliteration operator */
+                        Perl_croak(aTHX_
+			       "Invalid range \"\\x{%04X}-\\x{%04X}\""
+                               " in transliteration operator",
+			       range_min, range_max);
+                    }
+                }
+
+		if (has_utf8) {
+
+                    /* We try to avoid creating a swash.  If the upper end of
+                     * this range is below 256, this range won't force a swash;
+                     * otherwise it does force a swash, and as long as we have
+                     * to have one, we might as well not expand things out.
+                     * But if it's EBCDIC, we may have to look at each
+                     * character below 256 if we have to convert to/from
+                     * Unicode values */
+                    if (range_max > 255
+#ifdef EBCDIC
+		        && (range_min > 255 || ! convert_unicode)
+#endif
+                    ) {
+                        /* Move the high character one byte to the right; then
+                         * insert between it and the range begin, an illegal
+                         * byte which serves to indicate this is a range (using
+                         * a '-' could be ambiguous). */
+                        char *e = d++;
+                        while (e-- > max_ptr) {
+                            *(e + 1) = *e;
+                        }
+                        *(e + 1) = (char) ILLEGAL_UTF8_BYTE;
+                        goto range_done;
+                    }
+
+                    /* Here, we're going to expand out the range.  For EBCDIC
+                     * the range can extend above 255 (not so in ASCII), so
+                     * for EBCDIC, split it into the parts above and below
+                     * 255/256 */
+#ifdef EBCDIC
+                    if (range_max > 255) {
+                        real_range_max = range_max;
+                        range_max = 255;
+                    }
+#endif
 		}
 
-		i = d - SvPVX_const(sv);		/* remember current offset */
-#ifdef EBCDIC
-                SvGROW(sv,
-		       SvLEN(sv) + ((has_utf8)
-                                    ?  (512 - UTF_CONTINUATION_MARK
-                                        + UNISKIP(0x100))
-				    : 256));
-                /* How many two-byte within 0..255: 128 in UTF-8,
-		 * 96 in UTF-8-mod. */
-#else
-		SvGROW(sv, SvLEN(sv) + 256);	/* never more than 256 chars in a range */
-#endif
-		d = SvPVX(sv) + i;		/* refresh d after realloc */
-#ifdef EBCDIC
+                /* Here we need to expand out the string to contain each
+                 * character in the range.  Grow the output to handle this */
+
+                save_offset  = min_ptr - SvPVX_const(sv);
+
+                /* The base growth is the number of code points in the range */
+                grow = range_max - range_min + 1;
                 if (has_utf8) {
-                    int j;
-                    for (j = 0; j <= 1; j++) {
-                        char * const c = (char*)utf8_hop((U8*)d, -1);
-                        const UV uv    = utf8n_to_uvchr((U8*)c, d - c, NULL, 0);
-                        if (j)
-                            min = (U8)uv;
-                        else if (uv < 256)
-                            max = (U8)uv;
-                        else {
-                            max = (U8)0xff; /* only to \xff */
-                            uvmax = uv; /* \x{100} to uvmax */
+
+                    /* But if the output is UTF-8, some of those characters may
+                     * need two bytes (since the maximum range value here is
+                     * 255, the max bytes per character is two).  On ASCII
+                     * platforms, it's not much trouble to get an accurate
+                     * count of what's needed.  But on EBCDIC, the ones that
+                     * need 2 bytes are scattered around, so just use a worst
+                     * case value instead of calculating for that platform.  */
+#ifdef EBCDIC
+                    grow *= 2;
+#else
+                    /* Only those above 127 require 2 bytes.  This may be
+                     * everything in the range, or not */
+                    if (range_min > 127) {
+                        grow *= 2;
+                    }
+                    else if (range_max > 127) {
+                        grow += range_max - 127;
+                    }
+#endif
+                }
+
+                /* Subtract 3 for the bytes that were already accounted for
+                 * (min, max, and the hyphen) */
+                SvGROW(sv, SvLEN(sv) + grow - 3);
+		d = SvPVX(sv) + save_offset;	/* refresh d after realloc */
+
+                /* Here, we expand out the range.  On ASCII platforms, the
+                 * compiler should optimize out the 'convert_unicode==TRUE'
+                 * portion of this */
+                if (convert_unicode) {
+                    IV i;
+
+                    /* Recall that the min and max are now in Unicode terms, so
+                     * we have to convert each character to its native
+                     * equivalent */
+                    if (has_utf8) {
+                        for (i = range_min; i <= range_max; i++) {
+                            append_utf8_from_native_byte(LATIN1_TO_NATIVE(i),
+                                                         (U8 **) &d);
                         }
-                        d = c; /* eat endpoint chars */
-                     }
-                }
-               else {
-#endif
-		   d -= 2;		/* eat the first char and the - */
-		   min = (U8)*d;	/* first char in range */
-		   max = (U8)d[1];	/* last char in range  */
-#ifdef EBCDIC
-	       }
-#endif
-
-                if (min > max) {
-		    Perl_croak(aTHX_
-			       "Invalid range \"%c-%c\" in transliteration operator",
-			       (char)min, (char)max);
-                }
-
-#ifdef EBCDIC
-                /* Because of the discontinuities in EBCDIC A-Z and a-z, expand
-                 * any subsets of these ranges into individual characters */
-		if (literal_endpoint == 2
-                    && ((isLOWER_A(min) && isLOWER_A(max))
-                     || (isUPPER_A(min) && isUPPER_A(max))))
-                {
-                    for (i = min; i <= max; i++) {
-                        if (isALPHA_A(i))
-                            *d++ = i;
+                    }
+                    else {
+                        for (i = range_min; i <= range_max; i++) {
+                            *d++ = (char)LATIN1_TO_NATIVE(i);
+                        }
 		    }
 		}
-		else
-#endif
-		    for (i = min; i <= max; i++)
-#ifdef EBCDIC
-                        if (has_utf8) {
-                            append_utf8_from_native_byte(i, &d);
-                        }
-                        else
-#endif
-                            *d++ = (char)i;
- 
-#ifdef EBCDIC
-                if (uvmax) {
-                    d = (char*)uvchr_to_utf8((U8*)d, 0x100);
-                    if (uvmax > 0x101)
-                        *d++ = (char) ILLEGAL_UTF8_BYTE;
-                    if (uvmax > 0x100)
-                        d = (char*)uvchr_to_utf8((U8*)d, uvmax);
-                }
-#endif
+                else {
+                    IV i;
 
+                    /* Here, no conversions are necessary, which means that the
+                     * first character in the range is already in 'd' and
+                     * valid, so we can skip overwriting it */
+                    if (has_utf8) {
+                        d += UTF8SKIP(d);
+                        for (i = range_min + 1; i <= range_max; i++) {
+                            append_utf8_from_native_byte(i, (U8 **) &d);
+                        }
+                    }
+                    else {
+                        d++;
+                        for (i = range_min + 1; i <= range_max; i++) {
+                            *d++ = (char)i;
+                        }
+		    }
+		}
+
+                /* (Compilers should optimize this out for non-EBCDIC).  If the
+                 * original range extended above 255, add in that portion */
+                if (real_range_max) {
+                    *d++ = (char) UTF8_TWO_BYTE_HI(0x100);
+                    *d++ = (char) UTF8_TWO_BYTE_LO(0x100);
+                    if (real_range_max > 0x101)
+                        *d++ = (char) ILLEGAL_UTF8_BYTE;
+                    if (real_range_max > 0x100)
+                        d = (char*)uvchr_to_utf8((U8*)d, real_range_max);
+                }
+
+              range_done:
 		/* mark the range as done, and continue */
-		dorange = FALSE;
 		didrange = TRUE;
+		dorange = FALSE;
 #ifdef EBCDIC
-		literal_endpoint = 0;
+		non_portable_endpoint = 0;
+                backslash_N = 0;
 #endif
 		continue;
-	    }
-
-	    /* range begins (ignore - as first or last char) */
-	    else if (*s == '-' && s+1 < send  && s != start) {
-		if (didrange) {
-		    Perl_croak(aTHX_ "Ambiguous range in transliteration operator");
-		}
-		if (has_utf8
-#ifdef EBCDIC
-		    && !native_range
-#endif
-		    ) {
-		    *d++ = (char) ILLEGAL_UTF8_BYTE;	/* use illegal utf8 byte--see pmtrans */
-		    s++;
-		    continue;
-		}
-		dorange = TRUE;
-		s++;
-	    }
-	    else {
-		didrange = FALSE;
-#ifdef EBCDIC
-		literal_endpoint = 0;
-		native_range = TRUE;
-#endif
-	    }
-	}
-
-        /* if we get to any of these else's, we're not doing a
-         * transliteration. */
-
+	    } /* End of is a range */
+        } /* End of transliteration.  Joins main code after these else's */
 	else if (*s == '[' && PL_lex_inpat && !in_charclass) {
 	    char *s1 = s-1;
 	    int esc = 0;
@@ -3139,14 +3294,6 @@ S_scan_const(pTHX_ char *start)
 	    }
 
 	    switch (*s) {
-
-	    /* quoted - in transliterations */
-	    case '-':
-		if (PL_lex_inwhat == OP_TRANS) {
-		    *d++ = *s++;
-		    continue;
-		}
-		/* FALLTHROUGH */
 	    default:
 	        {
 		    if ((isALPHANUMERIC(*s)))
@@ -3216,7 +3363,10 @@ S_scan_const(pTHX_ char *start)
 		 * to recode the rest of the string into utf8 */
 		
 		/* Here uv is the ordinal of the next character being added */
-		if (!UVCHR_IS_INVARIANT(uv)) {
+		if (UVCHR_IS_INVARIANT(uv)) {
+		    *d++ = (char) uv;
+		}
+		else {
 		    if (!has_utf8 && uv > 255) {
 			/* Might need to recode whatever we have accumulated so
 			 * far if it contains any chars variant in utf8 or
@@ -3246,26 +3396,23 @@ S_scan_const(pTHX_ char *start)
 				(PL_lex_repl ? OPpTRANS_FROM_UTF
 					     : OPpTRANS_TO_UTF);
 			}
-#ifdef EBCDIC
-			if (uv > 255 && !dorange)
-			    native_range = FALSE;
-#endif
                     }
 		    else {
 		        *d++ = (char)uv;
 		    }
 		}
-		else {
-		    *d++ = (char) uv;
-		}
+#ifdef EBCDIC
+                non_portable_endpoint++;
+#endif
 		continue;
 
  	    case 'N':
                 /* In a non-pattern \N must be like \N{U+0041}, or it can be a
                  * named character, like \N{LATIN SMALL LETTER A}, or a named
                  * sequence, like \N{LATIN CAPITAL LETTER A WITH MACRON AND
-                 * GRAVE}.  For convenience all three forms are referred to as
-                 * "named characters" below.
+                 * GRAVE} (except y/// can't handle the latter, croaking).  For
+                 * convenience all three forms are referred to as "named
+                 * characters" below.
                  *
                  * For patterns, \N also can mean to match a non-newline.  Code
                  * before this 'switch' statement should already have handled
@@ -3283,11 +3430,14 @@ S_scan_const(pTHX_ char *start)
                  *
 		 * The structure of this section of code (besides checking for
 		 * errors and upgrading to utf8) is:
-                 *  If the named character is of the form \N{U+...}, pass it
+                 *    If the named character is of the form \N{U+...}, pass it
                  *      through if a pattern; otherwise convert the code point
                  *      to utf8
-                 *  Otherwise must be some \N{NAME}: convert to \N{U+c1.c2...}
-                 *      if a pattern; otherwise convert to utf8
+                 *    Otherwise must be some \N{NAME}: convert to
+                 *      \N{U+c1.c2...} if a pattern; otherwise convert to utf8
+                 *
+                 * Transliteration is an exception.  The conversion to utf8 is
+                 * only done if the code point requires it to be representable.
                  *
                  * Here, 's' points to the 'N'; the test below is guaranteed to
 		 * succeed if we are being called on a pattern, as we already
@@ -3352,11 +3502,16 @@ S_scan_const(pTHX_ char *start)
                         if (len == 0 || (len != (STRLEN)(e - s)))
                             goto bad_NU;
 
-                         /* If the destination is not in utf8, unconditionally
-			  * recode it to be so.  This is because \N{} implies
-			  * Unicode semantics, and scalars have to be in utf8
-			  * to guarantee those semantics */
-			if (! has_utf8) {
+                         /* For non-tr///, if the destination is not in utf8,
+                          * unconditionally recode it to be so.  This is
+                          * because \N{} implies Unicode semantics, and scalars
+                          * have to be in utf8 to guarantee those semantics.
+                          * tr/// doesn't care about Unicode rules, so no need
+                          * there to upgrade to UTF-8 for small enough code
+                          * points */
+			if (! has_utf8 && (   uv > 0xFF
+                                           || PL_lex_inwhat != OP_TRANS))
+                        {
 			    SvCUR_set(sv, d - SvPVX_const(sv));
 			    SvPOK_on(sv);
 			    *d = '\0';
@@ -3498,11 +3653,32 @@ S_scan_const(pTHX_ char *start)
 		    else { /* Here, not in a pattern.  Convert the name to a
 			    * string. */
 
-			 /* If destination is not in utf8, unconditionally
-			  * recode it to be so.  This is because \N{} implies
-			  * Unicode semantics, and scalars have to be in utf8
-			  * to guarantee those semantics */
-			if (! has_utf8) {
+                        if (PL_lex_inwhat == OP_TRANS) {
+                            str = SvPV_const(res, len);
+                            if (len > ((SvUTF8(res))
+                                       ? UTF8SKIP(str)
+                                       : 1))
+                            {
+                                yyerror(Perl_form(aTHX_
+                                    "%.*s must not be a named sequence"
+                                    " in transliteration operator",
+                                        /*  +1 to include the "}" */
+                                    (int) (e + 1 - start), start));
+                                goto end_backslash_N;
+                            }
+                        }
+                        else if (! SvUTF8(res)) {
+                            /* Make sure \N{} return is UTF-8.  This is because
+                            * \N{} implies Unicode semantics, and scalars have to
+                            * be in utf8 to guarantee those semantics; but not
+                            * needed in tr/// */
+                            sv_utf8_upgrade_flags(res, SV_UTF8_NO_ENCODING);
+                            str = SvPV_const(res, len);
+                        }
+
+                         /* Upgrade destination to be utf8 if this new
+                          * component is */
+			if (! has_utf8 && SvUTF8(res)) {
 			    SvCUR_set(sv, d - SvPVX_const(sv));
 			    SvPOK_on(sv);
 			    *d = '\0';
@@ -3519,10 +3695,6 @@ S_scan_const(pTHX_ char *start)
 			    const STRLEN off = d - SvPVX_const(sv);
 			    d = off + SvGROW(sv, off + len + (STRLEN)(send - s) + 1);
 			}
-                        if (! SvUTF8(res)) {    /* Make sure \N{} return is UTF-8 */
-                            sv_utf8_upgrade_flags(res, SV_UTF8_NO_ENCODING);
-                            str = SvPV_const(res, len);
-                        }
 			Copy(str, d, len, char);
 			d += len;
 		    }
@@ -3530,9 +3702,10 @@ S_scan_const(pTHX_ char *start)
 		    SvREFCNT_dec(res);
 
 		} /* End \N{NAME} */
+
+              end_backslash_N:
 #ifdef EBCDIC
-		if (!dorange) 
-		    native_range = FALSE; /* \N{} is defined to be Unicode */
+                backslash_N++; /* \N{} is defined to be Unicode */
 #endif
 		s = e + 1;  /* Point to just after the '}' */
 		continue;
@@ -3546,6 +3719,9 @@ S_scan_const(pTHX_ char *start)
 		else {
 		    yyerror("Missing control char name in \\c");
 		}
+#ifdef EBCDIC
+                non_portable_endpoint++;
+#endif
 		continue;
 
 	    /* printf-style backslashes, formfeeds, newlines, etc */
@@ -3575,17 +3751,12 @@ S_scan_const(pTHX_ char *start)
 	    s++;
 	    continue;
 	} /* end if (backslash) */
-#ifdef EBCDIC
-	else
-	    literal_endpoint++;
-#endif
 
     default_action:
 	/* If we started with encoded form, or already know we want it,
 	   then encode the next character */
 	if (! NATIVE_BYTE_IS_INVARIANT((U8)(*s)) && (this_utf8 || has_utf8)) {
 	    STRLEN len  = 1;
-
 
 	    /* One might think that it is wasted effort in the case of the
 	     * source being utf8 (this_utf8 == TRUE) to take the next character
@@ -3618,10 +3789,6 @@ S_scan_const(pTHX_ char *start)
 	    s += len;
 
 	    d = (char*)uvchr_to_utf8((U8*)d, nextuv);
-#ifdef EBCDIC
-	    if (uv > 255 && !dorange)
-		native_range = FALSE;
-#endif
 	}
 	else {
 	    *d++ = *s++;

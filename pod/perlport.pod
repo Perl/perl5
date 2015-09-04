@@ -651,7 +651,8 @@ Assume very little about character sets.
 Assume nothing about numerical values (C<ord>, C<chr>) of characters.
 Do not use explicit code point ranges (like C<\xHH-\xHH)>.  However,
 starting in Perl v5.22, regular expression pattern bracketed character
-class ranges specified like C<qr/[\N{U+HH}-\N{U+HH}]/> are portable.
+class ranges specified like C<qr/[\N{U+HH}-\N{U+HH}]/> are portable,
+and starting in Perl v5.24, the same ranges are portable in C<tr///>.
 You can portably use symbolic character classes like C<[:print:]>.
 
 Do not assume that the alphabetic characters are encoded contiguously
@@ -660,7 +661,7 @@ however, guarantees that all subsets of C<qr/[A-Z]/>, C<qr/[a-z]/>, and
 C<qr/[0-9]/> behave as expected.  C<tr///> behaves the same for these
 ranges.  In patterns, any ranges specified with end points using the
 C<\N{...}> notations ensures character set portability, but it is a bug
-in Perl v5.22, that this isn't true of C<tr///>.
+in Perl v5.22, that this isn't true of C<tr///>, fixed in v5.24.
 
 Do not assume anything about the ordering of the characters.
 The lowercase letters may come before or after the uppercase letters;

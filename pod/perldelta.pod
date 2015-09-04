@@ -320,6 +320,17 @@ Comparing two strings that were both encoded in UTF-8 (or more
 precisely, UTF-EBCDIC) did not work properly until now.  Since C<sort()>
 uses C<cmp()>, this fixes that as well.
 
+=item EBCDIC C<tr///> and C<yr///> fixed for C<\N{}>, and C<S<use utf8>> ranges
+
+Perl v5.22 introduced the concept of portable ranges to regular
+expression patterns.  A portable range matches the same set of
+characters no matter what platform is being run on.  This concept is now
+extended to C<tr///>.  See
+C<L<trE<sol>E<sol>E<sol>|perlop/trE<sol>SEARCHLISTE<sol>REPLACEMENTLISTE<sol>cdsr>>.
+
+There were also some problems with these operations under S<C<use
+utf8>>, which are now fixed
+
 =item Win32
 
 =over
@@ -374,6 +385,11 @@ work if I<min> and I<max> were equal.  [perl #125825]
 
 C<< BEGIN <> >> no longer segfaults and properly produces an error
 message.  [perl #125341]
+
+=item *
+
+In C<tr///> an illegal backwards range like C<tr/\x{101}-\x{100}//> was
+not always detected, giving incorrect results.  This is now fixed.
 
 =back
 

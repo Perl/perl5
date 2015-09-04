@@ -2372,11 +2372,7 @@ double-quoted strings.  But there is no interpolation, so C<"$"> and
 C<"@"> are treated as literals.  A hyphen at the beginning or end, or
 preceded by a backslash is considered a literal.  Escape sequence
 details are in L<the table near the beginning of this section|/Quote and
-Quote-like Operators>.  It is a bug in Perl v5.22 that something like
-
- tr/\N{U+20}-\N{U+7E}foobar//
-
-does not treat that range as fully Unicode.
+Quote-like Operators>.
 
 Note that C<tr> does B<not> do regular expression character classes such as
 C<\d> or C<\pL>.  The C<tr> operator is not equivalent to the C<L<tr(1)>>
@@ -2387,11 +2383,41 @@ C<\l> string-interpolation escapes on the right side of a substitution
 operator will perform correct case-mappings, but C<tr[a-z][A-Z]> will not
 (except sometimes on legacy 7-bit data).
 
-Note also that the whole range idea is rather unportable between
-character sets--and even within character sets they may cause results
-you probably didn't expect.  A sound principle is to use only ranges
-that begin from and end at either alphabets of equal case (a-e, A-E),
-or digits (0-4).  Anything else is unsafe.  If in doubt, spell out the
+Most ranges are unportable between character sets, but certain ones
+signal Perl to do special handling to make them portable.  There are two
+classes of portable ranges.  The first are any subsets of the ranges
+C<A-Z>, C<a-z>, and C<0-9>, when expressed as literal characters.
+
+  tr/h-k/H-K/
+
+capitalizes the letters C<"h">, C<"i">, C<"j">, and C<"k"> and nothing
+else, no matter what the platform's character set is.  In contrast, all
+of
+
+  tr/\x68-\x6B/\x48-\x4B/
+  tr/h-\x6B/H-\x4B/
+  tr/\x68-k/\x48-K/
+
+do the same capitalizations as the previous example when run on ASCII
+platforms, but something completely different on EBCDIC ones.
+
+The second class of portable ranges is invoked when one or both of the
+range's end points are expressed as C<\N{...}>
+
+ $string =~ tr/\N{U+20}-\N{U+7E}//d;
+
+removes from C<$string> all the platform's characters which are
+equivalent to any of Unicode U+0020, U+0021, ... U+007D, U+007E.  This
+is a portable range, and has the same effect on every platform it is
+run on.  It turns out that in this example, these are the ASCII
+printable characters.  So after this is run, C<$string> has only
+controls and characters which have no ASCII equivalents.
+
+But, even for portable ranges, it is not generally obvious what is
+included without having to look things up.  A sound principle is to use
+only ranges that begin from and end at either ASCII alphabetics of equal
+case (C<b-e>, C<b-E>), or digits (C<1-4>).  Anything else is unclear
+(and unportable unless C<\N{...}> is used).  If in doubt, spell out the
 character sets in full.
 
 Options:

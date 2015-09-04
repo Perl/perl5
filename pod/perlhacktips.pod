@@ -299,7 +299,7 @@ Also, the range 'A' - 'Z' in ASCII is an unbroken sequence of 26 upper
 case alphabetic characters.  That is not true in EBCDIC.  Nor for 'a' to
 'z'.  But '0' - '9' is an unbroken range in both systems.  Don't assume
 anything about other ranges.  (Note that special handling of ranges in
-regular expression patterns makes it appear to Perl
+regular expression patterns and transliterations makes it appear to Perl
 code that the aforementioned ranges are all unbroken.)
 
 Many of the comments in the existing code ignore the possibility of
