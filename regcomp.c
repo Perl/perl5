@@ -17005,11 +17005,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         U32 lo = ARG1(o), hi = ARG2(o);
 	if (OP(o) == CURLYM || OP(o) == CURLYN || OP(o) == CURLYX)
 	    Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */
-        Perl_sv_catpvf(aTHX_ sv, "{%d,", lo);
+        Perl_sv_catpvf(aTHX_ sv, "{%u,", (unsigned) lo);
         if (hi == REG_INFTY)
             sv_catpvs(sv, "INFTY");
         else
-            Perl_sv_catpvf(aTHX_ sv, "%d", hi);
+            Perl_sv_catpvf(aTHX_ sv, "%u", (unsigned) hi);
         sv_catpvs(sv, "}");
     }
     else if (k == WHILEM && o->flags)			/* Ordinal/of */
