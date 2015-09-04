@@ -88,7 +88,7 @@ close(F);
 	cmp_ok( $y, '==', 1 );
     }
 
-    print F $b,"\n"; # Don't upgrades $b
+    print F $b,"\n"; # Don't upgrade $b
 
     { # Check byte length of $b
 	use bytes; my $y = length($b);
