@@ -68,8 +68,7 @@ close(F);
     binmode(F, ":bytes");
     $x = <F>;
     chomp($x);
-    $chr = chr(196).chr(172);
-    if ($::IS_EBCDIC) { $chr = chr(141).chr(83); } # EBCDIC
+    $chr = byte_utf8a_to_utf8n(chr(196).chr(172));
     is( $x, $chr );
     close F;
 
@@ -167,7 +166,7 @@ SKIP: {
 
 SKIP: {
     if ($::IS_EBCDIC) {
-	skip("EBCDIC doesn't complain", 2);
+	skip("EBCDIC The file isn't deformed in UTF-EBCDIC", 2);
     } else {
 	my @warnings;
 	open F, "<:utf8", $a_file or die $!;
