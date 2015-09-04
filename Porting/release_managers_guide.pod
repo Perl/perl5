@@ -413,13 +413,13 @@ to guarantee binary compatibility in maint branches.
 After editing, regenerate uconfig.h (this must be run on a system with a
 /bin/sh available):
 
-    $ perl regen/uconfig_h.pl
+ $ perl regen/uconfig_h.pl
 
 This might not cause any new changes.
 
 You may also need to regen opcodes:
 
-    $ ./perl -Ilib regen/opcode.pl
+ $ ./perl -Ilib regen/opcode.pl
 
 You may have to add stub entries in C<%Module::CoreList::version>,
 C<%Module::CoreList::deprecated> and C<%Module::CoreList::Utils::delta>.
@@ -427,18 +427,18 @@ If so, you must up their version numbers as well.
 
 Test your changes:
 
-    $ git clean -xdf   # careful if you don't have local files to keep!
-    $ ./Configure -des -Dusedevel
-    $ make
-    $ make test
+ $ git clean -xdf   # careful if you don't have local files to keep!
+ $ ./Configure -des -Dusedevel
+ $ make
+ $ make test
 
 Commit your changes:
 
-    $ git status
-    $ git diff
-    B<review the delta carefully>
+ $ git status
+ $ git diff
+ B<review the delta carefully>
 
-    $ git commit -a -m 'Bump the perl version in various places for 5.x.y'
+ $ git commit -a -m 'Bump the perl version in various places for 5.x.y'
 
 At this point you may want to compare the commit with a previous bump to
 see if they look similar.  See commit f7cf42bb69 for an example of a
@@ -846,7 +846,7 @@ directory, they will still identify themselves using git tags and
 commits. (Note that for an odd-numbered version, perl will install
 itself as C<perl5.x.y>). C<perl -v> will identify itself as:
 
-    This is perl 5, version X, subversion Y (v5.X.Y (v5.X.Z-NNN-gdeadbeef))
+ This is perl 5, version X, subversion Y (v5.X.Y (v5.X.Z-NNN-gdeadbeef))
 
 where 5.X.Z is the latest tag, NNN the number of commits since this tag,
 and C<< deadbeef >> commit of that tag.
@@ -885,14 +885,14 @@ L<http://tukaani.org/xz/>.
 Create a tarball. Use the C<-s> option to specify a suitable suffix for
 the tarball and directory name:
 
-    $ cd root/of/perl/tree
-    $ make distclean       # make sure distclean works
-    $ git clean -xdf       # make sure perl and git agree on files
-                           # git clean should not output anything!
-    $ git status           # and there's nothing lying around
+ $ cd root/of/perl/tree
+ $ make distclean       # make sure distclean works
+ $ git clean -xdf       # make sure perl and git agree on files
+                        # git clean should not output anything!
+ $ git status           # and there's nothing lying around
 
-    $ perl Porting/makerel -bx -s RC1            # for a release candidate
-    $ perl Porting/makerel -bx                   # for the release itself
+ $ perl Porting/makerel -bx -s RC1            # for a release candidate
+ $ perl Porting/makerel -bx                   # for the release itself
 
 This creates the  directory F<../perl-x.y.z-RC1> or similar, copies all
 the MANIFEST files into it, sets the correct permissions on them, then
@@ -940,9 +940,9 @@ Check that basic configuration and tests work on each test machine:
 
 Check that the test harness and install work on each test machine:
 
-    $ make distclean
-    $ ./Configure -des -Dprefix=/install/path && make all test_harness install
-    $ cd /install/path
+ $ make distclean
+ $ ./Configure -des -Dprefix=/install/path && make all test_harness install
+ $ cd /install/path
 
 =head4 Check C<perl -v> and C<perl -V>
 
@@ -1317,9 +1317,9 @@ I<You MUST SKIP this step for RC, BLEAD-POINT>
 
 Copy the perldelta.pod for this release into blead; for example:
 
-    $ cd ..../blead
-    $ cp -i ../5.10.x/pod/perldelta.pod pod/perl5101delta.pod  # for example
-    $ git add pod/perl5101delta.pod
+ $ cd ..../blead
+ $ cp -i ../5.10.x/pod/perldelta.pod pod/perl5101delta.pod  #for example
+ $ git add pod/perl5101delta.pod
 
 Don't forget to set the NAME correctly in the new file (e.g. perl5101delta
 rather than perldelta).
@@ -1423,8 +1423,8 @@ test_porting makefile target to check that they're ok.
 
 Run
 
-    $ ./perl -Ilib -MModule::CoreList \
-        -le 'print Module::CoreList->find_version($]) ? "ok" : "not ok"'
+ $ ./perl -Ilib -MModule::CoreList \
+    -le 'print Module::CoreList->find_version($]) ? "ok" : "not ok"'
 
 and check that it outputs "ok" to prove that Module::CoreList now knows
 about blead's current version.

@@ -190,9 +190,9 @@ in.  For example, CCTools installs its toolchain in
 /data/data/com.pdaxrom.cctools/root/cctools.  With the path in hand,
 compiling perl is little more than:
 
-    export SYSROOT=<location of the native toolchain>
-    export LD_LIBRARY_PATH="$SYSROOT/lib:`pwd`:`pwd`/lib:`pwd`/lib/auto:$LD_LIBRARY_PATH"
-    sh Configure -des -Dsysroot=$SYSROOT -Alibpth="/system/lib /vendor/lib"
+ export SYSROOT=<location of the native toolchain>
+ export LD_LIBRARY_PATH="$SYSROOT/lib:`pwd`:`pwd`/lib:`pwd`/lib/auto:$LD_LIBRARY_PATH"
+ sh Configure -des -Dsysroot=$SYSROOT -Alibpth="/system/lib /vendor/lib"
 
 =head1 AUTHOR
 

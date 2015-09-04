@@ -1909,7 +1909,9 @@ done inside our C code:
 
  ...
 
- SV *cvrv = eval_pv("sub { print 'You will not find me cluttering any namespace!' }", TRUE);
+ SV *cvrv = eval_pv("sub {
+                    print 'You will not find me cluttering any namespace!'
+                    }", TRUE);
 
  ...
 

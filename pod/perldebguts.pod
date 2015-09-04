@@ -275,122 +275,122 @@ is not a complete listing, but only excerpts.
 
 =item 1
 
-  entering main::BEGIN
-   entering Config::BEGIN
-    Package lib/Exporter.pm.
-    Package lib/Carp.pm.
-   Package lib/Config.pm.
-   entering Config::TIEHASH
-   entering Exporter::import
-    entering Exporter::export
-  entering Config::myconfig
-   entering Config::FETCH
-   entering Config::FETCH
-   entering Config::FETCH
-   entering Config::FETCH
+ entering main::BEGIN
+  entering Config::BEGIN
+   Package lib/Exporter.pm.
+   Package lib/Carp.pm.
+  Package lib/Config.pm.
+  entering Config::TIEHASH
+  entering Exporter::import
+   entering Exporter::export
+ entering Config::myconfig
+  entering Config::FETCH
+  entering Config::FETCH
+  entering Config::FETCH
+  entering Config::FETCH
 
 =item 2
 
-  entering main::BEGIN
-   entering Config::BEGIN
-    Package lib/Exporter.pm.
-    Package lib/Carp.pm.
-   exited Config::BEGIN
-   Package lib/Config.pm.
-   entering Config::TIEHASH
-   exited Config::TIEHASH
-   entering Exporter::import
-    entering Exporter::export
-    exited Exporter::export
-   exited Exporter::import
-  exited main::BEGIN
-  entering Config::myconfig
-   entering Config::FETCH
-   exited Config::FETCH
-   entering Config::FETCH
-   exited Config::FETCH
-   entering Config::FETCH
+ entering main::BEGIN
+  entering Config::BEGIN
+   Package lib/Exporter.pm.
+   Package lib/Carp.pm.
+  exited Config::BEGIN
+  Package lib/Config.pm.
+  entering Config::TIEHASH
+  exited Config::TIEHASH
+  entering Exporter::import
+   entering Exporter::export
+   exited Exporter::export
+  exited Exporter::import
+ exited main::BEGIN
+ entering Config::myconfig
+  entering Config::FETCH
+  exited Config::FETCH
+  entering Config::FETCH
+  exited Config::FETCH
+  entering Config::FETCH
 
 =item 3
 
-  in  $=main::BEGIN() from /dev/null:0
-   in  $=Config::BEGIN() from lib/Config.pm:2
-    Package lib/Exporter.pm.
-    Package lib/Carp.pm.
-   Package lib/Config.pm.
-   in  $=Config::TIEHASH('Config') from lib/Config.pm:644
-   in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
-    in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from li
-  in  @=Config::myconfig() from /dev/null:0
-   in  $=Config::FETCH(ref(Config), 'package') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'PERL_VERSION') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'PERL_SUBVERSION') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'osname') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'osvers') from lib/Config.pm:574
+ in  $=main::BEGIN() from /dev/null:0
+  in  $=Config::BEGIN() from lib/Config.pm:2
+   Package lib/Exporter.pm.
+   Package lib/Carp.pm.
+  Package lib/Config.pm.
+  in  $=Config::TIEHASH('Config') from lib/Config.pm:644
+  in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
+   in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from li
+ in  @=Config::myconfig() from /dev/null:0
+  in  $=Config::FETCH(ref(Config), 'package') from lib/Config.pm:574
+  in  $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
+  in  $=Config::FETCH(ref(Config), 'PERL_VERSION') from lib/Config.pm:574
+  in  $=Config::FETCH(ref(Config), 'PERL_SUBVERSION') from lib/Config.pm:574
+  in  $=Config::FETCH(ref(Config), 'osname') from lib/Config.pm:574
+  in  $=Config::FETCH(ref(Config), 'osvers') from lib/Config.pm:574
 
 =item 4
 
-  in  $=main::BEGIN() from /dev/null:0
-   in  $=Config::BEGIN() from lib/Config.pm:2
-    Package lib/Exporter.pm.
-    Package lib/Carp.pm.
-   out $=Config::BEGIN() from lib/Config.pm:0
-   Package lib/Config.pm.
-   in  $=Config::TIEHASH('Config') from lib/Config.pm:644
-   out $=Config::TIEHASH('Config') from lib/Config.pm:644
-   in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
-    in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/
-    out $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/
-   out $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
-  out $=main::BEGIN() from /dev/null:0
-  in  @=Config::myconfig() from /dev/null:0
-   in  $=Config::FETCH(ref(Config), 'package') from lib/Config.pm:574
-   out $=Config::FETCH(ref(Config), 'package') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
-   out $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'PERL_VERSION') from lib/Config.pm:574
-   out $=Config::FETCH(ref(Config), 'PERL_VERSION') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'PERL_SUBVERSION') from lib/Config.pm:574
+ in  $=main::BEGIN() from /dev/null:0
+  in  $=Config::BEGIN() from lib/Config.pm:2
+   Package lib/Exporter.pm.
+   Package lib/Carp.pm.
+  out $=Config::BEGIN() from lib/Config.pm:0
+  Package lib/Config.pm.
+  in  $=Config::TIEHASH('Config') from lib/Config.pm:644
+  out $=Config::TIEHASH('Config') from lib/Config.pm:644
+  in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
+   in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/
+   out $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/
+  out $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
+ out $=main::BEGIN() from /dev/null:0
+ in  @=Config::myconfig() from /dev/null:0
+  in  $=Config::FETCH(ref(Config), 'package') from lib/Config.pm:574
+  out $=Config::FETCH(ref(Config), 'package') from lib/Config.pm:574
+  in  $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
+  out $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
+  in  $=Config::FETCH(ref(Config), 'PERL_VERSION') from lib/Config.pm:574
+  out $=Config::FETCH(ref(Config), 'PERL_VERSION') from lib/Config.pm:574
+  in  $=Config::FETCH(ref(Config), 'PERL_SUBVERSION') from lib/Config.pm:574
 
 =item 5
 
-  in  $=main::BEGIN() from /dev/null:0
-   in  $=Config::BEGIN() from lib/Config.pm:2
-    Package lib/Exporter.pm.
-    Package lib/Carp.pm.
-   out $=Config::BEGIN() from lib/Config.pm:0
-   Package lib/Config.pm.
-   in  $=Config::TIEHASH('Config') from lib/Config.pm:644
-   out $=Config::TIEHASH('Config') from lib/Config.pm:644
-   in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
-    in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/E
-    out $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/E
-   out $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
-  out $=main::BEGIN() from /dev/null:0
-  in  @=Config::myconfig() from /dev/null:0
-   in  $=Config::FETCH('Config=HASH(0x1aa444)', 'package') from lib/Config.pm:574
-   out $=Config::FETCH('Config=HASH(0x1aa444)', 'package') from lib/Config.pm:574
-   in  $=Config::FETCH('Config=HASH(0x1aa444)', 'baserev') from lib/Config.pm:574
-   out $=Config::FETCH('Config=HASH(0x1aa444)', 'baserev') from lib/Config.pm:574
+ in  $=main::BEGIN() from /dev/null:0
+  in  $=Config::BEGIN() from lib/Config.pm:2
+   Package lib/Exporter.pm.
+   Package lib/Carp.pm.
+  out $=Config::BEGIN() from lib/Config.pm:0
+  Package lib/Config.pm.
+  in  $=Config::TIEHASH('Config') from lib/Config.pm:644
+  out $=Config::TIEHASH('Config') from lib/Config.pm:644
+  in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
+   in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/E
+   out $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/E
+  out $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
+ out $=main::BEGIN() from /dev/null:0
+ in  @=Config::myconfig() from /dev/null:0
+  in  $=Config::FETCH('Config=HASH(0x1aa444)', 'package') from lib/Config.pm:574
+  out $=Config::FETCH('Config=HASH(0x1aa444)', 'package') from lib/Config.pm:574
+  in  $=Config::FETCH('Config=HASH(0x1aa444)', 'baserev') from lib/Config.pm:574
+  out $=Config::FETCH('Config=HASH(0x1aa444)', 'baserev') from lib/Config.pm:574
 
 =item 6
 
-  in  $=CODE(0x15eca4)() from /dev/null:0
-   in  $=CODE(0x182528)() from lib/Config.pm:2
-    Package lib/Exporter.pm.
-   out $=CODE(0x182528)() from lib/Config.pm:0
-   scalar context return from CODE(0x182528): undef
-   Package lib/Config.pm.
-   in  $=Config::TIEHASH('Config') from lib/Config.pm:628
-   out $=Config::TIEHASH('Config') from lib/Config.pm:628
-   scalar context return from Config::TIEHASH:   empty hash
-   in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
-    in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/Exporter.pm:171
-    out $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/Exporter.pm:171
-    scalar context return from Exporter::export: ''
-   out $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
-   scalar context return from Exporter::import: ''
+ in  $=CODE(0x15eca4)() from /dev/null:0
+  in  $=CODE(0x182528)() from lib/Config.pm:2
+   Package lib/Exporter.pm.
+  out $=CODE(0x182528)() from lib/Config.pm:0
+  scalar context return from CODE(0x182528): undef
+  Package lib/Config.pm.
+  in  $=Config::TIEHASH('Config') from lib/Config.pm:628
+  out $=Config::TIEHASH('Config') from lib/Config.pm:628
+  scalar context return from Config::TIEHASH:   empty hash
+  in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
+   in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/Exporter.pm:171
+   out $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/Exporter.pm:171
+   scalar context return from Exporter::export: ''
+  out $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
+  scalar context return from Exporter::import: ''
 
 =back
 
@@ -921,19 +921,19 @@ usage statistics after compiling your code when C<< $ENV{PERL_DEBUG_MSTATS}
 $ENV{PERL_DEBUG_MSTATS} >= 1 >>.  The report format is similar to
 the following example:
 
-  $ PERL_DEBUG_MSTATS=2 perl -e "require Carp"
-  Memory allocation statistics after compilation: (buckets 4(4)..8188(8192)
-     14216 free:   130   117    28     7     9   0   2     2   1 0 0
+ $ PERL_DEBUG_MSTATS=2 perl -e "require Carp"
+ Memory allocation statistics after compilation: (buckets 4(4)..8188(8192)
+    14216 free:   130   117    28     7     9   0   2     2   1 0 0
 		437    61    36     0     5
-     60924 used:   125   137   161    55     7   8   6    16   2 0 1
+    60924 used:   125   137   161    55     7   8   6    16   2 0 1
 		 74   109   304    84    20
-  Total sbrk(): 77824/21:119. Odd ends: pad+heads+chain+tail: 0+636+0+2048.
-  Memory allocation statistics after execution:   (buckets 4(4)..8188(8192)
-     30888 free:   245    78    85    13     6   2   1     3   2 0 1
+ Total sbrk(): 77824/21:119. Odd ends: pad+heads+chain+tail: 0+636+0+2048.
+ Memory allocation statistics after execution:   (buckets 4(4)..8188(8192)
+    30888 free:   245    78    85    13     6   2   1     3   2 0 1
 		315   162    39    42    11
-    175816 used:   265   176  1112   111    26  22  11    27   2 1 1
+   175816 used:   265   176  1112   111    26  22  11    27   2 1 1
 		196   178  1066   798    39
-  Total sbrk(): 215040/47:145. Odd ends: pad+heads+chain+tail: 0+2192+0+6144.
+ Total sbrk(): 215040/47:145. Odd ends: pad+heads+chain+tail: 0+2192+0+6144.
 
 It is possible to ask for such a statistic at arbitrary points in
 your execution using the mstat() function out of the standard
@@ -973,7 +973,7 @@ of two buckets "above".
 For example, suppose under the previous example, the memory footprints
 were
 
-     free:    8     16    32    64    128  256 512 1024 2048 4096 8192
+   free:    8     16    32    64    128  256 512 1024 2048 4096 8192
 	   4     12    24    48    80
 
 With a non-C<DEBUGGING> perl, the buckets starting from C<128> have

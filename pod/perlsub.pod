@@ -513,9 +513,10 @@ evolving.  The current semantics and interface are subject to change.
 See L<attributes> and L<Attribute::Handlers>.
 
 The C<my> operator declares the listed variables to be lexically
-confined to the enclosing block, conditional (C<if/unless/elsif/else>),
-loop (C<for/foreach/while/until/continue>), subroutine, C<eval>,
-or C<do/require/use>'d file.  If more than one value is listed, the
+confined to the enclosing block, conditional
+(C<if>/C<unless>/C<elsif>/C<else>), loop
+(C<for>/C<foreach>/C<while>/C<until>/C<continue>), subroutine, C<eval>,
+or C<do>/C<require>/C<use>'d file.  If more than one value is listed, the
 list must be placed in parentheses.  All listed elements must be
 legal lvalues.  Only alphanumeric identifiers may be lexically
 scoped--magical built-ins like C<$/> must currently be C<local>ized

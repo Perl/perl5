@@ -145,7 +145,7 @@ instructs Perl not to use the feature.
 
 =head1 Testing Perl on Tru64
 
-During "make test" the C<comp/cpp> will be skipped because on Tru64 it
+During "make test" the C<comp>/C<cpp> will be skipped because on Tru64 it
 cannot be tested before Perl has been installed.  The test refers to
 the use of the C<-P> option of Perl.
 

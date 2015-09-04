@@ -2150,7 +2150,7 @@ code like
 
 creates two scopes: the first starts at the C<(> and has C<full == 1>,
 the second starts at the C<{> and has C<full == 0>.  Both end at the
-C<}>, so calls to C<start> and C<pre/post_end> will match.  Anything
+C<}>, so calls to C<start> and C<pre>/C<post_end> will match.  Anything
 pushed onto the save stack by this hook will be popped just before the
 scope ends (between the C<pre_> and C<post_end> hooks, in fact).
 
@@ -2190,7 +2190,7 @@ is probably the best way, so the effect is lexically scoped; however it
 is also possible to use the C<BhkDISABLE> and C<BhkENABLE> macros to
 temporarily switch entries on and off.  You should also be aware that
 generally speaking at least one scope will have opened before your
-extension is loaded, so you will see some C<pre/post_end> pairs that
+extension is loaded, so you will see some C<pre>/C<post_end> pairs that
 didn't have a matching C<start>.
 
 =head1 Examining internal data structures with the C<dump> functions

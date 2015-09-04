@@ -101,7 +101,7 @@ broken.
 
 =item * F<t/cmd/>
 
-Tests for basic control structures, C<if/else>, C<while>, subroutines,
+Tests for basic control structures, C<if>/C<else>, C<while>, subroutines,
 etc.
 
 =item * F<t/comp/>

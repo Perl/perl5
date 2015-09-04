@@ -5792,7 +5792,7 @@ subclasses, like C<isa> does.
 Instead, use C<blessed> (in the L<Scalar::Util> module) for boolean
 checks, C<isa> for specific class checks and C<reftype> (also from
 L<Scalar::Util>) for type checks.  (See L<perlobj> for details and a
-C<blessed/isa> example.)
+C<blessed>/C<isa> example.)
 
 See also L<perlref>.
 
