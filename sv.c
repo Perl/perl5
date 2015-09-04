@@ -7804,15 +7804,16 @@ Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2,
 #ifdef EBCDIC
         if (! DO_UTF8(sv1)) {
 #endif
-        const I32 retval = memcmp((const void*)pv1, (const void*)pv2, shortest_len);
-
-	if (retval) {
-	    cmp = retval < 0 ? -1 : 1;
-	} else if (cur1 == cur2) {
-	    cmp = 0;
-        } else {
-	    cmp = cur1 < cur2 ? -1 : 1;
-	}
+            const I32 retval = memcmp((const void*)pv1,
+                                      (const void*)pv2,
+                                      shortest_len);
+            if (retval) {
+                cmp = retval < 0 ? -1 : 1;
+            } else if (cur1 == cur2) {
+                cmp = 0;
+            } else {
+                cmp = cur1 < cur2 ? -1 : 1;
+            }
 #ifdef EBCDIC
         }
         else {  /* Both are to be treated as UTF-EBCDIC */
