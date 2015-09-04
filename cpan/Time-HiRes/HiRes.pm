@@ -23,7 +23,7 @@ our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
 		 stat lstat
 		);
 
-our $VERSION = '1.9726';
+our $VERSION = '1.9727_02';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -510,7 +510,7 @@ modglobal hash:
 
   name             C prototype
   ---------------  ----------------------
-  Time::NVtime     double (*)()
+  Time::NVtime     NV (*)()
   Time::U2time     void (*)(pTHX_ UV ret[2])
 
 Both functions return equivalent information (like C<gettimeofday>)
@@ -521,12 +521,12 @@ VMS have emulations for it.)
 
 Here is an example of using C<NVtime> from C:
 
-  double (*myNVtime)(); /* Returns -1 on failure. */
+  NV (*myNVtime)(); /* Returns -1 on failure. */
   SV **svp = hv_fetch(PL_modglobal, "Time::NVtime", 12, 0);
   if (!svp)         croak("Time::HiRes is required");
   if (!SvIOK(*svp)) croak("Time::NVtime isn't a function pointer");
-  myNVtime = INT2PTR(double(*)(), SvIV(*svp));
-  printf("The current time is: %f\n", (*myNVtime)());
+  myNVtime = INT2PTR(NV(*)(), SvIV(*svp));
+  printf("The current time is: %" NVff "\n", (*myNVtime)());
 
 =head1 DIAGNOSTICS
 

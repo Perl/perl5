@@ -731,7 +731,7 @@ myNVtime()
 static void
 hrstatns(UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
 {
-  dTHXR;
+  dTHX;
 #if TIME_HIRES_STAT == 1
   *atime_nsec = PL_statcache.st_atimespec.tv_nsec;
   *mtime_nsec = PL_statcache.st_mtimespec.tv_nsec;
@@ -1109,6 +1109,12 @@ setitimer(which, seconds, interval = 0)
 	newit.it_interval.tv_sec  = (IV)interval;
 	newit.it_interval.tv_usec =
 	  (IV)((interval - (NV)newit.it_interval.tv_sec) * NV_1E6);
+        /* on some platforms the 1st arg to setitimer is an enum, which
+         * causes -Wc++-compat to complain about passing an int instead
+         */
+#ifdef GCC_DIAG_IGNORE
+        GCC_DIAG_IGNORE(-Wc++-compat);
+#endif
 	if (setitimer(which, &newit, &oldit) == 0) {
 	  EXTEND(sp, 1);
 	  PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_value))));
@@ -1117,6 +1123,9 @@ setitimer(which, seconds, interval = 0)
 	    PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_interval))));
 	  }
 	}
+#ifdef GCC_DIAG_RESTORE
+        GCC_DIAG_RESTORE;
+#endif
 
 void
 getitimer(which)
@@ -1124,6 +1133,12 @@ getitimer(which)
     PREINIT:
 	struct itimerval nowit;
     PPCODE:
+        /* on some platforms the 1st arg to getitimer is an enum, which
+         * causes -Wc++-compat to complain about passing an int instead
+         */
+#ifdef GCC_DIAG_IGNORE
+        GCC_DIAG_IGNORE(-Wc++-compat);
+#endif
 	if (getitimer(which, &nowit) == 0) {
 	  EXTEND(sp, 1);
 	  PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_value))));
@@ -1132,6 +1147,9 @@ getitimer(which)
 	    PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_interval))));
 	  }
 	}
+#ifdef GCC_DIAG_RESTORE
+        GCC_DIAG_RESTORE;
+#endif
 
 #endif /* #if defined(HAS_GETITIMER) && defined(HAS_SETITIMER) */
 
@@ -1247,7 +1265,7 @@ clock()
 	clock_t clocks;
     CODE:
 	clocks = clock();
-	RETVAL = clocks == -1 ? -1 : (NV)clocks / (NV)CLOCKS_PER_SEC;
+	RETVAL = clocks == (clock_t) -1 ? (clock_t) -1 : (NV)clocks / (NV)CLOCKS_PER_SEC;
 
     OUTPUT:
 	RETVAL
@@ -1284,7 +1302,7 @@ PROTOTYPE: ;$
 	fakeop.op_flags = GIMME_V == G_ARRAY ? OPf_WANT_LIST :
 		GIMME_V == G_SCALAR ? OPf_WANT_SCALAR : OPf_WANT_VOID;
 	PL_op = &fakeop;
-	(void)fakeop.op_ppaddr(aTHXR);
+	(void)fakeop.op_ppaddr(aTHX);
 	SPAGAIN;
 	LEAVE;
 	nret = SP+1 - &ST(0);

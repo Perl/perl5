@@ -153,8 +153,10 @@ __EOD__
 	    if ( $ok && exists $args{run} && $args{run}) {
 		my $tmp_exe =
 		    File::Spec->catfile(File::Spec->curdir, $tmp_exe);
+		my @run = $tmp_exe;
+		unshift @run, $Config{run} if $Config{run} && -e $Config{run};
 		printf "Running $tmp_exe..." if $VERBOSE;
-		if (system($tmp_exe) == 0) {
+		if (system(@run) == 0) {
 		    $ok = 1;
 		} else {
 		    $ok = 0;
