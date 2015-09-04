@@ -19,6 +19,10 @@ if ( $Config{usecrosscompile} ) {
   skip_all( "Odd failures during cross-compilation" );
 }
 
+if ($::IS_EBCDIC) {
+    skip_all("Fails on EBCDIC machines, prob. because of different sort order");
+}
+
 use strict;
 use warnings;
 use Maintainers qw(show_results process_options finish_tap_output);
