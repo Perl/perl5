@@ -7792,12 +7792,19 @@ Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2,
 	}
     }
 
+    /* Here, if both are non-NULL, then they have the same UTF8ness. */
+
     if (!cur1) {
 	cmp = cur2 ? -1 : 0;
     } else if (!cur2) {
 	cmp = 1;
     } else {
-        const I32 retval = memcmp((const void*)pv1, (const void*)pv2, cur1 < cur2 ? cur1 : cur2);
+        STRLEN shortest_len = cur1 < cur2 ? cur1 : cur2;
+
+#ifdef EBCDIC
+        if (! DO_UTF8(sv1)) {
+#endif
+        const I32 retval = memcmp((const void*)pv1, (const void*)pv2, shortest_len);
 
 	if (retval) {
 	    cmp = retval < 0 ? -1 : 1;
@@ -7806,6 +7813,145 @@ Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2,
         } else {
 	    cmp = cur1 < cur2 ? -1 : 1;
 	}
+#ifdef EBCDIC
+        }
+        else {  /* Both are to be treated as UTF-EBCDIC */
+
+            /* EBCDIC UTF-8 is complicated by the fact that it is based on I8
+             * which remaps code points 0-255.  We therefore generally have to
+             * unmap back to the original values to get an accurate comparison.
+             * But we don't have to do that for UTF-8 invariants, as by
+             * definition, they aren't remapped, nor do we have to do it for
+             * above-latin1 code points, as they also aren't remapped.  (This
+             * code also works on ASCII platforms, but the memcmp() above is
+             * much faster). */
+
+            const char *e = pv1 + shortest_len;
+
+            /* Find the first bytes that differ between the two strings */
+            while (pv1 < e && *pv1 == *pv2) {
+                pv1++;
+                pv2++;
+            }
+
+
+            if (pv1 == e) { /* Are the same all the way to the end */
+                if (cur1 == cur2) {
+                    cmp = 0;
+                } else {
+                    cmp = cur1 < cur2 ? -1 : 1;
+                }
+            }
+            else   /* Here *pv1 and *pv2 are not equal, but all bytes earlier
+                    * in the strings were.  The current bytes may or may not be
+                    * at the beginning of a character.  But neither or both are
+                    * (or else earlier bytes would have been different).  And
+                    * if we are in the middle of a character, the two
+                    * characters are comprised of the same number of bytes
+                    * (because in this case the start bytes are the same, and
+                    * the start bytes encode the character's length). */
+                 if (UTF8_IS_INVARIANT(*pv1))
+            {
+                /* If both are invariants; can just compare directly */
+                if (UTF8_IS_INVARIANT(*pv2)) {
+                    cmp = ((U8) *pv1 < (U8) *pv2) ? -1 : 1;
+                }
+                else   /* Since *pv1 is invariant, it is the whole character,
+                          which means it is at the beginning of a character.
+                          That means pv2 is also at the beginning of a
+                          character (see earlier comment).  Since it isn't
+                          invariant, it must be a start byte.  If it starts a
+                          character whose code point is above 255, that
+                          character is greater than any single-byte char, which
+                          *pv1 is */
+                      if (UTF8_IS_ABOVE_LATIN1_START(*pv2))
+                {
+                    cmp = -1;
+                }
+                else {
+                    /* Here, pv2 points to a character composed of 2 bytes
+                     * whose code point is < 256.  Get its code point and
+                     * compare with *pv1 */
+                    cmp = ((U8) *pv1 < EIGHT_BIT_UTF8_TO_NATIVE(*pv2, *(pv2 + 1)))
+                           ?  -1
+                           : 1;
+                }
+            }
+            else   /* The code point starting at pv1 isn't a single byte */
+                 if (UTF8_IS_INVARIANT(*pv2))
+            {
+                /* But here, the code point starting at *pv2 is a single byte,
+                 * and so *pv1 must begin a character, hence is a start byte.
+                 * If that character is above 255, it is larger than any
+                 * single-byte char, which *pv2 is */
+                if (UTF8_IS_ABOVE_LATIN1_START(*pv1)) {
+                    cmp = 1;
+                }
+                else {
+                    /* Here, pv1 points to a character composed of 2 bytes
+                     * whose code point is < 256.  Get its code point and
+                     * compare with the single byte character *pv2 */
+                    cmp = (EIGHT_BIT_UTF8_TO_NATIVE(*pv1, *(pv1 + 1)) < (U8) *pv2)
+                          ?  -1
+                          : 1;
+                }
+            }
+            else   /* Here, we've ruled out either *pv1 and *pv2 being
+                      invariant.  That means both are part of variants, but not
+                      necessarily at the start of a character */
+                 if (   UTF8_IS_ABOVE_LATIN1_START(*pv1)
+                     || UTF8_IS_ABOVE_LATIN1_START(*pv2))
+            {
+                /* Here, at least one is the start of a character, which means
+                 * the other is also a start byte.  And the code point of at
+                 * least one of the characters is above 255.  It is a
+                 * characteristic of UTF-EBCDIC that all start bytes for
+                 * above-latin1 code points are well behaved as far as code
+                 * point comparisons go, and all are larger than all other
+                 * start bytes, so the comparison with those is also well
+                 * behaved */
+                cmp = ((U8) *pv1 < (U8) *pv2) ? -1 : 1;
+            }
+            else {
+                /* Here both *pv1 and *pv2 are part of variant characters.
+                 * They could be both continuations, or both start characters.
+                 * (One or both could even be an illegal start character (for
+                 * an overlong) which for the purposes of sorting we treat as
+                 * legal. */
+                if (UTF8_IS_CONTINUATION(*pv1)) {
+
+                    /* If they are continuations for code points above 255,
+                     * then comparing the current byte is sufficient, as there
+                     * is no remapping of these and so the comparison is
+                     * well-behaved.   We determine if they are such
+                     * continuations by looking at the preceding byte.  It
+                     * could be a start byte, from which we can tell if it is
+                     * for an above 255 code point.  Or it could be a
+                     * continuation, which means the character occupies at
+                     * least 3 bytes, so must be above 255.  */
+                    if (   UTF8_IS_CONTINUATION(*(pv2 - 1))
+                        || UTF8_IS_ABOVE_LATIN1_START(*(pv2 -1)))
+                    {
+                        cmp = ((U8) *pv1 < (U8) *pv2) ? -1 : 1;
+                        goto cmp_done;
+                    }
+
+                    /* Here, the continuations are for code points below 256;
+                     * back up one to get to the start byte */
+                    pv1--;
+                    pv2--;
+                }
+
+                /* We need to get the actual native code point of each of these
+                 * variants in order to compare them */
+                cmp =  (  EIGHT_BIT_UTF8_TO_NATIVE(*pv1, *(pv1 + 1))
+                        < EIGHT_BIT_UTF8_TO_NATIVE(*pv2, *(pv2 + 1)))
+                        ? -1
+                        : 1;
+            }
+        }
+      cmp_done: ;
+#endif
     }
 
     SvREFCNT_dec(svrecode);

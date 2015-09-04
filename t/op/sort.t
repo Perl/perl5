@@ -1,4 +1,5 @@
 #!./perl
+$|=1;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -6,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 189);
+plan(tests => 193);
 
 # these shouldn't hang
 {
@@ -62,6 +63,84 @@ $x = join('', sort @george, 'to', @harry);
 $expected = $upperfirst ?
     'AbelAxedCaincatchaseddoggonepunishedtoxyz' :
     'catchaseddoggonepunishedtoxyzAbelAxedCain' ;
+
+my @initially_sorted = ( 0 .. 260,
+                         0x3FF, 0x400, 0x401,
+                         0x7FF, 0x800, 0x801,
+                         0x3FFF, 0x4000, 0x4001,
+		         0xFFFF, 0x10000, 0x10001,
+                       );
+# It makes things easier below if there are an even number of elements in the
+# array.
+if (scalar(@initially_sorted) % 2 == 1) {
+    push @initially_sorted, $initially_sorted[-1] + 1;
+}
+
+# We convert to a chr(), but prepend a constant string to make sure things can
+# work on more than a single character.
+my $prefix = "a\xb6";
+my $prefix_len = length $prefix;
+
+my @chr_initially_sorted = @initially_sorted;
+$_ = $prefix . chr($_) for @chr_initially_sorted;
+
+# Create a very unsorted version by reversing it, and then pushing the same
+# code points again, but pair-wise reversed.
+my @initially_unsorted = reverse @chr_initially_sorted;
+for (my $i = 0; $i < @chr_initially_sorted - 1; $i += 2) {
+    push @initially_unsorted, $chr_initially_sorted[$i+1],
+                              $chr_initially_sorted[$i];
+}
+
+# And, an all-UTF-8 version
+my @utf8_initialy_unsorted = @initially_unsorted;
+utf8::upgrade($_) for @utf8_initialy_unsorted;
+
+# Sort the non-UTF-8 version
+my @non_utf8_result = sort @initially_unsorted;
+my @wrongly_utf8;
+my $ordered_correctly = 1;
+for my $i (0 .. @chr_initially_sorted -1) {
+    if (   $chr_initially_sorted[$i] ne $non_utf8_result[2*$i]
+        || $chr_initially_sorted[$i] ne $non_utf8_result[2*$i+1])
+    {
+        $ordered_correctly = 0;
+        last;
+    }
+    push @wrongly_utf8, $i if $i < 256 && utf8::is_utf8($non_utf8_result[$i]);
+}
+if (! ok($ordered_correctly, "sort of non-utf8 list worked")) {
+    diag ("This should be in numeric order (with 2 instances of every code point):\n"
+        . join " ", map { sprintf "%02x", ord substr $_, $prefix_len, 1 } @non_utf8_result);
+}
+if (! is(@wrongly_utf8, 0,
+                      "No elements were wrongly converted to utf8 in sorting"))
+{
+    diag "For code points " . join " ", @wrongly_utf8;
+}
+
+# And then the UTF-8 one
+my @wrongly_non_utf8;
+$ordered_correctly = 1;
+my @utf8_result = sort @utf8_initialy_unsorted;
+for my $i (0 .. @chr_initially_sorted -1) {
+    if (   $chr_initially_sorted[$i] ne $utf8_result[2*$i]
+        || $chr_initially_sorted[$i] ne $utf8_result[2*$i+1])
+    {
+        $ordered_correctly = 0;
+        last;
+    }
+    push @wrongly_non_utf8, $i unless utf8::is_utf8($utf8_result[$i]);
+}
+if (! ok($ordered_correctly, "sort of utf8 list worked")) {
+    diag ("This should be in numeric order (with 2 instances of every code point):\n"
+        . join " ", map { sprintf "%02x", ord substr $_, $prefix_len, 1 } @utf8_result);
+}
+if (! is(@wrongly_non_utf8, 0,
+                      "No elements were wrongly converted from utf8 in sorting"))
+{
+    diag "For code points " . join " ", @wrongly_non_utf8;
+}
 
 cmp_ok($x,'eq',$expected,'upper first 4');
 $" = ' ';

@@ -314,9 +314,11 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item EBCDIC C<cmp()> and C<sort()> fixed for UTF-EBCDIC strings
 
-XXX
+Comparing two strings that were both encoded in UTF-8 (or more
+precisely, UTF-EBCDIC) did not work properly until now.  Since C<sort()>
+uses C<cmp()>, this fixes that as well.
 
 =back
 
