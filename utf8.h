@@ -347,6 +347,9 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 #define UNISKIP(uv)   NATIVE_SKIP(uv)
 #define UVCHR_SKIP(uv) NATIVE_SKIP(uv)
 
+/* Longer, but more accurate name */
+#define UTF8_IS_ABOVE_LATIN1_START(c)     UTF8_IS_ABOVE_LATIN1(c)
+
 /* Convert a two (not one) byte utf8 character to a native code point value.
  * Needs just one iteration of accumulate.  Should not be used unless it is
  * known that the two bytes are legal: 1) two-byte start, and 2) continuation.
