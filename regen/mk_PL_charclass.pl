@@ -359,6 +359,7 @@ foreach my $charset (get_supported_code_pages()) {
         $out[$index] = "/* ";
         $out[$index] .= sprintf "0x%02X ", $index if $ord != $index;
         $out[$index] .= sprintf "U+%02X ", $ord;
+        $out[$index] .= sprintf "I8=%02X ", $i8 if defined $i8 && $i8 != $ord;
         $out[$index] .= "$name */ ";
         $out[$index] .= $bits[$ord];
 
