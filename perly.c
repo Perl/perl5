@@ -213,7 +213,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 	if (yy_type_tab[yystos[ps->state]] == toketype_opval
 	    && ps->val.opval)
 	{
-	    if (ps->compcv != PL_compcv) {
+	    if (ps->compcv && (ps->compcv != PL_compcv)) {
 		PL_compcv = ps->compcv;
 		PAD_SET_CUR_NOSAVE(CvPADLIST(PL_compcv), 1);
 		PL_comppad_name = PadlistNAMES(CvPADLIST(PL_compcv));
