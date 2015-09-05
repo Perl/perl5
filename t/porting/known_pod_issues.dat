@@ -70,6 +70,7 @@ Devel::PPPort
 Devel::SawAmpersand
 Devel::Spy
 dirname(1)
+Encode::Detect
 Encode::Locale
 Eval::WithLexicals
 Exporter::Easy
@@ -257,7 +258,6 @@ ext/hash-util/lib/hash/util.pm	Verbatim line length including indents exceeds 79
 ext/pod-html/testdir/perlpodspec-copy.pod	Verbatim line length including indents exceeds 79 by	2
 ext/pod-html/testdir/perlvar-copy.pod	? Should you be using L<...> instead of	3
 ext/pod-html/testdir/perlvar-copy.pod	Verbatim line length including indents exceeds 79 by	6
-ext/posix/lib/posix.pod	? Should you be using F<...> or maybe L<...> instead of	1
 ext/vms-dclsym/dclsym.pm	? Should you be using L<...> instead of	1
 ext/vms-filespec/lib/vms/filespec.pm	Verbatim line length including indents exceeds 79 by	1
 install	? Should you be using F<...> or maybe L<...> instead of	1
@@ -304,7 +304,6 @@ porting/expand-macro.pl	Verbatim line length including indents exceeds 79 by	2
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	1
 porting/todo.pod	Verbatim line length including indents exceeds 79 by	1
 utils/c2ph	Verbatim line length including indents exceeds 79 by	44
-utils/encguess	Apparent broken link	1
 utils/encguess	There is no NAME	1
 lib/benchmark.pm	Verbatim line length including indents exceeds 79 by	2
 lib/config.pod	? Should you be using L<...> instead of	-1

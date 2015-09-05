@@ -1448,7 +1448,7 @@ Not implemented.  C<realloc()> is C-specific.  Perl does memory management trans
 =item C<remainder>
 
 Given C<x> and C<y>, returns the value S<C<x - n*y>>, where C<n> is the integer
-closest to C<x/y>. [C99]
+closest to C<x>/C<y>. [C99]
 
  my $remainder = POSIX::remainder($x, $y)
 
