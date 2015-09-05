@@ -1,3 +1,8 @@
+amigaos4/amigaio.c	AmigaOS4 port
+amigaos4/amigaio.h	AmigaOS4 port
+amigaos4/amigaos.c	AmigaOS4 port
+amigaos4/amigaos.h	AmigaOS4 port
+amigaos4/config.sh	AmigaOS4 config
 Artistic		The "Artistic License"
 asan_ignore		Errors to skip under clang's Addresss Sanitizer
 AUTHORS			Contact info for contributors
@@ -3299,6 +3304,7 @@ dist/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
 dist/Net-Ping/t/520_icmp_ttl.t		Ping Net::Ping
 dist/PathTools/Cwd.pm				Various cwd routines (getcwd, fastcwd, chdir)
 dist/PathTools/Cwd.xs				Cwd extension external subroutines
+dist/PathTools/lib/File/Spec/AmigaOS.pm		portable operations on AmigaOS file names
 dist/PathTools/lib/File/Spec/Cygwin.pm	portable operations on Cygwin file names
 dist/PathTools/lib/File/Spec/Epoc.pm		portable operations on EPOC file names
 dist/PathTools/lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
@@ -3535,6 +3541,20 @@ ebcdic_tables.h		Generated tables included in utfebcdic.h
 embed.fnc		Database used by embed.pl
 embed.h			Maps symbols to safer names
 embedvar.h		C namespace management
+ext/Amiga-ARexx/ARexx.pm	Amiga::ARexx extension
+ext/Amiga-ARexx/ARexx.xs	Amiga::ARexx extension
+ext/Amiga-ARexx/__examples/simplecommand.pl	Amiga::ARexx extension
+ext/Amiga-ARexx/__examples/simplehost.pl	Amiga::ARexx extension
+ext/Amiga-ARexx/Makefile.PL	Amiga::ARexx extension
+ext/Amiga-ARexx/tagtypes.h			Amiga::ARexx extension
+ext/Amiga-ARexx/typemap	Amiga::ARexx extension
+ext/Amiga-Exec/__examples/simplecommand.pl	Amiga::Exec extension
+ext/Amiga-Exec/__examples/simplehost.pl		Amiga::Exec extension
+ext/Amiga-Exec/Exec.pm	Amiga::Exec extension
+ext/Amiga-Exec/Exec.xs	Amiga::Exec extension
+ext/Amiga-Exec/Makefile.PL			Amiga::Exec extension
+ext/Amiga-Exec/tagtypes.h	Amiga::Exec extension
+ext/Amiga-Exec/typemap		Amiga::Exec extension
 ext/arybase/arybase.pm		For $[
 ext/arybase/arybase.xs		For $[
 ext/arybase/ptable.h		For $[

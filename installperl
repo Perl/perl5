@@ -11,13 +11,21 @@ BEGIN {
 }
 
 use strict;
-use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
+use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare $Is_AmigaOS
 	    %opts $packlist);
 my $versiononly;
 
 BEGIN {
     if ($Is_VMS) { eval 'use VMS::Filespec;' }
 }
+
+# HP-UX (at least) needs to maintain execute permissions
+# on dynamically-loadable libraries. So we do it for all.
+#
+# In AmigaOS, the 0777 means 'rwed' (e = execute, d = delete),
+# (not 'rwx') and having the 'd' makes updates more convenient.
+my $SO_MODE     = $Is_AmigaOS ? 0777 : 0555;
+my $NON_SO_MODE = $Is_AmigaOS ? 0666 : 0444;
 
 my $scr_ext = ($Is_VMS ? '.Com' : $Is_W32 ? '.bat' : '');
 
@@ -372,15 +380,15 @@ elsif ($Is_Cygwin) { # On Cygwin symlink it to CORE to make Makefile happy
     # AIX needs perl.exp installed as well.
     push(@corefiles,'perl.exp') if $^O eq 'aix';
 }
+
+
 foreach my $file (@corefiles) {
-    # HP-UX (at least) needs to maintain execute permissions
-    # on dynamically-loadable libraries. So we do it for all.
     if (copy_if_diff($file,"$installarchlib/CORE/$file")) {
 	if ($file =~ /\.(\Q$so\E|\Q$dlext\E)$/) {
 	    strip("-S", "$installarchlib/CORE/$file") if $^O eq 'darwin';
-	    chmod(0555, "$installarchlib/CORE/$file");
+	    chmod($SO_MODE, "$installarchlib/CORE/$file");
 	} else {
-	    chmod(0444, "$installarchlib/CORE/$file");
+	    chmod($NON_SO_MODE, "$installarchlib/CORE/$file");
 	}
     }
 }
@@ -495,6 +503,10 @@ if ($versiononly) {
 	(my $base = $_) =~ s#.*/##;
 	copy($_, "$installscript/$base");
 	chmod(0755, "$installscript/$base");
+	if ($Is_AmigaOS) {
+            my $amigapath = unixtoamiga("$installscript/$base");
+            amigaprotect($amigapath,"+s");
+        }
     }
 
     for (@tolink) {
@@ -735,7 +747,8 @@ sub installlib {
             if (copy_if_diff($_, "$installlib/$name")) {
                 strip("-S", "$installlib/$name")
                     if $^O eq 'darwin' and /\.(?:so|$dlext|a)$/;
-                chmod(/\.(so|$dlext)$/ ? 0555 : 0444, "$installlib/$name");
+                chmod(/\.(so|$dlext)$/ ? $SO_MODE : $NON_SO_MODE,
+                      "$installlib/$name");
             }
 	}
     }

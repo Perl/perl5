@@ -1513,6 +1513,7 @@ distclean: realclean
 	-del /f $(LIBDIR)\buildcustomize.pl
 	-del /f $(DISTDIR)\XSLoader\XSLoader.pm
 	-del /f *.def *.map
+	-if exist $(LIBDIR)\Amiga rmdir /s /q $(LIBDIR)\Amiga
 	-if exist $(LIBDIR)\App rmdir /s /q $(LIBDIR)\App
 	-if exist $(LIBDIR)\Archive rmdir /s /q $(LIBDIR)\Archive
 	-if exist $(LIBDIR)\Attribute rmdir /s /q $(LIBDIR)\Attribute

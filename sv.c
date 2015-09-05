@@ -12931,7 +12931,11 @@ Perl_fp_dup(pTHX_ PerlIO *const fp, const char type, CLONE_PARAMS *const param)
 	return ret;
 
     /* create anew and remember what it is */
+#ifdef __amigaos4__
+    ret = PerlIO_fdupopen(aTHX_ fp, param, PERLIO_DUP_CLONE|PERLIO_DUP_FD);
+#else
     ret = PerlIO_fdupopen(aTHX_ fp, param, PERLIO_DUP_CLONE);
+#endif
     ptr_table_store(PL_ptr_table, fp, ret);
     return ret;
 }
@@ -14404,9 +14408,11 @@ perl_clone(PerlInterpreter *proto_perl, UV flags)
    /* perlhost.h so we need to call into it
    to clone the host, CPerlHost should have a c interface, sky */
 
+#if !defined(__amigaos4__)
    if (flags & CLONEf_CLONE_HOST) {
        return perl_clone_host(proto_perl,flags);
    }
+#endif
    return perl_clone_using(proto_perl, flags,
 			    proto_perl->IMem,
 			    proto_perl->IMemShared,

@@ -219,6 +219,9 @@ use File::Glob qw(:case);
                 t/99pod.t
                 ),
         ],
+
+        # https://rt.cpan.org/Ticket/Display.html?id=106799
+        'CUSTOMIZED'   => [ qw[ Zlib.xs ] ],
     },
 
     'Config::Perl::V' => {
@@ -935,6 +938,9 @@ use File::Glob qw(:case);
         # XXX We can and should fix this, but clean up the DRY-failure in utils
         # first
         'EXCLUDED' => ['perldoc'],
+
+        # https://rt.cpan.org/Ticket/Display.html?id=106798
+        'CUSTOMIZED'   => [ qw[ lib/Pod/Perldoc.pm ] ],
     },
 
     'Pod::Simple' => {
@@ -1018,6 +1024,9 @@ use File::Glob qw(:case);
     'Socket' => {
         'DISTRIBUTION' => 'PEVANS/Socket-2.020.tar.gz',
         'FILES'        => q[cpan/Socket],
+
+        # https://rt.cpan.org/Ticket/Display.html?id=106797
+        'CUSTOMIZED'   => [ qw[ Socket.xs ] ],
     },
 
     'Storable' => {
@@ -1346,6 +1355,8 @@ use File::Glob qw(:case);
 
     '_PERLLIB' => {
         'FILES'    => q[
+                ext/Amiga-ARexx/
+                ext/Amiga-Exec/
                 ext/B/
                 ext/Devel-Peek/
                 ext/DynaLoader/

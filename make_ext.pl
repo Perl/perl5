@@ -742,7 +742,9 @@ sub fallback_cleanup {
     open my $fh, '>>', $file or die "open $file: $!";
     # Quite possible that we're being run in parallel here.
     # Can't use Fcntl this early to get the LOCK_EX
-    flock $fh, 2 or warn "flock $file: $!";
+    if ($^O ne "amigaos") {
+        flock $fh, 2 or warn "flock $file: $!";
+    }
     print $fh $contents or die "print $file: $!";
     close $fh or die "close $file: $!";
 }

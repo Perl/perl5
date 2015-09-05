@@ -943,7 +943,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 #endif
 		}
 		else {
-#if !defined(DOSISH) && !defined(AMIGAOS)
+#if !defined(DOSISH) && !defined(__amigaos4__)
 #  ifndef VMS  /* Don't delete; use automatic file versioning */
 		    if (UNLINK(PL_oldname) < 0) {
 			Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
@@ -1528,9 +1528,14 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
 {
     const int e = errno;
     PERL_ARGS_ASSERT_EXEC_FAILED;
-    if (ckWARN(WARN_EXEC))
-	Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
-		    cmd, Strerror(e));
+#ifdef __amigaos4__
+    if (e)
+#endif
+    {
+	if (ckWARN(WARN_EXEC))
+	    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
+			cmd, Strerror(e));
+    }
     if (do_report) {
         /* XXX silently ignore failures */
         PERL_UNUSED_RESULT(PerlLIO_write(fd, (void*)&e, sizeof(int)));
@@ -1538,12 +1543,14 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
     }
 }
 
-bool
+DO_EXEC_TYPE
 Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 	       int fd, int do_report)
 {
     dVAR;
+    DO_EXEC_TYPE result = DO_EXEC_FAILURE;
     PERL_ARGS_ASSERT_DO_AEXEC5;
+    PERL_UNUSED_VAR(result); /* if DO_EXEC_TYPE is bool */
 #if defined(__SYMBIAN32__) || defined(__LIBCATAMOUNT__)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
@@ -1566,16 +1573,21 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 	    (really && *tmps != '/'))		/* will execvp use PATH? */
 	    TAINT_ENV();		/* testing IFS here is overkill, probably */
 	PERL_FPU_PRE_EXEC
-	if (really && *tmps)
-	    PerlProc_execvp(tmps,EXEC_ARGV_CAST(PL_Argv));
-	else
-	    PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
+	if (really && *tmps) {
+            result =
+              (DO_EXEC_TYPE)
+              PerlProc_execvp(tmps,EXEC_ARGV_CAST(PL_Argv));
+	} else {
+	    result =
+              (DO_EXEC_TYPE)
+              PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
+	}
 	PERL_FPU_POST_EXEC
  	S_exec_failed(aTHX_ (really ? tmps : PL_Argv[0]), fd, do_report);
     }
     do_execfree();
 #endif
-    return FALSE;
+    return DO_EXEC_RETVAL(result);
 }
 
 void
@@ -1589,7 +1601,7 @@ Perl_do_execfree(pTHX)
 
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 
-bool
+DO_EXEC_TYPE
 Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 {
     dVAR;
@@ -1599,6 +1611,8 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     char *cmd;
     /* Make a copy so we can change it */
     const Size_t cmdlen = strlen(incmd) + 1;
+    DO_EXEC_TYPE result = DO_EXEC_FAILURE;
+    PERL_UNUSED_VAR(result); /* if DO_EXEC_TYPE is bool */
 
     PERL_ARGS_ASSERT_DO_EXEC3;
 
@@ -1634,12 +1648,14 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	      if (s[-1] == '\'') {
 		  *--s = '\0';
 		  PERL_FPU_PRE_EXEC
-		  PerlProc_execl(PL_cshname, "csh", flags, ncmd, (char*)NULL);
+		  result =
+                    (DO_EXEC_TYPE)
+                    PerlProc_execl(PL_cshname, "csh", flags, ncmd, (char*)NULL);
 		  PERL_FPU_POST_EXEC
 		  *s = '\'';
  		  S_exec_failed(aTHX_ PL_cshname, fd, do_report);
 		  Safefree(buf);
-		  return FALSE;
+		  return DO_EXEC_RETVAL(result);
 	      }
 	  }
 	}
@@ -1683,11 +1699,16 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	    }
 	  doshell:
 	    PERL_FPU_PRE_EXEC
-	    PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char *)NULL);
+	    result =
+              (DO_EXEC_TYPE)
+              PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char *)NULL);
 	    PERL_FPU_POST_EXEC
  	    S_exec_failed(aTHX_ PL_sh_path, fd, do_report);
+#if defined (__amigaos4__)
+            amigaos_post_exec(fd, do_report);
+#endif
 	    Safefree(buf);
-	    return FALSE;
+	    return DO_EXEC_RETVAL(result);
 	}
     }
 
@@ -1707,7 +1728,9 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     *a = NULL;
     if (PL_Argv[0]) {
 	PERL_FPU_PRE_EXEC
-	PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
+	result =
+          (DO_EXEC_TYPE)
+          PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
 	PERL_FPU_POST_EXEC
 	if (errno == ENOEXEC) {		/* for system V NIH syndrome */
 	    do_execfree();
@@ -1717,7 +1740,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     }
     do_execfree();
     Safefree(buf);
-    return FALSE;
+    return DO_EXEC_RETVAL(result);
 }
 
 #endif /* OS2 || WIN32 */
@@ -1952,7 +1975,21 @@ nothing in the core.
             }
 	    else if (PL_unsafe) {
 		if (UNLINK(s))
+		{
 		    tot--;
+		}
+#if defined(__amigaos4__) && defined(NEWLIB)
+		else
+		{
+                  /* Under AmigaOS4 unlink only 'fails' if the
+                   * filename is invalid.  It may not remove the file
+                   * if it's locked, so check if it's still around. */
+                  if ((access(s,F_OK) != -1))
+                  {
+                    tot--;
+                  }
+		}
+#endif
 	    }
 	    else {	/* don't let root wipe out directories without -U */
 		if (PerlLIO_lstat(s,&PL_statbuf) < 0)
@@ -1963,7 +2000,21 @@ nothing in the core.
 		}
 		else {
 		    if (UNLINK(s))
-			tot--;
+		    {
+				tot--;
+			}
+#if defined(__amigaos4__) && defined(NEWLIB)
+			else
+			{
+				/* Under AmigaOS4 unlink only 'fails' if the filename is invalid */
+				/* It may not remove the file if it's Locked, so check if it's still */
+				/* arround */
+				if((access(s,F_OK) != -1))
+				{
+					tot--;
+				}
+			}	
+#endif
 		}
 	    }
 	}

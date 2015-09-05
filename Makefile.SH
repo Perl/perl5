@@ -20,6 +20,15 @@ case $PERL_CONFIG_SH in
 	;;
 esac
 
+case "$osname" in
+amigaos)
+	devtty=CONSOLE:
+	;;
+*)
+	devtty=/dev/tty
+	;;
+esac
+
 Makefile=Makefile
 
 : This forces SH files to create target in same directory as SH file.
@@ -349,6 +358,9 @@ libs = $perllibs $cryptlib
 public = \$(PERL_EXE) utilities
 
 shellflags = $shellflags
+
+# The /dev/tty or the moral equivalent.
+devtty = $devtty
 
 # This is set to  MAKE=$make if your $make command doesn't
 # do it for you.
@@ -697,7 +709,21 @@ generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
 ;;
 esac
 
+case "$osname" in
+amigaos*)
+$spitshell >>$Makefile <<'!NO!SUBS!'
+perlmain.c: $(MINIPERL_EXE) ext/ExtUtils-Miniperl/pm_to_blib
+	$(MINIPERL) -Ilib -MExtUtils::Miniperl -e 'writemain(\\"perlmain.c", @ARGV)' DynaLoader $(static_ext)
 
+# The file ext.libs is a list of libraries that must be linked in
+# for static extensions, e.g. -lm -lgdbm, etc.  The individual
+# static extension Makefile's add to it.
+ext.libs: $(static_ext)
+	-@test -f ext.libs || touch ext.libs
+
+!NO!SUBS!
+;;
+*)
 $spitshell >>$Makefile <<'!NO!SUBS!'
 perlmain.c: $(MINIPERL_EXE) ext/ExtUtils-Miniperl/pm_to_blib
 	$(MINIPERL) -Ilib -MExtUtils::Miniperl -e 'writemain(\"perlmain.c", @ARGV)' DynaLoader $(static_ext)
@@ -709,6 +735,8 @@ ext.libs: $(static_ext)
 	-@test -f ext.libs || touch ext.libs
 
 !NO!SUBS!
+;;
+esac
 
 # How to build libperl.  This is still rather convoluted.
 # Load up custom Makefile.SH fragment for shared loading and executables:
@@ -873,6 +901,16 @@ $(MINIPERL_EXE): lib/buildcustomize.pl
 !NO!SUBS!
 
 	case "${osname}${osvers}" in
+	amigaos*)
+		$spitshell >>$Makefile <<'!NO!SUBS!'
+lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
+	-@rm -f miniperl.xok
+	$(CC) $(CLDFLAGS) -o $(MINIPERL_EXE) \
+	    $(mini_obj) $(libs)
+#	$(LDLIBPTH) ./miniperl$(HOST_EXE_EXT) -w -Ilib -Idist/Exporter/lib -MExporter -e '<?>' || sh -c 'echo >&2 Failed to build miniperl.  Please run make minitest; exit 1'
+	$(MINIPERL) -f write_buildcustomize.pl
+!NO!SUBS!
+		;;
 	aix*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
 lib/buildcustomize.pl: $& $(mini_obj)
@@ -941,6 +979,12 @@ $(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPOR
 !NO!SUBS!
 
         case $osname in
+	# In AmigaOS the Perl executable needs to be linked with -ldl,
+	# but none of the other executables should be.
+        amigaos) $spitshell >>$Makefile <<'!NO!SUBS!'
+	$(SHRPENV) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(LLIBPERL) $(static_ext) `cat ext.libs` $(libs) -ldl
+!NO!SUBS!
+        ;;
         os390) $spitshell >>$Makefile <<'!NO!SUBS!'
 	$(SHRPENV) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(LLIBPERL) $(static_ext) `cat ext.libs` $(libs)
 !NO!SUBS!
@@ -1342,7 +1386,7 @@ _cleaner2:
 	-rmdir lib/CPAN/Kwalify lib/CPAN/HTTP lib/CPAN/FTP lib/CPAN/Exception
 	-rmdir lib/CPAN/API lib/CPAN lib/Attribute lib/Archive/Tar lib/Archive
 	-rmdir lib/App/Prove/State/Result lib/App/Prove/State lib/App/Prove
-	-rmdir lib/App
+	-rmdir lib/App lib/Amiga
 
 _realcleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=distclean
@@ -1527,7 +1571,7 @@ minitest_prep:
 MINITEST_TESTS = base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t opbasic/*.t op/*.t uni/*.t perf/*.t
 
 minitest: $(MINIPERL_EXE) minitest_prep
-	- cd t && $(RUN_PERL) TEST $(MINITEST_TESTS) </dev/tty
+	- cd t && $(RUN_PERL) TEST $(MINITEST_TESTS) <$(devtty)
 
 minitest-notty minitest_notty: $(MINIPERL_EXE) minitest_prep
 	- cd t && PERL_SKIP_TTY_TEST=1 $(RUN_PERL) TEST $(MINITEST_TESTS)

@@ -777,7 +777,21 @@
 
 /* If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
+#    if defined(__amigaos4__)
+#        ifdef I_NETINET_IN
+#            include <netinet/in.h>
+#        endif
+#   endif
 #   include <unistd.h>
+#   if defined(__amigaos4__)
+/* Under AmigaOS 4 newlib.library provides an environ.  However using
+ * it doesn't give us enough control over inheritance of variables by
+ * subshells etc. so replace with custom version based on abc-shell
+ * code. */
+extern char **myenviron;
+#       undef environ
+#       define environ myenviron
+#   endif
 #endif
 
 /* for WCOREDUMP */
@@ -2789,6 +2803,11 @@ typedef struct padname PADNAME;
 #   include "unixish.h"
 #endif
 
+#if defined(__amigaos4__)
+#    include "amigaos.h"
+#    undef FD_CLOEXEC /* a lie in AmigaOS */
+#endif
+
 /* NSIG logic from Configure --> */
 /* Strange style to avoid deeply-nested #if/#else/#endif */
 #ifndef NSIG
@@ -3702,11 +3721,10 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #  define USE_HASH_SEED
 #endif
 
-/* Win32 defines a type 'WORD' in windef.h. This conflicts with the enumerator
- * 'WORD' defined in perly.h. The yytokentype enum is only a debugging aid, so
- * it's not really needed.
- */
-#if defined(WIN32)
+/* Win32 defines a type 'WORD' in windef.h, and AmigaOS in exec/types.h.
+ * This conflicts with the enumerator 'WORD' defined in perly.h.
+ * The yytokentype enum is only a debugging aid, so it's not really needed. */
+#if defined(WIN32) || defined(__amigaos4__)
 #  define YYTOKENTYPE
 #endif
 #include "perly.h"
@@ -5395,6 +5413,21 @@ struct tempsym; /* defined in pp_pack.c */
 #  include "win32iop.h"
 #endif
 
+/* DO_EXEC_TYPE is the return type of the do_*exec*() functions.
+ * For UNIXish platforms where the exec functions by definition
+ * return only failure, it can be bool (for success, they do not
+ * return).  For other platforms, where the calling entity may
+ * return, the return value may be more complex. */
+#if defined(__amigaos4__)
+#  define DO_EXEC_TYPE I32
+#  define DO_EXEC_FAILURE -1
+#  define DO_EXEC_RETVAL(val) (val)
+#else
+#  define DO_EXEC_TYPE bool
+#  define DO_EXEC_FAILURE FALSE
+#  define DO_EXEC_RETVAL(val) FALSE
+#endif
+
 #include "proto.h"
 
 /* this has structure inits, so it cannot be included before here */
@@ -6342,6 +6375,10 @@ expression, but with an empty argument list, like this:
 #  include <fcntl.h>
 #endif
 
+#ifdef __amigaos4__
+#  undef FD_CLOEXEC /* a lie in AmigaOS */
+#endif
+
 #ifdef I_SYS_FILE
 #  include <sys/file.h>
 #endif
@@ -6518,7 +6555,7 @@ extern void moncontrol(int);
 
 #define IS_SAFE_PATHNAME(p, len, op_name) IS_SAFE_SYSCALL((p), (len), "pathname", (op_name))
 
-#if defined(OEMVS)
+#if defined(OEMVS) || defined(__amigaos4__)
 #define NO_ENV_ARRAY_IN_MAIN
 #endif
 

@@ -69,7 +69,10 @@ EOF
 	exit 1
 fi
 
-if test ! -c /dev/null ; then
+if test -f /sys/utilities/MultiView ; then
+	# AmigaOS, test -c for /dev/null is not useful
+	:
+elif test ! -c /dev/null ; then
 	cat <<EOF
 ***
 *** I'm sorry, but /dev/null appears to be a file rather than a device.
@@ -1875,8 +1878,8 @@ touch posthint.sh
 package='perl5'
 first=`echo $package | sed -e 's/^\(.\).*/\1/'`
 last=`echo $package | sed -e 's/^.\(.*\)/\1/'`
-case "`echo AbyZ | tr '[:lower:]' '[:upper:]' 2>/dev/null`" in
-ABYZ) spackage=`echo $first | tr '[:lower:]' '[:upper:]'`$last;;
+case "`echo AbyZ | tr '[:lower:]' '[:upper:]' 2>/dev/null`"-"`echo AbyZ | tr '[:upper:]' '[:lower:]' 2>/dev/null`" in
+ABYZ-abyz) spackage=`echo $first | tr '[:lower:]' '[:upper:]'`$last;;
 *) spackage=`echo $first | tr '[a-z]' '[A-Z]'`$last;;
 esac
 
@@ -3208,8 +3211,8 @@ esac
 
 : see whether [:lower:] and [:upper:] are supported character classes
 echo " "
-case "`echo AbyZ | $tr '[:lower:]' '[:upper:]' 2>/dev/null`" in
-ABYZ)
+case "`echo AbyZ | $tr '[:lower:]' '[:upper:]' 2>/dev/null`"-"`echo AbyZ | $tr '[:upper:]' '[:lower:]' 2>/dev/null`" in
+ABYZ-abyz)
 	echo "Good, your tr supports [:lower:] and [:upper:] to convert case." >&4
 	up='[:upper:]'
 	low='[:lower:]'
@@ -3359,6 +3362,7 @@ EOM
 	$test -f /etc/saf/_sactab && osname=svr4
 	$test -d /usr/include/minix && osname=minix && osvers=`$uname -r`
 	$test -f /system/gnu_library/bin/ar.pm && osname=vos
+	$test -f /sys/utilities/MultiView && osname=amigaos
 	if $test -d /MachTen -o -d /MachTen_Folder; then
 		osname=machten
 		if $test -x /sbin/version; then
@@ -4336,15 +4340,15 @@ case "$osname" in
 dos|vms)
 	: XXX Should be a Configure test for double-dots in filenames.
 	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
+		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
 	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
+		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
 	;;
 *)
 	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
+		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
 	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
+		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
 	;;
 esac
 : Special case the 5.005_xx maintenance series, which used 5.005
@@ -5457,15 +5461,19 @@ default|recommended)
 	# is to add the flag to the flags passed to the compiler at link time,
 	# as that way the compiler can do the right implementation dependant
 	# thing. (NWC)
-	case "$gccversion" in
-	?*)	set stack-protector-strong -fstack-protector-strong
-		eval $checkccflag
-		case "$dflt" in
-		*-fstack-protector-strong*) ;; # It got added.
-		*) # Try the plain/older -fstack-protector.
-		   set stack-protector -fstack-protector
-		   eval $checkccflag
-		   ;;
+	case "$osname" in
+	amigaos) ;; # -fstack-protector builds but doesn't work
+	*)	case "$gccversion" in
+		?*)	set stack-protector-strong -fstack-protector-strong
+			eval $checkccflag
+			case "$dflt" in
+			*-fstack-protector-strong*) ;; # It got added.
+			*) # Try the plain/older -fstack-protector.
+			   set stack-protector -fstack-protector
+			   eval $checkccflag
+			   ;;
+			esac
+			;;
 		esac
 		;;
 	esac
@@ -5746,6 +5754,11 @@ $cc -o ${mc_file} $optimize $ccflags $ldflags $* ${mc_file}.c $libs;'
 echo " "
 echo "Computing filename position in cpp output for #include directives..." >&4
 case "$osname" in
+amigaos) fieldn=3 ;;  # Workaround for a bug in abc (pdksh).
+esac
+case "$fieldn" in
+'')
+case "$osname" in
 vos) testaccess=-e ;;
 *)   testaccess=-r ;;
 esac
@@ -5770,6 +5783,8 @@ EOF
 chmod +x fieldn
 fieldn=`./fieldn`
 $rm -f foo.c fieldn
+;;
+esac
 case $fieldn in
 '') pos='???';;
 1) pos=first;;
@@ -13311,7 +13326,7 @@ echo " "
 echo "Let's see what value errno gets from read() on a $o_nonblock file..." >&4
 case "$eagain" in
 '')
-	case "$d_fork:$d_pipe" in
+	case "$d_fork:$d_pipe:$d_alarm" in
 	define:define)
 	$cat head.c > try.c
 	$cat >>try.c <<EOCP
@@ -17148,6 +17163,8 @@ eval $inlibc
 echo " "
 procselfexe=''
 val="$undef"
+case "$d_procselfexe" in
+'')
 case "$d_readlink" in
     "$define")
 	: NetBSD first as /proc/self is a symlink to /proc/curproc, and it feels
@@ -17172,6 +17189,8 @@ esac
 $rm -f reflect
 set d_procselfexe
 eval $setvar
+;;
+esac
 
 : backward compatibility for d_hvfork
 if test X$d_hvfork != X; then
@@ -21989,6 +22008,8 @@ EOM
 esac
 
 : Trace out the files included by signal.h, then look for SIGxxx names.
+case "$sig_num_init" in
+'')
 if [ "X$fieldn" = X ]; then
 	: Just make some guesses.  We check them later.
 	xxx="$sysroot/usr/include/signal.h $sysroot/usr/include/sys/signal.h"
@@ -22252,6 +22273,8 @@ echo $sig_name | $awk \
 }'
 sig_size=`echo $sig_name | awk '{print NF}'`
 $rm -f signal signal.c signal.awk signal.lst signal_cmd
+;;
+esac
 
 : Check size of size
 echo " "
@@ -23521,6 +23544,11 @@ known_extensions=`echo $nonxs_extensions $xs_extensions  | tr ' ' $trnl | $sort 
 avail_ext=''
 for xxx in $xs_extensions ; do
 	case "$xxx" in
+	Amiga*)
+		case "$osname" in
+		amigaos) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
 	DB_File|db_file)
 		case "$i_db" in
 		$define) avail_ext="$avail_ext $xxx" ;;

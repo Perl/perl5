@@ -133,6 +133,10 @@ NETINET_DEFINE_CONTEXT
 # define INADDR_LOOPBACK	 0x7F000001
 #endif /* INADDR_LOOPBACK */
 
+#ifndef INET_ADDRSTRLEN
+#define INET_ADDRSTRLEN 16
+#endif
+
 #ifndef C_ARRAY_LENGTH
 #define C_ARRAY_LENGTH(arr) (sizeof(arr) / sizeof(*(arr)))
 #endif /* !C_ARRAY_LENGTH */

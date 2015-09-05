@@ -45,6 +45,10 @@
 int putenv(char *);
 #endif
 
+#ifdef __amigaos__
+# include "amigaos4/amigaio.h"
+#endif
+
 #ifdef HAS_SELECT
 # ifdef I_SYS_SELECT
 #  include <sys/select.h>
@@ -2051,6 +2055,9 @@ void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
   dVAR;
+#if defined(__amigaos4__)
+  amigaos4_obtain_environ(__FUNCTION__);
+#endif
 #ifdef USE_ITHREADS
   /* only parent thread can modify process environment */
   if (PL_curinterp == aTHX)
@@ -2092,7 +2099,11 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
                 environ[i] = environ[i+1];
                 i++;
             }
+#if defined(__amigaos4__)
+            goto my_setenv_out;
+#else
             return;
+#endif
         }
         if (!environ[i]) {                 /* does not exist yet */
             environ = (char**)safesysrealloc(environ, (i+2) * sizeof(char*));
@@ -2153,6 +2164,10 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     }
 #endif
   }
+#if defined(__amigaos4__)
+my_setenv_out:
+  amigaos4_release_environ(__FUNCTION__);
+#endif
 }
 
 #else /* WIN32 || NETWARE */
@@ -2331,7 +2346,7 @@ vsprintf(char *dest, const char *pat, void *args)
 PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 {
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(OS2) && !defined(VMS) && !defined(NETWARE) && !defined(__LIBCATAMOUNT__)
+#if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(OS2) && !defined(VMS) && !defined(NETWARE) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
     int p[2];
     I32 This, that;
     Pid_t pid;
@@ -2469,8 +2484,8 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 #endif
 }
 
-    /* VMS' my_popen() is in VMS.c, same with OS/2. */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__LIBCATAMOUNT__)
+    /* VMS' my_popen() is in VMS.c, same with OS/2 and AmigaOS 4. */
+#if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(VMS) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
@@ -2690,6 +2705,8 @@ Perl_my_fork(void)
     pid = fork();
 #endif
     return pid;
+#elif defined(__amigaos4__)
+    return amigaos_fork();
 #else
     /* this "canna happen" since nothing should be calling here if !HAS_FORK */
     Perl_croak_nocontext("fork() not available");
@@ -2889,7 +2906,7 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 #endif /* !PERL_MICRO */
 
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__LIBCATAMOUNT__)
+#if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(VMS) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
@@ -3049,7 +3066,10 @@ S_pidgone(pTHX_ Pid_t pid, int status)
 }
 #endif
 
-#if defined(OS2)
+#if defined(OS2) || defined(__amigaos4__)
+#  if defined(__amigaos4__) && defined(pclose)
+#    undef pclose
+#  endif
 int pclose();
 #ifdef HAS_FORK
 int					/* Cannot prototype with I32
@@ -4530,7 +4550,11 @@ Perl_seed(pTHX)
     * if there isn't enough entropy available.  You can compile with
     * PERL_RANDOM_DEVICE to it if you'd prefer Perl to block until there
     * is enough real entropy to fill the seed. */
-#  define PERL_RANDOM_DEVICE "/dev/urandom"
+#  ifdef __amigaos4__
+#    define PERL_RANDOM_DEVICE "RANDOM:SIZE=4"
+#  else
+#    define PERL_RANDOM_DEVICE "/dev/urandom"
+#  endif
 #endif
     fd = PerlLIO_open(PERL_RANDOM_DEVICE, 0);
     if (fd != -1) {

@@ -38,6 +38,10 @@
 
 #ifdef USE_ITHREADS
 
+#if defined(__amigaos4__)
+#  undef YIELD
+#  define YIELD sleep(0)
+#endif
 #ifdef WIN32
 #  include <windows.h>
    /* Supposed to be in Winbase.h */
@@ -136,7 +140,14 @@ typedef struct {
 
 #define MY_POOL (*my_poolp)
 
-#ifndef WIN32
+#if defined(WIN32) || (defined(__amigaos4__) && defined(__NEWLIB__))
+#  undef THREAD_SIGNAL_BLOCKING
+#else
+#  define THREAD_SIGNAL_BLOCKING
+#endif
+
+#ifdef THREAD_SIGNAL_BLOCKING
+
 /* Block most signals for calling thread, setting the old signal mask to
  * oldmask, if it is not NULL */
 STATIC int
@@ -212,7 +223,7 @@ S_ithread_clear(pTHX_ ithread *thread)
                 ||
            (thread->state & PERL_ITHR_NONVIABLE));
 
-#ifndef WIN32
+#ifdef THREAD_SIGNAL_BLOCKING
     /* We temporarily set the interpreter context to the interpreter being
      * destroyed.  It's in no condition to handle signals while it's being
      * taken apart.
@@ -241,7 +252,7 @@ S_ithread_clear(pTHX_ ithread *thread)
     }
 
     PERL_SET_CONTEXT(aTHX);
-#ifndef WIN32
+#ifdef THREAD_SIGNAL_BLOCKING
     S_set_sigmask(&origmask);
 #endif
 }
@@ -495,7 +506,7 @@ S_ithread_run(void * arg)
     PERL_SET_CONTEXT(thread->interp);
     S_ithread_set(aTHX_ thread);
 
-#ifndef WIN32
+#ifdef THREAD_SIGNAL_BLOCKING
     /* Thread starts with most signals blocked - restore the signal mask from
      * the ithread struct.
      */
@@ -535,7 +546,7 @@ S_ithread_run(void * arg)
         }
         JMPENV_POP;
 
-#ifndef WIN32
+#ifdef THREAD_SIGNAL_BLOCKING
         /* The interpreter is finished, so this thread can stop receiving
          * signals.  This way, our signal handler doesn't get called in the
          * middle of our parent thread calling perl_destruct()...
@@ -768,7 +779,7 @@ S_ithread_create(
     PL_srand_called = FALSE;   /* Set it to false so we can detect if it gets
                                   set during the clone */
 
-#ifndef WIN32
+#ifdef THREAD_SIGNAL_BLOCKING
     /* perl_clone() will leave us the new interpreter's context.  This poses
      * two problems for our signal handler.  First, it sets the new context
      * before the new interpreter struct is fully initialized, so our signal
@@ -930,7 +941,7 @@ S_ithread_create(
 #  endif
         }
 
-#ifndef WIN32
+#ifdef THREAD_SIGNAL_BLOCKING
     /* Now it's safe to accept signals, since we're in our own interpreter's
      * context and we have created the thread.
      */

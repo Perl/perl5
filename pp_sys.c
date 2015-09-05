@@ -192,6 +192,10 @@ void setservent(int);
 void endservent(void);
 #endif
 
+#ifdef __amigaos4__
+#  include "amigaos4/amigaio.h"
+#endif
+
 #undef PERL_EFF_ACCESS	/* EFFective uid/gid ACCESS */
 
 /* F_OK unused: if stat() cannot find it... */
@@ -4207,7 +4211,7 @@ PP(pp_fork)
     PUSHi(childpid);
     RETURN;
 #else
-#  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
+#  if (defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)) || defined(__amigaos4__)
     dSP; dTARGET;
     Pid_t childpid;
 
@@ -4259,6 +4263,12 @@ PP(pp_waitpid)
     const int optype = POPi;
     const Pid_t pid = TOPi;
     Pid_t result;
+#ifdef __amigaos4__
+    int argflags = 0;
+    result = amigaos_waitpid(aTHX_ optype, pid, &argflags);
+    STATUS_NATIVE_CHILD_SET((result >= 0) ? argflags : -1);
+    result = result == 0 ? pid : -1;
+#else
     int argflags;
 
     if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
@@ -4275,6 +4285,7 @@ PP(pp_waitpid)
 #  else
     STATUS_NATIVE_CHILD_SET((result > 0) ? argflags : -1);
 #  endif
+# endif /* __amigaos4__ */
     SETi(result);
     RETURN;
 #else
@@ -4291,7 +4302,11 @@ PP(pp_system)
     XPUSHi(-1);
 #else
     I32 value;
+# ifdef __amigaos4__
+    void * result;
+# else
     int result;
+# endif
 
     if (TAINTING_get) {
 	TAINT_ENV();
@@ -4304,17 +4319,33 @@ PP(pp_system)
 	TAINT_PROPER("system");
     }
     PERL_FLUSHALL_FOR_CHILD;
-#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
+#if (defined(HAS_FORK) || defined(__amigaos4__)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
     {
+#if defined(__amigaos4__)
+        struct UserData userdata;
+        pthread_t proc;
+#else
 	Pid_t childpid;
+#endif
 	int pp[2];
 	I32 did_pipes = 0;
+        bool child_success = FALSE;
 #ifdef HAS_SIGPROCMASK
 	sigset_t newset, oldset;
 #endif
 
 	if (PerlProc_pipe(pp) >= 0)
 	    did_pipes = 1;
+#if defined(__amigaos4__)
+        amigaos_fork_set_userdata(aTHX_
+                                  &userdata,
+                                  did_pipes,
+                                  pp[1],
+                                  SP,
+                                  mark);
+        pthread_create(&proc,NULL,amigaos_system_child,(void *)&userdata);
+        child_success = proc > 0;
+#else
 #ifdef HAS_SIGPROCMASK
 	sigemptyset(&newset);
 	sigaddset(&newset, SIGCHLD);
@@ -4336,19 +4367,27 @@ PP(pp_system)
 	    }
 	    sleep(5);
 	}
-	if (childpid > 0) {
+        child_success = childpid > 0;
+#endif
+	if (child_success) {
 	    Sigsave_t ihand,qhand; /* place to save signals during system() */
 	    int status;
 
+#ifndef __amigaos4__
 	    if (did_pipes)
 		PerlLIO_close(pp[1]);
+#endif
 #ifndef PERL_MICRO
 	    rsignal_save(SIGINT,  (Sighandler_t) SIG_IGN, &ihand);
 	    rsignal_save(SIGQUIT, (Sighandler_t) SIG_IGN, &qhand);
 #endif
+#ifdef __amigaos4__
+            result = pthread_join(proc, (void **)&status);
+#else
 	    do {
 		result = wait4pid(childpid, &status, 0);
 	    } while (result == -1 && errno == EINTR);
+#endif
 #ifndef PERL_MICRO
 #ifdef HAS_SIGPROCMASK
 	    sigprocmask(SIG_SETMASK, &oldset, NULL);
@@ -4377,12 +4416,20 @@ PP(pp_system)
 		    if (n != sizeof(int))
 			DIE(aTHX_ "panic: kid popen errno read, n=%u", n);
 		    errno = errkid;		/* Propagate errno from kid */
-		    STATUS_NATIVE_CHILD_SET(-1);
+#if defined(__amigaos4__)
+                    /* The pipe always has something in it
+                     * so n alone is not enough. */
+                    if (errno > 0)
+#endif
+                    {
+                        STATUS_NATIVE_CHILD_SET(-1);
+                    }
 		}
 	    }
 	    XPUSHi(STATUS_CURRENT);
 	    RETURN;
 	}
+#ifndef __amigaos4__
 #ifdef HAS_SIGPROCMASK
 	sigprocmask(SIG_SETMASK, &oldset, NULL);
 #endif
@@ -4402,6 +4449,7 @@ PP(pp_system)
 	else {
 	    value = (I32)do_exec3(SvPVx_nolen(sv_mortalcopy(*SP)), pp[1], did_pipes);
 	}
+#endif /* __amigaos4__ */
 	PerlProc__exit(-1);
     }
 #else /* ! FORK or VMS or OS/2 */
@@ -4440,6 +4488,9 @@ PP(pp_exec)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
+#if defined(__amigaos4__)
+    StdioStore store;
+#endif
 
     if (TAINTING_get) {
 	TAINT_ENV();
@@ -4451,6 +4502,12 @@ PP(pp_exec)
 	MARK = ORIGMARK;
 	TAINT_PROPER("exec");
     }
+#if defined(__amigaos4__)
+    /* Make sure redirection behaves after exec.  Yes, in AmigaOS the
+     * original process continues after exec, since processes are more
+     * like threads. */
+    amigaos_stdio_save(aTHX_ &store);
+#endif
     PERL_FLUSHALL_FOR_CHILD;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV * const really = *++MARK;
@@ -4470,6 +4527,12 @@ PP(pp_exec)
 #endif
     }
 
+#if defined(__amigaos4__)
+    amigaos_stdio_restore(aTHX_ &store);
+    STATUS_NATIVE_CHILD_SET(value);
+    PL_exit_flags |= PERL_EXIT_EXPECTED;
+    if (value != -1) my_exit(value);
+#endif
     SP = ORIGMARK;
     XPUSHi(value);
     RETURN;
