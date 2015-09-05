@@ -831,9 +831,12 @@ SKIP: {
     # setup
     ok(mkpath($xx), "make $xx");
     ok(chdir($xx), "... and chdir $xx");
+    my $do_end = 1;
     END {
-         ok(chdir($p), "... now chdir $p");
-         ok(rmtree($xx), "... and finally rmtree $xx");
+        if ($do_end) {
+            ok(chdir($p), "... now chdir $p");
+            ok(rmtree($xx), "... and finally rmtree $xx");
+        }
     }
 
     # create and delete directory
