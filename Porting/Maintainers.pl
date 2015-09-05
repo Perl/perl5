@@ -752,7 +752,7 @@ use File::Glob qw(:case);
 
     'Math::BigInt' => {
         'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.9997.tar.gz',
-        'FILES'        => q[dist/Math-BigInt],
+        'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^inc/},
             qr{^examples/},
@@ -766,7 +766,7 @@ use File::Glob qw(:case);
 
     'Math::BigInt::FastCalc' => {
         'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.31.tar.gz',
-        'FILES'        => q[dist/Math-BigInt-FastCalc],
+        'FILES'        => q[cpan/Math-BigInt-FastCalc],
         'EXCLUDED'     => [
             qr{^inc/},
             qw( t/00sig.t
@@ -789,7 +789,7 @@ use File::Glob qw(:case);
 
     'Math::BigRat' => {
         'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.2606.tar.gz',
-        'FILES'        => q[dist/Math-BigRat],
+        'FILES'        => q[cpan/Math-BigRat],
         'EXCLUDED'     => [
             qr{^inc/},
             qw( t/00sig.t
