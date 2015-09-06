@@ -95,9 +95,6 @@ no_index:
     - dist/lib/lib_pm.PL
     - dist/lib/Makefile.PL
     - dist/lib/t/01lib.t
-    - dist/Math-BigInt
-    - dist/Math-BigInt-FastCalc
-    - dist/Math-BigRat
     - lib/unicore/mktables
     - pod/perlfilter.pod
     - pod/perlpodstyle.pod
