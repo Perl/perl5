@@ -23,7 +23,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 57;  # Update this when adding/deleting tests.
+plan tests => 57;  #** update watchdog timeouts proportionally when adding tests
 
 use strict;
 use warnings;
@@ -41,7 +41,7 @@ run_tests() unless caller;
 sub run_tests {
 
 
-    watchdog(($::running_as_thread && $::running_as_thread) ? 50 : 75);
+    watchdog(($::running_as_thread && $::running_as_thread) ? 150 : 225);
 
     {
         # [perl #120446]
