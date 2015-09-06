@@ -931,7 +931,7 @@ L<Test::Builder> for building your own testing library.
 
 L<Test::Unit> is an interesting XUnit-style testing library.
 
-L<Test::Inline> and L<SelfTest> let you embed tests in code.
+L<Test::Inline> lets you embed tests in code.
 
 
 =head1 AUTHOR

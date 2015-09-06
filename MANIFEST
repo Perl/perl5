@@ -2413,7 +2413,6 @@ cpan/Test-Harness/t/unicode.t				Test::Harness test
 cpan/Test-Harness/t/yamlish-output.t			Test::Harness test
 cpan/Test-Harness/t/yamlish.t				Test::Harness test
 cpan/Test-Harness/t/yamlish-writer.t			Test::Harness test
-cpan/Test/lib/Test.pm		A simple framework for writing test scripts
 cpan/Test-Simple/lib/ok.pm
 cpan/Test-Simple/lib/Test/Builder/IO/Scalar.pm
 cpan/Test-Simple/lib/Test/Builder/Module.pm
@@ -2571,15 +2570,6 @@ cpan/Test-Simple/t/useing.t
 cpan/Test-Simple/t/use_ok.t
 cpan/Test-Simple/t/utf8.t
 cpan/Test-Simple/t/versions.t
-cpan/Test/t/05_about_verbose.t	See if Test works
-cpan/Test/t/fail.t		See if Test works
-cpan/Test/t/mix.t		See if Test works
-cpan/Test/t/multiline.t		See if Test works
-cpan/Test/t/onfail.t		See if Test works
-cpan/Test/t/qr.t		See if Test works
-cpan/Test/t/skip.t		See if Test works
-cpan/Test/t/success.t		See if Test works
-cpan/Test/t/todo.t		See if Test works
 cpan/Text-Balanced/lib/Text/Balanced.pm	Text::Balanced
 cpan/Text-Balanced/t/01_compile.t	See if Text::Balanced works
 cpan/Text-Balanced/t/02_extbrk.t	See if Text::Balanced works
@@ -3414,6 +3404,16 @@ dist/Term-ReadLine/t/AE.t			See if Term::ReadLine works
 dist/Term-ReadLine/t/AETk.t			See if Term::ReadLine works
 dist/Term-ReadLine/t/ReadLine.t			See if Term::ReadLine works
 dist/Term-ReadLine/t/Tk.t			See if Term::ReadLine works
+dist/Test/lib/Test.pm		A simple framework for writing test scripts
+dist/Test/t/05_about_verbose.t	See if Test works
+dist/Test/t/fail.t		See if Test works
+dist/Test/t/mix.t		See if Test works
+dist/Test/t/multiline.t		See if Test works
+dist/Test/t/onfail.t		See if Test works
+dist/Test/t/qr.t		See if Test works
+dist/Test/t/skip.t		See if Test works
+dist/Test/t/success.t		See if Test works
+dist/Test/t/todo.t		See if Test works
 dist/Text-Abbrev/lib/Text/Abbrev.pm		An abbreviation table builder
 dist/Text-Abbrev/t/Abbrev.t		Test Text::Abbrev
 dist/Thread-Queue/lib/Thread/Queue.pm	Thread-safe queues

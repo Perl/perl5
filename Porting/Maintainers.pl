@@ -1082,7 +1082,7 @@ use File::Glob qw(:case);
 
     'Test' => {
         'DISTRIBUTION' => 'JESSE/Test-1.26.tar.gz',
-        'FILES'        => q[cpan/Test],
+        'FILES'        => q[dist/Test],
     },
 
     'Test::Harness' => {

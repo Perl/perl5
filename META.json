@@ -43,6 +43,7 @@
          "dist/Storable",
          "dist/Term-Complete",
          "dist/Term-ReadLine",
+         "dist/Test",
          "dist/Text-Abbrev",
          "dist/Thread-Queue",
          "dist/Thread-Semaphore",

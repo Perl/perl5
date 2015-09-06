@@ -62,6 +62,7 @@ DBI
 DBIx::Profile
 Devel::CallParser
 Devel::Callsite
+Devel::Cover
 Devel::DProf
 Devel::DTrace::Provider
 Devel::InnerPackage
@@ -212,6 +213,7 @@ Term::UI::History
 Test::Harness::TAP
 Test::Inline
 Test::MockObject
+Test::Unit
 Text::Autoformat
 Text::Soundex
 Text::Template
