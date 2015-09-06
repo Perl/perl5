@@ -10,7 +10,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %DEFLATE_CONSTANTS, @DEFLATE_CONSTANTS);
 
-$VERSION = '2.068';
+$VERSION = '2.068_01'; # patched in perl5.git
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 

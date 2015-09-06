@@ -3,7 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.020';
+our $VERSION = '2.020_01'; # patched in perl5.git
 
 =head1 NAME
 
