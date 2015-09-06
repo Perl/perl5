@@ -71,7 +71,8 @@
 :
 :   M  May change:
 :
-:         any doc entry is marked that function may change
+:         any doc entry is marked that function may change.  Also used to
+:	  suppress making a doc entry if it would just be a placeholder.
 :
 :   m  Implemented as a macro:
 :
