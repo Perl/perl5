@@ -320,6 +320,17 @@ Comparing two strings that were both encoded in UTF-8 (or more
 precisely, UTF-EBCDIC) did not work properly until now.  Since C<sort()>
 uses C<cmp()>, this fixes that as well.
 
+=item Win32
+
+=over
+
+=item *
+
+Parallel building has been added to the dmake C<makefile.mk> makefile. All
+Win32 compilers are supported.
+
+=back
+
 =back
 
 =head1 Internal Changes
