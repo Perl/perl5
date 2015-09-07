@@ -295,14 +295,16 @@ the test fails.  Examples:
     ok( $foo =~ /bar/ );        # ok if $foo contains 'bar'
     ok( baz($x + $y) eq 'Armondo' );    # ok if baz($x + $y) returns
                                         # 'Armondo'
-    ok( @a == @b );             # ok if @a and @b are the same length
+    ok( @a == @b );             # ok if @a and @b are the same
+                                # length
 
 The expression is evaluated in scalar context.  So the following will
 work:
 
-    ok( @stuff );                       # ok if @stuff has any elements
-    ok( !grep !defined $_, @stuff );    # ok if everything in @stuff is
-                                        # defined.
+    ok( @stuff );                       # ok if @stuff has any
+                                        # elements
+    ok( !grep !defined $_, @stuff );    # ok if everything in @stuff
+                                        # is defined.
 
 A special case is if the expression is a subroutine reference (in either
 C<sub {...}> syntax or C<\&foo> syntax).  In
@@ -656,7 +658,8 @@ Example usage:
   my $if_MSWin =
     $^O =~ m/MSWin/ ? 'Skip if under MSWin' : '';
 
-  # A test to be skipped if under MSWin (i.e., run except under MSWin)
+  # A test to be skipped if under MSWin (i.e., run except under
+  # MSWin)
   skip($if_MSWin, thing($foo), thing($bar) );
 
 Or, going the other way:
@@ -664,7 +667,8 @@ Or, going the other way:
   my $unless_MSWin =
     $^O =~ m/MSWin/ ? '' : 'Skip unless under MSWin';
 
-  # A test to be skipped unless under MSWin (i.e., run only under MSWin)
+  # A test to be skipped unless under MSWin (i.e., run only under
+  # MSWin)
   skip($unless_MSWin, thing($foo), thing($bar) );
 
 The tricky thing to remember is that the first parameter is true if
