@@ -2885,6 +2885,7 @@ $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
 $ dflt = dflt - "Win32API/File" - "Win32"  ! need Dave Cutler's other project
+$ dflt = dflt - "Amiga/ARexx" - "Amiga/Exec" ! this is not AmigaOS
 $ nonxs_ext = nonxs_ext - "Win32CORE"
 $ nonxs_ext2 = nonxs_ext2 - "Win32CORE"
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
