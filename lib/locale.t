@@ -116,6 +116,20 @@ sub check_taint_not ($;$) {
     ok((not is_tainted($_[0])), "verify that isn't tainted$message_tail");
 }
 
+foreach my $category (qw(ALL COLLATE CTYPE MESSAGES MONETARY NUMERIC TIME)) {
+    my $short_result = locales_enabled($category);
+    ok ($short_result == 0 || $short_result == 1,
+        "Verify locales_enabled('$category') returns 0 or 1");
+    debug("locales_enabled('$category') returned '$short_result'");
+    my $long_result = locales_enabled("LC_$category");
+    if (! ok ($long_result == $short_result,
+              "   and locales_enabled('LC_$category') returns "
+            . "the same value")
+    ) {
+        debug("locales_enabled('LC_$category') returned $long_result");
+    }
+}
+
 "\tb\t" =~ /^m?(\s)(.*)\1$/;
 check_taint_not   $&, "not tainted outside 'use locale'";
 ;

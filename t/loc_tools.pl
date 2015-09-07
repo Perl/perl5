@@ -80,20 +80,38 @@ sub _decode_encodings { # For use only by other functions in this file!
     return @enc;
 }
 
+# LC_ALL can be -1 on some platforms.  And, in fact the implementors could
+# legally use any integer to represent any category.  But it makes the most
+# sense for them to have used small integers.  Below, we create new locale
+# numbers for ones missing from this machine.  We make them very negative,
+# hopefully more negative than anything likely to be a valid category on the
+# platform, but also below is a check to be sure that our guess is valid.
+my $max_bad_category_number = -1000000;
+
 # Initialize this hash so that it looks like e.g.,
 #   6 => 'CTYPE',
 # where 6 is the value of &POSIX::LC_CTYPE
 my %category_name;
 eval { require POSIX; import POSIX 'locale_h'; };
 unless ($@) {
-    my $number_for_missing_category = 0;
+    my $number_for_missing_category = $max_bad_category_number;
     foreach my $name (qw(ALL COLLATE CTYPE MESSAGES MONETARY NUMERIC TIME)) {
         my $number = eval "&POSIX::LC_$name";
 
-        # Use a negative number if the platform doesn't support this category,
-        # so we have an entry for all ones that might be specified in calls to
-        # us.
-        $number = --$number_for_missing_category if $@;
+        if ($@) {
+            # Use a negative number (smaller than any legitimate category
+            # number) if the platform doesn't support this category, so we
+            # have an entry for all the ones that might be specified in calls
+            # to us.
+            $number = $number_for_missing_category-- if $@;
+        }
+        elsif (   $number !~ / ^ -? \d+ $ /x
+               || $number <=  $max_bad_category_number)
+        {
+            # We think this should be an int.  And it has to be larger than
+            # any of our synthetic numbers.
+            die "Unexpected locale category number '$number' for LC_$name"
+        }
 
         $category_name{$number} = "$name";
     }
@@ -129,19 +147,30 @@ sub locales_enabled(;$) {
     if (defined $categories_ref) {
         $categories_ref = [ $categories_ref ] if ! ref $categories_ref;
         my @local_categories_copy = @$categories_ref;
-        for my $category (@local_categories_copy) {
-            if ($category =~ / ^ -? \d+ $ /x) {
-                die "Invalid locale category number '$category'"
-                    unless grep { $category == $_ } keys %category_name;
-                $category = $category_name{$category};
+        for my $category_name_or_number (@local_categories_copy) {
+            my $name;
+            my $number;
+            if ($category_name_or_number =~ / ^ -? \d+ $ /x) {
+                $number = $category_name_or_number;
+                die "Invalid locale category number '$number'"
+                    unless grep { $number == $_ } keys %category_name;
+                $name = $category_name{$number};
             }
             else {
-                $category =~ s/ ^ LC_ //x;
-                die "Invalid locale category name '$category'"
-                    unless grep { $category eq $_ } values %category_name;
+                $name = $category_name_or_number;
+                $name =~ s/ ^ LC_ //x;
+                foreach my $trial (keys %category_name) {
+                    if ($category_name{$trial} eq $name) {
+                        $number = $trial;
+                        last;
+                    }
+                }
+                die "Invalid locale category name '$name'"
+                    unless defined $number;
             }
 
-            return 0 if $Config{ccflags} =~ /\bD?NO_LOCALE_$category\b/;
+            return 0 if    $number <= $max_bad_category_number
+                        || $Config{ccflags} =~ /\bD?NO_LOCALE_$name\b/;
         }
     }
 
