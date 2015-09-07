@@ -283,29 +283,58 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 =cut
 */
 
+/* _EXTEND_SAFE_N(n): private helper macro for EXTEND().
+ * Tests whether the value of n would be truncated when implicitly cast to
+ * SSize_t as an arg to stack_grow(). If so, sets it to -1 instead to
+ * trigger a panic. It will be constant folded on platforms where this
+ * can't happen.
+ */
+
+#define _EXTEND_SAFE_N(n) \
+        (sizeof(n) > sizeof(SSize_t) && ((SSize_t)(n) != (n)) ? -1 : (n))
+
 #ifdef STRESS_REALLOC
 # define EXTEND(p,n)   STMT_START {                                     \
-                           sp = stack_grow(sp,p,(SSize_t) (n));         \
+                           sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
                            PERL_UNUSED_VAR(sp);                         \
                        } STMT_END
 /* Same thing, but update mark register too. */
 # define MEXTEND(p,n)   STMT_START {                                    \
                             const SSize_t markoff = mark - PL_stack_base; \
-                            sp = stack_grow(sp,p,(SSize_t) (n));        \
+                            sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));    \
                             mark = PL_stack_base + markoff;             \
                             PERL_UNUSED_VAR(sp);                        \
                         } STMT_END
 #else
-# define EXTEND(p,n)   STMT_START {                                     \
-                         if (UNLIKELY(PL_stack_max - p < (SSize_t)(n))) { \
-                           sp = stack_grow(sp,p,(SSize_t) (n));         \
+
+/* _EXTEND_NEEDS_GROW(p,n): private helper macro for EXTEND().
+ * Tests to see whether n is too big and we need to grow the stack. Be
+ * very careful if modifying this. There are many ways to get things wrong
+ * (wrapping, truncating etc) that could cause a false negative and cause
+ * the call to stack_grow() to be skipped. On the other hand, false
+ * positives are safe.
+ * Bear in mind that sizeof(p) may be less than, equal to, or greater
+ * than sizeof(n), and while n is documented to be signed, someone might
+ * pass an unsigned value or expression. In general don't use casts to
+ * avoid warnings; instead expect the caller to fix their code.
+ * It is legal for p to be greater than PL_stack_max.
+ * If the allocated stack is already very large but current usage is
+ * small, then PL_stack_max - p might wrap round to a negative value, but
+ * this just gives a safe false positive
+ */
+
+#  define _EXTEND_NEEDS_GROW(p,n) ( (n) < 0 || PL_stack_max - p < (n))
+
+#  define EXTEND(p,n)   STMT_START {                                    \
+                         if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
+                           sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
                            PERL_UNUSED_VAR(sp);                         \
                          } } STMT_END
 /* Same thing, but update mark register too. */
-# define MEXTEND(p,n)  STMT_START {                                     \
-                         if (UNLIKELY(PL_stack_max - p < (SSize_t)(n))) { \
-                           const SSize_t markoff = mark - PL_stack_base;  \
-                           sp = stack_grow(sp,p,(SSize_t) (n));         \
+#  define MEXTEND(p,n)  STMT_START {                                    \
+                         if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
+                           const SSize_t markoff = mark - PL_stack_base;\
+                           sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
                            mark = PL_stack_base + markoff;              \
                            PERL_UNUSED_VAR(sp);                         \
                          } } STMT_END

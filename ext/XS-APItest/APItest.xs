@@ -2137,6 +2137,39 @@ mxpushu()
 	mXPUSHu(3);
 	XSRETURN(3);
 
+
+ # test_EXTEND(): excerise the EXTEND() macro.
+ # After calling EXTEND(), it also does *(p+n) = NULL and
+ # *PL_stack_max = NULL to allow valgrind etc to spot if the stack hasn't
+ # actually been extended properly.
+ #
+ # max_offset specifies the SP to use.  It is treated as a signed offset
+ #              from PL_stack_max.
+ # nsv        is the SV holding the value of n indicating how many slots
+ #              to extend the stack by.
+ # use_ss     is a boolean indicating that n should be cast to a SSize_t
+
+void
+test_EXTEND(max_offset, nsv, use_ss)
+    IV   max_offset;
+    SV  *nsv;
+    bool use_ss;
+PREINIT:
+    SV **sp = PL_stack_max + max_offset;
+PPCODE:
+    if (use_ss) {
+        SSize_t n = (SSize_t)SvIV(nsv);
+        EXTEND(sp, n);
+        *(sp + n) = NULL;
+    }
+    else {
+        IV n = SvIV(nsv);
+        EXTEND(sp, n);
+        *(sp + n) = NULL;
+    }
+    *PL_stack_max = NULL;
+
+
 void
 call_sv_C()
 PREINIT:
