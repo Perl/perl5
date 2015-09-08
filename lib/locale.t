@@ -88,6 +88,7 @@ sub ok {
     print "ok " . ++$test_num;
     print " $message";
     print "\n";
+    return ($result) ? 1 : 0;
 }
 
 # First we'll do a lot of taint checking for locales.
