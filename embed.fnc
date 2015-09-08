@@ -2472,7 +2472,13 @@ s	|char*	|stdize_locale	|NN char* locs
 #if defined(USE_LOCALE) \
     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
 ApM	|bool	|_is_cur_LC_category_utf8|int category
+#	ifdef DEBUGGING
+AMnPpR	|char *	|_setlocale_debug_string|const int category		    \
+					|NULLOK const char* const locale    \
+					|NULLOK const char* const retval
+#	endif
 #endif
+
 
 #if defined(PERL_IN_UTIL_C)
 s	|SV*	|mess_alloc

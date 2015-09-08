@@ -696,6 +696,24 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     const char * const setlocale_init = (PerlEnv_getenv("PERL_SKIP_LOCALE_INIT"))
                                         ? NULL
                                         : "";
+#ifdef DEBUGGING
+    const bool debug = (PerlEnv_getenv("PERL_DEBUG_LOCALE_INIT"))
+                       ? TRUE
+                       : FALSE;
+#   define DEBUG_LOCALE_INIT(category, locale, result)                      \
+	STMT_START {                                                        \
+		if (debug) {                                                \
+                    PerlIO_printf(Perl_debug_log,                           \
+                                  "%s:%d: %s\n",                            \
+                                  __FILE__, __LINE__,                       \
+                                  _setlocale_debug_string(category,         \
+                                                          locale,           \
+                                                          result));         \
+                }                                                           \
+	} STMT_END
+#else
+#   define DEBUG_LOCALE_INIT(a,b,c)
+#endif
     const char* trial_locales[5];   /* 5 = 1 each for "", LC_ALL, LANG, "", C */
     unsigned int trial_locales_count;
     const char * const lc_all     = savepv(PerlEnv_getenv("LC_ALL"));
@@ -715,6 +733,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                     *bad_lang_use_once
                                     && strNE("0", bad_lang_use_once)))));
     bool done = FALSE;
+    char * sl_result;   /* return from setlocale() */
+    char * locale_param;
 #ifdef WIN32
     /* In some systems you can find out the system default locale
      * and use that as the fallback locale. */
@@ -726,6 +746,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #ifndef LOCALE_ENVIRON_REQUIRED
     PERL_UNUSED_VAR(done);
+    PERL_UNUSED_VAR(locale_param);
 #else
 
     /*
@@ -735,52 +756,64 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #   ifdef LC_ALL
     if (lang) {
-	if (my_setlocale(LC_ALL, setlocale_init))
+	sl_result = my_setlocale(LC_ALL, setlocale_init);
+        DEBUG_LOCALE_INIT(LC_ALL, setlocale_init, sl_result);
+	if (sl_result)
 	    done = TRUE;
 	else
 	    setlocale_failure = TRUE;
     }
-    if (!setlocale_failure) {
+    if (! setlocale_failure) {
 #       ifdef USE_LOCALE_CTYPE
-	if (! (curctype =
-	       my_setlocale(LC_CTYPE,
-			 (!done && (lang || PerlEnv_getenv("LC_CTYPE")))
-				    ? setlocale_init : NULL)))
+        locale_param = (! done && (lang || PerlEnv_getenv("LC_CTYPE")))
+                       ? setlocale_init
+                       : NULL;
+	curctype = my_setlocale(LC_CTYPE, locale_param);
+        DEBUG_LOCALE_INIT(LC_CTYPE, locale_param, sl_result);
+	if (! curctype)
 	    setlocale_failure = TRUE;
 	else
 	    curctype = savepv(curctype);
 #       endif /* USE_LOCALE_CTYPE */
 #       ifdef USE_LOCALE_COLLATE
-	if (! (curcoll =
-	       my_setlocale(LC_COLLATE,
-			 (!done && (lang || PerlEnv_getenv("LC_COLLATE")))
-				   ? setlocale_init : NULL)))
+        locale_param = (! done && (lang || PerlEnv_getenv("LC_COLLATE")))
+                       ? setlocale_init
+                       : NULL;
+	curcoll = my_setlocale(LC_COLLATE, locale_param);
+        DEBUG_LOCALE_INIT(LC_COLLATE, locale_param, sl_result);
+	if (! curcoll)
 	    setlocale_failure = TRUE;
 	else
 	    curcoll = savepv(curcoll);
 #       endif /* USE_LOCALE_COLLATE */
 #       ifdef USE_LOCALE_NUMERIC
-	if (! (curnum =
-	       my_setlocale(LC_NUMERIC,
-			 (!done && (lang || PerlEnv_getenv("LC_NUMERIC")))
-				  ? setlocale_init : NULL)))
+        locale_param = (! done && (lang || PerlEnv_getenv("LC_NUMERIC")))
+                       ? setlocale_init
+                       : NULL;
+	curnum = my_setlocale(LC_NUMERIC, locale_param);
+        DEBUG_LOCALE_INIT(LC_NUMERIC, locale_param, sl_result);
+	if (! curnum)
 	    setlocale_failure = TRUE;
 	else
 	    curnum = savepv(curnum);
 #       endif /* USE_LOCALE_NUMERIC */
 #       ifdef USE_LOCALE_MESSAGES
-	if (! my_setlocale(LC_MESSAGES,
-			 (!done && (lang || PerlEnv_getenv("LC_MESSAGES")))
-				  ? setlocale_init : NULL))
-        {
+        locale_param = (! done && (lang || PerlEnv_getenv("LC_MESSAGES")))
+                       ? setlocale_init
+                       : NULL;
+	sl_result = my_setlocale(LC_MESSAGES, locale_param);
+        DEBUG_LOCALE_INIT(LC_MESSAGES, locale_param, sl_result);
+	if (! sl_result)
 	    setlocale_failure = TRUE;
         }
 #       endif /* USE_LOCALE_MESSAGES */
 #       ifdef USE_LOCALE_MONETARY
-	if (! my_setlocale(LC_MONETARY,
-			 (!done && (lang || PerlEnv_getenv("LC_MONETARY")))
-				  ? setlocale_init : NULL))
-        {
+        locale_param = (! done && (lang || PerlEnv_getenv("LC_MONETARY")))
+                       ? setlocale_init
+                       : NULL;
+	sl_result = my_setlocale(LC_MONETARY, locale_param);
+        DEBUG_LOCALE_INIT(LC_MONETARY, locale_param, sl_result);
+	if (! sl_result) {
 	    setlocale_failure = TRUE;
         }
 #       endif /* USE_LOCALE_MONETARY */
@@ -816,6 +849,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 /* Note that this may change the locale, but we are going to do
                  * that anyway just below */
                 system_default_locale = setlocale(LC_ALL, "");
+                DEBUG_LOCALE_INIT(LC_ALL, "", system_default_locale);
 
                 /* Skip if invalid or it's already on the list of locales to
                  * try */
@@ -835,7 +869,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         }
 
 #ifdef LC_ALL
-        if (! my_setlocale(LC_ALL, trial_locale)) {
+        sl_result = my_setlocale(LC_ALL, trial_locale);
+        DEBUG_LOCALE_INIT(LC_ALL, trial_locale, sl_result);
+        if (! sl_result) {
             setlocale_failure = TRUE;
         }
         else {
@@ -853,31 +889,41 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         if (!setlocale_failure) {
 #ifdef USE_LOCALE_CTYPE
             Safefree(curctype);
-            if (! (curctype = my_setlocale(LC_CTYPE, trial_locale)))
+            curctype = my_setlocale(LC_CTYPE, trial_locale);
+            DEBUG_LOCALE_INIT(LC_CTYPE, trial_locale, curctype);
+            if (! curctype)
                 setlocale_failure = TRUE;
             else
                 curctype = savepv(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
             Safefree(curcoll);
-            if (! (curcoll = my_setlocale(LC_COLLATE, trial_locale)))
+            curcoll = my_setlocale(LC_COLLATE, trial_locale);
+            DEBUG_LOCALE_INIT(LC_COLLATE, trial_locale, curcoll);
+            if (! curcoll)
                 setlocale_failure = TRUE;
             else
                 curcoll = savepv(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
             Safefree(curnum);
-            if (! (curnum = my_setlocale(LC_NUMERIC, trial_locale)))
+            curnum = my_setlocale(LC_NUMERIC, trial_locale);
+            DEBUG_LOCALE_INIT(LC_NUMERIC, trial_locale, curnum);
+            if (! curnum)
                 setlocale_failure = TRUE;
             else
                 curnum = savepv(curnum);
 #endif /* USE_LOCALE_NUMERIC */
 #ifdef USE_LOCALE_MESSAGES
-            if (! (my_setlocale(LC_MESSAGES, trial_locale)))
+            sl_result = my_setlocale(LC_MESSAGES, trial_locale);
+            DEBUG_LOCALE_INIT(LC_MESSAGES, trial_locale, sl_result);
+            if (! (sl_result))
                 setlocale_failure = TRUE;
 #endif /* USE_LOCALE_MESSAGES */
 #ifdef USE_LOCALE_MONETARY
-            if (! (my_setlocale(LC_MONETARY, trial_locale)))
+            sl_result = my_setlocale(LC_MONETARY, trial_locale);
+            DEBUG_LOCALE_INIT(LC_MONETARY, trial_locale, sl_result);
+            if (! (sl_result))
                 setlocale_failure = TRUE;
 #endif /* USE_LOCALE_MONETARY */
 
@@ -1040,14 +1086,17 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #ifdef USE_LOCALE_CTYPE
             Safefree(curctype);
             curctype = savepv(setlocale(LC_CTYPE, NULL));
+            DEBUG_LOCALE_INIT(LC_CTYPE, NULL, curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
             Safefree(curcoll);
             curcoll = savepv(setlocale(LC_COLLATE, NULL));
+            DEBUG_LOCALE_INIT(LC_COLLATE, NULL, curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
             Safefree(curnum);
             curnum = savepv(setlocale(LC_NUMERIC, NULL));
+            DEBUG_LOCALE_INIT(LC_NUMERIC, NULL, curnum);
 #endif /* USE_LOCALE_NUMERIC */
         }
 
@@ -1789,6 +1838,100 @@ Perl_sync_locale(pTHX)
 
 }
 
+#if defined(DEBUGGING) && defined(USE_LOCALE)
+
+char *
+Perl__setlocale_debug_string(const int category,        /* category number,
+                                                           like LC_ALL */
+                            const char* const locale,   /* locale name */
+
+                            /* return value from setlocale() when attempting to
+                             * set 'category' to 'locale' */
+                            const char* const retval)
+{
+    /* Returns a pointer to a NUL-terminated string in static storage with
+     * added text about the info passed in.  This is not thread safe and will
+     * be overwritten by the next call, so this should be used just to
+     * formulate a string to immediately print or savepv() on.
+     *
+     * Buffer overflow checking is done only after the fact (via an assert),
+     * because this is used only in DEBUGGING, and an attacker would have to
+     * control the start up of perl with the correct environment variable or
+     * command line option. */
+
+    static char ret[128] = "";
+
+    strcpy(ret, "setlocale(");
+
+    switch (category) {
+        default:
+            sprintf(ret, "%s? %d", ret, category);
+            break;
+#   ifdef LC_ALL
+        case LC_ALL:
+            strcat(ret, "LC_ALL");
+            break;
+#   endif
+#   ifdef LC_CTYPE
+        case LC_CTYPE:
+            strcat(ret, "LC_CTYPE");
+            break;
+#   endif
+#   ifdef LC_NUMERIC
+        case LC_NUMERIC:
+            strcat(ret, "LC_NUMERIC");
+            break;
+#   endif
+#   ifdef LC_COLLATE
+        case LC_COLLATE:
+            strcat(ret, "LC_COLLATE");
+            break;
+#   endif
+#   ifdef LC_TIME
+        case LC_TIME:
+            strcat(ret, "LC_TIME");
+            break;
+#   endif
+#   ifdef LC_MONETARY
+        case LC_MONETARY:
+            strcat(ret, "LC_MONETARY");
+            break;
+#   endif
+#   ifdef LC_MESSAGES
+        case LC_MESSAGES:
+            strcat(ret, "LC_MESSAGES");
+            break;
+#   endif
+    }
+
+    strcat(ret, ", ");
+
+    if (locale) {
+        strcat(ret, "\"");
+        strcat(ret, locale);
+        strcat(ret, "\"");
+    }
+    else {
+        strcat(ret, "NULL");
+    }
+
+    strcat(ret, ") returned ");
+
+    if (retval) {
+        strcat(ret, "\"");
+        strcat(ret, retval);
+        strcat(ret, "\"");
+    }
+    else {
+        strcat(ret, "NULL");
+    }
+
+    assert(strlen(ret) < sizeof(ret));
+
+    return ret;
+}
+
+#endif
 
 
 /*

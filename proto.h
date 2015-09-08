@@ -3828,6 +3828,12 @@ STATIC int	S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp);
 #define PERL_ARGS_ASSERT_TOKEREPORT	\
 	assert(lvalp)
 #  endif
+#  if defined(USE_LOCALE)     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
+PERL_CALLCONV char *	Perl__setlocale_debug_string(const int category, const char* const locale, const char* const retval)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
+
+#  endif
 #endif
 #if defined(DEBUG_LEAKING_SCALARS_FORK_DUMP)
 PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv);
