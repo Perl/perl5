@@ -3176,7 +3176,7 @@ sigpending(sigset)
 	RETVAL = not_here("sigpending");
 #else
 	RETVAL = ix ? sigsuspend(sigset) : sigpending(sigset);
-#endif;
+#endif
     OUTPUT:
 	RETVAL
     CLEANUP:
