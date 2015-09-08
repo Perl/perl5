@@ -63,7 +63,7 @@ my $dumper = Dumpvalue->new(
 sub debug {
   return unless $debug;
   my($mess) = join "", '# ', @_;
-  chop $mess;
+  chomp $mess;
   print STDERR $dumper->stringify($mess,1), "\n";
 }
 
