@@ -312,6 +312,7 @@ __END__
 >%4.*2$d<   >[5,3]<       > 005<          >width with reordered precision<
 >%*3$.*2$d< >[5,3,4]<     > 005<          >reordered width with reordered precision<
 >%3$*2$.*1$d< >[3,4,5]<   > 005<          >reordered param, width, precision<
+>%*1$.*f<   >[4, 5, 10]<  >5.0000<        >perl #125956: reordered param, width, precision, floating point<
 >%d<        >-1<          >-1<
 >%-d<       >-1<          >-1<
 >%+d<       >-1<          >-1<
