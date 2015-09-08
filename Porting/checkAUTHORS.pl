@@ -258,6 +258,7 @@ sub display_test_output {
             print "ok $count - ".$real_names->{$_} ." $_\n";
         } else {
             print "not ok $count - Contributor not found in AUTHORS: $_ ".($real_names->{$_} || '???' )."\n";
+            print STDERR ($real_names->{$_} || '???' )." <$_> not found in AUTHORS\n";
         }
 
     }
