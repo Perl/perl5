@@ -6379,7 +6379,15 @@ END
                                     $range_name = "Hangul Syllable";
                                 }
 
-                                if ($i != $start || $range_end < $end) {
+                                # If the annotation would just repeat what's
+                                # already being output as the range, skip it.
+                                # (When an inversion list is being written, it
+                                # isn't a repeat, as that always is in
+                                # decimal)
+                                if (   $write_as_invlist
+                                    || $i != $start
+                                    || $range_end < $end)
+                                {
                                     if ($range_end < $MAX_WORKING_CODEPOINT)
                                     {
                                         $annotation = sprintf "%04X..%04X",
@@ -6393,6 +6401,7 @@ END
                                 else { # Indent if not displaying code points
                                     $annotation = " " x 4;
                                 }
+
                                 if ($range_name) {
                                     $annotation .= " $age[$i]" if $age[$i];
                                     $annotation .= " $range_name";
