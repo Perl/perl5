@@ -639,7 +639,42 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      *    1 = set ok or not applicable,
      *    0 = fallback to a locale of lower priority
      *   -1 = fallback to all locales failed, not even to the C locale
-     */
+     *
+     * Under -DDEBUGGING, if the environment variable PERL_DEBUG_LOCALE_INIT is
+     * set, debugging information is output.
+     *
+     * This looks more complicated than it is, mainly due to the #ifdefs.
+     *
+     * We try to set LC_ALL to the value determined by the environment.  If
+     * there is no LC_ALL on this platform, we try the individual categories we
+     * know about.  If this works, we are done.
+     *
+     * But if it doesn't work, we have to do something else.  We search the
+     * environment variables ourselves instead of relying on the system to do
+     * it.  We look at, in order, LC_ALL, LANG, a system default locale (if we
+     * think there is one), and the ultimate fallback "C".  This is all done in
+     * the same loop as above to avoid duplicating code, but it makes things
+     * more complex.  After the original failure, we add the fallback
+     * possibilities to the list of locales to try, and iterate the loop
+     * through them all until one succeeds.
+     *
+     * On Ultrix, the locale MUST come from the environment, so there is
+     * preliminary code to set it.  I (khw) am not sure that it is necessary,
+     * and that this couldn't be folded into the loop, but barring any real
+     * platforms to test on, it's staying as-is
+     *
+     * A slight complication is that in embedded Perls, the locale may already
+     * be set-up, and we don't want to get it from the normal environment
+     * variables.  This is handled by having a special environment variable
+     * indicate we're in this situation.  We simply set setlocale's 2nd
+     * parameter to be a NULL instead of "".  That indicates to setlocale that
+     * it is not to change anything, but to return the current value,
+     * effectively initializing perl's db to what the locale already is.
+     *
+     * We play the same trick with NULL if a LC_ALL succeeds.  We call
+     * setlocale() on the individual categores with NULL to get their existing
+     * values for our db, instead of trying to change them.
+     * */
 
     int ok = 1;
 
@@ -935,7 +970,12 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
              * LANG, and the C locale.  We don't try the same locale twice, so
              * don't add to the list if already there.  (On POSIX systems, the
              * LC_ALL element will likely be a repeat of the 0th element "",
-             * but there's no harm done by doing it explicitly */
+             * but there's no harm done by doing it explicitly.
+             *
+             * Note that this tries the LC_ALL environment variable even on
+             * systems which have no LC_ALL locale setting.  This may or may
+             * not have been originally intentional, but there's no real need
+             * to change the behavior. */
             if (lc_all) {
                 for (j = 0; j < trial_locales_count; j++) {
                     if (strEQ(lc_all, trial_locales[j])) {
