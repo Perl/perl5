@@ -6794,24 +6794,24 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                     || ! has_charset);
         bool has_runon = ((RExC_seen & REG_RUN_ON_COMMENT_SEEN)
                                                    == REG_RUN_ON_COMMENT_SEEN);
-	U16 reganch = (U16)((r->extflags & RXf_PMf_STD_PMMOD)
+	U8 reganch = (U8)((r->extflags & RXf_PMf_STD_PMMOD)
 			    >> RXf_PMf_STD_PMMOD_SHIFT);
 	const char *fptr = STD_PAT_MODS;        /*"msixn"*/
 	char *p;
-        /* Allocate for the worst case, which is all the std flags are turned
-         * on.  If more precision is desired, we could do a population count of
-         * the flags set.  This could be done with a small lookup table, or by
-         * shifting, masking and adding, or even, when available, assembly
-         * language for a machine-language population count.
-         * We never output a minus, as all those are defaults, so are
+
+        /* We output all the necessary flags; we never output a minus, as all
+         * those are defaults, so are
          * covered by the caret */
 	const STRLEN wraplen = plen + has_p + has_runon
             + has_default       /* If needs a caret */
+            + PL_bitcount[reganch] /* 1 char for each set standard flag */
 
 		/* If needs a character set specifier */
 	    + ((has_charset) ? MAX_CHARSET_NAME_LENGTH : 0)
-            + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
+
+        /* make sure PL_bitcount bounds not exceeded */
+        assert(sizeof(STD_PAT_MODS) <= 8);
 
         Newx(p, wraplen + 1, char); /* +1 for the ending NUL */
 	r->xpv_len_u.xpvlenu_pv = p;

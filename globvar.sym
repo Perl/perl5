@@ -5,6 +5,7 @@
 PL_No
 PL_Yes
 PL_bincompat_options
+PL_bitcount
 PL_block_type
 PL_charclass
 PL_check
