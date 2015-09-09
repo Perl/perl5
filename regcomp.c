@@ -12285,7 +12285,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * string's UTF8ness.  The reason to do this is that EXACTF is not
              * trie-able, EXACTFU is.
              *
-             * Similarly, we can convert EXACTFL nodes to EXACTFU if they
+             * Similarly, we can convert EXACTFL nodes to EXACTFLU8 if they
              * contain only above-Latin1 characters (hence must be in UTF8),
              * which don't participate in folds with Latin1-range characters,
              * as the latter's folds aren't known until runtime.  (We don't
@@ -12724,7 +12724,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * we have an array that finds its fold quickly */
                     *(s++) = (char) ender;
                 }
-                else {  /* FOLD and UTF */
+                else {  /* FOLD, and UTF (or sharp s) */
                     /* Unlike the non-fold case, we do actually have to
                      * calculate the results here in pass 1.  This is for two
                      * reasons, the folded length may be longer than the
