@@ -810,7 +810,7 @@ The side effects are:
 
 =over 4
 
-=item 1)
+=item *
 
 These select Unicode rules.  That means that in double-quotish strings,
 the string is always converted to UTF-8 to force a Unicode
@@ -819,7 +819,7 @@ to non-UTF8, if possible).  In regular expression patterns, the
 conversion isn't done, but if the character set modifier would
 otherwise be C</d>, it is changed to C</u>.
 
-=item 2)
+=item *
 
 If you use the form C<\N{I<character name>}>, the L<charnames> module
 gets automatically loaded.  This may not be suitable for the test level
