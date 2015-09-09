@@ -1876,78 +1876,73 @@ Perl__setlocale_debug_string(const int category,        /* category number,
     /* Returns a pointer to a NUL-terminated string in static storage with
      * added text about the info passed in.  This is not thread safe and will
      * be overwritten by the next call, so this should be used just to
-     * formulate a string to immediately print or savepv() on.
-     *
-     * Buffer overflow checking is done only after the fact (via an assert),
-     * because this is used only in DEBUGGING, and an attacker would have to
-     * control the start up of perl with the correct environment variable or
-     * command line option. */
+     * formulate a string to immediately print or savepv() on. */
 
     static char ret[128] = "";
 
-    strcpy(ret, "setlocale(");
+    my_strlcpy(ret, "setlocale(", sizeof(ret));
 
     switch (category) {
         default:
-            sprintf(ret, "%s? %d", ret, category);
+            my_snprintf(ret, sizeof(ret), "%s? %d", ret, category);
             break;
 #   ifdef LC_ALL
         case LC_ALL:
-            strcat(ret, "LC_ALL");
+            my_strlcat(ret, "LC_ALL", sizeof(ret));
             break;
 #   endif
 #   ifdef LC_CTYPE
         case LC_CTYPE:
-            strcat(ret, "LC_CTYPE");
+            my_strlcat(ret, "LC_CTYPE", sizeof(ret));
             break;
 #   endif
 #   ifdef LC_NUMERIC
         case LC_NUMERIC:
-            strcat(ret, "LC_NUMERIC");
+            my_strlcat(ret, "LC_NUMERIC", sizeof(ret));
             break;
 #   endif
 #   ifdef LC_COLLATE
         case LC_COLLATE:
-            strcat(ret, "LC_COLLATE");
+            my_strlcat(ret, "LC_COLLATE", sizeof(ret));
             break;
 #   endif
 #   ifdef LC_TIME
         case LC_TIME:
-            strcat(ret, "LC_TIME");
+            my_strlcat(ret, "LC_TIME", sizeof(ret));
             break;
 #   endif
 #   ifdef LC_MONETARY
         case LC_MONETARY:
-            strcat(ret, "LC_MONETARY");
+            my_strlcat(ret, "LC_MONETARY", sizeof(ret));
             break;
 #   endif
 #   ifdef LC_MESSAGES
         case LC_MESSAGES:
-            strcat(ret, "LC_MESSAGES");
+            my_strlcat(ret, "LC_MESSAGES", sizeof(ret));
             break;
 #   endif
     }
 
-    strcat(ret, ", ");
+    my_strlcat(ret, ", ", sizeof(ret));
 
     if (locale) {
-        strcat(ret, "\"");
-        strcat(ret, locale);
-        strcat(ret, "\"");
+        my_strlcat(ret, "\"", sizeof(ret));
+        my_strlcat(ret, locale, sizeof(ret));
+        my_strlcat(ret, "\"", sizeof(ret));
     }
     else {
-        strcat(ret, "NULL");
+        my_strlcat(ret, "NULL", sizeof(ret));
     }
 
-    strcat(ret, ") returned ");
+    my_strlcat(ret, ") returned ", sizeof(ret));
 
     if (retval) {
-        strcat(ret, "\"");
-        strcat(ret, retval);
-        strcat(ret, "\"");
+        my_strlcat(ret, "\"", sizeof(ret));
+        my_strlcat(ret, retval, sizeof(ret));
+        my_strlcat(ret, "\"", sizeof(ret));
     }
     else {
-        strcat(ret, "NULL");
+        my_strlcat(ret, "NULL", sizeof(ret));
     }
 
     assert(strlen(ret) < sizeof(ret));
