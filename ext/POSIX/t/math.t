@@ -186,8 +186,8 @@ SKIP: {
           # bothering with the test if things look iffy.
           # We could, say, $Config{ccsymbols} =~ /\b__[xi][3-7]86=1\b/,
           # but that feels quite shaky.
-          $Config{byteorder} eq '1234' &&
-          $Config{ivsize} == 4 &&  # Really redundant with the 'byteorder'.
+          $Config{byteorder} =~ /1234/ &&
+          $Config{longdblkind} == 3 &&
           $Config{ptrsize} == 4;
       skip($^O, 1) if $could_be_x86_32 && !$Config{uselongdouble};
       ok(issignaling($x), "setpayloadsig + issignaling");
