@@ -52,18 +52,40 @@
 #endif
 
 #ifdef WIN32
-int inet_pton(int af, const char *src, void *dst)
+
+/* VC 6 with its original headers doesn't know about sockaddr_storage, VC 2003 does*/
+#ifndef _SS_MAXSIZE
+
+#  define _SS_MAXSIZE 128
+#  define _SS_ALIGNSIZE (sizeof(__int64))
+
+#  define _SS_PAD1SIZE (_SS_ALIGNSIZE - sizeof (short))
+#  define _SS_PAD2SIZE (_SS_MAXSIZE - (sizeof (short) + _SS_PAD1SIZE \
+                                                    + _SS_ALIGNSIZE))
+
+struct sockaddr_storage {
+    short ss_family;
+    char __ss_pad1[_SS_PAD1SIZE];
+    __int64 __ss_align;
+    char __ss_pad2[_SS_PAD2SIZE];
+};
+
+typedef int socklen_t;
+
+#define in6_addr in_addr6
+
+#define INET_ADDRSTRLEN  22
+#define INET6_ADDRSTRLEN 65
+
+#endif
+
+static int inet_pton(int af, const char *src, void *dst)
 {
   struct sockaddr_storage ss;
   int size = sizeof(ss);
-  char src_copy[INET6_ADDRSTRLEN+1];
+  ss.ss_family = af; /* per MSDN */
 
-  ZeroMemory(&ss, sizeof(ss));
-  /* stupid non-const API */
-  strncpy(src_copy, src, INET6_ADDRSTRLEN+1);
-  src_copy[INET6_ADDRSTRLEN] = 0;
-
-  if (WSAStringToAddress(src_copy, af, NULL, (struct sockaddr *)&ss, &size) != 0)
+  if (WSAStringToAddress((char*)src, af, NULL, (struct sockaddr *)&ss, &size) != 0)
     return 0;
 
   switch(af) {
@@ -73,10 +95,13 @@ int inet_pton(int af, const char *src, void *dst)
     case AF_INET6:
       *(struct in6_addr *)dst = ((struct sockaddr_in6 *)&ss)->sin6_addr;
       return 1;
+    default:
+      WSASetLastError(WSAEAFNOSUPPORT);
+      return -1;
   }
 }
 
-const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
+static const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
 {
   struct sockaddr_storage ss;
   unsigned long s = size;
