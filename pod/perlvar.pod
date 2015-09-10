@@ -1135,10 +1135,8 @@ After a match against some variable C<$var>:
 
 This variable was added in Perl v5.6.0.
 
-=item %LAST_MATCH_START
-
 =item %-
-X<%-> X<%LAST_MATCH_START>
+X<%->
 
 Similar to C<%+>, this variable allows access to the named capture groups
 in the last successful match in the currently active dynamic scope.  To
