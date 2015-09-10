@@ -299,7 +299,9 @@ struct RExC_state_t {
 #define	SPSTART		0x04	/* Starts with * or + */
 #define POSTPONED	0x08    /* (?1),(?&name), (??{...}) or similar */
 #define TRYAGAIN	0x10	/* Weeded out a declaration. */
-#define RESTART_UTF8    0x20    /* Restart, need to calcuate sizes as UTF-8 */
+#define RESTART_PASS1   0x20    /* Need to restart sizing pass */
+#define NEED_UTF8       0x40    /* In conjunction with RESTART_PASS1, need to
+                                   calcuate sizes as UTF-8 */
 
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-RExC_emit_start) : -1)
 
@@ -6710,9 +6712,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         at least some part of the pattern, and therefore must convert the whole
         thing.
         -- dmq */
-        if (flags & RESTART_UTF8) {
-            S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen,
+        if (flags & RESTART_PASS1) {
+            if (flags & NEED_UTF8) {
+                S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen,
                                     pRExC_state->num_code_blocks);
+            }
             goto redo_first_pass;
         }
         Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for sizing pass, flags=%#"UVxf"", (UV) flags);
@@ -9769,10 +9773,10 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
 #endif
 
 /* Returns NULL, setting *flagp to TRYAGAIN at the end of (?) that only sets
-   flags. Returns NULL, setting *flagp to RESTART_UTF8 if the sizing scan
-   needs to be restarted.
-   Otherwise would only return NULL if regbranch() returns NULL, which
-   cannot happen.  */
+   flags. Returns NULL, setting *flagp to RESTART_PASS1 if the sizing scan
+   needs to be restarted, or'd with NEED_UTF8 if the pattern needs to be
+   upgraded to UTF-8.  Otherwise would only return NULL if regbranch() returns
+   NULL, which cannot happen.  */
 STATIC regnode *
 S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     /* paren: Parenthesized? 0=top; 1,2=inside '(': changed to letter.
@@ -10300,8 +10304,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			    ret->flags = 1;
 
                         tail = reg(pRExC_state, 1, &flag, depth+1);
-                        if (flag & RESTART_UTF8) {
-                            *flagp = RESTART_UTF8;
+                        if (flag & (RESTART_PASS1|NEED_UTF8)) {
+                            *flagp = flag & (RESTART_PASS1|NEED_UTF8);
                             return NULL;
                         }
                         REGTAIL(pRExC_state, ret, tail);
@@ -10389,8 +10393,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     REGTAIL(pRExC_state, ret, reganode(pRExC_state, IFTHEN, 0));
                     br = regbranch(pRExC_state, &flags, 1,depth+1);
 		    if (br == NULL) {
-                        if (flags & RESTART_UTF8) {
-                            *flagp = RESTART_UTF8;
+                        if (flags & (RESTART_PASS1|NEED_UTF8)) {
+                            *flagp = flags & (RESTART_PASS1|NEED_UTF8);
                             return NULL;
                         }
                         FAIL2("panic: regbranch returned NULL, flags=%#"UVxf"",
@@ -10409,8 +10413,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         lastbr = reganode(pRExC_state, IFTHEN, 0);
 
                         if (!regbranch(pRExC_state, &flags, 1,depth+1)) {
-                            if (flags & RESTART_UTF8) {
-                                *flagp = RESTART_UTF8;
+                            if (flags & (RESTART_PASS1|NEED_UTF8)) {
+                                *flagp = flags & (RESTART_PASS1|NEED_UTF8);
                                 return NULL;
                             }
                             FAIL2("panic: regbranch returned NULL, flags=%#"UVxf"",
@@ -10507,8 +10511,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     /*     branch_len = (paren != 0); */
 
     if (br == NULL) {
-        if (flags & RESTART_UTF8) {
-            *flagp = RESTART_UTF8;
+        if (flags & (RESTART_PASS1|NEED_UTF8)) {
+            *flagp = flags & (RESTART_PASS1|NEED_UTF8);
             return NULL;
         }
         FAIL2("panic: regbranch returned NULL, flags=%#"UVxf"", (UV) flags);
@@ -10554,8 +10558,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
         br = regbranch(pRExC_state, &flags, 0, depth+1);
 
 	if (br == NULL) {
-            if (flags & RESTART_UTF8) {
-                *flagp = RESTART_UTF8;
+            if (flags & (RESTART_PASS1|NEED_UTF8)) {
+                *flagp = flags & (RESTART_PASS1|NEED_UTF8);
                 return NULL;
             }
             FAIL2("panic: regbranch returned NULL, flags=%#"UVxf"", (UV) flags);
@@ -10716,8 +10720,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
  *
  * Implements the concatenation operator.
  *
- * Returns NULL, setting *flagp to RESTART_UTF8 if the sizing scan needs to be
- * restarted.
+ * Returns NULL, setting *flagp to RESTART_PASS1 if the sizing scan needs to be
+ * restarted, or'd with NEED_UTF8 if the pattern needs to be upgraded to UTF-8
  */
 STATIC regnode *
 S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
@@ -10756,8 +10760,8 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 	if (latest == NULL) {
 	    if (flags & TRYAGAIN)
 		continue;
-            if (flags & RESTART_UTF8) {
-                *flagp = RESTART_UTF8;
+            if (flags & (RESTART_PASS1|NEED_UTF8)) {
+                *flagp = flags & (RESTART_PASS1|NEED_UTF8);
                 return NULL;
             }
             FAIL2("panic: regpiece returned NULL, flags=%#"UVxf"", (UV) flags);
@@ -10799,8 +10803,8 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
  *
  * Returns NULL, setting *flagp to TRYAGAIN if regatom() returns NULL with
  * TRYAGAIN.
- * Returns NULL, setting *flagp to RESTART_UTF8 if the sizing scan needs to be
- * restarted.
+ * Returns NULL, setting *flagp to RESTART_PASS1 if the sizing scan needs to be
+ * restarted, or'd with NEED_UTF8 if the pattern needs to be upgraded to UTF-8
  */
 STATIC regnode *
 S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
@@ -10829,8 +10833,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     ret = regatom(pRExC_state, &flags,depth+1);
     if (ret == NULL) {
-	if (flags & (TRYAGAIN|RESTART_UTF8))
-	    *flagp |= flags & (TRYAGAIN|RESTART_UTF8);
+	if (flags & (TRYAGAIN|RESTART_PASS1|NEED_UTF8))
+	    *flagp |= flags & (TRYAGAIN|RESTART_PASS1|NEED_UTF8);
         else
             FAIL2("panic: regatom returned NULL, flags=%#"UVxf"", (UV) flags);
 	return(NULL);
@@ -11110,11 +11114,12 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   * The final possibility, which happens only when the fourth one would
   * otherwise be in effect, is that one of those code points requires the
   * pattern to be recompiled as UTF-8.  The function returns FALSE, and sets
-  * the RESTART_UTF8 flag in *flagp.  When this happens, the caller needs to
-  * desist from continuing parsing, and return this information to its caller.
-  * This is not set for when there is only one code point, as this can be
-  * called as part of an ANYOF node, and they can store above-Latin1 code
-  * points without the pattern having to be in UTF-8.
+  * the RESTART_PASS1 and NEED_UTF8 flags in *flagp.  When this happens, the
+  * caller needs to desist from continuing parsing, and return this information
+  * to its caller.  This is not set for when there is only one code point, as
+  * this can be called as part of an ANYOF node, and they can store
+  * above-Latin1 code points without the pattern having to be in UTF-8.
+  * XXX
   *
   * For non-single-quoted regexes, the tokenizer has resolved character and
   * sequence names inside \N{...} into their Unicode values, normalizing the
@@ -11343,8 +11348,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
         if (node_p) {
             if (!(*node_p = reg(pRExC_state, 1, &flags, depth+1))) {
-                if (flags & RESTART_UTF8) {
-                    *flagp = RESTART_UTF8;
+                if (flags & (RESTART_PASS1|NEED_UTF8)) {
+                    *flagp = flags & (RESTART_PASS1|NEED_UTF8);
                     return FALSE;
                 }
                 FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#"UVxf"",
@@ -11673,8 +11678,8 @@ S_backref_value(char *p)
 
    Returns NULL, setting *flagp to TRYAGAIN if reg() returns NULL with
    TRYAGAIN.
-   Returns NULL, setting *flagp to RESTART_UTF8 if the sizing scan needs to be
-   restarted.
+   Returns NULL, setting *flagp to RESTART_PASS1 if the sizing scan needs to be
+   restarted, or'd with NEED_UTF8 if the pattern needs to be upgraded to UTF-8
    Otherwise does not return NULL.
 */
 
@@ -11738,7 +11743,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                        TRUE, /* Allow an optimized regnode result */
                        NULL);
         if (ret == NULL) {
-            if (*flagp & RESTART_UTF8)
+            if (*flagp & (RESTART_PASS1|NEED_UTF8))
                 return NULL;
             FAIL2("panic: regclass returned NULL to regatom, flags=%#"UVxf"",
                   (UV) *flagp);
@@ -11763,8 +11768,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		    }
 		    goto tryagain;
 		}
-                if (flags & RESTART_UTF8) {
-                    *flagp = RESTART_UTF8;
+                if (flags & (RESTART_PASS1|NEED_UTF8)) {
+                    *flagp = flags & (RESTART_PASS1|NEED_UTF8);
                     return NULL;
                 }
                 FAIL2("panic: reg returned NULL to regatom, flags=%#"UVxf"",
@@ -12040,8 +12045,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                (bool) RExC_strict,
                                TRUE, /* Allow an optimized regnode result */
                                NULL);
-                /* regclass() can only return RESTART_UTF8 if multi-char folds
-                   are allowed.  */
+                /* regclass() can only return RESTART_PASS1 and NEED_UTF8 if
+                 * multi-char folds are allowed.  */
                 if (!ret)
                     FAIL2("panic: regclass returned NULL to regatom, flags=%#"UVxf"",
                           (UV) *flagp);
@@ -12078,7 +12083,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 break;
             }
 
-            if (*flagp & RESTART_UTF8)
+            if (*flagp & RESTART_PASS1)
                 return NULL;
             RExC_parse--;
             goto defchar;
@@ -12403,8 +12408,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                             flagp,
                                             depth)
                         ) {
-                            if (*flagp & RESTART_UTF8)
-                                FAIL("panic: grok_bslash_N set RESTART_UTF8");
+                            if (*flagp & NEED_UTF8)
+                                FAIL("panic: grok_bslash_N set NEED_UTF8");
 
                             /* Here, it wasn't a single code point.  Go close
                              * up this EXACTish node.  The switch() prior to
@@ -13410,8 +13415,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                         RExC_parse++;
                     }
 
-                    /* regclass() can only return RESTART_UTF8 if multi-char
-                       folds are allowed.  */
+                    /* regclass() can only return RESTART_PASS1 and NEED_UTF8
+                     * if multi-char folds are allowed.  */
                     if (!regclass(pRExC_state, flagp,depth+1,
                                   is_posix_class, /* parse the whole char
                                                      class only if not a
@@ -13670,8 +13675,8 @@ redo_curchar:
                 break;
 
             case '\\':
-                /* regclass() can only return RESTART_UTF8 if multi-char
-                   folds are allowed.  */
+                /* regclass() can only return RESTART_PASS1 and NEED_UTF8 if
+                 * multi-char folds are allowed.  */
                 if (!regclass(pRExC_state, flagp,depth+1,
                               TRUE, /* means parse just the next thing */
                               FALSE, /* don't allow multi-char folds */
@@ -13697,8 +13702,8 @@ redo_curchar:
                     RExC_parse++;
                 }
 
-                /* regclass() can only return RESTART_UTF8 if multi-char
-                   folds are allowed.  */
+                /* regclass() can only return RESTART_PASS1 and NEED_UTF8 if
+                 * multi-char folds are allowed.  */
                 if(!regclass(pRExC_state, flagp,depth+1,
                              is_posix_class, /* parse the whole char class
                                                 only if not a posix class */
@@ -13997,8 +14002,8 @@ redo_curchar:
      * already has all folding taken into consideration, and we don't want
      * regclass() to add to that */
     RExC_flags &= ~RXf_PMf_FOLD;
-    /* regclass() can only return RESTART_UTF8 if multi-char folds are allowed.
-     */
+    /* regclass() can only return RESTART_PASS1 and NEED_UTF8 if multi-char
+     * folds are allowed.  */
     node = regclass(pRExC_state, flagp,depth+1,
                     FALSE, /* means parse the whole char class */
                     FALSE, /* don't allow multi-char folds */
@@ -14219,8 +14224,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * are extra bits for \w, etc. in locale ANYOFs, as what these match is not
      * determinable at compile time
      *
-     * Returns NULL, setting *flagp to RESTART_UTF8 if the sizing scan needs
-     * to be restarted.  This can only happen if ret_invlist is non-NULL.
+     * Returns NULL, setting *flagp to RESTART_PASS1 if the sizing scan needs
+     * to be restarted, or'd with NEED_UTF8 if the pattern needs to be upgraded
+     * to UTF-8.  This can only happen if ret_invlist is non-NULL.
      */
 
     UV prevvalue = OOB_UNICODE, save_prevvalue = OOB_UNICODE;
@@ -14474,8 +14480,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                         depth)
                     ) {
 
-                        if (*flagp & RESTART_UTF8)
-                            FAIL("panic: grok_bslash_N set RESTART_UTF8");
+                        if (*flagp & NEED_UTF8)
+                            FAIL("panic: grok_bslash_N set NEED_UTF8");
 
                         if (cp_count < 0) {
                             vFAIL("\\N in a character class must be a named character: \\N{...}");
@@ -15364,7 +15370,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
 	ret = reg(pRExC_state, 1, &reg_flags, depth+1);
 
-	*flagp |= reg_flags&(HASWIDTH|SIMPLE|SPSTART|POSTPONED|RESTART_UTF8);
+	*flagp |= reg_flags&(HASWIDTH|SIMPLE|SPSTART|POSTPONED|RESTART_PASS1|NEED_UTF8);
 
 	RExC_parse = save_parse;
 	RExC_end = save_end;
