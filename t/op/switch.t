@@ -66,9 +66,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {
     my $ok;
     given("cd") {
-	when(qr/b/) { $ok = 'B'; }
-	when(qr/c/) { $ok = 'C'; continue }
-	when(qr/c/) { $ok = 'CC'; }
+	when(/b/) { $ok = 'B'; }
+	when(/c/) { $ok = 'C'; continue }
+	when(/c/) { $ok = 'CC'; }
 	default   { $ok = 'D'; }
     }
     is($ok, 'CC', "simple continue");

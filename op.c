@@ -10201,18 +10201,20 @@ OP *
 Perl_ck_smartmatch(pTHX_ OP *o)
 {
     dVAR;
+    OP *first;
+    OP *second;
     PERL_ARGS_ASSERT_CK_SMARTMATCH;
 
+    first  = cBINOPo->op_first;
+    second = OpSIBLING(first);
+
+    /* Implicitly take a reference to a regular expression on the right */
+    if (second->op_type == OP_MATCH) {
+        second->op_type = OP_QR;
+        second->op_ppaddr = PL_ppaddr[OP_QR];
+    }
+
     if (0 == (o->op_flags & OPf_SPECIAL)) {
-        OP *first  = cBINOPo->op_first;
-        OP *second = OpSIBLING(first);
-
-        /* Implicitly take a reference to a regular expression on the right*/
-        if (second->op_type == OP_MATCH) {
-            second->op_type = OP_QR;
-            second->op_ppaddr = PL_ppaddr[OP_QR];
-        }
-
         if (ckWARN(WARN_SYNTAX)) {
             moan_not_so_smart(first, false);
             moan_not_so_smart(second, true);
