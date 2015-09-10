@@ -318,12 +318,13 @@ struct RExC_state_t {
 #define PAREN_SET(u8str,paren) PBYTE(u8str,paren) |= PBITVAL(paren)
 #define PAREN_UNSET(u8str,paren) PBYTE(u8str,paren) &= (~PBITVAL(paren))
 
-#define REQUIRE_UTF8	STMT_START {                                       \
+#define REQUIRE_UTF8(flagp) STMT_START {                                   \
                                      if (!UTF) {                           \
-                                         *flagp = RESTART_UTF8;            \
+                                         assert(PASS1);                    \
+                                         *flagp = RESTART_PASS1|NEED_UTF8; \
                                          return NULL;                      \
                                      }                                     \
-                        } STMT_END
+                             } STMT_END
 
 /* This converts the named class defined in regcomp.h to its equivalent class
  * number defined in handy.h. */
@@ -12413,7 +12414,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         }
                         p = RExC_parse;
                         if (ender > 0xff) {
-                            REQUIRE_UTF8;
+                            REQUIRE_UTF8(flagp);
                         }
                         break;
 		    case 'r':
@@ -12460,7 +12461,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 				goto recode_encoding;
 			    }
 			    if (ender > 0xff) {
-				REQUIRE_UTF8;
+				REQUIRE_UTF8(flagp);
 			    }
 			    break;
 			}
@@ -12498,7 +12499,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                 }
 			    }
                             else {
-				REQUIRE_UTF8;
+				REQUIRE_UTF8(flagp);
 			    }
 			    break;
 			}
@@ -12543,7 +12544,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			    STRLEN numlen = 3;
 			    ender = grok_oct(p, &numlen, &flags, NULL);
 			    if (ender > 0xff) {
-				REQUIRE_UTF8;
+				REQUIRE_UTF8(flagp);
 			    }
 			    p += numlen;
                             if (PASS2   /* like \08, \178 */
@@ -12565,7 +12566,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			    ender = reg_recode((const char)(U8)ender, &enc);
 			    if (!enc && PASS2)
 				ckWARNreg(p, "Invalid escape in the specified encoding");
-			    REQUIRE_UTF8;
+			    REQUIRE_UTF8(flagp);
 			}
 			break;
 		    case '\0':
