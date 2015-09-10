@@ -612,20 +612,31 @@ X<binmode> X<binary> X<text> X<DOS> X<Windows>
 
 =for Pod::Functions prepare binary files for I/O
 
-Arranges for FILEHANDLE to be read or written in "binary" or "text"
-mode on systems where the run-time libraries distinguish between
-binary and text files.  If FILEHANDLE is an expression, the value is
-taken as the name of the filehandle.  Returns true on success,
-otherwise it returns C<undef> and sets C<$!> (errno).
+Changes the underlying L<PerlIO> layer of the filehandle.
+Returns true on success, otherwise it returns C<undef> and sets C<$!>
+(errno).
 
-On some systems (in general, DOS- and Windows-based systems) binmode()
-is necessary when you're not working with a text file.  For the sake
-of portability it is a good idea always to use it when appropriate,
-and never to use it when it isn't appropriate.  Also, people can
-set their I/O to be by default UTF8-encoded Unicode, not bytes.
+For example, to use the C<:raw> layer for binary data:
 
-In other words: regardless of platform, use binmode() on binary data,
-like images, for example.
+    binmode($fh) or die "Failed to binmode: $!";
+
+    # Or this...
+    binmode($fh, ':raw') or die "Failed to binmode: $!";
+
+You may use any layers that L<PerlIO> understands:
+
+    binmode($fh, ':utf8') or die ...
+    binmode($fh, ':encoding(UTF-8)') or die ...
+
+On some systems (in general, DOS- and Windows-based systems) C<:raw>
+binmode() is necessary when you're not working with a text file.
+For the sake of portability it is a good idea always to use it when
+appropriate, and never to use it when it isn't appropriate.  Also,
+people can set their I/O to be by default UTF8-encoded Unicode, not
+bytes.
+
+In other words: regardless of platform, use C<:raw> binmode() on
+binary data, like images, for example.
 
 If LAYER is present it is a single string, but may contain multiple
 directives.  The directives alter the behaviour of the filehandle.
@@ -641,7 +652,8 @@ I<also> disabled.  See L<PerlIO>, L<perlrun>, and the discussion about the
 PERLIO environment variable.
 
 The C<:bytes>, C<:crlf>, C<:utf8>, and any other directives of the
-form C<:...>, are called I/O I<layers>.  The C<open> pragma can be used to
+form C<:...>, are called I/O I<layers>.  See L<PerlIO> for a
+description of each LAYER type.  The C<open> pragma can be used to
 establish default I/O layers.  See L<open>.
 
 I<The LAYER parameter of the binmode() function is described as "DISCIPLINE"
