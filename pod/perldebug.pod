@@ -5,7 +5,8 @@ perldebug - Perl debugging
 
 =head1 DESCRIPTION
 
-First of all, have you tried using the B<-w> switch?
+First of all, have you tried using L<C<use strict;>|strict> and
+L<C<use warnings;>|warnings>?
 
 
 If you're new to the Perl debugger, you may prefer to read
@@ -1199,7 +1200,7 @@ See L<perldebguts/"Debugging Perl Memory Usage"> for the details.
 
 =head1 SEE ALSO
 
-You do have C<use warnings> enabled, don't you?
+You do have C<use strict> and C<use warnings> enabled, don't you?
 
 L<perldebtut>,
 L<perldebguts>,
