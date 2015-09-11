@@ -11737,16 +11737,16 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                        (bool) RExC_strict,
                        TRUE, /* Allow an optimized regnode result */
                        NULL);
-	if (*RExC_parse != ']') {
-	    RExC_parse = oregcomp_parse;
-	    vFAIL("Unmatched [");
-	}
         if (ret == NULL) {
             if (*flagp & RESTART_UTF8)
                 return NULL;
             FAIL2("panic: regclass returned NULL to regatom, flags=%#"UVxf"",
                   (UV) *flagp);
         }
+	if (*RExC_parse != ']') {
+	    RExC_parse = oregcomp_parse;
+	    vFAIL("Unmatched [");
+	}
 	nextchar(pRExC_state);
         Set_Node_Length(ret, RExC_parse - oregcomp_parse + 1); /* MJD */
 	break;
