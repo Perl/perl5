@@ -697,30 +697,34 @@ with the nuts and bolts of Unicode.
 
 Block names are matched in the compound form, like C<\p{Block: Arrows}> or
 C<\p{Blk=Hebrew}>.  Unlike most other properties, only a few block names have a
-Unicode-defined short name.  But Perl does provide a (slight, no longer
-recommended) shortcut:  You can say, for example C<\p{In_Arrows}> or
-C<\p{In_Hebrew}>.
+Unicode-defined short name.
 
-For backwards compatibility, the C<In> prefix may be
-omitted if there is no naming conflict with a script or any other
-property, and you can even use an C<Is> prefix instead in those cases.
-But don't do this for new code because your code could break in new
-releases, and this has already happened: There was a time in very
-early Unicode releases when C<\p{Hebrew}> would have matched the
-I<block> Hebrew; now it doesn't.
+Perl also defines single form synonyms for the block property in cases
+where these do not conflict with something else.  But don't use any of
+these, because they are unstable.  Since these are Perl extensions, they
+are subordinate to official Unicode property names; Unicode doesn't know
+nor care about Perl's extensions.  It may happen that a name that
+currently means the Perl extension will later be changed without warning
+to mean a different Unicode property in a future version of the perl
+interpreter that uses a later Unicode release, and your code would no
+longer work.  The extensions are mentioned here for completeness:  Take
+the block name and prefix it with one of: C<In> (for example
+C<\p{Blk=Arrows}> can currently be written as C<\p{In_Arrows}>); or
+sometimes C<Is> (like C<\p{Is_Arrows}>); or sometimes no prefix at all
+(C<\p{Arrows}>).  As of this writing (Unicode 8.0) there are no
+conflicts with using the C<In_> prefix, but there are plenty with the
+other two forms.  For example, C<\p{Is_Hebrew}> and C<\p{Hebrew}> mean
+C<\p{Script=Hebrew}> which is NOT the same thing as C<\p{Blk=Hebrew}>.  Our
+advice used to be to use the C<In_> prefix as a single form way of
+specifying a block.  But Unicode 8.0 added properties whose names begin
+with C<In>, and it's now clear that it's only luck that's so far
+prevented a conflict.  Using C<In> is only marginally less typing than
+C<Blk:>, and the latter's meaning is clearer anyway, and guaranteed to
+never conflict.  So don't take chances.  Use C<\p{Blk=foo}> for new
+code.  And be sure that block is what you really really want to do.  In
+most cases scripts are what you want instead.
 
-Using the C<In> prefix avoids this ambiguity, so far.  But new versions
-of Unicode continue to add new properties whose names begin with C<In>.
-There is a possibility that one of them someday will conflict with your
-usage.  Since this is just a Perl extension, Unicode's name will take
-precedence and your code will become broken.  Also, Unicode is free to
-add a script whose name begins with C<In>; that would cause problems.
-
-So it's clearer and best to use the compound form when specifying
-blocks.  And be sure that is what you really really want to do.  In most
-cases scripts are what you want instead.
-
-A complete list of blocks and their shortcuts is in L<perluniprops>.
+A complete list of blocks is in L<perluniprops>.
 
 =head3 B<Other Properties>
 

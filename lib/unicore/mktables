@@ -5716,6 +5716,9 @@ END
         }
 
         # Look at each alias
+        my $is_last_resort = 0;
+        my $deprecated_or_discouraged
+                                = qr/ ^ (?: $DEPRECATED | $DISCOURAGED ) $/x;
         foreach my $alias ($self->aliases()) {
 
             # Don't use an alias that isn't ok to use for an external name.
@@ -5724,10 +5727,13 @@ END
             my $name = main::Standardize($alias->name);
             trace $self, $name if main::DEBUG && $to_trace;
 
-            # Take the first one, or a shorter one that isn't numeric.  This
+            # Take the first one, or any non-deprecated non-discouraged one
+            # over one that is, or a shorter one that isn't numeric.  This
             # relies on numeric aliases always being last in the array
             # returned by aliases().  Any alpha one will have precedence.
-            if (! defined $short_name{$addr}
+            if (   ! defined $short_name{$addr}
+                || (   $is_last_resort
+                    && $alias->status !~ $deprecated_or_discouraged)
                 || ($name =~ /\D/
                     && length($name) < length($short_name{$addr})))
             {
@@ -5735,14 +5741,16 @@ END
                 ($short_name{$addr} = $name) =~ s/ (?<= . ) _ (?= . ) //xg;
 
                 $nominal_short_name_length{$addr} = length $name;
+                $is_last_resort = $alias->status =~ $deprecated_or_discouraged;
             }
         }
 
         # If the short name isn't a nice one, perhaps an equivalent table has
         # a better one.
-        if (! defined $short_name{$addr}
-            || $short_name{$addr} eq ""
-            || $short_name{$addr} eq "_")
+        if (   $self->can('children')
+            && (   ! defined $short_name{$addr}
+                || $short_name{$addr} eq ""
+                || $short_name{$addr} eq "_"))
         {
             my $return;
             foreach my $follower ($self->children) {    # All equivalents
@@ -15141,11 +15149,12 @@ sub add_perl_synonyms() {
                     my $status = $alias->status;
                     if ($nominal_property == $block) {
 
-                        # For block properties, the 'In' form is preferred for
-                        # external use; the pod file contains wild cards for
-                        # this and the 'Is' form so no entries for those; and
-                        # we don't want people using the name without the
-                        # 'In', so discourage that.
+                        # For block properties, only the compound form is
+                        # preferred for external use; the others are
+                        # discouraged.  The pod file contains wild cards for
+                        # the 'In' and 'Is' forms so no entries for those; and
+                        # we don't want people using the name without any
+                        # prefix, so discourage that.
                         if ($prefix eq "") {
                             $make_re_pod_entry = 1;
                             $status = $status || $DISCOURAGED;
@@ -15153,7 +15162,7 @@ sub add_perl_synonyms() {
                         }
                         elsif ($prefix eq 'In_') {
                             $make_re_pod_entry = 0;
-                            $status = $status || $NORMAL;
+                            $status = $status || $DISCOURAGED;
                             $ok_as_filename = 1;
                         }
                         else {
@@ -15932,7 +15941,7 @@ sub make_re_pod_entries($) {
                 # And if this is a compound form name, see if there is a
                 # single form equivalent
                 my $single_form;
-                if ($table_property != $perl) {
+                if ($table_property != $perl && $table_property != $block) {
 
                     # Special case the binary N tables, so that will print
                     # \P{single}, but use the Y table values to populate
@@ -16300,20 +16309,22 @@ sub make_pod () {
                                                 '\p{Block: *}'
                                                     . (($has_In_conflicts)
                                                       ? " $exception_message"
-                                                      : ""));
+                                                      : ""),
+                                                 $DISCOURAGED);
         @block_warning = << "END";
 
-Matches in the Block property have shortcuts that begin with "In_".  For
-example, C<\\p{Block=Latin1}> can be written as C<\\p{In_Latin1}>.  For
-backward compatibility, if there is no conflict with another shortcut, these
-may also be written as C<\\p{Latin1}> or C<\\p{Is_Latin1}>.  But, N.B., there
-are numerous such conflicting shortcuts.  Use of these forms for Block is
-discouraged, and are flagged as such, not only because of the potential
-confusion as to what is meant, but also because a later release of Unicode may
-preempt the shortcut, and your program would no longer be correct.  Use the
-"In_" form instead to avoid this, or even more clearly, use the compound form,
-e.g., C<\\p{blk:latin1}>.  See L<perlunicode/"Blocks"> for more information
-about this.
+In particular, matches in the Block property have single forms
+defined by Perl that begin with C<"In_">, C<"Is_>, or even with no prefix at
+all,  Like all B<DISCOURAGED> forms, these are not stable.  For example,
+C<\\p{Block=Deseret}> can currently be written as C<\\p{In_Deseret}>,
+C<\\p{Is_Deseret}>, or C<\\p{Deseret}>.  But, a new Unicode version may
+come along that would force Perl to change the meaning of one or more of
+these, and your program would no longer be correct.  Currently there are no
+such conflicts with the form that begins C<"In_">, but there are many with the
+other two shortcuts, and Unicode continues to define new properties that begin
+with C<"In">, so it's quite possible that a conflict will occur in the future.
+The compound form is guaranteed to not become obsolete, and its meaning is
+clearer anyway.  See L<perlunicode/"Blocks"> for more information about this.
 END
     }
     my $text = $Is_flags_text;
@@ -16656,18 +16667,21 @@ Properties marked with $a_bold_obsolete in the table are considered (plain)
 obsolete.  Generally this designation is given to properties that Unicode once
 used for internal purposes (but not any longer).
 
-=back
+=item Discouraged
 
-Some Perl extensions are present for backwards compatibility and are
-discouraged from being used, but are not obsolete.  $A_bold_discouraged
-flags each such entry in the table.  Future Unicode versions may force
-some of these extensions to be removed without warning, replaced by another
-property with the same name that means something different.  Use the
-equivalent shown instead.
-
-=back
+This is not actually a Unicode-specified obsolescence, but applies to certain
+Perl extensions that are present for backwards compatibility, but are
+discouraged from being used.  These are not obsolete, but their meanings are
+not stable.  Future Unicode versions could force any of these extensions to be
+removed without warning, replaced by another property with the same name that
+means something different.  $A_bold_discouraged flags each such entry in the
+table.  Use the equivalent shown instead.
 
 @block_warning
+
+=back
+
+=back
 
 The table below has two columns.  The left column contains the C<\\p{}>
 constructs to look up, possibly preceded by the flags mentioned above; and
