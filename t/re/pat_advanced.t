@@ -2411,6 +2411,27 @@ EOF
                             "Overlapping ranges in user-defined properties");
     }
 
+    { # [perl #125990], the final 2 tests below each caused a panic.
+        # The \0's are not necessary; it could be a printable character
+        # instead, but were in the ticket, so using them.
+        my $sharp_s = chr utf8::unicode_to_native(0xdf);
+        my $string        = ("\0" x 8)
+                          . ($sharp_s x 3)
+                          . ("\0" x 42)
+                          .  "ý";
+        my $folded_string = ("\0" x 8)
+                          . ("ss" x 3)
+                          . ("\0" x 42)
+                          .  "ý";
+        utf8::downgrade($string);
+        utf8::downgrade($folded_string);
+
+        like($string, qr/$string/i, "LATIN SMALL SHARP S matches itself under /id");
+        unlike($folded_string, qr/$string/i, "LATIN SMALL SHARP S doesn't match 'ss' under /di");
+        like($folded_string, qr/\N{}$string/i, "\\N{} earlier than LATIN SMALL SHARP S transforms /di into /ui, matches 'ss'");
+        like($folded_string, qr/$string\N{}/i, "\\N{} after LATIN SMALL SHARP S transforms /di into /ui, matches 'ss'");
+    }
+
     { # Regexp:Grammars was broken:
   # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-06/msg01290.html
         fresh_perl_like('use warnings; "abc" =~ qr{(?&foo){0}abc(?<foo>)}',
@@ -2427,6 +2448,7 @@ EOF
 	fresh_perl_is('/\x{E000000000}|/ and print qq(ok\n)', "ok\n", {},
 		      "buffer overflow in TRIE_STORE_REVCHAR");
     }
+
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.
