@@ -22,24 +22,14 @@ typedef FILE * InputStream;
 
 static const char* const svclassnames[] = {
     "B::NULL",
-#if PERL_VERSION < 19
-    "B::BIND",
-#endif
     "B::IV",
     "B::NV",
-#if PERL_VERSION <= 10
-    "B::RV",
-#endif
     "B::PV",
-#if PERL_VERSION >= 19
     "B::INVLIST",
-#endif
     "B::PVIV",
     "B::PVNV",
     "B::PVMG",
-#if PERL_VERSION >= 11
     "B::REGEXP",
-#endif
     "B::GV",
     "B::PVLV",
     "B::AV",
@@ -141,11 +131,6 @@ cc_opclass(pTHX_ const OP *o)
 	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPc_UNOP : OPc_BINOP);
 
     if (o->op_type == OP_AELEMFAST) {
-#if PERL_VERSION <= 14
-	if (o->op_flags & OPf_SPECIAL)
-	    return OPc_BASEOP;
-	else
-#endif
 #ifdef USE_ITHREADS
 	    return OPc_PADOP;
 #else
@@ -618,9 +603,7 @@ typedef SV	*B__IV;
 typedef SV	*B__PV;
 typedef SV	*B__NV;
 typedef SV	*B__PVMG;
-#if PERL_VERSION >= 11
 typedef SV	*B__REGEXP;
-#endif
 typedef SV	*B__PVLV;
 typedef SV	*B__BM;
 typedef SV	*B__RV;
@@ -702,11 +685,7 @@ const struct OP_methods {
   { STR_WITH_LEN("nextop"),  OPp,    STRUCT_OFFSET(struct loop, op_nextop), },/*10*/
   { STR_WITH_LEN("lastop"),  OPp,    STRUCT_OFFSET(struct loop, op_lastop), },/*11*/
   { STR_WITH_LEN("pmflags"), U32p,   STRUCT_OFFSET(struct pmop, op_pmflags),},/*12*/
-#if PERL_VERSION >= 17
   { STR_WITH_LEN("code_list"),OPp,   STRUCT_OFFSET(struct pmop, op_code_list),},/*13*/
-#else
-  { STR_WITH_LEN("code_list"),op_offset_special, 0,                         }, /*13*/
-#endif
   { STR_WITH_LEN("sv"),      SVp,     STRUCT_OFFSET(struct svop, op_sv),    },/*14*/
   { STR_WITH_LEN("gv"),      SVp,     STRUCT_OFFSET(struct svop, op_sv),    },/*15*/
   { STR_WITH_LEN("padix"),   PADOFFSETp,STRUCT_OFFSET(struct padop, op_padix),},/*16*/
@@ -718,13 +697,8 @@ const struct OP_methods {
   { STR_WITH_LEN("filegv"),  op_offset_special, 0,                     },/*21*/
   { STR_WITH_LEN("file"),    char_pp, STRUCT_OFFSET(struct cop, cop_file),  },/*22*/
   { STR_WITH_LEN("stash"),   op_offset_special, 0,                     },/*23*/
-#  if PERL_VERSION < 17
-  { STR_WITH_LEN("stashpv"), char_pp, STRUCT_OFFSET(struct cop, cop_stashpv),}, /*24*/
-  { STR_WITH_LEN("stashoff"),op_offset_special, 0,                     },/*25*/
-#  else
   { STR_WITH_LEN("stashpv"), op_offset_special, 0,                     },/*24*/
   { STR_WITH_LEN("stashoff"),PADOFFSETp,STRUCT_OFFSET(struct cop,cop_stashoff),},/*25*/
-#  endif
 #else
   { STR_WITH_LEN("pmoffset"),op_offset_special, 0,                     },/*20*/
   { STR_WITH_LEN("filegv"),  SVp,     STRUCT_OFFSET(struct cop, cop_filegv),},/*21*/
@@ -754,17 +728,12 @@ const struct OP_methods {
   { STR_WITH_LEN("warnings"),op_offset_special, 0,                     },/*44*/
   { STR_WITH_LEN("io"),      op_offset_special, 0,                     },/*45*/
   { STR_WITH_LEN("hints_hash"),op_offset_special, 0,                   },/*46*/
-#if PERL_VERSION >= 17
   { STR_WITH_LEN("slabbed"), op_offset_special, 0,                     },/*47*/
   { STR_WITH_LEN("savefree"),op_offset_special, 0,                     },/*48*/
   { STR_WITH_LEN("static"),  op_offset_special, 0,                     },/*49*/
-#  if PERL_VERSION >= 19
   { STR_WITH_LEN("folded"),  op_offset_special, 0,                     },/*50*/
   { STR_WITH_LEN("moresib"), op_offset_special, 0,                     },/*51*/
   { STR_WITH_LEN("parent"),  op_offset_special, 0,                     },/*52*/
-#  endif
-#endif
-#if PERL_VERSION >= 21
   { STR_WITH_LEN("first"),   op_offset_special, 0,                     },/*53*/
   { STR_WITH_LEN("meth_sv"), op_offset_special, 0,                     },/*54*/
   { STR_WITH_LEN("pmregexp"),op_offset_special, 0,                     },/*55*/
@@ -773,7 +742,6 @@ const struct OP_methods {
 #  else
   { STR_WITH_LEN("rclass"),  op_offset_special, 0,                     },/*56*/
 #  endif
-#endif
 };
 
 #include "const-c.inc"
@@ -1108,18 +1076,12 @@ next(o)
 		ret = make_sv_object(aTHX_ (SV *)CopSTASH((COP*)o));
 		break;
 #endif
-#if PERL_VERSION >= 17 || !defined USE_ITHREADS
 	    case 24: /* B::COP::stashpv */
-#  if PERL_VERSION >= 17
 		ret = sv_2mortal(CopSTASH((COP*)o)
 				&& SvTYPE(CopSTASH((COP*)o)) == SVt_PVHV
 		    ? newSVhek(HvNAME_HEK(CopSTASH((COP*)o)))
 		    : &PL_sv_undef);
-#  else
-		ret = sv_2mortal(newSVpv(CopSTASHPV((COP*)o), 0));
-#  endif
 		break;
-#endif
 	    case 26: /* B::OP::size */
 		ret = sv_2mortal(newSVuv((UV)(opsizes[cc_opclass(aTHX_ o)])));
 		break;
@@ -1140,15 +1102,11 @@ next(o)
 	    case 30: /* B::OP::type  */
 	    case 31: /* B::OP::opt   */
 	    case 32: /* B::OP::spare */
-#if PERL_VERSION >= 17
 	    case 47: /* B::OP::slabbed  */
 	    case 48: /* B::OP::savefree */
 	    case 49: /* B::OP::static   */
-#if PERL_VERSION >= 19
 	    case 50: /* B::OP::folded   */
 	    case 51: /* B::OP::moresib  */
-#endif
-#endif
 	    /* These are all bitfields, so we can't take their addresses */
 		ret = sv_2mortal(newSVuv((UV)(
 				      ix == 30 ? o->op_type
@@ -1557,13 +1515,7 @@ MODULE = B	PACKAGE = B::IV
 
 #define PVMG_stash_ix	sv_SVp | STRUCT_OFFSET(struct xpvmg, xmg_stash)
 
-#if PERL_VERSION > 18
-#    define PVBM_useful_ix	sv_IVp | STRUCT_OFFSET(struct xpviv, xiv_u.xivu_iv)
-#elif PERL_VERSION > 14
-#    define PVBM_useful_ix	sv_I32p | STRUCT_OFFSET(struct xpvgv, xnv_u.xbm_s.xbm_useful)
-#else
-#define PVBM_useful_ix	sv_I32p | STRUCT_OFFSET(struct xpvgv, xiv_u.xivu_i32)
-#endif
+#define PVBM_useful_ix	sv_IVp | STRUCT_OFFSET(struct xpviv, xiv_u.xivu_iv)
 
 #define PVLV_targoff_ix	sv_U32p | STRUCT_OFFSET(struct xpvlv, xlv_targoff)
 #define PVLV_targlen_ix	sv_U32p | STRUCT_OFFSET(struct xpvlv, xlv_targlen)
@@ -1589,23 +1541,14 @@ MODULE = B	PACKAGE = B::IV
 #define PVAV_max_ix	sv_SSize_tp | STRUCT_OFFSET(struct xpvav, xav_max)
 
 #define PVCV_stash_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_stash) 
-#if PERL_VERSION > 17 || (PERL_VERSION == 17 && PERL_SUBVERSION >= 3)
-# define PVCV_gv_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_gv_u.xcv_gv)
-#else
-# define PVCV_gv_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_gv)
-#endif
+#define PVCV_gv_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_gv_u.xcv_gv)
 #define PVCV_file_ix	sv_char_pp | STRUCT_OFFSET(struct xpvcv, xcv_file)
 #define PVCV_outside_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_outside)
 #define PVCV_outside_seq_ix sv_U32p | STRUCT_OFFSET(struct xpvcv, xcv_outside_seq)
 #define PVCV_flags_ix	sv_U32p | STRUCT_OFFSET(struct xpvcv, xcv_flags)
 
 #define PVHV_max_ix	sv_STRLENp | STRUCT_OFFSET(struct xpvhv, xhv_max)
-
-#if PERL_VERSION > 12
 #define PVHV_keys_ix	sv_STRLENp | STRUCT_OFFSET(struct xpvhv, xhv_keys)
-#else
-#define PVHV_keys_ix	sv_IVp | STRUCT_OFFSET(struct xpvhv, xhv_keys)
-#endif
 
 # The type checking code in B has always been identical for all SV types,
 # irrespective of whether the action is actually defined on that SV.
@@ -1731,18 +1674,6 @@ NV
 SvNV(sv)
 	B::NV	sv
 
-#if PERL_VERSION < 11
-
-MODULE = B	PACKAGE = B::RV		PREFIX = Sv
-
-void
-SvRV(sv)
-	B::RV	sv
-    PPCODE:
-	PUSHs(make_sv_object(aTHX_ SvRV(sv)));
-
-#else
-
 MODULE = B	PACKAGE = B::REGEXP
 
 void
@@ -1765,8 +1696,6 @@ REGEX(sv)
 	    /* FIXME - can we code this method more efficiently?  */
 		PUSHi(PTR2IV(sv));
 	}
-
-#endif
 
 MODULE = B	PACKAGE = B::PV
 
@@ -1939,9 +1868,7 @@ U32
 BmPREVIOUS(sv)
 	B::BM	sv
     CODE:
-#if PERL_VERSION >= 19
         PERL_UNUSED_VAR(sv);
-#endif
 	RETVAL = BmPREVIOUS(sv);
     OUTPUT:
         RETVAL
@@ -1951,9 +1878,7 @@ U8
 BmRARE(sv)
 	B::BM	sv
     CODE:
-#if PERL_VERSION >= 19
         PERL_UNUSED_VAR(sv);
-#endif
 	RETVAL = BmRARE(sv);
     OUTPUT:
         RETVAL
@@ -2190,8 +2115,6 @@ GV(cv)
     CODE:
 	ST(0) = make_sv_object(aTHX_ (SV*)CvGV(cv));
 
-#if PERL_VERSION > 17
-
 SV *
 NAME_HEK(cv)
 	B::CV cv
@@ -2199,8 +2122,6 @@ NAME_HEK(cv)
 	RETVAL = CvNAMED(cv) ? newSVhek(CvNAME_HEK(cv)) : &PL_sv_undef;
     OUTPUT:
 	RETVAL
-
-#endif
 
 MODULE = B	PACKAGE = B::HV		PREFIX = Hv
 
