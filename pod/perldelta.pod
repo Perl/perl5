@@ -193,11 +193,6 @@ L<[perl #123748]|https://rt.perl.org/Ticket/Display.html?id=123748>
 
 =item *
 
-New bitwise ops added in Perl 5.21.9 accidentally caused C<$^H |= 0x1c020000>
-to enable all features.  This has now been fixed.
-
-=item *
-
 UTF-8 variable names used in array indexes, unquoted UTF-8 HERE-document
 terminators and UTF-8 function names all now work correctly.
 L<[perl #124113]|https://rt.perl.org/Ticket/Display.html?id=124113>
