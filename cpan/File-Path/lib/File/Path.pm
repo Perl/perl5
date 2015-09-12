@@ -18,7 +18,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = '2.11';
+$VERSION   = '2.11_01';
 $VERSION   = eval $VERSION;
 @ISA       = qw(Exporter);
 @EXPORT    = qw(mkpath rmtree);
@@ -343,8 +343,7 @@ sub _rmtree {
           ? File::Spec->catfile( $arg->{prefix}, $root )
           : $root;
 
-        my ( $ldev, $lino, $perm ) = ( lstat $root )[ 0, 1, 2 ]
-          or ( _error( $arg, "$root", $root ) and next ROOT_DIR );
+        my ($ldev, $lino, $perm) = (lstat $root)[0,1,2] or next ROOT_DIR;
 
         if ( -d _ ) {
             $root = VMS::Filespec::vmspath( VMS::Filespec::pathify($root) )
