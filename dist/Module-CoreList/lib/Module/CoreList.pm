@@ -282,7 +282,7 @@ sub changes_between {
     5.023000 => '2015-06-20',
     5.023001 => '2015-07-20',
     5.023002 => '2015-08-20',
-    5.020003 => '????-??-??',
+    5.020003 => '2015-09-12',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -11696,9 +11696,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'Config'                => '5.020003',
             'Errno'                 => '1.20_06',
-            'Module::CoreList'      => '5.20150822',
-            'Module::CoreList::TieHashDelta'=> '5.20150822',
-            'Module::CoreList::Utils'=> '5.20150822',
+            'Module::CoreList'      => '5.20150912',
+            'Module::CoreList::TieHashDelta'=> '5.20150912',
+            'Module::CoreList::Utils'=> '5.20150912',
         },
         removed => {
         }
