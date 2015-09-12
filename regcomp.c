@@ -13537,7 +13537,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
      * a stack.  Each entry on the stack is a single character representing one
      * of the operators; or else a pointer to an operand inversion list. */
 
-#define IS_OPERAND(a)  (! SvIOK(a))
+#define IS_OPERATOR(a) SvIOK(a)
+#define IS_OPERAND(a)  (! IS_OPERATOR(a))
 
     /* The stack is kept in Łukasiewicz order.  (That's pronounced similar
      * to luke-a-shave-itch (or -itz), but people who didn't want to bother
@@ -13710,12 +13711,12 @@ redo_curchar:
                      * better be a '!', otherwise the entry below the top
                      * operand should be an operator */
                     if ( ! (top_ptr = av_fetch(stack, top_index, FALSE))
-                        || (! IS_OPERAND(*top_ptr) && SvUV(*top_ptr) != '!')
+                        || (IS_OPERATOR(*top_ptr) && SvUV(*top_ptr) != '!')
                         || top_index - fence < 1
                         || ! (stacked_ptr = av_fetch(stack,
                                                      top_index - 1,
                                                      FALSE))
-                        || IS_OPERAND(*stacked_ptr))
+                        || ! IS_OPERATOR(*stacked_ptr))
                     {
                         RExC_parse++;
                         vFAIL("Unexpected '(' with no preceding operator");
@@ -13964,7 +13965,7 @@ redo_curchar:
                  * be an operator */
                 top_ptr = av_fetch(stack, top_index, FALSE);
                 assert(top_ptr);
-                if (! IS_OPERAND(*top_ptr)) {
+                if (IS_OPERATOR(*top_ptr)) {
 
                     /* The only permissible operator at the top of the stack is
                      * '!', which is applied immediately to this operand. */
@@ -14109,6 +14110,7 @@ redo_curchar:
     Set_Node_Length(node, RExC_parse - oregcomp_parse + 1); /* MJD */
     return node;
 }
+#undef IS_OPERATOR
 #undef IS_OPERAND
 
 STATIC void
