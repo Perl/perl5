@@ -437,6 +437,30 @@ L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   Till the work its master honour.
   Blessing comes from Heaven’s Donor.
 
+=head2 v5.20.3 - Elias Lönnrot, trans. Keith Bosley, "The Kalevala", Canto 42: Stealing the Sampo
+
+L<Announced on 2015-09-12 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/09/msg230945.html>
+
+  Steady old Väinämöinen
+  uttered a word and spoke thus:
+  'No lilting on the waters
+  and no singing on the waves!
+    Song keeps you lazy
+    tales delay rowing.
+  Precious day would pass and night
+  would overtake us midway
+    on these wide waters
+    upon these vast waves.'
+
+  The wanton Lemminkäinen
+  uttered a word and spoke thus:
+  'The time will pass anyway
+    the fair day will flee
+  and the night will come panting
+  and the twilight will steal in
+  if you don't sing while you live
+    nor hum in this world.'
+
 =head2 v5.20.3-RC2 - Anon., trans. Malcolm C. Lyons, "The Story of Abu Muhammad the Idle and the Marvels He Encountered with the Ape As Well As the Marvels of the Seas and Islands", from "Tales of the Marvellous and News of the Strange"
 
 L<Announced on 2015-08-29 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/08/msg230544.html>
