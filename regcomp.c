@@ -14254,7 +14254,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                                        about too large
                                                        characters */
                  const bool strict,
-                 const bool optimizable,            /* ? Allow a non-ANYOF return
+                 bool optimizable,                  /* ? Allow a non-ANYOF return
                                                        node */
                  SV** ret_invlist  /* Return an inversion list, not a node */
           )
@@ -14703,6 +14703,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                         (value == 'p' ? '+' : '!'),
                                         UTF8fARG(UTF, n, name));
                         has_user_defined_property = TRUE;
+                        optimizable = FALSE;    /* Will have to leave this an
+                                                   ANYOF node */
 
                         /* We don't know yet, so have to assume that the
                          * property could match something in the Latin1 range,
@@ -14937,6 +14939,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     }
                     ANYOF_FLAGS(ret) |= ANYOF_MATCHES_POSIXL;
                     ANYOF_POSIXL_ZERO(ret);
+
+                    /* We can't change this into some other type of node
+                     * (unless this is the only element, in which case there
+                     * are nodes that mean exactly this) as has runtime
+                     * dependencies */
+                    optimizable = FALSE;
                 }
 
                 /* Coverity thinks it is possible for this to be negative; both
@@ -15899,7 +15907,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
         if (warn_super) {
             ANYOF_FLAGS(ret)
-            |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+             |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+
+            /* Because an ANYOF node is the only one that warns, this node
+             * can't be optimized into something else */
+            optimizable = FALSE;
         }
     }
 
@@ -15987,20 +15999,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * space).  _invlistEQ() could be used if one ever wanted to do something
      * like this at this point in the code */
 
-    if (   optimizable
-        && cp_list
-        && ! invert
-        && ! depends_list
-        && ! (ANYOF_FLAGS(ret) & (ANYOF_LOCALE_FLAGS))
-        && ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
-
-           /* We don't optimize if we are supposed to make sure all non-Unicode
-            * code points raise a warning, as only ANYOF nodes have this check.
-            * */
-        && ! ((ANYOF_FLAGS(ret) & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
-              && OP(ret) != ANYOFD
-              && ALWAYS_WARN_SUPER))
-    {
+    if (optimizable && cp_list && ! invert && ! depends_list) {
         UV start, end;
         U8 op = END;  /* The optimzation node-type */
         const char * cur_parse= RExC_parse;
