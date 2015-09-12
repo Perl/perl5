@@ -3115,13 +3115,13 @@ S_scan_const(pTHX_ char *start)
                      * equivalent */
                     if (has_utf8) {
                         for (i = range_min; i <= range_max; i++) {
-                            append_utf8_from_native_byte(LATIN1_TO_NATIVE(i),
+                            append_utf8_from_native_byte(LATIN1_TO_NATIVE((U8) i),
                                                          (U8 **) &d);
                         }
                     }
                     else {
                         for (i = range_min; i <= range_max; i++) {
-                            *d++ = (char)LATIN1_TO_NATIVE(i);
+                            *d++ = (char)LATIN1_TO_NATIVE((U8) i);
                         }
 		    }
 		}
@@ -3134,7 +3134,7 @@ S_scan_const(pTHX_ char *start)
                     if (has_utf8) {
                         d += UTF8SKIP(d);
                         for (i = range_min + 1; i <= range_max; i++) {
-                            append_utf8_from_native_byte(i, (U8 **) &d);
+                            append_utf8_from_native_byte((U8) i, (U8 **) &d);
                         }
                     }
                     else {
@@ -3657,7 +3657,7 @@ S_scan_const(pTHX_ char *start)
                             str = SvPV_const(res, len);
                             if (len > ((SvUTF8(res))
                                        ? UTF8SKIP(str)
-                                       : 1))
+                                       : 1U))
                             {
                                 yyerror(Perl_form(aTHX_
                                     "%.*s must not be a named sequence"
