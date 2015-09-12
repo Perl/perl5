@@ -15661,7 +15661,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             /* Our calculated list will be for Unicode rules.  For locale
              * matching, we have to keep a separate list that is consulted at
              * runtime only when the locale indicates Unicode rules.  For
-             * non-locale, we just use to the general list */
+             * non-locale, we just use the general list */
             if (LOC) {
                 use_list = &only_utf8_locale_list;
             }
@@ -15921,8 +15921,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         if (only_utf8_locale_list) {
             ANYOF_FLAGS(ret) |= ANYOF_LOC_FOLD;
         }
-        else if (cp_list) { /* Look to see if there a 0-255 code point is in
-                               the list */
+        else if (cp_list) { /* Look to see if a 0-255 code point is in list */
             UV start, end;
             invlist_iterinit(cp_list);
             if (invlist_iternext(cp_list, &start, &end) && start < 256) {
@@ -15981,9 +15980,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * adjacent such nodes.  And if the class is equivalent to things like /./,
      * expensive run-time swashes can be avoided.  Now that we have more
      * complete information, we can find things necessarily missed by the
-     * earlier code.  I (khw) am not sure how much to look for here.  It would
-     * be easy, but perhaps too slow, to check any candidates against all the
-     * node types they could possibly match using _invlistEQ(). */
+     * earlier code.  I (khw) did some benchmarks and found essentially no
+     * speed difference between using a POSIXA node versus an ANYOF node, so
+     * there is no reason to optimize, for example [A-Za-z0-9_] into
+     * [[:word:]]/a (although if we did it in the sizing pass it would save
+     * space).  _invlistEQ() could be used if one ever wanted to do something
+     * like this at this point in the code */
 
     if (   optimizable
         && cp_list
@@ -16007,9 +16009,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         if (! invlist_iternext(cp_list, &start, &end)) {
 
             /* Here, the list is empty.  This happens, for example, when a
-             * Unicode property is the only thing in the character class, and
-             * it doesn't match anything.  (perluniprops.pod notes such
-             * properties) */
+             * Unicode property that doesn't match anything is the only element
+             * in the character class (perluniprops.pod notes such properties).
+             * */
             op = OPFAIL;
             *flagp |= HASWIDTH|SIMPLE;
         }
@@ -16065,7 +16067,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     }
                 }
             }
-        }
+        }   /* End of first range contains just a single code point */
         else if (start == 0) {
             if (end == UV_MAX) {
                 op = SANY;
