@@ -4321,7 +4321,7 @@ PP(pp_system)
     PERL_FLUSHALL_FOR_CHILD;
 #if (defined(HAS_FORK) || defined(__amigaos4__)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
     {
-#if defined(__amigaos4__)
+#ifdef __amigaos4__
         struct UserData userdata;
         pthread_t proc;
 #else
@@ -4336,7 +4336,7 @@ PP(pp_system)
 
 	if (PerlProc_pipe(pp) >= 0)
 	    did_pipes = 1;
-#if defined(__amigaos4__)
+#ifdef __amigaos4__
         amigaos_fork_set_userdata(aTHX_
                                   &userdata,
                                   did_pipes,
@@ -4416,7 +4416,7 @@ PP(pp_system)
 		    if (n != sizeof(int))
 			DIE(aTHX_ "panic: kid popen errno read, n=%u", n);
 		    errno = errkid;		/* Propagate errno from kid */
-#if defined(__amigaos4__)
+#ifdef __amigaos4__
                     /* The pipe always has something in it
                      * so n alone is not enough. */
                     if (errno > 0)

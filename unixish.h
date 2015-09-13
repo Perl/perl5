@@ -123,7 +123,7 @@
 
 #define Stat(fname,bufptr) stat((fname),(bufptr))
 
-#if defined(__amigaos4__)
+#ifdef __amigaos4__
 int afstat(int fd, struct stat *statb);
 #    define Fstat(fd,bufptr) afstat((fd),(bufptr))
 #endif

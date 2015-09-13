@@ -2055,7 +2055,7 @@ void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
   dVAR;
-#if defined(__amigaos4__)
+#ifdef __amigaos4__
   amigaos4_obtain_environ(__FUNCTION__);
 #endif
 #ifdef USE_ITHREADS
@@ -2099,7 +2099,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
                 environ[i] = environ[i+1];
                 i++;
             }
-#if defined(__amigaos4__)
+#ifdef __amigaos4__
             goto my_setenv_out;
 #else
             return;
@@ -2164,7 +2164,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     }
 #endif
   }
-#if defined(__amigaos4__)
+#ifdef __amigaos4__
 my_setenv_out:
   amigaos4_release_environ(__FUNCTION__);
 #endif

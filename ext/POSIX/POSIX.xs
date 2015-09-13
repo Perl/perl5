@@ -1382,9 +1382,9 @@ char *tzname[] = { "" , "" };
 #  ifdef HAS_UNAME
 #    include <sys/utsname.h>
 #  endif
-#if !defined(__amigaos4__)
-#  include <sys/wait.h>
-#endif
+#  ifndef __amigaos4__
+#    include <sys/wait.h>
+#  endif
 #  ifdef I_UTIME
 #    include <utime.h>
 #  endif
@@ -3187,7 +3187,7 @@ sigpending(sigset)
     ALIAS:
 	sigsuspend = 1
     CODE:
-#if defined(__amigaos4__)
+#ifdef __amigaos4__
 	RETVAL = not_here("sigpending");
 #else
 	RETVAL = ix ? sigsuspend(sigset) : sigpending(sigset);

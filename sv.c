@@ -14408,7 +14408,7 @@ perl_clone(PerlInterpreter *proto_perl, UV flags)
    /* perlhost.h so we need to call into it
    to clone the host, CPerlHost should have a c interface, sky */
 
-#if !defined(__amigaos4__)
+#ifndef __amigaos4__
    if (flags & CLONEf_CLONE_HOST) {
        return perl_clone_host(proto_perl,flags);
    }

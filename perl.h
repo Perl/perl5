@@ -2803,7 +2803,7 @@ typedef struct padname PADNAME;
 #   include "unixish.h"
 #endif
 
-#if defined(__amigaos4__)
+#ifdef __amigaos4__
 #    include "amigaos.h"
 #    undef FD_CLOEXEC /* a lie in AmigaOS */
 #endif

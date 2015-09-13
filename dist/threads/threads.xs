@@ -38,7 +38,7 @@
 
 #ifdef USE_ITHREADS
 
-#if defined(__amigaos4__)
+#ifdef __amigaos4__
 #  undef YIELD
 #  define YIELD sleep(0)
 #endif
