@@ -125,11 +125,11 @@
 
 #ifdef __amigaos4__
 int afstat(int fd, struct stat *statb);
-#    define Fstat(fd,bufptr) afstat((fd),(bufptr))
+#  define Fstat(fd,bufptr) afstat((fd),(bufptr))
 #endif
 
 #ifndef Fstat
-#    define Fstat(fd,bufptr)   fstat((fd),(bufptr))
+#  define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #endif
 
 #define Fflush(fp)         fflush(fp)
