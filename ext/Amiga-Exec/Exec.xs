@@ -2,8 +2,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include "ppport.h"
-
 #undef __USE_INLINE__
 #include <exec/types.h>
 #include <utility/tagitem.h>
