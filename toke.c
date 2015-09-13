@@ -3018,14 +3018,14 @@ S_scan_const(pTHX_ char *start)
                     else if (convert_unicode) {
                         /* diag_listed_as: Invalid range "%s" in transliteration operator */
                         Perl_croak(aTHX_
-			       "Invalid range \"\\N{U+%04X}-\\N{U+%04X}\""
+			       "Invalid range \"\\N{U+%04"UVXf"}-\\N{U+%04"UVXf"}\""
                                " in transliteration operator",
 			       range_min, range_max);
                     }
                     else {
                         /* diag_listed_as: Invalid range "%s" in transliteration operator */
                         Perl_croak(aTHX_
-			       "Invalid range \"\\x{%04X}-\\x{%04X}\""
+			       "Invalid range \"\\x{%04"UVXf"}-\\x{%04"UVXf"}\""
                                " in transliteration operator",
 			       range_min, range_max);
                     }
