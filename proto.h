@@ -684,10 +684,10 @@ PERL_CALLCONV_NO_RET void	Perl_die_unwind(pTHX_ SV* msv)
 #define PERL_ARGS_ASSERT_DIE_UNWIND	\
 	assert(msv)
 
-/* PERL_CALLCONV DO_EXEC_TYPE	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp); */
+/* PERL_CALLCONV bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp); */
 #define PERL_ARGS_ASSERT_DO_AEXEC	\
 	assert(mark); assert(sp)
-PERL_CALLCONV DO_EXEC_TYPE	Perl_do_aexec5(pTHX_ SV* really, SV** mark, SV** sp, int fd, int do_report);
+PERL_CALLCONV bool	Perl_do_aexec5(pTHX_ SV* really, SV** mark, SV** sp, int fd, int do_report);
 #define PERL_ARGS_ASSERT_DO_AEXEC5	\
 	assert(mark); assert(sp)
 PERL_CALLCONV int	Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode);
@@ -3588,7 +3588,7 @@ PERL_CALLCONV Signal_t	Perl_sighandler(int sig);
 PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv);
 #endif
 #if !(defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION))
-PERL_CALLCONV DO_EXEC_TYPE	Perl_do_exec(pTHX_ const char* cmd);
+PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd);
 #define PERL_ARGS_ASSERT_DO_EXEC	\
 	assert(cmd)
 #endif
@@ -3747,7 +3747,7 @@ STATIC NV	S_mulexp10(NV value, I32 exponent);
 #  endif
 #endif
 #if !defined(WIN32)
-PERL_CALLCONV DO_EXEC_TYPE	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report);
+PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report);
 #define PERL_ARGS_ASSERT_DO_EXEC3	\
 	assert(incmd)
 #endif
@@ -3954,7 +3954,7 @@ PERL_CALLCONV PADOFFSET	Perl_op_refcnt_dec(pTHX_ OP *o);
 PERL_CALLCONV OP *	Perl_op_refcnt_inc(pTHX_ OP *o);
 #endif
 #if defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION)
-/* PERL_CALLCONV DO_EXEC_TYPE	Perl_do_exec(pTHX_ const char* cmd); */
+/* PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd); */
 #endif
 #if defined(PERL_DONT_CREATE_GVSV)
 /* PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV *gv); */

@@ -1,7 +1,9 @@
 #ifndef _AMIGAIO_H
 #define _AMIGAIO_H
 
+#ifndef H_PERL
 #include "../perl.h"
+#endif
 
 struct StdioStore
 {

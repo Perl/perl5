@@ -1528,14 +1528,10 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
 {
     const int e = errno;
     PERL_ARGS_ASSERT_EXEC_FAILED;
-#ifdef __amigaos4__
-    if (e)
-#endif
-    {
-	if (ckWARN(WARN_EXEC))
-	    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
-			cmd, Strerror(e));
-    }
+
+    if (ckWARN(WARN_EXEC))
+        Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
+                    cmd, Strerror(e));
     if (do_report) {
         /* XXX silently ignore failures */
         PERL_UNUSED_RESULT(PerlLIO_write(fd, (void*)&e, sizeof(int)));
@@ -1543,14 +1539,12 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
     }
 }
 
-DO_EXEC_TYPE
+bool
 Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 	       int fd, int do_report)
 {
     dVAR;
-    DO_EXEC_TYPE result = DO_EXEC_FAILURE;
     PERL_ARGS_ASSERT_DO_AEXEC5;
-    PERL_UNUSED_VAR(result); /* if DO_EXEC_TYPE is bool */
 #if defined(__SYMBIAN32__) || defined(__LIBCATAMOUNT__)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
@@ -1574,20 +1568,16 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 	    TAINT_ENV();		/* testing IFS here is overkill, probably */
 	PERL_FPU_PRE_EXEC
 	if (really && *tmps) {
-            result =
-              (DO_EXEC_TYPE)
-              PerlProc_execvp(tmps,EXEC_ARGV_CAST(PL_Argv));
+            PerlProc_execvp(tmps,EXEC_ARGV_CAST(PL_Argv));
 	} else {
-	    result =
-              (DO_EXEC_TYPE)
-              PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
+            PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
 	}
 	PERL_FPU_POST_EXEC
  	S_exec_failed(aTHX_ (really ? tmps : PL_Argv[0]), fd, do_report);
     }
     do_execfree();
 #endif
-    return DO_EXEC_RETVAL(result);
+    return FALSE;
 }
 
 void
@@ -1601,7 +1591,7 @@ Perl_do_execfree(pTHX)
 
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 
-DO_EXEC_TYPE
+bool
 Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 {
     dVAR;
@@ -1611,8 +1601,6 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     char *cmd;
     /* Make a copy so we can change it */
     const Size_t cmdlen = strlen(incmd) + 1;
-    DO_EXEC_TYPE result = DO_EXEC_FAILURE;
-    PERL_UNUSED_VAR(result); /* if DO_EXEC_TYPE is bool */
 
     PERL_ARGS_ASSERT_DO_EXEC3;
 
@@ -1648,14 +1636,12 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	      if (s[-1] == '\'') {
 		  *--s = '\0';
 		  PERL_FPU_PRE_EXEC
-		  result =
-                    (DO_EXEC_TYPE)
-                    PerlProc_execl(PL_cshname, "csh", flags, ncmd, (char*)NULL);
+		  PerlProc_execl(PL_cshname, "csh", flags, ncmd, (char*)NULL);
 		  PERL_FPU_POST_EXEC
 		  *s = '\'';
  		  S_exec_failed(aTHX_ PL_cshname, fd, do_report);
 		  Safefree(buf);
-		  return DO_EXEC_RETVAL(result);
+		  return FALSE;
 	      }
 	  }
 	}
@@ -1699,16 +1685,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	    }
 	  doshell:
 	    PERL_FPU_PRE_EXEC
-	    result =
-              (DO_EXEC_TYPE)
-              PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char *)NULL);
+            PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char *)NULL);
 	    PERL_FPU_POST_EXEC
  	    S_exec_failed(aTHX_ PL_sh_path, fd, do_report);
-#if defined (__amigaos4__)
-            amigaos_post_exec(fd, do_report);
-#endif
 	    Safefree(buf);
-	    return DO_EXEC_RETVAL(result);
+	    return FALSE;
 	}
     }
 
@@ -1728,9 +1709,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     *a = NULL;
     if (PL_Argv[0]) {
 	PERL_FPU_PRE_EXEC
-	result =
-          (DO_EXEC_TYPE)
-          PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
+        PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
 	PERL_FPU_POST_EXEC
 	if (errno == ENOEXEC) {		/* for system V NIH syndrome */
 	    do_execfree();
@@ -1740,7 +1719,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     }
     do_execfree();
     Safefree(buf);
-    return DO_EXEC_RETVAL(result);
+    return FALSE;
 }
 
 #endif /* OS2 || WIN32 */

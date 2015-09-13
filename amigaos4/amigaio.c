@@ -12,6 +12,8 @@
 #  define WORD int16
 #endif
 
+#include <stdio.h>
+
 #include <exec/semaphores.h>
 #include <exec/exectags.h>
 #include <proto/exec.h>
@@ -381,6 +383,176 @@ void amigaos_fork_set_userdata(
         userdata->my_perl = aTHX;
 }
 
+/* AmigaOS specific versions of #?exec#? solely for use in amigaos_system_child
+ */
+
+static void S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
+{
+        const int e = errno;
+//    PERL_ARGS_ASSERT_EXEC_FAILED;
+        if (e)
+        {
+                if (ckWARN(WARN_EXEC))
+                        Perl_warner(aTHX_ packWARN(WARN_EXEC),
+                                    "Can't exec \"%s\": %s", cmd, Strerror(e));
+        }
+        if (do_report)
+        {
+                /* XXX silently ignore failures */
+                PERL_UNUSED_RESULT(PerlLIO_write(fd, (void *)&e, sizeof(int)));
+                PerlLIO_close(fd);
+        }
+}
+
+static I32 S_do_amigaos_exec3(pTHX_ const char *incmd, int fd, int do_report)
+{
+        dVAR;
+        const char **a;
+        char *s;
+        char *buf;
+        char *cmd;
+        /* Make a copy so we can change it */
+        const Size_t cmdlen = strlen(incmd) + 1;
+        I32 result = -1;
+
+        PERL_ARGS_ASSERT_DO_EXEC3;
+
+        Newx(buf, cmdlen, char);
+        cmd = buf;
+        memcpy(cmd, incmd, cmdlen);
+
+        while (*cmd && isSPACE(*cmd))
+                cmd++;
+
+        /* see if there are shell metacharacters in it */
+
+        if (*cmd == '.' && isSPACE(cmd[1]))
+                goto doshell;
+
+        if (strnEQ(cmd, "exec", 4) && isSPACE(cmd[4]))
+                goto doshell;
+
+        s = cmd;
+        while (isWORDCHAR(*s))
+                s++; /* catch VAR=val gizmo */
+        if (*s == '=')
+                goto doshell;
+
+        for (s = cmd; *s; s++)
+        {
+                if (*s != ' ' && !isALPHA(*s) &&
+                    strchr("$&*(){}[]'\";\\|?<>~`\n", *s))
+                {
+                        if (*s == '\n' && !s[1])
+                        {
+                                *s = '\0';
+                                break;
+                        }
+                        /* handle the 2>&1 construct at the end */
+                        if (*s == '>' && s[1] == '&' && s[2] == '1' &&
+                            s > cmd + 1 && s[-1] == '2' && isSPACE(s[-2]) &&
+                            (!s[3] || isSPACE(s[3])))
+                        {
+                                const char *t = s + 3;
+
+                                while (*t && isSPACE(*t))
+                                        ++t;
+                                if (!*t && (PerlLIO_dup2(1, 2) != -1))
+                                {
+                                        s[-2] = '\0';
+                                        break;
+                                }
+                        }
+                doshell:
+                        PERL_FPU_PRE_EXEC
+                        result = myexecl(FALSE, PL_sh_path, "sh", "-c", cmd,
+                                         (char *)NULL);
+                        PERL_FPU_POST_EXEC
+                        S_exec_failed(aTHX_ PL_sh_path, fd, do_report);
+                        amigaos_post_exec(fd, do_report);
+                        Safefree(buf);
+                        return result;
+                }
+        }
+
+        Newx(PL_Argv, (s - cmd) / 2 + 2, const char *);
+        PL_Cmd = savepvn(cmd, s - cmd);
+        a = PL_Argv;
+        for (s = PL_Cmd; *s;)
+        {
+                while (isSPACE(*s))
+                        s++;
+                if (*s)
+                        *(a++) = s;
+                while (*s && !isSPACE(*s))
+                        s++;
+                if (*s)
+                        *s++ = '\0';
+        }
+        *a = NULL;
+        if (PL_Argv[0])
+        {
+                PERL_FPU_PRE_EXEC
+                result = myexecvp(FALSE, PL_Argv[0], EXEC_ARGV_CAST(PL_Argv));
+                PERL_FPU_POST_EXEC
+                if (errno == ENOEXEC)
+                { /* for system V NIH syndrome */
+                        do_execfree();
+                        goto doshell;
+                }
+                S_exec_failed(aTHX_ PL_Argv[0], fd, do_report);
+                amigaos_post_exec(fd, do_report);
+        }
+        do_execfree();
+        Safefree(buf);
+        return result;
+}
+
+I32 S_do_amigaos_aexec5(
+    pTHX_ SV *really, SV **mark, SV **sp, int fd, int do_report)
+{
+	dVAR;
+	I32 result = -1;
+	PERL_ARGS_ASSERT_DO_AEXEC5;
+	if (sp > mark)
+	{
+		const char **a;
+		const char *tmps = NULL;
+		Newx(PL_Argv, sp - mark + 1, const char *);
+		a = PL_Argv;
+
+		while (++mark <= sp)
+		{
+			if (*mark)
+				*a++ = SvPV_nolen_const(*mark);
+			else
+				*a++ = "";
+		}
+		*a = NULL;
+		if (really)
+			tmps = SvPV_nolen_const(really);
+		if ((!really && *PL_Argv[0] != '/') ||
+		        (really && *tmps != '/')) /* will execvp use PATH? */
+			TAINT_ENV(); /* testing IFS here is overkill, probably
+                                        */
+                PERL_FPU_PRE_EXEC
+                if (really && *tmps)
+                {
+                        result = myexecvp(FALSE, tmps, EXEC_ARGV_CAST(PL_Argv));
+                }
+                else
+                {
+                        result = myexecvp(FALSE, PL_Argv[0],
+                                          EXEC_ARGV_CAST(PL_Argv));
+                }
+                PERL_FPU_POST_EXEC
+                S_exec_failed(aTHX_(really ? tmps : PL_Argv[0]), fd, do_report);
+        }
+        amigaos_post_exec(fd, do_report);
+        do_execfree();
+        return result;
+}
+
 void *amigaos_system_child(void *userdata)
 {
         struct Task *parent;
@@ -417,16 +589,18 @@ void *amigaos_system_child(void *userdata)
         if (PL_op->op_flags & OPf_STACKED)
         {
                 SV *really = *++MARK;
-                value = (I32)do_aexec5(really, MARK, SP, pp, did_pipes);
+                value = (I32)S_do_amigaos_aexec5(aTHX_ really, MARK, SP, pp,
+                                                 did_pipes);
         }
         else if (SP - MARK != 1)
         {
-                value = (I32)do_aexec5(NULL, MARK, SP, pp, did_pipes);
+                value = (I32)S_do_amigaos_aexec5(aTHX_ NULL, MARK, SP, pp,
+                                                 did_pipes);
         }
         else
         {
-                value = (I32)do_exec3(SvPVx(sv_mortalcopy(*SP), n_a), pp,
-                                      did_pipes);
+                value = (I32)S_do_amigaos_exec3(
+                    aTHX_ SvPVx(sv_mortalcopy(*SP), n_a), pp, did_pipes);
         }
 
         //    Forbid();
@@ -435,4 +609,320 @@ void *amigaos_system_child(void *userdata)
         amigaos_stdio_restore(aTHX_ & store);
 
         return value;
+}
+
+static BOOL contains_whitespace(char *string)
+{
+
+        if (string)
+        {
+
+                if (strchr(string, ' '))
+                        return TRUE;
+                if (strchr(string, '\t'))
+                        return TRUE;
+                if (strchr(string, '\n'))
+                        return TRUE;
+                if (strchr(string, 0xA0))
+                        return TRUE;
+                if (strchr(string, '"'))
+                        return TRUE;
+        }
+        return FALSE;
+}
+
+static int no_of_escapes(char *string)
+{
+        int cnt = 0;
+        char *p;
+        for (p = string; p < string + strlen(string); p++)
+        {
+                if (*p == '"')
+                        cnt++;
+                if (*p == '*')
+                        cnt++;
+                if (*p == '\n')
+                        cnt++;
+                if (*p == '\t')
+                        cnt++;
+        }
+        return cnt;
+}
+
+struct command_data
+{
+        STRPTR args;
+        BPTR seglist;
+        struct Task *parent;
+};
+
+#undef fopen
+#undef fgetc
+#undef fgets
+#undef fclose
+
+#define __USE_RUNCOMMAND__
+
+int myexecve(bool isperlthread,
+             const char *filename,
+             char *argv[],
+             char *envp[])
+{
+        FILE *fh;
+        char buffer[1000];
+        int size = 0;
+        char **cur;
+        char *interpreter = 0;
+        char *interpreter_args = 0;
+        char *full = 0;
+        char *filename_conv = 0;
+        char *interpreter_conv = 0;
+        //        char *tmp = 0;
+        char *fname;
+        //        int tmpint;
+        //        struct Task *thisTask = IExec->FindTask(0);
+        int result = -1;
+
+        StdioStore store;
+
+        pTHX = NULL;
+
+        if (isperlthread)
+        {
+                aTHX = PERL_GET_THX;
+                /* Save away our stdio */
+                amigaos_stdio_save(aTHX_ & store);
+        }
+
+        // adebug("%s %ld %s\n",__FUNCTION__,__LINE__,filename?filename:"NULL");
+
+        /* Calculate the size of filename and all args, including spaces and
+         * quotes */
+        size = 0; // strlen(filename) + 1;
+        for (cur = (char **)argv /* +1 */; *cur; cur++)
+        {
+                size +=
+                    strlen(*cur) + 1 +
+                    (contains_whitespace(*cur) ? (2 + no_of_escapes(*cur)) : 0);
+        }
+        /* Check if it's a script file */
+
+        fh = fopen(filename, "r");
+        if (fh)
+        {
+                if (fgetc(fh) == '#' && fgetc(fh) == '!')
+                {
+                        char *p;
+                        char *q;
+                        fgets(buffer, 999, fh);
+                        p = buffer;
+                        while (*p == ' ' || *p == '\t')
+                                p++;
+                        if (buffer[strlen(buffer) - 1] == '\n')
+                                buffer[strlen(buffer) - 1] = '\0';
+                        if ((q = strchr(p, ' ')))
+                        {
+                                *q++ = '\0';
+                                if (*q != '\0')
+                                {
+                                        interpreter_args = mystrdup(q);
+                                }
+                        }
+                        else
+                                interpreter_args = mystrdup("");
+
+                        interpreter = mystrdup(p);
+                        size += strlen(interpreter) + 1;
+                        size += strlen(interpreter_args) + 1;
+                }
+
+                fclose(fh);
+        }
+        else
+        {
+                /* We couldn't open this why not? */
+                if (errno == ENOENT)
+                {
+                        /* file didn't exist! */
+                        goto out;
+                }
+        }
+
+        /* Allocate the command line */
+        filename_conv = convert_path_u2a(filename);
+
+        if (filename_conv)
+                size += strlen(filename_conv);
+        size += 1;
+        full = (char *)IExec->AllocVec(size + 10, MEMF_ANY | MEMF_CLEAR);
+        if (full)
+        {
+                if (interpreter)
+                {
+                        interpreter_conv = convert_path_u2a(interpreter);
+#if !defined(__USE_RUNCOMMAND__)
+#warning(using system!)
+                        sprintf(full, "%s %s %s ", interpreter_conv,
+                                interpreter_args, filename_conv);
+#else
+                        sprintf(full, "%s %s ", interpreter_args,
+                                filename_conv);
+#endif
+                        IExec->FreeVec(interpreter);
+                        IExec->FreeVec(interpreter_args);
+
+                        if (filename_conv)
+                                IExec->FreeVec(filename_conv);
+                        fname = mystrdup(interpreter_conv);
+
+                        if (interpreter_conv)
+                                IExec->FreeVec(interpreter_conv);
+                }
+                else
+                {
+#ifndef __USE_RUNCOMMAND__
+                        sprintf(full, "%s ", filename_conv);
+#else
+                        sprintf(full, "");
+#endif
+                        fname = mystrdup(filename_conv);
+                        if (filename_conv)
+                                IExec->FreeVec(filename_conv);
+                }
+
+                for (cur = (char **)(argv + 1); *cur != 0; cur++)
+                {
+                        if (contains_whitespace(*cur))
+                        {
+                                int esc = no_of_escapes(*cur);
+
+                                if (esc > 0)
+                                {
+                                        char *buff = IExec->AllocVec(
+                                            strlen(*cur) + 4 + esc,
+                                            MEMF_ANY | MEMF_CLEAR);
+                                        char *p = *cur;
+                                        char *q = buff;
+
+                                        *q++ = '"';
+                                        while (*p != '\0')
+                                        {
+
+                                                if (*p == '\n')
+                                                {
+                                                        *q++ = '*';
+                                                        *q++ = 'N';
+                                                        p++;
+                                                        continue;
+                                                }
+                                                else if (*p == '"')
+                                                {
+                                                        *q++ = '*';
+                                                        *q++ = '"';
+                                                        p++;
+                                                        continue;
+                                                }
+                                                else if (*p == '*')
+                                                {
+                                                        *q++ = '*';
+                                                }
+                                                *q++ = *p++;
+                                        }
+                                        *q++ = '"';
+                                        *q++ = ' ';
+                                        *q = '\0';
+                                        strcat(full, buff);
+                                        IExec->FreeVec(buff);
+                                }
+                                else
+                                {
+                                        strcat(full, "\"");
+                                        strcat(full, *cur);
+                                        strcat(full, "\" ");
+                                }
+                        }
+                        else
+                        {
+                                strcat(full, *cur);
+                                strcat(full, " ");
+                        }
+                }
+                strcat(full, "\n");
+
+//            if(envp)
+//                 createvars(envp);
+
+#ifndef __USE_RUNCOMMAND__
+                result = IDOS->SystemTags(
+                    full, SYS_UserShell, TRUE, NP_StackSize,
+                    ((struct Process *)thisTask)->pr_StackSize, SYS_Input,
+                    ((struct Process *)thisTask)->pr_CIS, SYS_Output,
+                    ((struct Process *)thisTask)->pr_COS, SYS_Error,
+                    ((struct Process *)thisTask)->pr_CES, TAG_DONE);
+#else
+
+                if (fname)
+                {
+                        BPTR seglist = IDOS->LoadSeg(fname);
+                        if (seglist)
+                        {
+                                /* check if we have an executable! */
+                                struct PseudoSegList *ps = NULL;
+                                if (!IDOS->GetSegListInfoTags(
+                                        seglist, GSLI_Native, &ps, TAG_DONE))
+                                {
+                                        IDOS->GetSegListInfoTags(
+                                            seglist, GSLI_68KPS, &ps, TAG_DONE);
+                                }
+                                if (ps != NULL)
+                                {
+                                        //                    adebug("%s %ld %s
+                                        //                    %s\n",__FUNCTION__,__LINE__,fname,full);
+                                        IDOS->SetCliProgramName(fname);
+                                        //                        result=RunCommand(seglist,8*1024,full,strlen(full));
+                                        //                        result=myruncommand(seglist,8*1024,full,strlen(full),envp);
+                                        result = myruncommand(seglist, 8 * 1024,
+                                                              full, -1, envp);
+                                        errno = 0;
+                                }
+                                else
+                                {
+                                        errno = ENOEXEC;
+                                }
+                                IDOS->UnLoadSeg(seglist);
+                        }
+                        else
+                        {
+                                errno = ENOEXEC;
+                        }
+                        IExec->FreeVec(fname);
+                }
+
+#endif /* USE_RUNCOMMAND */
+
+                IExec->FreeVec(full);
+                if (errno == ENOEXEC)
+                {
+                        result = -1;
+                }
+                goto out;
+        }
+
+        if (interpreter)
+                IExec->FreeVec(interpreter);
+        if (filename_conv)
+                IExec->FreeVec(filename_conv);
+
+        errno = ENOMEM;
+
+out:
+        if (isperlthread)
+        {
+                amigaos_stdio_restore(aTHX_ & store);
+                STATUS_NATIVE_CHILD_SET(result);
+                PL_exit_flags |= PERL_EXIT_EXPECTED;
+                if (result != -1)
+                        my_exit(result);
+        }
+        return (result);
 }

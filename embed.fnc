@@ -350,9 +350,9 @@ Afrpd   |OP*    |die            |NULLOK const char* pat|...
 pr	|void	|die_unwind	|NN SV* msv
 Ap	|void	|dounwind	|I32 cxix
 : FIXME
-pmb	|DO_EXEC_TYPE|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
+pmb	|bool|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
 : Used in pp_sys.c
-p	|DO_EXEC_TYPE|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int do_report
+p	|bool|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int do_report
 Ap	|int	|do_binmode	|NN PerlIO *fp|int iotype|int mode
 : Used in pp.c
 Ap	|bool	|do_close	|NULLOK GV* gv|bool not_implicit
@@ -360,9 +360,9 @@ Ap	|bool	|do_close	|NULLOK GV* gv|bool not_implicit
 p	|bool	|do_eof		|NN GV* gv
 
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
-pm	|DO_EXEC_TYPE|do_exec	|NN const char* cmd
+pm	|bool|do_exec	|NN const char* cmd
 #else
-p	|DO_EXEC_TYPE|do_exec	|NN const char* cmd
+p	|bool|do_exec	|NN const char* cmd
 #endif
 
 #if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
@@ -371,7 +371,7 @@ Ap	|int	|do_spawn	|NN char* cmd
 Ap	|int	|do_spawn_nowait|NN char* cmd
 #endif
 #if !defined(WIN32)
-p	|DO_EXEC_TYPE|do_exec3	|NN const char *incmd|int fd|int do_report
+p	|bool|do_exec3	|NN const char *incmd|int fd|int do_report
 #endif
 p	|void	|do_execfree
 #if defined(PERL_IN_DOIO_C)

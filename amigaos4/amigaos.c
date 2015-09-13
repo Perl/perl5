@@ -19,6 +19,9 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <stdbool.h>
+#undef WORD
+#define WORD int16
 
 #include <dos/dos.h>
 #include <proto/dos.h>
@@ -87,7 +90,6 @@ int VARARGS68K adebug(UBYTE *fmt, ...);
 char **myenviron = NULL;
 char **origenviron = NULL;
 
-int myexecve(const char *path, char *argv[], char *envp[]);
 static void createvars(char **envp);
 
 struct args
@@ -145,7 +147,7 @@ int32 myruncommand(
         return myargs.result;
 }
 
-static char *mystrdup(const char *s)
+char *mystrdup(const char *s)
 {
         char *result = NULL;
         size_t size;
@@ -338,7 +340,7 @@ struct command_data
         struct Task *parent;
 };
 
-int myexecvp(const char *filename, char *argv[])
+int myexecvp(bool isperlthread, const char *filename, char *argv[])
 {
         //	adebug("%s %ld
         //%s\n",__FUNCTION__,__LINE__,filename?filename:"NULL");
@@ -391,16 +393,16 @@ int myexecvp(const char *filename, char *argv[])
 
                 } while (*p++ != '\0');
         }
-        res = myexecve(filename, argv, myenviron);
+        res = myexecve(isperlthread, filename, argv, myenviron);
         return res;
 }
 
-int myexecv(const char *path, char *argv[])
+int myexecv(bool isperlthread, const char *path, char *argv[])
 {
-        return myexecve(path, argv, myenviron);
+        return myexecve(isperlthread, path, argv, myenviron);
 }
 
-int myexecl(const char *path, ...)
+int myexecl(bool isperlthread, const char *path, ...)
 {
         va_list va;
         char *argv[1024]; /* 1024 enough? let's hope so! */
@@ -416,8 +418,10 @@ int myexecl(const char *path, ...)
         } while (argv[i++] != NULL);
 
         va_end(va);
-        return myexecve(path, argv, myenviron);
+        return myexecve(isperlthread, path, argv, myenviron);
 }
+
+#if 0
 
 int myexecve(const char *filename, char *argv[], char *envp[])
 {
@@ -435,6 +439,15 @@ int myexecve(const char *filename, char *argv[], char *envp[])
         //        int tmpint;
         //        struct Task *thisTask = IExec->FindTask(0);
         int result = -1;
+
+        StdioStore store;
+
+		dTHX;
+		if(aTHX) // I hope this is NULL when not on a interpreteer thread nor to level.
+		{
+			/* Save away our stdio */
+	        amigaos_stdio_save(aTHX_ & store);
+		}
 
         // adebug("%s %ld %s\n",__FUNCTION__,__LINE__,filename?filename:"NULL");
 
@@ -486,7 +499,7 @@ int myexecve(const char *filename, char *argv[], char *envp[])
                 if (errno == ENOENT)
                 {
                         /* file didn't exist! */
-                        return -1;
+						goto out;
                 }
         }
 
@@ -644,8 +657,10 @@ int myexecve(const char *filename, char *argv[], char *envp[])
 
                 IExec->FreeVec(full);
                 if (errno == ENOEXEC)
-                        return -1;
-                return result;
+                {
+					result = -1;
+                }
+                goto out;
         }
 
         if (interpreter)
@@ -655,8 +670,17 @@ int myexecve(const char *filename, char *argv[], char *envp[])
 
         errno = ENOMEM;
 
-        return -1;
+out:
+
+    amigaos_stdio_restore(aTHX_ &store);
+    STATUS_NATIVE_CHILD_SET(result);
+    PL_exit_flags |= PERL_EXIT_EXPECTED;
+    if (result != -1) my_exit(result);
+
+        return(result);
 }
+
+#endif
 
 int pause(void)
 {
@@ -804,7 +828,7 @@ int popen_child()
          * argv[]
          */
 
-        myexecvp(argv[0], argv);
+        myexecvp(FALSE, argv[0], argv);
         if (command)
                 IExec->FreeVec(command);
 

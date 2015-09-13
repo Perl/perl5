@@ -3269,6 +3269,32 @@ typedef pthread_key_t	perl_key;
      vaxc$errno = PL_statusvalue_vms = MY_POSIX_EXIT ? \
 	(C_FAC_POSIX | (1 << 3) | STS$K_ERROR | STS$M_INHIB_MSG) : SS$_ABORT)
 
+#elif defined(__amigaos4__)
+ /* A somewhat experimental attempt to simulate posix return code values */
+#   define STATUS_NATIVE	PL_statusvalue_posix
+#   define STATUS_NATIVE_CHILD_SET(n)                      \
+        STMT_START {                                       \
+            PL_statusvalue_posix = (n);                    \
+            if (PL_statusvalue_posix < 0) {                \
+                PL_statusvalue = -1;                       \
+            }                                              \
+            else {                                         \
+                PL_statusvalue = n << 8;                   \
+            }                                              \
+        } STMT_END
+#   define STATUS_UNIX_SET(n)		\
+	STMT_START {			\
+	    PL_statusvalue = (n);		\
+	    if (PL_statusvalue != -1)	\
+		PL_statusvalue &= 0xFFFF;	\
+	} STMT_END
+#   define STATUS_UNIX_EXIT_SET(n) STATUS_UNIX_SET(n)
+#   define STATUS_EXIT_SET(n) STATUS_UNIX_SET(n)
+#   define STATUS_CURRENT STATUS_UNIX
+#   define STATUS_EXIT STATUS_UNIX
+#   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0, PL_statusvalue_posix = 0)
+#   define STATUS_ALL_FAILURE	(PL_statusvalue = 1, PL_statusvalue_posix = 1)
+
 #else
 #   define STATUS_NATIVE	PL_statusvalue_posix
 #   if defined(WCOREDUMP)
@@ -5418,20 +5444,6 @@ struct tempsym; /* defined in pp_pack.c */
 #  include "win32iop.h"
 #endif
 
-/* DO_EXEC_TYPE is the return type of the do_*exec*() functions.
- * For UNIXish platforms where the exec functions by definition
- * return only failure, it can be bool (for success, they do not
- * return).  For other platforms, where the calling entity may
- * return, the return value may be more complex. */
-#if defined(__amigaos4__)
-#  define DO_EXEC_TYPE I32
-#  define DO_EXEC_FAILURE -1
-#  define DO_EXEC_RETVAL(val) (val)
-#else
-#  define DO_EXEC_TYPE bool
-#  define DO_EXEC_FAILURE FALSE
-#  define DO_EXEC_RETVAL(val) FALSE
-#endif
 
 #include "proto.h"
 
