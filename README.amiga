@@ -178,6 +178,9 @@ This will build the default setup that installs under SDK:local/newlib/lib/
 
 =item Fix issue with newlib's unlink, which could cause infinite loops.
 
+=item Add flock() emulation using IDOS->LockRecord thanks to Tony Cook
+for the suggestion.
+
 =back
 
 =item B<27th November 2013>

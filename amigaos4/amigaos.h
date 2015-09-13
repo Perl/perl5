@@ -52,4 +52,15 @@ long amigaos_get_file(int fd);
 
 // BOOL constructed;
 
+/* emulated flock stuff */
+
+#define LOCK_SH 1 /* Shared lock.  */
+#define LOCK_EX 2 /* Exclusive lock.  */
+#define LOCK_UN 8 /* Unlock.  */
+#define LOCK_NB 4 /* Don't block when locking.  */
+
+extern int flock(int fd, int operation);
+
+#define flock(a, b) amigaos_flock((a), (b))
+
 #endif

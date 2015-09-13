@@ -1078,3 +1078,89 @@ BPTR amigaos_get_file(int fd)
         }
         return fh;
 }
+
+/*########################################################################*/
+
+#define LOCK_START 0xFFFFFFFFFFFFFFFELL
+#define LOCK_LENGTH 1LL
+
+// No wait forever option so lets wait for a loooong time.
+#define TIMEOUT 0x7FFFFFFF
+
+int amigaos_flock(int fd, int oper)
+{
+        BPTR fh;
+        int32 success = -1;
+
+        if (!(fh = amigaos_get_file(fd)))
+        {
+                errno = EBADF;
+                return -1;
+        }
+
+        switch (oper)
+        {
+        case LOCK_SH:
+        {
+                if (IDOS->LockRecord(fh, LOCK_START, LOCK_LENGTH,
+                                     REC_SHARED | RECF_DOS_METHOD_ONLY,
+                                     TIMEOUT))
+                {
+                        success = 0;
+                }
+                break;
+        }
+        case LOCK_EX:
+        {
+                if (IDOS->LockRecord(fh, LOCK_START, LOCK_LENGTH,
+                                     REC_EXCLUSIVE | RECF_DOS_METHOD_ONLY,
+                                     TIMEOUT))
+                {
+                        success = 0;
+                }
+                break;
+        }
+        case LOCK_SH | LOCK_NB:
+        {
+                if (IDOS->LockRecord(fh, LOCK_START, LOCK_LENGTH,
+                                     REC_SHARED_IMMED | RECF_DOS_METHOD_ONLY,
+                                     TIMEOUT))
+                {
+                        success = 0;
+                }
+                else
+                {
+                        errno = EWOULDBLOCK;
+                }
+                break;
+        }
+        case LOCK_EX | LOCK_NB:
+        {
+                if (IDOS->LockRecord(fh, LOCK_START, LOCK_LENGTH,
+                                     REC_EXCLUSIVE_IMMED | RECF_DOS_METHOD_ONLY,
+                                     TIMEOUT))
+                {
+                        success = 0;
+                }
+                else
+                {
+                        errno = EWOULDBLOCK;
+                }
+                break;
+        }
+        case LOCK_UN:
+        {
+                if (IDOS->UnLockRecord(fh, LOCK_START, LOCK_LENGTH))
+                {
+                        success = 0;
+                }
+                break;
+        }
+        default:
+        {
+                errno = EINVAL;
+                return -1;
+        }
+        }
+        return success;
+}
