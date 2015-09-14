@@ -462,7 +462,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::MakeMaker' => {
-        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.04.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.10.tar.gz',
         'FILES'        => q[cpan/ExtUtils-MakeMaker],
         'EXCLUDED'     => [
             qr{^t/lib/Test/},
@@ -472,6 +472,12 @@ use File::Glob qw(:case);
             qr{^\.perlcriticrc},
             'PATCHING',
             'README.packaging',
+        ],
+        # Upstreamed as https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/commit/ede9ea4a
+        'CUSTOMIZED'   => [
+            qq[lib/ExtUtils/MakeMaker.pm],
+            qq[t/prereq.t],
+            qq[t/vstrings.t],
         ],
     },
 

@@ -30,7 +30,7 @@ sub capture_make {
         $warnings .= join '', @_;
     };
 
-    local $ENV{PERL_CORE} = 0;
+    local $ExtUtils::MakeMaker::UNDER_CORE = 0;
 
     WriteMakefile(
         NAME      => 'VString::Test',

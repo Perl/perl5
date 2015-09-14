@@ -24,7 +24,7 @@ my %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.04_01';
+our $VERSION = '7.10';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -42,7 +42,7 @@ our @EXPORT_OK = qw($VERSION &neatvalue &mkbootstrap &mksymlists
 # purged.
 my $Is_VMS     = $^O eq 'VMS';
 my $Is_Win32   = $^O eq 'MSWin32';
-my $UNDER_CORE = $ENV{PERL_CORE};
+our $UNDER_CORE = $ENV{PERL_CORE}; # needs to be our
 
 full_setup();
 
@@ -439,7 +439,7 @@ sub new {
    }
 
     print "MakeMaker (v$VERSION)\n" if $Verbose;
-    if (-f "MANIFEST" && ! -f "Makefile" && ! $ENV{PERL_CORE}){
+    if (-f "MANIFEST" && ! -f "Makefile" && ! $UNDER_CORE){
         check_manifest();
     }
 
@@ -525,7 +525,7 @@ END
             warn sprintf "Warning: prerequisite %s %s not found.\n",
               $prereq, $required_version
                    unless $self->{PREREQ_FATAL}
-                       or $ENV{PERL_CORE};
+                       or $UNDER_CORE;
 
             $unsatisfied{$prereq} = 'not installed';
         }
@@ -533,7 +533,7 @@ END
             warn sprintf "Warning: prerequisite %s %s not found. We have %s.\n",
               $prereq, $required_version, ($pr_version || 'unknown version')
                   unless $self->{PREREQ_FATAL}
-                       or $ENV{PERL_CORE};
+                       or $UNDER_CORE;
 
             $unsatisfied{$prereq} = $required_version ? $required_version : 'unknown version' ;
         }
@@ -1175,12 +1175,9 @@ sub flush {
     binmode $fh, ':encoding(locale)' if $CAN_DECODE;
 
     for my $chunk (@{$self->{RESULT}}) {
-        my $to_write = "$chunk\n";
-        if (!$CAN_DECODE && $] > 5.008) {
-            utf8::encode $to_write;
-        }
-        print $fh "$chunk\n"
-            or die "Can't write to MakeMaker.tmp: $!";
+        my $to_write = $chunk;
+        utf8::encode $to_write if !$CAN_DECODE && $] > 5.008;
+        print $fh "$to_write\n" or die "Can't write to MakeMaker.tmp: $!";
     }
 
     close $fh

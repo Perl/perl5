@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '7.04_01';
+our $VERSION = '7.10';
 
 use Carp;
 use File::Spec;
@@ -1668,7 +1668,7 @@ CODE
     my $add_sign_to_dist = $self->cd('$(DISTVNAME)' => $add_sign );
 
     return sprintf <<'MAKE', $add_sign_to_dist, $touch_sig, $sign_dist
-distsignature : create_distdir
+distsignature : distmeta
 	$(NOECHO) %s
 	$(NOECHO) %s
 	%s

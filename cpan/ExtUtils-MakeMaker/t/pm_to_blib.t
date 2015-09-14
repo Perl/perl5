@@ -68,6 +68,8 @@ local $ENV{PERL_INSTALL_QUIET};
 
 # Rerun the Makefile.PL, pm_to_blib should rerun
 {
+    # Seems there are occasional race conditions with these tests
+    # waiting a couple of seconds appears to resolve these
     sleep 2;
     run_ok(qq{$perl Makefile.PL});
 

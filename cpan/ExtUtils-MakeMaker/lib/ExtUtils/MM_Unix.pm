@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.04_01';
+$VERSION = '7.10';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -676,13 +676,13 @@ Defines a check in target for RCS.
 
 sub dist_ci {
     my($self) = shift;
-    return q{
-ci :
-	$(PERLRUN) "-MExtUtils::Manifest=maniread" \\
-	  -e "@all = keys %{ maniread() };" \\
-	  -e "print(qq{Executing $(CI) @all\n}); system(qq{$(CI) @all});" \\
-	  -e "print(qq{Executing $(RCS_LABEL) ...\n}); system(qq{$(RCS_LABEL) @all});"
-};
+    return sprintf "ci :\n\t%s\n", $self->oneliner(<<'EOF', [qw(-MExtUtils::Manifest=maniread)]);
+@all = sort keys %{ maniread() };
+print(qq{Executing $(CI) @all\n});
+system(qq{$(CI) @all}) == 0 or die $!;
+print(qq{Executing $(RCS_LABEL) ...\n});
+system(qq{$(RCS_LABEL) @all}) == 0 or die $!;
+EOF
 }
 
 =item dist_core (o)

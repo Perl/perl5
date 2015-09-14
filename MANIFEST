@@ -1027,6 +1027,7 @@ cpan/ExtUtils-Install/t/lib/TieOut.pm			Testing library to capture prints
 cpan/ExtUtils-Install/t/Packlist.t			See if Packlist works
 cpan/ExtUtils-MakeMaker/bin/instmodsh				Give information about installed extensions
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Command/MM.pm		Calling MM functions from the cmd line
+cpan/ExtUtils-MakeMaker/lib/ExtUtils/Command.pm
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Liblist/Kid.pm		Does the real work of the above
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Liblist.pm			Locates libraries
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/Config.pm	MakeMaker wrapper for Config
@@ -1066,8 +1067,10 @@ cpan/ExtUtils-MakeMaker/t/basic.t				See if MakeMaker can build a module
 cpan/ExtUtils-MakeMaker/t/build_man.t				Set if MakeMaker builds manpages
 cpan/ExtUtils-MakeMaker/t/cd.t					Test to see cd works
 cpan/ExtUtils-MakeMaker/t/config.t				Test ExtUtils::MakeMaker::Config
+cpan/ExtUtils-MakeMaker/t/cp.t
 cpan/ExtUtils-MakeMaker/t/dir_target.t				Verify if dir_target() is supported
 cpan/ExtUtils-MakeMaker/t/echo.t				Test for ExtUtils::MakeMaker
+cpan/ExtUtils-MakeMaker/t/eu_command.t
 cpan/ExtUtils-MakeMaker/t/FIRST_MAKEFILE.t			See if FIRST_MAKEFILE works
 cpan/ExtUtils-MakeMaker/t/fixin.t				See if ExtUtils::MakeMaker works
 cpan/ExtUtils-MakeMaker/t/fix_libs.t				Test for ExtUtils::MakeMaker
