@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.013';
+$experimental::VERSION = '0.014';
 use strict;
 use warnings;
 use version ();
@@ -20,6 +20,7 @@ my %features = map { $_ => 1 } $] > 5.015006 ? keys %feature::feature : do {
 my %min_version = (
 	array_base      => '5',
 	autoderef       => '5.14.0',
+	bitwise         => '5.22.0',
 	current_sub     => '5.16.0',
 	evalbytes       => '5.16.0',
 	fc              => '5.16.0',
@@ -27,7 +28,7 @@ my %min_version = (
 	lexical_subs    => '5.18.0',
 	postderef       => '5.20.0',
 	postderef_qq    => '5.20.0',
-	refaliasing     => '5.21.5',
+	refaliasing     => '5.22.0',
 	regex_sets      => '5.18.0',
 	say             => '5.10.0',
 	smartmatch      => '5.10.0',
@@ -119,7 +120,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.013
+version 0.014
 
 =head1 SYNOPSIS
 
