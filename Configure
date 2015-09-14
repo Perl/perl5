@@ -23619,9 +23619,14 @@ for xxx in $xs_extensions ; do
 		esac
 		;;
 	Sys/Syslog|sys/syslog)
-		: XXX syslog requires socket
-		case "$d_socket" in
-		true|$define|y) avail_ext="$avail_ext $xxx" ;;
+		case $osname in
+			amigaos) ;; # not really very useful on AmigaOS
+			*)
+			: XXX syslog requires socket
+			case "$d_socket" in
+			true|$define|y) avail_ext="$avail_ext $xxx" ;;
+			esac
+			;;
 		esac
 		;;
 	Thread|thread)
