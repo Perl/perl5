@@ -4813,8 +4813,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     regnode *scan;
     regnode *next;
     U32 n = 0;	/* general value; init to avoid compiler warning */
-    U32 prevn = 0; /* previous character;  init to avoid compiler warning */
-    SSize_t ln = 0; /* len;  init to avoid compiler warning */
+    SSize_t ln = 0; /* len or last;  init to avoid compiler warning */
     char *locinput = startpos;
     char *pushinput; /* where to continue after a PUSH */
     I32 nextchr;   /* is always set to UCHARAT(locinput) */
@@ -5539,9 +5538,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	    if (utf8_target) {
 		if (locinput == reginfo->strbeg)
-		    prevn = isWORDCHAR_LC('\n');
+		    ln = isWORDCHAR_LC('\n');
 		else {
-                    prevn = isWORDCHAR_LC_utf8(reghop3((U8*)locinput, -1,
+                    ln = isWORDCHAR_LC_utf8(reghop3((U8*)locinput, -1,
                                                         (U8*)(reginfo->strbeg)));
 		}
                 n = (NEXTCHR_IS_EOS)
@@ -5549,14 +5548,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     : isWORDCHAR_LC_utf8((U8*)locinput);
 	    }
 	    else { /* Here the string isn't utf8 */
-		prevn = (locinput == reginfo->strbeg)
+		ln = (locinput == reginfo->strbeg)
                      ? isWORDCHAR_LC('\n')
                      : isWORDCHAR_LC(UCHARAT(locinput - 1));
                 n = (NEXTCHR_IS_EOS)
                     ? isWORDCHAR_LC('\n')
                     : isWORDCHAR_LC(nextchr);
 	    }
-            if (to_complement ^ (prevn == n)) {
+            if (to_complement ^ (ln == n)) {
                 sayNO;
             }
 	    break;
@@ -5587,13 +5586,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
              * 2) it is a multi-byte character, in which case the final byte is
              *    never mistakable for ASCII, and so the test will say it is
              *    not a word character, which is the correct answer. */
-            prevn = (locinput == reginfo->strbeg)
+            ln = (locinput == reginfo->strbeg)
                  ? isWORDCHAR_A('\n')
                  : isWORDCHAR_A(UCHARAT(locinput - 1));
             n = (NEXTCHR_IS_EOS)
                 ? isWORDCHAR_A('\n')
                 : isWORDCHAR_A(nextchr);
-            if (to_complement ^ (prevn == n)) {
+            if (to_complement ^ (ln == n)) {
                 sayNO;
             }
 	    break;
@@ -5610,14 +5609,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
               bound_utf8:
                 switch((bound_type) FLAGS(scan)) {
                     case TRADITIONAL_BOUND:
-                        prevn = (locinput == reginfo->strbeg)
+                        ln = (locinput == reginfo->strbeg)
                              ? 0 /* isWORDCHAR_L1('\n') */
                              : isWORDCHAR_utf8(reghop3((U8*)locinput, -1,
                                                                 (U8*)(reginfo->strbeg)));
                         n = (NEXTCHR_IS_EOS)
                             ? 0 /* isWORDCHAR_L1('\n') */
                             : isWORDCHAR_utf8((U8*)locinput);
-                        match = cBOOL(prevn != n);
+                        match = cBOOL(ln != n);
                         break;
                     case GCB_BOUND:
                         if (locinput == reginfo->strbeg || NEXTCHR_IS_EOS) {
@@ -5680,13 +5679,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    else {  /* Not utf8 target */
                 switch((bound_type) FLAGS(scan)) {
                     case TRADITIONAL_BOUND:
-                        prevn = (locinput == reginfo->strbeg)
+                        ln = (locinput == reginfo->strbeg)
                             ? 0 /* isWORDCHAR_L1('\n') */
                             : isWORDCHAR_L1(UCHARAT(locinput - 1));
                         n = (NEXTCHR_IS_EOS)
                             ? 0 /* isWORDCHAR_L1('\n') */
                             : isWORDCHAR_L1(nextchr);
-                        match = cBOOL(prevn != n);
+                        match = cBOOL(ln != n);
                         break;
 
                     case GCB_BOUND:
