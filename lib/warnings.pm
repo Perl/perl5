@@ -1025,8 +1025,10 @@ this snippet of code:
     package MyMod::Abc;
 
     sub open {
-        warnings::warnif("deprecated",
-                         "open is deprecated, use new instead");
+        if (warnings::enabled("deprecated")) {
+            warnings::warn("deprecated",
+                           "open is deprecated, use new instead");
+        }
         new(@_);
     }
 
