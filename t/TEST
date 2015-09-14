@@ -41,7 +41,6 @@ my %abs = (
 	   '../cpan/CPAN' => 1,
 	   '../cpan/Devel-PPPort' => 1,
 	   '../cpan/Encode' => 1,
-	   '../cpan/ExtUtils-Command' => 1,
 	   '../cpan/ExtUtils-Constant' => 1,
 	   '../cpan/ExtUtils-Install' => 1,
 	   '../cpan/ExtUtils-MakeMaker' => 1,

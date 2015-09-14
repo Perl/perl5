@@ -1007,10 +1007,6 @@ cpan/encoding-warnings/t/3-normal.t	tests for encoding::warnings
 cpan/encoding-warnings/t/4-lexical.t	tests for encoding::warnings
 cpan/experimental/lib/experimental.pm
 cpan/experimental/t/basic.t
-cpan/ExtUtils-Command/lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
-cpan/ExtUtils-Command/t/cp.t			See if ExtUtils::Command works
-cpan/ExtUtils-Command/t/eu_command.t		See if ExtUtils::Command works
-cpan/ExtUtils-Command/t/lib/TieOut.pm		Testing library to capture prints
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants
