@@ -55,7 +55,9 @@ void ___freeenviron() __attribute__((destructor));
 
 long amigaos_get_file(int fd);
 
-// BOOL constructed;
+void amigaos4_init_fork_array();
+void amigaos4_dispose_fork_array();
+void amigaos4_init_environ_sema();
 
 /* emulated flock stuff */
 

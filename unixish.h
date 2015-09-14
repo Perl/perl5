@@ -136,9 +136,6 @@ int afstat(int fd, struct stat *statb);
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
 #if defined(__amigaos4__)
-void amigaos4_init_fork_array();
-void amigaos4_dispose_fork_array();
-void amigaos4_init_environ_sema();
 #  define PERL_SYS_INIT_BODY(c,v)					\
 	MALLOC_CHECK_TAINT2(*c,*v) PERL_FPU_INIT; PERLIO_INIT; MALLOC_INIT; amigaos4_init_fork_array(); amigaos4_init_environ_sema();
 #  define PERL_SYS_TERM_BODY() \
