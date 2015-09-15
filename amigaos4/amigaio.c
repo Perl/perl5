@@ -89,6 +89,7 @@ struct thread_info
         int ti_children;
         pthread_t ti_parent;
         struct MsgPort *ti_port;
+        struct Process *ti_Process;
 };
 
 static struct thread_info pseudo_children[MAX_THREADS];
@@ -154,6 +155,31 @@ struct child_arg
         PerlInterpreter *ca_interp;
 };
 
+#undef kill
+
+/* FIXME: Is here's a chance, albeit it small of a clash between our pseudo pid */
+/* derived from the pthread API  and the dos.library pid that newlib kill uses? */
+/* clib2 used the Process address so there was no issue */
+
+int amigaos_kill(Pid_t pid, int signal)
+{
+	int i;
+	Pid_t realpid = pid; // Perhaps we have a real pid from else where?
+	/* Look for our DOS pid */
+	IExec->ObtainSemaphore(&fork_array_sema);
+	for (i = 0; i < MAX_THREADS; i++)
+	{
+		if (pseudo_children[i].ti_pid == pid)
+		{
+			realpid = (Pid_t)IDOS->GetPID(pseudo_children[i].ti_Process,GPID_PROCESS);
+			break;
+		}
+	}
+	IExec->ReleaseSemaphore(&fork_array_sema);
+	/* Allow the C library to work out which signals are realy valid */
+	return kill(realpid,signal);
+}
+
 static THREAD_RET_TYPE amigaos4_start_child(void *arg)
 {
 
@@ -183,6 +209,7 @@ static THREAD_RET_TYPE amigaos4_start_child(void *arg)
         nextchild = getnextchild();
 
         pseudo_children[nextchild].ti_pid = pseudo_id;
+        pseudo_children[nextchild].ti_Process = (struct Process *)IExec->FindTask(NULL);
         pseudo_children[nextchild].ti_parent =
             ((struct child_arg *)arg)->ca_parent;
         pseudo_children[nextchild].ti_port =

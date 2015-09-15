@@ -181,6 +181,8 @@ This will build the default setup that installs under SDK:local/newlib/lib/
 =item Add flock() emulation using IDOS->LockRecord thanks to Tony Cook
 for the suggestion.
 
+=item Fix issue where kill was using the wrong kind of process ID
+
 =back
 
 =item B<27th November 2013>

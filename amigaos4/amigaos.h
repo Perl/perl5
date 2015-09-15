@@ -41,9 +41,14 @@ char *mystrdup(const char *s);
 char *convert_path_u2a(const char *filename);
 char *convert_path_a2u(const char *filename);
 
-/* signal.h */
+/* Need Pid_t define to make amigaos.c compile without including config.h */
+#ifndef Pid_t
+#define Pid_t pid_t
+#endif
 
-// #define SIGQUIT SIGABRT
+int amigaos_kill(Pid_t pid, int  signal);
+
+#define kill(a,b) amigaos_kill((a),(b))
 
 void ___makeenviron() __attribute__((constructor));
 void ___freeenviron() __attribute__((destructor));
