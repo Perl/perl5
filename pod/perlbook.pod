@@ -6,12 +6,13 @@ perlbook - Books about and related to Perl
 
 There are many books on Perl and Perl-related. A few of these are
 good, some are OK, but many aren't worth your money. There is a list
-of these books, some with extensive reviews, at http://books.perl.org/
-. We list some of the books here, and while listing a book implies our
+of these books, some with extensive reviews, at
+L<http://books.perl.org/> . We list some of the books here, and while
+listing a book implies our
 endorsement, don't think that not including a book means anything.
 
 Most of these books are available online through Safari Books Online
-( http://safaribooksonline.com/ ).
+( L<http://safaribooksonline.com/> ).
 
 =head2 The most popular books
 
@@ -267,7 +268,7 @@ You might want to keep these desktop references close by your keyboard:
 
 Some of these books are available as free downloads.
 
-I<Higher-Order Perl>: http://hop.perl.plover.com/
+I<Higher-Order Perl>: L<http://hop.perl.plover.com/>
 
 =head2 Other interesting, non-Perl books
 
@@ -295,7 +296,7 @@ Each version of Perl comes with the documentation that was current at
 the time of release. This poses a problem for content such as book
 lists. There are probably very nice books published after this list
 was included in your Perl release, and you can check the latest
-released version at http://perldoc.perl.org/perlbook.html .
+released version at L<http://perldoc.perl.org/perlbook.html> .
 
 Some of the books we've listed appear almost ancient in internet
 scale, but we've included those books because they still describe the
@@ -307,5 +308,6 @@ limit this list to books published in the past five years.
 =head2 Get your book listed
 
 If your Perl book isn't listed and you think it should be, let us know.
+L<mailto:perl5-porters@perl.org>
 
 =cut
