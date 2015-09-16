@@ -1,0 +1,197 @@
+<?xml version="1.0"?><?xml-stylesheet type="text/xml" href="#stylesheet"?><!DOCTYPE doc SYSTEM "doc.dtd"><doc>
+
+<data>
+
+<div><h2>Tickets Listed in #125394: 5.22.1 blockers</h2>
+
+<commit votes="" id="" ticket="125469" desc="'redundant argument in printf' warning and computed field widths"/>
+<commit votes="steveh" id="89d84ff965b644c21c4c0633253e4cb21f72b62c" ticket="125381" desc="[perl #125381] fix -Cnn parsing"/>
+
+</div>
+
+<div><h2>Other Commits Nominated in #125394: 5.22.1 blockers</h2>
+
+Actual bug fix:
+<commit votes="jhi" id="5488d3733162ee806bb5f5c55694e8beaaf7b1cc" ticket="125633" desc="double-double long double %a fixes"/>
+<commit votes="jhi" id="5356d32ec564e8c2e19758f66dbcbbc38327aa75" ticket="125633" desc="remove the byte-order-mark introduced to sv.c by 5488d373"/>
+
+Another bug fix, for "double-double long double" platforms (e.g. ppc linux):
+<commit votes="jhi" id="09b94b1f0efd8c107548a6fefcd471e9b06c2cdf" ticket="125669" desc="[perl #125669] op/pack.t failures with PPC long double (double double) builds"/>
+
+Fix broken builds in some environments:
+(jhi: Might not apply cleanly to 5.22 since surroundings have moved, feel free to ask me for assistance.)
+<commit votes="jhi" id="8c1ed856816d90f9c4ab9da34ff97b9caf4d29c4" ticket="" desc="The #ifdef NV_MIN_EXP straddled the if () braces."/>
+
+Small code quality tweaks:
+(jhi: The last one is possibly debatable since it has the chance of changing behavior.)
+<commit votes="jhi" id="3c9658f5b74001ff66c07d06d2c7f2a0741bd160" ticket="" desc="gcc 5.1.0 thinks RETVAL might end up unset."/>
+<commit votes="jhi" id="976258ece432e47adaa13d955134a8972933bcca" ticket="" desc="Superfluous null ptr test warnings by clang 3.7"/>
+<commit votes="jhi" id="d1992db059626dbd1b9a7e2cf67ef89e6428a9c0" ticket="" desc="There is no SSize_t_size."/>
+
+INSTALL tweaks related to quadmath:
+<commit votes="jhi" id="b7ce25dd7b9b021b485b5de41e6e19d6029ba22d" ticket="" desc="Forgot to adjust this: quadmath is not long doubles."/>
+<commit votes="jhi" id="938039404b03b2d310c7f1c1b4e38c24ef441679" ticket="" desc="Remove uselongdoubles false claim."/>
+
+Doc-like commits:
+<commit votes="jhi" id="23ce015ee1c88f507f078091298d020d5e22a300" ticket="" desc="Make the LoTR quote of reentr.c formatted more like the others."/>
+<commit votes="jhi" id="ec610f8a9f2738d8a59ee84a3ec7ed858addea85" ticket="" desc="Link typo in last minute tweak."/>
+<commit votes="jhi" id="21ac16fed6668df441c18d5b3777df12ec41e0f8" ticket="" desc="Comment detypos."/>
+<commit votes="jhi" id="8757ed9b11519b7220e61e4765e36bd68345b6ec" ticket="" desc="There's no READ_UINT32."/>
+<commit votes="jhi" id="4943a717433fa4a342d031e05d80444da6cb0e11" ticket="" desc="Explicitly mention that even negative shiftees become UVs first."/>
+
+POSIX doc tweak:
+(jhi: Unfortunately it seems that the very last fragment might fail to apply because of the nearby signaling nan changes (which do not belong in 5.22). If in doubt, ask me for more details.)
+<commit votes="jhi" id="d7a0f0b000f94080cd0cb5efd28ae4b26f084294" ticket="" desc="POSIX: mention the Inf, NaN constants; other small tweaks"/>
+
+Documentation patches (suggested by ether):
+<commit votes="" id="9fcc23141fa6c68e7419a4caf9046d6912491e37" ticket="" desc="perlvar: discourage $OLD_PERL_VERSION"/>
+<commit votes="" id="83c1fffeadddac231b705fc8a420de87fd4f5ea3" ticket="" desc="Document $OLD_PERL_VERSION's history"/>
+<commit votes="" id="87518e92cecac2acea7073cceea51ca610774fb0" ticket="" desc="perldata: Change pod to reflect reality"/>
+<commit votes="" id="4e9736a3b8992ab439fe0bfc6201168cf7ac6a93" ticket="" desc="perlcommunity.pod updates"/>
+<commit votes="" id="3f9ec86148ce5619d909c108083f27a01c56adee" ticket="" desc="do not try printing undef"/>
+<commit votes="" id="256ca3d37ed232e10fbb2884be45691e745be7a9" ticket="" desc="perlvar: fix list of defaulted array operators"/>
+<commit votes="" id="f0b1ad2b19f6dbfdc5d5feb5c5fb48888f1cd46d" ticket="" desc="perlebcdic: Fix typo"/>
+<commit votes="" id="b6d5ddf72d1067c498a7ed65623df9f2f8f8d749" ticket="123264" desc="[perl #123264] explicitly document the return value of sysopen"/>
+<commit votes="" id="bace499647c542e44fa169173393f19316fe05b6" ticket="" desc="Perl example style nit in docs for sort()"/>
+<commit votes="" id="63602a3fc27a417daf3c532b6a11ae6eba2a072a" ticket="125313" desc="Prefer 'Foo->new' to 'new Foo' in examples of constructors."/>
+
+</div>
+
+<div><h2>Other Proposed Cherry-Picks</h2>
+
+Blead changes have been examined up to and including 64821df16a716bfc005acb06c7dc5b72afabe38d ([perl #123961] handle a missing closing ` for -DT output)
+
+Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
+
+(NOTE: The same document states that the following types of change are not acceptable:
+
+Anything controversial
+Breaking binary compatibility
+Adding or removing features
+Adding new warnings, errors or deprecations
+
+The same criteria apply to code in dual-life modules as to core code.)
+
+</div>
+
+<div><h3>Security Fixes</h3>
+
+</div>
+
+<div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
+
+<commit votes="steveh" id="46b27d2f2c37f40dde845f9b4743975c69f2cc27" ticket="123398" desc="don't fatalize warnings during unwinding (#123398)"/>
+<commit votes="" id="" ticket="123878" desc=""/>
+<commit votes="steveh" id="64821df16a716bfc005acb06c7dc5b72afabe38d" ticket="123961" desc="[perl #123961] handle a missing closing ` for -DT output"/>
+
+</div>
+
+<div><h3>Regression Fixes</h3>
+
+</div>
+
+<div><h3>Build and Installation Fixes</h3>
+
+<commit votes="jdb, steveh" id="16ac183d95cef3f9028737e9949a7e78a750c9fe" ticket="" desc="sunmath.h is only used for builds using long doubles"/>
+
+(steveh: Does this need the update to Win32-0.52 (083231ea891c049b70ef28512bfc9e68c3e5d595) too?:)
+<commit votes="steveh" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
+
+</div>
+
+<div><h3>Portability Fixes</h3>
+
+</div>
+
+<div><h3>Platform-Specific Test Fixes</h3>
+
+</div>
+
+<div><h3>Documentation Fixes</h3>
+
+<commit votes="steveh" id="8ec6d14a3d59c51796132614e9538a4c62e20dad" ticket="" desc="drop the perldeltas for 5.21.*"/>
+
+</div>
+
+</data>
+
+<xsl:stylesheet version="1.0" id="stylesheet" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="xsl:stylesheet"/>
+  <xsl:template match="/">
+    <html>
+      <head>
+        <title>Cherry-pick votes for maint-5.22</title>
+        <style>
+          .accepted .ref a { color: #090 }
+          .unvoted  .ref a { color: #c00 }
+        </style>
+      </head>
+      <body>
+        <h1>Cherry-pick votes for maint-5.22</h1>
+        <xsl:for-each select="/doc/data/div">
+          <h2><xsl:value-of select="h2"/></h2>
+          <h3><xsl:value-of select="h3"/></h3>
+          <table>
+            <xsl:for-each select="commit|head">
+              <xsl:choose>
+                <xsl:when test="local-name() = 'commit'">
+                  <tr>
+                    <xsl:apply-templates select="@votes"/>
+                    <td style="vertical-align: top; white-space: nowrap">
+                      <xsl:value-of select="@votes"/>
+                    </td>
+                    <td class="ref" style="vertical-align: top">
+                      <a href="http://perl5.git.perl.org/perl.git/commitdiff/{@id}">
+                        <xsl:value-of select="@id"/>
+                      </a>
+                    </td>
+                    <td style="vertical-align: top">
+                      <a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}">
+                        <xsl:value-of select="@ticket"/>
+                      </a>
+                    </td>
+                    <td style="vertical-align: top">
+                      <xsl:value-of select="@desc"/>
+                    </td>
+                  </tr>
+                </xsl:when>
+                <xsl:when test="local-name() = 'head'">
+                  <tr>
+                    <xsl:apply-templates select="@votes"/>
+                    <td style="vertical-align: top; white-space: nowrap">
+                      <xsl:value-of select="@votes"/>
+                    </td>
+                    <td class="ref" style="vertical-align: top">
+                      <a href="http://perl5.git.perl.org/perl.git/shortlog/refs/heads/{@branch}">
+                        <xsl:value-of select="@branch"/>
+                      </a>
+                    </td>
+                    <td style="vertical-align: top">
+                      <a href="https://rt.perl.org/Ticket/Display.html?id={@ticket}">
+                        <xsl:value-of select="@ticket"/>
+                      </a>
+                    </td>
+                    <td style="vertical-align: top">
+                      <xsl:value-of select="@desc"/>
+                    </td>
+                  </tr>
+                </xsl:when>
+              </xsl:choose>
+            </xsl:for-each>
+          </table>
+        </xsl:for-each>
+      </body>
+    </html>
+  </xsl:template>
+  <xsl:template match="@votes">
+    <xsl:choose>
+      <xsl:when test=". = ''">
+        <xsl:attribute name="class">unvoted</xsl:attribute>
+      </xsl:when>
+      <xsl:when test="substring-after(substring-after(normalize-space(translate(., ',', ' ')), ' '), ' ') != ''">
+        <xsl:attribute name="class">accepted</xsl:attribute>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:template>
+</xsl:stylesheet>
+
+</doc>
