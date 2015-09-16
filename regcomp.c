@@ -12651,7 +12651,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		    /*FALLTHROUGH*/
 		default:    /* A literal character */
 		  normal_default:
-		    if (UTF8_IS_START(*p) && UTF) {
+		    if (! UTF8_IS_INVARIANT(*p) && UTF) {
 			STRLEN numlen;
 			ender = utf8n_to_uvchr((U8*)p, RExC_end - p,
 					       &numlen, UTF8_ALLOW_DEFAULT);
