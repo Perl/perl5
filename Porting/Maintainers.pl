@@ -478,6 +478,8 @@ use File::Glob qw(:case);
             qq[lib/ExtUtils/MakeMaker.pm],
             qq[t/prereq.t],
             qq[t/vstrings.t],
+        # Upstreamed as https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/commit/dd1e236ab
+            qq[lib/ExtUtils/MM_VMS.pm],
         ],
     },
 

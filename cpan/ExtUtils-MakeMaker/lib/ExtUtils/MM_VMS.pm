@@ -1764,7 +1764,8 @@ sub oneliner {
     $cmd =~ s{^\n+}{};
     $cmd =~ s{\n+$}{};
 
-    $cmd = $self->quote_literal($cmd);
+    my @cmds = split /\n/, $cmd;
+    $cmd = join " \n\t  -e ", map $self->quote_literal($_), @cmds;
     $cmd = $self->escape_newlines($cmd);
 
     # Switches must be quoted else they will be lowercased.
