@@ -111,6 +111,12 @@ You might want to keep these desktop references close by your keyboard:
 
 =item I<Beginning Perl>
 
+(There are 2 books with this title)
+
+ by Curtis 'Ovid' Poe
+ ISBN 978-1-118-01384-7
+ http://www.wrox.com/WileyCDA/WroxTitle/productCd-1118013840.html
+
  by James Lee
  ISBN 1-59059-391-X [3rd edition April 2010 & ebook]
  http://www.apress.com/9781430227939
@@ -269,6 +275,8 @@ You might want to keep these desktop references close by your keyboard:
 Some of these books are available as free downloads.
 
 I<Higher-Order Perl>: L<http://hop.perl.plover.com/>
+
+I<Modern Perl>: L<http://onyxneon.com/books/modern_perl/>
 
 =head2 Other interesting, non-Perl books
 
