@@ -4498,8 +4498,8 @@ PP(pp_smartmatch)
 	    SPAGAIN;
 	    if (c == 0)
 		PUSHs(&PL_sv_no);
-	    else if (SvTEMP(TOPs))
-		SvREFCNT_inc_void(TOPs);
+	    else
+		SETs(boolSV(SvTRUE(TOPs)));
 	    FREETMPS;
 	    LEAVE_with_name("smartmatch_coderef");
 	    RETURN;

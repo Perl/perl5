@@ -172,6 +172,15 @@ sub NOT_DEF() { undef }
     is($bad, -1, "RT 123860: stack realloc");
 }
 
+{
+    # ensure ~~ returns a generic true or false value when the right
+    # side of a sub reference
+    sub blergh_false { "0" }
+    sub blergh_true { 42 }
+    is(1 ~~ \&blergh_false, "", "false return is a no");
+    is(1 ~~ \&blergh_true,  "1", "true return is a yes");
+}
+
 done_testing();
 
 # Prefix character :
