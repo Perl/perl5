@@ -4484,7 +4484,7 @@ PP(pp_smartmatch)
 	if (tmpsv) {
 	    SPAGAIN;
 	    (void)POPs;
-	    SETs(tmpsv);
+	    SETs(boolSV(SvTRUE(tmpsv)));
 	    RETURN;
 	}
 	DEBUG_M(Perl_deb(aTHX_ "        failed to run overload method; continuing...\n"));
@@ -4550,7 +4550,7 @@ PP(pp_smartmatch)
 	tmpsv = amagic_call(d, e, smart_amg, AMGf_noright);
 	if (tmpsv) {
 	    SPAGAIN;
-	    PUSHs(tmpsv);
+	    PUSHs(boolSV(SvTRUE(tmpsv)));
 	    RETURN;
 	}
 	DEBUG_M(Perl_deb(aTHX_ "        failed to run overload method; continuing...\n"));
