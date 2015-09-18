@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 2.12 2015/06/25 00:49:23 dankogai Exp $
+ $Id: Unicode.xs,v 2.13 2015/09/15 13:53:27 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -166,9 +166,19 @@ CODE:
 		endian = 'V';
 	    }
 	    else {
-		croak("%"SVf":Unrecognised BOM %"UVxf,
-		      *hv_fetch((HV *)SvRV(obj),"Name",4,0),
-		      bom);
+               /* No BOM found, use big-endian fallback as specified in
+                * RFC2781 and the Unicode Standard version 8.0:
+                *
+                *  The UTF-16 encoding scheme may or may not begin with
+                *  a BOM. However, when there is no BOM, and in the
+                *  absence of a higher-level protocol, the byte order
+                *  of the UTF-16 encoding scheme is big-endian.
+                *
+                *  If the first two octets of the text is not 0xFE
+                *  followed by 0xFF, and is not 0xFF followed by 0xFE,
+                *  then the text SHOULD be interpreted as big-endian.
+                */
+                s -= size;
 	    }
 	}
 #if 1

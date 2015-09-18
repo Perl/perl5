@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.33 2015/01/22 10:17:32 dankogai Exp $
+ $Id: Encode.xs,v 2.34 2015/09/15 13:53:27 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -534,20 +534,25 @@ CODE:
         }
     }
     else {
-    	/* Native bytes - can always encode */
-    U8 *d = (U8 *) SvGROW(dst, 2*slen+1); /* +1 or assertion will botch */
-    	while (s < e) {
-    	    UV uv = NATIVE_TO_UNI((UV) *s);
-	    s++; /* Above expansion of NATIVE_TO_UNI() is safer this way. */
+        /* Native bytes - can always encode */
+        U8 *d = (U8 *) SvGROW(dst, 2*slen+1); /* +1 or assertion will botch */
+        while (s < e) {
+#ifdef append_utf8_from_native_byte
+            append_utf8_from_native_byte(*s, &d);
+            s++;
+#else
+            UV uv = NATIVE_TO_UNI((UV) *s);
+            s++; /* Above expansion of NATIVE_TO_UNI() is safer this way. */
             if (UNI_IS_INVARIANT(uv))
-            	*d++ = (U8)UTF_TO_NATIVE(uv);
+                *d++ = (U8)UTF_TO_NATIVE(uv);
             else {
-    	        *d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
+                *d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
                 *d++ = (U8)UTF8_EIGHT_BIT_LO(uv);
             }
-    }
+#endif
+        }
         SvCUR_set(dst, d- (U8 *)SvPVX(dst));
-    	*SvEND(dst) = '\0';
+        *SvEND(dst) = '\0';
     }
 
     /* Clear out translated part of source unless asked not to */
