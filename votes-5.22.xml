@@ -4,7 +4,9 @@
 
 <div><h2>Tickets Listed in #125394: 5.22.1 blockers</h2>
 
-<commit votes="" id="" ticket="125469" desc="'redundant argument in printf' warning and computed field widths"/>
+(arc: The commit referenced here is a maint-specific patch, as the fix in blead strikes me as too invasive for maint. It smoked cleanly, FWIW.)
+<commit votes="arc" id="ddd5feee1fd3e7105e11f3266509b916b9d16e55" ticket="125469" desc="'redundant argument in printf' warning and computed field widths"/>
+
 <commit votes="steveh" id="89d84ff965b644c21c4c0633253e4cb21f72b62c" ticket="125381" desc="[perl #125381] fix -Cnn parsing"/>
 
 </div>
