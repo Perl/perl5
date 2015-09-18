@@ -5,9 +5,9 @@
 <div><h2>Tickets Listed in #125394: 5.22.1 blockers</h2>
 
 (arc: The commit referenced here is a maint-specific patch, as the fix in blead strikes me as too invasive for maint. It smoked cleanly, FWIW.)
-<commit votes="arc" id="ddd5feee1fd3e7105e11f3266509b916b9d16e55" ticket="125469" desc="'redundant argument in printf' warning and computed field widths"/>
+<commit votes="arc, khw" id="ddd5feee1fd3e7105e11f3266509b916b9d16e55" ticket="125469" desc="'redundant argument in printf' warning and computed field widths"/>
 
-<commit votes="steveh" id="89d84ff965b644c21c4c0633253e4cb21f72b62c" ticket="125381" desc="[perl #125381] fix -Cnn parsing"/>
+<commit votes="steveh, khw" id="89d84ff965b644c21c4c0633253e4cb21f72b62c" ticket="125381" desc="[perl #125381] fix -Cnn parsing"/>
 
 </div>
 
@@ -17,50 +17,50 @@
  We can always make exceptions where deemed necessary, or otherwise drop them from the list.)
 
 Actual bug fix:
-<commit votes="jhi, steveh" id="5488d3733162ee806bb5f5c55694e8beaaf7b1cc" ticket="125633" desc="double-double long double %a fixes"/>
-<commit votes="jhi, steveh" id="5356d32ec564e8c2e19758f66dbcbbc38327aa75" ticket="125633" desc="remove the byte-order-mark introduced to sv.c by 5488d373"/>
+<commit votes="jhi, steveh, khw" id="5488d3733162ee806bb5f5c55694e8beaaf7b1cc" ticket="125633" desc="double-double long double %a fixes"/>
+<commit votes="jhi, steveh, khw" id="5356d32ec564e8c2e19758f66dbcbbc38327aa75" ticket="125633" desc="remove the byte-order-mark introduced to sv.c by 5488d373"/>
 
 Another bug fix, for "double-double long double" platforms (e.g. ppc linux):
-<commit votes="jhi, steveh" id="09b94b1f0efd8c107548a6fefcd471e9b06c2cdf" ticket="125669" desc="[perl #125669] op/pack.t failures with PPC long double (double double) builds"/>
+<commit votes="jhi, steveh, khw" id="09b94b1f0efd8c107548a6fefcd471e9b06c2cdf" ticket="125669" desc="[perl #125669] op/pack.t failures with PPC long double (double double) builds"/>
 
 Fix broken builds in some environments:
 (jhi: Might not apply cleanly to 5.22 since surroundings have moved, feel free to ask me for assistance.)
-<commit votes="jhi, craigb" id="8c1ed856816d90f9c4ab9da34ff97b9caf4d29c4" ticket="" desc="The #ifdef NV_MIN_EXP straddled the if () braces."/>
+<commit votes="jhi, craigb, khw" id="8c1ed856816d90f9c4ab9da34ff97b9caf4d29c4" ticket="" desc="The #ifdef NV_MIN_EXP straddled the if () braces."/>
 
 Small code quality tweaks:
 (jhi: The last one is possibly debatable since it has the chance of changing behavior.)
-<commit votes="jhi" id="3c9658f5b74001ff66c07d06d2c7f2a0741bd160" ticket="" desc="gcc 5.1.0 thinks RETVAL might end up unset."/>
+<commit votes="jhi, khw" id="3c9658f5b74001ff66c07d06d2c7f2a0741bd160" ticket="" desc="gcc 5.1.0 thinks RETVAL might end up unset."/>
 <commit votes="jhi" id="976258ece432e47adaa13d955134a8972933bcca" ticket="" desc="Superfluous null ptr test warnings by clang 3.7"/>
-<commit votes="jhi" id="d1992db059626dbd1b9a7e2cf67ef89e6428a9c0" ticket="" desc="There is no SSize_t_size."/>
+<commit votes="jhi, khw" id="d1992db059626dbd1b9a7e2cf67ef89e6428a9c0" ticket="" desc="There is no SSize_t_size."/>
 
 INSTALL tweaks related to quadmath:
-<commit votes="jhi, steveh" id="b7ce25dd7b9b021b485b5de41e6e19d6029ba22d" ticket="" desc="Forgot to adjust this: quadmath is not long doubles."/>
-<commit votes="jhi, steveh" id="938039404b03b2d310c7f1c1b4e38c24ef441679" ticket="" desc="Remove uselongdoubles false claim."/>
+<commit votes="jhi, steveh, khw" id="b7ce25dd7b9b021b485b5de41e6e19d6029ba22d" ticket="" desc="Forgot to adjust this: quadmath is not long doubles."/>
+<commit votes="jhi, steveh, khw" id="938039404b03b2d310c7f1c1b4e38c24ef441679" ticket="" desc="Remove uselongdoubles false claim."/>
 
 Doc-like commits:
 <commit votes="jhi, craigb" id="23ce015ee1c88f507f078091298d020d5e22a300" ticket="" desc="Make the LoTR quote of reentr.c formatted more like the others."/>
-<commit votes="jhi, craigb" id="ec610f8a9f2738d8a59ee84a3ec7ed858addea85" ticket="" desc="Link typo in last minute tweak."/>
+<commit votes="jhi, craigb, khw" id="ec610f8a9f2738d8a59ee84a3ec7ed858addea85" ticket="" desc="Link typo in last minute tweak."/>
 <commit votes="jhi, craigb" id="21ac16fed6668df441c18d5b3777df12ec41e0f8" ticket="" desc="Comment detypos."/>
 <commit votes="jhi, craigb" id="8757ed9b11519b7220e61e4765e36bd68345b6ec" ticket="" desc="There's no READ_UINT32."/>
-<commit votes="jhi, craigb" id="4943a717433fa4a342d031e05d80444da6cb0e11" ticket="" desc="Explicitly mention that even negative shiftees become UVs first."/>
+<commit votes="jhi, craigb, khw" id="4943a717433fa4a342d031e05d80444da6cb0e11" ticket="" desc="Explicitly mention that even negative shiftees become UVs first."/>
 
 POSIX doc tweak:
 (jhi: Unfortunately it seems that the very last fragment might fail to apply because of the nearby signaling nan changes (which do not belong in 5.22). If in doubt, ask me for more details.)
-<commit votes="jhi" id="d7a0f0b000f94080cd0cb5efd28ae4b26f084294" ticket="" desc="POSIX: mention the Inf, NaN constants; other small tweaks"/>
+<commit votes="jhi, khw" id="d7a0f0b000f94080cd0cb5efd28ae4b26f084294" ticket="" desc="POSIX: mention the Inf, NaN constants; other small tweaks"/>
 (steveh: Version bump may need doing differently for maint, but it will need bumping:)
-<commit votes="" id="1dd11b288e33cbfb2c118b3331deea55b597b4d7" ticket="" desc="POSIX: version bump for d7a0f0b"/>
+<commit votes=khw"" id="1dd11b288e33cbfb2c118b3331deea55b597b4d7" ticket="" desc="POSIX: version bump for d7a0f0b"/>
 
 Documentation patches (suggested by ether):
-<commit votes="" id="9fcc23141fa6c68e7419a4caf9046d6912491e37" ticket="" desc="perlvar: discourage $OLD_PERL_VERSION"/>
-<commit votes="" id="83c1fffeadddac231b705fc8a420de87fd4f5ea3" ticket="" desc="Document $OLD_PERL_VERSION's history"/>
-<commit votes="steveh" id="87518e92cecac2acea7073cceea51ca610774fb0" ticket="" desc="perldata: Change pod to reflect reality"/>
-<commit votes="" id="4e9736a3b8992ab439fe0bfc6201168cf7ac6a93" ticket="" desc="perlcommunity.pod updates"/>
-<commit votes="" id="3f9ec86148ce5619d909c108083f27a01c56adee" ticket="" desc="do not try printing undef"/>
-<commit votes="steveh" id="256ca3d37ed232e10fbb2884be45691e745be7a9" ticket="" desc="perlvar: fix list of defaulted array operators"/>
-<commit votes="" id="f0b1ad2b19f6dbfdc5d5feb5c5fb48888f1cd46d" ticket="" desc="perlebcdic: Fix typo"/>
-<commit votes="" id="b6d5ddf72d1067c498a7ed65623df9f2f8f8d749" ticket="123264" desc="[perl #123264] explicitly document the return value of sysopen"/>
-<commit votes="" id="bace499647c542e44fa169173393f19316fe05b6" ticket="" desc="Perl example style nit in docs for sort()"/>
-<commit votes="" id="63602a3fc27a417daf3c532b6a11ae6eba2a072a" ticket="125313" desc="Prefer 'Foo->new' to 'new Foo' in examples of constructors."/>
+<commit votes="khw" id="9fcc23141fa6c68e7419a4caf9046d6912491e37" ticket="" desc="perlvar: discourage $OLD_PERL_VERSION"/>
+<commit votes="khw" id="83c1fffeadddac231b705fc8a420de87fd4f5ea3" ticket="" desc="Document $OLD_PERL_VERSION's history"/>
+<commit votes="steveh, khw" id="87518e92cecac2acea7073cceea51ca610774fb0" ticket="" desc="perldata: Change pod to reflect reality"/>
+<commit votes="khw" id="4e9736a3b8992ab439fe0bfc6201168cf7ac6a93" ticket="" desc="perlcommunity.pod updates"/>
+<commit votes="khw" id="3f9ec86148ce5619d909c108083f27a01c56adee" ticket="" desc="do not try printing undef"/>
+<commit votes="steveh, khw" id="256ca3d37ed232e10fbb2884be45691e745be7a9" ticket="" desc="perlvar: fix list of defaulted array operators"/>
+<commit votes="khw" id="f0b1ad2b19f6dbfdc5d5feb5c5fb48888f1cd46d" ticket="" desc="perlebcdic: Fix typo"/>
+<commit votes="khw" id="b6d5ddf72d1067c498a7ed65623df9f2f8f8d749" ticket="123264" desc="[perl #123264] explicitly document the return value of sysopen"/>
+<commit votes="khw" id="bace499647c542e44fa169173393f19316fe05b6" ticket="" desc="Perl example style nit in docs for sort()"/>
+<commit votes="khw" id="63602a3fc27a417daf3c532b6a11ae6eba2a072a" ticket="125313" desc="Prefer 'Foo->new' to 'new Foo' in examples of constructors."/>
 
 </div>
 
@@ -87,49 +87,55 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="steveh" id="46b27d2f2c37f40dde845f9b4743975c69f2cc27" ticket="123398" desc="don't fatalize warnings during unwinding (#123398)"/>
+<commit votes="steveh, khw" id="46b27d2f2c37f40dde845f9b4743975c69f2cc27" ticket="123398" desc="don't fatalize warnings during unwinding (#123398)"/>
 <commit votes="" id="" ticket="123878" desc=""/>
-<commit votes="steveh" id="64821df16a716bfc005acb06c7dc5b72afabe38d" ticket="123961" desc="[perl #123961] handle a missing closing ` for -DT output"/>
-<commit votes="steveh" id="d2fcb1d6773910aef058d59681ff6ae649f68352" ticket="125541" desc="[perl #125541] Fix crash with %::=(); J->${\&quot;::&quot;}"/>
+<commit votes="steveh, khw" id="64821df16a716bfc005acb06c7dc5b72afabe38d" ticket="123961" desc="[perl #123961] handle a missing closing ` for -DT output"/>
+<commit votes="steveh, khw" id="d2fcb1d6773910aef058d59681ff6ae649f68352" ticket="125541" desc="[perl #125541] Fix crash with %::=(); J->${\&quot;::&quot;}"/>
 
-<commit votes="steveh" id="e7cce976d7dd1f4fda1f387d02c6403f43346e9c" ticket="125805" desc="PATCH: [perl #125805] Perl segfaults with a regex_sets error message"/>
-<commit votes="steveh" id="e0be3f061825dcf8ffbb0e0581a77e09e74ab8fc" ticket="125805" desc="perldelta: Improve wording for [perl #125805]"/>
-<commit votes="steveh" id="e7bc593485cfd538614dec2ab351c68f94c75c39" ticket="125805" desc="Further clarification to [perl #125805] perldelta"/>
+<commit votes="steveh, khw" id="e7cce976d7dd1f4fda1f387d02c6403f43346e9c" ticket="125805" desc="PATCH: [perl #125805] Perl segfaults with a regex_sets error message"/>
+<commit votes="steveh, khw" id="e0be3f061825dcf8ffbb0e0581a77e09e74ab8fc" ticket="125805" desc="perldelta: Improve wording for [perl #125805]"/>
+<commit votes="steveh, khw" id="e7bc593485cfd538614dec2ab351c68f94c75c39" ticket="125805" desc="Further clarification to [perl #125805] perldelta"/>
 
-<commit votes="steveh" id="e6b2cf838e87ec34b3a2043c947b4f723d6efcca" ticket="125341" desc="[perl #125341] check for unexpected trash after any sub start"/>
-<commit votes="steveh" id="3160b44a75aed79c4961134279bf776ca5bff28b" ticket="125341" desc="perldelta for e6b2cf838"/>
+<commit votes="steveh, khw" id="e6b2cf838e87ec34b3a2043c947b4f723d6efcca" ticket="125341" desc="[perl #125341] check for unexpected trash after any sub start"/>
+<commit votes="steveh, khw" id="3160b44a75aed79c4961134279bf776ca5bff28b" ticket="125341" desc="perldelta for e6b2cf838"/>
 
-<commit votes="steveh" id="3c62f09f418b63bd79a6cbd20aaec4d992a6cc64" ticket="125840" desc="RT #125840 stop *x = $x doing bad things"/>
+<commit votes="steveh, khw" id="3c62f09f418b63bd79a6cbd20aaec4d992a6cc64" ticket="125840" desc="RT #125840 stop *x = $x doing bad things"/>
 
 (steveh: I haven't yet looked at whether this is applicable to maint-5.22 or not, or (if it is) whether it needs the preceding four commits as well:)
+(khw: This is my commit.  It does fix a bug, but one that was present in 5.20 and earlier.  It does need the 4 commits before it in order to compile.
+I would think this is too complicated for a maint release.  It also was found not from a field report but from the fuzzing work going on.
+So I'm inclined to not include it, even though I'm confident that it does fix this bug.)
 <commit votes="" id="512c0f5a351dd399dbb069e222741582044f88cc" ticket="125990" desc="PATCH: [perl #125990] panic: reg_node overrun"/>
 
 (steveh: Not a crash fix, but I feel this should be admissable for a maint release anyway:)
-<commit votes="steveh" id="22b433eff9a1ffa2454e18405a56650f07b385b5" ticket="123562" desc="PATCH [perl #123562] Regexp-matching &quot;hangs&quot;"/>
+(khw: Hanging IMO is just as serious as crashing.  But this is not a recent regression. OTOH, this is a trivial patch)
+<commit votes="steveh, khw" id="22b433eff9a1ffa2454e18405a56650f07b385b5" ticket="123562" desc="PATCH [perl #123562] Regexp-matching &quot;hangs&quot;"/>
+(khw: The following isn't necessary, but is a trivial improvement on 22b43)
 <commit votes="steveh" id="d820a0ff34c7df39297a54193fd756bb42c5c06e" ticket="123562" desc="regexec.c: Use Perl_croak_nocontext()"/>
 
-<commit votes="steveh" id="a293d0fd7883038d8dfef01528c7398ba246b5f9" ticket="125350" desc="Tentative fix for RT#125350 - AFL detected crash."/>
+<commit votes="steveh, khw" id="a293d0fd7883038d8dfef01528c7398ba246b5f9" ticket="125350" desc="Tentative fix for RT#125350 - AFL detected crash."/>
 
 </div>
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="steveh" id="23a7573439e81ad932fe176e4a9116ecc0ab362f" ticket="" desc="Update Term-Cap to CPAN version 1.17"/>
+<commit votes="steveh, khw" id="23a7573439e81ad932fe176e4a9116ecc0ab362f" ticket="" desc="Update Term-Cap to CPAN version 1.17"/>
 
-<commit votes="steveh" id="9a7bb2f73a8a1b561890191974201d576371e7f9" ticket="125825" desc="PATCH: [perl 125825] {n}+ possessive quantifier broken"/>
-<commit votes="steveh" id="6a475a49baf3f05fd8608db42c00aabd13729c7b" ticket="125825" desc="perldelta: Fix typo"/>
+<commit votes="steveh, khw" id="9a7bb2f73a8a1b561890191974201d576371e7f9" ticket="125825" desc="PATCH: [perl 125825] {n}+ possessive quantifier broken"/>
+<commit votes="steveh, khw" id="6a475a49baf3f05fd8608db42c00aabd13729c7b" ticket="125825" desc="perldelta: Fix typo"/>
 
-<commit votes="steveh" id="47f5936b63e4d8d8534d6dd332de6fe8a8510626" ticket="125892" desc="regcomp.c: Add synonym for macro complement"/>
-<commit votes="steveh" id="ab87267cc6ac3b1ea950ee4e45bd80dea25b8f79" ticket="125892" desc="PATCH: [perl #125892] qr/(?[ ]) regression with '!'"/>
+<commit votes="steveh, khw" id="47f5936b63e4d8d8534d6dd332de6fe8a8510626" ticket="125892" desc="regcomp.c: Add synonym for macro complement"/>
+(khw: 47f59 is needed for ab8726 to apply cleanly, but the latter could be hand edited instead.  But the first is pretty trivial)
+<commit votes="steveh, khw" id="ab87267cc6ac3b1ea950ee4e45bd80dea25b8f79" ticket="125892" desc="PATCH: [perl #125892] qr/(?[ ]) regression with '!'"/>
 
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="jdb, steveh" id="16ac183d95cef3f9028737e9949a7e78a750c9fe" ticket="" desc="sunmath.h is only used for builds using long doubles"/>
+<commit votes="jdb, steveh, khw" id="16ac183d95cef3f9028737e9949a7e78a750c9fe" ticket="" desc="sunmath.h is only used for builds using long doubles"/>
 
 (steveh: Does this need the update to Win32-0.52 (083231ea891c049b70ef28512bfc9e68c3e5d595) too?:)
-<commit votes="steveh" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
+<commit votes="steveh, khw" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
 
 (craigb: Following unnecessary without a55c5245146801, which is not currently a candidate)
 <commit votes="" id="495173e1f13ab12e8a1ca3725401b3cb10e725cd" ticket="" desc="Fix nit missed in a55c5245146801."/>
@@ -143,17 +149,17 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Platform-Specific Test Fixes</h3>
 
 <commit votes="" id="1f033515f88cb38a77368f249c75bc1a93c672e5" ticket="" desc="Find *inline.h differently in args_assert.t."/>
-<commit votes="steveh" id="c0bf9074e4a1b56f9afe46591417297e6613d5ea" ticket="125924" desc="[perl #125924] allow op/infnan.t to pass on Win32 gcc"/>
-<commit votes="steveh" id="c79631a1c8b4ecf3ec1fc557c875d412058b3e47" ticket="" desc="prevent op/time.t failures on NetBSD 5.1"/>
+<commit votes="steveh, khw" id="c0bf9074e4a1b56f9afe46591417297e6613d5ea" ticket="125924" desc="[perl #125924] allow op/infnan.t to pass on Win32 gcc"/>
+<commit votes="steveh, khw" id="c79631a1c8b4ecf3ec1fc557c875d412058b3e47" ticket="" desc="prevent op/time.t failures on NetBSD 5.1"/>
 
 </div>
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh, craigb" id="8ec6d14a3d59c51796132614e9538a4c62e20dad" ticket="" desc="drop the perldeltas for 5.21.*"/>
-<commit votes="steveh, craigb" id="078e2213d1e79935a637aef6d5b7bc38aa6954fe" ticket="120826" desc="[perl #120826] correct documentation of sv parameter of call_sv()"/>
-<commit votes="steveh, craigb" id="8764ee632ebcddc73e4e8d0f1cf1a48ac82ec87c" ticket="" desc="Require civility; aspire to kindness."/>
-<commit votes="steveh, craigb" id="2c3d35a4bbf08d71ed7e9a625c0e8262439abdfd" ticket="125467" desc="[perl #125467] mingw-w64 has moved"/>
+<commit votes="steveh, craigb, khw" id="8ec6d14a3d59c51796132614e9538a4c62e20dad" ticket="" desc="drop the perldeltas for 5.21.*"/>
+<commit votes="steveh, craigb, khw" id="078e2213d1e79935a637aef6d5b7bc38aa6954fe" ticket="120826" desc="[perl #120826] correct documentation of sv parameter of call_sv()"/>
+<commit votes="steveh, craigb, khw" id="8764ee632ebcddc73e4e8d0f1cf1a48ac82ec87c" ticket="" desc="Require civility; aspire to kindness."/>
+<commit votes="steveh, craigb, khw" id="2c3d35a4bbf08d71ed7e9a625c0e8262439abdfd" ticket="125467" desc="[perl #125467] mingw-w64 has moved"/>
 
 </div>
 
