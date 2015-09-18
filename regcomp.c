@@ -10947,8 +10947,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                "Useless use of greediness modifier '%c'",
                                *RExC_parse);
                 }
-                /* Absorb the modifier, so later code doesn't see nor use
-                    * it */
+                /* Absorb the modifier, so later code doesn't see nor use it */
                 nextchar(pRExC_state);
             }
 
@@ -11148,13 +11147,13 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   * sequence. *node_p * will be set to a generated node returned by this
   * function calling S_reg().
   *
-  * The final possibility, which happens is that it is premature to be calling
-  * this function; that pass1 needs to be restarted.  This can happen when this
-  * changes from /d to /u rules, or when the pattern needs to be upgraded to
-  * UTF-8.  The latter occurs only when the fourth possibility would otherwise
-  * be in effect, and is because one of those code points requires the
-  * pattern to be recompiled as UTF-8.  The function returns FALSE, and sets
-  * the RESTART_PASS1 and NEED_UTF8 flags in *flagp, as appropriate.  When this
+  * The final possibility is that it is premature to be calling this function;
+  * that pass1 needs to be restarted.  This can happen when this changes from
+  * /d to /u rules, or when the pattern needs to be upgraded to UTF-8.  The
+  * latter occurs only when the fourth possibility would otherwise be in
+  * effect, and is because one of those code points requires the pattern to be
+  * recompiled as UTF-8.  The function returns FALSE, and sets the
+  * RESTART_PASS1 and NEED_UTF8 flags in *flagp, as appropriate.  When this
   * happens, the caller needs to desist from continuing parsing, and return
   * this information to its caller.  This is not set for when there is only one
   * code point, as this can be called as part of an ANYOF node, and they can
@@ -11173,8 +11172,6 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   * parser.  But if the single-quoted regex is something like '\N{U+41}', that
   * is legal and handled here.  The code point is Unicode, and has to be
   * translated into the native character set for non-ASCII platforms.
-  * the tokenizer passes the \N sequence through unchanged; this code will not
-  * attempt to determine this nor expand those, instead raising a syntax error.
   */
 
     char * endbrace;    /* points to '}' following the name */
@@ -11205,7 +11202,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
     /* Disambiguate between \N meaning a named character versus \N meaning
      * [^\n].  The latter is assumed when the {...} following the \N is a legal
-     * quantifier, or there is no a '{' at all */
+     * quantifier, or there is no '{' at all */
     if (*p != '{' || regcurly(p)) {
 	RExC_parse = p;
         if (cp_count) {
@@ -12128,6 +12125,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             if (*flagp & RESTART_PASS1)
                 return NULL;
             RExC_parse--;
+
+            /* Here, evaluates to a single code point.  Go get that */
             goto defchar;
 
 	case 'k':    /* Handle \k<NAME> and \k'NAME' */
@@ -12298,7 +12297,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	       back into the quick-grab loop below */
 	    parse_start--;
 	    goto defchar;
-	}
+	} /* end of switch on a \foo sequence */
 	break;
 
     case '#':
@@ -12316,6 +12315,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    RExC_parse++;
 
 	  defchar: {
+
+            /* Here, we have determined that the next thing is probably a
+             * literal character.  (It still may be an escape sequence that
+             * evaluates to a single character) */
+
 	    STRLEN len = 0;
 	    UV ender = 0;
 	    char *p;
@@ -12356,8 +12360,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 	  reparse:
 
-            /* We do the EXACTFish to EXACT node only if folding.  (And we
-             * don't need to figure this out until pass 2) */
+            /* We look for the EXACTFish to EXACT node optimizaton only if
+             * folding.  (And we don't need to figure this out until pass 2) */
             maybe_exact = FOLD && PASS2;
 
 	    /* XXX The node can hold up to 255 bytes, yet this only goes to
@@ -12624,7 +12628,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			/* FALLTHROUGH */
 		    default:
 			if (!SIZE_ONLY&& isALPHANUMERIC(*p)) {
-			    /* Include any { following the alpha to emphasize
+			    /* Include any left brace following the alpha to emphasize
 			     * that it could be part of an escape at some point
 			     * in the future */
 			    int len = (isALPHA(*p) && *(p + 1) == '{') ? 2 : 1;
@@ -12636,7 +12640,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		case '{':
 		    /* Currently we don't warn when the lbrace is at the start
 		     * of a construct.  This catches it in the middle of a
-		     * literal string, or when its the first thing after
+		     * literal string, or when it's the first thing after
 		     * something like "\b" */
 		    if (! SIZE_ONLY
 			&& (len || (p > RExC_start && isALPHA_A(*(p -1)))))
@@ -12658,9 +12662,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		} /* End of switch on the literal */
 
 		/* Here, have looked at the literal character and <ender>
-		 * contains its ordinal, <p> points to the character after it
-		 */
-
+                 * contains its ordinal, <p> points to the character after it.
+                 * We need to check if the next non-ignored thing is a
+                 * quantifier.  Move <p> to after anything that should be
+                 * ignored, which, as a side effect, positions <p> for the next
+                 * loop iteration */
 		if ( RExC_flags & RXf_PMf_EXTENDED)
                     p = regpatws(pRExC_state, p,
                                           TRUE); /* means recognize comments */
@@ -12677,6 +12683,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     p = oldp;
                     goto loopdone;
                 }
+
+                /* Ready to add 'ender' to the node */
 
                 if (! FOLD) {  /* The simple case, just append the literal */
 
@@ -16398,15 +16406,12 @@ S_reg_skipcomment(RExC_state_t *pRExC_state, char* p)
 
 /* nextchar()
 
-   Advances the parse position, and optionally absorbs
-   "whitespace" from the inputstream.
+   Advances the parse position by one byte, unless that byte is the beginning
+   of a '(?#...)' style comment, or is /x whitespace and /x is in effect.  In
+   those two cases, the parse position is advanced beyond all such comments and
+   white space.
 
-   Without /x "whitespace" means (?#...) style comments only,
-   with /x this means (?#...) and # comments and whitespace proper.
-
-   Returns the RExC_parse point from BEFORE the scan occurs.
-
-   This is the /x friendly way of saying RExC_parse++.
+   This is the (?#...) and /x friendly way of saying RExC_parse++.
 */
 
 STATIC char*
