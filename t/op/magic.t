@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 190);
+    plan (tests => 192);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -680,6 +680,27 @@ like $@, qr/^Modification of a /, 'Setting ${^E_NCODING} croaks';
 $_ = ${^E_NCODING};
 pass('can read ${^E_NCODING} without blowing up');
 is $_, undef, '${^E_NCODING} is undef';
+
+{
+    my $warned = 0;
+    local $SIG{__WARN__} = sub { ++$warned if $_[0] =~ /Use of uninitialized value in unshift/; print "# @_"; };
+    unshift @RT12608::A::ISA, qw(RT12608::B RT12608::C);
+    is $warned, 0, '[perl #126082] unshifting onto @ISA doesn\'t trigger set magic for each item';
+}
+
+{
+    my $warned = 0;
+    local $SIG{__WARN__} = sub { ++$warned if $_[0] =~ /Use of uninitialized value in unshift/; print "# @_"; };
+
+    my $x; tie $x, 'RT12608::F';
+    unshift @RT12608::X::ISA, $x, "RT12608::Z";
+    is $warned, 0, '[perl #126082] PL_delaymagic correctly/saved restored when pushing/unshifting onto @ISA';
+
+    package RT12608::F;
+    use parent 'Tie::Scalar';
+    sub TIESCALAR { bless {}; }
+    sub FETCH { push @RT12608::G::ISA, "RT12608::H"; "RT12608::Y"; }
+}
 
 # ^^^^^^^^^ New tests go here ^^^^^^^^^
 
