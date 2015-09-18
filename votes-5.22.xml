@@ -25,7 +25,7 @@ Another bug fix, for "double-double long double" platforms (e.g. ppc linux):
 
 Fix broken builds in some environments:
 (jhi: Might not apply cleanly to 5.22 since surroundings have moved, feel free to ask me for assistance.)
-<commit votes="jhi" id="8c1ed856816d90f9c4ab9da34ff97b9caf4d29c4" ticket="" desc="The #ifdef NV_MIN_EXP straddled the if () braces."/>
+<commit votes="jhi, craigb" id="8c1ed856816d90f9c4ab9da34ff97b9caf4d29c4" ticket="" desc="The #ifdef NV_MIN_EXP straddled the if () braces."/>
 
 Small code quality tweaks:
 (jhi: The last one is possibly debatable since it has the chance of changing behavior.)
@@ -38,11 +38,11 @@ INSTALL tweaks related to quadmath:
 <commit votes="jhi, steveh" id="938039404b03b2d310c7f1c1b4e38c24ef441679" ticket="" desc="Remove uselongdoubles false claim."/>
 
 Doc-like commits:
-<commit votes="jhi" id="23ce015ee1c88f507f078091298d020d5e22a300" ticket="" desc="Make the LoTR quote of reentr.c formatted more like the others."/>
-<commit votes="jhi" id="ec610f8a9f2738d8a59ee84a3ec7ed858addea85" ticket="" desc="Link typo in last minute tweak."/>
-<commit votes="jhi" id="21ac16fed6668df441c18d5b3777df12ec41e0f8" ticket="" desc="Comment detypos."/>
-<commit votes="jhi" id="8757ed9b11519b7220e61e4765e36bd68345b6ec" ticket="" desc="There's no READ_UINT32."/>
-<commit votes="jhi" id="4943a717433fa4a342d031e05d80444da6cb0e11" ticket="" desc="Explicitly mention that even negative shiftees become UVs first."/>
+<commit votes="jhi, craigb" id="23ce015ee1c88f507f078091298d020d5e22a300" ticket="" desc="Make the LoTR quote of reentr.c formatted more like the others."/>
+<commit votes="jhi, craigb" id="ec610f8a9f2738d8a59ee84a3ec7ed858addea85" ticket="" desc="Link typo in last minute tweak."/>
+<commit votes="jhi, craigb" id="21ac16fed6668df441c18d5b3777df12ec41e0f8" ticket="" desc="Comment detypos."/>
+<commit votes="jhi, craigb" id="8757ed9b11519b7220e61e4765e36bd68345b6ec" ticket="" desc="There's no READ_UINT32."/>
+<commit votes="jhi, craigb" id="4943a717433fa4a342d031e05d80444da6cb0e11" ticket="" desc="Explicitly mention that even negative shiftees become UVs first."/>
 
 POSIX doc tweak:
 (jhi: Unfortunately it seems that the very last fragment might fail to apply because of the nearby signaling nan changes (which do not belong in 5.22). If in doubt, ask me for more details.)
@@ -131,6 +131,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 (steveh: Does this need the update to Win32-0.52 (083231ea891c049b70ef28512bfc9e68c3e5d595) too?:)
 <commit votes="steveh" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
 
+(craigb: Following unnecessary without a55c5245146801, which is not currently a candidate)
 <commit votes="" id="495173e1f13ab12e8a1ca3725401b3cb10e725cd" ticket="" desc="Fix nit missed in a55c5245146801."/>
 
 </div>
@@ -149,10 +150,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh" id="8ec6d14a3d59c51796132614e9538a4c62e20dad" ticket="" desc="drop the perldeltas for 5.21.*"/>
-<commit votes="steveh" id="078e2213d1e79935a637aef6d5b7bc38aa6954fe" ticket="120826" desc="[perl #120826] correct documentation of sv parameter of call_sv()"/>
-<commit votes="steveh" id="8764ee632ebcddc73e4e8d0f1cf1a48ac82ec87c" ticket="" desc="Require civility; aspire to kindness."/>
-<commit votes="steveh" id="2c3d35a4bbf08d71ed7e9a625c0e8262439abdfd" ticket="125467" desc="[perl #125467] mingw-w64 has moved"/>
+<commit votes="steveh, craigb" id="8ec6d14a3d59c51796132614e9538a4c62e20dad" ticket="" desc="drop the perldeltas for 5.21.*"/>
+<commit votes="steveh, craigb" id="078e2213d1e79935a637aef6d5b7bc38aa6954fe" ticket="120826" desc="[perl #120826] correct documentation of sv parameter of call_sv()"/>
+<commit votes="steveh, craigb" id="8764ee632ebcddc73e4e8d0f1cf1a48ac82ec87c" ticket="" desc="Require civility; aspire to kindness."/>
+<commit votes="steveh, craigb" id="2c3d35a4bbf08d71ed7e9a625c0e8262439abdfd" ticket="125467" desc="[perl #125467] mingw-w64 has moved"/>
 
 </div>
 
