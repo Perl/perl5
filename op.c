@@ -10333,6 +10333,7 @@ Perl_ck_sassign(pTHX_ OP *o)
 OP *
 Perl_ck_match(pTHX_ OP *o)
 {
+    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_CK_MATCH;
 
     if (o->op_type != OP_QR && PL_compcv) {
