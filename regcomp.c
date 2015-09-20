@@ -10410,7 +10410,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         parno = (I32)uv;
                         RExC_parse = (char*)endptr;
                     }
-                    /* XXX else what? */
+                    else {
+                        vFAIL("panic: grok_atoUV returned FALSE");
+                    }
                     ret = reganode(pRExC_state, GROUPP, parno);
 
                  insert_if_check_paren:
