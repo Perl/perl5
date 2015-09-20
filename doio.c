@@ -1724,10 +1724,6 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 
 #endif /* OS2 || WIN32 */
 
-#ifdef VMS
-#include <starlet.h> /* for sys$delprc */
-#endif
-
 I32
 Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 {
@@ -1889,40 +1885,7 @@ nothing in the core.
 	}
 	APPLY_TAINT_PROPER();
 	tot = sp - mark;
-#ifdef VMS
-	/* kill() doesn't do process groups (job trees?) under VMS */
-	if (val == SIGKILL) {
-	    /* Use native sys$delprc() to insure that target process is
-	     * deleted; supervisor-mode images don't pay attention to
-	     * CRTL's emulation of Unix-style signals and kill()
-	     */
-	    while (++mark <= sp) {
-		I32 proc;
-		unsigned long int __vmssts;
-		SvGETMAGIC(*mark);
-		if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
-		    Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
-		proc = SvIV_nomg(*mark);
-		APPLY_TAINT_PROPER();
-		if (!((__vmssts = sys$delprc(&proc,0)) & 1)) {
-		    tot--;
-		    switch (__vmssts) {
-			case SS$_NONEXPR:
-			case SS$_NOSUCHNODE:
-			    SETERRNO(ESRCH,__vmssts);
-			    break;
-			case SS$_NOPRIV:
-			    SETERRNO(EPERM,__vmssts);
-			    break;
-			default:
-			    SETERRNO(EVMSERR,__vmssts);
-		    }
-		}
-	    }
-	    PERL_ASYNC_CHECK();
-	    break;
-	}
-#endif
+
 	while (++mark <= sp) {
 	    Pid_t proc;
 	    SvGETMAGIC(*mark);
