@@ -9710,6 +9710,7 @@ Perl_ck_ftst(pTHX_ OP *o)
 	    op_free(o);
 	    return newop;
 	}
+	scalar((OP *) kid);
 	if ((PL_hints & HINT_FILETEST_ACCESS) && OP_IS_FILETEST_ACCESS(o->op_type))
 	    o->op_private |= OPpFT_ACCESS;
 	if (type != OP_STAT && type != OP_LSTAT
