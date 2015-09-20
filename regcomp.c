@@ -10402,7 +10402,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		else if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
                     /* (?(1)...) */
 		    char c;
-		    char *tmp;
                     UV uv;
                     if (grok_atoUV(RExC_parse, &uv, &endptr)
                         && uv <= I32_MAX
@@ -10416,14 +10415,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     ret = reganode(pRExC_state, GROUPP, parno);
 
                  insert_if_check_paren:
-		    if (*(tmp = nextchar(pRExC_state)) != ')') {
-                        /* nextchar also skips comments, so undo its work
-                         * and skip over the the next character.
-                         */
-                        RExC_parse = tmp;
+		    if (UCHARAT(RExC_parse) != ')') {
                         RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
 			vFAIL("Switch condition not recognized");
 		    }
+		    nextchar(pRExC_state);
 		  insert_if:
                     REGTAIL(pRExC_state, ret, reganode(pRExC_state, IFTHEN, 0));
                     br = regbranch(pRExC_state, &flags, 1,depth+1);
@@ -10437,7 +10433,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     } else
                         REGTAIL(pRExC_state, br, reganode(pRExC_state,
                                                           LONGJMP, 0));
-		    c = *nextchar(pRExC_state);
+		    c = UCHARAT(RExC_parse);
+                    nextchar(pRExC_state);
 		    if (flags&HASWIDTH)
 			*flagp |= HASWIDTH;
 		    if (c == '|') {
@@ -10458,7 +10455,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         REGTAIL(pRExC_state, ret, lastbr);
 		 	if (flags&HASWIDTH)
 			    *flagp |= HASWIDTH;
-			c = *nextchar(pRExC_state);
+                        c = UCHARAT(RExC_parse);
+                        nextchar(pRExC_state);
 		    }
 		    else
 			lastbr = NULL;
@@ -10731,10 +10729,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
         if (DEPENDS_SEMANTICS && RExC_uni_semantics) {
             set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);
         }
-	if (RExC_parse >= RExC_end || *nextchar(pRExC_state) != ')') {
+	if (RExC_parse >= RExC_end || UCHARAT(RExC_parse) != ')') {
 	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched (");
 	}
+	nextchar(pRExC_state);
     }
     else if (!paren && RExC_parse < RExC_end) {
 	if (*RExC_parse == ')') {
@@ -16416,12 +16415,12 @@ S_reg_skipcomment(RExC_state_t *pRExC_state, char* p)
    This is the (?#...) and /x friendly way of saying RExC_parse++.
 */
 
-STATIC char*
+STATIC void
 S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 {
-    char* const retval = RExC_parse++;
-
     PERL_ARGS_ASSERT_NEXTCHAR;
+
+    RExC_parse++;
 
     for (;;) {
 	if (RExC_end - RExC_parse >= 3
@@ -16445,7 +16444,7 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
                 continue;
             }
 	}
-        return retval;
+        break;
     }
 }
 
