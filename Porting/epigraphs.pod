@@ -17,6 +17,18 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.23.3 - Oliver Wendell Holmes, "The Deacon’s Masterpiece or The Wonderful 'One-Hoss Shay': A Logical Story"
+
+L<Announced on 2015-09-20 by Peter Martini|http://www.nntp.perl.org/group/perl.perl5.porters/2015/09/msg231173.html>
+
+  Little of of all we value here
+  Wakes on the morn of its hundredth year
+  Without both feeling and looking queer.
+  In fact, there’s nothing that keeps its youth,
+  So far as I know, but a tree and truth.
+  (This is a moral that runs at large;
+  Take it. — You’re welcome. — No extra charge.)
+
 =head2 v5.23.2 - Blind Guardian, "Skalds and Shadows"
 
 L<Announced on 2015-08-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2015/08/msg230298.html>
