@@ -1738,7 +1738,7 @@ void
 test_force_keys(HV *hv)
     PREINIT:
         HE *he;
-	STRLEN count = 0;
+	SSize_t count = 0;
     PPCODE:
         hv_iterinit(hv);
         he = hv_iternext(hv);
@@ -3551,7 +3551,7 @@ CODE:
     CV *cv;
     AV *av;
     SV **p;
-    Size_t i, size;
+    SSize_t i, size;
 
     cv = sv_2cv(block, &stash, &gv, 0);
     if (cv == Nullcv) {

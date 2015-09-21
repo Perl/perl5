@@ -378,7 +378,11 @@ T_PACKEDARRAY
 T_ARRAY
         {
 	    U32 ix_$var;
-	    EXTEND(SP,size_$var);
+            SSize_t extend_size =
+                sizeof(size_$var) > sizeof(SSize_t) && size_$var > SSize_t_MAX
+                    ? -1 /* might wrap; -1 triggers a panic in EXTEND() */
+                    : (SSize_t)size_$var;
+	    EXTEND(SP, extend_size);
 	    for (ix_$var = 0; ix_$var < size_$var; ix_$var++) {
 		ST(ix_$var) = sv_newmortal();
 	DO_ARRAY_ELEM

@@ -1810,7 +1810,9 @@ Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, SV *meth, U32 flags,
     PUSHSTACKi(PERLSI_MAGIC);
     PUSHMARK(SP);
 
-    EXTEND(SP, argc+1);
+    /* EXTEND() expects a signed argc; don't wrap when casting */
+    assert(argc <= I32_MAX);
+    EXTEND(SP, (I32)argc+1);
     PUSHs(SvTIED_obj(sv, mg));
     if (flags & G_UNDEF_FILL) {
 	while (argc--) {

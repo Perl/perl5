@@ -1370,7 +1370,9 @@ aux_list(o, cv)
                 PAD *comppad = PadlistARRAY(padlist)[1];
 #endif
 
-                EXTEND(SP, len);
+                /* len should never be big enough to truncate or wrap */
+                assert(len <= SSize_t_MAX);
+                EXTEND(SP, (SSize_t)len);
                 PUSHs(sv_2mortal(newSViv(actions)));
 
                 while (!last) {
@@ -2139,8 +2141,12 @@ HvARRAY(hv)
     PPCODE:
 	if (HvUSEDKEYS(hv) > 0) {
 	    HE *he;
+            SSize_t extend_size;
 	    (void)hv_iterinit(hv);
-	    EXTEND(sp, HvUSEDKEYS(hv) * 2);
+            /* 2*HvUSEDKEYS() should never be big enough to truncate or wrap */
+	    assert(HvUSEDKEYS(hv) <= (SSize_t_MAX >> 1));
+            extend_size = (SSize_t)HvUSEDKEYS(hv) * 2;
+	    EXTEND(sp, extend_size);
 	    while ((he = hv_iternext(hv))) {
                 if (HeSVKEY(he)) {
                     mPUSHs(HeSVKEY(he));

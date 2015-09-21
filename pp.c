@@ -88,18 +88,18 @@ PP(pp_padav)
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
         /* XXX see also S_pushav in pp_hot.c */
-	const Size_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
+	const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
 	EXTEND(SP, maxarg);
 	if (SvMAGICAL(TARG)) {
-	    Size_t i;
+	    SSize_t i;
 	    for (i=0; i < maxarg; i++) {
 		SV * const * const svp = av_fetch(MUTABLE_AV(TARG), i, FALSE);
 		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
 	    }
 	}
 	else {
-	    PADOFFSET i;
-	    for (i=0; i < (PADOFFSET)maxarg; i++) {
+	    SSize_t i;
+	    for (i=0; i < maxarg; i++) {
 		SV * const sv = AvARRAY((const AV *)TARG)[i];
 		SP[i+1] = sv ? sv : &PL_sv_undef;
 	    }
@@ -1718,14 +1718,15 @@ PP(pp_repeat)
 
     if (GIMME_V == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
-	const Size_t items = SP - MARK;
+	const SSize_t items = SP - MARK;
 	const U8 mod = PL_op->op_flags & OPf_MOD;
 
 	if (count > 1) {
-	    Size_t max;
+	    SSize_t max;
 
-            if (  items > MEM_SIZE_MAX / (UV)count   /* max would overflow */
-               || items > (U32)I32_MAX / sizeof(SV *) /* repeatcpy would overflow */
+            if (  items > SSize_t_MAX / count   /* max would overflow */
+                                                /* repeatcpy would overflow */
+               || items > I32_MAX / (I32)sizeof(SV *)
             )
                Perl_croak(aTHX_ "%s","Out of memory during list extend");
             max = items * count;
@@ -1746,7 +1747,7 @@ PP(pp_repeat)
 	    SP += max;
 	}
 	else if (count <= 0)
-	    SP -= items;
+	    SP = MARK;
     }
     else {	/* Note: mark already snarfed by pp_list */
 	SV * const tmpstr = POPs;
@@ -5660,7 +5661,7 @@ PP(pp_split)
     SSize_t maxiters = slen + 10;
     I32 trailing_empty = 0;
     const char *orig;
-    const I32 origlimit = limit;
+    const IV origlimit = limit;
     I32 realarray = 0;
     I32 base;
     const I32 gimme = GIMME_V;
@@ -5834,11 +5835,13 @@ PP(pp_split)
           split //, $str, $i;
         */
 	if (!gimme_scalar) {
-	    const U32 items = limit - 1;
-	    if (items < slen)
+	    const IV items = limit - 1;
+            /* setting it to -1 will trigger a panic in EXTEND() */
+            const SSize_t sslen = slen > SSize_t_MAX ?  -1 : (SSize_t)slen;
+	    if (items >=0 && items < sslen)
 		EXTEND(SP, items);
 	    else
-		EXTEND(SP, slen);
+		EXTEND(SP, sslen);
 	}
 
         if (do_utf8) {
