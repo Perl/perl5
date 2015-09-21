@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.26';
+our $VERSION = '1.27';
 
 %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -16,7 +16,7 @@ our $VERSION = '1.26';
     iterators           => '<>',
     filetest            => "-X",
     dereferencing       => '${} @{} %{} &{} *{}',
-    matching            => '~~',
+    matching            => '~~ x~~ ~~x',
     special             => 'nomethod fallback =',
 );
 

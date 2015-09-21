@@ -9,6 +9,7 @@ use strict;
 use warnings;
 no warnings 'uninitialized';
 no warnings 'experimental::smartmatch';
+no warnings 'syntax';
 
 ++$|;
 
@@ -58,8 +59,24 @@ tie my %tied_hash, 'Tie::StdHash';
     use overload 'eq' => sub {"$_[0]" eq "$_[1]"};
 }
 
+{
+    package Test::Object::WithNewOverload;
+    sub new { bless { key => ($_[1] // 'magic') } }
+    use overload '~~x' => sub {
+	my %hash = %{ $_[0] };
+        return $hash{key} eq $_[1];
+    };
+    use overload 'x~~' => sub {
+	my %hash = %{ $_[0] };
+        return $hash{key} ne $_[1];
+    };
+    use overload '""' => sub { "stringified" };
+    use overload 'eq' => sub {"$_[0]" eq "$_[1]"};
+}
+
 our $ov_obj = Test::Object::WithOverload->new;
 our $ov_obj_2 = Test::Object::WithOverload->new("object");
+our $ov_obj_3 = Test::Object::WithNewOverload->new;
 our $obj = Test::Object::NoOverload->new;
 our $str_obj = Test::Object::StringOverload->new;
 
@@ -589,3 +606,6 @@ __DATA__
 !	!1		undef
 !	\&foo		undef
 !	sub { }		undef
+
+	"magic"		$ov_obj_3
+

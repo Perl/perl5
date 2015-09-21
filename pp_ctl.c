@@ -4478,9 +4478,13 @@ PP(pp_smartmatch)
     if (SvAMAGIC(e)) {
 	SV * tmpsv;
 	DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Object\n"));
-	DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
+	DEBUG_M(Perl_deb(aTHX_ "        attempting ~~x overload\n"));
 
-	tmpsv = amagic_call(d, e, smart_amg, AMGf_noleft);
+        tmpsv = amagic_call(d, e, smartright_amg, AMGf_noleft);
+        if (!tmpsv) {
+            DEBUG_M(Perl_deb(aTHX_ "        falling back to ~~ overload\n"));
+            tmpsv = amagic_call(d, e, smart_amg, AMGf_noleft);
+        }
 	if (tmpsv) {
 	    SPAGAIN;
 	    (void)POPs;
@@ -4545,9 +4549,13 @@ PP(pp_smartmatch)
     if (SvAMAGIC(d)) {
 	SV * tmpsv;
 	DEBUG_M(Perl_deb(aTHX_ "    applying rule over-Any\n"));
-	DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
+	DEBUG_M(Perl_deb(aTHX_ "        attempting x~~ overload\n"));
 
-	tmpsv = amagic_call(d, e, smart_amg, AMGf_noright);
+	tmpsv = amagic_call(d, e, smartleft_amg, AMGf_noright);
+        if (!tmpsv) {
+            DEBUG_M(Perl_deb(aTHX_ "        falling back to ~~ overload\n"));
+            tmpsv = amagic_call(d, e, smart_amg, AMGf_noright);
+        }
 	if (tmpsv) {
 	    SPAGAIN;
 	    PUSHs(boolSV(SvTRUE(tmpsv)));

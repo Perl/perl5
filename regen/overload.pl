@@ -205,3 +205,5 @@ concat_ass	(.=
 smart		(~~
 ftest           (-X
 regexp          (qr
+smartleft	(x~~
+smartright	(~~x

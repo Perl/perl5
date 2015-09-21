@@ -3176,6 +3176,10 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 case sne_amg:
              off = scmp_amg;
              break;
+
+         case smartleft_amg:
+         case smartright_amg:
+             return NULL;
 	 }
       if (off != -1) {
           if (ocvp && (oamtp->fallback > AMGfallNEVER)) {
