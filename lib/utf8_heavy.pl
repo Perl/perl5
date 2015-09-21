@@ -289,8 +289,8 @@ sub _loose_name ($) {
                             if ($parts[1] =~ s/^-//) {
 
                                 # If numerator is also negative, convert the
-                                # whole thing to positive, or move the minus to
-                                # the numerator
+                                # whole thing to positive, else move the minus
+                                # to the numerator
                                 if ($parts[0] !~ s/^-//) {
                                     $parts[0] = '-' . $parts[0];
                                 }
