@@ -1,0 +1,404 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5233delta - what is new for perl v5.23.3
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.23.2 release and the 5.23.3
+release.
+
+If you are upgrading from an earlier release such as 5.23.1, first read
+L<perl5232delta>, which describes differences between 5.23.1 and 5.23.2.
+
+=head1 Core Enhancements
+
+=head2 C<qr/(?[ ])/> now works in UTF-8 locales
+
+L<Extended Bracketed Character Classes|perlrecharclass/Extended Bracketed Character Classes>
+now will successfully compile when S<C<use locale>> is in effect.  The compiled
+pattern will use standard Unicode rules.  If the runtime locale is not a
+UTF-8 one, a warning is raised and standard Unicode rules are used
+anyway.  No tainting is done since the outcome does not actually depend
+on the locale.
+
+=head1 Incompatible Changes
+
+=head2 An off by one issue in C<$Carp::MaxArgNums> has been fixed
+
+C<$Carp::MaxArgNums> is supposed to be the number of arguments to display.
+Prior to this version, it was instead showing C<$Carp::MaxArgNums> + 1 arguments,
+contrary to the documentation.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.58 to 1.59.
+
+=item *
+
+L<bignum> has been upgraded from version 0.39 to 0.40.
+
+=item *
+
+L<Carp> has been upgraded from version 1.36 to 1.37.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.068 to 2.068_01.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.33 to 1.34.
+
+=item *
+
+L<Encode> has been upgraded from version 2.76 to 2.77.
+
+=item *
+
+L<encoding> has been upgraded from version 2.16 to 2.17.
+
+=item *
+
+L<English> has been upgraded from version 1.09 to 1.10.
+
+=item *
+
+L<Errno> has been upgraded from version 1.23 to 1.24.
+
+=item *
+
+L<experimental> has been upgraded from version 0.013 to 0.014.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.04_01 to 7.10.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.29 to 3.30.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.29 to 3.30.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.30 to 1.31.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.57 to 3.58.
+
+=item *
+
+L<Hash::Util::FieldHash> has been upgraded from version 1.15 to 1.17.
+
+=item *
+
+L<if> has been upgraded from version 0.0604 to 0.0605.
+
+=item *
+
+L<locale> has been upgraded from version 1.06 to 1.07.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.35 to 3.36.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20150820 to 5.20150920.
+
+=item *
+
+L<mro> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.25 to 3.25_01.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.56 to 1.57.
+
+=item *
+
+L<Socket> has been upgraded from version 2.020 to 2.020_01.
+
+=item *
+
+L<Test> has been upgraded from version 1.26 to 1.27.
+
+=item *
+
+L<Thread::Queue> has been upgraded from version 3.05 to 3.06.
+
+=item *
+
+L<threads> has been upgraded from version 2.02 to 2.03.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9726 to 1.9727_02.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.62 to 0.63.
+
+=item *
+
+L<Win32> has been upgraded from version 0.51 to 0.52.
+
+=back
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Amiga::ARexx> has been added, as version 0.02
+
+=item *
+
+L<Amiga::Exec> has been added, as version 0.01
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlcall>
+
+=over 4
+
+=item *
+
+A number of cleanups have been made to perlcall, including:
+
+=over 4
+
+=item *
+
+use EXTEND(SP, n) and PUSHs() instead of XPUSHs() where applicable
+and update prose to match
+
+=item *
+
+add POPu, POPul and POPpbytex to the "complete list of POP macros"
+and clarify the documentation for some of the existing entries, and
+a note about side-effects
+
+=item *
+
+add API documentation for POPu and POPul
+
+=item *
+
+use ERRSV more efficiently
+
+=item *
+
+approaches to thread-safety storage of SVs.
+
+=back
+
+=back
+
+=head3 L<perlunicode>
+
+=over 4
+
+=item *
+
+Discourage use of 'In' prefix for Unicode Block property.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<%s must not be a named sequence in transliteration operator|perldiag/"%s must not be a named sequence in transliteration operator">
+
+(F) Transliteration (C<tr///> and C<y///>) transliterates individual
+characters.  But a named sequence by definition is more than an
+individual charater, and hence doing this operation on it doesn't make
+sense.
+
+=back
+
+=head1 Testing
+
+=over 4
+
+=item *
+
+Parallel building has been added to the dmake C<makefile.mk> makefile. All
+Win32 compilers are supported.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item EBCDIC C<cmp()> and C<sort()> fixed for UTF-EBCDIC strings
+
+Comparing two strings that were both encoded in UTF-8 (or more
+precisely, UTF-EBCDIC) did not work properly until now.  Since C<sort()>
+uses C<cmp()>, this fixes that as well.
+
+=item EBCDIC C<tr///> and C<yr///> fixed for C<\N{}>, and C<S<use utf8>> ranges
+
+Perl v5.22 introduced the concept of portable ranges to regular
+expression patterns.  A portable range matches the same set of
+characters no matter what platform is being run on.  This concept is now
+extended to C<tr///>.  See
+C<L<trE<sol>E<sol>E<sol>|perlop/trE<sol>SEARCHLISTE<sol>REPLACEMENTLISTE<sol>cdsr>>.
+
+There were also some problems with these operations under S<C<use
+utf8>>, which are now fixed
+
+=item Win32
+
+=over
+
+=item *
+
+Parallel building has been added to the dmake C<makefile.mk> makefile. All
+Win32 compilers are supported.
+
+=back
+
+=item AmigaOS
+
+The AmigaOS port has been reintegrated into the main tree, based off of
+Perl 5.22.1.
+
+=item clang++
+
+Don't add -shared when the compiler is clang++
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C<qr/(?[ () ])/> no longer segfaults, giving a syntax error message instead.
+[perl #125805]
+
+=item *
+
+Regular expression possessive quantifier v5.20 regression now fixed.
+C<qr/>I<PAT>C<{>I<min>,I<max>C<}+>C</> is supposed to behave identically
+to C<qr/(?E<gt>>I<PAT>C<{>I<min>,I<max>C<})/>.  Since v5.20, this didn't
+work if I<min> and I<max> were equal.  [perl #125825]
+
+=item *
+
+C<< BEGIN <> >> no longer segfaults and properly produces an error
+message.  [perl #125341]
+
+=item *
+
+In C<tr///> an illegal backwards range like C<tr/\x{101}-\x{100}//> was
+not always detected, giving incorrect results.  This is now fixed.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.23.3 represents approximately 4 weeks of development since Perl 5.23.2
+and contains approximately 150,000 lines of changes across 550 files from 30
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 120,000 lines of changes to 410 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.23.3:
+
+Aaron Crane, Alexander D'Archangel, Andy Broad, Chris 'BinGOs' Williams, Craig
+A. Berry, Dan Collins, Daniel Dragan, David Mitchell, Father Chrysostomos,
+James E Keenan, Jan Dubois, Jarkko Hietaniemi, Jerry D. Hedden, John SJ
+Anderson, Karen Etheridge, Karl Williamson, Lukas Mai, Matthew Horsfall,
+Nicolas R., Peter John Acklam, Peter Martini, Ricardo Signes, Shlomi Fish,
+Steffen Müller, Steve Hay, Sullivan Beck, Thomas Sibley, Todd Rinaldo, Tony
+Cook, Zachary Storer.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
