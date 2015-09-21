@@ -10117,8 +10117,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case '!':           /* (?!...) */
 		RExC_seen_zerolen++;
 		/* check if we're really just a "FAIL" assertion */
-		--RExC_parse;
-		nextchar(pRExC_state);
+                skip_to_be_ignored_text(pRExC_state, &RExC_parse,
+                                        FALSE /* Don't force to /x */ );
 	        if (*RExC_parse == ')') {
                     ret=reganode(pRExC_state, OPFAIL, 0);
 	            nextchar(pRExC_state);
@@ -10790,8 +10790,8 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 
     *flagp = WORST;			/* Tentatively. */
 
-    RExC_parse--;
-    nextchar(pRExC_state);
+    skip_to_be_ignored_text(pRExC_state, &RExC_parse,
+                            FALSE /* Don't force to /x */ );
     while (RExC_parse < RExC_end && *RExC_parse != '|' && *RExC_parse != ')') {
 	flags &= ~TRYAGAIN;
         latest = regpiece(pRExC_state, &flags,depth+1);
@@ -11213,9 +11213,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 	if (! node_p) {
             return FALSE;
         }
-        RExC_parse--;   /* Need to back off so nextchar() doesn't skip the
-                           current char */
-	nextchar(pRExC_state);
+	skip_to_be_ignored_text(pRExC_state, &RExC_parse,
+                               FALSE /* Don't force to /x */ );
 	*node_p = reg_node(pRExC_state, REG_ANY);
 	*flagp |= HASWIDTH|SIMPLE;
 	MARK_NAUGHTY(1);
@@ -12284,8 +12283,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     /* override incorrect value set in reganode MJD */
                     Set_Node_Offset(ret, parse_start+1);
                     Set_Node_Cur_Length(ret, parse_start);
-		    RExC_parse--;
-		    nextchar(pRExC_state);
+                    skip_to_be_ignored_text(pRExC_state, &RExC_parse,
+                                            FALSE /* Don't force to /x */ );
 		}
 	    }
 	    break;
@@ -13049,7 +13048,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 	    RExC_parse = p - 1;
             Set_Node_Cur_Length(ret, parse_start);
-	    nextchar(pRExC_state);
+	    RExC_parse = p;
+            skip_to_be_ignored_text(pRExC_state, &RExC_parse,
+                                    FALSE /* Don't force to /x */ );
 	    {
 		/* len is STRLEN which is unsigned, need to copy to signed */
 		IV iv = len;
@@ -16420,6 +16421,8 @@ S_skip_to_be_ignored_text(pTHX_ RExC_state_t *pRExC_state,
 
     PERL_ARGS_ASSERT_SKIP_TO_BE_IGNORED_TEXT;
 
+    assert( ! UTF || UTF8_IS_INVARIANT(**p) || UTF8_IS_START(**p));
+
     for (;;) {
 	if (RExC_end - (*p) >= 3
 	    && *(*p)     == '('
@@ -16457,7 +16460,7 @@ S_skip_to_be_ignored_text(pTHX_ RExC_state_t *pRExC_state,
    those two cases, the parse position is advanced beyond all such comments and
    white space.
 
-   This is the (?#...) and /x friendly way of saying RExC_parse++.
+   This is the UTF, (?#...), and /x friendly way of saying RExC_parse++.
 */
 
 STATIC void
@@ -16465,7 +16468,11 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 {
     PERL_ARGS_ASSERT_NEXTCHAR;
 
-    RExC_parse++;
+    assert(   ! UTF
+           || UTF8_IS_INVARIANT(*RExC_parse)
+           || UTF8_IS_START(*RExC_parse));
+
+    RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
 
     skip_to_be_ignored_text(pRExC_state, &RExC_parse,
                             FALSE /* Don't assume /x */ );
