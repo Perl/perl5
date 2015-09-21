@@ -16405,6 +16405,51 @@ S_reg_skipcomment(RExC_state_t *pRExC_state, char* p)
     return p;
 }
 
+STATIC void
+S_skip_to_be_ignored_text(pTHX_ RExC_state_t *pRExC_state,
+                                char ** p,
+                                const bool force_to_xmod
+                         )
+{
+    /* If the text at the current parse position '*p' is a '(?#...)' comment,
+     * or if we are under /x or 'force_to_xmod' is TRUE, and the text at '*p'
+     * is /x whitespace, advance '*p' so that on exit it points to the first
+     * byte past all such white space and comments */
+
+    const bool use_xmod = force_to_xmod || (RExC_flags & RXf_PMf_EXTENDED);
+
+    PERL_ARGS_ASSERT_SKIP_TO_BE_IGNORED_TEXT;
+
+    for (;;) {
+	if (RExC_end - (*p) >= 3
+	    && *(*p)     == '('
+	    && *(*p + 1) == '?'
+	    && *(*p + 2) == '#')
+	{
+	    while (*(*p) != ')') {
+		if ((*p) == RExC_end)
+		    FAIL("Sequence (?#... not terminated");
+		(*p)++;
+	    }
+	    (*p)++;
+	    continue;
+	}
+
+	if (use_xmod) {
+            char * new_p = regpatws(pRExC_state, *p,
+                                    TRUE); /* means recognize comments */
+            if (new_p != *p) {
+                *p = new_p;
+                continue;
+            }
+	}
+
+        break;
+    }
+
+    return;
+}
+
 /* nextchar()
 
    Advances the parse position by one byte, unless that byte is the beginning
@@ -16422,30 +16467,8 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 
     RExC_parse++;
 
-    for (;;) {
-	if (RExC_end - RExC_parse >= 3
-	    && *RExC_parse == '('
-	    && RExC_parse[1] == '?'
-	    && RExC_parse[2] == '#')
-	{
-	    while (*RExC_parse != ')') {
-		if (RExC_parse == RExC_end)
-		    FAIL("Sequence (?#... not terminated");
-		RExC_parse++;
-	    }
-	    RExC_parse++;
-	    continue;
-	}
-	if (RExC_flags & RXf_PMf_EXTENDED) {
-            char * p = regpatws(pRExC_state, RExC_parse,
-                                          TRUE); /* means recognize comments */
-            if (p != RExC_parse) {
-                RExC_parse = p;
-                continue;
-            }
-	}
-        break;
-    }
+    skip_to_be_ignored_text(pRExC_state, &RExC_parse,
+                            FALSE /* Don't assume /x */ );
 }
 
 STATIC regnode *
