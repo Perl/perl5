@@ -3532,7 +3532,7 @@ They're written like C<$foo[1][2][3]>, as in C.
 follow some unpack specification producing a numeric value.
 See L<perlfunc/pack>.
 
-=item %s must not be a named sequence in transliteration operator",
+=item %s must not be a named sequence in transliteration operator
 
 (F) Transliteration (C<tr///> and C<y///>) transliterates individual
 characters.  But a named sequence by definition is more than an
