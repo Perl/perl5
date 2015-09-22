@@ -148,12 +148,14 @@ my @writables = qw(
     perlapi.c
     cpan/Devel-PPPort/module2.c
     cpan/Devel-PPPort/module3.c
+    cpan/autodie/t/touch_me
     reentr.c
     reentr.h
     regcharclass.h
     regnodes.h
     warnings.h
     lib/warnings.pm
+    win32/GNUmakefile
     win32/Makefile
     win32/Makefile.ce
     win32/makefile.mk
