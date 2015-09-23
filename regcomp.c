@@ -13517,7 +13517,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                     }
                     goto no_close;
             }
-            RExC_parse++;
+
+            RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
         }
 
       no_close:
