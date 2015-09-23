@@ -11725,7 +11725,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
     regnode *ret = NULL;
     I32 flags = 0;
-    char *parse_start = RExC_parse;
+    char *parse_start;
     U8 op;
     int invert = 0;
     U8 arg;
@@ -11739,6 +11739,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     PERL_ARGS_ASSERT_REGATOM;
 
   tryagain:
+    parse_start = RExC_parse;
     switch ((U8)*RExC_parse) {
     case '^':
 	RExC_seen_zerolen++;
@@ -12118,9 +12119,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
             if (*flagp & RESTART_PASS1)
                 return NULL;
-            RExC_parse--;
 
             /* Here, evaluates to a single code point.  Go get that */
+            RExC_parse = parse_start;
             goto defchar;
 
 	case 'k':    /* Handle \k<NAME> and \k'NAME' */
@@ -12236,6 +12237,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                          * octal character escape, e.g. \35 or \777.
                          * The above logic should make it obvious why using
                          * octal escapes in patterns is problematic. - Yves */
+                        RExC_parse = parse_start;
                         goto defchar;
                     }
                 }
@@ -12284,7 +12286,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	default:
 	    /* Do not generate "unrecognized" warnings here, we fall
 	       back into the quick-grab loop below */
-	    parse_start--;
+            RExC_parse = parse_start;
 	    goto defchar;
 	} /* end of switch on a \foo sequence */
 	break;
@@ -12305,16 +12307,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	/* FALLTHROUGH */
 
     default:
-
-            parse_start = RExC_parse - 1;
-
-	    RExC_parse++;
-
 	  defchar: {
 
             /* Here, we have determined that the next thing is probably a
-             * literal character.  (It still may be an escape sequence that
-             * evaluates to a single character) */
+             * literal character.  RExC_parse points to the first byte of its
+             * definition.  (It still may be an escape sequence that evaluates
+             * to a single character) */
 
 	    STRLEN len = 0;
 	    UV ender = 0;
@@ -12378,7 +12376,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * could back off to end with only a code point that isn't such a
              * non-final, but it is possible for there not to be any in the
              * entire node. */
-	    for (p = RExC_parse - 1;
+
+            assert(   ! UTF     /* Is at the beginning of a character */
+                   || UTF8_IS_INVARIANT(UCHARAT(RExC_parse))
+                   || UTF8_IS_START(UCHARAT(RExC_parse)));
+
+	    for (p = RExC_parse;
 	         len < upper_parse && p < RExC_end;
 	         len++)
 	    {
