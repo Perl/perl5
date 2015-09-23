@@ -2162,8 +2162,6 @@ Es	|U32	|join_exact	|NN RExC_state_t *pRExC_state \
 				|NN regnode *scan|NN UV *min_subtract  \
 				|NN bool *unfolded_multi_char          \
 				|U32 flags|NULLOK regnode *val|U32 depth
-EsRn	|char *	|regpatws	|NN RExC_state_t *pRExC_state \
-				|NN char *p|const bool recognize_comment
 Ei	|void   |alloc_maybe_populate_EXACT|NN RExC_state_t *pRExC_state \
 				|NN regnode *node|NN I32 *flagp|STRLEN len \
 				|UV code_point|bool downgradable

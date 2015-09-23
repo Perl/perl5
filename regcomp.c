@@ -13063,29 +13063,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     return(ret);
 }
 
-STATIC char *
-S_regpatws(RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
-{
-    /* Returns the next non-pattern-white space, non-comment character (the
-     * latter only if 'recognize_comment is true) in the string p, which is
-     * ended by RExC_end.  See also reg_skipcomment */
-    const char *e = RExC_end;
-
-    PERL_ARGS_ASSERT_REGPATWS;
-
-    while (p < e) {
-        STRLEN len;
-	if ((len = is_PATWS_safe(p, e, UTF))) {
-	    p += len;
-        }
-	else if (recognize_comment && *p == '#') {
-            p = reg_skipcomment(pRExC_state, p);
-	}
-	else
-	    break;
-    }
-    return p;
-}
 
 STATIC void
 S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
@@ -16441,10 +16418,20 @@ S_skip_to_be_ignored_text(pTHX_ RExC_state_t *pRExC_state,
 	}
 
 	if (use_xmod) {
-            char * new_p = regpatws(pRExC_state, *p,
-                                    TRUE); /* means recognize comments */
-            if (new_p != *p) {
-                *p = new_p;
+            const char * save_p = *p;
+            while ((*p) < RExC_end) {
+                STRLEN len;
+                if ((len = is_PATWS_safe((*p), RExC_end, UTF))) {
+                    (*p) += len;
+                }
+                else if (*(*p) == '#') {
+                    (*p) = reg_skipcomment(pRExC_state, (*p));
+                }
+                else {
+                    break;
+                }
+            }
+            if (*p != save_p) {
                 continue;
             }
 	}

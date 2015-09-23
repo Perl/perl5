@@ -1003,7 +1003,6 @@
 #define regex_set_precedence	S_regex_set_precedence
 #define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)
 #define regnode_guts(a,b,c,d)	S_regnode_guts(aTHX_ a,b,c,d)
-#define regpatws		S_regpatws
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
 #define regpposixcc(a,b,c)	S_regpposixcc(aTHX_ a,b,c)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)

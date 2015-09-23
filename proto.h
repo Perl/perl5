@@ -4783,11 +4783,6 @@ STATIC void	S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U
 STATIC regnode*	S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_len, const char* const name);
 #define PERL_ARGS_ASSERT_REGNODE_GUTS	\
 	assert(pRExC_state); assert(name)
-STATIC char *	S_regpatws(RExC_state_t *pRExC_state, char *p, const bool recognize_comment)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_REGPATWS	\
-	assert(pRExC_state); assert(p)
-
 STATIC regnode*	S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth);
 #define PERL_ARGS_ASSERT_REGPIECE	\
 	assert(pRExC_state); assert(flagp)
