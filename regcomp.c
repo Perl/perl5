@@ -12066,32 +12066,30 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    break;
 	case 'p':
 	case 'P':
-	    {
-		RExC_parse--;
+            RExC_parse--;
 
-                ret = regclass(pRExC_state, flagp,depth+1,
-                               TRUE, /* means just parse this element */
-                               FALSE, /* don't allow multi-char folds */
-                               FALSE, /* don't silence non-portable warnings.
-                                         It would be a bug if these returned
-                                         non-portables */
-                               (bool) RExC_strict,
-                               TRUE, /* Allow an optimized regnode result */
-                               NULL);
-                if (*flagp & RESTART_PASS1)
-                    return NULL;
-                /* regclass() can only return RESTART_PASS1 and NEED_UTF8 if
-                 * multi-char folds are allowed.  */
-                if (!ret)
-                    FAIL2("panic: regclass returned NULL to regatom, flags=%#"UVxf"",
-                          (UV) *flagp);
+            ret = regclass(pRExC_state, flagp,depth+1,
+                           TRUE, /* means just parse this element */
+                           FALSE, /* don't allow multi-char folds */
+                           FALSE, /* don't silence non-portable warnings.  It
+                                     would be a bug if these returned
+                                     non-portables */
+                           (bool) RExC_strict,
+                           TRUE, /* Allow an optimized regnode result */
+                           NULL);
+            if (*flagp & RESTART_PASS1)
+                return NULL;
+            /* regclass() can only return RESTART_PASS1 and NEED_UTF8 if
+             * multi-char folds are allowed.  */
+            if (!ret)
+                FAIL2("panic: regclass returned NULL to regatom, flags=%#"UVxf"",
+                      (UV) *flagp);
 
-		RExC_parse--;
+            RExC_parse--;
 
-		Set_Node_Offset(ret, parse_start);
-                Set_Node_Cur_Length(ret, parse_start - 2);
-		nextchar(pRExC_state);
-	    }
+            Set_Node_Offset(ret, parse_start);
+            Set_Node_Cur_Length(ret, parse_start - 2);
+            nextchar(pRExC_state);
 	    break;
         case 'N':
             /* Handle \N, \N{} and \N{NAMED SEQUENCE} (the latter meaning the
@@ -12247,38 +12245,36 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * as an octal escape. It may or may not be a valid backref
                  * escape. For instance \88888888 is unlikely to be a valid
                  * backref. */
-		{
-		    while (isDIGIT(*RExC_parse))
-			RExC_parse++;
-                    if (hasbrace) {
-                        if (*RExC_parse != '}')
-                            vFAIL("Unterminated \\g{...} pattern");
-                        RExC_parse++;
-                    }
-		    if (!SIZE_ONLY) {
-		        if (num > (I32)RExC_rx->nparens)
-			    vFAIL("Reference to nonexistent group");
-		    }
-		    RExC_sawback = 1;
-		    ret = reganode(pRExC_state,
-				   ((! FOLD)
-				     ? REF
-				     : (ASCII_FOLD_RESTRICTED)
-				       ? REFFA
-                                       : (AT_LEAST_UNI_SEMANTICS)
-                                         ? REFFU
-                                         : (LOC)
-                                           ? REFFL
-                                           : REFF),
-				    num);
-		    *flagp |= HASWIDTH;
+                while (isDIGIT(*RExC_parse))
+                    RExC_parse++;
+                if (hasbrace) {
+                    if (*RExC_parse != '}')
+                        vFAIL("Unterminated \\g{...} pattern");
+                    RExC_parse++;
+                }
+                if (!SIZE_ONLY) {
+                    if (num > (I32)RExC_rx->nparens)
+                        vFAIL("Reference to nonexistent group");
+                }
+                RExC_sawback = 1;
+                ret = reganode(pRExC_state,
+                               ((! FOLD)
+                                 ? REF
+                                 : (ASCII_FOLD_RESTRICTED)
+                                   ? REFFA
+                                   : (AT_LEAST_UNI_SEMANTICS)
+                                     ? REFFU
+                                     : (LOC)
+                                       ? REFFL
+                                       : REFF),
+                                num);
+                *flagp |= HASWIDTH;
 
-                    /* override incorrect value set in reganode MJD */
-                    Set_Node_Offset(ret, parse_start);
-                    Set_Node_Cur_Length(ret, parse_start-1);
-                    skip_to_be_ignored_text(pRExC_state, &RExC_parse,
-                                            FALSE /* Don't force to /x */ );
-		}
+                /* override incorrect value set in reganode MJD */
+                Set_Node_Offset(ret, parse_start);
+                Set_Node_Cur_Length(ret, parse_start-1);
+                skip_to_be_ignored_text(pRExC_state, &RExC_parse,
+                                        FALSE /* Don't force to /x */ );
 	    }
 	    break;
 	case '\0':
