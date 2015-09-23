@@ -12377,9 +12377,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    {
 		oldp = p;
 
-		if (RExC_flags & RXf_PMf_EXTENDED)
-                    p = regpatws(pRExC_state, p,
-                                          TRUE); /* means recognize comments */
+                /* White space has already been ignored */
+                assert(   (RExC_flags & RXf_PMf_EXTENDED) == 0
+                       || ! is_PATWS_safe((p), RExC_end, UTF));
+
 		switch ((U8)*p) {
 		case '^':
 		case '$':
