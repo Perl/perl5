@@ -12067,10 +12067,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	case 'p':
 	case 'P':
 	    {
-#ifdef DEBUGGING
-		char* parse_start = RExC_parse - 2;
-#endif
-
 		RExC_parse--;
 
                 ret = regclass(pRExC_state, flagp,depth+1,
@@ -12092,8 +12088,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 		RExC_parse--;
 
-		Set_Node_Offset(ret, parse_start + 2);
-                Set_Node_Cur_Length(ret, parse_start);
+		Set_Node_Offset(ret, parse_start);
+                Set_Node_Cur_Length(ret, parse_start - 2);
 		nextchar(pRExC_state);
 	    }
 	    break;
@@ -12252,9 +12248,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * escape. For instance \88888888 is unlikely to be a valid
                  * backref. */
 		{
-#ifdef RE_TRACK_PATTERN_OFFSETS
-		    char * const parse_start = RExC_parse - 1; /* MJD */
-#endif
 		    while (isDIGIT(*RExC_parse))
 			RExC_parse++;
                     if (hasbrace) {
@@ -12281,8 +12274,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		    *flagp |= HASWIDTH;
 
                     /* override incorrect value set in reganode MJD */
-                    Set_Node_Offset(ret, parse_start+1);
-                    Set_Node_Cur_Length(ret, parse_start);
+                    Set_Node_Offset(ret, parse_start);
+                    Set_Node_Cur_Length(ret, parse_start-1);
                     skip_to_be_ignored_text(pRExC_state, &RExC_parse,
                                             FALSE /* Don't force to /x */ );
 		}
