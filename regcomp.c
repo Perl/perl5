@@ -11211,8 +11211,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 	if (! node_p) {
             return FALSE;
         }
-	skip_to_be_ignored_text(pRExC_state, &RExC_parse,
-                               FALSE /* Don't force to /x */ );
+
 	*node_p = reg_node(pRExC_state, REG_ANY);
 	*flagp |= HASWIDTH|SIMPLE;
 	MARK_NAUGHTY(1);
