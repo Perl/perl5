@@ -1051,8 +1051,9 @@ C<\N{...}>, etc.)
 
 This last example shows the use of this construct to specify an ordinary
 bracketed character class without additional set operations.  Note the
-white space within it; C<E<sol>x> is turned on even within bracketed
-character classes, except you can't have comments inside them.  Hence,
+white space within it; a limited version of C<E<sol>x> is turned on even
+within bracketed character classes, with only the SPACE and TAB (C<\t>)
+characters allowed, and no comments.  Hence,
 
  (?[ [#] ])
 

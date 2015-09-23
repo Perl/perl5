@@ -14253,6 +14253,23 @@ S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN c
 #define HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION                            \
                                         (SvCUR(listsv) != initial_listsv_len)
 
+/* There is a restricted set of white space characters that are legal when
+ * ignoring white space in a bracketed character class.  This generates the
+ * code to skip them.
+ *
+ * There is a line below that uses the same white space criteria but is outside
+ * this macro.  Both here and there must use the same definition */
+#define SKIP_BRACKETED_WHITE_SPACE(do_skip, p)                          \
+    STMT_START {                                                        \
+        if (do_skip) {                                                  \
+            while (   p < RExC_end                                      \
+                   && isBLANK_A(UCHARAT(p)))                            \
+            {                                                           \
+                p++;                                                    \
+            }                                                           \
+        }                                                               \
+    } STMT_END
+
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  const bool stop_at_1,  /* Just parse the next thing, don't
@@ -14413,20 +14430,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         SvTEMP_off(listsv); /* Grr, TEMPs and mortals are conflated.  */
     }
 
-    if (skip_white) {
-        RExC_parse = regpatws(pRExC_state, RExC_parse,
-                              FALSE /* means don't recognize comments */ );
-    }
+    SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse);
 
     if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
 	RExC_parse++;
         invert = TRUE;
         allow_multi_folds = FALSE;
         MARK_NAUGHTY(1);
-        if (skip_white) {
-            RExC_parse = regpatws(pRExC_state, RExC_parse,
-                                  FALSE /* means don't recognize comments */ );
-        }
+        SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse);
     }
 
     /* Check that they didn't say [:posix:] instead of [[:posix:]] */
@@ -14463,10 +14474,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             break;
         }
 
-        if (skip_white) {
-            RExC_parse = regpatws(pRExC_state, RExC_parse,
-                                  FALSE /* means don't recognize comments */ );
-        }
+        SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse);
 
         if  (UCHARAT(RExC_parse) == ']') {
             break;
@@ -14519,7 +14527,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * skipped, it means that that white space is wanted literally, and
              * is already in 'value'.  Otherwise, need to translate the escape
              * into what it signifies. */
-            if (! skip_white || ! is_PATWS_cp(value)) switch ((I32)value) {
+            if (! skip_white || ! isBLANK_A(value)) switch ((I32)value) {
 
 	    case 'w':	namedclass = ANYOF_WORDCHAR;	break;
 	    case 'W':	namedclass = ANYOF_NWORDCHAR;	break;
@@ -15068,10 +15076,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    }
 	} /* end of namedclass \blah */
 
-        if (skip_white) {
-            RExC_parse = regpatws(pRExC_state, RExC_parse,
-                                FALSE /* means don't recognize comments */ );
-        }
+        SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse);
 
         /* If 'range' is set, 'value' is the ending of a range--check its
          * validity.  (If value isn't a single code point in the case of a
@@ -15112,12 +15117,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 && *RExC_parse == '-')
             {
                 char* next_char_ptr = RExC_parse + 1;
-                if (skip_white) {   /* Get the next real char after the '-' */
-                    next_char_ptr = regpatws(pRExC_state,
-                                             RExC_parse + 1,
-                                             FALSE); /* means don't recognize
-                                                        comments */
-                }
+
+                /* Get the next real char after the '-' */
+                SKIP_BRACKETED_WHITE_SPACE(skip_white, next_char_ptr);
 
                 /* If the '-' is at the end of the class (just before the ']',
                  * it is a literal minus; otherwise it is a range */

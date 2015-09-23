@@ -27,7 +27,6 @@ like("a", qr/(?[ [a]      # This is a comment
 like("a", qr/(?[ [a]      # [[:notaclass:]]
                     ])/, 'A comment isn\'t parsed');
 unlike(uni_to_native("\x85"), qr/(?[ \t ])/, 'NEL is white space');
-unlike(uni_to_native("\x85"), qr/(?[ [\t] ])/, '... including within nested []');
 like(uni_to_native("\x85"), qr/(?[ \t + \ ])/, 'can escape NEL to match');
 like(uni_to_native("\x85"), qr/(?[ [\] ])/, '... including within nested []');
 like("\t", qr/(?[ \t + \ ])/, 'can do basic union');
