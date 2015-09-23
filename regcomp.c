@@ -12290,11 +12290,18 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	break;
 
     case '#':
-	if (RExC_flags & RXf_PMf_EXTENDED) {
+
+        /* '#' comments should have been spaced over before this function was
+         * called */
+        assert((RExC_flags & RXf_PMf_EXTENDED) == 0);
+	/*
+        if (RExC_flags & RXf_PMf_EXTENDED) {
 	    RExC_parse = reg_skipcomment( pRExC_state, RExC_parse );
 	    if (RExC_parse < RExC_end)
 		goto tryagain;
 	}
+        */
+
 	/* FALLTHROUGH */
 
     default:
