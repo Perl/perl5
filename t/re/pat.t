@@ -1681,7 +1681,10 @@ EOP
             my $code='
                 BEGIN{require q(test.pl);}
                 use Encode qw(_utf8_on);
-                my $malformed = "a\x80\n";
+                # \x80 and \x41 are continuation bytes in their respective
+                # character sets
+                my $malformed = (ord("A") == 65) ? "a\x80\n" : "a\x41\n";
+                utf8::downgrade($malformed);
                 _utf8_on($malformed);
                 watchdog(3);
                 $malformed =~ /(\n\r|\r)$/;
