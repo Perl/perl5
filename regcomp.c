@@ -11178,7 +11178,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     char * endbrace;    /* points to '}' following the name */
     char *endchar;	/* Points to '.' or '}' ending cur char in the input
                            stream */
-    char* p;            /* Temporary */
+    char* p = RExC_parse; /* Temporary */
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -11196,10 +11196,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     /* The [^\n] meaning of \N ignores spaces and comments under the /x
      * modifier.  The other meanings do not, so use a temporary until we find
      * out which we are being called with */
-    p = (RExC_flags & RXf_PMf_EXTENDED)
-	? regpatws(pRExC_state, RExC_parse,
-                                TRUE) /* means recognize comments */
-	: RExC_parse;
+    skip_to_be_ignored_text(pRExC_state, &p,
+                            FALSE /* Don't force to /x */ );
 
     /* Disambiguate between \N meaning a named character versus \N meaning
      * [^\n].  The latter is assumed when the {...} following the \N is a legal
@@ -12667,9 +12665,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * quantifier.  Move <p> to after anything that should be
                  * ignored, which, as a side effect, positions <p> for the next
                  * loop iteration */
-		if ( RExC_flags & RXf_PMf_EXTENDED)
-                    p = regpatws(pRExC_state, p,
-                                          TRUE); /* means recognize comments */
+                skip_to_be_ignored_text(pRExC_state, &p,
+                                        FALSE /* Don't force to /x */ );
 
                 /* If the next thing is a quantifier, it applies to this
                  * character only, which means that this character has to be in
@@ -13445,8 +13442,10 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
 
         while (RExC_parse < RExC_end) {
             SV* current = NULL;
-            RExC_parse = regpatws(pRExC_state, RExC_parse,
-                                          TRUE); /* means recognize comments */
+
+            skip_to_be_ignored_text(pRExC_state, &RExC_parse,
+                                    TRUE /* Force /x */ );
+
             switch (*RExC_parse) {
                 case '?':
                     if (RExC_parse[1] == '[') depth++, RExC_parse++;
@@ -13622,9 +13621,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                                        operand */
         SV* only_to_avoid_leaks;
 
-        /* Skip white space */
-        RExC_parse = regpatws(pRExC_state, RExC_parse,
-                TRUE /* means recognize comments */ );
+        skip_to_be_ignored_text(pRExC_state, &RExC_parse,
+                                TRUE /* Force /x */ );
         if (RExC_parse >= RExC_end) {
             Perl_croak(aTHX_ "panic: Read past end of '(?[ ])'");
         }

@@ -1936,5 +1936,9 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 foo(*ACCEPT:foo)	foo	y	$::REGMARK	foo
 (foo(*ACCEPT:foo))	foo	y	$::REGMARK	foo
 A(*FAIL:foo)[BC]	A	n	$::REGERROR	foo
+
+\N(?#comment){SPACE}	A	c	-	Missing braces on \N{}
+ab(?#Comment){2}c	abbc	y	$&	abbc
+
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

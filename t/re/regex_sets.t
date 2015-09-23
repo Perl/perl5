@@ -98,6 +98,8 @@ is($@, "", 'qr/(?[ [a] ])/ can be interpolated');
 
 like("B", qr/(?[ [B] | ! ( [^B] ) ])/, "[perl #125892]");
 
+like("a", qr/(?[ (?#comment) [a]])/, "Can have (?#comments)");
+
 if (! is_miniperl() && locales_enabled('LC_CTYPE')) {
     my $utf8_locale = find_utf8_ctype_locale;
     SKIP: {
