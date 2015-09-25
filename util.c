@@ -727,20 +727,36 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 			  s[rarest], (UV)rarest));
 }
 
-/* If SvTAIL(littlestr), it has a fake '\n' at end. */
-/* If SvTAIL is actually due to \Z or \z, this gives false positives
-   if multiline */
 
 /*
 =for apidoc fbm_instr
 
 Returns the location of the SV in the string delimited by C<big> and
-C<bigend>.  It returns C<NULL> if the string can't be found.  The C<sv>
+C<bigend> (C<bigend>) is the char following the last char).
+It returns C<NULL> if the string can't be found.  The C<sv>
 does not have to be C<fbm_compiled>, but the search will not be as fast
 then.
 
 =cut
+
+If SvTAIL(littlestr) is true, a fake "\n" was appended to to the string
+during FBM compilation due to FBMcf_TAIL in flags. It indicates that
+the littlestr must be anchored to the end of bigstr (or to any \n if
+FBMrf_MULTILINE).
+
+E.g. The regex compiler would compile /abc/ to a littlestr of "abc",
+while /abc$/ compiles to "abc\n" with SvTAIL() true.
+
+A littlestr of "abc", !SvTAIL matches as /abc/;
+a littlestr of "ab\n", SvTAIL matches as:
+   without FBMrf_MULTILINE: /ab\n?\z/
+   with    FBMrf_MULTILINE: /ab\n/ || /ab\z/;
+
+(According to Ilya from 1999; I don't know if this is still true, DAPM 2015):
+  "If SvTAIL is actually due to \Z or \z, this gives false positives
+  if multiline".
 */
+
 
 char *
 Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U32 flags)
@@ -766,6 +782,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
     switch (littlelen) { /* Special cases for 0, 1 and 2  */
     case 0:
 	return (char*)big;		/* Cannot be SvTAIL! */
+
     case 1:
 	    if (SvTAIL(littlestr) && !multiline) { /* Anchor only! */
 		/* Know that bigend != big.  */
@@ -782,6 +799,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 	    if (SvTAIL(littlestr))
 		return (char *) bigend;
 	    return NULL;
+
     case 2:
 	if (SvTAIL(littlestr) && !multiline) {
 	    if (bigend[-1] == '\n' && bigend[-2] == *little)
@@ -842,6 +860,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 	if (SvTAIL(littlestr) && (*bigend == *little))
 	    return (char *)bigend;	/* bigend is already decremented. */
 	return NULL;
+
     default:
 	break; /* Only lengths 0 1 and 2 have special-case code.  */
     }
@@ -861,6 +880,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 	}
 	return NULL;
     }
+
+    /* not compiled; use Perl_ninstr() instead */
     if (!SvVALID(littlestr)) {
 	char * const b = ninstr((char*)big,(char*)bigend,
 			 (char*)little, (char*)little + littlelen);
@@ -929,6 +950,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 	return NULL;
     }
 }
+
 
 /*
 =for apidoc foldEQ

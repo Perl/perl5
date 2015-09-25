@@ -467,7 +467,7 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 /* PVHV */
 #define SVphv_HASKFLAGS	0x80000000  /* keys have flag byte after hash */
 /* PVGV when SVpbm_VALID is true */
-#define SVpbm_TAIL	0x80000000
+#define SVpbm_TAIL	0x80000000  /* string has a fake "\n" appended */
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
 /* pad name vars only */
