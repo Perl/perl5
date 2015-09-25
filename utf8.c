@@ -714,7 +714,8 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Code point 0x%04"UVXf" is not Unicode, may not be portable", uv));
 		pack_warn = packWARN(WARN_NON_UNICODE);
 	    }
-#ifndef EBCDIC	/* EBCDIC always allows FE, FF */
+#ifndef EBCDIC	/* Can never have the equivalent of FE nor FF on EBCDIC, since
+                   not representable in UTF-EBCDIC */
 
             /* The first byte being 0xFE or 0xFF is a subset of the SUPER code
              * points.  We test for these after the regular SUPER ones, and
