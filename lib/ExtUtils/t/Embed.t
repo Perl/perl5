@@ -94,7 +94,7 @@ if ($^O eq 'VMS') {
     }
    }
    elsif ($^O eq 'os390' && $Config{usedl}) {
-    # Nothing for OS/390 (z/OS) dynamic.
+    push(@cmd,"-L$lib", ldopts());
    } else { # Not MSWin32 or OS/390 (z/OS) dynamic.
     push(@cmd,"-L$lib",'-lperl');
     local $SIG{__WARN__} = sub {
