@@ -1051,7 +1051,7 @@ For example, if your scalar is a reference and you want to modify the C<SvIVX>
 slot, you can't just do C<SvROK_off>, as that will leak the referent.
 
 This is used internally by various sv-modifying functions, such as
-C<sv_setsv>, C<sv_setiv> and C<sv_pvn_force..
+C<sv_setsv>, C<sv_setiv> and C<sv_pvn_force>.
 
 One case that this does not handle is a gv without SvFAKE set.  After
 
