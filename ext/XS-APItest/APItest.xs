@@ -189,6 +189,9 @@ test_freeent(freeent_function *f) {
     SvREFCNT_dec(test_scalar);
 }
 
+/* Not that it matters much, but it's handy for the flipped character to just
+ * be the opposite case (at least for ASCII-range and most Latin1 as well). */
+#define FLIP_BIT ('A' ^ 'a')
 
 static I32
 bitflip_key(pTHX_ IV action, SV *field) {
@@ -200,24 +203,33 @@ bitflip_key(pTHX_ IV action, SV *field) {
 	const char *p = SvPV(keysv, len);
 
 	if (len) {
-	    SV *newkey = newSV(len);
-	    char *new_p = SvPVX(newkey);
+            /* Allow for the flipped val to be longer than the original.  This
+             * is just for testing, so can afford to have some slop */
+            const STRLEN newlen = len * 2;
+
+	    SV *newkey = newSV(newlen);
+	    const char * const new_p_orig = SvPVX(newkey);
+	    char *new_p = (char *) new_p_orig;
 
 	    if (SvUTF8(keysv)) {
 		const char *const end = p + len;
 		while (p < end) {
-		    STRLEN len;
-		    UV chr = utf8_to_uvchr_buf((U8 *)p, (U8 *) end, &len);
-		    new_p = (char *)uvchr_to_utf8((U8 *)new_p, chr ^ 32);
-		    p += len;
+		    STRLEN curlen;
+		    UV chr = utf8_to_uvchr_buf((U8 *)p, (U8 *) end, &curlen);
+
+                    /* Make sure don't exceed bounds */
+                    assert(new_p - new_p_orig + curlen < newlen);
+
+		    new_p = (char *)uvchr_to_utf8((U8 *)new_p, chr ^ FLIP_BIT);
+		    p += curlen;
 		}
 		SvUTF8_on(newkey);
 	    } else {
 		while (len--)
-		    *new_p++ = *p++ ^ 32;
+		    *new_p++ = *p++ ^ FLIP_BIT;
 	    }
 	    *new_p = '\0';
-	    SvCUR_set(newkey, SvCUR(keysv));
+	    SvCUR_set(newkey, new_p - new_p_orig);
 	    SvPOK_on(newkey);
 
 	    mg->mg_obj = newkey;
