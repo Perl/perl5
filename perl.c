@@ -2729,13 +2729,11 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
     SAVEOP();
     PL_op = (OP*)&myop;
 
-    {
+    if (!(flags & G_METHOD_NAMED)) {
 	dSP;
 	EXTEND(SP, 1);
-	if (!(flags & G_METHOD_NAMED)) {
-	    PUSHs(sv);
-	    PUTBACK;
-	}
+	PUSHs(sv);
+	PUTBACK;
     }
     oldmark = TOPMARK;
     oldscope = PL_scopestack_ix;
