@@ -2699,7 +2699,7 @@ I32
 Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
           		/* See G_* flags in cop.h */
 {
-    dVAR; dSP;
+    dVAR;
     LOGOP myop;		/* fake syntax tree node */
     METHOP method_op;
     I32 oldmark;
@@ -2729,9 +2729,14 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
     SAVEOP();
     PL_op = (OP*)&myop;
 
-    EXTEND(PL_stack_sp, 1);
-    if (!(flags & G_METHOD_NAMED))
-        *++PL_stack_sp = sv;
+    {
+	dSP;
+	EXTEND(SP, 1);
+	if (!(flags & G_METHOD_NAMED)) {
+	    PUSHs(sv);
+	    PUTBACK;
+	}
+    }
     oldmark = TOPMARK;
     oldscope = PL_scopestack_ix;
 
@@ -2842,9 +2847,8 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
           		/* See G_* flags in cop.h */
 {
     dVAR;
-    dSP;
     UNOP myop;		/* fake syntax tree node */
-    VOL I32 oldmark = SP - PL_stack_base;
+    VOL I32 oldmark;
     VOL I32 retval = 0;
     int ret;
     OP* const oldop = PL_op;
@@ -2860,8 +2864,13 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     SAVEOP();
     PL_op = (OP*)&myop;
     Zero(&myop, 1, UNOP);
-    EXTEND(PL_stack_sp, 1);
-    *++PL_stack_sp = sv;
+    {
+	dSP;
+	oldmark = SP - PL_stack_base;
+	EXTEND(SP, 1);
+	PUSHs(sv);
+	PUTBACK;
+    }
 
     if (!(flags & G_NOARGS))
 	myop.op_flags = OPf_STACKED;
