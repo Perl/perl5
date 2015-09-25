@@ -1525,7 +1525,11 @@ wrapper instead.
 =cut
 */
 
-int
+/* prior to 5.000 stable, this function returned the new OOK-less SvFLAGS
+   prior to 5.23.4 this function always returned 0
+*/
+
+void
 Perl_sv_backoff(SV *const sv)
 {
     STRLEN delta;
@@ -1541,9 +1545,9 @@ Perl_sv_backoff(SV *const sv)
     
     SvLEN_set(sv, SvLEN(sv) + delta);
     SvPV_set(sv, SvPVX(sv) - delta);
-    Move(s, SvPVX(sv), SvCUR(sv)+1, char);
     SvFLAGS(sv) &= ~SVf_OOK;
-    return 0;
+    Move(s, SvPVX(sv), SvCUR(sv)+1, char);
+    return;
 }
 
 /*

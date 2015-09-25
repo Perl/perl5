@@ -1374,7 +1374,7 @@ Apd	|I32	|sv_true	|NULLOK SV *const sv
 sd	|void	|sv_add_arena	|NN char *const ptr|const U32 size \
 				|const U32 flags
 #endif
-Apdn	|int	|sv_backoff	|NN SV *const sv
+Apdn	|void	|sv_backoff	|NN SV *const sv
 Apd	|SV*	|sv_bless	|NN SV *const sv|NN HV *const stash
 #if defined(PERL_DEBUG_READONLY_COW)
 p	|void	|sv_buf_to_ro	|NN SV *sv

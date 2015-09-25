@@ -329,7 +329,13 @@ well.
 
 =item *
 
-XXX
+L<perlapi/sv_backoff> had its return type changed fron C<int> to C<void>.  It
+previously has always returned C<0> since 5.000 stable but that was
+undocumented.  Although C<sv_backoff> is marked as public API, XS code is not
+expected to be impacted since the proper API call would be through public API
+C<sv_setsv(sv, &PL_sv_undef)>, or quasi-public C<SvOOK_off>, or non-public
+C<SvOK_off> calls, and the return value of C<sv_backoff> was previously a
+meaningless constant that can be rewritten as C<(sv_backoff(sv),0)>.
 
 =back
 

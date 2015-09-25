@@ -2897,7 +2897,7 @@ PERL_CALLCONV char*	Perl_sv_2pvutf8(pTHX_ SV *sv, STRLEN *const lp);
 PERL_CALLCONV UV	Perl_sv_2uv_flags(pTHX_ SV *const sv, const I32 flags);
 #define PERL_ARGS_ASSERT_SV_2UV_FLAGS	\
 	assert(sv)
-PERL_CALLCONV int	Perl_sv_backoff(SV *const sv);
+PERL_CALLCONV void	Perl_sv_backoff(SV *const sv);
 #define PERL_ARGS_ASSERT_SV_BACKOFF	\
 	assert(sv)
 PERL_CALLCONV SV*	Perl_sv_bless(pTHX_ SV *const sv, HV *const stash);
