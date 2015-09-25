@@ -765,8 +765,7 @@ hash element for this:
 X<FIRSTKEY>
 
 This method will be triggered when the user is going
-to iterate through the hash, such as via a keys() or each()
-call.
+to iterate through the hash, such as via a keys(), values(), or each() call.
 
     sub FIRSTKEY {
 	carp &whowasi if $DEBUG;
@@ -775,13 +774,21 @@ call.
 	each %{$self->{LIST}}
     }
 
+FIRSTKEY is always called in scalar context and it should just
+return the first key.  values(), and each() in list context,
+will call FETCH for the returned keys.
+
 =item NEXTKEY this, lastkey
 X<NEXTKEY>
 
-This method gets triggered during a keys() or each() iteration.  It has a
+This method gets triggered during a keys(), values(), or each() iteration.  It has a
 second argument which is the last key that had been accessed.  This is
-useful if you're carrying about ordering or calling the iterator from more
+useful if you're caring about ordering or calling the iterator from more
 than one sequence, or not really storing things in a hash anywhere.
+
+NEXTKEY is always called in scalar context and it should just
+return the next key.  values(), and each() in list context,
+will call FETCH for the returned keys.
 
 For our example, we're using a real hash so we'll do just the simple
 thing, but we'll have to go through the LIST field indirectly.
