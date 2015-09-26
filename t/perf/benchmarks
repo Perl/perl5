@@ -236,6 +236,94 @@
     },
 
 
+    # using a const string as second arg to index triggers using FBM.
+    # the FBM matcher special-cases 1,2-byte strings.
+    #
+    'expr::index::short_const1' => {
+        desc    => 'index of a short string against a 1 char const substr',
+        setup   => 'my $x = "aaaab"',
+        code    => 'index $x, "b"',
+    },
+    'expr::index::long_const1' => {
+        desc    => 'index of a long string against a 1 char const substr',
+        setup   => 'my $x = "a" x 1000 . "b"',
+        code    => 'index $x, "b"',
+    },
+    'expr::index::short_const2aabc_bc' => {
+        desc    => 'index of a short string against a 2 char const substr',
+        setup   => 'my $x = "aaaabc"',
+        code    => 'index $x, "bc"',
+    },
+    'expr::index::long_const2aabc_bc' => {
+        desc    => 'index of a long string against a 2 char const substr',
+        setup   => 'my $x = "a" x 1000 . "bc"',
+        code    => 'index $x, "bc"',
+    },
+    'expr::index::long_const2aa_ab' => {
+        desc    => 'index of a long string aaa.. against const substr "ab"',
+        setup   => 'my $x = "a" x 1000',
+        code    => 'index $x, "ab"',
+    },
+    'expr::index::long_const2bb_ab' => {
+        desc    => 'index of a long string bbb.. against const substr "ab"',
+        setup   => 'my $x = "b" x 1000',
+        code    => 'index $x, "ab"',
+    },
+    'expr::index::long_const2aa_bb' => {
+        desc    => 'index of a long string aaa.. against const substr "bb"',
+        setup   => 'my $x = "a" x 1000',
+        code    => 'index $x, "bb"',
+    },
+    # this one is designed to be pathological
+    'expr::index::long_const2ab_aa' => {
+        desc    => 'index of a long string abab.. against const substr "aa"',
+        setup   => 'my $x = "ab" x 500',
+        code    => 'index $x, "aa"',
+    },
+    # near misses with gaps, 1st letter
+    'expr::index::long_const2aaxx_xy' => {
+        desc    => 'index of a long string with "xx"s against const substr "xy"',
+        setup   => 'my $x = "aaaaaaaaxx" x 100',
+        code    => 'index $x, "xy"',
+    },
+    # near misses with gaps, 2nd letter
+    'expr::index::long_const2aayy_xy' => {
+        desc    => 'index of a long string with "yy"s against const substr "xy"',
+        setup   => 'my $x = "aaaaaaaayy" x 100',
+        code    => 'index $x, "xy"',
+    },
+    # near misses with gaps, duplicate letter
+    'expr::index::long_const2aaxy_xx' => {
+        desc    => 'index of a long string with "xy"s against const substr "xx"',
+        setup   => 'my $x = "aaaaaaaaxy" x 100',
+        code    => 'index $x, "xx"',
+    },
+    # alternating near misses with gaps
+    'expr::index::long_const2aaxxaayy_xy' => {
+        desc    => 'index of a long string with "xx/yy"s against const substr "xy"',
+        setup   => 'my $x = "aaaaaaaaxxbbbbbbbbyy" x 50',
+        code    => 'index $x, "xy"',
+    },
+    'expr::index::short_const3aabcd_bcd' => {
+        desc    => 'index of a short string against a 3 char const substr',
+        setup   => 'my $x = "aaaabcd"',
+        code    => 'index $x, "bcd"',
+    },
+    'expr::index::long_const3aabcd_bcd' => {
+        desc    => 'index of a long string against a 3 char const substr',
+        setup   => 'my $x = "a" x 1000 . "bcd"',
+        code    => 'index $x, "bcd"',
+    },
+    'expr::index::long_const3ab_abc' => {
+        desc    => 'index of a long string of "ab"s against a 3 char const substr "abc"',
+        setup   => 'my $x = "ab" x 500',
+        code    => 'index $x, "abc"',
+    },
+    'expr::index::long_const3bc_abc' => {
+        desc    => 'index of a long string of "bc"s against a 3 char const substr "abc"',
+        setup   => 'my $x = "bc" x 500',
+        code    => 'index $x, "abc"',
+    },
     'expr::index::utf8_position_1' => {
         desc    => 'index of a utf8 string, matching at position 1',
         setup   => 'my $x = "abc". chr(0x100); chop $x',
