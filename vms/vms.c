@@ -42,6 +42,7 @@
 #include <ossdef.h>
 #include <ppropdef.h>
 #include <prvdef.h>
+#include <pscandef.h>
 #include <psldef.h>
 #include <rms.h>
 #include <shrdef.h>
@@ -2174,7 +2175,6 @@ Perl_my_sigaction (pTHX_ int sig, const struct sigaction* act,
 }
 /*}}}*/
 
-#ifdef KILL_BY_SIGPRC
 #include <errnodef.h>
 
 /* We implement our own kill() using the undocumented system service
@@ -2272,6 +2272,7 @@ Perl_sig_to_vmscondition(int sig)
 }
 
 
+#ifdef KILL_BY_SIGPRC
 #define sys$sigprc SYS$SIGPRC
 #ifdef __cplusplus
 extern "C" {
@@ -2321,17 +2322,18 @@ Perl_my_kill(int pid, int sig)
         return -1;
     }
 
-    /* Fixme: Per official UNIX specification: If pid = 0, or negative then
+    /* Per official UNIX specification: If pid = 0, or negative then
      * signals are to be sent to multiple processes.
      *  pid = 0 - all processes in group except ones that the system exempts
      *  pid = -1 - all processes except ones that the system exempts
      *  pid = -n - all processes in group (abs(n)) except ... 
-     * For now, just report as not supported.
+     *
+     * Handle these via killpg, which is redundant for the -n case, since OP_KILL
+     * in doio.c already does that. killpg currently does not support the -1 case.
      */
 
     if (pid <= 0) {
-	SETERRNO(ENOTSUP, SS$_UNSUPPORTED);
-        return -1;
+	return killpg(-pid, sig);
     }
 
     iss = sys$sigprc((unsigned int *)&pid,0,code);
@@ -2355,6 +2357,157 @@ Perl_my_kill(int pid, int sig)
     return -1;
 }
 #endif
+
+int
+Perl_my_killpg(pid_t master_pid, int signum)
+{
+    int pid, status, i;
+    unsigned long int jpi_context;
+    unsigned short int iosb[4];
+    struct itmlst_3  il3[3];
+
+    /* All processes on the system?  Seems dangerous, but it looks
+     * like we could implement this pretty easily with a wildcard
+     * input to sys$process_scan.
+     */
+    if (master_pid == -1) {
+        SETERRNO(ENOTSUP, SS$_UNSUPPORTED);
+        return -1;
+    }
+
+    /* All processes in the current process group; find the master
+     * pid for the current process.
+     */
+    if (master_pid == 0) {
+        i = 0;
+        il3[i].buflen   = sizeof( int );
+        il3[i].itmcode   = JPI$_MASTER_PID;
+        il3[i].bufadr   = &master_pid;
+        il3[i++].retlen = NULL;
+
+        il3[i].buflen   = 0;
+        il3[i].itmcode   = 0;
+        il3[i].bufadr   = NULL;
+        il3[i++].retlen = NULL;
+
+        status = sys$getjpiw(EFN$C_ENF, NULL, NULL, il3, iosb, NULL, 0);
+        if ($VMS_STATUS_SUCCESS(status))
+            status = iosb[0];
+
+        switch (status) {
+            case SS$_NORMAL:
+                break;
+            case SS$_NOPRIV:
+            case SS$_SUSPENDED:
+                SETERRNO(EPERM, status);
+                break;
+            case SS$_NOMOREPROC:
+            case SS$_NONEXPR:
+            case SS$_NOSUCHNODE:
+            case SS$_UNREACHABLE:
+                SETERRNO(ESRCH, status);
+                break;
+            case SS$_ACCVIO:
+            case SS$_BADPARAM:
+                SETERRNO(EINVAL, status);
+                break;
+            default:
+                SETERRNO(EVMSERR, status);
+        }
+        if (!$VMS_STATUS_SUCCESS(status))
+            return -1;
+    }
+
+    /* Set up a process context for those processes we will scan
+     * with sys$getjpiw.  Ask for all processes belonging to the
+     * master pid.
+     */
+
+    i = 0;
+    il3[i].buflen   = 0;
+    il3[i].itmcode   = PSCAN$_MASTER_PID;
+    il3[i].bufadr   = (void *)master_pid;
+    il3[i++].retlen = NULL;
+
+    il3[i].buflen   = 0;
+    il3[i].itmcode   = 0;
+    il3[i].bufadr   = NULL;
+    il3[i++].retlen = NULL;
+
+    status = sys$process_scan(&jpi_context, il3);
+    switch (status) {
+        case SS$_NORMAL:
+            break;
+        case SS$_ACCVIO:
+        case SS$_BADPARAM:
+        case SS$_IVBUFLEN:
+        case SS$_IVSSRQ:
+            SETERRNO(EINVAL, status);
+            break;
+        default:
+            SETERRNO(EVMSERR, status);
+    }
+    if (!$VMS_STATUS_SUCCESS(status))
+        return -1;
+
+    i = 0;
+    il3[i].buflen   = sizeof(int);
+    il3[i].itmcode  = JPI$_PID;
+    il3[i].bufadr   = &pid;
+    il3[i++].retlen = NULL;
+
+    il3[i].buflen   = 0;
+    il3[i].itmcode  = 0;
+    il3[i].bufadr   = NULL;
+    il3[i++].retlen = NULL;
+
+    /* Loop through the processes matching our specified criteria
+     */
+
+    while (1) {
+        /* Find the next process...
+         */
+        status = sys$getjpiw( EFN$C_ENF, &jpi_context, NULL, il3, iosb, NULL, 0);
+        if ($VMS_STATUS_SUCCESS(status)) status = iosb[0];
+
+        switch (status) {
+            case SS$_NORMAL:
+                if (kill(pid, signum) == -1)
+                    break;
+
+                continue;     /* next process */
+            case SS$_NOPRIV:
+            case SS$_SUSPENDED:
+                SETERRNO(EPERM, status);
+                break;
+            case SS$_NOMOREPROC:
+                break;
+            case SS$_NONEXPR:
+            case SS$_NOSUCHNODE:
+            case SS$_UNREACHABLE:
+                SETERRNO(ESRCH, status);
+                break;
+            case SS$_ACCVIO:
+            case SS$_BADPARAM:
+                SETERRNO(EINVAL, status);
+                break;
+            default:
+               SETERRNO(EVMSERR, status);
+        }
+
+        if (!$VMS_STATUS_SUCCESS(status))
+            break;
+    }
+
+    /* Release context-related resources.
+     */
+    (void) sys$process_scan(&jpi_context);
+
+    if (status != SS$_NOMOREPROC)
+        return -1;
+
+    return 0;
+}
 
 /* Routine to convert a VMS status code to a UNIX status code.
 ** More tricky than it appears because of conflicting conventions with

@@ -1754,8 +1754,8 @@ the Unix semantics, where the signal will be delivered to all
 processes in the same process group as the process specified by
 $pid. (Win32)
 
-Is not supported for process identification number of 0 or negative
-numbers. (VMS)
+A pid of -1 indicating all processes on the system is not currently
+supported. (VMS)
 
 =item link
 

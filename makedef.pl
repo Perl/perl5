@@ -939,6 +939,7 @@ elsif ($ARGS{PLATFORM} eq 'vms') {
 		      Perl_my_getpwuid
 		      Perl_my_gmtime
 		      Perl_my_kill
+		      Perl_my_killpg
 		      Perl_my_localtime
 		      Perl_my_mkdir
 		      Perl_my_sigaction

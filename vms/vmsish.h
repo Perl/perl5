@@ -477,6 +477,7 @@ struct utimbuf {
 #ifdef KILL_BY_SIGPRC
 #  define kill  Perl_my_kill
 #endif
+# define killpg  Perl_my_killpg
 
 
 /* VMS doesn't use a real sys_nerr, but we need this when scanning for error
@@ -714,6 +715,7 @@ int	Perl_my_sigaction (pTHX_ int, const struct sigaction*, struct sigaction*);
 #ifdef KILL_BY_SIGPRC
 unsigned int	Perl_sig_to_vmscondition (int);
 int	Perl_my_kill (int, int);
+int	Perl_my_killpg (int, int);
 void	Perl_csighandler_init (void);
 #endif
 int	Perl_my_utime (pTHX_ const char *, const struct utimbuf *);
