@@ -13444,6 +13444,10 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                      * default: case next time and keep on incrementing until
                      * we find one of the invariants we do handle. */
                     RExC_parse++;
+                    if (*RExC_parse == 'c') {
+                            /* Skip the \cX notation for control characters */
+                            RExC_parse++;
+                    }
                     break;
                 case '[':
                 {
