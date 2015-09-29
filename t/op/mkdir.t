@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 22;
+plan tests => 17;
 
 unless (eval {
     require File::Path;
@@ -58,13 +58,3 @@ ok(-d);
 ok(rmdir);
 ok(!-d);
 $_ = 'lfrulb';
-
-{
-    no warnings 'experimental::lexical_topic';
-    my $_ = 'blurfl';
-    ok(mkdir);
-    ok(-d);
-    ok(-d 'blurfl');
-    ok(!-d 'lfrulb');
-    ok(rmdir);
-}

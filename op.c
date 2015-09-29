@@ -594,7 +594,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 	!(is_our ||
 	  isALPHA(name[1]) ||
 	  ((flags & SVf_UTF8) && isIDFIRST_utf8((U8 *)name+1)) ||
-	  (name[1] == '_' && (*name == '$' || len > 2))))
+	  (name[1] == '_' && len > 2)))
     {
 	if (!(flags & SVf_UTF8 && UTF8_IS_START(name[1]))
 	 && isASCII(name[1])
@@ -607,13 +607,6 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 			      PL_parser->in_my == KEY_state ? "state" : "my"), flags & SVf_UTF8);
 	}
     }
-    else if (len == 2 && name[1] == '_' && !is_our)
-	/* diag_listed_as: Use of my $_ is experimental */
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__LEXICAL_TOPIC),
-			      "Use of %s $_ is experimental",
-			       PL_parser->in_my == KEY_state
-				 ? "state"
-				 : "my");
 
     /* allocate a spare slot and store the name in that slot */
 
@@ -5809,9 +5802,7 @@ Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
 /*
 =for apidoc Am|OP *|newDEFSVOP|
 
-Constructs and returns an op to access C<$_>, either as a lexical
-variable (if declared as C<my $_>) in the current scope, or the
-global C<$_>.
+Constructs and returns an op to access C<$_>.
 
 =cut
 */
@@ -5819,15 +5810,7 @@ global C<$_>.
 OP *
 Perl_newDEFSVOP(pTHX)
 {
-    const PADOFFSET offset = pad_findmy_pvs("$_", 0);
-    if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {
 	return newSVREF(newGVOP(OP_GV, 0, PL_defgv));
-    }
-    else {
-	OP * const o = newOP(OP_PADSV, 0);
-	o->op_targ = offset;
-	return o;
-    }
 }
 
 #ifdef USE_ITHREADS
@@ -7224,7 +7207,7 @@ loop (iteration through a list of values).  This is a heavyweight loop,
 with structure that allows exiting the loop by C<last> and suchlike.
 
 C<sv> optionally supplies the variable that will be aliased to each
-item in turn; if null, it defaults to C<$_> (either lexical or global).
+item in turn; if null, it defaults to C<$_>.
 C<expr> supplies the list of values to iterate over.  C<block> supplies
 the main body of the loop, and C<cont> optionally supplies a C<continue>
 block that operates as a second half of the body.  All of these optree
@@ -7287,13 +7270,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	}
     }
     else {
-        const PADOFFSET offset = pad_findmy_pvs("$_", 0);
-	if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {
-	    sv = newGVOP(OP_GV, 0, PL_defgv);
-	}
-	else {
-	    padoff = offset;
-	}
+	sv = newGVOP(OP_GV, 0, PL_defgv);
 	iterpflags |= OPpITER_DEF;
     }
 
@@ -10047,7 +10024,6 @@ Perl_ck_grep(pTHX_ OP *o)
     LOGOP *gwop;
     OP *kid;
     const OPCODE type = o->op_type == OP_GREPSTART ? OP_GREPWHILE : OP_MAPWHILE;
-    PADOFFSET offset;
 
     PERL_ARGS_ASSERT_CK_GREP;
 
@@ -10074,15 +10050,8 @@ Perl_ck_grep(pTHX_ OP *o)
 
     gwop = S_alloc_LOGOP(aTHX_ type, o, LINKLIST(kid));
     kid->op_next = (OP*)gwop;
-    offset = pad_findmy_pvs("$_", 0);
-    if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {
-	o->op_private = gwop->op_private = 0;
-	gwop->op_targ = pad_alloc(type, SVs_PADTMP);
-    }
-    else {
-	o->op_private = gwop->op_private = OPpGREP_LEX;
-	gwop->op_targ = o->op_targ = offset;
-    }
+    o->op_private = gwop->op_private = 0;
+    gwop->op_targ = pad_alloc(type, SVs_PADTMP);
 
     kid = OpSIBLING(cLISTOPo->op_first);
     for (kid = OpSIBLING(kid); kid; kid = OpSIBLING(kid))
@@ -10336,13 +10305,6 @@ Perl_ck_match(pTHX_ OP *o)
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_CK_MATCH;
 
-    if (o->op_type != OP_QR && PL_compcv) {
-	const PADOFFSET offset = pad_findmy_pvs("$_", 0);
-	if (offset != NOT_IN_PAD && !(PAD_COMPNAME_FLAGS_isOUR(offset))) {
-	    o->op_targ = offset;
-	    o->op_private |= OPpTARGET_MY;
-	}
-    }
     if (o->op_type == OP_MATCH || o->op_type == OP_QR)
 	o->op_private |= OPpRUNTIME;
     return o;

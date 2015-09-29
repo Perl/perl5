@@ -5,12 +5,14 @@ use Test::More 0.89;
 local $SIG{__WARN__} = sub { fail("Got unexpected warning"); diag($_[0]) };
 
 if ($] >= 5.010000) {
-	is (eval <<'END', 1, 'lexical topic compiles') or diag $@;
-	use experimental 'lexical_topic';
-	my $_ = 1;
-	is($_, 1, '$_ is 1');
-	1;
+	if ($] < 5.023) {
+		is (eval <<'END', 1, 'lexical topic compiles') or diag $@;
+		use experimental 'lexical_topic';
+		my $_ = 1;
+		is($_, 1, '$_ is 1');
+		1;
 END
+	}
 }
 else {
 	fail("No experimental features available on perl $]");

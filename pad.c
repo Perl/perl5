@@ -1035,11 +1035,12 @@ Perl_pad_findmy_sv(pTHX_ SV *name, U32 flags)
 /*
 =for apidoc Amp|PADOFFSET|find_rundefsvoffset
 
-Find the position of the lexical C<$_> in the pad of the
-currently-executing function.  Returns the offset in the current pad,
-or C<NOT_IN_PAD> if there is no lexical C<$_> in scope (in which case
-the global one should be used instead).
-L</find_rundefsv> is likely to be more convenient.
+Until the lexical C<$_> feature was removed, this function would
+find the position of the lexical C<$_> in the pad of the
+currently-executing function and returns the offset in the current pad,
+or C<NOT_IN_PAD>.
+
+Now it always returns C<NOT_IN_PAD>.
 
 =cut
 */
@@ -1047,18 +1048,14 @@ L</find_rundefsv> is likely to be more convenient.
 PADOFFSET
 Perl_find_rundefsvoffset(pTHX)
 {
-    PADNAME *out_pn;
-    int out_flags;
-    return pad_findlex("$_", 2, 0, find_runcv(NULL), PL_curcop->cop_seq, 1,
-	    NULL, &out_pn, &out_flags);
+    PERL_UNUSED_CONTEXT; /* Can we just remove the pTHX from the sig? */
+    return NOT_IN_PAD;
 }
 
 /*
 =for apidoc Am|SV *|find_rundefsv
 
-Find and return the variable that is named C<$_> in the lexical scope
-of the currently-executing function.  This may be a lexical C<$_>,
-or will otherwise be the global one.
+Returns the global variable C<$_>.
 
 =cut
 */
@@ -1066,35 +1063,7 @@ or will otherwise be the global one.
 SV *
 Perl_find_rundefsv(pTHX)
 {
-    PADNAME *name;
-    int flags;
-    PADOFFSET po;
-
-    po = pad_findlex("$_", 2, 0, find_runcv(NULL), PL_curcop->cop_seq, 1,
-	    NULL, &name, &flags);
-
-    if (po == NOT_IN_PAD || PadnameIsOUR(name))
-	return DEFSV;
-
-    return PAD_SVl(po);
-}
-
-SV *
-Perl_find_rundefsv2(pTHX_ CV *cv, U32 seq)
-{
-    PADNAME *name;
-    int flags;
-    PADOFFSET po;
-
-    PERL_ARGS_ASSERT_FIND_RUNDEFSV2;
-
-    po = pad_findlex("$_", 2, 0, cv, seq, 1,
-	    NULL, &name, &flags);
-
-    if (po == NOT_IN_PAD || PadnameIsOUR(name))
-	return DEFSV;
-
-    return AvARRAY(PadlistARRAY(CvPADLIST(cv))[CvDEPTH(cv)])[po];
+    return DEFSV;
 }
 
 /*

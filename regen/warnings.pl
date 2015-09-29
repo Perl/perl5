@@ -89,8 +89,6 @@ my $tree = {
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::regex_sets' =>
                                     [ 5.017, DEFAULT_ON ],
-                                'experimental::lexical_topic' =>
-                                    [ 5.017, DEFAULT_ON ],
                                 'experimental::smartmatch' =>
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::postderef' =>
@@ -481,7 +479,7 @@ read_only_bottom_close_and_rename($pm);
 __END__
 package warnings;
 
-our $VERSION = '1.33';
+our $VERSION = '1.34';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.

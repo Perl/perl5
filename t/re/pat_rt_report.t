@@ -856,8 +856,7 @@ sub run_tests {
     {
          my $message = '$REGMARK in replacement; Bug 49190';
          our $REGMARK;
-         no warnings 'experimental::lexical_topic';
-         my $_ = "A";
+         local $_ = "A";
          ok(s/(*:B)A/$REGMARK/, $message);
          is($_, "B", $message);
          $_ = "CCCCBAA";
