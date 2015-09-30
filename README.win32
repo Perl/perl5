@@ -485,10 +485,13 @@ You can also control the shell that perl uses to run system() and
 backtick commands via PERL5SHELL.  See L<perlrun>.
 
 Perl does not depend on the registry, but it can look up certain default
-values if you choose to put them there.  Perl attempts to read entries from
-C<HKEY_CURRENT_USER\Software\Perl> and C<HKEY_LOCAL_MACHINE\Software\Perl>.
-Entries in the former override entries in the latter.  One or more of the
-following entries (of type REG_SZ or REG_EXPAND_SZ) may be set:
+values if you choose to put them there.  On Perl process start Perl checks if
+C<HKEY_CURRENT_USER\Software\Perl> and C<HKEY_LOCAL_MACHINE\Software\Perl>
+exist.  If the keys exists, they will be checked for remainder of the Perl
+process's run life for certain entries.  Entries in
+C<HKEY_CURRENT_USER\Software\Perl> override entries in
+C<HKEY_LOCAL_MACHINE\Software\Perl>.  One or more of the following entries
+(of type REG_SZ or REG_EXPAND_SZ) may be set in the keys:
 
  lib-$]        version-specific standard library path to add to @INC
  lib           standard library path to add to @INC

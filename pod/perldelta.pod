@@ -319,6 +319,27 @@ L</Modules and Pragmata> section.
 
 XXX
 
+=item Win32
+
+=over
+
+=item *
+
+The behavior of Perl using C<HKEY_CURRENT_USER\Software\Perl> and
+C<HKEY_LOCAL_MACHINE\Software\Perl> to lookup certain values, including
+C<%ENV> vars starting with C<PERL> has changed.  Previously, the 2 keys were
+checked for entries at all times through Perl processes life time even if they
+did not exist.  For performance reasons, now, if the root key (i.e.
+C<HKEY_CURRENT_USER\Software\Perl> or C<HKEY_LOCAL_MACHINE\Software\Perl>) does
+not exist at process start time, it will not be checked again for C<%ENV>
+override entries for the remainder of the Perl processes life.  This more
+closely matches Unix behaviour in that the enviroment is copied or inherited on
+startup and changing the variable in the parent process or another process or
+editing <.bashrc> will not change the enviromental variable in other existing,
+running, processes.
+
+=back
+
 =back
 
 =head1 Internal Changes
