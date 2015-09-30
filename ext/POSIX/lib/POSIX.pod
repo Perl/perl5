@@ -444,7 +444,7 @@ C<FE_TONEAREST> is like L</round>, C<FE_TOWARDZERO> is like L</trunc> [C99].
 
 =item C<fesetround>
 
-Sets the floating point rounding mode, see L</fegetround>.
+Sets the floating point rounding mode, see L</fegetround> [C99].
 
 =item C<fma>
 
@@ -504,7 +504,10 @@ Returns one of
 
   FP_NORMAL FP_ZERO FP_SUBNORMAL FP_INFINITE FP_NAN
 
-telling the class of the argument [C99].
+telling the class of the argument [C99].  C<FP_INFINITE> is positive
+or negative infinity, C<FP_NAN> is not-a-number.  C<FP_SUBNORMAL>
+means subnormal numbers (also known as denormals), very small numbers
+with low precision. C<FP_ZERO> is zero.  C<FP_NORMAL> is all the rest.
 
 =item C<fprintf>
 
@@ -687,6 +690,16 @@ For example C<ilogb(20)> is 4, as an integer.
 
 See also L</logb>.
 
+=item C<Inf>
+
+The infinity as a constant:
+
+   use POSIX qw(Inf);
+   my $pos_inf = +Inf;  # Or just Inf.
+   my $neg_inf = -Inf;
+
+See also L</isinf>, and L</fpclassify>.
+
 =item C<isalnum>
 
 Deprecated function whose use raises a warning, and which is slated to
@@ -796,7 +809,7 @@ Floating point comparisons which handle the C<NaN> [C99].
 
 Returns true if the argument is an infinity (positive or negative) [C99].
 
-See also L</isnan>, L</isfinite>, and L</fpclassify>.
+See also L</Inf>, L</isnan>, L</isfinite>, and L</fpclassify>.
 
 =item C<islower>
 
@@ -826,7 +839,7 @@ Note that you cannot test for "C<NaN>-ness" with
 
 since the C<NaN> is not equivalent to anything, B<including itself>.
 
-See also L</nan>, L</isinf>, and L</fpclassify>.
+See also L</nan>, L</NaN>, L</isinf>, and L</fpclassify>.
 
 =item C<isnormal>
 
@@ -1191,11 +1204,20 @@ Return the integral and fractional parts of a floating-point number.
 
 See also L</round>.
 
+=item C<NaN>
+
+The not-a-number as a constant:
+
+   use POSIX qw(NaN);
+   my $nan = NaN;
+
+See also L</nan>, C</isnan>, and L</fpclassify>.
+
 =item C<nan>
 
 Returns not-a-number [C99].
 
-See also L</isnan>.
+See also L</isnan> and L</NaN>.
 
 =item C<nearbyint>
 
