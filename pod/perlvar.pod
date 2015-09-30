@@ -1824,10 +1824,12 @@ Each element of C<%!> has a true value only if C<$!> is set to that
 value.  For example, C<$!{ENOENT}> is true if and only if the current
 value of C<$!> is C<ENOENT>; that is, if the most recent error was "No
 such file or directory" (or its moral equivalent: not all operating
-systems give that exact error, and certainly not all languages).  To
-check if a particular key is meaningful on your system, use C<exists
-$!{the_key}>; for a list of legal keys, use C<keys %!>.  See L<Errno>
-for more information, and also see L</$!>.
+systems give that exact error, and certainly not all languages).  The
+specific true value is not guaranteed, but in the past has generally
+been the numeric value of C<$!>.  To check if a particular key is
+meaningful on your system, use C<exists $!{the_key}>; for a list of legal
+keys, use C<keys %!>.  See L<Errno> for more information, and also see
+L</$!>.
 
 This variable was added in Perl 5.005.
 
