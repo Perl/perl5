@@ -4,9 +4,6 @@
 
 <div><h2>Tickets Listed in #125394: 5.22.1 blockers</h2>
 
-(arc: The commit referenced here is a maint-specific patch, as the fix in blead strikes me as too invasive for maint. It smoked cleanly, FWIW.)
-<commit votes="arc, khw" id="ddd5feee1fd3e7105e11f3266509b916b9d16e55" ticket="125469" desc="'redundant argument in printf' warning and computed field widths"/>
-
 <commit votes="steveh, khw" id="89d84ff965b644c21c4c0633253e4cb21f72b62c" ticket="125381" desc="[perl #125381] fix -Cnn parsing"/>
 
 </div>
@@ -18,20 +15,8 @@
 
 Small code quality tweaks:
 (jhi: The last one is possibly debatable since it has the chance of changing behavior.)
-<commit votes="jhi, khw" id="3c9658f5b74001ff66c07d06d2c7f2a0741bd160" ticket="" desc="gcc 5.1.0 thinks RETVAL might end up unset."/>
 <commit votes="jhi" id="976258ece432e47adaa13d955134a8972933bcca" ticket="" desc="Superfluous null ptr test warnings by clang 3.7"/>
 <commit votes="jhi, khw" id="d1992db059626dbd1b9a7e2cf67ef89e6428a9c0" ticket="" desc="There is no SSize_t_size."/>
-
-Doc-like commits:
-<commit votes="jhi, craigb" id="23ce015ee1c88f507f078091298d020d5e22a300" ticket="" desc="Make the LoTR quote of reentr.c formatted more like the others."/>
-<commit votes="jhi, craigb" id="21ac16fed6668df441c18d5b3777df12ec41e0f8" ticket="" desc="Comment detypos."/>
-<commit votes="jhi, craigb" id="8757ed9b11519b7220e61e4765e36bd68345b6ec" ticket="" desc="There's no READ_UINT32."/>
-
-POSIX doc tweak:
-(jhi: Unfortunately it seems that the very last fragment might fail to apply because of the nearby signaling nan changes (which do not belong in 5.22). If in doubt, ask me for more details.)
-<commit votes="jhi, khw" id="d7a0f0b000f94080cd0cb5efd28ae4b26f084294" ticket="" desc="POSIX: mention the Inf, NaN constants; other small tweaks"/>
-(steveh: Version bump may need doing differently for maint, but it will need bumping:)
-<commit votes="khw" id="1dd11b288e33cbfb2c118b3331deea55b597b4d7" ticket="" desc="POSIX: version bump for d7a0f0b"/>
 
 Documentation patches (suggested by ether):
 <commit votes="khw" id="9fcc23141fa6c68e7419a4caf9046d6912491e37" ticket="" desc="perlvar: discourage $OLD_PERL_VERSION"/>
