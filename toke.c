@@ -10263,23 +10263,21 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                                 hexfp_exp *= 10;
                                 hexfp_exp += *h - '0';
 #ifdef NV_MIN_EXP
-                                if (negexp &&
-                                    -hexfp_exp < NV_MIN_EXP - 1) {
+                                if (negexp
+                                    && -hexfp_exp < NV_MIN_EXP - 1) {
                                     Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
                                                    "Hexadecimal float: exponent underflow");
-#endif
                                     break;
                                 }
-                                else {
-#ifdef NV_MAX_EXP
-                                    if (!negexp &&
-                                        hexfp_exp > NV_MAX_EXP - 1) {
-                                        Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                                                   "Hexadecimal float: exponent overflow");
-                                        break;
-                                    }
 #endif
+#ifdef NV_MAX_EXP
+                                if (!negexp
+                                    && hexfp_exp > NV_MAX_EXP - 1) {
+                                    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
+                                                   "Hexadecimal float: exponent overflow");
+                                    break;
                                 }
+#endif
                             }
                             h++;
                         }
