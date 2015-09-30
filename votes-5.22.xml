@@ -34,7 +34,7 @@ Documentation patches (suggested by ether):
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including a293d0fd7883038d8dfef01528c7398ba246b5f9 (Tentative fix for RT#125350 - AFL detected crash.)
+Blead changes have been examined up to and including 94757bf7ac8451b3588578f287f9c511a04011bf (perlfunc: Nit)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -83,6 +83,8 @@ So I'm inclined to not include it, even though I'm confident that it does fix th
 
 <commit votes="steveh, khw" id="a293d0fd7883038d8dfef01528c7398ba246b5f9" ticket="125350" desc="Tentative fix for RT#125350 - AFL detected crash."/>
 
+<commit votes="steveh" id="7f399b4008958590740e5bcb61cf22e2cfe5395b" ticket="126064" desc="[perl #126064] Apply scalar context to stat args"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
@@ -117,10 +119,13 @@ So I'm inclined to not include it, even though I'm confident that it does fix th
 <commit votes="" id="1f033515f88cb38a77368f249c75bc1a93c672e5" ticket="" desc="Find *inline.h differently in args_assert.t."/>
 <commit votes="steveh, khw" id="c0bf9074e4a1b56f9afe46591417297e6613d5ea" ticket="125924" desc="[perl #125924] allow op/infnan.t to pass on Win32 gcc"/>
 <commit votes="steveh, khw" id="c79631a1c8b4ecf3ec1fc557c875d412058b3e47" ticket="" desc="prevent op/time.t failures on NetBSD 5.1"/>
+<commit votes="steveh" id="e120c24fe257993e9cbf4c567194bec2792f3ccc" ticket="126133" desc="[perl #126133] autodie touches its touch_me, make it writable"/>
 
 </div>
 
 <div><h3>Documentation Fixes</h3>
+
+<commit votes="steveh" id="a3faa257b9fc52f80556200842eaee2d1ecf3f59" ticket="" desc="Clarify FIRSTKEY and NEXTKEY usage."/>
 
 </div>
 
