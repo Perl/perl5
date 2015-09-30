@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 94;
+plan tests => 96;
 our $TODO;
 
 my $deprecated = 0;
@@ -413,6 +413,38 @@ moretests:
 	}
     }
 }
+
+# This bug was introduced in Aug 2010 by commit ac56e7de46621c6f
+# Peephole optimise adjacent pairs of nextstate ops.
+# and fixed in Oct 2014 by commit f5b5c2a37af87535
+# Simplify double-nextstate optimisation
+
+# The bug manifests as a warning
+# Use of "goto" to jump into a construct is deprecated at t/op/goto.t line 442.
+# and $out is undefined. Devel::Peek reveals that the lexical in the pad has
+# been reset to undef. I infer that pp_goto thinks that it's leaving one scope
+# and entering another, but I don't know *why* it thinks that. Whilst this bug
+# has been fixed by Father C, because I don't understand why it happened, I am
+# not confident that other related bugs remain (or have always existed).
+
+sub DEBUG_TIME() {
+    0;
+}
+
+{
+    if (DEBUG_TIME) {
+    }
+
+    {
+        my $out = "";
+        $out .= 'perl rules';
+        goto no_list;
+    no_list:
+        is($out, 'perl rules', '$out has not been erroneously reset to undef');
+    };
+}
+
+is($deprecated, 0, 'no warning was emmitted');
 
 # deep recursion with gotos eventually caused a stack reallocation
 # which messed up buggy internals that didn't expect the stack to move
