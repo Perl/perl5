@@ -1787,6 +1787,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef USE_LOCALE_CTYPE
 			     " USE_LOCALE_CTYPE"
 #  endif
+#  ifdef WIN32_NO_REGISTRY
+			     " USE_NO_REGISTRY"
+#  endif
 #  ifdef USE_PERL_ATOF
 			     " USE_PERL_ATOF"
 #  endif	       

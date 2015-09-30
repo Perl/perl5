@@ -478,7 +478,7 @@ typedef char*		(*LPENVGetenv_len)(struct IPerlEnv*,
 #endif
 #ifdef WIN32
 typedef unsigned long	(*LPEnvOsID)(struct IPerlEnv*);
-typedef char*		(*LPEnvLibPath)(struct IPerlEnv*, const char*,
+typedef char*		(*LPEnvLibPath)(struct IPerlEnv*, WIN32_NO_REGISTRY_M_(const char*)
 					STRLEN *const len);
 typedef char*		(*LPEnvSiteLibPath)(struct IPerlEnv*, const char*,
 					    STRLEN *const len);
@@ -550,7 +550,7 @@ struct IPerlEnvInfo
 #define PerlEnv_os_id()						\
 	(*PL_Env->pEnvOsID)(PL_Env)
 #define PerlEnv_lib_path(str, lenp)				\
-	(*PL_Env->pLibPath)(PL_Env,(str),(lenp))
+	(*PL_Env->pLibPath)(PL_Env,WIN32_NO_REGISTRY_M_(str)(lenp))
 #define PerlEnv_sitelib_path(str, lenp)				\
 	(*PL_Env->pSiteLibPath)(PL_Env,(str),(lenp))
 #define PerlEnv_vendorlib_path(str, lenp)			\
@@ -575,7 +575,7 @@ struct IPerlEnvInfo
 
 #ifdef WIN32
 #define PerlEnv_os_id()			win32_os_id()
-#define PerlEnv_lib_path(str, lenp)	win32_get_privlib(str, lenp)
+#define PerlEnv_lib_path(str, lenp)	win32_get_privlib(WIN32_NO_REGISTRY_M_(str) lenp)
 #define PerlEnv_sitelib_path(str, lenp)	win32_get_sitelib(str, lenp)
 #define PerlEnv_vendorlib_path(str, lenp)	win32_get_vendorlib(str, lenp)
 #define PerlEnv_get_child_IO(ptr)	win32_get_child_IO(ptr)

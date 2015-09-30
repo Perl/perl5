@@ -230,7 +230,7 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
 }
 
 char *
-win32_get_privlib(const char *pl, STRLEN *const len)
+win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len)
 {
     dTHX;
     char *stdlib = "lib";

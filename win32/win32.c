@@ -114,12 +114,17 @@ static void	my_invalid_parameter_handler(const wchar_t* expression,
 			unsigned int line, uintptr_t pReserved);
 #endif
 
+#ifndef WIN32_NO_REGISTRY
 static char*	get_regstr_from(HKEY hkey, const char *valuename, SV **svp);
 static char*	get_regstr(const char *valuename, SV **svp);
+#endif
+
 static char*	get_emd_part(SV **prev_pathp, STRLEN *const len,
 			char *trailing, ...);
-static char*	win32_get_xlib(const char *pl, const char *xlib,
+static char*	win32_get_xlib(const char *pl,
+			WIN32_NO_REGISTRY_M_(const char *xlib)
 			const char *libname, STRLEN *const len);
+
 static BOOL	has_shell_metachars(const char *ptr);
 static long	tokenize(const char *str, char **dest, char ***destv);
 static void	get_shell(void);
@@ -167,9 +172,11 @@ END_EXTERN_C
 
 static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
 
+#ifndef WIN32_NO_REGISTRY
 /* initialized by Perl_win32_init/PERL_SYS_INIT */
 static HKEY HKCU_Perl_hnd;
 static HKEY HKLM_Perl_hnd;
+#endif
 
 #ifdef SET_INVALID_PARAMETER_HANDLER
 static BOOL silent_invalid_parameter_handler = FALSE;
@@ -258,6 +265,7 @@ set_w32_module_name(void)
     }
 }
 
+#ifndef WIN32_NO_REGISTRY
 /* *svp (if non-NULL) is expected to be POK (valid allocated SvPVX(*svp)) */
 static char*
 get_regstr_from(HKEY handle, const char *valuename, SV **svp)
@@ -305,6 +313,7 @@ get_regstr(const char *valuename, SV **svp)
     }
     return str;
 }
+#endif /* ifndef WIN32_NO_REGISTRY */
 
 /* *prev_pathp (if non-NULL) is expected to be POK (valid allocated SvPVX(sv)) */
 static char *
@@ -374,41 +383,49 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
 }
 
 EXTERN_C char *
-win32_get_privlib(const char *pl, STRLEN *const len)
+win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len)
 {
     char *stdlib = "lib";
-    char buffer[MAX_PATH+1];
     SV *sv = NULL;
+#ifndef WIN32_NO_REGISTRY
+    char buffer[MAX_PATH+1];
 
     /* $stdlib = $HKCU{"lib-$]"} || $HKLM{"lib-$]"} || $HKCU{"lib"} || $HKLM{"lib"} || "";  */
     sprintf(buffer, "%s-%s", stdlib, pl);
     if (!get_regstr(buffer, &sv))
 	(void)get_regstr(stdlib, &sv);
+#endif
 
     /* $stdlib .= ";$EMD/../../lib" */
     return get_emd_part(&sv, len, stdlib, ARCHNAME, "bin", NULL);
 }
 
 static char *
-win32_get_xlib(const char *pl, const char *xlib, const char *libname,
-	       STRLEN *const len)
+win32_get_xlib(const char *pl, WIN32_NO_REGISTRY_M_(const char *xlib)
+	       const char *libname, STRLEN *const len)
 {
+#ifndef WIN32_NO_REGISTRY
     char regstr[40];
+#endif
     char pathstr[MAX_PATH+1];
     SV *sv1 = NULL;
     SV *sv2 = NULL;
 
+#ifndef WIN32_NO_REGISTRY
     /* $HKCU{"$xlib-$]"} || $HKLM{"$xlib-$]"} . ---; */
     sprintf(regstr, "%s-%s", xlib, pl);
     (void)get_regstr(regstr, &sv1);
+#endif
 
     /* $xlib .=
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/$libname/$]/lib";  */
     sprintf(pathstr, "%s/%s/lib", libname, pl);
     (void)get_emd_part(&sv1, NULL, pathstr, ARCHNAME, "bin", pl, NULL);
 
+#ifndef WIN32_NO_REGISTRY
     /* $HKCU{$xlib} || $HKLM{$xlib} . ---; */
     (void)get_regstr(xlib, &sv2);
+#endif
 
     /* $xlib .=
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/$libname/lib";  */
@@ -433,7 +450,7 @@ win32_get_xlib(const char *pl, const char *xlib, const char *libname,
 EXTERN_C char *
 win32_get_sitelib(const char *pl, STRLEN *const len)
 {
-    return win32_get_xlib(pl, "sitelib", "site", len);
+    return win32_get_xlib(pl, WIN32_NO_REGISTRY_M_("sitelib") "site", len);
 }
 
 #ifndef PERL_VENDORLIB_NAME
@@ -443,7 +460,7 @@ win32_get_sitelib(const char *pl, STRLEN *const len)
 EXTERN_C char *
 win32_get_vendorlib(const char *pl, STRLEN *const len)
 {
-    return win32_get_xlib(pl, "vendorlib", PERL_VENDORLIB_NAME, len);
+    return win32_get_xlib(pl, WIN32_NO_REGISTRY_M_("vendorlib") PERL_VENDORLIB_NAME, len);
 }
 
 static BOOL
@@ -1824,12 +1841,14 @@ win32_getenv(const char *name)
     	    }
     	    FreeEnvironmentStrings(envv);
 	}
+#ifndef WIN32_NO_REGISTRY
 	else {
 	    /* last ditch: allow any environment variables that begin with 'PERL'
 	       to be obtained from the registry, if found there */
 	    if (strncmp(name, "PERL", 4) == 0)
 		(void)get_regstr(name, &curitem);
 	}
+#endif
     }
     if (curitem && SvCUR(curitem))
 	return SvPVX(curitem);
@@ -4451,6 +4470,8 @@ Perl_win32_init(int *argcp, char ***argvp)
 #endif
 
     ansify_path();
+
+#ifndef WIN32_NO_REGISTRY
     {
 	LONG retval;
 	retval = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Perl", 0, KEY_READ, &HKCU_Perl_hnd);
@@ -4462,6 +4483,7 @@ Perl_win32_init(int *argcp, char ***argvp)
 	    HKLM_Perl_hnd = NULL;
 	}
     }
+#endif
 }
 
 void
@@ -4471,11 +4493,13 @@ Perl_win32_term(void)
     OP_REFCNT_TERM;
     PERLIO_TERM;
     MALLOC_TERM;
+#ifndef WIN32_NO_REGISTRY
     /* handles might be NULL, RegCloseKey then returns ERROR_INVALID_HANDLE
        but no point of checking and we can't die() at this point */
     RegCloseKey(HKLM_Perl_hnd);
     RegCloseKey(HKCU_Perl_hnd);
     /* the handles are in an undefined state until the next PERL_SYS_INIT3 */
+#endif
 }
 
 void

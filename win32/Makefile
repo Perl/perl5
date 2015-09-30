@@ -96,6 +96,13 @@ USE_LARGE_FILES	= define
 #USE_64_BIT_INT	= define
 
 #
+# Uncomment this if you want to disable looking up values from
+# HKEY_CURRENT_USER\Software\Perl and HKEY_LOCAL_MACHINE\Software\Perl in
+# the Registry.
+#
+#USE_NO_REGISTRY = define
+
+#
 # uncomment exactly one of the following
 #
 # Visual C++ 6.0 (aka Visual C++ 98)
@@ -294,6 +301,10 @@ USE_LARGE_FILES	= undef
 USE_64_BIT_INT	= undef
 !ENDIF
 
+!IF "$(USE_NO_REGISTRY)" == ""
+USE_NO_REGISTRY	= undef
+!ENDIF
+
 !IF "$(USE_IMP_SYS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	= define
 !ENDIF
@@ -312,6 +323,10 @@ BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
 
 !IF "$(USE_IMP_SYS)" != "undef"
 BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_SYS
+!ENDIF
+
+!IF "$(USE_NO_REGISTRY)" != "undef"
+BUILDOPT	= $(BUILDOPT) -DWIN32_NO_REGISTRY
 !ENDIF
 
 !IF "$(PROCESSOR_ARCHITECTURE)" == ""
@@ -388,7 +403,16 @@ ARCHNAME	= $(ARCHNAME)-64int
 # All but the free version of VC++ 7.1 can load DLLs on demand.  Makes the test
 # suite run in about 10% less time.
 !IF "$(CCTYPE)" != "MSVC70FREE"
+# If no registry, advapi32 is only used for Perl_pp_getlogin/getlogin/GetUserNameA
+# which is rare to execute
+!IF "$(USE_NO_REGISTRY)" != "undef"
+DELAYLOAD	= -DELAYLOAD:ws2_32.dll -DELAYLOAD:advapi32.dll delayimp.lib
+MINIDELAYLOAD	=
+!ELSE
 DELAYLOAD	= -DELAYLOAD:ws2_32.dll delayimp.lib
+#miniperl never does any registry lookups
+MINIDELAYLOAD	= -DELAYLOAD:advapi32.dll
+!ENDIF
 !ENDIF
 
 # Visual C++ 2005 and 2008 (VC++ 8.0 and 9.0) create manifest files for EXEs and
@@ -1023,7 +1047,7 @@ $(MINIPERL) : ..\lib\buildcustomize.pl
 
 ..\lib\buildcustomize.pl : $(MINIDIR) $(MINI_OBJ) ..\write_buildcustomize.pl
 	$(LINK32) -out:$(MINIPERL) @<<
-	$(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ)
+	$(BLINK_FLAGS) $(DELAYLOAD) $(MINIDELAYLOAD) $(LIBFILES) $(MINI_OBJ)
 <<
 	$(EMBED_EXE_MANI:..\lib\buildcustomize.pl=..\miniperl.exe)
 	$(MINIPERL) -I..\lib -f ..\write_buildcustomize.pl ..

@@ -325,6 +325,14 @@ XXX
 
 =item *
 
+A new build option C<USE_NO_REGISTRY> has been added to the makefiles.  This
+option is off by default, meaning the default is to do Windows registry lookups.
+This option stops Perl from looking inside the registry for anything.  For what
+values are looked up in the registry see L<perlwin32>.  Internally, in C, the
+name of this option is C<WIN32_NO_REGISTRY>.
+
+=item *
+
 The behavior of Perl using C<HKEY_CURRENT_USER\Software\Perl> and
 C<HKEY_LOCAL_MACHINE\Software\Perl> to lookup certain values, including
 C<%ENV> vars starting with C<PERL> has changed.  Previously, the 2 keys were

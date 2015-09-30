@@ -24,6 +24,9 @@
 /* less I/O calls during each require */
 #  define PERL_DISABLE_PMC
 
+/* unnecessery for miniperl to lookup anything from an "installed" perl */
+#  define WIN32_NO_REGISTRY
+
 /* allow minitest to work */
 #  define PERL_TEXTMODE_SCRIPTS
 #endif
@@ -204,6 +207,13 @@ struct utsname {
 #ifndef WIN32_NO_SOCKETS
 #  define PERL_SOCK_SYSREAD_IS_RECV
 #  define PERL_SOCK_SYSWRITE_IS_SEND
+#endif
+
+#ifdef WIN32_NO_REGISTRY
+/* the last _ in WIN32_NO_REGISTRY_M_ is like the _ in aTHX_ */
+#  define WIN32_NO_REGISTRY_M_(x)
+#else
+#  define WIN32_NO_REGISTRY_M_(x) x,
 #endif
 
 #define PERL_NO_FORCE_LINK		/* no need for PL_force_link_funcs */
@@ -394,7 +404,7 @@ DllExport HWND		win32_create_message_window(void);
 DllExport int		win32_async_check(pTHX);
 
 extern int		my_fclose(FILE *);
-extern char *		win32_get_privlib(const char *pl, STRLEN *const len);
+extern char *		win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len);
 extern char *		win32_get_sitelib(const char *pl, STRLEN *const len);
 extern char *		win32_get_vendorlib(const char *pl, STRLEN *const len);
 

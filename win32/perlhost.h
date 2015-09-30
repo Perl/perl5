@@ -514,9 +514,9 @@ PerlEnvOsId(struct IPerlEnv* piPerl)
 }
 
 char*
-PerlEnvLibPath(struct IPerlEnv* piPerl, const char *pl, STRLEN *const len)
+PerlEnvLibPath(struct IPerlEnv* piPerl, WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len)
 {
-    return win32_get_privlib(pl, len);
+    return win32_get_privlib(WIN32_NO_REGISTRY_M_(pl) len);
 }
 
 char*
