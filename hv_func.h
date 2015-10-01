@@ -84,6 +84,8 @@
 #       define PERL_HASH_SEED PL_hash_seed
 #   elif PERL_HASH_SEED_BYTES == 4
 #       define PERL_HASH_SEED "PeRl"
+#   elif PERL_HASH_SEED_BYTES == 8
+#       define PERL_HASH_SEED "PeRlHaSh"
 #   elif PERL_HASH_SEED_BYTES == 16
 #       define PERL_HASH_SEED "PeRlHaShhAcKpErl"
 #   else
