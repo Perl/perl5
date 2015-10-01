@@ -1756,9 +1756,12 @@ cpan/Module-Metadata/lib/Module/Metadata.pm
 cpan/Module-Metadata/t/contains_pod.t
 cpan/Module-Metadata/t/encoding.t
 cpan/Module-Metadata/t/endpod.t
+cpan/Module-Metadata/t/extract-package.t
+cpan/Module-Metadata/t/extract-version.t
 cpan/Module-Metadata/t/lib/0_1/Foo.pm
 cpan/Module-Metadata/t/lib/0_2/Foo.pm
 cpan/Module-Metadata/t/lib/ENDPOD.pm
+cpan/Module-Metadata/t/lib/GeneratePackage.pm
 cpan/Module-Metadata/t/metadata.t
 cpan/Module-Metadata/t/taint.t
 cpan/Module-Metadata/t/version.t
