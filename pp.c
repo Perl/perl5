@@ -762,7 +762,8 @@ PP(pp_trans)
 	PUSHs(newsv);
     }
     else {
-	mPUSHi(do_trans(sv));
+	I32 i = do_trans(sv);
+	mPUSHi(i);
     }
     RETURN;
 }
