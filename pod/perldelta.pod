@@ -240,7 +240,9 @@ Use L<XXX> with program names to get proper documentation linking. ]
 
 =item *
 
-XXX
+Using the C<NO_HASH_SEED> define in combination with the default hash algorithm
+C<PERL_HASH_FUNC_ONE_AT_A_TIME_HARD> resulted in a fatal error while compiling
+the interpreter, since 5.17.10. This has been fixed.
 
 =back
 
