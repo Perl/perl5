@@ -1,6 +1,6 @@
 package if;
 
-$VERSION = '0.0605';
+$VERSION = '0.0606';
 
 sub work {
   my $method = shift() ? 'import' : 'unimport';
@@ -102,5 +102,12 @@ based on what version of Perl is running.
 =head1 AUTHOR
 
 Ilya Zakharevich L<mailto:ilyaz@cpan.org>.
+
+=head1 COPYRIGHT AND LICENCE
+
+This software is copyright (c) 2002 by Ilya Zakharevich.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
