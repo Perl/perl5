@@ -3933,6 +3933,7 @@ ext/XS-APItest/t/customop.t	XS::APItest: tests for custom ops
 ext/XS-APItest/t/cv_name.t	test cv_name
 ext/XS-APItest/t/eval-filter.t	Simple source filter/eval test
 ext/XS-APItest/t/exception.t	XS::APItest extension
+ext/XS-APItest/t/extend.t	test EXTEND() macro
 ext/XS-APItest/t/fetch_pad_names.t	Tests for UTF8 names in pad
 ext/XS-APItest/t/gotosub.t	XS::APItest: tests goto &xsub and hints
 ext/XS-APItest/t/grok.t		XS::APItest: tests for grok* functions

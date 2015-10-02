@@ -327,6 +327,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #define XSRETURN(off)					\
     STMT_START {					\
 	const IV tmpXSoff = (off);			\
+	assert(tmpXSoff >= 0);\
 	PL_stack_sp = PL_stack_base + ax + (tmpXSoff - 1);	\
 	return;						\
     } STMT_END

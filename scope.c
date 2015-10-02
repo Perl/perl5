@@ -31,6 +31,10 @@ Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
 {
     PERL_ARGS_ASSERT_STACK_GROW;
 
+    if (n < 0)
+        Perl_croak(aTHX_
+            "panic: stack_grow() negative count (%"IVdf")", (IV)n);
+
     PL_stack_sp = sp;
 #ifndef STRESS_REALLOC
     av_extend(PL_curstack, (p - PL_stack_base) + (n) + 128);

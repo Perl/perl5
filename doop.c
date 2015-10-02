@@ -1220,6 +1220,7 @@ Perl_do_kv(pTHX)
     dSP;
     HV * const keys = MUTABLE_HV(POPs);
     HE *entry;
+    SSize_t extend_size;
     const I32 gimme = GIMME_V;
     const I32 dokv =     (PL_op->op_type == OP_RV2HV || PL_op->op_type == OP_PADHV);
     /* op_type is OP_RKEYS/OP_RVALUES if pp_rkeys delegated to here */
@@ -1255,7 +1256,10 @@ Perl_do_kv(pTHX)
 	RETURN;
     }
 
-    EXTEND(SP, HvUSEDKEYS(keys) * (dokeys + dovalues));
+    /* 2*HvUSEDKEYS() should never be big enough to truncate or wrap */
+    assert(HvUSEDKEYS(keys) <= (SSize_t_MAX >> 1));
+    extend_size = (SSize_t)HvUSEDKEYS(keys) * (dokeys + dovalues);
+    EXTEND(SP, extend_size);
 
     while ((entry = hv_iternext(keys))) {
 	if (dokeys) {

@@ -1275,7 +1275,9 @@ PP(pp_aassign)
             }
 
             av_clear(ary);
-	    av_extend(ary, lastrelem - relem);
+	    if (relem <= lastrelem)
+                av_extend(ary, lastrelem - relem);
+
 	    i = 0;
 	    while (relem <= lastrelem) {	/* gobble up all the rest */
 		SV **didstore;

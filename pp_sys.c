@@ -533,6 +533,7 @@ Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
 {
     SV **orig_sp = sp;
     I32 ret_args;
+    SSize_t extend_size;
 
     PERL_ARGS_ASSERT_TIED_METHOD;
 
@@ -543,7 +544,12 @@ Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
 
     PUTBACK; /* sp is at *foot* of args, so this pops args from old stack */
     PUSHSTACKi(PERLSI_MAGIC);
-    EXTEND(SP, argc+1); /* object + args */
+    /* extend for object + args. If argc might wrap/truncate when cast
+     * to SSize_t, set to -1 which will trigger a panic in EXTEND() */
+    extend_size =
+        sizeof(argc) >= sizeof(SSize_t) && argc > SSize_t_MAX - 1
+            ? -1 : (SSize_t)argc + 1;
+    EXTEND(SP, extend_size);
     PUSHMARK(sp);
     PUSHs(SvTIED_obj(sv, mg));
     if (flags & TIED_METHOD_ARGUMENTS_ON_STACK) {

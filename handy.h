@@ -1917,10 +1917,13 @@ PoisonWith(0xEF) for catching access to freed memory.
  * As well as avoiding the need for a run-time check in some cases, it's
  * designed to avoid compiler warnings like:
  *     comparison is always false due to limited range of data type
+ * It's mathematically equivalent to
+ *    max(n) * sizeof(t) > MEM_SIZE_MAX
  */
 
 #  define _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) \
-    (sizeof(t) > ((MEM_SIZE)1 << 8*(sizeof(MEM_SIZE) - sizeof(n))))
+    (  sizeof(MEM_SIZE) < sizeof(n) \
+    || sizeof(t) > ((MEM_SIZE)1 << 8*(sizeof(MEM_SIZE) - sizeof(n))))
 
 /* This is written in a slightly odd way to avoid various spurious
  * compiler warnings. We *want* to write the expression as

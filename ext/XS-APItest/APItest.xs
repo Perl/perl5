@@ -1443,6 +1443,61 @@ XS_APIVERSION_valid(...)
         XS_APIVERSION_BOOTCHECK;
         XSRETURN_EMPTY;
 
+void
+xsreturn( int len )
+    PPCODE:
+        int i = 0;
+        EXTEND( SP, len );
+        for ( ; i < len; i++ ) {
+            ST(i) = sv_2mortal( newSViv(i) );
+        }
+        XSRETURN( len );
+
+void
+xsreturn_iv()
+    PPCODE:
+        XSRETURN_IV( (1<<31) + 1 );
+
+void
+xsreturn_uv()
+    PPCODE:
+        XSRETURN_UV( (U32)((1<<31) + 1) );
+
+void
+xsreturn_nv()
+    PPCODE:
+        XSRETURN_NV(0.25);
+
+void
+xsreturn_pv()
+    PPCODE:
+        XSRETURN_PV("returned");
+
+void
+xsreturn_pvn()
+    PPCODE:
+        XSRETURN_PVN("returned too much",8);
+
+void
+xsreturn_no()
+    PPCODE:
+        XSRETURN_NO;
+
+void
+xsreturn_yes()
+    PPCODE:
+        XSRETURN_YES;
+
+void
+xsreturn_undef()
+    PPCODE:
+        XSRETURN_UNDEF;
+
+void
+xsreturn_empty()
+    PPCODE:
+        XSRETURN_EMPTY;
+
 MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
 
 void
@@ -1738,7 +1793,7 @@ void
 test_force_keys(HV *hv)
     PREINIT:
         HE *he;
-	STRLEN count = 0;
+	SSize_t count = 0;
     PPCODE:
         hv_iterinit(hv);
         he = hv_iternext(hv);
@@ -2136,6 +2191,39 @@ mxpushu()
 	mXPUSHu(2);
 	mXPUSHu(3);
 	XSRETURN(3);
+
+
+ # test_EXTEND(): excerise the EXTEND() macro.
+ # After calling EXTEND(), it also does *(p+n) = NULL and
+ # *PL_stack_max = NULL to allow valgrind etc to spot if the stack hasn't
+ # actually been extended properly.
+ #
+ # max_offset specifies the SP to use.  It is treated as a signed offset
+ #              from PL_stack_max.
+ # nsv        is the SV holding the value of n indicating how many slots
+ #              to extend the stack by.
+ # use_ss     is a boolean indicating that n should be cast to a SSize_t
+
+void
+test_EXTEND(max_offset, nsv, use_ss)
+    IV   max_offset;
+    SV  *nsv;
+    bool use_ss;
+PREINIT:
+    SV **sp = PL_stack_max + max_offset;
+PPCODE:
+    if (use_ss) {
+        SSize_t n = (SSize_t)SvIV(nsv);
+        EXTEND(sp, n);
+        *(sp + n) = NULL;
+    }
+    else {
+        IV n = SvIV(nsv);
+        EXTEND(sp, n);
+        *(sp + n) = NULL;
+    }
+    *PL_stack_max = NULL;
+
 
 void
 call_sv_C()
@@ -3518,7 +3606,7 @@ CODE:
     CV *cv;
     AV *av;
     SV **p;
-    Size_t i, size;
+    SSize_t i, size;
 
     cv = sv_2cv(block, &stash, &gv, 0);
     if (cv == Nullcv) {
