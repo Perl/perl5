@@ -80,18 +80,6 @@ if test "X$android_warn" != X; then
 fi
 
 $cat > try.c << 'EOM'
-#include <stdio.h>
-#include <mntent.h>
-#include <unistd.h>
-int main() { (void) getmntent(stdout); return(0); }
-EOM
-$cc $ccflags try.c -o try
-android_warn=`$run ./try 2>&1 | $egrep "$android_stub"`
-if test "X$android_warn" != X; then
-   d_getmntent="$undef"
-fi
-
-$cat > try.c << 'EOM'
 #include <netdb.h>
 int main() { (void) getprotobyname("foo"); return(0); }
 EOM
