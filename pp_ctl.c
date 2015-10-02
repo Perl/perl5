@@ -4340,15 +4340,9 @@ PP(pp_entergiven)
     ENTER_with_name("given");
     SAVETMPS;
 
-    if (PL_op->op_targ) {
-	SAVEPADSVANDMORTALIZE(PL_op->op_targ);
-	SvREFCNT_dec(PAD_SVl(PL_op->op_targ));
-	PAD_SVl(PL_op->op_targ) = SvREFCNT_inc_NN(POPs);
-    }
-    else {
-	SAVE_DEFSV;
-	DEFSV_set(POPs);
-    }
+    assert(!PL_op->op_targ); /* used to be set for lexical $_ */
+    SAVE_DEFSV;
+    DEFSV_set(POPs);
 
     PUSHBLOCK(cx, CXt_GIVEN, SP);
     PUSHGIVEN(cx);

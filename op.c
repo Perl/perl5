@@ -7452,9 +7452,10 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
     OP *o;
 
     PERL_ARGS_ASSERT_NEWGIVWHENOP;
+    PERL_UNUSED_ARG(entertarg); /* used to indicate targ of lexical $_ */
 
     enterop = S_alloc_LOGOP(aTHX_ enter_opcode, block, NULL);
-    enterop->op_targ = ((entertarg == NOT_IN_PAD) ? 0 : entertarg);
+    enterop->op_targ = 0;
     enterop->op_private = 0;
 
     o = newUNOP(leave_opcode, 0, (OP *) enterop);
@@ -7573,8 +7574,7 @@ Constructs, checks, and returns an op tree expressing a C<given> block.
 C<cond> supplies the expression that will be locally assigned to a lexical
 variable, and C<block> supplies the body of the C<given> construct; they
 are consumed by this function and become part of the constructed op tree.
-C<defsv_off> is the pad offset of the scalar lexical variable that will
-be affected.  If it is 0, the global C<$_> will be used.
+C<defsv_off> must be zero (it used to identity the pad slot of lexical $_).
 
 =cut
 */
@@ -7583,11 +7583,14 @@ OP *
 Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 {
     PERL_ARGS_ASSERT_NEWGIVENOP;
+    PERL_UNUSED_ARG(defsv_off);
+
+    assert(!defsv_off);
     return newGIVWHENOP(
     	ref_array_or_hash(cond),
     	block,
 	OP_ENTERGIVEN, OP_LEAVEGIVEN,
-	defsv_off);
+	0);
 }
 
 /*

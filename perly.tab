@@ -196,33 +196,33 @@ static const yytype_uint16 yyrline[] =
        0,   115,   115,   114,   125,   124,   134,   133,   146,   145,
      158,   157,   170,   169,   181,   189,   197,   201,   209,   215,
      216,   226,   227,   236,   240,   244,   248,   255,   257,   268,
-     267,   301,   300,   339,   347,   346,   355,   361,   367,   378,
-     380,   382,   389,   397,   399,   396,   416,   421,   428,   427,
-     442,   450,   456,   463,   462,   477,   481,   489,   507,   508,
-     513,   515,   517,   519,   521,   523,   525,   528,   534,   535,
-     540,   551,   552,   558,   564,   565,   570,   573,   577,   582,
-     586,   590,   594,   595,   599,   605,   610,   615,   616,   621,
-     622,   627,   628,   630,   635,   637,   643,   642,   661,   662,
-     666,   668,   670,   672,   676,   678,   683,   687,   691,   695,
-     701,   706,   712,   718,   720,   723,   722,   733,   734,   738,
-     742,   745,   750,   755,   758,   762,   766,   769,   774,   778,
-     781,   783,   785,   790,   792,   794,   799,   801,   803,   805,
-     807,   809,   811,   813,   815,   817,   819,   824,   826,   829,
-     831,   833,   836,   839,   850,   853,   860,   862,   864,   866,
-     868,   871,   885,   887,   891,   892,   893,   894,   895,   897,
-     899,   901,   903,   905,   907,   909,   911,   913,   915,   917,
-     919,   921,   931,   941,   951,   961,   963,   965,   968,   973,
-     977,   979,   981,   983,   986,   988,   991,   993,   995,   997,
-     999,  1001,  1003,  1005,  1007,  1010,  1012,  1014,  1016,  1018,
-    1020,  1024,  1027,  1026,  1039,  1040,  1041,  1046,  1050,  1052,
-    1057,  1059,  1062,  1064,  1066,  1071,  1073,  1078,  1079,  1084,
-    1085,  1091,  1095,  1096,  1097,  1100,  1101,  1104,  1108,  1112,
-    1118,  1124,  1126,  1130,  1134,  1135,  1139,  1140,  1144,  1145,
-    1150,  1152,  1154,  1157
+     267,   301,   300,   339,   347,   346,   355,   361,   367,   372,
+     374,   376,   383,   391,   393,   390,   410,   415,   422,   421,
+     436,   444,   450,   457,   456,   471,   475,   483,   501,   502,
+     507,   509,   511,   513,   515,   517,   519,   522,   528,   529,
+     534,   545,   546,   552,   558,   559,   564,   567,   571,   576,
+     580,   584,   588,   589,   593,   599,   604,   609,   610,   615,
+     616,   621,   622,   624,   629,   631,   637,   636,   655,   656,
+     660,   662,   664,   666,   670,   672,   677,   681,   685,   689,
+     695,   700,   706,   712,   714,   717,   716,   727,   728,   732,
+     736,   739,   744,   749,   752,   756,   760,   763,   768,   772,
+     775,   777,   779,   784,   786,   788,   793,   795,   797,   799,
+     801,   803,   805,   807,   809,   811,   813,   818,   820,   823,
+     825,   827,   830,   833,   844,   847,   854,   856,   858,   860,
+     862,   865,   879,   881,   885,   886,   887,   888,   889,   891,
+     893,   895,   897,   899,   901,   903,   905,   907,   909,   911,
+     913,   915,   925,   935,   945,   955,   957,   959,   962,   967,
+     971,   973,   975,   977,   980,   982,   985,   987,   989,   991,
+     993,   995,   997,   999,  1001,  1004,  1006,  1008,  1010,  1012,
+    1014,  1018,  1021,  1020,  1033,  1034,  1035,  1040,  1044,  1046,
+    1051,  1053,  1056,  1058,  1060,  1065,  1067,  1072,  1073,  1078,
+    1079,  1085,  1089,  1090,  1091,  1094,  1095,  1098,  1102,  1106,
+    1112,  1118,  1120,  1124,  1128,  1129,  1133,  1134,  1138,  1139,
+    1144,  1146,  1148,  1151
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
+#if YYDEBUG || YYERROR_VERBOSE || 0
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
@@ -242,18 +242,18 @@ static const char *const yytname[] =
   "BITOROP", "BITANDOP", "SHIFTOP", "MATCHOP", "'!'", "'~'", "REFGEN",
   "UMINUS", "POWOP", "POSTJOIN", "POSTDEC", "POSTINC", "PREDEC", "PREINC",
   "ARROW", "')'", "'('", "';'", "'$'", "'*'", "'/'", "$accept", "grammar",
-  "@1", "@2", "@3", "@4", "@5", "@6", "block", "formblock", "remember",
-  "mblock", "mremember", "stmtseq", "formstmtseq", "fullstmt",
-  "labfullstmt", "barestmt", "@7", "@8", "@9", "@10", "@11", "@12", "@13",
-  "formline", "formarg", "sideff", "else", "cont", "mintro", "nexpr",
-  "texpr", "iexpr", "mexpr", "mnexpr", "miexpr", "formname", "startsub",
-  "startanonsub", "startformsub", "subname", "proto", "subattrlist",
-  "myattrlist", "subsignature", "@14", "optsubbody", "expr", "listexpr",
-  "listop", "@15", "method", "subscripted", "termbinop", "termunop",
-  "anonymous", "termdo", "term", "@16", "myattrterm", "myterm",
+  "$@1", "$@2", "$@3", "$@4", "$@5", "$@6", "block", "formblock",
+  "remember", "mblock", "mremember", "stmtseq", "formstmtseq", "fullstmt",
+  "labfullstmt", "barestmt", "$@7", "$@8", "$@9", "$@10", "$@11", "@12",
+  "$@13", "formline", "formarg", "sideff", "else", "cont", "mintro",
+  "nexpr", "texpr", "iexpr", "mexpr", "mnexpr", "miexpr", "formname",
+  "startsub", "startanonsub", "startformsub", "subname", "proto",
+  "subattrlist", "myattrlist", "subsignature", "@14", "optsubbody", "expr",
+  "listexpr", "listop", "@15", "method", "subscripted", "termbinop",
+  "termunop", "anonymous", "termdo", "term", "@16", "myattrterm", "myterm",
   "optlistexpr", "optexpr", "optrepl", "my_scalar", "my_var",
   "refgen_topic", "amper", "scalar", "ary", "hsh", "arylen", "star",
-  "sliceme", "kvslice", "gelem", "indirob", 0
+  "sliceme", "kvslice", "gelem", "indirob", YY_NULL
 };
 #endif
 
@@ -338,8 +338,8 @@ static const yytype_uint8 yyr2[] =
        1,     1,     1,     1
 };
 
-/* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
-   STATE-NUM when YYTABLE doesn't specify something else to do.  Zero
+/* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE doesn't specify something else to do.  Zero
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
@@ -482,8 +482,7 @@ static const yytype_int16 yypgoto[] =
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
-   number is the opposite.  If zero, do what YYDEFACT says.
-   If YYTABLE_NINF, syntax error.  */
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 #define YYTABLE_NINF -249
 static const yytype_int16 yytable[] =
 {
@@ -782,6 +781,12 @@ static const yytype_int16 yytable[] =
        0,     0,     0,     0,   180,   181,   182,   183,     0,     0,
      184
 };
+
+#define yypact_value_is_default(Yystate) \
+  (!!((Yystate) == (-402)))
+
+#define yytable_value_is_error(Yytable_value) \
+  (!!((Yytable_value) == (-249)))
 
 static const yytype_int16 yycheck[] =
 {
@@ -1160,21 +1165,21 @@ static const toketypes yy_type_tab[] =
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval, toketype_ival,
-  toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_opval,
-  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival,
-  toketype_ival, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
-  toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval,
+  toketype_ival, toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval,
   toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval,
   toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
   toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
   toketype_opval, toketype_opval, toketype_opval, toketype_opval
 };
 
 /* Generated from:
- * e2ef3626c25dd92c66987e4c2f707e7f194c2bd5df74da27c51df206d9809412 perly.y
+ * a0bc910627eeeffe8245b9a63dd97238e2e6b27b544be36b37d078cf6aba699b perly.y
  * d1d4df7b8e30ac9dede664af9179e6e5e7ddc7f2ad9c4eff9e2e5b32c9e16a6e regen_perly.pl
  * ex: set ro: */

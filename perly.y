@@ -366,13 +366,7 @@ barestmt:	PLUGSTMT
 			}
 	|	GIVEN '(' remember mexpr ')' mblock
 			{
-			  const PADOFFSET offset = pad_findmy_pvs("$_", 0);
-			  $$ = block_end($3,
-				  newGIVENOP($4, op_scope($6),
-				    offset == NOT_IN_PAD
-				    || PAD_COMPNAME_FLAGS_isOUR(offset)
-				      ? 0
-				      : offset));
+			  $$ = block_end($3, newGIVENOP($4, op_scope($6), 0));
 			  parser->copline = (line_t)$1;
 			}
 	|	WHEN '(' remember mexpr ')' mblock
