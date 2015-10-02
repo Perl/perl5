@@ -836,12 +836,23 @@ struct block_loop {
 /* given/when context */
 struct block_givwhen {
 	OP *leave_op;
+        SV *defsv_save; /* the original $_ */
 };
 
-#define PUSHGIVEN(cx)							\
+#define PUSHWHEN(cx)    						\
 	cx->blk_givwhen.leave_op = cLOGOP->op_other;
 
-#define PUSHWHEN PUSHGIVEN
+#define PUSHGIVEN(cx, orig_var)                                         \
+        PUSHWHEN(cx);                                                   \
+        cx->blk_givwhen.defsv_save = orig_var;
+
+#define POPWHEN(cx)                                                     \
+        NOOP;
+
+#define POPGIVEN(cx)                                                    \
+        SvREFCNT_dec(GvSV(PL_defgv));                                   \
+        GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;
+
 
 /* context common to subroutines, evals and loops */
 struct block {
