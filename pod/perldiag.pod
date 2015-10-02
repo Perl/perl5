@@ -6742,12 +6742,6 @@ for historical reasons.
 it already went past any symlink you are presumably trying to look for.
 The operation returned C<undef>.  Use a filename instead.
 
-=item Use of my $_ is experimental
-
-(S experimental::lexical_topic) Lexical $_ is an experimental feature and
-its behavior may change or even be removed in any future release of perl.
-See the explanation under L<perlvar/$_>.
-
 =item Use of %s on a handle without * is deprecated
 
 (D deprecated) You used C<tie>, C<tied> or C<untie> on a scalar but that scalar

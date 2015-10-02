@@ -685,13 +685,8 @@ and 5.16, under those implementations the version of C<$_> governed by
 C<given> is merely a lexically scoped copy of the original, not a
 dynamically scoped alias to the original, as it would be if it were a
 C<foreach> or under both the original and the current Perl 6 language
-specification.  This bug was fixed in Perl
-5.18.  If you really want a lexical C<$_>,
-specify that explicitly, but note that C<my $_>
-is now deprecated and will warn unless warnings
-have been disabled:
-
-    given(my $_ = EXPR) { ... }
+specification.  This bug was fixed in Perl 5.18 (and lexicalized C<$_> itself
+was removed in Perl 5.24).
 
 If your code still needs to run on older versions,
 stick to C<foreach> for your topicalizer and
