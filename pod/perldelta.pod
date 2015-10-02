@@ -43,7 +43,13 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs, and we request that you submit a
     report.  See L</Reporting Bugs> below.
 
-[ List each incompatible change as a =head2 entry ]
+=head2 Lexical $_ has been removed
+
+C<my $_> was introduced in Perl v5.10, and subsequently caused much confusion
+with no obvious solution.  In Perl v5.18.0, it was made experimental on the
+theory that it would either be removed or redesigned in a less confusing (but
+backward-incompatible) way.  Over the following years, no alternatives were
+proposed.  The feature has now been removed and will fail to compile.
 
 =head1 Deprecations
 
