@@ -408,43 +408,43 @@ close $fh;
 EXPECT
 Unicode surrogate U+D800 is illegal in UTF-8 at - line 6.
 Unicode surrogate U+DFFF is illegal in UTF-8 at - line 7.
-Unicode non-character U+FDD0 is not recommended for open interchange at - line 10.
-Unicode non-character U+FDEF is not recommended for open interchange at - line 11.
-Unicode non-character U+FFFE is not recommended for open interchange at - line 15.
-Unicode non-character U+FFFF is not recommended for open interchange at - line 16.
-Unicode non-character U+1FFFE is not recommended for open interchange at - line 18.
-Unicode non-character U+1FFFF is not recommended for open interchange at - line 19.
-Unicode non-character U+2FFFE is not recommended for open interchange at - line 20.
-Unicode non-character U+2FFFF is not recommended for open interchange at - line 21.
-Unicode non-character U+3FFFE is not recommended for open interchange at - line 22.
-Unicode non-character U+3FFFF is not recommended for open interchange at - line 23.
-Unicode non-character U+4FFFE is not recommended for open interchange at - line 24.
-Unicode non-character U+4FFFF is not recommended for open interchange at - line 25.
-Unicode non-character U+5FFFE is not recommended for open interchange at - line 26.
-Unicode non-character U+5FFFF is not recommended for open interchange at - line 27.
-Unicode non-character U+6FFFE is not recommended for open interchange at - line 28.
-Unicode non-character U+6FFFF is not recommended for open interchange at - line 29.
-Unicode non-character U+7FFFE is not recommended for open interchange at - line 30.
-Unicode non-character U+7FFFF is not recommended for open interchange at - line 31.
-Unicode non-character U+8FFFE is not recommended for open interchange at - line 32.
-Unicode non-character U+8FFFF is not recommended for open interchange at - line 33.
-Unicode non-character U+9FFFE is not recommended for open interchange at - line 34.
-Unicode non-character U+9FFFF is not recommended for open interchange at - line 35.
-Unicode non-character U+AFFFE is not recommended for open interchange at - line 36.
-Unicode non-character U+AFFFF is not recommended for open interchange at - line 37.
-Unicode non-character U+BFFFE is not recommended for open interchange at - line 38.
-Unicode non-character U+BFFFF is not recommended for open interchange at - line 39.
-Unicode non-character U+CFFFE is not recommended for open interchange at - line 40.
-Unicode non-character U+CFFFF is not recommended for open interchange at - line 41.
-Unicode non-character U+DFFFE is not recommended for open interchange at - line 42.
-Unicode non-character U+DFFFF is not recommended for open interchange at - line 43.
-Unicode non-character U+EFFFE is not recommended for open interchange at - line 44.
-Unicode non-character U+EFFFF is not recommended for open interchange at - line 45.
-Unicode non-character U+FFFFE is not recommended for open interchange at - line 46.
-Unicode non-character U+FFFFF is not recommended for open interchange at - line 47.
-Unicode non-character U+10FFFE is not recommended for open interchange at - line 49.
-Unicode non-character U+10FFFF is not recommended for open interchange at - line 50.
-Code point 0x110000 is not Unicode, may not be portable at - line 51.
+Unicode non-character U+FDD0 is not recommended for open interchange in print at - line 10.
+Unicode non-character U+FDEF is not recommended for open interchange in print at - line 11.
+Unicode non-character U+FFFE is not recommended for open interchange in print at - line 15.
+Unicode non-character U+FFFF is not recommended for open interchange in print at - line 16.
+Unicode non-character U+1FFFE is not recommended for open interchange in print at - line 18.
+Unicode non-character U+1FFFF is not recommended for open interchange in print at - line 19.
+Unicode non-character U+2FFFE is not recommended for open interchange in print at - line 20.
+Unicode non-character U+2FFFF is not recommended for open interchange in print at - line 21.
+Unicode non-character U+3FFFE is not recommended for open interchange in print at - line 22.
+Unicode non-character U+3FFFF is not recommended for open interchange in print at - line 23.
+Unicode non-character U+4FFFE is not recommended for open interchange in print at - line 24.
+Unicode non-character U+4FFFF is not recommended for open interchange in print at - line 25.
+Unicode non-character U+5FFFE is not recommended for open interchange in print at - line 26.
+Unicode non-character U+5FFFF is not recommended for open interchange in print at - line 27.
+Unicode non-character U+6FFFE is not recommended for open interchange in print at - line 28.
+Unicode non-character U+6FFFF is not recommended for open interchange in print at - line 29.
+Unicode non-character U+7FFFE is not recommended for open interchange in print at - line 30.
+Unicode non-character U+7FFFF is not recommended for open interchange in print at - line 31.
+Unicode non-character U+8FFFE is not recommended for open interchange in print at - line 32.
+Unicode non-character U+8FFFF is not recommended for open interchange in print at - line 33.
+Unicode non-character U+9FFFE is not recommended for open interchange in print at - line 34.
+Unicode non-character U+9FFFF is not recommended for open interchange in print at - line 35.
+Unicode non-character U+AFFFE is not recommended for open interchange in print at - line 36.
+Unicode non-character U+AFFFF is not recommended for open interchange in print at - line 37.
+Unicode non-character U+BFFFE is not recommended for open interchange in print at - line 38.
+Unicode non-character U+BFFFF is not recommended for open interchange in print at - line 39.
+Unicode non-character U+CFFFE is not recommended for open interchange in print at - line 40.
+Unicode non-character U+CFFFF is not recommended for open interchange in print at - line 41.
+Unicode non-character U+DFFFE is not recommended for open interchange in print at - line 42.
+Unicode non-character U+DFFFF is not recommended for open interchange in print at - line 43.
+Unicode non-character U+EFFFE is not recommended for open interchange in print at - line 44.
+Unicode non-character U+EFFFF is not recommended for open interchange in print at - line 45.
+Unicode non-character U+FFFFE is not recommended for open interchange in print at - line 46.
+Unicode non-character U+FFFFF is not recommended for open interchange in print at - line 47.
+Unicode non-character U+10FFFE is not recommended for open interchange in print at - line 49.
+Unicode non-character U+10FFFF is not recommended for open interchange in print at - line 50.
+Code point 0x110000 is not Unicode, may not be portable in print at - line 51.
 ########
 require "../test.pl";
 use warnings 'utf8';
@@ -456,8 +456,8 @@ print $fh "\x{110000}", "\n";
 close $fh;
 EXPECT
 Unicode surrogate U+D800 is illegal in UTF-8 at - line 5.
-Unicode non-character U+FFFF is not recommended for open interchange at - line 6.
-Code point 0x110000 is not Unicode, may not be portable at - line 7.
+Unicode non-character U+FFFF is not recommended for open interchange in print at - line 6.
+Code point 0x110000 is not Unicode, may not be portable in print at - line 7.
 ########
 require "../test.pl";
 use warnings 'utf8';
@@ -469,8 +469,8 @@ print $fh "\x{FFFF}", "\n";
 print $fh "\x{110000}", "\n";
 close $fh;
 EXPECT
-Unicode non-character U+FFFF is not recommended for open interchange at - line 7.
-Code point 0x110000 is not Unicode, may not be portable at - line 8.
+Unicode non-character U+FFFF is not recommended for open interchange in print at - line 7.
+Code point 0x110000 is not Unicode, may not be portable in print at - line 8.
 ########
 require "../test.pl";
 use warnings 'utf8';
@@ -483,7 +483,7 @@ print $fh "\x{110000}", "\n";
 close $fh;
 EXPECT
 Unicode surrogate U+D800 is illegal in UTF-8 at - line 6.
-Code point 0x110000 is not Unicode, may not be portable at - line 8.
+Code point 0x110000 is not Unicode, may not be portable in print at - line 8.
 ########
 require "../test.pl";
 use warnings 'utf8';
@@ -496,7 +496,7 @@ print $fh "\x{110000}", "\n";
 close $fh;
 EXPECT
 Unicode surrogate U+D800 is illegal in UTF-8 at - line 6.
-Unicode non-character U+FFFF is not recommended for open interchange at - line 7.
+Unicode non-character U+FFFF is not recommended for open interchange in print at - line 7.
 ########
 # NAME C<use warnings "nonchar"> works in isolation
 require "../test.pl";
@@ -506,7 +506,7 @@ open(my $fh, "+>:utf8", $file);
 print $fh "\x{FFFF}", "\n";
 close $fh;
 EXPECT
-Unicode non-character U+FFFF is not recommended for open interchange at - line 5.
+Unicode non-character U+FFFF is not recommended for open interchange in print at - line 5.
 ########
 # NAME C<use warnings "surrogate"> works in isolation
 require "../test.pl";
@@ -526,7 +526,7 @@ open(my $fh, "+>:utf8", $file);
 print $fh "\x{110000}", "\n";
 close $fh;
 EXPECT
-Code point 0x110000 is not Unicode, may not be portable at - line 5.
+Code point 0x110000 is not Unicode, may not be portable in print at - line 5.
 ########
 require "../test.pl";
 no warnings 'utf8';
