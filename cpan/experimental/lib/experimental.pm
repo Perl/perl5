@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.014';
+$experimental::VERSION = '0.015';
 use strict;
 use warnings;
 use version ();
@@ -38,6 +38,10 @@ my %min_version = (
 	unicode_eval    => '5.16.0',
 	unicode_strings => '5.12.0',
 );
+my %max_version = (
+	lexical_topic   => '5.23.4',
+);
+
 $_ = version->new($_) for values %min_version;
 
 my %additional = (
@@ -56,10 +60,13 @@ sub _enable {
 		feature->import($pragma);
 		_enable(@{ $additional{$pragma} }) if $additional{$pragma};
 	}
+	elsif ($] >= $max_version{$pragma}) {
+		croak "Experimental feature $pragma has been removed from perl in version $max_version{$pragma}";
+	}
 	elsif (not exists $min_version{$pragma}) {
 		croak "Can't enable unknown feature $pragma";
 	}
-	elsif ($min_version{$pragma} > $]) {
+	elsif ($] < $min_version{$pragma}) {
 		my $stable = $min_version{$pragma};
 		if ($stable->{version}[1] % 2) {
 			$stable = version->new(
@@ -120,7 +127,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.014
+version 0.015
 
 =head1 SYNOPSIS
 
