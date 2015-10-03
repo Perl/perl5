@@ -4,7 +4,7 @@ use warnings;
 package Perl::OSType;
 # ABSTRACT: Map Perl operating system names to generic types
 
-our $VERSION = '1.008';
+our $VERSION = '1.009';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -40,6 +40,7 @@ my %OSTYPES = qw(
   nto         Unix
   svr4        Unix
   svr5        Unix
+  sco         Unix
   sco_sv      Unix
   unicos      Unix
   unicosmk    Unix
@@ -95,7 +96,7 @@ Perl::OSType - Map Perl operating system names to generic types
 
 =head1 VERSION
 
-version 1.008
+version 1.009
 
 =head1 SYNOPSIS
 
@@ -156,7 +157,7 @@ L<Devel::CheckOS>
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<https://github.com/dagolden/Perl-OSType/issues>.
+at L<https://github.com/Perl-Toolchain-Gang/Perl-OSType/issues>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
@@ -164,9 +165,9 @@ You will be notified automatically of any progress on your issue.
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<https://github.com/dagolden/Perl-OSType>
+L<https://github.com/Perl-Toolchain-Gang/Perl-OSType>
 
-  git clone https://github.com/dagolden/Perl-OSType.git
+  git clone https://github.com/Perl-Toolchain-Gang/Perl-OSType.git
 
 =head1 AUTHOR
 
