@@ -1933,5 +1933,7 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 ^((?(?!)xb|ya)z)	xbz	n	-	-
 ^((?(?!)xb|ya)z)	yaz	y	$1	yaz		# [perl-126222]
 
+(*ACCEPT:foo)	foo	Tc	-	Verb pattern 'ACCEPT' may not have an argument
+((*ACCEPT:foo))	foo	c	-	Verb pattern 'ACCEPT' may not have an argument
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab
