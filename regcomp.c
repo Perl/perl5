@@ -9861,8 +9861,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    char *start_arg = NULL;
 	    unsigned char op = 0;
 	    int argok = 1;
-            int internal_argval = 0; /* internal_argval is only useful if
-                                        !argok */
+            int internal_argval = -1; /* if >-1 we are not allowed an argument*/
 
             if (has_intervening_patws) {
                 RExC_parse++;
@@ -9937,15 +9936,15 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     UTF8fARG(UTF, verb_len, start_verb));
 	    }
 	    if ( argok ) {
-                if ( start_arg && internal_argval ) {
+                if ( start_arg && internal_argval != -1 ) {
 	            vFAIL3("Verb pattern '%.*s' may not have an argument",
 	                verb_len, start_verb);
 	        } else if ( argok < 0 && !start_arg ) {
                     vFAIL3("Verb pattern '%.*s' has a mandatory argument",
 	                verb_len, start_verb);
-	        } else {
-	            ret = reganode(pRExC_state, op, internal_argval);
-	            if ( ! internal_argval && ! SIZE_ONLY ) {
+                } else if ( internal_argval == -1 ) {
+                    ret = reganode(pRExC_state, op, 0);
+                    if ( ! SIZE_ONLY ) {
                         if (start_arg) {
                             SV *sv = newSVpvn( start_arg,
                                                RExC_parse - start_arg);
@@ -9957,9 +9956,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                             ret->flags = 1;
                         }
                     }
-	        }
-	        if (!internal_argval)
                     RExC_seen |= REG_VERBARG_SEEN;
+	        } else {
+                    /* ACCEPT does not allow :args like the rest of the verbs
+                     * as it currently uses its arg slot for something else. 
+                     * We can change that in a future commit. */
+	            ret = reganode(pRExC_state, op, internal_argval);
+                }
 	    } else if ( start_arg ) {
 	        vFAIL3("Verb pattern '%.*s' may not have an argument",
 	                verb_len, start_verb);
