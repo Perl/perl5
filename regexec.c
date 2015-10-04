@@ -7722,7 +7722,15 @@ NULL
 	    /* FALLTHROUGH */	    
 
 	case OPFAIL:   /* (*FAIL)  */
-	    sayNO;
+            if (logical) {
+                /* deal with (?(?!)X|Y) properly,
+                 * make sure we trigger the no branch
+                 * of the trailing IFTHEN structure*/
+                sw= 0;
+                break;
+            } else {
+                sayNO;
+            }
             /* NOTREACHED */
 	    NOT_REACHED; /* NOTREACHED */
 

@@ -1931,7 +1931,7 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 ^((?(?!y)xb|ya)z)	xbz	y	$1	xbz
 ^((?(?!y)xb|ya)z)	yaz	y	$1	yaz
 ^((?(?!)xb|ya)z)	xbz	n	-	-
-^((?(?!)xb|ya)z)	yaz	Ty	$1	yaz	break-fix test for [perl-126222]
+^((?(?!)xb|ya)z)	yaz	y	$1	yaz		# [perl-126222]
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab
