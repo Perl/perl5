@@ -1856,7 +1856,7 @@ See L<perlrecharclass/Extended Bracketed Character Classes>.
 
 These special patterns are generally of the form C<(*VERB:ARG)>. Unless
 otherwise stated the ARG argument is optional; in some cases, it is
-forbidden.
+mandatory.
 
 Any pattern containing a special backtracking verb that allows an argument
 has the special behaviour that when executed it sets the current package's
@@ -1884,7 +1884,7 @@ argument, then C<$REGERROR> and C<$REGMARK> are not touched at all.
 
 =over 3
 
-=item Verbs that take an argument
+=item Verbs
 
 =over 4
 
@@ -2040,13 +2040,7 @@ is not the same as
 as after matching the A but failing on the B the C<(*THEN)> verb will
 backtrack and try C; but the C<(*PRUNE)> verb will simply fail.
 
-=back
-
-=item Verbs without an argument
-
-=over 4
-
-=item C<(*COMMIT)>
+=item C<(*COMMIT)> C<(*COMMIT:args)>
 X<(*COMMIT)>
 
 This is the Perl 6 "commit pattern" C<< <commit> >> or C<:::>. It's a
@@ -2067,16 +2061,18 @@ In other words, once the C<(*COMMIT)> has been entered, and if the pattern
 does not match, the regex engine will not try any further matching on the
 rest of the string.
 
-=item C<(*FAIL)> C<(*F)>
+=item C<(*FAIL)> C<(*F)> C<(*FAIL:arg)>
 X<(*FAIL)> X<(*F)>
 
 This pattern matches nothing and always fails. It can be used to force the
 engine to backtrack. It is equivalent to C<(?!)>, but easier to read. In
-fact, C<(?!)> gets optimised into C<(*FAIL)> internally.
+fact, C<(?!)> gets optimised into C<(*FAIL)> internally. You can provide
+an argument so that if the match fails because of this FAIL directive
+the argument can be obtained from $REGERROR.
 
 It is probably useful only when combined with C<(?{})> or C<(??{})>.
 
-=item C<(*ACCEPT)>
+=item C<(*ACCEPT)> C<(*ACCEPT:arg)>
 X<(*ACCEPT)>
 
 This pattern matches nothing and causes the end of successful matching at
@@ -2094,6 +2090,9 @@ For instance:
 will match, and C<$1> will be C<AB> and C<$2> will be C<B>, C<$3> will not
 be set. If another branch in the inner parentheses was matched, such as in the
 string 'ACDE', then the C<D> and C<E> would have to be matched as well.
+
+You can provide an argument, which will be available in the var $REGMARK
+after the match completes.
 
 =back
 

@@ -9860,7 +9860,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    STRLEN verb_len = 0;
 	    char *start_arg = NULL;
 	    unsigned char op = 0;
-	    int argok = 1;
+            int arg_required = 0;
             int internal_argval = -1; /* if >-1 we are not allowed an argument*/
 
             if (has_intervening_patws) {
@@ -9903,14 +9903,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             case 'F':  /* (*FAIL) */
                 if ( verb_len==1 || memEQs(start_verb,verb_len,"FAIL") ) {
 		    op = OPFAIL;
-		    argok = 0;
 		}
 		break;
             case ':':  /* (*:NAME) */
 	    case 'M':  /* (*MARK:NAME) */
 	        if ( verb_len==0 || memEQs(start_verb,verb_len,"MARK") ) {
                     op = MARKPOINT;
-                    argok = -1;
+                    arg_required = 1;
                 }
                 break;
             case 'P':  /* (*PRUNE) */
@@ -9935,40 +9934,30 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     "Unknown verb pattern '%"UTF8f"'",
                     UTF8fARG(UTF, verb_len, start_verb));
 	    }
-	    if ( argok ) {
-                if ( start_arg && internal_argval != -1 ) {
-	            vFAIL3("Verb pattern '%.*s' may not have an argument",
-	                verb_len, start_verb);
-	        } else if ( argok < 0 && !start_arg ) {
-                    vFAIL3("Verb pattern '%.*s' has a mandatory argument",
-	                verb_len, start_verb);
-                } else if ( internal_argval == -1 ) {
-                    ret = reganode(pRExC_state, op, 0);
-                    if ( ! SIZE_ONLY ) {
-                        if (start_arg) {
-                            SV *sv = newSVpvn( start_arg,
-                                               RExC_parse - start_arg);
-                            ARG(ret) = add_data( pRExC_state,
-                                                 STR_WITH_LEN("S"));
-                            RExC_rxi->data->data[ARG(ret)]=(void*)sv;
-                            ret->flags = 0;
-                        } else {
-                            ret->flags = 1;
-                        }
-                    }
-                    RExC_seen |= REG_VERBARG_SEEN;
-	        } else {
-                    /* ACCEPT does not allow :args like the rest of the verbs
-                     * as it currently uses its arg slot for something else. 
-                     * We can change that in a future commit. */
-	            ret = reganode(pRExC_state, op, internal_argval);
+            if ( arg_required && !start_arg ) {
+                vFAIL3("Verb pattern '%.*s' has a mandatory argument",
+                    verb_len, start_verb);
+            }
+            if (internal_argval == -1) {
+                ret = reganode(pRExC_state, op, 0);
+            } else {
+                ret = reg2Lanode(pRExC_state, op, 0, internal_argval);
+            }
+            RExC_seen |= REG_VERBARG_SEEN;
+            if ( ! SIZE_ONLY ) {
+                if (start_arg) {
+                    SV *sv = newSVpvn( start_arg,
+                                       RExC_parse - start_arg);
+                    ARG(ret) = add_data( pRExC_state,
+                                         STR_WITH_LEN("S"));
+                    RExC_rxi->data->data[ARG(ret)]=(void*)sv;
+                    ret->flags = 1;
+                } else {
+                    ret->flags = 0;
                 }
-	    } else if ( start_arg ) {
-	        vFAIL3("Verb pattern '%.*s' may not have an argument",
-	                verb_len, start_verb);
-	    } else {
-	        ret = reg_node(pRExC_state, op);
-	    }
+                if ( internal_argval != -1 )
+                    ARG2L_SET(ret, internal_argval);
+            }
 	    nextchar(pRExC_state);
 	    return ret;
         }
@@ -10131,7 +10120,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		--RExC_parse;
 		nextchar(pRExC_state);
 	        if (*RExC_parse == ')') {
-	            ret=reg_node(pRExC_state, OPFAIL);
+                    ret=reganode(pRExC_state, OPFAIL, 0);
 	            nextchar(pRExC_state);
 	            return ret;
 	        }
@@ -10948,7 +10937,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
                     RExC_emit = orig_emit;
                 }
-                ret = reg_node(pRExC_state, OPFAIL);
+                ret = reganode(pRExC_state, OPFAIL, 0);
                 return ret;
             }
             else if (min == max && RExC_parse < RExC_end && *RExC_parse == '?')
@@ -16094,7 +16083,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             RExC_parse = (char *)orig_parse;
             RExC_emit = (regnode *)orig_emit;
 
-            ret = reg_node(pRExC_state, op);
+            if (regarglen[op]) {
+                ret = reganode(pRExC_state, op, 0);
+            } else {
+                ret = reg_node(pRExC_state, op);
+            }
 
             RExC_parse = (char *)cur_parse;
 
@@ -17090,7 +17083,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
              || k == GROUPP || OP(o)==ACCEPT)
     {
         AV *name_list= NULL;
-	Perl_sv_catpvf(aTHX_ sv, "%d", (int)ARG(o));	/* Parenth number */
+        U32 parno= OP(o) == ACCEPT ? (U32)ARG2L(o) : ARG(o);
+        Perl_sv_catpvf(aTHX_ sv, "%"UVuf, (UV)parno);        /* Parenth number */
 	if ( RXp_PAREN_NAMES(prog) ) {
             name_list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
         } else if ( pRExC_state ) {
@@ -17098,12 +17092,12 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
         if (name_list) {
             if ( k != REF || (OP(o) < NREF)) {
-                SV **name= av_fetch(name_list, ARG(o), 0 );
+                SV **name= av_fetch(name_list, parno, 0 );
 	        if (name)
 	            Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", SVfARG(*name));
             }
             else {
-                SV *sv_dat= MUTABLE_SV(progi->data->data[ ARG( o ) ]);
+                SV *sv_dat= MUTABLE_SV(progi->data->data[ parno ]);
                 I32 *nums=(I32*)SvPVX(sv_dat);
                 SV **name= av_fetch(name_list, nums[0], 0 );
                 I32 n;
@@ -17146,11 +17140,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                 Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", SVfARG(*name));
         }
     }
-    else if (k == VERB) {
-        if (!o->flags)
-            Perl_sv_catpvf(aTHX_ sv, ":%"SVf,
-			   SVfARG((MUTABLE_SV(progi->data->data[ ARG( o ) ]))));
-    } else if (k == LOGICAL)
+    else if (k == LOGICAL)
         /* 2: embedded, otherwise 1 */
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);
     else if (k == ANYOF) {
@@ -17329,6 +17319,12 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", -(o->flags));
     else if (OP(o) == SBOL)
         Perl_sv_catpvf(aTHX_ sv, " /%s/", o->flags ? "\\A" : "^");
+
+    /* add on the verb argument if there is one */
+    if ( ( k == VERB || OP(o) == ACCEPT || OP(o) == OPFAIL ) && o->flags) {
+        Perl_sv_catpvf(aTHX_ sv, ":%"SVf,
+                       SVfARG((MUTABLE_SV(progi->data->data[ ARG( o ) ]))));
+    }
 #else
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);

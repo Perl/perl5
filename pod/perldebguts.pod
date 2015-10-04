@@ -755,8 +755,9 @@ will be lost.
 
  # Backtracking Verbs
  ENDLIKE         none       Used only for the type field of verbs
- OPFAIL          none       Same as (?!)
- ACCEPT          parno 1    Accepts the current matched string.
+ OPFAIL          no-sv 1    Same as (?!), but with verb arg
+ ACCEPT          no-sv/num  Accepts the current matched string, with
+                 2L         verbar
 
  # Verbs With Arguments
  VERB            no-sv 1    Used only for the type field of verbs

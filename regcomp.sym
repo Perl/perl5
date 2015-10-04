@@ -199,9 +199,8 @@ DEFINEP     DEFINEP,    none 1    ; Never execute directly.
 
 #*Backtracking Verbs
 ENDLIKE     ENDLIKE,    none      ; Used only for the type field of verbs
-OPFAIL      ENDLIKE,    none      ; Same as (?!)
-ACCEPT      ENDLIKE,    parno 1   ; Accepts the current matched string.
-
+OPFAIL      ENDLIKE,    no-sv 1   ; Same as (?!), but with verb arg
+ACCEPT      ENDLIKE,    no-sv/num 2L   ; Accepts the current matched string, with verbar
 
 #*Verbs With Arguments
 VERB        VERB,       no-sv 1   ; Used only for the type field of verbs
