@@ -10331,9 +10331,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	        int is_define= 0;
                 const int DEFINE_len = sizeof("DEFINE") - 1;
 		if (RExC_parse[0] == '?') {        /* (?(?...)) */
-		    if (RExC_parse[1] == '=' || RExC_parse[1] == '!'
-			|| RExC_parse[1] == '<'
-			|| RExC_parse[1] == '{') { /* Lookahead or eval. */
+                    if (
+                        RExC_parse[1] == '=' ||
+                        RExC_parse[1] == '!' ||
+                        RExC_parse[1] == '<' ||
+                        RExC_parse[1] == '{'
+                    ) { /* Lookahead or eval. */
 			I32 flag;
                         regnode *tail;
 
