@@ -291,9 +291,10 @@ EXTCONST U8 PL_regkind[] = {
 };
 #endif
 
+#ifdef REG_COMP_C
+
 /* regarglen[] - How large is the argument part of the node (in regnodes) */
 
-#ifdef REG_COMP_C
 static const U8 regarglen[] = {
 	0,                                   	/* END          */
 	0,                                   	/* SUCCEED      */
@@ -491,6 +492,7 @@ static const char reg_off_by_arg[] = {
 };
 
 #endif /* REG_COMP_C */
+
 
 /* reg_name[] - Opcode/state names in string form, for debugging */
 
