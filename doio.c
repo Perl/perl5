@@ -2514,7 +2514,8 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 
 Function called by C<do_readline> to spawn a glob (or do the glob inside
 perl on VMS).  This code used to be inline, but now perl uses C<File::Glob>
-this glob starter is only used by miniperl during the build process.
+this glob starter is only used by miniperl during the build process,
+or when PERL_EXTERNAL_GLOB is defined.
 Moving it away shrinks F<pp_hot.c>; shrinking F<pp_hot.c> helps speed perl up.
 
 =cut
