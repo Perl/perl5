@@ -4992,7 +4992,10 @@ PP(pp_leavewhen)
     PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
-    PMOP *newpm;
+
+    cx = &cxstack[cxstack_ix];
+    assert(CxTYPE(cx) == CXt_WHEN);
+    gimme = cx->blk_gimme;
 
     cxix = dopoptogivenfor(cxstack_ix);
     if (cxix < 0)
@@ -5000,18 +5003,14 @@ PP(pp_leavewhen)
 	DIE(aTHX_ "Can't \"%s\" outside a topicalizer",
 	           PL_op->op_flags & OPf_SPECIAL ? "default" : "when");
 
-    POPBLOCK(cx,newpm);
-    assert(CxTYPE(cx) == CXt_WHEN);
+    newsp = PL_stack_base + cx->blk_oldsp;
     SP = (gimme == G_VOID)
         ? newsp
         : leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
-    POPWHEN(cx);
-
-    PL_curpm = newpm;   /* pop $1 et al */
-
-    if (cxix < cxstack_ix)
-        dounwind(cxix);
+    /* pop the WHEN, BLOCK and anything else before the GIVEN/FOR */
+    assert(cxix < cxstack_ix);
+    dounwind(cxix);
 
     cx = &cxstack[cxix];
 
@@ -5024,6 +5023,7 @@ PP(pp_leavewhen)
     }
     else {
 	PERL_ASYNC_CHECK();
+        assert(cx->blk_givwhen.leave_op->op_type == OP_LEAVEGIVEN);
 	RETURNOP(cx->blk_givwhen.leave_op);
     }
 }
