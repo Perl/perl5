@@ -2089,6 +2089,7 @@ PP(pp_leave)
         ? newsp
         : leave_common(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP,
                                PL_op->op_private & OPpLVALUE);
+
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE_with_name("block");
@@ -4292,13 +4293,13 @@ PP(pp_leaveeval)
 
     PERL_ASYNC_CHECK();
     POPBLOCK(cx,newpm);
+    if (gimme != G_VOID)
+        SP = leave_common(newsp, SP, newsp, gimme, SVs_TEMP, FALSE);
     POPEVAL(cx);
     namesv = cx->blk_eval.old_namesv;
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
 
-    if (gimme != G_VOID)
-        SP = leave_common(newsp, SP, newsp, gimme, SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
 #ifdef DEBUGGING
@@ -4394,13 +4395,13 @@ PP(pp_leavetry)
     PERL_ASYNC_CHECK();
     POPBLOCK(cx,newpm);
     retop = cx->blk_eval.retop;
-    POPEVAL(cx);
-    PERL_UNUSED_VAR(optype);
-
     SP = (gimme == G_VOID)
         ? newsp
         : leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
+    POPEVAL(cx);
+    PERL_UNUSED_VAR(optype);
+
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
@@ -4440,13 +4441,13 @@ PP(pp_leavegiven)
     PERL_UNUSED_CONTEXT;
 
     POPBLOCK(cx,newpm);
-    POPGIVEN(cx);
-    assert(CxTYPE(cx) == CXt_GIVEN);
-
     SP = (gimme == G_VOID)
         ? newsp
         : leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
+    POPGIVEN(cx);
+    assert(CxTYPE(cx) == CXt_GIVEN);
+
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE_with_name("given");
@@ -5028,12 +5029,12 @@ PP(pp_leavewhen)
 
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
-    POPWHEN(cx);
-
     SP = (gimme == G_VOID)
         ? newsp
         : leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
+    POPWHEN(cx);
+
     PL_curpm = newpm;   /* pop $1 et al */
 
     LEAVE_with_name("when");
