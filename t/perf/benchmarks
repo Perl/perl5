@@ -850,11 +850,109 @@
         code    => '$y = $x--', # scalar context so not optimised to --$x
     },
 
+    'loop::block' => {
+        desc    => 'empty basic loop',
+        setup   => ';',
+        code    => '{1;}',
+    },
 
-    'loop::for_my_range' => {
-        desc    => 'empty for loop with my var and integer range',
+    'loop::do' => {
+        desc    => 'basic do block',
+        setup   => 'my $x; my $y = 2;',
+        code    => '$x = do {1; $y}', # the ';' stops the do being optimised
+    },
+
+    'loop::for::my_range1' => {
+        desc    => 'empty for loop with my var and 1 integer range',
         setup   => '',
-        code    => 'for my $x (1..10) {}',
+        code    => 'for my $x (1..1) {}',
+    },
+    'loop::for::lex_range1' => {
+        desc    => 'empty for loop with lexical var and 1 integer range',
+        setup   => 'my $x;',
+        code    => 'for $x (1..1) {}',
+    },
+    'loop::for::pkg_range1' => {
+        desc    => 'empty for loop with package var and 1 integer range',
+        setup   => '$x = 1;',
+        code    => 'for $x (1..1) {}',
+    },
+    'loop::for::defsv_range1' => {
+        desc    => 'empty for loop with $_ and integer 1 range',
+        setup   => ';',
+        code    => 'for (1..1) {}',
+    },
+    'loop::for::my_range4' => {
+        desc    => 'empty for loop with my var and 4 integer range',
+        setup   => '',
+        code    => 'for my $x (1..4) {}',
+    },
+    'loop::for::lex_range4' => {
+        desc    => 'empty for loop with lexical var and 4 integer range',
+        setup   => 'my $x;',
+        code    => 'for $x (1..4) {}',
+    },
+    'loop::for::pkg_range4' => {
+        desc    => 'empty for loop with package var and 4 integer range',
+        setup   => '$x = 1;',
+        code    => 'for $x (1..4) {}',
+    },
+    'loop::for::defsv_range4' => {
+        desc    => 'empty for loop with $_ and integer 4 range',
+        setup   => ';',
+        code    => 'for (1..4) {}',
+    },
+
+    'loop::for::my_list1' => {
+        desc    => 'empty for loop with my var and 1 integer list',
+        setup   => '',
+        code    => 'for my $x (1) {}',
+    },
+    'loop::for::lex_list1' => {
+        desc    => 'empty for loop with lexical var and 1 integer list',
+        setup   => 'my $x;',
+        code    => 'for $x (1) {}',
+    },
+    'loop::for::pkg_list1' => {
+        desc    => 'empty for loop with package var and 1 integer list',
+        setup   => '$x = 1;',
+        code    => 'for $x (1) {}',
+    },
+    'loop::for::defsv_list1' => {
+        desc    => 'empty for loop with $_ and integer 1 list',
+        setup   => ';',
+        code    => 'for (1) {}',
+    },
+    'loop::for::my_list4' => {
+        desc    => 'empty for loop with my var and 4 integer list',
+        setup   => '',
+        code    => 'for my $x (1,2,3,4) {}',
+    },
+    'loop::for::lex_list4' => {
+        desc    => 'empty for loop with lexical var and 4 integer list',
+        setup   => 'my $x;',
+        code    => 'for $x (1,2,3,4) {}',
+    },
+    'loop::for::pkg_list4' => {
+        desc    => 'empty for loop with package var and 4 integer list',
+        setup   => '$x = 1;',
+        code    => 'for $x (1,2,3,4) {}',
+    },
+    'loop::for::defsv_list4' => {
+        desc    => 'empty for loop with $_ and integer 4 list',
+        setup   => '',
+        code    => 'for (1,2,3,4) {}',
+    },
+
+    'loop::while::i1' => {
+        desc    => 'empty while loop 1 iteration',
+        setup   => 'my $i = 0;',
+        code    => 'while (++$i % 2) {}',
+    },
+    'loop::while::i4' => {
+        desc    => 'empty while loop 4 iterations',
+        setup   => 'my $i = 0;',
+        code    => 'while (++$i % 4) {}',
     },
 
 ];
