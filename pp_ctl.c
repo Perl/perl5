@@ -5016,15 +5016,10 @@ PP(pp_leavewhen)
     cx = &cxstack[cxix];
 
     if (CxFOREACH(cx)) {
-	/* clear off anything above the scope we're re-entering */
-	I32 inner = PL_scopestack_ix;
-
+        /* emulate pp_next. Note that any stack(s) cleanup will be
+         * done by the pp_unstack which op_nextop should point to */
 	TOPBLOCK(cx);
-	if (PL_scopestack_ix < inner)
-	    leave_scope(PL_scopestack[PL_scopestack_ix]);
 	PL_curcop = cx->blk_oldcop;
-
-	PERL_ASYNC_CHECK();
 	return cx->blk_loop.my_op->op_nextop;
     }
     else {
