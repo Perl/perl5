@@ -32,8 +32,7 @@ foreach (@mp) {
         close $f;
     }
 }
-my @b = glob(qq{$path/mp_[0123456789]*.dat
-                $path/md_[0123456789]*.dat});
+my @b = glob(qq{$path/mp_[0123456789]*.dat $path/md_[0123456789]*.dat});
 if ($md+$mp < @md+@mp) {
    warn sprintf("$0: expected to create %d files, created only %d (path $path)\n",
                 @md+@mp, $md+$mp);
