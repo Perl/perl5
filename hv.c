@@ -1599,8 +1599,8 @@ Perl_hv_delayfree_ent(pTHX_ HV *hv, HE *entry)
 Frees the all the elements of a hash, leaving it empty.
 The XS equivalent of C<%hash = ()>.  See also L</hv_undef>.
 
-If any destructors are triggered as a result, the hv itself may
-be freed.
+See L</av_clear> for a note about the hash possibly being invalid on
+return.
 
 =cut
 */
@@ -1834,10 +1834,8 @@ Undefines the hash.  The XS equivalent of C<undef(%hash)>.
 As well as freeing all the elements of the hash (like C<hv_clear()>), this
 also frees any auxiliary data and storage associated with the hash.
 
-If any destructors are triggered as a result, the hv itself may
-be freed.
-
-See also L</hv_clear>.
+See L</av_clear> for a note about the hash possibly being invalid on
+return.
 
 =cut
 */
