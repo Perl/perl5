@@ -274,9 +274,10 @@ static const char my_z_errmsg[][32] = {
 # define NO_WRITEABLE_DATA
 #endif
 
+/* Set TRACE_DEFAULT to a non-zero value to enable tracing */
 #define TRACE_DEFAULT 0
 
-#ifdef NO_WRITEABLE_DATA
+#if defined(NO_WRITEABLE_DATA) || TRACE_DEFAULT == 0
 #  define trace TRACE_DEFAULT
 #else
   static int trace = TRACE_DEFAULT ;
@@ -372,7 +373,7 @@ rotate(list, len, rot)
     /* do simple left shift by one */
     if (rot == 1) {
         tmp = *list;
-        memcpy(list, list + 1, len - 1);
+        memmove(list, list + 1, len - 1);
         *last = tmp;
         return;
     }
