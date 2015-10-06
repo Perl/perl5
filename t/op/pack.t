@@ -936,10 +936,7 @@ is("@{[unpack('U*', pack('U*', 100, 200, 300))]}", "100 200 300");
 # is unpack U the reverse of pack U for byte string?
 is("@{[unpack('U*', pack('U*', 100, 200))]}", "100 200");
 
-
-SKIP: {
-    skip "Two of these still fail on EBCDIC; investigate in v5.23", 3 if $::IS_EBCDIC;
-
+{
     # does pack U0C create Unicode?
     my $cp202 = chr(202);
     utf8::upgrade $cp202;
@@ -948,10 +945,15 @@ SKIP: {
         use bytes;
         @bytes202 = map { ord } split "", $cp202;
     }
-    is("@{[pack('U0C*', 100, @bytes202)]}", v100.v202);
+
+    # This test requires the first number to be invariant; 64 is invariant on
+    # ASCII and EBCDIC.
+    is("@{[pack('U0C*', 64, @bytes202)]}", v64.v202);
 
     # does pack C0U create characters?
-    is("@{[pack('C0U*', 100, 202)]}", pack("C*", 100, @bytes202));
+    # The U* is expecting Unicode, so convert to that.
+    is("@{[pack('C0U*', map { utf8::native_to_unicode($_) } 64, 202)]}",
+       pack("C*", 64, @bytes202));
 
     # does unpack U0U on byte data warn?
     {
@@ -1534,7 +1536,6 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
 }
 
 my $U_1FFC_bytes = byte_utf8a_to_utf8n("\341\277\274");
-my $first_byte = ord uni_to_native("\341");
 {
     # U0 and C0 must be scoped
     my (@x) = unpack("a(U0)U", "b$U_1FFC_bytes");
@@ -1544,14 +1545,16 @@ my $first_byte = ord uni_to_native("\341");
     is(pack("a(U0)U", "b", 8188), "b$U_1FFC_bytes");
 }
 
-SKIP:
 {
     # counted length prefixes shouldn't change C0/U0 mode
     # (note the length is actually 0 in this test, as the C/ is replaced by C0
     # due to the \0 in the string)
     is(join(',', unpack("aC/UU",   "b\0$U_1FFC_bytes")), 'b,8188');
     is(join(',', unpack("aC/CU",   "b\0$U_1FFC_bytes")), 'b,8188');
-    skip "These two still fail on EBCDIC; investigate in v5.23", 2 if $::IS_EBCDIC;
+
+    # The U expects Unicode, so convert from native
+    my $first_byte = utf8::native_to_unicode(ord substr($U_1FFC_bytes, 0, 1));
+
     is(join(',', unpack("aU0C/UU", "b\0$U_1FFC_bytes")), "b,$first_byte");
     is(join(',', unpack("aU0C/CU", "b\0$U_1FFC_bytes")), "b,$first_byte");
 }
