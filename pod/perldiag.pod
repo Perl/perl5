@@ -1108,7 +1108,7 @@ to change it, such as with an auto-increment.
 (P) The internal routine that does assignment to a substr() was handed
 a NULL.
 
-=item Can't modify non-lvalue subroutine call
+=item Can't modify non-lvalue subroutine call of &%s
 
 (F) Subroutines meant to be used in lvalue context should be declared as
 such.  See L<perlsub/"Lvalue subroutines">.

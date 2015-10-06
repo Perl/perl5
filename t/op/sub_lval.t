@@ -169,7 +169,7 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-like($_, qr/Can\'t modify non-lvalue subroutine call in scalar assignment/);
+like($_, qr/Can\'t modify non-lvalue subroutine call of &main::nolv in scalar assignment/);
 
 $_ = '';
 
@@ -178,7 +178,7 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-like($_, qr/Can\'t modify non-lvalue subroutine call in scalar assignment/);
+like($_, qr/Can\'t modify non-lvalue subroutine call of &main::nolv in scalar assignment/);
 
 $_ = '';
 
@@ -187,7 +187,7 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-like($_, qr/Can\'t modify non-lvalue subroutine call in scalar assignment/);
+like($_, qr/Can\'t modify non-lvalue subroutine call of &main::nolv in scalar assignment/);
 
 $x0 = $x1 = $_ = undef;
 $nolv = \&nolv;
@@ -358,7 +358,7 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-like($_, qr/Can\'t modify non-lvalue subroutine call at /);
+like($_, qr/Can\'t modify non-lvalue subroutine call of &main::xxx at /);
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -366,7 +366,7 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-like($_, qr/Can\'t modify non-lvalue subroutine call at /);
+like($_, qr/Can\'t modify non-lvalue subroutine call of &main::xxx at /);
 
 sub yyy () { 'yyy' } # Const, not lvalue
 
@@ -823,7 +823,7 @@ foo = 3;
 ----
 lvalue attribute ignored after the subroutine has been defined at - line 4.
 lvalue attribute ignored after the subroutine has been defined at - line 6.
-Can't modify non-lvalue subroutine call in scalar assignment at - line 7, near "3;"
+Can't modify non-lvalue subroutine call of &main::foo in scalar assignment at - line 7, near "3;"
 Execution of - aborted due to compilation errors.
 ====
 }
@@ -979,7 +979,7 @@ package _102486 {
       'sub:lvalue{&$x}->() does not die for non-lvalue inner sub call';
   ::is $called, 1, 'The &$x actually called the sub';
   eval { +sub :lvalue { &$x }->() = 3 };
-  ::like $@, qr/^Can't modify non-lvalue subroutine call at /,
+  ::like $@, qr/^Can't modify non-lvalue subroutine call of &_102486::nonlv at /,
         'sub:lvalue{&$x}->() dies in true lvalue context';
 }
 
@@ -1008,7 +1008,7 @@ for (sub : lvalue { "$x" }->()) {
 
 # [perl #117947] XSUBs should not be treated as lvalues at run time
 eval { &{\&utf8::is_utf8}("") = 3 };
-like $@, qr/^Can't modify non-lvalue subroutine call at /,
+like $@, qr/^Can't modify non-lvalue subroutine call of &utf8::is_utf8 at /,
         'XSUB not seen at compile time dies in lvalue context';
 
 # [perl #119797] else implicitly returning value
