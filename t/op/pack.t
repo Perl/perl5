@@ -1533,26 +1533,27 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is(unpack("C0%128U", "abcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
 }
 
-my $U_1FFC_utf8 = byte_utf8a_to_utf8n("\341\277\274");
+my $U_1FFC_bytes = byte_utf8a_to_utf8n("\341\277\274");
 my $first_byte = ord uni_to_native("\341");
 {
     # U0 and C0 must be scoped
-    my (@x) = unpack("a(U0)U", "b$U_1FFC_utf8");
+    my (@x) = unpack("a(U0)U", "b$U_1FFC_bytes");
     is($x[0], 'b', 'before scope');
     is($x[1], 8188, 'after scope');
 
-    is(pack("a(U0)U", "b", 8188), "b$U_1FFC_utf8");
+    is(pack("a(U0)U", "b", 8188), "b$U_1FFC_bytes");
 }
 
 SKIP:
 {
     # counted length prefixes shouldn't change C0/U0 mode
-    # (note the length is actually 0 in this test)
-    is(join(',', unpack("aC/UU",   "b\0$U_1FFC_utf8")), 'b,8188');
-    is(join(',', unpack("aC/CU",   "b\0$U_1FFC_utf8")), 'b,8188');
+    # (note the length is actually 0 in this test, as the C/ is replaced by C0
+    # due to the \0 in the string)
+    is(join(',', unpack("aC/UU",   "b\0$U_1FFC_bytes")), 'b,8188');
+    is(join(',', unpack("aC/CU",   "b\0$U_1FFC_bytes")), 'b,8188');
     skip "These two still fail on EBCDIC; investigate in v5.23", 2 if $::IS_EBCDIC;
-    is(join(',', unpack("aU0C/UU", "b\0$U_1FFC_utf8")), "b,$first_byte");
-    is(join(',', unpack("aU0C/CU", "b\0$U_1FFC_utf8")), "b,$first_byte");
+    is(join(',', unpack("aU0C/UU", "b\0$U_1FFC_bytes")), "b,$first_byte");
+    is(join(',', unpack("aU0C/CU", "b\0$U_1FFC_bytes")), "b,$first_byte");
 }
 
 {
