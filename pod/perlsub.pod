@@ -319,7 +319,8 @@ disabled.
 The signature is part of a subroutine's body.  Normally the body of a
 subroutine is simply a braced block of code.  When using a signature,
 the signature is a parenthesised list that goes immediately after
-the subroutine name.  The signature declares lexical variables that are
+the subroutine name (or, for anonymous subroutines, immediately after
+the C<sub> keyword).  The signature declares lexical variables that are
 in scope for the block.  When the subroutine is called, the signature
 takes control first.  It populates the signature variables from the
 list of arguments that were passed.  If the argument list doesn't meet
