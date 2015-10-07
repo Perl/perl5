@@ -34,7 +34,7 @@ Documentation patches (suggested by ether):
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 94757bf7ac8451b3588578f287f9c511a04011bf (perlfunc: Nit)
+Blead changes have been examined up to and including 55121b6b0516ee559126c7bee6b4b43b1e8f59f7 (perlsub.pod: note that anonymous subs can have signatures, too)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -98,6 +98,9 @@ So I'm inclined to not include it, even though I'm confident that it does fix th
 (khw: 47f59 is needed for ab8726 to apply cleanly, but the latter could be hand edited instead.  But the first is pretty trivial)
 <commit votes="steveh, khw" id="ab87267cc6ac3b1ea950ee4e45bd80dea25b8f79" ticket="125892" desc="PATCH: [perl #125892] qr/(?[ ]) regression with '!'"/>
 
+<commit votes="steveh" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
+<commit votes="steveh" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
+
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
@@ -126,6 +129,8 @@ So I'm inclined to not include it, even though I'm confident that it does fix th
 <div><h3>Documentation Fixes</h3>
 
 <commit votes="steveh" id="a3faa257b9fc52f80556200842eaee2d1ecf3f59" ticket="" desc="Clarify FIRSTKEY and NEXTKEY usage."/>
+<commit votes="steveh" id="3b90fd9161349d784f8fd6d60e63a664a3f9411e" ticket="" desc="document the specific value of $!{E...}"/>
+<commit votes="jhi, steveh" id="55121b6b0516ee559126c7bee6b4b43b1e8f59f7" ticket="" desc="perlsub.pod: note that anonymous subs can have signatures, too"/>
 
 </div>
 
