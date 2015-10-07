@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 2.15 2015/09/15 13:53:27 dankogai Exp dankogai $
+# $Id: Makefile.PL,v 2.16 2015/09/24 02:19:21 dankogai Exp dankogai $
 #
 use 5.007003;
 use strict;
@@ -14,8 +14,10 @@ $ENV{PERL_CORE} ||= $ARGV{PERL_CORE} if $ARGV{PERL_CORE};
 
 my %tables = 
     (
-     def_t => ['ascii.ucm',
-           '8859-1.ucm', # cp1252 is an alias thereof
+     def_t => [
+           'ascii.ucm',
+           '8859-1.ucm',
+           'cp1252.ucm',
            'null.ucm',
            'ctrl.ucm',
            ]

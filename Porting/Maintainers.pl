@@ -382,8 +382,13 @@ use File::Glob qw(:case);
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-2.77.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-2.78.tar.gz',
         'FILES'        => q[cpan/Encode],
+        CUSTOMIZED     => [
+                  qq{cpan/Encode/Encode.xs},
+                  qq{cpan/Encode/Unicode/Unicode.xs},
+                  qq{cpan/Encode/encoding.pm},
+        ],
     },
 
     'encoding::warnings' => {
