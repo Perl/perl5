@@ -14663,11 +14663,17 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             swash = NULL;
                         }
 
-                        /* Here didn't find it.  It could be a user-defined
-                         * property that will be available at run-time.  If we
-                         * accept only compile-time properties, is an error;
-                         * otherwise add it to the list for run-time look up */
-                        if (ret_invlist) {
+                        /* Here didn't find it.  If the name begins with 'In'
+                         * or 'Is', it could be a user-defined property that
+                         * will be available at run-time.  So if not one of
+                         * those, or if we accept only compile-time properties,
+                         * is an error; otherwise add it to the list for
+                         * run-time look up */
+                        if (   n < 3
+                            || name[0] != 'I'
+                            || (name[1] != 's' && name[1] != 'n')
+                            || ret_invlist)
+                        {
                             RExC_parse = e + 1;
                             vFAIL2utf8f(
                                 "Property '%"UTF8f"' is unknown",
