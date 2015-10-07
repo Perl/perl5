@@ -12161,7 +12161,7 @@ enum {
                                          that's flagged OA_DANGEROUS */
     AAS_SAFE_SCALAR     = 0x100, /* produces at least one scalar SV that's
                                         not in any of the categories above */
-    AAS_DEFAV           = 0x200, /* contains just a single '@_' on RHS */
+    AAS_DEFAV           = 0x200  /* contains just a single '@_' on RHS */
 };
 
 
