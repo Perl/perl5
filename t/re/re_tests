@@ -1939,6 +1939,10 @@ A(*FAIL:foo)[BC]	A	n	$::REGERROR	foo
 
 \N(?#comment){SPACE}	A	c	-	Missing braces on \N{}
 ab(?#Comment){2}c	abbc	y	$&	abbc
+\p A	A	c	-	Character following \\p must be '{' or a single-character Unicode property name		# [perl #126187
+\P:A	A	c	-	Character following \\P must be '{' or a single-character Unicode property name
+\p^	A	c	-	Character following \\p must be '{' or a single-character Unicode property name
+\PU	A	c	-	Can't find Unicode property definition \"U\"
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

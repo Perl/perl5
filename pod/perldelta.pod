@@ -192,7 +192,7 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Character following \p must be '{' or a single-character Unicode property name in regex;|perldiag/"Character following \%c must be '{' or a single-character Unicode property name in regex; marked by <-- HERE in m/%s/">
 
 =back
 

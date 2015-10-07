@@ -14598,18 +14598,44 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 		    vFAIL2("Empty \\%c{}", (U8)value);
 		if (*RExC_parse == '{') {
 		    const U8 c = (U8)value;
-		    e = strchr(RExC_parse++, '}');
-                    if (!e)
+		    e = strchr(RExC_parse, '}');
+                    if (!e) {
+                        RExC_parse++;
                         vFAIL2("Missing right brace on \\%c{}", c);
-		    while (isSPACE(*RExC_parse))
-		        RExC_parse++;
+                    }
+
+                    RExC_parse++;
+                    while (isSPACE(*RExC_parse)) {
+                         RExC_parse++;
+		    }
+
+		    if (UCHARAT(RExC_parse) == '^') {
+
+                        /* toggle.  (The rhs xor gets the single bit that
+                         * differs between P and p; the other xor inverts just
+                         * that bit) */
+                        value ^= 'P' ^ 'p';
+
+                        RExC_parse++;
+                        while (isSPACE(*RExC_parse)) {
+                            RExC_parse++;
+                        }
+                    }
+
                     if (e == RExC_parse)
                         vFAIL2("Empty \\%c{}", c);
+
 		    n = e - RExC_parse;
 		    while (isSPACE(*(RExC_parse + n - 1)))
 		        n--;
-		}
-		else {
+		}   /* The \p isn't immediately followed by a '{' */
+		else if (! isALPHA(*RExC_parse)) {
+                    RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+                    vFAIL2("Character following \\%c must be '{' or a "
+                           "single-character Unicode property name",
+                           (U8) value);
+                }
+                else {
 		    e = RExC_parse;
 		    n = 1;
 		}
@@ -14617,19 +14643,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     SV* invlist;
                     char* name;
 
-		    if (UCHARAT(RExC_parse) == '^') {
-			 RExC_parse++;
-			 n--;
-                         /* toggle.  (The rhs xor gets the single bit that
-                          * differs between P and p; the other xor inverts just
-                          * that bit) */
-                         value ^= 'P' ^ 'p';
-
-			 while (isSPACE(*RExC_parse)) {
-			      RExC_parse++;
-			      n--;
-			 }
-		    }
                     /* Try to get the definition of the property into
                      * <invlist>.  If /i is in effect, the effective property
                      * will have its name be <__NAME_i>.  The design is

@@ -1484,6 +1484,13 @@ Note that ASCII characters that don't map to control characters are
 discouraged, and will generate the warning (when enabled)
 L</""\c%c" is more clearly written simply as "%s"">.
 
+=item Character following \%c must be '{' or a single-character Unicode property name in regex; marked by <-- HERE in m/%s/
+
+(F) (In the above the C<%c> is replaced by either C<p> or C<P>.)  You
+specified something that isn't a legal Unicode property name.  Most
+Unicode properties are specified by C<\p{...}>.  But if the name is a
+single character one, the braces may be omitted.
+
 =item Character in 'C' format wrapped in pack
 
 (W pack) You said
