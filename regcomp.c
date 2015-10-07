@@ -14676,7 +14676,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         {
                             RExC_parse = e + 1;
                             vFAIL2utf8f(
-                                "Property '%"UTF8f"' is unknown",
+                                "Can't find Unicode property definition \"%"UTF8f"\"",
                                 UTF8fARG(UTF, n, name));
                         }
 

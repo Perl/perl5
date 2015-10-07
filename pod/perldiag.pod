@@ -907,13 +907,19 @@ L<perlop> for the full details on here-documents.
 
 =item Can't find Unicode property definition "%s"
 
-(F) You may have tried to use C<\p> which means a Unicode
-property (for example C<\p{Lu}> matches all uppercase
-letters).  If you did mean to use a Unicode property, see
+=item Can't find Unicode property definition "%s" in regex; marked by <-- HERE in m/%s/
+
+(F) The named property which you specified via C<\p> or C<\P> is not one
+known to Perl.  Perhaps you misspelled the name?  See
 L<perluniprops/Properties accessible through \p{} and \P{}>
-for a complete list of available properties.  If you didn't
-mean to use a Unicode property, escape the C<\p>, either by
-C<\\p> (just the C<\p>) or by C<\Q\p> (the rest of the string, or
+for a complete list of available official
+properties.  If it is a
+L<user-defined property|perlunicode/User-Defined Character Properties>
+it must have been defined by the time the regular expression is
+matched.
+
+If you didn't mean to use a Unicode property, escape the C<\p>, either
+by C<\\p> (just the C<\p>) or by C<\Q\p> (the rest of the string, or
 until C<\E>).
 
 =item Can't fork: %s
@@ -4812,16 +4818,6 @@ applications die in silence.  It is considered a feature of the OS/2
 port.  One can easily disable this by appropriate sighandlers, see
 L<perlipc/"Signals">.  See also "Process terminated by SIGTERM/SIGINT"
 in L<perlos2>.
-
-=item Property '%s' is unknown in regex; marked by S<<-- HERE> in m/%s/
-
-(F) The named property which you specified via C<\p> or C<\P> is not one
-known to Perl.  Perhaps you misspelled the name?  See
-L<perluniprops/Properties accessible through \p{} and \P{}>
-for a complete list of available official
-properties.  If it is a L<user-defined property|perlunicode/User-Defined Character Properties>
-it must have been defined by the time the regular expression is
-compiled.
 
 =item Prototype after '%c' for %s : %s
 
