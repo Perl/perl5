@@ -14,8 +14,9 @@
  We can always make exceptions where deemed necessary, or otherwise drop them from the list.)
 
 Small code quality tweaks:
-(jhi: The last one is possibly debatable since it has the chance of changing behavior.)
 <commit votes="jhi" id="976258ece432e47adaa13d955134a8972933bcca" ticket="" desc="Superfluous null ptr test warnings by clang 3.7"/>
+(jhi: This one is possibly debatable since it has the chance of changing behavior.)
+(steveh: This requires the scalar.pm $VERSION bump from 4b59afe63011514fa1a42231ca1f7bd830b8b0bd as well:)
 <commit votes="jhi, khw" id="d1992db059626dbd1b9a7e2cf67ef89e6428a9c0" ticket="" desc="There is no SSize_t_size."/>
 
 Documentation patches (suggested by ether):
@@ -112,6 +113,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, khw" id="c0bf9074e4a1b56f9afe46591417297e6613d5ea" ticket="125924" desc="[perl #125924] allow op/infnan.t to pass on Win32 gcc"/>
 <commit votes="steveh, khw" id="c79631a1c8b4ecf3ec1fc557c875d412058b3e47" ticket="" desc="prevent op/time.t failures on NetBSD 5.1"/>
+
+(steveh: Only the autodie part of this is applicable; win32/GNUmakefile isn't in maint-5.22)
 <commit votes="steveh" id="e120c24fe257993e9cbf4c567194bec2792f3ccc" ticket="126133" desc="[perl #126133] autodie touches its touch_me, make it writable"/>
 
 </div>
