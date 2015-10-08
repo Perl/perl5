@@ -51,11 +51,7 @@ typedef struct {
 	int dsize;
 } datum;
 
-extern const datum nullitem
-#ifdef DOINIT
-                        = {0, 0}
-#endif
-                                   ;
+extern const datum nullitem;
 
 #if defined(__STDC__) || defined(__cplusplus) || defined(CAN_PROTOTYPE)
 #define proto(p) p

@@ -48,6 +48,8 @@ extern Free_t free proto((Malloc_t));
 }
 #endif
 
+const datum nullitem = {0, 0};
+
 /*
  * forward
  */
