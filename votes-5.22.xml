@@ -102,9 +102,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 (steveh: Does this need the update to Win32-0.52 (083231ea891c049b70ef28512bfc9e68c3e5d595) too?:)
 <commit votes="steveh, khw" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
 
-(craigb: Following unnecessary without a55c5245146801, which is not currently a candidate)
-<commit votes="" id="495173e1f13ab12e8a1ca3725401b3cb10e725cd" ticket="" desc="Fix nit missed in a55c5245146801."/>
-
 </div>
 
 <div><h3>Portability Fixes</h3>
