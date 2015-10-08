@@ -110,7 +110,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="" id="1f033515f88cb38a77368f249c75bc1a93c672e5" ticket="" desc="Find *inline.h differently in args_assert.t."/>
 <commit votes="steveh, khw" id="c0bf9074e4a1b56f9afe46591417297e6613d5ea" ticket="125924" desc="[perl #125924] allow op/infnan.t to pass on Win32 gcc"/>
 <commit votes="steveh, khw" id="c79631a1c8b4ecf3ec1fc557c875d412058b3e47" ticket="" desc="prevent op/time.t failures on NetBSD 5.1"/>
 <commit votes="steveh" id="e120c24fe257993e9cbf4c567194bec2792f3ccc" ticket="126133" desc="[perl #126133] autodie touches its touch_me, make it writable"/>
