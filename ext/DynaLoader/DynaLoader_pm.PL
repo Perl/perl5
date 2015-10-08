@@ -422,7 +422,6 @@ sub bootstrap {
 }
 
 sub dl_findfile {
-    # Read ext/DynaLoader/DynaLoader.doc for detailed information.
     # This function does not automatically consider the architecture
     # or the perl library auto directories.
     my (@args) = @_;
