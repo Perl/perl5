@@ -69,12 +69,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, khw" id="3c62f09f418b63bd79a6cbd20aaec4d992a6cc64" ticket="125840" desc="RT #125840 stop *x = $x doing bad things"/>
 
-(steveh: I haven't yet looked at whether this is applicable to maint-5.22 or not, or (if it is) whether it needs the preceding four commits as well:)
-(khw: This is my commit.  It does fix a bug, but one that was present in 5.20 and earlier.  It does need the 4 commits before it in order to compile.
-I would think this is too complicated for a maint release.  It also was found not from a field report but from the fuzzing work going on.
-So I'm inclined to not include it, even though I'm confident that it does fix this bug.)
-<commit votes="" id="512c0f5a351dd399dbb069e222741582044f88cc" ticket="125990" desc="PATCH: [perl #125990] panic: reg_node overrun"/>
-
 (steveh: Not a crash fix, but I feel this should be admissable for a maint release anyway:)
 (khw: Hanging IMO is just as serious as crashing.  But this is not a recent regression. OTOH, this is a trivial patch)
 <commit votes="steveh, khw" id="22b433eff9a1ffa2454e18405a56650f07b385b5" ticket="123562" desc="PATCH [perl #123562] Regexp-matching &quot;hangs&quot;"/>
