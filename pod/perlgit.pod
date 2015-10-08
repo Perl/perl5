@@ -616,6 +616,11 @@ C<git am>:
   % git am 0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
   Applying Rename Leon Brocard to Orange Brocard
 
+Note that some UNIX mail systems can mess with text attachments containing
+'From '. This will fix them up:
+
+  % perl -pi -e's/^>From /From /' 0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
+
 If just a raw diff is provided, it is also possible use this two-step
 process:
 
