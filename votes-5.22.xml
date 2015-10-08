@@ -19,8 +19,8 @@ Small code quality tweaks:
 <commit votes="jhi, khw" id="d1992db059626dbd1b9a7e2cf67ef89e6428a9c0" ticket="" desc="There is no SSize_t_size."/>
 
 Documentation patches (suggested by ether):
-<commit votes="khw" id="9fcc23141fa6c68e7419a4caf9046d6912491e37" ticket="" desc="perlvar: discourage $OLD_PERL_VERSION"/>
 <commit votes="khw" id="83c1fffeadddac231b705fc8a420de87fd4f5ea3" ticket="" desc="Document $OLD_PERL_VERSION's history"/>
+<commit votes="khw" id="9fcc23141fa6c68e7419a4caf9046d6912491e37" ticket="" desc="perlvar: discourage $OLD_PERL_VERSION"/>
 <commit votes="steveh, khw" id="87518e92cecac2acea7073cceea51ca610774fb0" ticket="" desc="perldata: Change pod to reflect reality"/>
 <commit votes="khw" id="4e9736a3b8992ab439fe0bfc6201168cf7ac6a93" ticket="" desc="perlcommunity.pod updates"/>
 <commit votes="khw" id="3f9ec86148ce5619d909c108083f27a01c56adee" ticket="" desc="do not try printing undef"/>
