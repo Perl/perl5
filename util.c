@@ -3190,6 +3190,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
     I32 len = 0;
     int retval;
     char *bufend;
+    Stat_t statbuf;
 #if defined(DOSISH) && !defined(OS2)
 #  define SEARCH_EXTS ".bat", ".cmd", NULL
 #  define MAX_EXT_LEN 4
@@ -3282,7 +3283,6 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 	    DEBUG_p(PerlIO_printf(Perl_debug_log,
 				  "Looking for %s\n",cur));
 	    {
-		Stat_t statbuf;
 		if (PerlLIO_stat(cur,&statbuf) >= 0
 		    && !S_ISDIR(statbuf.st_mode)) {
 		    dosearch = 0;
