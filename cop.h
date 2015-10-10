@@ -938,12 +938,10 @@ struct block {
 #define POPBLOCK(cx,pm)							\
 	DEBUG_CX("POP");						\
 	cx = &cxstack[cxstack_ix--],					\
-	newsp		 = PL_stack_base + cx->blk_oldsp,		\
 	PL_curcop	 = cx->blk_oldcop,				\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
-	pm		 = cx->blk_oldpm,				\
-	gimme		 = cx->blk_gimme;
+	pm		 = cx->blk_oldpm;
 
 /* Continue a block elsewhere (NEXT and REDO). */
 #define TOPBLOCK(cx)							\
@@ -1313,6 +1311,9 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
         LEAVESUB(multicall_cv);     					\
 	POPBLOCK(cx,PL_curpm);						\
+        /* these two set for backcompat by callers */                   \
+        newsp = PL_stack_base + cx->blk_oldsp;                          \
+        gimme = cx->blk_gimme;                                          \
         /* includes partial unrolled POPSUB(): */                       \
 	LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);   		\
         PL_comppad = cx->blk_sub.prevcomppad;                           \

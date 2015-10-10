@@ -1640,7 +1640,6 @@ PP(pp_sort)
 	SV **start;
 	if (PL_sortcop) {
 	    PERL_CONTEXT *cx;
-	    SV** newsp;
 	    const bool oldcatch = CATCH_GET;
             I32 old_savestack_ix = PL_savestack_ix;
 
@@ -1720,7 +1719,7 @@ PP(pp_sort)
                 PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 	    POPBLOCK(cx,PL_curpm);
-	    PL_stack_sp = newsp;
+	    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
 	    POPSTACK;
 	    CATCH_SET(oldcatch);
 	}

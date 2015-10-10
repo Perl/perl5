@@ -1578,7 +1578,6 @@ Perl_die_unwind(pTHX_ SV *msv)
 
     if (in_eval) {
 	I32 cxix;
-	I32 gimme;
 
 	/*
 	 * Historically, perl used to set ERRSV ($@) early in the die
@@ -1631,6 +1630,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    SV *namesv;
 	    PERL_CONTEXT *cx;
 	    SV **newsp;
+            I32 gimme;
 #ifdef DEBUGGING
 	    COP *oldcop;
 #endif
@@ -1640,7 +1640,16 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    if (cxix < cxstack_ix)
 		dounwind(cxix);
 
-	    POPBLOCK(cx,PL_curpm);
+            cx = &cxstack[cxstack_ix];
+            assert(CxTYPE(cx) == CXt_EVAL);
+            newsp = PL_stack_base + cx->blk_oldsp;
+            gimme = cx->blk_gimme;
+
+	    if (gimme == G_SCALAR)
+		*++newsp = &PL_sv_undef;
+	    PL_stack_sp = newsp;
+
+
 	    if (CxTYPE(cx) != CXt_EVAL) {
 		STRLEN msglen;
 		const char* message = SvPVx_const(exceptsv, msglen);
@@ -1648,6 +1657,8 @@ Perl_die_unwind(pTHX_ SV *msv)
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
 	    }
+
+	    POPBLOCK(cx,PL_curpm);
 	    POPEVAL(cx);
 	    namesv = cx->blk_eval.old_namesv;
 #ifdef DEBUGGING
@@ -1655,10 +1666,6 @@ Perl_die_unwind(pTHX_ SV *msv)
 #endif
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop = cx->blk_eval.retop;
-
-	    if (gimme == G_SCALAR)
-		*++newsp = &PL_sv_undef;
-	    PL_stack_sp = newsp;
 
             LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
             PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
@@ -2556,9 +2563,7 @@ S_unwind_loop(pTHX_ const char * const opname)
 PP(pp_last)
 {
     PERL_CONTEXT *cx;
-    I32 gimme;
     OP *nextop = NULL;
-    SV **newsp;
     PMOP *newpm;
 
     S_unwind_loop(aTHX_ "last");
@@ -2571,18 +2576,16 @@ PP(pp_last)
         || CxTYPE(cx) == CXt_LOOP_FOR
         || CxTYPE(cx) == CXt_LOOP_PLAIN
     );
-    newsp = PL_stack_base + cx->blk_loop.resetsp;
+    PL_stack_sp = PL_stack_base + cx->blk_loop.resetsp;
     nextop = cx->blk_loop.my_op->op_lastop->op_next;
 
     TAINT_NOT;
-    PL_stack_sp = newsp;
 
     cxstack_ix--;
     /* Stack values are safe: */
     POPLOOP(cx);	/* release loop vars ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
-    PERL_UNUSED_VAR(gimme);
     return nextop;
 }
 
@@ -2812,14 +2815,9 @@ PP(pp_goto)
 
 	    /* Now do some callish stuff. */
 	    if (CvISXSUB(cv)) {
-		SV **newsp;
-		I32 gimme;
 		const SSize_t items = arg ? AvFILL(arg) + 1 : 0;
 		const bool m = arg ? cBOOL(SvRMAGICAL(arg)) : 0;
 		SV** mark;
-
-                PERL_UNUSED_VAR(newsp);
-                PERL_UNUSED_VAR(gimme);
 
                 ENTER;
                 SAVETMPS;
@@ -3427,7 +3425,6 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
     yystatus = (!in_require && CATCH_GET) ? S_try_yyparse(aTHX_ GRAMPROG) : yyparse(GRAMPROG);
 
     if (yystatus || PL_parser->error_count || !PL_eval_root) {
-	SV **newsp;			/* Used by POPBLOCK. */
 	PERL_CONTEXT *cx;
 	I32 optype;			/* Used by POPEVAL. */
 	SV *namesv;
@@ -3435,7 +3432,6 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 
 	cx = NULL;
 	namesv = NULL;
-	PERL_UNUSED_VAR(newsp);
 	PERL_UNUSED_VAR(optype);
 
 	/* note that if yystatus == 3, then the EVAL CX block has already
@@ -4328,9 +4324,7 @@ PP(pp_leaveeval)
 void
 Perl_delete_eval_scope(pTHX)
 {
-    SV **newsp;
     PMOP *newpm;
-    I32 gimme;
     PERL_CONTEXT *cx;
     I32 optype;
 	
@@ -4339,8 +4333,6 @@ Perl_delete_eval_scope(pTHX)
     PL_curpm = newpm;
     LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
     PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
-    PERL_UNUSED_VAR(newsp);
-    PERL_UNUSED_VAR(gimme);
     PERL_UNUSED_VAR(optype);
 }
 
@@ -5056,11 +5048,8 @@ PP(pp_continue)
     dSP;
     I32 cxix;
     PERL_CONTEXT *cx;
-    I32 gimme;
-    SV **newsp;
     PMOP *newpm;
 
-    PERL_UNUSED_VAR(gimme);
     
     cxix = dopoptowhen(cxstack_ix); 
     if (cxix < 0)   
@@ -5073,7 +5062,7 @@ PP(pp_continue)
     assert(CxTYPE(cx) == CXt_WHEN);
     POPWHEN(cx);
 
-    SP = newsp;
+    SP = PL_stack_base + cx->blk_oldsp;
     PL_curpm = newpm;   /* pop $1 et al */
 
     RETURNOP(cx->blk_givwhen.leave_op->op_next);
