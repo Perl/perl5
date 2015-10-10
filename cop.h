@@ -865,6 +865,18 @@ struct block_givwhen {
         PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 
+/* basic block, i.e. pp_enter/leave */
+
+#define PUSHBASICBLK(cx)                                                     \
+        cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
+        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
+        PL_tmps_floor = PL_tmps_ix;
+
+#define POPBASICBLK(cx)                                                      \
+        LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);             \
+        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
+
+
 /* context common to subroutines, evals and loops */
 struct block {
     U8		blku_type;	/* what kind of context this is */

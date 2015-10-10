@@ -1523,8 +1523,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    POPEVAL(cx);
             /* FALLTHROUGH */
 	case CXt_BLOCK:
-            LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
-            PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
+            POPBASICBLK(cx);
 	    break;
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
@@ -2065,9 +2064,7 @@ PP(pp_enter)
     I32 gimme = GIMME_V;
 
     PUSHBLOCK(cx, CXt_BLOCK, SP);
-    cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;
-    cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;
-    PL_tmps_floor = PL_tmps_ix;
+    PUSHBASICBLK(cx);
 
     RETURN;
 }
@@ -2094,8 +2091,7 @@ PP(pp_leave)
         : leave_common(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP,
                                PL_op->op_private & OPpLVALUE);
 
-    LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
-    PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
+    POPBASICBLK(cx);
 
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
