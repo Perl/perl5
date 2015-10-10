@@ -3276,15 +3276,18 @@ PP(pp_leavesub)
     PERL_CONTEXT *cx;
     SV *sv;
 
-    if (CxMULTICALL(&cxstack[cxstack_ix])) {
+    cx = &cxstack[cxstack_ix];
+    assert(CxTYPE(cx) == CXt_SUB);
+
+    if (CxMULTICALL(cx)) {
         /* entry zero of a stack is always PL_sv_undef, which
          * simplifies converting a '()' return into undef in scalar context */
         assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
 	return 0;
     }
 
-    POPBLOCK(cx,newpm);
-    cxstack_ix++; /* temporarily protect top context */
+    newsp = PL_stack_base + cx->blk_oldsp;
+    gimme = cx->blk_gimme;
 
     TAINT_NOT;
     if (gimme == G_SCALAR) {
@@ -3335,6 +3338,8 @@ PP(pp_leavesub)
     }
     PUTBACK;
 
+    POPBLOCK(cx,newpm);
+    cxstack_ix++; /* temporarily protect top context */
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     cxstack_ix--;
     PL_curpm = newpm;	/* ... and pop $1 et al */

@@ -2082,8 +2082,10 @@ PP(pp_leave)
 	cx->blk_oldpm = PL_curpm;	/* fake block should preserve $1 et al */
     }
 
-    POPBLOCK(cx,newpm);
-
+    cx = &cxstack[cxstack_ix];
+    assert(CxTYPE(cx) == CXt_BLOCK);
+    newsp = PL_stack_base + cx->blk_oldsp;
+    gimme = cx->blk_gimme;
     gimme = OP_GIMME(PL_op, (cxstack_ix >= 0) ? gimme : G_SCALAR);
 
     SP = (gimme == G_VOID)
@@ -2091,6 +2093,7 @@ PP(pp_leave)
         : leave_common(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP,
                                PL_op->op_private & OPpLVALUE);
 
+    POPBLOCK(cx,newpm);
     POPBASICBLK(cx);
 
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
@@ -2257,10 +2260,11 @@ PP(pp_leaveloop)
     PMOP *newpm;
     SV **mark;
 
-    POPBLOCK(cx,newpm);
+    cx = &cxstack[cxstack_ix];
     assert(CxTYPE_is_LOOP(cx));
-    mark = newsp;
+    mark = PL_stack_base + cx->blk_oldsp;
     newsp = PL_stack_base + cx->blk_loop.resetsp;
+    gimme = cx->blk_gimme;
 
     SP = (gimme == G_VOID)
         ? newsp
@@ -2268,6 +2272,7 @@ PP(pp_leaveloop)
 			       PL_op->op_private & OPpLVALUE);
     PUTBACK;
 
+    POPBLOCK(cx,newpm);
     POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
@@ -2295,15 +2300,18 @@ PP(pp_leavesublv)
     bool ref;
     const char *what = NULL;
 
-    if (CxMULTICALL(&cxstack[cxstack_ix])) {
+    cx = &cxstack[cxstack_ix];
+    assert(CxTYPE(cx) == CXt_SUB);
+
+    if (CxMULTICALL(cx)) {
         /* entry zero of a stack is always PL_sv_undef, which
          * simplifies converting a '()' return into undef in scalar context */
         assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
 	return 0;
     }
 
-    POPBLOCK(cx,newpm);
-    cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
+    newsp = PL_stack_base + cx->blk_oldsp;
+    gimme = cx->blk_gimme;
     TAINT_NOT;
 
     mark = newsp + 1;
@@ -2328,7 +2336,7 @@ PP(pp_leavesublv)
           croak:
 	    POPSUB(cx,sv);
 	    cxstack_ix--;
-	    PL_curpm = newpm;
+	    PL_curpm = cx->blk_oldpm;
 	    LEAVESUB(sv);
 	    Perl_croak(aTHX_
 	              "Can't return %s from lvalue subroutine", what
@@ -2396,6 +2404,8 @@ PP(pp_leavesublv)
     }
     PUTBACK;
 
+    POPBLOCK(cx,newpm);
+    cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     cxstack_ix--;
     PL_curpm = newpm;	/* ... and pop $1 et al */
@@ -4268,9 +4278,15 @@ PP(pp_leaveeval)
     bool keep = cBOOL(PL_in_eval & EVAL_KEEPERR);
 
     PERL_ASYNC_CHECK();
-    POPBLOCK(cx,newpm);
+
+    cx = &cxstack[cxstack_ix];
+    assert(CxTYPE(cx) == CXt_EVAL);
+    newsp = PL_stack_base + cx->blk_oldsp;
+    gimme = cx->blk_gimme;
+
     if (gimme != G_VOID)
         SP = leave_common(newsp, SP, newsp, gimme, SVs_TEMP, FALSE);
+    POPBLOCK(cx,newpm);
     POPEVAL(cx);
     namesv = cx->blk_eval.old_namesv;
     retop = cx->blk_eval.retop;
@@ -4369,12 +4385,18 @@ PP(pp_leavetry)
     OP *retop;
 
     PERL_ASYNC_CHECK();
-    POPBLOCK(cx,newpm);
-    retop = cx->blk_eval.retop;
+
+    cx = &cxstack[cxstack_ix];
+    assert(CxTYPE(cx) == CXt_EVAL);
+    newsp = PL_stack_base + cx->blk_oldsp;
+    gimme = cx->blk_gimme;
+
     SP = (gimme == G_VOID)
         ? newsp
         : leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
+    POPBLOCK(cx,newpm);
+    retop = cx->blk_eval.retop;
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);
 
@@ -4413,11 +4435,16 @@ PP(pp_leavegiven)
     PMOP *newpm;
     PERL_UNUSED_CONTEXT;
 
-    POPBLOCK(cx,newpm);
+    cx = &cxstack[cxstack_ix];
+    assert(CxTYPE(cx) == CXt_GIVEN);
+    newsp = PL_stack_base + cx->blk_oldsp;
+    gimme = cx->blk_gimme;
+
     SP = (gimme == G_VOID)
         ? newsp
         : leave_common(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
+    POPBLOCK(cx,newpm);
     POPGIVEN(cx);
     assert(CxTYPE(cx) == CXt_GIVEN);
 
