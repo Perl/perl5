@@ -1659,6 +1659,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    }
 
 	    POPBLOCK(cx,PL_curpm);
+            LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
 	    POPEVAL(cx);
 	    namesv = cx->blk_eval.old_namesv;
 #ifdef DEBUGGING
@@ -1667,7 +1668,6 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop = cx->blk_eval.retop;
 
-            LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
             PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 	    if (optype == OP_REQUIRE) {
@@ -3444,10 +3444,10 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	    }
 	    SP = PL_stack_base + POPMARK;	/* pop original mark */
 	    POPBLOCK(cx,PL_curpm);
+            LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
 	    POPEVAL(cx);
 	    namesv = cx->blk_eval.old_namesv;
 	    /* POPBLOCK has rendered LEAVE_with_name("evalcomp") unnecessary */
-            LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
             PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 	}
 
@@ -4283,6 +4283,7 @@ PP(pp_leaveeval)
     if (gimme != G_VOID)
         SP = leave_common(newsp, SP, newsp, gimme, SVs_TEMP, FALSE);
     POPBLOCK(cx,newpm);
+    LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
     POPEVAL(cx);
     namesv = cx->blk_eval.old_namesv;
     retop = cx->blk_eval.retop;
@@ -4303,14 +4304,12 @@ PP(pp_leaveeval)
 			SvPVX_const(namesv),
                         SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
 			G_DISCARD);
-        LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
         PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 	Perl_die(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
         NOT_REACHED; /* NOTREACHED */
 	/* die_unwind() did LEAVE, or we won't be here */
     }
     else {
-        LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
         PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
         if (!keep)
 	    CLEAR_ERRSV();
@@ -4329,9 +4328,9 @@ Perl_delete_eval_scope(pTHX)
     I32 optype;
 	
     POPBLOCK(cx,newpm);
+    LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
     POPEVAL(cx);
     PL_curpm = newpm;
-    LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
     PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
     PERL_UNUSED_VAR(optype);
 }
@@ -4389,12 +4388,12 @@ PP(pp_leavetry)
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     POPBLOCK(cx,newpm);
     retop = cx->blk_eval.retop;
+    LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);
 
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
-    LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
     PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
     CLEAR_ERRSV();
