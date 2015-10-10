@@ -2091,7 +2091,6 @@ PP(pp_leave)
     assert(CxTYPE(cx) == CXt_BLOCK);
     newsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
-    gimme = OP_GIMME(PL_op, (cxstack_ix >= 0) ? gimme : G_SCALAR);
 
     SP = (gimme == G_VOID)
         ? newsp
