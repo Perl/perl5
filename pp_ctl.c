@@ -1507,7 +1507,6 @@ Perl_dounwind(pTHX_ I32 cxix)
 	return;
 
     while (cxstack_ix > cxix) {
-	SV *sv;
         PERL_CONTEXT *cx = &cxstack[cxstack_ix];
 	DEBUG_CX("UNWIND");						\
 	/* Note: we don't need to restore the base context info till the end. */
@@ -1516,8 +1515,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    POPSUBST(cx);
 	    continue;  /* not break */
 	case CXt_SUB:
-	    POPSUB(cx,sv);
-	    LEAVESUB(sv);
+	    POPSUB(cx);
 	    break;
 	case CXt_EVAL:
 	    POPEVAL(cx);
@@ -2303,7 +2301,6 @@ PP(pp_leavesublv)
     PMOP *newpm;
     I32 gimme;
     PERL_CONTEXT *cx;
-    SV *sv;
     bool ref;
     const char *what = NULL;
 
@@ -2326,7 +2323,6 @@ PP(pp_leavesublv)
     ref = !!(CxLVAL(cx) & OPpENTERSUB_INARGS);
     if (gimme == G_SCALAR) {
 	if (CxLVAL(cx) && !ref) {     /* Leave it as it is if we can. */
-	    SV *sv;
 	    if (MARK <= SP) {
 		if ((SvPADTMP(TOPs) || SvREADONLY(TOPs)) &&
 		    !SvSMAGICAL(TOPs)) {
@@ -2341,8 +2337,7 @@ PP(pp_leavesublv)
 		what = "undef";
 	    }
           croak:
-	    POPSUB(cx,sv);
-	    LEAVESUB(sv);
+	    POPSUB(cx);
 	    cxstack_ix--;
 	    PL_curpm = cx->blk_oldpm;
 	    Perl_croak(aTHX_
@@ -2413,8 +2408,7 @@ PP(pp_leavesublv)
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
-    POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
-    LEAVESUB(sv);
+    POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
     cxstack_ix--;
     PL_curpm = newpm;	/* ... and pop $1 et al */
 

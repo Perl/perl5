@@ -651,7 +651,7 @@ struct block_format {
 	AvFILLp(ary) = -1;						\
     } STMT_END
 
-#define POPSUB(cx,sv)							\
+#define POPSUB(cx)							\
     STMT_START {							\
 	CX_LEAVE_SCOPE(cx);                                             \
         if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
@@ -681,13 +681,8 @@ struct block_format {
         PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
-	sv = MUTABLE_SV(cx->blk_sub.cv);				\
-        CvDEPTH((const CV*)sv) = cx->blk_sub.olddepth;                  \
-    } STMT_END
-
-#define LEAVESUB(sv)							\
-    STMT_START {							\
-	SvREFCNT_dec(sv);						\
+        CvDEPTH((const CV*)cx->blk_sub.cv) = cx->blk_sub.olddepth;      \
+	SvREFCNT_dec_NN(cx->blk_sub.cv);				\
     } STMT_END
 
 #define POPFORMAT(cx)							\
@@ -1323,7 +1318,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	CX_LEAVE_SCOPE(cx);                                             \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
-        LEAVESUB(multicall_cv);     					\
+        SvREFCNT_dec_NN(multicall_cv);                                  \
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
 	SPAGAIN;							\
@@ -1340,7 +1335,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	cx = &cxstack[cxstack_ix];					\
 	assert(cx->cx_type & CXp_MULTICALL);				\
 	CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
-        LEAVESUB(multicall_cv);					        \
+        SvREFCNT_dec_NN(multicall_cv);                                  \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
         {                                                               \
             /* save a few things that we don't want PUSHSUB to zap */   \
