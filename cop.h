@@ -1315,7 +1315,6 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     STMT_START {							\
 	cx = &cxstack[cxstack_ix];					\
         CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
-        LEAVESUB(multicall_cv);     					\
 	POPBLOCK(cx,PL_curpm);						\
         /* these two set for backcompat by callers */                   \
         newsp = PL_stack_base + cx->blk_oldsp;                          \
@@ -1324,6 +1323,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	CX_LEAVE_SCOPE(cx);                                             \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
+        LEAVESUB(multicall_cv);     					\
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
 	SPAGAIN;							\
