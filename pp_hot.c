@@ -254,7 +254,7 @@ PP(pp_unstack)
             || CxTYPE(cx) == CXt_LOOP_LAZYSV
             || CxTYPE(cx) == CXt_LOOP_LAZYIV
         );
-        LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);
+	CX_LEAVE_SCOPE(cx);
     }
     return NORMAL;
 }

@@ -570,6 +570,11 @@ struct block_format {
     GV *	dfoutgv;
 };
 
+/* free all savestack items back to the watermark of the specified context */
+
+#define CX_LEAVE_SCOPE(cx) \
+    LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix)
+
 /* base for the next two macros. Don't use directly.
  * The context frame holds a reference to the CV so that it can't be
  * freed while we're executing it */
@@ -648,7 +653,7 @@ struct block_format {
 
 #define POPSUB(cx,sv)							\
     STMT_START {							\
-	LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);  		\
+	CX_LEAVE_SCOPE(cx);                                             \
         if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
         cx->blk_u16 |= CxPOPSUB_DONE;                                   \
 	RETURN_PROBE(CvNAMED(cx->blk_sub.cv)				\
@@ -687,7 +692,7 @@ struct block_format {
 
 #define POPFORMAT(cx)							\
     STMT_START {							\
-	LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);   		\
+	CX_LEAVE_SCOPE(cx);                                             \
         if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
 	CV * const cv = cx->blk_format.cv;				\
 	GV * const dfuot = cx->blk_format.dfoutgv;			\
@@ -820,7 +825,7 @@ struct block_loop {
         PUSHLOOP_FOR_setpad(cx);
 
 #define POPLOOP(cx)							\
-	LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);    		\
+	CX_LEAVE_SCOPE(cx);                                             \
 	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.cur);		\
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.end);		\
@@ -855,11 +860,11 @@ struct block_givwhen {
         cx->blk_givwhen.defsv_save = orig_var;
 
 #define POPWHEN(cx)                                                     \
-        LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);             \
+	CX_LEAVE_SCOPE(cx);                                             \
         PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 #define POPGIVEN(cx)                                                    \
-        LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);             \
+	CX_LEAVE_SCOPE(cx);                                             \
         SvREFCNT_dec(GvSV(PL_defgv));                                   \
         GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;                    \
         PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
@@ -867,13 +872,13 @@ struct block_givwhen {
 
 /* basic block, i.e. pp_enter/leave */
 
-#define PUSHBASICBLK(cx)                                                     \
+#define PUSHBASICBLK(cx)                                                \
         cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
         cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
         PL_tmps_floor = PL_tmps_ix;
 
-#define POPBASICBLK(cx)                                                      \
-        LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);             \
+#define POPBASICBLK(cx)                                                 \
+	CX_LEAVE_SCOPE(cx);                                             \
         PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 
@@ -1315,7 +1320,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         newsp = PL_stack_base + cx->blk_oldsp;                          \
         gimme = cx->blk_gimme;                                          \
         /* includes partial unrolled POPSUB(): */                       \
-	LEAVE_SCOPE(cx->cx_u.cx_blk.blku_old_savestack_ix);   		\
+	CX_LEAVE_SCOPE(cx);                                             \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
 	POPSTACK;							\
