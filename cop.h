@@ -742,6 +742,7 @@ struct block_eval {
 
 #define POPEVAL(cx)							\
     STMT_START {							\
+        CX_LEAVE_SCOPE(cx);                                             \
 	PL_in_eval = CxOLD_IN_EVAL(cx);					\
 	optype = CxOLD_OP_TYPE(cx);					\
 	PL_eval_root = cx->blk_eval.old_eval_root;			\

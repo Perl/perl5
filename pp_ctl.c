@@ -1521,7 +1521,8 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    break;
 	case CXt_EVAL:
 	    POPEVAL(cx);
-            /* FALLTHROUGH */
+            PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
+	    break;
 	case CXt_BLOCK:
             POPBASICBLK(cx);
 	    break;
@@ -1659,7 +1660,6 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    }
 
 	    POPBLOCK(cx,PL_curpm);
-            CX_LEAVE_SCOPE(cx);
 	    POPEVAL(cx);
 	    namesv = cx->blk_eval.old_namesv;
 #ifdef DEBUGGING
@@ -3444,7 +3444,6 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	    }
 	    SP = PL_stack_base + POPMARK;	/* pop original mark */
 	    POPBLOCK(cx,PL_curpm);
-            CX_LEAVE_SCOPE(cx);
 	    POPEVAL(cx);
 	    namesv = cx->blk_eval.old_namesv;
 	    /* POPBLOCK has rendered LEAVE_with_name("evalcomp") unnecessary */
@@ -4283,7 +4282,6 @@ PP(pp_leaveeval)
     if (gimme != G_VOID)
         SP = leave_common(newsp, SP, newsp, gimme, SVs_TEMP, FALSE);
     POPBLOCK(cx,newpm);
-    CX_LEAVE_SCOPE(cx);
     POPEVAL(cx);
     namesv = cx->blk_eval.old_namesv;
     retop = cx->blk_eval.retop;
@@ -4328,7 +4326,6 @@ Perl_delete_eval_scope(pTHX)
     I32 optype;
 	
     POPBLOCK(cx,newpm);
-    CX_LEAVE_SCOPE(cx);
     POPEVAL(cx);
     PL_curpm = newpm;
     PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
@@ -4388,7 +4385,6 @@ PP(pp_leavetry)
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     POPBLOCK(cx,newpm);
     retop = cx->blk_eval.retop;
-    CX_LEAVE_SCOPE(cx);
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);
 
