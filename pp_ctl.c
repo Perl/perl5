@@ -2009,9 +2009,8 @@ PP(pp_dbstate)
 /* S_leave_common: Common code that many functions in this file use on
 		   scope exit.
 
-   Process the return args on the stack in the range (mark+1..sp) based on
-   context, with any final args starting at newsp+1. Returns the new
-   top-of-stack position
+   Process the return args on the stack in the range (mark+1..PL_stack_sp)
+   based on context, with any final args starting at newsp+1.
    Args are mortal copied (or mortalied if lvalue) unless its safe to use
    as-is, based on whether it has the specified flags. Note that most
    callers specify flags as (SVs_PADTMP|SVs_TEMP), while leaveeval skips
@@ -2021,10 +2020,11 @@ PP(pp_dbstate)
    Also, taintedness is cleared.
 */
 
-STATIC SV **
-S_leave_common(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme,
+STATIC void
+S_leave_common(pTHX_ SV **newsp, SV **mark, I32 gimme,
 			      U32 flags, bool lvalue)
 {
+    dSP;
     PERL_ARGS_ASSERT_LEAVE_COMMON;
 
     TAINT_NOT;
@@ -2036,11 +2036,8 @@ S_leave_common(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme,
 				? sv_2mortal(SvREFCNT_inc_simple_NN(*SP))
 				: sv_mortalcopy(*SP);
 	else {
-	    /* MEXTEND() only updates MARK, so reuse it instead of newsp. */
-	    MARK = newsp;
-	    MEXTEND(MARK, 1);
-	    *++MARK = &PL_sv_undef;
-	    return MARK;
+	    EXTEND(newsp, 1);
+	    *++newsp = &PL_sv_undef;
 	}
     }
     else if (gimme == G_ARRAY) {
@@ -2059,8 +2056,9 @@ S_leave_common(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme,
 	 * point with SP == newsp. */
     }
 
-    return newsp;
+    PL_stack_sp = newsp;
 }
+
 
 PP(pp_enter)
 {
@@ -2076,7 +2074,6 @@ PP(pp_enter)
 
 PP(pp_leave)
 {
-    dSP;
     PERL_CONTEXT *cx;
     SV **newsp;
     PMOP *newpm;
@@ -2092,9 +2089,10 @@ PP(pp_leave)
     newsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
-    SP = (gimme == G_VOID)
-        ? newsp
-        : leave_common(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP,
+    if (gimme == G_VOID)
+        PL_stack_sp = newsp;
+    else
+        leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP,
                                PL_op->op_private & OPpLVALUE);
 
     POPBLOCK(cx,newpm);
@@ -2102,7 +2100,7 @@ PP(pp_leave)
 
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
-    RETURN;
+    return NORMAL;
 }
 
 static bool
@@ -2257,7 +2255,6 @@ PP(pp_enterloop)
 
 PP(pp_leaveloop)
 {
-    dSP;
     PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
@@ -2270,11 +2267,11 @@ PP(pp_leaveloop)
     newsp = PL_stack_base + cx->blk_loop.resetsp;
     gimme = cx->blk_gimme;
 
-    SP = (gimme == G_VOID)
-        ? newsp
-        : leave_common(newsp, SP, MARK, gimme, SVs_PADTMP|SVs_TEMP,
+    if (gimme == G_VOID)
+        PL_stack_sp = newsp;
+    else
+        leave_common(newsp, MARK, gimme, SVs_PADTMP|SVs_TEMP,
 			       PL_op->op_private & OPpLVALUE);
-    PUTBACK;
 
     POPBLOCK(cx,newpm);
     POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
@@ -2461,9 +2458,10 @@ PP(pp_return)
          * return.
          */
         cx = &cxstack[cxix];
-        SP = leave_common(PL_stack_base + cx->blk_oldsp, SP, MARK,
-                            cx->blk_gimme, SVs_TEMP|SVs_PADTMP, TRUE);
         PUTBACK;
+        leave_common(PL_stack_base + cx->blk_oldsp, MARK,
+                            cx->blk_gimme, SVs_TEMP|SVs_PADTMP, TRUE);
+        SPAGAIN;
 	dounwind(cxix);
     }
     else {
@@ -4272,8 +4270,11 @@ PP(pp_leaveeval)
     newsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
-    if (gimme != G_VOID)
-        SP = leave_common(newsp, SP, newsp, gimme, SVs_TEMP, FALSE);
+    if (gimme != G_VOID) {
+        PUTBACK;
+        leave_common(newsp, newsp, gimme, SVs_TEMP, FALSE);
+        SPAGAIN;
+    }
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
     namesv = cx->blk_eval.old_namesv;
@@ -4357,7 +4358,6 @@ PP(pp_entertry)
 
 PP(pp_leavetry)
 {
-    dSP;
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
@@ -4372,10 +4372,10 @@ PP(pp_leavetry)
     newsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
-    SP = (gimme == G_VOID)
-        ? newsp
-        : leave_common(newsp, SP, newsp, gimme,
-			       SVs_PADTMP|SVs_TEMP, FALSE);
+    if (gimme == G_VOID)
+        PL_stack_sp = newsp;
+    else
+        leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP, FALSE);
     POPBLOCK(cx,newpm);
     retop = cx->blk_eval.retop;
     POPEVAL(cx);
@@ -4386,7 +4386,7 @@ PP(pp_leavetry)
     PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
     CLEAR_ERRSV();
-    RETURNOP(retop);
+    return retop;
 }
 
 PP(pp_entergiven)
@@ -4408,7 +4408,6 @@ PP(pp_entergiven)
 
 PP(pp_leavegiven)
 {
-    dSP;
     PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
@@ -4420,17 +4419,17 @@ PP(pp_leavegiven)
     newsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
-    SP = (gimme == G_VOID)
-        ? newsp
-        : leave_common(newsp, SP, newsp, gimme,
-			       SVs_PADTMP|SVs_TEMP, FALSE);
+    if (gimme == G_VOID)
+        PL_stack_sp = newsp;
+    else
+        leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP, FALSE);
     POPBLOCK(cx,newpm);
     POPGIVEN(cx);
     assert(CxTYPE(cx) == CXt_GIVEN);
 
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
-    RETURN;
+    return NORMAL;
 }
 
 /* Helper routines used by pp_smartmatch */
@@ -4990,7 +4989,6 @@ PP(pp_enterwhen)
 
 PP(pp_leavewhen)
 {
-    dSP;
     I32 cxix;
     PERL_CONTEXT *cx;
     I32 gimme;
@@ -5007,10 +5005,10 @@ PP(pp_leavewhen)
 	           PL_op->op_flags & OPf_SPECIAL ? "default" : "when");
 
     newsp = PL_stack_base + cx->blk_oldsp;
-    SP = (gimme == G_VOID)
-        ? newsp
-        : leave_common(newsp, SP, newsp, gimme,
-			       SVs_PADTMP|SVs_TEMP, FALSE);
+    if (gimme == G_VOID)
+        PL_stack_sp = newsp;
+    else
+        leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP, FALSE);
     /* pop the WHEN, BLOCK and anything else before the GIVEN/FOR */
     assert(cxix < cxstack_ix);
     dounwind(cxix);
@@ -5027,7 +5025,7 @@ PP(pp_leavewhen)
     else {
 	PERL_ASYNC_CHECK();
         assert(cx->blk_givwhen.leave_op->op_type == OP_LEAVEGIVEN);
-	RETURNOP(cx->blk_givwhen.leave_op);
+	return cx->blk_givwhen.leave_op;
     }
 }
 
