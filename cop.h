@@ -939,7 +939,6 @@ struct block {
 /* Exit a block (RETURN and LAST). */
 #define POPBLOCK(cx,pm)							\
 	DEBUG_CX("POP");						\
-	cx = &cxstack[cxstack_ix--],					\
 	PL_curcop	 = cx->blk_oldcop,				\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
@@ -1311,15 +1310,16 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     STMT_START {							\
 	cx = &cxstack[cxstack_ix];					\
         CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
-	POPBLOCK(cx,PL_curpm);						\
-        /* these two set for backcompat by callers */                   \
-        newsp = PL_stack_base + cx->blk_oldsp;                          \
-        gimme = cx->blk_gimme;                                          \
         /* includes partial unrolled POPSUB(): */                       \
 	CX_LEAVE_SCOPE(cx);                                             \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
         SvREFCNT_dec_NN(multicall_cv);                                  \
+        /* these two set for backcompat by callers */                   \
+        newsp = PL_stack_base + cx->blk_oldsp;                          \
+        gimme = cx->blk_gimme;                                          \
+	POPBLOCK(cx,PL_curpm);						\
+	cxstack_ix--;                                                   \
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
 	SPAGAIN;							\

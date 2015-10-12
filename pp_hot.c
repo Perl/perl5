@@ -3337,11 +3337,10 @@ PP(pp_leavesub)
     }
     PUTBACK;
 
-    POPBLOCK(cx,newpm);
-    cxstack_ix++; /* temporarily protect top context */
     POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
-    cxstack_ix--;
+    POPBLOCK(cx,newpm);
     PL_curpm = newpm;	/* ... and pop $1 et al */
+    cxstack_ix--;
 
     return cx->blk_sub.retop;
 }

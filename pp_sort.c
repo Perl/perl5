@@ -1706,18 +1706,22 @@ PP(pp_sort)
 		    (is_xsub ? S_sortcv_xsub : hasargs ? S_sortcv_stacked : S_sortcv),
 		    sort_flags);
 
+            /* Reset cx, in case the context stack has been reallocated. */
+            cx = &cxstack[cxstack_ix];
+
+	    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+
 	    if (!(flags & OPf_SPECIAL)) {
-		/* Reset cx, in case the context stack has been
-		   reallocated. */
-		cx = &cxstack[cxstack_ix];
-		POPSUB(cx);
+                assert(CxTYPE(cx) == CXt_SUB);
+                POPSUB(cx);
 	    }
             else
+                assert(CxTYPE(cx) == CXt_NULL);
                 /* mimic POPSUB */
                 PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 	    POPBLOCK(cx,PL_curpm);
-	    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+            cxstack_ix--;
 	    POPSTACK;
 	    CATCH_SET(oldcatch);
 	}

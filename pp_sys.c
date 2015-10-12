@@ -1520,10 +1520,13 @@ PP(pp_leavewrite)
     }
 
   forget_top:
+    cx = &cxstack[cxstack_ix];
+    assert(CxTYPE(cx) == CXt_FORMAT);
+    SP = PL_stack_base + cx->blk_oldsp; /* ignore retval of formline */
+    POPFORMAT(cx);
     POPBLOCK(cx,PL_curpm);
     retop = cx->blk_sub.retop;
-    POPFORMAT(cx);
-    SP = PL_stack_base + cx->blk_oldsp; /* ignore retval of formline */
+    cxstack_ix--;
 
     if (is_return)
         /* XXX the semantics of doing 'return' in a format aren't documented.
