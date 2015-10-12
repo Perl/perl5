@@ -53,12 +53,17 @@ is(Cygwin::mount_flags("/cygdrive") =~ /,cygdrive/,  1, "check cygdrive mount_fl
 my @flags = split(/,/, Cygwin::mount_flags('/cygdrive'));
 my $prefix = pop(@flags);
 ok($prefix, "cygdrive mount prefix = " . (($prefix) ? $prefix : '<none>'));
-chomp(my $prefix2 = `df | grep -i '^c: ' | cut -d% -f2 | xargs`);
+chomp(my $prefix2 = `df -a | grep -i '^c: ' | cut -d% -f2 | xargs`);
+# we get something like "C: - - - - /cygdrive" if this isn't the entry
+# df displays free space info for
+$prefix2 =~ s/.* //;
 $prefix2 =~ s/\/c$//i;
-if (! $prefix2) {
-    $prefix2 = '/';
+SKIP:
+{
+    $prefix2
+       or skip("No C: entry found in df output", 1);
+    is($prefix, $prefix2, 'cygdrive mount prefix');
 }
-is($prefix, $prefix2, 'cygdrive mount prefix');
 
 my @mnttbl = Cygwin::mount_table();
 ok(@mnttbl > 0, "non empty mount_table");
