@@ -14650,6 +14650,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 		if (!SIZE_ONLY) {
                     SV* invlist;
                     char* name;
+                    char* base_name;    /* name after any packages are stripped */
+                    const char * const colon_colon = "::";
 
                     /* Try to get the definition of the property into
                      * <invlist>.  If /i is in effect, the effective property
@@ -14679,6 +14681,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         HV* curpkg = (IN_PERL_COMPILETIME)
                                       ? PL_curstash
                                       : CopSTASH(PL_curcop);
+                        UV final_n = n;
+                        bool has_pkg;
+
                         if (swash) {    /* Got a swash but no inversion list.
                                            Something is likely wrong that will
                                            be sorted-out later */
@@ -14690,25 +14695,43 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                          * typo) in specifying a Unicode property, or it could
                          * be a user-defined property that will be available at
                          * run-time.  The names of these must begin with 'In'
-                         * or 'Is'.  So
+                         * or 'Is' (after any packages are stripped off).  So
                          * if not one of those, or if we accept only
                          * compile-time properties, is an error; otherwise add
                          * it to the list for run-time look up. */
-                        if (   n < 3
-                            || name[0] != 'I'
-                            || (name[1] != 's' && name[1] != 'n')
+                        if ((base_name = rninstr(name, name + n,
+                                                 colon_colon, colon_colon + 2)))
+                        { /* Has ::.  We know this must be a user-defined
+                             property */
+                            base_name += 2;
+                            final_n -= base_name - name;
+                            has_pkg = TRUE;
+                        }
+                        else {
+                            base_name = name;
+                            has_pkg = FALSE;
+                        }
+
+                        if (   final_n < 3
+                            || base_name[0] != 'I'
+                            || (base_name[1] != 's' && base_name[1] != 'n')
                             || ret_invlist)
                         {
+                            const char * const msg
+                                = (has_pkg)
+                                  ? "Illegal user-defined property name"
+                                  : "Can't find Unicode property definition";
                             RExC_parse = e + 1;
-                            vFAIL2utf8f(
-                                "Can't find Unicode property definition \"%"UTF8f"\"",
-                                UTF8fARG(UTF, n, name));
+
+                            /* diag_listed_as: Can't find Unicode property definition "%s" */
+                            vFAIL3utf8f("%s \"%"UTF8f"\"",
+                                msg, UTF8fARG(UTF, n, name));
                         }
 
                         /* If the property name doesn't already have a package
                          * name, add the current one to it so that it can be
                          * referred to outside it. [perl #121777] */
-                        if (curpkg && ! instr(name, "::")) {
+                        if (! has_pkg && curpkg) {
                             char* pkgname = HvNAME(curpkg);
                             if (strNE(pkgname, "main")) {
                                 char* full_name = Perl_form(aTHX_

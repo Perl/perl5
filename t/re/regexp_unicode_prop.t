@@ -240,9 +240,16 @@ sub run_tests {
     }
 
 
-    my $pat = qr /^Can't find Unicode property definition/;
     print "# Illegal properties\n";
     foreach my $p (@ILLEGAL_PROPERTIES) {
+        my $pat;
+        if ($p =~ /::/) {
+            $pat = qr /^Illegal user-defined property name/;
+        }
+        else {
+            $pat = qr /^Can't find Unicode property definition/;
+        }
+
         undef $@;
         my $r = eval "'a' =~ /\\p{$p}/; 1";
         is($r, undef, "Unknown Unicode property \\p{$p}");
