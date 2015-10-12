@@ -13791,10 +13791,16 @@ redo_curchar:
                 /* Here, the new operator has equal or lower precedence than
                  * what's already there.  This means the operation already
                  * there should be performed now, before the new one. */
-                rhs = av_pop(stack);
-                lhs = av_pop(stack);
 
-                assert(IS_OPERAND(rhs));
+                rhs = av_pop(stack);
+                if (! IS_OPERAND(rhs)) {
+
+                    /* This can happen when a ! is not followed by an operand,
+                     * like in /(?[\t &!])/ */
+                    goto bad_syntax;
+                }
+
+                lhs = av_pop(stack);
                 assert(IS_OPERAND(lhs));
 
                 switch (stacked_operator) {
@@ -13918,6 +13924,7 @@ redo_curchar:
         || SvTYPE(final) != SVt_INVLIST
         || av_tindex(stack) >= 0)  /* More left on stack */
     {
+      bad_syntax:
         SvREFCNT_dec(final);
         vFAIL("Incomplete expression within '(?[ ])'");
     }
