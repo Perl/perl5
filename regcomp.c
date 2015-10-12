@@ -669,6 +669,14 @@ static const scan_data_t zero_scan_data =
             REPORT_LOCATION_ARGS(offset));         \
 } STMT_END
 
+#define vFAIL3utf8f(m, a1, a2) STMT_START {             \
+    const IV offset = RExC_parse - RExC_precomp;        \
+    if (!SIZE_ONLY)                                     \
+        SAVEFREESV(RExC_rx_sv);                         \
+    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1, a2,  \
+            REPORT_LOCATION_ARGS(offset));              \
+} STMT_END
+
 /* These have asserts in them because of [perl #122671] Many warnings in
  * regcomp.c can occur twice.  If they get output in pass1 and later in that
  * pass, the pattern has to be converted to UTF-8 and the pass restarted, they
