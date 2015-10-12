@@ -1519,7 +1519,6 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    break;
 	case CXt_EVAL:
 	    POPEVAL(cx);
-            PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 	    break;
 	case CXt_BLOCK:
             POPBASICBLK(cx);
@@ -1665,8 +1664,6 @@ Perl_die_unwind(pTHX_ SV *msv)
 #endif
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop = cx->blk_eval.retop;
-
-            PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 	    if (optype == OP_REQUIRE) {
                 assert (PL_curcop == oldcop);
@@ -3437,8 +3434,6 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	    POPBLOCK(cx,PL_curpm);
 	    POPEVAL(cx);
 	    namesv = cx->blk_eval.old_namesv;
-	    /* POPBLOCK has rendered LEAVE_with_name("evalcomp") unnecessary */
-            PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 	}
 
 	errsv = ERRSV;
@@ -4296,13 +4291,11 @@ PP(pp_leaveeval)
 			SvPVX_const(namesv),
                         SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
 			G_DISCARD);
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 	Perl_die(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
         NOT_REACHED; /* NOTREACHED */
 	/* die_unwind() did LEAVE, or we won't be here */
     }
     else {
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
         if (!keep)
 	    CLEAR_ERRSV();
     }
@@ -4322,7 +4315,6 @@ Perl_delete_eval_scope(pTHX)
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
     PL_curpm = newpm;
-    PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
     PERL_UNUSED_VAR(optype);
 }
 
@@ -4382,8 +4374,6 @@ PP(pp_leavetry)
     PERL_UNUSED_VAR(optype);
 
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
-
-    PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
     CLEAR_ERRSV();
     return retop;

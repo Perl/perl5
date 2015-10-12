@@ -678,11 +678,11 @@ struct block_format {
 	    }								\
 	}								\
         }                                                               \
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
         CvDEPTH((const CV*)cx->blk_sub.cv) = cx->blk_sub.olddepth;      \
 	SvREFCNT_dec_NN(cx->blk_sub.cv);				\
+        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
     } STMT_END
 
 #define POPFORMAT(cx)							\
@@ -692,7 +692,6 @@ struct block_format {
 	CV * const cv = cx->blk_format.cv;				\
 	GV * const dfuot = cx->blk_format.dfoutgv;			\
         cx->blk_u16 |= CxPOPSUB_DONE;                                   \
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
 	setdefout(dfuot);						\
         PL_comppad = cx->blk_format.prevcomppad;                        \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
@@ -700,6 +699,7 @@ struct block_format {
 	SvREFCNT_dec_NN(cx->blk_format.cv);				\
 	SvREFCNT_dec_NN(dfuot);						\
         }                                                               \
+        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
     } STMT_END
 
 /* eval context */
@@ -745,6 +745,7 @@ struct block_eval {
 	    SvREFCNT_dec_NN(cx->blk_eval.cur_text);			\
 	if (cx->blk_eval.old_namesv)					\
 	    sv_2mortal(cx->blk_eval.old_namesv);			\
+        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
     } STMT_END
 
 /* loop context */
