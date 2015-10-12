@@ -214,7 +214,10 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<"Can't modify non-lvalue subroutine call of &%s"|perldiag/"Can't modify non-lvalue subroutine call of &%s">
+
+This error now reports the name of the non-lvalue subroutine you
+attempted to use as an lvalue.
 
 =back
 
