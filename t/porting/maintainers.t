@@ -19,17 +19,17 @@ if ( $Config{usecrosscompile} ) {
   skip_all( "Odd failures during cross-compilation" );
 }
 
-if ($::IS_EBCDIC) {
-    skip_all("Fails on EBCDIC machines, prob. because of different sort order");
+if ( $Config{ccflags} =~ /-DPERL_EXTERNAL_GLOB/) {
+    skip_all "Maintainers doesn't currently work for '-DPERL_EXTERNAL_GLOB'";
+}
+
+if ($^O eq 'VMS') {
+    skip_all "home-grown glob doesn't handle fancy patterns";
 }
 
 use strict;
 use warnings;
 use Maintainers qw(show_results process_options finish_tap_output);
-
-if ($^O eq 'VMS') {
-    skip_all "home-grown glob doesn't handle fancy patterns";
-}
 
 {
     local @ARGV = qw|--checkmani|;
