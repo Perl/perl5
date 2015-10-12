@@ -394,6 +394,13 @@ There were places in regular expression patterns where comments
 (C<(?#...)>) weren't allowed, but should have been.  This is now fixed.
 [perl #116639]
 
+=item *
+
+A regression from perl v5.20 has been fixed, in which some syntax errors
+in L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes>
+constructs within regular expression patterns could cause a segfault
+instead of a proper error message.  [perl #126180]
+
 =back
 
 =head1 Known Problems
