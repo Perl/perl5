@@ -273,7 +273,7 @@ pod/perlcygwin.pod	Verbatim line length including indents exceeds 79 by	20
 pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	27
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perldtrace.pod	Verbatim line length including indents exceeds 79 by	7
-pod/perlgit.pod	Verbatim line length including indents exceeds 79 by	11
+pod/perlgit.pod	Verbatim line length including indents exceeds 79 by	12
 pod/perlguts.pod	? Should you be using L<...> instead of	1
 pod/perlguts.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlhack.pod	? Should you be using L<...> instead of	1
