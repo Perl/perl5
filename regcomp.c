@@ -661,7 +661,7 @@ static const scan_data_t zero_scan_data =
 } STMT_END
 
 /* A specialized version of vFAIL2 that works with UTF8f */
-#define vFAIL2utf8f(m, a1) STMT_START { \
+#define vFAIL2utf8f(m, a1) STMT_START {            \
     const IV offset = RExC_parse - RExC_precomp;   \
     if (!SIZE_ONLY)                                \
         SAVEFREESV(RExC_rx_sv);                    \
@@ -14658,7 +14658,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                     /* Look up the property name, and get its swash and
                      * inversion list, if the property is found  */
-                    if (swash) {
+                    if (swash) {    /* Return any left-overs */
                         SvREFCNT_dec_NN(swash);
                     }
                     swash = _core_swash_init("utf8", name, &PL_sv_undef,
@@ -14671,17 +14671,21 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         HV* curpkg = (IN_PERL_COMPILETIME)
                                       ? PL_curstash
                                       : CopSTASH(PL_curcop);
-                        if (swash) {
+                        if (swash) {    /* Got a swash but no inversion list.
+                                           Something is likely wrong that will
+                                           be sorted-out later */
                             SvREFCNT_dec_NN(swash);
                             swash = NULL;
                         }
 
-                        /* Here didn't find it.  If the name begins with 'In'
-                         * or 'Is', it could be a user-defined property that
-                         * will be available at run-time.  So if not one of
-                         * those, or if we accept only compile-time properties,
-                         * is an error; otherwise add it to the list for
-                         * run-time look up */
+                        /* Here didn't find it.  It could be a an error (like a
+                         * typo) in specifying a Unicode property, or it could
+                         * be a user-defined property that will be available at
+                         * run-time.  The names of these must begin with 'In'
+                         * or 'Is'.  So
+                         * if not one of those, or if we accept only
+                         * compile-time properties, is an error; otherwise add
+                         * it to the list for run-time look up. */
                         if (   n < 3
                             || name[0] != 'I'
                             || (name[1] != 's' && name[1] != 'n')
@@ -14716,9 +14720,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                                    ANYOF node */
 
                         /* We don't know yet, so have to assume that the
-                         * property could match something in the Latin1 range,
-                         * hence something that isn't utf8.  Note that this
-                         * would cause things in <depends_list> to match
+                         * property could match something in the upper Latin1
+                         * range, hence something that isn't utf8.  Note that
+                         * this would cause things in <depends_list> to match
                          * inappropriately, except that any \p{}, including
                          * this one forces Unicode semantics, which means there
                          * is no <depends_list> */
