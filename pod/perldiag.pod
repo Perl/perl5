@@ -868,13 +868,6 @@ found in the PATH did not have correct permissions.
 (F) A string of a form C<CORE::word> was given to prototype(), but there
 is no builtin with the name C<word>.
 
-=item Can't find %s character property "%s"
-
-(F) You used C<\p{}> or C<\P{}> but the character property by that name
-could not be found.  Maybe you misspelled the name of the property?
-See L<perluniprops/Properties accessible through \p{} and \P{}>
-for a complete list of available official properties.
-
 =item Can't find label %s
 
 (F) You said to goto a label that isn't mentioned anywhere that it's
