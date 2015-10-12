@@ -1720,7 +1720,7 @@ PP(pp_sort)
                 /* mimic POPSUB */
                 PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
-	    POPBLOCK(cx,PL_curpm);
+	    POPBLOCK(cx);
             cxstack_ix--;
 	    POPSTACK;
 	    CATCH_SET(oldcatch);

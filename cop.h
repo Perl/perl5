@@ -937,12 +937,12 @@ struct block {
 	DEBUG_CX("PUSH");
 
 /* Exit a block (RETURN and LAST). */
-#define POPBLOCK(cx,pm)							\
+#define POPBLOCK(cx)							\
 	DEBUG_CX("POP");						\
 	PL_curcop	 = cx->blk_oldcop,				\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
-	pm		 = cx->blk_oldpm;
+	PL_curpm	 = cx->blk_oldpm;
 
 /* Continue a block elsewhere (NEXT and REDO). */
 #define TOPBLOCK(cx)							\
@@ -1318,7 +1318,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         /* these two set for backcompat by callers */                   \
         newsp = PL_stack_base + cx->blk_oldsp;                          \
         gimme = cx->blk_gimme;                                          \
-	POPBLOCK(cx,PL_curpm);						\
+	POPBLOCK(cx);						\
 	cxstack_ix--;                                                   \
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\

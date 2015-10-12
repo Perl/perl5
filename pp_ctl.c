@@ -1657,7 +1657,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    }
 
 	    POPEVAL(cx);
-	    POPBLOCK(cx,PL_curpm);
+	    POPBLOCK(cx);
             cxstack_ix--;
 	    namesv = cx->blk_eval.old_namesv;
 #ifdef DEBUGGING
@@ -2074,7 +2074,6 @@ PP(pp_leave)
 {
     PERL_CONTEXT *cx;
     SV **newsp;
-    PMOP *newpm;
     I32 gimme;
 
     cx = &cxstack[cxstack_ix];
@@ -2093,8 +2092,7 @@ PP(pp_leave)
                                PL_op->op_private & OPpLVALUE);
 
     POPBASICBLK(cx);
-    POPBLOCK(cx,newpm);
-    PL_curpm = newpm;	/* Don't pop $1 et al till now */
+    POPBLOCK(cx);
     cxstack_ix--;
 
     return NORMAL;
@@ -2255,7 +2253,6 @@ PP(pp_leaveloop)
     PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
-    PMOP *newpm;
     SV **mark;
 
     cx = &cxstack[cxstack_ix];
@@ -2271,8 +2268,7 @@ PP(pp_leaveloop)
 			       PL_op->op_private & OPpLVALUE);
 
     POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
-    POPBLOCK(cx,newpm);
-    PL_curpm = newpm;	/* ... and pop $1 et al */
+    POPBLOCK(cx);
     cxstack_ix--;
 
     return NORMAL;
@@ -2292,7 +2288,6 @@ PP(pp_leavesublv)
     dSP;
     SV **newsp;
     SV **mark;
-    PMOP *newpm;
     I32 gimme;
     PERL_CONTEXT *cx;
     bool ref;
@@ -2401,8 +2396,7 @@ PP(pp_leavesublv)
     PUTBACK;
 
     POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
-    POPBLOCK(cx,newpm);
-    PL_curpm = newpm;	/* ... and pop $1 et al */
+    POPBLOCK(cx);
     cxstack_ix--;
 
     return cx->blk_sub.retop;
@@ -2551,7 +2545,6 @@ S_unwind_loop(pTHX_ const char * const opname)
 PP(pp_last)
 {
     PERL_CONTEXT *cx;
-    PMOP *newpm;
 
     S_unwind_loop(aTHX_ "last");
 
@@ -2569,8 +2562,7 @@ PP(pp_last)
 
     /* Stack values are safe: */
     POPLOOP(cx);	/* release loop vars ... */
-    POPBLOCK(cx,newpm);
-    PL_curpm = newpm;	/* ... and pop $1 et al */
+    POPBLOCK(cx);
     cxstack_ix--;
 
     return cx->blk_loop.my_op->op_lastop->op_next;
@@ -3432,7 +3424,7 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	    SP = PL_stack_base + POPMARK;	/* pop original mark */
             cx = &cxstack[cxstack_ix];
 	    POPEVAL(cx);
-	    POPBLOCK(cx,PL_curpm);
+	    POPBLOCK(cx);
             cxstack_ix--;
 	    namesv = cx->blk_eval.old_namesv;
 	}
@@ -4249,7 +4241,6 @@ PP(pp_leaveeval)
 {
     dSP;
     SV **newsp;
-    PMOP *newpm;
     I32 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
@@ -4279,8 +4270,7 @@ PP(pp_leaveeval)
      */
     PL_curcop = cx->blk_oldcop;
     POPEVAL(cx);
-    POPBLOCK(cx,newpm);
-    PL_curpm = newpm;	/* Don't pop $1 et al till now */
+    POPBLOCK(cx);
     cxstack_ix--;
     namesv = cx->blk_eval.old_namesv;
     retop = cx->blk_eval.retop;
@@ -4317,14 +4307,12 @@ PP(pp_leaveeval)
 void
 Perl_delete_eval_scope(pTHX)
 {
-    PMOP *newpm;
     PERL_CONTEXT *cx;
     I32 optype;
 	
     cx = &cxstack[cxstack_ix];
     POPEVAL(cx);
-    POPBLOCK(cx,newpm);
-    PL_curpm = newpm;
+    POPBLOCK(cx);
     cxstack_ix--;
     PERL_UNUSED_VAR(optype);
 }
@@ -4362,7 +4350,6 @@ PP(pp_entertry)
 PP(pp_leavetry)
 {
     SV **newsp;
-    PMOP *newpm;
     I32 gimme;
     PERL_CONTEXT *cx;
     I32 optype;
@@ -4380,12 +4367,10 @@ PP(pp_leavetry)
     else
         leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP, FALSE);
     POPEVAL(cx);
-    POPBLOCK(cx,newpm);
+    POPBLOCK(cx);
     cxstack_ix--;
     retop = cx->blk_eval.retop;
     PERL_UNUSED_VAR(optype);
-
-    PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     CLEAR_ERRSV();
     return retop;
@@ -4413,7 +4398,6 @@ PP(pp_leavegiven)
     PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
-    PMOP *newpm;
     PERL_UNUSED_CONTEXT;
 
     cx = &cxstack[cxstack_ix];
@@ -4426,8 +4410,7 @@ PP(pp_leavegiven)
     else
         leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP, FALSE);
     POPGIVEN(cx);
-    POPBLOCK(cx,newpm);
-    PL_curpm = newpm;	/* Don't pop $1 et al till now */
+    POPBLOCK(cx);
     cxstack_ix--;
 
     return NORMAL;
@@ -5034,8 +5017,6 @@ PP(pp_continue)
 {
     I32 cxix;
     PERL_CONTEXT *cx;
-    PMOP *newpm;
-
     
     cxix = dopoptowhen(cxstack_ix); 
     if (cxix < 0)   
@@ -5048,8 +5029,7 @@ PP(pp_continue)
     assert(CxTYPE(cx) == CXt_WHEN);
     PL_stack_sp = PL_stack_base + cx->blk_oldsp;
     POPWHEN(cx);
-    POPBLOCK(cx,newpm);
-    PL_curpm = newpm;   /* pop $1 et al */
+    POPBLOCK(cx);
     cxstack_ix--;
 
     return cx->blk_givwhen.leave_op->op_next;

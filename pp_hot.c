@@ -3271,7 +3271,6 @@ PP(pp_leavesub)
     dSP;
     SV **mark;
     SV **newsp;
-    PMOP *newpm;
     I32 gimme;
     PERL_CONTEXT *cx;
 
@@ -3338,8 +3337,7 @@ PP(pp_leavesub)
     PUTBACK;
 
     POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
-    POPBLOCK(cx,newpm);
-    PL_curpm = newpm;	/* ... and pop $1 et al */
+    POPBLOCK(cx);
     cxstack_ix--;
 
     return cx->blk_sub.retop;
