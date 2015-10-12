@@ -4,7 +4,7 @@
 
 <div><h2>Tickets Listed in #125394: 5.22.1 blockers</h2>
 
-<commit votes="steveh, khw" id="89d84ff965b644c21c4c0633253e4cb21f72b62c" ticket="125381" desc="[perl #125381] fix -Cnn parsing"/>
+<commit votes="steveh, khw, arc" id="89d84ff965b644c21c4c0633253e4cb21f72b62c" ticket="125381" desc="[perl #125381] fix -Cnn parsing"/>
 
 </div>
 
@@ -16,16 +16,22 @@
 Small code quality tweaks:
 <commit votes="jhi" id="976258ece432e47adaa13d955134a8972933bcca" ticket="" desc="Superfluous null ptr test warnings by clang 3.7"/>
 (jhi: This one is possibly debatable since it has the chance of changing behavior.)
+(arc: I agree that explicit nullity tests on NN arguments are (at best)
+misleading, so I'm in favour of fixes like this in blead; but I'm very
+nervous about the idea of applying this change in maint. If other committers
+agree on applying this, I won't block that, but I nonetheless suggest this
+should be excluded.)
+
 (steveh: This requires the scalar.pm $VERSION bump from 4b59afe63011514fa1a42231ca1f7bd830b8b0bd as well:)
-<commit votes="jhi, khw" id="d1992db059626dbd1b9a7e2cf67ef89e6428a9c0" ticket="" desc="There is no SSize_t_size."/>
+<commit votes="jhi, khw, arc" id="d1992db059626dbd1b9a7e2cf67ef89e6428a9c0" ticket="" desc="There is no SSize_t_size."/>
 
 Documentation patches (suggested by ether):
-<commit votes="khw" id="83c1fffeadddac231b705fc8a420de87fd4f5ea3" ticket="" desc="Document $OLD_PERL_VERSION's history"/>
-<commit votes="khw" id="9fcc23141fa6c68e7419a4caf9046d6912491e37" ticket="" desc="perlvar: discourage $OLD_PERL_VERSION"/>
-<commit votes="steveh, khw" id="87518e92cecac2acea7073cceea51ca610774fb0" ticket="" desc="perldata: Change pod to reflect reality"/>
-<commit votes="khw" id="4e9736a3b8992ab439fe0bfc6201168cf7ac6a93" ticket="" desc="perlcommunity.pod updates"/>
-<commit votes="khw" id="3f9ec86148ce5619d909c108083f27a01c56adee" ticket="" desc="do not try printing undef"/>
-<commit votes="steveh, khw" id="256ca3d37ed232e10fbb2884be45691e745be7a9" ticket="" desc="perlvar: fix list of defaulted array operators"/>
+<commit votes="khw, arc" id="83c1fffeadddac231b705fc8a420de87fd4f5ea3" ticket="" desc="Document $OLD_PERL_VERSION's history"/>
+<commit votes="khw, arc" id="9fcc23141fa6c68e7419a4caf9046d6912491e37" ticket="" desc="perlvar: discourage $OLD_PERL_VERSION"/>
+<commit votes="steveh, khw, arc" id="87518e92cecac2acea7073cceea51ca610774fb0" ticket="" desc="perldata: Change pod to reflect reality"/>
+<commit votes="khw, arc" id="4e9736a3b8992ab439fe0bfc6201168cf7ac6a93" ticket="" desc="perlcommunity.pod updates"/>
+<commit votes="khw, arc" id="3f9ec86148ce5619d909c108083f27a01c56adee" ticket="" desc="do not try printing undef"/>
+<commit votes="steveh, khw, arc" id="256ca3d37ed232e10fbb2884be45691e745be7a9" ticket="" desc="perlvar: fix list of defaulted array operators"/>
 <commit votes="khw" id="f0b1ad2b19f6dbfdc5d5feb5c5fb48888f1cd46d" ticket="" desc="perlebcdic: Fix typo"/>
 <commit votes="khw" id="b6d5ddf72d1067c498a7ed65623df9f2f8f8d749" ticket="123264" desc="[perl #123264] explicitly document the return value of sysopen"/>
 <commit votes="khw" id="bace499647c542e44fa169173393f19316fe05b6" ticket="" desc="Perl example style nit in docs for sort()"/>
@@ -56,45 +62,55 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="steveh, khw" id="46b27d2f2c37f40dde845f9b4743975c69f2cc27" ticket="123398" desc="don't fatalize warnings during unwinding (#123398)"/>
+<commit votes="steveh, khw, arc" id="46b27d2f2c37f40dde845f9b4743975c69f2cc27" ticket="123398" desc="don't fatalize warnings during unwinding (#123398)"/>
 <commit votes="" id="" ticket="123878" desc=""/>
-<commit votes="steveh, khw" id="64821df16a716bfc005acb06c7dc5b72afabe38d" ticket="123961" desc="[perl #123961] handle a missing closing ` for -DT output"/>
-<commit votes="steveh, khw" id="d2fcb1d6773910aef058d59681ff6ae649f68352" ticket="125541" desc="[perl #125541] Fix crash with %::=(); J->${\&quot;::&quot;}"/>
+<commit votes="steveh, khw, arc" id="64821df16a716bfc005acb06c7dc5b72afabe38d" ticket="123961" desc="[perl #123961] handle a missing closing ` for -DT output"/>
+<commit votes="steveh, khw, arc" id="d2fcb1d6773910aef058d59681ff6ae649f68352" ticket="125541" desc="[perl #125541] Fix crash with %::=(); J->${\&quot;::&quot;}"/>
 
-<commit votes="steveh, khw" id="e7cce976d7dd1f4fda1f387d02c6403f43346e9c" ticket="125805" desc="PATCH: [perl #125805] Perl segfaults with a regex_sets error message"/>
-<commit votes="steveh, khw" id="e0be3f061825dcf8ffbb0e0581a77e09e74ab8fc" ticket="125805" desc="perldelta: Improve wording for [perl #125805]"/>
-<commit votes="steveh, khw" id="e7bc593485cfd538614dec2ab351c68f94c75c39" ticket="125805" desc="Further clarification to [perl #125805] perldelta"/>
+<commit votes="steveh, khw, arc" id="e7cce976d7dd1f4fda1f387d02c6403f43346e9c" ticket="125805" desc="PATCH: [perl #125805] Perl segfaults with a regex_sets error message"/>
+<commit votes="steveh, khw, arc" id="e0be3f061825dcf8ffbb0e0581a77e09e74ab8fc" ticket="125805" desc="perldelta: Improve wording for [perl #125805]"/>
+<commit votes="steveh, khw, arc" id="e7bc593485cfd538614dec2ab351c68f94c75c39" ticket="125805" desc="Further clarification to [perl #125805] perldelta"/>
 
-<commit votes="steveh, khw" id="e6b2cf838e87ec34b3a2043c947b4f723d6efcca" ticket="125341" desc="[perl #125341] check for unexpected trash after any sub start"/>
-<commit votes="steveh, khw" id="3160b44a75aed79c4961134279bf776ca5bff28b" ticket="125341" desc="perldelta for e6b2cf838"/>
+<commit votes="steveh, khw, arc" id="e6b2cf838e87ec34b3a2043c947b4f723d6efcca" ticket="125341" desc="[perl #125341] check for unexpected trash after any sub start"/>
+<commit votes="steveh, khw, arc" id="3160b44a75aed79c4961134279bf776ca5bff28b" ticket="125341" desc="perldelta for e6b2cf838"/>
 
-<commit votes="steveh, khw" id="3c62f09f418b63bd79a6cbd20aaec4d992a6cc64" ticket="125840" desc="RT #125840 stop *x = $x doing bad things"/>
+<commit votes="steveh, khw, arc" id="3c62f09f418b63bd79a6cbd20aaec4d992a6cc64" ticket="125840" desc="RT #125840 stop *x = $x doing bad things"/>
 
 (steveh: Not a crash fix, but I feel this should be admissable for a maint release anyway:)
 (khw: Hanging IMO is just as serious as crashing.  But this is not a recent regression. OTOH, this is a trivial patch)
-<commit votes="steveh, khw" id="22b433eff9a1ffa2454e18405a56650f07b385b5" ticket="123562" desc="PATCH [perl #123562] Regexp-matching &quot;hangs&quot;"/>
+<commit votes="steveh, khw, arc" id="22b433eff9a1ffa2454e18405a56650f07b385b5" ticket="123562" desc="PATCH [perl #123562] Regexp-matching &quot;hangs&quot;"/>
 (khw: The following isn't necessary, but is a trivial improvement on 22b43)
-<commit votes="steveh" id="d820a0ff34c7df39297a54193fd756bb42c5c06e" ticket="123562" desc="regexec.c: Use Perl_croak_nocontext()"/>
+<commit votes="steveh, arc" id="d820a0ff34c7df39297a54193fd756bb42c5c06e" ticket="123562" desc="regexec.c: Use Perl_croak_nocontext()"/>
 
-<commit votes="steveh, khw" id="a293d0fd7883038d8dfef01528c7398ba246b5f9" ticket="125350" desc="Tentative fix for RT#125350 - AFL detected crash."/>
+<commit votes="steveh, khw, arc" id="a293d0fd7883038d8dfef01528c7398ba246b5f9" ticket="125350" desc="Tentative fix for RT#125350 - AFL detected crash."/>
 
-<commit votes="steveh" id="7f399b4008958590740e5bcb61cf22e2cfe5395b" ticket="126064" desc="[perl #126064] Apply scalar context to stat args"/>
+<commit votes="steveh, arc" id="7f399b4008958590740e5bcb61cf22e2cfe5395b" ticket="126064" desc="[perl #126064] Apply scalar context to stat args"/>
 
 </div>
 
 <div><h3>Regression Fixes</h3>
 
+(arc: I'm puzzled by this one, in that I can't see a maint regression that's
+fixed by 1.17. Term::Cap version 1.16 did contain a regression that is fixed
+by 1.17, but no releases of Perl (including blead releases) have ever contained
+1.16. (Commit 60d2b2aebfceab38ad669bac181bb68e42c05cb2 imported 1.16 into
+then-blead, but 663bce880acdd4bee8f6d5b50dbb3fee75e1d0ec, pushed to blead
+later the same day, reverted to 1.15.) Unless there's something I'm missing,
+I think perlpolicy says that maint-5.22 should retain Term::Cap 1.15.)
 <commit votes="steveh, khw" id="23a7573439e81ad932fe176e4a9116ecc0ab362f" ticket="" desc="Update Term-Cap to CPAN version 1.17"/>
 
-<commit votes="steveh, khw" id="9a7bb2f73a8a1b561890191974201d576371e7f9" ticket="125825" desc="PATCH: [perl 125825] {n}+ possessive quantifier broken"/>
-<commit votes="steveh, khw" id="6a475a49baf3f05fd8608db42c00aabd13729c7b" ticket="125825" desc="perldelta: Fix typo"/>
+<commit votes="steveh, khw, arc" id="9a7bb2f73a8a1b561890191974201d576371e7f9" ticket="125825" desc="PATCH: [perl 125825] {n}+ possessive quantifier broken"/>
+<commit votes="steveh, khw, arc" id="6a475a49baf3f05fd8608db42c00aabd13729c7b" ticket="125825" desc="perldelta: Fix typo"/>
 
-<commit votes="steveh, khw" id="47f5936b63e4d8d8534d6dd332de6fe8a8510626" ticket="125892" desc="regcomp.c: Add synonym for macro complement"/>
+<commit votes="steveh, khw, arc" id="47f5936b63e4d8d8534d6dd332de6fe8a8510626" ticket="125892" desc="regcomp.c: Add synonym for macro complement"/>
 (khw: 47f59 is needed for ab8726 to apply cleanly, but the latter could be hand edited instead.  But the first is pretty trivial)
-<commit votes="steveh, khw" id="ab87267cc6ac3b1ea950ee4e45bd80dea25b8f79" ticket="125892" desc="PATCH: [perl #125892] qr/(?[ ]) regression with '!'"/>
+(arc: FWIW, I think it looks less risky to take both commits than to unpick
+the substantive change in ab8726 from the refactoring in its parent 47f59.)
+<commit votes="steveh, khw, arc" id="ab87267cc6ac3b1ea950ee4e45bd80dea25b8f79" ticket="125892" desc="PATCH: [perl #125892] qr/(?[ ]) regression with '!'"/>
 
-<commit votes="steveh" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
-<commit votes="steveh" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
+(arc: This regression was introduced in 5.10.0. Yow!)
+<commit votes="steveh, arc" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
+<commit votes="steveh, arc" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
 
 </div>
 
@@ -112,18 +128,18 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Platform-Specific Test Fixes</h3>
 
 <commit votes="steveh, khw" id="c0bf9074e4a1b56f9afe46591417297e6613d5ea" ticket="125924" desc="[perl #125924] allow op/infnan.t to pass on Win32 gcc"/>
-<commit votes="steveh, khw" id="c79631a1c8b4ecf3ec1fc557c875d412058b3e47" ticket="" desc="prevent op/time.t failures on NetBSD 5.1"/>
+<commit votes="steveh, khw, arc" id="c79631a1c8b4ecf3ec1fc557c875d412058b3e47" ticket="" desc="prevent op/time.t failures on NetBSD 5.1"/>
 
 (steveh: Only the autodie part of this is applicable; win32/GNUmakefile isn't in maint-5.22)
-<commit votes="steveh" id="e120c24fe257993e9cbf4c567194bec2792f3ccc" ticket="126133" desc="[perl #126133] autodie touches its touch_me, make it writable"/>
+<commit votes="steveh, arc" id="e120c24fe257993e9cbf4c567194bec2792f3ccc" ticket="126133" desc="[perl #126133] autodie touches its touch_me, make it writable"/>
 
 </div>
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh" id="a3faa257b9fc52f80556200842eaee2d1ecf3f59" ticket="" desc="Clarify FIRSTKEY and NEXTKEY usage."/>
+<commit votes="steveh, arc" id="a3faa257b9fc52f80556200842eaee2d1ecf3f59" ticket="" desc="Clarify FIRSTKEY and NEXTKEY usage."/>
 <commit votes="steveh" id="3b90fd9161349d784f8fd6d60e63a664a3f9411e" ticket="" desc="document the specific value of $!{E...}"/>
-<commit votes="jhi, steveh" id="55121b6b0516ee559126c7bee6b4b43b1e8f59f7" ticket="" desc="perlsub.pod: note that anonymous subs can have signatures, too"/>
+<commit votes="jhi, steveh, arc" id="55121b6b0516ee559126c7bee6b4b43b1e8f59f7" ticket="" desc="perlsub.pod: note that anonymous subs can have signatures, too"/>
 
 </div>
 
