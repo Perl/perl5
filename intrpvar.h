@@ -76,7 +76,22 @@ PERLVAR(I, curpm,	PMOP *)		/* what to do \ interps in REs from */
 
 PERLVAR(I, tainting,	bool)		/* doing taint checks */
 PERLVAR(I, tainted,	bool)		/* using variables controlled by $< */
+
+/* PL_delaymagic is currently used for two purposes: to assure simultaneous
+ * updates in ($<,$>) = ..., and to assure atomic update in push/unshift
+ * @ISA, It works like this: a few places such as pp_push set the DM_DELAY
+ * flag; then various places such as av_store() skip mg_set(ary) if this
+ * flag is set, and various magic vtable methods set flags like
+ * DM_ARRAY_ISA if they've seen something of that ilk. Finally when
+ * control returns to pp_push or whatever, it sees if any of those flags
+ * have been set, and if so finally calls mg_set().
+ *
+ * NB: PL_delaymagic is automatically saved and restored by JUMPENV_PUSH
+ * / POP. This removes the need to do ENTER/SAVEI16(PL_delaymagic)/LEAVE
+ * in hot code like pp_push.
+ */
 PERLVAR(I, delaymagic,	U16)		/* ($<,$>) = ... */
+
 PERLVAR(I, localizing,	U8)		/* are we processing a local() list? */
 PERLVAR(I, in_eval,	U8)		/* trap "fatal" errors? */
 PERLVAR(I, defgv,	GV *)           /* the *_ glob */

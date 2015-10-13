@@ -34,6 +34,7 @@ struct jmpenv {
     Sigjmp_buf		je_buf;		/* uninit if je_prev is NULL */
     int			je_ret;		/* last exception thrown */
     bool		je_mustcatch;	/* need to call longjmp()? */
+    U16                 je_old_delaymagic; /* saved PL_delaymagic */
 };
 
 typedef struct jmpenv JMPENV;
@@ -55,6 +56,7 @@ typedef struct jmpenv JMPENV;
 	PL_start_env.je_prev = NULL;		\
 	PL_start_env.je_ret = -1;		\
 	PL_start_env.je_mustcatch = TRUE;	\
+	PL_start_env.je_old_delaymagic = 0;	\
     } STMT_END
 
 /*
@@ -103,6 +105,7 @@ typedef struct jmpenv JMPENV;
 	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK);		\
 	PL_top_env = &cur_env;						\
 	cur_env.je_mustcatch = FALSE;					\
+	cur_env.je_old_delaymagic = PL_delaymagic;			\
 	(v) = cur_env.je_ret;						\
     } STMT_END
 
@@ -114,6 +117,7 @@ typedef struct jmpenv JMPENV;
 	    Perl_deb(aTHX_ "JUMPENV_POP level=%d at %s:%d\n",		\
 		         i, __FILE__, __LINE__);})			\
 	assert(PL_top_env == &cur_env);					\
+	PL_delaymagic = cur_env.je_old_delaymagic;			\
 	PL_top_env = cur_env.je_prev;					\
     } STMT_END
 

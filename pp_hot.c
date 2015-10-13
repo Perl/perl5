@@ -1174,6 +1174,9 @@ PP(pp_aassign)
     SSize_t i;
     int magic;
     U32 lval;
+    /* PL_delaymagic is restored by JUMPENV_POP on dieing, so we
+     * only need to save locally, not on the save stack */
+    U16 old_delaymagic = PL_delaymagic;
 #ifdef DEBUGGING
     bool fake = 0;
 #endif
@@ -1545,7 +1548,7 @@ PP(pp_aassign)
         PERL_UNUSED_VAR(tmp_egid);
 #endif
     }
-    PL_delaymagic = 0;
+    PL_delaymagic = old_delaymagic;
 
     if (gimme == G_VOID)
 	SP = firstrelem - 1;
