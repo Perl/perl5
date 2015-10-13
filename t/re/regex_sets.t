@@ -96,6 +96,8 @@ like("k", $still_fold, "/i on interpolated (?[ ]) is retained in outer without /
 eval 'my $x = qr/(?[ [a] ])/; qr/(?[ $x ])/';
 is($@, "", 'qr/(?[ [a] ])/ can be interpolated');
 
+like("B", qr/(?[ [B] | ! ( [^B] ) ])/, "[perl #125892]");
+
 done_testing();
 
 1;
