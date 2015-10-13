@@ -1,5 +1,8 @@
 package ExtUtils::CBuilder::Platform::Windows::MSVC;
-$ExtUtils::CBuilder::Platform::Windows::MSVC::VERSION = '0.280223';
+$ExtUtils::CBuilder::Platform::Windows::MSVC::VERSION = '0.280224';
+use warnings;
+use strict;
+
 sub arg_exec_file {
   my ($self, $file) = @_;
   return "/OUT:$file";

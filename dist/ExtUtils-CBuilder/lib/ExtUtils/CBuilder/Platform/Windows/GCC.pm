@@ -1,5 +1,8 @@
 package ExtUtils::CBuilder::Platform::Windows::GCC;
-$ExtUtils::CBuilder::Platform::Windows::GCC::VERSION = '0.280223';
+$ExtUtils::CBuilder::Platform::Windows::GCC::VERSION = '0.280224';
+use warnings;
+use strict;
+
 sub format_compiler_cmd {
   my ($self, %spec) = @_;
 

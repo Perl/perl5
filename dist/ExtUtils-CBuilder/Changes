@@ -1,5 +1,11 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.282224 - 2015-10-09
+
+  Enhncements:
+
+  - Use warnings/strict on all modules.
+
 0.280223 - 2015-06-02
 
   Fixed:
