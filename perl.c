@@ -1485,8 +1485,8 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
         const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 
         if (s && strEQ(s, "1")) {
-            unsigned char *seed= PERL_HASH_SEED;
-            unsigned char *seed_end= PERL_HASH_SEED + PERL_HASH_SEED_BYTES;
+            const unsigned char *seed= PERL_HASH_SEED;
+            const unsigned char *seed_end= PERL_HASH_SEED + PERL_HASH_SEED_BYTES;
             PerlIO_printf(Perl_debug_log, "HASH_FUNCTION = %s HASH_SEED = 0x", PERL_HASH_FUNC);
             while (seed < seed_end) {
                 PerlIO_printf(Perl_debug_log, "%02x", *seed++);

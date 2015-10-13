@@ -83,11 +83,11 @@
 #   if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
 #       define PERL_HASH_SEED PL_hash_seed
 #   elif PERL_HASH_SEED_BYTES == 4
-#       define PERL_HASH_SEED "PeRl"
+#       define PERL_HASH_SEED ((const U8 *)"PeRl")
 #   elif PERL_HASH_SEED_BYTES == 8
-#       define PERL_HASH_SEED "PeRlHaSh"
+#       define PERL_HASH_SEED ((const U8 *)"PeRlHaSh")
 #   elif PERL_HASH_SEED_BYTES == 16
-#       define PERL_HASH_SEED "PeRlHaShhAcKpErl"
+#       define PERL_HASH_SEED ((const U8 *)"PeRlHaShhAcKpErl")
 #   else
 #       error "No PERL_HASH_SEED definition for " PERL_HASH_FUNC
 #   endif
