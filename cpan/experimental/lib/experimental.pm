@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.015';
+$experimental::VERSION = '0.016';
 use strict;
 use warnings;
 use version ();
@@ -43,6 +43,7 @@ my %max_version = (
 );
 
 $_ = version->new($_) for values %min_version;
+$_ = version->new($_) for values %max_version;
 
 my %additional = (
 	postderef  => ['postderef_qq'],
@@ -60,9 +61,6 @@ sub _enable {
 		feature->import($pragma);
 		_enable(@{ $additional{$pragma} }) if $additional{$pragma};
 	}
-	elsif ($] >= $max_version{$pragma}) {
-		croak "Experimental feature $pragma has been removed from perl in version $max_version{$pragma}";
-	}
 	elsif (not exists $min_version{$pragma}) {
 		croak "Can't enable unknown feature $pragma";
 	}
@@ -74,6 +72,9 @@ sub _enable {
 			);
 		}
 		croak "Need perl $stable or later for feature $pragma";
+	}
+	elsif ($] >= ($max_version{$pragma} || 7)) {
+		croak "Experimental feature $pragma has been removed from perl in version $max_version{$pragma}";
 	}
 }
 
@@ -127,7 +128,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.015
+version 0.016
 
 =head1 SYNOPSIS
 
