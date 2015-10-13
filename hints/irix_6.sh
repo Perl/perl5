@@ -683,3 +683,6 @@ usemymalloc=${usemymalloc:-false}
 # instead; in IRIX this is not true because the prototype of fcntl()
 # requires explicit include of <fcntl.h>
 i_fcntl=define
+
+# There is <prctl.h> but it's not the Linux one that Configure expects.
+d_prctl="$undef"
