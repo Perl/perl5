@@ -234,3 +234,8 @@ Constant(q) unknown at - line 12, near ""a""
 <<"foo
 EXPECT
 Unterminated delimiter for here document at - line 1.
+########
+# NAME BEGIN <> [perl #125341]
+BEGIN <>
+EXPECT
+Illegal declaration of subroutine BEGIN at - line 1.
