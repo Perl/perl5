@@ -1147,7 +1147,10 @@ cpan/File-Fetch/lib/File/Fetch.pm	File::Fetch
 cpan/File-Fetch/t/01_File-Fetch.t	File::Fetch tests
 cpan/File-Fetch/t/null_subclass.t
 cpan/File-Path/lib/File/Path.pm		Do things like 'mkdir -p' and 'rm -r'
+cpan/File-Path/t/FilePathTest.pm	See if File::Path works
+cpan/File-Path/t/Path_root.t		See if File::Path works
 cpan/File-Path/t/Path.t			See if File::Path works
+cpan/File-Path/t/Path_win32.t		See if File::Path works
 cpan/File-Path/t/taint.t		See if File::Path works with -T
 cpan/File-Temp/lib/File/Temp.pm	create safe temporary files and file handles
 cpan/File-Temp/t/cmp.t		See if File::Temp works

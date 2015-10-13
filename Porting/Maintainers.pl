@@ -502,12 +502,11 @@ use File::Glob qw(:case);
     },
 
     'File::Path' => {
-        'DISTRIBUTION' => 'RICHE/File-Path-2.11.tar.gz',
+        'DISTRIBUTION' => 'RICHE/File-Path-2.12.tar.gz',
         'FILES'        => q[cpan/File-Path],
         'EXCLUDED'     => [
-            qw( eg/setup-extra-tests
-                t/Path-Class.t
-                )
+            qw(t/Path-Class.t),
+            qr{^xt/},
         ],
     },
 

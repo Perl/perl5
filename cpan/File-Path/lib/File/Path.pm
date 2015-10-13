@@ -18,7 +18,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = '2.11';
+$VERSION   = '2.12';
 $VERSION   = eval $VERSION;
 @ISA       = qw(Exporter);
 @EXPORT    = qw(mkpath rmtree);
@@ -344,7 +344,7 @@ sub _rmtree {
           : $root;
 
         my ( $ldev, $lino, $perm ) = ( lstat $root )[ 0, 1, 2 ]
-          or ( _error( $arg, "$root", $root ) and next ROOT_DIR );
+          or next ROOT_DIR;
 
         if ( -d _ ) {
             $root = VMS::Filespec::vmspath( VMS::Filespec::pathify($root) )
@@ -576,8 +576,7 @@ File::Path - Create or remove directory trees
 
 =head1 VERSION
 
-This document describes version 2.09 of File::Path, released
-2013-01-17.
+This document describes version 2.12 of File::Path.
 
 =head1 SYNOPSIS
 
@@ -717,11 +716,14 @@ return value of the function is otherwise identical to make_path().
 
 The C<remove_tree> function deletes the given directories and any
 files and subdirectories they might contain, much like the Unix
-command C<rm -r> or the Windows commands C<rmdir /s> and C<rd /s>.
+command C<rm -r> or the Windows commands C<rmdir /s> and C<rd /s>. The
+only exception to the function similarity is C<remove_tree> accepts
+only directories whereas C<rm -r> also accepts files.
 
 The function accepts a list of directories to be
 removed. Its behaviour may be tuned by an optional hashref
-appearing as the last parameter on the call.
+appearing as the last parameter on the call.  If an empty string is
+passed to C<remove_tree>, an error will occur.
 
 The functions returns the number of files successfully deleted.
 
@@ -802,9 +804,12 @@ remove_tree().
 
 =item B<NOTE:>
 
-The following error handling mechanism is considered
-experimental and is subject to change pending feedback from
-users.
+The following error handling mechanism is consistent throughout all
+code paths EXCEPT in cases where the ROOT node is nonexistent.  In
+version 2.11 the maintainers attempted to rectify this inconsistency
+but too many downstream modules encountered problems.  In such case,
+if you require root node evaluation or error checking prior to calling
+C<make_path> or C<remove_tree>, you should take additional precautions.
 
 =back
 
@@ -1141,6 +1146,8 @@ Contributors to File::Path, in alphabetical order.
 =over 1
 
 =item <F<bulkdd@cpan.org>>
+
+=item Craig A. Berry <F<craigberry@mac.com>>
 
 =item Richard Elberger <F<riche@cpan.org>>
 
