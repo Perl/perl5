@@ -506,7 +506,6 @@ my @warning = (
                     'Useless (?c) - use /gc modifier {#} m/(?ogc{#})\x{100}/',
                   ],
     '/a{1,1}?\x{100}/' => 'Useless use of greediness modifier \'?\' {#} m/a{1,1}?{#}\x{100}/',
-    '/b{3}  +\x{100}/x' => 'Useless use of greediness modifier \'+\' {#} m/b{3}  +{#}\x{100}/',
     "/(?[ [ % - % ] ])/" => "",
     "/(?[ [ : - \\x$colon_hex ] ])\\x{100}/" => "\": - \\x$colon_hex \" is more clearly written simply as \":\" {#} m/(?[ [ : - \\x$colon_hex {#}] ])\\x{100}/",
     "/(?[ [ \\x$colon_hex - : ] ])\\x{100}/" => "\"\\x$colon_hex\ - : \" is more clearly written simply as \":\" {#} m/(?[ [ \\x$colon_hex - : {#}] ])\\x{100}/",

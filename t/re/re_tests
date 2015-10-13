@@ -1925,5 +1925,7 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 /w\zxy?\z/i	\x{100}a\x{80}a	n	-	-
 /w\z\R\z/i	\x{100}a\x{80}a	n	-	-
 
+/(a+){1}+a/	aaa	n	-	-		# [perl #125825]
+
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

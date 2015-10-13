@@ -343,6 +343,13 @@ C<qr/(?[ () ])/> no longer segfaults, giving a syntax error message instead.
 
 =item *
 
+Regular expression possesive quantifier v5.20 regression now fixed.
+C<qr/>I<PAT>C<{>I<min>,I<max>C<}+>C</> is supposed to behave identically
+to C<qr/(?E<gt>>I<PAT>C<{>I<min>,I<max>C<})/>.  Since v5.20, this didn't
+work if I<min> and I<max> were equal.  [perl #125825]
+
+=item *
+
 C<< BEGIN <> >> no longer segfaults and properly produces an error
 message.  [perl #125341]
 
