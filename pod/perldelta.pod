@@ -341,6 +341,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 C<qr/(?[ () ])/> no longer segfaults, giving a syntax error message instead.
 [perl #125805]
 
+=item *
+
+C<< BEGIN <> >> no longer segfaults and properly produces an error
+message.  [perl #125341]
+
 =back
 
 =head1 Known Problems
