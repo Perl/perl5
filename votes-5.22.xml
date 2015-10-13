@@ -11,15 +11,6 @@
 (steveh: These don't all meet the normal criteria for inclusion, but I've listed them for now since they've all been nominated anyway.
  We can always make exceptions where deemed necessary, or otherwise drop them from the list.)
 
-Small code quality tweaks:
-<commit votes="jhi" id="976258ece432e47adaa13d955134a8972933bcca" ticket="" desc="Superfluous null ptr test warnings by clang 3.7"/>
-(jhi: This one is possibly debatable since it has the chance of changing behavior.)
-(arc: I agree that explicit nullity tests on NN arguments are (at best)
-misleading, so I'm in favour of fixes like this in blead; but I'm very
-nervous about the idea of applying this change in maint. If other committers
-agree on applying this, I won't block that, but I nonetheless suggest this
-should be excluded.)
-
 Documentation patches (suggested by ether):
 <commit votes="khw, arc" id="83c1fffeadddac231b705fc8a420de87fd4f5ea3" ticket="" desc="Document $OLD_PERL_VERSION's history"/>
 <commit votes="khw, arc" id="9fcc23141fa6c68e7419a4caf9046d6912491e37" ticket="" desc="perlvar: discourage $OLD_PERL_VERSION"/>
