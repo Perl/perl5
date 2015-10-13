@@ -16,7 +16,7 @@ use Carp;
 
 no warnings 'utf8';
 
-our $VERSION = '1.19';
+our $VERSION = '1.21';
 our $PACKAGE = __PACKAGE__;
 
 our @EXPORT = qw( NFC NFD NFKC NFKD );
@@ -45,7 +45,27 @@ sub pack_U {
 }
 
 sub unpack_U {
+
+    # The empty pack returns an empty UTF-8 string, so the effect is to force
+    # the shifted parameter into being UTF-8.  This shouldn't matter; the
+    # commit messages seem to point to an attempt to get things to work in
+    # EBCDIC in 5.8.
     return unpack('U*', shift(@_).pack('U*'));
+}
+
+BEGIN {
+    # Starting in v5.20, the tables in lib/unicore are built using the
+    # platform's native character set for code points 0-255.  Things like the
+    # combining class and compositions exclusions are all above 255, so it
+    # doesn't matter for them.
+
+    *pack_unicore = ($] ge 5.020)
+                    ? sub { return pack('W*', @_); }
+                    : \&pack_U;
+
+    *unpack_unicore = ($] ge 5.020)
+                      ? sub { return unpack('W*', $_[0]); }
+                      : \&unpack_U;
 }
 
 require Exporter;
@@ -70,7 +90,9 @@ our $Decomp = do "unicore/Decomposition.pl"
     || do "unicode/Decomposition.pl"
     || croak "$PACKAGE: Decomposition.pl not found";
 
-# CompositionExclusions.txt since Unicode 3.2.0
+# CompositionExclusions.txt since Unicode 3.2.0.  Modern perl versions allow
+# one to get this table from Unicode::UCD, so if it ever changes, it might be
+# better to retrieve it from there, rather than hard-coding it here.
 our @CompEx = qw(
     0958 0959 095A 095B 095C 095D 095E 095F 09DC 09DD 09DF 0A33 0A36
     0A59 0A5A 0A5B 0A5E 0B5C 0B5D 0F43 0F4D 0F52 0F57 0F5C 0F69 0F76
@@ -106,7 +128,7 @@ sub decomposeHangul {
        VBase + $vindex,
       $tindex ? (TBase + $tindex) : (),
     );
-    return wantarray ? @ret : pack_U(@ret);
+    return wantarray ? @ret : pack_unicore(@ret);
 }
 
 ########## getting full decomposition ##########
@@ -223,7 +245,7 @@ sub getCombinClass ($) {
 sub getCanon ($) {
     my $uv = 0 + shift;
     return exists $Canon{$uv}
-	? pack_U(@{ $Canon{$uv} })
+	? pack_unicore(@{ $Canon{$uv} })
 	: (SBase <= $uv && $uv <= SFinal)
 	    ? scalar decomposeHangul($uv)
 	    : undef;
@@ -232,7 +254,7 @@ sub getCanon ($) {
 sub getCompat ($) {
     my $uv = 0 + shift;
     return exists $Compat{$uv}
-	? pack_U(@{ $Compat{$uv} })
+	? pack_unicore(@{ $Compat{$uv} })
 	: (SBase <= $uv && $uv <= SFinal)
 	    ? scalar decomposeHangul($uv)
 	    : undef;
@@ -310,10 +332,10 @@ sub isNFKC_NO ($) {
 sub decompose ($;$)
 {
     my $hash = $_[1] ? \%Compat : \%Canon;
-    return pack_U map {
+    return pack_unicore map {
 	$hash->{ $_ } ? @{ $hash->{ $_ } } :
 	    (SBase <= $_ && $_ <= SFinal) ? decomposeHangul($_) : $_
-    } unpack_U($_[0]);
+        } unpack_unicore($_[0]);
 }
 
 ##
@@ -321,7 +343,7 @@ sub decompose ($;$)
 ##
 sub reorder ($)
 {
-    my @src = unpack_U($_[0]);
+    my @src = unpack_unicore($_[0]);
 
     for (my $i=0; $i < @src;) {
 	$i++, next if ! $Combin{ $src[$i] };
@@ -335,7 +357,7 @@ sub reorder ($)
 
 	@src[ $ini .. $i - 1 ] = @src[ @tmp ];
     }
-    return pack_U(@src);
+    return pack_unicore(@src);
 }
 
 
@@ -350,7 +372,7 @@ sub reorder ($)
 ##
 sub compose ($)
 {
-    my @src = unpack_U($_[0]);
+    my @src = unpack_unicore($_[0]);
 
     for (my $s = 0; $s+1 < @src; $s++) {
 	next unless defined $src[$s] && ! $Combin{ $src[$s] };
@@ -377,7 +399,7 @@ sub compose ($)
 	    if ($blocked) { $blocked = 0 } else { -- $uncomposed_cc }
 	}
     }
-    return pack_U(grep defined, @src);
+    return pack_unicore(grep defined, @src);
 }
 
 
@@ -386,7 +408,7 @@ sub compose ($)
 ##
 sub composeContiguous ($)
 {
-    my @src = unpack_U($_[0]);
+    my @src = unpack_unicore($_[0]);
 
     for (my $s = 0; $s+1 < @src; $s++) {
 	next unless defined $src[$s] && ! $Combin{ $src[$s] };
@@ -402,7 +424,7 @@ sub composeContiguous ($)
 	    $src[$s] = $c; $src[$j] = undef;
 	}
     }
-    return pack_U(grep defined, @src);
+    return pack_unicore(grep defined, @src);
 }
 
 
@@ -426,7 +448,7 @@ sub checkNFD ($)
 {
     my $preCC = 0;
     my $curCC;
-    for my $uv (unpack_U($_[0])) {
+    for my $uv (unpack_unicore($_[0])) {
 	$curCC = $Combin{ $uv } || 0;
 	return '' if $preCC > $curCC && $curCC != 0;
 	return '' if exists $Canon{$uv} || (SBase <= $uv && $uv <= SFinal);
@@ -439,7 +461,7 @@ sub checkNFKD ($)
 {
     my $preCC = 0;
     my $curCC;
-    for my $uv (unpack_U($_[0])) {
+    for my $uv (unpack_unicore($_[0])) {
 	$curCC = $Combin{ $uv } || 0;
 	return '' if $preCC > $curCC && $curCC != 0;
 	return '' if exists $Compat{$uv} || (SBase <= $uv && $uv <= SFinal);
@@ -452,7 +474,7 @@ sub checkNFC ($)
 {
     my $preCC = 0;
     my($curCC, $isMAYBE);
-    for my $uv (unpack_U($_[0])) {
+    for my $uv (unpack_unicore($_[0])) {
 	$curCC = $Combin{ $uv } || 0;
 	return '' if $preCC > $curCC && $curCC != 0;
 
@@ -470,7 +492,7 @@ sub checkNFKC ($)
 {
     my $preCC = 0;
     my($curCC, $isMAYBE);
-    for my $uv (unpack_U($_[0])) {
+    for my $uv (unpack_unicore($_[0])) {
 	$curCC = $Combin{ $uv } || 0;
 	return '' if $preCC > $curCC && $curCC != 0;
 
@@ -488,7 +510,7 @@ sub checkFCD ($)
 {
     my $preCC = 0;
     my $curCC;
-    for my $uv (unpack_U($_[0])) {
+    for my $uv (unpack_unicore($_[0])) {
 	# Hangul syllable need not decomposed since cc[any Jamo] == 0;
 	my @uvCan = exists $Canon{$uv} ? @{ $Canon{$uv} } : ($uv);
 
@@ -503,7 +525,7 @@ sub checkFCC ($)
 {
     my $preCC = 0;
     my($curCC, $isMAYBE);
-    for my $uv (unpack_U($_[0])) {
+    for my $uv (unpack_unicore($_[0])) {
 	# Hangul syllable need not decomposed since cc[any Jamo] == 0;
 	my @uvCan = exists $Canon{$uv} ? @{ $Canon{$uv} } : ($uv);
 
@@ -527,7 +549,7 @@ sub checkFCC ($)
 
 sub splitOnLastStarter
 {
-    my $str = pack_U(unpack_U(shift));
+    my $str = pack_unicore(unpack_unicore(shift));
     if ($str eq '') {
 	return ('', '');
     }
@@ -537,7 +559,9 @@ sub splitOnLastStarter
     do {
 	$ch = chop($str);
 	$unproc = $ch.$unproc;
-    } while (getCombinClass(unpack 'U', $ch) && $str ne "");
+    } # Relies on the fact that the combining class for code points < 256 is
+      # 0, so don't have to worry about EBCDIC issues
+      while (getCombinClass(unpack 'U', $ch) && $str ne "");
     return ($str, $unproc);
 }
 
@@ -1019,22 +1043,29 @@ C<normalize> and other some functions: on request.
 
 Since this module refers to perl core's Unicode database in the directory
 F</lib/unicore> (or formerly F</lib/unicode>), the Unicode version of
-normalization implemented by this module depends on your perl's version.
+normalization implemented by this module depends on what has been
+compiled into your perl.  The following table lists the default Unicode
+version that comes with various perl versions.  (It is possible to change
+the Unicode version in any perl version to be any earlier Unicode version,
+so one could cause Unicode 3.2 to be used in any perl version starting with
+5.8.0.  See C<$Config{privlib}>/F<unicore/README.perl>.
 
     perl's version     implemented Unicode version
        5.6.1              3.0.1
        5.7.2              3.1.0
        5.7.3              3.1.1 (normalization is same as 3.1.0)
        5.8.0              3.2.0
-     5.8.1-5.8.3          4.0.0
-     5.8.4-5.8.6          4.0.1 (normalization is same as 4.0.0)
-     5.8.7-5.8.8          4.1.0
+         5.8.1-5.8.3      4.0.0
+         5.8.4-5.8.6      4.0.1 (normalization is same as 4.0.0)
+         5.8.7-5.8.8      4.1.0
        5.10.0             5.0.0
-    5.8.9, 5.10.1         5.1.0
+        5.8.9, 5.10.1     5.1.0
        5.12.x             5.2.0
        5.14.x             6.0.0
        5.16.x             6.1.0
        5.18.x             6.2.0
+       5.20.x             6.3.0
+       5.22.x             7.0.0
 
 =item Correction of decomposition mapping
 
