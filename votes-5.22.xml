@@ -21,7 +21,7 @@ Documentation patches (suggested by ether):
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 55121b6b0516ee559126c7bee6b4b43b1e8f59f7 (perlsub.pod: note that anonymous subs can have signatures, too)
+Blead changes have been examined up to and including 8c9009ad13ddadd4e5865ef02a27df15933a7ca7 (Perl_call_sv move EXTEND into branch that needs it)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -83,6 +83,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, arc" id="a3faa257b9fc52f80556200842eaee2d1ecf3f59" ticket="" desc="Clarify FIRSTKEY and NEXTKEY usage."/>
 <commit votes="steveh" id="3b90fd9161349d784f8fd6d60e63a664a3f9411e" ticket="" desc="document the specific value of $!{E...}"/>
+
+<commit votes="steveh" id="3d8ff82557d67bc81d10600b537a57f90f401a4f" ticket="126051" desc="sync regen/warnings.pl and warnings.pm $VERSION"/>
+<commit votes="steveh" id="4a21999a595cf89f78d57aa5b3fdf3fbfa638fb1" ticket="126051" desc="[perl #126051] make the warnings::enabled example use warnings::enabled"/>
 
 </div>
 
