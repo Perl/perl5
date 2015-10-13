@@ -12,10 +12,6 @@
  We can always make exceptions where deemed necessary, or otherwise drop them from the list.)
 
 Documentation patches (suggested by ether):
-<commit votes="khw, arc" id="83c1fffeadddac231b705fc8a420de87fd4f5ea3" ticket="" desc="Document $OLD_PERL_VERSION's history"/>
-<commit votes="khw, arc" id="9fcc23141fa6c68e7419a4caf9046d6912491e37" ticket="" desc="perlvar: discourage $OLD_PERL_VERSION"/>
-<commit votes="khw, arc" id="4e9736a3b8992ab439fe0bfc6201168cf7ac6a93" ticket="" desc="perlcommunity.pod updates"/>
-<commit votes="khw, arc" id="3f9ec86148ce5619d909c108083f27a01c56adee" ticket="" desc="do not try printing undef"/>
 <commit votes="khw" id="f0b1ad2b19f6dbfdc5d5feb5c5fb48888f1cd46d" ticket="" desc="perlebcdic: Fix typo"/>
 <commit votes="khw" id="b6d5ddf72d1067c498a7ed65623df9f2f8f8d749" ticket="123264" desc="[perl #123264] explicitly document the return value of sysopen"/>
 <commit votes="khw" id="bace499647c542e44fa169173393f19316fe05b6" ticket="" desc="Perl example style nit in docs for sort()"/>
