@@ -57,15 +57,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Regression Fixes</h3>
 
-(arc: I'm puzzled by this one, in that I can't see a maint regression that's
-fixed by 1.17. Term::Cap version 1.16 did contain a regression that is fixed
-by 1.17, but no releases of Perl (including blead releases) have ever contained
-1.16. (Commit 60d2b2aebfceab38ad669bac181bb68e42c05cb2 imported 1.16 into
-then-blead, but 663bce880acdd4bee8f6d5b50dbb3fee75e1d0ec, pushed to blead
-later the same day, reverted to 1.15.) Unless there's something I'm missing,
-I think perlpolicy says that maint-5.22 should retain Term::Cap 1.15.)
-<commit votes="steveh, khw" id="23a7573439e81ad932fe176e4a9116ecc0ab362f" ticket="" desc="Update Term-Cap to CPAN version 1.17"/>
-
 (arc: This regression was introduced in 5.10.0. Yow!)
 <commit votes="steveh, arc" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
 <commit votes="steveh, arc" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
