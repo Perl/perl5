@@ -14,4 +14,11 @@ $! = 1;
 POSIX::strerror(1);
 is (0+$!, 1, 'strerror doesn\'t destroy $!');
 
+# [perl #126229] POSIX::strerror() clears $!
+{
+    local $! = 29;
+    my $e = POSIX::strerror($!);
+    is (0+$!, 29);
+}
+
 done_testing();
