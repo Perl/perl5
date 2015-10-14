@@ -20,6 +20,7 @@ Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util/XS.pm 08abbe1a707927cee53
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/Scalar/Util.pm 7f1e6eb11105623200ef9cdcb881545ccb769ded
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/Sub/Util.pm d87811528ae3587f04e2f09894b8c88471754386
 Scalar-List-Utils cpan/Scalar-List-Utils/ListUtil.xs ed25abc419771d6f3f12323f1f0a372f043d51b2
+Socket cpan/Socket/Socket.pm f5d4a196fe9376d4ec8c09da318e348cbf1e2ab5
 Socket cpan/Socket/Socket.xs ae3f68904b11389da5442319cb15918b629d86b4
 Text::ParseWords cpan/Text-ParseWords/t/ParseWords.t 9bae51c9b944cd5c0bbabe9d397e573976a2be8e
 Win32API::File cpan/Win32API-File/buffers.h 02d230ac9ac7091365128161a0ed671898baefae

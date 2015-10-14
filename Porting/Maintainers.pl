@@ -995,7 +995,7 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Socket],
 
         # https://rt.cpan.org/Ticket/Display.html?id=106797
-        'CUSTOMIZED'   => [ qw[ Socket.xs ] ],
+        'CUSTOMIZED'   => [ qw[ Socket.pm Socket.xs ] ],
     },
 
     'Storable' => {
