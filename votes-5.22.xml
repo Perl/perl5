@@ -86,7 +86,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh, arc" id="a3faa257b9fc52f80556200842eaee2d1ecf3f59" ticket="" desc="Clarify FIRSTKEY and NEXTKEY usage."/>
+<commit votes="steveh, arc, jhi" id="a3faa257b9fc52f80556200842eaee2d1ecf3f59" ticket="" desc="Clarify FIRSTKEY and NEXTKEY usage."/>
 <commit votes="steveh, rjbs" id="3b90fd9161349d784f8fd6d60e63a664a3f9411e" ticket="" desc="document the specific value of $!{E...}"/>
 
 <commit votes="steveh" id="3d8ff82557d67bc81d10600b537a57f90f401a4f" ticket="126051" desc="sync regen/warnings.pl and warnings.pm $VERSION"/>
