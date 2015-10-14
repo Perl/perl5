@@ -87,6 +87,9 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 
 <div><h3>Build and Installation Fixes</h3>
 
+<commit votes="tonyc" id="c2d4ebc6c9a49f99997e3438fc8288c7bdbeb2c0" ticket="126242" desc="fix NO_HASH_SEED build" />
+<commit votes="tonyc" id="25c1b134afb28e3391447584a4ccc05b5caa9922" ticket="126242" desc="make the constant hash seeds unsigned char *" />
+
 </div>
 
 <div><h3>Portability Fixes</h3>
