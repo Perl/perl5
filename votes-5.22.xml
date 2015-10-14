@@ -47,7 +47,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 (khw: The following isn't necessary, but is a trivial improvement on 22b43)
 <commit votes="steveh, arc" id="d820a0ff34c7df39297a54193fd756bb42c5c06e" ticket="123562" desc="regexec.c: Use Perl_croak_nocontext()"/>
 
-<commit votes="steveh, arc" id="7f399b4008958590740e5bcb61cf22e2cfe5395b" ticket="126064" desc="[perl #126064] Apply scalar context to stat args"/>
+<commit votes="steveh, arc, khw" id="7f399b4008958590740e5bcb61cf22e2cfe5395b" ticket="126064" desc="[perl #126064] Apply scalar context to stat args"/>
 
 <commit votes="khw, steveh" id="5a55ed33047e05399ce1a3781bb35f300aa7fb63" ticket="126180" desc="PATCH: [perl #126180] /(?[\ &amp;!])/ segfaults"/>
 
@@ -56,8 +56,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Regression Fixes</h3>
 
 (arc: This regression was introduced in 5.10.0. Yow!)
-<commit votes="steveh, arc" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
-<commit votes="steveh, arc" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
+<commit votes="steveh, arc, khw" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
+<commit votes="steveh, arc, khw" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
 
 </div>
 
@@ -66,8 +66,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 (steveh: Does this need the update to Win32-0.52 (083231ea891c049b70ef28512bfc9e68c3e5d595) too?:)
 <commit votes="steveh, khw" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
 
-<commit votes="tonyc, steveh" id="c2d4ebc6c9a49f99997e3438fc8288c7bdbeb2c0" ticket="126242" desc="fix NO_HASH_SEED build" />
-<commit votes="tonyc, steveh" id="25c1b134afb28e3391447584a4ccc05b5caa9922" ticket="126242" desc="make the constant hash seeds unsigned char *" />
+<commit votes="tonyc, steveh, khw" id="c2d4ebc6c9a49f99997e3438fc8288c7bdbeb2c0" ticket="126242" desc="fix NO_HASH_SEED build" />
+<commit votes="tonyc, steveh, khw" id="25c1b134afb28e3391447584a4ccc05b5caa9922" ticket="126242" desc="make the constant hash seeds unsigned char *" />
 
 </div>
 
@@ -80,17 +80,17 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="steveh, khw" id="c0bf9074e4a1b56f9afe46591417297e6613d5ea" ticket="125924" desc="[perl #125924] allow op/infnan.t to pass on Win32 gcc"/>
 
 (steveh: Only the autodie part of this is applicable; win32/GNUmakefile isn't in maint-5.22)
-<commit votes="steveh, arc" id="e120c24fe257993e9cbf4c567194bec2792f3ccc" ticket="126133" desc="[perl #126133] autodie touches its touch_me, make it writable"/>
+<commit votes="steveh, arc, khw" id="e120c24fe257993e9cbf4c567194bec2792f3ccc" ticket="126133" desc="[perl #126133] autodie touches its touch_me, make it writable"/>
 
 </div>
 
 <div><h3>Documentation Fixes</h3>
 
 <commit votes="steveh, arc, jhi" id="a3faa257b9fc52f80556200842eaee2d1ecf3f59" ticket="" desc="Clarify FIRSTKEY and NEXTKEY usage."/>
-<commit votes="steveh, rjbs" id="3b90fd9161349d784f8fd6d60e63a664a3f9411e" ticket="" desc="document the specific value of $!{E...}"/>
+<commit votes="steveh, rjbs, khw" id="3b90fd9161349d784f8fd6d60e63a664a3f9411e" ticket="" desc="document the specific value of $!{E...}"/>
 
-<commit votes="steveh" id="3d8ff82557d67bc81d10600b537a57f90f401a4f" ticket="126051" desc="sync regen/warnings.pl and warnings.pm $VERSION"/>
-<commit votes="steveh" id="4a21999a595cf89f78d57aa5b3fdf3fbfa638fb1" ticket="126051" desc="[perl #126051] make the warnings::enabled example use warnings::enabled"/>
+<commit votes="steveh, khw" id="3d8ff82557d67bc81d10600b537a57f90f401a4f" ticket="126051" desc="sync regen/warnings.pl and warnings.pm $VERSION"/>
+<commit votes="steveh, khw" id="4a21999a595cf89f78d57aa5b3fdf3fbfa638fb1" ticket="126051" desc="[perl #126051] make the warnings::enabled example use warnings::enabled"/>
 
 </div>
 
