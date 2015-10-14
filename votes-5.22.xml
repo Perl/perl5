@@ -49,6 +49,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, arc" id="7f399b4008958590740e5bcb61cf22e2cfe5395b" ticket="126064" desc="[perl #126064] Apply scalar context to stat args"/>
 
+<commit votes="khw, steveh" id="5a55ed33047e05399ce1a3781bb35f300aa7fb63" ticket="126180" desc="PATCH: [perl #126180] /(?[\ &amp;!])/ segfaults"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
