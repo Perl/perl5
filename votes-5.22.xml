@@ -66,8 +66,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 (steveh: Does this need the update to Win32-0.52 (083231ea891c049b70ef28512bfc9e68c3e5d595) too?:)
 <commit votes="steveh, khw" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
 
-<commit votes="tonyc" id="c2d4ebc6c9a49f99997e3438fc8288c7bdbeb2c0" ticket="126242" desc="fix NO_HASH_SEED build" />
-<commit votes="tonyc" id="25c1b134afb28e3391447584a4ccc05b5caa9922" ticket="126242" desc="make the constant hash seeds unsigned char *" />
+<commit votes="tonyc, steveh" id="c2d4ebc6c9a49f99997e3438fc8288c7bdbeb2c0" ticket="126242" desc="fix NO_HASH_SEED build" />
+<commit votes="tonyc, steveh" id="25c1b134afb28e3391447584a4ccc05b5caa9922" ticket="126242" desc="make the constant hash seeds unsigned char *" />
 
 </div>
 
