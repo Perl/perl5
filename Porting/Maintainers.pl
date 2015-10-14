@@ -204,7 +204,9 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Compress-Raw-Bzip2],
         'EXCLUDED'     => [
             qr{^t/Test/},
+            'bzip2-src/bzip2-const.patch',
             'bzip2-src/bzip2-cpp.patch',
+            'bzip2-src/bzip2-unsigned.patch',
         ],
     },
 
