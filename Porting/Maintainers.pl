@@ -760,6 +760,10 @@ use File::Glob qw(:case);
                 t/mbimbf.t
                 ),
         ],
+        'CUSTOMIZED'   => [
+            qw( lib/Math/BigInt/FastCalc.pm
+                ),
+        ],
     },
 
     'Math::BigRat' => {
