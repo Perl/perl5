@@ -2336,10 +2336,6 @@ PP(pp_leavesublv)
 		what = "undef";
 	    }
           croak:
-            CX_LEAVE_SCOPE(cx);
-	    POPSUB(cx);
-	    cxstack_ix--;
-	    PL_curpm = cx->blk_oldpm;
 	    Perl_croak(aTHX_
 	              "Can't return %s from lvalue subroutine", what
 	    );
