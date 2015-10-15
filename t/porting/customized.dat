@@ -6,7 +6,6 @@ ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm fd048a43fc
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_VMS.pm 0c78ba02d6249dfcca12ac9886a7c7cfb60e77fe
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/prereq.t 53bda2c549fd13a6b6c13a070ca6bc79883081c0
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/vstrings.t 90035a2bdbf45f15b9c3196d072d7cba7e662871
-Math::BigInt::FastCalc cpan/Math-BigInt-FastCalc/lib/Math/BigInt/FastCalc.pm 3f92fc3b8735055d1ea496c3c44d82ea3819c306
 Math::BigRat cpan/Math-BigRat/lib/Math/BigRat.pm 682352dde33638125ce12ca44990bd1cd44af4f8
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm dcd53fba13060dbb71b1b5861fbc5c0881c8625a
 Pod::Simple cpan/Pod-Simple/lib/Pod/Simple/BlackBox.pm 4108633c4f40f7f63c5a0245df2b07a4a2f22fec

@@ -8,7 +8,7 @@ use Math::BigInt::Calc 1.997;
 
 use vars '$VERSION';
 
-$VERSION = '0.31';
+$VERSION = '0.34';
 
 ##############################################################################
 # global constants, flags and accessory
@@ -43,7 +43,9 @@ XSLoader::load(__PACKAGE__, $VERSION, Math::BigInt::Calc::_base_len());
 ##############################################################################
 
 1;
+
 __END__
+
 =pod
 
 =head1 NAME
@@ -88,6 +90,65 @@ The following functions are now implemented in FastCalc.xs:
 	_inc		_dec
 	__strip_zeros	_copy
 
+=head1 BUGS
+
+Please report any bugs or feature requests to
+C<bug-math-bigint-fastcalc at rt.cpan.org>, or through the web interface at
+L<https://rt.cpan.org/Ticket/Create.html?Queue=Math-BigInt-FastCalc>
+(requires login).
+We will be notified, and then you'll automatically be notified of progress on
+your bug as I make changes.
+
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc Math::BigInt::FastCalc
+
+You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker
+
+L<https://rt.cpan.org/Public/Dist/Display.html?Name=Math-BigInt-FastCalc>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Math-BigInt-FastCalc>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/dist/Math-BigInt-FastCalc>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/Math-BigInt-FastCalc/>
+
+=item * CPAN Testers Matrix
+
+L<http://matrix.cpantesters.org/?dist=Math-BigInt-FastCalc>
+
+=item * The Bignum mailing list
+
+=over 4
+
+=item * Post to mailing list
+
+C<bignum at lists.scsys.co.uk>
+
+=item * View mailing list
+
+L<http://lists.scsys.co.uk/pipermail/bignum/>
+
+=item * Subscribe/Unsubscribe
+
+L<http://lists.scsys.co.uk/cgi-bin/mailman/listinfo/bignum>
+
+=back
+
+=back
+
 =head1 LICENSE
 
 This program is free software; you may redistribute it and/or modify it under
@@ -102,11 +163,11 @@ Separated from BigInt and shaped API with the help of John Peacock.
 Fixed, sped-up and enhanced by Tels http://bloodgate.com 2001-2003.
 Further streamlining (api_version 1 etc.) by Tels 2004-2007.
 
-Bug-fixing by Peter John Acklam E<lt>pjacklam@online.noE<gt> 2010-2011.
+Bug-fixing by Peter John Acklam E<lt>pjacklam@online.noE<gt> 2010-2015.
 
 =head1 SEE ALSO
 
-L<Math::BigInt>, L<Math::BigFloat>,
-L<Math::BigInt::GMP>, L<Math::BigInt::FastCalc> and L<Math::BigInt::Pari>.
+L<Math::BigInt>, L<Math::BigFloat>, and the other backends
+L<Math::BigInt::Calc>, L<Math::BigInt::GMP>, and L<Math::BigInt::Pari>.
 
 =cut
