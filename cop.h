@@ -942,6 +942,11 @@ struct block {
 	PL_curcop	 = cx->blk_oldcop,				\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
+        /* LEAVE_SCOPE() should have made this true. /(?{})/ cheats
+         * and leaves a CX entry lying around for repeated use, so
+         * skip for multicall */                  \
+        assert(CxMULTICALL(cx) ||                                       \
+            PL_savestack_ix == cx->cx_u.cx_blk.blku_old_savestack_ix);  \
 	PL_curpm	 = cx->blk_oldpm;
 
 /* Continue a block elsewhere (NEXT and REDO). */

@@ -1718,6 +1718,7 @@ PP(pp_sort)
             else
                 assert(CxTYPE(cx) == CXt_NULL);
                 /* mimic POPSUB */
+                CX_LEAVE_SCOPE(cx);
                 PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
 
 	    POPBLOCK(cx);
