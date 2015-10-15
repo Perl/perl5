@@ -285,8 +285,11 @@ PP(pp_substcont)
 	    /* PL_tainted must be correctly set for this mg_set */
 	    SvSETMAGIC(TARG);
 	    TAINT_NOT;
+
 	    CX_LEAVE_SCOPE(cx);
 	    POPSUBST(cx);
+            cxstack_ix--;
+
 	    PERL_ASYNC_CHECK();
 	    RETURNOP(pm->op_next);
 	    NOT_REACHED; /* NOTREACHED */
@@ -1516,7 +1519,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	    POPSUBST(cx);
-	    continue;  /* not break */
+	    break;
 	case CXt_SUB:
 	    POPSUB(cx);
 	    break;

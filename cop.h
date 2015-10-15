@@ -982,7 +982,7 @@ struct subst {
 	(void)ReREFCNT_inc(rx);						\
         SvREFCNT_inc_void_NN(targ)
 
-#  define POPSUBST(cx) cx = &cxstack[cxstack_ix--];			\
+#  define POPSUBST(cx) \
 	rxres_free(&cx->sb_rxres);					\
 	ReREFCNT_dec(cx->sb_rx);					\
         SvREFCNT_dec_NN(cx->sb_targ)
