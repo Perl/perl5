@@ -1703,14 +1703,14 @@ PP(pp_sort)
 
 	    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
 
+            CX_LEAVE_SCOPE(cx);
 	    if (!(flags & OPf_SPECIAL)) {
                 assert(CxTYPE(cx) == CXt_SUB);
                 POPSUB(cx);
 	    }
-            else {
+            else
                 assert(CxTYPE(cx) == CXt_NULL);
-                CX_LEAVE_SCOPE(cx);
-            }
+                /* there isn't a POPNULL ! */
 
 	    POPBLOCK(cx);
             cxstack_ix--;

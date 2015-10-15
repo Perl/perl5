@@ -1515,29 +1515,38 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    POPSUBST(cx);
 	    continue;  /* not break */
 	case CXt_SUB:
+            CX_LEAVE_SCOPE(cx);
 	    POPSUB(cx);
 	    break;
 	case CXt_EVAL:
+            CX_LEAVE_SCOPE(cx);
 	    POPEVAL(cx);
 	    break;
 	case CXt_BLOCK:
+            CX_LEAVE_SCOPE(cx);
             POPBASICBLK(cx);
 	    break;
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_FOR:
 	case CXt_LOOP_PLAIN:
+            CX_LEAVE_SCOPE(cx);
 	    POPLOOP(cx);
 	    break;
 	case CXt_WHEN:
+            CX_LEAVE_SCOPE(cx);
 	    POPWHEN(cx);
 	    break;
 	case CXt_GIVEN:
+            CX_LEAVE_SCOPE(cx);
 	    POPGIVEN(cx);
 	    break;
 	case CXt_NULL:
+            /* there isn't a POPNULL ! */
+            CX_LEAVE_SCOPE(cx);
 	    break;
 	case CXt_FORMAT:
+            CX_LEAVE_SCOPE(cx);
 	    POPFORMAT(cx);
 	    break;
 	}
@@ -1656,6 +1665,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 		my_exit(1);
 	    }
 
+            CX_LEAVE_SCOPE(cx);
 	    POPEVAL(cx);
 	    POPBLOCK(cx);
             cxstack_ix--;
@@ -2091,6 +2101,7 @@ PP(pp_leave)
         leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP,
                                PL_op->op_private & OPpLVALUE);
 
+    CX_LEAVE_SCOPE(cx);
     POPBASICBLK(cx);
     POPBLOCK(cx);
     cxstack_ix--;
@@ -2267,6 +2278,7 @@ PP(pp_leaveloop)
         leave_common(newsp, MARK, gimme, SVs_PADTMP|SVs_TEMP,
 			       PL_op->op_private & OPpLVALUE);
 
+    CX_LEAVE_SCOPE(cx);
     POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
     POPBLOCK(cx);
     cxstack_ix--;
@@ -2326,6 +2338,7 @@ PP(pp_leavesublv)
 		what = "undef";
 	    }
           croak:
+            CX_LEAVE_SCOPE(cx);
 	    POPSUB(cx);
 	    cxstack_ix--;
 	    PL_curpm = cx->blk_oldpm;
@@ -2395,6 +2408,7 @@ PP(pp_leavesublv)
     }
     PUTBACK;
 
+    CX_LEAVE_SCOPE(cx);
     POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
     POPBLOCK(cx);
     cxstack_ix--;
@@ -2570,6 +2584,7 @@ PP(pp_last)
     TAINT_NOT;
 
     /* Stack values are safe: */
+    CX_LEAVE_SCOPE(cx);
     POPLOOP(cx);	/* release loop vars ... */
     POPBLOCK(cx);
     cxstack_ix--;
@@ -2751,14 +2766,14 @@ PP(pp_goto)
 	    TOPBLOCK(cx);
 	    SPAGAIN;
 
-            /* partial unrolled POPSUB(): */
-
             /* protect @_ during save stack unwind. */
             if (arg)
                 SvREFCNT_inc_NN(sv_2mortal(MUTABLE_SV(arg)));
 
 	    assert(PL_scopestack_ix == cx->blk_oldscopesp);
             CX_LEAVE_SCOPE(cx);
+
+            /* partial unrolled POPSUB(): */
 
 	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		AV* av = MUTABLE_AV(PAD_SVl(0));
@@ -3432,6 +3447,7 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	    }
 	    SP = PL_stack_base + POPMARK;	/* pop original mark */
             cx = &cxstack[cxstack_ix];
+            CX_LEAVE_SCOPE(cx);
 	    POPEVAL(cx);
 	    POPBLOCK(cx);
             cxstack_ix--;
@@ -4278,6 +4294,7 @@ PP(pp_leaveeval)
      * to get the current hints. So restore it early.
      */
     PL_curcop = cx->blk_oldcop;
+    CX_LEAVE_SCOPE(cx);
     POPEVAL(cx);
     POPBLOCK(cx);
     cxstack_ix--;
@@ -4320,6 +4337,7 @@ Perl_delete_eval_scope(pTHX)
     I32 optype;
 	
     cx = &cxstack[cxstack_ix];
+    CX_LEAVE_SCOPE(cx);
     POPEVAL(cx);
     POPBLOCK(cx);
     cxstack_ix--;
@@ -4375,6 +4393,7 @@ PP(pp_leavetry)
         PL_stack_sp = newsp;
     else
         leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP, FALSE);
+    CX_LEAVE_SCOPE(cx);
     POPEVAL(cx);
     POPBLOCK(cx);
     cxstack_ix--;
@@ -4418,6 +4437,8 @@ PP(pp_leavegiven)
         PL_stack_sp = newsp;
     else
         leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP, FALSE);
+
+    CX_LEAVE_SCOPE(cx);
     POPGIVEN(cx);
     POPBLOCK(cx);
     cxstack_ix--;
@@ -5037,6 +5058,7 @@ PP(pp_continue)
     cx = &cxstack[cxstack_ix];
     assert(CxTYPE(cx) == CXt_WHEN);
     PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+    CX_LEAVE_SCOPE(cx);
     POPWHEN(cx);
     POPBLOCK(cx);
     cxstack_ix--;

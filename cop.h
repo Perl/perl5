@@ -649,7 +649,6 @@ struct block_format {
 
 #define POPSUB(cx)							\
     STMT_START {							\
-	CX_LEAVE_SCOPE(cx);                                             \
         if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
         cx->blk_u16 |= CxPOPSUB_DONE;                                   \
 	RETURN_PROBE(CvNAMED(cx->blk_sub.cv)				\
@@ -682,7 +681,6 @@ struct block_format {
 
 #define POPFORMAT(cx)							\
     STMT_START {							\
-	CX_LEAVE_SCOPE(cx);                                             \
         if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
 	CV * const cv = cx->blk_format.cv;				\
 	GV * const dfuot = cx->blk_format.dfoutgv;			\
@@ -729,7 +727,6 @@ struct block_eval {
 
 #define POPEVAL(cx)							\
     STMT_START {							\
-        CX_LEAVE_SCOPE(cx);                                             \
 	PL_in_eval = CxOLD_IN_EVAL(cx);					\
 	optype = CxOLD_OP_TYPE(cx);					\
 	PL_eval_root = cx->blk_eval.old_eval_root;			\
@@ -809,7 +806,6 @@ struct block_loop {
         PUSHLOOP_FOR_setpad(cx);
 
 #define POPLOOP(cx)							\
-	CX_LEAVE_SCOPE(cx);                                             \
 	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.cur);		\
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.end);		\
@@ -841,10 +837,9 @@ struct block_givwhen {
         cx->blk_givwhen.defsv_save = orig_var;
 
 #define POPWHEN(cx)                                                     \
-	CX_LEAVE_SCOPE(cx);
+	NOOP;
 
 #define POPGIVEN(cx)                                                    \
-	CX_LEAVE_SCOPE(cx);                                             \
         SvREFCNT_dec(GvSV(PL_defgv));                                   \
         GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;
 
@@ -855,7 +850,7 @@ struct block_givwhen {
         cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;
 
 #define POPBASICBLK(cx)                                                 \
-	CX_LEAVE_SCOPE(cx);
+	NOOP;
 
 
 /* context common to subroutines, evals and loops */
@@ -1291,8 +1286,8 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     STMT_START {							\
 	cx = &cxstack[cxstack_ix];					\
         CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
-        /* includes partial unrolled POPSUB(): */                       \
 	CX_LEAVE_SCOPE(cx);                                             \
+        /* includes partial unrolled POPSUB(): */                       \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
         SvREFCNT_dec_NN(multicall_cv);                                  \
