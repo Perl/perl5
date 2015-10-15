@@ -6444,15 +6444,20 @@ PP(pp_coreargs)
                    this corresponds to the part of POPSUB that
                    does @_ cleanup */
 		PERL_CONTEXT *cx = &cxstack[cxstack_ix];
-                AV *av = MUTABLE_AV(PAD_SVl(0));
-		POP_SAVEARRAY();
-		cx->cx_type &= ~ CXp_HASARGS;
-                assert(AvARRAY(MUTABLE_AV(
-                    PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
-                            CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);
 
-		assert(!AvREAL(av));
-                CLEAR_ARGARRAY(av);
+                assert(CxHASARGS(cx));
+                {
+                    AV *av;
+                    assert(AvARRAY(MUTABLE_AV(
+                        PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
+                                CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);
+                    POP_SAVEARRAY();
+                    av = MUTABLE_AV(PAD_SVl(0));
+                    assert(!AvREAL(av));
+                    CLEAR_ARGARRAY(av);
+                }
+
+		cx->cx_type &= ~CXp_HASARGS;
 	    }
 	  }
 	  break;
