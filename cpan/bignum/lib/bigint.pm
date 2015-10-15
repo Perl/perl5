@@ -1,7 +1,7 @@
 package bigint;
 use 5.006;
 
-$VERSION = '0.40';
+$VERSION = '0.41';
 use Exporter;
 @ISA            = qw( Exporter );
 @EXPORT_OK      = qw( PI e bpi bexp hex oct );
@@ -110,21 +110,109 @@ sub in_effect {
 
 use constant LEXICAL => $] > 5.009004;
 
+# Internal function with the same semantics as CORE::hex(). This function is
+# not used directly, but rather by other front-end functions.
+
+sub _hex_core {
+    my $str = shift;
+
+    # Strip off, clean, and parse as much as we can from the beginning.
+
+    my $x;
+    if ($str =~ s/ ^ (0?[xX])? ( [0-9a-fA-F]* ( _ [0-9a-fA-F]+ )* ) //x) {
+        my $chrs = $2;
+        $chrs =~ tr/_//d;
+        $chrs = '0' unless CORE::length $chrs;
+        $x = Math::BigInt -> from_hex($chrs);
+    } else {
+        $x = Math::BigInt -> bzero();
+    }
+
+    # Warn about trailing garbage.
+
+    if (CORE::length($str)) {
+        require Carp;
+        Carp::carp(sprintf("Illegal hexadecimal digit '%s' ignored",
+                           substr($str, 0, 1)));
+    }
+
+    return $x;
+}
+
+# Internal function with the same semantics as CORE::oct(). This function is
+# not used directly, but rather by other front-end functions.
+
+sub _oct_core {
+    my $str = shift;
+
+    $str =~ s/^\s*//;
+
+    # Hexadecimal input.
+
+    return _hex_core($str) if $str =~ /^0?[xX]/;
+
+    my $x;
+
+    # Binary input.
+
+    if ($str =~ /^0?[bB]/) {
+
+        # Strip off, clean, and parse as much as we can from the beginning.
+
+        if ($str =~ s/ ^ (0?[bB])? ( [01]* ( _ [01]+ )* ) //x) {
+            my $chrs = $2;
+            $chrs =~ tr/_//d;
+            $chrs = '0' unless CORE::length $chrs;
+            $x = Math::BigInt -> from_bin($chrs);
+        }
+
+        # Warn about trailing garbage.
+
+        if (CORE::length($str)) {
+            require Carp;
+            Carp::carp(sprintf("Illegal binary digit '%s' ignored",
+                               substr($str, 0, 1)));
+        }
+
+        return $x;
+    }
+
+    # Octal input. Strip off, clean, and parse as much as we can from the
+    # beginning.
+
+    if ($str =~ s/ ^ ( [0-7]* ( _ [0-7]+ )* ) //x) {
+        my $chrs = $1;
+        $chrs =~ tr/_//d;
+        $chrs = '0' unless CORE::length $chrs;
+        $x = Math::BigInt -> from_oct($chrs);
+    }
+
+    # Warn about trailing garbage. CORE::oct() only warns about 8 and 9.
+
+    if (CORE::length($str)) {
+        my $chr = substr($str, 0, 1);
+        if ($chr eq '8' || $chr eq '9') {
+            require Carp;
+            Carp::carp(sprintf("Illegal octal digit '%s' ignored", $chr));
+        }
+    }
+
+    return $x;
+}
+
 {
     my $proto = LEXICAL ? '_' : ';$';
     eval '
 sub hex(' . $proto . ') {' . <<'.';
-    my $i = @_ ? $_[0] : $_;
-    $i = '0x'.$i unless $i =~ /^0x/;
-    Math::BigInt->new($i);
+    my $str = @_ ? $_[0] : $_;
+    _hex_core($str);
 }
 .
+
     eval '
 sub oct(' . $proto . ') {' . <<'.';
-    my $i = @_ ? $_[0] : $_;
-    # oct() should never fall back to decimal
-    return Math::BigInt->from_oct($i) if $i =~ s/^(?=0[0-9]|[1-9])/0/;
-    Math::BigInt->new($i);
+    my $str = @_ ? $_[0] : $_;
+    _oct_core($str);
 }
 .
 }
@@ -139,19 +227,14 @@ sub _hex(_) {
     my $hh = (caller 0)[10];
     return $prev_hex ? &$prev_hex($_[0]) : CORE::hex($_[0])
       unless $$hh{bigint}||$$hh{bignum}||$$hh{bigrat};
-    my $i = $_[0];
-    $i = '0x'.$i unless $i =~ /^0x/;
-    Math::BigInt->new($i);
+    _hex_core($_[0]);
 }
 
 sub _oct(_) {
     my $hh = (caller 0)[10];
     return $prev_oct ? &$prev_oct($_[0]) : CORE::oct($_[0])
       unless $$hh{bigint}||$$hh{bignum}||$$hh{bigrat};
-    my $i = $_[0];
-    # oct() should never fall back to decimal
-    return Math::BigInt->from_oct($i) if $i =~ s/^(?=0[0-9]|[1-9])/0/;
-    Math::BigInt->new($i);
+    _oct_core($_[0]);
 }
 .
 

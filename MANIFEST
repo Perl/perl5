@@ -141,6 +141,8 @@ cpan/bignum/lib/bignum.pm		bignum
 cpan/bignum/lib/bigrat.pm		bigrat
 cpan/bignum/lib/Math/BigFloat/Trace.pm	bignum tracing
 cpan/bignum/lib/Math/BigInt/Trace.pm	bignum tracing
+cpan/bignum/t/auth-bigint-hex.t		See if bignum works
+cpan/bignum/t/auth-bigint-oct.t		See if bignum works
 cpan/bignum/t/big_e_pi.t		See if bignum exports e() and PI()
 cpan/bignum/t/bigexp.t			See if bignum works
 cpan/bignum/t/bigint.t			See if bigint works
