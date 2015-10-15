@@ -1527,7 +1527,7 @@ PP(pp_leavewrite)
     POPFORMAT(cx);
     POPBLOCK(cx);
     retop = cx->blk_sub.retop;
-    cxstack_ix--;
+    CX_POP(cx);
 
     if (is_return)
         /* XXX the semantics of doing 'return' in a format aren't documented.

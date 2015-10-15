@@ -3273,6 +3273,7 @@ PP(pp_leavesub)
     SV **newsp;
     I32 gimme;
     PERL_CONTEXT *cx;
+    OP *retop;
 
     cx = &cxstack[cxstack_ix];
     assert(CxTYPE(cx) == CXt_SUB);
@@ -3339,9 +3340,10 @@ PP(pp_leavesub)
     CX_LEAVE_SCOPE(cx);
     POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
     POPBLOCK(cx);
-    cxstack_ix--;
+    retop = cx->blk_sub.retop;
+    CX_POP(cx);
 
-    return cx->blk_sub.retop;
+    return retop;
 }
 
 

@@ -1713,7 +1713,7 @@ PP(pp_sort)
                 /* there isn't a POPNULL ! */
 
 	    POPBLOCK(cx);
-            cxstack_ix--;
+            CX_POP(cx);
 	    POPSTACK;
 	    CATCH_SET(oldcatch);
 	}

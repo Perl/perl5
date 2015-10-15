@@ -574,6 +574,19 @@ struct block_format {
 
 #define CX_LEAVE_SCOPE(cx) LEAVE_SCOPE(cx->cx_old_savestack_ix)
 
+#ifdef DEBUGGING
+/* on debugging builds, poison cx afterwards so we know no code
+ * uses it - because after doing cxstack_ix--, any ties, exceptions etc
+ * may overwrite the current stack frame */
+#  define CX_POP(cx)                                                   \
+        assert(&cxstack[cxstack_ix] == cx);                            \
+        cxstack_ix--;                                                  \
+        cx = NULL;
+#else
+#  define CX_POP(cx) cxstack_ix--;
+#endif
+
+
 /* base for the next two macros. Don't use directly.
  * The context frame holds a reference to the CV so that it can't be
  * freed while we're executing it */
@@ -1298,12 +1311,12 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	cx = &cxstack[cxstack_ix];					\
 	CX_LEAVE_SCOPE(cx);                                             \
         POPSUB_COMMON(cx);                                              \
-	POPBLOCK(cx);				   		        \
         newsp = PL_stack_base + cx->blk_oldsp;                          \
         gimme = cx->blk_gimme;                                          \
         PERL_UNUSED_VAR(newsp); /* for API */                           \
         PERL_UNUSED_VAR(gimme); /* for API */                           \
-	cxstack_ix--;                                                   \
+	POPBLOCK(cx);				   		        \
+	CX_POP(cx);                                                     \
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
 	SPAGAIN;							\
