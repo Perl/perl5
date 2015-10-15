@@ -66,9 +66,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 (steveh: Does this need the update to Win32-0.52 (083231ea891c049b70ef28512bfc9e68c3e5d595) too?:)
 <commit votes="steveh, khw" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
 
-<commit votes="tonyc, steveh, khw" id="c2d4ebc6c9a49f99997e3438fc8288c7bdbeb2c0" ticket="126242" desc="fix NO_HASH_SEED build" />
-<commit votes="tonyc, steveh, khw" id="25c1b134afb28e3391447584a4ccc05b5caa9922" ticket="126242" desc="make the constant hash seeds unsigned char *" />
-
 </div>
 
 <div><h3>Portability Fixes</h3>
@@ -85,9 +82,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 </div>
 
 <div><h3>Documentation Fixes</h3>
-
-<commit votes="steveh, arc, jhi" id="a3faa257b9fc52f80556200842eaee2d1ecf3f59" ticket="" desc="Clarify FIRSTKEY and NEXTKEY usage."/>
-<commit votes="steveh, rjbs, khw" id="3b90fd9161349d784f8fd6d60e63a664a3f9411e" ticket="" desc="document the specific value of $!{E...}"/>
 
 <commit votes="steveh, khw" id="3d8ff82557d67bc81d10600b537a57f90f401a4f" ticket="126051" desc="sync regen/warnings.pl and warnings.pm $VERSION"/>
 <commit votes="steveh, khw" id="4a21999a595cf89f78d57aa5b3fdf3fbfa638fb1" ticket="126051" desc="[perl #126051] make the warnings::enabled example use warnings::enabled"/>
