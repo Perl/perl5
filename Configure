@@ -17105,16 +17105,21 @@ EOM
 set readlink d_readlink
 eval $inlibc
 
-: Check if exe is symlink to abs path of executing program
+: Check if there is a /proc symlink to the abs path of
+: the executing program.  We will honor hints of d_procselfexe=$undef
+: or procselfexe being non-empty, otherwise will try to determine both
+: if we have readlink.
+: AmigaOS will attempt to mount proc: aka /proc, if /proc/... is
+: referenced, and AmigaOS does not have a proc filesystem anyway.
 echo " "
-procselfexe=''
 val="$undef"
-case "$d_procselfexe" in
-'')
-case "$d_readlink" in
-    "$define")
-	: NetBSD first as /proc/self is a symlink to /proc/curproc, and it feels
-	: more tidy to avoid an extra level of symlink
+if $test "X$d_procselfexe" = Xundef; then
+	procselfexe=''
+elif $test "X$procselfexe" != X -a "X$procselfexe" != 'X '; then
+	val="$define"
+elif $test "X$d_readlink" = Xdefine; then
+        : NetBSD first as /proc/self is a symlink to /proc/curproc,
+        : and it feels more tidy to avoid an extra level of symlink
 	set NetBSD /proc/curproc/exe Linux /proc/self/exe FreeBSD /proc/curproc/file Solaris /proc/self/path/a.out
 	while test $# -gt 0; do
 	    type=$1; try=$2
@@ -17130,13 +17135,10 @@ case "$d_readlink" in
 		fi
 	    fi
 	done
-	;;
-esac
+fi
 $rm -f reflect
 set d_procselfexe
 eval $setvar
-;;
-esac
 
 : backward compatibility for d_hvfork
 if test X$d_hvfork != X; then
