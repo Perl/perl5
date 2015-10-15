@@ -1319,16 +1319,9 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PADLIST * const padlist = CvPADLIST(cv);			\
 	cx = &cxstack[cxstack_ix];					\
 	assert(CxMULTICALL(cx));                                        \
-	CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
-        SvREFCNT_dec_NN(multicall_cv);                                  \
+        POPSUB_COMMON(cx);                                              \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
-        {                                                               \
-            /* save a few things that we don't want PUSHSUB to zap */   \
-            PAD * const prevcomppad = cx->blk_sub.prevcomppad;          \
-	    PUSHSUB(cx);						\
-            /* undo the stuff that PUSHSUB zapped */                    \
-            cx->blk_sub.prevcomppad = prevcomppad ;                     \
-        }                                                               \
+        PUSHSUB(cx);						        \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2) {						\
