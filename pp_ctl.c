@@ -1291,7 +1291,7 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 	    /* diag_listed_as: Exiting subroutine via %s */
 	    Perl_ck_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
 			   context_name[CxTYPE(cx)], OP_NAME(PL_op));
-	    if (CxTYPE(cx) == CXt_NULL)
+	    if (CxTYPE(cx) == CXt_NULL) /* sort BLOCK */
 		return -1;
 	    break;
 	case CXt_LOOP_LAZYIV:
@@ -1438,7 +1438,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	    /* diag_listed_as: Exiting subroutine via %s */
 	    Perl_ck_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
 			   context_name[CxTYPE(cx)], OP_NAME(PL_op));
-	    if ((CxTYPE(cx)) == CXt_NULL)
+	    if ((CxTYPE(cx)) == CXt_NULL) /* sort BLOCK */
 		return -1;
 	    break;
 	case CXt_LOOP_LAZYIV:
@@ -2412,10 +2412,19 @@ PP(pp_return)
     assert(cxstack_ix >= 0);
     if (cxix < cxstack_ix) {
         if (cxix < 0) {
-            if (!CxMULTICALL(cxstack))
+            if (!(       PL_curstackinfo->si_type == PERLSI_SORT
+                  || (   PL_curstackinfo->si_type == PERLSI_MULTICALL
+                      && (cxstack[0].cx_type & CXp_SUB_RE_FAKE))
+                 )
+            )
                 DIE(aTHX_ "Can't return outside a subroutine");
-            /* We must be in a sort block, which is a CXt_NULL not a
-             * CXt_SUB. Handle specially. */
+            /* We must be in:
+             *  a sort block, which is a CXt_NULL not a CXt_SUB;
+             *  or a /(?{...})/ block.
+             * Handle specially. */
+            assert(CxTYPE(&cxstack[0]) == CXt_NULL
+                    || (   CxTYPE(&cxstack[0]) == CXt_SUB
+                        && (cxstack[0].cx_type & CXp_SUB_RE_FAKE)));
             if (cxstack_ix > 0) {
                 /* See comment below about context popping. Since we know
                  * we're scalar and not lvalue, we can preserve the return

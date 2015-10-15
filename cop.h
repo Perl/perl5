@@ -945,7 +945,7 @@ struct block {
         /* LEAVE_SCOPE() should have made this true. /(?{})/ cheats
          * and leaves a CX entry lying around for repeated use, so
          * skip for multicall */                  \
-        assert(CxMULTICALL(cx) ||                                       \
+        assert((CxTYPE(cx) == CXt_SUB && CxMULTICALL(cx)) ||            \
             PL_savestack_ix == cx->cx_u.cx_blk.blku_old_savestack_ix);  \
 	PL_curpm	 = cx->blk_oldpm;
 
@@ -1028,7 +1028,7 @@ struct context {
 /* If you re-order these, there is also an array of uppercase names in perl.h
    and a static array of context names in pp_ctl.c  */
 #define CXTYPEMASK	0xf
-#define CXt_NULL	0
+#define CXt_NULL	0 /* currently only used for sort BLOCK */
 #define CXt_WHEN	1
 #define CXt_BLOCK	2
 /* When micro-optimising :-) keep GIVEN next to the LOOPs, as these 5 share a
@@ -1047,14 +1047,9 @@ struct context {
 #define CXt_SUBST      11
 /* SUBST doesn't feature in all switch statements.  */
 
-/* private flags for CXt_SUB and CXt_NULL
-   However, this is checked in many places which do not check the type, so
-   this bit needs to be kept clear for most everything else. For reasons I
-   haven't investigated, it can coexist with CXp_FOR_DEF */
-#define CXp_MULTICALL	0x10	/* part of a multicall (so don't
-				   tear down context on exit). */ 
-
 /* private flags for CXt_SUB and CXt_FORMAT */
+#define CXp_MULTICALL	0x10	/* part of a multicall (so don't tear down
+                                   context on exit). (not CXt_FORMAT) */
 #define CXp_HASARGS	0x20
 #define CXp_SUB_RE	0x40    /* code called within regex, i.e. (?{}) */
 #define CXp_SUB_RE_FAKE	0x80    /* fake sub CX for (?{}) in current scope */
@@ -1075,8 +1070,7 @@ struct context {
 
 #define CxTYPE(c)	((c)->cx_type & CXTYPEMASK)
 #define CxTYPE_is_LOOP(c)	(((c)->cx_type & 0xC) == 0x4)
-#define CxMULTICALL(c)	(((c)->cx_type & CXp_MULTICALL)			\
-			 == CXp_MULTICALL)
+#define CxMULTICALL(c)	((c)->cx_type & CXp_MULTICALL)
 #define CxREALEVAL(c)	(((c)->cx_type & (CXTYPEMASK|CXp_REAL))		\
 			 == (CXt_EVAL|CXp_REAL))
 #define CxTRYBLOCK(c)	(((c)->cx_type & (CXTYPEMASK|CXp_TRYBLOCK))	\
@@ -1339,7 +1333,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	CV * const cv = _nOnclAshIngNamE_;				\
 	PADLIST * const padlist = CvPADLIST(cv);			\
 	cx = &cxstack[cxstack_ix];					\
-	assert(cx->cx_type & CXp_MULTICALL);				\
+	assert(CxMULTICALL(cx));                                        \
 	CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
         SvREFCNT_dec_NN(multicall_cv);                                  \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \

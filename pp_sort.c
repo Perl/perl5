@@ -1670,7 +1670,7 @@ PP(pp_sort)
             gimme = G_SCALAR;
 	    PUSHBLOCK(cx, CXt_NULL, PL_stack_base);
 	    if (!(flags & OPf_SPECIAL)) {
-		cx->cx_type = CXt_SUB;
+		cx->cx_type = CXt_SUB|CXp_MULTICALL;
 		PUSHSUB(cx);
 		if (!is_xsub) {
 		    PADLIST * const padlist = CvPADLIST(cv);
@@ -1692,15 +1692,12 @@ PP(pp_sort)
 		}
 	    }
             else {
-                /* mimic PUSHSUB. Note that we're cheating and using a
-                 * CXt_NULL block as a CXt_SUB block */
+                /* /sort BLOCK: CXt_NULL */
                 cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;
                 PL_tmps_floor = PL_tmps_ix;
             }
             cx->cx_u.cx_blk.blku_old_savestack_ix = old_savestack_ix;
 
-	    cx->cx_type |= CXp_MULTICALL;
-	    
 	    start = p1 - max;
 	    sortsvp(aTHX_ start, max,
 		    (is_xsub ? S_sortcv_xsub : hasargs ? S_sortcv_stacked : S_sortcv),

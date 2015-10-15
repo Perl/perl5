@@ -1756,6 +1756,12 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 ^(A)((?(?{return 1})abc|xyz))$	Aabc	y	$1-$2	A-abc	-
 ^(A)((?(?{return 0})abc|xyz))$	Axyz	y	$1-$2	A-xyz	-
 
+# using 'return' in code blocks with additional scopes to pop
+^(A)(?{ { 1; return "xyz"} })B$	AB	y	$1-$^R	A-xyz	-
+^(A)((??{ { 1; return "xyz" } }))$	Axyz	y	$1-$2	A-xyz	-
+^(A)((?(?{ { 1; return 1 } })abc|xyz))$	Aabc	y	$1-$2	A-abc	-
+^(A)((?(?{ { 1; return 0 } })abc|xyz))$	Axyz	y	$1-$2	A-xyz	-
+
 # pattern modifier flags should propagate into returned (??{}) pattern
 # p,d,l not tested
 
