@@ -1691,11 +1691,6 @@ PP(pp_sort)
 
 		}
 	    }
-            else {
-                /* /sort BLOCK: CXt_NULL */
-                cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;
-                PL_tmps_floor = PL_tmps_ix;
-            }
             cx->cx_u.cx_blk.blku_old_savestack_ix = old_savestack_ix;
 
 	    start = p1 - max;

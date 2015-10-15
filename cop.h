@@ -592,9 +592,7 @@ struct block_format {
 	cx->blk_sub.prevcomppad = PL_comppad;				\
 	cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;			\
 	cx->blk_sub.retop = NULL;					\
-        SvREFCNT_inc_simple_void_NN(cv);                                \
-        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
-        PL_tmps_floor = PL_tmps_ix;
+        SvREFCNT_inc_simple_void_NN(cv);
 
 #define PUSHSUB_GET_LVALUE_MASK(func) \
 	/* If the context is indeterminate, then only the lvalue */	\
@@ -628,8 +626,6 @@ struct block_format {
 	cx->blk_format.prevcomppad = PL_comppad;			\
 	cx->blk_u16 = 0;                                                \
         cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
-        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
-        PL_tmps_floor = PL_tmps_ix;                                     \
 	SvREFCNT_inc_simple_void_NN(cv);		                \
 	CvDEPTH(cv)++;							\
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
@@ -723,8 +719,6 @@ struct block_eval {
 	assert(!(PL_in_eval & ~0x7F));					\
 	assert(!(PL_op->op_type & ~0x1FF));				\
 	cx->blk_u16 = (PL_in_eval & 0x7F) | ((U16)PL_op->op_type << 7);	\
-        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
-        PL_tmps_floor = PL_tmps_ix;                                     \
 	cx->blk_eval.old_namesv = (n ? newSVpv(n,0) : NULL);		\
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_parser ? PL_parser->linestr : NULL;	\
@@ -795,8 +789,6 @@ struct block_loop {
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
         cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
-        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
-        PL_tmps_floor = PL_tmps_ix;                                     \
 	cx->blk_loop.itervar_u.svp = NULL;                              \
 	cx->blk_loop.itersave = NULL;
 
@@ -813,8 +805,6 @@ struct block_loop {
 	cx->blk_loop.state_u.ary.ix = 0;				\
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
         cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
-        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
-        PL_tmps_floor = PL_tmps_ix;                                     \
         cx->blk_loop.itersave = isave;                                  \
         PUSHLOOP_FOR_setpad(cx);
 
@@ -844,8 +834,6 @@ struct block_givwhen {
 
 #define PUSHWHEN(cx)    						\
         cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
-        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
-        PL_tmps_floor = PL_tmps_ix;                                     \
 	cx->blk_givwhen.leave_op = cLOGOP->op_other;
 
 #define PUSHGIVEN(cx, orig_var)                                         \
@@ -864,9 +852,7 @@ struct block_givwhen {
 /* basic block, i.e. pp_enter/leave */
 
 #define PUSHBASICBLK(cx)                                                \
-        cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;        \
-        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
-        PL_tmps_floor = PL_tmps_ix;
+        cx->cx_u.cx_blk.blku_old_savestack_ix = PL_savestack_ix;
 
 #define POPBASICBLK(cx)                                                 \
 	CX_LEAVE_SCOPE(cx);
@@ -927,6 +913,8 @@ struct block {
 	cx->blk_oldscopesp	= PL_scopestack_ix,			\
 	cx->blk_oldpm		= PL_curpm,				\
 	cx->blk_gimme		= (U8)gimme;				\
+        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
+        PL_tmps_floor           = PL_tmps_ix;                           \
 	DEBUG_CX("PUSH");
 
 /* Exit a block (RETURN and LAST). */
@@ -1334,13 +1322,9 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         {                                                               \
             /* save a few things that we don't want PUSHSUB to zap */   \
             PAD * const prevcomppad = cx->blk_sub.prevcomppad;          \
-            SSize_t old_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;     \
-            SSize_t floor = PL_tmps_floor;                              \
 	    PUSHSUB(cx);						\
             /* undo the stuff that PUSHSUB zapped */                    \
             cx->blk_sub.prevcomppad = prevcomppad ;                     \
-            cx->cx_u.cx_blk.blku_old_tmpsfloor = old_floor;             \
-            PL_tmps_floor = floor;                                      \
         }                                                               \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
