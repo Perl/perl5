@@ -1510,44 +1510,38 @@ Perl_dounwind(pTHX_ I32 cxix)
         PERL_CONTEXT *cx = &cxstack[cxstack_ix];
 	DEBUG_CX("UNWIND");						\
 	/* Note: we don't need to restore the base context info till the end. */
+
+        CX_LEAVE_SCOPE(cx);
+
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
-            CX_LEAVE_SCOPE(cx);
 	    POPSUBST(cx);
 	    continue;  /* not break */
 	case CXt_SUB:
-            CX_LEAVE_SCOPE(cx);
 	    POPSUB(cx);
 	    break;
 	case CXt_EVAL:
-            CX_LEAVE_SCOPE(cx);
 	    POPEVAL(cx);
 	    break;
 	case CXt_BLOCK:
-            CX_LEAVE_SCOPE(cx);
             POPBASICBLK(cx);
 	    break;
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_FOR:
 	case CXt_LOOP_PLAIN:
-            CX_LEAVE_SCOPE(cx);
 	    POPLOOP(cx);
 	    break;
 	case CXt_WHEN:
-            CX_LEAVE_SCOPE(cx);
 	    POPWHEN(cx);
 	    break;
 	case CXt_GIVEN:
-            CX_LEAVE_SCOPE(cx);
 	    POPGIVEN(cx);
 	    break;
 	case CXt_NULL:
             /* there isn't a POPNULL ! */
-            CX_LEAVE_SCOPE(cx);
 	    break;
 	case CXt_FORMAT:
-            CX_LEAVE_SCOPE(cx);
 	    POPFORMAT(cx);
 	    break;
 	}
