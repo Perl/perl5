@@ -682,7 +682,6 @@ struct block_format {
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
         CvDEPTH((const CV*)cx->blk_sub.cv) = cx->blk_sub.olddepth;      \
 	SvREFCNT_dec_NN(cx->blk_sub.cv);				\
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
     } STMT_END
 
 #define POPFORMAT(cx)							\
@@ -699,7 +698,6 @@ struct block_format {
 	SvREFCNT_dec_NN(cx->blk_format.cv);				\
 	SvREFCNT_dec_NN(dfuot);						\
         }                                                               \
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
     } STMT_END
 
 /* eval context */
@@ -745,7 +743,6 @@ struct block_eval {
 	    SvREFCNT_dec_NN(cx->blk_eval.cur_text);			\
 	if (cx->blk_eval.old_namesv)					\
 	    sv_2mortal(cx->blk_eval.old_namesv);			\
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
     } STMT_END
 
 /* loop context */
@@ -837,8 +834,7 @@ struct block_loop {
             cursv = *svp;                                               \
             *svp = cx->blk_loop.itersave;                               \
             SvREFCNT_dec(cursv);                                        \
-        }                                                               \
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
+        }
 
 /* given/when context */
 struct block_givwhen {
@@ -857,14 +853,12 @@ struct block_givwhen {
         cx->blk_givwhen.defsv_save = orig_var;
 
 #define POPWHEN(cx)                                                     \
-	CX_LEAVE_SCOPE(cx);                                             \
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
+	CX_LEAVE_SCOPE(cx);
 
 #define POPGIVEN(cx)                                                    \
 	CX_LEAVE_SCOPE(cx);                                             \
         SvREFCNT_dec(GvSV(PL_defgv));                                   \
-        GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;                    \
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
+        GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;
 
 
 /* basic block, i.e. pp_enter/leave */
@@ -875,8 +869,7 @@ struct block_givwhen {
         PL_tmps_floor = PL_tmps_ix;
 
 #define POPBASICBLK(cx)                                                 \
-	CX_LEAVE_SCOPE(cx);                                             \
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
+	CX_LEAVE_SCOPE(cx);
 
 
 /* context common to subroutines, evals and loops */
@@ -947,6 +940,7 @@ struct block {
          * skip for multicall */                  \
         assert((CxTYPE(cx) == CXt_SUB && CxMULTICALL(cx)) ||            \
             PL_savestack_ix == cx->cx_u.cx_blk.blku_old_savestack_ix);  \
+        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
 	PL_curpm	 = cx->blk_oldpm;
 
 /* Continue a block elsewhere (NEXT and REDO). */

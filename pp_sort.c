@@ -1712,11 +1712,10 @@ PP(pp_sort)
                 assert(CxTYPE(cx) == CXt_SUB);
                 POPSUB(cx);
 	    }
-            else
+            else {
                 assert(CxTYPE(cx) == CXt_NULL);
-                /* mimic POPSUB */
                 CX_LEAVE_SCOPE(cx);
-                PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
+            }
 
 	    POPBLOCK(cx);
             cxstack_ix--;
