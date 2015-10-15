@@ -2771,9 +2771,8 @@ PP(pp_goto)
 	    assert(PL_scopestack_ix == cx->blk_oldscopesp);
             CX_LEAVE_SCOPE(cx);
 
-            /* partial unrolled POPSUB(): */
-
 	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
+                /* this is POPSUB_ARGS() with minor variations */
 		AV* av = MUTABLE_AV(PAD_SVl(0));
                 assert(AvARRAY(MUTABLE_AV(
                     PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[

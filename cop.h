@@ -655,6 +655,23 @@ struct block_format {
     CvDEPTH((const CV*)cx->blk_sub.cv) = cx->blk_sub.olddepth;          \
     SvREFCNT_dec_NN(cx->blk_sub.cv);
 
+/* handle the @_ part of leaving a sub */
+
+#define POPSUB_ARGS(cx) \
+    STMT_START {							\
+        AV *av;                                                         \
+        assert(AvARRAY(MUTABLE_AV(                                      \
+            PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[                    \
+                    CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);           \
+        POP_SAVEARRAY();						\
+        /* abandon @_ if it got reified */				\
+        av = MUTABLE_AV(PAD_SVl(0));                                    \
+        if (UNLIKELY(AvREAL(av))) 			                \
+            clear_defarray(av, 0);                                      \
+        else {							        \
+            CLEAR_ARGARRAY(av);			                        \
+        }								\
+    } STMT_END
 
 #define POPSUB(cx)							\
     STMT_START {							\
@@ -668,18 +685,7 @@ struct block_format {
 		CopSTASHPV((COP*)CvSTART((const CV*)cx->blk_sub.cv)));	\
 									\
 	if (CxHASARGS(cx)) {						\
-            AV *av;                                                     \
-            assert(AvARRAY(MUTABLE_AV(                                  \
-                PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[                \
-                        CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);       \
-	    POP_SAVEARRAY();						\
-	    /* abandon @_ if it got reified */				\
-            av = MUTABLE_AV(PAD_SVl(0));                                \
-	    if (UNLIKELY(AvREAL(av))) 			                \
-                clear_defarray(av, 0);                                  \
-	    else {							\
-		CLEAR_ARGARRAY(av);			                \
-	    }								\
+            POPSUB_ARGS(cx);                                            \
 	}								\
         }                                                               \
         POPSUB_COMMON(cx);                                              \
