@@ -646,6 +646,16 @@ struct block_format {
 	AvFILLp(ary) = -1;						\
     } STMT_END
 
+
+/* subsets of POPSUB */
+
+#define POPSUB_COMMON(cx) \
+    PL_comppad = cx->blk_sub.prevcomppad;                               \
+    PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;        \
+    CvDEPTH((const CV*)cx->blk_sub.cv) = cx->blk_sub.olddepth;          \
+    SvREFCNT_dec_NN(cx->blk_sub.cv);
+
+
 #define POPSUB(cx)							\
     STMT_START {							\
         if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
@@ -672,10 +682,7 @@ struct block_format {
 	    }								\
 	}								\
         }                                                               \
-        PL_comppad = cx->blk_sub.prevcomppad;                           \
-        PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
-        CvDEPTH((const CV*)cx->blk_sub.cv) = cx->blk_sub.olddepth;      \
-	SvREFCNT_dec_NN(cx->blk_sub.cv);				\
+        POPSUB_COMMON(cx);                                              \
     } STMT_END
 
 #define POPFORMAT(cx)							\
@@ -1270,6 +1277,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	}								\
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
 	multicall_cv = cv;						\
+        PERL_UNUSED_VAR(multicall_cv); /* for API */                    \
 	multicall_cop = CvSTART(cv);					\
     } STMT_END
 
@@ -1282,16 +1290,13 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 #define POP_MULTICALL \
     STMT_START {							\
 	cx = &cxstack[cxstack_ix];					\
-        CvDEPTH(multicall_cv) = cx->blk_sub.olddepth;                   \
 	CX_LEAVE_SCOPE(cx);                                             \
-        /* includes partial unrolled POPSUB(): */                       \
-        PL_comppad = cx->blk_sub.prevcomppad;                           \
-        PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
-        SvREFCNT_dec_NN(multicall_cv);                                  \
-        /* these two set for backcompat by callers */                   \
+        POPSUB_COMMON(cx);                                              \
+	POPBLOCK(cx);				   		        \
         newsp = PL_stack_base + cx->blk_oldsp;                          \
         gimme = cx->blk_gimme;                                          \
-	POPBLOCK(cx);						\
+        PERL_UNUSED_VAR(newsp); /* for API */                           \
+        PERL_UNUSED_VAR(gimme); /* for API */                           \
 	cxstack_ix--;                                                   \
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
