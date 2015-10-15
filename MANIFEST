@@ -136,6 +136,33 @@ cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
 cpan/B-Debug/Debug.pm	Compiler Debug backend
 cpan/B-Debug/t/debug.t	See if B::Debug works
+cpan/bignum/lib/bigint.pm		bigint
+cpan/bignum/lib/bignum.pm		bignum
+cpan/bignum/lib/bigrat.pm		bigrat
+cpan/bignum/lib/Math/BigFloat/Trace.pm	bignum tracing
+cpan/bignum/lib/Math/BigInt/Trace.pm	bignum tracing
+cpan/bignum/t/big_e_pi.t		See if bignum exports e() and PI()
+cpan/bignum/t/bigexp.t			See if bignum works
+cpan/bignum/t/bigint.t			See if bigint works
+cpan/bignum/t/bignum.t			See if bignum works
+cpan/bignum/t/bigrat.t			See if bigrat works
+cpan/bignum/t/bii_e_pi.t		See if bigint exports e() and PI()
+cpan/bignum/t/biinfnan.t		See if bignum works
+cpan/bignum/t/bir_e_pi.t		See if bigrat exports e() and PI()
+cpan/bignum/t/bninfnan.t		See if bignum works
+cpan/bignum/t/bn_lite.t			See if bignum with Math::BigInt::Lite works
+cpan/bignum/t/brinfnan.t		See if bignum works
+cpan/bignum/t/br_lite.t			See if bigrat with Math::BigInt::Lite works
+cpan/bignum/t/in_effect.t		See if in_effect() works
+cpan/bignum/t/infnan.inc		See if bignum with inf/NaN works
+cpan/bignum/t/option_a.t		See if bignum a => X works
+cpan/bignum/t/option_l.t		See if bignum l => X works
+cpan/bignum/t/option_p.t		See if bignum p => X works
+cpan/bignum/t/overrides.t		See if global overrides behave
+cpan/bignum/t/ratopt_a.t		See if bigrat a => X works
+cpan/bignum/t/scope_f.t			See if no bignum works
+cpan/bignum/t/scope_i.t			See if no bigint works
+cpan/bignum/t/scope_r.t			See if no bigrat works
 cpan/Compress-Raw-Bzip2/bzip2-src/blocksort.c
 cpan/Compress-Raw-Bzip2/bzip2-src/bzlib.c
 cpan/Compress-Raw-Bzip2/bzip2-src/bzlib.h
@@ -3000,33 +3027,6 @@ dist/base/t/lib/HasSigDie.pm	Module for testing base.pm
 dist/base/t/sigdie.t		See if base works with SIGDIE
 dist/base/t/version.t		See if base works with versions
 dist/base/t/warnings.t		See if base works with warnings
-dist/bignum/lib/bigint.pm		bigint
-dist/bignum/lib/bignum.pm		bignum
-dist/bignum/lib/bigrat.pm		bigrat
-dist/bignum/lib/Math/BigFloat/Trace.pm	bignum tracing
-dist/bignum/lib/Math/BigInt/Trace.pm	bignum tracing
-dist/bignum/t/big_e_pi.t		See if bignum exports e() and PI()
-dist/bignum/t/bigexp.t			See if bignum works
-dist/bignum/t/bigint.t			See if bigint works
-dist/bignum/t/bignum.t			See if bignum works
-dist/bignum/t/bigrat.t			See if bigrat works
-dist/bignum/t/bii_e_pi.t		See if bigint exports e() and PI()
-dist/bignum/t/biinfnan.t		See if bignum works
-dist/bignum/t/bir_e_pi.t		See if bigrat exports e() and PI()
-dist/bignum/t/bninfnan.t		See if bignum works
-dist/bignum/t/bn_lite.t			See if bignum with Math::BigInt::Lite works
-dist/bignum/t/brinfnan.t		See if bignum works
-dist/bignum/t/br_lite.t			See if bigrat with Math::BigInt::Lite works
-dist/bignum/t/in_effect.t		See if in_effect() works
-dist/bignum/t/infnan.inc		See if bignum with inf/NaN works
-dist/bignum/t/option_a.t		See if bignum a => X works
-dist/bignum/t/option_l.t		See if bignum l => X works
-dist/bignum/t/option_p.t		See if bignum p => X works
-dist/bignum/t/overrides.t		See if global overrides behave
-dist/bignum/t/ratopt_a.t		See if bigrat a => X works
-dist/bignum/t/scope_f.t			See if no bignum works
-dist/bignum/t/scope_i.t			See if no bigint works
-dist/bignum/t/scope_r.t			See if no bigrat works
 dist/Carp/lib/Carp/Heavy.pm	Error message retired workhorse
 dist/Carp/lib/Carp.pm		Error message extension
 dist/Carp/Makefile.PL		makefile writer for Carp
