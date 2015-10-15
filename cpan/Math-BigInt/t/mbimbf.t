@@ -7,8 +7,8 @@ use strict;
 use Test::More tests => 684
     + 26;		# own tests
 
-use Math::BigInt 1.70;
-use Math::BigFloat 1.43;
+use Math::BigInt lib => 'Calc';
+use Math::BigFloat;
 
 use vars qw/$mbi $mbf/;
 

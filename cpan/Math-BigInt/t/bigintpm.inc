@@ -75,6 +75,9 @@ while (<DATA>)
   # some unary ops
    } elsif ($f =~ /^b(nan|floor|ceil|int|sstr|neg|abs|sgn|inc|dec|not|sqrt|fac)$/) {
     $try .= "\$x->$f();";
+  # overloaded functions
+   } elsif ($f =~ /^(log|exp|sin|cos|atan2|int|neg|abs|sqrt)$/) {
+    $try .= "\$x = $f(\$x);";
    } elsif ($f =~ /^(numify|length|stringify|as_hex|as_bin)$/) {
     $try .= "\$x->$f();";
    } elsif ($f eq "exponent"){
@@ -549,140 +552,144 @@ SKIP: {
 # the following tests only make sense with Math::BigInt::Calc or BareCalc or
 # FastCalc
 
-exit if $CALC !~ /^Math::BigInt::(|Bare|Fast)Calc$/; # for Pari et al.
+SKIP: {
+    # skip GMP, Pari et al.
+    skip("skipping tests not intended for the backend $CALC", 50)
+      unless $CALC =~ /^Math::BigInt::(Bare|Fast)?Calc$/;
 
-###############################################################################
-# check proper length of internal arrays
+    ###########################################################################
+    # check proper length of internal arrays
 
-my $bl = $CL->_base_len();
-my $BASE = '9' x $bl;
-my $MAX = $BASE;
-$BASE++;
+    my $bl = $CL->_base_len();
+    my $BASE = '9' x $bl;
+    my $MAX = $BASE;
+    $BASE++;
 
-$x = $class->new($MAX); is_valid($x);	# f.i. 9999
-$x += 1; is ($x,$BASE); is_valid($x); 	# 10000
-$x -= 1; is ($x,$MAX); is_valid($x);	# 9999 again
+    $x = $class->new($MAX); is_valid($x);	# f.i. 9999
+    $x += 1; is ($x,$BASE); is_valid($x); 	# 10000
+    $x -= 1; is ($x,$MAX); is_valid($x);	# 9999 again
 
-###############################################################################
-# check numify
+    ###########################################################################
+    # check numify
 
-$x = $class->new($BASE-1);     is ($x->numify(),$BASE-1); 
-$x = $class->new(-($BASE-1));  is ($x->numify(),-($BASE-1)); 
+    $x = $class->new($BASE-1);     is ($x->numify(),$BASE-1); 
+    $x = $class->new(-($BASE-1));  is ($x->numify(),-($BASE-1)); 
 
-# +0 is to protect from 1e15 vs 100000000 (stupid to_string aaaarglburblll...)
-$x = $class->new($BASE);       is ($x->numify()+0,$BASE+0); 	
-$x = $class->new(-$BASE);      is ($x->numify(),-$BASE);
-$x = $class->new( -($BASE*$BASE*1+$BASE*1+1) ); 
-is ($x->numify(),-($BASE*$BASE*1+$BASE*1+1));
+    # +0 is to protect from 1e15 vs 100000000 (stupid to_string aaaarglburblll...)
+    $x = $class->new($BASE);       is ($x->numify()+0,$BASE+0); 	
+    $x = $class->new(-$BASE);      is ($x->numify(),-$BASE);
+    $x = $class->new( -($BASE*$BASE*1+$BASE*1+1) ); 
+    is ($x->numify(),-($BASE*$BASE*1+$BASE*1+1));
 
-###############################################################################
-# test bug in _digits with length($c[-1]) where $c[-1] was "00001" instead of 1
+    ###########################################################################
+    # test bug in _digits with length($c[-1]) where $c[-1] was "00001" instead of 1
 
-$x = $class->new($BASE-2); $x++; $x++; $x++; $x++;
-if ($x > $BASE) { is (1,1) } else { is ("$x < $BASE","$x > $BASE"); }
+    $x = $class->new($BASE-2); $x++; $x++; $x++; $x++;
+    if ($x > $BASE) { is (1,1) } else { is ("$x < $BASE","$x > $BASE"); }
 
-$x = $class->new($BASE+3); $x++;
-if ($x > $BASE) { is (1,1) } else { is ("$x > $BASE","$x < $BASE"); }
+    $x = $class->new($BASE+3); $x++;
+    if ($x > $BASE) { is (1,1) } else { is ("$x > $BASE","$x < $BASE"); }
 
-# test for +0 instead of int(): 
-$x = $class->new($MAX); is ($x->length(), length($MAX));
+    # test for +0 instead of int(): 
+    $x = $class->new($MAX); is ($x->length(), length($MAX));
 
-###############################################################################
-# test bug that $class->digit($string) did not work
+    ###########################################################################
+    # test bug that $class->digit($string) did not work
 
-is ($class->digit(123,2),1);
+    is ($class->digit(123,2),1);
 
-###############################################################################
-# bug in sub where number with at least 6 trailing zeros after any op failed
+    ###########################################################################
+    # bug in sub where number with at least 6 trailing zeros after any op failed
 
-$x = $class->new(123456); $z = $class->new(10000); $z *= 10; $x -= $z;
-is ($z, 100000);
-is ($x, 23456);
+    $x = $class->new(123456); $z = $class->new(10000); $z *= 10; $x -= $z;
+    is ($z, 100000);
+    is ($x, 23456);
 
-###############################################################################
-# bug in shortcut in mul()
+    ###########################################################################
+    # bug in shortcut in mul()
 
-# construct a number with a zero-hole of BASE_LEN_SMALL
-{
- my @bl = $CL->_base_len(); my $bl = $bl[5];
+    # construct a number with a zero-hole of BASE_LEN_SMALL
+    {
+     my @bl = $CL->_base_len(); my $bl = $bl[5];
 
- $x = '1' x $bl . '0' x $bl . '1' x $bl . '0' x $bl;
- $y = '1' x (2*$bl);
- $x = $class->new($x)->bmul($y);
- # result is 123..$bl .  $bl x (3*bl-1) . $bl...321 . '0' x $bl
- $y = ''; my $d = '';
- for (my $i = 1; $i <= $bl; $i++)
-   {
-   $y .= $i; $d = $i.$d;
-   }
- $y .= $bl x (3*$bl-1) . $d . '0' x $bl;
- is ($x,$y);
+     $x = '1' x $bl . '0' x $bl . '1' x $bl . '0' x $bl;
+     $y = '1' x (2*$bl);
+     $x = $class->new($x)->bmul($y);
+     # result is 123..$bl .  $bl x (3*bl-1) . $bl...321 . '0' x $bl
+     $y = ''; my $d = '';
+     for (my $i = 1; $i <= $bl; $i++)
+       {
+       $y .= $i; $d = $i.$d;
+       }
+     $y .= $bl x (3*$bl-1) . $d . '0' x $bl;
+     is ($x,$y);
 
 
-  #############################################################################
-  # see if mul shortcut for small numbers works
+      #########################################################################
+      # see if mul shortcut for small numbers works
 
-  $x = '9' x $bl;
-  $x = $class->new($x); 
-  # 999 * 999 => 998 . 001, 9999*9999 => 9998 . 0001
-  is ($x*$x, '9' x ($bl-1) . '8' . '0' x ($bl-1) . '1');
+      $x = '9' x $bl;
+      $x = $class->new($x); 
+      # 999 * 999 => 998 . 001, 9999*9999 => 9998 . 0001
+      is ($x*$x, '9' x ($bl-1) . '8' . '0' x ($bl-1) . '1');
+    }
+
+    ###########################################################################
+    # bug with rest "-0" in div, causing further div()s to fail
+
+    $x = $class->new('-322056000'); ($x,$y) = $x->bdiv('-12882240');
+
+    is ($y,'0'); is_valid($y);	# $y not '-0'
+
+    ###########################################################################
+    # bug in $x->bmod($y)
+
+    # if $x < 0 and $y > 0
+    $x = $class->new('-629'); is ($x->bmod(5033),4404);
+
+    ###########################################################################
+    # bone/binf etc as plain calls (Lite failed them)
+
+    is ($class->bzero(),0);
+    is ($class->bone(),1);
+    is ($class->bone('+'),1);
+    is ($class->bone('-'),-1);
+    is ($class->bnan(),'NaN');
+    is ($class->binf(),'inf');
+    is ($class->binf('+'),'inf');
+    is ($class->binf('-'),'-inf');
+    is ($class->binf('-inf'),'-inf');
+
+    ###########################################################################
+    # is_one('-')
+
+    is ($class->new(1)->is_one('-'),0);
+    is ($class->new(-1)->is_one('-'),1);
+    is ($class->new(1)->is_one(),1);
+    is ($class->new(-1)->is_one(),0);
+
+    ###########################################################################
+    # [perl #30609] bug with $x -= $x not being 0, but 2*$x
+
+    $x = $class->new(3);  $x -= $x; is ($x, 0);
+    $x = $class->new(-3); $x -= $x; is ($x, 0);
+    $x = $class->new('NaN'); $x -= $x; is ($x->is_nan(), 1);
+    $x = $class->new('inf'); $x -= $x; is ($x->is_nan(), 1);
+    $x = $class->new('-inf'); $x -= $x; is ($x->is_nan(), 1);
+
+    $x = $class->new('NaN'); $x += $x; is ($x->is_nan(), 1);
+    $x = $class->new('inf'); $x += $x; is ($x->is_inf(), 1);
+    $x = $class->new('-inf'); $x += $x; is ($x->is_inf('-'), 1);
+    $x = $class->new(3);  $x += $x; is ($x, 6);
+    $x = $class->new(-3); $x += $x; is ($x, -6);
+
+    $x = $class->new(3);  $x *= $x; is ($x, 9);
+    $x = $class->new(-3); $x *= $x; is ($x, 9);
+    $x = $class->new(3);  $x /= $x; is ($x, 1);
+    $x = $class->new(-3); $x /= $x; is ($x, 1);
+    $x = $class->new(3);  $x %= $x; is ($x, 0);
+    $x = $class->new(-3); $x %= $x; is ($x, 0);
 }
-
-###############################################################################
-# bug with rest "-0" in div, causing further div()s to fail
-
-$x = $class->new('-322056000'); ($x,$y) = $x->bdiv('-12882240');
-
-is ($y,'0'); is_valid($y);	# $y not '-0'
-
-###############################################################################
-# bug in $x->bmod($y)
-
-# if $x < 0 and $y > 0
-$x = $class->new('-629'); is ($x->bmod(5033),4404);
-
-###############################################################################
-# bone/binf etc as plain calls (Lite failed them)
-
-is ($class->bzero(),0);
-is ($class->bone(),1);
-is ($class->bone('+'),1);
-is ($class->bone('-'),-1);
-is ($class->bnan(),'NaN');
-is ($class->binf(),'inf');
-is ($class->binf('+'),'inf');
-is ($class->binf('-'),'-inf');
-is ($class->binf('-inf'),'-inf');
-
-###############################################################################
-# is_one('-')
-
-is ($class->new(1)->is_one('-'),0);
-is ($class->new(-1)->is_one('-'),1);
-is ($class->new(1)->is_one(),1);
-is ($class->new(-1)->is_one(),0);
-
-###############################################################################
-# [perl #30609] bug with $x -= $x not being 0, but 2*$x
-
-$x = $class->new(3);  $x -= $x; is ($x, 0);
-$x = $class->new(-3); $x -= $x; is ($x, 0);
-$x = $class->new('NaN'); $x -= $x; is ($x->is_nan(), 1);
-$x = $class->new('inf'); $x -= $x; is ($x->is_nan(), 1);
-$x = $class->new('-inf'); $x -= $x; is ($x->is_nan(), 1);
-
-$x = $class->new('NaN'); $x += $x; is ($x->is_nan(), 1);
-$x = $class->new('inf'); $x += $x; is ($x->is_inf(), 1);
-$x = $class->new('-inf'); $x += $x; is ($x->is_inf('-'), 1);
-$x = $class->new(3);  $x += $x; is ($x, 6);
-$x = $class->new(-3); $x += $x; is ($x, -6);
-
-$x = $class->new(3);  $x *= $x; is ($x, 9);
-$x = $class->new(-3); $x *= $x; is ($x, 9);
-$x = $class->new(3);  $x /= $x; is ($x, 1);
-$x = $class->new(-3); $x /= $x; is ($x, 1);
-$x = $class->new(3);  $x %= $x; is ($x, 0);
-$x = $class->new(-3); $x %= $x; is ($x, 0);
 
 ###############################################################################
 # all tests done
@@ -745,18 +752,40 @@ __DATA__
 &^=
 5:7:2
 &blog
+#
 NaNlog:2:NaN
 122:NaNlog:NaN
 NaNlog1:NaNlog:NaN
-122:inf:NaN
-inf:122:NaN
-122:-inf:NaN
--inf:122:NaN
+#
+122:inf:0
+inf:122:inf
+122:-inf:0
+-inf:122:inf
 -inf:-inf:NaN
-inf:inf:NaN
-0:4:NaN
+0:4:-inf
 -21:4:NaN
 21:-21:NaN
+#
+0:-inf:NaN
+0:-1:NaN
+0:0:NaN
+0:1:NaN
+0:inf:NaN
+#
+1:-inf:0
+1:-1:0
+1:0:0
+1:1:NaN
+1:4:0
+1:inf:0
+#
+inf:-inf:NaN
+inf:-1:NaN
+inf:0:NaN
+inf:1:NaN
+inf:4:inf
+inf:inf:NaN
+#
 # normal results
 1024:2:10
 81:3:4
@@ -764,6 +793,7 @@ inf:inf:NaN
 82:3:4
 # 3.9... truncate
 80:3:3
+4096:2:12
 15625:5:6
 15626:5:6
 15624:5:5
@@ -781,7 +811,6 @@ inf:inf:NaN
 144115188075855872:2:57
 288230376151711744:2:58
 576460752303423488:2:59
-4096:2:12
 1329227995784915872903807060280344576:2:120
 # $x == $base => result 1
 3:3:1
@@ -2705,3 +2734,23 @@ NaNas_hex:NaN
 +inf:inf
 -inf:-inf
 NaNas_bin:NaN
+# overloaded functions
+&log
+-1:NaN
+0:-inf
+1:0
+2:0
+3:1
+123456789:18
+1234567890987654321:41
+-inf:inf
+inf:inf
+NaN:NaN
+&exp
+&sin
+&cos
+&atan2
+&int
+&neg
+&abs
+&sqrt

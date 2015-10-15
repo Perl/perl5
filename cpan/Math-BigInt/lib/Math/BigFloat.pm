@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.999701';
+$VERSION = '1.999704';
 require 5.006002;
 
 require Exporter;
@@ -860,18 +860,23 @@ sub blog
   {
   my ($self,$x,$base,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
+  # If called as $x -> blog() or $x -> blog(undef), don't objectify the
+  # undefined base, since undef signals that the base is Euler's number.
+  #unless (ref($x) && !defined($base)) {
+  #    # objectify is costly, so avoid it
+  #    if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1]))) {
+  #        ($self,$x,$base,$a,$p,$r) = objectify(2,@_);
+  #    }
+  #}
+
   return $x if $x->modify('blog');
 
-  # $base > 0, $base != 1; if $base == undef default to $base == e
-  # $x >= 0
+  return $x -> bnan() if $x -> is_nan();
 
   # we need to limit the accuracy to protect against overflow
   my $fallback = 0;
   my ($scale,@params);
   ($x,@params) = $x->_find_round_parameters($a,$p,$r);
-
-  # also takes care of the "error in _find_round_parameters?" case
-  return $x->bnan() if $x->{sign} ne '+' || $x->is_zero();
 
   # no rounding at all, so must use fallback
   if (scalar @params == 0)
@@ -890,28 +895,62 @@ sub blog
     $scale = abs($params[0] || $params[1]) + 4;	# take whatever is defined
     }
 
-  return $x->bzero(@params) if $x->is_one();
-  # base not defined => base == Euler's number e
-  if (defined $base)
-    {
-    # make object, since we don't feed it through objectify() to still get the
-    # case of $base == undef
-    $base = $self->new($base) unless ref($base);
-    # $base > 0; $base != 1
-    return $x->bnan() if $base->is_zero() || $base->is_one() ||
-      $base->{sign} ne '+';
-    # if $x == $base, we know the result must be 1.0
-    if ($x->bcmp($base) == 0)
-      {
-      $x->bone('+',@params);
-      if ($fallback)
-        {
+  my $done = 0;
+  if (defined $base) {
+      $base = $self -> new($base) unless ref $base;
+      if ($base -> is_nan() || $base -> is_one()) {
+          $x -> bnan();
+          $done = 1;
+      } elsif ($base -> is_inf() || $base -> is_zero()) {
+          if ($x -> is_inf() || $x -> is_zero()) {
+              $x -> bnan();
+          } else {
+              $x -> bzero(@params);
+          }
+          $done = 1;
+      } elsif ($base -> is_negative()) {        # -inf < base < 0
+          if ($x -> is_one()) {                 #     x = 1
+              $x -> bzero(@params);
+          } elsif ($x == $base) {
+              $x -> bone('+', @params);         #     x = base
+          } else {
+              $x -> bnan();                     #     otherwise
+          }
+          $done = 1;
+      } elsif ($x == $base) {
+          $x -> bone('+', @params);             # 0 < base && 0 < x < inf
+          $done = 1;
+      }
+  }
+
+  # We now know that the base is either undefined or positive and finite.
+
+  unless ($done) {
+      if ($x -> is_inf()) {             #   x = +/-inf
+          my $sign = defined $base && $base < 1 ? '-' : '+';
+          $x -> binf($sign);
+          $done = 1;
+      } elsif ($x -> is_neg()) {        #   -inf < x < 0
+          $x -> bnan();
+          $done = 1;
+      } elsif ($x -> is_one()) {        #   x = 1
+          $x -> bzero(@params);
+          $done = 1;
+      } elsif ($x -> is_zero()) {       #   x = 0
+          my $sign = defined $base && $base < 1 ? '+' : '-';
+          $x -> binf($sign);
+          $done = 1;
+      }
+  }
+
+  if ($done) {
+      if ($fallback) {
         # clear a/p after round, since user did not request it
-        delete $x->{_a}; delete $x->{_p};
+          delete $x->{_a};
+          delete $x->{_p};
         }
       return $x;
       }
-    }
 
   # when user set globals, they would interfere with our calculation, so
   # disable them and later re-enable them
@@ -933,7 +972,7 @@ sub blog
     $self = ref($x);
     }
   
-  my $done = 0;
+  $done = 0;
 
   # If the base is defined and an integer, try to calculate integer result
   # first. This is very fast, and in case the real result was found, we can
@@ -4395,6 +4434,24 @@ This method was added in v1.87 of Math::BigInt (June 2007).
 Multiply $x by $y, and then add $z to the result.
 
 This method was added in v1.87 of Math::BigInt (June 2007).
+
+=item as_float()
+
+This method is called when Math::BigFloat encounters an object it doesn't know
+how to handle. For instance, assume $x is a Math::BigFloat, or subclass
+thereof, and $y is defined, but not a Math::BigFloat, or subclass thereof. If
+you do
+
+    $x -> badd($y);
+
+$y needs to be converted into an object that $x can deal with. This is done by
+first checking if $y is something that $x might be upgraded to. If that is the
+case, no further attempts are made. The next is to see if $y supports the
+method C<as_float()>. The method C<as_float()> is expected to return either an
+object that has the same class as $x, a subclass thereof, or a string that
+C<ref($x)-E<gt>new()> can parse to create an object.
+
+In Math::BigFloat, C<as_float()> has the same effect as C<copy()>.
 
 =back
 

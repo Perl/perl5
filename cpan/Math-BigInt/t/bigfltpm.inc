@@ -60,6 +60,9 @@ while (<DATA>)
       # some unary ops (test the fxxx form, since that is done by AUTOLOAD)
       } elsif ($f =~ /^f(nan|sstr|neg|floor|ceil|int|abs)$/) {
         $try .= "\$x->f$1();";
+      # overloaded functions
+      } elsif ($f =~ /^(log|exp|sin|cos|atan2|int|neg|abs|sqrt)$/) {
+        $try .= "\$x = $f(\$x);";
       # some is_xxx test function	
       } elsif ($f =~ /^is_(zero|one|negative|positive|odd|even|nan|int)$/) {
         $try .= "\$x->$f();";
@@ -499,16 +502,16 @@ NaN:1:NaN
 7:0:1
 2:1:2
 &flog
-0::NaN
+0::-inf
 -1::NaN
 -2::NaN
 # base > 0, base != 1
 2:-1:NaN
-2:0:NaN
+2:0:0
 2:1:NaN
-# log(1) is always 1, regardless of $base
+# log(1)
 1::0
-1:1:0
+1:1:NaN
 1:2:0
 2::0.6931471805599453094172321214581765680755
 2.718281828::0.9999999998311266953289851340574956564911
@@ -1834,3 +1837,23 @@ NaN:NaN
 -51.2:-51
 12.2:12
 -0.4:0
+# overloaded functions
+&log
+-1:NaN
+0:-inf
+1:0
+2:0.6931471805599453094172321214581765680755
+3:1.098612288668109691395245236922525704647
+123456789:18.63140176616801803319393334796320420971
+1234567890987654321:41.657252696908474880343847955484513481
+-inf:inf
+inf:inf
+NaN:NaN
+&exp
+&sin
+&cos
+&atan2
+&int
+&neg
+&abs
+&sqrt

@@ -1628,6 +1628,8 @@ cpan/Math-BigInt/t/bigints.t		See if BigInt.pm works
 cpan/Math-BigInt/t/biglog.t		Test the log function
 cpan/Math-BigInt/t/big_pi_e.t		test bpi() and bexp()
 cpan/Math-BigInt/t/bigroot.t		Test the broot function
+cpan/Math-BigInt/t/blog-mbf.t		Math::BigInt tests
+cpan/Math-BigInt/t/blog-mbi.t		Math::BigInt tests
 cpan/Math-BigInt/t/calling.t		Test calling conventions
 cpan/Math-BigInt/t/config.t		Test Math::BigInt->config()
 cpan/Math-BigInt/t/constant.t		Test Math::BigInt/BigFloat under :constant
@@ -1648,6 +1650,8 @@ cpan/Math-BigInt/t/mbimbf.t		BigInt/BigFloat accuracy, precision and fallback, r
 cpan/Math-BigInt/t/mbi_rand.t		Test Math::BigInt randomly
 cpan/Math-BigInt/t/nan_cmp.t		overloaded comparison involving *NaN*
 cpan/Math-BigInt/t/new_overloaded.t	test overloaded numbers in BigFloat's new()
+cpan/Math-BigInt/t/objectify_mbf.t	Math::BigInt tests
+cpan/Math-BigInt/t/objectify_mbi.t	Math::BigInt tests
 cpan/Math-BigInt/t/req_mbf0.t		test: require Math::BigFloat; ->bzero();
 cpan/Math-BigInt/t/req_mbf1.t		test: require Math::BigFloat; ->bone();
 cpan/Math-BigInt/t/req_mbfa.t		test: require Math::BigFloat; ->bnan();

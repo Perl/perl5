@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 2340
+use Test::More tests => 2360
     + 5;		# own tests
 
 
@@ -24,6 +24,11 @@ $c = Math::BigFloat->new('0.008'); my $d = Math::BigFloat->new(3);
 my $e = $c->bdiv(Math::BigFloat->new(3),$d);
 
 is ($e,'0.00267'); # '0.008 / 3 => 0.0027');
-is (ref($e->{_e}->[0]), ''); # 'Not a BigInt');
+
+SKIP: {
+    skip("skipping test which is not for this backend", 1)
+      unless $CL eq 'Math::BigInt::Calc';
+    is (ref($e->{_e}->[0]), '');  # 'Not a BigInt');
+}
 
 require 't/bigfltpm.inc';	# all tests here for sharing

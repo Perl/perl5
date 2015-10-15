@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.999701';
+$VERSION = '1.999704';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -94,7 +94,7 @@ use overload
 #'oct'	=>	sub { print "oct"; $_[0]; }, 
 
 # log(N) is log(N, e), where e is Euler's number
-'log'	=>	sub { $_[0]->copy()->blog($_[1], undef); }, 
+'log'	=>	sub { $_[0]->copy()->blog(); }, 
 'exp'	=>	sub { $_[0]->copy()->bexp($_[1]); }, 
 'int'	=>	sub { $_[0]->copy(); }, 
 'neg'	=>	sub { $_[0]->copy()->bneg(); }, 
@@ -1277,27 +1277,52 @@ sub bdec
 
 sub blog
   {
-  # calculate $x = $a ** $base + $b and return $a (e.g. the log() to base
-  # $base of $x)
+  # Return the logarithm of the operand. If a second operand is defined, that
+  # value is used as the base, otherwise the base is assumed to be Euler's
+  # constant.
+
+  # Don't objectify the base, since an undefined base, as in $x->blog() or
+  # $x->blog(undef) signals that the base is Euler's number.
 
   # set up parameters
   my ($self,$x,$base,@r) = (undef,@_);
   # objectify is costly, so avoid it
-  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
-    {
-    ($self,$x,$base,@r) = objectify(2,@_);
-    }
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1]))) {
+      ($self,$x,$base,@r) = objectify(1,@_);
+  }
 
   return $x if $x->modify('blog');
 
-  $base = $self->new($base) if defined $base && !ref $base;
+  # Handle all exception cases and all trivial cases. I have used Wolfram Alpha
+  # (http://www.wolframalpha.com) as the reference for these cases.
 
-  # inf, -inf, NaN, <0 => NaN
-  return $x->bnan()
-   if $x->{sign} ne '+' || (defined $base && $base->{sign} ne '+');
+  return $x -> bnan() if $x -> is_nan();
 
-  return $upgrade->blog($upgrade->new($x),$base,@r) if 
-    defined $upgrade;
+  if (defined $base) {
+      $base = $self -> new($base) unless ref $base;
+      if ($base -> is_nan() || $base -> is_one()) {
+          return $x -> bnan();
+      } elsif ($base -> is_inf() || $base -> is_zero()) {
+          return $x -> bnan() if $x -> is_inf() || $x -> is_zero();
+          return $x -> bzero();
+      } elsif ($base -> is_negative()) {            # -inf < base < 0
+          return $x -> bzero() if $x -> is_one();   #     x = 1
+          return $x -> bone()  if $x == $base;      #     x = base
+          return $x -> bnan();                      #     otherwise
+      }
+      return $x -> bone() if $x == $base;           # 0 < base && 0 < x < inf
+  }
+
+  # We now know that the base is either undefined or >= 2 and finite.
+
+  return $x -> binf('+') if $x -> is_inf();         #   x = +/-inf
+  return $x -> bnan()    if $x -> is_neg();         #   -inf < x < 0
+  return $x -> bzero()   if $x -> is_one();         #   x = 1
+  return $x -> binf('-') if $x -> is_zero();        #   x = 0
+
+  # At this point we are done handling all exception cases and trivial cases.
+
+  return $upgrade -> blog($upgrade -> new($x), $base, @r) if defined $upgrade;
 
   # fix for bug #24969:
   # the default base is e (Euler's number) which is not an integer
@@ -1312,7 +1337,7 @@ sub blog
     }
 
   my ($rc,$exact) = $CALC->_log_int($x->{value},$base->{value});
-  return $x->bnan() unless defined $rc;		# not possible to take log?
+  return $x->bnan() unless defined $rc;         # not possible to take log?
   $x->{value} = $rc;
   $x->round(@r);
   }
@@ -2801,9 +2826,7 @@ sub objectify {
 
         # If it is an object of the right class, all is fine.
 
-        if ($ref -> isa($a[0])) {
-            next;
-        }
+        next if $ref -> isa($a[0]);
 
         # Upgrading is OK, so skip further tests if the argument is upgraded.
 
@@ -2811,27 +2834,44 @@ sub objectify {
             next;
         }
 
-        # If we want a Math::BigInt, see if the object can become one.
-        # Support the old misnomer as_number().
+        # See if we can call one of the as_xxx() methods. We don't know whether
+        # the as_xxx() method returns an object or a scalar, so re-check
+        # afterwards.
 
-        if ($a[0] eq 'Math::BigInt') {
+        my $recheck = 0;
+
+        if ($a[0] -> isa('Math::BigInt')) {
             if ($a[$i] -> can('as_int')) {
                 $a[$i] = $a[$i] -> as_int();
-                next;
-            }
-            if ($a[$i] -> can('as_number')) {
+                $recheck = 1;
+            } elsif ($a[$i] -> can('as_number')) {
                 $a[$i] = $a[$i] -> as_number();
-                next;
+                $recheck = 1;
             }
         }
 
-        # If we want a Math::BigFloat, see if the object can become one.
-
-        if ($a[0] eq 'Math::BigFloat') {
+        elsif ($a[0] -> isa('Math::BigFloat')) {
             if ($a[$i] -> can('as_float')) {
                 $a[$i] = $a[$i] -> as_float();
+                $recheck = $1;
+            }
+        }
+
+        # If we called one of the as_xxx() methods, recheck.
+
+        if ($recheck) {
+            $ref = ref($a[$i]);
+
+            # Perl scalars are fed to the appropriate constructor.
+
+            unless ($ref) {
+                $a[$i] = $a[0] -> new($a[$i]);
                 next;
             }
+
+            # If it is an object of the right class, all is fine.
+
+            next if $ref -> isa($a[0]);
         }
 
         # Last resort.
@@ -4326,15 +4366,29 @@ Return the signed mantissa of $x as BigInt.
 
     $x->copy();		# make a true copy of $x (unlike $y = $x;)
 
-=item as_int()/as_number()
+=item as_int()
 
-    $x->as_int();
+=item as_number()
 
-Returns $x as a BigInt (truncated towards zero). In BigInt this is the same as
-C<copy()>.
+These methods are called when Math::BigInt encounters an object it doesn't know
+how to handle. For instance, assume $x is a Math::BigInt, or subclass thereof,
+and $y is defined, but not a Math::BigInt, or subclass thereof. If you do
 
-C<as_number()> is an alias to this method. C<as_number> was introduced in
-v1.22, while C<as_int()> was only introduced in v1.68.
+    $x -> badd($y);
+
+$y needs to be converted into an object that $x can deal with. This is done by
+first checking if $y is something that $x might be upgraded to. If that is the
+case, no further attempts are made. The next is to see if $y supports the
+method C<as_int()>. If it does, C<as_int()> is called, but if it doesn't, the
+next thing is to see if $y supports the method C<as_number()>. If it does,
+C<as_number()> is called. The method C<as_int()> (and C<as_number()>) is
+expected to return either an object that has the same class as $x, a subclass
+thereof, or a string that C<ref($x)-E<gt>new()> can parse to create an object.
+
+C<as_number()> is an alias to C<as_int()>. C<as_number> was introduced in
+v1.22, while C<as_int()> was introduced in v1.68.
+
+In Math::BigInt, C<as_int()> has the same effect as C<copy()>.
 
 =item bstr()
 
@@ -4365,7 +4419,7 @@ Returns a normalized string representation of C<$x>.
 This returns a normal Perl scalar from $x. It is used automatically
 whenever a scalar is needed, for instance in array index operations.
 
-This loses precision, to avoid this use L<as_int()|/"as_int()/as_number()"> instead.
+This loses precision, to avoid this use L</as_int()> instead.
 
 =item modify()
 
@@ -5390,43 +5444,34 @@ This makes a copy of $x and takes O(N), but $x->bneg() is O(1).
 
 =item Mixing different object types
 
-In Perl you will get a floating point value if you do one of the following:
-
-	$float = 5.0 + 2;
-	$float = 2 + 5.0;
-	$float = 5 / 2;
-
-With overloaded math, only the first two variants will result in a BigFloat:
+With overloaded operators, it is the first (dominating) operand that determines
+which method is called. Here are some examples showing what actually gets
+called in various cases.
 
 	use Math::BigInt;
 	use Math::BigFloat;
 
-	$mbf = Math::BigFloat->new(5);
-	$mbi2 = Math::BigInteger->new(5);
-	$mbi = Math::BigInteger->new(2);
-
+	$mbf  = Math::BigFloat->new(5);
+	$mbi2 = Math::BigInt->new(5);
+	$mbi  = Math::BigInt->new(2);
 					# what actually gets called:
-	$float = $mbf + $mbi;		# $mbf->badd()
-	$float = $mbf / $mbi;		# $mbf->bdiv()
-	$integer = $mbi + $mbf;		# $mbi->badd()
-	$integer = $mbi2 / $mbi;	# $mbi2->bdiv()
-	$integer = $mbi2 / $mbf;	# $mbi2->bdiv()
+        $float = $mbf + $mbi;           # $mbf->badd($mbi)
+        $float = $mbf / $mbi;           # $mbf->bdiv($mbi)
+        $integer = $mbi + $mbf;         # $mbi->badd($mbf)
+        $integer = $mbi2 / $mbi;        # $mbi2->bdiv($mbi)
+        $integer = $mbi2 / $mbf;        # $mbi2->bdiv($mbf)
 
-This is because math with overloaded operators follows the first (dominating)
-operand, and the operation of that is called and returns thus the result. So,
-Math::BigInt::bdiv() will always return a Math::BigInt, regardless whether
-the result should be a Math::BigFloat or the second operant is one.
-
-To get a Math::BigFloat you either need to call the operation manually,
-make sure the operands are already of the proper type or casted to that type
-via Math::BigFloat->new():
+For instance, Math::BigInt->bdiv() will always return a Math::BigInt, regardless of
+whether the second operant is a Math::BigFloat. To get a Math::BigFloat you
+either need to call the operation manually, make sure each operand already is a
+Math::BigFloat, or cast to that type via Math::BigFloat->new():
 
 	$float = Math::BigFloat->new($mbi2) / $mbi;	# = 2.5
 
-Beware of simple "casting" the entire expression, this would only convert
-the already computed result:
+Beware of casting the entire expression, as this would cast the
+result, at which point it is too late:
 
-	$float = Math::BigFloat->new($mbi2 / $mbi);	# = 2.0 thus wrong!
+	$float = Math::BigFloat->new($mbi2 / $mbi);	# = 2
 
 Beware also of the order of more complicated expressions like:
 

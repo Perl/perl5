@@ -20,14 +20,14 @@ use Math::BigInt;
 my $cl = "Math::BigInt";
 
 #############################################################################
-# test log($n) in BigInt (broken until 1.80)
+# test $n->blog() in BigInt (broken until 1.80)
 
 is ($cl->new(2)->blog(), '0', "blog(2)");
 is ($cl->new(288)->blog(), '5',"blog(288)");
 is ($cl->new(2000)->blog(), '7', "blog(2000)");
 
 #############################################################################
-# test exp($n) in BigInt
+# test $n->bexp() in BigInt
 
 is ($cl->new(1)->bexp(), '2', "bexp(1)");
 is ($cl->new(2)->bexp(), '7',"bexp(2)");
@@ -38,7 +38,7 @@ is ($cl->new(3)->bexp(), '20', "bexp(3)");
 # BigFloat tests
 
 #############################################################################
-# test log(2, N) where N > 67 (broken until 1.82)
+# test $n->blog(undef, N) where N > 67 (broken until 1.82)
 
 $cl = "Math::BigFloat";
 

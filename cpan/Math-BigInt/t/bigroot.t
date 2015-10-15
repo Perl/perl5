@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!perl
 
 # Test broot function (and bsqrt() function, since it is used by broot()).
 
@@ -8,7 +8,9 @@
 # But it is better to test the numerical functionality, instead of not testing
 # it at all.
 
-use strict;
+use strict;             # restrict unsafe constructs
+use warnings;           # enable optional warnings
+
 use Test::More tests => 4 * 2;
 
 use Math::BigFloat;
