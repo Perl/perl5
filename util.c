@@ -3310,6 +3310,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 	while (deftypes ||
 	       (!hasdir && my_trnlnm("DCL$PATH",tmpbuf,idx++)) )
 	{
+	    Stat_t statbuf;
 	    if (deftypes) {
 		deftypes = 0;
 		*tmpbuf = '\0';
