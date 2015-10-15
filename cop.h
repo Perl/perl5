@@ -940,7 +940,6 @@ struct subst {
     U8		sbu_type;	/* what kind of context this is */
     U8		sbu_rflags;
     U16		sbu_rxtainted;	/* matches struct block */
-    I32		sbu_oldsave;
     SSize_t	sbu_iters;
     SSize_t	sbu_maxiters;
     char *	sbu_orig;
@@ -955,7 +954,6 @@ struct subst {
 #define sb_iters	cx_u.cx_subst.sbu_iters
 #define sb_maxiters	cx_u.cx_subst.sbu_maxiters
 #define sb_rflags	cx_u.cx_subst.sbu_rflags
-#define sb_oldsave	cx_u.cx_subst.sbu_oldsave
 #define sb_rxtainted	cx_u.cx_subst.sbu_rxtainted
 #define sb_orig		cx_u.cx_subst.sbu_orig
 #define sb_dstr		cx_u.cx_subst.sbu_dstr
@@ -968,10 +966,10 @@ struct subst {
 
 #ifdef PERL_CORE
 #  define PUSHSUBST(cx) CXINC, cx = &cxstack[cxstack_ix],		\
+	cx->cx_old_savestack_ix = oldsave,				\
 	cx->sb_iters		= iters,				\
 	cx->sb_maxiters		= maxiters,				\
 	cx->sb_rflags		= r_flags,				\
-	cx->sb_oldsave		= oldsave,				\
 	cx->sb_rxtainted	= rxtainted,				\
 	cx->sb_orig		= orig,					\
 	cx->sb_dstr		= dstr,					\
@@ -995,6 +993,7 @@ struct subst {
 #define CxONCE(cx)		((cx)->cx_type & CXp_ONCE)
 
 struct context {
+    I32		        cx_old_savestack_ix;
     union {
 	struct block	cx_blk;
 	struct subst	cx_subst;

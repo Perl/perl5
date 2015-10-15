@@ -285,7 +285,7 @@ PP(pp_substcont)
 	    /* PL_tainted must be correctly set for this mg_set */
 	    SvSETMAGIC(TARG);
 	    TAINT_NOT;
-	    LEAVE_SCOPE(cx->sb_oldsave);
+	    LEAVE_SCOPE(cx->cx_old_savestack_ix);
 	    POPSUBST(cx);
 	    PERL_ASYNC_CHECK();
 	    RETURNOP(pm->op_next);
