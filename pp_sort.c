@@ -1691,7 +1691,7 @@ PP(pp_sort)
 
 		}
 	    }
-            cx->cx_u.cx_blk.blku_old_savestack_ix = old_savestack_ix;
+            cx->cx_old_savestack_ix = old_savestack_ix;
 
 	    start = p1 - max;
 	    sortsvp(aTHX_ start, max,
