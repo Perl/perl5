@@ -5533,7 +5533,12 @@ esac
 : the following weeds options from ccflags that are of no interest to cpp
 case "$cppflags" in
 '') cppflags="$ccflags" ;;
-*)  cppflags="$cppflags $ccflags" ;;
+*)  set X $ccflags; shift
+    case " $cppflags " in
+    *" $1 "*) ;;  # Try to avoid doubling the cppflags.
+    *) cppflags="$cppflags $ccflags" ;;
+    esac
+    ;;
 esac
 case "$gccversion" in
 1*) cppflags="$cppflags -D__GNUC__"
