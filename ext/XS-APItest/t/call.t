@@ -81,7 +81,9 @@ for my $test (
 	"$description call_pv('f')");
 
     ok(eq_array( [ eval_sv('f(' . join(',',map"'$_'",@$args) . ')', $flags) ],
-	$expected), "$description eval_sv('f(args)')");
+                 $flags == G_VOID ? [ 0 ] : $expected
+               ),
+        "$description eval_sv('f(args)')");
 
     ok(eq_array( [ call_method('meth', $flags, $obj, @$args) ], $expected),
 	"$description call_method('meth')");
@@ -135,7 +137,9 @@ for my $test (
 	$expected), "$description G_NOARGS call_pv('f')");
 
     ok(eq_array( [ sub { eval_sv('f(@_)', $flags|G_NOARGS) }->(@$args) ],
-	$expected), "$description G_NOARGS eval_sv('f(@_)')");
+                  $flags == G_VOID ? [ 0 ] :  $expected
+               ),
+        "$description G_NOARGS eval_sv('f(@_)')");
 
     # XXX call_method(G_NOARGS) isn't tested: I'm assuming
     # it's not a sensible combination. DAPM.

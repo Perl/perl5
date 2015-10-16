@@ -4258,12 +4258,11 @@ PP(pp_entereval)
 
 PP(pp_leaveeval)
 {
-    dSP;
     SV **newsp;
     I32 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
-    I32 optype;
+    bool require_failed = FALSE;
     CV *evalcv;
     /* grab this value before POPEVAL restores old PL_in_eval */
     bool keep = cBOOL(PL_in_eval & EVAL_KEEPERR);
@@ -4272,14 +4271,23 @@ PP(pp_leaveeval)
 
     cx = &cxstack[cxstack_ix];
     assert(CxTYPE(cx) == CXt_EVAL);
+
     newsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
-    if (gimme != G_VOID) {
-        PUTBACK;
+    /* did require return a false value? */
+    if (       CxOLD_OP_TYPE(cx) == OP_REQUIRE
+            && !(gimme == G_SCALAR
+                    ? SvTRUE(*PL_stack_sp)
+                : PL_stack_sp > newsp)
+    )
+        require_failed = TRUE;
+
+    if (gimme == G_VOID)
+        PL_stack_sp = newsp;
+    else
         leave_common(newsp, newsp, gimme, SVs_TEMP, FALSE);
-        SPAGAIN;
-    }
+
     /* the POPEVAL does a leavescope, which frees the optree associated
      * with eval, which if it frees the nextstate associated with
      * PL_curcop, sets PL_curcop to NULL. Which can mess up freeing a
@@ -4287,22 +4295,19 @@ PP(pp_leaveeval)
      * to get the current hints. So restore it early.
      */
     PL_curcop = cx->blk_oldcop;
+
     CX_LEAVE_SCOPE(cx);
     POPEVAL(cx);
     POPBLOCK(cx);
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
-    optype = CxOLD_OP_TYPE(cx);
-
 
 #ifdef DEBUGGING
     assert(CvDEPTH(evalcv) == 1);
 #endif
     CvDEPTH(evalcv) = 0;
 
-    if (optype == OP_REQUIRE &&
-	!(gimme == G_SCALAR ? SvTRUE(*SP) : SP > newsp))
-    {
+    if (require_failed) {
 	/* Unassume the success we assumed earlier. */
         S_undo_inc_then_croak(aTHX_ cx, NULL, TRUE);
         NOT_REACHED; /* NOTREACHED */
@@ -4313,7 +4318,7 @@ PP(pp_leaveeval)
     if (!keep)
         CLEAR_ERRSV();
 
-    RETURNOP(retop);
+    return retop;
 }
 
 /* Common code for Perl_call_sv and Perl_fold_constants, put here to keep it
