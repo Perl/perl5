@@ -944,6 +944,47 @@
         code    => 'for (1,2,3,4) {}',
     },
 
+    'loop::for::my_array1' => {
+        desc    => 'empty for loop with my var and 1 integer array',
+        setup   => 'my @a = (1);',
+        code    => 'for my $x (@a) {}',
+    },
+    'loop::for::lex_array1' => {
+        desc    => 'empty for loop with lexical var and 1 integer array',
+        setup   => 'my $x; my @a = (1);',
+        code    => 'for $x (@a) {}',
+    },
+    'loop::for::pkg_array1' => {
+        desc    => 'empty for loop with package var and 1 integer array',
+        setup   => '$x = 1; my @a = (1);',
+        code    => 'for $x (@a) {}',
+    },
+    'loop::for::defsv_array1' => {
+        desc    => 'empty for loop with $_ and integer 1 array',
+        setup   => 'my @a = (@a);',
+        code    => 'for (1) {}',
+    },
+    'loop::for::my_array4' => {
+        desc    => 'empty for loop with my var and 4 integer array',
+        setup   => 'my @a = (1..4);',
+        code    => 'for my $x (@a) {}',
+    },
+    'loop::for::lex_array4' => {
+        desc    => 'empty for loop with lexical var and 4 integer array',
+        setup   => 'my $x; my @a = (1..4);',
+        code    => 'for $x (@a) {}',
+    },
+    'loop::for::pkg_array4' => {
+        desc    => 'empty for loop with package var and 4 integer array',
+        setup   => '$x = 1; my @a = (1..4);',
+        code    => 'for $x (@a) {}',
+    },
+    'loop::for::defsv_array4' => {
+        desc    => 'empty for loop with $_ and integer 4 array',
+        setup   => 'my @a = (1..4);',
+        code    => 'for (@a) {}',
+    },
+
     'loop::while::i1' => {
         desc    => 'empty while loop 1 iteration',
         setup   => 'my $i = 0;',
