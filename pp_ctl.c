@@ -2487,6 +2487,7 @@ PP(pp_return)
                             cx->blk_gimme, SVs_TEMP|SVs_PADTMP, TRUE);
         SPAGAIN;
 	dounwind(cxix);
+        cx = &cxstack[cxix]; /* CX stack may have been realloced */
     }
     else {
         /* Like in the branch above, we need to handle any extra junk on
