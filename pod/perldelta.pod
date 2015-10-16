@@ -355,6 +355,19 @@ startup and changing the variable in the parent process or another process or
 editing <.bashrc> will not change the enviromental variable in other existing,
 running, processes.
 
+=item *
+
+One glob fetch was removed for each C<-X> or C<stat> call whether done from
+Perl code or internally from Perl's C code. The glob being looked up was
+C<${^WIN32_SLOPPY_STAT}> which is a special variable. This makes C<-X> and
+C<stat> slightly faster.
+
+=item *
+
+During Miniperl's process startup, during the build process, 4 to 8 IO calls
+related to the process starting C<.pl> and the C<buildcustomize.pl> file were
+removed from the code opening and executing the first 1 or 2 C<.pl> files.
+
 =back
 
 =back

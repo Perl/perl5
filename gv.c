@@ -1975,6 +1975,10 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	    case '\027':	/* $^WARNING_BITS */
 		if (strEQ(name2, "ARNING_BITS"))
 		    goto magicalize;
+#ifdef WIN32
+		else if (strEQ(name2, "IN32_SLOPPY_STAT"))
+		    goto magicalize;
+#endif
 		break;
 	    case '1':
 	    case '2':

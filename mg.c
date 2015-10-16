@@ -1041,6 +1041,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 			  *PL_compiling.cop_warnings);
 	    }
 	}
+#ifdef WIN32
+	else if (strEQ(remaining, "IN32_SLOPPY_STAT")) {
+	    sv_setiv(sv, w32_sloppystat);
+	}
+#endif
 	break;
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
@@ -2802,6 +2807,11 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		}
 	    }
 	}
+#ifdef WIN32
+	else if (strEQ(mg->mg_ptr+1, "IN32_SLOPPY_STAT")) {
+	    w32_sloppystat = (bool)sv_true(sv);
+	}
+#endif
 	break;
     case '.':
 	if (PL_localizing) {

@@ -1463,10 +1463,6 @@ win32_stat(const char *path, Stat_t *sbuf)
     int         nlink = 1;
     BOOL        expect_dir = FALSE;
 
-    GV          *gv_sloppy = gv_fetchpvs("\027IN32_SLOPPY_STAT",
-                                         GV_NOTQUAL, SVt_PV);
-    BOOL        sloppy = gv_sloppy && SvTRUE(GvSV(gv_sloppy));
-
     if (l > 1) {
 	switch(path[l - 1]) {
 	/* FindFirstFile() and stat() are buggy with a trailing
@@ -1507,7 +1503,7 @@ win32_stat(const char *path, Stat_t *sbuf)
     path = PerlDir_mapA(path);
     l = strlen(path);
 
-    if (!sloppy) {
+    if (!w32_sloppystat) {
         /* We must open & close the file once; otherwise file attribute changes  */
         /* might not yet have propagated to "other" hard links of the same file. */
         /* This also gives us an opportunity to determine the number of links.   */
@@ -4681,6 +4677,11 @@ Perl_sys_intern_init(pTHX)
     w32_timerid                 = 0;
     w32_message_hwnd            = CAST_HWND__(INVALID_HANDLE_VALUE);
     w32_poll_count              = 0;
+#ifdef PERL_IS_MINIPERL
+    w32_sloppystat              = TRUE;
+#else
+    w32_sloppystat              = FALSE;
+#endif
     for (i=0; i < SIG_SIZE; i++) {
     	w32_sighandler[i] = SIG_DFL;
     }
@@ -4748,6 +4749,7 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->timerid                = 0;
     dst->message_hwnd		= CAST_HWND__(INVALID_HANDLE_VALUE);
     dst->poll_count             = 0;
+    dst->sloppystat             = src->sloppystat;
     Copy(src->sigtable,dst->sigtable,SIG_SIZE,Sighandler_t);
 }
 #  endif /* USE_ITHREADS */
