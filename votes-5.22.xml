@@ -12,10 +12,10 @@
  We can always make exceptions where deemed necessary, or otherwise drop them from the list.)
 
 Documentation patches (suggested by ether):
-<commit votes="khw" id="f0b1ad2b19f6dbfdc5d5feb5c5fb48888f1cd46d" ticket="" desc="perlebcdic: Fix typo"/>
-<commit votes="khw" id="b6d5ddf72d1067c498a7ed65623df9f2f8f8d749" ticket="123264" desc="[perl #123264] explicitly document the return value of sysopen"/>
-<commit votes="khw" id="bace499647c542e44fa169173393f19316fe05b6" ticket="" desc="Perl example style nit in docs for sort()"/>
-<commit votes="khw" id="63602a3fc27a417daf3c532b6a11ae6eba2a072a" ticket="125313" desc="Prefer 'Foo->new' to 'new Foo' in examples of constructors."/>
+<commit votes="khw, jhi" id="f0b1ad2b19f6dbfdc5d5feb5c5fb48888f1cd46d" ticket="" desc="perlebcdic: Fix typo"/>
+<commit votes="khw, jhi" id="b6d5ddf72d1067c498a7ed65623df9f2f8f8d749" ticket="123264" desc="[perl #123264] explicitly document the return value of sysopen"/>
+<commit votes="khw, jhi" id="bace499647c542e44fa169173393f19316fe05b6" ticket="" desc="Perl example style nit in docs for sort()"/>
+<commit votes="khw, jhi" id="63602a3fc27a417daf3c532b6a11ae6eba2a072a" ticket="125313" desc="Prefer 'Foo->new' to 'new Foo' in examples of constructors."/>
 
 </div>
 
@@ -74,7 +74,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="steveh, khw" id="c0bf9074e4a1b56f9afe46591417297e6613d5ea" ticket="125924" desc="[perl #125924] allow op/infnan.t to pass on Win32 gcc"/>
+<commit votes="steveh, khw, jhi" id="c0bf9074e4a1b56f9afe46591417297e6613d5ea" ticket="125924" desc="[perl #125924] allow op/infnan.t to pass on Win32 gcc"/>
 
 (steveh: Only the autodie part of this is applicable; win32/GNUmakefile isn't in maint-5.22)
 <commit votes="steveh, arc, khw" id="e120c24fe257993e9cbf4c567194bec2792f3ccc" ticket="126133" desc="[perl #126133] autodie touches its touch_me, make it writable"/>
@@ -83,8 +83,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh, khw" id="3d8ff82557d67bc81d10600b537a57f90f401a4f" ticket="126051" desc="sync regen/warnings.pl and warnings.pm $VERSION"/>
-<commit votes="steveh, khw" id="4a21999a595cf89f78d57aa5b3fdf3fbfa638fb1" ticket="126051" desc="[perl #126051] make the warnings::enabled example use warnings::enabled"/>
+<commit votes="steveh, khw, jhi" id="3d8ff82557d67bc81d10600b537a57f90f401a4f" ticket="126051" desc="sync regen/warnings.pl and warnings.pm $VERSION"/>
+<commit votes="steveh, khw, jhi" id="4a21999a595cf89f78d57aa5b3fdf3fbfa638fb1" ticket="126051" desc="[perl #126051] make the warnings::enabled example use warnings::enabled"/>
 
 </div>
 
