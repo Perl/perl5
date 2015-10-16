@@ -208,6 +208,13 @@ esac
 # Yosemite        10.10.x 14.x.y  6 (llvm clang 6.0)
 # El Capitan      10.11.x 15.x.y  7 (llvm clang 7.0)
 
+# Processors Supported
+#
+# PowerPC (PPC):       10.0.x - 10.5.8 (final 10.5.x)
+# PowerPC via Rosetta: 10.4.4 - 10.6.8 (final 10.6.x)
+# IA-32:               10.4.4 - 10.6.8 (though still supported on x86-64)
+# x86-64:              10.4.7 - current
+
 # MACOSX_DEPLOYMENT_TARGET selects the minimum OS level we want to support
 #
 # It is needed for OS releases before 10.6.
