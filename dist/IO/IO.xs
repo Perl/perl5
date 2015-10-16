@@ -319,7 +319,10 @@ PPCODE:
 #ifdef HAS_POLL
     const int nfd = (items - 1) / 2;
     SV *tmpsv = NEWSV(999,nfd * sizeof(struct pollfd));
-    struct pollfd *fds = (struct pollfd *)SvPVX(tmpsv);
+    /* We should pass _some_ valid pointer even if nfd is zero, but it
+     * doesn't matter what it is, since we're telling it to not check any fds.
+     */
+    struct pollfd *fds = nfd ? (struct pollfd *)SvPVX(tmpsv) : (struct pollfd *)tmpsv;
     int i,j,ret;
     for(i=1, j=0  ; j < nfd ; j++) {
 	fds[j].fd = SvIV(ST(i));
