@@ -861,7 +861,10 @@ use File::Glob qw(:case);
     'PathTools' => {
         'DISTRIBUTION' => 'SMUELLER/PathTools-3.47.tar.gz',
         'FILES'        => q[dist/PathTools],
-        'EXCLUDED'     => [qr{^t/lib/Test/}],
+        'EXCLUDED'     => [
+            qr{^t/lib/Test/},
+            qw( t/rel2abs_vs_symlink.t),
+        ],
     },
 
     'Perl::OSType' => {
@@ -1007,6 +1010,9 @@ use File::Glob qw(:case);
     'Storable' => {
         'DISTRIBUTION' => 'AMS/Storable-2.51.tar.gz',
         'FILES'        => q[dist/Storable],
+        'EXCLUDED'     => [
+            qr{^t/compat/},
+        ],
     },
 
     'Sys::Syslog' => {
