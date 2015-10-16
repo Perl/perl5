@@ -1573,19 +1573,16 @@ Perl_qerror(pTHX_ SV *err)
 
 
 
-/* pop the cx, undef or delete the %INC entry, then croak.
+/* undef or delete the $INC{namesv} entry, then croak.
  * require0 indicates that the require didn't return a true value */
 
-void
-S_undo_inc_then_croak(pTHX_ PERL_CONTEXT *cx, SV *err, bool require0)
+static void
+S_undo_inc_then_croak(pTHX_ SV *namesv, SV *err, bool require0)
 {
     const char *fmt;
     HV *inc_hv = GvHVn(PL_incgv);
-    SV *namesv = cx->blk_eval.old_namesv;
     I32  klen  = SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv);
     const char *key = SvPVX_const(namesv);
-
-    CX_POP(cx);
 
     if (require0) {
 	(void)hv_delete(inc_hv, key, klen, G_DISCARD);
@@ -1598,10 +1595,6 @@ S_undo_inc_then_croak(pTHX_ PERL_CONTEXT *cx, SV *err, bool require0)
         err = err ? err : newSVpvs_flags("Unknown error\n", SVs_TEMP);
     }
 
-    /* note that unlike pp_entereval, pp_require isn't
-     * supposed to trap errors. So now that we've popped the
-     * EVAL that pp_require pushed, and processed the error
-     * message, rethrow the error */
     Perl_croak(aTHX_ fmt, SVfARG(err));
 }
 
@@ -1663,6 +1656,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	}
 
 	if (cxix >= 0) {
+            SV *namesv = NULL;
 	    PERL_CONTEXT *cx;
 	    SV **newsp;
             I32 gimme;
@@ -1685,14 +1679,20 @@ Perl_die_unwind(pTHX_ SV *msv)
             CX_LEAVE_SCOPE(cx);
 	    POPEVAL(cx);
 	    POPBLOCK(cx);
-
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop = cx->blk_eval.retop;
-            if (CxOLD_OP_TYPE(cx) == OP_REQUIRE) {
-                S_undo_inc_then_croak(aTHX_ cx, exceptsv, FALSE);
+            if (CxOLD_OP_TYPE(cx) == OP_REQUIRE)
+                namesv = cx->blk_eval.old_namesv;
+            CX_POP(cx);
+
+            if (namesv) {
+                /* note that unlike pp_entereval, pp_require isn't
+                 * supposed to trap errors. So now that we've popped the
+                 * EVAL that pp_require pushed, process the error message
+                 * and rethrow the error */
+                S_undo_inc_then_croak(aTHX_ namesv, exceptsv, FALSE);
                 NOT_REACHED; /* NOTREACHED */
             }
-            CX_POP(cx);
 
 	    if (!(in_eval & EVAL_KEEPERR))
 		sv_setsv(ERRSV, exceptsv);
@@ -3434,6 +3434,7 @@ S_doeval_compile(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
     yystatus = (!in_require && CATCH_GET) ? S_try_yyparse(aTHX_ GRAMPROG) : yyparse(GRAMPROG);
 
     if (yystatus || PL_parser->error_count || !PL_eval_root) {
+        SV *namesv = NULL; /* initialise  to avoid compiler warning */
 	PERL_CONTEXT *cx;
         SV *errsv;
 
@@ -3451,19 +3452,19 @@ S_doeval_compile(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
             CX_LEAVE_SCOPE(cx);
 	    POPEVAL(cx);
 	    POPBLOCK(cx);
-            if (in_require) {
-                S_undo_inc_then_croak(aTHX_ cx, ERRSV, FALSE);
-                NOT_REACHED; /* NOTREACHED */
-            }
+            if (in_require)
+                namesv = cx->blk_eval.old_namesv;
             CX_POP(cx);
 	}
 
 	errsv = ERRSV;
 	if (in_require) {
-            assert(yystatus == 3);
-            cx = &cxstack[cxstack_ix];
-            assert(CxTYPE(cx) == CXt_EVAL);
-            S_undo_inc_then_croak(aTHX_ cx, errsv, FALSE);
+            if (yystatus == 3) {
+                cx = &cxstack[cxstack_ix];
+                assert(CxTYPE(cx) == CXt_EVAL);
+                namesv = cx->blk_eval.old_namesv;
+            }
+            S_undo_inc_then_croak(aTHX_ namesv, errsv, FALSE);
             NOT_REACHED; /* NOTREACHED */
 	}
 
@@ -4262,7 +4263,7 @@ PP(pp_leaveeval)
     I32 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
-    bool require_failed = FALSE;
+    SV *namesv = NULL;
     CV *evalcv;
     /* grab this value before POPEVAL restores old PL_in_eval */
     bool keep = cBOOL(PL_in_eval & EVAL_KEEPERR);
@@ -4281,7 +4282,7 @@ PP(pp_leaveeval)
                     ? SvTRUE(*PL_stack_sp)
                 : PL_stack_sp > newsp)
     )
-        require_failed = TRUE;
+        namesv = cx->blk_eval.old_namesv;
 
     if (gimme == G_VOID)
         PL_stack_sp = newsp;
@@ -4301,19 +4302,18 @@ PP(pp_leaveeval)
     POPBLOCK(cx);
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
+    CX_POP(cx);
 
 #ifdef DEBUGGING
     assert(CvDEPTH(evalcv) == 1);
 #endif
     CvDEPTH(evalcv) = 0;
 
-    if (require_failed) {
+    if (namesv) { /* require returned false */
 	/* Unassume the success we assumed earlier. */
-        S_undo_inc_then_croak(aTHX_ cx, NULL, TRUE);
+        S_undo_inc_then_croak(aTHX_ namesv, NULL, TRUE);
         NOT_REACHED; /* NOTREACHED */
     }
-
-    CX_POP(cx);
 
     if (!keep)
         CLEAR_ERRSV();
