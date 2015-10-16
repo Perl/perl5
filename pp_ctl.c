@@ -1674,21 +1674,13 @@ Perl_die_unwind(pTHX_ SV *msv)
 
             cx = &cxstack[cxstack_ix];
             assert(CxTYPE(cx) == CXt_EVAL);
+
+            /* return false to the caller of eval */
             newsp = PL_stack_base + cx->blk_oldsp;
             gimme = cx->blk_gimme;
-
 	    if (gimme == G_SCALAR)
 		*++newsp = &PL_sv_undef;
 	    PL_stack_sp = newsp;
-
-
-	    if (CxTYPE(cx) != CXt_EVAL) {
-		STRLEN msglen;
-		const char* message = SvPVx_const(exceptsv, msglen);
-		PerlIO_write(Perl_error_log, (const char *)"panic: die ", 11);
-		PerlIO_write(Perl_error_log, message, msglen);
-		my_exit(1);
-	    }
 
             CX_LEAVE_SCOPE(cx);
 	    POPEVAL(cx);
