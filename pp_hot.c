@@ -247,13 +247,7 @@ PP(pp_unstack)
     PL_stack_sp = PL_stack_base + cx->blk_oldsp;
     FREETMPS;
     if (!(PL_op->op_flags & OPf_SPECIAL)) {
-        assert(
-               CxTYPE(cx) == CXt_BLOCK
-            || CxTYPE(cx) == CXt_LOOP_FOR
-            || CxTYPE(cx) == CXt_LOOP_PLAIN
-            || CxTYPE(cx) == CXt_LOOP_LAZYSV
-            || CxTYPE(cx) == CXt_LOOP_LAZYIV
-        );
+        assert(CxTYPE(cx) == CXt_BLOCK || CxTYPE_is_LOOP(cx));
 	CX_LEAVE_SCOPE(cx);
     }
     return NORMAL;
@@ -2702,28 +2696,37 @@ PP(pp_iter)
         break;
     }
 
-    case CXt_LOOP_FOR: /* iterate array */
     {
-
-        AV *av = cx->blk_loop.state_u.ary.ary;
         SV *sv;
-        bool av_is_stack = FALSE;
+        AV *av;
         IV ix;
+        IV inc;
 
-        if (!av) {
-            av_is_stack = TRUE;
-            av = PL_curstack;
-        }
-        if (PL_op->op_private & OPpITER_REVERSED) {
-            ix = --cx->blk_loop.state_u.ary.ix;
-            if (UNLIKELY(ix <= (av_is_stack ? cx->blk_loop.resetsp : -1)))
-                RETPUSHNO;
-        }
-        else {
-            ix = ++cx->blk_loop.state_u.ary.ix;
-            if (UNLIKELY(ix > (av_is_stack ? cx->blk_oldsp : AvFILL(av))))
-                RETPUSHNO;
-        }
+    case CXt_LOOP_LIST: /* for (1,2,3) */
+
+        assert(OPpITER_REVERSED == 2); /* so inc becomes -1 or 1 */
+        inc = 1 - (PL_op->op_private & OPpITER_REVERSED);
+        ix = (cx->blk_loop.state_u.stack.ix += inc);
+        if (UNLIKELY(inc > 0
+                        ? ix > cx->blk_oldsp
+                        : ix <= cx->blk_loop.state_u.stack.basesp)
+        )
+            RETPUSHNO;
+
+        sv = PL_stack_base[ix];
+        av = NULL;
+        goto loop_ary_common;
+
+    case CXt_LOOP_ARY: /* for (@ary) */
+
+        av = cx->blk_loop.state_u.ary.ary;
+        inc = 1 - (PL_op->op_private & OPpITER_REVERSED);
+        ix = (cx->blk_loop.state_u.ary.ix += inc);
+        if (UNLIKELY(inc > 0
+                        ? ix > AvFILL(av)
+                        : ix < 0)
+        )
+            RETPUSHNO;
 
         if (UNLIKELY(SvMAGICAL(av) || AvREIFY(av))) {
             SV * const * const svp = av_fetch(av, ix, FALSE);
@@ -2732,6 +2735,8 @@ PP(pp_iter)
         else {
             sv = AvARRAY(av)[ix];
         }
+
+      loop_ary_common:
 
         if (UNLIKELY(cx->cx_type & CXp_FOR_LVREF)) {
             SvSetMagicSV(*itersvp, sv);
@@ -2751,7 +2756,7 @@ PP(pp_iter)
                 SvREFCNT_inc_simple_void_NN(sv);
             }
         }
-        else if (!av_is_stack) {
+        else if (av) {
             sv = newSVavdefelem(av, ix, 0);
         }
         else

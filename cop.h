@@ -770,15 +770,19 @@ struct block_loop {
     } itervar_u;
     SV          *itersave; /* the original iteration var */
     union {
-	struct { /* valid if type is LOOP_FOR or LOOP_PLAIN (but {NULL,0})*/
-	    AV * ary; /* use the stack if this is NULL */
-	    IV ix;
+	struct { /* CXt_LOOP_ARY, C<for (@ary)>  */
+	    AV *ary; /* array being iterated over */
+	    IV  ix;   /* index relative to base of array */
 	} ary;
-	struct { /* valid if type is LOOP_LAZYIV */
+	struct { /* CXt_LOOP_LIST, C<for (list)> */
+	    I32 basesp; /* first element of list on stack */
+	    IV  ix;      /* index relative to basesp */
+	} stack;
+	struct { /* CXt_LOOP_LAZYIV, C<for (1..9)> */
 	    IV cur;
 	    IV end;
 	} lazyiv;
-	struct { /* valid if type if LOOP_LAZYSV */
+	struct { /* CXt_LOOP_LAZYSV C<for ('a'..'z')> */
 	    SV * cur;
 	    SV * end; /* maxiumum value (or minimum in reverse) */
 	} lazysv;
@@ -822,8 +826,6 @@ struct block_loop {
 #define PUSHLOOP_FOR(cx, ivar, isave, s)				\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
-	cx->blk_loop.state_u.ary.ary = NULL;				\
-	cx->blk_loop.state_u.ary.ix = 0;				\
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
         cx->cx_old_savestack_ix = PL_savestack_ix;                      \
         cx->blk_loop.itersave = isave;                                  \
@@ -834,7 +836,7 @@ struct block_loop {
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.cur);		\
 	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.end);		\
 	}								\
-	else if (CxTYPE(cx) == CXt_LOOP_FOR)  				\
+	else if (CxTYPE(cx) == CXt_LOOP_ARY)  				\
 	    SvREFCNT_dec(cx->blk_loop.state_u.ary.ary);                 \
         if (cx->cx_type & (CXp_FOR_PAD|CXp_FOR_GV)) {                   \
             SV *cursv;                                                  \
@@ -1035,15 +1037,19 @@ struct context {
    The first 4 don't have a 'case' in at least one switch statement in pp_ctl.c
 */
 #define CXt_GIVEN	3
-/* This is first so that CXt_LOOP_FOR|CXt_LOOP_LAZYIV is CXt_LOOP_LAZYIV */
-#define CXt_LOOP_FOR	4
-#define CXt_LOOP_PLAIN	5
-#define CXt_LOOP_LAZYSV	6
-#define CXt_LOOP_LAZYIV	7
-#define CXt_SUB		8
-#define CXt_FORMAT      9
-#define CXt_EVAL       10
-#define CXt_SUBST      11
+
+/* be careful of the ordering of these five. Macros like CxTYPE_is_LOOP,
+ * CxFOREACH compare ranges */
+#define CXt_LOOP_PLAIN	4 /*                {} */
+#define CXt_LOOP_LAZYIV	5 /* for (1..9)     {} */
+#define CXt_LOOP_LAZYSV	6 /* for ('a'..'z') {} */
+#define CXt_LOOP_LIST	7 /* for (1,2,3)    {} */
+#define CXt_LOOP_ARY	8 /* for (@ary)     {} */
+
+#define CXt_SUB		9
+#define CXt_FORMAT     10
+#define CXt_EVAL       11
+#define CXt_SUBST      12
 /* SUBST doesn't feature in all switch statements.  */
 
 /* private flags for CXt_SUB and CXt_FORMAT */
@@ -1068,15 +1074,15 @@ struct context {
 #define CXp_ONCE	0x10	/* What was sbu_once in struct subst */
 
 #define CxTYPE(c)	((c)->cx_type & CXTYPEMASK)
-#define CxTYPE_is_LOOP(c)	(((c)->cx_type & 0xC) == 0x4)
+#define CxTYPE_is_LOOP(c) (   CxTYPE(cx) >= CXt_LOOP_PLAIN              \
+                           && CxTYPE(cx) <= CXt_LOOP_ARY)
 #define CxMULTICALL(c)	((c)->cx_type & CXp_MULTICALL)
 #define CxREALEVAL(c)	(((c)->cx_type & (CXTYPEMASK|CXp_REAL))		\
 			 == (CXt_EVAL|CXp_REAL))
 #define CxTRYBLOCK(c)	(((c)->cx_type & (CXTYPEMASK|CXp_TRYBLOCK))	\
 			 == (CXt_EVAL|CXp_TRYBLOCK))
-#define CxFOREACH(c)	(CxTYPE_is_LOOP(c) && CxTYPE(c) != CXt_LOOP_PLAIN)
-#define CxFOREACHDEF(c)	((CxTYPE_is_LOOP(c) && CxTYPE(c) != CXt_LOOP_PLAIN) \
-			 && ((c)->cx_type & CXp_FOR_DEF))
+#define CxFOREACH(c)	(   CxTYPE(cx) >= CXt_LOOP_LAZYSV               \
+                         && CxTYPE(cx) <= CXt_LOOP_ARY)
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 

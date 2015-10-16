@@ -1266,10 +1266,11 @@ static const char * const context_name[] = {
     NULL, /* CXt_WHEN never actually needs "block" */
     NULL, /* CXt_BLOCK never actually needs "block" */
     NULL, /* CXt_GIVEN never actually needs "block" */
-    NULL, /* CXt_LOOP_FOR never actually needs "loop" */
     NULL, /* CXt_LOOP_PLAIN never actually needs "loop" */
-    NULL, /* CXt_LOOP_LAZYSV never actually needs "loop" */
     NULL, /* CXt_LOOP_LAZYIV never actually needs "loop" */
+    NULL, /* CXt_LOOP_LAZYSV never actually needs "loop" */
+    NULL, /* CXt_LOOP_LIST never actually needs "loop" */
+    NULL, /* CXt_LOOP_ARY never actually needs "loop" */
     "subroutine",
     "format",
     "eval",
@@ -1297,10 +1298,11 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 	    if (CxTYPE(cx) == CXt_NULL) /* sort BLOCK */
 		return -1;
 	    break;
+	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
-	case CXt_LOOP_FOR:
-	case CXt_LOOP_PLAIN:
+	case CXt_LOOP_LIST:
+	case CXt_LOOP_ARY:
 	  {
             STRLEN cx_label_len = 0;
             U32 cx_label_flags = 0;
@@ -1444,10 +1446,11 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	    if ((CxTYPE(cx)) == CXt_NULL) /* sort BLOCK */
 		return -1;
 	    break;
+	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
-	case CXt_LOOP_FOR:
-	case CXt_LOOP_PLAIN:
+	case CXt_LOOP_LIST:
+	case CXt_LOOP_ARY:
 	    DEBUG_l( Perl_deb(aTHX_ "(dopoptoloop(): found loop at cx=%ld)\n", (long)i));
 	    return i;
 	}
@@ -1470,12 +1473,13 @@ S_dopoptogivenfor(pTHX_ I32 startingblock)
 	    DEBUG_l( Perl_deb(aTHX_ "(dopoptogivenfor(): found given at cx=%ld)\n", (long)i));
 	    return i;
 	case CXt_LOOP_PLAIN:
-	    assert(!CxFOREACHDEF(cx));
+            assert(!(cx->cx_type & CXp_FOR_DEF));
 	    break;
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
-	case CXt_LOOP_FOR:
-	    if (CxFOREACHDEF(cx)) {
+	case CXt_LOOP_LIST:
+	case CXt_LOOP_ARY:
+            if (cx->cx_type & CXp_FOR_DEF) {
 		DEBUG_l( Perl_deb(aTHX_ "(dopoptogivenfor(): found foreach at cx=%ld)\n", (long)i));
 		return i;
 	    }
@@ -1527,10 +1531,11 @@ Perl_dounwind(pTHX_ I32 cxix)
 	case CXt_BLOCK:
             POPBASICBLK(cx);
 	    break;
+	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
-	case CXt_LOOP_FOR:
-	case CXt_LOOP_PLAIN:
+	case CXt_LOOP_LIST:
+	case CXt_LOOP_ARY:
 	    POPLOOP(cx);
 	    break;
 	case CXt_WHEN:
@@ -2142,7 +2147,7 @@ PP(pp_enteriter)
     const I32 gimme = GIMME_V;
     void *itervarp; /* GV or pad slot of the iteration variable */
     SV   *itersave; /* the old var in the iterator var slot */
-    U8 cxtype = CXt_LOOP_FOR;
+    U8 cxflags = 0;
 
     if (PL_op->op_targ) {			 /* "my" variable */
 	itervarp = &PAD_SVl(PL_op->op_targ);
@@ -2155,7 +2160,7 @@ PP(pp_enteriter)
 	    SvPADSTALE_on(itersave);
 	}
         SvREFCNT_inc_simple_void_NN(itersave);
-	cxtype |= CXp_FOR_PAD;
+	cxflags = CXp_FOR_PAD;
     }
     else {
 	SV * const sv = POPs;
@@ -2167,37 +2172,33 @@ PP(pp_enteriter)
                 SvREFCNT_inc_simple_void_NN(itersave);
             else
                 *svp = newSV(0);
-            cxtype |= CXp_FOR_GV;
+            cxflags = CXp_FOR_GV;
         }
         else {                          /* LV ref: for \$foo (...) */
             assert(SvTYPE(sv) == SVt_PVMG);
             assert(SvMAGIC(sv));
             assert(SvMAGIC(sv)->mg_type == PERL_MAGIC_lvref);
             itersave = NULL;
-            cxtype |= CXp_FOR_LVREF;
+            cxflags = CXp_FOR_LVREF;
         }
     }
 
     if (PL_op->op_private & OPpITER_DEF)
-	cxtype |= CXp_FOR_DEF;
+	cxflags |= CXp_FOR_DEF;
 
-    PUSHBLOCK(cx, cxtype, SP);
+    PUSHBLOCK(cx, cxflags, SP);
     PUSHLOOP_FOR(cx, itervarp, itersave, MARK);
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *maybe_ary = POPs;
 	if (SvTYPE(maybe_ary) != SVt_PVAV) {
 	    dPOPss;
 	    SV * const right = maybe_ary;
-	    if (UNLIKELY(cxtype & CXp_FOR_LVREF))
+	    if (UNLIKELY(cxflags & CXp_FOR_LVREF))
 		DIE(aTHX_ "Assigned value is not a reference");
 	    SvGETMAGIC(sv);
 	    SvGETMAGIC(right);
 	    if (RANGE_IS_NUMERIC(sv,right)) {
-		cx->cx_type &= ~CXTYPEMASK;
 		cx->cx_type |= CXt_LOOP_LAZYIV;
-		/* Make sure that no-one re-orders cop.h and breaks our
-		   assumptions */
-		assert(CxTYPE(cx) == CXt_LOOP_LAZYIV);
 		if (S_outside_integer(aTHX_ sv) ||
                     S_outside_integer(aTHX_ right))
 		    DIE(aTHX_ "Range iterator outside integer range");
@@ -2209,11 +2210,7 @@ PP(pp_enteriter)
 #endif
 	    }
 	    else {
-		cx->cx_type &= ~CXTYPEMASK;
 		cx->cx_type |= CXt_LOOP_LAZYSV;
-		/* Make sure that no-one re-orders cop.h and breaks our
-		   assumptions */
-		assert(CxTYPE(cx) == CXt_LOOP_LAZYSV);
 		cx->blk_loop.state_u.lazysv.cur = newSVsv(sv);
 		cx->blk_loop.state_u.lazysv.end = right;
 		SvREFCNT_inc(right);
@@ -2230,6 +2227,7 @@ PP(pp_enteriter)
 	    }
 	}
 	else /* SvTYPE(maybe_ary) == SVt_PVAV */ {
+            cx->cx_type |= CXt_LOOP_ARY;
 	    cx->blk_loop.state_u.ary.ary = MUTABLE_AV(maybe_ary);
 	    SvREFCNT_inc(maybe_ary);
 	    cx->blk_loop.state_u.ary.ix =
@@ -2239,13 +2237,12 @@ PP(pp_enteriter)
 	}
     }
     else { /* iterating over items on the stack */
-	cx->blk_loop.state_u.ary.ary = NULL; /* means to use the stack */
-	if (PL_op->op_private & OPpITER_REVERSED) {
-	    cx->blk_loop.state_u.ary.ix = cx->blk_oldsp + 1;
-	}
-	else {
-	    cx->blk_loop.state_u.ary.ix = MARK - PL_stack_base;
-	}
+        cx->cx_type |= CXt_LOOP_LIST;
+	cx->blk_loop.state_u.stack.basesp = MARK - PL_stack_base;
+        cx->blk_loop.state_u.stack.ix =
+            (PL_op->op_private & OPpITER_REVERSED)
+                ? cx->blk_oldsp + 1
+                : cx->blk_loop.state_u.stack.basesp;
     }
 
     RETURN;
@@ -2577,12 +2574,7 @@ PP(pp_last)
 
     cx = &cxstack[cxstack_ix];
 
-    assert(
-           CxTYPE(cx) == CXt_LOOP_LAZYIV
-        || CxTYPE(cx) == CXt_LOOP_LAZYSV
-        || CxTYPE(cx) == CXt_LOOP_FOR
-        || CxTYPE(cx) == CXt_LOOP_PLAIN
-    );
+    assert(CxTYPE_is_LOOP(cx));
     PL_stack_sp = PL_stack_base + cx->blk_loop.resetsp;
 
     TAINT_NOT;
@@ -2969,10 +2961,11 @@ PP(pp_goto)
 		    break;
                 }
                 /* else fall through */
-	    case CXt_LOOP_LAZYIV:
-	    case CXt_LOOP_LAZYSV:
-	    case CXt_LOOP_FOR:
-	    case CXt_LOOP_PLAIN:
+            case CXt_LOOP_PLAIN:
+            case CXt_LOOP_LAZYIV:
+            case CXt_LOOP_LAZYSV:
+            case CXt_LOOP_LIST:
+            case CXt_LOOP_ARY:
 	    case CXt_GIVEN:
 	    case CXt_WHEN:
 		gotoprobe = OpSIBLING(cx->blk_oldcop);

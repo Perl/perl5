@@ -13969,10 +13969,11 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		assert ((void *) &ncx->blk_loop.state_u.ary.ary ==
 			(void *) &ncx->blk_loop.state_u.lazysv.cur);
                 /* FALLTHROUGH */
-	    case CXt_LOOP_FOR:
+	    case CXt_LOOP_ARY:
 		ncx->blk_loop.state_u.ary.ary
 		    = av_dup_inc(ncx->blk_loop.state_u.ary.ary, param);
                 /* FALLTHROUGH */
+	    case CXt_LOOP_LIST:
 	    case CXt_LOOP_LAZYIV:
 	    case CXt_LOOP_PLAIN:
                 /* code common to all CXt_LOOP_* types */
