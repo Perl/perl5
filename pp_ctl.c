@@ -3481,11 +3481,14 @@ S_check_type_and_open(pTHX_ SV *name)
     /* checking here captures a reasonable error message when
      * PERL_DISABLE_PMC is true, but when PMC checks are enabled, the
      * user gets a confusing message about looking for the .pmc file
-     * rather than for the .pm file.
+     * rather than for the .pm file so do the check in S_doopen_pm when
+     * PMC is on instead of here. S_doopen_pm calls this func.
      * This check prevents a \0 in @INC causing problems.
      */
+#ifdef PERL_DISABLE_PMC
     if (!IS_SAFE_PATHNAME(p, len, "require"))
         return NULL;
+#endif
 
     /* on Win32 stat is expensive (it does an open() and close() twice and
        a couple other IO calls), the open will fail with a dir on its own with
@@ -3541,13 +3544,14 @@ S_doopen_pm(pTHX_ SV *name)
 
     if (namelen > 3 && memEQs(p + namelen - 3, 3, ".pm")) {
 	SV *const pmcsv = sv_newmortal();
-	Stat_t pmcstat;
+	PerlIO * pmcio;
 
 	SvSetSV_nosteal(pmcsv,name);
 	sv_catpvs(pmcsv, "c");
 
-	if (PerlLIO_stat(SvPV_nolen_const(pmcsv), &pmcstat) >= 0)
-	    return check_type_and_open(pmcsv);
+	pmcio = check_type_and_open(pmcsv);
+	if (pmcio)
+	    return pmcio;
     }
     return check_type_and_open(name);
 }
