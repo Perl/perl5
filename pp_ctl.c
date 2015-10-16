@@ -1666,9 +1666,6 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    PERL_CONTEXT *cx;
 	    SV **newsp;
             I32 gimme;
-#ifdef DEBUGGING
-	    COP *oldcop;
-#endif
 	    JMPENV *restartjmpenv;
 	    OP *restartop;
 
@@ -1696,13 +1693,10 @@ Perl_die_unwind(pTHX_ SV *msv)
             CX_LEAVE_SCOPE(cx);
 	    POPEVAL(cx);
 	    POPBLOCK(cx);
-#ifdef DEBUGGING
-	    oldcop = cx->blk_oldcop;
-#endif
+
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop = cx->blk_eval.retop;
             if (CxOLD_OP_TYPE(cx) == OP_REQUIRE) {
-                assert (PL_curcop == oldcop);
                 S_undo_inc_then_croak(aTHX_ cx, exceptsv, FALSE);
                 NOT_REACHED; /* NOTREACHED */
             }
