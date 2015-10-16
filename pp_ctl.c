@@ -3429,6 +3429,8 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
     /* note that yyparse() may raise an exception, e.g. C<BEGIN{die}>,
      * so honour CATCH_GET and trap it here if necessary */
 
+
+    /* compile the code */
     yystatus = (!in_require && CATCH_GET) ? S_try_yyparse(aTHX_ GRAMPROG) : yyparse(GRAMPROG);
 
     if (yystatus || PL_parser->error_count || !PL_eval_root) {
@@ -3436,8 +3438,9 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
         SV *errsv;
 
 	PL_op = saveop;
-	/* note that if yystatus == 3, then the EVAL CX block has already
-	 * been popped, and various vars restored */
+	/* note that if yystatus == 3, then the require/eval died during
+         * compilation, so the EVAL CX block has already been popped, and
+         * various vars restored */
 	if (yystatus != 3) {
 	    if (PL_eval_root) {
 		op_free(PL_eval_root);
@@ -3471,8 +3474,10 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	PUTBACK;
 	return FALSE;
     }
-    else
-	LEAVE_with_name("evalcomp");
+
+    /* Compilation successful. Now clean up */
+
+    LEAVE_with_name("evalcomp");
 
     CopLINE_set(&PL_compiling, 0);
     SAVEFREEOP(PL_eval_root);
@@ -3498,8 +3503,6 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	PL_eval_start = es;
     }
 
-    /* compiled okay, so do it */
-
     CvDEPTH(evalcv) = 1;
     SP = PL_stack_base + POPMARK;		/* pop original mark */
     PL_op = saveop;			/* The caller may need it. */
@@ -3508,6 +3511,7 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
     PUTBACK;
     return TRUE;
 }
+
 
 STATIC PerlIO *
 S_check_type_and_open(pTHX_ SV *name)
