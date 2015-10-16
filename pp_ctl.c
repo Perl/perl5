@@ -3310,7 +3310,7 @@ S_try_yyparse(pTHX_ int gramtype)
  */
 
 STATIC bool
-S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
+S_doeval_compile(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 {
     dSP;
     OP * const saveop = PL_op;
@@ -4104,7 +4104,7 @@ PP(pp_require)
 
     PUTBACK;
 
-    if (doeval(gimme, NULL, PL_curcop->cop_seq, NULL))
+    if (doeval_compile(gimme, NULL, PL_curcop->cop_seq, NULL))
 	op = DOCATCH(PL_eval_start);
     else
 	op = PL_op->op_next;
@@ -4232,7 +4232,7 @@ PP(pp_entereval)
     
     PUTBACK;
 
-    if (doeval(gimme, runcv, seq, saved_hh)) {
+    if (doeval_compile(gimme, runcv, seq, saved_hh)) {
 	if (was != PL_breakable_sub_gen /* Some subs defined here. */
 	    ?  PERLDB_LINE_OR_SAVESRC
 	    :  PERLDB_SAVESRC_NOSUBS) {
@@ -4244,7 +4244,7 @@ PP(pp_entereval)
 	return DOCATCH(PL_eval_start);
     } else {
 	/* We have already left the scope set up earlier thanks to the LEAVE
-	   in doeval().  */
+	   in doeval_compile().  */
 	if (was != PL_breakable_sub_gen /* Some subs defined here. */
 	    ?  PERLDB_LINE_OR_SAVESRC
 	    :  PERLDB_SAVESRC_INVALID) {

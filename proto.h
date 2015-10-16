@@ -4473,7 +4473,7 @@ STATIC OP*	S_do_smartmatch(pTHX_ HV* seen_this, HV* seen_other, const bool copie
 STATIC OP*	S_docatch(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 
-STATIC bool	S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV* hh);
+STATIC bool	S_doeval_compile(pTHX_ int gimme, CV* outside, U32 seq, HV* hh);
 STATIC OP*	S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstack, OP **oplimit)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DOFINDLABEL	\

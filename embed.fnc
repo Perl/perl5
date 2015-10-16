@@ -794,7 +794,6 @@ Apdn	|OP*	|op_parent|NN OP *o
 #if defined(PERL_IN_OP_C)
 s	|OP*	|listkids	|NULLOK OP* o
 #endif
-: Used in S_doeval in pp_ctl.c
 p	|OP*	|list		|NULLOK OP* o
 Apd	|void	|load_module|U32 flags|NN SV* name|NULLOK SV* ver|...
 Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
@@ -2068,7 +2067,7 @@ sR	|I32	|dopoptoloop	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
 sR	|I32	|dopoptowhen	|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
-s	|bool	|doeval		|int gimme \
+s	|bool	|doeval_compile	|int gimme \
 				|NULLOK CV* outside|U32 seq|NULLOK HV* hh
 sR	|PerlIO *|check_type_and_open|NN SV *name
 #ifndef PERL_DISABLE_PMC
