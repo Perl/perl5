@@ -186,30 +186,125 @@ case "$ld" in
         ;;
 esac
 
+# From http://ftp.netbsd.org/pub/pkgsrc/current/pkgsrc/mk/platform/Darwin.mk
+#
+# OS, Kernel, Xcode Version
+# Note that Xcode gets updates on older systems sometimes.
+# pkgsrc generally expects that the most up-to-date xcode available for
+# an OS version is installed
+#
+# Codename        OS      Kernel  Xcode
+# Cheetah         10.0.x  1.3.1
+# Puma            10.1    1.4.1
+#                 10.1.x  5.x.y
+# Jaguar          10.2.x  6.x.y
+# Panther         10.3.x  7.x.y
+# Tiger           10.4.x  8.x.y   2.x (gcc 4.0, 4.0.1 from 2.2)
+# Leopard         10.5.x  9.x.y   3.x (gcc 4.0.1, 4.0.1 and 4.2.1 from 3.1)
+# Snow Leopard    10.6.x  10.x.y  3.2+ (gcc 4.0.1 and 4.2.1)
+# Lion            10.7.x  11.x.y  4.1 (llvm gcc 4.2.1)
+# Mountain Lion   10.8.x  12.x.y  4.5 (llvm gcc 4.2.1)
+# Mavericks       10.9.x  13.x.y  6 (llvm clang 6.0)
+# Yosemite        10.10.x 14.x.y  6 (llvm clang 6.0)
+# El Capitan      10.11.x 15.x.y  7 (llvm clang 7.0)
+
+# MACOSX_DEPLOYMENT_TARGET selects the minimum OS level we want to support
+#
+# It is needed for OS releases before 10.6.
+#
+# https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/cross_development/Configuring/configuring.html
+#
+# If it is set, we also propagate its value to ccflags and ldflags
+# using the -mmacosx-version-min flag.  If it is not set, we use
+# the OS X release as the min value for the flag.
+
+# Adds "-mmacosx-version-min=$2" to "$1" unless it already is there.
+add_macosx_version_min () {
+  local v
+  eval "v=\$$1"
+  case " $v " in
+  *"-mmacosx-version-min"*)
+     echo "NOT adding -mmacosx-version-min=$2 to $1 ($v)" >&4
+     ;;
+  *) echo "Adding -mmacosx-version-min=$2 to $1" >&4
+     eval "$1='$v -mmacosx-version-min=$2'"
+     ;;
+  esac
+}
+
 # Perl bundles do not expect two-level namespace, added in Darwin 1.4.
 # But starting from perl 5.8.1/Darwin 7 the default is the two-level.
-case "$osvers" in
-1.[0-3].*)
+case "$osvers" in  # Note: osvers is the kernel version, not the 10.x
+1.[0-3].*) # OS X 10.0.x
    lddlflags="${ldflags} -bundle -undefined suppress"
    ;;
-1.*)
+1.*)       # OS X 10.1
    ldflags="${ldflags} -flat_namespace"
    lddlflags="${ldflags} -bundle -undefined suppress"
    ;;
-[2-6].*)
+[2-6].*)   # OS X 10.1.x - 10.2.x (though [2-4] never existed publicly)
    ldflags="${ldflags} -flat_namespace"
    lddlflags="${ldflags} -bundle -undefined suppress"
    ;;
-*) 
-   # MACOSX_DEPLOYMENT_TARGET selects the minimum OS level we want to support
-   # https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/cross_development/Configuring/configuring.html
+[7-9].*)   # OS X 10.3.x - 10.5.x
    lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
    case "$ld" in
        *MACOSX_DEVELOPMENT_TARGET*) ;;
        *) ld="env MACOSX_DEPLOYMENT_TARGET=10.3 ${ld}" ;;
    esac
    ;;
+*)        # OS X 10.6.x - current
+   # The MACOSX_DEPLOYMENT_TARGET is not needed,
+   # but the -mmacosx-version-min option is always used.
+
+   # We now use MACOSX_DEPLOYMENT_TARGET, if set, as an override by
+   # capturing its value and adding it to the flags.
+    case "$MACOSX_DEPLOYMENT_TARGET" in
+    10.*)
+      add_macosx_version_min ccflags $MACOSX_DEPLOYMENT_TARGET
+      add_macosx_version_min ldflags $MACOSX_DEPLOYMENT_TARGET
+      ;;
+    '')
+      # Empty MACOSX_DEPLOYMENT_TARGET is okay.
+      ;;
+    *)
+      cat <<EOM >&4
+
+*** Unexpected MACOSX_DEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET
+***
+*** Please either set it to 10.something, or to empty.
+
+EOM
+      exit 1
+      ;;
+    esac
+
+    # Keep the prodvers leading whitespace (Configure magic).
+    # Cannot use $osvers here since that is the kernel version.
+    # sw_vers output                 what we want
+    # "ProductVersion:    10.10.5"   "10.10"
+    # "ProductVersion:    10.11"     "10.11"
+        prodvers=`sw_vers|awk '/^ProductVersion:/{print $2}'|awk -F. '{print $1"."$2}'`
+    case "$prodvers" in
+    10.*)
+      add_macosx_version_min ccflags $prodvers
+      add_macosx_version_min ldflags $prodvers
+      ;;
+    *)
+      cat <<EOM >&4
+
+*** Unexpected product version $prodvers.
+***
+*** Try running sw_vers and see what its ProductVersion says.
+
+EOM
+      exit 1
+    esac
+
+   lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
+   ;;
 esac
+
 ldlibpthname='DYLD_LIBRARY_PATH';
 
 # useshrplib=true results in much slower startup times.
