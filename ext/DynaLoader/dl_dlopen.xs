@@ -171,10 +171,11 @@ dl_load_file(filename, flags=0)
 #if defined(DLOPEN_WONT_DO_RELATIVE_PATHS)
     char pathbuf[PATH_MAX + 2];
     if (*filename != '/' && strchr(filename, '/')) {
-	if (getcwd(pathbuf, PATH_MAX - strlen(filename))) {
-	    strcat(pathbuf, "/");
-	    strcat(pathbuf, filename);
-	    filename = pathbuf;
+        const size_t filename_len = strlen(filename);
+        if (getcwd(pathbuf, PATH_MAX - filename_len)) {
+            const size_t path_len = strlen(pathbuf);
+            pathbuf[path_len] = '/';
+            filename = (char *) memcpy(pathbuf + path_len + 1, filename, filename_len + 1);
 	}
     }
 #endif
