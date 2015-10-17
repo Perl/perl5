@@ -6,19 +6,6 @@
 
 </div>
 
-<div><h2>Other Commits Nominated in #125394: 5.22.1 blockers</h2>
-
-(steveh: These don't all meet the normal criteria for inclusion, but I've listed them for now since they've all been nominated anyway.
- We can always make exceptions where deemed necessary, or otherwise drop them from the list.)
-
-Documentation patches (suggested by ether):
-<commit votes="khw, jhi" id="f0b1ad2b19f6dbfdc5d5feb5c5fb48888f1cd46d" ticket="" desc="perlebcdic: Fix typo"/>
-<commit votes="khw, jhi" id="b6d5ddf72d1067c498a7ed65623df9f2f8f8d749" ticket="123264" desc="[perl #123264] explicitly document the return value of sysopen"/>
-<commit votes="khw, jhi" id="bace499647c542e44fa169173393f19316fe05b6" ticket="" desc="Perl example style nit in docs for sort()"/>
-<commit votes="khw, jhi" id="63602a3fc27a417daf3c532b6a11ae6eba2a072a" ticket="125313" desc="Prefer 'Foo->new' to 'new Foo' in examples of constructors."/>
-
-</div>
-
 <div><h2>Other Proposed Cherry-Picks</h2>
 
 Blead changes have been examined up to and including 8c9009ad13ddadd4e5865ef02a27df15933a7ca7 (Perl_call_sv move EXTEND into branch that needs it)
