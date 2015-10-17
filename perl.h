@@ -2157,7 +2157,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 /* Solaris and IRIX have fpclass/fpclassl, but they are using
  * an enum typedef, not cpp symbols, and Configure doesn't detect that.
  * Define some symbols also as cpp symbols so we can detect them. */
-#    if defined(__sun) || defined(__irix__) /* XXX Configure test instead */
+#    if defined(__sun) || defined(__sgi) /* XXX Configure test instead */
 #     define FP_PINF FP_PINF
 #     define FP_QNAN FP_QNAN
 #    endif
@@ -2207,7 +2207,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #        include <fp_class.h>
 #    endif
 #    if defined(FP_POS_INF) && defined(FP_QNAN)
-#        ifdef __irix__ /* XXX Configure test instead */
+#        ifdef __sgi /* XXX Configure test instead */
 #            ifdef USE_LONG_DOUBLE
 #                define Perl_fp_class(x)	fp_class_l(x)
 #            else
