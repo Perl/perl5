@@ -8,7 +8,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 8c9009ad13ddadd4e5865ef02a27df15933a7ca7 (Perl_call_sv move EXTEND into branch that needs it)
+Blead changes have been examined up to and including 00ebc5bdc54d3943d2470f1053942f5849ab1a9d (Replace 2 strcat()s with strlen() and memcpy() in dl_dlopen.xs.)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -46,6 +46,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="steveh, arc, khw" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
 <commit votes="steveh, arc, khw" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
 
+(steveh: The POSIX $VERSION bump will need to be different in maint:)
+<commit votes="steveh" id="068e3fb46a24909060201961a41f2ab7fb778caf" ticket="126229" desc="[perl #126229] POSIX::strerror() clears $!"/>
+
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
@@ -57,6 +60,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Portability Fixes</h3>
 
+<commit votes="jhi, steveh" id="a7dba6f870a82e3be87bda50593cb5d2042277fd" ticket="" desc="IRIX &lt;sys/prctl.h&gt; is not what Configure expects."/>
+
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
@@ -65,6 +70,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 (steveh: Only the autodie part of this is applicable; win32/GNUmakefile isn't in maint-5.22)
 <commit votes="steveh, arc, khw" id="e120c24fe257993e9cbf4c567194bec2792f3ccc" ticket="126133" desc="[perl #126133] autodie touches its touch_me, make it writable"/>
+
+<commit votes="jhi, steveh" id="8e7f1f724eb9360bef95eb47b50c93350a9fe142" ticket="126306" desc="perl #126306: openbsd t/io/errno.t tests fail randomly"/>
+<commit votes="jhi, steveh" id="9f7ba77d76fb7406010117db6bfe6b5f86b376b6" ticket="" desc="rt.perl.org perl #88814 was revived in openbsd by commit 23705063."/>
 
 </div>
 
