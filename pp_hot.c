@@ -2727,7 +2727,7 @@ PP(pp_iter)
         )
             goto retno;
 
-        if (UNLIKELY(SvMAGICAL(av) || AvREIFY(av))) {
+        if (UNLIKELY(SvRMAGICAL(av))) {
             SV * const * const svp = av_fetch(av, ix, FALSE);
             sv = svp ? *svp : NULL;
         }
