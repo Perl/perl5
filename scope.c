@@ -1374,13 +1374,17 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.LABEL = %s\n", CxLABEL(cx));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.MY_OP = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_loop.my_op));
-	/* XXX: not accurate for LAZYSV/IV */
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.state_u.ary.ary));
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERIX = %ld\n",
-		(long)cx->blk_loop.state_u.ary.ix);
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERVAR = 0x%"UVxf"\n",
-		PTR2UV(CxITERVAR(cx)));
+        if (CxTYPE(cx) != CXt_LOOP_PLAIN) {
+            PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERVAR = 0x%"UVxf"\n",
+                    PTR2UV(CxITERVAR(cx)));
+            PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%"UVxf"\n",
+                    PTR2UV(cx->blk_loop.itersave));
+            /* XXX: not accurate for LAZYSV/IV/LIST */
+            PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%"UVxf"\n",
+                    PTR2UV(cx->blk_loop.state_u.ary.ary));
+            PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERIX = %ld\n",
+                    (long)cx->blk_loop.state_u.ary.ix);
+        }
 	break;
 
     case CXt_SUBST:

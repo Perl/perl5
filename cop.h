@@ -809,11 +809,7 @@ struct block_loop {
 
 #define PUSHLOOP_PLAIN(cx)						\
 	cx->blk_loop.my_op = cLOOP;					\
-	cx->blk_loop.state_u.ary.ary = NULL;				\
-	cx->blk_loop.state_u.ary.ix = 0;				\
-        cx->cx_old_savestack_ix = PL_savestack_ix;                      \
-	cx->blk_loop.itervar_u.svp = NULL;                              \
-	cx->blk_loop.itersave = NULL;
+        cx->cx_old_savestack_ix = PL_savestack_ix;
 
 #ifdef USE_ITHREADS
 #  define PUSHLOOP_FOR_setpad(c) (c)->blk_loop.oldcomppad = PL_comppad
