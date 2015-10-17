@@ -2186,8 +2186,8 @@ PP(pp_enteriter)
     if (PL_op->op_private & OPpITER_DEF)
 	cxflags |= CXp_FOR_DEF;
 
-    PUSHBLOCK(cx, cxflags, SP);
-    PUSHLOOP_FOR(cx, itervarp, itersave, MARK);
+    PUSHBLOCK(cx, cxflags, MARK);
+    PUSHLOOP_FOR(cx, itervarp, itersave);
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *maybe_ary = POPs;
 	if (SvTYPE(maybe_ary) != SVt_PVAV) {
@@ -2204,10 +2204,6 @@ PP(pp_enteriter)
 		    DIE(aTHX_ "Range iterator outside integer range");
 		cx->blk_loop.state_u.lazyiv.cur = SvIV_nomg(sv);
 		cx->blk_loop.state_u.lazyiv.end = SvIV_nomg(right);
-#ifdef DEBUGGING
-		/* for correct -Dstv display */
-		cx->blk_oldsp = sp - PL_stack_base;
-#endif
 	    }
 	    else {
 		cx->cx_type |= CXt_LOOP_LAZYSV;
@@ -2239,6 +2235,7 @@ PP(pp_enteriter)
     }
     else { /* iterating over items on the stack */
         cx->cx_type |= CXt_LOOP_LIST;
+        cx->blk_oldsp = SP - PL_stack_base;
 	cx->blk_loop.state_u.stack.basesp = MARK - PL_stack_base;
         cx->blk_loop.state_u.stack.ix =
             (PL_op->op_private & OPpITER_REVERSED)
@@ -2259,7 +2256,7 @@ PP(pp_enterloop)
     const I32 gimme = GIMME_V;
 
     PUSHBLOCK(cx, CXt_LOOP_PLAIN, SP);
-    PUSHLOOP_PLAIN(cx, SP);
+    PUSHLOOP_PLAIN(cx);
 
     RETURN;
 }
@@ -2274,7 +2271,9 @@ PP(pp_leaveloop)
     cx = &cxstack[cxstack_ix];
     assert(CxTYPE_is_LOOP(cx));
     mark = PL_stack_base + cx->blk_oldsp;
-    newsp = PL_stack_base + cx->blk_loop.resetsp;
+    newsp = CxTYPE(cx) == CXt_LOOP_LIST
+                ? PL_stack_base + cx->blk_loop.state_u.stack.basesp
+                : mark;
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
@@ -2579,7 +2578,11 @@ PP(pp_last)
     cx = &cxstack[cxstack_ix];
 
     assert(CxTYPE_is_LOOP(cx));
-    PL_stack_sp = PL_stack_base + cx->blk_loop.resetsp;
+    PL_stack_sp = PL_stack_base
+                + (CxTYPE(cx) == CXt_LOOP_LIST
+                    ?  cx->blk_loop.state_u.stack.basesp
+                    : cx->blk_oldsp
+                );
 
     TAINT_NOT;
 

@@ -762,7 +762,6 @@ struct block_eval {
 
 /* loop context */
 struct block_loop {
-    I32		resetsp;
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
     union {	/* different ways of locating the iteration variable */
 	SV      **svp; /* for lexicals: address of pad slot */
@@ -808,8 +807,7 @@ struct block_loop {
 #define CxPOPSUB_DONE 0x100
 
 
-#define PUSHLOOP_PLAIN(cx, s)						\
-	cx->blk_loop.resetsp = s - PL_stack_base;			\
+#define PUSHLOOP_PLAIN(cx)						\
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
@@ -823,8 +821,7 @@ struct block_loop {
 #  define PUSHLOOP_FOR_setpad(c) NOOP
 #endif
 
-#define PUSHLOOP_FOR(cx, ivar, isave, s)				\
-	cx->blk_loop.resetsp = s - PL_stack_base;			\
+#define PUSHLOOP_FOR(cx, ivar, isave)   				\
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
         cx->cx_old_savestack_ix = PL_savestack_ix;                      \
@@ -884,7 +881,7 @@ struct block {
     U8		blku_type;	/* what kind of context this is */
     U8		blku_gimme;	/* is this block running in list context? */
     U16		blku_u16;	/* used by block_sub and block_eval (so far) */
-    I32		blku_oldsp;	/* stack pointer to copy stuff down to */
+    I32		blku_oldsp;	/* current sp floor: where nextstate pops to */
     COP *	blku_oldcop;	/* old curcop pointer */
     I32		blku_oldmarksp;	/* mark stack index */
     I32		blku_oldscopesp;	/* scope stack index */
