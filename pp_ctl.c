@@ -2235,6 +2235,7 @@ PP(pp_enteriter)
 		AvFILL(cx->blk_loop.state_u.ary.ary) + 1 :
 		-1;
 	}
+        /* EXTEND(SP, 1) not needed in this branch because we just did POPs */
     }
     else { /* iterating over items on the stack */
         cx->cx_type |= CXt_LOOP_LIST;
@@ -2243,6 +2244,9 @@ PP(pp_enteriter)
             (PL_op->op_private & OPpITER_REVERSED)
                 ? cx->blk_oldsp + 1
                 : cx->blk_loop.state_u.stack.basesp;
+        /* pre-extend stack so pp_iter doesn't have to check every time
+         * it pushes yes/no */
+        EXTEND(SP, 1);
     }
 
     RETURN;
