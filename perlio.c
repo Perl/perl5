@@ -3355,6 +3355,12 @@ PerlIOStdio_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	    return -1;
 	SETERRNO(0,0);	/* just in case */
     }
+#ifdef __sgi
+    /* Under some circumstances IRIX stdio fgetc() and fread()
+     * set the errno to ENOENT, which makes no sense according
+     * to either IRIX or POSIX.  [rt.perl.org #123977] */
+    if (errno == ENOENT) SETERRNO(0,0);
+#endif
     return got;
 }
 
